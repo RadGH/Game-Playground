@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vehicles 3D</title>
+<link rel="stylesheet" href="../shared/style.css">
+<link rel="stylesheet" href="avatar-3d.css">
+<script type="importmap">{ "imports": { "three": "../vendor/three/three.module.js", "three/addons/": "../vendor/three/addons/" } }</script>
+</head>
+<body>
+<div class="topbar">
+  <a href="../" class="muted">← Playground</a>
+  <h1>Vehicles 3D</h1>
+  <span class="muted small">Procedural travel vehicles in the creature style: hand cart, pack mule, covered wagon, ox cart, iron-plated war wagon, closed coach and a sled pulled by a drake. Draft animals are real creature bodies. <a href="creatures.html">Creatures</a> <a href="./">Humanoids</a></span>
+  <span class="spacer"></span>
+  <span id="status" class="small muted">loading…</span>
+</div>
+<div class="layout three">
+  <aside class="sidebar" id="left"></aside>
+  <main class="main" id="main"></main>
+  <aside class="sidebar right" id="right"></aside>
+</div>
+<script type="module" src="js/vehicles-app.js"></script>
+</body>
+</html>

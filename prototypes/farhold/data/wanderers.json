@@ -1,0 +1,370 @@
+{
+  "_doc": "Fourteen kinds of person you meet outside a town. A wanderer is one encounter: a body on or near a road, at a landmark, or at a fire after dark. `where` is scored against the spot, `when` against the clock, `wants`/`gives` are what the talk is FOR. They speak through Lingo and are drawn with the existing 2D-avatar to Chibi 2 pipeline, so nothing new is needed to render or voice them. Original names only.",
+  "kinds": [
+    {
+      "key": "pedlar",
+      "name": "Pedlar",
+      "role": "merchant",
+      "where": [
+        "road"
+      ],
+      "when": [
+        "day"
+      ],
+      "weight": 10,
+      "blurb": "A pack, a stick, and three things nobody in town will sell you.",
+      "lines": [
+        "Everything here has walked further than you have. That is the price.",
+        "I do not haggle on the road. Too easy to be robbed twice."
+      ],
+      "wants": "coin",
+      "gives": "shop",
+      "stock": {
+        "count": 3,
+        "rarity": "magic",
+        "markup": 1.3,
+        "category": "other"
+      }
+    },
+    {
+      "key": "courier",
+      "name": "Courier",
+      "role": "villager",
+      "where": [
+        "road"
+      ],
+      "when": [
+        "day",
+        "night"
+      ],
+      "weight": 9,
+      "blurb": "Walking fast, looking back, carrying something sealed.",
+      "lines": [
+        "I do not stop. If you want to talk, keep up.",
+        "There is a letter and there is a road and they are both somebody else's business."
+      ],
+      "wants": "escort",
+      "gives": "job",
+      "job": "the_relic",
+      "rumourChance": 0.8
+    },
+    {
+      "key": "hedge_witch",
+      "name": "Hedge-witch",
+      "role": "elder",
+      "where": [
+        "forest",
+        "wetland"
+      ],
+      "when": [
+        "day",
+        "dusk"
+      ],
+      "weight": 7,
+      "blurb": "Knee-deep in something, and not surprised to see you.",
+      "lines": [
+        "Bring me three of the grey-stemmed sort and I will do you a kindness.",
+        "It will wear off. Everything does."
+      ],
+      "wants": "gather",
+      "gives": "buff",
+      "buff": {
+        "stat": "regen",
+        "amount": 2,
+        "minutes": 30
+      }
+    },
+    {
+      "key": "bounty_poster",
+      "name": "Bounty Poster",
+      "role": "villager",
+      "where": [
+        "crossroads",
+        "road"
+      ],
+      "when": [
+        "day"
+      ],
+      "weight": 8,
+      "blurb": "A board on a post, and someone whose whole job is the board.",
+      "lines": [
+        "Read it. Do not tear it down, it took me an hour.",
+        "The ones with two names on them are the ones to leave alone."
+      ],
+      "wants": "nothing",
+      "gives": "board"
+    },
+    {
+      "key": "refugee",
+      "name": "Refugee",
+      "role": "villager",
+      "where": [
+        "road"
+      ],
+      "when": [
+        "day",
+        "night"
+      ],
+      "weight": 8,
+      "blurb": "Carrying too much of the wrong things, going the other way.",
+      "lines": [
+        "Do not go up that way. There is nothing up that way now.",
+        "If you are going anyway — there is a cellar, and there is a key under the step."
+      ],
+      "wants": "escort",
+      "gives": "incident",
+      "rumourChance": 1
+    },
+    {
+      "key": "surveyor",
+      "name": "Surveyor",
+      "role": "elder",
+      "where": [
+        "highland",
+        "crossroads"
+      ],
+      "when": [
+        "day"
+      ],
+      "weight": 7,
+      "blurb": "A tripod, a long brass thing, and a great deal of paper.",
+      "lines": [
+        "Stand where I tell you and count to twenty. That is the whole job.",
+        "A place is not a place until somebody writes it down."
+      ],
+      "wants": "landmarks",
+      "gives": "job",
+      "job": "map_the_edge",
+      "faction": "longsight"
+    },
+    {
+      "key": "hermit",
+      "name": "Hermit",
+      "role": "elder",
+      "where": [
+        "wild",
+        "mountain",
+        "forest"
+      ],
+      "when": [
+        "day",
+        "night"
+      ],
+      "weight": 6,
+      "blurb": "A long way from any road, and not lost.",
+      "lines": [
+        "I have not spoken to anyone since the frost. Forgive the rust.",
+        "There is something buried a hundred paces that way. I have never wanted it."
+      ],
+      "wants": "food",
+      "gives": "cache"
+    },
+    {
+      "key": "mercenary_captain",
+      "name": "Mercenary Captain",
+      "role": "guard",
+      "where": [
+        "road",
+        "settlement"
+      ],
+      "when": [
+        "day"
+      ],
+      "weight": 7,
+      "blurb": "Four tents, a cookfire, and a price list.",
+      "lines": [
+        "Coin first. Everyone says they are good for it and most of them are dead.",
+        "One zone. After that we renegotiate or we part friends."
+      ],
+      "wants": "coin",
+      "gives": "hire",
+      "hire": {
+        "gold": 180,
+        "hp": 320,
+        "dmg": [
+          18,
+          30
+        ]
+      }
+    },
+    {
+      "key": "toll_keeper",
+      "name": "Toll-keeper",
+      "role": "guard",
+      "where": [
+        "bridge",
+        "pass"
+      ],
+      "when": [
+        "day",
+        "night"
+      ],
+      "weight": 8,
+      "blurb": "A chain across the road and a chair beside it.",
+      "lines": [
+        "Six coin. Four if you are carrying nothing worth taking.",
+        "You can ford it downstream. People drown doing that."
+      ],
+      "wants": "toll",
+      "gives": "passage",
+      "faction": "stonecount",
+      "toll": 6
+    },
+    {
+      "key": "minstrel",
+      "name": "Minstrel",
+      "role": "villager",
+      "where": [
+        "camp",
+        "settlement"
+      ],
+      "when": [
+        "night"
+      ],
+      "weight": 6,
+      "blurb": "At somebody else's fire, as usual.",
+      "lines": [
+        "I heard what you did at the crossing. I have made it worse and put a tune on it.",
+        "Give me a week and this will be a song people get wrong."
+      ],
+      "wants": "story",
+      "gives": "rumour",
+      "buff": {
+        "stat": "morale",
+        "amount": 1,
+        "minutes": 60
+      }
+    },
+    {
+      "key": "poacher",
+      "name": "Poacher",
+      "role": "villager",
+      "where": [
+        "forest",
+        "wetland"
+      ],
+      "when": [
+        "dusk",
+        "night"
+      ],
+      "weight": 6,
+      "blurb": "Very still, until you are past.",
+      "lines": [
+        "You did not see me and I did not see you, and we are both better for it.",
+        "Hides. Cheap, and do not ask whose land they walked on."
+      ],
+      "wants": "silence",
+      "gives": "shop",
+      "stock": {
+        "count": 2,
+        "rarity": "normal",
+        "markup": 0.6,
+        "category": "armor"
+      },
+      "angers": "greenhand"
+    },
+    {
+      "key": "relic_hunter",
+      "name": "Relic Hunter",
+      "role": "merchant",
+      "where": [
+        "ruin",
+        "dungeon"
+      ],
+      "when": [
+        "day"
+      ],
+      "weight": 7,
+      "blurb": "Kitted out, impatient, and eyeing the same door you are.",
+      "lines": [
+        "I was here first. That is not a threat, it is a fact about time.",
+        "Whoever gets to the bottom takes the box. Agreed?"
+      ],
+      "wants": "race",
+      "gives": "race",
+      "faction": "lantern_house"
+    },
+    {
+      "key": "wounded_patroller",
+      "name": "Wounded Patroller",
+      "role": "guard",
+      "where": [
+        "road",
+        "battlefield"
+      ],
+      "when": [
+        "day",
+        "night"
+      ],
+      "weight": 7,
+      "blurb": "Propped against something, and not going any further on that leg.",
+      "lines": [
+        "The rest of them are further up. Do not look at their faces.",
+        "Water. Then tell somebody at the post, if you are going that way."
+      ],
+      "wants": "heal",
+      "gives": "job",
+      "job": "patrol_gone_quiet",
+      "rumourChance": 1
+    }
+  ],
+  "names": {
+    "_doc": "Given names for the people you meet on the road, so a job reads \"Tolvi is missing somebody\" and not \"Mercenary Captain is missing somebody\". Original, and deliberately plain — these are working people, not heroes.",
+    "given": [
+      "Wren",
+      "Tolvi",
+      "Marek",
+      "Sefa",
+      "Orlan",
+      "Brida",
+      "Hask",
+      "Ilva",
+      "Corran",
+      "Nesta",
+      "Byrd",
+      "Alred",
+      "Runa",
+      "Vosk",
+      "Ketil",
+      "Mirren",
+      "Dagen",
+      "Solveig",
+      "Harrow",
+      "Pell",
+      "Ysolde",
+      "Tarn",
+      "Ebba",
+      "Grimm",
+      "Lisbet",
+      "Odran",
+      "Fenna",
+      "Rask",
+      "Merrit",
+      "Ailith",
+      "Bran",
+      "Skara",
+      "Ewan",
+      "Torvi",
+      "Cass",
+      "Hollis",
+      "Nettle",
+      "Ferrin",
+      "Maud",
+      "Slade"
+    ],
+    "bynames": [
+      "the Elder",
+      "of the Low Road",
+      "Twice-Lost",
+      "the Quiet",
+      "Long-Walk",
+      "Coldhand",
+      "of Thornwell",
+      "the Patient",
+      "Nine-Toes",
+      "Ashfoot",
+      "Saltborn",
+      "the Younger"
+    ]
+  }
+}

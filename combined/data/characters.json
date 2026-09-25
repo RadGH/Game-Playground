@@ -1,0 +1,600 @@
+{
+  "_doc": "Full characters using all three sections of the shared character JSON. avatar → avatar-2d/3d, voice → voice-lab, speech → lingo. 'entry' is the lingo lexicon person id (name, race, pronouns).",
+  "characters": [
+    {
+      "schema": 1,
+      "id": "thalen",
+      "name": "Thalen Ashvine",
+      "entry": "thalen",
+      "avatar": {
+        "body": {
+          "height": 0.85,
+          "width": 0.3,
+          "headSize": 0.4,
+          "skin": "#f1c27d"
+        },
+        "headShape": "oval",
+        "hair": {
+          "id": "ponytail",
+          "color": "#d9c27a"
+        },
+        "eyes": {
+          "id": "almond",
+          "color": "#3a8a5a",
+          "x": 0.1,
+          "y": 0,
+          "scale": 1,
+          "rot": 6
+        },
+        "brows": {
+          "id": "arched",
+          "y": 0,
+          "rot": 0,
+          "x": 0.1
+        },
+        "nose": {
+          "id": "small",
+          "y": 0,
+          "scale": 1
+        },
+        "mouth": {
+          "id": "smirk",
+          "y": 0,
+          "scale": 1,
+          "color": "#b5484d"
+        },
+        "ears": {
+          "id": "pointed"
+        },
+        "facialHair": {
+          "id": "none"
+        },
+        "top": {
+          "id": "leather",
+          "color": "#2a6a4a",
+          "color2": "#6b4a2a"
+        },
+        "bottom": {
+          "id": "pants",
+          "color": "#4a3a2a"
+        },
+        "shoes": {
+          "id": "pointed",
+          "color": "#6b4a2a"
+        },
+        "accessory": {
+          "id": "none",
+          "color": "#333333"
+        },
+        "hat": {
+          "id": "hood",
+          "color": "#2a6a4a"
+        },
+        "extras": {
+          "id": "tattoo",
+          "color": "#2a7a5a"
+        }
+      },
+      "voice": {
+        "engine": "espeak",
+        "pitch": 0.55,
+        "speed": 0.3,
+        "depth": 0.45,
+        "tone": 0.6,
+        "breath": 0.15,
+        "rough": 0.05,
+        "flutter": 0.05,
+        "intonation": 3,
+        "wordgap": 0.05,
+        "gender": "m",
+        "accent": "en-rp",
+        "variant": "custom",
+        "fx": {
+          "reverb": 0.1
+        }
+      },
+      "speech": {
+        "traits": [
+          "pompous",
+          "honorable",
+          "scholar"
+        ],
+        "formality": 0.85,
+        "verbosity": 0.7,
+        "cheer": 0.4,
+        "aggression": 0.3,
+        "confidence": 0.8,
+        "custom": {
+          "greeting": "Well met",
+          "farewell": "Walk with the Root",
+          "catchphrase": "{~The roots remember.|The Root keeps count.|Ask the old trees; they saw it.|Rootwarden's word on it.|The forest has a long memory, and so do I.|Every leaf remembers a hand.}",
+          "oath": "by the Root",
+          "curse": "rot and ruin"
+        },
+        "customRate": {
+          "catchphrase": 0.3
+        },
+        "tics": [],
+        "mood": 0.1
+      }
+    },
+    {
+      "schema": 1,
+      "id": "mara",
+      "name": "Mara Ironjaw",
+      "entry": "mara",
+      "avatar": {
+        "body": {
+          "height": 0.8,
+          "width": 0.95,
+          "headSize": 0.5,
+          "skin": "#9db38a"
+        },
+        "headShape": "wide",
+        "hair": {
+          "id": "mohawk",
+          "color": "#111111"
+        },
+        "eyes": {
+          "id": "angry",
+          "color": "#c33333",
+          "x": 0,
+          "y": 0,
+          "scale": 1,
+          "rot": 0
+        },
+        "brows": {
+          "id": "angry",
+          "y": 0,
+          "rot": 0,
+          "x": 0
+        },
+        "nose": {
+          "id": "wide",
+          "y": 0,
+          "scale": 1
+        },
+        "mouth": {
+          "id": "tusks",
+          "y": 0,
+          "scale": 1,
+          "color": "#5a2a2a"
+        },
+        "ears": {
+          "id": "pointed"
+        },
+        "facialHair": {
+          "id": "none"
+        },
+        "top": {
+          "id": "plate",
+          "color": "#5a5f66",
+          "color2": "#c9a227"
+        },
+        "bottom": {
+          "id": "greaves",
+          "color": "#4a3a2a"
+        },
+        "shoes": {
+          "id": "heavy",
+          "color": "#3b2a1a"
+        },
+        "accessory": {
+          "id": "none",
+          "color": "#333333"
+        },
+        "hat": {
+          "id": "none",
+          "color": "#5a3d8a"
+        },
+        "extras": {
+          "id": "scar",
+          "color": "#8a2e2e"
+        }
+      },
+      "voice": {
+        "engine": "espeak",
+        "pitch": 0.35,
+        "speed": 0.35,
+        "depth": 0.75,
+        "tone": 0.4,
+        "breath": 0.2,
+        "rough": 0.7,
+        "flutter": 0.05,
+        "intonation": 2,
+        "wordgap": 0,
+        "gender": "f",
+        "accent": "en-sc",
+        "variant": "custom",
+        "fx": {
+          "lowpass": 3500,
+          "formant": -2
+        }
+      },
+      "speech": {
+        "traits": [
+          "abrasive",
+          "brave",
+          "bloodlust"
+        ],
+        "formality": 0.15,
+        "verbosity": 0.4,
+        "cheer": 0.5,
+        "aggression": 0.8,
+        "confidence": 0.9,
+        "custom": {
+          "greeting": "Oi",
+          "farewell": "Don't die stupid",
+          "catchphrase": "{~Blood pays for blood.|Steel settles it.|One debt, one blade.|They started it. I'll end it.|Iron remembers what flesh forgets.|Pay me in blood or stay out of my way.}",
+          "curse": "Forge take it",
+          "yes": "Aye",
+          "no": "Piss off"
+        },
+        "customRate": {
+          "catchphrase": 0.25
+        },
+        "tics": [],
+        "mood": 0
+      }
+    },
+    {
+      "schema": 1,
+      "id": "bran",
+      "name": "Bran Holloway",
+      "entry": "bran",
+      "avatar": {
+        "body": {
+          "height": 0.45,
+          "width": 0.55,
+          "headSize": 0.55,
+          "skin": "#e0ac69"
+        },
+        "headShape": "round",
+        "hair": {
+          "id": "short",
+          "color": "#6b4a2a"
+        },
+        "eyes": {
+          "id": "tired",
+          "color": "#6b4a2a",
+          "x": 0,
+          "y": 0.1,
+          "scale": 1,
+          "rot": -4
+        },
+        "brows": {
+          "id": "worried",
+          "y": 0,
+          "rot": 0,
+          "x": 0
+        },
+        "nose": {
+          "id": "button",
+          "y": 0,
+          "scale": 1
+        },
+        "mouth": {
+          "id": "neutral",
+          "y": 0,
+          "scale": 1,
+          "color": "#b5484d"
+        },
+        "ears": {
+          "id": "big"
+        },
+        "facialHair": {
+          "id": "stubble"
+        },
+        "top": {
+          "id": "tunic",
+          "color": "#6b4a2a",
+          "color2": "#c9a227"
+        },
+        "bottom": {
+          "id": "baggy",
+          "color": "#4a3a2a"
+        },
+        "shoes": {
+          "id": "boots",
+          "color": "#3b2a1a"
+        },
+        "accessory": {
+          "id": "none",
+          "color": "#333333"
+        },
+        "hat": {
+          "id": "straw",
+          "color": "#c9a227"
+        },
+        "extras": {
+          "id": "dirt",
+          "color": "#8a2e2e"
+        }
+      },
+      "voice": {
+        "engine": "espeak",
+        "pitch": 0.45,
+        "speed": 0.28,
+        "depth": 0.55,
+        "tone": 0.45,
+        "breath": 0.3,
+        "rough": 0.2,
+        "flutter": 0.3,
+        "intonation": 2,
+        "wordgap": 0.1,
+        "gender": "m",
+        "accent": "en-wm",
+        "variant": "custom",
+        "fx": {}
+      },
+      "speech": {
+        "traits": [
+          "kind",
+          "nervous",
+          "hungry"
+        ],
+        "formality": 0.4,
+        "verbosity": 0.5,
+        "cheer": 0.6,
+        "aggression": 0.1,
+        "confidence": 0.3,
+        "custom": {
+          "greeting": "Morning",
+          "farewell": "Mind the mud",
+          "prefix": "{~Lost the game.|Well. That's a thing that happened.|Right. Anyway.|Not my best day.|Hm. Noted.|Let's pretend I meant that.}",
+          "worried": "The turnips won't come in. I can feel it.",
+          "happy": "Good soil today. Good soil."
+        },
+        "customRate": {
+          "prefix": 0.35
+        },
+        "tics": [],
+        "mood": 0.2
+      }
+    },
+    {
+      "schema": 1,
+      "id": "kaelith",
+      "name": "Kaelith Vorrun",
+      "entry": "kaelith",
+      "avatar": {
+        "body": {
+          "height": 0.75,
+          "width": 0.25,
+          "headSize": 0.55,
+          "skin": "#c9cfc3"
+        },
+        "headShape": "long",
+        "hair": {
+          "id": "long",
+          "color": "#eeeeee"
+        },
+        "eyes": {
+          "id": "hollow",
+          "color": "#7fe0ee",
+          "x": 0,
+          "y": 0,
+          "scale": 1.1,
+          "rot": 0
+        },
+        "brows": {
+          "id": "none",
+          "y": 0,
+          "rot": 0,
+          "x": 0
+        },
+        "nose": {
+          "id": "none",
+          "y": 0,
+          "scale": 1
+        },
+        "mouth": {
+          "id": "stitched",
+          "y": 0,
+          "scale": 1,
+          "color": "#333333"
+        },
+        "ears": {
+          "id": "pointed"
+        },
+        "facialHair": {
+          "id": "none"
+        },
+        "top": {
+          "id": "robe",
+          "color": "#1a1a2a",
+          "color2": "#7fe0ee"
+        },
+        "bottom": {
+          "id": "pants",
+          "color": "#1a1a2a"
+        },
+        "shoes": {
+          "id": "barefoot",
+          "color": "#111111"
+        },
+        "accessory": {
+          "id": "none",
+          "color": "#333333"
+        },
+        "hat": {
+          "id": "crown",
+          "color": "#5a5f66"
+        },
+        "extras": {
+          "id": "undead_skin",
+          "color": "#8a2e2e"
+        }
+      },
+      "voice": {
+        "engine": "espeak",
+        "pitch": 0.4,
+        "speed": 0.22,
+        "depth": 0.6,
+        "tone": 0.6,
+        "breath": 0.7,
+        "rough": 0.8,
+        "flutter": 0.3,
+        "intonation": 1,
+        "wordgap": 0.15,
+        "gender": "f",
+        "accent": "en-rp",
+        "variant": "custom",
+        "fx": {
+          "highpass": 300,
+          "lowpass": 4500,
+          "echo": 0.3,
+          "echoSec": 0.14,
+          "reverb": 0.5,
+          "reverbSize": 0.8,
+          "lofi": 0.1
+        }
+      },
+      "speech": {
+        "traits": [
+          "cruel",
+          "archaic",
+          "pompous",
+          "scholar"
+        ],
+        "formality": 0.95,
+        "verbosity": 0.8,
+        "cheer": 0.2,
+        "aggression": 0.7,
+        "confidence": 1,
+        "custom": {
+          "greeting": "Be brief",
+          "farewell": "Return to the dust",
+          "catchphrase": "{~Death is merely a door I hold the key to.|The grave is a rumour I started.|I have buried better men than you, and dug them up again.|Dying is for people without a plan.|Every corpse is a conversation waiting to happen.|The dead are excellent listeners.}",
+          "suffix": "{~mortal|little one|child of dust|breather|fleeting thing|my dear soon-to-be}",
+          "curse": "Pale Lady's teeth",
+          "oath": "by the silent throne"
+        },
+        "customRate": {
+          "suffix": 0.35,
+          "catchphrase": 0.2
+        },
+        "tics": [],
+        "mood": -0.2
+      }
+    },
+    {
+      "schema": 1,
+      "id": "pip",
+      "name": "Pip Nine-Fingers",
+      "entry": "pip",
+      "avatar": {
+        "body": {
+          "height": 0.1,
+          "width": 0.4,
+          "headSize": 0.9,
+          "skin": "#7fa86a"
+        },
+        "headShape": "heart",
+        "hair": {
+          "id": "bald",
+          "color": "#111111"
+        },
+        "eyes": {
+          "id": "wide",
+          "color": "#e0c040",
+          "x": 0.2,
+          "y": 0,
+          "scale": 1.2,
+          "rot": 0
+        },
+        "brows": {
+          "id": "raised",
+          "y": 0,
+          "rot": 0,
+          "x": 0.2
+        },
+        "nose": {
+          "id": "long",
+          "y": 0.1,
+          "scale": 1.2
+        },
+        "mouth": {
+          "id": "grin",
+          "y": 0,
+          "scale": 1.1,
+          "color": "#5a2a2a"
+        },
+        "ears": {
+          "id": "big"
+        },
+        "facialHair": {
+          "id": "none"
+        },
+        "top": {
+          "id": "vest",
+          "color": "#6b4a2a",
+          "color2": "#e8e8e8"
+        },
+        "bottom": {
+          "id": "shorts",
+          "color": "#4a3a2a"
+        },
+        "shoes": {
+          "id": "barefoot",
+          "color": "#111111"
+        },
+        "accessory": {
+          "id": "goggles",
+          "color": "#b5651d"
+        },
+        "hat": {
+          "id": "none",
+          "color": "#5a3d8a"
+        },
+        "extras": {
+          "id": "dirt",
+          "color": "#8a2e2e"
+        }
+      },
+      "voice": {
+        "engine": "espeak",
+        "pitch": 0.85,
+        "speed": 0.55,
+        "depth": 0.15,
+        "tone": 0.8,
+        "breath": 0.1,
+        "rough": 0.3,
+        "flutter": 0.1,
+        "intonation": 4,
+        "wordgap": 0,
+        "gender": "n",
+        "accent": "en-n",
+        "variant": "custom",
+        "fx": {
+          "formant": 2
+        }
+      },
+      "speech": {
+        "traits": [
+          "jolly",
+          "greedy",
+          "coward",
+          "third_person"
+        ],
+        "formality": 0.1,
+        "verbosity": 0.6,
+        "cheer": 0.9,
+        "aggression": 0.2,
+        "confidence": 0.4,
+        "custom": {
+          "greeting": "Heyo heyo",
+          "farewell": "Pip goes now, yes yes",
+          "catchphrase": "{~Shiny shiny.|Ooh, that's mine now.|Pockets, meet friend.|Is that gold? That's gold.|Finders keepers, losers weepers.|Don't mind me, just counting.}",
+          "yes": "Yes yes",
+          "no": "No no no"
+        },
+        "customRate": {
+          "catchphrase": 0.3
+        },
+        "tics": [],
+        "mood": 0.5
+      }
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Space Models</title>
+<link rel="stylesheet" href="../shared/style.css">
+<link rel="stylesheet" href="assets.css">
+<script type="importmap">{ "imports": { "three": "../vendor/three/three.module.js", "three/addons/": "../vendor/three/addons/" } }</script>
+</head>
+<body>
+<div class="topbar">
+  <a href="./" class="muted">← Asset Library</a>
+  <h1>Space Models</h1>
+  <span class="muted small">Procedural Three.js objects for orbit and deep space: planets with real map textures, every star class, belts, craft and stations. <a href="../universe/">Universe</a></span>
+  <span class="spacer"></span>
+  <label class="small">archetype
+    <select id="archetype"></select>
+  </label>
+  <label class="small">star
+    <select id="starclass"></select>
+  </label>
+  <span id="status" class="small muted">loading…</span>
+</div>
+
+<div class="main">
+  <div class="panel">
+    <h3>Models</h3>
+    <p class="small muted">Every builder in <code>assets/js/space-models.js</code>, each in its own scene, turning. Drag a tile to orbit it. The two selects at the top rebuild the planet and the star with a different kind. Planets here use the library's own blotchy texture; hand <code>createPlanet</code> a texture set from <code>universe/js/texture.js</code> and you get the real surface map instead.</p>
+    <div class="model-grid" id="model-grid"></div>
+  </div>
+
+  <div class="panel">
+    <h3>How to use</h3>
+<pre class="small">import { createSpaceScene, createPlanet, createStar } from '../assets/js/space-models.js';
+
+const view = createSpaceScene(container);            // renderer + camera + orbit controls + loop
+const star = createStar(starRecord, { radius: 1.2 });
+view.scene.add(star.group); view.addTicker(star.update);
+
+// a planet with its real surface map (needs the universe library)
+import { generatePlanetMap } from '../universe/js/planetmap.js';
+import { planetTexture } from '../universe/js/texture.js';
+const world   = generatePlanetMap(planet);
+const texture = planetTexture(planet, world, { size: 1024 });
+const globe   = createPlanet(planet, { texture, radius: 1 });
+view.scene.add(globe.group); view.addTicker(globe.update);
+
+// or by manifest id
+import { createSpaceModel, SPACE_MODEL_IDS } from '../assets/js/space-models.js';
+const ship = createSpaceModel('ship_hauler');</pre>
+    <p class="small muted">Every builder returns <code>{ group, update(dt, t), dispose() }</code> — the same shape the creature models use, so the same scene code drives both.</p>
+  </div>
+</div>
+
+<script type="module" src="js/models-app.js"></script>
+</body>
+</html>

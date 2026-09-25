@@ -1,0 +1,1104 @@
+{
+ "encounters": {
+  "abyssal_garrison": {
+   "enemies": [
+    {
+     "count": 2,
+     "ref": "abyssal_knight"
+    },
+    {
+     "count": 1,
+     "ref": "primordial_elemental"
+    }
+   ],
+   "name": "Abyssal Garrison"
+  },
+  "ancient_dragon_fight": {
+   "enemies": [
+    {
+     "count": 1,
+     "overrides": {
+      "armor": 38,
+      "blockChance": 0.28,
+      "dmg": [
+       148,
+       228
+      ],
+      "hp": 8750,
+      "loot": null,
+      "maxHp": 8750,
+      "spellChance": 0.5,
+      "spellList": [
+       "titan_magma_wave",
+       "infernal_brand",
+       "nightmare_hex",
+       "brute_slam"
+      ],
+      "statusOnHit": null,
+      "stealableBuffs": []
+     },
+     "ref": "ancient_dragon"
+    },
+    {
+     "count": 2,
+     "overrides": {
+      "armor": 22,
+      "dmg": [
+       80,
+       124
+      ],
+      "hp": 1240,
+      "loot": null,
+      "maxHp": 1240,
+      "spellChance": 0.3,
+      "spellList": [
+       "imp_fireball",
+       "infernal_brand"
+      ],
+      "statusOnHit": null
+     },
+     "ref": "dragon_whelp"
+    }
+   ],
+   "introText": "The dragon turns one vast eye on you, each scale the size of a shield.\nIt has watched empires rise and crumble. You are a very small interruption.",
+   "name": "The Ancient Dragon"
+  },
+  "archfiend_malgrath": {
+   "enemies": [
+    {
+     "count": 1,
+     "ref": "archfiend_malgrath"
+    },
+    {
+     "count": 2,
+     "ref": "hell_knight"
+    }
+   ],
+   "introText": "Malgrath fills the throne room with the stench of sulfur and contempt.\n\"Mortals. Still climbing. Still dying. It does not get old.\"",
+   "name": "Archfiend Malgrath"
+  },
+  "ash_patrol": {
+   "enemies": [
+    {
+     "count": 2,
+     "ref": "ash_wraith"
+    },
+    {
+     "count": 2,
+     "ref": "cinder_hound"
+    }
+   ],
+   "name": "Ash Patrol"
+  },
+  "bandit_ambush": {
+   "enemies": [
+    {
+     "count": 2,
+     "ref": "bandit"
+    },
+    {
+     "count": 1,
+     "ref": "bandit_captain"
+    }
+   ],
+   "name": "Bandit Ambush"
+  },
+  "bear_ambush": {
+   "enemies": [
+    {
+     "count": 1,
+     "ref": "corrupted_bear"
+    },
+    {
+     "count": 2,
+     "ref": "corrupted_wolf"
+    }
+   ],
+   "name": "Corrupted Predator"
+  },
+  "big_abyssal_tide": {
+   "enemies": [
+    {
+     "count": 4,
+     "ref": "reality_shard"
+    },
+    {
+     "count": 2,
+     "ref": "abyssal_knight"
+    },
+    {
+     "count": 1,
+     "ref": "primordial_elemental"
+    }
+   ],
+   "name": "Abyssal Tide"
+  },
+  "big_ash_swarm": {
+   "enemies": [
+    {
+     "count": 4,
+     "ref": "cinder_hound"
+    },
+    {
+     "count": 3,
+     "ref": "ash_wraith"
+    },
+    {
+     "count": 1,
+     "ref": "veil_cultist"
+    }
+   ],
+   "name": "Ash Swarm"
+  },
+  "big_demon_horde": {
+   "enemies": [
+    {
+     "count": 4,
+     "ref": "imp"
+    },
+    {
+     "count": 2,
+     "ref": "hell_knight"
+    },
+    {
+     "count": 2,
+     "ref": "void_shade"
+    }
+   ],
+   "name": "Demon Horde"
+  },
+  "big_dragon_skyfall": {
+   "enemies": [
+    {
+     "count": 4,
+     "overrides": {
+      "armor": 22,
+      "dmg": [
+       72,
+       116
+      ],
+      "hp": 800,
+      "loot": null,
+      "maxHp": 800,
+      "statusOnHit": null
+     },
+     "ref": "dragon_whelp"
+    },
+    {
+     "count": 2,
+     "overrides": {
+      "armor": 32,
+      "dmg": [
+       96,
+       144
+      ],
+      "hp": 1200,
+      "loot": null,
+      "maxHp": 1200,
+      "statusOnHit": null
+     },
+     "ref": "wyrm_warrior"
+    },
+    {
+     "count": 2,
+     "overrides": {
+      "armor": 16,
+      "dmg": [
+       84,
+       128
+      ],
+      "hp": 880,
+      "loot": null,
+      "maxHp": 880,
+      "statusOnHit": null
+     },
+     "ref": "dragon_cultist"
+    }
+   ],
+   "name": "Dragon Skyfall"
+  },
+  "big_goblin_warband": {
+   "enemies": [
+    {
+     "count": 1,
+     "ref": "goblin_scout"
+    },
+    {
+     "count": 1,
+     "ref": "goblin_warrior"
+    },
+    {
+     "count": 1,
+     "ref": "goblin_shaman"
+    }
+   ],
+   "name": "Goblin Vanguard"
+  },
+  "big_void_tide": {
+   "enemies": [
+    {
+     "count": 4,
+     "overrides": {
+      "armor": 16,
+      "dmg": [
+       56,
+       88
+      ],
+      "gold": [
+       20,
+       40
+      ],
+      "hit": 82,
+      "hp": 640,
+      "maxHp": 640,
+      "spellChance": 0.35,
+      "spellList": [
+       "void_silence",
+       "wraith_chill"
+      ],
+      "statusOnHit": null,
+      "xpValue": 120
+     },
+     "ref": "void_wraith"
+    },
+    {
+     "count": 3,
+     "overrides": {
+      "armor": 12,
+      "dmg": [
+       48,
+       76
+      ],
+      "gold": [
+       18,
+       35
+      ],
+      "hit": 78,
+      "hp": 720,
+      "maxHp": 720,
+      "spellChance": 0.35,
+      "spellList": [
+       "cosmic_rupture",
+       "nightmare_hex"
+      ],
+      "xpValue": 130
+     },
+     "ref": "star_horror"
+    }
+   ],
+   "name": "Void Tide"
+  },
+  "border_boss": {
+   "enemies": [
+    {
+     "count": 1,
+     "ref": "goblin_warlord"
+    },
+    {
+     "count": 2,
+     "ref": "goblin_warrior"
+    }
+   ],
+   "introText": "A goblin warlord and his honor guard block the road, axes raised.\nThey have held this crossing for three seasons. No one passes alive.",
+   "name": "Warlord's Vanguard"
+  },
+  "corrupted_outpost": {
+   "enemies": [
+    {
+     "count": 2,
+     "ref": "goblin_warrior"
+    },
+    {
+     "count": 2,
+     "ref": "goblin_scout"
+    }
+   ],
+   "name": "Corrupted Outpost"
+  },
+  "cosmic_assault": {
+   "enemies": [
+    {
+     "count": 2,
+     "overrides": {
+      "spellChance": 0.35,
+      "spellList": [
+       "cosmic_rupture",
+       "nightmare_hex"
+      ]
+     },
+     "ref": "star_horror"
+    },
+    {
+     "count": 1,
+     "overrides": {
+      "blockChance": 0.25,
+      "spellChance": 0.4,
+      "spellList": [
+       "void_lance",
+       "brute_slam",
+       "cosmic_rupture"
+      ]
+     },
+     "ref": "cosmic_titan"
+    }
+   ],
+   "name": "Cosmic Assault"
+  },
+  "demon_patrol": {
+   "enemies": [
+    {
+     "count": 3,
+     "ref": "imp"
+    },
+    {
+     "count": 1,
+     "ref": "hell_knight"
+    }
+   ],
+   "name": "Demon Patrol"
+  },
+  "dragon_elite": {
+   "enemies": [
+    {
+     "count": 2,
+     "overrides": {
+      "armor": 32,
+      "blockChance": 0.25,
+      "dmg": [
+       104,
+       152
+      ],
+      "hp": 1840,
+      "loot": null,
+      "maxHp": 1840,
+      "spellChance": 0.25,
+      "spellList": [
+       "demon_disarm"
+      ],
+      "statusOnHit": null
+     },
+     "ref": "wyrm_warrior"
+    },
+    {
+     "count": 1,
+     "overrides": {
+      "armor": 28,
+      "dmg": [
+       104,
+       160
+      ],
+      "hp": 2240,
+      "loot": null,
+      "maxHp": 2240,
+      "spellChance": 0.4,
+      "spellList": [
+       "frost_lance",
+       "wraith_chill",
+       "ash_blind"
+      ],
+      "statusOnHit": null
+     },
+     "ref": "frost_wyrm"
+    },
+    {
+     "count": 1,
+     "overrides": {
+      "armor": 26,
+      "dmg": [
+       116,
+       176
+      ],
+      "hp": 2560,
+      "loot": null,
+      "maxHp": 2560,
+      "spellChance": 0.4,
+      "spellList": [
+       "brute_slam",
+       "molten_shatter",
+       "ash_blind"
+      ],
+      "statusOnHit": null
+     },
+     "ref": "storm_dragon"
+    }
+   ],
+   "name": "Dragon Elite Flight"
+  },
+  "dragon_king_fight": {
+   "enemies": [
+    {
+     "count": 1,
+     "overrides": {
+      "armor": 46,
+      "blockChance": 0.35,
+      "dmg": [
+       172,
+       276
+      ],
+      "hp": 18900,
+      "loot": null,
+      "maxHp": 18900,
+      "spellChance": 0.55,
+      "spellList": [
+       "titan_magma_wave",
+       "infernal_brand",
+       "molten_shatter",
+       "nightmare_hex",
+       "demon_disarm"
+      ],
+      "statusOnHit": null,
+      "stealableBuffs": []
+     },
+     "ref": "dragon_king"
+    },
+    {
+     "count": 1,
+     "overrides": {
+      "armor": 38,
+      "blockChance": 0.28,
+      "dmg": [
+       148,
+       228
+      ],
+      "hp": 8750,
+      "loot": null,
+      "maxHp": 8750,
+      "spellChance": 0.5,
+      "spellList": [
+       "titan_magma_wave",
+       "infernal_brand",
+       "nightmare_hex",
+       "brute_slam"
+      ],
+      "statusOnHit": null,
+      "stealableBuffs": []
+     },
+     "ref": "ancient_dragon"
+    },
+    {
+     "count": 2,
+     "overrides": {
+      "armor": 32,
+      "blockChance": 0.25,
+      "dmg": [
+       104,
+       152
+      ],
+      "hp": 1840,
+      "loot": null,
+      "maxHp": 1840,
+      "spellChance": 0.25,
+      "spellList": [
+       "demon_disarm"
+      ],
+      "statusOnHit": null
+     },
+     "ref": "wyrm_warrior"
+    }
+   ],
+   "introText": "Bahamorth speaks and the mountain shakes. Every word is an earthquake.\n\"I am the first flame. The world ends with me. Come, then. Try.\"",
+   "name": "Bahamorth, the Dragon King"
+  },
+  "dragon_patrol": {
+   "enemies": [
+    {
+     "count": 3,
+     "overrides": {
+      "armor": 22,
+      "dmg": [
+       80,
+       124
+      ],
+      "hp": 1240,
+      "loot": null,
+      "maxHp": 1240,
+      "spellChance": 0.3,
+      "spellList": [
+       "imp_fireball",
+       "infernal_brand"
+      ],
+      "statusOnHit": null
+     },
+     "ref": "dragon_whelp"
+    },
+    {
+     "count": 1,
+     "overrides": {
+      "armor": 16,
+      "dmg": [
+       84,
+       128
+      ],
+      "hp": 1320,
+      "loot": null,
+      "maxHp": 1320,
+      "spellChance": 0.4,
+      "spellList": [
+       "acolyte_curse",
+       "molten_shatter"
+      ],
+      "statusOnHit": null
+     },
+     "ref": "dragon_cultist"
+    }
+   ],
+   "name": "Dragon Patrol"
+  },
+  "echo_sovereign": {
+   "bossLootRef": {
+    "bases": [
+     "heavy_chest",
+     "ring",
+     "amulet",
+     "staff",
+     "necklace"
+    ],
+    "quality": "exotic",
+    "rarity": "legendary",
+    "rolls": 4
+   },
+   "enemies": [
+    {
+     "count": 1,
+     "ref": "echo_sovereign"
+    }
+   ],
+   "hidden": true,
+   "introText": "The Veil remembers those who broke it.\nYou feel the memory of the Emberveil Sovereign coalesce around you — cold, furious, incomplete.",
+   "name": "Echo of the Sovereign"
+  },
+  "ember_ambush": {
+   "enemies": [
+    {
+     "count": 4,
+     "ref": "cinder_hound"
+    }
+   ],
+   "name": "Ember Ambush"
+  },
+  "emberveil_sovereign": {
+   "enemies": [
+    {
+     "count": 1,
+     "ref": "emberveil_sovereign"
+    },
+    {
+     "count": 2,
+     "ref": "void_shade"
+    },
+    {
+     "count": 1,
+     "ref": "demon_brute"
+    }
+   ],
+   "introText": "The Sovereign does not speak. It simply regards you with depthless, burning eyes.\nYou understand, somehow, that you were always meant to be here.",
+   "name": "The Emberveil Sovereign"
+  },
+  "frost_wyrm_pack": {
+   "enemies": [
+    {
+     "count": 1,
+     "overrides": {
+      "armor": 28,
+      "dmg": [
+       104,
+       160
+      ],
+      "hp": 2240,
+      "loot": null,
+      "maxHp": 2240,
+      "spellChance": 0.4,
+      "spellList": [
+       "frost_lance",
+       "wraith_chill",
+       "ash_blind"
+      ],
+      "statusOnHit": null
+     },
+     "ref": "frost_wyrm"
+    },
+    {
+     "count": 2,
+     "overrides": {
+      "armor": 32,
+      "blockChance": 0.25,
+      "dmg": [
+       104,
+       152
+      ],
+      "hp": 1840,
+      "loot": null,
+      "maxHp": 1840,
+      "spellChance": 0.25,
+      "spellList": [
+       "demon_disarm"
+      ],
+      "statusOnHit": null
+     },
+     "ref": "wyrm_warrior"
+    }
+   ],
+   "name": "Frost Wyrm Pack"
+  },
+  "genesis_nest": {
+   "enemies": [
+    {
+     "count": 1,
+     "ref": "genesis_worm"
+    },
+    {
+     "count": 3,
+     "ref": "reality_shard"
+    }
+   ],
+   "name": "Genesis Nest"
+  },
+  "goblin_camp": {
+   "enemies": [
+    {
+     "count": 2,
+     "ref": "goblin_scout"
+    },
+    {
+     "count": 1,
+     "ref": "goblin_shaman"
+    },
+    {
+     "count": 2,
+     "ref": "goblin_warrior"
+    }
+   ],
+   "name": "Goblin Camp"
+  },
+  "goblin_patrol": {
+   "enemies": [
+    {
+     "count": 3,
+     "ref": "goblin_scout"
+    }
+   ],
+   "name": "Goblin Patrol"
+  },
+  "grax_final": {
+   "enemies": [
+    {
+     "count": 1,
+     "ref": "grax_veil_touched"
+    },
+    {
+     "count": 2,
+     "ref": "veil_warden"
+    }
+   ],
+   "name": "Grax the Veil-Touched"
+  },
+  "hell_garrison": {
+   "enemies": [
+    {
+     "count": 2,
+     "ref": "hell_knight"
+    },
+    {
+     "count": 2,
+     "ref": "imp"
+    }
+   ],
+   "name": "Hell Garrison"
+  },
+  "lava_titan": {
+   "enemies": [
+    {
+     "count": 1,
+     "ref": "lava_titan"
+    },
+    {
+     "count": 2,
+     "ref": "molten_golem"
+    }
+   ],
+   "introText": "The earth splits. A figure of living rock and molten fire heaves itself upright.\nThe heat alone could kill you. The fists are just a courtesy.",
+   "name": "The Lava Titan"
+  },
+  "obsidian_garrison": {
+   "enemies": [
+    {
+     "count": 1,
+     "ref": "molten_golem"
+    },
+    {
+     "count": 2,
+     "ref": "ash_wraith"
+    }
+   ],
+   "name": "Obsidian Garrison"
+  },
+  "primordial_patrol": {
+   "enemies": [
+    {
+     "count": 2,
+     "ref": "primordial_elemental"
+    },
+    {
+     "count": 2,
+     "ref": "reality_shard"
+    }
+   ],
+   "name": "Primordial Patrol"
+  },
+  "prologue_miniboss": {
+   "enemies": [
+    {
+     "count": 1,
+     "ref": "veilspawn_herald"
+    }
+   ],
+   "introText": "Something tears through the fabric between worlds — wrong shape, wrong number of limbs.\nIt locks eyes with you. It has been waiting.",
+   "name": "The Veilspawn Herald"
+  },
+  "prologue_pair": {
+   "enemies": [
+    {
+     "count": 1,
+     "ref": "goblin_scout"
+    },
+    {
+     "count": 1,
+     "ref": "goblin_warrior"
+    }
+   ],
+   "name": "Goblin Pair"
+  },
+  "prologue_scout": {
+   "enemies": [
+    {
+     "count": 1,
+     "ref": "goblin_scout"
+    }
+   ],
+   "name": "Lone Goblin Scout"
+  },
+  "rift_assault": {
+   "enemies": [
+    {
+     "count": 3,
+     "ref": "void_shade"
+    },
+    {
+     "count": 1,
+     "ref": "demon_brute"
+    }
+   ],
+   "name": "Rift Assault"
+  },
+  "spider_nest": {
+   "enemies": [
+    {
+     "count": 4,
+     "ref": "giant_spider"
+    }
+   ],
+   "name": "Spider Hollow"
+  },
+  "storm_dragon_nest": {
+   "enemies": [
+    {
+     "count": 1,
+     "overrides": {
+      "armor": 26,
+      "dmg": [
+       116,
+       176
+      ],
+      "hp": 2560,
+      "loot": null,
+      "maxHp": 2560,
+      "spellChance": 0.4,
+      "spellList": [
+       "brute_slam",
+       "molten_shatter",
+       "ash_blind"
+      ],
+      "statusOnHit": null
+     },
+     "ref": "storm_dragon"
+    },
+    {
+     "count": 2,
+     "overrides": {
+      "armor": 16,
+      "dmg": [
+       84,
+       128
+      ],
+      "hp": 1320,
+      "loot": null,
+      "maxHp": 1320,
+      "spellChance": 0.4,
+      "spellList": [
+       "acolyte_curse",
+       "molten_shatter"
+      ],
+      "statusOnHit": null
+     },
+     "ref": "dragon_cultist"
+    }
+   ],
+   "name": "Storm Dragon Nest"
+  },
+  "the_architect_final": {
+   "enemies": [
+    {
+     "count": 1,
+     "ref": "the_architect"
+    },
+    {
+     "count": 2,
+     "ref": "abyssal_knight"
+    }
+   ],
+   "introText": "It built the abyss you have been walking through. It is still building.\n\"You have interrupted the design. This is unacceptable.\"",
+   "name": "The Architect"
+  },
+  "the_first_ember": {
+   "bossLootRef": {
+    "bases": [
+     "heavy_chest",
+     "ring",
+     "amulet",
+     "greatsword",
+     "necklace"
+    ],
+    "quality": "exotic",
+    "rarity": "legendary",
+    "rolls": 5
+   },
+   "enemies": [
+    {
+     "count": 1,
+     "ref": "the_first_ember"
+    }
+   ],
+   "hidden": true,
+   "introText": "Before the Emberveil there was fire.\nNot the fire of dragons or molten stone — the first fire, the one that should have gone out when the world was young.\nIt has been waiting for someone to find the door.",
+   "name": "The First Ember"
+  },
+  "thornwood_boss": {
+   "enemies": [
+    {
+     "count": 2,
+     "ref": "veil_warden"
+    },
+    {
+     "count": 2,
+     "ref": "goblin_shaman"
+    }
+   ],
+   "introText": "Ancient guardians of the Thornwood — stone-faced, merciless, older than the village they protect.\nThe shamans chant. The air curdles with old magic.",
+   "name": "The Veil Wardens"
+  },
+  "thornwood_vault_guardian": {
+   "bossLootRef": {
+    "bases": [
+     "ring",
+     "amulet",
+     "wand",
+     "medium_chest"
+    ],
+    "quality": "high",
+    "rarity": "rare",
+    "rolls": 2
+   },
+   "enemies": [
+    {
+     "count": 1,
+     "ref": "vault_guardian"
+    }
+   ],
+   "hidden": true,
+   "introText": "The key trembles in your hand as the vault door swings open.\nSomething ancient that should never have been caged stares back at you.",
+   "name": "The Vault Guardian"
+  },
+  "unraveler": {
+   "enemies": [
+    {
+     "count": 1,
+     "overrides": {
+      "spellChance": 0.5,
+      "spellList": [
+       "sovereign_voidstorm",
+       "void_silence",
+       "nightmare_hex",
+       "cosmic_rupture"
+      ],
+      "stealableBuffs": []
+     },
+     "ref": "the_unraveler"
+    },
+    {
+     "count": 2,
+     "overrides": {
+      "spellChance": 0.35,
+      "spellList": [
+       "void_silence",
+       "wraith_chill"
+      ]
+     },
+     "ref": "void_wraith"
+    }
+   ],
+   "introText": "Reality peels back like old skin to reveal something vast and hungry beneath.\n\"You were never real,\" it whispers. \"None of this was.\"",
+   "name": "The Unraveler"
+  },
+  "veil_cult_camp": {
+   "enemies": [
+    {
+     "count": 3,
+     "ref": "veil_cultist"
+    },
+    {
+     "count": 1,
+     "ref": "veil_sorcerer"
+    }
+   ],
+   "name": "Veil Cult Encampment"
+  },
+  "veil_high_priest": {
+   "enemies": [
+    {
+     "count": 1,
+     "overrides": {
+      "dmg": [
+       36,
+       56
+      ],
+      "hp": 1260,
+      "maxHp": 1260,
+      "name": "Veil High Priest",
+      "xpValue": 220
+     },
+     "ref": "veil_sorcerer"
+    },
+    {
+     "count": 3,
+     "ref": "veil_cultist"
+    }
+   ],
+   "introText": "He stands at the altar, arms spread wide, face ecstatic with devotion.\n\"You will serve the Veil. One way or another.\"",
+   "name": "Veil High Priest"
+  },
+  "void_horde": {
+   "enemies": [
+    {
+     "count": 2,
+     "overrides": {
+      "spellChance": 0.35,
+      "spellList": [
+       "void_silence",
+       "wraith_chill"
+      ]
+     },
+     "ref": "void_wraith"
+    },
+    {
+     "count": 1,
+     "overrides": {
+      "spellChance": 0.35,
+      "spellList": [
+       "cosmic_rupture",
+       "nightmare_hex"
+      ]
+     },
+     "ref": "star_horror"
+    }
+   ],
+   "name": "Void Horde"
+  },
+  "void_nexus_ambush": {
+   "enemies": [
+    {
+     "count": 4,
+     "ref": "void_shade"
+    }
+   ],
+   "name": "Void Nexus"
+  },
+  "void_scholar": {
+   "bossLootRef": {
+    "bases": [
+     "staff",
+     "wand",
+     "ring",
+     "cloth_chest"
+    ],
+    "quality": "elite",
+    "rarity": "legendary",
+    "rolls": 3
+   },
+   "enemies": [
+    {
+     "count": 1,
+     "ref": "void_scholar"
+    }
+   ],
+   "hidden": true,
+   "introText": "He recognises the intelligence in your eyes before you have said a word.\n\"Good. Someone who might actually understand what I am about to do.\"",
+   "name": "The Void Scholar"
+  },
+  "wolf_pack": {
+   "enemies": [
+    {
+     "count": 3,
+     "ref": "corrupted_wolf"
+    }
+   ],
+   "name": "Corrupted Wolf Pack"
+  },
+  "wyrm_citadel": {
+   "enemies": [
+    {
+     "count": 2,
+     "overrides": {
+      "armor": 32,
+      "blockChance": 0.25,
+      "dmg": [
+       104,
+       152
+      ],
+      "hp": 1840,
+      "loot": null,
+      "maxHp": 1840,
+      "spellChance": 0.25,
+      "spellList": [
+       "demon_disarm"
+      ],
+      "statusOnHit": null
+     },
+     "ref": "wyrm_warrior"
+    },
+    {
+     "count": 2,
+     "overrides": {
+      "armor": 22,
+      "dmg": [
+       80,
+       124
+      ],
+      "hp": 1240,
+      "loot": null,
+      "maxHp": 1240,
+      "spellChance": 0.3,
+      "spellList": [
+       "imp_fireball",
+       "infernal_brand"
+      ],
+      "statusOnHit": null
+     },
+     "ref": "dragon_whelp"
+    }
+   ],
+   "name": "Wyrm Citadel"
+  }
+ },
+ "source": "mapData.js ENCOUNTERS + HIDDEN_BOSS_ENCOUNTERS",
+ "version": 1
+}

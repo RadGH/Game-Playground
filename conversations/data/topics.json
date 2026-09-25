@@ -1,0 +1,4660 @@
+{
+ "_doc": "Conversation scripts for conversations/js/conversations.js. topic: { id, tags, weight, requires: [ { who: asker|answerer|third, memory: type (+maxAgeHours, details, detailsNot), gear: { slot, minKills, delta: better|worse, maxDaysAgo, replaced }, bag: { minDaysAgo }, stats: { kills|damage|fights|downs|healing: number | \"top\" }, party: { key: value | {min,max,is} }, trait, notTrait, relation: { to, min, max } } ], lines: [ { role, to?, optional?, variants: [ { t: template, cond? } ] } ] }. Templates use Lingo syntax; bindings: asker/answerer/third (speakers), memory.* (details + when + count), foe/place/item (entities from the memory), weapon + gear.{kills,damage,delta,deltaAbs,replaced,daysAgo}, bagItem + bag.*, stats.*, party.* (rations, exhaustion, vehicleName, act, nextBoss, companion…).",
+ "topics": [
+  {
+   "id": "fight_recap",
+   "tags": [
+    "camp",
+    "combat"
+   ],
+   "requires": [
+    {
+     "memory": "combat",
+     "maxAgeHours": 48
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "{answerer.name}, what did you make of {memory.when} — {foe.count} {foe.pl} at {place.the}?"
+      },
+      {
+       "t": "So. The {foe.pl}. Talk me through it, {answerer.name}."
+      },
+      {
+       "t": "{answerer.name}. That fight {memory.when}. Honest opinion."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "{foe.count} {foe.pl} and not a scratch on me. Write that down.",
+       "cond": "memory.wounded!==true && (has('pompous')||has('brave'))"
+      },
+      {
+       "t": "I took a cut. It's nothing. {foe.count} of them, and it's nothing.",
+       "cond": "memory.wounded===true"
+      },
+      {
+       "t": "We won. That's the whole review. {foe.count} {foe.pl}, one pile.",
+       "cond": "has('gruff')||has('cynical')"
+      },
+      {
+       "t": "Messy. We won because they were stupid, not because we were good. I want that said before anyone gets cocky."
+      },
+      {
+       "t": "I keep seeing the {foe.sg} that nearly got past me. Ask me again in a week."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "My {weapon} did most of that, if we're being honest. {gear.kills} kills on it now.",
+       "cond": "gear.kills>=2"
+      },
+      {
+       "t": "I counted. Nobody thanks the one who counts."
+      }
+     ],
+     "optional": true
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Fair. Sleep on it. There'll be more."
+      },
+      {
+       "t": "Good. Same again tomorrow, then."
+      },
+      {
+       "t": "Cocky. I like it.",
+       "cond": "has('jolly')"
+      }
+     ]
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "fight_worst_moment",
+   "tags": [
+    "camp",
+    "combat"
+   ],
+   "requires": [
+    {
+     "memory": "combat",
+     "maxAgeHours": 72,
+     "details": {
+      "wounded": true
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "You went quiet after the {foe.pl}, {answerer.name}."
+      },
+      {
+       "t": "That last fight — you were bleeding. Don't say you weren't."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "A {foe.sg} got under my guard. Once. It won't happen twice."
+      },
+      {
+       "t": "I was slow. Cold hands. {~It happens.|Don't make it a thing.|I'll be faster.}"
+      },
+      {
+       "t": "I nearly died at {place.the} and you want to chat about it by the fire.",
+       "cond": "has('cynical')||has('gruff')"
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "Bind it properly. I've seen a scratch turn a leg black in three days."
+      },
+      {
+       "t": "{~Eat something.|Drink.|Sleep.} Wounds close on full stomachs."
+      }
+     ],
+     "optional": true
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Next time shout. I'll be there."
+      },
+      {
+       "t": "Then I'll stand closer."
+      }
+     ]
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "kill_count_brag",
+   "tags": [
+    "camp",
+    "combat",
+    "loot"
+   ],
+   "requires": [
+    {
+     "gear": {
+      "minKills": 3
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "This {weapon} has {gear.kills} kills on it. {~I've named it.|I don't name things, but I'm tempted.|It earned its keep.}"
+      },
+      {
+       "t": "{gear.kills} dead by this {weapon} since I picked it up. {gear.damage} damage dealt, if you like numbers."
+      }
+     ]
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "You count? Who counts?",
+       "cond": "!has('scholar')"
+      },
+      {
+       "t": "{gear.damage} in how many swings? That's what matters.",
+       "cond": "has('scholar')"
+      },
+      {
+       "t": "Careful. Blades that get counted get cocky."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Someone has to keep score."
+      },
+      {
+       "t": "Cocky is fine. Dead is not. {~So far, so good.|Ask the {gear.kills} who disagreed.}"
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "My turn to hold it tomorrow."
+      },
+      {
+       "t": "Mine's still at zero. Say nothing."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "top_damage_ribbing",
+   "tags": [
+    "camp",
+    "combat"
+   ],
+   "requires": [
+    {
+     "stats": {
+      "damage": "top",
+      "fights": 1
+     },
+     "who": "answerer"
+    },
+    {
+     "stats": {
+      "fights": 1
+     },
+     "who": "asker"
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "{answerer.name}, the meter says you did most of the hurting today."
+      },
+      {
+       "t": "Top of the pile again, {answerer.name}. {stats.damage} damage. Leave some for the rest of us."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Naturally.",
+       "cond": "has('pompous')"
+      },
+      {
+       "t": "Somebody had to. {~You were busy falling over.|You were busy healing me, which I noticed. Thank you.}"
+      },
+      {
+       "t": "Numbers. Fine. Next fight you take the front and we'll see whose numbers grow."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "I healed for more than either of you hit for. Nobody makes a bar for that."
+      },
+      {
+       "t": "I'll take a small pile and a whole skin, thanks."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "went_down",
+   "tags": [
+    "camp",
+    "combat"
+   ],
+   "requires": [
+    {
+     "memory": "wounded",
+     "maxAgeHours": 72,
+     "details": {
+      "down": true
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "You went down today, {answerer.name}. How's the head?"
+      },
+      {
+       "t": "We carried you out of {place.the}. You owe me a drink and an apology to my back."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "I remember the {foe.sg}, then the sky, then your ugly face. Thank you. Don't mention it again."
+      },
+      {
+       "t": "Down isn't dead. {~Write that on my stone when it's time.|I've been down before.}"
+      },
+      {
+       "t": "I'm not going down again. I'll take the back line and I'll take the shame.",
+       "cond": "has('coward')||has('nervous')"
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "Next time I'll put the barrier on you first. My mistake."
+      },
+      {
+       "t": "Eat double tonight. That's an order from someone with no rank."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "new_gear_better",
+   "tags": [
+    "camp",
+    "loot"
+   ],
+   "requires": [
+    {
+     "gear": {
+      "delta": "better",
+      "maxDaysAgo": 3,
+      "replaced": true
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Is that new, {answerer.name}? The {weapon}?"
+      },
+      {
+       "t": "Show me the {weapon}. Better than what you had?"
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Found it {gear.daysAgo, plural, =0{today} one{yesterday} other{# days ago}}. Beats {gear.replaced} by about {gear.deltaAbs} — you can feel it in the swing."
+      },
+      {
+       "t": "Better by {gear.deltaAbs} on whatever scale you smiths use. {~The old one's in the bag if anyone wants it.|Sold the old one. No sentiment.}"
+      },
+      {
+       "t": "It is magnificent and I will not be taking questions.",
+       "cond": "has('pompous')"
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "{gear.kills, plural, =0{No kills on it yet. Tomorrow.} one{One kill already.} other{# kills already. It works.}}",
+       "cond": "true"
+      }
+     ],
+     "optional": true
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Don't get attached. They break."
+      },
+      {
+       "t": "Good. Then you're in front tomorrow."
+      }
+     ]
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "new_gear_worse",
+   "tags": [
+    "camp",
+    "loot"
+   ],
+   "requires": [
+    {
+     "gear": {
+      "delta": "worse",
+      "maxDaysAgo": 4,
+      "replaced": true
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Why are you carrying that {weapon}? The old one was better."
+      },
+      {
+       "t": "That {weapon}. You took a step backwards, {answerer.name}."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "It looks better. {~Looks count for something.|Don't they?}"
+      },
+      {
+       "t": "It's worse by {gear.deltaAbs}, I know. {~The old one was falling apart.|I'll swap back. Don't gloat.|I like the weight.}"
+      },
+      {
+       "t": "I know exactly what I'm doing.",
+       "cond": "has('pompous')||has('gruff')"
+      }
+     ]
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Your funeral. Literally, possibly."
+      },
+      {
+       "t": "Swap it before the next fight. I'm not carrying you."
+      }
+     ]
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "bag_dust",
+   "tags": [
+    "camp",
+    "loot"
+   ],
+   "requires": [
+    {
+     "bag": {
+      "minDaysAgo": 2
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "{answerer.name}, that {bagItem} you found — still in the bag?"
+      },
+      {
+       "t": "Whatever happened to the {bagItem}? {bag.daysAgo} days you've hauled it."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Gathering dust. {~Sell it in town.|Somebody take it.|It'll be worth something to someone.}"
+      },
+      {
+       "t": "I forgot I had it. {~That's the honest answer.|Don't tell the merchant.}"
+      },
+      {
+       "t": "I'm saving it for the right moment.",
+       "cond": "has('greedy')"
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "If nobody wants it, I'll salvage it for scrap. Iron is iron."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "loot_found",
+   "tags": [
+    "camp",
+    "loot"
+   ],
+   "requires": [
+    {
+     "memory": "loot",
+     "maxAgeHours": 48
+    }
+   ],
+   "lines": [
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "We found {item.a} {memory.when}. {memory.worth.cap}, I'd say."
+      },
+      {
+       "t": "{item.the.cap} from {place.the} — did anyone look at it properly?"
+      }
+     ]
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Looked. {~Held it.|Sniffed it.|Weighed it.} {~Junk.|Decent.|Better than it looks.}"
+      },
+      {
+       "t": "Who's carrying it? Because it isn't me."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "Everything we pick up is somebody's grave-goods. Just saying."
+      },
+      {
+       "t": "Mind we don't die for loot. Loot doesn't mourn."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "levelup",
+   "tags": [
+    "camp",
+    "growth"
+   ],
+   "requires": [
+    {
+     "memory": "levelup",
+     "maxAgeHours": 48
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "You're standing taller, {answerer.name}."
+      },
+      {
+       "t": "Something's different about you today."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Level {memory.level}. {~I can feel it in my shoulders.|Don't ask how it works. It works.|The old wounds close faster.}"
+      },
+      {
+       "t": "Stronger. {~Not wiser.|Sadly not richer.}"
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "Buy the good talent, not the flashy one."
+      },
+      {
+       "t": "Spend the points before the next fight or I'll spend them for you."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "road_talk",
+   "tags": [
+    "camp",
+    "travel"
+   ],
+   "requires": [
+    {
+     "memory": "travel",
+     "maxAgeHours": 30
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Long day. {place.the.cap} goes on forever."
+      },
+      {
+       "t": "How many more of these roads before something's actually different?"
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Every road ends somewhere with teeth.",
+       "cond": "has('cynical')||has('gruff')"
+      },
+      {
+       "t": "{~Three|Two|Four} more days of this and we're through. Probably."
+      },
+      {
+       "t": "I like the roads. {~Nobody's trying to kill us on the roads.|Mostly.}"
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "My feet have opinions. Loud ones."
+      },
+      {
+       "t": "{party.rations, plural, =0{We are out of food. Say it with me: out of food.} one{One ration left. One.} other{# rations. Count them before the {$creature.pl} do.}}"
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "rations_low",
+   "tags": [
+    "camp",
+    "supplies"
+   ],
+   "requires": [
+    {
+     "party": {
+      "rations": {
+       "max": 2
+      }
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "How's the food, {answerer.name}?"
+      },
+      {
+       "t": "Count the rations. Out loud."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "{party.rations, plural, =0{None. We're eating our belts tomorrow.} one{One. Split four ways, that's a mouthful.} other{#. Not enough.}}"
+      },
+      {
+       "t": "{~Bad.|Thin.|Somebody's been sneaking.} We buy food in town or we start eating what we kill."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "Goblin isn't as bad as people say.",
+       "cond": "has('hungry')||has('gruff')"
+      },
+      {
+       "t": "I saved a crust. Don't look at me like that."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "exhausted",
+   "tags": [
+    "camp",
+    "supplies"
+   ],
+   "requires": [
+    {
+     "party": {
+      "exhaustion": {
+       "min": 1
+      }
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "You've gone grey, {answerer.name}. When did you last eat?"
+      },
+      {
+       "t": "Nobody's marching straight. We're worn thin."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Two days on water. {~My hands shake.|I missed a goblin at arm's length.|I'll be fine when there's bread.}"
+      },
+      {
+       "t": "Exhausted. It's a word for hungry and stubborn at once."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "Town. Tomorrow. No detours for shiny ruins."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "vehicle_talk",
+   "tags": [
+    "camp",
+    "travel"
+   ],
+   "requires": [
+    {
+     "party": {
+      "vehicle": {
+       "min": "a"
+      }
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "The {party.vehicleName} was a good buy. Say it."
+      },
+      {
+       "t": "We'd be a day behind without the {party.vehicleName}."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "It rattles. {~I've said my piece.|Every bone in me knows it rattles.}"
+      },
+      {
+       "t": "Good buy. {~Better than my boots.|Now buy me boots.}"
+      },
+      {
+       "t": "It draws eyes. Wagons draw thieves. We'll see who's right.",
+       "cond": "has('paranoid')||has('cynical')"
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "I'll sleep under it. Warmer than the sky."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "night_attack_after",
+   "tags": [
+    "camp",
+    "combat"
+   ],
+   "requires": [
+    {
+     "memory": "combat",
+     "maxAgeHours": 30,
+     "details": {
+      "night": true
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Last night's {foe.pl} — anyone hear them coming?"
+      },
+      {
+       "t": "Who was on watch when the {foe.pl} came? {~Nobody. Right.|I was. Sorry.}"
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "I heard the fire pop and then a {foe.sg} was in my blanket. {~Never again.|Double watch.}"
+      },
+      {
+       "t": "We should sleep with the boots on. All of us."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "Or we buy a wagon with high sides and stop arguing about watches."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "opinion_check",
+   "tags": [
+    "camp",
+    "people"
+   ],
+   "requires": [
+    {
+     "relation": {
+      "to": "asker",
+      "min": 0.2
+     },
+     "who": "answerer"
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Be honest, {answerer.name}. Am I any good at this?"
+      },
+      {
+       "t": "{answerer.name}. Would you follow me into whatever is waiting up the road?"
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "You're better than you think and worse than you say.",
+       "cond": "has('sarcastic')"
+      },
+      {
+       "t": "I'd follow you. {~Don't make it a speech.|Ask again when I'm sober.}"
+      },
+      {
+       "t": "You're good. {~Loud, but good.|Slow, but good.|Reckless, but good.}"
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "I'm right here, you two."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "opinion_grudge",
+   "tags": [
+    "camp",
+    "people"
+   ],
+   "requires": [
+    {
+     "relation": {
+      "to": "asker",
+      "max": -0.2
+     },
+     "who": "answerer"
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Something on your mind, {answerer.name}? You've been staring."
+      },
+      {
+       "t": "Say it. Whatever it is."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "You left me standing alone {~at the ford|in the last fight|with three on me}. I noticed."
+      },
+      {
+       "t": "Nothing. {~Nothing worth the fire.|Eat your food.}"
+      },
+      {
+       "t": "I don't like you. It doesn't matter. We fight the same direction.",
+       "cond": "has('abrasive')||has('cynical')"
+      }
+     ]
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Fine. I'll do better. Or I won't, and you'll say so again."
+      },
+      {
+       "t": "Noted."
+      }
+     ]
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "silas_doubt",
+   "tags": [
+    "camp",
+    "story"
+   ],
+   "requires": [
+    {
+     "party": {
+      "act": {
+       "min": 2
+      }
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Does anyone actually trust Silas Veilward?"
+      },
+      {
+       "t": "{silas_veilward.name} knew where the cult was too early. Nobody else thinks that's odd?"
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "I trust nobody who talks in riddles.",
+       "cond": "has('paranoid')||has('cynical')"
+      },
+      {
+       "t": "He's kept us alive. That buys a lot of odd."
+      },
+      {
+       "t": "The Ashen Veil had him once. People don't come back from that clean."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "If he turns, I want first swing."
+      },
+      {
+       "t": "Keep your voice down. Roads have ears out here."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "veil_talk",
+   "tags": [
+    "camp",
+    "story"
+   ],
+   "requires": [
+    {
+     "party": {
+      "act": {
+       "min": 1
+      }
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "What is the Veil, really? Nobody says it plainly."
+      },
+      {
+       "t": "The Corruption. Is it a thing, or is it someone?"
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Fire between worlds. Everything we call magic is what leaks through.",
+       "cond": "has('scholar')||has('pious')"
+      },
+      {
+       "t": "Someone. It has intent. You can feel it choosing."
+      },
+      {
+       "t": "Doesn't matter what it is. It bleeds. So it dies."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "Mira said something was on the other side, pushing. I believed her."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "boss_ahead",
+   "tags": [
+    "camp",
+    "plan"
+   ],
+   "requires": [
+    {
+     "party": {
+      "nextBoss": {
+       "min": "a"
+      }
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "{party.nextBoss} is ahead of us. Plans?"
+      },
+      {
+       "t": "We're close to {party.nextBoss}. I want everyone's honest plan."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "I go in first. The rest of you keep up.",
+       "cond": "has('brave')||has('bloodlust')"
+      },
+      {
+       "t": "Potions on the belt, not in the bag. Healer in the back. Nobody gets clever."
+      },
+      {
+       "t": "Sleep. Eat. Then hit it until it stops."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "I'll save my best spell for the second half. Bosses always have a second half."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "companion_talk",
+   "tags": [
+    "camp",
+    "people"
+   ],
+   "requires": [
+    {
+     "party": {
+      "companion": {
+       "min": "a"
+      }
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "The {party.companion} keeps looking at me."
+      },
+      {
+       "t": "Who's feeding the {party.companion}? It's getting fat."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "It likes you. {~Somebody should.|That's rare.}"
+      },
+      {
+       "t": "I feed it. It fights better than most of us. {~No offence.|Some offence.}"
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "It ate my glove."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "weather_scene",
+   "tags": [
+    "camp",
+    "scene"
+   ],
+   "requires": [],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "{~Cold night.|Quiet night.|Too quiet.} {~Anyone else feel it?|Anyone awake?}"
+      },
+      {
+       "t": "Look at that sky."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "I feel it. Something out there is patient.",
+       "cond": "has('paranoid')||has('nervous')"
+      },
+      {
+       "t": "It's a night. They happen. Sleep."
+      },
+      {
+       "t": "{~Beautiful, if you forget what's under it.|I miss walls.|I miss beds.}"
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "I'll take first watch. Nobody argue."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "old_wound_story",
+   "tags": [
+    "camp",
+    "people"
+   ],
+   "requires": [
+    {
+     "trait": "grieving",
+     "who": "answerer"
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "You never talk about before, {answerer.name}."
+      },
+      {
+       "t": "Who did you lose? You can say."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Someone. {~The road took them.|The Veil took them.|A fever took them, which is worse, because there's nobody to hit.}"
+      },
+      {
+       "t": "Not tonight. {~Tomorrow, maybe.|Ask me after the next fight.}"
+      }
+     ]
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "When you're ready."
+      },
+      {
+       "t": "Then we'll hit something for them tomorrow."
+      }
+     ]
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "drink_jolly",
+   "tags": [
+    "camp",
+    "people"
+   ],
+   "requires": [
+    {
+     "trait": "jolly",
+     "who": "answerer"
+    }
+   ],
+   "lines": [
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Right, who wants a song? {~No? Tough.|Silence means yes.}"
+      },
+      {
+       "t": "A toast! To {~not being dead|the ones we haven't met yet|small mercies and big swords}!"
+      }
+     ]
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Sing and I'll gag you with a ration.",
+       "cond": "has('gruff')||has('abrasive')"
+      },
+      {
+       "t": "One song. A quiet one."
+      },
+      {
+       "t": "{~Fine.|Go on then.|If you must.}"
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "Sing the one about the goblin king. The rude one."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "scholar_lore",
+   "tags": [
+    "camp",
+    "story"
+   ],
+   "requires": [
+    {
+     "trait": "scholar",
+     "who": "answerer"
+    },
+    {
+     "memory": "travel",
+     "maxAgeHours": 48,
+     "who": "answerer"
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "You've been scribbling all day, {answerer.name}. What's {place.the} to you?"
+      },
+      {
+       "t": "Tell me something about {place.the} that isn't grim."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "{place.the.cap} is older than the maps. The stones were cut before the Veil tore. Nothing about that is grim; it's a comfort."
+      },
+      {
+       "t": "Before the goblins it was a dwarven ore-test. Before the dwarves, something else. Everything's on top of something."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "Fascinating. Pass the bread."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "healer_tally",
+   "tags": [
+    "camp",
+    "combat"
+   ],
+   "requires": [
+    {
+     "stats": {
+      "healing": 20
+     },
+     "who": "answerer"
+    }
+   ],
+   "lines": [
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "{stats.healing} points of healing today. I'm keeping a tally now. Nobody claps for the tally."
+      },
+      {
+       "t": "You are all alive because of me. Say it back."
+      }
+     ]
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "We're alive because of you. {~And the sword.|Mostly you.}"
+      },
+      {
+       "t": "Clap clap. Now heal my knee."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "I'd have been fine."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "callback_promise",
+   "tags": [
+    "camp",
+    "callback"
+   ],
+   "requires": [
+    {
+     "memory": "conversation",
+     "maxAgeHours": 72,
+     "who": "asker"
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "{memory.when.cap} you said \"{memory.said}\". {~Did you?|Still true?|Well?}"
+      },
+      {
+       "t": "Remember what you told me {memory.when}? \"{memory.said}\"."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "I remember. {~I meant it.|I was tired.|Ask me again tomorrow.}",
+       "cond": "!has('cynical')"
+      },
+      {
+       "t": "I say a lot of things by a fire.",
+       "cond": "has('cynical')||has('sarcastic')"
+      },
+      {
+       "t": "I did say that. {~Hold me to it.|I'll get to it.}"
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "I remember it too. Everyone remembers everything out here."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "callback_grudge",
+   "tags": [
+    "camp",
+    "callback"
+   ],
+   "requires": [
+    {
+     "memory": "conversation",
+     "maxAgeHours": 96,
+     "who": "answerer",
+     "details": {
+      "topic": "opinion_grudge"
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "You still sore about what you said the other night?"
+      },
+      {
+       "t": "We never finished that argument."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "I'm not sore. {~I'm right.|I'm tired.}"
+      },
+      {
+       "t": "We finished it. You just didn't like the ending."
+      }
+     ]
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Then we're fine."
+      },
+      {
+       "t": "Then eat, and we'll see."
+      }
+     ]
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "callback_gear",
+   "tags": [
+    "camp",
+    "callback",
+    "loot"
+   ],
+   "requires": [
+    {
+     "memory": "conversation",
+     "maxAgeHours": 96,
+     "who": "answerer",
+     "details": {
+      "topic": "new_gear_worse"
+     }
+    },
+    {
+     "gear": {
+      "delta": "worse",
+      "who": "answerer"
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "You said you'd swap that {weapon}. It's still in your hand."
+      },
+      {
+       "t": "Still carrying the worse one, I see."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "I like it. {~We've been through this.|Leave it.}"
+      },
+      {
+       "t": "Tomorrow. {~I said tomorrow last time, I know.}"
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "Somebody take it off {answerer.them} while {answerer.they} sleeps."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "callback_gear_fixed",
+   "tags": [
+    "camp",
+    "callback",
+    "loot"
+   ],
+   "requires": [
+    {
+     "memory": "conversation",
+     "maxAgeHours": 96,
+     "who": "answerer",
+     "details": {
+      "topic": "new_gear_worse"
+     }
+    },
+    {
+     "gear": {
+      "delta": "better",
+      "who": "answerer"
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "You swapped it. Good."
+      },
+      {
+       "t": "Better {weapon} today. Somebody listened."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "I listen. {~Occasionally.|Don't get used to it.}"
+      },
+      {
+       "t": "It was the {gear.replaced} or my pride. Pride's lighter."
+      }
+     ]
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Miracles."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "nemesis_escaped",
+   "tags": [
+    "camp",
+    "nemesis",
+    "combat"
+   ],
+   "requires": [
+    {
+     "memory": "nemesis",
+     "maxAgeHours": 240,
+     "details": {
+      "outcome": "beat_us"
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "{memory.name}. Say it. We owe that one."
+      },
+      {
+       "t": "Nobody's talking about {memory.name}. So I will."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "{memory.name} put me on my back at {place.the}. Next time I go first and I go for the throat.",
+       "cond": "has('brave')||has('bloodlust')"
+      },
+      {
+       "t": "I'd rather not meet {memory.name} again, honestly. I'd rather a lot of things.",
+       "cond": "has('coward')||has('nervous')"
+      },
+      {
+       "t": "We were tired and it was fast. {~Excuses.|That's all it was.} It'll be back."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "Named things come back. That's what names are for."
+      },
+      {
+       "t": "I dreamt about it. It had my knife."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "nemesis_slain",
+   "tags": [
+    "camp",
+    "nemesis",
+    "combat"
+   ],
+   "requires": [
+    {
+     "memory": "nemesis",
+     "maxAgeHours": 96,
+     "details": {
+      "outcome": "slain"
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "{memory.name} is dead. {~I want that written somewhere.|Say it twice; it sounds better twice.}"
+      },
+      {
+       "t": "We finally got {memory.name}. {memory.when.cap}, at {place.the}."
+      }
+     ]
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "About time.",
+       "cond": "has('gruff')"
+      },
+      {
+       "t": "I kept the ear. {~Don't look at me like that.|Proof.}"
+      },
+      {
+       "t": "Who gets the story rights? Because I'm telling it differently."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "There'll be another one with a worse name by next week."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "named_seen",
+   "tags": [
+    "camp",
+    "nemesis"
+   ],
+   "requires": [
+    {
+     "party": {
+      "namedSeen": {
+       "min": 1
+      }
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "That one with the name. {party.lastNamed}. What was that?"
+      },
+      {
+       "t": "Regular goblins don't have names. {party.lastNamed} did."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Champions. Warlords. Whatever the Veil makes when it pays attention.",
+       "cond": "has('scholar')||has('pious')"
+      },
+      {
+       "t": "Bigger, meaner, and it knew our faces. That's what."
+      },
+      {
+       "t": "Bounty boards pay for names. I checked."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "If it comes back, mine."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "companion_kills",
+   "tags": [
+    "camp",
+    "companion"
+   ],
+   "requires": [
+    {
+     "party": {
+      "companionKills": {
+       "min": 1
+      }
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "The {party.companion} got {party.companionKills, plural, one{a kill} other{# kills}} today. More than some of us."
+      },
+      {
+       "t": "Who's the best fighter here? Because the {party.companion} has opinions."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Don't compare me to a dog.",
+       "cond": "has('pompous')||has('abrasive')"
+      },
+      {
+       "t": "Good {party.companion}. {~Deserves the bigger share.|Gets my ration.}"
+      },
+      {
+       "t": "It doesn't count. It doesn't have to carry anything."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "It counts. I saw the goblin's face."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "companion_hurt",
+   "tags": [
+    "camp",
+    "companion"
+   ],
+   "requires": [
+    {
+     "party": {
+      "companionHurt": {
+       "is": true
+      }
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "The {party.companion} is limping."
+      },
+      {
+       "t": "Somebody look at the {party.companion}'s leg."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "I bound it. {~It bit me. Fair.|It'll walk tomorrow.}"
+      },
+      {
+       "t": "Bandages are for people. {~I said that out loud. Sorry.|Fine, one bandage.}"
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "If it dies I'm not fighting tomorrow."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "companion_new",
+   "tags": [
+    "camp",
+    "companion"
+   ],
+   "requires": [
+    {
+     "memory": "join",
+     "maxAgeHours": 48
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "So. {newcomer.name}. Thoughts?"
+      },
+      {
+       "t": "New face at the fire. {newcomer.name}."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "{memory.impression.cap}. {~That's my whole report.|Ask me in a week.}"
+      },
+      {
+       "t": "Eats a lot. {~Fights, though.|We'll see.}"
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "Give it time. We were all new once. {~Some of us still are.}"
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "quest_active",
+   "tags": [
+    "camp",
+    "quest"
+   ],
+   "requires": [
+    {
+     "party": {
+      "activeQuest": {
+       "min": "a"
+      }
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "{party.activeQuest}. That's the job. Anyone remember why we took it?"
+      },
+      {
+       "t": "We're still on {party.activeQuest}, in case anyone forgot."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Coin.",
+       "cond": "has('greedy')"
+      },
+      {
+       "t": "Because someone had to, and we were standing there."
+      },
+      {
+       "t": "The board said {party.questGold} gold. I remember that part."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "I remember the part where it's dangerous."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "quest_done",
+   "tags": [
+    "camp",
+    "quest"
+   ],
+   "requires": [
+    {
+     "party": {
+      "lastQuestDone": {
+       "min": "a"
+      }
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "{party.lastQuestDone}: done. {~Paid.|Mostly paid.|Paid in gold and in scars.}"
+      },
+      {
+       "t": "Cross {party.lastQuestDone} off. Somebody write that down."
+      }
+     ]
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "What's next on the board?"
+      },
+      {
+       "t": "Good. Drink to it. Then sleep."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "There's always a next one."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "kaela_rival",
+   "tags": [
+    "camp",
+    "story"
+   ],
+   "requires": [
+    {
+     "party": {
+      "act": {
+       "min": 2
+      }
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Kaela Thorne was ahead of us again. How does she do that?"
+      },
+      {
+       "t": "If Kaela Thorne beats us to the Sovereign I'll never hear the end of it."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "She travels light and sleeps less. We could learn something.",
+       "cond": "has('scholar')||has('honorable')"
+      },
+      {
+       "t": "Rivals are useful. Somebody has to be ahead so we know where the road is."
+      },
+      {
+       "t": "She's welcome to the Sovereign. Let her die first."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "I like her. Don't tell her."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "marek_odd",
+   "tags": [
+    "camp",
+    "story"
+   ],
+   "requires": [
+    {
+     "party": {
+      "act": {
+       "min": 3
+      }
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "That scholar. Marek Greel. He's always where the worst of it is."
+      },
+      {
+       "t": "Does anyone know where Marek Greel sleeps? I've never seen him sleep."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Scholars follow ruin. It's where the notes are.",
+       "cond": "has('scholar')"
+      },
+      {
+       "t": "He offered sympathy when Lysa died. Too fast. Sympathy takes a breath first."
+      },
+      {
+       "t": "Keep him where you can see him. That's all I'll say."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "Or in front of us, when the demons come."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "yssira_prophecy",
+   "tags": [
+    "camp",
+    "story"
+   ],
+   "requires": [
+    {
+     "party": {
+      "act": {
+       "min": 2
+      }
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Mother Yssira said one of us wouldn't come back. Which one?"
+      },
+      {
+       "t": "The seer's words keep me up. 'Three voices to close the door.'"
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Prophecy is a debt collector. It always comes.",
+       "cond": "has('pious')||has('archaic')"
+      },
+      {
+       "t": "Seers say things. Then things happen. Then everyone claps for the seer."
+      },
+      {
+       "t": "If it's me, sell my gear. Don't bury it."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "If it's me, keep the {~axe|bow|staff}. It's better than yours."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "emberglen_home",
+   "tags": [
+    "camp",
+    "story"
+   ],
+   "requires": [
+    {
+     "party": {
+      "act": {
+       "min": 1
+      }
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Miss Emberglen yet?"
+      },
+      {
+       "t": "Turnip fields and geese. I'd give a rare sword for the geese right now."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "I miss walls. {~And the priest.|And bread that isn't a rock.}"
+      },
+      {
+       "t": "Emberglen was three roads and a well. But it was ours."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "It'll be there when we're done. Probably."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "vehicle_none",
+   "tags": [
+    "camp",
+    "travel"
+   ],
+   "requires": [
+    {
+     "party": {
+      "vehicle": {
+       "is": null
+      }
+     }
+    },
+    {
+     "party": {
+      "act": {
+       "min": 1
+      }
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "My feet. {~Say something about my feet.|I want it noted.}"
+      },
+      {
+       "t": "Three nodes a day on foot. A wagon does four."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Buy a mule. {~Mules don't complain.|Mules carry the food.}"
+      },
+      {
+       "t": "We'd have a wagon if someone hadn't bought the {~rapier|ring|fancy boots}."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "I'll carry the mule."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "torch_talk",
+   "tags": [
+    "camp",
+    "supplies"
+   ],
+   "requires": [
+    {
+     "party": {
+      "torches": {
+       "max": 0
+      }
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "No torches. So we sit in the dark and hope."
+      },
+      {
+       "t": "Last torch burnt out. Who was supposed to buy more?"
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Dark is fine. {~The fire's enough.|Things see fire too.}"
+      },
+      {
+       "t": "I was. {~I bought bandages instead.|I forgot.} Say it. I forgot."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "Double watch, then."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "exhaustion_fight",
+   "tags": [
+    "camp",
+    "supplies"
+   ],
+   "requires": [
+    {
+     "party": {
+      "exhaustion": {
+       "min": 2
+      }
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "I missed twice today. Twice. I don't miss."
+      },
+      {
+       "t": "My arms weigh double. Yours?"
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Hunger. {~Two days of it.|We're eating tomorrow or we're not fighting.}"
+      },
+      {
+       "t": "It's the food. Nothing else. We eat, we're fine."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "Town. Or a goblin. I'll eat the goblin."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "ashfall_weather",
+   "tags": [
+    "camp",
+    "scene"
+   ],
+   "requires": [
+    {
+     "party": {
+      "act": {
+       "min": 2
+      }
+     }
+    },
+    {
+     "party": {
+      "act": {
+       "max": 3
+      }
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Ash in everything. My teeth, my boots, my {~soup|bow|sleep}."
+      },
+      {
+       "t": "The sky's been grey for a week. Is it the sky, or the Veil?"
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Both. {~That's the Ashen Wastes for you.|Breathe through cloth.}"
+      },
+      {
+       "t": "It'll be worse in the breach. Enjoy the ash."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "I miss rain. Never thought I'd say it."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "void_weather",
+   "tags": [
+    "camp",
+    "scene"
+   ],
+   "requires": [
+    {
+     "party": {
+      "act": {
+       "min": 4
+      }
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "There's no sky. I keep looking up and there's no sky."
+      },
+      {
+       "t": "Does anyone else hear it? Under the quiet."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "The void has a sound. It's the sound of things being decided.",
+       "cond": "has('scholar')||has('pious')||has('archaic')"
+      },
+      {
+       "t": "Don't listen to it. That's the whole trick."
+      },
+      {
+       "t": "I hear it. I'm choosing not to."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "Sing something. Anything. Drown it."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "bandage_talk",
+   "tags": [
+    "camp",
+    "supplies"
+   ],
+   "requires": [
+    {
+     "memory": "wounded",
+     "maxAgeHours": 48
+    },
+    {
+     "party": {
+      "bandages": {
+       "min": 1
+      }
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Use a bandage, {answerer.name}. We have {party.bandages}."
+      },
+      {
+       "t": "Stop bleeding on the food. Bandage. Now."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Save them. {~Someone worse will need one.|Wounds heal.}"
+      },
+      {
+       "t": "Fine. {~One.|Give it here.} Don't tell the cleric I complained."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "I'll do it. Hold still."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "armor_talk",
+   "tags": [
+    "camp",
+    "loot"
+   ],
+   "requires": [
+    {
+     "gear": {
+      "slot": "chest",
+      "maxDaysAgo": 5
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "New {weapon} on your chest. Fits?"
+      },
+      {
+       "t": "That armour. Where'd you find it?"
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Off a {~dead thing|corpse|bandit}, like everything we own. {~It fits.|It'll fit once it's mine.}"
+      },
+      {
+       "t": "Better than the {gear.replaced} by {gear.deltaAbs}. I feel taller.",
+       "cond": "gear.delta>0"
+      },
+      {
+       "t": "Worse than the {gear.replaced}, truth be told. But look at it.",
+       "cond": "gear.delta<0"
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "Looks heavy. Good. Stand in front."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "unique_item",
+   "tags": [
+    "camp",
+    "loot"
+   ],
+   "requires": [
+    {
+     "gear": {
+      "rarity": "legendary"
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "This {weapon}. It has a name. Things with names are trouble."
+      },
+      {
+       "t": "I keep hearing the {weapon} hum at night. Is that normal?"
+      }
+     ]
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Legendary work. Someone died for that to exist.",
+       "cond": "has('scholar')"
+      },
+      {
+       "t": "Trouble that kills faster. Keep it."
+      },
+      {
+       "t": "No. Nothing's normal. Sleep with it under you."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "If it starts talking, wake me."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "healer_thanks",
+   "tags": [
+    "camp",
+    "people"
+   ],
+   "requires": [
+    {
+     "stats": {
+      "healing": 30
+     },
+     "who": "answerer"
+    },
+    {
+     "memory": "wounded",
+     "maxAgeHours": 48,
+     "who": "asker"
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "You pulled me back today, {answerer.name}. I felt it."
+      },
+      {
+       "t": "Thanks. For the thing. {~With the glowing.|Earlier.}"
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "That's the job. Say it to the {$deity} if you must.",
+       "cond": "has('pious')"
+      },
+      {
+       "t": "Stay in front of me and I'll keep doing it."
+      },
+      {
+       "t": "You're welcome. Now eat, or it was wasted."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "I'd have caught you. Eventually."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "kill_streak",
+   "tags": [
+    "camp",
+    "combat"
+   ],
+   "requires": [
+    {
+     "stats": {
+      "kills": 5
+     },
+     "who": "answerer"
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "{stats.kills} kills on the tally, {answerer.name}. Slow down."
+      },
+      {
+       "t": "The meter says {answerer.name} killed {stats.kills} things. I say the meter's a liar."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Numbers are honest. People aren't.",
+       "cond": "has('cynical')"
+      },
+      {
+       "t": "Somebody has to. {~They don't die on their own.|Easier than talking.}"
+      },
+      {
+       "t": "I'll slow down when they do."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "I softened half of them. Nobody counts softening."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "no_kills",
+   "tags": [
+    "camp",
+    "combat"
+   ],
+   "requires": [
+    {
+     "stats": {
+      "fights": 2
+     },
+     "who": "answerer"
+    },
+    {
+     "stats": {
+      "kills": 0
+     },
+     "who": "answerer"
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "{answerer.name}. Two fights. Zero kills. Explain."
+      },
+      {
+       "t": "Are you fighting or watching, {answerer.name}?"
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "I keep you alive. Killing is your department.",
+       "cond": "has('kind')||has('pious')"
+      },
+      {
+       "t": "I soften. You finish. That's a system."
+      },
+      {
+       "t": "Tomorrow. I'll get one tomorrow."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "Softening. Right."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "levelup_talent",
+   "tags": [
+    "camp",
+    "growth"
+   ],
+   "requires": [
+    {
+     "memory": "levelup",
+     "maxAgeHours": 48
+    }
+   ],
+   "lines": [
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Level {memory.level}. I have a point to spend and no idea where."
+      },
+      {
+       "t": "Stronger today. The trainer would want {~gold|a speech|both}."
+      }
+     ]
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Buy the one that keeps you standing. Damage is vanity.",
+       "cond": "has('honorable')||has('kind')"
+      },
+      {
+       "t": "Anything that hits more things. That's the whole philosophy."
+      },
+      {
+       "t": "Spend it before a fight. Points don't help dead people."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "I'd take the extra mana. But I'm biased."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "boss_after",
+   "tags": [
+    "camp",
+    "combat"
+   ],
+   "requires": [
+    {
+     "memory": "combat",
+     "maxAgeHours": 48,
+     "details": {
+      "boss": true
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "We killed a {foe.sg} yesterday. Somebody say it out loud."
+      },
+      {
+       "t": "The {foe.sg}. Down. {~I still don't believe it.|Say something, one of you.}"
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "It was always going to die. I just didn't say so before.",
+       "cond": "has('pompous')"
+      },
+      {
+       "t": "I can still smell it. {~That'll take a week.|Bath first, then pride.}"
+      },
+      {
+       "t": "Next one's bigger. They're always bigger."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "The road's open now. That's the real prize."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "shrine_visit",
+   "tags": [
+    "camp",
+    "travel"
+   ],
+   "requires": [
+    {
+     "party": {
+      "shrineToday": {
+       "is": true
+      }
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "That shrine. Did anyone feel anything?"
+      },
+      {
+       "t": "The water at the shrine. It was warm. Why was it warm?"
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Old gods don't ask why. Neither should you.",
+       "cond": "has('pious')||has('archaic')"
+      },
+      {
+       "t": "I felt a bruise go away. That's enough theology for me."
+      },
+      {
+       "t": "Something looked at us. Kindly, I think."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "I took a coin from it. {~Don't.|It's a coin.}"
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "gold_talk",
+   "tags": [
+    "camp",
+    "supplies"
+   ],
+   "requires": [
+    {
+     "party": {
+      "gold": {
+       "min": 300
+      }
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "{party.gold} gold between us. Who's buying the wagon?"
+      },
+      {
+       "t": "We're rich, for a given value of rich."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Mine. Half of it. The good half.",
+       "cond": "has('greedy')"
+      },
+      {
+       "t": "Spend it before we lose it. Gold doesn't fight."
+      },
+      {
+       "t": "Rations. Then a mule. Then whatever's left is yours."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "Buy the priest something. He looked hungry."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "poor_talk",
+   "tags": [
+    "camp",
+    "supplies"
+   ],
+   "requires": [
+    {
+     "party": {
+      "gold": {
+       "max": 30
+      }
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "{party.gold} gold. That's a bad joke."
+      },
+      {
+       "t": "We can't afford the inn. Or the bridge. Or {~dignity|salt}."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Somebody sold the good sword. I'm not saying who.",
+       "cond": "has('sarcastic')"
+      },
+      {
+       "t": "We kill things for money. There's a lot of things. Do the sum."
+      },
+      {
+       "t": "There's a named bounty on the board. Names pay."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "I still have my ring. {~It's not worth much.|Don't ask.}"
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "watch_argue",
+   "tags": [
+    "camp",
+    "scene"
+   ],
+   "requires": [],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Who's on first watch? {~Not me.|I did it last night.}"
+      },
+      {
+       "t": "Watch order. Now. Before someone falls asleep mid-argument."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Me. I don't sleep much anyway.",
+       "cond": "has('paranoid')||has('grieving')"
+      },
+      {
+       "t": "{third.name} snores. {third.name} takes the first watch. Logic."
+      },
+      {
+       "t": "I'll take last watch. Dawn's the dangerous one."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "I do not snore."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "dream_talk",
+   "tags": [
+    "camp",
+    "people"
+   ],
+   "requires": [
+    {
+     "trait": "paranoid",
+     "who": "answerer"
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "You were talking in your sleep, {answerer.name}."
+      },
+      {
+       "t": "Bad dreams again?"
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "I don't dream. I plan. {~Loudly, apparently.}"
+      },
+      {
+       "t": "Something was counting us. In the dream. {~It got to four and stopped.|It kept counting past four.}"
+      }
+     ]
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Sleep closer to the fire."
+      },
+      {
+       "t": "Then we stay four. Simple."
+      }
+     ]
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "romance_hint",
+   "tags": [
+    "camp",
+    "people"
+   ],
+   "requires": [
+    {
+     "trait": "romantic",
+     "who": "answerer"
+    },
+    {
+     "relation": {
+      "to": "asker",
+      "min": 0.3
+     },
+     "who": "answerer"
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "You've been staring at the fire a lot, {answerer.name}."
+      },
+      {
+       "t": "Something on your mind?"
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Not the fire. {~Don't make it strange.|Forget I said that.}"
+      },
+      {
+       "t": "The way you fought today. It was… {~fine. It was fine.|worth watching.}"
+      }
+     ]
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Eat your food.",
+       "cond": "has('gruff')||has('shy')"
+      },
+      {
+       "t": "Then keep watching. I'll try to be worth it."
+      }
+     ]
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "archaic_tale",
+   "tags": [
+    "camp",
+    "story"
+   ],
+   "requires": [
+    {
+     "trait": "archaic",
+     "who": "answerer"
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Tell the old one, {answerer.name}. The one about the first tear."
+      },
+      {
+       "t": "Give us a story. An old one."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "When the Veil first tore, three practitioners stood on a stone older than stone and held the fire back for six hours. Two of them did not wake. That is why Clerics train to fight."
+      },
+      {
+       "t": "Before the Border Wars there was a king who asked the Veil a question. The answer was Emberglen. Nobody knows the question."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "That's grim. {~Good.|Tell another.}"
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "jolly_bet",
+   "tags": [
+    "camp",
+    "people"
+   ],
+   "requires": [
+    {
+     "trait": "jolly",
+     "who": "asker"
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Bet you a ration I get more kills tomorrow than you, {answerer.name}."
+      },
+      {
+       "t": "Wager! Whoever hits the first goblin buys the drinks in town."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Done. Bring the ration.",
+       "cond": "has('brave')||has('bloodlust')||has('greedy')"
+      },
+      {
+       "t": "I don't bet food. {~Bet gear.|Bet something you can lose.}"
+      },
+      {
+       "t": "You're on. {~The loser carries the mule.|If we live.}"
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "I'll hold the stakes. Trust me."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "rare_coin_boot",
+   "tags": [
+    "camp",
+    "rare"
+   ],
+   "requires": [],
+   "lines": [
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Ha. There's a gold piece in my boot. How long has that been there?"
+      },
+      {
+       "t": "Something's been stabbing my heel for three days. It's a coin. It's a coin!"
+      }
+     ]
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Then you're buying the next round."
+      },
+      {
+       "t": "Give it here. Party funds."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "Check the other boot."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 0.25,
+   "reward": {
+    "gold": 15,
+    "text": "there was something in the old boot after all"
+   }
+  },
+  {
+   "id": "rare_shooting_star",
+   "tags": [
+    "camp",
+    "rare"
+   ],
+   "requires": [],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Did you see that? A star fell. Right over the ridge."
+      },
+      {
+       "t": "Look up. Now. A falling star."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "An omen. Good or bad, I couldn't say.",
+       "cond": "has('pious')||has('archaic')"
+      },
+      {
+       "t": "Make a wish. {~I wished for bread.|I wished for a wagon.|I wished for you to stop talking.}"
+      },
+      {
+       "t": "Stars fall. Rocks, mostly. Still pretty."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "I felt something. Like a hand on the shoulder."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 0.25,
+   "reward": {
+    "xp": 25,
+    "text": "a good omen crosses the sky"
+   }
+  },
+  {
+   "id": "rare_wandering_bard",
+   "tags": [
+    "camp",
+    "rare"
+   ],
+   "requires": [],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "There's a bard on the road, asking to share our fire. Let him?"
+      },
+      {
+       "t": "Someone's singing out there. Badly."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Let him. Bad singing is still company.",
+       "cond": "has('jolly')||has('kind')"
+      },
+      {
+       "t": "Search him first. Then let him."
+      },
+      {
+       "t": "One song. Then he sleeps by the horses."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "He knew a verse about the Border Wars I'd never heard. I'll remember that one."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 0.2,
+   "reward": {
+    "xp": 40,
+    "text": "a bard stops at the fire and sings for supper"
+   }
+  },
+  {
+   "id": "rare_ghost_story",
+   "tags": [
+    "camp",
+    "rare"
+   ],
+   "requires": [],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Ghost story. Somebody. The scary kind."
+      },
+      {
+       "t": "Who's got a story? A real one, with teeth."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "There was a village near Cinderhold where the well answered questions. Then one night it asked one back."
+      },
+      {
+       "t": "A soldier in the Border Guard swore his shadow started walking a step ahead of him. Then two. Then it went into Thornwood and he followed it. Nobody saw either again."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "I am not sleeping tonight. Thanks for that.",
+       "cond": "has('nervous')||has('coward')"
+      },
+      {
+       "t": "Good one. Mine's worse, but it's true."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 0.3,
+   "reward": {
+    "relation": 0.1,
+    "text": "nobody wants to sleep on the outside of the fire tonight"
+   }
+  },
+  {
+   "id": "rare_stray_pup",
+   "tags": [
+    "camp",
+    "rare"
+   ],
+   "requires": [
+    {
+     "party": {
+      "companions": {
+       "max": 3
+      }
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Something's whining under the wagon. A pup. Skin and bones."
+      },
+      {
+       "t": "Don't move. There's a wolf pup by your pack. It's eating our rations."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Absolutely not. We can barely feed ourselves.",
+       "cond": "has('cynical')||has('greedy')"
+      },
+      {
+       "t": "It's coming with us. That's decided."
+      },
+      {
+       "t": "Give it a crust. If it follows, it follows."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "It has your eyes, {answerer.name}."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 0.15,
+   "reward": {
+    "companion": "pet_wolf",
+    "text": "something small has been following the party for two days"
+   }
+  },
+  {
+   "id": "rare_dream_talent",
+   "tags": [
+    "camp",
+    "rare"
+   ],
+   "requires": [],
+   "lines": [
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "I dreamt the fight again. Every step. I know what I did wrong now."
+      },
+      {
+       "t": "Strange dream. I was watching myself from above. I saw the opening I keep missing."
+      }
+     ]
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Dreams don't win fights."
+      },
+      {
+       "t": "Then use it tomorrow."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "I dreamt of soup."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 0.15,
+   "reward": {
+    "talent": 1,
+    "who": "answerer",
+    "text": "{answerer} wakes up knowing something they did not know"
+   }
+  },
+  {
+   "id": "rare_lost_merchant",
+   "tags": [
+    "camp",
+    "rare"
+   ],
+   "requires": [],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "A merchant just walked into camp, lost, half-frozen. He's offering a discount for a place by the fire."
+      },
+      {
+       "t": "We have a guest. Says his caravan left without him."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Feed him. Then rob him. Politely."
+      },
+      {
+       "t": "Sit him down. Coin for kindness."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "He sold me a ring for two rations. Fair trade."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 0.15,
+   "reward": {
+    "item": {
+     "base": "ring",
+     "rarity": "magic"
+    },
+    "text": "the lost merchant pays in kind"
+   }
+  },
+  {
+   "id": "rare_veil_whisper",
+   "tags": [
+    "camp",
+    "rare"
+   ],
+   "requires": [
+    {
+     "party": {
+      "act": {
+       "min": 2
+      }
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Did anyone else hear that? Under the fire. Like someone saying my name backwards."
+      },
+      {
+       "t": "The Veil talked to me just now. It offered something."
+      }
+     ]
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Don't answer it. Whatever it offers, the price is you.",
+       "cond": "has('pious')||has('scholar')"
+      },
+      {
+       "t": "What did it offer?"
+      },
+      {
+       "t": "Throw more wood on. Loud fires drown quiet voices."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "It offered me a nap. I said yes."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 0.15,
+   "reward": {
+    "xp": 30,
+    "text": "a whisper out of the Veil, and a chill after it"
+   }
+  },
+  {
+   "id": "rare_old_map",
+   "tags": [
+    "camp",
+    "rare"
+   ],
+   "requires": [],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Look what fell out of that book we took. A map. Old one."
+      },
+      {
+       "t": "There's a map sewn into the lining of this cloak."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Let me see. That's a survey mark. Someone paid for this.",
+       "cond": "has('scholar')"
+      },
+      {
+       "t": "X marks nothing. Never does."
+      },
+      {
+       "t": "Keep it. Maps are money to the right buyer."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "That's a shrine, there. Near the road."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 0.15,
+   "reward": {
+    "gold": 40,
+    "text": "the old map is worth something to the right buyer"
+   }
+  },
+  {
+   "id": "rare_arm_wrestle",
+   "tags": [
+    "camp",
+    "rare"
+   ],
+   "requires": [],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Arm wrestle. You and me, {answerer.name}. Loser carries the pot."
+      },
+      {
+       "t": "Settle it now. Arm on the log."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Done. Try not to cry.",
+       "cond": "has('brave')||has('gruff')||has('bloodlust')"
+      },
+      {
+       "t": "Fine. But I'm using the good arm."
+      },
+      {
+       "t": "This is beneath me. {~Which is why I'll win.|Fine, once.}"
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "I have two rations on {answerer.name}."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 0.25,
+   "reward": {
+    "relation": 0.15,
+    "text": "somebody's elbow is going to hurt tomorrow"
+   }
+  },
+  {
+   "id": "rare_healers_lesson",
+   "tags": [
+    "camp",
+    "rare"
+   ],
+   "requires": [
+    {
+     "stats": {
+      "healing": 20
+     },
+     "who": "answerer"
+    }
+   ],
+   "lines": [
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Come here. I'll show you where to press so a cut stops. Everyone should know this."
+      },
+      {
+       "t": "Lesson. Bandage on. Bandage off. Again."
+      }
+     ]
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "I know how to bleed. That's the part I'm good at."
+      },
+      {
+       "t": "Show me. Slowly."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "I tied it wrong three times. Fourth time held."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 0.15,
+   "reward": {
+    "supply": {
+     "bandages": 2
+    },
+    "text": "spare cloth, torn and rolled by the fire"
+   }
+  },
+  {
+   "id": "rare_singing_contest",
+   "tags": [
+    "camp",
+    "rare"
+   ],
+   "requires": [
+    {
+     "trait": "jolly",
+     "who": "asker"
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Singing contest! Loser does dishes for a week."
+      },
+      {
+       "t": "Right. Everyone sings one verse. I judge."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "I would rather fight the dragon.",
+       "cond": "has('gruff')||has('shy')"
+      },
+      {
+       "t": "Fine. But it's a sad one."
+      },
+      {
+       "t": "Only if you go first."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "That was… actually good. Who taught you that?"
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 0.2,
+   "reward": {
+    "relation": 0.1,
+    "xp": 10,
+    "text": "the singing is bad; the mood is good"
+   }
+  },
+  {
+   "id": "road_weapon_forager",
+   "tags": [
+    "camp",
+    "loot",
+    "travel"
+   ],
+   "requires": [
+    {
+     "gear": {
+      "effect": [
+       "cond_forageRation",
+       "legendary:forage_feast",
+       "forage_feast"
+      ]
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Where did tonight's food come from, {answerer.name}?"
+      },
+      {
+       "t": "We had nothing this morning. Now there's supper. Explain the {weapon}."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "The {weapon}. {~It cuts as well as it forages.|Half blade, half billhook.|You'd be surprised what grows near a battlefield.} I go through the field after, that's all."
+      },
+      {
+       "t": "I strip the field when the shouting stops. Roots, birds, whatever the {weapon} can reach. Nobody starves on my watch."
+      },
+      {
+       "t": "I do not discuss my methods. Eat.",
+       "cond": "has('pompous')"
+      }
+     ]
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "You go through the dead for turnips."
+      },
+      {
+       "t": "Rations we didn't pay for. {~I'll take it.|That's the best kind.}"
+      },
+      {
+       "t": "{party.rations, plural, =0{We still have nothing left for tomorrow.} one{One day left after this.} other{# days of food, then. Better.}}"
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Turnips keep you walking. Glory doesn't."
+      },
+      {
+       "t": "Someone has to think past tonight."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "optional": true,
+     "variants": [
+      {
+       "t": "I'd rather not know which field it came out of."
+      },
+      {
+       "t": "Pass it here before {asker.name} gets ideas."
+      }
+     ]
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "road_weapon_watch",
+   "tags": [
+    "camp",
+    "travel",
+    "fear"
+   ],
+   "requires": [
+    {
+     "gear": {
+      "effect": [
+       "cond_watch",
+       "cond_nightWard",
+       "no_night_raids",
+       "camp_mend"
+      ]
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "You've planted the {weapon} at the edge of the fire again."
+      },
+      {
+       "t": "Is that thing standing watch, or are you?"
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "It stands the watch. {~I sleep.|I still don't sleep, but I could.|Nothing has come at us since I started doing it.}"
+      },
+      {
+       "t": "Light and iron where they can see it. Most things in the dark are looking for an easier camp."
+      },
+      {
+       "t": "I'd rather burn a ration than bury one of you.",
+       "cond": "!has('cynical')"
+      },
+      {
+       "t": "It costs us a ration a night. I have decided that is cheaper than a funeral.",
+       "cond": "has('cynical')"
+      }
+     ]
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "And when the food runs out?"
+      },
+      {
+       "t": "{party.rations, plural, =0{We have nothing to feed it with.} one{We can feed it one more night.} other{# days of that, then we're guessing again.}}"
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Then we sleep the old way. Badly, in shifts."
+      },
+      {
+       "t": "Then I stand there myself and you owe me."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "optional": true,
+     "variants": [
+      {
+       "t": "I woke twice anyway. Habit."
+      },
+      {
+       "t": "Put it nearer my side tonight."
+      }
+     ]
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "road_weapon_named_blade",
+   "tags": [
+    "camp",
+    "combat",
+    "loot"
+   ],
+   "requires": [
+    {
+     "gear": {
+      "effect": [
+       "cond_killMemory",
+       "naming_kills",
+       "cond_killGrowth",
+       "kill_ledger"
+      ],
+      "minKills": 5
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "You keep count on that {weapon}, don't you."
+      },
+      {
+       "t": "{gear.kills} and rising. Does it feel heavier?"
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "{gear.kills} now. {~It gets easier to swing, not harder.|The count is the point.|I'll stop counting when it stops working.}"
+      },
+      {
+       "t": "{gear.kills}. {gear.damage} damage on the tally. A blade that has done that much knows the work."
+      },
+      {
+       "t": "I would rather carry a thing with a history than a clean one.",
+       "cond": "has('scholar')"
+      }
+     ]
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Blades don't remember. People do.",
+       "cond": "!has('pious')"
+      },
+      {
+       "t": "Careful. Things that are counted start expecting to be fed.",
+       "cond": "has('pious')"
+      },
+      {
+       "t": "Name it, then. Everything else in this party has one."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "It'll name itself. They always do."
+      },
+      {
+       "t": "Fifty. Then it gets a name and you all have to learn it."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "optional": true,
+     "variants": [
+      {
+       "t": "{gear.kills, plural, one{One more than mine.} other{# more than mine. I noticed.}}"
+      },
+      {
+       "t": "I've stopped listening to this conversation."
+      }
+     ]
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "road_weapon_hated",
+   "tags": [
+    "camp",
+    "combat",
+    "conflict"
+   ],
+   "requires": [
+    {
+     "gear": {
+      "effect": [
+       "hated_blade",
+       "cond_nemesisMark"
+      ]
+     }
+    },
+    {
+     "who": "asker",
+     "relation": {
+      "to": "answerer",
+      "max": 0.15
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Put the {weapon} down while we eat, {answerer.name}."
+      },
+      {
+       "t": "Nobody wants to watch you clean that thing."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "It wins fights. {~You liked winning this morning.|Say the part where you'd rather lose.}"
+      },
+      {
+       "t": "You want the thing that works or the thing that's polite? I brought the one that works."
+      },
+      {
+       "t": "I know what it costs. I carry it anyway.",
+       "cond": "!has('jolly')"
+      }
+     ]
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "It costs you something every swing. We can see it from here."
+      },
+      {
+       "t": "The ones that get away from it don't forget you. They come back with friends."
+      },
+      {
+       "t": "One day it'll be pointed at one of us."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Then stand behind me and stop talking."
+      },
+      {
+       "t": "If it ever is, you'll have earned it."
+      },
+      {
+       "t": "…I'll wrap it tonight. That's all you get.",
+       "cond": "has('shy') || has('nervous')"
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "optional": true,
+     "variants": [
+      {
+       "t": "Both of you. Eat."
+      },
+      {
+       "t": "I'm sleeping on the far side of the fire."
+      }
+     ]
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "revive_thanks",
+   "tags": [
+    "camp",
+    "people",
+    "gratitude"
+   ],
+   "requires": [
+    {
+     "who": "asker",
+     "memory": "revive",
+     "maxAgeHours": 72,
+     "bindingIs": {
+      "by": "answerer"
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "{answerer.name}. I was on the ground and you came and got me. I have not said thank you."
+      },
+      {
+       "t": "You brought me back, {answerer.name}. {memory.how.cap}, apparently. I remember none of it."
+      },
+      {
+       "t": "I owe you one, {answerer.name}. That's not a figure of speech any more."
+      },
+      {
+       "t": "Thank you. {~That's the whole speech.|I practised it and it still came out short.|Don't make me say it twice.}",
+       "cond": "has('gruff')||has('blunt')"
+      },
+      {
+       "t": "I keep thinking about it. {memory.when.cap}. You did not have to come back for me.",
+       "cond": "has('nervous')||has('grieving')"
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "You'd have done it for me. {~Don't make it strange.|Eat something.}"
+      },
+      {
+       "t": "You were heavy. That's all I'll say about it.",
+       "cond": "has('sarcastic')||has('jolly')"
+      },
+      {
+       "t": "It is what I am for, {asker.name}. Sit down before you fall down.",
+       "cond": "has('kind')||has('pious')"
+      },
+      {
+       "t": "Thank me by not doing it again."
+      },
+      {
+       "t": "I was closest. Anyone would have.",
+       "cond": "has('modest')||has('timid')"
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "optional": true,
+     "variants": [
+      {
+       "t": "Somebody write the day down. {asker.name} said thank you."
+      },
+      {
+       "t": "We all saw it. Nobody's going to let either of you forget it."
+      }
+     ]
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "All the same. It stands."
+      },
+      {
+       "t": "Fine. It's said. {~Pass the bread.|Now stop looking at me.}"
+      }
+     ]
+    }
+   ],
+   "reward": {
+    "relation": 0.2,
+    "text": "the debt is spoken aloud"
+   },
+   "weight": 3
+  },
+  {
+   "id": "revive_thanks_awkward",
+   "tags": [
+    "camp",
+    "people",
+    "gratitude"
+   ],
+   "requires": [
+    {
+     "who": "asker",
+     "memory": "revive",
+     "maxAgeHours": 72,
+     "bindingIs": {
+      "by": "answerer"
+     }
+    },
+    {
+     "who": "asker",
+     "trait": "proud"
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "About the other day. {answerer.name}. The… ground business."
+      },
+      {
+       "t": "{answerer.name}. I am told you did something. {~I'm told I should mind.|I'd rather not have needed it.}"
+      },
+      {
+       "t": "{answerer.name}. I have been putting this off. The ground. You. Thank you."
+      },
+      {
+       "t": "Nobody needs to make a thing of it, but {answerer.name} — I know what you did."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "You don't have to say it."
+      },
+      {
+       "t": "Say it or don't. The fire doesn't care."
+      },
+      {
+       "t": "I know what you mean. That's enough.",
+       "cond": "has('kind')"
+      },
+      {
+       "t": "You look like a man passing a stone. Sit down."
+      },
+      {
+       "t": "Whatever it costs you to say, keep it. I'll take the look on your face."
+      }
+     ]
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Good. Then it's said."
+      },
+      {
+       "t": "…Thank you. There. It cost me nothing and it felt like a tooth coming out."
+      },
+      {
+       "t": "Right. Don't repeat any of this."
+      },
+      {
+       "t": "There. It's out. {~I feel worse.|I feel lighter. Don't tell anyone.}"
+      }
+     ]
+    }
+   ],
+   "reward": {
+    "relation": 0.15,
+    "text": "something goes unsaid, and lands anyway"
+   },
+   "weight": 2
+  },
+  {
+   "id": "revive_callback",
+   "tags": [
+    "camp",
+    "people",
+    "gratitude",
+    "callback"
+   ],
+   "requires": [
+    {
+     "who": "asker",
+     "memory": "revive",
+     "minAgeHours": 96,
+     "bindingIs": {
+      "by": "answerer"
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "{memory.when.cap} you picked me up off the ground, {answerer.name}. I still think about it on the quiet stretches."
+      },
+      {
+       "t": "I never paid you back for {memory.when}. I have not forgotten that I haven't."
+      },
+      {
+       "t": "Do you remember pulling me back? {memory.when.cap}. I remember the ceiling and then your face."
+      },
+      {
+       "t": "{answerer.name}. That thing you did {memory.when}. It's still doing the rounds in my head."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "I remember. I don't need it brought up at every fire."
+      },
+      {
+       "t": "Long time ago now. {~You've been upright since.|You've earned it back twice over.}"
+      },
+      {
+       "t": "Every time you say it I have to think about it again. Let it be old.",
+       "cond": "has('gruff')||has('cynical')"
+      },
+      {
+       "t": "I'd do it again tomorrow. Try not to make me.",
+       "cond": "has('kind')||has('loyal')"
+      }
+     ]
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "It stays said. That's the point of saying it."
+      },
+      {
+       "t": "Then I'll stop bringing it up. Once more, though: thank you."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "optional": true,
+     "variants": [
+      {
+       "t": "The pair of you. Every camp."
+      },
+      {
+       "t": "One day somebody will do it for me and I'll be just as bad."
+      }
+     ]
+    }
+   ],
+   "reward": {
+    "relation": 0.15,
+    "xp": 15,
+    "text": "an old debt, still standing"
+   },
+   "weight": 2
+  }
+ ]
+}

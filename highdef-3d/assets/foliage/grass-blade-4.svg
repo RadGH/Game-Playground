@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- Grass blade 4: a wide blade bent over to the left; past the bend the
+       paler underside shows. The seam at the fold is the darkest line. -->
+  <defs>
+    <linearGradient id="g" gradientUnits="userSpaceOnUse" x1="0" y1="252" x2="0" y2="80">
+      <stop offset="0" stop-color="#425a2e"/>
+      <stop offset="1" stop-color="#6f8c4a"/>
+    </linearGradient>
+    <linearGradient id="u" gradientUnits="userSpaceOnUse" x1="120" y1="80" x2="40" y2="140">
+      <stop offset="0" stop-color="#8ea166"/>
+      <stop offset="1" stop-color="#a5b57a"/>
+    </linearGradient>
+  </defs>
+  <!-- standing part -->
+  <path d="M112,254 C110,200 112,140 118,84 C124,110 134,120 144,124 C142,160 140,210 146,254 Z" fill="url(#g)" stroke="#3b5029" stroke-width="0.8" stroke-linejoin="round"/>
+  <path d="M128,252 C126,200 126,150 130,110" fill="none" stroke="#3d572b" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/>
+  <path d="M131,252 C129,200 129,150 133,112" fill="none" stroke="#adc47a" stroke-width="1" stroke-linecap="round" opacity="0.4"/>
+  <!-- folded part: hangs down-left showing the underside -->
+  <path d="M118,84 C124,110 134,120 144,124 C110,132 70,160 36,206 C30,214 26,222 28,228 C34,218 44,206 56,190 C84,152 100,110 118,84 Z" fill="url(#u)" stroke="#4d6338" stroke-width="0.8" stroke-linejoin="round"/>
+  <path d="M132,124 C100,140 70,168 40,212" fill="none" stroke="#6b8249" stroke-width="1.4" stroke-linecap="round" opacity="0.5"/>
+  <path d="M118,84 C124,110 134,120 144,124" fill="none" stroke="#2e4022" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+</svg>

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Damage Meter</title>
+<link rel="stylesheet" href="../shared/style.css">
+<style id="meter-css"></style>
+<style>.layout.two{display:grid;grid-template-columns:1fr 1.4fr;gap:12px;padding:12px}@media(max-width:900px){.layout.two{grid-template-columns:1fr}}.panel h3{margin:4px 0 8px}.log{font-size:12px;max-height:40vh;overflow:auto;color:#bbb}</style>
+</head>
+<body>
+<div class="topbar"><a href="../" class="muted">← Playground</a><h1>Damage Meter</h1><span class="muted small">Bars per fighter → click for sources (weapon, skill, dot, proc) → click for every hit with crit, overkill and damage type.</span><span class="spacer"></span><span id="status" class="small muted">loading…</span></div>
+<div class="layout two">
+  <div class="panel"><h3>Simulated fights</h3><p class="small muted">The meter is a plain record log. Any game feeds it one record per hit or heal: who, whom, how much, through what (weapon, skill, effect), damage type, crit, overkill, killing blow. The Emberveil 2 prototype feeds it from its combat simulator.</p>
+    <div class="row"><button id="btn-fight" class="primary">Simulate a fight</button><button id="btn-clear" class="small">Clear</button><label class="small">seed <input id="seed" type="number" value="1" style="width:70px"></label></div>
+    <h3>Records (last fight)</h3><div id="log" class="log"></div>
+    <h3>Weapon stats (kills per item, across fights)</h3><div id="items" class="small"></div>
+    <h3>How to embed</h3><pre class="small" style="white-space:pre-wrap">import { Meter } from './meters/js/meter.js';
+import { renderMeter, METER_CSS } from './meters/js/meter-ui.js';
+const m = new Meter(); m.startFight('goblins');
+m.record({ t, source, sourceName, target, targetName, kind: 'damage',
+  amount, overkill, crit, dtype: 'fire', via: 'skill:fireball',
+  viaName: 'Fireball', itemId, killingBlow, tags: ['blocked'] });
+m.endFight(); renderMeter(m, container, state);</pre></div>
+  <div class="panel"><h3>Meter</h3><div id="meter"></div></div>
+</div>
+<script type="module">
+import { Meter, simulateFight } from './js/meter.js'; import { renderMeter, METER_CSS } from './js/meter-ui.js';
+document.getElementById('meter-css').textContent = METER_CSS;
+function rng(seed) { let a = seed >>> 0; return () => { a += 0x6D2B79F5; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+let meter = new Meter(); const state = {}; const log = document.getElementById('log'), items = document.getElementById('items'), status = document.getElementById('status');
+function fight() { const seed = +document.getElementById('seed').value; const sim = simulateFight(rng(seed + meter.fights.length * 101)); const f = sim.fights[0]; f.label = 'fight ' + (meter.fights.length + 1); meter.fights.push(f); for (const [k, v] of Object.entries(sim.itemStats)) { const s = meter.itemStats[k] ||= { itemId: k, name: v.name, damage: 0, hits: 0, kills: 0, crits: 0 }; s.damage += v.damage; s.hits += v.hits; s.kills += v.kills; s.crits += v.crits; } state.scope = f.id; state.actor = null; state.source = null; render(); }
+function render() { renderMeter(meter, document.getElementById('meter'), state); const f = meter.fight(state.scope === 'current' || state.scope === 'all' ? null : state.scope); log.innerHTML = (f?.records || []).slice(-60).map(r => `<div>${(+r.t).toFixed(1)}s ${r.sourceName} → ${r.targetName}: ${meter.describeHit(r)}${r.kind === 'heal' ? ' (heal)' : ''}</div>`).join(''); items.innerHTML = Object.values(meter.itemStats).map(s => `<div><b>${s.name || s.itemId}</b>: ${s.kills} kills · ${s.damage} damage · ${s.hits} hits · ${s.crits} crits</div>`).join('') || '<span class="muted">none yet</span>'; status.textContent = `${meter.fights.length} fights · ${meter.summary('all').hits} hits recorded`; }
+document.getElementById('btn-fight').onclick = fight; document.getElementById('btn-clear').onclick = () => { meter = new Meter(); state.scope = 'current'; state.actor = null; state.source = null; render(); };
+fight(); fight(); window.meterDemo = { get meter() { return meter; }, state, render, fight };
+</script>
+</body>
+</html>

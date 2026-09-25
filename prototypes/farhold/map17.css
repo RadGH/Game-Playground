@@ -1,0 +1,114 @@
+/* Farhold — round 17's map rules.
+ *
+ * Its own file rather than a block in style.css, because style.css belongs to another pass this
+ * round and two agents writing one file is how work gets clobbered. js/map.js injects it the same
+ * way js/civics-ui.js injects civics.css. Everything here either RESERVES space or stops something
+ * moving; there is no new look in it.
+ *
+ * ---------------------------------------------------------------------------------------------
+ * THE MAP MUST NOT MOVE. EVER.
+ *
+ *   "When you hover over the full screen planetary map a bar appears with your hover tooltip. Can
+ *    that bars space be reserved so that the map doesn't shift position and size when you hover?
+ *    Also when I open the map the first time I click on the map canvas element the sides shrink in."
+ *
+ * Both halves were one bug, and it is not a tooltip at all — it is the readout strip UNDER the
+ * canvas. `.map-canvas-wrap` is a column flex holding the canvas (`flex: 1`), the legend strip and
+ * the readout, so anything that changes the height of the bottom two rows takes that height out of
+ * the canvas. And the canvas's height is what sets the map's SCALE — `viewBox()` fits the world
+ * into the canvas — so a strip growing by six pixels shrinks the whole planet and its left and
+ * right edges visibly move inwards. That is the "sides shrink in" exactly.
+ *
+ * Three things were changing that height:
+ *
+ *   1. js/map.js's mousemove handler did `readout.className = 'readout ' + tone`, which THREW AWAY
+ *      `map-readout` (12px monospace, `min-height: 18px`) and `small`. `.readout` does not exist in
+ *      style.css, so on the first hover the strip jumped to the body font and lost its reserved
+ *      height. Fixed in the JS; the rules below make sure it cannot matter again.
+ *   2. The legend strip is empty until the first `draw()` fills it, and its height then depends on
+ *      which layer is showing and how many swatches wrap onto a second line.
+ *   3. Clicking a cell adds a panel to the side, which can grow a scrollbar.
+ *
+ * So the wrap is a GRID with three fixed rows instead of a flex with one elastic one. The canvas
+ * row is `1fr` and the other two are locked to a height that does not depend on their contents.
+ */
+
+.map-canvas-wrap {
+  display: grid;
+  /* map · legend · readout — the last two are reserved whether or not they have anything in them */
+  grid-template-rows: 1fr 20px 18px;
+  row-gap: 6px;
+  align-items: stretch;
+}
+
+/* The canvas fills its row and nothing else. `min-height: 0` so a grid row can shrink below the
+   canvas element's own intrinsic 150px, which is what lets `1fr` actually mean "the rest". */
+.map-canvas-wrap > .map-canvas { min-height: 0; height: 100%; width: 100%; }
+
+/* One line, always, however long the layer's ramp is. A second row of swatches used to eat 17px of
+   map; now the overflow is simply not drawn, and the fold in the side panel has the full list. */
+.map-canvas-wrap > .legend {
+  height: 20px;
+  overflow: hidden;
+  flex-wrap: nowrap;
+  align-items: center;
+}
+
+/* …and the readout keeps its box whether it is empty, one word long, or the full cell description.
+   `nowrap` is the load-bearing half: at a narrow window the line used to wrap onto a second row,
+   which is the same six pixels coming out of the map again. */
+.map-canvas-wrap > .map-readout,
+.map-canvas-wrap > .readout {
+  height: 18px;
+  line-height: 18px;
+  font: 12px var(--mono, ui-monospace, Consolas, monospace);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The side panel may not change width either. `flex: 0 0 300px` already said so, but a scrollbar
+   appearing when a panel is added still moves its contents — `scrollbar-gutter: stable` keeps the
+   gutter there from the start, so the first click does not reflow the column. */
+.map-side { scrollbar-gutter: stable; min-width: 300px; max-width: 300px; }
+
+/* ---------------------------------------------------------------- the hover card's icon
+ *
+ *   "if you are hovering over an icon on the map, can we show the icon itself in the tooltip to the
+ *    left of the name so it's clear that icon is corresponding to what is on the map? This will
+ *    help with understanding that a village is a white square."
+ *
+ * The swatch is a real canvas with `drawMark()` called on it — the SAME function that puts the mark
+ * on the map — so the two cannot drift. All this does is stand it beside the name.
+ */
+.tip-map-head { display: flex; align-items: center; gap: 7px; }
+.tip-map-head canvas { flex: 0 0 auto; display: block; }
+.tip-map-head b { font-size: 13px; }
+
+/* ---------------------------------------------------------------- the side panel's new rows */
+
+/* A row of small square toggles at the end of a marker row: star, on the map, in the world. */
+.pin-eye {
+  background: none; border: 0; cursor: pointer; padding: 0 2px; line-height: 1;
+  font-size: 12px; color: #4e5866;
+}
+.pin-eye.on { color: #8fd3ff; }
+.pin-eye:hover { color: #cfe6ff; }
+.pin-eye:focus-visible { outline: 2px solid #4a86c0; outline-offset: 1px; }
+
+/* the inline rename field on an outpost marker */
+.pin-rename {
+  flex: 1; min-width: 0; background: #0b111b; color: #e8dfd2;
+  border: 1px solid #2a3446; border-radius: 4px; padding: 1px 5px; font-size: 12px;
+}
+.pin-rename:focus { outline: none; border-color: #3f9fd8; }
+
+/* a locked marker says so where the × would have been, so the missing button is not a mystery */
+.pin-locked { color: #55606f; font-size: 12px; padding: 0 3px; cursor: help; }
+
+/* the Selected group's heading line: what you clicked, before you decide to keep it */
+.map-selected { display: flex; align-items: center; gap: 7px; font-size: 12px; }
+.map-selected .pin-name { color: #e8dfd2; }
+
+/* Tracked Resources and Favorites both use .pin-list; only the empty note needs anything. */
+.map-empty { color: #7d8794; font-size: 12px; margin: 2px 0; }

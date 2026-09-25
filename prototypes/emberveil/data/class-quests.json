@@ -1,0 +1,983 @@
+{
+ "_doc": "Personal (class) quests. Each hero can carry one: the hero asks for it at camp, the party tracks the objective, a quest node (star, violet) is added to the current zone when the quest starts, and the party reacts by relationship on completion. Objective types: skill_kills (kills by listed skills), skill_hits, skill_uses, skill_heal, heal, kills_tag (enemy template matches), weapon_kills (weapon subtype), named_kills, fights_unbroken (wins with no hero down), crits, statuses, status_type, rests, nodes (new nodes visited), node_types, loot, salvage. reward: talent (points), xp, gold, item {category, rarity}.",
+ "quests": {
+  "warrior": [
+   {
+    "id": "cq_warrior_cleave_five",
+    "title": "Five in one swing",
+    "task": "Kill 5 enemies with Cleave or Whirlwind.",
+    "objective": {
+     "type": "skill_kills",
+     "skills": [
+      "cleave",
+      "whirlwind"
+     ],
+     "n": 5
+    },
+    "reward": {
+     "talent": 1
+    },
+    "ask": "I've been thinking about my craft. Kill 5 enemies with Cleave or Whirlwind. Do that with me and I'll have learned something."
+   },
+   {
+    "id": "cq_warrior_frontline",
+    "title": "Hold the front",
+    "task": "Win 3 fights without going down.",
+    "objective": {
+     "type": "fights_unbroken",
+     "n": 3
+    },
+    "reward": {
+     "xp": 80
+    },
+    "ask": "A favour. Win 3 fights without going down. It matters to me, don't ask why."
+   }
+  ],
+  "fighter": [
+   {
+    "id": "cq_fighter_riposte_hits",
+    "title": "Counter-punch",
+    "task": "Land 6 hits with Precise Strike.",
+    "objective": {
+     "type": "skill_hits",
+     "skills": [
+      "precise_strike"
+     ],
+     "n": 6
+    },
+    "reward": {
+     "talent": 1
+    },
+    "ask": "I've been thinking about my craft. Land 6 hits with Precise Strike. Do that with me and I'll have learned something."
+   },
+   {
+    "id": "cq_fighter_sunder_named",
+    "title": "Break the big one",
+    "task": "Kill a named enemy.",
+    "objective": {
+     "type": "named_kills",
+     "n": 1
+    },
+    "reward": {
+     "item": {
+      "category": "weapon",
+      "rarity": "rare"
+     }
+    },
+    "ask": "Kill a named enemy. If we do, I'll have earned the blade I keep dreaming about."
+   }
+  ],
+  "paladin": [
+   {
+    "id": "cq_paladin_holy_undead",
+    "title": "Cleanse the dead",
+    "task": "Kill 4 undead or demons.",
+    "objective": {
+     "type": "kills_tag",
+     "tags": [
+      "undead",
+      "demon"
+     ],
+     "n": 4
+    },
+    "reward": {
+     "talent": 1
+    },
+    "ask": "I've been thinking about my craft. Kill 4 undead or demons. Do that with me and I'll have learned something."
+   },
+   {
+    "id": "cq_paladin_lay_hands",
+    "title": "Hands that mend",
+    "task": "Heal 150 with Lay on Hands.",
+    "objective": {
+     "type": "skill_heal",
+     "skills": [
+      "lay_on_hands"
+     ],
+     "n": 150
+    },
+    "reward": {
+     "xp": 80
+    },
+    "ask": "A favour. Heal 150 with Lay on Hands. It matters to me, don't ask why."
+   }
+  ],
+  "ranger": [
+   {
+    "id": "cq_ranger_bow_kills",
+    "title": "Ten arrows",
+    "task": "Kill 10 enemies with a bow or crossbow.",
+    "objective": {
+     "type": "weapon_kills",
+     "subs": [
+      "bow",
+      "crossbow"
+     ],
+     "n": 10
+    },
+    "reward": {
+     "talent": 1
+    },
+    "ask": "I've been thinking about my craft. Kill 10 enemies with a bow or crossbow. Do that with me and I'll have learned something."
+   },
+   {
+    "id": "cq_ranger_scout",
+    "title": "Scout the land",
+    "task": "Visit 6 new nodes.",
+    "objective": {
+     "type": "nodes",
+     "n": 6
+    },
+    "reward": {
+     "gold": 60
+    },
+    "ask": "Visit 6 new nodes. There's coin in it, and I'll split it."
+   }
+  ],
+  "rogue": [
+   {
+    "id": "cq_rogue_crits",
+    "title": "Between the ribs",
+    "task": "Land 5 critical hits.",
+    "objective": {
+     "type": "crits",
+     "n": 5
+    },
+    "reward": {
+     "talent": 1
+    },
+    "ask": "I've been thinking about my craft. Land 5 critical hits. Do that with me and I'll have learned something."
+   },
+   {
+    "id": "cq_rogue_backstab_named",
+    "title": "A name on the knife",
+    "task": "Kill a named enemy.",
+    "objective": {
+     "type": "named_kills",
+     "n": 1
+    },
+    "reward": {
+     "item": {
+      "category": "weapon",
+      "rarity": "rare"
+     }
+    },
+    "ask": "Kill a named enemy. If we do, I'll have earned the blade I keep dreaming about."
+   }
+  ],
+  "cleric": [
+   {
+    "id": "cq_cleric_heal_total",
+    "title": "Keep them standing",
+    "task": "Heal 300 in total.",
+    "objective": {
+     "type": "heal",
+     "n": 300
+    },
+    "reward": {
+     "talent": 1
+    },
+    "ask": "I've been thinking about my craft. Heal 300 in total. Do that with me and I'll have learned something."
+   },
+   {
+    "id": "cq_cleric_no_downs",
+    "title": "Nobody falls",
+    "task": "Win 3 fights with no hero knocked down.",
+    "objective": {
+     "type": "fights_unbroken",
+     "n": 3
+    },
+    "reward": {
+     "xp": 100
+    },
+    "ask": "A favour. Win 3 fights with no hero knocked down. It matters to me, don't ask why."
+   }
+  ],
+  "bard": [
+   {
+    "id": "cq_bard_songs",
+    "title": "Three songs",
+    "task": "Use Inspiring Tune 3 times.",
+    "objective": {
+     "type": "skill_uses",
+     "skills": [
+      "inspiring_tune",
+      "ballad_of_valor"
+     ],
+     "n": 3
+    },
+    "reward": {
+     "talent": 1
+    },
+    "ask": "I've been thinking about my craft. Use Inspiring Tune 3 times. Do that with me and I'll have learned something."
+   },
+   {
+    "id": "cq_bard_crowd",
+    "title": "Draw a crowd",
+    "task": "Rest 3 times (an audience each night).",
+    "objective": {
+     "type": "rests",
+     "n": 3
+    },
+    "reward": {
+     "gold": 50
+    },
+    "ask": "Rest 3 times (an audience each night). There's coin in it, and I'll split it."
+   }
+  ],
+  "mage": [
+   {
+    "id": "cq_mage_fireballs",
+    "title": "Burn it down",
+    "task": "Kill 6 enemies with Fireball or Blizzard.",
+    "objective": {
+     "type": "skill_kills",
+     "skills": [
+      "fireball",
+      "blizzard"
+     ],
+     "n": 6
+    },
+    "reward": {
+     "talent": 1
+    },
+    "ask": "I've been thinking about my craft. Kill 6 enemies with Fireball or Blizzard. Do that with me and I'll have learned something."
+   },
+   {
+    "id": "cq_mage_study",
+    "title": "Study the ruins",
+    "task": "Visit 2 lore or shrine nodes.",
+    "objective": {
+     "type": "node_types",
+     "types": [
+      "lore",
+      "shrine"
+     ],
+     "n": 2
+    },
+    "reward": {
+     "xp": 80
+    },
+    "ask": "A favour. Visit 2 lore or shrine nodes. It matters to me, don't ask why."
+   }
+  ],
+  "necromancer": [
+   {
+    "id": "cq_necromancer_drain",
+    "title": "Feed the dark",
+    "task": "Kill 5 with Life Drain, Bone Spike or Bone Spear.",
+    "objective": {
+     "type": "skill_kills",
+     "skills": [
+      "life_drain",
+      "bone_spike",
+      "bone_spear"
+     ],
+     "n": 5
+    },
+    "reward": {
+     "talent": 1
+    },
+    "ask": "I've been thinking about my craft. Kill 5 with Life Drain, Bone Spike or Bone Spear. Do that with me and I'll have learned something."
+   },
+   {
+    "id": "cq_necromancer_grave",
+    "title": "Grave-robber",
+    "task": "Loot 3 items from fights.",
+    "objective": {
+     "type": "loot",
+     "n": 3
+    },
+    "reward": {
+     "xp": 70
+    },
+    "ask": "A favour. Loot 3 items from fights. It matters to me, don't ask why."
+   }
+  ],
+  "warlock": [
+   {
+    "id": "cq_warlock_corrupt",
+    "title": "Spread the rot",
+    "task": "Apply 8 statuses to enemies.",
+    "objective": {
+     "type": "statuses",
+     "n": 8
+    },
+    "reward": {
+     "talent": 1
+    },
+    "ask": "I've been thinking about my craft. Apply 8 statuses to enemies. Do that with me and I'll have learned something."
+   },
+   {
+    "id": "cq_warlock_pact",
+    "title": "The pact",
+    "task": "Kill a named enemy.",
+    "objective": {
+     "type": "named_kills",
+     "n": 1
+    },
+    "reward": {
+     "item": {
+      "category": "weapon",
+      "rarity": "rare"
+     }
+    },
+    "ask": "Kill a named enemy. If we do, I'll have earned the blade I keep dreaming about."
+   }
+  ],
+  "demon_hunter": [
+   {
+    "id": "cq_demon_hunter_demons",
+    "title": "Hell owes me",
+    "task": "Kill 4 demons or undead.",
+    "objective": {
+     "type": "kills_tag",
+     "tags": [
+      "demon",
+      "undead"
+     ],
+     "n": 4
+    },
+    "reward": {
+     "talent": 1
+    },
+    "ask": "I've been thinking about my craft. Kill 4 demons or undead. Do that with me and I'll have learned something."
+   },
+   {
+    "id": "cq_demon_hunter_vengeance",
+    "title": "No one falls",
+    "task": "Win 2 fights with no hero knocked down.",
+    "objective": {
+     "type": "fights_unbroken",
+     "n": 2
+    },
+    "reward": {
+     "xp": 80
+    },
+    "ask": "A favour. Win 2 fights with no hero knocked down. It matters to me, don't ask why."
+   }
+  ],
+  "scavenger": [
+   {
+    "id": "cq_scavenger_scrap",
+    "title": "Waste not",
+    "task": "Salvage 3 items.",
+    "objective": {
+     "type": "salvage",
+     "n": 3
+    },
+    "reward": {
+     "talent": 1
+    },
+    "ask": "I've been thinking about my craft. Salvage 3 items. Do that with me and I'll have learned something."
+   },
+   {
+    "id": "cq_scavenger_pockets",
+    "title": "Full pockets",
+    "task": "Loot 4 items.",
+    "objective": {
+     "type": "loot",
+     "n": 4
+    },
+    "reward": {
+     "gold": 80
+    },
+    "ask": "Loot 4 items. There's coin in it, and I'll split it."
+   }
+  ],
+  "swashbuckler": [
+   {
+    "id": "cq_swashbuckler_flourish",
+    "title": "Flair",
+    "task": "Use Flourish 4 times.",
+    "objective": {
+     "type": "skill_uses",
+     "skills": [
+      "flourish"
+     ],
+     "n": 4
+    },
+    "reward": {
+     "talent": 1
+    },
+    "ask": "I've been thinking about my craft. Use Flourish 4 times. Do that with me and I'll have learned something."
+   },
+   {
+    "id": "cq_swashbuckler_duel",
+    "title": "A proper duel",
+    "task": "Kill a named enemy.",
+    "objective": {
+     "type": "named_kills",
+     "n": 1
+    },
+    "reward": {
+     "item": {
+      "category": "weapon",
+      "rarity": "rare"
+     }
+    },
+    "ask": "Kill a named enemy. If we do, I'll have earned the blade I keep dreaming about."
+   }
+  ],
+  "dragon_knight": [
+   {
+    "id": "cq_dragon_knight_breath",
+    "title": "Breathe",
+    "task": "Kill 5 with Breath Weapon or Dragon Claw.",
+    "objective": {
+     "type": "skill_kills",
+     "skills": [
+      "breath_weapon",
+      "dragon_claw"
+     ],
+     "n": 5
+    },
+    "reward": {
+     "talent": 1
+    },
+    "ask": "I've been thinking about my craft. Kill 5 with Breath Weapon or Dragon Claw. Do that with me and I'll have learned something."
+   },
+   {
+    "id": "cq_dragon_knight_dragonkin",
+    "title": "Kin",
+    "task": "Kill a dragon-kind or beast named enemy.",
+    "objective": {
+     "type": "named_kills",
+     "n": 1
+    },
+    "reward": {
+     "xp": 120
+    },
+    "ask": "A favour. Kill a dragon-kind or beast named enemy. It matters to me, don't ask why."
+   }
+  ],
+  "pyromancer": [
+   {
+    "id": "cq_pyromancer_ignite",
+    "title": "Everything burns",
+    "task": "Apply Burn 8 times.",
+    "objective": {
+     "type": "status_type",
+     "status": "burn",
+     "n": 8
+    },
+    "reward": {
+     "talent": 1
+    },
+    "ask": "I've been thinking about my craft. Apply Burn 8 times. Do that with me and I'll have learned something."
+   },
+   {
+    "id": "cq_pyromancer_inferno",
+    "title": "Inferno",
+    "task": "Kill 6 with Flame Lance, Pyroclasm or Meteor.",
+    "objective": {
+     "type": "skill_kills",
+     "skills": [
+      "flame_lance",
+      "pyroclasm",
+      "meteor",
+      "ignite"
+     ],
+     "n": 6
+    },
+    "reward": {
+     "xp": 90
+    },
+    "ask": "A favour. Kill 6 with Flame Lance, Pyroclasm or Meteor. It matters to me, don't ask why."
+   }
+  ],
+  "stormcaller": [
+   {
+    "id": "cq_stormcaller_chain",
+    "title": "Chain them",
+    "task": "Kill 6 with Chain Lightning or Tempest.",
+    "objective": {
+     "type": "skill_kills",
+     "skills": [
+      "chain_lightning",
+      "tempest",
+      "thunder_ring",
+      "static_field"
+     ],
+     "n": 6
+    },
+    "reward": {
+     "talent": 1
+    },
+    "ask": "I've been thinking about my craft. Kill 6 with Chain Lightning or Tempest. Do that with me and I'll have learned something."
+   },
+   {
+    "id": "cq_stormcaller_storm_rest",
+    "title": "Storm watcher",
+    "task": "Rest under an open sky 3 times.",
+    "objective": {
+     "type": "rests",
+     "n": 3
+    },
+    "reward": {
+     "xp": 60
+    },
+    "ask": "A favour. Rest under an open sky 3 times. It matters to me, don't ask why."
+   }
+  ],
+  "druid": [
+   {
+    "id": "cq_druid_rejuv",
+    "title": "Growth",
+    "task": "Heal 200 with Rejuvenation.",
+    "objective": {
+     "type": "skill_heal",
+     "skills": [
+      "rejuvenation"
+     ],
+     "n": 200
+    },
+    "reward": {
+     "talent": 1
+    },
+    "ask": "I've been thinking about my craft. Heal 200 with Rejuvenation. Do that with me and I'll have learned something."
+   },
+   {
+    "id": "cq_druid_wild",
+    "title": "Walk the wild",
+    "task": "Visit 5 new nodes.",
+    "objective": {
+     "type": "nodes",
+     "n": 5
+    },
+    "reward": {
+     "gold": 50
+    },
+    "ask": "Visit 5 new nodes. There's coin in it, and I'll split it."
+   }
+  ],
+  "oracle": [
+   {
+    "id": "cq_oracle_foresee",
+    "title": "Foresight",
+    "task": "Cast Foresight or Prophecy 4 times.",
+    "objective": {
+     "type": "skill_uses",
+     "skills": [
+      "foresight",
+      "prophecy"
+     ],
+     "n": 4
+    },
+    "reward": {
+     "talent": 1
+    },
+    "ask": "I've been thinking about my craft. Cast Foresight or Prophecy 4 times. Do that with me and I'll have learned something."
+   },
+   {
+    "id": "cq_oracle_omen",
+    "title": "Read the omen",
+    "task": "Visit 2 shrine or lore nodes.",
+    "objective": {
+     "type": "node_types",
+     "types": [
+      "shrine",
+      "lore"
+     ],
+     "n": 2
+    },
+    "reward": {
+     "xp": 80
+    },
+    "ask": "A favour. Visit 2 shrine or lore nodes. It matters to me, don't ask why."
+   }
+  ],
+  "tactician": [
+   {
+    "id": "cq_tactician_rally",
+    "title": "Give orders",
+    "task": "Use Rally Action or Reposition 4 times.",
+    "objective": {
+     "type": "skill_uses",
+     "skills": [
+      "rally_action",
+      "reposition",
+      "masterstroke"
+     ],
+     "n": 4
+    },
+    "reward": {
+     "talent": 1
+    },
+    "ask": "I've been thinking about my craft. Use Rally Action or Reposition 4 times. Do that with me and I'll have learned something."
+   },
+   {
+    "id": "cq_tactician_clean",
+    "title": "A clean plan",
+    "task": "Win 3 fights with no hero knocked down.",
+    "objective": {
+     "type": "fights_unbroken",
+     "n": 3
+    },
+    "reward": {
+     "xp": 90
+    },
+    "ask": "A favour. Win 3 fights with no hero knocked down. It matters to me, don't ask why."
+   }
+  ],
+  "chronomancer": [
+   {
+    "id": "cq_chronomancer_haste",
+    "title": "Borrowed time",
+    "task": "Cast Haste or Time Stop 4 times.",
+    "objective": {
+     "type": "skill_uses",
+     "skills": [
+      "haste",
+      "time_stop",
+      "slow_time"
+     ],
+     "n": 4
+    },
+    "reward": {
+     "talent": 1
+    },
+    "ask": "I've been thinking about my craft. Cast Haste or Time Stop 4 times. Do that with me and I'll have learned something."
+   },
+   {
+    "id": "cq_chronomancer_rewind",
+    "title": "Rewind",
+    "task": "Heal 150 with Rewind.",
+    "objective": {
+     "type": "skill_heal",
+     "skills": [
+      "rewind"
+     ],
+     "n": 150
+    },
+    "reward": {
+     "xp": 80
+    },
+    "ask": "A favour. Heal 150 with Rewind. It matters to me, don't ask why."
+   }
+  ],
+  "monk": [
+   {
+    "id": "cq_monk_flurry",
+    "title": "A hundred hands",
+    "task": "Land 12 hits with Flurry or Palm Strike.",
+    "objective": {
+     "type": "skill_hits",
+     "skills": [
+      "flurry",
+      "palm_strike"
+     ],
+     "n": 12
+    },
+    "reward": {
+     "talent": 1
+    },
+    "ask": "I've been thinking about my craft. Land 12 hits with Flurry or Palm Strike. Do that with me and I'll have learned something."
+   },
+   {
+    "id": "cq_monk_stillness",
+    "title": "Stillness",
+    "task": "Rest 3 times.",
+    "objective": {
+     "type": "rests",
+     "n": 3
+    },
+    "reward": {
+     "xp": 60
+    },
+    "ask": "A favour. Rest 3 times. It matters to me, don't ask why."
+   }
+  ],
+  "shaman": [
+   {
+    "id": "cq_shaman_totem",
+    "title": "Totems",
+    "task": "Use Healing Totem or Ancestral Shield 4 times.",
+    "objective": {
+     "type": "skill_uses",
+     "skills": [
+      "healing_totem",
+      "ancestral_shield"
+     ],
+     "n": 4
+    },
+    "reward": {
+     "talent": 1
+    },
+    "ask": "I've been thinking about my craft. Use Healing Totem or Ancestral Shield 4 times. Do that with me and I'll have learned something."
+   },
+   {
+    "id": "cq_shaman_spirits",
+    "title": "Spirit bolts",
+    "task": "Kill 5 with Spirit Bolt or Spirit Chain.",
+    "objective": {
+     "type": "skill_kills",
+     "skills": [
+      "spirit_bolt",
+      "chain_lightning_spirit"
+     ],
+     "n": 5
+    },
+    "reward": {
+     "xp": 80
+    },
+    "ask": "A favour. Kill 5 with Spirit Bolt or Spirit Chain. It matters to me, don't ask why."
+   }
+  ],
+  "witch_hunter": [
+   {
+    "id": "cq_witch_hunter_purge",
+    "title": "Purge",
+    "task": "Kill 4 cultists, demons or undead.",
+    "objective": {
+     "type": "kills_tag",
+     "tags": [
+      "cult",
+      "demon",
+      "undead"
+     ],
+     "n": 4
+    },
+    "reward": {
+     "talent": 1
+    },
+    "ask": "I've been thinking about my craft. Kill 4 cultists, demons or undead. Do that with me and I'll have learned something."
+   },
+   {
+    "id": "cq_witch_hunter_mark",
+    "title": "Mark and end",
+    "task": "Kill a named enemy.",
+    "objective": {
+     "type": "named_kills",
+     "n": 1
+    },
+    "reward": {
+     "item": {
+      "category": "weapon",
+      "rarity": "rare"
+     }
+    },
+    "ask": "Kill a named enemy. If we do, I'll have earned the blade I keep dreaming about."
+   }
+  ],
+  "knight": [
+   {
+    "id": "cq_knight_bash",
+    "title": "Shield first",
+    "task": "Land 6 hits with Shield Bash.",
+    "objective": {
+     "type": "skill_hits",
+     "skills": [
+      "knight_shield_bash"
+     ],
+     "n": 6
+    },
+    "reward": {
+     "talent": 1
+    },
+    "ask": "I've been thinking about my craft. Land 6 hits with Shield Bash. Do that with me and I'll have learned something."
+   },
+   {
+    "id": "cq_knight_oath",
+    "title": "The oath",
+    "task": "Win 3 fights without going down.",
+    "objective": {
+     "type": "fights_unbroken",
+     "n": 3
+    },
+    "reward": {
+     "xp": 90
+    },
+    "ask": "A favour. Win 3 fights without going down. It matters to me, don't ask why."
+   }
+  ],
+  "sorcerer": [
+   {
+    "id": "cq_sorcerer_wild",
+    "title": "Wild bolts",
+    "task": "Kill 6 with Wild Bolt.",
+    "objective": {
+     "type": "skill_kills",
+     "skills": [
+      "wild_bolt"
+     ],
+     "n": 6
+    },
+    "reward": {
+     "talent": 1
+    },
+    "ask": "I've been thinking about my craft. Kill 6 with Wild Bolt. Do that with me and I'll have learned something."
+   },
+   {
+    "id": "cq_sorcerer_chaos",
+    "title": "Chaos",
+    "task": "Apply 6 statuses.",
+    "objective": {
+     "type": "statuses",
+     "n": 6
+    },
+    "reward": {
+     "xp": 80
+    },
+    "ask": "A favour. Apply 6 statuses. It matters to me, don't ask why."
+   }
+  ],
+  "runesmith": [
+   {
+    "id": "cq_runesmith_forge",
+    "title": "Forge-marked",
+    "task": "Salvage 3 items and add an affix.",
+    "objective": {
+     "type": "salvage",
+     "n": 3
+    },
+    "reward": {
+     "talent": 1
+    },
+    "ask": "I've been thinking about my craft. Salvage 3 items and add an affix. Do that with me and I'll have learned something."
+   },
+   {
+    "id": "cq_runesmith_hammer",
+    "title": "Hammer says",
+    "task": "Land 8 hits with Rune Hammer.",
+    "objective": {
+     "type": "skill_hits",
+     "skills": [
+      "rune_hammer"
+     ],
+     "n": 8
+    },
+    "reward": {
+     "xp": 80
+    },
+    "ask": "A favour. Land 8 hits with Rune Hammer. It matters to me, don't ask why."
+   }
+  ],
+  "shadow_dancer": [
+   {
+    "id": "cq_shadow_dancer_assassinate",
+    "title": "Execution",
+    "task": "Kill 3 with Assassinate or Shadow Strike.",
+    "objective": {
+     "type": "skill_kills",
+     "skills": [
+      "assassinate",
+      "sd_shadow_strike",
+      "dance_of_blades"
+     ],
+     "n": 3
+    },
+    "reward": {
+     "talent": 1
+    },
+    "ask": "I've been thinking about my craft. Kill 3 with Assassinate or Shadow Strike. Do that with me and I'll have learned something."
+   },
+   {
+    "id": "cq_shadow_dancer_crit",
+    "title": "Cruel edge",
+    "task": "Land 6 critical hits.",
+    "objective": {
+     "type": "crits",
+     "n": 6
+    },
+    "reward": {
+     "xp": 80
+    },
+    "ask": "A favour. Land 6 critical hits. It matters to me, don't ask why."
+   }
+  ],
+  "tinker": [
+   {
+    "id": "cq_tinker_gadgets",
+    "title": "Gadgets",
+    "task": "Use Alchemical Grenade or Quick-Fix 4 times.",
+    "objective": {
+     "type": "skill_uses",
+     "skills": [
+      "tinker_grenade",
+      "tinker_quick_fix",
+      "tinker_overcharge"
+     ],
+     "n": 4
+    },
+    "reward": {
+     "talent": 1
+    },
+    "ask": "I've been thinking about my craft. Use Alchemical Grenade or Quick-Fix 4 times. Do that with me and I'll have learned something."
+   },
+   {
+    "id": "cq_tinker_parts",
+    "title": "Parts",
+    "task": "Salvage 3 items.",
+    "objective": {
+     "type": "salvage",
+     "n": 3
+    },
+    "reward": {
+     "gold": 60
+    },
+    "ask": "Salvage 3 items. There's coin in it, and I'll split it."
+   }
+  ],
+  "priest": [
+   {
+    "id": "cq_priest_mend",
+    "title": "Mend",
+    "task": "Heal 250 in total.",
+    "objective": {
+     "type": "heal",
+     "n": 250
+    },
+    "reward": {
+     "talent": 1
+    },
+    "ask": "I've been thinking about my craft. Heal 250 in total. Do that with me and I'll have learned something."
+   },
+   {
+    "id": "cq_priest_callback",
+    "title": "Call them back",
+    "task": "Revive an ally or win 3 fights with no downs.",
+    "objective": {
+     "type": "fights_unbroken",
+     "n": 3
+    },
+    "reward": {
+     "xp": 90
+    },
+    "ask": "A favour. Revive an ally or win 3 fights with no downs. It matters to me, don't ask why."
+   }
+  ],
+  "enchanter": [
+   {
+    "id": "cq_enchanter_sleep",
+    "title": "Hush",
+    "task": "Put 6 enemies to sleep.",
+    "objective": {
+     "type": "status_type",
+     "status": "sleep",
+     "n": 6
+    },
+    "reward": {
+     "talent": 1
+    },
+    "ask": "I've been thinking about my craft. Put 6 enemies to sleep. Do that with me and I'll have learned something."
+   },
+   {
+    "id": "cq_enchanter_jolt",
+    "title": "Wake them dead",
+    "task": "Kill 4 with Arcane Jolt.",
+    "objective": {
+     "type": "skill_kills",
+     "skills": [
+      "arcane_jolt"
+     ],
+     "n": 4
+    },
+    "reward": {
+     "xp": 80
+    },
+    "ask": "A favour. Kill 4 with Arcane Jolt. It matters to me, don't ask why."
+   }
+  ]
+ }
+}

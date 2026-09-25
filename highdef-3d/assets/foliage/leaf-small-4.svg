@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- Small leaves 4: hazel / alder. Rounder, larger leaves with a heart-shaped
+       base, alternating along stout twigs. Warmer olive green. -->
+  <defs>
+    <linearGradient id="lf" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0" stop-color="#86985a"/>
+      <stop offset="1" stop-color="#586f40"/>
+    </linearGradient>
+    <linearGradient id="lf2" x1="0.3" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7a8f55"/>
+      <stop offset="1" stop-color="#4f663c"/>
+    </linearGradient>
+    <linearGradient id="lu" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#77855e"/>
+      <stop offset="1" stop-color="#525f43"/>
+    </linearGradient>
+    <path id="h" d="M0,-20 C10,-19 17,-10 16,2 C15,12 8,19 0,21 C-8,19 -15,12 -16,2 C-17,-10 -10,-19 0,-20 Z"/>
+    <path id="hv" d="M0,-17 L0,18 M0,-9 L9,-4 M0,-9 L-9,-4 M0,1 L9,6 M0,1 L-9,6 M0,10 L6,14 M0,10 L-6,14"/>
+    <g id="leaf">
+      <use href="#h" stroke="#3b4a2e" stroke-width="0.7"/>
+      <use href="#hv" fill="none" stroke="#475a37" stroke-width="0.9" opacity="0.8"/>
+      <use href="#hv" fill="none" stroke="#b0c07c" stroke-width="0.4" opacity="0.4" transform="translate(-0.5 0.4)"/>
+    </g>
+    <g id="twig">
+      <path d="M0,0 C-4,-30 4,-60 0,-96" fill="none" stroke="#5a4838" stroke-width="2.2" stroke-linecap="round"/>
+      <use href="#leaf" fill="url(#lf2)" transform="translate(-14 -14) rotate(-62) scale(1.1)"/>
+      <use href="#leaf" fill="url(#lf)" transform="translate(12 -30) rotate(62) scale(1.15)"/>
+      <use href="#leaf" fill="url(#lu)" transform="translate(-12 -48) rotate(-58) scale(1.05)"/>
+      <use href="#leaf" fill="url(#lf2)" transform="translate(12 -64) rotate(56) scale(1.0)"/>
+      <use href="#leaf" fill="url(#lf)" transform="translate(-10 -80) rotate(-52) scale(0.9)"/>
+      <use href="#leaf" fill="url(#lf2)" transform="translate(2 -100) rotate(4) scale(0.85)"/>
+    </g>
+  </defs>
+
+  <path d="M128,248 C130,224 126,206 124,190" fill="none" stroke="#4f3f2f" stroke-width="3.4" stroke-linecap="round"/>
+  <use href="#twig" transform="translate(124 190) rotate(-46) scale(1.2)"/>
+  <use href="#twig" transform="translate(124 190) rotate(44) scale(1.2)"/>
+  <use href="#twig" transform="translate(124 190) rotate(-4) scale(1.4)"/>
+</svg>

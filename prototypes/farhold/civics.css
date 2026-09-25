@@ -1,0 +1,259 @@
+/*
+ * Farhold — the Holding screen (the Civilization Expansion §5.7) and the "while you were away" card.
+ *
+ * Its own stylesheet, loaded by js/civics-ui.js rather than linked from index.html, so that adding
+ * a whole screen to the game touches neither style.css (2 000-odd lines, every other screen) nor
+ * the page itself. The palette is the one the character sheet already uses — this is the same game
+ * and a second colour scheme would read as a second application.
+ */
+
+.civics {
+  --civ-bg: #080d17;
+  --civ-pane: #0f1624;
+  --civ-line: #223049;
+  --civ-soft: #1a2433;
+  --civ-ink: #cfe0ef;
+  --civ-dim: #9fb0c8;
+  --civ-faint: #7f8ea4;
+  --civ-accent: #7fd8ff;
+  --civ-gold: #ffd24a;
+  --civ-good: #8fe0a0;
+  --civ-bad: #ff9a8a;
+
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  gap: 12px;
+  padding: 20px;
+  background: var(--civ-bg);
+  color: var(--civ-ink);
+  font: 13px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  overflow: hidden;
+}
+
+.civics[hidden] { display: none !important; }
+
+/*
+ * R17 — the same screen, as a tab of the character sheet.
+ *
+ * Only the positioning changes. It stops being a fixed full-window overlay with a z-index and
+ * becomes a box that fills whatever it was mounted in, so the sheet's own close, Esc and cursor
+ * hand-off cover it. Everything below this rule — the rail, the panes, the rows — is untouched.
+ */
+.civics--tab {
+  position: static;
+  inset: auto;
+  z-index: auto;
+  height: 100%;
+  padding: 0;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+}
+.civics--tab .civics-head { padding-bottom: 6px; }
+.civics--tab .civics-head h2 { font-size: 15px; }
+
+.civics-head {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--civ-line);
+  padding-bottom: 10px;
+}
+.civics-head h2 { margin: 0; font-size: 20px; color: var(--civ-accent); }
+.civics-head .civics-sub { color: var(--civ-faint); font-size: 12px; }
+.civics-head .civics-close {
+  margin-left: auto;
+  background: none;
+  border: 1px solid var(--civ-line);
+  color: var(--civ-dim);
+  border-radius: 6px;
+  padding: 4px 12px;
+  cursor: pointer;
+  font: inherit;
+}
+.civics-head .civics-close:hover { color: var(--civ-ink); border-color: var(--civ-accent); }
+
+.civics-rail { display: flex; gap: 6px; flex-wrap: wrap; }
+.civics-rail button {
+  background: var(--civ-pane);
+  border: 1px solid var(--civ-line);
+  color: var(--civ-dim);
+  border-radius: 6px;
+  padding: 6px 14px;
+  cursor: pointer;
+  font: inherit;
+}
+.civics-rail button.on { color: #061018; background: var(--civ-accent); border-color: var(--civ-accent); }
+.civics-rail button .civ-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 6px;
+  border-radius: 8px;
+  background: var(--civ-gold);
+  color: #201700;
+  font-size: 11px;
+}
+
+.civics-body { overflow: auto; min-height: 0; padding-right: 4px; }
+
+.civ-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+
+.civ-pane {
+  background: var(--civ-pane);
+  border: 1px solid var(--civ-line);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+.civ-pane > h3 {
+  margin: 0 0 8px;
+  font-size: 11.5px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--civ-faint);
+}
+
+.civ-row {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--civ-soft);
+}
+.civ-row:last-child { border-bottom: 0; }
+.civ-row b { color: #eaf6ff; font-weight: 600; }
+.civ-row .civ-note { color: var(--civ-faint); font-size: 12px; }
+.civ-row .civ-right { margin-left: auto; color: var(--civ-dim); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.civ-good { color: var(--civ-good); }
+.civ-bad { color: var(--civ-bad); }
+.civ-gold { color: var(--civ-gold); }
+
+.civ-bar { height: 6px; border-radius: 3px; background: var(--civ-soft); overflow: hidden; min-width: 90px; flex: 1; }
+.civ-bar > i { display: block; height: 100%; background: linear-gradient(90deg, #3f8fb0, var(--civ-accent)); }
+.civ-bar.civ-bar--warm > i { background: linear-gradient(90deg, #8a6a10, var(--civ-gold)); }
+
+.civ-empty { color: var(--civ-faint); font-style: italic; padding: 8px 0; }
+
+.civ-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.civ-actions button {
+  background: #14203a;
+  border: 1px solid var(--civ-line);
+  color: var(--civ-ink);
+  border-radius: 6px;
+  padding: 5px 12px;
+  cursor: pointer;
+  font: inherit;
+}
+.civ-actions button:hover { border-color: var(--civ-accent); }
+.civ-actions button[disabled] { opacity: 0.45; cursor: default; }
+
+/* ---------------------------------------------------------------- the away card */
+
+.civ-away {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 62;
+  width: min(420px, calc(100vw - 40px));
+  background: #0f1624;
+  border: 1px solid #223049;
+  border-left: 3px solid #ffd24a;
+  border-radius: 8px;
+  padding: 14px 16px;
+  color: #cfe0ef;
+  font: 13px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+}
+.civ-away[hidden] { display: none !important; }
+.civ-away h3 { margin: 0 0 8px; font-size: 14px; color: #ffd24a; letter-spacing: 0.5px; }
+.civ-away p { margin: 0 0 6px; }
+.civ-away .civ-away-close {
+  margin-top: 10px;
+  background: none;
+  border: 1px solid #223049;
+  color: #9fb0c8;
+  border-radius: 6px;
+  padding: 4px 12px;
+  cursor: pointer;
+  font: inherit;
+}
+
+/* ---------------------------------------------------------------- the HUD hold readout */
+
+.civ-hold {
+  position: fixed;
+  left: 14px;
+  bottom: 96px;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(8, 13, 23, 0.72);
+  border: 1px solid #223049;
+  color: #cfe0ef;
+  font: 12px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+  pointer-events: none;
+}
+.civ-hold[hidden] { display: none !important; }
+.civ-hold .civ-bar { min-width: 70px; }
+
+@media (max-width: 720px) {
+  .civics { padding: 12px; }
+  .civ-grid { grid-template-columns: 1fr; }
+  .civ-hold { left: 8px; bottom: 76px; }
+}
+
+/* ---------------------------------------------------------------- R14: the Muster tab
+   Four ranks, always all four, each greyed with the SENTENCE saying why — a greyed row with no
+   reason is the one answer a player cannot act on. */
+.civ-row.civ-dim { opacity: .55; }
+.civ-sub {
+  flex-basis: 100%; margin: 2px 0 0; font-size: 12px; line-height: 1.45;
+  color: var(--civ-dim);
+}
+.civ-go {
+  margin-left: auto; padding: 4px 12px; border-radius: 5px; cursor: pointer;
+  border: 1px solid var(--civ-gold); background: rgba(255, 210, 74, .12);
+  color: var(--civ-gold); font-size: 12px; font-weight: 600;
+}
+.civ-go:hover { background: rgba(255, 210, 74, .24); }
+.civ-go:focus-visible { outline: 2px solid var(--civ-gold); outline-offset: 2px; }
+
+/* ---------------------------------------------------------------- R16: the Town Hall
+   Its own structural names, sharing this file's look. The Holding screen's tests reach for
+   `.civics-head` / `.civics-rail` / `.civics-body` with `document.querySelector`, and a second
+   element wearing those means whichever comes first in the document wins — which is exactly how a
+   hidden Town Hall became the thing a muster test was reading its text out of. Everything INSIDE
+   a pane (`.civ-pane`, `.civ-row`, `.civ-grid`) is deliberately still shared: those are
+   components, and the two screens should look identical. */
+.hall-head {
+  display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
+  border-bottom: 1px solid var(--civ-line); padding-bottom: 10px;
+}
+.hall-head h2 { margin: 0; font-size: 20px; color: var(--civ-accent); }
+.hall-head .hall-sub { color: var(--civ-faint); font-size: 12px; }
+.hall-head .hall-close {
+  margin-left: auto; background: none; border: 1px solid var(--civ-line);
+  color: var(--civ-dim); border-radius: 6px; padding: 4px 12px; cursor: pointer; font: inherit;
+}
+.hall-head .hall-close:hover { color: var(--civ-ink); border-color: var(--civ-accent); }
+
+.hall-rail { display: flex; gap: 6px; flex-wrap: wrap; }
+.hall-rail button {
+  background: var(--civ-pane); border: 1px solid var(--civ-line); color: var(--civ-dim);
+  border-radius: 6px; padding: 6px 14px; cursor: pointer; font: inherit;
+}
+.hall-rail button.on { color: #061018; background: var(--civ-accent); border-color: var(--civ-accent); }
+
+.hall-body { overflow: auto; min-height: 0; padding-right: 4px; }
+
+/* R22 — a Town Hall pane that has nothing to say, or could not be read at all. `.civ-note` was
+   only ever styled inside a `.civ-row`, so a bare one in a pane inherited nothing and came out
+   the same colour as the background it was explaining. */
+.civ-pane > .civ-note { color: var(--civ-faint); font-size: 13px; line-height: 1.5; margin: 6px 0 0; }

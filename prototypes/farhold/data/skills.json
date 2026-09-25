@@ -1,0 +1,919 @@
+{
+ "_markedDoc": "statuses.marked: Quarry (the ranged perk node) and Branding (a tier-3 skill talent) both hang this on a target. It is a plain takeMore debuff, so js/skills.js buffsOf already knows what to do with it; each caller passes its own seconds and share, so this row is the default and the name the log prints.",
+ "_descDoc": "EVERY `desc` BELOW IS GENERATED, NOT WRITTEN. `js/skills.js` `describeSkill(skill, statuses)` builds each line out of that skill's own `mult`, `reach`, `arc`, `radius`, `range`, `splash`, `width`, `projectiles`, `spread`, `heal`, `status`, `mp` and `cooldown`, and out of the `statuses` row the skill names — so a description cannot promise something the numbers do not do. The text is stored here as well as generated so the screens that read this file directly (js/classbuild-ui.js, js/followers-ui.js, js/newgame.js) are right before any skill bar is built; `describeSkills(data)` runs at the top of `createSkillBar` and rewrites all forty anyway, so changing a number here changes the card even if nobody regenerated the file. Do not hand-edit a `desc`: change the number, or change `describeSkill`.",
+ "_doc": "Farhold's skill bar (round 4). Emberveil's skills are written for a turn-based party fight ('adjacent2', 'row', 'per_source'), which does not translate to one person in real time, so these are its ideas rebuilt around a shape, a radius and a cooldown. Each class gets SIX, on keys 1-6, unlocked at the levels in `unlockAt` — so a new character has one button and earns the rest. `element` picks the spell effect from avatar-3d/js/spellfx.js. `projectiles` on a bolt fires that many at once in a fan `spread` radians wide — a multi shot that fires one arrow is not a multi shot. Shapes: melee (an arc in front), around (a ring centred on you), bolt (flies where you look), beam (a line), ground (lands where you are looking), dash (you move, everything on the way is hit), self (you), summon (a temporary companion).",
+ "unlockAt": [
+  1,
+  3,
+  6,
+  12,
+  18,
+  24
+ ],
+ "statuses": {
+  "burn": {
+   "name": "Burning",
+   "kind": "damage",
+   "element": "fire",
+   "perSecond": 0.3,
+   "seconds": 5
+  },
+  "poison": {
+   "name": "Poisoned",
+   "kind": "damage",
+   "element": "poison",
+   "perSecond": 0.26,
+   "seconds": 8
+  },
+  "bleed": {
+   "name": "Bleeding",
+   "kind": "damage",
+   "element": "physical",
+   "perSecond": 0.26,
+   "seconds": 6
+  },
+  "chill": {
+   "name": "Chilled",
+   "kind": "slow",
+   "element": "ice",
+   "slow": 0.45,
+   "seconds": 4
+  },
+  "web": {
+   "name": "Snared",
+   "kind": "slow",
+   "element": "nature",
+   "slow": 0.8,
+   "seconds": 3
+  },
+  "shock": {
+   "name": "Shocked",
+   "kind": "debuff",
+   "element": "lightning",
+   "takeMore": 0.3,
+   "seconds": 5
+  },
+  "marked": {
+   "name": "Marked",
+   "kind": "debuff",
+   "element": "arcane",
+   "takeMore": 0.15,
+   "seconds": 8
+  },
+  "curse": {
+   "name": "Cursed",
+   "kind": "debuff",
+   "element": "shadow",
+   "takeMore": 0.25,
+   "slow": 0.15,
+   "seconds": 8
+  },
+  "weaken": {
+   "name": "Weakened",
+   "kind": "debuff",
+   "element": "shadow",
+   "dealLess": 0.35,
+   "seconds": 7
+  },
+  "might": {
+   "name": "Might",
+   "kind": "buff",
+   "element": "physical",
+   "damage": 0.3,
+   "seconds": 12
+  },
+  "guard": {
+   "name": "Guarded",
+   "kind": "buff",
+   "element": "holy",
+   "resist": 0.45,
+   "seconds": 8
+  },
+  "haste": {
+   "name": "Hastened",
+   "kind": "buff",
+   "element": "lightning",
+   "haste": 0.45,
+   "move": 0.3,
+   "seconds": 10
+  },
+  "stoneskin": {
+   "name": "Stoneskin",
+   "kind": "buff",
+   "element": "physical",
+   "armor": 60,
+   "seconds": 14
+  },
+  "regen": {
+   "name": "Mending",
+   "kind": "buff",
+   "element": "holy",
+   "healPerSecond": 0.025,
+   "seconds": 10
+  },
+  "rally": {
+   "name": "Rallied",
+   "kind": "buff",
+   "element": "holy",
+   "damage": 0.2,
+   "resist": 0.15,
+   "seconds": 8
+  }
+ },
+ "skills": {
+  "power_strike": {
+   "name": "Power Strike",
+   "shape": "melee",
+   "element": "physical",
+   "mult": 1.9,
+   "reach": 3.4,
+   "arc": 1.6,
+   "cooldown": 4,
+   "mp": 0,
+   "desc": "Strikes everything in a 92° arc 3.4 m in front of you for 190% weapon damage. No mana cost, 4s cooldown."
+  },
+  "cleave": {
+   "name": "Cleave",
+   "shape": "around",
+   "element": "physical",
+   "mult": 1.15,
+   "radius": 4.5,
+   "cooldown": 7,
+   "mp": 6,
+   "desc": "Strikes everything within 4.5 m of you for 143% weapon damage. 6 mana, 7s cooldown."
+  },
+  "sunder": {
+   "name": "Sunder",
+   "shape": "melee",
+   "element": "physical",
+   "mult": 1.6,
+   "reach": 3.2,
+   "arc": 1.4,
+   "status": "weaken",
+   "cooldown": 9,
+   "mp": 8,
+   "desc": "Strikes everything in an 80° arc 3.2 m in front of you for 224% weapon damage. Leaves the target Weakened: the target deals 35% less damage for 7s. 8 mana, 9s cooldown."
+  },
+  "shield_bash": {
+   "name": "Shield Bash",
+   "shape": "melee",
+   "element": "physical",
+   "mult": 1.3,
+   "reach": 2.8,
+   "arc": 2.2,
+   "status": "web",
+   "cooldown": 8,
+   "mp": 6,
+   "desc": "Strikes everything in a 126° arc 2.8 m in front of you for 172% weapon damage. Leaves the target Snared: the target moves 80% slower for 3s. 6 mana, 8s cooldown."
+  },
+  "whirlwind": {
+   "name": "Whirlwind",
+   "shape": "around",
+   "element": "physical",
+   "mult": 0.8,
+   "radius": 5.5,
+   "cooldown": 12,
+   "mp": 14,
+   "desc": "Spins 5 times, striking everything within 5.5 m of you for 131% weapon damage on every spin. Leaves the target Bleeding: a further 72% weapon damage over 6s. 14 mana, 12s cooldown.",
+   "repeats": 5,
+   "repeatEvery": 0.32,
+   "status": "bleed"
+  },
+  "charge": {
+   "name": "Charge",
+   "shape": "dash",
+   "element": "physical",
+   "mult": 1.7,
+   "range": 12,
+   "splash": 2.4,
+   "cooldown": 10,
+   "mp": 10,
+   "desc": "Carries you 12 m forward, striking everything within 2.4 m of your path for 252% weapon damage. Leaves the target Weakened: the target deals 35% less damage for 7s. 10 mana, 10s cooldown.",
+   "status": "weaken"
+  },
+  "execute": {
+   "name": "Execute",
+   "shape": "melee",
+   "element": "physical",
+   "mult": 3.2,
+   "reach": 3,
+   "arc": 1.2,
+   "cooldown": 14,
+   "mp": 12,
+   "desc": "Strikes everything in a 69° arc 3 m in front of you for 576% weapon damage. Leaves the target Weakened: the target deals 35% less damage for 7s. 12 mana, 14s cooldown.",
+   "status": "weaken"
+  },
+  "aimed_shot": {
+   "name": "Aimed Shot",
+   "shape": "bolt",
+   "element": "physical",
+   "mult": 2.2,
+   "range": 42,
+   "splash": 1.2,
+   "cooldown": 5,
+   "mp": 4,
+   "desc": "Looses one shot out to 42 m for 238% weapon damage, splashing everything within 1.2 m of where the shot lands. 4 mana, 5s cooldown."
+  },
+  "multi_shot": {
+   "name": "Multi Shot",
+   "shape": "bolt",
+   "element": "physical",
+   "mult": 0.8,
+   "range": 34,
+   "splash": 1.6,
+   "cooldown": 8,
+   "mp": 10,
+   "desc": "Looses 5 shots in an 11° fan out to 34 m, each for 106% weapon damage, splashing everything within 1.6 m of where a shot lands. 10 mana, 8s cooldown.",
+   "projectiles": 5,
+   "spread": 0.2
+  },
+  "pinning_shot": {
+   "name": "Pinning Shot",
+   "shape": "bolt",
+   "element": "physical",
+   "mult": 1,
+   "range": 38,
+   "splash": 1.4,
+   "status": "web",
+   "cooldown": 9,
+   "mp": 8,
+   "desc": "Looses 2 shots in a 5° fan out to 38 m, each for 140% weapon damage, splashing everything within 1.4 m of where a shot lands. Leaves the target Snared: the target moves 80% slower for 3s. 8 mana, 9s cooldown.",
+   "projectiles": 2,
+   "spread": 0.09
+  },
+  "rain_of_arrows": {
+   "name": "Rain of Arrows",
+   "shape": "ground",
+   "element": "physical",
+   "mult": 1.5,
+   "range": 32,
+   "radius": 6.5,
+   "cooldown": 14,
+   "mp": 16,
+   "desc": "Falls on a spot up to 32 m away striking everything within 6.5 m of that spot for 270% weapon damage. Leaves the target Snared: the target moves 80% slower for 3s. 16 mana, 14s cooldown.",
+   "status": "web"
+  },
+  "poison_dart": {
+   "name": "Poison Dart",
+   "shape": "bolt",
+   "element": "poison",
+   "mult": 1.1,
+   "range": 34,
+   "splash": 1.5,
+   "status": "poison",
+   "cooldown": 5,
+   "mp": 6,
+   "desc": "Looses one bolt out to 34 m for 119% weapon damage as poison, splashing everything within 1.5 m of where the bolt lands. Leaves the target Poisoned: a further 156% weapon damage over 8s. 6 mana, 5s cooldown.",
+   "statusMult": 1.8
+  },
+  "shadowstep": {
+   "name": "Shadow Step",
+   "shape": "dash",
+   "element": "shadow",
+   "mult": 2.1,
+   "range": 14,
+   "splash": 2,
+   "cooldown": 9,
+   "mp": 10,
+   "desc": "Carries you 14 m forward, striking everything within 2 m of your path for 294% weapon damage as shadow. 10 mana, 9s cooldown."
+  },
+  "eviscerate": {
+   "name": "Eviscerate",
+   "shape": "melee",
+   "element": "physical",
+   "mult": 2.4,
+   "reach": 2.8,
+   "arc": 1.1,
+   "status": "bleed",
+   "cooldown": 7,
+   "mp": 8,
+   "desc": "Strikes everything in a 63° arc 2.8 m in front of you for 298% weapon damage. Leaves the target Bleeding: a further 162% weapon damage over 6s. 8 mana, 7s cooldown."
+  },
+  "smoke": {
+   "name": "Smoke",
+   "shape": "self",
+   "element": "shadow",
+   "status": "haste",
+   "cooldown": 20,
+   "mp": 12,
+   "desc": "Gives you Hastened: you attack 45% faster and move 30% faster for 10s. 12 mana, 20s cooldown."
+  },
+  "firebolt": {
+   "name": "Firebolt",
+   "shape": "bolt",
+   "element": "fire",
+   "mult": 1.6,
+   "range": 36,
+   "splash": 2.6,
+   "status": "burn",
+   "cooldown": 4,
+   "mp": 8,
+   "desc": "Looses one bolt out to 36 m for 160% weapon damage as fire, splashing everything within 2.6 m of where the bolt lands. Leaves the target Burning: a further 84% weapon damage over 5s. 8 mana, 4s cooldown."
+  },
+  "fire_wall": {
+   "name": "Ember Field",
+   "shape": "ground",
+   "element": "fire",
+   "mult": 1.8,
+   "range": 30,
+   "radius": 6,
+   "status": "burn",
+   "cooldown": 13,
+   "mp": 18,
+   "desc": "Falls on a spot up to 30 m away striking everything within 6 m of that spot for 310% weapon damage as fire. Leaves the target Burning: a further 163% weapon damage over 5s. 18 mana, 13s cooldown."
+  },
+  "frost_nova": {
+   "name": "Frost Nova",
+   "shape": "around",
+   "element": "ice",
+   "mult": 1.2,
+   "radius": 6,
+   "status": "chill",
+   "cooldown": 9,
+   "mp": 14,
+   "desc": "Strikes everything within 6 m of you for 168% weapon damage as ice. Leaves the target Chilled: the target moves 45% slower for 4s. 14 mana, 9s cooldown."
+  },
+  "ice_lance": {
+   "name": "Ice Lance",
+   "shape": "beam",
+   "element": "ice",
+   "mult": 1.9,
+   "range": 26,
+   "width": 1.8,
+   "status": "chill",
+   "cooldown": 7,
+   "mp": 12,
+   "desc": "Fires a 1.8 m wide beam 26 m straight ahead, striking everything in the line for 236% weapon damage as ice. Leaves the target Chilled: the target moves 45% slower for 4s. 12 mana, 7s cooldown."
+  },
+  "chain_bolt": {
+   "name": "Chain Bolt",
+   "shape": "bolt",
+   "element": "lightning",
+   "mult": 1.1,
+   "range": 40,
+   "splash": 3.2,
+   "status": "shock",
+   "cooldown": 7,
+   "mp": 12,
+   "desc": "Looses 3 bolts in an 8° fan out to 40 m, each for 136% weapon damage as lightning, splashing everything within 3.2 m of where a bolt lands. Leaves the target Shocked: the target takes 30% more damage for 5s. 12 mana, 7s cooldown.",
+   "projectiles": 3,
+   "spread": 0.14
+  },
+  "thunderclap": {
+   "name": "Thunderclap",
+   "shape": "around",
+   "element": "lightning",
+   "mult": 1.7,
+   "radius": 7,
+   "status": "shock",
+   "cooldown": 12,
+   "mp": 18,
+   "desc": "Strikes everything within 7 m of you for 279% weapon damage as lightning. Leaves the target Shocked: the target takes 30% more damage for 5s. 18 mana, 12s cooldown."
+  },
+  "storm_beam": {
+   "name": "Storm Beam",
+   "shape": "beam",
+   "element": "lightning",
+   "mult": 2.2,
+   "range": 30,
+   "width": 2.4,
+   "cooldown": 11,
+   "mp": 20,
+   "desc": "Fires a 2.4 m wide beam 30 m straight ahead, striking everything in the line for 343% weapon damage as lightning. Leaves the target Shocked: the target takes 30% more damage for 5s. 20 mana, 11s cooldown.",
+   "status": "shock"
+  },
+  "shadow_lance": {
+   "name": "Shadow Lance",
+   "shape": "bolt",
+   "element": "shadow",
+   "mult": 1.9,
+   "range": 38,
+   "splash": 2,
+   "cooldown": 5,
+   "mp": 10,
+   "desc": "Looses one bolt out to 38 m for 205% weapon damage as shadow, splashing everything within 2 m of where the bolt lands. 10 mana, 5s cooldown."
+  },
+  "curse": {
+   "name": "Curse",
+   "shape": "bolt",
+   "element": "shadow",
+   "mult": 0.8,
+   "range": 34,
+   "splash": 5,
+   "status": "curse",
+   "cooldown": 12,
+   "mp": 14,
+   "desc": "Looses one bolt out to 34 m for 131% weapon damage as shadow, splashing everything within 5 m of where the bolt lands. Leaves the target Cursed: the target takes 25% more damage and moves 15% slower for 8s. 14 mana, 12s cooldown."
+  },
+  "drain": {
+   "name": "Drain",
+   "shape": "beam",
+   "element": "shadow",
+   "mult": 1.5,
+   "range": 22,
+   "width": 1.6,
+   "heal": 0.12,
+   "cooldown": 9,
+   "mp": 12,
+   "desc": "Fires a 1.6 m wide beam 22 m straight ahead, striking everything in the line for 210% weapon damage as shadow. Heals you for 12% of the damage dealt. 12 mana, 9s cooldown."
+  },
+  "arcane_burst": {
+   "name": "Arcane Burst",
+   "shape": "ground",
+   "element": "arcane",
+   "mult": 2.3,
+   "range": 34,
+   "radius": 5,
+   "cooldown": 10,
+   "mp": 18,
+   "desc": "Falls on a spot up to 34 m away striking everything within 5 m of that spot for 340% weapon damage as arcane. Leaves the target Cursed: the target takes 25% more damage and moves 15% slower for 8s. 18 mana, 10s cooldown.",
+   "status": "curse"
+  },
+  "meteor": {
+   "name": "Fallstone",
+   "shape": "ground",
+   "element": "fire",
+   "mult": 3.4,
+   "range": 36,
+   "radius": 8,
+   "status": "burn",
+   "cooldown": 22,
+   "mp": 30,
+   "desc": "Falls on a spot up to 36 m away striking everything within 8 m of that spot for 830% weapon damage as fire. Leaves the target Burning: a further 436% weapon damage over 5s. 30 mana, 22s cooldown."
+  },
+  "mend": {
+   "name": "Mend",
+   "shape": "self",
+   "element": "holy",
+   "heal": 0.35,
+   "cooldown": 14,
+   "mp": 18,
+   "desc": "Heals you for 35% of your maximum health. 18 mana, 14s cooldown."
+  },
+  "renew": {
+   "name": "Renew",
+   "shape": "self",
+   "element": "holy",
+   "status": "regen",
+   "cooldown": 16,
+   "mp": 14,
+   "desc": "Gives you Mending: heals 25% of your maximum health over 10s. Everything following you is mended with you. 14 mana, 16s cooldown."
+  },
+  "warcry": {
+   "name": "War Cry",
+   "shape": "self",
+   "element": "physical",
+   "status": "might",
+   "cooldown": 22,
+   "mp": 10,
+   "desc": "Gives you Might: you deal 30% more damage for 12s. 10 mana, 22s cooldown."
+  },
+  "guard_stance": {
+   "name": "Guard",
+   "shape": "self",
+   "element": "holy",
+   "status": "guard",
+   "cooldown": 18,
+   "mp": 8,
+   "desc": "Gives you Guarded: you take 45% less damage for 8s. 8 mana, 18s cooldown."
+  },
+  "stoneskin": {
+   "name": "Stoneskin",
+   "shape": "self",
+   "element": "physical",
+   "status": "stoneskin",
+   "cooldown": 24,
+   "mp": 14,
+   "desc": "Gives you Stoneskin: you gain 60 armour for 14s. 14 mana, 24s cooldown."
+  },
+  "quicken": {
+   "name": "Quicken",
+   "shape": "self",
+   "element": "lightning",
+   "status": "haste",
+   "cooldown": 26,
+   "mp": 16,
+   "desc": "Gives you Hastened: you attack 45% faster and move 30% faster for 10s. 16 mana, 26s cooldown."
+  },
+  "rally": {
+   "name": "Rally",
+   "shape": "self",
+   "element": "holy",
+   "status": "rally",
+   "pets": true,
+   "cooldown": 30,
+   "mp": 18,
+   "desc": "Gives you Rallied: you deal 20% more damage and take 15% less damage for 8s. Everything following you gets the same. 18 mana, 30s cooldown."
+  },
+  "consecrate": {
+   "name": "Consecrate",
+   "shape": "around",
+   "element": "holy",
+   "mult": 1.4,
+   "radius": 6.5,
+   "heal": 0.15,
+   "cooldown": 16,
+   "mp": 20,
+   "desc": "Strikes everything within 6.5 m of you for 274% weapon damage as holy. Heals you for 15% of your maximum health. 20 mana, 16s cooldown."
+  },
+  "raise_thrall": {
+   "name": "Raise Thrall",
+   "shape": "summon",
+   "element": "shadow",
+   "pet": "bone_thrall",
+   "count": 1,
+   "cooldown": 26,
+   "mp": 20,
+   "desc": "Summons 1 Bone Thrall to fight beside you. 20 mana, 26s cooldown."
+  },
+  "call_wolf": {
+   "name": "Call the Pack",
+   "shape": "summon",
+   "element": "nature",
+   "pet": "grove_wolf",
+   "count": 1,
+   "cooldown": 26,
+   "mp": 18,
+   "desc": "Summons 1 Grove Wolf to fight beside you. 18 mana, 26s cooldown."
+  },
+  "call_spirit": {
+   "name": "Call a Spirit",
+   "shape": "summon",
+   "element": "holy",
+   "pet": "spirit_bear",
+   "count": 1,
+   "cooldown": 40,
+   "mp": 26,
+   "desc": "Summons 1 Spirit Bear to fight beside you. 26 mana, 40s cooldown."
+  },
+  "bind_imp": {
+   "name": "Bind a Fiend",
+   "shape": "summon",
+   "element": "shadow",
+   "pet": "bound_imp",
+   "count": 1,
+   "cooldown": 32,
+   "mp": 22,
+   "desc": "Summons 1 Bound Imp to fight beside you. 22 mana, 32s cooldown."
+  },
+  "deploy_sentry": {
+   "name": "Deploy Sentry",
+   "shape": "summon",
+   "element": "physical",
+   "pet": "clockwork_sentry",
+   "count": 1,
+   "cooldown": 30,
+   "mp": 20,
+   "desc": "Summons 1 Clockwork Sentry to fight beside you. 20 mana, 30s cooldown."
+  },
+  "flamethrower": {
+   "name": "Flamethrower",
+   "shape": "melee",
+   "element": "fire",
+   "mult": 0.4,
+   "reach": 7,
+   "arc": 0.9,
+   "repeats": 10,
+   "repeatEvery": 0.22,
+   "breath": true,
+   "status": "burn",
+   "cooldown": 10,
+   "mp": 18,
+   "desc": "Breathes a stream that strikes everything in a 52° cone 7 m in front of you 10 times over 2.2s, for 59% weapon damage as fire each time. Leaves the target Burning: a further 31% weapon damage over 5s. 18 mana, 10s cooldown."
+  },
+  "ember_stride": {
+   "name": "Ember Stride",
+   "shape": "self",
+   "element": "fire",
+   "mult": 0.25,
+   "trail": {
+    "seconds": 8,
+    "every": 0.3,
+    "radius": 1.8,
+    "burns": 2.5,
+    "step": 1.4
+   },
+   "cooldown": 20,
+   "mp": 16,
+   "desc": "For 8s, every step leaves burning ground behind you, 3.6 m across, that lasts 2.5s and strikes whatever stands in it for 57% weapon damage as fire every 0.75s. 16 mana, 20s cooldown."
+  },
+  "storm_orbs": {
+   "name": "Storm Orbs",
+   "shape": "self",
+   "element": "lightning",
+   "mult": 0.15,
+   "orbs": {
+    "count": 3,
+    "seconds": 12,
+    "every": 1.2,
+    "radius": 8,
+    "status": "shock"
+   },
+   "cooldown": 24,
+   "mp": 22,
+   "desc": "For 12s, 3 orbs circle you in a fight; each one strikes the nearest enemy within 8 m every 1.2s for 39% weapon damage as lightning and leaves it Shocked. 22 mana, 24s cooldown."
+  },
+  "blizzard": {
+   "name": "Blizzard",
+   "shape": "ground",
+   "element": "ice",
+   "mult": 0.35,
+   "range": 30,
+   "radius": 5.5,
+   "repeats": 6,
+   "repeatEvery": 0.5,
+   "weather": true,
+   "status": "chill",
+   "cooldown": 14,
+   "mp": 24,
+   "desc": "Falls on a spot up to 30 m away and strikes everything within 5.5 m of it 6 times over 3s, for 63% weapon damage as ice each time. Leaves the target Chilled: the target moves 45% slower for 4s. 24 mana, 14s cooldown."
+  },
+  "toxic_cloud": {
+   "name": "Toxic Cloud",
+   "shape": "ground",
+   "element": "poison",
+   "mult": 0.25,
+   "range": 26,
+   "radius": 5,
+   "repeats": 8,
+   "repeatEvery": 0.6,
+   "weather": true,
+   "status": "poison",
+   "cooldown": 14,
+   "mp": 20,
+   "desc": "Falls on a spot up to 26 m away and strikes everything within 5 m of it 8 times over 4.8s, for 45% weapon damage as poison each time. Leaves the target Poisoned: a further 33% weapon damage over 8s. 20 mana, 14s cooldown."
+  },
+  "judgement": {
+   "name": "Judgement",
+   "shape": "ground",
+   "element": "holy",
+   "mult": 2.4,
+   "range": 28,
+   "radius": 3.5,
+   "delay": 0.7,
+   "status": "weaken",
+   "cooldown": 12,
+   "mp": 22,
+   "desc": "Falls on a spot up to 28 m away, 0.7s after you cast, striking everything within 3.5 m of that spot for 394% weapon damage as holy. Leaves the target Weakened: the target deals 35% less damage for 7s. 22 mana, 12s cooldown."
+  },
+  "void_rift": {
+   "name": "Void Rift",
+   "shape": "ground",
+   "element": "shadow",
+   "mult": 0.45,
+   "range": 26,
+   "radius": 5,
+   "repeats": 4,
+   "repeatEvery": 0.5,
+   "pull": 2.5,
+   "status": "curse",
+   "cooldown": 16,
+   "mp": 24,
+   "desc": "Falls on a spot up to 26 m away and strikes everything within 5 m of it 4 times over 2s, for 88% weapon damage as shadow each time. Every pulse drags everything 2.5 m toward the middle. Leaves the target Cursed: the target takes 25% more damage and moves 15% slower for 8s. 24 mana, 16s cooldown."
+  }
+ },
+ "classes": {
+  "warrior": [
+   "power_strike",
+   "cleave",
+   "warcry",
+   "shield_bash",
+   "whirlwind",
+   "execute"
+  ],
+  "fighter": [
+   "power_strike",
+   "sunder",
+   "guard_stance",
+   "charge",
+   "cleave",
+   "execute"
+  ],
+  "paladin": [
+   "power_strike",
+   "guard_stance",
+   "consecrate",
+   "shield_bash",
+   "renew",
+   "rally"
+  ],
+  "ranger": [
+   "aimed_shot",
+   "poison_dart",
+   "multi_shot",
+   "mend",
+   "pinning_shot",
+   "rain_of_arrows"
+  ],
+  "rogue": [
+   "eviscerate",
+   "poison_dart",
+   "shadowstep",
+   "smoke",
+   "power_strike",
+   "execute"
+  ],
+  "cleric": [
+   "mend",
+   "guard_stance",
+   "consecrate",
+   "renew",
+   "judgement",
+   "rally"
+  ],
+  "bard": [
+   "shadow_lance",
+   "warcry",
+   "curse",
+   "mend",
+   "quicken",
+   "rally"
+  ],
+  "mage": [
+   "firebolt",
+   "frost_nova",
+   "arcane_burst",
+   "ice_lance",
+   "fire_wall",
+   "meteor"
+  ],
+  "necromancer": [
+   "shadow_lance",
+   "raise_thrall",
+   "curse",
+   "drain",
+   "poison_dart",
+   "toxic_cloud"
+  ],
+  "warlock": [
+   "shadow_lance",
+   "bind_imp",
+   "curse",
+   "drain",
+   "void_rift",
+   "meteor"
+  ],
+  "demon_hunter": [
+   "aimed_shot",
+   "shadowstep",
+   "multi_shot",
+   "curse",
+   "pinning_shot",
+   "execute"
+  ],
+  "scavenger": [
+   "aimed_shot",
+   "poison_dart",
+   "guard_stance",
+   "mend",
+   "smoke",
+   "rain_of_arrows"
+  ],
+  "swashbuckler": [
+   "eviscerate",
+   "charge",
+   "smoke",
+   "power_strike",
+   "whirlwind",
+   "execute"
+  ],
+  "dragon_knight": [
+   "power_strike",
+   "cleave",
+   "firebolt",
+   "flamethrower",
+   "fire_wall",
+   "meteor"
+  ],
+  "pyromancer": [
+   "firebolt",
+   "fire_wall",
+   "flamethrower",
+   "arcane_burst",
+   "ember_stride",
+   "meteor"
+  ],
+  "stormcaller": [
+   "chain_bolt",
+   "frost_nova",
+   "storm_beam",
+   "storm_orbs",
+   "quicken",
+   "meteor"
+  ],
+  "druid": [
+   "poison_dart",
+   "call_wolf",
+   "renew",
+   "toxic_cloud",
+   "stoneskin",
+   "rally"
+  ],
+  "oracle": [
+   "arcane_burst",
+   "guard_stance",
+   "renew",
+   "curse",
+   "quicken",
+   "meteor"
+  ],
+  "tactician": [
+   "sunder",
+   "shield_bash",
+   "rally",
+   "warcry",
+   "charge",
+   "execute"
+  ],
+  "chronomancer": [
+   "arcane_burst",
+   "quicken",
+   "ice_lance",
+   "frost_nova",
+   "blizzard",
+   "meteor"
+  ],
+  "monk": [
+   "power_strike",
+   "charge",
+   "quicken",
+   "whirlwind",
+   "stoneskin",
+   "execute"
+  ],
+  "shaman": [
+   "chain_bolt",
+   "call_spirit",
+   "renew",
+   "thunderclap",
+   "stoneskin",
+   "rally"
+  ],
+  "witch_hunter": [
+   "aimed_shot",
+   "sunder",
+   "curse",
+   "pinning_shot",
+   "smoke",
+   "execute"
+  ],
+  "knight": [
+   "shield_bash",
+   "guard_stance",
+   "power_strike",
+   "sunder",
+   "stoneskin",
+   "execute"
+  ],
+  "sorcerer": [
+   "firebolt",
+   "chain_bolt",
+   "arcane_burst",
+   "storm_beam",
+   "storm_orbs",
+   "meteor"
+  ],
+  "runesmith": [
+   "power_strike",
+   "stoneskin",
+   "sunder",
+   "thunderclap",
+   "guard_stance",
+   "whirlwind"
+  ],
+  "shadow_dancer": [
+   "eviscerate",
+   "shadowstep",
+   "smoke",
+   "poison_dart",
+   "whirlwind",
+   "execute"
+  ],
+  "tinker": [
+   "aimed_shot",
+   "deploy_sentry",
+   "pinning_shot",
+   "fire_wall",
+   "quicken",
+   "rain_of_arrows"
+  ],
+  "priest": [
+   "mend",
+   "renew",
+   "consecrate",
+   "curse",
+   "judgement",
+   "rally"
+  ],
+  "enchanter": [
+   "arcane_burst",
+   "bind_imp",
+   "curse",
+   "ice_lance",
+   "quicken",
+   "meteor"
+  ]
+ },
+ "_r25Doc": "R25: a skill's damage share is multiplied by js/skills.js effectiveMult — its unlock level (x1.0 at 1 to x2.0 at 24) and its cooldown (+8% per second past 4) — so a long wait and a late unlock buy a bigger hit. The late damage skills that had no debuff got one (Storm Beam shock, Arcane Burst curse, Rain of Arrows web, Whirlwind bleed, Execute and Charge weaken). Whirlwind spins five times at 80% (was one hit at 160%).",
+ "_r25NewDoc": "R25 — seven new skills (Flamethrower, Ember Stride, Storm Orbs, Blizzard, Toxic Cloud, Judgement, Void Rift). New fields: `repeats`/`repeatEvery` on melee and ground (the whole strike again that many times), `breath` (drawn as a stream), `weather` (drawn as falling weather over the circle), `delay` (seconds between the cast and the hit landing), `pull` (metres every pulse drags a body toward the middle), `trail` (self: for `seconds` every step leaves `burns`-second burning ground `radius` wide), `orbs` (self: `count` orbs for `seconds`, each striking the nearest enemy within `radius` every `every` s for the skill's share, and laying `status`)."
+}

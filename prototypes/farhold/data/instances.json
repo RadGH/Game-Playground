@@ -1,0 +1,1685 @@
+{
+  "_doc": "ROUND 16 — INSTANCES: twenty places on the overworld that are a DOOR, not a dot. \"Add about 20 new overworld events that feature an instance system. It could be an abandoned building, a cave entrance, a dungeon entrance. These take you to a different zone similar to our current dungeon system where a quest can be found, or a boss to kill. Have one be a dragons lair, which can both be discovered randomly or through a quest from someone in town or elsewhere.\" Each entry is a MOUTH (a set piece on the surface, `plan`) plus an INTERIOR (`interior`, handed to createDungeon as its `shape`) plus what is down there (`holds`) and what clearing it pays (`gives`). FIELDS. `id` is the key everything else refers to. `name` is what the mouth is called when the map slot has no name of its own. `icon` is the map glyph and is unique across this file AND data/landmarks.json, so a cave and a cistern are not the same dot. `blurb` is what you see from outside, before you go in. `weight` is the relative chance of this one winning a slot it fits. `on` is matched against a slot's tag set the same way data/landmarks.json's `on` is — the slot kind (landmark, pass, dungeon, crossing, road, junction) and the ground tags (grass, farmland, scrub, forest, wetland, river, coast, highland, mountain). `biomes` is the ground it will stand on, or [\"any\"]. `minBand`/`maxBand` are zone bands (0 settled … 7 unforgiving), inclusive. `townGap` is metres of clear ground it needs between itself and the nearest settlement's watch. `arch` picks the archway look from GATE_ARCHES in js/dungeon.js (stone / rough / timber / pale) — a cave with a dressed lintel over it reads as a door somebody made, which is what a cave is not. `interior` is the createDungeon `shape` override plus three fields createDungeon does not read: `overLevel` (how far above the zone's mid level the inside is), `packs` (bodies per room, replacing balance.dungeon.packsPerRoom) and `families` (which bestiary families fill it — filter the defsFor pool by these and FALL BACK to the unfiltered pool if the filter empties, or a warren quietly fills with bandits). `holds` is the point of the whole feature and is never empty: `boss` (either a forced bestiary boss `id`, or a `family` + `rank` + `modifiers` to roll one), `quest` (a job FOUND inside — `kind` is a quests.js kind, `to` is \"here\" / \"town\" / \"instance:<id>\", `found` is the object that starts it), `prisoner` (who is down there and which faction thanks you), `cache` (a chest grade from balance.chests.kinds, placed in the boss room when `room` says so) and `lore` (a thing to read). `gives` is paid ONCE, when the boss goes down, and uses data/landmarks.json's vocabulary — xp, loot (a rarity floor), standing (a data/factions.json key), perkPoint, revealZone, clears — plus `gold` as a [low, high] span, which is the one key the landmark payout switch does not already handle. `discovery` is \"random\" (you find it by walking), \"quest\" (a town job puts it on the map and it is not rolled onto slots otherwise) or \"both\". The dragon's lair is \"both\", because that is what was asked for. Original names and ideas only.",
+  "instances": [
+    {
+      "id": "weeping_cave",
+      "name": "Weeping Cave",
+      "icon": "cave",
+      "plan": "inst_weeping_cave",
+      "arch": "rough",
+      "weight": 12,
+      "on": [
+        "landmark",
+        "highland",
+        "mountain",
+        "forest"
+      ],
+      "biomes": [
+        "highland",
+        "mountain",
+        "forest",
+        "grass",
+        "scrub"
+      ],
+      "minBand": 0,
+      "townGap": 220,
+      "discovery": "random",
+      "blurb": "Water runs out of the hillside and does not run back in. The mouth is wider than the stream that made it.",
+      "interior": {
+        "look": "cave",
+        "rooms": [
+          3,
+          5
+        ],
+        "roomSize": [
+          8,
+          13
+        ],
+        "corridor": 2.6,
+        "cellSize": 5,
+        "wallHeight": 3.8,
+        "sconceEvery": 99,
+        "chestChance": 0.7,
+        "packs": [
+          1,
+          2
+        ],
+        "families": [
+          "beast",
+          "aberration"
+        ],
+        "overLevel": 0
+      },
+      "holds": {
+        "boss": {
+          "family": "beast",
+          "rank": "champion",
+          "modifiers": 1
+        },
+        "cache": {
+          "kind": "iron",
+          "name": "What the Water Left"
+        },
+        "lore": {
+          "id": "cave_marks",
+          "title": "Cut Marks",
+          "text": "Somebody counted days on this wall and then stopped counting."
+        }
+      },
+      "gives": {
+        "xp": 70,
+        "loot": "magic",
+        "gold": [
+          40,
+          110
+        ],
+        "clears": true
+      }
+    },
+    {
+      "id": "bramble_burrow",
+      "name": "Bramble Burrow",
+      "icon": "burrow",
+      "plan": "inst_bramble_burrow",
+      "arch": "rough",
+      "weight": 11,
+      "on": [
+        "landmark",
+        "forest",
+        "grass",
+        "road"
+      ],
+      "biomes": [
+        "forest",
+        "grass",
+        "farmland",
+        "scrub",
+        "wetland"
+      ],
+      "minBand": 0,
+      "maxBand": 3,
+      "townGap": 180,
+      "discovery": "random",
+      "blurb": "A hole under a leaning stone, worn smooth by something going in and out of it.",
+      "interior": {
+        "look": "warren",
+        "rooms": [
+          3,
+          5
+        ],
+        "roomSize": [
+          7,
+          12
+        ],
+        "corridor": 2.4,
+        "cellSize": 5,
+        "wallHeight": 3.4,
+        "sconceEvery": 99,
+        "chestChance": 0.6,
+        "packs": [
+          2,
+          3
+        ],
+        "families": [
+          "beast"
+        ],
+        "overLevel": 0
+      },
+      "holds": {
+        "boss": {
+          "family": "beast",
+          "rank": "rare",
+          "modifiers": 1
+        },
+        "cache": {
+          "kind": "wooden",
+          "name": "The Burrow Hoard"
+        },
+        "quest": {
+          "id": "what_took_the_lambs",
+          "kind": "clear",
+          "to": "here",
+          "title": "What Took the Lambs",
+          "found": "A sheep bell, chewed through at the strap.",
+          "text": "Somebody down the road is short four lambs and a dog. Finish what is living in here and the bell is proof enough.",
+          "reward": {
+            "gold": [
+              60,
+              140
+            ],
+            "xp": 90,
+            "loot": "magic"
+          }
+        }
+      },
+      "gives": {
+        "xp": 60,
+        "loot": "magic",
+        "gold": [
+          30,
+          90
+        ],
+        "clears": true
+      }
+    },
+    {
+      "id": "sinkhole_stair",
+      "name": "Sinkhole Stair",
+      "icon": "sinkhole",
+      "plan": "inst_sinkhole_stair",
+      "arch": "rough",
+      "weight": 9,
+      "on": [
+        "landmark",
+        "grass",
+        "highland",
+        "junction"
+      ],
+      "biomes": [
+        "grass",
+        "highland",
+        "scrub",
+        "farmland"
+      ],
+      "minBand": 1,
+      "townGap": 260,
+      "discovery": "random",
+      "blurb": "The ground gave way and somebody cut steps down into what it gave way into.",
+      "interior": {
+        "look": "hollow",
+        "rooms": [
+          4,
+          6
+        ],
+        "roomSize": [
+          9,
+          15
+        ],
+        "corridor": 3.0,
+        "cellSize": 6,
+        "wallHeight": 4.4,
+        "sconceEvery": 8,
+        "chestChance": 0.6,
+        "packs": [
+          1,
+          3
+        ],
+        "families": [
+          "aberration",
+          "undead",
+          "beast"
+        ],
+        "overLevel": 1
+      },
+      "holds": {
+        "boss": {
+          "family": "aberration",
+          "rank": "champion",
+          "modifiers": 2
+        },
+        "cache": {
+          "kind": "iron",
+          "name": "The Stairfoot Cache"
+        },
+        "lore": {
+          "id": "sinkhole_steps",
+          "title": "Whose Steps",
+          "text": "The steps are cut for somebody with a longer stride than yours."
+        }
+      },
+      "gives": {
+        "xp": 110,
+        "loot": "magic",
+        "gold": [
+          60,
+          160
+        ],
+        "clears": true,
+        "revealZone": true
+      }
+    },
+    {
+      "id": "fallow_farmstead",
+      "name": "Fallow Farmstead",
+      "icon": "farmstead",
+      "plan": "inst_fallow_farmstead",
+      "arch": "timber",
+      "weight": 12,
+      "on": [
+        "road",
+        "junction",
+        "farmland",
+        "grass"
+      ],
+      "biomes": [
+        "farmland",
+        "grass",
+        "scrub"
+      ],
+      "minBand": 0,
+      "maxBand": 4,
+      "townGap": 300,
+      "discovery": "random",
+      "blurb": "A house with its roof in it, a fence gone to stakes, and a cellar hatch nobody nailed shut.",
+      "interior": {
+        "look": "ruin",
+        "rooms": [
+          4,
+          6
+        ],
+        "roomSize": [
+          8,
+          14
+        ],
+        "corridor": 2.8,
+        "cellSize": 5,
+        "wallHeight": 3.6,
+        "sconceEvery": 9,
+        "chestChance": 0.65,
+        "packs": [
+          1,
+          2
+        ],
+        "families": [
+          "undead",
+          "humanoid",
+          "beast"
+        ],
+        "overLevel": 0
+      },
+      "holds": {
+        "boss": {
+          "family": "undead",
+          "rank": "champion",
+          "modifiers": 1
+        },
+        "cache": {
+          "kind": "iron",
+          "name": "The Cellar Shelf"
+        },
+        "quest": {
+          "id": "the_deed_and_the_debt",
+          "kind": "visit",
+          "to": "town",
+          "title": "The Deed and the Debt",
+          "found": "A deed, a tally of debts, and a name that is still owed money.",
+          "text": "Whoever holds this paper holds the field above it. Carry it to a town that keeps records.",
+          "reward": {
+            "gold": [
+              80,
+              180
+            ],
+            "xp": 80,
+            "loot": "magic"
+          }
+        }
+      },
+      "gives": {
+        "xp": 75,
+        "loot": "magic",
+        "gold": [
+          40,
+          120
+        ],
+        "clears": true
+      }
+    },
+    {
+      "id": "hushed_chapel",
+      "name": "Hushed Chapel",
+      "icon": "chapel",
+      "plan": "inst_hushed_chapel",
+      "arch": "pale",
+      "weight": 9,
+      "on": [
+        "landmark",
+        "road",
+        "junction"
+      ],
+      "biomes": [
+        "any"
+      ],
+      "minBand": 1,
+      "townGap": 280,
+      "discovery": "random",
+      "blurb": "Four walls, no roof, and a stair behind the altar going down further than the walls go up.",
+      "interior": {
+        "look": "crypt",
+        "rooms": [
+          5,
+          8
+        ],
+        "roomSize": [
+          9,
+          15
+        ],
+        "corridor": 3.0,
+        "cellSize": 6,
+        "wallHeight": 4.6,
+        "sconceEvery": 6,
+        "chestChance": 0.6,
+        "packs": [
+          1,
+          3
+        ],
+        "families": [
+          "undead"
+        ],
+        "overLevel": 1
+      },
+      "holds": {
+        "boss": {
+          "family": "undead",
+          "rank": "champion",
+          "modifiers": 2
+        },
+        "cache": {
+          "kind": "gilded",
+          "name": "Under the Third Slab"
+        },
+        "lore": {
+          "id": "chapel_names",
+          "title": "The Roll of Names",
+          "text": "Every name on the wall is crossed through but one, and that one is recent."
+        }
+      },
+      "gives": {
+        "xp": 130,
+        "loot": "rare",
+        "gold": [
+          70,
+          190
+        ],
+        "standing": "quiet_wake",
+        "clears": true
+      }
+    },
+    {
+      "id": "drowned_mill",
+      "name": "Drowned Mill",
+      "icon": "mill",
+      "plan": "inst_drowned_mill",
+      "arch": "timber",
+      "weight": 8,
+      "on": [
+        "river",
+        "crossing",
+        "wetland",
+        "road"
+      ],
+      "biomes": [
+        "river",
+        "wetland",
+        "farmland",
+        "grass",
+        "coast"
+      ],
+      "minBand": 1,
+      "townGap": 300,
+      "discovery": "both",
+      "blurb": "The wheel is off its axle and lying in the race. The undercroft below has water in it and always did.",
+      "interior": {
+        "look": "flooded",
+        "rooms": [
+          4,
+          7
+        ],
+        "roomSize": [
+          9,
+          14
+        ],
+        "corridor": 3.0,
+        "cellSize": 6,
+        "wallHeight": 4.2,
+        "sconceEvery": 8,
+        "chestChance": 0.6,
+        "packs": [
+          1,
+          3
+        ],
+        "families": [
+          "aberration",
+          "undead",
+          "beast"
+        ],
+        "overLevel": 1
+      },
+      "holds": {
+        "boss": {
+          "family": "aberration",
+          "rank": "champion",
+          "modifiers": 2
+        },
+        "cache": {
+          "kind": "gilded",
+          "name": "The Miller's Strongbox"
+        },
+        "quest": {
+          "id": "the_millers_share",
+          "kind": "visit",
+          "to": "town",
+          "title": "The Miller's Share",
+          "found": "A year of milling tallies, and a note about who stopped paying.",
+          "text": "The mill stopped because somebody stopped paying for it. Take the tallies back and somebody will want to know.",
+          "reward": {
+            "gold": [
+              90,
+              200
+            ],
+            "xp": 110,
+            "loot": "rare"
+          }
+        }
+      },
+      "gives": {
+        "xp": 120,
+        "loot": "rare",
+        "gold": [
+          70,
+          180
+        ],
+        "clears": true
+      }
+    },
+    {
+      "id": "hollowed_manor",
+      "name": "Hollowed Manor",
+      "icon": "manor",
+      "plan": "inst_ivory_manor",
+      "arch": "pale",
+      "weight": 6,
+      "on": [
+        "landmark",
+        "road",
+        "junction",
+        "grass"
+      ],
+      "biomes": [
+        "grass",
+        "farmland",
+        "forest",
+        "highland"
+      ],
+      "minBand": 2,
+      "townGap": 420,
+      "discovery": "random",
+      "blurb": "The gate still shuts. There is nothing behind it but floor, and a way down through the floor.",
+      "interior": {
+        "look": "ruin",
+        "rooms": [
+          6,
+          9
+        ],
+        "roomSize": [
+          10,
+          17
+        ],
+        "corridor": 3.4,
+        "cellSize": 6,
+        "wallHeight": 5.0,
+        "sconceEvery": 6,
+        "chestChance": 0.65,
+        "packs": [
+          2,
+          3
+        ],
+        "families": [
+          "humanoid",
+          "undead",
+          "construct"
+        ],
+        "overLevel": 2
+      },
+      "holds": {
+        "boss": {
+          "family": "humanoid",
+          "rank": "champion",
+          "modifiers": 2
+        },
+        "cache": {
+          "kind": "gilded",
+          "name": "The Long Gallery"
+        },
+        "prisoner": {
+          "count": 1,
+          "who": "a servant who never left",
+          "standing": "lantern_house"
+        }
+      },
+      "gives": {
+        "xp": 200,
+        "loot": "rare",
+        "gold": [
+          120,
+          300
+        ],
+        "standing": "lantern_house",
+        "perkPoint": 1,
+        "clears": true
+      }
+    },
+    {
+      "id": "spent_quarry",
+      "name": "Spent Quarry",
+      "icon": "quarry",
+      "plan": "inst_cut_quarry",
+      "arch": "timber",
+      "weight": 9,
+      "on": [
+        "landmark",
+        "highland",
+        "mountain",
+        "road"
+      ],
+      "biomes": [
+        "highland",
+        "mountain",
+        "scrub",
+        "grass"
+      ],
+      "minBand": 1,
+      "townGap": 300,
+      "discovery": "random",
+      "blurb": "They cut this face until they hit something they would rather not have cut into.",
+      "interior": {
+        "look": "crypt",
+        "rooms": [
+          5,
+          8
+        ],
+        "roomSize": [
+          10,
+          16
+        ],
+        "corridor": 3.2,
+        "cellSize": 6,
+        "wallHeight": 4.8,
+        "sconceEvery": 7,
+        "chestChance": 0.6,
+        "packs": [
+          1,
+          3
+        ],
+        "families": [
+          "construct",
+          "elemental",
+          "humanoid"
+        ],
+        "overLevel": 1
+      },
+      "holds": {
+        "boss": {
+          "family": "construct",
+          "rank": "champion",
+          "modifiers": 2
+        },
+        "cache": {
+          "kind": "gilded",
+          "name": "The Overseer's Locker"
+        },
+        "lore": {
+          "id": "quarry_stop",
+          "title": "The Day They Stopped",
+          "text": "The tally of stone ends mid-week, and the tools are still where they were put down."
+        }
+      },
+      "gives": {
+        "xp": 140,
+        "loot": "rare",
+        "gold": [
+          80,
+          200
+        ],
+        "standing": "stonecount",
+        "clears": true
+      }
+    },
+    {
+      "id": "slumped_adit",
+      "name": "Slumped Adit",
+      "icon": "adit",
+      "plan": "inst_slumped_adit",
+      "arch": "timber",
+      "weight": 9,
+      "on": [
+        "landmark",
+        "mountain",
+        "highland",
+        "pass"
+      ],
+      "biomes": [
+        "mountain",
+        "highland",
+        "scrub"
+      ],
+      "minBand": 1,
+      "townGap": 260,
+      "discovery": "random",
+      "blurb": "A shaft head with the winding gear rotted where it stood, and the props still holding.",
+      "interior": {
+        "look": "cave",
+        "rooms": [
+          4,
+          7
+        ],
+        "roomSize": [
+          8,
+          14
+        ],
+        "corridor": 2.8,
+        "cellSize": 5,
+        "wallHeight": 4.0,
+        "sconceEvery": 8,
+        "chestChance": 0.7,
+        "packs": [
+          1,
+          3
+        ],
+        "families": [
+          "beast",
+          "construct",
+          "elemental"
+        ],
+        "overLevel": 1
+      },
+      "holds": {
+        "boss": {
+          "family": "elemental",
+          "rank": "champion",
+          "modifiers": 1
+        },
+        "cache": {
+          "kind": "iron",
+          "name": "The Deep Face"
+        },
+        "quest": {
+          "id": "the_shift_that_stayed",
+          "kind": "clear",
+          "to": "here",
+          "title": "The Shift That Stayed",
+          "found": "A shift board with eleven names still hung out.",
+          "text": "Eleven went down and the board says none came up. Go down far enough to hang the board yourself.",
+          "reward": {
+            "gold": [
+              80,
+              170
+            ],
+            "xp": 120,
+            "loot": "rare"
+          }
+        }
+      },
+      "gives": {
+        "xp": 120,
+        "loot": "magic",
+        "gold": [
+          60,
+          170
+        ],
+        "standing": "deepworn",
+        "clears": true
+      }
+    },
+    {
+      "id": "doorstone_barrow",
+      "name": "Doorstone Barrow",
+      "icon": "barrow",
+      "plan": "inst_kings_barrow",
+      "arch": "stone",
+      "weight": 8,
+      "on": [
+        "landmark",
+        "highland",
+        "grass"
+      ],
+      "biomes": [
+        "grass",
+        "highland",
+        "scrub",
+        "farmland"
+      ],
+      "minBand": 2,
+      "townGap": 340,
+      "discovery": "random",
+      "blurb": "A mound longer than a hall, and the stone that shut it is lying flat in the grass.",
+      "interior": {
+        "look": "barrow",
+        "rooms": [
+          5,
+          8
+        ],
+        "roomSize": [
+          10,
+          16
+        ],
+        "corridor": 3.2,
+        "cellSize": 6,
+        "wallHeight": 4.6,
+        "sconceEvery": 7,
+        "chestChance": 0.6,
+        "packs": [
+          2,
+          3
+        ],
+        "families": [
+          "undead"
+        ],
+        "overLevel": 2
+      },
+      "holds": {
+        "boss": {
+          "id": "the_long_dark",
+          "modifiers": 2
+        },
+        "cache": {
+          "kind": "gilded",
+          "name": "The Doorstone Hoard"
+        },
+        "lore": {
+          "id": "barrow_doorstone",
+          "title": "Which Way It Fell",
+          "text": "The doorstone fell outward. Nothing outside pushed it."
+        }
+      },
+      "gives": {
+        "xp": 240,
+        "loot": "rare",
+        "gold": [
+          140,
+          340
+        ],
+        "perkPoint": 1,
+        "clears": true
+      }
+    },
+    {
+      "id": "ash_tomb",
+      "name": "Ash Tomb",
+      "icon": "tomb",
+      "plan": "inst_ash_tomb",
+      "arch": "pale",
+      "weight": 7,
+      "on": [
+        "landmark",
+        "mountain",
+        "highland",
+        "pass"
+      ],
+      "biomes": [
+        "mountain",
+        "highland",
+        "scrub",
+        "desert"
+      ],
+      "minBand": 3,
+      "townGap": 380,
+      "discovery": "both",
+      "blurb": "A face cut flat into the rock, a door cut into the face, and a marker over the door taller than the door.",
+      "interior": {
+        "look": "crypt",
+        "rooms": [
+          6,
+          9
+        ],
+        "roomSize": [
+          10,
+          17
+        ],
+        "corridor": 3.2,
+        "cellSize": 6,
+        "wallHeight": 5.0,
+        "sconceEvery": 6,
+        "chestChance": 0.65,
+        "packs": [
+          2,
+          3
+        ],
+        "families": [
+          "undead",
+          "construct"
+        ],
+        "overLevel": 2
+      },
+      "holds": {
+        "boss": {
+          "family": "undead",
+          "rank": "boss",
+          "modifiers": 2
+        },
+        "cache": {
+          "kind": "warded",
+          "name": "The Sealed Niche"
+        },
+        "quest": {
+          "id": "the_wyrm_in_the_carving",
+          "kind": "visit",
+          "to": "instance:emberhold_lair",
+          "title": "The Wyrm in the Carving",
+          "found": "A carved wall showing where the thing on the ceiling went to sleep.",
+          "text": "The carving is a map, and the thing it maps is still where the carving says it is.",
+          "reward": {
+            "gold": [
+              200,
+              460
+            ],
+            "xp": 320,
+            "loot": "rare"
+          }
+        }
+      },
+      "gives": {
+        "xp": 300,
+        "loot": "rare",
+        "gold": [
+          160,
+          400
+        ],
+        "standing": "quiet_wake",
+        "clears": true,
+        "revealZone": true
+      }
+    },
+    {
+      "id": "black_cistern",
+      "name": "Black Cistern",
+      "icon": "cistern",
+      "plan": "inst_black_cistern",
+      "arch": "pale",
+      "weight": 7,
+      "on": [
+        "landmark",
+        "road",
+        "junction",
+        "crossing"
+      ],
+      "biomes": [
+        "grass",
+        "scrub",
+        "desert",
+        "farmland",
+        "highland"
+      ],
+      "minBand": 2,
+      "townGap": 320,
+      "discovery": "quest",
+      "blurb": "A squat tower over a hole, and the hole is full of water that has nowhere to go.",
+      "interior": {
+        "look": "flooded",
+        "rooms": [
+          5,
+          8
+        ],
+        "roomSize": [
+          10,
+          16
+        ],
+        "corridor": 3.2,
+        "cellSize": 6,
+        "wallHeight": 4.6,
+        "sconceEvery": 7,
+        "chestChance": 0.6,
+        "packs": [
+          1,
+          3
+        ],
+        "families": [
+          "aberration",
+          "elemental"
+        ],
+        "overLevel": 2
+      },
+      "holds": {
+        "boss": {
+          "family": "aberration",
+          "rank": "champion",
+          "modifiers": 2
+        },
+        "quest": {
+          "id": "the_rope_still_tied",
+          "kind": "clear",
+          "to": "here",
+          "title": "The Rope Still Tied",
+          "found": "A rope tied off at the lip, going down, still taking weight from something.",
+          "text": "Somebody in a town paid for this well to be sounded. The sounding line came back short and the man on it did not come back at all.",
+          "reward": {
+            "gold": [
+              140,
+              320
+            ],
+            "xp": 190,
+            "loot": "rare"
+          }
+        },
+        "prisoner": {
+          "count": 1,
+          "who": "a well-digger who went down on a rope",
+          "standing": "cutwater"
+        },
+        "cache": {
+          "kind": "gilded",
+          "name": "The Sump"
+        }
+      },
+      "gives": {
+        "xp": 210,
+        "loot": "rare",
+        "gold": [
+          120,
+          300
+        ],
+        "standing": "cutwater",
+        "clears": true
+      }
+    },
+    {
+      "id": "sealed_strongroom",
+      "name": "Sealed Strongroom",
+      "icon": "strongroom",
+      "plan": "inst_sealed_vault",
+      "arch": "pale",
+      "weight": 5,
+      "on": [
+        "landmark",
+        "pass",
+        "highland",
+        "dungeon"
+      ],
+      "biomes": [
+        "any"
+      ],
+      "minBand": 3,
+      "townGap": 420,
+      "discovery": "quest",
+      "blurb": "A door with no handle on this side and four markers around it telling you why.",
+      "interior": {
+        "look": "vault",
+        "rooms": [
+          4,
+          6
+        ],
+        "roomSize": [
+          12,
+          19
+        ],
+        "corridor": 3.6,
+        "cellSize": 7,
+        "wallHeight": 5.4,
+        "sconceEvery": 5,
+        "chestChance": 0.8,
+        "packs": [
+          2,
+          3
+        ],
+        "families": [
+          "construct",
+          "elemental",
+          "aberration"
+        ],
+        "overLevel": 3
+      },
+      "holds": {
+        "boss": {
+          "family": "construct",
+          "rank": "boss",
+          "modifiers": 3
+        },
+        "quest": {
+          "id": "no_handle_this_side",
+          "kind": "clear",
+          "to": "here",
+          "title": "No Handle This Side",
+          "found": "A key that fits nothing on this side of the door.",
+          "text": "Whoever holds the key was told the room is full. They were not told what is in it with the full.",
+          "reward": {
+            "gold": [
+              300,
+              700
+            ],
+            "xp": 420,
+            "loot": "legendary"
+          }
+        },
+        "cache": {
+          "kind": "warded",
+          "name": "The Strongroom Itself"
+        },
+        "lore": {
+          "id": "vault_warning",
+          "title": "Four Markers",
+          "text": "The markers face inward. They were not put up to keep people out."
+        }
+      },
+      "gives": {
+        "xp": 380,
+        "loot": "legendary",
+        "gold": [
+          240,
+          620
+        ],
+        "standing": "stonecount",
+        "perkPoint": 1,
+        "clears": true
+      }
+    },
+    {
+      "id": "tidewrack_hold",
+      "name": "Tidewrack Hold",
+      "icon": "smuggler",
+      "plan": "inst_tidewrack_hold",
+      "arch": "rough",
+      "weight": 8,
+      "on": [
+        "coast",
+        "landmark",
+        "crossing"
+      ],
+      "biomes": [
+        "coast",
+        "wetland",
+        "river",
+        "scrub"
+      ],
+      "minBand": 1,
+      "townGap": 300,
+      "discovery": "random",
+      "blurb": "A boat up the shingle where no boat should be, and behind it a crack in the cliff with a door in it.",
+      "interior": {
+        "look": "cave",
+        "rooms": [
+          4,
+          7
+        ],
+        "roomSize": [
+          9,
+          15
+        ],
+        "corridor": 3.0,
+        "cellSize": 6,
+        "wallHeight": 4.2,
+        "sconceEvery": 7,
+        "chestChance": 0.7,
+        "packs": [
+          1,
+          3
+        ],
+        "families": [
+          "humanoid",
+          "beast"
+        ],
+        "overLevel": 1
+      },
+      "holds": {
+        "boss": {
+          "family": "humanoid",
+          "rank": "champion",
+          "modifiers": 2
+        },
+        "cache": {
+          "kind": "gilded",
+          "name": "The Run They Never Made"
+        },
+        "prisoner": {
+          "count": 1,
+          "who": "a tidewaiter who asked the wrong boat a question",
+          "standing": "saltbound"
+        }
+      },
+      "gives": {
+        "xp": 150,
+        "loot": "rare",
+        "gold": [
+          110,
+          280
+        ],
+        "standing": "saltbound",
+        "clears": true
+      }
+    },
+    {
+      "id": "gnawed_warren",
+      "name": "Gnawed Warren",
+      "icon": "warren",
+      "plan": "inst_gnawed_warren",
+      "arch": "rough",
+      "weight": 10,
+      "on": [
+        "landmark",
+        "forest",
+        "wetland",
+        "grass",
+        "highland"
+      ],
+      "biomes": [
+        "forest",
+        "wetland",
+        "grass",
+        "scrub",
+        "highland",
+        "tundra"
+      ],
+      "minBand": 1,
+      "townGap": 240,
+      "discovery": "random",
+      "blurb": "Two mouths in one bank, and a path worn between them that nothing with two legs wore.",
+      "interior": {
+        "look": "warren",
+        "rooms": [
+          5,
+          8
+        ],
+        "roomSize": [
+          8,
+          13
+        ],
+        "corridor": 2.6,
+        "cellSize": 5,
+        "wallHeight": 3.6,
+        "sconceEvery": 99,
+        "chestChance": 0.5,
+        "packs": [
+          2,
+          4
+        ],
+        "families": [
+          "beast"
+        ],
+        "overLevel": 1
+      },
+      "holds": {
+        "boss": {
+          "family": "beast",
+          "rank": "boss",
+          "modifiers": 2
+        },
+        "cache": {
+          "kind": "iron",
+          "name": "The Feeding Floor"
+        },
+        "quest": {
+          "id": "cull_the_litter",
+          "kind": "clear",
+          "to": "here",
+          "title": "Cull the Litter",
+          "found": "A collar, a harness and a bit of a saddle, all from different animals.",
+          "text": "It is not one animal, it is a litter, and a litter does not stop. Take the whole warren.",
+          "reward": {
+            "gold": [
+              90,
+              210
+            ],
+            "xp": 150,
+            "loot": "rare"
+          }
+        }
+      },
+      "gives": {
+        "xp": 160,
+        "loot": "rare",
+        "gold": [
+          70,
+          190
+        ],
+        "standing": "greenhand",
+        "clears": true
+      }
+    },
+    {
+      "id": "pale_undercroft",
+      "name": "Pale Undercroft",
+      "icon": "undercroft",
+      "plan": "inst_pale_undercroft",
+      "arch": "timber",
+      "weight": 6,
+      "on": [
+        "landmark",
+        "forest",
+        "highland",
+        "junction"
+      ],
+      "biomes": [
+        "forest",
+        "highland",
+        "grass",
+        "wetland"
+      ],
+      "minBand": 3,
+      "townGap": 400,
+      "discovery": "quest",
+      "blurb": "The hall above burned to its footings. The stair down from it did not, and somebody has been using it.",
+      "interior": {
+        "look": "vault",
+        "rooms": [
+          5,
+          8
+        ],
+        "roomSize": [
+          10,
+          17
+        ],
+        "corridor": 3.2,
+        "cellSize": 6,
+        "wallHeight": 5.0,
+        "sconceEvery": 6,
+        "chestChance": 0.65,
+        "packs": [
+          2,
+          3
+        ],
+        "families": [
+          "humanoid",
+          "fiend",
+          "undead"
+        ],
+        "overLevel": 3
+      },
+      "holds": {
+        "boss": {
+          "id": "ashen_choir",
+          "modifiers": 3
+        },
+        "quest": {
+          "id": "the_date_that_has_not_come",
+          "kind": "clear",
+          "to": "here",
+          "title": "The Date That Has Not Come",
+          "found": "A calendar with one day ringed, and it is not far off.",
+          "text": "They are keeping people for something, and the something has a date on it. Be early.",
+          "reward": {
+            "gold": [
+              260,
+              600
+            ],
+            "xp": 400,
+            "loot": "legendary"
+          }
+        },
+        "prisoner": {
+          "count": 2,
+          "who": "people kept for a date that has not come yet",
+          "standing": "hollowed"
+        },
+        "cache": {
+          "kind": "warded",
+          "name": "The Vestry Below"
+        }
+      },
+      "gives": {
+        "xp": 340,
+        "loot": "legendary",
+        "gold": [
+          200,
+          520
+        ],
+        "standing": "hollowed",
+        "perkPoint": 1,
+        "clears": true
+      }
+    },
+    {
+      "id": "rimeward_deep",
+      "name": "Rimeward Deep",
+      "icon": "deepfrost",
+      "plan": "inst_rimeward_deep",
+      "arch": "rough",
+      "weight": 6,
+      "on": [
+        "landmark",
+        "mountain",
+        "highland",
+        "pass"
+      ],
+      "biomes": [
+        "ice",
+        "tundra",
+        "mountain",
+        "highland",
+        "snowyPeaks"
+      ],
+      "minBand": 3,
+      "townGap": 340,
+      "discovery": "random",
+      "blurb": "A crack in the ice with warm air coming out of it, which is the wrong way round.",
+      "interior": {
+        "look": "rime",
+        "rooms": [
+          5,
+          8
+        ],
+        "roomSize": [
+          10,
+          17
+        ],
+        "corridor": 3.2,
+        "cellSize": 6,
+        "wallHeight": 5.0,
+        "sconceEvery": 7,
+        "chestChance": 0.65,
+        "packs": [
+          2,
+          3
+        ],
+        "families": [
+          "elemental",
+          "aberration",
+          "beast"
+        ],
+        "overLevel": 2
+      },
+      "holds": {
+        "boss": {
+          "family": "elemental",
+          "rank": "boss",
+          "modifiers": 2
+        },
+        "cache": {
+          "kind": "warded",
+          "name": "What the Thaw Uncovered"
+        },
+        "lore": {
+          "id": "rime_warm",
+          "title": "The Wrong Way Round",
+          "text": "Warm air comes up and cold air goes down. Something down there is burning."
+        }
+      },
+      "gives": {
+        "xp": 320,
+        "loot": "legendary",
+        "gold": [
+          180,
+          460
+        ],
+        "perkPoint": 1,
+        "clears": true,
+        "revealZone": true
+      }
+    },
+    {
+      "id": "the_slagworks",
+      "name": "The Slagworks",
+      "icon": "slagworks",
+      "plan": "inst_slagworks",
+      "arch": "timber",
+      "weight": 6,
+      "on": [
+        "landmark",
+        "road",
+        "highland",
+        "mountain"
+      ],
+      "biomes": [
+        "volcanic",
+        "ashPlain",
+        "highland",
+        "mountain",
+        "scrub",
+        "badlands"
+      ],
+      "minBand": 4,
+      "townGap": 420,
+      "discovery": "random",
+      "blurb": "It burned down, and then it kept burning, and it is burning now.",
+      "interior": {
+        "look": "cinderworks",
+        "rooms": [
+          6,
+          9
+        ],
+        "roomSize": [
+          11,
+          18
+        ],
+        "corridor": 3.4,
+        "cellSize": 7,
+        "wallHeight": 5.2,
+        "sconceEvery": 5,
+        "chestChance": 0.7,
+        "packs": [
+          2,
+          4
+        ],
+        "families": [
+          "elemental",
+          "construct",
+          "fiend"
+        ],
+        "overLevel": 3
+      },
+      "holds": {
+        "boss": {
+          "family": "elemental",
+          "rank": "boss",
+          "modifiers": 3
+        },
+        "cache": {
+          "kind": "warded",
+          "name": "The Tap Floor"
+        },
+        "quest": {
+          "id": "bank_the_furnace",
+          "kind": "clear",
+          "to": "here",
+          "title": "Bank the Furnace",
+          "found": "A works ledger, and an order to bank the furnace that nobody carried out.",
+          "text": "Nobody banked it and nobody has since. Kill whatever is keeping it lit.",
+          "reward": {
+            "gold": [
+              240,
+              560
+            ],
+            "xp": 380,
+            "loot": "legendary"
+          }
+        }
+      },
+      "gives": {
+        "xp": 400,
+        "loot": "legendary",
+        "gold": [
+          240,
+          600
+        ],
+        "standing": "emberwrights",
+        "perkPoint": 1,
+        "clears": true
+      }
+    },
+    {
+      "id": "windward_gaol",
+      "name": "Windward Gaol",
+      "icon": "gaol",
+      "plan": "inst_windward_gaol",
+      "arch": "stone",
+      "weight": 5,
+      "on": [
+        "landmark",
+        "coast",
+        "highland",
+        "pass"
+      ],
+      "biomes": [
+        "coast",
+        "highland",
+        "mountain",
+        "scrub",
+        "tundra"
+      ],
+      "minBand": 4,
+      "townGap": 440,
+      "discovery": "quest",
+      "blurb": "Cells out in the open air, a tower to watch them from, and nobody watching.",
+      "interior": {
+        "look": "ruin",
+        "rooms": [
+          6,
+          10
+        ],
+        "roomSize": [
+          10,
+          17
+        ],
+        "corridor": 3.2,
+        "cellSize": 6,
+        "wallHeight": 5.0,
+        "sconceEvery": 6,
+        "chestChance": 0.6,
+        "packs": [
+          2,
+          4
+        ],
+        "families": [
+          "humanoid",
+          "undead",
+          "fiend"
+        ],
+        "overLevel": 3
+      },
+      "holds": {
+        "boss": {
+          "family": "humanoid",
+          "rank": "boss",
+          "modifiers": 3
+        },
+        "quest": {
+          "id": "nobody_came_back_for_them",
+          "kind": "clear",
+          "to": "here",
+          "title": "Nobody Came Back For Them",
+          "found": "A roll of names signed off daily for eleven years, then never again.",
+          "text": "The gaol was abandoned with people still in the cells. Take the place and open every door.",
+          "reward": {
+            "gold": [
+              320,
+              760
+            ],
+            "xp": 460,
+            "loot": "legendary"
+          }
+        },
+        "prisoner": {
+          "count": 3,
+          "who": "people nobody came back for",
+          "standing": "wardens_reach"
+        },
+        "cache": {
+          "kind": "warded",
+          "name": "The Gaoler's Room"
+        },
+        "lore": {
+          "id": "gaol_roll",
+          "title": "The Last Roll",
+          "text": "The roll is signed off every day for eleven years and then not at all."
+        }
+      },
+      "gives": {
+        "xp": 420,
+        "loot": "legendary",
+        "gold": [
+          260,
+          640
+        ],
+        "standing": "wardens_reach",
+        "perkPoint": 1,
+        "clears": true,
+        "revealZone": true
+      }
+    },
+    {
+      "id": "emberhold_lair",
+      "name": "Emberhold Lair",
+      "icon": "wyrm",
+      "plan": "inst_emberhold_lair",
+      "arch": "rough",
+      "weight": 2,
+      "on": [
+        "landmark",
+        "mountain",
+        "pass",
+        "highland",
+        "dungeon"
+      ],
+      "biomes": [
+        "mountain",
+        "highland",
+        "volcanic",
+        "ashPlain",
+        "badlands",
+        "snowyPeaks"
+      ],
+      "minBand": 6,
+      "townGap": 900,
+      "discovery": "both",
+      "dragon": true,
+      "blurb": "A mouth in the mountain you could drive a wagon into, bones out front in a ring, and the rock warm under your hand.",
+      "interior": {
+        "look": "hoard",
+        "rooms": [
+          3,
+          4
+        ],
+        "roomSize": [
+          26,
+          36
+        ],
+        "corridor": 6.5,
+        "cellSize": 9,
+        "wallHeight": 9.5,
+        "sconceEvery": 4,
+        "chestChance": 1.0,
+        "packs": [
+          2,
+          3
+        ],
+        "families": [
+          "dragonkin",
+          "elemental"
+        ],
+        "overLevel": 4
+      },
+      "holds": {
+        "boss": {
+          "id": "kirrath_cinderwyrm",
+          "modifiers": 3
+        },
+        "cache": {
+          "kind": "warded",
+          "name": "The Emberhold Hoard",
+          "room": "boss",
+          "extra": 2
+        },
+        "quest": {
+          "id": "the_thing_on_the_ceiling",
+          "kind": "clear",
+          "to": "here",
+          "title": "The Thing on the Ceiling",
+          "found": "It is not on the floor. Look up.",
+          "text": "Whatever a town paid you to see, this is the thing itself. There is no part of this that is a rumour.",
+          "reward": {
+            "gold": [
+              900,
+              1800
+            ],
+            "xp": 1400,
+            "loot": "legendary"
+          }
+        },
+        "lore": {
+          "id": "hoard_count",
+          "title": "What It Counts",
+          "text": "The coin is stacked. Something down here can count, and knows exactly how much there is."
+        }
+      },
+      "gives": {
+        "xp": 1600,
+        "loot": "legendary",
+        "gold": [
+          900,
+          2200
+        ],
+        "standing": "emberwrights",
+        "perkPoint": 2,
+        "clears": true,
+        "revealZone": true
+      }
+    }
+  ]
+}

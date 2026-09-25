@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "note": "Attack pacing. The first wave comes when EITHER the grace timer runs out OR the threat score crosses firstThreatThreshold - whichever happens first, so a quiet base still eventually gets visitors and a smoky one gets them early. Threat is earned per second by anything that pollutes or makes noise, decays on its own, and is also raised by every nest left standing.",
+  "grace": { "easy": 1200, "normal": 720, "hard": 420 },
+  "firstThreatThreshold": { "easy": 700, "normal": 420, "hard": 260 },
+  "interval": { "base": 420, "min": 180, "shrinkPerWave": 8, "jitter": 0.18 },
+  "threat": {
+    "decayPerSecond": 0.5,
+    "perPollutionUnit": 1.0,
+    "perNoiseUnit": 0.6,
+    "perNestPerSecond": 0.06,
+    "drillNoise": 0.08,
+    "turretFireNoise": 0.02,
+    "rocketLaunch": 220,
+    "nestKilled": -90,
+    "waveCleared": -60
+  },
+  "budget": {
+    "base": 4,
+    "growth": 1.22,
+    "threatShare": 0.005,
+    "difficulty": { "easy": 0.7, "normal": 1.0, "hard": 1.45 },
+    "cap": 900
+  },
+  "escalation": {
+    "note": "Every fifth wave is a push: budget x1.6 and it comes from two edges at once. Every tenth adds a boss if the table allows one.",
+    "surgeEvery": 5, "surgeMultiplier": 1.6, "surgeFronts": 2,
+    "bossEvery": 10,
+    "armorPerWave": 0.12,
+    "hpPerWave": 0.05,
+    "speedPerWave": 0.01
+  },
+  "spawning": {
+    "edgeMargin": 2,
+    "note": "Waves pick the map edge nearest the noisiest cluster of your structures, then walk the cheapest path in. Nests on the map spawn their own attacks independently of the wave clock.",
+    "fromNestsChance": 0.3,
+    "clusterRadius": 14
+  },
+  "targeting": {
+    "note": "Each enemy scores every structure it can reach: closeness, its own targetPref, and how weakly defended the approach is. Walls are attacked only when they block the cheapest path.",
+    "weights": { "distance": -1.0, "prefMatch": 40, "turretCoverage": -6, "wallOnPath": -2, "hqBonus": 12 },
+    "repathEvery": 8,
+    "wallBreakPatience": 12
+  },
+  "rewards": { "researchPerThreatKilled": 0.4, "salvagePerKill": { "iron_ore": 1 } },
+  "hazardWaves": {
+    "note": "Planet hazards can also trigger an attack: a storm brings storm wraiths on a shattered world, an ash fall brings ash stalkers on a volcanic one.",
+    "stormSpawnChance": 0.35, "stormBudgetShare": 0.5
+  }
+}

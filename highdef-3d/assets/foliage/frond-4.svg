@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- Frond 4: broad fern with rounded leaflets, more widely spaced than
+       frond 1 so daylight shows through, tips going a little rusty. -->
+  <defs>
+    <linearGradient id="pl" x1="0" y1="1" x2="0.2" y2="0">
+      <stop offset="0" stop-color="#4f6b40"/>
+      <stop offset="1" stop-color="#7f965a"/>
+    </linearGradient>
+    <linearGradient id="pr" x1="0" y1="1" x2="-0.2" y2="0">
+      <stop offset="0" stop-color="#47623b"/>
+      <stop offset="1" stop-color="#748c53"/>
+    </linearGradient>
+    <linearGradient id="rust" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#6d6e3e"/>
+      <stop offset="1" stop-color="#9c8a4d"/>
+    </linearGradient>
+    <path id="p" d="M0,0 C5,-2 8,-6 7,-10 C10,-12 10,-17 8,-20 C10,-23 9,-28 6,-31 C6,-35 3,-38 0,-40 C-3,-38 -6,-35 -6,-31 C-9,-28 -10,-23 -8,-20 C-10,-17 -10,-12 -7,-10 C-8,-6 -5,-2 0,0 Z"/>
+    <path id="pv" d="M0,-1 L0,-38 M0,-10 L5,-13 M0,-10 L-5,-13 M0,-20 L5,-23 M0,-20 L-5,-23 M0,-30 L3,-33 M0,-30 L-3,-33"/>
+    <g id="pair">
+      <g transform="rotate(-72)">
+        <use href="#p" fill="url(#pl)" stroke="#354b2d" stroke-width="0.6" stroke-linejoin="round"/>
+        <use href="#pv" fill="none" stroke="#405836" stroke-width="0.8" opacity="0.8"/>
+      </g>
+      <g transform="rotate(72)">
+        <use href="#p" fill="url(#pr)" stroke="#354b2d" stroke-width="0.6" stroke-linejoin="round"/>
+        <use href="#pv" fill="none" stroke="#405836" stroke-width="0.8" opacity="0.8"/>
+      </g>
+    </g>
+    <g id="pairr">
+      <g transform="rotate(-72)">
+        <use href="#p" fill="url(#rust)" stroke="#4a4a2b" stroke-width="0.6" stroke-linejoin="round"/>
+        <use href="#pv" fill="none" stroke="#5e5b33" stroke-width="0.8" opacity="0.8"/>
+      </g>
+      <g transform="rotate(72)">
+        <use href="#p" fill="url(#rust)" stroke="#4a4a2b" stroke-width="0.6" stroke-linejoin="round"/>
+        <use href="#pv" fill="none" stroke="#5e5b33" stroke-width="0.8" opacity="0.8"/>
+      </g>
+    </g>
+  </defs>
+
+  <path d="M130,252 C134,200 126,120 120,28 C119,18 114,12 110,14" fill="none" stroke="#5d583a" stroke-width="3.4" stroke-linecap="round"/>
+  <path d="M130,252 C134,200 126,120 120,28" fill="none" stroke="#8b8656" stroke-width="1" stroke-linecap="round" opacity="0.5"/>
+
+  <use href="#pair" transform="translate(132 232) rotate(4) scale(0.8)"/>
+  <use href="#pair" transform="translate(133 206) rotate(2) scale(1.05)"/>
+  <use href="#pair" transform="translate(132 180) rotate(-1) scale(1.2)"/>
+  <use href="#pair" transform="translate(130 154) rotate(-3) scale(1.24)"/>
+  <use href="#pair" transform="translate(128 128) rotate(-4) scale(1.15)"/>
+  <use href="#pair" transform="translate(126 102) rotate(-5) scale(1.0)"/>
+  <use href="#pairr" transform="translate(124 78) rotate(-6) scale(0.82)"/>
+  <use href="#pairr" transform="translate(122 58) rotate(-7) scale(0.64)"/>
+  <use href="#pairr" transform="translate(121 42) rotate(-9) scale(0.46)"/>
+  <use href="#pairr" transform="translate(119 30) rotate(-30) scale(0.3)"/>
+</svg>

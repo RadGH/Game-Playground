@@ -1,0 +1,310 @@
+{
+ "entities": [
+  {
+   "classDefault": "cleric",
+   "gender": "female",
+   "id": "cleric_priestess",
+   "name": "Cleric (Priestess)",
+   "npc": true,
+   "playable": false,
+   "sprite": "cleric_priestess",
+   "tags": [
+    "robes",
+    "holy",
+    "female",
+    "npc"
+   ]
+  },
+  {
+   "classDefault": "silas_veilward",
+   "gender": "male",
+   "id": "silas_veilward",
+   "name": "Silas Veilward",
+   "npc": true,
+   "playable": false,
+   "sprite": "silas_veilward",
+   "tags": [
+    "npc",
+    "mentor"
+   ]
+  },
+  {
+   "classDefault": "kaela_thorne",
+   "gender": "female",
+   "id": "kaela_thorne",
+   "name": "Kaela Thorne",
+   "npc": true,
+   "playable": false,
+   "sprite": "kaela_thorne",
+   "tags": [
+    "npc",
+    "rival"
+   ]
+  },
+  {
+   "classDefault": "marek_greel",
+   "gender": "male",
+   "id": "marek_greel",
+   "name": "Marek Greel",
+   "npc": true,
+   "playable": false,
+   "sprite": "marek_greel",
+   "tags": [
+    "npc",
+    "villain"
+   ]
+  },
+  {
+   "classDefault": "mira_seer",
+   "gender": "female",
+   "id": "mira_seer",
+   "name": "Mira the Seer",
+   "npc": true,
+   "playable": false,
+   "sprite": "mira_seer",
+   "tags": [
+    "npc",
+    "oracle"
+   ]
+  },
+  {
+   "classDefault": "iris_vael",
+   "gender": "female",
+   "id": "iris_vael",
+   "name": "Iris Vael",
+   "npc": true,
+   "playable": false,
+   "sprite": "iris_vael",
+   "tags": [
+    "npc",
+    "scholar",
+    "recurring"
+   ]
+  },
+  {
+   "classDefault": "garrick_ostmere",
+   "gender": "male",
+   "id": "garrick_ostmere",
+   "name": "Sir Garrick Ostmere",
+   "npc": true,
+   "playable": false,
+   "sprite": "garrick_ostmere",
+   "tags": [
+    "npc",
+    "knight",
+    "recurring"
+   ]
+  },
+  {
+   "classDefault": "mother_yssira",
+   "gender": "female",
+   "id": "mother_yssira",
+   "name": "Mother Yssira",
+   "npc": true,
+   "playable": false,
+   "sprite": "mother_yssira",
+   "tags": [
+    "npc",
+    "seer",
+    "recurring"
+   ]
+  },
+  {
+   "classDefault": "tomek_halverin",
+   "gender": "male",
+   "id": "tomek_halverin",
+   "name": "Tomek Halverin",
+   "npc": true,
+   "playable": false,
+   "sprite": "tomek_halverin",
+   "tags": [
+    "npc",
+    "merchant",
+    "recurring"
+   ]
+  },
+  {
+   "classDefault": "krix_bonechewer",
+   "gender": "male",
+   "id": "krix_bonechewer",
+   "name": "Krix Bonechewer",
+   "npc": true,
+   "playable": false,
+   "sprite": "krix_bonechewer",
+   "tags": [
+    "npc",
+    "defector",
+    "recurring"
+   ]
+  },
+  {
+   "classDefault": "fighter",
+   "gender": "male",
+   "id": "halden_man_at_arms",
+   "name": "Halden",
+   "npc": true,
+   "playable": false,
+   "sprite": "halden_man_at_arms",
+   "tags": [
+    "npc",
+    "recruitable",
+    "fighter"
+   ]
+  },
+  {
+   "classDefault": "cleric",
+   "gender": "female",
+   "id": "sister_veya",
+   "name": "Sister Veya",
+   "npc": true,
+   "playable": false,
+   "sprite": "sister_veya",
+   "tags": [
+    "npc",
+    "recruitable",
+    "healer"
+   ]
+  },
+  {
+   "classDefault": "paladin",
+   "gender": "male",
+   "id": "bulwark_dorn",
+   "name": "Bulwark Dorn",
+   "npc": true,
+   "playable": false,
+   "sprite": "bulwark_dorn",
+   "tags": [
+    "npc",
+    "recruitable",
+    "tank"
+   ]
+  },
+  {
+   "classDefault": "ranger",
+   "gender": "female",
+   "id": "kessa_quill",
+   "name": "Kessa Quill",
+   "npc": true,
+   "playable": false,
+   "sprite": "kessa_quill",
+   "tags": [
+    "npc",
+    "recruitable",
+    "ranged"
+   ]
+  },
+  {
+   "classDefault": "mage",
+   "gender": "male",
+   "id": "magnus_orre",
+   "name": "Magnus Orre",
+   "npc": true,
+   "playable": false,
+   "sprite": "magnus_orre",
+   "tags": [
+    "npc",
+    "recruitable",
+    "caster"
+   ]
+  },
+  {
+   "classDefault": "giant_spider",
+   "gender": "none",
+   "id": "giant_spider",
+   "name": "Giant Spider",
+   "npc": true,
+   "playable": false,
+   "sprite": "giant_spider",
+   "tags": [
+    "enemy",
+    "beast"
+   ]
+  },
+  {
+   "classDefault": "the_unraveler",
+   "gender": "none",
+   "id": "the_unraveler",
+   "name": "The Unraveler",
+   "npc": true,
+   "playable": false,
+   "sprite": "the_unraveler",
+   "tags": [
+    "enemy",
+    "boss",
+    "void"
+   ]
+  },
+  {
+   "classDefault": "dragon_king",
+   "gender": "none",
+   "id": "dragon_king",
+   "name": "Dragon King",
+   "npc": true,
+   "playable": false,
+   "sprite": "dragon_king",
+   "tags": [
+    "enemy",
+    "boss",
+    "dragon"
+   ]
+  },
+  {
+   "classDefault": "vault_guardian",
+   "gender": "none",
+   "id": "vault_guardian",
+   "name": "Vault Guardian",
+   "npc": true,
+   "playable": false,
+   "sprite": "vault_guardian",
+   "tags": [
+    "enemy",
+    "boss",
+    "construct"
+   ]
+  },
+  {
+   "classDefault": "void_scholar",
+   "gender": "none",
+   "id": "void_scholar",
+   "name": "Void Scholar",
+   "npc": true,
+   "playable": false,
+   "sprite": "void_scholar",
+   "tags": [
+    "enemy",
+    "boss",
+    "void"
+   ]
+  },
+  {
+   "classDefault": "echo_sovereign",
+   "gender": "none",
+   "id": "echo_sovereign",
+   "name": "Echo Sovereign",
+   "npc": true,
+   "playable": false,
+   "sprite": "echo_sovereign",
+   "tags": [
+    "enemy",
+    "boss",
+    "hidden"
+   ]
+  },
+  {
+   "classDefault": "the_first_ember",
+   "gender": "none",
+   "id": "the_first_ember",
+   "name": "The First Ember",
+   "npc": true,
+   "playable": false,
+   "sprite": "the_first_ember",
+   "tags": [
+    "enemy",
+    "boss",
+    "fire"
+   ]
+  }
+ ],
+ "source": "appearances.js APPEARANCES (playable === false)",
+ "version": 1
+}

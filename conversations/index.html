@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Conversations</title>
+<link rel="stylesheet" href="../shared/style.css">
+<style>.layout.two{display:grid;grid-template-columns:1fr 1.3fr;gap:12px;padding:12px}@media(max-width:900px){.layout.two{grid-template-columns:1fr}}.conv p{margin:4px 0;padding-left:8px;border-left:3px solid #e08a2a}.conv p.b{border-color:#7fb2e0}.conv p.c{border-color:#7fc37f}.conv .topic{color:#999;font-size:12px;margin-top:10px}.facts label{display:block;font-size:13px;margin:2px 0}.elig span{display:inline-block;margin:2px;padding:2px 6px;border:1px solid #444;border-radius:6px;font-size:11px}.elig span.on{border-color:#7fc37f;color:#7fc37f}</style>
+</head>
+<body>
+<div class="topbar"><a href="../" class="muted">← Playground</a><h1>Conversations</h1><span class="muted small">Topics with roles and requirements over memories, gear, kill counts and party facts. Toggle facts to see which topics unlock.</span><span class="spacer"></span><span id="status" class="small muted">loading…</span></div>
+<div class="layout two">
+  <div class="panel facts"><h3>Facts (simulated party: Brannoc, Wren, Edric)</h3>
+    <label><input type="checkbox" id="f-combat" checked> Wren remembers a fight (3 goblin scouts at Thornwood, unhurt)</label>
+    <label><input type="checkbox" id="f-wounded"> Brannoc was bloodied / went down</label>
+    <label><input type="checkbox" id="f-kills" checked> Brannoc's Sharp Longsword has 4 kills (meter)</label>
+    <label><input type="checkbox" id="f-better" checked> Brannoc's new sword scores +12 over the Iron Sword it replaced</label>
+    <label><input type="checkbox" id="f-worse"> Wren's Rusty Bow scores −6 vs her old Longbow</label>
+    <label><input type="checkbox" id="f-bag" checked> Edric found a Copper Ring 3 days ago and never equipped it</label>
+    <label><input type="checkbox" id="f-loot"> Loot memory: an orb found at the Ember Plateau yesterday</label>
+    <label><input type="checkbox" id="f-level"> Edric reached level 4 yesterday</label>
+    <label><input type="checkbox" id="f-travel" checked> Travelled the Border Roads today</label>
+    <label>Rations <input id="f-rations" type="number" value="1" style="width:60px"> · exhaustion <input id="f-exh" type="number" value="0" style="width:50px"> · act <input id="f-act" type="number" value="2" style="width:50px"></label>
+    <label><input type="checkbox" id="f-vehicle"> Vehicle: wagon</label>
+    <label><input type="checkbox" id="f-companion"> Companion: war dog</label>
+    <label><input type="checkbox" id="f-boss"> Next boss known: the Veil Wardens</label>
+    <label><input type="checkbox" id="f-rel"> Relations: Wren likes Brannoc (+0.5), Edric resents him (−0.4)</label>
+    <label><input type="checkbox" id="f-night"> Last night the camp was attacked</label>
+    <div class="row"><button id="btn-talk" class="primary">Talk</button><button id="btn-talk5" class="small">Five conversations</button></div>
+    <h3>Eligible topics</h3><div id="elig" class="elig"></div>
+    <h3>How to embed</h3><pre class="small" style="white-space:pre-wrap">import { Conversations, factsFrom } from './conversations/js/conversations.js';
+const conv = new Conversations({ lingo, topics });
+const facts = factsFrom({ now, day, banks, heroes, meter, lootLog, party, relations });
+const lines = conv.talk(speakers, facts, { scene, tags: ['camp'] }); // [{ speaker, listener, text, speech, topic }]</pre></div>
+  <div class="panel"><h3>Around the fire</h3><div id="conv" class="conv"></div></div>
+</div>
+<script type="module">
+import { Lingo, Speaker } from '../lingo/js/lingo.js'; import { MemoryBank } from '../lingo/js/memory.js'; import { RelationGraph } from '../lingo/js/relations.js'; import { Meter } from '../meters/js/meter.js'; import { Conversations, factsFrom } from './js/conversations.js';
+const j = async p => (await fetch(p)).json(); const [lex, gram, traits, pack, events, rel, topics] = await Promise.all([j('../lingo/data/lexicon.json'), j('../lingo/data/grammar.json'), j('../lingo/data/traits.json'), j('../lingo/data/packs/emberveil.json'), j('../lingo/data/events.json'), j('../lingo/data/relations.json'), j('data/topics.json')]);
+const lingo = new Lingo({ lexicon: lex, grammar: gram, traits }); for (const e of pack.entries) lingo.lexicon.add(e); lingo.invalidatePronunciations();
+const mk = (id, name, tr) => new Speaker({ id, name, lexicon: lingo.lexicon, speech: { traits: tr } }); const sp = [mk('a', 'Brannoc', ['gruff', 'brave']), mk('b', 'Wren', ['shy', 'kind']), mk('c', 'Edric', ['scholar', 'pompous', 'jolly'])];
+const conv = new Conversations({ lingo, topics }); const $ = id => document.getElementById(id); const on = id => $(id).checked;
+function facts() {
+  const now = 48, day = 4; const banks = {}; const bank = id => banks[id] ||= new MemoryBank({ ownerId: id, eventTypes: events.types, lexicon: lingo.lexicon });
+  if (on('f-combat')) bank('b').remember({ type: 'combat', time: 40, participants: ['b', 'a', 'c'], bindings: { foe: { id: 'goblin_scout', count: 3 }, place: { id: 'thornwood' } }, details: { outcome: 'won', wounded: false, night: on('f-night') } });
+  if (on('f-wounded')) { bank('a').remember({ type: 'combat', time: 40, participants: ['a'], bindings: { foe: { id: 'corrupted_wolf', count: 2 }, place: { id: 'thornwood' } }, details: { outcome: 'won', wounded: true } }); bank('a').remember({ type: 'wounded', time: 41, participants: ['a'], bindings: { foe: { id: 'corrupted_wolf', count: 1 }, place: { id: 'thornwood' } }, details: { down: true } }); }
+  if (on('f-loot')) bank('c').remember({ type: 'loot', time: 30, participants: ['a', 'b', 'c'], bindings: { item: { id: 'orb' }, place: { id: 'ember_plateau' } }, details: { worth: 'more than it looked' } });
+  if (on('f-level')) bank('c').remember({ type: 'levelup', time: 30, participants: ['c'], bindings: {}, details: { level: 4 } });
+  if (on('f-travel')) for (const id of ['a', 'b', 'c']) bank(id).remember({ type: 'travel', time: 44, participants: ['a', 'b', 'c'], bindings: { place: { id: 'border_roads' } }, details: {} });
+  const meter = new Meter(); meter.startFight('x'); if (on('f-kills')) for (let i = 0; i < 4; i++) meter.record({ t: i, source: 'a', sourceName: 'Brannoc', target: 'g', targetName: 'Goblin', kind: 'damage', amount: 12, via: 'attack', viaName: 'Sharp Longsword', itemId: 'w1', killingBlow: true }); meter.record({ t: 5, source: 'b', sourceName: 'Wren', target: 'g', targetName: 'Goblin', kind: 'damage', amount: 9, via: 'attack', viaName: 'Rusty Bow', itemId: 'w2' }); meter.record({ t: 6, source: 'c', sourceName: 'Edric', target: 'a', targetName: 'Brannoc', kind: 'heal', amount: 25, via: 'skill:heal', viaName: 'Mend' }); meter.endFight();
+  const heroes = [{ id: 'a', equipment: { weapon: { id: 'w1', name: 'Sharp Longsword', baseKey: 'longsword', rarity: 'magic' } } }, { id: 'b', equipment: { weapon: { id: 'w2', name: 'Rusty Bow', baseKey: 'shortbow' } } }, { id: 'c', equipment: {} }];
+  const lootLog = []; if (on('f-better')) lootLog.push({ itemId: 'w1', item: heroes[0].equipment.weapon, holder: 'a', day: 3, delta: 12, replaced: 'Iron Sword', equipped: true }); if (on('f-worse')) lootLog.push({ itemId: 'w2', item: heroes[1].equipment.weapon, holder: 'b', day: 2, delta: -6, replaced: 'Longbow', equipped: true }); if (on('f-bag')) lootLog.push({ itemId: 'r1', item: { id: 'r1', name: 'Copper Ring', baseKey: 'ring' }, holder: 'c', day: 1, equipped: false });
+  let relations = null; if (on('f-rel')) { relations = new RelationGraph(rel); relations.get('b', 'a').set('warmth', 0.5); relations.get('b', 'a').set('respect', 0.4); relations.get('c', 'a').set('warmth', -0.5); relations.get('c', 'a').set('respect', -0.3); }
+  return factsFrom({ now, day, banks, heroes, meter, lootLog, relations, party: { rations: +$('f-rations').value, exhaustion: +$('f-exh').value, act: +$('f-act').value, vehicle: on('f-vehicle') ? 'wagon' : null, vehicleName: 'wagon', companion: on('f-companion') ? 'war dog' : null, nextBoss: on('f-boss') ? 'the Veil Wardens' : null } });
+}
+function renderElig() { const f = facts(); const ok = new Set(conv.eligible(sp, f).map(e => e.topic.id)); $('elig').replaceChildren(...topics.topics.map(t => { const s = document.createElement('span'); s.textContent = t.id; s.className = ok.has(t.id) ? 'on' : ''; s.title = JSON.stringify(t.requires); return s; })); $('status').textContent = `${ok.size} of ${topics.topics.length} topics eligible`; }
+function talk(n = 1) { const f = facts(); for (let i = 0; i < n; i++) { const lines = conv.talk(sp, f, { tags: ['camp'] }); const box = $('conv'); const t = document.createElement('div'); t.className = 'topic'; t.textContent = '— ' + (lines[0]?.topic || 'nothing to say'); box.append(t); for (const l of lines) { const p = document.createElement('p'); p.className = l.speaker.id; p.innerHTML = `<b>${l.speaker.name}</b> → ${l.listener?.name || ''}: ${l.text}`; box.append(p); } box.scrollTop = 1e9; } }
+for (const i of document.querySelectorAll('.facts input')) i.addEventListener('change', renderElig); $('btn-talk').onclick = () => talk(1); $('btn-talk5').onclick = () => talk(5); renderElig(); talk(2);
+window.conversationsDemo = { conv, facts, talk, sp, lingo };
+</script>
+</body>
+</html>

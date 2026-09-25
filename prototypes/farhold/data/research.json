@@ -1,0 +1,189 @@
+{
+  "schema": 1,
+  "_doc": "Farhold's research tree, R17. js/research.js is the engine; nothing about a node lives in code.\n\n  \"There are some high-tech options in the building menu so it's clear we'll need a research system. I think our research system can unlock research points by completing quests or exploring or defeating bosses… Make this rather simple for now, basically unlock all low tech gear from the start and then iron-age tier 2 and steel-age tier 3 and rocket-age tier 4.\"\n\nFOUR AGES, SEVEN NODES YOU CAN BUY, AND AGE ONE IS FREE.\n\nThat last part is the rule the whole file is built around and it is enforced by ABSENCE: a structure in data/structures.json is locked only if it carries a `tech` key naming a node here. No key, no lock. So the default for anything anybody adds later is 'available', and the failure mode of forgetting is a piece that is too easy rather than a player who lands on a planet and cannot build a box.\n\nWHERE POINTS COME FROM. Three sources, and they are the three the user named — finish a quest, find somewhere you had not been, kill something that had a name. Every one of them is a single call to `research.award(reason, n)`; see js/research.js. Nothing is bought with materials and nothing is bought with gold, deliberately: research is what you did, not what you saved up.\n\nWHY IT IS SMALL. Seven purchasable nodes and twenty-seven points is about eight hours of play, which is the right size for a tree whose job is to pace four ages rather than to be a game of its own. Each node opens several structures at once so that buying one is a visible change to the build panel — a node that unlocked one bench would read as a paywall.",
+  "_pointDoc": "What each kind of deed is worth. `reason` is the string the caller passes to `research.award`; an unknown reason is worth `default` and is still recorded, because a point quietly worth nothing is worse than a point worth one.",
+  "points": {
+    "default": 1,
+    "quest": 1,
+    "story": 2,
+    "region": 1,
+    "landmark": 1,
+    "instance": 2,
+    "boss": 3,
+    "worldboss": 4,
+    "planet": 3
+  },
+  "_reasonDoc": "The player-facing words for each reason, for the 'where your points came from' list on the Research screen. A ledger of seven lines beats a single number, because it tells you what to go and do for the eighth.",
+  "reasons": {
+    "quest": "Quests finished",
+    "story": "Story steps",
+    "region": "Regions found",
+    "landmark": "Landmarks found",
+    "instance": "Places cleared",
+    "boss": "Bosses killed",
+    "worldboss": "World bosses killed",
+    "planet": "Worlds landed on",
+    "default": "Other"
+  },
+  "_ageDoc": "An age is a heading and a colour, nothing more — the real order is the `needs` graph on the nodes. Age 1 has no nodes at all: it is the name for everything that was never gated.",
+  "ages": [
+    {
+      "id": "age1",
+      "name": "Age of Timber",
+      "tone": "#8fbf72",
+      "blurb": "Everything you can cut, dig, burn or weave. None of it is researched and none of it ever will be — you land knowing all of it."
+    },
+    {
+      "id": "age2",
+      "name": "Age of Iron",
+      "tone": "#c99a4e",
+      "blurb": "Machines that need a grid behind them, and the first pieces that are made of metal rather than held together by it."
+    },
+    {
+      "id": "age3",
+      "name": "Age of Steel",
+      "tone": "#9fb6c8",
+      "blurb": "Alloys, coolant and lenses. The tier where a base starts running without you standing in it."
+    },
+    {
+      "id": "age4",
+      "name": "Age of the Rocket",
+      "tone": "#b79ae0",
+      "blurb": "Two nodes, and between them they are the sky."
+    }
+  ],
+  "_nodeDoc": "  id       what data/structures.json's `tech` names.\n  age      which heading it sits under.\n  cost     research points. Spent once; there is no refund and no respec, because there is nothing to regret — every node is a gain.\n  needs    node ids that must already be taken. The tree is a small lattice, not a line: `assembly` wants both the steel and the optics arms.\n  unlocks  structure ids this opens. A structure may be named by exactly one node.\n  grants   recipe ids this opens on top of the learn-by-doing unlocks in data/refining.json. Usually empty: a recipe is already gated by the machine it runs on, and gating it twice is a second rule to keep in step.",
+  "nodes": [
+    {
+      "id": "ironworking",
+      "name": "Ironworking",
+      "age": "age2",
+      "cost": 2,
+      "needs": [],
+      "unlocks": [
+        "smelter",
+        "alloy_forge",
+        "crusher",
+        "drill",
+        "pump",
+        "storage_silo",
+        "ballista_turret",
+        "reinforced_wall",
+        "fluid_tank",
+        "gas_tank"
+      ],
+      "grants": [],
+      "blurb": "A hotter fire and a bellows. Ore that a furnace shrugged at goes to dust and then to metal, a drill works a seam while you are asleep, and steel makes a wall and a bolt-thrower worth the name.",
+      "why": "The first real jump: every machine here is one you power rather than one you feed."
+    },
+    {
+      "id": "wiring",
+      "name": "Drawn Wire",
+      "age": "age2",
+      "cost": 3,
+      "needs": [
+        "ironworking"
+      ],
+      "unlocks": [
+        "battery_bank",
+        "solar_array",
+        "wind_turbine",
+        "repair_station",
+        "flame_turret",
+        "frost_turret"
+      ],
+      "grants": [],
+      "blurb": "Copper pulled into wire. Power stops being one generator beside one machine and becomes a grid with a night in it.",
+      "why": "A battery is the difference between solar being power and solar being a daytime hobby."
+    },
+    {
+      "id": "chemistry",
+      "name": "Reagents",
+      "age": "age2",
+      "cost": 3,
+      "needs": [
+        "ironworking"
+      ],
+      "unlocks": [
+        "chemical_bench",
+        "washer",
+        "alchemy_bench"
+      ],
+      "grants": [],
+      "blurb": "Lye, acid and salt. Unpleasant, and everything past the Age of Iron refuses to run without it.",
+      "why": "Coolant comes from here, and nothing at tier three starts without coolant."
+    },
+    {
+      "id": "steelwork",
+      "name": "Steelwork",
+      "age": "age3",
+      "cost": 4,
+      "needs": [
+        "wiring",
+        "chemistry"
+      ],
+      "unlocks": [
+        "refinery",
+        "manufactory",
+        "hauler_drone",
+        "tender_arm",
+        "geothermal_tap",
+        "garage"
+      ],
+      "grants": [],
+      "blurb": "Tempering, and the machines that no longer want a pair of hands at all.",
+      "why": "The Tender Arm is here, which is how a furnace stays lit at night without a second shift."
+    },
+    {
+      "id": "optics",
+      "name": "Ground Glass",
+      "age": "age3",
+      "cost": 4,
+      "needs": [
+        "steelwork"
+      ],
+      "unlocks": [
+        "crystal_cutter",
+        "enchant_altar",
+        "shield_pylon",
+        "crystal_lamp",
+        "tesla_coil"
+      ],
+      "grants": [],
+      "blurb": "Lenses and focusers. Everything that aims light, holds a charge or talks an affix on to a blade starts with one.",
+      "why": "A lens is an input to half of the Age of the Rocket, so this arm is not optional however it looks."
+    },
+    {
+      "id": "assembly",
+      "name": "Assembly",
+      "age": "age4",
+      "cost": 5,
+      "needs": [
+        "steelwork",
+        "optics"
+      ],
+      "unlocks": [
+        "assembler"
+      ],
+      "grants": [],
+      "blurb": "One machine, and it is the one that makes the four parts of a ship.",
+      "why": "Nothing at the top of the chain exists without an Assembler — it is the whole node on purpose."
+    },
+    {
+      "id": "propulsion",
+      "name": "Propulsion",
+      "age": "age4",
+      "cost": 6,
+      "needs": [
+        "assembly"
+      ],
+      "unlocks": [
+        "fuel_synthesiser",
+        "waypoint_pad"
+      ],
+      "grants": [],
+      "blurb": "Fuel you make rather than fuel you find, and a pad that puts you anywhere you have already stood.",
+      "why": "The last node in the tree. Fuel is spent per flight, so this is a structure you keep running rather than one you finish."
+    }
+  ]
+}

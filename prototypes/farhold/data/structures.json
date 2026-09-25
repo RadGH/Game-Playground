@@ -1,0 +1,3337 @@
+{
+  "_doc": "Farhold's buildable things — BUILDING_EXPANSION.md §4c (decorative), §4d (manufacturing), §4e (defensive), plus the road, wall and waypoint pieces. Every entry is pure data: a footprint in metres, a material cost, a look recipe that js/build.js turns into boxes and cylinders, and the rules js/buildplan.js checks before it will let you put one down. NOTHING here knows about Three.js, so node --test can read the whole catalogue.\n\nON MATERIALS: the ids in `cost` are a CONTRACT, not an inventory. §1 (gathering) and §2 (refining) belong to another part of this expansion and will decide where `iron` or `plank` actually comes from; this file only says what a workbench costs. js/buildplan.js never reads a bag directly — it asks a `have(id)` callback the game supplies — so whichever store system wins, the catalogue does not change.\n\nON SLOPE: `slope` is the steepest ground a piece will accept under its corners, as rise over run. Most things want 0.18 (about a 1-in-5 bank), which almost nowhere on Farhold is, and that is deliberate: it is what sends the player to the smoothing tool in js/terraform.js first, exactly as §4.11 intends.\n\nON LIGHT: anything with a `light` block hands that block straight to js/light.js's source pool — the same pool the carried torch uses — so a lamp post genuinely lights the ground. §4c: 'they should be the first thing a player builds after walls, because Farhold's nights are dark and that is the point of them.'\n\nNo third-party IP: every name here is descriptive English.",
+  "rules": {
+    "grid": 2,
+    "snapDistance": 1.6,
+    "rotateStep": 0.7853981633974483,
+    "refund": 0.75,
+    "defaultSlope": 0.18,
+    "footingTolerance": 0.35,
+    "claimRadius": 64,
+    "terraformBudget": 60000,
+    "maxLift": 12,
+    "undoDepth": 30,
+    "_doc": "grid: metres between snap points. snapDistance: how close a ghost has to be to an existing piece's edge before it jumps to it. refund: fraction of the cost the deconstruct tool gives back (§4.7 — 'building should not punish experimenting'). footingTolerance: how far a corner may sit off the ground before the piece counts as floating. claimRadius: metres from the claim stone."
+  },
+  "materials": {
+    "timber": {
+      "name": "Timber",
+      "tier": 1
+    },
+    "plank": {
+      "name": "Plank",
+      "tier": 1
+    },
+    "beam": {
+      "name": "Beam",
+      "tier": 2
+    },
+    "stone": {
+      "name": "Rough Stone",
+      "tier": 1
+    },
+    "block": {
+      "name": "Cut Block",
+      "tier": 2
+    },
+    "brick": {
+      "name": "Fired Brick",
+      "tier": 2
+    },
+    "clay": {
+      "name": "Clay",
+      "tier": 1
+    },
+    "glass": {
+      "name": "Glass",
+      "tier": 2
+    },
+    "fibre": {
+      "name": "Plant Fibre",
+      "tier": 1
+    },
+    "cloth": {
+      "name": "Cloth",
+      "tier": 1
+    },
+    "rope": {
+      "name": "Rope",
+      "tier": 1
+    },
+    "leather": {
+      "name": "Leather",
+      "tier": 1
+    },
+    "iron": {
+      "name": "Iron Ingot",
+      "tier": 1
+    },
+    "copper": {
+      "name": "Copper Ingot",
+      "tier": 1
+    },
+    "steel": {
+      "name": "Steel Ingot",
+      "tier": 2
+    },
+    "alloy": {
+      "name": "Bright Alloy",
+      "tier": 2
+    },
+    "coal": {
+      "name": "Coal",
+      "tier": 1
+    },
+    "crystal": {
+      "name": "Raw Crystal",
+      "tier": 2
+    },
+    "lens": {
+      "name": "Cut Lens",
+      "tier": 3
+    },
+    "parts": {
+      "name": "Machine Parts",
+      "tier": 3
+    },
+    "wire": {
+      "name": "Drawn Wire",
+      "tier": 2
+    },
+    "concrete": {
+      "name": "Poured Concrete",
+      "tier": 2
+    },
+    "salvage": {
+      "name": "Salvage",
+      "tier": 1
+    },
+    "reagent": {
+      "name": "Reagent",
+      "tier": 3
+    },
+    "fuel": {
+      "name": "Refined Fuel",
+      "tier": 3
+    },
+    "waypoint_core": {
+      "name": "Waypoint Core",
+      "tier": 3
+    },
+    "resin": {
+      "name": "Resin",
+      "tier": 1
+    }
+  },
+  "categories": {
+    "decor": {
+      "name": "Decoration",
+      "_doc": "§4c. None of them do anything, and that is the point."
+    },
+    "light": {
+      "name": "Lighting",
+      "_doc": "§4c street lights. Real lights, in js/light.js's pool."
+    },
+    "craft": {
+      "name": "Workshop",
+      "_doc": "§3 benches. Each one unlocks a recipe family."
+    },
+    "extract": {
+      "name": "Extraction",
+      "_doc": "R16. Things that take raw material OUT of the world — a drill on a seam, a pump in a river. Every one of them is pinned to a piece of world geometry by `needs`, and every one of them RUNS ITSELF: an extraction piece is never a js/refining.json machine, so it can never want a worker. That invariant is the whole reason this category is separate from Refining, and tests/round16-industry.test.js asserts it. \"Drills and similar resource extraction devices should be on their own building menu and are automated, separate from manufacturing devices which require work to be done by the player or NPC.\""
+    },
+    "refine": {
+      "name": "Refining",
+      "_doc": "§2. Raw to useful, three tiers — MANUFACTURING, which is the half of the old category that needs somebody at it. A tier-0 furnace always wants a worker, a tier-1 bench wants one until you wire it to the grid, and a tier-2 machine wants only power. Extraction moved out to `extract` in R16."
+    },
+    "power": {
+      "name": "Power",
+      "_doc": "§8. Generation, storage and the poles between them."
+    },
+    "store": {
+      "name": "Storage",
+      "_doc": "§8.1 pools: stores in reach of each other share everything."
+    },
+    "defence": {
+      "name": "Defence",
+      "_doc": "§4e and §7. Walls stop, barricades redirect, turrets kill."
+    },
+    "road": {
+      "name": "Groundwork",
+      "_doc": "§4b. Roads, slabs and paving — these paint terrain as well as geometry."
+    },
+    "waypoint": {
+      "name": "Waypoint",
+      "_doc": "§5.5–5.20. The one exception to towns-only."
+    },
+    "home": {
+      "name": "Housing",
+      "_doc": "The Civilization Expansion §2. A house is a footprint, a bed count and a comfort number — no interiors, no furniture list, no room scoring. A utility is a thing that serves every house within its radius and does nothing else. Comfort is the house's own number plus one point per DISTINCT utility kind in range: four privies is one privy. What comfort buys is a better night's mood and a vendor who is willing to live here, and nothing else."
+    },
+    "trade": {
+      "name": "Trade",
+      "_doc": "The Civilization Expansion §6 and §7. Where what you made waits for a cart, and the bench that makes it."
+    }
+  },
+  "structures": [
+    {
+      "id": "banner",
+      "name": "Banner",
+      "cat": "decor",
+      "tier": 1,
+      "w": 0.6,
+      "d": 0.6,
+      "h": 4.2,
+      "snap": "wall",
+      "look": {
+        "kind": "banner",
+        "color": "#8a2f3a"
+      },
+      "cost": {
+        "cloth": 2,
+        "timber": 2
+      },
+      "desc": "A long hanging of dyed cloth. Says somebody lives here."
+    },
+    {
+      "id": "brazier",
+      "name": "Brazier",
+      "cat": "light",
+      "tier": 1,
+      "w": 1.1,
+      "d": 1.1,
+      "h": 1.5,
+      "snap": "grid",
+      "look": {
+        "kind": "brazier",
+        "color": "#4a4038"
+      },
+      "light": {
+        "range": 20,
+        "intensity": 2.4,
+        "color": "#ff9040",
+        "y": 1.5
+      },
+      "cost": {
+        "iron": 3,
+        "stone": 4
+      },
+      "desc": "An iron bowl of coals on three legs. Warm, loud, and visible from the treeline."
+    },
+    {
+      "id": "bench",
+      "name": "Bench",
+      "cat": "decor",
+      "tier": 1,
+      "w": 1.8,
+      "d": 0.6,
+      "h": 0.8,
+      "snap": "grid",
+      "look": {
+        "kind": "bench",
+        "color": "#6b4f34"
+      },
+      "cost": {
+        "plank": 3
+      },
+      "desc": "Two trestles and a board. Somewhere to sit and look at what you have made."
+    },
+    {
+      "id": "table_chairs",
+      "name": "Table and Chairs",
+      "cat": "decor",
+      "tier": 1,
+      "w": 2.2,
+      "d": 1.6,
+      "h": 0.9,
+      "snap": "grid",
+      "look": {
+        "kind": "table",
+        "color": "#6b4f34"
+      },
+      "cost": {
+        "plank": 6
+      },
+      "desc": "A plank table with four stools. Where a camp becomes a household."
+    },
+    {
+      "id": "rug",
+      "name": "Rug",
+      "cat": "decor",
+      "tier": 1,
+      "w": 2.4,
+      "d": 1.6,
+      "h": 0.04,
+      "snap": "floor",
+      "look": {
+        "kind": "flat",
+        "color": "#7a3b46"
+      },
+      "cost": {
+        "cloth": 4
+      },
+      "desc": "Woven, worn, and the wrong colour for the room. Perfect."
+    },
+    {
+      "id": "bookshelf",
+      "name": "Bookshelf",
+      "cat": "decor",
+      "tier": 1,
+      "w": 1.6,
+      "d": 0.5,
+      "h": 2.1,
+      "snap": "wall",
+      "look": {
+        "kind": "shelf",
+        "color": "#5a432c"
+      },
+      "cost": {
+        "plank": 6,
+        "cloth": 1
+      },
+      "desc": "Ledgers, star tables and one novel somebody left behind."
+    },
+    {
+      "id": "crate_stack",
+      "name": "Crate and Barrel Stack",
+      "cat": "decor",
+      "tier": 1,
+      "w": 1.6,
+      "d": 1.6,
+      "h": 1.7,
+      "snap": "grid",
+      "look": {
+        "kind": "crates",
+        "color": "#7a5c3a"
+      },
+      "cost": {
+        "plank": 4
+      },
+      "desc": "Empty, mostly. A yard without clutter looks abandoned."
+    },
+    {
+      "id": "hanging_sign",
+      "name": "Hanging Sign",
+      "cat": "decor",
+      "tier": 1,
+      "w": 1.2,
+      "d": 0.2,
+      "h": 3.2,
+      "snap": "wall",
+      "look": {
+        "kind": "sign",
+        "color": "#5a432c"
+      },
+      "cost": {
+        "plank": 2,
+        "iron": 1
+      },
+      "desc": "A painted board on a bracket. Squeaks in a wind."
+    },
+    {
+      "id": "statue",
+      "name": "Statue",
+      "cat": "decor",
+      "tier": 2,
+      "w": 1.4,
+      "d": 1.4,
+      "h": 3.4,
+      "snap": "grid",
+      "look": {
+        "kind": "statue",
+        "color": "#9a968c"
+      },
+      "cost": {
+        "block": 10
+      },
+      "desc": "Somebody standing on a plinth, weathered past recognising."
+    },
+    {
+      "id": "fountain",
+      "name": "Fountain",
+      "cat": "decor",
+      "tier": 2,
+      "w": 3.2,
+      "d": 3.2,
+      "h": 1.6,
+      "snap": "grid",
+      "slope": 0.08,
+      "look": {
+        "kind": "fountain",
+        "color": "#8e8a80"
+      },
+      "cost": {
+        "block": 14,
+        "copper": 3
+      },
+      "desc": "A basin, a spout and the sound of moving water. The most civilised thing you can build."
+    },
+    {
+      "id": "planter",
+      "name": "Planter",
+      "cat": "decor",
+      "tier": 1,
+      "w": 1.2,
+      "d": 0.6,
+      "h": 0.6,
+      "snap": "grid",
+      "look": {
+        "kind": "planter",
+        "color": "#6b4f34"
+      },
+      "cost": {
+        "plank": 2,
+        "clay": 1
+      },
+      "desc": "A trough of earth with something green in it."
+    },
+    {
+      "id": "flower_bed",
+      "name": "Flower Bed",
+      "cat": "decor",
+      "tier": 1,
+      "w": 2.4,
+      "d": 1.2,
+      "h": 0.3,
+      "snap": "floor",
+      "look": {
+        "kind": "bed",
+        "color": "#4a6a34"
+      },
+      "cost": {
+        "stone": 3,
+        "fibre": 2
+      },
+      "desc": "Edged in stone, planted with whatever survives here."
+    },
+    {
+      "id": "hedge",
+      "name": "Hedge",
+      "cat": "decor",
+      "tier": 1,
+      "w": 2,
+      "d": 0.7,
+      "h": 1.3,
+      "snap": "grid",
+      "run": true,
+      "look": {
+        "kind": "hedge",
+        "color": "#3e5c30"
+      },
+      "cost": {
+        "fibre": 3
+      },
+      "desc": "A run of clipped shrub. Stops nothing, divides everything."
+    },
+    {
+      "id": "fence",
+      "name": "Fence",
+      "cat": "decor",
+      "tier": 1,
+      "w": 2,
+      "d": 0.2,
+      "h": 1.1,
+      "snap": "grid",
+      "run": true,
+      "look": {
+        "kind": "fence",
+        "color": "#6b4f34"
+      },
+      "cost": {
+        "plank": 2
+      },
+      "desc": "Post and rail. For keeping animals in, not raiders out."
+    },
+    {
+      "id": "fence_gate",
+      "name": "Fence Gate",
+      "cat": "decor",
+      "tier": 1,
+      "w": 2,
+      "d": 0.2,
+      "h": 1.1,
+      "snap": "grid",
+      "gate": true,
+      "look": {
+        "kind": "fencegate",
+        "color": "#6b4f34"
+      },
+      "cost": {
+        "plank": 2,
+        "iron": 1
+      },
+      "desc": "A gap in the fence with a latch on it."
+    },
+    {
+      "id": "lamp_post",
+      "name": "Lamp Post",
+      "cat": "light",
+      "tier": 1,
+      "w": 0.5,
+      "d": 0.5,
+      "h": 4,
+      "snap": "grid",
+      "look": {
+        "kind": "lamppost",
+        "color": "#3a3630"
+      },
+      "light": {
+        "range": 26,
+        "intensity": 2.2,
+        "color": "#ffc070",
+        "y": 3.7
+      },
+      "cost": {
+        "iron": 4,
+        "glass": 2,
+        "resin": 1
+      },
+      "desc": "An oil lamp on a cast post. The first thing to build after the walls.",
+      "_r17": "R17 — it cost one `fuel`, which aliases to `lift_fuel`, which comes out of the Fuel Synthesiser: the last structure in the game. A street lamp was priced in rocket propellant. Resin off a sawmill is what a lamp burns."
+    },
+    {
+      "id": "wall_sconce",
+      "name": "Wall Sconce",
+      "cat": "light",
+      "tier": 1,
+      "w": 0.4,
+      "d": 0.4,
+      "h": 0.6,
+      "snap": "wall",
+      "look": {
+        "kind": "sconce",
+        "color": "#3a3630"
+      },
+      "light": {
+        "range": 16,
+        "intensity": 1.8,
+        "color": "#ffb060",
+        "y": 2.4
+      },
+      "cost": {
+        "iron": 2
+      },
+      "desc": "A bracket and a flame, close enough to a doorway to find the door."
+    },
+    {
+      "id": "hanging_lantern",
+      "name": "Hanging Lantern",
+      "cat": "light",
+      "tier": 1,
+      "w": 0.4,
+      "d": 0.4,
+      "h": 2.8,
+      "snap": "wall",
+      "look": {
+        "kind": "lantern",
+        "color": "#3a3630"
+      },
+      "light": {
+        "range": 20,
+        "intensity": 2,
+        "color": "#ffca88",
+        "y": 2.6
+      },
+      "cost": {
+        "iron": 2,
+        "glass": 1,
+        "rope": 1
+      },
+      "desc": "Glass and iron on a chain. Swings, and the shadows swing with it."
+    },
+    {
+      "id": "crystal_lamp",
+      "name": "Crystal Lamp",
+      "cat": "light",
+      "tier": 3,
+      "w": 0.6,
+      "d": 0.6,
+      "h": 3.6,
+      "snap": "grid",
+      "look": {
+        "kind": "crystallamp",
+        "color": "#5c6a80"
+      },
+      "light": {
+        "range": 44,
+        "intensity": 2.6,
+        "color": "#bcd8ff",
+        "y": 3.3,
+        "flicker": false
+      },
+      "power": {
+        "use": 4
+      },
+      "cost": {
+        "steel": 3,
+        "lens": 1,
+        "wire": 2
+      },
+      "desc": "A cut crystal on a steel stem, lit from inside. Cold, steady, and reaches twice as far as a flame.",
+      "tech": "optics"
+    },
+    {
+      "id": "window_box",
+      "name": "Window Box",
+      "cat": "decor",
+      "tier": 1,
+      "w": 1,
+      "d": 0.4,
+      "h": 0.4,
+      "snap": "wall",
+      "look": {
+        "kind": "planter",
+        "color": "#6b4f34"
+      },
+      "cost": {
+        "plank": 1,
+        "fibre": 1
+      },
+      "desc": "Flowers under a window. Nobody needs it, which is why it matters."
+    },
+    {
+      "id": "shutters",
+      "name": "Shutters",
+      "cat": "decor",
+      "tier": 1,
+      "w": 1.2,
+      "d": 0.15,
+      "h": 1.2,
+      "snap": "wall",
+      "look": {
+        "kind": "shutters",
+        "color": "#4a6a7a"
+      },
+      "cost": {
+        "plank": 2
+      },
+      "desc": "Painted boards either side of a window, hinged to close on a storm."
+    },
+    {
+      "id": "weather_vane",
+      "name": "Weather Vane",
+      "cat": "decor",
+      "tier": 1,
+      "w": 0.4,
+      "d": 0.4,
+      "h": 1.2,
+      "snap": "wall",
+      "look": {
+        "kind": "vane",
+        "color": "#4a4038"
+      },
+      "cost": {
+        "iron": 2
+      },
+      "desc": "An iron creature on a spindle, pointing at the weather."
+    },
+    {
+      "id": "chimney_pot",
+      "name": "Chimney Pot",
+      "cat": "decor",
+      "tier": 1,
+      "w": 0.5,
+      "d": 0.5,
+      "h": 0.8,
+      "snap": "wall",
+      "look": {
+        "kind": "pot",
+        "color": "#8a5a44"
+      },
+      "cost": {
+        "brick": 2
+      },
+      "desc": "Fired clay on a stack, smoking gently."
+    },
+    {
+      "id": "trophy_mount",
+      "name": "Trophy Mount",
+      "cat": "decor",
+      "tier": 2,
+      "w": 1.2,
+      "d": 0.6,
+      "h": 1,
+      "snap": "wall",
+      "look": {
+        "kind": "trophy",
+        "color": "#6b4f34"
+      },
+      "cost": {
+        "plank": 2,
+        "leather": 2
+      },
+      "desc": "A skull on a board. Everyone who visits asks about it."
+    },
+    {
+      "id": "bed",
+      "name": "Bed",
+      "cat": "decor",
+      "tier": 1,
+      "w": 2,
+      "d": 1.2,
+      "h": 0.6,
+      "snap": "grid",
+      "look": {
+        "kind": "bed",
+        "color": "#7a5c3a"
+      },
+      "cost": {
+        "plank": 4,
+        "cloth": 3
+      },
+      "desc": "Frame, tick and blanket. Farhold has nights; this is where you spend them."
+    },
+    {
+      "id": "drawers",
+      "name": "Chest of Drawers",
+      "cat": "decor",
+      "tier": 1,
+      "w": 1.2,
+      "d": 0.6,
+      "h": 1.1,
+      "snap": "wall",
+      "look": {
+        "kind": "drawers",
+        "color": "#5a432c"
+      },
+      "cost": {
+        "plank": 5
+      },
+      "desc": "Four drawers, two of which stick."
+    },
+    {
+      "id": "wardrobe",
+      "name": "Wardrobe",
+      "cat": "decor",
+      "tier": 1,
+      "w": 1.2,
+      "d": 0.7,
+      "h": 2.2,
+      "snap": "wall",
+      "look": {
+        "kind": "wardrobe",
+        "color": "#5a432c"
+      },
+      "cost": {
+        "plank": 7
+      },
+      "desc": "Tall, dark, and far too heavy to have carried here."
+    },
+    {
+      "id": "cooking_pot",
+      "name": "Cooking Pot",
+      "cat": "decor",
+      "tier": 1,
+      "w": 1,
+      "d": 1,
+      "h": 1.1,
+      "snap": "grid",
+      "look": {
+        "kind": "pot",
+        "color": "#3a3630"
+      },
+      "light": {
+        "range": 10,
+        "intensity": 1.2,
+        "color": "#ff8038",
+        "y": 0.7
+      },
+      "cost": {
+        "iron": 3
+      },
+      "desc": "A black pot on a tripod over embers."
+    },
+    {
+      "id": "washing_line",
+      "name": "Washing Line",
+      "cat": "decor",
+      "tier": 1,
+      "w": 4,
+      "d": 0.2,
+      "h": 2,
+      "snap": "grid",
+      "look": {
+        "kind": "line",
+        "color": "#c8c0b0"
+      },
+      "cost": {
+        "rope": 2,
+        "timber": 2
+      },
+      "desc": "Two poles and a rope of shirts. The single fastest way to make a place look lived in."
+    },
+    {
+      "id": "well_head",
+      "name": "Well Head",
+      "cat": "decor",
+      "tier": 1,
+      "w": 1.8,
+      "d": 1.8,
+      "h": 1.6,
+      "snap": "grid",
+      "look": {
+        "kind": "well",
+        "color": "#8e8a80"
+      },
+      "utility": {
+        "kind": "water",
+        "radius": 24,
+        "comfort": 0.2,
+        "maxSlope": 0.2
+      },
+      "cost": {
+        "stone": 8,
+        "timber": 3,
+        "rope": 1
+      },
+      "desc": "A ring of stone, a windlass and a bucket. Every house within twenty-four metres is a better place to live for it."
+    },
+    {
+      "id": "dovecote",
+      "name": "Dovecote",
+      "cat": "decor",
+      "tier": 1,
+      "w": 1.2,
+      "d": 1.2,
+      "h": 3.4,
+      "snap": "grid",
+      "look": {
+        "kind": "dovecote",
+        "color": "#c0b6a4"
+      },
+      "cost": {
+        "plank": 6,
+        "clay": 2
+      },
+      "desc": "A tower of nesting holes. The birds arrive on their own."
+    },
+    {
+      "id": "beehive",
+      "name": "Beehive",
+      "cat": "decor",
+      "tier": 1,
+      "w": 0.8,
+      "d": 0.8,
+      "h": 1,
+      "snap": "grid",
+      "look": {
+        "kind": "hive",
+        "color": "#b09050"
+      },
+      "cost": {
+        "plank": 2,
+        "fibre": 2
+      },
+      "desc": "A stack of straw skeps. Loud in summer."
+    },
+    {
+      "id": "scarecrow",
+      "name": "Scarecrow",
+      "cat": "decor",
+      "tier": 1,
+      "w": 0.8,
+      "d": 0.8,
+      "h": 2.2,
+      "snap": "grid",
+      "look": {
+        "kind": "scarecrow",
+        "color": "#9a8a5a"
+      },
+      "cost": {
+        "timber": 2,
+        "cloth": 2,
+        "fibre": 1
+      },
+      "desc": "Sacking, straw and a hat. It does not fool the crows and it unsettles visitors."
+    },
+    {
+      "id": "paving",
+      "name": "Paving Tile",
+      "cat": "road",
+      "tier": 1,
+      "w": 2,
+      "d": 2,
+      "h": 0.08,
+      "snap": "floor",
+      "flatten": "slab",
+      "look": {
+        "kind": "flat",
+        "color": "#8e8a80"
+      },
+      "cost": {
+        "stone": 3
+      },
+      "desc": "A flagged square. Lays flat because it flattens what is under it."
+    },
+    {
+      "id": "moss_carpet",
+      "name": "Carpet of Moss",
+      "cat": "decor",
+      "tier": 1,
+      "w": 2,
+      "d": 2,
+      "h": 0.05,
+      "snap": "floor",
+      "look": {
+        "kind": "flat",
+        "color": "#4a6a3a"
+      },
+      "cost": {
+        "fibre": 2
+      },
+      "desc": "Encouraged rather than planted. Soft underfoot, and quiet."
+    },
+    {
+      "id": "potted_tree",
+      "name": "Potted Tree",
+      "cat": "decor",
+      "tier": 1,
+      "w": 1,
+      "d": 1,
+      "h": 2.6,
+      "snap": "grid",
+      "look": {
+        "kind": "pottedtree",
+        "color": "#3e5c30"
+      },
+      "cost": {
+        "clay": 2,
+        "fibre": 1
+      },
+      "desc": "A sapling in a tub, taken from the treeline and kept."
+    },
+    {
+      "id": "wind_chime",
+      "name": "Wind Chime",
+      "cat": "decor",
+      "tier": 1,
+      "w": 0.3,
+      "d": 0.3,
+      "h": 0.8,
+      "snap": "wall",
+      "look": {
+        "kind": "chime",
+        "color": "#a89a70"
+      },
+      "cost": {
+        "copper": 1,
+        "rope": 1
+      },
+      "desc": "Hollow copper tubes. You will hear the weather change before you see it."
+    },
+    {
+      "id": "nameplate",
+      "name": "Nameplate",
+      "cat": "decor",
+      "tier": 1,
+      "w": 1,
+      "d": 0.1,
+      "h": 0.3,
+      "snap": "wall",
+      "look": {
+        "kind": "sign",
+        "color": "#4a4038"
+      },
+      "cost": {
+        "plank": 1,
+        "iron": 1
+      },
+      "desc": "Your name over the door, cut into a board."
+    },
+    {
+      "id": "crafting_table",
+      "name": "Crafting Table",
+      "cat": "craft",
+      "tier": 0,
+      "w": 2.0,
+      "d": 1.0,
+      "h": 1.0,
+      "snap": "grid",
+      "look": {
+        "kind": "table",
+        "color": "#6b4f34"
+      },
+      "cost": {
+        "timber": 6,
+        "stone": 2
+      },
+      "desc": "Six logs and two stone, and it is the first thing you should put down. It splits logs into planks, twists cord, builds your tools, and carries a three-slot shelf of its own so it works with nothing else standing.",
+      "store": {
+        "slots": 3
+      },
+      "_r17": "R17 — IT COST SIX PLANKS AND TWO IRON INGOTS, AND IT IS THE THING THAT MAKES PLANKS. A plank came off a Sawmill, a Sawmill cost eight iron ingots, iron came out of a Furnace, and a machine draws only from a STORAGE POOL — so the first store in the game stood behind the first store in the game, and the onboarding line that says to build a crate before a forge could not be followed. Logs and stone now, its own shelf so it IS a pool, and `split_planks` on it. See data/refining.json's `crafting_table`.",
+      "station": {
+        "title": "Crafting Table",
+        "blurb": "A trestle, a vice and a wedge. Split logs into planks, twist cord, and build the tool you carry. It keeps its own small shelf, so it works the moment it is down.",
+        "recipes": [
+          "split_planks",
+          "twist_cord"
+        ],
+        "panels": [
+          "tools"
+        ]
+      },
+      "unlocksNotBuilt": "tools"
+    },
+    {
+      "id": "anvil",
+      "name": "Anvil",
+      "cat": "craft",
+      "tier": 1,
+      "w": 1.2,
+      "d": 0.8,
+      "h": 1,
+      "snap": "grid",
+      "look": {
+        "kind": "anvil",
+        "color": "#4a4038"
+      },
+      "cost": {
+        "iron": 10,
+        "timber": 3
+      },
+      "desc": "Weapons and armour from ingots. Feeds the crafting screen you already have.",
+      "station": {
+        "title": "Anvil",
+        "blurb": "A face, a horn and a hardy hole. Iron heads are forged on to hafts here.",
+        "panels": [
+          "tools"
+        ]
+      },
+      "unlocksNotBuilt": "smithing"
+    },
+    {
+      "id": "workbench",
+      "name": "Workbench",
+      "cat": "craft",
+      "tier": 2,
+      "w": 2.2,
+      "d": 1,
+      "h": 1,
+      "snap": "grid",
+      "look": {
+        "kind": "table",
+        "color": "#5a432c"
+      },
+      "cost": {
+        "plank": 8,
+        "iron": 4
+      },
+      "desc": "Machine parts, furniture and every decorative piece in this catalogue.",
+      "station": {
+        "title": "Workbench",
+        "blurb": "Fine work at a vice: the devices you build once and own for good.",
+        "panels": [
+          "tools"
+        ]
+      },
+      "unlocksNotBuilt": "parts"
+    },
+    {
+      "id": "garage",
+      "name": "Garage",
+      "cat": "craft",
+      "tier": 2,
+      "w": 6.0,
+      "d": 5.0,
+      "h": 3.2,
+      "snap": "grid",
+      "flatten": "slab",
+      "hp": 600,
+      "cost": {
+        "plank": 16,
+        "iron": 8,
+        "block": 10
+      },
+      "look": {
+        "kind": "shed",
+        "color": "#5c5a54"
+      },
+      "desc": "A pit, a bench and a fuel drum. Everything you drive is built, fuelled and repaired from here.",
+      "_r17": "\"There is also a garage menu… there should be a distinct Garage building where you manage that sort of thing.\" There is now. The rows used to hang off the build panel and turned up whenever you stood near any bench at all.",
+      "station": {
+        "title": "Garage",
+        "blurb": "A pit, a bench and a fuel drum. Build, fuel and repair what you drive. The parts themselves are still cut on the line — an Assembler, and for the bigger rigs an Alloy Forge and a Refinery — so put this beside them.",
+        "panels": [
+          "garage"
+        ]
+      },
+      "tech": "steelwork"
+    },
+    {
+      "id": "enchant_altar",
+      "name": "Enchanting Altar",
+      "cat": "craft",
+      "tier": 3,
+      "w": 2,
+      "d": 2,
+      "h": 1.3,
+      "snap": "grid",
+      "look": {
+        "kind": "altar",
+        "color": "#6a5a84"
+      },
+      "power": {
+        "use": 8
+      },
+      "cost": {
+        "block": 12,
+        "crystal": 3,
+        "reagent": 2
+      },
+      "desc": "Where an affix is talked on to a blade. Hums when nobody is near it.",
+      "tech": "optics",
+      "unlocksNotBuilt": "affixes"
+    },
+    {
+      "id": "alchemy_bench",
+      "name": "Alchemy Bench",
+      "cat": "craft",
+      "tier": 2,
+      "w": 1.8,
+      "d": 1,
+      "h": 1.1,
+      "snap": "grid",
+      "look": {
+        "kind": "bench",
+        "color": "#4a6a5a"
+      },
+      "cost": {
+        "plank": 5,
+        "glass": 4,
+        "copper": 2
+      },
+      "desc": "Potions, oils and the explosives you will regret storing indoors.",
+      "tech": "chemistry",
+      "unlocksNotBuilt": "potions"
+    },
+    {
+      "id": "fletching_bench",
+      "name": "Fletching Bench",
+      "cat": "craft",
+      "tier": 1,
+      "w": 1.8,
+      "d": 0.9,
+      "h": 1,
+      "snap": "grid",
+      "look": {
+        "kind": "bench",
+        "color": "#6b4f34"
+      },
+      "cost": {
+        "plank": 4,
+        "fibre": 3
+      },
+      "desc": "Shafts, heads and fletches. Quivers do not fill themselves.",
+      "unlocksNotBuilt": "arrows"
+    },
+    {
+      "id": "cooking_station",
+      "name": "Cooking Station",
+      "cat": "craft",
+      "tier": 1,
+      "w": 2,
+      "d": 1.2,
+      "h": 1.2,
+      "snap": "grid",
+      "look": {
+        "kind": "stove",
+        "color": "#7a6050"
+      },
+      "light": {
+        "range": 12,
+        "intensity": 1.4,
+        "color": "#ff8a40",
+        "y": 1
+      },
+      "cost": {
+        "stone": 8,
+        "iron": 3
+      },
+      "desc": "A hearth, a griddle and a rack. Food buffs come from here.",
+      "unlocksNotBuilt": "food"
+    },
+    {
+      "id": "campfire",
+      "name": "Campfire",
+      "cat": "refine",
+      "tier": 0,
+      "w": 1.4,
+      "d": 1.4,
+      "h": 0.6,
+      "snap": "grid",
+      "look": {
+        "kind": "fire",
+        "color": "#4a4038"
+      },
+      "light": {
+        "range": 18,
+        "intensity": 2.2,
+        "color": "#ff8a40",
+        "y": 0.7
+      },
+      "cost": {
+        "stone": 4,
+        "timber": 2
+      },
+      "desc": "Tier nought. Cook, boil, burn. Free, and no power.",
+      "station": {
+        "title": "Campfire",
+        "blurb": "Cook, boil, burn. It wants something to burn and somebody to tend it, and nothing else — no wiring, no grid, no permit.",
+        "recipes": [
+          "cook_meat",
+          "bake_grain",
+          "melt_ice",
+          "burn_charcoal"
+        ]
+      }
+    },
+    {
+      "id": "furnace",
+      "name": "Furnace",
+      "cat": "refine",
+      "tier": 1,
+      "w": 2,
+      "d": 2,
+      "h": 2.4,
+      "snap": "grid",
+      "look": {
+        "kind": "furnace",
+        "color": "#6a5a4a"
+      },
+      "light": {
+        "range": 14,
+        "intensity": 1.6,
+        "color": "#ff7030",
+        "y": 1
+      },
+      "cost": {
+        "stone": 16,
+        "clay": 6
+      },
+      "desc": "Ore in, ingot out, coal or wood underneath. The first real structure.",
+      "station": {
+        "title": "Furnace",
+        "blurb": "Ore in, ingot out, wood or coal underneath. Hold E to work it yourself, or house somebody who will.",
+        "recipes": [
+          "smelt_iron",
+          "smelt_copper",
+          "smelt_tin",
+          "smelt_silver",
+          "smelt_gold",
+          "melt_salvage",
+          "melt_plate"
+        ]
+      }
+    },
+    {
+      "id": "kiln",
+      "name": "Kiln",
+      "cat": "refine",
+      "tier": 1,
+      "w": 2.2,
+      "d": 2.2,
+      "h": 2.6,
+      "snap": "grid",
+      "look": {
+        "kind": "kiln",
+        "color": "#8a5a44"
+      },
+      "cost": {
+        "stone": 14,
+        "clay": 8
+      },
+      "desc": "Clay to brick, sand to glass. Takes a day to cool.",
+      "station": {
+        "title": "Kiln",
+        "blurb": "Clay to brick, sand to glass. Almost everything you build after this is made of what comes out of it.",
+        "recipes": [
+          "fire_brick",
+          "melt_glass",
+          "burn_bone"
+        ]
+      }
+    },
+    {
+      "id": "smelter",
+      "name": "Smelter",
+      "cat": "refine",
+      "tier": 2,
+      "w": 3,
+      "d": 2.4,
+      "h": 3,
+      "snap": "grid",
+      "power": {
+        "use": 16
+      },
+      "cost": {
+        "brick": 20,
+        "iron": 10,
+        "parts": 2
+      },
+      "look": {
+        "kind": "machine",
+        "color": "#6a6058"
+      },
+      "desc": "A faster furnace that takes several ores at once — and takes power to do it.",
+      "station": {
+        "title": "Smelter",
+        "blurb": "A furnace that needs no feeding, and takes the dust and concentrate a furnace cannot. It does not run at all without power.",
+        "recipes": [
+          "smelt_iron_dust",
+          "smelt_copper_dust",
+          "draw_wire",
+          "smelt_iron_conc",
+          "smelt_copper_conc",
+          "smelt_bulk_iron"
+        ]
+      },
+      "tech": "ironworking"
+    },
+    {
+      "id": "alloy_forge",
+      "name": "Alloy Forge",
+      "cat": "refine",
+      "tier": 2,
+      "w": 3,
+      "d": 2.4,
+      "h": 2.8,
+      "snap": "grid",
+      "power": {
+        "use": 20
+      },
+      "cost": {
+        "brick": 18,
+        "iron": 10,
+        "block": 8
+      },
+      "look": {
+        "kind": "machine",
+        "color": "#7a6450"
+      },
+      "desc": "Two ingots in, one better one out. This is the gate on mid-tier gear.",
+      "station": {
+        "title": "Alloy Forge",
+        "blurb": "Two ingots in, one better one out. This is the gate on every mid-tier piece of gear.",
+        "recipes": [
+          "forge_bronze",
+          "forge_steel",
+          "forge_rough_part",
+          "forge_meteoric"
+        ]
+      },
+      "tech": "ironworking"
+    },
+    {
+      "id": "sawmill",
+      "name": "Sawmill",
+      "cat": "refine",
+      "tier": 1,
+      "w": 4,
+      "d": 2.6,
+      "h": 2.6,
+      "snap": "grid",
+      "cost": {
+        "timber": 20,
+        "iron": 8
+      },
+      "look": {
+        "kind": "mill",
+        "color": "#6b4f34"
+      },
+      "desc": "Logs to planks and beams at a rate that does not insult you.",
+      "station": {
+        "title": "Sawmill",
+        "blurb": "Logs to planks and beams at a rate that does not insult you. It turns by hand at a third the speed; wire it to the grid and it turns itself.",
+        "recipes": [
+          "saw_planks",
+          "saw_beams",
+          "tap_resin"
+        ]
+      }
+    },
+    {
+      "id": "stonecutter",
+      "name": "Stonecutter",
+      "cat": "refine",
+      "tier": 1,
+      "w": 2.6,
+      "d": 2,
+      "h": 1.6,
+      "snap": "grid",
+      "cost": {
+        "timber": 8,
+        "iron": 6
+      },
+      "look": {
+        "kind": "machine",
+        "color": "#8e8a80"
+      },
+      "desc": "Rubble to cut block. The wall tool eats its output.",
+      "station": {
+        "title": "Stonecutter",
+        "blurb": "Rubble and slag to cut block and gravel. The wall tool eats its output.",
+        "recipes": [
+          "cut_block",
+          "pour_concrete",
+          "crush_rubble",
+          "crush_slag"
+        ]
+      }
+    },
+    {
+      "id": "tannery",
+      "name": "Tannery",
+      "cat": "refine",
+      "tier": 1,
+      "w": 3,
+      "d": 2.4,
+      "h": 2.2,
+      "snap": "grid",
+      "cost": {
+        "timber": 12,
+        "clay": 6
+      },
+      "look": {
+        "kind": "shed",
+        "color": "#8a6a44"
+      },
+      "desc": "Hides to leather. Build it downwind.",
+      "station": {
+        "title": "Tannery",
+        "blurb": "Hides to leather, with lye and a great deal of water.",
+        "recipes": [
+          "tan_leather",
+          "tan_heavy"
+        ]
+      }
+    },
+    {
+      "id": "loom",
+      "name": "Loom",
+      "cat": "refine",
+      "tier": 1,
+      "w": 2.2,
+      "d": 1.4,
+      "h": 1.8,
+      "snap": "grid",
+      "cost": {
+        "timber": 8,
+        "fibre": 10
+      },
+      "look": {
+        "kind": "loom",
+        "color": "#6b4f34"
+      },
+      "desc": "Fibre to cloth, cloth to rope, rope to everything.",
+      "station": {
+        "title": "Loom",
+        "blurb": "Fibre to cloth, cloth to rope, rope to everything.",
+        "recipes": [
+          "spin_cloth",
+          "twist_rope",
+          "weave_matting",
+          "bind_sinew"
+        ]
+      }
+    },
+    {
+      "id": "chemical_bench",
+      "name": "Chemical Bench",
+      "cat": "refine",
+      "tier": 2,
+      "w": 2.4,
+      "d": 1.2,
+      "h": 1.3,
+      "snap": "grid",
+      "power": {
+        "use": 6
+      },
+      "cost": {
+        "steel": 6,
+        "glass": 6,
+        "copper": 3
+      },
+      "look": {
+        "kind": "bench",
+        "color": "#4a6a5a"
+      },
+      "desc": "Sulphur, salt and water into reagents.",
+      "station": {
+        "title": "Chemical Bench",
+        "blurb": "Sulphur, salt, ash and water into the things later machines refuse to run without.",
+        "recipes": [
+          "leach_lye",
+          "make_acid",
+          "mix_reagent",
+          "brew_coolant",
+          "pack_charge"
+        ]
+      },
+      "tech": "chemistry"
+    },
+    {
+      "id": "refinery",
+      "name": "Refinery",
+      "cat": "refine",
+      "tier": 3,
+      "w": 4,
+      "d": 3.2,
+      "h": 4.2,
+      "snap": "grid",
+      "power": {
+        "use": 40
+      },
+      "cost": {
+        "steel": 24,
+        "parts": 10,
+        "wire": 8
+      },
+      "look": {
+        "kind": "tower",
+        "color": "#6a6058"
+      },
+      "desc": "Reagents and ore into refined compounds. The tier-two gate, and loud about it.",
+      "station": {
+        "title": "Refinery",
+        "blurb": "Reagents and ore into refined compounds. It will not start without coolant and will not stay started without a real grid.",
+        "recipes": [
+          "refine_alloy",
+          "refine_composite",
+          "charge_cell"
+        ]
+      },
+      "tech": "steelwork"
+    },
+    {
+      "id": "crusher",
+      "name": "Crusher",
+      "cat": "refine",
+      "tier": 2,
+      "w": 2.6,
+      "d": 2.2,
+      "h": 2.4,
+      "snap": "grid",
+      "power": {
+        "use": 22
+      },
+      "cost": {
+        "steel": 12,
+        "parts": 4
+      },
+      "look": {
+        "kind": "machine",
+        "color": "#5a564e"
+      },
+      "desc": "Ore to dust. More metal per rock, at the cost of the grid.",
+      "station": {
+        "title": "Crusher",
+        "blurb": "Ore to dust. It costs power and buys yield — the first machine that makes a poor seam worth working.",
+        "recipes": [
+          "crush_iron",
+          "crush_copper",
+          "crush_stone"
+        ]
+      },
+      "tech": "ironworking"
+    },
+    {
+      "id": "washer",
+      "name": "Washer",
+      "cat": "refine",
+      "tier": 2,
+      "w": 2.6,
+      "d": 2.2,
+      "h": 1.8,
+      "snap": "grid",
+      "power": {
+        "use": 12
+      },
+      "cost": {
+        "steel": 8,
+        "parts": 3,
+        "copper": 4
+      },
+      "look": {
+        "kind": "machine",
+        "color": "#54606a"
+      },
+      "desc": "Dust and water to concentrate. One more step, one more yield.",
+      "station": {
+        "title": "Washer",
+        "blurb": "Dust and water to concentrate. One more step, one more yield, and where tailings come from.",
+        "recipes": [
+          "wash_iron",
+          "wash_copper",
+          "rework_tailings"
+        ]
+      },
+      "tech": "chemistry"
+    },
+    {
+      "id": "assembler",
+      "name": "Assembler",
+      "cat": "refine",
+      "tier": 3,
+      "w": 3.4,
+      "d": 3,
+      "h": 3,
+      "snap": "grid",
+      "power": {
+        "use": 34
+      },
+      "cost": {
+        "steel": 20,
+        "parts": 8,
+        "wire": 6,
+        "lens": 1
+      },
+      "look": {
+        "kind": "machine",
+        "color": "#606a72"
+      },
+      "desc": "Components into machine parts. Nothing at tier three exists without it.",
+      "station": {
+        "title": "Assembler",
+        "blurb": "Components into machine parts, and machine parts into the four things that make a ship.",
+        "recipes": [
+          "make_machine_part",
+          "make_control_board",
+          "build_hull",
+          "build_drive",
+          "build_tanks",
+          "build_avionics",
+          "build_waypoint_core",
+          "build_warp_core"
+        ],
+        "panels": [
+          "shipyard"
+        ]
+      },
+      "tech": "assembly"
+    },
+    {
+      "id": "crystal_cutter",
+      "name": "Crystal Cutter",
+      "cat": "refine",
+      "tier": 3,
+      "w": 2.6,
+      "d": 2.2,
+      "h": 2.2,
+      "snap": "grid",
+      "power": {
+        "use": 26
+      },
+      "cost": {
+        "steel": 14,
+        "parts": 5,
+        "crystal": 4
+      },
+      "look": {
+        "kind": "machine",
+        "color": "#5c6a80"
+      },
+      "desc": "Raw crystal into lenses and focusers. Everything that aims light starts here.",
+      "station": {
+        "title": "Crystal Cutter",
+        "blurb": "Glass and raw crystal into lenses and focusers. Slow on purpose: a focuser should feel expensive.",
+        "recipes": [
+          "grind_lens",
+          "grind_obsidian_lens",
+          "cut_focuser"
+        ]
+      },
+      "tech": "optics"
+    },
+    {
+      "id": "fuel_synthesiser",
+      "name": "Fuel Synthesiser",
+      "cat": "refine",
+      "tier": 3,
+      "w": 4.4,
+      "d": 3.4,
+      "h": 4.6,
+      "snap": "grid",
+      "power": {
+        "use": 55
+      },
+      "cost": {
+        "steel": 30,
+        "parts": 14,
+        "lens": 2,
+        "wire": 10
+      },
+      "look": {
+        "kind": "tower",
+        "color": "#5a6a60"
+      },
+      "desc": "The last structure before the sky opens. Every flight burns what comes out of it.",
+      "station": {
+        "title": "Fuel Synthesiser",
+        "blurb": "The last structure before the sky opens. Every flight burns what comes out of it.",
+        "recipes": [
+          "synth_fuel_gas",
+          "synth_fuel_sulphur"
+        ]
+      },
+      "tech": "propulsion"
+    },
+    {
+      "id": "small_drill",
+      "name": "Small Drill",
+      "cat": "extract",
+      "tier": 1,
+      "w": 1.6,
+      "d": 1.6,
+      "h": 2.2,
+      "snap": "grid",
+      "needs": "node",
+      "cost": {
+        "iron": 6
+      },
+      "look": {
+        "kind": "drill",
+        "color": "#7a6a52",
+        "scale": 0.62
+      },
+      "desc": "A hand-cranked rig you clamp over a seam. Slower than a real Drill and needs no power at all — six iron ingots and it works while you are somewhere else.",
+      "_r15": "R15 — \"I would like to add a Small Drill crafted out of just iron ingots for earlier game use.\" The full Drill costs 14 steel and 5 machine parts, which is most of the way down the tech tree, so there was nothing at all between swinging at a rock by hand and an industrial base. This is that rung: iron only, NO power (a generator is its own project), tier 1 so it refuses the hard seams exactly as an iron weapon does. It is automation, not a tech jump."
+    },
+    {
+      "id": "drill",
+      "name": "Drill",
+      "cat": "extract",
+      "tier": 2,
+      "w": 2.8,
+      "d": 2.8,
+      "h": 3.4,
+      "snap": "grid",
+      "needs": "node",
+      "power": {
+        "use": 18
+      },
+      "cost": {
+        "steel": 14,
+        "parts": 5
+      },
+      "look": {
+        "kind": "drill",
+        "color": "#6a6058"
+      },
+      "desc": "Stands on an ore node and works it without you. Hand-mining is slow so that this feels like a promotion.",
+      "tech": "ironworking"
+    },
+    {
+      "id": "pump",
+      "name": "Pump",
+      "cat": "extract",
+      "tier": 2,
+      "w": 2,
+      "d": 2,
+      "h": 1.8,
+      "snap": "grid",
+      "needs": "water",
+      "power": {
+        "use": 10
+      },
+      "cost": {
+        "iron": 10,
+        "parts": 2
+      },
+      "look": {
+        "kind": "machine",
+        "color": "#54606a"
+      },
+      "desc": "Water out of a river, a lake or a well, into the pool.",
+      "tech": "ironworking"
+    },
+    {
+      "id": "hauler_drone",
+      "name": "Hauler Post",
+      "cat": "store",
+      "tier": 3,
+      "w": 2,
+      "d": 2,
+      "h": 2.6,
+      "snap": "grid",
+      "power": {
+        "use": 14
+      },
+      "cost": {
+        "steel": 10,
+        "parts": 6,
+        "wire": 4
+      },
+      "look": {
+        "kind": "post",
+        "color": "#606a72"
+      },
+      "desc": "A drone and a perch for it. Carries between two pools that do not reach each other.",
+      "tech": "steelwork"
+    },
+    {
+      "id": "storage_crate",
+      "name": "Storage Box",
+      "cat": "store",
+      "tier": 1,
+      "w": 1.6,
+      "d": 1.6,
+      "h": 1.4,
+      "snap": "grid",
+      "store": {
+        "slots": 6
+      },
+      "cost": {
+        "plank": 6
+      },
+      "look": {
+        "kind": "crates",
+        "color": "#7a5c3a"
+      },
+      "desc": "Six slots and no metal in it anywhere. The first store you build — anything within reach of one shares its pile.",
+      "_r17": "R17 — \"Update the Storage Crate so it only requires 6 plank, no iron ingot (the onboarding quest says to build one before a forge).\" The one ingot was the whole wall: an ingot is a furnace away and the onboarding asks for this first. THE ID IS DELIBERATELY UNCHANGED. Every save in existence files its crates as `storage_crate` — in the build ledger, in the store network and in the power book — and renaming the id would strand all three. What the player reads is the name; what the save depends on is the id, and only one of those had to move."
+    },
+    {
+      "id": "storage_chest",
+      "name": "Storage Chest",
+      "cat": "store",
+      "tier": 1,
+      "w": 2.0,
+      "d": 1.4,
+      "h": 1.3,
+      "snap": "grid",
+      "store": {
+        "slots": 20
+      },
+      "cost": {
+        "plank": 8,
+        "iron": 2
+      },
+      "look": {
+        "kind": "crates",
+        "color": "#6a4a2c"
+      },
+      "desc": "Twenty slots, banded and pegged. Three times a Storage Box for two iron ingots — the upgrade you build the day you can smelt.",
+      "_r17": "\"add a mid-tier 'Storage Chest' that requires 2 iron ingot that has more storage\". Its capacity is exactly what the old Storage Crate's was, so nothing about a settled base's throughput changes — what changed is that there is now a rung BELOW it you can reach with no metal at all."
+    },
+    {
+      "id": "storage_silo",
+      "name": "Storage Silo",
+      "cat": "store",
+      "tier": 2,
+      "w": 3,
+      "d": 3,
+      "h": 5,
+      "snap": "grid",
+      "store": {
+        "slots": 90
+      },
+      "cost": {
+        "block": 18,
+        "steel": 8
+      },
+      "look": {
+        "kind": "silo",
+        "color": "#8e8a80"
+      },
+      "desc": "Bulk. Stone, ore and grain, and the reason the pool idea beats belts.",
+      "tech": "ironworking"
+    },
+    {
+      "id": "fluid_tank",
+      "name": "Fluid Tank",
+      "cat": "store",
+      "tier": 2,
+      "w": 2.2,
+      "d": 2.2,
+      "h": 3.0,
+      "snap": "grid",
+      "store": {
+        "slots": 30,
+        "accepts": [
+          "fluid"
+        ]
+      },
+      "cost": {
+        "steel": 12,
+        "resin": 6,
+        "parts": 1
+      },
+      "look": {
+        "kind": "silo",
+        "color": "#6f8a96"
+      },
+      "desc": "Water, coolant, acid, fuel. The only store that will take a liquid — a wooden box just gets wet.",
+      "tech": "ironworking",
+      "_r18": "R18 — data/power.json has carried a full spec for this (cap, linkRadius, accepts, a build cost and a desc) since the building expansion landed, and there has never been a row here, so it could not be built. That did not show while `kindOf()` was broken: js/main.js handed createStoreNetwork the whole of resources.json instead of its `materials` block, every resource came back `'refined'`, and a wooden crate cheerfully held water. Fixing that turned the accept rules on and left the game with NO buildable store that takes a fluid or a gas — and js/refine.js sources machine inputs only from the pool, never the bag, so thirteen recipes (cook_meat, bake_grain, pour_concrete, tan_leather, tan_heavy, leach_lye, make_acid, brew_coolant, wash_iron, wash_copper, synth_fuel_gas, synth_fuel_sulphur, melt_ice) could never run. Cost and tier are power.json's own numbers, written in the catalogue's vocabulary (see MATERIAL_ALIASES in js/buildplan.js)."
+    },
+    {
+      "id": "gas_tank",
+      "name": "Gas Tank",
+      "cat": "store",
+      "tier": 2,
+      "w": 2.0,
+      "d": 2.0,
+      "h": 3.4,
+      "snap": "grid",
+      "store": {
+        "slots": 20,
+        "accepts": [
+          "gas"
+        ]
+      },
+      "cost": {
+        "steel": 16,
+        "parts": 2,
+        "crystal": 1
+      },
+      "look": {
+        "kind": "silo",
+        "color": "#9a8f6f"
+      },
+      "desc": "Pressurised. The only thing a vent collector can deliver into.",
+      "tech": "ironworking",
+      "_r18": "R18 — data/power.json has carried a full spec for this (cap, linkRadius, accepts, a build cost and a desc) since the building expansion landed, and there has never been a row here, so it could not be built. That did not show while `kindOf()` was broken: js/main.js handed createStoreNetwork the whole of resources.json instead of its `materials` block, every resource came back `'refined'`, and a wooden crate cheerfully held water. Fixing that turned the accept rules on and left the game with NO buildable store that takes a fluid or a gas — and js/refine.js sources machine inputs only from the pool, never the bag, so thirteen recipes (cook_meat, bake_grain, pour_concrete, tan_leather, tan_heavy, leach_lye, make_acid, brew_coolant, wash_iron, wash_copper, synth_fuel_gas, synth_fuel_sulphur, melt_ice) could never run. Cost and tier are power.json's own numbers, written in the catalogue's vocabulary (see MATERIAL_ALIASES in js/buildplan.js). power.json prices it with a `composite_plate`, which is a real material but not one the catalogue's vocabulary declares; the nearest catalogue word for the same rung is `crystal` (crystal_raw), which the Gas Tank's lens-like pressure gauge can stand in for without inventing an alias."
+    },
+    {
+      "id": "logistics_pole",
+      "name": "Logistics Pole",
+      "cat": "store",
+      "tier": 1,
+      "w": 0.6,
+      "d": 0.6,
+      "h": 4.4,
+      "snap": "grid",
+      "pool": {
+        "relay": true
+      },
+      "cost": {
+        "timber": 4,
+        "iron": 2,
+        "cloth": 1
+      },
+      "look": {
+        "kind": "post",
+        "color": "#6b4f34"
+      },
+      "desc": "Draws the pool's edge on the ground. Stores inside it share everything.",
+      "_r18": "R18 — this carried `pool: { radius: 40 }` while data/power.json's `poles.logistics_pole.linkRadius` says 22, and js/stores.js `defFor` reads power.json. So the 40 was the dead half of a number stated twice. Per the ruling that power.json owns reach and this file owns cost, the number is gone and `pool` is now just the flag that says THIS IS A RELAY — which is what js/main.js `joinSystems` reads to put it in the store network at all. Before that it joined nothing: no `store.slots`, no `power`, so the piece whose whole job is 'everything inside the ring shares one pile' shared nothing."
+    },
+    {
+      "id": "burner_generator",
+      "name": "Burner Generator",
+      "cat": "power",
+      "tier": 1,
+      "w": 2.6,
+      "d": 2,
+      "h": 2.2,
+      "snap": "grid",
+      "power": {
+        "make": 30,
+        "burns": "coal"
+      },
+      "cost": {
+        "iron": 12,
+        "stone": 8
+      },
+      "look": {
+        "kind": "machine",
+        "color": "#5a4a3a"
+      },
+      "light": {
+        "range": 8,
+        "intensity": 0.9,
+        "color": "#ff7030",
+        "y": 1
+      },
+      "desc": "Coal in, power out, smoke everywhere. Duty-cycles down when the grid is idle."
+    },
+    {
+      "id": "wind_turbine",
+      "name": "Wind Turbine",
+      "cat": "power",
+      "tier": 2,
+      "w": 2,
+      "d": 2,
+      "h": 9,
+      "snap": "grid",
+      "power": {
+        "make": 22,
+        "weather": "wind"
+      },
+      "cost": {
+        "steel": 12,
+        "parts": 3,
+        "cloth": 4
+      },
+      "look": {
+        "kind": "turbine",
+        "color": "#b8b4ac"
+      },
+      "desc": "Free power when the weather agrees, which on some worlds is never.",
+      "tech": "wiring"
+    },
+    {
+      "id": "solar_array",
+      "name": "Solar Array",
+      "cat": "power",
+      "tier": 2,
+      "w": 4,
+      "d": 4,
+      "h": 1,
+      "snap": "grid",
+      "slope": 0.1,
+      "power": {
+        "make": 26,
+        "weather": "sun"
+      },
+      "cost": {
+        "steel": 8,
+        "glass": 12,
+        "wire": 6
+      },
+      "look": {
+        "kind": "panel",
+        "color": "#3a4a66"
+      },
+      "desc": "Nothing at night — which is what makes a battery bank a real decision.",
+      "tech": "wiring"
+    },
+    {
+      "id": "geothermal_tap",
+      "name": "Geothermal Tap",
+      "cat": "power",
+      "tier": 3,
+      "w": 3.4,
+      "d": 3.4,
+      "h": 3.2,
+      "snap": "grid",
+      "needs": "vent",
+      "power": {
+        "make": 70
+      },
+      "cost": {
+        "steel": 22,
+        "parts": 10,
+        "alloy": 6
+      },
+      "look": {
+        "kind": "tower",
+        "color": "#6a5a50"
+      },
+      "desc": "Sunk into a vent. Steady day and night, and only some worlds have one.",
+      "tech": "steelwork"
+    },
+    {
+      "id": "battery_bank",
+      "name": "Battery Bank",
+      "cat": "power",
+      "tier": 2,
+      "w": 2.6,
+      "d": 1.6,
+      "h": 1.8,
+      "snap": "grid",
+      "power": {
+        "store": 400
+      },
+      "cost": {
+        "copper": 14,
+        "wire": 10,
+        "parts": 2
+      },
+      "look": {
+        "kind": "machine",
+        "color": "#4a5a50"
+      },
+      "desc": "Carries the night for the solar array, and the gap between waves for the turrets.",
+      "tech": "wiring"
+    },
+    {
+      "id": "power_pole",
+      "name": "Power Pole",
+      "cat": "power",
+      "tier": 1,
+      "w": 0.5,
+      "d": 0.5,
+      "h": 6,
+      "snap": "grid",
+      "power": {
+        "reach": 28
+      },
+      "cost": {
+        "timber": 4,
+        "copper": 2
+      },
+      "look": {
+        "kind": "post",
+        "color": "#5a432c"
+      },
+      "desc": "Carries the grid. You should be able to see what is connected, and this is how.",
+      "_r17": "R17, and it is round 13's rule again: a tier-1 Power Pole cost two `wire`, and wire is drawn on a SMELTER, which needs power, which needs poles. The first pole in the game could not be built by any honest route. Copper comes straight out of a furnace, which is the rung this piece actually sits on."
+    },
+    {
+      "id": "palisade",
+      "name": "Palisade",
+      "cat": "defence",
+      "tier": 1,
+      "w": 2,
+      "d": 0.5,
+      "h": 2.6,
+      "snap": "grid",
+      "run": true,
+      "hp": 400,
+      "cost": {
+        "timber": 6
+      },
+      "look": {
+        "kind": "palisade",
+        "color": "#6b4f34"
+      },
+      "desc": "Sharpened stakes in a ditch. Tier one of three, and better than nothing by a long way."
+    },
+    {
+      "id": "stone_wall",
+      "name": "Stone Wall",
+      "cat": "defence",
+      "tier": 2,
+      "w": 2,
+      "d": 0.8,
+      "h": 3.2,
+      "snap": "grid",
+      "run": true,
+      "hp": 1200,
+      "cost": {
+        "block": 10
+      },
+      "look": {
+        "kind": "wall",
+        "color": "#8e8a80"
+      },
+      "desc": "Cut block, coursed. Stops most things that walk."
+    },
+    {
+      "id": "reinforced_wall",
+      "name": "Reinforced Wall",
+      "cat": "defence",
+      "tier": 3,
+      "w": 2,
+      "d": 1,
+      "h": 3.6,
+      "snap": "grid",
+      "run": true,
+      "hp": 3000,
+      "cost": {
+        "block": 10,
+        "steel": 6
+      },
+      "look": {
+        "kind": "wall",
+        "color": "#7a7a74"
+      },
+      "desc": "Block with a steel spine. Stops the things that do not walk.",
+      "tech": "ironworking"
+    },
+    {
+      "id": "gate",
+      "name": "Gate",
+      "cat": "defence",
+      "tier": 2,
+      "w": 4,
+      "d": 1,
+      "h": 3.6,
+      "snap": "grid",
+      "gate": true,
+      "hp": 900,
+      "cost": {
+        "timber": 10,
+        "steel": 6
+      },
+      "look": {
+        "kind": "gate",
+        "color": "#5a432c"
+      },
+      "desc": "Opens for you, and not for them. Put it where your road crosses your wall."
+    },
+    {
+      "id": "watchtower",
+      "name": "Watchtower",
+      "cat": "defence",
+      "tier": 2,
+      "w": 3,
+      "d": 3,
+      "h": 8,
+      "snap": "grid",
+      "hp": 800,
+      "perch": true,
+      "cost": {
+        "timber": 18,
+        "plank": 10,
+        "iron": 4
+      },
+      "look": {
+        "kind": "tower",
+        "color": "#6b4f34"
+      },
+      "light": {
+        "range": 24,
+        "intensity": 1.6,
+        "color": "#ffc070",
+        "y": 7.4
+      },
+      "desc": "Line of sight, and somewhere a hired archer can actually stand.",
+      "defence": {
+        "range": 30,
+        "damage": 7,
+        "every": 1.4,
+        "splash": 0
+      }
+    },
+    {
+      "id": "arrow_turret",
+      "name": "Arrow Turret",
+      "cat": "defence",
+      "tier": 1,
+      "w": 1.4,
+      "d": 1.4,
+      "h": 2.2,
+      "snap": "grid",
+      "hp": 300,
+      "turret": {
+        "range": 30,
+        "dps": 14,
+        "rate": 1.4,
+        "ammo": "arrow"
+      },
+      "cost": {
+        "timber": 8,
+        "iron": 4,
+        "rope": 2
+      },
+      "look": {
+        "kind": "turret",
+        "color": "#6b4f34"
+      },
+      "desc": "Cheap, fast, and individually unimpressive. Build six.",
+      "defence": {
+        "range": 26,
+        "damage": 11,
+        "every": 1.0,
+        "splash": 0
+      }
+    },
+    {
+      "id": "ballista_turret",
+      "name": "Ballista Turret",
+      "cat": "defence",
+      "tier": 2,
+      "w": 2.4,
+      "d": 2.4,
+      "h": 2.6,
+      "snap": "grid",
+      "hp": 500,
+      "turret": {
+        "range": 52,
+        "dps": 46,
+        "rate": 0.3,
+        "ammo": "bolt"
+      },
+      "cost": {
+        "timber": 14,
+        "steel": 8,
+        "rope": 4
+      },
+      "look": {
+        "kind": "turret",
+        "color": "#5a432c"
+      },
+      "desc": "Slow, heavy, one target at a time. What you point at the big one.",
+      "defence": {
+        "range": 34,
+        "damage": 30,
+        "every": 2.6,
+        "splash": 0
+      },
+      "tech": "ironworking"
+    },
+    {
+      "id": "flame_turret",
+      "name": "Flame Turret",
+      "cat": "defence",
+      "tier": 2,
+      "w": 1.8,
+      "d": 1.8,
+      "h": 1.8,
+      "snap": "grid",
+      "hp": 380,
+      "turret": {
+        "range": 14,
+        "dps": 30,
+        "area": 5,
+        "ammo": "fuel"
+      },
+      "power": {
+        "use": 8
+      },
+      "cost": {
+        "steel": 10,
+        "parts": 2,
+        "copper": 4
+      },
+      "look": {
+        "kind": "turret",
+        "color": "#7a4a30"
+      },
+      "desc": "Short reach, wide cone, superb against a pack and useless against one big thing.",
+      "defence": {
+        "range": 14,
+        "damage": 9,
+        "every": 0.7,
+        "splash": 3.5,
+        "element": "fire"
+      },
+      "tech": "wiring"
+    },
+    {
+      "id": "frost_turret",
+      "name": "Frost Turret",
+      "cat": "defence",
+      "tier": 3,
+      "w": 1.8,
+      "d": 1.8,
+      "h": 2,
+      "snap": "grid",
+      "hp": 380,
+      "turret": {
+        "range": 22,
+        "dps": 8,
+        "slow": 0.45,
+        "area": 6
+      },
+      "power": {
+        "use": 14
+      },
+      "cost": {
+        "steel": 10,
+        "crystal": 4,
+        "wire": 4
+      },
+      "look": {
+        "kind": "turret",
+        "color": "#5c7a90"
+      },
+      "desc": "Barely scratches anything. Slows everything — the only crowd control you get.",
+      "defence": {
+        "range": 20,
+        "damage": 12,
+        "every": 1.3,
+        "splash": 2.5,
+        "element": "frost"
+      },
+      "tech": "wiring"
+    },
+    {
+      "id": "tesla_coil",
+      "name": "Arc Coil",
+      "cat": "defence",
+      "tier": 3,
+      "w": 2,
+      "d": 2,
+      "h": 4.4,
+      "snap": "grid",
+      "hp": 420,
+      "turret": {
+        "range": 26,
+        "dps": 38,
+        "chains": 4
+      },
+      "power": {
+        "use": 40
+      },
+      "cost": {
+        "steel": 14,
+        "wire": 18,
+        "lens": 1
+      },
+      "look": {
+        "kind": "coil",
+        "color": "#6a7a90"
+      },
+      "light": {
+        "range": 14,
+        "intensity": 1.2,
+        "color": "#9ec8ff",
+        "y": 4,
+        "flicker": true
+      },
+      "desc": "Jumps from one to the next. Expensive, and it will take your grid down if you build two.",
+      "defence": {
+        "range": 24,
+        "damage": 34,
+        "every": 1.8,
+        "splash": 4.5,
+        "element": "shock"
+      },
+      "tech": "optics"
+    },
+    {
+      "id": "spike_trap",
+      "name": "Spike Trap",
+      "cat": "defence",
+      "tier": 1,
+      "w": 2,
+      "d": 2,
+      "h": 0.4,
+      "snap": "floor",
+      "hp": 120,
+      "trap": {
+        "dps": 12,
+        "area": 2
+      },
+      "cost": {
+        "timber": 4,
+        "iron": 3
+      },
+      "look": {
+        "kind": "spikes",
+        "color": "#5a5248"
+      },
+      "desc": "Area denial for the price of a fence panel."
+    },
+    {
+      "id": "caltrops",
+      "name": "Caltrops",
+      "cat": "defence",
+      "tier": 1,
+      "w": 2,
+      "d": 2,
+      "h": 0.15,
+      "snap": "floor",
+      "hp": 60,
+      "trap": {
+        "dps": 4,
+        "slow": 0.3,
+        "area": 2
+      },
+      "cost": {
+        "iron": 3
+      },
+      "look": {
+        "kind": "flat",
+        "color": "#6a6258"
+      },
+      "desc": "Scattered iron. Slows a charge to a walk."
+    },
+    {
+      "id": "pit_trap",
+      "name": "Pit Trap",
+      "cat": "defence",
+      "tier": 2,
+      "w": 3,
+      "d": 3,
+      "h": 0.2,
+      "snap": "floor",
+      "flatten": "pit",
+      "hp": 150,
+      "trap": {
+        "dps": 30,
+        "hold": 2.5,
+        "area": 3
+      },
+      "cost": {
+        "timber": 6,
+        "fibre": 4
+      },
+      "look": {
+        "kind": "flat",
+        "color": "#4a4438"
+      },
+      "desc": "The terrain tool and a cover over it. Digs itself when you place it."
+    },
+    {
+      "id": "barricade",
+      "name": "Barricade",
+      "cat": "defence",
+      "tier": 1,
+      "w": 2,
+      "d": 0.8,
+      "h": 1.4,
+      "snap": "grid",
+      "run": true,
+      "hp": 250,
+      "blocks": true,
+      "cost": {
+        "timber": 5
+      },
+      "look": {
+        "kind": "barricade",
+        "color": "#6b4f34"
+      },
+      "desc": "Does not stop them; sends them the long way round. The primitive the whole defence rests on."
+    },
+    {
+      "id": "repair_station",
+      "name": "Repair Station",
+      "cat": "defence",
+      "tier": 2,
+      "w": 2.2,
+      "d": 2,
+      "h": 2.2,
+      "snap": "grid",
+      "hp": 300,
+      "power": {
+        "use": 12
+      },
+      "repairs": {
+        "radius": 30,
+        "rate": 25
+      },
+      "cost": {
+        "steel": 10,
+        "parts": 4
+      },
+      "look": {
+        "kind": "machine",
+        "color": "#5a6a60"
+      },
+      "desc": "Patches structures between waves so you can watch the fight instead of the hammer.",
+      "tech": "wiring"
+    },
+    {
+      "id": "alarm_bell",
+      "name": "Alarm Bell",
+      "cat": "defence",
+      "tier": 1,
+      "w": 1.4,
+      "d": 1.4,
+      "h": 3.6,
+      "snap": "grid",
+      "hp": 200,
+      "alarm": true,
+      "cost": {
+        "timber": 8,
+        "copper": 6
+      },
+      "look": {
+        "kind": "bell",
+        "color": "#a08040"
+      },
+      "desc": "Early warning — and ring it yourself to start the wave on your terms, for a better purse."
+    },
+    {
+      "id": "guard_post",
+      "name": "Guard Post",
+      "cat": "defence",
+      "tier": 2,
+      "w": 2,
+      "d": 2,
+      "h": 2.4,
+      "snap": "grid",
+      "hp": 350,
+      "hires": 2,
+      "cost": {
+        "timber": 10,
+        "plank": 6
+      },
+      "look": {
+        "kind": "shed",
+        "color": "#6b4f34"
+      },
+      "desc": "A brazier, a roof and two stools. Spend gold instead of materials and somebody stands here.",
+      "defence": {
+        "range": 18,
+        "damage": 9,
+        "every": 1.2,
+        "splash": 0
+      }
+    },
+    {
+      "id": "shield_pylon",
+      "name": "Shield Pylon",
+      "cat": "defence",
+      "tier": 3,
+      "w": 1.6,
+      "d": 1.6,
+      "h": 3.8,
+      "snap": "grid",
+      "hp": 400,
+      "power": {
+        "use": 30
+      },
+      "shield": {
+        "radius": 26,
+        "absorb": 4000
+      },
+      "cost": {
+        "steel": 12,
+        "crystal": 5,
+        "lens": 1
+      },
+      "look": {
+        "kind": "pylon",
+        "color": "#5c6a80"
+      },
+      "light": {
+        "range": 18,
+        "intensity": 1.1,
+        "color": "#9ec8ff",
+        "y": 3.4,
+        "flicker": false
+      },
+      "desc": "Eats a fixed amount of damage per wave and then goes dark. Buys you a minute, which is usually enough.",
+      "tech": "optics"
+    },
+    {
+      "id": "ammo_hopper",
+      "name": "Ammo Hopper",
+      "cat": "defence",
+      "tier": 2,
+      "w": 1.6,
+      "d": 1.6,
+      "h": 1.8,
+      "snap": "grid",
+      "hp": 200,
+      "feeds": {
+        "radius": 22,
+        "rate": 1.35
+      },
+      "cost": {
+        "plank": 6,
+        "iron": 6
+      },
+      "look": {
+        "kind": "crates",
+        "color": "#6a6058"
+      },
+      "desc": "Turrets need feeding. This is where the logistics pool stops being an abstraction.",
+      "_r18": "R18 — `feeds` was read by nothing at all. There is no ammunition in Farhold (R16 removed it), so what a hopper honestly buys is RATE: a turret inside its radius reloads 35% faster. `rate` lives here so it is tunable without touching js/defence.js."
+    },
+    {
+      "id": "foundation",
+      "name": "Foundation Slab",
+      "cat": "road",
+      "tier": 1,
+      "w": 4,
+      "d": 4,
+      "h": 0.25,
+      "snap": "floor",
+      "flatten": "slab",
+      "cost": {
+        "stone": 8,
+        "clay": 2
+      },
+      "look": {
+        "kind": "slab",
+        "color": "#8a8680"
+      },
+      "desc": "Flatten and floor in one action. Everything else stands on these."
+    },
+    {
+      "id": "road_dirt",
+      "name": "Dirt Track",
+      "cat": "road",
+      "tier": 1,
+      "w": 4,
+      "d": 4,
+      "h": 0.06,
+      "snap": "floor",
+      "run": true,
+      "road": {
+        "half": 2,
+        "surface": "dirt"
+      },
+      "flatten": "strip",
+      "cost": {
+        "stone": 1
+      },
+      "look": {
+        "kind": "flat",
+        "color": "#6a5a44"
+      },
+      "desc": "Painted, not placed. Flattens under itself and joins the world's own road graph."
+    },
+    {
+      "id": "road_gravel",
+      "name": "Gravel Road",
+      "cat": "road",
+      "tier": 1,
+      "w": 5,
+      "d": 5,
+      "h": 0.08,
+      "snap": "floor",
+      "run": true,
+      "road": {
+        "half": 2.5,
+        "surface": "gravel"
+      },
+      "flatten": "strip",
+      "cost": {
+        "stone": 3
+      },
+      "look": {
+        "kind": "flat",
+        "color": "#7a7468"
+      },
+      "desc": "Drains, and does not turn to soup in the rain."
+    },
+    {
+      "id": "road_cobble",
+      "name": "Cobbled Road",
+      "cat": "road",
+      "tier": 2,
+      "w": 6,
+      "d": 6,
+      "h": 0.1,
+      "snap": "floor",
+      "run": true,
+      "road": {
+        "half": 3,
+        "surface": "cobble"
+      },
+      "flatten": "strip",
+      "cost": {
+        "block": 4
+      },
+      "look": {
+        "kind": "flat",
+        "color": "#8e8a80"
+      },
+      "desc": "Set stone with a kerb. Traffic from the real road will use it."
+    },
+    {
+      "id": "claim_stone",
+      "name": "Outpost Marker",
+      "cat": "waypoint",
+      "tier": 1,
+      "w": 1.2,
+      "d": 1.2,
+      "h": 1.8,
+      "snap": "grid",
+      "claims": true,
+      "cost": {
+        "stone": 12
+      },
+      "look": {
+        "kind": "statue",
+        "color": "#8e8a80"
+      },
+      "desc": "Optional. Names the outpost it stands in and marks its middle, which is where a raid comes. Round 14: it does not permit anything — you can build anywhere without one."
+    },
+    {
+      "id": "waypoint_pad",
+      "name": "Waypoint Pad",
+      "cat": "waypoint",
+      "tier": 3,
+      "w": 7,
+      "d": 7,
+      "h": 0.35,
+      "snap": "floor",
+      "flatten": "slab",
+      "slope": 0.06,
+      "waypoint": true,
+      "hp": 2000,
+      "power": {
+        "use": 25
+      },
+      "cost": {
+        "concrete": 30,
+        "waypoint_core": 1,
+        "crystal": 4,
+        "steel": 10
+      },
+      "look": {
+        "kind": "waypointpad",
+        "color": "#8d8a84"
+      },
+      "light": {
+        "range": 22,
+        "intensity": 1.8,
+        "color": "#7fd0ff",
+        "y": 0.5,
+        "flicker": false
+      },
+      "desc": "The same round concrete pad and the same sigil ring as every other waypoint in the network — because it IS the network. Needs a seated core and a live grid, or the sigils go dark and nobody can travel to it.",
+      "tech": "propulsion"
+    },
+    {
+      "id": "bedroll",
+      "name": "Bedroll",
+      "cat": "home",
+      "tier": 1,
+      "w": 2,
+      "d": 1,
+      "h": 0.3,
+      "snap": "grid",
+      "home": {
+        "beds": 1,
+        "comfort": 0
+      },
+      "look": {
+        "kind": "bed",
+        "color": "#6a5f4a"
+      },
+      "cost": {
+        "cloth": 3,
+        "fibre": 4
+      },
+      "desc": "A roll and a blanket on the ground. Somebody will sleep on it, and they will not thank you."
+    },
+    {
+      "id": "bunkhouse",
+      "name": "Bunkhouse",
+      "cat": "home",
+      "tier": 1,
+      "w": 6,
+      "d": 4,
+      "h": 3.2,
+      "snap": "grid",
+      "flatten": "slab",
+      "hp": 500,
+      "home": {
+        "beds": 4,
+        "comfort": 0.15
+      },
+      "look": {
+        "kind": "shed",
+        "color": "#6b4f34"
+      },
+      "cost": {
+        "timber": 28,
+        "plank": 12,
+        "cloth": 8
+      },
+      "desc": "Four bunks and a stove. The cheapest way to put four workers next to the furnaces."
+    },
+    {
+      "id": "cottage",
+      "name": "Cottage",
+      "cat": "home",
+      "tier": 2,
+      "w": 5,
+      "d": 4.5,
+      "h": 3.6,
+      "snap": "grid",
+      "flatten": "slab",
+      "hp": 600,
+      "home": {
+        "beds": 2,
+        "comfort": 0.35
+      },
+      "look": {
+        "kind": "house",
+        "color": "#8a7a5c"
+      },
+      "cost": {
+        "timber": 20,
+        "plank": 14,
+        "block": 8,
+        "glass": 2
+      },
+      "desc": "Two beds, a window and a door that shuts. The first house anybody is glad to be given."
+    },
+    {
+      "id": "longhouse",
+      "name": "Longhouse",
+      "cat": "home",
+      "tier": 2,
+      "w": 9,
+      "d": 5,
+      "h": 4,
+      "snap": "grid",
+      "flatten": "slab",
+      "hp": 800,
+      "home": {
+        "beds": 5,
+        "comfort": 0.3
+      },
+      "look": {
+        "kind": "hall",
+        "color": "#7a6244"
+      },
+      "cost": {
+        "plank": 30,
+        "beam": 8,
+        "block": 16,
+        "glass": 4
+      },
+      "desc": "One long room, five beds down one side. More people per plot than anything else you can raise."
+    },
+    {
+      "id": "row_house",
+      "name": "Row House",
+      "cat": "home",
+      "tier": 3,
+      "w": 5,
+      "d": 6,
+      "h": 5.4,
+      "snap": "grid",
+      "flatten": "slab",
+      "hp": 900,
+      "home": {
+        "beds": 3,
+        "comfort": 0.45
+      },
+      "look": {
+        "kind": "house",
+        "color": "#8e7b66"
+      },
+      "cost": {
+        "brick": 26,
+        "plank": 16,
+        "glass": 6
+      },
+      "desc": "Two storeys of brick with a chimney. Builds a street rather than a camp."
+    },
+    {
+      "id": "manor",
+      "name": "Manor",
+      "cat": "home",
+      "tier": 3,
+      "w": 11,
+      "d": 8,
+      "h": 6.4,
+      "snap": "grid",
+      "flatten": "slab",
+      "hp": 1400,
+      "home": {
+        "beds": 6,
+        "comfort": 0.6
+      },
+      "look": {
+        "kind": "hall",
+        "color": "#94826a"
+      },
+      "cost": {
+        "brick": 48,
+        "beam": 14,
+        "glass": 12,
+        "iron": 8
+      },
+      "desc": "The best bed in the holding, six times over. A trader who would not look at a bunkhouse will live here."
+    },
+    {
+      "id": "hearth",
+      "name": "Common Hearth",
+      "cat": "home",
+      "tier": 1,
+      "w": 2.2,
+      "d": 2.2,
+      "h": 1.4,
+      "snap": "grid",
+      "utility": {
+        "kind": "warmth",
+        "radius": 16,
+        "comfort": 0.15
+      },
+      "light": {
+        "range": 18,
+        "intensity": 1.5,
+        "color": "#ff8a40",
+        "y": 1
+      },
+      "look": {
+        "kind": "firepit",
+        "color": "#6a5a4a"
+      },
+      "cost": {
+        "block": 10,
+        "timber": 6
+      },
+      "desc": "A fire that is never allowed to go out. Warmth for every house within sixteen metres, and light for the street."
+    },
+    {
+      "id": "larder",
+      "name": "Larder",
+      "cat": "home",
+      "tier": 1,
+      "w": 3,
+      "d": 2.4,
+      "h": 2.4,
+      "snap": "grid",
+      "hp": 300,
+      "utility": {
+        "kind": "food",
+        "radius": 20,
+        "comfort": 0.12
+      },
+      "look": {
+        "kind": "shed",
+        "color": "#7a6a52"
+      },
+      "cost": {
+        "plank": 14,
+        "block": 6
+      },
+      "desc": "Cold stone shelves and a heavy door. Somewhere the day's food is not the day's worry."
+    },
+    {
+      "id": "wash_house",
+      "name": "Wash House",
+      "cat": "home",
+      "tier": 2,
+      "w": 4,
+      "d": 3,
+      "h": 2.8,
+      "snap": "grid",
+      "hp": 400,
+      "utility": {
+        "kind": "wash",
+        "radius": 18,
+        "comfort": 0.14,
+        "needsKind": "water"
+      },
+      "look": {
+        "kind": "shed",
+        "color": "#8a8478"
+      },
+      "cost": {
+        "brick": 16,
+        "plank": 8,
+        "copper": 4
+      },
+      "desc": "Coppers, a drain and a line outside. Useless without a well within reach of it."
+    },
+    {
+      "id": "privy",
+      "name": "Privy",
+      "cat": "home",
+      "tier": 1,
+      "w": 1.2,
+      "d": 1.2,
+      "h": 2.2,
+      "snap": "grid",
+      "utility": {
+        "kind": "sanitation",
+        "radius": 14,
+        "comfort": 0.1
+      },
+      "look": {
+        "kind": "shed",
+        "color": "#6b5a42"
+      },
+      "cost": {
+        "plank": 8
+      },
+      "desc": "The cheapest point of comfort in the game, and the one nobody thinks to build."
+    },
+    {
+      "id": "oven_house",
+      "name": "Oven House",
+      "cat": "home",
+      "tier": 2,
+      "w": 3.4,
+      "d": 3,
+      "h": 3,
+      "snap": "grid",
+      "hp": 450,
+      "utility": {
+        "kind": "bread",
+        "radius": 18,
+        "comfort": 0.16
+      },
+      "light": {
+        "range": 10,
+        "intensity": 0.9,
+        "color": "#ff9050",
+        "y": 1.2
+      },
+      "look": {
+        "kind": "kiln",
+        "color": "#8c6a50"
+      },
+      "cost": {
+        "brick": 18,
+        "iron": 4
+      },
+      "desc": "A brick oven under a roof. Bakes rations, and the whole street smells of it."
+    },
+    {
+      "id": "shrine_post",
+      "name": "Shrine Post",
+      "cat": "home",
+      "tier": 2,
+      "w": 1,
+      "d": 1,
+      "h": 2.4,
+      "snap": "grid",
+      "utility": {
+        "kind": "quiet",
+        "radius": 22,
+        "comfort": 0.12
+      },
+      "look": {
+        "kind": "statue",
+        "color": "#9a9488"
+      },
+      "cost": {
+        "block": 8,
+        "crystal": 1
+      },
+      "desc": "A carved post with a light in it. Nobody will tell you what it is for and everybody minds if you move it."
+    },
+    {
+      "id": "meeting_hall",
+      "name": "Meeting Hall",
+      "cat": "home",
+      "tier": 3,
+      "w": 8,
+      "d": 6,
+      "h": 5,
+      "snap": "grid",
+      "flatten": "slab",
+      "hp": 1100,
+      "utility": {
+        "kind": "gather",
+        "radius": 30,
+        "comfort": 0.22
+      },
+      "board": true,
+      "look": {
+        "kind": "hall",
+        "color": "#85745a"
+      },
+      "cost": {
+        "beam": 12,
+        "plank": 30,
+        "glass": 6
+      },
+      "desc": "One big room with benches round the walls. Traders post their offers here, and so does whoever is running the muster."
+    },
+    {
+      "id": "stable",
+      "name": "Stable",
+      "cat": "home",
+      "tier": 2,
+      "w": 7,
+      "d": 4.5,
+      "h": 3.4,
+      "snap": "grid",
+      "flatten": "slab",
+      "hp": 550,
+      "look": {
+        "kind": "shed",
+        "color": "#6f5a3e"
+      },
+      "cost": {
+        "timber": 24,
+        "plank": 12,
+        "rope": 6
+      },
+      "desc": "Six stalls, a feed bin and a yard. A drover will not set up anywhere else."
+    },
+    {
+      "id": "watch_post",
+      "name": "Watch Post",
+      "cat": "defence",
+      "tier": 1,
+      "w": 2,
+      "d": 2,
+      "h": 2.6,
+      "snap": "grid",
+      "hp": 350,
+      "post": {
+        "slots": 2
+      },
+      "look": {
+        "kind": "shed",
+        "color": "#6b4f34"
+      },
+      "cost": {
+        "timber": 12,
+        "iron": 4
+      },
+      "desc": "A roof, a brazier and somewhere to lean a spear. It has no weapon of its own — it is a place for a person to stand."
+    },
+    {
+      "id": "guard_tower",
+      "name": "Guard Tower",
+      "cat": "defence",
+      "tier": 2,
+      "w": 3,
+      "d": 3,
+      "h": 8,
+      "snap": "grid",
+      "hp": 900,
+      "perch": true,
+      "post": {
+        "slots": 3,
+        "reachBonus": 4
+      },
+      "look": {
+        "kind": "tower",
+        "color": "#8e8a80"
+      },
+      "cost": {
+        "block": 18,
+        "timber": 10,
+        "iron": 6
+      },
+      "desc": "Eight metres of it. Whoever stands up there reaches four metres further than they would on the ground."
+    },
+    {
+      "id": "gate_house",
+      "name": "Gate House",
+      "cat": "defence",
+      "tier": 2,
+      "w": 4,
+      "d": 3,
+      "h": 4.4,
+      "snap": "grid",
+      "hp": 1000,
+      "gate": true,
+      "post": {
+        "slots": 2
+      },
+      "look": {
+        "kind": "gate",
+        "color": "#8e8a80"
+      },
+      "cost": {
+        "block": 24,
+        "timber": 12,
+        "iron": 8
+      },
+      "desc": "A gate with somebody in it. Raiders stop at a manned gate instead of walking through the gap beside it."
+    },
+    {
+      "id": "muster_stone",
+      "name": "Muster Stone",
+      "cat": "defence",
+      "tier": 1,
+      "w": 1.6,
+      "d": 1.6,
+      "h": 2,
+      "snap": "grid",
+      "hp": 600,
+      "muster": true,
+      "look": {
+        "kind": "statue",
+        "color": "#7f7a72"
+      },
+      "cost": {
+        "block": 14,
+        "iron": 4
+      },
+      "desc": "A stone you strike to call a drill. Nothing comes until you strike it, nothing is broken if you lose, and the crates are real either way."
+    },
+    {
+      "id": "workshop",
+      "name": "Workshop",
+      "cat": "trade",
+      "tier": 2,
+      "w": 4,
+      "d": 3,
+      "h": 3,
+      "snap": "grid",
+      "flatten": "slab",
+      "hp": 500,
+      "power": {
+        "use": 4
+      },
+      "look": {
+        "kind": "machine",
+        "color": "#7a6448"
+      },
+      "cost": {
+        "plank": 16,
+        "iron": 6,
+        "rope": 4
+      },
+      "desc": "Benches, vices and a rack of hand tools. Fourteen of the twenty-two trade goods are made here — one cheap bench is the whole trade tier.",
+      "station": {
+        "title": "Workshop",
+        "blurb": "Benches, vices and a rack of hand tools. Fourteen of the twenty-two trade goods are made here."
+      }
+    },
+    {
+      "id": "manufactory",
+      "name": "Manufactory",
+      "cat": "trade",
+      "tier": 3,
+      "w": 7,
+      "d": 5,
+      "h": 4.6,
+      "snap": "grid",
+      "flatten": "slab",
+      "hp": 900,
+      "power": {
+        "use": 26
+      },
+      "look": {
+        "kind": "machine",
+        "color": "#8a8278"
+      },
+      "cost": {
+        "steel": 18,
+        "parts": 8,
+        "brick": 16
+      },
+      "desc": "Line shafts and jigs. Makes the goods a workshop cannot, and never needs anybody standing at it.",
+      "station": {
+        "title": "Manufactory",
+        "blurb": "Line shafts and jigs. It makes the goods a workshop cannot and never wants anybody standing at it."
+      },
+      "tech": "steelwork"
+    },
+    {
+      "id": "trade_post",
+      "name": "Trade Post",
+      "cat": "trade",
+      "tier": 2,
+      "w": 6,
+      "d": 5,
+      "h": 4.2,
+      "snap": "grid",
+      "flatten": "slab",
+      "hp": 700,
+      "store": {
+        "slots": 36
+      },
+      "hold": 2000,
+      "tradePost": true,
+      "look": {
+        "kind": "shed",
+        "color": "#7f6a4c"
+      },
+      "cost": {
+        "plank": 30,
+        "beam": 8,
+        "brick": 18,
+        "iron": 6
+      },
+      "desc": "Somewhere to keep what you have made until a cart comes for it. Trade goods only, two tonnes of them, and the only place a route can start or end."
+    },
+    {
+      "id": "tender_arm",
+      "name": "Tender Arm",
+      "cat": "refine",
+      "tier": 3,
+      "w": 1.2,
+      "d": 1.2,
+      "h": 2.6,
+      "snap": "grid",
+      "hp": 300,
+      "power": {
+        "use": 8
+      },
+      "tender": {
+        "range": 6,
+        "unitsPerHour": 12
+      },
+      "look": {
+        "kind": "post",
+        "color": "#9aa0a6"
+      },
+      "cost": {
+        "steel": 8,
+        "parts": 4,
+        "wire": 6
+      },
+      "desc": "A jointed arm on a post. It works whatever bench it can reach, for as long as the grid holds — which is how a furnace stays lit at night without a second shift.",
+      "tech": "steelwork"
+    }
+  ],
+  "_defenceDoc": "A `defence` block is what makes a defensive structure SHOOT: range in metres, damage a hit, `every` seconds between shots, `splash` metres of area, and an element that js/effects.js already understands. A wall, a gate, a trap or a barricade has no block and does not fire — the category alone is not enough, because js/defence.js gates on the block rather than on `cat` and a palisade must never snipe. Tuned here so the numbers live beside the costs they are paid for.",
+  "_stationDoc": "R17 — `station` IS THE WHOLE PER-BUILDING INTERFACE, AND IT IS DATA.\n\n\"I built a furnace, campfire, kiln, and loom, but I still cannot figure out how to convert iron ore into ingots. The furnace says it can smelt iron. But when I press E to open it it just opens the regular build menu.\"\n\nA structure carrying a `station` block has a screen of its own: js/station-ui.js draws it, E opens it, and adding another one later is a row in this file rather than a new panel in code.\n\n  title    what the screen is called.\n  blurb    one sentence saying what the thing is FOR, at the top of its own screen.\n  recipes  ids out of data/refining.json. The station runs exactly these and nothing else.\n  panels   the built-in sections it also shows: \"tools\" (the tool and device bench), \"garage\" (what you drive),\n           \"shipyard\" (the pad, the four subsystems and the orbital yard).\n\nA station with `panels` and no `recipes` is a bench you USE rather than one you queue — an anvil, a garage. It is still listed in data/refining.json (with `labour.secondsPerUnit: 0`, so it never asks for a worker) because that list is what js/main.js's `interactTarget` matches on, and without an entry there E has no door.",
+  "_techDoc": "R17 — `tech` NAMES THE RESEARCH NODE THAT OPENS A PIECE, and its absence means \"from the start\".\n\nThat default is the rule, not a convenience: AGE 1 IS EVERYTHING LOW-TECH AND IT IS NEVER RESEARCHED. A player who lands with nothing must be able to gather, build a Crafting Table, a Storage Box, a Campfire and a Furnace, and smelt iron, without ever opening the Research screen. Nodes live in data/research.json; js/research.js reads both and js/build-ui.js greys a locked row WITH THE SENTENCE saying which node opens it, because a greyed row with no reason is the one answer a player cannot act on.",
+  "_r18Unlocks": "R18 — the seven per-structure `unlocks` strings are renamed `unlocksNotBuilt`, because nothing reads them and their vocabulary matches nothing else in the project: `tools`, `smithing`, `parts`, `affixes`, `potions`, `arrows`, `food` are not craft groups (those are base/rarity/properties/brand) and are not research nodes. The only `unlocks` reader is js/research.js:56, which reads it off research.json NODES — a different field with the same name, which is how these came to look wired. They are a planned crafting-category system that was never built; inventing a gate for a vocabulary that exists nowhere else would be fiction. Renamed rather than deleted so the design intent survives, and renamed rather than left alone so the file stops implying a working gate. tests/round13.test.js fails if a bare `unlocks` reappears on a structure."
+}

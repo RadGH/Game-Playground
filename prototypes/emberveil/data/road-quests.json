@@ -1,0 +1,106 @@
+{
+ "_doc": "Strangers on the road with paying work. Ours, not the original game's — tools/build-emberveil-data.mjs never touches this file. A `dialog` node can turn up one of these instead of a random event: an NPC offers a one-off bounty aimed at a real, uncleared node in a zone the party has open. They pay better than the town board (goldBase + goldPerAct × act, times the offer's `pay`) because you have to be out there to be offered one. An accepted road quest is an ordinary side quest from then on: it shows in the Quests tab, it puts a marker on the map, and checkSideQuests() pays it out when the node is cleared.",
+ "schema": 1,
+ "chance": 0.22,
+ "goldBase": 90,
+ "goldPerAct": 130,
+ "maxOpen": 2,
+ "offers": [
+  {
+   "id": "courier",
+   "npcName": "A road courier",
+   "role": "villager",
+   "minAct": 0,
+   "pay": 1,
+   "targets": ["combat", "ambush"],
+   "lines": [
+    { "speaker": "npc", "text": "You look like people who solve things. I carry letters, and one of them is about {target}." },
+    { "speaker": "npc", "text": "Whoever is sitting there has stopped the post twice. The guild pays for quiet roads." }
+   ],
+   "accept": "She marks {target} on your map with a thumbnail of red wax. \"Come back through Crowsfoot and say it is done.\"",
+   "decline": "She shrugs, tucks the letter away and walks on faster than you would think possible.",
+   "title": "The Stopped Post",
+   "text": "A courier wants {target} cleared so the letters move again."
+  },
+  {
+   "id": "widow",
+   "npcName": "A woman in mourning grey",
+   "role": "elder",
+   "minAct": 1,
+   "pay": 1.15,
+   "targets": ["combat", "challenge", "ambush"],
+   "lines": [
+    { "speaker": "npc", "text": "My husband went as far as {target} and no further. I would like to know it is empty now." },
+    { "speaker": "npc", "text": "I have his wages. I have no use for them." }
+   ],
+   "accept": "She counts the coin out twice, the way people do when the number matters more than the money. \"{target},\" she says. \"That is all.\"",
+   "decline": "She nods as though she expected it, and goes back to looking down the road.",
+   "title": "His Wages",
+   "text": "Clear {target}. A widow is paying with her husband's last wages."
+  },
+  {
+   "id": "factor",
+   "npcName": "A caravan factor",
+   "role": "merchant",
+   "minAct": 1,
+   "pay": 1.3,
+   "targets": ["combat", "challenge"],
+   "lines": [
+    { "speaker": "npc", "text": "Straight business. My wagons will not go past {target} while it is held." },
+    { "speaker": "npc", "text": "I pay better than a town board because a town board cannot reach you out here." }
+   ],
+   "accept": "He writes a bond, stamps it with a wheel-and-hammer seal, and hands it over without a smile. \"{target}. Before the frost.\"",
+   "decline": "\"Then I will find somebody with fewer scruples and worse armour.\" He waves the wagons on.",
+   "title": "The Blocked Run",
+   "text": "A caravan factor pays above the board rate to see {target} cleared."
+  },
+  {
+   "id": "warden",
+   "npcName": "A road warden",
+   "role": "villager",
+   "minAct": 2,
+   "pay": 1.45,
+   "targets": ["challenge", "combat", "ambush"],
+   "lines": [
+    { "speaker": "npc", "text": "Warden of this stretch. I have one deputy and he is fifteen." },
+    { "speaker": "npc", "text": "{target} is past what the two of us can do. The bounty is real and it is signed." }
+   ],
+   "accept": "He tears the warrant along the fold and gives you the half with the seal on it. \"{target}. Bring me the other half back.\"",
+   "decline": "\"Understood.\" He does not look surprised, and that is the worst of it.",
+   "title": "The Warden's Warrant",
+   "text": "A road warden's signed bounty on {target}."
+  },
+  {
+   "id": "penitent",
+   "npcName": "A hooded penitent",
+   "role": "cultist",
+   "minAct": 3,
+   "pay": 1.6,
+   "targets": ["challenge", "combat"],
+   "lines": [
+    { "speaker": "npc", "text": "I was there when it was made. I would like to be there when it is unmade, but my hands shake now." },
+    { "speaker": "npc", "text": "{target}. Take the purse. It was never mine." }
+   ],
+   "accept": "The purse is heavier than it looks and smells of incense. \"{target},\" they say, and start walking the other way.",
+   "decline": "They bow, which is somehow worse than an argument, and keep walking.",
+   "title": "Unmaking",
+   "text": "A penitent pays in guilt money to see {target} unmade."
+  },
+  {
+   "id": "surveyor",
+   "npcName": "A surveyor with a broken glass",
+   "role": "villager",
+   "minAct": 4,
+   "pay": 1.7,
+   "targets": ["combat", "challenge", "ambush"],
+   "lines": [
+    { "speaker": "npc", "text": "I map what is left. My last chain-man walked to {target} and the map went blank there." },
+    { "speaker": "npc", "text": "I need the blank filled in. I will pay for the ink and the risk both." }
+   ],
+   "accept": "He rules a hard line to {target} and writes a number beside it that is more than you expected.",
+   "decline": "He inks a small cross on the map instead, and does not explain what it means.",
+   "title": "The Blank on the Map",
+   "text": "A surveyor pays to have {target} cleared so the map can be finished."
+  }
+ ]
+}

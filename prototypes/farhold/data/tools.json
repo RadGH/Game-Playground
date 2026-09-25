@@ -1,0 +1,176 @@
+{
+  "_doc": "R16 — TOOLS ARE THINGS YOU BUILD, NOT A GUESS ABOUT YOUR SWORD.\n\n\"It appears ranged characters can't harvest materials.\" They could not, and neither could anybody else in a reliable way, because the tool tier was READ OFF THE WEAPON: js/main.js's old `toolTierFor` matched the weapon's material against a regex — /steel|adamant/ was a Steel Tool, /iron|bronze/ an Iron Tool, anything else 'hands'. A bow is made of yew and string, so an archer was bare-handed at every seam in the game, and a mage with a crystal staff was worse. It also meant nobody could ever ANSWER the question the refusal asked — \"you need a Steel Tool\" with no tool slot to put one in.\n\nSo: a Tool is an item, in its own slot, that you BUILD. One tool is both pickaxe and axe (\"The mining tool should be both a pickaxe and axe\") because carrying two of a thing that does one job is book-keeping, not a decision. `toolKey` is the row in data/resources.json's `tools` table the item counts as, so every hardness gate, every refusal line and every drill rate goes on reading exactly what it read before.\n\nRARITY IS SPEED AND A LITTLE MORE (\"Tools should also be able to come in different rarities that affect mining speed and other things\"): `speed` is how fast the progress bar fills, `yield` is the share of extra material that comes off each gather, `reach` is how far from a seam you can stand, and `scan` widens the scanner if you are carrying a better tool when you sweep.\n\nDEVICES are the other two things the mouse wheel reaches. They are built once and owned, like a boat, rather than rolled like loot — there is nothing interesting about a rare scanner, and a Command Rod you might not have is the gate on the whole population system.\n\nWHY THE FIRST TOOL IS FREE AND CHEAP. You START with a Knapped Tool. It used to cost stone, and stone comes off a rock, and a rock is tier 1 — which a bare-handed character cannot touch. So the cheapest tool in the game was behind a tool. It now costs only things hands can already take, and you are given one anyway, because a first hour spent unable to pick anything up is not a difficulty curve.",
+  "bases": [
+    {
+      "id": "knapped_tool",
+      "name": "Knapped Tool",
+      "toolKey": "stone_tool",
+      "tier": 1,
+      "level": 1,
+      "cost": {
+        "log": 4,
+        "fibre": 8
+      },
+      "at": "hand",
+      "desc": "A flaked head lashed to a cut haft. It digs clay and sand, cuts fibre and reed, and fells a young tree. Anything harder laughs at it.",
+      "made": "Lashed together out of what is lying about — no bench, no fire, nothing but your hands. Both of its materials come off things bare hands can already take (a dead tree, a bush), which is the point: it is the tool that unlocks every tool."
+    },
+    {
+      "id": "ironhead_tool",
+      "name": "Ironhead Pick and Axe",
+      "toolKey": "iron_tool",
+      "tier": 1,
+      "level": 4,
+      "cost": {
+        "iron_ingot": 6,
+        "log": 3,
+        "leather": 2
+      },
+      "at": "anvil",
+      "desc": "A proper head, both faces forged: a point for rock and a bit for timber. The tool the early game is balanced around.",
+      "made": "Forged at an anvil from iron ingots, which means a furnace and a seam first."
+    },
+    {
+      "id": "steelhead_tool",
+      "name": "Steelhead Pick and Axe",
+      "toolKey": "steel_tool",
+      "tier": 2,
+      "level": 10,
+      "cost": {
+        "steel_ingot": 6,
+        "log": 3,
+        "leather": 3
+      },
+      "at": "anvil",
+      "desc": "Hardened faces that hold an edge in deep vein, crystal and obsidian. This is the tier that opens the second half of the material table — and the one a meteor crater is waiting for.",
+      "made": "Forged at an anvil from steel, which comes off an Alloy Forge."
+    },
+    {
+      "id": "powered_cutter",
+      "name": "Powered Cutter",
+      "toolKey": "powered_tool",
+      "tier": 3,
+      "level": 18,
+      "cost": {
+        "steel_ingot": 8,
+        "machine_part": 6,
+        "wire": 6,
+        "crystal": 2
+      },
+      "at": "workbench",
+      "desc": "A cutting head on a cell. It takes a gas vent and a rare seam, and it does in one pass what the steel head does in three.",
+      "made": "Assembled at a workbench. Parts, wire and a crystal — by which point you should be building drills instead."
+    }
+  ],
+  "rarity": {
+    "normal": {
+      "speed": 1.0,
+      "yield": 0,
+      "reach": 0,
+      "scan": 0,
+      "affixes": 0
+    },
+    "magic": {
+      "speed": 1.18,
+      "yield": 0.1,
+      "reach": 0.4,
+      "scan": 10,
+      "affixes": 1
+    },
+    "rare": {
+      "speed": 1.4,
+      "yield": 0.22,
+      "reach": 0.8,
+      "scan": 22,
+      "affixes": 2
+    },
+    "legendary": {
+      "speed": 1.75,
+      "yield": 0.4,
+      "reach": 1.4,
+      "scan": 40,
+      "affixes": 3
+    }
+  },
+  "devices": [
+    {
+      "id": "scanner",
+      "name": "Prospector's Scanner",
+      "level": 1,
+      "tier": 1,
+      "cost": {
+        "iron_ingot": 3,
+        "crystal": 1,
+        "wire": 2
+      },
+      "at": "workbench",
+      "range": 110,
+      "desc": "Sweeps the ground around you and names what is under it. What it finds stays on your map for good — it is a survey, not a torch.",
+      "made": "Built at a workbench. One crystal, a little wire and three iron."
+    },
+    {
+      "id": "deep_scanner",
+      "name": "Deep Scanner",
+      "level": 12,
+      "tier": 2,
+      "replaces": "scanner",
+      "cost": {
+        "steel_ingot": 4,
+        "crystal": 3,
+        "wire": 6,
+        "machine_part": 2
+      },
+      "at": "workbench",
+      "range": 210,
+      "desc": "Twice the reach of the prospector's set and it reads through rock — the buried veins a hand scanner walks straight over.",
+      "made": "Built at a workbench once you are forging steel. It supersedes the first scanner rather than replacing it in the bag: the wheel holds one scanner, and it is the best one you own."
+    },
+    {
+      "id": "survey_array",
+      "name": "Survey Array",
+      "level": 24,
+      "tier": 3,
+      "replaces": "deep_scanner",
+      "cost": {
+        "steel_ingot": 8,
+        "crystal": 6,
+        "wire": 12,
+        "machine_part": 6,
+        "control_board": 2
+      },
+      "at": "workbench",
+      "range": 380,
+      "desc": "A shoulder rig that reads the whole valley and tells the difference between a seam and a rare seam without your having to stand on it.",
+      "made": "Built at a workbench. The end of prospecting on foot."
+    },
+    {
+      "id": "command_rod",
+      "name": "Command Rod",
+      "level": 1,
+      "cost": {
+        "iron_ingot": 4,
+        "log": 2,
+        "crystal": 1
+      },
+      "at": "workbench",
+      "range": 45,
+      "desc": "Point it at your own people and they listen. Select one or several and give them somewhere to be and something to do.",
+      "made": "Built at a workbench once you have a holding worth giving orders in."
+    }
+  ],
+  "gather": {
+    "_doc": "How long a gather takes before it pays, in seconds, divided by the tool's speed. A seam is slower than a bush on purpose — hand mining is meant to be the thing that gets a drill built, not a career. \"The goal isn't really to mine resources by hand, other than to get production started, it's really to build drills and automate a factory.\"",
+    "seamSeconds": 3.2,
+    "propSeconds": 2.4,
+    "softSeconds": 1.2,
+    "moveCancel": 3.2,
+    "_moveCancelDoc": "Walk this far from where you started and the bar drops. Small enough that you cannot wander off and still be gathering, big enough that a slope you slide down does not cancel it."
+  },
+  "scan": {
+    "_doc": "The scanner sweeps on a clock rather than every frame: a sweep walks the node field near you, and anything inside the range is remembered for the rest of the save. The range is deliberately short — \"The scanner should only work nearby the player but once a node is scanned it should remain visible on the map.\"",
+    "everySeconds": 0.45,
+    "range": 110,
+    "pingSeconds": 1.6,
+    "maxMarks": 400
+  }
+}

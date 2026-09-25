@@ -1,0 +1,48 @@
+{
+  "_doc": "Emberveil 2 lines spoken on arrival in a settlement (round 21, E39). Registered into the Lingo grammar at start-up by js/talk.js registerTownTalk(); each key is a grammar symbol spoken through Talk.line(), so the speaker's traits, tics and voice apply. Bindings from Talk.woundedLine(): hurt / down (an Entity whose name is one hero or a joined list, 'Corvin and Mirelle'), hurtCount, downCount, allHurt (nobody in the party is healthy, so the speaker is hurt too), town (the settlement's name). Every line has a cond that picks exactly one situation, so a list is never read with the wrong verb. Lines tagged 'healer' are only offered to a healer (js/talk.js speechFor role tags); every situation also has untagged lines for everyone else.",
+  "symbols": {
+    "wounded_rest": [
+      { "id": "wr_a1", "t": "We should take a rest, {hurt.name} is wounded.", "cond": "!allHurt && downCount===0 && hurtCount===1", "w": 3 },
+      { "id": "wr_a2", "t": "{hurt.name} is bleeding through the wraps. We rest here tonight.", "cond": "!allHurt && downCount===0 && hurtCount===1" },
+      { "id": "wr_a3", "t": "{hurt.name} won't say it, so I will. We need a night off the road.", "cond": "!allHurt && downCount===0 && hurtCount===1" },
+      { "id": "wr_a4", "t": "Before we go anywhere, {hurt.name} needs a bed and a quiet night.", "cond": "!allHurt && downCount===0 && hurtCount===1" },
+      { "id": "wr_a5", "t": "Sit down, {hurt.name}. I want a proper look at that wound before we leave {town.name}.", "cond": "!allHurt && downCount===0 && hurtCount===1", "tags": ["healer"], "w": 2 },
+
+      { "id": "wr_b1", "t": "We should take a rest. {hurt.name} are wounded.", "cond": "!allHurt && downCount===0 && hurtCount>1", "w": 3 },
+      { "id": "wr_b2", "t": "Half of us are held together with string. {hurt.name} need rest.", "cond": "!allHurt && downCount===0 && hurtCount>1" },
+      { "id": "wr_b3", "t": "Nobody walks out of {town.name} like this. {hurt.name} are carrying wounds.", "cond": "!allHurt && downCount===0 && hurtCount>1" },
+      { "id": "wr_b4", "t": "{hurt.name}, both of you, sit. We are resting before the road finishes the job.", "cond": "!allHurt && downCount===0 && hurtCount===2" },
+      { "id": "wr_b5", "t": "I count too many wounds. {hurt.name} rest tonight, and I'm not asking.", "cond": "!allHurt && downCount===0 && hurtCount>1", "tags": ["healer"], "w": 2 },
+
+      { "id": "wr_c1", "t": "{down.name} is down. The cleric here can get them back on their feet.", "cond": "!allHurt && downCount===1 && hurtCount===0", "w": 3 },
+      { "id": "wr_c2", "t": "We can't carry {down.name} another mile. Find the cleric.", "cond": "!allHurt && downCount===1 && hurtCount===0" },
+      { "id": "wr_c3", "t": "{down.name} is down. The cleric first, then anything else.", "cond": "!allHurt && downCount===1 && hurtCount===0" },
+      { "id": "wr_c4", "t": "I did what I could for {down.name} on the road. The cleric can do the rest.", "cond": "!allHurt && downCount===1 && hurtCount===0", "tags": ["healer"], "w": 2 },
+
+      { "id": "wr_d1", "t": "{down.name} are down. We need the cleric, now.", "cond": "!allHurt && downCount>1 && hurtCount===0", "w": 3 },
+      { "id": "wr_d2", "t": "Get {down.name} to the cleric. Nothing else matters tonight.", "cond": "!allHurt && downCount>1 && hurtCount===0" },
+      { "id": "wr_d3", "t": "Too many of us on stretchers. {down.name} go to the cleric before we do anything.", "cond": "!allHurt && downCount>1 && hurtCount===0" },
+
+      { "id": "wr_e1", "t": "{down.name} is down and {hurt.name} is hurt. The cleric, then a bed.", "cond": "!allHurt && downCount===1 && hurtCount===1", "w": 3 },
+      { "id": "wr_e2", "t": "{down.name} is down, {hurt.name} is not far behind. The cleric in {town.name} can see to both.", "cond": "!allHurt && downCount===1 && hurtCount===1" },
+
+      { "id": "wr_f1", "t": "{down.name} is down and {hurt.name} are hurt. The cleric, then a long rest.", "cond": "!allHurt && downCount===1 && hurtCount>1", "w": 3 },
+      { "id": "wr_f2", "t": "{down.name} is down. {hurt.name} are bleeding. We stop here and see the cleric.", "cond": "!allHurt && downCount===1 && hurtCount>1" },
+
+      { "id": "wr_g1", "t": "{down.name} are down and {hurt.name} is hurt. We need the cleric.", "cond": "!allHurt && downCount>1 && hurtCount===1", "w": 3 },
+      { "id": "wr_g2", "t": "{down.name} are down. {hurt.name} is barely standing. The cleric, now.", "cond": "!allHurt && downCount>1 && hurtCount===1" },
+
+      { "id": "wr_h1", "t": "{down.name} are down and {hurt.name} are hurt. The cleric. Now.", "cond": "!allHurt && downCount>1 && hurtCount>1", "w": 3 },
+      { "id": "wr_h2", "t": "Look at us. {down.name} are down, {hurt.name} are bleeding. The cleric before anything.", "cond": "!allHurt && downCount>1 && hurtCount>1" },
+
+      { "id": "wr_i1", "t": "None of us is fit for the road. We rest in {town.name} tonight.", "cond": "allHurt && downCount===0", "w": 3 },
+      { "id": "wr_i2", "t": "Every one of us is hurting, me included. A bed. Please.", "cond": "allHurt && downCount===0" },
+      { "id": "wr_i3", "t": "We should take a rest. There isn't a whole one of us left.", "cond": "allHurt && downCount===0" },
+
+      { "id": "wr_j1", "t": "{down.name} is down and the rest of us aren't much better. Find the cleric.", "cond": "allHurt && downCount===1", "w": 3 },
+      { "id": "wr_j2", "t": "{down.name} are down and I can barely stand. The cleric, before we lose anyone.", "cond": "allHurt && downCount>1", "w": 3 },
+      { "id": "wr_j3", "t": "We're all hurt, and {down.name} isn't standing at all. The cleric. Now.", "cond": "allHurt && downCount===1" },
+      { "id": "wr_j4", "t": "We're all hurt, and {down.name} aren't standing at all. The cleric. Now.", "cond": "allHurt && downCount>1" }
+    ]
+  }
+}

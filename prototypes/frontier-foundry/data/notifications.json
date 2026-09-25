@@ -1,0 +1,426 @@
+{
+  "schema": 1,
+  "note": "Every message the engine can raise. text is a template: {name}, {n}, {resource}, {wave}, {planet}, {text}, {reason}, {from}, {to} are filled from the payload. importance 1 is chatter, 5 is 'drop what you are doing'. jumpTo true means the UI should offer a camera jump to `at`. Anything at 4 or 5 deserves to interrupt.",
+  "types": {
+    "landed": {
+      "importance": 4,
+      "icon": "pod",
+      "jumpTo": true,
+      "text": "Landing pod down on {planet}. {n} crew, and everything else is up to you."
+    },
+    "node_found": {
+      "importance": 2,
+      "icon": "scan",
+      "jumpTo": true,
+      "text": "Scan found {resource} - {n} units in the patch."
+    },
+    "rare_found": {
+      "importance": 4,
+      "icon": "scan",
+      "jumpTo": true,
+      "text": "That is {resource}. This world has something the others do not."
+    },
+    "node_depleted": {
+      "importance": 3,
+      "icon": "drill",
+      "jumpTo": true,
+      "text": "The {resource} patch under {name} is empty. The drill is standing idle."
+    },
+    "build_started": {
+      "importance": 1,
+      "icon": "build",
+      "jumpTo": false,
+      "text": "Outline placed: {name}. Builders are on the way."
+    },
+    "build_done": {
+      "importance": 1,
+      "icon": "build",
+      "jumpTo": false,
+      "text": "{name} finished."
+    },
+    "build_blocked": {
+      "importance": 3,
+      "icon": "warn",
+      "jumpTo": true,
+      "text": "{name} cannot be built there: {reason}."
+    },
+    "no_materials": {
+      "importance": 3,
+      "icon": "warn",
+      "jumpTo": true,
+      "text": "Builders are stalled on {name} - short of {resource}."
+    },
+    "brownout": {
+      "importance": 4,
+      "icon": "power",
+      "jumpTo": false,
+      "text": "Grid at {n}% - everything is running slow. You need more generation or fewer machines."
+    },
+    "power_restored": {
+      "importance": 2,
+      "icon": "power",
+      "jumpTo": false,
+      "text": "Grid back to full."
+    },
+    "machine_starved": {
+      "importance": 2,
+      "icon": "warn",
+      "jumpTo": true,
+      "text": "{name} has been idle waiting for {resource}."
+    },
+    "machine_full": {
+      "importance": 2,
+      "icon": "warn",
+      "jumpTo": true,
+      "text": "{name} has stopped - its output has nowhere to go."
+    },
+    "storage_full": {
+      "importance": 2,
+      "icon": "crate",
+      "jumpTo": true,
+      "text": "{name} is full of {resource}."
+    },
+    "route_created": {
+      "importance": 1,
+      "icon": "truck",
+      "jumpTo": false,
+      "text": "Route running: {resource} from {from} to {to}, about {n} seconds a trip."
+    },
+    "route_blocked": {
+      "importance": 3,
+      "icon": "warn",
+      "jumpTo": true,
+      "text": "No path for the {resource} run to {to}. Something is in the way, or there is water between them."
+    },
+    "vehicle_lost": {
+      "importance": 4,
+      "icon": "truck",
+      "jumpTo": true,
+      "text": "{name} was destroyed on the road. The load is gone with it."
+    },
+    "research_done": {
+      "importance": 3,
+      "icon": "lab",
+      "jumpTo": false,
+      "text": "Research finished: {name}."
+    },
+    "research_stalled": {
+      "importance": 2,
+      "icon": "lab",
+      "jumpTo": false,
+      "text": "Labs are idle - out of {resource}."
+    },
+    "quest_offered": {
+      "importance": 2,
+      "icon": "quest",
+      "jumpTo": false,
+      "text": "New objective: {name}. {text}"
+    },
+    "quest_done": {
+      "importance": 3,
+      "icon": "quest",
+      "jumpTo": false,
+      "text": "{name} complete. {text}"
+    },
+    "threat_rising": {
+      "importance": 3,
+      "icon": "warn",
+      "jumpTo": false,
+      "text": "Something is circling. Threat is at {n} and climbing."
+    },
+    "wave_incoming": {
+      "importance": 5,
+      "icon": "attack",
+      "jumpTo": true,
+      "text": "Wave {wave} inbound from the {name} - {n} of them."
+    },
+    "wave_cleared": {
+      "importance": 3,
+      "icon": "attack",
+      "jumpTo": false,
+      "text": "Wave {wave} is down. {n} killed."
+    },
+    "structure_lost": {
+      "importance": 5,
+      "icon": "attack",
+      "jumpTo": true,
+      "text": "{name} destroyed."
+    },
+    "wall_breached": {
+      "importance": 5,
+      "icon": "attack",
+      "jumpTo": true,
+      "text": "The wall is open near {name}. They are inside."
+    },
+    "unit_lost": {
+      "importance": 4,
+      "icon": "crew",
+      "jumpTo": true,
+      "text": "{name} was killed."
+    },
+    "nest_found": {
+      "importance": 3,
+      "icon": "scan",
+      "jumpTo": true,
+      "text": "Nest spotted {n} tiles out. It will keep raising the threat until it is gone."
+    },
+    "nest_cleared": {
+      "importance": 3,
+      "icon": "attack",
+      "jumpTo": true,
+      "text": "Nest destroyed. Threat dropped."
+    },
+    "hazard_storm": {
+      "importance": 4,
+      "icon": "hazard",
+      "jumpTo": false,
+      "text": "Storm front rolling in. Wind power is up, everything outdoors is taking damage, and something may ride in with it."
+    },
+    "hazard_cold": {
+      "importance": 4,
+      "icon": "hazard",
+      "jumpTo": false,
+      "text": "Deep cold. Unheated machines are seizing up - keep the power on."
+    },
+    "hazard_radiation": {
+      "importance": 4,
+      "icon": "hazard",
+      "jumpTo": true,
+      "text": "Radiation spike near {name}. Crew out there are taking damage."
+    },
+    "hazard_ashfall": {
+      "importance": 3,
+      "icon": "hazard",
+      "jumpTo": false,
+      "text": "Ash fall. Solar output is halved until it clears."
+    },
+    "hazard_over": {
+      "importance": 2,
+      "icon": "hazard",
+      "jumpTo": false,
+      "text": "The weather has passed."
+    },
+    "region_explored": {
+      "importance": 2,
+      "icon": "map",
+      "jumpTo": true,
+      "text": "Scouts mapped {name}. {text}"
+    },
+    "satellite_up": {
+      "importance": 4,
+      "icon": "space",
+      "jumpTo": false,
+      "text": "Satellite in orbit. The whole world map is yours, and orbital research is open."
+    },
+    "probe_arrived": {
+      "importance": 4,
+      "icon": "space",
+      "jumpTo": false,
+      "text": "Probe reached {planet}: {text}"
+    },
+    "rocket_ready": {
+      "importance": 5,
+      "icon": "space",
+      "jumpTo": true,
+      "text": "The rocket is assembled. Load the hold and it can leave whenever you are ready."
+    },
+    "rocket_launched": {
+      "importance": 5,
+      "icon": "space",
+      "jumpTo": false,
+      "text": "Launch. {n} crates and {text} away to {planet}."
+    },
+    "station_module": {
+      "importance": 4,
+      "icon": "space",
+      "jumpTo": false,
+      "text": "Station module {n} of 6 in orbit."
+    },
+    "station_complete": {
+      "importance": 5,
+      "icon": "space",
+      "jumpTo": false,
+      "text": "The orbital station is crewed and turning. Cargo goes up on the lift from here on."
+    },
+    "beacon_lit": {
+      "importance": 5,
+      "icon": "beacon",
+      "jumpTo": true,
+      "text": "Beacon lit on {planet}. That is {n} of {text} worlds claimed."
+    },
+    "victory": {
+      "importance": 5,
+      "icon": "beacon",
+      "jumpTo": false,
+      "text": "The beacon chain is complete. The frontier is yours - {n} worlds, all of it built from the ground up."
+    },
+    "defeat": {
+      "importance": 5,
+      "icon": "attack",
+      "jumpTo": true,
+      "text": "The landing pod is gone. There is nothing left on {planet} to build from."
+    },
+    "hazard_heat": {
+      "importance": 4,
+      "icon": "hazard",
+      "jumpTo": false,
+      "text": "Heat wave. Machines are running {n}% slower and anyone outside is cooking."
+    },
+    "hazard_toxic": {
+      "importance": 4,
+      "icon": "hazard",
+      "jumpTo": false,
+      "text": "The air has turned. Anything outside a filter's reach is corroding - chemical plants and med bays cover a circle around themselves."
+    },
+    "hazard_quake": {
+      "importance": 5,
+      "icon": "hazard",
+      "jumpTo": false,
+      "text": "Ground shock. Everything is taking damage and the roads are cracking."
+    },
+    "hazard_overgrowth": {
+      "importance": 3,
+      "icon": "hazard",
+      "jumpTo": false,
+      "text": "Everything is growing back at once. Good for the harvesters, hard on the walls."
+    },
+    "hazard_lowlight": {
+      "importance": 3,
+      "icon": "hazard",
+      "jumpTo": false,
+      "text": "The cloud deck has closed over. Solar is down to a third until it lifts."
+    },
+    "hazard_pressure": {
+      "importance": 3,
+      "icon": "hazard",
+      "jumpTo": false,
+      "text": "Pressure front. Machines are labouring and the seals are complaining."
+    },
+    "hazard_tide": {
+      "importance": 4,
+      "icon": "hazard",
+      "jumpTo": false,
+      "text": "High tide running. Anything near the water is taking damage, and something may come in with it."
+    },
+    "hazard_dust": {
+      "importance": 3,
+      "icon": "hazard",
+      "jumpTo": false,
+      "text": "Dust fall out of the dark. Solar is halved and the panels are pitting."
+    },
+    "hazard_sheltered": {
+      "importance": 2,
+      "icon": "hazard",
+      "jumpTo": false,
+      "text": "{n} crew are under cover and riding this one out."
+    },
+    "builder_idle": {
+      "importance": 2,
+      "icon": "crew",
+      "jumpTo": false,
+      "text": "{n} builders have had nothing to do for a while. Place something, or put them on a yard."
+    },
+    "nest_wanderers": {
+      "importance": 3,
+      "icon": "attack",
+      "jumpTo": true,
+      "text": "Something came out of the nest on its own - {n} of them, wandering in."
+    },
+    "nest_bounty": {
+      "importance": 3,
+      "icon": "attack",
+      "jumpTo": false,
+      "text": "Salvage from the nest: {text}"
+    },
+    "quest_step": {
+      "importance": 3,
+      "icon": "quest",
+      "jumpTo": false,
+      "text": "{name} done - step {n} of {text}. {reason}"
+    },
+    "quest_chain_done": {
+      "importance": 4,
+      "icon": "quest",
+      "jumpTo": false,
+      "text": "{name} finished, every step of it."
+    },
+    "tech_granted": {
+      "importance": 4,
+      "icon": "lab",
+      "jumpTo": false,
+      "text": "{name} read straight off the find - that node is done without paying for it."
+    },
+    "element_available": {
+      "importance": 4,
+      "icon": "scan",
+      "jumpTo": false,
+      "text": "{resource} is on this world, which means {name} can be researched here and nowhere else."
+    },
+    "scarce_found": {
+      "importance": 3,
+      "icon": "scan",
+      "jumpTo": true,
+      "text": "A thin seam of {resource} - {n} units. This archetype does not normally carry it, so this is all there is."
+    },
+    "route_stalled": {
+      "importance": 3,
+      "icon": "truck",
+      "jumpTo": true,
+      "text": "The {resource} run has been sitting at the loading bay with nothing to load."
+    },
+    "vehicle_upgraded": {
+      "importance": 2,
+      "icon": "truck",
+      "jumpTo": false,
+      "text": "{name} upgraded to tier {n} - bigger load, quicker trip."
+    },
+    "road_done": {
+      "importance": 1,
+      "icon": "truck",
+      "jumpTo": false,
+      "text": "{n} tiles of {name} laid on the main run."
+    },
+    "wave_repelled": {
+      "importance": 3,
+      "icon": "attack",
+      "jumpTo": false,
+      "text": "Wave {wave} broke on the line. {n} killed, nothing of ours lost."
+    },
+    "wave_quiet": {
+      "importance": 2,
+      "icon": "attack",
+      "jumpTo": false,
+      "text": "Nothing on the sensors for a while. Next one is roughly {n} minutes out - build something."
+    },
+    "satellite_online": {
+      "importance": 4,
+      "icon": "space",
+      "jumpTo": false,
+      "text": "Satellite uplink online. Orbital science packs are available and every patch on the ground is on the chart."
+    },
+    "probe_result": {
+      "importance": 4,
+      "icon": "space",
+      "jumpTo": false,
+      "text": "Probe report on {planet}: {text}"
+    },
+    "input_starved": {
+      "importance": 3,
+      "icon": "warn",
+      "jumpTo": true,
+      "text": "{n} machines are all waiting on {resource}. Widen that chain or dig another patch."
+    },
+    "storage_pressure": {
+      "importance": 3,
+      "icon": "crate",
+      "jumpTo": false,
+      "text": "Stores are {n}% full. Anything that cannot be put down stops the machine that made it."
+    },
+    "power_short": {
+      "importance": 4,
+      "icon": "power",
+      "jumpTo": false,
+      "text": "Generation is {n} kW behind demand. The factory is being shed first; the drills and the guns keep their power."
+    }
+  }
+}

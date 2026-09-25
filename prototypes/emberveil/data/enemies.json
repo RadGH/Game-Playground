@@ -1,0 +1,1065 @@
+{
+ "entities": {
+  "abyssal_knight": {
+   "armor": 32,
+   "blockChance": 0.32,
+   "dmg": [
+    100,
+    164
+   ],
+   "dodge": 10,
+   "gold": [
+    52,
+    92
+   ],
+   "hit": 80,
+   "hp": 1520,
+   "id": "abyssal_knight",
+   "magicResist": 0,
+   "maxHp": 1520,
+   "name": "Abyssal Knight",
+   "spellChance": 0.3,
+   "spellList": [
+    "demon_disarm",
+    "void_lance"
+   ],
+   "xpValue": 300
+  },
+  "ash_wraith": {
+   "armor": 4,
+   "dmg": [
+    36,
+    56
+   ],
+   "dodge": 20,
+   "gold": [
+    8,
+    18
+   ],
+   "hit": 80,
+   "hp": 340,
+   "id": "ash_wraith",
+   "loot": [
+    "wand",
+    "ring"
+   ],
+   "magicResist": 0,
+   "maxHp": 340,
+   "name": "Ash Wraith",
+   "spellChance": 0.4,
+   "spellList": [
+    "wraith_chill",
+    "ash_blind"
+   ],
+   "statusOnHit": [
+    {
+     "chance": 0.4,
+     "duration": 2,
+     "power": 7,
+     "type": "burn"
+    }
+   ],
+   "xpValue": 42
+  },
+  "bandit": {
+   "armor": 3,
+   "blockChance": 0.1,
+   "dmg": [
+    48,
+    68
+   ],
+   "dodge": 10,
+   "gold": [
+    4,
+    10
+   ],
+   "hit": 80,
+   "hp": 152,
+   "id": "bandit",
+   "loot": [
+    "dagger",
+    "light_chest"
+   ],
+   "magicResist": 0,
+   "maxHp": 152,
+   "name": "Bandit",
+   "xpValue": 26
+  },
+  "bandit_captain": {
+   "armor": 6,
+   "blockChance": 0.2,
+   "dmg": [
+    64,
+    88
+   ],
+   "dodge": 12,
+   "gold": [
+    20,
+    40
+   ],
+   "hit": 82,
+   "hp": 296,
+   "id": "bandit_captain",
+   "loot": [
+    "sword",
+    "medium_chest"
+   ],
+   "magicResist": 0,
+   "maxHp": 296,
+   "name": "Bandit Captain",
+   "spellChance": 0.3,
+   "spellList": [
+    "bandit_flashbomb",
+    "shadow_blind"
+   ],
+   "xpValue": 58
+  },
+  "cinder_hound": {
+   "armor": 5,
+   "dmg": [
+    38,
+    54
+   ],
+   "dodge": 16,
+   "gold": [
+    4,
+    12
+   ],
+   "hit": 80,
+   "hp": 288,
+   "id": "cinder_hound",
+   "loot": [],
+   "magicResist": 0,
+   "maxHp": 288,
+   "name": "Cinder Hound",
+   "spellChance": 0.22,
+   "spellList": [
+    "serpent_venom"
+   ],
+   "statusOnHit": [
+    {
+     "chance": 0.45,
+     "duration": 2,
+     "power": 6,
+     "type": "bleed"
+    }
+   ],
+   "xpValue": 36
+  },
+  "corrupted_bear": {
+   "armor": 4,
+   "blockChance": 0.15,
+   "dmg": [
+    68,
+    96
+   ],
+   "dodge": 5,
+   "gold": [
+    5,
+    15
+   ],
+   "hit": 76,
+   "hp": 380,
+   "id": "corrupted_bear",
+   "loot": [],
+   "magicResist": 0,
+   "maxHp": 380,
+   "name": "Corrupted Bear",
+   "spellChance": 0.25,
+   "spellList": [
+    "brute_slam"
+   ],
+   "statusOnHit": [
+    {
+     "chance": 0.25,
+     "duration": 1,
+     "power": 0,
+     "type": "stun"
+    }
+   ],
+   "xpValue": 65
+  },
+  "corrupted_wolf": {
+   "armor": 1,
+   "dmg": [
+    52,
+    72
+   ],
+   "dodge": 18,
+   "gold": [
+    1,
+    4
+   ],
+   "hit": 80,
+   "hp": 160,
+   "id": "corrupted_wolf",
+   "loot": [],
+   "magicResist": 0,
+   "maxHp": 160,
+   "name": "Corrupted Wolf",
+   "spellChance": 0.22,
+   "spellList": [
+    "bone_grasp"
+   ],
+   "statusOnHit": [
+    {
+     "chance": 0.4,
+     "duration": 2,
+     "power": 4,
+     "type": "bleed"
+    }
+   ],
+   "xpValue": 28
+  },
+  "cosmic_titan": {
+   "armor": 30,
+   "dmg": [
+    100,
+    156
+   ],
+   "dodge": 8,
+   "gold": [
+    44,
+    82
+   ],
+   "hit": 73,
+   "hp": 1920,
+   "id": "cosmic_titan",
+   "magicResist": 0,
+   "maxHp": 1920,
+   "name": "Cosmic Titan",
+   "xpValue": 270,
+   "spellChance": 0.28,
+   "spellList": [
+    "cosmic_rupture",
+    "brute_slam"
+   ]
+  },
+  "demon_brute": {
+   "armor": 20,
+   "blockChance": 0.22,
+   "dmg": [
+    76,
+    120
+   ],
+   "dodge": 5,
+   "gold": [
+    44,
+    85
+   ],
+   "hit": 70,
+   "hp": 1360,
+   "id": "demon_brute",
+   "loot": [
+    "heavy_chest"
+   ],
+   "magicResist": 0,
+   "maxHp": 1360,
+   "name": "Demon Brute",
+   "spellChance": 0.35,
+   "spellList": [
+    "brute_slam",
+    "demon_disarm"
+   ],
+   "statusOnHit": [
+    {
+     "chance": 0.25,
+     "duration": 1,
+     "power": 0,
+     "type": "stun"
+    }
+   ],
+   "xpValue": 135
+  },
+  "dragon_cultist": {
+   "armor": 8,
+   "dmg": [
+    72,
+    116
+   ],
+   "dodge": 20,
+   "gold": [
+    45,
+    85
+   ],
+   "hit": 85,
+   "hp": 560,
+   "id": "dragon_cultist",
+   "loot": [
+    "dragonbone_staff",
+    "cloth_chest"
+   ],
+   "magicResist": 0,
+   "maxHp": 560,
+   "name": "Dragon Cultist",
+   "statusOnHit": [
+    {
+     "chance": 0.6,
+     "duration": 3,
+     "power": 16,
+     "type": "burn"
+    }
+   ],
+   "xpValue": 230,
+   "spellChance": 0.3,
+   "spellList": [
+    "acolyte_curse",
+    "ritual_silence"
+   ]
+  },
+  "dragon_whelp": {
+   "armor": 14,
+   "dmg": [
+    60,
+    104
+   ],
+   "dodge": 18,
+   "gold": [
+    40,
+    80
+   ],
+   "hit": 82,
+   "hp": 480,
+   "id": "dragon_whelp",
+   "loot": [
+    "dragonscale_cloth",
+    "dragonfang_dagger"
+   ],
+   "magicResist": 0,
+   "maxHp": 480,
+   "name": "Dragon Whelp",
+   "statusOnHit": [
+    {
+     "chance": 0.5,
+     "duration": 3,
+     "power": 14,
+     "type": "burn"
+    }
+   ],
+   "xpValue": 220,
+   "spellChance": 0.25,
+   "spellList": [
+    "imp_fireball",
+    "infernal_brand"
+   ]
+  },
+  "frost_wyrm": {
+   "armor": 18,
+   "dmg": [
+    84,
+    140
+   ],
+   "dodge": 12,
+   "gold": [
+    60,
+    100
+   ],
+   "hit": 80,
+   "hp": 880,
+   "id": "frost_wyrm",
+   "loot": [
+    "wyrmscale_chest",
+    "dragontooth_amulet"
+   ],
+   "magicResist": 0,
+   "maxHp": 880,
+   "name": "Frost Wyrm",
+   "statusOnHit": [
+    {
+     "chance": 0.3,
+     "duration": 1,
+     "type": "stun"
+    }
+   ],
+   "xpValue": 300,
+   "spellChance": 0.3,
+   "spellList": [
+    "frost_lance",
+    "wraith_chill"
+   ]
+  },
+  "genesis_worm": {
+   "armor": 25,
+   "dmg": [
+    88,
+    140
+   ],
+   "dodge": 5,
+   "gold": [
+    65,
+    110
+   ],
+   "hit": 78,
+   "hp": 2320,
+   "id": "genesis_worm",
+   "magicResist": 0,
+   "maxHp": 2320,
+   "name": "Genesis Worm",
+   "spellChance": 0.35,
+   "spellList": [
+    "bone_grasp",
+    "nightmare_hex",
+    "brute_slam"
+   ],
+   "xpValue": 350
+  },
+  "giant_spider": {
+   "armor": 1,
+   "dmg": [
+    22,
+    34
+   ],
+   "dodge": 14,
+   "gold": [
+    1,
+    4
+   ],
+   "hit": 80,
+   "hp": 72,
+   "id": "giant_spider",
+   "loot": [],
+   "magicResist": 0,
+   "maxHp": 72,
+   "name": "Giant Spider",
+   "statusOnHit": [
+    {
+     "chance": 0.5,
+     "duration": 2,
+     "power": 3,
+     "type": "poison"
+    }
+   ],
+   "xpValue": 18
+  },
+  "goblin_scout": {
+   "armor": 2,
+   "dmg": [
+    44,
+    64
+   ],
+   "dodge": 15,
+   "gold": [
+    2,
+    6
+   ],
+   "hit": 80,
+   "hp": 120,
+   "id": "goblin_scout",
+   "loot": [
+    "dagger",
+    "light_chest"
+   ],
+   "magicResist": 0,
+   "maxHp": 120,
+   "name": "Goblin Scout",
+   "spellChance": 0.18,
+   "spellList": [
+    "bandit_flashbomb"
+   ],
+   "xpValue": 8
+  },
+  "goblin_shaman": {
+   "armor": 1,
+   "dmg": [
+    52,
+    76
+   ],
+   "dodge": 10,
+   "gold": [
+    8,
+    18
+   ],
+   "hit": 80,
+   "hp": 144,
+   "id": "goblin_shaman",
+   "loot": [
+    "wand",
+    "ring"
+   ],
+   "magicResist": 0,
+   "maxHp": 144,
+   "name": "Goblin Shaman",
+   "spellChance": 0.4,
+   "spellList": [
+    "imp_fireball",
+    "ritual_silence"
+   ],
+   "statusOnHit": [
+    {
+     "chance": 0.35,
+     "duration": 2,
+     "power": 6,
+     "type": "burn"
+    }
+   ],
+   "xpValue": 18
+  },
+  "goblin_warlord": {
+   "armor": 8,
+   "blockChance": 0.18,
+   "dmg": [
+    68,
+    96
+   ],
+   "dodge": 6,
+   "gold": [
+    28,
+    55
+   ],
+   "hit": 82,
+   "hp": 630,
+   "id": "goblin_warlord",
+   "loot": [
+    "sword",
+    "heavy_chest"
+   ],
+   "magicResist": 0,
+   "maxHp": 630,
+   "name": "Goblin Warlord",
+   "spellChance": 0.25,
+   "spellList": [
+    "bandit_flashbomb"
+   ],
+   "xpValue": 72
+  },
+  "goblin_warrior": {
+   "armor": 5,
+   "blockChance": 0.12,
+   "dmg": [
+    56,
+    80
+   ],
+   "dodge": 8,
+   "gold": [
+    5,
+    12
+   ],
+   "hit": 80,
+   "hp": 200,
+   "id": "goblin_warrior",
+   "loot": [
+    "sword",
+    "medium_chest",
+    "shield"
+   ],
+   "magicResist": 0,
+   "maxHp": 200,
+   "name": "Goblin Warrior",
+   "xpValue": 15
+  },
+  "hell_knight": {
+   "armor": 26,
+   "blockChance": 0.28,
+   "dmg": [
+    64,
+    100
+   ],
+   "dodge": 8,
+   "gold": [
+    28,
+    60
+   ],
+   "hit": 72,
+   "hp": 960,
+   "id": "hell_knight",
+   "loot": [
+    "heavy_chest",
+    "heavy_legs"
+   ],
+   "magicResist": 0,
+   "maxHp": 960,
+   "name": "Hell Knight",
+   "spellChance": 0.3,
+   "spellList": [
+    "demon_disarm",
+    "infernal_brand"
+   ],
+   "statusOnHit": [
+    {
+     "chance": 0.4,
+     "duration": 2,
+     "power": 10,
+     "type": "bleed"
+    }
+   ],
+   "xpValue": 105
+  },
+  "imp": {
+   "armor": 4,
+   "dmg": [
+    34,
+    52
+   ],
+   "dodge": 22,
+   "gold": [
+    6,
+    14
+   ],
+   "hit": 82,
+   "hp": 380,
+   "id": "imp",
+   "loot": [],
+   "magicResist": 0,
+   "maxHp": 380,
+   "name": "Imp",
+   "spellChance": 0.4,
+   "spellList": [
+    "imp_fireball",
+    "infernal_brand"
+   ],
+   "statusOnHit": [
+    {
+     "chance": 0.55,
+     "duration": 2,
+     "power": 9,
+     "type": "burn"
+    }
+   ],
+   "xpValue": 40
+  },
+  "molten_golem": {
+   "armor": 16,
+   "blockChance": 0.2,
+   "dmg": [
+    52,
+    76
+   ],
+   "dodge": 4,
+   "gold": [
+    20,
+    40
+   ],
+   "hit": 78,
+   "hp": 620,
+   "id": "molten_golem",
+   "loot": [
+    "heavy_chest"
+   ],
+   "magicResist": 0,
+   "maxHp": 620,
+   "name": "Molten Golem",
+   "spellChance": 0.3,
+   "spellList": [
+    "molten_shatter"
+   ],
+   "statusOnHit": [
+    {
+     "chance": 0.6,
+     "duration": 3,
+     "power": 9,
+     "type": "burn"
+    }
+   ],
+   "xpValue": 85
+  },
+  "primordial_elemental": {
+   "armor": 22,
+   "dmg": [
+    92,
+    144
+   ],
+   "dodge": 15,
+   "gold": [
+    42,
+    75
+   ],
+   "hit": 82,
+   "hp": 1280,
+   "id": "primordial_elemental",
+   "magicResist": 12,
+   "maxHp": 1280,
+   "name": "Primordial Elemental",
+   "spellChance": 0.35,
+   "spellList": [
+    "cosmic_rupture",
+    "molten_shatter"
+   ],
+   "statusOnHit": {
+    "chance": 0.35,
+    "duration": 2,
+    "power": 20,
+    "type": "burn"
+   },
+   "xpValue": 260
+  },
+  "reality_shard": {
+   "armor": 12,
+   "dmg": [
+    104,
+    168
+   ],
+   "dodge": 30,
+   "gold": [
+    32,
+    58
+   ],
+   "hit": 90,
+   "hp": 800,
+   "id": "reality_shard",
+   "magicResist": 0,
+   "maxHp": 800,
+   "name": "Reality Shard",
+   "spellChance": 0.4,
+   "spellList": [
+    "void_lance",
+    "void_silence"
+   ],
+   "statusOnHit": {
+    "chance": 0.1,
+    "duration": 1,
+    "type": "stun"
+   },
+   "xpValue": 220
+  },
+  "star_horror": {
+   "armor": 13,
+   "dmg": [
+    68,
+    108
+   ],
+   "dodge": 18,
+   "gold": [
+    24,
+    46
+   ],
+   "hit": 80,
+   "hp": 1080,
+   "id": "star_horror",
+   "magicResist": 0,
+   "maxHp": 1080,
+   "name": "Star Horror",
+   "xpValue": 175,
+   "spellChance": 0.3,
+   "spellList": [
+    "nightmare_hex",
+    "void_lance"
+   ]
+  },
+  "storm_dragon": {
+   "armor": 16,
+   "dmg": [
+    96,
+    156
+   ],
+   "dodge": 16,
+   "gold": [
+    70,
+    120
+   ],
+   "hit": 86,
+   "hp": 1040,
+   "id": "storm_dragon",
+   "loot": [
+    "dragonheart_ring",
+    "dragonscale_cloth"
+   ],
+   "magicResist": 0,
+   "maxHp": 1040,
+   "name": "Storm Dragon",
+   "statusOnHit": [
+    {
+     "chance": 0.25,
+     "duration": 1,
+     "type": "stun"
+    },
+    {
+     "chance": 0.4,
+     "duration": 2,
+     "power": 10,
+     "type": "burn"
+    }
+   ],
+   "xpValue": 340,
+   "spellChance": 0.3,
+   "spellList": [
+    "cosmic_rupture",
+    "harpy_screech"
+   ]
+  },
+  "veil_cultist": {
+   "armor": 5,
+   "dmg": [
+    40,
+    58
+   ],
+   "dodge": 12,
+   "gold": [
+    11,
+    24
+   ],
+   "hit": 80,
+   "hp": 368,
+   "id": "veil_cultist",
+   "loot": [
+    "cloth_chest",
+    "wand"
+   ],
+   "magicResist": 0,
+   "maxHp": 368,
+   "name": "Veil Cultist",
+   "spellChance": 0.35,
+   "spellList": [
+    "acolyte_curse",
+    "ritual_silence"
+   ],
+   "statusOnHit": [
+    {
+     "chance": 0.35,
+     "duration": 3,
+     "power": 7,
+     "type": "poison"
+    }
+   ],
+   "xpValue": 46
+  },
+  "veil_sorcerer": {
+   "armor": 4,
+   "dmg": [
+    52,
+    76
+   ],
+   "dodge": 14,
+   "gold": [
+    26,
+    52
+   ],
+   "hit": 82,
+   "hp": 440,
+   "id": "veil_sorcerer",
+   "loot": [
+    "staff",
+    "cloth_chest",
+    "ring"
+   ],
+   "magicResist": 0,
+   "maxHp": 440,
+   "name": "Veil Sorcerer",
+   "spellChance": 0.5,
+   "spellList": [
+    "mage_arcane_blast",
+    "acolyte_curse",
+    "nightmare_hex"
+   ],
+   "statusOnHit": [
+    {
+     "chance": 0.5,
+     "duration": 2,
+     "power": 10,
+     "type": "burn"
+    },
+    {
+     "chance": 0.15,
+     "duration": 1,
+     "power": 0,
+     "type": "stun"
+    }
+   ],
+   "xpValue": 78
+  },
+  "veil_warden": {
+   "armor": 8,
+   "blockChance": 0.22,
+   "dmg": [
+    44,
+    64
+   ],
+   "dodge": 12,
+   "gold": [
+    35,
+    62
+   ],
+   "hit": 80,
+   "hp": 480,
+   "id": "veil_warden",
+   "loot": [
+    "medium_chest",
+    "wand"
+   ],
+   "magicResist": 0,
+   "maxHp": 480,
+   "name": "Veil Warden",
+   "spellChance": 0.4,
+   "spellList": [
+    "acolyte_curse",
+    "druid_thorns"
+   ],
+   "statusOnHit": [
+    {
+     "chance": 0.45,
+     "duration": 2,
+     "power": 7,
+     "type": "burn"
+    }
+   ],
+   "xpValue": 108
+  },
+  "veilspawn_herald": {
+   "armor": 3,
+   "dmg": [
+    52,
+    76
+   ],
+   "dodge": 8,
+   "gold": [
+    10,
+    20
+   ],
+   "hit": 80,
+   "hp": 560,
+   "id": "veilspawn_herald",
+   "loot": [
+    "medium_chest",
+    "ring"
+   ],
+   "magicResist": 0,
+   "maxHp": 560,
+   "name": "Veilspawn Herald",
+   "spellChance": 0.3,
+   "spellList": [
+    "wraith_chill"
+   ],
+   "xpValue": 28
+  },
+  "void_prophet": {
+   "armor": 11,
+   "dmg": [
+    72,
+    116
+   ],
+   "dodge": 15,
+   "gold": [
+    36,
+    68
+   ],
+   "hit": 85,
+   "hp": 840,
+   "id": "void_prophet",
+   "magicResist": 0,
+   "maxHp": 840,
+   "name": "Void Prophet",
+   "statusOnHit": {
+    "chance": 0.25,
+    "duration": 3,
+    "power": 16,
+    "type": "burn"
+   },
+   "xpValue": 215,
+   "spellChance": 0.35,
+   "spellList": [
+    "void_silence",
+    "nightmare_hex",
+    "lich_drain_life"
+   ]
+  },
+  "void_shade": {
+   "armor": 7,
+   "dmg": [
+    52,
+    80
+   ],
+   "dodge": 28,
+   "gold": [
+    18,
+    40
+   ],
+   "hit": 85,
+   "hp": 600,
+   "id": "void_shade",
+   "loot": [
+    "ring",
+    "wand"
+   ],
+   "magicResist": 0,
+   "maxHp": 600,
+   "name": "Void Shade",
+   "spellChance": 0.4,
+   "spellList": [
+    "wraith_chill",
+    "lich_drain_life",
+    "void_silence"
+   ],
+   "statusOnHit": [
+    {
+     "chance": 0.5,
+     "duration": 3,
+     "power": 10,
+     "type": "poison"
+    },
+    {
+     "chance": 0.12,
+     "duration": 1,
+     "power": 0,
+     "type": "stun"
+    }
+   ],
+   "xpValue": 80
+  },
+  "void_wraith": {
+   "armor": 17,
+   "dmg": [
+    80,
+    124
+   ],
+   "dodge": 22,
+   "gold": [
+    28,
+    52
+   ],
+   "hit": 83,
+   "hp": 960,
+   "id": "void_wraith",
+   "magicResist": 0,
+   "maxHp": 960,
+   "name": "Void Wraith",
+   "statusOnHit": {
+    "chance": 0.12,
+    "duration": 1,
+    "type": "stun"
+   },
+   "xpValue": 165,
+   "spellChance": 0.3,
+   "spellList": [
+    "wraith_chill",
+    "bone_grasp"
+   ]
+  },
+  "wyrm_warrior": {
+   "armor": 22,
+   "dmg": [
+    80,
+    128
+   ],
+   "dodge": 10,
+   "gold": [
+    50,
+    90
+   ],
+   "hit": 80,
+   "hp": 720,
+   "id": "wyrm_warrior",
+   "loot": [
+    "dragonsteel_chest",
+    "wyrmscale_helm"
+   ],
+   "magicResist": 0,
+   "maxHp": 720,
+   "name": "Wyrm Warrior",
+   "statusOnHit": [
+    {
+     "chance": 0.4,
+     "duration": 3,
+     "power": 12,
+     "type": "bleed"
+    }
+   ],
+   "xpValue": 260,
+   "spellChance": 0.25,
+   "spellList": [
+    "brute_slam",
+    "demon_disarm"
+   ]
+  }
+ },
+ "source": "mapData.js ENEMIES/ENEMIES_ACT4/5/6 + inline ENCOUNTERS",
+ "version": 1
+}

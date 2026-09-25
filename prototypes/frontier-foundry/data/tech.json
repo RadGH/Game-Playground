@@ -1,0 +1,1661 @@
+{
+  "schema": 1,
+  "note": "Research tree. work is lab-seconds at researchRate 1; cost is the packs consumed over the whole node, drawn steadily as it progresses. requires lists techs that must be done first. unlocks holds structure, recipe, vehicle and unit ids. effects are flat multipliers the rules apply.",
+  "techs": [
+    {
+      "id": "t_landfall",
+      "name": "Landfall Kit",
+      "tier": 0,
+      "starting": true,
+      "work": 0,
+      "cost": {},
+      "requires": [],
+      "unlocks": [
+        "landing_pod",
+        "builder_yard",
+        "workshop",
+        "drill_mk1",
+        "biomass_harvester",
+        "smelter",
+        "crusher",
+        "kiln",
+        "assembler_mk1",
+        "combustion_generator",
+        "power_pole",
+        "storage_crate",
+        "dirt_path",
+        "wooden_wall",
+        "watchtower",
+        "scanner_tower",
+        "lab",
+        "rover",
+        "builder",
+        "smelt_iron",
+        "smelt_copper",
+        "crush_stone",
+        "char_biomass",
+        "make_iron_plate",
+        "make_wire",
+        "make_gear",
+        "pack_basic",
+        "melt_ice"
+      ],
+      "desc": "What came down in the pod. Enough to dig, smelt, build and look around."
+    },
+    {
+      "id": "t_masonry",
+      "name": "Masonry",
+      "tier": 1,
+      "work": 60,
+      "cost": {
+        "pack_basic": 20
+      },
+      "requires": [
+        "t_landfall"
+      ],
+      "unlocks": [
+        "quarry",
+        "concrete_mixer",
+        "silo",
+        "calcine_lime",
+        "make_concrete"
+      ],
+      "desc": "Lime, concrete and a quarry that never runs dry. Concrete is the floor everything later stands on."
+    },
+    {
+      "id": "t_crushing",
+      "name": "Ore Sorting",
+      "tier": 1,
+      "work": 70,
+      "cost": {
+        "pack_basic": 24
+      },
+      "requires": [
+        "t_landfall"
+      ],
+      "unlocks": [
+        "sort_rubble"
+      ],
+      "effects": {
+        "extractRate": 1.1
+      },
+      "desc": "Sort salvage out of plain rubble, and get ten per cent more out of every drill."
+    },
+    {
+      "id": "t_alloys",
+      "name": "Bronze Working",
+      "tier": 1,
+      "work": 80,
+      "cost": {
+        "pack_basic": 28
+      },
+      "requires": [
+        "t_landfall"
+      ],
+      "unlocks": [
+        "smelt_bronze"
+      ],
+      "desc": "Tin turns copper into something structural. The first alloy, and it does not spark near gas."
+    },
+    {
+      "id": "t_haulage",
+      "name": "Haulage",
+      "tier": 1,
+      "work": 110,
+      "cost": {
+        "pack_basic": 40
+      },
+      "requires": [
+        "t_landfall"
+      ],
+      "unlocks": [
+        "truck_garage",
+        "warehouse",
+        "depot",
+        "loading_dock",
+        "garage",
+        "hauler",
+        "pack_logistics"
+      ],
+      "desc": "Trucks, depots and routes. Until this, everything has to be built within walking distance of the drill."
+    },
+    {
+      "id": "t_roads",
+      "name": "Road Building",
+      "tier": 1,
+      "work": 120,
+      "cost": {
+        "pack_basic": 30,
+        "pack_logistics": 15
+      },
+      "requires": [
+        "t_haulage",
+        "t_masonry"
+      ],
+      "unlocks": [
+        "gravel_road",
+        "bridge"
+      ],
+      "desc": "Gravel and spans. Seventy per cent faster hauling and water stops being a wall."
+    },
+    {
+      "id": "t_settlement",
+      "name": "Settlement",
+      "tier": 1,
+      "work": 100,
+      "cost": {
+        "pack_basic": 36
+      },
+      "requires": [
+        "t_landfall"
+      ],
+      "unlocks": [
+        "dormitory",
+        "medbay",
+        "scout",
+        "guard"
+      ],
+      "effects": {
+        "crewCap": 6
+      },
+      "desc": "Beds and a medbay. More crew means more builders, scouts to explore and guards to hold a line."
+    },
+    {
+      "id": "t_radar",
+      "name": "Radar",
+      "tier": 1,
+      "work": 130,
+      "cost": {
+        "pack_basic": 45
+      },
+      "requires": [
+        "t_landfall",
+        "t_electronics"
+      ],
+      "unlocks": [
+        "short_radar"
+      ],
+      "desc": "Stops the map being dark. Also the first warning you get that something is walking towards you."
+    },
+    {
+      "id": "t_scouting",
+      "name": "Field Scouting",
+      "tier": 1,
+      "work": 90,
+      "cost": {
+        "pack_basic": 30
+      },
+      "requires": [
+        "t_settlement"
+      ],
+      "unlocks": [
+        "skimmer"
+      ],
+      "effects": {
+        "scoutSpeed": 1.3,
+        "visionRadius": 1.15
+      },
+      "desc": "Light kit and a skimmer. Scouts move faster and see further, which is how you find the next region."
+    },
+    {
+      "id": "t_steel",
+      "name": "Steelmaking",
+      "tier": 2,
+      "work": 180,
+      "cost": {
+        "pack_basic": 60
+      },
+      "requires": [
+        "t_masonry",
+        "t_alloys"
+      ],
+      "unlocks": [
+        "arc_furnace",
+        "make_steel",
+        "make_steel_plate",
+        "steel_wall"
+      ],
+      "desc": "Iron burned down with carbon. Everything past here is made of steel or bolted to it."
+    },
+    {
+      "id": "t_electronics",
+      "name": "Electronics",
+      "tier": 2,
+      "work": 170,
+      "cost": {
+        "pack_basic": 55
+      },
+      "requires": [
+        "t_landfall"
+      ],
+      "unlocks": [
+        "circuit_printer",
+        "make_circuit"
+      ],
+      "desc": "Wire, board, resin, current. Nothing clever happens on this planet until you have circuits."
+    },
+    {
+      "id": "t_glass",
+      "name": "Glassworking",
+      "tier": 2,
+      "work": 150,
+      "cost": {
+        "pack_basic": 50
+      },
+      "requires": [
+        "t_masonry"
+      ],
+      "unlocks": [
+        "glassworks",
+        "make_glass"
+      ],
+      "desc": "Sand into sheet. Windows, vat walls and the raw stock for every lens you will ever grind."
+    },
+    {
+      "id": "t_fluids",
+      "name": "Fluid Handling",
+      "tier": 2,
+      "work": 190,
+      "cost": {
+        "pack_basic": 40,
+        "pack_logistics": 25
+      },
+      "requires": [
+        "t_haulage"
+      ],
+      "unlocks": [
+        "fluid_pump",
+        "fluid_tank",
+        "tanker_bay",
+        "tanker"
+      ],
+      "desc": "Pumps, tanks and tankers. Liquids will not ride in a crate, so this gates the whole oil chain."
+    },
+    {
+      "id": "t_paving",
+      "name": "Paving",
+      "tier": 2,
+      "work": 170,
+      "cost": {
+        "pack_logistics": 40
+      },
+      "requires": [
+        "t_roads"
+      ],
+      "unlocks": [
+        "paved_road"
+      ],
+      "desc": "Poured slab instead of packed gravel. Trucks run at better than double cross-country speed."
+    },
+    {
+      "id": "t_drilling2",
+      "name": "Powered Drilling",
+      "tier": 2,
+      "work": 210,
+      "cost": {
+        "pack_basic": 50,
+        "pack_logistics": 30
+      },
+      "requires": [
+        "t_steel"
+      ],
+      "unlocks": [
+        "drill_mk2"
+      ],
+      "effects": {
+        "extractRate": 1.05
+      },
+      "desc": "Twice the bite per drill. Your first real throughput jump, and your first real power bill."
+    },
+    {
+      "id": "t_oil",
+      "name": "Oil Refining",
+      "tier": 2,
+      "work": 230,
+      "cost": {
+        "pack_logistics": 45,
+        "pack_basic": 40
+      },
+      "requires": [
+        "t_fluids",
+        "t_steel"
+      ],
+      "unlocks": [
+        "refinery",
+        "refine_oil"
+      ],
+      "desc": "Crude into fuel and lubricant. Trucks stop being free to run and start being fast."
+    },
+    {
+      "id": "t_chemistry",
+      "name": "Chemistry",
+      "tier": 2,
+      "work": 240,
+      "cost": {
+        "pack_logistics": 50,
+        "pack_basic": 40
+      },
+      "requires": [
+        "t_oil",
+        "t_glass"
+      ],
+      "unlocks": [
+        "chemical_plant",
+        "make_acid",
+        "leach_tailings",
+        "pack_chem",
+        "sweeten_crude"
+      ],
+      "desc": "Acid and controlled reactions, and a way to pull sulfur out of sour crude. Opens the chemistry pack, which is the gate on most of the mid tree."
+    },
+    {
+      "id": "t_polymers",
+      "name": "Polymers",
+      "tier": 2,
+      "work": 220,
+      "cost": {
+        "pack_logistics": 45,
+        "pack_chem": 20
+      },
+      "requires": [
+        "t_chemistry"
+      ],
+      "unlocks": [
+        "polymer_press",
+        "make_polymer",
+        "make_resin"
+      ],
+      "desc": "Pressed oil. Seals, insulation, drone shells and the resin that glues composites."
+    },
+    {
+      "id": "t_wind",
+      "name": "Wind Power",
+      "tier": 2,
+      "work": 120,
+      "cost": {
+        "pack_basic": 45
+      },
+      "requires": [
+        "t_landfall"
+      ],
+      "unlocks": [
+        "wind_turbine"
+      ],
+      "desc": "Cheap power with no fuel and no smoke. What it gives depends entirely on the weather."
+    },
+    {
+      "id": "t_batteries",
+      "name": "Energy Storage",
+      "tier": 2,
+      "work": 260,
+      "cost": {
+        "pack_logistics": 50,
+        "pack_chem": 25
+      },
+      "requires": [
+        "t_chemistry",
+        "t_electronics"
+      ],
+      "unlocks": [
+        "battery_bank",
+        "make_battery"
+      ],
+      "desc": "Six thousand kilojoules on a shelf. Solar stops being useless the moment you have these."
+    },
+    {
+      "id": "t_fortification",
+      "name": "Fortification",
+      "tier": 2,
+      "work": 160,
+      "cost": {
+        "pack_basic": 50
+      },
+      "requires": [
+        "t_steel"
+      ],
+      "unlocks": [
+        "gate"
+      ],
+      "desc": "Steel walls and a gate that knows your trucks from theirs."
+    },
+    {
+      "id": "t_ballistics",
+      "name": "Ballistics",
+      "tier": 2,
+      "work": 180,
+      "cost": {
+        "pack_basic": 60
+      },
+      "requires": [
+        "t_steel"
+      ],
+      "unlocks": [
+        "gun_turret",
+        "pack_military"
+      ],
+      "desc": "A turret that puts metal downrange. The default answer to the first six waves."
+    },
+    {
+      "id": "t_ordnance",
+      "name": "Ordnance Studies",
+      "tier": 2,
+      "work": 150,
+      "cost": {
+        "pack_basic": 45
+      },
+      "requires": [
+        "t_ballistics"
+      ],
+      "unlocks": [
+        "pack_military"
+      ],
+      "desc": "Formalises what the turrets learn. Produces the ordnance pack the military tree runs on."
+    },
+    {
+      "id": "t_machining",
+      "name": "Machining",
+      "tier": 2,
+      "work": 200,
+      "cost": {
+        "pack_basic": 55,
+        "pack_logistics": 30
+      },
+      "requires": [
+        "t_steel"
+      ],
+      "unlocks": [
+        "make_machine_frame",
+        "builder_buggy"
+      ],
+      "desc": "Welded frames. Every big machine from here on is bolted onto one."
+    },
+    {
+      "id": "t_assembly2",
+      "name": "Assembly II",
+      "tier": 2,
+      "work": 250,
+      "cost": {
+        "pack_logistics": 55,
+        "pack_basic": 40
+      },
+      "requires": [
+        "t_machining",
+        "t_electronics"
+      ],
+      "unlocks": [
+        "assembler_mk2"
+      ],
+      "effects": {
+        "craftSpeed": 1.05
+      },
+      "desc": "Faster arms and a much longer recipe list. The workhorse of the mid game."
+    },
+    {
+      "id": "t_gasworks",
+      "name": "Gasworks",
+      "tier": 3,
+      "work": 300,
+      "cost": {
+        "pack_chem": 40,
+        "pack_logistics": 40
+      },
+      "requires": [
+        "t_polymers"
+      ],
+      "unlocks": [
+        "gas_extractor",
+        "gas_tank",
+        "gas_turbine",
+        "gas_hauler"
+      ],
+      "desc": "Caps, pressure vessels and a turbine that burns gas cleanly. Four hundred kilowatts from one building."
+    },
+    {
+      "id": "t_cracking",
+      "name": "Cracking",
+      "tier": 3,
+      "work": 330,
+      "cost": {
+        "pack_chem": 50,
+        "pack_logistics": 35
+      },
+      "requires": [
+        "t_gasworks"
+      ],
+      "unlocks": [
+        "cracking_tower",
+        "crack_heavy",
+        "crack_methane"
+      ],
+      "desc": "Break long molecules into short ones. This is where hydrogen becomes available in quantity."
+    },
+    {
+      "id": "t_electrolysis",
+      "name": "Electrolysis",
+      "tier": 3,
+      "work": 320,
+      "cost": {
+        "pack_chem": 50,
+        "pack_energy": 10
+      },
+      "requires": [
+        "t_chemistry",
+        "t_batteries"
+      ],
+      "unlocks": [
+        "electrolyzer",
+        "split_water",
+        "split_brine"
+      ],
+      "desc": "Current through a fluid until it comes apart. Water into hydrogen and oxidizer - literally rocket fuel."
+    },
+    {
+      "id": "t_centrifuge",
+      "name": "Centrifuging",
+      "tier": 3,
+      "work": 300,
+      "cost": {
+        "pack_chem": 45,
+        "pack_logistics": 30
+      },
+      "requires": [
+        "t_chemistry",
+        "t_machining"
+      ],
+      "unlocks": [
+        "centrifuge",
+        "spin_brine"
+      ],
+      "desc": "Spin a mixture until the heavy parts leave. Lithium out of brine, and later the uranium road."
+    },
+    {
+      "id": "t_optics",
+      "name": "Optics",
+      "tier": 3,
+      "work": 280,
+      "cost": {
+        "pack_chem": 40,
+        "pack_basic": 40
+      },
+      "requires": [
+        "t_glass"
+      ],
+      "unlocks": [
+        "grind_lens"
+      ],
+      "desc": "Ground and coated glass. Lasers, long radar and observatories all wait on this node."
+    },
+    {
+      "id": "t_logic",
+      "name": "Logic Cores",
+      "tier": 3,
+      "work": 340,
+      "cost": {
+        "pack_chem": 55,
+        "pack_logistics": 35
+      },
+      "requires": [
+        "t_polymers",
+        "t_electronics"
+      ],
+      "unlocks": [
+        "make_advanced_circuit"
+      ],
+      "desc": "Layered boards with gold contacts. The bottleneck of the entire late game - plan your gold early."
+    },
+    {
+      "id": "t_controls",
+      "name": "Control Systems",
+      "tier": 3,
+      "work": 380,
+      "cost": {
+        "pack_chem": 60,
+        "pack_military": 20
+      },
+      "requires": [
+        "t_logic"
+      ],
+      "unlocks": [
+        "make_control_unit"
+      ],
+      "desc": "A sealed brick that can fly a rocket or lay an artillery piece."
+    },
+    {
+      "id": "t_titanium",
+      "name": "Titanium Metallurgy",
+      "tier": 3,
+      "work": 400,
+      "cost": {
+        "pack_chem": 60,
+        "pack_logistics": 50
+      },
+      "requires": [
+        "t_steel",
+        "t_chemistry"
+      ],
+      "unlocks": [
+        "alloy_foundry",
+        "smelt_titanium",
+        "make_alloy_plate"
+      ],
+      "desc": "Light and stubborn. Alloy plate is what a rocket is skinned with."
+    },
+    {
+      "id": "t_refractory",
+      "name": "Refractory Metals",
+      "tier": 3,
+      "work": 420,
+      "cost": {
+        "pack_chem": 60,
+        "pack_energy": 15
+      },
+      "requires": [
+        "t_titanium"
+      ],
+      "unlocks": [
+        "smelt_tungsten"
+      ],
+      "desc": "Tungsten. Furnace linings, gun barrels and the sleeve a fuel rod lives in."
+    },
+    {
+      "id": "t_solar",
+      "name": "Photovoltaics",
+      "tier": 3,
+      "work": 330,
+      "cost": {
+        "pack_chem": 45,
+        "pack_logistics": 45
+      },
+      "requires": [
+        "t_glass",
+        "t_electronics"
+      ],
+      "unlocks": [
+        "solar_array",
+        "make_solar_cell"
+      ],
+      "desc": "Power with no fuel and no smoke, which also means no swarms come looking for you."
+    },
+    {
+      "id": "t_highvoltage",
+      "name": "High Voltage",
+      "tier": 3,
+      "work": 360,
+      "cost": {
+        "pack_chem": 55,
+        "pack_logistics": 30
+      },
+      "requires": [
+        "t_batteries"
+      ],
+      "unlocks": [
+        "substation",
+        "pack_energy"
+      ],
+      "effects": {
+        "powerLoss": 0.9
+      },
+      "desc": "Fifteen tiles of grid per mast instead of seven, and the power pack that gates the energy tree."
+    },
+    {
+      "id": "t_biofuel",
+      "name": "Biofuel",
+      "tier": 3,
+      "work": 260,
+      "cost": {
+        "pack_chem": 40,
+        "pack_logistics": 30
+      },
+      "requires": [
+        "t_chemistry"
+      ],
+      "unlocks": [
+        "fuel_plant",
+        "make_fuel_bio"
+      ],
+      "desc": "Ferment growth into fuel. On a green world this beats drilling for oil."
+    },
+    {
+      "id": "t_biotech",
+      "name": "Applied Biology",
+      "tier": 3,
+      "work": 300,
+      "cost": {
+        "pack_chem": 45
+      },
+      "requires": [
+        "t_biofuel"
+      ],
+      "unlocks": [
+        "make_fertiliser"
+      ],
+      "effects": {
+        "regrowRate": 1.6
+      },
+      "desc": "Slurry that makes cut ground grow back over half again as fast."
+    },
+    {
+      "id": "t_cold_ops",
+      "name": "Cold Operations",
+      "tier": 3,
+      "work": 240,
+      "cost": {
+        "pack_logistics": 40,
+        "pack_basic": 40
+      },
+      "requires": [
+        "t_steel"
+      ],
+      "unlocks": [
+        "ice_harvester"
+      ],
+      "effects": {
+        "coldResist": 0.4
+      },
+      "desc": "Heated housings and an ice harvester. Without this a frozen world has no water at all."
+    },
+    {
+      "id": "t_atmospherics",
+      "name": "Atmospherics",
+      "tier": 3,
+      "work": 340,
+      "cost": {
+        "pack_chem": 50,
+        "pack_logistics": 35
+      },
+      "requires": [
+        "t_gasworks"
+      ],
+      "unlocks": [
+        "atmospheric_condenser",
+        "condense_nitrogen",
+        "condense_hydrogen",
+        "condense_water"
+      ],
+      "desc": "Pull gas and water straight out of the sky. The answer to a planet with nothing useful in the ground."
+    },
+    {
+      "id": "t_exotic_gas",
+      "name": "Exotic Gases",
+      "tier": 4,
+      "work": 460,
+      "cost": {
+        "pack_energy": 30,
+        "pack_chem": 50
+      },
+      "requires": [
+        "t_atmospherics",
+        "t_highvoltage"
+      ],
+      "unlocks": [
+        "sift_helium"
+      ],
+      "desc": "Sifting helium-3 out of a whole atmosphere. Slow, power-hungry and the only source on most worlds."
+    },
+    {
+      "id": "t_geothermal",
+      "name": "Geothermal Power",
+      "tier": 3,
+      "work": 380,
+      "cost": {
+        "pack_chem": 50,
+        "pack_energy": 20
+      },
+      "requires": [
+        "t_refractory",
+        "t_fluids"
+      ],
+      "unlocks": [
+        "geothermal_tap",
+        "geothermal_plant"
+      ],
+      "desc": "Six hundred kilowatts that does not care about weather, night or fuel. Needs a fissure."
+    },
+    {
+      "id": "t_incendiary",
+      "name": "Incendiaries",
+      "tier": 3,
+      "work": 280,
+      "cost": {
+        "pack_military": 35,
+        "pack_chem": 25
+      },
+      "requires": [
+        "t_ballistics",
+        "t_oil"
+      ],
+      "unlocks": [
+        "flame_turret"
+      ],
+      "desc": "Short reach, enormous damage, hits the whole crowd. Chokepoint weapon."
+    },
+    {
+      "id": "t_explosives",
+      "name": "Explosives",
+      "tier": 3,
+      "work": 260,
+      "cost": {
+        "pack_military": 35,
+        "pack_chem": 20
+      },
+      "requires": [
+        "t_chemistry",
+        "t_ballistics"
+      ],
+      "unlocks": [
+        "mine_field"
+      ],
+      "desc": "Sulfur charges you can carpet an approach with. One bang each, and cheap enough not to care."
+    },
+    {
+      "id": "t_hardened_defence",
+      "name": "Hardened Defence",
+      "tier": 3,
+      "work": 320,
+      "cost": {
+        "pack_military": 40,
+        "pack_basic": 40
+      },
+      "requires": [
+        "t_fortification",
+        "t_masonry"
+      ],
+      "unlocks": [
+        "reinforced_wall"
+      ],
+      "effects": {
+        "wallHp": 1.15
+      },
+      "desc": "Concrete over steel with armour that shrugs small bites off entirely."
+    },
+    {
+      "id": "t_field_repair",
+      "name": "Field Repair",
+      "tier": 3,
+      "work": 300,
+      "cost": {
+        "pack_military": 35,
+        "pack_logistics": 35
+      },
+      "requires": [
+        "t_machining"
+      ],
+      "unlocks": [
+        "repair_bay"
+      ],
+      "desc": "Walls and turrets patch themselves between waves so you are not rebuilding the perimeter every night."
+    },
+    {
+      "id": "t_drilling3",
+      "name": "Deep Drilling",
+      "tier": 4,
+      "work": 520,
+      "cost": {
+        "pack_chem": 55,
+        "pack_energy": 25
+      },
+      "requires": [
+        "t_drilling2",
+        "t_titanium"
+      ],
+      "unlocks": [
+        "drill_mk3"
+      ],
+      "effects": {
+        "extractRate": 1.1
+      },
+      "desc": "A drill head that does not care what the rock is. Four times a mk1."
+    },
+    {
+      "id": "t_deep_boring",
+      "name": "Deep Boring",
+      "tier": 4,
+      "work": 620,
+      "cost": {
+        "pack_energy": 35,
+        "pack_chem": 50
+      },
+      "requires": [
+        "t_drilling3"
+      ],
+      "unlocks": [
+        "deep_bore"
+      ],
+      "desc": "Follows the seam under the patch. Slower than a mk3, but the node never empties."
+    },
+    {
+      "id": "t_assembly3",
+      "name": "Assembly III",
+      "tier": 4,
+      "work": 560,
+      "cost": {
+        "pack_energy": 30,
+        "pack_chem": 50
+      },
+      "requires": [
+        "t_assembly2",
+        "t_titanium"
+      ],
+      "unlocks": [
+        "assembler_mk3"
+      ],
+      "effects": {
+        "craftSpeed": 1.05
+      },
+      "desc": "Two and a half times a mk1, and it can put a satellite together."
+    },
+    {
+      "id": "t_precision",
+      "name": "Precision Assembly",
+      "tier": 4,
+      "work": 600,
+      "cost": {
+        "pack_energy": 35,
+        "pack_chem": 45
+      },
+      "requires": [
+        "t_assembly3",
+        "t_controls"
+      ],
+      "unlocks": [
+        "make_advanced_part"
+      ],
+      "desc": "Bearings, servos and a logic core sealed as one unit. The part every late building wants."
+    },
+    {
+      "id": "t_superalloy",
+      "name": "Superalloys",
+      "tier": 4,
+      "work": 640,
+      "cost": {
+        "pack_energy": 40,
+        "pack_chem": 40
+      },
+      "requires": [
+        "t_refractory",
+        "t_precision"
+      ],
+      "unlocks": [
+        "make_superalloy"
+      ],
+      "desc": "Tungsten, titanium and platinum. Engine bells, reactor cores, beacon hearts."
+    },
+    {
+      "id": "t_lasers",
+      "name": "Laser Weapons",
+      "tier": 4,
+      "work": 540,
+      "cost": {
+        "pack_military": 50,
+        "pack_energy": 30
+      },
+      "requires": [
+        "t_optics",
+        "t_highvoltage"
+      ],
+      "unlocks": [
+        "laser_turret"
+      ],
+      "desc": "Never needs ammunition, and goes dark the instant the grid does. Build batteries first."
+    },
+    {
+      "id": "t_electrics",
+      "name": "Arc Weapons",
+      "tier": 4,
+      "work": 500,
+      "cost": {
+        "pack_military": 45,
+        "pack_energy": 25
+      },
+      "requires": [
+        "t_highvoltage",
+        "t_ballistics"
+      ],
+      "unlocks": [
+        "tesla_coil"
+      ],
+      "desc": "Arcs to four targets at once. Against a swarm nothing its size comes close."
+    },
+    {
+      "id": "t_field_tech",
+      "name": "Field Emitters",
+      "tier": 4,
+      "work": 560,
+      "cost": {
+        "pack_energy": 35,
+        "pack_military": 35
+      },
+      "requires": [
+        "t_logic",
+        "t_highvoltage"
+      ],
+      "unlocks": [
+        "slow_field_emitter"
+      ],
+      "desc": "Everything hostile in the field moves at half speed, which quietly doubles every turret you own."
+    },
+    {
+      "id": "t_shields",
+      "name": "Shield Projection",
+      "tier": 4,
+      "work": 700,
+      "cost": {
+        "pack_energy": 45,
+        "pack_military": 40
+      },
+      "requires": [
+        "t_field_tech"
+      ],
+      "unlocks": [
+        "shield_generator"
+      ],
+      "desc": "A bubble that soaks three thousand damage and refills between waves."
+    },
+    {
+      "id": "t_artillery",
+      "name": "Artillery",
+      "tier": 4,
+      "work": 720,
+      "cost": {
+        "pack_military": 60,
+        "pack_energy": 30
+      },
+      "requires": [
+        "t_controls",
+        "t_refractory"
+      ],
+      "unlocks": [
+        "artillery"
+      ],
+      "desc": "Kills nests at forty tiles, before they ever become a wave. Cannot defend itself up close."
+    },
+    {
+      "id": "t_missiles",
+      "name": "Guided Missiles",
+      "tier": 4,
+      "work": 680,
+      "cost": {
+        "pack_military": 55,
+        "pack_energy": 30
+      },
+      "requires": [
+        "t_controls",
+        "t_explosives"
+      ],
+      "unlocks": [
+        "missile_battery"
+      ],
+      "desc": "The only ground gun that reliably hits things in the air."
+    },
+    {
+      "id": "t_fission",
+      "name": "Fission Power",
+      "tier": 4,
+      "work": 900,
+      "cost": {
+        "pack_energy": 60,
+        "pack_chem": 50
+      },
+      "requires": [
+        "t_centrifuge",
+        "t_refractory",
+        "t_highvoltage"
+      ],
+      "unlocks": [
+        "fission_reactor",
+        "enrich_uranium"
+      ],
+      "desc": "Two megawatts from one building, and a crater if the water ever stops."
+    },
+    {
+      "id": "t_research_methods",
+      "name": "Research Methods",
+      "tier": 3,
+      "work": 380,
+      "cost": {
+        "pack_chem": 45,
+        "pack_logistics": 40
+      },
+      "requires": [
+        "t_electronics"
+      ],
+      "unlocks": [
+        "research_station",
+        "archive"
+      ],
+      "effects": {
+        "researchRate": 1.15
+      },
+      "desc": "Three labs in one footprint, plus an archive so what you learn survives the trip to the next planet."
+    },
+    {
+      "id": "t_astronomy",
+      "name": "Astronomy",
+      "tier": 4,
+      "work": 520,
+      "cost": {
+        "pack_chem": 45,
+        "pack_energy": 25
+      },
+      "requires": [
+        "t_optics",
+        "t_research_methods"
+      ],
+      "unlocks": [
+        "observatory"
+      ],
+      "desc": "Read a planet from the ground before you spend a probe on it."
+    },
+    {
+      "id": "t_survey",
+      "name": "Regional Survey",
+      "tier": 3,
+      "work": 320,
+      "cost": {
+        "pack_logistics": 45,
+        "pack_chem": 25
+      },
+      "requires": [
+        "t_radar"
+      ],
+      "unlocks": [
+        "survey_station"
+      ],
+      "desc": "Reads the region instead of the local map. Tells you where the second outpost should go."
+    },
+    {
+      "id": "t_long_range_scan",
+      "name": "Long Range Scanning",
+      "tier": 4,
+      "work": 480,
+      "cost": {
+        "pack_chem": 45,
+        "pack_energy": 25
+      },
+      "requires": [
+        "t_radar",
+        "t_optics"
+      ],
+      "unlocks": [
+        "long_radar"
+      ],
+      "effects": {
+        "scanRadius": 1.2
+      },
+      "desc": "One mast covering most of a local map, and early warning on waves forming at the edge."
+    },
+    {
+      "id": "t_drones",
+      "name": "Cargo Drones",
+      "tier": 4,
+      "work": 520,
+      "cost": {
+        "pack_energy": 30,
+        "pack_logistics": 50
+      },
+      "requires": [
+        "t_batteries",
+        "t_logic"
+      ],
+      "unlocks": [
+        "drone_pad",
+        "drone"
+      ],
+      "desc": "Small loads that ignore terrain completely. Water, cliffs and enemies on the road stop mattering."
+    },
+    {
+      "id": "t_hover",
+      "name": "Hover Transport",
+      "tier": 5,
+      "work": 760,
+      "cost": {
+        "pack_energy": 50,
+        "pack_space": 15
+      },
+      "requires": [
+        "t_drones",
+        "t_field_tech"
+      ],
+      "unlocks": [
+        "hover_lane",
+        "hover_truck"
+      ],
+      "desc": "A powered strip and a truck that floats above it. Three times cross-country speed on a paid-for lane."
+    },
+    {
+      "id": "t_heavy_haulage",
+      "name": "Heavy Haulage",
+      "tier": 3,
+      "work": 360,
+      "cost": {
+        "pack_logistics": 55
+      },
+      "requires": [
+        "t_haulage",
+        "t_machining"
+      ],
+      "unlocks": [
+        "heavy_hauler"
+      ],
+      "effects": {
+        "vehicleCapacity": 1.1
+      },
+      "desc": "Six-axle trucks. Three times the load for half again the fuel."
+    },
+    {
+      "id": "t_airships",
+      "name": "Airships",
+      "tier": 4,
+      "work": 600,
+      "cost": {
+        "pack_logistics": 50,
+        "pack_chem": 40
+      },
+      "requires": [
+        "t_gasworks",
+        "t_heavy_haulage"
+      ],
+      "unlocks": [
+        "airship"
+      ],
+      "desc": "Lifting gas and a big net. Slow, enormous capacity, ignores the ground entirely."
+    },
+    {
+      "id": "t_nanofabrication",
+      "name": "Nanofabrication",
+      "tier": 5,
+      "work": 1000,
+      "cost": {
+        "pack_energy": 60,
+        "pack_space": 25
+      },
+      "requires": [
+        "t_precision",
+        "t_superalloy"
+      ],
+      "unlocks": [
+        "nano_forge"
+      ],
+      "effects": {
+        "craftSpeed": 1.1
+      },
+      "desc": "Builds atom by atom. Four times a mk1 assembler and it never needs a second pass."
+    },
+    {
+      "id": "t_reentry",
+      "name": "Re-entry Shielding",
+      "tier": 4,
+      "work": 640,
+      "cost": {
+        "pack_chem": 50,
+        "pack_energy": 35
+      },
+      "requires": [
+        "t_titanium",
+        "t_polymers"
+      ],
+      "unlocks": [
+        "make_heat_shield"
+      ],
+      "desc": "Ablative tiles. What stops a landing from being a cremation."
+    },
+    {
+      "id": "t_rocketry",
+      "name": "Rocketry",
+      "tier": 5,
+      "work": 1200,
+      "cost": {
+        "pack_energy": 70,
+        "pack_chem": 60,
+        "pack_military": 30
+      },
+      "requires": [
+        "t_reentry",
+        "t_controls",
+        "t_electrolysis",
+        "t_superalloy"
+      ],
+      "unlocks": [
+        "launch_pad",
+        "rocket_assembly",
+        "landing_beacon",
+        "make_rocket_part",
+        "make_rocket_fuel",
+        "make_oxidizer"
+      ],
+      "desc": "The gantry, the pad and the fuel. The moment this finishes, the run has a finish line."
+    },
+    {
+      "id": "t_satellites",
+      "name": "Satellites",
+      "tier": 5,
+      "work": 900,
+      "cost": {
+        "pack_energy": 55,
+        "pack_chem": 45
+      },
+      "requires": [
+        "t_rocketry",
+        "t_long_range_scan"
+      ],
+      "unlocks": [
+        "satellite_launcher",
+        "satellite_uplink",
+        "make_satellite",
+        "pack_space"
+      ],
+      "desc": "Eyes in orbit: the whole world map at once, and the orbital pack that gates the last tier."
+    },
+    {
+      "id": "t_probes",
+      "name": "Deep Probes",
+      "tier": 5,
+      "work": 950,
+      "cost": {
+        "pack_space": 25,
+        "pack_energy": 40
+      },
+      "requires": [
+        "t_satellites"
+      ],
+      "unlocks": [
+        "probe_launcher",
+        "make_probe"
+      ],
+      "desc": "Learn what the next planet is made of before you spend a rocket getting there."
+    },
+    {
+      "id": "t_orbital_station",
+      "name": "Orbital Station",
+      "tier": 6,
+      "work": 1600,
+      "cost": {
+        "pack_space": 60,
+        "pack_energy": 60
+      },
+      "requires": [
+        "t_probes",
+        "t_nanofabrication"
+      ],
+      "unlocks": [
+        "orbital_lift",
+        "make_station_module"
+      ],
+      "desc": "Six modules and a lift. Once it is up, cargo goes to orbit without burning a rocket every time."
+    },
+    {
+      "id": "t_beacon",
+      "name": "Frontier Beacon",
+      "tier": 6,
+      "work": 1800,
+      "cost": {
+        "pack_space": 70,
+        "pack_energy": 50
+      },
+      "requires": [
+        "t_orbital_station"
+      ],
+      "unlocks": [
+        "beacon",
+        "make_beacon_core"
+      ],
+      "desc": "A claim visible from orbit. Light one on enough worlds and the frontier is yours."
+    },
+    {
+      "id": "t_cryo_metallurgy",
+      "name": "Cryo Metallurgy",
+      "tier": 3,
+      "planetRequirement": "cryonite",
+      "work": 380,
+      "cost": {
+        "pack_chem": 45,
+        "pack_logistics": 35
+      },
+      "requires": [
+        "t_steel",
+        "t_cold_ops"
+      ],
+      "unlocks": [
+        "cryo_forge",
+        "quench_alloy"
+      ],
+      "desc": "Only researchable where cryonite exists. Alloy plate for a third of the titanium."
+    },
+    {
+      "id": "t_plasma_smelting",
+      "name": "Plasma Smelting",
+      "tier": 3,
+      "planetRequirement": "pyrocrystal",
+      "work": 400,
+      "cost": {
+        "pack_chem": 50,
+        "pack_energy": 15
+      },
+      "requires": [
+        "t_steel",
+        "t_chemistry"
+      ],
+      "unlocks": [
+        "plasma_refinery",
+        "plasma_smelt"
+      ],
+      "desc": "Only on a volcanic world. Smelts at twice the speed and skips the ingot step for steel."
+    },
+    {
+      "id": "t_void_condensing",
+      "name": "Void Condensing",
+      "tier": 4,
+      "planetRequirement": "umbral_shale",
+      "work": 560,
+      "cost": {
+        "pack_energy": 40,
+        "pack_chem": 45
+      },
+      "requires": [
+        "t_atmospherics"
+      ],
+      "unlocks": [
+        "void_condenser",
+        "condense_void"
+      ],
+      "desc": "Umbral shale pulls gas out of nothing. Helium-3 without a gas giant overhead."
+    },
+    {
+      "id": "t_resonance",
+      "name": "Resonance Milling",
+      "tier": 4,
+      "planetRequirement": "aetherite",
+      "work": 520,
+      "cost": {
+        "pack_chem": 50,
+        "pack_energy": 25
+      },
+      "requires": [
+        "t_logic"
+      ],
+      "unlocks": [
+        "resonance_mill",
+        "mill_aether"
+      ],
+      "desc": "Aetherite lays circuit traces by humming at them. Four logic cores a pass."
+    },
+    {
+      "id": "t_xenobiology",
+      "name": "Xenobiology",
+      "tier": 4,
+      "planetRequirement": "xenoplasm",
+      "work": 540,
+      "cost": {
+        "pack_chem": 55,
+        "pack_logistics": 30
+      },
+      "requires": [
+        "t_biotech",
+        "t_chemistry"
+      ],
+      "unlocks": [
+        "bio_vat",
+        "culture_plate"
+      ],
+      "desc": "Grow plate instead of rolling it, in a vat that heals its own damage."
+    },
+    {
+      "id": "t_umbral_shielding",
+      "name": "Umbral Shielding",
+      "tier": 4,
+      "planetRequirement": "umbral_shale",
+      "work": 500,
+      "cost": {
+        "pack_chem": 45,
+        "pack_military": 30
+      },
+      "requires": [
+        "t_masonry",
+        "t_chemistry"
+      ],
+      "unlocks": [
+        "umbral_kiln",
+        "bake_shield"
+      ],
+      "desc": "Shielding that eats heat and hides what is under it. Cheap heat shields and quieter waves."
+    },
+    {
+      "id": "t_glimmer_optics",
+      "name": "Glimmer Optics",
+      "tier": 4,
+      "planetRequirement": "glimmer_salt",
+      "work": 480,
+      "cost": {
+        "pack_chem": 45,
+        "pack_energy": 20
+      },
+      "requires": [
+        "t_optics"
+      ],
+      "unlocks": [
+        "glimmer_still",
+        "distil_lens"
+      ],
+      "desc": "Three lenses a pass. On a glimmer world lasers stop being a luxury."
+    },
+    {
+      "id": "t_ferrovine",
+      "name": "Ferrovine Weaving",
+      "tier": 3,
+      "planetRequirement": "ferrovine",
+      "work": 340,
+      "cost": {
+        "pack_logistics": 45,
+        "pack_basic": 40
+      },
+      "requires": [
+        "t_biotech"
+      ],
+      "unlocks": [
+        "ferrovine_loom",
+        "weave_cable"
+      ],
+      "desc": "A vine that grows wire. Ten wire from two vine, and not a gram of copper."
+    },
+    {
+      "id": "t_voltaics",
+      "name": "Voltaics",
+      "tier": 4,
+      "planetRequirement": "voltaic_ore",
+      "work": 520,
+      "cost": {
+        "pack_energy": 35,
+        "pack_chem": 35
+      },
+      "requires": [
+        "t_batteries",
+        "t_highvoltage"
+      ],
+      "unlocks": [
+        "voltaic_coil_works",
+        "storm_anchor",
+        "wind_coil"
+      ],
+      "desc": "Ore that holds a charge before you connect it. Six cells a pass, and a tap that feeds on storms."
+    },
+    {
+      "id": "t_helion_fusion",
+      "name": "Helion Fusion",
+      "tier": 4,
+      "work": 520,
+      "cost": {
+        "pack_energy": 35,
+        "pack_chem": 40
+      },
+      "requires": [
+        "t_gasworks",
+        "t_highvoltage"
+      ],
+      "unlocks": [
+        "helion_still",
+        "still_helion"
+      ],
+      "planetRequirement": "helion_gas",
+      "desc": "Burning helion gas in a still gives you rocket fuel and spare power at the same time. Only where helion vents."
+    },
+    {
+      "id": "t_null_forging",
+      "name": "Null Forging",
+      "tier": 4,
+      "work": 560,
+      "cost": {
+        "pack_energy": 40,
+        "pack_chem": 40
+      },
+      "requires": [
+        "t_refractory",
+        "t_field_tech"
+      ],
+      "unlocks": [
+        "null_forge",
+        "forge_nullsteel"
+      ],
+      "planetRequirement": "nullstone",
+      "desc": "A nullstone shell kills every field inside it, and superalloy will cold-work in that dead air without platinum."
+    },
+    {
+      "id": "t_emberlace_weaving",
+      "name": "Emberlace Weaving",
+      "tier": 4,
+      "work": 500,
+      "cost": {
+        "pack_chem": 45,
+        "pack_logistics": 35
+      },
+      "requires": [
+        "t_reentry"
+      ],
+      "unlocks": [
+        "emberlace_loom",
+        "weave_shield"
+      ],
+      "planetRequirement": "emberlace",
+      "desc": "Emberlace threads take the heat a re-entry shield has to take, and they weave faster than plate presses."
+    },
+    {
+      "id": "t_pearl_medicine",
+      "name": "Pearl Medicine",
+      "tier": 3,
+      "work": 400,
+      "cost": {
+        "pack_chem": 40,
+        "pack_basic": 40
+      },
+      "requires": [
+        "t_settlement",
+        "t_chemistry"
+      ],
+      "unlocks": [
+        "pearl_press",
+        "press_tonic"
+      ],
+      "planetRequirement": "brinepearl",
+      "desc": "Ground brinepearl keeps a crew standing and doubles as chemistry stock. Bigger bunks, cheaper packs."
+    }
+  ]
+}

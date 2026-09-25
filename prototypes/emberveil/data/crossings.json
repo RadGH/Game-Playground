@@ -1,0 +1,510 @@
+{
+ "schema": 1,
+ "note": "Travel hazards for `crossing` nodes. The party walks the stage from one side to the other, then one of these blocks the way. Resolved by js/explore.js; every choice must end in a result, so each crossing needs at least one choice with no requirement. `dc` is a base difficulty: js/explore.js adds 2 per act. Rewards come back in the same shape a won fight returns ({ xp, gold, fame, drops }). R19: js/explore.js now reads this `difficulty` block off the game data (it used to be dead data \u2014 the defaults baked into explore.js were what ran).",
+ "difficulty": {
+  "perAct": 2,
+  "cap": 20,
+  "rewardPerAct": 0.32,
+  "note": "A skill check is d20 + one point per three attribute points (js/explore.js checkBonus, rules.js owns the divisor) against the choice's dc plus perAct per act, capped."
+ },
+ "crossings": [
+  {
+   "id": "cold_ford",
+   "name": "The Cold Ford",
+   "scenery": "bridge",
+   "hazard": "water",
+   "intro": "The river is wide, brown and moving faster than it looks. The old ford markers are under water.",
+   "choices": [
+    {
+     "id": "rope",
+     "text": "Rig a rope line across",
+     "needs": {
+      "supply": {
+       "rope": 1
+      }
+     },
+     "auto": true,
+     "dc": 0,
+     "success": "One end round a stump, one end round a shoulder. Everyone comes out wet and whole.",
+     "reward": {
+      "mult": 0.8
+     }
+    },
+    {
+     "id": "wade",
+     "text": "Wade it, strongest first",
+     "check": {
+      "stat": "STR",
+      "dc": 12
+     },
+     "success": "The current pulls, the line holds, and the packs stay dry.",
+     "failure": "Somebody goes under and comes up spitting. A sack of food goes downstream.",
+     "fail": {
+      "supply": {
+       "ration": -1
+      },
+      "damage": 0.08
+     },
+     "reward": {
+      "mult": 1
+     }
+    },
+    {
+     "id": "swim_gear",
+     "text": "Float the packs and swim the deep channel",
+     "check": {
+      "stat": "CON",
+      "dc": 14
+     },
+     "success": "Cold, fast and over quickly. A drowned traveller's purse is still on the far bank.",
+     "failure": "The cold gets into everyone. You make the far bank shaking.",
+     "fail": {
+      "damage": 0.14,
+      "exhaustion": 1
+     },
+     "reward": {
+      "mult": 1.3,
+      "rare": 0.12
+     }
+    },
+    {
+     "id": "upstream",
+     "text": "Walk upstream and look for a shallower crossing",
+     "cost": {
+      "day": 1
+     },
+     "success": "Half a day upstream there is a gravel bar you can walk over. Slow, but nobody drowns.",
+     "reward": {
+      "mult": 0.2
+     }
+    }
+   ]
+  },
+  {
+   "id": "scree_gate",
+   "name": "The Scree Gate",
+   "scenery": "mountain",
+   "hazard": "rock",
+   "intro": "The pass is a throat of loose stone, and the slope above it is still shedding. Something big came down here recently.",
+   "choices": [
+    {
+     "id": "dash",
+     "text": "Time the slides and go across fast",
+     "check": {
+      "stat": "DEX",
+      "dc": 13
+     },
+     "success": "Three runs, three gaps in the falling stone, and the pass is behind you.",
+     "failure": "The slope lets go halfway. Everyone digs out bruised.",
+     "fail": {
+      "damage": 0.15,
+      "exhaustion": 1
+     },
+     "reward": {
+      "mult": 1.1
+     }
+    },
+    {
+     "id": "shore",
+     "text": "Shore the worst of it with timber",
+     "needs": {
+      "supply": {
+       "timber": 1
+      }
+     },
+     "auto": true,
+     "success": "Two props and a crossbeam hold the throat open long enough to walk it.",
+     "reward": {
+      "mult": 1
+     }
+    },
+    {
+     "id": "wait",
+     "text": "Camp below and wait for the slope to settle",
+     "cost": {
+      "day": 1,
+      "supply": {
+       "ration": -1
+      }
+     },
+     "success": "A day of listening to stone move. By morning the pass is quiet.",
+     "reward": {
+      "mult": 0.2
+     }
+    }
+   ]
+  },
+  {
+   "id": "fever_row",
+   "name": "Fever Row",
+   "scenery": "village",
+   "hazard": "sickness",
+   "intro": "The only road runs through a village where every second door is chalked. Somebody is coughing behind all of them.",
+   "choices": [
+    {
+     "id": "treat",
+     "text": "Spend bandages and treat who you can",
+     "needs": {
+      "supply": {
+       "bandages": 1
+      }
+     },
+     "auto": true,
+     "success": "You leave clean linen and boiled water behind. A grateful woman presses a keepsake on you.",
+     "reward": {
+      "mult": 1.2,
+      "fameBonus": 3
+     },
+     "memory": "helped the sick at Fever Row"
+    },
+    {
+     "id": "read",
+     "text": "Work out what the sickness is before you walk in",
+     "check": {
+      "stat": "INT",
+      "dc": 13
+     },
+     "success": "It is in the well, not the air. You go round the well and through untouched.",
+     "failure": "You guess wrong about the air and hold your breath for nothing.",
+     "fail": {
+      "damage": 0.1
+     },
+     "reward": {
+      "mult": 1
+     }
+    },
+    {
+     "id": "push",
+     "text": "Hold cloth over your faces and walk straight through",
+     "check": {
+      "stat": "CON",
+      "dc": 14
+     },
+     "success": "Fast, quiet, and nobody takes anything with them but the smell.",
+     "failure": "Two of you are sweating by evening.",
+     "fail": {
+      "damage": 0.12,
+      "exhaustion": 1
+     },
+     "reward": {
+      "mult": 0.9
+     }
+    }
+   ]
+  },
+  {
+   "id": "broken_span",
+   "name": "The Broken Span",
+   "scenery": "ruins",
+   "hazard": "rock",
+   "intro": "The bridge is two stumps and a gap. Forty feet down, the gorge does not care how you get across.",
+   "choices": [
+    {
+     "id": "build",
+     "text": "Build a span with timber",
+     "needs": {
+      "supply": {
+       "timber": 1
+      }
+     },
+     "auto": true,
+     "success": "Three beams, a lot of rope and a plank floor. It creaks, and it holds.",
+     "reward": {
+      "mult": 1.2
+     },
+     "memory": "built a bridge over the gorge"
+    },
+    {
+     "id": "climb",
+     "text": "Climb down and up the other side",
+     "check": {
+      "stat": "DEX",
+      "dc": 15
+     },
+     "success": "Down, across the shallows, and up. Somebody finds an old strongbox wedged in the rocks.",
+     "failure": "A handhold goes. The rope catches, but not before it hurts.",
+     "fail": {
+      "damage": 0.18
+     },
+     "reward": {
+      "mult": 1.4,
+      "rare": 0.18
+     }
+    },
+    {
+     "id": "detour",
+     "text": "Take the long way round",
+     "cost": {
+      "day": 1,
+      "supply": {
+       "ration": -1
+      }
+     },
+     "success": "An extra day of walking and no gorge at all.",
+     "reward": {
+      "mult": 0.2
+     }
+    }
+   ]
+  },
+  {
+   "id": "toll_stone",
+   "enemyFamily": "humanoid",
+   "name": "The Toll Stone",
+   "scenery": "forest",
+   "hazard": "people",
+   "intro": "Somebody has dragged a standing stone across the road and painted a price on it. Six of them are sitting behind it, bored and armed.",
+   "choices": [
+    {
+     "id": "pay",
+     "text": "Pay the toll",
+     "cost": {
+      "goldPerAct": 22
+     },
+     "success": "Coin changes hands. The stone gets rolled aside with surprising politeness.",
+     "reward": {
+      "mult": 0.15
+     }
+    },
+    {
+     "id": "talk",
+     "text": "Talk them down",
+     "check": {
+      "stat": "INT",
+      "dc": 14,
+      "traits": [
+       "silver_tongue",
+       "charming",
+       "cunning",
+       "proud",
+       "greedy"
+      ],
+      "traitBonus": 4
+     },
+     "success": "By the end of it they are apologising and throwing in directions.",
+     "failure": "They stop listening halfway and reach for the axes.",
+     "fail": {
+      "fight": true
+     },
+     "reward": {
+      "mult": 1.2
+     }
+    },
+    {
+     "id": "fight",
+     "text": "Refuse and take the road",
+     "fight": true,
+     "success": "The stone gets rolled aside. Nobody asks for money.",
+     "reward": {
+      "mult": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "grey_fen",
+   "name": "The Grey Fen",
+   "scenery": "marsh",
+   "hazard": "fog",
+   "intro": "The causeway goes into fog and does not obviously come out. There are cairns every hundred paces, when you can see them.",
+   "choices": [
+    {
+     "id": "light",
+     "text": "Burn a torch and follow the cairns",
+     "needs": {
+      "supply": {
+       "torch": 1
+      }
+     },
+     "auto": true,
+     "success": "One torch, one cairn at a time. It takes hours and it works.",
+     "reward": {
+      "mult": 0.9
+     }
+    },
+    {
+     "id": "lantern",
+     "text": "Lead with a light-bearing weapon",
+     "needs": {
+      "item": "lantern|torch|lamp|ember|flame|sun"
+     },
+     "auto": true,
+     "success": "The glow off the steel is enough to hold the line together.",
+     "reward": {
+      "mult": 1.1
+     }
+    },
+    {
+     "id": "reckon",
+     "text": "Take a bearing and keep it",
+     "check": {
+      "stat": "INT",
+      "dc": 13
+     },
+     "success": "Counted paces and a fixed heading. You come out exactly where you meant to.",
+     "failure": "You come out a mile north with wet boots and no dignity.",
+     "fail": {
+      "day": 1,
+      "exhaustion": 1
+     },
+     "reward": {
+      "mult": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "windbite_ridge",
+   "name": "Windbite Ridge",
+   "scenery": "mountain",
+   "hazard": "cold",
+   "intro": "The ridge road is exposed for four miles and the weather coming over it is already white.",
+   "choices": [
+    {
+     "id": "tent",
+     "text": "Pitch the tent and go over in the lull",
+     "needs": {
+      "supply": {
+       "tent": 1
+      }
+     },
+     "auto": true,
+     "success": "You sit the worst of it out under canvas and walk the ridge in clear air.",
+     "reward": {
+      "mult": 0.9
+     }
+    },
+    {
+     "id": "eat",
+     "text": "Eat hard and push over in one go",
+     "needs": {
+      "supply": {
+       "ration": 1
+      }
+     },
+     "check": {
+      "stat": "CON",
+      "dc": 14
+     },
+     "success": "Full stomachs and four fast miles. A frozen pack on the verge still has its owner's gear in it.",
+     "failure": "The wind takes more out of everyone than the food put in.",
+     "fail": {
+      "damage": 0.14,
+      "exhaustion": 1
+     },
+     "reward": {
+      "mult": 1.3,
+      "rare": 0.12
+     }
+    },
+    {
+     "id": "shelter",
+     "text": "Wait a day in the lee of the rocks",
+     "cost": {
+      "day": 1,
+      "supply": {
+       "ration": -1
+      }
+     },
+     "success": "A cold, dull day. The ridge is walkable by morning.",
+     "reward": {
+      "mult": 0.2
+     }
+    }
+   ]
+  },
+  {
+   "id": "wardens_gate",
+   "enemyFamily": "humanoid",
+   "name": "The Warden's Gate",
+   "scenery": "town",
+   "hazard": "people",
+   "guard": {
+    "name": "Gate Warden",
+    "role": "guard",
+    "race": "human",
+    "traits": [
+     "dutiful",
+     "gruff",
+     "suspicious"
+    ],
+    "greeting": "Road's closed past this post. Warden's orders. State your business.",
+    "refuse": "Then state it somewhere else. Turn around.",
+    "relent": "\u2026Right. Go on, then. Keep to the road and don't make me regret it."
+   },
+   "intro": "A timber gate across the road, a warden's post beside it, and a warden already walking out to meet you.",
+   "choices": [
+    {
+     "id": "papers",
+     "text": "Show the warrant you are carrying",
+     "needs": {
+      "flag": "gate_warrant"
+     },
+     "auto": true,
+     "success": "The seal is checked twice and the bar comes up.",
+     "reward": {
+      "mult": 0.6
+     }
+    },
+    {
+     "id": "fame",
+     "text": "Give your names",
+     "needs": {
+      "fame": 60
+     },
+     "auto": true,
+     "success": "The warden has heard the names. The bar comes up faster than it should.",
+     "reward": {
+      "mult": 0.8,
+      "fameBonus": 2
+     }
+    },
+    {
+     "id": "bribe",
+     "text": "Make it worth the warden's evening",
+     "cost": {
+      "goldPerAct": 28
+     },
+     "success": "The coin goes somewhere it will not be found. The bar comes up.",
+     "reward": {
+      "mult": 0.15
+     }
+    },
+    {
+     "id": "bluff",
+     "text": "Bluff your way past",
+     "check": {
+      "stat": "INT",
+      "dc": 15,
+      "traits": [
+       "silver_tongue",
+       "charming",
+       "cunning",
+       "brave"
+      ],
+      "traitBonus": 4
+     },
+     "success": "The story is thin but told well. The warden decides not to look at it too hard.",
+     "failure": "The story falls apart at the third question.",
+     "fail": {
+      "fight": true
+     },
+     "reward": {
+      "mult": 1.3
+     }
+    },
+    {
+     "id": "force",
+     "text": "Go through the post",
+     "fight": true,
+     "success": "The gate is opened the loud way.",
+     "reward": {
+      "mult": 1
+     },
+     "fameBonus": -4,
+     "memory": "forced the warden's gate"
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,608 @@
+{
+  "_doc": "The colony: who lives at your base, what they do all day, what they eat and what they pay you. Design references (comments only, never in game text): Colony Survival for the go-to-work loop, Necesse for workers who maintain what you laid out rather than inventing it. The numbers here are the whole balance of js/colony.js — no rule lives in code that could live in this file. Hours are in-game hours; a day is 24 of them.",
+  "_scheduleDoc": "A rudimentary day, deliberately. Wake, walk to the job, work it, walk home, eat, sleep. Boundaries are hours of the day; js/colony.js steps a citizen through them and nothing else decides where they are. A citizen with no job still wakes and still eats — an idle mouth is meant to be visible.",
+  "schedule": {
+    "wake": 6,
+    "leaveForWork": 7,
+    "leaveWork": 18,
+    "bed": 22,
+    "mealHours": [
+      7,
+      13,
+      19
+    ],
+    "travelHoursDefault": 0.25,
+    "walkSpeedMetresPerHour": 3000,
+    "maxTravelHours": 2
+  },
+  "_jobsDoc": "A job says which work orders a citizen will pick up (`tags`), how fast they turn hours into work units, and whether the job is allowed to CREATE anything. `mayBreakGround` is false on every job in this file and that is the Necesse rule made literal: a farmer harvests and replants the plots the player laid out, and can never lay a new one. Nothing in js/farm.js will let a citizen past that flag.",
+  "jobs": [
+    {
+      "key": "labourer",
+      "name": "Labourer",
+      "tags": [
+        "haul",
+        "build",
+        "craft",
+        "mine",
+        "chop"
+      ],
+      "unitsPerHour": 1.0,
+      "mayBreakGround": false,
+      "tendMax": 2,
+      "blurb": "Turns their hand to whatever order is nearest."
+    },
+    {
+      "key": "farmer",
+      "name": "Farmer",
+      "tags": [
+        "harvest",
+        "replant"
+      ],
+      "unitsPerHour": 1.2,
+      "mayBreakGround": false,
+      "tendMax": 1,
+      "blurb": "Brings in what is ripe and puts the next seed in the same hole. Will not break new ground."
+    },
+    {
+      "key": "miner",
+      "name": "Miner",
+      "tags": [
+        "mine",
+        "haul"
+      ],
+      "unitsPerHour": 1.15,
+      "mayBreakGround": false,
+      "tendMax": 1,
+      "blurb": "Works a face or a drill; carries ore to the nearest store."
+    },
+    {
+      "key": "smelter",
+      "name": "Smelter",
+      "tags": [
+        "refine",
+        "craft"
+      ],
+      "unitsPerHour": 1.1,
+      "mayBreakGround": false,
+      "tendMax": 3,
+      "blurb": "Feeds the furnaces and pulls the ingots."
+    },
+    {
+      "key": "carpenter",
+      "name": "Carpenter",
+      "tags": [
+        "build",
+        "craft",
+        "chop"
+      ],
+      "unitsPerHour": 1.15,
+      "mayBreakGround": false,
+      "tendMax": 3,
+      "blurb": "Raises what you have outlined and keeps it standing."
+    },
+    {
+      "key": "hauler",
+      "name": "Hauler",
+      "tags": [
+        "haul"
+      ],
+      "unitsPerHour": 1.4,
+      "mayBreakGround": false,
+      "tendMax": 1,
+      "blurb": "Walks the pool boundary all day so nothing sits in the wrong crate."
+    },
+    {
+      "key": "cook",
+      "name": "Cook",
+      "tags": [
+        "cook",
+        "haul"
+      ],
+      "unitsPerHour": 1.1,
+      "mayBreakGround": false,
+      "tendMax": 1,
+      "blurb": "Turns raw crop into meals, which go further than raw crop."
+    },
+    {
+      "key": "guard",
+      "name": "Guard",
+      "tags": [
+        "watch",
+        "repair"
+      ],
+      "unitsPerHour": 0.8,
+      "mayBreakGround": false,
+      "tendMax": 0,
+      "wagePerDay": 8,
+      "blurb": "Stands a post. Counts toward the base's defence, not its output."
+    }
+  ],
+  "_foodDoc": "Citizens eat, and an unfed colony has to degrade in a way the player NOTICES without being a disaster they cannot come back from. Four rungs: hungry (slower), grumbling (stops paying tax), downs tools (does no work at all), leaves (walks out). Nobody ever starves to death — a dead citizen is a save-scum, a departed one is a lesson. Hunger runs 0..1 and one full day with nothing to eat is `hungerPerDay`.",
+  "food": {
+    "perCitizenPerDay": 2,
+    "hungerPerDay": 0.5,
+    "hungerFedPerMeal": 0.34,
+    "rungs": {
+      "hungry": 0.3,
+      "grumbling": 0.55,
+      "downsTools": 0.78,
+      "leaves": 1.0
+    },
+    "outputAtHungry": 0.65,
+    "moodLossPerDayHungry": 0.35,
+    "moodGainPerDayFed": 0.2
+  },
+  "_housingDoc": "A bed is the whole housing model. Housed citizens sleep, recover mood and pay tax; an unhoused one sleeps rough, loses mood and pays nothing. Spare beds are also the single biggest pull on migration, which is what makes building a house BEFORE you have anybody a sensible thing to do.",
+  "housing": {
+    "moodLossPerDayUnhoused": 0.25,
+    "moodGainPerNightHoused": 0.12,
+    "spareBedsIgnoredAbove": 12
+  },
+  "_taxDoc": "Gold out of people rather than out of loot. Only a citizen who is both FED and HOUSED pays — that is the whole lever, and it means the answer to 'how do I make money' is always 'look after more people'. Mood scales it, prosperity (your refined output, your waypoint, your walls) scales it again, and the cap stops a hundred peasants from replacing the game. R19: `unhousedPays` and `grumblingPays` are SHARES of the full rate, not flags — 0 is the cliff the design wants, and js/colony.js `collectTax` now reads them instead of hard-coding the same two zeroes. Set `grumblingPays` to 0.5 if a hungry village going broke ever reads as too sharp.",
+  "tax": {
+    "perCitizenPerDay": 6,
+    "moodFloor": 0.25,
+    "prosperityPerStructure": 0.01,
+    "prosperityMax": 1.5,
+    "unhousedPays": 0,
+    "grumblingPays": 0
+  },
+  "_migrationDoc": "New people arrive because the place is worth coming to — spare beds, food in the store, walls up, and folk already there who are not miserable. Appeal runs 0..1 and is rolled against once per in-game day. A migrant is an OFFER, never an automatic arrival: they turn up at the edge of the claim and the player says yes or no, because a citizen you did not choose is a mouth you did not budget for.",
+  "migration": {
+    "rollEveryHours": 24,
+    "baseChance": 0.08,
+    "chanceAtFullAppeal": 0.55,
+    "weights": {
+      "spareBeds": 0.24,
+      "foodDays": 0.24,
+      "safety": 0.16,
+      "mood": 0.16,
+      "comfort": 0.1,
+      "trade": 0.1
+    },
+    "foodDaysForFullMarks": 6,
+    "spareBedsForFullMarks": 3,
+    "safetyForFullMarks": 6,
+    "offerExpiresHours": 12,
+    "maxPending": 2
+  },
+  "_recruitDoc": "The other way to get people: walk into a town and pay somebody to come back with you. A town has a small pool that refills slowly, the price climbs with the size of your colony (you are asking them to leave a working town for a hole in the ground), and good standing with whoever holds the zone knocks it down. Refusing is free.",
+  "recruit": {
+    "poolPerSettlementSize": 1.5,
+    "poolRefillDays": 8,
+    "basePrice": 120,
+    "pricePerExistingCitizen": 18,
+    "priceBySkill": 90,
+    "standingDiscountAtMax": 0.35,
+    "maxSkill": 1.6,
+    "minSkill": 0.75
+  },
+  "_comfortDoc": "THE CIVILIZATION EXPANSION, §2. A house is a structure with a `home` block in data/structures.json; a utility is a structure with a `utility` block. Comfort is the house's own number plus one point for each DISTINCT utility KIND whose radius reaches it — four privies is one privy — clamped to 0..1. Comfort does exactly two things and no more: it scales the mood a housed citizen recovers overnight, and it decides whether a vendor will live here. It deliberately does NOT scale work output, because a second hidden multiplier would make 'why is my furnace slow' unanswerable.",
+  "comfort": {
+    "moodFloor": 0.4,
+    "moodSpan": 1.2,
+    "utilityKinds": {
+      "water": "somewhere to draw water",
+      "warmth": "a fire that is always lit",
+      "food": "a larder within reach",
+      "wash": "somewhere to get clean",
+      "sanitation": "a privy",
+      "bread": "an oven",
+      "quiet": "somewhere quiet to sit",
+      "gather": "somewhere to meet"
+    }
+  },
+  "_labourDoc": "§3. One work unit buys thirty seconds of a tended machine's running time. `bankSeconds` caps how far ahead a machine can be charged, so a furnace cannot be wound up for a week and left. `orderUnits` is the grain the board posts in — four units is two minutes of furnace, which is a stream of small completions rather than one enormous order.",
+  "labour": {
+    "secondsPerUnit": 30,
+    "bankSeconds": 120,
+    "orderUnits": 4,
+    "tenderUnitsPerHour": 12
+  },
+  "_vendorDoc": "§5. A vendor is a person who decides to live at your place because of something you did. Three gates and all three are required: the condition, a FREE BED whose comfort clears `wants`, and no offer already pending. The panel always says which of the three is short. A vendor is never a job in `jobs` above — they must never be rolled as a migrant off the road, and `jobs` is what rollMigration picks from. They occupy a bed, they eat, they pay rent instead of tax, and they put exactly zero units on the work board.",
+  "vendorJob": {
+    "key": "vendor",
+    "name": "Trader",
+    "tags": [],
+    "unitsPerHour": 0,
+    "mayBreakGround": false,
+    "tendMax": 0,
+    "rentPerDay": 14,
+    "restockDays": 3,
+    "blurb": "Keeps a stall. Pays you rent, works for nobody."
+  },
+  "vendors": [
+    {
+      "id": "quartermaster",
+      "name": "Quartermaster",
+      "role": "merchant",
+      "sells": "Rations, rope, torches, bedrolls and seed",
+      "buys": "Anything, at four-tenths of what it is worth",
+      "needs": {
+        "citizens": 2
+      },
+      "wants": 0.15,
+      "stand": "centre",
+      "blurb": "The first trader who will look twice at a place like this."
+    },
+    {
+      "id": "forge_warden",
+      "name": "Forge-Warden",
+      "role": "smith",
+      "sells": "Weapons and heavy armour",
+      "buys": "Weapons, armour and scrap",
+      "needs": {
+        "structure": [
+          "furnace",
+          "smelter"
+        ],
+        "made": {
+          "iron_ingot": 20
+        }
+      },
+      "wants": 0.3,
+      "stand": "machine",
+      "blurb": "Follows the smoke. Will not set up where nothing is hot."
+    },
+    {
+      "id": "stonewright",
+      "name": "Stonewright",
+      "role": "merchant",
+      "sells": "Cut stone, brick, concrete and the groundwork pieces, cheap",
+      "buys": "Rubble, stone and gravel",
+      "needs": {
+        "structure": [
+          "stonecutter"
+        ],
+        "made": {
+          "cut_stone": 40
+        }
+      },
+      "wants": 0.2,
+      "stand": "machine",
+      "blurb": "Sells the dull half of every building for less than anyone else."
+    },
+    {
+      "id": "apothecary",
+      "name": "Apothecary",
+      "role": "alchemist",
+      "sells": "Reagents, salves, antidotes and coolant",
+      "buys": "Sulphur, saltpetre, ash and reagent",
+      "needs": {
+        "structure": [
+          "chemical_bench"
+        ]
+      },
+      "wants": 0.35,
+      "stand": "quiet",
+      "blurb": "Wants a quiet plot well away from the hammering."
+    },
+    {
+      "id": "victualler",
+      "name": "Victualler",
+      "role": "merchant",
+      "sells": "Grain, cooked rations, seed and salt",
+      "buys": "Crops, game meat and hide",
+      "needs": {
+        "plots": 2,
+        "structure": [
+          "larder"
+        ]
+      },
+      "wants": 0.25,
+      "stand": "larder",
+      "blurb": "Turns up the week the second field goes in."
+    },
+    {
+      "id": "carter",
+      "name": "Carter",
+      "role": "merchant",
+      "sells": "Hand carts, pack mules, wagons and route upkeep",
+      "buys": "—",
+      "needs": {
+        "structure": [
+          "trade_post"
+        ]
+      },
+      "wants": 0.2,
+      "stand": "trade_post",
+      "blurb": "Stands at the Trade Post door and tells you what a cart really costs."
+    },
+    {
+      "id": "chandler",
+      "name": "Chandler",
+      "role": "merchant",
+      "sells": "Lamps, lanterns, lamp oil, candles and the street lights",
+      "buys": "Resin, tallow and wax",
+      "needs": {
+        "citizens": 4,
+        "structure": [
+          "lamp_post",
+          "brazier",
+          "wall_sconce",
+          "hanging_lantern",
+          "crystal_lamp"
+        ]
+      },
+      "wants": 0.3,
+      "stand": "lit",
+      "blurb": "Will only live on a street that is lit after dark."
+    },
+    {
+      "id": "armiger",
+      "name": "Armiger",
+      "role": "guard",
+      "sells": "Guard contracts, turret parts and ammunition",
+      "buys": "Broken gear",
+      "needs": {
+        "structure": [
+          "watch_post",
+          "guard_tower",
+          "gate_house"
+        ],
+        "posted": 1
+      },
+      "wants": 0.25,
+      "stand": "post",
+      "blurb": "Runs the muster, and will sell you somebody to walk beside a cart."
+    },
+    {
+      "id": "wright",
+      "name": "Wright",
+      "role": "smith",
+      "sells": "Machine parts, wire, control boards and the Tender Arm",
+      "buys": "Salvage and scrap plate",
+      "needs": {
+        "structure": [
+          "assembler"
+        ]
+      },
+      "wants": 0.4,
+      "stand": "machine",
+      "blurb": "The last one to move in, and the one who makes the rest unnecessary."
+    },
+    {
+      "id": "factor",
+      "name": "Factor",
+      "role": "merchant",
+      "sells": "Trade goods, at this place's price",
+      "buys": "Trade goods",
+      "needs": {
+        "structure": [
+          "trade_post"
+        ],
+        "turnover": 400
+      },
+      "wants": 0.35,
+      "stand": "trade_post",
+      "blurb": "Keeps the price board. Everything they touch costs a twentieth more than it should."
+    },
+    {
+      "id": "drover",
+      "name": "Drover",
+      "role": "merchant",
+      "sells": "Mounts, pack mules and feed",
+      "buys": "—",
+      "needs": {
+        "structure": [
+          "stable"
+        ]
+      },
+      "wants": 0.2,
+      "stand": "outside",
+      "blurb": "Camps outside the ring, because the animals will not settle inside it."
+    },
+    {
+      "id": "gambler",
+      "name": "Gambler",
+      "role": "gambler",
+      "sells": "Sealed crates, contents unknown",
+      "buys": "—",
+      "needs": {
+        "citizens": 6,
+        "spent": 1000
+      },
+      "wants": 0.3,
+      "stand": "gather",
+      "blurb": "Arrives once there is enough money here to be worth losing."
+    }
+  ],
+  "_guardDoc": "§8. A post is a structure with a `post` block; a guard is a citizen standing in one. A posted guard counts as a point of defence exactly the way a turret does, which is what makes 'spend gold on people' a real alternative to 'spend materials on walls'. One stat block, read by your guards AND by a town's, so the two are never quietly different. Nobody dies: a guard who falls in a raid is knocked down and is back at their post the next morning at half mood. `wardRadius` is how far that presence REACHES: js/colony.js `stationed(centre)` counts only guards whose post is inside it, so js/defence.js asks about the base being raided and a guard posted at the far mine stops raising the home base's raid tier (R19 — it was read by nobody, so every guard defended the whole planet).",
+  "guard": {
+    "hp": 260,
+    "dmg": [
+      14,
+      22
+    ],
+    "armor": 22,
+    "speed": 5.2,
+    "reach": 3,
+    "attackEvery": 1.2,
+    "perLevel": 1.17,
+    "towerReach": 7,
+    "wagePerDay": 8,
+    "hireRetainerPerDay": 14,
+    "wardRadius": 90,
+    "unpaidDaysBeforeMood": 3,
+    "unpaidDaysBeforeLeaving": 7,
+    "routeGuardGold": 10,
+    "routeGuardAmbushCut": 0.18
+  },
+  "_awayDoc": "§4. Production does not stop when you leave. js/logistics.js's away clock already runs the machines and the carts forward; this block is the half it does not cover — the people, the fields and the trade runs — plus the caps. `rate.closed` is under 1 so that closing the game is not straightforwardly better than playing it; it is a fudge and the away card says so. The REAL cap is the crate: catch-up runs the actual machines against the actual pool, so a furnace with forty ore in reach makes twenty ingots and then says it is waiting for ore. Nothing anywhere invents an input. `mercyDays` holds hunger at the grumbling rung after three game days, because losing your village for taking a flight is a punishment for playing.",
+  "away": {
+    "rate": {
+      "away": 1.0,
+      "closed": 0.55
+    },
+    "capSeconds": 28800,
+    "mercyDays": 3,
+    "sliceSeconds": 20,
+    "minCardSeconds": 900
+  },
+  "_musterDoc": "§9. A drill is an ordinary raid with a flag on it, run through js/raid.js so every rule the raid already keeps — nothing spawns before the bell, night is harder and pays more, the rare crate is a floor — keeps itself for free. Cooldown is per RANK and per PLACE, so clearing rank 4 does not lock out rank 1. Losing costs nothing at all beyond whatever dying already costs you: no broken structures, no materials taken, no citizen leaves, no standing lost. The user's words: 'No need to penalize for a minigame.'",
+  "_tradeDoc": "§7. What a thing is worth somewhere is its base price moved by whether that place NEEDS the tag and whether it MAKES it, plus a slow wobble on a six-day step. Clamped hard, so the whole spread a player can ever see on one good is about three and a half times — enough to be worth a cart, never enough to be a slot machine. A place never both needs and makes the same tag; `makes` wins.",
+  "trade": {
+    "needWeight": 0.45,
+    "makesWeight": 0.35,
+    "driftWeight": 0.18,
+    "driftDays": 6,
+    "clamp": [
+      0.55,
+      1.85
+    ],
+    "spread": 0.05,
+    "standingSwing": 0.08,
+    "noMarketCut": 0.12,
+    "maxNeeds": 2,
+    "roadBonus": 0.6,
+    "ambush": {
+      "base": 0.34,
+      "escortCut": 0.25,
+      "floor": 0.03,
+      "ceiling": 0.7
+    },
+    "materialsShelf": {
+      "buyMultiplier": 2.2,
+      "sellMultiplier": 0.45
+    }
+  },
+  "_carrierDoc": "§7.5. A carrier is a row in a table — how much it holds, how fast it goes, what a trip costs in upkeep and how many guards may walk with it. Three of the five are already in data/power.json's hauler table with these exact capacities and speeds and are repeated here ONLY with the trade fields; the haulage numbers themselves still belong to that file.",
+  "carriers": [
+    {
+      "key": "porter",
+      "name": "Porter",
+      "hold": 40,
+      "speed": 2.6,
+      "upkeep": 6,
+      "guardsMax": 0,
+      "from": "hired at any Trade Post",
+      "blurb": "One person and a pack. Slow, cheap, and always available."
+    },
+    {
+      "key": "hand_cart",
+      "name": "Hand Cart",
+      "hold": 160,
+      "speed": 3.4,
+      "upkeep": 12,
+      "guardsMax": 2,
+      "from": "built",
+      "blurb": "The first real load. Four times a porter for twice the money."
+    },
+    {
+      "key": "pack_mule",
+      "name": "Pack Mule",
+      "hold": 260,
+      "speed": 4.0,
+      "upkeep": 20,
+      "guardsMax": 2,
+      "from": "bought from a Drover",
+      "feed": {
+        "grain": 4
+      },
+      "blurb": "Faster than the cart and it eats."
+    },
+    {
+      "key": "covered_wagon",
+      "name": "Covered Wagon",
+      "hold": 620,
+      "speed": 3.0,
+      "upkeep": 34,
+      "guardsMax": 4,
+      "from": "built",
+      "blurb": "Slow, enormous, and worth robbing. Take the four guards."
+    },
+    {
+      "key": "hauler_drone",
+      "name": "Hauler Drone",
+      "hold": 200,
+      "speed": 7.5,
+      "upkeep": 0,
+      "guardsMax": 0,
+      "from": "built",
+      "powerAtOrigin": 12,
+      "blurb": "Faster than anything that wants to rob it, and it dies with the grid."
+    }
+  ],
+  "_holdDoc": "§6.5. The hold is the ONE capped container in the game, and the weight limit is the entire reason trade is interesting. There is no encumbrance: going over the limit is impossible rather than slow, and the panel says 'the cart is full, three of seven went in'. `onBack` is the same forty kilograms data/resources.json's haul block already uses.",
+  "hold": {
+    "onBack": 40,
+    "mountPack": 120,
+    "tradePost": 2000,
+    "vehicles": {
+      "motorcycle": 30,
+      "car": 140,
+      "truck": 900
+    }
+  },
+  "_namesDoc": "Plain invented names, built from syllables so the colony never repeats itself and nothing here belongs to anybody else. A game that already has Name Forge can pass its own `makeName` into createColony and this table is ignored.",
+  "names": {
+    "first": [
+      "Ard",
+      "Bri",
+      "Cal",
+      "Dov",
+      "El",
+      "Fen",
+      "Gwyn",
+      "Hal",
+      "Ing",
+      "Jor",
+      "Kest",
+      "Lin",
+      "Mar",
+      "Nev",
+      "Orr",
+      "Pel",
+      "Quill",
+      "Rha",
+      "Sev",
+      "Tam",
+      "Ul",
+      "Ver",
+      "Wyn",
+      "Yst"
+    ],
+    "last": [
+      "a",
+      "en",
+      "ith",
+      "ora",
+      "us",
+      "wen",
+      "ric",
+      "ana",
+      "eld",
+      "os",
+      "iel",
+      "ur"
+    ],
+    "family": [
+      "Ashfoot",
+      "Bellow",
+      "Carrick",
+      "Dunmer",
+      "Elmgate",
+      "Fallow",
+      "Granner",
+      "Holt",
+      "Iverly",
+      "Jarrow",
+      "Kelm",
+      "Lowry",
+      "Marrow",
+      "Nettle",
+      "Orrick",
+      "Prynne",
+      "Quarry",
+      "Raddle",
+      "Selk",
+      "Thorn",
+      "Underhill",
+      "Vance",
+      "Weld",
+      "Yarrow"
+    ]
+  },
+  "_r18Dead": "R18 — a number stated in two files is a number that will be tuned in the wrong one, which this round has now fixed four times (structures/power prices, the generator kW, the logistics pole's radius, and these). `food.cookedMealMultiplier` removed: the live one is data/crops.json's `cook.multiplier`, read by js/farm.js. Same value, 1.6, in two files — and only one of them was ever read. the `muster` block removed: js/muster.js reads `D.muster || civics?.muster` where `D` is data/raids.json, so raids.json's block always won and this one never applied."
+}

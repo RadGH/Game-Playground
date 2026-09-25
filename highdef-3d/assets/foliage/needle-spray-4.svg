@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- Needle spray 4: pine bough end. A woody stem, bare in its lower half,
+       ending in three tufts of very long needles that fan out like brushes.
+       Long needles look best on distant trees; this sprite is the "far" pine. -->
+  <defs>
+    <linearGradient id="nd" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#3b5233"/>
+      <stop offset="0.45" stop-color="#587347"/>
+      <stop offset="1" stop-color="#7f9760"/>
+    </linearGradient>
+    <linearGradient id="nd2" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#2f432b"/>
+      <stop offset="0.45" stop-color="#48603c"/>
+      <stop offset="1" stop-color="#688252"/>
+    </linearGradient>
+    <path id="n" d="M0,0 C1.6,-18 1.6,-44 0,-64 C-1.6,-44 -1.6,-18 0,0 Z"/>
+    <!-- a tuft: 14 needles fanned over 150 degrees, slightly different lengths -->
+    <g id="tuft">
+      <use href="#n" transform="rotate(-76) scale(0.8)"/>
+      <use href="#n" transform="rotate(-64) scale(0.95)"/>
+      <use href="#n" transform="rotate(-52)"/>
+      <use href="#n" transform="rotate(-40) scale(1.05)"/>
+      <use href="#n" transform="rotate(-28) scale(0.98)"/>
+      <use href="#n" transform="rotate(-16) scale(1.04)"/>
+      <use href="#n" transform="rotate(-5) scale(0.96)"/>
+      <use href="#n" transform="rotate(5) scale(1.02)"/>
+      <use href="#n" transform="rotate(16) scale(0.94)"/>
+      <use href="#n" transform="rotate(28) scale(1.06)"/>
+      <use href="#n" transform="rotate(40) scale(0.98)"/>
+      <use href="#n" transform="rotate(52) scale(1.0)"/>
+      <use href="#n" transform="rotate(64) scale(0.92)"/>
+      <use href="#n" transform="rotate(76) scale(0.82)"/>
+    </g>
+  </defs>
+
+  <!-- stem with two forks -->
+  <path d="M128,250 C126,210 128,180 130,150 M130,150 C112,132 84,118 62,110 M130,150 C150,130 176,116 196,104 M130,150 C132,130 132,110 128,90" fill="none" stroke="#5a4634" stroke-width="5" stroke-linecap="round"/>
+  <path d="M128,250 C126,210 128,180 130,150" fill="none" stroke="#7d6852" stroke-width="1.6" stroke-linecap="round" opacity="0.5"/>
+  <!-- scaly bark flecks on the stem -->
+  <path d="M125,236 L131,234 M124,222 L130,220 M126,206 L132,204 M125,192 L131,190 M127,176 L133,174" stroke="#3f3024" stroke-width="1.4" stroke-linecap="round"/>
+
+  <!-- back halves of the tufts, darker -->
+  <use href="#tuft" fill="url(#nd2)" transform="translate(62 110) rotate(-42) scale(1.02)"/>
+  <use href="#tuft" fill="url(#nd2)" transform="translate(196 104) rotate(40) scale(1.0)"/>
+  <use href="#tuft" fill="url(#nd2)" transform="translate(128 90) rotate(-4) scale(1.08)"/>
+  <!-- front halves, lit, rotated a little so needles interleave -->
+  <use href="#tuft" fill="url(#nd)" transform="translate(64 112) rotate(-36) scale(0.94)"/>
+  <use href="#tuft" fill="url(#nd)" transform="translate(194 106) rotate(46) scale(0.92)"/>
+  <use href="#tuft" fill="url(#nd)" transform="translate(128 92) rotate(3) scale(1.0)"/>
+  <!-- a small cone bud at the middle tip -->
+  <ellipse cx="128" cy="88" rx="5" ry="8" fill="#6b5640" stroke="#43342a" stroke-width="1"/>
+  <path d="M125,84 L131,84 M124,88 L132,88 M125,92 L131,92" stroke="#43342a" stroke-width="1" opacity="0.7"/>
+</svg>

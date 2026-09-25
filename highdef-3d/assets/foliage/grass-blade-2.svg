@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- Grass blade 2: two blades from one root, crossing - one leans left and
+       bends over near the top, one stands nearly straight. -->
+  <defs>
+    <linearGradient id="g" gradientUnits="userSpaceOnUse" x1="0" y1="252" x2="0" y2="12">
+      <stop offset="0" stop-color="#425a2e"/>
+      <stop offset="0.4" stop-color="#5a773d"/>
+      <stop offset="1" stop-color="#8ca35b"/>
+    </linearGradient>
+    <linearGradient id="g2" gradientUnits="userSpaceOnUse" x1="0" y1="252" x2="0" y2="12">
+      <stop offset="0" stop-color="#3f552c"/>
+      <stop offset="0.4" stop-color="#546f3a"/>
+      <stop offset="1" stop-color="#809856"/>
+    </linearGradient>
+  </defs>
+  <!-- back blade: leaning left with a droop -->
+  <path d="M130,254 C110,190 74,120 50,60 C42,44 36,30 40,20 C50,34 60,50 68,64 C96,120 120,190 150,254 Z" fill="url(#g2)" stroke="#354a26" stroke-width="0.8" stroke-linejoin="round"/>
+  <path d="M140,252 C116,190 86,120 58,60 C50,46 44,34 42,24" fill="none" stroke="#33482a" stroke-width="1.6" stroke-linecap="round" opacity="0.45"/>
+  <!-- front blade: near vertical, slight lean right -->
+  <path d="M122,254 C120,190 132,110 160,12 C150,110 146,190 146,254 Z" fill="url(#g)" stroke="#3b5029" stroke-width="0.8" stroke-linejoin="round"/>
+  <path d="M134,252 C131,190 140,110 158,18" fill="none" stroke="#3d572b" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/>
+  <path d="M137,252 C134,190 143,110 159,20" fill="none" stroke="#adc47a" stroke-width="1" stroke-linecap="round" opacity="0.4"/>
+</svg>

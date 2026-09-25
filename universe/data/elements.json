@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "_doc": "Materials a planet can be mined for. `baseline` is the set every world carries in some amount (abundance 0..1, so a lava world still has 'water ice' — just almost none of it). `rare` is the interesting half: each planet gets 1–2 of these, drawn from the entries whose `worlds` list contains its archetype. Every name here is invented for this playground — see rule 9 in CLAUDE.md. Colours are for map keys, item icons and UI chips; `tags` are what a crafting or quest system should match on; `value` is a rough credits-per-unit hint so a game has somewhere to start.",
+
+  "baseline": [
+    { "key": "metals",  "name": "Base Metals",  "color": "#9aa3ad", "tags": ["metal", "industry", "common"], "value": 4,  "blurb": "iron, nickel and copper in the crust — the floor of any supply chain" },
+    { "key": "stone",   "name": "Stone",        "color": "#8b8178", "tags": ["mineral", "building", "common"], "value": 1, "blurb": "rock to cut, crush and build with" },
+    { "key": "waterIce","name": "Water Ice",    "color": "#a8d6ef", "tags": ["volatile", "life", "fuel", "common"], "value": 6, "blurb": "water, frozen or liquid — drinking, cooling and split for fuel" },
+    { "key": "gas",     "name": "Volatile Gas", "color": "#c7b9e8", "tags": ["gas", "fuel", "common"], "value": 5, "blurb": "light gases held in the atmosphere or in pockets underground" }
+  ],
+
+  "rare": [
+    { "key": "aetherite",  "name": "Aetherite",   "color": "#b79cf5", "tags": ["arcane", "power", "crystal"],   "value": 180, "weight": 1.0, "hazard": ["radiation"],
+      "worlds": ["crystal", "voidTouched", "barren", "ice", "tidalLocked", "living"], "blurb": "a violet crystal that holds a charge far longer than it should; the usual core of a jump drive" },
+    { "key": "cryonite",   "name": "Cryonite",    "color": "#8fd8f0", "tags": ["cold", "coolant", "crystal"],   "value": 95,  "weight": 1.2, "hazard": ["cold"],
+      "worlds": ["ice", "tundra", "iceGiant", "barren", "ocean", "tidalLocked"], "blurb": "ice that stays frozen well above freezing — every reactor coolant loop wants it" },
+    { "key": "voltaicOre", "name": "Voltaic Ore", "color": "#e8c94a", "tags": ["metal", "power", "electric"],   "value": 120, "weight": 1.1, "hazard": ["storms"],
+      "worlds": ["barren", "desert", "lava", "tidalLocked", "toxic", "gasGiant"], "blurb": "a streaked metal laid down by lightning; cuts battery mass roughly in half" },
+    { "key": "pyrocrystal","name": "Pyrocrystal", "color": "#ff7a3c", "tags": ["heat", "fuel", "crystal"],      "value": 140, "weight": 1.0, "hazard": ["heat"],
+      "worlds": ["lava", "desert", "barren", "tidalLocked", "voidTouched"], "blurb": "burns from the inside for months once lit — furnace fuel and, less wisely, a weapon" },
+    { "key": "xenoplasm",  "name": "Xenoplasm",   "color": "#6fd68a", "tags": ["organic", "medical", "living"], "value": 210, "weight": 0.8, "hazard": ["toxic"],
+      "worlds": ["jungle", "ocean", "living", "toxic", "tundra"], "blurb": "a living gel that knits torn tissue; it also eats through seals if the cold chain breaks" },
+    { "key": "umbralShale","name": "Umbral Shale","color": "#5d4c7a", "tags": ["void", "shielding", "stone"],   "value": 160, "weight": 0.7, "hazard": ["radiation"],
+      "worlds": ["voidTouched", "barren", "ice", "crystal", "tidalLocked"], "blurb": "rock that swallows light and most of the spectrum around it; the best hull shielding known" },
+    { "key": "glimmerSalt","name": "Glimmer Salt","color": "#f0c8e0", "tags": ["light", "arcane", "mineral"],   "value": 110, "weight": 1.1, "hazard": [],
+      "worlds": ["desert", "ocean", "crystal", "living", "barren", "tundra"], "blurb": "salt flats that glow for a night after a hot day; refined into signal flares and lamps" },
+    { "key": "ferrovine",  "name": "Ferrovine",   "color": "#9c7a3c", "tags": ["organic", "metal", "living"],   "value": 175, "weight": 0.8, "hazard": [],
+      "worlds": ["jungle", "living", "toxic", "ocean", "tundra"], "blurb": "a creeper that pulls metal out of the soil and lays it down in its stems; a farm, not a mine" },
+    { "key": "helionGas",  "name": "Helion Gas",  "color": "#ffd98a", "tags": ["gas", "fuel", "power"],         "value": 130, "weight": 1.2, "hazard": ["storms"],
+      "worlds": ["gasGiant", "iceGiant", "toxic", "lava"], "blurb": "the clean fusion feedstock, skimmed from the top of a giant's atmosphere" },
+    { "key": "nullstone",  "name": "Nullstone",   "color": "#3f434b", "tags": ["void", "damping", "stone"],     "value": 230, "weight": 0.5, "hazard": ["radiation"],
+      "worlds": ["voidTouched", "crystal", "barren", "ice"], "blurb": "a dull grey stone that quietly drains any field laid across it; rare enough to start arguments" },
+    { "key": "emberlace",  "name": "Emberlace",   "color": "#e06a4a", "tags": ["metal", "heat", "craft"],       "value": 150, "weight": 0.9, "hazard": ["heat"],
+      "worlds": ["lava", "barren", "desert", "tidalLocked"], "blurb": "copper threads grown in cooling lava; the finest heat exchangers are woven from it" },
+    { "key": "brinepearl", "name": "Brinepearl",  "color": "#4fd3c2", "tags": ["organic", "medical", "water"],  "value": 125, "weight": 1.0, "hazard": [],
+      "worlds": ["ocean", "living", "jungle", "ice", "tundra"], "blurb": "grown by something in the deep water; ground up it keeps a crew's bones from thinning on a long haul" }
+  ]
+}

@@ -1,0 +1,2542 @@
+/* Farhold — phase 1 interface. Deliberately plain: a canvas that fills the window and a few
+   panels over it. Visual polish is not the point of this prototype (CLAUDE.md convention 8). */
+
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  background: #05070d; color: var(--fg, #e6e6e6);
+  font: 14px/1.45 var(--font, system-ui, Segoe UI, Roboto, sans-serif);
+  overflow: hidden;
+}
+
+#stage { position: fixed; inset: 0; }
+#stage canvas { display: block; width: 100%; height: 100%; }
+
+/* ---------------------------------------------------------------- loading + title */
+
+#boot {
+  position: fixed; inset: 0; z-index: 40; display: grid;
+  background: radial-gradient(circle at 50% 40%, #16203a, #05070d 70%);
+  text-align: center; padding: 24px;
+  /**
+   * THE TITLE SCREEN SCROLLS.
+   *
+   * "Allow scrolling on the main menu screen. I can't see the submit button with all the options
+   * open." It was `place-items: center` on a fixed, full-viewport grid with no overflow: once the
+   * content grew past the screen — the class card, the save list, the control legend — centring
+   * pushed it off BOTH ends at once and there was no way to reach either. `safe center` centres only
+   * while it fits and falls back to the start edge when it does not, which is exactly the rule you
+   * want, and `overflow-y: auto` then makes the rest reachable.
+   */
+  place-items: safe center;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+#boot.hidden { display: none; }
+#boot h1 { font-size: 40px; letter-spacing: 6px; margin: 0 0 6px; font-weight: 600; }
+#boot h1 b { color: #7fd8ff; font-weight: 600; }
+/* R17: THE TAGLINE SAT AGAINST THE LEFT EDGE while everything around it was centred.
+   `.boot-inner` is 1040px wide and the tagline is capped at 560px — with no auto side margins that
+   560px box simply starts at the left of the 1040, so the words inside it were centred within a box
+   that was itself shoved to one side. `margin-inline: auto` centres the BOX; `text-align` was never
+   the problem. Same trap for `.note`, which only looked right because its parent happens to be
+   exactly as wide as its cap. */
+#boot .tagline { color: #9fb0c8; margin: 0 auto 22px; max-width: 560px; }
+#boot .row { display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap; margin-bottom: 14px; }
+/* A label and the thing it labels wrap TOGETHER — the class select is wide enough that "Class" was
+   being left at the end of the line above it, pointing at nothing. */
+#boot .row .pair { display: inline-flex; align-items: center; gap: 8px; }
+/* the knob rows read as a column of label / control / explanation, not as three centred blocks */
+.boot-knobs .row { justify-content: flex-start; text-align: left; }
+.boot-knobs .row > label:first-child { min-width: 118px; text-align: right; }
+.boot-knobs .row > .small { flex: 1 1 100%; margin: 0 0 0 126px; }
+.boot-knobs .note { text-align: left; margin-left: 126px; }
+#boot label { color: #9fb0c8; font-size: 13px; }
+#boot input, #boot select {
+  background: #121826; color: #e6e6e6; border: 1px solid #2c3a52; border-radius: 6px; padding: 6px 8px; font: inherit;
+}
+#boot-name { width: 130px; }
+#boot-seed { width: 90px; }
+#boot button {
+  background: #1b4a6a; color: #dff2ff; border: 1px solid #2f7ba8; border-radius: 6px;
+  padding: 10px 22px; font: inherit; font-size: 16px; cursor: pointer;
+}
+#boot button:hover { background: #24618a; }
+#boot .status { color: #7f8ea4; min-height: 20px; margin-top: 12px; font-variant-numeric: tabular-nums; }
+#boot .note { color: #66748a; font-size: 12px; max-width: 620px; margin: 18px auto 0; }
+
+/* The class preview beside the picker. Thirty classes in a dropdown told you nothing about any of
+   them, and the choice lasts the whole run — so the skills, the kit and the companion are on screen
+   before the run starts rather than on the Skills tab an hour later. */
+.class-card {
+  text-align: left; margin: 0 auto 14px; max-width: 560px;
+  background: rgba(10, 16, 28, .66); border: 1px solid #23304a; border-radius: 8px;
+  padding: 10px 14px 12px;
+}
+.class-card h4 { margin: 0 0 2px; font-size: 15px; color: #e6eefa; font-weight: 600; }
+.class-card h4 span { color: #7fd8ff; font-size: 13px; font-weight: 400; margin-left: 6px; }
+.class-card .cc-kit { margin: 0 0 8px; color: #9fb0c8; font-size: 12px; }
+.class-card .cc-skills { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; }
+.class-card .cc-skills li {
+  display: grid; grid-template-columns: 130px 1fr auto; gap: 8px; align-items: baseline;
+  font-size: 12px;
+}
+.class-card .cc-skills b { color: #dfe9f6; font-weight: 600; }
+.class-card .cc-skills span { color: #8b9ab0; }
+.class-card .cc-skills i { color: #66748a; font-style: normal; font-variant-numeric: tabular-nums; }
+.class-card .cc-pet { margin: 8px 0 0; color: #8fe0a0; font-size: 12px; }
+@media (max-width: 620px) {
+  .class-card .cc-skills li { grid-template-columns: 1fr; gap: 0; }
+}
+
+/* ---------------------------------------------------------------- hud */
+
+.hud { position: fixed; z-index: 10; pointer-events: none; }
+.hud.panel { pointer-events: auto; }
+
+#hud-left { left: 14px; top: 14px; width: 260px; }
+/* E10: nothing in space can hit you, so health, mana, the status chips and the "what you are doing"
+   line are all answering a question that cannot come up until you are back on the ground. The name
+   and the XP bar stay — they are the only place the level is written. */
+#hud-left.flying .bar.hp,
+#hud-left.flying .bar.mp,
+#hud-left.flying #hud-statuses,
+#hud-left.flying #hud-objective { display: none; }
+.bar { height: 14px; background: #0c111b; border: 1px solid #2a3446; border-radius: 4px; overflow: hidden; margin-bottom: 4px; position: relative; }
+.bar > i { display: block; height: 100%; width: 0%; transition: width .12s linear; }
+.bar > span { position: absolute; inset: 0; text-align: center; font-size: 11px; line-height: 12px; text-shadow: 0 1px 2px #000; }
+.bar.hp > i { background: linear-gradient(#d0503c, #8a2a20); }
+.bar.mp > i { background: linear-gradient(#4a8ad0, #24508a); }
+.bar.xp { height: 11px; }
+.bar.xp > i { background: linear-gradient(#d8b040, #8a6a10); }
+#hud-name { font-weight: 600; text-shadow: 0 1px 3px #000; }
+#hud-name small { color: #9fb0c8; font-weight: 400; }
+
+#hud-place {
+  position: fixed; right: 14px; top: 14px; text-align: right; max-width: 320px;
+  text-shadow: 0 1px 3px #000; color: #cfe0ef; font-size: 13px;
+}
+#hud-place b { color: #7fd8ff; }
+#hud-place .clock { color: #9fb0c8; font-variant-numeric: tabular-nums; }
+
+#minimap {
+  position: fixed; right: 14px; top: 86px; width: 180px; height: 180px;
+  border: 1px solid #2c3a52; border-radius: 6px; background: #05070d; image-rendering: pixelated;
+}
+
+#target {
+  position: fixed; left: 50%; top: 40px; transform: translateX(-50%); text-align: center;
+  text-shadow: 0 1px 3px #000; min-width: 200px;
+}
+#target.hidden { display: none; }
+#target .bar { width: 220px; margin: 3px auto 0; }
+
+/* The log is the only teacher the game has, so it keeps twelve lines rather than five and reads at
+   full strength instead of 55% grey. `L` opens the last fifty. */
+#log {
+  position: fixed; left: 14px; bottom: 14px; width: 380px; max-height: 252px; overflow: hidden;
+  display: flex; flex-direction: column-reverse; gap: 2px; font-size: 13px;
+}
+#log div { text-shadow: 0 1px 3px #000, 0 0 8px rgba(0,0,0,.8); color: #e4ecf7; line-height: 1.34; }
+#log div.good { color: #8fe0a0; }
+#log div.bad { color: #ff9a8a; }
+#log div.loot { color: #ffd070; }
+#log div.level { color: #7fd8ff; font-weight: 600; }
+
+/* ---------------------------------------------------------------- what you are doing
+ * The game never said. You land beside a town with a quest-giver forty metres away and the screen
+ * showed no objective at all — this is one line under the bars that names the thing you are tracking
+ * and how far off it is, fed from the marker book that already existed.
+ */
+#hud-objective {
+  display: flex; align-items: baseline; gap: 8px; margin-top: 6px;
+  padding: 4px 8px; border-radius: 5px; max-width: 300px;
+  background: rgba(10, 16, 26, .55); border-left: 2px solid #7fd8ff;
+  text-shadow: 0 1px 3px #000;
+}
+#hud-objective.hidden { display: none; }
+#hud-objective b { color: #eaf6ff; font-size: 13px; }
+#hud-objective span { color: #9fb0c8; font-size: 12px; font-variant-numeric: tabular-nums; margin-left: auto; }
+
+#crosshair {
+  position: fixed; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px 0 0 -3px;
+  border-radius: 50%; background: rgba(255,255,255,.55); box-shadow: 0 0 4px #000;
+}
+
+#hint {
+  position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%);
+  color: #8fa0b8; font-size: 12px; text-shadow: 0 1px 3px #000; text-align: center;
+}
+
+/* ---------------------------------------------------------------- panels */
+
+/* ================================================================ the full-screen sheet
+ *
+ * Round 10. This used to be a 880px centred modal with `max-height: 86vh` and its own scrollbar —
+ * on a 1920 x 1080 screen it used a fifth of the pixels and still scrolled, and every one of the
+ * seven screens was two stacked columns because that was all that fitted. It is a full-viewport
+ * interface now: a header that never changes, a tab rail down the left, and one purpose-built grid
+ * per screen in the rest.
+ *
+ * Two rules hold the whole thing up:
+ *   * every grid track is `minmax(0, 1fr)`, so a long list can never push the layout wider than the
+ *     screen and nothing ever scrolls sideways;
+ *   * `#sheet` itself is `overflow: hidden`. The only thing that scrolls is a `.pane-body`.
+ *
+ * z-index 34, deliberately: `O` (settings, 38) and `M` (map, 45) can both be pressed while the sheet
+ * is open and have to draw over it.
+ */
+.sheet {
+  /* ---- tokens. Every number in the sheet comes from one of these. */
+  --rail: 208px;          /* the tab rail */
+  --head: 64px;           /* the persistent header */
+  --gap: 14px;            /* between panes */
+  --pad: 20px;            /* body gutter */
+  --pane-r: 8px;          /* pane corner */
+  --doll: 372px;          /* the equip figure column */
+  --card: 360px;          /* a standing item card column */
+  --fs: 13px;             /* body text in the sheet */
+  --fs-sm: 12px;          /* the floor. Nothing in the sheet is smaller. */
+  --fs-head: 11.5px;      /* pane titles — uppercase and tracked, so 11.5px still reads */
+
+  --sheet-bg: #080d17;
+  --pane-bg: #0f1624;
+  --pane-bg2: #121a29;
+  --pane-line: #223049;
+  --pane-line-soft: #1a2433;
+  --ink: #cfe0ef;
+  --ink-dim: #9fb0c8;
+  --ink-faint: #7f8ea4;
+  --accent: #7fd8ff;
+  --gold: #ffd24a;
+  --good: #8fe0a0;
+  --bad: #ff9a8a;
+
+  position: fixed; inset: 0; z-index: 34;
+  display: grid;
+  grid-template-columns: var(--rail) minmax(0, 1fr);
+  grid-template-rows: var(--head) minmax(0, 1fr);
+  grid-template-areas:
+    "head head"
+    "rail body";
+  background: radial-gradient(130% 100% at 16% -10%, #131d2e 0%, #0b1220 52%, var(--sheet-bg) 100%);
+  color: var(--ink);
+  font-size: var(--fs);
+  overflow: hidden;
+}
+.sheet.hidden { display: none; }
+.sheet h2 { margin: 0 0 12px; font-size: 20px; color: #7fd8ff; }
+.sheet h3 { margin: 16px 0 6px; font-size: 14px; color: #9fb0c8; text-transform: uppercase; letter-spacing: 1px; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 720px) { .cols { grid-template-columns: 1fr; } }
+
+.sheet-head { grid-area: head; }
+#sheet-tabs { grid-area: rail; }
+.sheet > .tab-body { grid-area: body; min-width: 0; min-height: 0; }
+
+/* ---- more air on a big screen */
+@media (min-width: 1600px) {
+  .sheet { --rail: 220px; --head: 68px; --gap: 16px; --pad: 24px; --doll: 372px; --card: 380px; }
+}
+/* ---- 1366 x 768 and 1280 x 720: shorter header, tighter gaps, narrower figure */
+@media (max-width: 1440px), (max-height: 800px) {
+  .sheet { --rail: 184px; --head: 56px; --gap: 10px; --pad: 12px; --doll: 332px; --card: 320px; }
+  .pane-head { min-height: 26px; }
+}
+/* ---- below the supported range: one column, and the body may scroll because nothing else fits */
+@media (max-width: 1120px) {
+  .sheet {
+    grid-template-columns: 1fr; grid-template-rows: var(--head) 40px minmax(0, 1fr);
+    grid-template-areas: "head" "rail" "body"; --rail: auto;
+  }
+  #sheet-tabs {
+    flex-direction: row; overflow-x: auto; overflow-y: hidden;
+    border-right: 0; border-bottom: 1px solid var(--pane-line); padding: 4px 8px;
+  }
+  #sheet-tabs button { min-height: 30px; white-space: nowrap; box-shadow: none; }
+  #sheet-tabs .rail-foot { display: none; }
+  .sheet > .tab-body:not(.hidden) {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: none !important; grid-template-areas: none !important;
+    grid-auto-rows: minmax(200px, auto); grid-auto-flow: row; overflow-y: auto;
+  }
+  .pane-body { overflow: visible; }
+}
+
+.slot-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.slot {
+  background: #121a29; border: 1px solid #2a3446; border-radius: 6px; padding: 6px 8px; min-height: 48px;
+  cursor: pointer; font-size: 12px;
+}
+.slot:hover { border-color: #3f6f9a; }
+.slot .label { color: #7f8ea4; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; }
+.slot .name { display: block; margin-top: 2px; }
+
+.bag { display: flex; flex-direction: column; gap: 4px; }
+.bag .row {
+  display: flex; align-items: center; gap: 8px; background: #121a29; border: 1px solid #2a3446;
+  border-radius: 6px; padding: 5px 8px; cursor: pointer;
+  min-height: 34px; border-left-width: 3px; border-left-color: #2a3446;
+}
+.bag .row:hover { border-color: #3f6f9a; }
+/* the rarity as a colour down the left edge, so a bag of forty reads at a glance */
+.bag .row[data-rarity="magic"]     { border-left-color: #7f95ff; }
+.bag .row[data-rarity="rare"]      { border-left-color: #e8d020; }
+.bag .row[data-rarity="legendary"] { border-left-color: #ff8020; }
+.bag .row[data-rarity="unique"]    { border-left-color: #ff5a3c; }
+.bag .row[data-rarity="set"]       { border-left-color: #2fc4b2; }
+.bag .row > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+/* reserved width: "▲ +128" appearing must not re-flow the name beside it */
+.bag .row .score { margin-left: auto; color: #7f8ea4; font-variant-numeric: tabular-nums; min-width: 62px; text-align: right; }
+.bag .row .up { color: #8fe0a0; }
+.bag .row .down { color: #ff9a8a; }
+.bag .empty { color: #66748a; }
+
+.stats { display: grid; grid-template-columns: auto 1fr; gap: 0 14px; font-variant-numeric: tabular-nums; font-size: var(--fs, 13px); }
+.pane .stats dt, .pane .stats dd { padding: 3px 4px; border-bottom: 1px solid rgba(34, 48, 73, .5); }
+.pane .stats dd { text-align: right; min-width: 92px; }
+/* two pairs of columns once there is room for them */
+@media (min-width: 1500px) { .pane .stats { grid-template-columns: auto 1fr auto 1fr; } }
+.stats dt { color: #8fa0b8; }
+.stats dd { margin: 0; }
+.attr-row { display: flex; gap: 6px; align-items: center; margin-top: 4px; }
+.attr-row button { width: 26px; height: 24px; border-radius: 5px; border: 1px solid #2f7ba8; background: #1b4a6a; color: #dff2ff; cursor: pointer; }
+.attr-row button:disabled { opacity: .3; cursor: default; }
+
+.rarity-normal { color: #c9c2b6; }
+.rarity-magic { color: #7f95ff; }
+.rarity-rare { color: #e8d020; }
+.rarity-legendary { color: #ff8020; }
+.rarity-unique { color: #ff5a3c; }
+.rarity-set { color: #2fc4b2; }
+
+.muted { color: #7f8ea4; }
+.small { font-size: 12px; }
+.back { position: fixed; left: 14px; top: 14px; z-index: 30; color: #8fa0b8; font-size: 12px; text-decoration: none; }
+.back:hover { color: #cfe0ef; }
+
+/* ---------------------------------------------------------------- debug menu (the ` key) */
+
+.debug {
+  position: fixed; z-index: 50; left: 14px; top: 58px; width: 370px;
+  max-height: 82vh; overflow: auto;
+  background: #0b111ceb; border: 1px solid #2c3a52; border-radius: 10px; padding: 12px 14px;
+  box-shadow: 0 14px 44px #000a;
+}
+.debug.hidden { display: none; }
+.debug-head { display: flex; justify-content: space-between; align-items: baseline; }
+.debug h3 { margin: 0 0 4px; font-size: 15px; color: #7fd8ff; }
+.debug-hint { color: #66748a; font-size: 11px; }
+.debug-group { margin-top: 10px; }
+.debug-group h4 { margin: 0 0 4px; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #7f8ea4; }
+.debug-row { display: flex; flex-wrap: wrap; gap: 4px; }
+.debug-btn {
+  background: #16202f; color: #cfe0ef; border: 1px solid #2a3446; border-radius: 5px;
+  padding: 4px 8px; font: inherit; font-size: 12px; cursor: pointer;
+}
+.debug-btn:hover { border-color: #3f6f9a; }
+.debug-btn.on { background: #1b4a6a; border-color: #3f9fd8; color: #dff2ff; }
+.debug-btn.wide { flex: 0 0 100%; }
+.debug-slider { width: 100%; margin-top: 4px; }
+.debug-readout {
+  margin: 0; font: 11px/1.5 var(--mono, ui-monospace, Consolas, monospace);
+  color: #8fa0b8; white-space: pre-wrap;
+}
+
+/* D1: the copy drawer. It is a real textarea because the only copy that works off https is
+   "select some text and ask the document to copy the selection" — and because the text has to stay
+   on screen, selectable, until it is dismissed. It used to be written into the State box above,
+   which the refresh timer wipes five times a second. */
+.debug-copy { flex: 0 0 100%; margin-top: 6px; }
+.debug-copy.hidden { display: none; }
+.debug-copy-head { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.debug-copy-note { flex: 1; min-width: 0; font-size: 11px; color: #9ae0a0; }
+.debug-copy-note.bad { color: #ffb36a; }
+.debug-copy-text {
+  width: 100%; height: 132px; resize: vertical; box-sizing: border-box;
+  background: #060a12; color: #cfe0ef; border: 1px solid #2a3446; border-radius: 5px; padding: 6px 7px;
+  font: 11px/1.5 var(--mono, ui-monospace, Consolas, monospace);
+  /* wrap rather than scroll sideways: the report has 120-character lines in it and a drawer you
+     have to scroll horizontally is a drawer nobody reads */
+  white-space: pre-wrap; word-break: break-word;
+}
+
+#hud-weather { color: #b8d4ea; }
+
+/* ---------------------------------------------------------------- readable HUD text
+
+   Grey text with a grey shadow vanished over bright ground (snow, sand, a white ice world), so the
+   panels that carry small text now sit on their own dark card instead of relying on a shadow. */
+
+.hud-card {
+  background: rgba(8, 12, 20, .58);
+  border: 1px solid rgba(120, 150, 180, .18);
+  border-radius: 7px;
+  padding: 6px 9px;
+  backdrop-filter: blur(2px);
+}
+#hud-place { text-shadow: none; color: #eaf2fa; }
+#hud-place .clock { color: #cfe0ef; }
+#hud-place .small { color: #d8e6f2; }
+#hud-place .small.dim { color: #a8bccc; }
+#hud-weather { color: #bfe4ff; }
+
+#hud-where {
+  position: fixed; right: 14px; top: 286px; text-align: right;
+  font: 11px/1.4 var(--mono, ui-monospace, Consolas, monospace);
+  color: #cfe0ef; background: rgba(8, 12, 20, .58);
+  border: 1px solid rgba(120, 150, 180, .18); border-radius: 6px; padding: 3px 7px;
+}
+
+
+/* ---------------------------------------------------------------- title screen saves */
+
+.boot-inner { max-width: 640px; }
+#boot button.ghost { background: #121826; border-color: #2c3a52; color: #9fb0c8; }
+.saves { margin-top: 14px; text-align: left; }
+.saves h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #7f8ea4; margin: 0 0 6px; }
+.save-row {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 5px;
+  background: #121a29; border: 1px solid #2a3446; border-radius: 6px; padding: 5px 8px;
+}
+.save-row .save-name { font-weight: 600; }
+.save-row .muted { margin-left: auto; }
+.save-row button {
+  padding: 3px 10px; font-size: 13px; border-radius: 5px;
+  background: #1b4a6a; border: 1px solid #2f7ba8; color: #dff2ff; cursor: pointer;
+}
+.save-row button.ghost { background: none; border-color: #3a2a2a; color: #c08080; padding: 3px 8px; }
+
+/* ---------------------------------------------------------------- the map screen (M) */
+
+.map-screen {
+  position: fixed; inset: 0; z-index: 45; display: flex; flex-direction: column;
+  background: #070b12f2;
+}
+.map-screen.hidden { display: none; }
+.map-head {
+  display: flex; align-items: baseline; gap: 14px; padding: 10px 16px;
+  border-bottom: 1px solid #222c3c;
+}
+.map-head h2 { margin: 0; font-size: 19px; color: #7fd8ff; }
+.map-coords { color: #8fa0b8; font: 12px var(--mono, ui-monospace, Consolas, monospace); }
+.map-close {
+  margin-left: auto; background: none; border: 0; color: #9fb0c8; font-size: 24px; cursor: pointer;
+}
+/* D2: "Copy location". The text sits in a real input because the game is served over plain http,
+   where there is no clipboard API — see js/debug.js `copyTextVia`. One line, so an input rather
+   than a textarea, and it stays up until it is closed. */
+.map-copy { display: flex; align-items: center; gap: 10px; padding: 8px 16px; border-bottom: 1px solid #222c3c; }
+.map-copy.hidden { display: none; }
+.map-copy-text {
+  flex: 1; min-width: 0; height: 26px; box-sizing: border-box;
+  background: #060a12; color: #cfe0ef; border: 1px solid #2a3446; border-radius: 5px; padding: 3px 7px;
+  font: 12px var(--mono, ui-monospace, Consolas, monospace);
+}
+.map-copy-note { font-size: 12px; color: #9ae0a0; }
+.map-copy-note.bad { color: #ffb36a; }
+.map-body { flex: 1; display: flex; min-height: 0; }
+/* The map and the panels beside it need a real gutter: at some sizes the canvas ran under the
+   layers and pin columns — "the map covers up the layers/pins/cell menus on the right side, there
+   is not enough space between the columns". */
+.map-canvas-wrap { flex: 1; position: relative; min-width: 0; padding: 10px 16px 10px 10px; display: flex; flex-direction: column; gap: 6px; }
+.map-canvas { flex: 1; min-height: 0; border: 1px solid #222c3c; border-radius: 6px; cursor: crosshair; touch-action: none; }
+.map-readout { font: 12px var(--mono, ui-monospace, Consolas, monospace); min-height: 18px; }
+.map-side {
+  width: 300px; flex: 0 0 300px; overflow-y: auto; padding: 10px 14px 10px 0;
+  display: flex; flex-direction: column; gap: 10px;
+  border-left: 1px solid #1a2433;
+}
+
+/* the layers panel is World Forge's, so it needs World Forge's chip styling */
+.chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.chip {
+  background: #16202f; color: #cfe0ef; border: 1px solid #2a3446; border-radius: 999px;
+  padding: 2px 10px; font-size: 12px; cursor: pointer; text-transform: capitalize;
+}
+.chip:hover { border-color: #3f6f9a; }
+.chip.on { background: #1b4a6a; border-color: #3f9fd8; color: #dff2ff; }
+.chip.off { opacity: .4; cursor: not-allowed; }
+.grid.c2 { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 8px; margin-top: 6px; font-size: 12px; }
+.legend { display: flex; flex-wrap: wrap; gap: 3px 10px; font-size: 11px; color: #9fb0c8; }
+.legend .sw { display: inline-flex; align-items: center; gap: 4px; }
+.legend .sw i { width: 11px; height: 11px; border-radius: 2px; border: 1px solid rgba(0,0,0,.5); display: inline-block; }
+
+.pin-list { display: flex; flex-direction: column; gap: 4px; }
+.pin-row { display: flex; align-items: center; gap: 7px; font-size: 12px; padding: 2px 0; }
+.pin-row.tracked .pin-name { color: #ffe6a8; }
+/* the marker icon: a glyph now rather than a bare dot, so a quest reads differently to a pin */
+.pin-dot { width: 13px; text-align: center; font-size: 12px; line-height: 1; display: inline-block; color: #ffd070; }
+.pin-track { background: none; border: 0; color: #6a6258; cursor: pointer; font-size: 13px; padding: 0 1px; line-height: 1; }
+.pin-track.on { color: #ffd24a; }
+.pin-track:hover { color: #ffe6a8; }
+.pin-name { flex: 1; }
+.pin-del { background: none; border: 0; color: #c08080; cursor: pointer; font-size: 15px; }
+
+/* ---------------------------------------------------------------- talking to somebody (E) */
+
+.talk {
+  position: fixed; z-index: 35; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: min(760px, 94vw); max-height: 84vh; overflow: auto;
+  /* E1: at f2 the 3D character behind the panel showed through the stock list, and a shop is the
+     one screen you read line by line. Solid, with a blur behind it for the edges. */
+  background: #0d1320; border: 1px solid #2c3a52; border-radius: 10px; padding: 16px 20px;
+  box-shadow: 0 18px 60px #000c;
+  backdrop-filter: blur(3px);
+}
+.talk.hidden { display: none; }
+.talk-head { display: flex; align-items: baseline; gap: 12px; border-bottom: 1px solid #222c3c; padding-bottom: 8px; }
+.talk-head h2 { margin: 0; font-size: 19px; color: #7fd8ff; }
+.talk-role { font-size: 12px; }
+.talk-close { margin-left: auto; background: none; border: 0; color: #9fb0c8; font-size: 22px; cursor: pointer; }
+.talk-body { padding-top: 10px; }
+.talk-say { font-style: italic; color: #d8e6f2; margin: 0 0 12px; }
+.talk h3 { margin: 14px 0 6px; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #7f8ea4; }
+.talk-foot { margin-top: 12px; }
+/* why the prices are what they are — standing was invisible at the one counter it should show at */
+.talk-standing { color: #ffd24a; margin: 2px 0 6px; }
+/* R20 — an Unbinder's row that cannot be acted on, with the reason printed on it rather than
+   hidden in a tooltip the player has to hover a dead button to find. */
+.trade-row.refused { opacity: .75; }
+.trade-row.refused .trade-spec { color: #ffd24a; }
+.trade-row.unbind-all { border-top: 1px solid #2b3a52; margin-top: 6px; padding-top: 8px; }
+.talk-btn:disabled { opacity: .35; cursor: default; }
+.talk-gold { margin-top: 8px; }
+
+.talk-quest {
+  background: #121a29; border: 1px solid #2a3446; border-left: 3px solid #d8b040;
+  border-radius: 6px; padding: 8px 10px; margin-bottom: 7px;
+}
+.talk-quest.done { border-left-color: #5ad48a; }
+.talk-quest .q-title { font-weight: 600; }
+.talk-btn {
+  background: #16202f; color: #cfe0ef; border: 1px solid #2a3446; border-radius: 5px;
+  padding: 3px 10px; font: inherit; font-size: 12px; cursor: pointer; margin-top: 5px;
+}
+.talk-btn:hover { border-color: #3f6f9a; }
+.talk-btn.primary { background: #1b4a6a; border-color: #2f7ba8; color: #dff2ff; }
+
+.trade { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 680px) { .trade { grid-template-columns: 1fr; } }
+.trade-col h3 { margin-top: 4px; }
+.trade-row {
+  display: flex; align-items: center; gap: 8px; padding: 4px 6px; border-radius: 5px;
+  border: 1px solid #222c3c; margin-bottom: 4px; font-size: 13px;
+}
+.trade-row .coin { margin-left: auto; color: #ffd070; font-variant-numeric: tabular-nums; }
+
+/* ---- E1: a shop row you can read without hovering it */
+.trade-what { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.trade-spec { font-size: 11px; color: #8595ab; line-height: 1.3; }
+/* one word on whether it beats what you are wearing */
+.trade-mark { font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px; padding: 1px 5px;
+  border-radius: 3px; white-space: nowrap; align-self: center; }
+.trade-mark.up { color: #8fe0a0; background: #1c3325; }
+.trade-mark.down { color: #c89090; background: #33201f; }
+/* something you cannot put on yet is dimmed rather than hidden — it is still a thing to save for */
+.trade-row-no .trade-what { opacity: 0.55; }
+.trade-row-no .trade-spec { color: #a06a6a; }
+
+/* ---- the racks inside the Gear and Other tabs: quivers, trinkets · mounts, lights, hulls */
+.trade-rack { display: flex; align-items: baseline; gap: 8px; margin: 12px 0 2px;
+  border-bottom: 1px solid #1e2836; padding-bottom: 3px; }
+.trade-rack:first-child { margin-top: 2px; }
+.trade-rack h4 { margin: 0; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+  color: #7fd8ff; white-space: nowrap; }
+/* the note wraps, the heading does not — "Boats and ships" broke over two lines and read as two
+   headings with a rack between them */
+.trade-rack-note { flex: 1; min-width: 0; }
+.trade-rack-note { font-size: 11px; color: #7f8ea4; }
+.trade-row .talk-btn { margin-top: 0; }
+
+/* ---------------------------------------------------------------- the passive tree */
+
+.passives { display: flex; flex-direction: column; gap: 3px; margin-bottom: 4px; }
+.passive-row {
+  display: flex; align-items: center; gap: 8px; font-size: 12px;
+  background: #121a29; border: 1px solid #2a3446; border-radius: 5px; padding: 3px 7px;
+}
+.passive-row.maxed { border-color: #3f6f9a; }
+.passive-name { flex: 1; }
+.passive-pips { color: #d8b040; letter-spacing: 1px; font-size: 11px; }
+.passive-row button {
+  width: 22px; height: 20px; border-radius: 4px; border: 1px solid #2f7ba8;
+  background: #1b4a6a; color: #dff2ff; cursor: pointer; font-size: 12px; line-height: 1;
+}
+.passive-row button:disabled { opacity: .25; cursor: default; }
+
+/* ---------------------------------------------------------------- the journal */
+
+.journal { display: flex; flex-direction: column; gap: 2px; margin-bottom: 10px; }
+.journal-head { margin: 6px 0 2px; font-size: 12px; color: #cfe0ef; }
+.journal-row {
+  display: flex; justify-content: space-between; gap: 10px; font-size: 12px;
+  padding: 2px 6px; border-left: 2px solid #2a3446;
+}
+.journal-row.done { border-left-color: #5ad48a; color: #9fd8b0; }
+.journal-row.nemesis { border-left-color: #d0503c; color: #ffb0a0; }
+
+/* ---------------------------------------------------------------- settings (O) */
+
+.settings {
+  position: fixed; z-index: 38; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: min(520px, 94vw); max-height: 84vh; overflow: auto;
+  background: #0d1320f2; border: 1px solid #2c3a52; border-radius: 10px; padding: 16px 20px;
+  box-shadow: 0 18px 60px #000a;
+}
+.settings.hidden { display: none; }
+.settings-head { display: flex; align-items: baseline; border-bottom: 1px solid #222c3c; padding-bottom: 8px; }
+.settings-head h2 { margin: 0; font-size: 19px; color: #7fd8ff; }
+.settings-close { margin-left: auto; background: none; border: 0; color: #9fb0c8; font-size: 22px; cursor: pointer; }
+.settings h3 { margin: 14px 0 4px; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #7f8ea4; }
+.settings-row { display: flex; align-items: center; gap: 10px; padding: 3px 0; font-size: 13px; }
+.settings-label { flex: 1; }
+.settings-choice { display: flex; gap: 4px; }
+.settings-btn {
+  background: #16202f; color: #cfe0ef; border: 1px solid #2a3446; border-radius: 5px;
+  padding: 3px 12px; font: inherit; font-size: 12px; cursor: pointer; min-width: 52px;
+}
+.settings-btn:hover { border-color: #3f6f9a; }
+.settings-btn.on { background: #1b4a6a; border-color: #3f9fd8; color: #dff2ff; }
+.settings-range { width: 150px; }
+.settings-value { width: 34px; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* ---------------------------------------------------------------- skill bar (phase 3)
+   Four slots on 1-4. A slot dims when it is on cooldown or you cannot pay for it, and the dark
+   sweep up it is the cooldown itself, so the bar reads without reading any numbers. */
+#skillbar {
+  position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%);
+  display: flex; gap: 8px; pointer-events: none;
+}
+.skill-slot {
+  position: relative; width: 58px; height: 58px; overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 7px;
+  background: rgba(12, 16, 22, 0.72);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; line-height: 1.15; text-align: center; color: #e8eef6;
+  text-shadow: 0 1px 2px #000;
+}
+.skill-slot .skill-key { position: absolute; top: 2px; left: 4px; font-size: 9px; color: #9fb2c6; }
+.skill-slot .skill-mp { position: absolute; bottom: 2px; right: 4px; font-size: 10px; color: #6fa8ff; }
+/* A dead key says why it is dead: red mana when you cannot afford it, the seconds left when it is
+   cooling. Both used to be the same 45% opacity, so there was no reason on screen either way. */
+.skill-slot.poor .skill-mp { color: #ff7a5a; font-weight: 600; }
+.skill-slot .skill-left {
+  position: absolute; inset: 0; display: grid; place-items: center; z-index: 2;
+  font-size: 15px; font-weight: 600; color: #eaf6ff; text-shadow: 0 1px 4px #000;
+  font-variant-numeric: tabular-nums; pointer-events: none;
+}
+.skill-slot .skill-name { padding: 0 3px; font-weight: 600; z-index: 1; }
+.skill-slot .skill-cd { position: absolute; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.62); }
+.skill-slot.blocked { opacity: 0.45; }
+.skill-slot.ready { border-color: rgba(255, 214, 128, 0.6); box-shadow: 0 0 9px rgba(255, 190, 90, 0.18); }
+
+/* statuses on the player, under the bars */
+#hud-statuses { display: flex; gap: 6px; margin-top: 4px; }
+#hud-statuses .status-chip {
+  font-size: 10px; padding: 1px 6px; border-radius: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.2); background: rgba(0, 0, 0, 0.45);
+}
+
+/* ---------------------------------------------------------------- the star's effect on the picture
+   God rays, lens flare and the sunset rim, all in screen space over the canvas. `#sunfx` never takes
+   a click and never scrolls; its opacity is driven per frame from js/sunfx.js. */
+.sunfx {
+  position: fixed; inset: 0; overflow: hidden; pointer-events: none;
+  mix-blend-mode: screen; z-index: 2; visibility: hidden;
+}
+.sunfx-flare { position: absolute; inset: 0; }
+.sunfx-glow {
+  position: absolute; width: 300px; height: 300px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,242,205,0.55) 0%, rgba(255,200,120,0.28) 26%, rgba(255,160,70,0) 68%);
+}
+/* the shafts: a fan of hard-edged wedges, turned slowly so they never read as a static decal */
+.sunfx-rays {
+  position: absolute; width: 1500px; height: 1500px; border-radius: 50%;
+  background: conic-gradient(
+    rgba(255,232,190,0.20) 0deg, rgba(255,232,190,0) 5deg, rgba(255,232,190,0) 16deg,
+    rgba(255,232,190,0.13) 22deg, rgba(255,232,190,0) 27deg, rgba(255,232,190,0) 44deg,
+    rgba(255,232,190,0.17) 51deg, rgba(255,232,190,0) 57deg, rgba(255,232,190,0) 82deg,
+    rgba(255,232,190,0.10) 88deg, rgba(255,232,190,0) 94deg, rgba(255,232,190,0) 128deg,
+    rgba(255,232,190,0.15) 134deg, rgba(255,232,190,0) 140deg, rgba(255,232,190,0) 176deg,
+    rgba(255,232,190,0.12) 182deg, rgba(255,232,190,0) 188deg, rgba(255,232,190,0) 226deg,
+    rgba(255,232,190,0.16) 232deg, rgba(255,232,190,0) 238deg, rgba(255,232,190,0) 281deg,
+    rgba(255,232,190,0.11) 287deg, rgba(255,232,190,0) 293deg, rgba(255,232,190,0) 335deg,
+    rgba(255,232,190,0.14) 341deg, rgba(255,232,190,0) 347deg, rgba(255,232,190,0) 360deg);
+  -webkit-mask-image: radial-gradient(circle, #000 12%, rgba(0,0,0,0.55) 40%, transparent 72%);
+  mask-image: radial-gradient(circle, #000 12%, rgba(0,0,0,0.55) 40%, transparent 72%);
+}
+.sunfx-ghost { position: absolute; border-radius: 50%; }
+/* the last of the light catching the sky as the star goes behind a ridge */
+.sunfx-horizon {
+  position: absolute; inset: auto 0 0 0; height: 46%;
+  background: linear-gradient(to top, rgba(255,140,60,0.42) 0%, rgba(255,110,50,0.16) 38%, rgba(255,90,40,0) 100%);
+  opacity: 0;
+}
+/* the corona: a bright rim around a star something is sitting in front of */
+.sunfx-ring {
+  position: absolute; width: 190px; height: 190px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,0,0,0) 40%, rgba(255,236,200,0.55) 47%,
+    rgba(255,190,120,0.28) 53%, rgba(255,150,80,0) 74%);
+  opacity: 0;
+}
+.sunfx.eclipsed .sunfx-ghost { filter: brightness(2.1) saturate(1.4); }
+
+/* ==========================================================================
+   Round 4 — the tabbed sheet, crafting, zones, prompts and the boss bar
+   ========================================================================== */
+
+/* ---------------------------------------------------------------- the header
+ * Name, level, the XP bar, the crafting materials and the purse — on every screen, never moving.
+ * Materials used to live on the Crafting and Upgrade screens only, which meant the one number you
+ * want while deciding whether to recycle something was on neither of the screens you recycle from.
+ */
+.sheet-head {
+  display: grid;
+  grid-template-columns:
+    var(--rail)             /* the title, aligned with the rail below it */
+    minmax(170px, auto)     /* who */
+    minmax(170px, 260px)    /* xp */
+    minmax(0, 1fr)          /* materials, takes the slack */
+    auto                    /* purse */
+    32px;                   /* close */
+  grid-template-areas: "title who xp mats purse close";
+  align-items: center;
+  gap: var(--gap);
+  margin: 0; padding: 0 var(--pad) 0 0;
+  border-bottom: 1px solid var(--pane-line);
+  background: linear-gradient(#101827, #0b1220);
+}
+.sheet-head h2 {
+  grid-area: title; margin: 0;
+  font-size: 14px; letter-spacing: 1.6px; text-transform: uppercase;
+  color: var(--accent); padding-left: var(--pad);
+}
+.sheet-who { grid-area: who; display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.sheet-who b { font-size: 15px; color: #eaf6ff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sheet-who .who-class { font-size: var(--fs-sm); color: var(--ink-dim); text-transform: capitalize; }
+.sheet-who .who-level { font-size: var(--fs-sm); color: var(--gold); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.sheet-xp { grid-area: xp; display: flex; align-items: center; gap: 8px; min-width: 0; }
+.sheet-xp .xpbar {
+  flex: 1; min-width: 80px; height: 7px; border-radius: 4px;
+  background: #0c111b; border: 1px solid #2a3446; overflow: hidden;
+}
+.sheet-xp .xpbar > i { display: block; height: 100%; width: 0; background: linear-gradient(#d8b040, #8a6a10); }
+.sheet-xp .xp-text { font-size: var(--fs-sm); color: var(--ink-faint); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.sheet-mats {
+  grid-area: mats; justify-content: flex-end; align-items: center;
+  overflow: hidden; flex-wrap: nowrap; gap: 6px;
+  font-size: var(--fs-sm); color: var(--ink-faint);
+}
+.sheet-mats .material { flex: none; }
+/* R14: "+4 more" opens the materials this screen does not spend. It has to stay readable when the
+   strip wraps to a second row, so it is allowed to wrap where the chips are not. */
+.sheet-mats { flex-wrap: wrap; max-height: 56px; }
+.sheet-mats .mat-more { flex: none; padding: 3px 9px; font-size: var(--fs-sm); white-space: nowrap; }
+.sheet-purse { grid-area: purse; margin: 0; font-size: var(--fs); font-variant-numeric: tabular-nums; white-space: nowrap; color: #cfe0ef; }
+.sheet-purse b { color: var(--gold); }
+.sheet .close {
+  grid-area: close; position: static; font-size: 24px; line-height: 1;
+  width: 32px; height: 32px; border-radius: 6px;
+  cursor: pointer; color: var(--ink-dim); background: none; border: 0;
+}
+.sheet .close:hover { background: #17293c; color: #eaf6ff; }
+/* narrow: a material chip keeps its dot and its count and drops its name (46px, not 118px) */
+@media (max-width: 1340px) {
+  .sheet-mats .material { padding: 3px 7px; }
+  .sheet-mats .material > span { display: none; }
+  /* …but the toggle keeps its words, or it is an unlabelled button */
+  .sheet-mats .mat-more { padding: 3px 7px; }
+}
+
+/* ---------------------------------------------------------------- the rail */
+.tabs {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: var(--gap) 8px var(--pad);
+  border-right: 1px solid var(--pane-line);
+  background: linear-gradient(#0c1320, #090e18);
+  overflow-y: auto; overflow-x: hidden;
+}
+.tabs button {
+  display: flex; align-items: center; gap: 9px;
+  min-height: 38px; padding: 0 10px;
+  text-align: left; font: inherit; font-size: 13.5px;
+  background: none; border: 1px solid transparent; border-radius: 6px;
+  color: var(--ink-dim); cursor: pointer;
+}
+.tabs button:hover { background: #121b2b; border-color: var(--pane-line); color: var(--ink); }
+.tabs button.on {
+  background: #17293c; border-color: #2f5d84; color: var(--accent);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+.rail-key {
+  flex: none; width: 18px; height: 18px; border-radius: 4px;
+  display: grid; place-items: center;
+  font-size: var(--fs-sm); font-variant-numeric: tabular-nums;
+  background: #0c111b; border: 1px solid #2a3446; color: var(--ink-faint);
+}
+.tabs button.on .rail-key { border-color: #2f5d84; color: var(--accent); }
+.rail-name { flex: 1; }
+/* An unspent point is invisible today unless you happen to open the screen it belongs to. */
+.rail-badge {
+  flex: none; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px;
+  display: grid; place-items: center;
+  font-size: var(--fs-sm); font-style: normal; font-weight: 600; font-variant-numeric: tabular-nums;
+  background: #4a3a10; border: 1px solid var(--gold); color: var(--gold);
+}
+/* `.rail-badge` is `display: grid`, which beats the browser's own `[hidden]` rule */
+.rail-badge[hidden] { display: none; }
+.rail-foot { margin-top: auto; padding: 10px 4px 0; display: flex; flex-direction: column; gap: 5px; }
+.tab-body.hidden { display: none; }
+
+/* ================================================================ panes
+ * One set of parts, used by all seven screens. A pane is a titled box with exactly one scrolling
+ * body; `.pane-head` and any `.chipbar` stay put while the body scrolls under them.
+ */
+.pane {
+  display: flex; flex-direction: column; min-height: 0; min-width: 0;
+  background: var(--pane-bg);
+  border: 1px solid var(--pane-line);
+  border-radius: var(--pane-r);
+  overflow: hidden;
+}
+.pane-head {
+  display: flex; align-items: center; gap: 10px;
+  min-height: 30px; padding: 0 10px;
+  background: linear-gradient(#141d2d, #101828);
+  border-bottom: 1px solid var(--pane-line-soft);
+  flex: none;
+}
+.pane-title {
+  font-size: var(--fs-head); letter-spacing: 1.2px; text-transform: uppercase;
+  color: var(--ink-dim); font-weight: 600; white-space: nowrap;
+}
+.pane-meta { font-size: var(--fs-sm); color: var(--ink-faint); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pane-tools { margin-left: auto; display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; }
+/* a hint is the first thing to give up room when a tools row runs out of it — the perk row gained a
+   search box and a checkbox (D9/D10) and the hint was being cut off mid-word rather than shortened */
+.pane-tools > .keyhint { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pane-body {
+  flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden;
+  padding: 10px; display: flex; flex-direction: column; gap: 8px;
+  /* load-bearing: without it a list that crosses the scroll threshold shoves every row 15px sideways */
+  scrollbar-gutter: stable;
+}
+/* D1: a pane that scrolls has to LOOK like it scrolls. Two panes on the Journal were cut mid-row at
+   1366 with nothing on screen to say there was more — five of the twelve factions were simply gone. */
+.pane-body::-webkit-scrollbar { width: 10px; }
+.pane-body::-webkit-scrollbar-track { background: rgba(8, 12, 20, .6); border-radius: 5px; }
+.pane-body::-webkit-scrollbar-thumb { background: #2c3e59; border-radius: 5px; border: 2px solid transparent; background-clip: content-box; }
+.pane-body::-webkit-scrollbar-thumb:hover { background: #3f6f9a; background-clip: content-box; }
+.pane-body { scrollbar-color: #2c3e59 rgba(8, 12, 20, .6); scrollbar-width: thin; }
+.pane-body.tight { padding: 6px; gap: 5px; }
+.pane-body.flush { padding: 0; gap: 0; }
+.pane-body.grid { display: grid; align-content: start; }
+.pane-stack { display: flex; flex-direction: column; gap: var(--gap); min-height: 0; min-width: 0; }
+.pane-stack > .pane.grow { flex: 1; min-height: 0; }
+/* An empty pane should not hold a full-height column open — "Nothing on your gear does anything
+   clever yet" was taking 750px at level 1 and pushing Companions to the floor. */
+.pane-stack > .pane.grow.empty { flex: 0 1 auto; }
+.pane-stack > .pane.fixed { flex: none; }
+/* the old `.sheet h3 { margin: 16px 0 6px }` is what forced the stacked look — not inside a pane */
+.pane h3, .pane h4 { margin: 0; }
+.pane-body > h4 {
+  margin: 4px 0 0; font-size: var(--fs-head); letter-spacing: 1px;
+  text-transform: uppercase; color: var(--ink-faint);
+}
+
+/* ---- chips and filter bars */
+.chipbar {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  padding: 6px 10px; background: #0c1220;
+  border-bottom: 1px solid var(--pane-line-soft); flex: none;
+}
+.chipbar .chip-label {
+  font-size: var(--fs-sm); color: var(--ink-faint); text-transform: uppercase;
+  letter-spacing: .6px; margin-right: 2px;
+}
+.chipbar .sep { width: 1px; height: 16px; background: var(--pane-line); margin: 0 3px; }
+/* `capitalize` turns "In the bag" into "In The Bag" — the map screen wants it, the sheet does not */
+.sheet .chip { font-size: var(--fs-sm); min-height: 22px; display: inline-flex; align-items: center; text-transform: none; }
+
+/* ---- a generic row for the journal, zone and named-foe lists */
+.list-row {
+  display: grid; align-items: baseline; gap: 4px 10px;
+  padding: 5px 8px; border-radius: 5px;
+  background: rgba(16, 24, 36, .6);
+  border-left: 2px solid var(--pane-line);
+  font-size: var(--fs);
+}
+.list-row .row-main { font-weight: 600; color: var(--ink); }
+.list-row .row-note { color: var(--ink-faint); font-size: var(--fs-sm); }
+.list-row .row-num { color: var(--ink-dim); font-variant-numeric: tabular-nums; text-align: right; min-width: 48px; }
+
+/* ---- an item card standing in a panel rather than chasing the pointer */
+.itemcard {
+  background: rgba(10, 16, 26, .7);
+  border: 1px solid var(--pane-line);
+  border-radius: 7px; padding: 9px 11px;
+  font-size: 12.5px; line-height: 1.45;
+}
+.itemcard.empty { color: var(--ink-faint); font-style: italic; }
+.itemcard b { color: #f0c46a; }
+.itemcard--worn { border-color: #2f5d84; }
+.itemcard--worn::before {
+  content: "Worn now"; display: block; margin-bottom: 4px;
+  font-size: var(--fs-head); letter-spacing: 1px; text-transform: uppercase; color: var(--accent);
+}
+
+/* ---- empty state, divider, key hint */
+.empty-state {
+  display: flex; flex-direction: column; gap: 4px; align-items: flex-start;
+  padding: 14px 12px; color: var(--ink-faint); font-size: var(--fs);
+  border: 1px dashed var(--pane-line); border-radius: 6px;
+  background: rgba(10, 16, 26, .4);
+}
+.empty-state b { color: var(--ink-dim); font-weight: 600; }
+.divider {
+  display: flex; align-items: center; gap: 8px; margin: 6px 0 2px;
+  font-size: var(--fs-head); letter-spacing: 1.1px; text-transform: uppercase; color: var(--ink-faint);
+}
+.divider::after { content: ""; flex: 1; height: 1px; background: var(--pane-line); }
+.keyhint { font-size: var(--fs-sm); color: var(--ink-faint); }
+.keyhint kbd {
+  display: inline-block; min-width: 16px; padding: 1px 5px; margin: 0 1px;
+  background: #0c111b; border: 1px solid #2a3446; border-bottom-width: 2px;
+  border-radius: 4px; font: inherit; font-size: 11.5px; color: var(--ink-dim);
+}
+
+/* ----------------------------------------------------------------- inventory */
+.bagtools { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+.bag .row .scrap {
+  background: rgba(30,20,12,.8); border: 1px solid #4a3a26; color: #c8a24a;
+  border-radius: 5px; width: 24px; height: 22px; cursor: pointer; font-size: 13px; line-height: 1;
+}
+.bag .row .scrap:hover { border-color: #c8a24a; color: #ffd24a; }
+.small-bag { max-height: 190px; overflow-y: auto; }
+
+/* ----------------------------------------------------------------- skills tab */
+/* `.skilllist` / `.skill-row` went with the "All skills" pane (D5) — it drew the same six slots as
+   the bar strip. The strip's own rules are down in the sheet section, under `.sk-card`. */
+.skill-slot.locked { opacity: .4; }
+.skill-slot.locked .skill-name { font-size: 10px; }
+.skill-slot.locked .skill-mp { color: #8fa0b8; }
+
+/* ----------------------------------------------------------------- companions + powers */
+.pets, .powers { display: flex; flex-direction: column; gap: 3px; }
+.pet-row, .power-row {
+  display: flex; justify-content: space-between; gap: 10px;
+  padding: 4px 8px; background: rgba(16,24,36,.6); border-left: 2px solid #3f6f9a; border-radius: 3px;
+}
+.power-row { border-left-color: #c8a24a; }
+.powers { max-height: 260px; overflow-y: auto; }
+
+/* ----------------------------------------------------------------- crafting */
+.materials { display: flex; flex-wrap: wrap; gap: 5px; }
+.material {
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 9px; background: rgba(16,24,36,.7); border: 1px solid #23344a; border-radius: 14px;
+  font-size: 12px;
+}
+.material i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.material b { color: #ffd24a; font-variant-numeric: tabular-nums; }
+
+.bench-card { padding: 9px 10px; background: rgba(16,24,36,.75); border: 1px solid #3f6f9a; border-radius: 7px; }
+.bench-affixes { display: flex; flex-direction: column; gap: 3px; margin: 7px 0; }
+.bench-affix { padding: 3px 7px; border-radius: 4px; background: rgba(8,14,22,.6); font-size: 12px; color: #9fb0c8; }
+.bench-affix.pickable { cursor: pointer; border: 1px solid transparent; }
+.bench-affix.pickable:hover { border-color: #3f6f9a; color: #cfe0ef; }
+.bench-affix.picked { border-color: #ffd24a; color: #ffe8b0; }
+.bench-affix.fixed { opacity: .55; font-style: italic; }
+.bench-card button { margin-top: 4px; }
+
+.recipes { display: flex; flex-direction: column; gap: 6px; max-height: 60vh; overflow-y: auto; }
+.recipe {
+  display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center;
+  padding: 8px 10px; background: rgba(16,24,36,.6); border: 1px solid #23344a; border-radius: 7px;
+}
+.recipe > div { grid-column: 1; }
+.recipe button { grid-column: 2; grid-row: 1 / span 3; align-self: center; }
+.recipe-head { display: flex; justify-content: space-between; gap: 10px; }
+.recipe-head b { color: #cfe0ef; }
+.recipe .note { color: #8fa8c0; }
+.recipe.off { opacity: .5; }
+.recipe.off .note { color: #c08a6a; }
+
+/* ----------------------------------------------------------------- zones */
+.zonelist { display: flex; flex-direction: column; gap: 3px; }
+.zone-row {
+  display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: baseline;
+  padding: 4px 8px; background: rgba(16,24,36,.6); border-left: 2px solid #2a3a4e; border-radius: 3px;
+}
+.zone-row.here { border-left-color: #7fd8ff; background: rgba(24,40,58,.8); }
+.zone-trivial { color: #7f8ea4; }
+.zone-easy    { color: #8fe0a0; }
+.zone-even    { color: #ffe08a; }
+.zone-hard    { color: #ffa860; }
+.zone-deadly  { color: #ff6a5a; }
+
+/* ----------------------------------------------------------------- prompt + boss bar */
+#prompt {
+  position: fixed; left: 50%; bottom: 128px; transform: translateX(-50%);
+  padding: 7px 16px; background: rgba(8,14,22,.86); border: 1px solid #3f6f9a; border-radius: 7px;
+  color: #cfe0ef; font-size: 14px; pointer-events: none; text-align: center;
+}
+#prompt.hidden { display: none; }
+#prompt b { color: #ffd24a; }
+
+#boss-bar {
+  position: fixed; left: 50%; top: 18px; transform: translateX(-50%);
+  width: min(560px, 60vw); pointer-events: none; text-align: center;
+}
+#boss-bar.hidden { display: none; }
+#boss-name { color: #ffd24a; font-size: 15px; letter-spacing: 1px; margin-bottom: 3px; text-shadow: 0 2px 6px #000; }
+#boss-bar .bar { height: 14px; }
+
+/* the target nameplate takes a rarity colour when it is a champion, a rare or a boss */
+#target-name.rarity-rare { color: #6ab0ff; }
+#target-name.rarity-unique { color: #ff8adf; }
+#target-name.rarity-legendary { color: #ffd24a; }
+
+/* ==========================================================================
+   Round 4 — HUD layout. Six skill slots, a zone line and a boss bar all wanted
+   room, and the old positions had the log sitting under the hint and the
+   minimap under the place card. Everything gets its own lane.
+   ========================================================================== */
+
+/* right column: place card, then the minimap under it, then the location line */
+#minimap { top: 128px; }
+#hud-where { top: 330px; }
+#hud-planet { max-width: 300px; }
+
+/* the skill bar sits above the hint rather than on top of it */
+/* …and the 44px that was reserved for it during play goes back to the skill bar, because `#hint` is
+   inside `#pause` and is never on screen while you are playing. */
+#skillbar { bottom: 18px; }
+/* `#hint` lives INSIDE `.pause-card` in the markup, but `#hint`'s base rule pins it to the viewport,
+   so the card showed a "Controls" heading with empty space under it and the keys floated across the
+   bottom of the screen on top of the skill bar. It is part of the card; let it sit in the card. */
+#pause #hint { position: static; transform: none; bottom: auto; left: auto; max-width: 620px; margin: 0 auto; }
+#prompt { bottom: 118px; }
+
+/* the log gets a panel so it reads over bright ground, and stops short of the bar */
+#log {
+  bottom: 44px; width: 340px; max-height: 252px;
+  padding: 6px 9px; border-radius: 7px;
+  background: linear-gradient(to top, rgba(8,12,20,.72), rgba(8,12,20,0));
+}
+
+/* ---- A8: the history behind `L`. Everything the game explained, still readable. */
+#log-history {
+  position: fixed; inset: 0; z-index: 30; display: grid; place-items: center;
+  background: rgba(4, 6, 12, .62);
+}
+#log-history.hidden { display: none; }
+#log-history .lh-card {
+  width: min(680px, 88vw); max-height: 70vh; display: flex; flex-direction: column;
+  background: rgba(10, 14, 24, .96); border: 1px solid #2a3a52; border-radius: 10px;
+  padding: 14px 18px 16px;
+}
+#log-history h3 {
+  margin: 0 0 10px; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #9fb0c8;
+}
+#log-history h3 .dim { text-transform: none; letter-spacing: 0; color: #66748a; margin-left: 8px; }
+#log-history-lines { overflow-y: auto; display: flex; flex-direction: column; gap: 3px; font-size: 13px; }
+#log-history-lines div { color: #c8d4e2; line-height: 1.4; }
+#log-history-lines div.good { color: #8fe0a0; }
+#log-history-lines div.bad { color: #ff9a8a; }
+#log-history-lines div.loot { color: #ffd070; }
+#log-history-lines div.level { color: #7fd8ff; font-weight: 600; }
+
+/* a boss bar owns the top of the screen; the ordinary nameplate moves down under it */
+#boss-bar:not(.hidden) ~ #target { top: 78px; }
+
+/* the right-hand column is a real column now, so nothing in it can overlap anything else */
+#hud-right {
+  position: fixed; right: 14px; top: 14px; width: 300px;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+}
+/* C9: five lines of right-aligned text of wildly different lengths made a ragged staircase down the
+   left edge. The title keeps the right edge; the body reads left, the way text does. */
+#hud-place { position: static; max-width: 300px; text-align: left; }
+#hud-place > div:first-child { text-align: right; }
+#hud-place .small, #hud-place .clock { text-align: right; }
+#hud-place #hud-planet { text-align: left; line-height: 1.35; }
+#minimap { position: static; }
+#hud-where { position: static; }
+
+/* the map's level-band toggle sits above the layer list */
+.map-toggle {
+  display: flex; align-items: center; gap: 7px;
+  padding: 6px 8px; margin-bottom: 8px;
+  background: rgba(16,24,36,.7); border: 1px solid #3f6f9a; border-radius: 6px;
+  color: #cfe0ef; font-size: 13px; cursor: pointer;
+}
+.map-toggle input { accent-color: #7fd8ff; }
+
+/* ==========================================================================
+   Crafting and Upgrade, laid out like a trade skill: a list, then a detail panel
+   ========================================================================== */
+
+.recipe-list { display: flex; flex-direction: column; gap: 3px; max-height: 42vh; overflow-y: auto; }
+.recipe-group {
+  margin: 8px 0 2px; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #7f8ea4;
+}
+.recipe-row {
+  display: flex; justify-content: space-between; gap: 10px; align-items: baseline; cursor: pointer;
+  padding: 6px 9px; background: rgba(16,24,36,.6); border: 1px solid #23344a; border-radius: 6px;
+}
+.recipe-row:hover { border-color: #3f6f9a; }
+.recipe-row.on { border-color: #7fd8ff; background: rgba(24,44,62,.85); }
+.recipe-row.off { opacity: .48; }
+.recipe-row .recipe-name { color: #cfe0ef; }
+.recipe-row .recipe-cost { color: #8fa8c0; font-size: 12px; font-variant-numeric: tabular-nums; }
+
+.recipe-detail { display: flex; flex-direction: column; gap: 6px; }
+.recipe-detail h3 { margin: 0 0 2px; }
+.recipe-detail h4 {
+  margin: 10px 0 2px; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #7f8ea4;
+}
+.recipe-detail p { margin: 0; }
+
+.forge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 5px; max-height: 34vh; overflow-y: auto; }
+.forge-option {
+  display: flex; flex-direction: column; gap: 2px; text-align: left; cursor: pointer;
+  padding: 6px 8px; background: rgba(16,24,36,.65); border: 1px solid #23344a; border-radius: 6px;
+  color: #cfe0ef; font: inherit; font-size: 12px;
+}
+.forge-option:hover { border-color: #3f6f9a; }
+.forge-option.on { border-color: #7fd8ff; background: rgba(24,44,62,.9); }
+.forge-option.cannot { opacity: .6; }
+.forge-option.cannot b { color: #c9a78a; }
+
+.cost-table { display: flex; flex-direction: column; gap: 3px; }
+.cost-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 4px 9px; background: rgba(16,24,36,.6); border-radius: 5px; font-size: 13px;
+}
+.cost-row i { width: 10px; height: 10px; border-radius: 50%; }
+.cost-row b { margin-left: auto; font-variant-numeric: tabular-nums; }
+.cost-row.ok b { color: #8fe0a0; }
+.cost-row.short b { color: #ff9a8a; }
+
+.forge-result {
+  padding: 8px 10px; background: rgba(16,24,36,.6); border-left: 2px solid #c8a24a; border-radius: 5px;
+  display: flex; flex-direction: column; gap: 3px;
+}
+.forge-btn {
+  align-self: flex-start; margin-top: 8px; padding: 7px 18px;
+  background: #1d3a52; border: 1px solid #3f6f9a; border-radius: 6px; color: #cfe0ef;
+  font: inherit; cursor: pointer;
+}
+.forge-btn:hover:not(:disabled) { border-color: #7fd8ff; color: #eaf6ff; }
+.forge-btn:disabled { opacity: .4; cursor: default; }
+.bench-card-wrap { margin-bottom: 4px; }
+.bag .row.on { border-color: #7fd8ff; background: rgba(24,44,62,.8); }
+.tip-bad { color: #ff9a8a; }
+.tip-good { color: var(--good); }   /* R20 — a spell slot standing open */
+
+/* ---------------------------------------------------------------- item hover cards */
+:is(.tipbox, .itemcard) .tip-dim { color: #8fa0b4; font-size: 12px; }
+:is(.tipbox, .itemcard) .tip-base { margin: 4px 0; color: #eaf2fa; }
+:is(.tipbox, .itemcard) .tip-affixes { margin: 4px 0; padding: 0 0 0 14px; list-style: none; }
+:is(.tipbox, .itemcard) .tip-affixes li { position: relative; margin: 2px 0; font-size: 12.5px; }
+:is(.tipbox, .itemcard) .tip-affixes li::before { content: '·'; position: absolute; left: -11px; color: #7f8ea4; }
+:is(.tipbox, .itemcard) .tip-stat { color: #8fd0ff; }
+:is(.tipbox, .itemcard) .tip-cond { color: #c9b3ff; }
+:is(.tipbox, .itemcard) .tip-set { color: #7ae06a; }
+:is(.tipbox, .itemcard) .tip-legend { color: #ffb040; }
+:is(.tipbox, .itemcard) .tip-base-affix { color: #cfd8e3; }
+:is(.tipbox, .itemcard) .tip-set-head { margin-top: 5px; color: #7ae06a; font-size: 12px; }
+:is(.tipbox, .itemcard) .tip-lore { margin-top: 5px; color: #b7a98d; font-style: italic; font-size: 12px; }
+:is(.tipbox, .itemcard) .tip-compare { margin-top: 6px; padding-top: 5px; border-top: 1px solid rgba(120,150,180,.22); }
+:is(.tipbox, .itemcard) .tip-compare .up { color: #8fe0a0; }
+:is(.tipbox, .itemcard) .tip-compare .down { color: #ff9a8a; }
+:is(.tipbox, .itemcard) .tip-foot { margin-top: 5px; color: #7f8ea4; font-size: 11px; }
+:is(.tipbox, .itemcard) .tip-line { margin-top: 3px; }
+
+/* ---------------------------------------------------------------- the zone banner */
+#zone-banner {
+  position: fixed; left: 50%; top: 21%; transform: translateX(-50%);
+  text-align: center; pointer-events: none; min-width: 320px;
+  animation: zb-in 5.2s ease-out forwards;
+}
+#zone-banner.hidden { display: none; }
+#zone-banner .zb-name {
+  font-size: 30px; letter-spacing: 3px; color: #f2e8d4;
+  text-shadow: 0 2px 14px #000, 0 0 30px rgba(0,0,0,.9);
+}
+#zone-banner .zb-level {
+  margin-top: 2px; font-size: 17px; letter-spacing: 2px;
+  text-shadow: 0 2px 10px #000;
+}
+#zone-banner .zb-danger {
+  margin-top: 1px; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: #a8b6c6;
+  text-shadow: 0 2px 8px #000;
+}
+/* a hairline over and under, tinted by how dangerous it is */
+#zone-banner::before, #zone-banner::after {
+  content: ''; display: block; height: 1px; margin: 7px auto;
+  width: 78%; background: linear-gradient(90deg, transparent, currentColor, transparent);
+  opacity: .55;
+}
+#zone-banner.zb-trivial { color: #aab6c6; }
+#zone-banner.zb-easy    { color: #8fe0a0; }
+#zone-banner.zb-even    { color: #ffe08a; }
+#zone-banner.zb-hard    { color: #ffa860; }
+#zone-banner.zb-deadly  { color: #ff6a5a; }
+@keyframes zb-in {
+  0%   { opacity: 0; transform: translate(-50%, 10px); }
+  9%   { opacity: 1; transform: translate(-50%, 0); }
+  78%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+:is(.tipbox, .itemcard) .tip-shift { margin-top: 5px; color: #7fd8ff; font-size: 11px; }
+:is(.tipbox, .itemcard) .tip-losing li { color: #a08a8a; }
+:is(.tipbox, .itemcard) .tip-losing li::before { content: '−'; }
+
+/* ---------------------------------------------------------------- the pause menu (Esc) */
+#pause {
+  position: fixed; inset: 0; z-index: 60;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(4, 7, 12, .72); backdrop-filter: blur(3px);
+}
+#pause.hidden { display: none; }
+.pause-card {
+  min-width: 340px; max-width: 560px; padding: 22px 26px;
+  background: rgba(12, 18, 28, .96); border: 1px solid #3f6f9a; border-radius: 11px;
+  box-shadow: 0 18px 60px rgba(0,0,0,.6);
+  text-align: center;
+}
+.pause-card h2 { margin: 0 0 2px; font-size: 26px; letter-spacing: 4px; color: #7fd8ff; }
+.pause-card h3 {
+  margin: 18px 0 6px; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #7f8ea4;
+}
+.pause-where { color: #9fb0c8; font-size: 13px; margin-bottom: 16px; }
+.pause-buttons { display: flex; flex-direction: column; gap: 7px; }
+.pause-buttons button {
+  padding: 9px 16px; font: inherit; font-size: 15px; cursor: pointer;
+  background: #1d3a52; border: 1px solid #3f6f9a; border-radius: 7px; color: #eaf2fa;
+}
+.pause-buttons button.ghost { background: rgba(20,30,44,.7); color: #cfe0ef; }
+.pause-buttons button:hover { border-color: #7fd8ff; color: #fff; }
+.pause-card .keys { color: #8fa0b8; font-size: 12px; line-height: 1.6; }
+.pause-card .back { position: static; display: inline-block; margin-top: 14px; }
+.boot-back { position: static !important; display: inline-block; margin-top: 10px; }
+
+/* ---------------------------------------------------------------- space reticles */
+#reticles { position: fixed; inset: 0; pointer-events: none; }
+.reticle {
+  position: absolute; transform: translate(-50%, -50%);
+  color: rgba(150, 200, 235, .55);
+}
+.reticle .rt { position: absolute; width: 11px; height: 11px; border: 1px solid currentColor; }
+.reticle .rt.tl { left: 0; top: 0; border-right: 0; border-bottom: 0; }
+.reticle .rt.tr { right: 0; top: 0; border-left: 0; border-bottom: 0; }
+.reticle .rt.bl { left: 0; bottom: 0; border-right: 0; border-top: 0; }
+.reticle .rt.br { right: 0; bottom: 0; border-left: 0; border-top: 0; }
+.reticle .rt-name {
+  position: absolute; left: 50%; top: -17px; transform: translateX(-50%);
+  font-size: 11px; letter-spacing: 1px; white-space: nowrap; text-shadow: 0 1px 3px #000;
+}
+.reticle .rt-dist {
+  position: absolute; left: 50%; bottom: -16px; transform: translateX(-50%);
+  font-size: 10px; opacity: .7; white-space: nowrap; text-shadow: 0 1px 3px #000;
+}
+/* a world with a tracked quest or pin on it wears its glyphs above the bracket */
+.reticle .rt-mark {
+  position: absolute; left: 50%; top: -32px; transform: translateX(-50%);
+  font-size: 13px; color: #ffd24a; white-space: nowrap; text-shadow: 0 1px 4px #000;
+}
+.reticle.marked { color: rgba(255, 210, 74, .75); }
+.reticle.landable  { color: rgba(140, 230, 170, .6); }
+.reticle.moon      { color: rgba(190, 200, 215, .6); }
+.reticle.nolanding { color: rgba(230, 150, 110, .5); }
+.reticle.star      { color: rgba(255, 210, 120, .55); }
+.reticle.on { color: #eaf6ff; }
+.reticle.on .rt { width: 15px; height: 15px; border-width: 2px; }
+.reticle.on .rt-name { font-size: 13px; color: #fff; }
+
+#space-card {
+  position: fixed; right: 26px; top: 50%; transform: translateY(-50%);
+  width: 250px; padding: 12px 14px;
+  background: rgba(8, 14, 22, .82); border: 1px solid rgba(120, 180, 220, .4); border-radius: 8px;
+  color: #cfe0ef; font-size: 12.5px; pointer-events: none; backdrop-filter: blur(2px);
+}
+#space-card.hidden { display: none; }
+#space-card .sc-name { font-size: 17px; color: #eaf6ff; letter-spacing: 1px; }
+#space-card .sc-kind { color: #8fa8c0; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 7px; }
+#space-card .sc-lines { margin: 0; padding-left: 15px; }
+#space-card .sc-lines li { margin: 2px 0; }
+#space-card .sc-marks {
+  margin-top: 8px; padding-top: 7px; border-top: 1px solid rgba(120, 180, 220, .25);
+  color: #e8dfd2; font-size: 11.5px; line-height: 1.5;
+}
+#space-card .sc-land { margin-top: 8px; color: #8fe0a0; }
+#space-card .sc-noland { margin-top: 8px; color: #ffa860; }
+#space-card b { color: #ffd24a; }
+
+/* the new-game knobs */
+.boot-knobs { margin: 8px 0; text-align: left; }
+.boot-knobs summary { cursor: pointer; color: #9fb0c8; font-size: 13px; }
+.boot-knobs summary:hover { color: #cfe0ef; }
+.boot-knobs .row { margin-top: 7px; align-items: baseline; }
+.boot-knobs label.check { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+.boot-knobs label.check input { accent-color: #7fd8ff; }
+
+/* ---------------------------------------------------------------- the star chart (M in space) */
+.chart {
+  position: fixed; inset: 0; z-index: 46; display: flex; flex-direction: column;
+  background: #04060c;
+}
+.chart.hidden { display: none; }
+.chart-top {
+  display: flex; align-items: center; gap: 14px; padding: 10px 16px;
+  border-bottom: 1px solid #16263a; flex-wrap: wrap;
+}
+.chart-title { font-size: 18px; color: #7fd8ff; letter-spacing: .5px; }
+.chart-steps { display: flex; gap: 6px; flex-wrap: wrap; }
+.chart .screen-close {
+  margin-left: auto; background: none; border: 0; color: #9fb0c8; font-size: 24px; cursor: pointer;
+}
+.chart .screen-close:hover { color: #eaf6ff; }
+.chart-body { flex: 1; display: flex; min-height: 0; }
+.chart-wrap { flex: 1; min-width: 0; padding: 10px; display: flex; }
+.chart-canvas {
+  flex: 1; min-height: 0; min-width: 0; border: 1px solid #16263a; border-radius: 6px; cursor: crosshair;
+}
+.chart-side {
+  width: 300px; overflow-y: auto; padding: 10px 12px 10px 0;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.chart-name { font-size: 17px; color: #eaf6ff; letter-spacing: .5px; }
+.chart-list { display: flex; flex-direction: column; gap: 2px; }
+.chart-row {
+  display: flex; align-items: center; gap: 8px; font-size: 12.5px; padding: 3px 4px; border-radius: 4px;
+}
+.chart-row.link { cursor: pointer; }
+.chart-row.link:hover { background: rgba(120, 180, 220, .12); }
+.chart-row.on { background: rgba(120, 180, 220, .2); }
+.chart-row.marked .chart-rowname { color: #ffe6a8; }
+.chart-rowname { flex: 1; }
+.chart-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.chart-mark { color: #ffd24a; }
+.chart .warn { color: #ffa860; }
+
+/* item level and the wearer requirement on an item card */
+.tip-req { font-size: 11.5px; color: #8d8375; margin-top: 2px; }
+.tip-req .req-ok  { color: #a9a094; }
+/* something has lowered it — the "of Early Promise" affix, worn or in the bag */
+.tip-req .req-cut { color: #7fd4ff; }
+.tip-req .req-no  { color: #ff7a5a; font-weight: 600; }
+
+/* the shop's three shelves, plus whatever you have sold back */
+.shop-tabs { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 7px; }
+.trade-col { min-width: 0; }
+.trade-col .trade-row { cursor: default; }
+.trade-col .trade-row:hover { background: rgba(120, 180, 220, .08); }
+/* the gambler */
+.crate-row .coin { margin-left: auto; }
+.crate-result {
+  margin-top: 8px; padding: 7px 9px; border-radius: 5px;
+  background: rgba(255, 210, 74, .1); border: 1px solid rgba(255, 210, 74, .3);
+}
+
+/* ---------------------------------------------------------------- the perk forest */
+.perks-head { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 8px; }
+.perks-head h3 { margin: 0; }
+.perk-legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; }
+.perk-arm { display: inline-flex; align-items: center; gap: 5px; color: #9fb0c8; }
+.perk-arm i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.perks-body { display: flex; gap: 12px; flex: 1; min-height: 460px; }
+
+/* D9/D10: the two controls in the forest's head bar. The search box is deliberately plain — a wide
+   pill in a row of chips reads as "type here" without a label taking the space. */
+.perk-search {
+  width: 170px; min-width: 0; box-sizing: border-box;
+  background: #0c111b; color: var(--ink, #cfe0ef); border: 1px solid #2a3446; border-radius: 12px;
+  padding: 3px 10px; font: inherit; font-size: var(--fs-sm, 12px);
+}
+.perk-search:focus { outline: none; border-color: var(--accent, #3f9fd8); }
+.perk-search::placeholder { color: var(--ink-faint, #7f8ea4); }
+#perk-search-note { white-space: nowrap; }
+#perk-search-note.bad { color: #ffb36a; }
+/* a checkbox that sits in a row of chips has to look like one, or it reads as a stray tick box */
+.perk-check { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; }
+.perk-check input { margin: 0; accent-color: var(--accent, #3f9fd8); cursor: pointer; }
+/* The buffer is sized from this element's own box (see hud.js `perkView`), so it must not be given
+   an intrinsic size to argue with — `flex: 1` owns the width, `align-self: stretch` the height. */
+.perk-canvas {
+  flex: 1; min-width: 0; min-height: 440px; align-self: stretch; display: block;
+  border: 1px solid #222c3c; border-radius: 6px; background: #0b0e15;
+  touch-action: none; cursor: grab;
+}
+.perk-side { width: 270px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+.perk-side h4 { margin: 4px 0 0; font-size: 15px; color: #eaf6ff; }
+.perk-side .warn { color: #ffa860; }
+.perk-side .good { color: #8fe0a0; }
+.perk-bars { display: flex; flex-direction: column; gap: 3px; font-size: 12px; }
+.perk-bar { display: flex; justify-content: space-between; }
+/* the perks tab is a column so the canvas can fill it — but  still has to win, or the
+   forest bleeds through whatever tab you are actually on */
+.tab-body[data-tab="perks"]:not(.hidden) { display: flex; flex-direction: column; min-height: 0; }
+
+/* ================================================================ R17 — the four tabs added this round
+ * Log, Holding, Research and Followers. Three of them are a MOUNT POINT and nothing else: the
+ * screen inside brings its own markup and its own stylesheet (js/civics-ui.js has done this since
+ * the Civilization expansion), so all style.css owes them is a box that fills the body and does not
+ * scroll on its own — the panel inside owns its own scrolling, the way every other pane does.
+ */
+.tab-body[data-tab="log"]:not(.hidden) { display: flex; flex-direction: column; min-height: 0; }
+.tab-body[data-tab="holding"]:not(.hidden),
+.tab-body[data-tab="research"]:not(.hidden),
+.tab-body[data-tab="followers"]:not(.hidden) { display: block; min-height: 0; overflow: hidden; }
+.sheet-mount { height: 100%; min-height: 0; position: relative; }
+/* A tab nothing has mounted into yet says so, rather than being a blank rectangle. */
+.sheet-mount:empty::after {
+  content: 'Nothing here yet.';
+  display: block; padding: 18px; color: var(--ink-faint, #7f8ea4); font-size: 12px;
+}
+/* The Log tab's lines keep the colours they were logged in — the same classes the HUD log uses. */
+#log-history-lines > div { padding: 2px 0; }
+.tab-body.hidden { display: none !important; }
+
+/* a skill's own three tiers */
+.skilltree { display: flex; flex-direction: column; gap: 6px; }
+.tier-head { margin: 8px 0 2px; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #8fa0b8; }
+.tier-head.locked { opacity: .5; }
+.tier-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.talent-card {
+  flex: 1 1 150px; min-width: 140px; padding: 7px 9px; border-radius: 5px; cursor: pointer;
+  border: 1px solid #263246; background: rgba(255,255,255,.02);
+  display: flex; flex-direction: column; gap: 3px; font-size: 12px;
+}
+.talent-card:hover { border-color: #3f5d80; }
+.talent-card.on { border-color: #7fd8ff; background: rgba(127, 216, 255, .1); }
+.talent-card.locked { opacity: .4; cursor: default; }
+/* R20 — this tier already has a talent on it, and it is not this one. Dimmed rather than merely
+   inert, so a card you cannot take does not look identical to one you can. */
+.talent-card.spent { opacity: .45; cursor: default; }
+.talent-card.spent:hover { border-color: #2b3a52; }
+
+/* a weapon's attack pattern */
+.tip-pattern { display: flex; align-items: baseline; gap: 8px; margin-top: 3px; }
+.tip-pattern .glyphs { font-size: 15px; letter-spacing: 3px; color: #ffd24a; }
+
+/* the boat and ship dropdowns */
+.vehicles { display: flex; flex-direction: column; gap: 5px; }
+.vehicle-row { display: flex; align-items: center; gap: 7px; font-size: 12px; }
+.vehicle-row select {
+  background: #131a26; color: #dfe7f2; border: 1px solid #2a3a4e; border-radius: 4px; padding: 3px 5px;
+}
+
+/* handing over things you were already carrying */
+.talk-quest.hand-in { border-left: 2px solid #7fd8ff; }
+.hand-list { display: flex; flex-direction: column; gap: 2px; margin: 6px 0; max-height: 170px; overflow-y: auto; }
+.hand-row { display: flex; align-items: center; gap: 7px; font-size: 12.5px; cursor: pointer; padding: 1px 0; }
+.hand-row input { accent-color: #7fd8ff; }
+.hand-tools { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* ================================================================================================
+   ROUND 10 — the seven screens, each laid out for the space it now has
+   ================================================================================================
+   Every one of these was two stacked columns in an 880px box. They are grids across a full viewport
+   now. Three rules hold everywhere: a track is `minmax(0, 1fr)` so nothing can push the layout
+   sideways, the only scroller is a `.pane-body`, and any number that changes has a reserved width so
+   a live redraw never re-flows the row beside it.
+   ============================================================================================== */
+
+.pane-foot {
+  flex: none; padding: 6px 10px;
+  border-top: 1px solid var(--pane-line-soft); background: #0c1220;
+}
+
+/* ---------------------------------------------------------------- 1. character */
+.tab-body[data-tab="character"]:not(.hidden) {
+  display: grid;
+  grid-template-columns: var(--doll) minmax(340px, 1fr) minmax(340px, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  grid-template-areas: "figure stats side";
+  gap: var(--gap); padding: var(--gap) var(--pad) var(--pad); min-height: 0;
+}
+.col-figure { grid-area: figure; }
+.col-stats { grid-area: stats; }
+.col-side { grid-area: side; }
+@media (max-width: 1240px) {
+  .tab-body[data-tab="character"]:not(.hidden) {
+    grid-template-columns: var(--doll) minmax(0, 1fr);
+    grid-template-areas: "figure stats" "figure side";
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+/* The equip figure. Twelve slots in a 3-across list of text boxes became twelve name plates around
+ * a silhouette — placed purely by `[data-tip-slot]`, an attribute `slotGrid()` already writes, so
+ * the render code did not have to change at all. No item ICONS: Farhold's items carry a name, a
+ * rarity and numbers and no art, so an icon grid would be twelve identical coloured squares. */
+.doll {
+  display: grid;
+  grid-template-columns: 1fr 96px 1fr;
+  grid-template-rows: repeat(6, minmax(52px, 1fr));
+  grid-template-areas:
+    "head   body necklace"
+    "chest  body hands"
+    "weapon body offhand"
+    "legs   body ring"
+    "feet   body ring2"
+    "light  body mount";
+  gap: 6px; padding: 8px; min-height: 342px; flex: 1;
+  /* the silhouette is a BACKGROUND on the grid, so `replaceChildren` cannot wipe it */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 150'%3E%3Cg fill='none' stroke='%232b3d57' stroke-width='2' stroke-linejoin='round'%3E%3Cpath d='M30 8c7 0 11 5 11 12 0 8-5 13-11 13s-11-5-11-13c0-7 4-12 11-12z'/%3E%3Cpath d='M18 36l12-4 12 4 6 10-4 26 3 30-7 2-4-24h-12l-4 24-7-2 3-30-4-26z'/%3E%3Cpath d='M12 46l-5 30 5 3'/%3E%3Cpath d='M48 46l5 30-5 3'/%3E%3Cpath d='M23 96l-2 44h6l3-30'/%3E%3Cpath d='M37 96l2 44h-6l-3-30'/%3E%3C/g%3E%3C/svg%3E");
+  /* the silhouette scales with the box, so the figure still fills a tall pane */
+  background-repeat: no-repeat; background-position: center; background-size: auto 82%;
+}
+.doll .slot[data-tip-slot="head"] { grid-area: head; }
+.doll .slot[data-tip-slot="necklace"] { grid-area: necklace; }
+.doll .slot[data-tip-slot="chest"] { grid-area: chest; }
+.doll .slot[data-tip-slot="hands"] { grid-area: hands; }
+.doll .slot[data-tip-slot="weapon"] { grid-area: weapon; }
+.doll .slot[data-tip-slot="offhand"] { grid-area: offhand; }
+.doll .slot[data-tip-slot="legs"] { grid-area: legs; }
+.doll .slot[data-tip-slot="ring"] { grid-area: ring; }
+.doll .slot[data-tip-slot="ring1"] { grid-area: ring; }
+.doll .slot[data-tip-slot="feet"] { grid-area: feet; }
+.doll .slot[data-tip-slot="ring2"] { grid-area: ring2; }
+.doll .slot[data-tip-slot="light"] { grid-area: light; }
+.doll .slot[data-tip-slot="mount"] { grid-area: mount; }
+/* the right-hand column reads right-to-left, so every label sits against the figure */
+.doll .slot[data-tip-slot="necklace"], .doll .slot[data-tip-slot="hands"],
+.doll .slot[data-tip-slot="offhand"], .doll .slot[data-tip-slot="ring"],
+.doll .slot[data-tip-slot="ring1"], .doll .slot[data-tip-slot="ring2"],
+.doll .slot[data-tip-slot="mount"] { text-align: right; }
+.doll .slot {
+  min-height: 52px; padding: 5px 8px; display: flex; flex-direction: column;
+  justify-content: center; gap: 2px; overflow: hidden;
+  border-left: 3px solid #2a3446;
+}
+.doll .slot[data-rarity="magic"] { border-left-color: #7f95ff; }
+.doll .slot[data-rarity="rare"] { border-left-color: #e8d020; }
+.doll .slot[data-rarity="legendary"] { border-left-color: #ff8020; }
+.doll .slot[data-rarity="unique"] { border-left-color: #ff5a3c; }
+.doll .slot[data-rarity="set"] { border-left-color: #2fc4b2; }
+.doll .slot .label { font-size: var(--fs-sm); }
+.doll .slot .name {
+  margin: 0; font-size: var(--fs); line-height: 1.25;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+/* R14: the Attributes pane is gone — the four values are rows in the Stats pane now, and the `+`
+   buttons beside them had been dead since the perk forest replaced point-buy in round 7. */
+
+/* the cap is gone: the pane scrolls, and a geared character has twenty-odd properties to read */
+.pane .powers { max-height: none; overflow: visible; }
+.pane .pets { max-height: none; }
+#sheet-pet-pane .pane-body, #sheet-vehicle-pane .pane-body { max-height: 160px; }
+
+/* the effect-registry warning was grey small print at the bottom of a scrolled column */
+#sheet-inert:empty { display: none; }
+#sheet-inert {
+  margin: 0; padding: 7px 9px; border-radius: 6px; font-size: var(--fs-sm);
+  color: #ffc9a0; background: rgba(60, 30, 14, .5); border: 1px solid #5a3a1e;
+}
+
+/* ---------------------------------------------------------------- 2. inventory */
+.tab-body[data-tab="inventory"]:not(.hidden) {
+  display: grid;
+  grid-template-columns: var(--doll) minmax(380px, 1fr) var(--card);
+  grid-template-rows: minmax(0, 1fr);
+  grid-template-areas: "figure bag compare";
+  gap: var(--gap); padding: var(--gap) var(--pad) var(--pad); min-height: 0;
+}
+.col-bag { grid-area: bag; }
+.col-compare { grid-area: compare; }
+@media (max-width: 1240px) {
+  .tab-body[data-tab="inventory"]:not(.hidden) {
+    grid-template-columns: minmax(380px, 1fr) 330px;
+    grid-template-areas: "bag compare" "bag figure";
+    grid-template-rows: minmax(0, 1.2fr) minmax(0, 1fr);
+  }
+}
+#inv-tools {
+  flex: none; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 7px 10px; border-top: 1px solid var(--pane-line-soft); background: #0c1220;
+}
+#inv-tools .sep { width: 1px; height: 14px; background: var(--pane-line); }
+/* "see the whole haul": four columns of rarity-edged cards instead of a one-per-line list */
+.bag--grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(196px, 1fr)); gap: 6px; }
+.bag--grid .row {
+  flex-wrap: wrap; align-items: flex-start; align-content: flex-start;
+  min-height: 62px; padding: 7px 9px;
+}
+.bag--grid .row > span:first-child {
+  flex: 1 0 100%; white-space: normal;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+}
+.bag--grid .row .score { min-width: 0; margin-left: auto; }
+
+/* ---------------------------------------------------------------- 3. skills */
+/* D5: the "All skills" column is gone — it listed the same six slots as the bar, with the same
+   names and the same numbers (see js/hud.js renderSkills). The bar keeps the whole top of the
+   screen and the talent tree gets the whole of the rest, which is what it wanted: it lays its three
+   tiers out as three columns. */
+.tab-body[data-tab="skills"]:not(.hidden) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 186px minmax(0, 1fr);
+  grid-template-areas: "bar" "tree";
+  gap: var(--gap); padding: var(--gap) var(--pad) var(--pad); min-height: 0;
+}
+.col-bar { grid-area: bar; }
+.col-tree { grid-area: tree; }
+@media (max-width: 1440px) {
+  .tab-body[data-tab="skills"]:not(.hidden) { grid-template-rows: 168px minmax(0, 1fr); }
+}
+/* The in-game bar and this screen used to share nothing — the screen was a text list and the bar
+ * six boxes, and neither showed which talents were on a skill. This strip is both, and it is the
+ * talent picker too (which used to be a chip row INSIDE the tree, so it scrolled away with it). */
+#sheet-skillbar { display: flex; gap: 8px; align-items: stretch; padding: 8px 10px; height: 100%; }
+.sk-card {
+  /* D5: no max-width any more — six cards share the whole width of the screen now that the
+     duplicate list beside them is gone, and each one carries a description. */
+  flex: 1 1 0; min-width: 0; position: relative;
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 7px 9px 6px 26px;
+  background: var(--pane-bg2); border: 1px solid #2a3446; border-radius: 7px;
+  cursor: pointer; text-align: left; font: inherit; color: var(--ink);
+}
+.sk-card .sk-key {
+  position: absolute; left: 6px; top: 6px;
+  width: 16px; height: 16px; border-radius: 4px; display: grid; place-items: center;
+  font-size: var(--fs-sm); font-variant-numeric: tabular-nums;
+  background: #0c111b; border: 1px solid #2a3446; color: var(--ink-faint);
+}
+.sk-card .sk-name { font-weight: 600; font-size: var(--fs); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sk-card .sk-cost { font-size: var(--fs-sm); color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+/* D5: what the skill DOES — the one thing the deleted "All skills" list had that the card did not.
+   Clamped to three lines so six cards stay the same height whatever the wording. */
+.sk-card .sk-desc {
+  font-size: var(--fs-sm); color: var(--ink-dim); line-height: 1.35;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.sk-card.locked .sk-desc { color: var(--ink-faint); }
+.sk-card .sk-pips { display: flex; gap: 3px; margin-top: auto; }
+.sk-card .sk-pips i { width: 7px; height: 7px; border-radius: 50%; background: #26344a; border: 1px solid #38496a; }
+.sk-card .sk-pips i.on { background: var(--gold); border-color: var(--gold); }
+.sk-card .sk-pips i.open { border-color: var(--accent); }
+.sk-card:hover { border-color: #3f6f9a; }
+.sk-card.on { border-color: var(--accent); background: rgba(24, 44, 62, .9); box-shadow: inset 0 -2px 0 var(--accent); }
+.sk-card.locked { opacity: .45; cursor: default; }
+.sk-card.locked .sk-name { color: var(--ink-faint); }
+
+/* R20 — a slot whose level has come and has nothing in it. It is the one card on this strip you
+   can act on, so it is the one that is lit; clicking it opens the spell chooser. */
+.sk-card.pending { border-color: var(--good); background: rgba(22, 48, 36, .85); cursor: pointer; }
+.sk-card.pending .sk-name, .sk-card.pending .sk-cost { color: var(--good); }
+.sk-card.pending:hover { border-color: #b6f0c4; }
+.skill-slot.pending { border-color: var(--good); box-shadow: 0 0 0 1px var(--good) inset; }
+.skill-slot.pending .skill-name, .skill-slot.pending .skill-mp { color: var(--good); }
+
+/* three tiers side by side instead of three stacked rows that read as one list */
+.pane .skilltree {
+  display: grid; grid-auto-flow: column;
+  grid-template-columns: repeat(3, minmax(220px, 1fr));
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 8px 12px; align-content: start; min-height: 0;
+}
+.pane .skilltree > .tier-head { margin: 0; padding-bottom: 5px; border-bottom: 1px solid var(--pane-line); }
+.pane .skilltree > .tier-row {
+  flex-direction: column; flex-wrap: nowrap; gap: 7px; min-height: 0;
+  align-content: start; justify-content: flex-start;
+}
+.pane .skilltree > .tier-row > .talent-card { flex: 0 0 auto; align-self: stretch; }
+.pane .talent-card {
+  width: auto; min-height: 62px; padding: 8px 10px; position: relative;
+  display: flex; flex-direction: column; gap: 3px;
+}
+.pane .talent-card b { font-size: 13.5px; color: #eaf6ff; }
+.pane .talent-card .small { font-size: var(--fs-sm); }
+.pane .talent-card.on::after { content: "✓"; position: absolute; right: 8px; top: 6px; color: var(--accent); }
+/* D10: a tier that does not open for ten more levels rendered at the same contrast as the one you
+   can take right now, under a footer that said "pick one from each tier" as though you could. */
+.pane .talent-card.locked { opacity: .38; }
+.pane .skilltree > .tier-head.locked { opacity: .5; }
+.pane .talent-card:not(.locked):not(.on)::after {
+  content: "take"; position: absolute; right: 8px; top: 6px;
+  font-size: var(--fs-sm); color: var(--ink-faint);
+}
+.pane .talent-card:not(.locked):hover { border-color: var(--accent); }
+.pane .talent-card:not(.locked):hover::after { color: var(--accent); }
+/* …and on the sheet, where the corner of every takeable card says "take", a spent tier says what
+   is actually true instead of inviting a click that does nothing. */
+.pane .talent-card.spent { opacity: .42; }
+.pane .talent-card.spent:not(.locked):not(.on)::after { content: "tier spent"; color: var(--ink-faint); }
+.pane .talent-card.spent:not(.locked):hover { border-color: #2b3a52; }
+.pane .talent-card.spent:not(.locked):hover::after { color: var(--ink-faint); }
+
+/* ---------------------------------------------------------------- 4. perks */
+.perks-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-rows: minmax(0, 1fr);
+  gap: var(--gap); padding: var(--gap) var(--pad) var(--pad); min-height: 0;
+}
+@media (max-width: 1440px) { .perks-body { grid-template-columns: minmax(0, 1fr) 320px; } }
+/* The canvas is taken out of flow so the pane owns the size and the two cannot argue about it —
+ * `perkView()` measures the canvas's own box, which is the other half of the click-offset fix. */
+#perk-stage { position: relative; min-height: 0; min-width: 0; overflow: hidden; }
+/* A canvas is a REPLACED element: `width: auto` takes its intrinsic size (the `width` attribute),
+ * and `right`/`bottom` are then ignored — so `inset: 4px` left it at whatever the last buffer was,
+ * overflowing the pane, and each redraw measured that and grew the buffer again. Explicit sizes. */
+#perk-stage .perk-canvas {
+  position: absolute; left: 4px; top: 4px;
+  width: calc(100% - 8px); height: calc(100% - 8px);
+  min-height: 0; min-width: 0; box-sizing: border-box;
+  border: 1px solid var(--pane-line); border-radius: 6px;
+}
+#perk-foot {
+  flex: none; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 6px 10px; border-top: 1px solid var(--pane-line-soft); background: #0c1220;
+}
+.perk-legend { font-size: var(--fs-sm); }
+.pane .perk-side { width: auto; }
+.perk-bars { font-size: var(--fs); }
+.perk-bar { padding: 3px 6px; border-radius: 4px; background: rgba(16, 24, 36, .6); font-variant-numeric: tabular-nums; }
+#perk-taken { display: flex; flex-direction: column; gap: 3px; }
+#perk-taken .list-row { cursor: pointer; }
+#perk-taken .list-row:hover { background: rgba(28, 42, 60, .8); }
+
+/* 4.2: what the selected node actually touches, in words as well as in lines on the canvas */
+.perk-links { display: flex; flex-direction: column; gap: 3px; }
+.perk-links .list-row { cursor: pointer; }
+.perk-links .list-row:hover { background: rgba(28, 42, 60, .8); }
+.perk-links .list-row.on .row-note { color: #8fe0a0; }
+/* 4.3: one perk back. Disabled says WHY in the line under it, never just greys out. */
+.perk-refund-one { align-self: flex-start; }
+.perk-refund-one:disabled { opacity: .45; cursor: not-allowed; }
+
+/* ---------------------------------------------------------------- 5. crafting */
+.tab-body[data-tab="crafting"]:not(.hidden) {
+  display: grid;
+  grid-template-columns: minmax(280px, 320px) minmax(0, 1fr) var(--card);
+  grid-template-rows: minmax(0, 1fr);
+  grid-template-areas: "recipes bases detail";
+  gap: var(--gap); padding: var(--gap) var(--pad) var(--pad); min-height: 0;
+}
+.col-recipes { grid-area: recipes; }
+.col-bases { grid-area: bases; }
+.col-detail { grid-area: detail; }
+/* the two nested scrollers are gone — 42vh and 34vh inside an 86vh modal put the Forge button
+ * below the fold on a 768px screen. The panes scroll instead. */
+.pane .recipe-list { max-height: none; overflow: visible; gap: 4px; }
+.pane .recipe-row { min-height: 34px; align-items: center; }
+.pane .forge-grid {
+  max-height: none; overflow: visible;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 7px;
+}
+.pane .forge-option { min-height: 58px; padding: 8px 10px; display: flex; flex-direction: column; gap: 3px; }
+.pane .forge-option b { font-size: 13.5px; }
+.pane .forge-option .small { font-size: var(--fs-sm); }
+.pane .recipe-detail { gap: 8px; }
+.pane .recipe-detail h4 { margin-top: 2px; }
+.pane .forge-btn { width: 100%; min-height: 38px; font-size: 14px; margin-top: auto; }
+
+/* ---------------------------------------------------------------- 6. upgrade */
+.tab-body[data-tab="upgrade"]:not(.hidden) {
+  display: grid;
+  grid-template-columns: 340px 340px minmax(320px, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  grid-template-areas: "pick bench detail";
+  gap: var(--gap); padding: var(--gap) var(--pad) var(--pad); min-height: 0;
+}
+.col-pick { grid-area: pick; }
+.col-bench { grid-area: bench; }
+@media (max-width: 1440px) {
+  .tab-body[data-tab="upgrade"]:not(.hidden) { grid-template-columns: 300px 330px minmax(320px, 1fr); }
+}
+@media (max-width: 1199px) {
+  .tab-body[data-tab="upgrade"]:not(.hidden) {
+    grid-template-columns: 300px minmax(320px, 1fr);
+    grid-template-areas: "pick bench" "pick detail";
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+/* the worst pane in the old sheet: thirty-odd rows in a 190px window, five at a time */
+.pane .small-bag { max-height: none; overflow: visible; }
+.pane .bench-card { padding: 10px 12px; }
+.pane .bench-affixes { gap: 4px; }
+.pane .bench-affix {
+  padding: 6px 9px; font-size: var(--fs); min-height: 30px;
+  display: flex; align-items: center;
+}
+#up-card:empty { display: none; }
+
+/* ---------------------------------------------------------------- 7. journal */
+/* the journal's five panes live in a wrapper (`#journal-body`, which the town spec reads), so the
+   tab body has to hand it the whole cell or the grid grows past the screen and the SHEET scrolls */
+.tab-body[data-tab="journal"]:not(.hidden) {
+  display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); min-height: 0;
+}
+/* Round 10 + The Territory: nine panes. The zone list spans all three rows because a forty-region
+   world with three lines a region is the tallest thing on the screen by a long way. */
+.journal-grid {
+  display: grid; min-width: 0;
+  grid-template-columns: minmax(260px, .9fr) minmax(260px, .9fr) minmax(320px, 1.1fr);
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-areas:
+    "survey standing zones"
+    "quests board    zones"
+    "foes   word     zones";
+  gap: var(--gap); padding: var(--gap) var(--pad) var(--pad); min-height: 0;
+}
+.col-board { grid-area: board; }
+.col-word { grid-area: word; }
+.col-standing { grid-area: standing; }
+.standing { display: flex; flex-direction: column; gap: 3px; }
+.standing-row {
+  display: grid; grid-template-columns: 3px 1fr auto auto; align-items: center; gap: 8px;
+  padding: 4px 8px; border-radius: 5px; background: rgba(16, 24, 36, .6); font-size: var(--fs);
+}
+.standing-row i { width: 3px; height: 100%; min-height: 16px; border-radius: 2px; display: block; }
+.standing-row .band { font-size: var(--fs-sm); color: var(--ink-faint); text-align: right; }
+.standing-row .band em { display: block; font-style: normal; color: #c8a24a; font-size: 11.5px; }
+/* the five-band ladder, so "Trusted" is a position rather than a word */
+.standing-row .ladder { display: inline-flex; gap: 2px; margin-left: 8px; vertical-align: middle; }
+.standing-row .ladder u {
+  width: 12px; height: 4px; border-radius: 2px; background: #27334a; display: inline-block;
+}
+.standing-row .ladder u.on { background: var(--accent); }
+.reward-row {
+  display: flex; justify-content: space-between; gap: 10px; align-items: baseline;
+  padding: 4px 8px; border-radius: 5px; background: rgba(16, 24, 36, .5);
+  font-size: var(--fs); color: var(--ink-faint); opacity: .6;
+}
+.reward-row.earned { opacity: 1; color: var(--ink); border-left: 2px solid var(--gold); }
+.reward-row b { font-weight: 600; }
+.deed-list { display: flex; flex-direction: column; gap: 2px; }
+.deed-row {
+  display: flex; justify-content: space-between; gap: 10px;
+  font-size: var(--fs-sm); color: var(--ink-faint); padding: 2px 8px;
+}
+.deed-row b { font-variant-numeric: tabular-nums; }
+.deed-row b.up { color: var(--good); }
+.deed-row b.down { color: var(--bad); }
+.standing-row .num { font-variant-numeric: tabular-nums; min-width: 38px; text-align: right; }
+.standing-row .num.up { color: var(--good); }
+.standing-row .num.down { color: var(--bad); }
+.standing-row.holder { box-shadow: inset 0 0 0 1px rgba(127, 216, 255, .3); }
+.job-row .scope { font-size: var(--fs-sm); color: var(--ink-faint); }
+.job-row { grid-template-columns: 1fr auto auto; align-items: baseline; }
+/* 4.5: the journal row is a notice, not a button — it no longer takes the job, so it no longer
+   looks like something you press. `where` says where the work is actually taken. */
+.job-row .where {
+  font-size: var(--fs-sm); color: var(--ink-faint); border: 1px dashed var(--pane-line);
+  border-radius: 999px; padding: 1px 9px; margin-left: 8px; white-space: nowrap;
+}
+.job-row.taken .where { color: var(--good); border-style: solid; border-color: #2f6f4a; }
+.job-row .from { display: block; font-size: var(--fs-sm); color: var(--ink-faint); }
+
+/* ---- the notice board in a settlement: the one place a board job is taken from a screen.
+   Opened by `hud.openNoticeBoard()` when the player walks up to a board in a town. */
+.noticeboard {
+  position: fixed; inset: 0; z-index: 40; display: grid; place-items: center;
+  background: rgba(4, 7, 12, .72);
+}
+.noticeboard.hidden { display: none; }
+.noticeboard .board-card {
+  width: min(680px, 92vw); max-height: 80vh; display: flex; flex-direction: column;
+  /* solid, not the panel's usual translucency: a village behind the board showed straight through it */
+  background: #0d1420; border: 1px solid var(--pane-line); border-radius: 10px;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, .6);
+}
+.noticeboard .chip { text-transform: none; }
+.noticeboard .board-head {
+  display: flex; align-items: baseline; gap: 10px;
+  padding: 10px 14px; border-bottom: 1px solid var(--pane-line-soft);
+}
+.noticeboard .board-head h3 { margin: 0; font-size: 16px; color: var(--ink); }
+.noticeboard .board-head .board-where { color: var(--ink-faint); font-size: var(--fs-sm); flex: 1; }
+.noticeboard .board-list { overflow-y: auto; padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; }
+.noticeboard .board-job {
+  display: grid; grid-template-columns: 1fr auto auto; gap: 2px 10px; align-items: baseline;
+  padding: 7px 9px; border-radius: 6px; background: rgba(16, 24, 36, .6);
+  border-left: 2px solid var(--pane-line); font-size: var(--fs);
+}
+.noticeboard .board-job .from { display: block; font-size: var(--fs-sm); color: var(--ink-faint); }
+.noticeboard .board-job .pay { color: var(--ink-dim); font-variant-numeric: tabular-nums; }
+.noticeboard .board-job.taken { opacity: .6; }
+.noticeboard .board-foot { padding: 8px 14px; border-top: 1px solid var(--pane-line-soft); }
+.rumour-row { display: block; padding: 5px 8px; border-radius: 5px; background: rgba(16, 24, 36, .5); font-size: var(--fs); }
+.rumour-row .who { display: block; font-size: var(--fs-sm); color: var(--ink-faint); margin-top: 2px; }
+.col-survey { grid-area: survey; }
+.col-quests { grid-area: quests; }
+.col-foes { grid-area: foes; }
+.col-zones { grid-area: zones; }
+@media (max-width: 1240px) {
+  .journal-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "survey zones" "quests board" "standing word" "foes foes";
+    grid-template-rows: repeat(4, minmax(0, 1fr));
+  }
+}
+.pane .journal { gap: 3px; margin: 0; }
+.pane .journal-row {
+  display: grid; grid-template-columns: 1fr auto; gap: 2px 10px;
+  padding: 5px 8px; font-size: var(--fs);
+}
+.pane .journal-row .muted { font-variant-numeric: tabular-nums; }
+/* the work rows have a third column — where the job is actually taken — and `.pane .journal-row`
+   above is more specific than `.job-row`, so it was wrapping onto a line of its own */
+.pane .job-row { grid-template-columns: 1fr auto auto; }
+.pane .job-row .where { justify-self: end; }
+/* ---------------------------------------------------------------- R14: ⌖ locate, ★ keep
+   "add a target icon to 'locate on map'". One glyph, one verb, on every row with a position — so
+   every row that has one grows a column for it, and the rows without one do not shift. */
+.pane .journal-row.has-locate { grid-template-columns: 1fr auto auto; }
+.pane .job-row.has-locate,
+.pane .zone-row.has-locate { grid-template-columns: 1fr auto auto auto; }
+.row-locate, .row-star, .row-forget {
+  justify-self: end; align-self: center;
+  width: 22px; height: 22px; padding: 0; border: 0; border-radius: 5px;
+  background: none; color: var(--ink-faint); cursor: pointer;
+  font-size: 14px; line-height: 1;
+}
+.row-locate:hover, .row-forget:hover { background: #1b2c40; color: #cfe6ff; }
+.row-locate:focus-visible, .row-star:focus-visible, .row-forget:focus-visible { outline: 2px solid #4a86c0; outline-offset: 1px; }
+.row-star:hover { color: var(--gold); }
+.row-star.on { color: var(--gold); }
+.row-forget:hover { color: #ff9a8a; }
+/* the kept-places row leads with its star, so it is a four-column grid the other way round */
+.pane .saved-row { grid-template-columns: auto 1fr auto auto auto; gap: 2px 8px; align-items: center; }
+.pane .saved-row .row-star { justify-self: start; }
+
+.pane .zonelist { gap: 4px; }
+/* a zone's own description used to be in a `title=` attribute — invisible unless you hovered and waited */
+.pane .zone-row {
+  grid-template-columns: 1fr auto auto;
+  grid-template-areas: "name band danger" "desc desc desc";
+  padding: 6px 9px; row-gap: 2px;
+}
+.pane .zone-row > :nth-child(1) { grid-area: name; font-weight: 600; }
+.pane .zone-row > :nth-child(2) { grid-area: band; font-variant-numeric: tabular-nums; }
+.pane .zone-row > :nth-child(3) { grid-area: danger; }
+.pane .zone-row .zone-desc { grid-area: desc; font-size: var(--fs-sm); color: var(--ink-faint); }
+.pane .zone-row.here { box-shadow: inset 0 0 0 1px rgba(127, 216, 255, .35); }
+
+/* ---------------------------------------------------------------- focus, and the 12px floor */
+.sheet :focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-radius: 5px; }
+.sheet .bag .row:focus-visible, .sheet .slot:focus-visible { outline-offset: -1px; }
+.sheet .legend, .sheet .perk-legend { font-size: var(--fs-sm); }
+.sheet :is(.tipbox, .itemcard) .tip-foot { font-size: var(--fs-sm); }
+.sheet .tip-req { font-size: var(--fs-sm); }
+.sheet .sheet-purse, .sheet .who-level, .sheet .row-num { font-variant-numeric: tabular-nums; }
+
+/* ---------------------------------------------------------------- damage numbers
+ * Every hit went to the text log in the far corner, away from the fight. A number that rises off the
+ * thing you hit is the feedback loop of a real-time game, and it was the one piece missing.
+ */
+#hitnums { position: fixed; inset: 0; pointer-events: none; z-index: 11; }
+.hitnum {
+  position: absolute; transform: translate(-50%, -50%);
+  font-size: 17px; font-weight: 700; color: #f0f4fa;
+  text-shadow: 0 2px 5px #000, 0 0 2px #000;
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+  animation: hitfloat .9s ease-out forwards;
+}
+.hitnum.crit { font-size: 23px; color: #ffd24a; }
+.hitnum.heal { color: #8fe0a0; }
+.hitnum.miss { color: #9fb0c8; font-size: 14px; font-weight: 600; }
+.hitnum.taken { color: #ff8a7a; }
+@keyframes hitfloat {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.8); }
+  15% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--drift, 0px)), -170%) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) { .hitnum { animation-duration: .5s; } }
+
+/* While the reward popup is up, the world's own HUD is not. The popup is shared with Emberveil, so
+   the right place to fix "the skill bar shows through it" is here, not in the shared sheet. */
+body.popup-open .hud { opacity: 0; pointer-events: none; }
+/* …and the same while the map is up: the place card used to show through the map's header at about
+   20% opacity, which reads as a rendering fault rather than a design. */
+body:has(#map-screen:not(.hidden)) .hud,
+body:has(.chart:not(.hidden)) .hud { opacity: 0; pointer-events: none; }
+.map-composition { margin-top: 4px; }
+.map-composition > summary { cursor: pointer; color: #9fb0c8; font-size: 12px; }
+.map-composition[hidden] { display: none; }
+.map-composition .legend { margin-top: 6px; }
+
+/* anything you cannot undo takes two clicks, and the first one says what it is about to do */
+.chip.arm, .sheet button.arm {
+  background: #4a2418; border-color: #a04a2a; color: #ffd0b8; font-weight: 600;
+}
+
+/* the target bar: dim when the thing is out of reach, and out from under the boss bar */
+#target.far { opacity: .5; }
+#target.under-boss { top: auto; margin-top: 58px; }
+
+/* ---------------------------------------------------------------- 4.11: the map key
+   Fifteen kinds of place, each drawn by the map's own `drawMark()` into a 22px canvas, so a swatch
+   here is literally the mark on the map rather than a coloured square that has to be kept in step. */
+.map-key { display: flex; flex-direction: column; gap: 3px; }
+.map-key-title { margin: 0; font-size: 12px; color: #cfe0f4; text-transform: uppercase; letter-spacing: .06em; }
+.map-key-group { font-size: 11px; color: #7f8fa6; margin-top: 4px; }
+.map-key-rows { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 8px; }
+.map-key-row { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #9fb0c8; }
+.map-key-swatch { width: 22px; height: 22px; flex: 0 0 22px; }
+
+/* ---------------------------------------------------------------- build mode
+   The panel that answers "how does build mode work". Right-hand column, because the ghost you are
+   aiming is in the middle of the screen and the panel must never be under the cursor. */
+.build-ui {
+  position: fixed;
+  top: 64px;
+  right: 12px;
+  bottom: 12px;
+  width: 322px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(12, 16, 22, .93);
+  border: 1px solid #2a3542;
+  border-radius: 10px;
+  color: #cfd8e3;
+  font-size: 13px;
+  z-index: 40;
+  /* the panel is a readout, not a target: clicks on the WORLD must not be eaten by its padding */
+  pointer-events: auto;
+}
+.build-ui.hidden { display: none; }
+/* the middle scrolls so nothing is ever cut off the bottom; the head and the key line stay put */
+.build-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  /* room for the scrollbar so it never sits on top of a price */
+  padding-right: 4px;
+}
+.build-head { display: flex; align-items: center; justify-content: space-between; }
+.build-head h2 { margin: 0; font-size: 15px; letter-spacing: .04em; color: #eaf2fb; }
+.build-close {
+  background: none; border: 0; color: #8a97a8; font-size: 20px; line-height: 1; cursor: pointer;
+}
+.build-close:hover { color: #eaf2fb; }
+
+.build-steps h3 { margin: 4px 0 2px; font-size: 12px; color: #ffd98a; }
+.build-steplist { margin: 0; padding-left: 18px; color: #b6c2d0; font-size: 12px; line-height: 1.45; }
+.build-steplist li { margin-bottom: 3px; }
+
+.build-tools, .build-cats { display: flex; flex-wrap: wrap; gap: 4px; }
+.build-tool, .build-cat {
+  background: #18202b; border: 1px solid #2a3542; color: #b6c2d0;
+  border-radius: 5px; padding: 3px 7px; font-size: 11.5px; cursor: pointer;
+}
+.build-tool:hover, .build-cat:hover { border-color: #3d556e; color: #eaf2fb; }
+.build-tool.on, .build-cat.on { background: #1d3446; border-color: #4f88b5; color: #cfe9ff; }
+
+.build-list {
+  flex: 0 0 auto;
+  max-height: 34vh;
+  min-height: 80px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-top: 1px solid #222c38;
+  border-bottom: 1px solid #222c38;
+  padding: 6px 0;
+}
+.build-row {
+  display: flex; justify-content: space-between; gap: 8px; align-items: baseline;
+  background: none; border: 1px solid transparent; border-radius: 5px;
+  padding: 4px 6px; text-align: left; cursor: pointer; color: inherit; font: inherit;
+}
+.build-row:hover { background: #18212c; }
+.build-row.on { background: #1d3446; border-color: #4f88b5; }
+/* you can still SELECT something you cannot afford — seeing the price is the point */
+.build-row.short .build-row-cost { color: #d98a7a; }
+.build-row-name { color: #e6eef7; }
+.build-row-cost { color: #8a97a8; font-size: 11px; text-align: right; }
+
+.build-detail h3 { margin: 2px 0; font-size: 13px; color: #eaf2fb; }
+.build-detail p { margin: 2px 0; line-height: 1.4; }
+.build-cost { margin: 4px 0; padding-left: 16px; font-size: 12px; color: #b6c2d0; }
+.build-cost li.short { color: #d98a7a; }
+.build-why { color: #d98a7a; font-size: 12px; }
+.build-ok { color: #8ad6a0; font-size: 12px; }
+.build-keys { line-height: 1.4; }
+
+@media (max-width: 900px) {
+  .build-ui { width: auto; left: 12px; }
+}
+
+/* the drills, and the one word that says what is holding each of them up */
+.build-mines, .build-scan { border-bottom: 1px solid #222c38; padding-bottom: 6px; }
+.build-mines h3, .build-scan h3 { margin: 4px 0 2px; font-size: 12px; color: #ffd98a; }
+/* the scanner's rows are the drill rows' shape, with the note and the pin button on a second line */
+.build-scan .build-mine button {
+  grid-column: 3; grid-row: 2; justify-self: end;
+  background: #1b4a6a; border: 1px solid #2f7ba8; color: #dff2ff;
+  border-radius: 4px; padding: 1px 8px; font: inherit; font-size: 10.5px; cursor: pointer;
+}
+.build-scan .build-mine .muted { grid-column: 1 / 3; }
+.build-mine {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 6px;
+  align-items: baseline;
+  font-size: 11.5px;
+  padding: 2px 0;
+}
+.build-mine .muted { grid-column: 1 / -1; font-size: 10.5px; }
+.build-mine-name { color: #e6eef7; }
+.build-mine-rate { color: #8a97a8; }
+.build-mine-limit { border-radius: 3px; padding: 0 5px; font-size: 10.5px; }
+/* digging is the only one that means "nothing is wrong" */
+.limit-digging { background: #1d3a28; color: #8ad6a0; }
+.limit-hauling { background: #3a3220; color: #ffd98a; }
+.limit-power, .limit-no-route, .limit-seam { background: #3a2422; color: #d98a7a; }
+
+/* the bench you are standing next to: its queue, and everything it could make */
+.build-bench { border-bottom: 1px solid #222c38; padding-bottom: 6px; max-height: 240px; overflow-y: auto; }
+.build-bench h3 { margin: 4px 0 2px; font-size: 12px; color: #ffd98a; }
+.build-job {
+  display: flex; gap: 6px; align-items: baseline; justify-content: space-between;
+  font-size: 11.5px; padding: 2px 4px; background: #18212c; border-radius: 4px; margin-bottom: 2px;
+}
+.build-job button { background: none; border: 0; color: #8a97a8; cursor: pointer; font-size: 13px; }
+.build-job button:hover { color: #d98a7a; }
+.build-recipe {
+  display: flex; justify-content: space-between; gap: 8px; align-items: baseline; width: 100%;
+  background: none; border: 1px solid transparent; border-radius: 4px;
+  padding: 3px 5px; text-align: left; cursor: pointer; color: inherit; font: inherit; font-size: 11.5px;
+}
+.build-recipe:hover { background: #18212c; }
+/* a locked recipe is SHOWN, greyed, with what unlocks it — one you cannot see is one you will
+   never go looking for */
+.build-recipe.locked { opacity: .55; cursor: help; }
+.build-recipe.locked .build-row-cost { color: #a08ab0; }
+
+/* the shipyard: every row is a button with its refusal written beside it */
+.build-yard { border-bottom: 1px solid #222c38; padding-bottom: 6px; }
+.build-yard h3 { margin: 4px 0 2px; font-size: 12px; color: #ffd98a; }
+.build-yard-row { display: flex; gap: 6px; align-items: baseline; margin-bottom: 3px; }
+.build-yard-row button { white-space: nowrap; }
+.build-yard-row .bad { color: #d98a7a; }
+
+/* the holding: who lives here, and what they are worth */
+.build-holding .build-yard-row button { flex: 0 0 auto; }
+
+/* the work board: an order, a bar, and who put the units in */
+.build-work-row { display: grid; gap: 2px; padding: 3px 0; border-bottom: 1px solid #1a222c; }
+.build-work-row:last-child { border-bottom: 0; }
+.build-work-bar { height: 4px; background: #18212c; border-radius: 2px; overflow: hidden; }
+.build-work-bar i { display: block; height: 100%; background: #6ad0ff; }
+/* the credit line is the feature — a unit is a unit whoever produced it */
+.build-work-credit { font-size: 10.5px; font-style: italic; }
+
+/* ================================================================ build mode owns the mouse
+ *
+ * "Pressing B to open the build menu should also free up the cursor so you can select items from
+ * it." With the pointer freed, the fixed dot in the middle of the screen is telling the player they
+ * are aiming somewhere they are not — the ghost is under the cursor. So the dot goes and the canvas
+ * carries a real crosshair.
+ */
+body.building #crosshair { display: none; }
+body.building canvas { cursor: crosshair; }
+
+/* ---------------------------------------------------------------- R14: Nearby Activities
+   "Add a 'Nearby Activities' area below the minimap when walking around… In the world, there should
+   be a large animated pointer above the location or object to help the player find it, and a radial
+   arrow pointing to it when its off-screen."
+   The panel is five rows of two lines under the minimap. It is redrawn four times a second, so
+   everything here has to be cheap: no shadows that repaint the column, no transitions on the rows. */
+#nearby { width: 180px; padding: 0; overflow: hidden; }
+#nearby .nb-head {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 8px; cursor: pointer; user-select: none;
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
+}
+#nearby .nb-title { flex: 1; font-size: 10px; letter-spacing: .09em; text-transform: uppercase; color: #9fb4d4; }
+#nearby .nb-count { font-variant-numeric: tabular-nums; color: #cfe6ff; font-size: 11px; }
+#nearby .nb-caret { color: #9fb4d4; font-size: 10px; }
+#nearby.shut .nb-rows, #nearby.shut .nb-more { display: none; }
+
+/**
+ * R15 — THE SECOND LINE WRAPPED ONE WORD PER LINE.
+ *
+ *   "The 'Nearby' menu below the map gets too tall because the right column wraps every word like
+ *    'go ahd dig it out' are all on one line."
+ *
+ * The clock sat in a fixed 20 px column — the width of the ⌖ button above it — so anything longer
+ * than "12s" became a vertical stack of words and a five-row panel grew to the height of the
+ * screen. The third column is `auto` now, so it takes the width of whichever of the button and the
+ * clock is wider, and the name above it gives way (it already has an ellipsis). Nothing on the
+ * second line is allowed to wrap at all.
+ */
+#nearby .nb-row {
+  display: grid; grid-template-columns: 14px minmax(0, 1fr) auto;
+  grid-template-areas: "icon name go" "where where clock";
+  gap: 0 6px; padding: 4px 8px 5px;
+  border-top: 1px solid rgba(255, 255, 255, .05);
+}
+#nearby .nb-row:first-child { border-top: 0; }
+#nearby .nb-icon { grid-area: icon; font-style: normal; font-size: 11px; color: #ffd24a; line-height: 1.3; }
+#nearby .nb-name {
+  grid-area: name; font-size: 11.5px; color: #eaf6ff; line-height: 1.3;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+#nearby .nb-go {
+  grid-area: go; width: 18px; height: 18px; padding: 0; border: 0; border-radius: 4px;
+  background: none; color: #7f97b5; cursor: pointer; font-size: 12px; line-height: 1;
+}
+#nearby .nb-go:hover { background: #1b2c40; color: #cfe6ff; }
+#nearby .nb-go:focus-visible { outline: 2px solid #4a86c0; outline-offset: 1px; }
+#nearby .nb-where {
+  grid-area: where; font-size: 10px; color: #8ea6c4; font-variant-numeric: tabular-nums;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
+}
+#nearby .nb-clock {
+  grid-area: clock; font-size: 10px; color: #8ea6c4; text-align: right;
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+  /* it may not push the row wider than the panel, however long a state word turns out to be */
+  max-width: 96px; overflow: hidden; text-overflow: ellipsis;
+}
+/* a clock you are about to lose. Colour only — a flashing row four times a second is unreadable. */
+#nearby .nb-clock.soon { color: #ffc65a; }
+#nearby .nb-clock.urgent { color: #ff7a5a; font-weight: 600; }
+#nearby .nb-more { padding: 4px 8px 6px; font-size: 10px; }
+
+/* the right-hand column is a fixed width, and the panel must not push the minimap about */
+@media (max-height: 760px) {
+  #nearby .nb-row:nth-child(n+4) { display: none; }
+}
+
+/* ---------------------------------------------------------------- R14: the radial edge arrows
+   "a radial arrow pointing to it when its off-screen". The in-world pointer is js/beacon.js; this
+   is what takes over when the thing is behind you or past the edge of the screen. Pinned to a rim
+   just inside the viewport so the whole arrow is visible, and pointer-events: none throughout —
+   an arrow that ate a click on the world behind it would be a worse bug than no arrow. */
+#edge-arrows { position: fixed; inset: 0; pointer-events: none; z-index: 6; }
+.edge-arrow {
+  position: absolute; transform: translate(-50%, -50%);
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  pointer-events: none; text-shadow: 0 1px 3px rgba(0, 0, 0, .95);
+}
+.edge-arrow .ea-tip {
+  display: block; width: 0; height: 0;
+  border-left: 8px solid transparent; border-right: 8px solid transparent;
+  border-bottom: 13px solid currentColor;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .9));
+  animation: ea-pulse 1.6s ease-in-out infinite;
+}
+.edge-arrow .ea-name { font-size: 11px; font-weight: 600; color: currentColor; white-space: nowrap; max-width: 150px; overflow: hidden; text-overflow: ellipsis; }
+.edge-arrow .ea-dist { font-size: 10px; color: #cfe0ef; font-variant-numeric: tabular-nums; }
+@keyframes ea-pulse { 0%, 100% { opacity: .65; } 50% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .edge-arrow .ea-tip { animation: none; opacity: .9; } }
+
+/* ---------------------------------------------------------------- R14: the map's Find panel
+   "The scanner tool should let you select a material and scan for it". A dropdown, one line saying
+   where that material lives, a sweep button, and the hits nearest first. */
+.map-side .find-pick {
+  width: 100%; margin-bottom: 6px; padding: 4px 6px;
+  background: #101a28; color: #eaf6ff; border: 1px solid var(--pane-line, #2a3446); border-radius: 5px;
+  font-size: var(--fs-sm, 12px);
+}
+.map-side .pin-go, .map-side .pin-keep {
+  width: 20px; height: 20px; padding: 0; border: 0; border-radius: 4px;
+  background: none; color: #7f97b5; cursor: pointer; font-size: 12px; line-height: 1;
+}
+.map-side .pin-go:hover { background: #1b2c40; color: #cfe6ff; }
+.map-side .pin-keep:hover { background: #1b2c40; color: var(--gold, #ffd24a); }
+.map-side .pin-go:focus-visible, .map-side .pin-keep:focus-visible { outline: 2px solid #4a86c0; outline-offset: 1px; }
+
+/* R14: the key says when places have been switched off, and lists the marker glyphs it draws */
+.map-key-off {
+  margin: 4px 0 8px; padding: 5px 8px; border-radius: 5px;
+  background: rgba(90, 60, 20, .35); border-left: 2px solid #c8a04a;
+  font-size: var(--fs-sm, 12px); color: #e8d8b0;
+}
+.map-key-glyph {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; font-style: normal; font-size: 14px; font-weight: 700;
+}
+
+/* R14: the map's hover card. The readout under the canvas is still the always-visible fact line —
+   this is the detail on top of it, saying what the mark you are pointing at actually IS. */
+.tip-map { display: flex; flex-direction: column; gap: 2px; max-width: 260px; }
+.tip-map b { color: #eaf6ff; }
+.tip-map .tip-what { font-size: 11px; color: #9fb4d4; text-transform: lowercase; }
+.tip-map .tip-note { font-size: 11px; color: #cfe0ef; }
+
+/* ---------------------------------------------------------------- R15: the map's tab rail
+   "The map does not seem like it was redesigned to my expectations and the useful stuff is still at
+   the bottom." Four tabs at the top — the four questions this screen answers — and the layers, the
+   key and the biome breakdown folded away at the bottom where reference material belongs. */
+.map-tabs { display: flex; gap: 3px; margin-bottom: 8px; }
+.map-tab {
+  flex: 1; padding: 6px 4px; border-radius: 5px; cursor: pointer;
+  border: 1px solid var(--pane-line, #2a3446); background: #101a28;
+  color: var(--ink-dim, #9fb4d4); font-size: var(--fs-sm, 12px); font-weight: 600;
+}
+.map-tab:hover { background: #17253a; color: #cfe6ff; }
+.map-tab.on { background: #1d3550; color: #eaf6ff; border-color: #3d6288; }
+.map-tab:focus-visible { outline: 2px solid #4a86c0; outline-offset: 1px; }
+
+.map-ref { margin-top: 10px; border-top: 1px solid var(--pane-line-soft, #1e2838); padding-top: 8px; }
+.map-ref > summary {
+  cursor: pointer; font-size: var(--fs-sm, 12px); color: var(--ink-faint, #7f97b5);
+  list-style: none; padding: 3px 0;
+}
+.map-ref > summary::-webkit-details-marker { display: none; }
+.map-ref > summary::before { content: '▸ '; }
+.map-ref[open] > summary::before { content: '▾ '; }
+.map-ref > summary:hover { color: #cfe6ff; }
+.map-ref-body { padding-top: 6px; }
+
+/* the per-cart limit on a supply route — "in either direction with a max limit" */
+.map-side .supply-cap {
+  width: 64px; margin-left: auto; padding: 2px 5px; text-align: right;
+  background: #101a28; color: #eaf6ff; border: 1px solid var(--pane-line, #2a3446); border-radius: 4px;
+  font-size: var(--fs-sm, 12px); font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------- R15: the one thing to do next
+   "I have stone and clay and I built a furnace. Now what?" The six-line starting list deleted itself
+   the moment anything was standing, so it was on screen for the minute you did not need it and gone
+   for the hour you did. This replaces it and never goes away. */
+.build-next {
+  display: flex; flex-direction: column; gap: 3px;
+  padding: 8px 10px; margin-bottom: 10px; border-radius: 6px;
+  background: rgba(28, 44, 26, .55); border-left: 3px solid #7ac86a;
+}
+.build-next b { color: #eaf6ff; font-size: var(--fs, 13px); }
+.build-next .small { color: #b8cbb4; line-height: 1.45; }
+.build-next-tag {
+  align-self: flex-start; font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase;
+  color: #7ac86a; font-weight: 700;
+}
+.build-next-where {
+  margin-top: 2px; font-size: 11px; color: #8fd0ff;
+}
+.build-next-where::before { content: '→ '; }
+.build-next.done { background: rgba(26, 38, 52, .55); border-left-color: #6a7480; }
+.build-next.done b { color: #cfe6ff; }
+
+
+/* ---------------------------------------------------------------- R16: the bar over the rock
+   "…starts a small progress bar above the resource that collects the item when complete, similar
+   to World of Warcraft." Every other bar in this game is pinned to a corner of the screen; this
+   one is put at a projected world point by hud.workBar(), the same way a damage number is. */
+.work-bar {
+  position: fixed; z-index: 45; transform: translate(-50%, -50%);
+  pointer-events: none; opacity: 0; transition: opacity .12s;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  text-shadow: 0 1px 2px #000;
+}
+.work-bar.on { opacity: 1; }
+.work-bar .wb-label { font-size: 12px; font-weight: 600; color: #e8dcc0; white-space: nowrap; }
+.work-bar .wb-track {
+  display: block; width: 108px; height: 7px; border-radius: 4px;
+  background: #0d1013cc; border: 1px solid #2c3a46; overflow: hidden;
+}
+.work-bar .wb-fill {
+  display: block; height: 100%; width: 0;
+  background: linear-gradient(90deg, #7ac8a0, #b8e06a);
+}
+
+/* ---------------------------------------------------------------- R16: what is in your hands
+   The mouse wheel changes it now, and a mode you cannot see is a mode you forget you are in. */
+.held-mode {
+  position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%); z-index: 40;
+  pointer-events: none; opacity: 0; transition: opacity .15s;
+  text-align: center; text-shadow: 0 1px 2px #000;
+}
+.held-mode.on { opacity: 1; }
+.held-mode .hm-ring { display: flex; gap: 5px; justify-content: center; margin-bottom: 3px; }
+.held-mode .hm-pip {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #2c3a46; border: 1px solid #4a5a68;
+}
+.held-mode .hm-pip.on { background: #d8c48a; border-color: #d8c48a; }
+.held-mode .hm-name { font-size: 13px; font-weight: 600; color: #e8dcc0; }
+.held-mode .hm-note { font-size: 11px; }
+@media (prefers-reduced-motion: reduce) {
+  .work-bar, .held-mode { transition: none; }
+}
+
+/* R16: the Find tab's sort and favourites row */
+.find-row { display: flex; gap: 8px; align-items: center; margin: 4px 0; flex-wrap: wrap; }
+.find-fav { display: flex; gap: 4px; align-items: center; cursor: pointer; }
+.pin-keep.on { color: #8fe0a0; }
+
+/* ================================================================ R16 — the title flow
+   "I would also like to restructure the landing page." Four screens in the one #boot section
+   (menu / load / character / world) plus the appearance editor that opens over them. Everything
+   here is additive: the old #boot rules above still style the inputs, the class card and the save
+   rows, because those are the same controls in a different arrangement.            js/newgame.js */
+
+/* The two-column steps need more room than the old single column. The menu stays narrow, so it
+   still reads as a title screen rather than a spreadsheet. */
+#boot .boot-inner { max-width: 1040px; width: 100%; }
+#boot-menu { max-width: 620px; margin: 0 auto; }
+#boot .boot-screen.hidden { display: none; }
+#boot .boot-h2 {
+  margin: 0 0 14px; font-size: 20px; font-weight: 600; letter-spacing: 2px;
+  text-transform: uppercase; color: #9fd8f6;
+}
+
+/* ---- the menu: one column of buttons, all the same width, keyboard-reachable top to bottom */
+.boot-menu-buttons { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.boot-menu-buttons button { min-width: 260px; }
+.boot-menu-buttons button[disabled] { opacity: .45; cursor: default; }
+.boot-menu-buttons .boot-back { margin-top: 6px; color: #7f8ea4; }
+
+/* ---- the two-column body of a step: controls one side, the preview the other */
+.boot-two { display: flex; gap: 26px; align-items: flex-start; text-align: left; }
+.boot-two .boot-col { flex: 1 1 0; min-width: 0; }
+.boot-two .boot-side { flex: 0 0 340px; max-width: 340px; }
+#boot .boot-two .row { justify-content: flex-start; margin-bottom: 10px; }
+.boot-actions {
+  display: flex; gap: 10px; justify-content: flex-end; align-items: center;
+  margin-top: 18px; padding-top: 14px; border-top: 1px solid #1e2738;
+}
+.boot-actions .ghost { margin-right: auto; }
+#boot button.small-btn { padding: 6px 12px; font-size: 13px; }
+
+/* ---- step 1: the figure beside the picker. avatar-2d SVG, so it costs nothing to redraw. */
+.boot-figure {
+  display: flex; justify-content: center; align-items: flex-end;
+  min-height: 258px; margin-bottom: 4px;
+  background: linear-gradient(180deg, #0d1422, #131c2c);
+  border: 1px solid #22304a; border-radius: 10px; padding: 6px;
+}
+.boot-figure svg { max-width: 100%; height: auto; }
+#boot-figure-note { text-align: center; margin-bottom: 8px; }
+
+/* ---- step 2: the map of the planet you are about to land on */
+#boot-map {
+  width: 100%; height: auto; display: block; border-radius: 8px;
+  border: 1px solid #22304a; background: #0b1017;
+  image-rendering: auto;
+}
+#boot-map-status { min-height: 16px; margin-top: 6px; }
+.boot-map-where { color: #dfe9f6; font-weight: 600; margin: 2px 0 4px; }
+#boot-map-facts, #boot-world-facts { margin-bottom: 6px; }
+/* the knob column: label, control, explanation — the same shape it had inside the old <details> */
+#boot-world .boot-knobs .row > label:first-child,
+#boot-world .boot-knobs .row > .check { min-width: 128px; }
+#boot-world .boot-knobs .row > select { max-width: 320px; }
+
+/* one column on a laptop in a half-width window, or anything narrower */
+@media (max-width: 900px) {
+  .boot-two { flex-direction: column; }
+  .boot-two .boot-side { flex: 1 1 auto; max-width: none; width: 100%; }
+  #boot .boot-inner { max-width: 640px; }
+}
+
+/* ================================================================ R16 — appearance editor
+   js/appearance.js. It is avatar-2d's catalogue in a panel, not a second catalogue — see the note
+   at the top of that file about why `held`, `offhand` and `decor` are deliberately missing. */
+.appearance {
+  position: fixed; inset: 0; z-index: 60; display: grid; place-items: safe center;
+  background: rgba(4, 7, 13, .86); padding: 20px; overflow-y: auto; overscroll-behavior: contain;
+}
+.appearance.hidden { display: none; }
+.ap-inner {
+  width: min(880px, 100%); background: #0e1523; border: 1px solid #27344c;
+  border-radius: 12px; padding: 18px; text-align: left; box-shadow: 0 18px 60px rgba(0, 0, 0, .6);
+}
+.ap-head h2 { margin: 0 0 4px; font-size: 18px; font-weight: 600; color: #e6eefa; }
+.ap-head p { margin: 0 0 12px; }
+.ap-body { display: flex; gap: 18px; align-items: flex-start; }
+.ap-left { flex: 0 0 250px; }
+.ap-figure {
+  display: flex; justify-content: center; align-items: flex-end; min-height: 324px;
+  background: linear-gradient(180deg, #0d1422, #131c2c);
+  border: 1px solid #22304a; border-radius: 10px; padding: 6px;
+}
+.ap-figure svg { max-width: 100%; height: auto; }
+.ap-right { flex: 1 1 0; min-width: 0; }
+.ap-tabs { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+.ap-tab {
+  background: #121826; color: #9fb0c8; border: 1px solid #2c3a52; border-radius: 6px;
+  padding: 6px 14px; font: inherit; font-size: 14px; cursor: pointer;
+}
+.ap-tab.on { background: #1b4a6a; border-color: #2f7ba8; color: #dff2ff; }
+.ap-controls { max-height: 330px; overflow-y: auto; padding-right: 4px; }
+.ap-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.ap-row-wide { align-items: flex-start; }
+.ap-label { flex: 0 0 116px; color: #9fb0c8; font-size: 13px; }
+.ap-select {
+  flex: 1 1 0; min-width: 0; background: #121826; color: #e6e6e6;
+  border: 1px solid #2c3a52; border-radius: 6px; padding: 5px 7px; font: inherit; font-size: 13px;
+}
+.ap-range { flex: 1 1 0; min-width: 0; accent-color: #2f7ba8; }
+.ap-num { flex: 0 0 44px; text-align: right; color: #7f8ea4; font-size: 12px; font-variant-numeric: tabular-nums; }
+.ap-swatches { flex: 1 1 0; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.ap-swatch {
+  width: 20px; height: 20px; border-radius: 5px; border: 1px solid #2c3a52;
+  padding: 0; cursor: pointer;
+}
+.ap-swatch.on { border-color: #7fd8ff; box-shadow: 0 0 0 2px rgba(127, 216, 255, .3); }
+.ap-colour {
+  width: 26px; height: 22px; padding: 0; border: 1px solid #2c3a52;
+  border-radius: 5px; background: #121826; cursor: pointer;
+}
+.ap-actions { display: flex; gap: 8px; align-items: center; margin-top: 16px; }
+.ap-spacer { flex: 1 1 auto; }
+.ap-actions button {
+  background: #1b4a6a; color: #dff2ff; border: 1px solid #2f7ba8; border-radius: 6px;
+  padding: 8px 18px; font: inherit; font-size: 15px; cursor: pointer;
+}
+.ap-actions button.ghost { background: #121826; border-color: #2c3a52; color: #9fb0c8; }
+.ap-actions button:hover { background: #24618a; }
+.ap-actions button.ghost:hover { background: #1a2333; }
+@media (max-width: 760px) {
+  .ap-body { flex-direction: column; }
+  .ap-left { flex: 1 1 auto; width: 100%; }
+  .ap-controls { max-height: none; }
+}
+
+/* ---------------------------------------------------------------- R16: handing a job in from the journal
+   "It's currently difficult to turn in a quest, finding the right quest giver. Allow quests to be
+   turned in through the interface journal page."
+
+   A finished row grows one more column. `.journal-row` in the pane is a grid, so the column count
+   has to be declared for every combination that can turn up — with a locate target, without one —
+   or the button wraps onto a line of its own, which is the bug the ⌖ button hit in round 14. */
+.pane .journal-row.has-action { grid-template-columns: 1fr auto auto; }
+.pane .journal-row.has-locate.has-action { grid-template-columns: 1fr auto auto auto; }
+.row-handin {
+  justify-self: end; align-self: center;
+  padding: 2px 9px; border: 1px solid #4a7a52; border-radius: 5px;
+  background: #1b3323; color: #a8e6ba;
+  font-size: 11px; font-family: inherit; line-height: 1.5; white-space: nowrap; cursor: pointer;
+}
+.row-handin:hover { background: #24472f; color: #d4ffe0; border-color: #6aa876; }
+.row-handin:focus-visible { outline: 2px solid #6aa876; outline-offset: 1px; }
+.row-handin:disabled { opacity: .45; cursor: default; }
+/* a job with nobody to hand it to says so where the button would have been */
+.row-selfpaid { justify-self: end; align-self: center; font-size: 11px; color: var(--ink-faint); font-style: italic; }
+
+/* R25 — the bottom-of-screen notice (hud.notice): refusals a player must not miss */
+.hud-notice {
+  position: fixed; left: 50%; bottom: 128px; translate: -50% 12px; z-index: 60; pointer-events: none;
+  max-width: min(90vw, 560px); padding: 10px 18px; border-radius: 8px; text-align: center;
+  background: rgba(20, 14, 12, 0.92); border: 1px solid #a8452f; color: #ffd8cc; font-size: 15px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5); opacity: 0; transition: opacity .2s, translate .2s;
+}
+.hud-notice.show { opacity: 1; translate: -50% 0; }
+.hud-notice.good { border-color: #6aa84f; color: #dff5d4; }
+
+/* R25 — the log's filter toggles (hud.drawLogHistory) */
+.log-filters { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 6px 12px 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); font-size: 13px; }
+.log-filters .log-filter { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; opacity: 0.9; }
+.log-filters .log-filter input { accent-color: #d9b477; }

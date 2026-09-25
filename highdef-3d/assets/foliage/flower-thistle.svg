@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- Thistle: a stout stem with spiny lobed leaves and one head - a scaly
+       green bulb topped with a brush of dusty purple florets. -->
+  <defs>
+    <radialGradient id="bulb" cx="0.4" cy="0.4" r="0.7">
+      <stop offset="0" stop-color="#7f8c5c"/>
+      <stop offset="1" stop-color="#4c5838"/>
+    </radialGradient>
+    <linearGradient id="pur" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#6d557d"/>
+      <stop offset="1" stop-color="#9f86aa"/>
+    </linearGradient>
+    <linearGradient id="lf" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#4b6038"/>
+      <stop offset="1" stop-color="#6e8550"/>
+    </linearGradient>
+    <!-- one floret hair: thin lens from the origin upward -->
+    <path id="hair" d="M0,0 C1.2,-10 1.2,-24 0,-34 C-1.2,-24 -1.2,-10 0,0 Z"/>
+    <!-- a spiny leaf with lobes ending in points -->
+    <path id="spl" d="M0,0 C6,-4 10,-12 8,-16 L14,-18 C10,-22 12,-30 10,-34 L16,-36 C10,-40 12,-48 8,-52 L12,-56 L4,-60 L0,-64 L-4,-60 L-12,-56 L-8,-52 C-12,-48 -10,-40 -16,-36 L-10,-34 C-12,-30 -10,-22 -14,-18 L-8,-16 C-10,-12 -6,-4 0,0 Z"/>
+  </defs>
+  <!-- stem -->
+  <path d="M128,254 C130,210 128,170 128,128" fill="none" stroke="#5b6b41" stroke-width="4.5" stroke-linecap="round"/>
+  <path d="M128,254 C130,210 128,170 128,128" fill="none" stroke="#87995e" stroke-width="1.2" stroke-linecap="round" opacity="0.5"/>
+  <!-- leaves, spiny -->
+  <use href="#spl" fill="url(#lf)" stroke="#33422a" stroke-width="0.7" stroke-linejoin="round" transform="translate(128 220) rotate(-64) scale(1.05)"/>
+  <use href="#spl" fill="url(#lf)" stroke="#33422a" stroke-width="0.7" stroke-linejoin="round" transform="translate(128 196) rotate(58) scale(0.95)"/>
+  <use href="#spl" fill="url(#lf)" stroke="#33422a" stroke-width="0.7" stroke-linejoin="round" transform="translate(128 168) rotate(-54) scale(0.8)"/>
+  <!-- back hairs -->
+  <g transform="translate(128 96)" fill="#5c4a6a" opacity="0.9">
+    <use href="#hair" transform="rotate(-70) scale(0.9)"/><use href="#hair" transform="rotate(-50)"/>
+    <use href="#hair" transform="rotate(-30) scale(1.08)"/><use href="#hair" transform="rotate(-10) scale(1.12)"/>
+    <use href="#hair" transform="rotate(10) scale(1.12)"/><use href="#hair" transform="rotate(30) scale(1.08)"/>
+    <use href="#hair" transform="rotate(50)"/><use href="#hair" transform="rotate(70) scale(0.9)"/>
+  </g>
+  <!-- bulb with scales -->
+  <ellipse cx="128" cy="110" rx="20" ry="24" fill="url(#bulb)" stroke="#33402a" stroke-width="0.9"/>
+  <g fill="none" stroke="#2f3b26" stroke-width="1" stroke-linecap="round" opacity="0.8">
+    <path d="M114,102 L110,96 M120,98 L118,91 M128,96 L128,89 M136,98 L138,91 M142,102 L146,96"/>
+    <path d="M112,112 L107,108 M119,109 L116,103 M128,108 L128,101 M137,109 L140,103 M144,112 L149,108"/>
+    <path d="M113,122 L108,120 M120,120 L118,114 M128,120 L128,113 M136,120 L138,114 M143,122 L148,120"/>
+    <path d="M118,130 L116,125 M128,131 L128,125 M138,130 L140,125"/>
+  </g>
+  <!-- front hairs -->
+  <g transform="translate(128 92)" fill="url(#pur)" stroke="#54425f" stroke-width="0.3">
+    <use href="#hair" transform="rotate(-60) scale(0.95)"/><use href="#hair" transform="rotate(-42) scale(1.05)"/>
+    <use href="#hair" transform="rotate(-24) scale(1.12)"/><use href="#hair" transform="rotate(-8) scale(1.18)"/>
+    <use href="#hair" transform="rotate(8) scale(1.18)"/><use href="#hair" transform="rotate(24) scale(1.12)"/>
+    <use href="#hair" transform="rotate(42) scale(1.05)"/><use href="#hair" transform="rotate(60) scale(0.95)"/>
+    <use href="#hair" transform="rotate(-34) scale(0.8)"/><use href="#hair" transform="rotate(0) scale(0.9)"/>
+    <use href="#hair" transform="rotate(34) scale(0.8)"/>
+  </g>
+</svg>

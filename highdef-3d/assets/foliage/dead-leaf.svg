@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- Dead leaf: a dried ovate leaf with ragged edges, two holes eaten through
+       it (evenodd fill), curled up at the tip and stalk so the paler underside
+       shows in a strip along one edge. Browns kept mid-toned. -->
+  <defs>
+    <linearGradient id="dry" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#9c7c52"/>
+      <stop offset="0.5" stop-color="#7f6141"/>
+      <stop offset="1" stop-color="#5a4330"/>
+    </linearGradient>
+    <linearGradient id="under" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#b09a72"/>
+      <stop offset="1" stop-color="#8d7654"/>
+    </linearGradient>
+    <linearGradient id="spot" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4c3627"/>
+      <stop offset="1" stop-color="#6c5138"/>
+    </linearGradient>
+  </defs>
+  <!-- curled underside strip along the left edge, drawn first -->
+  <path d="M60,150 C56,120 70,80 100,56 C92,80 84,120 84,156 C78,160 68,160 60,150 Z" fill="url(#under)" stroke="#6e5a3e" stroke-width="0.8"/>
+  <!-- leaf body with ragged edge and two holes -->
+  <path fill-rule="evenodd" fill="url(#dry)" stroke="#4a3626" stroke-width="1" stroke-linejoin="round"
+        d="M100,56 C126,44 160,44 184,60 C206,74 214,104 208,132 C204,148 196,160 190,172 C182,184 176,196 172,208 C166,206 162,198 158,196 C150,206 140,212 130,214 C122,208 116,196 108,190 C98,182 90,172 86,160 C82,140 84,120 90,96 C93,82 96,68 100,56 Z
+           M132,110 C138,104 148,106 150,114 C152,122 144,128 136,126 C130,124 128,116 132,110 Z
+           M166,150 C170,146 176,148 177,153 C178,158 172,161 168,159 C164,157 163,153 166,150 Z"/>
+  <!-- veins: midrib and side veins, dark, slightly ragged -->
+  <path d="M100,60 C130,100 156,150 172,206" fill="none" stroke="#4d3828" stroke-width="2" stroke-linecap="round" opacity="0.8"/>
+  <path d="M112,78 C126,72 144,68 160,70 M118,96 C136,92 156,92 176,98 M126,118 C140,120 160,124 188,130 M136,142 C150,148 166,154 184,160 M146,166 C156,170 164,176 172,184" fill="none" stroke="#4d3828" stroke-width="1.1" stroke-linecap="round" opacity="0.65"/>
+  <!-- spots of rot and a rim of darker brown at the ragged edges -->
+  <ellipse cx="180" cy="112" rx="10" ry="7" fill="url(#spot)" opacity="0.55" transform="rotate(20 180 112)"/>
+  <ellipse cx="116" cy="170" rx="7" ry="5" fill="url(#spot)" opacity="0.5"/>
+  <ellipse cx="150" cy="80" rx="5" ry="4" fill="url(#spot)" opacity="0.45"/>
+  <path d="M184,60 C206,74 214,104 208,132" fill="none" stroke="#3f2d20" stroke-width="2.2" opacity="0.5"/>
+  <path d="M130,214 C122,208 116,196 108,190" fill="none" stroke="#3f2d20" stroke-width="2" opacity="0.5"/>
+  <!-- stalk, curling away -->
+  <path d="M100,56 C90,48 80,46 70,52" fill="none" stroke="#5a4330" stroke-width="3" stroke-linecap="round"/>
+</svg>

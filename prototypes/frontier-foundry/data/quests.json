@@ -1,0 +1,698 @@
+{
+  "schema": 1,
+  "note": "Side objectives and the tutorial. `type` drives how progress is measured, `goal` is the number needed. `chain` groups a run of quests; only the lowest unfinished `step` of a chain is ever offered, so the UI can show it as a numbered list. `requires` names quests that must be done first. Rewards hand over resources, finish research work for free (`research`), complete a whole research node (`tech`), or add crew. `text` is the notification when it is offered, `done` the one when it completes. `hint` is one plain-language line the UI can put under the objective.",
+  "quests": [
+    {
+      "id": "q_tut_t1",
+      "name": "Look at the Ground",
+      "chain": "tutorial",
+      "step": 1,
+      "type": "scan_nodes",
+      "goal": 6,
+      "tier": 0,
+      "reward": {
+        "resources": {
+          "iron_plate": 20
+        }
+      },
+      "text": "Nothing under the surface shows up until something looks at it. The pod swept a ring when it landed - read what it found.",
+      "done": "Six patches on the map. That circle around the pod is your whole world for the next ten minutes.",
+      "hint": "Open the map. Scanned patches are the coloured blobs; everything else is still hidden."
+    },
+    {
+      "id": "q_tut_t2",
+      "name": "Break Ground",
+      "chain": "tutorial",
+      "step": 2,
+      "type": "build",
+      "target": "drill_mk1",
+      "goal": 1,
+      "tier": 0,
+      "reward": {
+        "resources": {
+          "iron_plate": 16,
+          "gear": 8
+        }
+      },
+      "text": "Put a rock drill on the iron patch next to the pod.",
+      "done": "The drill is turning and ore is going into the pod. That is the first link of every chain in this game.",
+      "hint": "Select Rock Drill I in the build list and click the iron patch. A drill has to sit on a scanned patch."
+    },
+    {
+      "id": "q_tut_t3",
+      "name": "Somewhere to Put It",
+      "chain": "tutorial",
+      "step": 3,
+      "type": "build",
+      "target": "storage_crate",
+      "goal": 1,
+      "tier": 0,
+      "reward": {
+        "resources": {
+          "iron_plate": 14
+        }
+      },
+      "text": "Drop a storage crate near the drill. Machines can only use what a store within reach is holding.",
+      "done": "Crate down. Anything inside the same pool of stores is shared for free - that is the rule the whole base is shaped by.",
+      "hint": "Crates within reach of each other join into one pool. The pod reaches 34 tiles on its own."
+    },
+    {
+      "id": "q_tut_t4",
+      "name": "First Pour",
+      "chain": "tutorial",
+      "step": 4,
+      "type": "build",
+      "target": "smelter",
+      "goal": 1,
+      "tier": 0,
+      "reward": {
+        "resources": {
+          "stone": 40,
+          "coal": 30
+        }
+      },
+      "text": "Build a smelter and point it at Smelt Iron. Ore is not metal.",
+      "done": "Bars coming out. Two ore and a lump of coal make two bars, and the whole tree is built on them.",
+      "hint": "Build the smelter next to the crate, then choose Smelt Iron from its recipe list."
+    },
+    {
+      "id": "q_tut_t5",
+      "name": "Make the Run",
+      "chain": "tutorial",
+      "step": 5,
+      "type": "routes",
+      "goal": 1,
+      "tier": 0,
+      "reward": {
+        "resources": {
+          "fuel": 40
+        }
+      },
+      "text": "Set a delivery route between two stores so a truck hauls for you instead of you laying out the base around one crate.",
+      "done": "The truck is running. Every patch on the map is in reach of the base now, at the cost of a garage and a road.",
+      "hint": "Click a store, then Route, then pick a destination store and a resource."
+    },
+    {
+      "id": "q_tut_t6",
+      "name": "Keep the Lights On",
+      "chain": "tutorial",
+      "step": 6,
+      "type": "power_capacity",
+      "goal": 300,
+      "tier": 0,
+      "reward": {
+        "resources": {
+          "copper_wire": 40
+        }
+      },
+      "text": "Three hundred kilowatts. Every machine you build stops the moment the grid cannot pay for it.",
+      "done": "Three hundred kilowatts and steady. Watch the grid number - a brownout slows every machine at once.",
+      "hint": "Build a combustion generator and run power poles from it to your machines."
+    },
+    {
+      "id": "q_tut_t7",
+      "name": "Start Reading",
+      "chain": "tutorial",
+      "step": 7,
+      "type": "research_count",
+      "goal": 3,
+      "tier": 0,
+      "reward": {
+        "research": 60
+      },
+      "text": "Build a lab, make survey packs, and finish three research nodes. Research is your factory's throughput, not a separate currency.",
+      "done": "Three nodes done. Packs are made from what you already make, so a bigger factory is a faster tree.",
+      "hint": "Labs eat science packs. Point an assembler at Survey Pack and put a lab next to a crate."
+    },
+    {
+      "id": "q_tut_t8",
+      "name": "Eyes Open",
+      "chain": "tutorial",
+      "step": 8,
+      "type": "build",
+      "target": "scanner_tower",
+      "goal": 1,
+      "tier": 0,
+      "reward": {
+        "research": 80
+      },
+      "text": "Build a scanner tower away from the pod. It looks underground, and it is the cheapest thing you will ever build per unit of value.",
+      "done": "Another ring of the map is readable. Put these where you want to build next, not where you already are.",
+      "hint": "Scanner towers only reveal patches. A radar reveals the surface too."
+    },
+    {
+      "id": "q_tut_t9",
+      "name": "Draw a Line",
+      "chain": "tutorial",
+      "step": 9,
+      "type": "build_count",
+      "target": "category:defence",
+      "goal": 6,
+      "tier": 0,
+      "reward": {
+        "resources": {
+          "iron_plate": 60,
+          "gear": 20
+        },
+        "research": 100
+      },
+      "text": "Six pieces of defence - wall, watchtower, whatever you can afford. Something out there has noticed the smoke.",
+      "done": "There is a line now. A wall buys time; the turret behind it does the work.",
+      "hint": "Turrets need to cover the side your base is noisiest on. Waves come in from the nearest map edge."
+    },
+    {
+      "id": "q_first_route",
+      "name": "Make the Run",
+      "type": "routes",
+      "goal": 1,
+      "tier": 1,
+      "reward": {
+        "resources": {
+          "fuel": 30
+        }
+      },
+      "text": "Walking distance is not a base plan. Set up a delivery route between two stores.",
+      "done": "The first truck is running. Now every ore patch on the map is in reach."
+    },
+    {
+      "id": "q_power_200",
+      "name": "Keep the Lights On",
+      "type": "power_capacity",
+      "goal": 200,
+      "tier": 1,
+      "reward": {
+        "resources": {
+          "copper_wire": 40
+        }
+      },
+      "text": "Two hundred kilowatts of generation. Machines stop the moment the grid does.",
+      "done": "Two hundred kilowatts and steady. Brownouts slow every machine at once - watch that number."
+    },
+    {
+      "id": "q_survive_first",
+      "name": "First Contact",
+      "type": "survive_wave",
+      "goal": 1,
+      "tier": 1,
+      "reward": {
+        "research": 80,
+        "resources": {
+          "steel_plate": 10
+        }
+      },
+      "text": "Something out there has noticed the smoke. Survive the first attack.",
+      "done": "They came, they died at the wall. They will come back bigger - the smoke you make is what calls them."
+    },
+    {
+      "id": "q_walls_40",
+      "name": "Draw a Line",
+      "type": "build_count",
+      "target": "category:defence",
+      "goal": 40,
+      "tier": 1,
+      "reward": {
+        "resources": {
+          "steel_plate": 24
+        }
+      },
+      "text": "Put forty pieces of defence between the swarms and your machines.",
+      "done": "There is a perimeter now. A wall only buys time - the turrets behind it do the work."
+    },
+    {
+      "id": "q_explore_3",
+      "name": "Look Over the Hill",
+      "type": "explore_regions",
+      "goal": 3,
+      "tier": 1,
+      "reward": {
+        "research": 100
+      },
+      "text": "Send scouts into three neighbouring regions and see what is there.",
+      "done": "Three regions mapped. There is more iron out there than under your feet, and worse things too."
+    },
+    {
+      "id": "q_scan_all_type",
+      "name": "Complete Survey",
+      "type": "scan_all_of_kind",
+      "target": "ore",
+      "goal": 1,
+      "tier": 2,
+      "reward": {
+        "research": 140,
+        "resources": {
+          "circuit": 12
+        }
+      },
+      "text": "Scan every ore node on this local map. Know exactly what you are standing on.",
+      "done": "Every ore patch on the map is on the map. Now you can plan a base instead of reacting to one."
+    },
+    {
+      "id": "q_steel_100",
+      "name": "Steel Age",
+      "type": "produce",
+      "target": "steel_ingot",
+      "goal": 100,
+      "tier": 2,
+      "reward": {
+        "research": 120
+      },
+      "text": "A hundred steel ingots. Everything past this point is bolted to steel.",
+      "done": "A hundred bars of steel. The buildings stop being brick and start being machines."
+    },
+    {
+      "id": "q_road_100",
+      "name": "Pave It",
+      "type": "build_count",
+      "target": "category:logistics",
+      "goal": 100,
+      "tier": 2,
+      "reward": {
+        "resources": {
+          "concrete": 60
+        }
+      },
+      "text": "A hundred tiles of road and logistics. Hauling is most of your throughput problem.",
+      "done": "The roads are in. Every truck you own just got faster without you buying a single truck."
+    },
+    {
+      "id": "q_first_radar",
+      "name": "Eyes Open",
+      "type": "build",
+      "target": "short_radar",
+      "goal": 1,
+      "tier": 2,
+      "reward": {
+        "research": 90
+      },
+      "text": "Build a radar. Fighting blind is how bases die.",
+      "done": "Radar up. You will see the next wave forming instead of hearing it hit the wall."
+    },
+    {
+      "id": "q_kill_nest",
+      "name": "Burn the Nest",
+      "type": "kill_nests",
+      "goal": 1,
+      "tier": 2,
+      "reward": {
+        "research": 150,
+        "resources": {
+          "sulfur": 30
+        }
+      },
+      "text": "There is a nest out there raising the threat every second it stands. Destroy one.",
+      "done": "Nest cleared, and the threat score dropped with it. Nests are why waves grow even when you are quiet."
+    },
+    {
+      "id": "q_chem_chain",
+      "name": "Wet Chemistry",
+      "type": "produce",
+      "target": "sulfuric_acid",
+      "goal": 60,
+      "tier": 3,
+      "reward": {
+        "research": 180
+      },
+      "text": "Sixty units of acid. Half the mid-game recipe list runs through a chemical plant.",
+      "done": "Acid flowing. From here the tree branches - polymers, batteries, enrichment."
+    },
+    {
+      "id": "q_rare_element",
+      "name": "Something New",
+      "type": "reach_rare",
+      "goal": 1,
+      "tier": 3,
+      "reward": {
+        "research": 250
+      },
+      "text": "This planet has an element you have never mined. Find it, scan it, and put a drill on it.",
+      "done": "The rare element is flowing. Its own buildings are researchable now, and they do things nothing else can."
+    },
+    {
+      "id": "q_variant_build",
+      "name": "Local Advantage",
+      "type": "build_count",
+      "target": "category:variant",
+      "goal": 1,
+      "tier": 3,
+      "reward": {
+        "research": 280
+      },
+      "text": "Build the planet-specific machine this world unlocked. It exists nowhere else.",
+      "done": "It is running. Every planet has one trick nowhere else has - this one is yours."
+    },
+    {
+      "id": "q_research_20",
+      "name": "Standing Library",
+      "type": "research_count",
+      "goal": 20,
+      "tier": 3,
+      "reward": {
+        "resources": {
+          "advanced_circuit": 10
+        }
+      },
+      "text": "Finish twenty research nodes.",
+      "done": "Twenty nodes done. Build an archive before you leave or you relearn all of it."
+    },
+    {
+      "id": "q_defend_10",
+      "name": "Ten Waves Deep",
+      "type": "survive_wave",
+      "goal": 10,
+      "tier": 3,
+      "reward": {
+        "research": 300,
+        "resources": {
+          "alloy_plate": 12
+        }
+      },
+      "text": "Hold the base through ten attacks.",
+      "done": "Ten waves held. What comes next is armoured, and some of it flies."
+    },
+    {
+      "id": "q_power_2000",
+      "name": "Industrial Grid",
+      "type": "power_capacity",
+      "goal": 2000,
+      "tier": 4,
+      "reward": {
+        "research": 320
+      },
+      "text": "Two megawatts of generation. The late machines each eat a small town's worth.",
+      "done": "Two megawatts. Now the nano forge and the laser line are actually affordable to run."
+    },
+    {
+      "id": "q_satellite",
+      "name": "Eyes in Orbit",
+      "type": "launch",
+      "target": "satellite",
+      "goal": 1,
+      "tier": 5,
+      "reward": {
+        "research": 400
+      },
+      "text": "Build a satellite and put it up. The whole world map opens the moment it is in orbit.",
+      "done": "Satellite up and the map is open. Orbital packs are available now, which is the last research tier."
+    },
+    {
+      "id": "q_probe",
+      "name": "Look Ahead",
+      "type": "launch",
+      "target": "probe",
+      "goal": 1,
+      "tier": 5,
+      "reward": {
+        "research": 380
+      },
+      "text": "Send a probe at another planet. Know what is there before you spend a rocket getting there.",
+      "done": "Probe arrived. That world's resources and hazards are on the chart - pick your next home with your eyes open."
+    },
+    {
+      "id": "q_rocket_parts",
+      "name": "Stack the Stages",
+      "type": "produce",
+      "target": "rocket_part",
+      "goal": 6,
+      "tier": 5,
+      "reward": {
+        "research": 500
+      },
+      "text": "Six rocket sections. That is a launch.",
+      "done": "Six sections on the pad. Load the hold with everything you want on the next world - what you leave behind is gone."
+    },
+    {
+      "id": "q_launch_rocket",
+      "name": "Leave the Ground",
+      "type": "launch",
+      "target": "rocket",
+      "goal": 1,
+      "tier": 6,
+      "reward": {
+        "research": 600
+      },
+      "text": "Load the pad and launch. Whatever is in the hold comes with you; whatever is not, does not.",
+      "done": "Launched. New planet, new rules, and the research you archived came along for the ride."
+    },
+    {
+      "id": "q_station",
+      "name": "Somewhere to Stand",
+      "type": "launch",
+      "target": "station",
+      "goal": 1,
+      "tier": 6,
+      "reward": {
+        "research": 800
+      },
+      "text": "Six station modules and an orbital lift. Build a place in orbit that does not need a rocket every time.",
+      "done": "The station is crewed. Cargo goes up on the lift now - the rocket bill for every future launch just collapsed."
+    },
+    {
+      "id": "q_beacon_first",
+      "name": "Plant the Flag",
+      "type": "build",
+      "target": "beacon",
+      "goal": 1,
+      "tier": 6,
+      "reward": {
+        "research": 700
+      },
+      "text": "Light a frontier beacon on this world.",
+      "done": "Beacon lit and burning. Light them on enough worlds and the frontier is formally yours."
+    },
+    {
+      "id": "q_turret_first",
+      "name": "Before They Come",
+      "type": "turret_before_wave",
+      "goal": 1,
+      "tier": 1,
+      "reward": {
+        "resources": {
+          "iron_plate": 40,
+          "gear": 16
+        },
+        "research": 90
+      },
+      "text": "Get a turret standing before the first attack arrives. Reacting to a wave is always more expensive than expecting one.",
+      "done": "A gun was waiting for them. That is the cheapest wave you will ever fight.",
+      "hint": "The grace period is on the threat readout. Build a watchtower or a gun turret before it runs out."
+    },
+    {
+      "id": "q_survive_5",
+      "name": "Five Deep",
+      "type": "survive_wave",
+      "goal": 5,
+      "tier": 2,
+      "reward": {
+        "research": 200,
+        "resources": {
+          "steel_plate": 30
+        }
+      },
+      "text": "Hold the base through five attacks. Every fifth one comes from two sides at once.",
+      "done": "Five waves held, including a push from two fronts. From here they start bringing armour.",
+      "hint": "Surge waves split across two edges - a ring of turrets beats a wall on one side."
+    },
+    {
+      "id": "q_power_1000",
+      "name": "One Megawatt",
+      "type": "power_capacity",
+      "goal": 1000,
+      "tier": 3,
+      "reward": {
+        "research": 240,
+        "resources": {
+          "battery_cell": 12
+        }
+      },
+      "text": "A megawatt of generation. The chemistry and electronics tiers each eat a small town's worth.",
+      "done": "A megawatt on the meter. Now the printers and the electrolyser can run at the same time.",
+      "hint": "Solar is quiet and makes no threat; coal is cheap and calls things to your door."
+    },
+    {
+      "id": "q_first_paved",
+      "name": "Lay the Concrete",
+      "type": "build",
+      "target": "paved_road",
+      "goal": 1,
+      "tier": 3,
+      "reward": {
+        "resources": {
+          "concrete": 80
+        },
+        "research": 140
+      },
+      "text": "Put down your first paved road. Pavement is worth more than a bigger truck on the same route.",
+      "done": "Paved. A truck on that road moves about twice as fast as one crossing raw ground.",
+      "hint": "Pave the busiest run first - the one between your ore outpost and the smelters."
+    },
+    {
+      "id": "q_first_tanker",
+      "name": "Wet Freight",
+      "type": "route_vehicle",
+      "target": "tanker",
+      "goal": 1,
+      "tier": 3,
+      "reward": {
+        "research": 180,
+        "resources": {
+          "polymer": 30
+        }
+      },
+      "text": "Run a tanker route. Liquids will not ride in a crate truck, and half the mid-game needs water.",
+      "done": "The tanker is looping. Oil, water, acid and fuel can all leave the patch they were found on now.",
+      "hint": "A tanker needs a tanker bay for a garage and a fluid tank at each end."
+    },
+    {
+      "id": "q_clear_three_nests",
+      "name": "Burn Them Out",
+      "type": "kill_nests",
+      "goal": 3,
+      "tier": 3,
+      "reward": {
+        "research": 280,
+        "resources": {
+          "sulfur": 60,
+          "steel_plate": 24
+        }
+      },
+      "text": "Three nests down. Every one left standing raises the threat every second of the run.",
+      "done": "Three nests gone and the threat curve is visibly flatter. Artillery pays for itself here.",
+      "hint": "Artillery shells nests from 44 tiles without anything having to walk out there."
+    },
+    {
+      "id": "q_scan_all_rare",
+      "name": "Every Seam",
+      "type": "scan_all_of_kind",
+      "target": "rare",
+      "goal": 1,
+      "tier": 3,
+      "reward": {
+        "research": 260
+      },
+      "text": "Scan every rare-element patch on this map. They are small, and they are the only ones here.",
+      "done": "Every seam of it on the chart. What this planet gives you, it gives you here and nowhere else.",
+      "hint": "A long radar or a satellite finds the ones a scanner tower missed."
+    },
+    {
+      "id": "q_second_planet",
+      "name": "Somewhere Else",
+      "type": "landed_again",
+      "goal": 1,
+      "tier": 6,
+      "reward": {
+        "research": 700,
+        "resources": {
+          "iron_plate": 200,
+          "steel_plate": 80
+        }
+      },
+      "text": "Land on a second world. Whatever the hold carried is all you have until the first drill turns.",
+      "done": "Down on a new world with a different rule book. Build an archive before the next launch.",
+      "hint": "Only the cargo in the hold and the research an archive was holding come with you."
+    },
+    {
+      "id": "q_beacon_chain",
+      "name": "The Frontier",
+      "type": "beacons",
+      "goal": 3,
+      "tier": 6,
+      "reward": {
+        "research": 1000
+      },
+      "text": "Light a beacon on enough worlds to claim the frontier, and finish the orbital station.",
+      "done": "The chain is lit. Everything out here was built from the ground up, twice over.",
+      "hint": "Beacons plus a complete six-module station wins the run."
+    },
+    {
+      "id": "q_gate_1",
+      "name": "Signal in the Dust",
+      "chain": "far_seam",
+      "step": 1,
+      "type": "explore_regions",
+      "goal": 2,
+      "tier": 2,
+      "reward": {
+        "research": 160,
+        "resources": {
+          "iron_plate": 80,
+          "copper_wire": 40
+        }
+      },
+      "text": "Something is reading back off the survey band from two regions over. Send scouts to both.",
+      "done": "Both regions mapped, and one of them is sitting on a seam this valley does not have.",
+      "hint": "Build a dormitory for crew room, spawn a scout, then pick a region on the world map."
+    },
+    {
+      "id": "q_gate_2",
+      "name": "Deep Seam",
+      "chain": "far_seam",
+      "step": 2,
+      "type": "reach_rare",
+      "goal": 1,
+      "tier": 3,
+      "reward": {
+        "research": 260,
+        "resources": {
+          "titanium_ore": 260,
+          "tungsten_ore": 200,
+          "platinum_ore": 140
+        }
+      },
+      "text": "The scouts brought back an assay. Find the seam on your own ground, scan it and put a drill on it.",
+      "done": "The seam is running, and the cache the scouts marked came in with it - enough heavy metal to start an alloy line.",
+      "hint": "Rare patches are small and often outside the pod's first scan. This is what the second scanner tower is for."
+    },
+    {
+      "id": "q_gate_3",
+      "name": "Long Haul",
+      "chain": "far_seam",
+      "step": 3,
+      "type": "explore_regions",
+      "goal": 5,
+      "tier": 4,
+      "reward": {
+        "tech": "t_reentry",
+        "research": 300,
+        "resources": {
+          "alloy_plate": 40,
+          "superalloy": 10
+        }
+      },
+      "text": "Five regions surveyed. The shielding recipe is out there in somebody's wreck, not in your labs.",
+      "done": "Re-entry shielding read straight off a hull that survived one. That is a rocket section's worth of research you did not have to pay for.",
+      "hint": "Region surveys are the cheapest research in the game if you have a skimmer to do them."
+    },
+    {
+      "id": "q_gate_4",
+      "name": "First Stage",
+      "chain": "far_seam",
+      "step": 4,
+      "type": "produce",
+      "target": "rocket_part",
+      "goal": 1,
+      "tier": 5,
+      "reward": {
+        "research": 420,
+        "resources": {
+          "rocket_fuel": 40,
+          "oxidizer": 30
+        }
+      },
+      "text": "One rocket section. Everything upstream of it has to be running at once for that to happen.",
+      "done": "A section on the gantry, and the fuel for the launch is in the tanks. Five more.",
+      "hint": "A section wants alloy plate, superalloy, control units, a heat shield and rocket fuel - six chains meeting in one machine."
+    }
+  ],
+  "chains": [
+    {
+      "id": "tutorial",
+      "name": "Landfall",
+      "desc": "The first twenty minutes, one step at a time: scan, drill, store, haul, smelt, power, research, look further, and draw a line."
+    },
+    {
+      "id": "far_seam",
+      "name": "The Far Seam",
+      "desc": "The rocket is gated behind exploration: what this valley does not have, the next region does. Survey, assay, haul it home, and the first stage goes on the gantry."
+    }
+  ]
+}

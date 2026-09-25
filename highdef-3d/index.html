@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3D High Def</title>
+<link rel="stylesheet" href="../shared/style.css">
+<link rel="stylesheet" href="css/highdef.css">
+<script type="importmap">{ "imports": { "three": "../vendor/three/three.module.js", "three/addons/": "../vendor/three/addons/" } }</script>
+</head>
+<body class="hd-body">
+
+<div id="stage" class="hd-stage"></div>
+
+<div id="loading" class="hd-loading">
+  <div class="hd-loading-inner">
+    <h1>3D High Def</h1>
+    <p class="hd-sub">A high-detail atmospheric world — terrain, forest, weather, light.</p>
+    <div class="hd-bar"><div id="loading-bar"></div></div>
+    <p id="loading-text" class="hd-loading-text">starting…</p>
+    <p class="hd-tip">W A S D to move · V switches between the strategy camera and third person · / for the full list</p>
+  </div>
+</div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

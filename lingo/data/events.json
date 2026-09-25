@@ -1,0 +1,715 @@
+{
+  "_doc": "Memory event types. importance = base 0..1 (how much anyone would remember it); halfLifeDays = how fast salience halves; valence = emotional sign; traitWeights multiply importance for owners with that trait; mergeKeys = bindings that must match for repeats to merge into one memory (count+1); intent = grammar symbol used when the memory is talked about; bindings/details = what generateEvent rolls for demos (games supply real values). core = never forgotten.",
+  "types": {
+    "combat": {
+      "importance": 0.55,
+      "halfLifeDays": 10,
+      "valence": -0.2,
+      "intent": "recall_combat",
+      "tags": [
+        "combat",
+        "danger"
+      ],
+      "mergeKeys": [
+        "foe"
+      ],
+      "traitWeights": {
+        "bloodlust": 1.6,
+        "brave": 1.2,
+        "coward": 1.5,
+        "nervous": 1.4,
+        "kind": 0.9,
+        "scholar": 0.8
+      },
+      "bindings": {
+        "foe": {
+          "type": "creature",
+          "count": [
+            1,
+            12
+          ]
+        },
+        "place": {
+          "type": "place"
+        },
+        "weapon": {
+          "type": "item",
+          "tags": [
+            "weapon"
+          ]
+        },
+        "ally": {
+          "type": "person"
+        }
+      },
+      "details": {
+        "outcome": [
+          "won",
+          "won",
+          "won",
+          "fled",
+          "lost"
+        ],
+        "wounded": [
+          false,
+          false,
+          true
+        ]
+      }
+    },
+    "kill": {
+      "importance": 0.6,
+      "halfLifeDays": 20,
+      "valence": 0.1,
+      "intent": "recall_kill",
+      "tags": [
+        "combat",
+        "gore"
+      ],
+      "mergeKeys": [
+        "foe"
+      ],
+      "traitWeights": {
+        "bloodlust": 1.8,
+        "cruel": 1.5,
+        "kind": 1.3,
+        "pious": 1.2
+      },
+      "bindings": {
+        "foe": {
+          "type": "creature",
+          "count": [
+            1,
+            1
+          ]
+        },
+        "weapon": {
+          "type": "item",
+          "tags": [
+            "weapon"
+          ]
+        },
+        "place": {
+          "type": "place"
+        }
+      },
+      "details": {
+        "how": [
+          "a clean stroke",
+          "a lucky blow",
+          "a long ugly struggle",
+          "from behind",
+          "with the last of my strength"
+        ]
+      }
+    },
+    "death": {
+      "importance": 0.95,
+      "halfLifeDays": 120,
+      "valence": -0.9,
+      "core": true,
+      "intent": "recall_death",
+      "tags": [
+        "grief",
+        "death"
+      ],
+      "mergeKeys": [
+        "victim"
+      ],
+      "traitWeights": {
+        "grieving": 1.3,
+        "kind": 1.2,
+        "loyal": 1.3,
+        "cruel": 0.6,
+        "cynical": 0.9
+      },
+      "bindings": {
+        "victim": {
+          "type": "person"
+        },
+        "foe": {
+          "type": "creature",
+          "count": [
+            1,
+            6
+          ]
+        },
+        "place": {
+          "type": "place"
+        }
+      },
+      "details": {
+        "how": [
+          "quickly",
+          "slowly",
+          "screaming",
+          "quietly, in the night",
+          "holding the line"
+        ]
+      }
+    },
+    "wounded": {
+      "importance": 0.5,
+      "halfLifeDays": 14,
+      "valence": -0.5,
+      "intent": "recall_wounded",
+      "tags": [
+        "pain",
+        "combat"
+      ],
+      "mergeKeys": [
+        "bodypart"
+      ],
+      "traitWeights": {
+        "coward": 1.5,
+        "nervous": 1.3,
+        "brave": 0.8,
+        "gruff": 0.7
+      },
+      "bindings": {
+        "bodypart": {
+          "type": "bodypart"
+        },
+        "foe": {
+          "type": "creature",
+          "count": [
+            1,
+            3
+          ]
+        },
+        "place": {
+          "type": "place"
+        }
+      },
+      "details": {}
+    },
+    "levelup": {
+      "importance": 0.5,
+      "halfLifeDays": 30,
+      "valence": 0.7,
+      "intent": "recall_levelup",
+      "tags": [
+        "growth",
+        "pride"
+      ],
+      "mergeKeys": [],
+      "traitWeights": {
+        "pompous": 1.5,
+        "brave": 1.2,
+        "shy": 0.8,
+        "scholar": 1.2
+      },
+      "bindings": {},
+      "details": {
+        "level": [
+          2,
+          12
+        ]
+      }
+    },
+    "skill": {
+      "importance": 0.45,
+      "halfLifeDays": 40,
+      "valence": 0.6,
+      "intent": "recall_skill",
+      "tags": [
+        "growth"
+      ],
+      "mergeKeys": [
+        "skill"
+      ],
+      "traitWeights": {
+        "scholar": 1.6,
+        "pompous": 1.3,
+        "greedy": 0.8
+      },
+      "bindings": {
+        "skill": {
+          "type": "spell"
+        },
+        "teacher": {
+          "type": "person"
+        }
+      },
+      "details": {}
+    },
+    "join": {
+      "importance": 0.45,
+      "halfLifeDays": 40,
+      "valence": 0.3,
+      "intent": "recall_join",
+      "tags": [
+        "social"
+      ],
+      "mergeKeys": [
+        "newcomer"
+      ],
+      "traitWeights": {
+        "paranoid": 1.5,
+        "kind": 1.2,
+        "loyal": 1.3,
+        "gruff": 0.8
+      },
+      "bindings": {
+        "newcomer": {
+          "type": "person"
+        },
+        "place": {
+          "type": "place"
+        }
+      },
+      "details": {
+        "impression": [
+          "seemed all right",
+          "talked too much",
+          "smelled of the road",
+          "would not meet my eye",
+          "brought food, which helped"
+        ]
+      }
+    },
+    "leave": {
+      "importance": 0.4,
+      "halfLifeDays": 30,
+      "valence": -0.3,
+      "intent": "recall_leave",
+      "tags": [
+        "social"
+      ],
+      "mergeKeys": [
+        "leaver"
+      ],
+      "traitWeights": {
+        "loyal": 1.5,
+        "paranoid": 1.3,
+        "cynical": 1.2
+      },
+      "bindings": {
+        "leaver": {
+          "type": "person"
+        }
+      },
+      "details": {
+        "why": [
+          "for coin",
+          "in the night, without a word",
+          "after the argument",
+          "to go home",
+          "because of me, I think"
+        ]
+      }
+    },
+    "loot": {
+      "importance": 0.35,
+      "halfLifeDays": 8,
+      "valence": 0.6,
+      "intent": "recall_loot",
+      "tags": [
+        "money",
+        "loot"
+      ],
+      "mergeKeys": [
+        "item"
+      ],
+      "traitWeights": {
+        "greedy": 2.0,
+        "pious": 0.7,
+        "honorable": 0.8
+      },
+      "bindings": {
+        "item": {
+          "type": "item"
+        },
+        "place": {
+          "type": "place"
+        }
+      },
+      "details": {
+        "worth": [
+          "a fortune",
+          "a few coins",
+          "more than it looked",
+          "nothing, it turned out"
+        ]
+      }
+    },
+    "travel": {
+      "importance": 0.25,
+      "halfLifeDays": 5,
+      "valence": 0,
+      "intent": "recall_travel",
+      "tags": [
+        "travel"
+      ],
+      "mergeKeys": [
+        "place"
+      ],
+      "traitWeights": {
+        "scholar": 1.3,
+        "drunkard": 0.7
+      },
+      "bindings": {
+        "place": {
+          "type": "place"
+        },
+        "weather": {
+          "type": "weather"
+        }
+      },
+      "details": {}
+    },
+    "meal": {
+      "importance": 0.2,
+      "halfLifeDays": 2,
+      "valence": 0.4,
+      "intent": "recall_meal",
+      "tags": [
+        "food"
+      ],
+      "mergeKeys": [
+        "food"
+      ],
+      "traitWeights": {
+        "hungry": 2.5,
+        "drunkard": 1.5,
+        "pompous": 0.7
+      },
+      "bindings": {
+        "food": {
+          "type": "food"
+        },
+        "place": {
+          "type": "place"
+        }
+      },
+      "details": {
+        "quality": [
+          "good",
+          "terrible",
+          "the best in years",
+          "burnt",
+          "cold"
+        ]
+      }
+    },
+    "insulted": {
+      "importance": 0.4,
+      "halfLifeDays": 12,
+      "valence": -0.6,
+      "intent": "recall_insulted",
+      "tags": [
+        "social",
+        "grudge"
+      ],
+      "mergeKeys": [
+        "by"
+      ],
+      "traitWeights": {
+        "abrasive": 1.4,
+        "pompous": 1.6,
+        "kind": 0.8,
+        "paranoid": 1.5,
+        "jolly": 0.6
+      },
+      "bindings": {
+        "by": {
+          "type": "person"
+        }
+      },
+      "details": {
+        "what": [
+          "called me a coward",
+          "laughed at my {$item}",
+          "insulted my mother",
+          "said I was useless",
+          "took my seat"
+        ]
+      }
+    },
+    "kindness": {
+      "importance": 0.4,
+      "halfLifeDays": 30,
+      "valence": 0.7,
+      "intent": "recall_kindness",
+      "tags": [
+        "social",
+        "gratitude"
+      ],
+      "mergeKeys": [
+        "by"
+      ],
+      "traitWeights": {
+        "kind": 1.5,
+        "loyal": 1.5,
+        "cynical": 0.7,
+        "greedy": 0.8
+      },
+      "bindings": {
+        "by": {
+          "type": "person"
+        }
+      },
+      "details": {
+        "what": [
+          "shared their last {$food}",
+          "stood between me and a {$creature}",
+          "carried me out",
+          "listened",
+          "lent me coin and never asked for it back"
+        ]
+      }
+    },
+    "omen": {
+      "importance": 0.4,
+      "halfLifeDays": 20,
+      "valence": -0.3,
+      "intent": "recall_omen",
+      "tags": [
+        "religious",
+        "fear"
+      ],
+      "mergeKeys": [],
+      "traitWeights": {
+        "pious": 2.0,
+        "paranoid": 1.5,
+        "cynical": 0.4,
+        "scholar": 0.8
+      },
+      "bindings": {
+        "deity": {
+          "type": "deity"
+        },
+        "place": {
+          "type": "place"
+        }
+      },
+      "details": {
+        "sign": [
+          "a red moon",
+          "crows in a circle",
+          "a well that ran black",
+          "a child speaking in an old tongue",
+          "the bells ringing on their own"
+        ]
+      }
+    },
+    "lore": {
+      "importance": 0.25,
+      "halfLifeDays": 100000,
+      "valence": 0,
+      "intent": "recall_lore",
+      "tags": [
+        "lore",
+        "history"
+      ],
+      "mergeKeys": [
+        "figure"
+      ],
+      "traitWeights": {
+        "scholar": 2.5,
+        "pompous": 1.3,
+        "archaic": 1.5,
+        "drunkard": 0.5
+      },
+      "bindings": {
+        "figure": {
+          "type": "person",
+          "tags": [
+            "historical"
+          ]
+        },
+        "place": {
+          "type": "place"
+        }
+      },
+      "details": {}
+    },
+    "lineage": {
+      "importance": 0.35,
+      "halfLifeDays": 100000,
+      "valence": 0.2,
+      "intent": "recall_lineage",
+      "tags": [
+        "lore",
+        "family"
+      ],
+      "mergeKeys": [
+        "figure"
+      ],
+      "traitWeights": {
+        "pompous": 2.0,
+        "honorable": 1.5,
+        "cynical": 0.7
+      },
+      "bindings": {
+        "figure": {
+          "type": "person",
+          "tags": [
+            "historical"
+          ]
+        }
+      },
+      "details": {
+        "relation": [
+          "grandmother",
+          "grandfather",
+          "great-uncle",
+          "mother's line",
+          "father's father"
+        ]
+      }
+    },
+    "deed": {
+      "importance": 0.45,
+      "halfLifeDays": 60,
+      "valence": 0.4,
+      "intent": "recall_deed",
+      "tags": [
+        "rumor",
+        "lore"
+      ],
+      "mergeKeys": [
+        "hero"
+      ],
+      "traitWeights": {
+        "paranoid": 1.2,
+        "jolly": 1.2,
+        "cynical": 0.7
+      },
+      "bindings": {
+        "hero": {
+          "type": "person"
+        },
+        "place": {
+          "type": "place"
+        }
+      },
+      "details": {
+        "what": [
+          "cleared the goblin cave",
+          "put the barrow wight to rest",
+          "opened the troll bridge",
+          "broke the orc war-camp"
+        ]
+      }
+    },
+    "nemesis": {
+      "importance": 0.7,
+      "halfLifeDays": 40,
+      "valence": -0.5,
+      "intent": "recall_nemesis",
+      "tags": [
+        "grudge",
+        "combat"
+      ],
+      "mergeKeys": [
+        "foe"
+      ],
+      "traitWeights": {
+        "paranoid": 1.4,
+        "bloodlust": 1.3,
+        "coward": 1.3
+      },
+      "bindings": {
+        "foe": {
+          "type": "creature"
+        },
+        "place": {
+          "type": "place"
+        }
+      },
+      "details": {
+        "name": [
+          "Vekkash",
+          "Grulnak the Loud"
+        ],
+        "outcome": [
+          "beat_us",
+          "escaped",
+          "slain"
+        ]
+      }
+    },
+    "conversation": {
+      "importance": 0.25,
+      "halfLifeDays": 4,
+      "valence": 0.1,
+      "intent": "recall_conversation",
+      "tags": [
+        "talk"
+      ],
+      "mergeKeys": [
+        "with"
+      ],
+      "traitWeights": {
+        "romantic": 1.3,
+        "shy": 1.2
+      },
+      "bindings": {
+        "with": {
+          "type": "person"
+        },
+        "place": {
+          "type": "place"
+        }
+      },
+      "details": {
+        "topic": [
+          "fight_recap",
+          "new_gear_worse"
+        ],
+        "said": [
+          "I'll swap it before the next fight."
+        ]
+      }
+    },
+    "revive": {
+      "importance": 0.95,
+      "halfLifeDays": 150,
+      "valence": 0.9,
+      "core": true,
+      "intent": "recall_revive",
+      "tags": [
+        "gratitude",
+        "death",
+        "social"
+      ],
+      "mergeKeys": [
+        "by"
+      ],
+      "traitWeights": {
+        "loyal": 1.5,
+        "kind": 1.4,
+        "grieving": 1.3,
+        "proud": 0.8,
+        "cynical": 0.9,
+        "coward": 1.3
+      },
+      "bindings": {
+        "by": {
+          "type": "person"
+        },
+        "foe": {
+          "type": "creature",
+          "count": [
+            1,
+            4
+          ]
+        },
+        "place": {
+          "type": "place"
+        }
+      },
+      "details": {
+        "how": [
+          "hands on my chest until I breathed again",
+          "a prayer and a hard slap",
+          "a flask forced between my teeth",
+          "cold shrine water",
+          "a cleric's fee and no questions",
+          "sheer stubbornness"
+        ]
+      }
+    }
+  }
+}

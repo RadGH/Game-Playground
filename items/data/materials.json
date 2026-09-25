@@ -1,0 +1,503 @@
+{
+ "_doc": "Material groups for variants. Each: id, adj (name prefix), value multiplier, tags, affinity. qualities: prefix + value multiplier + weight. enchant_prefix: names for magical variants with the tags they add.",
+ "materials": [
+  {
+   "id": "iron",
+   "adj": "iron",
+   "value": 1.0,
+   "tags": [
+    "metal",
+    "common"
+   ],
+   "affinity": {
+    "dwarf": 2,
+    "human": 2
+   }
+  },
+  {
+   "id": "steel",
+   "adj": "steel",
+   "value": 1.6,
+   "tags": [
+    "metal"
+   ],
+   "affinity": {
+    "dwarf": 3,
+    "human": 3
+   }
+  },
+  {
+   "id": "bronze",
+   "adj": "bronze",
+   "value": 0.9,
+   "tags": [
+    "metal",
+    "ancient"
+   ],
+   "affinity": {
+    "giant": 2,
+    "human": 1
+   }
+  },
+  {
+   "id": "silver",
+   "adj": "silvered",
+   "value": 2.5,
+   "tags": [
+    "metal",
+    "precious",
+    "holy"
+   ],
+   "affinity": {
+    "elf": 3,
+    "human": 1,
+    "fey": 1
+   }
+  },
+  {
+   "id": "gold",
+   "adj": "gilded",
+   "value": 4.0,
+   "tags": [
+    "metal",
+    "precious"
+   ],
+   "affinity": {
+    "dragon": 3,
+    "dwarf": 2,
+    "human": 1
+   }
+  },
+  {
+   "id": "veilsilver",
+   "adj": "veilsilver",
+   "value": 12.0,
+   "tags": [
+    "metal",
+    "precious",
+    "light",
+    "magic"
+   ],
+   "affinity": {
+    "dwarf": 3,
+    "elf": 3
+   }
+  },
+  {
+   "id": "copper",
+   "adj": "copper",
+   "value": 0.8,
+   "tags": [
+    "metal"
+   ],
+   "affinity": {
+    "gnome": 3
+   }
+  },
+  {
+   "id": "brass",
+   "adj": "brass",
+   "value": 1.1,
+   "tags": [
+    "metal",
+    "tinker"
+   ],
+   "affinity": {
+    "gnome": 3
+   }
+  },
+  {
+   "id": "pewter",
+   "adj": "pewter",
+   "value": 0.7,
+   "tags": [
+    "metal",
+    "humble"
+   ],
+   "affinity": {
+    "halfling": 2,
+    "human": 1
+   }
+  },
+  {
+   "id": "wood",
+   "adj": "wooden",
+   "value": 0.5,
+   "tags": [
+    "wood",
+    "humble"
+   ],
+   "affinity": {
+    "halfling": 2,
+    "elf": 1,
+    "troll": 2
+   }
+  },
+  {
+   "id": "yew",
+   "adj": "yew",
+   "value": 1.4,
+   "tags": [
+    "wood",
+    "bow"
+   ],
+   "affinity": {
+    "elf": 3,
+    "human": 2
+   }
+  },
+  {
+   "id": "livingwood",
+   "adj": "livingwood",
+   "value": 6.0,
+   "tags": [
+    "wood",
+    "magic",
+    "living"
+   ],
+   "affinity": {
+    "elf": 3,
+    "fey": 2
+   }
+  },
+  {
+   "id": "bone",
+   "adj": "bone",
+   "value": 0.4,
+   "tags": [
+    "bone",
+    "crude",
+    "gore"
+   ],
+   "affinity": {
+    "orc": 3,
+    "undead": 3,
+    "goblin": 2
+   }
+  },
+  {
+   "id": "horn",
+   "adj": "horn",
+   "value": 0.9,
+   "tags": [
+    "horn"
+   ],
+   "affinity": {
+    "orc": 2,
+    "giant": 2,
+    "dwarf": 1
+   }
+  },
+  {
+   "id": "stone",
+   "adj": "stone",
+   "value": 0.3,
+   "tags": [
+    "stone",
+    "crude"
+   ],
+   "affinity": {
+    "troll": 3,
+    "giant": 3,
+    "goblin": 1
+   }
+  },
+  {
+   "id": "obsidian",
+   "adj": "obsidian",
+   "value": 1.5,
+   "tags": [
+    "stone",
+    "sharp",
+    "brittle"
+   ],
+   "affinity": {
+    "orc": 2,
+    "goblin": 2,
+    "dragon": 1
+   }
+  },
+  {
+   "id": "crystal",
+   "adj": "crystal",
+   "value": 3.0,
+   "tags": [
+    "crystal",
+    "magic"
+   ],
+   "affinity": {
+    "gnome": 2,
+    "fey": 2,
+    "elf": 1
+   }
+  },
+  {
+   "id": "leather",
+   "adj": "leather",
+   "value": 0.6,
+   "tags": [
+    "leather"
+   ],
+   "affinity": {
+    "human": 2,
+    "elf": 2,
+    "halfling": 2
+   }
+  },
+  {
+   "id": "hide",
+   "adj": "hide",
+   "value": 0.4,
+   "tags": [
+    "hide",
+    "crude"
+   ],
+   "affinity": {
+    "orc": 3,
+    "troll": 2
+   }
+  },
+  {
+   "id": "cloth",
+   "adj": "cloth",
+   "value": 0.4,
+   "tags": [
+    "cloth"
+   ],
+   "affinity": {
+    "human": 2,
+    "halfling": 2
+   }
+  },
+  {
+   "id": "clay",
+   "adj": "clay",
+   "value": 0.2,
+   "tags": [
+    "clay",
+    "humble"
+   ],
+   "affinity": {
+    "halfling": 2,
+    "human": 2,
+    "goblin": 1
+   }
+  },
+  {
+   "id": "glass",
+   "adj": "glass",
+   "value": 1.2,
+   "tags": [
+    "glass",
+    "fragile"
+   ],
+   "affinity": {
+    "gnome": 2,
+    "elf": 1
+   }
+  },
+  {
+   "id": "dragonscale",
+   "adj": "dragonscale",
+   "value": 15.0,
+   "tags": [
+    "scale",
+    "magic",
+    "fire"
+   ],
+   "affinity": {
+    "dragon": 3
+   }
+  },
+  {
+   "id": "vellum",
+   "adj": "vellum",
+   "value": 1.0,
+   "tags": [
+    "paper"
+   ],
+   "affinity": {
+    "human": 2,
+    "elf": 2
+   }
+  },
+  {
+   "id": "paper",
+   "adj": "paper",
+   "value": 0.5,
+   "tags": [
+    "paper"
+   ],
+   "affinity": {
+    "human": 2,
+    "gnome": 2
+   }
+  },
+  {
+   "id": "bark",
+   "adj": "bark",
+   "value": 0.3,
+   "tags": [
+    "paper",
+    "nature"
+   ],
+   "affinity": {
+    "elf": 2,
+    "fey": 2
+   }
+  }
+ ],
+ "qualities": [
+  {
+   "id": "crude",
+   "adj": "crude",
+   "value": 0.5,
+   "weight": 3,
+   "tags": [
+    "crude"
+   ],
+   "affinity": {
+    "goblin": 3,
+    "troll": 3,
+    "orc": 2
+   }
+  },
+  {
+   "id": "worn",
+   "adj": "worn",
+   "value": 0.7,
+   "weight": 4,
+   "tags": [
+    "old"
+   ]
+  },
+  {
+   "id": "plain",
+   "adj": "",
+   "value": 1.0,
+   "weight": 8,
+   "tags": []
+  },
+  {
+   "id": "fine",
+   "adj": "fine",
+   "value": 1.8,
+   "weight": 3,
+   "tags": [
+    "fine"
+   ],
+   "affinity": {
+    "elf": 2,
+    "human": 2,
+    "dwarf": 2
+   }
+  },
+  {
+   "id": "masterwork",
+   "adj": "masterwork",
+   "value": 4.0,
+   "weight": 1,
+   "tags": [
+    "masterwork"
+   ],
+   "affinity": {
+    "dwarf": 3,
+    "elf": 2,
+    "gnome": 2
+   }
+  },
+  {
+   "id": "ancient",
+   "adj": "ancient",
+   "value": 3.0,
+   "weight": 1,
+   "tags": [
+    "ancient",
+    "lore"
+   ],
+   "affinity": {
+    "undead": 2,
+    "giant": 2,
+    "dragon": 2,
+    "elf": 1
+   }
+  }
+ ],
+ "enchant_prefix": [
+  "Flaming",
+  "Frost",
+  "Venomous",
+  "Shadowed",
+  "Blessed",
+  "Cursed",
+  "Thundering",
+  "Vampiric",
+  "Keen",
+  "Warding",
+  "Whispering",
+  "Mending",
+  "Hungering",
+  "Sunlit",
+  "Moonlit",
+  "Runed"
+ ],
+ "enchant_tags": {
+  "Flaming": [
+   "fire"
+  ],
+  "Frost": [
+   "ice",
+   "cold"
+  ],
+  "Venomous": [
+   "poison"
+  ],
+  "Shadowed": [
+   "dark",
+   "stealth"
+  ],
+  "Blessed": [
+   "holy"
+  ],
+  "Cursed": [
+   "cursed",
+   "dark"
+  ],
+  "Thundering": [
+   "storm"
+  ],
+  "Vampiric": [
+   "dark",
+   "blood"
+  ],
+  "Keen": [
+   "sharp"
+  ],
+  "Warding": [
+   "protect"
+  ],
+  "Whispering": [
+   "fey",
+   "secret"
+  ],
+  "Mending": [
+   "heal"
+  ],
+  "Hungering": [
+   "dark",
+   "cursed"
+  ],
+  "Sunlit": [
+   "holy",
+   "light"
+  ],
+  "Moonlit": [
+   "elf",
+   "magic"
+  ],
+  "Runed": [
+   "dwarf",
+   "runes"
+  ]
+ }
+}

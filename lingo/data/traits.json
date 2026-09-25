@@ -1,0 +1,306 @@
+{
+  "_doc": "Personality traits. tagWeights multiply the weight of phrases carrying that tag (0 = never). tics are post-filters applied to every line. custom = default custom slots a character with this trait might use (a game may copy them). Modelled on RimWorld traits.",
+  "traits": [
+    {
+      "id": "abrasive",
+      "name": "Abrasive",
+      "desc": "Rude by default; insults come easily, compliments do not.",
+      "tagWeights": {
+        "rude": 3,
+        "insult": 2.5,
+        "gentle": 0.2,
+        "polite": 0.2,
+        "crude": 2
+      },
+      "tics": [
+        "clipped"
+      ]
+    },
+    {
+      "id": "kind",
+      "name": "Kind",
+      "desc": "Warm, encouraging, hates cruelty.",
+      "tagWeights": {
+        "gentle": 3,
+        "polite": 2,
+        "compliment": 2,
+        "rude": 0.1,
+        "insult": 0.05,
+        "cruel": 0
+      }
+    },
+    {
+      "id": "shy",
+      "name": "Shy",
+      "desc": "Short, hesitant lines; avoids confrontation.",
+      "tagWeights": {
+        "short": 2.5,
+        "timid": 3,
+        "long": 0.3,
+        "confident": 0.2,
+        "insult": 0.2,
+        "brag": 0.1
+      },
+      "tics": [
+        "um",
+        "hesitant"
+      ]
+    },
+    {
+      "id": "pompous",
+      "name": "Pompous",
+      "desc": "Formal, flowery, talks about themselves.",
+      "tagWeights": {
+        "formal": 3,
+        "long": 2,
+        "brag": 3,
+        "casual": 0.1,
+        "crude": 0
+      },
+      "tics": [
+        "flowery"
+      ]
+    },
+    {
+      "id": "bloodlust",
+      "name": "Bloodlust",
+      "desc": "Enjoys violence; threats and gore delight them.",
+      "tagWeights": {
+        "violent": 3,
+        "aggressive": 2.5,
+        "threat": 2,
+        "gore": 3,
+        "gentle": 0.2,
+        "pacifist": 0
+      }
+    },
+    {
+      "id": "pious",
+      "name": "Pious",
+      "desc": "Invokes the gods; oaths and blessings.",
+      "tagWeights": {
+        "religious": 4,
+        "oath": 3,
+        "crude": 0.2,
+        "blasphemy": 0
+      }
+    },
+    {
+      "id": "cynical",
+      "name": "Cynical",
+      "desc": "Nothing works out; expects the worst.",
+      "tagWeights": {
+        "gloomy": 2.5,
+        "sarcastic": 3,
+        "hopeful": 0.2,
+        "joyful": 0.3
+      }
+    },
+    {
+      "id": "jolly",
+      "name": "Jolly",
+      "desc": "Laughs, jokes, sees the bright side.",
+      "tagWeights": {
+        "happy": 3,
+        "joke": 3,
+        "joyful": 2,
+        "gloomy": 0.2,
+        "cruel": 0.2
+      }
+    },
+    {
+      "id": "nervous",
+      "name": "Nervous",
+      "desc": "Worries aloud, hesitates under pressure.",
+      "tagWeights": {
+        "worried": 3,
+        "timid": 2,
+        "confident": 0.3
+      },
+      "tics": [
+        "hesitant"
+      ]
+    },
+    {
+      "id": "greedy",
+      "name": "Greedy",
+      "desc": "Everything is about coin.",
+      "tagWeights": {
+        "money": 4,
+        "trade": 2,
+        "generous": 0.1
+      }
+    },
+    {
+      "id": "brave",
+      "name": "Brave",
+      "desc": "Unshaken; combat lines are calm and sure.",
+      "tagWeights": {
+        "confident": 3,
+        "heroic": 3,
+        "timid": 0.1,
+        "worried": 0.3
+      }
+    },
+    {
+      "id": "coward",
+      "name": "Coward",
+      "desc": "Flees, begs, blames.",
+      "tagWeights": {
+        "timid": 3,
+        "worried": 2,
+        "cowardly": 4,
+        "heroic": 0,
+        "brag": 0.2
+      }
+    },
+    {
+      "id": "gruff",
+      "name": "Gruff",
+      "desc": "Few words, none of them soft.",
+      "tagWeights": {
+        "short": 3,
+        "long": 0.2,
+        "gentle": 0.3,
+        "formal": 0.5,
+        "blunt": 3
+      },
+      "tics": [
+        "clipped"
+      ]
+    },
+    {
+      "id": "romantic",
+      "name": "Romantic",
+      "desc": "Flirts, sighs, quotes poetry.",
+      "tagWeights": {
+        "romantic": 4,
+        "flirt": 3,
+        "flowery": 2,
+        "blunt": 0.3
+      }
+    },
+    {
+      "id": "scholar",
+      "name": "Scholar",
+      "desc": "Lectures about history and magic.",
+      "tagWeights": {
+        "lore": 4,
+        "long": 2,
+        "formal": 1.5,
+        "crude": 0.2
+      }
+    },
+    {
+      "id": "drunkard",
+      "name": "Drunkard",
+      "desc": "Slurs, rambles, wants ale.",
+      "tagWeights": {
+        "drink": 4,
+        "casual": 2,
+        "formal": 0.2,
+        "rambling": 3
+      },
+      "tics": [
+        "drawl"
+      ]
+    },
+    {
+      "id": "grieving",
+      "name": "Grieving",
+      "desc": "Recently lost someone; it colours everything.",
+      "tagWeights": {
+        "grief": 5,
+        "gloomy": 2,
+        "joyful": 0.2,
+        "joke": 0.3
+      }
+    },
+    {
+      "id": "paranoid",
+      "name": "Paranoid",
+      "desc": "Trusts nobody; sees plots.",
+      "tagWeights": {
+        "suspicious": 4,
+        "hostile": 1.5,
+        "friendly": 0.5,
+        "worried": 1.5
+      }
+    },
+    {
+      "id": "archaic",
+      "name": "Old-fashioned",
+      "desc": "Speaks like the old texts: thee, thou, hath.",
+      "tagWeights": {
+        "formal": 2,
+        "lore": 1.5,
+        "casual": 0.3
+      },
+      "tics": [
+        "archaic"
+      ]
+    },
+    {
+      "id": "honorable",
+      "name": "Honorable",
+      "desc": "Oaths, duty, fair dealing.",
+      "tagWeights": {
+        "honor": 4,
+        "oath": 2,
+        "polite": 1.5,
+        "treacherous": 0,
+        "cruel": 0.2
+      }
+    },
+    {
+      "id": "cruel",
+      "name": "Cruel",
+      "desc": "Enjoys others' pain.",
+      "tagWeights": {
+        "cruel": 4,
+        "insult": 2,
+        "gore": 2,
+        "gentle": 0,
+        "compliment": 0.2
+      }
+    },
+    {
+      "id": "loyal",
+      "name": "Loyal",
+      "desc": "Stands by friends and faction.",
+      "tagWeights": {
+        "loyal": 4,
+        "friendly": 1.5,
+        "treacherous": 0
+      }
+    },
+    {
+      "id": "sarcastic",
+      "name": "Sarcastic",
+      "desc": "Says the opposite with a straight face.",
+      "tagWeights": {
+        "sarcastic": 4,
+        "joke": 1.5,
+        "earnest": 0.3
+      }
+    },
+    {
+      "id": "hungry",
+      "name": "Always hungry",
+      "desc": "Food is on their mind.",
+      "tagWeights": {
+        "food": 4,
+        "hunger": 3
+      }
+    },
+    {
+      "id": "third_person",
+      "name": "Speaks in third person",
+      "desc": "A verbal quirk, not a personality.",
+      "tagWeights": {},
+      "tics": [
+        "thirdperson"
+      ]
+    }
+  ]
+}

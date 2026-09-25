@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- Broadleaf cluster 4: ovate, pointed leaves (hornbeam / elm shape) with a
+       hint of autumn - two leaves have turned yellow-olive. Nine leaves, dense
+       in the middle with ragged transparent edges. -->
+  <defs>
+    <linearGradient id="top" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0" stop-color="#7f9556"/>
+      <stop offset="0.6" stop-color="#5c7642"/>
+      <stop offset="1" stop-color="#485f35"/>
+    </linearGradient>
+    <linearGradient id="turn" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0" stop-color="#a8a45a"/>
+      <stop offset="0.6" stop-color="#8b8a48"/>
+      <stop offset="1" stop-color="#6b7239"/>
+    </linearGradient>
+    <linearGradient id="turn2" x1="0.2" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b09d55"/>
+      <stop offset="0.6" stop-color="#8f8646"/>
+      <stop offset="1" stop-color="#6d6a38"/>
+    </linearGradient>
+    <linearGradient id="under" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#71825a"/>
+      <stop offset="1" stop-color="#4b5a3d"/>
+    </linearGradient>
+    <path id="ov" d="M0,-50 C6,-40 24,-30 28,-4 C30,18 16,42 0,50 C-16,42 -30,18 -28,-4 C-24,-30 -6,-40 0,-50 Z"/>
+    <path id="ovv" d="M0,-47 L0,48 M0,-30 L12,-20 M0,-30 L-12,-20 M0,-18 L20,-6 M0,-18 L-20,-6 M0,-4 L24,8 M0,-4 L-24,8 M0,10 L20,22 M0,10 L-20,22 M0,24 L13,34 M0,24 L-13,34"/>
+  </defs>
+
+  <path d="M128,140 L52,70 M128,140 L130,34 M128,140 L204,60 M128,140 L226,150 M128,140 L184,220 M128,140 L100,226 M128,140 L36,150 M128,140 L90,100 M128,140 L170,116" fill="none" stroke="#5c4a36" stroke-width="2.8" stroke-linecap="round"/>
+
+  <g transform="translate(52 72) rotate(-48) scale(0.9)">
+    <use href="#ov" fill="url(#under)" stroke="#3f4c35" stroke-width="0.8"/>
+    <use href="#ovv" fill="none" stroke="#5d6d4e" stroke-width="1.2" opacity="0.8"/>
+  </g>
+  <g transform="translate(204 62) rotate(44) scale(0.85)">
+    <use href="#ov" fill="url(#under)" stroke="#3f4c35" stroke-width="0.8"/>
+    <use href="#ovv" fill="none" stroke="#5d6d4e" stroke-width="1.2" opacity="0.8"/>
+  </g>
+  <g transform="translate(36 152) rotate(-98) scale(0.85)">
+    <use href="#ov" fill="url(#under)" stroke="#3f4c35" stroke-width="0.8"/>
+    <use href="#ovv" fill="none" stroke="#5d6d4e" stroke-width="1.2" opacity="0.8"/>
+  </g>
+  <g transform="translate(184 218) rotate(146) scale(0.9)">
+    <use href="#ov" fill="url(#under)" stroke="#3f4c35" stroke-width="0.8"/>
+    <use href="#ovv" fill="none" stroke="#5d6d4e" stroke-width="1.2" opacity="0.8"/>
+  </g>
+
+  <g transform="translate(130 36) rotate(-4) scale(1.0)">
+    <use href="#ov" fill="#2a331f" opacity="0.4" transform="translate(2 3)"/>
+    <use href="#ov" fill="url(#top)" stroke="#39482c" stroke-width="0.7"/>
+    <use href="#ovv" fill="none" stroke="#4a5e36" stroke-width="1.1" opacity="0.85"/>
+  </g>
+  <g transform="translate(226 148) rotate(100) scale(0.95)">
+    <use href="#ov" fill="#2a331f" opacity="0.4" transform="translate(2 3)"/>
+    <use href="#ov" fill="url(#turn)" stroke="#4d4f2c" stroke-width="0.7"/>
+    <use href="#ovv" fill="none" stroke="#6c6d3a" stroke-width="1.1" opacity="0.8"/>
+  </g>
+  <g transform="translate(100 224) rotate(196) scale(1.0)">
+    <use href="#ov" fill="#2a331f" opacity="0.4" transform="translate(2 3)"/>
+    <use href="#ov" fill="url(#top)" stroke="#39482c" stroke-width="0.7"/>
+    <use href="#ovv" fill="none" stroke="#4a5e36" stroke-width="1.1" opacity="0.85"/>
+  </g>
+  <g transform="translate(92 100) rotate(-34) scale(1.05)">
+    <use href="#ov" fill="#2a331f" opacity="0.45" transform="translate(2 3)"/>
+    <use href="#ov" fill="url(#turn2)" stroke="#4d4f2c" stroke-width="0.7"/>
+    <use href="#ovv" fill="none" stroke="#6c6d3a" stroke-width="1.1" opacity="0.8"/>
+    <use href="#ovv" fill="none" stroke="#d1c684" stroke-width="0.5" opacity="0.4" transform="translate(-0.7 0.5)"/>
+  </g>
+  <g transform="translate(168 118) rotate(30) scale(1.1)">
+    <use href="#ov" fill="#2a331f" opacity="0.45" transform="translate(2 3)"/>
+    <use href="#ov" fill="url(#top)" stroke="#39482c" stroke-width="0.7"/>
+    <use href="#ovv" fill="none" stroke="#4a5e36" stroke-width="1.1" opacity="0.85"/>
+    <use href="#ovv" fill="none" stroke="#a3b673" stroke-width="0.5" opacity="0.45" transform="translate(-0.7 0.5)"/>
+  </g>
+</svg>

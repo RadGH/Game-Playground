@@ -1,0 +1,481 @@
+{
+ "version": 1,
+ "source": "src/game/enemySpells.js ENEMY_SPELLS const (canonical-data migration M497)",
+ "spells": {
+  "imp_fireball": {
+   "id": "imp_fireball",
+   "name": "Fireball",
+   "fxKind": "fire",
+   "cooldown": 2,
+   "target": "single",
+   "effect": {
+    "damage": 12
+   },
+   "animationMs": 640
+  },
+  "mage_arcane_blast": {
+   "id": "mage_arcane_blast",
+   "name": "Arcane Blast",
+   "fxKind": "fire",
+   "cooldown": 2,
+   "target": "single",
+   "effect": {
+    "damage": 14
+   },
+   "animationMs": 600
+  },
+  "acolyte_curse": {
+   "id": "acolyte_curse",
+   "name": "Wither Curse",
+   "fxKind": "shadow",
+   "cooldown": 3,
+   "target": "single",
+   "effect": {
+    "status": {
+     "type": "curse",
+     "duration": 3,
+     "power": 25,
+     "chance": 1
+    }
+   },
+   "animationMs": 680
+  },
+  "lich_drain_life": {
+   "id": "lich_drain_life",
+   "name": "Drain Life",
+   "fxKind": "shadow",
+   "cooldown": 3,
+   "target": "single",
+   "effect": {
+    "damage": 10,
+    "selfHeal": 10
+   },
+   "animationMs": 700
+  },
+  "frost_lance": {
+   "id": "frost_lance",
+   "name": "Frost Lance",
+   "fxKind": "ice",
+   "cooldown": 2,
+   "target": "single",
+   "effect": {
+    "damage": 8,
+    "status": {
+     "type": "freeze",
+     "duration": 1,
+     "power": 0,
+     "chance": 0.65
+    }
+   },
+   "animationMs": 580
+  },
+  "wraith_chill": {
+   "id": "wraith_chill",
+   "name": "Deathchill",
+   "fxKind": "ice",
+   "cooldown": 3,
+   "target": "single",
+   "effect": {
+    "damage": 14,
+    "statuses": [
+     {
+      "type": "slow",
+      "duration": 2,
+      "power": 0,
+      "chance": 1
+     },
+     {
+      "type": "bleed",
+      "duration": 2,
+      "power": 4,
+      "chance": 1
+     }
+    ]
+   },
+   "animationMs": 560
+  },
+  "priest_heal": {
+   "id": "priest_heal",
+   "name": "Mend",
+   "fxKind": "holy",
+   "cooldown": 3,
+   "target": "ally_lowest_hp",
+   "effect": {
+    "heal": 25
+   },
+   "animationMs": 600
+  },
+  "harpy_screech": {
+   "id": "harpy_screech",
+   "name": "Banshee Screech",
+   "fxKind": "holy",
+   "cooldown": 3,
+   "target": "aoe",
+   "effect": {
+    "damage": 6,
+    "status": {
+     "type": "confused",
+     "duration": 1,
+     "power": 0,
+     "chance": 0.45
+    }
+   },
+   "animationMs": 620
+  },
+  "druid_thorns": {
+   "id": "druid_thorns",
+   "name": "Thornwall",
+   "fxKind": "nature",
+   "cooldown": 3,
+   "target": "self",
+   "effect": {
+    "status": {
+     "type": "thorns",
+     "duration": 3,
+     "power": 10,
+     "chance": 1
+    }
+   },
+   "animationMs": 560
+  },
+  "serpent_venom": {
+   "id": "serpent_venom",
+   "name": "Venom Spit",
+   "fxKind": "nature",
+   "cooldown": 2,
+   "target": "single",
+   "effect": {
+    "statuses": [
+     {
+      "type": "poison",
+      "duration": 3,
+      "power": 5,
+      "chance": 1
+     },
+     {
+      "type": "poison",
+      "duration": 3,
+      "power": 5,
+      "chance": 1
+     }
+    ]
+   },
+   "animationMs": 560
+  },
+  "void_silence": {
+   "id": "void_silence",
+   "name": "Void Hush",
+   "fxKind": "shadow",
+   "cooldown": 4,
+   "target": "single",
+   "effect": {
+    "status": {
+     "type": "silence",
+     "duration": 2,
+     "power": 0,
+     "chance": 0.85
+    }
+   },
+   "animationMs": 640
+  },
+  "ritual_silence": {
+   "id": "ritual_silence",
+   "name": "Silencing Rite",
+   "fxKind": "shadow",
+   "cooldown": 4,
+   "target": "aoe",
+   "effect": {
+    "damage": 6,
+    "status": {
+     "type": "silence",
+     "duration": 1,
+     "power": 0,
+     "chance": 0.6
+    }
+   },
+   "animationMs": 680
+  },
+  "ash_blind": {
+   "id": "ash_blind",
+   "name": "Cinder Blind",
+   "fxKind": "fire",
+   "cooldown": 3,
+   "target": "single",
+   "effect": {
+    "statuses": [
+     {
+      "type": "burn",
+      "duration": 2,
+      "power": 5,
+      "chance": 1
+     },
+     {
+      "type": "blind",
+      "duration": 2,
+      "power": 0,
+      "chance": 0.7
+     }
+    ]
+   },
+   "animationMs": 580
+  },
+  "shadow_blind": {
+   "id": "shadow_blind",
+   "name": "Umbral Strike",
+   "fxKind": "shadow",
+   "cooldown": 3,
+   "target": "single",
+   "effect": {
+    "damage": 8,
+    "status": {
+     "type": "blind",
+     "duration": 2,
+     "power": 0,
+     "chance": 0.8
+    }
+   },
+   "animationMs": 580
+  },
+  "nightmare_hex": {
+   "id": "nightmare_hex",
+   "name": "Nightmare Hex",
+   "fxKind": "shadow",
+   "cooldown": 4,
+   "target": "single",
+   "effect": {
+    "status": {
+     "type": "sleep",
+     "duration": 2,
+     "power": 0,
+     "chance": 0.7
+    }
+   },
+   "animationMs": 700
+  },
+  "bone_grasp": {
+   "id": "bone_grasp",
+   "name": "Bone Grasp",
+   "fxKind": "nature",
+   "cooldown": 3,
+   "target": "single",
+   "effect": {
+    "damage": 5,
+    "status": {
+     "type": "root",
+     "duration": 2,
+     "power": 0,
+     "chance": 0.8
+    }
+   },
+   "animationMs": 600
+  },
+  "demon_disarm": {
+   "id": "demon_disarm",
+   "name": "Weapon Smash",
+   "fxKind": "fire",
+   "cooldown": 4,
+   "target": "single",
+   "effect": {
+    "damage": 10,
+    "status": {
+     "type": "disarm",
+     "duration": 2,
+     "power": 0,
+     "chance": 0.65
+    }
+   },
+   "animationMs": 640
+  },
+  "void_lance": {
+   "id": "void_lance",
+   "name": "Void Lance",
+   "fxKind": "shadow",
+   "cooldown": 2,
+   "target": "single",
+   "effect": {
+    "damage": 16,
+    "status": {
+     "type": "slow",
+     "duration": 2,
+     "power": 0,
+     "chance": 0.5
+    }
+   },
+   "animationMs": 600
+  },
+  "cosmic_rupture": {
+   "id": "cosmic_rupture",
+   "name": "Cosmic Rupture",
+   "fxKind": "shadow",
+   "cooldown": 3,
+   "target": "aoe",
+   "effect": {
+    "damage": 12,
+    "status": {
+     "type": "dazed",
+     "duration": 2,
+     "power": 0,
+     "chance": 0.55
+    }
+   },
+   "animationMs": 720
+  },
+  "infernal_brand": {
+   "id": "infernal_brand",
+   "name": "Infernal Brand",
+   "fxKind": "fire",
+   "cooldown": 3,
+   "target": "single",
+   "effect": {
+    "statuses": [
+     {
+      "type": "burn",
+      "duration": 3,
+      "power": 12,
+      "chance": 1
+     },
+     {
+      "type": "marked",
+      "duration": 2,
+      "power": 15,
+      "chance": 0.75
+     }
+    ]
+   },
+   "animationMs": 660
+  },
+  "molten_shatter": {
+   "id": "molten_shatter",
+   "name": "Molten Shatter",
+   "fxKind": "fire",
+   "cooldown": 3,
+   "target": "aoe",
+   "effect": {
+    "damage": 14,
+    "status": {
+     "type": "burn",
+     "duration": 2,
+     "power": 8,
+     "chance": 0.8
+    }
+   },
+   "animationMs": 700
+  },
+  "bandit_flashbomb": {
+   "id": "bandit_flashbomb",
+   "name": "Flash Bomb",
+   "fxKind": "holy",
+   "cooldown": 3,
+   "target": "aoe",
+   "effect": {
+    "damage": 5,
+    "statuses": [
+     {
+      "type": "blind",
+      "duration": 1,
+      "power": 0,
+      "chance": 0.6
+     },
+     {
+      "type": "confused",
+      "duration": 1,
+      "power": 0,
+      "chance": 0.5
+     }
+    ]
+   },
+   "animationMs": 600
+  },
+  "brute_slam": {
+   "id": "brute_slam",
+   "name": "Seismic Slam",
+   "fxKind": "nature",
+   "cooldown": 3,
+   "target": "aoe",
+   "effect": {
+    "damage": 18,
+    "status": {
+     "type": "dazed",
+     "duration": 2,
+     "power": 0,
+     "chance": 0.7
+    }
+   },
+   "animationMs": 700
+  },
+  "sovereign_voidstorm": {
+   "id": "sovereign_voidstorm",
+   "name": "Void Storm",
+   "fxKind": "shadow",
+   "cooldown": 5,
+   "target": "aoe",
+   "effect": {
+    "damage": 30,
+    "statuses": [
+     {
+      "type": "curse",
+      "duration": 2,
+      "power": 20,
+      "chance": 0.8
+     },
+     {
+      "type": "slow",
+      "duration": 2,
+      "power": 0,
+      "chance": 1
+     }
+    ]
+   },
+   "animationMs": 900,
+   "windUp": {
+    "rounds": 2,
+    "interruptThreshold": 40
+   },
+   "stealable": false
+  },
+  "lich_soul_shatter": {
+   "id": "lich_soul_shatter",
+   "name": "Soul Shatter",
+   "fxKind": "shadow",
+   "cooldown": 5,
+   "target": "aoe",
+   "effect": {
+    "damage": 22,
+    "status": {
+     "type": "curse",
+     "duration": 3,
+     "power": 30,
+     "chance": 1
+    }
+   },
+   "animationMs": 820,
+   "windUp": {
+    "rounds": 2,
+    "interruptThreshold": 35
+   },
+   "stealable": false
+  },
+  "titan_magma_wave": {
+   "id": "titan_magma_wave",
+   "name": "Magma Wave",
+   "fxKind": "fire",
+   "cooldown": 4,
+   "target": "aoe",
+   "effect": {
+    "damage": 25,
+    "status": {
+     "type": "burn",
+     "duration": 3,
+     "power": 8,
+     "chance": 0.9
+    }
+   },
+   "animationMs": 800,
+   "windUp": {
+    "rounds": 1,
+    "interruptThreshold": 30
+   },
+   "stealable": false
+  }
+ }
+}

@@ -1,0 +1,86 @@
+{
+ "_doc": "What kind of thing each enemy is, and which fights are made of people. Ours, not the original game's — tools/build-emberveil-data.mjs never touches this file. A toll on the road is collected by somebody with hands, so the toll and bandit events, and the crossings that end in a brawl, pick a fight from `roadBands` (or a humanoid encounter already in the zone's pool) instead of whatever happens to haunt the zone. Before this, a bandit demanding a toll on the Dust Roads could summon four cinder hounds.",
+ "schema": 1,
+ "families": {
+  "humanoid": "people and things that stand, talk and take money: bandits, goblins, cultists, knights, wardens",
+  "beast": "four legs, wings, fangs — nothing that negotiates",
+  "undead": "wraiths, shades and the walking remains of people",
+  "construct": "golems, elementals, shards — made things",
+  "horror": "void and primordial things with no shape worth naming"
+ },
+ "enemies": {
+  "bandit": "humanoid",
+  "bandit_captain": "humanoid",
+  "goblin_scout": "humanoid",
+  "goblin_warrior": "humanoid",
+  "goblin_shaman": "humanoid",
+  "goblin_warlord": "humanoid",
+  "veil_cultist": "humanoid",
+  "veil_sorcerer": "humanoid",
+  "veil_warden": "humanoid",
+  "veilspawn_herald": "humanoid",
+  "dragon_cultist": "humanoid",
+  "wyrm_warrior": "humanoid",
+  "hell_knight": "humanoid",
+  "demon_brute": "humanoid",
+  "imp": "humanoid",
+  "abyssal_knight": "humanoid",
+  "void_prophet": "humanoid",
+  "cinder_hound": "beast",
+  "corrupted_wolf": "beast",
+  "corrupted_bear": "beast",
+  "giant_spider": "beast",
+  "dragon_whelp": "beast",
+  "frost_wyrm": "beast",
+  "storm_dragon": "beast",
+  "genesis_worm": "beast",
+  "ash_wraith": "undead",
+  "void_shade": "undead",
+  "void_wraith": "undead",
+  "molten_golem": "construct",
+  "primordial_elemental": "construct",
+  "reality_shard": "construct",
+  "star_horror": "horror",
+  "cosmic_titan": "horror"
+ },
+ "roadBandsByAct": {
+  "0": ["road_toll_band"],
+  "1": ["road_toll_band", "bandit_ambush"],
+  "2": ["veil_toll_watch", "veil_cult_camp"],
+  "3": ["hell_toll_gate", "hell_garrison"],
+  "4": ["void_toll_choir"],
+  "5": ["abyssal_toll_watch"],
+  "6": ["dragon_toll_watch"]
+ },
+ "extraEncounters": {
+  "road_toll_band": {
+   "name": "Toll Collectors",
+   "enemies": [{ "count": 3, "ref": "bandit" }, { "count": 1, "ref": "bandit_captain" }]
+  },
+  "veil_toll_watch": {
+   "name": "Veil Tithe-Takers",
+   "enemies": [{ "count": 2, "ref": "veil_cultist" }, { "count": 1, "ref": "veil_warden" }]
+  },
+  "hell_toll_gate": {
+   "name": "Gate Wardens of the Breach",
+   "enemies": [{ "count": 2, "ref": "hell_knight" }, { "count": 2, "ref": "imp" }]
+  },
+  "void_toll_choir": {
+   "name": "The Toll Choir",
+   "enemies": [{ "count": 1, "ref": "void_prophet" }, { "count": 2, "ref": "veil_cultist" }]
+  },
+  "abyssal_toll_watch": {
+   "name": "Abyssal Toll Watch",
+   "enemies": [{ "count": 2, "ref": "abyssal_knight" }, { "count": 1, "ref": "veilspawn_herald" }]
+  },
+  "dragon_toll_watch": {
+   "name": "Scale-Tithe Watch",
+   "enemies": [{ "count": 2, "ref": "dragon_cultist" }, { "count": 1, "ref": "wyrm_warrior" }]
+  }
+ },
+ "humanoidEvents": {
+  "_doc": "Random and dialog events whose fight must be against people. Matched on the event id (exact, or the prefix before an underscore run) — everything about a toll, a bandit, a robber, a press-gang or a warden.",
+  "prefixes": ["bandit", "combat_bandit", "combat_highway", "toll", "robber", "brigand", "mercenar", "deserter", "press_gang", "warden", "cult", "veil", "smuggler", "thug", "raider"],
+  "ids": ["combat_bandit_toll", "combat_highway_robbers", "bandit_protection_racket", "bandit_deserter_plea", "bandit_reformed_leader", "bandit_heist_offer", "bandit_last_job", "shady_wanderer"]
+ }
+}

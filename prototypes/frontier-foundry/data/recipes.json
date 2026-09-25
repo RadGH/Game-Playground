@@ -1,0 +1,1400 @@
+{
+  "schema": 1,
+  "note": "Crafting recipes. machines[] lists the structure ids that can run it. time is seconds at full power; power is the extra draw while running (on top of the structure's idle draw). Drills, pumps and harvesters do NOT use recipes - they pull from a map node.",
+  "recipes": [
+    {
+      "id": "smelt_iron",
+      "name": "Smelt Iron",
+      "category": "smelting",
+      "machines": [
+        "smelter",
+        "arc_furnace",
+        "plasma_refinery"
+      ],
+      "time": 4.4,
+      "power": 24,
+      "inputs": {
+        "iron_ore": 4,
+        "coal": 1
+      },
+      "outputs": {
+        "iron_ingot": 2
+      },
+      "unlock": "t_landfall"
+    },
+    {
+      "id": "smelt_copper",
+      "name": "Smelt Copper",
+      "category": "smelting",
+      "machines": [
+        "smelter",
+        "arc_furnace",
+        "plasma_refinery"
+      ],
+      "time": 4.4,
+      "power": 24,
+      "inputs": {
+        "copper_ore": 4,
+        "coal": 1
+      },
+      "outputs": {
+        "copper_ingot": 2
+      },
+      "unlock": "t_landfall"
+    },
+    {
+      "id": "smelt_bronze",
+      "name": "Cast Bronze",
+      "category": "smelting",
+      "machines": [
+        "smelter",
+        "arc_furnace"
+      ],
+      "time": 6,
+      "power": 24,
+      "inputs": {
+        "copper_ingot": 2,
+        "tin_ore": 3,
+        "coal": 1
+      },
+      "outputs": {
+        "bronze_ingot": 2
+      },
+      "unlock": "t_alloys"
+    },
+    {
+      "id": "make_steel",
+      "name": "Burn Steel",
+      "category": "smelting",
+      "machines": [
+        "arc_furnace",
+        "plasma_refinery"
+      ],
+      "time": 8,
+      "power": 90,
+      "inputs": {
+        "iron_ingot": 3,
+        "coal": 2
+      },
+      "outputs": {
+        "steel_ingot": 1
+      },
+      "unlock": "t_steel"
+    },
+    {
+      "id": "smelt_titanium",
+      "name": "Smelt Titanium",
+      "category": "smelting",
+      "machines": [
+        "arc_furnace",
+        "plasma_refinery"
+      ],
+      "time": 12,
+      "power": 140,
+      "inputs": {
+        "titanium_ore": 3,
+        "coal": 2
+      },
+      "outputs": {
+        "titanium_ingot": 1
+      },
+      "unlock": "t_titanium"
+    },
+    {
+      "id": "smelt_tungsten",
+      "name": "Smelt Tungsten",
+      "category": "smelting",
+      "machines": [
+        "arc_furnace",
+        "plasma_refinery"
+      ],
+      "time": 14,
+      "power": 170,
+      "inputs": {
+        "tungsten_ore": 3,
+        "coal": 3
+      },
+      "outputs": {
+        "tungsten_bar": 1
+      },
+      "unlock": "t_refractory"
+    },
+    {
+      "id": "crush_stone",
+      "name": "Crush Stone to Sand",
+      "category": "crushing",
+      "machines": [
+        "crusher"
+      ],
+      "time": 2,
+      "power": 25,
+      "inputs": {
+        "stone": 2
+      },
+      "outputs": {
+        "sand": 1
+      },
+      "unlock": "t_landfall"
+    },
+    {
+      "id": "sort_rubble",
+      "name": "Sort Rubble",
+      "category": "crushing",
+      "machines": [
+        "crusher"
+      ],
+      "time": 5,
+      "power": 30,
+      "inputs": {
+        "stone": 6
+      },
+      "outputs": {
+        "iron_ore": 1,
+        "copper_ore": 1
+      },
+      "unlock": "t_crushing"
+    },
+    {
+      "id": "leach_tailings",
+      "name": "Leach Tailings",
+      "category": "crushing",
+      "machines": [
+        "crusher",
+        "chemical_plant"
+      ],
+      "time": 9,
+      "power": 45,
+      "inputs": {
+        "stone": 8,
+        "sulfuric_acid": 4
+      },
+      "outputs": {
+        "iron_ore": 3,
+        "silver_ore": 1
+      },
+      "unlock": "t_chemistry"
+    },
+    {
+      "id": "char_biomass",
+      "name": "Char Biomass",
+      "category": "kiln",
+      "machines": [
+        "kiln",
+        "umbral_kiln"
+      ],
+      "time": 6,
+      "power": 15,
+      "inputs": {
+        "biomass": 4
+      },
+      "outputs": {
+        "coal": 1
+      },
+      "unlock": "t_landfall"
+    },
+    {
+      "id": "calcine_lime",
+      "name": "Calcine Lime",
+      "category": "kiln",
+      "machines": [
+        "kiln",
+        "umbral_kiln"
+      ],
+      "time": 7,
+      "power": 30,
+      "inputs": {
+        "stone": 4,
+        "coal": 1
+      },
+      "outputs": {
+        "concrete": 3
+      },
+      "unlock": "t_masonry"
+    },
+    {
+      "id": "make_concrete",
+      "name": "Mix Concrete",
+      "category": "building",
+      "machines": [
+        "concrete_mixer"
+      ],
+      "time": 5,
+      "power": 30,
+      "inputs": {
+        "stone": 4,
+        "sand": 2,
+        "water": 10
+      },
+      "outputs": {
+        "concrete": 5
+      },
+      "unlock": "t_masonry"
+    },
+    {
+      "id": "make_glass",
+      "name": "Blow Glass",
+      "category": "glass",
+      "machines": [
+        "glassworks"
+      ],
+      "time": 5,
+      "power": 45,
+      "inputs": {
+        "sand": 3,
+        "coal": 1
+      },
+      "outputs": {
+        "glass": 2
+      },
+      "unlock": "t_glass"
+    },
+    {
+      "id": "grind_lens",
+      "name": "Grind Lens",
+      "category": "glass",
+      "machines": [
+        "glassworks",
+        "glimmer_still",
+        "nano_forge"
+      ],
+      "time": 12,
+      "power": 70,
+      "inputs": {
+        "glass": 4,
+        "silver_ore": 1
+      },
+      "outputs": {
+        "lens": 1
+      },
+      "unlock": "t_optics"
+    },
+    {
+      "id": "melt_ice",
+      "name": "Melt Ice",
+      "category": "fluids",
+      "machines": [
+        "chemical_plant",
+        "kiln"
+      ],
+      "time": 4,
+      "power": 40,
+      "inputs": {
+        "ice": 4
+      },
+      "outputs": {
+        "water": 12
+      },
+      "unlock": "t_landfall"
+    },
+    {
+      "id": "refine_oil",
+      "name": "Refine Crude",
+      "category": "fluids",
+      "machines": [
+        "refinery"
+      ],
+      "time": 8,
+      "power": 110,
+      "inputs": {
+        "crude_oil": 20
+      },
+      "outputs": {
+        "fuel": 8,
+        "lubricant": 2
+      },
+      "unlock": "t_oil"
+    },
+    {
+      "id": "crack_heavy",
+      "name": "Crack Heavy Ends",
+      "category": "fluids",
+      "machines": [
+        "cracking_tower"
+      ],
+      "time": 9,
+      "power": 130,
+      "inputs": {
+        "crude_oil": 15,
+        "water": 10
+      },
+      "outputs": {
+        "fuel": 6,
+        "natural_gas": 8
+      },
+      "unlock": "t_cracking"
+    },
+    {
+      "id": "crack_methane",
+      "name": "Crack Methane",
+      "category": "fluids",
+      "machines": [
+        "cracking_tower"
+      ],
+      "time": 8,
+      "power": 120,
+      "inputs": {
+        "methane": 12
+      },
+      "outputs": {
+        "hydrogen": 10,
+        "coal": 1
+      },
+      "unlock": "t_cracking"
+    },
+    {
+      "id": "make_polymer",
+      "name": "Press Polymer",
+      "category": "chemistry",
+      "machines": [
+        "polymer_press",
+        "chemical_plant"
+      ],
+      "time": 6,
+      "power": 80,
+      "inputs": {
+        "crude_oil": 10,
+        "coal": 1
+      },
+      "outputs": {
+        "polymer": 4
+      },
+      "unlock": "t_polymers"
+    },
+    {
+      "id": "sweeten_crude",
+      "name": "Sweeten Crude",
+      "category": "chemistry",
+      "machines": [
+        "chemical_plant",
+        "cracking_tower"
+      ],
+      "time": 9,
+      "power": 90,
+      "inputs": {
+        "crude_oil": 15,
+        "water": 6
+      },
+      "outputs": {
+        "sulfur": 5,
+        "fuel": 3
+      },
+      "unlock": "t_chemistry",
+      "desc": "Pulls the sour out of crude oil. Slower than digging sulfur, but oil is everywhere and sulfur is not - and a world with one small sulfur patch used to be a world where the chemistry pack ran out for good."
+    },
+    {
+      "id": "make_acid",
+      "name": "Cook Acid",
+      "category": "chemistry",
+      "machines": [
+        "chemical_plant"
+      ],
+      "time": 6,
+      "power": 75,
+      "inputs": {
+        "sulfur": 3,
+        "water": 8
+      },
+      "outputs": {
+        "sulfuric_acid": 6
+      },
+      "unlock": "t_chemistry"
+    },
+    {
+      "id": "make_resin",
+      "name": "Blend Resin",
+      "category": "chemistry",
+      "machines": [
+        "chemical_plant",
+        "polymer_press"
+      ],
+      "time": 7,
+      "power": 70,
+      "inputs": {
+        "crude_oil": 8,
+        "sulfur": 2
+      },
+      "outputs": {
+        "resin": 4
+      },
+      "unlock": "t_polymers"
+    },
+    {
+      "id": "make_oxidizer",
+      "name": "Make Oxidizer",
+      "category": "chemistry",
+      "machines": [
+        "chemical_plant"
+      ],
+      "time": 12,
+      "power": 150,
+      "inputs": {
+        "water": 15,
+        "nitrogen": 8
+      },
+      "outputs": {
+        "oxidizer": 6
+      },
+      "unlock": "t_rocketry"
+    },
+    {
+      "id": "make_fertiliser",
+      "name": "Mix Growth Slurry",
+      "category": "chemistry",
+      "machines": [
+        "chemical_plant",
+        "bio_vat"
+      ],
+      "time": 8,
+      "power": 55,
+      "inputs": {
+        "phosphate": 3,
+        "nitrogen": 6,
+        "water": 8
+      },
+      "outputs": {
+        "biomass": 8
+      },
+      "unlock": "t_biotech"
+    },
+    {
+      "id": "split_water",
+      "name": "Split Water",
+      "category": "chemistry",
+      "machines": [
+        "electrolyzer"
+      ],
+      "time": 8,
+      "power": 160,
+      "inputs": {
+        "water": 20
+      },
+      "outputs": {
+        "hydrogen": 12,
+        "oxidizer": 4
+      },
+      "unlock": "t_electrolysis"
+    },
+    {
+      "id": "split_brine",
+      "name": "Split Brine",
+      "category": "chemistry",
+      "machines": [
+        "electrolyzer"
+      ],
+      "time": 9,
+      "power": 140,
+      "inputs": {
+        "brine": 20
+      },
+      "outputs": {
+        "salt": 3,
+        "lithium_ore": 1,
+        "water": 8
+      },
+      "unlock": "t_electrolysis"
+    },
+    {
+      "id": "spin_brine",
+      "name": "Spin Brine",
+      "category": "chemistry",
+      "machines": [
+        "centrifuge"
+      ],
+      "time": 10,
+      "power": 120,
+      "inputs": {
+        "brine": 25
+      },
+      "outputs": {
+        "lithium_ore": 2,
+        "salt": 4
+      },
+      "unlock": "t_centrifuge"
+    },
+    {
+      "id": "enrich_uranium",
+      "name": "Enrich Uranium",
+      "category": "nuclear",
+      "machines": [
+        "centrifuge"
+      ],
+      "time": 30,
+      "power": 280,
+      "inputs": {
+        "uranium_ore": 8,
+        "sulfuric_acid": 6,
+        "tungsten_bar": 1
+      },
+      "outputs": {
+        "fuel_rod": 1
+      },
+      "unlock": "t_fission"
+    },
+    {
+      "id": "make_alloy_plate",
+      "name": "Roll Alloy Plate",
+      "category": "alloy",
+      "machines": [
+        "alloy_foundry",
+        "cryo_forge"
+      ],
+      "time": 16,
+      "power": 200,
+      "inputs": {
+        "titanium_ingot": 2,
+        "steel_plate": 2,
+        "resin": 2
+      },
+      "outputs": {
+        "alloy_plate": 2
+      },
+      "unlock": "t_titanium"
+    },
+    {
+      "id": "make_superalloy",
+      "name": "Pour Superalloy",
+      "category": "alloy",
+      "machines": [
+        "alloy_foundry",
+        "nano_forge"
+      ],
+      "time": 25,
+      "power": 320,
+      "inputs": {
+        "tungsten_bar": 2,
+        "titanium_ingot": 2,
+        "platinum_ore": 2
+      },
+      "outputs": {
+        "superalloy": 1
+      },
+      "unlock": "t_superalloy"
+    },
+    {
+      "id": "make_fuel_bio",
+      "name": "Ferment Fuel",
+      "category": "fuel",
+      "machines": [
+        "fuel_plant",
+        "bio_vat"
+      ],
+      "time": 9,
+      "power": 60,
+      "inputs": {
+        "biomass": 10,
+        "water": 5
+      },
+      "outputs": {
+        "fuel": 3
+      },
+      "unlock": "t_biofuel"
+    },
+    {
+      "id": "make_rocket_fuel",
+      "name": "Chill Rocket Fuel",
+      "category": "fuel",
+      "machines": [
+        "fuel_plant"
+      ],
+      "time": 20,
+      "power": 260,
+      "inputs": {
+        "hydrogen": 20,
+        "fuel": 6
+      },
+      "outputs": {
+        "rocket_fuel": 4
+      },
+      "unlock": "t_rocketry"
+    },
+    {
+      "id": "make_iron_plate",
+      "name": "Roll Iron Plate",
+      "category": "parts",
+      "machines": [
+        "assembler_mk1",
+        "assembler_mk2",
+        "assembler_mk3"
+      ],
+      "time": 3,
+      "power": 30,
+      "inputs": {
+        "iron_ingot": 2
+      },
+      "outputs": {
+        "iron_plate": 2
+      },
+      "unlock": "t_landfall"
+    },
+    {
+      "id": "make_steel_plate",
+      "name": "Roll Steel Plate",
+      "category": "parts",
+      "machines": [
+        "assembler_mk1",
+        "assembler_mk2",
+        "assembler_mk3",
+        "bio_vat"
+      ],
+      "time": 4,
+      "power": 40,
+      "inputs": {
+        "steel_ingot": 2
+      },
+      "outputs": {
+        "steel_plate": 2
+      },
+      "unlock": "t_steel"
+    },
+    {
+      "id": "make_wire",
+      "name": "Draw Wire",
+      "category": "parts",
+      "machines": [
+        "assembler_mk1",
+        "assembler_mk2",
+        "assembler_mk3",
+        "ferrovine_loom"
+      ],
+      "time": 2,
+      "power": 25,
+      "inputs": {
+        "copper_ingot": 1
+      },
+      "outputs": {
+        "copper_wire": 2
+      },
+      "unlock": "t_landfall"
+    },
+    {
+      "id": "make_gear",
+      "name": "Cut Gears",
+      "category": "parts",
+      "machines": [
+        "assembler_mk1",
+        "assembler_mk2",
+        "assembler_mk3"
+      ],
+      "time": 2.5,
+      "power": 30,
+      "inputs": {
+        "iron_ingot": 2
+      },
+      "outputs": {
+        "gear": 1
+      },
+      "unlock": "t_landfall"
+    },
+    {
+      "id": "make_circuit",
+      "name": "Print Circuit",
+      "category": "electronics",
+      "machines": [
+        "circuit_printer",
+        "assembler_mk2",
+        "assembler_mk3"
+      ],
+      "time": 6,
+      "power": 60,
+      "inputs": {
+        "copper_wire": 6,
+        "iron_plate": 1,
+        "glass": 1
+      },
+      "outputs": {
+        "circuit": 2
+      },
+      "unlock": "t_electronics"
+    },
+    {
+      "id": "make_advanced_circuit",
+      "name": "Print Logic Core",
+      "category": "electronics",
+      "machines": [
+        "circuit_printer",
+        "resonance_mill",
+        "nano_forge"
+      ],
+      "time": 14,
+      "power": 120,
+      "inputs": {
+        "circuit": 2,
+        "gold_ore": 1,
+        "sulfuric_acid": 3,
+        "polymer": 2
+      },
+      "outputs": {
+        "advanced_circuit": 1
+      },
+      "unlock": "t_logic"
+    },
+    {
+      "id": "make_control_unit",
+      "name": "Seal Control Unit",
+      "category": "electronics",
+      "machines": [
+        "assembler_mk2",
+        "assembler_mk3",
+        "nano_forge"
+      ],
+      "time": 22,
+      "power": 160,
+      "inputs": {
+        "advanced_circuit": 3,
+        "gold_ore": 2,
+        "polymer": 4
+      },
+      "outputs": {
+        "control_unit": 1
+      },
+      "unlock": "t_controls"
+    },
+    {
+      "id": "make_machine_frame",
+      "name": "Weld Machine Frame",
+      "category": "parts",
+      "machines": [
+        "assembler_mk1",
+        "assembler_mk2",
+        "assembler_mk3"
+      ],
+      "time": 14,
+      "power": 90,
+      "inputs": {
+        "steel_plate": 4,
+        "gear": 6,
+        "concrete": 4
+      },
+      "outputs": {
+        "machine_frame": 1
+      },
+      "unlock": "t_machining"
+    },
+    {
+      "id": "make_battery",
+      "name": "Fill Battery Cells",
+      "category": "power",
+      "machines": [
+        "assembler_mk2",
+        "assembler_mk3",
+        "voltaic_coil_works"
+      ],
+      "time": 10,
+      "power": 85,
+      "inputs": {
+        "lithium_ore": 3,
+        "sulfuric_acid": 4,
+        "iron_plate": 1
+      },
+      "outputs": {
+        "battery_cell": 2
+      },
+      "unlock": "t_batteries"
+    },
+    {
+      "id": "make_solar_cell",
+      "name": "Dope Solar Cells",
+      "category": "power",
+      "machines": [
+        "assembler_mk2",
+        "assembler_mk3",
+        "nano_forge"
+      ],
+      "time": 12,
+      "power": 110,
+      "inputs": {
+        "sand": 4,
+        "glass": 2,
+        "copper_wire": 4
+      },
+      "outputs": {
+        "solar_cell": 2
+      },
+      "unlock": "t_solar"
+    },
+    {
+      "id": "make_advanced_part",
+      "name": "Build Precision Assembly",
+      "category": "parts",
+      "machines": [
+        "assembler_mk2",
+        "assembler_mk3",
+        "nano_forge"
+      ],
+      "time": 26,
+      "power": 200,
+      "inputs": {
+        "machine_frame": 1,
+        "advanced_circuit": 4,
+        "lubricant": 6,
+        "gear": 8
+      },
+      "outputs": {
+        "advanced_part": 1
+      },
+      "unlock": "t_precision"
+    },
+    {
+      "id": "make_heat_shield",
+      "name": "Stack Heat Shield",
+      "category": "rocket",
+      "machines": [
+        "assembler_mk3",
+        "umbral_kiln",
+        "nano_forge"
+      ],
+      "time": 30,
+      "power": 240,
+      "inputs": {
+        "alloy_plate": 6,
+        "concrete": 6,
+        "resin": 8
+      },
+      "outputs": {
+        "heat_shield": 1
+      },
+      "unlock": "t_reentry"
+    },
+    {
+      "id": "make_rocket_part",
+      "name": "Build Rocket Section",
+      "category": "rocket",
+      "machines": [
+        "rocket_assembly"
+      ],
+      "time": 60,
+      "power": 420,
+      "inputs": {
+        "alloy_plate": 10,
+        "superalloy": 4,
+        "control_unit": 2,
+        "heat_shield": 1,
+        "rocket_fuel": 10
+      },
+      "outputs": {
+        "rocket_part": 1
+      },
+      "unlock": "t_rocketry"
+    },
+    {
+      "id": "make_satellite",
+      "name": "Build Survey Satellite",
+      "category": "rocket",
+      "machines": [
+        "rocket_assembly",
+        "assembler_mk3"
+      ],
+      "time": 45,
+      "power": 300,
+      "inputs": {
+        "alloy_plate": 6,
+        "advanced_circuit": 8,
+        "solar_cell": 10,
+        "lens": 4,
+        "control_unit": 1
+      },
+      "outputs": {
+        "satellite": 1
+      },
+      "unlock": "t_satellites"
+    },
+    {
+      "id": "make_probe",
+      "name": "Build Deep Probe",
+      "category": "rocket",
+      "machines": [
+        "rocket_assembly",
+        "assembler_mk3"
+      ],
+      "time": 40,
+      "power": 280,
+      "inputs": {
+        "alloy_plate": 4,
+        "advanced_circuit": 6,
+        "lens": 3,
+        "rocket_fuel": 8,
+        "control_unit": 1
+      },
+      "outputs": {
+        "probe": 1
+      },
+      "unlock": "t_probes"
+    },
+    {
+      "id": "make_station_module",
+      "name": "Build Station Module",
+      "category": "rocket",
+      "machines": [
+        "rocket_assembly"
+      ],
+      "time": 90,
+      "power": 500,
+      "inputs": {
+        "rocket_part": 2,
+        "alloy_plate": 12,
+        "polymer": 20,
+        "advanced_part": 4
+      },
+      "outputs": {
+        "station_module": 1
+      },
+      "unlock": "t_orbital_station"
+    },
+    {
+      "id": "make_beacon_core",
+      "name": "Build Beacon Core",
+      "category": "rocket",
+      "machines": [
+        "rocket_assembly",
+        "nano_forge"
+      ],
+      "time": 120,
+      "power": 600,
+      "inputs": {
+        "superalloy": 6,
+        "control_unit": 4,
+        "lens": 6,
+        "battery_cell": 10
+      },
+      "outputs": {
+        "beacon_core": 1
+      },
+      "unlock": "t_beacon"
+    },
+    {
+      "id": "pack_basic",
+      "name": "Survey Pack",
+      "category": "science",
+      "machines": [
+        "assembler_mk1",
+        "assembler_mk2",
+        "assembler_mk3"
+      ],
+      "time": 8,
+      "power": 40,
+      "inputs": {
+        "gear": 2,
+        "copper_wire": 3
+      },
+      "outputs": {
+        "pack_basic": 1
+      },
+      "unlock": "t_landfall"
+    },
+    {
+      "id": "pack_logistics",
+      "name": "Haulage Pack",
+      "category": "science",
+      "machines": [
+        "assembler_mk1",
+        "assembler_mk2",
+        "assembler_mk3"
+      ],
+      "time": 12,
+      "power": 55,
+      "inputs": {
+        "gear": 3,
+        "iron_plate": 2,
+        "concrete": 2
+      },
+      "outputs": {
+        "pack_logistics": 1
+      },
+      "unlock": "t_haulage"
+    },
+    {
+      "id": "pack_chem",
+      "name": "Chemistry Pack",
+      "category": "science",
+      "machines": [
+        "assembler_mk2",
+        "assembler_mk3"
+      ],
+      "time": 16,
+      "power": 90,
+      "inputs": {
+        "sulfuric_acid": 4,
+        "glass": 2,
+        "copper_wire": 6
+      },
+      "outputs": {
+        "pack_chem": 1
+      },
+      "unlock": "t_chemistry"
+    },
+    {
+      "id": "pack_military",
+      "name": "Ordnance Pack",
+      "category": "science",
+      "machines": [
+        "assembler_mk2",
+        "assembler_mk3"
+      ],
+      "time": 16,
+      "power": 90,
+      "inputs": {
+        "steel_plate": 2,
+        "circuit": 2,
+        "sulfur": 4
+      },
+      "outputs": {
+        "pack_military": 1
+      },
+      "unlock": "t_ordnance"
+    },
+    {
+      "id": "pack_energy",
+      "name": "Power Pack",
+      "category": "science",
+      "machines": [
+        "assembler_mk2",
+        "assembler_mk3",
+        "nano_forge"
+      ],
+      "time": 22,
+      "power": 150,
+      "inputs": {
+        "battery_cell": 2,
+        "solar_cell": 1,
+        "advanced_circuit": 1
+      },
+      "outputs": {
+        "pack_energy": 1
+      },
+      "unlock": "t_highvoltage"
+    },
+    {
+      "id": "pack_space",
+      "name": "Orbital Pack",
+      "category": "science",
+      "machines": [
+        "satellite_uplink"
+      ],
+      "time": 30,
+      "power": 220,
+      "inputs": {
+        "advanced_part": 1,
+        "lens": 2,
+        "helium3": 4
+      },
+      "outputs": {
+        "pack_space": 1
+      },
+      "unlock": "t_satellites"
+    },
+    {
+      "id": "condense_nitrogen",
+      "name": "Condense Nitrogen",
+      "category": "atmosphere",
+      "machines": [
+        "atmospheric_condenser"
+      ],
+      "time": 5,
+      "power": 70,
+      "inputs": {},
+      "outputs": {
+        "nitrogen": 4
+      },
+      "unlock": "t_atmospherics"
+    },
+    {
+      "id": "condense_hydrogen",
+      "name": "Sift Hydrogen",
+      "category": "atmosphere",
+      "machines": [
+        "atmospheric_condenser"
+      ],
+      "time": 8,
+      "power": 95,
+      "inputs": {},
+      "outputs": {
+        "hydrogen": 2
+      },
+      "unlock": "t_atmospherics"
+    },
+    {
+      "id": "condense_water",
+      "name": "Wring Water from Air",
+      "category": "atmosphere",
+      "machines": [
+        "atmospheric_condenser"
+      ],
+      "time": 7,
+      "power": 80,
+      "inputs": {},
+      "outputs": {
+        "water": 6
+      },
+      "unlock": "t_atmospherics"
+    },
+    {
+      "id": "sift_helium",
+      "name": "Sift Helium-3",
+      "category": "atmosphere",
+      "machines": [
+        "atmospheric_condenser",
+        "void_condenser"
+      ],
+      "time": 24,
+      "power": 210,
+      "inputs": {
+        "nitrogen": 10
+      },
+      "outputs": {
+        "helium3": 1
+      },
+      "unlock": "t_exotic_gas"
+    },
+    {
+      "id": "quench_alloy",
+      "name": "Cryo-Quench Alloy",
+      "category": "variant",
+      "machines": [
+        "cryo_forge"
+      ],
+      "time": 10,
+      "power": 150,
+      "inputs": {
+        "steel_ingot": 2,
+        "cryonite": 1
+      },
+      "outputs": {
+        "alloy_plate": 3
+      },
+      "unlock": "t_cryo_metallurgy",
+      "planetRequirement": "cryonite"
+    },
+    {
+      "id": "plasma_smelt",
+      "name": "Plasma Smelt",
+      "category": "variant",
+      "machines": [
+        "plasma_refinery"
+      ],
+      "time": 8,
+      "power": 180,
+      "inputs": {
+        "iron_ore": 6,
+        "pyrocrystal": 1
+      },
+      "outputs": {
+        "steel_ingot": 4
+      },
+      "unlock": "t_plasma_smelting",
+      "planetRequirement": "pyrocrystal"
+    },
+    {
+      "id": "condense_void",
+      "name": "Condense the Void",
+      "category": "variant",
+      "machines": [
+        "void_condenser"
+      ],
+      "time": 20,
+      "power": 220,
+      "inputs": {
+        "umbral_shale": 2,
+        "nitrogen": 10
+      },
+      "outputs": {
+        "helium3": 6
+      },
+      "unlock": "t_void_condensing",
+      "planetRequirement": "umbral_shale"
+    },
+    {
+      "id": "mill_aether",
+      "name": "Mill Aetherite",
+      "category": "variant",
+      "machines": [
+        "resonance_mill"
+      ],
+      "time": 14,
+      "power": 190,
+      "inputs": {
+        "aetherite": 2,
+        "copper_wire": 6
+      },
+      "outputs": {
+        "advanced_circuit": 4
+      },
+      "unlock": "t_resonance",
+      "planetRequirement": "aetherite"
+    },
+    {
+      "id": "culture_plate",
+      "name": "Culture Living Plate",
+      "category": "variant",
+      "machines": [
+        "bio_vat"
+      ],
+      "time": 12,
+      "power": 130,
+      "inputs": {
+        "xenoplasm": 2,
+        "biomass": 8,
+        "water": 10
+      },
+      "outputs": {
+        "steel_plate": 4,
+        "resin": 2
+      },
+      "unlock": "t_xenobiology",
+      "planetRequirement": "xenoplasm"
+    },
+    {
+      "id": "bake_shield",
+      "name": "Bake Umbral Shielding",
+      "category": "variant",
+      "machines": [
+        "umbral_kiln"
+      ],
+      "time": 20,
+      "power": 170,
+      "inputs": {
+        "umbral_shale": 3,
+        "concrete": 4
+      },
+      "outputs": {
+        "heat_shield": 2
+      },
+      "unlock": "t_umbral_shielding",
+      "planetRequirement": "umbral_shale"
+    },
+    {
+      "id": "distil_lens",
+      "name": "Distil Glimmer Lens",
+      "category": "variant",
+      "machines": [
+        "glimmer_still"
+      ],
+      "time": 10,
+      "power": 140,
+      "inputs": {
+        "glimmer_salt": 2,
+        "glass": 2
+      },
+      "outputs": {
+        "lens": 3
+      },
+      "unlock": "t_glimmer_optics",
+      "planetRequirement": "glimmer_salt"
+    },
+    {
+      "id": "weave_cable",
+      "name": "Weave Ferrovine Cable",
+      "category": "variant",
+      "machines": [
+        "ferrovine_loom"
+      ],
+      "time": 8,
+      "power": 100,
+      "inputs": {
+        "ferrovine": 2
+      },
+      "outputs": {
+        "copper_wire": 10
+      },
+      "unlock": "t_ferrovine",
+      "planetRequirement": "ferrovine"
+    },
+    {
+      "id": "wind_coil",
+      "name": "Wind Voltaic Coils",
+      "category": "variant",
+      "machines": [
+        "voltaic_coil_works"
+      ],
+      "time": 12,
+      "power": 160,
+      "inputs": {
+        "voltaic_ore": 2,
+        "copper_wire": 8
+      },
+      "outputs": {
+        "battery_cell": 6
+      },
+      "unlock": "t_voltaics",
+      "planetRequirement": "voltaic_ore"
+    },
+    {
+      "id": "still_helion",
+      "name": "Still Helion",
+      "category": "chemistry",
+      "machines": [
+        "helion_still"
+      ],
+      "time": 14,
+      "power": 180,
+      "inputs": {
+        "helion_gas": 3,
+        "fuel": 2
+      },
+      "outputs": {
+        "rocket_fuel": 6
+      },
+      "unlock": "t_helion_fusion",
+      "desc": "Rocket fuel without an electrolyser, a hydrogen line or a water supply."
+    },
+    {
+      "id": "forge_nullsteel",
+      "name": "Forge Nullsteel",
+      "category": "metallurgy",
+      "machines": [
+        "null_forge"
+      ],
+      "time": 16,
+      "power": 240,
+      "inputs": {
+        "nullstone": 2,
+        "titanium_ingot": 2,
+        "tungsten_bar": 1
+      },
+      "outputs": {
+        "superalloy": 2
+      },
+      "unlock": "t_null_forging",
+      "desc": "Superalloy with no platinum in it, at twice the yield."
+    },
+    {
+      "id": "weave_shield",
+      "name": "Weave Heat Shield",
+      "category": "assembly",
+      "machines": [
+        "emberlace_loom"
+      ],
+      "time": 18,
+      "power": 150,
+      "inputs": {
+        "emberlace": 3,
+        "alloy_plate": 2,
+        "concrete": 2
+      },
+      "outputs": {
+        "heat_shield": 3
+      },
+      "unlock": "t_emberlace_weaving",
+      "desc": "Three heat shields a pass, using a third of the alloy plate the normal recipe wants."
+    },
+    {
+      "id": "press_tonic",
+      "name": "Press Tonic",
+      "category": "science",
+      "machines": [
+        "pearl_press",
+        "bio_vat"
+      ],
+      "time": 12,
+      "power": 110,
+      "inputs": {
+        "brinepearl": 1,
+        "water": 8
+      },
+      "outputs": {
+        "pack_chem": 3
+      },
+      "unlock": "t_pearl_medicine",
+      "desc": "Chemistry packs straight from brinepearl - no acid, no glassworks, no sulfur."
+    }
+  ]
+}

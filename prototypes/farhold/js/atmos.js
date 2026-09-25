@@ -1,0 +1,577 @@
+// Farhold — flying the ship inside the world: take-off, atmosphere, and the handover to space.
+//
+// The ask, in the user's words: *"I was picturing the planet take-off and landing to be like No
+// Man's Sky where you actually fly out of atmosphere (or back into it) and it seamlessly transitions
+// from space to ground… The rocket should just act like a space ship and let you fly around in
+// atmosphere, but not clip through the world. Space ships should not suffer damage at this point
+// though, just bounce off."*
+//
+// **Why this is a separate mode rather than one coordinate space.** `js/space.js` runs in compressed
+// units because an AU is 150 million km and the ground is measured in metres; a float cannot hold
+// both at a useful precision, which is why the prototype has always had two scenes. What it CAN do —
+// and what actually produces the feeling — is fly the ship *in the world*, in metres, all the way up
+// through the air until the ground has faded to nothing, and hand over to the space scene there,
+// matched in position and attitude, with the sky already black. Coming down is the same in reverse.
+// There is no cut, no loading screen and no camera jump; the terrain's own clipmap rings do the
+// level of detail as you climb, which is what they were built for.
+//
+//   const air = createAtmosphere({ scene, terrain, balance, ship, sky });
+//   air.board(control);                       // step off the ground into the cockpit
+//   const out = air.update(dt, snap, camera); // { leftAtmosphere, landed, altitude }
+//
+// Collision is a bounce, never damage: the hull is pushed back out of the ground and the velocity
+// along the surface normal is reflected and damped. You lose speed and your nerve, not health.
+
+import * as THREE from 'three';
+import { M_PER_CELL, M_PER_CELL_DEFAULT } from './planet.js';
+
+/** Everything the flight model reads. All of it is in `balance.json` `flight`. */
+const DEFAULTS = {
+  ceiling: 20000,         // metres: the top of the air. Above it, and only deliberately, space takes over
+  /**
+   * THE UPPER ATMOSPHERE.
+   *
+   * Above `highFrom` x ceiling the wing has nothing to bite on and the flight model changes
+   * character: the throttle stops being thrust and becomes a COMMANDED VERTICAL RATE, so letting go
+   * holds the altitude you are at instead of falling out of it. See `updateHigh` for why that is the
+   * right model rather than a second set of numbers for the same one.
+   */
+  highFrom: 0.26,         // fraction of the ceiling where rate control takes over
+  climbRate: 900,         // m/s of climb or descent at full deflection at the BOTTOM of the band
+  climbRateTop: 2.2,      // …multiplied by this much again at the ceiling, because thin air is fast
+  thinSpeed: 1.8,         // how much the airframe speed limit relaxes by the ceiling, where there is no air
+  holdGain: 1.9,          // how hard it holds the altitude you left it at
+  holdDamp: 2.4,          // …without bouncing around it
+  exitHold: 1.1,          // seconds of held climb AT the ceiling before space takes you
+  thrust: 260,            // m/s² at full throttle
+  boost: 2.8,
+  drag: 0.24,             // thick air slows you; it thins out with altitude
+  maxSpeed: 900,
+  liftSpeed: 26,          // how fast it rises with no throttle at all, so take-off is forgiving
+  liftMax: 1.04,          // a wing can carry the whole ship (and a little more) at speed
+  liftSpeedFull: 95,      // …once it is going this fast
+  throttleUp: 3.2,        // how quickly W reaches full — about a third of a second
+  throttleDown: 2.2,
+  hoverFloor: 12,         // metres of ground clearance the ship will not sink below on its own
+  hoverPush: 16,          // …and how hard it pushes back up to keep it
+  turnRate: 1.5,          // radians a second at full deflection
+  rollRate: 2.2,
+  clearance: 6,           // metres of hull below the centre point
+  bounce: 0.35,           // how much of the impact speed comes back
+  groundDrag: 0.82,       // and how much of the rest is scrubbed off
+  landSpeed: 40,          // slow enough to put down
+  landHeight: 14,         // and low enough
+  camBack: 26,
+  camLift: 9,
+};
+
+export function createAtmosphere({ scene, terrain: terrainIn, balance = {}, ship = null, settings = null, onLog = () => {} } = {}) {
+  // read through a binding: landing on a different world swaps the whole ground out
+  let terrain = terrainIn;
+  /**
+   * THE FLIGHT MODEL SCALES WITH THE PLANET.
+   *
+   * Every number above is absolute metres, tuned for the full-size 163 x 81 km world. Pick "Super
+   * tiny" on the title screen and that world is 16 x 8 km: a 9 km ceiling is most of the way to
+   * space, and 900 m/s crosses the entire map in eighteen seconds. Speed, reach and altitude follow
+   * the square root of the scale — 32% of each on the smallest world — so a flight across a small
+   * world takes about as long as a flight across a big one, and the ceiling still leaves room to
+   * climb. Anything about the SHAPE of the ship (clearance, camera, roll rate) is left alone.
+   */
+  const scale = Math.sqrt(Math.max(0.05, (terrainIn?.metresPerCell || M_PER_CELL) / M_PER_CELL_DEFAULT));
+  // balance.json's own `flight` block is folded in FIRST, so the scaling applies to whatever the
+  // data file actually asks for rather than being overwritten by it
+  const cfg = { ...DEFAULTS, ...(balance.flight || {}) };
+  if (scale < 0.999) {
+    const floors = { ceiling: 1200, maxSpeed: 120, thrust: 60, liftSpeedFull: 24, hoverFloor: 6, landSpeed: 12 };
+    for (const [key, floor] of Object.entries(floors)) {
+      cfg[key] = Math.max(floor, Math.round(cfg[key] * scale));
+    }
+  }
+  const state = {
+    x: 0, y: 0, z: 0,
+    yaw: 0, pitch: 0, roll: 0, lift: 0,
+    velocity: new THREE.Vector3(),
+    throttle: 0,
+    boosting: false,
+    speed: 0,
+    flying: false,
+    parked: false,          // sitting on its legs: no physics until the pilot asks for thrust
+    bumped: 0,              // counts down after a bounce, for the HUD and the sound
+    // the upper atmosphere: how far into it we are, the altitude being held, and how long the
+    // pilot has been asking to leave. See the regime note in `update`.
+    regime: 'surface',
+    highness: 0,
+    holdY: null,
+    exiting: 0,
+    readyToLeave: false,
+  };
+
+  let lastYaw = 0;
+  /** A bank is a lean, not a barrel roll. */
+  const clampRoll = r => Math.max(-0.85, Math.min(0.85, r));
+
+  const forward = new THREE.Vector3();
+  const up = new THREE.Vector3(0, 1, 0);
+  const tmp = new THREE.Vector3();
+  const quat = new THREE.Quaternion();
+  const euler = new THREE.Euler(0, 0, 0, 'YXZ');
+
+  /** How thick the air is here, 1 at the ground and 0 at the ceiling. Thin air means less drag. */
+  function density(y) {
+    return Math.max(0, 1 - Math.max(0, y) / cfg.ceiling);
+  }
+
+  /**
+   * Step into the cockpit from wherever the character is standing.
+   *
+   * **The ship is PARKED, on its legs, going nowhere.** "Pressing J while walking slingshots you
+   * upward as though launching" — because boarding handed the hull 26 m/s straight up and two
+   * metres of clearance, so the first thing that happened was a take-off nobody asked for. It now
+   * sits on the ground with the brake on, and the brake comes off the moment you ask for thrust
+   * (W, or Space) and not before. See the parked branch in `update`.
+   */
+  function board(at) {
+    resetHigh();
+
+    state.x = at.x;
+    state.z = at.z;
+    state.y = terrain.heightAt(at.x, at.z) + cfg.clearance;
+    state.yaw = at.yaw ?? 0;
+    // LEVEL. It used to start nose-up, which meant W climbed for ever and you could not fly across
+    // the world looking for somewhere to land — "W always goes up, I can no longer fly around".
+    // Lift-off is the vertical thrust below (Space), not a permanent angle of attack.
+    state.pitch = 0;
+    state.roll = 0;
+    state.velocity.set(0, 0, 0);
+    state.throttle = 0;
+    state.lift = 0;                     // …and nothing held over from the last flight
+    state.parked = true;
+    state.flying = true;
+    lastYaw = state.yaw;
+    if (ship) ship.group.visible = true;
+    return state;
+  }
+
+  /** The upper-atmosphere state is per flight and is never carried between them. */
+  function resetHigh() {
+    state.holdY = null;
+    state.exiting = 0;
+    state.highness = 0;
+    state.regime = 'surface';
+    state.readyToLeave = false;
+  }
+
+  /** Drop in from space, above the point the ship was over. */
+  function descend(at, { altitude = cfg.ceiling * 0.92, yaw = 0 } = {}) {
+    resetHigh();
+    state.x = at.x;
+    state.z = at.z;
+    state.y = Math.max(terrain.heightAt(at.x, at.z) + 200, altitude);
+    state.yaw = yaw;
+    state.pitch = -0.5;               // nose down: you are coming in
+    state.roll = 0;
+    state.velocity.set(0, -120, 0);
+    state.throttle = 0.25;
+    state.parked = false;
+    state.flying = true;
+    lastYaw = state.yaw;
+    if (ship) ship.group.visible = true;
+    return state;
+  }
+
+  function leave() {
+    resetHigh();
+
+    state.flying = false;
+    if (ship) ship.group.visible = false;
+  }
+
+  /**
+   * One frame of flight. Returns what the caller needs to decide:
+   *   leftAtmosphere — climbed past the ceiling, hand over to space
+   *   landed         — slow enough and low enough to put down
+   *   bumped         — hit the ground this frame (a noise, not a wound)
+   */
+  function update(dt, input, camera) {
+    if (!state.flying) return { flying: false };
+    const out = { flying: true, leftAtmosphere: false, landed: false, bumped: false };
+
+    // ---- attitude: the mouse steers, A/D rolls
+    if (input) {
+      state.yaw -= (input.look?.[0] || 0) * 0.0022;
+      // Pull the mouse back and the nose comes UP, the same way it does on foot. The aircraft
+      // convention is the other way round and is an option rather than the default.
+      const invert = settings?.get('invertFlight') ? -1 : 1;
+      const sens = settings?.get('sensitivity') ?? 1;
+      state.pitch = Math.max(-1.35, Math.min(1.35, state.pitch - (input.look?.[1] || 0) * 0.0019 * invert * sens));
+      /**
+       * BANK INTO THE TURN, NOT OUT OF IT.
+       *
+       * "Turning left/right tilts the wrong way — the roll is inverted." It was. The hull is
+       * modelled nose along +Z with up along +Y, so the ship's RIGHT wing is at local -X; a
+       * positive Z rotation carries +X toward +Y and therefore drops that right wing. Banking right
+       * is a positive roll — and D (`strafe` +1) was being multiplied by -0.6, which lifted the
+       * right wing and leaned the ship away from the turn every time.
+       *
+       * The mouse now banks it too, by how fast the nose is swinging, the same way `space.js` does.
+       * Rolling does not steer here — it is the tell that says which way you are going round — and
+       * a mouse turn with a dead-level hull was the other half of "it tilts the wrong way".
+       */
+      const yawRate = (state.yaw - lastYaw + Math.PI * 3) % (Math.PI * 2) - Math.PI;
+      lastYaw = state.yaw;
+      const fromMouse = clampRoll(-yawRate / Math.max(1e-4, dt) * 0.18);
+      const rollWant = clampRoll((input.strafe || 0) * 0.6 + fromMouse);
+      state.roll += (rollWant - state.roll) * Math.min(1, dt * cfg.rollRate);
+      /**
+       * W AND S FLY YOU FORWARD AND BACK.
+       *
+       * "The spaceship flying system in atmosphere… changed at some point so that W/S only go up and
+       * down, not forward and back, so I can no longer fly around the planet. The goal is to fly
+       * around the planet and reveal more terrain."
+       *
+       * W was always the throttle, but it took nearly a second to reach full and the wing could only
+       * ever carry 92% of the ship's weight — so holding W got you a slow sink with some forward
+       * drift, and the only thing that actually moved you was Space. It eases to full in about a
+       * third of a second now, and level flight below actually holds its altitude.
+       */
+      const want = input.forward || 0;
+      const ease = want > state.throttle ? cfg.throttleUp : cfg.throttleDown;
+      state.throttle = Math.max(0, Math.min(1, state.throttle + (want - state.throttle) * Math.min(1, dt * ease)));
+      state.boosting = !!input.run;
+      // Space lifts, C drops. Straight vertical thrust, so you can hold an altitude, hop a ridge and
+      // put down on a flat spot without having to fly a landing pattern.
+      state.lift = (input.jump ? 1 : 0) - (input.keys?.has?.('KeyC') ? 1 : 0);
+    }
+
+    // NOTE the minus. Three's X rotation tips +Z toward -Y, so a positive `pitch` through a
+    // quaternion points the nose DOWN — the opposite of every other pitch in this game, where
+    // positive is up (player.js builds its direction from sin(pitch) by hand and so avoids this).
+    // Without it the ship dived at full throttle and take-off was impossible.
+    euler.set(-state.pitch, state.yaw, state.roll);
+    quat.setFromEuler(euler);
+    forward.set(0, 0, 1).applyQuaternion(quat);
+
+    /**
+     * PARKED: the ship is on the ground and stays there.
+     *
+     * No thrust, no wing, no gravity, no hover floor — the whole flight model is skipped, because
+     * every one of those wants to move a hull that is meant to be standing still. You may look
+     * around (the mouse still steers) and the moment you ask for thrust the brake comes off.
+     */
+    if (state.parked) {
+      if (state.throttle > 0.02 || state.lift > 0) {          // W or Space; Shift on its own is not a launch
+        state.parked = false;
+      } else {
+        const ground = terrain.heightAt(state.x, state.z);
+        state.y = ground + cfg.clearance;
+        state.velocity.set(0, 0, 0);
+        state.speed = 0;
+        out.altitude = cfg.clearance;
+        out.landed = true;                    // you can step straight back out again
+        out.parked = true;
+        place(camera);
+        return out;
+      }
+    }
+
+    // ---- thrust, lift and drag
+    const air = density(state.y);
+    const push = cfg.thrust * state.throttle * (state.boosting ? cfg.boost : 1);
+    state.velocity.addScaledVector(forward, push * dt);
+    if (state.lift) state.velocity.y += cfg.thrust * 0.55 * state.lift * dt;
+    // a wing holds you up: the faster you go, the more of your weight the air carries
+    const gravity = 9.81 * (terrain.planet?.gravity ?? 1);
+    // A wing holds you up when you are moving and roughly level. It is capped below 1 so the ship
+    // always sinks a little with no input, which is what makes "hold this altitude" a thing you do
+    // rather than a thing that happens.
+    const level = Math.max(0, 1 - Math.abs(state.pitch) / 1.2);
+    /**
+     * A wing that can actually hold the ship up.
+     *
+     * It used to be capped at 0.92, so a ship flying flat out and dead level still fell out of the
+     * sky at 0.8 m/s² — which is why crossing a continent needed a hand on Space the whole way. It
+     * reaches `cfg.liftMax` (just over 1) with speed, so level flight holds its line and a nose-up
+     * or nose-down attitude is what changes your altitude. Below the speed it needs, it still sags:
+     * a hovering ship should sink.
+     */
+    /**
+     * THE UPPER ATMOSPHERE IS A DIFFERENT MACHINE, not the same one with thinner air.
+     *
+     * "I'd like to have an upper atmosphere mode where you match the planets speed and get fine
+     * tuned controls to descend. And seamlessly load the ground planet beneath while still flying.
+     * Same for takeoff. Is there a better system?"
+     *
+     * There is, and this is it. Down low, the throttle is THRUST and the wing does the holding —
+     * which is right, because that is what flying in air is. Up high there is no air to hold you, so
+     * the same controls give a ship that either climbs forever or falls, and the player is left
+     * riding the throttle to stay put. So above `highFrom` the throttle becomes a commanded VERTICAL
+     * RATE and the model holds whatever altitude you stop at, actively, with a damped spring. Let go
+     * and you hover; nudge S and you descend at a rate you can read off the HUD.
+     *
+     * That is the whole of "match the planet's speed": in planet-local coordinates, holding station
+     * IS matching it. And because nothing here tears the ground down, the terrain keeps streaming
+     * underneath the entire way — which is the "seamlessly load the ground beneath while still
+     * flying" half, for descent and for take-off alike.
+     *
+     * The two regimes blend rather than switch: `highness` ramps 0 to 1 across the band, so the wing
+     * fades out as the rate control fades in and there is no altitude where the ship changes hands.
+     */
+    const highFrom = cfg.ceiling * cfg.highFrom;
+    const highness = Math.max(0, Math.min(1, (state.y - highFrom) / Math.max(1, cfg.ceiling - highFrom)));
+    state.highness = highness;
+    const wasRegime = state.regime;
+    state.regime = highness > 0.02 ? 'high' : 'surface';
+    /**
+     * Say it once, when it happens.
+     *
+     * The controls change meaning at this line and there is nothing to see out of the window that
+     * tells you so — the player climbed through it and reported that nothing had happened. It is one
+     * line in the log, on the way in and on the way out, and the HUD carries the rest.
+     */
+    if (state.regime !== wasRegime) {
+      out.regimeChanged = state.regime;
+      if (state.regime === 'high') {
+        onLog('Upper atmosphere. The wing has nothing to bite on — point the nose to climb or descend, level out to hold your altitude.', 'level');
+      } else {
+        onLog('Back into thick air. The wing has hold of you again.', '');
+      }
+    }
+
+    const lift = Math.min(cfg.liftMax, (state.speed / cfg.liftSpeedFull) * air * level);
+    // gravity and the wing still act, faded out as the air runs out
+    state.velocity.y -= gravity * (1 - lift) * dt * (1 - highness);
+
+    if (highness > 0.02) {
+      /**
+       * Rate control, and a held altitude.
+       *
+       * `wanted` is the vertical rate the player is asking for. With no input it is zero, and the
+       * spring below pulls the ship back to `holdY` — the altitude it was at when they stopped
+       * asking. With input, `holdY` follows the ship, so letting go holds wherever you got to.
+       *
+       * TWO THINGS THIS GOT WRONG THE FIRST TIME, and they made the climb to space take 75 seconds
+       * where it used to take 19:
+       *
+       *   * The commanded rate was a SPEED LIMIT, not an assist. At 4 km the ship was already
+       *     climbing 510 m/s on thrust; crossing into the band then dragged it down toward 260. The
+       *     climb got slower the higher you went — 510 at 4 km, 309 at 24 km — which is backwards,
+       *     because thin air is where a ship should be quickest. Asking to climb can now only ever
+       *     ADD to a climb already in progress.
+       *   * And the rate was far too low for the distance. It scales up with altitude now
+       *     (`climbRateTop`) and the boost applies, so the top of the band is the fastest part of it.
+       */
+      /**
+       * W IS FORWARD. IT IS NEVER UP.
+       *
+       * The first version of this read `input.forward` as the commanded climb rate, which quietly
+       * turned W and S into up and down the moment you crossed into the band — and the user's answer
+       * to that was "I don't want that, ever. W is always forward, s is always backward."
+       *
+       * They are right, and it is better flying anyway: the nose is what decides whether you go up.
+       * W and S remain the throttle, exactly as they are on the deck, and the climb rate is taken
+       * from the PITCH — point the nose up and you climb, level out and you hold. That is also the
+       * "fine tuned controls to descend" that was asked for, because the mouse is a far finer
+       * instrument than a key that is either pressed or not.
+       */
+      const ask = Math.max(-1, Math.min(1, state.pitch / 1.1));
+      const rate = cfg.climbRate * (1 + (cfg.climbRateTop - 1) * highness)
+        * (state.boosting ? (cfg.boost ?? 2.8) * 0.6 + 0.4 : 1);
+      const wanted = ask * rate;
+      if (Math.abs(ask) > 0.02) {
+        state.holdY = state.y;
+        // never slow a climb the engines are already winning: take whichever is faster
+        const target = ask > 0 ? Math.max(state.velocity.y, wanted) : Math.min(state.velocity.y, wanted);
+        state.velocity.y += (target - state.velocity.y) * Math.min(1, dt * 2.6) * highness;
+      } else {
+        // nobody is asking: hold the altitude they stopped at, with a damped spring
+        if (state.holdY == null) state.holdY = state.y;
+        const off = state.holdY - state.y;
+        const push = off * cfg.holdGain - state.velocity.y * cfg.holdDamp;
+        state.velocity.y += push * dt * highness;
+      }
+    } else {
+      state.holdY = null;
+    }
+    // and thin air is less of a brake, which is why you accelerate as you climb
+    const drag = cfg.drag * air;
+    state.velocity.multiplyScalar(Math.max(0, 1 - drag * dt));
+    /**
+     * THE SPEED CAP RISES AS THE AIR THINS.
+     *
+     * `maxSpeed` is an airframe limit — it exists because air pushes back, and there is less of it
+     * the higher you go. Holding one number all the way up made the top of the climb the slowest
+     * part of it: the ship pinned at 532 m/s from 4 km to the ceiling with nothing resisting it.
+     * Letting the cap climb with `highness` means the last stretch is the quick one, which is both
+     * what the physics says and what makes the trip to space feel like leaving rather than commuting.
+     */
+    const speedCap = cfg.maxSpeed * (1 + highness * (cfg.thinSpeed ?? 1.8));
+    if (state.velocity.length() > speedCap) state.velocity.setLength(speedCap);
+
+    // ---- move
+    state.x += state.velocity.x * dt;
+    state.y += state.velocity.y * dt;
+    state.z += state.velocity.z * dt;
+    /**
+     * FLY AROUND THE WHOLE PLANET, AND DO NOT BOUNCE OFF THE MIDDLE OF IT.
+     *
+     * This used to call `terrain.clampToWorld`, compare the result to what went in, and treat any
+     * difference as "you hit the edge of the map" — `velocity.x *= -0.4; velocity.z *= -0.4`. Two
+     * things were wrong with that, and together they are the "W and S only go up and down" report:
+     *
+     *   * the comparison was false on most frames because the longitude wrap was not bit-exact for a
+     *     position already in range (fixed in `planet.js`), so the brake fired about forty-five times
+     *     a second anywhere on the map and the ship never got above about 7 m/s;
+     *   * and there is no edge to hit. East and west are the same line, and the top and bottom of the
+     *     map are the poles. `terrain.wrapAround` carries the ship over a pole — down the other side,
+     *     half a world round in longitude, turned about — so a heading held long enough goes all the
+     *     way round and comes back. Nothing is a wall.
+     */
+    {
+      const w = terrain.wrapAround
+        ? terrain.wrapAround(state.x, state.z)
+        : (([cx, cz]) => ({ x: cx, z: cz, turn: 0 }))(terrain.clampToWorld(state.x, state.z));
+      state.x = w.x; state.z = w.z;
+      if (w.turn) {
+        // over the top: the ship keeps its speed, but "north" is now behind it
+        state.yaw += w.turn;
+        state.velocity.x = -state.velocity.x;
+        state.velocity.z = -state.velocity.z;
+        out.crossedPole = true;
+      }
+    }
+
+    /**
+     * A SOFT FLOOR over the terrain.
+     *
+     * Flying across a continent means looking at it, and looking at it means not watching the
+     * ground come up. This is not autopilot — you can still fly it into a hill at speed, and you can
+     * still descend deliberately by pointing the nose down — but with the stick centred the ship
+     * will not sink into a rise it is passing over. It is what makes "fly around and find somewhere
+     * to land" a thing you can do rather than a thing you have to concentrate on.
+     */
+    {
+      const ahead = terrain.heightAt(state.x + state.velocity.x * 0.6, state.z + state.velocity.z * 0.6);
+      const clear = state.y - Math.max(ahead, terrain.heightAt(state.x, state.z));
+      if (clear < cfg.hoverFloor && state.lift >= 0 && state.pitch > -0.35) {
+        const need = (cfg.hoverFloor - clear) / cfg.hoverFloor;
+        state.velocity.y += cfg.hoverPush * need * dt;
+      }
+    }
+
+    // ---- the ground is solid. A ship does not take damage here; it bounces.
+    const ground = terrain.heightAt(state.x, state.z);
+    const floor = ground + cfg.clearance;
+    if (state.y < floor) {
+      state.y = floor;
+      if (state.velocity.y < 0) {
+        // reflect what is going into the ground, scrub the rest
+        const impact = -state.velocity.y;
+        state.velocity.y = impact * cfg.bounce;
+        state.velocity.x *= cfg.groundDrag;
+        state.velocity.z *= cfg.groundDrag;
+        if (impact > 8) { out.bumped = true; state.bumped = 0.4; }
+      }
+      // and level the nose out, so you do not plough along at an angle
+      state.pitch += (0 - state.pitch) * Math.min(1, dt * 3);
+    }
+    if (state.bumped > 0) state.bumped -= dt;
+
+    state.speed = state.velocity.length();
+    const altitude = state.y - ground;
+
+    // ---- can we put down, and have we left?
+    out.altitude = altitude;
+    out.landed = altitude < cfg.landHeight && state.speed < cfg.landSpeed;
+    /**
+     * LEAVING IS SOMETHING YOU DO, not a line you drift across.
+     *
+     * The old rule handed you to space the instant `y` passed the ceiling, so a ship coasting upward
+     * was ejected from the world it was looking at. Now the ceiling has to be held: you must still be
+     * asking to climb, at the top, for `exitHold` seconds. Stop asking and you simply hover there,
+     * in the upper atmosphere, with the ground still drawn below — which is the point of having the
+     * band at all.
+     */
+    /**
+     * Leaving is nose up AND under power — which is how you would actually do it.
+     *
+     * Not `input.forward`: that is the throttle, and reading it as "asking to climb" is the same
+     * mistake as turning W into up. A ship pointed at the sky with its engines open is asking to
+     * leave; a ship coasting level at the ceiling is sightseeing.
+     */
+    const askingUp = Math.min(state.throttle ?? 0, Math.max(0, state.pitch) / 0.5);
+    if (state.y > cfg.ceiling && askingUp > 0.2) state.exiting = (state.exiting || 0) + dt;
+    else state.exiting = 0;
+
+    /**
+     * ONCE YOU HAVE COMMITTED TO LEAVING, YOU LEAVE — it latches.
+     *
+     * Reporting `leftAtmosphere` only on the frames where the hold was still being met made the flag
+     * depend on who happened to be calling. `main.js` steps the model once a frame with the real
+     * input; anything else that steps it — the tests, the debug menu — passes its own. The moment
+     * two callers disagreed about whether the pilot was asking, the counter reset and a ship that
+     * had earned its exit sat above the ceiling for ever. It is a one-way door now, opened by
+     * holding the climb and closed only by coming back down into the air.
+     */
+    if (state.exiting > cfg.exitHold) state.readyToLeave = true;
+    if (state.y < cfg.ceiling * 0.95) state.readyToLeave = false;
+    out.leftAtmosphere = !!state.readyToLeave;
+    out.regime = state.regime;
+    out.highness = highness;
+    out.holdingAt = state.holdY;
+
+    place(camera);
+    return out;
+  }
+
+  /** Put the hull where the state says it is, and the camera behind it. */
+  function place(camera) {
+    if (ship) {
+      ship.group.position.set(state.x, state.y, state.z);
+      ship.group.quaternion.copy(quat);
+    }
+    if (camera) {
+      tmp.set(0, 0, -1).applyQuaternion(quat).multiplyScalar(cfg.camBack);
+      const lift2 = up.clone().applyQuaternion(quat).multiplyScalar(cfg.camLift);
+      camera.position.set(state.x + tmp.x + lift2.x, state.y + tmp.y + lift2.y, state.z + tmp.z + lift2.z);
+      // never let the camera go under the ground
+      const camGround = terrain.heightAt(camera.position.x, camera.position.z) + 3;
+      if (camera.position.y < camGround) camera.position.y = camGround;
+      camera.lookAt(state.x, state.y, state.z);
+    }
+  }
+
+  /**
+   * How far through the handover to space we are, 0 on the ground and 1 at the ceiling. The caller
+   * uses it to fade the sky to black and the ground to nothing, so the change is continuous rather
+   * than a cut.
+   */
+  function spaceBlend() {
+    return Math.max(0, Math.min(1, (state.y - cfg.ceiling * 0.45) / (cfg.ceiling * 0.55)));
+  }
+
+  return {
+    state, cfg, board, descend, leave, update, spaceBlend, density,
+    get flying() { return state.flying; },
+    get altitude() { return state.y - terrain.heightAt(state.x, state.z); },
+    /** Point the camera at the ship without moving it — used while the world rebuilds. */
+    setTerrain(next) { terrain = next; },
+    readout() {
+      return {
+        altitude: Math.round(state.y - terrain.heightAt(state.x, state.z)),
+        speed: Math.round(state.speed),
+        throttle: state.throttle,
+        lift: state.lift,
+        air: +density(state.y).toFixed(2),
+        boosting: state.boosting,
+        // the upper atmosphere: which machine you are flying, how fast you are rising or falling,
+        // and whether the ship is holding station for you
+        regime: state.regime,
+        highness: +state.highness.toFixed(2),
+        climb: Math.round(state.velocity.y),
+        holding: state.regime === 'high' && state.holdY != null
+          && Math.abs(state.velocity.y) < 4 ? Math.round(state.holdY) : null,
+      };
+    },
+  };
+}

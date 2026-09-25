@@ -1,0 +1,456 @@
+/* Farhold — the Research screen (js/research-ui.js), R22.
+ *
+ * Injected by its own module, like civics.css and station.css. It has to look right in two frames:
+ * as a tab of the character sheet (where js/hud.js owns the header and the rail) and as its own
+ * overlay opened from the build panel (`research--overlay`).
+ *
+ * ------------------------------------------------------------------------------------------------
+ * THE BUG THIS FILE OWNS: "'Reagents' goes off screen and I can't scroll down."
+ *
+ * `.research` is a flex column and `.res-body` asks for `flex: 1 1 auto; min-height: 0;
+ * overflow-y: auto`. That only becomes a scroller when the flex parent has a HEIGHT to divide up.
+ * The overlay had one — `max-height` below — so the overlay scrolled. The character-sheet tab did
+ * not, so the column simply grew past the bottom of the sheet and style.css's `overflow: hidden` on
+ * `.tab-body[data-tab="research"]` cut off whatever hung over the edge. Nothing was broken in the
+ * screen; there was just no bottom for it to stop at.
+ *
+ * The Holding and the Followers screens fix this with a flag their caller passes in (`.civics--tab`,
+ * `.flw--tab`). js/main.js belongs to another pair of hands this round, so the rule here is written
+ * so that NO flag is needed: `.research` is `height: 100%` by default and the overlay rule below
+ * puts its own bounded height back. `.sheet-mount` is already `height: 100%`, and the sheet's tab
+ * body is a grid area with a definite height, so the chain reaches the screen with no gaps in it.
+ */
+
+.research {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #dfe4ea;
+  font-size: 13px;
+  min-height: 0;
+  /* the fix. Mounted in a box, the screen is exactly as tall as the box and its body scrolls. */
+  height: 100%;
+  max-height: 100%;
+
+  /* one card width, shared by the grid columns and the wire maths' idea of a column */
+  --res-col: 172px;
+  --res-ink: #dfe4ea;
+  --res-gold: #e8c86a;
+  --res-green: #6fbf72;
+  --res-faint: #59657a;
+}
+
+.research[hidden] { display: none !important; }
+
+/* ---------------------------------------------------------------- the overlay frame */
+
+.research--overlay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  /* wide enough that all four ages and the side panel fit at 1280px with nothing to scroll
+   * sideways; narrower windows scroll the board, which is what the board is for */
+  width: min(1120px, calc(100vw - 32px));
+  /* the overlay floats, so it is bounded by the window rather than by a parent — which is why this
+   * screen scrolled here and nowhere else before R22. Both rules now exist; only one applies. */
+  height: auto;
+  max-height: min(84vh, 820px);
+  z-index: 62;
+  background: #14161aef;
+  border: 1px solid #3a4250;
+  border-radius: 10px;
+  box-shadow: 0 18px 60px #000a;
+  padding: 12px 14px 14px;
+}
+
+/* ---------------------------------------------------------------- head */
+
+.res-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+  flex: 0 0 auto;
+  /* R22 — the legend ended flush with the right edge of the screen, so "Locked" read as clipped.
+     The screen is mounted edge to edge in the sheet tab, so the gutter has to come from here. */
+  padding-right: 10px;
+}
+
+.res-head h2 { margin: 0; font-size: 17px; letter-spacing: 0.02em; }
+
+/* The number the whole screen is about. It is a colour of its own so the eye finds it first. */
+.res-points {
+  color: var(--res-gold);
+  font-weight: 600;
+}
+
+.res-sub { flex: 1 1 auto; }
+
+/* The four colours, named once. A card's state is a border and a dot and nothing else, which only
+ * works if the colours are spelled out somewhere. */
+.res-key {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 11px;
+  color: #8fa0b4;
+}
+.res-key-item { display: inline-flex; align-items: center; gap: 4px; }
+
+.res-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  background: var(--res-faint);
+}
+.res-dot--done { background: var(--res-green); }
+.res-dot--ready { background: var(--res-gold); box-shadow: 0 0 6px #e8c86a88; }
+.res-dot--short { background: #c9853e; }
+.res-dot--blocked { background: var(--res-faint); }
+
+.res-close {
+  background: #222834;
+  border: 1px solid #3a4250;
+  border-radius: 5px;
+  color: #cfd6df;
+  cursor: pointer;
+  font: inherit;
+  padding: 3px 10px;
+}
+.res-close:hover { background: #2c3440; }
+
+/* ---------------------------------------------------------------- where points come from */
+
+/* R22 — a strip, not a column. It used to be a fifth pane beside the four ages, which gave a static
+ * reference list the same weight as the tree the screen is for. */
+.res-ledger { flex: 0 0 auto; }
+
+.res-earn-toggle {
+  background: #1b2029;
+  border: 1px solid #2a323d;
+  border-radius: 6px;
+  color: #9fb6c8;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  padding: 4px 10px 4px 22px;
+  position: relative;
+  text-align: left;
+  width: 100%;
+}
+.res-earn-toggle:hover { background: #222933; color: #cfd6df; }
+.res-earn-toggle::before {
+  content: '▸';
+  position: absolute;
+  left: 9px;
+  transition: transform 0.12s ease;
+}
+.res-earn-toggle.is-open::before { transform: rotate(90deg); }
+
+.res-earn {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 0 16px;
+  background: #181c22;
+  border: 1px solid #262c36;
+  border-top: 0;
+  border-radius: 0 0 6px 6px;
+  padding: 6px 11px 8px;
+}
+.res-earn[hidden] { display: none; }
+
+.res-earn-note { grid-column: 1 / -1; margin: 0 0 4px; }
+
+.res-earn-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 3px 0;
+  border-bottom: 1px solid #20262f;
+}
+.res-earn-row b { flex: 0 0 auto; }
+.res-earn-row .small { flex: 1 1 auto; }
+
+.res-earn-n {
+  color: var(--res-gold);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------- the body: board + side panel */
+
+.res-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
+/* The board scrolls in BOTH directions. A tech tree is wider than a sheet tab and taller than a
+ * window, and the R17 screen's answer — wrap the ages into whatever fits — is what pushed a node
+ * off the bottom with nothing to scroll. */
+.res-board {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  background: #14181e;
+  border: 1px solid #262c36;
+  border-radius: 8px;
+  padding: 10px 12px 14px;
+}
+
+/* sized by its contents, so the board has something wider than itself to scroll over */
+.res-canvas {
+  position: relative;
+  width: max-content;
+  min-width: 100%;
+}
+
+/* behind the cards, and it never eats a click */
+.res-wires {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 0;
+}
+
+.res-wire {
+  stroke: #39414f;
+  stroke-width: 1.6;
+  fill: none;
+}
+.res-wire--done { stroke: #4b7a52; }
+.res-wire--ready { stroke: #8a7439; }
+.res-wire--short { stroke: #6b5232; }
+.res-wire--blocked { stroke: #2e3541; }
+/* hovering a card traces its whole chain: the lit wires brighten and everything else steps back */
+.res-canvas.is-tracing .res-wire { opacity: 0.35; }
+.res-wires .res-wire.is-lit { stroke: var(--res-gold); stroke-width: 2.4; opacity: 1; }
+
+.res-lattice {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-auto-rows: minmax(0, auto);
+  gap: 12px 26px;
+  align-items: start;
+  justify-items: stretch;
+}
+
+.res-col-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding-bottom: 2px;
+  border-bottom: 1px solid #262c36;
+}
+
+.res-col-head h3 {
+  margin: 0;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #8fa0b4;
+  white-space: nowrap;
+}
+
+/* One swatch per age, taking the colour out of data/research.json so the palette is data too. */
+.res-tone {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+
+.res-free {
+  color: #8fbf72;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ---------------------------------------------------------------- a card */
+
+/* A button rather than a div, so Tab reaches it and Enter picks it with no keyboard code of ours. */
+.res-node {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: var(--res-ink);
+  cursor: pointer;
+  border: 1px solid #2d3542;
+  border-left: 3px solid var(--res-faint);
+  border-radius: 6px;
+  padding: 7px 9px 8px;
+  background: #1c2129;
+}
+.res-node:hover { background: #222833; }
+
+.res-node--ready { border-left-color: var(--res-gold); }
+.res-node--short { border-left-color: #c9853e; }
+.res-node--done { border-left-color: var(--res-green); }
+.res-node--blocked { border-left-color: var(--res-faint); color: #9aa5b4; }
+
+.res-node.is-picked {
+  border-color: var(--res-gold);
+  background: #262c37;
+  box-shadow: 0 0 0 1px #e8c86a55;
+}
+.res-node.is-lit { border-color: #6d7c93; }
+
+.res-node-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.res-node-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 12.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.res-cost {
+  color: var(--res-gold);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.res-node--done .res-cost { color: var(--res-green); }
+.res-node--blocked .res-cost { color: #8b93a1; }
+
+/* The one line of text a card carries. It is never dropped: a greyed box with nothing beside it is
+ * the one answer a player cannot act on. */
+.res-node-state {
+  font-size: 11px;
+  line-height: 1.35;
+  color: #93a3b6;
+}
+.res-node--ready .res-node-state { color: var(--res-gold); }
+.res-node--done .res-node-state { color: var(--res-green); }
+
+/* ---------------------------------------------------------------- the side panel */
+
+.res-detail {
+  flex: 0 0 272px;
+  min-height: 0;
+  overflow-y: auto;
+  background: #181c22;
+  border: 1px solid #262c36;
+  border-radius: 8px;
+  padding: 10px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.res-detail-head { display: flex; align-items: center; gap: 7px; }
+.res-detail-head h3 { margin: 0; font-size: 14px; letter-spacing: 0.01em; }
+
+.res-detail-age { display: flex; align-items: center; gap: 6px; margin: 0; }
+
+.res-empty { margin: 0; }
+
+.res-blurb { margin: 2px 0 0; line-height: 1.45; }
+.res-why { margin: 0; font-style: italic; line-height: 1.4; }
+
+.res-sect { margin-top: 4px; }
+.res-sect h4 {
+  margin: 0 0 4px;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #8fa0b4;
+}
+
+.res-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+
+/* a prerequisite is clickable, because "what is holding this up" is answered by going there */
+.res-chip {
+  background: #222834;
+  border: 1px solid #39414f;
+  border-radius: 4px;
+  color: #cfd6df;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  padding: 2px 7px;
+}
+.res-chip:hover { background: #2c3440; }
+.res-chip--done { border-color: #4b7a52; color: #9fd1a2; }
+.res-chip--ready { border-color: #8a7439; color: var(--res-gold); }
+
+.res-open {
+  background: #1e242d;
+  border: 1px solid #2b323d;
+  border-radius: 4px;
+  color: #9fb6c8;
+  font-size: 11px;
+  padding: 2px 7px;
+  text-transform: capitalize;
+}
+
+.res-detail-foot {
+  margin-top: auto;
+  padding-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+}
+
+.res-buy {
+  background: #2a3341;
+  border: 1px solid #3f4a5a;
+  border-radius: 5px;
+  color: #e6ebf1;
+  cursor: pointer;
+  font: inherit;
+  padding: 5px 12px;
+}
+.res-buy:hover:not(:disabled) { background: #36414f; }
+.res-buy:disabled { opacity: 0.45; cursor: default; }
+
+/* The sentence beside a button that will not press. It is never optional: a greyed button with
+ * nothing next to it is the one answer a player cannot act on. */
+.res-verdict {
+  color: #c9a05e;
+  font-size: 12px;
+}
+.res-verdict--done { color: var(--res-green); }
+
+/* ---------------------------------------------------------------- narrow */
+
+/* Under about 760px there is no room for a board and a 272px panel side by side, so the panel goes
+ * under the board and takes a share of the height. The board still scrolls both ways, so every node
+ * is reachable at the project's 400px floor. */
+@media (max-width: 760px) {
+  .res-body { flex-direction: column; overflow-y: auto; }
+  /* the board keeps a real height of its own and still scrolls both ways inside it — squeezing it
+   * to whatever was left over is how a node ends up in a 169px slot on a phone */
+  .res-board { flex: 0 0 auto; min-height: 240px; max-height: 60vh; }
+  .res-detail { flex: 0 0 auto; max-height: none; }
+  /* eight ways to earn a point is eight rows stacked on a narrow screen, which is most of the
+   * window; it gets a third of the height and scrolls inside that */
+  .res-earn { max-height: 30vh; overflow-y: auto; }
+  .res-key { font-size: 10px; gap: 7px; }
+}
+
+@media (max-width: 460px) {
+  .research--overlay {
+    width: calc(100vw - 16px);
+    max-height: calc(100vh - 32px);
+    padding: 10px;
+  }
+  .research { --res-col: 152px; }
+  .res-head h2 { font-size: 15px; }
+}

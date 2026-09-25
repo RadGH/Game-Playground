@@ -1,0 +1,49 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../shared/style.css">
+<link rel="stylesheet" href="style.css">
+<title>Building Kit Gallery</title>
+
+<header class="page-head">
+  <h1>Building Kit Gallery</h1>
+  <p class="lede">Every base, every roof, every material and every culture's palette — drawn from the
+    same <code>partsFor()</code> list <code>prototypes/farhold/</code> instances. A roof that missed
+    its walls would miss them here too.</p>
+</header>
+
+<main class="town-wrap">
+  <section class="town-panel">
+    <h2>View</h2>
+    <label>Show <select id="view">
+      <option value="bases">Bases &times; roofs</option>
+      <option value="roofs">One base, every roof</option>
+      <option value="materials">Materials</option>
+      <option value="culture">A street of one culture</option>
+      <option value="stalls">Outdoor stalls</option>
+      <option value="palette">Palettes</option>
+    </select></label>
+
+    <label>Culture <select id="culture"></select></label>
+    <label>Base <select id="base"></select></label>
+    <label>Seed <input id="seed" type="number" value="7" min="1"></label>
+    <div class="row">
+      <button id="prev" class="btn">&larr;</button>
+      <button id="reroll" class="btn primary">Reroll</button>
+      <button id="next" class="btn">&rarr;</button>
+    </div>
+    <label>Tile size <input id="tile" type="range" min="90" max="320" value="170"><span id="tile-val">170</span></label>
+    <label class="chk"><input type="checkbox" id="only-culture" checked> Only what this culture builds</label>
+
+    <h2>Checks</h2>
+    <div id="verdict" class="verdict"></div>
+    <button id="audit" class="btn">Audit every combination</button>
+    <pre id="report" class="report"></pre>
+  </section>
+
+  <section class="town-stage">
+    <div id="grid" class="kit-grid"></div>
+  </section>
+</main>
+
+<a class="back" href="index.html">&larr; Procedural Towns</a>
+<script type="module" src="js/kit-app.js"></script>

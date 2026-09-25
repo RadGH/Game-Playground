@@ -1,0 +1,17 @@
+#stage { width: 100%; height: 420px; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; position: relative; }
+#stage canvas { width: 100% !important; height: 100% !important; display: block; }
+.subtitle { position: absolute; left: 0; right: 0; bottom: 10px; text-align: center; pointer-events: none; }
+.subtitle span { display: inline-block; background: rgba(0,0,0,.65); color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 16px; max-width: 90%; }
+.subtitle .who { color: var(--accent2); font-weight: 600; margin-right: 6px; }
+.charcard { display: flex; gap: 8px; align-items: flex-start; }
+.charcard .portrait { width: 96px; flex: none; } .charcard .portrait svg { width: 100%; height: auto; }
+.charcard .info { flex: 1; font-size: 12px; }
+.charcard .info .name { font-weight: 600; font-size: 14px; }
+.line { padding: 6px 8px; border-left: 3px solid var(--accent); background: var(--bg3); border-radius: 4px; margin-bottom: 6px; }
+.line.b { border-left-color: var(--accent2); } .line .who { font-weight: 600; margin-right: 6px; } .line .meta { font-size: 11px; color: var(--fg2); font-family: var(--mono); }
+.line.now { outline: 1px solid var(--accent); }
+#json { font-family: var(--mono); font-size: 11px; min-height: 300px; }
+.sections td { font-size: 12px; vertical-align: top; }
+
+.mem { padding: 3px 6px; background: var(--bg3); border-radius: 4px; margin-bottom: 3px; font-size: 12px; }
+.mem .bar { height: 3px; background: var(--bg2); border-radius: 2px; margin-top: 2px; } .mem .bar div { height: 100%; background: var(--accent2); }

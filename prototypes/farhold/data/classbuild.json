@@ -1,0 +1,99 @@
+{
+  "_doc": "Round 17 — the custom class. Everything here is the TUNING a point-buy character needs and nothing here is a copy of anything. The spell tier list itself is NOT in this file: js/classbuild.js derives it at load from data/classes.json and data/skills.json, because those two are already the source of truth for all 30 preset classes and a committed copy of them would drift the first time somebody adds a skill. See CLASSES.md, 'Where the tier list comes from'.",
+
+  "_wordingDoc": "Round 21 — every blurb in this file is held to WORDING.md: name the thing rather than saying 'it', and give magnitude and duration as digits. The loadout blurbs quote js/weapons.js (WEAPON_PATTERNS reach and clock, WEAPON_TRAITS damage/armourBreak/backstab/guard/pierceLine, RANGED ranges and draw power, OFFHAND_DAMAGE, STAFF_CHARGE) and js/rpg.js (a wand's 34 m castRange). The element blurbs quote data/skills.json `statuses` carried through js/main.js `brandHit`, which hands the status 70% of the hit's damage as its power — so burn's 0.3/s over 5s is 0.3 x 5 x 0.7 = about 105% of the hit again. The companion blurbs quote data/enemies.json. Change one of those numbers and this file is wrong, so change this file too.",
+
+  "_customDoc": "The synthetic class a custom build is injected as. `id` is what ends up in the save's `classId`, which is why it must never collide with one of the 30 real ones.",
+  "custom": {
+    "id": "custom",
+    "name": "Freelance",
+    "role": "Built to order",
+    "hook": "Nothing came with this class. Every spell on the bar was chosen.",
+    "primaryAttr": "STR",
+    "armorTier": "medium",
+    "baseLook": "ranger"
+  },
+
+  "_tierDoc": "The six rungs, mirroring data/skills.json's `unlockAt`. A spell's TIER is the earliest rung any of the 30 classes hands it out on; a pick may only take a spell whose tier is at or below the rung being filled, which is the whole of the point-buy rule. The levels below are a cross-check, not a second source: js/classbuild.js asserts they match skills.json and throws if they do not, because two ladders that disagree is the bug this project keeps finding.",
+  "tiers": [
+    { "level": 1, "name": "Opening", "blurb": "The spell you start the game holding, at level 1." },
+    { "level": 3, "name": "Second", "blurb": "Your 2nd spell, unlocked at level 3." },
+    { "level": 6, "name": "Third", "blurb": "Your 3rd spell, unlocked at level 6." },
+    { "level": 12, "name": "Fourth", "blurb": "Your 4th spell, unlocked at level 12." },
+    { "level": 18, "name": "Fifth", "blurb": "Your 5th spell, unlocked at level 18." },
+    { "level": 24, "name": "Sixth", "blurb": "Your 6th and last spell, unlocked at level 24." }
+  ],
+
+  "_loadoutDoc": "Every sensible pair of hands. `main` and `off` are weaponBase keys out of the shared items.json; `offArmour` is an off-hand ARMOUR base (a shield, a focus, a quiver) rather than a second weapon. `needsPerk` names a perk-forest keystone by its KEYSTONE id — a saved perk is the node id, so js/classbuild.js looks the node up through the forest rather than hard-coding one. `element` marks the loadouts that carry a branded caster and therefore get an element picker.",
+  "loadouts": [
+    { "id": "blade_board", "name": "Blade and Board", "main": "longsword", "offArmour": "shield", "armour": "heavy", "blurb": "A longsword at 3.0 m reach, a swing every 0.64s, and a shield to get in the way. The build that survives its own mistakes.", "weapons": ["sword", "longsword", "hammer", "mace", "axe"] },
+    { "id": "hammer_board", "name": "Hammer and Board", "main": "hammer", "offArmour": "kite_shield", "armour": "heavy", "blurb": "A hammer at 2.5 m reach, a swing every 0.66s, stripping 7% of the target's armour on every hit, behind a kite shield.", "weapons": ["hammer", "warhammer", "mace", "sword"] },
+    { "id": "spear_board", "name": "Spear and Shield", "main": "spear", "offArmour": "shield", "armour": "medium", "blurb": "4.0 m of reach behind a shield, and a thrust that runs through 2 bodies in a line.", "weapons": ["spear", "javelin", "halberd", "sword"] },
+    { "id": "javelin_board", "name": "Javelin and Buckler", "main": "javelin", "offArmour": "buckler", "armour": "medium", "blurb": "Javelins thrown out to 28 m, landing in a 1.4 m splash every 0.75s, with a buckler in the free hand.", "weapons": ["javelin", "spear", "dagger"] },
+    { "id": "two_blades", "name": "Two Blades", "main": "sword", "off": "sword", "armour": "medium", "blurb": "Two swords on two clocks, 2.8 m reach each. The off-hand sword deals 60% damage and never stops.", "weapons": ["sword", "longsword", "rapier", "dagger", "axe"] },
+    { "id": "knife_pair", "name": "Knife Pair", "main": "dagger", "off": "dagger", "armour": "light", "blurb": "2.0 m reach and a strike every 0.34s — the fastest hands in the game — dealing 80% damage from the front and 2.2× damage from behind.", "weapons": ["dagger", "rapier", "sword"] },
+    { "id": "rapier_knife", "name": "Rapier and Knife", "main": "rapier", "off": "dagger", "armour": "light", "blurb": "Thrust, thrust, lunge at 3.3 m with a 10% chance to block, and a dagger for whatever closes the distance.", "weapons": ["rapier", "dagger", "sword"] },
+    { "id": "great_blade", "name": "Great Blade", "main": "sword2h", "armour": "medium", "blurb": "A 3.9 m sweep and a slow overhead every 0.88s, at 1.20× damage for taking both hands.", "weapons": ["sword2h", "greatsword", "axe2h", "longsword"] },
+    { "id": "great_axe", "name": "Great Axe", "main": "axe2h", "armour": "heavy", "blurb": "3.6 m of cleave at 1.20× damage, opening a bleed on every cleave and stripping 5% of the target's armour per hit.", "weapons": ["axe2h", "sword2h", "battleaxe", "hammer"] },
+    { "id": "polearm", "name": "Halberd", "main": "halberd", "armour": "medium", "blurb": "4.8 m of reach at 1.20× damage, and a thrust that runs through 3 bodies standing in a line.", "weapons": ["halberd", "spear", "sword2h"] },
+    { "id": "quarterstaff", "name": "Quarterstaff", "main": "quarterstaff", "armour": "light", "blurb": "A pole, not a wand: 3.5 m reach, a strike every 0.48s, and a 12% chance to block while the staff is held.", "weapons": ["quarterstaff", "spear", "staff"] },
+    { "id": "longbow", "name": "Bow and Quiver", "main": "bow", "offArmour": "quiver", "armour": "light", "blurb": "A bow out to 46 m. A full 0.95s draw hits for 1.60× damage; loosed early the shot hits for 0.55×.", "weapons": ["bow", "shortbow", "crossbow", "dagger"] },
+    { "id": "crossbow", "name": "Crossbow and Quiver", "main": "crossbow", "offArmour": "quiver", "armour": "medium", "blurb": "Bolts out to 50 m at 1.80× damage, with 1.25s to crank the crossbow back between shots. No draw to hold.", "weapons": ["crossbow", "bow", "sword"] },
+    { "id": "wand_focus", "name": "Wand and Focus", "main": "wand", "offArmour": "warded_focus", "armour": "light", "element": true, "blurb": "A branded bolt out to 34 m, and a warded focus in the other hand.", "weapons": ["wand", "scepter", "orb", "tome"] },
+    { "id": "wand_tome", "name": "Wand and Tome", "main": "wand", "off": "tome", "armour": "light", "element": true, "blurb": "Both hands casting out to 34 m, the off hand at 60% damage. No shield, so nothing to block with at all.", "weapons": ["wand", "tome", "orb", "scepter"] },
+    { "id": "elemental_staff", "name": "Elemental Staff", "main": "staff", "armour": "light", "element": true, "blurb": "Swung, not aimed, and every swing carries the element you chose. A 1.40s charge casts at full damage; holding to 2.60s casts at 1.60× damage over 2× the area.", "weapons": ["staff", "quarterstaff", "wand"] },
+    { "id": "scepter_board", "name": "Sceptre and Shield", "main": "scepter", "offArmour": "shield", "armour": "medium", "element": true, "blurb": "A sceptre that casts and still stands in the front rank: 2.5 m reach behind a shield, stripping 4% of the target's armour per hit.", "weapons": ["scepter", "mace", "wand", "sword"] },
+    {
+      "id": "doubled_two_handers",
+      "name": "Two Two-Handers",
+      "main": "sword2h", "off": "axe2h", "armour": "heavy",
+      "needsPerk": "doubled_grasp",
+      "blurb": "A two-handed sword and a two-handed axe at once, both at 1.20× damage, the off-hand axe at 60% of that. Only possible once the Doubled Grasp keystone is taken.",
+      "weapons": ["sword2h", "axe2h", "greatsword", "halberd"]
+    }
+  ],
+
+  "_elementDoc": "What a branded caster may be attuned to. These are rpg.js's own CAST_ELEMENTS keys — js/classbuild.js checks each one resolves there, so a choice can never be an element the game does not have. The blurbs quote data/skills.json `statuses` at the power js/main.js `brandHit` hands them (70% of the hit's damage), stated as a TOTAL over the whole duration the way WORDING.md rule 2 requires.",
+  "elements": [
+    { "key": "fire", "name": "Flame", "blurb": "A hit also sets Burning: about 105% of that hit's damage again, as fire damage, over 5s." },
+    { "key": "ice", "name": "Rime", "blurb": "A hit also sets Chilled: the target moves 45% slower for 4s." },
+    { "key": "lightning", "name": "Storm", "blurb": "A hit also sets Shocked: the target takes 30% more damage from every source for 5s." },
+    { "key": "poison", "name": "Blight", "blurb": "A hit also sets Poisoned: about 146% of that hit's damage again, as poison damage, over 8s." },
+    { "key": "shadow", "name": "Gloom", "blurb": "A hit also sets Cursed: the target takes 25% more damage and moves 15% slower for 8s." },
+    { "key": "arcane", "name": "Arc", "blurb": "Plain arcane damage. Arc is the 1 element that leaves no status on the target at all." }
+  ],
+
+  "_armourDoc": "What each armour tier puts on you at level 1. Base keys out of items.json, equipped exactly the way a preset class's `startingArmour` is.",
+  "armour": {
+    "light": ["light_chest", "cloth_helm", "light_boots", "light_gauntlets"],
+    "medium": ["medium_chest", "medium_helm", "medium_boots", "medium_gauntlets"],
+    "heavy": ["heavy_chest", "heavy_helm", "heavy_boots", "heavy_gauntlets"]
+  },
+
+  "_openingDoc": "The one choice the user asked for by name: somebody to walk with you, or a crate and some money for the people who would rather be alone. A companion is a bestiary pet id out of data/enemies.json, so it is a real body with real numbers — and the blurbs below quote those numbers. The crate is rolled through rpg.loot the same way every chest in the game is — `floor` is the worst rarity it can hold, which is what makes 'three magic or better' a promise rather than a hope.",
+  "opening": {
+    "companions": [
+      { "id": "grove_wolf", "name": "A wolf", "blurb": "46 health, 5–9 damage a bite, one bite every 1.3s. Fast and fragile." },
+      { "id": "dire_companion", "name": "A dire hound", "blurb": "78 health and 6 armour, 7–12 damage every 1.7s. The heavy one: walks in first and stays there." },
+      { "id": "hunting_cat", "name": "A hunting cat", "blurb": "40 health, 6–10 damage every 1.1s at 5.6 m/s. The fastest companion, and the one that reaches the casters." },
+      { "id": "bone_thrall", "name": "A bone thrall", "blurb": "2 thralls, 34 health and 4–7 damage each. Cheap and expendable." , "count": 2 },
+      { "id": "ember_familiar", "name": "An ember familiar", "blurb": "30 health, 6–10 fire damage out to 24 m, and every hit sets Burning. Flies." },
+      { "id": "storm_familiar", "name": "A storm familiar", "blurb": "30 health, 6–10 lightning damage out to 26 m. Flies, and has the longest reach of the familiars." },
+      { "id": "spirit_bear", "name": "A spirit bear", "blurb": "110 health and 10 armour — the toughest companion — for 8–13 damage every 2s at 3.6 m/s." },
+      { "id": "clockwork_sentry", "name": "A clockwork sentry", "blurb": "60 health and 12 armour, 6–11 damage out to 30 m. Rolls along behind you and never needs feeding." },
+      { "id": "bound_imp", "name": "A bound imp", "blurb": "42 health and 3 armour, 7–12 shadow damage out to 24 m." }
+    ],
+    "crate": {
+      "name": "A Sealed Chest",
+      "blurb": "3 items of magic quality or better, and 450 gold.",
+      "count": 3,
+      "floor": "magic",
+      "lift": 0.28,
+      "quality": "medium",
+      "gold": 450
+    }
+  },
+
+  "_lookDoc": "Which of the 30 class looks a custom character borrows its body from before the appearance editor gets to it. Nothing but a starting point — Customize on the character step replaces the whole avatar.",
+  "looks": ["ranger", "warrior", "rogue", "mage", "cleric", "bard", "necromancer", "paladin", "druid", "monk"]
+}

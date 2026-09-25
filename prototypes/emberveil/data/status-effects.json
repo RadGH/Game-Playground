@@ -1,0 +1,180 @@
+{
+ "version": 1,
+ "source": "src/game/statusEffects.js STATUS_META const (canonical-data migration M497) + sunder/fury/weaken added for Emberveil 2 (used by skills and boss phases)",
+ "statusMeta": {
+  "bleed": {
+   "glyph": "B",
+   "color": "#e05050",
+   "name": "Bleeding",
+   "plain": "Loses a small amount of HP every round from a bleeding wound."
+  },
+  "poison": {
+   "glyph": "P",
+   "color": "#60c060",
+   "name": "Poisoned",
+   "plain": "Loses HP every round; multiple doses stack on top of each other."
+  },
+  "burn": {
+   "glyph": "F",
+   "color": "#e08020",
+   "name": "Burning",
+   "plain": "Takes fire damage every round and has reduced protection against flames."
+  },
+  "stun": {
+   "glyph": "S",
+   "color": "#e0c020",
+   "name": "Stunned",
+   "plain": "Skips the next turn and cannot act while the stun lasts."
+  },
+  "haste": {
+   "glyph": "H",
+   "color": "#40c8ff",
+   "name": "Hasted",
+   "plain": "Gets extra actions per round, acting more frequently than normal."
+  },
+  "rally": {
+   "glyph": "R",
+   "color": "#e8a020",
+   "name": "Rallied",
+   "plain": "Deals more damage on every hit while this effect is active."
+  },
+  "barrier": {
+   "glyph": "■",
+   "color": "#60a0e0",
+   "name": "Barrier",
+   "plain": "A protective shield absorbs incoming damage before HP is reduced."
+  },
+  "block": {
+   "glyph": "◆",
+   "color": "#8080e0",
+   "name": "Blocking",
+   "plain": "Has a higher chance to block incoming attacks with a shield or weapon."
+  },
+  "deflect": {
+   "glyph": "D",
+   "color": "#8080e0",
+   "name": "Deflecting",
+   "plain": "The next hit that lands is partially or fully turned aside."
+  },
+  "enchant": {
+   "glyph": "E",
+   "color": "#c080ff",
+   "name": "Enchanted",
+   "plain": "Weapon carries a magical charge, dealing 25% more magic damage."
+  },
+  "slow": {
+   "glyph": "W",
+   "color": "#8090b0",
+   "name": "Slowed",
+   "plain": "Acts less often each round, taking longer between turns."
+  },
+  "taunt_totem": {
+   "glyph": "T",
+   "color": "#c04030",
+   "name": "Taunt Totem",
+   "plain": "A totem draws enemy attacks toward itself, protecting the rest of the party."
+  },
+  "regen": {
+   "glyph": "+",
+   "color": "#60c080",
+   "name": "Regenerating",
+   "plain": "Recovers a small amount of HP at the start of each round."
+  },
+  "marked": {
+   "glyph": "M",
+   "color": "#c060c0",
+   "name": "Marked",
+   "plain": "Receives extra damage from all sources while the mark is active."
+  },
+  "blind": {
+   "glyph": "◌",
+   "color": "#a08060",
+   "name": "Blinded",
+   "plain": "Vision is impaired; attacks miss far more often than usual."
+  },
+  "soulbind": {
+   "glyph": "✶",
+   "color": "#9060ff",
+   "name": "Soul-Bound",
+   "plain": "A soul link connects this target to the caster; effects on one may transfer to the other."
+  },
+  "curse": {
+   "glyph": "†",
+   "color": "#8040c0",
+   "name": "Cursed",
+   "plain": "A dark curse weakens this target, applying a mix of harmful effects."
+  },
+  "silence": {
+   "glyph": "✕",
+   "color": "#c08040",
+   "name": "Silenced",
+   "plain": "Cannot cast spells or use any abilities that require speaking or channeling."
+  },
+  "disarm": {
+   "glyph": "∅",
+   "color": "#a06040",
+   "name": "Disarmed",
+   "plain": "Weapon has been knocked away; physical weapon attacks are unavailable."
+  },
+  "root": {
+   "glyph": "⊥",
+   "color": "#60a040",
+   "name": "Rooted",
+   "plain": "Held in place and cannot move or change position in the fight."
+  },
+  "holy_burn": {
+   "glyph": "✝",
+   "color": "#f0d040",
+   "name": "Holy Fire",
+   "plain": "Sacred flames scorch this unholy target, dealing light damage every round."
+  },
+  "freeze": {
+   "glyph": "Z",
+   "color": "#60c8ff",
+   "name": "Frozen",
+   "plain": "Encased in ice — cannot act this round."
+  },
+  "confused": {
+   "glyph": "?",
+   "color": "#c0a0ff",
+   "name": "Confused",
+   "plain": "Disoriented — has a 50% chance to skip their next action."
+  },
+  "thorns": {
+   "glyph": "X",
+   "color": "#40c840",
+   "name": "Thorns",
+   "plain": "Returns damage to any attacker that lands a hit."
+  },
+  "dazed": {
+   "glyph": "~",
+   "color": "#a8b0e0",
+   "name": "Dazed",
+   "plain": "Disoriented — attacks have a much harder time finding their mark (-25% hit chance) for the duration."
+  },
+  "sleep": {
+   "glyph": "z",
+   "color": "#b070ff",
+   "name": "Asleep",
+   "plain": "Cannot act for up to 2 rounds. Any damage instantly wakes the target. Allies will avoid attacking sleeping enemies."
+  },
+  "sunder": {
+   "glyph": "⌁",
+   "color": "#b08050",
+   "name": "Sundered",
+   "plain": "Its armour is split open, so every weapon hit bites deeper."
+  },
+  "fury": {
+   "glyph": "!",
+   "color": "#e06030",
+   "name": "Furious",
+   "plain": "Lashing out much harder than normal."
+  },
+  "weaken": {
+   "glyph": "v",
+   "color": "#7080a0",
+   "name": "Weakened",
+   "plain": "Its blows have lost their strength."
+  }
+ }
+}

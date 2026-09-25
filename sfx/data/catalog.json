@@ -1,0 +1,6984 @@
+{
+ "version": 1,
+ "generatedBy": "sfx/tools/build-catalog.py",
+ "note": "Logical sound ids a game asks for. Categories drive the loudness target; see sfx/README.md.",
+ "categories": {
+  "spell": {
+   "target": -19,
+   "bus": "sfx",
+   "label": "Spells (cast / flight)"
+  },
+  "impact": {
+   "target": -16,
+   "bus": "sfx",
+   "label": "Spell impacts"
+  },
+  "melee": {
+   "target": -17,
+   "bus": "sfx",
+   "label": "Melee"
+  },
+  "status": {
+   "target": -22,
+   "bus": "sfx",
+   "label": "Status effects"
+  },
+  "death": {
+   "target": -17,
+   "bus": "sfx",
+   "label": "Deaths"
+  },
+  "sting": {
+   "target": -18,
+   "bus": "sfx",
+   "label": "Stings (heal, level up, quest)"
+  },
+  "loot": {
+   "target": -19,
+   "bus": "sfx",
+   "label": "Loot and coins"
+  },
+  "world": {
+   "target": -21,
+   "bus": "sfx",
+   "label": "World (steps, equip)"
+  },
+  "ui": {
+   "target": -26,
+   "bus": "ui",
+   "label": "Interface"
+  },
+  "ambience": {
+   "target": -40,
+   "bus": "ambience",
+   "label": "Ambience loops"
+  }
+ },
+ "peakCeilingDb": -1.0,
+ "elements": [
+  "fire",
+  "ice",
+  "shadow",
+  "holy",
+  "nature",
+  "arcane",
+  "lightning",
+  "physical",
+  "poison",
+  "bleed",
+  "true"
+ ],
+ "statuses": [
+  "burn",
+  "poison",
+  "bleed",
+  "freeze",
+  "stun",
+  "sleep",
+  "confused",
+  "dazed",
+  "blind",
+  "slow",
+  "marked",
+  "barrier",
+  "regen",
+  "sunder",
+  "curse",
+  "silence",
+  "disarm",
+  "root",
+  "rally",
+  "haste",
+  "enchant",
+  "block",
+  "deflect"
+ ],
+ "rarities": [
+  "common",
+  "normal",
+  "uncommon",
+  "magic",
+  "rare",
+  "epic",
+  "legendary"
+ ],
+ "ambiences": [
+  "forest",
+  "cave",
+  "town",
+  "marsh",
+  "mountain",
+  "void",
+  "fire",
+  "wind"
+ ],
+ "sounds": [
+  {
+   "id": "spell.fire.launch",
+   "category": "spell",
+   "label": "Fire launch",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.42,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "brown",
+      "dur": 0.4,
+      "delay": 0.0,
+      "gain": 0.9,
+      "filter": {
+       "type": "lowpass",
+       "f0": 280,
+       "f1": 1300,
+       "q": 0.7
+      },
+      "env": {
+       "a": 0.03,
+       "d": 0.4,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.22,
+      "delay": 0.0,
+      "gain": 0.35,
+      "f0": 95,
+      "f1": 62,
+      "env": {
+       "a": 0.003,
+       "d": 0.22,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "grain",
+      "dur": 0.36,
+      "delay": 0.05,
+      "gain": 0.18,
+      "n": 6,
+      "freq": [
+       380,
+       1300
+      ],
+      "gdur": [
+       0.01,
+       0.03
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 1.0,
+      "noisy": false
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "arp",
+    "wave": "square",
+    "dur": 0.3,
+    "loop": false
+   }
+  },
+  {
+   "id": "spell.fire.travel",
+   "category": "spell",
+   "label": "Fire in flight",
+   "loop": true,
+   "trim": 0.0,
+   "synth": {
+    "dur": 1.2,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "drone",
+      "dur": 1.2,
+      "gain": 0.7,
+      "color": "brown",
+      "filter": {
+       "type": "bandpass",
+       "f0": 420,
+       "f1": 1500,
+       "q": 0.9
+      },
+      "lfo": 3.1,
+      "depth": 0.55
+     },
+     {
+      "type": "drone",
+      "dur": 1.2,
+      "gain": 0.35,
+      "color": "pink",
+      "filter": {
+       "type": "bandpass",
+       "f0": 90,
+       "f1": 180,
+       "q": 1.4
+      },
+      "lfo": 1.7,
+      "depth": 0.4
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "arp",
+    "wave": "square",
+    "dur": 0.3,
+    "loop": true
+   }
+  },
+  {
+   "id": "spell.fire.impact",
+   "category": "impact",
+   "label": "Fire impact",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.72,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "brown",
+      "dur": 0.6,
+      "delay": 0.0,
+      "gain": 1.0,
+      "filter": {
+       "type": "lowpass",
+       "f0": 1400,
+       "f1": 220,
+       "q": 0.8
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.6,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.36,
+      "delay": 0.0,
+      "gain": 0.85,
+      "f0": 120,
+      "f1": 44,
+      "env": {
+       "a": 0.003,
+       "d": 0.36,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "grain",
+      "dur": 0.6,
+      "delay": 0.03,
+      "gain": 0.28,
+      "n": 12,
+      "freq": [
+       450,
+       1800
+      ],
+      "gdur": [
+       0.01,
+       0.04
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 1.0,
+      "noisy": false
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "hit",
+    "wave": "noise",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "spell.ice.launch",
+   "category": "spell",
+   "label": "Ice launch",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.3,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.26,
+      "delay": 0.0,
+      "gain": 0.7,
+      "filter": {
+       "type": "bandpass",
+       "f0": 5200,
+       "f1": 2400,
+       "q": 3.0
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.26,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "triangle",
+      "dur": 0.22,
+      "delay": 0.0,
+      "gain": 0.35,
+      "f0": 2600,
+      "f1": 1700,
+      "env": {
+       "a": 0.003,
+       "d": 0.22,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "arp",
+    "wave": "square",
+    "dur": 0.3,
+    "loop": false
+   }
+  },
+  {
+   "id": "spell.ice.travel",
+   "category": "spell",
+   "label": "Ice in flight",
+   "loop": true,
+   "trim": 0.0,
+   "synth": {
+    "dur": 1.2,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "drone",
+      "dur": 1.2,
+      "gain": 0.5,
+      "color": "white",
+      "filter": {
+       "type": "bandpass",
+       "f0": 2600,
+       "f1": 5200,
+       "q": 2.2
+      },
+      "lfo": 2.3,
+      "depth": 0.5
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "arp",
+    "wave": "square",
+    "dur": 0.3,
+    "loop": true
+   }
+  },
+  {
+   "id": "spell.ice.impact",
+   "category": "impact",
+   "label": "Ice impact",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.85,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.34,
+      "delay": 0.0,
+      "gain": 0.9,
+      "filter": {
+       "type": "bandpass",
+       "f0": 6000,
+       "f1": 1400,
+       "q": 1.6
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.34,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "chord",
+      "dur": 0.8,
+      "delay": 0.0,
+      "gain": 0.5,
+      "freqs": [
+       2093,
+       2794,
+       3520
+      ],
+      "wave": "sine",
+      "stagger": 0.02,
+      "env": {
+       "a": 0.01,
+       "d": 0.8,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "grain",
+      "dur": 0.6,
+      "delay": 0.02,
+      "gain": 0.4,
+      "n": 16,
+      "freq": [
+       2200,
+       6500
+      ],
+      "gdur": [
+       0.006,
+       0.02
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 1.0,
+      "noisy": false
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.2,
+      "delay": 0.0,
+      "gain": 0.4,
+      "f0": 140,
+      "f1": 70,
+      "env": {
+       "a": 0.003,
+       "d": 0.2,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/impact/impactGlass_medium_000.ogg",
+     "kenney/impact/impactGlass_medium_001.ogg",
+     "kenney/impact/impactGlass_medium_002.ogg",
+     "kenney/impact/impactGlass_medium_003.ogg",
+     "kenney/impact/impactGlass_medium_004.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "hit",
+    "wave": "noise",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "spell.shadow.launch",
+   "category": "spell",
+   "label": "Shadow launch",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.42,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "brown",
+      "dur": 0.4,
+      "delay": 0.0,
+      "gain": 0.8,
+      "filter": {
+       "type": "lowpass",
+       "f0": 300,
+       "f1": 120,
+       "q": 1.4
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.4,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "triangle",
+      "dur": 0.34,
+      "delay": 0.0,
+      "gain": 0.4,
+      "f0": 210,
+      "f1": 92,
+      "env": {
+       "a": 0.003,
+       "d": 0.34,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "arp",
+    "wave": "square",
+    "dur": 0.3,
+    "loop": false
+   }
+  },
+  {
+   "id": "spell.shadow.travel",
+   "category": "spell",
+   "label": "Shadow in flight",
+   "loop": true,
+   "trim": 0.0,
+   "synth": {
+    "dur": 1.2,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "drone",
+      "dur": 1.2,
+      "gain": 0.7,
+      "color": "brown",
+      "filter": {
+       "type": "bandpass",
+       "f0": 130,
+       "f1": 420,
+       "q": 1.1
+      },
+      "lfo": 0.9,
+      "depth": 0.6
+     },
+     {
+      "type": "drone",
+      "dur": 1.2,
+      "gain": 0.2,
+      "color": "pink",
+      "filter": {
+       "type": "bandpass",
+       "f0": 900,
+       "f1": 1800,
+       "q": 3.0
+      },
+      "lfo": 2.6,
+      "depth": 0.7
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "arp",
+    "wave": "square",
+    "dur": 0.3,
+    "loop": true
+   }
+  },
+  {
+   "id": "spell.shadow.impact",
+   "category": "impact",
+   "label": "Shadow impact",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.95,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "tone",
+      "wave": "triangle",
+      "dur": 0.7,
+      "delay": 0.0,
+      "gain": 0.8,
+      "f0": 180,
+      "f1": 38,
+      "env": {
+       "a": 0.003,
+       "d": 0.7,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "brown",
+      "dur": 0.8,
+      "delay": 0.0,
+      "gain": 0.85,
+      "filter": {
+       "type": "lowpass",
+       "f0": 600,
+       "f1": 90,
+       "q": 0.8
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.8,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "triangle",
+      "dur": 0.55,
+      "delay": 0.04,
+      "gain": 0.3,
+      "f0": 305,
+      "f1": 147,
+      "env": {
+       "a": 0.003,
+       "d": 0.55,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "grain",
+      "dur": 0.6,
+      "delay": 0.05,
+      "gain": 0.3,
+      "n": 9,
+      "freq": [
+       200,
+       800
+      ],
+      "gdur": [
+       0.03,
+       0.09
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 1.0,
+      "noisy": false
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "hit",
+    "wave": "noise",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "spell.holy.launch",
+   "category": "spell",
+   "label": "Holy launch",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.4,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "chord",
+      "dur": 0.38,
+      "delay": 0.0,
+      "gain": 0.5,
+      "freqs": [
+       880,
+       1320,
+       1760
+      ],
+      "wave": "sine",
+      "stagger": 0.03,
+      "env": {
+       "a": 0.01,
+       "d": 0.38,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.3,
+      "delay": 0.0,
+      "gain": 0.3,
+      "filter": {
+       "type": "highpass",
+       "f0": 4200,
+       "f1": 6800,
+       "q": 1.4
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.3,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "arp",
+    "wave": "square",
+    "dur": 0.3,
+    "loop": false
+   }
+  },
+  {
+   "id": "spell.holy.travel",
+   "category": "spell",
+   "label": "Holy in flight",
+   "loop": true,
+   "trim": 0.0,
+   "synth": {
+    "dur": 1.2,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "drone",
+      "dur": 1.2,
+      "gain": 0.35,
+      "color": "white",
+      "filter": {
+       "type": "bandpass",
+       "f0": 1800,
+       "f1": 3600,
+       "q": 1.6
+      },
+      "lfo": 1.1,
+      "depth": 0.5
+     },
+     {
+      "type": "drone",
+      "dur": 1.2,
+      "gain": 0.25,
+      "color": "pink",
+      "filter": {
+       "type": "bandpass",
+       "f0": 500,
+       "f1": 900,
+       "q": 2.4
+      },
+      "lfo": 0.6,
+      "depth": 0.4
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "arp",
+    "wave": "square",
+    "dur": 0.3,
+    "loop": true
+   }
+  },
+  {
+   "id": "spell.holy.impact",
+   "category": "impact",
+   "label": "Holy impact",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 1.2,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "chord",
+      "dur": 1.1,
+      "delay": 0.0,
+      "gain": 0.6,
+      "freqs": [
+       523.25,
+       659.25,
+       783.99,
+       1046.5
+      ],
+      "wave": "sine",
+      "stagger": 0.035,
+      "env": {
+       "a": 0.01,
+       "d": 1.1,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.45,
+      "delay": 0.0,
+      "gain": 0.45,
+      "filter": {
+       "type": "highpass",
+       "f0": 3000,
+       "f1": 7000,
+       "q": 1.0
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.45,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.4,
+      "delay": 0.0,
+      "gain": 0.45,
+      "f0": 110,
+      "f1": 82,
+      "env": {
+       "a": 0.003,
+       "d": 0.4,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/impact/impactBell_heavy_000.ogg",
+     "kenney/impact/impactBell_heavy_001.ogg",
+     "kenney/impact/impactBell_heavy_002.ogg",
+     "kenney/impact/impactBell_heavy_003.ogg",
+     "kenney/impact/impactBell_heavy_004.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "hit",
+    "wave": "noise",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "spell.nature.launch",
+   "category": "spell",
+   "label": "Nature launch",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.34,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.28,
+      "delay": 0.0,
+      "gain": 0.6,
+      "filter": {
+       "type": "bandpass",
+       "f0": 1400,
+       "f1": 700,
+       "q": 1.8
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.28,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "pluck",
+      "dur": 0.3,
+      "delay": 0.0,
+      "gain": 0.55,
+      "freq": 330,
+      "damp": 0.55
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "arp",
+    "wave": "square",
+    "dur": 0.3,
+    "loop": false
+   }
+  },
+  {
+   "id": "spell.nature.travel",
+   "category": "spell",
+   "label": "Nature in flight",
+   "loop": true,
+   "trim": 0.0,
+   "synth": {
+    "dur": 1.2,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "drone",
+      "dur": 1.2,
+      "gain": 0.5,
+      "color": "pink",
+      "filter": {
+       "type": "bandpass",
+       "f0": 700,
+       "f1": 2200,
+       "q": 1.3
+      },
+      "lfo": 1.9,
+      "depth": 0.6
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "arp",
+    "wave": "square",
+    "dur": 0.3,
+    "loop": true
+   }
+  },
+  {
+   "id": "spell.nature.impact",
+   "category": "impact",
+   "label": "Nature impact",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.78,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "pink",
+      "dur": 0.42,
+      "delay": 0.0,
+      "gain": 0.8,
+      "filter": {
+       "type": "bandpass",
+       "f0": 1800,
+       "f1": 420,
+       "q": 1.1
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.42,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "pluck",
+      "dur": 0.7,
+      "delay": 0.0,
+      "gain": 0.6,
+      "freq": 196,
+      "damp": 0.4
+     },
+     {
+      "type": "grain",
+      "dur": 0.6,
+      "delay": 0.03,
+      "gain": 0.4,
+      "n": 14,
+      "freq": [
+       500,
+       1900
+      ],
+      "gdur": [
+       0.012,
+       0.05
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 1.0,
+      "noisy": false
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.26,
+      "delay": 0.0,
+      "gain": 0.5,
+      "f0": 96,
+      "f1": 52,
+      "env": {
+       "a": 0.003,
+       "d": 0.26,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/impact/impactWood_medium_000.ogg",
+     "kenney/impact/impactWood_medium_001.ogg",
+     "kenney/impact/impactWood_medium_002.ogg",
+     "kenney/impact/impactWood_medium_003.ogg",
+     "kenney/impact/impactWood_medium_004.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "hit",
+    "wave": "noise",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "spell.arcane.launch",
+   "category": "spell",
+   "label": "Arcane launch",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.38,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "fm",
+      "wave": "sine",
+      "dur": 0.34,
+      "delay": 0.0,
+      "gain": 0.55,
+      "f0": 440,
+      "f1": 880,
+      "ratio": 3.5,
+      "index": 600,
+      "index1": 60,
+      "env": {
+       "a": 0.004,
+       "d": 0.34,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.24,
+      "delay": 0.0,
+      "gain": 0.3,
+      "filter": {
+       "type": "highpass",
+       "f0": 3200,
+       "f1": 5600,
+       "q": 2.0
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.24,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "arp",
+    "wave": "square",
+    "dur": 0.3,
+    "loop": false
+   }
+  },
+  {
+   "id": "spell.arcane.travel",
+   "category": "spell",
+   "label": "Arcane in flight",
+   "loop": true,
+   "trim": 0.0,
+   "synth": {
+    "dur": 1.2,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "drone",
+      "dur": 1.2,
+      "gain": 0.35,
+      "color": "white",
+      "filter": {
+       "type": "bandpass",
+       "f0": 900,
+       "f1": 2400,
+       "q": 2.6
+      },
+      "lfo": 4.3,
+      "depth": 0.7
+     },
+     {
+      "type": "drone",
+      "dur": 1.2,
+      "gain": 0.3,
+      "color": "pink",
+      "filter": {
+       "type": "bandpass",
+       "f0": 220,
+       "f1": 500,
+       "q": 1.6
+      },
+      "lfo": 1.3,
+      "depth": 0.5
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "arp",
+    "wave": "square",
+    "dur": 0.3,
+    "loop": true
+   }
+  },
+  {
+   "id": "spell.arcane.impact",
+   "category": "impact",
+   "label": "Arcane impact",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.9,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "fm",
+      "wave": "sine",
+      "dur": 0.7,
+      "delay": 0.0,
+      "gain": 0.75,
+      "f0": 330,
+      "f1": 110,
+      "ratio": 3.51,
+      "index": 1400,
+      "index1": 40,
+      "env": {
+       "a": 0.004,
+       "d": 0.7,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.44,
+      "delay": 0.0,
+      "gain": 0.55,
+      "filter": {
+       "type": "bandpass",
+       "f0": 5200,
+       "f1": 1200,
+       "q": 1.2
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.44,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "chord",
+      "dur": 0.7,
+      "delay": 0.03,
+      "gain": 0.35,
+      "freqs": [
+       349.23,
+       523.25,
+       739.99
+      ],
+      "wave": "triangle",
+      "stagger": 0.02,
+      "env": {
+       "a": 0.01,
+       "d": 0.7,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.28,
+      "delay": 0.0,
+      "gain": 0.5,
+      "f0": 130,
+      "f1": 55,
+      "env": {
+       "a": 0.003,
+       "d": 0.28,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "hit",
+    "wave": "noise",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "spell.lightning.launch",
+   "category": "spell",
+   "label": "Lightning launch",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.22,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.16,
+      "delay": 0.0,
+      "gain": 0.9,
+      "filter": {
+       "type": "highpass",
+       "f0": 4000,
+       "f1": 9000,
+       "q": 0.8
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.16,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "square",
+      "dur": 0.14,
+      "delay": 0.0,
+      "gain": 0.25,
+      "f0": 1800,
+      "f1": 5200,
+      "env": {
+       "a": 0.003,
+       "d": 0.14,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "arp",
+    "wave": "square",
+    "dur": 0.3,
+    "loop": false
+   }
+  },
+  {
+   "id": "spell.lightning.travel",
+   "category": "spell",
+   "label": "Lightning in flight",
+   "loop": true,
+   "trim": 0.0,
+   "synth": {
+    "dur": 1.2,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "drone",
+      "dur": 1.2,
+      "gain": 0.35,
+      "color": "white",
+      "filter": {
+       "type": "bandpass",
+       "f0": 3000,
+       "f1": 8000,
+       "q": 1.2
+      },
+      "lfo": 11.0,
+      "depth": 0.8
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "arp",
+    "wave": "square",
+    "dur": 0.3,
+    "loop": true
+   }
+  },
+  {
+   "id": "spell.lightning.impact",
+   "category": "impact",
+   "label": "Lightning impact",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.75,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.1,
+      "delay": 0.0,
+      "gain": 1.0,
+      "filter": {
+       "type": "highpass",
+       "f0": 6000,
+       "f1": 2000,
+       "q": 0.5
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.1,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "brown",
+      "dur": 0.65,
+      "delay": 0.02,
+      "gain": 0.8,
+      "filter": {
+       "type": "lowpass",
+       "f0": 1200,
+       "f1": 120,
+       "q": 0.7
+      },
+      "env": {
+       "a": 0.001,
+       "d": 0.65,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.3,
+      "delay": 0.01,
+      "gain": 0.7,
+      "f0": 90,
+      "f1": 38,
+      "env": {
+       "a": 0.003,
+       "d": 0.3,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "grain",
+      "dur": 0.35,
+      "delay": 0.0,
+      "gain": 0.45,
+      "n": 12,
+      "freq": [
+       3000,
+       9000
+      ],
+      "gdur": [
+       0.003,
+       0.012
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 1.0,
+      "noisy": true
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "hit",
+    "wave": "noise",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "spell.physical.launch",
+   "category": "spell",
+   "label": "Physical launch",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.26,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.22,
+      "delay": 0.0,
+      "gain": 0.6,
+      "filter": {
+       "type": "bandpass",
+       "f0": 700,
+       "f1": 2600,
+       "q": 0.9
+      },
+      "env": {
+       "a": 0.02,
+       "d": 0.22,
+       "curve": "lin"
+      }
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/rpg/knifeSlice.ogg",
+     "kenney/rpg/knifeSlice2.ogg",
+     "kenney/rpg/chop.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "arp",
+    "wave": "square",
+    "dur": 0.3,
+    "loop": false
+   }
+  },
+  {
+   "id": "spell.physical.travel",
+   "category": "spell",
+   "label": "Physical in flight",
+   "loop": true,
+   "trim": 0.0,
+   "synth": {
+    "dur": 1.2,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "drone",
+      "dur": 1.2,
+      "gain": 0.3,
+      "color": "white",
+      "filter": {
+       "type": "bandpass",
+       "f0": 600,
+       "f1": 2000,
+       "q": 0.9
+      },
+      "lfo": 5.0,
+      "depth": 0.6
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "arp",
+    "wave": "square",
+    "dur": 0.3,
+    "loop": true
+   }
+  },
+  {
+   "id": "spell.physical.impact",
+   "category": "impact",
+   "label": "Physical impact",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.45,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.16,
+      "delay": 0.0,
+      "gain": 0.95,
+      "filter": {
+       "type": "bandpass",
+       "f0": 2600,
+       "f1": 400,
+       "q": 0.7
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.16,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.26,
+      "delay": 0.0,
+      "gain": 0.9,
+      "f0": 150,
+      "f1": 52,
+      "env": {
+       "a": 0.003,
+       "d": 0.26,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "brown",
+      "dur": 0.3,
+      "delay": 0.01,
+      "gain": 0.5,
+      "filter": {
+       "type": "bandpass",
+       "f0": 900,
+       "f1": 200,
+       "q": 1.6
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.3,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/impact/impactPunch_medium_000.ogg",
+     "kenney/impact/impactPunch_medium_001.ogg",
+     "kenney/impact/impactPunch_medium_002.ogg",
+     "kenney/impact/impactPunch_medium_003.ogg",
+     "kenney/impact/impactPunch_medium_004.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "hit",
+    "wave": "noise",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "spell.poison.launch",
+   "category": "spell",
+   "label": "Poison launch",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.36,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "grain",
+      "dur": 0.34,
+      "delay": 0.0,
+      "gain": 0.6,
+      "n": 10,
+      "freq": [
+       260,
+       900
+      ],
+      "gdur": [
+       0.02,
+       0.07
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 2.2,
+      "noisy": false
+     },
+     {
+      "type": "noise",
+      "color": "pink",
+      "dur": 0.3,
+      "delay": 0.0,
+      "gain": 0.5,
+      "filter": {
+       "type": "lowpass",
+       "f0": 500,
+       "f1": 220,
+       "q": 1.2
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.3,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "arp",
+    "wave": "square",
+    "dur": 0.3,
+    "loop": false
+   }
+  },
+  {
+   "id": "spell.poison.travel",
+   "category": "spell",
+   "label": "Poison in flight",
+   "loop": true,
+   "trim": 0.0,
+   "synth": {
+    "dur": 1.2,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "drone",
+      "dur": 1.2,
+      "gain": 0.45,
+      "color": "pink",
+      "filter": {
+       "type": "bandpass",
+       "f0": 300,
+       "f1": 900,
+       "q": 1.8
+      },
+      "lfo": 2.7,
+      "depth": 0.6
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "arp",
+    "wave": "square",
+    "dur": 0.3,
+    "loop": true
+   }
+  },
+  {
+   "id": "spell.poison.impact",
+   "category": "impact",
+   "label": "Poison impact",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.85,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "pink",
+      "dur": 0.5,
+      "delay": 0.0,
+      "gain": 0.8,
+      "filter": {
+       "type": "lowpass",
+       "f0": 900,
+       "f1": 180,
+       "q": 0.9
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.5,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "grain",
+      "dur": 0.8,
+      "delay": 0.02,
+      "gain": 0.6,
+      "n": 20,
+      "freq": [
+       200,
+       1100
+      ],
+      "gdur": [
+       0.02,
+       0.09
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 2.4,
+      "noisy": false
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.3,
+      "delay": 0.0,
+      "gain": 0.45,
+      "f0": 110,
+      "f1": 60,
+      "env": {
+       "a": 0.003,
+       "d": 0.3,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "hit",
+    "wave": "noise",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "spell.bleed.launch",
+   "category": "spell",
+   "label": "Bleed launch",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.28,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "pink",
+      "dur": 0.24,
+      "delay": 0.0,
+      "gain": 0.65,
+      "filter": {
+       "type": "lowpass",
+       "f0": 800,
+       "f1": 300,
+       "q": 1.0
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.24,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "arp",
+    "wave": "square",
+    "dur": 0.3,
+    "loop": false
+   }
+  },
+  {
+   "id": "spell.bleed.travel",
+   "category": "spell",
+   "label": "Bleed in flight",
+   "loop": true,
+   "trim": 0.0,
+   "synth": {
+    "dur": 1.2,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "drone",
+      "dur": 1.2,
+      "gain": 0.4,
+      "color": "brown",
+      "filter": {
+       "type": "bandpass",
+       "f0": 250,
+       "f1": 700,
+       "q": 1.2
+      },
+      "lfo": 1.6,
+      "depth": 0.5
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "arp",
+    "wave": "square",
+    "dur": 0.3,
+    "loop": true
+   }
+  },
+  {
+   "id": "spell.bleed.impact",
+   "category": "impact",
+   "label": "Bleed impact",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.6,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "pink",
+      "dur": 0.26,
+      "delay": 0.0,
+      "gain": 0.9,
+      "filter": {
+       "type": "lowpass",
+       "f0": 1400,
+       "f1": 260,
+       "q": 0.8
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.26,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.3,
+      "delay": 0.0,
+      "gain": 0.6,
+      "f0": 120,
+      "f1": 46,
+      "env": {
+       "a": 0.003,
+       "d": 0.3,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "grain",
+      "dur": 0.5,
+      "delay": 0.05,
+      "gain": 0.45,
+      "n": 8,
+      "freq": [
+       300,
+       1200
+      ],
+      "gdur": [
+       0.02,
+       0.06
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 0.4,
+      "noisy": false
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/impact/impactSoft_medium_000.ogg",
+     "kenney/impact/impactSoft_medium_001.ogg",
+     "kenney/impact/impactSoft_medium_002.ogg",
+     "kenney/impact/impactSoft_medium_003.ogg",
+     "kenney/impact/impactSoft_medium_004.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "hit",
+    "wave": "noise",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "spell.true.launch",
+   "category": "spell",
+   "label": "True launch",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.3,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.26,
+      "delay": 0.0,
+      "gain": 0.5,
+      "f0": 1200,
+      "f1": 2400,
+      "env": {
+       "a": 0.003,
+       "d": 0.26,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.2,
+      "delay": 0.0,
+      "gain": 0.3,
+      "filter": {
+       "type": "highpass",
+       "f0": 5000,
+       "f1": 9000,
+       "q": 1.0
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.2,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "arp",
+    "wave": "square",
+    "dur": 0.3,
+    "loop": false
+   }
+  },
+  {
+   "id": "spell.true.travel",
+   "category": "spell",
+   "label": "True in flight",
+   "loop": true,
+   "trim": 0.0,
+   "synth": {
+    "dur": 1.2,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "drone",
+      "dur": 1.2,
+      "gain": 0.3,
+      "color": "white",
+      "filter": {
+       "type": "bandpass",
+       "f0": 1500,
+       "f1": 3000,
+       "q": 3.0
+      },
+      "lfo": 0.8,
+      "depth": 0.4
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "arp",
+    "wave": "square",
+    "dur": 0.3,
+    "loop": true
+   }
+  },
+  {
+   "id": "spell.true.impact",
+   "category": "impact",
+   "label": "True impact",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.8,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "chord",
+      "dur": 0.75,
+      "delay": 0.0,
+      "gain": 0.6,
+      "freqs": [
+       1046.5,
+       1567.98,
+       2093
+      ],
+      "wave": "sine",
+      "stagger": 0.015,
+      "env": {
+       "a": 0.01,
+       "d": 0.75,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.28,
+      "delay": 0.0,
+      "gain": 0.6,
+      "filter": {
+       "type": "bandpass",
+       "f0": 7000,
+       "f1": 2500,
+       "q": 1.1
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.28,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.26,
+      "delay": 0.0,
+      "gain": 0.4,
+      "f0": 100,
+      "f1": 60,
+      "env": {
+       "a": 0.003,
+       "d": 0.26,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/impact/impactGlass_light_000.ogg",
+     "kenney/impact/impactGlass_light_001.ogg",
+     "kenney/impact/impactGlass_light_002.ogg",
+     "kenney/impact/impactGlass_light_003.ogg",
+     "kenney/impact/impactGlass_light_004.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "hit",
+    "wave": "noise",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.burn.apply",
+   "category": "status",
+   "label": "Burn applied",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.4,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "brown",
+      "dur": 0.4,
+      "delay": 0.0,
+      "gain": 0.8,
+      "filter": {
+       "type": "bandpass",
+       "f0": 1600,
+       "f1": 400,
+       "q": 1.1
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.4,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "grain",
+      "dur": 0.4,
+      "delay": 0.0,
+      "gain": 0.35,
+      "n": 10,
+      "freq": [
+       900,
+       3200
+      ],
+      "gdur": [
+       0.01,
+       0.035
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 1.0,
+      "noisy": true
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.burn.tick",
+   "category": "status",
+   "label": "Burn tick",
+   "loop": false,
+   "trim": -3.0,
+   "synth": {
+    "dur": 0.2,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "brown",
+      "dur": 0.2,
+      "delay": 0.0,
+      "gain": 0.44,
+      "filter": {
+       "type": "bandpass",
+       "f0": 1600,
+       "f1": 400,
+       "q": 1.1
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.2,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.poison.apply",
+   "category": "status",
+   "label": "Poison applied",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.45,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "grain",
+      "dur": 0.45,
+      "delay": 0.0,
+      "gain": 0.6,
+      "n": 10,
+      "freq": [
+       220,
+       800
+      ],
+      "gdur": [
+       0.02,
+       0.08
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 2.2,
+      "noisy": false
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.35,
+      "delay": 0.0,
+      "gain": 0.4,
+      "filter": {
+       "type": "lowpass",
+       "f0": 450,
+       "f1": 200,
+       "q": 1.2
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.35,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.poison.tick",
+   "category": "status",
+   "label": "Poison tick",
+   "loop": false,
+   "trim": -3.0,
+   "synth": {
+    "dur": 0.225,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "grain",
+      "dur": 0.225,
+      "delay": 0.0,
+      "gain": 0.33,
+      "n": 10,
+      "freq": [
+       220,
+       800
+      ],
+      "gdur": [
+       0.02,
+       0.08
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 2.2,
+      "noisy": false
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.bleed.apply",
+   "category": "status",
+   "label": "Bleed applied",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.3,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "pink",
+      "dur": 0.3,
+      "delay": 0.0,
+      "gain": 0.7,
+      "filter": {
+       "type": "lowpass",
+       "f0": 900,
+       "f1": 250,
+       "q": 0.9
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.3,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.24,
+      "delay": 0.06,
+      "gain": 0.3,
+      "f0": 420,
+      "f1": 180,
+      "env": {
+       "a": 0.003,
+       "d": 0.24,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.bleed.tick",
+   "category": "status",
+   "label": "Bleed tick",
+   "loop": false,
+   "trim": -3.0,
+   "synth": {
+    "dur": 0.15,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "pink",
+      "dur": 0.15,
+      "delay": 0.0,
+      "gain": 0.385,
+      "filter": {
+       "type": "lowpass",
+       "f0": 900,
+       "f1": 250,
+       "q": 0.9
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.15,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.freeze.apply",
+   "category": "status",
+   "label": "Freeze applied",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.5,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.45,
+      "delay": 0.0,
+      "gain": 0.7,
+      "filter": {
+       "type": "bandpass",
+       "f0": 5200,
+       "f1": 1100,
+       "q": 1.4
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.45,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "chord",
+      "dur": 0.5,
+      "delay": 0.0,
+      "gain": 0.4,
+      "freqs": [
+       1568,
+       2093
+      ],
+      "wave": "sine",
+      "stagger": 0.03,
+      "env": {
+       "a": 0.01,
+       "d": 0.5,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/impact/impactGlass_light_000.ogg",
+     "kenney/impact/impactGlass_light_001.ogg",
+     "kenney/impact/impactGlass_light_002.ogg",
+     "kenney/impact/impactGlass_light_003.ogg",
+     "kenney/impact/impactGlass_light_004.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.freeze.tick",
+   "category": "status",
+   "label": "Freeze tick",
+   "loop": false,
+   "trim": -3.0,
+   "synth": {
+    "dur": 0.225,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.225,
+      "delay": 0.0,
+      "gain": 0.385,
+      "filter": {
+       "type": "bandpass",
+       "f0": 5200,
+       "f1": 1100,
+       "q": 1.4
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.225,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.stun.apply",
+   "category": "status",
+   "label": "Stun applied",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.55,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "tone",
+      "wave": "triangle",
+      "dur": 0.55,
+      "delay": 0.0,
+      "gain": 0.5,
+      "f0": 660,
+      "f1": 330,
+      "env": {
+       "a": 0.003,
+       "d": 0.55,
+       "curve": "exp"
+      },
+      "vib": {
+       "rate": 9,
+       "depth": 0.06
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.16,
+      "delay": 0.0,
+      "gain": 0.5,
+      "filter": {
+       "type": "bandpass",
+       "f0": 2400,
+       "f1": 600,
+       "q": 0.8
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.16,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/impact/impactBell_heavy_004.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.stun.tick",
+   "category": "status",
+   "label": "Stun tick",
+   "loop": false,
+   "trim": -3.0,
+   "synth": {
+    "dur": 0.275,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "tone",
+      "wave": "triangle",
+      "dur": 0.275,
+      "delay": 0.0,
+      "gain": 0.275,
+      "f0": 660,
+      "f1": 330,
+      "env": {
+       "a": 0.003,
+       "d": 0.275,
+       "curve": "exp"
+      },
+      "vib": {
+       "rate": 9,
+       "depth": 0.06
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.sleep.apply",
+   "category": "status",
+   "label": "Sleep applied",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.7,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.7,
+      "delay": 0.0,
+      "gain": 0.45,
+      "f0": 300,
+      "f1": 130,
+      "env": {
+       "a": 0.003,
+       "d": 0.7,
+       "curve": "exp"
+      },
+      "vib": {
+       "rate": 3.2,
+       "depth": 0.05
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.5,
+      "delay": 0.0,
+      "gain": 0.3,
+      "filter": {
+       "type": "lowpass",
+       "f0": 400,
+       "f1": 180,
+       "q": 1.0
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.5,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.sleep.tick",
+   "category": "status",
+   "label": "Sleep tick",
+   "loop": false,
+   "trim": -3.0,
+   "synth": {
+    "dur": 0.35,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.35,
+      "delay": 0.0,
+      "gain": 0.248,
+      "f0": 300,
+      "f1": 130,
+      "env": {
+       "a": 0.003,
+       "d": 0.35,
+       "curve": "exp"
+      },
+      "vib": {
+       "rate": 3.2,
+       "depth": 0.05
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.confused.apply",
+   "category": "status",
+   "label": "Confused applied",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.6,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "fm",
+      "wave": "sine",
+      "dur": 0.6,
+      "delay": 0.0,
+      "gain": 0.5,
+      "f0": 380,
+      "f1": 260,
+      "ratio": 1.41,
+      "index": 420,
+      "index1": 120,
+      "env": {
+       "a": 0.004,
+       "d": 0.6,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "triangle",
+      "dur": 0.55,
+      "delay": 0.0,
+      "gain": 0.25,
+      "f0": 520,
+      "f1": 700,
+      "env": {
+       "a": 0.003,
+       "d": 0.55,
+       "curve": "exp"
+      },
+      "vib": {
+       "rate": 7,
+       "depth": 0.1
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.confused.tick",
+   "category": "status",
+   "label": "Confused tick",
+   "loop": false,
+   "trim": -3.0,
+   "synth": {
+    "dur": 0.3,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "fm",
+      "wave": "sine",
+      "dur": 0.3,
+      "delay": 0.0,
+      "gain": 0.275,
+      "f0": 380,
+      "f1": 260,
+      "ratio": 1.41,
+      "index": 420,
+      "index1": 120,
+      "env": {
+       "a": 0.004,
+       "d": 0.3,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.dazed.apply",
+   "category": "status",
+   "label": "Dazed applied",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.6,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.6,
+      "delay": 0.0,
+      "gain": 0.45,
+      "f0": 520,
+      "f1": 380,
+      "env": {
+       "a": 0.003,
+       "d": 0.6,
+       "curve": "exp"
+      },
+      "vib": {
+       "rate": 6,
+       "depth": 0.08
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.25,
+      "delay": 0.0,
+      "gain": 0.35,
+      "filter": {
+       "type": "bandpass",
+       "f0": 1600,
+       "f1": 700,
+       "q": 1.4
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.25,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.dazed.tick",
+   "category": "status",
+   "label": "Dazed tick",
+   "loop": false,
+   "trim": -3.0,
+   "synth": {
+    "dur": 0.3,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.3,
+      "delay": 0.0,
+      "gain": 0.248,
+      "f0": 520,
+      "f1": 380,
+      "env": {
+       "a": 0.003,
+       "d": 0.3,
+       "curve": "exp"
+      },
+      "vib": {
+       "rate": 6,
+       "depth": 0.08
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.blind.apply",
+   "category": "status",
+   "label": "Blind applied",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.6,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.6,
+      "delay": 0.0,
+      "gain": 0.7,
+      "filter": {
+       "type": "lowpass",
+       "f0": 2400,
+       "f1": 220,
+       "q": 0.7
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.6,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.4,
+      "delay": 0.0,
+      "gain": 0.35,
+      "f0": 180,
+      "f1": 90,
+      "env": {
+       "a": 0.003,
+       "d": 0.4,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.blind.tick",
+   "category": "status",
+   "label": "Blind tick",
+   "loop": false,
+   "trim": -3.0,
+   "synth": {
+    "dur": 0.3,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.3,
+      "delay": 0.0,
+      "gain": 0.385,
+      "filter": {
+       "type": "lowpass",
+       "f0": 2400,
+       "f1": 220,
+       "q": 0.7
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.3,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.slow.apply",
+   "category": "status",
+   "label": "Slow applied",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.75,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "tone",
+      "wave": "triangle",
+      "dur": 0.75,
+      "delay": 0.0,
+      "gain": 0.45,
+      "f0": 330,
+      "f1": 110,
+      "env": {
+       "a": 0.003,
+       "d": 0.75,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.6,
+      "delay": 0.0,
+      "gain": 0.35,
+      "filter": {
+       "type": "lowpass",
+       "f0": 700,
+       "f1": 200,
+       "q": 1.0
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.6,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.slow.tick",
+   "category": "status",
+   "label": "Slow tick",
+   "loop": false,
+   "trim": -3.0,
+   "synth": {
+    "dur": 0.375,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "tone",
+      "wave": "triangle",
+      "dur": 0.375,
+      "delay": 0.0,
+      "gain": 0.248,
+      "f0": 330,
+      "f1": 110,
+      "env": {
+       "a": 0.003,
+       "d": 0.375,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.marked.apply",
+   "category": "status",
+   "label": "Marked applied",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.36,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "tone",
+      "wave": "square",
+      "dur": 0.22,
+      "delay": 0.0,
+      "gain": 0.35,
+      "f0": 880,
+      "f1": 880,
+      "env": {
+       "a": 0.003,
+       "d": 0.22,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "square",
+      "dur": 0.22,
+      "delay": 0.14,
+      "gain": 0.3,
+      "f0": 1320,
+      "f1": 1320,
+      "env": {
+       "a": 0.003,
+       "d": 0.22,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.marked.tick",
+   "category": "status",
+   "label": "Marked tick",
+   "loop": false,
+   "trim": -3.0,
+   "synth": {
+    "dur": 0.11,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "tone",
+      "wave": "square",
+      "dur": 0.11,
+      "delay": 0.0,
+      "gain": 0.193,
+      "f0": 880,
+      "f1": 880,
+      "env": {
+       "a": 0.003,
+       "d": 0.11,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.barrier.apply",
+   "category": "status",
+   "label": "Barrier applied",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.7,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "chord",
+      "dur": 0.7,
+      "delay": 0.0,
+      "gain": 0.5,
+      "freqs": [
+       392,
+       587.33,
+       784
+      ],
+      "wave": "sine",
+      "stagger": 0.04,
+      "env": {
+       "a": 0.01,
+       "d": 0.7,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.35,
+      "delay": 0.0,
+      "gain": 0.3,
+      "filter": {
+       "type": "highpass",
+       "f0": 1400,
+       "f1": 3200,
+       "q": 1.2
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.35,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.barrier.tick",
+   "category": "status",
+   "label": "Barrier tick",
+   "loop": false,
+   "trim": -3.0,
+   "synth": {
+    "dur": 0.35,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "chord",
+      "dur": 0.35,
+      "delay": 0.0,
+      "gain": 0.275,
+      "freqs": [
+       392,
+       587.33,
+       784
+      ],
+      "wave": "sine",
+      "stagger": 0.04,
+      "env": {
+       "a": 0.01,
+       "d": 0.35,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.regen.apply",
+   "category": "status",
+   "label": "Regen applied",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.75,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "chord",
+      "dur": 0.75,
+      "delay": 0.0,
+      "gain": 0.45,
+      "freqs": [
+       523.25,
+       659.25,
+       880
+      ],
+      "wave": "triangle",
+      "stagger": 0.07,
+      "env": {
+       "a": 0.01,
+       "d": 0.75,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "pluck",
+      "dur": 0.6,
+      "delay": 0.0,
+      "gain": 0.35,
+      "freq": 440,
+      "damp": 0.5
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.regen.tick",
+   "category": "status",
+   "label": "Regen tick",
+   "loop": false,
+   "trim": -3.0,
+   "synth": {
+    "dur": 0.375,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "chord",
+      "dur": 0.375,
+      "delay": 0.0,
+      "gain": 0.248,
+      "freqs": [
+       523.25,
+       659.25,
+       880
+      ],
+      "wave": "triangle",
+      "stagger": 0.07,
+      "env": {
+       "a": 0.01,
+       "d": 0.375,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.sunder.apply",
+   "category": "status",
+   "label": "Sunder applied",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.35,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "brown",
+      "dur": 0.3,
+      "delay": 0.0,
+      "gain": 0.85,
+      "filter": {
+       "type": "bandpass",
+       "f0": 1800,
+       "f1": 300,
+       "q": 0.8
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.3,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.3,
+      "delay": 0.0,
+      "gain": 0.6,
+      "f0": 130,
+      "f1": 55,
+      "env": {
+       "a": 0.003,
+       "d": 0.3,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "grain",
+      "dur": 0.35,
+      "delay": 0.0,
+      "gain": 0.4,
+      "n": 8,
+      "freq": [
+       400,
+       1600
+      ],
+      "gdur": [
+       0.01,
+       0.04
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 1.0,
+      "noisy": false
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/impact/impactPlank_medium_000.ogg",
+     "kenney/impact/impactPlank_medium_001.ogg",
+     "kenney/impact/impactPlank_medium_002.ogg",
+     "kenney/impact/impactPlank_medium_003.ogg",
+     "kenney/impact/impactPlank_medium_004.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.sunder.tick",
+   "category": "status",
+   "label": "Sunder tick",
+   "loop": false,
+   "trim": -3.0,
+   "synth": {
+    "dur": 0.15,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "brown",
+      "dur": 0.15,
+      "delay": 0.0,
+      "gain": 0.468,
+      "filter": {
+       "type": "bandpass",
+       "f0": 1800,
+       "f1": 300,
+       "q": 0.8
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.15,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.curse.apply",
+   "category": "status",
+   "label": "Curse applied",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.85,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "tone",
+      "wave": "triangle",
+      "dur": 0.85,
+      "delay": 0.0,
+      "gain": 0.6,
+      "f0": 155,
+      "f1": 58,
+      "env": {
+       "a": 0.003,
+       "d": 0.85,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "fm",
+      "wave": "sine",
+      "dur": 0.7,
+      "delay": 0.0,
+      "gain": 0.4,
+      "f0": 110,
+      "f1": 82,
+      "ratio": 2.51,
+      "index": 300,
+      "index1": 0,
+      "env": {
+       "a": 0.004,
+       "d": 0.7,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.6,
+      "delay": 0.0,
+      "gain": 0.45,
+      "filter": {
+       "type": "lowpass",
+       "f0": 600,
+       "f1": 140,
+       "q": 0.8
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.6,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.curse.tick",
+   "category": "status",
+   "label": "Curse tick",
+   "loop": false,
+   "trim": -3.0,
+   "synth": {
+    "dur": 0.425,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "tone",
+      "wave": "triangle",
+      "dur": 0.425,
+      "delay": 0.0,
+      "gain": 0.33,
+      "f0": 155,
+      "f1": 58,
+      "env": {
+       "a": 0.003,
+       "d": 0.425,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.silence.apply",
+   "category": "status",
+   "label": "Silence applied",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.45,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.45,
+      "delay": 0.0,
+      "gain": 0.6,
+      "filter": {
+       "type": "lowpass",
+       "f0": 3000,
+       "f1": 180,
+       "q": 0.6
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.45,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.35,
+      "delay": 0.0,
+      "gain": 0.3,
+      "f0": 440,
+      "f1": 110,
+      "env": {
+       "a": 0.003,
+       "d": 0.35,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.silence.tick",
+   "category": "status",
+   "label": "Silence tick",
+   "loop": false,
+   "trim": -3.0,
+   "synth": {
+    "dur": 0.225,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.225,
+      "delay": 0.0,
+      "gain": 0.33,
+      "filter": {
+       "type": "lowpass",
+       "f0": 3000,
+       "f1": 180,
+       "q": 0.6
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.225,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.disarm.apply",
+   "category": "status",
+   "label": "Disarm applied",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.35,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.3,
+      "delay": 0.0,
+      "gain": 0.6,
+      "filter": {
+       "type": "bandpass",
+       "f0": 3000,
+       "f1": 900,
+       "q": 2.2
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.3,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "triangle",
+      "dur": 0.35,
+      "delay": 0.0,
+      "gain": 0.4,
+      "f0": 700,
+      "f1": 260,
+      "env": {
+       "a": 0.003,
+       "d": 0.35,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "grain",
+      "dur": 0.35,
+      "delay": 0.0,
+      "gain": 0.35,
+      "n": 6,
+      "freq": [
+       1200,
+       3600
+      ],
+      "gdur": [
+       0.008,
+       0.03
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 1.0,
+      "noisy": false
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.disarm.tick",
+   "category": "status",
+   "label": "Disarm tick",
+   "loop": false,
+   "trim": -3.0,
+   "synth": {
+    "dur": 0.15,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.15,
+      "delay": 0.0,
+      "gain": 0.33,
+      "filter": {
+       "type": "bandpass",
+       "f0": 3000,
+       "f1": 900,
+       "q": 2.2
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.15,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.root.apply",
+   "category": "status",
+   "label": "Root applied",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.5,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "brown",
+      "dur": 0.5,
+      "delay": 0.0,
+      "gain": 0.7,
+      "filter": {
+       "type": "lowpass",
+       "f0": 700,
+       "f1": 180,
+       "q": 1.0
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.5,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "pluck",
+      "dur": 0.45,
+      "delay": 0.0,
+      "gain": 0.45,
+      "freq": 147,
+      "damp": 0.35
+     },
+     {
+      "type": "grain",
+      "dur": 0.45,
+      "delay": 0.0,
+      "gain": 0.35,
+      "n": 10,
+      "freq": [
+       300,
+       1100
+      ],
+      "gdur": [
+       0.015,
+       0.05
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 1.0,
+      "noisy": false
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.root.tick",
+   "category": "status",
+   "label": "Root tick",
+   "loop": false,
+   "trim": -3.0,
+   "synth": {
+    "dur": 0.25,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "brown",
+      "dur": 0.25,
+      "delay": 0.0,
+      "gain": 0.385,
+      "filter": {
+       "type": "lowpass",
+       "f0": 700,
+       "f1": 180,
+       "q": 1.0
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.25,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.rally.apply",
+   "category": "status",
+   "label": "Rally applied",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.6,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "chord",
+      "dur": 0.6,
+      "delay": 0.0,
+      "gain": 0.55,
+      "freqs": [
+       392,
+       493.88,
+       587.33,
+       784
+      ],
+      "wave": "triangle",
+      "stagger": 0.05,
+      "env": {
+       "a": 0.01,
+       "d": 0.6,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.25,
+      "delay": 0.0,
+      "gain": 0.25,
+      "filter": {
+       "type": "highpass",
+       "f0": 1800,
+       "f1": 4000,
+       "q": 1.0
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.25,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.rally.tick",
+   "category": "status",
+   "label": "Rally tick",
+   "loop": false,
+   "trim": -3.0,
+   "synth": {
+    "dur": 0.3,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "chord",
+      "dur": 0.3,
+      "delay": 0.0,
+      "gain": 0.303,
+      "freqs": [
+       392,
+       493.88,
+       587.33,
+       784
+      ],
+      "wave": "triangle",
+      "stagger": 0.05,
+      "env": {
+       "a": 0.01,
+       "d": 0.3,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.haste.apply",
+   "category": "status",
+   "label": "Haste applied",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.35,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "tone",
+      "wave": "triangle",
+      "dur": 0.35,
+      "delay": 0.0,
+      "gain": 0.45,
+      "f0": 600,
+      "f1": 2200,
+      "env": {
+       "a": 0.003,
+       "d": 0.35,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.3,
+      "delay": 0.0,
+      "gain": 0.35,
+      "filter": {
+       "type": "highpass",
+       "f0": 2200,
+       "f1": 6000,
+       "q": 1.4
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.3,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "grain",
+      "dur": 0.35,
+      "delay": 0.0,
+      "gain": 0.3,
+      "n": 10,
+      "freq": [
+       2000,
+       6000
+      ],
+      "gdur": [
+       0.004,
+       0.014
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 1.0,
+      "noisy": false
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.haste.tick",
+   "category": "status",
+   "label": "Haste tick",
+   "loop": false,
+   "trim": -3.0,
+   "synth": {
+    "dur": 0.175,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "tone",
+      "wave": "triangle",
+      "dur": 0.175,
+      "delay": 0.0,
+      "gain": 0.248,
+      "f0": 600,
+      "f1": 2200,
+      "env": {
+       "a": 0.003,
+       "d": 0.175,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.enchant.apply",
+   "category": "status",
+   "label": "Enchant applied",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.6,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "fm",
+      "wave": "sine",
+      "dur": 0.6,
+      "delay": 0.0,
+      "gain": 0.5,
+      "f0": 660,
+      "f1": 990,
+      "ratio": 3.5,
+      "index": 500,
+      "index1": 50,
+      "env": {
+       "a": 0.004,
+       "d": 0.6,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "chord",
+      "dur": 0.55,
+      "delay": 0.0,
+      "gain": 0.3,
+      "freqs": [
+       880,
+       1174.66
+      ],
+      "wave": "sine",
+      "stagger": 0.03,
+      "env": {
+       "a": 0.01,
+       "d": 0.55,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.enchant.tick",
+   "category": "status",
+   "label": "Enchant tick",
+   "loop": false,
+   "trim": -3.0,
+   "synth": {
+    "dur": 0.3,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "fm",
+      "wave": "sine",
+      "dur": 0.3,
+      "delay": 0.0,
+      "gain": 0.275,
+      "f0": 660,
+      "f1": 990,
+      "ratio": 3.5,
+      "index": 500,
+      "index1": 50,
+      "env": {
+       "a": 0.004,
+       "d": 0.3,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.block.apply",
+   "category": "status",
+   "label": "Block applied",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.47,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.24,
+      "delay": 0.0,
+      "gain": 0.8,
+      "filter": {
+       "type": "bandpass",
+       "f0": 3400,
+       "f1": 900,
+       "q": 1.8
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.24,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "triangle",
+      "dur": 0.3,
+      "delay": 0.0,
+      "gain": 0.5,
+      "f0": 220,
+      "f1": 120,
+      "env": {
+       "a": 0.003,
+       "d": 0.3,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.45,
+      "delay": 0.02,
+      "gain": 0.25,
+      "f0": 1760,
+      "f1": 1500,
+      "env": {
+       "a": 0.003,
+       "d": 0.45,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/impact/impactMetal_light_000.ogg",
+     "kenney/impact/impactMetal_light_001.ogg",
+     "kenney/impact/impactMetal_light_002.ogg",
+     "kenney/impact/impactMetal_light_003.ogg",
+     "kenney/impact/impactMetal_light_004.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.block.tick",
+   "category": "status",
+   "label": "Block tick",
+   "loop": false,
+   "trim": -3.0,
+   "synth": {
+    "dur": 0.12,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.12,
+      "delay": 0.0,
+      "gain": 0.44,
+      "filter": {
+       "type": "bandpass",
+       "f0": 3400,
+       "f1": 900,
+       "q": 1.8
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.12,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.deflect.apply",
+   "category": "status",
+   "label": "Deflect applied",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.35,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.2,
+      "delay": 0.0,
+      "gain": 0.7,
+      "filter": {
+       "type": "bandpass",
+       "f0": 4200,
+       "f1": 1400,
+       "q": 2.4
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.2,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.35,
+      "delay": 0.0,
+      "gain": 0.35,
+      "f0": 1320,
+      "f1": 2000,
+      "env": {
+       "a": 0.003,
+       "d": 0.35,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "status.deflect.tick",
+   "category": "status",
+   "label": "Deflect tick",
+   "loop": false,
+   "trim": -3.0,
+   "synth": {
+    "dur": 0.1,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.1,
+      "delay": 0.0,
+      "gain": 0.385,
+      "filter": {
+       "type": "bandpass",
+       "f0": 4200,
+       "f1": 1400,
+       "q": 2.4
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.1,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "cast.start",
+   "category": "spell",
+   "label": "Cast start",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.55,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "fm",
+      "wave": "sine",
+      "dur": 0.5,
+      "delay": 0.0,
+      "gain": 0.55,
+      "f0": 220,
+      "f1": 660,
+      "ratio": 2.5,
+      "index": 300,
+      "index1": 80,
+      "env": {
+       "a": 0.004,
+       "d": 0.5,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.45,
+      "delay": 0.0,
+      "gain": 0.4,
+      "filter": {
+       "type": "bandpass",
+       "f0": 600,
+       "f1": 3400,
+       "q": 1.6
+      },
+      "env": {
+       "a": 0.12,
+       "d": 0.45,
+       "curve": "lin"
+      }
+     },
+     {
+      "type": "chord",
+      "dur": 0.45,
+      "delay": 0.05,
+      "gain": 0.25,
+      "freqs": [
+       440,
+       554.37
+      ],
+      "wave": "sine",
+      "stagger": 0.04,
+      "env": {
+       "a": 0.01,
+       "d": 0.45,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "arp",
+    "wave": "square",
+    "dur": 0.3,
+    "loop": false
+   }
+  },
+  {
+   "id": "heal",
+   "category": "sting",
+   "label": "Heal",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.9,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "chord",
+      "dur": 0.85,
+      "delay": 0.0,
+      "gain": 0.55,
+      "freqs": [
+       523.25,
+       659.25,
+       783.99
+      ],
+      "wave": "sine",
+      "stagger": 0.06,
+      "env": {
+       "a": 0.02,
+       "d": 0.85,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.5,
+      "delay": 0.0,
+      "gain": 0.28,
+      "filter": {
+       "type": "highpass",
+       "f0": 2400,
+       "f1": 5200,
+       "q": 1.2
+      },
+      "env": {
+       "a": 0.1,
+       "d": 0.5,
+       "curve": "lin"
+      }
+     },
+     {
+      "type": "pluck",
+      "dur": 0.6,
+      "delay": 0.05,
+      "gain": 0.3,
+      "freq": 880,
+      "damp": 0.6
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/interface/pluck_001.ogg",
+     "kenney/interface/pluck_002.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "fanfare",
+    "wave": "square",
+    "dur": 0.7,
+    "loop": false
+   }
+  },
+  {
+   "id": "revive",
+   "category": "sting",
+   "label": "Revive",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 1.4,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "chord",
+      "dur": 1.3,
+      "delay": 0.0,
+      "gain": 0.6,
+      "freqs": [
+       261.63,
+       392,
+       523.25,
+       783.99
+      ],
+      "wave": "sine",
+      "stagger": 0.1,
+      "env": {
+       "a": 0.03,
+       "d": 1.3,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.9,
+      "delay": 0.0,
+      "gain": 0.3,
+      "filter": {
+       "type": "highpass",
+       "f0": 1200,
+       "f1": 5600,
+       "q": 1.0
+      },
+      "env": {
+       "a": 0.35,
+       "d": 0.9,
+       "curve": "lin"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "triangle",
+      "dur": 0.7,
+      "delay": 0.0,
+      "gain": 0.35,
+      "f0": 65.41,
+      "f1": 130.81,
+      "env": {
+       "a": 0.003,
+       "d": 0.7,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/interface/confirmation_004.ogg",
+     "kenney/interface/maximize_008.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "fanfare",
+    "wave": "square",
+    "dur": 0.7,
+    "loop": false
+   }
+  },
+  {
+   "id": "melee.swing",
+   "category": "melee",
+   "label": "Melee swing",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.26,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.22,
+      "delay": 0.0,
+      "gain": 0.7,
+      "filter": {
+       "type": "bandpass",
+       "f0": 600,
+       "f1": 2800,
+       "q": 1.0
+      },
+      "env": {
+       "a": 0.03,
+       "d": 0.22,
+       "curve": "lin"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.2,
+      "delay": 0.05,
+      "gain": 0.4,
+      "filter": {
+       "type": "bandpass",
+       "f0": 2800,
+       "f1": 500,
+       "q": 1.2
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.2,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/rpg/knifeSlice.ogg",
+     "kenney/rpg/knifeSlice2.ogg",
+     "kenney/rpg/drawKnife1.ogg",
+     "kenney/rpg/drawKnife2.ogg",
+     "kenney/rpg/drawKnife3.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "hit",
+    "wave": "noise",
+    "dur": 0.16,
+    "loop": false
+   }
+  },
+  {
+   "id": "melee.hit",
+   "category": "melee",
+   "label": "Melee hit",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.4,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.14,
+      "delay": 0.0,
+      "gain": 0.95,
+      "filter": {
+       "type": "bandpass",
+       "f0": 2400,
+       "f1": 500,
+       "q": 0.8
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.14,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.26,
+      "delay": 0.0,
+      "gain": 0.85,
+      "f0": 160,
+      "f1": 55,
+      "env": {
+       "a": 0.003,
+       "d": 0.26,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "brown",
+      "dur": 0.28,
+      "delay": 0.01,
+      "gain": 0.5,
+      "filter": {
+       "type": "bandpass",
+       "f0": 800,
+       "f1": 220,
+       "q": 1.4
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.28,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/impact/impactPunch_medium_000.ogg",
+     "kenney/impact/impactPunch_medium_001.ogg",
+     "kenney/impact/impactPunch_medium_002.ogg",
+     "kenney/impact/impactPunch_medium_003.ogg",
+     "kenney/impact/impactPunch_medium_004.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "hit",
+    "wave": "noise",
+    "dur": 0.16,
+    "loop": false
+   }
+  },
+  {
+   "id": "melee.crit",
+   "category": "melee",
+   "label": "Melee crit",
+   "loop": false,
+   "trim": 1.0,
+   "synth": {
+    "dur": 0.6,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.18,
+      "delay": 0.0,
+      "gain": 1.0,
+      "filter": {
+       "type": "bandpass",
+       "f0": 3600,
+       "f1": 500,
+       "q": 0.7
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.18,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.4,
+      "delay": 0.0,
+      "gain": 1.0,
+      "f0": 190,
+      "f1": 44,
+      "env": {
+       "a": 0.003,
+       "d": 0.4,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "brown",
+      "dur": 0.45,
+      "delay": 0.02,
+      "gain": 0.6,
+      "filter": {
+       "type": "bandpass",
+       "f0": 1100,
+       "f1": 180,
+       "q": 1.1
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.45,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "grain",
+      "dur": 0.4,
+      "delay": 0.02,
+      "gain": 0.35,
+      "n": 8,
+      "freq": [
+       800,
+       3200
+      ],
+      "gdur": [
+       0.006,
+       0.02
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 1.0,
+      "noisy": false
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/impact/impactPunch_heavy_000.ogg",
+     "kenney/impact/impactPunch_heavy_001.ogg",
+     "kenney/impact/impactPunch_heavy_002.ogg",
+     "kenney/impact/impactPunch_heavy_003.ogg",
+     "kenney/impact/impactPunch_heavy_004.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "hit",
+    "wave": "noise",
+    "dur": 0.16,
+    "loop": false
+   }
+  },
+  {
+   "id": "melee.miss",
+   "category": "melee",
+   "label": "Melee miss",
+   "loop": false,
+   "trim": -2.0,
+   "synth": {
+    "dur": 0.3,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.26,
+      "delay": 0.0,
+      "gain": 0.55,
+      "filter": {
+       "type": "bandpass",
+       "f0": 400,
+       "f1": 1800,
+       "q": 0.8
+      },
+      "env": {
+       "a": 0.06,
+       "d": 0.26,
+       "curve": "lin"
+      }
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/rpg/cloth1.ogg",
+     "kenney/rpg/cloth2.ogg",
+     "kenney/rpg/cloth3.ogg",
+     "kenney/rpg/cloth4.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "hit",
+    "wave": "noise",
+    "dur": 0.16,
+    "loop": false
+   }
+  },
+  {
+   "id": "melee.block",
+   "category": "melee",
+   "label": "Block",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.55,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.16,
+      "delay": 0.0,
+      "gain": 0.85,
+      "filter": {
+       "type": "bandpass",
+       "f0": 3800,
+       "f1": 1000,
+       "q": 1.8
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.16,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.45,
+      "delay": 0.01,
+      "gain": 0.35,
+      "f0": 1760,
+      "f1": 1400,
+      "env": {
+       "a": 0.003,
+       "d": 0.45,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "triangle",
+      "dur": 0.3,
+      "delay": 0.0,
+      "gain": 0.55,
+      "f0": 230,
+      "f1": 120,
+      "env": {
+       "a": 0.003,
+       "d": 0.3,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/impact/impactMetal_medium_000.ogg",
+     "kenney/impact/impactMetal_medium_001.ogg",
+     "kenney/impact/impactMetal_medium_002.ogg",
+     "kenney/impact/impactMetal_medium_003.ogg",
+     "kenney/impact/impactMetal_medium_004.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "hit",
+    "wave": "noise",
+    "dur": 0.16,
+    "loop": false
+   }
+  },
+  {
+   "id": "death.humanoid",
+   "category": "death",
+   "label": "Death (humanoid)",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.9,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "pink",
+      "dur": 0.55,
+      "delay": 0.0,
+      "gain": 0.8,
+      "filter": {
+       "type": "lowpass",
+       "f0": 900,
+       "f1": 180,
+       "q": 0.8
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.55,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "sawtooth",
+      "dur": 0.7,
+      "delay": 0.0,
+      "gain": 0.5,
+      "f0": 180,
+      "f1": 52,
+      "env": {
+       "a": 0.003,
+       "d": 0.7,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "brown",
+      "dur": 0.35,
+      "delay": 0.35,
+      "gain": 0.45,
+      "filter": {
+       "type": "bandpass",
+       "f0": 500,
+       "f1": 160,
+       "q": 1.2
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.35,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/impact/impactSoft_heavy_000.ogg",
+     "kenney/impact/impactSoft_heavy_001.ogg",
+     "kenney/impact/impactSoft_heavy_002.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "fall",
+    "wave": "square",
+    "dur": 0.5,
+    "loop": false
+   }
+  },
+  {
+   "id": "death.beast",
+   "category": "death",
+   "label": "Death (beast)",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 1.0,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "fm",
+      "wave": "sine",
+      "dur": 0.8,
+      "delay": 0.0,
+      "gain": 0.7,
+      "f0": 150,
+      "f1": 62,
+      "ratio": 1.51,
+      "index": 420,
+      "index1": 40,
+      "env": {
+       "a": 0.004,
+       "d": 0.8,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "brown",
+      "dur": 0.7,
+      "delay": 0.0,
+      "gain": 0.65,
+      "filter": {
+       "type": "lowpass",
+       "f0": 1400,
+       "f1": 260,
+       "q": 0.9
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.7,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "sawtooth",
+      "dur": 0.5,
+      "delay": 0.1,
+      "gain": 0.35,
+      "f0": 240,
+      "f1": 90,
+      "env": {
+       "a": 0.003,
+       "d": 0.5,
+       "curve": "exp"
+      },
+      "vib": {
+       "rate": 7,
+       "depth": 0.08
+      }
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/impact/impactSoft_heavy_003.ogg",
+     "kenney/impact/impactSoft_heavy_004.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "fall",
+    "wave": "square",
+    "dur": 0.5,
+    "loop": false
+   }
+  },
+  {
+   "id": "death.construct",
+   "category": "death",
+   "label": "Death (construct)",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 1.1,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.3,
+      "delay": 0.0,
+      "gain": 0.85,
+      "filter": {
+       "type": "bandpass",
+       "f0": 3200,
+       "f1": 700,
+       "q": 1.4
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.3,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "grain",
+      "dur": 0.95,
+      "delay": 0.05,
+      "gain": 0.6,
+      "n": 20,
+      "freq": [
+       300,
+       2600
+      ],
+      "gdur": [
+       0.01,
+       0.06
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 1.0,
+      "noisy": false
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.45,
+      "delay": 0.0,
+      "gain": 0.6,
+      "f0": 110,
+      "f1": 40,
+      "env": {
+       "a": 0.003,
+       "d": 0.45,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/impact/impactPlate_heavy_000.ogg",
+     "kenney/impact/impactPlate_heavy_001.ogg",
+     "kenney/impact/impactPlate_heavy_002.ogg",
+     "kenney/impact/impactPlate_heavy_003.ogg",
+     "kenney/impact/impactPlate_heavy_004.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "fall",
+    "wave": "square",
+    "dur": 0.5,
+    "loop": false
+   }
+  },
+  {
+   "id": "levelup",
+   "category": "sting",
+   "label": "Level up",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 1.2,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "chord",
+      "dur": 1.1,
+      "delay": 0.0,
+      "gain": 0.6,
+      "freqs": [
+       523.25,
+       659.25,
+       783.99,
+       1046.5
+      ],
+      "wave": "triangle",
+      "stagger": 0.09,
+      "env": {
+       "a": 0.01,
+       "d": 1.1,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.5,
+      "delay": 0.0,
+      "gain": 0.3,
+      "filter": {
+       "type": "highpass",
+       "f0": 2000,
+       "f1": 6000,
+       "q": 1.0
+      },
+      "env": {
+       "a": 0.2,
+       "d": 0.5,
+       "curve": "lin"
+      }
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/interface/confirmation_001.ogg",
+     "kenney/interface/confirmation_002.ogg",
+     "kenney/interface/confirmation_003.ogg",
+     "kenney/interface/confirmation_004.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "fanfare",
+    "wave": "square",
+    "dur": 0.7,
+    "loop": false
+   }
+  },
+  {
+   "id": "quest.complete",
+   "category": "sting",
+   "label": "Quest complete",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 1.3,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "chord",
+      "dur": 1.2,
+      "delay": 0.0,
+      "gain": 0.6,
+      "freqs": [
+       392,
+       523.25,
+       659.25,
+       783.99
+      ],
+      "wave": "sine",
+      "stagger": 0.13,
+      "env": {
+       "a": 0.01,
+       "d": 1.2,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "triangle",
+      "dur": 0.6,
+      "delay": 0.0,
+      "gain": 0.35,
+      "f0": 98,
+      "f1": 196,
+      "env": {
+       "a": 0.003,
+       "d": 0.6,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/interface/bong_001.ogg",
+     "kenney/interface/maximize_005.ogg",
+     "kenney/interface/maximize_009.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "fanfare",
+    "wave": "square",
+    "dur": 0.7,
+    "loop": false
+   }
+  },
+  {
+   "id": "night.ambush",
+   "category": "sting",
+   "label": "Night ambush",
+   "loop": false,
+   "trim": 1.0,
+   "synth": {
+    "dur": 1.3,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "tone",
+      "wave": "sawtooth",
+      "dur": 1.1,
+      "delay": 0.0,
+      "gain": 0.7,
+      "f0": 110,
+      "f1": 55,
+      "env": {
+       "a": 0.003,
+       "d": 1.1,
+       "curve": "exp"
+      },
+      "vib": {
+       "rate": 5.5,
+       "depth": 0.04
+      }
+     },
+     {
+      "type": "noise",
+      "color": "brown",
+      "dur": 1.0,
+      "delay": 0.0,
+      "gain": 0.6,
+      "filter": {
+       "type": "lowpass",
+       "f0": 1800,
+       "f1": 200,
+       "q": 0.7
+      },
+      "env": {
+       "a": 0.25,
+       "d": 1.0,
+       "curve": "lin"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "triangle",
+      "dur": 0.8,
+      "delay": 0.15,
+      "gain": 0.35,
+      "f0": 165,
+      "f1": 82,
+      "env": {
+       "a": 0.003,
+       "d": 0.8,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "fanfare",
+    "wave": "square",
+    "dur": 0.7,
+    "loop": false
+   }
+  },
+  {
+   "id": "loot.common",
+   "category": "loot",
+   "label": "Loot: common",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.5,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "chord",
+      "dur": 0.45,
+      "delay": 0.0,
+      "gain": 0.5,
+      "freqs": [
+       440.0
+      ],
+      "wave": "sine",
+      "stagger": 0.04,
+      "env": {
+       "a": 0.01,
+       "d": 0.45,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.28,
+      "delay": 0.0,
+      "gain": 0.3,
+      "filter": {
+       "type": "highpass",
+       "f0": 1800,
+       "f1": 4200,
+       "q": 1.2
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.28,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/rpg/dropLeather.ogg",
+     "kenney/rpg/handleSmallLeather.ogg",
+     "kenney/rpg/handleSmallLeather2.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "rise",
+    "wave": "triangle",
+    "dur": 0.3,
+    "loop": false
+   }
+  },
+  {
+   "id": "loot.normal",
+   "category": "loot",
+   "label": "Loot: normal",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.5,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "chord",
+      "dur": 0.45,
+      "delay": 0.0,
+      "gain": 0.5,
+      "freqs": [
+       440.0
+      ],
+      "wave": "sine",
+      "stagger": 0.04,
+      "env": {
+       "a": 0.01,
+       "d": 0.45,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.28,
+      "delay": 0.0,
+      "gain": 0.3,
+      "filter": {
+       "type": "highpass",
+       "f0": 1800,
+       "f1": 4200,
+       "q": 1.2
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.28,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/rpg/dropLeather.ogg",
+     "kenney/rpg/handleSmallLeather.ogg",
+     "kenney/rpg/handleSmallLeather2.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "rise",
+    "wave": "triangle",
+    "dur": 0.3,
+    "loop": false
+   }
+  },
+  {
+   "id": "loot.uncommon",
+   "category": "loot",
+   "label": "Loot: uncommon",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.65,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "chord",
+      "dur": 0.5700000000000001,
+      "delay": 0.0,
+      "gain": 0.5,
+      "freqs": [
+       466.1637615180899,
+       699.245642277135
+      ],
+      "wave": "sine",
+      "stagger": 0.04,
+      "env": {
+       "a": 0.01,
+       "d": 0.5700000000000001,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.28,
+      "delay": 0.0,
+      "gain": 0.3,
+      "filter": {
+       "type": "highpass",
+       "f0": 2700,
+       "f1": 5400,
+       "q": 1.2
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.28,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/interface/drop_001.ogg",
+     "kenney/interface/drop_002.ogg",
+     "kenney/interface/drop_003.ogg",
+     "kenney/interface/drop_004.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "rise",
+    "wave": "triangle",
+    "dur": 0.3,
+    "loop": false
+   }
+  },
+  {
+   "id": "loot.magic",
+   "category": "loot",
+   "label": "Loot: magic",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.65,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "chord",
+      "dur": 0.5700000000000001,
+      "delay": 0.0,
+      "gain": 0.5,
+      "freqs": [
+       466.1637615180899,
+       699.245642277135
+      ],
+      "wave": "sine",
+      "stagger": 0.04,
+      "env": {
+       "a": 0.01,
+       "d": 0.5700000000000001,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.28,
+      "delay": 0.0,
+      "gain": 0.3,
+      "filter": {
+       "type": "highpass",
+       "f0": 2700,
+       "f1": 5400,
+       "q": 1.2
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.28,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/interface/drop_001.ogg",
+     "kenney/interface/drop_002.ogg",
+     "kenney/interface/drop_003.ogg",
+     "kenney/interface/drop_004.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "rise",
+    "wave": "triangle",
+    "dur": 0.3,
+    "loop": false
+   }
+  },
+  {
+   "id": "loot.rare",
+   "category": "loot",
+   "label": "Loot: rare",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.8,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "chord",
+      "dur": 0.69,
+      "delay": 0.0,
+      "gain": 0.5,
+      "freqs": [
+       493.8833012561241,
+       740.8249518841862,
+       987.7666025122483
+      ],
+      "wave": "sine",
+      "stagger": 0.04,
+      "env": {
+       "a": 0.01,
+       "d": 0.69,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.28,
+      "delay": 0.0,
+      "gain": 0.3,
+      "filter": {
+       "type": "highpass",
+       "f0": 3600,
+       "f1": 6600,
+       "q": 1.2
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.28,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/interface/glass_001.ogg",
+     "kenney/interface/glass_003.ogg",
+     "kenney/interface/glass_005.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "rise",
+    "wave": "triangle",
+    "dur": 0.3,
+    "loop": false
+   }
+  },
+  {
+   "id": "loot.epic",
+   "category": "loot",
+   "label": "Loot: epic",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.95,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "chord",
+      "dur": 0.81,
+      "delay": 0.0,
+      "gain": 0.5,
+      "freqs": [
+       523.2511306011972,
+       784.8766959017959,
+       1046.5022612023945
+      ],
+      "wave": "sine",
+      "stagger": 0.04,
+      "env": {
+       "a": 0.01,
+       "d": 0.81,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.28,
+      "delay": 0.0,
+      "gain": 0.3,
+      "filter": {
+       "type": "highpass",
+       "f0": 4500,
+       "f1": 7800,
+       "q": 1.2
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.28,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "triangle",
+      "dur": 0.7,
+      "delay": 0.06,
+      "gain": 0.3,
+      "f0": 130.8127826502993,
+      "f1": 130.8127826502993,
+      "env": {
+       "a": 0.003,
+       "d": 0.7,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/interface/glass_002.ogg",
+     "kenney/interface/glass_004.ogg",
+     "kenney/interface/glass_006.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "rise",
+    "wave": "triangle",
+    "dur": 0.3,
+    "loop": false
+   }
+  },
+  {
+   "id": "loot.legendary",
+   "category": "loot",
+   "label": "Loot: legendary",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 1.1,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "chord",
+      "dur": 0.9299999999999999,
+      "delay": 0.0,
+      "gain": 0.5,
+      "freqs": [
+       554.3652619537442,
+       831.5478929306162,
+       1108.7305239074883
+      ],
+      "wave": "sine",
+      "stagger": 0.04,
+      "env": {
+       "a": 0.01,
+       "d": 0.9299999999999999,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.28,
+      "delay": 0.0,
+      "gain": 0.3,
+      "filter": {
+       "type": "highpass",
+       "f0": 5400,
+       "f1": 9000,
+       "q": 1.2
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.28,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "triangle",
+      "dur": 0.7,
+      "delay": 0.06,
+      "gain": 0.3,
+      "f0": 138.59131548843604,
+      "f1": 138.59131548843604,
+      "env": {
+       "a": 0.003,
+       "d": 0.7,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/interface/bong_001.ogg",
+     "kenney/impact/impactBell_heavy_000.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "rise",
+    "wave": "triangle",
+    "dur": 0.3,
+    "loop": false
+   }
+  },
+  {
+   "id": "coin",
+   "category": "loot",
+   "label": "Coins",
+   "loop": false,
+   "trim": -2.0,
+   "synth": {
+    "dur": 0.5,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "grain",
+      "dur": 0.45,
+      "delay": 0.0,
+      "gain": 0.6,
+      "n": 9,
+      "freq": [
+       2400,
+       6400
+      ],
+      "gdur": [
+       0.006,
+       0.022
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 1.0,
+      "noisy": false
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.2,
+      "delay": 0.0,
+      "gain": 0.35,
+      "filter": {
+       "type": "bandpass",
+       "f0": 3800,
+       "f1": 2200,
+       "q": 3.0
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.2,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/rpg/handleCoins.ogg",
+     "kenney/rpg/handleCoins2.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "rise",
+    "wave": "triangle",
+    "dur": 0.3,
+    "loop": false
+   }
+  },
+  {
+   "id": "equip",
+   "category": "world",
+   "label": "Equip",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.45,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.18,
+      "delay": 0.0,
+      "gain": 0.6,
+      "filter": {
+       "type": "bandpass",
+       "f0": 2600,
+       "f1": 900,
+       "q": 1.6
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.18,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "brown",
+      "dur": 0.3,
+      "delay": 0.05,
+      "gain": 0.5,
+      "filter": {
+       "type": "bandpass",
+       "f0": 700,
+       "f1": 260,
+       "q": 1.2
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.3,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "triangle",
+      "dur": 0.22,
+      "delay": 0.04,
+      "gain": 0.3,
+      "f0": 320,
+      "f1": 180,
+      "env": {
+       "a": 0.003,
+       "d": 0.22,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/rpg/beltHandle1.ogg",
+     "kenney/rpg/beltHandle2.ogg",
+     "kenney/rpg/clothBelt.ogg",
+     "kenney/rpg/clothBelt2.ogg",
+     "kenney/rpg/metalLatch.ogg",
+     "kenney/rpg/metalClick.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "noise",
+    "dur": 0.12,
+    "loop": false
+   }
+  },
+  {
+   "id": "ui.click",
+   "category": "ui",
+   "label": "UI click",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.1,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.05,
+      "delay": 0.0,
+      "gain": 0.7,
+      "filter": {
+       "type": "bandpass",
+       "f0": 2600,
+       "f1": 1400,
+       "q": 3.0
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.05,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "triangle",
+      "dur": 0.08,
+      "delay": 0.0,
+      "gain": 0.35,
+      "f0": 900,
+      "f1": 620,
+      "env": {
+       "a": 0.003,
+       "d": 0.08,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/interface/click_001.ogg",
+     "kenney/interface/click_002.ogg",
+     "kenney/interface/click_003.ogg",
+     "kenney/interface/click_004.ogg",
+     "kenney/interface/click_005.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.08,
+    "loop": false
+   }
+  },
+  {
+   "id": "ui.hover",
+   "category": "ui",
+   "label": "UI hover",
+   "loop": false,
+   "trim": -6.0,
+   "synth": {
+    "dur": 0.07,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.05,
+      "delay": 0.0,
+      "gain": 0.3,
+      "f0": 1400,
+      "f1": 1600,
+      "env": {
+       "a": 0.003,
+       "d": 0.05,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.04,
+      "delay": 0.0,
+      "gain": 0.2,
+      "filter": {
+       "type": "bandpass",
+       "f0": 4200,
+       "f1": 3400,
+       "q": 4.0
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.04,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/interface/tick_001.ogg",
+     "kenney/interface/tick_002.ogg",
+     "kenney/interface/tick_004.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.08,
+    "loop": false
+   }
+  },
+  {
+   "id": "ui.tab",
+   "category": "ui",
+   "label": "UI tab",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.14,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "tone",
+      "wave": "triangle",
+      "dur": 0.11,
+      "delay": 0.0,
+      "gain": 0.4,
+      "f0": 620,
+      "f1": 880,
+      "env": {
+       "a": 0.003,
+       "d": 0.11,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.06,
+      "delay": 0.0,
+      "gain": 0.25,
+      "filter": {
+       "type": "bandpass",
+       "f0": 2200,
+       "f1": 3000,
+       "q": 2.5
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.06,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/interface/select_001.ogg",
+     "kenney/interface/select_002.ogg",
+     "kenney/interface/select_003.ogg",
+     "kenney/interface/select_004.ogg",
+     "kenney/interface/select_005.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.08,
+    "loop": false
+   }
+  },
+  {
+   "id": "ui.open",
+   "category": "ui",
+   "label": "UI open",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.26,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "tone",
+      "wave": "triangle",
+      "dur": 0.22,
+      "delay": 0.0,
+      "gain": 0.4,
+      "f0": 330,
+      "f1": 740,
+      "env": {
+       "a": 0.003,
+       "d": 0.22,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.18,
+      "delay": 0.0,
+      "gain": 0.3,
+      "filter": {
+       "type": "bandpass",
+       "f0": 900,
+       "f1": 3000,
+       "q": 1.4
+      },
+      "env": {
+       "a": 0.05,
+       "d": 0.18,
+       "curve": "lin"
+      }
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/interface/open_001.ogg",
+     "kenney/interface/open_002.ogg",
+     "kenney/interface/open_003.ogg",
+     "kenney/interface/open_004.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.08,
+    "loop": false
+   }
+  },
+  {
+   "id": "ui.close",
+   "category": "ui",
+   "label": "UI close",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.26,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "tone",
+      "wave": "triangle",
+      "dur": 0.22,
+      "delay": 0.0,
+      "gain": 0.4,
+      "f0": 740,
+      "f1": 300,
+      "env": {
+       "a": 0.003,
+       "d": 0.22,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.18,
+      "delay": 0.0,
+      "gain": 0.3,
+      "filter": {
+       "type": "bandpass",
+       "f0": 3000,
+       "f1": 800,
+       "q": 1.4
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.18,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/interface/close_001.ogg",
+     "kenney/interface/close_002.ogg",
+     "kenney/interface/close_003.ogg",
+     "kenney/interface/close_004.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.08,
+    "loop": false
+   }
+  },
+  {
+   "id": "ui.error",
+   "category": "ui",
+   "label": "UI error",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.32,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "tone",
+      "wave": "square",
+      "dur": 0.14,
+      "delay": 0.0,
+      "gain": 0.4,
+      "f0": 220,
+      "f1": 220,
+      "env": {
+       "a": 0.003,
+       "d": 0.14,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "square",
+      "dur": 0.16,
+      "delay": 0.13,
+      "gain": 0.4,
+      "f0": 165,
+      "f1": 150,
+      "env": {
+       "a": 0.003,
+       "d": 0.16,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/interface/error_001.ogg",
+     "kenney/interface/error_002.ogg",
+     "kenney/interface/error_003.ogg",
+     "kenney/interface/error_004.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "square",
+    "dur": 0.08,
+    "loop": false
+   }
+  },
+  {
+   "id": "travel.step",
+   "category": "world",
+   "label": "Travel step",
+   "loop": false,
+   "trim": -3.0,
+   "synth": {
+    "dur": 0.28,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "brown",
+      "dur": 0.12,
+      "delay": 0.0,
+      "gain": 0.7,
+      "filter": {
+       "type": "bandpass",
+       "f0": 1200,
+       "f1": 300,
+       "q": 1.0
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.12,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.22,
+      "delay": 0.01,
+      "gain": 0.4,
+      "filter": {
+       "type": "lowpass",
+       "f0": 400,
+       "f1": 160,
+       "q": 1.4
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.22,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "grain",
+      "dur": 0.2,
+      "delay": 0.0,
+      "gain": 0.3,
+      "n": 5,
+      "freq": [
+       600,
+       2400
+      ],
+      "gdur": [
+       0.006,
+       0.02
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 1.0,
+      "noisy": true
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "kenney/rpg/footstep00.ogg",
+     "kenney/rpg/footstep01.ogg",
+     "kenney/rpg/footstep02.ogg",
+     "kenney/rpg/footstep03.ogg",
+     "kenney/rpg/footstep04.ogg",
+     "kenney/rpg/footstep05.ogg",
+     "kenney/rpg/footstep06.ogg",
+     "kenney/rpg/footstep07.ogg",
+     "kenney/rpg/footstep08.ogg",
+     "kenney/rpg/footstep09.ogg",
+     "kenney/impact/footstep_grass_000.ogg",
+     "kenney/impact/footstep_grass_001.ogg",
+     "kenney/impact/footstep_grass_002.ogg",
+     "kenney/impact/footstep_grass_003.ogg",
+     "kenney/impact/footstep_grass_004.ogg"
+    ],
+    "pitch": [
+     0.94,
+     1.06
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "noise",
+    "dur": 0.12,
+    "loop": false
+   }
+  },
+  {
+   "id": "travel.step.soft",
+   "category": "world",
+   "label": "Travel step (grass / earth)",
+   "loop": false,
+   "trim": -9.0,
+   "synth": {
+    "dur": 0.2,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "brown",
+      "dur": 0.09,
+      "delay": 0.0,
+      "gain": 0.75,
+      "filter": {
+       "type": "lowpass",
+       "f0": 260,
+       "f1": 110,
+       "q": 0.8
+      },
+      "env": {
+       "a": 0.006,
+       "d": 0.09,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "pink",
+      "dur": 0.12,
+      "delay": 0.01,
+      "gain": 0.07,
+      "filter": {
+       "type": "highpass",
+       "f0": 2600,
+       "f1": 3400,
+       "q": 0.9
+      },
+      "env": {
+       "a": 0.02,
+       "d": 0.12,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.06,
+      "delay": 0.0,
+      "gain": 0.18,
+      "f0": 70,
+      "f1": 52,
+      "env": {
+       "a": 0.003,
+       "d": 0.06,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "noise",
+    "dur": 0.12,
+    "loop": false
+   }
+  },
+  {
+   "id": "camp.fire",
+   "category": "ambience",
+   "label": "Campfire (loop)",
+   "loop": true,
+   "trim": 0.0,
+   "synth": {
+    "dur": 2.4,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "drone",
+      "dur": 2.4,
+      "gain": 0.55,
+      "color": "brown",
+      "filter": {
+       "type": "bandpass",
+       "f0": 260,
+       "f1": 900,
+       "q": 0.9
+      },
+      "lfo": 0.7,
+      "depth": 0.5
+     },
+     {
+      "type": "grain",
+      "dur": 2.4,
+      "delay": 0.0,
+      "gain": 0.35,
+      "n": 26,
+      "freq": [
+       900,
+       4200
+      ],
+      "gdur": [
+       0.004,
+       0.02
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 1.0,
+      "noisy": true
+     },
+     {
+      "type": "drone",
+      "dur": 2.4,
+      "gain": 0.3,
+      "color": "brown",
+      "filter": {
+       "type": "bandpass",
+       "f0": 60,
+       "f1": 150,
+       "q": 1.2
+      },
+      "lfo": 0.31,
+      "depth": 0.4
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "hum",
+    "wave": "triangle",
+    "dur": 1.2,
+    "loop": true
+   }
+  },
+  {
+   "id": "ambience.forest",
+   "category": "ambience",
+   "label": "Ambience: forest",
+   "loop": true,
+   "trim": 0.0,
+   "synth": {
+    "dur": 3.0,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "drone",
+      "dur": 3.0,
+      "gain": 0.5,
+      "color": "pink",
+      "filter": {
+       "type": "bandpass",
+       "f0": 300,
+       "f1": 1400,
+       "q": 0.8
+      },
+      "lfo": 0.18,
+      "depth": 0.55
+     },
+     {
+      "type": "grain",
+      "dur": 3.0,
+      "delay": 0.0,
+      "gain": 0.22,
+      "n": 12,
+      "freq": [
+       1800,
+       5200
+      ],
+      "gdur": [
+       0.02,
+       0.12
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 1.0,
+      "noisy": false
+     },
+     {
+      "type": "drone",
+      "dur": 3.0,
+      "gain": 0.25,
+      "color": "brown",
+      "filter": {
+       "type": "bandpass",
+       "f0": 80,
+       "f1": 240,
+       "q": 1.0
+      },
+      "lfo": 0.09,
+      "depth": 0.4
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "hum",
+    "wave": "triangle",
+    "dur": 1.2,
+    "loop": true
+   }
+  },
+  {
+   "id": "ambience.cave",
+   "category": "ambience",
+   "label": "Ambience: cave",
+   "loop": true,
+   "trim": 0.0,
+   "synth": {
+    "dur": 3.0,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "drone",
+      "dur": 3.0,
+      "gain": 0.6,
+      "color": "brown",
+      "filter": {
+       "type": "bandpass",
+       "f0": 90,
+       "f1": 380,
+       "q": 1.1
+      },
+      "lfo": 0.07,
+      "depth": 0.5
+     },
+     {
+      "type": "grain",
+      "dur": 3.0,
+      "delay": 0.0,
+      "gain": 0.25,
+      "n": 7,
+      "freq": [
+       400,
+       1600
+      ],
+      "gdur": [
+       0.03,
+       0.14
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 0.5,
+      "noisy": false
+     },
+     {
+      "type": "drone",
+      "dur": 3.0,
+      "gain": 0.15,
+      "color": "pink",
+      "filter": {
+       "type": "bandpass",
+       "f0": 900,
+       "f1": 1800,
+       "q": 3.0
+      },
+      "lfo": 0.21,
+      "depth": 0.6
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "hum",
+    "wave": "triangle",
+    "dur": 1.2,
+    "loop": true
+   }
+  },
+  {
+   "id": "ambience.town",
+   "category": "ambience",
+   "label": "Ambience: town",
+   "loop": true,
+   "trim": 0.0,
+   "synth": {
+    "dur": 3.0,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "drone",
+      "dur": 3.0,
+      "gain": 0.45,
+      "color": "pink",
+      "filter": {
+       "type": "bandpass",
+       "f0": 200,
+       "f1": 900,
+       "q": 0.7
+      },
+      "lfo": 0.26,
+      "depth": 0.5
+     },
+     {
+      "type": "grain",
+      "dur": 3.0,
+      "delay": 0.0,
+      "gain": 0.28,
+      "n": 16,
+      "freq": [
+       300,
+       1200
+      ],
+      "gdur": [
+       0.05,
+       0.2
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 1.3,
+      "noisy": false
+     },
+     {
+      "type": "drone",
+      "dur": 3.0,
+      "gain": 0.12,
+      "color": "white",
+      "filter": {
+       "type": "bandpass",
+       "f0": 1200,
+       "f1": 2600,
+       "q": 2.0
+      },
+      "lfo": 0.4,
+      "depth": 0.5
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "hum",
+    "wave": "triangle",
+    "dur": 1.2,
+    "loop": true
+   }
+  },
+  {
+   "id": "ambience.marsh",
+   "category": "ambience",
+   "label": "Ambience: marsh",
+   "loop": true,
+   "trim": 0.0,
+   "synth": {
+    "dur": 3.0,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "drone",
+      "dur": 3.0,
+      "gain": 0.5,
+      "color": "brown",
+      "filter": {
+       "type": "bandpass",
+       "f0": 140,
+       "f1": 560,
+       "q": 1.0
+      },
+      "lfo": 0.12,
+      "depth": 0.5
+     },
+     {
+      "type": "grain",
+      "dur": 3.0,
+      "delay": 0.0,
+      "gain": 0.3,
+      "n": 14,
+      "freq": [
+       200,
+       900
+      ],
+      "gdur": [
+       0.03,
+       0.16
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 2.0,
+      "noisy": false
+     },
+     {
+      "type": "drone",
+      "dur": 3.0,
+      "gain": 0.12,
+      "color": "white",
+      "filter": {
+       "type": "bandpass",
+       "f0": 2200,
+       "f1": 4200,
+       "q": 2.4
+      },
+      "lfo": 0.33,
+      "depth": 0.6
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "hum",
+    "wave": "triangle",
+    "dur": 1.2,
+    "loop": true
+   }
+  },
+  {
+   "id": "ambience.mountain",
+   "category": "ambience",
+   "label": "Ambience: mountain",
+   "loop": true,
+   "trim": 0.0,
+   "synth": {
+    "dur": 3.0,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "drone",
+      "dur": 3.0,
+      "gain": 0.55,
+      "color": "white",
+      "filter": {
+       "type": "bandpass",
+       "f0": 400,
+       "f1": 2400,
+       "q": 0.6
+      },
+      "lfo": 0.15,
+      "depth": 0.7
+     },
+     {
+      "type": "drone",
+      "dur": 3.0,
+      "gain": 0.3,
+      "color": "brown",
+      "filter": {
+       "type": "bandpass",
+       "f0": 70,
+       "f1": 200,
+       "q": 0.9
+      },
+      "lfo": 0.06,
+      "depth": 0.5
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "hum",
+    "wave": "triangle",
+    "dur": 1.2,
+    "loop": true
+   }
+  },
+  {
+   "id": "ambience.void",
+   "category": "ambience",
+   "label": "Ambience: void",
+   "loop": true,
+   "trim": 0.0,
+   "synth": {
+    "dur": 3.0,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "drone",
+      "dur": 3.0,
+      "gain": 0.55,
+      "color": "brown",
+      "filter": {
+       "type": "bandpass",
+       "f0": 60,
+       "f1": 260,
+       "q": 1.4
+      },
+      "lfo": 0.04,
+      "depth": 0.5
+     },
+     {
+      "type": "drone",
+      "dur": 3.0,
+      "gain": 0.25,
+      "color": "pink",
+      "filter": {
+       "type": "bandpass",
+       "f0": 700,
+       "f1": 1500,
+       "q": 4.0
+      },
+      "lfo": 0.11,
+      "depth": 0.8
+     },
+     {
+      "type": "drone",
+      "dur": 3.0,
+      "gain": 0.12,
+      "color": "white",
+      "filter": {
+       "type": "bandpass",
+       "f0": 2400,
+       "f1": 5200,
+       "q": 6.0
+      },
+      "lfo": 0.23,
+      "depth": 0.9
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "hum",
+    "wave": "triangle",
+    "dur": 1.2,
+    "loop": true
+   }
+  },
+  {
+   "id": "ambience.fire",
+   "category": "ambience",
+   "label": "Ambience: fire",
+   "loop": true,
+   "trim": 0.0,
+   "synth": {
+    "dur": 3.0,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "drone",
+      "dur": 3.0,
+      "gain": 0.55,
+      "color": "brown",
+      "filter": {
+       "type": "bandpass",
+       "f0": 240,
+       "f1": 1100,
+       "q": 0.9
+      },
+      "lfo": 0.55,
+      "depth": 0.55
+     },
+     {
+      "type": "grain",
+      "dur": 3.0,
+      "delay": 0.0,
+      "gain": 0.32,
+      "n": 30,
+      "freq": [
+       800,
+       4600
+      ],
+      "gdur": [
+       0.004,
+       0.02
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 1.0,
+      "noisy": true
+     },
+     {
+      "type": "drone",
+      "dur": 3.0,
+      "gain": 0.3,
+      "color": "brown",
+      "filter": {
+       "type": "bandpass",
+       "f0": 55,
+       "f1": 140,
+       "q": 1.1
+      },
+      "lfo": 0.19,
+      "depth": 0.4
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "hum",
+    "wave": "triangle",
+    "dur": 1.2,
+    "loop": true
+   }
+  },
+  {
+   "id": "ambience.wind",
+   "category": "ambience",
+   "label": "Ambience: wind",
+   "loop": true,
+   "trim": 0.0,
+   "synth": {
+    "dur": 3.0,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "drone",
+      "dur": 3.0,
+      "gain": 0.55,
+      "color": "pink",
+      "filter": {
+       "type": "bandpass",
+       "f0": 300,
+       "f1": 1800,
+       "q": 0.6
+      },
+      "lfo": 0.13,
+      "depth": 0.7
+     },
+     {
+      "type": "drone",
+      "dur": 3.0,
+      "gain": 0.25,
+      "color": "brown",
+      "filter": {
+       "type": "bandpass",
+       "f0": 90,
+       "f1": 260,
+       "q": 1.0
+      },
+      "lfo": 0.05,
+      "depth": 0.5
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "hum",
+    "wave": "triangle",
+    "dur": 1.2,
+    "loop": true
+   }
+  }
+ ]
+}

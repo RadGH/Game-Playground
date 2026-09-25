@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- Mushroom, side view: a domed tan cap with pale flecks, gills under the
+       rim, a stout pale stem with a ring, and a small one growing beside it. -->
+  <defs>
+    <radialGradient id="cap" cx="0.4" cy="0.3" r="0.75">
+      <stop offset="0" stop-color="#b8956a"/>
+      <stop offset="0.6" stop-color="#94734d"/>
+      <stop offset="1" stop-color="#6b5136"/>
+    </radialGradient>
+    <linearGradient id="stem" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#a89c84"/>
+      <stop offset="0.4" stop-color="#d1c7b0"/>
+      <stop offset="1" stop-color="#9a8e76"/>
+    </linearGradient>
+    <linearGradient id="gill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8f7a5e"/>
+      <stop offset="1" stop-color="#c3b08e"/>
+    </linearGradient>
+  </defs>
+  <!-- small side mushroom -->
+  <path d="M182,246 C180,232 182,220 184,210 L198,210 C200,222 200,234 198,246 Z" fill="url(#stem)" stroke="#6e644f" stroke-width="0.8"/>
+  <path d="M166,212 C168,190 182,178 192,178 C204,178 216,192 216,212 Z" fill="url(#cap)" stroke="#4e3a27" stroke-width="0.9"/>
+  <path d="M166,212 L216,212" stroke="#6b5640" stroke-width="2"/>
+  <!-- ground shadow under the main one -->
+  <ellipse cx="118" cy="248" rx="44" ry="6" fill="#2d2a20" opacity="0.35"/>
+  <!-- main stem -->
+  <path d="M100,248 C98,210 100,170 104,140 L134,140 C138,170 140,210 138,248 Z" fill="url(#stem)" stroke="#6e644f" stroke-width="0.9"/>
+  <path d="M102,158 C112,164 128,164 136,158 C136,166 130,170 118,170 C108,170 102,166 102,158 Z" fill="#b5a88f" stroke="#6e644f" stroke-width="0.7"/>
+  <path d="M106,236 L110,200 M126,236 L124,196" stroke="#8c8068" stroke-width="1" opacity="0.5"/>
+  <!-- gills: a band under the cap rim -->
+  <path d="M52,140 C56,148 90,152 118,152 C146,152 180,148 184,140 Z" fill="url(#gill)"/>
+  <g stroke="#6e5a42" stroke-width="0.8" opacity="0.7">
+    <path d="M60,141 L62,148 M70,142 L72,150 M80,143 L82,151 M90,143 L92,152 M100,144 L101,152 M110,144 L111,152 M120,144 L120,152 M130,144 L129,152 M140,143 L139,152 M150,143 L148,151 M160,142 L158,150 M170,142 L168,149 M178,141 L176,147"/>
+  </g>
+  <!-- cap -->
+  <path d="M50,142 C52,100 82,66 118,66 C154,66 186,100 186,142 Z" fill="url(#cap)" stroke="#4e3a27" stroke-width="1"/>
+  <path d="M50,142 L186,142" stroke="#5c4531" stroke-width="2.5"/>
+  <!-- flecks and a rim highlight -->
+  <g fill="#d6c3a0" opacity="0.55">
+    <ellipse cx="96" cy="92" rx="5" ry="3" transform="rotate(-20 96 92)"/>
+    <ellipse cx="128" cy="80" rx="6" ry="3.5"/>
+    <ellipse cx="156" cy="100" rx="4.5" ry="3" transform="rotate(25 156 100)"/>
+    <ellipse cx="112" cy="118" rx="3.5" ry="2.5"/>
+    <ellipse cx="146" cy="126" rx="4" ry="2.5"/>
+    <ellipse cx="74" cy="122" rx="3.5" ry="2.2"/>
+  </g>
+  <path d="M64,124 C72,96 92,78 116,72" fill="none" stroke="#cfb48d" stroke-width="2.5" stroke-linecap="round" opacity="0.35"/>
+</svg>

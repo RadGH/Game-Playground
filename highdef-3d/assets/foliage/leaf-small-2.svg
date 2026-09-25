@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- Small leaves 2: ash. Compound leaves - paired lance-shaped leaflets down
+       a stalk with one at the tip. Three stalks spread from a common base. -->
+  <defs>
+    <linearGradient id="lf" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0" stop-color="#7c9556"/>
+      <stop offset="1" stop-color="#4f6a3c"/>
+    </linearGradient>
+    <linearGradient id="lf2" x1="0.3" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6f8a50"/>
+      <stop offset="1" stop-color="#486139"/>
+    </linearGradient>
+    <linearGradient id="lu" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#70805a"/>
+      <stop offset="1" stop-color="#4c5a40"/>
+    </linearGradient>
+    <path id="a" d="M0,-22 C6,-18 9,-6 7,6 C5,14 3,19 0,22 C-3,19 -5,14 -7,6 C-9,-6 -6,-18 0,-22 Z"/>
+    <path id="av" d="M0,-19 L0,19 M0,-9 L5,-4 M0,-9 L-5,-4 M0,2 L4,6 M0,2 L-4,6"/>
+    <g id="leaf">
+      <use href="#a" stroke="#38472c" stroke-width="0.6"/>
+      <use href="#av" fill="none" stroke="#455737" stroke-width="0.8" opacity="0.8"/>
+    </g>
+    <g id="stalk">
+      <path d="M0,0 C2,-30 -1,-60 2,-104" fill="none" stroke="#5f4d3a" stroke-width="1.8" stroke-linecap="round"/>
+      <use href="#leaf" fill="url(#lf)" transform="translate(-10 -16) rotate(-58) scale(1.05)"/>
+      <use href="#leaf" fill="url(#lf2)" transform="translate(10 -16) rotate(58) scale(1.05)"/>
+      <use href="#leaf" fill="url(#lu)" transform="translate(-10 -38) rotate(-56) scale(1.0)"/>
+      <use href="#leaf" fill="url(#lf)" transform="translate(10 -38) rotate(56) scale(1.0)"/>
+      <use href="#leaf" fill="url(#lf2)" transform="translate(-9 -60) rotate(-54) scale(0.92)"/>
+      <use href="#leaf" fill="url(#lu)" transform="translate(9 -60) rotate(54) scale(0.92)"/>
+      <use href="#leaf" fill="url(#lf)" transform="translate(-8 -80) rotate(-50) scale(0.82)"/>
+      <use href="#leaf" fill="url(#lf2)" transform="translate(8 -80) rotate(50) scale(0.82)"/>
+      <use href="#leaf" fill="url(#lf)" transform="translate(2 -108) rotate(-2) scale(0.85)"/>
+    </g>
+  </defs>
+
+  <path d="M128,248 C126,226 124,210 124,196" fill="none" stroke="#54432f" stroke-width="3" stroke-linecap="round"/>
+  <use href="#stalk" transform="translate(124 196) rotate(-44) scale(1.15)"/>
+  <use href="#stalk" transform="translate(124 196) rotate(40) scale(1.15)"/>
+  <use href="#stalk" transform="translate(124 196) rotate(-3) scale(1.3)"/>
+</svg>

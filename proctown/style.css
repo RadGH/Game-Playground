@@ -1,0 +1,53 @@
+/* Procedural Towns — the tuning page. Dark, dense, nothing decorative. */
+.town-wrap { display: grid; grid-template-columns: 300px 1fr; gap: 18px; align-items: start;
+  padding: 0 16px 40px; }
+@media (max-width: 800px) { .town-wrap { grid-template-columns: 1fr; } }
+
+.town-panel { background: #121826; border: 1px solid #222c3c; border-radius: 8px; padding: 14px 16px; }
+.town-panel h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #7f8ea4;
+  margin: 16px 0 8px; }
+.town-panel h2:first-child { margin-top: 0; }
+.town-panel label { display: block; font-size: 12px; color: #9fb0c8; margin: 6px 0; }
+.town-panel label.chk { display: flex; align-items: center; gap: 7px; }
+.town-panel input[type="number"], .town-panel input[type="text"], .town-panel select {
+  width: 100%; background: #0d1320; color: #e4ecf7; border: 1px solid #2c3a52; border-radius: 4px;
+  padding: 5px 7px; font: inherit; font-size: 13px; margin-top: 3px; }
+.town-panel input[type="range"] { width: calc(100% - 34px); vertical-align: middle; }
+.row { display: flex; gap: 6px; margin: 8px 0; }
+.btn { flex: 1; background: #1b2436; color: #cfe0ef; border: 1px solid #2f3b52; border-radius: 4px;
+  padding: 6px 8px; cursor: pointer; font: inherit; font-size: 12px; }
+.btn:hover { background: #24304a; }
+.btn.primary { background: #1b4a6a; border-color: #2f7ba8; color: #dff2ff; }
+
+.verdict { font-size: 12px; padding: 7px 9px; border-radius: 4px; margin-bottom: 8px; }
+.verdict.ok { background: #1c3325; color: #8fe0a0; }
+.verdict.bad { background: #33201f; color: #e08a8a; }
+.report { font-size: 11px; color: #9fb0c8; background: #0d1320; border: 1px solid #222c3c;
+  border-radius: 4px; padding: 8px; max-height: 190px; overflow: auto; white-space: pre-wrap;
+  margin: 8px 0 0; }
+
+.town-stage { min-width: 0; }
+#stage { display: grid; gap: 10px; }
+#stage.one { grid-template-columns: 1fr; }
+#stage.four { grid-template-columns: 1fr 1fr; }
+#stage canvas { width: 100%; height: auto; background: #0d1118; border: 1px solid #222c3c;
+  border-radius: 6px; display: block; }
+.stats { margin-top: 10px; font-size: 12px; color: #9fb0c8; line-height: 1.7; }
+.stats b { color: #e4ecf7; font-weight: 600; }
+.stats .key { display: inline-block; width: 11px; height: 11px; border-radius: 2px;
+  vertical-align: -1px; margin-right: 4px; }
+
+/* ---------------------------------------------------------------- the building kit gallery */
+.kit-grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(var(--tile, 170px), 1fr)); }
+.kit-grid.wide { grid-template-columns: 1fr; }
+.kit-tile { margin: 0; background: #0d1118; border: 1px solid #222c3c; border-radius: 6px;
+  padding: 6px; display: flex; flex-direction: column; gap: 5px; }
+.kit-tile canvas { width: 100%; height: auto; display: block; border-radius: 4px; }
+.kit-tile figcaption { font-size: 11px; color: #7f8ea4; line-height: 1.45; }
+.kit-tile figcaption b { display: block; color: #cfe0ef; font-weight: 600; font-size: 12px; }
+.kit-tile figcaption span { display: block; }
+.kit-tile.palette figcaption { font-size: 12px; }
+.kit-links { display: flex; gap: 8px; margin: 8px 0 0; }
+.kit-links a { flex: 1; text-align: center; background: #1b2436; color: #cfe0ef; border: 1px solid #2f3b52;
+  border-radius: 4px; padding: 6px 8px; font-size: 12px; text-decoration: none; }
+.kit-links a:hover { background: #24304a; }

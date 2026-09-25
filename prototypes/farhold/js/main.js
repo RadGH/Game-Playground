@@ -1,0 +1,10383 @@
+// Farhold — phase 3. Boot the planet, build the scene, run the loop.
+//
+// Everything the game does is in the modules next door; this file wires them together and owns the
+// frame loop. `window.farhold` is the handle the Playwright specs drive.
+
+import { createNightLights } from './nightlights.js';
+import * as THREE from 'three';
+import { createWorld, makeTerrain, describePlanet, createSystem, chooseLanding, isHabitableStart, landableBodies, M_PER_CELL, setMetresPerCell, M_PER_CELL_DEFAULT } from './planet.js';
+import { createSpace } from './space.js';
+import { createShip } from '../../../assets/js/space-models.js';
+import { createAtmosphere } from './atmos.js';
+import { createTownFolk } from './town.js';
+import { createTalkPanel } from './talkui.js';
+import { QuestLog, gatherable, submitGather, makeFallQuest, makeQuest, isStarted, setQuestXpMult } from './quests.js';
+import { Campaign } from './campaign.js';
+import { createSound } from './sound.js';
+import { createSpeech } from './speech.js';
+import { createSettings } from './settings.js';
+import { NameGen } from '../../../namegen/js/namegen.js';
+import { generatePlanetMap } from '../../../universe/js/planetmap.js';
+import { BIOMES } from '../../../worldgen/js/biomes.js';
+import { createTerrainView } from './terrain.js';
+import { createSky } from './sky.js';
+import { createProps } from './props.js';
+import { createFeatures } from './features.js';
+import { createWeatherView } from './weather.js';
+// R23 — the graphics round: post-processing, the sky table, height fog, one wind, GPU rain and grass
+import { createGraphics } from './graphics.js';
+import { resolveGraphics } from './gfx.js';
+import { createCombatFx } from './combat-fx.js';
+import { createSunFx } from './sunfx.js';
+import { createDebugMenu } from './debug.js';
+import { createMapScreen, markFor as mapMarkFor } from './map.js';
+import { MarkerBook, distanceText, MARKER_LOOKS } from './markers.js';
+import { createStarChart, reachFrom, LY_PER_UNIT } from './starchart.js';
+import { createWarp } from './warp.js';
+import { generateGalaxy } from '../../../universe/js/galaxy.js';
+import { createSaves, snapshot, restore, playtimeText, saveCarriesWorld } from './save.js';
+import { runTitle } from './newgame.js';
+import { pointsFor } from './perks.js';
+// ---- The Territory expansion (see EXPANSION.md): who holds the ground, and what it asks of you
+import { createStandings, ranked as rankedFactions, createIntroducer } from './factions.js';
+import { createTerritory } from './territory.js';
+import { createJobGen, candidatesFrom } from './jobgen.js';
+import { createIncidents, NO_EFFECT } from './incidents.js';
+import { createPatrols } from './patrols.js';
+import { createCaravans } from './caravans.js';
+import { createWanderers } from './wanderers.js';
+import { createRumours } from './rumours.js';
+import { createWaypoints, boardSpotFor, hallSpotFor } from './waypoints.js';
+import { createCommand } from './command.js';
+import { createTownHall } from './townhall.js';
+import { population, recruitRefusal, populationText } from './population.js';
+// The building expansion: BUILDING_EXPANSION.md. Industry, ground, colony, and the way off the rock.
+import { createStoreNetwork } from './stores.js';
+import { createLogistics, createAwayClock } from './logistics.js';
+import { createGrid } from './power.js';
+import { createWorks, createHandWork } from './refine.js';
+import { createNodeWorld, createNodePatch, placedNode, materialIndex, whereToFind, nodeLabel } from './resources.js';
+import { createBeacons, BEACON_RANGE } from './beacon.js';
+// R17 — the scanner's right-click chooser. See the note where it is constructed.
+import { createScannerChooser } from './scanner-ui.js';
+/**
+ * R17 — RESEARCH. `sharedResearch()` is the one instance js/build.js and js/build-ui.js already
+ * use; it takes no arguments and loads data/research.json itself. Points only come into being
+ * through `award(reason, n)`, and every caller of it in this file is tagged R17.
+ */
+import { sharedResearch } from './research.js';
+import { createResearchScreen } from './research-ui.js';
+// R17 — the custom class: the opening kit a build asks for, and the screen that manages the company
+// R20 — …and the spell ladder: one pick at creation, one more at every rung of skills.json's
+// `unlockAt`, chosen from the character sheet when the level comes.
+import { applyOpeningKit, spellCatalogue, installCustomClass, pendingPicks } from './classbuild.js';
+import { createClassBuilder } from './classbuild-ui.js';
+/**
+ * R20 — THE UNBINDER. The only way a spell, a perk or a talent comes back off a character.
+ * Every price and every refusal is in js/retrain.js; this file only wires it to the person.
+ */
+import {
+  retrainMenu, forgetSpell, forgetAllSpells, forgetPerk, forgetAllPerks,
+  forgetTalent, forgetAllTalents,
+} from './retrain.js';
+import { createFollowers } from './followers.js';
+import { createFollowersScreen } from './followers-ui.js';
+import { roadHireOffer } from './hire.js';
+import { createMining } from './mining.js';
+import { createOreView } from './ore-view.js';
+import { createDefence } from './defence.js';
+import { helpersNear, helperKey } from './questhelp.js';
+import {
+  GROUND_VEHICLES, LADDER as GROUND_LADDER, driveFor, selectVehicle as selectGroundVehicle,
+  canBuild as canBuildVehicle,
+  buildVehicle, refuel as refuelVehicle, repair as repairVehicle, speedOn, drive as driveVehicle,
+  rangeLeft, modelFor, describeVehicle, GROUND_FUEL,
+} from './vehicles.js';
+import { createGroundVehicle } from '../../../avatar-3d/js/ground-vehicles.js';
+import { createTerraform } from './terraform.js';
+import { createPortals } from './portal.js';
+import { createBuild } from './build.js';
+import { ObstacleField } from './collide.js';
+import { alignCatalogue } from './buildplan.js';
+import { createBuildUI } from './build-ui.js';
+import { nextStep as chainNextStep } from './nextstep.js';
+// R17 — the five-step line that takes a new player from an empty field to an iron ingot.
+import { createOnboarding } from './onboarding.js';
+import { createHomes } from './homes.js';
+import { WorkBoard, progressText, progressFraction, creditLine, workLeft } from './work.js';
+import { createColony } from './colony.js';
+// the Civilization Expansion: one module owns housing, vendors, the hold, trade, the muster and
+// the away half, so main.js constructs ONE thing and ticks ONE thing
+import { createCivics } from './civics.js';
+import { createCivicsScreen } from './civics-ui.js';
+import { createFarm } from './farm.js';
+import {
+  migrateSave as migrateShipyard, canLaunch as canLaunchShip, spendFlightFuel, grantShip,
+  yard as shipYard, PART_IDS, SUBSYSTEMS, SHIPS, PAD, FUEL,
+  canBuildPart, buildPart, buildPad as buildLaunchPad, assembleShip, shipReady, refuel, partCost,
+  STATION, stationProgress, stationGate, buildStationModule, nextStep as shipNextStep,
+} from './shipyard.js';
+import { createInput, createController, KEY_HELP } from './player.js';
+import { EnemyField, makeActor, setActorAnim } from './actors.js';
+import { Rpg, heldLookFor, offhandLookFor, attuneWeapon, elementOf, statusOf, CAST_ELEMENTS, bandForPlanet, PLANET_BANDS, setLevelCap, levelCap, xpForLevel, eventXp, itemScore, displayName } from './rpg.js';
+import { Hud, SLOT_LABELS, MINIMAP_NEAR } from './hud.js';
+// R17: one rule for printing a quantity of a material. Ore, timber and clay are all floats —
+// "you are short of 6.000000000003 clay" was the stored number reaching the screen untouched.
+// aliased: two functions in this file already have a local `mat` holding a material's NAME,
+// and a shadowed import is a bug waiting for whoever edits one of them next.
+import { mat as matAmount } from '../../../shared/format.js';
+import { createSkillBar, applyStatus, tickStatuses, slowOf, buffsOf, outgoingFrom, incomingFrom, STATUS_POWER_SHARE } from './skills.js';
+// R23 — Farhold's own uniques and the requests their powers make (see js/uniques.js)
+import { installFoci } from './foci.js';
+import { installUniques, resolveAttack, afterKill as uniquesAfterKill, afterDamaged as uniquesAfterDamaged, tickAuras } from './uniques.js';
+import { EFFECTS as FX_TABLE } from './effects.js';
+// round 4: the RPG expansion
+import { buildZones } from './zones.js';
+import { createChests } from './chests.js';
+import { createMeteors } from './meteors.js';
+import { nearbyList } from './nearby.js';
+import { drawNearby } from './nearby-ui.js';
+import { createAmbient } from './ambient.js';
+import { createDungeon, createGates, lookForBiome } from './dungeon.js';
+import { createPets, CLASS_PETS } from './pets.js';
+import { createSites } from './sites.js';
+import { createEncounters } from './encounters.js';
+import { createEventProps } from './eventprops.js';
+import {
+  HELD_MODES, HELD_LABELS, makeTool, toolItem, toolKeyFor, toolTierOf, toolSpeed, toolYield,
+  toolReach, canWork, buildable as buildableTools, giveDevice, heldModes, heldNow, cycleHeld,
+  workClipFor,
+  holdWeapon, createGathering, createScanner,
+} from './tools.js';
+import { createLight, STARTER_TORCH, STARTER_MOUNT } from './light.js';
+import {
+  unlockVehicle, selectVehicle, startingVehicles, vehicleFor, VEHICLES, mountLook,
+  // R18 — both of these were imported by TESTS ONLY, so the three `buildOnly` pieces could not be
+  // obtained by any route in the game. See the `gear` block handed to createBuildUI below.
+  gearRecipes, craftVehicle, craftGearItem, gearQuote,
+} from './gear.js';
+import { createBoat } from './boat.js';
+import { handsOf, strikeAt, withArea, profileOf, isStaff, isWand, staffSpell, wandBehaviour, chargedForm, OFFHAND_DAMAGE, tuneWeapons } from './weapons.js';
+// R15: the dome's shove resists by rank through the same helper a hammer's knockback uses
+import { pushFor, feel, tuneFeel } from './combat-feel.js';
+// R20 — `clearTalent` moved with it: js/retrain.js is what empties a tier now, for gold.
+import { talentPlan, pickTalent, talentsOn } from './skilltalents.js';
+// R20 — `refundAll` and `refundOne` are no longer imported here: giving a perk back is an Unbinder
+// in a town and a price, and js/retrain.js is the only caller of either.
+import { allocate as allocatePerk, pointsLeft as perkPointsLeft } from './perks.js';
+import { createCrafting, Materials } from './craft.js';
+import { showRewards, rewardsOpen } from '../../../shared/rewards.js';
+import { grantReward, rewardBlurb } from './questrewards.js';
+import { familiesOf } from '../../../worldgen/js/biomes.js';
+import { SpellFx } from '../../../avatar-3d/js/spellfx.js';
+import { Assets } from '../../../assets/js/assets.js';
+import { atmospherePalette, weatherWeights, weatherOdds, WeatherClock, WEATHER_BY_KEY } from '../../../worldgen/js/weather.js';
+
+const $ = id => document.getElementById(id);
+const params = new URLSearchParams(location.search);
+
+/**
+ * The ship's speed, in something a person can plan a flight with.
+ *
+ * It used to print `state.speed` straight out as "0 u/s" — scene units a second, which is an engine
+ * number and means nothing on screen. The distance beside it is already in AU, so the speed is too:
+ * full cruise is about 0.7 AU a minute, boost a little over two, and a world three AU out is then
+ * plainly a four-minute flight.
+ */
+function speedText(unitsPerSecond, auInUnits) {
+  return `${(unitsPerSecond / (auInUnits || 1) * 60).toFixed(2)} AU/min`;
+}
+
+// Round 4: every class in `data/classes.json` is playable — all thirty. What each one starts
+// holding lives there too, so the old eight-entry starter-weapon table is gone.
+
+const state = { ready: false, running: false, paused: false, elapsed: 0, frames: 0, playtime: 0 };
+/** R14: how long a press of V may last and still count as "tap for first person". */
+const V_TAP = 0.28;
+/** The V key in flight: when it went down, and whether it has swung the camera yet. */
+let vKey = null;
+const saves = createSaves();
+
+/**
+ * R16 — THE SETTINGS PANEL IS BUILT ONCE, AT BOOT, NOT INSIDE `begin`.
+ *
+ * The title screen has a Settings button now, and the panel it opens has to be the same panel the
+ * game uses: `createSettings` appends a `<section id="settings">` and installs a capture-phase key
+ * listener that rewrites every rebound key for the whole page, so a second one would double both.
+ *
+ * But `apply()` has to reach the camera, the scatter and the sound, none of which exist before
+ * `begin` runs. So the panel is built at boot with a forwarder, and `begin` sets the real one on
+ * the line where `createSettings` used to be called, then runs it once — which is exactly what
+ * `createSettings` did for itself at the end of its constructor.
+ */
+let settingsApply = () => {};
+
+async function loadJSON(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`could not load ${url} (${res.status})`);
+  return res.json();
+}
+
+async function boot() {
+  const status = t => { $('boot-status').textContent = t; };
+  status('reading the data…');
+
+  const [items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen,
+    factionData, frameData, incidentData, wandererData, landmarkData, rewardData,
+    resourceData, refiningData, powerData, structureData, colonyData, cropData, raidData, goodsData,
+    // R17 — the custom class's tuning and the ten hireable mercenary types
+    classbuildData, mercData] = await Promise.all([
+    loadJSON('../emberveil/data/items.json'),
+    loadJSON('data/balance.json'),
+    loadJSON('data/enemies.json'),
+    loadJSON('data/talents.json'),
+    loadJSON('data/campaign.json'),
+    loadJSON('../emberveil/data/class-looks.json'),
+    loadJSON('data/skills.json'),
+    loadJSON('data/classes.json'),
+    loadJSON('data/crafting.json'),
+    loadJSON('data/encounters.json'),
+    // Name Forge, so the folk in a dwarf town have dwarf names
+    NameGen.load(new URL('../../../namegen/data/', import.meta.url).href).catch(() => null),
+    // The Territory expansion
+    loadJSON('data/factions.json'),
+    loadJSON('data/job-frames.json'),
+    loadJSON('data/incidents.json'),
+    loadJSON('data/wanderers.json'),
+    loadJSON('data/landmarks.json'),
+    loadJSON('data/faction-rewards.json'),
+    // the building expansion's own data
+    loadJSON('data/resources.json').catch(() => null),
+    loadJSON('data/refining.json').catch(() => null),
+    loadJSON('data/power.json').catch(() => null),
+    loadJSON('data/structures.json').catch(() => null),
+    loadJSON('data/colony.json').catch(() => null),
+    loadJSON('data/crops.json').catch(() => null),
+    loadJSON('data/raids.json').catch(() => null),
+    // the Civilization Expansion §6 — the twenty-two trade goods, injected into resources and
+    // refining at boot by js/trade.js rather than written into either file
+    loadJSON('data/tradegoods.json').catch(() => null),
+    /**
+     * R17 — the custom class and the mercenary types.
+     *
+     * Both `.catch(() => null)` like everything else added since round 14: without
+     * `classbuild.json` the title screen simply does not offer the Custom entry and the thirty
+     * presets are untouched, and without `mercenaries.json` the follower book falls back to its
+     * own defaults (three slots, one of each summon) and nobody is for hire.
+     */
+    loadJSON('data/classbuild.json').catch(() => null),
+    loadJSON('data/mercenaries.json').catch(() => null),
+  ]);
+
+  /**
+   * R23 — FARHOLD'S 184 UNIQUES, put into the shared item table IN MEMORY before anything reads it.
+   *
+   * `items.json` belongs to Emberveil too, and none of these powers exist there, so they are never
+   * written into the file. Done here, before the title screen, because the title screen already
+   * holds `items` (the class preview draws starter weapons from it) and everything after it shares
+   * the same object. `.catch(() => null)` like every file added since round 14: without it the game
+   * simply has Emberveil's thirty-six uniques and nothing else changes.
+   */
+  {
+    const [uniqueData, uniqueTools] = await Promise.all([
+      loadJSON('data/uniques.json').catch(() => null),
+      loadJSON('data/tools.json').catch(() => null),
+    ]);
+    installUniques(items, uniqueData, { tools: uniqueTools, describe: id => FX_TABLE['legendary:' + id]?.desc?.() || null });
+    // R25 — the caster's off hand: four foci, eight uniques and the Archivist's set (js/foci.js)
+    installFoci(items, { describe: id => FX_TABLE['legendary:' + id]?.desc?.() || null, balance });
+  }
+
+  /**
+   * R16 — THE TITLE SCREEN IS ITS OWN MODULE NOW.
+   *
+   * "I would also like to restructure the landing page." It is four screens — menu, load, character,
+   * world — and none of it belongs in here: js/newgame.js owns the markup, the class card, the save
+   * list, the appearance editor and the map preview, and hands back the one object `begin` needs.
+   *
+   * The other half of the win is that `begin`'s argument list used to be written out IN FULL at four
+   * separate call sites. Adding an argument meant remembering all four, and js/save.js's own header
+   * records what happens when one of those gets missed — three fields passed and silently dropped.
+   * There is one call site now, so there is nothing to keep in step.
+   */
+  const settings = createSettings({ apply: (v, key) => settingsApply(v, key) });
+  const data = { items, balance, bestiary, talents, campaignData, classLooks, skillData, classData,
+    craftData, encounterData, namegen, factionData, frameData, incidentData, wandererData,
+    landmarkData, rewardData, resourceData, refiningData, powerData, structureData, colonyData,
+    cropData, raidData, goodsData, classbuildData, mercData };
+
+  status('');
+  const choice = await runTitle({ classData, classLooks, skillData, items, bestiary, balance, saves, params, settings, status, classbuildData });
+  await begin({ ...data, status, settings, choice, save: choice.save || null }).catch(err => {
+    status('failed: ' + err.message);
+    const start = $('boot-start');
+    if (start) start.disabled = false;
+    console.error(err);
+  });
+}
+
+async function begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen, factionData, frameData, incidentData, wandererData, landmarkData, rewardData, resourceData, refiningData, powerData, structureData: rawStructures, colonyData, cropData, raidData, goodsData, classbuildData, mercData, status, settings, choice, save }) {
+  /**
+   * ONE VOCABULARY FOR MATERIALS, FROM HERE ON.
+   *
+   * `data/structures.json` costs things in short names — `timber`, `iron`, `parts` — and says in
+   * its own header that §1 and §2 "will decide where `iron` or `plank` actually comes from". They
+   * decided: `log`, `iron_ingot`, `machine_part`. Nobody joined the two up, so a palisade cost six
+   * `timber` and **nothing in Farhold has ever produced one unit of anything called `timber`** —
+   * twenty-two pieces of the catalogue were unbuildable by any honest route, and felling a tree
+   * gave you logs a fence would not take.
+   *
+   * `alignCatalogue` is the join, done once at the boundary so nothing downstream has to know there
+   * were ever two words for the same thing. The display names come with it, so the panel still says
+   * "6 timber".
+   */
+  const structureData = alignCatalogue(rawStructures, resourceData, powerData);
+  /**
+   * R16: what the player chose, from js/newgame.js. `begin` used to read `#boot-seed`, `#boot-class`,
+   * `#boot-name` and the five knobs straight out of the DOM, which is why loading a save had to
+   * override each of them one at a time and why the round-10 bug — a run saved at Small reloading at
+   * Full — was possible at all. It is handed one object now, and a save wins over it field by field.
+   */
+  const pick = choice || {};
+  const seed = save ? save.seed : (Number(pick.seed) || 1);
+  const classId = save ? save.classId : (pick.classId || 'ranger');
+  const lowQuality = params.get('quality') === 'low';
+
+  /**
+   * R16 — the tools, the two devices and the gather clocks. Loaded here rather than being threaded
+   * through `begin`'s argument list, which is already twenty-six names long and copied out in full
+   * at four different call sites; adding a twenty-seventh to all four is how one of them gets
+   * missed. (`js/save.js`'s own header has a note about exactly that class of bug.)
+   */
+  const toolData = await loadJSON('data/tools.json').catch(() => null)
+    || { bases: [], devices: [], rarity: {}, gather: {}, scan: {} };
+
+  /**
+   * The world knobs from the title screen, remembered in the save so a loaded run rebuilds the same
+   * world. `regionScale` is the one that matters most: World Forge's own regions are enormous, and
+   * a region is a level band — "it would take a long time to get to the next zone" was the note.
+   */
+  const worldOpts = save?.world || pick.world || {
+    regionScale: Number(params.get('regions')) || 2,
+    bandWidth: Number(params.get('band')) || 4,
+    density: Number(params.get('density')) || 1,
+    planetScale: Number(params.get('scale')) || 1,
+    levelCap: Number(params.get('levels')) || 50,
+    // On by default: a first hour on a locked-biome rock with nobody on it is a poor first hour.
+    habitable: params.has('habitable') ? params.get('habitable') !== '0' : true,
+  };
+  /**
+   * R22 — the level ladder this world was generated with, set before anything asks how long it is.
+   *
+   * `setLevelCap` rewrites `PLANET_BANDS` in place and re-bases the XP curve, and `buildZones` a few
+   * hundred lines below reads the bands to lay its level bands out. So it has to happen HERE, above
+   * both, and it has to come out of `worldOpts` rather than a fresh read of the URL — a saved game
+   * carries the cap it was made with, and loading a 100-level run into a 50-level ladder would halve
+   * every character in it.
+   */
+  setLevelCap(worldOpts.levelCap ?? 50);
+  // How big a planet feels underfoot. 640 m a cell gives 163 x 82 km, which is a lot of ground on
+  // foot; the default is smaller now, and it is a knob because the full size is the right size once
+  // you are riding. It has to be set BEFORE the world is built — every module reads the live binding.
+  setMetresPerCell(M_PER_CELL_DEFAULT * (worldOpts.planetScale ?? 1));
+  // the enemy-density knob multiplies how many are alive and how often one arrives
+  const spawnCfg = {
+    ...balance.spawn,
+    maxAlive: Math.round((balance.spawn?.maxAlive ?? 38) * worldOpts.density),
+    everySeconds: (balance.spawn?.everySeconds ?? 1.1) / Math.max(0.3, worldOpts.density),
+  };
+  balance = {
+    ...balance,
+    spawn: spawnCfg,
+    zones: { ...balance.zones, bandWidth: worldOpts.bandWidth },
+    progression: { ...balance.progression, levelCap: levelCap() },
+  };
+  /** R22 — the XP knobs, in one bag, handed to every award site. See `_xpDoc` in data/balance.json. */
+  const xpCfg = balance.xp || {};
+  // js/quests.js rolls a job's experience when the job is WRITTEN, so it needs the knob up front
+  setQuestXpMult(xpCfg.quest ?? 1.5);
+  /**
+   * How hard the ground under a point is, for an award that should be worth more out in the deep.
+   * Falls back to the player's own level so a place with no zone record (a dungeon floor, a moon
+   * with one region) still pays something sensible rather than the level-1 rate.
+   */
+  const zoneLevelAt = (x, z) => zones?.at?.(x, z)?.midLevel || player?.level || 1;
+
+  /**
+   * R19 — HAND THE COMBAT KNOBS TO THE MODULES THAT SPEND THEM.
+   *
+   * `balance.json` `player.combat`, `player.ranged` and `player.staff` — 21 numbers — had no reader
+   * anywhere. js/combat-feel.js and js/weapons.js held the same 21 as constants, spelled
+   * differently, and they happened to agree, so the only symptom was that editing the balance file
+   * did nothing at all. Both tuners mutate in place, so this has to run before any module that
+   * reads them fires — which is here, right after `balance` stops being reassigned.
+   */
+  tuneFeel(balance.player?.combat);
+  tuneWeapons(balance.player);
+
+  status('shaping the planet…');
+  await frame();
+  const mapSize = { width: balance.world?.width ?? 256, height: balance.world?.height ?? 128, regionScale: worldOpts.regionScale };
+  /**
+   * WHERE THE RUN IS, NOT JUST WHICH SEED IT STARTED FROM.
+   *
+   * A save used to carry the run seed and nothing else, so loading always rebuilt the *starting*
+   * system — travel several stars out, save, reload, and you woke up in the ocean of the world you
+   * had left hours ago. The save now also carries the system seed and the planet, and a load builds
+   * that system directly.
+   */
+  const at = save?.at || null;
+  const created = at?.systemSeed
+    ? (() => {
+      const built = createSystem({ seed: at.systemSeed });
+      const landing = built.system.planets.find(p => p.id === at.planetId)
+        || built.system.planets.flatMap(p => p.moons || []).find(m => m.id === at.planetId)
+        || chooseLanding(built.system);
+      return {
+        star: built.star, system: built.system, planet: landing,
+        world: generatePlanetMap(landing, mapSize),
+        systemSeed: at.systemSeed, movedSeed: false,
+      };
+    })()
+    // `liveable: true` whether or not the box is ticked — the box decides where you LAND, and the
+    // starting system always has somewhere you could breathe (see createWorld)
+    : createWorld({ seed, ...mapSize, habitable: worldOpts.habitable, liveable: true });
+  // the search may have stepped to a neighbouring seed; everything downstream uses the one it found
+  let systemSeed = created.systemSeed ?? seed;   // `let`: a jump replaces the whole system
+  let { star, system } = created;   // `let`: a jump to another star replaces both
+
+  /**
+   * THE GALAXY THIS RUN LIVES IN.
+   *
+   * Star Forge grows a disc of stars with travel lanes between them; every one of them carries its
+   * own seed, and a seed is all `createSystem` needs. So a star on the chart IS a system — jumping
+   * there means building that seed's system and dropping the ship into it.
+   *
+   * The one join is the star you start at. The habitable search picked a seed, not a position in a
+   * galaxy, so the first star on the chart is rewritten to be that system: same seed, same name,
+   * same class. Everything else in the disc is untouched, which keeps the lanes and the layout the
+   * generator produced.
+   */
+  const galaxy = generateGalaxy({ seed, stars: 180, layout: 'spiral' });
+  // …and only when we are actually AT the first star. Loading a save taken several jumps out
+  // restores that star instead, and rewriting star 0 with its seed would have made two different
+  // stars claim to be the same system.
+  if (!Number.isFinite(at?.starId) || at.starId === 0) {
+    const home = galaxy.stars[0];
+    home.seed = systemSeed;
+    home.name = star.name;
+    home.classKey = star.classKey;
+    home.className = star.className;
+    home.color = star.color;
+    home.habitable = star.habitable;
+  }
+  // a load puts you back at the star you were at, not at the one the run began from
+  let starId = Number.isFinite(at?.starId) ? at.starId : 0;
+  const starNow = () => galaxy.stars[starId] || galaxy.stars[0];
+  // these are replaced wholesale when you land on a different world
+  let planet = created.planet, world = created.world;
+  let terrain = makeTerrain(world, planet, balance.terrain);
+  /**
+   * THE GROUND THE PLAYER HAS RESHAPED.
+   *
+   * `terraform` holds the brushes — a level here, a road strip there — and `wrap` puts them in front
+   * of the world's own height so everything downstream (collision, the camera, the clipmap, props)
+   * asks one question and gets the edited answer. It has to be built BEFORE `createTerrainView`,
+   * because the clipmap samples the terrain it is handed at construction.
+   */
+  let terraform = createTerraform({ saved: save?.terraform || null });
+  terrain = terraform.wrap(terrain);
+  let palette = atmospherePalette(planet);
+  // Round 4: how hard a fight is belongs to the PLACE. World Forge already grows named regions with
+  // borders it draws on the map, so those are the level bands — see js/zones.js.
+  /**
+   * A WORLD'S OWN DIFFICULTY BAND.
+   *
+   * "Let's categorize planets by difficulty and have low (1-30), medium (30-40), and high (40-50)
+   * difficulty." The band is a level range; the region graph then lays its own ladder INSIDE it, so
+   * the softest corner of a far-reach world is still level 30 and its worst is 40.
+   */
+  let band = bandForPlanet(planet);
+  let zones = buildZones(world, {
+    spawn: [terrain.spawnPoint().x, terrain.spawnPoint().z],
+    maxLevel: band.max, bandWidth: balance.zones?.bandWidth ?? 4, startLevel: band.min,
+  });
+
+  status('finding somewhere to stand…');
+  await frame();
+
+  // ---------------------------------------------------------------- renderer
+  // R23: with the picture pipeline on, the frame is multisampled in its own HDR target and the
+  // canvas only ever receives one full-screen quad, so canvas antialiasing would be wasted work
+  const bootGraphics = resolveGraphics(settings.get('graphics'), { lowQuality, override: params.get('graphics') });
+  const renderer = new THREE.WebGLRenderer({ antialias: !lowQuality && !bootGraphics.postfx, logarithmicDepthBuffer: true });
+  renderer.setPixelRatio(lowQuality ? 1 : Math.min(2, window.devicePixelRatio || 1));
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.autoClear = false;
+  $('stage').append(renderer.domElement);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(62, 1, 0.2, 24000);
+
+  let sky = createSky({ star, system, planet, balance, palette });
+  scene.add(sky.sunLight);
+  scene.add(sky.sunLight.target);
+  scene.add(sky.ambient);
+  scene.fog = sky.fog;
+
+  // Round 4: torches, braziers, sconces and a floor under the night ambient.
+  const light = createLight(scene, { balance });
+
+  const ringSpec = lowQuality ? balance.terrain?.ringsLow : balance.terrain?.rings;
+
+  /**
+   * How far the ground is drawn, as the player asked for it.
+   *
+   * One function, so the ground view and the flight stretch cannot disagree. The old `viewDistance`
+   * setting was three words that nothing read; this is a multiplier on the clipmap's view scale,
+   * and everything that stretches the view multiplies through it.
+   */
+  let viewWanted = 1;
+  const viewMul = () => viewWanted;
+  let view = createTerrainView(scene, terrain, {
+    // the terrain knobs are a knob file like everything else; without this `maxSkirtScale` and
+    // friends were code defaults nobody could tune
+    ...(balance.terrain || {}), rings: ringSpec, waterColor: palette.sea });
+
+  status('planting the world…');
+  await frame();
+  let props = createProps(scene, terrain, {
+    seed,
+    density: lowQuality ? 0.45 : (balance.props?.density ?? 1),
+    radius: lowQuality ? 4 : (balance.props?.radius ?? 7),
+    grassPerCell: lowQuality ? 60 : (balance.props?.grassPerCell ?? 150),
+  });
+  let features = createFeatures(scene, terrain, {
+    // the pad is dark until the town has been entered; `waypoints` is built just below, so this is
+    // read through a function rather than captured
+    waypointLit: id => waypoints?.isLit?.(id),
+    palette, seed, radius: lowQuality ? 1500 : (balance.features?.radius ?? 2600),
+  });
+  // R23 — see js/graphics.js. `world` is read through a getter because every one of these is rebuilt
+  // when you land somewhere else.
+  const graphics = createGraphics({
+    renderer, scene, camera, settings, lowQuality, seed, override: params.get('graphics'),
+    world: () => ({ sky, terrain, view, props, features }),
+  });
+  let weatherView = createWeatherView({
+    scene, skyScene: sky.scene, palette, seed, quality: lowQuality ? 'low' : 'high', ...graphics.weatherOpts(),
+  });
+  graphics.setWeatherView(weatherView);
+
+  // phase 7: sound and speech. Both start silent and come up on the first click, because a
+  // browser will not give a page an audio context until somebody has interacted with it.
+  const sound = await createSound({ balance, enabled: params.get('sound') !== 'off' });
+  const speech = await createSpeech({ enabled: params.get('sound') !== 'off' });
+  const wake = () => { sound.start(); window.removeEventListener('pointerdown', wake); window.removeEventListener('keydown', wake); };
+  window.addEventListener('pointerdown', wake);
+  window.addEventListener('keydown', wake);
+
+  /**
+   * ================================================================ THE TERRITORY
+   *
+   * See EXPANSION.md. Farhold is a whole planet and crossing one is slow on purpose, so the content
+   * has to be where you are standing. These seven modules turn a zone from "a name and a level band"
+   * into a place that is HELD by somebody, has real camps and roads and people on them, and asks you
+   * for things that are actually there.
+   *
+   * All seven are pure — no Three.js, no DOM — and they are ticked from the game loop rather than
+   * simulating on their own, so a distant patrol costs one line of arithmetic a frame.
+   */
+  const standings = createStandings(factionData, save?.standings || null);
+  // say a faction's full name the first time it comes up, and the short one after that
+  const intro = createIntroducer(factionData);
+  // `holdings` rather than `land`, because `land()` is already the verb for putting the ship down
+  const holdings = createTerritory({
+    zones, seed, factions: factionData, standings, landmarks: landmarkData,
+    metresPerCell: terrain.metresPerCell, saved: save?.territory || null,
+    // so a wayshrine stands on a real landmark node rather than in the middle of a field
+    nodesFor: zone => (world.nodes || []).filter(n =>
+      zones.at(n.x * terrain.metresPerCell, n.y * terrain.metresPerCell)?.id === zone.id),
+  });
+  const trouble = createIncidents({ data: incidentData, territory: holdings, factions: factionData, seed });
+  const patrols = createPatrols({ territory: holdings, factions: factionData, standings, seed });
+  const trade = createCaravans({ territory: holdings, factions: factionData, standings, seed });
+  const roadFolk = createWanderers({ data: wandererData, territory: holdings, standings, seed });
+
+  /**
+   * R22 — THE PEOPLE ON THE ROAD GET BODIES.
+   *
+   * `js/wanderers.js` is pure JavaScript on purpose, and that was right: it decides WHO is out there
+   * and what they want, and it should not need a scene to do it. What was missing is the other half
+   * — somebody to actually stand there — so the game offered "E to talk to Mercenary Captain" at
+   * twenty-two metres of empty grass, and the only trace of a wanderer anywhere in the world was a
+   * dot on the minimap.
+   *
+   * `folk.spawnOne` already builds a person with an avatar, an idle animation and a greeting; it was
+   * written for the freed prisoners in round 12 and used again for the townsfolk you recruit. This
+   * is the third caller. A wanderer's body is put down when you come within `WANDERER_BODY` metres
+   * and taken away again past `WANDERER_DROP`, which is the same shape as the enemy despawn leash
+   * and for the same reason: forty people standing on a road you cannot see is forty skinned meshes
+   * for nothing.
+   */
+  const WANDERER_TALK = 3.6;       // the same range the townsfolk use — you are next to them
+  const WANDERER_BODY = 90;        // put a person down inside this
+  const WANDERER_DROP = 130;       // and take them away again out here (hysteresis, so none flickers)
+  const wandererBodies = new Map(); // wanderer id -> the group id folk.spawnOne filed them under
+  const wandererPending = new Set();
+  let sinceWanderers = 0;
+
+  function keepWandererBodies(dt) {
+    sinceWanderers += dt;
+    if (sinceWanderers < 0.75) return;      // four times a second is plenty for people who walk
+    sinceWanderers = 0;
+    // `folk` is `let folk = null` until the first landing builds it, and a dungeon floor has no
+    // road on it at all — in both cases every body that exists goes away and none is made.
+    if (!folk?.spawnOne || dungeon) { clearWandererBodies(); return; }
+
+    const near = roadFolk.near(control.x, control.z, WANDERER_BODY);
+    const seen = new Set();
+    for (const w of near) {
+      seen.add(w.id);
+      if (wandererBodies.has(w.id) || wandererPending.has(w.id)) continue;
+      wandererPending.add(w.id);
+      const groupId = `road:${w.id}`;
+      folk.spawnOne({
+        groupId, role: w.role || 'wanderer', roleName: w.kindName || null,
+        name: w.name, x: w.x, z: w.z, greeting: w.greeting || null, seed: seed ^ 0x5bd1,
+      }).then(who => {
+        wandererPending.delete(w.id);
+        // they may have walked out of range, or the world may have been rebuilt, while we waited
+        if (!who) return;
+        if (Math.hypot(w.x - control.x, w.z - control.z) > WANDERER_DROP) { folk.depopulate?.(groupId); return; }
+        wandererBodies.set(w.id, groupId);
+      }).catch(() => { wandererPending.delete(w.id); });
+    }
+    for (const [id, groupId] of [...wandererBodies]) {
+      const still = roadFolk.near(control.x, control.z, WANDERER_DROP).some(w => w.id === id);
+      if (!still || !seen.has(id)) {
+        if (!still) { folk.depopulate?.(groupId); wandererBodies.delete(id); }
+      }
+    }
+  }
+
+  function dropWandererBody(id) {
+    const groupId = wandererBodies.get(id);
+    if (!groupId) return;
+    folk.depopulate?.(groupId);
+    wandererBodies.delete(id);
+  }
+
+  /** Every wanderer body goes when the world underneath them does. */
+  function clearWandererBodies() {
+    for (const id of [...wandererBodies.keys()]) dropWandererBody(id);
+    wandererPending.clear();
+  }
+  const rumours = createRumours({ territory: holdings, factions: factionData, seed });
+  if (save?.rumours) rumours.load(save.rumours);
+
+  /**
+   * The waypoint network.
+   *
+   * Built from whatever settlements this world has, and re-pointed at the new list when you land
+   * somewhere else — the pads are per world, like the map's learned region names, because a pad on
+   * another planet is not somewhere you can walk to.
+   */
+  /**
+   * EVERY BASE YOU EVER RAISED, WHEREVER IT IS.
+   *
+   * "It should be easy to teleport back to your bases even if you go to a different star system."
+   * The waypoint network below is per world and gets thrown away every time you land somewhere
+   * else; this does not. It is the one register that outlives a planet, so a base you built four
+   * hundred light years ago is still on the list — and `routeTo` says how many legs the trip home
+   * takes rather than refusing.
+   */
+  const homes = createHomes(save?.homes || null);
+  /** Which world we are standing on, in the two numbers the register files a base under. */
+  const worldKey = () => ({ systemSeed, planetId: planet?.id ?? null });
+
+  let waypoints = createWaypoints({
+    settlements: features.settlements, seed,
+    built: homes.forWorld(worldKey()),
+    // the same test js/features.js uses to site the pad, so the two cannot disagree
+    groundOk: (x, z) => !terrain.waterAt(x, z) && !terrain.underwater(x, z)
+      && terrain.riverAt(x, z) <= 0.3 && terrain.slopeAt(x, z, 4) <= 0.5,
+  });
+  if (save?.waypoints) waypoints.load(save.waypoints);
+  // R18 — `incidentData` so `resolvedBy` is read: without it four incidents could never be cleared.
+  const jobs = createJobGen({ frames: frameData, territory: holdings, factions: factionData, standings, incidents: incidentData, seed });
+  /** The board for the zone you are in. Rebuilt when you cross a border, not every frame. */
+  let localBoard = [];
+  let boardZone = null;
+  /** R14: dusk and dawn want a new notice board, and nothing else that arriving somewhere does. */
+  let rebuildBoard = false;
+  /** R14: the Nearby Activities list, kept so the journal can show the same rows the panel does. */
+  let nearbyRows = [];
+  /** …and what the beacons and the screen-edge arrows are pointing at right now. */
+  let beaconRows = [];
+
+  // the folk who live in the settlements, and the work they hand out
+  const questLog = save?.quests ? QuestLog.fromJSON(save.quests) : new QuestLog();
+  /**
+   * R17 — the onboarding line. Built much further down, once the base modules it reads exist;
+   * declared here as a `let` so the HUD's `objective:` closure can name it without reading a
+   * `const` that has not been initialised yet. Round 11 produced three crashes of exactly that
+   * shape and `node --check` can see none of them.
+   */
+  let onboard = null;
+  /**
+   * Everything the player is keeping an eye on: quest destinations, story objectives and the pins
+   * they dropped themselves. It carries the world each one is on, so flying somewhere else no
+   * longer leaves the old planet's pins scattered over the new one's map.
+   */
+  const markers = new MarkerBook(save?.markers || null);
+  markers.setWorld({
+    systemSeed, planetId: planet.id,
+    planetName: planet.name, starName: star.name,
+  });
+  markers.syncQuests(questLog.active);
+  const campaign = new Campaign(campaignData, save?.campaign || null);
+  // cut the survey to what this system can actually offer
+  {
+    const solid = system.planets.filter(p => !p.giant && p.landable !== false);
+    const townCount = (world.nodes || []).filter(n => n.type === 'settlement' || n.type === 'port').length;
+    campaign.fit({
+      settlements: townCount ? Infinity : 0,
+      planets: solid.length,
+      dungeons: (world.nodes || []).filter(n => n.type === 'dungeon').length,
+    });
+  }
+  const npcLooks = ['ranger', 'cleric', 'rogue', 'warrior', 'bard', 'mage']
+    .map(id => classLooks.classes[id]?.avatar).filter(Boolean);
+  let folk = null;
+
+  // ---------------------------------------------------------------- the player
+  status('waking the wayfarer…');
+  await frame();
+
+  const rpg = new Rpg(items, { ...balance, seed }, talents);
+  const classDef = classData.classes.find(c => c.id === classId) || classData.classes[0];
+  const look = classLooks.classes[classId];
+  /**
+   * R16 — THE FACE THE PLAYER BUILT, IF THEY BUILT ONE.
+   *
+   * Farhold has only ever had one look per class: `class-looks.json`'s entry, the same body for
+   * every ranger anyone ever played. The appearance editor (js/appearance.js) hands back a whole
+   * avatar in the shared character schema, and a save carries it (js/save.js), so the order is:
+   * what this save was wearing, then what was built on the title screen, then the class's own.
+   *
+   * It is `baseLook`, not `look.avatar`, everywhere below — `applyGearLook()` rebuilds the body from
+   * this every time a piece of armour changes, so reading the class look there would put the class
+   * face back on the first equip.
+   */
+  const baseLook = save?.avatar || pick.avatar || look?.avatar || null;
+  const playerName = save?.name || (pick.name || '').trim() || look?.name?.split(' ')[0] || 'Wayfarer';
+  const player = rpg.createPlayer({ name: playerName, classId, avatar: baseLook });
+  player.barrier = 0;
+  // the pretty name, for the sheet header — `classId` is the raw id ("stormcaller")
+  player.classLabel = classDef.name || classId;
+
+  // the materials bag: separate from the item bag, and it never fills
+  const materials = Materials.from(save?.materials || {});
+  /**
+   * R19 — THE BENCH GETS THE THREE THINGS IT WAS WRITTEN TO TAKE.
+   *
+   * `createCrafting` has taken `stores`, `resources` and `bench` since round 14 and this call
+   * passed none of them, which killed two features outright and nobody noticed either:
+   *
+   *   - §3.11 craft-from-storage. `poolHere()` was null forever, so the bench only ever paid out
+   *     of the bag in your pockets. You could stand on a crate holding 400 iron ingots and the
+   *     anvil would tell you that you needed iron.
+   *   - the names. `M` is built from `resources.materials` plus the recycling materials, so without
+   *     it every refined material printed as its raw id — "iron_ingot", "cut_stone" — on the bench
+   *     AND in the inventory's material strip, which reads as an unfinished game.
+   *
+   * `stores` goes in as a thunk because the store network is built ~1600 lines below this and is
+   * rebuilt every time you land on a new world; craft.js derefs it on each use.
+   */
+  /**
+   * The holder, not a closure over `stores` itself: `const stores` is declared ~1600 lines below,
+   * and a thunk that read it would throw a ReferenceError for anything that crafted before then —
+   * a temporal dead zone, which `node --check` cannot see and which this file has now produced
+   * five times. A field goes where its FIRST READER is, and the first reader is this line.
+   */
+  let storeNet = null;
+  const craft = createCrafting({
+    data: craftData, rpg, materials, rng: rpg.rng,
+    stores: () => storeNet,
+    resources: resourceData,
+  });
+
+  /**
+   * R20 — what the opening kit said, held until there is a HUD to say it in. See the note below.
+   */
+  const openingLines = [];
+
+  if (!save) {
+    // attuned like every other weapon, or a level-1 character's first sword has no facts on its
+    // card until the day it is replaced
+    const starter = attuneWeapon(rpg.loot.generate(classDef.starter || 'sword', 'normal', 'low', { rng: rpg.rng }));
+    if (starter) rpg.equip(player, starter, { force: true });
+    for (const key of classDef.startingArmour || []) {
+      const piece = attuneWeapon(rpg.loot.generate(key, 'normal', 'low', { rng: rpg.rng }));
+      if (piece) rpg.equip(player, piece, { force: true });
+    }
+    // EVERY character starts with a torch and a horse — both in slots of their own, so a torch does
+    // not cost you your shield and a mount is a thing you own rather than a key you press.
+    rpg.equip(player, JSON.parse(JSON.stringify(STARTER_TORCH)), { force: true });
+    rpg.equip(player, JSON.parse(JSON.stringify(STARTER_MOUNT)), { force: true });
+    /**
+     * R16 — AND A TOOL, BECAUSE OTHERWISE THE CHAIN CANNOT START.
+     *
+     * The Knapped Tool costs timber and fibre, and both come off things the game files as tier 1 —
+     * a live tree is tier 1, a rock is tier 1 — so a character with an empty Tool slot could get
+     * at nothing but a dead tree, a bush and a reed bed. That is not a difficulty curve, it is a
+     * locked door with the key on the other side of it. You start holding the crudest one there
+     * is; every better one is built.
+     *
+     * It also means the mouse wheel has two entries from the first minute, which is the only way
+     * anybody finds out it does anything.
+     */
+    const firstTool = makeTool((toolData.bases || [])[0], 'normal', toolData, { level: 1 });
+    if (firstTool) rpg.equip(player, firstTool, { force: true });
+    player.held = 'weapon';
+    /**
+     * R17 — THE CUSTOM CLASS'S OPENING KIT.
+     *
+     * A build is installed AS a class on the title screen (js/newgame.js), so everything above this
+     * line has already happened for it: the starter weapon out of `classDef.starter`, the armour
+     * out of `classDef.startingArmour`, and the companion out of `classDef.pet`. What is left is
+     * the three things a class def has no field for — the second weapon a dual loadout wants, the
+     * element a branded caster was attuned to, and the sealed chest. A preset class returns
+     * immediately without doing anything at all.
+     */
+    /**
+     * R20 — AND ITS LINES ARE BUFFERED, BECAUSE THE HUD DOES NOT EXIST YET.
+     *
+     * This passed `(t, k) => hud.log(t, k)` straight in, and `hud` is a `const` declared some
+     * seven hundred lines below here — so the moment `applyOpeningKit` actually logged anything,
+     * the whole boot died with "Cannot access 'hud' before initialization" and the title screen
+     * said `failed:` and nothing else.
+     *
+     * It logs whenever the opening kit hands over a crate or a second weapon, and the DEFAULT
+     * opening for a new build is the crate (`createBuild` sets `opening: { kind: 'crate' }`). So
+     * every custom character made the ordinary way, through the title screen, has failed to start
+     * since the custom class shipped in R17 — the one path nobody had a browser test for. Found by
+     * tests/round20-unbinder.spec.js, which builds a character the way a player does.
+     *
+     * This is the fourth of these in the project (see BUILD-MODE.md, "three TDZ crashes") and
+     * `node --check` cannot see any of them: it is a scope question, not a syntax one.
+     */
+    applyOpeningKit({ player, rpg, classDef, data: classbuildData, log: (t, k) => openingLines.push([t, k]) });
+  }
+
+  // only the player swims, so only the player pays for the swim clips
+  const actor = await makeActor({ avatar: JSON.parse(JSON.stringify(look?.avatar || {})), swim: true });
+  scene.add(actor.group);
+
+  // ---------------------------------------------------------------- first person (V)
+  //
+  // A skinned mesh draws from the mesh, not the bone tree, so hiding the head bone does nothing —
+  // the vertices are still there. Collapsing it to nothing does work: everything weighted to the
+  // head (and to the eyes, which hang off it) folds into a point inside the neck. The camera then
+  // sits on the eye bone itself, so the view is where the model's eyes actually are.
+  const eyeWorld = new THREE.Vector3(), eyeRight = new THREE.Vector3();
+  let headScale = null;
+  function setFirstPerson(on) {
+    const head = actor.parts?.head;
+    if (!head) return false;
+    if (headScale === null) {
+      headScale = head.scale.clone();
+      // how high this particular body's eyes sit above its feet, taken from the bones themselves
+      actor.group.updateMatrixWorld(true);
+      eyeWorld.setFromMatrixPosition(actor.parts.eyeL.matrixWorld);
+      eyeRight.setFromMatrixPosition(actor.parts.eyeR.matrixWorld);
+      eyeWorld.lerp(eyeRight, 0.5);
+      control.eyeHeight = Math.max(0.6, eyeWorld.y - actor.group.position.y);
+    }
+    control.firstPerson = !!on;
+    if (on) head.scale.setScalar(0.0001);
+    else head.scale.copy(headScale);
+    hud.log(on ? 'First person. V to come back out.' : 'Back over your shoulder.');
+    return control.firstPerson;
+  }
+
+  /**
+   * The mount you bought is the mount you ride.
+   *
+   * E3: "I bought a moor pony, which seemed to be identical to Trail Horse I started with." It was —
+   * one hard-coded brown horse was built at boot and shown for every mount in the game, so the shop
+   * sold three animals and the world had one. `mountLook` (js/gear.js) gives each base its own body,
+   * and the model is rebuilt whenever the mount slot changes rather than once at boot.
+   */
+  let horse = null;
+  let horseKey = null;
+  /**
+   * The motorcycle, the car and the truck — built once and hidden, like the horse and the boat.
+   *
+   * "I definitely want the ability to craft a motorcycle and a car and eventually a truck."
+   * avatar-3d/js/ground-vehicles.js holds all three bodies; js/vehicles.js holds what they cost,
+   * how fast they are on which ground, and how much fuel they drink. Neither was imported.
+   */
+  const rig = createGroundVehicle();
+  scene.add(rig.group);
+  /** Did the ground vehicle hide the walking body? Only it may put it back. */
+  let hidForRig = false;
+  async function buildMount() {
+    const item = player.equipment?.mount || null;
+    const key = item?.baseKey || 'trail_horse';
+    if (horse && key === horseKey) return;
+    try {
+      const made = await makeActor(mountLook(item));
+      if (horse) { scene.remove(horse.group); horse.dispose?.(); }
+      horse = made;
+      horseKey = key;
+      horse.group.visible = false;
+      scene.add(horse.group);
+    } catch { /* keep whatever we had rather than leaving the player on foot */ }
+  }
+  await buildMount();
+
+  /**
+   * The boat, built once beside the horse and hidden until you are in deep water.
+   *
+   * Same reasoning as the horse above: a boat is put away far more often than it is used, and
+   * building geometry the moment somebody wades into a river is a hitch you only ever notice on the
+   * water. All three hulls live inside the one group; `show()` picks between them.
+   */
+  const boat = createBoat();
+  scene.add(boat.group);
+
+  // Settings are built before the controller, because the camera reads the shoulder side, the
+  // inverted look and the sensitivity on every frame. `control` is declared first and left null:
+  // createSettings applies what it remembered straight away, and reaching a `let` before its
+  // declaration is a ReferenceError, not undefined.
+  let control = null;
+  // declared here, built further down: `createSettings` applies the stored values immediately and
+  // reads this, and reading a `const` before its line throws rather than coming back undefined
+  let sunfx = null;
+  settingsApply = (v, key) => {
+      if (!key || key === 'sound') sound.mute(!v.sound);
+      if (!key || key === 'voices') speech.setVoice(v.voices);
+      if ((!key || key === 'density' || key === 'grass') && props && control) {
+        props.setDensity(v.density, control.x, control.z);
+        props.setGrass(v.grass, control.x, control.z);
+      }
+      if (!key || key === 'viewDistance') {
+        // read off the values `apply` was handed, NOT off `settings` — this callback runs while
+        // createSettings is still constructing, so the binding does not exist yet
+        viewWanted = Math.max(0.5, Number(v.viewDistance) || 1);
+        if (view && control) {
+          view.setViewScale(viewWanted, control.x, control.z);
+          view.update(control.x, control.z, true);
+        }
+      }
+      if ((!key || key === 'sunfx') && sunfx) sunfx.setEnabled(v.sunfx);
+      // R23: Off / Low / High (js/gfx.js). `?quality=low` holds it at Off and `?graphics=` wins over both.
+      if (!key || key === 'graphics') graphics.setLevel(v.graphics, { explicit: key === 'graphics' });
+      if (!key || key === 'grassDistance') graphics.setGrassDistance?.(v.grassDistance);
+      // D15: the field of view. settings.js used to reach for `window.farhold.camera` on a timer,
+      // because the agent that added it could not edit this file — it has the camera handed to it.
+      if ((!key || key === 'fov') && camera?.isPerspectiveCamera && camera.fov !== v.fov) {
+        camera.fov = v.fov;
+        camera.updateProjectionMatrix();
+      }
+  };
+  // the panel was built at boot (see `settingsApply` at the top of this file) and has already
+  // applied what it remembered to a forwarder that did nothing; run the real one over it now
+  settingsApply(settings.all(), null);
+
+  /**
+   * R18 — WHAT YOU BUILD IS SOLID.
+   *
+   * Nothing the player built had ever collided with anything. `createBuild` was handed no collider
+   * and nothing anywhere filed a build entry as an obstacle — so you walked straight through your
+   * own palisade, stone wall, gate, barricade, turret and house, and so did everything chasing you.
+   * That is why `barricade`'s `blocks: true` was read by nobody: there was no collision for a built
+   * piece to plug into, and a whole defensive category existed to stop things and stopped nothing.
+   *
+   * It gets a field of its OWN rather than joining `features.solids`, because features clears that
+   * field on every world rebuild (every 260 m) and would take the base's walls with it. This one is
+   * rebuilt from the ledger, so it only changes when what is standing changes.
+   *
+   * A piece is a cylinder like every other solid in the game, and the radius is half its footprint's
+   * LONG side. That is the opposite of what I first wrote, and the probe caught it: half the SHORT
+   * side turns a 2 x 0.5 m palisade into a 0.25 m post, and a run of posts at 1.5 m spacing has a
+   * one-metre gap between each pair that you simply walk through — a fence that fences nothing. Half
+   * the long side (1.0 m here) makes consecutive pieces overlap, which is what a wall is for. A
+   * cylinder is a coarse fit for a thin fence either way, and blocking is the half that matters.
+   *
+   * It goes into `field.solids` as well as the player's own list, because a palisade that only
+   * stops YOU is worse than no palisade.
+   */
+  /**
+   * `ObstacleField`'s constructor takes a BUCKET SIZE, not an options object — the first version of
+   * this line passed `{ ground: … }` as the bucket, which made every bucket key NaN. `setGround` is
+   * how a field learns the terrain, and it is what props and features both use.
+   */
+  const buildSolids = new ObstacleField().setGround((x, z) => terrain.heightAt(x, z));
+  /**
+   * R18 — AND GATES AND SET PIECES GET THEIR OWN FIELDS FOR THE SAME REASON.
+   *
+   * All three of these used to file into `features.solids`, and `features.buildInstances` calls
+   * `solids.clear()` on every world rebuild — so a rebuild wiped the dungeon-mouth jamb posts and
+   * every bandit camp's palisades, towers and huts. Each of the three re-files on its OWN movement
+   * threshold (features 260 m, gates 200 m, sites 180 m) and the frame order is gates, sites, then
+   * features, so features erased what the other two had just filed and they did not come back until
+   * their own thresholds were crossed: a window roughly 260-400 m into any straight walk where a
+   * camp's walls and a dungeon's doorposts were not solid, repeating for as long as you kept walking.
+   *
+   * My first fix for this was to force `gates.update`/`sites.update` whenever features rebuilt, and
+   * `prisoners.spec.js` caught it: a forced `sites.update` does far more than re-file colliders — it
+   * re-runs the whole layout and ticks the wave clock, so it ran twice a frame and the nearest
+   * person at a stronghold stopped being a prisoner. Separate fields are the actual fix: nobody
+   * clears anybody else's, and neither module has to be called more often than it wants.
+   */
+  const gateSolids = new ObstacleField().setGround((x, z) => terrain.heightAt(x, z));
+  const siteSolids = new ObstacleField().setGround((x, z) => terrain.heightAt(x, z));
+  /** Flat, walk-on or decorative pieces: a rug is not a wall. */
+  const NO_COLLIDE = new Set(['road', 'lane', 'rug', 'flower_bed', 'moss_carpet', 'nameplate', 'bedroll']);
+  function rebuildBuildSolids() {
+    buildSolids.clear();
+    for (const e of build?.entries || []) {
+      const def = build.defOf?.(e.key);
+      if (!def || NO_COLLIDE.has(e.key)) continue;
+      if ((def.h ?? 1) <= 0.35) continue;            // ankle-high is not a wall
+      const r = Math.max(0.35, Math.min(1.4, Math.max(def.w ?? 1, def.d ?? 1) / 2));
+      buildSolids.add(e.x, e.z, r, def.h ?? 2);
+    }
+    return buildSolids.count;
+  }
+
+  /**
+   * Declared HERE, above `createController`, rather than beside `createBuild` where it is filled.
+   * `buildSolids` is read by the controller's obstacle list a few lines below, and a `const` read
+   * before its declaration is a TDZ crash `node --check` cannot see — the game simply does not
+   * boot, which is exactly what happened on the first attempt at this. Third time this project has
+   * been bitten by it, so the rule is: a field goes where its FIRST READER is, not where its owner
+   * is. `rebuildBuildSolids` reads `build` lazily, so it does not mind being declared before it.
+   */
+
+  control = createController(terrain, balance, camera, {
+    obstacles: [props.solids, features.solids, buildSolids, gateSolids, siteSolids], settings,
+    // which boat goes under you when you start swimming — read live, so buying one mid-run counts
+    boat: () => vehicleFor(player, 'boat'),
+    // …and everything the player is wearing, riding and has spent a perk on. Without this the legs
+    // ran on the flat numbers out of balance.json and every move-speed perk was inert.
+    derived: () => player.derived,
+  });
+  const input = createInput(renderer.domElement);
+
+  /** Clicks taken while build mode is up, drained by the frame loop. Filled just after `build`. */
+  let buildClicks = 0;
+  /** Where the mouse is on screen, -1..1 on each axis. Only meaningful with the pointer unlocked. */
+  const pointerNdc = [0, 0];
+  const fx = createCombatFx(scene, {
+    // `terrain` is replaced when you land on a new world, so read it through the binding
+    groundAt: (x, z) => terrain.heightAt(x, z),
+    onArrowLand: arrow => {
+      const splash = balance.player?.arrowSplash ?? 2.6;
+      const bow = player.equipment.weapon;
+      // R23 — a power may have changed this shot's element when it left the string (Prism Dancer)
+      const shot = arrow.payload || null;
+      const element = shot?.element || elementOf(bow);
+      const leaves = shot?.element ? statusForElement(shot.element) : statusOf(bow);
+      const hits = field.strikeArea(arrow.x, arrow.z, splash, player, { element, applyStatus: statusHook });
+      sound.combat('arrow');
+      for (const { enemy, result } of hits) {
+        if (leaves && skillData.statuses[leaves] && result.amount > 0) {
+          landStatus(leaves, skillData.statuses[leaves], enemy, Math.max(1, result.amount * 0.7));
+        }
+        reportHit(enemy, result);
+      }
+      // R23 — and whatever the shot's powers asked for: a ricochet, a chain, a patch of fire
+      if (shot?.mods) resolveAttack(uniqueEnv, shot.mods, hits, { x: control.x, z: control.z, at: { x: arrow.x, z: arrow.z }, element });
+      // R16 — nothing sticks in the ground to be collected. See the note on RANGED.javelin: there
+      // is no ammunition in this game, so there is nothing to go and pick back up.
+    },
+  });
+
+  // ---------------------------------------------------------------- skills (phase 3)
+  //
+  // Four of them, on 1-4. The spell effects are avatar-3d's `SpellFx`, the same module both other
+  // prototypes draw with, so a firebolt here is the firebolt Emberveil throws. Textures load in the
+  // background; until they arrive every effect draws its geometry and nothing throws.
+  const spellfx = new SpellFx(scene, { camera, scale: 1.15, maxParticles: 260, maxLive: 36 });
+  const nightLights = createNightLights();          // R25 — torches carried at night
+  /**
+   * R25 — the effects overhaul draws floor marks (scorch, frost ring, rune ring, puddle) ON THE
+   * FLOOR, and away from a stage's y = 0 it can only guess where the floor is. Every impact, area and
+   * cast here is handed the real ground height under it, so a mark never lands underground.
+   */
+  {
+    const groundUnder = p => { try { return p ? terrain.heightAt(p.x, p.z) : null; } catch { return null; } };
+    for (const name of ['impact', 'aoe', 'cast']) {
+      const raw = spellfx[name].bind(spellfx);
+      spellfx[name] = (opts = {}) => {
+        if (opts.ground == null) {
+          const p = name === 'aoe' ? opts.points?.[0] : opts.at;
+          const g = groundUnder(p);
+          if (g != null) opts = { ...opts, ground: g };
+        }
+        return raw(opts);
+      };
+    }
+  }
+  Assets.open(new URL('../../../assets/', import.meta.url).href)
+    .then(a => a.fxTextures(THREE, { size: 128 }))
+    .then(t => spellfx.setTextures(t))
+    .catch(() => { /* geometry only, which still reads fine */ });
+  const skills = createSkillBar({
+    data: skillData, player, rpg,
+    /**
+     * R18 — so a summon you cannot keep costs nothing to press. `pets` is built further down, hence
+     * the lazy reach: this is only ever called from a key press, long after everything exists.
+     */
+    canSummon: (petId, s) => pets?.canAdmit?.(petId, { name: s?.name }) ?? { ok: true },
+  });
+
+  /**
+   * R20 — THE SPELL LADDER: ONE PICK AT CREATION, THE REST AS THE LEVELS COME.
+   *
+   *   "Let's change the character creator so that you only pick the first level spell. When you
+   *    reach levels 3/6/12/18/24 (+ also change 7 to 6) unlock the next spell and have a 'spell
+   *    available' slot in the inventory screen so you can open the dialog to choose the next spell."
+   *
+   * Three things have to agree whenever a pick is made, and this is the one place that makes them:
+   * the saved build (`player.build`), the synthetic class the rest of the game reads
+   * (`skillData.classes.custom`), and the live bar the number keys actually fire. `installCustomClass`
+   * rewrites the second; without `skills.relearn` the third would go on firing the spell that was
+   * there before — a change that reaches the screen and not the keys, which is the failure this
+   * project keeps finding.
+   *
+   * The catalogue is built once. It reads `data/classes.json` and `data/skills.json`, neither of
+   * which changes during a run, and rebuilding it on every redraw of the chooser was measurable.
+   */
+  const spellCat = classbuildData ? spellCatalogue({ classData, skillData, data: classbuildData }) : null;
+
+  /** How many spell slots have come open with nothing in them. Zero for a preset class. */
+  function spellsOwed() {
+    if (!spellCat || !player.build?.custom) return 0;
+    return pendingPicks(player.build, spellCat, player.level || 1);
+  }
+
+  /** A pick was made (or unbound): put it in the class, on the bar, and in the save. */
+  function buildChanged(build = player.build) {
+    if (!build || !classbuildData) return;
+    player.build = build;
+    installCustomClass({ classData, skillData, classLooks, data: classbuildData, build });
+    skills.relearn(skillData.classes[classbuildData.custom?.id || 'custom']);
+    hud.skills(skills.state());
+    hud.setPlayer(player);
+    autoSave();
+  }
+
+  /**
+   * THE CHOOSER, which is the class builder's own Spells tab with a level on it.
+   *
+   * Deliberately not a second screen. The rules about which spell may go in which slot live in
+   * js/classbuild.js and are drawn by js/classbuild-ui.js; a bespoke in-game dialog would be a
+   * second rendering of the same rules, correct on the day it was written. `getLevel` is the whole
+   * difference between the title screen (level 1, so only the opening slot is live) and this one.
+   */
+  let spellChooser = null;
+  function openSpellChooser(slot = null) {
+    if (!classbuildData || !player.build?.custom) {
+      hud.log('Your six came with the class you chose — only a class you built yourself picks its own.', '');
+      return;
+    }
+    if (!spellChooser) {
+      spellChooser = createClassBuilder({
+        classData, skillData, classLooks, data: classbuildData, build: player.build,
+        getPlayer: () => player, getLevel: () => player.level || 1, forest: rpg.forest,
+        inGame: true, tabs: [{ key: 'spells', name: 'Spells' }],
+        onChange: b => buildChanged(b),
+        onClose: () => { hud.renderSheet?.(); },
+      });
+    }
+    spellChooser.build = player.build;
+    // the card that was clicked knows which slot it is — open on that one, not on the first
+    spellChooser.show('spells', { slot });
+  }
+
+  // god rays, lens flare and the moment the star drops behind a ridge — screen space, over the
+  // canvas. `terrain` is rebound when you land on a new world, so it is read through the binding.
+  sunfx = createSunFx({ balance, terrain: { heightAt: (x, z) => terrain.heightAt(x, z) } });
+  sunfx.setEnabled(settings.get('sunfx') !== false);
+
+  /**
+   * Hang a status on whatever the skill just hit, and say so once. `cond_burnExtend` and
+   * `cond_poisonStackPower` land here — this is the one place a status the PLAYER applies is made.
+   */
+  function landStatus(type, spec, enemy, power = 1) {
+    if (!type || !spec) return;
+    const first = !enemy.statuses?.[type];
+    const longer = rpg.fx.sum(player, 'statusLonger', { type, spec });
+    const strength = rpg.fx.product(player, 'statusPower', { type });
+    applyStatus(enemy, type, spec, power, { longer, strength });
+    if (first) hud.log(`${enemy.name} is ${(spec.name || type).toLowerCase()}.`, 'good');
+  }
+  /** The callback every strike hands to the effect registry, so a crit can open a bleed. */
+  const statusHook = (target, type, spec) => { if (target && spec) landStatus(type, spec, target, 1); };
+
+  /** R23 — the status an element leaves, for an attack whose element a unique's power changed. */
+  const statusForElement = el => CAST_ELEMENTS.find(e => e.element === el)?.status || null;
+
+  /**
+   * R23 — WHAT THE UNIQUES' POWERS ARE CARRIED OUT AGAINST.
+   *
+   * js/uniques.js `resolveAttack`, `afterKill`, `afterDamaged` and `tickAuras` are pure and take
+   * this object instead of reaching into the field themselves, so the node tests can hand them a
+   * field made of plain objects and the real `rpg.strike`. Every function here is read lazily —
+   * `field`, `player` and `control` do not exist yet when this line runs.
+   *
+   * A strike made from here carries `proc: true`, which is how a chain does not chain off itself.
+   */
+  const uniqueEnv = {
+    get player() { return player; },
+    at: () => ({ x: control.x, z: control.z }),
+    rng: () => field.rng(),
+    near: (x, z, r, except) => field.near(x, z, r, except),
+    strikeOne(e, { power = 1, element = 'physical' } = {}) {
+      if (!e || e.dying != null || e.removed) return null;
+      const result = rpg.strike(player, e, field.rng, { multiplier: power, element, proc: true, applyStatus: statusHook });
+      field.land(e, result, { fromX: control.x, fromZ: control.z, element, share: power });
+      reportHit(e, result);
+      if (result.dead) field.kill(e);
+      return result;
+    },
+    strikeArea(x, z, r, { power = 1, element = 'physical', falloff = 0.5 } = {}) {
+      const hits = field.strikeArea(x, z, r, player, { power, element, falloff, proc: true, applyStatus: statusHook });
+      for (const h of hits) reportHit(h.enemy, h.result);
+      if (hits.length) spellfx.impact({ at: new THREE.Vector3(x, terrain.heightAt(x, z) + 0.6, z), element });
+      return hits;
+    },
+    push(e, fromX, fromZ, metres) {
+      const dx = e.x - fromX, dz = e.z - fromZ;
+      const len = Math.hypot(dx, dz) || 1;
+      const sign = metres < 0 ? -1 : 1;
+      // a pull never drags a body PAST the point it is being pulled to
+      const want = sign < 0 ? Math.min(-metres, len * 0.9) : metres;
+      const m = pushFor(e, want);
+      if (m > 0.01) e.push = { dx: sign * dx / len, dz: sign * dz / len, metres: m, t: 0.18, span: 0.18, done: 0 };
+    },
+    dropPool: spec => dropPool(spec),
+    later: (ms, fn) => setTimeout(() => { if (state.running) fn(); }, ms),
+    applyStatus: (t, type, spec, power = 1) => { if (t && spec) landStatus(type, spec, t, power); },
+    applySelf: (type, spec) => applyStatus(player, type, spec, 1),
+    statusSpec: type => skillData.statuses[type] || null,
+    kill: e => field.kill(e),
+    // R25 — a keystone burst (Pyre Heart) is drawn as a ring of its element where the body fell
+    burstFx(x, z, r, element) { spellfx.aoe({ points: ringPoints(x, z, r), element, stagger: 0.02 }); },
+    arc(from, to, element) {
+      if (!from || !to) return;
+      const y0 = (from.y ?? terrain.heightAt(from.x, from.z)) + 1, y1 = (to.y ?? terrain.heightAt(to.x, to.z)) + 1;
+      spellfx.projectile({ from: new THREE.Vector3(from.x, y0, from.z), to: new THREE.Vector3(to.x, y1, to.z), element, ms: 120 })
+        .catch(() => { /* the scene went away */ });
+    },
+  };
+
+  /**
+   * Where the player is AIMING — which is not the same as where the player is standing.
+   *
+   * The camera sits over the left shoulder, so the crosshair's ray starts about 0.85 m to the left
+   * of the body. Firing from the body along the same direction gives two parallel lines 0.85 m
+   * apart, and every arrow lands that far to the right of the crosshair. (Reported in play: "arrows
+   * land to the right of where I am aiming.")
+   *
+   * The fix every third-person game uses: find the point the CROSSHAIR is actually on — march the
+   * camera's ray until it meets the ground, or stop at the first enemy under the reticle — then aim
+   * the shot from the muzzle *at that point*. The two rays converge on the target instead of staying
+   * parallel. `AIM_MIN` stops the correction going wild at point-blank range, where the angle
+   * between the two would be enormous.
+   */
+  const AIM_FAR = 260, AIM_MIN = 7;
+  function aim() {
+    const cp = Math.cos(control.pitch);
+    const lx = Math.sin(control.yaw) * cp, ly = Math.sin(control.pitch), lz = Math.cos(control.yaw) * cp;
+    const eye = { x: control.x, y: control.y + 1.45, z: control.z };
+    // In first person the camera IS the eye, so there is nothing to correct — but it still has to
+    // say what is under the reticle, or the target bar goes blind the moment you press V.
+    if (control.firstPerson) {
+      const hit = field.hitScan(eye.x, eye.y, eye.z, lx, ly, lz, { range: AIM_FAR, width: 1.2 });
+      return { ...eye, dx: lx, dy: ly, dz: lz, focus: null, dist: hit?.distance ?? AIM_FAR, target: hit?.enemy || null };
+    }
+
+    const cam = camera.position;
+    let t = AIM_FAR;
+    for (let step = 2; step < AIM_FAR; step += 2) {
+      const gx = cam.x + lx * step, gz = cam.z + lz * step;
+      if (cam.y + ly * step <= terrain.heightAt(gx, gz)) { t = step; break; }
+    }
+    // a body under the reticle wins over the hill behind it
+    const under = field.hitScan(cam.x, cam.y, cam.z, lx, ly, lz, { range: Math.min(t, AIM_FAR), width: 1.2 });
+    if (under) t = under.distance;
+    t = Math.max(AIM_MIN, t);
+
+    const px = cam.x + lx * t, py = cam.y + ly * t, pz = cam.z + lz * t;
+    const dx = px - eye.x, dy = py - eye.y, dz = pz - eye.z;
+    const len = Math.hypot(dx, dy, dz) || 1;
+    return { ...eye, dx: dx / len, dy: dy / len, dz: dz / len, focus: { x: px, y: py, z: pz }, dist: t, target: under?.enemy || null };
+  }
+
+  /** The ground point the player is looking at, for a skill that lands where you aim. */
+  function groundTarget(range) {
+    const a = aim();
+    for (let t = 2; t < range; t += 1.5) {
+      const gx = a.x + a.dx * t, gz = a.z + a.dz * t;
+      if (a.y + a.dy * t <= terrain.heightAt(gx, gz)) return { x: gx, z: gz, y: terrain.heightAt(gx, gz), dist: t };
+    }
+    const gx = a.x + a.dx * range, gz = a.z + a.dz * range;
+    return { x: gx, z: gz, y: terrain.heightAt(gx, gz), dist: range };
+  }
+
+  /** A ring of effect points on the actual ground, so an area spell does not float over a slope. */
+  function ringPoints(cx, cz, radius, count = 8) {
+    const points = [];
+    for (let k = 0; k < count; k++) {
+      const ang = (k / count) * Math.PI * 2;
+      const px = cx + Math.cos(ang) * radius * 0.75, pz = cz + Math.sin(ang) * radius * 0.75;
+      points.push(new THREE.Vector3(px, terrain.heightAt(px, pz) + 0.1, pz));
+    }
+    return points;
+  }
+
+  /**
+   * One bolt of a skill: fly down the line, stop at the first body or the ground, burst there.
+   *
+   * BOLT_SPEED, and the bolt follows whoever it was aimed at. Both matter: at the effect module's
+   * own pace a bolt takes about half a second to cross 7 m, and anything charging you has moved
+   * several metres by the time it arrives, so a shot lined up on a wolf's nose burst behind it.
+   */
+  const BOLT_SPEED = 48;
+  function fireBolt(plan, a, dx, dy, dz, strikeOpts, from, loud = true, hop = 0) {
+    /**
+     * PIERCE: do not stop at the first body.
+     *
+     * A bolt scans for what it hits and bursts there. The `pierce` talent says it should carry on
+     * through, so with it the scan is simply not allowed to shorten the flight — the bolt flies its
+     * full range and the splash along the way does the work.
+     */
+    /**
+     * R21b — HOMING, WHICH WAS CARRIED ALL THE WAY HERE AND THEN DROPPED ON THE FLOOR.
+     *
+     * `plan.homing` arrives on every bolt: `js/skilltalents.js` sums it for the Seeking talent, and
+     * `js/main.js`'s wand path sets it from `wandBehaviour` — there is a whole wand behaviour called
+     * "seeking", described to the player as *"turns after what you aimed at"*, priced and sold. And
+     * `fireBolt` never read the field, so a seeking wand fired exactly the same straight bolt as
+     * every other wand, and the talent was on the project's own `PENDING_MODS` list as "a
+     * projectile cannot steer yet".
+     *
+     * It steers now, and it does it the way the ARROW path already did (`width: 1.1 + homing * 2.6`
+     * at the bow) so the two agree on what the word means:
+     *
+     *   1. a wider acquisition — a near miss is a hit;
+     *   2. and if that still finds nothing, the bolt LOOKS for a body near the line it was fired
+     *      along and turns onto it. That is the half that makes it "seeking" rather than "forgiving":
+     *      it sweeps out from the muzzle and takes the first enemy within reach of the flight path,
+     *      so it cannot snap onto something behind you.
+     *
+     * The impact already resolves against `chase`'s live position, so a body that moves during the
+     * flight is still hit — that part was right all along, which is probably why nobody noticed the
+     * bolt was not actually turning.
+     */
+    const homing = (!hop && plan.homing) ? plan.homing : 0;
+    let target = field.hitScan(a.x, a.y, a.z, dx, dy, dz, { range: plan.range, width: 1.4 + homing * 2.6 });
+    if (!target && homing > 0) {
+      const reach = 2.5 + homing * 3.5;
+      for (let t = 4; t <= plan.range && !target; t += 3) {
+        const found = field.nearestTo(a.x + dx * t, a.z + dz * t, reach);
+        if (!found) continue;
+        const ex = found.x - a.x, ey = (found.y + 0.9) - a.y, ez = found.z - a.z;
+        const len = Math.hypot(ex, ey, ez) || 1;
+        if (len > plan.range) continue;
+        dx = ex / len; dy = ey / len; dz = ez / len;          // turn onto it
+        target = { enemy: found, distance: len };
+      }
+    }
+    let dist = (plan.pierce && !hop) ? plan.range : (target ? target.distance : plan.range);
+    for (let t = 2; t < dist; t += 2) {
+      const gx = a.x + dx * t, gz = a.z + dz * t;
+      if (a.y + dy * t <= terrain.heightAt(gx, gz)) { dist = t; break; }
+    }
+    const to = new THREE.Vector3(a.x + dx * dist, a.y + dy * dist, a.z + dz * dist);
+    const flight = Math.max(90, (dist / BOLT_SPEED) * 1000);
+    const chase = target?.enemy || null;
+    return spellfx.projectile({ from, to, element: plan.element, ms: flight })
+      .then(() => {
+        const at = chase && chase.dying == null
+          ? new THREE.Vector3(chase.x, chase.y + 0.9, chase.z)
+          : to;
+        spellfx.impact({ at, element: plan.element });
+        const splash = plan.splash * (rpg.fx.sum(player, 'boltSplash') || 1);
+        const hits = field.strikeArea(at.x, at.z, splash, player, { falloff: 0.5, ...strikeOpts });
+        // R25 — a spell lands with its element's own sound, not a sword hitting armour
+        if (loud) { if (plan.element && plan.element !== 'physical') sound.spell(plan.element, 'impact'); else if (hits.length) sound.combat('hit', { crit: hits.some(h => h.result.crit) }); }
+        // R23 — the attack's powers, where the bolt burst: shards, the pull, a chain, a patch. Only the
+        // first bolt of a chain carries them, so a hop is not a fresh attack with fresh procs.
+        if (plan.mods && !hop) resolveAttack(uniqueEnv, plan.mods, hits, { x: control.x, z: control.z, at: { x: at.x, z: at.z }, element: plan.element });
+
+        /**
+         * CHAIN: jump to the next body along.
+         *
+         * `plan.chains` is how many more hops are left and `plan.chainFalloff` is what each one
+         * keeps. The hop is fired as another bolt from where this one burst, at the nearest enemy
+         * that is not the one just hit, so it reuses every rule above — including its own chain, one
+         * shorter, which is what makes the talent terminate.
+         */
+        const left = (plan.chains || 0) - hop;
+        if (left > 0) {
+          const next = field.nearestTo(at.x, at.z, 12, chase) || null;
+          if (next) {
+            const ndx = next.x - at.x, ndz = next.z - at.z;
+            const nlen = Math.hypot(ndx, ndz) || 1;
+            const keep = plan.chainFalloff ?? 0.65;
+            const weaker = { ...strikeOpts, power: (strikeOpts?.power ?? 1) * keep };
+            fireBolt({ ...plan, range: 14 }, { x: at.x, y: at.y, z: at.z },
+              ndx / nlen, 0, ndz / nlen, weaker,
+              new THREE.Vector3(at.x, at.y, at.z), false, hop + 1);
+          }
+        }
+      })
+      .catch(() => { /* the scene went away mid-flight */ });
+  }
+
+  /**
+   * Take the mouse back if nothing is holding it. Closing a panel used to leave the cursor loose and
+   * the player had to click the world again before they could look around — which, with a panel's
+   * click-to-close under the pointer, was easy to get wrong.
+   */
+  function regrab() {
+    if (!panelOpen()) input.grab();
+  }
+
+  /**
+   * Is a full-screen panel up?
+   *
+   * One predicate, used for two things: whether to take the mouse back, and whether the world is
+   * running. The debug menu is deliberately NOT in here — it is a small dev overlay you often want
+   * to read while something is moving.
+   */
+  /**
+   * Anything that covers the game belongs in here — and the Town Hall did not.
+   *
+   * R18 — `townHall.isOpen` was in neither this nor `frozen`, while its root is
+   * `position: fixed; inset: 0; z-index: 60` (civics.css). It IS in the Escape chain and it DOES
+   * call `input.release()`, which is what shows this was an oversight rather than a decision. So
+   * press E at a Town Hall with a pack nearby and `uiPaused()` stayed false: the whole frame ran
+   * under the screen — enemies closed and hit you, holding W walked you out of the building, 1-6
+   * cast spells at nothing, and a click could re-take the pointer lock.
+   */
+  function panelOpen() {
+    return hud.sheetOpen || map.isOpen || chart.isOpen || talk.isOpen || settings.isOpen
+      || rewardsOpen() || pauseMenu.isOpen || !!townHall?.isOpen;
+  }
+
+  /**
+   * PAUSE WHILE A PANEL IS OPEN.
+   *
+   * "Make it so the game is paused when in your inventory, trade menu or dialog, options menu, map,
+   * or other full screen indicator. If we add multiplayer later it should only work in
+   * singleplayer." Reading your bag should not be a way to get killed, and standing in a shop
+   * should not burn daylight.
+   *
+   * `multiplayer` is the seam that turn-off lives behind: set it and the world keeps running
+   * whatever is on screen, which is the only behaviour that works when somebody else is playing too.
+   */
+  const multiplayer = false;
+  function uiPaused() {
+    return !multiplayer && panelOpen();
+  }
+
+  /** Fire skill slot `i`. Returns the plan it ran, or null if it could not. */
+  /** R25 — the sound a skill's hits make: its element's impact, or the melee hit for a physical one. */
+  function skillSound(plan, hits) {
+    if (plan.element && plan.element !== 'physical') { if (hits.length) sound.spell(plan.element, 'impact'); }
+    else sound.combat(hits.length ? 'hit' : 'swing', { crit: hits.some(h => h.result?.crit) });
+  }
+
+  function castSkill(i, { echo = false } = {}) {
+    const plan = echo ? i : skills.use(i);
+    if (!plan.ok) { if (plan.why) hud.log(plan.why); return null; }
+    const a = aim();
+    const from = new THREE.Vector3(a.x + a.dx * 0.6, a.y - 0.2, a.z + a.dz * 0.6);
+    /**
+     * R22 — THE SECOND DOUBLE-COUNT ON THE SAME CAST.
+     *
+     * R18 moved `outgoingFrom(attacker) * incomingFrom(defender)` into `js/rpg.js`'s `strike`, where
+     * a swing, an arrow, a skill, a turret and a trap all pass through it, and its own comment says
+     * "nothing is counted twice". This line was left behind, so a skill — and only a skill — got
+     * War Cry and Rally applied on top of themselves: +30% became +69%, and it multiplied into the
+     * squared spell-power term above it.
+     *
+     * `plan.mult` alone now. `strike` is the one place a buff is worth what it says it is worth.
+     */
+    const power = plan.mult;
+    const onHit = (enemy, result) => {
+      // R21b: the share is `js/skills.js`'s constant, not a second copy of it here. The two were
+      // 0.9 in both places and nothing compared them; the description generator read one and the
+      // game read the other.
+      if (plan.status && plan.statusSpec) landStatus(plan.status, plan.statusSpec, enemy, Math.max(1, plan.damage * STATUS_POWER_SHARE * (plan.statusMult || 1)));
+      reportHit(enemy, result);
+    };
+    const strikeOpts = { power, element: plan.element, skill: plan.skill?.id, onHit, applyStatus: statusHook };
+    // R25 — every cast has a voice: its element's launch now, and its impact if it caught anything
+    // (a physical skill keeps the melee swing and hit). Only bows had a sound before.
+    if (plan.element && plan.element !== 'physical' && !['self', 'summon'].includes(plan.kind)) sound.spell(plan.element, 'launch');
+
+    /**
+     * R18 — BULWARK. `plan.barrier` was written by js/skilltalents.js and read by nobody, while
+     * `player.castBarrierFor` was READ twice in the frame loop and written nowhere — the two halves
+     * of one feature, neither of them joined. js/skilltalents.js's own audit table even names this:
+     * "barrier: js/main.js castSkill — nothing grants a barrier off a cast".
+     *
+     * So taking Bulwark on a shielding skill spent the point and granted nothing. The barrier is a
+     * share of the cast's own damage, which is what the talent's description promises, and it ticks
+     * down on its own clock that the frame loop was already watching for.
+     */
+    if (plan.barrier > 0) {
+      const gained = Math.max(1, Math.round((plan.damage || 0) * plan.barrier));
+      player.barrier = Math.max(player.barrier || 0, gained);
+      player.castBarrierFor = plan.barrierSeconds || 6;
+      hud.log(`A barrier worth ${gained} holds for ${Math.round(player.castBarrierFor)}s.`, 'good');
+    }
+
+    // every "when you cast" affix and legendary gets its turn first
+    if (!echo) {
+      const cast = rpg.fx.onCast({ self: player, skill: plan.skill, applyStatus: statusHook });
+      // R25 — the Archivist's Regalia: every fourth cast is free and goes off again for half
+      if (cast.refund && plan.spent > 0) { if (plan.paidWith === 'health') player.hp = Math.min(player.maxHp, player.hp + plan.spent); else player.mp = Math.min(player.maxMp, player.mp + plan.spent); }
+      if (cast.echoCast > 0) setTimeout(() => castSkill({ ...plan, mult: plan.mult * cast.echoCast, damage: Math.round(plan.damage * cast.echoCast) }, { echo: true }), 300);
+      if (cast.shockwave) {
+        spellfx.aoe({ points: ringPoints(control.x, control.z, 7), element: 'arcane', stagger: 0.03 });
+        field.strikeArea(control.x, control.z, 7, player, { element: 'arcane', power: 1.2, onHit });
+      }
+      // `echo_cast`: a quarter of your skills go off a second time for half
+      const chance = rpg.fx.sum(player, 'echo');
+      if (chance > 0 && rpg.rng() < chance) {
+        setTimeout(() => castSkill({ ...plan, mult: plan.mult * 0.5, damage: Math.round(plan.damage * 0.5) }, { echo: true }), 260);
+      }
+    }
+
+    if (plan.kind === 'summon') {
+      pets.summon(plan.pet, player, { count: plan.petCount, at: control }).then(made => {
+        if (made.length) hud.log(`${made[0].name} answers.`, 'good');
+        // R18 — and if it was refused, SAY so. `made.refused` carries the reason and was dropped on
+        // the floor, which is why every class summon failed in silence. `check()` catches this case
+        // before the mana is spent now, so reaching here means something changed mid-cast.
+        else if (made.refused) hud.notice(made.refused, 'bad');
+      });
+      spellfx.cast({ at: new THREE.Vector3(control.x, control.y + 0.4, control.z), element: plan.element, ms: 520 });
+      sound.ui('click');
+    } else if (plan.kind === 'beam') {
+      // a line out from you: everything within `width` of the ray, out to `range`
+      const points = [];
+      for (let t = 2; t <= plan.range; t += 3) {
+        const bx = a.x + a.dx * t, bz = a.z + a.dz * t;
+        if (a.y + a.dy * t <= terrain.heightAt(bx, bz)) break;
+        points.push(new THREE.Vector3(bx, a.y + a.dy * t, bz));
+      }
+      if (points.length) spellfx.aoe({ points, element: plan.element, stagger: 0.015 });
+      let healed = 0;
+      for (const e of field.enemies) {
+        if (e.dying != null) continue;
+        const ex = e.x - a.x, ez = e.z - a.z;
+        const along = ex * a.dx + ez * a.dz;
+        if (along < 0 || along > plan.range) continue;
+        if (Math.hypot(ex - a.dx * along, ez - a.dz * along) > plan.width + (e.reach || 2) * 0.3) continue;
+        const result = rpg.strike(player, e, field.rng, { multiplier: power, element: plan.element, applyStatus: statusHook });
+        e.hitFlash = 0.18;
+        if (e.state !== 'chase') e.state = 'chase';
+        onHit(e, result);
+        healed += Math.round(result.amount * (plan.healFrac || 0));
+        spellfx.impact({ at: new THREE.Vector3(e.x, e.y + 0.9, e.z), element: plan.element, crit: result.crit });
+        if (result.dead) field.kill(e);
+      }
+      if (healed) { player.hp = Math.min(player.maxHp, player.hp + healed); hud.log(`Drained ${healed} back.`, 'good'); }
+      sound.combat('hit');
+    } else if (plan.kind === 'ground') {
+      // it lands where you are looking, not where you are
+      const spot = groundTarget(plan.range);
+      const at = new THREE.Vector3(spot.x, spot.y, spot.z);
+      /**
+       * R25 — THE NEW GROUND SKILLS. Judgement lands `delay` seconds after the cast (a ring shows
+       * where); Blizzard, Toxic Cloud and Void Rift PULSE `repeats` times on the same spot, one whole
+       * `strikeArea` a pulse, so a body is hit once a pulse; Void Rift drags everything `pull` metres
+       * toward the middle every pulse. Each is drawn by its own spellfx piece where one exists.
+       */
+      const pulse = (first) => {
+        if (!state.running) return;
+        if (plan.pull) for (const e of field.enemies) {
+          if (e.dying != null || Math.hypot(e.x - spot.x, e.z - spot.z) > plan.radius + 1) continue;
+          uniqueEnv.push(e, spot.x, spot.z, -plan.pull);
+        }
+        if (first || !plan.weather) spellfx.aoe({ points: ringPoints(spot.x, spot.z, plan.radius), element: plan.element, stagger: first ? 0.05 : 0.02 });
+        if (first && !plan.weather) spellfx.impact({ at: new THREE.Vector3(spot.x, spot.y + 0.6, spot.z), element: plan.element });
+        skillSound(plan, field.strikeArea(spot.x, spot.z, plan.radius, player, { falloff: 0.55, ...strikeOpts }));
+      };
+      const span = plan.repeats * (plan.repeatEvery || 0.5) * 1000;
+      if (plan.weather) spellfx.storm?.({ at, radius: plan.radius, element: plan.element, ms: span + 400 });
+      if (plan.pull) spellfx.vortex?.({ at, radius: plan.radius, element: plan.element, ms: span + 300 });
+      if (plan.delay) {
+        spellfx.aoe({ points: ringPoints(spot.x, spot.z, plan.radius), element: plan.element, stagger: 0.02 });
+        setTimeout(() => { spellfx.pillar?.({ at, radius: plan.radius, element: plan.element, ms: 700 }); pulse(true); }, plan.delay * 1000);
+      } else pulse(true);
+      for (let k = 1; k < plan.repeats; k++) setTimeout(() => pulse(false), (plan.delay + k * (plan.repeatEvery || 0.5)) * 1000);
+      // `linger`: the ground keeps burning after the cast
+      if (plan.ground > 0) {
+        dropPool({
+          x: spot.x, z: spot.z,
+          r: plan.groundRadius || plan.radius,
+          seconds: plan.ground, element: plan.element, power: power * 0.35,
+        });
+      }
+    } else if (plan.kind === 'dash') {
+      // you move: everything along the line takes the hit, and you end up at the far end of it
+      const spot = groundTarget(plan.range);
+      const dist = Math.min(plan.range, spot.dist);
+      const points = [];
+      for (let t = 1; t <= dist; t += 2) {
+        const bx = control.x + a.dx * t, bz = control.z + a.dz * t;
+        points.push(new THREE.Vector3(bx, terrain.heightAt(bx, bz) + 0.3, bz));
+      }
+      spellfx.aoe({ points, element: plan.element, stagger: 0.02 });
+      const hits = [];
+      for (let t = 1; t <= dist; t += 2) {
+        hits.push(...field.strikeArea(control.x + a.dx * t, control.z + a.dz * t, plan.splash, player, { falloff: 0.8, ...strikeOpts }));
+      }
+      control.teleport(control.x + a.dx * dist, control.z + a.dz * dist);
+      control.swing = Math.max(control.swing, 0.35);
+      skillSound(plan, hits);
+    } else if (plan.kind === 'self') {
+      if (plan.heal) {
+        const before = player.hp;
+        // `camp_mend` lifts anything that mends you
+        const lift = 1 + rpg.fx.sum(player, 'healBonus');
+        player.hp = Math.min(player.maxHp, player.hp + Math.round(plan.heal * lift));
+        spellfx.heal({ at: new THREE.Vector3(control.x, control.y + 0.9, control.z) });
+        hud.log(`${plan.skill.name} closes ${Math.round(player.hp - before)} damage.`, 'good');
+      }
+      if (plan.status && plan.statusSpec) {
+        applyStatus(player, plan.status, plan.statusSpec, 1);
+        // a rallying skill puts the same buff on everything following you
+        if (plan.pets || plan.status === 'regen') {
+          for (const pet of pets.pets) if (pet.dying == null) applyStatus(pet, plan.status, plan.statusSpec, 1);
+        }
+        hud.log(`${plan.statusSpec.name}.`, 'good');
+      }
+      // R25 — Ember Stride and Storm Orbs: something that goes on fighting after the cast
+      if (plan.trail) {
+        player.trail = { left: plan.trail.seconds, step: plan.trail.step || 1.4, radius: plan.trail.radius, burns: plan.trail.burns, power: plan.mult, element: plan.element, lastX: control.x, lastZ: control.z };
+        hud.log(`${plan.skill.name}: the ground burns where you walk for ${plan.trail.seconds}s.`, 'good');
+      }
+      if (plan.orbs) startOrbs(plan);
+      spellfx.cast({ at: new THREE.Vector3(control.x, control.y + 0.4, control.z), element: plan.element, ms: 420 });
+      sound.ui('click');
+    } else if (plan.kind === 'melee') {
+      /**
+       * R25 — FLAMETHROWER. A melee cone with `repeats`: the same `field.strike` again every
+       * `repeatEvery` seconds from wherever you are standing and facing NOW, so you can sweep the
+       * stream across a crowd. `breath` draws it as a stream (spellfx.breath) instead of a swipe.
+       */
+      const cone = (first) => {
+        if (!state.running || player.hp <= 0) return;
+        if (plan.breath) {
+          const dir = new THREE.Vector3(Math.sin(control.yaw), 0, Math.cos(control.yaw));
+          const mouth = new THREE.Vector3(control.x + dir.x * 0.6, control.y + 1.1, control.z + dir.z * 0.6);
+          if (spellfx.breath) spellfx.breath({ from: mouth, dir, length: plan.reach, arc: plan.arc, element: plan.element, ms: 300 });
+          else spellfx.aoe({ points: [mouth.clone().addScaledVector(dir, plan.reach * 0.6)], element: plan.element, stagger: 0 });
+        } else fx.swipe({ x: control.x, y: control.y, z: control.z, yaw: control.yaw, reach: plan.reach, arc: plan.arc });
+        const hits = field.strike(control, player, { reach: plan.reach, arc: plan.arc, ...strikeOpts });
+        skillSound(plan, hits);
+        if (first || !plan.breath) for (const h of hits) spellfx.impact({ at: new THREE.Vector3(h.enemy.x, h.enemy.y + 0.9, h.enemy.z), element: plan.element, crit: h.result.crit });
+        control.swing = Math.max(control.swing, plan.repeats > 1 ? (plan.repeatEvery || 0.32) + 0.05 : 0.35);
+      };
+      cone(true);
+      for (let k = 1; k < plan.repeats; k++) setTimeout(() => cone(false), k * (plan.repeatEvery || 0.32) * 1000);
+    } else if (plan.kind === 'around') {
+      // a ring on the ground, drawn where the ground actually is so it does not float on a slope
+      const points = [];
+      for (let k = 0; k < 8; k++) {
+        const ang = (k / 8) * Math.PI * 2;
+        const px = control.x + Math.cos(ang) * plan.radius * 0.75, pz = control.z + Math.sin(ang) * plan.radius * 0.75;
+        points.push(new THREE.Vector3(px, terrain.heightAt(px, pz) + 0.1, pz));
+      }
+      spellfx.aoe({ points, element: plan.element, stagger: 0.04 });
+      const hits = field.strikeArea(control.x, control.z, plan.radius, player, { falloff: 0.6, ...strikeOpts });
+      skillSound(plan, hits);
+      /**
+       * R25 — WHIRLWIND SPINS FIVE TIMES. "Work like it does currently but at half damage, but now
+       * repeats 5 times so that you continually slash around in circles… It's OK (and preferred) if
+       * it hits the same enemy each strike, but not multiple times per strike." Each repeat is one
+       * whole `strikeArea` where you are standing NOW (you can walk while you spin), and one
+       * strikeArea hits each body once — so one hit per enemy per spin, by construction.
+       */
+      if (plan.repeats > 1) {
+        feel.swing.clip = 'whirl';
+        for (let k = 1; k < plan.repeats; k++) {
+          setTimeout(() => {
+            if (!state.running || player.hp <= 0) return;
+            const ring = [];
+            for (let q = 0; q < 8; q++) {
+              const ang = (q / 8) * Math.PI * 2 + k * 0.4;
+              const px = control.x + Math.cos(ang) * plan.radius * 0.75, pz = control.z + Math.sin(ang) * plan.radius * 0.75;
+              ring.push(new THREE.Vector3(px, terrain.heightAt(px, pz) + 0.1, pz));
+            }
+            spellfx.aoe({ points: ring, element: plan.element, stagger: 0.02 });
+            fx.swipe?.({ x: control.x, y: control.y, z: control.z, yaw: control.yaw + k * 1.3, reach: plan.radius, arc: Math.PI * 2 });
+            skillSound(plan, field.strikeArea(control.x, control.z, plan.radius, player, { falloff: 0.6, ...strikeOpts }));
+            feel.swing.clip = 'whirl';
+            control.swing = Math.max(control.swing, (plan.repeatEvery || 0.32) + 0.05);
+          }, k * (plan.repeatEvery || 0.32) * 1000);
+        }
+        control.swing = Math.max(control.swing, (plan.repeatEvery || 0.32) + 0.05);
+      }
+      // `linger` is offered on the nova tree too, and a nova leaves its pool where you stood
+      if (plan.ground > 0) {
+        dropPool({
+          x: control.x, z: control.z,
+          r: plan.groundRadius || plan.radius,
+          seconds: plan.ground, element: plan.element, power: power * 0.35,
+        });
+      }
+      // Consecrate mends you as it burns them
+      if (plan.healFrac) {
+        const back = Math.round(player.maxHp * plan.healFrac);
+        player.hp = Math.min(player.maxHp, player.hp + back);
+        spellfx.heal({ at: new THREE.Vector3(control.x, control.y + 0.9, control.z) });
+      }
+      control.swing = Math.max(control.swing, 0.35);
+    } else {
+      // A bolt — or a FAN of them. Multi Shot, Chain Bolt and Pinning Shot fire several at once,
+      // spread across `plan.spread` radians, because a "multi shot" that fires one arrow is not one.
+      sound.combat('bow');
+      const n = plan.projectiles || 1;
+      for (let k = 0; k < n; k++) {
+        // fan them either side of where you are aiming; a single bolt keeps the exact line
+        const off = n === 1 ? 0 : (k / (n - 1) - 0.5) * plan.spread;
+        const cs = Math.cos(off), sn = Math.sin(off);
+        const dx = a.dx * cs - a.dz * sn, dz = a.dx * sn + a.dz * cs, dy = a.dy;
+        fireBolt(plan, a, dx, dy, dz, strikeOpts, from, k === 0);
+      }
+    }
+    hud.setPlayer(player);
+    return plan;
+  }
+
+  // ---------------------------------------------------------------- weather
+  let weather = new WeatherClock({
+    weights: weatherWeights(terrain.climateAt(control.x, control.z)),
+    seed,
+    minMinutes: balance.weather?.minMinutes ?? 1.2,
+    maxMinutes: balance.weather?.maxMinutes ?? 4,
+    transitionSeconds: balance.weather?.transitionSeconds ?? 20,
+    start: params.get('weather') || save?.weather || null,
+  });
+  if (params.get('weather')) weather.set(params.get('weather'), { lock: true, instant: true });
+  let blended = weather.blend();
+  let weatherCell = [-1, -1];
+
+  // ---------------------------------------------------------------- hud + enemies
+  const hud = new Hud({
+    rpg, terrain, settings, seed, craft, zones,
+    pets: { roster: () => pets?.roster() || [] },
+    // Opening the sheet gives the mouse back IMMEDIATELY — this was the bug: the pointer stayed
+    // locked, so the cursor was invisible and none of the buttons could be clicked.
+    onOpen: () => { input.release(); },
+    // …and closing it takes the mouse BACK. It used to wait for a click on the canvas, so pressing
+    // I to leave the sheet left you with a visible cursor and no way to look around until you
+    // clicked — which also fired an attack.
+    onClose: () => { regrab(); },
+    onRecycle: (item, { quiet = false } = {}) => {
+      const at = player.bag.indexOf(item);
+      if (at < 0) return;
+      player.bag.splice(at, 1);
+      const got = craft.recycle(item);
+      if (!quiet) {
+        const text = Object.entries(got).map(([id, k]) => `${k} ${craft.M[id]?.name || id}`).join(', ');
+        hud.log(`Recycled ${item.name}${text ? ' → ' + text : ''}.`, 'loot');
+        sound.ui('click');
+      }
+      hud.setPlayer(player);
+      autoSave();
+    },
+    onCraft: (recipeId, item, opts) => {
+      const out = craft.apply(recipeId, item, { magicFind: player.derived?.magicFind || 0, ...opts, player });
+      if (!out.ok) { hud.log(out.why || 'That cannot be done.', 'bad'); return; }
+      /**
+       * A brand put on at the bench re-attunes the weapon, so the swing carries the new element.
+       *
+       * R25 — ONLY a brand. This ran after EVERY recipe, so promoting or tempering a caster cleared
+       * its element and attuned it again; "I upgraded my Arc Staff with promote and temper… it is no
+       * longer dealing damage" was a staff whose element (and so its staff spell — a nova round you
+       * can become a cone in front of you) could change under it at the bench.
+       */
+      if (item && out.ok && craft.byId?.[recipeId]?.kind === 'brand') { item.castElement = null; attuneWeapon(item); }
+      if (out.made) {
+        attuneWeapon(out.made);
+        player.bag.push(out.made);
+        hud.log(`${out.text} It is in your bag.`, out.lucky ? 'level' : 'loot');
+        sound.loot(out.made);
+      }
+      else { hud.log(out.text, 'loot'); sound.equip(); }
+      rpg.refresh(player);
+      applyGearLook();
+      hud.setPlayer(player);
+      autoSave();
+    },
+    onEquip: (item, unequipSlot) => {
+      if (unequipSlot) { const off = rpg.unequip(player, unequipSlot); if (off) hud.log(`Took off ${off.name}.`); }
+      else {
+        const out = rpg.equip(player, item);
+        if (out?.refused) { hud.notice(out.refused, 'bad'); sound.ui?.('error'); }
+        else { hud.log(`Equipped ${item.name}.`, 'loot'); sound.equip(); }
+      }
+      applyGearLook();
+      hud.setPlayer(player);
+    },
+    /**
+     * R14: `onSpendAttr` is gone with the pane that called it. The four `+` buttons had been dead
+     * since round 7 (the perk forest replaced point-buy and nothing increments `player.pendingAttr`),
+     * and attributes are now a readout under Stats — see js/hud.js `renderCharacter`.
+     */
+
+    /**
+     * R14 — SHOW ME THAT ON THE MAP.
+     *
+     * `hud.js` must not import `js/map.js` (the HUD is built before the world is, and the map is
+     * rebuilt on every landing), so the three things the journal needs are handed to it as
+     * callbacks. `map` is assigned a few hundred lines below this — hence the `?.`: a click cannot
+     * happen before there is a map, but a test can call it.
+     */
+    /** R14: the journal's "Going on near you" reads the same list the panel under the minimap does. */
+    nearby: () => nearbyRows,
+
+    /**
+     * R15 — ONE CHOICE FOR WHAT YOU TRAVEL ON.
+     *
+     *   "Add a motorcycle, car, and truck, as crafting vehicles that move much faster than horse
+     *    but occupy the same slot."
+     *
+     * They already existed and were already faster (20.0 / 17.0 / 13.5 m/s against a horse's
+     * 11.34), but they sat in a slot of their own on a key of their own, so the game had two
+     * unrelated answers to "what am I travelling on" and you had to remember which key summoned
+     * which. This is the one list: the mount in your mount slot, plus every ground vehicle you have
+     * built. `H` brings whichever is picked.
+     *
+     * `note` is what the thing is FOR, out of its own figures — the horse is the only one that will
+     * climb anything, which is the whole reason it never stops being useful.
+     */
+    /**
+     * R22 — every mount you own is IN this list, not in a second dropdown above it.
+     *
+     * An option key is either `mount:<item id>` (a mount item — picking it equips that item and
+     * points H at the horse) or a ground-vehicle key. `rideChoice` keeps its old two values —
+     * `'mount'` or a vehicle key — so a save written before this round still loads and still means
+     * the same thing; only the option keys the dropdown speaks are new.
+     *
+     * One speed, one unit. A mount's `speed` is a MULTIPLIER on the walk (the Trail Horse is 1.6×)
+     * and a vehicle's is metres a second, so both are printed through `paceNote` as m/s. Nothing
+     * else in the sheet computes a mount speed any more.
+     */
+    ground: () => {
+      const walk = balance.player?.moveSpeed ?? 5.4;
+      const paceNote = (ms, tail) => `${ms.toFixed(1)} m/s · ${tail}`;
+      const worn = player.equipment?.mount || null;
+      const mounts = [...(worn ? [worn] : []), ...(player.bag || []).filter(i => i && i.slot === 'mount')];
+      const options = mounts.map(m => ({
+        key: `mount:${m.id}`,
+        name: displayName(m),
+        note: paceNote((m.speed ?? 1.6) * walk, 'climbs anything'),
+      }));
+      for (const key of player.vehicles?.owned?.ground || []) {
+        const v = GROUND_VEHICLES[key];
+        if (!v) continue;
+        options.push({
+          key,
+          name: v.name,
+          note: paceNote(v.speed, v.maxSlope < 0.35 ? 'flat ground only' : 'takes rough ground'),
+        });
+      }
+      options.push({ key: 'foot', name: '— on foot —', note: paceNote(walk, 'nothing in the mount slot') });
+      const active = player.rideChoice && player.rideChoice !== 'mount'
+        ? player.rideChoice
+        : (worn ? `mount:${worn.id}` : 'foot');
+      const hint = options.length <= 2
+        ? 'A motorcycle, a car or a truck is built at an assembler and appears in this list. '
+          + 'All three are faster than a horse; only a horse climbs anything steep.'
+        : '';
+      return { options, active: options.some(o => o.key === active) ? active : 'foot', hint };
+    },
+    onSelectRide: key => {
+      if (key === 'foot') {
+        const off = rpg.unequip(player, 'mount');
+        if (off) hud.log(`Took off ${off.name}. You are on foot.`);
+        player.rideChoice = 'mount';
+      } else if (key.startsWith('mount:')) {
+        const id = key.slice(6);
+        const pick = player.equipment?.mount?.id === id
+          ? player.equipment.mount
+          : (player.bag || []).find(i => i && i.id === id);
+        if (pick && pick !== player.equipment?.mount) {
+          const out = rpg.equip(player, pick);
+          if (out?.refused) { hud.notice(out.refused, 'bad'); return; }
+          sound.equip();
+        }
+        player.rideChoice = 'mount';
+        hud.log(`H whistles for the ${(player.equipment?.mount?.name || 'horse').toLowerCase()}.`, '');
+      } else {
+        player.rideChoice = key;
+        selectGroundVehicle(player, key);
+        hud.log(`H brings the ${(GROUND_VEHICLES[key]?.name || key).toLowerCase()}.`, '');
+      }
+      rpg.refresh(player);
+      applyGearLook();
+      hud.setPlayer(player);
+      autoSave();
+    },
+    /**
+     * R15 — WHAT COUNTS AS YOUR TOOL, AND HOW TO GET A BETTER ONE.
+     *
+     * "How do you even get better tools? I do not see a slot for tools" — there is no slot, your
+     * weapon is the tool, and `data/resources.json` has carried a `from` sentence for every rung of
+     * that ladder the whole time without ever putting one on a screen. This hands the sheet the
+     * live answer plus the next rung up, so the row can say both.
+     */
+    tool: () => {
+      const key = toolTierFor(player);
+      const all = resourceData?.tools || {};
+      const here = all[key];
+      if (!here) return null;
+      // the cheapest rung strictly above this one, by tier then by rate
+      const next = Object.values(all)
+        .filter(t => (t.tier > here.tier) || (t.tier === here.tier && t.rate > here.rate))
+        .sort((a, b) => a.tier - b.tier || a.rate - b.rate)[0] || null;
+      return { key, ...here, next };
+    },
+    /**
+     * R16 — the journal's "Hand it in" button. It takes an id rather than the quest, because the
+     * HUD has a projection of the log and not the log itself.
+     */
+    onTurnInQuest: async id => {
+      const quest = questLog.active.find(q => q.id === id);
+      if (!quest || !quest.done || quest.turnedIn) return false;
+      await grantQuest(quest);
+      return true;
+    },
+    onLocate: (place, opts) => {
+      const out = map?.locate?.(place, opts);
+      if (out && !out.ok) hud.log(out.why || 'That is not somewhere you can be shown.', 'warn');
+      return out;
+    },
+    /** The checkbox: is this place highlighted on the map with a star? */
+    onStarSaved: (id, on) => {
+      const m = markers.markers.find(x => x.id === id);
+      if (!m) return false;
+      markers.star(m, on);
+      autoSave();
+      return m.starred;
+    },
+    /** Throw one away. A place you saved is yours to unsave — a quest marker is not. */
+    onForgetSaved: id => {
+      const m = markers.markers.find(x => x.id === id);
+      if (!m || m.kind !== 'saved') return false;
+      markers.remove(m);
+      autoSave();
+      return true;
+    },
+    journal: () => ({
+      title: campaignData.title,
+      share: campaign.share,
+      objectives: campaign.list(),
+      /** R14: the places you have decided to keep — the map's list, mirrored into the journal. */
+      saved: markers.saved().map(m => ({
+        id: m.id, name: m.name, note: m.note || '',
+        starred: !!m.starred, tracked: !!m.tracked,
+        place: { x: (m.cell.x + 0.5) * M_PER_CELL, z: (m.cell.y + 0.5) * M_PER_CELL, name: m.name, kind: 'saved' },
+      })),
+      nemesis: campaign.nemesis,
+      /**
+       * R14: a quest row carries its PLACE now, not only its words.
+       *
+       * "On the journal screen > work in hand, and for Work Going On Here, and anything else on
+       *  this screen with a primary location, add a target icon to 'locate on map'."
+       *
+       * The position was right there on the quest and was being thrown away one line before the
+       * screen that wanted it — the journal could say "Clear the Sunken Vault" and had no way to
+       * say where the Sunken Vault is.
+       */
+      quests: questLog.active.map(q => ({
+        title: q.title, progress: questLog.progressText(q), done: q.done,
+        place: q.place ? { ...q.place, kind: q.markerKind || 'quest' } : null,
+        /**
+         * R16 — AND ENOUGH OF THE QUEST TO HAND IT IN FROM HERE.
+         *
+         *   "It's currently difficult to turn in a quest, finding the right quest giver. Allow
+         *    quests to be turned in through the interface journal page."
+         *
+         * This projection dropped `id`, so the journal could name a finished job and had no way to
+         * refer to it. `blurb` is what handing it in pays (js/questrewards.js), and `canHandIn` is
+         * false only for the jobs that pay themselves the moment they finish — a raid, a meteor —
+         * which the row says in words rather than wearing a button that does nothing.
+         */
+        id: q.id,
+        blurb: rewardBlurb(q),
+        canHandIn: !isStarted(q),
+      })),
+      // who you have already put down — it was in the save and never shown on the screen
+      defeated: campaign.defeatedNemeses || [],
+      bestiary: campaign.bestiary,
+      names: Object.fromEntries(bestiary.enemies.map(e => [e.id, e.name])),
+    }),
+
+    /**
+     * WHAT YOU ARE DOING, in one line under the health bars.
+     *
+     * The tracked marker if there is one; otherwise the nearest settlement, because on a fresh run
+     * the honest answer to "what now" is "go and find somebody to talk to". Everything here already
+     * existed — the marker book, the bearing maths and `distanceText` — it was just never on screen.
+     */
+    objective: () => {
+      /**
+       * R17 — the onboarding line speaks first while it is live, and only while it is live.
+       *
+       * Round 10's review put this strip here because "the game never said what to do"; what it
+       * says is WHERE something is, which is no use at all for the opening ten minutes, where
+       * every move is a key nobody has been told about. js/onboarding.js returns null the moment
+       * the line is over, or if the player never took it, so the strip goes straight back to the
+       * marker book. It never holds the line hostage.
+       */
+      const guide = onboard?.objective();
+      if (guide) return guide;
+      if (dungeon) return { name: dungeon.name, where: 'find the way down' };
+      const tracked = markers.tracked()[0];
+      const trackedAt = tracked ? markers.bearing(tracked, control, terrain) : null;
+      if (trackedAt) return { name: tracked.name, where: distanceText(trackedAt.distance) };
+      const town = features.nearestSettlement?.(control.x, control.z) || null;
+      if (town) {
+        const d = Math.hypot(town.x - control.x, town.z - control.z);
+        return { name: town.name, where: d < 90 ? 'look for work here' : distanceText(d) };
+      }
+      const here = zones.at(control.x, control.z);
+      return here ? { name: here.name, where: `level ${here.minLevel}–${here.maxLevel}` } : null;
+    },
+
+    // ---- The Territory: three more things the Journal shows
+    standings: () => rankedFactions(factionData, standings),
+    factionBands: () => factionData.bands || [],
+    factionName: key => intro.fullName(key),
+    distanceTo: place => distanceText(Math.hypot((place?.x ?? 0) - control.x, (place?.z ?? 0) - control.z)),
+    /** What one faction owes you, and whether you have earned it yet. */
+    factionRewards: key => {
+      if (!key) return [];
+      const ranks = rewardData.ranks || [];
+      const value = standings.get(key);
+      return (rewardData.rewards?.[key] || []).map(r => {
+        const rank = ranks.find(x => x.key === r.rank);
+        return { ...r, at: rank?.at ?? 0, rankName: rank?.name || r.rank, earned: value >= (rank?.at ?? 0) };
+      });
+    },
+    /** Everything you have earned, everywhere — what the rest of the game asks before it acts. */
+    perks: () => earnedRewards(),
+    /** The five deeds worth knowing about, biggest first — the rest are variations on them. */
+    factionDeeds: () => ([
+      ['finish a job for them', factionData.deeds?.job_done],
+      ['see a caravan of theirs home', factionData.deeds?.caravan_escorted],
+      ['clear their enemy\'s camp', factionData.deeds?.camp_cleared],
+      ['kill one of their patrol', factionData.deeds?.patrol_killed],
+      ['rob one of their caravans', factionData.deeds?.caravan_robbed],
+      ['desecrate one of their places', factionData.deeds?.landmark_desecrated],
+    ].filter(row => Number.isFinite(row[1]))),
+    territoryHere: () => (hud.here ? holdings.of(hud.here.id) : null),
+    board: () => localBoard,
+    rumours: () => rumours.all(),
+    /**
+     * Take a job off the local board.
+     *
+     * A generated job is richer than the four shapes the quest log counts against, so it goes in with
+     * `logKind` and keeps its own words — see the note in js/jobgen.js.
+     */
+    onTakeJob: job => takeBoardJob(job),
+    onTakeTalent: id => { if (rpg.takeTalent(player, id)) { sound.ui('click'); hud.log(`Talent taken: ${rpg.talentList.find(t => t.id === id)?.name}.`, 'level'); autoSave(); } hud.setPlayer(player); },
+    onSpendPassive: id => { if (rpg.spendPassive(player, id)) { sound.ui('click'); autoSave(); } hud.setPlayer(player); },
+
+    // ---- round 7: the perk forest, the per-skill talent trees, and the vehicle dropdowns
+    onTakePerk: id => {
+      const out = allocatePerk(player, rpg.forest, id);
+      if (!out.ok) { hud.log(out.why, 'bad'); sound.ui('error'); return; }
+      sound.ui('click');
+      hud.log(`Perk taken: ${out.node.name}.`, 'level');
+      rpg.refresh(player, { full: true });
+      hud.setPlayer(player);
+      autoSave();
+    },
+    /**
+     * R20 — `onRefundPerk` and `onRefundPerks` used to sit here, free and instant.
+     *
+     * "…remove the ability to do it directly from the inventory." Both are now the Unbinder's, with
+     * a price: see the `forgetPerk` / `forgetAllPerks` handlers on the talk panel further down.
+     * `onChooseSpell` is what takes their place on this screen — the Skills tab's "spell available"
+     * slot opening the chooser for whichever slot has come due.
+     */
+    onChooseSpell: slot => openSpellChooser(slot),
+    onPickTalent: (skillId, tier, nodeId, shape) => {
+      const out = pickTalent(player, skillId, tier, nodeId, { shape });
+      if (!out.ok) { hud.log(out.why, 'bad'); sound.ui('error'); return; }
+      sound.ui('click');
+      hud.log(`${out.node.name} on ${skillId}.`, 'level');
+      hud.setPlayer(player);
+      autoSave();
+    },
+    // R20 — `onClearTalent` is gone with the click that cleared one. The Unbinder charges for it.
+    onSelectVehicle: (slot, key) => {
+      if (!selectVehicle(player, slot, key)) return;
+      sound.ui('click');
+      hud.log(`${vehicleFor(player, slot)?.name} it is.`, '');
+      hud.setPlayer(player);
+      autoSave();
+    },
+  });
+  hud.setPlayer(player);
+
+  /**
+   * R20 — and now say what the opening kit handed over.
+   *
+   * These were written before the HUD existed (see the note at `applyOpeningKit`), so they have
+   * been sitting in `openingLines` waiting for a log to go in. Flushed here, at the first point
+   * there is one, so a custom character still opens their run being told what was in the crate.
+   */
+  for (const [text, kind] of openingLines) hud.log(text, kind);
+  openingLines.length = 0;
+
+  /** A hit, in the log AND over the thing you hit — see `hud.hit`. */
+  function reportHit(enemy, result) {
+    const at = new THREE.Vector3(enemy.x, (enemy.y ?? 0) + (enemy.height || 1.7) * 0.9, enemy.z);
+    if (result.dodged) {
+      hud.log(`${enemy.name} dodges.`, '', 'dealt');
+      hud.hit(at, 'miss', 'miss', camera);
+      return;
+    }
+    hud.log(`You hit ${enemy.name} for ${result.amount}${result.crit ? ' (critical)' : ''}.`, result.crit ? 'good' : '', 'dealt');
+    // R25 — a hit far above your weapon's own damage says where it came from (see rpg.strike `why`)
+    const top = player.derived?.damage?.[1] || 10;
+    if (result.why && result.amount > top * 8) {
+      const w = result.why, parts = [`roll ${w.roll}`, `x${w.power} skill/strike`];
+      if (w.flat) parts.push(`+${w.flat} flat`);
+      if (w.items && w.items !== 1) parts.push(`x${w.items} item powers`);
+      if (w.spellPower) parts.push(`x${w.spellPower} spell power`);
+      if (w.crit) parts.push(`x${w.crit} critical`);
+      if (w.buffs && w.buffs !== 1) parts.push(`x${w.buffs} buffs/debuffs`);
+      hud.log(`That hit (${result.amount}, ${result.element}) came from: ${parts.join(', ')}.`, 'level', 'dealt');
+      console.warn('farhold: outlier hit', result.amount, result.why, enemy.name);
+    }
+    hud.hit(at, result.amount, result.crit ? 'crit' : '', camera);
+  }
+
+  /**
+   * The reward popup, shared with Emberveil (`shared/rewards.js`): a chest lands, bursts, the gold
+   * and xp count up, and the items fly out one at a time with their rarity colour. Used for a
+   * chest, a boss, a rare and a cleared dungeon — everything with a haul worth stopping for.
+   */
+  function rewards(spec) {
+    state.paused = true;
+    input.release();
+    // the HUD, the skill bar and the "E open the gilded chest" prompt were all still legible through
+    // the popup, which is a shared overlay Emberveil uses too — so hide ours rather than dim theirs
+    document.body.classList.add('popup-open');
+    return showRewards(spec, {
+      base: '../../assets/data/ui',
+      sounds: {
+        open: () => sound.ui('open'),
+        item: r => sound.loot({ rarity: r }),
+        close: () => sound.ui('click'),
+      },
+    }).finally(() => { state.paused = false; document.body.classList.remove('popup-open'); });
+  }
+
+  /**
+   * One item, in the shape the reward popup wants — and the one line you actually want.
+   *
+   * The card showed the item's own numbers and nothing else, which is not the question you are asking
+   * when a chest has just opened. The question is "is this better than what I have on", and the
+   * inventory already computes that number; the popup just never asked for it.
+   */
+  /**
+   * R22 — THE LOOT CARD IS A CARD, AND THE DETAIL IS ON THE HOVER.
+   *
+   *   "On loot window, redesign the item rewards. The spot where the weapon type appears (Weapon,
+   *    Legs, etc) has an empty line below it. Properties are listed below (4-8 damage, 20.4 health,
+   *    3.4 damage) this should go away. Make it so you can hover over the items on this screen to
+   *    see their actual tooltip (with compare tool)."
+   *
+   * The property list was three lines of a summary the game already writes properly somewhere else:
+   * `hud.itemCard` is the full card — every affix spelled out, the set progress, the level
+   * requirement, the lore, and the standing comparison against what you are wearing with Shift to
+   * compare against the other hand. The reward popup had a cut-down version of it squeezed into
+   * 132 pixels and truncated to three lines with ellipses.
+   *
+   * `shared/rewards.js` has carried the hook for this since R16 (`it.tipRender` sets
+   * `dataset.tipRender`) and nothing ever used it — and it could not have worked if it had, because
+   * it wrote `dataset.itemId` while Farhold's renderer reads `dataset.tipItem`. Both halves are
+   * joined now, through `hud.tipFor`, which is the same function every other item in the game is
+   * registered with. So the popup's hover card is not a second implementation to keep in step; it
+   * IS the item card.
+   *
+   * The one line kept is the verdict. It is not a property — it is the decision — and a chooser
+   * that makes you hover all three cards to find out which is better is a worse popup, not a
+   * cleaner one.
+   */
+  function rewardItem(item) {
+    const slot = item.type === 'weapon' ? 'weapon' : item.slot === 'ring1' ? 'ring' : item.slot;
+    const worn = player.equipment?.[slot];
+    const delta = worn ? itemScore(item) - itemScore(worn) : null;
+    const verdict = delta == null ? 'nothing in that slot yet'
+      : delta > 0 ? `+${delta} over your ${worn.name}`
+      : delta < 0 ? `worse than your ${worn.name}`
+      : `no better than your ${worn.name}`;
+    // registers the item with the HUD's tooltip book and hands back the key it filed it under
+    const probe = hud.tipFor({ dataset: {} }, item);
+    return {
+      name: displayName(item), rarity: item.rarity, unique: !!item.isUnique, set: !!item.setId,
+      slot: item.type === 'weapon' ? 'Weapon' : (SLOT_LABELS[slot] || item.slot || ''),
+      note: verdict,
+      tipRender: probe.dataset.tipRender,
+      tipItem: probe.dataset.tipItem,
+      tipClass: 'tip-item',
+    };
+  }
+
+  /**
+   * ================================================================ R16 — PAYING A JOB OUT
+   *
+   *   "Let's have some quests give money and xp, some give item reward via loot crate popup, others
+   *    give materials (especially if the quest was triggered by building or town growth), or a
+   *    fourth option where the quest giver asks what type of reward you want and you get to pick."
+   *
+   * There used to be THREE places that paid a quest — the talk screen, the board sweep and the
+   * meteor crate — and every one of them could add gold and experience and nothing else. So a job
+   * could not pay an item even in principle, and `reward.extras`, which the job generator has been
+   * building out of `data/job-frames.json` since the day it was written, was read by nobody: four
+   * frames promised a perk point, an opened dungeon, a revealed zone and a branded weapon and paid
+   * none of them.
+   *
+   * `js/questrewards.js` is the one function that pays a job now, whatever kind it is, and this is
+   * the only place that hands it the game to touch.
+   */
+  function questRewardCtx() {
+    return {
+      level: player.level,
+      rng: rpg.rng,
+      addGold: g => { player.gold += g; },
+      gainXp: x => rpg.gainXp(player, x),
+      addItem: it => { player.bag.push(it); campaign.onLoot(it); },
+      addMaterials: bag => craft.materials.addAll(bag),
+      rollDrop: ({ level, floor = null, rarityBoost = 1, chance = 1 }) => rpg.rollDrop({
+        level, rng: rpg.rng, magicFind: player.derived?.magicFind || 0, chance, rarityBoost, floor,
+      }),
+      showCrate: spec => rewards({
+        title: spec.title, subtitle: spec.subtitle, button: 'Take it',
+        gold: spec.gold, xp: spec.xp,
+        items: (spec.items || []).map(rewardItem),
+        extras: [
+          ...Object.entries(spec.mats || {}).map(([k, n]) => ({ kind: 'quest', text: `${matAmount(n)} ${craft.M[k]?.name || k}` })),
+          ...(spec.extras || []).filter(x => x.text).map(x => ({ kind: 'memory', text: x.text })),
+        ],
+      }),
+      /**
+       * The chooser is the same popup, with `choose` turned on (shared/rewards.js, opt-in and
+       * default-off, so Emberveil's loot popup is untouched). Three item cards with their real stat
+       * lines, or three plain cards for "what would you rather have" — one screen either way.
+       */
+      choose: async ask => {
+        const cards = (ask.options || []).map(o => (o.item
+          ? rewardItem(o.item)
+          : { name: o.name, icon: o.icon, slot: '', rarity: 'normal', lines: o.lines || [] }));
+        const at = await rewards({
+          title: ask.title, subtitle: ask.subtitle, items: cards,
+          choose: { prompt: 'Pick one' },
+        });
+        return Number.isInteger(at) && at >= 0 ? at : 0;
+      },
+      extras: questExtraHandlers(),
+    };
+  }
+
+  /** The four things a job frame can promise on top of the money. None of these had a reader. */
+  function questExtraHandlers() {
+    return {
+      perk: value => {
+        const n = value === true ? 1 : Math.max(1, Math.round(value));
+        player.bonusPerks = (player.bonusPerks || 0) + n;
+        hud.log(n === 1 ? 'A perk point, for the trouble.' : `${n} perk points, for the trouble.`, 'level');
+        return n === 1 ? 'a perk point' : `${n} perk points`;
+      },
+      opens: () => {
+        hud.log('The mouth is open. Something is down there.', 'loot');
+        return 'a way down is open';
+      },
+      reveals: (_value, quest) => {
+        const id = Number.isFinite(quest?.zoneId) ? quest.zoneId : hud.here?.id;
+        if (id == null) return '';
+        map.revealZone?.(id);
+        const name = zones.byId?.(id)?.name || 'The country around you';
+        hud.log(`${name} goes on your chart.`, 'good');
+        return `${name} goes on the chart`;
+      },
+      /**
+       * "{smith.name} will brand your weapon, but the fire has to come from somewhere." So the smith
+       * does the work: the cost is credited and then spent, which is the bench's own rule about
+       * where a brand comes from rather than a second way of branding that skips it. A weapon that
+       * cannot take one (too plain, already branded, or you are unarmed) pays in the components
+       * instead — never in nothing.
+       */
+      brand: (_value, quest) => {
+        const weapon = player.equipment?.weapon;
+        const beast = bestiary.enemies.find(d => d.id === quest?.bindings?.beast);
+        const element = beast?.element || 'fire';
+        const id = (element === 'ice' || element === 'frost') ? 'brand_ice'
+          : (element === 'shadow' || element === 'void') ? 'brand_void'
+          : 'brand_fire';
+        const quote = weapon ? craft.quote(id, weapon, { player }) : { ok: false };
+        if (!quote.ok) {
+          craft.materials.addAll({ essence: 6, dust: 3 });
+          hud.log('Your weapon will not take a brand, so the smith pays you in what one costs.', '');
+          return 'the makings of a brand';
+        }
+        craft.materials.addAll(quote.cost);
+        craft.apply(id, weapon, { player });
+        applyGearLook();
+        hud.setPlayer(player);
+        hud.log(`${weapon.name} carries a brand now.`, 'loot');
+        return `${weapon.name} is branded`;
+      },
+    };
+  }
+
+  /**
+   * Hand one job in. The ONE path — the talk screen, the board sweep, the meteor crate and the
+   * journal's own button all come through here, so there is one place where a job is paid, one
+   * place where the log is updated and one line in the log however it finished.
+   */
+  async function grantQuest(quest, { npc = null } = {}) {
+    if (!quest || quest.turnedIn) return null;
+    const paid = await grantReward(quest, questRewardCtx());
+    if (paid.already) return null;
+    questLog.turnIn(quest);
+    markers.syncQuests(questLog.active);
+    // a board job has nobody behind it; everything else earns its giver's settlement some regard,
+    // and `giverNodeId` is recorded when the job is taken so handing it in from the journal three
+    // zones away earns exactly the same as walking back would have
+    if (!quest.frame) campaign.onQuestDone(quest, npc?.node?.id ?? quest.giverNodeId ?? null);
+    /**
+     * R17 — and it is worth a research point.
+     *
+     * Here rather than at the three places a quest can be handed in, because `grantQuest` is
+     * already the one payer for every path (round 16) and a second bookkeeper would drift from it.
+     * A campaign objective is worth two; `data/research.json` owns which is which, so this only
+     * has to say what happened.
+     */
+    sharedResearch().award(quest.storyId || quest.campaign ? 'story' : 'quest', 1);
+    const bits = [
+      paid.gold ? `${paid.gold} gold` : null,
+      paid.xp ? `${paid.xp} xp` : null,
+      ...paid.items.map(it => it.name),
+      ...Object.entries(paid.mats).map(([k, n]) => `${matAmount(n)} ${craft.M[k]?.name || k}`),
+      ...paid.extras.map(x => x.text).filter(Boolean),
+    ].filter(Boolean);
+    hud.log(`${quest.title} — done.${bits.length ? ` ${bits.join(', ')}.` : ''}`, 'good');
+    sound.questDone();
+    if (paid.levels) hud.log(`Level ${player.level}!`, 'level');
+    // this project's recurring bug, caught out loud rather than silently: a promised reward with
+    // nothing on the other end of it
+    if (paid.unhandled.length) console.warn('quest reward promises nothing can grant:', paid.unhandled);
+    if (quest.frame) {
+      const out = jobs.complete(quest);
+      if (out.rumour) {
+        rumours.add(out.rumour, { zone: zones.byId(quest.zoneId), from: 'word going round' });
+        hud.log(out.rumour + '.', '');
+      }
+      if (out.flipped) hud.log(`${quest.zoneName} belongs to ${intro.nameFor(out.flipped.to)} now.`, 'level');
+    }
+    hud.setPlayer(player);
+    hud.railBadges?.();
+    autoSave();
+    return paid;
+  }
+
+  /**
+   * R16 — `goldFind` WAS DEAD DATA, AND IT HAD BEEN FOR THE WHOLE GAME.
+   *
+   * It is declared in `rpg.derive`, granted by an affix, granted by a perk node (`wild`'s "+12%
+   * gold"), rounded, and printed on the character sheet as "Gold find +35%" — and not one of the
+   * eleven `player.gold += …` lines in this file multiplied by it. Every one of those was a
+   * promise the game did not keep, on the stat a player checks most carefully.
+   *
+   * Found gold only. Selling a sword at a shop and collecting a caravan's takings are EARNINGS,
+   * and an affix that says "you find more gold" has no business inflating a sale price.
+   */
+  function foundGold(amount) {
+    const mul = 1 + (player.derived?.goldFind || 0) / 100;
+    return Math.max(0, Math.round(amount * mul));
+  }
+
+  /** Hand the player a haul: items to the bag, gold to the purse, materials to the materials bag. */
+  function takeHaul({ items = [], gold = 0, mats = {} } = {}) {
+    for (const it of items) { player.bag.push(it); campaign.onLoot(it); }
+    player.gold += foundGold(gold);
+    craft.materials.addAll(mats);
+    for (const it of items) for (const q of questLog.onLoot({ baseKey: it.baseKey })) {
+      hud.log(`${q.title}: ${questLog.progressText(q)}`, q.done ? 'good' : '');
+    }
+    hud.setPlayer(player);
+  }
+
+  /**
+   * Kills near a hostile camp put it down.
+   *
+   * This is the one repeatable action the whole territory layer hangs off: small, obvious, and enough
+   * of them change who holds the ground. Four kills inside a camp's own footprint clears it — the
+   * camp's grip on the zone falls, its rival's claim rises, and the people who owned it notice.
+   */
+  const siteKills = new Map();
+  function creditKill(x, z) {
+    const here = zones.at(x, z);
+    if (!here) return;
+    for (const site of holdings.sitesIn(here.id, { hostileOnly: true })) {
+      const reach = 60 + (site.size || 1) * 25;
+      if (Math.hypot(site.x - x, site.z - z) > reach) continue;
+      const need = 3 + (site.size || 1);
+      const n = (siteKills.get(site.id) || 0) + 1;
+      siteKills.set(site.id, n);
+      if (n < need) { hud.log(`${site.name}: ${n} of ${need}.`); return; }
+      siteKills.delete(site.id);
+      const out = holdings.clearSite(here.id, site.id);
+      if (!out) return;
+      hud.log(`${site.name} is cleared.`, 'good');
+      sound.questDone();
+
+      /**
+       * …AND WHOEVER WAS BEING HELD IN IT WALKS OUT.
+       *
+       * They stop being captives, they say something worth hearing, and the standing moves — a
+       * faction remembers people you got out far longer than it remembers a cleared camp. Without
+       * this, freeing prisoners was a line of data that only the zone record ever saw.
+       */
+      /**
+       * AND THE REST OF THE STRONGHOLD'S `gives`, WHICH NOBODY READ EITHER.
+       *
+       * `data/strongholds.json` pays out in xp, loot, standing, perk points, an opened dungeon, a
+       * revealed zone and a lifted siege. `territory.clearSite` moves the grip and the claim — that
+       * part worked — and every one of these went straight in the bin, so the difference between
+       * clearing a bandit camp and taking a Stonecount keep was two lines in the log.
+       */
+      const near = sites.nearest?.(site.x, site.z, 40) || null;
+      const pays = site.gives || site.spec?.gives || near?.gives || near?.spec?.gives || {};
+      if (pays.xp) {
+        const paid = eventXp(pays.xp, { zoneLevel: zoneLevelAt(site.x, site.z), kind: 'event', cfg: xpCfg });
+        const levels = rpg.gainXp(player, paid);
+        hud.log(`${paid} experience for taking ${site.name}.`, 'level');
+        if (levels > 0) { hud.log(`Level ${player.level}.`, 'level'); }
+      }
+      if (pays.loot) {
+        // a guaranteed grade, dropped where the boss fell rather than into the bag, so it is found
+        chests.place(pays.loot === 'legendary' ? 'gilded' : 'iron', site.x + 2, site.z + 2,
+          { level: player.level, floor: pays.loot, name: `${site.name}: the spoils` });
+        hud.log(`Something ${pays.loot} is in there.`, 'loot');
+      }
+      if (pays.perkPoint) {
+        player.bonusPerks = (player.bonusPerks || 0) + pays.perkPoint;
+        hud.log(`A perk point for taking ${site.name}.`, 'level');
+      }
+      if (pays.standing) standings.deed(pays.standing, 'stronghold_taken');
+      if (pays.revealZone) { map.revealZone?.(here.id); hud.log(`${here.name} goes on your chart.`, 'good'); }
+      if (pays.opensDungeon) hud.log('Behind the keep, a stair goes down. It was not there before.', 'loot');
+      if (pays.liftsSiege) {
+        holdings.press?.(here.id, 0.18, { claim: 0.1 });
+        hud.log(`The siege on ${here.name} lifts.`, 'level');
+      }
+
+      rumours.add(`${site.name} in ${here.name} has been cleared out`, { zone: here, from: 'you, mostly' });
+      autoSave();
+      return;
+    }
+  }
+
+  /** What happens when something dies. Named, because the enemy field is rebuilt on every world. */
+  function onEnemyKilled(e) {
+    player.kills++;
+    freePrisonersOf(e);
+    // §7 — a raider going down is progress through the wave, and the last one ends the raid
+    if (e.raider) {
+      const out = defence.killed();
+      if (out?.raidDone && out.prize?.crate) {
+        chests.place(out.prize.crate, control.x + 3, control.z + 3, { level: player.level });
+        sound.questDone();
+      } else if (out?.cleared && !out.raidDone) {
+        defence.spawnWave({ level: player.level });
+      }
+    }
+    if (!dungeon) creditKill(e.x ?? control.x, e.z ?? control.z);
+    sound.combat('death', { beast: e.kind !== 'humanoid' });
+    /**
+     * R17 — a boss is worth researching. A world boss is its own tier (`data/worldbosses.json`
+     * marks them, and js/sites.js carries the family through onto the body), so it pays more.
+     */
+    if (e.rank === 'boss' || e.worldBoss || e.family === 'worldboss') {
+      sharedResearch().award(e.worldBoss || e.family === 'worldboss' ? 'worldboss' : 'boss', 1);
+    }
+    const settled = campaign.onKill(e.defId);
+    if (settled === 'nemesis') {
+      hud.log('The grudge is settled.', 'level');
+      sound.questDone();
+      /**
+       * R18 — and somebody is pleased about it. `deeds.nemesis_killed` is declared in
+       * data/factions.json, is DISPLAYED to the player on the standings screen as though it were
+       * the rules (js/main.js:1433), and was credited by nobody — so killing the thing that has
+       * been hunting you moved no standing anywhere. Credited to whoever holds the ground it died
+       * on, which is the faction that had to live with it.
+       */
+      const holder = holdings?.of?.(hud.here?.id)?.holder;
+      if (holder) standings.deed(holder, 'nemesis_killed');
+    }
+    const back = rpg.onKillRestore(player);
+    if (back.hp || back.mp) hud.log(`The kill returns ${[back.hp && `${back.hp} health`, back.mp && `${back.mp} mana`].filter(Boolean).join(' and ')}.`);
+
+    // every on-kill affix and legendary power gets its turn
+    const post = rpg.fx.onKill({ self: player, target: e, applyStatus: (t, type, spec) => applyStatus(t, type, spec) });
+    if (post.heal) player.hp = Math.min(player.maxHp, player.hp + post.heal);
+    if (post.petHeal) pets.heal(post.petHeal);
+    if (post.gold) player.gold += foundGold(post.gold);
+    if (post.cooldownCut) skills.refresh(post.cooldownCut);
+    if (post.rally) applyStatus(player, 'rally', skillData.statuses.rally, 1);
+    if (post.breath) {
+      for (const other of field.near(e.x, e.z, post.breath.radius, e)) {
+        field.strikeArea(other.x, other.z, 1.5, player, { element: post.breath.element, power: 0.6 });
+        applyStatus(other, post.breath.status, skillData.statuses[post.breath.status], 6);
+      }
+      spellfx.impact({ at: new THREE.Vector3(e.x, e.y + 1, e.z), element: 'fire' });
+    }
+    if (post.spreadStatuses && e.statuses) {
+      for (const other of field.near(e.x, e.z, post.spreadStatuses, e)) {
+        for (const [type, st] of Object.entries(e.statuses)) applyStatus(other, type, skillData.statuses[type], st.power);
+      }
+    }
+    // R23 — Rot passes on to whatever stood near, and Gorewind's Siphon starts mending you
+    uniquesAfterKill(uniqueEnv, post, e);
+
+    /**
+     * R22 — a kill is worth a fifth of what it was, and nothing at all five levels below you.
+     * `killXpFor` is the whole rule; see the note on it in js/rpg.js. The log prints what you were
+     * actually paid rather than the enemy's sticker price, because "+58 xp" on a fight that gave you
+     * none is the kind of line that makes a player think the save is broken.
+     */
+    const award = rpg.killXpFor(player, e, xpCfg);
+    const levels = rpg.gainXp(player, award);
+    const coin = foundGold(e.gold);
+    player.gold += coin;
+    hud.log(award > 0
+      ? `${e.name} falls. +${award} xp, +${coin} gold.`
+      : `${e.name} falls. Too far beneath you to learn from. +${coin} gold.`,
+    e.rank && e.rank !== 'normal' ? 'loot' : 'good', 'reward');
+    if (levels) {
+      /**
+       * NAME THE CURRENCY THE GAME ACTUALLY PAYS IN.
+       *
+       * This said "3 points to spend (press I)" at every level — `balance.progression.attrPerLevel`
+       * is still 3 — but attributes stopped being bought a point at a time in round 7 and
+       * `player.pendingAttr` is never incremented by anything, so pressing I showed four dead `+`
+       * buttons and "no points to spend". A level buys a PERK now, and sometimes a talent.
+       */
+      const gained = pointsFor(player.level) - pointsFor(player.level - levels);
+      /**
+       * R20 — AND SAY WHEN A SPELL SLOT HAS OPENED.
+       *
+       * The whole point of moving five of the six picks out of the character creator is that they
+       * arrive while you are playing, and a slot that opens in silence is a slot nobody finds. The
+       * Skills tab carries a badge and the bar draws the empty slot in green, but the level-up
+       * line is what the player is actually looking at in the moment it happens.
+       */
+      const owed = spellsOwed();
+      const bits = [gained ? `${gained} perk point${gained === 1 ? '' : 's'}` : null,
+        owed ? `${owed} spell${owed === 1 ? '' : 's'} to choose` : null,
+        player.pendingTalent ? `${player.pendingTalent} talent` : null].filter(Boolean);
+      hud.log(`Level ${player.level}!${bits.length ? ` ${bits.join(', ')} — press I.` : ''}`, 'level');
+      sound.levelUp();
+    }
+
+    // the body itself is worth something — hide, bone, plate, and the rare components
+    const mats = craft.harvest(e);
+    // an extra roll from the `forage_feast` legendary
+    if (rpg.fx.sum(player, 'scavenge') > 0 && field.rng() < rpg.fx.sum(player, 'scavenge')) craft.materials.add('scrap', 2);
+
+    const drops = rpg.rollDrops(e, { rng: field.rng, magicFind: player.derived.magicFind });
+    if (rpg.fx.sum(player, 'extraDrop') > 0 && field.rng() < rpg.fx.sum(player, 'extraDrop')) {
+      const bonus = rpg.rollDrop({ level: e.level, rng: field.rng, magicFind: player.derived.magicFind, bases: e.dropBases, chance: 1 });
+      if (bonus) drops.push(bonus);
+    }
+
+    /**
+     * A boss or a rare leaves a BAG rather than pushing five things silently into the inventory.
+     * Walking over to pick it up is the beat that makes the kill feel finished.
+     *
+     * R14 — A GIANT ALWAYS LEAVES ONE.
+     *
+     * "Now we have giant monsters which are useful, but sometimes they don't drop anything
+     * interesting. Make them always drop a loot crate."
+     *
+     * The Giant modifier (data/enemies.json) is three times the size, 1.8x health and 1.5x damage,
+     * but it is only a CHAMPION — one modifier — so it fell into the `else` branch and handed you
+     * whatever the ordinary drop roll produced, which is frequently nothing at all. A fight that
+     * reads as a set piece has to pay like one.
+     *
+     * Two changes, both of them here: a giant counts as bag-worthy, and it does so even when the
+     * rolls came up empty (`|| giant` on the second test), because "always" has to mean always. The
+     * rare floor below then applies to it exactly as it does to a boss, so the bag is never a
+     * walk across a field for two normals.
+     */
+    const giant = !!e.modifiers?.includes('giant');
+    if ((e.rank === 'boss' || e.rank === 'rare' || giant) && (drops.length || Object.keys(mats).length || giant)) {
+      /**
+       * "When receiving a loot crate from a kill, ensure there is always at least a rare item in
+       * it."
+       *
+       * A bag is the reward for a fight you had to work for, and walking across a field to open one
+       * holding two normals is worse than getting nothing. If the rolls did not produce a rare, one
+       * is rolled with `floor: 'rare'` and added — and the beacon over the bag then shows it,
+       * because the beacon reads the best thing inside.
+       */
+      const RANKS = ['normal', 'magic', 'rare', 'legendary'];
+      if (!drops.some(d => RANKS.indexOf(d.rarity) >= 2)) {
+        const promised = rpg.rollDrop({
+          level: e.level, rng: field.rng, magicFind: player.derived.magicFind,
+          bases: e.dropBases, chance: 1, floor: 'rare',
+        });
+        if (promised) drops.push(promised);
+      }
+      chests.dropBag(e.x, e.z, {
+        items: drops, gold: Math.round(e.gold * 0.5), mats: {},
+        title: e.rank === 'boss' ? e.name + ' falls'
+          : giant && e.rank !== 'rare' ? 'The big one goes down'
+            : 'A rare kill',
+        subtitle: e.rank === 'boss' ? 'Everything it was hoarding is yours.'
+          : giant && e.rank !== 'rare' ? `Something that size does not travel light.`
+            : `${e.name} was carrying something.`,
+      });
+      hud.log('It dropped a bag. Walk over it.', 'loot');
+    } else {
+      for (const drop of drops) {
+        player.bag.push(drop);
+        hud.log(`${e.name} dropped ${drop.name}.`, 'loot');
+        sound.loot(drop);
+        campaign.onLoot(drop);
+        for (const q of questLog.onLoot({ baseKey: drop.baseKey })) hud.log(`${q.title}: ${questLog.progressText(q)}`, q.done ? 'good' : '');
+      }
+    }
+    for (const q of questLog.onKill({ defId: e.defId })) hud.log(`${q.title}: ${questLog.progressText(q)}`, q.done ? 'good' : '');
+    if (e === bossUnit) { bossUnit = null; hud.boss(null); if (dungeon) onDungeonBossDown(); }
+    hud.setPlayer(player);
+    autoSave();
+  }
+
+  function makeField(forTerrain = terrain, forZones = zones) {
+    const made = new EnemyField({
+      // C8: a Fiery enemy is visibly on fire because the field hands the modifier one of spellfx's
+      // existing looping auras. Without this the modifier still works and still wears its coloured
+      // ring — it just does not burn.
+      spellfx,
+      scene, terrain: forTerrain, rpg, defs: bestiary.enemies,
+      bosses: bestiary.bosses || [], modifiers: bestiary.modifiers || [],
+      zones: forZones, balance: { ...balance, seed },
+      onLog: (t, c) => hud.log(t, c),
+      onKill: onEnemyKilled,
+      // a rare gets a real name, in the language of the region it turned up in
+      nameRare,
+    });
+    /**
+     * R22 — THE COMPANIONS THIS FIELD CAN BE MADE TO LOOK AT.
+     *
+     * A callback, not a list, for two reasons. The roster changes inside a fight, so a copy handed
+     * over once would go stale. And `makeField()` is first called ABOVE `const pets`, so naming
+     * `pets` directly here would be the fifth temporal-dead-zone crash this project has shipped —
+     * except that a closure is only a problem when it is CALLED early, and the first thing to call
+     * this is an enemy's own tick, hundreds of lines and one frame later. `?.` covers the rebuild
+     * path (js/main.js re-makes the field on landing) for the same reason.
+     */
+    made.setCompanions(() => pets?.pets || null);
+    return made;
+  }
+  /**
+   * A rare or a stronghold's boss gets a real name, in the language of the region it turned up in.
+   *
+   * Declared out here rather than inline in `makeField`'s options because two callers need it: the
+   * enemy field, and `sites.populate` when it names a camp's boss. It was an object property, and
+   * the stronghold wiring called it as a bare identifier — "nameRare is not defined", thrown on
+   * walking into the first camp.
+   */
+  function nameRare(def, rng = Math.random) {
+    /**
+     * R16 — `rng` DEFAULTS NOW, because one of the two callers never passed one.
+     *
+     * `atLandmark`'s `gives.namesFoe` branch calls `nameRare(def)` with one argument, and the line
+     * below is `rng() * 1e9` — so it threw "rng is not a function" and took the frame with it. It
+     * had never been seen because that branch was unreachable: a set-piece landmark could not pay
+     * out at all until the id join earlier this round, so the only landmark in the game that names
+     * a foe had never once reached this line.
+     */
+    if (!namegen) return null;
+    const race = zones.at(control.x, control.z)?.race || 'human';
+    return namegen.generate('person.full', { race, seed: Math.floor(rng() * 1e9) })?.text?.split(' ')[0] || null;
+  }
+
+  let field = makeField();
+  // whatever stops the player stops an enemy too
+  field.solids = [props.solids, features.solids, buildSolids, gateSolids, siteSolids];
+
+  // ---------------------------------------------------------------- companions
+  const pets = createPets({
+    scene, terrain, rpg, defs: bestiary.pets || [], balance: { ...balance, seed },
+    field, statuses: skillData.statuses,
+  });
+  /**
+   * R17 — THE FOLLOWER BOOK, and it goes in BEFORE the class companion is summoned.
+   *
+   * It installs the limit on `pets.summon` (`pets.setGate`) and registers the ten hireable types,
+   * so every door into the pet system — a summoning skill, a hire, the class companion below —
+   * asks the same question. Built here rather than later because the class companion is the first
+   * thing through that door.
+   */
+  const followers = createFollowers({
+    data: mercData, skillData, pets,
+    getPlayer: () => player,
+    // where a new body is PUT DOWN: the player's position lives on `control`, not on `player`
+    getAt: () => control,
+    log: (t, k) => hud.log(t, k),
+  });
+
+  if (classDef.pet) {
+    /**
+     * R17 — the perk no longer adds to this. The Kept Company grants `followerSlots` now, which is
+     * a limit on how many things may walk with you rather than a number added to a summon; the
+     * follower book above enforces it at `pets.summon`. See js/perks.js and js/skills.js.
+     */
+    const pet = { ...classDef.pet };
+    pets.summonForClass(classId, player, pet).then(made => {
+      if (made.length) hud.log(`${player.name} ${pet.verb || 'calls'} ${made.length === 1 ? made[0].name : made.length + ' companions'}.`, 'good');
+    });
+  }
+
+  // ---------------------------------------------------------------- treasure
+  let chests = createChests(scene, terrain, { seed, balance, zones, rpg, collide: props.solids });
+  /**
+   * R16 — the mouths, declared here and FILLED once js/sites.js has decided where its instances
+   * are. `gates` is built before `sites` and moving either one is a pile of ordering risk for no
+   * gain, so `openMouths` is the one line that joins them, called right after `sites` exists and
+   * again whenever the world is rebuilt.
+   */
+  let gates = createGates(scene, terrain, { balance, zones, radius: balance.features?.radius ?? 2600, collide: gateSolids });
+  /**
+   * R16 — SOMEBODY TELLS YOU WHERE A PLACE IS.
+   *
+   *   "Have one be a dragons lair, which can both be discovered randomly or through a quest from
+   *    someone in town or elsewhere."
+   *
+   * Four of the twenty instanced places carry `discovery: "quest"` and are never scattered on the
+   * map — they are somewhere you are SENT. `revealInstance` is the sending: it puts the mouth on
+   * the ground near you, opens the door, files a marker so you can find it again, and hands back
+   * the site so the caller can point a job at it. Without this those four would be four entries in
+   * a JSON file that nothing reads, which is the fault this whole round keeps turning up.
+   */
+  function revealInstance(id, near = null) {
+    const site = sites.placeInstance?.(id, near || { x: control.x, z: control.z });
+    if (!site) return null;
+    openMouths();
+    markers.save?.({
+      cellX: Math.floor(site.x / terrain.metresPerCell),
+      cellY: Math.floor(site.z / terrain.metresPerCell),
+      name: site.name, note: site.blurb || '',
+      from: { type: 'instance', id: site.type, label: site.name },
+    });
+    hud.log(`${site.name} is on your chart. ${site.blurb || ''}`, 'level');
+    autoSave();
+    return site;
+  }
+
+  /**
+   * The instanced places a settlement could tell you about: quest-only ones that suit this zone's
+   * band and are not already standing somewhere. Cached per town so the offer does not reshuffle
+   * every time the Town Hall redraws.
+   */
+  function hallLeads(zone) {
+    const band = zone?.band ?? 1;
+    const standing = new Set((sites.sites || []).filter(s => s.family === 'instance').map(s => s.type));
+    return (sites.instanceKinds?.() || []).filter(i =>
+      (i.discovery === 'quest' || i.discovery === 'both')
+      && !standing.has(i.id)
+      && (i.minBand ?? 0) <= band
+      && (i.maxBand == null || band <= i.maxBand));
+  }
+
+  function openMouths() {
+    const extra = sites?.mouths?.() || [];
+    if (!extra.length) return;
+    gates.dispose();
+    gates = createGates(scene, terrain, {
+      balance, zones, radius: balance.features?.radius ?? 2600, collide: gateSolids, extra,
+    });
+    gates.update?.(control.x, control.z, true);
+  }
+  // set-piece encounters on the road: warbands, ambushes, swarms, a rare with an escort
+  /**
+   * R14 — ONE CHOKE POINT FOR EVERYTHING THE WORLD SAYS TO ITSELF.
+   *
+   *   "There are events that happen very frequently in the chat like 'something out there has your
+   *    measure and …'. They happen too often."
+   *
+   * Seven places called `hud.log` with an ambient line and none of them knew about the other six.
+   * `js/ambient.js` is the budget they all draw on: two lines a minute, never the same sentence
+   * twice in a run, nothing at all during a fight or underground, and a line whose `{tokens}` cannot
+   * be filled is refused rather than printed as "undefined".
+   */
+  const ambient = createAmbient({ now: () => state.elapsed });
+
+  /**
+   * The one router. A line with no ambient tag is a consequence of something the player did — a
+   * win, a fail, a level, a loot — and goes straight through untouched. A tagged one has to be
+   * afforded.
+   */
+  function sayAmbient(text, tone, meta) {
+    if (!meta) { hud.log(text, tone); return true; }
+    const line = ambient.offer({ ...meta, text, tone, zoneId: hud.here?.id ?? null });
+    if (!line) return false;
+    hud.log(line.text, line.tone);
+    return true;
+  }
+
+  let encounters = createEncounters({
+    field, zones, terrain, balance, data: encounterData,
+    onLog: (t, c, meta) => sayAmbient(t, c, meta),
+    isNight: () => sky.isNight,
+  });
+
+  // camps with a fire in them, and the lairs the world bosses keep
+  let sites = createSites(scene, terrain, { seed, balance, zones, collide: siteSolids, radius: balance.features?.radius ?? 2600 });
+  /**
+   * A set piece near a stronghold is that stronghold's people.
+   *
+   * Inert until this is called: a warband rolled within a few hundred metres of a fort now draws
+   * from THAT garrison and says where it came from, instead of being whatever the biome happens to
+   * hold. It is the difference between a random fight and a patrol.
+   */
+  encounters.setSites?.(sites);
+  // …and every instanced place on this planet becomes a door you can press E at
+  openMouths();
+
+  // sites.js and encounters.js both put chests down now — a boss hoard, a landmark cache, the bait
+  // in a trap. They find the field through a registry when nobody hands it over; this is the front
+  // door, and it means the registry is a fallback rather than the only route.
+  encounters.setChests?.(chests);
+  /**
+   * R16 — AN EVENT GETS TO PUT THINGS ON THE GROUND, AND PEOPLE IN THEM.
+   *
+   *   "I also found a marker that reads 'Somebody in a cage' but there was no person to speak
+   *    about, nothing to interact with. Just a dead pointer to nothing."
+   *
+   * js/encounters.js was written to own no meshes, which is a fine rule for a module that decides
+   * WHAT happens and a terrible one for a module whose events are called "Somebody in a cage".
+   * `eventProps` builds the cage, the fire and the palisade out of the same geometry js/sites.js
+   * uses; `setFolk` lets it stand a real person inside one, who talks like any other NPC because
+   * they ARE any other NPC. Both are handed in, so the module still loads in a node test.
+   */
+  const eventProps = createEventProps(scene, terrain);
+  encounters.setProps?.(eventProps);
+  encounters.setFolk?.(opts => folk.spawnOne(opts), id => folk.depopulate?.(id));
+
+  /**
+   * ================= THE BUILDING EXPANSION =================
+   *
+   * BUILDING_EXPANSION.md, wired. The order matters and it is the order of the doc: stores hold
+   * things, the grid powers the things that move them, the works turn ore into parts, the board
+   * turns effort into progress, the colony supplies the effort, and `build` is the hand that puts
+   * any of it on the ground.
+   */
+  // `materials` is resources.json's `materials` BLOCK, not the whole file — see the note at the
+  // top of createStoreNetwork for what handing it the file silently switched off (R18).
+  const stores = createStoreNetwork({ power: powerData || {}, materials: resourceData?.materials || {} });
+  // …and the bench above can reach it from here on (R19: it never could before)
+  storeNet = stores;
+  const grid = createGrid({ power: powerData || {}, stores, log: (t, c) => hud.log(t, c) });
+  /**
+   * The pools and the grid come back BEFORE build.load runs.
+   *
+   * `build.load` walks every piece and rejoins it to both, and `stores.add`/`grid.add` on an id
+   * that is already there replaces it — so loading the contents first and the buildings second
+   * keeps the coal in the crate rather than handing back an empty one of the same name.
+   */
+  if (save?.stores) stores.load(save.stores);
+  if (save?.grid) grid.load(save.grid);
+  const works = createWorks({
+    refining: refiningData || {}, resources: resourceData || {},
+    stores, grid, log: (t, c) => hud.log(t, c),
+    rareElement: planet?.rare?.[0] || null,
+    /**
+     * THE CIVILIZATION EXPANSION §3 — AND THIS ONE ARGUMENT IS THE WHOLE SWITCH.
+     *
+     *   "The goal being that you can have ore sent to a town and have an NPC run the furnace to
+     *    smelt it automatically, consuming work."
+     *
+     * With it, a tended machine refuses to run unless somebody has put work units into it: one unit
+     * is thirty seconds of running time, so one bound smelter is worth about one furnace. Without
+     * it js/refine.js behaves exactly as it always has, which is why the balance harness and the
+     * node tests still drive the module they have always driven.
+     */
+    labour: colonyData?.labour || null,
+  });
+  /**
+   * The benches, their queues, and which recipes you have unlocked by doing them.
+   *
+   * Loaded BEFORE `build.load` puts the pieces back, so `joinSystems` finds each machine already
+   * registered and leaves it alone rather than replacing a half-smelted batch with a fresh one.
+   */
+  if (save?.works) works.load(save.works);
+  /**
+   * ORE IN THE GROUND, ACROSS THE WHOLE WORLD.
+   *
+   * This was `createNodeField({ data, seed, terrain })` — a function that takes none of those three
+   * — so every seam in the game was scattered inside a 300 m circle around the ORIGIN, about
+   * twenty-nine kilometres from where the player lands. Nobody could ever have found one.
+   * `createNodeWorld` generates a 512 m tile at a time from the world seed folded with the tile's
+   * own coordinates, so a seam stays where you left it without any of them being saved.
+   */
+  let ore = createNodeWorld({
+    data: resourceData || {}, seed, terrain, planet,
+    band: planet?.band || 'medium',
+  });
+  if (save?.ore) ore.load(save.ore);
+  // R18 — and the research tree, which nothing had ever loaded. Before `build`/`build-ui` read it,
+  // so a reloaded base's tech gates are right the first time they are asked.
+  if (save?.research) sharedResearch().load(save.research);
+  if (save?.props) props.loadHarvest(save.props, control?.x ?? 0, control?.z ?? 0);
+  /**
+   * THE SEAMS ON THIS FLOOR, when you are underground.
+   *
+   * The Deep Vein's own description is "underground, and something is usually standing in front of
+   * it" and its data has said `indoors: true` since it landed — but nothing read that flag, so deep
+   * veins scattered across open grassland. They are hardness 2, their heaviest resource weight is
+   * iron ore, and the only hand tool that clears hardness 2 is a steel weapon you cannot have yet:
+   * "I found iron ore but it says I need a steel tool. How do I get steel if I can't mine iron?"
+   *
+   * So the surface scatter no longer offers them (js/resources.js `kindsForBiome`) and a dungeon
+   * floor does. `oreHere()` is the one question — what is in the ground where I am standing — and
+   * every screen asks it rather than reaching for whichever list it happens to know about.
+   */
+  let dungeonOre = null;
+  const oreHere = () => dungeonOre || ore;
+
+  /**
+   * R16: the Command Rod, filled in below once the holding exists. Declared here because the frame
+   * tick reaches for it — `commandRod?.use?.()` protects against a null VALUE, not against an
+   * identifier that was never declared, which is a ReferenceError and takes the whole loop down.
+   */
+  let commandRod = null;
+
+  /** Drills, routes, and the sum that says a long route delivers less. */
+  const mining = createMining({
+    data: resourceData || {}, ore, stores, grid, bag: materials,
+    log: (t, c) => hud.log(t, c),
+    // the ground a hauler has to walk over, so a route round a lake costs what it costs
+    terrain,
+  });
+  // (the saved drills are reattached after `build` exists — see below. `build` is a const declared
+  // a hundred lines down, so doing it here would be a crash on any save with a drill in it.)
+  /**
+   * §7 — the raid, which the player STARTS.
+   *
+   * "[the tower defence] might be better as a quest rather than a random event, so the player can
+   * decide when to start on it rather than being a burden." Nothing here fires on its own: the
+   * world offers, the player accepts, and the bell is the player choosing the hour.
+   */
+  const defence = createDefence({
+    getPlayer: () => player,   // R18 — for the purse in `baseOf()`; notoriety.perThousandGold
+    data: raidData || null, bestiary, grid,
+    rng: rpg.rng, log: (t, c) => hud.log(t, c), spellfx,
+    // getters: the enemy field is rebuilt on every landing, and `build` is declared below this
+    getField: () => field,
+    getBuild: () => build,
+    /**
+     * THE NINTH JOIN. `colony.guards()` has counted the citizens standing a watch since the colony
+     * landed, and `defence.baseOf()` hard-coded `citizens: 0` right next to it. Two consequences,
+     * both immediate: four guards and a bolt turret now qualify for a Warband where before you
+     * needed five turrets, and `notoriety.perCitizen` finally gets a real number rather than a
+     * zero, so a village of twelve with a watch is noticed by the world.
+     *
+     * Getters, for the same reason `getField` is one: both are rebuilt on every landing.
+     */
+    getColony: () => colony,
+    getWorks: () => works,
+    getOutposts: () => build?.outposts?.() || null,
+    folk: null,
+  });
+  // the raid you had taken on, and how far through it you were. AFTER `defence` exists: putting
+  // this up with the other loads read a `const` a hundred lines before its declaration, which is
+  // a crash on every save that has a base in it and on no save that does not.
+  if (save?.defence) defence.load(save.defence);
+
+  /**
+   * §1 — THE SCANNER. "A way to find ones nearby."
+   *
+   * The deposits have always been fixed in place: a seam's position is a pure function of the world
+   * seed, so the one you found yesterday is where you left it. What was missing was any way to know
+   * one was there without walking over it, and they are sparse on purpose — about fourteen to a
+   * 512 m tile. Fourteen in a quarter of a square kilometre is a long walk between lucky finds.
+   *
+   * A sweep therefore answers the question a player actually has: WHERE IS THE IRON. One row per
+   * material, the best of each judged by what it would deliver from where you are standing — the
+   * same number js/resources.js compares seams with everywhere else — with a bearing and a pin.
+   */
+  /**
+   * R14 — THE SCANNER, REMEMBERED AND WIDENED.
+   *
+   *   "I previously asked for a scan tool to locate resources. Where is that? Where do you find
+   *    clay? … The scanner tool should let you select a material and scan for it, displaying it
+   *    with a marker in the world for some time and displaying it on the world map as well."
+   *
+   * It existed and nobody could find it: it was a TOOL inside build mode, reachable only by pressing
+   * B, picking Scan, aiming at the ground and clicking, with a default radius of 144 m on a world
+   * that scatters about fourteen seams to a 512 m tile. So it was a sweep you could not find, that
+   * found nothing, of a thing you did not know the name of.
+   *
+   * Three changes: a `want` filter so you can sweep FOR something; a radius measured in hundreds of
+   * metres rather than tens; and `hits`, which is every seam found rather than the single best one
+   * per material — because "show me where the clay is" wants all of them, and the old shape could
+   * only ever answer "here is one".
+   */
+  const scanState = {
+    swept: false, radius: 0, found: 0, rows: [], pinned: new Set(),
+    /** The material id the last sweep was looking for, or null for everything. */
+    want: null,
+    /** Every seam the last sweep turned up, for the beacons and the map layer. */
+    hits: [],
+    /** When the in-world beacons over those hits go out. A sweep is a torch, not a map. */
+    until: 0,
+  };
+  /** How long scan beacons stand in the world, in seconds. */
+  const SCAN_SHOWS_FOR = 150;
+  /** How far a sweep reaches. "for now just a large proximity." */
+  const SCAN_RADIUS = 900;
+  /**
+   * R14 — material id → the node kinds that yield it, the biomes they live in, the tool they want.
+   * Derived from data/resources.json once, so adding a node kind updates every list that reads it.
+   */
+  const materialWhere = materialIndex(resourceData || {});
+  /** A World Forge biome key as a player reads it. BIOMES is indexed by id, so this walks it once. */
+  const biomeWords = (() => {
+    const byKey = new Map();
+    for (const b of Object.values(BIOMES || {})) if (b?.key) byKey.set(b.key, b.name || b.key);
+    return key => byKey.get(key) || String(key).replace(/([A-Z])/g, ' $1').toLowerCase();
+  })();
+
+  const COMPASS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+  function compassTo(dx, dz) {
+    // +z is north in Farhold's world space, the same convention the minimap draws with
+    const a = Math.atan2(dx, dz);
+    return COMPASS[(Math.round(a / (Math.PI / 4)) + 8) % 8];
+  }
+
+  function sweepForDeposits(x, z, radius, { want = null } = {}) {
+    const all = oreHere().near(x, z, radius).filter(n => !n.gone && !n.depleted);
+    // R14: sweeping FOR something is the whole ask — "let you select a material and scan for it"
+    const seams = want ? all.filter(n => n.resource === want) : all;
+    const byResource = new Map();
+    for (const n of seams) {
+      const rep = mining.report(n, control, { tool: toolTierFor(player), stores });
+      const row = byResource.get(n.resource);
+      if (!row || rep.deliveredPerMinute > row.deliveredPerMinute) {
+        byResource.set(n.resource, {
+          id: n.id,
+          x: n.x, z: n.z,
+          resource: n.resource,
+          resourceName: n.resourceName || rep.resourceName,
+          band: (n.band || 'fair').replace(/ /g, '-'),
+          bandName: rep.bandName,
+          workable: rep.workable,
+          why: rep.why,
+          deliveredPerMinute: rep.deliveredPerMinute,
+          distance: Math.hypot(n.x - control.x, n.z - control.z),
+          compass: compassTo(n.x - control.x, n.z - control.z),
+          pinned: scanState.pinned.has(n.id),
+        });
+      }
+    }
+    scanState.swept = true;
+    scanState.radius = radius;
+    scanState.found = seams.length;
+    scanState.want = want;
+    scanState.rows = [...byResource.values()].sort((a, b) => b.deliveredPerMinute - a.deliveredPerMinute || a.distance - b.distance);
+    /**
+     * R14 — EVERY hit, not one per material.
+     *
+     * `rows` keeps the best seam of each kind, which is the right shape for "what is around here".
+     * It is the wrong shape for "show me where the clay is", which is the thing that was asked for:
+     * that wants all of them, on the ground and on the map. `hits` is that list, and the beacons and
+     * the map layer both read it.
+     */
+    scanState.hits = seams
+      .map(n => ({
+        id: n.id, x: n.x, z: n.z, resource: n.resource,
+        name: n.resourceName || resourceData?.materials?.[n.resource]?.name || n.resource,
+        colour: n.colour || resourceData?.materials?.[n.resource]?.colour || '#c08a3e',
+        band: n.band || 'fair',
+        distance: Math.hypot(n.x - control.x, n.z - control.z),
+      }))
+      .sort((a, b) => a.distance - b.distance);
+    scanState.until = state.elapsed + SCAN_SHOWS_FOR;
+
+    sound.ui(seams.length ? 'open' : 'error');
+    const what = want
+      ? (resourceData?.materials?.[want]?.name || want.replace(/_/g, ' ')).toLowerCase()
+      : null;
+    if (seams.length) {
+      const near = scanState.hits[0];
+      hud.log(what
+        ? `Sweep: ${seams.length} ${what} within ${Math.round(radius)} m — nearest ${Math.round(near.distance)} m ${compassTo(near.x - control.x, near.z - control.z)}.`
+        : `Sweep: ${seams.length} deposits within ${Math.round(radius)} m — ${scanState.rows.slice(0, 4).map(r => r.resourceName.toLowerCase()).join(', ')}${scanState.rows.length > 4 ? ` and ${scanState.rows.length - 4} more` : ''}.`,
+      'good');
+      hud.log(`They are lit for ${Math.round(SCAN_SHOWS_FOR / 60)} minutes, and on the map.`, '');
+    } else if (what) {
+      /**
+       * A sweep that finds nothing must say where the thing DOES live, or it is a dead end. This is
+       * the whole of "where do you find clay?" — the game knows, and never said.
+       */
+      const row = materialWhere?.get?.(want);
+      hud.log(`Sweep: no ${what} within ${Math.round(radius)} m.`, 'warn');
+      if (row) hud.log(`${row.name} is found in ${whereToFind(row, { biomeName: biomeWords })}`, '');
+    } else {
+      hud.log(`Sweep: nothing within ${Math.round(radius)} m.`, 'warn');
+    }
+    buildUI.refresh();
+    return { found: seams.length, rows: scanState.rows, hits: scanState.hits };
+  }
+
+  /** Put one scanned deposit on the map and the minimap, through the one marker book. */
+  function pinDeposit(id) {
+    const row = scanState.rows.find(r => r.id === id);
+    if (!row || scanState.pinned.has(id)) return null;
+    const m = markers.add({
+      kind: 'seam',
+      name: `${row.resourceName} — ${row.bandName.toLowerCase()}`,
+      cellX: Math.floor(row.x / M_PER_CELL),
+      cellY: Math.floor(row.z / M_PER_CELL),
+    });
+    scanState.pinned.add(id);
+    row.pinned = true;
+    hud.log(`${row.resourceName} pinned — ${Math.round(row.distance)} m ${row.compass}.`, 'level');
+    return m;
+  }
+
+  /**
+   * Redraw the haul routes. Called when a route is laid, a store is built, or a piece comes down —
+   * never every frame, because the path only moves when one of its ends does.
+   */
+  function drawRoutes() {
+    oreView?.drawRoutes?.(mining.overview(), { heightAt: (x, z) => terrain.heightAt(x, z) });
+  }
+
+  /** The seams, drawn. One InstancedMesh per kind — see js/ore-view.js. */
+  let oreView = createOreView(scene, { data: resourceData || {} });
+
+  /**
+   * R14 — the columns of light over whatever you are being pointed at.
+   *
+   * A pool of six, built once and re-aimed, shared by the Nearby panel and the scanner. It lives on
+   * the scene rather than being rebuilt per world, and `clear()` is enough when the ground changes —
+   * see js/beacon.js.
+   */
+  const beacons = createBeacons(scene, { heightAt: (x, z) => terrain.heightAt(x, z) });
+
+  /** Ten units of work, from a swing, a machine or a citizen — js/work.js keeps them the same. */
+  const board = new WorkBoard(save?.work || {});
+  const colony = createColony({
+    data: colonyData || null, board, seed,
+    name: `${player.name}'s holding`,
+    /**
+     * `stationAt` is how a citizen's walk to work becomes a real number of metres —
+     * `walkSpeedMetresPerHour` and `maxTravelHours` have sat unread in data/colony.json since the
+     * colony landed. A callback rather than an object because js/colony.js must never learn what a
+     * machine is, and because `civics` is declared below this and has to be read lazily.
+     */
+    stationAt: id => civics?.stationAt?.(id) || null,
+  });
+  if (save?.colony) colony.load(save.colony);
+  const farm = createFarm({ data: cropData || null, board, seed });
+  if (save?.farm) farm.load(save.farm);
+
+  /**
+   * ================= THE CIVILIZATION EXPANSION =================
+   *
+   *   "Do a new Civilization Expansion which integrates with the build system and adds NPC housing
+   *    and utilities. The goal being that you can have ore sent to a town and have an NPC run the
+   *    furnace to smelt it automatically, consuming work."
+   *
+   * One module, one tick, one save field. js/civics.js owns js/housing.js, js/vendors.js,
+   * js/hold.js, js/trade.js and js/muster.js, and it injects the twenty-two trade goods into the
+   * live resources and refining data before anything reads either — never into the files, which is
+   * the rule data/items.json taught when it turned out to be shared with Emberveil.
+   */
+  const civics = createCivics({
+    data: colonyData || null, goods: goodsData || null, raids: raidData || null,
+    resources: resourceData || {}, refining: refiningData || {},
+    colony, works, board, stores, farm, bestiary,
+    // R19 — so the Hauler Drone's `powerAtOrigin` is a real condition: no grid at the end it
+    // leaves from, no drone. `grid` is built ~300 lines above this, so it is safe to read here.
+    powerAt: place => grid.spareAt(place?.x, place?.z),
+    dayLengthSeconds: balance.sky?.dayLengthSeconds ?? 900,
+    seed, log: t => hud.log(t, 'level'),
+  });
+
+  /**
+   * R16 — MOVED DOWN HERE ON PURPOSE.
+   *
+   * The first version of this sat next to `openMouths()`, four hundred lines above, and took the
+   * whole game down with "Cannot access 'colony' before initialization" — `createCommand({ colony })`
+   * reads the binding EAGERLY, and `colony` is a `const` declared below. That is the third TDZ crash
+   * this file has had (see the round-11 note) and `node --check` cannot see any of them, because a
+   * temporal dead zone is perfectly good syntax. It goes after the things it reads.
+   */
+  /**
+   * R16 — THE TOWN HALL, and the rod you point at your own people.
+   *
+   *   "The towns big enough to support a population should support a Town Hall which you can
+   *    interact with to see an overview of the town, resources, population and assignments, total
+   *    population, and this is also where we can put some new quests or other systems."
+   *
+   * The hall has stood in every settlement of size three or more since towns were built and has
+   * never been anything but scenery with an elder near it. It is also the right place to hire
+   * somebody — recruiting used to be buried inside an ordinary conversation, so growing a holding
+   * meant walking round a market clicking on strangers.
+   */
+  const townHall = createTownHall({
+    read: town => {
+      if (!town) return {};
+      const zone = zones.at(town.wx, town.wz);
+      const holder = zone?.holder || null;
+      const here = (folk.roster() || []).filter(n => n.node?.id === town.id);
+      const byRole = new Map();
+      for (const n of here) byRole.set(n.roleName, (byRole.get(n.roleName) || 0) + 1);
+      const pop = population({ colony });
+      const mine = colony.roster() || [];
+      return {
+        town: {
+          name: town.name, kind: town.kind || 'settlement', size: town.size || 1,
+          headcount: here.length,
+          factionName: holder ? (factionData?.factions?.find(f => f.key === holder)?.name || holder) : null,
+          standingWord: holder ? (standings.band(holder)?.name || null) : null,
+          roles: [...byRole.entries()].map(([name, n]) => ({ name, n })).sort((a, b) => b.n - a.n),
+        },
+        /**
+         * "…resources…" — what this settlement actually has to sell, read off the shelves its own
+         * merchants are standing behind rather than invented for the panel. A town you have never
+         * walked into has no merchants loaded, and an honest empty list is better than a made-up
+         * one.
+         */
+        goods: here.filter(n => n.trades).flatMap(n => (n.stock || []).slice(0, 6))
+          .slice(0, 10).map(it => ({ name: it.name, n: it.price ? `${it.price}g` : '' })),
+        pop,
+        people: mine.map(c => ({
+          id: c.id, name: c.name, line: c.line, job: c.job,
+          station: c.station, housed: c.housed,
+        })),
+        offers: hallOffers(town, pop),
+        /**
+         * The same board the notice board shows — a hall is a second way to find work rather than
+         * a second set of work — plus the one thing only a hall has: somebody who knows where a
+         * place IS. That is the "or through a quest from someone in town" half of the ask, and it
+         * is the only route to the four instanced places that are never scattered on the map.
+         */
+        jobs: [
+          ...hallLeads(zone).slice(0, 2).map(i => ({
+            id: `lead:${i.id}`, lead: i.id,
+            title: `Word of ${i.name}`,
+            text: `${i.blurb} Somebody here knows the way, and will mark it on your chart.`,
+            reward: 'a place on your chart',
+          })),
+          ...(localBoard || []).slice(0, 5).map(j => ({
+            id: j.id, title: j.title, text: j.text,
+            reward: j.reward ? `${j.reward.gold || 0} gold, ${j.reward.xp || 0} xp` : '',
+          })),
+        ],
+        work: (works.allJobs?.() || []).slice(0, 8).map(w => ({
+          id: `${w.machine}:${w.index}`, name: `${w.machineName} — ${w.name}`,
+          state: w.state, fraction: w.progress || 0, credit: null,
+        })),
+      };
+    },
+    onRecruit: offer => {
+      const out = takeSomebodyOn(offer.raw || offer);
+      // taken on, so they are not still standing in the hall looking for work
+      if (out?.ok) for (const [, rows] of hallPool) {
+        const at = rows.findIndex(r => r.id === (offer.raw || offer).id);
+        if (at >= 0) rows.splice(at, 1);
+      }
+      townHall.refresh();
+    },
+    onTakeJob: j => {
+      // a "lead" is not a job off the board: it is somebody telling you where a place is
+      if (j.lead) { revealInstance(j.lead); townHall.refresh(); return; }
+      takeBoardJob(j);
+    },
+    log: (t, c) => hud.log(t, c),
+  });
+
+  /**
+   * Who in this town would come and work for you. Cached on the settlement so the list does not
+   * reshuffle every time the screen redraws, and cleared when somebody is taken on.
+   */
+  const hallPool = new Map();
+  function hallOffers(town, pop) {
+    if (!pop.started) return [];
+    let rows = hallPool.get(town.id);
+    if (!rows) {
+      rows = [];
+      const zone = zones.at(town.wx, town.wz);
+      for (let i = 0; i < 3; i++) {
+        const raw = colony.recruitOffer({
+          settlementId: town.id, settlementName: town.name, size: town.size || 2,
+          standing: zone?.holder ? Math.max(0, (standings.get(zone.holder) || 0) / 100) : 0,
+        });
+        if (!raw?.ok) break;
+        rows.push(raw);
+      }
+      hallPool.set(town.id, rows);
+    }
+    return rows.map(raw => {
+      const why = recruitRefusal(pop, { gold: player.gold, price: raw.price });
+      return {
+        id: raw.id, raw, name: raw.citizen.name,
+        job: colony.jobOf(raw.citizen)?.name || raw.citizen.job,
+        price: raw.price, text: raw.text,
+        ok: !why, why,
+      };
+    });
+  }
+
+  /**
+   * THE COMMAND ROD — the fourth thing on the mouse wheel, and the first time anything in this
+   * game has let the player give an order. js/colony.js could always assign a citizen to a station
+   * and js/work.js could always take units from any of three sources; what did not exist was
+   * somebody holding something and pointing it.
+   */
+  commandRod = createCommand({
+    // every one of these is asked for at CALL time — see the note in js/command.js. Two of them do
+    // not exist yet at this line, and `folk` is rebuilt every time you land on a new world.
+    colony: () => colony, folk: () => folk, build: () => build, works: () => works, terrain,
+    onLog: (t, c) => hud.log(t, c),
+    range: (toolData.devices || []).find(d => d.id === 'command_rod')?.range ?? 45,
+  });
+  if (save?.civics) civics.loadJSON(save.civics);
+
+  /**
+   * THE HOLDING SCREEN — its own file, its own stylesheet, and `K` opens it.
+   *
+   * js/hud.js is three thousand lines and carries nine other screens; a sixth tab bolted into it
+   * would be the tenth thing that has to be right for the character sheet to open at all.
+   * civics.css is loaded by the module itself, so index.html needs no change either.
+   */
+  /**
+   * R17 — THE FOLLOWERS SCREEN.
+   *
+   *   "We should also add a Followers tab to the menu where you can manage your follower slots."
+   *
+   * Its own module and its own stylesheet, the way the Holding screen is — and like the Holding
+   * screen this round, it is mounted INSIDE the character sheet on the tab index.html reserves for
+   * it, so it inherits the sheet's one Esc, one close and one cursor hand-off. `F` is a shortcut
+   * straight to that tab, not a second window.
+   */
+  const company = createFollowersScreen({
+    followers, pets,
+    getPlayer: () => player,
+    getAt: () => control,
+    getDay: () => Math.floor(state.elapsed / (balance.sky?.dayLengthSeconds ?? 900)) + 1,
+    mount: document.getElementById('sheet-body-followers') || document.body,
+    embedded: !!document.getElementById('sheet-body-followers'),
+    /**
+     * WHERE YOU COULD HIRE SOMEBODY, IF ANYWHERE. A broker keeps a board in every settlement; out
+     * on the road the tab says so in a sentence rather than showing four dead rows.
+     */
+    hireAt: () => {
+      const town = features.settlementAt(control.x, control.z);
+      return town ? { town, name: town.name } : null;
+    },
+    log: (t, k) => hud.log(t, k),
+  });
+  hud.mount('followers', company);
+
+  const holding = createCivicsScreen({
+    civics, colony, works,
+    /**
+     * R17 — it mounts INSIDE the character sheet, on the tab index.html reserves for it.
+     *
+     * The screen is unchanged: same markup, same civics.css, same rail. `embedded` only drops the
+     * fixed full-window positioning and its own close button, so the sheet's one Esc, one × and
+     * one cursor hand-off cover it. The "while you were away" card and the hold readout stay on the
+     * page (`awayMount`), because both have to be readable while you are walking about.
+     */
+    mount: document.getElementById('sheet-body-holding') || document.body,
+    embedded: !!document.getElementById('sheet-body-holding'),
+    awayMount: document.body,
+    getPlayer: () => player,
+    getDay: () => Math.floor(state.elapsed / (balance.sky?.dayLengthSeconds ?? 900)) + 1,
+    log: (t, c) => hud.log(t, c),
+    /**
+     * WHERE A MUSTER WOULD BE CALLED, IF YOU CALLED ONE NOW.
+     *
+     * Your own holding if you are standing in it, otherwise the town you are in. `null` means
+     * neither, and the tab says so in a sentence rather than showing four dead rows.
+     */
+    musterAt: () => {
+      const home = defence.spot?.({ near: { x: control.x, z: control.z } });
+      const town = features.settlementAt(control.x, control.z);
+      if (home && Math.hypot(home.x - control.x, home.z - control.z) < 90) {
+        return {
+          placeId: 'home', placeName: colony.name || 'your holding',
+          base: defence.base, level: player.level, at: state.elapsed,
+        };
+      }
+      if (town) {
+        return {
+          placeId: 't' + town.id, placeName: town.name,
+          base: civics.muster.baseForTown(town, {
+            plots: town.size || 0,
+            guards: colony.guards?.() || 0,
+            walled: !!town.walled,
+          }),
+          level: player.level, at: state.elapsed,
+        };
+      }
+      return null;
+    },
+    /**
+     * CALL ONE. The muster builds the quest; `defence` adopts it so there is still exactly one
+     * wave system, one kill counter and one `loseRaid` deciding what a loss costs.
+     */
+    onMuster: (tier, spot) => {
+      const out = civics.muster.start({
+        placeId: spot.placeId, placeName: spot.placeName, tier, base: spot.base,
+        level: player.level, biome: terrain.biomeAt(control.x, control.z).key,
+        at: state.elapsed, hour: sky.dayFraction * 24,
+      });
+      if (!out.ok) { hud.log(out.why || 'Not now.', 'bad'); return out; }
+      defence.adopt(out.quest);
+      defence.rally?.({ level: player.level });
+      defence.spawnWave({ level: player.level });
+      hud.log(`The muster is called at ${spot.placeName}. Stay near the ground or it is called off.`, 'bad');
+      sound.questDone();
+      return out;
+    },
+  });
+
+  /**
+   * R17 — hand the Holding to the character sheet, so it gets a rail button and a number.
+   *
+   * `hud.mount` is the one join: js/hud.js never imports js/civics-ui.js, it just shows and hides
+   * whatever it was given and calls `draw()` when that tab is the one you are looking at. The same
+   * door is what js/research-ui.js and js/followers-ui.js come through.
+   */
+  hud.mount('holding', holding);
+
+  /**
+   * R17 — THE RESEARCH TAB.
+   *
+   * Same door as the Holding and the Followers screen: its own module, its own stylesheet, mounted
+   * into the div index.html reserves for it. There is a second way in — a Research button in the
+   * build panel's head — because the decision to research something is usually made while looking
+   * at the piece you cannot build yet.
+   */
+  const researchScreen = createResearchScreen({
+    research: sharedResearch(),
+    log: (t, c) => hud.log(t, c),
+  });
+  researchScreen.mount(document.getElementById('sheet-body-research'));
+  hud.mount('research', researchScreen);
+
+  /** Exactly one portal, ever — the whole state is one variable in js/portal.js. */
+  const portals = createPortals({
+    saved: save?.portal || null,
+    spotOk: (x, z) => !terrain.waterAt(x, z) && !terrain.underwater(x, z) && terrain.slopeAt(x, z, 4) < 0.6,
+  });
+
+  /**
+   * R16 — WHICH DIGGING TOOL YOU ARE HOLDING, ASKED OF THE TOOL SLOT.
+   *
+   *   "It appears ranged characters can't harvest materials… Instead of having tool be based on
+   *    weapon (no idea how that works) change it so you build new tools."
+   *
+   * The old version of this function matched the WEAPON'S NAME against a regular expression —
+   * /steel|adamant|star|void|mithr/ was a Steel Tool, /iron|bronze|copper/ an Iron Tool. A bow is
+   * made of yew and a staff of crystal, so an archer and a mage were bare-handed at every seam in
+   * the game and nothing anywhere told them why. It also made the refusal unanswerable: "you need
+   * a Steel Tool" with no slot to put one in.
+   *
+   * Now it is js/tools.js's business and it reads `player.equipment.tool`. Bare hands is still a
+   * real answer — clay, sand, fibre and camp scrap are hardness 0 — so a new character can still
+   * start the chain with nothing.
+   */
+  const toolTierFor = p => toolKeyFor(p);
+
+  /**
+   * R16 — THE BAR THAT FILLS WHILE YOU DIG, and the thing that finds what to dig.
+   *
+   *   "Change mining behavior instead of press E to collect an item or chop a tree, to press E or
+   *    attack a mineable resource with the tool equipped = starts a small progress bar above the
+   *    resource that collects the item when complete, similar to World of Warcraft."
+   *
+   * `gathering` owns the clock and the cancel rule; js/hud.js draws the bar at the point it names.
+   * `scanner` owns the sweep and, more importantly, the MEMORY of the sweep — "once a node is
+   * scanned it should remain visible on the map", so what it finds goes into the marker book and
+   * into the save with everything else.
+   */
+  const gathering = createGathering({ data: toolData, onLog: (t, c) => hud.log(t, c) });
+  const scanner = createScanner({
+    data: toolData,
+    onLog: (t, c) => hud.log(t, c),
+    label: n => nodeLabel(n, { data: resourceData }),
+  });
+  if (save?.scanner) scanner.load(save.scanner);
+  /**
+   * R17 — THE SCANNER'S RIGHT-CLICK CHOOSER: what to sweep for, and "forget survey".
+   *
+   * Constructed here rather than lazily imported from inside `createScanner`, so that the one
+   * thing in the game that claims the right mouse button is visible in the file that owns the
+   * input. It only takes the event while the scanner is what you are holding — right-click was
+   * completely unclaimed in Farhold before this, which is why it was free to take.
+   */
+  const scanChooser = createScannerChooser({
+    scanner,
+    onLog: (t, c) => hud.log(t, c),
+    materialName: id => resourceData?.materials?.[id]?.name || id,
+    canOpen: () => heldModes(player).includes('scanner') && !build.mode,   // R25: owning one is enough
+  });
+
+  /**
+   * Start working whatever is in front of you, if the tool can work it. Returns true if a bar went
+   * up, so the caller knows not to also swing a sword at it.
+   *
+   * Both doors into this are deliberate: `E` (which is what the player already presses at a seam)
+   * and an ATTACK with the tool in hand ("press E **or attack** a mineable resource with the tool
+   * equipped"). One of them being the attack button is the whole reason ranged characters can
+   * harvest now — an archer has no melee swing to land on a rock.
+   */
+  function beginGather({ x, z, reach = null } = {}) {
+    const speed = toolSpeed(player);
+    const range = reach ?? toolReach(player, 4);
+    const seam = oreHere().at(x, z, range);
+    if (seam) {
+      if (!canWork(player, seam, resourceData)) {
+        const out = mining.swing(seam, 0, { tool: toolTierFor(player) });
+        hud.log(out.why ? `You cannot work this: ${out.why}.` : 'You cannot work this.', 'warn');
+        return true;
+      }
+      const name = nodeLabel(seam, { data: resourceData });
+      gathering.begin({
+        id: `seam:${seam.id}`, kind: 'seam', name,
+        x: seam.x, y: terrain.heightAt(seam.x, seam.z), z: seam.z,
+        seconds: gathering.secondsFor('seam', 1), speed,
+        onDone: () => {
+          const seconds = toolData.gather?.seamSeconds ?? 3.2;
+          // R23 — Prospector's Pride can pay a gather twice; Quickhand Pick starts its run of speed
+          const bonus = rpg.gatherBonus(player, field.rng);
+          if (bonus.times > 1) hud.log('A second vein shows in the same stroke.', 'good');
+          const out = mining.swing(seam, seconds * toolYield(player) * bonus.times, { tool: toolTierFor(player) });
+          if (out.got <= 0) { hud.log(out.why ? `You cannot work this: ${out.why}.` : 'Nothing comes loose.', 'warn'); return; }
+          sound.ui('click');
+          const mat = (resourceData?.materials?.[out.resource]?.name || out.resource).toLowerCase();
+          hud.log(`${out.got.toFixed(1)} ${mat}${out.intoPool ? ' into the store beside you' : ''}.${out.depleted ? ' The seam is worked out.' : ''}`, 'good');
+        },
+      });
+      return true;
+    }
+
+    const prop = props.nearest?.(x, z, Math.max(3, range));
+    if (prop) {
+      const about = props.describe?.(prop) || {};
+      const tier = toolTierOf(player, resourceData);
+      /**
+       * R17 — a giant that is not made of wood says WHY.
+       *
+       * "Obviously this should only work for mega trees actually made of wood, but maybe not all
+       * mega-structures." The refusal below is true but implies a better tool would do it, which
+       * for a stone arch is a lie you can act on. data/megaflora.json carries a sentence for every
+       * one of the eight that gives nothing; `props.describe()` hands it over.
+       */
+      if (about.harvestable === false) {
+        hud.log(about.why || `The ${about.name || 'it'} gives nothing.`, 'warn');
+        return true;
+      }
+      if ((about.tier ?? 0) > tier) {
+        hud.log(`The ${about.name || 'it'} is too hard for what you are carrying.`, 'warn');
+        return true;
+      }
+      gathering.begin({
+        id: `prop:${prop.id}`, kind: 'prop', name: about.name || 'Harvest',
+        x: prop.x, y: terrain.heightAt(prop.x, prop.z), z: prop.z,
+        seconds: gathering.secondsFor(about.tier ? 'prop' : 'soft', 1), speed,
+        onDone: () => {
+          // one gather fells it outright: the bar IS the effort, and chipping away at a bush for
+          // four separate bars is the busywork this change exists to remove
+          const res = props.strike(prop.x, prop.z, { damage: 1e6, reach: Math.max(3, range), tier });
+          if (!res.hit) { hud.log(res.why || 'There is nothing there now.', 'warn'); return; }
+          sound.combat('hit');
+          // R23 — the same two powers as a seam, on a tree or a boulder
+          const bonus = rpg.gatherBonus(player, field.rng);
+          if (bonus.times > 1) for (const k of Object.keys(res.materials || {})) res.materials[k] *= bonus.times;
+          payOut(res.materials);
+          const got = matText(res.materials);
+          hud.log(`You ${res.verb} the ${res.name}.${got ? ` ${got}.` : ''}`, 'good');
+        },
+      });
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Where the camera is pointing at the ground, in world metres.
+   *
+   * Marched rather than solved: the terrain is a noise field with rivers and roads carved into it,
+   * so there is no closed form for "where does this ray meet it". Forty one-metre steps covers the
+   * whole useful build range and costs forty height lookups, which is nothing beside the clipmap
+   * rebuilding itself. Looking at the sky returns the far end of the march, so the ghost slides out
+   * to arm's length instead of vanishing.
+   */
+  function aimSpot(maxRange = 40) {
+    const dir = new THREE.Vector3();
+    /**
+     * THE RAY GOES THROUGH THE CURSOR when there is one.
+     *
+     * Build mode frees the pointer so the panel can be used, and a freed pointer makes the camera's
+     * own heading the wrong ray: you would be pointing at one patch of ground with the mouse and
+     * building on another in the middle of the screen. Unprojecting the cursor costs one matrix
+     * multiply and makes the two agree. With the pointer locked there IS no cursor, and the nose of
+     * the camera is the aim, exactly as before.
+     */
+    if (!input.state.locked) {
+      dir.set(pointerNdc[0], pointerNdc[1], 0.5).unproject(camera).sub(camera.position).normalize();
+    } else {
+      camera.getWorldDirection(dir);
+    }
+    const from = camera.position;
+    let last = { x: control.x, z: control.z };
+    for (let t = 1.5; t <= maxRange; t += 1) {
+      const x = from.x + dir.x * t;
+      const y = from.y + dir.y * t;
+      const z = from.z + dir.z * t;
+      if (y <= terrain.heightAt(x, z)) return { x, z };
+      last = { x, z };
+    }
+    return last;
+  }
+
+  /**
+   * What you can pay with, standing where you are.
+   *
+   * The storage pool at your feet AND the bag on your back, in one object with the `count`/`spend`
+   * shape js/shipyard.js's `bagOf` wants. A shipyard bill is large enough that making the player
+   * carry it by hand would be a punishment rather than a decision.
+   */
+  function payBag() {
+    const pool = () => stores.poolAt?.(control.x, control.z);
+    const count = id => {
+      const p = pool();
+      return (p ? stores.count(p, id) : 0) + (materials.count?.(id) ?? 0);
+    };
+    return {
+      count,
+      /**
+       * `canAfford` IS THE HANDLE js/vehicles.js's `bagOf` LOOKS FOR.
+       *
+       * Anything without it is treated as a plain `{ id: count }` map and read with `held[id]` — so
+       * a purse with `count` and `spend` but no `canAfford` came back as completely empty, and the
+       * whole shipyard answered "the assembler has not built a Hull Section yet" while ninety of
+       * them sat in the crate at the player's feet.
+       */
+      canAfford: cost => Object.entries(cost || {}).every(([id, n]) => count(id) >= n),
+      missing: cost => {
+        const out = {};
+        for (const [id, n] of Object.entries(cost || {})) { const short = n - count(id); if (short > 0) out[id] = short; }
+        return out;
+      },
+      add: (id, n = 1) => materials.add?.(id, n),
+      spend: cost => {
+        // check the whole bill before taking any of it, or a short build eats half the materials
+        for (const [id, n] of Object.entries(cost || {})) {
+          const p = pool();
+          if ((p ? stores.count(p, id) : 0) + (materials.count?.(id) ?? 0) < n) return false;
+        }
+        for (const [id, n] of Object.entries(cost || {})) {
+          const p = pool();
+          const fromPool = p ? Math.min(n, stores.count(p, id)) : 0;
+          if (fromPool > 0) stores.take(p, id, fromPool);
+          if (n - fromPool > 0) materials.spend?.({ [id]: n - fromPool });
+        }
+        return true;
+      },
+    };
+  }
+
+  /** Which benches are within reach, for the recipes and subsystems that need one. */
+  function benchesNear(reach = 10) {
+    return (build.entries || [])
+      .filter(e => works.machineDefs?.[e.key] && Math.hypot(e.x - control.x, e.z - control.z) < reach)
+      .map(e => e.key);
+  }
+
+  /**
+   * Is the ground here flat enough for a launch pad?
+   *
+   * Sampled rather than assumed: `PAD.maxSlope` is 0.04, which is flatter than anywhere on Farhold
+   * is naturally — that is the point, it is what sends the player to the smoothing tool. The
+   * terraform wrapper means `heightAt` already answers with the edited ground.
+   */
+  function padGroundOk() {
+    const r = PAD.flatRadius;
+    const h0 = terrain.heightAt(control.x, control.z);
+    for (let a = 0; a < 8; a++) {
+      const th = (a / 8) * Math.PI * 2;
+      const h = terrain.heightAt(control.x + Math.cos(th) * r, control.z + Math.sin(th) * r);
+      if (Math.abs(h - h0) / r > PAD.maxSlope) return false;
+    }
+    return true;
+  }
+
+  /**
+   * Put a finished piece on the grid, in the storage pools, or both.
+   *
+   * `power.make` is a generator, `power.store` a battery, `power.reach` a pole and `power.use` a
+   * machine that draws — the four shapes js/power.js already knows. `store.slots` is a crate. A
+   * piece that is none of those (a wall, a statue, a road) joins nothing, which is correct.
+   */
+  function joinSystems(entry, def) {
+    if (!entry || !def) return;
+    const power = def.power || null;
+    // A REJOIN MUST NOT BE A RESET. `stores.add` and `grid.add` both build a fresh unit and drop
+    // the old one, so on a load — where the pools and the grid were restored a moment earlier —
+    // calling them again would empty every crate and flatten every battery.
+    if (grid.get(entry.id) || stores.get(entry.id) || works.get(entry.id)) return;
+    if (power) {
+      if (power.make != null || power.store != null || power.reach != null) {
+        // a generator, a battery or a pole: the type carries its own numbers in data/power.json
+        grid.add({ id: entry.id, type: entry.key, name: entry.name, x: entry.x, z: entry.z });
+      } else if (power.use != null) {
+        // a machine: it only needs how much it pulls and how early it is shed in a brownout
+        grid.add({
+          id: entry.id, type: entry.key, name: entry.name, x: entry.x, z: entry.z,
+          draw: power.use, priority: def.cat === 'waypoint' ? 'waypoint' : def.cat === 'defence' ? 'defence' : 'refining',
+        });
+      }
+    }
+    /**
+     * R18 — AND A RELAY IS A STORE WITH NO SHELVES.
+     *
+     * This joined a store only `if (def.store?.slots)`. The Logistics Pole has a
+     * `pool: { radius: 40 }` block, no `store`, and no `power`, so it joined NOTHING — and
+     * `def.pool` is read nowhere else in js/ either. The player reads "Relays goods. Everything
+     * inside the ring shares one pile; a drill under it never needs carrying", pays 4 timber, 2
+     * iron and 1 cloth, plants it between a remote drill and their crates, and nothing shares:
+     * `poolAt` still answers null at the pole and the drill still needs a hauled route.
+     *
+     * js/stores.js has always known how to be a relay — `cap 0` with a `linkRadius` is one, by its
+     * own definition at the top of that file — and `defFor` would find `poles.logistics_pole` in
+     * data/power.json. Nobody ever asked. The node tests called `net.add({type:'logistics_pole'})`
+     * directly, which works, so the store module was exercised and the game's join never was.
+     */
+    if (def.store?.slots || def.pool) {
+      stores.add({ id: entry.id, type: entry.key, name: entry.name, x: entry.x, z: entry.z });
+    }
+    /**
+     * …AND A BENCH IS A BENCH.
+     *
+     * Every one of data/refining.json's sixteen machines has a structure with the SAME id in
+     * data/structures.json, so a smelter you build is a smelter js/refine.js can queue work on.
+     * Nothing called `works.place` either: you could build the whole refining chain and it would
+     * stand there as geometry while the module that runs it had an empty machine list.
+     */
+    if (works.machineDefs?.[entry.key]) {
+      works.place({ id: entry.id, type: entry.key, x: entry.x, z: entry.z, name: entry.name });
+    }
+  }
+
+  /**
+   * CARRY THE GRID'S ANSWER BACK TO THE THINGS THAT CARE.
+   *
+   * `grid.tick` works out what is lit; nothing was reading the result. So a pad's `powered` flag
+   * never moved off whatever js/buildplan.js set it to when it was placed, which for anything with
+   * a `power.use` is `false` — the sigils could never light however many generators you built
+   * beside them. Run after the grid, once a second rather than every frame: a waypoint that takes
+   * a tick to notice the lights came back is fine, sixty needless writes a second is not.
+   */
+  function syncPower() {
+    for (const entry of build.entries || []) {
+      const lit = grid.get(entry.id) ? grid.poweredOf(entry.id) > 0 : true;
+      if (entry.powered === lit) continue;
+      entry.powered = lit;
+      if (!entry.waypoint) continue;
+      waypoints.setPowered(entry.id, lit);
+      homes.setPowered(entry.id, lit);
+      hud.log(lit
+        ? `The sigils at ${entry.name} come up. You can travel here from anywhere now.`
+        : `The sigils at ${entry.name} go dark. Its grid is down.`, lit ? 'level' : 'bad');
+    }
+  }
+
+  /** What the terrain tools have knocked down since the last frame — see `onGround`. */
+  const groundPile = { removed: 0, bag: {} };
+  function flushGroundPile() {
+    if (!groundPile.removed) return;
+    const what = matText(groundPile.bag);
+    hud.log(`The ground moves. ${groundPile.removed} thing${groundPile.removed === 1 ? '' : 's'} came down with it${what ? ` — ${what}` : ''}.`, 'good');
+    groundPile.removed = 0;
+    groundPile.bag = {};
+  }
+  /**
+   * "9 log, 2 resin" — one wording for every pile of materials the world hands you.
+   */
+  function matText(bag) {
+    return Object.entries(bag || {})
+      .filter(([, n]) => n > 0)
+      .map(([id, n]) => `${Math.round(n)} ${(resourceData?.materials?.[id]?.name || id.replace(/_/g, ' ')).toLowerCase()}`)
+      .join(', ');
+  }
+
+  /**
+   * Put a pile of materials somewhere sensible: the storage pool at your feet, then your own bag.
+   *
+   * The same rule build mode's refunds follow, and for the same reason — whatever you just felled is
+   * most likely going straight back into the next thing you build, and that looks in the pool.
+   */
+  function payOut(bag) {
+    for (const [id, n] of Object.entries(bag || {})) {
+      if (!(n > 0)) continue;
+      const pool = stores.poolAt?.(control.x, control.z);
+      const stored = pool ? stores.put(pool, id, n) : 0;
+      if (n - stored > 0) materials.add(id, n - stored);
+    }
+    return bag;
+  }
+
+  /**
+   * Build mode. `B` toggles it; the rest of the keys are listed on screen when it is up.
+   *
+   * `store` is how a cost is paid: the pool the ghost is standing in first, then the materials bag,
+   * so a bench beside a crate builds out of the crate without the player carrying anything.
+   */
+  const build = createBuild(scene, {
+    terrain, terraform, view,
+    catalogue: structureData || null,
+    plan: null,
+    spellfx,
+    /**
+     * THE POOL YOU ARE STANDING IN, THEN THE BAG ON YOUR BACK.
+     *
+     * js/stores.js addresses a POOL, not a position — `count(pool, res)` — so the pool has to be
+     * looked up first. I had these three calling `count(id, x, z)`, which passed the resource id as
+     * the pool and the player's x as the resource: a crate at your feet paid for nothing, every
+     * cost came out of the bag, and the whole storage-pool layer was decorative. `poolAt` returns
+     * null when there is nothing near, and then the bag is the only answer anyway.
+     *
+     * The sum is deliberate: a bench beside a half-full crate builds out of BOTH rather than
+     * refusing because neither holds the whole cost on its own.
+     */
+    store: {
+      have: id => {
+        const pool = stores.poolAt?.(control.x, control.z);
+        return (pool ? stores.count(pool, id) : 0) + (materials.count?.(id) ?? 0);
+      },
+      take: (id, n) => {
+        const pool = stores.poolAt?.(control.x, control.z);
+        const fromPool = pool ? Math.min(n, stores.count(pool, id)) : 0;
+        if (fromPool > 0) stores.take(pool, id, fromPool);
+        const rest = n - fromPool;
+        if (rest > 0) materials.spend?.({ [id]: rest });
+        return n;
+      },
+      // a refund goes back into the pool if there is one, because that is where the next build
+      // will look for it — putting it in the bag means carrying it back to the crate by hand
+      give: (id, n) => {
+        const pool = stores.poolAt?.(control.x, control.z);
+        // `put` returns how many actually FITTED — the caps in js/stores.js mean a full crate takes
+        // some of a refund and not all of it — so whatever it would not take goes in the bag
+        const stored = pool ? stores.put(pool, id, n) : 0;
+        if (n - stored > 0) materials.add?.(id, n - stored);
+        return n;
+      },
+    },
+    onLog: (t, c) => hud.log(t, c),
+    /**
+     * THE CLEAR TOOL, which for the whole life of the expansion silently did nothing.
+     *
+     * `props.clearAround` did not exist, and `?.()` turned the whole call into `undefined` — so the
+     * tool reported "Cleared 0 of it" and the player learned the build interface lies. It exists
+     * now (js/props.js), and this is the one line that was missing.
+     */
+    onClear: (x, z, r) => props.clearAround(x, z, r),
+    onScan: (x, z, r) => sweepForDeposits(x, z, r),
+    /**
+     * …and the terrain tools take the trees with them.
+     *
+     * Everything standing in the brush comes down — you keep the timber, same as Clear — and the
+     * rebuild underneath re-reads the ground height for everything left, so nothing is stranded in
+     * the air over a levelled plot.
+     */
+    /**
+     * One click of a terrain tool is one message; one run of road is one message too.
+     *
+     * A road is cleared leg by leg in brush-sized steps (js/build.js `clearProps`), which for a
+     * hundred metres through a wood is thirty calls — and thirty log lines is a log nobody reads.
+     * The take is piled up and reported on the next frame, so the player sees "the road goes
+     * through: 214 log, 30 stone" once.
+     */
+    onGround: (x, z, r) => {
+      const out = props.groundMoved(x, z, r);
+      if (!out.removed) return;
+      payOut(out.materials);
+      groundPile.removed += out.removed;
+      for (const [id, n] of Object.entries(out.materials)) groundPile.bag[id] = (groundPile.bag[id] || 0) + n;
+    },
+    /**
+     * A WAYPOINT PAD JOINS THE NETWORK THE MOMENT IT IS FINISHED.
+     *
+     * Two registers, on purpose: `waypoints` so the map on THIS world draws it beside the towns,
+     * and `homes` so it is still there after you fold to another star. The pad is filed under the
+     * world it stands on, which is why both calls happen here rather than inside build.js — that
+     * file has no idea what system it is in and should not learn.
+     */
+    /**
+     * A PIECE HAS TO JOIN THE SYSTEMS THAT MAKE IT WORK.
+     *
+     * The grid, the storage pools and the waypoint network are all built above and every one of
+     * them was empty: nothing ever called `grid.add` or `stores.add`, so a generator you built
+     * generated nothing, a crate held nothing, and the pad you paid four crystal for stayed dark
+     * for ever. The catalogue already says which is which — `power.make`, `power.use`,
+     * `store.slots` — and the ids in data/structures.json match data/power.json exactly, so the
+     * join is this and nothing more.
+     */
+    onPlace: (entry, def) => {
+      joinSystems(entry, def);
+      // R18 — and it is solid from this moment. See `rebuildBuildSolids`.
+      rebuildBuildSolids();
+      // houses, utilities, watch posts, Trade Posts and Tender Arms, all worked out from where
+      // things stand rather than declared — the same rule js/outposts.js applies to outposts
+      civics.rebuild(build.entries, build.defOf);
+      /**
+       * A NEW CRATE IS A NEW ANSWER FOR EVERY DRILL THAT HAD NONE.
+       *
+       * The usual order of play is drill first, storage second — you put the drill on the seam you
+       * walked out to and then work out where to keep the ore. Without this the drill sits on its
+       * capped little stockpile for ever and the player has to know to go and re-route it by hand.
+       */
+      if (def?.store?.slots) {
+        // only the drills this crate could plausibly serve: each re-route is an A* search, and a
+        // base with a dozen of each would otherwise spend a second thinking about it on one click
+        for (const row of mining.overview()) {
+          if (row.route) continue;
+          const drill = (build.entries || []).find(e => e.id === row.id);
+          if (!drill || Math.hypot(drill.x - entry.x, drill.z - entry.z) > 700) continue;
+          const got = mining.autoRoute(row.id, { quiet: true });
+          if (got.ok) hud.log(`${row.name} now hauls to ${entry.name} — ${got.rate.direct ? 'no trip at all' : `${got.rate.perMinute.toFixed(1)}/min`}.`, 'good');
+        }
+        drawRoutes();
+      }
+      /**
+       * A DRILL PUT DOWN ON A SEAM STARTS WORKING IT.
+       *
+       * The catalogue calls it `drill`; js/resources.js knows what is under it. Refused out loud
+       * rather than silently, because a drill is an expensive thing to put in the wrong place and
+       * "nothing happened" is the worst possible answer to having done so.
+       */
+      /**
+       * R15 — ANY PIECE THAT HAS TO STAND ON A SEAM IS A DRILL.
+       *
+       * This tested two literal keys, so the Small Drill added this round placed correctly, looked
+       * right, cost its iron and dug absolutely nothing — the join that makes a drill a drill was
+       * behind `entry.key === 'drill'`. That is the whole fault class this project keeps finding,
+       * in miniature: the feature was complete and there was one string in the way.
+       *
+       * `needs: 'node'` is the catalogue's own word for "this must be built on a resource", and it
+       * is what `js/buildplan.js` already checks before it will let you place one. Asking the same
+       * question here means the next thing that stands on a seam works without anybody remembering
+       * to add its name to a list.
+       */
+      // R16 — one question, asked of the catalogue: does this piece DIG? The id list beside the
+      // rule is gone (js/buildplan.js `isExtractor`), so the next digger works by being data.
+      if (build.isExtractor?.(def) ?? (def?.needs === 'node' || entry.key === 'drill' || entry.key === 'pump')) {
+        const seam = oreHere().at(entry.x, entry.z, 6);
+        const got = mining.bindDrill(entry, seam);
+        if (!got.ok) hud.log(got.why, 'warn');
+        else {
+          const what = (resourceData?.materials?.[seam.resource]?.name || seam.resource).toLowerCase();
+          /**
+           * …AND IT FINDS ITS OWN WAY HOME.
+           *
+           * "We should not require the user to click the route button." The drill asks js/mining.js
+           * for the store that delivers the most over ground a hauler can actually walk, and lays
+           * the route itself. If there is nowhere to send it, the message says what to build.
+           */
+          const road = mining.autoRoute(entry.id, { quiet: true });
+          hud.log(road.ok
+            ? `${entry.name} bites into the ${what}. ${road.rate.direct
+              ? 'It is standing in your store pool, so everything it digs is already home.'
+              : `Hauling ${road.rate.perMinute.toFixed(1)}/min over ${Math.round(road.rate.metres)} m to ${stores.pools().find(p => p.id === road.route.toPoolId)?.name || 'your store'}.`} It needs power.`
+            : `${entry.name} bites into the ${what}. ${road.why}`, road.ok ? 'good' : 'warn');
+          drawRoutes();
+        }
+      }
+      if (!entry?.waypoint) return;
+      const name = `${planet?.name || 'This world'} — ${entry.claim || 'base'}`;
+      waypoints.addBuilt({ id: entry.id, name, x: entry.x, z: entry.z, claim: entry.claim, powered: !!entry.powered });
+      homes.add({
+        id: entry.id, name, x: entry.x, z: entry.z, claim: entry.claim, powered: !!entry.powered,
+        starId, systemSeed, starName: star?.name || '',
+        planetId: planet?.id ?? null, planetName: planet?.name || '',
+        founded: Math.round(state.elapsed || 0),
+      });
+      hud.log(`${name} is on the waypoint network. You can travel back to it from anywhere.`, 'level');
+    },
+    /**
+     * The route tool's two ends: a drill, and somewhere to put what it digs.
+     *
+     * js/build.js picks the objects; the rate is entirely js/mining.js's business, which is why it
+     * comes back through here as a callback rather than build mode learning about storage pools.
+     */
+    onRoute: (from, to) => {
+      const pool = stores.poolAt(to.x, to.z);
+      if (!pool) return { ok: false, why: `${to.name} is not a store. A route ends somewhere that holds things.` };
+      /**
+       * R14 — TWO STORES IS A SUPPLY LINE, NOT A MISTAKE.
+       *
+       * Clicking a drill and then a store lays a mining route, as it always has. Clicking a STORE
+       * and then a store is the thing that was asked for — "send the output back to my base using a
+       * travel route" — and it used to be refused for the wrong reason, because `mining.route`
+       * cannot bind something that is not a drill and said so about the wrong end.
+       */
+      const fromPool = stores.poolAt(from.x, from.z);
+      if (fromPool && fromPool.id !== pool.id && !mining.overview().some(r => r.id === from.id)) {
+        const made = logistics.link(fromPool.id, pool.id);
+        if (!made.ok) return made;
+        hud.log(`${fromPool.name} now sends what it piles up to ${pool.name}. ${made.quote.text}`, 'good');
+        return { ok: true };
+      }
+      const out = mining.route(from.id, pool.id);
+      if (out.ok) drawRoutes();
+      return out;
+    },
+    onRemove: entry => {
+      // R18 — you can walk where it stood again
+      rebuildBuildSolids();
+      grid.remove(entry.id);
+      stores.remove(entry.id);
+      works.remove(entry.id);
+      // a house that was pulled down must not leave its citizen holding a bed that is not there
+      civics.rebuild(build.entries, build.defOf);
+      mining.unbindDrill(entry.id);
+      drawRoutes();
+      if (!entry?.waypoint) return;
+      waypoints.removeBuilt(entry.id);
+      homes.remove(entry.id);
+    },
+  });
+  /**
+   * R14 — GOODS THAT TAKE TIME TO ARRIVE.
+   *
+   *   "I would like to slap down a drill at a remote deposit, connect it to the power grid and
+   *    storage, and send the output back to my base using a travel route. Resources should take
+   *    time to move unless in the immediate vicinity, and should be able to greatly improve that
+   *    time by building roads."
+   *
+   * Inside one storage pool nothing moves and nothing is charged — that is js/stores.js's rule and
+   * it is unchanged. Between two pools a load leaves one and arrives at the other on a real clock,
+   * timed by the ground a hauler can actually walk (js/haulpath.js) and cut sharply by how much of
+   * that ground is a road you laid. `build.roads` is the book of those roads.
+   */
+  const logistics = createLogistics({
+    stores, terrain,
+    roads: build.roads,
+    power: powerData || {},
+    materials: resourceData?.materials || {},
+    log: t => hud.log(t, ''),
+  });
+
+  /**
+   * …and the base keeps working when you are not on the planet.
+   *
+   * "Production and manufacturing should continue even if you leave a planet." The clock is stamped
+   * on the way out and run forward on the way back, capped so a weekend away is not a mountain of
+   * iron. The grid is in the list because without it the generators would run for six hours on no
+   * fuel at all.
+   */
+  const away = createAwayClock({
+    works, logistics, stores, grid,
+    materials: resourceData?.materials || {},
+  });
+
+  /**
+   * R14 — THE WORKS KEPT RUNNING WHILE YOU WERE GONE.
+   *
+   * This sits HERE, rather than beside `save?.works` a few hundred lines up, for one reason: the
+   * catch-up has to happen after the stores, the grid, the works AND build mode are all back, or it
+   * runs a base that is still half empty and produces nothing out of nothing. `resume()` re-stamps
+   * the clock itself, so running it twice is harmless.
+   */
+  if (save?.logistics) logistics.load(save.logistics);
+  if (save?.away) {
+    away.load(save.away);
+    const back = away.resume();
+    if (back.text) hud.log(back.text, 'level');
+    /**
+     * THE HALF THE AWAY CLOCK NEVER COVERED: THE PEOPLE.
+     *
+     *   "Production and manufacturing should continue even if you leave a planet."
+     *
+     * js/logistics.js runs the grid, the machines and the shipments forward. Nobody woke, nobody
+     * walked to work, nobody ate and nobody filled a labour order — which did not matter before
+     * this round, because a citizen's work never made a single ingot. `civics.away` takes the
+     * window that clock already decided on, cap included, and runs the colony, the fields and the
+     * trade routes across the same seconds in the same order the live loop uses. No second clock.
+     *
+     * The mercy: nobody walks out while you are off-world. Losing your village because you took a
+     * flight is a punishment for playing.
+     */
+    civics.rebuild(build.entries, build.defOf);
+    const card = civics.away({ seconds: back.seconds, rng: rpg.rng });
+    if (card) holding.showAway(card);
+  }
+
+  /**
+   * The panel that answers the question. B puts it up with the ghost.
+   *
+   * It is handed the SAME `store.have` build mode pays out of, so a price it shows is a price the
+   * placement will agree with — the one thing a build interface must never get wrong.
+   */
+  /**
+   * §9 — the shipyard's four actions, and the state behind the screen that offers them.
+   *
+   * A named object rather than an inline one so the tests and the debug menu press exactly the
+   * buttons the panel presses. Everything is computed here rather than in js/build-ui.js because
+   * every one of these questions needs the world: which bench you are at, what the pool beside you
+   * holds, whether the ground under the pad is actually flat.
+   */
+  const shipyardActions = {
+    state: () => {
+      const y = shipYard(player);
+      const here = (build.entries || [])
+        .filter(e => e.key === 'assembler')
+        .some(e => Math.hypot(e.x - control.x, e.z - control.z) < 10);
+      const purse = payBag();
+      const stations = benchesNear();
+      const parts = PART_IDS.map(id => {
+        const sub = SUBSYSTEMS[id];
+        const next = partCost(player, id);
+        const can = canBuildPart(player, id, purse, { stations });
+        return {
+          id, name: sub.name,
+          done: (y.built[id] || 0) > 0,
+          tier: y.built[id] || 0,
+          ok: can.ok, why: can.ok ? '' : can.why,
+          costText: next ? Object.entries(next.cost).map(([k, n]) => `${matAmount(n)} ${k.replace(/_/g, ' ')}`).join(', ') : 'finished',
+        };
+      });
+      const ready = shipReady(player, 'lander');
+      const flat = padGroundOk();
+      const padPowered = !!(build.entries || []).some(e => e.powered && grid.get(e.id));
+      const padCan = !y.pad
+        ? (!flat ? { ok: false, why: `The pad wants ${PAD.flatRadius} m of level ground. Use the Level tool.` }
+          : !padPowered ? { ok: false, why: `The pad draws ${PAD.power} kW. Get a generator to it first.` }
+          : { ok: true, why: Object.entries(PAD.cost).map(([k, n]) => `${n} ${k.replace(/_/g, ' ')}`).join(', ') })
+        : { ok: false, why: 'Built.' };
+      const fuelHave = purse.count(FUEL.id);
+
+      /**
+       * §9.15 — THE FAR END. Four modules, each one lifted into orbit by a hauler.
+       *
+       * js/shipyard.js has had `stationProgress`, `stationGate` and `buildStationModule` since the
+       * shipyard landed and NOTHING imported any of them, so the whole top of the tech tree was
+       * unreachable. Shown only once the gate is passable or something is already up: a list of
+       * four things you cannot touch for twenty hours of play is noise, and this panel is busy.
+       */
+      const yardGate = stationGate(player);
+      const prog = stationProgress(player);
+      const station = (yardGate.ok || prog.done.length) ? {
+        name: STATION.name,
+        fraction: prog.fraction,
+        gateWhy: yardGate.ok ? '' : yardGate.why,
+        modules: STATION.modules.map(m => {
+          const up = prog.done.includes(m.id);
+          const short = purse.missing(m.cost);
+          const shortText = Object.entries(short).map(([k, n]) => `${n} ${k.replace(/_/g, ' ')}`).join(', ');
+          return {
+            id: m.id, name: m.name, up,
+            ok: !up && yardGate.ok && !shortText && y.fuel >= STATION.fuelPerModule && stations.includes('assembler'),
+            note: up ? 'up there'
+              : !yardGate.ok ? yardGate.why
+              : !stations.includes('assembler') ? 'a module is assembler work'
+              : shortText ? `short ${shortText}`
+              : y.fuel < STATION.fuelPerModule ? `lifting it wants ${STATION.fuelPerModule} lift fuel`
+              : m.desc,
+          };
+        }),
+      } : null;
+
+      return {
+        station,
+        atAssembler: here,
+        started: !!y.pad || PART_IDS.some(id => (y.built[id] || 0) > 0) || (player.vehicles?.owned?.ship || []).length > 0,
+        // §9.16 — one line saying what to build next, so the player is never guessing which of the
+        // seven buttons below is the one that will actually move. Another export that had been
+        // sitting in js/shipyard.js with nobody calling it.
+        next: shipNextStep(player)?.text || '',
+        summary: (player.vehicles?.owned?.ship || []).length
+          ? `${SHIPS[player.vehicles.active?.ship]?.key || 'ship'} · tanks ${y.fuel.toFixed(1)}/${FUEL.capacity}`
+          : 'Four subsystems, a pad, and a tank of fuel.',
+        pad: !!y.pad, padOk: padCan.ok, padWhy: padCan.why,
+        parts,
+        assembleOk: ready.ok,
+        assembleWhy: ready.ok ? '' : ready.why,
+        fuelOk: fuelHave > 0 && y.fuel < FUEL.capacity,
+        fuelText: fuelHave > 0
+          ? `${Math.min(fuelHave, FUEL.capacity - y.fuel).toFixed(1)} to hand · tanks ${y.fuel.toFixed(1)}/${FUEL.capacity}`
+          : `No lift fuel. A fuel synthesiser makes it. Tanks ${y.fuel.toFixed(1)}/${FUEL.capacity}`,
+      };
+    },
+    buildPad: () => {
+      const out = buildLaunchPad(player, payBag(), { stations: benchesNear(), flat: padGroundOk(), powered: true });
+      hud.log(out.ok ? 'The pad is laid. A ship can put down here now.' : out.why, out.ok ? 'level' : 'bad');
+      return out;
+    },
+    buildPart: id => {
+      const out = buildPart(player, id, payBag(), { stations: benchesNear() });
+      hud.log(out.ok ? `${out.name || SUBSYSTEMS[id].name} fitted.` : out.why, out.ok ? 'good' : 'bad');
+      return out;
+    },
+    assemble: () => {
+      const out = assembleShip(player, 'lander', payBag());
+      hud.log(out.ok ? `${out.name} stands on the pad. Fill the tanks and J takes you up.` : out.why, out.ok ? 'level' : 'bad');
+      if (out.ok) autoSave();
+      return out;
+    },
+    refuel: () => {
+      const out = refuel(player, payBag());
+      hud.log(out.ok ? `${out.added.toFixed(1)} lift fuel aboard. Tanks at ${out.fuel.toFixed(1)}.` : out.why, out.ok ? 'good' : 'bad');
+      return out;
+    },
+    /**
+     * §9.15 — a module is built AND lifted in one action, because they are one decision.
+     *
+     * `buildStationModule` checks the fuel BEFORE it takes anything out of the bag: a module that
+     * is built and then cannot be lifted would quietly eat twenty hull plates for nothing.
+     */
+    buildModule: id => {
+      const out = buildStationModule(player, id, payBag(), { stations: benchesNear() });
+      hud.log(out.ok
+        ? `${out.module?.name || 'The module'} goes up.${out.complete ? ` ${STATION.name} is finished — you can refuel and refit in orbit now.` : ''}`
+        : out.why, out.ok ? 'level' : 'bad');
+      if (out.ok) { sound.questDone(); autoSave(); }
+      return out;
+    },
+  };
+
+  /**
+   * R16 — HOLD E AND YOU ARE THE WORKER.
+   *
+   *   "Players can contribute work by holding E, and the progress bar should be indicated over the
+   *    structure. NPCs can also work automatically and the player can jump in to help make it go
+   *    faster."
+   *
+   * Everything about the rule is in js/refine.js `createHandWork`, including why it does NOT use
+   * `createGathering`. The only thing this end owns is WHERE the player is standing — `machineAt`
+   * is the same six-metre reach `interactTarget` uses for E, so the machine you press E at is the
+   * machine you then work.
+   */
+  const handWork = createHandWork({
+    works, board,
+    machineAt: () => (build.entries || [])
+      .filter(e => works.machineDefs?.[e.key])
+      .map(e => ({ e, away: Math.hypot(e.x - control.x, e.z - control.z) }))
+      .filter(r => r.away < 6)
+      .sort((a, b) => a.away - b.away)[0]?.e || null,
+    speed: () => toolSpeed(player),
+    byName: player.name || 'You',
+    onLog: (t, c) => hud.log(t, c),
+  });
+
+  /**
+   * R18 — the gear you BUILD, for the build panel. `gearRecipes()` already knows which of js/gear.js's
+   * three tables a recipe came from; this only has to quote it against what the player can reach and
+   * hand the builder a bench list. Only `buildOnly` rows: everything else is on a shop shelf, and
+   * offering both would be two prices for one thing, which is a fault this round has already fixed
+   * twice.
+   */
+  const gearPanel = {
+    /**
+     * QUOTED, never built. `craftVehicle` spends the moment it can afford to, so listing with it
+     * would build the piece on every redraw of the panel — `gearQuote` is the same checks with
+     * nothing behind them, which is why it exists.
+     */
+    list: () => gearRecipes().filter(r => r.buildOnly).map(r => {
+      const gate = gearQuote(player, r, payBag(), { stations: benchesNear() });
+      return { ...r, ok: gate.ok, why: gate.why, costText: craft.costText ? craft.costText(r.cost || {}) : '' };
+    }),
+    build: (key, slot) => {
+      const row = gearRecipes().find(r => r.key === key && r.slot === slot);
+      if (!row) return { ok: false, why: 'No such recipe.' };
+      // a vehicle is UNLOCKED; a lamp is an ITEM that goes in the bag
+      const out = row.kind === 'vehicle'
+        ? craftVehicle(player, slot, key, payBag(), { stations: benchesNear() })
+        : craftGearItem(player, key, payBag(), { stations: benchesNear(), rpg, level: player.level || 1, rng: rpg.rng });
+      if (out.ok && out.item) player.bag.push(out.item);
+      hud.log(out.ok ? `You build the ${out.name || row.name}.` : (out.why || 'Not yet.'), out.ok ? 'good' : 'bad');
+      return out;
+    },
+  };
+
+  const buildUI = createBuildUI({
+    gear: gearPanel,          // R18 — the buildOnly gear, which had no route at all
+    catalogue: structureData || null,
+    build,
+    store: { have: id => {
+      const pool = stores.poolAt?.(control.x, control.z);
+      return (pool ? stores.count(pool, id) : 0) + (materials.count?.(id) ?? 0);
+    } },
+    onLog: (t, c) => hud.log(t, c),
+    // the × leaves the mode, not just the panel — see the note beside the button
+    onClose: () => { build.setMode(false); document.body.classList.remove('building'); regrab(); },
+    mining,
+    scan: { state: () => scanState, pin: id => pinDeposit(id) },
+    works,
+    /**
+     * R16 — THE TOOL BENCH. "…change it so you build new tools."
+     *
+     * `have` is the same purse the rest of the panel spends from — the materials bag plus whatever
+     * store pool you are standing in — so building a pickaxe beside a full crate does not mean
+     * carrying six iron ingots there first.
+     */
+    tools: {
+      list: () => {
+        const have = id => {
+          const pool = stores.poolAt?.(control.x, control.z);
+          return (pool ? stores.count(pool, id) : 0) + (materials.count?.(id) ?? 0);
+        };
+        const names = resourceData?.materials || {};
+        return buildableTools(toolData, player, have, resourceData?.materials)
+          .filter(r => r.level <= player.level + 2)
+          .map(r => ({ ...r, names: Object.fromEntries(Object.entries(names).map(([k, v]) => [k, v.name || k])) }));
+      },
+      build: (kind, id) => buildTool(kind, id),
+    },
+    // the bench you are standing next to — a base ends up with sixteen and listing them all turns
+    // the panel into a spreadsheet
+    shipyard: shipyardActions,
+    /**
+     * §6.3 — the motorcycle, the car and the truck. Built at a bench, ridden with G.
+     *
+     * Only shown once you are standing at a bench that could make one, because a vehicle has no
+     * footprint and cannot go in the catalogue list with everything that does.
+     */
+    /**
+     * §6.5 / §6.8 / §6.9 — the people who live here, their fields, and the tax.
+     *
+     * js/colony.js and js/farm.js were both complete, both ticking, and both invisible: there was no
+     * way to see a citizen, accept a migrant, break a field or collect a penny.
+     */
+    /**
+     * §6.6 — the work board, and the three things that can put units into it.
+     *
+     * js/work.js has kept a board of orders since the colony landed and had no screen at all: you
+     * could not see an order, swing at one, or point a citizen at it. A unit is a unit whoever
+     * produced it, which is the whole idea, so the row carries the credit line.
+     */
+    workboard: {
+      /** One row, so the bench panel can show a machine its own order. */
+      at: stationId => {
+        const o = board.openAt(stationId)[0];
+        return o ? { id: o.id, title: o.name, progress: progressText(o), fraction: progressFraction(o), credit: creditLine(o) } : null;
+      },
+      list: () => board.open().slice(0, 6).map(o => ({
+        id: o.id,
+        // R16 — `name` is what js/work.js's `createOrder` actually sets ("Work the Furnace").
+        // There has never been a `title`, so every row on the board printed the word "refine".
+        title: o.name || o.tag || 'work',
+        progress: progressText(o),
+        fraction: progressFraction(o),
+        credit: creditLine(o),
+        left: workLeft(o),
+      })),
+      /** Citizens with no station to go to — the ones a click can actually move. */
+      idle: () => (colony.citizens || []).filter(c => !c.stationId && c.rung !== 'leaving').length,
+      swing: id => {
+        const res = board.swing(id, { units: 1, by: 'player', byName: player.name });
+        // R16 — pay the machine straight away if this was a bench's order, so the panel button and
+        // holding E at the thing itself do exactly the same thing.
+        works.collectLabour?.(board);
+        if (res.complete) { hud.log(`${res.order.name || 'The job'} is done.`, 'good'); sound.questDone(); }
+        else if (res.applied <= 0) hud.log('Nothing left to do on that one.', '');
+      },
+      assign: id => {
+        const who = (colony.citizens || []).find(c => !c.stationId && c.rung !== 'leaving');
+        if (!who) { hud.log('Nobody is free.', 'warn'); return; }
+        colony.assign(who.id, { stationId: id });
+        hud.log(`${who.name} goes to it.`, 'good');
+      },
+    },
+    holding: {
+      state: () => {
+        const beds = (build.entries || []).filter(e => e.key === 'bed').length;
+        const cit = colony.citizens?.length ?? 0;
+        if (!beds && !cit) return { show: false };
+        const a = colony.appeal?.() || { score: 0 };
+        const crop = farm.report?.() || { plots: 0, ripe: 0, meals: 0 };
+        const taxable = colony.housed?.() ?? 0;
+        return {
+          show: true,
+          summary: `${cit} of ${beds} beds · appeal ${Math.round(a.score * 100)}% · `
+            + `${crop.plots} field${crop.plots === 1 ? '' : 's'}${crop.ripe ? `, ${crop.ripe} ripe` : ''} · ${crop.meals} meals`,
+          offers: (colony.pending || []).map(o => ({ id: o.id, name: o.name, job: o.job })),
+          taxOk: taxable > 0,
+          taxNote: taxable > 0
+            ? `${taxable} housed · prosperity ${colony.prosperity().toFixed(2)}`
+            : cit ? 'Nobody is housed. A citizen with no bed pays nothing.' : 'Nobody lives here yet.',
+          fieldOk: true,
+          fieldNote: `${crop.plots} broken · they will replant what you start, never start their own`,
+        };
+      },
+      accept: id => {
+        const out = colony.accept?.(id);
+        hud.log(out?.ok ? `${out.citizen.name} moves in.` : (out?.why || 'They did not stay.'), out?.ok ? 'level' : '');
+      },
+      turnAway: id => { colony.turnAway?.(id); hud.log('You send them on their way.', ''); },
+      tax: () => {
+        const out = colony.collectTax?.();
+        if (!out) return;
+        player.gold += out.gold;
+        hud.log(out.gold > 0
+          ? `${out.gold} gold in tax from ${out.paid.length}.${out.skipped.length ? ` ${out.skipped.length} paid nothing.` : ''}`
+          : 'Nobody had anything to give.', out.gold > 0 ? 'good' : 'warn');
+      },
+      field: () => {
+        const out = farm.layPlot?.({
+          x: control.x, z: control.z, by: 'player',
+          biome: terrain.biomeAt(control.x, control.z).key,
+          at: state.elapsed / 3600,
+        });
+        hud.log(out?.ok ? `A field of ${out.plot.crop}. Your folk will work it once it is going.` : (out?.why || 'Not here.'),
+          out?.ok ? 'good' : 'warn');
+      },
+    },
+    garage: {
+      list: () => {
+        const stations = benchesNear();
+        if (!stations.length) return [];
+        const purse = payBag();
+        return GROUND_LADDER.map(key => {
+          const spec = GROUND_VEHICLES[key];
+          const owned = (player.vehicles?.owned?.ground || []).includes(key);
+          const can = canBuildVehicle(player, key, purse, { stations });
+          const rigNow = player.vehicles?.rigs?.[key] || { fuel: 0, condition: 100 };
+          const fuelHave = purse.count(GROUND_FUEL.id);
+          return {
+            key, name: spec.name, owned,
+            ok: can.ok, fuelOk: owned && fuelHave > 0 && rigNow.fuel < spec.tank,
+            note: owned
+              ? `tank ${rigNow.fuel.toFixed(1)}/${spec.tank} · ${Math.round(rigNow.condition)}% · ${Math.round(rangeLeft(player, key))} m left`
+              // the cost lives under `craft`, beside the stations that can do the work
+              : can.ok ? Object.entries(spec.craft?.cost || {}).map(([k, n]) => `${n} ${k.replace(/_/g, ' ')}`).join(', ') : can.why,
+          };
+        }).filter(v => v.owned || v.ok || GROUND_LADDER.indexOf(v.key) === 0 || (player.vehicles?.owned?.ground || []).length);
+      },
+      build: key => {
+        const out = buildVehicle(player, key, payBag(), { stations: benchesNear() });
+        hud.log(out.ok ? `${GROUND_VEHICLES[key].name} built. G gets on it.` : out.why, out.ok ? 'level' : 'bad');
+        if (out.ok) autoSave();
+        return out;
+      },
+      refuel: key => {
+        const out = refuelVehicle(player, key, payBag());
+        hud.log(out.ok ? `${out.added?.toFixed?.(1) ?? ''} ${GROUND_FUEL.name} in the tank.` : out.why, out.ok ? 'good' : 'bad');
+        return out;
+      },
+    },
+    /**
+     * R15 — THE ONE THING TO DO NEXT.
+     *
+     * Every field here is read from what is actually standing rather than from a flag somebody
+     * remembered to set — which is the only way a hint can be trusted, because a flag that drifts
+     * out of step tells you to do something you have already done.
+     */
+    nextStep: () => {
+      const entries = build.entries || [];
+      const defOf = k => build.defOf?.(k) || null;
+      const machineOf = e => works.get?.(e.id) || null;
+      const smelters = entries.filter(e => works.machineDefs?.[e.key]).map(machineOf).filter(Boolean);
+      const fuels = Object.keys(refiningData?.machines?.furnace?.fuels || { log: 1, charcoal: 1, coal: 1 });
+      const pools = stores.pools?.() || [];
+      const haveAnywhere = id => pools.reduce((n, p) => n + stores.count(p, id), 0) + (materials.count?.(id) ?? 0);
+      const drills = mining.overview?.() || [];
+      return chainNextStep({
+        have: haveAnywhere,
+        toolTier: resourceData?.tools?.[toolTierFor(player)]?.tier ?? 0,
+        hasStore: pools.length > 0,
+        // R17 — "is there a FURNACE", not "is there a bench". `smelters` is every machine in
+        // data/refining.json, which now includes the Crafting Table, the Anvil, the Workbench and
+        // the Garage, none of which smelts anything. Every tier-0 burner has a `fuels` block.
+        hasSmelter: smelters.some(m => Object.keys(m.def?.fuels || {}).length > 0),
+        hasFuel: fuels.some(f => haveAnywhere(f) > 0),
+        hasDrill: entries.some(e => defOf(e.key)?.needs === 'node'),
+        hasRoute: drills.some(d => d.routed || d.deliveredPerMinute > 0),
+        hasPower: entries.some(e => defOf(e.key)?.power?.make > 0),
+        hasLink: (logistics.links || []).length > 0,
+        smelting: smelters.some(m => (m.queue || []).length > 0),
+        outposts: (build.outposts?.() || []).length,
+      });
+    },
+    nearest: () => (build.entries || [])
+      .filter(e => works.machineDefs?.[e.key])
+      .map(e => ({ e, away: Math.hypot(e.x - control.x, e.z - control.z) }))
+      .filter(r => r.away < 8)
+      .sort((a, b) => a.away - b.away)[0]?.e || null,
+  });
+  document.body.append(buildUI.root);
+
+  /**
+   * The mouse, in build mode. Registered HERE rather than beside `createInput`, because `build` is
+   * a `const` declared further down and a click during the load would have hit it before it exists.
+   *
+   * A click counter rather than a flag: a player putting a line of fence posts down clicks faster
+   * than the frame rate on a bad frame, and a dropped post feels like the game ignoring you.
+   */
+  /**
+   * A CLICK IS A CLICK; A DRAG TURNS THE CAMERA.
+   *
+   * With the pointer freed in build mode (see `input.setBlocked`) the left button does two jobs:
+   * dragging the view round, and putting a piece down. They are told apart the way every desktop
+   * application tells them apart — by whether the mouse moved between press and release. Six pixels
+   * is comfortably more than a hand shakes and far less than a deliberate drag.
+   */
+  let downAt = null;
+  renderer.domElement.addEventListener('mousedown', e => {
+    if (!build.mode || e.button !== 0) return;
+    downAt = [e.clientX, e.clientY];
+  });
+  window.addEventListener('mouseup', e => {
+    if (!build.mode || e.button !== 0 || !downAt) return;
+    const moved = Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]);
+    downAt = null;
+    if (moved <= 6) buildClicks++;
+  });
+  /**
+   * WHERE THE CURSOR IS, in normalised device coordinates.
+   *
+   * Only used while the pointer is free. With it locked there is no cursor and the camera's own
+   * heading is the aim, which is what `aimSpot` falls back to.
+   */
+  renderer.domElement.addEventListener('mousemove', e => {
+    const r = renderer.domElement.getBoundingClientRect();
+    pointerNdc[0] = ((e.clientX - r.left) / r.width) * 2 - 1;
+    pointerNdc[1] = -((e.clientY - r.top) / r.height) * 2 + 1;
+  });
+  renderer.domElement.addEventListener('wheel', e => {
+    if (build.mode) {
+      e.preventDefault();
+      // the terrain tools have no ghost to turn, so the wheel sizes the brush for them instead
+      if (build.tool === 'build') build.rotate(Math.sign(e.deltaY) * (Math.PI / 8));
+      else build.setRadius(build.radius - Math.sign(e.deltaY) * 2);
+      return;
+    }
+    /**
+     * R25 — the wheel no longer changes what is in your hands. The weapon/tool/scanner/rod ring
+     * (R16) overlapped the "E to …" prompt, and E already works every seam and every tree with the
+     * tool in your Tool slot whatever you hold, so the ring only ever added a way to be holding the
+     * wrong thing. The scanner is X and the Command Rod is R now (js/settings.js BINDINGS).
+     */
+  }, { passive: false });
+
+  if (save?.build) {
+    build.load?.(save.build);
+    // the drills and their routes, now that the pieces they hang off are back
+    if (save.mining) { mining.load(save.mining, id => (build.entries || []).find(e => e.id === id) || null); drawRoutes(); }
+    // …and everything that came back joins the grid and the pools again, or a reloaded base is a
+    // field of dead machinery beside a dark pad
+    // R18 — one pass for the whole reloaded base, rather than once per piece
+    rebuildBuildSolids();
+    for (const entry of build.entries || []) {
+      joinSystems(entry, build.defOf(entry.key));
+      civics.rebuild(build.entries, build.defOf);
+      if (entry.waypoint) {
+        waypoints.addBuilt({ id: entry.id, name: entry.name, x: entry.x, z: entry.z, claim: entry.claim, powered: !!entry.powered });
+      }
+    }
+  }
+
+  // an old save keeps the ship it already has — the gate only applies to a fresh start
+  migrateShipyard(player);
+  /**
+   * `?ship=1` starts with one.
+   *
+   * The gate is §9's whole point and stays real in ordinary play. This exists for the flight tests,
+   * which are about how the drive handles and should not have to mine ore first, and for anybody
+   * who wants to look at space without earning it.
+   */
+  if (params.get('ship') === '1') grantShip(player);
+
+  sites.setChests?.(chests);
+
+  /** Fill a camp or a lair with what lives there. Called once per site as you come near it. */
+  /**
+   * Fill a stronghold with what lives there. Called once per site as you come near it.
+   *
+   * The body of this used to live here: a champion, four or five of whatever the biome has, and a
+   * coin-flip between an iron and a gilded chest, for every site in the game whether it was a bandit
+   * camp or a castle. `js/sites.js` knows far more than that now — each of the eight stronghold types
+   * declares its own garrison, a named boss with an epithet, prisoners, and a chest grade that climbs
+   * with the tier — so the work belongs there and this hands it the things only main.js has: the
+   * enemy field, the chest pool, and the namer.
+   *
+   * A lair keeps its own path, because a lair is one boss and nothing else, and `bossUnit` is what
+   * the rest of the file watches to know the world boss is up.
+   */
+  async function populateSite(site) {
+    const level = site.level || player.level;
+    if (site.kind === 'lair') {
+      const bossDef = field.bossFor(level, site.x, site.z) || (bestiary.bosses || [])[0];
+      if (!bossDef) return;
+      const unit = await field.placeBoss(bossDef, level, site.x, site.z);
+      if (unit) {
+        bossUnit = unit;
+        hud.log(`${unit.name} keeps this place.`, 'bad');
+        sound.combat('death', { beast: true });
+      }
+      return;
+    }
+    const filled = await sites.populate(site, {
+      field, chests, level,
+      nameFor: nameRare,
+    });
+
+    /**
+     * PRISONERS ARE PEOPLE, NOT A COUNTER.
+     *
+     * `sites.populate` has returned a prisoner count since the strongholds landed and nothing did
+     * anything with it — so a site whose whole point was that somebody was being held in it played
+     * out exactly like one that was not. They stand in the middle of the camp, they have names and
+     * faces, and `E` talks to them the same as anybody else. What frees them is the boss going
+     * down, which is checked in `creditKill`.
+     */
+    const held = filled?.prisoners || 0;
+    if (held > 0) {
+      site.heldFolk = [];
+      /**
+       * R18 — SOMEWHERE YOU CAN ACTUALLY REACH THEM.
+       *
+       * This put prisoners on a 3.4 m ring around the site centre, which is exactly where a
+       * stronghold's central buildings stand — so a prisoner was inside a solid. Nobody noticed
+       * while set-piece colliders were being wiped by every world rebuild (you could walk through
+       * the cage); the moment sites kept their colliders, `prisoners.spec.js` failed with the
+       * player shoved 7.85 m away and `folk.nearest` finding nobody at all.
+       *
+       * The spec's own title is the requirement — "a prisoner is a person you can walk up to, not
+       * a number" — so the answer is to place them where that is true, not to relax the check.
+       * Walks out from the ring until the ground is clear of everything the player collides with,
+       * and falls back to the original spot rather than refusing to place anybody.
+       */
+      const clearOf = (x, z) => !(control.obstacles || []).some(o => o.blocked?.(x, z, 0.6));
+      const spotFor = (i, n) => {
+        const base = (i / n) * Math.PI * 2;
+        for (let r = 3.4; r <= 14; r += 1.6) {
+          for (let k = 0; k < 8; k++) {
+            const a = base + (k / 8) * Math.PI * 2;
+            const x = site.x + Math.cos(a) * r, z = site.z + Math.sin(a) * r;
+            if (clearOf(x, z)) return { x, z };
+          }
+        }
+        return { x: site.x + Math.cos(base) * 3.4, z: site.z + Math.sin(base) * 3.4 };
+      };
+      for (let i = 0; i < held; i++) {
+        const at = spotFor(i, held);
+        const who = await folk.spawnOne({
+          groupId: `prisoner:${site.id}`,
+          role: 'villager',
+          roleName: 'prisoner',
+          x: at.x,
+          z: at.z,
+          greeting: 'Keep your voice down. Kill the one in charge and we can all walk out of here.',
+          seed,
+        });
+        if (who) { who.captive = true; site.heldFolk.push(who); }
+      }
+      site.bossUnit = filled?.boss || null;
+      if (site.heldFolk.length) {
+        hud.log(`Somebody is being held in ${site.name}. ${site.heldFolk.length === 1 ? 'One of them.' : `${site.heldFolk.length} of them.`}`, 'bad');
+      }
+    }
+  }
+
+  /**
+   * THE ONE IN CHARGE IS DOWN, SO THE PEOPLE IN THE CELLS WALK OUT.
+   *
+   * Hung off the BOSS rather than off `creditKill`, and that is not a detail. There are two site
+   * lists: `holdings.sitesIn` is the territory record (who holds what, a few hundred bytes in the
+   * save) and `js/sites.js` is the physical set piece standing on the ground. They describe the
+   * same places and do NOT share coordinates, so a clear credited against one never reaches the
+   * other. The boss is a thing that exists in the world, which makes it the honest hook — and it
+   * is also exactly what the prisoners themselves tell you to do.
+   */
+  function freePrisonersOf(unit) {
+    if (!unit) return;
+    const site = (sites.sites || []).find(s => (s.heldFolk || []).length && s.bossUnit === unit);
+    if (!site) return;
+    const freed = site.heldFolk;
+    site.heldFolk = [];
+    for (const who of freed) {
+      who.captive = false;
+      who.roleName = 'freed';
+      who.greeting = 'You came. I had stopped expecting anybody.';
+    }
+    player.freed = (player.freed || 0) + freed.length;
+    // R22: was `40 × freed × playerLevel`, the one award in the game that scaled LINEARLY with your
+    // own level and so paid a level-40 character ten times what it paid a level-4 one for the same
+    // door. It is an event like any other now, priced by the zone it happened in.
+    rpg.gainXp(player, eventXp(40 * freed.length, { zoneLevel: zoneLevelAt(site.x, site.z), kind: 'event', cfg: xpCfg }));
+    hud.log(freed.length === 1
+      ? `${freed[0].name} walks out of ${site.name} behind you.`
+      : `${freed.length} walk out of ${site.name} behind you.`, 'level');
+    sound.questDone();
+
+    // the rest of what the stronghold pays, which nothing read either — see BUILD-MODE.md §19
+    const pays = site.gives || site.spec?.gives || {};
+    if (pays.xp) rpg.gainXp(player, eventXp(pays.xp, { zoneLevel: zoneLevelAt(site.x, site.z), kind: 'event', cfg: xpCfg }));
+    if (pays.loot) {
+      chests.place(pays.loot === 'legendary' ? 'gilded' : 'iron', site.x + 2, site.z + 2,
+        { level: player.level, floor: pays.loot, name: `${site.name}: the spoils` });
+      hud.log(`Something ${pays.loot} is in there.`, 'loot');
+    }
+    if (pays.perkPoint) {
+      player.bonusPerks = (player.bonusPerks || 0) + pays.perkPoint;
+      hud.log(`A perk point for taking ${site.name}.`, 'level');
+    }
+    if (pays.standing) standings.deed(pays.standing, 'stronghold_taken');
+    const here = zones.at(site.x, site.z);
+    if (pays.revealZone && here) { map.revealZone?.(here.id); hud.log(`${here.name} goes on your chart.`, 'good'); }
+    if (pays.opensDungeon) hud.log('Behind the keep, a stair goes down. It was not there before.', 'loot');
+    if (pays.liftsSiege && here) {
+      holdings.press?.(here.id, 0.18, { claim: 0.1 });
+      hud.log(`The siege on ${here.name} lifts.`, 'level');
+    }
+    if (here) rumours.add(`somebody got ${freed.length === 1 ? 'a prisoner' : 'prisoners'} out of ${site.name}`,
+      { zone: here, from: 'one of them' });
+    hud.setPlayer(player);
+    autoSave();
+  }
+
+  // ---------------------------------------------------------------- dungeons
+  //
+  // Going inside swaps the FLOOR — the controller, the enemy field and the companions all read
+  // their terrain through a binding for exactly this — hides the surface, and turns the lights out.
+  // Coming back out puts everything where it was.
+  let dungeon = null;
+  let bossUnit = null;
+  /** The last thing the quest helper said, so it does not say it sixty times a second. */
+  let lastHelper = null;
+
+  /**
+   * GROUND THAT KEEPS BURNING — the `linger` talent, which had nothing to land in.
+   *
+   * `js/skilltalents.js` has listed `ground` and `groundRadius` under PENDING_MODS since round 7
+   * with the note "no lingering ground pool exists", and the talent is offered on four of the six
+   * skill trees. Taking it did nothing whatsoever.
+   *
+   * A pool is four numbers and a ring. It ticks on a CLOCK rather than per frame — a pool paying
+   * `perSecond * dt` sixty times a second reads as "1 damage" however correct the total, which is
+   * the same trap the DoTs fell into in round 6 and is written up in RPG.md.
+   */
+  const pools = [];
+  /**
+   * The disc on the floor. Drawn here rather than through spellfx because spellfx has no ground
+   * effect — and a pool you cannot see is precisely the failure this whole round was about.
+   */
+  const POOL_TINT = {
+    fire: '#ff7a3a', frost: '#8fd6ff', shock: '#ffe86a', poison: '#9ede6a',
+    shadow: '#c090ff', holy: '#ffe6a8', nature: '#8ad66a', arcane: '#b79cf5', physical: '#d8dcea',
+  };
+  /**
+   * R25 — STORM ORBS. `player.skillAuras` is read by js/rpg.js `auraList`, so each orb is one more
+   * `nearestOnly` aura run by js/uniques.js `tickAuras` — the same clock, the same targeting and the
+   * same status hand-off every pulsing power already uses. The orbs are only drawn here.
+   */
+  const orbs = [];
+  function startOrbs(plan) {
+    stopOrbs();
+    const o = plan.orbs;
+    const clock = rpg.fx.rt(player).auraClock || (rpg.fx.rt(player).auraClock = {});
+    player.skillAuras = [];
+    for (let k = 0; k < o.count; k++) {
+      const id = `storm_orb_${k}`;
+      // staggered, so three orbs crack one after another rather than all at once
+      clock[id] = -k * (o.every / o.count);
+      player.skillAuras.push({ id, left: o.seconds, every: o.every, radius: o.radius, power: plan.mult, element: plan.element, nearestOnly: true, status: o.status || null, always: true });
+      const handle = spellfx.orbitOrb?.({ element: plan.element, size: 0.35 }) || null;
+      orbs.push({ id, handle, phase: (k / o.count) * Math.PI * 2 });
+    }
+    hud.log(`${plan.skill.name}: ${o.count} orbs circle you for ${o.seconds}s.`, 'good');
+  }
+  function stopOrbs() {
+    for (const orb of orbs) orb.handle?.dispose?.();
+    orbs.length = 0;
+    player.skillAuras = [];
+  }
+  function tickSkillLeftovers(dt, fired = []) {
+    // the orbs: count down, circle the player, flash when one fires
+    if (player.skillAuras?.length) {
+      for (const a of player.skillAuras) a.left -= dt;
+      if (player.skillAuras.every(a => a.left <= 0)) stopOrbs();
+      else {
+        const t = performance.now() / 1000;
+        for (const orb of orbs) {
+          const ang = orb.phase + t * 2.2;
+          orb.handle?.setPosition?.(new THREE.Vector3(control.x + Math.cos(ang) * 1.3, control.y + 1.3 + Math.sin(t * 3 + orb.phase) * 0.15, control.z + Math.sin(ang) * 1.3));
+          if (fired.some(f => f.id === orb.id)) orb.handle?.pulse?.();
+        }
+      }
+    }
+    // Ember Stride: a burning patch every `step` metres you move
+    const tr = player.trail;
+    if (tr) {
+      tr.left -= dt;
+      if (tr.left <= 0 || player.hp <= 0) { player.trail = null; return; }
+      if (Math.hypot(control.x - tr.lastX, control.z - tr.lastZ) >= tr.step) {
+        tr.lastX = control.x; tr.lastZ = control.z;
+        dropPool({ x: control.x, z: control.z, r: tr.radius, seconds: tr.burns, element: tr.element, power: tr.power });
+        spellfx.footfall?.({ at: new THREE.Vector3(control.x, terrain.heightAt(control.x, control.z), control.z), element: tr.element });
+      }
+    }
+  }
+
+  function dropPool({ x, z, r, seconds, element = 'physical', power = 0.5 }) {
+    const geo = new THREE.CircleGeometry(r, 24);
+    const mat = new THREE.MeshBasicMaterial({
+      color: new THREE.Color(POOL_TINT[element] || POOL_TINT.physical),
+      transparent: true, opacity: 0.32, depthWrite: false, side: THREE.DoubleSide,
+    });
+    const ring = new THREE.Mesh(geo, mat);
+    ring.rotation.x = -Math.PI / 2;
+    // a hand's breadth above the ground so it does not fight the terrain for the same pixels
+    ring.position.set(x, terrain.heightAt(x, z) + 0.08, z);
+    scene.add(ring);
+    pools.push({ x, z, r, left: seconds, life: seconds, every: 0.75, next: 0.75, element, power, ring });
+    return pools[pools.length - 1];
+  }
+  function tickPools(dt) {
+    for (let i = pools.length - 1; i >= 0; i--) {
+      const p = pools[i];
+      p.left -= dt;
+      p.next -= dt;
+      if (p.next <= 0) {
+        p.next = p.every;
+        const hits = field.strikeArea(p.x, p.z, p.r, player, { falloff: 0.2, element: p.element, power: p.power, proc: true });
+        /**
+         * R23 — THIS CALLED `brandHit`, WHICH DOES NOT EXIST HERE.
+         *
+         * `brandHit` is a `const` declared inside the frame loop's `swingWith` block, ~3,600 lines
+         * down; this function is at the top of `begin` and cannot see it. So the first time a pool
+         * touched anything — the Ground talent, a charged staff's wall — the frame threw
+         * "brandHit is not defined" and the pool never paid a second tick. It went unnoticed because
+         * nothing in the round-23 list had made a pool you could stand an enemy in until Pyrewright.
+         * A pool now lands its own element's status and reports its own numbers.
+         */
+        const leaves = statusForElement(p.element);
+        for (const h of hits) {
+          if (leaves && skillData.statuses[leaves] && h.result?.amount > 0) {
+            landStatus(leaves, skillData.statuses[leaves], h.enemy, Math.max(1, h.result.amount * 0.7));
+          }
+          reportHit(h.enemy, h.result);
+        }
+      }
+      // it fades as it burns out, so you can see how long you have left to stand clear of it
+      if (p.ring) p.ring.material.opacity = 0.32 * Math.max(0, p.left / p.life);
+      if (p.left <= 0) {
+        if (p.ring) {
+          scene.remove(p.ring);
+          p.ring.geometry.dispose();
+          p.ring.material.dispose();
+        }
+        pools.splice(i, 1);
+      }
+    }
+  }
+  let surfaceSpot = null;
+  let dungeonsCleared = new Set(save?.dungeonsCleared || []);
+
+  function surfaceVisible(on) {
+    view.setVisible?.(on);
+    props.setVisible?.(on);
+    features.setVisible?.(on);
+    weatherView.setVisible?.(on);
+    chests.clear();
+    gates.mesh.visible = on;
+  }
+
+  /**
+   * R16 — GO IN. The door is the same door; what is behind it is now a parameter.
+   *
+   *   "Add about 20 new overworld events that feature an instance system… These take you to a
+   *    different zone similar to our current dungeon system where a quest can be found, or a boss
+   *    to kill."
+   *
+   * `node.instance` is an entry from data/instances.json, put on the node by js/sites.js's
+   * `mouths()`. Everything it carries is optional: a node without one builds exactly the dungeon
+   * this function has always built.
+   */
+  async function enterDungeon(node) {
+    if (dungeon) return;
+    const inst = node.instance || null;
+    const level = Math.max(1, (node.zone?.midLevel ?? player.level) + (inst?.interior?.overLevel ?? 1));
+    hud.log(`You go down into ${node.name}.`, 'level');
+    if (inst?.blurb) hud.log(inst.blurb, '');
+    state.paused = true;
+    surfaceSpot = { x: control.x, z: control.z };
+    field.clear();
+
+    const families = familiesOf(terrain.biomeIdAt(node.x, node.z));
+    dungeon = await createDungeon(scene, {
+      seed: (seed * 31 + node.id) >>> 0, balance, node, level, rpg,
+      look: inst?.interior?.look || lookForBiome(families), name: node.name,
+      surface: { ...terrain, spawn: { x: node.x, z: node.z } },
+      // the shape of the place, the id that identifies it, and what it holds
+      shape: inst?.interior || null,
+      nodeId: node.id,
+      instance: inst,
+    });
+
+    surfaceVisible(false);
+    control.setTerrain(dungeon.terrain, dungeon.entryPoint());
+    control.obstacles = [dungeon.solids];
+    field.terrain = dungeon.terrain;
+    field.solids = [dungeon.solids];
+    field.rankBonus = 1.7;                     // more champions and rares than out in the open
+    pets.setTerrain(dungeon.terrain);
+    chests = dungeon.chests;
+
+    // a pack in every room but the one you came in by, and the boss at the far end
+    const packs = inst?.interior?.packs || balance.dungeon?.packsPerRoom || [1, 3];
+    /**
+     * An instance can say what LIVES in it — a beast warren is beasts, an undercroft is undead.
+     * The filter falls back to the unfiltered pool when it empties, which is not a nicety: the
+     * bestiary is filtered by biome and level first, so a families list that happens to match
+     * nothing on this world would otherwise leave the whole place empty and silent.
+     */
+    const wantFamilies = inst?.interior?.families || null;
+    const poolFor = (x, z, lv) => {
+      const all = field.defsFor(x, z, lv);
+      if (!wantFamilies?.length) return all;
+      const narrowed = all.filter(d => wantFamilies.includes(d.family));
+      return narrowed.length ? narrowed : all;
+    };
+    for (const room of dungeon.rooms) {
+      if (room.kind === 'entrance') continue;
+      if (room.kind === 'boss') continue;
+      const want = packs[0] + Math.floor(field.rng() * (packs[1] - packs[0] + 1));
+      for (let i = 0; i < want; i++) {
+        const pool = poolFor(node.x, node.z, level);
+        if (!pool.length) break;
+        const def = field.rng.pick(pool);
+        const rank = field.rpg.rollRank(field.rng, { bonus: field.rankBonus });
+        const x = room.x + (field.rng() - 0.5) * (room.w - 3);
+        const z = room.z + (field.rng() - 0.5) * (room.h - 3);
+        field.addRanked(def, level, x, z, rank);
+      }
+    }
+    if (dungeon.bossRoom !== dungeon.entrance) {
+      /**
+       * An instance may NAME its boss — that is what makes a dragon's lair a dragon's lair and not
+       * a big room with whatever the biome happened to offer. A named one that is not in the
+       * bestiary falls back rather than leaving the far room empty.
+       */
+      const want = inst?.holds?.boss || null;
+      const named = want?.id ? (bestiary.bosses || []).concat(bestiary.enemies || []).find(b => b.id === want.id) : null;
+      const byFamily = !named && want?.family
+        ? (bestiary.bosses || []).filter(b => b.family === want.family)
+        : [];
+      const bossDef = named
+        || (byFamily.length ? field.rng.pick(byFamily) : null)
+        || field.bossFor(level, node.x, node.z)
+        || (bestiary.bosses || [])[0];
+      if (bossDef) {
+        bossUnit = await field.placeBoss(bossDef, level, dungeon.bossRoom.x, dungeon.bossRoom.z);
+      }
+    }
+
+    /**
+     * WHAT ELSE IS DOWN HERE. An instance that is only a boss is a corridor with a fight at the
+     * end of it — `holds` is what makes each of the twenty different.
+     */
+    if (inst?.holds) {
+      const H = inst.holds;
+      // the cache: one or more chests of a named grade, in the boss room or scattered
+      if (H.cache && dungeon.chests?.place) {
+        const n = 1 + (H.cache.extra || 0);
+        for (let i = 0; i < n; i++) {
+          const room = H.cache.room === 'boss'
+            ? dungeon.bossRoom
+            : dungeon.rooms[1 + Math.floor(field.rng() * Math.max(1, dungeon.rooms.length - 1))];
+          if (!room) continue;
+          dungeon.chests.place(H.cache.kind || 'iron',
+            room.x + (field.rng() - 0.5) * (room.w - 4),
+            room.z + (field.rng() - 0.5) * (room.h - 4),
+            { key: `inst:${node.id}:cache${i}`, level, name: H.cache.name || 'A cache' });
+        }
+      }
+      // somebody to get out, standing in a room that is not the one you came in by
+      if (H.prisoner?.count && folk?.spawnOne) {
+        for (let i = 0; i < H.prisoner.count; i++) {
+          const room = dungeon.rooms[1 + Math.floor(field.rng() * Math.max(1, dungeon.rooms.length - 1))];
+          if (!room) continue;
+          folk.spawnOne({
+            groupId: `inst:${node.id}`, role: 'villager', roleName: H.prisoner.who || 'Prisoner',
+            x: room.x, z: room.z, seed: node.id + i,
+            greeting: 'Kill whatever is at the end of this and I will walk out behind you.',
+          }).catch(() => {});
+        }
+      }
+      // something written on a wall, which is the cheapest way a place says who used to be here
+      if (H.lore) hud.log(`${H.lore.title}. ${H.lore.text}`, '');
+      // and a job you find down here rather than being handed in a town
+      if (H.quest && questLog?.add && makeQuest) {
+        const q = makeQuest('clear', {
+          rng: rpg.rng, level, giver: null,
+          enemies: bestiary.enemies, nodes: [], terrain,
+          from: node.name, at: { x: node.x, z: node.z },
+          wrapM: terrain.widthM, zoneAt: (x, z) => zones.at(x, z),
+        });
+        if (q) {
+          q.title = H.quest.title || q.title;
+          q.text = H.quest.text || q.text;
+          q.found = true;
+          q.reward = { ...q.reward, ...(H.quest.reward || {}) };
+          /**
+           * `to: "instance:<id>"` is what makes one of these places lead to another — the ash tomb
+           * is how you learn where the wyrm's hold is. The place is put on the ground NOW, so the
+           * job has a real destination rather than a name; a job that points nowhere is the dead
+           * pointer this round set out to remove.
+           */
+          const to = String(H.quest.to || '');
+          if (to.startsWith('instance:')) {
+            const led = revealInstance(to.slice('instance:'.length), { x: node.x, z: node.z });
+            if (led) q.place = { x: led.x, z: led.z, name: led.name, cell: led.cell };
+          }
+          questLog.add(q);
+          markers.syncQuests(questLog.active);
+          hud.log(`${H.quest.found || 'You find something here.'} — ${q.title}`, 'level');
+        }
+      }
+    }
+    /**
+     * THE DEEP VEINS, WHICH ARE THE ONLY PLACE DEEP VEINS BELONG.
+     *
+     * Roughly twice what an outcrop holds, hardness 2, and something is usually standing in front
+     * of it — which is exactly what the data has always said and what nothing ever built. One per
+     * room or so, never in the room you came in by, so going down is a mining decision as well as a
+     * fighting one. The pack that was already placed in that room IS the guard.
+     */
+    {
+      const rooms = dungeon.rooms.filter(r => r.kind !== 'entrance');
+      const veins = [];
+      for (const room of rooms) {
+        if (field.rng() > 0.55) continue;
+        const x = room.x + (field.rng() - 0.5) * (room.w - 4);
+        const z = room.z + (field.rng() - 0.5) * (room.h - 4);
+        const made = placedNode({
+          data: resourceData || {}, rng: field.rng, kindId: 'deep_vein', x, z,
+          band: planet?.band || 'medium', id: `dv${veins.length}`,
+        });
+        if (made) veins.push(made);
+      }
+      dungeonOre = veins.length ? createNodePatch(veins, resourceData || {}) : null;
+    }
+
+    field.paused = true;                        // nothing wanders in from outside: this is a closed place
+    light.setTorch(true);
+    scene.fog.near = 2; scene.fog.far = 70;
+    scene.fog.color.set(dungeon.look.fog);
+    node.entered = true;
+    state.paused = false;
+    hud.log('It is very dark. Your torch is lit.', '');
+    autoSave();
+  }
+
+  function leaveDungeon() {
+    if (!dungeon) return;
+    dungeonOre = null;                          // the floor's seams go with the floor
+    field.clear();
+    bossUnit = null;
+    hud.boss(null);
+    dungeon.dispose();
+    dungeon = null;
+    field.terrain = terrain;
+    field.solids = [props.solids, features.solids, buildSolids, gateSolids, siteSolids];
+    field.rankBonus = 1;
+    field.paused = false;
+    pets.setTerrain(terrain);
+    chests = createChests(scene, terrain, { seed, balance, zones, rpg, collide: props.solids });
+    control.setTerrain(terrain, surfaceSpot ? { ...surfaceSpot, y: null } : null);
+    control.obstacles = [props.solids, features.solids, buildSolids, gateSolids, siteSolids];
+    surfaceVisible(true);
+    rebuildWorldAround(true);
+    hud.log('Daylight, or what passes for it.', 'good');
+    autoSave();
+  }
+
+  /** The boss of the dungeon you are standing in went down. Pay for it. */
+  function onDungeonBossDown() {
+    if (!dungeon) return;
+    /**
+     * R16 — MATCHED BY ID, NOT BY NAME.
+     *
+     * `gates.nodes.find(g => g.name === dungeon.name)` was fine while World Forge was the only
+     * thing making mouths and every one of them had its own generated name. Twenty instance kinds
+     * with one name each makes a collision likely rather than theoretical, and the consequence is
+     * that clearing one barrow marks a different barrow cleared.
+     */
+    const node = gates.nodes.find(g => g.id === dungeon.nodeId)
+      || gates.nodes.find(g => g.name === dungeon.name);
+    if (node) node.cleared = true;
+    dungeonsCleared.add(dungeon.nodeId != null ? `n${dungeon.nodeId}` : dungeon.name);
+    const inst = dungeon.instance || null;
+    const cfg = balance.dungeon || {};
+    const goldSpan = inst?.gives?.gold || cfg.clearRewardGold || [80, 240];
+    const gold = Math.round(goldSpan[0] + field.rng() * (goldSpan[1] - goldSpan[0]) * (1 + dungeon.level * 0.1));
+    const wantSpan = cfg.clearRewardItems || [1, 3];
+    const want = wantSpan[0] + Math.floor(field.rng() * (wantSpan[1] - wantSpan[0] + 1));
+    const items = [];
+    for (let i = 0; i < want; i++) {
+      const it = rpg.rollDrop({ level: dungeon.level, rng: rpg.rng, magicFind: player.derived.magicFind, chance: 1, rarityBoost: 2, floor: i === 0 ? 'rare' : null });
+      if (it) items.push(it);
+    }
+    const mats = { dust: 2 + Math.floor(field.rng() * 3), core: 1 };
+    takeHaul({ items, gold, mats });
+    /**
+     * R16 — and everything else an instance promised. Same `gives` vocabulary data/landmarks.json
+     * uses, so a place that says `perkPoint` or `standing` gets it wherever it is written down.
+     */
+    if (inst?.gives) {
+      const g = inst.gives;
+      if (g.xp) {
+        const paid = eventXp(g.xp, { zoneLevel: zoneLevelAt(control.x, control.z), kind: 'event', cfg: xpCfg });
+        const levels = rpg.gainXp(player, paid);
+        hud.log(`${paid} experience.`, 'level');
+        if (levels > 0) hud.log(`Level ${player.level}.`, 'level');
+      }
+      if (g.perkPoint) {
+        player.bonusPerks = (player.bonusPerks || 0) + g.perkPoint;
+        hud.log('A perk point, for going all the way in.', 'level');
+      }
+      if (g.standing) standings.deed(g.standing, 'job_done');
+      if (g.revealZone && hud.here) { map.revealZone?.(hud.here.id); hud.log(`${hud.here.name} goes on your chart.`, 'good'); }
+    }
+    campaign.onKill('dungeon_cleared');
+    for (const q of questLog.onClear?.({ name: dungeon.name }) || []) hud.log(`${q.title}: cleared.`, 'good');
+    sound.questDone();
+    rewards({
+      title: 'Dungeon cleared', subtitle: `${dungeon.name} is quiet now.`,
+      gold, xp: 0, items: items.map(rewardItem),
+      extras: [{ kind: 'quest', text: `${Object.entries(mats).map(([k, v]) => `${v} ${craft.M[k]?.name || k}`).join(', ')} recovered` }],
+      button: 'Take it',
+    });
+  }
+
+  /**
+   * `E` in the world: open a chest, go into a dungeon, come back out, or talk to somebody. One key,
+   * and the prompt above the hint bar always says which of those it is about to do.
+   */
+  function interactTarget() {
+    if (dungeon) {
+      const exit = dungeon.exitPoint();
+      if (Math.hypot(control.x - exit.x, control.z - exit.z) < 4) return { kind: 'leave' };
+    }
+    const chest = chests.nearest(control.x, control.z);
+    if (chest) return { kind: 'chest', chest };
+    if (!dungeon) {
+      const gate = gates.nearest(control.x, control.z);
+      if (gate) return { kind: 'dungeon', gate };
+      const who = folk.nearest(control.x, control.z);
+      if (who) return { kind: 'talk', who };
+      /**
+       * R22 — "E TO TALK TO MERCENARY CAPTAIN" WITH NOBODY ANYWHERE NEAR YOU.
+       *
+       *   "the popup didn't go away until I walked almost 20 feet away. I was NOT standing next to
+       *    an NPC."
+       *
+       * Twenty feet is six metres, and this line was TWENTY-TWO. Worse, js/wanderers.js is pure
+       * JavaScript by design — "no Three.js, no DOM" is the first line of the file — so a wanderer
+       * is a name and a pair of coordinates and has never had a body. The prompt was offering a
+       * conversation with an empty field, and the widening to 22 m was an honest attempt to fix the
+       * opposite complaint (at 6 m on a 57 km world you only met somebody by walking over the exact
+       * spot) that made this one much more visible.
+       *
+       * Both halves are fixed rather than one: `keepWandererBodies` below puts a REAL PERSON on the
+       * ground for every wanderer within sight, so there is something to walk up to and something to
+       * see from a distance — and this radius drops to the same `talkRange` the townsfolk use, so
+       * the prompt appears when you are next to them and goes away when you are not.
+       */
+      const met = roadFolk.near(control.x, control.z, WANDERER_TALK)[0];
+      if (met) return { kind: 'wanderer', met };
+      const mark = hud.here && holdings.landmarksIn(hud.here.id)
+        .find(l => l.state !== 'done' && Math.hypot(l.x - control.x, l.z - control.z) < 14);
+      if (mark) return { kind: 'landmark', mark };
+
+      /**
+       * …and a landmark you can SEE, not only one the territory layer knows about.
+       *
+       * `landmarksIn` lists what the zone record holds. The set pieces standing on the ground come
+       * from `js/sites.js`, and nothing joined the two up — so you could walk to a ring of standing
+       * stones, look straight at it, press E, and be told there is nothing here. Every landmark site
+       * is shaped with the `cell`/`steps`/`gives` fields `atLandmark` reads, so it can be handed
+       * straight in.
+       */
+      /**
+       * R21 — …and a SPENT landmark is not a target any more.
+       *
+       * The territory branch just above already filters `l.state !== 'done'`; this branch, which is
+       * the one that actually fires for a set piece you can see, had no such test at all. That is
+       * why a used Forge Fire kept offering itself and answering "you have already had what there
+       * is to have here" forever. A place that still does something every time you come back (a
+       * bench, a rest, a ford) is not spent and stays offered — `standingOffer` is the same test
+       * `atLandmark` uses to decide whether to mark it taken in the first place.
+       */
+      const seen = sites.nearest?.(control.x, control.z, 18);
+      if (seen && seen.family === 'landmark'
+        && !(seen.taken && !holdings.standingOffer(seen))) return { kind: 'landmark', mark: seen };
+
+      /**
+       * THE NOTICE BOARD — where work comes from now, and it is a THING you walk up to.
+       *
+       * "Under your journal you can accept quests arbitrarily from the menu... Players should look
+       * for towns to pick up quests." The Journal lists what you know and takes nothing; a town has
+       * a board, and this is how you reach it.
+       *
+       * The first version tested `features.settlementAt()`, which is the whole settlement — so "E to
+       * read the notice board" followed the player around the entire town and sat on top of every
+       * other thing they might have wanted to press E on. It is a real object at a real spot now,
+       * and you have to be next to it.
+       */
+      // a portal mouth, either end of it
+      const end = portals.endAt?.(control.x, control.z, planet?.name || null);
+      if (end) return { kind: 'portal', end };
+
+      const inTown = features.settlementAt(control.x, control.z);
+      if (inTown) {
+        const ok = (x, z) => !terrain.waterAt(x, z) && !terrain.underwater(x, z)
+          && terrain.riverAt(x, z) <= 0.3 && terrain.slopeAt(x, z, 4) <= 0.5;
+        const board = boardSpotFor(inTown, ok);
+        if (Math.hypot(control.x - board.x, control.z - board.z) < 5) return { kind: 'board', town: inTown };
+        /**
+         * R16 — AND THE TOWN HALL, which has stood in every settlement of size three or more
+         * since towns were built and has never been a thing you could walk up to.
+         */
+        const hall = hallSpotFor(inTown, ok);
+        if (hall && Math.hypot(control.x - hall.x, control.z - hall.z) < 6) return { kind: 'hall', town: inTown };
+      }
+
+      /**
+       * A SEAM UNDER YOUR FEET. Last, because everything above is rarer and more interesting.
+       *
+       * Ore is the one thing on this list there is a lot of, so it must never be what E finds when
+       * you meant the chest, the person or the door standing in the same few metres.
+       */
+      /**
+       * THE ALARM BELL — §7's whole design in one object.
+       *
+       * The raid does not arrive; you ring for it. Before that it is an offer you have taken and
+       * nothing at all is happening, which is the difference between a quest and a tax on building.
+       */
+      /**
+       * R18 — matched on the `alarm` FLAG rather than on the id `alarm_bell`.
+       *
+       * data/structures.json has carried `alarm: true` on the bell since it landed and nothing read
+       * it; the bell worked only because this line named the piece. Reading the flag means the data
+       * is the rule — a second alarm, or a renamed one, rings without touching this file. Same
+       * reason the turret loop gates on `def.defence` and not on `cat`.
+       */
+      const bell = (build.entries || [])
+        .find(e => build.defOf?.(e.key)?.alarm && Math.hypot(e.x - control.x, e.z - control.z) < 4);
+      if (bell) return { kind: 'bell', bell };
+
+      /**
+       * R18 — AND THE MUSTER STONE, which js/muster.js's own header says is one of the two ways to
+       * call a drill ("a MUSTER STONE at your own outpost"). `muster: true` was read by nobody, so
+       * the piece was a rock. Same shape as the bell above and matched the same way, on its flag.
+       */
+      const stone = (build.entries || [])
+        .find(e => build.defOf?.(e.key)?.muster && Math.hypot(e.x - control.x, e.z - control.z) < 4);
+      if (stone) return { kind: 'muster', stone };
+
+      /**
+       * R15 — E ON A MACHINE OPENS ITS RECIPES.
+       *
+       *   "I have stone and clay and I built a furnace. Now what? How do I interact with the
+       *    furnace and tell it what to smelt?"
+       *
+       * You could not. The recipe picker has existed since the building expansion — `drawBench` in
+       * js/build-ui.js, which lists everything a machine can make and queues it — but the ONLY way
+       * to reach it was to press B, enter build mode, and notice a panel that appears halfway down
+       * the sidebar when you happen to be standing close enough. E, which is the key this game uses
+       * for every other "use the thing in front of you", did nothing at all.
+       *
+       * So a player builds a furnace, walks up to it, presses E, and the game is silent. Which is
+       * the same shape as every other fault this project keeps finding: the feature was finished
+       * and there was no door into it.
+       *
+       * Above the seam, because a machine is something you built and put there on purpose and ore
+       * is something the world scattered — if the two are within four metres of each other, you
+       * meant the machine.
+       */
+      const machine = (build.entries || [])
+        .filter(e => works.machineDefs?.[e.key])
+        .map(e => ({ e, away: Math.hypot(e.x - control.x, e.z - control.z) }))
+        /**
+         * Six metres, not four. A machine is a big object and you stand in FRONT of one — placing a
+         * furnace at arm's length and turning round puts its centre about 4.75 m away, which a
+         * four-metre reach misses by a quarter of a metre. That is the sort of number that makes a
+         * feature feel broken rather than absent, because it works from one side and not the other.
+         */
+        .filter(r => r.away < 6)
+        .sort((a, b) => a.away - b.away)[0]?.e;
+      if (machine) return { kind: 'machine', machine, works: works.get(machine.id) };
+
+      const seam = oreHere().at(control.x, control.z, 4);
+      if (seam) return { kind: 'seam', seam };
+
+      /**
+       * R22 — E ON A TREE.
+       *
+       *   "The onboarding quest at the top left says 'Cut timber and break stone - E on a tree then
+       *    on a boulder'. Actually, pressing E on a tree, even with tool equipped, says 'Nothing
+       *    here to do'."
+       *
+       * It did, and the tutorial was telling the truth about the wrong tree. Farhold has TWO tree
+       * objects: the scenery prop in js/props.js, which is what you can see, and a resource node in
+       * js/resources.js, which is invisible and is what the `seam` branch above finds. Only the
+       * second had ever been on E. `beginGather` has handled props since round 13 — it checks the
+       * tool tier, plays the work bar and pays out — but the only two things that called it were
+       * the attack button with a tool held and a melee swing that hit nothing.
+       *
+       * So this is the join, and it is last in the list on purpose: a seam, a machine, a person and
+       * a chest all beat a tree, because standing next to a tree is the default state of a forest.
+       */
+      const prop = props.nearest?.(control.x, control.z, toolReach(player, 4));
+      const about = prop ? props.describe?.(prop) : null;
+      if (about) return { kind: 'prop', prop, about };
+    }
+    return null;
+  }
+
+  /**
+   * What the prompt says about the tree or rock in front of you.
+   *
+   * It names the materials, because "E to fell the conifer" still leaves you guessing whether a
+   * conifer is the thing the tutorial wants, and it names the tool you are holding, because the one
+   * question the old "Nothing here to do" never answered was whether you had the wrong tool or were
+   * looking at scenery. A giant that refuses says the refusal instead — `props.describe` already
+   * carries `why` for exactly that case.
+   */
+  function propPrompt(about) {
+    const name = (about.name || 'it').toLowerCase();
+    if (about.harvestable === false) return `<b>${name}</b> · ${about.why}`;
+    const gives = Object.keys(about.drops || {})
+      .map(id => (resourceData?.materials?.[id]?.name || id).toLowerCase())
+      .slice(0, 3).join(', ');
+    const tool = (resourceData?.tools?.[toolTierFor(player)]?.name || 'bare hands').toLowerCase();
+    return `<b>E</b> to ${about.verb || 'work'} the ${name}`
+      + (gives ? ` · ${gives}` : '') + ` · ${tool}`;
+  }
+
+  /**
+   * Somebody on the road.
+   *
+   * A wanderer is one encounter, not a shop you can come back to, so it resolves in a line or two
+   * rather than a panel: they say their piece and the one thing they are there for happens. That is
+   * deliberate — the notice board is in a town, and this is how a job reaches you when you are not.
+   */
+  function meetOnTheRoad(met) {
+    const out = roadFolk.talk(met.id);
+    if (!out) return;
+    const { wanderer: w, line } = out;
+    sound.ui('open');
+    hud.log(`${w.name}, ${w.kindName.toLowerCase()}: "${line}"`, 'good');
+    const here = zones.at(control.x, control.z);
+
+    switch (w.gives) {
+      case 'rumour':
+      case 'board': {
+        const elsewhere = zones.list().filter(z => z.id !== here?.id);
+        const pick = elsewhere[Math.floor(Math.random() * elsewhere.length)];
+        const heard = pick && rumours.hear(pick, { from: `${w.name}, on the road`, extra: { unvisitedLandmarks: 2 } });
+        hud.log(heard ? `${w.name} says ${heard.text}.` : `${w.name} has nothing new to tell you.`);
+        roadFolk.settle(w.id, 'helped');
+        break;
+      }
+      case 'job': {
+        const job = localBoard.find(j => !j.taken && (!w.job || j.frame === w.job)) || localBoard.find(j => !j.taken);
+        if (job) { hud.onTakeJob?.(job); } else hud.log(`${w.name} has no work for you.`);
+        roadFolk.settle(w.id, 'helped');
+        break;
+      }
+      case 'buff': {
+        const b = w.buff || { stat: 'regen', amount: 2, minutes: 20 };
+        hud.log(`${w.name} does you a kindness. It will wear off.`, 'level');
+        rpg.fx?.grant?.(player, b) ?? (player.hp = Math.min(player.derived.maxHp, player.hp + 30));
+        roadFolk.settle(w.id, 'helped');
+        break;
+      }
+      case 'passage': {
+        const toll = earnedRewards().freeTolls ? 0 : (w.toll || 6);
+        if (!toll) {
+          hud.log(`${w.name} knows your face and lifts the chain without asking.`, 'good');
+          roadFolk.settle(w.id, 'paid');
+          break;
+        }
+        if (player.gold >= toll) {
+          player.gold -= toll;
+          hud.log(`You pay ${toll}. ${w.name} lifts the chain.`);
+          roadFolk.settle(w.id, 'paid');
+        } else hud.log(`${w.name} wants ${toll} and you have ${player.gold}.`, 'bad');
+        break;
+      }
+      /**
+       * R14: THE TAX COLLECTOR IS GONE.
+       *
+       * "I had an event at town from a tax collector who took some money. Remove that lol."
+       *
+       * It was the only wanderer that took a share of your purse for nothing you chose, which is
+       * the one kind of road event that is purely a subtraction. `tax_collector` is out of
+       * data/wanderers.json and this was its only handler, so the `standing` branch goes with it.
+       * `cutShare` is still read in js/wanderers.js:101 — harmless, and there if a *chosen* tribute
+       * ever wants it.
+       */
+      case 'cache': {
+        const gold = foundGold(40 + Math.round(Math.random() * 60 * player.level));
+        player.gold += gold;
+        hud.log(`${w.name} points, and there is ${gold} gold where they pointed.`, 'good');
+        roadFolk.settle(w.id, 'helped');
+        break;
+      }
+      case 'shop': {
+        const spec = w.stock || { count: 2, rarity: 'magic' };
+        for (let i = 0; i < spec.count; i++) {
+          const item = attuneWeapon(rpg.loot.generate(null, spec.rarity, 'low', { rng: rpg.rng, level: player.level }));
+          if (item) player.bag.push(item);
+        }
+        hud.log(`${w.name} sells you ${spec.count} things off their own back.`, 'good');
+        roadFolk.settle(w.id, w.angers ? 'helped' : 'paid');
+        break;
+      }
+      case 'hire': {
+        /**
+         * AN OFFER, NOT A TRANSACTION.
+         *
+         * "I found a mercenary in town who joined me but it should have opened a dialog where they
+         * offered to join me and I was able to accept/deny. I had no idea it would just straight up
+         * hire them." It took the gold and summoned in the same frame, so meeting one on the road
+         * was indistinguishable from being robbed. `folk.hireOffer` builds the card — who they are,
+         * what they cost, what they bring — and nothing is spent until it is accepted.
+         */
+        /**
+         * R17 — ONE OF TEN, NOT ALWAYS THE SAME SELLSWORD.
+         *
+         *   "Companions should also be hireable at town, which we sort of have right now but is
+         *    only for a single person."
+         *
+         * It was literally one person: `sellsword` is the single humanoid in the bestiary's pet
+         * table and this line asked for it by name, so every mercenary in the game was the same
+         * body with a different label. `roadHireOffer` picks a type out of data/mercenaries.json
+         * from a hash of who this person is, so they always sell the same thing and two captains
+         * sell different people. The hire goes through the follower book, which charges for it,
+         * writes the contract a save carries, and refuses when there is no slot left.
+         */
+        const offer = roadHireOffer(w, {
+          mercenaries: mercData?.mercenaries || [],
+          playerLevel: player.level, gold: player.gold, scaling: mercData?.scaling,
+        });
+        talk.showOffer(offer, {
+          accept: async () => {
+            const out = await followers.hire(offer.mercId, { at: control });
+            if (!out.ok) { hud.log(out.why, 'bad'); return; }
+            if (out.unit) out.unit.name = w.name;
+            hud.setPlayer(player);
+            roadFolk.settle(w.id, 'paid');
+            autoSave();
+          },
+          decline: () => {
+            hud.log(`${w.name} shrugs and goes back to the fire.`);
+            roadFolk.settle(w.id, 'helped');
+          },
+          dismiss: () => { /* walked away mid-sentence: they are still standing there */ },
+        });
+        break;
+      }
+      case 'incident': {
+        // a refugee is running FROM something, and that something is the news
+        const trouble0 = trouble.describe(here?.id || 0)[0];
+        hud.log(trouble0
+          ? `${w.name} says ${here.name} is having a bad week — ${trouble0.blurb}.`
+          : `${w.name} has not stopped since the last village and cannot say what they saw.`);
+        if (here) rumours.hear(here, { from: `${w.name}, running` });
+        roadFolk.settle(w.id, 'helped');
+        break;
+      }
+      case 'race': {
+        hud.log(`${w.name} is going in whether you do or not. Whoever reaches the bottom takes the box.`);
+        roadFolk.settle(w.id, 'helped');
+        break;
+      }
+      default:
+        hud.log(`${w.name} has said their piece.`);
+        roadFolk.settle(w.id, 'helped');
+    }
+    hud.setPlayer(player);
+    autoSave();
+  }
+
+  /**
+   * Standing at one of the places that fill a zone in.
+   *
+   * Some are a thing you do once (a shrine, a hunting blind); some take a few visits (a ring of
+   * stones, a collapsed mine, a washed-out road). `data/landmarks.json` says which, and what each one
+   * gives — all of it was parsed at boot and read by nothing until now.
+   */
+  function atLandmark(mark) {
+    const here = hud.here;
+    if (!here) return;
+
+    /**
+     * R16 — WHICHEVER OF THE TWO LANDMARK SYSTEMS THIS CAME FROM, IT GETS THE SAME LEDGER ROW.
+     *
+     * `mark` arrives either as a territory record (string id `l3_0`) or as a set piece off
+     * js/sites.js (numeric id `9012`) — and every `holdings.*Landmark` call below looks the row up
+     * BY ID. A set piece never matched, so `takeLandmark` returned false on the very first press:
+     * "You have already had what there is to have here", forever, and the experience, the loot,
+     * the perk point and the named foe were unreachable. A `solve: true` set piece was worse — the
+     * `if (!out) return` below meant E did nothing at all for the life of the save.
+     *
+     * `recordFor` hands back the row, adopting the set piece into the zone record if this is the
+     * first time anyone has stood at it.
+     */
+    const row = holdings.recordFor(here.id, mark) || mark;
+    const markId = row.id;
+    sound.ui('open');
+    hud.log(`${mark.name}. ${mark.blurb}`, '');
+    holdings.visitLandmark(here.id, markId);
+
+    if (mark.steps) {
+      const out = holdings.workLandmark(here.id, markId);
+      if (!out) return;
+      if (!out.finished) {
+        hud.log(`${mark.does} ${out.left} more ${out.left === 1 ? 'visit' : 'visits'}.`, '');
+        autoSave();
+        return;
+      }
+      hud.log(`${mark.name} is finished.`, 'good');
+      sound.questDone();
+    }
+
+    const gives = mark.gives || {};
+
+    /**
+     * R14 — A LANDMARK PAYS ONCE.
+     *
+     *   "I found a node 'E look at field of cairns' and it allows me to repeatedly press E to gain
+     *    infinite experience."
+     *
+     * Correct, and it was not only experience: loot, a perk point, a curse and the rest of the
+     * one-off `gives` all fired again on every press. A landmark with `steps` was safe by accident,
+     * because `workLandmark` only pays out on the last step — but twelve of the sixteen kinds in
+     * data/landmarks.json carry `solve: false`, have no steps, and so had no gate whatever.
+     *
+     * `holdings.takeLandmark` is true exactly once per landmark, for the life of the save. What it
+     * gates is the things that only make sense once: the reward, the punishment, and the events
+     * that change the world. What it does NOT gate is the standing offer a place makes — you can
+     * rest at a shrine again tomorrow, the bench is still a bench, the ford is still a ford, and
+     * the toll is charged every time you go through, which is what a toll is.
+     */
+    const firstTime = holdings.takeLandmark(here.id, markId);
+    /**
+     * …and once it has nothing left to give, it stops being a dot on the map. `takeLandmark` sets
+     * the record's state; this takes the pin off the set piece standing on the ground.
+     */
+    if (firstTime && !holdings.standingOffer(row) && row.siteKey) sites.markTaken?.(row.siteKey);
+    // R17 — the first time at a landmark is a research point. `firstTime` is already exactly once.
+    if (firstTime) sharedResearch().award('landmark', 1);
+
+    // --- the standing offer. True every time you come back.
+    if (gives.rest) { player.hp = player.maxHp; player.mp = player.maxMp; hud.log('You rest. Nothing follows you here.', 'good'); }
+    /**
+     * R21 — `gives.bench` WAS A LOG LINE AND NOTHING ELSE, which is why a Forge Fire felt pointless.
+     *
+     * `data/landmarks.json` describes this place as "A crafting bench, outside a town, which is the
+     * whole point of it" — and grepping `gives.bench` found exactly one hit in the codebase: the
+     * line below, printing a sentence. So the landmark's entire reason to exist was never built,
+     * and what the player actually got was 30 experience and a building. Now the bench opens.
+     */
+    if (gives.bench) {
+      hud.log('An anvil, and a fire that never goes out. You can work here.', '');
+      if (!hud.sheetOpen) hud.toggleSheet(true);
+      hud.setTab('crafting');
+    }
+    if (gives.crossing) hud.log('You can cross here.', '');
+    if (gives.travelBonus) hud.log('The road is whole again. Travelling through here is quicker now.', 'good');
+    if (gives.reviveDaily) {
+      // one charge, and the day it was granted — `reviveDaily` means daily
+      player.reviveCharge = 1;
+      player.reviveDay = Math.floor(state.elapsed / (balance.sky?.dayLengthSeconds ?? 900));
+      hud.log('The water holds. If you fall today, you will get up once.', 'good');
+    }
+    if (gives.toll) {
+      const due = Math.round(gives.toll === true ? 25 * player.level : gives.toll);
+      if (player.gold >= due) {
+        player.gold -= due;
+        hud.log(`${due} gold to pass. The way is open.`, '');
+        if (mark.faction) standings.deed(mark.faction, 'toll_paid');
+      } else {
+        hud.log(`They want ${due} gold and you have ${player.gold}. You go the long way round.`, 'bad');
+      }
+    }
+
+    if (!firstTime) {
+      // Everything below has already happened here. Say so rather than silently doing nothing, or
+      // the second press reads like the key stopped working.
+      if (gives.xp || gives.loot || gives.perkPoint || gives.curse || gives.namesFoe) {
+        hud.log('You have already had what there is to have here.', '');
+      }
+      autoSave();
+      return;
+    }
+
+    // --- and the one-off, from here down.
+    if (gives.revealZone) { map.revealZone?.(here.id); hud.log(`${here.name} goes on your chart.`, 'good'); }
+    if (gives.perkPoint) { player.bonusPerks = (player.bonusPerks || 0) + gives.perkPoint; hud.log('A perk point, for the trouble.', 'level'); }
+    if (gives.loot) { for (const it of rpg.loot.roll?.(gives.loot, player.level) || []) player.bag.push(it); }
+    if (gives.callsBeast) hud.log('Bait on the hook. Something bigger than usual will come.', 'bad');
+    if (gives.opensDungeon) hud.log('The mouth is open. Something is down there.', 'loot');
+
+    /**
+     * THE SEVEN `gives` KEYS NOTHING READ.
+     *
+     * `data/landmarks.json` uses sixteen of them; nine were handled above and these seven were not,
+     * so seven kinds of landmark were a name, a blurb and no consequence whatever. The territory
+     * layer reads its own copy for the zone record, which is why this went unnoticed — the WORLD
+     * knew something had happened at the standing stones and the player never found out.
+     */
+    if (gives.xp) {
+      /**
+       * R22 — "you gain 50 xp for the walk… should be greatly increased like 150, probably scaling
+       * with level of the zone." Three times the written number, then the zone on top — and the log
+       * prints what was PAID. It used to print `gives.xp` raw while awarding the scaled figure, so
+       * the one number the player could see was the only one that was not true.
+       */
+      const paid = eventXp(gives.xp, { zoneLevel: zoneLevelAt(control.x, control.z), kind: 'landmark', cfg: xpCfg });
+      const levels = rpg.gainXp(player, paid);
+      hud.log(`${paid} experience for the walk.`, 'level');
+      if (levels > 0) { hud.log(`Level ${player.level}.`, 'level'); sound.questDone(); }
+    }
+    if (gives.curse) {
+      // a landmark that costs you something is the only reason the ones that pay are interesting
+      applyStatus(player, 'curse', skillData.statuses?.curse, gives.curse === true ? 1 : gives.curse);
+      hud.log('Something here takes an interest in you. It does not feel like a blessing.', 'bad');
+      sound.combat('death', { beast: true });
+    }
+    if (gives.namesFoe) {
+      // the thing that lives here gets a NAME, which is what makes it worth coming back for
+      const def = field.bossFor?.(player.level + 2, mark.x, mark.z) || (bestiary.enemies || [])[0];
+      if (def) {
+        const named = nameRare(def);
+        // the campaign's own nemesis book: `onDeath` is what names one, and a stone that names a
+        // foe is doing the same job without having to kill you first
+        campaign.onDeath({ defId: def.id, name: named, level: player.level });
+        hud.log(`A name is cut into the stone: ${named}. Whatever wore it is still about.`, 'bad');
+        rumours.add(`${named} is said to walk near ${mark.name}`, { zone: here, from: 'the stone itself' });
+      }
+    }
+    if (gives.callsPatrol) {
+      const stops = holdings.landmarksIn(here.id).slice(0, 4).map(l => ({ x: l.x, z: l.z, name: l.name }));
+      if (stops.length >= 2) {
+        patrols.enter(here, stops);
+        hud.log('The horn carries. Somebody is coming this way.', '');
+      }
+    }
+    if (gives.startsIncident) {
+      const kind = gives.startsIncident === true ? null : gives.startsIncident;
+      const row = kind ? trouble.start(here.id, kind) : null;
+      hud.log(row ? `${row.name}. ${row.blurb}.` : 'Something has been set in motion here.', 'bad');
+    }
+
+    if (mark.faction) standings.deed(mark.faction, 'job_done');
+    hud.setPlayer(player);
+    autoSave();
+  }
+
+  /** Open a chest: roll the haul, show the reward screen — or find out it was never a chest. */
+  async function openChest(chest) {
+    const level = dungeon ? dungeon.level : (zones.at(control.x, control.z)?.midLevel || player.level);
+    const haul = chests.open(chest, { level, magicFind: player.derived.magicFind });
+    if (!haul) return;
+    if (haul.sealed) { hud.notice(haul.sealed, 'bad'); return; }    // R25: kill the guards first
+    sound.ui('open');
+    if (haul.mimic) {
+      hud.log('The chest opens its own lid. That is not a chest.', 'bad');
+      const def = bestiary.enemies.find(d => d.id === 'hoard_mimic');
+      if (def) await field.add(def, level, chest.x, chest.z, { rank: 'rare', modifiers: rpg.pickModifiers(bestiary.modifiers, 2, field.rng), name: 'The Waiting Lid' });
+      return;
+    }
+    const mats = {};
+    for (let i = 0; i < (haul.materialCount || 0); i++) {
+      const pool = chest.kind === 'warded' ? ['dust', 'core', 'voidsalt', 'runeplate'] : chest.kind === 'gilded' ? ['dust', 'essence', 'emberglass', 'rimeshard'] : ['scrap', 'cloth', 'hide', 'essence'];
+      const id = pool[Math.floor(field.rng() * pool.length)];
+      mats[id] = (mats[id] || 0) + 1 + Math.floor(field.rng() * 2);
+    }
+    takeHaul({ items: haul.items, gold: haul.gold, mats });
+    /**
+     * R14 — opening the crate is what finishes a fall. It pays itself out, like a raid: nobody
+     * handed it to you, so there is nobody to walk back to.
+     */
+    const fell = questLog.onChestOpened({ key: chest.key });
+    if (fell) {
+      // R16: through the one payer, like everything else. `showCrate` is left off because the crate
+      // popup for the meteor's own haul is opened three lines below and two would stack.
+      // R22: priced by the ground it fell on rather than by how high a level you happen to be
+      fell.reward = { gold: 0, xp: eventXp(40, { zoneLevel: zoneLevelAt(fell.place?.x ?? control.x, fell.place?.z ?? control.z), kind: 'event', cfg: xpCfg }), kind: 'coin' };
+      await grantReward(fell, { ...questRewardCtx(), showCrate: null });
+      questLog.turnIn(fell);
+      markers.syncQuests(questLog.active);
+      hud.log('The crater is picked clean.', 'good');
+    }
+    autoSave();
+    rewards({
+      title: chest.name, subtitle: 'The lid comes up.',
+      gold: haul.gold, items: haul.items.map(rewardItem),
+      extras: Object.keys(mats).length
+        ? [{ kind: 'quest', text: Object.entries(mats).map(([k, v]) => `${v} ${craft.M[k]?.name || k}`).join(', ') }]
+        : [],
+      button: 'Take it',
+    });
+  }
+
+  function applyGearLook() {
+    // R16: the player's own look if they customised one, the class's if they did not — see baseLook
+    const next = JSON.parse(JSON.stringify(baseLook || {}));
+    next.held = heldLookFor(player.equipment.weapon);
+    next.offhand = offhandLookFor(player.equipment.offhand);
+    // phase 8: armour you can see — the base's tier picks the Chibi 2 part
+    Object.assign(next, rpg.gearLook(player));
+    actor.setAvatar(next);        // keeps the clip set it was built with
+  }
+  applyGearLook();
+
+  /**
+   * R16 — PAY FOR A TOOL OR A DEVICE AND PUT IT IN YOUR HANDS.
+   *
+   * A tool ROLLS A RARITY, because "Tools should also be able to come in different rarities that
+   * affect mining speed and other things" — and rolling it at the bench rather than handing out a
+   * plain one means the bench is worth going back to. Magic find is folded in, so the same stat
+   * that makes a chest better makes a forged tool better, which is the connection a player expects.
+   *
+   * A device does NOT roll: there is nothing interesting about a rare scanner, and a Command Rod
+   * you might or might not have is the gate on the whole population system.
+   */
+  function buildTool(kind, id) {
+    const pool = stores.poolAt?.(control.x, control.z);
+    const have = m => (pool ? stores.count(pool, m) : 0) + (materials.count?.(m) ?? 0);
+    const spend = cost => {
+      for (const [m, n] of Object.entries(cost)) {
+        const fromBag = Math.min(n, materials.count?.(m) ?? 0);
+        if (fromBag > 0) materials.spend?.({ [m]: fromBag });
+        const left = n - fromBag;
+        if (left > 0 && pool) stores.take(pool, m, left);
+      }
+    };
+    const row = buildableTools(toolData, player, have, resourceData?.materials).find(r => r.kind === kind && r.id === id);
+    if (!row) return;
+    if (!row.canAfford) {
+      const names = resourceData?.materials || {};
+      hud.log(`Short: ${row.short.map(s => `${Math.ceil(s.n - s.got)} ${(names[s.m]?.name || s.m).toLowerCase()}`).join(', ')}.`, 'warn');
+      return;
+    }
+    spend(row.cost);
+    if (kind === 'device') {
+      if (!giveDevice(player, row.id)) { hud.log(`You already have a ${row.name}.`, 'warn'); return; }
+      hud.log(`${row.name} built. ${row.id === 'scanner' || /scan/.test(row.id) ? 'Press X to sweep with it.' : 'Press R to give an order where you look.'}`, 'level');
+      sound.questDone();
+      hud.heldMode(heldNow(player), heldModes(player), HELD_LABELS);
+      autoSave();
+      return;
+    }
+    const rarity = rpg.rarityFor(player.level, rpg.rng, player.derived?.magicFind || 0);
+    // R19 — `rpg` and the run's rng so the rarity table's `affixes` column rolls real values
+    const item = makeTool(row.base, rarity, toolData, { level: player.level, rpg, rng: rpg.rng });
+    if (!item) return;
+    const old = rpg.equip(player, item, { force: true });
+    if (old) hud.log(`${old.name} goes into the bag.`, '');
+    hud.log(`${item.name} — tier ${item.tier}, ${Math.round(item.speed * 100)}% work speed.`, 'loot');
+    sound.loot({ rarity });
+    rpg.refresh(player);
+    hud.setPlayer(player);
+    hud.heldMode(heldNow(player), heldModes(player), HELD_LABELS);
+    autoSave();
+  }
+
+  /**
+   * SOMETHING FALLS OUT OF THE SKY.
+   *
+   * A meteor is rolled every five minutes on the surface, is visible in the sky and on the map for
+   * the whole thirty seconds it takes to come down, and leaves a Meteorite chest where it lands —
+   * 1-3 items, never worse than rare, with the beams that go with that. See js/meteors.js.
+   */
+  const meteors = createMeteors({
+    scene, terrain, chests, balance, rng: () => field.rng(),
+    /**
+     * R16 — NOTHING FALLS UNTIL YOU COULD DO ANYTHING ABOUT IT.
+     *
+     *   "Meteor events shouldn't occur until the player equips a tool capable of mining one."
+     *
+     * A `meteor_site` seam is hardness 2, so a crater is a locked door to anybody below a steel
+     * tool — and the fall also files a quest and a map pin, so before this the early game was
+     * pinning a thirty-second sprint to a rock the player could not touch and then leaving the
+     * marker on their chart. The crate in the crater is still worth having on its own, which is
+     * why the gate is the SEAM's hardness and not some arbitrary level.
+     */
+    canFall: () => toolTierOf(player, resourceData)
+      >= (resourceData?.nodeKinds?.meteor_site?.hardness ?? 2),
+    onWarn: m => {
+      const away = Math.hypot(m.x - control.x, m.z - control.z);
+      hud.log(`Something is coming down, about ${away > 1000 ? `${(away / 1000).toFixed(1)} km` : `${Math.round(away)} m`} off. Thirty seconds.`, 'level');
+      sound.ui('open');
+      /**
+       * R14 — AND IT GOES IN THE LOG, WITH A PIN ON IT.
+       *
+       * "I could not tell where the meteor landed however, so it should have its own map marker. It
+       *  would be interesting to act like a quest."
+       *
+       * The job is created the moment the fall starts, so the marker is on the map for the whole
+       * thirty seconds and stays there afterwards. `markers.syncQuests` picks it up on its next
+       * pass and draws it with its own ☄ rather than a quest's exclamation mark — see
+       * js/markers.js MARKER_LOOKS.fall.
+       */
+      questLog.add(makeFallQuest({
+        x: m.x, z: m.z, seconds: m.seconds,
+        cell: { x: Math.floor(m.x / M_PER_CELL), y: Math.floor(m.z / M_PER_CELL) },
+      }));
+      markers.syncQuests(questLog.active);
+    },
+    onLand: (m, chest) => {
+      const away = Math.hypot(m.x - control.x, m.z - control.z);
+      hud.log(away < 60 ? 'It comes down close enough to feel.' : 'It lands. Whatever is in it is still hot.', 'loot');
+      sound.combat('death', { beast: true });
+      questLog.onFallLanded(m.chestKey);
+      if (chest) chest.name = 'Meteorite';
+      /**
+       * …AND THE CRATER IS A SEAM.
+       *
+       * `meteor_site` is the only source of meteoric iron and its own description says "which is
+       * why a meteor fall is worth the walk" — and it was in the ordinary scatter, so meteoric iron
+       * turned up in fields where nothing had fallen while an actual meteor left only a chest. It
+       * is placed by hand now, here, where a meteor actually lands.
+       */
+      const seam = ore.place?.({ kindId: 'meteor_site', x: m.x + 4, z: m.z + 2, band: planet?.band || 'medium' });
+      if (seam) hud.log('Metal shows in the crater — still warm, and hard going.', 'level');
+    },
+  });
+
+  // ---------------------------------------------------------------- the map
+  let map = null;
+  map = makeMap();
+  folk = makeFolk();
+
+  // ---------------------------------------------------------------- talking to people
+  function talkContext(npc) {
+    return {
+      gold: player.gold,
+      // the three shelves plus the buyback list — see js/town.js `shelves`
+      shelves: npc.trades ? folk.shelves(npc, player.level) : null,
+      stock: npc.trades ? folk.forSale(npc, player.level) : [],
+      vehicles: npc.trades ? folk.vehicles() : [],
+      ownsVehicle: (slot, key) => (player.vehicles?.owned?.[slot] || []).includes(key),
+      crates: npc.gambles ? folk.CRATE_TIERS : [],
+      // what in the bag would count toward one of this person's gather jobs
+      gatherable: quest => gatherable(quest, player.bag),
+      lastCrate, lastCrateLifted,
+      bag: player.bag,
+      offer: folk.questFrom(npc, { level: player.level, enemies: bestiary.enemies, nodes: world.nodes }),
+      /**
+       * §6.5 — somebody in this town who would come and work at your holding.
+       *
+       * Offered only once you have somewhere to put them: `recruit()` refuses without a spare bed
+       * ("nobody signs on to sleep in the mud") and offering a deal that cannot be taken is exactly
+       * the kind of dead button this round has been removing. The offer is cached on the NPC so it
+       * does not reshuffle every time the panel redraws.
+       */
+      recruitOffer: recruitFrom(npc),
+      /**
+       * R17 — THE BROKER'S BOARD, in a conversation like every other offer.
+       *
+       * `F` → Hire shows the same board, and that is the screen for comparing four of them side by
+       * side. This is the person: "add a mercenary person who sells mercenaries to the player".
+       * The board is deterministic per settlement and per day, so walking away and coming back does
+       * not reshuffle who is on it.
+       */
+      mercBoard: npc.brokers
+        ? followers.board({ town: npc.node, day: Math.floor(state.elapsed / (balance.sky?.dayLengthSeconds ?? 900)) + 1 })
+        : null,
+      /**
+       * R20 — THE UNBINDER'S COUNTER: every spell, perk and talent you could have taken back off
+       * you, priced, with a sentence on anything they will not do. js/retrain.js owns the rules and
+       * js/talkui.js only draws them, so a price can never be quoted in one place and charged in
+       * another. `skillState` goes in because a talent's tree depends on its skill's SHAPE.
+       */
+      retrain: npc.retrains
+        ? retrainMenu({
+          player, build: player.build, cat: spellCat, forest: rpg.forest,
+          skillState: skills.state(), prices: balance.retrain,
+        })
+        : null,
+      active: questLog.active,
+      hasQuest: id => questLog.has(id),
+      readyToTurnIn: giverId => questLog.readyToTurnIn(giverId),
+      progressText: q => questLog.progressText(q),
+    };
+  }
+
+  // what the gambler last pulled out of a crate, so the panel can show it
+  let lastCrate = null, lastCrateLifted = false;
+
+  /**
+   * R20 — one shape for all six of the Unbinder's buttons.
+   *
+   * `result` is whatever js/retrain.js came back with. A refusal is said out loud and costs
+   * nothing; a success runs `then` (which is the only part that differs between the six) and then
+   * redraws the panel, because the prices and the lists it is showing have just changed under it —
+   * the gold went down and the thing you unbound is no longer on the shelf.
+   */
+  function unbind(result, then = null) {
+    if (!result?.ok) {
+      if (result?.why) hud.log(result.why, 'bad');
+      sound.ui('error');
+      return result;
+    }
+    sound.coin();
+    then?.(result);
+    hud.setPlayer(player);
+    if (talk.npc) talk.update(talkContext(talk.npc));
+    autoSave();
+    return result;
+  }
+
+  /**
+   * The recruit offer for one person, built once and remembered on them.
+   *
+   * `recruitOffer` draws a fresh name, job and price every call, so rebuilding it on every panel
+   * redraw would shuffle the person in front of you mid-sentence. It is shaped into the same
+   * `offerNodes` object the mercenary hire uses, because from the player's side these are two
+   * versions of one question: will you come with me.
+   */
+  /**
+   * Take a job off the board. Two doors reach this now — the notice board and the Town Hall — so
+   * it stopped being an inline closure the moment there was a second caller.
+   */
+  function takeBoardJob(job) {
+    if (!job || job.taken) return;
+    // the hall hands back its own flattened row, so find the real one by id
+    const real = localBoard.find(j => j.id === job.id) || job;
+    if (real.taken) return;
+    real.taken = true;
+    questLog.add({
+      ...real,
+      kind: real.logKind || 'visit',
+      giverName: real.faction ? intro.nameFor(real.faction) : 'a notice board',
+      fromName: real.zoneName,
+    });
+    markers.syncQuests(questLog.active);
+    sound.ui('click');
+    hud.log(`Taken: ${real.title}.`, 'good');
+    autoSave();
+  }
+
+  /**
+   * R16 — ONE WAY TO TAKE SOMEBODY ON, USED BY BOTH DOORS.
+   *
+   *   "…which allows you to recruit NPCs from town (random npcs, not like shops)…"
+   *
+   * There was one door and it was a conversation: you had to walk up to the right stranger in a
+   * market and hope they were hiring. The Town Hall is the second door and the sensible one, and a
+   * body spawned by one route must be identical to a body spawned by the other — so the whole of
+   * it lives here rather than being written out twice.
+   *
+   * `citizen.body` is the join between the line in the colony's roster and the person walking
+   * about your holding. The Command Rod points at bodies and follows that link back.
+   */
+  function takeSomebodyOn(offer) {
+    const pop = population({ colony });
+    const refused = recruitRefusal(pop, { gold: player.gold, price: offer?.price || 0 });
+    if (refused) { hud.log(refused, 'warn'); sound.ui('error'); return { ok: false }; }
+    const out = colony.recruit(offer, { gold: player.gold });
+    if (!out.ok) { hud.log(out.why, 'bad'); sound.ui('error'); return { ok: false }; }
+    player.gold -= offer.price;
+    hud.log(`${out.citizen.name} packs up and starts for your holding. ${populationText(population({ colony }))}.`, 'level');
+    sound.questDone();
+    const home = defence.spot?.();
+    if (home) {
+      const a = Math.random() * Math.PI * 2;
+      folk.spawnOne({
+        groupId: 'colony', role: 'villager',
+        roleName: colony.jobOf(out.citizen)?.name || out.citizen.job,
+        name: out.citizen.name,
+        x: home.x + Math.cos(a) * 5, z: home.z + Math.sin(a) * 5,
+        greeting: 'Good to be somewhere with walls. What wants doing? Point the rod at me and say.',
+        seed,
+      }).then(who => {
+        if (!who) return;
+        out.citizen.body = who.id;
+        who.citizenId = out.citizen.id;
+      });
+    }
+    hud.setPlayer(player);
+    autoSave();
+    return out;
+  }
+
+  function recruitFrom(npc) {
+    if (!npc?.node || npc.guards) return null;
+    if (colony.spareBeds() <= 0) return null;          // no bed, no deal — see colony.recruit
+    if (npc.recruitOffer === null) return null;        // they already said no, or you took them
+    if (!npc.recruitOffer) {
+      const zone = zones.at(npc.x, npc.z);
+      const raw = colony.recruitOffer({
+        settlementId: npc.node.id,
+        settlementName: npc.node.name,
+        size: npc.node.size || 2,
+        standing: zone?.holder ? Math.max(0, (standings.get(zone.holder) || 0) / 100) : 0,
+      });
+      if (!raw.ok) { npc.recruitOffer = null; return null; }
+      const c = raw.citizen;
+      npc.recruitOffer = {
+        ...raw,
+        title: `${c.name}, ${(colony.jobOf(c)?.name || c.job).toLowerCase()}`,
+        lines: [raw.text],
+        blurb: `${c.name} ${raw.skillWord}. They would live at your holding and work it — not walk with you.`,
+        rows: [
+          ['Work', colony.jobOf(c)?.name || c.job],
+          ['Skill', raw.skillWord],
+          ['From', raw.settlementName],
+          ['Beds spare', colony.spareBeds()],
+        ],
+        terms: 'They stay at the holding. Feed them and give them a bed, or they will walk back.',
+        price: raw.price,
+        gold: Math.floor(player.gold),
+        acceptText: 'Take them on',
+        declineText: 'Not today',
+        refusal: player.gold < raw.price
+          ? `That costs ${raw.price} gold and you have ${Math.floor(player.gold)}.`
+          : (colony.spareBeds() <= 0 ? 'Build them a bed first.' : ''),
+      };
+    }
+    // the purse and the beds move while the panel is open, so those two are refreshed every look
+    npc.recruitOffer.gold = Math.floor(player.gold);
+    npc.recruitOffer.refusal = player.gold < npc.recruitOffer.price
+      ? `That costs ${npc.recruitOffer.price} gold and you have ${Math.floor(player.gold)}.`
+      : (colony.spareBeds() <= 0 ? 'Build them a bed first.' : '');
+    return npc.recruitOffer;
+  }
+
+  const talk = createTalkPanel({
+    describe: item => hud.describe(item),
+    /**
+     * The SAME hover card the inventory uses, on every row of the shop.
+     *
+     * "Update shops to support the same item hover effects as the menu, and also support comparing.
+     * All item interfaces should have these tooltips." `hud.tipFor` already builds the full card —
+     * properties, set progress, item level, and the delta against what you are wearing — so the
+     * shop simply asks for it rather than growing a second, worse one.
+     */
+    tip: (node, item) => hud.tipFor(node, item),
+    displayName: item => displayName(item),
+    /**
+     * One word on a shop row saying whether it beats what you are wearing.
+     *
+     * E1 again: the card on hover has carried the full comparison for rounds, but you have to hover
+     * every row to use it, and a shelf of six Scepters all priced the same is unreadable until you
+     * do. `itemScore` is the same number the inventory sorts and compares by, so the row and the
+     * card can never disagree. Jewellery compares against the weaker of the two rings, which is the
+     * one it would actually replace.
+     */
+    upgradeMark: item => {
+      const slot = item.type === 'weapon' ? 'weapon'
+        : item.slot === 'ring' ? (itemScore(player.equipment.ring2) < itemScore(player.equipment.ring) ? 'ring2' : 'ring')
+        : item.slot;
+      if (!slot || !(slot in player.equipment)) return null;
+      const worn = player.equipment[slot];
+      if (!worn) return { kind: 'up', text: 'empty slot' };
+      const delta = itemScore(item) - itemScore(worn);
+      if (delta > 0.5) return { kind: 'up', text: 'upgrade' };
+      if (delta < -0.5) return { kind: 'down', text: 'worse' };
+      return null;                              // too close to call; the card has the detail
+    },
+    /** Why you could not put this on — the level, or a two-handed rule. Null if you can. */
+    cannotUse: item => rpg.equipRefusal(player, item) || null,
+    buyVehicle: v => {
+      const r = unlockVehicle(player, v.slot, v.key);
+      hud.log(r.ok ? `The ${r.kind.name} is yours. Pick it on the character sheet.` : r.why, r.ok ? 'loot' : 'bad');
+      if (r.ok) sound.coin(); else sound.ui('error');
+      hud.setPlayer(player);
+      talk.update(talkContext(talk.npc));
+      autoSave();
+    },
+    submitGather: (quest, chosen) => {
+      const out = submitGather(quest, player.bag, chosen);
+      if (!out.ok) { hud.log(out.why, 'bad'); sound.ui('error'); return; }
+      hud.log(out.done
+        ? `${quest.title} — that is all of them.`
+        : `Handed over ${out.taken.length}. ${out.left} to go.`, out.done ? 'good' : '');
+      sound.ui('click');
+      hud.setPlayer(player);
+      talk.update(talkContext(talk.npc));
+      autoSave();
+    },
+    /**
+     * R20 — THE UNBINDER'S SIX BUTTONS.
+     *
+     * All six are the same four steps: ask js/retrain.js (which prices it, refuses it or takes the
+     * gold and makes the change), say what happened, rebuild whatever the change touched, save.
+     * Nothing here decides anything — a rule in this file would be a second copy of one in
+     * retrain.js, and the node tests only drive the latter.
+     */
+    forgetSpell: row => unbind(forgetSpell({
+      player, build: player.build, cat: spellCat, slot: row.slot, prices: balance.retrain,
+    }), out => {
+      hud.log(`${out.name} unbound for ${out.spent} gold. Slot ${out.slot + 1} is open again.`
+        + (out.talents ? ` Its ${out.talents} talent${out.talents === 1 ? '' : 's'} went with it.` : ''), 'level');
+      buildChanged();
+    }),
+    forgetAllSpells: () => unbind(forgetAllSpells({
+      player, build: player.build, cat: spellCat, prices: balance.retrain,
+    }), out => {
+      hud.log(`${out.count} spells unbound for ${out.spent} gold.`
+        + (out.talents ? ` ${out.talents} talent${out.talents === 1 ? '' : 's'} went with them.` : '')
+        + ' Choose again from the Skills screen.', 'level');
+      buildChanged();
+    }),
+    forgetPerk: row => unbind(forgetPerk({
+      player, forest: rpg.forest, id: row.id, prices: balance.retrain,
+    }), out => {
+      hud.log(`${out.name} given back for ${out.spent} gold. The point is yours again.`, 'level');
+      rpg.refresh(player, { full: true });
+    }),
+    forgetAllPerks: () => unbind(forgetAllPerks({ player, prices: balance.retrain }), out => {
+      hud.log(`${out.count} perk point${out.count === 1 ? '' : 's'} back, for ${out.spent} gold.`, 'level');
+      rpg.refresh(player, { full: true });
+    }),
+    forgetTalent: row => unbind(forgetTalent({
+      player, skillId: row.skillId, tier: row.tier, prices: balance.retrain,
+    }), out => hud.log(`${out.name} taken off ${row.skillName} for ${out.spent} gold.`, 'level')),
+    forgetAllTalents: () => unbind(forgetAllTalents({ player, prices: balance.retrain }), out =>
+      hud.log(`${out.count} talent${out.count === 1 ? '' : 's'} taken off, for ${out.spent} gold.`, 'level')),
+    gamble: tier => {
+      const r = folk.gamble(talk.npc, tier.key, player, { level: player.level });
+      if (!r.ok) { hud.log(r.why, 'bad'); sound.ui('error'); }
+      else {
+        lastCrate = r.item;
+        lastCrateLifted = r.lifted;
+        hud.log(`${tier.name}: ${r.item.name}.${r.lifted ? ' Better than the seal promised.' : ''}`, 'loot');
+        sound.loot(r.item);
+      }
+      hud.setPlayer(player);
+      talk.update(talkContext(talk.npc));
+      autoSave();
+    },
+    /**
+     * WHAT YOU PAY, AND WHY.
+     *
+     * `standings.priceMult` was written, exported and never called — so standing changed nothing a
+     * player could feel at the one counter where it should be obvious. The shop's own deed-based
+     * multiplier and the faction band now stack: be Trusted where the Greenhand hold the ground and
+     * everything is 15% off; be Disliked and it is 40% more.
+     */
+    price: item => Math.max(1, Math.round(rpg.price(item) * shopMult())),
+    /** One line the trade panel can print, so the number has a reason next to it. */
+    standingNote: () => {
+      const key = holdings.of(hud.here?.id)?.holder;
+      if (!key) return null;
+      const band = standings.band(key);
+      if (!band || band.key === 'known') return null;
+      const pct = Math.round((band.priceMult - 1) * 100);
+      return `${intro.fullName(key)} hold this ground — ${band.name}${pct ? `, ${pct > 0 ? '+' : ''}${pct}% here` : ''}.`;
+    },
+    sellPrice: item => Math.max(1, Math.round(rpg.price(item) * (items.sellFactor ?? 0.35))),
+    buy: item => {
+      const r = folk.buy(talk.npc, item, player, shopMult());
+      hud.log(r.ok ? `Bought ${item.name} for ${r.price} gold.` : r.why, r.ok ? 'loot' : 'bad');
+      if (r.ok) sound.coin(); else sound.ui('error');
+      hud.setPlayer(player);
+      talk.update(talkContext(talk.npc));
+      autoSave();
+    },
+    sell: item => {
+      const r = folk.sell(talk.npc, item, player);
+      hud.log(r.ok ? `Sold ${item.name} for ${r.price} gold.` : r.why, r.ok ? '' : 'bad');
+      if (r.ok) sound.coin();
+      hud.setPlayer(player);
+      talk.update(talkContext(talk.npc));
+      autoSave();
+    },
+    /**
+     * §6.5 — they pack up and go to your holding.
+     *
+     * A BODY as well as a line in a panel: `folk.spawnOne` (written for the prisoners) gives them a
+     * face standing at the claim stone, so a colony of six is six people walking about rather than
+     * a number on a screen.
+     */
+    recruit: async offer => {
+      const out = takeSomebodyOn(offer);
+      if (!out.ok) return;
+      if (talk.npc) talk.npc.recruitOffer = null;
+      talk.update(talkContext(talk.npc));
+    },
+    declineRecruit: () => {
+      if (talk.npc) talk.npc.recruitOffer = null;
+      hud.log('You leave them to it.', '');
+      talk.update(talkContext(talk.npc));
+    },
+    /**
+     * R17 — hire one of the names on the broker's board.
+     *
+     * `followers.hire` is the only door: it charges, writes the contract a save carries, puts the
+     * body down and refuses in a sentence when there is no slot left or not enough gold. The panel
+     * redraws afterwards because the board's own refusal lines change the moment your purse does.
+     */
+    hireMerc: async id => {
+      const out = await followers.hire(id, { at: control });
+      if (!out.ok) { hud.log(out.why, 'bad'); sound.ui('error'); return; }
+      sound.coin();
+      hud.setPlayer(player);
+      talk.update(talkContext(talk.npc));
+      autoSave();
+    },
+    accept: quest => {
+      // R16: remember which settlement the job came out of, so handing it in from the journal three
+      // zones later earns that place the same regard walking back would have
+      quest.giverNodeId = talk.npc?.node?.id ?? null;
+      questLog.add(quest);
+      hud.log(`Took the job: ${quest.title}.`, 'level');
+      // the marker book mirrors the quest log, so the destination lands on the map, the minimap and
+      // the rim arrow all at once — and goes away again when the job is turned in
+      markers.syncQuests(questLog.active);
+      if (quest.place) hud.log(`${quest.place.name} is marked. Press M to see it, or follow the arrow.`, '');
+      talk.update(talkContext(talk.npc));
+      autoSave();
+    },
+    turnIn: async quest => {
+      // R16: one payer for every path — see grantQuest. This used to add gold and experience and
+      // nothing else, which is why a quest could not pay an item even in principle.
+      const npc = talk.npc;
+      await grantQuest(quest, { npc });
+      // the person who gave it has new work next time
+      if (npc) npc.offered = null;
+      talk.update(talkContext(talk.npc));
+    },
+  });
+
+  // ---------------------------------------------------------------- flight and other worlds
+  //
+  // Space is a separate scene in compressed units (see js/space.js). Landing on a different world
+  // means rebuilding everything that belongs to a planet — terrain, sky, scatter, features, weather,
+  // the controller, the enemies and the map — while the character, their gear and their level carry
+  // straight over.
+
+  let space = null;
+  let mode = 'ground';                 // ground | launch | space | land
+  let modeT = 0;
+  let landingTarget = null;
+
+  function disposePlanet() {
+    folk?.dispose();
+    view.dispose(); props.dispose(); features.dispose(); weatherView.dispose();
+    field.clear();
+    map.dispose();
+    scene.remove(sky.sunLight); scene.remove(sky.sunLight.target); scene.remove(sky.ambient);
+    sky.dispose();
+  }
+
+  function makeFolk() {
+    return createTownFolk(scene, terrain, {
+      features, rpg, namegen, looks: npcLooks, seed, balance,
+      radius: lowQuality ? 500 : (balance.town?.radius ?? 900),
+      // R14: so a crier's errand lands somewhere near, at a level you can survive — js/quests.js
+      zoneAt: (x, z) => zones.at(x, z),
+      // R18 — `cond_guardBond`: read live, so equipping the hammer counts without a rebuild
+      guardPower: () => rpg.fx.product(player, 'guardPower'),
+    });
+  }
+
+  function makeMap() {
+    return createMapScreen({
+      // B8: a region's name is something you learn — by walking in, or by hearing about it. The map
+      // read this off `window.farhold` because the agent that built it could not edit this file;
+      // handed in properly, the map works with no global at all.
+      rumours,
+      terrain, seed,
+      getPlayer: () => control,
+      getEnemies: () => field.enemies,
+      onTeleport: (x, z) => { control.teleport(x, z); rebuildWorldAround(true); field.clear(); },
+      markers,
+      // round 4: the level-band overlay, and the dungeon mouths and camps to plan a route around
+      zones,
+      getLevel: () => player.level,
+      sites: { get sites() { return sites.sites; } },
+      meteors: { get marks() { return meteors.marks(); } },
+      gates: { get nodes() { return gates.nodes; } },
+      showCoords: () => !!settings.get('coords'),
+      // R14: `portals.mapMarkers()` has been finished and unimported since §6.8 — the portal was on
+      // the ground, in the save and in the journal, and not on the map
+      portals: { mapMarkers: () => portals.mapMarkers?.() || [] },
+
+      /**
+       * R15 — THE SUPPLY TAB.
+       *
+       *   "I would like the map to show outposts on it and allow creating connections between then
+       *    to transport items, in either direction with a max limit."
+       *
+       * An outpost is worked out from the geometry (js/outposts.js) and a route between two of them
+       * is a `logistics` link, which already carried a per-shipment batch — the "max limit" — and
+       * already runs both ways if you make two of them. None of it was on a screen.
+       *
+       * `poolId` is the join: a route runs between STORES, not between places, so an outpost with
+       * nothing to put things in cannot be either end of one, and the list says so by simply not
+       * offering the arrow.
+       */
+      outposts: () => (build.outposts?.() || []).map(p => {
+        const pool = stores.poolAt?.(p.x, p.z);
+        return { id: p.id, name: p.name, role: p.role, x: p.x, z: p.z, count: p.count, poolId: pool?.id || null };
+      }),
+      supplyLinks: () => {
+        const pools = stores.pools?.() || [];
+        const nameOf = id => pools.find(q => q.id === id)?.name || 'a store';
+        return (logistics.links || []).map(l => ({
+          id: l.id, from: l.from, to: l.to,
+          fromName: nameOf(l.from), toName: nameOf(l.to),
+          batch: l.batch, only: l.only,
+          quote: logistics.quote({ from: l.from, to: l.to, hauler: l.hauler }),
+        }));
+      },
+      onLink: (fromPool, toPool, opts) => {
+        const out = logistics.link(fromPool, toPool, opts || {});
+        hud.log(out.ok
+          ? `Route laid. ${out.quote?.text || ''}`
+          : (out.why || 'That route cannot run.'), out.ok ? 'good' : 'bad');
+        return out;
+      },
+      onUnlink: id => {
+        const gone = logistics.unlink(id);
+        if (gone) hud.log('Route stopped.', '');
+        return gone;
+      },
+      /**
+       * R14 — THE SCANNER, ON THE MAP WHERE PEOPLE LOOK FOR IT.
+       *
+       *   "I previously asked for a scan tool to locate resources. Where is that? Where do you find
+       *    clay?"
+       *
+       * It was a tool inside build mode with a 144 m reach. `findables` is every material this world
+       * can yield, each with the one line that answers "where do I look" — which is on screen BEFORE
+       * you sweep, so a sweep that comes back empty still teaches you something.
+       */
+      findables: () => [...materialWhere.values()]
+        .filter(row => !row.placedOnly && !row.fromPlanet)
+        .map(row => ({
+          id: row.id, name: row.name, colour: row.colour,
+          where: whereToFind(row, { biomeName: biomeWords, toolNames: resourceData?.tools ? Object.fromEntries(Object.values(resourceData.tools).map(t => [t.tier, t.name])) : null }),
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name)),
+      onSweep: want => sweepForDeposits(control.x, control.z, SCAN_RADIUS, { want: want || null }),
+      scanState: () => scanState,
+      /** Keep one of the hits, so it is still there when the sweep goes out. */
+      /** R16 — the Find tab shows the whole survey, and dims everything else while sweeping. */
+      scanning: () => scanner.on,
+      scanned: () => scanner.list(control),
+      onKeep: hit => {
+        const m = markers.save({
+          cellX: Math.floor(hit.x / M_PER_CELL), cellY: Math.floor(hit.z / M_PER_CELL),
+          name: hit.name, note: `${hit.band} seam`, from: { type: 'scan', id: hit.id, label: hit.name },
+        });
+        hud.log(`${hit.name} kept — it is on the map with a star.`, 'level');
+        autoSave();
+        return m;
+      },
+      // "Make the current teleport feature a debug option, but keep it enabled by default"
+      allowDebugTeleport: () => settings.get('debugTeleport') !== false,
+      // every base the character ever raised, and the trip home from here — see js/homes.js
+      bases: {
+        list: () => homes.overview({ ...worldKey(), x: control.x, z: control.z }),
+        go: id => returnToBase(id),
+      },
+      /**
+       * F15: the waypoint network, and what happens when you click one.
+       *
+       * "Allow clicking on waypoints on the map to fast travel between them." The map draws every
+       * pad, greys the ones you have not lit, and calls this for the rest. "Go here" stays beside
+       * it — the user considers it cheating but asked for it to remain for debugging.
+       */
+      /**
+       * R17 — the map gets the WHOLE waypoint network, not a two-method view of it.
+       *
+       * It stars pads, hides them and feeds the starred ones to the minimap (js/waypoints.js
+       * `star`/`show`/`minimapPads`), and with only `{ list, travel }` it had to go and find the
+       * real book on `window.farhold` to do any of that. `Object.create` keeps `travel` ours —
+       * it is real logic (the fighting/underground/from checks, the portal, the hours on the road)
+       * and belongs here, beside the things it moves.
+       */
+      onChanged: () => autoSave(),
+      waypoints: Object.assign(Object.create(waypoints), {
+        travel: id => {
+          const here = waypoints.settlementAt(control.x, control.z);
+          const can = waypoints.canTravel(id, {
+            fighting: field.enemies.some(e => e && e.state === 'chase'),
+            underground: !!dungeon,
+            fromId: here?.id ?? null,
+          });
+          if (!can.ok) { hud.log(can.why, 'bad'); sound.ui('error'); return false; }
+
+          // what a town portal would anchor to, once BUILDING_EXPANSION's portal is built
+          /**
+           * THE TOWN PORTAL OPENS BEHIND YOU.
+           *
+           * Travelling to a waypoint leaves a way back to exactly where you were standing. Opening
+           * a new one closes any existing one — there is only ever one, because in js/portal.js the
+           * whole state is a single variable and there is nowhere for a second to live.
+           */
+          const from = waypoints.noteDeparture(control.x, control.z, planet?.name || null);
+          const opened = portals.open({
+            anchor: { x: from.x, z: from.z, world: from.world },
+            exit: { x: can.pad.x, z: can.pad.z, world: planet?.name || null, name: can.pad.name },
+          });
+          if (opened?.closed) hud.log('The portal you left open has closed.', '');
+          build.showPortal?.(portals.portal?.exit || null);
+          const hours = waypoints.hoursFor(control.x, control.z, can.pad);
+          control.teleport(can.pad.x, can.pad.z);
+          rebuildWorldAround(true);
+          field.clear();
+          sky.advanceHours?.(hours);
+          hud.log(`You step onto the sigil at ${can.pad.name}. ${hours < 1 ? 'Half a day' : Math.round(hours) + ' hours'} on the road.`, 'level');
+          sound.ui('click');
+          autoSave();
+          return true;
+        },
+      }),
+    });
+  }
+
+  /** Build a world and put the player on it. `spot` is {u, v} across the map, from a landing. */
+  function buildPlanet(nextPlanet, spot = null) {
+    if (dungeon) leaveDungeon();
+    disposePlanet();
+
+    planet = nextPlanet;
+    // Markers belong to a world, not to the player: landing somewhere else must not drag the last
+    // planet's pins along with you. They stay in the book, filed under the world they were made on,
+    // and space mode puts a ring round the worlds that still hold one.
+    markers.setWorld({ systemSeed, planetId: planet.id, planetName: planet.name, starName: star.name });
+    world = generatePlanetMap(planet, mapSize);
+    terrain = makeTerrain(world, planet, balance.terrain);
+    // a new world starts unshaped; the brushes are per planet, like the waypoint network
+    terraform = createTerraform({ saved: null });
+    terrain = terraform.wrap(terrain);
+    palette = atmospherePalette(planet);
+    // a new world has its own regions, so it has its own level bands
+    band = bandForPlanet(planet);
+    zones = buildZones(world, {
+      spawn: [terrain.spawnPoint().x, terrain.spawnPoint().z],
+      maxLevel: band.max, bandWidth: balance.zones?.bandWidth ?? 4, startLevel: band.min,
+    });
+    hud.log(`${planet.name} — ${band.name.toLowerCase()}, levels ${band.min}–${band.max}. ${band.blurb}`, 'level');
+    hud.zones = zones;
+
+    sky = createSky({ star, system, planet, balance, palette });
+    scene.add(sky.sunLight); scene.add(sky.sunLight.target); scene.add(sky.ambient);
+    scene.fog = sky.fog;
+
+    view = createTerrainView(scene, terrain, {
+    // the terrain knobs are a knob file like everything else; without this `maxSkirtScale` and
+    // friends were code defaults nobody could tune
+    ...(balance.terrain || {}), rings: ringSpec, waterColor: palette.sea });
+    props = createProps(scene, terrain, {
+      seed,
+      density: lowQuality ? 0.45 : (balance.props?.density ?? 1),
+      radius: lowQuality ? 4 : (balance.props?.radius ?? 7),
+      grassPerCell: lowQuality ? 60 : (balance.props?.grassPerCell ?? 150),
+    });
+    features = createFeatures(scene, terrain, {
+      palette, seed, radius: lowQuality ? 1500 : (balance.features?.radius ?? 2600),
+      waypointLit: id => waypoints?.isLit?.(id),
+    });
+    // a new world has its own seams, on its own seed
+    ore = createNodeWorld({ data: resourceData || {}, seed, terrain, planet: nextPlanet, band: nextPlanet?.band || 'medium' });
+    mining.setOre?.(ore);
+    oreView?.dispose?.();
+    oreView = createOreView(scene, { data: resourceData || {} });
+
+    // A pad on another planet is not somewhere you can WALK to, so the network is rebuilt per
+    // world — but the bases on this world come back out of the register, which is not.
+    waypoints = createWaypoints({
+    settlements: features.settlements, seed,
+    built: homes.forWorld({ systemSeed, planetId: nextPlanet?.id ?? planet?.id ?? null }),
+    // the same test js/features.js uses to site the pad, so the two cannot disagree
+    groundOk: (x, z) => !terrain.underwater(x, z) && terrain.riverAt(x, z) <= 0.3
+      && terrain.slopeAt(x, z, 4) <= 0.5,
+  });
+    weatherView = createWeatherView({
+      scene, skyScene: sky.scene, palette, seed, quality: lowQuality ? 'low' : 'high', ...graphics.weatherOpts(),
+    });
+    graphics.setWeatherView(weatherView);
+    graphics.rebind();
+
+    control = createController(terrain, balance, camera, {
+      obstacles: [props.solids, features.solids, buildSolids, gateSolids, siteSolids], settings,
+      boat: () => vehicleFor(player, 'boat'),
+      derived: () => player.derived,
+    });
+    field = makeField();
+    field.solids = [props.solids, features.solids, buildSolids, gateSolids, siteSolids];
+    encounters = createEncounters({
+      field, zones, terrain, balance, data: encounterData,
+      // R14: the same router as the first one, or landing on a second world would un-throttle the
+      // whole ambient layer — which is exactly the kind of thing that goes unnoticed for months
+      onLog: (t, c, meta) => sayAmbient(t, c, meta), isNight: () => sky.isNight,
+    });
+    // the new world's encounters get the same props and the same people as the first one's
+    eventProps.clearAll();
+    encounters.setProps?.(eventProps);
+    encounters.setFolk?.(opts => folk.spawnOne(opts), id => folk.depopulate?.(id));
+    pets.setTerrain(terrain);
+    chests.clear();
+    chests = createChests(scene, terrain, { seed, balance, zones, rpg, collide: props.solids });
+    gates.dispose();
+    gates = createGates(scene, terrain, { balance, zones, radius: balance.features?.radius ?? 2600, collide: gateSolids });
+    sites.dispose();
+    sites = createSites(scene, terrain, { seed, balance, zones, collide: siteSolids, radius: balance.features?.radius ?? 2600 });
+    openMouths();
+    clearWandererBodies();
+    folk = makeFolk();
+    hud.setTerrain(terrain);
+    map = makeMap();
+
+    const start = spot
+      ? { x: spot.u * terrain.widthM, z: spot.v * terrain.depthM }
+      : { x: control.spawn.x, z: control.spawn.z };
+    control.teleport(start.x, start.z);
+    /**
+     * NEVER come down in the sea.
+     *
+     * The old guard fell back to `control.spawn` — but `spawn` is read once when the controller is
+     * built, and on an ocean world the fallback can be wet too. This walks outward from where you
+     * aimed until it finds dry, walkable ground, and only then gives up on the spawn.
+     */
+    if (terrain.waterAt(control.x, control.z)) {
+      let landed = false;
+      for (let ring = 1; ring <= 14 && !landed; ring++) {
+        for (let k = 0; k < 12 && !landed; k++) {
+          const a = (k / 12) * Math.PI * 2 + ring;
+          const r = ring * terrain.widthM * 0.035;
+          const [x, z] = terrain.clampToWorld(start.x + Math.cos(a) * r, start.z + Math.sin(a) * r);
+          if (terrain.waterAt(x, z) || terrain.slopeAt(x, z, 6) > 0.6) continue;
+          control.teleport(x, z);
+          landed = true;
+        }
+      }
+      if (!landed) control.teleport(control.spawn.x, control.spawn.z);
+    }
+
+    weather = new WeatherClock({
+      weights: weatherWeights(terrain.climateAt(control.x, control.z)),
+      seed,
+      minMinutes: balance.weather?.minMinutes ?? 1.2,
+      maxMinutes: balance.weather?.maxMinutes ?? 4,
+      transitionSeconds: balance.weather?.transitionSeconds ?? 20,
+    });
+    blended = weather.blend();
+    weatherCell = [-1, -1];
+
+    state.elapsed = morningElapsed();
+    rebuildWorldAround(true);
+    chests.update(control.x, control.z);
+    gates.update(control.x, control.z, true);
+    sites.update(control.x, control.z, true);
+    if (campaign.onLandOn(planet.id)) hud.log(`${planet.name} charted.`, 'level');
+    $('hud-planet').textContent = describePlanet(planet, star);
+    return planet;
+  }
+
+  function ensureSpace() {
+    if (!space) {
+      // the BACKDROP is seeded by the system, not the run: "different systems should have different
+      // properties in the skybox", and a jump has to look like it took you somewhere
+      space = createSpace({ star, system, homePlanet: planet, homeWorld: world, balance, seed: systemSeed });
+    }
+    return space;
+  }
+
+  // ---------------------------------------------------------------- the chart, and the jump
+
+  /** The star chart. It replaces the world map whenever there is no ground under you. */
+  const chart = createStarChart({
+    getState: () => ({
+      galaxy, starId, star: starNow(), system, systemSeed,
+      bodies: space?.bodies || null,
+      /**
+       * What the survey of another star can tell you: what is orbiting it and roughly how hard each
+       * one is. Building the system costs a few milliseconds and the answer is cached per star, so
+       * clicking around the chart stays instant.
+       */
+      surveyOf: star => surveyStar(star),
+      /** …and the surface of a world you have actually been down to. */
+      surfaceOf: p => surfaceKnown(p),
+      // the ship's position in AU, for the "you are here" dot on the system view
+      shipAu: space ? { x: space.state.position.x / space.AU, z: space.state.position.z / space.AU } : null,
+      markers: markers.markers,
+    }),
+    onTravel: (target, reach) => beginJump(target, reach),
+    onClose: () => regrab(),
+  });
+
+  /**
+   * The survey cache. A star's system is deterministic from its seed, so this is a pure function
+   * with a memo in front of it rather than any kind of state.
+   */
+  const surveyCache = new Map();
+  function surveyStar(target) {
+    if (!target) return null;
+    if (surveyCache.has(target.id)) return surveyCache.get(target.id);
+    let out = null;
+    try {
+      const built = target.id === starId ? { system } : createSystem({ seed: target.seed });
+      const planets = (built.system.planets || []).map(p => ({
+        name: p.name,
+        kind: p.giant ? 'gas giant' : (p.archetypeName || p.archetype || 'world'),
+        band: bandForPlanet(p).name,
+        color: p.giant ? '#d8b070' : p.atmosphere?.breathable ? '#8fe0a0' : '#8fb8d8',
+      }));
+      const moons = (built.system.planets || []).reduce((n, p) => n + (p.moons?.length || 0), 0);
+      out = { planets, moons };
+    } catch { out = null; }
+    surveyCache.set(target.id, out);
+    return out;
+  }
+
+  /**
+   * What is known about a world's SURFACE — only ever the one you are standing on, because that is
+   * the only surface map this run has built. Everything else honestly says it is unmapped.
+   */
+  function surfaceKnown(p) {
+    if (!p || p.id !== planet.id || !world) return null;
+    const counts = new Map();
+    for (const b of world.biome) counts.set(b, (counts.get(b) || 0) + 1);
+    const total = world.biome.length || 1;
+    const top = [...counts.entries()]
+      .sort((a, b) => b[1] - a[1]).slice(0, 4)
+      .map(([id, n]) => ({ name: BIOMES?.[id]?.name || `biome ${id}`, share: Math.round((n / total) * 100) }));
+    return {
+      regions: world.regions?.length || 0,
+      biomes: counts.size,
+      towns: (world.nodes || []).filter(n => n.type === 'settlement' || n.type === 'port').length,
+      top,
+    };
+  }
+
+  const warp = createWarp({ opts: { seconds: balance.space?.warpSeconds ?? 5 } });
+  let jump = null;          // { from, to, reach } while the drive is running
+
+  /**
+   * Fold to another star.
+   *
+   * Five seconds of tunnel, then the whole system is thrown away and rebuilt from the target star's
+   * seed — a new star, new worlds, a new backdrop — and the ship comes out of it in orbit. The
+   * character, the bag, the quests and every marker come along untouched; markers are filed under
+   * the world they were made on, so nothing from the old system follows you onto the new one's map.
+   */
+  function beginJump(target, reach = null) {
+    if (!target || target.id === starId) return false;
+    if (mode !== 'space') { hud.log('The drive only spins up in open space.', 'bad'); return false; }
+    jump = { from: starNow(), to: target, reach: reach || reachFrom(galaxy, starNow(), target) };
+    if (!jump.reach.ok) { hud.log(jump.reach.why, 'bad'); jump = null; return false; }
+    warp.attach(space.scene);
+    warp.start({ from: jump.from, to: jump.to, seconds: balance.space?.warpSeconds ?? 5 });
+    // point the nose out of the system before the drive catches, so the tunnel flies away from
+    // whatever you were parked beside instead of straight through it
+    const out = space.state.position.clone();
+    if (out.lengthSq() < 1e-6) out.set(1, 0, 0.2);
+    out.normalize();
+    space.state.yaw = Math.atan2(out.x, out.z);
+    space.state.pitch = Math.asin(Math.max(-1, Math.min(1, out.y))) + 0.25;
+    mode = 'warp';
+    modeT = 0;
+    hud.log(`Drive engaged. ${Math.round(jump.reach.ly).toLocaleString()} light years to ${target.name}.`, 'level');
+    return true;
+  }
+
+  /**
+   * Come out of the tunnel somewhere else entirely.
+   *
+   * Only the SYSTEM is built here — the star, its worlds, their orbits. A surface map is 256×128
+   * cells of erosion and rivers and costs about a second, and there is no reason to pay it for a
+   * world nobody has decided to land on yet; `buildPlanet` does that when you actually go down.
+   */
+  function arriveAt(target) {
+    const built = createSystem({ seed: target.seed });
+    star = built.star;
+    system = built.system;
+    const firstWorld = chooseLanding(system) || system.planets[0];
+    // keep the chart's idea of the star in step with the one we actually built
+    target.name = star.name;
+    target.classKey = star.classKey;
+    target.className = star.className;
+    target.color = star.color;
+    starId = target.id;
+    systemSeed = target.seed;
+    // markers are filed by system, so the new one starts with a clean map and the old one keeps its
+    markers.setWorld({ systemSeed, planetId: -1, planetName: '', starName: star.name });
+
+    // the old system's scene, models and textures all go
+    space?.dispose?.();
+    space = null;
+    // there is no "home world" out here until you land on one, so the space scene draws every world
+    // from its procedural texture rather than a real surface map
+    space = createSpace({ star, system, homePlanet: firstWorld, homeWorld: null, balance, seed: target.seed });
+    warp.attach(space.scene);
+    space.enter({ fromPlanet: firstWorld, elapsed: state.elapsed, offset: 6 });
+    camera.far = 600000; camera.updateProjectionMatrix();
+    mode = 'space';
+    jump = null;
+    hud.log(`${star.name}. ${star.className}, ${(system.planets || []).length} worlds.`, 'good');
+    hud.log('M for the chart · fly at a world to drop into its air', '');
+    autoSave();
+  }
+
+  /** Leave the ground. */
+  /**
+   * Board the ship. There is no cinematic any more: you fly it, in the world, in metres, and when
+   * you are high enough the space scene takes over with the sky already black. See js/atmos.js.
+   */
+  function launch() {
+    if (mode !== 'ground') return;
+    if (dungeon) { hud.log('Not down here.', 'bad'); return; }
+    /**
+     * YOU DO NOT START WITH A SHIP.
+     *
+     * BUILDING_EXPANSION.md §9: four subsystems, a rare element and a tank of fuel before the sky
+     * opens. `canLaunch` also refuses a launch that would leave you nothing to land with, and says
+     * which part is missing rather than greying a key out in silence. An existing save keeps the
+     * ship it already had — `migrateShipyard` ran at boot.
+     */
+    const gate = canLaunchShip(player);
+    if (!gate.ok) { hud.log(gate.why, 'bad'); sound.ui('error'); return; }
+    spendFlightFuel(player, 'launch');
+    ensureSpace();
+    ensureAir().board(control);
+    input.grab();                       // the mouse steers the ship; you cannot fly without it
+    actor.group.visible = false;
+    if (horse) horse.group.visible = false;
+    mode = 'air';
+    hud.log('W/S throttle · mouse steers · A/D roll · Space up · C down · Shift boost · J to set down', 'level');
+    hud.log('Climb high enough and you leave the atmosphere.', '');
+  }
+
+  /** Put down on whatever the ship is close enough to — which now means flying down to it. */
+  function land() {
+    if (mode === 'air') {
+      // already in the air over a world: put the ship on the ground and step out
+      const out = air.readout();
+      if (out.altitude > air.cfg.landHeight || out.speed > air.cfg.landSpeed) {
+        hud.log(`Too fast or too high to set down — under ${air.cfg.landSpeed} m/s and ${air.cfg.landHeight} m up.`, 'bad');
+        return;
+      }
+      stepOut();
+      return;
+    }
+    if (mode !== 'space') return;
+    const target = space.canLand();
+    if (!target) {
+      // say WHY, using the same card the reticle draws
+      const under = space.targetUnder(space.heading());
+      const card = space.describe(under);
+      hud.log(card && !card.landable ? card.why : 'Nothing close enough to land on. Fly nearer a world.', 'bad');
+      return;
+    }
+    beginDescent(target);
+  }
+
+  /**
+   * GO HOME, FROM ANYWHERE.
+   *
+   * "It should be easy to teleport back to your bases even if you go to a different star system."
+   *
+   * js/homes.js works out how many legs the trip takes; this takes them. All three endings put the
+   * player on the sigil, because the pad IS the destination — §5 of BUILDING_EXPANSION is explicit
+   * that you arrive standing on it — and all three open the town portal behind you, so the way back
+   * to whatever you were doing is the same whether home was over the hill or four hundred light
+   * years away.
+   *
+   * The refusals are the waypoint network's own, not new ones. A base is a waypoint; it should not
+   * have a second, different rulebook just because you built it.
+   */
+  function returnToBase(id) {
+    const route = homes.routeTo(id, { ...worldKey(), x: control.x, z: control.z });
+    if (!route.ok) { hud.log(route.why, 'bad'); sound.ui('error'); return false; }
+    if (field.enemies.some(e => e && e.state === 'chase')) {
+      hud.log('Not while something is trying to kill you.', 'bad'); sound.ui('error'); return false;
+    }
+    if (dungeon) { hud.log('Not from underground. Get back to the surface first.', 'bad'); sound.ui('error'); return false; }
+    const base = route.base;
+
+    // the way back, opened before anything moves, so the anchor is where the player actually stood
+    const from = waypoints.noteDeparture(control.x, control.z, planet?.name || null);
+    const opened = portals.open({
+      anchor: { x: from.x, z: from.z, world: from.world },
+      exit: { x: base.x, z: base.z, world: base.planetName || null, name: base.name },
+    });
+    if (opened?.closed) hud.log('The portal you left open has closed.', '');
+
+    /**
+     * A FOLD IS A FOLD, whether the sigils do it or the drive does.
+     *
+     * Rebuilding the system from the base's own `systemSeed` is exactly what `arriveAt` does coming
+     * out of warp — a star is its seed — so travelling home across the galaxy costs the same second
+     * of generation and lands in the same place it would have if you had flown.
+     */
+    if (route.step === 'jump') {
+      const target = galaxy.stars[base.starId] || { id: base.starId, seed: base.systemSeed, name: base.starName };
+      // Not from inside the tunnel — there is nowhere to leave a portal and nothing to leave it at.
+      // Everywhere else is allowed on purpose: "It should be easy to teleport back to your bases
+      // even if you go to a different star system", and making the player land on some unrelated
+      // world first so they can stand on a sigil is the opposite of easy.
+      if (mode === 'warp') { hud.log('Not mid-jump.', 'bad'); return false; }
+      const built = createSystem({ seed: base.systemSeed });
+      star = built.star;
+      system = built.system;
+      starId = base.starId ?? starId;
+      systemSeed = base.systemSeed;
+      if (target) { target.name = star.name; target.classKey = star.classKey; }
+      space?.dispose?.();
+      space = null;
+      hud.log(`The sigils fold ${Math.round(base.x / 1000)} km and ${star.name} with them.`, 'level');
+    }
+
+    if (route.step === 'jump' || route.step === 'land') {
+      const all = [...system.planets, ...system.planets.flatMap(x => x.moons || [])];
+      const p = all.find(x => x.id === base.planetId);
+      if (!p) { hud.log(`${base.name} is not where the chart says it is.`, 'bad'); return false; }
+      camera.far = 24000; camera.updateProjectionMatrix();
+      buildPlanet(p, null);
+      mode = 'ground';
+    }
+
+    control.teleport(base.x, base.z);
+    rebuildWorldAround(true);
+    field.clear();
+    // a longer trip is a longer trip: one leg is the ordinary waypoint cost, three is most of a day
+    const hours = Math.min(24, waypoints.hoursFor(from.x, from.z, base) * route.legs);
+    sky.advanceHours?.(hours);
+    build.showPortal?.(portals.portal?.exit || null);
+    hud.log(`You step onto the sigil at ${base.name}. ${Math.round(hours)} hours.`, 'level');
+    sound.ui('click');
+    autoSave();
+    return true;
+  }
+
+  /** Come down out of space into the air over a world, and keep flying. */
+  function beginDescent(target) {
+    const spot = space.landingSpot(target.body);
+    camera.far = 24000; camera.updateProjectionMatrix();
+    buildPlanet(target.planet, spot);
+    ensureAir();
+    air.setTerrain(terrain);
+    air.descend({ x: control.x, z: control.z }, { yaw: control.yaw });
+    actor.group.visible = false;
+    if (horse) horse.group.visible = false;
+    mode = 'air';
+    hud.log(`Coming down on ${planet.name}. ${describePlanet(planet, star)}`, 'level');
+    hud.log('Pull up and set down gently — J when you are slow and low.', '');
+  }
+
+  /** Get out of the ship where it is standing. */
+  function stepOut() {
+    // whatever the flight thinned out comes back
+    lastAirLod = -1;
+    view.setSkirtScale(1, air.state.x, air.state.z);
+    view.setViewScale(viewMul(), air.state.x, air.state.z);
+    // the scatter comes back to full density on the ground, at the player's own setting
+    props.setDensity(settings.get('density') ?? 1, air.state.x, air.state.z);
+    props.setGrass(settings.get('grass') !== false, air.state.x, air.state.z);
+    props.setRadius(lowQuality ? 5 : 7, air.state.x, air.state.z);
+    props.setDensity(settings.get('density') ?? 1, air.state.x, air.state.z);
+    props.setGrass(settings.get('grass') !== false, air.state.x, air.state.z);
+    const st = air.state;
+    control.teleport(st.x, st.z);
+    control.yaw = st.yaw;
+    air.leave();
+    actor.group.visible = true;
+    mode = 'ground';
+    rebuildWorldAround(true);
+    hud.log(`You set down on ${planet.name}.`, 'good');
+    // R14: …and whatever your works made while you were away is waiting for you
+    const back = away.resume();
+    if (back.text) hud.log(back.text, 'level');
+    /**
+     * THE HALF THE AWAY CLOCK NEVER COVERED: THE PEOPLE.
+     *
+     *   "Production and manufacturing should continue even if you leave a planet."
+     *
+     * js/logistics.js runs the grid, the machines and the shipments forward. Nobody woke, nobody
+     * walked to work, nobody ate and nobody filled a labour order — which did not matter before
+     * this round, because a citizen's work never made a single ingot. `civics.away` takes the
+     * window that clock already decided on, cap included, and runs the colony, the fields and the
+     * trade routes across the same seconds in the same order the live loop uses. No second clock.
+     *
+     * The mercy: nobody walks out while you are off-world. Losing your village because you took a
+     * flight is a punishment for playing.
+     */
+    civics.rebuild(build.entries, build.defOf);
+    const card = civics.away({ seconds: back.seconds, rng: rpg.rng });
+    if (card) holding.showAway(card);
+    autoSave();
+  }
+
+  let air = null;
+  let airShip = null;
+  function ensureAir() {
+    if (!air) {
+      // Its OWN hull. Re-parenting `space.ship` into the ground scene took it OUT of the space
+      // scene — a Three object has one parent — and flight in space went first-person with no ship
+      // in front of you at all.
+      airShip = createShip('explorer');
+      airShip.group.scale.setScalar((balance.space?.shipScale ?? 12) * 0.22);
+      airShip.group.visible = false;
+      scene.add(airShip.group);
+      air = createAtmosphere({
+        scene, terrain, balance, settings,
+        ship: airShip,
+        onLog: (t, c) => hud.log(t, c),
+      });
+    }
+    return air;
+  }
+
+  /** Everything that happens when you are not standing on a planet. */
+  function stepFlight(dt, snap) {
+    modeT += dt;
+    const spaceCfg = balance.space || {};
+
+    // ---------------------------------------------------------------- flying in the air
+    if (mode === 'air') {
+      const out = air.update(dt, snap, camera);
+      if (out.bumped) { sound.combat('hit'); hud.log('The hull scrapes. No harm done.', ''); }
+
+      // The world streams under the SHIP. Props and buildings are also thinned out with altitude:
+      // at 4 km you cannot make out a bush, and drawing forty thousand of them is pure waste.
+      rebuildWorldAround(false, air.state);
+      chests.update(air.state.x, air.state.z);
+      gates.update(air.state.x, air.state.z);
+      sites.update(air.state.x, air.state.z);
+      const high = Math.min(1, Math.max(0, (air.state.y - terrain.heightAt(air.state.x, air.state.z)) / 2600));
+      if (Math.abs(high - lastAirLod) > 0.12) {
+        lastAirLod = high;
+        /**
+         * Props REACH FURTHER and thin out as you climb, rather than simply switching off.
+         *
+         * At ground level the scatter is seven cells across; from a kilometre up it is nearly three
+         * times that at a fifth of the density, so the forest runs to the horizon instead of ending
+         * in a circle around the ship. The two together keep the instance count roughly flat.
+         */
+        const baseRadius = lowQuality ? 5 : 7;
+        // the reach scales with the view the player asked for, so a 6x card sees trees as far as it
+        // draws ground rather than a ring of them inside an empty plain
+        props.setRadius(Math.round(baseRadius * (1 + high * 1.9) * Math.sqrt(viewMul())), air.state.x, air.state.z);
+        props.setDensity((settings.get('density') ?? 1) * Math.max(0, 1 - high * 1.15), air.state.x, air.state.z);
+        props.setGrass(high < 0.25 && settings.get('grass') !== false, air.state.x, air.state.z);
+        // and deepen the clipmap skirts, because from up here you are looking straight down the
+        // seam between two rings and a head-height skirt does not cover it
+        view.setSkirtScale(1 + high * 7, air.state.x, air.state.z);
+        // …and STRETCH the rings, for the same triangle count. "You should see many chunks away but
+        // at lower resolution. As you get lower altitude the planet should get more detailed and
+        // eventually props should appear." At the ceiling the view reaches ten kilometres; on the
+        // way down it tightens back up and the grass comes back.
+        view.setViewScale(viewMul() * (1 + high * 5), air.state.x, air.state.z);
+
+      }
+      const blend = air.spaceBlend();
+      // the sky drains to black on the way up and fills back in on the way down
+      // R23: `space` drains the sky table to black from the top down (js/sky-palette.js) and takes the
+      // height fog with it, so orbit has no fog wall; a little gloom still steals the light
+      sky.update(state.elapsed, { gloom: blend * 0.3, space: blend, cloud: blended.cloud, longitude: air.state.x / terrain.widthM });
+      graphics.update(dt, { mode, blended, space: blend, x: air.state.x, z: air.state.z, y: air.state.y });
+      sky.sunLight.intensity *= 1 - blend * 0.35;
+      scene.fog.near = 40 + blend * 4000;
+      scene.fog.far = 7000 + blend * 40000;
+
+      if (out.leftAtmosphere) {
+        // hand over: the space scene, positioned off the world we just climbed away from
+        ensureSpace().enter({ fromPlanet: planet, elapsed: state.elapsed });
+        camera.far = 600000; camera.updateProjectionMatrix();
+        air.leave();
+        light.setSpots(false);            // nothing to light between the worlds
+        mode = 'space';
+        /**
+         * R14 — start the away clock.
+         *
+         * "Production and manufacturing should continue even if you leave a planet." This is the
+         * one moment the planet is genuinely left behind, so it is where the stamp goes. It is also
+         * written into every save (see `snapshot`), which covers quitting from orbit.
+         */
+        away.mark();
+        hud.log(`${planet.name} falls away below you.`, 'level');
+        hud.log('W to fly · Shift to boost · hold Space to warp · point at a world and press J to land', '');
+        autoSave();
+      }
+
+      /**
+       * L in the air is the landing lights.
+       *
+       * Same key as the lamp on foot — "allow the light when on foot to be toggled on both with the
+       * hotkey L for light" — because from the player's side it is one idea: L means light, and what
+       * that means depends on whether you are standing on the ground or flying over it.
+       */
+      if (snap.pressed?.has('KeyL')) {
+        light.setSpots(!light.spotsOn);
+        hud.log(light.spotsOn ? 'Landing lights on.' : 'Landing lights off.');
+      }
+      light.aimSpots(air.state, air.state?.yaw ?? 0, -0.35);
+
+      /**
+       * B2: the minimap follows the SHIP.
+       *
+       * The ground tick is what draws the minimap, and flight returns out of `stepFlight` long
+       * before it — so the canvas kept whatever was painted the last time the player was on foot,
+       * and the arrow sat at the spot they took off from however far they flew.
+       */
+      if (state.frames % 6 === 0) hud.drawMinimap(air.state, field.enemies, [], []);
+
+      const r = air.readout();
+      hud.prompt(out.landed ? '<b>J</b> set down' : null);
+      hud.tick(player, {
+        place: `${planet.name} · in the air`,
+        zone: null,
+        clock: `${r.altitude} m · ${r.speed} m/s`,
+        target: null,
+        /**
+         * The upper atmosphere says what it is, and what the controls do up there.
+         *
+         * A player who climbs into a band where the throttle has quietly changed meaning needs to be
+         * told, once, in the place they are already looking. Below it, the old line still points the
+         * way out.
+         */
+        sky: r.regime === 'high'
+          ? (r.holding != null
+            ? `holding station at ${r.holding} m — nose down to descend, up to climb`
+            : `upper atmosphere · ${r.climb > 0 ? '+' : ''}${r.climb} m/s — level out to hold this altitude`)
+          : 'climb to leave the atmosphere',
+        weather: r.regime === 'high'
+          ? `rate ${Math.round((r.throttle || 0) * 100)}% · air ${Math.round(r.air * 100)}%`
+            + `${r.holding != null ? ' · station held' : ''}`
+          : `throttle ${Math.round(r.throttle * 100)}%${r.boosting ? ' · boost' : ''}`
+            + `${r.lift > 0 ? ' · climbing' : r.lift < 0 ? ' · descending' : ''} · air ${Math.round(r.air * 100)}%`,
+        where: `seed ${seed} · x ${Math.round(air.state.x)} z ${Math.round(air.state.z)} · ${r.altitude} m`,
+      });
+      return;
+    }
+
+    /**
+     * R18 — `'launch'` AND `'land'` ARE UNREACHABLE, AND THEY STAY, WITH THIS NOTE ON THEM.
+     *
+     * `mode` is only ever assigned `'ground' | 'air' | 'space' | 'warp'` (twelve sites, all
+     * checked), and `landingTarget` is only ever READ or set back to null — nothing ever fills it.
+     * Both blocks are leftovers from before round 5's seamless take-off and landing, which replaced
+     * a staged launch/land sequence with a continuous climb through the atmosphere.
+     *
+     * Kept rather than deleted because they are the only written record of how the staged version
+     * worked, and this file has twice had a "dead" branch turn out to be the live one. Recorded
+     * rather than left silent, because the whole point of this round is that unreachable code which
+     * LOOKS live is the most expensive kind: the next person to read `mode === 'launch'` should know
+     * in one line that it cannot run, instead of spending an afternoon proving it.
+     */
+    if (mode === 'launch') {
+      // climb away from the ground. The fog closes and the light drains, and at the top the space
+      // scene takes over — the swap happens while there is nothing left to see of the ground.
+      const k = Math.min(1, modeT / (spaceCfg.ascentSeconds ?? 3.2));
+      control.y += dt * 240 * (0.3 + k * 2.4);
+      camera.position.set(control.x - Math.sin(control.yaw) * 30, control.y + 16, control.z - Math.cos(control.yaw) * 30);
+      camera.lookAt(control.x, control.y + 60, control.z);
+      scene.fog.near = 10;
+      scene.fog.far = Math.max(180, 7000 * (1 - k * 0.94));
+      if (k >= 1) {
+        ensureSpace().enter({ fromPlanet: planet, elapsed: state.elapsed });
+        camera.far = 600000; camera.updateProjectionMatrix();
+        mode = 'space';
+        hud.log('W to fly · Shift to boost · hold Space to warp · J to land', 'level');
+      }
+      return;
+    }
+
+    if (mode === 'space') {
+      space.update(dt, snap, camera);
+      // FLY into an atmosphere rather than pressing a key at it. `space.atmosphereEntry()` fires
+      // once the ship has dropped inside half a radius of a landable world; the descent then picks
+      // up exactly where the space flight left off, over the point the ship was actually above.
+      const entry = space.atmosphereEntry();
+      if (entry) {
+        hud.log(`You fall into ${entry.planet.name}'s air.`, 'level');
+        beginDescent(entry);
+        return;
+      }
+      const r = space.readout();
+      // the reticles: a bracket round every world in view, and a card on the one you are pointing at
+      const marks = space.marks(camera);
+      const under = space.targetUnder(space.heading());
+      // hang each world's markers off its bracket, so a tracked quest is visible from orbit
+      const byWorld = new Map();
+      for (const m of markers.inSystem(systemSeed)) {
+        if (!byWorld.has(m.planetId)) byWorld.set(m.planetId, []);
+        byWorld.get(m.planetId).push(m);
+      }
+      for (const mk of marks) mk.markers = (byWorld.get(mk.body?.planet?.id) || []).map(m => m.kind);
+      const card = space.describe(under);
+      if (card && under?.planet) card.markers = byWorld.get(under.planet.id) || [];
+      hud.reticles(marks, under, camera, card);
+      hud.tick(player, {
+        place: `${star.name} system`,
+        zone: null,
+        clock: `${r.target} · ${r.distanceAu.toFixed(2)} AU`,
+        target: null,
+        sky: r.canLand ? 'close enough to land — press J, or just keep going down' : 'fly to a world to land on it',
+        weather: `${r.mode}${r.warpCharge > 0.05 ? ` (warp ${Math.round(r.warpCharge * 100)}%)` : ''} · ${speedText(r.speed, space.AU)}`
+          + (r.approach < 0.92 ? ` · slowing (${Math.round(r.approach * 100)}%)` : '')
+          // "warp locked" read like a fault in the drive. It is a rule: you cannot warp with a
+          // world in your lap, and the fix is to fly away from it.
+          + (r.crowded ? ' · warp needs open space' : ''),
+        where: `seed ${seed} · in flight`,
+        flying: true,
+      });
+      // the minimap is the system from above up here, not the ground we left standing on the canvas
+      if (state.frames % 6 === 0) {
+        hud.drawSystemMap({
+          bodies: space.bodies.filter(b => !b.moon).map(b => ({
+            x: b.position.x / space.AU, z: b.position.z / space.AU,
+            giant: !!b.planet.giant,
+            target: b.planet.name === r.target,
+          })),
+          ship: { x: space.state.position.x / space.AU, z: space.state.position.z / space.AU },
+          yaw: space.state.yaw,
+        });
+      }
+      return;
+    }
+
+    if (mode === 'warp') {
+      // The tunnel. The system is still there behind it and still being flown through, so the
+      // streaks have something to streak past; at the halfway mark the arrival is built and the
+      // second half of the ramp plays over the NEW sky.
+      const out = warp.update(dt, camera);
+      space.state.throttle = 1;
+      space.update(dt, null, camera);
+      // the system itself streaks past — without this the tunnel plays over a set of stationary
+      // planets, which reads as a screen effect rather than as going somewhere
+      space.warpStretch(out.intensity, space.heading());
+      if (out.done) {
+        space.releaseWarp();
+        if (jump) arriveAt(jump.to);
+        else mode = 'space';
+      }
+      hud.reticles(null);
+      hud.tick(player, {
+        place: jump ? `${jump.from.name} → ${jump.to.name}` : 'in transit',
+        zone: null,
+        clock: jump ? `${Math.round(jump.reach.ly).toLocaleString()} ly` : '',
+        target: null,
+        sky: 'the stars draw out into lines',
+        weather: `warp · ${Math.round(out.t * 100)}%`,
+        where: 'between stars',
+        flying: true,
+      });
+      // between stars there is no system to draw — an empty field rather than the last planet's map
+      if (state.frames % 6 === 0) hud.drawSystemMap({});
+      return;
+    }
+
+    if (mode === 'land') {
+      // dive at the target, then rebuild the ground under it
+      const body = space.bodies.find(b => b.planet.id === landingTarget.planet.id);
+      if (body) { space.aimAt(body); space.state.throttle = 1; }
+      space.update(dt, { forward: 1, strafe: 0, run: true, jump: false, attack: false, look: [0, 0], pressed: new Set() }, camera);
+      if (modeT >= (spaceCfg.descentSeconds ?? 2.6)) {
+        camera.far = 24000; camera.updateProjectionMatrix();
+        buildPlanet(landingTarget.planet, landingTarget.spot);
+        landingTarget = null;
+        mode = 'ground';
+        hud.log(`You set down on ${planet.name}. ${describePlanet(planet, star)}`);
+        autoSave();
+      }
+    }
+  }
+
+  /** Draw whichever world we are in. */
+  function renderFrame() {
+    // R23: through js/postfx.js — an HDR frame, bloom, shafts, ACES and the grade — or, with the
+    // Graphics setting Off, straight to the screen exactly as before
+    graphics.render(mode, () => {
+    renderer.clear();
+    if (mode === 'ground' || mode === 'launch' || mode === 'air') {
+      // Underground there is no sky to draw — just black behind the walls, which is what a dungeon
+      // with no ceiling should look like from inside.
+      if (!dungeon) {
+        renderer.render(sky.scene, sky.camera(camera));
+        renderer.clearDepth();
+      }
+      renderer.render(scene, camera);
+    } else {
+      renderer.render(space.scene, camera);
+    }
+    });
+    document.body.dataset.ready = '1';
+    state.ready = true;
+  }
+
+  // ---------------------------------------------------------------- place the player
+  control.teleport(control.spawn.x, control.spawn.z);
+  /**
+   * Start a new run in the MORNING.
+   *
+   * The bug: `sky.js` gives every world a local time — the sun's angle is
+   * `elapsed/dayLength + startFraction + longitude`, and `longitude` is where you are on the map,
+   * 0..1. So `startFraction: 0.34` only meant "morning" at longitude 0; landing two thirds of the
+   * way across the map added 0.66 and put you at half past ten at night. Winding the clock back by
+   * the player's own longitude makes startFraction mean what it says wherever you come down.
+   */
+  function morningElapsed() {
+    const dayLength = balance.sky?.dayLengthSeconds ?? 900;
+    const longitude = control.x / terrain.widthM;
+    return (((1 - longitude) % 1) + 1) % 1 * dayLength;
+  }
+  state.elapsed = morningElapsed();
+  // no eclipse for the first two in-game hours — a first impression of a sunlit world should be one
+  sky.holdEclipsesUntil?.(state.elapsed + (balance.sky?.eclipseGrace ?? 450));
+  if (save) {
+    state.elapsed = restore(save, { rpg, player, control, map }) || 0;
+    // written on every save since round 3 and never read back, so the save list's clock restarted
+    state.playtime = Math.max(0, Math.round(save.playtime || 0));
+    if (save.world && !saveCarriesWorld(save)) {
+      hud.log('This save was written before the world settings travelled with it — it may not line up.', 'bad');
+    }
+  }
+  rebuildWorldAround(true);
+  actor.group.position.set(control.x, control.y, control.z);
+  applyGearLook();
+  hud.setPlayer(player);
+
+  /**
+   * Stream the world around a point. It used to hard-code the CHARACTER's position, so flying the
+   * ship left a square of detailed ground sitting where you took off and nothing but empty
+   * clipmap beyond it — "the map does not update".
+   */
+  function rebuildWorldAround(force = false, at = null) {
+    if (dungeon) return;                 // the surface is hidden; do not stream it while you are down there
+    const x = at ? at.x : control.x, z = at ? at.z : control.z;
+    view.update(x, z, force);
+    props.update(x, z, force);
+    features.update(x, z, force);
+  }
+
+  $('hud-planet').textContent = describePlanet(planet, star);
+  hud.log(save ? `Welcome back, ${player.name}.` : `You land on ${planet.name}.`);
+  if (!save && created.movedSeed) {
+    hud.log(`Seed ${seed} had nowhere worth starting — this is system ${systemSeed}, the nearest that did.`, '');
+  }
+
+  /**
+   * ================================================================ walking into a zone
+   *
+   * Everything the territory layer does for one zone happens here, once, on the frame you cross the
+   * border — not on a timer and not per frame. It reveals who holds the ground, starts its patrols on
+   * the real road nodes, puts people on the road, sends a caravan if there is somewhere for one to go,
+   * rolls for trouble, and builds the board.
+   */
+  function enterTerritory(zone) {
+    boardZone = zone.id;
+    const record = holdings.visit(zone.id);
+    // R17 — exploring pays for research, and `visits` is 1 the first time only
+    if (record?.visits === 1) sharedResearch().award('region', 1);
+
+    /**
+     * R16 — EVERY LANDMARK IN THIS ZONE GETS A MODEL, AND EVERY MODEL GETS A LEDGER.
+     *
+     *   "Also, despite the name 'gibbet cage' there was no model there."
+     *
+     * Two systems made landmarks and had never been introduced: js/territory.js invented a few per
+     * zone with state and a save slot and no geometry, js/sites.js built the set pieces with no way
+     * to pay out. `claimLandmarks` marries them — a territory mark near a set piece adopts it, one
+     * with nothing near it gets a set piece built where it stands. After this line, pressing E at a
+     * landmark and looking at a landmark are the same place.
+     */
+    sites.claimLandmarks?.(holdings.landmarksIn(zone.id));
+    const cell = terrain.metresPerCell;
+    const inZone = n => zones.at(n.x * cell, n.y * cell)?.id === zone.id;
+    const nodes = (world.nodes || []).filter(inZone);
+    const spot = n => ({ x: n.x * cell, z: n.y * cell, name: n.name || zone.name, kind: n.type, tags: [n.type] });
+
+    // a patrol walks between real places: the zone's settlements, landmarks and passes
+    const route = nodes.filter(n => ['settlement', 'port', 'landmark', 'pass'].includes(n.type)).map(spot);
+    const stops = route.length >= 2 ? route
+      : holdings.sitesIn(zone.id).map(si => ({ x: si.x, z: si.z, name: si.name }));
+    if (stops.length >= 2) patrols.enter(zone, stops);
+
+    // somebody on the road: junctions, landmarks and the sites themselves
+    roadFolk.populate(zone, [
+      ...nodes.map(spot),
+      ...holdings.sitesIn(zone.id).map(si => ({ x: si.x, z: si.z, kind: 'road', tags: ['road', 'camp'] })),
+    ], { night: sky.dayFraction < 0.25 || sky.dayFraction > 0.78, level: player.level });
+
+    // and a load moving between two of its settlements
+    const towns = nodes.filter(n => n.type === 'settlement' || n.type === 'port').map(spot);
+    if (towns.length >= 2 && !trade.inZone(zone.id).length) trade.dispatch(zone, towns);
+
+    /**
+     * Does anything happen to this place today?
+     *
+     * R14 — AND IF IT DOES, *THAT* IS THE NEWS.
+     *
+     * The line under this used to be `for (const row of trouble.describe(zone.id))`, and
+     * `describe()` returns everything currently RUNNING in the zone, not what has just started. So
+     * an incident that began forty minutes ago was announced again as though it were news — and
+     * with open water re-triggering this function several times a minute (see the note in the main
+     * loop), that is where "something out there has your measure and has told its friends" was
+     * coming from, over and over. `consider()` already returns the one that started. Announce that.
+     */
+    const started = trouble.consider(zone, {
+      biome: terrain.biomeAt(control.x, control.z).key,
+      weather: blended.key,
+      playerBeaten: !!campaign.nemesis,
+    });
+
+    // the board. Everything on it names something that is actually in this zone right now.
+    const candidates = candidatesFrom({
+      zone, territory: holdings, bestiary: bestiary.enemies || [], nodes: world.nodes || [],
+      landmarks: holdings.landmarksIn(zone.id),
+      npcs: roadFolk.candidates(zone.id),
+      caravans: trade.candidates(zone.id),
+      patrols: patrols.candidates(zone.id),
+      named: campaign.nemesis ? [{ id: campaign.nemesis.id || 'nemesis', name: campaign.nemesis.name, state: 'grudge' }] : [],
+      metresPerCell: cell, level: player.level,
+      /**
+       * R14 — tell the generator where the board is, how wide the world is, and what level each
+       * place sits at, so its own "local means local" rule can finally be enforced. Without these
+       * three it was handed every settlement on the planet and no way to tell them apart. See the
+       * note at the top of js/jobgen.js.
+       */
+      from: { x: control.x, z: control.z },
+      wrapM: terrain.widthM || 0,
+      zoneAt: (x, z) => zones.at(x, z),
+    });
+    localBoard = jobs.offer({ zone, level: player.level, candidates, want: 5 });
+
+    // and one thing you now know about somewhere you have not been
+    const neighbours = zones.list().filter(z => z.id !== zone.id && Math.abs(z.minLevel - zone.minLevel) <= 6);
+    if (neighbours.length) {
+      const pick = neighbours[Math.floor(Math.random() * neighbours.length)];
+      rumours.hear(pick, { from: rumourSource(zone), extra: { unvisitedLandmarks: 2 } });
+    }
+
+    if (record?.holder) hud.log(`${zone.name} is held by ${intro.nameFor(record.holder)}.`, '');
+    // R14: a tier-C zone event costs four of the purse's four points, so it cannot happen twice in
+    // two minutes however much the world wants it to
+    if (started) {
+      sayAmbient(`${zone.name}: ${started.blurb}.`, 'bad',
+        { tier: 'zone', id: 'inc:' + started.kind, zoneId: zone.id });
+    }
+  }
+
+  /**
+   * R14 — just the board, please.
+   *
+   * Dusk and dawn want the notice board rebuilt with whoever is on the road now. They used to get
+   * that by setting `boardZone = null`, which made the game believe you had walked into the region
+   * for the first time — and so it re-announced the region, re-rolled the trouble, re-populated the
+   * road and heard a fresh rumour, twice an in-game day, for ever.
+   */
+  function buildLocalBoard(zone) {
+    if (!zone) return;
+    const cell = terrain.metresPerCell;
+    localBoard = jobs.offer({
+      zone, level: player.level, want: 5,
+      candidates: candidatesFrom({
+        zone, territory: holdings, bestiary: bestiary.enemies || [], nodes: world.nodes || [],
+        landmarks: holdings.landmarksIn(zone.id),
+        npcs: roadFolk.candidates(zone.id),
+        caravans: trade.candidates(zone.id),
+        patrols: patrols.candidates(zone.id),
+        named: campaign.nemesis ? [{ id: campaign.nemesis.id || 'nemesis', name: campaign.nemesis.name, state: 'grudge' }] : [],
+        metresPerCell: cell, level: player.level,
+        from: { x: control.x, z: control.z },
+        wrapM: terrain.widthM || 0,
+        zoneAt: (x, z) => zones.at(x, z),
+      }),
+    });
+  }
+
+  /**
+   * A job off a notice board pays itself.
+   *
+   * Every other quest in the game is handed back to the person who gave it, and the talk screen does
+   * the paying. A board job has no person — it came off a post in a village or out of somebody's
+   * mouth on the road — so it would have sat at "done" for ever with nobody to give it to. It pays
+   * on the frame it finishes, and the WORLD moves at the same time: the faction that posted it is
+   * pleased, whoever holds the ground feels it, and it leaves a rumour behind.
+   */
+  function payBoardJobs() {
+    for (const quest of [...questLog.active]) {
+      if (!quest.done || !quest.frame) continue;
+      // R16: `paid` is set the moment grantQuest starts, before it can await a chooser. This sweep
+      // runs every few frames, so without the guard a board job that asks you what you want would
+      // be re-entered sixty times a second while the popup was open.
+      if (quest.paid) continue;
+      /**
+       * …AND A JOB THAT PAYS ITSELF CANNOT ASK YOU A QUESTION.
+       *
+       * This sweep fires with nobody having pressed anything — you finished the last kill and
+       * walked on. A `choice` or a `pick3` there would stop the game dead with a menu you did not
+       * open, and if you never answered it the job would never be turned in. Both downgrade to the
+       * crate, which is a reveal you can ignore; the two kinds that ask are for a hand-in you
+       * actually made, at a person or from the journal.
+       */
+      if (quest.reward && (quest.reward.kind === 'choice' || quest.reward.kind === 'pick3')) {
+        quest.reward.kind = 'crate';
+      }
+      grantQuest(quest);
+    }
+  }
+
+  /**
+   * Every rank reward you have actually earned, keyed by its effect.
+   *
+   * `data/faction-rewards.json` was loaded and read by nothing. This is the one place that asks it,
+   * so a caller can say `earnedRewards().freeTolls` and not care which faction it came from.
+   */
+  function earnedRewards() {
+    const out = {};
+    for (const [key, list] of Object.entries(rewardData.rewards || {})) {
+      const value = standings.get(key);
+      for (const row of list) {
+        const at = (rewardData.ranks || []).find(r => r.key === row.rank)?.at ?? 999;
+        if (value < at) continue;
+        for (const [effect, amount] of Object.entries(row.effect || {})) out[effect] = amount;
+      }
+    }
+    return out;
+  }
+
+  /**
+   * What a shop charges: the campaign's own multiplier, times how the people who hold this ground
+   * feel about you.
+   */
+  function shopMult() {
+    const base = campaign.priceMultiplier(talk.npc?.node?.id);
+    const key = holdings.of(hud.here?.id)?.holder;
+    // …and what is happening here: short rations put every price up, a fair day takes them down
+    const earned = earnedRewards();
+    // the Greenhand feed everybody at half price once you are one of theirs
+    const ration = earned.rationPrice ? (earned.rationPrice + 1) / 2 : 1;
+    return base * (key ? standings.priceMult(key) : 1) * (zoneEffects.shopMult || 1) * ration;
+  }
+
+  /** A faction's own colour, for a minimap mark or a row on the standing screen. */
+  function factionColour(key) {
+    return (factionData.factions || []).find(f => f.key === key)?.colour || null;
+  }
+
+  /**
+   * What the trouble in this zone is actually doing.
+   *
+   * `trouble.effects()` was written and never called, so an incident was one red line in the log and
+   * changed nothing. It is read here once a tick and applied to the two things a player feels: how
+   * much is out there, and what a shop charges.
+   */
+  let zoneEffects = { ...NO_EFFECT };
+  let lastBudget = null;
+  function applyIncidents() {
+
+    zoneEffects = hud.here ? trouble.effects(hud.here.id) : { ...NO_EFFECT };
+    /**
+     * C11: the starting band is thinner than the rest.
+     *
+     * Fighting a kilometre outside town at level 1 took a character from 94 health to 30 in about
+     * seven seconds with thirty-three things alive in the field. A moor hound is seven swings; three
+     * arriving together is a death you cannot answer. The first band gets half the crowd, and the
+     * rest of the world is unchanged.
+     */
+    const soft = hud.here && (hud.here.minLevel ?? 1) <= 4 ? 0.5 : 1;
+    /**
+     * R18 — `legendary:no_night_raids` — "Nothing ambushes you in the dark: night spawns leave you
+     * alone." Its `noAmbush` hook was defined in the registry and read by nobody, so The Long
+     * Watch's whole reason for existing did nothing.
+     *
+     * Applied to the crowd after dark, which is the only thing "night spawns leave you alone" can
+     * mean in a game where the spawner works to a budget: with it on, the field after dark is a
+     * quarter of what it would be. Not zero — an empty world is not a reward, it is a different
+     * game — and it does not touch daylight at all.
+     */
+    const dark = sky.dayFraction < 0.25 || sky.dayFraction > 0.78;
+    const warded = dark && rpg.fx.sum(player, 'noAmbush') > 0 ? 0.25 : 1;
+    const want = Math.round((spawnCfg.maxAlive ?? 38) * zoneEffects.spawnMult * soft * warded);
+    if (want !== lastBudget) { lastBudget = want; field.setBudget?.(want); }
+  }
+
+  /** The world moving while you are in it. Cheap enough to run twice a second. */
+  let lastPhase = null;
+  /** R18 — twice a second at most, so a canter is not sixty hits. See the trample block. */
+  let trampleIn = 0;
+  function tickTerritory(seconds) {
+    applyIncidents();
+    payBoardJobs();
+    const night = sky.dayFraction < 0.25 || sky.dayFraction > 0.78;
+    /**
+     * Different people are on the road at night, and different people again tomorrow.
+     *
+     * The roster is cached per zone per phase so it does not churn while you stand there, which means
+     * something has to clear it — otherwise the same pedlar stands on the same stretch of road for
+     * the whole run. Dusk and dawn are the two moments it is reasonable for the road to change.
+     */
+    const phase = night ? 'n' : 'd';
+    if (lastPhase !== null && phase !== lastPhase && hud.here) {
+      roadFolk.refresh(hud.here.id);
+      // R14: rebuild the board with whoever is out there now — WITHOUT re-announcing the region,
+      // the trouble and a fresh rumour, which is what `boardZone = null` used to do here.
+      rebuildBoard = true;
+    }
+    lastPhase = phase;
+    patrols.update(seconds, { night });
+    for (const event of trade.update(seconds, { playerNear: { x: control.x, z: control.z } })) {
+      /**
+       * R14: a load being taken apart is something you can run to, so it is an activity and it
+       * carries a position. Arriving and being wrecked are flavour — they are news about something
+       * that is already over.
+       */
+      if (event.kind === 'caravan-wrecked') sayAmbient(`${event.name} never arrived.`, 'bad', { tier: 'flavour', id: 'car-lost:' + event.id });
+      if (event.kind === 'caravan-arrived') sayAmbient(`${event.name} got through.`, 'good', { tier: 'flavour', id: 'car-in:' + event.id });
+      if (event.kind === 'caravan-attacked') {
+        sayAmbient(`${event.name} is under attack.`, 'bad',
+          { tier: 'activity', id: 'car-hit:' + event.id, at: { x: event.x, z: event.z } });
+      }
+    }
+    // in-game hours, from the same clock the day/night cycle runs on
+    /**
+     * R14 — AN HOUR MEANS THE SAME THING TO EVERY CLOCK IN THE GAME.
+     *
+     * This read `seconds / 60`: one territory hour per sixty real seconds. The sun runs off
+     * `balance.json` `sky.dayLengthSeconds` (900), which is twenty-four hours in fifteen real
+     * minutes — one sky hour per 37.5 seconds. So an incident written as "24 hours" (the ash fall,
+     * the fair day) lasted twenty-four real minutes, which the sun says is a day and two thirds,
+     * and an incident's lifetime never lined up with anything the player could see out of a window.
+     * Deriving it from the same number means "48 hours" is two sunrises, because it is.
+     */
+    const hoursPerSecond = 24 / (balance.sky?.dayLengthSeconds ?? 900);
+    for (const event of holdings.tick(seconds * hoursPerSecond)) {
+      if (event.kind === 'zone-changed-hands') {
+        hud.log(`${zones.byId(event.zoneId)?.name || 'The ground'} belongs to ${intro.nameFor(event.to)} now.`, 'level');
+      }
+      if (event.kind === 'incident-over') {
+        // the aftermath, which is the interesting half — `onExpire` was data nothing ever read
+        const spec = trouble.byKind(event.incident);
+        const line = spec?.onExpire?.rumour;
+        if (line) {
+          const text = line.replace(/\{zone\}/g, event.zoneName || 'the place');
+          rumours.add(text, { zone: zones.byId(event.zoneId), from: 'word going round' });
+          hud.log(text + '.', '');
+        }
+        if (spec?.onExpire?.grip) holdings.press(event.zoneId, spec.onExpire.grip);
+      }
+    }
+  }
+
+  // ---------------------------------------------------------------- saving
+  const saveId = save?.id || saves.newId();
+  let sinceSave = 0;
+  /** R16: the body under the crosshair, and how long it stays on the target bar after it leaves. */
+  let lookTarget = null, lookTargetFor = 0;
+  function currentSnapshot() {
+    return snapshot({
+      id: saveId, name: player.name, seed, classId, player, control,
+      // R16: the appearance, so a customised character comes back looking like themselves
+      avatar: baseLook,
+      // where you actually are, so a load does not drop you back at the starting star
+      at: { systemSeed, starId, planetId: planet.id, starName: star.name, planetName: planet.name },
+      elapsed: state.elapsed, playtime: state.playtime,
+      markers: markers.toJSON(),
+      scanner: scanner.toJSON(),
+      place: features.settlementAt(control.x, control.z)?.name || terrain.regionAt(control.x, control.z) || terrain.biomeAt(control.x, control.z).name,
+      weather: blended.key,
+      quests: questLog.toJSON(),
+      campaign: campaign.toJSON(),
+      // R18 — `passiveRanks`, `pendingPassive` and `pendingTalent` used to be passed here as well.
+      // `snapshot()` has never had them in its parameter list, so the top-level copies were dropped;
+      // the values are saved, off `player`, in its `player` block. Three lines that looked like they
+      // mattered and did nothing, which in this file is indistinguishable from the real bug next to
+      // them — so they are gone rather than added to a list of exceptions.
+      materials: craft.materials.toJSON(),
+      dungeonsCleared,
+      world: worldOpts,
+      // a save taken underground is in the dungeon's own coordinates — carry the way back out
+      inDungeon: !!dungeon,
+      surface: surfaceSpot,
+      // The Territory: who likes you, what you have knocked over, and what you have heard
+      standings: standings.toJSON(),
+      territory: holdings.toJSON(),
+      rumours: rumours.toJSON(),
+      waypoints: waypoints.toJSON(),
+      // the bases, which belong to the CHARACTER and not to any one world
+      homes: homes.toJSON(),
+      // what the crates are holding, and what the grid is carrying
+      stores: stores.toJSON(),
+      grid: grid.toJSON(),
+      // which seams you have worked out, and the drills and routes standing on them
+      ore: ore.toJSON(),
+      // what you have cut down and where you have cleared the ground — see js/props.js
+      props: props.toJSON(),
+      mining: mining.toJSON(),
+      // the benches, their queues, and the recipes you have unlocked by doing them
+      works: works.toJSON(),
+      // R14 — loads on the road, the standing orders behind them, and when you left
+      logistics: logistics.toJSON(),
+      away: away.toJSON(),
+      /**
+       * R18 — THE RESEARCH TREE, WHICH WAS NEVER PASSED AT ALL.
+       *
+       * `sharedResearch().toJSON()`/`load()` have existed since the tree landed with no caller, so
+       * every point earned vanished on save and all 31 structures carrying a `tech` key re-locked
+       * on the next load. The earning events — a first-time landmark, a first-visit region, a boss
+       * kill — do not repeat, so those points were unrecoverable.
+       */
+      research: sharedResearch().toJSON(),
+      // §7 — the raid you took on, and how far through it you are
+      defence: defence.toJSON(),
+      /**
+       * THE BASE IS PART OF THE SAVE.
+       *
+       * `snapshot()` destructures a fixed argument list, and its own comment records what happened
+       * the last time something was left off it — `world`, `quests` and `campaign` were silently
+       * dropped and every load emptied them. So each of these is added here AND in save.js's
+       * parameter list, together.
+       */
+      terraform: terraform.toJSON(),
+      build: build.toJSON?.() || null,
+      portal: portals.toJSON?.() || null,
+      colony: colony.toJSON?.() || null,
+      // who sleeps where, which traders moved in, what is in the hold and the Trade Post, the carts
+      // on the long roads, and the muster cooldowns. js/save.js's parameter list already has it.
+      civics: civics.toJSON?.() || null,
+      farm: farm.toJSON?.() || null,
+      work: board.toJSON?.() || null,
+    });
+  }
+  function autoSave({ quiet = true } = {}) {
+    const id = saves.write(currentSnapshot());
+    if (!quiet) hud.log(id ? 'Saved.' : 'Could not save — this browser is blocking storage.', id ? '' : 'bad');
+    sinceSave = 0;
+    return id;
+  }
+  window.addEventListener('beforeunload', () => { try { autoSave(); } catch { /* ignore */ } });
+
+  /**
+   * R17 — THE ONBOARDING LINE, WIRED UP.
+   *
+   * Five steps from an empty field to an iron ingot: take a job in the first town, cut timber and
+   * break stone, put a crate down, dig clay and raise a furnace, smelt. It is one quest in the
+   * ordinary log, so the journal row, the save, the marker sweep and the turn-in path already work
+   * on it; what is wired here is the four things only main.js has.
+   *
+   * `game` is READ, never written — the module asks what is standing and what is in a pool rather
+   * than keeping bookkeeping of its own, which is the only way a hint can be trusted. `pay` is
+   * js/questrewards.js, the one payer; there is no second one. It awaits its own data file rather
+   * than joining the `loadJSON` block at the top, so a failed fetch turns the tutorial off instead
+   * of stopping the game from booting.
+   */
+  onboard = await createOnboarding({
+    questLog,
+    structures: structureData, refining: refiningData, resources: resourceData,
+    game: { player, control, stores, materials: craft.materials, build, features },
+    pay: quest => grantReward(quest, questRewardCtx()),
+    log: (text, tone) => hud.log(text, tone),
+    save: () => autoSave(),
+    // the research module, if it has landed. `createOnboarding` also looks for
+    // `window.farhold.research` at award time, so this can stay null until it exists.
+    research: null,
+  }).catch(err => { console.warn('onboarding: could not start', err); return null; });
+
+  // ---------------------------------------------------------------- debug menu
+  const shown = { props: true, grass: true, features: true };
+  const debug = createDebugMenu({
+    getState: () => {
+      const s = view.stats(), p = props.stats(), f = features.stats();
+      return {
+        seed, planet: planet.name, biome: terrain.biomeAt(control.x, control.z).name,
+        x: Math.round(control.x), z: Math.round(control.z), altitude: Math.round(control.y),
+        'draw calls': renderer.info.render.calls,
+        triangles: renderer.info.render.triangles,
+        props: p.instances, grass: p.grass, buildings: f.buildings,
+        solids: p.solids + f.solids,
+        enemies: field.enemies.length, level: player.level,
+        swimming: control.swimming ? 'yes' : 'no', mounted: control.mounted ? 'yes' : 'no',
+        'view distance': s.viewDistance,
+      };
+    },
+    report: () => {
+      const s = view.stats(), p = props.stats(), f = features.stats();
+      return [
+        'Farhold debug report',
+        new Date().toISOString(),
+        `planet    ${planet.name} (${planet.archetype}), ${planet.gravity} g, star ${star.name} (${star.className})`,
+        `where     ${hud.locationText(control)}`,
+        `region    ${terrain.regionAt(control.x, control.z) || '—'}  settlement ${features.settlementAt(control.x, control.z)?.name || '—'}`,
+        `player    ${player.name}, ${classId}, level ${player.level}, ${Math.round(player.hp)}/${player.maxHp} hp, ${player.gold} gold, ${player.bag.length} in the bag`,
+        `weapon    ${player.equipment.weapon?.name || 'unarmed'}  damage ${player.derived.damage.join('-')}`,
+        `state     swimming=${control.swimming} mounted=${control.mounted} grounded=${control.grounded} waterDepth=${control.waterDepth.toFixed(2)}`,
+        `weather   ${blended.name} (${blended.key})${weather.locked ? ' held' : ''}  cloud=${blended.cloud.toFixed(2)} rain=${blended.rain.toFixed(2)} fog=${blended.fog.toFixed(2)}`,
+        `sky       day ${(sky.dayFraction * 24).toFixed(1)}h  sun.y ${sky.sunDirection.y.toFixed(3)}  eclipse ${sky.eclipse.kind || 'none'} ${sky.eclipse.solar.toFixed(2)}/${sky.eclipse.lunar.toFixed(2)}`,
+        `visible   ${sky.visible().map(b => `${b.name} ${b.size.toFixed(1)}`).join(', ') || '—'}`,
+        `render    ${renderer.info.render.calls} draw calls, ${renderer.info.render.triangles} triangles, view ${s.viewDistance} m`,
+        `world     ${p.instances} props, ${p.grass} grass, ${f.buildings} buildings, ${f.bridges} bridges, ${p.solids + f.solids} solids`,
+        `palette   sky ${palette.sky} sea ${palette.sea} cloud ${palette.cloud} extremity ${palette.extremity}`,
+        `url       ${location.href}`,
+      ].join('\n');
+    },
+    getWeather: () => ({ key: blended.key, locked: weather.locked, odds: weatherOdds(weather.weights) }),
+    setWeather: key => {
+      if (key === null) { weather.unlock(); hud.log('Weather back on its own schedule.'); }
+      else { weather.set(key, { lock: true }); hud.log(`Weather: ${WEATHER_BY_KEY[key].name}.`); }
+    },
+    strike: () => weatherView.strike(),
+    eclipse: kind => {
+      const name = sky.forceEclipse(kind);
+      hud.log(name ? `${kind === 'lunar' ? 'Lunar' : 'Solar'} eclipse: ${name}.` : 'No moon to eclipse with.', 'level');
+    },
+    getTime: () => sky.dayFraction,
+    setTime: fraction => {
+      const dayLength = balance.sky?.dayLengthSeconds ?? 900;
+      const startFraction = balance.sky?.startFraction ?? 0.34;
+      // LOCAL time. The sun's angle is `elapsed/dayLength + startFraction + longitude`, so a
+      // "Midnight" button that ignored longitude gave midnight at the left edge of the map and
+      // whatever-o'clock wherever you were actually standing.
+      const longitude = control.x / terrain.widthM;
+      state.elapsed = (((fraction - startFraction - longitude) % 1) + 1) % 1 * dayLength;
+      sky.update(state.elapsed, { gloom: blended.gloom, cloud: blended.cloud });
+    },
+    setDensity: d => { props.setDensity(d, control.x, control.z); },
+    toggleProps: () => { shown.props = !shown.props; props.setVisible(shown.props, control.x, control.z); },
+    toggleGrass: () => { shown.grass = !shown.grass; props.setGrass(shown.grass, control.x, control.z); },
+    toggleFeatures: () => { shown.features = !shown.features; features.setVisible(shown.features, control.x, control.z); },
+    teleport: kind => {
+      let target = null;
+      if (kind === 'random') {
+        const p = terrain.spawnPoint(Math.random);
+        target = { wx: p.x, wz: p.z };
+      } else if (kind === 'peak') {
+        let best = null;
+        for (let i = 0; i < 300; i++) {
+          const x = Math.random() * terrain.widthM, z = Math.random() * terrain.depthM;
+          const h = terrain.heightAt(x, z);
+          if (!best || h > best.h) best = { wx: x, wz: z, h };
+        }
+        target = best;
+      } else {
+        target = features.nearest(kind, control.x, control.z);
+      }
+      if (!target) { hud.log('Nothing of that kind on this planet.', 'bad'); return; }
+      control.teleport(target.wx, target.wz);
+      rebuildWorldAround(true);
+      field.clear();
+      hud.log(`Moved to ${target.name || kind}.`);
+    },
+    levelUp: () => { rpg.gainXp(player, xpToNext()); hud.log(`Level ${player.level}.`, 'level'); hud.setPlayer(player); },
+    heal: () => { player.hp = player.maxHp; player.mp = player.maxMp; hud.setPlayer(player); },
+    give: rarity => {
+      const bases = rpg.basesFor(player.level);
+      const item = attuneWeapon(rpg.loot.generate(field.rng.pick(bases), rarity, 'high', { rng: rpg.rng }));
+      if (item) { player.bag.push(item); hud.log(`Given ${item.name}.`, 'loot'); hud.setPlayer(player); }
+    },
+    spawn: () => { field.spawnNear(control.x, control.z, player.level); },
+    clearEnemies: () => field.clear(),
+    save: () => autoSave({ quiet: false }),
+    sound: () => { const m = sound.mute(); hud.log(m ? 'Sound off.' : 'Sound on.'); return m; },
+    voice: () => { const v = speech.setVoice(!speech.voiceOn); hud.log(v ? 'Voices on.' : 'Voices off.'); return v; },
+  });
+
+  /**
+   * R22 — the debug "level up" button was still on the pre-round-7 one-section curve, so above
+   * level 30 it granted the wrong amount and above 40 it granted far too little to reach anything.
+   * It asks the real table now, which is the only table.
+   */
+  function xpToNext() {
+    return Math.max(1, xpForLevel(Math.min(levelCap(), player.level + 1)) - player.xp);
+  }
+
+  // ---------------------------------------------------------------- the pause menu
+  //
+  // Escape used to only close whatever was open and then do nothing, which left no way out of the
+  // game except the browser's back button. Now it steps back through the panels and, when there is
+  // nothing left to close, opens a menu: resume, settings, save, main menu — and the control list,
+  // which used to sit permanently across the bottom of the screen on top of the log.
+  const pauseMenu = {
+    get isOpen() { return !$('pause').classList.contains('hidden'); },
+    toggle(open = !pauseMenu.isOpen) {
+      $('pause').classList.toggle('hidden', !open);
+      if (open) {
+        input.release();
+        $('pause-where').textContent = dungeon
+          ? `${dungeon.name} · level ${dungeon.level}`
+          // "0m" sat four inches from "93 m" of altitude, meaning something else entirely
+          : `${planet.name} · ${zones.at(control.x, control.z)?.name || ''} · ${state.playtime < 60 ? 'just landed' : playtimeText(state.playtime) + ' played'}`;
+        drawKeyHint();
+      }
+      return open;
+    },
+  };
+  /**
+   * The control list says the keys you actually have.
+   *
+   * D15 made every key rebindable, at which point a hard-coded "M map" in the markup becomes a lie
+   * the moment somebody moves it — and the pause menu is the one place a player goes to find out
+   * what to press. Built from `settings.bindings` each time the menu opens, so it is right even if
+   * the binding changed a second ago. `KEY_HELP` stays in js/player.js as the fallback for anything
+   * that wants one string and has no settings object.
+   */
+  function drawKeyHint() {
+    const hint = $('hint');
+    if (!hint || !settings?.bindings) return;
+    const parts = settings.bindings.map(b => {
+      const code = settings.keyFor(b.action);
+      // a default you moved away from and never reused does nothing at all; say so rather than
+      // printing a key that is not bound
+      // R14: `b.name` was a typo for `b.label` — every row in the pause menu's control list read
+      // "W undefined" for the whole life of the rebinding panel.
+      return code
+        ? `<b>${settings.keyLabel(code)}</b> ${b.label}`
+        : `<span class="dim">${b.label} unbound</span>`;
+    });
+    hint.innerHTML = `${parts.join(' · ')}<br><span class="dim">in space: W fly · Shift boost · `
+      + 'hold Space warp · J land</span>';
+  }
+
+  $('pause-resume').onclick = () => pauseMenu.toggle(false);
+  $('pause-settings').onclick = () => { pauseMenu.toggle(false); settings.toggle(true); };
+  $('pause-save').onclick = () => { autoSave({ quiet: false }); pauseMenu.toggle(false); };
+  $('pause-menu').onclick = () => { autoSave(); location.href = location.pathname; };
+
+  // ---------------------------------------------------------------- keys that are not movement
+  window.addEventListener('keydown', e => {
+    // Tab OPENS the sheet; once it is open Tab has to move focus, or keyboard navigation inside the
+    // sheet closes it on the first press. (Nothing in the old sheet was reachable by keyboard, which
+    // is the only reason this was not noticed.)
+    if (e.code === 'KeyI' || (e.code === 'Tab' && !hud.sheetOpen)) {
+      e.preventDefault(); pauseMenu.toggle(false); hud.toggleSheet();
+    }
+    /**
+     * B IS BUILD MODE.
+     *
+     * "How does build mode work? How do I start building a base?" — it starts here. B puts the ghost
+     * up, the mouse wheel turns it, click puts it down, Enter finishes a run of wall or road, and
+     * Ctrl+Z takes back the last thing. Everything else is on screen while the mode is up.
+     */
+    /**
+     * K IS THE HOLDING — AND IT IS A TAB OF THE CHARACTER SHEET NOW.
+     *
+     * Five tabs: who lives here, what they sleep in, what is being worked, which traders would move
+     * in and why the rest will not, and what is in the hold. Every refusal on that screen is a
+     * sentence rather than a greyed-out row, because a greyed-out row is the one answer a player
+     * cannot act on.
+     *
+     * R17 — "Pressing 'K' opens a new civilization menu, which I like. However it does not free up
+     * the cursor so I have to press ESC afterwards." It was a second full-window overlay that knew
+     * nothing about the pointer lock: `hud.toggleSheet` releases the mouse on the way in and asks
+     * for it back on the way out, and this screen went round it. As a tab it gets all of that for
+     * free, along with one Esc and one close button.
+     */
+    if (e.code === 'KeyK' && !map.isOpen && !talk.isOpen && !build.mode) {
+      e.preventDefault();
+      pauseMenu.toggle(false);
+      // pressing it again while you are already looking at the Holding closes the sheet
+      if (hud.sheetOpen && hud.tab === 'holding') hud.toggleSheet(false);
+      else { if (!hud.sheetOpen) hud.toggleSheet(true); hud.setTab('holding'); }
+    }
+    /**
+     * R17 — F IS YOUR COMPANY.
+     *
+     * Three tabs: who follows you and a dismiss on everything that can be dismissed, the mercenary
+     * board in whatever settlement you are standing in, and the spell respec — "you should be able
+     * to unlearn a skill at any time", which means at any time and not only on the title screen.
+     * Like `K` it is a shortcut to a tab of the sheet, so there is one window and one Esc.
+     */
+    if (e.code === 'KeyF' && !map.isOpen && !talk.isOpen && !build.mode) {
+      e.preventDefault();
+      pauseMenu.toggle(false);
+      if (hud.sheetOpen && hud.tab === 'followers') hud.toggleSheet(false);
+      else { if (!hud.sheetOpen) hud.toggleSheet(true); hud.setTab('followers'); }
+    }
+    if (e.code === 'KeyB' && !hud.sheetOpen && !map.isOpen && !talk.isOpen) {
+      e.preventDefault();
+      const on = !build.mode;
+      build.setMode(on);
+      buildUI.setOpen(on);
+      /**
+       * The middle-of-the-screen dot is a LIE while the cursor is free: it says "you are aiming
+       * here" and the ghost is under the mouse. So it goes away, and the canvas gets a real
+       * crosshair cursor instead.
+       */
+      document.body.classList.toggle('building', on);
+      if (on) input.release(); else regrab();
+      hud.log(on
+        ? 'Build mode. Scroll to turn · click to place · Enter to finish a run · Ctrl+Z to undo · B to stop.'
+        : 'Build mode off.', on ? 'level' : '');
+    }
+    if (build.mode) {
+      if (e.code === 'Enter') { e.preventDefault(); build.finishRun?.(); }
+      if (e.code === 'KeyZ' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); build.undo?.(); }
+      if (e.code === 'Escape') {
+        e.preventDefault();
+        // a half-dragged road is thrown away first; a second Esc leaves the mode
+        if (build.cancelRun?.()) { hud.log('Run dropped.', ''); buildUI.refresh(); }
+        else {
+          build.setMode(false); buildUI.setOpen(false);
+          document.body.classList.remove('building'); regrab();
+        }
+      }
+      // the brush is the terrain tools' whole interface; it needs a size you can change
+      if (e.code === 'BracketLeft') { e.preventDefault(); build.setRadius(build.radius - 2); }
+      if (e.code === 'BracketRight') { e.preventDefault(); build.setRadius(build.radius + 2); }
+    }
+    if (e.code === 'KeyM') {
+      e.preventDefault();
+      pauseMenu.toggle(false);
+      // "Pressing M for map while outside of a planet should instead open a galaxy map." A world
+      // map of a planet you are not standing on is no use; the chart is.
+      // B9: in the atmosphere M is the PLANET map, not the star chart — you are over ground, so the
+      // ground is what you want to look at. map.js had a capture-phase listener standing in for this
+      // while main.js was another agent's file; that workaround is gone now.
+      if (mode === 'ground' || mode === 'air') map.toggle();
+      else { if (map.isOpen) map.toggle(false); chart.toggle(); }
+    }
+    if (e.code === 'KeyO') { e.preventDefault(); pauseMenu.toggle(false); settings.toggle(); }
+    if (e.code === 'Escape') {
+      e.preventDefault();
+      if (settings.isOpen) settings.toggle(false);
+      else if (townHall.isOpen) townHall.close();
+      else if (talk.isOpen) talk.close();
+      else if (hud.sheetOpen) hud.toggleSheet(false);
+      else if (map.isOpen) map.toggle(false);
+      else if (chart.isOpen) chart.toggle(false);
+      else pauseMenu.toggle();                      // nothing left to close: the menu
+      regrab();
+    }
+  });
+
+  function resize() {
+    const w = window.innerWidth, h = window.innerHeight;
+    renderer.setSize(w, h, false);
+    graphics.setSize(w, h);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // ---------------------------------------------------------------- the loop
+  const clock = new THREE.Clock();
+  let sinceRegen = 0;
+  let sinceArrive = 0;
+  const lastPos = [0, 0];
+  let campaignDone = false;
+  let lastEclipse = null;
+  let fighting = false;
+  let lastAirLod = -1;
+  let torchWanted = true;
+  // cleared at dawn, so the hint below is once per planetary day rather than once per session
+  let nightHintShown = false;
+  /** Are you holding something that burns? The starting torch sits in the off hand. */
+  function carryingLight() {
+    const lamp = player.equipment.light;
+    return !!(lamp?.light || lamp?.baseKey === 'torch' || player.equipment.offhand?.light);
+  }
+  // panels own the mouse while they are open: the canvas must not grab it back on the next click
+  // one predicate, so the mouse and the clock never disagree about whether a panel is up
+  /**
+   * BUILD MODE GIVES THE MOUSE BACK.
+   *
+   * "Pressing B to open the build menu should also free up the cursor so you can select items from
+   * it." It is a panel with forty buttons in it and the pointer was locked to the middle of the
+   * screen, so the only way to pick anything was the keyboard, and there were no keys. The mode is
+   * therefore in the blocked list: the click that would normally re-take the pointer does not, and
+   * `aimSpot` reads the real cursor instead of the camera's nose. Dragging still turns the camera —
+   * js/player.js has always supported that for players who would rather not be captured at all.
+   */
+  input.setBlocked(() => panelOpen() || debug.isOpen || build.mode);
+
+  function tick() {
+    requestAnimationFrame(tick);
+    const dt = Math.min(0.1, clock.getDelta());
+    if (state.paused) return;
+    if (uiPaused()) {
+      // Drain the input queue while we are stopped, or every key tapped with the map open fires the
+      // instant it closes. The panels themselves are driven by their own keydown handlers, so they
+      // keep working.
+      input.sample();
+      /**
+       * R17 — THE ONE PIECE OF HUD THAT HAS TO KEEP THINKING WHILE THE GAME IS STOPPED.
+       *
+       * "[the held-mode readout] stays visible even when the inventory is open." `hud.tick` is what
+       * asks the readout whether it should be on screen, and this early return is why it was never
+       * asked: opening ANY panel stops the frame loop dead, so the last thing drawn before the
+       * inventory came up stayed drawn on top of it. One call, here, is the whole fix — and it
+       * covers the map, a conversation, the settings and the pause menu as well as the sheet,
+       * because all of them come through `panelOpen()`.
+       */
+      hud.refreshHeld();
+      state.uiPaused = true;
+      return;
+    }
+    state.uiPaused = false;
+    state.elapsed += dt;
+    state.playtime += dt;
+    state.frames++;
+
+    const snap = input.sample();
+    /**
+     * A CLICK IN BUILD MODE IS NOT A SWING.
+     *
+     * The controller runs its own attack clock off `snap.attack`, so suppressing the swing in the
+     * frame loop was not enough — the arm still came up and the swing timer still ran, which reads
+     * as the character taking a swipe at the fence post they are placing. The button is taken away
+     * from the controller entirely while the mode is up.
+     */
+    if (build.mode) { snap.attack = false; snap.attackHeld = false; }
+
+    // J is the ship: board it on the ground, put it down in space
+    if (snap.pressed?.has('KeyJ')) {
+      // ground: board. air: set down. space: come down to whatever you are pointing at.
+      if (mode === 'ground') launch();
+      else if (mode === 'air' || mode === 'space') land();
+    }
+    if (mode !== 'ground') {
+      hud.skills(null);
+      sunfx.hide();
+      if (mode !== 'space') hud.reticles(null);
+      stepFlight(dt, snap);
+      if (state.frames % 12 === 0) chart.tick();   // the system view has planets moving on it
+      renderFrame();
+      return;
+    }
+
+    // E: open a chest, go down into a dungeon, come back up, or talk to somebody
+    if (snap.pressed?.has('KeyE')) {
+      if (talk.isOpen) { talk.close(); regrab(); }
+      else {
+        const it = interactTarget();
+        if (!it) hud.log('Nothing here to do.');
+        else if (it.kind === 'chest') openChest(it.chest);
+        else if (it.kind === 'dungeon') enterDungeon(it.gate);
+        else if (it.kind === 'leave') leaveDungeon();
+        else if (it.kind === 'wanderer') meetOnTheRoad(it.met);
+        else if (it.kind === 'landmark') atLandmark(it.mark);
+        // the town's notice board: the one place work is taken from now
+        else if (it.kind === 'board') hud.openNoticeBoard({ where: it.town.name });
+        else if (it.kind === 'hall') {
+          // the hall pauses the world the way every other full screen does, and E is how you got in
+          input.release();
+          townHall.open(it.town);
+        }
+        /**
+         * E ON A SEAM TAKES A SWING AT IT.
+         *
+         * One press is one swing rather than a channel, so it reads like the rest of the game's E.
+         * The report afterwards is the point of §1: it says what you got AND what it would deliver
+         * per minute from where you are standing, which is the rich-and-far trade-off in one number.
+         */
+        /**
+         * R18 — THE MUSTER STONE IS THE WAY IN, which is what it was built to be.
+         *
+         * js/muster.js's own header says "a MUSTER STONE at your own outpost" is one of the two
+         * ways to call a drill, and `muster: true` sat in data/structures.json read by nobody, so
+         * the piece was a rock you had paid for. The board itself already exists and works — it is
+         * a tab of the Holding — and `musterAt()` already recognises standing near home. So the
+         * stone opens that board rather than growing a second copy of the logic beside it.
+         */
+        else if (it.kind === 'muster') {
+          holding.show?.();
+          holding.tab = 'muster';
+          hud.log('The muster board. Pick a tier and they will come when you say.', 'level');
+        }
+        else if (it.kind === 'bell') {
+          const st = defence.standing();
+          if (!st.state || st.state === 'won' || st.state === 'lost' || st.state === 'declined') {
+            const offer = defence.offer({ level: player.level, biome: terrain.biomeAt(control.x, control.z).key });
+            if (!offer.ok) hud.log(offer.why, 'warn');
+            else {
+              hud.log(`${offer.tier.name}: ${offer.waves.length} waves. Press E again to take it on.`, 'level');
+            }
+          } else if (st.state === 'offered') {
+            defence.accept({ at: state.elapsed });
+          } else if (st.state === 'accepted') {
+            defence.ring({ hour: sky.dayFraction * 24, at: state.elapsed, level: player.level });
+            // `ring` spawns the first wave itself, at the base — see defence.spot()
+          } else {
+            hud.log('They are already at the wall.', 'bad');
+          }
+        }
+        /**
+         * R15 — the furnace answers now. E puts up build mode with the bench panel open on the
+         * machine you are standing at, which is where `drawBench` has always lived; what was
+         * missing was the door, not the room.
+         */
+        /**
+         * R16 — E AT A BENCH THAT WANTS WORK IS YOU WORKING IT. HOLD IT TO KEEP GOING.
+         *
+         *   "Manufacturing devices require work to be done by the player or NPC. Players can
+         *    contribute work by holding E, and the progress bar should be indicated over the
+         *    structure."
+         *
+         * Which of the two things E does is decided by the machine, not by how long you hold the
+         * key: a bench with a job on it that needs hands is one you HELP, and a bench that is idle,
+         * switched off or already running itself is one you TALK TO. That way there is never a
+         * guess, and there is always a door — emptying the queue, or simply pressing B, brings the
+         * recipe list up on whatever you are standing at.
+         */
+        else if (it.kind === 'machine') {
+          /**
+           * R17 — E AT A STATION OPENS THAT STATION'S SCREEN.
+           *
+           *   "I built a furnace, campfire, kiln, and loom, but I still cannot figure out how to
+           *    convert iron ore into ingots… when I press E to open it it just opens the regular
+           *    build menu."
+           *
+           * It did. The only door into a machine's recipe list was the build panel's bench section,
+           * so asking a furnace what it could make put the whole catalogue, the tool rail, the
+           * digging list and the shipyard on screen and left you to find the furnace in it.
+           * `buildUI.openStation` returns false for anything with no screen of its own, so the old
+           * answer is still the fallback and nothing ends up with no answer at all.
+           *
+           * TAP E to open it, HOLD E to work it: the frame loop's `handWork.tick` runs off
+           * `keys.has('KeyE')` and is untouched here, so holding the key keeps putting units into
+           * the same order whether the screen is up or not.
+           */
+          const m = it.works;
+          if (buildUI.openStation?.(it.machine)) {
+            input.release();
+            if (m) hud.log(`${m.name}. ${works.stateText(m)} Hold E to work it.`, '');
+          } else {
+            const wants = m && works.labourNeed(m) > 0 && m.queue.length > 0 && m.enabled !== false;
+            if (wants) {
+              handWork.tick(0.25, { at: state.elapsed, holding: true, machine: it.machine });
+              hud.log(`You put your back into the ${m.name}. Hold E to keep at it.`, 'good');
+            } else {
+              build.setMode(true);
+              buildUI.setOpen(true);
+              document.body.classList.add('building');
+              buildUI.refresh();
+              input.release();
+              hud.log(`${it.machine.name || 'It'} is not a machine that makes anything.`, 'warn');
+            }
+          }
+        }
+        else if (it.kind === 'seam') {
+          /**
+           * R16 — E STARTS A BAR, it does not take a bite.
+           *
+           * It used to be one `mining.swing(node, 1.6)` per press: hold E and you got a stream of
+           * log lines and a number that never meant anything. Now the press begins a gather with a
+           * bar over the rock, and what comes off is one whole take.
+           */
+          if (!beginGather({ x: it.seam.x, z: it.seam.z, reach: toolReach(player, 5) })) {
+            hud.log('Nothing comes loose.', 'warn');
+          }
+        }
+        // R22 — a tree or a boulder you can SEE, on the same key and through the same work bar
+        else if (it.kind === 'prop') {
+          if (!beginGather({ x: it.prop.x, z: it.prop.z, reach: toolReach(player, 4.2) })) {
+            hud.log('Nothing comes loose.', 'warn');
+          }
+        }
+        else if (it.kind === 'portal') {
+          const out = portals.use?.(it.end);
+          if (out?.ok) {
+            control.teleport(out.to.x, out.to.z);
+            rebuildWorldAround(true);
+            field.clear();
+            hud.log('You step through.', 'level');
+            autoSave();
+          } else if (out?.why) hud.log(out.why, 'bad');
+        }
+        else if (it.kind === 'talk') {
+          // phase 7: what they say comes from Lingo and their own personality, not a fixed string
+          const who = it.who;
+          speech.attach(who);
+          who.greeting = speech.line(who, 'greet', { listener: { name: player.name } });
+          sound.ui('open');
+          talk.show(who, talkContext(who));
+          speech.say(who, who.greeting);
+        }
+      }
+    }
+    /**
+     * L IS THE LIGHT — on foot and in the ship.
+     *
+     * It was F, and the user asked for one key that means "light" wherever you are: "let's also
+     * allow the light when on foot to be toggled on both with the hotkey L for light". The log moved
+     * to K to make room. The lamp can only be lit while you are actually carrying one; the ship's
+     * spotlights are part of the ship, so they have nothing to carry.
+     */
+    // R25 — the scanner and the Command Rod, one key each (they used to be on the mouse-wheel ring)
+    if (snap.pressed?.has('KeyX') && !build.mode) {
+      if (!heldModes(player).includes('scanner')) hud.log('You have no scanner. Build one at the bench first.', 'warn');
+      else { scanner.toggle(player); sound.ui('click'); }
+    }
+    if (snap.pressed?.has('KeyR') && !build.mode && !hud.sheetOpen) {
+      if (heldModes(player).includes('rod')) {
+        const spot = aimSpot(60);
+        const out = commandRod?.use?.(spot, { add: !!snap.pressed?.has('ShiftLeft') });
+        if (out && out.ok === false && out.why) hud.log(out.why, 'warn');
+      }
+    }
+    if (snap.pressed?.has('KeyL')) {
+      if (!carryingLight()) hud.log('You have nothing to light. A torch or a lantern goes in the off hand.');
+      else {
+        torchWanted = !torchWanted;
+        hud.log(torchWanted ? 'You light your lamp.' : 'You snuff your lamp.');
+        nightHintShown = true;            // they know where the key is now; stop offering
+      }
+    }
+    light.setTorch(torchWanted && carryingLight());
+
+    /**
+     * ONCE A NIGHT, tell them the key exists.
+     *
+     * "At night, if your light is off, there should be a chat hint press L to turn the light on,
+     * shown only once per planetary day." Once per day means per planetary day, so the flag is
+     * cleared when the sun comes back up rather than on a timer — on a world with a six-minute day
+     * that is six minutes, and on a slow one it is not nagging every few seconds either way.
+     */
+    const dark = sky.isNight;
+    if (!dark) nightHintShown = false;
+    else if (!nightHintShown && !torchWanted && carryingLight() && !panelOpen()) {
+      nightHintShown = true;
+      hud.log('It is dark. Press L to light your lamp.', 'level');
+    }
+
+    const frozen = hud.sheetOpen || debug.isOpen || map.isOpen || talk.isOpen || settings.isOpen || rewardsOpen() || pauseMenu.isOpen;
+
+    /**
+     * G GETS ON AND OFF WHATEVER YOU BUILT.
+     *
+     * H is the horse and G is the machine, because they are genuinely different things: the horse
+     * climbs and swims badly, the motorcycle does neither and does not care about the hill until it
+     * does. Nothing to ride is said out loud — a key that does nothing silently is a key nobody
+     * presses twice.
+     */
+    // R18 — read through the binding table, so rebinding G actually moves the Garage
+    if (!frozen && snap.pressed?.has(settings.keyFor?.('garage') || 'KeyG')) {
+      const owned = player.vehicles?.owned?.ground || [];
+      if (!owned.length) hud.log('You have nothing to drive. Build one at an assembler.');
+      else if (control.swimming) hud.log('Not in the water.');
+      else if (control.driving) {
+        control.driving = null;
+        selectGroundVehicle(player, null);
+        rig.hide();
+        hud.log('You step off.');
+      } else {
+        // the best one you own, unless you have chosen otherwise
+        const key = player.vehicles.active?.ground || [...owned].sort(
+          (a, b) => GROUND_LADDER.indexOf(b) - GROUND_LADDER.indexOf(a))[0];
+        selectGroundVehicle(player, key);
+        control.mounted = false;
+        control.driving = { speed: 0 };
+        rig.show(modelFor(key) || key);
+        hud.log(`You get on the ${GROUND_VEHICLES[key].name.toLowerCase()}. Shift is the throttle.`);
+      }
+    }
+
+
+    /**
+     * V DOES TWO THINGS NOW: TAP FOR FIRST PERSON, HOLD TO LOOK AROUND.
+     *
+     *   "Allow holding V in walk mode to cause the camera to change to rotation mode, where mouse
+     *    moves the camera. This is to allow you to get a front view look at your character."
+     *
+     * The orbiting itself is in js/player.js — it is the camera's own angles, and the body keeps
+     * facing where it was facing. All this does is decide which of the two a press of V was: a tap
+     * shorter than `V_TAP` that never actually swung the camera toggles first person (the head
+     * comes off the model, not just the camera), and anything else was a look-around and must NOT
+     * also flip the view mode when you let go.
+     */
+    if (!frozen && snap.pressed?.has('KeyV')) vKey = { at: state.elapsed, orbited: false };
+    if (vKey && control.freeLook) vKey.orbited = true;
+    if (vKey && !snap.keys?.has('KeyV')) {
+      if (!vKey.orbited && state.elapsed - vKey.at < V_TAP) setFirstPerson(!control.firstPerson);
+      vKey = null;
+    }
+
+    // skills on 1-6 — not while a panel has the keyboard
+    if (!frozen && snap.pressed?.size) {
+      for (let i = 0; i < 6; i++) if (snap.pressed.has(`Digit${i + 1}`)) { castSkill(i); break; }
+    }
+
+    /**
+     * THE THREE CONDITIONAL AFFIXES NOBODY TOLD ABOUT THE WORLD.
+     *
+     * `cond_nightWard` reads `unit.atNight`, `cond_watch` reads `unit.moving`, and
+     * `cond_vehicleDmg` reads `self.mounted` — and nothing ever set the first two on the player, so
+     * "+18% armour after dark" and "+2 health a second while standing still" were true only in the
+     * tooltip. They go on before the sheet is derived, not after.
+     */
+    {
+      const night = sky.dayFraction < 0.25 || sky.dayFraction > 0.78;
+      const still = control.moving <= 0.05;
+      /**
+       * R23 — …and `self.mounted`, which was the third of the three and was never set either.
+       * `cond_vehicleDmg` ("+N% damage while you are mounted") read `self.mounted` off the player,
+       * and only `control.mounted` was ever written, so the Wagon-Axle Club's property was inert.
+       * Brambleback's Rider's Fury reads the same flag.
+       */
+      const mounted = !!control.mounted;
+      if (player.atNight !== night || (player.moving > 0) === still || !!player.mounted !== mounted) {
+        player.atNight = night;
+        player.moving = still ? 0 : 1;
+        player.mounted = mounted;
+        rpg.refresh?.(player);
+      }
+    }
+
+    // haste is a real stat: keep the controller's swing clock in step with it
+    control.attackEvery = player.derived.attackEvery ?? (balance.player?.attackEvery ?? 0.62);
+    /**
+     * …and each HAND keeps its own rhythm, because a dagger and a greatsword do not swing at
+     * the same speed and a dual-wielder swings both. `haste` scales whatever the weapon's own
+     * pattern says; see js/weapons.js.
+     */
+    {
+      const hands = handsOf(player);
+      const hasteK = control.attackEvery / (balance.player?.attackEvery ?? 0.62);
+      control.dualWield = hands.dual;
+      control.mainEvery = strikeAt(hands.main, control.mainStep).every * hasteK;
+      control.offEvery = hands.dual ? strikeAt(hands.off, control.offStep).every * hasteK : null;
+    }
+    const step = control.update(dt, snap, { frozen });
+    // R15: the draw and the channel are only playable if you can see where you are in them
+    // R17 — where the body is, for the charge effect and the work animations. One writer, on the
+    // frame loop, rather than the gather clock having to do it because it was the only thing called.
+    feel.postBody(control);
+    hud.chargeMeter?.(control.charge);
+
+    if (step.mountChanged) {
+      /**
+       * R15 — H BRINGS WHATEVER YOU PICKED.
+       *
+       *   "Add a motorcycle, car, and truck, as crafting vehicles that move much faster than horse
+       *    but occupy the same slot."
+       *
+       * They were on their own key, so the game had two answers to "what am I travelling on". One
+       * choice now — the Ride dropdown on the character sheet — and H honours it. G still works and
+       * is still the quick way onto a vehicle; it just is not the only way any more.
+       */
+      const ride = player.rideChoice && player.rideChoice !== 'mount' ? player.rideChoice : null;
+      const ownsRide = ride && (player.vehicles?.owned?.ground || []).includes(ride);
+      if (ride && ownsRide) {
+        control.mounted = false;
+        if (horse) horse.group.visible = false;
+        if (control.driving) {
+          control.driving = null;
+          selectGroundVehicle(player, null);
+          rig.hide();
+          hud.log('You step off.');
+        } else if (control.swimming) {
+          hud.log('Not in the water.');
+        } else {
+          selectGroundVehicle(player, ride);
+          control.driving = { speed: 0 };
+          rig.show(modelFor(ride) || ride);
+          hud.log(`You get on the ${GROUND_VEHICLES[ride].name.toLowerCase()}. Shift is the throttle.`);
+        }
+      } else if (control.mounted && !player.equipment.mount) {
+        // you cannot ride what you do not have — the mount slot is the thing that makes H work
+        control.mounted = false;
+        hud.log('You have nothing to ride. A mount goes in the mount slot.');
+      } else {
+        if (control.mounted) buildMount();     // the slot may have changed since the last ride
+        hud.log(control.mounted ? `You swing up onto the ${(player.equipment.mount?.name || 'horse').toLowerCase()}.` : 'You dismount.');
+        if (horse) horse.group.visible = control.mounted;
+      }
+    }
+    if (step.enteredWater && !step.boarded) hud.log('You wade in and start swimming.');
+    if (step.boarded) hud.log(`You put the ${step.boarded.name} in the water.`);
+    if (step.leftBoat) hud.log(`You haul the ${step.leftBoat.name} up the bank.`);
+
+    /**
+     * THE BODY FOLLOWS THE CONTROLLER. Chibi 2 models face +Z, the same way `forward` points.
+     *
+     * R16 — STANDING ON THE RAFT INSTEAD OF LYING BACK ON IT.
+     *
+     *   "On the default Lashed Raft (and other water vehicles) the character sits leaning
+     *    backwards and doesn't look right."
+     *
+     * Two faults, both here. `control.boating` never had a branch of its own, so a man on a raft
+     * fell through to `control.swimming` and played the swim clip — which pitches the root back
+     * 64° on purpose so a swimmer floats flat. And his height was `control.y`, the SWIMMER's
+     * height, which is `waterSurface - 0.55`: he was 0.4 m under the deck as well as lying on it.
+     * Now he stands on the boards at the hull's own deck height and poles.
+     */
+    const aboard = control.boating || null;
+    const bodyY = aboard
+      ? (control.waterSurface ?? control.y) + boat.deckHeight()
+      : control.y + (control.mounted ? 1.15 : 0);
+    actor.group.position.set(control.x, bodyY, control.z);
+    actor.group.rotation.y = control.yaw;
+    if (aboard) {
+      setActorAnim(actor, 'boat');
+    } else if (control.swimming) {
+      // which stroke depends on the way you are moving relative to the way you face
+      if (snap.forward < 0) setActorAnim(actor, 'swimBack');
+      else if (!snap.forward && snap.strafe) setActorAnim(actor, 'swimSide');
+      else setActorAnim(actor, 'swim');
+    } else if (control.mounted) {
+      setActorAnim(actor, 'sit');
+    } else if (gathering.active) {
+      // R17 — working a seam or felling a tree is a pick swing, not a sword swing. It was going
+      // through `control.swing` and coming out as the attack clip, which is what the report
+      // ("generate a mining animation… to differentiate it from the attack animation") is about.
+      setActorAnim(actor, workClipFor(gathering.job));
+    } else if (control.swing > 0) setActorAnim(actor, 'attack');
+    else if (!control.grounded) setActorAnim(actor, 'jump');
+    else if (control.moving > 0) setActorAnim(actor, control.running ? 'run' : 'walk');
+    else setActorAnim(actor, 'idle');
+
+    /**
+     * THE STRIDE HAS TO MATCH THE GROUND.
+     *
+     * "Can you make the character walking animation fixed? He doesn't walk, but my minions do."
+     *
+     * The legs were moving the whole time — checked the bones, they swing 0.7 rad, and the mesh is
+     * properly skinned to them. The fault is that a walk cycle is a fixed 1.05 seconds while the
+     * body covers 5.4 metres in that second: a 2.7 metre stride on a character a metre and a bit
+     * tall. The feet skate, and a model gliding with its knees moving does not read as walking. The
+     * companions never had the problem because a creature's gait is driven from its own speed.
+     *
+     * So the clip is played at the rate the body is actually travelling. `STRIDE` is how far one
+     * full cycle should carry you; the clamp inside `setRate` keeps a sprint from turning into a
+     * blur and a crawl from stopping dead.
+     */
+    if (actor.setRate) {
+      const cycle = control.running ? 0.65 : 1.05;          // the clip's own length, chibi2-motion.js
+      const STRIDE = control.running ? 3.4 : 2.0;           // metres one cycle should cover
+      const moving = control.moving > 0.15 && control.grounded && !control.mounted
+        && !control.driving && !control.boating;
+      actor.setRate(moving ? (control.moving * cycle) / STRIDE : 1);
+    }
+    actor.update(dt);
+
+    if (horse) horse.group.visible = control.mounted;
+    if (horse && control.mounted) {
+      /**
+       * R16 — THE HORSE STUTTERED AND THE PLAYER DID NOT.
+       *
+       *   "The walk and run animations for a player work better now, but for the horse it seems
+       *    more like a stutter."
+       *
+       * Two causes, and the first is the whole of it. `createCreature().setAnim` used to reset its
+       * clock on EVERY call, and this line calls it every frame — so `state.t` never got past one
+       * frame's dt and all four legs were frozen on the first sixteen milliseconds of the gait,
+       * twitching with the frame time. The humanoid rig has had that guard since it was written;
+       * the beasts never did. (Fixed in avatar-3d/js/creatures.js, which also fixes every beast
+       * enemy and every animal companion in the game.)
+       *
+       * The second is the same fix the player got in round 14: the gait ran at a fixed 6.5 rad/s
+       * whatever the ground speed. `PACE` is the speed each clip was drawn for, so a horse at half
+       * pace puts its feet down half as often instead of skating.
+       */
+      horse.group.position.set(control.x, control.y, control.z);
+      horse.group.rotation.y = control.yaw;
+      const running = control.moving > 6;
+      horse.setAnim(running ? 'run' : control.moving > 0.2 ? 'walk' : 'idle');
+      if (horse.setRate) {
+        const PACE = running ? 11.3 : 4.2;               // m/s the clip was drawn at
+        horse.setRate(control.moving > 0.2 ? control.moving / PACE : 1);
+      }
+      horse.update(dt);
+    }
+
+    /**
+     * THE MACHINE UNDER YOU, and the fuel it is drinking.
+     *
+     * `speedOn` is asked every frame rather than once, because the answer changes with the ground:
+     * a motorcycle is quick on a road, wallows off it, and simply stops at a bank it cannot climb.
+     * `drive()` burns the fuel for the metres actually covered and wears the thing out, and when
+     * the tank runs dry it says so once and puts you on your feet.
+     */
+    if (control.driving) {
+      const spec = driveFor(player);
+      if (!spec) { control.driving = null; rig.hide(); }
+      else {
+        const onRoad = terrain.roadAt(control.x, control.z) > 0.45;
+        const slope = terrain.slopeAt(control.x, control.z, 3);
+        const surface = onRoad ? 'road' : terrain.biomeAt(control.x, control.z).key;
+        const moved = driveVehicle(player, control.moving * dt, materials, { surface, slope });
+        control.driving = { speed: moved.speed || 0 };
+        if (moved.dry || !moved.moving) {
+          hud.log(moved.why || `The ${spec.name} stops.`, 'warn');
+          control.driving = null;
+          selectGroundVehicle(player, null);
+          rig.hide();
+        } else {
+          rig.place(control.x, terrain.heightAt(control.x, control.z), control.z, control.yaw);
+          rig.update(dt, control.moving, -snap.strafe || 0);
+          // you are ON it, so the walking body is put away exactly as the horse does
+          actor.group.visible = false;
+          hidForRig = true;
+        }
+      }
+    } else if (hidForRig) {
+      /**
+       * Got off, ran out of fuel, or waded into a river — whichever it was, the body comes back.
+       *
+       * Gated on a flag WE set rather than on "the actor is hidden and we are on the ground",
+       * because the ship hides it too and a frame where both are true would put the walking
+       * character back inside the cockpit.
+       */
+      hidForRig = false;
+      actor.group.visible = true;
+      rig.hide();
+    }
+
+    /**
+     * And the boat, which nobody asked for by name.
+     *
+     * "Boats should automatically equip when you start swimming" — so there is no key and no slot to
+     * manage; js/player.js boards on the way in. All this does is put the hull where the controller
+     * says you are. It sits on `waterSurface` rather than `control.y`, because while swimming `y` is
+     * the body's height, which is UNDER the surface — a boat drawn there floats like a submarine.
+     */
+    if (control.boating) {
+      boat.show(control.boating.key);
+      boat.place(control.x, control.waterSurface, control.z, control.yaw);
+      boat.update(dt, control.moving);
+    } else {
+      boat.hide();
+    }
+
+    // --- attacking
+    /**
+     * ONE SWING, of whichever hand swung.
+     *
+     * A weapon is a PATTERN now, not a number: the strike that comes out depends on how far into
+     * its sequence you are, and each shape has its own reach, arc, damage share and splash. A
+     * greatsword sweeps then comes down overhead; a rapier thrusts; a dagger jabs twice and slashes.
+     * `derived.areaPct` widens all of it at once, and the drawn arc is scaled by the same number so
+     * what you see is what hits.
+     */
+    const swingWith = (hand, stepIndex) => {
+      const hands = handsOf(player);
+      const weapon = hand === 'off' ? hands.off : hands.main;
+      /**
+       * R23 — THE UNIQUES' POWERS GET ONE LOOK AT EVERY ATTACK, before anything is struck.
+       *
+       * `rpg.attackMods` runs every `onAttack` hook once per swing, shot, bolt or staff cast and hands
+       * back what they asked for: a `power` and a `scale` to multiply in (Overload), an `element` to
+       * swing instead of the weapon's own (Prism Dancer), a full circle (Hearthsplitter), and the
+       * requests `resolveAttack` carries out once the hits are in. Blood Price has already been paid
+       * by the time this returns.
+       */
+      const kind = isStaff(weapon) ? 'staff' : (weapon?.castElement && weapon?.ranged) ? 'bolt' : weapon?.ranged ? 'arrow' : 'melee';
+      const mods = rpg.attackMods(player, kind, { weapon, hand });
+      const share = (hand === 'off' ? OFFHAND_DAMAGE : 1) * (mods.power || 1);
+      const shape = { ...withArea(strikeAt(weapon, stepIndex), player.derived.areaPct || 0) };
+      if (mods.scale && mods.scale !== 1) shape.scale = (shape.scale || 1) * mods.scale;
+      const reach = shape.reach;
+      const arc = mods.fullCircle ? Math.PI * 2 : shape.arc;
+      // What this weapon is made of. A wand throws its element; a branded sword carries it into the
+      // swing. Both go through `magicResist` instead of armour and leave their status behind.
+      const element = mods.element || elementOf(weapon);
+      const leaves = mods.element ? statusForElement(mods.element) : statusOf(weapon);
+      /** Carry out what this attack's powers asked for, once its hits are known. */
+      const resolveHits = (hits, at = null) => resolveAttack(uniqueEnv, mods, hits, { x: control.x, z: control.z, at, element });
+      const brandHit = (enemy, result) => {
+        if (leaves && skillData.statuses[leaves] && result?.amount > 0) {
+          landStatus(leaves, skillData.statuses[leaves], enemy, Math.max(1, result.amount * 0.7));
+        }
+        reportHit(enemy, result);
+      };
+      const meleeOpts = {
+        element, onHit: brandHit, applyStatus: statusHook,
+        // the field calls this `power`: the off hand hits for less, and each strike shape has its
+        // own share of a full hit
+        power: share * shape.damage,
+      };
+
+      if (isStaff(weapon)) {
+        /**
+         * A STAFF DOES NOT SWING. Its attack is a close-range spell, free to cast, chosen from its
+         * element's own list — "replace the auto attacks with a close range spell… this eventually
+         * acts like an additional spell but does not require mana to use".
+         */
+        const spell = staffSpell(weapon, element);
+        /**
+         * R15 — AND A HELD CHARGE IS A DIFFERENT SPELL, WHICH IT HAS NEVER BEEN.
+         *
+         *   "staves are lacking their magical appeal, find a way to improve all of these"
+         *
+         * `CHARGED_FORMS` in js/weapons.js says what a released charge becomes — a cone becomes a
+         * sustained jet, a nova becomes a dome that shoves everything out, a wave becomes a wall
+         * that stands and burns, a lob becomes a mortar, a chain jumps five times instead of three
+         * — and `chargedForm()` was exported and called by NOBODY. Six forms written down, zero
+         * reachable, which is the fault this project keeps finding written out in one table.
+         *
+         * So a full charge has until now been the same spell at 1.6x damage and 2x radius: a fine
+         * weapon and not the design, and not something a player can feel is a second spell.
+         *
+         * `charge.tap` is the test. A quick tap is the ordinary cast, which is what makes a staff
+         * usable without holding anything; a real charge is one of these.
+         */
+        const charged = shape.charge && !shape.charge.tap ? chargedForm(spell) : null;
+        const a = aim();
+        const base = Math.max(1, Math.round((player.derived.damage[1] || 6) * (spell.mult || 1) * share));
+        const radius = (spell.radius || spell.width || 3) * shape.scale;
+        sound.spell(element, 'launch');
+        // R15: `cast` takes { at, element, ms } — `scale` was silently dropped, so a wide-area
+        // build's flourish was the same size as everybody else's. A bigger charge holds longer,
+        // which is the only feedback the cast itself gives.
+        spellfx.cast({
+          at: new THREE.Vector3(control.x, control.y + 1.1, control.z), element,
+          ms: Math.round(380 * (shape.charge?.radius || shape.scale || 1)),
+        });
+        /**
+         * R15 — THE FOUR CHARGED FORMS.
+         *
+         * Each is a branch, and each is deliberately a different KIND of thing rather than a bigger
+         * version of the tap — that is the whole of "two spells per staff". The numbers come from
+         * `CHARGED_FORMS` in js/weapons.js so the table stays the single place they are written.
+         */
+        if (charged && charged.shape === 'jet') {
+          /**
+           * A SUSTAINED JET. The cone, five times over, at a fifth of the power each and reaching
+           * half again as far — so the total is the same hit spread over three quarters of a
+           * second, and standing in it is much worse than being clipped by it.
+           */
+          const range = (spell.range || 9) * shape.scale * (charged.rangeScale || 1.45);
+          const wide = (spell.arc || 0.9) * shape.scale * 0.8;
+          const ticks = charged.ticks || 5;
+          for (let i = 0; i < ticks; i++) {
+            const when = i * 130;
+            setTimeout(() => {
+              if (!state.running) return;
+              fx.swipe({ x: control.x, y: control.y, z: control.z, yaw: control.yaw, reach: range, arc: wide });
+              for (const { enemy } of field.strike(control, player, {
+                reach: range, arc: wide, ...meleeOpts, power: meleeOpts.power / ticks,
+              })) {
+                if (spell.status) landStatus(spell.status, skillData.statuses[spell.status], enemy, Math.max(1, base * 0.4));
+              }
+            }, when);
+          }
+          control.swing = Math.max(control.swing, 0.32 + ticks * 0.13);
+          hud.log(`${spell.name || 'The jet'} holds.`, '');
+          return;
+        }
+        if (charged && charged.shape === 'dome') {
+          /**
+           * A DOME THAT POPS. The nova, and then everything inside it is shoved outward — which is
+           * the one thing a caster has never had and the reason a staff felt like a worse bow.
+           */
+          spellfx.aoe({ points: ringPoints(control.x, control.z, radius, 12), element, stagger: 0.03 });
+          const domeHits = field.strikeArea(control.x, control.z, radius, player, {
+            falloff: 0.2, element, power: share * (spell.mult || 1) * (shape.charge?.power || 1),
+          });
+          if (!domeHits.length) hud.log(`The dome reaches ${radius.toFixed(1)} m and catches nobody.`, '', 'dealt');
+          resolveHits(domeHits);
+          for (const { enemy, result } of domeHits) {
+            brandHit(enemy, result);
+            if (spell.status) landStatus(spell.status, skillData.statuses[spell.status], enemy, Math.max(1, base * 0.6));
+            /**
+             * The shove goes on `e.push`, which is the SAME field js/actors.js fills for a hammer's
+             * knockback and the same one it travels over 0.18 s — so a dome resists by rank through
+             * `pushFor` exactly as a maul does, and a boss is barely moved. Writing a position here
+             * instead would have pushed things through walls.
+             */
+            const dx = enemy.x - control.x, dz = enemy.z - control.z;
+            const len = Math.hypot(dx, dz) || 1;
+            const metres = pushFor(enemy, charged.push || 2.4);
+            if (metres > 0.01) enemy.push = { dx: dx / len, dz: dz / len, metres, t: 0.18, span: 0.18, done: 0 };
+          }
+          control.swing = Math.max(control.swing, 0.4);
+          hud.log('The dome pops.', '');
+          return;
+        }
+        if (charged && charged.shape === 'wall') {
+          /**
+           * A WALL THAT STANDS. `dropPool` is the lingering-ground system the skills already use,
+           * so a wall is a pool in front of you rather than a second mechanism that behaves almost
+           * the same. Three seconds for a wave, four for a ground spell, from the table.
+           */
+          const ahead = 4.5 * shape.scale;
+          const wx = control.x + a.dx * ahead, wz = control.z + a.dz * ahead;
+          dropPool({
+            x: wx, z: wz, r: radius * 1.15, seconds: charged.seconds || 3,
+            element, power: share * (spell.mult || 1) * (shape.charge?.power || 1) * 0.5,
+          });
+          spellfx.aoe({ points: ringPoints(wx, wz, radius * 1.15, 10), element, stagger: 0.03 });
+          control.swing = Math.max(control.swing, 0.4);
+          hud.log(`${charged.name === 'field' ? 'The ground stays poisoned' : 'A wall stands'} for ${charged.seconds || 3} seconds.`, '');
+          return;
+        }
+
+        if (spell.shape === 'nova') {
+          /**
+           * R15 — THE NOVA HAS NEVER DRAWN ANYTHING.
+           *
+           * `SpellFx.aoe`'s signature is `{ points, element, crit, stagger }` — it walks `points`
+           * and draws one burst at each. This call passed `at` and `radius`, so `points` defaulted
+           * to `[]`, the loop ran zero times, and every staff nova in the game has been invisible
+           * for its whole life. Both of the other `aoe` call sites in this file pass `points`
+           * correctly; this was the one that did not, and `ringPoints` was already sitting here.
+           */
+          spellfx.aoe({ points: ringPoints(control.x, control.z, radius), element, stagger: 0.04 });
+          // R15: a charged staff's nova pays for the charge. `withArea` already folds the charge
+          // into the radius and into the shapes that route through `meleeOpts`; this branch
+          // computes its own power and so never saw it — a full charge was twice the circle at the
+          // same damage, which reads as the charge doing nothing.
+          const novaHits = field.strikeArea(control.x, control.z, radius, player, { falloff: 0.35, element, power: share * (spell.mult || 1) * (shape.charge?.power || 1) });
+          // R25 — say it when a cast catches nobody, so "my staff does no damage" has an answer on screen
+          if (!novaHits.length && field.enemies.some(e => e.dying == null && Math.hypot(e.x - control.x, e.z - control.z) < 14)) hud.log(`${spell.name || 'The nova'} reaches ${radius.toFixed(1)} m around you and catches nobody.`, '', 'dealt');
+          for (const { enemy, result } of novaHits) {
+            brandHit(enemy, result);
+            if (spell.status) landStatus(spell.status, skillData.statuses[spell.status], enemy, Math.max(1, base * 0.6));
+          }
+          resolveHits(novaHits);
+        } else if (spell.shape === 'cone' || spell.shape === 'wave') {
+          const range = (spell.range || 9) * shape.scale;
+          const wide = spell.shape === 'cone' ? (spell.arc || 0.9) * shape.scale : 0.45;
+          fx.swipe({ x: control.x, y: control.y, z: control.z, yaw: control.yaw, reach: range, arc: wide });
+          const coneHits = field.strike(control, player, { reach: range, arc: wide, ...meleeOpts });
+          if (!coneHits.length && field.enemies.some(e => e.dying == null && Math.hypot(e.x - control.x, e.z - control.z) < 14)) hud.log(`${spell.name || 'The cone'} reaches ${range.toFixed(1)} m in front of you and catches nobody.`, '', 'dealt');
+          for (const { enemy } of coneHits) {
+            if (spell.status) landStatus(spell.status, skillData.statuses[spell.status], enemy, Math.max(1, base * 0.6));
+          }
+          resolveHits(coneHits);
+        } else {
+          // lob, ground and chain all leave the hand as a bolt and do their work where they land
+          const plan = talentPlan(player, 'staff:' + spell.key, {
+            element, range: (spell.range || 12) * shape.scale, splash: radius,
+            projectiles: 1, spread: 0,
+            status: spell.status || leaves,
+            statusSpec: (spell.status || leaves) ? skillData.statuses[spell.status || leaves] : null,
+          });
+          /**
+           * R15 — the two charged forms that are still a bolt, but a different one.
+           *
+           * A MORTAR is aimed: it lands where you are pointing rather than on the first thing it
+           * meets, and it leaves the ground burning, which is what makes it worth the wind-up over
+           * just throwing two of the ordinary ones. A STORM jumps five times instead of three.
+           */
+          if (charged?.shape === 'mortar') {
+            plan.kind = 'ground';
+            plan.radius = radius * 1.4;
+            plan.groundRadius = radius * 1.4;
+            plan.ground = Math.max(plan.ground || 0, 3);
+            hud.log('It arcs up and comes down where you are pointing.', '');
+          } else if (charged?.shape === 'storm') {
+            plan.chains = charged.chains || 5;
+            hud.log('It jumps.', '');
+          }
+          const from = new THREE.Vector3(a.x + a.dx * 0.6, a.y - 0.1, a.z + a.dz * 0.6);
+          // R23 — the bolt carries this attack's requests to where it lands (Loomstaff's pull)
+          plan.mods = mods;
+          // R15: …and so does a charged lob. Same fault, same fix. R23: `share` carries Overload.
+          fireBolt(plan, a, a.dx, a.dy, a.dz, { ...meleeOpts, power: (spell.mult || 1) * (shape.charge?.power || 1) * (mods.power || 1) }, from, true);
+        }
+        control.swing = Math.max(control.swing, 0.32);
+        return;
+      }
+
+      if (weapon?.castElement && weapon?.ranged) {
+        /**
+         * A WAND. Every wand throws a bolt, and what the bolt DOES is what makes one different from
+         * the next — "update wands so each one also has a projectile effect, area, chain/bounce,
+         * explosion, multi-shot". The behaviour is decided once from the item's own id, so a given
+         * wand always behaves the same way.
+         */
+        const how = wandBehaviour(weapon);
+        const a = aim();
+        const from = new THREE.Vector3(a.x + a.dx * 0.6, a.y - 0.15, a.z + a.dz * 0.6);
+        const plan = {
+          element, range: (weapon.castRange ?? 34) * (how.slow ? 0.85 : 1),
+          splash: (how.splash ?? 2.2) * shape.scale,
+          projectiles: how.projectiles || 1, spread: how.spread || 0,
+          chains: how.chains || 0, homing: how.homing || 0,
+          status: leaves, statusSpec: leaves ? skillData.statuses[leaves] : null,
+          // R23 — the requests this attack's powers made, resolved where the bolt lands
+          mods,
+        };
+        sound.combat('bow');
+        fireBolt(plan, a, a.dx, a.dy, a.dz, { ...meleeOpts, power: (how.mult || 1) * share }, from, true);
+        // R23 — Twin Bolt: a second bolt a beat behind the first, at a share of its damage
+        if (mods.twin) {
+          uniqueEnv.later(mods.twin.ms, () => {
+            const again = aim();
+            fireBolt({ ...plan, mods: null }, again, again.dx, again.dy, again.dz,
+              { ...meleeOpts, power: (how.mult || 1) * share * mods.twin.power },
+              new THREE.Vector3(again.x + again.dx * 0.6, again.y - 0.15, again.z + again.dz * 0.6), false);
+          });
+        }
+        control.swing = Math.max(control.swing, 0.3);
+        return;
+      }
+
+      if (weapon?.ranged) {
+        // A bow aims where the CROSSHAIR is, not where the body is pointing — see aim(). Using the
+        // body's facing meant every arrow flew flat (fixed in round 3) and, once the camera moved
+        // over the shoulder, a shoulder's width to the right of the reticle (fixed in round 4).
+        const a = aim();
+        const ax = a.dx, ay = a.dy, az = a.dz;
+        const eyeY = a.y;
+        /**
+         * R16 — NO AMMUNITION, ANYWHERE.
+         *
+         * Round 15 gave the javelin a count of six and a pick-them-up-off-the-ground loop. The
+         * user's answer to that was plain: "I do not want any ammunition system in the game at
+         * this point." So a shot costs nothing to fire and the weapon is balanced by what it is —
+         * 28 m of reach against a longbow's 54, and a throw clock of 0.75 s.
+         */
+        const plan = player.derived.swing?.main;
+        const range = plan?.range ?? balance.player?.arrowRange ?? 46;
+        // a quiver decides how many arrows leave and what they do when they land
+        // …and a power may ask for more (Warden's Volley: every 4th shot is three)
+        const shots = Math.max(1, Math.round(player.derived.arrowsPerShot || 1), mods.shots || 1);
+        const spread = shots > 1 ? 0.08 : 0;
+        sound.combat('bow');
+        for (let i = 0; i < shots; i++) {
+          const t = shots === 1 ? 0 : (i / (shots - 1) - 0.5) * 2;
+          const yaw = Math.atan2(ax, az) + t * spread;
+          const dx = Math.sin(yaw) * Math.hypot(ax, az), dz = Math.cos(yaw) * Math.hypot(ax, az);
+          const arrow = fx.shoot({
+            x: control.x + dx * 0.7, y: eyeY + ay * 0.5, z: control.z + dz * 0.7,
+            dirX: dx, dirY: ay, dirZ: dz,
+            range, speed: balance.player?.arrowSpeed ?? 42,
+            // R23 — the arrow carries this shot's requests to where it lands (Hawkfeather's bounce)
+            payload: { mods, element },
+          });
+          /**
+           * A QUIVER DECIDES WHAT AN ARROW DOES, AND NOTHING WAS ASKING IT.
+           *
+           * `arrowsPerShot` was read; `arrowHoming` and `arrowBurst` were derived off the quiver
+           * affixes, stored on the sheet, and never looked at again — so two of the three quiver
+           * powers in the game did nothing at all.
+           *
+           * Homing widens the shot's own hit test rather than steering the model: an arrow that
+           * curves is a projectile simulation, and what the affix promises ("arrows steer toward
+           * whatever you aimed at") is that you hit the thing you were pointing at.
+           */
+          const homing = player.derived.arrowHoming || 0;
+          const target = field.hitScan(control.x, eyeY, control.z, dx, ay, dz, {
+            range, width: 1.1 + homing * 2.6,
+          });
+          if (target && arrow) arrow.range = Math.min(arrow.range, target.distance);
+          // and a bursting arrow catches everything standing around what it hit
+          const burst = player.derived.arrowBurst || 0;
+          if (target && burst > 0) {
+            const at = target.enemy || target;
+            for (const { enemy, result } of field.strikeArea(at.x, at.z, burst, player, { falloff: 0.4, power: 0.55 })) {
+              if (enemy !== at) brandHit(enemy, result);
+            }
+            spellfx.impact({ at: new THREE.Vector3(at.x, (at.y || 0) + 0.9, at.z), element: 'physical' });
+          }
+        }
+        return;
+      }
+
+      // a swing: the white arc IS the hit box — same reach, same angle, same shape as the strike
+      fx.swipe({ x: control.x, y: control.y, z: control.z, yaw: control.yaw, reach, arc });
+      const hits = field.strike(control, player, { reach, arc, ...meleeOpts });
+      sound.combat(hits.length ? 'hit' : 'swing', { crit: hits.some(h => h.result.crit) });
+      // R23 — chain lightning, burning ground, the slam, the echo: see js/uniques.js
+      resolveHits(hits);
+      // a branded weapon flashes its element on every body it lands on
+      if (element !== 'physical') {
+        for (const h of hits) spellfx.impact({ at: new THREE.Vector3(h.enemy.x, h.enemy.y + 0.9, h.enemy.z), element, crit: h.result.crit });
+      }
+      // `sunder` from the perk forest: the third strike of a pattern strips armour for good
+      if (player.perkFlags?.sunder && shape.last) {
+        for (const h of hits) h.enemy.armor = Math.max(0, (h.enemy.armor || 0) - 8);
+      }
+      /**
+       * R18 — `fx.onSwing` HAD A DISPATCHER AND NO CALLER.
+       *
+       * `Effects.onSwing(c)` exists, `affix:cond_manaOnAttack` ("Every swing returns 1-3 mana")
+       * hangs off it, the affix is rollable from item level 4 with a weight of 2 — and nothing in
+       * the game ever fired it. Here is the swing, so here is the call: one per swing, not one per
+       * enemy hit, which is what "every swing" says and also means a wide arc into six bodies does
+       * not hand back six times the mana.
+       */
+      const swung = { self: player, mana: 0 };
+      rpg.fx.onSwing(swung);
+      if (swung.mana > 0) player.mp = Math.min(player.derived.maxMp || player.mp, player.mp + swung.mana);
+
+      // and a little splash behind the arc, scaled by the strike's own shape and the area stat
+      const splash = (balance.player?.meleeSplash ?? 1) * (shape.splash || 1);
+      if (splash > 0) {
+        const [dx, dz] = control.facing();
+        const already = new Set(hits.map(h => h.enemy));
+        for (const { enemy, result } of field.strikeArea(control.x + dx * reach * 0.6, control.z + dz * reach * 0.6, splash, player, { falloff: 0.3, element, power: share * shape.damage })) {
+          if (!already.has(enemy)) brandHit(enemy, result);
+        }
+      }
+
+      /**
+       * AND THE SAME SWING TAKES DOWN A TREE, A BOULDER OR A SEAM.
+       *
+       * "Since we need timber and stone now, can we update the existing wood and stone to be
+       * mineable? I think it would be more fun to attack these objects rather than press E on
+       * them." So there is no gathering key and no gathering mode: the thing you already do sixty
+       * times a minute is the thing that gathers. Only when the swing landed on nothing living —
+       * hitting a wolf standing in front of an oak should fight the wolf.
+       */
+      // R25 — a swing that hits nothing is just a swing; E is how you gather (see the attack branch)
+    };
+
+    /**
+     * One swing, against whatever scenery is in front of you.
+     *
+     * The tool tier is the same ladder a seam uses, read off the weapon in your hands, so there is
+     * one rule for "can I get this out of the ground" rather than two. A seam takes its swing from
+     * js/mining.js and a tree from js/props.js; both pay out through `payOut`, which puts the goods
+     * in the store beside you if there is one.
+     */
+    /**
+     * R16 — A SWORD SWUNG AT A TREE STARTS THE SAME BAR A TOOL DOES.
+     *
+     * This used to be the ONLY way to harvest anything: a melee swing that found no enemy fell
+     * through to here and took a bite out of whatever was in front of it. That is why an archer
+     * could not gather — an arrow never reaches this line. The Tool on the mouse wheel is the real
+     * answer (see `beginGather`), and this stays as the melee fall-through so that hacking at a
+     * bush with a sword still does something; it just goes through the same progress bar now
+     * rather than being a second, faster, invisible way to do the same job.
+     */
+    function harvestSwing(power = 1, reach = 3) {
+      const [fx0, fz0] = control.facing();
+      const ax = control.x + fx0 * reach * 0.45, az = control.z + fz0 * reach * 0.45;
+      return beginGather({ x: ax, z: az, reach: Math.max(3, reach) });
+    }
+
+    /**
+     * A CLICK IN BUILD MODE BUILDS. IT DOES NOT SWING.
+     *
+     * Nothing was calling `build.confirm()` at all: every key worked, the ghost tracked the ground,
+     * and clicking drew a sword. `buildClicks` is filled by the listener on the canvas rather than
+     * read off `step.attacked`, because a swing is rate-limited by attack speed and putting a fence
+     * post down should not be.
+     */
+    if (buildClicks > 0) {
+      for (let i = 0; i < buildClicks; i++) {
+        const res = build.confirm();
+        if (res && res.ok === false && res.why) hud.log(res.why, 'warn');
+      }
+      buildClicks = 0;
+      buildUI.refresh();
+    } else if (!build.mode) {
+      /**
+       * R16 — WHAT THE ATTACK BUTTON DOES DEPENDS ON WHAT YOU ARE HOLDING.
+       *
+       *   "It appears ranged characters can't harvest materials… press E **or attack** a mineable
+       *    resource with the tool equipped."
+       *
+       * The old harvest path rode on the MELEE swing: `swingWith` found nothing to hit and fell
+       * through to `harvestSwing`. An archer's attack fires an arrow and never reaches that line,
+       * and a mage's throws a bolt, so two thirds of the class list could not gather at all.
+       *
+       * R25 — and now the attack button ALWAYS attacks. "Pressing E works to harvest a lot of
+       * things even if your weapon is equipped, let's just remove the whole weapon/tool menu and
+       * just make it so pressing E harvests ALL things. Not weapon attacks." E is the one way to
+       * gather; X sweeps the scanner and R gives a Command Rod order.
+       */
+      {
+        if (step.attacked) swingWith('main', step.step || 0);
+        if (step.attackedOff) swingWith('off', step.offStep || 0);
+      }
+    }
+
+    field.update(dt, control, player, {
+
+      onStatusDamage: (e, amount) => {
+        if (amount > 0.6) hud.log(`${e.name} takes ${amount.toFixed(0)}.`, '', 'dealt');
+      },
+      onBossPhase: (e, phase) => {
+        hud.log(phase.say || `${e.name} changes.`, 'bad');
+        sound.combat('death', { beast: true });
+      },
+      onEnemyStrike: e => {
+        /**
+         * R22 — IT HITS WHAT IT WALKED UP TO.
+         *
+         * This used to be `pets.nearest(...)` and a 55% coin flip at the instant the swing fired:
+         * the enemy walked to YOU whatever was in its way, and then half the time hit whichever
+         * companion happened to be standing nearby. That is not a companion drawing a hit, it is a
+         * companion being splashed by one. js/actors.js now decides who an enemy is fighting before
+         * it takes a step, and `e.aimingAt` is that decision — so the thing it closed on is the
+         * thing it swings at. `pets.nearest` stays as the fallback for a field built without the
+         * companion list (a dungeon floor, a test).
+         */
+        const pet = e.aimingAt || pets.nearest(e.x, e.z, (e.reach || 2.4) + 0.6);
+        const victim = pet && (e.aimingAt || field.rng() < 0.55) ? pet : player;
+        const result = rpg.strike(e, victim, field.rng, { multiplier: incomingFrom(victim) * outgoingFrom(e) });
+        if (e.lifeSteal) e.hp = Math.min(e.maxHp, e.hp + Math.round(result.amount * e.lifeSteal));
+        // R23 — a frost nova off the hit, a barrier that bursts, a body the thorns just killed
+        if (victim === player) {
+          const after = uniquesAfterDamaged(uniqueEnv, result, e);
+          if (result.defenderPost?.secondWind) hud.log('A second wind: a barrier holds you up.', 'good');
+          if (after.killed) hud.log(`${e.name} dies on the thorns.`, 'good');
+        }
+        if (e.onHit?.length) field.statusOnHit(e, victim, skillData.statuses);
+        if (victim !== player) {
+          // R25 — damage a companion takes is in the log now, under its own filter
+          if (result.dodged) hud.log(`${victim.name} dodges ${e.name}.`, '', 'petTaken');
+          else hud.log(`${e.name} hits ${victim.name} for ${result.amount}.`, '', 'petTaken');
+          if (result.dead) { pets.fall(victim); hud.log(`${victim.name} goes down.`, 'bad', 'petTaken'); }
+          return;
+        }
+        if (result.dodged) { hud.log(`You dodge ${e.name}.`, '', 'taken'); return; }
+        hud.log(`${e.name} hits you for ${result.amount}${result.absorbed ? ` (${result.absorbed} on the barrier)` : ''}.`, 'bad', 'taken');
+        /**
+         * R18 — AND IT MIGHT PUT YOU ON THE GROUND, so `cond_mountCalm` means something.
+         *
+         * "N% less likely to throw you when something charges it" was the affix's own sentence and
+         * there was nothing that could throw you: `mountCalm` landed in `derived` and nothing read
+         * it. So here is the mechanic — a hit taken while riding can dismount you — which is also
+         * what makes fighting from the saddle a choice rather than a free speed bonus.
+         */
+        if (control.mounted) {
+          const calm = Math.max(0, Math.min(0.9, player.derived.mountCalm || 0));
+          if (field.rng() < (balance.player?.mountThrowChance ?? 0.28) * (1 - calm)) {
+            control.mounted = false;
+            if (horse) horse.group.visible = false;
+            hud.log('It throws you.', 'bad');
+          }
+        }
+        hud.hit(new THREE.Vector3(control.x, control.y + 1.9, control.z), result.amount, 'taken', camera);
+        if (result.saved) hud.log('Something would not let you die.', 'level');
+        if (result.reflected) hud.log(`Thorns bite back for ${result.reflected}.`, 'good');
+        if (result.defenderPost?.guard) applyStatus(player, 'guard', skillData.statuses.guard, 1);
+        if (result.dead && player.hp <= 0) respawn(e);
+      },
+      // archers and casters: a real bolt, drawn with the same spell effects the player uses
+      onEnemyShoot: e => {
+        const spec = e.ranged || { range: 24, element: 'physical' };
+        // R22 — an archer shoots what it is standing off FROM, which js/actors.js decided before it
+        // took its step. The 40% coin flip below it is the same fallback the melee path keeps.
+        const pet = e.aimingAt || pets.nearest(control.x, control.z, 4);
+        const aimAt = pet && (e.aimingAt || field.rng() < 0.4) ? pet : control;
+        const from = new THREE.Vector3(e.x, e.y + 1.1 + (e.hover || 0), e.z);
+        const to = new THREE.Vector3(aimAt.x, (aimAt.y ?? control.y) + 1, aimAt.z);
+        const flight = Math.max(110, from.distanceTo(to) / 40 * 1000);
+        spellfx.projectile({ from, to, element: spec.element, ms: flight })
+          .then(() => {
+            spellfx.impact({ at: to, element: spec.element });
+            // it lands where it was aimed: if you moved, it misses
+            const missed = Math.hypot(aimAt.x - to.x, aimAt.z - to.z) > 2.6;
+            if (missed) return;
+            const victim = aimAt === control ? player : aimAt;
+            const result = rpg.strike(e, victim, field.rng, { multiplier: incomingFrom(victim) * outgoingFrom(e), element: spec.element, ranged: true });
+            if (e.onHit?.length) field.statusOnHit(e, victim, skillData.statuses);
+            if (victim === player) {
+              // R23 — the same answers a melee hit gets; Frost Skin alone asks `ranged` and stays out
+              uniquesAfterDamaged(uniqueEnv, result, e);
+              hud.log(`${e.name} hits you for ${result.amount}.`, 'bad', 'taken');
+              hud.hit(new THREE.Vector3(control.x, control.y + 1.9, control.z), result.amount, 'taken', camera);
+              if (player.hp <= 0) respawn(e);
+            } else if (result.dead) { pets.fall(victim); hud.log(`${victim.name} goes down.`, 'bad'); }
+          })
+          .catch(() => { /* the scene went away mid-flight */ });
+      },
+    });
+
+    // companions, treasure, and everything the round-4 systems need every frame
+    pets.update(dt, control, player, {
+      // R25 — every companion hit is logged, with its number, under the 'Pet damage dealt' filter
+      onPetHit: (p, target, result) => {
+        if (result.dodged) hud.log(`${target.name} dodges ${p.name}.`, '', 'petDealt');
+        else hud.log(`${p.name} hits ${target.name} for ${result.amount}${result.crit ? ' (critical)' : ''}.`, result.crit ? 'good' : '', 'petDealt');
+      },
+      onPetCast: (p, ab, out) => {
+        if (out?.healed) hud.log(`${p.name}: ${ab.name || 'a mend'} heals you for ${out.healed}.`, 'good', 'petDealt');
+        else if (out?.amount) hud.log(`${p.name}'s ${ab.name || 'ability'} hits for ${out.amount}.`, '', 'petDealt');
+      },
+      onFallen: p => { hud.log(`${p.name} will come back.`, ''); },
+      // …and say so when it does. `reviveSeconds` was dead data, so "will come back" was a lie.
+      onReturned: p => { hud.log(`${p.name} is back.`, 'good'); },
+    });
+    /**
+     * R17 — a save carries the CONTRACTS and not the bodies, because the bodies are meshes and the
+     * world they stood in is rebuilt from its seed. This is what puts a mercenary you are paying
+     * for back beside you after a load. It runs on a slow clock of its own.
+     */
+    followers.tick(dt);
+    if (!dungeon) {
+      chests.update(control.x, control.z);
+      gates.update(control.x, control.z);
+      sites.update(control.x, control.z);
+      sites.relax(control.x, control.z);
+      encounters.update(dt, control, player);
+      for (const site of sites.due(control.x, control.z)) {
+        // R14: `fresh` is false on a place that has already introduced itself once — walking away
+        // and back used to announce the same camp every time. See `due()` in js/sites.js.
+        if (site.fresh) {
+          // a castle is not "a camp": sites.js gives each place its own blurb and its own type name.
+          // R14: a place you can walk to and clear is an activity, and it announces itself once.
+          sayAmbient(site.kind === 'lair'
+            ? `Something lives at ${site.name}.`
+            : (site.blurb || `${site.spec?.name || 'A camp'} at ${site.name}.`), 'bad',
+          { tier: 'activity', id: 'site:' + site.key, at: { x: site.x, z: site.z } });
+        }
+        populateSite(site);
+      }
+    }
+    for (const haul of chests.collect(control.x, control.z, dt)) {
+      takeHaul({ items: haul.items || [], gold: haul.gold || 0, mats: haul.mats || {} });
+      sound.loot({ rarity: 'rare' });
+      rewards({
+        title: haul.title || 'A haul', subtitle: haul.subtitle || '',
+        gold: haul.gold || 0, items: (haul.items || []).map(rewardItem), button: 'Take it',
+      });
+    }
+    // The effect registry's own clock: how long you have been fighting, hit streaks, cheat-death.
+    //
+    // …and then REBUILD THE SHEET when one of those timers changes what it is worth. This was the
+    // missing half of "the move speed on hit proc doesn't seem to work in game": the timer ticked
+    // and the registry knew about the buff, but `derived.moveSpeed` is only computed in
+    // `rpg.refresh`, so nothing the buff added ever reached the legs. `rt.dirty` is set only when a
+    // bucketed timer actually moves, so this is a handful of refreshes a fight, not sixty a second.
+    const rt = rpg.fx.update(player, dt, { fighting: field.engaged });
+    if (rt.dirty) rpg.refresh(player);
+    const wasFighting = fighting;
+    fighting = field.engaged;
+    if (fighting && !wasFighting) {
+      const start = rpg.fx.combatStart({ self: player });
+      if (start.strip) {
+        const big = field.enemies.find(e => e.dying == null && e.rank !== 'normal');
+        if (big?.modifiers?.length) { big.modifiers.pop(); hud.log(`${big.name} loses one of its tricks.`, 'good'); }
+      }
+    }
+    fx.update(dt);
+    spellfx.update(dt);
+    skills.update(dt);
+    // R23 — the powers that pulse on a clock: Pyre, Searing Light, the Dread Lantern, Stormrider
+    tickSkillLeftovers(dt, tickAuras(uniqueEnv, rpg, player, dt, { fighting }));
+    // whatever is burning or blessing the player keeps working while they run
+    const selfTick = tickStatuses(player, dt, { resist: rpg.fx.product(player, 'statusIn') });
+    if (selfTick > 0 && player.hp <= 0) respawn(null);
+    hud.skills(skills.state());
+
+    // a cast barrier runs down in real time, not on the one-second regen tick
+    if (player.castBarrierFor > 0) {
+      player.castBarrierFor -= dt;
+      if (player.castBarrierFor <= 0) { player.castBarrierFor = 0; player.barrier = 0; }
+    }
+    sinceRegen += dt;
+    if (sinceRegen > 1) {
+      sinceRegen = 0;
+      /**
+       * YOU MEND WHEN NOTHING IS HITTING YOU.
+       *
+       * `hpRegen` is zero without gear that grants it, so a character who came out of a fight at 30
+       * of 94 stayed there until they levelled — and there is no potion in the starting kit. Out of a
+       * fight you get back 1.5% of your health a second, which is about a minute from nearly dead to
+       * full: long enough that running away has a cost, short enough that it is not a walk home.
+       */
+      const mending = fighting ? 0 : player.maxHp * (balance.player?.outOfCombatRegen ?? 0.015);
+      player.hp = Math.min(player.maxHp, player.hp + (player.derived.hpRegen || 0) + mending);
+      player.mp = Math.min(player.maxMp, player.mp + (player.derived.mpRegen || 0) + (fighting ? 0 : player.maxMp * 0.02));
+      // barrier refills out of a fight, and faster with `barrierRegen`
+      /**
+       * A barrier a SKILL put up is not the gear's barrier.
+       *
+       * This wiped `player.barrier` to zero every second for anyone whose gear grants none — which
+       * is most characters — so the `bulwark` talent granted a shield that was gone before the
+       * player could be hit by anything. A cast barrier is tracked separately and ticks down on its
+       * own clock; the gear's pool refills underneath it as it always did.
+       */
+      /**
+       * R18 — …and a Shield Pylon you are standing under adds to that pool.
+       *
+       * The pylon holds a charge and PAYS for the barrier it keeps up (js/defence.js `spendShield`),
+       * so it runs down over a long fight and recharges between raids. That is what makes it worth
+       * its 30 kW rather than a free permanent buff.
+       */
+      const fromPylon = defence.shieldAt?.(control.x, control.z) || 0;
+      const maxBarrier = (player.derived.barrier || 0) + fromPylon;
+      if (maxBarrier > 0) {
+        const rate = (player.derived.barrierRegen || 0) + (fighting ? 0 : maxBarrier * 0.08);
+        const was = Math.max(player.barrier || 0, 0);
+        player.barrier = Math.min(maxBarrier, was + rate);
+        // whatever of that rise the gear could not have paid for, the pylon just did
+        const overGear = Math.max(0, player.barrier - (player.derived.barrier || 0));
+        const grew = Math.max(0, player.barrier - was);
+        if (grew > 0 && overGear > 0) defence.spendShield?.(control.x, control.z, Math.min(grew, overGear));
+      } else if ((player.castBarrierFor || 0) <= 0) {
+        player.barrier = 0;
+      }
+    }
+
+    rebuildWorldAround(false);
+    // The watch: the spawner keeps out of these circles, and the guards inside them fight.
+    field.safeZones = dungeon ? [] : folk.safeZones();
+    folk.update(dt, control, { field, level: player.level, onLog: (t, c) => hud.log(t, c) });
+    // R22 — put a real person on the road for every wanderer you are close enough to see
+    keepWandererBodies(dt);
+    // R25 — soft steps on natural ground, the harder step on roads, rock and in dungeons
+    if (state.frames % 20 === 0) {
+      const bk = BIOMES[terrain.biomeIdAt?.(control.x, control.z)]?.key || '';
+      const hard = !!dungeon || (terrain.roadAt?.(control.x, control.z) || 0) > 0.5
+        || ['mountains', 'snowyPeaks', 'volcanic', 'badlands', 'glimmerwaste', 'crystalFields'].includes(bk);
+      sound.setGround(hard ? 'hard' : 'soft');
+    }
+    sound.step(dt, control);
+    // the survey counts the ground you actually cover
+    const stepped = Math.hypot(control.x - lastPos[0], control.z - lastPos[1]);
+    if (stepped > 0 && stepped < 200) campaign.onWalk(stepped);
+    lastPos[0] = control.x; lastPos[1] = control.z;
+
+    sinceArrive += dt;
+    if (sinceArrive > 1) {
+      sinceArrive = 0;
+      for (const q of questLog.onArrive({ x: control.x, z: control.z })) {
+        hud.log(`${q.title}: arrived.`, 'good');
+      }
+    }
+    // R17 — the onboarding line watches what is actually standing and what is actually in a pool.
+    // It throttles itself (half a second), so this is one comparison on most frames.
+    onboard?.tick(dt);
+
+    // --- light. The torch fades out in daylight and comes fully up at night; braziers, sconces,
+    // warded chests and dungeon mouths hand their positions over and the nearest handful get lit.
+    // …and anything the player has built that burns. A lamp post you put up has to light the street
+    // it stands on, or there is no reason to put one up.
+    /**
+     * R25 — people carry torches at night (js/nightlights.js), and spells light up what they hit:
+     * a bolt in flight, a nova, a burst all hand a coloured source to the pool (SpellFx#lights).
+     */
+    {
+      const night = Math.max(0, Math.min(1, 1 - (sky.sunDirection.y + 0.05) * 4));
+      const bodies = [];
+      if (!dungeon) {
+        for (const n of folk?.roster?.() || []) {
+          if (!n.actor || Math.hypot(n.x - control.x, n.z - control.z) > 140) continue;
+          bodies.push({ key: n.id, actor: n.actor, kind: String(n.id).startsWith('road:') ? 'wanderer' : n.guards ? 'guard' : 'townsfolk' });
+        }
+      }
+      for (const e of field.enemies) {
+        if (!e.actor || e.dying != null || Math.hypot(e.x - control.x, e.z - control.z) > 140) continue;
+        bodies.push({ key: (e.__torchKey ??= String(e.id ?? Math.random())), actor: e.actor, kind: 'enemy' });
+      }
+      nightLights.update(bodies, dungeon ? 1 : night, state.elapsed);
+    }
+    light.setSources([
+      ...(dungeon ? dungeon.lights() : [...chests.lights(), ...gates.lights(), ...sites.lights(), ...(build.lights?.() || [])]),
+      ...nightLights.sources(), ...(spellfx.lights?.() || []),
+    ]);
+    light.setRange(player.equipment.light?.range || null);
+    light.update(dt, control, {
+      day: Math.max(0, Math.min(1, sky.sunDirection.y * 1.6)),
+      inside: !!dungeon,
+      ambient: sky.ambient,
+    });
+
+    // --- the "press E to…" line, and the boss bar
+    // …and not while a panel has the screen: the world prompt used to read "E speak to Rosie
+    // Nine-Pies" at the bottom of the screen while her own shop said "E or Esc to step away"
+    const near = talk.isOpen || rewardsOpen() || map.isOpen ? null : interactTarget();
+    hud.prompt(near
+      ? near.kind === 'portal' ? `<b>E</b> step through the portal`
+      : near.kind === 'hall' ? `<b>E</b> go into the Town Hall`
+      : near.kind === 'board' ? `<b>E</b> read the notice board`
+      : near.kind === 'chest' ? `<b>E</b> open the ${near.chest.name.toLowerCase()}`
+        : near.kind === 'dungeon' ? `<b>E</b> go down into ${near.gate.name}${near.gate.zone ? ` · level ${near.gate.zone.minLevel}–${near.gate.zone.maxLevel}` : ''}`
+        : near.kind === 'leave' ? '<b>E</b> climb back out'
+        : near.kind === 'wanderer' ? `<b>E</b> speak to ${near.met.name}, ${near.met.kindName.toLowerCase()}`
+        : near.kind === 'landmark' ? `<b>E</b> ${near.mark.steps ? 'work on' : 'look at'} ${near.mark.name}`
+          + (near.mark.steps ? ` · ${near.mark.done}/${near.mark.steps}` : '')
+        /**
+         * A seam says what is in it AND how good it is, because that is the decision.
+         *
+         * "a location where resources are dense but far away, and another where resources are not
+         * as dense but closer" — the band is the density half of that, and you should be able to
+         * read it off the ground without opening anything.
+         */
+        : near.kind === 'muster' ? '<b>E</b> call a muster'
+        : near.kind === 'bell' ? (() => {
+          const st = defence.standing();
+          return st.state === 'offered' ? '<b>E</b> take the fight on'
+            : st.state === 'accepted' ? '<b>E</b> ring the bell — they come when you say'
+            : st.state === 'running' ? 'They are already at the wall'
+            : `<b>E</b> listen at the bell${st.why ? ` · ${st.why}` : ''}`;
+        })()
+        /**
+         * …and the prompt says WHAT YOU ARE DIGGING WITH.
+         *
+         * Farhold has no pick slot: the tool tier is read off the weapon in your hands, and nothing
+         * on screen ever said so — which is half of why "I need a steel tool" read as a dead end.
+         * Naming the tool on the one prompt where it matters teaches the rule in passing, and the
+         * refusal (js/resources.js) says where the next tier comes from when you hit one.
+         */
+        /**
+         * R15 — and the prompt says so, which is the other half. "I built a furnace. Now what?"
+         * was as much about nothing appearing at the bottom of the screen as about E doing nothing.
+         * It says what the machine is DOING, not just its name: a furnace with no fuel and a
+         * furnace with nothing queued need different things from you.
+         */
+        : near.kind === 'machine' ? `<b>E</b> work the ${(near.machine.name || 'machine').toLowerCase()}`
+          + (near.works ? ` · ${works.stateText(near.works)}` : '')
+        : near.kind === 'seam' ? `<b>E</b> to work the ${(resourceData?.materials?.[near.seam.resource]?.name || near.seam.resource).toLowerCase()}`
+          + ` · ${(resourceData?.richnessBands?.find(b => b.key === near.seam.band)?.name || near.seam.band || '').toLowerCase()}`
+          + ` · ${(resourceData?.tools?.[toolTierFor(player)]?.name || 'bare hands').toLowerCase()}`
+        /**
+         * R22 — and the tree in front of you says what it gives and what it needs, because the one
+         * question the old "Nothing here to do" never answered was whether the thing was harvestable
+         * at all or whether you were simply carrying the wrong tool.
+         */
+        : near.kind === 'prop' ? propPrompt(near.about)
+        /**
+         * …and anything this list has not heard of is NOT a person.
+         *
+         * The fallback used to be `near.who.name`, which is right for every branch above it and
+         * wrong the moment a new kind of thing is added — it threw sixty times a second the first
+         * time the player stood on an ore seam, because a seam has no `who`.
+         */
+        : near.who ? `<b>E</b> speak to ${near.who.name}`
+        : null
+      : null);
+    /**
+     * THE QUEST HELPER — §4.4.
+     *
+     * "quest markers lead nowhere. There should be a quest helper that activates when you get near
+     * and says what to do." The markers were never wrong; arriving simply told you nothing, so a
+     * marker with nothing under it and a marker you had not understood looked identical.
+     *
+     * ONE line, nearest job first, and only when the sentence itself changes — a helper that
+     * repeats every frame is noise and one that never repeats is missed. `helperKey` is exactly
+     * "this quest, saying this", so it speaks again when something has actually happened.
+     */
+    if (state.frames % 30 === 0 && !dungeon) {
+      const [best] = helpersNear(questLog.active || [], { x: control.x, z: control.z });
+      const key = best ? helperKey(best.quest, best.help) : null;
+      if (key && key !== lastHelper) {
+        lastHelper = key;
+        hud.log(best.help.text, 'level');
+      } else if (!key) {
+        lastHelper = null;
+      }
+    }
+
+    if (bossUnit && bossUnit.dying == null) hud.boss(bossUnit);
+    else if (bossUnit) { bossUnit = null; hud.boss(null); }
+
+    // --- weather
+    const cell = terrain.cellAt(control.x, control.z);
+    if (cell.x !== weatherCell[0] || cell.y !== weatherCell[1]) {
+      weatherCell = [cell.x, cell.y];
+      weather.setWeights(weatherWeights(terrain.climateAt(control.x, control.z)));
+    }
+    weather.update(dt);
+    blended = weather.blend(blended);
+    if (dungeon) { blended = { ...blended, cloud: 0, rain: 0, snow: 0, dust: 0, gloom: 1, lightning: 0 }; }
+
+    const daylight = Math.max(0, Math.min(1, sky.sunDirection.y * 1.4));
+    sky.update(state.elapsed, { gloom: blended.gloom, flash: weatherView.state.flash, cloud: blended.cloud, longitude: control.x / terrain.widthM });
+    graphics.update(dt, { mode, blended, indoors: !!dungeon, x: control.x, z: control.z, y: control.y });
+    // the sky writes the ambient colour every frame, so underground has to have the last word
+    if (dungeon) light.update(0, control, { day: 0, inside: true, ambient: sky.ambient });
+    weatherView.update(dt, blended, { camera, daylight, sunDir: sky.sunDirection, baseFogColor: sky.fog.color, ...graphics.weatherCtx() });
+    sunfx.update({
+      camera, sunDirection: sky.sunDirection, dt,
+      cloud: blended.cloud, eclipse: sky.eclipse.solar, day: daylight,
+    });
+    if (dungeon) {
+      // Underground the weather does not get a say. Setting this once in enterDungeon was not
+      // enough: the weather view writes the fog every frame, so it put the horizon back.
+      scene.fog.color.set(dungeon.look.fog);
+      scene.fog.near = 2;
+      scene.fog.far = 70;
+    } else {
+      scene.fog.color.copy(weatherView.fogColor);
+      scene.fog.far = weatherView.fogFar;
+      scene.fog.near = weatherView.fogNear;
+    }
+
+    // --- an eclipse is worth announcing
+    const kind = sky.eclipse.kind;
+    // No banner: it covered the sky at the exact moment there was something worth looking at.
+    // The log line is enough.
+    if (kind && kind !== lastEclipse) {
+      hud.log(kind === 'solar'
+        ? `A solar eclipse begins — ${sky.eclipse.body} crosses the sun.`
+        : `A lunar eclipse begins — ${sky.eclipse.body} enters the shadow.`, 'level');
+    }
+    lastEclipse = kind;
+
+    // --- saving
+    sinceSave += dt;
+    if (sinceSave > (balance.save?.autoSaveSeconds ?? 45)) autoSave();
+
+    /**
+     * WHAT THE TARGET BAR IS LOOKING AT.
+     *
+     *   "The health bar at the top of the screen is almost never accurate. It should show the
+     *    creature I am looking at with priority."
+     *
+     * It was never asking. `field.target()` is a flat 2D guess from the player's FEET — it scores
+     * `yawDelta * 14 + distance * 0.3` with no pitch, no camera and no line of sight, so a wolf
+     * forty degrees off to the side and four metres away beat the champion you were staring at
+     * twenty-five metres down the hill. Meanwhile `aim()` has done a proper 3D hitscan down the
+     * crosshair on every frame of every fight since round 4, and the bar never read it.
+     *
+     * So: what is under the reticle wins. It STICKS for a moment afterwards, because a bar that
+     * blinks out every time the crosshair slips off a moving body is its own kind of useless — and
+     * only once that has expired does the old proximity guess get a turn, which is the right
+     * answer for "something is chewing on me and I am not looking at it".
+     */
+    const looked = aim().target;
+    if (looked && looked.dying == null) { lookTarget = looked; lookTargetFor = 1.4; }
+    else if (lookTargetFor > 0) {
+      lookTargetFor -= dt;
+      if (lookTargetFor <= 0 || !lookTarget || lookTarget.dying != null || lookTarget.removed) {
+        lookTarget = null; lookTargetFor = 0;
+      }
+    }
+    const targetUnit = lookTarget || field.target(control);
+    const target = targetUnit ? {
+      ...targetUnit,
+      distance: Math.hypot(targetUnit.x - control.x, targetUnit.z - control.z),
+      reach: (player.derived?.reach ?? 0) || (control.reach ?? 3),
+    } : null;
+    const town = features.settlementAt(control.x, control.z);
+    if (town && campaign.onEnterSettlement(town.id)) hud.log(`${town.name} charted.`, 'level');
+    /**
+     * F15: crossing the boundary lights the pad. Diablo 2's rule, and the user's:
+     * "No need to get physically close to them though, entering the city boundaries is enough."
+     * `settlementAt` is already that test — the same one the HUD uses to say where you are.
+     */
+    if (town) {
+      const lit = waypoints.visit(town);
+      if (lit) {
+        hud.log(`The sigils at ${town.name} light as you cross the boundary. You can travel here from any other waypoint.`, 'level');
+        sound.questDone();
+        features.update(control.x, control.z, true);   // so the ring lights now, not on the next visit
+      }
+    }
+    if (!campaignDone && campaign.complete) {
+      campaignDone = true;
+      hud.log(`${campaignData.title} complete. The ledger is closed.`, 'level');
+      sound.questDone();
+      autoSave();
+    }
+    if (state.frames % 45 === 0) {
+      sound.place(terrain.biomeAt(control.x, control.z).key, { inTown: !!town, storm: blended.wind });
+    }
+    /**
+     * R14 — ARRIVING SOMEWHERE IS NOT THE SAME AS THE ZONE ID CHANGING.
+     *
+     *   "There are events that happen very frequently in the chat… They happen too often."
+     *
+     * `zones.at()` calls open water a zone of its own (`id: -1`), and this line treated any change
+     * of id as walking into new territory — which re-announced the region, re-rolled what is
+     * happening here, re-populated the road and heard another rumour. Wading into a river and back
+     * out did all of that, several times a minute, on every world that has rivers.
+     *
+     * `atOrLast` hands back the last real region while you are in the water, so a river is
+     * something you cross. The map readout and the spawn bands still use `at()`, because they do
+     * genuinely want to know you are in the sea.
+     */
+    const here = dungeon ? null : zones.atOrLast(control.x, control.z);
+    hud.here = here;
+    // crossing a border announces the new region on screen, with its band
+    if (here && !zones.isOpenWater(here)) hud.announceZone(here, player.level);
+    if (here && here.id !== boardZone) enterTerritory(here);
+    /**
+     * …and R14's other half: dusk and dawn used to set `boardZone = null` to get the notice board
+     * rebuilt with whoever is on the road now, which is right — but it did it by pretending you had
+     * just arrived, so everything else `enterTerritory` says was said again. Twice an in-game day,
+     * for ever. The board now asks for itself.
+     */
+    if (here && rebuildBoard) { rebuildBoard = false; buildLocalBoard(here); }
+    if (state.frames % 30 === 0) tickTerritory(0.5);
+
+    /**
+     * The base runs whether you are watching it or not.
+     *
+     * The grid and the works tick every frame because a duty cycle and a smelter both care about
+     * fractions of a second; the colony and the farm are given the clock instead, because a citizen's
+     * day is measured in hours and a crop's life in days.
+     */
+    // a solar array wants the sun's HEIGHT, not the hour: noon is 1, midnight 0, dusk in between
+    grid.tick(dt, {
+      daylight: Math.max(0, Math.sin(sky.dayFraction * Math.PI * 2 - Math.PI / 2)),
+      wind: blended.wind ?? 0.5,
+    });
+    works.tick(dt);
+    /**
+     * R19 — WHERE THE BENCH IS STANDING, which is wherever you are.
+     *
+     * `craft.setBench` is the third of the three joins this call never had, and the reason
+     * §3.11's craft-from-storage stayed dead even once `stores` was passed: `poolHere()` needs a
+     * POINT to ask `stores.poolAt` about, and `benchAt` started null and nothing ever moved it.
+     * Your own feet are the honest answer — you are standing at the anvil when you open the tab,
+     * and the pool's own reach is what decides whether a crate counts. Once every twenty frames
+     * because `poolAt` walks the network and the answer cannot change faster than you can walk.
+     */
+    if (state.frames % 20 === 0) craft.setBench({ x: control.x, z: control.z });
+    // R14: the carts on the road between your outposts and your base — js/logistics.js
+    for (const got of logistics.tick(dt).arrived) {
+      hud.log(`${got.n} ${got.name.toLowerCase()} arrived at ${got.to}.`, 'good');
+    }
+    // the grid's answer reaches the pad, the turret and the smelter — see syncPower
+    if (state.frames % 20 === 0) syncPower();
+    if (state.frames % 15 === 0) {
+      /**
+       * THE COLONY HAS TO BE TOLD WHAT YOU BUILT.
+       *
+       * `colony.setBase` is the one input the whole module has — beds decide how many people can
+       * live here, defences decide whether anybody feels safe enough to come, structures decide how
+       * prosperous the place is and therefore what a tax is worth. Nothing was calling it, so every
+       * one of those was zero for ever: appeal 0, migration never, prosperity 1.00, tax nothing.
+       */
+      colony.setBase?.({
+        structures: build.entries?.length || 0,
+        defences: (build.entries || []).filter(e => build.defOf?.(e.key)?.cat === 'defence' && e.powered !== false).length,
+        beds: (build.entries || []).filter(e => e.key === 'bed').length,
+        waypoint: (build.entries || []).some(e => e.waypoint),
+        wealth: player.gold || 0,
+      });
+      colony.setClock?.(sky.dayFraction * 24, Math.floor(state.elapsed / (balance.sky?.dayLengthSeconds ?? 900)) + 1);
+      colony.tick?.(dt * 15);
+      farm.tick?.(dt * 15);
+      /**
+       * `works.machines()` RETURNS SOMETHING NOW.
+       *
+       * This call has been here since the building expansion and `works.machines` did not exist, so
+       * js/work.js's third source — the whole reason `runMachines` was written — has never once
+       * run. It returns the Tender Arms, which js/civics.js hands over in `rebuild`.
+       */
+      board.runMachines?.(works.machines?.() || [], (dt * 15) / 3600);
+      /**
+       * …and the labour orders, the vendor day, and the carts on the long roads.
+       *
+       *   "you can have ore sent to a town and have an NPC run the furnace to smelt it
+       *    automatically, consuming work."
+       *
+       * `civics.tick` posts at most one small order per machine that wants tending and takes it off
+       * again when it does not, then pays each finished order into the machine it was for. That is
+       * the join the whole expansion is about.
+       */
+      const civ = civics.tick(dt * 15, {
+        day: Math.floor(state.elapsed / (balance.sky?.dayLengthSeconds ?? 900)) + 1,
+        hour: sky.dayFraction * 24,
+        gold: player.gold, rng: rpg.rng, at: state.elapsed,
+      });
+      for (const r of civ.arrived || []) player.gold += civics.trade.collect(r.id).gold || 0;
+      if (civ.vendor) hud.log(`${civ.vendor.name} is asking after a bed. Press K.`, 'level');
+      holding.drawHold();
+      if (holding.open) holding.draw();
+    }
+    tickPools(dt);
+    // the seams' respawn clocks, and the drills and routes that work them
+    if (state.frames % 900 === 0) { oreHere().tick(15); props.tickHarvest(15); }
+    // the run of swings is over the moment you stop, or after three quiet seconds
+    // R16: the swing tally is gone with the swing. A gather is one bar and one line now, so there
+    // is no run of per-second takings left to add up.
+    flushGroundPile();
+    mining.tick(dt);
+    /**
+     * THE TURRETS SHOOT BACK.
+     *
+     * Every powered defensive structure with a `defence` block in the catalogue picks the nearest
+     * thing in range and hits it. A wall, a gate or a trap has no block and never fires — gating on
+     * the category alone would have a palisade sniping across the valley.
+     */
+    defence.tick(dt, {
+      enemies: field.enemies,
+      /**
+       * R18 — GROUND YOU DO NOT WANT TO CROSS.
+       *
+       * The three traps carried a `trap` block that nothing read, so a caltrops field across the
+       * approach was scenery that still made the wave bigger. js/defence.js owns the rule (who is
+       * standing on what) and this owns the field, the numbers and the picture, exactly as it does
+       * for a turret's `onHit`.
+       *
+       * `dps` is per SECOND and this runs every frame, so it is scaled by `dt` — the mistake the
+       * project has already made once, where a DoT paying `perSecond * dt` sixty times a second
+       * read as "1 damage" however right the total was. A trap also needs no line of fire and no
+       * projectile: the hit lands where the enemy is standing.
+       */
+      onTrap: (unit, trap, piece, dt) => {
+        const share = (trap.dps || 0) * dt / Math.max(1, player.derived?.damage || 10);
+        // `strikeArea` takes falloff/power/element/skill/onHit/applyStatus and nothing else —
+        // an option it does not read would be one more rule written for nobody.
+        if (share > 0) field.strikeArea(unit.x, unit.z, 0.8, player, { power: share, falloff: 0 });
+        // caltrops slow and a pit holds — both are real statuses, so they read on the enemy's bar
+        /**
+         * Caltrops slow and a pit holds. There is no `root` or `stun` in data/skills.json, so the
+         * hold is `web` — the heaviest slow the game has — given the pit's own `hold` SECONDS as
+         * extra duration. Using a status rather than a bespoke field means it reads on the enemy's
+         * own bar and is cleansed and resisted like everything else.
+         */
+        if (trap.slow) landStatus('chill', skillData.statuses.chill, unit, trap.slow);
+        if (trap.hold) applyStatus(unit, 'web', skillData.statuses.web, 1, { longer: trap.hold });
+        // a trap you cannot see going off reads as a broken trap
+        spellfx?.impact?.({
+          at: new THREE.Vector3(unit.x, (unit.y || 0) + 0.3, unit.z),
+          element: trap.hold ? 'earth' : 'physical',
+        });
+      },
+      onHit: (unit, gun, turret) => {
+        field.strikeArea(unit.x, unit.z, Math.max(0.8, gun.splash), player, {
+          element: gun.element, power: gun.damage / Math.max(1, player.derived?.damage || 10),
+        });
+        // the shot has to be VISIBLE or a turret reads as broken: the enemy loses health across
+        // the clearing and nothing says why
+        spellfx?.projectile?.({
+          from: new THREE.Vector3(turret.x, (turret.y || 0) + 2.2, turret.z),
+          to: new THREE.Vector3(unit.x, (unit.y || 0) + 0.9, unit.z),
+          element: gun.element || 'physical',
+          shape: gun.element ? null : 'arrow',
+          ms: 160,
+        });
+      },
+    });
+
+    /**
+     * R18 — TRAMPLE, so `cond_mountTrample` means something.
+     *
+     * "Things you ride through take N damage" was the affix's own sentence and nothing read
+     * `derived.trample`. It needs no new state: you are mounted, you are moving, and anything inside
+     * the horse's shoulders takes a share of it. Gated on actually MOVING and on the gallop, so
+     * standing still in a crowd is not a free damage aura — trampling is something you do by
+     * riding at something.
+     */
+    if (control.mounted && !dungeon && (player.derived.trample || 0) > 0 && control.moving > 2) {
+      trampleIn -= dt;
+      if (trampleIn <= 0) {
+        trampleIn = 0.5;
+        const share = (player.derived.trample || 0) / Math.max(1, player.derived.damage?.[1] || 10);
+        field.strikeArea(control.x, control.z, 1.8, player, { power: share, falloff: 0.2 });
+      }
+    }
+
+    // …and the rocks on the ground. It does its own "has anything changed" check.
+    if (state.frames % 10 === 0) {
+      oreView.update(oreHere().around(control.x, control.z), control.x, control.z, {
+        heightAt: (x, z) => terrain.heightAt(x, z),
+        // seams are sparse — about fourteen to a 512 m tile — so a short draw radius means walking
+        // through a field of ore and seeing none of it. This is cheap: one InstancedMesh per kind.
+        radius: lowQuality ? 260 : 360,
+      });
+    }
+
+    /**
+     * BUILD MODE FOLLOWS WHERE YOU ARE LOOKING, NOT WHERE YOU ARE STANDING.
+     *
+     * This was `build.aim(control.x, control.z)` — the player's own feet — so the ghost sat inside
+     * the character, the brush levelled the ground you were standing on, and placing anything meant
+     * walking onto the exact spot and then off it again. The cursor is a ray now: march out along
+     * the camera's heading in one-metre steps until it goes under the ground, which is a hit test
+     * that costs a handful of height lookups and needs no physics.
+     */
+    if (build.mode) {
+      const spot = aimSpot();
+      build.aim(spot.x, spot.z);
+      buildUI.tick();
+    }
+    hud.tick(player, {
+      place: dungeon ? dungeon.name : town ? `${town.name} (${town.kind || 'settlement'})` : (terrain.regionAt(control.x, control.z) || terrain.biomeAt(control.x, control.z).name),
+      zone: dungeon ? { minLevel: dungeon.level, maxLevel: dungeon.level + 2, midLevel: dungeon.level + 1, danger: 'Underground' } : here,
+      clock: clockText(sky.dayFraction, control),
+      target,
+      // underground it still reported the weather, the daylight and the surface gravity
+      sky: dungeon ? '' : skyText(sky),
+      weather: dungeon
+        ? `${dungeon.plan.rooms.length} rooms · level ${dungeon.level}`
+        : blended.name + (weather.locked ? ' · held' : '') + (control.swimming ? ' · swimming' : '') + (control.mounted ? ' · riding' : ''),
+      where: hud.locationText(control, dungeon),
+    });
+    if (state.frames % 6 === 0) {
+      // R16: what is in your hands, and how many things the wheel can reach
+      hud.daylight = Math.max(0.28, Math.min(1, sky.sunDirection.y * 1.7 + 0.3));
+      /**
+       * `revealRange` WIDENS THE MINIMAP, WHICH IS THE ONLY THING IT COULD MEAN.
+       *
+       * Derived off the affixes ("you see further on the map") and read by nothing. The span is in
+       * CELLS, and `+`/`-` still set the base — this multiplies whatever the player chose, so the
+       * affix makes their own setting better rather than overriding it.
+       */
+      hud.revealMul = 1 + (player.derived.revealRange || 0);
+      if (dungeon) hud.drawDungeonMap(control, dungeon.plan, field.enemies, chests.chests);
+      else hud.drawMinimap(control, field.enemies, [
+        ...chests.chests.filter(c => !c.opened).map(c => ({ x: c.x, z: c.z, color: '#ffd24a', r: 3 })),
+        // something still in the air, with how long you have to get there
+        ...meteors.marks().map(m => ({ x: m.x, z: m.z, icon: '☄', color: '#ff8a40' })),
+        ...gates.visible.map(g => ({ x: g.x, z: g.z, color: '#b090ff', r: 4 })),
+        // each stronghold type draws itself: sites.js carries a colour, a radius and a glyph per
+        // kind, so a castle and a bandit camp are not the same orange dot
+        ...sites.visible.map(v => ({
+          x: v.x, z: v.z,
+          color: v.pin?.color || (v.kind === 'lair' ? '#ff6a3a' : '#ffa860'),
+          r: v.pin?.r ?? 3.4,
+          glyph: v.pin?.glyph || null,
+          // a world boss carries its own character; without this it is just a big red pip
+          icon: v.pin?.icon || undefined,
+        })),
+        ...pets.pets.filter(p => p.dying == null).map(p => ({ x: p.x, z: p.z, color: '#7ae06a', r: 2.6 })),
+        /**
+         * R17 — a shop and a job only show up once you are nearly on top of them.
+         *
+         * `folk.marks()` is every stall and every person with work in the zone, and it was drawn at
+         * any distance, so a town read as a cluster of `$` and `!` glyphs from the next hill and
+         * there was nothing left to find by walking in. `near` is the opt-in; MINIMAP_NEAR is the
+         * distance, and it is the one place it is written down.
+         */
+        ...folk.marks().map(m => ({ ...m, near: MINIMAP_NEAR })),
+        /**
+         * The Territory, on the minimap.
+         *
+         * Without this the whole layer is invisible: a wanderer is one body in forty square
+         * kilometres and you would have to walk into them, and a camp you are meant to clear looks
+         * like ordinary ground. Each mark is drawn in the colour of whoever it belongs to, which is
+         * also how you tell the people pushing into a zone from the people who hold it.
+         */
+        ...(hud.here ? holdings.sitesIn(hud.here.id).map(si => ({
+          x: si.x, z: si.z, r: 3.6,
+          color: si.hostile ? (factionColour(si.faction) || '#ff6a3a') : '#6f8aa8',
+        })) : []),
+        ...(hud.here ? patrols.inZone(hud.here.id).map(p => ({
+          x: p.x, z: p.z, r: 2.8, color: factionColour(p.faction) || '#9fb0c8',
+        })) : []),
+        ...(hud.here ? trade.inZone(hud.here.id).map(c => ({
+          x: c.x, z: c.z, icon: '▣', color: c.state === 'wrecked' ? '#8a6a5a' : factionColour(c.faction) || '#c8b48a',
+        })) : []),
+        ...(hud.here ? roadFolk.inZone(hud.here.id).map(w => ({
+          x: w.x, z: w.z, icon: '•', color: '#eaf6ff',
+        })) : []),
+        /**
+         * R16: a landmark that has been used up is not a destination any more. One that still does
+         * something every time you come back — a shrine you can rest at, a ford, a toll bridge —
+         * keeps its glyph and wears the filled one, because that IS still somewhere to head for.
+         */
+        ...(hud.here ? holdings.landmarksIn(hud.here.id)
+          .filter(l => !(l.taken && !holdings.standingOffer(l)))
+          .map(l => ({
+            x: l.x, z: l.z, icon: l.state === 'done' ? '◈' : '◇', color: '#a8c8e8',
+          })) : []),
+      ], (scanner.on
+        /**
+         * R16 — "When scanning for nodes, hide all the quest/markers and only show node markers
+         * for simplicity, and show the name of the resource on the floating indicator."
+         *
+         * So while the scanner is up the minimap is a prospecting minimap: only deposits, and each
+         * one wearing its material's name instead of the quest exclamation it would otherwise
+         * share the rim with. Tracked-ness is ignored on purpose — you have not tracked the seam
+         * you found four seconds ago and you want to see it anyway.
+         */
+        ? markers.here().filter(m => m.kind === 'seam').map(m => {
+          const b = markers.bearing(m, control, terrain);
+          return b ? { ...m, x: b.x, z: b.z, distance: b.distance, label: m.name } : null;
+        }).filter(Boolean)
+        /**
+         * R17 — "Waypoints favorited on the map with a star do not show a star on the minimap."
+         *
+         * They could not: this was fed `markers.tracked()`, and STARRING SOMETHING DOES NOT TRACK
+         * IT. Two different checkboxes, only one of which ever reached the small map — and a
+         * waypoint pad is not a marker at all, so no amount of marker filtering was going to find
+         * one. `map.minimapMarkers()` is the single call that knows all three things, so js/hud.js
+         * does not have to, and it honours the show-on-map switch this round added.
+         */
+        : map.minimapMarkers(control)
+      ));
+    }
+    // the sky's own events: a meteor every few minutes, and shooting stars in between
+    if (!dungeon) meteors.update(dt, control);
+    if (state.frames % 12 === 0) map.tick();
+
+    /**
+     * R14 — WHAT IS GOING ON WITHIN WALKING DISTANCE.
+     *
+     *   "Add a 'Nearby Activities' area below the minimap when walking around… It should show what
+     *    nearby activities are available including the ones that pop up in chat or have a location
+     *    nearby."
+     *
+     * Every one of these lists already existed and none of them was ever shown together.
+     * `encounters.events` in particular is a finished activity feed — id, name, position, seconds
+     * left — that nothing in the game read. Redrawn four times a second, which for distances and
+     * clocks is indistinguishable from every frame and fifteen times less work; the list itself is
+     * pure (js/nearby.js) so the sort order is tested rather than eyeballed.
+     */
+    if (state.frames % 15 === 0) {
+      // `mode` is 'ground' when you are on your feet; anything else is flight or a jump
+      const flying = mode !== 'ground';
+      const rows = (dungeon || flying) ? [] : nearbyList({
+        at: { x: control.x, z: control.z },
+        wrapM: terrain.widthM || 0,
+        events: encounters.events || [],
+        meteors: meteors.marks(),
+        sites: sites.visible || [],
+        caravans: hud.here ? trade.inZone(hud.here.id) : [],
+        folk: hud.here ? roadFolk.inZone(hud.here.id) : [],
+        quests: questLog.active.map(q => ({
+          id: q.id, title: q.title, place: q.place, done: q.done,
+          markerKind: q.markerKind, progress: questLog.progressText(q),
+        })),
+      });
+      drawNearby(rows, {
+        hidden: !!dungeon || flying,
+        onLocate: a => map?.locate?.({ x: a.x, z: a.z, name: a.name, kind: a.kind === 'fall' ? 'fall' : 'place' }),
+      });
+      nearbyRows = rows;
+
+      /**
+       * R14 — AND THE SAME THINGS, IN THE WORLD.
+       *
+       *   "In the world, there should be a large animated pointer above the location or object to
+       *    help the player find it, and a radial arrow pointing to it when its off-screen."
+       *
+       * One pool of six beacons (js/beacon.js) serves two callers: whatever the Nearby panel is
+       * pointing at, and — while a sweep is still lit — the deposits it turned up. The scan wins
+       * when one is running, because you asked for it in the last couple of minutes and it is the
+       * more specific request.
+       */
+      const scanLit = scanState.until > state.elapsed && scanState.hits.length;
+      beaconRows = (dungeon || flying) ? []
+        : scanLit
+          ? scanState.hits.slice(0, 6).map(h => ({
+            id: 'scan:' + h.id, x: h.x, z: h.z, name: h.name,
+            color: h.colour, where: distanceText(h.distance),
+          }))
+          /**
+           * R25 — NO ARROW AT NOBODY. A person only has a body inside 90 m (keepWandererBodies),
+           * but their row reached the beacon from anywhere in the zone, so a yellow arrow stood over
+           * an empty field saying "E speak to …, Mercenary Captain". A person gets a beacon only
+           * once there is somebody standing there to point at.
+           */
+          : rows.filter(a => a.kind !== 'person' || wandererBodies.has(String(a.id).slice(4))).slice(0, 6).map(a => ({
+            id: a.id, x: a.x, z: a.z, name: a.name,
+            color: (MARKER_LOOKS[a.kind] || MARKER_LOOKS.quest).color,
+            where: `${a.where} ${a.compass}`,
+          }));
+      /**
+       * R17 — AND THE MARKERS AND WAYPOINTS YOU ASKED TO SEE IN THE WORLD.
+       *
+       *   "Can they have a toggle to show on the map, and show on the game world? That way you can
+       *    uncheck those to keep them favorited but hide them from the map/world so they are not
+       *    distracting."
+       *
+       * There is a "show in the world" switch on every marker and every waypoint pad now, and this
+       * is its consumer — without it the switch would be a saved boolean nothing reads, which is
+       * this project's signature fault wearing a checkbox. The beacon pool is six and the Nearby
+       * list has first claim on it, because that is what the pool was built for; your own pins fill
+       * whatever is left, nearest first, and only inside BEACON_RANGE. A scan owns the pool
+       * outright while it is lit, for the same reason it always has.
+       */
+      if (!scanLit && !dungeon && !flying && beaconRows.length < 6) {
+        const mine = [];
+        for (const m of map.worldMarkers?.() || []) {
+          // markers are filed in map CELLS; `bearing` is the one place that turns one into metres
+          const b = m.kind === 'waypoint' ? { x: m.x, z: m.z, distance: Math.hypot(m.x - control.x, m.z - control.z) }
+            : markers.bearing(m, control, terrain);
+          if (!b || !Number.isFinite(b.x) || b.distance > BEACON_RANGE) continue;
+          mine.push({
+            id: 'mark:' + (m.id ?? m.name), x: b.x, z: b.z, name: m.name,
+            color: (MARKER_LOOKS[m.kind] || MARKER_LOOKS.pin).color,
+            where: distanceText(b.distance), distance: b.distance,
+          });
+        }
+        mine.sort((a, b) => a.distance - b.distance);
+        // …and never twice: the Nearby list can already be pointing at the same quest
+        const taken = new Set(beaconRows.map(b => b.name));
+        for (const row of mine) {
+          if (beaconRows.length >= 6) break;
+          if (taken.has(row.name)) continue;
+          taken.add(row.name);
+          beaconRows.push(row);
+        }
+      }
+      /**
+       * The ground height is sampled ONCE here, not per frame. The edge arrows below are drawn
+       * every frame, and re-sampling six terrain heights sixty times a second to place six
+       * triangles is three hundred and sixty lookups a second for a number that has not moved.
+       * `y` is where the ARROW points (six metres up, so it does not aim at somebody's feet);
+       * js/beacon.js asks the terrain for the ground itself, because the two are not the same.
+       */
+      for (const b of beaconRows) b.y = terrain.heightAt(b.x, b.z) + 6;
+      beacons.set(beaconRows);
+    }
+    /**
+     * R14 — THE MUSTER'S LEASH. Walk away from a drill and it is called off, which is the only
+     * thing that stops "call it and go and do something else" being the optimal play.
+     */
+    if (civics.muster.quest) {
+      const out = civics.muster.tickLeash(dt, { x: control.x, z: control.z, spot: defence.spot?.() });
+      if (out?.warn) hud.log(`You are ${out.metres} m from the muster. ${out.seconds}s and it is over.`, 'warn');
+      if (out?.over) { hud.log(out.line, ''); defence.adopt(null); }
+    }
+
+    /**
+     * R15 — YOU ARE SOMEBODY. STANDING AT A MACHINE WORKS IT.
+     *
+     * The Civilization Expansion made a machine need work units before it will run, which is the
+     * right rule and the whole reason citizens are worth having. But I turned it on from the first
+     * minute of a new game, before a player can possibly have a colony — so somebody who built a
+     * furnace, queued iron and stood there watching was told "Standing cold — nobody is working
+     * this", by a game in which they were the only person alive.
+     *
+     * js/refine.js's own note has the answer in it: work units are interchangeable, and "it makes
+     * no difference at all whether the player swung at it, a citizen filled it on their shift, or a
+     * Tender Arm ground through it while everyone was asleep." You standing next to a machine IS
+     * somebody working it. It credits at exactly the rate the machine spends, so a furnace you are
+     * attending runs, and one you walked away from coasts on its bank — two minutes — and then
+     * waits. Which is precisely what a citizen is then worth hiring for.
+     */
+    /**
+     * R16 — …AND NOW IT GOES THROUGH THE BOARD, WHICH IS THE POINT.
+     *
+     * The rule above is kept exactly: stand at a bench and it stays lit, 1:1. What changed is HOW.
+     * This used to call `works.credit` directly — straight into the machine's bank, round the side
+     * of js/work.js — so your effort never appeared in an order, never appeared in the ledger, and
+     * a citizen walking to the same furnace could not tell you had been there. "The player can jump
+     * in to help" has to mean helping with the job they are doing.
+     *
+     * So it is one call now, and holding E is the same call with `holding` true: three times the
+     * rate, and a bar over the structure showing the ORDER's real progress.
+     */
+    const handBar = dungeon ? null : (() => {
+      handWork.tick(dt, { at: state.elapsed, holding: !!snap.keys?.has('KeyE') && !build.mode && !talk.isOpen });
+      return handWork.bar();
+    })();
+
+    /**
+     * R16 — THE GATHER CLOCK AND THE SCANNER SWEEP.
+     *
+     * The bar is drawn at a projected world point by js/hud.js, the same way a damage number is.
+     * `stillThere` is what stops a bar hanging in the air over a seam that ran dry or a tree that
+     * something else knocked down while you were working it.
+     */
+    {
+      const live = gathering.tick(dt, control, {
+        stillThere: job => job.kind !== 'seam' || !oreHere().byId?.(String(job.id).slice(5))?.gone,
+      });
+      // R16 — one bar, two things that can want it. Digging wins: you cannot be swinging at a rock
+      // and turning a crank at the same moment, and the rock is the one you just clicked on.
+      const bar = (live ? gathering.bar() : null) || handBar;
+      hud.workBar(bar ? { ...bar, pos: new THREE.Vector3(bar.x, bar.y, bar.z) } : null, camera);
+    }
+    // R16: the rod says when somebody got where they were sent
+    if (heldModes(player).includes('rod')) commandRod?.tick?.();
+    if (scanner.on) {
+      const fresh = scanner.tick(dt, control, {
+        player,
+        nodesNear: (x, z, r) => oreHere().near(x, z, r) || [],
+      });
+      /**
+       * "…once a node is scanned it should remain visible on the map." The marker book is already
+       * the thing that survives a save and draws on both the map and the minimap, and it already
+       * has a `seam` kind, so a scanned deposit becomes an ordinary marker and every screen that
+       * draws markers gets it for nothing.
+       */
+      for (const row of fresh) {
+        markers.add({
+          kind: 'seam', name: row.name,
+          cellX: row.x / terrain.metresPerCell, cellY: row.z / terrain.metresPerCell,
+          tracked: false,
+        });
+      }
+    }
+
+    // R14: the ambient purse earns while you walk, and not at all during a fight or underground
+    ambient.tick(dt, {
+      fighting: field.enemies.some(e => e && e.state === 'chase'),
+      inTown: !!town,
+      inDungeon: !!dungeon,
+    });
+
+    // the beacons breathe and turn every frame; the list behind them only changes four times a second
+    if (!dungeon) beacons.update(dt, camera);
+    hud.edgeArrows(beaconRows, camera);
+
+    renderFrame();
+  }
+
+  function respawn(killer = null) {
+    /**
+     * THE STONE THAT SAID YOU WOULD GET UP ONCE.
+     *
+     * `gives.reviveDaily` on a landmark. Without this it would be one more flag written and never
+     * read, which is the exact mistake this whole round was about: you get up where you fell, you
+     * keep your gold, and it costs the charge.
+     */
+    const today = Math.floor(state.elapsed / (balance.sky?.dayLengthSeconds ?? 900));
+    if (player.reviveDay != null && player.reviveDay !== today) player.reviveCharge = 0;
+    if ((player.reviveCharge || 0) > 0) {
+      player.reviveCharge--;
+      player.hp = player.maxHp;
+      player.mp = player.maxMp;
+      hud.log('The water holds. You get up where you fell, whole.', 'level');
+      sound.questDone();
+      hud.setPlayer(player);
+      return;
+    }
+    if (dungeon) { hud.log('You wake outside, with no memory of the climb.', 'bad'); leaveDungeon(); }
+    else hud.log('You black out, and wake where you landed.', 'bad');
+    player.deaths++;
+    if (killer) {
+      const named = campaign.onDeath({
+        defId: killer.defId,
+        name: namegen ? (namegen.generate('person.full', { race: 'orc', seed: (killer.defId || '').length * 7919 + player.deaths })?.text || killer.name) : killer.name,
+        level: killer.level,
+      });
+      if (named) hud.log(`${named.name} ${named.title} left you for dead. It will be back.`, 'bad');
+    }
+    /**
+     * R22 — YOU GET UP WHOLE.
+     *
+     *   "Change it so if you die and respawn, you start at full health and mana."
+     *
+     * Both paths, because the two disagreed in a way nobody would defend: the PUNISHING path gave
+     * 50% health and the forgiving one gave 40%, and neither had ever touched mana at all — so a
+     * caster who died mid-fight got up with whatever was left in the bar, which for a caster who
+     * died mid-fight is nothing. The cost of dying is the walk back and the tenth of your purse;
+     * it does not need to also be a second fight you cannot win.
+     */
+    player.hp = player.maxHp;
+    player.mp = player.maxMp;
+    player.gold = Math.round(player.gold * 0.9);
+    control.teleport(control.spawn.x, control.spawn.z);
+    field.clear();
+    rebuildWorldAround(true);
+    autoSave();
+  }
+
+  /**
+   * WHO TOLD YOU.
+   *
+   * E15: every rumour was signed "somebody in The Bleak Moor", which is exactly the flavour a rumour
+   * system exists to avoid — a rumour is a person saying a thing, and an anonymous one is just a
+   * notification. The zone already has people in it, so one of them gets the credit: their name,
+   * what they do, and where they are. Their trade matters more than their name here ("the smith in
+   * Pebelkeep" is a better source than a name you have never heard), so both go in.
+   *
+   * Nobody about — an empty stretch of road, a zone whose settlements are out of range — falls back
+   * to the old wording, because "somebody on the road" is honest when there is genuinely nobody.
+   */
+  function rumourSource(zone) {
+    const people = folk?.roster?.() || [];
+    if (!people.length) return 'somebody on the road';
+    const who = people[Math.floor(Math.random() * people.length)];
+    const trade = who.roleName ? who.roleName.toLowerCase() : null;
+    const place = who.node?.name || zone?.name;
+    if (who.name && trade && place) return `${who.name}, the ${trade} in ${place}`;
+    if (who.name && place) return `${who.name}, in ${place}`;
+    return who.name || 'somebody on the road';
+  }
+
+  function clockText(fraction, c) {
+    const hours = Math.floor(fraction * 24), minutes = Math.floor((fraction * 24 % 1) * 60);
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} · ${Math.round(c.y)} m`;
+  }
+  function skyText(s) {
+    const up = s.visible().slice(0, 2);
+    if (!up.length) return '';
+    /**
+     * C10: this rendered "Shaukraen Anchor III, Shaukraen Anchor IV a in the daylight" — no verb, a
+     * comma where an "and" belongs, and a moon's raw catalogue designation. The chart and the space
+     * screen both already say "Moon of X"; this now agrees with them.
+     */
+    const names = up.map(b => b.moon ? `${b.parentName || 'its parent'}'s moon` : b.name);
+    const list = names.length > 1
+      ? `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`
+      : names[0];
+    const verb = names.length > 1 ? 'are' : 'is';
+    return `${list} ${verb} up${s.isNight ? '' : ', in the daylight'}`;
+  }
+
+  $('boot').classList.add('hidden');
+  state.running = true;
+  autoSave();
+  tick();
+
+  // ---------------------------------------------------------------- test handle
+  window.farhold = {
+    // ------------------------------------------------ round 16, for tests/round16.spec.js
+    /** The tool slot, the mouse-wheel ring and the gather bar. */
+    get tools() {
+      return {
+        held: heldNow(player), modes: heldModes(player),
+        tool: player.equipment.tool || null,
+        devices: player.devices || {},
+        cycle: dir => cycleHeld(player, dir),
+        build: (kind, id) => buildTool(kind, id),
+        gathering,
+        beginGather: (x, z) => beginGather({ x, z, reach: 8 }),
+      };
+    },
+    /** The hand scanner, and what it has remembered. */
+    get scanner() { return scanner; },
+    /** Every instanced place on this planet, and the doors they opened. */
+    get instances() {
+      return {
+        mouths: sites.mouths?.() || [], gates: gates.nodes.length,
+        kinds: (sites.instanceKinds?.() || []).map(i => ({ id: i.id, discovery: i.discovery, minBand: i.minBand })),
+        leads: hallLeads(hud.here),
+        reveal: id => revealInstance(id),
+      };
+    },
+    /**
+     * R17 — the company: the slot ladder, the contracts, the summon gate and the broker's board.
+     *
+     * Also the door js/onboarding.js and any later module use to find the research module without
+     * being timed against it — everything on `window.farhold` is a live getter, so reading one
+     * before it exists is `undefined` rather than a crash.
+     */
+    get followers() { return followers; },
+    get company() { return company; },
+    /** The holding's population, the rod, and the Town Hall. */
+    get holdingPop() { return population({ colony }); },
+    get rod() { return commandRod; },
+    get townHall() { return townHall; },
+    /** The territory layer, so a spec can read a landmark's own ledger row rather than guess. */
+    get holdings() { return holdings; },
+    /** The landmark join: a set piece and its ledger row are the same place now. */
+    landmarkAudit: () => (sites.sites || [])
+      .filter(s => s.family === 'landmark')
+      .map(s => ({ key: s.key, type: s.type, taken: !!s.taken, territoryId: s.territoryId || null })),
+    THREE, renderer, scene, camera, weatherView, weather, debug, fx,
+    star, system, saves, horse, boat,
+    rpg, player, hud, actor, balance, state,
+    // `control`, `field`, `props`, `features`, `view`, `sky` and the rest are REBUILT when you land
+    // on another world, so the handle has to read them through a getter. Captured by value they go
+    // stale the moment you fly anywhere, and a test then compares an old position against a new
+    // planet's ground — which is exactly what "you landed in the sea at 55 m" turned out to be.
+    // `folk` is rebuilt with the world, like `control` below, so it has to be a getter too
+    get folk() { return folk; },
+    // the waypoint network, and the same travel action the map's click uses
+    get waypoints() { return waypoints; },
+    // the building expansion, for the tests and the debug menu
+    get build() { return build; },
+    get stores() { return stores; },
+    /** The materials bag itself. `materials` below is already taken by its JSON readout. */
+    get bag() { return materials; },
+    get grid() { return grid; },
+    /** The build catalogue, so a test or the debug menu can read a cost without a second fetch. */
+    get structures() { return structureData || { structures: [] }; },
+    /**
+     * The resource table, same door as `structures` above and for the same reason: a test needs to
+     * ask what KIND a seam's output is. R18 — without this, `mining.spec.js` picked the richest
+     * seam near the spawn, got a WATER source on seed 11, built a wooden crate for it and then
+     * reported "five seconds of drilling delivered nothing" as though the drill were broken. The
+     * drill was fine; a wooden box does not hold water.
+     */
+    get resources() { return resourceData || { materials: {} }; },
+    get works() { return works; },
+    get colony() { return colony; },
+    get farm() { return farm; },
+    /**
+     * The WORK board, under its own name.
+     *
+     * `board` was declared twice on this object — the work board here and the zone's notice board
+     * further down — and the later one silently won, so `farhold.board` has been the job list all
+     * along and nothing could reach js/work.js at all.
+     */
+    get workBoard() { return board; },
+    get portals() { return portals; },
+    get terraform() { return terraform; },
+    get ore() { return ore; },
+    get oreView() { return oreView; },
+    get mining() { return mining; },
+    /** Round 13: the scanner's last sweep, and the pin button behind it. */
+    scan: { sweep: (x, z, r = 400) => sweepForDeposits(x ?? control.x, z ?? control.z, r), state: () => scanState, pin: id => pinDeposit(id) },
+    get defence() { return defence; },
+    /** Every enemy id, so a test can spawn one without reading the data file. */
+    get bestiaryIds() { return (bestiary.enemies || []).map(e => e.id); },
+    shipGate: () => canLaunchShip(player),
+    /** The shipyard's own actions, for the tests and the debug menu — the same ones the panel calls. */
+    /** The shipyard's own actions — the same object the panel's buttons call. */
+    shipyardApi: shipyardActions,
+    get shipFuel() { return shipYard(player).fuel; },
+    travelTo: id => map.travelTo(id),
+    /** Open the shop panel on somebody, for the specs — the same call the E key makes. */
+    openTalk: who => talk.show(who, talkContext(who)),
+    get control() { return control; },
+    get field() { return field; },
+    get props() { return props; },
+    get features() { return features; },
+    get view() { return view; },
+    get sky() { return sky; },
+    /** R23: the graphics round — the setting, the pipeline, the wind, the fog, the grass. */
+    get graphics() { return graphics; },
+    get world() { return world; },
+    /** R14: which mark a place wears, so a test can prove the landmarks are drawn at all. */
+    mapMarkFor,
+    /** R15: what E would act on right now, so a spec can prove the furnace answers. */
+    interactTarget,
+    /** R15: the three ground vehicles, for the spec that checks they all beat a horse. */
+    groundVehicles: GROUND_VEHICLES,
+    /** R15: the build panel, so a spec can prove the guidance survives building something. */
+    get buildUI() { return buildUI; },
+    /**
+     * One swing, from a test.
+     *
+     * `swingWith` is a local inside the frame tick and cannot be reached from here, so this sets
+     * the flag the tick itself reads — which is better anyway: it goes through the same path a
+     * mouse click does, including the cooldown and the wind-up.
+     */
+    swingNow: () => { input.state.attack = true; },
+    /** R25 — hold (true) or release (false) the attack button, for a charged staff or a bow draw */
+    holdAttack: on => { input.state.attackHeld = !!on; input.state.attack = !!on; },
+    // R25 — where a ground skill would land right now (the tests put their targets there)
+    groundTarget: range => groundTarget(range),
+    /** The Civilization Expansion, for tests/civilization.spec.js. */
+    get civics() { return civics; },
+    get holding() { return holding; },
+    get housing() { return civics.housing; },
+    get hold() { return civics.hold; },
+    /**
+     * NOT `trade` — THAT NAME IS ALREADY TAKEN, AND TAKING IT AGAIN LOSES SILENTLY.
+     *
+     * `trade` further down this same object literal is js/caravans.js, the loads that move between
+     * a zone's settlements. A duplicate key in an object literal is not an error in JavaScript, it
+     * is a shrug: the later one wins, and `farhold.trade` would have gone on being the caravans
+     * while looking for all the world like it was the goods market. This project has been bitten by
+     * exactly that once already — `board` was declared twice and js/work.js became unreachable.
+     */
+    get goodsMarket() { return civics.trade; },
+    get muster() { return civics.muster; },
+    get map() { return map; },
+    /** Is the world under your feet a settled, multi-biome one? (round 10, for the specs) */
+    liveableHere: () => isHabitableStart(planet),
+    /** Does the system you are in hold one at all? */
+    liveableInSystem: () => landableBodies(system).some(isHabitableStart),
+    zones, chests, gates, sites, pets, craft, light, encounters, skillData, classData, encounterData,
+    // R14: the ambient purse, the nearby list and the beacons, for the tests and the debug menu
+    ambient,
+    get nearby() { return nearbyRows; },
+    beacons,
+    get materialWhere() { return materialWhere; },
+    // The Territory expansion, for the specs and the debug menu
+    standings, holdings, trouble, patrols, trade, roadFolk, rumours, jobs, factionData,
+    creditKill, meetOnTheRoad,
+    get sites() { return sites; },
+    get board() { return localBoard; },
+    enterTerritory, tickTerritory,
+    pauseMenu,
+    get dungeon() { return dungeon; },
+    get bossUnit() { return bossUnit; },
+    enterDungeon: (node = null) => {
+      // A world with no `dungeon` nodes on it still needs to be testable, so fall back to a mouth
+      // at the player's feet. The game itself only ever enters through a gate that is really there.
+      const g = node || gates.visible[0] || gates.nodes[0]
+        || { id: 0, name: 'Test Hollow', x: control.x, z: control.z, zone: zones.at(control.x, control.z) };
+      return enterDungeon(g);
+    },
+    leaveDungeon,
+    openChest: () => { const c = chests.nearest(control.x, control.z, 999); return c ? openChest(c) : null; },
+    placeChest: (kind = 'gilded') => chests.place(kind, control.x + 2, control.z + 2, { level: player.level }),
+    materials: () => craft.materials.toJSON(),
+    recycle: item => craft.recycle(item),
+    torch: on => light.setTorch(on),
+    saveNow: () => autoSave({ quiet: false }),
+    snapshot: currentSnapshot,
+    stats: () => ({
+      ...view.stats(),
+      props: props.stats(),
+      features: features.stats(),
+      weather: { ...blended },
+      eclipse: { ...sky.eclipse },
+      enemies: field.enemies.length,
+      drawCalls: renderer.info.render.calls,
+      triangles: renderer.info.render.triangles,
+      level: player.level, hp: player.hp, bag: player.bag.length,
+      height: control.y, x: control.x, z: control.z,
+      pitch: control.pitch, camDistance: control.camDistanceUsed,
+      swimming: control.swimming, mounted: control.mounted, waterDepth: control.waterDepth,
+      dayFraction: sky.dayFraction, sunY: sky.sunDirection.y,
+      sky: sky.visible(),
+    }),
+    // through `clampToWorld` first: a coordinate off the map used to reach `colorAt` with a biome id
+    // that has no colour, which threw inside the ring rebuild and killed the frame loop
+    /** R25 — the carried torches and the spell glows, for tests */
+    get nightLights() { return nightLights; },
+    get spellfx() { return spellfx; },
+    teleport: (x, z) => {
+      const [cx, cz] = terrain.clampToWorld(Number(x) || 0, Number(z) || 0);
+      control.teleport(cx, cz);
+      rebuildWorldAround(true);
+    },
+    get mode() { return mode; },
+    get space() { return space; },
+    get air() { return air; },
+    get planet() { return planet; },
+    get palette() { return palette; },
+    get terrain() { return terrain; },
+    launch, land,
+    questLog, markers, talk, talkContext, sound, speech, campaign, settings, meteors,
+    get band() { return band; },
+    chart, galaxy, warp, beginJump,
+    get starId() { return starId; },
+    /** Every base you ever raised, and the trip home — see js/homes.js. */
+    homes,
+    returnToBase,
+    get starNow() { return starNow(); },
+    get systemSeed() { return systemSeed; },
+    skills, spellfx, sunfx,
+    /** First person on or off, for a test or the debug menu. */
+    firstPerson: on => setFirstPerson(on),
+    /** Fire a skill slot from a test or the debug menu. */
+    cast: i => castSkill(i),
+    get statuses() { return { player: player.statuses || {}, enemies: field.enemies.map(e => ({ name: e.name, statuses: e.statuses || {} })) }; },
+    /** Skip the cinematics — go straight to space, or straight down onto a world. */
+    toSpace: () => { ensureSpace().enter({ fromPlanet: planet, elapsed: state.elapsed }); camera.far = 600000; camera.updateProjectionMatrix(); mode = 'space'; },
+    landOn: (planetId, spot = null) => {
+      // moons are landable too, and they are not in `system.planets` — they hang off their parent
+      const all = [...system.planets, ...system.planets.flatMap(x => x.moons || [])];
+      const p = all.find(x => x.id === planetId) || planet;
+      camera.far = 24000; camera.updateProjectionMatrix();
+      buildPlanet(p, spot);
+      mode = 'ground';
+      return planet.name;
+    },
+    setWeather: (key, lock = true) => { if (key === null) weather.unlock(); else weather.set(key, { lock, instant: true }); blended = weather.blend(blended); return blended; },
+    // R23: WITH the player's longitude, as the frame loop does — without it `sky.isNight` right after
+    // a setTime described the time at the map's left edge, hours off local time (round4.spec's
+    // "genuinely night HERE" loop found a lon-0 night and then read a local morning sky)
+    setTime: t => { state.elapsed = t; sky.update(t, { gloom: blended.gloom, cloud: blended.cloud, longitude: control ? control.x / terrain.widthM : 0 }); },
+    spawn: async (defId, level = player.level) => {
+      const def = bestiary.enemies.find(d => d.id === defId) || bestiary.enemies[0];
+      return field.add(def, level, control.x + 3, control.z + 3);
+    },
+    hit: () => field.strike(control, player, { reach: 9, arc: 6.3 }),
+    /** How many perk points are unspent — the level-up currency, since round 7. */
+    perkPoints: () => perkPointsLeft(player),
+    give: (baseKey, rarity = 'rare', opts = {}) => {
+      const level = opts.level ?? player.level;
+      const item = attuneWeapon(rpg.loot.generate(baseKey, rarity, 'high', { rng: rpg.rng, level, ...opts }));
+      if (item) player.bag.push(item);
+      hud.setPlayer(player);
+      return item;
+    },
+    pause: v => { state.paused = v; },
+  };
+}
+
+function frame() { return new Promise(r => requestAnimationFrame(() => r())); }
+
+boot().catch(err => {
+  document.getElementById('boot-status').textContent = 'failed: ' + err.message;
+  console.error(err);
+});

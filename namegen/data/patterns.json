@@ -1,0 +1,825 @@
+{
+  "_doc": "Name patterns by category. Token syntax: {given} {family} {epithet} {native:N} (N syllables, generated) {concept:tag} (English word, race-weighted) {concept:tag|adj} {concept:tag|agent} {tr:tag} (translated native word) {list:name} {race.sg} {~a|b|c}; modifiers |cap |lower |pl |a |the. Each pattern: t = text, w = weight, tags = descriptive, races = only for these (omit = all), not = never for these, forms = extra forms (sg/pl/adj/people/short) using the same tokens where * is the generated name. gloss records concept meanings.",
+  "lists": {
+    "factionNoun": [
+      "Company",
+      "Guild",
+      "Brotherhood",
+      "Circle",
+      "Compact",
+      "Court",
+      "Order",
+      "Covenant",
+      "League",
+      "Host",
+      "Fellowship",
+      "Lodge",
+      "Conclave",
+      "Legion",
+      "Watch",
+      "Wardens",
+      "Hand",
+      "Sons",
+      "Daughters",
+      "Children",
+      "Chorus",
+      "Banner",
+      "Crown",
+      "Council"
+    ],
+    "warband": [
+      "Warband",
+      "Horde",
+      "Fang",
+      "Claw",
+      "Raiders",
+      "Reavers",
+      "Marauders",
+      "Pack",
+      "Blades",
+      "Skulls",
+      "Teeth",
+      "Hounds"
+    ],
+    "clan": [
+      "Clan",
+      "Hold",
+      "Kinhold",
+      "House",
+      "Line",
+      "Delving",
+      "Vault"
+    ],
+    "gang": [
+      "Gang",
+      "Lot",
+      "Mob",
+      "Crew",
+      "Bunch",
+      "Nest",
+      "Warren",
+      "Scrabble"
+    ],
+    "elfOrder": [
+      "Grove",
+      "Circle",
+      "Vigil",
+      "Song",
+      "Watch",
+      "Wardens",
+      "Court",
+      "Bough"
+    ],
+    "cult": [
+      "Cult",
+      "Choir",
+      "Sepulchre",
+      "Court",
+      "Congregation",
+      "Vigil",
+      "Silence",
+      "Procession"
+    ],
+    "settlementSuffix": [
+      "ford",
+      "bury",
+      "wick",
+      "ton",
+      "haven",
+      "stead",
+      "mere",
+      "bridge",
+      "gate",
+      "hollow",
+      "field",
+      "market",
+      "cross",
+      "ham",
+      "worth",
+      "dale",
+      "shaw",
+      "combe",
+      "well",
+      "moor"
+    ],
+    "settlementType": [
+      "village",
+      "town",
+      "city",
+      "hamlet",
+      "fort",
+      "keep",
+      "outpost",
+      "harbor",
+      "crossing",
+      "ruin"
+    ],
+    "landform": [
+      "Wood",
+      "Forest",
+      "Reach",
+      "Pass",
+      "Peak",
+      "Marsh",
+      "Mire",
+      "Moor",
+      "Vale",
+      "Hollow",
+      "Ridge",
+      "Deep",
+      "Crag",
+      "Fen",
+      "Heath",
+      "Down",
+      "Fell",
+      "Barrow",
+      "Waste",
+      "Coast",
+      "Isle",
+      "Falls",
+      "Run",
+      "Spine",
+      "Maw",
+      "Gap",
+      "Cut",
+      "Shelf",
+      "Steps",
+      "Gate"
+    ],
+    "water": [
+      "River",
+      "Lake",
+      "Mere",
+      "Tarn",
+      "Brook",
+      "Run",
+      "Ford",
+      "Falls",
+      "Bay",
+      "Sound",
+      "Strait",
+      "Loch"
+    ],
+    "realm": [
+      "Kingdom",
+      "Realm",
+      "March",
+      "Dominion",
+      "Protectorate",
+      "Freehold",
+      "Reach",
+      "Holdfast",
+      "Principality",
+      "Throne"
+    ],
+    "weaponNoun": [
+      "bane",
+      "bite",
+      "song",
+      "kiss",
+      "edge",
+      "tooth",
+      "fang",
+      "whisper",
+      "wrath",
+      "reaver",
+      "render",
+      "cleaver",
+      "breaker",
+      "splitter",
+      "seeker",
+      "keeper",
+      "mourner",
+      "brand",
+      "thorn",
+      "needle"
+    ],
+    "artifactType": [
+      "Blade",
+      "Hammer",
+      "Crown",
+      "Ring",
+      "Eye",
+      "Heart",
+      "Key",
+      "Staff",
+      "Shield",
+      "Horn",
+      "Lantern",
+      "Tome",
+      "Chalice",
+      "Mask",
+      "Bell",
+      "Mirror"
+    ],
+    "mottoVerb": [
+      "remembers",
+      "endures",
+      "returns",
+      "hungers",
+      "keeps",
+      "waits",
+      "forgets nothing",
+      "pays",
+      "burns",
+      "holds",
+      "sleeps",
+      "watches"
+    ]
+  },
+  "categories": {
+    "person.given": [
+      {
+        "t": "{given}",
+        "w": 5
+      },
+      {
+        "t": "{native:2}",
+        "w": 2,
+        "not": [
+          "human",
+          "halfling"
+        ]
+      },
+      {
+        "t": "{native:3}",
+        "w": 1,
+        "races": [
+          "elf",
+          "dragon",
+          "undead"
+        ]
+      }
+    ],
+    "person.family": [
+      {
+        "t": "{family}",
+        "w": 4
+      },
+      {
+        "t": "{concept:nature,metal,weather,element|cap}{concept:nature,body,landform,war|lower}",
+        "w": 4,
+        "gloss": true
+      },
+      {
+        "t": "{concept:quality|cap}{concept:animal,nature,body|lower}",
+        "w": 2,
+        "gloss": true
+      },
+      {
+        "t": "{concept:animal,metal,body|cap}{concept:agent|lower}",
+        "w": 2,
+        "races": [
+          "orc",
+          "goblin",
+          "troll",
+          "dwarf",
+          "human"
+        ],
+        "gloss": true
+      },
+      {
+        "t": "{tr:nature,metal,war,abstract|cap}",
+        "w": 2,
+        "not": [
+          "human",
+          "halfling"
+        ],
+        "gloss": true
+      }
+    ],
+    "person.epithet": [
+      {
+        "t": "{epithet}",
+        "w": 5
+      },
+      {
+        "t": "the {concept:quality|cap}",
+        "w": 2,
+        "gloss": true
+      },
+      {
+        "t": "{concept:animal,body,metal|cap}-{concept:agent}",
+        "w": 1,
+        "races": [
+          "orc",
+          "giant",
+          "troll",
+          "goblin",
+          "dragon"
+        ],
+        "gloss": true
+      },
+      {
+        "t": "of the {concept:quality|cap} {concept:landform,nature|cap}",
+        "w": 1,
+        "gloss": true
+      }
+    ],
+    "person.full": [
+      {
+        "t": "{given} {family}",
+        "w": 6,
+        "not": [
+          "giant",
+          "dragon",
+          "troll",
+          "undead",
+          "goblin"
+        ],
+        "forms": {
+          "short": "{given}"
+        }
+      },
+      {
+        "t": "{given} {epithet}",
+        "w": 2,
+        "forms": {
+          "short": "{given}"
+        }
+      },
+      {
+        "t": "{given} {family}, {epithet}",
+        "w": 1,
+        "not": [
+          "giant",
+          "dragon",
+          "troll",
+          "goblin"
+        ],
+        "forms": {
+          "short": "{given}"
+        }
+      },
+      {
+        "t": "{given} {epithet}",
+        "w": 6,
+        "races": [
+          "giant",
+          "dragon",
+          "troll",
+          "undead",
+          "goblin"
+        ],
+        "forms": {
+          "short": "{given}"
+        }
+      },
+      {
+        "t": "{given} son of {given}",
+        "w": 3,
+        "races": [
+          "giant",
+          "dwarf"
+        ],
+        "gender": "m",
+        "forms": {
+          "short": "{given}"
+        }
+      },
+      {
+        "t": "{given} daughter of {given}",
+        "w": 3,
+        "races": [
+          "giant",
+          "dwarf"
+        ],
+        "gender": "f",
+        "forms": {
+          "short": "{given}"
+        }
+      },
+      {
+        "t": "{given} {family} of {list:clan} {family}",
+        "w": 1,
+        "races": [
+          "dwarf"
+        ],
+        "forms": {
+          "short": "{given}"
+        }
+      },
+      {
+        "t": "{given} {epithet}, {epithet}",
+        "w": 2,
+        "races": [
+          "dragon"
+        ],
+        "forms": {
+          "short": "{given}"
+        }
+      }
+    ],
+    "faction": [
+      {
+        "t": "the {concept:quality,metal,element|cap} {concept:war,body,animal,craft|cap|pl}",
+        "w": 4,
+        "gloss": true,
+        "forms": {
+          "members": "{2|pl}",
+          "member": "{2}",
+          "adj": "{1} {2}",
+          "people": "the {1} {2|pl}"
+        }
+      },
+      {
+        "t": "the {family} {list:factionNoun}",
+        "w": 3,
+        "forms": {
+          "members": "{family|pl}",
+          "member": "{family}",
+          "adj": "{family}",
+          "people": "the {family|pl}"
+        }
+      },
+      {
+        "t": "the {list:factionNoun} of the {concept:element,nature,abstract,dark|cap}",
+        "w": 3,
+        "gloss": true,
+        "forms": {
+          "members": "{list|pl}",
+          "member": "{list|sg}",
+          "adj": "{concept}",
+          "people": "the {list}"
+        }
+      },
+      {
+        "t": "{list:clan} {family}",
+        "w": 4,
+        "races": [
+          "dwarf"
+        ],
+        "forms": {
+          "members": "{family|pl}",
+          "member": "{family}",
+          "adj": "{family}",
+          "people": "{list} {family}"
+        }
+      },
+      {
+        "t": "the {concept:red,black,blood,skull,iron,fang,bone,fire|cap} {list:warband}",
+        "w": 5,
+        "races": [
+          "orc",
+          "goblin",
+          "troll"
+        ],
+        "gloss": true,
+        "forms": {
+          "members": "{concept} {list}",
+          "member": "{concept} {list|sg}",
+          "adj": "{concept} {list}",
+          "people": "the {concept} {list}"
+        }
+      },
+      {
+        "t": "the {family|possessive} {list:gang}",
+        "w": 3,
+        "races": [
+          "goblin"
+        ],
+        "forms": {
+          "members": "{family|pl}",
+          "member": "{family}",
+          "adj": "{family}",
+          "people": "the {family|pl}"
+        }
+      },
+      {
+        "t": "the {list:elfOrder} of {tr:nature,element,abstract|cap}",
+        "w": 4,
+        "races": [
+          "elf",
+          "fey"
+        ],
+        "gloss": true,
+        "forms": {
+          "members": "{list} folk",
+          "member": "{list} elf",
+          "adj": "{tr}",
+          "people": "the {list}"
+        }
+      },
+      {
+        "t": "the {concept:dark,quality,element|cap} {list:cult}",
+        "w": 5,
+        "races": [
+          "undead"
+        ],
+        "gloss": true,
+        "forms": {
+          "members": "{concept} {list}",
+          "member": "{concept} cultist",
+          "adj": "{concept}",
+          "people": "the {concept} {list}"
+        }
+      },
+      {
+        "t": "the {family} {~Cousins|Kin|Table|Pantry|Society}",
+        "w": 4,
+        "races": [
+          "halfling"
+        ],
+        "forms": {
+          "members": "{family|pl}",
+          "member": "{family}",
+          "adj": "{family}",
+          "people": "the {family|pl}"
+        }
+      },
+      {
+        "t": "the {family} {~Works|Foundry|Workshop|Collective|Consortium}",
+        "w": 4,
+        "races": [
+          "gnome"
+        ],
+        "forms": {
+          "members": "{family|pl}",
+          "member": "{family}",
+          "adj": "{family}",
+          "people": "the {family|pl}"
+        }
+      },
+      {
+        "t": "the {~Brood|Hoard|Flight|Scale} of {given}",
+        "w": 5,
+        "races": [
+          "dragon"
+        ],
+        "forms": {
+          "members": "{given|possessive} brood",
+          "member": "one of {given|possessive} brood",
+          "adj": "{given}",
+          "people": "{given|possessive} brood"
+        }
+      },
+      {
+        "t": "the {~Court|Ring|Hunt|Revel} of the {concept:quality,element,nature|cap} {concept:landform,nature|cap}",
+        "w": 4,
+        "races": [
+          "fey"
+        ],
+        "gloss": true,
+        "forms": {
+          "members": "{1} courtiers",
+          "member": "{1} courtier",
+          "adj": "{1}",
+          "people": "the {1} Court"
+        }
+      },
+      {
+        "t": "the Sons of {tr:element,abstract,war|cap}",
+        "w": 2,
+        "races": [
+          "giant",
+          "troll",
+          "orc",
+          "dwarf"
+        ],
+        "gloss": true,
+        "forms": {
+          "members": "Sons of {tr}",
+          "member": "Son of {tr}",
+          "adj": "{tr}-born",
+          "people": "the Sons of {tr}"
+        }
+      }
+    ],
+    "region": [
+      {
+        "t": "the {concept:quality,element,weather|cap} {list:landform}",
+        "w": 5,
+        "gloss": true,
+        "forms": {
+          "adj": "{1} {2}",
+          "people": "{1} {2} folk"
+        }
+      },
+      {
+        "t": "{tr:nature,element,abstract|cap} {list:landform}",
+        "w": 4,
+        "gloss": true,
+        "forms": {
+          "adj": "{tr}",
+          "people": "{tr} folk"
+        }
+      },
+      {
+        "t": "{concept:metal,nature,animal,weather|cap}{concept:landform|lower}",
+        "w": 4,
+        "gloss": true,
+        "forms": {
+          "adj": "{1}{2}",
+          "people": "{1}{2} folk"
+        }
+      },
+      {
+        "t": "the {list:realm} of {tr:abstract,element,nature|cap}",
+        "w": 2,
+        "gloss": true,
+        "forms": {
+          "adj": "{tr}",
+          "people": "{tr} folk"
+        }
+      },
+      {
+        "t": "{given|possessive} {list:landform}",
+        "w": 1,
+        "forms": {
+          "adj": "{given|possessive}",
+          "people": "folk of {given|possessive} {list}"
+        }
+      }
+    ],
+    "settlement": [
+      {
+        "t": "{concept:metal,nature,animal,weather,quality|cap}{list:settlementSuffix}",
+        "w": 6,
+        "gloss": true,
+        "not": [
+          "dragon"
+        ],
+        "forms": {
+          "adj": "*",
+          "people": "* folk"
+        }
+      },
+      {
+        "t": "{tr:nature,element,abstract,craft|cap}{~hold|deep|delve|forge|gate}",
+        "w": 4,
+        "races": [
+          "dwarf"
+        ],
+        "gloss": true,
+        "forms": {
+          "adj": "*",
+          "people": "* dwarves"
+        }
+      },
+      {
+        "t": "{tr:nature,element,abstract|cap}",
+        "w": 4,
+        "races": [
+          "elf",
+          "fey",
+          "undead",
+          "dragon"
+        ],
+        "gloss": true,
+        "forms": {
+          "adj": "*",
+          "people": "* folk"
+        }
+      },
+      {
+        "t": "{concept:animal,body,dark|cap}{~pit|hole|nest|warren|den}",
+        "w": 5,
+        "races": [
+          "goblin",
+          "orc",
+          "troll"
+        ],
+        "gloss": true,
+        "forms": {
+          "adj": "*",
+          "people": "* {race.pl}"
+        }
+      },
+      {
+        "t": "{concept:home,nature,comfort|cap}{~bottom|hill|bury|hollow|end}",
+        "w": 5,
+        "races": [
+          "halfling"
+        ],
+        "gloss": true,
+        "forms": {
+          "adj": "*",
+          "people": "* folk"
+        }
+      },
+      {
+        "t": "{concept:tinker,craft|cap}{~works|town|burg|spring}",
+        "w": 5,
+        "races": [
+          "gnome"
+        ],
+        "gloss": true,
+        "forms": {
+          "adj": "*",
+          "people": "* folk"
+        }
+      },
+      {
+        "t": "{concept:landform,element|cap}-{concept:agent,role|cap}",
+        "w": 4,
+        "races": [
+          "giant"
+        ],
+        "gloss": true,
+        "forms": {
+          "adj": "*",
+          "people": "* giants"
+        }
+      }
+    ],
+    "landmark": [
+      {
+        "t": "the {concept:quality,element,animal,dark|cap} {list:landform}",
+        "w": 5,
+        "gloss": true
+      },
+      {
+        "t": "{concept:metal,nature,animal,body|cap}{list:landform|lower}",
+        "w": 4,
+        "gloss": true
+      },
+      {
+        "t": "{tr:nature,element,dark|cap} {list:water}",
+        "w": 3,
+        "gloss": true
+      },
+      {
+        "t": "the {list:landform} of {concept:abstract,dark,virtue,vice|cap}",
+        "w": 2,
+        "gloss": true
+      },
+      {
+        "t": "{given|possessive} {list:landform}",
+        "w": 1
+      }
+    ],
+    "object": [
+      {
+        "t": "{concept:element,weather,dark,animal|cap}{list:weaponNoun}",
+        "w": 5,
+        "gloss": true
+      },
+      {
+        "t": "the {list:artifactType} of {concept:abstract,virtue,vice,dark,element|cap}",
+        "w": 4,
+        "gloss": true
+      },
+      {
+        "t": "{given|possessive} {concept:abstract,war,dark|cap}",
+        "w": 3,
+        "gloss": true
+      },
+      {
+        "t": "{tr:element,abstract,war|cap}",
+        "w": 2,
+        "gloss": true,
+        "not": [
+          "human",
+          "halfling"
+        ]
+      },
+      {
+        "t": "{concept:quality|cap} {concept:war,craft|cap} of {given}",
+        "w": 1,
+        "gloss": true
+      },
+      {
+        "t": "the {concept:quality|cap} {list:artifactType}",
+        "w": 2,
+        "gloss": true
+      }
+    ],
+    "motto": [
+      {
+        "t": "{concept:element,dark,abstract|cap} {list:mottoVerb}.",
+        "w": 4,
+        "gloss": true
+      },
+      {
+        "t": "{concept:virtue,vice|cap} before {concept:virtue,vice}.",
+        "w": 3,
+        "gloss": true
+      },
+      {
+        "t": "By {concept:element,metal} and {concept:element,metal}.",
+        "w": 3,
+        "gloss": true
+      },
+      {
+        "t": "No {concept:abstract,virtue} without {concept:abstract,dark,vice}.",
+        "w": 2,
+        "gloss": true
+      },
+      {
+        "t": "The {concept:landform,nature} {list:mottoVerb}.",
+        "w": 2,
+        "gloss": true
+      },
+      {
+        "t": "{concept:abstract,dark|cap} pays for {concept:abstract,dark}.",
+        "w": 2,
+        "gloss": true
+      },
+      {
+        "t": "We are the {concept:war,animal,body|cap|pl}.",
+        "w": 2,
+        "gloss": true
+      }
+    ]
+  }
+}

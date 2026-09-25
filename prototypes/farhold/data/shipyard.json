@@ -1,0 +1,375 @@
+{
+  "schema": 1,
+  "_doc": "The gate in BUILDING_EXPANSION.md \u00a79: you do not start with a ship and you cannot buy one. The four subsystems \u2014 hull, drive, tanks, avionics \u2014 are MADE by the refining chain (data/refining.json's `build_hull`, `build_drive`, `build_tanks`, `build_avionics`, each out of a different tier-3 material, \u00a79.5, and the avionics carrying the rare element, \u00a79.6). This file is the layer ABOVE that: which finished parts a ship of each tier needs, the pad it is put together on, the fuel every flight burns, the warp coil, the orbital yard, and what a city charges somebody who would rather not build any of it. Read by js/shipyard.js. Every id here comes from data/resources.json.",
+  "_balanceDoc": "\u00a79.20 asks for the whole gate to be one tunable block in data/balance.json. That file belonged to another pair of hands this round, so the block lives here instead and js/shipyard.js takes a `balance` override: if `balance.shipGate` ever appears, it wins over everything below, field by field.",
+  "gate": {
+    "version": 1,
+    "_versionDoc": "Stamped into player.vehicles.shipyard when a character is made. A save with no stamp was made before the gate existed, so it keeps the ship it has and its four subsystems are marked built \u2014 \u00a79.19, nobody mid-run loses the ship they have been flying."
+  },
+  "_subsystemDoc": "Three tiers each, and a ship needs all four at its own tier. Tier 1 IS the part the assembler makes; tiers 2 and 3 are that part again with real reinforcement on top, which is why a hauler is a season of work and a lander is a fortnight. `signature` is the tier-3 material that part is mostly made of and no other part uses \u2014 that is \u00a79.5, and you can check it against data/refining.json rather than taking this file's word for it.",
+  "subsystems": {
+    "hull": {
+      "id": "hull",
+      "name": "Hull",
+      "part": "ship_hull",
+      "signature": "composite_plate",
+      "station": "assembler",
+      "desc": "Frame, skin and the seals between them. It is what keeps the outside outside.",
+      "tiers": [
+        {
+          "tier": 1,
+          "name": "Patched Hull",
+          "cost": {
+            "ship_hull": 1
+          },
+          "hours": 10
+        },
+        {
+          "tier": 2,
+          "name": "Welded Hull",
+          "cost": {
+            "ship_hull": 1,
+            "composite_plate": 4,
+            "machine_part": 4
+          },
+          "hours": 20
+        },
+        {
+          "tier": 3,
+          "name": "Braced Hull",
+          "cost": {
+            "ship_hull": 2,
+            "composite_plate": 8,
+            "tempered_alloy": 6
+          },
+          "hours": 36
+        }
+      ]
+    },
+    "drive": {
+      "id": "drive",
+      "name": "Drive",
+      "part": "ship_drive",
+      "signature": "aether_cell",
+      "station": "assembler",
+      "desc": "The engine and the cell that charges it. Most of the noise and all of the thrust.",
+      "tiers": [
+        {
+          "tier": 1,
+          "name": "Salvaged Drive",
+          "cost": {
+            "ship_drive": 1
+          },
+          "hours": 14
+        },
+        {
+          "tier": 2,
+          "name": "Tuned Drive",
+          "cost": {
+            "ship_drive": 1,
+            "aether_cell": 1,
+            "machine_part": 8
+          },
+          "hours": 26
+        },
+        {
+          "tier": 3,
+          "name": "Heavy Drive",
+          "cost": {
+            "ship_drive": 2,
+            "aether_cell": 3,
+            "tempered_alloy": 8
+          },
+          "hours": 44
+        }
+      ]
+    },
+    "tanks": {
+      "id": "tanks",
+      "name": "Tanks",
+      "part": "ship_tanks",
+      "signature": "steel_ingot",
+      "station": "assembler",
+      "desc": "Where the fuel sits and, more to the point, stays. A tank that leaks is a short flight.",
+      "tiers": [
+        {
+          "tier": 1,
+          "name": "Strapped Tanks",
+          "cost": {
+            "ship_tanks": 1
+          },
+          "hours": 8
+        },
+        {
+          "tier": 2,
+          "name": "Lined Tanks",
+          "cost": {
+            "ship_tanks": 1,
+            "steel_ingot": 12,
+            "composite_plate": 2
+          },
+          "hours": 16
+        },
+        {
+          "tier": 3,
+          "name": "Deep Tanks",
+          "cost": {
+            "ship_tanks": 2,
+            "steel_ingot": 24,
+            "composite_plate": 6
+          },
+          "hours": 30
+        }
+      ],
+      "capacity": [
+        18,
+        34,
+        60
+      ],
+      "_capacityDoc": "Units of Lift Fuel the ship can hold at each tier. A lander's tanks hold two flights; deep tanks hold a tour."
+    },
+    "avionics": {
+      "id": "avionics",
+      "name": "Avionics",
+      "part": "ship_avionics",
+      "signature": "control_board",
+      "station": "assembler",
+      "rare": true,
+      "_rareDoc": "\u00a79.6 lives in data/refining.json's `build_avionics`, which carries `rareInput: 4` \u2014 a COUNT, not an id, so js/refine.js spends whichever rare element the planet you are standing on actually holds. That is what stops a seed hard-locking a run: no world needs a particular element, it just needs one.",
+      "desc": "How the ship knows which way is up, where the pad is, and how far it is to the next world.",
+      "tiers": [
+        {
+          "tier": 1,
+          "name": "Bare Avionics",
+          "cost": {
+            "ship_avionics": 1
+          },
+          "hours": 7
+        },
+        {
+          "tier": 2,
+          "name": "Charted Avionics",
+          "cost": {
+            "ship_avionics": 1,
+            "control_board": 4,
+            "lens": 2
+          },
+          "hours": 15
+        },
+        {
+          "tier": 3,
+          "name": "Deepfield Avionics",
+          "cost": {
+            "ship_avionics": 2,
+            "control_board": 8,
+            "focuser": 2
+          },
+          "hours": 28
+        }
+      ]
+    },
+    "warp": {
+      "id": "warp",
+      "name": "Warp Coil",
+      "part": "warp_core",
+      "signature": "warp_core",
+      "station": "assembler",
+      "optional": true,
+      "rare": true,
+      "desc": "\u00a79.15: a coil, not a ship. Without it you fly between the worlds of one star; with it you leave the star.",
+      "_coreDoc": "`build_warp_core` carries its own `rareInput: 6` on top of the avionics' four, and its note says it is meant to be a SECOND world's element. Which world that is is js/refine.js's business, not this file's \u2014 all the gate does is refuse to warp without the coil.",
+      "tiers": [
+        {
+          "tier": 1,
+          "name": "Warp Coil",
+          "cost": {
+            "warp_core": 1,
+            "composite_plate": 4,
+            "machine_part": 8
+          },
+          "hours": 40
+        }
+      ]
+    }
+  },
+  "_shipDoc": "\u00a79.11: the three hulls that used to be shop stock are buildable tiers now. `needs` is the tier each subsystem must be at; `assembly` is what it costs to put them together on the pad.",
+  "ships": {
+    "lander": {
+      "key": "lander",
+      "tier": 1,
+      "needs": {
+        "hull": 1,
+        "drive": 1,
+        "tanks": 1,
+        "avionics": 1
+      },
+      "assembly": {
+        "rope": 6,
+        "machine_part": 4,
+        "steel_ingot": 6
+      },
+      "hours": 12,
+      "fuel": {
+        "launch": 1.0,
+        "land": 1.0,
+        "jump": 1.0,
+        "warp": 1.0
+      }
+    },
+    "runner": {
+      "key": "runner",
+      "tier": 2,
+      "needs": {
+        "hull": 2,
+        "drive": 2,
+        "tanks": 2,
+        "avionics": 2
+      },
+      "assembly": {
+        "rope": 8,
+        "machine_part": 10,
+        "composite_plate": 3
+      },
+      "hours": 22,
+      "fuel": {
+        "launch": 0.8,
+        "land": 0.8,
+        "jump": 0.9,
+        "warp": 1.1
+      }
+    },
+    "hauler": {
+      "key": "hauler",
+      "tier": 3,
+      "needs": {
+        "hull": 3,
+        "drive": 3,
+        "tanks": 3,
+        "avionics": 3
+      },
+      "assembly": {
+        "rope": 10,
+        "machine_part": 16,
+        "composite_plate": 8
+      },
+      "hours": 40,
+      "fuel": {
+        "launch": 1.5,
+        "land": 1.3,
+        "jump": 0.75,
+        "warp": 0.7
+      }
+    }
+  },
+  "_fuelDoc": "\u00a79.7 and \u00a79.10: fuel is a consumable and it is per FLIGHT, not per launch, so the industry stays relevant after the first time the sky opens. Units of Lift Fuel, multiplied by the ship's own row above. data/refining.json has two ways to make it \u2014 one for a world with gas vents and one for a world with sulphur \u2014 which is the other half of \"no seed can wall you in\".",
+  "fuel": {
+    "id": "lift_fuel",
+    "legs": {
+      "launch": 1,
+      "land": 1,
+      "jump": 1,
+      "warp": 1
+    },
+    "_legsDoc": "R16: every leg costs one unit. It used to be launch 6 + a held-back landing 3, so the first flight demanded nine and the answer to \"can I go to space yet\" was another afternoon at the synthesiser. The gate that means anything is the SHIP — four subsystems, a pad, and a warp coil before you leave the star. Fuel is the reminder that the industry exists, not the wall.",
+    "reserve": 1,
+    "_reserveDoc": "A launch is refused unless there is enough left over to put the ship down again. Stranding a player in orbit with a dry tank is a loss they cannot undo, and that is not a difficulty setting, it is a bug.",
+    "capacity": 60,
+    "_capacityDoc": "How much Lift Fuel the tanks hold. Ten launches and landings for a lander, which is a long trip and not an afternoon. `refuel` will not overfill it."
+  },
+  "_padDoc": "\u00a79.8: the pad is a structure, and the terrain tools exist so that you can make the ground flat enough for it. js/build.js owns placing it; these are the numbers it should read.",
+  "pad": {
+    "id": "launch_pad",
+    "name": "Launch Pad",
+    "cost": {
+      "cut_stone": 40,
+      "gravel": 20,
+      "steel_ingot": 8,
+      "machine_part": 6
+    },
+    "hours": 18,
+    "flatRadius": 12,
+    "maxSlope": 0.04,
+    "clearance": 30,
+    "power": 20,
+    "desc": "A levelled apron of cut stone with a burn ring in the middle. It is also where the ship comes back to (\u00a79.13)."
+  },
+  "_stationDoc": "\u00a79.15 and the far end of the ladder: an orbital yard. Four modules, each one a tier-3 craft that has to be LAUNCHED into orbit, which means a hauler, a pad and a lot of fuel. Finished, it refuels a ship without a synthesiser on the ground, it is a pad you can return to from anywhere in the system, and it is where an interstellar run is fitted out. A stated goal with stated requirements rather than a second game \u2014 everything it needs already exists in the chain.",
+  "station": {
+    "id": "orbital_yard",
+    "name": "Orbital Yard",
+    "requires": {
+      "ship": "hauler",
+      "pad": true,
+      "warp": false
+    },
+    "fuelPerModule": 14,
+    "modules": [
+      {
+        "id": "spine",
+        "name": "Spine and Airlock",
+        "cost": {
+          "composite_plate": 8,
+          "machine_part": 18,
+          "control_board": 4,
+          "steel_ingot": 20
+        },
+        "hours": 30,
+        "desc": "A corridor with a door at each end. Everything else bolts to it."
+      },
+      {
+        "id": "ring",
+        "name": "Habitat Ring",
+        "cost": {
+          "composite_plate": 12,
+          "glass": 16,
+          "machine_part": 16,
+          "cloth": 20
+        },
+        "hours": 44,
+        "desc": "Somewhere to sleep that is not a seat. It is also the only window in the system."
+      },
+      {
+        "id": "cradle",
+        "name": "Ship Cradle",
+        "cost": {
+          "tempered_alloy": 10,
+          "machine_part": 20,
+          "aether_cell": 2,
+          "control_board": 6
+        },
+        "hours": 40,
+        "desc": "Clamps, a fuel arm and a crane. A ship parked here is repaired and fuelled without ever landing."
+      },
+      {
+        "id": "array",
+        "name": "Power Array",
+        "cost": {
+          "glass": 24,
+          "copper_ingot": 30,
+          "aether_cell": 3,
+          "control_board": 8
+        },
+        "hours": 36,
+        "desc": "Panels and cells. Nothing above works without it, so it is the one people build first and the one this list puts last."
+      }
+    ],
+    "grants": {
+      "refuel": true,
+      "returnPad": true,
+      "warpFitting": true,
+      "desc": "Refuel in orbit, return to it from anywhere in the system, and fit the warp coil without a refinery on the ground."
+    }
+  },
+  "_marketDoc": "\u00a79.18: skipping is possible and it is meant to hurt. A city \u2014 not a village, not a camp \u2014 will sell a finished subsystem at a price that assumes you are desperate. Buying is never cheaper than building, and the point of it is that a bad seed can never wall a player in.",
+  "market": {
+    "minSettlement": "city",
+    "parts": {
+      "hull": 9000,
+      "drive": 14000,
+      "tanks": 7000,
+      "avionics": 11000
+    },
+    "fuel": 260,
+    "_fuelPriceDoc": "Per unit of Lift Fuel, so a launch bought over the counter is about 1,600 gold. Enough to get home once; not a way to live."
+  }
+}

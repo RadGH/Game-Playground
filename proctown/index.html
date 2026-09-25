@@ -1,0 +1,59 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../shared/style.css">
+<link rel="stylesheet" href="style.css">
+<title>Procedural Towns</title>
+
+<header class="page-head">
+  <h1>Procedural Towns</h1>
+  <p class="lede">The one true town planner. <code>prototypes/farhold/</code> imports
+    <code>js/townplan.js</code> from here, so a town tuned on this page is the town you walk into in
+    the game.</p>
+</header>
+
+<main class="town-wrap">
+  <section class="town-panel">
+    <h2>The town</h2>
+    <label>Seed <input id="seed" type="number" value="7" min="1"></label>
+    <div class="row">
+      <button id="prev" class="btn">&larr;</button>
+      <button id="reroll" class="btn primary">Reroll</button>
+      <button id="next" class="btn">&rarr;</button>
+    </div>
+    <label>Culture <select id="culture"></select></label>
+    <label>Size <input id="size" type="range" min="1" max="6" value="4"><span id="size-val">4</span></label>
+
+    <h2>Overlays</h2>
+    <label class="chk"><input type="checkbox" id="ov-plots" checked> Plots and districts</label>
+    <label class="chk"><input type="checkbox" id="ov-blocks"> Blocks</label>
+    <label class="chk"><input type="checkbox" id="ov-frontage"> Frontage (which way the door faces)</label>
+    <label class="chk"><input type="checkbox" id="ov-compare"> Compare four seeds</label>
+
+    <h2>Find</h2>
+    <label>Highlight <input id="find" type="text" placeholder="inn, forge, hall…"></label>
+
+    <h2>Checks</h2>
+    <div id="validate" class="verdict"></div>
+    <button id="batch" class="btn">Sameness report (200 towns)</button>
+    <pre id="report" class="report"></pre>
+
+    <h2>The building kit</h2>
+    <div class="kit-links">
+      <a href="kit.html">Kit gallery &rarr;</a>
+    </div>
+
+    <h2>Plan</h2>
+    <div class="row">
+      <button id="copy" class="btn">Copy JSON</button>
+      <button id="paste" class="btn">Paste JSON</button>
+    </div>
+  </section>
+
+  <section class="town-stage">
+    <div id="stage"></div>
+    <div id="stats" class="stats"></div>
+  </section>
+</main>
+
+<a class="back" href="../index.html">&larr; Playground</a>
+<script type="module" src="js/app.js"></script>

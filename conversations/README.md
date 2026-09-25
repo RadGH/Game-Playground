@@ -1,0 +1,36 @@
+# Conversations (`conversations/`)
+
+Why: the Party Quest camp talk was a random string of intents. A character mentioned a memory once and nobody answered it.
+This experiment adds **structure**: a conversation is a small script (a *topic*) with roles, and it only runs when the
+party actually has the facts it talks about.
+
+## How it works
+- `data/topics.json` holds topics: `{ id, tags, weight, requires: [...], lines: [{ role, to?, optional?, variants: [{ t, cond? }] }] }`.
+- Roles: `asker` opens, `answerer` is the one who has the memory/gear the topic is about, `third` chimes in (optional lines are dropped if there is no third speaker).
+- Requirements are checked against a `facts` object and, when satisfied, produce bindings for the templates:
+  - `memory: 'combat'` (+ `maxAgeHours`, `minAgeHours`, `details: { wounded: true }`, `detailsNot`) → `memory.*`, `foe`, `place`, `item` entities from the memory bindings. `minAgeHours` is what makes a **callback** possible: the same memory, brought up again days later, as its own topic.
+  - `bindingIs: { by: 'answerer' }` on a memory requirement casts the other side of it. "The hero who was revived thanks the one who revived them" needs the person named in the memory's `by` binding to *be* the answerer, not just anybody at the fire — casting keeps trying orderings until that holds. See the `revive_thanks` / `revive_thanks_awkward` / `revive_callback` topics.
+  - `gear: { minKills, delta: 'better'|'worse', maxDaysAgo, replaced, slot }` → `weapon`, `gear.{kills,damage,delta,deltaAbs,replaced,daysAgo}` (kill counts come from the damage meter's per-item stats; deltas from the game's loot log which records the score difference against the item it replaced).
+  - `bag: { minDaysAgo }` → items found but never equipped (`bagItem`, `bag.daysAgo`).
+  - `stats: { damage: 'top' | number, fights, kills, healing, downs }` from the meter.
+  - `party: { rations: { max: 2 }, act: { min: 2 }, vehicle, nextBoss, companion }`, `trait`, `notTrait`, `relation: { to, min, max }`.
+- Casting tries every speaker as the answerer; the first that satisfies the requirements gets the role, the others become asker and third.
+- Variants can carry a `cond` (`has('gruff')`, `gear.kills>=2`, `memory.wounded===true`, `party.rations===0`).
+- Every line is spoken through `lingo.speak()` so the speaker's prefix/suffix/tics/formality apply and a `speech` string (respelled names) comes back for the voice engine.
+- `factsFrom({ now, day, banks, heroes, meter, lootLog, party, relations })` builds the facts object from a game's own data.
+- `conv.talk(speakers, facts, { tags, rng })` picks an eligible topic (weighted; topics with more requirements are preferred because they are more specific; the last 8 topics are avoided) and performs it. `conv.eligible()` lists what could run.
+
+## Content
+63 topics with 2–4 variants per line (recaps of a fight, the worst moment, weapon kill-count brag, top-damage ribbing, going down, new gear better/worse than the replaced piece, items left in the bag, loot found, level ups, the road, low rations, exhaustion, the wagon, last night's attack, opinions warm/cold, Silas doubts, what the Veil is, the boss ahead, the companion, the sky, grief, a jolly song, scholar lore, the healer's tally). Round 10 added callbacks (the engine's host records a `conversation` memory of what was said; `callback_*` topics require one and quote it), nemesis/named-enemy topics, companion topics (kills, hurt, new), quest topics, story-cast topics (Kaela, Marek, Yssira, Emberglen), supplies/weather/gold/torches, gear (armour, legendary items), healer thanks, kill streaks, watch order, dreams, romance, tales and bets. Emberveil 2 and Party Quest both use the engine at camp.
+
+## Threads, rewards and the variety generator (round 11)
+- **Threads** (`data/threads.json`, `Threads` class): conversations that span several rests. Stage 0 starts when the thread's requirements pass; each later stage waits for `after` — days since the previous stage, nodes travelled since it, or an objective the host reports done (`town`, `named`, `rest`…). The same answerer carries the thread. Stages can carry a `reward`. Six threads ship: a gear promise checked in town, a grudge hunt that settles when a named enemy falls, a scholar's three-night reading, a homesick letter and its reply, a watch debt, a kill-count wager.
+- **Rewards on topics**: `reward: { xp, gold, talent, item, supply, companion, relation, relationIf, buff, text, who }` — the host applies them (Emberveil 2's `applyTopicReward`). Twelve **rare** topics (tag `rare`, low weight) are fun or rewarding: a coin in a boot, a falling star, a wandering bard, a ghost story, a stray wolf pup, a dream that grants a talent point, a lost merchant's ring, a whisper from the Veil, an old map, arm wrestling, a healer's lesson, a singing contest.
+- **Variety generator**: `expandVariants(topics, { perLine })` multiplies every line with trait-conditioned openers and closers (`OPENERS`/`CLOSERS`), so a gruff speaker gets "Hn. …" and a scholar "Consider: …". Emberveil 2 runs it at load (about 3× the lines).
+
+## Demo
+`index.html`: toggle facts and watch the eligible topic list change, then generate conversations.
+
+## Limits / next
+- Lines are English templates; a topic is 3–5 turns. Longer arcs (a topic that continues the next night) need a "thread" field — not built.
+- Callbacks need the host to call `rememberConversation()` (Emberveil 2 does) so a `conversation` memory exists; Party Quest does not record them yet.

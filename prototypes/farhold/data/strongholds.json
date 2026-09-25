@@ -1,0 +1,452 @@
+{
+  "_doc": "Enemy structures. The ask was 'add enemy structures like castles and forts and camps' and 'bandit camps … should have treasure chests to loot and bosses / quests tied to them'. So every entry here declares three things a player can take away — a named boss, a chest whose grade goes up with the tier, and a `gives` block of reward hooks — and `tests/poi.test.js` fails if any of them is missing. `plan` names a layout in data/setpieces.json; `on` says which world-map nodes it may sit on, which is what keeps a garrison at a pass or a junction instead of on a coordinate in an empty field. Original names only.",
+  "_schema": {
+    "tier": "1 camp, 2 outpost, 3 fort, 4 castle — drives the chest grade, the garrison and how far off you can see it",
+    "on": "world node types it may claim: landmark, pass, dungeon, crossing, road, junction. `road` and `junction` are worked out from world.roads, not from a node.",
+    "minBand": "the lowest zone band that may hold one. A castle in the starting valley is not a landmark, it is a wall.",
+    "garrison": "{ count: [min,max], rankBonus, prefer: { roles, families } } — what js/sites.js asks the enemy field for",
+    "boss": "{ rank, modifiers, epithets } — every one of these gets a Name Forge given name and an epithet from this list",
+    "chest": "{ kind } — a key from balance.json's chests.kinds",
+    "gives": "the reward hooks. At least one must be present or the POI test fails.",
+    "icon": "8.17 — the map glyph for this kind, so a fort and a lair are not the same dot. js/sites.js puts it on `site.pin.glyph`."
+  },
+  "_chanceDoc": "How often a slot of each type grows a garrison rather than a landmark. A road has three slots and a crossroads turns up every third shared cell, so those two have to stay low or the road becomes a gauntlet; a pass or a lair node is a place somebody would fortify, so those are close to even.",
+  "chance": {
+    "landmark": 0.42,
+    "pass": 0.55,
+    "dungeon": 0.55,
+    "crossing": 0.32,
+    "road": 0.14,
+    "junction": 0.4
+  },
+  "kinds": [
+    {
+      "kind": "bandit_camp",
+      "name": "Bandit Camp",
+      "plan": "bandit_camp",
+      "tier": 1,
+      "weight": 14,
+      "on": [
+        "landmark",
+        "road"
+      ],
+      "minBand": 1,
+      "faction": "ashen_pact",
+      "blurb": "Tents round a fire behind a ring of stakes, and horses nobody paid for.",
+      "garrison": {
+        "count": [
+          4,
+          6
+        ],
+        "rankBonus": 2,
+        "prefer": {
+          "families": [
+            "humanoid",
+            "beast"
+          ]
+        }
+      },
+      "boss": {
+        "rank": "champion",
+        "modifiers": 1,
+        "epithets": [
+          "the Stake",
+          "Rope-Hand",
+          "Camp-Taker",
+          "the Short Knife",
+          "Tollbreaker"
+        ]
+      },
+      "chest": {
+        "kind": "iron"
+      },
+      "gives": {
+        "loot": "magic",
+        "standing": "ashen_pact",
+        "xp": 40,
+        "clears": true,
+        "uses": [
+          "push_them_out",
+          "the_grudge"
+        ]
+      },
+      "icon": "camp"
+    },
+    {
+      "kind": "raider_stockade",
+      "name": "Raider Stockade",
+      "plan": "raider_stockade",
+      "tier": 2,
+      "weight": 9,
+      "on": [
+        "landmark",
+        "pass",
+        "road"
+      ],
+      "minBand": 2,
+      "faction": "ashen_pact",
+      "blurb": "A stockade with two lookouts on it and cages inside the gate.",
+      "garrison": {
+        "count": [
+          6,
+          9
+        ],
+        "rankBonus": 2,
+        "prefer": {
+          "families": [
+            "humanoid"
+          ]
+        }
+      },
+      "boss": {
+        "rank": "champion",
+        "modifiers": 2,
+        "epithets": [
+          "the Gate-Keeper",
+          "Chainwright",
+          "the Long Count",
+          "Stockade-Born"
+        ]
+      },
+      "chest": {
+        "kind": "gilded"
+      },
+      "gives": {
+        "loot": "rare",
+        "prisoners": 2,
+        "standing": "ashen_pact",
+        "xp": 90,
+        "clears": true,
+        "uses": [
+          "push_them_out",
+          "someones_boy"
+        ]
+      },
+      "icon": "stockade"
+    },
+    {
+      "kind": "watchtower_hold",
+      "name": "Held Watchtower",
+      "plan": "watchtower_hold",
+      "tier": 2,
+      "weight": 12,
+      "on": [
+        "road",
+        "junction",
+        "pass"
+      ],
+      "minBand": 1,
+      "faction": "stonecount",
+      "blurb": "Somebody else's tower, with somebody else's flag on it.",
+      "garrison": {
+        "count": [
+          3,
+          5
+        ],
+        "rankBonus": 1,
+        "prefer": {
+          "roles": [
+            "archer",
+            "skirmisher",
+            "caster"
+          ]
+        }
+      },
+      "boss": {
+        "rank": "champion",
+        "modifiers": 1,
+        "epithets": [
+          "the Topmost",
+          "Ladderhand",
+          "the Watch",
+          "Flag-Cutter"
+        ]
+      },
+      "chest": {
+        "kind": "iron"
+      },
+      "gives": {
+        "revealZone": true,
+        "loot": "magic",
+        "standing": "stonecount",
+        "xp": 55,
+        "clears": true,
+        "uses": [
+          "pay_the_toll"
+        ]
+      },
+      "icon": "tower"
+    },
+    {
+      "kind": "border_fort",
+      "name": "Fort",
+      "plan": "border_fort",
+      "tier": 3,
+      "weight": 7,
+      "on": [
+        "pass",
+        "junction",
+        "crossing"
+      ],
+      "minBand": 2,
+      "faction": "wardens_reach",
+      "blurb": "A curtain of wall, four corner towers and a gate that is shut.",
+      "garrison": {
+        "count": [
+          8,
+          12
+        ],
+        "rankBonus": 2,
+        "prefer": {
+          "families": [
+            "humanoid",
+            "construct"
+          ]
+        }
+      },
+      "boss": {
+        "rank": "rare",
+        "modifiers": 2,
+        "epithets": [
+          "the Keeper of the Gate",
+          "Wallsworn",
+          "the Shut Door",
+          "Iron Muster"
+        ]
+      },
+      "chest": {
+        "kind": "gilded"
+      },
+      "gives": {
+        "loot": "rare",
+        "prisoners": 1,
+        "standing": "wardens_reach",
+        "xp": 180,
+        "clears": true,
+        "revealZone": true,
+        "uses": [
+          "push_them_out",
+          "the_claim"
+        ]
+      },
+      "icon": "fort"
+    },
+    {
+      "kind": "castle",
+      "name": "Castle",
+      "plan": "castle",
+      "tier": 4,
+      "weight": 3,
+      "on": [
+        "pass",
+        "junction",
+        "landmark"
+      ],
+      "minBand": 3,
+      "faction": "stonecount",
+      "blurb": "Two rings of wall, six towers and a keep you can see from the next valley.",
+      "garrison": {
+        "count": [
+          10,
+          14
+        ],
+        "rankBonus": 3,
+        "prefer": {
+          "families": [
+            "humanoid",
+            "construct",
+            "undead"
+          ]
+        }
+      },
+      "boss": {
+        "rank": "rare",
+        "modifiers": 3,
+        "epithets": [
+          "of the High Seat",
+          "the Last Count",
+          "Crownless",
+          "the Keep Itself"
+        ]
+      },
+      "chest": {
+        "kind": "warded"
+      },
+      "gives": {
+        "loot": "legendary",
+        "prisoners": 2,
+        "opensDungeon": true,
+        "standing": "stonecount",
+        "xp": 400,
+        "clears": true,
+        "uses": [
+          "push_them_out",
+          "the_grudge"
+        ]
+      },
+      "icon": "castle"
+    },
+    {
+      "kind": "cult_circle",
+      "name": "Cult Circle",
+      "plan": "cult_circle",
+      "tier": 3,
+      "weight": 6,
+      "on": [
+        "landmark",
+        "dungeon"
+      ],
+      "minBand": 2,
+      "faction": "hollowed",
+      "blurb": "Nine stones, four fires and a slab that is wet in the middle of a dry season.",
+      "garrison": {
+        "count": [
+          6,
+          10
+        ],
+        "rankBonus": 2,
+        "prefer": {
+          "roles": [
+            "caster",
+            "leader"
+          ],
+          "families": [
+            "humanoid",
+            "undead"
+          ]
+        }
+      },
+      "boss": {
+        "rank": "rare",
+        "modifiers": 2,
+        "epithets": [
+          "who Reads the Slab",
+          "the Ninth Stone",
+          "Hollow-Throat",
+          "the Long Vigil"
+        ]
+      },
+      "chest": {
+        "kind": "gilded"
+      },
+      "gives": {
+        "loot": "rare",
+        "prisoners": 3,
+        "perkPoint": 1,
+        "standing": "hollowed",
+        "xp": 220,
+        "clears": true,
+        "uses": [
+          "the_wake",
+          "standing_stone"
+        ]
+      },
+      "icon": "cult"
+    },
+    {
+      "kind": "beast_lair",
+      "name": "Beast Lair",
+      "plan": "beast_lair",
+      "tier": 3,
+      "weight": 8,
+      "on": [
+        "dungeon",
+        "landmark"
+      ],
+      "minBand": 2,
+      "faction": null,
+      "blurb": "A hole in a bank, a bone field around it, and a path worn flat by something heavy.",
+      "garrison": {
+        "count": [
+          3,
+          6
+        ],
+        "rankBonus": 2,
+        "prefer": {
+          "families": [
+            "beast",
+            "dragonkin"
+          ]
+        }
+      },
+      "boss": {
+        "rank": "boss",
+        "modifiers": 2,
+        "epithets": [
+          "the Heavy",
+          "Den-Mother",
+          "the Worn Path",
+          "Bonefield"
+        ]
+      },
+      "chest": {
+        "kind": "gilded"
+      },
+      "gives": {
+        "loot": "rare",
+        "callsBeast": "boss",
+        "xp": 240,
+        "clears": true,
+        "uses": [
+          "thin_the_pack",
+          "the_grudge"
+        ]
+      },
+      "icon": "lair"
+    },
+    {
+      "kind": "siege_camp",
+      "name": "Siege Camp",
+      "plan": "siege_camp",
+      "tier": 3,
+      "weight": 5,
+      "on": [
+        "road",
+        "junction"
+      ],
+      "minBand": 2,
+      "nearSettlement": true,
+      "faction": "ashen_pact",
+      "blurb": "Eight tents, three engines pointed the wrong way for you, and a town a mile off that has stopped opening its gate.",
+      "garrison": {
+        "count": [
+          8,
+          11
+        ],
+        "rankBonus": 2,
+        "prefer": {
+          "families": [
+            "humanoid"
+          ]
+        }
+      },
+      "boss": {
+        "rank": "rare",
+        "modifiers": 2,
+        "epithets": [
+          "the Engineer",
+          "who Waits at the Wall",
+          "Gate-Breaker",
+          "the Third Week"
+        ]
+      },
+      "chest": {
+        "kind": "gilded"
+      },
+      "gives": {
+        "loot": "rare",
+        "prisoners": 1,
+        "standing": "ashen_pact",
+        "liftsSiege": true,
+        "xp": 200,
+        "clears": true,
+        "uses": [
+          "the_claim",
+          "push_them_out"
+        ]
+      },
+      "icon": "siege"
+    }
+  ],
+  "_r18Uses": "R18 — the `uses` lists say which job frames a place can host, and were read by NOTHING; js/jobgen.js now prefers a frame a nearby landmark uses. Three of the eleven ids named no frame at all: `burn_it_out` -> push_them_out, `cull` -> thin_the_pack, and `hold_the_line`, which is a MERCENARY ABILITY id from data/mercenaries.json rather than a frame -> the_claim. A guard test now fails on any `uses` id that is not a real frame, so the join cannot dangle again."
+}

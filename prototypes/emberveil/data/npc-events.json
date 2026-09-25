@@ -1,0 +1,4461 @@
+{
+ "RECURRING_NPC_EVENTS": {
+  "iris_corruption_notes": {
+   "id": "iris_corruption_notes",
+   "bg": "forest",
+   "npcName": "Iris Vael",
+   "npcPortrait": "images/openai_v2/iris_vael_portrait.png",
+   "npcAppearance": "iris_vael",
+   "showPartyOnGrid": true,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Don't move — there's a ghoul-tooth wedged under the moss right where your boot is. Step back. Slowly."
+      },
+      {
+       "speaker": "hero",
+       "text": "You always greet travelers this way?"
+      },
+      {
+       "speaker": "npc",
+       "text": "Only the ones I'd like to keep alive long enough to question. Iris Vael — I catalogue what the Veil-rot does to a land before the land forgets it ever had a shape."
+      },
+      {
+       "speaker": "companion",
+       "companionIndex": 1,
+       "text": "\"She's scribbling in three notebooks at once,\" $name mutters. \"Either she's mad or she's the most useful person we've met all week.\""
+      },
+      {
+       "speaker": "npc",
+       "text": "Useful, I'd hope. There's a corruption pattern spreading west of here in concentric rings. I need a second pair of eyes — and a second pair of swords, ideally, because the ghouls don't much like being measured."
+      }
+     ],
+     "choices": [
+      {
+       "text": "[INT 11] Skim her notebook — see if the pattern's real.",
+       "skillCheck": {
+        "stat": "INT",
+        "dc": 11
+       },
+       "outcomes": {
+        "pass": "pattern_real",
+        "fail": "pattern_blur"
+       }
+      },
+      {
+       "text": "[WIS 10] Sense the corruption yourself.",
+       "skillCheck": {
+        "stat": "WIS",
+        "dc": 10
+       },
+       "outcomes": {
+        "pass": "wis_sense",
+        "fail": "pattern_blur"
+       }
+      },
+      {
+       "text": "Help her gather a sample.",
+       "next": "ambush"
+      },
+      {
+       "text": "We don't have time for fieldwork.",
+       "outcome": "decline"
+      }
+     ]
+    },
+    "pattern_real": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "These rings line up with the ley-marks under the old Emberglen wall."
+      },
+      {
+       "speaker": "npc",
+       "text": "You read fast. Yes — the rot is following the lines the wardens drew to bind it. Whoever broke the Veil knew exactly where to push."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Help her get the sample anyway.",
+       "next": "ambush"
+      }
+     ]
+    },
+    "wis_sense": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "(The air tastes wrong here — like iron and old smoke. The rot is leaning toward something, not just spreading.)"
+      },
+      {
+       "speaker": "npc",
+       "text": "You feel it. Good. Most people don't, and the ones who do tend to vanish inside a fortnight. Stay close to me."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Lead the way.",
+       "next": "ambush"
+      }
+     ]
+    },
+    "pattern_blur": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "It's subtle. You'll see it when we're closer. Try not to step on anything that hisses."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Move with her.",
+       "next": "ambush"
+      }
+     ]
+    },
+    "ambush": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "The sample's in the hollow ahead — just under the — oh. Oh no."
+      },
+      {
+       "speaker": "companion",
+       "companionIndex": 1,
+       "text": "\"$name, behind her!\" Three corrupted goblins peel out of the underbrush, teeth bared."
+      },
+      {
+       "speaker": "hero",
+       "text": "Iris, get behind us!"
+      }
+     ],
+     "choices": [
+      {
+       "text": "Cover the scholar and fight.",
+       "outcome": "fight"
+      },
+      {
+       "text": "Run — leave her the sample.",
+       "outcome": "flee"
+      }
+     ],
+     "outcomes": {
+      "fight": {
+       "text": "You shoulder Iris back and meet the goblins head-on. She crouches behind your line, already sketching the rot pattern as the steel rings.",
+       "startCombat": "goblin_patrol",
+       "setFlag": "iris_met"
+      },
+      "flee": {
+       "text": "\"Wait — wait!\" She scrambles after you, sample lost, three goblins on her heels. You hear the shouting fade behind you. You don't look back.",
+       "setFlag": "iris_abandoned",
+       "reward": {
+        "xp": 10
+       }
+      }
+     }
+    },
+    "decline": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Pity. The Veil doesn't wait for convenient hours either."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Move on.",
+       "outcome": "leave"
+      }
+     ],
+     "outcomes": {
+      "leave": {
+       "text": "She returns to her notebook. The wind smells of iron.",
+       "setFlag": "iris_declined"
+      }
+     }
+    }
+   }
+  },
+  "iris_ember_field": {
+   "id": "iris_ember_field",
+   "bg": "ruins",
+   "npcName": "Iris Vael",
+   "npcPortrait": "images/openai_v2/iris_vael_portrait.png",
+   "npcAppearance": "iris_vael",
+   "showPartyOnGrid": true,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "I knew you'd catch up. The rot crawled three hundred miles in a fortnight — faster than any record I have, and I have records going back to the Second Warding."
+      },
+      {
+       "speaker": "companion",
+       "companionIndex": 1,
+       "text": "$name leans in. \"You've been chasing this thing on foot?\""
+      },
+      {
+       "speaker": "npc",
+       "text": "On foot, on horseback, once on the back of a half-tamed reach-hound. The rot doesn't care how I move. It just keeps eating."
+      },
+      {
+       "speaker": "npc",
+       "text": "There's a focal point in the ash field east of here — a place where the corruption is denser than it should be. If we can map its geometry we can predict the next breach. If."
+      }
+     ],
+     "choices": [
+      {
+       "text": "[INT 14] Crunch the geometry with her.",
+       "skillCheck": {
+        "stat": "INT",
+        "dc": 14
+       },
+       "outcomes": {
+        "pass": "geometry_pass",
+        "fail": "geometry_fail"
+       }
+      },
+      {
+       "text": "[Mage] Probe the focal point with arcane sense.",
+       "next": "mage_probe",
+       "requires": {
+        "partyClass": "mage"
+       }
+      },
+      {
+       "text": "[WIS 13] Sit with it and listen.",
+       "skillCheck": {
+        "stat": "WIS",
+        "dc": 13
+       },
+       "outcomes": {
+        "pass": "wis_pass",
+        "fail": "geometry_fail"
+       }
+      },
+      {
+       "text": "Just point us at the breach.",
+       "outcome": "shortcut"
+      }
+     ]
+    },
+    "geometry_pass": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "If you treat each ring as a phase offset, the next bloom is going to surface — there. Northeast."
+      },
+      {
+       "speaker": "npc",
+       "text": "You should have my job. Or — no. You'd be insufferable. Northeast it is."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Mark the location and continue.",
+       "outcome": "noted"
+      }
+     ],
+     "outcomes": {
+      "noted": {
+       "text": "Iris commits the prediction to ink with shaking hands. Whatever was coming, you'll meet it on your terms.",
+       "setFlag": "iris_geometry_solved",
+       "reward": {
+        "xp": 90,
+        "gold": 60
+       }
+      }
+     }
+    },
+    "mage_probe": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "(You let your senses unspool into the field. The focal point pulls — not toward a god, not toward a place. Toward a person.)"
+      },
+      {
+       "speaker": "npc",
+       "text": "A person? Veil-rot doesn't target — wait. Wait. That changes everything. Write that down. Write that down."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Hand her the impression.",
+       "outcome": "arcane_note"
+      }
+     ],
+     "outcomes": {
+      "arcane_note": {
+       "text": "She trembles as she copies your impression into the master volume. \"If the rot wants a person, then we are not fighting a plague. We are fighting a hunger.\" She presses a sealed scroll into your hand.",
+       "setFlag": "iris_arcane_truth",
+       "reward": {
+        "xp": 120,
+        "item": "iris_scroll",
+        "itemName": "Iris's Sealed Probe",
+        "itemDesc": "A bound impression of the rot's hunger. May open later doors."
+       }
+      }
+     }
+    },
+    "wis_pass": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "(You close your eyes. The field hums under your breath like grief. Whoever made this was angry.)"
+      },
+      {
+       "speaker": "npc",
+       "text": "You felt it too. I've been calling it geometry to keep my hands steady, but you're right — it's grief. Someone is mourning the world by ending it."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Record the truth.",
+       "outcome": "grief"
+      }
+     ],
+     "outcomes": {
+      "grief": {
+       "text": "She writes the word \"grief\" at the top of the page and underlines it twice. \"Thank you. I've been afraid to write that one alone.\"",
+       "setFlag": "iris_grief_truth",
+       "reward": {
+        "xp": 90
+       }
+      }
+     }
+    },
+    "geometry_fail": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "No matter. We have time. Or — we have a little time. Walk with me, then."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Walk with her.",
+       "outcome": "walked"
+      }
+     ],
+     "outcomes": {
+      "walked": {
+       "text": "You walk the perimeter together. She talks until her voice goes hoarse. You learn nothing concrete, but you're both still here.",
+       "setFlag": "iris_walked",
+       "reward": {
+        "xp": 40
+       }
+      }
+     }
+    },
+    "shortcut": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Fine. Northwest, past the last spire, until your bones ache. Try not to die before we meet again."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Move on.",
+       "outcome": "shortcut_left"
+      }
+     ],
+     "outcomes": {
+      "shortcut_left": {
+       "text": "She watches you go, scribbling. You feel observed.",
+       "setFlag": "iris_shortcut"
+      }
+     }
+    }
+   }
+  },
+  "iris_shard_archive": {
+   "id": "iris_shard_archive",
+   "bg": "dungeon",
+   "npcName": "Iris Vael",
+   "npcPortrait": "images/openai_v2/iris_vael_portrait.png",
+   "npcAppearance": "iris_vael",
+   "showPartyOnGrid": true,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "You're alive. I'd started to bet against you. The archive is here — what's left of it. The shards hold copies of every record the wardens ever buried."
+      },
+      {
+       "speaker": "npc",
+       "text": "And — listen — the corruption knows what I am now. It's been editing the shards. Removing the parts that name the thing that broke the Veil."
+      },
+      {
+       "speaker": "companion",
+       "companionIndex": 2,
+       "text": "\"That's not possible,\" $name says. \"Records don't un-write themselves.\""
+      },
+      {
+       "speaker": "npc",
+       "text": "They do here. I need someone with a clean mind to read the shards before the edit catches up to them. I can't — I've been too close to it too long."
+      }
+     ],
+     "choices": [
+      {
+       "text": "[Mage] Stabilize the shards with a binding rite.",
+       "next": "bind",
+       "requires": {
+        "partyClass": "mage"
+       }
+      },
+      {
+       "text": "I've seen this before. (Requires sealed probe.)",
+       "next": "recall",
+       "requires": {
+        "flag": "iris_arcane_truth"
+       }
+      },
+      {
+       "text": "[INT 16] Read the shards yourself.",
+       "skillCheck": {
+        "stat": "INT",
+        "dc": 16
+       },
+       "outcomes": {
+        "pass": "read_pass",
+        "fail": "read_fail"
+       }
+      },
+      {
+       "text": "There must be another way.",
+       "outcome": "walk"
+      }
+     ]
+    },
+    "bind": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "(You drop into the binding cant your master drilled into you, three nights running. The shards still. The editing pauses.)"
+      },
+      {
+       "speaker": "npc",
+       "text": "You — you bound it. You actually bound it. I have minutes. I have minutes. Read with me."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Read together.",
+       "outcome": "bound_read"
+      }
+     ],
+     "outcomes": {
+      "bound_read": {
+       "text": "You read the un-edited record together. The name of the thing that broke the Veil is written there. You commit it to memory. Iris weeps quietly and writes it into the master volume.",
+       "setFlag": "knows_breaker_name",
+       "reward": {
+        "xp": 200,
+        "gold": 180,
+        "item": "breaker_codex",
+        "itemName": "Iris's Master Volume",
+        "itemDesc": "The breaker has a name. You carry it now."
+       }
+      }
+     }
+    },
+    "recall": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "The probe we took from the ember field — it's the same signature. Whoever's editing the shards is the same hunger we mapped."
+      },
+      {
+       "speaker": "npc",
+       "text": "Then we already have a thread. I'm an idiot. I've been chasing the eraser instead of the hand."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Find the hand together.",
+       "outcome": "hand_found"
+      }
+     ],
+     "outcomes": {
+      "hand_found": {
+       "text": "You and Iris cross-reference the probe with the surviving shards. The pattern resolves into a name. She seals it three times and gives you one of the copies.",
+       "setFlag": "knows_breaker_name",
+       "reward": {
+        "xp": 180,
+        "gold": 150
+       }
+      }
+     }
+    },
+    "read_pass": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "I've got the next phrase before it edits — \"the one who first opened, opens still.\""
+      }
+     ],
+     "choices": [
+      {
+       "text": "Tell her.",
+       "outcome": "read_told"
+      }
+     ],
+     "outcomes": {
+      "read_told": {
+       "text": "\"That's a self-reference,\" she breathes. \"The breaker is the door. The door is still open.\" She marks the codex.",
+       "setFlag": "iris_door_truth",
+       "reward": {
+        "xp": 130
+       }
+      }
+     }
+    },
+    "read_fail": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "The shard ate the line as you read it. I'm sorry. I'll keep trying."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Leave her to it.",
+       "outcome": "left"
+      }
+     ],
+     "outcomes": {
+      "left": {
+       "text": "She doesn't notice you go. The shards keep humming.",
+       "setFlag": "iris_archive_left"
+      }
+     }
+    },
+    "walk": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "There isn't. But thank you for pretending there might be."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Move on.",
+       "outcome": "walk_away"
+      }
+     ],
+     "outcomes": {
+      "walk_away": {
+       "text": "You turn back to the path. The archive hums behind you, editing itself smaller.",
+       "setFlag": "iris_walked_away"
+      }
+     }
+    }
+   }
+  },
+  "garrick_redemption": {
+   "id": "garrick_redemption",
+   "bg": "forest",
+   "npcName": "Sir Garrick Ostmere",
+   "npcPortrait": "images/openai_v2/garrick_ostmere_portrait.png",
+   "npcAppearance": "garrick_ostmere",
+   "showPartyOnGrid": true,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Walk past. I'm not worth the breath of a hello. Just — walk past."
+      },
+      {
+       "speaker": "hero",
+       "text": "That blade's seen worse hands than yours. And your sigil's been cut off your tabard, not torn."
+      },
+      {
+       "speaker": "npc",
+       "text": "Cut. By me. Three winters ago — after I broke an oath that broke the men who trusted me. I keep meaning to fall on the steel and I keep finding reasons not to. So I sit on the road and wait for someone to do it for me."
+      },
+      {
+       "speaker": "companion",
+       "companionIndex": 1,
+       "text": "$name folds their arms. \"If self-pity were a kingdom, ser, you'd be its king.\""
+      },
+      {
+       "speaker": "npc",
+       "text": "(He lets out a laugh that surprises him.) Aye. Aye, fair. And who are you, to insult a knight who has earned every word of it?"
+      }
+     ],
+     "choices": [
+      {
+       "text": "[CHA 11] Talk him into walking with us, at least one day.",
+       "skillCheck": {
+        "stat": "CHA",
+        "dc": 11
+       },
+       "outcomes": {
+        "pass": "cha_pass",
+        "fail": "cha_fail"
+       }
+      },
+      {
+       "text": "[STR 12] Haul him to his feet whether he likes it or not.",
+       "skillCheck": {
+        "stat": "STR",
+        "dc": 12
+       },
+       "outcomes": {
+        "pass": "str_pass",
+        "fail": "str_fail"
+       }
+      },
+      {
+       "text": "\"Bandits coming up the road. Decide now.\"",
+       "next": "ambush"
+      },
+      {
+       "text": "Leave him to it.",
+       "outcome": "leave"
+      }
+     ]
+    },
+    "cha_pass": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "One day. That's all. I'll carry your gear. I won't draw the blade — that part of me is dead. But I'll walk."
+      }
+     ],
+     "choices": [
+      {
+       "text": "One day, then.",
+       "next": "ambush"
+      }
+     ]
+    },
+    "str_pass": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "(You drag him upright. He sways, then steadies.) Damn you. Damn you for making me stand."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Bandits coming. Move.",
+       "next": "ambush"
+      }
+     ]
+    },
+    "cha_fail": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "I'm done being talked into things. Save your breath."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Have it your way.",
+       "next": "ambush"
+      }
+     ]
+    },
+    "str_fail": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "I'm heavier than I look, traveler. Stop pulling."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Bandits coming anyway.",
+       "next": "ambush"
+      }
+     ]
+    },
+    "ambush": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "Bandits — three of them coming up at a run. They're going for him first."
+      },
+      {
+       "speaker": "npc",
+       "text": "Of course they are. Of course they are. (He doesn't reach for the blade. But he turns his head and whistles, two notes, low and sharp.) Halden. HALDEN. Up. Now."
+      },
+      {
+       "speaker": "companion",
+       "companionIndex": 1,
+       "text": "A broad shape rises out of the ditch behind the knight — older, scarred, a notched billhook already in his hands. \"$name,\" $name murmurs, \"where was HE this whole time?\""
+      },
+      {
+       "speaker": "npc",
+       "text": "My man-at-arms. Halden's carried me down this road on his back more nights than I can count. I won't leave the post — I swore I'd sit it until the order forgives me or the road kills me, and I keep my word now even when it's stupid. But he's under no such oath. Halden — go with them. Be worth something. One of us should."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Form a line — and take Halden with us.",
+       "outcome": "recruit_join"
+      },
+      {
+       "text": "Fight beside Garrick, but go on alone after.",
+       "outcome": "defend_only"
+      },
+      {
+       "text": "Let them have him.",
+       "outcome": "abandon"
+      }
+     ],
+     "outcomes": {
+      "recruit_join": {
+       "text": "You put your party between Garrick and the road. Halden steps over the ditch-lip and falls in on your flank like he's done it a thousand times — because he has. \"Don't mind the knight,\" he says without looking back. \"He talks like a tombstone. He used to laugh. Maybe we'll get there again.\" Garrick picks up a fallen blade — not his own, never his own — and holds the post as the bandits break against your line.",
+       "recruitHero": {
+        "id": "halden_man_at_arms",
+        "name": "Halden",
+        "classId": "fighter",
+        "classChoices": [
+         "fighter",
+         "warrior",
+         "paladin"
+        ],
+        "thenCombat": "bandit_ambush"
+       },
+       "setFlag": "garrick_saved"
+      },
+      "defend_only": {
+       "text": "You hold the line for the knight and his man both, then wave Halden back when it's done. He grips Garrick's shoulder, says nothing, and the two of them watch you go. \"The post stays held,\" Garrick calls after you. \"That's something. It has to be something.\"",
+       "startCombat": "bandit_ambush",
+       "setFlag": "garrick_saved"
+      },
+      "abandon": {
+       "text": "You step back. Halden makes it two strides before the bandits drop him in front of the knight. Garrick does not cry out. He does not stand. You walk on. The road remembers both of them.",
+       "setFlag": "garrick_dead",
+       "reward": {
+        "xp": 20
+       }
+      }
+     }
+    },
+    "leave": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Wise. Go."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Move on.",
+       "outcome": "left"
+      }
+     ],
+     "outcomes": {
+      "left": {
+       "text": "You walk past. You don't hear the bandits arrive, but you know they will.",
+       "setFlag": "garrick_left"
+      }
+     }
+    }
+   }
+  },
+  "garrick_old_oath": {
+   "id": "garrick_old_oath",
+   "bg": "ruins",
+   "npcName": "Sir Garrick Ostmere",
+   "npcPortrait": "images/openai_v2/garrick_ostmere_portrait.png",
+   "npcAppearance": "garrick_ostmere",
+   "showPartyOnGrid": true,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "You spared me before. I've been trying to be worth it. Some days I am. Most days I read my old oath out loud to the wind and the wind doesn't care."
+      },
+      {
+       "speaker": "npc",
+       "text": "There's a chapel two miles north. The order I betrayed kept a relic there. If I can return it cleanly — without lying about what I did — I can borrow the oath back. Just to use it once."
+      },
+      {
+       "speaker": "companion",
+       "companionIndex": 1,
+       "text": "\"Borrowing an oath,\" $name says, \"is a thing I have never heard of. Is that allowed?\""
+      },
+      {
+       "speaker": "npc",
+       "text": "(He laughs.) Not allowed. Just done. Will you walk it with me?"
+      }
+     ],
+     "choices": [
+      {
+       "text": "[CHA 13] Help him write the confession he'll need.",
+       "skillCheck": {
+        "stat": "CHA",
+        "dc": 13
+       },
+       "outcomes": {
+        "pass": "confession",
+        "fail": "confession_fail"
+       }
+      },
+      {
+       "text": "[Cleric/healer] Witness the rite properly.",
+       "next": "witness",
+       "requires": {
+        "partyTag": "healer"
+       }
+      },
+      {
+       "text": "[STR 14] Carry him the last mile when his leg gives out.",
+       "skillCheck": {
+        "stat": "STR",
+        "dc": 14
+       },
+       "outcomes": {
+        "pass": "carried",
+        "fail": "confession_fail"
+       }
+      },
+      {
+       "text": "You don't need us for this.",
+       "outcome": "decline"
+      }
+     ]
+    },
+    "confession": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "(You draft the confession with him by firelight — sharp, honest, no flinching. He reads it three times and his hands stop shaking on the third.)"
+      },
+      {
+       "speaker": "npc",
+       "text": "I couldn't have written this alone. The relic returns clean. The oath returns with it. Just once. Just for what's coming."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Walk on.",
+       "outcome": "borrowed"
+      }
+     ],
+     "outcomes": {
+      "borrowed": {
+       "text": "He buckles the old crest back onto his tabard. It does not feel like forgiveness. It feels like permission.",
+       "setFlag": "garrick_oath_borrowed",
+       "reward": {
+        "xp": 120,
+        "gold": 80
+       }
+      }
+     }
+    },
+    "witness": {
+     "lines": [
+      {
+       "speaker": "companion",
+       "companionIndex": 1,
+       "text": "$name speaks the witness-rite as the order keeps it. The chapel air goes very still."
+      },
+      {
+       "speaker": "npc",
+       "text": "I don't deserve this. But I'll carry it as if I do."
+      }
+     ],
+     "choices": [
+      {
+       "text": "It's done.",
+       "outcome": "witnessed"
+      }
+     ],
+     "outcomes": {
+      "witnessed": {
+       "text": "The relic is returned, the witness is spoken. Garrick stands a fraction taller. The oath sits in him again.",
+       "setFlag": "garrick_oath_borrowed",
+       "reward": {
+        "xp": 150,
+        "gold": 100,
+        "item": "borrowed_crest",
+        "itemName": "Garrick's Borrowed Crest",
+        "itemDesc": "An old order's sigil, returned to its bearer for one last fight."
+       }
+      }
+     }
+    },
+    "carried": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "Lean on me, ser. We finish this."
+      },
+      {
+       "speaker": "npc",
+       "text": "I — gods. Thank you. The relic. Now. Before I lose my nerve."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Return the relic.",
+       "outcome": "carried_done"
+      }
+     ],
+     "outcomes": {
+      "carried_done": {
+       "text": "He kneels in the chapel and finds words you can't hear. When he stands, something is different. The oath is back, on loan.",
+       "setFlag": "garrick_oath_borrowed",
+       "reward": {
+        "xp": 110,
+        "gold": 70
+       }
+      }
+     }
+    },
+    "confession_fail": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "I'll try the words alone. I'm used to that."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Move on.",
+       "outcome": "alone"
+      }
+     ],
+     "outcomes": {
+      "alone": {
+       "text": "You hear him reciting from inside the chapel as you leave. He gets through it. Whatever it cost him is his to know.",
+       "setFlag": "garrick_alone_oath",
+       "reward": {
+        "xp": 50
+       }
+      }
+     }
+    },
+    "decline": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "I understand. You have your own oaths to keep."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Move on.",
+       "outcome": "declined"
+      }
+     ],
+     "outcomes": {
+      "declined": {
+       "text": "He turns north alone. You don't look back.",
+       "setFlag": "garrick_declined_oath"
+      }
+     }
+    }
+   }
+  },
+  "garrick_hell_stand": {
+   "id": "garrick_hell_stand",
+   "bg": "cave",
+   "npcName": "Sir Garrick Ostmere",
+   "npcPortrait": "images/openai_v2/garrick_ostmere_portrait.png",
+   "npcAppearance": "garrick_ostmere",
+   "showPartyOnGrid": true,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "I held this gap for six hours before you arrived. The relic-oath kept me alive past the third. After that — stubbornness."
+      },
+      {
+       "speaker": "companion",
+       "companionIndex": 2,
+       "text": "\"His armor's half slag,\" $name says quietly. \"He shouldn't be standing.\""
+      },
+      {
+       "speaker": "npc",
+       "text": "There's a second wave coming up the breach. If we collapse the arch behind us we trap it on this side. If we don't — it pours into the road and there's nothing left between it and Emberglen."
+      }
+     ],
+     "choices": [
+      {
+       "text": "[STR 16] Drop the arch by hand.",
+       "skillCheck": {
+        "stat": "STR",
+        "dc": 16
+       },
+       "outcomes": {
+        "pass": "str_drop",
+        "fail": "str_failed"
+       }
+      },
+      {
+       "text": "Use the borrowed crest as the seal. (Requires it.)",
+       "next": "crest_seal",
+       "requires": {
+        "flag": "garrick_oath_borrowed"
+       }
+      },
+      {
+       "text": "[INT 14] Find the keystone.",
+       "skillCheck": {
+        "stat": "INT",
+        "dc": 14
+       },
+       "outcomes": {
+        "pass": "keystone",
+        "fail": "str_failed"
+       }
+      },
+      {
+       "text": "We can't hold this. Retreat.",
+       "outcome": "retreat"
+      }
+     ]
+    },
+    "str_drop": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "(You set your shoulder to the keystone and pull. Garrick is beside you, then on top of you, then under you as the arch comes down in a roar.)"
+      }
+     ],
+     "choices": [
+      {
+       "text": "Dig him out.",
+       "outcome": "dug_out"
+      }
+     ],
+     "outcomes": {
+      "dug_out": {
+       "text": "He's alive. Bruised, bleeding, alive. The breach is sealed on this side. He grips your wrist — once, hard.",
+       "setFlag": "garrick_arch_held",
+       "reward": {
+        "xp": 220,
+        "gold": 140
+       }
+      }
+     }
+    },
+    "crest_seal": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "It's the right way. The oath was for one fight — let it be this one."
+      },
+      {
+       "speaker": "hero",
+       "text": "The crest seats into the arch. The metal sings as the rite closes."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Witness the seal.",
+       "outcome": "crest_sealed"
+      }
+     ],
+     "outcomes": {
+      "crest_sealed": {
+       "text": "Garrick steps back as the seal takes. The crest is spent — but the breach is closed and the road is safe. He says, very quietly: \"Thank you. For the borrowing.\" Then he draws the longsword for the first time in three winters.",
+       "setFlag": "garrick_oath_spent",
+       "reward": {
+        "xp": 280,
+        "gold": 180
+       }
+      }
+     }
+    },
+    "keystone": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "The keystone's — there. The one with the warden's mark. Strike it three times, same beat."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Strike together.",
+       "outcome": "keystone_hit"
+      }
+     ],
+     "outcomes": {
+      "keystone_hit": {
+       "text": "The arch falls with a precise musical crack. Garrick salutes you like a man who finally remembers how.",
+       "setFlag": "garrick_arch_held",
+       "reward": {
+        "xp": 200,
+        "gold": 120
+       }
+      }
+     }
+    },
+    "str_failed": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "It's too much weight. We'll have to hold the line the long way."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Hold with him.",
+       "outcome": "held_long"
+      }
+     ],
+     "outcomes": {
+      "held_long": {
+       "text": "You hold for another hour. The second wave breaks against you both. Garrick is barely upright at the end of it — but he is upright.",
+       "setFlag": "garrick_held_long",
+       "reward": {
+        "xp": 150
+       }
+      }
+     }
+    },
+    "retreat": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Go. I'll cover you."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Run.",
+       "outcome": "retreated"
+      }
+     ],
+     "outcomes": {
+      "retreated": {
+       "text": "You retreat down the gap. Garrick stays. You hear him singing the old marching cant until you can't hear him anymore.",
+       "setFlag": "garrick_left_behind",
+       "reward": {
+        "xp": 60
+       }
+      }
+     }
+    }
+   }
+  },
+  "garrick_final_charge": {
+   "id": "garrick_final_charge",
+   "bg": "ruins",
+   "npcName": "Sir Garrick Ostmere",
+   "npcPortrait": "images/openai_v2/garrick_ostmere_portrait.png",
+   "npcAppearance": "garrick_ostmere",
+   "showPartyOnGrid": true,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "You're further than I ever thought I'd see anyone go. The Veil is so thin here I can hear the order I betrayed singing on the other side of it."
+      },
+      {
+       "speaker": "npc",
+       "text": "I'm not coming back from this one. I'm saying that plain so you don't have to guess."
+      },
+      {
+       "speaker": "companion",
+       "companionIndex": 1,
+       "text": "$name doesn't answer right away. Then: \"Then make it count, ser.\""
+      }
+     ],
+     "choices": [
+      {
+       "text": "[Cleric/healer] Speak the order's passing-rite for him.",
+       "next": "rite",
+       "requires": {
+        "partyTag": "healer"
+       }
+      },
+      {
+       "text": "[CHA 17] Convince him to live one more day.",
+       "skillCheck": {
+        "stat": "CHA",
+        "dc": 17
+       },
+       "outcomes": {
+        "pass": "live_pass",
+        "fail": "live_fail"
+       }
+      },
+      {
+       "text": "Charge with him.",
+       "outcome": "charge"
+      },
+      {
+       "text": "Let him do it alone.",
+       "outcome": "alone"
+      }
+     ]
+    },
+    "rite": {
+     "lines": [
+      {
+       "speaker": "companion",
+       "companionIndex": 1,
+       "text": "$name speaks the rite the order keeps. Garrick closes his eyes."
+      },
+      {
+       "speaker": "npc",
+       "text": "I am released. I am released. Thank you."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Watch him charge.",
+       "outcome": "rite_done"
+      }
+     ],
+     "outcomes": {
+      "rite_done": {
+       "text": "He charges the Void Herald with the old order's cant on his lips. He breaks their line. You break the herald. He does not stand back up. The road is open.",
+       "setFlag": "garrick_final_charge",
+       "reward": {
+        "xp": 400,
+        "gold": 300,
+        "item": "garrick_sword",
+        "itemName": "Garrick's Longsword",
+        "itemDesc": "Returned to you with the order's blessing still warm in the steel."
+       }
+      }
+     }
+    },
+    "live_pass": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "You broke an oath and spent three winters paying for it. You don't get to spend the next one paying for this one too."
+      },
+      {
+       "speaker": "npc",
+       "text": "(He stares at you for a long time.) One more day. Damn you. One more day."
+      }
+     ],
+     "choices": [
+      {
+       "text": "One more day.",
+       "outcome": "lived"
+      }
+     ],
+     "outcomes": {
+      "lived": {
+       "text": "He sheathes the longsword. He fights beside you for the rest of the act and lives. The crest is still on his tabard when it ends.",
+       "setFlag": "garrick_lived",
+       "reward": {
+        "xp": 350,
+        "gold": 240
+       }
+      }
+     }
+    },
+    "live_fail": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "You're kind. I can't live on kindness."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Then charge with him.",
+       "outcome": "charge"
+      }
+     ]
+    },
+    "charge": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "On three, ser. One — two — three."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Charge.",
+       "outcome": "charged"
+      }
+     ],
+     "outcomes": {
+      "charged": {
+       "text": "You and Garrick break the herald's line together. He buys you the killing blow with his last breath. The road is open. The crest is gone.",
+       "setFlag": "garrick_final_charge",
+       "reward": {
+        "xp": 380,
+        "gold": 280
+       }
+      }
+     }
+    },
+    "alone": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Aye. As it should be."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Watch.",
+       "outcome": "watched"
+      }
+     ],
+     "outcomes": {
+      "watched": {
+       "text": "He charges alone. He does not break the herald, but he distracts it long enough for you to finish the work. He dies kneeling. The crest burns down with him.",
+       "setFlag": "garrick_alone_charge",
+       "reward": {
+        "xp": 250
+       }
+      }
+     }
+    }
+   }
+  },
+  "yssira_first_vision": {
+   "id": "yssira_first_vision",
+   "bg": "cave",
+   "npcName": "Mother Yssira",
+   "npcPortrait": "images/openai_v2/mother_yssira_portrait.png",
+   "npcAppearance": "mother_yssira",
+   "showPartyOnGrid": true,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "You have been carrying a question for two acts now, and you have not asked it aloud, even to yourselves. I will not say it for you. But I will answer it, if you ask."
+      },
+      {
+       "speaker": "companion",
+       "companionIndex": 1,
+       "text": "$name shifts uneasily. \"Her eyes are wrong. They're wrong in a way I've seen before.\""
+      },
+      {
+       "speaker": "npc",
+       "text": "I am veil-touched. The corruption sees through me a little. I see through it a little. It is a fair trade most days. It will not be fair on the last one."
+      }
+     ],
+     "choices": [
+      {
+       "text": "[WIS 14] Ask the question.",
+       "skillCheck": {
+        "stat": "WIS",
+        "dc": 14
+       },
+       "outcomes": {
+        "pass": "wis_ask",
+        "fail": "wis_fail"
+       }
+      },
+      {
+       "text": "[INT 13] Ask her the wrong question on purpose.",
+       "skillCheck": {
+        "stat": "INT",
+        "dc": 13
+       },
+       "outcomes": {
+        "pass": "wrong_q",
+        "fail": "wis_fail"
+       }
+      },
+      {
+       "text": "[Mage] Probe the bond she carries.",
+       "next": "probe",
+       "requires": {
+        "partyClass": "mage"
+       }
+      },
+      {
+       "text": "We don't want her prophecy.",
+       "outcome": "refuse"
+      }
+     ]
+    },
+    "wis_ask": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "Will we be enough?"
+      },
+      {
+       "speaker": "npc",
+       "text": "You will be enough if you keep the seer alive past the third breaking. After that the answer changes hands."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Mark it.",
+       "outcome": "asked"
+      }
+     ],
+     "outcomes": {
+      "asked": {
+       "text": "Yssira presses a bone token into your palm. \"When you see this again, it will be in my hand. Remember whose hand it was first.\"",
+       "setFlag": "yssira_first_prophecy",
+       "reward": {
+        "xp": 130,
+        "item": "yssira_token",
+        "itemName": "Yssira's Bone Token",
+        "itemDesc": "A carved knuckle-bone. Warm, somehow."
+       }
+      }
+     }
+    },
+    "wrong_q": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "What's for dinner."
+      },
+      {
+       "speaker": "npc",
+       "text": "(She laughs — a startled, dry sound.) Bread, if you are lucky. Memory, if you are not. You are clever. Clever may be enough."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Take the laugh and go.",
+       "outcome": "wry"
+      }
+     ],
+     "outcomes": {
+      "wry": {
+       "text": "She presses a bone token into your palm. \"For your cleverness. Spend it wisely.\"",
+       "setFlag": "yssira_first_prophecy",
+       "reward": {
+        "xp": 110,
+        "item": "yssira_token",
+        "itemName": "Yssira's Bone Token",
+        "itemDesc": "A carved knuckle-bone. Warm, somehow."
+       }
+      }
+     }
+    },
+    "probe": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "(You reach toward what she's carrying with the arcane senses. You see — it is not a curse. It is a leash. Held on the other side by something patient.)"
+      },
+      {
+       "speaker": "npc",
+       "text": "You see it. Then you know what is coming for me. Do not weep for it now. Weep for it when it happens. I will need the weeping then."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Walk with her.",
+       "outcome": "probed"
+      }
+     ],
+     "outcomes": {
+      "probed": {
+       "text": "You walk with her down the plateau in silence. The bond hums against your senses the whole way.",
+       "setFlag": "yssira_leash_seen",
+       "reward": {
+        "xp": 160
+       }
+      }
+     }
+    },
+    "wis_fail": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "You will ask it later. I will be there."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Move on.",
+       "outcome": "later"
+      }
+     ],
+     "outcomes": {
+      "later": {
+       "text": "She watches you go with her milk-white eyes. You feel watched for the next mile.",
+       "setFlag": "yssira_met"
+      }
+     }
+    },
+    "refuse": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Wise. Prophecy is a worse companion than ghosts."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Move on.",
+       "outcome": "refused"
+      }
+     ],
+     "outcomes": {
+      "refused": {
+       "text": "She does not follow. The bone token she did not give you weighs heavier in its absence than it would have in your pocket.",
+       "setFlag": "yssira_refused"
+      }
+     }
+    }
+   }
+  },
+  "yssira_breaking": {
+   "id": "yssira_breaking",
+   "bg": "cave",
+   "npcName": "Mother Yssira",
+   "npcPortrait": "images/openai_v2/mother_yssira_portrait.png",
+   "npcAppearance": "mother_yssira",
+   "showPartyOnGrid": true,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "I told you there would be a third breaking. It is here. The leash is pulling and I am not strong enough to keep my own face on. I am sorry. I am so sorry."
+      },
+      {
+       "speaker": "companion",
+       "companionIndex": 1,
+       "text": "\"$name — her eyes — they're — gods, she's changing.\""
+      },
+      {
+       "speaker": "npc",
+       "text": "When I come at you, do not pretend I am still me. The leash will use my hands. Do what you must. Please. Promise."
+      }
+     ],
+     "choices": [
+      {
+       "text": "[WIS 16] Cut the leash before it lands.",
+       "skillCheck": {
+        "stat": "WIS",
+        "dc": 16
+       },
+       "outcomes": {
+        "pass": "cut_leash",
+        "fail": "fight"
+       }
+      },
+      {
+       "text": "Use her bone token to anchor her. (Requires it.)",
+       "next": "anchor",
+       "requires": {
+        "inventoryItem": "yssira_token"
+       }
+      },
+      {
+       "text": "[Mage] Try a binding that won't kill her.",
+       "next": "bind",
+       "requires": {
+        "partyClass": "mage"
+       }
+      },
+      {
+       "text": "\"I promise. We'll do what we must.\"",
+       "outcome": "fight"
+      }
+     ]
+    },
+    "cut_leash": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "(You see the leash in the same instant she does. You cut it with the will of every yes you ever said. She gasps. Falls. Stands again, fully herself.)"
+      }
+     ],
+     "choices": [
+      {
+       "text": "Help her up.",
+       "outcome": "leash_cut"
+      }
+     ],
+     "outcomes": {
+      "leash_cut": {
+       "text": "Yssira laughs through tears. \"You — you cut it. I will pay you that debt for the rest of my acts.\" She presses her staff into your hand for one moment, then takes it back.",
+       "setFlag": "yssira_leash_cut",
+       "reward": {
+        "xp": 280,
+        "gold": 200
+       }
+      }
+     }
+    },
+    "anchor": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "(You press the bone token to her brow. The leash slackens — you see her find her own face again, just behind her own eyes.)"
+      },
+      {
+       "speaker": "npc",
+       "text": "You kept it. You kept it. Bless you. Bless you. I am still here."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Walk her out.",
+       "outcome": "anchored"
+      }
+     ],
+     "outcomes": {
+      "anchored": {
+       "text": "You walk her out of the breaking with the token between you. She is changed — quieter, sadder, alive.",
+       "setFlag": "yssira_anchored",
+       "reward": {
+        "xp": 250,
+        "gold": 160
+       }
+      }
+     }
+    },
+    "bind": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "(You weave a non-lethal binding around her — soft, holding, the spell-cant your master called the lullaby. She shudders, then sleeps.)"
+      }
+     ],
+     "choices": [
+      {
+       "text": "Carry her.",
+       "outcome": "bound"
+      }
+     ],
+     "outcomes": {
+      "bound": {
+       "text": "She sleeps for an hour, then wakes herself. The leash held this time. Next time it may not. She knows it. So do you.",
+       "setFlag": "yssira_bound_safe",
+       "reward": {
+        "xp": 220,
+        "gold": 140
+       }
+      }
+     }
+    },
+    "fight": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "(Her voice changes. The leash pulls. She comes at you.)"
+      }
+     ],
+     "choices": [
+      {
+       "text": "Fight.",
+       "outcome": "fought"
+      }
+     ],
+     "outcomes": {
+      "fought": {
+       "text": "You fight her. The thing on the other end of the leash is stronger than she ever was. When it ends, she is on her knees, herself again, the leash burned to ash.",
+       "startCombat": {
+        "name": "The Leashed Seer",
+        "enemies": [
+         {
+          "id": "leashed_yssira",
+          "name": "The Leashed Seer",
+          "hp": 720,
+          "maxHp": 720,
+          "dmg": [
+           70,
+           110
+          ],
+          "armor": 10,
+          "hit": 84,
+          "dodge": 14,
+          "xpValue": 320,
+          "magicResist": 8,
+          "gold": [
+           40,
+           80
+          ],
+          "count": 1,
+          "statusOnHit": {
+           "type": "stun",
+           "chance": 0.18,
+           "duration": 1
+          }
+         },
+         {
+          "id": "veil_echo",
+          "name": "Veil Echo",
+          "hp": 240,
+          "maxHp": 240,
+          "dmg": [
+           44,
+           72
+          ],
+          "armor": 6,
+          "hit": 78,
+          "dodge": 16,
+          "xpValue": 90,
+          "magicResist": 0,
+          "gold": [
+           10,
+           24
+          ],
+          "count": 2
+         }
+        ]
+       },
+       "setFlag": "yssira_fought_loose",
+       "reward": {
+        "xp": 100
+       }
+      }
+     }
+    }
+   }
+  },
+  "yssira_last_song": {
+   "id": "yssira_last_song",
+   "bg": "ruins",
+   "npcName": "Mother Yssira",
+   "npcPortrait": "images/openai_v2/mother_yssira_portrait.png",
+   "npcAppearance": "mother_yssira",
+   "showPartyOnGrid": true,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "You came. I knew you would. The void is louder here than I have ever heard it. It is singing me a song I am not allowed to learn the words to."
+      },
+      {
+       "speaker": "npc",
+       "text": "I want to give you the prophecy I would not give you on the plateau. I have been carrying it for three acts. It is heavy."
+      },
+      {
+       "speaker": "companion",
+       "companionIndex": 2,
+       "text": "$name kneels beside her. \"We can carry it for you, Mother.\""
+      }
+     ],
+     "choices": [
+      {
+       "text": "[INT 17] Take the prophecy whole.",
+       "skillCheck": {
+        "stat": "INT",
+        "dc": 17
+       },
+       "outcomes": {
+        "pass": "whole",
+        "fail": "partial"
+       }
+      },
+      {
+       "text": "[Mage] Take only the parts that won't break you.",
+       "next": "safe_take",
+       "requires": {
+        "partyClass": "mage"
+       }
+      },
+      {
+       "text": "[WIS 16] Ask her what she'd like instead.",
+       "skillCheck": {
+        "stat": "WIS",
+        "dc": 16
+       },
+       "outcomes": {
+        "pass": "her_wish",
+        "fail": "partial"
+       }
+      },
+      {
+       "text": "Let her keep it.",
+       "outcome": "keep"
+      }
+     ]
+    },
+    "whole": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "(You take the prophecy whole. It lands inside you like a swallowed star. You will not sleep right for a week.)"
+      },
+      {
+       "speaker": "npc",
+       "text": "You carry it now. You will know the words when you need them. Thank you. Thank you."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Walk her down.",
+       "outcome": "whole_taken"
+      }
+     ],
+     "outcomes": {
+      "whole_taken": {
+       "text": "You walk her down the void path. She hums in time with whatever the void is singing. When she stops, you keep humming for her.",
+       "setFlag": "yssira_prophecy_whole",
+       "reward": {
+        "xp": 360,
+        "gold": 280
+       }
+      }
+     }
+    },
+    "safe_take": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "(You take only what won't break you. She gives the rest to the wind.)"
+      }
+     ],
+     "choices": [
+      {
+       "text": "Keep going.",
+       "outcome": "safe"
+      }
+     ],
+     "outcomes": {
+      "safe": {
+       "text": "You will know the parts you need. The rest is gone where the void can't reach it. She seems lighter for the giving.",
+       "setFlag": "yssira_prophecy_partial",
+       "reward": {
+        "xp": 280,
+        "gold": 200
+       }
+      }
+     }
+    },
+    "her_wish": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "What would you like, Mother?"
+      },
+      {
+       "speaker": "npc",
+       "text": "(She is quiet for a long moment.) I would like to see the sky once more. Without the void singing under it."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Walk her up.",
+       "outcome": "sky"
+      }
+     ],
+     "outcomes": {
+      "sky": {
+       "text": "You walk her up out of the void to the last edge where the stars still look like stars. She watches them for an hour. Then she nods, and you walk her back down. She gives you the prophecy in pieces on the way.",
+       "setFlag": "yssira_sky_seen",
+       "reward": {
+        "xp": 320,
+        "gold": 240,
+        "item": "yssira_sky",
+        "itemName": "Yssira's Sky-Memory",
+        "itemDesc": "A handful of stars she gave you to keep for her."
+       }
+      }
+     }
+    },
+    "partial": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "A piece, then. The piece you need most. I trust you to know it."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Take the piece.",
+       "outcome": "piece"
+      }
+     ],
+     "outcomes": {
+      "piece": {
+       "text": "You take a piece. You hope it's the right one.",
+       "setFlag": "yssira_prophecy_partial",
+       "reward": {
+        "xp": 200
+       }
+      }
+     }
+    },
+    "keep": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Then I will carry it where it goes next. Walk well."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Move on.",
+       "outcome": "kept"
+      }
+     ],
+     "outcomes": {
+      "kept": {
+       "text": "She walks the other way. You don't see her again until Act 5.",
+       "setFlag": "yssira_kept_prophecy"
+      }
+     }
+    }
+   }
+  },
+  "yssira_final_rite": {
+   "id": "yssira_final_rite",
+   "bg": "temple",
+   "npcName": "Mother Yssira",
+   "npcPortrait": "images/openai_v2/mother_yssira_portrait.png",
+   "npcAppearance": "mother_yssira",
+   "showPartyOnGrid": true,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "The Architect waits on the other side of the gate. The Veil is thinnest here because this is where it first opened. I was here that day. I was very young."
+      },
+      {
+       "speaker": "npc",
+       "text": "I am here to close the door. I cannot do it alone. The rite needs a chord — three voices, three intents, one moment. Will you be two of the voices?"
+      },
+      {
+       "speaker": "companion",
+       "companionIndex": 1,
+       "text": "$name looks at you. \"It's your call, $hero.\""
+      }
+     ],
+     "choices": [
+      {
+       "text": "Carry the prophecy with her. (Requires prior prophecy.)",
+       "next": "with_prophecy",
+       "requires": {
+        "flag": "yssira_prophecy_whole"
+       }
+      },
+      {
+       "text": "Stand the witness with her. (Requires sky-memory.)",
+       "next": "sky_rite",
+       "requires": {
+        "flag": "yssira_sky_seen"
+       }
+      },
+      {
+       "text": "[WIS 18] Speak the third voice from your own life.",
+       "skillCheck": {
+        "stat": "WIS",
+        "dc": 18
+       },
+       "outcomes": {
+        "pass": "own_voice",
+        "fail": "rite_fail"
+       }
+      },
+      {
+       "text": "[CON 16] Endure the rite physically — the chord drains the body.",
+       "skillCheck": {
+        "stat": "CON",
+        "dc": 16
+       },
+       "outcomes": {
+        "pass": "endure",
+        "fail": "rite_fail"
+       }
+      },
+      {
+       "text": "No. Walk through alone.",
+       "outcome": "alone"
+      }
+     ]
+    },
+    "with_prophecy": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "(You give the prophecy back as the third voice. The chord closes. The door closes with it.)"
+      }
+     ],
+     "choices": [
+      {
+       "text": "Witness the closing.",
+       "outcome": "closed_proph"
+      }
+     ],
+     "outcomes": {
+      "closed_proph": {
+       "text": "The gate closes from the inside out. Yssira lays her staff down. She is older than she was an hour ago, but she is whole. The road ahead is clear of leashes for the first time in five acts.",
+       "setFlag": "yssira_door_closed",
+       "reward": {
+        "xp": 500,
+        "gold": 400
+       }
+      }
+     }
+    },
+    "sky_rite": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "(You give back the handful of stars. They sing the third voice for you.)"
+      }
+     ],
+     "choices": [
+      {
+       "text": "Witness the closing.",
+       "outcome": "closed_sky"
+      }
+     ],
+     "outcomes": {
+      "closed_sky": {
+       "text": "The stars sing. The gate closes. Yssira is laughing — actually laughing — when it ends.",
+       "setFlag": "yssira_door_closed",
+       "reward": {
+        "xp": 480,
+        "gold": 360
+       }
+      }
+     }
+    },
+    "own_voice": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "(You speak the truest thing you have ever said. The chord closes around it. The door closes around the chord.)"
+      }
+     ],
+     "choices": [
+      {
+       "text": "Stand at the closing.",
+       "outcome": "own_closed"
+      }
+     ],
+     "outcomes": {
+      "own_closed": {
+       "text": "You will not remember the words you said tomorrow. The world will. Yssira will. The Architect, beyond the closing door, will.",
+       "setFlag": "yssira_door_closed",
+       "reward": {
+        "xp": 520,
+        "gold": 420
+       }
+      }
+     }
+    },
+    "endure": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "(You take the body-cost of the chord. Your knees lock. You don't fall. The gate closes anyway.)"
+      }
+     ],
+     "choices": [
+      {
+       "text": "Stand at the closing.",
+       "outcome": "endured"
+      }
+     ],
+     "outcomes": {
+      "endured": {
+       "text": "It cost you. You are paler than you were. The gate is shut. Yssira binds your wrist with a strip of her own vestment.",
+       "setFlag": "yssira_door_closed",
+       "reward": {
+        "xp": 460,
+        "gold": 320,
+        "damage": 40
+       }
+      }
+     }
+    },
+    "rite_fail": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "It is enough that you tried. I will finish the chord alone."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Stand witness.",
+       "outcome": "witness_alone"
+      }
+     ],
+     "outcomes": {
+      "witness_alone": {
+       "text": "She sings the chord alone. The gate half-closes. It will hold long enough. The cost is hers.",
+       "setFlag": "yssira_door_half",
+       "reward": {
+        "xp": 250
+       }
+      }
+     }
+    },
+    "alone": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Then I will let the door stand open. Walk well."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Move on.",
+       "outcome": "door_open"
+      }
+     ],
+     "outcomes": {
+      "door_open": {
+       "text": "You walk past the gate. It stays open behind you. Whatever comes through next is yours to meet alone.",
+       "setFlag": "yssira_door_open"
+      }
+     }
+    }
+   }
+  },
+  "tomek_caravan_burn": {
+   "id": "tomek_caravan_burn",
+   "bg": "forest",
+   "npcName": "Tomek Halverin",
+   "npcPortrait": "images/openai_v2/tomek_halverin_portrait.png",
+   "npcAppearance": "tomek_halverin",
+   "showPartyOnGrid": true,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Help — please — they're hitting my last cart! I'll pay! I'll pay double, triple, whatever you want, just don't let them take the strongbox!"
+      },
+      {
+       "speaker": "hero",
+       "text": "Bandits or goblins?"
+      },
+      {
+       "speaker": "npc",
+       "text": "Bandits — five of them — they followed me out of the dust roads, they think I have — well, I do have, but it's mine, and they — please!"
+      },
+      {
+       "speaker": "companion",
+       "companionIndex": 1,
+       "text": "\"He's lying about something,\" $name says flatly. \"But probably not about the bandits.\""
+      }
+     ],
+     "choices": [
+      {
+       "text": "[CHA 12] Talk the bandits down before swords come out.",
+       "skillCheck": {
+        "stat": "CHA",
+        "dc": 12
+       },
+       "outcomes": {
+        "pass": "talked_down",
+        "fail": "fight"
+       }
+      },
+      {
+       "text": "[DEX 13] Slip around and cut their retreat.",
+       "skillCheck": {
+        "stat": "DEX",
+        "dc": 13
+       },
+       "outcomes": {
+        "pass": "flank",
+        "fail": "fight"
+       }
+      },
+      {
+       "text": "Fight the bandits.",
+       "outcome": "fight"
+      },
+      {
+       "text": "\"Pay us up front and we'll think about it.\" (50g down payment)",
+       "requires": {
+        "gold": 50
+       },
+       "outcome": "mercenary"
+      },
+      {
+       "text": "Walk on.",
+       "outcome": "walk"
+      }
+     ]
+    },
+    "talked_down": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "(You step between Tomek and the bandits, palms open. You name their captain. You name the price of a fight they can't afford. They sheathe.)"
+      }
+     ],
+     "choices": [
+      {
+       "text": "Send them off.",
+       "outcome": "talked"
+      }
+     ],
+     "outcomes": {
+      "talked": {
+       "text": "The bandits leave. Tomek collapses against his cart, weeping with relief. He presses a heavy purse on you. \"You — you saved me. I'll remember this. I always remember.\"",
+       "setFlag": "tomek_saved",
+       "reward": {
+        "xp": 130,
+        "gold": 120
+       }
+      }
+     }
+    },
+    "flank": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "(You loop wide, cut off the retreat road, and force the bandits between two threats.)"
+      }
+     ],
+     "choices": [
+      {
+       "text": "Press the advantage.",
+       "outcome": "flank_pressed"
+      }
+     ],
+     "outcomes": {
+      "flank_pressed": {
+       "text": "Three surrender. Two run. The strongbox is intact. Tomek is babbling thanks before the dust settles.",
+       "setFlag": "tomek_saved",
+       "reward": {
+        "xp": 140,
+        "gold": 100
+       }
+      }
+     }
+    },
+    "fight": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Hold the cart! Hold the cart!"
+      }
+     ],
+     "choices": [
+      {
+       "text": "Engage.",
+       "outcome": "fought"
+      }
+     ],
+     "outcomes": {
+      "fought": {
+       "text": "You meet the bandits at the cart. Steel rings. When it ends, Tomek is still standing, still talking, still pressing a purse into your hand.",
+       "startCombat": "bandit_ambush",
+       "setFlag": "tomek_saved"
+      }
+     }
+    },
+    "mercenary": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "I — yes, yes, take it, take all of it, just — oh gods, here, here —"
+      },
+      {
+       "speaker": "companion",
+       "companionIndex": 1,
+       "text": "\"$hero, are you sure?\" $name murmurs. \"Look at him.\""
+      }
+     ],
+     "choices": [
+      {
+       "text": "Take the coin, then fight.",
+       "outcome": "merc_fought"
+      }
+     ],
+     "outcomes": {
+      "merc_fought": {
+       "text": "You take the coin. You fight the bandits anyway. Tomek pays you, but he watches you pay him too. He remembers being looked at like a price tag. He always remembers.",
+       "startCombat": "bandit_ambush",
+       "setFlag": "tomek_paid_first",
+       "reward": {
+        "gold": 50
+       }
+      }
+     }
+    },
+    "walk": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Wait — wait — please — !"
+      }
+     ],
+     "choices": [
+      {
+       "text": "Keep walking.",
+       "outcome": "walked"
+      }
+     ],
+     "outcomes": {
+      "walked": {
+       "text": "You keep walking. You don't see the smoke until you're half a mile down the road. He always remembers.",
+       "setFlag": "tomek_burned"
+      }
+     }
+    }
+   }
+  },
+  "tomek_recovery": {
+   "id": "tomek_recovery",
+   "bg": "ruins",
+   "npcName": "Tomek Halverin",
+   "npcPortrait": "images/openai_v2/tomek_halverin_portrait.png",
+   "npcAppearance": "tomek_halverin",
+   "showPartyOnGrid": true,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "I knew it was you the moment you crested the rise — I have a head for faces and a better head for debts. Sit, sit, this is my second caravan and a much better second than my second wife."
+      },
+      {
+       "speaker": "companion",
+       "companionIndex": 1,
+       "text": "$name eyes the wares. \"Half of this is contraband and the other half is older than the wars.\""
+      },
+      {
+       "speaker": "npc",
+       "text": "Exactly the half I sell. There's a Veil-cult buyer offering me three times market for a sealed jar I shouldn't have. I want to back out, but the deposit is a noose. Will you help me wriggle?"
+      }
+     ],
+     "choices": [
+      {
+       "text": "[CHA 14] Renegotiate the deal — get him out clean.",
+       "skillCheck": {
+        "stat": "CHA",
+        "dc": 14
+       },
+       "outcomes": {
+        "pass": "cha_renego",
+        "fail": "renego_fail"
+       }
+      },
+      {
+       "text": "Buy out his deposit yourself. (200g)",
+       "requires": {
+        "gold": 200
+       },
+       "outcome": "bought_out"
+      },
+      {
+       "text": "[INT 13] Read the contract for an escape clause.",
+       "skillCheck": {
+        "stat": "INT",
+        "dc": 13
+       },
+       "outcomes": {
+        "pass": "clause",
+        "fail": "renego_fail"
+       }
+      },
+      {
+       "text": "Sell to the cult anyway, split the profit.",
+       "outcome": "sell"
+      },
+      {
+       "text": "Walk away.",
+       "outcome": "walked"
+      }
+     ]
+    },
+    "cha_renego": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "(You meet the cult buyer with Tomek behind you and renegotiate the deal so the deposit returns clean. The buyer is furious. They leave with their jar undelivered.)"
+      }
+     ],
+     "choices": [
+      {
+       "text": "Get out before they reconsider.",
+       "outcome": "cha_done"
+      }
+     ],
+     "outcomes": {
+      "cha_done": {
+       "text": "Tomek splits the recovered deposit with you. \"I owe you something larger than this. Larger debts come due later.\"",
+       "setFlag": "tomek_clean",
+       "reward": {
+        "xp": 150,
+        "gold": 180
+       }
+      }
+     }
+    },
+    "bought_out": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "You — you bought it out. I — I do not know what to say. I will pay you back. Twice. Threefold. Let me write it down. I always write debts down."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Make sure he writes it down.",
+       "outcome": "bought_done"
+      }
+     ],
+     "outcomes": {
+      "bought_done": {
+       "text": "He writes the debt in a heavy leather ledger. The pen scratches a long time. You leave with a chit that says he owes you.",
+       "setFlag": "tomek_owes_big",
+       "reward": {
+        "gold": -200,
+        "xp": 200,
+        "item": "tomek_chit",
+        "itemName": "Tomek's IOU",
+        "itemDesc": "A signed chit. Tomek always remembers."
+       }
+      }
+     }
+    },
+    "clause": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "Subclause four — voids the deposit if the buyer fails to provide consecrated transport. They didn't. You're free."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Walk him through the escape.",
+       "outcome": "clause_done"
+      }
+     ],
+     "outcomes": {
+      "clause_done": {
+       "text": "He weeps. He pays you in old gold he's been saving against the day a clever stranger reads a clever clause.",
+       "setFlag": "tomek_clean",
+       "reward": {
+        "xp": 140,
+        "gold": 200
+       }
+      }
+     }
+    },
+    "renego_fail": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "No matter, no matter. I will find another way. I always find another way. Eventually."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Move on.",
+       "outcome": "rf_left"
+      }
+     ],
+     "outcomes": {
+      "rf_left": {
+       "text": "You leave him counting the deposit again. The jar will get sold. He knows it. So do you.",
+       "setFlag": "tomek_stuck"
+      }
+     }
+    },
+    "sell": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "Sell it. Split it. I'll take half."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Take the cut.",
+       "outcome": "sold"
+      }
+     ],
+     "outcomes": {
+      "sold": {
+       "text": "You take the cut. The cult takes the jar. Something the cult will use, you helped them get. Tomek watches you pocket the gold without flinching. He always remembers.",
+       "setFlag": "tomek_cult_sold",
+       "reward": {
+        "gold": 240,
+        "xp": -30
+       }
+      }
+     }
+    },
+    "walked": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "No matter, no matter. Travel well."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Move on.",
+       "outcome": "left_walk"
+      }
+     ],
+     "outcomes": {
+      "left_walk": {
+       "text": "You walk. He waves you off cheerfully. He writes the not-helping in the same ledger.",
+       "setFlag": "tomek_walked"
+      }
+     }
+    }
+   }
+  },
+  "tomek_last_deal": {
+   "id": "tomek_last_deal",
+   "bg": "cave",
+   "npcName": "Tomek Halverin",
+   "npcPortrait": "images/openai_v2/tomek_halverin_portrait.png",
+   "npcAppearance": "tomek_halverin",
+   "showPartyOnGrid": true,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "I shouldn't be here. A merchant doesn't belong this deep in the breach. But — the chit I owe you, the debt — I came to settle it before I can't."
+      },
+      {
+       "speaker": "npc",
+       "text": "There's a relic the demons are using to anchor the breach. I bought it once. I sold it to a man who sold it to a cult. I know exactly where it is. I can put it back where it stops being useful to them."
+      },
+      {
+       "speaker": "companion",
+       "companionIndex": 1,
+       "text": "$name stares at him. \"You — you bought the relic anchoring the Hell Breach?\""
+      },
+      {
+       "speaker": "npc",
+       "text": "(He flinches.) I did not know what it was. I know now. That is the difference between an apology and an act."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Walk it with him. (Requires Tomek's IOU.)",
+       "next": "accept",
+       "requires": {
+        "flag": "tomek_owes_big"
+       }
+      },
+      {
+       "text": "Walk it with him. (Requires saving him in Act 1.)",
+       "next": "accept",
+       "requires": {
+        "flag": "tomek_saved"
+       }
+      },
+      {
+       "text": "[CHA 15] Demand he do it cleanly — no profit, no exit deal.",
+       "skillCheck": {
+        "stat": "CHA",
+        "dc": 15
+       },
+       "outcomes": {
+        "pass": "clean",
+        "fail": "cold"
+       }
+      },
+      {
+       "text": "[DEX 14] Pick the cult's relic cache yourself — leave him out of it.",
+       "skillCheck": {
+        "stat": "DEX",
+        "dc": 14
+       },
+       "outcomes": {
+        "pass": "solo_steal",
+        "fail": "cold"
+       }
+      },
+      {
+       "text": "Pay him 200g to do the job up front.",
+       "requires": {
+        "gold": 200
+       },
+       "outcome": "cold"
+      },
+      {
+       "text": "Walk away.",
+       "outcome": "walk_off"
+      }
+     ]
+    },
+    "accept": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "(You walk with Tomek to the cult's cache. He moves the relic himself. His hands shake the whole time. He does not flinch.)"
+      }
+     ],
+     "choices": [
+      {
+       "text": "Watch him return it.",
+       "outcome": "returned"
+      }
+     ],
+     "outcomes": {
+      "returned": {
+       "text": "The relic returns to a place the cult cannot reach. The breach narrows. Tomek lights a candle for the caravans he didn't mean to burn. He hands you the ledger. \"Closed. All of them.\"",
+       "setFlag": "tomek_relic_returned",
+       "reward": {
+        "xp": 280,
+        "gold": 220,
+        "item": "tomek_ledger",
+        "itemName": "Tomek's Ledger",
+        "itemDesc": "A merchant's soul, fully balanced."
+       }
+      }
+     }
+    },
+    "clean": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Clean. No profit. No exit. I — yes. Yes. I will do it clean. It will be the first thing I have ever done that way."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Walk him through it.",
+       "outcome": "cleaned"
+      }
+     ],
+     "outcomes": {
+      "cleaned": {
+       "text": "He does it clean. He cries, the way only people who finally got the chance to do something right cry.",
+       "setFlag": "tomek_relic_clean",
+       "reward": {
+        "xp": 320,
+        "gold": 240
+       }
+      }
+     }
+    },
+    "cold": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "You — you want payment for this. Fine. Fine. I will pay you because I cannot stand to owe you any other way."
+      },
+      {
+       "speaker": "hero",
+       "text": "(He counts out the coin. His hands shake. You take it. You go with him to the cache anyway.)"
+      }
+     ],
+     "choices": [
+      {
+       "text": "Return the relic, coldly.",
+       "outcome": "cold_done"
+      }
+     ],
+     "outcomes": {
+      "cold_done": {
+       "text": "The relic returns. Tomek does not look at you when it does. He writes the ledger closed. He always remembers.",
+       "setFlag": "tomek_relic_cold",
+       "reward": {
+        "gold": -200,
+        "xp": 120
+       }
+      }
+     }
+    },
+    "solo_steal": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "(You shadow the cult cache yourself. The lock yields to clever hands. You lift the relic and walk it back out without rousing a single sentry.)"
+      },
+      {
+       "speaker": "npc",
+       "text": "You — you did it without me. I — thank you. The ledger should not be closed by your hand, but it is closed all the same."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Hand him the ledger.",
+       "outcome": "solo_done"
+      }
+     ],
+     "outcomes": {
+      "solo_done": {
+       "text": "Tomek writes the last line himself. The breach narrows the next dawn. He stays out of the deep places after that.",
+       "setFlag": "tomek_relic_stolen",
+       "reward": {
+        "xp": 240,
+        "gold": 180,
+        "item": "tomek_ledger",
+        "itemName": "Tomek's Ledger",
+        "itemDesc": "A merchant's soul, balanced by another's hands."
+       }
+      }
+     }
+    },
+    "walk_off": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "I will return it alone. I always end up alone. Walk well."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Move on.",
+       "outcome": "walked_off"
+      }
+     ],
+     "outcomes": {
+      "walked_off": {
+       "text": "You leave him going deeper into the breach. You don't hear if he makes it. The breach narrows by a foot the next dawn anyway.",
+       "setFlag": "tomek_alone_relic"
+      }
+     }
+    }
+   }
+  },
+  "krix_offering": {
+   "id": "krix_offering",
+   "bg": "forest",
+   "npcName": "Krix Bonechewer",
+   "npcPortrait": "images/openai_v2/krix_bonechewer_portrait.png",
+   "npcAppearance": "krix_bonechewer",
+   "showPartyOnGrid": true,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Don't shoot — don't shoot — I'm cast-out, see the red rag? Cast-out. My old band would skin me before they'd let me near a human. So would you, maybe. But I'm offering first, see? Hands open."
+      },
+      {
+       "speaker": "companion",
+       "companionIndex": 1,
+       "text": "$name keeps a hand on the hilt. \"A goblin offering. Is that — is that a thing?\""
+      },
+      {
+       "speaker": "npc",
+       "text": "New thing. Made it up. You go that way — the goblin camp by the burned oak — they got a stash. I tell you the way around the sentries. You leave me alive. We both come out richer than this morning. Eh?"
+      }
+     ],
+     "choices": [
+      {
+       "text": "[CHA 12] Trust him.",
+       "skillCheck": {
+        "stat": "CHA",
+        "dc": 12
+       },
+       "outcomes": {
+        "pass": "trust",
+        "fail": "distrust"
+       }
+      },
+      {
+       "text": "[STR 13] Intimidate — make him swear it.",
+       "skillCheck": {
+        "stat": "STR",
+        "dc": 13
+       },
+       "outcomes": {
+        "pass": "intim",
+        "fail": "distrust"
+       }
+      },
+      {
+       "text": "[INT 12] Cross-check his story against goblin sign you've seen.",
+       "skillCheck": {
+        "stat": "INT",
+        "dc": 12
+       },
+       "outcomes": {
+        "pass": "verify",
+        "fail": "distrust"
+       }
+      },
+      {
+       "text": "Kill him on principle.",
+       "outcome": "kill"
+      }
+     ]
+    },
+    "trust": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "All right, Bonechewer. Lead."
+      },
+      {
+       "speaker": "npc",
+       "text": "(A grin splits his face.) Krix. Krix to friends. We're friends now. Probably."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Follow him.",
+       "outcome": "trust_paid"
+      }
+     ],
+     "outcomes": {
+      "trust_paid": {
+       "text": "He leads you true. The stash is fat. You leave him alive. He waves as you go. The wave looks a lot like a salute.",
+       "setFlag": "krix_trusted",
+       "reward": {
+        "xp": 130,
+        "gold": 110
+       }
+      }
+     }
+    },
+    "intim": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "Swear it. On the rag."
+      },
+      {
+       "speaker": "npc",
+       "text": "On the rag. On my teeth. On the warband that cast me out. I swear it."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Follow.",
+       "outcome": "intim_paid"
+      }
+     ],
+     "outcomes": {
+      "intim_paid": {
+       "text": "He leads you true. He is sweating the entire way. The stash is real. You leave him alive. He bows. The bow is sincere and a little funny.",
+       "setFlag": "krix_trusted",
+       "reward": {
+        "xp": 120,
+        "gold": 100
+       }
+      }
+     }
+    },
+    "verify": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "The trail-marks match what he's saying. He's not lying about the route."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Follow him.",
+       "outcome": "verify_paid"
+      }
+     ],
+     "outcomes": {
+      "verify_paid": {
+       "text": "You go in eyes open. The stash is real. The way out is real. You leave him alive. He nods at you — one professional to another.",
+       "setFlag": "krix_trusted",
+       "reward": {
+        "xp": 140,
+        "gold": 100
+       }
+      }
+     }
+    },
+    "distrust": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Fine, fine, no offering. I'll be on my way. Don't — don't kill me. Please."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Let him go.",
+       "outcome": "let_go"
+      },
+      {
+       "text": "Kill him after all.",
+       "outcome": "kill"
+      }
+     ],
+     "outcomes": {
+      "let_go": {
+       "text": "You let him go. He vanishes into the underbrush like he was never there. You wonder if you'll regret it.",
+       "setFlag": "krix_let_go"
+      }
+     }
+    },
+    "kill": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "(You raise the blade. He doesn't run.)"
+      }
+     ],
+     "choices": [
+      {
+       "text": "Strike.",
+       "outcome": "killed"
+      }
+     ],
+     "outcomes": {
+      "killed": {
+       "text": "He dies bowing. The red rag falls in the moss. Somewhere in the goblin camp two miles east, a sentry will not be expected back. You walk on.",
+       "setFlag": "krix_killed",
+       "reward": {
+        "gold": 30,
+        "xp": 20
+       }
+      }
+     }
+    }
+   }
+  },
+  "krix_trap": {
+   "id": "krix_trap",
+   "bg": "ruins",
+   "npcName": "Krix Bonechewer",
+   "npcPortrait": "images/openai_v2/krix_bonechewer_portrait.png",
+   "npcAppearance": "krix_bonechewer",
+   "showPartyOnGrid": true,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "You spared me! I knew you would, knew it like sunrise. Listen — shortcut through the dust. Saves you a day. Maybe two."
+      },
+      {
+       "speaker": "companion",
+       "companionIndex": 1,
+       "text": "$name leans toward you. \"Goblin shortcut. Why does my skin itch.\""
+      },
+      {
+       "speaker": "npc",
+       "text": "Don't listen to your friend. Or — listen. But come anyway. Save a day. I'll lead. Promise on the rag."
+      }
+     ],
+     "choices": [
+      {
+       "text": "[INT 14] Notice the sign-cut on his palm — it's a warband mark, fresh.",
+       "skillCheck": {
+        "stat": "INT",
+        "dc": 14
+       },
+       "outcomes": {
+        "pass": "spot_trap",
+        "fail": "walk_in"
+       }
+      },
+      {
+       "text": "[WIS 13] Sense his nerves.",
+       "skillCheck": {
+        "stat": "WIS",
+        "dc": 13
+       },
+       "outcomes": {
+        "pass": "spot_trap",
+        "fail": "walk_in"
+       }
+      },
+      {
+       "text": "Follow his shortcut. (Requires krix_trusted.)",
+       "next": "shortcut_clean",
+       "requires": {
+        "flag": "krix_trusted"
+       }
+      },
+      {
+       "text": "Follow him anyway.",
+       "outcome": "walk_in"
+      },
+      {
+       "text": "Refuse the shortcut.",
+       "outcome": "refuse"
+      }
+     ]
+    },
+    "spot_trap": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "That cut on your palm. That's a warband mark. They're paying you to bring us in, aren't they."
+      },
+      {
+       "speaker": "npc",
+       "text": "(He freezes. His shoulders sag.) Yes. They found me. Said cast-out can come home if I bring them you. I — I was going to lead you in. I was. I am sorry. I am so sorry."
+      }
+     ],
+     "choices": [
+      {
+       "text": "[CHA 14] Turn him — make him lead them into the ambush instead.",
+       "skillCheck": {
+        "stat": "CHA",
+        "dc": 14
+       },
+       "outcomes": {
+        "pass": "flip",
+        "fail": "fight_them"
+       }
+      },
+      {
+       "text": "Kill him here.",
+       "outcome": "kill_now"
+      },
+      {
+       "text": "\"Lead them in. We'll be waiting.\"",
+       "outcome": "fight_them"
+      }
+     ]
+    },
+    "flip": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "You lead them in. We'll come up the rear. They're your warband — give us the angle."
+      },
+      {
+       "speaker": "npc",
+       "text": "Yes. Yes. Yes. I — yes. Thank you. Thank you for letting me be useful again."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Spring the counter-ambush.",
+       "outcome": "flipped"
+      }
+     ],
+     "outcomes": {
+      "flipped": {
+       "text": "Krix leads his old warband into the canyon. You hit them from the high side. He fights at your back like he was born to it.",
+       "startCombat": "goblin_camp",
+       "setFlag": "krix_flipped"
+      }
+     }
+    },
+    "walk_in": {
+     "lines": [
+      {
+       "speaker": "companion",
+       "companionIndex": 1,
+       "text": "\"$hero, this is — oh — ambush!\" Goblins drop from the rocks on three sides."
+      },
+      {
+       "speaker": "npc",
+       "text": "I am sorry — I am sorry — I had no — choice — !"
+      }
+     ],
+     "choices": [
+      {
+       "text": "Fight.",
+       "outcome": "walked_in_fought"
+      }
+     ],
+     "outcomes": {
+      "walked_in_fought": {
+       "text": "You fight your way out. Krix fights too — for which side, you're not sure until it's over. When it ends he is bloody and weeping at your feet.",
+       "startCombat": "goblin_camp",
+       "setFlag": "krix_walked_in"
+      }
+     }
+    },
+    "fight_them": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "Lead them in. We'll be waiting."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Spring it.",
+       "outcome": "sprung"
+      }
+     ],
+     "outcomes": {
+      "sprung": {
+       "text": "You spring it on his warband. He fights at your back. He bows when it's over. The bow is sincere and a little funny again.",
+       "startCombat": "goblin_camp",
+       "setFlag": "krix_flipped"
+      }
+     }
+    },
+    "shortcut_clean": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Yes — yes, this one's real, no warband, I promise on the rag, promise — !"
+      }
+     ],
+     "choices": [
+      {
+       "text": "Follow.",
+       "outcome": "clean_walk"
+      }
+     ],
+     "outcomes": {
+      "clean_walk": {
+       "text": "The shortcut is real. You save a day. He grins the whole way. Trust paid forward.",
+       "setFlag": "krix_shortcut_clean",
+       "reward": {
+        "xp": 100,
+        "gold": 80
+       }
+      }
+     }
+    },
+    "kill_now": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "(You strike before he can bow.)"
+      }
+     ],
+     "choices": [
+      {
+       "text": "Walk on.",
+       "outcome": "killed_act2"
+      }
+     ],
+     "outcomes": {
+      "killed_act2": {
+       "text": "He dies on his knees. The warband ambush is still coming. You meet it on your terms, but you meet it alone.",
+       "startCombat": "goblin_camp",
+       "setFlag": "krix_killed"
+      }
+     }
+    },
+    "refuse": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Fine — fine — I'll go alone — they'll — they'll find me anyway —"
+      }
+     ],
+     "choices": [
+      {
+       "text": "Move on.",
+       "outcome": "refused"
+      }
+     ],
+     "outcomes": {
+      "refused": {
+       "text": "You take the long road. You hear screaming in the canyon as you pass it. You don't investigate.",
+       "setFlag": "krix_refused"
+      }
+     }
+    }
+   }
+  },
+  "krix_redemption": {
+   "id": "krix_redemption",
+   "bg": "cave",
+   "npcName": "Krix Bonechewer",
+   "npcPortrait": "images/openai_v2/krix_bonechewer_portrait.png",
+   "npcAppearance": "krix_bonechewer",
+   "showPartyOnGrid": true,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "I came down here on my own legs. You believe that? Me. A goblin. In the Hell Breach. Voluntarily. My old warband would laugh themselves sick."
+      },
+      {
+       "speaker": "npc",
+       "text": "There's a cell of cast-outs down here. Goblins like me. The demons are using them as fuel for the breach. Burning them to keep the rift open. I'm going to get them out. Will you walk it with me?"
+      },
+      {
+       "speaker": "companion",
+       "companionIndex": 2,
+       "text": "$name draws their blade. \"A jailbreak. In the Hell Breach. Krix, I love this plan and I hate this plan.\""
+      }
+     ],
+     "choices": [
+      {
+       "text": "Walk it with him. (Requires krix_flipped.)",
+       "next": "walk",
+       "requires": {
+        "flag": "krix_flipped"
+       }
+      },
+      {
+       "text": "Walk it anyway. (Requires krix_trusted.)",
+       "next": "walk",
+       "requires": {
+        "flag": "krix_trusted"
+       }
+      },
+      {
+       "text": "[INT 15] Read the cell's wards.",
+       "skillCheck": {
+        "stat": "INT",
+        "dc": 15
+       },
+       "outcomes": {
+        "pass": "ward_pass",
+        "fail": "fight_in"
+       }
+      },
+      {
+       "text": "\"Lead. We'll break the door.\"",
+       "outcome": "fight_in"
+      },
+      {
+       "text": "No. Too deep.",
+       "outcome": "too_deep"
+      }
+     ]
+    },
+    "walk": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "Lead."
+      },
+      {
+       "speaker": "npc",
+       "text": "I will. I will. Friends. We're friends now. We are."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Walk it.",
+       "outcome": "walked"
+      }
+     ],
+     "outcomes": {
+      "walked": {
+       "text": "You free the cast-outs together. Krix herds them out like an exhausted shepherd, swearing at them in three dialects of goblin. The breach narrows by another foot.",
+       "setFlag": "krix_redeemed",
+       "reward": {
+        "xp": 320,
+        "gold": 240,
+        "item": "krix_rag",
+        "itemName": "Krix's Red Rag",
+        "itemDesc": "A cast-out's sigil, given to a friend."
+       }
+      }
+     }
+    },
+    "ward_pass": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "These wards are tied to the demon's heartbeat. Cut here. Then here. Then we're in clean."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Cut the wards.",
+       "outcome": "wards_cut"
+      }
+     ],
+     "outcomes": {
+      "wards_cut": {
+       "text": "You cut the wards. Krix gets the cast-outs out without losing one. He weeps. They weep. You stand there pretending not to weep.",
+       "setFlag": "krix_redeemed",
+       "reward": {
+        "xp": 300,
+        "gold": 200
+       }
+      }
+     }
+    },
+    "fight_in": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "On three! One — two — three!"
+      }
+     ],
+     "choices": [
+      {
+       "text": "Break the door.",
+       "outcome": "door_broken"
+      }
+     ],
+     "outcomes": {
+      "door_broken": {
+       "text": "You smash the cell door. Demons swarm. You and Krix hold the line while the cast-outs run. When it's over, the breach is narrower and the cast-outs are alive.",
+       "startCombat": "demon_patrol",
+       "setFlag": "krix_redeemed"
+      }
+     }
+    },
+    "too_deep": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "I — yes. Yes. Too deep. I'll go alone. I will. I — go. Go."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Move on.",
+       "outcome": "left_him"
+      }
+     ],
+     "outcomes": {
+      "left_him": {
+       "text": "You leave him at the breach mouth. You don't look back. He goes in alone. The breach narrows by an inch the next day. You don't know what to do with that.",
+       "setFlag": "krix_alone"
+      }
+     }
+    }
+   }
+  },
+  "tidekeeper_lament": {
+   "id": "tidekeeper_lament",
+   "bg": "cave",
+   "npcName": "The Tidekeeper",
+   "npcPortrait": null,
+   "showPartyOnGrid": true,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Travelers. You walk where the tide forgot to swallow. I keep the count of what the depths take. I am behind by three centuries."
+      },
+      {
+       "speaker": "companion",
+       "companionIndex": 1,
+       "text": "$name peers at the keeper's ledger. \"The pages are wet. Are those — names?\""
+      },
+      {
+       "speaker": "npc",
+       "text": "Every name the abyss has taken. I write them in salt so the abyss cannot edit them. It tries. It is very persistent."
+      }
+     ],
+     "choices": [
+      {
+       "text": "[INT 16] Help him catch up the count.",
+       "skillCheck": {
+        "stat": "INT",
+        "dc": 16
+       },
+       "outcomes": {
+        "pass": "caught",
+        "fail": "caught_part"
+       }
+      },
+      {
+       "text": "[CON 17] Drink the salt to seal a page.",
+       "skillCheck": {
+        "stat": "CON",
+        "dc": 17
+       },
+       "outcomes": {
+        "pass": "salt_pass",
+        "fail": "salt_fail"
+       }
+      },
+      {
+       "text": "\"Read me one name. Any name.\"",
+       "outcome": "read_name"
+      },
+      {
+       "text": "Walk on.",
+       "outcome": "walked"
+      }
+     ]
+    },
+    "caught": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "(You work the count with him for an hour. Three centuries condense into a clean tally.)"
+      }
+     ],
+     "choices": [
+      {
+       "text": "Move on.",
+       "outcome": "caught_done"
+      }
+     ],
+     "outcomes": {
+      "caught_done": {
+       "text": "The Tidekeeper bows. \"You have given the dead their proper number. The abyss owes you one act of forbearance. Spend it wisely.\"",
+       "setFlag": "tidekeeper_aided",
+       "reward": {
+        "xp": 280,
+        "gold": 180
+       }
+      }
+     }
+    },
+    "caught_part": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "A century is still a century. Thank you."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Move on.",
+       "outcome": "part_done"
+      }
+     ],
+     "outcomes": {
+      "part_done": {
+       "text": "You leave him scribbling salt across a fresh page.",
+       "setFlag": "tidekeeper_partial",
+       "reward": {
+        "xp": 120
+       }
+      }
+     }
+    },
+    "salt_pass": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "(You drink the brine. It burns. The page seals. The abyss recoils a fraction.)"
+      }
+     ],
+     "choices": [
+      {
+       "text": "Hand back the page.",
+       "outcome": "salt_sealed"
+      }
+     ],
+     "outcomes": {
+      "salt_sealed": {
+       "text": "The keeper presses a small salt-charm into your hand. \"Wear it. The abyss will hesitate before it tastes you.\"",
+       "setFlag": "tidekeeper_aided",
+       "reward": {
+        "xp": 240,
+        "gold": 140,
+        "item": "salt_charm",
+        "itemName": "Tidekeeper's Salt-Charm",
+        "itemDesc": "The abyss is a worse swimmer than you, now."
+       }
+      }
+     }
+    },
+    "salt_fail": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "The brine refuses you. No matter. Walk softly."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Move on.",
+       "outcome": "salt_left"
+      }
+     ],
+     "outcomes": {
+      "salt_left": {
+       "text": "You leave him bowing over the ledger.",
+       "setFlag": "tidekeeper_met",
+       "reward": {
+        "damage": 12
+       }
+      }
+     }
+    },
+    "read_name": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Yorra of the Reach. Drowned on a clear day with no water in sight. The abyss reaches further than the tide does."
+      },
+      {
+       "speaker": "companion",
+       "companionIndex": 2,
+       "text": "$name murmurs the name back, like a prayer."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Walk on.",
+       "outcome": "named"
+      }
+     ],
+     "outcomes": {
+      "named": {
+       "text": "You walk on. The name stays with you longer than it should.",
+       "setFlag": "tidekeeper_met",
+       "reward": {
+        "xp": 90
+       }
+      }
+     }
+    },
+    "walked": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Walk well. The abyss watches the walkers."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Move on.",
+       "outcome": "walked_off"
+      }
+     ],
+     "outcomes": {
+      "walked_off": {
+       "text": "You walk. The salt-pages rustle behind you for a long while.",
+       "setFlag": "tidekeeper_walked"
+      }
+     }
+    }
+   }
+  },
+  "recruit_veya": {
+   "id": "recruit_veya",
+   "bg": "ruins",
+   "npcName": "Sister Veya",
+   "npcPortrait": "images/openai_v2/sister_veya_portrait.png",
+   "npcAppearance": "sister_veya",
+   "showPartyOnGrid": true,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Quiet — quiet, please. He's sleeping for the first time in two days and I'd like to keep at least one promise today. Step softly or step around."
+      },
+      {
+       "speaker": "hero",
+       "text": "There are six of them under that awning. You're treating a whole road of wounded alone?"
+      },
+      {
+       "speaker": "npc",
+       "text": "Alone is a strong word. I have bandages, willowbark, and a god who doesn't always answer letters. Sister Veya. The convent that trained me is ash now — the Veil took it the way it takes everything, politely and then all at once. So I follow the wounded instead. They're easy to find. They're always on the road that leads toward whatever's killing them."
+      },
+      {
+       "speaker": "companion",
+       "companionIndex": 1,
+       "text": "$name crouches by the sleeping man. \"His wound's gone black at the edges. That's not a sword-cut anymore.\""
+      },
+      {
+       "speaker": "npc",
+       "text": "No. It's the rot, wearing a sword-cut as a disguise. I can hold it back from one man with my two hands. I cannot hold it back from a kingdom. You look like people walking toward the thing I keep treating the edges of. If that's true — I'd rather treat the cause."
+      }
+     ],
+     "choices": [
+      {
+       "text": "[WIS 13] Lay your hand by the wound — feel what she's fighting.",
+       "skillCheck": {
+        "stat": "WIS",
+        "dc": 13
+       },
+       "outcomes": {
+        "pass": "wis_pass",
+        "fail": "wis_fail"
+       }
+      },
+      {
+       "text": "[Cleric/healer] Match her rite, hand over hand.",
+       "next": "healer_bond",
+       "requires": {
+        "partyTag": "healer"
+       }
+      },
+      {
+       "text": "\"We are walking toward it. We're walking at it. Come with us.\"",
+       "next": "recruit_offer"
+      },
+      {
+       "text": "\"You should rest. We can't stay.\"",
+       "outcome": "not_now"
+      }
+     ]
+    },
+    "wis_pass": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "(You hold your palm a hand's width above the black wound. It pulls at you — patient, hungry, certain. Not a poison. An appetite.)"
+      },
+      {
+       "speaker": "npc",
+       "text": "You felt it lean. Most people just see a bad cut. The ones who feel it lean either run, or they get useful. Which are you?"
+      }
+     ],
+     "choices": [
+      {
+       "text": "\"Useful. Come with us — we're going to the cause.\"",
+       "next": "recruit_offer"
+      },
+      {
+       "text": "\"I felt it. I still can't stay.\"",
+       "outcome": "not_now"
+      }
+     ]
+    },
+    "healer_bond": {
+     "lines": [
+      {
+       "speaker": "companion",
+       "companionIndex": 1,
+       "text": "$name kneels opposite Veya and lays their hands where hers already are. The two rites don't clash — they brace each other, like two people carrying one beam."
+      },
+      {
+       "speaker": "npc",
+       "text": "Oh. You've done a deathbed before. I can always tell — your hands don't hurry. People who've never lost one always hurry."
+      },
+      {
+       "speaker": "npc",
+       "text": "If your order will have me, I'll walk with people who know how to lose well. It means they fight for the right reasons."
+      }
+     ],
+     "choices": [
+      {
+       "text": "\"Then walk with us.\"",
+       "next": "recruit_offer"
+      },
+      {
+       "text": "\"Stay with your patients. We'll carry word back.\"",
+       "outcome": "not_now"
+      }
+     ]
+    },
+    "wis_fail": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "You can't feel it, can you. That's not a flaw. It just means you'll have to take my word for what we're facing — and decide if my word is worth a road."
+      }
+     ],
+     "choices": [
+      {
+       "text": "\"Your word's good enough. Come with us.\"",
+       "next": "recruit_offer"
+      },
+      {
+       "text": "\"We can't take that on faith. Not now.\"",
+       "outcome": "not_now"
+      }
+     ]
+    },
+    "recruit_offer": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Then I have conditions, and they aren't negotiable. I treat the enemy's wounded too, if there's time and they've laid down steel. I don't leave a dying man to make better marching speed. And when I tell you someone can't be saved, you don't make me try anyway just so you can sleep. Those are my oaths. Can your road hold them?"
+      },
+      {
+       "speaker": "hero",
+       "text": "It can. It should have all along."
+      }
+     ],
+     "choices": [
+      {
+       "text": "\"Those are good oaths. Welcome, Sister.\"",
+       "outcome": "recruit_join"
+      },
+      {
+       "text": "On second thought — gather what she can spare instead.",
+       "next": "decline"
+      }
+     ],
+     "outcomes": {
+      "recruit_join": {
+       "text": "Veya looks at the sleeping man a long moment, then presses her remaining willowbark into a colleague's hands and stands. \"He'll keep till the next walker. They always come.\" She falls in beside you, already counting your party's old scars with her eyes.",
+       "recruitHero": {
+        "id": "sister_veya",
+        "name": "Sister Veya",
+        "classId": "cleric",
+        "classChoices": [
+         "cleric",
+         "druid"
+        ]
+       },
+       "setFlag": "veya_recruited"
+      }
+     }
+    },
+    "decline": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "I understand. The wounded don't move themselves and you can't carry both us and the world. Take something, then — I'd rather it walk toward the cause even if I can't."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Accept a purse for the convent's lost work.",
+       "outcome": "take_gold"
+      },
+      {
+       "text": "Take the warding-mace she no longer has hands to swing.",
+       "outcome": "take_gear"
+      },
+      {
+       "text": "\"Keep all of it. Just point us the right way.\"",
+       "outcome": "send_off"
+      }
+     ],
+     "outcomes": {
+      "take_gold": {
+       "text": "She counts coin out of a salt-stained alms box without ceremony. \"It was for a roof we'll never raise. Spend it on the cause.\" (+~145 gold)",
+       "setFlag": "veya_declined",
+       "reward": {
+        "gold": 145
+       }
+      },
+      "take_gear": {
+       "text": "She unwraps a head-heavy mace banded in old convent silver. \"A sister carried this to three wars and one bad winter. My wrists are done. Yours aren't.\"",
+       "setFlag": "veya_declined",
+       "reward": {
+        "item": "iron_mace",
+        "itemRarity": "magic",
+        "itemName": "Sister's Warding Mace",
+        "itemDesc": "Convent-blessed, war-worn. The silver bands still hold a faint warmth."
+       }
+      },
+      "send_off": {
+       "text": "She points you down the dark road without a word, then turns back to her patients. \"Go well. Come back wounded if you have to. I'll be on a road like this one.\" (+20 xp)",
+       "setFlag": "veya_declined",
+       "reward": {
+        "xp": 20
+       }
+      }
+     }
+    },
+    "not_now": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Then go, and go fast. The road keeps its own hours. I'll still be here treating its leavings if you change your mind."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Move on.",
+       "outcome": "leave"
+      }
+     ],
+     "outcomes": {
+      "leave": {
+       "text": "You leave Sister Veya bent over the sleeping man, her lips moving in a rite older than the convent that taught it. The black at the wound's edge does not advance while she works. It only waits."
+      }
+     }
+    }
+   }
+  },
+  "recruit_dorn": {
+   "id": "recruit_dorn",
+   "bg": "forest",
+   "npcName": "Bulwark Dorn",
+   "npcPortrait": "images/openai_v2/bulwark_dorn_portrait.png",
+   "npcAppearance": "bulwark_dorn",
+   "showPartyOnGrid": true,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "The bridge is one man wide and one man holds it. That man is me. State your weight and your business, in that order."
+      },
+      {
+       "speaker": "hero",
+       "text": "There's no toll-post here. No banner. Whose bridge is this?"
+      },
+      {
+       "speaker": "npc",
+       "text": "Nobody's. That's the point. The village it fed is gone — Veil-eaten, three months back, while their levy waited for orders that never came. I was the levy. I had nothing to do with my shield after, so I brought it here. Things still try to cross toward the living. They don't cross. That's the whole of my work now and I do it well."
+      },
+      {
+       "speaker": "companion",
+       "companionIndex": 1,
+       "text": "$name studies the far bank. \"The planks on his side are scored to splinters. He's not exaggerating the traffic.\""
+      },
+      {
+       "speaker": "npc",
+       "text": "I am incapable of exaggerating. It's a documented flaw. So believe me plainly: I would rather hold a bridge that mattered. This one stopped mattering when the village did. I keep it out of stubbornness. Stubbornness is a fine shield and a poor purpose."
+      }
+     ],
+     "choices": [
+      {
+       "text": "[STR 12] Take the line beside him, shoulder to shield, while something tests it.",
+       "skillCheck": {
+        "stat": "STR",
+        "dc": 12
+       },
+       "outcomes": {
+        "pass": "str_pass",
+        "fail": "str_fail"
+       }
+      },
+      {
+       "text": "[Paladin] Speak the levy-oath he was never released from.",
+       "next": "oath_release",
+       "requires": {
+        "partyClass": "paladin"
+       }
+      },
+      {
+       "text": "\"Then hold a bridge that matters. Come with us.\"",
+       "next": "recruit_offer"
+      },
+      {
+       "text": "\"We're only crossing. Stand aside.\"",
+       "outcome": "not_now"
+      }
+     ]
+    },
+    "str_pass": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "(Something pale and many-legged comes off the far bank fast. You set your feet next to Dorn's and the two of you take the weight together. It does not move you. It does not move at all. It dies on the planks.)"
+      },
+      {
+       "speaker": "npc",
+       "text": "You braced instead of swung. Most people swing — they want the kill more than the line. You wanted the line. That's the rarer instinct. The more useful one, too."
+      }
+     ],
+     "choices": [
+      {
+       "text": "\"Bring that instinct somewhere it counts. Come with us.\"",
+       "next": "recruit_offer"
+      },
+      {
+       "text": "\"Good line. We still have to cross alone.\"",
+       "outcome": "not_now"
+      }
+     ]
+    },
+    "oath_release": {
+     "lines": [
+      {
+       "speaker": "companion",
+       "companionIndex": 2,
+       "text": "$name steps forward and speaks the old levy-release — the words a captain says to a soldier whose post no longer exists, freeing them to be useful elsewhere without it counting as desertion."
+      },
+      {
+       "speaker": "npc",
+       "text": "(He is silent for a long time. The shield lowers by an inch — the first inch in three months.) Nobody came to say those words. Captains don't, when there's no village to send the paperwork to. I have been held here by a sentence nobody bothered to finish. You finished it."
+      }
+     ],
+     "choices": [
+      {
+       "text": "\"You're released. Now choose where to stand.\"",
+       "next": "recruit_offer"
+      },
+      {
+       "text": "\"You're free. Even if that's away from us.\"",
+       "outcome": "not_now"
+      }
+     ]
+    },
+    "str_fail": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "You broke your stance to strike and the planks took the price for it. Watch — like this. Feet, then weight, then patience. The killing is the bridge's job. Standing is yours."
+      }
+     ],
+     "choices": [
+      {
+       "text": "\"Teach us on the road, then. Come with us.\"",
+       "next": "recruit_offer"
+      },
+      {
+       "text": "\"Noted. We cross alone for now.\"",
+       "outcome": "not_now"
+      }
+     ]
+    },
+    "recruit_offer": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "I have one term. If I take a line with you, I hold it until you call me off it — not until it gets hard. Things get hard. That's when the line is for. If you're the sort to pull a shield-man back the moment it costs blood, say so now and I'll stay on my pointless bridge instead."
+      },
+      {
+       "speaker": "hero",
+       "text": "We hold what we hold. You won't stand alone."
+      }
+     ],
+     "choices": [
+      {
+       "text": "\"You won't. Take the front, Dorn.\"",
+       "outcome": "recruit_join"
+      },
+      {
+       "text": "Actually — leave him the bridge, take what he can spare.",
+       "next": "decline"
+      }
+     ],
+     "outcomes": {
+      "recruit_join": {
+       "text": "Dorn looks back once at the empty bank, the way a man checks a door he no longer needs to lock. Then he turns his shield toward the road ahead and falls in at your front rank. \"Tell me where the line is,\" is all he says. \"I'll be on it.\"",
+       "recruitHero": {
+        "id": "bulwark_dorn",
+        "name": "Bulwark Dorn",
+        "classId": "paladin",
+        "classChoices": [
+         "paladin",
+         "warrior",
+         "fighter"
+        ]
+       },
+       "setFlag": "dorn_recruited"
+      }
+     }
+    },
+    "decline": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Then the bridge keeps me and I keep the bridge. Fair enough — at least it's a clean trade. But don't cross empty-handed. Stubbornness is the only thing here I can't give away."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Accept the levy's buried pay-chest he never spent.",
+       "outcome": "take_gold"
+      },
+      {
+       "text": "Take the war-maul he keeps for the things a shield won't stop.",
+       "outcome": "take_gear"
+      },
+      {
+       "text": "\"Keep it all. Just tell us the safe bank.\"",
+       "outcome": "send_off"
+      }
+     ],
+     "outcomes": {
+      "take_gold": {
+       "text": "He levers up a plank and hauls out an iron strongbox, the village levy's last unpaid wages. \"Nobody left to pay it to. Spend it where soldiers still get paid.\" (+~105 gold)",
+       "setFlag": "dorn_declined",
+       "reward": {
+        "gold": 105
+       }
+      },
+      "take_gear": {
+       "text": "He passes you a brutal long-hafted maul, its head pitted from the things that come off the far bank at night. \"A shield stops most. This is for the rest. I won't need it on a bridge nothing crosses if you're not crossing it.\"",
+       "setFlag": "dorn_declined",
+       "reward": {
+        "item": "warhammer",
+        "itemRarity": "magic",
+        "itemName": "Bridgewarden's Maul",
+        "itemDesc": "Long-hafted, pitted, patient. Held one bridge against three months of dark."
+       }
+      },
+      "send_off": {
+       "text": "He points across to the firmer planks on the western side and plants his shield again before you've finished crossing. \"Go on. The bridge is held. It'll still be held.\" (+20 xp)",
+       "setFlag": "dorn_declined",
+       "reward": {
+        "xp": 20
+       }
+      }
+     }
+    },
+    "not_now": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Cross, then. Mind the scored planks on my side. And mind that I'll still be standing here if the road sends you back this way with a better offer."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Move on.",
+       "outcome": "leave"
+      }
+     ],
+     "outcomes": {
+      "leave": {
+       "text": "You cross under Bulwark Dorn's flat, patient stare. He does not watch you go. He watches the far bank. Nothing comes off it while you can still see him. That, you suspect, is not luck."
+      }
+     }
+    }
+   }
+  },
+  "recruit_kessa": {
+   "id": "recruit_kessa",
+   "bg": "forest",
+   "npcName": "Kessa Quill",
+   "npcPortrait": "images/openai_v2/kessa_quill_portrait.png",
+   "npcAppearance": "kessa_quill",
+   "showPartyOnGrid": true,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Don't step left. There's a print there I've been reading for an hour and a boot would cost me the whole sentence. Stand where you are and tell me you're not the thing that made it."
+      },
+      {
+       "speaker": "hero",
+       "text": "We're not. We're hunting the same thing you are, if that print is what I think it is."
+      },
+      {
+       "speaker": "npc",
+       "text": "Kessa Quill. I track. Used to be deer, boar, the occasional fool who owed the wrong man money. Now I track this — a thing that walks like it borrowed legs and didn't read the instructions. It leaves rot where it rests. I've followed it nine days. It does not sleep, which is rude, because I have to."
+      },
+      {
+       "speaker": "companion",
+       "companionIndex": 1,
+       "text": "$name peers at the print. \"The toes splay wrong. And nothing grows in the heel-mark — it's killed the ground just by standing on it.\""
+      },
+      {
+       "speaker": "npc",
+       "text": "Now you see why I haven't loosed an arrow yet. You don't shoot a thing until you know which end of it learns. I know almost enough. Almost is a bad word in my trade. A second set of eyes — and a few more arrows in the air when it finally turns around — would make almost into enough."
+      }
+     ],
+     "choices": [
+      {
+       "text": "[DEX 12] Read the trail ahead of her — call where it's heading.",
+       "skillCheck": {
+        "stat": "DEX",
+        "dc": 12
+       },
+       "outcomes": {
+        "pass": "dex_pass",
+        "fail": "dex_fail"
+       }
+      },
+      {
+       "text": "[INT 13] Reason out what the rot-pattern means, not just where it goes.",
+       "skillCheck": {
+        "stat": "INT",
+        "dc": 13
+       },
+       "outcomes": {
+        "pass": "int_pass",
+        "fail": "dex_fail"
+       }
+      },
+      {
+       "text": "\"We're hunting it too. Track it with us — more arrows, more eyes.\"",
+       "next": "recruit_offer"
+      },
+      {
+       "text": "\"Track your way. We'll cross paths.\"",
+       "outcome": "not_now"
+      }
+     ]
+    },
+    "dex_pass": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "(You crouch past her, reading where she stopped. The stride lengthens here — it's not wandering anymore. It's going somewhere. Upwind. Toward the spring the village still uses.)"
+      },
+      {
+       "speaker": "npc",
+       "text": "You read the lengthening. I missed the lengthening for two hours. You're either a tracker or a liar, and liars don't crouch that careful. Fine. You're hired into my hunt — or I'm hired into yours. Whichever costs me fewer arrows."
+      }
+     ],
+     "choices": [
+      {
+       "text": "\"Same hunt. Come with us.\"",
+       "next": "recruit_offer"
+      },
+      {
+       "text": "\"Good read. We still move apart for now.\"",
+       "outcome": "not_now"
+      }
+     ]
+    },
+    "int_pass": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "It's not hunting prey. Look at the rot-spread — it rests where the old warding-stones were. It's not feeding. It's unmaking the fences someone built to hold its kind out."
+      },
+      {
+       "speaker": "npc",
+       "text": "(She is quiet for a moment.) Nine days and I read it as a beast. You read it as a saboteur in one breath. I track better with someone who thinks about why the thing walks, not just where. That's an offer, if you want it heard as one."
+      }
+     ],
+     "choices": [
+      {
+       "text": "\"Heard. Walk the hunt with us.\"",
+       "next": "recruit_offer"
+      },
+      {
+       "text": "\"Keep tracking. We'll meet down the trail.\"",
+       "outcome": "not_now"
+      }
+     ]
+    },
+    "dex_fail": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "You lost it at the deadfall. Don't feel clever about it — it took me a season to stop losing things at deadfalls. The question isn't whether you can track. It's whether you'll keep up while I do."
+      }
+     ],
+     "choices": [
+      {
+       "text": "\"We'll keep up. Come with us.\"",
+       "next": "recruit_offer"
+      },
+      {
+       "text": "\"We'll manage our own trail.\"",
+       "outcome": "not_now"
+      }
+     ]
+    },
+    "recruit_offer": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "One rule, and it's not about coin. I take the shot when the shot is right, not when someone shouts for it. I've watched good hunters die because somebody panicked them into loosing early. If you can stand a few breaths of me not firing while you'd rather I did — we'll get along, and you'll live longer for it."
+      },
+      {
+       "speaker": "hero",
+       "text": "Your shot, your call. We'll hold the line until you take it."
+      }
+     ],
+     "choices": [
+      {
+       "text": "\"Your shot, your timing. Welcome, Kessa.\"",
+       "outcome": "recruit_join"
+      },
+      {
+       "text": "Reconsider — let her hunt alone, take what she offers.",
+       "next": "decline"
+      }
+     ],
+     "outcomes": {
+      "recruit_join": {
+       "text": "Kessa eases the tension off her bowstring, marks the print with a peeled twig so she can find the thread again, and stands. \"Nine days alone makes a person strange. Tell me if I get strange.\" She drops into your column at the back, eyes already past you, reading the road you haven't walked yet.",
+       "recruitHero": {
+        "id": "kessa_quill",
+        "name": "Kessa Quill",
+        "classId": "ranger",
+        "classChoices": [
+         "ranger",
+         "rogue"
+        ]
+       },
+       "setFlag": "kessa_recruited"
+      }
+     }
+    },
+    "decline": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Suit yourself. The thing won't mind being hunted by two parties instead of one — it'll just have twice as much to ignore. Take something off me before you go, though. A hunter who travels heavy travels slow, and I'd rather you carried it than the rot did."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Accept the bounty-purse she's been hauling unspent.",
+       "outcome": "take_gold"
+      },
+      {
+       "text": "Take the long hunting bow she keeps as a spare.",
+       "outcome": "take_gear"
+      },
+      {
+       "text": "\"Keep your gear. Just mark its trail for us.\"",
+       "outcome": "send_off"
+      }
+     ],
+     "outcomes": {
+      "take_gold": {
+       "text": "She tosses you a heavy purse without looking up from the print. \"Bounty money. Three jobs I finished and never went back to collect proper. It spends. The trail doesn't.\" (+~130 gold)",
+       "setFlag": "kessa_declined",
+       "reward": {
+        "gold": 130
+       }
+      },
+      "take_gear": {
+       "text": "She unstraps a tall, dark-limbed bow from her pack and holds it out. \"Spare. Heavier draw than mine — I keep it for things that don't go down on the first shaft. Sounds like you're walking toward exactly that.\"",
+       "setFlag": "kessa_declined",
+       "reward": {
+        "item": "shortbow",
+        "itemRarity": "magic",
+        "itemName": "Tracker's Long Hunting Bow",
+        "itemDesc": "A heavy-draw spare, kept oiled for the things that don't fall on the first arrow."
+       }
+      },
+      "send_off": {
+       "text": "She scratches a fast map into the dirt with an arrowhead — where it rested, where it's headed, where the rot runs deepest. \"There. Now we're both ahead of it. Go.\" (+20 xp)",
+       "setFlag": "kessa_declined",
+       "reward": {
+        "xp": 20
+       }
+      }
+     }
+    },
+    "not_now": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Go on, then. Step right, not left — I told you about the print. If you wise up, the trail's easy to follow. Just walk toward whatever the birds stopped singing about."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Move on.",
+       "outcome": "leave"
+      }
+     ],
+     "outcomes": {
+      "leave": {
+       "text": "Kessa Quill goes back to the print without watching you leave, the way only people who trust their ears do. Somewhere ahead, the woods have gone quiet in a long, deliberate line. You both know what that means. Only one of you is being paid for it."
+      }
+     }
+    }
+   }
+  },
+  "recruit_magnus": {
+   "id": "recruit_magnus",
+   "bg": "ruins",
+   "npcName": "Magnus Orre",
+   "npcPortrait": "images/openai_v2/magnus_orre_portrait.png",
+   "npcAppearance": "magnus_orre",
+   "showPartyOnGrid": true,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "If you're here to rob me, the good news is you're fourth in line and the previous three found nothing. If you're here to kill me, you'll have to wait — I'm mid-equation and dying out of order would offend me."
+      },
+      {
+       "speaker": "hero",
+       "text": "Those are escort colors on the dead men behind you. A scholar's train. Ambushed?"
+      },
+      {
+       "speaker": "npc",
+       "text": "Six guards, a clerk, two mules and a man who once held a chair in arcane theory at a university that is now, I'm told, a crater. The Veil took the road faster than the maps could warn us. The guards died doing their work. I survived doing mine, which is sitting very still and being briefly uninteresting. Magnus Orre. I study the wards that were supposed to hold all this — academically, until about a week ago, when it became extremely practical."
+      },
+      {
+       "speaker": "companion",
+       "companionIndex": 1,
+       "text": "$name eyes the scorched ground in a ring around him. \"He's sitting inside a circle. The rot stopped at the chalk.\""
+      },
+      {
+       "speaker": "npc",
+       "text": "A holding-ward. Third-rate, frankly — I had better chalk on the mules. It's kept me alive four days and it will not keep me alive five. I have a head full of how the great wardings were built and no legs worth the word to carry it anywhere it matters. You appear to have legs and a direction. I'd very much like to borrow both."
+      }
+     ],
+     "choices": [
+      {
+       "text": "[INT 14] Argue his warding theory back at him — find the flaw he's missed.",
+       "skillCheck": {
+        "stat": "INT",
+        "dc": 14
+       },
+       "outcomes": {
+        "pass": "int_pass",
+        "fail": "int_fail"
+       }
+      },
+      {
+       "text": "[Mage] Read the holding-ward's structure with him, hand to chalk.",
+       "next": "mage_bond",
+       "requires": {
+        "partyClass": "mage"
+       }
+      },
+      {
+       "text": "\"We have legs and a direction. Both are yours. Come with us.\"",
+       "next": "recruit_offer"
+      },
+      {
+       "text": "\"We can't escort a scholar through this. Not now.\"",
+       "outcome": "not_now"
+      }
+     ]
+    },
+    "int_pass": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "Your circle assumes the rot pushes inward evenly. It doesn't. It probes. Brace the chalk on the windward arc and you double your four days. You knew that and you were saving it."
+      },
+      {
+       "speaker": "npc",
+       "text": "(He is delighted in the specific way of a man who has found someone worth being wrong in front of.) I was saving it, yes — testing whether you'd find it. You did. I will travel with people who argue. People who only agree get me killed politely."
+      }
+     ],
+     "choices": [
+      {
+       "text": "\"Then argue with us on the move. Come on.\"",
+       "next": "recruit_offer"
+      },
+      {
+       "text": "\"Sharp. We still can't carry you. Not now.\"",
+       "outcome": "not_now"
+      }
+     ]
+    },
+    "mage_bond": {
+     "lines": [
+      {
+       "speaker": "companion",
+       "companionIndex": 1,
+       "text": "$name kneels at the chalk line and traces the holding-ward's logic back to its root. Magnus watches their hand the way other men watch a blade — judging, then approving."
+      },
+      {
+       "speaker": "npc",
+       "text": "You followed it to the keystone glyph instead of fussing the decoration. That's a real education or a frighteningly good guesser. Either way — I have a great deal of stolen lecture in my head and finally someone fit to hear it. That's as close to a recruitment pitch as I get."
+      }
+     ],
+     "choices": [
+      {
+       "text": "\"Then teach us walking. Come with us.\"",
+       "next": "recruit_offer"
+      },
+      {
+       "text": "\"Hold your ward. We'll send help if we can.\"",
+       "outcome": "not_now"
+      }
+     ]
+    },
+    "int_fail": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "No — the windward arc, not the leeward, you've got it inverted. Don't look stricken; the inversion is the single most common error and it has killed cleverer people than either of us. The point isn't that you were wrong. It's that you tried the equation at all. Most people just stare at the chalk."
+      }
+     ],
+     "choices": [
+      {
+       "text": "\"We'll learn the rest on the road. Come with us.\"",
+       "next": "recruit_offer"
+      },
+      {
+       "text": "\"We'll leave the wardcraft to you. Not now.\"",
+       "outcome": "not_now"
+      }
+     ]
+    },
+    "recruit_offer": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "One condition, and it is non-negotiable because it is the entire point of me. When I say a thing about the Veil that contradicts what you'd rather believe, you let me finish the sentence. I survived a crater because I finished sentences. If you're the sort to march off mid-explanation because the explanation was inconvenient — leave me the chalk and a clean conscience."
+      },
+      {
+       "speaker": "hero",
+       "text": "Finish your sentences. We'll need every one of them."
+      }
+     ],
+     "choices": [
+      {
+       "text": "\"Every sentence. Get up, scholar — you're with us.\"",
+       "outcome": "recruit_join"
+      },
+      {
+       "text": "On reflection — leave him the circle, take what he offers.",
+       "next": "decline"
+      }
+     ],
+     "outcomes": {
+      "recruit_join": {
+       "text": "Magnus stands with the careful dignity of a man whose legs have voted against him for four days. He scuffs his own ward closed with one heel — \"no point leaving good theory for the rot to misread\" — and falls in, already explaining something none of you asked about. None of you stop him.",
+       "recruitHero": {
+        "id": "magnus_orre",
+        "name": "Magnus Orre",
+        "classId": "mage",
+        "classChoices": [
+         "mage",
+         "sorcerer"
+        ]
+       },
+       "setFlag": "magnus_recruited"
+      }
+     }
+    },
+    "decline": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "A reasonable conclusion, if a disappointing one. I am, objectively, a logistical liability with strong opinions. Still — don't leave with empty hands. Knowledge I can't carry is worse than knowledge nobody has. Take a piece of it that fits in a pack."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Accept the chair's stipend he never got to spend.",
+       "outcome": "take_gold"
+      },
+      {
+       "text": "Take the focusing-staff from his ruined train.",
+       "outcome": "take_gear"
+      },
+      {
+       "text": "\"Keep it. Just teach us one thing before we go.\"",
+       "outcome": "send_off"
+      }
+     ],
+     "outcomes": {
+      "take_gold": {
+       "text": "He digs a sealed academic purse from his robes — a term's stipend, paid in advance for a chair that no longer exists. \"It funded nothing. Let it fund something.\" (+~165 gold)",
+       "setFlag": "magnus_declined",
+       "reward": {
+        "gold": 165
+       }
+      },
+      "take_gear": {
+       "text": "He retrieves a tall focusing-staff from beneath a dead guard's cloak, its head a lattice of cooled glass. \"Faculty issue. Better than my chalk, considerably better than my legs. It should walk toward the wards instead of rotting here with me.\"",
+       "setFlag": "magnus_declined",
+       "reward": {
+        "item": "staff",
+        "itemRarity": "magic",
+        "itemName": "Faculty Focusing-Staff",
+        "itemDesc": "University issue, lattice-headed. Hums faintly when the Veil is near."
+       }
+      },
+      "send_off": {
+       "text": "He tells you the one thing that matters — where the great wardings' keystones still hold, and which has already failed — fast and clear, the lecture of a man who knows his time is short. \"There. Now the knowledge has legs even if I don't. Go.\" (+20 xp)",
+       "setFlag": "magnus_declined",
+       "reward": {
+        "xp": 20
+       }
+      }
+     }
+    },
+    "not_now": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Understandable. A scholar is poor cargo on a fast road. The chalk holds another day, perhaps. If your road loops back before it doesn't — I'll be the man in the circle, still talking. I'm always still talking."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Move on.",
+       "outcome": "leave"
+      }
+     ],
+     "outcomes": {
+      "leave": {
+       "text": "You leave Magnus Orre cross-legged inside his third-rate circle, lecturing the empty air on the structural failure of everything around him. The chalk holds. For now, the chalk holds. He does not look up as you go — but his voice follows you a surprising distance down the road."
+      }
+     }
+    }
+   }
+  }
+ }
+}

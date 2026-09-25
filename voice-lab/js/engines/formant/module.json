@@ -1,0 +1,12 @@
+{
+  "name": "playground-formant-voice",
+  "version": "1.1.0",
+  "description": "Our own rule-based formant text-to-speech (Klatt-style synth + CMUdict + letter-to-sound rules). Pure JS, no network, deterministic.",
+  "entry": "../../formant-voice.js",
+  "engine": "formant",
+  "sampleRate": 22050,
+  "knobs": ["pitch", "speed", "depth", "tone", "breath", "rough", "flutter", "intonation", "wordgap", "gender"],
+  "data": ["voice-lab/data/cmudict/cmudict.txt (BSD)"],
+  "license": "MIT-style (ours) + CMUdict BSD",
+  "compat": { "voiceJson": 1 }
+}

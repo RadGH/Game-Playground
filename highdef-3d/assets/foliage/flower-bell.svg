@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- Bluebell: an arching stem with six hanging bells, each with a flared
+       rim and curled tips, and two long narrow leaves from the base. -->
+  <defs>
+    <linearGradient id="bl" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#5a5f8a"/>
+      <stop offset="0.45" stop-color="#8083ad"/>
+      <stop offset="1" stop-color="#5f6390"/>
+    </linearGradient>
+    <linearGradient id="bl2" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#4e527a"/>
+      <stop offset="0.45" stop-color="#70739c"/>
+      <stop offset="1" stop-color="#52567f"/>
+    </linearGradient>
+    <linearGradient id="lf" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#4a6138"/>
+      <stop offset="1" stop-color="#6f8a4c"/>
+    </linearGradient>
+    <!-- a bell hanging from the origin, mouth at the bottom with three curled lobes -->
+    <path id="bell" d="M0,0 C-6,4 -9,14 -9,24 C-11,28 -12,32 -9,32 C-7,30 -5,28 -3,30 C-1,32 1,32 3,30 C5,28 7,30 9,32 C12,32 11,28 9,24 C9,14 6,4 0,0 Z"/>
+    <path id="bellv" d="M-4,6 C-6,14 -6,22 -5,28 M4,6 C6,14 6,22 5,28"/>
+    <path id="stalk" d="M0,0 C2,-2 4,-4 6,-4"/>
+  </defs>
+  <!-- leaves -->
+  <path d="M126,254 C108,210 90,170 84,110 C100,160 116,200 132,254 Z" fill="url(#lf)" stroke="#3a4d2c" stroke-width="0.7"/>
+  <path d="M132,254 C150,214 166,170 176,120 C164,170 150,214 138,254 Z" fill="url(#lf)" stroke="#3a4d2c" stroke-width="0.7"/>
+  <!-- arching stem -->
+  <path d="M130,254 C132,200 136,140 150,90 C158,64 166,50 186,42" fill="none" stroke="#5a7040" stroke-width="3.2" stroke-linecap="round"/>
+  <path d="M130,254 C132,200 136,140 150,90" fill="none" stroke="#88a05a" stroke-width="1" stroke-linecap="round" opacity="0.5"/>
+  <!-- bells hanging from short stalks, alternating sides, larger lower down -->
+  <g stroke="#43466a" stroke-width="0.6">
+    <path d="M140,130 C136,132 132,134 130,138" fill="none" stroke="#5a7040" stroke-width="1.6"/>
+    <use href="#bell" fill="url(#bl)" transform="translate(130 138) rotate(8) scale(1.15)"/>
+    <use href="#bellv" fill="none" stroke="#4d5079" opacity="0.7" transform="translate(130 138) rotate(8) scale(1.15)"/>
+    <path d="M144,112 C150,114 156,116 158,120" fill="none" stroke="#5a7040" stroke-width="1.6"/>
+    <use href="#bell" fill="url(#bl2)" transform="translate(158 120) rotate(-10) scale(1.1)"/>
+    <use href="#bellv" fill="none" stroke="#4d5079" opacity="0.7" transform="translate(158 120) rotate(-10) scale(1.1)"/>
+    <path d="M150,94 C146,96 140,98 136,102" fill="none" stroke="#5a7040" stroke-width="1.6"/>
+    <use href="#bell" fill="url(#bl)" transform="translate(136 102) rotate(10) scale(1.05)"/>
+    <use href="#bellv" fill="none" stroke="#4d5079" opacity="0.7" transform="translate(136 102) rotate(10) scale(1.05)"/>
+    <path d="M156,78 C162,78 168,80 172,84" fill="none" stroke="#5a7040" stroke-width="1.6"/>
+    <use href="#bell" fill="url(#bl2)" transform="translate(172 84) rotate(-12) scale(0.95)"/>
+    <use href="#bellv" fill="none" stroke="#4d5079" opacity="0.7" transform="translate(172 84) rotate(-12) scale(0.95)"/>
+    <path d="M164,62 C160,64 156,66 154,70" fill="none" stroke="#5a7040" stroke-width="1.5"/>
+    <use href="#bell" fill="url(#bl)" transform="translate(154 70) rotate(12) scale(0.85)"/>
+    <path d="M176,50 C180,50 184,52 186,56" fill="none" stroke="#5a7040" stroke-width="1.4"/>
+    <use href="#bell" fill="url(#bl2)" transform="translate(186 56) rotate(-14) scale(0.72)"/>
+    <!-- unopened bud at the tip -->
+    <ellipse cx="190" cy="40" rx="4" ry="7" fill="#7a7d9e" transform="rotate(-30 190 40)"/>
+  </g>
+</svg>

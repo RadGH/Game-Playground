@@ -1,0 +1,14 @@
+node_modules/
+test-results/
+playwright-report/
+.playwright/
+*.log
+.DS_Store
+# Large third-party model files are downloaded on demand (see vendor/README.md)
+vendor/piper/*.onnx
+vendor/piper/*.onnx.json
+.scratch/
+voice-lab/samples/*.wav
+library/synced/
+!library/synced/.gitkeep
+tools/scratch/

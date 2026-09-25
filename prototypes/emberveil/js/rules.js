@@ -1,0 +1,150 @@
+// Rules: Emberveil's stat formulas, progression, passives and skill merging (see research/rules-notes.md).
+// Every named effect (affix, legendary, skill key, status…) is registered in js/effects.js; this file
+// calls its derive hooks from derive(), its merge hooks from mergeSkill() and its wording from describeEffect().
+import { EFFECTS, applyDeriveEffects, applySkillMerge, describeSkillKey, describeId } from './effects.js';
+// One number formatter for the whole game (E5): health is always whole, everything else gets at
+// most two decimals. Re-exported here so game code can `import { fmt, fmtHp } from './rules.js'`.
+export { fmt, hp as fmtHp, hpRaw as fmtHpRaw, pct as fmtPct, pctOf as fmtPctOf, sign as fmtSign, range as fmtRange, secs as fmtSecs, hasLongDecimal } from '../../../shared/format.js';
+
+// ---------------------------------------------------------------------------------------------
+// Skill checks (crossings, map nodes, dialog events, dungeon stages, fleeing)
+//
+// An attribute is NOT the bonus. A hero with 28 STR used to add all 28 to a d20 against a
+// difficulty of 15, which meant every check passed. One point of bonus per ATTR_PER_BONUS points
+// of the attribute keeps the d20 in charge: 28 STR is +9, so a difficulty of 15 wants a 6 or
+// better. Every check in the game goes through checkBonus()/bestCheckBonus().
+/** Attribute points per point of skill-check bonus. */
+export const ATTR_PER_BONUS = 3;
+/** The check bonus an attribute value is worth (1 per 3 points, rounded down). */
+export function checkBonus(value) { const v = Number(value); return isFinite(v) ? Math.floor(Math.max(0, v) / ATTR_PER_BONUS) : 0; }
+/** The best check bonus in a group: the highest value of `stat` among them, turned into a bonus. */
+export function bestCheckBonus(units, stat, read = null) {
+  const list = (units || []).filter(Boolean); if (!list.length) return 0;
+  const get = read || (u => u?.derived?.[stat] ?? u?.attrs?.[stat] ?? 8);
+  return checkBonus(Math.max(...list.map(u => { const v = Number(get(u)); return isFinite(v) ? v : 8; })));
+}
+export const XP_TABLE = [0, 120, 320, 600, 960, 1400, 1920, 2520, 3200, 3960, 4800, 5720, 6720, 7800, 8960, 10200, 11520, 12920, 14400, 15960, 17640, 19440, 21360, 23400, 25560, 27840, 30240, 32760, 35400, 38160];
+export const MAX_LEVEL = 30, TALENT_LEVELS = [3, 8, 13, 18, 23, 28], PASSIVE_EVERY = 5, ATTR_PER_LEVEL = 2;
+export const HEALER_CLASSES = ['cleric', 'druid', 'priest', 'oracle', 'paladin', 'bard', 'shaman'];
+export const PASSIVE_NODES = { toughness: { name: 'Toughness', desc: '+10 Max HP per rank', maxHp: 10 }, devotion: { name: 'Devotion', desc: '+10 Max HP per rank', maxHp: 10 }, mana_pool: { name: 'Mana Pool', desc: '+10 Max MP per rank', maxMp: 10 }, regrowth: { name: 'Regrowth', desc: 'Regen +1 HP/turn per rank', hpRegen: 1 }, mana_flow: { name: 'Mana Flow', desc: 'Regen +1 MP/turn per rank', mpRegen: 1 }, wisdom: { name: 'Wisdom', desc: '+5 HP & +5 MP per rank', maxHp: 5, maxMp: 5 }, iron_wall: { name: 'Iron Wall', desc: '+5% block chance per rank', blockChance: 5 }, thorns: { name: 'Thorns', desc: 'Reflect 8% damage per rank', thorns: 0.08 }, resistance: { name: 'Resistance', desc: '+3% all-damage reduction per rank', resistAll: 3 }, aegis: { name: 'Aegis', desc: '+3% block & +5 HP per rank', blockChance: 3, maxHp: 5 }, vampirism: { name: 'Vampirism', desc: 'Lifesteal +5% per rank', lifesteal: 0.05 }, killing_blow: { name: 'Killing Blow', desc: 'Restore 10 HP on kill per rank', hpOnKill: 10 }, soul_harvest: { name: 'Soul Harvest', desc: 'Restore 8 MP on kill per rank', manaOnKill: 8 }, igniting: { name: 'Igniting', desc: '15% chance/rank to burn on hit', burnOnHit: 0.15 }, venomous: { name: 'Venomous', desc: '25% chance/rank to poison on crit', poisonOnCrit: 0.25 }, stormcharged: { name: 'Stormcharged', desc: '10% chance/rank to chain 50% damage', chainOnHit: 0.1 }, fleetfoot: { name: 'Fleetfoot', desc: '+4% dodge per rank', dodgePct: 4 }, deadly_aim: { name: 'Deadly Aim', desc: '+3% crit chance per rank', critPct: 3 }, assassin: { name: 'Assassin', desc: '+2% crit & 15%/rank poison on crit', critPct: 2, poisonOnCrit: 0.15 } };
+export const PASSIVE_TREES = { warrior: ['toughness', 'iron_wall', 'thorns', 'vampirism', 'killing_blow'], paladin: ['devotion', 'iron_wall', 'resistance', 'thorns', 'killing_blow'], ranger: ['regrowth', 'fleetfoot', 'deadly_aim', 'stormcharged', 'killing_blow'], rogue: ['wisdom', 'fleetfoot', 'assassin', 'vampirism', 'venomous'], cleric: ['devotion', 'mana_pool', 'mana_flow', 'aegis', 'soul_harvest'], bard: ['mana_flow', 'wisdom', 'fleetfoot', 'vampirism', 'soul_harvest'], mage: ['mana_pool', 'mana_flow', 'igniting', 'stormcharged', 'soul_harvest'], necromancer: ['mana_pool', 'mana_flow', 'soul_harvest', 'vampirism', 'venomous'], warlock: ['mana_pool', 'soul_harvest', 'igniting', 'vampirism', 'thorns'], demon_hunter: ['fleetfoot', 'deadly_aim', 'vampirism', 'assassin', 'killing_blow'], scavenger: ['regrowth', 'fleetfoot', 'killing_blow', 'soul_harvest', 'vampirism'], swashbuckler: ['wisdom', 'fleetfoot', 'deadly_aim', 'venomous', 'vampirism'], dragon_knight: ['toughness', 'iron_wall', 'resistance', 'igniting', 'killing_blow'], pyromancer: ['mana_pool', 'mana_flow', 'igniting', 'vampirism', 'soul_harvest'], stormcaller: ['mana_pool', 'mana_flow', 'stormcharged', 'deadly_aim', 'soul_harvest'], druid: ['regrowth', 'mana_flow', 'thorns', 'resistance', 'venomous'], oracle: ['mana_pool', 'mana_flow', 'wisdom', 'resistance', 'soul_harvest'], tactician: ['wisdom', 'mana_flow', 'deadly_aim', 'aegis', 'killing_blow'], chronomancer: ['mana_pool', 'mana_flow', 'wisdom', 'stormcharged', 'resistance'], tinker: ['mana_pool', 'mana_flow', 'deadly_aim', 'igniting', 'vampirism'] };
+export const PASSIVE_FALLBACK = ['toughness', 'regrowth', 'vampirism', 'fleetfoot', 'soul_harvest'];
+export const UNLOCKS = { warrior: null, fighter: null, ranger: null, rogue: null, mage: null, paladin: 'Complete Act 1', cleric: 'Complete Act 1', knight: 'Complete Act 1', shaman: 'Complete Act 1', tinker: 'Complete Act 1', priest: 'Complete Act 1', necromancer: 'Complete Act 2', bard: 'Complete Act 2', druid: 'Complete Act 2', witch_hunter: 'Complete Act 2', shadow_dancer: 'Complete Act 2', enchanter: 'Complete Act 2', demon_hunter: 'Complete Act 3', tactician: 'Complete Act 3', chronomancer: 'Complete Act 4', oracle: 'Complete the game', monk: 'Reach hero level 10', sorcerer: 'Reach hero level 15', stormcaller: 'Reach hero level 20', pyromancer: 'Slay 50 enemies', warlock: 'Kill a boss below 20% HP', dragon_knight: 'Defeat the Dragon boss', swashbuckler: 'Accumulate 1,000 gold', scavenger: 'Find 10 rare items', runesmith: 'Find 5 rare items' };
+// Enemy scaling knobs. These are the defaults; `applyBalance(data.balance)` (called by Game) replaces
+// them with whatever data/balance.json says, so balance.json is the one file to edit when tuning.
+export const ENEMY_GLOBAL = { hp: 0.58, dmg: 0.30, armor: 0.85 };
+export const ACT_MULT = { 0: [0.5, 0.75], 1: [0.85, 0.92], 2: [1.15, 1.1], 3: [1.85, 1.3], 4: [2.15, 1.45], 5: [2.45, 1.6], 6: [2.6, 1.65], 7: [3.2, 1.78], 8: [3.9, 1.9], 9: [4.7, 2.0], 10: [5.6, 2.1] };
+/** Per-act armour multiplier and flat magic-resist top-up (balance.json enemies.actMultipliers[act].armor / .magicResist). */
+export const ACT_DEFENCE = {};
+/** How a boss scales next to the trash in the same act (balance.json enemies.boss). */
+export const BOSS_MULT = { hpShare: 0.35, hp: 1, damage: 1, armor: 1 };
+/** Champion and named-leader frequency and strength (balance.json enemies.champion / .named). */
+export const CHAMPION = { chance: 0.05, hp: 1.5, damage: 1.3, perAct: 0 };
+export const NAMED = { chance: 0.28, nemesisChance: 0.2, hp: 1.5, damage: 1.25, xp: 2, gold: 3 };
+export const ECONOMY = { gold: 1.2, xp: 3, shopPrice: 1, dropRate: 1 };
+export const PARTY_SIZE_DMG = { 1: 0.4, 2: 0.65, 3: 0.85, 4: 1 };
+export const SKILL_MULT = { hero: 0.95, magic: 0.78, heavy: 1, light: 1 };
+/** Load data/balance.json over the defaults above. Safe to call more than once. */
+export function applyBalance(b) {
+  if (!b) return { ENEMY_GLOBAL, ACT_MULT, PARTY_SIZE_DMG, SKILL_MULT };
+  const g = b.enemies?.globalMultipliers; if (g) { ENEMY_GLOBAL.hp = g.hp ?? ENEMY_GLOBAL.hp; ENEMY_GLOBAL.dmg = g.damage ?? ENEMY_GLOBAL.dmg; ENEMY_GLOBAL.armor = g.armor ?? ENEMY_GLOBAL.armor; }
+  for (const [act, m] of Object.entries(b.enemies?.actMultipliers || {})) ACT_MULT[act] = [m.hp, m.damage];
+  for (const [n, m] of Object.entries(b.partySize?.enemyDmgMult || {})) PARTY_SIZE_DMG[n] = m;
+  const sk = b.combat?.skill; if (sk) { SKILL_MULT.hero = sk.heroDamageMult ?? SKILL_MULT.hero; SKILL_MULT.magic = sk.magicMult ?? SKILL_MULT.magic; SKILL_MULT.heavy = sk.heavyMult ?? SKILL_MULT.heavy; SKILL_MULT.light = sk.lightMult ?? SKILL_MULT.light; }
+  for (const [act, m] of Object.entries(b.enemies?.actMultipliers || {})) ACT_DEFENCE[act] = { armor: m.armor ?? 1, magicResist: m.magicResist ?? 0 };
+  Object.assign(BOSS_MULT, b.enemies?.boss || {});
+  Object.assign(CHAMPION, b.enemies?.champion || {});
+  Object.assign(NAMED, b.enemies?.named || {});
+  Object.assign(ECONOMY, b.economy?.globalMultipliers || {});
+  // The XP curve is a knob too: a longer table means slower levelling without touching any hero stat.
+  const pr = b.progression || {};
+  if (Array.isArray(pr.xpTable) && pr.xpTable.length) { XP_TABLE.length = 0; XP_TABLE.push(...pr.xpTable); }
+  if (Array.isArray(pr.talentPointLevels) && pr.talentPointLevels.length) { TALENT_LEVELS.length = 0; TALENT_LEVELS.push(...pr.talentPointLevels); }
+  return { ENEMY_GLOBAL, ACT_MULT, ACT_DEFENCE, BOSS_MULT, CHAMPION, NAMED, ECONOMY, PARTY_SIZE_DMG, SKILL_MULT };
+}
+
+export function levelFromXp(xp) { let l = 1; for (let i = 0; i < XP_TABLE.length; i++) if (xp >= XP_TABLE[i]) l = i + 1; return Math.min(MAX_LEVEL, l); }
+export function xpForLevel(l) { return XP_TABLE[Math.min(XP_TABLE.length, l) - 1] ?? Infinity; }
+export function passiveTree(classId) { return (PASSIVE_TREES[classId] || PASSIVE_FALLBACK).map(id => ({ id, ...PASSIVE_NODES[id], maxRank: 3 })); }
+export function passiveBonuses(hero) { const out = {}; for (const [id, rank] of Object.entries(hero.passiveRanks || {})) { const n = PASSIVE_NODES[id]; if (!n) continue; for (const [k, v] of Object.entries(n)) if (typeof v === 'number') out[k] = (out[k] || 0) + v * rank; } return out; }
+export function weaponCategory(hero) { const w = hero.equipment?.weapon; if (w?.weaponCategory) return w.weaponCategory; const sub = w?.subtype; if (['wand', 'staff', 'orb', 'tome', 'scepter'].includes(sub)) return 'magic'; if (['dagger', 'bow', 'crossbow', 'javelin', 'spear'].includes(sub)) return 'light'; return 'heavy'; }
+/** Derived combat stats for a hero (attrs + equipment affixes + passives). `loot` supplies equipmentBonuses(). */
+export function derive(hero, loot) {
+  const eq = loot.equipmentBonuses(hero.equipment); const pv = passiveBonuses(hero); const A = hero.attrs;
+  // attributes stay whole: an affix that rolls "+3.4 STR" is worth 3 points, not 3.4
+  const STR = Math.round(A.STR + (eq.str || 0)), DEX = Math.round(A.DEX + (eq.dex || 0)), INT = Math.round(A.INT + (eq.int || 0)), CON = Math.round(A.CON + (eq.con || 0));
+  const armor = Math.round(Object.values(hero.equipment || {}).reduce((s, it) => s + (it?.armor || 0), 0) + (eq.armor || 0));
+  const equipDmg = Object.values(hero.equipment || {}).reduce((s, it) => s + (Array.isArray(it?.dmg) ? Math.floor((it.dmg[0] + it.dmg[1]) / 2 * 0.3) : 0), 0) + (eq.dmg || 0);
+  const cat = weaponCategory(hero); const primary = cat === 'light' ? DEX : cat === 'magic' ? INT : STR; const spellBonus = cat === 'magic' ? Math.floor(INT * 0.25) : 0;
+  const isCompanion = !!hero.isCompanion; const dodgeBonusItems = Object.values(hero.equipment || {}).reduce((s, it) => s + (it?.dodgeBonus || 0), 0);
+  const out = {
+    STR, DEX, INT, CON, armor, cat,
+    // health and mana are whole numbers (E5): affix values roll with decimals, so round here once
+    // rather than letting "247.37 max HP" leak into every bar, tooltip and log line.
+    maxHp: Math.round(50 + CON * 10 + (pv.maxHp || 0) + (eq.hp || 0)), maxMp: Math.round(30 + INT * 8 + (pv.maxMp || 0) + (eq.mp || 0)),
+    hit: Math.min(95, 70 + Math.round(DEX * 1.2) + (eq.hit || 0)), dodge: Math.max(0, (isCompanion ? Math.min(15, 3 + Math.round(DEX * 0.35)) : Math.min(40, 5 + Math.round(DEX * 0.8))) + (eq.dodge || 0) + (pv.dodgePct || 0) + dodgeBonusItems),
+    initiative: DEX + hero.level + (eq.initiative || 0), critChance: Math.min(75, 5 + (pv.critPct || 0) + (eq.critChance || 0) * 100), critDamage: 1.5 + (eq.critDamage || 0),
+    spellPower: INT * 0.025 + (eq.spellPower || 0), manaRegen: Math.max(1, Math.round(INT * 0.3)) + (eq.manaRegen || 0) + (pv.mpRegen || 0), hpRegen: (pv.hpRegen || 0) + (eq.hpRegen || 0),
+    lifeSteal: (eq.lifeSteal || 0) / 100 + (pv.lifesteal || 0), manaSteal: (eq.manaSteal || 0) / 100, magicResist: Math.round(eq.magicResist || 0), blockChance: Math.min(1, (eq.block_chance || 0) + (pv.blockChance || 0) / 100), blockPower: eq.block_power || 0, thorns: pv.thorns || 0, resistAll: pv.resistAll || 0,
+    hpOnKill: pv.hpOnKill || 0, manaOnKill: pv.manaOnKill || 0, burnOnHit: pv.burnOnHit || 0, poisonOnCrit: pv.poisonOnCrit || 0, chainOnHit: pv.chainOnHit || 0, goldFind: eq.goldFind || 0, xpFind: eq.xpFind || 0, magicFind: eq.magicFind || 0,
+    dmgMin: Math.max(1, Math.round(primary * 0.4 + equipDmg)) + spellBonus, dmgMax: Math.max(3, Math.round(primary + equipDmg * 1.5)) + spellBonus,
+    attackSpeed: hero.equipment?.weapon?.attackSpeed || 'normal', armorPen: hero.equipment?.weapon?.armorPen || 0, legendary: loot.legendaryEffects(hero.equipment),
+    barrier: 0, barrierRegen: 0, cooldownReduction: 0, mpCostReduce: 0, dotReduce: 0, thornsFlat: 0,
+  };
+  return applyDeriveEffects(hero, out, eq);
+}
+/** Merge a skill with the hero's bought talents (additive) and level-gated upgrades (replace numbers, concat arrays). */
+export function mergeSkill(skill, hero) {
+  const TOP = ['aoe', 'damageMult', 'damageStat', 'mpCost', 'statusEffects', 'healMult', 'healStat', 'cooldown', 'target', 'type'];
+  const out = JSON.parse(JSON.stringify(skill)); out.effect = out.effect || {};
+  // Seed the hit count so a talent that "adds one extra strike" has something to add to (E23):
+  // without this, `hits: 1` on a skill that never wrote a hit count merged to 1 and changed nothing.
+  if (out.effect.hits == null) out.effect.hits = out.hits ?? 1;
+  const apply = (obj, add) => { for (const [k, v] of Object.entries(obj)) { const dst = TOP.includes(k) ? out : out.effect; if (Array.isArray(v)) dst[k] = [...(dst[k] || []), ...v]; else if (typeof v === 'number') dst[k] = add && typeof dst[k] === 'number' ? dst[k] + v : v; else if (typeof v === 'boolean') dst[k] = dst[k] || v; else if (v && typeof v === 'object') dst[k] = { ...(dst[k] || {}), ...v }; else dst[k] = v; } };
+  for (const t of skill.talents || []) if (hero.talents?.[t.id]) apply(t.effect || {}, true);
+  for (const u of (skill.upgrades || []).filter(u => hero.level >= u.level).sort((a, b) => a.level - b.level)) apply(u.bonus || {}, false);
+  if (out.mpCost < 0) out.mpCost = 0; return applySkillMerge(out, hero);
+}
+export function classSkills(skills, classId, level = 99) { return Object.entries(skills).filter(([, s]) => s.class === classId && (s.unlockLevel ?? 1) <= level).map(([id, s]) => ({ id, ...s })).sort((a, b) => (a.unlockLevel ?? 1) - (b.unlockLevel ?? 1)); }
+/** New hero. attrs start at 8 each with 8 free points (+2 per extra level), spent by the build preset weights. */
+export function createHero({ id, name, classId, level = 1, classDef, build = null, blueprint = null, loot, skills, rng = null }) {
+  const budget = 8 + (level - 1) * ATTR_PER_LEVEL; const w = build?.targetAttrs || { STR: 25, DEX: 25, INT: 25, CON: 25 }; const sum = Object.values(w).reduce((a, b) => a + b, 0) || 1;
+  const attrs = { STR: 8, DEX: 8, INT: 8, CON: 8 }; let spent = 0; for (const k of ['STR', 'DEX', 'INT', 'CON']) { const n = Math.floor(budget * (w[k] || 0) / sum); attrs[k] += n; spent += n; } let left = budget - spent; const order = Object.entries(w).sort((a, b) => b[1] - a[1]).map(([k]) => k); for (let i = 0; left > 0; i = (i + 1) % order.length, left--) attrs[order[i]]++;
+  const hero = { id: id || 'h_' + Math.random().toString(36).slice(2, 8), name, class: classId, className: classDef.name, role: classDef.role, primaryAttr: classDef.primaryAttr, armorTier: classDef.armorTier, weapons: classDef.weapons, level, xp: xpForLevel(level), attrs, equipment: {}, skills: [], talents: {}, passiveRanks: {}, pendingAttr: 0, pendingTalent: TALENT_LEVELS.filter(l => l <= level).length, pendingPassive: Math.floor(level / PASSIVE_EVERY), build: build?.id || null, blueprint, alive: true, statuses: [], cooldowns: {}, isHero: true };
+  for (const key of classDef.startingEquipment || []) { const it = loot.generate(key, 'normal', 'medium', rng ? { rng } : {}); if (it) equip(hero, it, loot, { keepOld: false }); }
+  hero.skills = classSkills(skills, classId, level).map(s => s.id); const d = derive(hero, loot); hero.maxHp = d.maxHp; hero.hp = d.maxHp; hero.maxMp = d.maxMp; hero.mp = d.maxMp; return hero;
+}
+/** Equip into the right slot; returns the displaced item (or null). Two-handed weapons clear the off-hand. */
+export function equip(hero, item, loot, { keepOld = true } = {}) {
+  let slot = item.slot; if (slot === 'ring') slot = !hero.equipment.ring1 ? 'ring1' : !hero.equipment.ring2 ? 'ring2' : 'ring1';
+  if (item.type === 'weapon' && item.offHandOk && hero.equipment.weapon && !hero.equipment.weapon.twoHanded && !hero.equipment.offhand) slot = 'offhand';
+  const old = hero.equipment[slot] || null; hero.equipment[slot] = item; const displaced = [old];
+  if (slot === 'weapon' && item.twoHanded && hero.equipment.offhand) { displaced.push(hero.equipment.offhand); delete hero.equipment.offhand; }
+  if (slot === 'offhand' && hero.equipment.weapon?.twoHanded) { displaced.push(hero.equipment.weapon); delete hero.equipment.weapon; }
+  refresh(hero, loot); return keepOld ? displaced.filter(Boolean) : [];
+}
+export function unequip(hero, slot, loot) { const it = hero.equipment[slot]; if (!it) return null; delete hero.equipment[slot]; refresh(hero, loot); return it; }
+export function refresh(hero, loot) { const d = derive(hero, loot); const hpFrac = hero.maxHp ? hero.hp / hero.maxHp : 1, mpFrac = hero.maxMp ? hero.mp / hero.maxMp : 1; hero.maxHp = d.maxHp; hero.maxMp = d.maxMp; hero.hp = Math.min(d.maxHp, Math.max(0, Math.round(d.maxHp * hpFrac))); hero.mp = Math.min(d.maxMp, Math.round(d.maxMp * mpFrac)); hero.derived = d; return d; }
+export function canUse(hero, item) { if (item.type === 'weapon') return (hero.weapons || []).includes(item.subtype) || (hero.weapons || []).includes(item.baseKey) || !hero.weapons?.length; return true; }
+/** Award xp; returns the number of levels gained and grants points. */
+export function gainXp(hero, amount) { const before = hero.level; hero.xp += amount; const after = levelFromXp(hero.xp); let gained = 0; for (let l = before + 1; l <= after; l++) { hero.level = l; hero.pendingAttr += ATTR_PER_LEVEL; if (TALENT_LEVELS.includes(l)) hero.pendingTalent++; if (l % PASSIVE_EVERY === 0) hero.pendingPassive++; gained++; } return gained; }
+export function catchUp(memberLvl, partyAvg) { return memberLvl >= partyAvg ? 1 : Math.min(3, 1 + 0.5 * (partyAvg - memberLvl)); }
+export function hireCost(level) { return Math.round(100 * level * (1 + 0.1 * (level - 1))); }
+/** Enemy instance from a template, scaled for act / party size / NG+ (rules-notes.md). */
+export function makeEnemy(tpl, { act = 1, heroes = 4, ngPlus = 0, boss = false, overrides = {}, index = 0 } = {}) {
+  const t = { ...tpl, ...overrides }; const eAct = Math.min(10, ngPlus ? act + 4 * ngPlus : act); const am = ACT_MULT[eAct] || [1, 1]; const ad = ACT_DEFENCE[eAct] || { armor: 1, magicResist: 0 };
+  let hpMul = ENEMY_GLOBAL.hp * (boss ? (1 + (am[0] - 1) * BOSS_MULT.hpShare) * BOSS_MULT.hp : am[0]),
+      dmgMul = ENEMY_GLOBAL.dmg * am[1] * (boss ? BOSS_MULT.damage : 1) * (PARTY_SIZE_DMG[Math.min(4, Math.max(1, heroes))] || 1),
+      armorMul = ENEMY_GLOBAL.armor * (ad.armor ?? 1) * (boss ? BOSS_MULT.armor : 1);
+  if (ngPlus) { hpMul *= Math.pow(4.5, ngPlus) * (boss ? 1.35 : 1); dmgMul *= Math.pow(2.8, ngPlus) * (boss ? 1.2 : 1); armorMul *= 1 + ngPlus * 0.55; }
+  const hp = Math.max(1, Math.round((t.maxHp || t.hp) * hpMul));
+  return { id: `${t.id}_${index}`, templateId: t.id, name: t.name, isEnemy: true, boss, hp, maxHp: hp, dmg: [Math.max(1, Math.round(t.dmg[0] * dmgMul)), Math.max(1, Math.round(t.dmg[1] * dmgMul))], armor: Math.round((t.armor || 0) * armorMul), hit: Math.min(95, (t.hit || 70) + ngPlus * 5), dodge: Math.min(45, (t.dodge || 5) + ngPlus * 3), magicResist: (t.magicResist || 0) + Math.round(ad.magicResist || 0), blockChance: t.blockChance || 0, xpValue: Math.round((t.xpValue || 10) * (1 + 0.8 * ngPlus + (boss && ngPlus ? 1 : 0))), gold: t.gold || [1, 5], spellList: t.spellList || [], spellChance: t.spellChance || 0, statusOnHit: Array.isArray(t.statusOnHit) ? t.statusOnHit : t.statusOnHit ? [t.statusOnHit] : null, role: t.role || 'melee', race: t.race || t.tags?.[0] || 'monster', tags: t.tags || [], alive: true, statuses: [], cooldowns: {}, level: Math.max(1, Math.round((t.xpValue || 10) / 8)) };
+}
+
+/** Plain-language description of a talent/upgrade effect object (skills.json), e.g. { damageMult: 0.5, statusEffects: [...] }. */
+export function describeEffect(eff = {}, { replace = false } = {}) {
+  const out = []; const pct = v => `${Math.round(v * 100)}%`; if (replace) { const R = { damageMult: v => `damage ×${v}`, healMult: v => `healing ×${v}`, mpCost: v => `${v} mana`, duration: v => `${v} rounds`, dmgBuff: v => `+${pct(v)} party damage`, dmgReduct: v => `${pct(v)} less damage taken`, reflect: v => `reflects ${pct(v)}`, targets: v => `${v} targets`, bolts: v => `${v} bolts`, hits: v => `${v} hits`, strikeCount: v => `${v} strikes`, barrier: v => `barrier ${v}`, healAmount: v => `heals ${v}` }; const rest = {}; for (const [k, v] of Object.entries(eff)) { if (R[k]) out.push(R[k](v)); else rest[k] = v; } const more = describeEffect(rest); if (more) out.push(more); return out.join(', '); } const status = s => `${s.type} (${Math.round((s.chance ?? 0.5) * 100)}%, ${s.duration ?? 2} round${(s.duration ?? 2) === 1 ? '' : 's'}${s.power ? ', power ' + s.power : ''})`;
+  const T = { damageMult: v => `+${pct(v)} damage`, healMult: v => `+${pct(v)} healing`, healAmount: v => `heals ${v}`, mpCost: v => v < 0 ? `${-v} less mana` : `${v} more mana`, cooldown: v => `cooldown ${v}`, aoe: v => `hits ${({ single: 'one target', adjacent: 'two adjacent', adjacent2: 'up to four in a group', group: 'the whole group', group2: 'up to four in a group', row: 'every enemy', row2: 'every enemy', all: 'every enemy', chain: 'a chain of enemies', random3: 'three random enemies', random4: 'four random enemies', multi3: 'three bolts', multi4: 'four bolts', pierce_row: 'every enemy in a line' })[v] || v}`, targets: v => `${v} target${v > 1 ? 's' : ''}`, bolts: v => `${v} bolts`, hits: v => `+${v} hit${v > 1 ? 's' : ''}`, strikeCount: v => `${v} strikes`, duration: v => `+${v} round${v > 1 ? 's' : ''}`, durationMult: v => `${pct(v - 1)} longer`, dmgBuff: v => `+${pct(v)} party damage`, dmgReduct: v => `${pct(v)} less damage taken`, reflect: v => `reflects ${pct(v)}`, tempHp: v => `+${v} temporary HP`, armorPen: v => v > 1 ? `ignores ${v} armor` : `ignores ${pct(v)} armor`, critBonus: v => `+${pct(v)} crit`, critChance: v => `+${pct(v)} crit`, critBuff: v => `+${v}% crit`, dodgeBuff: v => `+${v} dodge`, dodgeBonus: v => `+${pct(v)} dodge`, hitBuff: v => `+${v} hit`, barrier: v => `barrier ${v < 5 ? '×' + v : v}`, shield: v => `shield ${v.conMult ? v.conMult + '× CON' : ''}${v.duration ? ' for ' + v.duration : ''}`, cleanse: v => v === 'all' ? 'cleanses everything' : Array.isArray(v) ? 'cleanses ' + v.join('/') : 'cleanses one effect', immuneStun: () => 'immune to stun', immuneBleed: () => 'immune to bleed', immuneSlow: () => 'immune to slow', immuneCC: () => 'immune to crowd control', lifesteal: v => `${pct(v)} life steal`, mpOnHit: v => `+${v} mana per hit`, mpRestore: v => `restores ${v} mana`, mpRestoreOnKill: v => `${pct(v)} mana back on kill`, mpDrain: v => `drains ${v} mana`, mpRegen: v => `+${v} mana regen`, regenPct: v => `regen ${pct(v)} HP`, hpRegen: v => `+${v} HP regen`, regenRounds: v => `for ${v} rounds`, regenMult: v => `×${v} regen`, regenDur: v => `regen ${v} rounds`, partyRegen: () => 'regen for the whole party', partyHealPct: v => `heals the party ${pct(v)}`, healPct: v => `heals ${pct(v)}`, executeThreshold: v => `executes below ${pct(v)} HP`, executeMult: v => `×${v} on execute`, extraAction: v => `${v} extra action${v > 1 ? 's' : ''}`, extraActionDuration: v => `extra actions for ${v} rounds`, actionsLost: v => `enemies lose ${v} action${v > 1 ? 's' : ''}`, enemySkipRound: () => 'enemies skip a round', enemySkipExtra: v => `enemies skip +${v} round`, enemySkipRounds: v => `enemies skip ${v} rounds`, unlocksCompanion: v => `unlocks companion ${String(v).replace('pet_', '').replace(/_/g, ' ')}`, buildsFlairStacks: v => `+${v} Flair`, keepStacks: v => `keeps ${v} Flair`, stackDmgMult: v => `×${v} per stack`, parryCount: v => `parries ${v} hit${v > 1 ? 's' : ''}`, taunt: () => 'taunts', thorns: v => `thorns ${pct(v)}`, armorReduce: v => `−${v} enemy armor`, armorReduceDuration: v => `for ${v} rounds`, sunderAmp: v => `+${pct(v)} vs sundered`, armorBonus: v => `+${v} armor`, magicResistBonus: v => `+${v} magic resist`, magicPen: v => `ignores ${pct(v)} resist`, ignoreMR: () => 'ignores magic resist', bonusVsUndead: v => `×${1 + v} vs undead`, bonusVsDemon: v => `×${1 + v} vs demons`, dmgBuffVsDemon: v => `+${pct(v)} vs demons`, dmgBuffVsUndead: v => `+${pct(v)} vs undead`, burnVsUndead: () => 'burns undead', burnMult: v => `×${v} burn`, freezeChance: v => `${pct(v)} freeze`, stunChance: v => `${pct(v)} stun`, chainTargets: v => `chains to ${v}`, slowMult: v => `×${v} slow`, elementStatusMult: v => `×${v} element status`, elementStatusGuaranteed: () => 'element status always applies', elementImmunityParty: () => 'party immune to elements', breathWeaponFree: () => 'Breath Weapon costs nothing', randomElement: () => 'random element', elementalStatus: () => 'applies its element', spellDmgBuff: v => `+${pct(v)} spell damage`, dmgAmp: v => `target takes +${pct(v)}`, atkDebuff: v => `−${pct(v)} enemy hit`, dmgDebuff: v => `−${pct(v)} enemy damage`, intDebuff: v => `−${pct(v)} enemy INT`, fireResistDebuff: v => `−${pct(v)} fire resist`, splitHeal: () => 'heal is shared', splash: v => `${pct(v)} splash`, neverMiss: () => 'never misses', aoeReduction: v => `×${v} on extra targets`, minDebuffs: v => `at least ${v} debuffs`, guaranteedDebuffPerStack: () => 'a debuff per stack', firstStrike: () => 'party acts first', stealth: () => 'stealth', selfFree: () => 'no action cost on self', critExtra: () => 'crits hit twice', damageMultInt: v => `+${pct(v)} scaling with INT`, damageVsStatus: v => Object.entries(v).map(([k, b]) => `+${pct(b)} vs ${k}`).join(', '), critVsBleed: v => `+${pct(v)} crit vs bleeding`, reviveHp: v => `revive at ${pct(v)} HP`, reviveAll: () => 'revives everyone', reviveImmuneRounds: v => `${v} round${v > 1 ? 's' : ''} immunity after revive`, immune: () => 'immune after revive', attackSpeed: v => `+${pct(v)} attack speed`, slow: v => `slow ${v.duration || 2} rounds`, bleed: v => `bleed ${v.duration || 2} rounds`, tauntedBy: () => 'taunts the target', rounds: v => `${v} rounds`, cleanseParty: () => 'cleanses the party', target: v => `targets ${v}`, type: v => v, damageStat: v => `scales with ${v}` };
+  for (const [k, v] of Object.entries(eff)) { if (k === 'statusEffects') { out.push('applies ' + v.map(status).join(', ')); continue; } const f = T[k]; out.push(f ? f(v) : describeSkillKey(k, v) || `${k} ${JSON.stringify(v)}`); }
+  return out.join(', ');
+}

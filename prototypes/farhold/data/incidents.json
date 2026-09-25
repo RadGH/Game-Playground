@@ -1,0 +1,93 @@
+{
+  "_doc": "Twelve things that happen TO a zone. An incident is a timed state on the territory record: it changes what spawns, what people say, which job frames can fire and what a shop charges. They start on a clock, on something you did, or on a faction's grip crossing a line. `hours` null means it runs until something resolves it. Read by js/incidents.js.",
+
+  "incidents": [
+    {
+      "kind": "raid_coming", "name": "A raid is coming", "hours": 48, "weight": 8,
+      "blurb": "there is a band on the road and the gate is not manned",
+      "starts": { "holderGrip": { "faction": "ashen_pact", "above": 0.6 } },
+      "effects": { "spawnMult": 1.4, "patrol": "raid_band", "opensFrame": "light_the_beacon" },
+      "resolvedBy": "light_the_beacon",
+      "onExpire": { "grip": 0.08, "rumour": "the gate at {zone} did not hold" }
+    },
+    {
+      "kind": "hunger", "name": "Short rations", "hours": 96, "weight": 7,
+      "blurb": "nothing has come up the road in a week",
+      "starts": { "caravanLost": true },
+      "effects": { "shopMult": 1.5, "folkOut": -0.5, "opensFrame": "feed_the_hold" },
+      "resolvedBy": "feed_the_hold",
+      "onExpire": { "grip": -0.06, "rumour": "{zone} went hungry and remembers who did not come" }
+    },
+    {
+      "kind": "restless_dead", "name": "The dead are up", "hours": 72, "weight": 6,
+      "blurb": "something got dug and the rest have taken it badly",
+      "starts": { "cairnDug": true },
+      "effects": { "nightSpawn": "undead", "spawnMult": 1.3, "opensFrame": "the_wake" },
+      "resolvedBy": "the_wake",
+      "onExpire": { "rumour": "the cairns at {zone} settled on their own. Probably." }
+    },
+    {
+      "kind": "grudge", "name": "A grudge", "hours": null, "weight": 10,
+      "blurb": "something out there has your measure and has told its friends",
+      "starts": { "playerBeaten": true },
+      "effects": { "namedHunts": true, "namedGrowth": 0.15, "opensFrame": "the_grudge" },
+      "resolvedBy": "the_grudge"
+    },
+    {
+      "kind": "feud", "name": "A feud", "hours": 120, "weight": 6,
+      "blurb": "two of them want the same ground and have stopped talking about it",
+      "starts": { "gripsWithin": 0.1 },
+      "effects": { "factionsFight": true, "patrolMult": 1.5 },
+      "onExpire": { "rumour": "the feud in {zone} burned itself out" }
+    },
+    {
+      "kind": "bloom", "name": "A bloom", "hours": 48, "weight": 5,
+      "blurb": "everything green has come up at once",
+      "starts": { "biome": ["wetland", "forest", "farmland"], "chance": 0.12 },
+      "effects": { "gatherMult": 3, "rareHerb": true },
+      "onExpire": { "rumour": "the bloom in {zone} is over" }
+    },
+    {
+      "kind": "collapse", "name": "A collapse", "hours": null, "weight": 4,
+      "blurb": "a gallery came down and took the way in with it",
+      "starts": { "biome": ["mountain", "highland"], "chance": 0.08 },
+      "effects": { "sealsDungeon": true, "opensFrame": "dig_it_out" },
+      "resolvedBy": "dig_it_out"
+    },
+    {
+      "kind": "ash_fall", "name": "Ash fall", "hours": 24, "weight": 5,
+      "blurb": "the sky is the colour of a floor and everyone is indoors",
+      "starts": { "biome": ["ash", "mountain"], "chance": 0.1 },
+      "effects": { "visibility": 0.5, "fireDamage": 1.25, "folkOut": -0.8 },
+      "onExpire": { "rumour": "the ash over {zone} has settled" }
+    },
+    {
+      "kind": "fair_day", "name": "Fair day", "hours": 24, "weight": 6,
+      "blurb": "there is a fair on and everything is cheap",
+      "starts": { "holderGrip": { "faction": "greenhand", "above": 0.7 } },
+      "effects": { "shopMult": 0.7, "stockMult": 2, "gambler": true, "minstrel": true },
+      "onExpire": { "rumour": "the fair at {zone} has packed up" }
+    },
+    {
+      "kind": "quarantine", "name": "Shut gates", "hours": 72, "weight": 4,
+      "blurb": "the gates are shut and they are trading over the wall",
+      "starts": { "chance": 0.05 },
+      "effects": { "townClosed": true, "shopMult": 1.3 },
+      "onExpire": { "rumour": "{zone} has opened its gates again" }
+    },
+    {
+      "kind": "bounty_up", "name": "The bounty has gone up", "hours": null, "weight": 7,
+      "blurb": "something has survived three hunts and the price on it has tripled",
+      "starts": { "namedSurvived": 3 },
+      "effects": { "bountyMult": 3, "rivalHunters": true },
+      "resolvedBy": "the_grudge"
+    },
+    {
+      "kind": "road_out", "name": "The road is out", "hours": null, "weight": 5,
+      "blurb": "the direct road is washed through and the long way is worse",
+      "starts": { "weather": ["storm", "downpour"], "chance": 0.15 },
+      "effects": { "travelMult": 1.6, "opensFrame": "dig_it_out" },
+      "resolvedBy": "dig_it_out"
+    }
+  ]
+}

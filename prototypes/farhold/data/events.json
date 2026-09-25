@@ -1,0 +1,1268 @@
+{
+ "_doc": "Road events — the other half of js/encounters.js. In the user's words: 'Add more events like that too, to give the world more things to do as you wander around.' data/encounters.json already holds eleven set pieces, and every one of them is the same verb: bodies appear, you fight them. These are the ones that are NOT that. Each has a beat of its own — something to get out of a cage, something that runs and has to be caught, something that has to still be standing when the clock runs out, something that looks like treasure and is not, and something that is simply there for anyone who bothered to walk off the road. The engine for each `kind` is in js/encounters.js; this file only says which ones exist and how they are shaped. Original names and ideas only.\n\nR16 — THE MARKER THAT POINTED AT NOTHING. \"I also found a marker that reads 'Somebody in a cage' but there was no person to speak about, nothing to interact with. Just a dead pointer to nothing. We need to revamp all of these events to be more expansive and detailed and most of all worthwhile.\" Two things were missing and one was broken. Missing: every event now carries a `dressing` — a list of `{piece, dx, dz, scale, spin}` built out of js/sites.js's PIECES by js/eventprops.js, so a cage is a cage standing on the road and a watchfire is a beacon you can walk round; and a `rescue` carries a `captive`, a real body spawned inside the cage who tells you why they are in it and hands you the bag when the last guard goes down. Broken: an event closed at 520 m while its bodies despawned at 300, so in the band between the two a rescue won ITSELF and dropped a gilded bag on empty grass a quarter-kilometre away — the close radius is tied to the despawn radius now and a win needs `ev.seen`. The file also went from eleven events to twenty-two, with at least four of every beat.",
+ "_schema": {
+  "kind": "which beat js/encounters.js runs: rescue | chase | defend | trap | find. Anything else is refused by tests/events.test.js, because an event nothing knows how to tick is an announcement and nothing more.",
+  "where": "ring (out of sight) | ahead (down the line you are walking) | close (on top of you) — the same placement data/encounters.json uses.",
+  "count / escort / spread / prefer / aggro / weaken / rankBonus / forceRank / leader": "the bodies, exactly as data/encounters.json shapes them. The set-piece builder is shared.",
+  "seconds": "how long you have. A defend fails when it runs out; a chase gives up.",
+  "escapeAt": "metres. A chase is lost if the runner gets this far from you.",
+  "springAt": "metres. A trap springs when you come this close to the bait.",
+  "reward": "{ as: bag|chest, kind: a balance.json chest grade, name, gold: [lo,hi] } — a bag is dropped where the beat finished and is picked up by walking over it; a chest stands on the ground and is opened with E.",
+  "bait": "a trap's or a find's chest: { kind, name } — placed the moment the event starts, because being able to see it from a distance is the whole hook.",
+  "win / fail / announce": "the lines the player reads. Plain language, no exclamation marks."
+ },
+ "events": [
+  {
+   "id": "the_cage_on_the_road",
+   "kind": "rescue",
+   "name": "Somebody in a cage",
+   "weight": 11,
+   "where": "ahead",
+   "announce": "There is a cage on a cart up ahead, and it is not empty.",
+   "prefer": {
+    "families": [
+     "humanoid"
+    ]
+   },
+   "count": [
+    4,
+    6
+   ],
+   "spread": 11,
+   "aggro": false,
+   "seconds": 240,
+   "reward": {
+    "as": "bag",
+    "kind": "gilded",
+    "name": "What they were carrying",
+    "gold": [
+     40,
+     120
+    ]
+   },
+   "win": "The bar comes off. They do not wait to be thanked, but they empty the slavers' bag into your hands first.",
+   "fail": "You walk on. The cart goes the other way.",
+   "desc": "Kill every guard and the captive is out. Nothing you can do to the cage itself — the guards have the key.",
+   "named": "A cage on a cart on the road through {place}, and it is not empty. {count} {beasts} watching it.",
+   "dressing": [
+    {
+     "piece": "cage",
+     "dx": 0,
+     "dz": 0,
+     "scale": 1.35
+    },
+    {
+     "piece": "tent",
+     "dx": -6,
+     "dz": 3,
+     "scale": 1.0
+    },
+    {
+     "piece": "tent",
+     "dx": 5,
+     "dz": -4,
+     "scale": 0.95,
+     "spin": 0.9
+    },
+    {
+     "piece": "pyre",
+     "dx": 0,
+     "dz": 5.5,
+     "scale": 0.8
+    },
+    {
+     "piece": "bonepile",
+     "dx": -3,
+     "dz": -5,
+     "scale": 0.7
+    },
+    {
+     "piece": "waystone",
+     "dx": 9,
+     "dz": 1,
+     "scale": 0.9
+    }
+   ],
+   "captive": {
+    "at": "cage",
+    "role": "villager",
+    "roleName": "Prisoner",
+    "greeting": "Do not talk to me, kill them. The key is on the big one's belt and I have been watching it for two days."
+   }
+  },
+  {
+   "id": "the_pit_cage",
+   "kind": "rescue",
+   "name": "A pit with a lid on it",
+   "weight": 8,
+   "where": "ring",
+   "announce": "Somebody is calling from under a grate, and somebody else is sitting on it.",
+   "prefer": {
+    "families": [
+     "humanoid",
+     "fiend"
+    ]
+   },
+   "count": [
+    5,
+    7
+   ],
+   "spread": 13,
+   "aggro": false,
+   "forceRank": "champion",
+   "seconds": 240,
+   "reward": {
+    "as": "bag",
+    "kind": "gilded",
+    "name": "The prisoner's thanks",
+    "gold": [
+     50,
+     140
+    ]
+   },
+   "win": "The last one goes down and the cage swings open. What the others left behind is yours.",
+   "fail": "The calling stops before you reach it.",
+   "desc": "A rescue with a champion sitting on the lid. The one that pays best of the two.",
+   "named": "Somebody is calling from under a grate in {place}, and {beasts} are sitting on it.",
+   "dressing": [
+    {
+     "piece": "cage",
+     "dx": -1.8,
+     "dz": 0,
+     "scale": 1.4
+    },
+    {
+     "piece": "cage",
+     "dx": 2.4,
+     "dz": 1.2,
+     "scale": 1.15,
+     "spin": 0.6
+    },
+    {
+     "piece": "palisade",
+     "dx": 0,
+     "dz": -7,
+     "scale": 1.0
+    },
+    {
+     "piece": "palisade",
+     "dx": 7,
+     "dz": 0,
+     "scale": 1.0,
+     "spin": 1.57
+    },
+    {
+     "piece": "banner",
+     "dx": -6,
+     "dz": -3,
+     "scale": 1.0
+    },
+    {
+     "piece": "bonepile",
+     "dx": 4,
+     "dz": -4,
+     "scale": 0.9
+    },
+    {
+     "piece": "pyre",
+     "dx": -4,
+     "dz": 4,
+     "scale": 0.9
+    }
+   ],
+   "captive": {
+    "at": "cage",
+    "role": "villager",
+    "roleName": "Prisoner",
+    "greeting": "There were four of us when they put me in here. Do not let them finish the count."
+   }
+  },
+  {
+   "id": "the_laden_runner",
+   "kind": "chase",
+   "name": "Something running with your money",
+   "weight": 10,
+   "where": "ahead",
+   "announce": "One of them breaks cover and runs, and it is carrying something.",
+   "prefer": {
+    "roles": [
+     "skirmisher"
+    ]
+   },
+   "count": [
+    1,
+    1
+   ],
+   "escort": [
+    0,
+    0
+   ],
+   "forceRank": "champion",
+   "spread": 3,
+   "seconds": 34,
+   "escapeAt": 190,
+   "reward": {
+    "as": "bag",
+    "kind": "gilded",
+    "name": "Off the runner",
+    "gold": [
+     60,
+     160
+    ]
+   },
+   "win": "You put it down. It was carrying more than it could spend.",
+   "fail": "It gets over the rise and keeps going.",
+   "desc": "Thirty-four seconds and a hundred and ninety metres. Movement speed and anything ranged is what wins this.",
+   "named": "A {beast} breaks cover and runs, and it is carrying something.",
+   "dressing": [
+    {
+     "piece": "rubble",
+     "dx": 2,
+     "dz": -2,
+     "scale": 0.8
+    },
+    {
+     "piece": "waystone",
+     "dx": -4,
+     "dz": 1,
+     "scale": 1.0
+    }
+   ]
+  },
+  {
+   "id": "the_last_of_the_pack",
+   "kind": "chase",
+   "name": "The one that got away",
+   "weight": 8,
+   "where": "ring",
+   "announce": "Something wounded is going flat out across the open ground.",
+   "prefer": {
+    "families": [
+     "beast"
+    ]
+   },
+   "count": [
+    1,
+    1
+   ],
+   "escort": [
+    0,
+    0
+   ],
+   "forceRank": "rare",
+   "spread": 3,
+   "seconds": 28,
+   "escapeAt": 170,
+   "reward": {
+    "as": "bag",
+    "kind": "warded",
+    "name": "What it had been eating",
+    "gold": [
+     40,
+     110
+    ]
+   },
+   "win": "It goes down in the grass. Whatever it took from the last people through here is still on it.",
+   "fail": "It makes the treeline.",
+   "desc": "A named beast, already hurt, already running. The best-paid of the chases and the hardest to catch.",
+   "named": "A wounded {beast} going flat out across the open ground.",
+   "dressing": [
+    {
+     "piece": "den",
+     "dx": 0,
+     "dz": 0,
+     "scale": 0.8
+    },
+    {
+     "piece": "bonepile",
+     "dx": 3.5,
+     "dz": 2,
+     "scale": 1.0
+    },
+    {
+     "piece": "bonepile",
+     "dx": -3,
+     "dz": -2.5,
+     "scale": 0.7
+    }
+   ]
+  },
+  {
+   "id": "the_stranded_cart",
+   "kind": "defend",
+   "name": "A cart with a wheel off",
+   "weight": 11,
+   "where": "ahead",
+   "announce": "A cart on its side, a strongbox still lashed to it, and somebody is coming for it.",
+   "prefer": {
+    "families": [
+     "humanoid",
+     "beast"
+    ]
+   },
+   "count": [
+    5,
+    8
+   ],
+   "spread": 22,
+   "aggro": true,
+   "seconds": 75,
+   "bait": {
+    "kind": "gilded",
+    "name": "The Carter's Strongbox"
+   },
+   "reward": {
+    "as": "chest"
+   },
+   "win": "The last of them goes down and the box is still shut. The carter is long gone; the box is not.",
+   "fail": "They get the lashings off and take the box with them.",
+   "desc": "The box is real and is standing there from the first second. Kill everything inside seventy-five seconds or it goes.",
+   "named": "A cart on its side in {place}, a strongbox still lashed to it, and {count} {beasts} coming for it.",
+   "dressing": [
+    {
+     "piece": "engine",
+     "dx": 0,
+     "dz": 0,
+     "scale": 0.7,
+     "spin": 0.4
+    },
+    {
+     "piece": "rubble",
+     "dx": 3,
+     "dz": 2,
+     "scale": 0.9
+    },
+    {
+     "piece": "waystone",
+     "dx": -7,
+     "dz": -1,
+     "scale": 0.9
+    },
+    {
+     "piece": "bonepile",
+     "dx": -2,
+     "dz": 5,
+     "scale": 0.6
+    }
+   ]
+  },
+  {
+   "id": "the_watchfire",
+   "kind": "defend",
+   "name": "A watchfire nobody is standing at",
+   "weight": 9,
+   "where": "ring",
+   "nightOnly": true,
+   "announce": "A fire still burning and the watch not at it. Something is working its way in.",
+   "prefer": {
+    "families": [
+     "undead",
+     "aberration",
+     "fiend"
+    ]
+   },
+   "count": [
+    6,
+    9
+   ],
+   "spread": 26,
+   "aggro": true,
+   "rankBonus": 1.4,
+   "seconds": 90,
+   "bait": {
+    "kind": "gilded",
+    "name": "The Watch's Footlocker"
+   },
+   "reward": {
+    "as": "chest"
+   },
+   "win": "It stays lit. Whoever was on watch left their locker behind, and you were the one who stayed.",
+   "fail": "The fire goes out behind you.",
+   "desc": "The night version, and harder. Ninety seconds against a bigger crowd, in the dark, for the same grade of box.",
+   "named": "A fire still burning in {place} and the watch not at it. {beasts} are working their way in.",
+   "dressing": [
+    {
+     "piece": "pyre",
+     "dx": 0,
+     "dz": 0,
+     "scale": 1.6
+    },
+    {
+     "piece": "palisade",
+     "dx": 0,
+     "dz": -8,
+     "scale": 1.0
+    },
+    {
+     "piece": "palisade",
+     "dx": 8,
+     "dz": 0,
+     "scale": 1.0,
+     "spin": 1.57
+    },
+    {
+     "piece": "palisade",
+     "dx": -8,
+     "dz": 0,
+     "scale": 1.0,
+     "spin": 1.57
+    },
+    {
+     "piece": "banner",
+     "dx": 3,
+     "dz": 4,
+     "scale": 1.1
+    },
+    {
+     "piece": "tent",
+     "dx": -5,
+     "dz": 4,
+     "scale": 1.0
+    }
+   ]
+  },
+  {
+   "id": "the_open_offer",
+   "kind": "trap",
+   "name": "A chest in the open",
+   "weight": 10,
+   "where": "ahead",
+   "announce": "There is a chest sitting on its own in the middle of clear ground.",
+   "prefer": {
+    "families": [
+     "humanoid",
+     "fiend"
+    ]
+   },
+   "count": [
+    5,
+    7
+   ],
+   "spread": 16,
+   "aggro": true,
+   "springAt": 18,
+   "bait": {
+    "kind": "gilded",
+    "name": "The Bait"
+   },
+   "reward": {
+    "as": "chest"
+   },
+   "win": "Whoever put it there is not going to need it.",
+   "desc": "The chest is real and the loot is real. So is everything that comes out of the grass at eighteen metres.",
+   "named": "A chest sitting on its own in the middle of clear ground in {place}.",
+   "dressing": [
+    {
+     "piece": "tent",
+     "dx": -4,
+     "dz": 2,
+     "scale": 1.0
+    },
+    {
+     "piece": "waystone",
+     "dx": 3,
+     "dz": -3,
+     "scale": 1.0
+    },
+    {
+     "piece": "bonepile",
+     "dx": 5,
+     "dz": 3,
+     "scale": 0.7
+    },
+    {
+     "piece": "pyre",
+     "dx": -2,
+     "dz": -4,
+     "scale": 0.6
+    }
+   ]
+  },
+  {
+   "id": "the_quiet_barrow",
+   "kind": "trap",
+   "name": "An offering nobody collected",
+   "weight": 8,
+   "where": "ring",
+   "announce": "Something has been left out on a flat stone, wrapped and tied.",
+   "prefer": {
+    "families": [
+     "undead",
+     "aberration"
+    ]
+   },
+   "count": [
+    6,
+    9
+   ],
+   "spread": 18,
+   "aggro": true,
+   "weaken": 0.85,
+   "springAt": 15,
+   "bait": {
+    "kind": "warded",
+    "name": "The Offering"
+   },
+   "reward": {
+    "as": "chest"
+   },
+   "win": "The offering was always going to be paid for. It is still worth it.",
+   "desc": "A warded chest, so it is worth springing on purpose. Bring something that hits more than one thing at a time.",
+   "named": "Something left out on a flat stone in {place}, wrapped and tied.",
+   "dressing": [
+    {
+     "piece": "menhir",
+     "dx": 0,
+     "dz": -5,
+     "scale": 1.0
+    },
+    {
+     "piece": "cairn",
+     "dx": -5,
+     "dz": 2,
+     "scale": 1.0
+    },
+    {
+     "piece": "cairn",
+     "dx": 5,
+     "dz": 2,
+     "scale": 0.9
+    },
+    {
+     "piece": "cairn",
+     "dx": 0,
+     "dz": 6,
+     "scale": 1.1
+    },
+    {
+     "piece": "altar",
+     "dx": 0,
+     "dz": 0,
+     "scale": 1.0
+    }
+   ]
+  },
+  {
+   "id": "the_stone_that_moved",
+   "kind": "find",
+   "name": "A stone that has been moved",
+   "weight": 9,
+   "where": "ring",
+   "announce": "One of these stones has been turned over, and not long ago.",
+   "bait": {
+    "kind": "iron",
+    "name": "Under the Turned Stone"
+   },
+   "reward": {
+    "as": "chest"
+   },
+   "win": "Somebody hid this and did not come back for it.",
+   "desc": "No fight at all. The whole event is that you went and looked at a thing that was slightly wrong.",
+   "named": "One of these stones in {place} has been turned over, and not long ago.",
+   "dressing": [
+    {
+     "piece": "menhir",
+     "dx": 0,
+     "dz": 0,
+     "scale": 1.2
+    },
+    {
+     "piece": "rubble",
+     "dx": 2.5,
+     "dz": 1.5,
+     "scale": 1.0
+    }
+   ]
+  },
+  {
+   "id": "the_hollow_tree",
+   "kind": "find",
+   "name": "A tree with something in it",
+   "weight": 8,
+   "where": "ahead",
+   "announce": "There is a split trunk a little off your line with something packed into it.",
+   "bait": {
+    "kind": "iron",
+    "name": "The Hollow Trunk"
+   },
+   "reward": {
+    "as": "chest"
+   },
+   "win": "A courier's drop, or a thief's. Either way it is yours.",
+   "desc": "The other no-fight one. These two are what make walking off the road ever worth doing.",
+   "named": "A split trunk a little off your line through {place}, with something packed into it.",
+   "dressing": [
+    {
+     "piece": "den",
+     "dx": 0,
+     "dz": 0,
+     "scale": 0.65
+    },
+    {
+     "piece": "rubble",
+     "dx": -2,
+     "dz": 2,
+     "scale": 0.7
+    }
+   ]
+  },
+  {
+   "id": "the_cairn_count",
+   "kind": "find",
+   "name": "Somebody's count",
+   "weight": 6,
+   "where": "ring",
+   "announce": "Somebody has been keeping a tally on a rock out here, and it stops.",
+   "bait": {
+    "kind": "gilded",
+    "name": "Where the Tally Stops"
+   },
+   "reward": {
+    "as": "chest"
+   },
+   "win": "Whatever they were counting down to, they reached it. What they were saving is still here.",
+   "desc": "The rare one of the three finds, and the best paid. Pure curiosity.",
+   "named": "Somebody has been keeping a tally on a rock in {place}, and it stops.",
+   "dressing": [
+    {
+     "piece": "cairn",
+     "dx": 0,
+     "dz": 0,
+     "scale": 1.2
+    },
+    {
+     "piece": "cairn",
+     "dx": -6,
+     "dz": 3,
+     "scale": 0.9
+    },
+    {
+     "piece": "cairn",
+     "dx": 6,
+     "dz": 2,
+     "scale": 1.0
+    },
+    {
+     "piece": "cairn",
+     "dx": -3,
+     "dz": -6,
+     "scale": 0.8
+    },
+    {
+     "piece": "cairn",
+     "dx": 4,
+     "dz": -6,
+     "scale": 1.05
+    },
+    {
+     "piece": "menhir",
+     "dx": 0,
+     "dz": 9,
+     "scale": 0.9
+    }
+   ]
+  },
+  {
+   "id": "the_press_gang",
+   "kind": "rescue",
+   "name": "A press gang and their cage",
+   "weight": 9,
+   "where": "ahead",
+   "announce": "A covered cage on the road, a fire beside it, and a smith in irons who is worth more than the cart.",
+   "prefer": {
+    "families": [
+     "humanoid"
+    ],
+    "roles": [
+     "brute"
+    ]
+   },
+   "count": [
+    4,
+    6
+   ],
+   "spread": 13,
+   "aggro": false,
+   "seconds": 240,
+   "reward": {
+    "as": "bag",
+    "kind": "gilded",
+    "name": "The smith's own tools",
+    "gold": [
+     50,
+     140
+    ]
+   },
+   "win": "The irons come off. He will not come with you, but he puts his own tools in your hands and tells you where the ore is.",
+   "fail": "The fire goes out and the cart moves on before you reach it.",
+   "desc": "A rescue whose captive is a tradesman, so the bag is tools and materials rather than coin somebody was carrying.",
+   "named": "A press gang camped on the road through {place}. {count} {beasts}, and a man in irons.",
+   "dressing": [
+    {
+     "piece": "cage",
+     "dx": 0,
+     "dz": 0,
+     "scale": 1.25
+    },
+    {
+     "piece": "pyre",
+     "dx": 4,
+     "dz": 3,
+     "scale": 0.9
+    },
+    {
+     "piece": "tent",
+     "dx": -5,
+     "dz": -2,
+     "scale": 1.0
+    },
+    {
+     "piece": "engine",
+     "dx": -8,
+     "dz": 3,
+     "scale": 0.55
+    },
+    {
+     "piece": "bonepile",
+     "dx": 6,
+     "dz": -4,
+     "scale": 0.6
+    }
+   ],
+   "captive": {
+    "at": "cage",
+    "role": "villager",
+    "roleName": "Smith in irons",
+    "greeting": "Twelve years at a forge and they want me for the hammer arm. Put them down and the tools are yours."
+   }
+  },
+  {
+   "id": "the_holding_pen",
+   "kind": "rescue",
+   "name": "A holding pen off the road",
+   "weight": 7,
+   "where": "ring",
+   "announce": "A pen of green wood a little off the road, three cages in it, and only one of them occupied.",
+   "prefer": {
+    "families": [
+     "humanoid",
+     "fiend"
+    ]
+   },
+   "count": [
+    5,
+    7
+   ],
+   "spread": 15,
+   "aggro": false,
+   "seconds": 260,
+   "forceRank": "champion",
+   "reward": {
+    "as": "bag",
+    "kind": "warded",
+    "name": "What the pen was paid in",
+    "gold": [
+     70,
+     190
+    ]
+   },
+   "win": "You get the last bar off. Whoever built this was paid in advance, and the payment is still in the strongbox under the bench.",
+   "fail": "By the time you get there the pen is empty and the gate is swinging.",
+   "desc": "The hardest rescue in the file: a champion runs it, and it pays a warded bag for the trouble.",
+   "named": "A holding pen in {place}, {count} {beasts} minding it, and somebody still inside.",
+   "dressing": [
+    {
+     "piece": "cage",
+     "dx": -2.5,
+     "dz": 0,
+     "scale": 1.3
+    },
+    {
+     "piece": "cage",
+     "dx": 1,
+     "dz": 2.5,
+     "scale": 1.1,
+     "spin": 0.5
+    },
+    {
+     "piece": "cage",
+     "dx": 3.5,
+     "dz": -1.5,
+     "scale": 1.15,
+     "spin": 1.2
+    },
+    {
+     "piece": "palisade",
+     "dx": 0,
+     "dz": -8,
+     "scale": 1.1
+    },
+    {
+     "piece": "palisade",
+     "dx": 8,
+     "dz": 1,
+     "scale": 1.1,
+     "spin": 1.57
+    },
+    {
+     "piece": "palisade",
+     "dx": -8,
+     "dz": 1,
+     "scale": 1.1,
+     "spin": 1.57
+    },
+    {
+     "piece": "banner",
+     "dx": -5,
+     "dz": -5,
+     "scale": 1.0
+    },
+    {
+     "piece": "pyre",
+     "dx": 5,
+     "dz": 5,
+     "scale": 0.8
+    }
+   ],
+   "captive": {
+    "at": "cage",
+    "role": "villager",
+    "roleName": "Prisoner",
+    "greeting": "They sort us. I do not know what for and I have decided not to find out."
+   }
+  },
+  {
+   "id": "the_bolting_mule",
+   "kind": "chase",
+   "name": "A pack mule with the load still on",
+   "weight": 9,
+   "where": "ahead",
+   "announce": "A pack animal going flat out down the road with somebody's whole season lashed to it.",
+   "prefer": {
+    "families": [
+     "beast"
+    ]
+   },
+   "count": [
+    1,
+    1
+   ],
+   "escort": [
+    0,
+    0
+   ],
+   "forceRank": "champion",
+   "spread": 0,
+   "aggro": false,
+   "seconds": 36,
+   "escapeAt": 200,
+   "reward": {
+    "as": "bag",
+    "kind": "gilded",
+    "name": "The load it was carrying",
+    "gold": [
+     60,
+     150
+    ]
+   },
+   "win": "You get a hand on the halter. Whatever it was running from, the load is intact.",
+   "fail": "It goes over the rise and does not come back.",
+   "desc": "A chase whose quarry is not hostile — you are catching a frightened animal, not killing a courier.",
+   "named": "A pack animal bolting through {place} with a full load still on it.",
+   "dressing": [
+    {
+     "piece": "rubble",
+     "dx": -3,
+     "dz": 3,
+     "scale": 0.6
+    }
+   ]
+  },
+  {
+   "id": "the_courier_who_ran",
+   "kind": "chase",
+   "name": "Somebody who did not want to be seen",
+   "weight": 8,
+   "where": "ring",
+   "announce": "A figure breaks cover the moment you come over the rise, and does not look back.",
+   "prefer": {
+    "families": [
+     "humanoid"
+    ],
+    "roles": [
+     "skirmisher"
+    ]
+   },
+   "count": [
+    1,
+    1
+   ],
+   "escort": [
+    0,
+    0
+   ],
+   "forceRank": "rare",
+   "spread": 0,
+   "aggro": false,
+   "seconds": 30,
+   "escapeAt": 170,
+   "reward": {
+    "as": "bag",
+    "kind": "gilded",
+    "name": "What they were carrying for somebody else",
+    "gold": [
+     55,
+     145
+    ]
+   },
+   "win": "Whatever was in the satchel was not theirs, and it is not theirs now.",
+   "fail": "They know the ground better than you do.",
+   "desc": "A chase against a rare skirmisher — fast, evasive, and worth catching.",
+   "named": "Somebody breaking cover in {place} and running for it.",
+   "dressing": [
+    {
+     "piece": "waystone",
+     "dx": 4,
+     "dz": -3,
+     "scale": 0.9
+    }
+   ]
+  },
+  {
+   "id": "the_ferry_post",
+   "kind": "defend",
+   "name": "A ferry post under attack",
+   "weight": 9,
+   "where": "ahead",
+   "announce": "A landing stage, a hut, and the season's takings in a box nobody has time to carry.",
+   "prefer": {
+    "families": [
+     "humanoid",
+     "beast"
+    ]
+   },
+   "count": [
+    5,
+    8
+   ],
+   "spread": 20,
+   "aggro": true,
+   "seconds": 80,
+   "bait": {
+    "kind": "gilded",
+    "name": "The Ferryman's Box"
+   },
+   "reward": {
+    "as": "chest"
+   },
+   "win": "They break off. The ferryman will be back tomorrow, and the box is still shut.",
+   "fail": "They get it off the post and away down the bank.",
+   "desc": "A defend at a river crossing, so the ground fights for you — they have to come along the bank.",
+   "named": "A ferry post in {place} with {count} {beasts} on it.",
+   "dressing": [
+    {
+     "piece": "hut",
+     "dx": 0,
+     "dz": 0,
+     "scale": 1.0
+    },
+    {
+     "piece": "hull",
+     "dx": 7,
+     "dz": 2,
+     "scale": 0.7,
+     "spin": 1.2
+    },
+    {
+     "piece": "waystone",
+     "dx": -6,
+     "dz": -2,
+     "scale": 0.9
+    },
+    {
+     "piece": "pyre",
+     "dx": 3,
+     "dz": -4,
+     "scale": 0.7
+    }
+   ]
+  },
+  {
+   "id": "the_seed_wagon",
+   "kind": "defend",
+   "name": "A seed wagon they cannot afford to lose",
+   "weight": 8,
+   "where": "ring",
+   "announce": "A wagon stopped in the open with next year's sowing on it, and something circling.",
+   "prefer": {
+    "families": [
+     "beast",
+     "aberration"
+    ]
+   },
+   "count": [
+    6,
+    9
+   ],
+   "spread": 24,
+   "aggro": true,
+   "seconds": 70,
+   "bait": {
+    "kind": "iron",
+    "name": "The Sowing Crates"
+   },
+   "reward": {
+    "as": "chest"
+   },
+   "win": "The last of them breaks off. A village eats next winter because you were on this road.",
+   "fail": "They get into the crates, and a village does not eat next winter.",
+   "desc": "The cheapest defend in the file on purpose — an iron box, a wide spread, and a reason that is not treasure.",
+   "named": "A seed wagon stopped in {place}, {count} {beasts} circling it.",
+   "dressing": [
+    {
+     "piece": "engine",
+     "dx": 0,
+     "dz": 0,
+     "scale": 0.6
+    },
+    {
+     "piece": "rubble",
+     "dx": -4,
+     "dz": 3,
+     "scale": 0.7
+    },
+    {
+     "piece": "waystone",
+     "dx": 6,
+     "dz": -2,
+     "scale": 0.9
+    }
+   ]
+  },
+  {
+   "id": "the_offering_stone",
+   "kind": "trap",
+   "name": "An offering somebody left out",
+   "weight": 9,
+   "where": "ahead",
+   "announce": "A flat stone off the road with a box on it, and everything around it very quiet.",
+   "prefer": {
+    "families": [
+     "fiend",
+     "aberration"
+    ]
+   },
+   "count": [
+    5,
+    7
+   ],
+   "spread": 12,
+   "aggro": true,
+   "springAt": 17,
+   "bait": {
+    "kind": "gilded",
+    "name": "The Offering"
+   },
+   "reward": {
+    "as": "chest"
+   },
+   "win": "Nothing comes. Somebody left it out for something that is not hungry today.",
+   "fail": "It was not left for you.",
+   "desc": "A trap dressed as a shrine, so the tell is that nobody has taken it yet.",
+   "named": "An offering stone in {place}, untouched, with a box still sitting on it.",
+   "dressing": [
+    {
+     "piece": "altar",
+     "dx": 0,
+     "dz": 0,
+     "scale": 1.1
+    },
+    {
+     "piece": "menhir",
+     "dx": 0,
+     "dz": -6,
+     "scale": 0.9
+    },
+    {
+     "piece": "bonepile",
+     "dx": 4,
+     "dz": 3,
+     "scale": 0.8
+    },
+    {
+     "piece": "bonepile",
+     "dx": -4,
+     "dz": 2,
+     "scale": 0.6
+    }
+   ]
+  },
+  {
+   "id": "the_baited_den",
+   "kind": "trap",
+   "name": "A den with the door open",
+   "weight": 7,
+   "where": "ring",
+   "announce": "A dug-out mouth in the bank with a strongbox sitting in the light, four paces inside.",
+   "prefer": {
+    "families": [
+     "beast",
+     "fiend"
+    ]
+   },
+   "count": [
+    6,
+    9
+   ],
+   "spread": 11,
+   "aggro": true,
+   "springAt": 14,
+   "weaken": 0.9,
+   "bait": {
+    "kind": "warded",
+    "name": "What the Den Kept"
+   },
+   "reward": {
+    "as": "chest"
+   },
+   "win": "Whatever dug this is not home. Take it and go.",
+   "fail": "It was home.",
+   "desc": "The best bait in the file and the worst place to be standing when it springs.",
+   "named": "A den mouth in {place} with something valuable four paces inside it.",
+   "dressing": [
+    {
+     "piece": "den",
+     "dx": 0,
+     "dz": 0,
+     "scale": 1.0
+    },
+    {
+     "piece": "bonepile",
+     "dx": 5,
+     "dz": 3,
+     "scale": 1.0
+    },
+    {
+     "piece": "bonepile",
+     "dx": -4,
+     "dz": 4,
+     "scale": 0.8
+    },
+    {
+     "piece": "rubble",
+     "dx": 3,
+     "dz": -4,
+     "scale": 0.9
+    }
+   ]
+  },
+  {
+   "id": "the_drowned_boat",
+   "kind": "find",
+   "name": "A hull nobody came back for",
+   "weight": 8,
+   "where": "ring",
+   "announce": "A hull up on the stones, well above where any water reaches now.",
+   "bait": {
+    "kind": "iron",
+    "name": "Under the Boards"
+   },
+   "win": "The boards come up. Somebody meant to come back for this and did not.",
+   "desc": "A find with no fight in it at all — a wreck a long way from any water, and a box under the boards.",
+   "named": "A hull on the stones in {place}, a long way from any water.",
+   "dressing": [
+    {
+     "piece": "hull",
+     "dx": 0,
+     "dz": 0,
+     "scale": 1.0,
+     "spin": 0.3
+    },
+    {
+     "piece": "rubble",
+     "dx": 4,
+     "dz": 2,
+     "scale": 0.8
+    },
+    {
+     "piece": "bonepile",
+     "dx": -3,
+     "dz": 3,
+     "scale": 0.5
+    }
+   ]
+  },
+  {
+   "id": "the_marker_that_lies",
+   "kind": "find",
+   "name": "A waystone facing the wrong way",
+   "weight": 7,
+   "where": "ahead",
+   "announce": "A waystone with its face turned off the road, which took somebody some effort.",
+   "bait": {
+    "kind": "iron",
+    "name": "Behind the Waystone"
+   },
+   "win": "It was turned to point at something. The something is still there.",
+   "desc": "A find whose whole tell is that a heavy thing has been moved on purpose.",
+   "named": "A waystone in {place} turned to face off the road.",
+   "dressing": [
+    {
+     "piece": "waystone",
+     "dx": 0,
+     "dz": 0,
+     "scale": 1.3,
+     "spin": 2.4
+    },
+    {
+     "piece": "cairn",
+     "dx": 3,
+     "dz": 3,
+     "scale": 0.7
+    }
+   ]
+  },
+  {
+   "id": "the_cold_watchfire",
+   "kind": "find",
+   "name": "A watchfire nobody lit",
+   "weight": 6,
+   "where": "ring",
+   "announce": "A beacon pile built and dressed and never once lit.",
+   "bait": {
+    "kind": "gilded",
+    "name": "Under the Beacon"
+   },
+   "win": "Whoever built this cached what they had under it, and then never came back to light it.",
+   "desc": "The best-paying find in the file, because it is the hardest to explain away as scenery.",
+   "named": "An unlit beacon in {place}, built and dressed and never used.",
+   "dressing": [
+    {
+     "piece": "pyre",
+     "dx": 0,
+     "dz": 0,
+     "scale": 1.7
+    },
+    {
+     "piece": "palisade",
+     "dx": 0,
+     "dz": -7,
+     "scale": 0.9
+    },
+    {
+     "piece": "waystone",
+     "dx": 6,
+     "dz": 2,
+     "scale": 0.9
+    },
+    {
+     "piece": "bonepile",
+     "dx": -5,
+     "dz": -3,
+     "scale": 0.5
+    }
+   ]
+  }
+ ],
+ "_r14": "R14 — the same as data/encounters.json: a `named` variant with {tokens}, filled from what actually spawned and where. These eleven are the game's best content and were announced in one anonymous line and then never mentioned again — they have a row in the Nearby panel and a beacon in the world now (js/nearby.js, js/beacon.js), so the line only has to start the story."
+}

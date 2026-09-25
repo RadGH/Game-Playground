@@ -1,0 +1,911 @@
+{
+ "version": 1,
+ "source": "src/game/classes.js (CLASSES base literal + CLASS_TAGS)",
+ "classes": [
+  {
+   "id": "warrior",
+   "name": "Warrior",
+   "role": "Frontline Tank",
+   "hook": "Shield Bash stuns enemies. Whirlwind hits all adjacent foes. Unbreakable when outnumbered.",
+   "armorType": "Heavy Armor · Sword / Hammer / 2H",
+   "primaryAttr": "STR",
+   "armorTier": "heavy",
+   "weapons": [
+    "sword",
+    "hammer",
+    "sword2h",
+    "axe2h"
+   ],
+   "startingEquipment": [
+    "longsword",
+    "shield",
+    "heavy_chest",
+    "heavy_helm",
+    "heavy_gauntlets"
+   ],
+   "skills": [
+    "cleave",
+    "battle_cry",
+    "whirlwind",
+    "unbreakable"
+   ]
+  },
+  {
+   "id": "fighter",
+   "name": "Fighter",
+   "role": "Disciplined Duelist",
+   "hook": "Riposte counters parries. Tactical stances swap between offense and defense. Precise Strike never misses.",
+   "armorType": "Heavy Armor · Sword / Hammer / Shield",
+   "primaryAttr": "STR",
+   "armorTier": "heavy",
+   "weapons": [
+    "sword",
+    "hammer",
+    "sword2h"
+   ],
+   "startingEquipment": [
+    "longsword",
+    "shield",
+    "medium_chest",
+    "heavy_helm",
+    "heavy_gauntlets"
+   ],
+   "skills": [
+    "precise_strike",
+    "defensive_stance",
+    "offensive_stance",
+    "riposte",
+    "second_wind",
+    "sunder_armor"
+   ]
+  },
+  {
+   "id": "paladin",
+   "name": "Paladin",
+   "role": "Holy Warrior",
+   "hook": "Holy Strike crits vs demons. Lay on Hands keeps allies alive. Consecration sustains long fights.",
+   "armorType": "Medium Armor · Sword / Scepter + Shield",
+   "primaryAttr": "STR",
+   "armorTier": "medium",
+   "weapons": [
+    "sword",
+    "scepter"
+   ],
+   "startingEquipment": [
+    "scepter",
+    "shield",
+    "medium_chest",
+    "medium_helm"
+   ],
+   "skills": [
+    "holy_strike",
+    "lay_on_hands",
+    "divine_shield",
+    "consecration"
+   ]
+  },
+  {
+   "id": "ranger",
+   "name": "Ranger",
+   "role": "Precision Ranged",
+   "hook": "Aimed Shot ignores armor. Rain of Arrows blankets the entire enemy field for 3 rounds.",
+   "armorType": "Light Armor · Bow / Crossbow / Javelin",
+   "primaryAttr": "DEX",
+   "armorTier": "light",
+   "weapons": [
+    "bow",
+    "crossbow",
+    "javelin"
+   ],
+   "startingEquipment": [
+    "shortbow",
+    "light_chest",
+    "light_boots",
+    "ring"
+   ],
+   "skills": [
+    "aimed_shot",
+    "multi_shot",
+    "smoke_trap",
+    "rain_of_arrows"
+   ]
+  },
+  {
+   "id": "rogue",
+   "name": "Rogue",
+   "role": "Burst Assassin",
+   "hook": "200% Backstab on stunned targets. Death Mark makes enemies take 50% more damage from all sources.",
+   "armorType": "Light Armor · Dagger (dual wield)",
+   "primaryAttr": "DEX",
+   "armorTier": "light",
+   "weapons": [
+    "dagger"
+   ],
+   "startingEquipment": [
+    "dagger",
+    "dagger",
+    "light_chest",
+    "light_boots"
+   ],
+   "skills": [
+    "backstab",
+    "poison_blade",
+    "shadow_step",
+    "death_mark"
+   ]
+  },
+  {
+   "id": "cleric",
+   "name": "Cleric",
+   "role": "Primary Healer",
+   "hook": "Mass Resurrection can auto-trigger on wipe. Sanctuary makes an ally temporarily untargetable.",
+   "armorType": "Light Armor · Staff / Scepter / Wand",
+   "primaryAttr": "INT",
+   "armorTier": "light",
+   "weapons": [
+    "staff",
+    "scepter",
+    "wand"
+   ],
+   "startingEquipment": [
+    "scepter",
+    "shield",
+    "medium_chest",
+    "medium_helm"
+   ],
+   "skills": [
+    "heal",
+    "smite",
+    "sanctuary",
+    "mass_resurrection"
+   ]
+  },
+  {
+   "id": "bard",
+   "name": "Bard",
+   "role": "Support Maestro",
+   "hook": "Ballad of Valor gives one hero two turns per round. Song of Ruin strips all enemy buffs at once.",
+   "armorType": "Light Armor · Dagger / Wand",
+   "primaryAttr": "INT",
+   "armorTier": "light",
+   "weapons": [
+    "dagger",
+    "wand"
+   ],
+   "startingEquipment": [
+    "quarterstaff",
+    "light_chest",
+    "silver_amulet"
+   ],
+   "skills": [
+    "inspiring_tune",
+    "discordant_wail",
+    "ballad_of_valor",
+    "song_of_ruin"
+   ]
+  },
+  {
+   "id": "mage",
+   "name": "Mage",
+   "role": "AoE Glass Cannon",
+   "hook": "Fireball torches entire enemy packs. Blizzard hits all enemies for 3 rounds. Arcane Surge: 400% INT.",
+   "armorType": "Cloth Armor · Staff / Wand",
+   "primaryAttr": "INT",
+   "armorTier": "cloth",
+   "weapons": [
+    "staff",
+    "wand"
+   ],
+   "startingEquipment": [
+    "staff",
+    "cloth_chest",
+    "cloth_helm",
+    "ring"
+   ],
+   "skills": [
+    "magic_missile",
+    "fireball",
+    "blizzard",
+    "arcane_surge"
+   ]
+  },
+  {
+   "id": "necromancer",
+   "name": "Necromancer",
+   "role": "Army Builder",
+   "hook": "Raise Dead turns corpses into skeleton allies. Death Coil applies Poison AND Bleed to all enemies.",
+   "armorType": "Cloth Armor · Staff / Wand / Scepter",
+   "primaryAttr": "INT",
+   "armorTier": "cloth",
+   "weapons": [
+    "staff",
+    "wand",
+    "scepter"
+   ],
+   "startingEquipment": [
+    "staff",
+    "cloth_chest",
+    "cloth_helm",
+    "silver_amulet"
+   ],
+   "skills": [
+    "bone_spike",
+    "bone_spear",
+    "life_drain",
+    "corpse_explosion"
+   ]
+  },
+  {
+   "id": "warlock",
+   "name": "Warlock",
+   "role": "Chaos Dealer",
+   "hook": "Corruption spreads on enemy death. Soul Pact doubles all DoT at cost of own HP.",
+   "armorType": "Cloth Armor · Staff / Wand",
+   "primaryAttr": "INT",
+   "armorTier": "cloth",
+   "weapons": [
+    "staff",
+    "wand"
+   ],
+   "startingEquipment": [
+    "staff",
+    "cloth_chest",
+    "cloth_helm"
+   ],
+   "skills": [
+    "corruption",
+    "hellfire",
+    "soul_pact",
+    "void_rift"
+   ]
+  },
+  {
+   "id": "demon_hunter",
+   "name": "Demon Hunter",
+   "role": "Specialist Killer",
+   "hook": "+50% damage vs demons. Vengeance stacks from fallen allies then unleashes devastating burst.",
+   "armorType": "Light Armor · Crossbow / Dagger",
+   "primaryAttr": "DEX",
+   "armorTier": "light",
+   "weapons": [
+    "crossbow",
+    "dagger"
+   ],
+   "startingEquipment": [
+    "dagger",
+    "dagger",
+    "light_chest",
+    "light_boots"
+   ],
+   "skills": [
+    "demon_bolt",
+    "glaive_toss",
+    "fel_sight",
+    "vengeance"
+   ]
+  },
+  {
+   "id": "scavenger",
+   "name": "Scavenger",
+   "role": "Resource Specialist",
+   "hook": "Lucky Strike inflicts random statuses. Big Score is a high-variance gambling strike — crit huge or whiff.",
+   "armorType": "Light/Medium · Any 1H weapon",
+   "primaryAttr": "DEX",
+   "armorTier": "light",
+   "weapons": [
+    "dagger",
+    "sword",
+    "hammer",
+    "javelin"
+   ],
+   "startingEquipment": [
+    "quarterstaff",
+    "light_chest",
+    "light_gauntlets"
+   ],
+   "skills": [
+    "scrounge",
+    "thrown_junk",
+    "makeshift_bomb",
+    "jackpot"
+   ]
+  },
+  {
+   "id": "swashbuckler",
+   "name": "Swashbuckler",
+   "role": "Flashy Duelist",
+   "hook": "Build Flair stacks with Flourish. Grandeur releases all stacks in one legendary strike.",
+   "armorType": "Light Armor · Sword / Dagger",
+   "primaryAttr": "DEX",
+   "armorTier": "light",
+   "weapons": [
+    "sword",
+    "dagger"
+   ],
+   "startingEquipment": [
+    "rapier",
+    "dagger",
+    "light_chest",
+    "light_boots"
+   ],
+   "skills": [
+    "riposte",
+    "flourish",
+    "taunt",
+    "grandeur"
+   ]
+  },
+  {
+   "id": "dragon_knight",
+   "name": "Dragon Knight",
+   "role": "Draconic Warrior",
+   "hook": "Choose fire/ice/lightning. Draconic Fury turns all attacks into group AoE for 2 rounds.",
+   "armorType": "Heavy/Medium · 2H Sword / 2H Axe",
+   "primaryAttr": "STR",
+   "armorTier": "heavy",
+   "weapons": [
+    "sword2h",
+    "axe2h"
+   ],
+   "startingEquipment": [
+    "longsword",
+    "shield",
+    "heavy_chest",
+    "heavy_helm",
+    "heavy_gauntlets"
+   ],
+   "skills": [
+    "dragon_claw",
+    "breath_weapon",
+    "dragon_scales",
+    "draconic_fury"
+   ]
+  },
+  {
+   "id": "pyromancer",
+   "name": "Pyromancer",
+   "role": "Fire Specialist",
+   "hook": "Stack Burn on multiple groups. Meteor ignites every enemy group simultaneously.",
+   "armorType": "Cloth Armor · Staff / Wand / Scepter",
+   "primaryAttr": "INT",
+   "armorTier": "cloth",
+   "weapons": [
+    "staff",
+    "wand",
+    "scepter"
+   ],
+   "startingEquipment": [
+    "staff",
+    "cloth_chest",
+    "cloth_helm",
+    "silver_amulet"
+   ],
+   "skills": [
+    "flame_lance",
+    "ignite",
+    "pyroclasm",
+    "meteor"
+   ]
+  },
+  {
+   "id": "stormcaller",
+   "name": "Stormcaller",
+   "role": "Chain Lightning Mage",
+   "hook": "Chain Lightning jumps between enemies. Thunder Ring zones the battlefield.",
+   "armorType": "Cloth Armor · Staff / Wand",
+   "primaryAttr": "INT",
+   "armorTier": "cloth",
+   "weapons": [
+    "staff",
+    "wand"
+   ],
+   "startingEquipment": [
+    "wand",
+    "orb",
+    "cloth_chest",
+    "cloth_helm"
+   ],
+   "skills": [
+    "chain_lightning",
+    "static_field",
+    "thunder_ring",
+    "tempest"
+   ]
+  },
+  {
+   "id": "druid",
+   "name": "Druid",
+   "role": "Shapeshifting Healer",
+   "hook": "Rejuvenation HoTs. Wild Shape for raw damage. Nature’s Wrath in the late game.",
+   "armorType": "Medium Armor · Staff / Scepter",
+   "primaryAttr": "INT",
+   "armorTier": "medium",
+   "weapons": [
+    "staff",
+    "scepter"
+   ],
+   "startingEquipment": [
+    "quarterstaff",
+    "medium_chest",
+    "medium_helm",
+    "ring"
+   ],
+   "skills": [
+    "rejuvenation",
+    "entangle",
+    "wild_shape",
+    "natures_wrath"
+   ]
+  },
+  {
+   "id": "oracle",
+   "name": "Oracle",
+   "role": "Predictive Protector",
+   "hook": "Foresight pre-shields allies against incoming damage. Prophecy reveals enemy intents.",
+   "armorType": "Cloth Armor · Staff / Scepter",
+   "primaryAttr": "INT",
+   "armorTier": "cloth",
+   "weapons": [
+    "staff",
+    "scepter"
+   ],
+   "startingEquipment": [
+    "scepter",
+    "orb",
+    "cloth_chest",
+    "silver_amulet"
+   ],
+   "skills": [
+    "foresight",
+    "prophecy",
+    "fate_weave",
+    "ascendance"
+   ]
+  },
+  {
+   "id": "tactician",
+   "name": "Tactician",
+   "role": "Turn-Order Manipulator",
+   "hook": "Grants extra actions, repositions allies, reshuffles enemy turn order.",
+   "armorType": "Medium Armor · Sword / Scepter",
+   "primaryAttr": "INT",
+   "armorTier": "medium",
+   "weapons": [
+    "sword",
+    "scepter"
+   ],
+   "startingEquipment": [
+    "scepter",
+    "shield",
+    "medium_chest",
+    "medium_helm"
+   ],
+   "skills": [
+    "rally_action",
+    "feint",
+    "reposition",
+    "masterstroke"
+   ]
+  },
+  {
+   "id": "chronomancer",
+   "name": "Chronomancer",
+   "role": "Time Mage",
+   "hook": "Haste allies, slow enemies, rewind HP, freeze the battlefield in Time Stop.",
+   "armorType": "Cloth Armor · Staff / Wand",
+   "primaryAttr": "INT",
+   "armorTier": "cloth",
+   "weapons": [
+    "staff",
+    "wand"
+   ],
+   "startingEquipment": [
+    "staff",
+    "cloth_chest",
+    "cloth_helm",
+    "gold_signet"
+   ],
+   "skills": [
+    "haste",
+    "slow_time",
+    "rewind",
+    "time_stop"
+   ]
+  },
+  {
+   "id": "monk",
+   "name": "Monk",
+   "role": "Martial Artist",
+   "hook": "Unarmed flurries stack chi. Inner Focus self-heals. Shadow Step dashes into crit range.",
+   "armorType": "Cloth Armor · Unarmed / Staff",
+   "primaryAttr": "DEX",
+   "armorTier": "cloth",
+   "weapons": [
+    "staff"
+   ],
+   "startingEquipment": [
+    "quarterstaff",
+    "cloth_chest",
+    "light_boots"
+   ],
+   "skills": [
+    "palm_strike",
+    "flurry",
+    "inner_focus",
+    "monk_shadow_step"
+   ],
+   "appearance": "warrior"
+  },
+  {
+   "id": "shaman",
+   "name": "Shaman",
+   "role": "Spirit Caster",
+   "hook": "Totems heal over time. Spirit bolts chain to nearby foes. Ancestral Shield wards the party.",
+   "armorType": "Medium Armor · Staff / Scepter",
+   "primaryAttr": "INT",
+   "armorTier": "medium",
+   "weapons": [
+    "staff",
+    "scepter"
+   ],
+   "startingEquipment": [
+    "quarterstaff",
+    "medium_chest",
+    "medium_helm",
+    "silver_amulet"
+   ],
+   "skills": [
+    "spirit_bolt",
+    "healing_totem",
+    "chain_lightning_spirit",
+    "ancestral_shield"
+   ],
+   "appearance": "druid"
+  },
+  {
+   "id": "witch_hunter",
+   "name": "Witch Hunter",
+   "role": "Anti-Magic Skirmisher",
+   "hook": "Silver bolts purge curses. Bonus damage vs demons and undead. Marks targets for the party.",
+   "armorType": "Medium Armor · Crossbow / Sword",
+   "primaryAttr": "DEX",
+   "armorTier": "medium",
+   "weapons": [
+    "crossbow",
+    "sword",
+    "dagger"
+   ],
+   "startingEquipment": [
+    "shortbow",
+    "dagger",
+    "medium_chest",
+    "light_boots"
+   ],
+   "skills": [
+    "silver_bolt",
+    "dispel_curse",
+    "purge_strike",
+    "inquisitor_mark"
+   ],
+   "appearance": "ranger"
+  },
+  {
+   "id": "knight",
+   "name": "Knight",
+   "role": "Sworn Tank",
+   "hook": "Shield Bash stuns, Taunt locks aggro, Holy Strike sears evil, Rally bolsters the party.",
+   "armorType": "Heavy Armor · Sword + Shield",
+   "primaryAttr": "STR",
+   "armorTier": "heavy",
+   "weapons": [
+    "sword",
+    "hammer"
+   ],
+   "startingEquipment": [
+    "longsword",
+    "shield",
+    "heavy_chest",
+    "heavy_helm",
+    "heavy_gauntlets"
+   ],
+   "skills": [
+    "knight_shield_bash",
+    "knight_taunt",
+    "knight_holy_strike",
+    "rally"
+   ],
+   "appearance": "warrior"
+  },
+  {
+   "id": "sorcerer",
+   "name": "Sorcerer",
+   "role": "Chaos Caster",
+   "hook": "Wild Bolt rolls a random element. Arcane Surge doubles spell power. Mana Burn punishes casters.",
+   "armorType": "Cloth Armor · Staff / Wand",
+   "primaryAttr": "INT",
+   "armorTier": "cloth",
+   "weapons": [
+    "staff",
+    "wand"
+   ],
+   "startingEquipment": [
+    "wand",
+    "cloth_chest",
+    "cloth_helm"
+   ],
+   "skills": [
+    "wild_bolt",
+    "sorc_arcane_surge",
+    "mana_burn",
+    "chaos_ward"
+   ],
+   "appearance": "mage"
+  },
+  {
+   "id": "runesmith",
+   "name": "Runesmith",
+   "role": "Rune-Forged Bulwark",
+   "hook": "Rune Hammer hits with imbued force. Wards protect allies. Forge Flame ignites weapons.",
+   "armorType": "Heavy Armor · Hammer",
+   "primaryAttr": "STR",
+   "armorTier": "heavy",
+   "weapons": [
+    "hammer",
+    "axe2h"
+   ],
+   "startingEquipment": [
+    "longsword",
+    "shield",
+    "heavy_chest",
+    "heavy_helm"
+   ],
+   "skills": [
+    "rune_hammer",
+    "rune_of_warding",
+    "rune_of_might",
+    "forge_flame"
+   ],
+   "appearance": "warrior"
+  },
+  {
+   "id": "shadow_dancer",
+   "name": "Shadow Dancer",
+   "role": "Stealth Duelist",
+   "hook": "Smoke Veil grants evasion. Assassinate executes low-HP foes. Dance of Blades chains strikes.",
+   "armorType": "Light Armor · Dagger (dual wield)",
+   "primaryAttr": "DEX",
+   "armorTier": "light",
+   "weapons": [
+    "dagger"
+   ],
+   "startingEquipment": [
+    "dagger",
+    "dagger",
+    "light_chest",
+    "light_boots"
+   ],
+   "skills": [
+    "sd_shadow_strike",
+    "smoke_veil",
+    "assassinate",
+    "dance_of_blades"
+   ],
+   "appearance": "rogue"
+  },
+  {
+   "id": "tinker",
+   "name": "Tinker",
+   "role": "Clockwork Mechanist",
+   "hook": "Clockwork bolts, alchemical grenades, and a pocket-watch that patches wounds mid-fight. Overcharge the whole party with an arcane spring-wound battery.",
+   "armorType": "Medium Armor · Hand-Crossbow / Dagger",
+   "primaryAttr": "INT",
+   "armorTier": "medium",
+   "weapons": [
+    "crossbow",
+    "dagger"
+   ],
+   "startingEquipment": [
+    "shortbow",
+    "dagger",
+    "medium_chest",
+    "light_boots"
+   ],
+   "skills": [
+    "tinker_bolt",
+    "tinker_grenade",
+    "tinker_quick_fix",
+    "tinker_overcharge"
+   ],
+   "appearance": "tinker"
+  },
+  {
+   "id": "priest",
+   "name": "Priest",
+   "role": "Holy/Shadow Caster",
+   "hook": "Heals the living, calls back the fallen, and answers their killers with shadow. The party's reviver and second-line damage dealer.",
+   "armorType": "Light Armor · Mace / Scepter",
+   "primaryAttr": "INT",
+   "armorTier": "light",
+   "weapons": [
+    "iron_mace",
+    "scepter",
+    "staff"
+   ],
+   "startingEquipment": [
+    "scepter",
+    "shield",
+    "medium_chest",
+    "medium_helm"
+   ],
+   "skills": [
+    "priest_mend",
+    "priest_call_back",
+    "shadow_bolt",
+    "shadow_veil"
+   ],
+   "appearance": "priest_female"
+  },
+  {
+   "id": "enchanter",
+   "name": "Enchanter",
+   "role": "Mind-Magic Controller",
+   "hook": "Lulls foes to sleep so the party can pick its fights. Drowse opens packs without alerting them. Arcane Jolt wakes targets only when you decide they should die.",
+   "armorType": "Light Armor · Staff / Wand",
+   "primaryAttr": "INT",
+   "armorTier": "light",
+   "weapons": [
+    "staff",
+    "wand"
+   ],
+   "startingEquipment": [
+    "staff",
+    "light_chest",
+    "light_boots"
+   ],
+   "skills": [
+    "lullaby",
+    "mind_charm",
+    "mass_drowse",
+    "arcane_jolt"
+   ],
+   "appearance": "enchanter_male"
+  }
+ ],
+ "classTags": {
+  "warrior": [
+   "heavy",
+   "melee",
+   "tank"
+  ],
+  "fighter": [
+   "heavy",
+   "melee"
+  ],
+  "paladin": [
+   "heavy",
+   "melee",
+   "holy",
+   "healer"
+  ],
+  "ranger": [
+   "ranged",
+   "tracker",
+   "hunter"
+  ],
+  "rogue": [
+   "stealth",
+   "melee"
+  ],
+  "mage": [
+   "arcane",
+   "magic"
+  ],
+  "cleric": [
+   "holy",
+   "healer",
+   "reviver",
+   "support"
+  ],
+  "bard": [
+   "support",
+   "charm",
+   "healer"
+  ],
+  "druid": [
+   "nature",
+   "healer",
+   "support"
+  ],
+  "necromancer": [
+   "dark",
+   "arcane",
+   "reviver"
+  ],
+  "warlock": [
+   "dark",
+   "arcane"
+  ],
+  "demon_hunter": [
+   "hunter",
+   "holy"
+  ],
+  "dragon_knight": [
+   "heavy",
+   "draconic"
+  ],
+  "pyromancer": [
+   "fire",
+   "arcane"
+  ],
+  "stormcaller": [
+   "storm",
+   "arcane"
+  ],
+  "oracle": [
+   "prophetic",
+   "support"
+  ],
+  "swashbuckler": [
+   "stealth",
+   "melee",
+   "duel"
+  ],
+  "scavenger": [
+   "hunter",
+   "utility"
+  ],
+  "tactician": [
+   "leader",
+   "support"
+  ],
+  "chronomancer": [
+   "arcane",
+   "time"
+  ],
+  "monk": [
+   "martial",
+   "melee"
+  ],
+  "knight": [
+   "heavy",
+   "melee"
+  ],
+  "sorcerer": [
+   "arcane",
+   "magic"
+  ],
+  "shaman": [
+   "nature",
+   "support",
+   "healer"
+  ],
+  "witch_hunter": [
+   "holy",
+   "hunter"
+  ],
+  "runesmith": [
+   "heavy",
+   "craft"
+  ],
+  "shadow_dancer": [
+   "stealth",
+   "dark"
+  ],
+  "tinker": [
+   "craft",
+   "utility",
+   "clockwork"
+  ],
+  "enchanter": [
+   "arcane",
+   "enchant",
+   "support"
+  ],
+  "priest": [
+   "holy",
+   "healer",
+   "reviver",
+   "shadow"
+  ]
+ }
+}

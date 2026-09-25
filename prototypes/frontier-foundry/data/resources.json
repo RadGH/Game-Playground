@@ -1,0 +1,1926 @@
+{
+  "schema": 1,
+  "note": "Every material in Frontier Foundry. kind: ore|mineral|fluid|gas|organic|rare|intermediate|science. transport: crate (solid, any hauler), tanker (liquid), gas_hauler (pressurised). found.rarity 0..1 is the chance weight a node of this shows up on a matching planet; found.richness scales how much is in a node.",
+  "resources": [
+    {
+      "id": "iron_ore",
+      "name": "Iron Ore",
+      "kind": "ore",
+      "phase": "solid",
+      "color": "#8c7a6b",
+      "tags": [
+        "metal",
+        "common",
+        "structural"
+      ],
+      "value": 2,
+      "stack": 200,
+      "transport": "crate",
+      "found": {
+        "biomes": [
+          "hills",
+          "mountains",
+          "badlands",
+          "grassland",
+          "shrubland"
+        ],
+        "archetypes": [
+          "temperate",
+          "arid",
+          "barren",
+          "frozen",
+          "volcanic",
+          "shattered",
+          "verdant",
+          "toxic",
+          "oceanic",
+          "gas_shrouded"
+        ],
+        "rarity": 1.0,
+        "richness": 1.0
+      },
+      "desc": "The backbone metal. Smelts into iron, iron into steel, steel into everything."
+    },
+    {
+      "id": "copper_ore",
+      "name": "Copper Ore",
+      "kind": "ore",
+      "phase": "solid",
+      "color": "#b5713b",
+      "tags": [
+        "metal",
+        "common",
+        "conductive"
+      ],
+      "value": 3,
+      "stack": 200,
+      "transport": "crate",
+      "found": {
+        "biomes": [
+          "hills",
+          "mountains",
+          "badlands",
+          "desert",
+          "savanna"
+        ],
+        "archetypes": [
+          "temperate",
+          "arid",
+          "barren",
+          "volcanic",
+          "shattered",
+          "verdant",
+          "toxic",
+          "oceanic",
+          "frozen"
+        ],
+        "rarity": 0.9,
+        "richness": 0.9
+      },
+      "desc": "Drawn into wire. Nothing electrical happens without it."
+    },
+    {
+      "id": "tin_ore",
+      "name": "Tin Ore",
+      "kind": "ore",
+      "phase": "solid",
+      "color": "#9fa7ad",
+      "tags": [
+        "metal",
+        "alloy"
+      ],
+      "value": 4,
+      "stack": 200,
+      "transport": "crate",
+      "found": {
+        "biomes": [
+          "hills",
+          "beach",
+          "shrubland",
+          "badlands"
+        ],
+        "archetypes": [
+          "temperate",
+          "arid",
+          "oceanic",
+          "verdant",
+          "barren"
+        ],
+        "rarity": 0.55,
+        "richness": 0.6
+      },
+      "desc": "Soft on its own, but it turns copper into bronze."
+    },
+    {
+      "id": "titanium_ore",
+      "name": "Titanium Ore",
+      "kind": "ore",
+      "phase": "solid",
+      "color": "#cdd3d8",
+      "tags": [
+        "metal",
+        "light",
+        "aerospace"
+      ],
+      "value": 12,
+      "stack": 150,
+      "transport": "crate",
+      "found": {
+        "biomes": [
+          "mountains",
+          "snowyPeaks",
+          "volcanic",
+          "badlands"
+        ],
+        "archetypes": [
+          "volcanic",
+          "shattered",
+          "frozen",
+          "barren",
+          "arid"
+        ],
+        "rarity": 0.35,
+        "richness": 0.55
+      },
+      "desc": "Light and stubborn. Rocket frames are made of it."
+    },
+    {
+      "id": "tungsten_ore",
+      "name": "Tungsten Ore",
+      "kind": "ore",
+      "phase": "solid",
+      "color": "#6d6a63",
+      "tags": [
+        "metal",
+        "heat",
+        "dense"
+      ],
+      "value": 14,
+      "stack": 120,
+      "transport": "crate",
+      "found": {
+        "biomes": [
+          "mountains",
+          "volcanic",
+          "badlands"
+        ],
+        "archetypes": [
+          "volcanic",
+          "shattered",
+          "barren",
+          "toxic"
+        ],
+        "rarity": 0.3,
+        "richness": 0.5
+      },
+      "desc": "Melts at a temperature nothing else survives. Furnace linings and gun barrels."
+    },
+    {
+      "id": "gold_ore",
+      "name": "Gold Ore",
+      "kind": "ore",
+      "phase": "solid",
+      "color": "#d8b040",
+      "tags": [
+        "metal",
+        "precious",
+        "conductive"
+      ],
+      "value": 30,
+      "stack": 100,
+      "transport": "crate",
+      "found": {
+        "biomes": [
+          "mountains",
+          "hills",
+          "badlands",
+          "desert"
+        ],
+        "archetypes": [
+          "arid",
+          "barren",
+          "temperate",
+          "shattered"
+        ],
+        "rarity": 0.22,
+        "richness": 0.4
+      },
+      "desc": "Corrosion-proof contacts for circuits that must never fail."
+    },
+    {
+      "id": "silver_ore",
+      "name": "Silver Ore",
+      "kind": "ore",
+      "phase": "solid",
+      "color": "#c9d2d8",
+      "tags": [
+        "metal",
+        "precious",
+        "conductive"
+      ],
+      "value": 18,
+      "stack": 120,
+      "transport": "crate",
+      "found": {
+        "biomes": [
+          "mountains",
+          "hills",
+          "tundra",
+          "badlands"
+        ],
+        "archetypes": [
+          "frozen",
+          "arid",
+          "temperate",
+          "barren",
+          "shattered"
+        ],
+        "rarity": 0.3,
+        "richness": 0.5
+      },
+      "desc": "The best conductor there is. Wasted on anything but fine work."
+    },
+    {
+      "id": "lithium_ore",
+      "name": "Lithium Ore",
+      "kind": "ore",
+      "phase": "solid",
+      "color": "#c7b3d6",
+      "tags": [
+        "metal",
+        "battery"
+      ],
+      "value": 16,
+      "stack": 150,
+      "transport": "crate",
+      "found": {
+        "biomes": [
+          "desert",
+          "badlands",
+          "shrubland",
+          "tundra"
+        ],
+        "archetypes": [
+          "arid",
+          "barren",
+          "frozen",
+          "toxic"
+        ],
+        "rarity": 0.32,
+        "richness": 0.55
+      },
+      "desc": "Salt-flat metal. Every battery cell starts here."
+    },
+    {
+      "id": "uranium_ore",
+      "name": "Uranium Ore",
+      "kind": "ore",
+      "phase": "solid",
+      "color": "#7fbf5a",
+      "tags": [
+        "metal",
+        "radioactive",
+        "fuel"
+      ],
+      "value": 40,
+      "stack": 80,
+      "transport": "crate",
+      "found": {
+        "biomes": [
+          "badlands",
+          "mountains",
+          "ashPlain",
+          "volcanic"
+        ],
+        "archetypes": [
+          "barren",
+          "toxic",
+          "shattered",
+          "volcanic"
+        ],
+        "rarity": 0.16,
+        "richness": 0.35,
+        "hazard": "radiation"
+      },
+      "desc": "Hot rock. Enrich it and a single cell runs a base for hours."
+    },
+    {
+      "id": "platinum_ore",
+      "name": "Platinum Ore",
+      "kind": "ore",
+      "phase": "solid",
+      "color": "#dfe4e8",
+      "tags": [
+        "metal",
+        "precious",
+        "catalyst"
+      ],
+      "value": 45,
+      "stack": 80,
+      "transport": "crate",
+      "found": {
+        "biomes": [
+          "mountains",
+          "volcanic",
+          "snowyPeaks"
+        ],
+        "archetypes": [
+          "volcanic",
+          "shattered",
+          "barren"
+        ],
+        "rarity": 0.14,
+        "richness": 0.3
+      },
+      "desc": "A catalyst that makes stubborn chemistry happen at all."
+    },
+    {
+      "id": "stone",
+      "name": "Stone",
+      "kind": "mineral",
+      "phase": "solid",
+      "color": "#8a8a84",
+      "tags": [
+        "bulk",
+        "common",
+        "building"
+      ],
+      "value": 1,
+      "stack": 300,
+      "transport": "crate",
+      "found": {
+        "biomes": [
+          "hills",
+          "mountains",
+          "badlands",
+          "desert",
+          "tundra",
+          "grassland"
+        ],
+        "archetypes": [
+          "temperate",
+          "arid",
+          "barren",
+          "frozen",
+          "volcanic",
+          "shattered",
+          "verdant",
+          "toxic",
+          "oceanic",
+          "gas_shrouded"
+        ],
+        "rarity": 1.0,
+        "richness": 1.4
+      },
+      "desc": "Crushed for gravel, burned for cement, stacked for walls."
+    },
+    {
+      "id": "sand",
+      "name": "Sand",
+      "kind": "mineral",
+      "phase": "solid",
+      "color": "#ddcb95",
+      "tags": [
+        "bulk",
+        "common",
+        "glass"
+      ],
+      "value": 1,
+      "stack": 300,
+      "transport": "crate",
+      "found": {
+        "biomes": [
+          "desert",
+          "beach",
+          "savanna",
+          "shrubland"
+        ],
+        "archetypes": [
+          "arid",
+          "oceanic",
+          "temperate",
+          "barren",
+          "gas_shrouded"
+        ],
+        "rarity": 0.8,
+        "richness": 1.3
+      },
+      "desc": "Glass, silicon wafers and concrete filler all start as sand."
+    },
+    {
+      "id": "coal",
+      "name": "Coal",
+      "kind": "mineral",
+      "phase": "solid",
+      "color": "#3a3a3d",
+      "tags": [
+        "fuel",
+        "carbon",
+        "common"
+      ],
+      "value": 3,
+      "stack": 200,
+      "transport": "crate",
+      "found": {
+        "biomes": [
+          "hills",
+          "temperateForest",
+          "borealForest",
+          "marsh",
+          "badlands"
+        ],
+        "archetypes": [
+          "temperate",
+          "verdant",
+          "frozen",
+          "arid",
+          "toxic"
+        ],
+        "rarity": 0.75,
+        "richness": 1.0
+      },
+      "desc": "Burns for power, feeds the furnaces, and is the cheapest carbon there is."
+    },
+    {
+      "id": "sulfur",
+      "name": "Sulfur",
+      "kind": "mineral",
+      "phase": "solid",
+      "color": "#e0d24a",
+      "tags": [
+        "chemical",
+        "acid"
+      ],
+      "value": 6,
+      "stack": 200,
+      "transport": "crate",
+      "found": {
+        "biomes": [
+          "volcanic",
+          "ashPlain",
+          "badlands",
+          "marsh"
+        ],
+        "archetypes": [
+          "volcanic",
+          "toxic",
+          "barren",
+          "shattered"
+        ],
+        "rarity": 0.5,
+        "richness": 0.8
+      },
+      "desc": "Yellow crust around vents. Acid, explosives and polymer chemistry."
+    },
+    {
+      "id": "phosphate",
+      "name": "Phosphate Rock",
+      "kind": "mineral",
+      "phase": "solid",
+      "color": "#c8b98e",
+      "tags": [
+        "chemical",
+        "agri"
+      ],
+      "value": 5,
+      "stack": 200,
+      "transport": "crate",
+      "found": {
+        "biomes": [
+          "savanna",
+          "shrubland",
+          "marsh",
+          "beach",
+          "grassland"
+        ],
+        "archetypes": [
+          "verdant",
+          "temperate",
+          "oceanic",
+          "toxic"
+        ],
+        "rarity": 0.45,
+        "richness": 0.8
+      },
+      "desc": "Feeds the bio-vats and doubles as a fire-suppressant filler."
+    },
+    {
+      "id": "salt",
+      "name": "Rock Salt",
+      "kind": "mineral",
+      "phase": "solid",
+      "color": "#e8e4dc",
+      "tags": [
+        "chemical",
+        "common"
+      ],
+      "value": 3,
+      "stack": 250,
+      "transport": "crate",
+      "found": {
+        "biomes": [
+          "desert",
+          "badlands",
+          "beach",
+          "tundra"
+        ],
+        "archetypes": [
+          "arid",
+          "barren",
+          "oceanic",
+          "frozen"
+        ],
+        "rarity": 0.55,
+        "richness": 1.0
+      },
+      "desc": "Split it and you get chlorine for chemistry and soda for glass."
+    },
+    {
+      "id": "water",
+      "name": "Water",
+      "kind": "fluid",
+      "phase": "liquid",
+      "color": "#4f9bd0",
+      "tags": [
+        "fluid",
+        "common",
+        "coolant"
+      ],
+      "value": 1,
+      "stack": 1000,
+      "transport": "tanker",
+      "found": {
+        "biomes": [
+          "lake",
+          "marsh",
+          "grassland",
+          "temperateForest",
+          "rainforest",
+          "beach"
+        ],
+        "archetypes": [
+          "temperate",
+          "verdant",
+          "oceanic",
+          "toxic",
+          "frozen"
+        ],
+        "rarity": 0.9,
+        "richness": 2.0
+      },
+      "desc": "Coolant, feedstock, and the thing you split for hydrogen."
+    },
+    {
+      "id": "crude_oil",
+      "name": "Crude Oil",
+      "kind": "fluid",
+      "phase": "liquid",
+      "color": "#20201f",
+      "tags": [
+        "fluid",
+        "fuel",
+        "carbon"
+      ],
+      "value": 8,
+      "stack": 800,
+      "transport": "tanker",
+      "found": {
+        "biomes": [
+          "marsh",
+          "desert",
+          "badlands",
+          "beach",
+          "savanna"
+        ],
+        "archetypes": [
+          "temperate",
+          "arid",
+          "oceanic",
+          "toxic",
+          "verdant"
+        ],
+        "rarity": 0.6,
+        "richness": 1.2
+      },
+      "desc": "Crack it for fuel, press it for polymer, thin it for lubricant."
+    },
+    {
+      "id": "brine",
+      "name": "Brine",
+      "kind": "fluid",
+      "phase": "liquid",
+      "color": "#7fa9a2",
+      "tags": [
+        "fluid",
+        "chemical",
+        "salts"
+      ],
+      "value": 4,
+      "stack": 800,
+      "transport": "tanker",
+      "found": {
+        "biomes": [
+          "beach",
+          "marsh",
+          "desert",
+          "lake"
+        ],
+        "archetypes": [
+          "oceanic",
+          "arid",
+          "toxic",
+          "barren"
+        ],
+        "rarity": 0.5,
+        "richness": 1.3
+      },
+      "desc": "Salty water worth running through a centrifuge for lithium and rare salts."
+    },
+    {
+      "id": "magma",
+      "name": "Magma Tap",
+      "kind": "fluid",
+      "phase": "liquid",
+      "color": "#e05a1c",
+      "tags": [
+        "fluid",
+        "heat",
+        "hazard"
+      ],
+      "value": 20,
+      "stack": 400,
+      "transport": "tanker",
+      "found": {
+        "biomes": [
+          "volcanic",
+          "ashPlain",
+          "mountains"
+        ],
+        "archetypes": [
+          "volcanic",
+          "shattered"
+        ],
+        "rarity": 0.3,
+        "richness": 0.7,
+        "hazard": "heat"
+      },
+      "desc": "Molten rock drawn straight from a fissure. Free heat if you can hold it."
+    },
+    {
+      "id": "natural_gas",
+      "name": "Natural Gas",
+      "kind": "gas",
+      "phase": "gas",
+      "color": "#a8c4a0",
+      "tags": [
+        "gas",
+        "fuel"
+      ],
+      "value": 6,
+      "stack": 600,
+      "transport": "gas_hauler",
+      "found": {
+        "biomes": [
+          "marsh",
+          "badlands",
+          "desert",
+          "tundra"
+        ],
+        "archetypes": [
+          "temperate",
+          "arid",
+          "gas_shrouded",
+          "toxic",
+          "frozen"
+        ],
+        "rarity": 0.55,
+        "richness": 1.1
+      },
+      "desc": "Cleanest thing you can burn in a turbine, and a carbon source for chemistry."
+    },
+    {
+      "id": "hydrogen",
+      "name": "Hydrogen",
+      "kind": "gas",
+      "phase": "gas",
+      "color": "#bcd6f0",
+      "tags": [
+        "gas",
+        "fuel",
+        "rocket"
+      ],
+      "value": 10,
+      "stack": 600,
+      "transport": "gas_hauler",
+      "found": {
+        "biomes": [
+          "volcanic",
+          "ice",
+          "tundra"
+        ],
+        "archetypes": [
+          "gas_shrouded",
+          "frozen",
+          "volcanic"
+        ],
+        "rarity": 0.35,
+        "richness": 0.9
+      },
+      "desc": "Split out of water or pulled from the sky. Half of rocket fuel."
+    },
+    {
+      "id": "helium3",
+      "name": "Helium-3",
+      "kind": "gas",
+      "phase": "gas",
+      "color": "#dfc9f0",
+      "tags": [
+        "gas",
+        "exotic",
+        "fusion"
+      ],
+      "value": 55,
+      "stack": 400,
+      "transport": "gas_hauler",
+      "found": {
+        "biomes": [
+          "ice",
+          "tundra",
+          "badlands",
+          "ashPlain"
+        ],
+        "archetypes": [
+          "gas_shrouded",
+          "barren",
+          "frozen",
+          "shattered"
+        ],
+        "rarity": 0.14,
+        "richness": 0.4
+      },
+      "desc": "Rare isotope skimmed from thin air. Fusion cores and deep-space thrusters."
+    },
+    {
+      "id": "nitrogen",
+      "name": "Nitrogen",
+      "kind": "gas",
+      "phase": "gas",
+      "color": "#9fb8c8",
+      "tags": [
+        "gas",
+        "inert",
+        "chemical"
+      ],
+      "value": 4,
+      "stack": 600,
+      "transport": "gas_hauler",
+      "found": {
+        "biomes": [
+          "grassland",
+          "tundra",
+          "marsh",
+          "savanna"
+        ],
+        "archetypes": [
+          "temperate",
+          "verdant",
+          "gas_shrouded",
+          "frozen",
+          "oceanic"
+        ],
+        "rarity": 0.6,
+        "richness": 1.2
+      },
+      "desc": "Condensed out of the atmosphere. Inert padding, fertiliser and cold storage."
+    },
+    {
+      "id": "methane",
+      "name": "Methane",
+      "kind": "gas",
+      "phase": "gas",
+      "color": "#8fb27a",
+      "tags": [
+        "gas",
+        "fuel",
+        "carbon"
+      ],
+      "value": 7,
+      "stack": 600,
+      "transport": "gas_hauler",
+      "found": {
+        "biomes": [
+          "marsh",
+          "ice",
+          "rainforest",
+          "tundra"
+        ],
+        "archetypes": [
+          "gas_shrouded",
+          "toxic",
+          "frozen",
+          "verdant"
+        ],
+        "rarity": 0.45,
+        "richness": 1.0
+      },
+      "desc": "Swamp gas and ice-moon gas. Burns well, cracks into hydrogen better."
+    },
+    {
+      "id": "ice",
+      "name": "Ice",
+      "kind": "mineral",
+      "phase": "solid",
+      "color": "#cfe6f2",
+      "tags": [
+        "water",
+        "cold",
+        "common"
+      ],
+      "value": 2,
+      "stack": 250,
+      "transport": "crate",
+      "found": {
+        "biomes": [
+          "ice",
+          "snowyPeaks",
+          "tundra"
+        ],
+        "archetypes": [
+          "frozen",
+          "barren",
+          "gas_shrouded"
+        ],
+        "rarity": 0.7,
+        "richness": 1.5
+      },
+      "desc": "Water you have to chip out. On a frozen world it is the only water there is."
+    },
+    {
+      "id": "biomass",
+      "name": "Biomass",
+      "kind": "organic",
+      "phase": "solid",
+      "color": "#5e8f45",
+      "tags": [
+        "organic",
+        "fuel",
+        "renewable"
+      ],
+      "value": 2,
+      "stack": 250,
+      "transport": "crate",
+      "found": {
+        "biomes": [
+          "temperateForest",
+          "rainforest",
+          "borealForest",
+          "grassland",
+          "marsh"
+        ],
+        "archetypes": [
+          "verdant",
+          "temperate",
+          "toxic",
+          "oceanic"
+        ],
+        "rarity": 0.7,
+        "richness": 1.2,
+        "renewable": true
+      },
+      "desc": "Cut growth. Burns, ferments, or feeds a vat. It grows back."
+    },
+    {
+      "id": "aetherite",
+      "name": "Aetherite",
+      "kind": "rare",
+      "phase": "solid",
+      "color": "#8fd8e8",
+      "tags": [
+        "rare",
+        "exotic",
+        "resonant"
+      ],
+      "value": 90,
+      "stack": 60,
+      "transport": "crate",
+      "found": {
+        "biomes": [
+          "mountains",
+          "badlands",
+          "glimmerwaste",
+          "snowyPeaks"
+        ],
+        "archetypes": [
+          "shattered",
+          "barren"
+        ],
+        "rarity": 0.5,
+        "richness": 0.35,
+        "exclusive": true
+      },
+      "desc": "Humming blue crystal. A resonance mill turns it into fields that bend force."
+    },
+    {
+      "id": "cryonite",
+      "name": "Cryonite",
+      "kind": "rare",
+      "phase": "solid",
+      "color": "#a9e0ff",
+      "tags": [
+        "rare",
+        "exotic",
+        "cold"
+      ],
+      "value": 85,
+      "stack": 60,
+      "transport": "crate",
+      "found": {
+        "biomes": [
+          "ice",
+          "snowyPeaks",
+          "tundra"
+        ],
+        "archetypes": [
+          "frozen"
+        ],
+        "rarity": 0.55,
+        "richness": 0.4,
+        "exclusive": true
+      },
+      "desc": "Stays cold no matter what you do to it. A cryo-forge quenches alloys with it."
+    },
+    {
+      "id": "voltaic_ore",
+      "name": "Voltaic Ore",
+      "kind": "rare",
+      "phase": "solid",
+      "color": "#f0e07a",
+      "tags": [
+        "rare",
+        "exotic",
+        "electric"
+      ],
+      "value": 88,
+      "stack": 60,
+      "transport": "crate",
+      "found": {
+        "biomes": [
+          "badlands",
+          "ashPlain",
+          "desert",
+          "mountains"
+        ],
+        "archetypes": [
+          "shattered",
+          "arid",
+          "gas_shrouded"
+        ],
+        "rarity": 0.5,
+        "richness": 0.4,
+        "exclusive": true
+      },
+      "desc": "Holds a charge on its own. Storm taps and coil works run on it."
+    },
+    {
+      "id": "pyrocrystal",
+      "name": "Pyrocrystal",
+      "kind": "rare",
+      "phase": "solid",
+      "color": "#ff8a3c",
+      "tags": [
+        "rare",
+        "exotic",
+        "heat"
+      ],
+      "value": 95,
+      "stack": 60,
+      "transport": "crate",
+      "found": {
+        "biomes": [
+          "volcanic",
+          "ashPlain",
+          "badlands"
+        ],
+        "archetypes": [
+          "volcanic"
+        ],
+        "rarity": 0.55,
+        "richness": 0.4,
+        "exclusive": true
+      },
+      "desc": "Burns without fuel. A plasma refinery uses it to melt anything you feed it."
+    },
+    {
+      "id": "xenoplasm",
+      "name": "Xenoplasm",
+      "kind": "rare",
+      "phase": "liquid",
+      "color": "#8ce06a",
+      "tags": [
+        "rare",
+        "exotic",
+        "organic"
+      ],
+      "value": 92,
+      "stack": 400,
+      "transport": "tanker",
+      "found": {
+        "biomes": [
+          "rainforest",
+          "marsh",
+          "blighted",
+          "grassland"
+        ],
+        "archetypes": [
+          "toxic",
+          "verdant"
+        ],
+        "rarity": 0.5,
+        "richness": 0.45,
+        "exclusive": true
+      },
+      "desc": "Living sludge that repairs what it coats. Bio-vats culture it into self-healing plate."
+    },
+    {
+      "id": "umbral_shale",
+      "name": "Umbral Shale",
+      "kind": "rare",
+      "phase": "solid",
+      "color": "#4a4358",
+      "tags": [
+        "rare",
+        "exotic",
+        "absorbent"
+      ],
+      "value": 86,
+      "stack": 60,
+      "transport": "crate",
+      "found": {
+        "biomes": [
+          "badlands",
+          "ashPlain",
+          "veiledHills",
+          "mountains"
+        ],
+        "archetypes": [
+          "barren",
+          "shattered"
+        ],
+        "rarity": 0.45,
+        "richness": 0.4,
+        "exclusive": true
+      },
+      "desc": "Eats light and heat. Umbral kilns bake it into shielding nothing scans through."
+    },
+    {
+      "id": "glimmer_salt",
+      "name": "Glimmer Salt",
+      "kind": "rare",
+      "phase": "solid",
+      "color": "#e6c8ff",
+      "tags": [
+        "rare",
+        "exotic",
+        "optic"
+      ],
+      "value": 82,
+      "stack": 80,
+      "transport": "crate",
+      "found": {
+        "biomes": [
+          "desert",
+          "beach",
+          "glimmerwaste",
+          "badlands"
+        ],
+        "archetypes": [
+          "arid",
+          "oceanic"
+        ],
+        "rarity": 0.5,
+        "richness": 0.5,
+        "exclusive": true
+      },
+      "desc": "Crystals that bend light hard. Distilled into lenses for lasers and long optics."
+    },
+    {
+      "id": "ferrovine",
+      "name": "Ferrovine",
+      "kind": "rare",
+      "phase": "solid",
+      "color": "#9a7f4a",
+      "tags": [
+        "rare",
+        "exotic",
+        "organic",
+        "renewable"
+      ],
+      "value": 80,
+      "stack": 100,
+      "transport": "crate",
+      "found": {
+        "biomes": [
+          "temperateForest",
+          "rainforest",
+          "grassland",
+          "hallowed"
+        ],
+        "archetypes": [
+          "verdant",
+          "temperate"
+        ],
+        "rarity": 0.5,
+        "richness": 0.6,
+        "exclusive": true,
+        "renewable": true
+      },
+      "desc": "A vine that pulls metal out of the soil and grows it as wire. Looms weave it into cable."
+    },
+    {
+      "id": "helion_gas",
+      "name": "Helion Gas",
+      "kind": "rare",
+      "phase": "gas",
+      "color": "#ffd98a",
+      "tags": [
+        "rare",
+        "exotic",
+        "gas",
+        "fuel"
+      ],
+      "value": 95,
+      "stack": 500,
+      "transport": "gas_hauler",
+      "found": {
+        "biomes": [
+          "badlands",
+          "desert",
+          "marsh",
+          "volcanic",
+          "blighted"
+        ],
+        "archetypes": [
+          "gas_shrouded",
+          "volcanic",
+          "toxic"
+        ],
+        "rarity": 0.45,
+        "richness": 0.8,
+        "exclusive": true
+      },
+      "desc": "A clean fusion feedstock that vents from deep pockets. A helion still burns it straight into rocket fuel."
+    },
+    {
+      "id": "nullstone",
+      "name": "Nullstone",
+      "kind": "rare",
+      "phase": "solid",
+      "color": "#4a4f58",
+      "tags": [
+        "rare",
+        "exotic",
+        "void",
+        "damping"
+      ],
+      "value": 120,
+      "stack": 60,
+      "transport": "crate",
+      "found": {
+        "biomes": [
+          "badlands",
+          "rockyDesert",
+          "snowyPeaks",
+          "shard",
+          "tundra"
+        ],
+        "archetypes": [
+          "barren",
+          "shattered",
+          "frozen"
+        ],
+        "rarity": 0.4,
+        "richness": 0.4,
+        "exclusive": true
+      },
+      "desc": "Dull grey rock that quietly drains any field laid across it. A null forge cold-works alloys inside that dead zone."
+    },
+    {
+      "id": "emberlace",
+      "name": "Emberlace",
+      "kind": "rare",
+      "phase": "solid",
+      "color": "#e06a4a",
+      "tags": [
+        "rare",
+        "exotic",
+        "metal",
+        "heat"
+      ],
+      "value": 100,
+      "stack": 80,
+      "transport": "crate",
+      "found": {
+        "biomes": [
+          "volcanic",
+          "badlands",
+          "rockyDesert",
+          "desert"
+        ],
+        "archetypes": [
+          "volcanic",
+          "arid",
+          "barren"
+        ],
+        "rarity": 0.45,
+        "richness": 0.5,
+        "exclusive": true
+      },
+      "desc": "Copper threads grown in cooling lava. Woven on a loom it makes the best heat shielding anyone has found."
+    },
+    {
+      "id": "brinepearl",
+      "name": "Brinepearl",
+      "kind": "rare",
+      "phase": "solid",
+      "color": "#4fd3c2",
+      "tags": [
+        "rare",
+        "exotic",
+        "organic",
+        "medical"
+      ],
+      "value": 90,
+      "stack": 100,
+      "transport": "crate",
+      "found": {
+        "biomes": [
+          "ocean",
+          "marsh",
+          "rainforest",
+          "ice",
+          "tundra",
+          "beach"
+        ],
+        "archetypes": [
+          "oceanic",
+          "verdant",
+          "frozen"
+        ],
+        "rarity": 0.45,
+        "richness": 0.5,
+        "exclusive": true
+      },
+      "desc": "Grown by something in the deep water. Pressed into a tonic it keeps a long-haul crew on their feet."
+    },
+    {
+      "id": "iron_ingot",
+      "name": "Iron Ingot",
+      "kind": "intermediate",
+      "phase": "solid",
+      "color": "#a09488",
+      "tags": [
+        "ingot",
+        "metal"
+      ],
+      "value": 6,
+      "stack": 200,
+      "transport": "crate",
+      "desc": "One smelted bar of iron."
+    },
+    {
+      "id": "copper_ingot",
+      "name": "Copper Ingot",
+      "kind": "intermediate",
+      "phase": "solid",
+      "color": "#c9813f",
+      "tags": [
+        "ingot",
+        "metal"
+      ],
+      "value": 8,
+      "stack": 200,
+      "transport": "crate",
+      "desc": "One smelted bar of copper."
+    },
+    {
+      "id": "bronze_ingot",
+      "name": "Bronze Ingot",
+      "kind": "intermediate",
+      "phase": "solid",
+      "color": "#b08444",
+      "tags": [
+        "ingot",
+        "alloy"
+      ],
+      "value": 16,
+      "stack": 200,
+      "transport": "crate",
+      "desc": "Copper and tin. Tougher than either, and it does not spark."
+    },
+    {
+      "id": "steel_ingot",
+      "name": "Steel Ingot",
+      "kind": "intermediate",
+      "phase": "solid",
+      "color": "#79808a",
+      "tags": [
+        "ingot",
+        "alloy",
+        "structural"
+      ],
+      "value": 22,
+      "stack": 200,
+      "transport": "crate",
+      "desc": "Iron burned down with carbon. Walls, frames, rails, guns."
+    },
+    {
+      "id": "titanium_ingot",
+      "name": "Titanium Ingot",
+      "kind": "intermediate",
+      "phase": "solid",
+      "color": "#cfd6dc",
+      "tags": [
+        "ingot",
+        "metal",
+        "aerospace"
+      ],
+      "value": 40,
+      "stack": 150,
+      "transport": "crate",
+      "desc": "Light, strong and a nightmare to melt."
+    },
+    {
+      "id": "tungsten_bar",
+      "name": "Tungsten Bar",
+      "kind": "intermediate",
+      "phase": "solid",
+      "color": "#63615c",
+      "tags": [
+        "ingot",
+        "metal",
+        "heat"
+      ],
+      "value": 48,
+      "stack": 120,
+      "transport": "crate",
+      "desc": "Takes an arc furnace to make and a lot to destroy."
+    },
+    {
+      "id": "iron_plate",
+      "name": "Iron Plate",
+      "kind": "intermediate",
+      "phase": "solid",
+      "color": "#9a9188",
+      "tags": [
+        "plate",
+        "metal"
+      ],
+      "value": 10,
+      "stack": 200,
+      "transport": "crate",
+      "desc": "Rolled sheet. Half the machines in your base are made of it."
+    },
+    {
+      "id": "steel_plate",
+      "name": "Steel Plate",
+      "kind": "intermediate",
+      "phase": "solid",
+      "color": "#7d848d",
+      "tags": [
+        "plate",
+        "alloy"
+      ],
+      "value": 30,
+      "stack": 200,
+      "transport": "crate",
+      "desc": "Armour plate for walls, turrets and hulls."
+    },
+    {
+      "id": "copper_wire",
+      "name": "Copper Wire",
+      "kind": "intermediate",
+      "phase": "solid",
+      "color": "#d4924f",
+      "tags": [
+        "wire",
+        "electrical"
+      ],
+      "value": 5,
+      "stack": 400,
+      "transport": "crate",
+      "desc": "Drawn from an ingot. Two per ingot if the die is sharp."
+    },
+    {
+      "id": "gear",
+      "name": "Gear",
+      "kind": "intermediate",
+      "phase": "solid",
+      "color": "#8e9299",
+      "tags": [
+        "part",
+        "mechanical"
+      ],
+      "value": 14,
+      "stack": 200,
+      "transport": "crate",
+      "desc": "Cut teeth on a blank. The unit of anything that turns."
+    },
+    {
+      "id": "circuit",
+      "name": "Circuit Board",
+      "kind": "intermediate",
+      "phase": "solid",
+      "color": "#4d9a5e",
+      "tags": [
+        "part",
+        "electronic"
+      ],
+      "value": 26,
+      "stack": 200,
+      "transport": "crate",
+      "desc": "Printed board with wire runs. The brain of a cheap machine."
+    },
+    {
+      "id": "advanced_circuit",
+      "name": "Logic Core",
+      "kind": "intermediate",
+      "phase": "solid",
+      "color": "#c2453e",
+      "tags": [
+        "part",
+        "electronic",
+        "advanced"
+      ],
+      "value": 70,
+      "stack": 150,
+      "transport": "crate",
+      "desc": "Layered board with gold contacts. Anything clever needs one."
+    },
+    {
+      "id": "control_unit",
+      "name": "Control Unit",
+      "kind": "intermediate",
+      "phase": "solid",
+      "color": "#7a6ad0",
+      "tags": [
+        "part",
+        "electronic",
+        "advanced"
+      ],
+      "value": 160,
+      "stack": 100,
+      "transport": "crate",
+      "desc": "A sealed brick that flies a rocket or aims an artillery piece."
+    },
+    {
+      "id": "glass",
+      "name": "Glass",
+      "kind": "intermediate",
+      "phase": "solid",
+      "color": "#bdd8dd",
+      "tags": [
+        "part",
+        "optic"
+      ],
+      "value": 6,
+      "stack": 200,
+      "transport": "crate",
+      "desc": "Melted sand. Windows, lenses, fibre and vat walls."
+    },
+    {
+      "id": "lens",
+      "name": "Optic Lens",
+      "kind": "intermediate",
+      "phase": "solid",
+      "color": "#dcc4ff",
+      "tags": [
+        "part",
+        "optic",
+        "advanced"
+      ],
+      "value": 65,
+      "stack": 150,
+      "transport": "crate",
+      "desc": "Ground and coated. Lasers, radars and observatories all want one."
+    },
+    {
+      "id": "concrete",
+      "name": "Concrete",
+      "kind": "intermediate",
+      "phase": "solid",
+      "color": "#9a9a94",
+      "tags": [
+        "building",
+        "bulk"
+      ],
+      "value": 5,
+      "stack": 300,
+      "transport": "crate",
+      "desc": "Stone, sand and water. Foundations, roads and reinforced walls."
+    },
+    {
+      "id": "polymer",
+      "name": "Polymer",
+      "kind": "intermediate",
+      "phase": "solid",
+      "color": "#d3d0c8",
+      "tags": [
+        "part",
+        "chemical"
+      ],
+      "value": 18,
+      "stack": 250,
+      "transport": "crate",
+      "desc": "Pressed from oil. Insulation, pipes, seals, drone shells."
+    },
+    {
+      "id": "resin",
+      "name": "Bonding Resin",
+      "kind": "intermediate",
+      "phase": "liquid",
+      "color": "#c8a860",
+      "tags": [
+        "chemical",
+        "fluid"
+      ],
+      "value": 14,
+      "stack": 600,
+      "transport": "tanker",
+      "desc": "Sticky two-part goo. Glues composite plate together."
+    },
+    {
+      "id": "lubricant",
+      "name": "Lubricant",
+      "kind": "intermediate",
+      "phase": "liquid",
+      "color": "#b8a24a",
+      "tags": [
+        "chemical",
+        "fluid"
+      ],
+      "value": 12,
+      "stack": 600,
+      "transport": "tanker",
+      "desc": "Keeps gears from eating themselves. Every mk2 machine wants it."
+    },
+    {
+      "id": "sulfuric_acid",
+      "name": "Sulfuric Acid",
+      "kind": "intermediate",
+      "phase": "liquid",
+      "color": "#d6cf5a",
+      "tags": [
+        "chemical",
+        "fluid",
+        "hazard"
+      ],
+      "value": 16,
+      "stack": 600,
+      "transport": "tanker",
+      "desc": "Leaches metal out of low-grade rock and etches circuit boards."
+    },
+    {
+      "id": "fuel",
+      "name": "Refined Fuel",
+      "kind": "intermediate",
+      "phase": "liquid",
+      "color": "#e0a44a",
+      "tags": [
+        "fuel",
+        "fluid"
+      ],
+      "value": 24,
+      "stack": 600,
+      "transport": "tanker",
+      "desc": "What the trucks, generators and flame turrets drink."
+    },
+    {
+      "id": "rocket_fuel",
+      "name": "Rocket Fuel",
+      "kind": "intermediate",
+      "phase": "liquid",
+      "color": "#6fd0e0",
+      "tags": [
+        "fuel",
+        "fluid",
+        "rocket"
+      ],
+      "value": 120,
+      "stack": 400,
+      "transport": "tanker",
+      "desc": "Hydrogen chilled into something a first stage can burn."
+    },
+    {
+      "id": "oxidizer",
+      "name": "Oxidizer",
+      "kind": "intermediate",
+      "phase": "liquid",
+      "color": "#9fd8ff",
+      "tags": [
+        "fuel",
+        "fluid",
+        "rocket"
+      ],
+      "value": 100,
+      "stack": 400,
+      "transport": "tanker",
+      "desc": "The other half of a launch. Nothing burns in vacuum without it."
+    },
+    {
+      "id": "alloy_plate",
+      "name": "Alloy Plate",
+      "kind": "intermediate",
+      "phase": "solid",
+      "color": "#b6c0c8",
+      "tags": [
+        "plate",
+        "alloy",
+        "advanced"
+      ],
+      "value": 95,
+      "stack": 150,
+      "transport": "crate",
+      "desc": "Titanium over a steel core. Where steel would buckle, this holds.",
+      "icon": "alloy_ingot"
+    },
+    {
+      "id": "superalloy",
+      "name": "Superalloy Billet",
+      "kind": "intermediate",
+      "phase": "solid",
+      "color": "#d8dee4",
+      "tags": [
+        "alloy",
+        "advanced",
+        "heat"
+      ],
+      "value": 210,
+      "stack": 100,
+      "transport": "crate",
+      "desc": "Tungsten, titanium and platinum. Engine bells and reactor cores.",
+      "icon": "alloy_ingot"
+    },
+    {
+      "id": "machine_frame",
+      "name": "Machine Frame",
+      "kind": "intermediate",
+      "phase": "solid",
+      "color": "#8b8f96",
+      "tags": [
+        "part",
+        "structural"
+      ],
+      "value": 90,
+      "stack": 100,
+      "transport": "crate",
+      "desc": "The welded skeleton every big machine is bolted onto."
+    },
+    {
+      "id": "advanced_part",
+      "name": "Precision Assembly",
+      "kind": "intermediate",
+      "phase": "solid",
+      "color": "#a8b6c8",
+      "tags": [
+        "part",
+        "advanced"
+      ],
+      "value": 240,
+      "stack": 100,
+      "transport": "crate",
+      "desc": "Bearings, servos and a logic core in one sealed unit.",
+      "icon": "advanced_parts"
+    },
+    {
+      "id": "battery_cell",
+      "name": "Battery Cell",
+      "kind": "intermediate",
+      "phase": "solid",
+      "color": "#7ec8a0",
+      "tags": [
+        "part",
+        "power"
+      ],
+      "value": 55,
+      "stack": 200,
+      "transport": "crate",
+      "desc": "Lithium and acid in a can. Buffers the grid and runs the drones."
+    },
+    {
+      "id": "solar_cell",
+      "name": "Solar Cell",
+      "kind": "intermediate",
+      "phase": "solid",
+      "color": "#3f6ea8",
+      "tags": [
+        "part",
+        "power"
+      ],
+      "value": 48,
+      "stack": 200,
+      "transport": "crate",
+      "desc": "Doped silicon wafer under glass. Free power while the sun is up."
+    },
+    {
+      "id": "fuel_rod",
+      "name": "Fuel Rod",
+      "kind": "intermediate",
+      "phase": "solid",
+      "color": "#8fd85a",
+      "tags": [
+        "part",
+        "power",
+        "radioactive"
+      ],
+      "value": 300,
+      "stack": 60,
+      "transport": "crate",
+      "desc": "Enriched uranium in a tungsten sleeve. One rod, hours of power."
+    },
+    {
+      "id": "heat_shield",
+      "name": "Heat Shield",
+      "kind": "intermediate",
+      "phase": "solid",
+      "color": "#5a4a42",
+      "tags": [
+        "part",
+        "rocket",
+        "advanced"
+      ],
+      "value": 320,
+      "stack": 60,
+      "transport": "crate",
+      "desc": "Ablative tile stack. It is what stops a re-entry from being a cremation."
+    },
+    {
+      "id": "rocket_part",
+      "name": "Rocket Section",
+      "kind": "intermediate",
+      "phase": "solid",
+      "color": "#dde2e8",
+      "tags": [
+        "rocket",
+        "advanced",
+        "endgame"
+      ],
+      "value": 900,
+      "stack": 20,
+      "transport": "crate",
+      "desc": "One finished stage section. Stack enough of them and you leave."
+    },
+    {
+      "id": "satellite",
+      "name": "Survey Satellite",
+      "kind": "intermediate",
+      "phase": "solid",
+      "color": "#c8d8f0",
+      "tags": [
+        "rocket",
+        "space",
+        "advanced"
+      ],
+      "value": 700,
+      "stack": 10,
+      "transport": "crate",
+      "desc": "Boost it up and the whole world map opens."
+    },
+    {
+      "id": "probe",
+      "name": "Deep Probe",
+      "kind": "intermediate",
+      "phase": "solid",
+      "color": "#9fe0d0",
+      "tags": [
+        "rocket",
+        "space",
+        "advanced"
+      ],
+      "value": 620,
+      "stack": 10,
+      "transport": "crate",
+      "desc": "A one-way scanner aimed at another planet."
+    },
+    {
+      "id": "station_module",
+      "name": "Station Module",
+      "kind": "intermediate",
+      "phase": "solid",
+      "color": "#e0e6ee",
+      "tags": [
+        "rocket",
+        "space",
+        "endgame"
+      ],
+      "value": 1500,
+      "stack": 10,
+      "transport": "crate",
+      "desc": "A habitable ring segment. Six of them make an orbital station."
+    },
+    {
+      "id": "beacon_core",
+      "name": "Beacon Core",
+      "kind": "intermediate",
+      "phase": "solid",
+      "color": "#ffd98a",
+      "tags": [
+        "endgame",
+        "victory"
+      ],
+      "value": 2400,
+      "stack": 5,
+      "transport": "crate",
+      "desc": "Light one on enough worlds and the frontier is officially yours."
+    },
+    {
+      "id": "pack_basic",
+      "name": "Survey Pack",
+      "kind": "science",
+      "phase": "solid",
+      "color": "#c04a4a",
+      "tags": [
+        "science"
+      ],
+      "value": 30,
+      "stack": 200,
+      "transport": "crate",
+      "desc": "Tier 1 research: gears and wire in a sample case.",
+      "icon": "science_pack"
+    },
+    {
+      "id": "pack_logistics",
+      "name": "Haulage Pack",
+      "kind": "science",
+      "phase": "solid",
+      "color": "#4a8ac0",
+      "tags": [
+        "science"
+      ],
+      "value": 60,
+      "stack": 200,
+      "transport": "crate",
+      "desc": "Tier 2 research: everything about moving things faster.",
+      "icon": "science_pack"
+    },
+    {
+      "id": "pack_chem",
+      "name": "Chemistry Pack",
+      "kind": "science",
+      "phase": "solid",
+      "color": "#5ac07a",
+      "tags": [
+        "science"
+      ],
+      "value": 110,
+      "stack": 200,
+      "transport": "crate",
+      "desc": "Tier 3 research: acids, polymers and cracked hydrocarbons.",
+      "icon": "science_pack"
+    },
+    {
+      "id": "pack_military",
+      "name": "Ordnance Pack",
+      "kind": "science",
+      "phase": "solid",
+      "color": "#b0b0b0",
+      "tags": [
+        "science"
+      ],
+      "value": 110,
+      "stack": 200,
+      "transport": "crate",
+      "desc": "Tier 3 research: the things that shoot back.",
+      "icon": "science_pack"
+    },
+    {
+      "id": "pack_energy",
+      "name": "Power Pack",
+      "kind": "science",
+      "phase": "solid",
+      "color": "#d0b04a",
+      "tags": [
+        "science"
+      ],
+      "value": 200,
+      "stack": 200,
+      "transport": "crate",
+      "desc": "Tier 4 research: reactors, capacitors and high-voltage work.",
+      "icon": "science_pack"
+    },
+    {
+      "id": "pack_space",
+      "name": "Orbital Pack",
+      "kind": "science",
+      "phase": "solid",
+      "color": "#9a7ad0",
+      "tags": [
+        "science"
+      ],
+      "value": 380,
+      "stack": 200,
+      "transport": "crate",
+      "desc": "Tier 5 research: only a satellite uplink can produce the data for it.",
+      "icon": "science_pack"
+    }
+  ]
+}

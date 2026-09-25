@@ -1,0 +1,598 @@
+{
+  "_doc": "Relationship model (RimWorld-style opinions split into factors). dimensions: -1..1 each, decayPerDay = fraction of the value that fades per day toward 0. opinionWeights combine them into one -1..1 'opinion' for code that only wants a number. tags: phrase tags switched on by thresholds so tone follows the mix (respect without warmth = grudging, fear = deferential…). events: how an interaction changes the viewer's dimensions (viewer = the one whose feelings change; target = the other). traitModifiers: how the viewer's traits scale gains (+) and losses (-) per dimension. reveals: events that teach the viewer a trait of the target.",
+  "dimensions": {
+    "warmth": {
+      "label": "warmth",
+      "desc": "like ↔ dislike; affection",
+      "decayPerDay": 0.01
+    },
+    "respect": {
+      "label": "respect",
+      "desc": "regard for competence, courage, standing",
+      "decayPerDay": 0.005
+    },
+    "trust": {
+      "label": "trust",
+      "desc": "belief they will keep faith",
+      "decayPerDay": 0.005
+    },
+    "appreciation": {
+      "label": "appreciation",
+      "desc": "gratitude for what they did for me (negative = resentment for what they did to me)",
+      "decayPerDay": 0.02
+    },
+    "fear": {
+      "label": "fear",
+      "desc": "dread of what they could do to me",
+      "decayPerDay": 0.03
+    },
+    "attraction": {
+      "label": "attraction",
+      "desc": "romantic or aesthetic pull",
+      "decayPerDay": 0.01
+    }
+  },
+  "opinionWeights": {
+    "warmth": 0.35,
+    "respect": 0.2,
+    "trust": 0.2,
+    "appreciation": 0.15,
+    "attraction": 0.1,
+    "fear": -0.15
+  },
+  "tags": [
+    {
+      "tag": "fond",
+      "when": "warmth > 0.35"
+    },
+    {
+      "tag": "cold",
+      "when": "warmth < -0.35"
+    },
+    {
+      "tag": "respectful",
+      "when": "respect > 0.35"
+    },
+    {
+      "tag": "contemptuous",
+      "when": "respect < -0.35"
+    },
+    {
+      "tag": "trusting",
+      "when": "trust > 0.35"
+    },
+    {
+      "tag": "suspicious",
+      "when": "trust < -0.3"
+    },
+    {
+      "tag": "grateful",
+      "when": "appreciation > 0.3"
+    },
+    {
+      "tag": "resentful",
+      "when": "appreciation < -0.3"
+    },
+    {
+      "tag": "fearful",
+      "when": "fear > 0.4"
+    },
+    {
+      "tag": "attracted",
+      "when": "attraction > 0.4"
+    },
+    {
+      "tag": "rival",
+      "when": "respect > 0.3 && warmth < -0.15"
+    },
+    {
+      "tag": "protective",
+      "when": "warmth > 0.4 && respect < 0 "
+    },
+    {
+      "tag": "stranger",
+      "when": "familiarity < 0.15"
+    },
+    {
+      "tag": "intimate",
+      "when": "familiarity > 0.7 && warmth > 0.2"
+    }
+  ],
+  "events": {
+    "kindness": {
+      "desc": "they did me a kindness",
+      "effects": {
+        "appreciation": 0.3,
+        "warmth": 0.2,
+        "trust": 0.1
+      },
+      "familiarity": 0.05,
+      "reveals": [
+        "kind"
+      ]
+    },
+    "gift": {
+      "desc": "they gave me something",
+      "effects": {
+        "appreciation": 0.25,
+        "warmth": 0.15
+      },
+      "familiarity": 0.03
+    },
+    "saved_life": {
+      "desc": "they saved my life",
+      "effects": {
+        "appreciation": 0.6,
+        "trust": 0.3,
+        "respect": 0.2,
+        "warmth": 0.2
+      },
+      "familiarity": 0.1,
+      "reveals": [
+        "brave",
+        "loyal"
+      ]
+    },
+    "shared_victory": {
+      "desc": "we won a fight together",
+      "effects": {
+        "respect": 0.25,
+        "trust": 0.15,
+        "warmth": 0.1
+      },
+      "familiarity": 0.08
+    },
+    "shared_defeat": {
+      "desc": "we lost a fight together",
+      "effects": {
+        "trust": 0.05,
+        "warmth": 0.05,
+        "respect": -0.05
+      },
+      "familiarity": 0.08
+    },
+    "shared_meal": {
+      "desc": "we ate together",
+      "effects": {
+        "warmth": 0.08
+      },
+      "familiarity": 0.06
+    },
+    "shared_grief": {
+      "desc": "we mourned together",
+      "effects": {
+        "warmth": 0.15,
+        "trust": 0.1
+      },
+      "familiarity": 0.08,
+      "reveals": [
+        "grieving"
+      ]
+    },
+    "compliment": {
+      "desc": "they praised me",
+      "effects": {
+        "warmth": 0.1,
+        "respect": 0.05
+      },
+      "familiarity": 0.02
+    },
+    "insult": {
+      "desc": "they insulted me",
+      "effects": {
+        "warmth": -0.25,
+        "appreciation": -0.1,
+        "respect": -0.05
+      },
+      "familiarity": 0.03,
+      "reveals": [
+        "abrasive"
+      ]
+    },
+    "mockery": {
+      "desc": "they made a fool of me in public",
+      "effects": {
+        "warmth": -0.3,
+        "appreciation": -0.2,
+        "respect": -0.1
+      },
+      "familiarity": 0.03,
+      "reveals": [
+        "cruel",
+        "sarcastic"
+      ]
+    },
+    "argument": {
+      "desc": "we argued",
+      "effects": {
+        "warmth": -0.12,
+        "respect": -0.03
+      },
+      "familiarity": 0.04
+    },
+    "threatened": {
+      "desc": "they threatened me",
+      "effects": {
+        "fear": 0.4,
+        "warmth": -0.3,
+        "trust": -0.15
+      },
+      "familiarity": 0.03,
+      "reveals": [
+        "bloodlust",
+        "cruel"
+      ]
+    },
+    "attacked": {
+      "desc": "they attacked me",
+      "effects": {
+        "fear": 0.5,
+        "warmth": -0.5,
+        "trust": -0.5,
+        "appreciation": -0.4
+      },
+      "familiarity": 0.05
+    },
+    "betrayal": {
+      "desc": "they betrayed me",
+      "effects": {
+        "trust": -0.7,
+        "warmth": -0.4,
+        "appreciation": -0.3,
+        "respect": -0.2
+      },
+      "familiarity": 0.05,
+      "reveals": [
+        "paranoid",
+        "greedy"
+      ]
+    },
+    "kept_word": {
+      "desc": "they kept a promise",
+      "effects": {
+        "trust": 0.25,
+        "respect": 0.1
+      },
+      "familiarity": 0.03,
+      "reveals": [
+        "honorable",
+        "loyal"
+      ]
+    },
+    "broke_word": {
+      "desc": "they broke a promise",
+      "effects": {
+        "trust": -0.35,
+        "respect": -0.1,
+        "appreciation": -0.1
+      },
+      "familiarity": 0.03
+    },
+    "bravery_seen": {
+      "desc": "I saw them do something brave",
+      "effects": {
+        "respect": 0.3,
+        "fear": 0.05
+      },
+      "familiarity": 0.04,
+      "reveals": [
+        "brave",
+        "bloodlust"
+      ]
+    },
+    "cowardice_seen": {
+      "desc": "I saw them run",
+      "effects": {
+        "respect": -0.4,
+        "trust": -0.2
+      },
+      "familiarity": 0.04,
+      "reveals": [
+        "coward",
+        "nervous"
+      ]
+    },
+    "skill_seen": {
+      "desc": "I saw them do something masterfully",
+      "effects": {
+        "respect": 0.2
+      },
+      "familiarity": 0.03,
+      "reveals": [
+        "scholar"
+      ]
+    },
+    "cruelty_seen": {
+      "desc": "I saw them be cruel to someone",
+      "effects": {
+        "warmth": -0.25,
+        "fear": 0.15,
+        "respect": -0.05
+      },
+      "familiarity": 0.03,
+      "reveals": [
+        "cruel"
+      ]
+    },
+    "generosity_seen": {
+      "desc": "I saw them be generous",
+      "effects": {
+        "warmth": 0.15,
+        "respect": 0.05
+      },
+      "familiarity": 0.03,
+      "reveals": [
+        "kind"
+      ]
+    },
+    "flirt_accepted": {
+      "desc": "we flirted and it went well",
+      "effects": {
+        "attraction": 0.3,
+        "warmth": 0.15
+      },
+      "familiarity": 0.05,
+      "reveals": [
+        "romantic"
+      ]
+    },
+    "flirt_rejected": {
+      "desc": "they turned me down",
+      "effects": {
+        "attraction": -0.15,
+        "warmth": -0.1,
+        "appreciation": -0.05
+      },
+      "familiarity": 0.03
+    },
+    "drank_together": {
+      "desc": "we drank together",
+      "effects": {
+        "warmth": 0.12,
+        "trust": 0.05
+      },
+      "familiarity": 0.08,
+      "reveals": [
+        "drunkard",
+        "jolly"
+      ]
+    },
+    "debt_paid": {
+      "desc": "they paid what they owed",
+      "effects": {
+        "appreciation": -0.15,
+        "trust": 0.15
+      },
+      "familiarity": 0.02
+    },
+    "debt_owed": {
+      "desc": "they still owe me",
+      "effects": {
+        "appreciation": -0.1,
+        "trust": -0.05
+      },
+      "familiarity": 0.01,
+      "reveals": [
+        "greedy"
+      ]
+    },
+    "long_absence": {
+      "desc": "they were gone a long time",
+      "effects": {
+        "warmth": -0.05,
+        "trust": -0.05
+      },
+      "familiarity": -0.1
+    },
+    "rumor_bad": {
+      "desc": "I heard something bad about them",
+      "effects": {
+        "trust": -0.1,
+        "warmth": -0.05
+      },
+      "familiarity": 0.01
+    },
+    "rumor_good": {
+      "desc": "I heard something good about them",
+      "effects": {
+        "respect": 0.08,
+        "warmth": 0.05
+      },
+      "familiarity": 0.01
+    },
+    "first_meeting": {
+      "desc": "we met",
+      "effects": {},
+      "familiarity": 0.1
+    }
+  },
+  "traitModifiers": {
+    "paranoid": {
+      "trust": {
+        "gain": 0.4,
+        "loss": 1.6
+      },
+      "fear": {
+        "gain": 1.3
+      }
+    },
+    "kind": {
+      "warmth": {
+        "gain": 1.3,
+        "loss": 0.7
+      },
+      "appreciation": {
+        "gain": 1.2
+      }
+    },
+    "cynical": {
+      "appreciation": {
+        "gain": 0.6
+      },
+      "respect": {
+        "gain": 0.7
+      },
+      "trust": {
+        "gain": 0.6
+      }
+    },
+    "honorable": {
+      "trust": {
+        "loss": 1.5
+      },
+      "respect": {
+        "gain": 1.3
+      }
+    },
+    "coward": {
+      "fear": {
+        "gain": 1.6,
+        "loss": 0.6
+      }
+    },
+    "brave": {
+      "fear": {
+        "gain": 0.5
+      },
+      "respect": {
+        "gain": 1.2
+      }
+    },
+    "bloodlust": {
+      "respect": {
+        "gain": 1.3
+      },
+      "warmth": {
+        "gain": 0.7
+      }
+    },
+    "loyal": {
+      "trust": {
+        "gain": 1.3,
+        "loss": 0.7
+      },
+      "warmth": {
+        "loss": 0.8
+      }
+    },
+    "grieving": {
+      "warmth": {
+        "gain": 0.7
+      },
+      "attraction": {
+        "gain": 0.5
+      }
+    },
+    "jolly": {
+      "warmth": {
+        "loss": 0.7,
+        "gain": 1.2
+      }
+    },
+    "abrasive": {
+      "warmth": {
+        "gain": 0.7
+      },
+      "appreciation": {
+        "gain": 0.8
+      }
+    },
+    "pompous": {
+      "respect": {
+        "gain": 0.6
+      },
+      "warmth": {
+        "loss": 1.2
+      }
+    },
+    "romantic": {
+      "attraction": {
+        "gain": 1.5
+      },
+      "warmth": {
+        "gain": 1.2
+      }
+    },
+    "greedy": {
+      "appreciation": {
+        "gain": 1.3,
+        "loss": 1.3
+      }
+    },
+    "shy": {
+      "familiarity": {
+        "gain": 0.6
+      }
+    },
+    "cruel": {
+      "fear": {
+        "gain": 0.6
+      },
+      "warmth": {
+        "gain": 0.6
+      }
+    },
+    "sarcastic": {
+      "respect": {
+        "gain": 0.8
+      }
+    },
+    "nervous": {
+      "fear": {
+        "gain": 1.4
+      }
+    },
+    "gruff": {
+      "warmth": {
+        "gain": 0.7
+      }
+    }
+  },
+  "memoryEvents": {
+    "_doc": "How memory events (lingo/data/events.json) translate into relationship events for each participant. 'other' = the other participant, 'by' = bindings.by, 'victim' = bindings.victim.",
+    "combat": {
+      "won": "shared_victory",
+      "fled": "shared_defeat",
+      "lost": "shared_defeat"
+    },
+    "kill": {
+      "*": "bravery_seen"
+    },
+    "death": {
+      "*": "shared_grief"
+    },
+    "wounded": {
+      "*": "shared_defeat"
+    },
+    "join": {
+      "*": "first_meeting"
+    },
+    "meal": {
+      "*": "shared_meal"
+    },
+    "loot": {
+      "*": "gift"
+    },
+    "kindness": {
+      "by": "kindness"
+    },
+    "insulted": {
+      "by": "insult"
+    },
+    "levelup": {
+      "*": "skill_seen"
+    },
+    "skill": {
+      "teacher": "kindness"
+    },
+    "nemesis": {
+      "*": "shared_defeat"
+    },
+    "conversation": {
+      "with": "shared_meal"
+    },
+    "revive": {
+      "by": "saved_life"
+    }
+  }
+}

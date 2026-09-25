@@ -54,6 +54,17 @@
 #boot[data-screen="boot-character"], #boot[data-screen="boot-world"] {
   display: flex; flex-direction: column; align-items: center; padding: 14px 20px 10px;
 }
+/**
+ * R26 — THE TITLE HAS TO BE ABLE TO GO AWAY.
+ *
+ * "Sometimes after creating a character I get stuck at 'waking the wayfarer…'" — the rule above is
+ * `#boot[data-screen]`, one id and one attribute, which is EXACTLY as specific as style.css's
+ * `#boot.hidden { display: none }`, and this file is linked after that one. So on the world step
+ * (the screen Start is on) `display: flex` won, main.js added `.hidden` and nothing disappeared,
+ * while the game ran and played its sounds behind the title. `!important` because nothing may ever
+ * out-rank "hidden" again; tests/round26-fixes.spec.js checks the computed style, not the class.
+ */
+#boot.hidden { display: none !important; }
 #boot[data-screen="boot-character"] .boot-inner, #boot[data-screen="boot-world"] .boot-inner {
   max-width: 1360px; flex: 1 0 auto; display: flex; flex-direction: column;
 }

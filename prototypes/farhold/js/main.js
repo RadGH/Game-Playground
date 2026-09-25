@@ -8060,8 +8060,11 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
    */
   input.setBlocked(() => panelOpen() || debug.isOpen || build.mode);
 
+  let bootChecked = false;
   function tick() {
     requestAnimationFrame(tick);
+    // R26: the loop is running, so the title must not be on screen — checked once, on frame one
+    if (!bootChecked) { bootChecked = true; hideBoot(); }
     const dt = Math.min(0.1, clock.getDelta());
     if (state.paused) return;
     if (uiPaused()) {
@@ -10144,9 +10147,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     return `${list} ${verb} up${s.isNight ? '' : ', in the daylight'}`;
   }
 
-  $('boot').classList.add('hidden');
+  hideBoot();
   state.running = true;
-  autoSave();
+  // R26: a save that throws must not keep the frame loop from starting — log it and carry on
+  try { autoSave(); } catch (err) { console.error('autosave on start failed', err); }
   tick();
 
   // ---------------------------------------------------------------- test handle
@@ -10413,6 +10417,35 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 }
 
 function frame() { return new Promise(r => requestAnimationFrame(() => r())); }
+
+/**
+ * R26 — PUT THE TITLE AWAY, AND MAKE SURE IT WENT.
+ *
+ * "Stuck at 'waking the wayfarer…' — I can hear the game behind the menu." It was a stylesheet:
+ * title.css's `#boot[data-screen="boot-world"] { display: flex }` tied `#boot.hidden` on
+ * specificity and came later, so adding the class hid nothing (fixed in title.css). The class is
+ * still what the rest of the game asks (`hud.js` pauses the loop on `#boot:not(.hidden)`), so this
+ * keeps it, clears the status line, and then asks the browser whether the box is really gone —
+ * if some future rule out-ranks `.hidden` again it is forced off inline and said out loud in the
+ * console rather than leaving a player on a menu that does nothing. Called at start and again on
+ * the first frame, so it holds even if something between the two re-shows the title.
+ */
+function hideBoot() {
+  const boot = document.getElementById('boot');
+  if (!boot) return;
+  try {
+    boot.classList.add('hidden');
+    const status = document.getElementById('boot-status');
+    if (status) status.textContent = '';
+    if (getComputedStyle(boot).display !== 'none') {
+      console.warn('farhold: #boot.hidden did not hide the title; forcing it off');
+      boot.style.display = 'none';
+    }
+  } catch (err) {
+    console.error('farhold: could not hide the title', err);
+    boot.style.display = 'none';
+  }
+}
 
 boot().catch(err => {
   document.getElementById('boot-status').textContent = 'failed: ' + err.message;

@@ -1014,6 +1014,33 @@ export function strikeAt(item, step = 0) {
   };
 }
 
+/**
+ * R26 — HOW FAR AND HOW WIDE THIS WEAPON'S OWN SWINGS GO, for a melee skill to measure itself by.
+ *
+ *   "Power Strike does no damage on a level 1 fighter where my normal attack deals 8-10 damage."
+ *
+ * A melee skill carried a FIXED reach and arc (Power Strike: 3.4 m, 92°) whatever was in your
+ * hand, while a basic swing is shaped by the weapon — a greatsword sweeps 4.6 m wide across 253°.
+ * So the skill could land on nothing at exactly the spot where the free swing kept hitting: the
+ * enemy stood inside the swing and outside the skill. The rule this answers for: a melee skill
+ * reaches at least as far, and at least as wide, as the widest swing of the weapon doing it.
+ *
+ * Returns `{ reach, arc }` — the largest of each over the weapon's whole pattern — or null for a
+ * bow, a wand or a staff, whose "swing" is not a blade and should not stretch a melee skill.
+ * Pure: `strikeAt` is read, never `withArea`, which posts a swing to the feel channel.
+ */
+export function meleeSpanOf(item) {
+  const p = profileOf(item);
+  if (p.ranged || isStaff(item) || isWand(item)) return null;
+  let reach = 0, arc = 0;
+  for (let i = 0; i < p.pattern.length; i++) {
+    const s = strikeAt(item, i);
+    reach = Math.max(reach, s.reach || 0);
+    arc = Math.max(arc, s.arc || 0);
+  }
+  return reach > 0 ? { reach, arc } : null;
+}
+
 // ---------------------------------------------------------------------------- hands
 
 /**

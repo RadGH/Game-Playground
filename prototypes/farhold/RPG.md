@@ -3988,3 +3988,31 @@ dungeon, leaving one, landing on a new world). No payout changed: a bag event pa
 crate event by crate only, so nothing pays twice. `tests/round26-event-crates.spec.js` goes down and
 back up first, then runs all 22 crate/bag events in data/events.json (fails on the old wiring at the
 first rescue bag, passes on the new).
+
+### Round 26 — class looks on the character screen (2026-09-25)
+
+A 23-item list against the character-creation figures. Most of it was one fault: `rpg.gearLook()`
+paints armour by TIER, and the character screen and the first morning equip each class's
+`startingArmour` — so every heavy helm was the horned helm, every cloth/medium helm a hood in the hood's
+default purple, every medium chest a tunic in its default green, drawn over the thirty hand-made class
+looks. **js/classwear.js** stamps each starting piece with its class's own part (`item.look.worn`,
+saved with the item), taken from Emberveil's class-looks.json dressed in the shared outfits
+(`avatar-3d/data/class-outfits.json`). A piece found later is still drawn by tier.
+
+* Starting kits: warrior sword + shield, fighter two-handed sword (`sword2h`), paladin sword + a
+  **Psalter** (new focus in js/foci.js: +12% spell power, +8 mana), rogue two daggers (`offStarter`,
+  a new optional class field for a second weapon in the off hand).
+* The torch goes on the belt when the weapon is two-handed or a bow (a bow is held in the LEFT hand).
+* The model fixes (inside-out legs/robes, floating bob, blade rods, torch, bow, hammer angle, new helms,
+  the overhead animation) are in avatar-3d and are listed in `avatar-3d/CHIBI2.md`.
+* Also this round, from the same play-test session: the stuck "Waking the wayfarer…" screen (a CSS
+  specificity tie, `#boot.hidden` lost to `title.css`'s `display:flex`), Power Strike's reach (melee
+  skills now reach at least as far as the weapon's own swing), the overhead's slash trail, the black
+  square (a repeated road point made a NaN pixel that bloom smeared; postfx now contains NaN), and the
+  Undercroft (a beast den's bank covered the dungeon mouth; `QuestLog.onClear` did not exist). Building
+  onboarding and the build ring: see BUILD-MODE.md "Round 26 — building".
+
+Tests: `tests/round26-classlooks.test.js` (every class starts in its own look slot by slot; the horned
+helm is the fighter's alone; the four starting kits; the Psalter), `avatar-3d/tests/class-outfits.test.js`,
+`avatar-3d/tests/chibi2-looks.spec.js`, `tests/round26-fixes.spec.js`, `tests/round26-skills.test.js`,
+`tests/round26-nan.test.js`, `tests/round26-dungeon.test.js`.

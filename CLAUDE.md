@@ -59,6 +59,8 @@ A specific example of "what went wrong" was on 9/17/2026, the agent stopped afte
 
 **2026-09-24 overhaul — Chibi 2 is the flagship; `mii.js` (Chibi procedural) and `quaternius.js` are DEPRECATED** (still on the avatar page, labelled, for comparison; build nothing new for them). Races (`avatar-3d/js/chibi2-races.js`, `body.race`), roundness (`body.round`), optional cheeks (`body.cheeks`), self-contained outfits (`chibi2-body.js`), a face placed on its own surface (`chibi2-face.js`), eleven new hats (`chibi2-hats.js`), grip bones + a solved wrist aim + follow-through + hold-aware clips + `CHIBI2_MELEE_ANIMS` / `CHIBI2_EMOTE_ANIMS` (`chibi2-motion.js`), hands-free emotes (`actor.setHandsFree`), strapped shields face-out, any weapon in the off hand. New part ids are registered in `avatar-2d/js/parts/chibi2-parts.js` — **a new Chibi 2 part id must be added there too, or the shared normaliser (which Farhold runs on every look) drops it**. Read `avatar-3d/CHIBI2.md` first.
 
+**2026-09-25 — class outfits**: `avatar-3d/data/class-outfits.json` + `js/class-outfits.js` (`dressAs(avatar, outfit)`) dress any body as any of the 30 classes; seven new headwear models (`CLASS_HATS` in chibi2-hats.js); and `profile()` now faces outward whichever way its rings run (legs, arms, hems and robes had been inside out in every game). See CHIBI2.md "Class outfits".
+
 `avatar-3d/chibi2.html` is the first Chibi 2 comparison: three humanoid presets, an 18-bone rig,
 two merged skinned meshes per character and 12 animations, with eight-fighter spell benchmarks.
 `avatar-3d/CHIBI2.md` documents the API, performance budgets and incomplete part mappings.

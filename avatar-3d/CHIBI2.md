@@ -4,6 +4,54 @@
 and the Quaternius mesh mode (`quaternius.js`) are **deprecated**: they stay on the avatar page,
 labelled as such, only so the three can be compared. Nothing new is built for them.
 
+## Class outfits and the 2026-09-25 look fixes
+
+**Class outfits** — `data/class-outfits.json` + `js/class-outfits.js` (no Three.js). An outfit is only
+clothes, headwear and carried items for one of the 30 classes, so any body can be dressed as any class:
+
+```js
+import { loadClassOutfits, dressAs } from '../../avatar-3d/js/class-outfits.js';
+const outfits = await loadClassOutfits();
+const look = dressAs(avatar, outfits.paladin);               // a copy; the avatar is untouched
+const clothesOnly = dressAs(avatar, outfits.mage, { hands: false });
+```
+
+The Chibi 2 page has a **Class outfit** picker that dresses whichever preset is showing. Every id in the
+file survives the shared 2D normaliser (`tests/class-outfits.test.js`). Farhold draws each class's
+starting armour from these (its `js/classwear.js`).
+
+**New headwear** (`js/chibi2-hats.js`, `CLASS_HATS`, dispatched by chibi2.js BEFORE its generic
+`/helm/` dome — any id containing "helm" used to become the same grey bowl): `war_helm` (nasal, cheek
+guards, mail curtain — warrior), `great_helm` (closed barrel, eye slit, gold cross — paladin),
+`plate_helm` (bascinet, raised visor, sallet tail, plume in `color2` — knight), `wolf_helm` (druid),
+`bone_headdress` (feather fan + horns; hair stays out — shaman), `rune_helm` (glowing rune band in
+`color2` — runesmith), `tricorn` (tactician). The horned helm is the fighter's alone. `gi` is a new top
+(the monk's fitted wrap jacket). All are registered in `avatar-2d/js/parts/chibi2-parts.js`.
+
+**Fixes that change every character, in every game:**
+
+* **Inside-out clothing.** `profile()` (chibi2-geometry.js) faced outward only when its rings climbed.
+  Legs, upper arms, tunic hems, skirts and robes are written top-to-bottom, so their outer walls were
+  culled — skin showed through trousers, a tunic's hem through greaves, and a robe could be seen
+  straight through. The winding now follows the direction the rings run. Write rings in whichever
+  order reads best.
+* **No zero-length normals.** `SkinBuilder.add` gives any vertex with a zero normal (a closed ring, a
+  point) the direction out from its piece's centre; a zero normal lights to NaN and a bloom pass will
+  smear one NaN pixel over the screen.
+* **Bob haircut.** Its lining was cloned after the shell was placed (`add` moves geometry in place), so
+  it was placed twice and floated above the head. Clone first, then add.
+* **Hair under helms.** `HELM_BRIM` flattens the hair cap under a helm's rim instead of dropping it, so
+  no band of scalp shows between the back hair and the helm.
+* **Blades.** The two straight edge stripes stuck out past every tapered point; they are gone.
+* **Torch** rebuilt down −y past the fingers (it ran up the forearm into the shoulder) and stood up by
+  `REST_PITCH.torch`. **Bow** tipped forward at rest so the upper limb clears the forearm.
+  **One-handed hafted weapons** (hammer, mace, axe, scepter) carried head-up at rest instead of hung by
+  the boot.
+* **Overhead** is one backward circle: the blade trails down and behind as the arm rises, goes over the
+  head and comes down in front. It used to lift slowly up through the front and chop in 0.05 s, so what
+  anyone saw was the lift. Measured by `tests/chibi2-looks.spec.js`.
+* **Goblins** are shorter (head 1.18 → 1.02, legs 0.72 → 0.62): the big head cancelled the short legs.
+
 ## The 2026-09-24 overhaul (races, bodies, faces, animation)
 
 A play-test list against the Avatar 3D page, all of it done in the model so every game gets it:

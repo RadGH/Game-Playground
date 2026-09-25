@@ -1698,8 +1698,15 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     onCraft: (recipeId, item, opts) => {
       const out = craft.apply(recipeId, item, { magicFind: player.derived?.magicFind || 0, ...opts, player });
       if (!out.ok) { hud.log(out.why || 'That cannot be done.', 'bad'); return; }
-      // a brand put on at the bench re-attunes the weapon, so the swing carries the new element
-      if (item && out.ok) { item.castElement = null; attuneWeapon(item); }
+      /**
+       * A brand put on at the bench re-attunes the weapon, so the swing carries the new element.
+       *
+       * R25 — ONLY a brand. This ran after EVERY recipe, so promoting or tempering a caster cleared
+       * its element and attuned it again; "I upgraded my Arc Staff with promote and temper… it is no
+       * longer dealing damage" was a staff whose element (and so its staff spell — a nova round you
+       * can become a cone in front of you) could change under it at the bench.
+       */
+      if (item && out.ok && craft.byId?.[recipeId]?.kind === 'brand') { item.castElement = null; attuneWeapon(item); }
       if (out.made) {
         attuneWeapon(out.made);
         player.bag.push(out.made);
@@ -2045,6 +2052,18 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       return;
     }
     hud.log(`You hit ${enemy.name} for ${result.amount}${result.crit ? ' (critical)' : ''}.`, result.crit ? 'good' : '', 'dealt');
+    // R25 — a hit far above your weapon's own damage says where it came from (see rpg.strike `why`)
+    const top = player.derived?.damage?.[1] || 10;
+    if (result.why && result.amount > top * 8) {
+      const w = result.why, parts = [`roll ${w.roll}`, `x${w.power} skill/strike`];
+      if (w.flat) parts.push(`+${w.flat} flat`);
+      if (w.items && w.items !== 1) parts.push(`x${w.items} item powers`);
+      if (w.spellPower) parts.push(`x${w.spellPower} spell power`);
+      if (w.crit) parts.push(`x${w.crit} critical`);
+      if (w.buffs && w.buffs !== 1) parts.push(`x${w.buffs} buffs/debuffs`);
+      hud.log(`That hit (${result.amount}, ${result.element}) came from: ${parts.join(', ')}.`, 'level', 'dealt');
+      console.warn('farhold: outlier hit', result.amount, result.why, enemy.name);
+    }
     hud.hit(at, result.amount, result.crit ? 'crit' : '', camera);
   }
 
@@ -8519,6 +8538,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
           const domeHits = field.strikeArea(control.x, control.z, radius, player, {
             falloff: 0.2, element, power: share * (spell.mult || 1) * (shape.charge?.power || 1),
           });
+          if (!domeHits.length) hud.log(`The dome reaches ${radius.toFixed(1)} m and catches nobody.`, '', 'dealt');
           resolveHits(domeHits);
           for (const { enemy, result } of domeHits) {
             brandHit(enemy, result);
@@ -8572,6 +8592,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
           // computes its own power and so never saw it — a full charge was twice the circle at the
           // same damage, which reads as the charge doing nothing.
           const novaHits = field.strikeArea(control.x, control.z, radius, player, { falloff: 0.35, element, power: share * (spell.mult || 1) * (shape.charge?.power || 1) });
+          // R25 — say it when a cast catches nobody, so "my staff does no damage" has an answer on screen
+          if (!novaHits.length && field.enemies.some(e => e.dying == null && Math.hypot(e.x - control.x, e.z - control.z) < 14)) hud.log(`${spell.name || 'The nova'} reaches ${radius.toFixed(1)} m around you and catches nobody.`, '', 'dealt');
           for (const { enemy, result } of novaHits) {
             brandHit(enemy, result);
             if (spell.status) landStatus(spell.status, skillData.statuses[spell.status], enemy, Math.max(1, base * 0.6));
@@ -8582,6 +8604,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
           const wide = spell.shape === 'cone' ? (spell.arc || 0.9) * shape.scale : 0.45;
           fx.swipe({ x: control.x, y: control.y, z: control.z, yaw: control.yaw, reach: range, arc: wide });
           const coneHits = field.strike(control, player, { reach: range, arc: wide, ...meleeOpts });
+          if (!coneHits.length && field.enemies.some(e => e.dying == null && Math.hypot(e.x - control.x, e.z - control.z) < 14)) hud.log(`${spell.name || 'The cone'} reaches ${range.toFixed(1)} m in front of you and catches nobody.`, '', 'dealt');
           for (const { enemy } of coneHits) {
             if (spell.status) landStatus(spell.status, skillData.statuses[spell.status], enemy, Math.max(1, base * 0.6));
           }
@@ -10049,6 +10072,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      * mouse click does, including the cooldown and the wind-up.
      */
     swingNow: () => { input.state.attack = true; },
+    /** R25 — hold (true) or release (false) the attack button, for a charged staff or a bow draw */
+    holdAttack: on => { input.state.attackHeld = !!on; input.state.attack = !!on; },
     /** The Civilization Expansion, for tests/civilization.spec.js. */
     get civics() { return civics; },
     get holding() { return holding; },

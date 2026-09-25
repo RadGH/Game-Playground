@@ -429,7 +429,9 @@ export function createCrafting({ data, rpg, materials = new Materials(), rng = m
       item.quality = to;
       if (item.dmg) item.dmg = item.dmg.map(v => Math.max(1, Math.round(v * step)));
       if (item.armor) item.armor = Math.max(1, Math.round(item.armor * step));
-      for (const a of item.affixes || []) if (typeof a.value === 'number') a.value = +(a.value * step).toFixed(2);
+      // R25 — a marker (what the weapon is made of, a brand) is not a number to scale: `castElement`
+      // went 1 → 1.43 → 1.72 → 2.01 across three tempers
+      for (const a of item.affixes || []) if (typeof a.value === 'number' && a.stat !== 'castElement' && !a.brand) a.value = +(a.value * step).toFixed(2);
       return { ok: true, text: `Tempered to ${to} quality.` };
     }
 

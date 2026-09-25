@@ -171,7 +171,10 @@ export function attuneWeapon(item) {
   if (!isQuarterstaff && CASTERS.has(sub) && !item.castElement) {
     // a brand put on at the bench wins over the base's own attunement — and so does the element a
     // round-23 unique was written for (`attune`), or "a wand of fire" would be fire one drop in six
-    const forced = item.brand || item.attune;
+    // R25 — and the element already written on the item (its castElement line) wins over a re-roll:
+    // an item that is attuned twice must come out the same thing both times
+    const recorded = (item.affixes || []).find(a => a.stat === 'castElement' && a.element)?.element;
+    const forced = item.brand || item.attune || recorded;
     const pick = forced
       ? CAST_ELEMENTS.find(e => e.element === forced) || CAST_ELEMENTS[0]
       : CAST_ELEMENTS[Math.floor(hashOf(item.id || item.baseKey) * CAST_ELEMENTS.length)];
@@ -1549,12 +1552,21 @@ export class Rpg {
     const rules = (attacker.castRules && skill && attacker.castRules.skill === skill) ? attacker.castRules : null;
 
     let amount = rng.range(dmgRange[0], dmgRange[1]) * multiplier;
+    /**
+     * R25 — THE BREAKDOWN, so an outlier explains itself. "All my spells deal 6-30 but Consecrate
+     * hits for like 600" could not be reproduced from the formula (400 random level-15 paladins
+     * never passed 95), so a hit far above the weapon's own damage now carries every factor that
+     * made it, and js/main.js writes them to the log. Only for the player's own strikes.
+     */
+    const why = attacker.equipment ? { roll: +(amount / Math.max(0.001, multiplier)).toFixed(1), power: +multiplier.toFixed(2) } : null;
     if (attacker.equipment) {
       const out = this.fx.dmgOut(ctx);
       amount = (amount + out.flat) * out.mult;
+      if (why) { why.flat = +(out.flat || 0).toFixed(1); why.items = +out.mult.toFixed(2); }
     }
     if (element !== 'physical' && a?.spellPower) amount *= 1 + a.spellPower;
-    if (crit) amount *= 1 + (a?.critDamage ?? attacker.critDamage ?? 50) / 100;
+    if (why && element !== 'physical' && a?.spellPower) why.spellPower = +(1 + a.spellPower).toFixed(2);
+    if (crit) { amount *= 1 + (a?.critDamage ?? attacker.critDamage ?? 50) / 100; if (why) why.crit = +(1 + (a?.critDamage ?? attacker.critDamage ?? 50) / 100).toFixed(2); }
 
     /**
      * WHAT BOTH OF THEM ARE ALREADY CARRYING.
@@ -1574,6 +1586,7 @@ export class Rpg {
      * is excluded by the same test as before, so nothing is counted twice.
      */
     if (attacker.equipment && !defender.equipment) amount *= outgoingFrom(attacker) * incomingFrom(defender);
+    if (why && !defender.equipment) why.buffs = +(outgoingFrom(attacker) * incomingFrom(defender)).toFixed(2);
 
     /**
      * FAR SHOT, the ranged keystone: "arrows and bolts hit harder the further they have flown, up
@@ -1672,7 +1685,7 @@ export class Rpg {
       if (reflected > 0) attacker.hp = Math.max(0, attacker.hp - reflected);
     }
 
-    const result = { dodged: false, amount, crit, healed, manaBack, reflected, blocked, absorbed, fromMana, saved, element, dead: defender.hp <= 0 };
+    const result = { dodged: false, amount, crit, healed, manaBack, reflected, blocked, absorbed, fromMana, saved, element, dead: defender.hp <= 0, why };
     // A belt-and-braces guard. A NaN anywhere upstream used to walk straight into a health bar and
     // leave it reading "NaN / 94" with no way to tell where it came from; now it is caught here.
     if (!Number.isFinite(result.amount)) {

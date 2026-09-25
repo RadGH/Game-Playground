@@ -24,6 +24,7 @@ import { talentPlan, talentsOn, castRulesFrom } from './skilltalents.js';
 // R17 — the one place the follower bonus is read off `derived`, so the summon cap and the follower
 // book can never drift apart about what The Kept Company is worth.
 import { followerBonus } from './followers.js';
+import { handsOf, meleeSpanOf } from './weapons.js';
 import { fmt, pct, pctOf, secs } from '../../../shared/format.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -137,7 +138,7 @@ function shapeSentence(skill) {
       // R25 — Flamethrower: the same cone again and again while you hold it
       return skill.repeats > 1
         ? `${skill.breath ? 'Breathes a stream that strikes' : 'Strikes'} everything in ${article(arc)} ${arc} cone ${metres(skill.reach ?? 3)} in front of you ${fmt(skill.repeats)} times over ${secs(skill.repeats * (skill.repeatEvery ?? 0.32))}, for ${dmg} each time.`
-        : `Strikes everything in ${article(arc)} ${arc} arc ${metres(skill.reach ?? 3)} in front of you for ${dmg}.`;
+        : `Strikes everything in ${article(arc)} ${arc} arc ${metres(skill.reach ?? 3)} in front of you, or as far and as wide as your weapon swings if that is more, for ${dmg}.`;
     case 'around':
       // R25 — Whirlwind spins five times: say so, and say it is per spin
       return skill.repeats > 1
@@ -688,6 +689,24 @@ export function createSkillBar({ data, player, rpg, unlocks = null, canSummon = 
       spent: cost,
       paidWith: bloodPrice() ? 'health' : 'mana',
     };
+
+    /**
+     * R26 — A MELEE SKILL REACHES AS FAR AND AS WIDE AS THE WEAPON SWINGING IT.
+     *
+     * "Power Strike does no damage on a level 1 fighter where my normal attack deals 8-10." The
+     * skill's 3.4 m / 92° was fixed while a basic swing is shaped by the weapon, so a target the
+     * free swing kept hitting could stand outside the skill (a greatsword sweeps 4.6 m across
+     * 253°). The skill's own numbers are now a FLOOR: `meleeSpanOf` is the widest swing in the
+     * weapon's pattern, and the skill takes whichever is bigger. A stream (Flamethrower) is a
+     * spell cone, not a blade, and keeps its own shape.
+     */
+    if (plan.kind === 'melee' && !plan.breath) {
+      const span = meleeSpanOf(handsOf(player).main);
+      if (span) {
+        plan.reach = Math.max(plan.reach, span.reach);
+        plan.arc = Math.max(plan.arc, span.arc);
+      }
+    }
 
     /**
      * AND NOW THE TALENTS. This one line is the whole of D7: the board was built, the modifiers

@@ -39,7 +39,7 @@
       "id": "timber",
       "name": "Cut timber and break stone",
       "hud": "E on a tree, then on a boulder",
-      "text": "Everything you are about to build starts as wood and rock. You start with a Knapped Tool in the Tool slot — that is what works a tree or a rock — so walk up to one and press E, or swing at it. You need 8 logs AND 20 stone, so do both: chopping only trees will not finish this step.",
+      "text": "Everything you are about to build starts as wood and rock. You start with a Knapped Tool in the Tool slot — that is what works a tree or a rock — so walk up to one and press E, or swing at it. You need 8 logs AND 20 stone: six logs make a Storage Box, the other two feed the furnace fire, and the stone is the furnace itself.",
       "where": "Anywhere with trees and loose rock",
       "check": {
         "kind": "materials",
@@ -52,9 +52,9 @@
     },
     {
       "id": "store",
-      "name": "Put a crate on the ground",
-      "hud": "B for build · Storage",
-      "text": "A pile of materials on the floor is yours alone. A crate is what makes it a base: anything you build within reach of one can spend what is in it, and the first thing you ever put down stakes your claim for free.",
+      "name": "Put a storage box on the ground",
+      "hud": "B for build · Storage · Storage Box (6 logs)",
+      "text": "A Storage Box is six logs and nothing else. It is what makes a pile of materials a base: anything you build within reach of one can spend what is in it, and a machine beside it puts what it makes straight in.",
       "where": "Build mode (B) · Storage",
       "check": {
         "kind": "structure",
@@ -82,8 +82,8 @@
     {
       "id": "ingot",
       "name": "Smelt your first iron",
-      "hud": "E on an ore seam, then E on the Furnace",
-      "text": "Iron ore breaks out of an outcrop — hills, badlands, or plain open grassland. Bring it back, walk up to the furnace, press E and queue the smelt. Feed it logs if you have nothing better to burn.",
+      "hud": "E on an ore outcrop, then E on the Furnace · queue Smelt Iron · stay beside it",
+      "text": "Iron ore breaks out of an outcrop — hills, badlands, or plain open grassland. Bring it back, walk up to the furnace, press E and queue Smelt Iron. It takes the ore and a log to burn from your pack or the box beside it, and it only works while somebody is at it: stand next to it, or hold E to go three times faster. The ingot lands in the box, or in your pack if there is no box in reach.",
       "where": "Map (M) · Find · sweep for Iron Ore",
       "check": {
         "kind": "recipe",

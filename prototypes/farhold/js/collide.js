@@ -208,6 +208,31 @@ export class ObstacleField {
     return this.buckets.get(this._key(Math.floor(x / this.bucket), Math.floor(z / this.bucket))) || null;
   }
 
+  /**
+   * R26 — HOW FAR OUT FROM THIS POINT THE NEAREST WALKABLE GROUND IS, if something solid is
+   * standing ON the point. 0 when the point is open.
+   *
+   * "I went to the location and there is a big rock thing that looks like a cave entrance … I
+   * cannot interact with it in any way." A beast den (js/sites.js) is built on the same spot as
+   * the dungeon mouth, and its earth bank is a solid disc about 7 m across the middle — while `E`
+   * asked for the mouth within 4.5 m of its centre. You could walk all the way round it and never
+   * get close enough. `js/dungeon.js` `nearest()` adds this to its reach, so the door counts from
+   * the edge of whatever is built over it rather than from a point you cannot stand on.
+   *
+   * Only round solids count (a deck is walked on, a wall segment has no middle to cover).
+   */
+  coverAt(x, z) {
+    const list = this.near(x, z);
+    if (!list) return 0;
+    let r = 0;
+    for (const o of list) {
+      if (o.deck || o.seg) continue;
+      const d = Math.hypot(x - o.x, z - o.z);
+      if (d < o.r) r = Math.max(r, o.r - d);
+    }
+    return r;
+  }
+
   /** Can you stand on top of this one, or is it too narrow to be a floor? */
   standable(o) { return o.deck ? true : o.seg ? false : o.r >= STANDABLE_RADIUS; }
 

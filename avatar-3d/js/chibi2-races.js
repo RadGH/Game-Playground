@@ -131,7 +131,9 @@ export const CHIBI2_RACES = {
   },
   goblin: {
     name: 'Goblin', label: 'Chibi 2 Goblin',
-    body: { leg: 0.72, torso: 0.84, width: 0.84, shoulders: 0.86, arm: 1.08, hand: 1.05, head: 1.18, neck: 0.7, round: 0.15 },
+    // 2026-09-25: head 1.18 -> 1.02 and legs 0.72 -> 0.62 — the big head cancelled the short legs, so a
+    // goblin stood only ~10% under a human and a warband of them read as people, not goblins
+    body: { leg: 0.62, torso: 0.8, width: 0.84, shoulders: 0.86, arm: 1.08, hand: 1.05, head: 1.02, neck: 0.7, round: 0.15 },
     face: { jaw: 0.88, brow: 0.2, ear: 1.7, hollow: 0.1, muzzle: 0 },
     posture: { chest: 0.16, head: -0.12, knees: 0.16 },
     ranges: { height: [0, 0.3], width: [0.2, 0.6], headSize: [0.6, 1], round: [0, 0.5] },

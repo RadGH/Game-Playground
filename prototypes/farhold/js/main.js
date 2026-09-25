@@ -129,6 +129,9 @@ import { mat as matAmount } from '../../../shared/format.js';
 import { createSkillBar, applyStatus, tickStatuses, slowOf, buffsOf, outgoingFrom, incomingFrom, STATUS_POWER_SHARE } from './skills.js';
 // R23 — Farhold's own uniques and the requests their powers make (see js/uniques.js)
 import { installFoci } from './foci.js';
+import { dressClassLooks, wearClassLook } from './classwear.js';
+import { loadClassOutfits } from '../../../avatar-3d/js/class-outfits.js';
+import { installWarbands, createWarbandMap } from './warbands.js';
 import { installUniques, resolveAttack, afterKill as uniquesAfterKill, afterDamaged as uniquesAfterDamaged, tickAuras } from './uniques.js';
 import { EFFECTS as FX_TABLE } from './effects.js';
 // round 4: the RPG expansion
@@ -286,6 +289,14 @@ async function boot() {
     installUniques(items, uniqueData, { tools: uniqueTools, describe: id => FX_TABLE['legendary:' + id]?.desc?.() || null });
     // R25 — the caster's off hand: four foci, eight uniques and the Archivist's set (js/foci.js)
     installFoci(items, { describe: id => FX_TABLE['legendary:' + id]?.desc?.() || null, balance });
+    /**
+     * R26 — the five enemy warbands (js/warbands.js): goblin, orc, beastkin, undead and giant
+     * humanoids, put into the bestiary in memory so enemies.json stays as it is. The raw data rides
+     * on `bestiary.warbands` because `makeField` is what needs it, and it already holds `bestiary`.
+     */
+    const warbandData = await loadJSON('data/warbands.json').catch(() => null);
+    installWarbands(bestiary, warbandData);
+    bestiary.warbands = warbandData;
   }
 
   /**
@@ -301,6 +312,9 @@ async function boot() {
    * There is one call site now, so there is nothing to keep in step.
    */
   const settings = createSettings({ apply: (v, key) => settingsApply(v, key) });
+  // 2026-09-25 — each class's look wears its outfit (avatar-3d/data/class-outfits.json), and the
+  // starting armour is drawn as that look rather than by tier (js/classwear.js)
+  dressClassLooks(classLooks, await loadClassOutfits());
   const data = { items, balance, bestiary, talents, campaignData, classLooks, skillData, classData,
     craftData, encounterData, namegen, factionData, frameData, incidentData, wandererData,
     landmarkData, rewardData, resourceData, refiningData, powerData, structureData, colonyData,
@@ -818,9 +832,13 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     // card until the day it is replaced
     const starter = attuneWeapon(rpg.loot.generate(classDef.starter || 'sword', 'normal', 'low', { rng: rpg.rng }));
     if (starter) rpg.equip(player, starter, { force: true });
+    // a second weapon for the off hand (the rogue's second dagger)
+    const offStarter = classDef.offStarter ? attuneWeapon(rpg.loot.generate(classDef.offStarter, 'normal', 'low', { rng: rpg.rng })) : null;
+    if (offStarter) rpg.equip(player, offStarter, { into: 'offhand', force: true });
+    const classAvatar = classLooks?.classes?.[classDef.id]?.avatar;
     for (const key of classDef.startingArmour || []) {
       const piece = attuneWeapon(rpg.loot.generate(key, 'normal', 'low', { rng: rpg.rng }));
-      if (piece) rpg.equip(player, piece, { force: true });
+      if (piece) rpg.equip(player, wearClassLook(piece, classAvatar), { force: true });
     }
     // EVERY character starts with a torch and a horse — both in slots of their own, so a torch does
     // not cost you your shield and a mount is a thing you own rather than a key you press.
@@ -2691,6 +2709,18 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       onKill: onEnemyKilled,
       // a rare gets a real name, in the language of the region it turned up in
       nameRare,
+      /**
+       * R26 — who holds each zone of THIS world. Built per field, because a landing builds new
+       * zones and the claims are remembered against the zone objects. A zone's biome for a
+       * warband's `prefers` is read at the middle of its region.
+       */
+      warbands: bestiary.warbands ? createWarbandMap(bestiary.warbands, {
+        seed,
+        biomeOf: z => {
+          const cell = forTerrain.metresPerCell || 640;
+          return z?.center ? familiesOf(forTerrain.biomeIdAt(z.center.x * cell, z.center.y * cell)) : [];
+        },
+      }) : null,
     });
     /**
      * R22 — THE COMPANIONS THIS FIELD CAN BE MADE TO LOOK AT.
@@ -2724,8 +2754,21 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      * a foe had never once reached this line.
      */
     if (!namegen) return null;
-    const race = zones.at(control.x, control.z)?.race || 'human';
+    // R26 — a warband rare is named in its own tongue (an orc chief has an orc name in a human valley)
+    const race = def?.nameRace || zones.at(control.x, control.z)?.race || 'human';
     return namegen.generate('person.full', { race, seed: Math.floor(rng() * 1e9) })?.text?.split(' ')[0] || null;
+  }
+
+  /**
+   * R26 — THE ENEMIES A JOB MAY NAME, HERE. A warband's members only spawn in the zones it holds
+   * (js/warbands.js), so a notice asking you to cull Ashtusk Raiders in a valley no orc has ever
+   * stood in would be a promise the world cannot keep. Everything else in the bestiary is as it was.
+   */
+  function huntableIn(zone) {
+    // try: `field` is a `let` further down, and reading it early is a TDZ throw, `?.` or not
+    let held = null;
+    try { held = field?.warbands?.of?.(zone)?.id || null; } catch { held = null; }
+    return (bestiary.enemies || []).filter(d => !d.warband || d.warband === held);
   }
 
   let field = makeField();
@@ -2930,6 +2973,18 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      * node tests still drive the module they have always driven.
      */
     labour: colonyData?.labour || null,
+    /**
+     * R26 — THE PACK. A furnace with no box in reach used to see nothing at all, so queued iron
+     * never smelted while the ore sat in your pack. It now takes from its stores first and your pack
+     * second — the pack always when there is no store, and otherwise only while you are standing
+     * at it (12 m), so a furnace across the base never quietly eats what you are carrying.
+     */
+    bag: {
+      count: id => materials.count(id),
+      take: (id, n) => { const got = Math.min(n, materials.count(id)); if (got > 0) materials.spend({ [id]: got }); return got; },
+      put: (id, n) => { materials.add(id, n); return n; },
+    },
+    bagReach: m => !!control && Math.hypot(control.x - m.x, control.z - m.z) <= 12,
   });
   /**
    * The benches, their queues, and which recipes you have unlocked by doing them.
@@ -4960,6 +5015,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     field.rankBonus = 1.7;                     // more champions and rares than out in the open
     pets.setTerrain(dungeon.terrain);
     chests = dungeon.chests;
+    handOverChests();
 
     // a pack in every room but the one you came in by, and the boss at the far end
     const packs = inst?.interior?.packs || balance.dungeon?.packsPerRoom || [1, 3];
@@ -4988,6 +5044,31 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         const x = room.x + (field.rng() - 0.5) * (room.w - 3);
         const z = room.z + (field.rng() - 0.5) * (room.h - 3);
         field.addRanked(def, level, x, z, rank);
+      }
+    }
+    /**
+     * R26 — THE THINGS A JOB SENT YOU HERE FOR ARE HERE.
+     *
+     * "Clear the Mauran Undercroft: 6 Moor Hounds have made a home of it." The rooms were filled
+     * from the biome's pool, which need not include the job's target at all — so the kill count
+     * could never be made down here. Whatever an open `clear` job at this mouth still wants is put
+     * in the rooms, spread across them, before anything else is.
+     */
+    {
+      const rooms = dungeon.rooms.filter(r => r.kind !== 'entrance' && r.kind !== 'boss');
+      const spots = rooms.length ? rooms : dungeon.rooms;
+      for (const q of questLog.active || []) {
+        if (q.done || q.kind !== 'clear' || !q.place) continue;
+        const here = Math.hypot((q.place.x ?? Infinity) - node.x, (q.place.z ?? Infinity) - node.z) <= 200
+          || (q.place.name && q.place.name === node.name);
+        if (!here) continue;
+        const def = bestiary.enemies.find(d => d.id === q.target);
+        if (!def) continue;
+        const left = Math.max(0, (q.count || 0) - (q.progress || 0));
+        for (let i = 0; i < left && spots.length; i++) {
+          const room = spots[i % spots.length];
+          await field.add(def, level, room.x + (field.rng() - 0.5) * (room.w - 3), room.z + (field.rng() - 0.5) * (room.h - 3));
+        }
       }
     }
     if (dungeon.bossRoom !== dungeon.entrance) {
@@ -5048,7 +5129,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       if (H.quest && questLog?.add && makeQuest) {
         const q = makeQuest('clear', {
           rng: rpg.rng, level, giver: null,
-          enemies: bestiary.enemies, nodes: [], terrain,
+          enemies: huntableIn(zones.at(node.x, node.z)), nodes: [], terrain,
           from: node.name, at: { x: node.x, z: node.z },
           wrapM: terrain.widthM, zoneAt: (x, z) => zones.at(x, z),
         });
@@ -5108,6 +5189,27 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     autoSave();
   }
 
+  /**
+   * R26 — EVERY TIME `chests` IS REPLACED, THE TWO MODULES THAT PUT BOXES DOWN ARE TOLD.
+   *
+   *   "A loot crate dropped from an event… it sat on the ground and I could not pick it up. It does
+   *    not offer to press E and does not get picked up when I walk over it… They used to work."
+   *
+   * js/encounters.js and js/sites.js were each handed the chest field ONCE, at boot. Going down into
+   * a dungeon swaps `chests` for the dungeon's own field, and coming back up builds a brand-new
+   * surface field — and nobody told either of them. From the first dungeon onwards, every road
+   * event put its crate (a defend's strongbox, a trap's bait, a find's cache) and its reward bag (a
+   * rescue, a chase) into the OLD field: the mesh and the beacon went into the scene, but `E` asks
+   * `chests.nearest` and walking over a bag asks `chests.collect`, both on the NEW field, which had
+   * never heard of them. A beam of light over a box that nothing in the game could reach. A new
+   * world (`buildPlanet`) recreated encounters and sites with no hand-over either; they happened to
+   * fall back to the chest registry there, which is why it only showed after a dungeon.
+   */
+  function handOverChests() {
+    encounters?.setChests?.(chests);
+    sites?.setChests?.(chests);
+  }
+
   function leaveDungeon() {
     if (!dungeon) return;
     dungeonOre = null;                          // the floor's seams go with the floor
@@ -5122,6 +5224,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     field.paused = false;
     pets.setTerrain(terrain);
     chests = createChests(scene, terrain, { seed, balance, zones, rpg, collide: props.solids });
+    handOverChests();
     control.setTerrain(terrain, surfaceSpot ? { ...surfaceSpot, y: null } : null);
     control.obstacles = [props.solids, features.solids, buildSolids, gateSolids, siteSolids];
     surfaceVisible(true);
@@ -5178,7 +5281,11 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       if (g.revealZone && hud.here) { map.revealZone?.(hud.here.id); hud.log(`${hud.here.name} goes on your chart.`, 'good'); }
     }
     campaign.onKill('dungeon_cleared');
-    for (const q of questLog.onClear?.({ name: dungeon.name }) || []) hud.log(`${q.title}: cleared.`, 'good');
+    // R26: `onClear` exists now (js/quests.js) — matched by where the mouth is as well as its name
+    for (const q of questLog.onClear?.({ name: dungeon.name, x: node?.x, z: node?.z }) || []) {
+      hud.log(`${q.title}: cleared.`, 'good');
+      markers.syncQuests?.(questLog.active);
+    }
     sound.questDone();
     rewards({
       title: 'Dungeon cleared', subtitle: `${dungeon.name} is quiet now.`,
@@ -5200,7 +5307,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     const chest = chests.nearest(control.x, control.z);
     if (chest) return { kind: 'chest', chest };
     if (!dungeon) {
-      const gate = gates.nearest(control.x, control.z);
+      // R26: measured from the edge of anything built over the mouth (a den's earth bank is 7 m
+      // across on the very same spot, and E used to ask for 4.5 m from its middle)
+      const gate = gates.nearest(control.x, control.z, 4.5, [siteSolids, features?.solids, props?.solids]);
       if (gate) return { kind: 'dungeon', gate };
       const who = folk.nearest(control.x, control.z);
       if (who) return { kind: 'talk', who };
@@ -5908,7 +6017,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       gatherable: quest => gatherable(quest, player.bag),
       lastCrate, lastCrateLifted,
       bag: player.bag,
-      offer: folk.questFrom(npc, { level: player.level, enemies: bestiary.enemies, nodes: world.nodes }),
+      offer: folk.questFrom(npc, { level: player.level, enemies: huntableIn(hud.here), nodes: world.nodes }),
       /**
        * §6.5 — somebody in this town who would come and work at your holding.
        *
@@ -6563,6 +6672,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     gates = createGates(scene, terrain, { balance, zones, radius: balance.features?.radius ?? 2600, collide: gateSolids });
     sites.dispose();
     sites = createSites(scene, terrain, { seed, balance, zones, collide: siteSolids, radius: balance.features?.radius ?? 2600 });
+    handOverChests();
     openMouths();
     clearWandererBodies();
     folk = makeFolk();
@@ -7311,6 +7421,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     const record = holdings.visit(zone.id);
     // R17 — exploring pays for research, and `visits` is 1 the first time only
     if (record?.visits === 1) sharedResearch().award('region', 1);
+    // R26 — say who holds the ground, once, the first time you walk into it
+    const heldBy = field?.warbands?.of?.(zone);
+    if (heldBy && record?.visits === 1) hud.log(`${heldBy.name} hold ${zone.name} — ${heldBy.blurb}.`, 'warn');
 
     /**
      * R16 — EVERY LANDMARK IN THIS ZONE GETS A MODEL, AND EVERY MODEL GETS A LEDGER.
@@ -7365,7 +7478,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
     // the board. Everything on it names something that is actually in this zone right now.
     const candidates = candidatesFrom({
-      zone, territory: holdings, bestiary: bestiary.enemies || [], nodes: world.nodes || [],
+      zone, territory: holdings, bestiary: huntableIn(zone), nodes: world.nodes || [],
       landmarks: holdings.landmarksIn(zone.id),
       npcs: roadFolk.candidates(zone.id),
       caravans: trade.candidates(zone.id),
@@ -7414,7 +7527,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     localBoard = jobs.offer({
       zone, level: player.level, want: 5,
       candidates: candidatesFrom({
-        zone, territory: holdings, bestiary: bestiary.enemies || [], nodes: world.nodes || [],
+        zone, territory: holdings, bestiary: huntableIn(zone), nodes: world.nodes || [],
         landmarks: holdings.landmarksIn(zone.id),
         npcs: roadFolk.candidates(zone.id),
         caravans: trade.candidates(zone.id),
@@ -7929,7 +8042,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       e.preventDefault();
       const on = !build.mode;
       build.setMode(on);
-      buildUI.setOpen(on);
+      // R26 — B opens the build RING (js/build-radial.js); Tab or its "Full list" is the old panel
+      if (on) buildUI.openRadial(); else buildUI.setOpen(false);
       /**
        * The middle-of-the-screen dot is a LIE while the cursor is free: it says "you are aiming
        * here" and the ghost is under the mouse. So it goes away, and the canvas gets a real
@@ -7938,7 +8052,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       document.body.classList.toggle('building', on);
       if (on) input.release(); else regrab();
       hud.log(on
-        ? 'Build mode. Scroll to turn · click to place · Enter to finish a run · Ctrl+Z to undo · B to stop.'
+        ? 'Build mode. Pick from the ring (1-9, or click) · Tab for the full list · right-click brings the ring back · B to stop.'
         : 'Build mode off.', on ? 'level' : '');
     }
     if (build.mode) {
@@ -8023,8 +8137,11 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
    */
   input.setBlocked(() => panelOpen() || debug.isOpen || build.mode);
 
+  let bootChecked = false;
   function tick() {
     requestAnimationFrame(tick);
+    // R26: the loop is running, so the title must not be on screen — checked once, on frame one
+    if (!bootChecked) { bootChecked = true; hideBoot(); }
     const dt = Math.min(0.1, clock.getDelta());
     if (state.paused) return;
     if (uiPaused()) {
@@ -10107,9 +10224,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     return `${list} ${verb} up${s.isNight ? '' : ', in the daylight'}`;
   }
 
-  $('boot').classList.add('hidden');
+  hideBoot();
   state.running = true;
-  autoSave();
+  // R26: a save that throws must not keep the frame loop from starting — log it and carry on
+  try { autoSave(); } catch (err) { console.error('autosave on start failed', err); }
   tick();
 
   // ---------------------------------------------------------------- test handle
@@ -10286,6 +10404,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       return enterDungeon(g);
     },
     leaveDungeon,
+    /** R26 — the chest field that is live NOW (the `chests` key above is the one from boot). */
+    get chestField() { return chests; },
     openChest: () => { const c = chests.nearest(control.x, control.z, 999); return c ? openChest(c) : null; },
     placeChest: (kind = 'gilded') => chests.place(kind, control.x + 2, control.z + 2, { level: player.level }),
     materials: () => craft.materials.toJSON(),
@@ -10376,6 +10496,35 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 }
 
 function frame() { return new Promise(r => requestAnimationFrame(() => r())); }
+
+/**
+ * R26 — PUT THE TITLE AWAY, AND MAKE SURE IT WENT.
+ *
+ * "Stuck at 'waking the wayfarer…' — I can hear the game behind the menu." It was a stylesheet:
+ * title.css's `#boot[data-screen="boot-world"] { display: flex }` tied `#boot.hidden` on
+ * specificity and came later, so adding the class hid nothing (fixed in title.css). The class is
+ * still what the rest of the game asks (`hud.js` pauses the loop on `#boot:not(.hidden)`), so this
+ * keeps it, clears the status line, and then asks the browser whether the box is really gone —
+ * if some future rule out-ranks `.hidden` again it is forced off inline and said out loud in the
+ * console rather than leaving a player on a menu that does nothing. Called at start and again on
+ * the first frame, so it holds even if something between the two re-shows the title.
+ */
+function hideBoot() {
+  const boot = document.getElementById('boot');
+  if (!boot) return;
+  try {
+    boot.classList.add('hidden');
+    const status = document.getElementById('boot-status');
+    if (status) status.textContent = '';
+    if (getComputedStyle(boot).display !== 'none') {
+      console.warn('farhold: #boot.hidden did not hide the title; forcing it off');
+      boot.style.display = 'none';
+    }
+  } catch (err) {
+    console.error('farhold: could not hide the title', err);
+    boot.style.display = 'none';
+  }
+}
 
 boot().catch(err => {
   document.getElementById('boot-status').textContent = 'failed: ' + err.message;

@@ -384,6 +384,28 @@ export class QuestLog {
     return advanced;
   }
 
+  /**
+   * R26 — A PLACE WAS CLEARED (its boss went down). Every `clear` job sent there is done.
+   *
+   * js/main.js has called `questLog.onClear?.(…)` from `onDungeonBossDown` since round 16, and
+   * this method did not exist — the `?.` swallowed it, so emptying the very dungeon a job named
+   * never finished the job. Matched by place (within `radius` metres of the mouth) or by name.
+   */
+  onClear({ name = null, x = null, z = null } = {}, radius = 200) {
+    const advanced = [];
+    for (const q of this.active) {
+      if (q.done || q.kind !== 'clear' || !q.place) continue;
+      const near = Number.isFinite(x) && Number.isFinite(z) && Number.isFinite(q.place.x)
+        && Math.hypot(q.place.x - x, q.place.z - z) <= radius;
+      const named = !!name && !!q.place.name && q.place.name === name;
+      if (!near && !named) continue;
+      q.progress = Math.max(q.progress || 0, q.count || 1);
+      q.done = true;
+      advanced.push(q);
+    }
+    return advanced;
+  }
+
   /** The player moved. `x`,`z` in metres. */
   onArrive({ x, z }, radius = 120) {
     const advanced = [];

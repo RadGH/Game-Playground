@@ -63,6 +63,26 @@ function ensureCombatStyles() {
   document.head.appendChild(link);
 }
 
+/**
+ * R26 — where an overhead's ribbon starts: 100° up from your facing, i.e. just past vertical, over
+ * and a little behind the head. It ends wherever a blade of the strike's reach meets the ground.
+ */
+export const UPRIGHT_FROM = (100 / 180) * Math.PI;
+/** …and how far that plane is rolled onto the right shoulder (radians about the facing). */
+export const UPRIGHT_ROLL = (32 / 180) * Math.PI;
+
+/**
+ * Show the top `share` of an upright ribbon. RingGeometry lays its quads out from `thetaStart`
+ * (the low, forward end) upward, six indices a quad, so the top of the chop is the END of the
+ * index buffer and revealing it from the top means drawing the last N quads.
+ */
+function revealUpright(s, share) {
+  const g = s.mesh.geometry;
+  const n = Math.max(1, Math.round(s.segs * Math.max(0, Math.min(1, share))));
+  const total = g.index ? g.index.count : s.segs * 6;
+  g.setDrawRange(total - n * 6, n * 6);
+}
+
 export function createCombatFx(scene, { onArrowLand = null, groundAt = null } = {}) {
   ensureCombatStyles();
   // ---------------------------------------------------------------- swipe arcs
@@ -125,18 +145,47 @@ export function createCombatFx(scene, { onArrowLand = null, groundAt = null } = 
      */
     const span = plane === 'lance' ? Math.min(arc, 0.22) : arc;
     const inner = plane === 'lance' ? Math.max(0.2, reach * 0.12) : Math.max(0.15, reach * 0.22);
-    const geom = new THREE.RingGeometry(inner, reach, plane === 'lance' ? 6 : 30, 1, -span / 2, span);
+    let geom;
+    s.segs = 0;
+    if (plane === 'upright') {
+      /**
+       * R26 — AN OVERHEAD COMES DOWN, IT DOES NOT FAN UP.
+       *
+       *   "The third attack from the longsword (Overhead) still plays the animation that looks like
+       *    the character is swinging into the air. Can you flip that cone around so it looks like
+       *    the slash is coming from above?"
+       *
+       * The old ribbon was a sector centred on straight up, in the plane ACROSS your facing (left-
+       * right and up) — a fan standing over your head, which reads as a blade thrown at the sky.
+       * A chop travels in the plane that holds your facing and the vertical: it starts high and a
+       * little behind the head and ends in front of you at the ground. So the sector is built in
+       * that plane (+X forward, +Y up, turned onto +Z so the yaw below points it where you face),
+       * from UPRIGHT_FROM (just past vertical, behind) down to where a blade of this reach meets
+       * the grass, and it is REVEALED from the top down over its life (see `update`), so the edge
+       * visibly falls rather than the shape appearing.
+       */
+      const shoulder = 1.3;
+      const to = -Math.asin(Math.min(0.9, (shoulder - 0.05) / Math.max(0.5, reach)));
+      const segs = 30;
+      geom = new THREE.RingGeometry(Math.max(0.3, reach * 0.35), reach, segs, 1, to, UPRIGHT_FROM - to);
+      geom.rotateY(-Math.PI / 2);
+      // …rolled a little onto the right shoulder. Seen from behind — which is where the camera
+      // always is — a chop in the exact vertical plane is edge-on, a sliver pointing at the sky.
+      // Tilted, it reads as a blade falling from over the right shoulder to the ground in front.
+      geom.rotateZ(UPRIGHT_ROLL);
+      s.segs = segs;
+      s.mesh.rotation.set(0, yaw, 0);
+      s.mesh.position.set(x, y + shoulder, z);
+    } else {
+      geom = new THREE.RingGeometry(inner, reach, plane === 'lance' ? 6 : 30, 1, -span / 2, span);
+    }
     if (plane === 'flat') {
       // the sector opens along +X after the -90 rotate; R_y(yaw - pi/2) maps +X to `forward`
       geom.rotateX(-Math.PI / 2);
       s.mesh.rotation.set(0, yaw - Math.PI / 2, 0);
       s.mesh.position.set(x, y + 1.0, z);
     } else if (plane === 'upright') {
-      // a chop: the ring stays in its own XY plane and is turned so +X points the way you face,
-      // which puts the sweep in the vertical plane the weapon really comes down in
-      geom.rotateZ(Math.PI / 2 - span * 0.1);
-      s.mesh.rotation.set(0, yaw, 0);
-      s.mesh.position.set(x, y + 1.15, z);
+      // placed above, with its own geometry — the flat path's rotateX would lay it on the grass
     } else {
       geom.rotateX(-Math.PI / 2);
       s.mesh.rotation.set(0, yaw - Math.PI / 2, 0);
@@ -145,7 +194,9 @@ export function createCombatFx(scene, { onArrowLand = null, groundAt = null } = 
     s.mesh.geometry = geom;
     s.mesh.material.color.setHex(hex);
     s.mesh.visible = true;
-    s.mesh.scale.set(0.35, 1, 1);
+    // a chop is revealed from the top down (drawRange), everything else widens (scale x)
+    if (plane === 'upright') { s.mesh.scale.set(1, 1, 1); revealUpright(s, 0.2); }
+    else s.mesh.scale.set(0.35, 1, 1);
     s.life = life; s.span = life; s.plane = plane;
     s.weight = Math.min(1, (strike?.shake ?? 0.2) / 0.55);
 
@@ -382,7 +433,8 @@ export function createCombatFx(scene, { onArrowLand = null, groundAt = null } = 
        * "hammers should smash" in one line of easing.
        */
       const open = Math.min(1, u / (0.3 + (s.weight || 0) * 0.3));
-      s.mesh.scale.set(0.35 + 0.65 * open, 1, 1);
+      if (s.plane === 'upright') revealUpright(s, 0.2 + 0.8 * open);
+      else s.mesh.scale.set(0.35 + 0.65 * open, 1, 1);
       s.mesh.material.opacity = (u < 0.25 ? u / 0.25 : k / 0.75) * (0.35 + (s.weight || 0) * 0.4);
       if (s.life <= 0) { s.mesh.visible = false; s.mesh.scale.set(1, 1, 1); }
     }

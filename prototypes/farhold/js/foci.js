@@ -29,6 +29,10 @@ export const FOCUS_BASES = {
     isFocus: true, look: 'orb', intrinsic: [{ stat: 'cond_focusOrb', value: 1, name: 'Mote' }] },
   reliquary: { name: 'Reliquary', type: 'armor', slot: 'offhand', tier: 'cloth', armor: 3, dodgeBonus: 0,
     isFocus: true, look: 'relic', intrinsic: [{ stat: 'cond_focusRelic', value: 1, name: 'Answering Light' }, { stat: 'barrier', value: 10, name: 'Barrier' }] },
+  // 2026-09-25: the paladin's starting book — a holy warrior's focus that simply makes spells
+  // stronger, and keeps a little mana in hand. The plain one to hold beside a sword.
+  psalter: { name: 'Psalter', type: 'armor', slot: 'offhand', tier: 'cloth', armor: 2, dodgeBonus: 0,
+    isFocus: true, look: 'book', intrinsic: [{ stat: 'spellPower', value: 0.12, name: 'Hymns' }, { stat: 'mp', value: 8, name: 'Mana' }] },
   effigy: { name: 'Effigy', type: 'armor', slot: 'offhand', tier: 'cloth', armor: 1, dodgeBonus: 1,
     isFocus: true, look: 'idol', intrinsic: [{ stat: 'cond_focusIdol', value: 1, name: 'Binding' }] },
 };
@@ -73,7 +77,7 @@ export const FOCUS_SETS = [
 ];
 
 /** The level a focus starts dropping at, per base (added to the matching `lootTiers` rows). */
-export const FOCUS_FROM_LEVEL = { grimoire: 3, seer_orb: 5, reliquary: 5, effigy: 8 };
+export const FOCUS_FROM_LEVEL = { grimoire: 3, psalter: 3, seer_orb: 5, reliquary: 5, effigy: 8 };
 
 /**
  * Put the four bases, the eight uniques and the set into the shared tables. Call BEFORE `new Rpg`:

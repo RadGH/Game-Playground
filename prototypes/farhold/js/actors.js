@@ -176,8 +176,10 @@ export function activeEnemyField() { return liveField; }
  * deps: { scene, terrain, rpg, defs, bosses, modifiers, zones, balance, spellfx, onLog, onKill, nameRare }
  */
 export class EnemyField {
-  constructor({ scene, terrain, rpg, defs, bosses = [], modifiers = [], zones = null, balance = {}, spellfx = null, onLog = () => {}, onKill = () => {}, nameRare = null }) {
+  constructor({ scene, terrain, rpg, defs, bosses = [], modifiers = [], zones = null, balance = {}, spellfx = null, onLog = () => {}, onKill = () => {}, nameRare = null, warbands = null }) {
     this.scene = scene; this.terrain = terrain; this.rpg = rpg; this.defs = defs;
+    /** R26 — who holds each zone (js/warbands.js `createWarbandMap`), or null for no warbands at all. */
+    this.warbands = warbands;
     this.bosses = bosses; this.modifiers = modifiers; this.zones = zones;
     this.cfg = balance.spawn || {};
     this.baseAlive = this.cfg.maxAlive ?? 14;   // what `setBudget(null)` goes back to
@@ -247,12 +249,23 @@ export class EnemyField {
     return this.zones.levelFor(x, z, this.rng);
   }
 
+  /**
+   * R26 — the warband that holds the ground here (js/warbands.js), or null. A warband's members
+   * only ever spawn inside a zone it holds; see `defsFor` and `spawnNear`.
+   */
+  warbandAt(x, z) {
+    if (!this.warbands || !this.zones) return null;
+    return this.warbands.of(this.zones.at(x, z)) || null;
+  }
+
   /** The table entries that belong in the biome the player is standing in, at this level. */
   defsFor(x, z, level) {
     const families = familiesOf(this.terrain.biomeIdAt(x, z));
     const band = this.cfg.levelSpread ?? 2;
+    const held = this.warbandAt(x, z)?.id || null;
     return this.defs.filter(d => {
       if (d.rareOnly) return false;
+      if (d.warband && d.warband !== held) return false;
       const biomeOk = (d.biomes || ['any']).includes('any') || d.biomes.some(f => families.includes(f));
       const levelOk = (d.minLevel ?? 1) <= level + band && (d.maxLevel ?? 99) >= level - band;
       return biomeOk && levelOk;
@@ -262,7 +275,9 @@ export class EnemyField {
   /** Every enemy the rare table may pull from here — `rareOnly` entries are back in. */
   rareDefsFor(x, z, level) {
     const families = familiesOf(this.terrain.biomeIdAt(x, z));
+    const held = this.warbandAt(x, z)?.id || null;
     return this.defs.filter(d => {
+      if (d.warband && d.warband !== held) return false;
       const biomeOk = (d.biomes || ['any']).includes('any') || d.biomes.some(f => families.includes(f));
       return biomeOk && (d.minLevel ?? 1) <= level + 3 && (d.maxLevel ?? 99) >= level - 4;
     });
@@ -307,8 +322,16 @@ export class EnemyField {
     if (!this.wild(cx, cz)) return null;            // not inside a town's watch
 
     const level = this.levelAt(cx, cz, playerLevel);
-    const pool = this.defsFor(cx, cz, level);
+    let pool = this.defsFor(cx, cz, level);
     if (!pool.length) return null;
+    /**
+     * R26 — IN A HELD ZONE, THE WARBAND IS MOST OF WHAT YOU MEET. Its five members against the
+     * zone's thirty-odd beasts would otherwise be one spawn in seven, and "the Ashtusk Horde hold
+     * this valley" would be a claim the valley never backs up. The rng is only drawn when there is
+     * a warband here, so every unheld zone rolls exactly the sequence it always did.
+     */
+    const own = pool.filter(d => d.warband);
+    if (own.length && own.length < pool.length && this.rng() < (this.warbands?.spawnShare ?? 0.65)) pool = own;
     const def = this.rng.pick(pool);
 
     const rank = this.rpg.rollRank(this.rng, { bonus: this.rankBonus });

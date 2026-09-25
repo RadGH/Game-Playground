@@ -7,9 +7,12 @@ import { SpellFx } from './spellfx.js';
 import { BatchedSpellFx } from './spellfx-batched.js';
 import { Assets } from '../../assets/js/assets.js';
 import { installTooltips } from '../../shared/tooltip.js';
+import { loadClassOutfits, dressAs } from './class-outfits.js';
 
 const $ = id => document.getElementById(id);
 const data = await (await fetch('./data/chibi2-presets.json')).json();
+// 2026-09-25 class outfits (data/class-outfits.json): any preset can be dressed as any class
+const outfits = await loadClassOutfits();
 const params = new URLSearchParams(location.search);
 const state = { engine: params.get('engine') === 'original' ? 'original' : 'chibi2', view: params.get('view') || 'combat', preset: 0, fxMode: 'batched', spells: true, rate: 4, paused: false, turntable: false, shadows: 'contact', resolution: 1 };
 if (!['combat', 'portrait', 'pair'].includes(state.view)) state.view = 'combat';
@@ -247,7 +250,10 @@ for (const [i, p] of data.presets.entries()) $('preset').add(new Option(p.name, 
 for (const name of CHIBI2_ANIMS) $('animation').add(new Option(name[0].toUpperCase() + name.slice(1), name));
 for (const button of document.querySelectorAll('[data-view]')) button.addEventListener('click', () => { state.view = button.dataset.view; rebuild().catch(onError); });
 for (const button of document.querySelectorAll('[data-engine]')) button.addEventListener('click', () => { state.engine = button.dataset.engine; rebuild().catch(onError); });
-$('preset').addEventListener('change', () => { state.preset = +$('preset').value; avatar = normalizeAvatar(data.presets[state.preset].avatar); rebuild().catch(onError); });
+const presetLook = () => { const o = outfits[$('outfit').value]; const a = data.presets[state.preset].avatar; return normalizeAvatar(o ? dressAs(a, o) : a); };
+for (const id of Object.keys(outfits).sort()) $('outfit').add(new Option(id.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()), id));
+$('preset').addEventListener('change', () => { state.preset = +$('preset').value; avatar = presetLook(); rebuild().catch(onError); });
+$('outfit').addEventListener('change', () => { avatar = presetLook(); rebuild().catch(onError); });
 for (const [id, field] of [['cloth', 'top'], ['hair', 'hair'], ['skin', 'body']]) $(id).addEventListener('change', () => { avatar[field][id === 'skin' ? 'skin' : 'color'] = $(id).value; rebuild().catch(onError); });
 $('animation').addEventListener('change', () => { for (const a of actors) a.ctrl.setAnim($('animation').value); });
 $('fx-mode').addEventListener('change', () => { state.fxMode = $('fx-mode').value; rebuild().catch(onError); });

@@ -247,6 +247,41 @@ gear on followers **medium** and it touches the item pipeline.
 - **Notifications with a history you can act on**, rather than a log you scroll. Round 17 makes the
   log a tab; the next step is that every line knows what it is about and can take you there.
 
+## 7b. Raidable warband bases (wishlist, 2026-09-25 — asked for, NOT built)
+
+Round 26 put five enemy **warbands** in the world (`js/warbands.js`, `data/warbands.json`): the
+Sootwick Gang (goblin), the Ashtusk Horde (orc), the Thornmane Packs (beastkin), the Unburied Legion
+(undead) and the Stonehide Clans (giant). Each holds whole zones and fields melee, rogue, ranged,
+caster and leader bodies. The user wants a next step: **a base per warband you can raid**. What it
+would need, building on what exists:
+
+- **Placement.** One base per held zone (or per two), put on a real World Forge node the way
+  `js/sites.js` places strongholds — a `dungeon`/`landmark` cell away from roads and towns, never in
+  the starting zone. The claim is already seeded per zone (`claimFor`), so the base can be too, and
+  nothing new needs saving until it is taken.
+- **The camp itself.** A race-themed layout from the building kit (`proctown/js/buildkit.js`): goblin
+  scrap huts and a junk wall, orc palisade and bone totems, beastkin hide tents in a thorn ring, an
+  undead barrow-fort, a giant's stone ring of standing slabs. `data/strongholds.json` + `sites.js`
+  already build a stronghold with guards, a boss and a paid "taken" state — the base is that, dressed
+  per warband, with its garrison drawn from the warband's own five members.
+- **The raid.** Guards on posts and patrols (`js/patrols.js`), a leader-rank boss (a rare
+  Warchief / Packlord / Deathmarshal / Mountainlord with a Name Forge name in `nameRace`), an alarm
+  that pulls the patrols in, and a sealed war-chest that opens only when the garrison is down (the
+  rule round 25 gave event chests).
+- **Consequences.** Taking a base should LOOSEN the warband's hold: `spawnShare` for that zone drops
+  (fewer of them on the road), the zone's claim can flip to nobody after every base in it falls, and a
+  warband can retake it after N days with a counter-raid on your Holding (`js/raid.js` /
+  `js/defence.js` already run raids — a warband-themed wave is a data change). Territory standings
+  could pay for it: the factions whose ground a warband sits on (`data/factions.json` rivals) are
+  grateful.
+- **Loot.** Warband-flavoured rewards: a race-specific unique or set per warband (`js/uniques.js`
+  injects at load, like the 184), trophies for the Holding, and a "war banner" you can plant.
+- **Tests.** A base spawns in a held zone and never in an unheld one; its garrison is that warband's
+  members; the chest stays sealed until the last guard falls; taking it lowers the zone's warband
+  share; a save round-trips the taken state.
+- **Size.** Medium. Placement, garrison and the sealed chest reuse sites/strongholds almost whole; the
+  five layouts and the "hold loosens / counter-raid" loop are the new work.
+
 ---
 
 ## 8. If I had to pick an order

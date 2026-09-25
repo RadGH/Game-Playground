@@ -268,11 +268,18 @@ export function laneRibbon(lane, { lift = 0.06, color = null, groundAt = null } 
   const heights = lane?.surface || [];
   // both edges of every cross-section first, so a vertex can look at its neighbour on its own side
   const sides = [];
+  // R26: a point repeated in the polyline has no direction of its own; it keeps the last one
+  // rather than pinching the ribbon to zero width (see `roadDeck` in js/water-plan.js)
+  let lastDx = 1, lastDz = 0;
+  for (let i = 0; i + 1 < points.length; i++) {
+    const ex = points[i + 1][0] - points[i][0], ez = points[i + 1][1] - points[i][1], el = Math.hypot(ex, ez);
+    if (el > 1e-6) { lastDx = ex / el; lastDz = ez / el; break; }
+  }
   for (let i = 0; i < points.length; i++) {
     const prev = points[Math.max(0, i - 1)], next = points[Math.min(points.length - 1, i + 1)];
     let dx = next[0] - prev[0], dz = next[1] - prev[1];
-    const len = Math.hypot(dx, dz) || 1;
-    dx /= len; dz /= len;
+    const len = Math.hypot(dx, dz);
+    if (len > 1e-6) { dx /= len; dz /= len; lastDx = dx; lastDz = dz; } else { dx = lastDx; dz = lastDz; }
     const half = (typeof lane.half === 'function' ? lane.half(i) : lane.half) || 1;
     sides.push([[points[i][0] - dz * half, points[i][1] + dx * half],
       [points[i][0] + dz * half, points[i][1] - dx * half]]);

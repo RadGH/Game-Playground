@@ -118,3 +118,25 @@
   }
   .station-makes { display: none; }
 }
+
+/* ---------------------------------------------------------------- R26 — what it is waiting for
+ *
+ * One line per condition, ticked or crossed, so a furnace that will not run says ALL of why at
+ * once rather than one word at a time. The store line is a bullet: it is information, not a fault. */
+.station-needs {
+  list-style: none;
+  margin: 4px 0 8px;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  background: #0d0f12;
+  border: 1px solid #262c36;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.35;
+}
+.station-need.ok { color: #9fd49a; }
+.station-need.bad { color: #f0a27a; }
+.station-need.need-store { color: #a9b4c2; }
+.station .build-job button { margin-left: 4px; min-width: 24px; }

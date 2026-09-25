@@ -32,6 +32,28 @@ import * as THREE from 'three';
 import { FullScreenQuad } from 'three/addons/postprocessing/Pass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
+/**
+ * R26 — A NaN MUST NOT REACH THE BLOOM.
+ *
+ * "A large black square fills my interface" (seed 19629, Thinareik, x 13318 z 2171). One pixel of
+ * the HDR frame came out NaN — a road's side wall had a zero-length vertex normal and the lighting
+ * divided by it (fixed in js/water-plan.js `roadDeck`). One NaN pixel is invisible; the bloom
+ * blurs it across every level of its mip chain, and a NaN mixed into anything is NaN, so it grew
+ * into a black square the size of the screen, and it followed the camera. Graphics "Off" (no
+ * post-processing) showed the town perfectly.
+ *
+ * So every pass that READS the frame asks this first. NaN fails every comparison, which is the
+ * whole trick — `c >= -BIG && c <= BIG` is false for NaN and for either infinity — and a half-float
+ * target overflows to infinity past 65504, which would otherwise go the same way through ACES
+ * (inf / inf). Anything that was never a real colour comes out black at that pixel and nowhere
+ * else. Exported so the test can find it in all three passes.
+ */
+export const SAFE_GLSL = /* glsl */`
+  vec3 fhSafe( vec3 c ) {
+    bool ok = c.r >= -6.0e4 && c.r <= 6.0e4 && c.g >= -6.0e4 && c.g <= 6.0e4 && c.b >= -6.0e4 && c.b <= 6.0e4;
+    return ok ? max( c, vec3( 0.0 ) ) : vec3( 0.0 );
+  }`;
+
 const QUAD_VERT = /* glsl */`
   varying vec2 vUv;
   void main() { vUv = uv; gl_Position = vec4( position.xy, 0.0, 1.0 ); }`;
@@ -55,8 +77,9 @@ function shaftMaterial(samples) {
       uniform float uDensity, uDecay, uExposure, uThreshold, uAmount, uAspect, uFalloff;
       uniform vec3 uTint;
       varying vec2 vUv;
+      ${SAFE_GLSL}
       vec3 bright( vec2 uv ) {
-        vec3 c = texture2D( tDiffuse, uv ).rgb;
+        vec3 c = fhSafe( texture2D( tDiffuse, uv ).rgb );
         float l = dot( c, vec3( 0.2126, 0.7152, 0.0722 ) );
         return min( c, vec3( 24.0 ) ) * smoothstep( uThreshold, uThreshold + 1.2, l );
       }
@@ -104,6 +127,7 @@ function finalMaterial() {
       uniform vec3 uShadowTint, uHighTint;
       uniform vec2 uResolution;
       varying vec2 vUv;
+      ${SAFE_GLSL}
       // ACES filmic, the fitted curve (Narkowicz / Hill) three uses for ACESFilmicToneMapping
       vec3 RRTAndODTFit( vec3 v ) {
         vec3 a = v * ( v + 0.0245786 ) - 0.000090537;
@@ -128,7 +152,7 @@ function finalMaterial() {
         return fract( ( p3.x + p3.y ) * p3.z );
       }
       void main() {
-        vec3 hdr = texture2D( tDiffuse, vUv ).rgb + texture2D( tShafts, vUv ).rgb * uShafts;
+        vec3 hdr = fhSafe( texture2D( tDiffuse, vUv ).rgb ) + fhSafe( texture2D( tShafts, vUv ).rgb ) * uShafts;
         vec3 col = toSRGB( aces( hdr ) );
         col = col * ( 1.0 - uLift ) + uLift;
         col = ( col - 0.5 ) * uContrast + 0.5;
@@ -144,6 +168,27 @@ function finalMaterial() {
       }`,
     depthTest: false, depthWrite: false,
   });
+}
+
+/**
+ * The bloom's first read of the frame is its high-pass filter; teach it `fhSafe` (see SAFE_GLSL).
+ * The material belongs to our own pass instance, so this changes nothing in the vendored file.
+ * Returns true when the shader was patched — if a three.js update ever renames the line, the game
+ * still runs and the console says the guard is off.
+ */
+export function safeHighPass(bloom) {
+  const m = bloom?.materialHighPassFilter;
+  if (!m) return false;
+  const read = 'vec4 texel = texture2D( tDiffuse, vUv );';
+  if (!m.fragmentShader.includes(read) || !m.fragmentShader.includes('void main()')) {
+    console.warn('farhold: the bloom high-pass shader changed; the NaN guard is not installed');
+    return false;
+  }
+  m.fragmentShader = m.fragmentShader
+    .replace('void main()', SAFE_GLSL + '\nvoid main()')
+    .replace(read, read + ' texel.rgb = fhSafe( texel.rgb );');
+  m.needsUpdate = true;
+  return true;
 }
 
 export function createPostFx(renderer, gfx) {
@@ -175,6 +220,7 @@ export function createPostFx(renderer, gfx) {
       // strength, radius, threshold — the threshold is on the HDR frame: sunlit grass is ~1, the
       // sun's core is 18, so 1.35 lets the lights and the sun through and leaves the fields alone
       bloom = new UnrealBloomPass(new THREE.Vector2(Math.max(1, w * k), Math.max(1, h * k)), 0.55, 0.42, 1.35);
+      safeHighPass(bloom);
     }
     S.uAspect.value = w / h;
     F.uResolution.value.set(w, h);

@@ -22,9 +22,11 @@
 
 import { mat } from '../../../shared/format.js';
 import { el } from '../../../shared/ui.js';
-import { createStationScreen, drawStationBody } from './station-ui.js';
+import { createStationScreen, drawStationBody, steadyRedraw } from './station-ui.js';
 import { createResearchScreen } from './research-ui.js';
 import { sharedResearch } from './research.js';
+// R26 — the build ring. B opens it; this panel is what its Tab / "Full list" opens.
+import { createBuildRadial } from './build-radial.js';
 
 /**
  * The tools, in the order a base is actually built.
@@ -126,9 +128,11 @@ const FIRST_STEPS = [
    * came off a Sawmill, which cost eight iron ingots, which came out of the Furnace. The Crafting
    * Table is the rung that was missing: logs and stone, its own shelf, and it splits planks.
    */
-  'Pick Place and put down a Crafting Table — six logs and two stone. Walk up to it, press E, and split some logs into planks.',
-  'Build a Storage Box out of six of those planks, then a Furnace beside it. Anything within reach of a store shares its pile.',
-  'Press E at the Furnace, queue Smelt Iron, and hold E to work it. That is your first ingot — and a Storage Chest after it.',
+  /* R26 — the Storage Box is six LOGS now, so the Crafting Table is no longer a step on the way to
+     the first ingot. It is still the bench for planks and tools; it just is not in the way. */
+  'Build a Storage Box — six logs, nothing else. Anything within reach of it shares its pile.',
+  'Dig clay at the water\'s edge and build a Furnace beside the box — sixteen stone and six clay.',
+  'Press E at the Furnace and queue Smelt Iron. It takes ore and a log to burn from your pack or the box, and runs while you stand beside it — hold E to go faster.',
   'Pick Scan to find the seams around you, then put a Small Drill on one — it finds its own way to your store.',
   'Far from home? Put a box out there too and link it back. The load takes a while; a road makes it much quicker.',
 ];
@@ -288,13 +292,32 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
      * up behind it and dropping out of build mode to close a sub-screen would be the game taking a
      * mode away you did not ask it to.
      */
-    onClose: () => { if (!open) onClose?.(); },
+    // R26 — …and not while build mode is up behind it with the ring or the placement card, which
+    // is the same case as the panel being up: the mode is the player's, not the station's
+    onClose: () => { if (!open && !build?.mode) onClose?.(); },
+  });
+  /**
+   * R26 — THE RING. "The build menu needs redesigned, maybe into a radial menu." B opens it (see
+   * `openRadial`), picking a piece puts the ghost up exactly as the panel's rows do, and Tab or its
+   * "Full list" button brings this panel up instead — which carries a "Ring" button back.
+   */
+  const radial = createBuildRadial({
+    catalogue, build, store, tools: TOOLS, onLog,
+    lockOf: p => build?.plan?.lockOf?.(p) || null,
+    panelOpen: () => open,
+    onPanel: () => { api.setOpen(true); },
   });
   const research = sharedResearch({ catalogue });
   const researchScreen = createResearchScreen({ research, log: onLog, standalone: true });
 
   head.append(
     el('h2', { text: 'Build' }),
+    // R26 — back to the ring, keeping build mode up
+    el('button', {
+      class: 'build-ring-btn', text: 'Ring',
+      title: 'The build ring (right-click while placing does the same)',
+      onclick: () => { api.setOpen(false, { keepMode: true }); radial.open(); },
+    }),
     /**
      * R17 — the door to the Research screen, put where the question is asked. A player reading
      * "Locked — research Ironworking" on a catalogue row should not have to close build mode, open
@@ -863,22 +886,37 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
     root,
     get isOpen() { return open; },
     get pick() { return pick; },
-    setOpen(on) {
+    /**
+     * R26 — closing the panel used to mean leaving build mode, so it also puts the ring and the
+     * placement card away. `keepMode` is the one exception: the panel's own "Ring" button.
+     */
+    setOpen(on, { keepMode = false } = {}) {
       open = !!on;
       root.classList.toggle('hidden', !open);
-      if (open) redraw();
+      if (open) { radial.close(); redraw(); }
+      else if (!keepMode) radial.hide();
       return open;
     },
+    /** R26 — what B opens now: build mode with the ring up and the long panel down. */
+    openRadial() { open = false; root.classList.add('hidden'); return radial.open(); },
+    closeRadial() { return radial.close(); },
+    get radial() { return radial; },
     /** Called from the frame loop while the mode is up: only the live bits change. */
     tick() {
+      radial.tick();
       if (!open) return;
-      drawDetail();
-      drawScan();
-      drawMines();
-      drawBench();
-      drawWork();
-      drawHolding();
-      drawYard();
+      /**
+       * R26 — every frame, these used to throw away and rebuild every button in them, so a real
+       * mouse click (press on one node, release on its replacement) never landed on the bench's
+       * recipes, the work board or the shipyard. `steadyRedraw` keeps the nodes that did not change.
+       */
+      steadyRedraw(detail, drawDetail);
+      steadyRedraw(scanBox, drawScan);
+      steadyRedraw(minesBox, drawMines);
+      steadyRedraw(benchBox, drawBench);
+      steadyRedraw(workBox, drawWork);
+      steadyRedraw(holdBox, drawHolding);
+      steadyRedraw(yardBox, drawYard);
       // R17 — the station screen has a live queue and a live work bar on it, and it is up while
       // the panel is, so it ticks with everything else rather than owning a clock of its own.
       station.tick();
@@ -916,7 +954,7 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
     get categories() { return catKeys; },
     /** R17 — which categories the tool that is up will actually draw. The panel-tidy rule, askable. */
     get toolCategories() { return toolCats(); },
-    dispose() { root.remove(); station.dispose(); researchScreen.dispose(); },
+    dispose() { root.remove(); station.dispose(); researchScreen.dispose(); radial.dispose(); },
   };
   return api;
 }

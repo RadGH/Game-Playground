@@ -5,14 +5,14 @@ import { createClips, CHIBI2_ANIMS, CHIBI2_ALL_ANIMS, CHIBI2_SWIM_ANIMS, ONE_SHO
 import { buildGear, CAPELETS } from './chibi2-gear.js';
 import { buildBody } from './chibi2-body.js';
 import { buildFace, HEAD_SHAPES } from './chibi2-face.js';
-import { buildExtraHat, HATS_COVER_CROWN } from './chibi2-hats.js';
+import { buildExtraHat, HATS_COVER_CROWN, CLASS_HATS, HELM_BRIM } from './chibi2-hats.js';
 import { raceOf } from './chibi2-races.js';
 import { holdFor } from './chibi2-weapon-ids.js';
 
 export { CHIBI2_ANIMS, CHIBI2_SWIM_ANIMS, CHIBI2_ALL_ANIMS };
 const templates = new Map();
 /** Hats with a brim the hair shows beneath, and the height (head units) the hair is cut off at. */
-const HAT_BRIM = { wizard: 0.5, wide_brim: 0.41, straw: 0.43, top_hat: 0.51, feather_cap: 0.43, bard_red_feather: 0.43, cap: 0.44, bandana: 0.44, leather_cap: 0.4 };
+const HAT_BRIM = { wizard: 0.5, wide_brim: 0.41, straw: 0.43, top_hat: 0.51, feather_cap: 0.43, bard_red_feather: 0.43, cap: 0.44, bandana: 0.44, leather_cap: 0.4, ...HELM_BRIM };
 const sphere = () => new THREE.SphereGeometry(1, 10, 6);
 const ring = (r, tube) => new THREE.TorusGeometry(r, tube, 4, 12);
 
@@ -104,8 +104,12 @@ function buildTemplate(a, rig) {
     if (hairId === 'bob' && !headwearCoversCrown) {
       // Bob: a rounded shell over the back and sides, open over the face and cut level at the jaw.
       const open = 1.05, bob = new THREE.SphereGeometry(1, 14, 7, Math.PI / 2 + open, Math.PI * 2 - open * 2, 0.62, 1.72);
+      // The lining is copied BEFORE the shell is placed: `add` moves a geometry in place, so a copy
+      // taken afterwards was placed twice — shrunk to a small cap floating above the head, with the
+      // sides left hollow ("the hair piece on top is not connected, the hair on the sides floats").
+      const lining = backface(bob.clone());
       head(bob, hair, { position: [0, 0.30, -0.03], scale: [0.385, 0.40, 0.335] });
-      head(backface(bob.clone()), shade(hair, -0.2), { position: [0, 0.30, -0.03], scale: [0.375, 0.39, 0.325] });
+      head(lining, shade(hair, -0.2), { position: [0, 0.30, -0.03], scale: [0.375, 0.39, 0.325] });
     }
     if (hairId === 'braids' && !hoodUp) for (const s of [-1, 1]) {
       // Braids: two plaits of stacked links falling in front of the shoulders, tied off at the ends.
@@ -118,6 +122,8 @@ function buildTemplate(a, rig) {
   }
   if (a.hat.id === 'dragon_helm') {
     buildDragonHelm(a, head);
+  } else if (CLASS_HATS.includes(a.hat.id)) {
+    buildExtraHat(a, { add, head, H, W, T, trim, leather, steel, darkSteel });
   } else if (/helmet|helm/.test(a.hat.id)) {
     head(profile([[0.41, 0.353, 0.30], [0.48, 0.335, 0.286], [0.60, 0.20, 0.18], [0.66, 0.02, 0.02]], 16), a.hat.color, { metal: true });
     head(profile([[0.405, 0.357, 0.302], [0.435, 0.357, 0.302]], 16), trim, { metal: true });

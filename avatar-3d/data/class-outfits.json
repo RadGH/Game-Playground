@@ -1,0 +1,206 @@
+{
+  "_doc": "Class outfits for Chibi 2 (2026-09-25). An OUTFIT is only the clothes, the headwear and the carried items — no face, no body — so any game can dress any body as any class: `dressAs(avatar, outfit)` in avatar-3d/js/class-outfits.js lays these slots over an avatar and leaves the rest alone. Keys are the Emberveil/Farhold class ids. `held`/`offhand` are what the class LOOKS like it carries in a portrait; a game that equips real items (Farhold) draws its own hands. Every id here exists in avatar-2d/js/parts (chibi2-parts.js registers the Chibi 2-only ones), so the shared normaliser keeps them. Classes a player asked to be distinct: the horned helm is the FIGHTER's alone; warrior, knight, paladin, runesmith, druid, shaman and tactician each have their own headwear.",
+  "slots": ["hat", "top", "bottom", "shoes", "cape", "decor", "held", "offhand"],
+  "classes": {
+    "warrior": {
+      "hat": { "id": "war_helm", "color": "#8a9098" },
+      "top": { "id": "chainmail", "color": "#7a8088", "color2": "#8a2a1a" },
+      "bottom": { "id": "pants", "color": "#4a3a2a" },
+      "shoes": { "id": "boots", "color": "#3b2a1a" },
+      "cape": { "id": "none" },
+      "decor": { "id": "pauldrons", "color": "#6a6a72" },
+      "held": { "id": "fh_longsword", "color": "#b9c2cc" },
+      "offhand": { "id": "fh_heater_shield", "color": "#8a3a2a" }
+    },
+    "fighter": {
+      "hat": { "id": "horned_helm", "color": "#8a8f98" },
+      "top": { "id": "plate", "color": "#c0c4cc", "color2": "#8a2a2a" },
+      "bottom": { "id": "greaves", "color": "#9aa0a8" },
+      "shoes": { "id": "heavy", "color": "#8a8e96" },
+      "cape": { "id": "cape", "color": "#8a2a2a" },
+      "decor": { "id": "pauldrons", "color": "#9aa0aa" },
+      "held": { "id": "fh_greatsword", "color": "#b9c2cc" },
+      "offhand": { "id": "none" }
+    },
+    "paladin": {
+      "hat": { "id": "great_helm", "color": "#d8dce4", "color2": "#d8b040" },
+      "top": { "id": "plate", "color": "#e0e2e8", "color2": "#d8b040" },
+      "bottom": { "id": "greaves", "color": "#c8ccd4" },
+      "shoes": { "id": "heavy", "color": "#b8bcc4" },
+      "cape": { "id": "cape", "color": "#f0ece0" },
+      "decor": { "id": "tabard", "color": "#f4f0e4" },
+      "held": { "id": "fh_sword", "color": "#e8e0c0" },
+      "offhand": { "id": "book", "color": "#e8e0c8" }
+    },
+    "ranger": {
+      "hat": { "id": "none" },
+      "top": { "id": "leather", "color": "#4a5a2a", "color2": "#6a4a2a" },
+      "bottom": { "id": "pants", "color": "#3a4a2a" },
+      "shoes": { "id": "boots", "color": "#4a3a2a" },
+      "cape": { "id": "travel_cloak", "color": "#3a5a2a" },
+      "decor": { "id": "herb_satchel", "color": "#6a4a2a" },
+      "held": { "id": "bow", "color": "#8a6a3a" },
+      "offhand": { "id": "none" }
+    },
+    "rogue": {
+      "hat": { "id": "hood", "color": "#2a2a2e" },
+      "top": { "id": "strapped_leather", "color": "#2a2a2e", "color2": "#4a3a2a" },
+      "bottom": { "id": "pants", "color": "#1e1e22" },
+      "shoes": { "id": "boots", "color": "#1a1a1a" },
+      "cape": { "id": "none" },
+      "decor": { "id": "knife_rig", "color": "#4a3a2a" },
+      "held": { "id": "fh_daggers", "color": "#b9c2cc" },
+      "offhand": { "id": "fh_dagger", "color": "#b9c2cc" }
+    },
+    "cleric": {
+      "hat": { "id": "hood", "color": "#f0ece2", "color2": "#b02a2a" },
+      "top": { "id": "trim_robe", "color": "#f4f2ec", "color2": "#b02a2a" },
+      "bottom": { "id": "pants", "color": "#e8e4dc" },
+      "shoes": { "id": "boots", "color": "#6a4a2a" },
+      "cape": { "id": "shoulder_cape", "color": "#b02a2a" },
+      "decor": { "id": "prayer_ribbons", "color": "#b02a2a" },
+      "held": { "id": "fh_mace", "color": "#d8c890" },
+      "offhand": { "id": "none" }
+    },
+    "mage": {
+      "hat": { "id": "hood", "color": "#2a3a8a", "color2": "#d8b040" },
+      "top": { "id": "trim_robe", "color": "#2a3a8a", "color2": "#d8b040" },
+      "bottom": { "id": "pants", "color": "#1a2a5a" },
+      "shoes": { "id": "slippers", "color": "#2a2a4a" },
+      "cape": { "id": "none" },
+      "decor": { "id": "scroll_case", "color": "#8a6a3a" },
+      "held": { "id": "staff_orb", "color": "#8a6a3a" },
+      "offhand": { "id": "none" }
+    },
+    "necromancer": {
+      "hat": { "id": "hood", "color": "#1a1a1e", "color2": "#5a3a6a" },
+      "top": { "id": "trim_robe", "color": "#1a1a1e", "color2": "#4a2a5a" },
+      "bottom": { "id": "pants", "color": "#121214" },
+      "shoes": { "id": "boots", "color": "#121214" },
+      "cape": { "id": "none" },
+      "decor": { "id": "bone_charms", "color": "#e8e0c8" },
+      "held": { "id": "staff_skull", "color": "#3a2a2a" },
+      "offhand": { "id": "none" }
+    },
+    "warlock": {
+      "hat": { "id": "hood", "color": "#2a1a3a", "color2": "#8a3ac0" },
+      "top": { "id": "robe", "color": "#2a1a3a", "color2": "#8a3ac0" },
+      "bottom": { "id": "pants", "color": "#1a1024" },
+      "shoes": { "id": "boots", "color": "#1a1024" },
+      "cape": { "id": "cape", "color": "#1a1024" },
+      "decor": { "id": "rune_bracers", "color": "#8a3ac0" }
+    },
+    "dragon_knight": {
+      "hat": { "id": "dragon_helm", "color": "#2a5a2a" },
+      "top": { "id": "scale_plate", "color": "#2a5a2a", "color2": "#c8362a" },
+      "bottom": { "id": "greaves", "color": "#3a4a3a" },
+      "shoes": { "id": "heavy", "color": "#2a3a2a" },
+      "decor": { "id": "tabard", "color": "#8a1a1a" }
+    },
+    "pyromancer": {
+      "hat": { "id": "hood", "color": "#b0301a", "color2": "#f09030" },
+      "top": { "id": "trim_robe", "color": "#b0301a", "color2": "#f08a2a" },
+      "bottom": { "id": "pants", "color": "#5a1a0a" },
+      "shoes": { "id": "slippers", "color": "#3a1a0a" },
+      "cape": { "id": "none" },
+      "decor": { "id": "ember_censer", "color": "#d8b040" }
+    },
+    "stormcaller": {
+      "hat": { "id": "hood", "color": "#1f4aa8", "color2": "#9fd8ff" },
+      "top": { "id": "trim_robe", "color": "#1f4aa8", "color2": "#d8e8ff" },
+      "bottom": { "id": "pants", "color": "#1a2a5a" },
+      "shoes": { "id": "boots", "color": "#1a2440" },
+      "cape": { "id": "none" },
+      "decor": { "id": "storm_rods", "color": "#9fd8ff" }
+    },
+    "druid": {
+      "hat": { "id": "wolf_helm", "color": "#7a7068" },
+      "top": { "id": "fur_tunic", "color": "#5a6a3a", "color2": "#9a8a6a" },
+      "bottom": { "id": "leggings", "color": "#4a3a2a" },
+      "shoes": { "id": "wraps", "color": "#6a5a3a" },
+      "cape": { "id": "none" },
+      "decor": { "id": "herb_satchel", "color": "#6a4a2a" },
+      "held": { "id": "staff_crook", "color": "#6a4a2a" }
+    },
+    "oracle": {
+      "hat": { "id": "hood", "color": "#f4f0e0", "color2": "#e0b020" },
+      "top": { "id": "trim_robe", "color": "#e8c030", "color2": "#f8f4e8" },
+      "bottom": { "id": "pants", "color": "#f4f0e0" },
+      "shoes": { "id": "slippers", "color": "#d8b040" },
+      "cape": { "id": "none" },
+      "decor": { "id": "prayer_ribbons", "color": "#e0b020" }
+    },
+    "tactician": {
+      "hat": { "id": "tricorn", "color": "#1e2436", "color2": "#d8b040" },
+      "top": { "id": "coat", "color": "#1e2a4a", "color2": "#d8b040" },
+      "bottom": { "id": "breeches", "color": "#e8e2d2" },
+      "shoes": { "id": "boots", "color": "#1a1a1a" },
+      "cape": { "id": "shoulder_cape", "color": "#8a1a2a" },
+      "decor": { "id": "scroll_case", "color": "#6a4a2a" },
+      "held": { "id": "fh_sword", "color": "#b9c2cc" },
+      "offhand": { "id": "map", "color": "#e8dcb8" }
+    },
+    "chronomancer": {
+      "hat": { "id": "hood", "color": "#4a1a6a", "color2": "#d8b040" },
+      "top": { "id": "trim_robe", "color": "#4a1a6a", "color2": "#d8b040" },
+      "bottom": { "id": "pants", "color": "#2a0a3a" },
+      "shoes": { "id": "slippers", "color": "#2a1a2a" },
+      "cape": { "id": "none" },
+      "decor": { "id": "rune_halo", "color": "#d8b040" }
+    },
+    "monk": {
+      "hat": { "id": "none" },
+      "top": { "id": "gi", "color": "#e07a1a", "color2": "#8a3a1a" },
+      "bottom": { "id": "baggy", "color": "#e07a1a" },
+      "shoes": { "id": "wraps", "color": "#e8dcc8" },
+      "cape": { "id": "none" },
+      "decor": { "id": "bead_necklace", "color": "#6a3a1a" }
+    },
+    "shaman": {
+      "hat": { "id": "bone_headdress", "color": "#8a5a3a", "color2": "#c8402a" }
+    },
+    "knight": {
+      "hat": { "id": "plate_helm", "color": "#b8c0cc", "color2": "#2a4a9a" },
+      "top": { "id": "surcoat", "color": "#2a4a9a", "color2": "#2a4a9a" },
+      "bottom": { "id": "greaves", "color": "#9aa0a8" },
+      "shoes": { "id": "heavy", "color": "#8a8e96" },
+      "cape": { "id": "cape", "color": "#2a4a9a" },
+      "decor": { "id": "pauldrons", "color": "#9aa0aa" }
+    },
+    "sorcerer": {
+      "hat": { "id": "hood", "color": "#6a1a2a", "color2": "#d8b040" },
+      "top": { "id": "high_collar_robe", "color": "#6a1a2a", "color2": "#1a1a1a" },
+      "bottom": { "id": "pants", "color": "#1a1a1a" },
+      "shoes": { "id": "pointed", "color": "#1a1a1a" },
+      "cape": { "id": "shoulder_cape", "color": "#1a1a1a" },
+      "decor": { "id": "rune_halo", "color": "#d8b040" }
+    },
+    "runesmith": {
+      "hat": { "id": "rune_helm", "color": "#6a6258", "color2": "#58d8f0" },
+      "top": { "id": "plate", "color": "#5a5650", "color2": "#58d8f0" },
+      "bottom": { "id": "greaves", "color": "#4a4640" },
+      "shoes": { "id": "heavy", "color": "#3a3632" },
+      "cape": { "id": "none" },
+      "decor": { "id": "rune_bracers", "color": "#58d8f0" }
+    },
+    "tinker": {
+      "top": { "id": "smith_apron", "color": "#5a3a1a", "color2": "#2f6a8a" }
+    },
+    "priest": {
+      "hat": { "id": "hood", "color": "#f4f4f8", "color2": "#2a5ab0" },
+      "top": { "id": "trim_robe", "color": "#f4f4f8", "color2": "#2a5ab0" },
+      "bottom": { "id": "pants", "color": "#e8e8f0" },
+      "shoes": { "id": "slippers", "color": "#2a5ab0" },
+      "cape": { "id": "none" },
+      "decor": { "id": "chained_tome", "color": "#2a5ab0" }
+    },
+    "enchanter": {
+      "hat": { "id": "circlet", "color": "#c8c8d8" },
+      "top": { "id": "high_collar_robe", "color": "#1f5a5e", "color2": "#c090ff" },
+      "bottom": { "id": "pants", "color": "#143a3c" },
+      "shoes": { "id": "pointed", "color": "#2a2a3a" },
+      "cape": { "id": "shoulder_cape", "color": "#6a3a9a" },
+      "decor": { "id": "rune_bracers", "color": "#c090ff" }
+    }
+  }
+}

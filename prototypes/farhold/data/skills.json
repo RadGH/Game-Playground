@@ -130,7 +130,7 @@
    "arc": 1.6,
    "cooldown": 4,
    "mp": 0,
-   "desc": "Strikes everything in a 92° arc 3.4 m in front of you for 190% weapon damage. No mana cost, 4s cooldown."
+   "desc": "Strikes everything in a 92° arc 3.4 m in front of you, or as far and as wide as your weapon swings if that is more, for 190% weapon damage. No mana cost, 4s cooldown."
   },
   "cleave": {
    "name": "Cleave",
@@ -152,7 +152,7 @@
    "status": "weaken",
    "cooldown": 9,
    "mp": 8,
-   "desc": "Strikes everything in an 80° arc 3.2 m in front of you for 224% weapon damage. Leaves the target Weakened: the target deals 35% less damage for 7s. 8 mana, 9s cooldown."
+   "desc": "Strikes everything in an 80° arc 3.2 m in front of you, or as far and as wide as your weapon swings if that is more, for 224% weapon damage. Leaves the target Weakened: the target deals 35% less damage for 7s. 8 mana, 9s cooldown."
   },
   "shield_bash": {
    "name": "Shield Bash",
@@ -164,7 +164,7 @@
    "status": "web",
    "cooldown": 8,
    "mp": 6,
-   "desc": "Strikes everything in a 126° arc 2.8 m in front of you for 172% weapon damage. Leaves the target Snared: the target moves 80% slower for 3s. 6 mana, 8s cooldown."
+   "desc": "Strikes everything in a 126° arc 2.8 m in front of you, or as far and as wide as your weapon swings if that is more, for 172% weapon damage. Leaves the target Snared: the target moves 80% slower for 3s. 6 mana, 8s cooldown."
   },
   "whirlwind": {
    "name": "Whirlwind",
@@ -200,7 +200,7 @@
    "arc": 1.2,
    "cooldown": 14,
    "mp": 12,
-   "desc": "Strikes everything in a 69° arc 3 m in front of you for 576% weapon damage. Leaves the target Weakened: the target deals 35% less damage for 7s. 12 mana, 14s cooldown.",
+   "desc": "Strikes everything in a 69° arc 3 m in front of you, or as far and as wide as your weapon swings if that is more, for 576% weapon damage. Leaves the target Weakened: the target deals 35% less damage for 7s. 12 mana, 14s cooldown.",
    "status": "weaken"
   },
   "aimed_shot": {
@@ -287,7 +287,7 @@
    "status": "bleed",
    "cooldown": 7,
    "mp": 8,
-   "desc": "Strikes everything in a 63° arc 2.8 m in front of you for 298% weapon damage. Leaves the target Bleeding: a further 162% weapon damage over 6s. 8 mana, 7s cooldown."
+   "desc": "Strikes everything in a 63° arc 2.8 m in front of you, or as far and as wide as your weapon swings if that is more, for 298% weapon damage. Leaves the target Bleeding: a further 162% weapon damage over 6s. 8 mana, 7s cooldown."
   },
   "smoke": {
    "name": "Smoke",

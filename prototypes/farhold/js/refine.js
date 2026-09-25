@@ -33,7 +33,28 @@ import { creditLine, progressFraction } from './work.js';
  * which is the whole point of §8: a machine outside every pool has nothing to work with.
  * `grid` is a js/power.js grid, or null for a base that has not got that far yet.
  */
-export function createWorks({ refining = {}, resources = {}, stores = null, grid = null, log = null, rareElement = null, labour = null } = {}) {
+export function createWorks({ refining = {}, resources = {}, stores = null, grid = null, log = null, rareElement = null, labour = null,
+  /**
+   * R26 — THE PACK ON YOUR BACK, AS A LAST RESORT.
+   *
+   *   "I built a furnace and queued up 2 iron ingot. However it just says '2 min of work banked'…
+   *    It is not making the iron, and I cannot add or remove items."
+   *
+   * A machine used to draw ONLY from the storage pool it stood in. With no box in reach there was
+   * no pool, `see()` answered 0 for everything, and a furnace with a full work bank sat starved for
+   * iron ore while the ore was in the player's pack two metres away. The screen's one way to move
+   * it — "Load it from your pack" — tipped the pack into the stores, and with no stores it put
+   * everything straight back in the pack. So nothing could ever go in.
+   *
+   * `bag` is `{ count(id), take(id, n) -> taken, put(id, n) -> put }` (js/main.js hands in the
+   * materials bag). A machine takes from its pool first and then from the bag, and puts what it
+   * makes into the pool first and then the bag. The bag is used when there is NO pool at all (then
+   * the pack is the only place anything can be), or when `bagReach(machine)` says yes — main.js
+   * answers "the player is standing at it", so a furnace far from you never quietly eats your pack.
+   * Omit it and the module is the one every older test drives.
+   */
+  bag = null, bagReach = null,
+} = {}) {
   const MACHINES = refining.machines || {};
   const RECIPES = Object.fromEntries((refining.recipes || []).map(r => [r.id, r]));
   const BY_MACHINE = {};
@@ -202,8 +223,34 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
     if (r.machine !== m.type) return { ok: false, why: `${m.name} cannot run ${r.name}` };
     if (!isUnlocked(recipeId)) return { ok: false, why: unlockProgress(recipeId).text || 'not learned yet' };
     if (r.rareInput && !rareElement) return { ok: false, why: 'this world holds no rare element — you will have to go and find one' };
+    /**
+     * R26 — THE SAME RECIPE TWICE IS ONE ROW, NOT TWO.
+     *
+     * "Smelt Iron is still listed as 0/1 two times." Clicking ×1 twice pushed two jobs of one each,
+     * which read as two separate orders that were each stuck. If the LAST job on the queue is the
+     * same recipe, the new count goes onto it — "0/2" — and a standing order swallows any count.
+     */
+    const last = m.queue[m.queue.length - 1];
+    if (last && last.recipe === recipeId) {
+      if (count <= 0) last.left = Infinity;
+      else if (last.left !== Infinity) last.left += count;
+      return { ok: true, job: last, merged: true };
+    }
     m.queue.push({ recipe: recipeId, left: count > 0 ? count : Infinity, done: 0 });
     return { ok: true, job: m.queue[m.queue.length - 1] };
+  }
+  /**
+   * R26 — change how many a queued job still has to make, from the screen's − and + buttons.
+   * Down to zero takes the job off; the one being made right now is never un-made.
+   */
+  function adjust(machineId, index = 0, delta = 0) {
+    const m = get(machineId);
+    const job = m?.queue[index];
+    if (!job || job.left === Infinity) return false;
+    const floor = index === 0 && m.crafting ? 1 : 0;
+    job.left = Math.max(floor, job.left + Math.round(delta));
+    if (job.left <= 0) cancel(machineId, index);
+    return true;
   }
   function cancel(machineId, index = 0) {
     const m = get(machineId);
@@ -217,9 +264,28 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
   // ---------------------------------------------------------------- the pool it stands in
 
   function poolFor(m) { return stores ? stores.poolAt(m.x, m.z) : null; }
-  function see(m, res) { const p = poolFor(m); return p ? stores.count(p, res) : 0; }
-  function takeFrom(m, res, n) { const p = poolFor(m); return p ? stores.take(p, res, n) : 0; }
-  function putInto(m, res, n) { const p = poolFor(m); return p ? stores.put(p, res, n) : 0; }
+  /** R26 — may this machine reach the pack right now? See the `bag` note at the top. */
+  function bagOpen(m, pool = poolFor(m)) {
+    if (!bag) return false;
+    if (!pool) return true;
+    try { return !!bagReach?.(m); } catch { return false; }
+  }
+  function see(m, res) {
+    const p = poolFor(m);
+    return (p ? stores.count(p, res) : 0) + (bagOpen(m, p) ? (bag.count?.(res) || 0) : 0);
+  }
+  function takeFrom(m, res, n) {
+    const p = poolFor(m);
+    let got = p ? stores.take(p, res, n) : 0;
+    if (got < n - 1e-9 && bagOpen(m, p)) got += bag.take?.(res, n - got) || 0;
+    return got;
+  }
+  function putInto(m, res, n) {
+    const p = poolFor(m);
+    let put = p ? stores.put(p, res, n) : 0;
+    if (put < n - 1e-9 && bagOpen(m, p)) put += bag.put?.(res, n - put) || 0;
+    return put;
+  }
 
   // ---------------------------------------------------------------- fuel, for the tier-0 lot
 
@@ -681,9 +747,12 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
     switch (m.state) {
       case 'running': return `Working${m.fuelRes ? ` — burning ${nameOf(m.fuelRes)}` : ''}`;
       case 'idle': return m.queue.length ? 'Waiting' : 'Nothing queued';
-      case 'starved': return m.starvedFor === 'fuel' ? 'Out of fuel' : `Waiting for ${nameOf(m.starvedFor)}`;
+      // R26 — say where it looked, so "Waiting for Iron Ore" is not a riddle
+      case 'starved': return m.starvedFor === 'fuel'
+        ? `Out of fuel — nothing to burn ${poolFor(m) ? 'in the stores here' : 'in your pack'}`
+        : `Waiting for ${nameOf(m.starvedFor)} — none ${poolFor(m) ? (bagOpen(m) ? 'here or in your pack' : 'in the stores here') : 'in your pack'}`;
       case 'blocked': return 'Finished, and nowhere to put it';
-      case 'unworked': return 'Standing cold — nobody is working this';
+      case 'unworked': return 'Standing cold — nobody is working this. Stand beside it, or hold E at it';
       case 'unpowered': return 'No power reaches this';
       case 'shed': return 'Grid is short — this was switched off to keep the important things on';
       default:
@@ -703,6 +772,88 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
         return m.state;
     }
   }
+
+  /**
+   * R26 — WHAT THIS MACHINE IS WAITING FOR, AS A CHECKLIST.
+   *
+   * "It is not making the iron… I'm not sure why, it is unintuitive, and I'm not sure if its
+   * because I don't have a storage crate." The badge said one word at a time — and only the FIRST
+   * thing wrong — so a furnace with no ore, no fuel and nobody at it read "Waiting for Iron Ore"
+   * and the other two were a surprise each. This is every condition at once, each with `ok` and a
+   * sentence that says what to do. js/station-ui.js draws it at the top of the screen.
+   *
+   *   [{ key: 'job'|'input'|'fuel'|'work'|'power'|'store', ok, text }]
+   */
+  function needs(machineId) {
+    const m = get(machineId);
+    if (!m) return [];
+    const out = [];
+    const pool = poolFor(m);
+    const pack = bagOpen(m, pool);
+    const from = pool ? (pack ? 'here and in your pack' : 'in the stores here') : (pack ? 'in your pack' : 'anywhere it can reach');
+    const job = m.queue[0];
+    const recipe = job ? RECIPES[job.recipe] : null;
+    if (m.enabled === false) out.push({ key: 'job', ok: false, text: 'Switched off — press Running to turn it back on.' });
+    if (!recipe) {
+      out.push({ key: 'job', ok: false, text: 'Nothing queued — pick something to make below.' });
+    } else {
+      const left = job.left === Infinity ? 'on a standing order' : `${job.left} to go`;
+      out.push({ key: 'job', ok: true, text: `Making ${recipe.name} — ${left}.` });
+      const ins = inputsOf(recipe);
+      if (!ins) out.push({ key: 'input', ok: false, text: 'Needs a rare element this world does not hold.' });
+      else if (!m.crafting) {
+        for (const [res, n] of Object.entries(ins)) {
+          const got = see(m, res);
+          out.push({
+            key: 'input', ok: got >= n,
+            text: got >= n
+              ? `${nameOf(res)}: ${fmtN(got)} ${from} (${fmtN(n)} a batch).`
+              : `${nameOf(res)}: needs ${fmtN(n)} a batch, ${got > 0 ? `only ${fmtN(got)}` : 'none'} ${from}.`,
+          });
+        }
+      } else {
+        out.push({ key: 'input', ok: true, text: 'This batch is loaded and under way.' });
+      }
+    }
+    const fuels = m.def.fuels || {};
+    if (Object.keys(fuels).length) {
+      const names = Object.keys(fuels).map(nameOf).join(', ');
+      const on = Object.keys(fuels).find(r => see(m, r) >= 1);
+      out.push({
+        key: 'fuel', ok: m.fuelSeconds > 0 || !!on,
+        text: m.fuelSeconds > 0 ? `Fuel: burning ${nameOf(m.fuelRes)}, ${Math.ceil(m.fuelSeconds)}s left${on ? ` · ${fmtN(see(m, on))} ${nameOf(on)} ${from}` : ''}.`
+          : on ? `Fuel: ${fmtN(see(m, on))} ${nameOf(on)} ${from}.`
+          : `Fuel: nothing to burn ${from} — it burns ${names}.`,
+      });
+    }
+    const need = labourNeed(m);
+    if (need > 0) {
+      // standing at it pays in exactly what it spends, so a machine you are attending runs with an
+      // EMPTY bank — "nobody is working it" would be a lie told to the person working it
+      const secs = Math.round(m.workBank);
+      const running = m.state === 'running';
+      out.push({
+        key: 'work', ok: running || secs > 0,
+        text: running ? `Work: being worked right now${secs > 1 ? ` (${secs}s more paid for)` : ''}. Hold E to go three times faster.`
+          : secs > 0 ? `Work: ${secs}s of running time paid for — it runs while somebody stands at it. Hold E to go three times faster.`
+          : 'Work: nobody is working it. Stand beside it, or hold E at it.',
+      });
+    }
+    if ((m.def.powerUse || 0) > 0 && m.def.needsPower) {
+      const sp = speedOf(m);
+      out.push({ key: 'power', ok: sp.speed > 0, text: sp.speed > 0 ? 'Power: on.' : 'Power: none reaches this — build a generator and poles.' });
+    }
+    out.push({
+      key: 'store', ok: true,
+      text: pool
+        ? (pack ? 'Takes from the stores here first, then your pack. What it makes goes into the stores.'
+          : 'Takes from and fills the stores here. Stand beside it and it can use your pack too.')
+        : bag ? 'No store in reach, so it takes from your pack and what it makes goes into your pack. A Storage Box beside it (six logs) lets it keep working while you are away.'
+          : 'No store in reach: it cannot get at anything. Build a Storage Box (six logs) beside it.',
+    });
+    return out;
+  }
+  const fmtN = n => (Math.round(n * 10) / 10).toString();
 
   /** R19 — is this machine showing a state data/power.json declares? True with no grid to ask. */
   function stateDeclared(m) { return grid?.isState ? grid.isState(m.state) : true; }
@@ -799,6 +950,8 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
 
   return {
     place, remove: removeMachine, get, queue, cancel, clear, tick, catchUp,
+    // R26 — the − / + on a queued job, the checklist, and whether the pack is in reach
+    adjust, needs, bagOpen: id => { const m = get(id); return m ? bagOpen(m) : false; },
     isUnlocked, unlockProgress, available, board, inputsOf, snapshot, stateText, allJobs,
     // the Civilization Expansion §3 — work runs the machines
     labourNeed, credit, postLabour, collectLabour, labourBoard, setTenders,
@@ -906,7 +1059,7 @@ export function createHandWork({
       return null;
     }
     if (!m.queue.length) {
-      if (holding) say(m.id, `The ${m.name} has nothing queued. Press B and pick what it should make.`, 'warn');
+      if (holding) say(m.id, `The ${m.name} has nothing queued. Tap E to open it and pick what it should make.`, 'warn');
       return null;
     }
     const cap = m.def.labour?.bankSeconds ?? works.labour.bankSeconds;

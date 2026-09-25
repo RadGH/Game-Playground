@@ -18,6 +18,8 @@
 #   tools/publish-pages.sh --ref master       # build from another ref
 #   tools/publish-pages.sh --only "index.html shared/ prototypes/tinyrts/"
 #                                             # publish a SUBSET (keeps paths starting with these)
+#   tools/publish-pages.sh --skip "vendor/espeak-ng/"
+#                                             # leave out paths starting with these (heavy files later)
 #   tools/publish-pages.sh --no-push          # build the commit, do not push
 #
 # Each run adds one commit on top of the previous gh-pages commit, so a later push only
@@ -28,6 +30,7 @@ cd "$(dirname "$0")/.."
 
 REF=stable
 ONLY=""
+SKIP=""
 PUSH=1
 REMOTE=origin
 TINYRTS=${TINYRTS_REPO:-$HOME/claude/tinyrts}
@@ -36,13 +39,14 @@ while [ $# -gt 0 ]; do
   case "$1" in
     --ref) REF=$2; shift 2 ;;
     --only) ONLY=$2; shift 2 ;;
+    --skip) SKIP=$2; shift 2 ;;
     --no-push) PUSH=0; shift ;;
     *) echo "unknown option: $1" >&2; exit 1 ;;
   esac
 done
 
 # Paths the site never needs (regex, matched against the full path).
-EXCLUDE='(^|/)(tests|test-results|playwright-report|node_modules)/|/research/.*\.(png|jpe?g|webp)$|^package(-lock)?\.json$|^playwright\.config\.js$'
+EXCLUDE='(^|/)(tests|test-results|playwright-report|node_modules)/|/research/.*[.](png|jpe?g|webp)$|^package(-lock)?[.]json$|^playwright[.]config[.]js$'
 
 # 1. Pull TinyRTS's committed files into this repo's object store (no merge, just objects).
 git fetch -q "$TINYRTS" master:refs/tinyrts/master --force
@@ -61,6 +65,12 @@ export GIT_INDEX_FILE=$TMPIDX
 if [ -n "$ONLY" ]; then
   awk -F'\t' -v only="$ONLY" 'BEGIN { n = split(only, p, " ") }
     { for (i = 1; i <= n; i++) if (index($2, p[i]) == 1) { print; next } }' "$TMPIDX.list" > "$TMPIDX.list2"
+  mv "$TMPIDX.list2" "$TMPIDX.list"
+fi
+
+if [ -n "$SKIP" ]; then
+  awk -F'\t' -v skip="$SKIP" 'BEGIN { n = split(skip, p, " ") }
+    { for (i = 1; i <= n; i++) if (index($2, p[i]) == 1) next; print }' "$TMPIDX.list" > "$TMPIDX.list2"
   mv "$TMPIDX.list2" "$TMPIDX.list"
 fi
 

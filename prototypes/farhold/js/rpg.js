@@ -1835,10 +1835,17 @@ export class Rpg {
   rarityFor(level, rng, magicFind = 0, rarityBoost = 1) {
     const table = this.b.rarity || { normal: 0.52, magic: 0.31, rare: 0.14, legendary: 0.03 };
     const lift = (1 + magicFind / 100) * rarityBoost;
+    /**
+     * R25 — THE BEST THINGS RAMP IN WITH LEVEL. "I am only level 6 and already have 5 legendary
+     * items. I should have 0 or 1 at this point." A flat legendary chance means the first hour
+     * showers them; this scales it from about a quarter at level 6 to the full table at
+     * `legendaryFullAt` (16), and rare the same way by `rareFullAt` (10).
+     */
+    const ramp = (full, floorK) => Math.max(floorK, Math.min(1, (level - 1) / Math.max(1, (full ?? 16) - 1)));
     const roll = rng();
-    let cut = (table.legendary ?? 0.03) * lift;
+    let cut = (table.legendary ?? 0.03) * lift * ramp(table.legendaryFullAt, 0.1);
     if (roll < cut) return 'legendary';
-    cut += (table.rare ?? 0.14) * lift;
+    cut += (table.rare ?? 0.14) * lift * ramp(table.rareFullAt ?? 10, 0.35);
     if (roll < cut) return 'rare';
     cut += (table.magic ?? 0.31) * lift;
     if (roll < cut) return 'magic';

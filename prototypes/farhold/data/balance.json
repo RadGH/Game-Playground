@@ -42,12 +42,12 @@
     "arrowSplash": 0.9,
     "meleeSplash": 1,
     "damagePerLevel": 0.11,
-    "_damageDoc": "damagePerLevel is what a level is worth in raw damage. A weapon's base does not change when you level but an enemy's health compounds every level, so without this a perfect bow at level 20 could not scratch a level-25 anything. Round 14 moved it: the level term multiplies the WEAPON'S OWN DICE and damageFlat is added afterwards (js/rpg.js derive), so gear no longer dilutes the weapon — 0.10 -> 0.11 keeps the overall curve where the simulator tuned it.",
+    "_damageDoc": "damagePerLevel is what a level is worth in raw damage. A weapon's base does not change when you level but an enemy's health compounds every level, so without this a perfect bow at level 20 could not scratch a level-25 anything. Round 14 moved it: the level term multiplies the WEAPON'S OWN DICE and damageFlat is added afterwards (js/rpg.js derive), so gear no longer dilutes the weapon \u2014 0.10 -> 0.11 keeps the overall curve where the simulator tuned it.",
     "outOfCombatRegen": 0.015,
-    "_regenDoc": "Share of maximum health you get back each second while nothing is fighting you. Without it a character who walked out of a fight at a third health stayed there — hpRegen is zero without gear that grants it, and there is no potion in the starting kit.",
+    "_regenDoc": "Share of maximum health you get back each second while nothing is fighting you. Without it a character who walked out of a fight at a third health stayed there \u2014 hpRegen is zero without gear that grants it, and there is no potion in the starting kit.",
     "_arrowSplashDoc": "Round 14: an arrow used to burst for 2.6 m at full power on every shot, for free, while a melee jab was 0.65 of a hit inside a 0.3 m splash. An arrow hits what you aimed at now; the quiver's arrowBurst affix is what turns it back into an area shot, which is what that affix is for.",
     "combat": {
-      "_doc": "What a hit feels like, round 14. The per-shape numbers — knockback, stagger, hit-stop, shake — live on the strike shapes in js/weapons.js, because a shape is where they belong. These are the few that are global. R19 — THIS BLOCK IS NOW READ: js/combat-feel.js tuneFeel() takes it at boot, and its COMBAT_FEEL holds the five spent in js/actors.js and js/player.js. Note hitStopMaxMs is milliseconds where the code keeps seconds.",
+      "_doc": "What a hit feels like, round 14. The per-shape numbers \u2014 knockback, stagger, hit-stop, shake \u2014 live on the strike shapes in js/weapons.js, because a shape is where they belong. These are the few that are global. R19 \u2014 THIS BLOCK IS NOW READ: js/combat-feel.js tuneFeel() takes it at boot, and its COMBAT_FEEL holds the five spent in js/actors.js and js/player.js. Note hitStopMaxMs is milliseconds where the code keeps seconds.",
       "hitStopFloor": 0.05,
       "hitStopMaxMs": 260,
       "shakePerPoint": 0.035,
@@ -60,7 +60,7 @@
       "wallSlamShare": 0.015
     },
     "ranged": {
-      "_doc": "A bow's rate of fire used to be the light-melee swing clock, because `bow` was in neither weapon table and profileOf fell through to the `light` category: 1.91 shots a second with no draw, no nock and no reload, and nobody designed it. The per-base numbers are in js/weapons.js RANGED; these are the shared ones, and R19 — they are now READ: tuneWeapons() overwrites RANGED with them at boot, so editing them here moves the game.",
+      "_doc": "A bow's rate of fire used to be the light-melee swing clock, because `bow` was in neither weapon table and profileOf fell through to the `light` category: 1.91 shots a second with no draw, no nock and no reload, and nobody designed it. The per-base numbers are in js/weapons.js RANGED; these are the shared ones, and R19 \u2014 they are now READ: tuneWeapons() overwrites RANGED with them at boot, so editing them here moves the game.",
       "bowDrawMin": 0.35,
       "bowDrawFull": 0.95,
       "bowPowerMin": 0.55,
@@ -69,7 +69,7 @@
       "crossbowPower": 1.8
     },
     "staff": {
-      "_doc": "A staff cast a free shaped area spell every 0.6 s with no cast time, no mana and no choice — the most powerful weapon in the game and the least interesting. It charges now: a tap is still free and weak, a full channel is 1.6x damage over twice the radius, and it drinks mana while it builds. R19 — THIS BLOCK IS NOW THE LIVE COPY: tuneWeapons() writes it into js/weapons.js STAFF_CHARGE at boot, which js/player.js and js/rpg.js hold by reference.",
+      "_doc": "A staff cast a free shaped area spell every 0.6 s with no cast time, no mana and no choice \u2014 the most powerful weapon in the game and the least interesting. It charges now: a tap is still free and weak, a full channel is 1.6x damage over twice the radius, and it drinks mana while it builds. R19 \u2014 THIS BLOCK IS NOW THE LIVE COPY: tuneWeapons() writes it into js/weapons.js STAFF_CHARGE at boot, which js/player.js and js/rpg.js hold by reference.",
       "chargeMin": 0.35,
       "chargeFull": 1.4,
       "chargeMax": 2.6,
@@ -87,8 +87,7 @@
     "levelCap": 50,
     "_doc": "XP curve lives in js/rpg.js (xpForLevel), written in fractions of `levelCap` so a 100-level world is the same climb cut into twice as many steps. At cap 50: level 2 at 58 xp, level 10 at ~3,500, level 30 at ~30,400, level 50 at ~118,700. `levelCap` is set by the world screen and rewritten into this object at boot."
   },
-
-  "_xpDoc": "R22 — WHERE EXPERIENCE COMES FROM, AND HOW MUCH. Every one of these is a multiplier on what the game paid before this round, and every XP award in the game goes through js/rpg.js `killXpFor` or `eventXp` so there is one place to change them. The report: 'Companions running around one-shotting everything... I was level 22 and teleported to a level 20-22 zone and after just a few kills from my companions I was level 30, 31. I reached level 30 in about 10 minutes.'",
+  "_xpDoc": "R22 \u2014 WHERE EXPERIENCE COMES FROM, AND HOW MUCH. Every one of these is a multiplier on what the game paid before this round, and every XP award in the game goes through js/rpg.js `killXpFor` or `eventXp` so there is one place to change them. The report: 'Companions running around one-shotting everything... I was level 22 and teleported to a level 20-22 zone and after just a few kills from my companions I was level 30, 31. I reached level 30 in about 10 minutes.'",
   "xp": {
     "kill": 0.2,
     "killFalloffPerLevel": 0.2,
@@ -98,10 +97,11 @@
     "event": 1.5,
     "landmark": 3.0,
     "perZoneLevel": 0.12,
-    "_doc": "kill: a kill pays a fifth of what it used to ('cut XP gains from kills down to just 20% of the current value'). killFalloffPerLevel: each level the enemy is BELOW you takes this share off the award, so five levels below pays nothing at all ('anything 5 levels lower should not reward any xp'). killBonusPerLevelAbove/Cap: the other side of the same rule — something above your level is worth more, up to 60% more. quest/event/landmark: turn-ins, cleared places and the little 'experience for the walk' awards, which were 20-60 and are now 60-180 before the zone scaling. perZoneLevel: what a level of ZONE adds to an event award — it replaces five different per-PLAYER-level multipliers (0.15, 0.15, 0.1, 0.1, 0.12) that had grown up one at a time."
+    "_doc": "kill: a kill pays a fifth of what it used to ('cut XP gains from kills down to just 20% of the current value'). killFalloffPerLevel: each level the enemy is BELOW you takes this share off the award, so five levels below pays nothing at all ('anything 5 levels lower should not reward any xp'). killBonusPerLevelAbove/Cap: the other side of the same rule \u2014 something above your level is worth more, up to 60% more. quest/event/landmark: turn-ins, cleared places and the little 'experience for the walk' awards, which were 20-60 and are now 60-180 before the zone scaling. perZoneLevel: what a level of ZONE adds to an event award \u2014 it replaces five different per-PLAYER-level multipliers (0.15, 0.15, 0.1, 0.1, 0.12) that had grown up one at a time."
   },
   "enemies": {
-    "_xpDoc": "R22 — and `xpPerLevel` is a THIRD curve, because what a kill is worth was tied to the HEALTH curve (1.13, exponential) while the cost of a level is polynomial for the first 60% of the ladder. Exponential income against a polynomial price means levelling accelerates: an even-level kill was 107 of them for level 10 and SEVEN for level 40. At 1.09 it is 150/116/47/30 at levels 10/20/30/40 and the spread across the whole ladder falls from 16x to 5x. Turn this DOWN to flatten the top further, UP to make the late game quicker; level 1 is unaffected either way.", "_doc": "Health and damage are SEPARATE curves. They used to share `perLevel`, which meant a five-level gap doubled an enemy's damage as well as its health and the fight stopped being winnable. A higher-level enemy should be much tougher and only somewhat harder hitting.",
+    "_xpDoc": "R22 \u2014 and `xpPerLevel` is a THIRD curve, because what a kill is worth was tied to the HEALTH curve (1.13, exponential) while the cost of a level is polynomial for the first 60% of the ladder. Exponential income against a polynomial price means levelling accelerates: an even-level kill was 107 of them for level 10 and SEVEN for level 40. At 1.09 it is 150/116/47/30 at levels 10/20/30/40 and the spread across the whole ladder falls from 16x to 5x. Turn this DOWN to flatten the top further, UP to make the late game quicker; level 1 is unaffected either way.",
+    "_doc": "Health and damage are SEPARATE curves. They used to share `perLevel`, which meant a five-level gap doubled an enemy's damage as well as its health and the fight stopped being winnable. A higher-level enemy should be much tougher and only somewhat harder hitting.",
     "perLevel": 1.13,
     "dmgPerLevel": 1.085,
     "xpPerLevel": 1.09,
@@ -117,22 +117,26 @@
     "everySeconds": 1.1,
     "levelSpread": 2,
     "despawnRadius": 300,
-    "_doc": "Enemies appear in a ring around the player, out of sight, and are cleaned up when you walk far enough away. A spawn is usually a whole PACK rather than one body, and `js/encounters.js` turns some of them into a set piece — a warband on the march, a hunt, an ambush. Round 4 raised maxAlive from 14 to 38 and shortened the ring, because the old numbers left one straggler at a time wandering a very large map."
+    "_doc": "Enemies appear in a ring around the player, out of sight, and are cleaned up when you walk far enough away. A spawn is usually a whole PACK rather than one body, and `js/encounters.js` turns some of them into a set piece \u2014 a warband on the march, a hunt, an ambush. Round 4 raised maxAlive from 14 to 38 and shortened the ring, because the old numbers left one straggler at a time wandering a very large map."
   },
   "loot": {
-    "dropRate": 0.45,
+    "dropRate": 0.315,
     "setChance": 0.3,
     "affixMult": 1,
     "shopPrice": 1,
     "plainWeight": 5,
     "exoticWeight": 1,
-    "_affixDoc": "How often each kind of property turns up. Emberveil's generator picks uniformly from 59 affixes, 40 of which are exotic conditionals — so a weapon almost never rolled plain damage. plainWeight/exoticWeight are the fallbacks; js/rpg.js AFFIX_WEIGHT names the ones worth steering."
+    "_affixDoc": "How often each kind of property turns up. Emberveil's generator picks uniformly from 59 affixes, 40 of which are exotic conditionals \u2014 so a weapon almost never rolled plain damage. plainWeight/exoticWeight are the fallbacks; js/rpg.js AFFIX_WEIGHT names the ones worth steering.",
+    "_r25": "R25: 0.45 -> 0.315 (-30%): 'reduce the chance to find items by about 30%\u2026 the game progresses way too quickly'."
   },
   "rarity": {
-    "normal": 0.52,
-    "magic": 0.31,
-    "rare": 0.14,
-    "legendary": 0.03
+    "normal": 0.605,
+    "magic": 0.29,
+    "rare": 0.09,
+    "legendary": 0.015,
+    "legendaryFullAt": 16,
+    "rareFullAt": 10,
+    "_doc": "R25: legendary halved (0.03 -> 0.015) and it ramps in with level \u2014 full chance from level `legendaryFullAt`, about a quarter of it at level 6 \u2014 so a level-6 character has seen 0-1 legendaries, not 5. Rare ramps in by `rareFullAt`."
   },
   "lootTiers": [
     {
@@ -283,15 +287,15 @@
         "res": 48
       }
     ],
-    "_doc": "Concentric square rings centred on the player, each three times wider than the last at the same vertex count — near ground is 2 m per quad, the horizon 162 m. Five rings reach 7.8 km in five draw calls. ?quality=low uses the smaller set for headless tests. riverDepth is how deep a river cuts its valley into the ground, in metres.",
+    "_doc": "Concentric square rings centred on the player, each three times wider than the last at the same vertex count \u2014 near ground is 2 m per quad, the horizon 162 m. Five rings reach 7.8 km in five draw calls. ?quality=low uses the smaller set for headless tests. riverDepth is how deep a river cuts its valley into the ground, in metres.",
     "riverDepth": 16,
     "deckGrip": 1.5,
     "mergeCells": 0.3,
     "minLakeCells": 2,
     "roundLakeCells": 4,
-    "_roundDoc": "The round-11 world fixes, all read by makeTerrain in js/planet.js. deckGrip: metres of abutment either side of a road where the graded deck keeps its ground after a river or lake is carved through it — this is what gives a bridge collision instead of letting you walk through it. mergeCells: how close two roads have to run, in map cells, before the lower-class one stops drawing a second line and joins the higher one at a junction (they used to weave). minLakeCells: a 'lake' smaller than this is the depression filler rounding one cell down, not water — it goes back to dry land on the map as well. roundLakeCells: a lake this size or smaller is drawn with a shoreline rather than as cell-sized squares with sharp corners.",
+    "_roundDoc": "The round-11 world fixes, all read by makeTerrain in js/planet.js. deckGrip: metres of abutment either side of a road where the graded deck keeps its ground after a river or lake is carved through it \u2014 this is what gives a bridge collision instead of letting you walk through it. mergeCells: how close two roads have to run, in map cells, before the lower-class one stops drawing a second line and joins the higher one at a junction (they used to weave). minLakeCells: a 'lake' smaller than this is the depression filler rounding one cell down, not water \u2014 it goes back to dry land on the map as well. roundLakeCells: a lake this size or smaller is drawn with a shoreline rather than as cell-sized squares with sharp corners.",
     "reliefScale": 0.22,
-    "_reliefDoc": "How tall the world is against how wide it is. universe/ gives a planet its TRUE relief — often 8 km — and this map is 90-160 km across, not 40,000, so the real number turns every coastline into a cliff. 0.22 keeps mountains that read as mountains and slopes you can walk up. It is multiplied by the planet-scale knob, so a smaller map gets proportionally smaller hills."
+    "_reliefDoc": "How tall the world is against how wide it is. universe/ gives a planet its TRUE relief \u2014 often 8 km \u2014 and this map is 90-160 km across, not 40,000, so the real number turns every coastline into a cliff. 0.22 keeps mountains that read as mountains and slopes you can walk up. It is multiplied by the planet-scale knob, so a smaller map gets proportionally smaller hills."
   },
   "sky": {
     "dayLengthSeconds": 900,
@@ -323,7 +327,7 @@
   },
   "save": {
     "autoSaveSeconds": 45,
-    "_doc": "How often a run writes itself to browser storage. A save is the seed plus what the player did — never the world, which is a pure function of the seed."
+    "_doc": "How often a run writes itself to browser storage. A save is the seed plus what the player did \u2014 never the world, which is a pure function of the seed."
   },
   "space": {
     "auUnits": 14000,
@@ -357,9 +361,24 @@
   },
   "_retrainDoc": "R20 \u2014 what an Unbinder charges. Forgetting a spell, a perk or a talent is the only way any of the three comes back now: the character sheet shows what you have taken and no longer takes it away again. `one` is the price at level 1 and `perLevel` is what each level past the first adds, so the cost keeps pace with the purse rather than becoming free. `all` / `allPerLevel` are the same two numbers for the wipe-the-lot button. Read by js/retrain.js; every number here is safe to tune without touching code.",
   "retrain": {
-    "spell": { "one": 120, "perLevel": 20, "all": 500, "allPerLevel": 60 },
-    "perk": { "one": 80, "perLevel": 12, "all": 400, "allPerLevel": 45 },
-    "talent": { "one": 60, "perLevel": 8, "all": 250, "allPerLevel": 30 }
+    "spell": {
+      "one": 120,
+      "perLevel": 20,
+      "all": 500,
+      "allPerLevel": 60
+    },
+    "perk": {
+      "one": 80,
+      "perLevel": 12,
+      "all": 400,
+      "allPerLevel": 45
+    },
+    "talent": {
+      "one": 60,
+      "perLevel": 8,
+      "all": 250,
+      "allPerLevel": 30
+    }
   },
   "town": {
     "talkRange": 3.6,
@@ -419,7 +438,7 @@
     "packRadius": 10
   },
   "chests": {
-    "_doc": "Treasure on the ground. `perCell` is how many chests a 64 m prop cell may hold at density 1, which is deliberately tiny — finding one should be an event. Dungeons place their own on top of this. Every kind declares a `floor` rarity: the worst thing it may contain, and the colour of the beacon standing over it. The beam is a promise, so the two must never disagree — one shaft for a common find, four and a ring of motes for a legendary.",
+    "_doc": "Treasure on the ground. `perCell` is how many chests a 64 m prop cell may hold at density 1, which is deliberately tiny \u2014 finding one should be an event. Dungeons place their own on top of this. Every kind declares a `floor` rarity: the worst thing it may contain, and the colour of the beacon standing over it. The beam is a promise, so the two must never disagree \u2014 one shaft for a common find, four and a ring of motes for a legendary.",
     "perCell": 0.012,
     "radius": 5,
     "openRange": 3.2,
@@ -428,14 +447,14 @@
         "name": "Wooden Chest",
         "weight": 52,
         "items": [
-          1,
+          0,
           2
         ],
         "gold": [
           14,
           40
         ],
-        "rarityBoost": 1.1,
+        "rarityBoost": 1.0,
         "materials": 1,
         "floor": "normal"
       },
@@ -443,14 +462,14 @@
         "name": "Iron-Bound Chest",
         "weight": 30,
         "items": [
-          2,
-          3
+          1,
+          2
         ],
         "gold": [
           40,
           110
         ],
-        "rarityBoost": 1.5,
+        "rarityBoost": 1.3,
         "floor": "magic",
         "materials": 2
       },
@@ -459,13 +478,13 @@
         "weight": 14,
         "items": [
           2,
-          4
+          3
         ],
         "gold": [
           120,
           300
         ],
-        "rarityBoost": 2.2,
+        "rarityBoost": 1.7,
         "floor": "rare",
         "materials": 3
       },
@@ -473,18 +492,19 @@
         "name": "Warded Chest",
         "weight": 4,
         "items": [
-          3,
-          5
+          2,
+          4
         ],
         "gold": [
           260,
           700
         ],
-        "rarityBoost": 3.2,
+        "rarityBoost": 2.4,
         "floor": "legendary",
         "materials": 5,
         "mimicChance": 0.22,
-        "guarded": true
+        "guarded": true,
+        "minZoneLevel": 10
       },
       "meteorite": {
         "name": "Meteorite",
@@ -497,11 +517,12 @@
           180,
           480
         ],
-        "rarityBoost": 2.8,
+        "rarityBoost": 2.2,
         "floor": "rare",
         "materials": 4
       }
-    }
+    },
+    "_r25": "R25: every grade holds fewer items (about -30% overall) and lifts rarity less; a warded chest (guaranteed legendary) does not appear in a zone below level 10 \u2014 it becomes a gilded one."
   },
   "dungeon": {
     "_doc": "A dungeon is a real interior built from rooms and corridors, not a marker. `rooms` is how many the layout aims for at difficulty 1; deeper zones get more. Everything inside is dark, which is why a torch matters.",
@@ -533,7 +554,7 @@
     ]
   },
   "pets": {
-    "_doc": "Companions. `perLevel` scales a pet off its OWNER's level so a pet never falls behind. It is 1.13 — the SAME number as `enemies.perLevel` — so a companion's share of a kill is the same at level 50 as at level 1. It was 1.17, which meant the share grew by (1.17/1.13)^(level-1): 2.1x by level 22 and 5.5x by 50. On top of that, js/followers.js caps a companion's damage at 75% of the top of the OWNER's own swing, because matching the exponents only stops the drift and the two curves were never related in the first place. `leash` is how far it may get from you before it gives up and comes back.",
+    "_doc": "Companions. `perLevel` scales a pet off its OWNER's level so a pet never falls behind. It is 1.13 \u2014 the SAME number as `enemies.perLevel` \u2014 so a companion's share of a kill is the same at level 50 as at level 1. It was 1.17, which meant the share grew by (1.17/1.13)^(level-1): 2.1x by level 22 and 5.5x by 50. On top of that, js/followers.js caps a companion's damage at 75% of the top of the OWNER's own swing, because matching the exponents only stops the drift and the two curves were never related in the first place. `leash` is how far it may get from you before it gives up and comes back.",
     "perLevel": 1.13,
     "leash": 26,
     "follow": 4.5,
@@ -552,7 +573,7 @@
       "spread": 2.6,
       "reach": 90
     },
-    "_doc": "Night used to be unplayable. Every character now carries a torch; `torch` is its point light, `ambientNight` is the floor the sky light never drops below, and `maxLights` caps how many world lights (braziers, sconces, campfires) are switched on at once — the nearest win.",
+    "_doc": "Night used to be unplayable. Every character now carries a torch; `torch` is its point light, `ambientNight` is the floor the sky light never drops below, and `maxLights` caps how many world lights (braziers, sconces, campfires) are switched on at once \u2014 the nearest win.",
     "torch": {
       "range": 34,
       "intensity": 3.2,
@@ -574,7 +595,7 @@
     },
     "dungeonAmbient": 0.17,
     "dungeonAmbientColor": "#5a6e8c",
-    "_dungeonDoc": "Underground, the same torch that throws a 20 m pool outdoors lit about four metres and you could not tell a doorway from a wall. The floor is high enough that geometry reads at about twelve metres; the dark comes from the COLOUR — a cold blue-grey — not from the player being unable to see."
+    "_dungeonDoc": "Underground, the same torch that throws a 20 m pool outdoors lit about four metres and you could not tell a doorway from a wall. The floor is high enough that geometry reads at about twelve metres; the dark comes from the COLOUR \u2014 a cold blue-grey \u2014 not from the player being unable to see."
   },
   "encounters": {
     "_doc": "Set-piece encounters on the road, rolled instead of a plain pack. `everySeconds` is how often one is considered, `chance` how often the roll takes, and `maxLive` how many can be running at once. The weights are in data/encounters.json.",
@@ -584,7 +605,7 @@
     "radius": 240,
     "ambushRadius": 26,
     "keepRadius": 620,
-    "_r21": "R21: `radius` was 90, which put a whole set piece \u2014 including its buildings \u2014 between 49 and 99 m away. The play-test: \"I just watched an entire building appear only ~100 meters away.\" 240 puts the ring at 132-240 m and the `ahead` case at 168-264 m, so a thing arrives on the horizon rather than in your lap. `ambushRadius` is deliberately NOT raised: an ambush is supposed to be on top of you. `keepRadius` is how far a set piece\u0027s own bodies survive, which HAS to be larger than the furthest a set piece can be placed \u2014 at the old 300 m despawn, an event placed at 264 m would have lost its guards almost immediately (see js/actors.js)."
+    "_r21": "R21: `radius` was 90, which put a whole set piece \u2014 including its buildings \u2014 between 49 and 99 m away. The play-test: \"I just watched an entire building appear only ~100 meters away.\" 240 puts the ring at 132-240 m and the `ahead` case at 168-264 m, so a thing arrives on the horizon rather than in your lap. `ambushRadius` is deliberately NOT raised: an ambush is supposed to be on top of you. `keepRadius` is how far a set piece's own bodies survive, which HAS to be larger than the furthest a set piece can be placed \u2014 at the old 300 m despawn, an event placed at 264 m would have lost its guards almost immediately (see js/actors.js)."
   },
   "meteors": {
     "everySeconds": 300,
@@ -597,7 +618,7 @@
     "startHeight": 2600,
     "shootingEvery": 22,
     "shootingSeconds": 1.6,
-    "_doc": "A meteor is rolled every `everySeconds` on the surface and lands `fallSeconds` later, somewhere `landRange` metres away — far enough to be a walk, near enough to find. It is on the map and in the sky the whole time it is falling, and it leaves a Meteorite chest (see chests.kinds.meteorite): 1-3 items, never worse than rare, with the rarity beams. `shootingEvery` is the decorative streaks that never land."
+    "_doc": "A meteor is rolled every `everySeconds` on the surface and lands `fallSeconds` later, somewhere `landRange` metres away \u2014 far enough to be a walk, near enough to find. It is on the map and in the sky the whole time it is falling, and it leaves a Meteorite chest (see chests.kinds.meteorite): 1-3 items, never worse than rare, with the rarity beams. `shootingEvery` is the decorative streaks that never land."
   },
   "flight": {
     "liftMax": 1.04,
@@ -608,5 +629,5 @@
     "hoverPush": 16,
     "_doc": "Flying the ship inside the atmosphere. W and S are the throttle and the mouse steers, so the nose is where you are looking and the ship goes where the nose points. `liftMax` is how much of the ship's weight the wing carries at `liftSpeedFull`: at or above 1 the ship holds its altitude in level flight, which is what lets you cross a continent with one hand. `hoverFloor` is a soft floor over the terrain so looking at the scenery does not fly you into it - you can still dive into a hill deliberately. `ceiling` is where the air ends and js/space.js takes over."
   },
-  "_r18Mount": "R18 — the gallop and the throw. Three mount affixes (`cond_mountStamina`, `cond_mountTrample`, `cond_mountCalm`) landed in derived fields nothing read, because the mechanics they describe did not exist. These are those mechanics' knobs: `gallopSeconds` is how long a mount can run flat out before dropping back (extended by mountStamina), `gallopBonus` how much faster that is, `gallopRecover` how fast it gets its wind back, and `mountThrowChance` the chance a hit while riding throws you (reduced by mountCalm)."
+  "_r18Mount": "R18 \u2014 the gallop and the throw. Three mount affixes (`cond_mountStamina`, `cond_mountTrample`, `cond_mountCalm`) landed in derived fields nothing read, because the mechanics they describe did not exist. These are those mechanics' knobs: `gallopSeconds` is how long a mount can run flat out before dropping back (extended by mountStamina), `gallopBonus` how much faster that is, `gallopRecover` how fast it gets its wind back, and `mountThrowChance` the chance a hit while riding throws you (reduced by mountCalm)."
 }

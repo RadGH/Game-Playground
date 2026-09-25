@@ -315,7 +315,10 @@ export function createChests(scene, terrain, { seed = 1, balance = {}, zones = n
         const [wx, wz] = terrain.clampToWorld(x, z);
         if (terrain.underwater(wx, wz)) continue;
         if (terrain.slopeAt && terrain.slopeAt(wx, wz) > 0.5) continue;
-        const kind = pickKind(rng());
+        let kind = pickKind(rng());
+        // R25 — a guaranteed legendary is not a low-level find: below its zone level it is gilded
+        const minZ = kinds[kind]?.minZoneLevel;
+        if (minZ && (zones?.at?.(wx, wz)?.maxLevel ?? 99) < minZ) kind = kinds.gilded ? 'gilded' : kind;
         const chest = place(kind, wx, wz, { key, opened: opened.has(key), facing: rng() * Math.PI * 2 });
         if (chest) chest.rng = rng;
       }

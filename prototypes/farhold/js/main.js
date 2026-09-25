@@ -8002,7 +8002,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       e.preventDefault();
       const on = !build.mode;
       build.setMode(on);
-      buildUI.setOpen(on);
+      // R26 — B opens the build RING (js/build-radial.js); Tab or its "Full list" is the old panel
+      if (on) buildUI.openRadial(); else buildUI.setOpen(false);
       /**
        * The middle-of-the-screen dot is a LIE while the cursor is free: it says "you are aiming
        * here" and the ghost is under the mouse. So it goes away, and the canvas gets a real
@@ -8011,7 +8012,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       document.body.classList.toggle('building', on);
       if (on) input.release(); else regrab();
       hud.log(on
-        ? 'Build mode. Scroll to turn · click to place · Enter to finish a run · Ctrl+Z to undo · B to stop.'
+        ? 'Build mode. Pick from the ring (1-9, or click) · Tab for the full list · right-click brings the ring back · B to stop.'
         : 'Build mode off.', on ? 'level' : '');
     }
     if (build.mode) {

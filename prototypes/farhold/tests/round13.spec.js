@@ -157,6 +157,7 @@ test('you can attack a tree down, and it leaves timber behind', async ({ page })
 test('B frees the cursor, and the panel is clickable', async ({ page }) => {
   const errors = await land(page);
   await page.keyboard.press('KeyB');
+  await page.keyboard.press('Tab');   // R26 — B opens the ring; Tab is the full panel
   await expect(page.locator('#build-ui')).toBeVisible();
 
   // the middle-of-the-screen dot is a lie while the cursor is free

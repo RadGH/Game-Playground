@@ -37,6 +37,8 @@ test('beds make a holding, and the colony is told what you built', async ({ page
     await new Promise(r => setTimeout(r, 400));
 
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyB', bubbles: true }));
+    // R26 — B opens the build ring now; Tab from it is the full panel this test reads
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Tab', bubbles: true }));
     await new Promise(r => setTimeout(r, 250));
     // no beds yet: the panel must not show a column of zeroes
     const empty = document.querySelector('#build-ui .build-holding')?.textContent || '';

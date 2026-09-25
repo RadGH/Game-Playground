@@ -23,6 +23,7 @@ test('B opens a panel that says what to do and what everything costs', async ({ 
 
   await expect(page.locator('#build-ui')).toBeHidden();
   await page.keyboard.press('KeyB');
+  await page.keyboard.press('Tab');   // R26 — B opens the ring; Tab is the full panel
   await expect(page.locator('#build-ui')).toBeVisible();
 
   const panel = page.locator('#build-ui');
@@ -101,6 +102,7 @@ test('the ghost follows the camera, and a click on the ground builds', async ({ 
   });
 
   await page.keyboard.press('KeyB');
+  await page.keyboard.press('Tab');   // R26 — B opens the ring; Tab is the full panel
   await page.waitForTimeout(300);
 
   /**
@@ -163,6 +165,7 @@ test('build mode swallows the swing, so you do not attack the fence you are plac
 
   const before = await page.evaluate(() => window.farhold.player.kills ?? 0);
   await page.keyboard.press('KeyB');
+  await page.keyboard.press('Tab');   // R26 — B opens the ring; Tab is the full panel
   await page.waitForTimeout(200);
   const swungInBuild = await page.evaluate(async () => {
     const f = window.farhold;
@@ -214,6 +217,8 @@ test('with every section up, nothing falls off the bottom of the panel', async (
 
     // everything that puts a section on the panel
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyB', bubbles: true }));
+    // R26 — B opens the build ring now; Tab from it is the full panel this test reads
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Tab', bubbles: true }));
     await new Promise(r => setTimeout(r, 200));
     f.build.setTool('smooth'); f.build.setRadius(20);
     for (const [dx, dz] of [[0, 0], [13, 0], [-13, 0], [0, 13]]) { f.build.aim(spot.x + dx, spot.z + dz); f.build.paint(); }

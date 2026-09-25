@@ -28,6 +28,7 @@ test('the build panel only shows the catalogue for a placement tool', async ({ p
   const errors = watch(page);
   await land(page);
   await page.keyboard.press('KeyB');
+  await page.keyboard.press('Tab');   // R26 — B opens the ring; Tab is the full panel
   await page.waitForTimeout(700);
 
   const out = await page.evaluate(() => {

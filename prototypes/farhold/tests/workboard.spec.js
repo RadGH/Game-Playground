@@ -29,6 +29,8 @@ test('the work board is on the build panel, and all three sources put units in',
 
     // nothing posted yet: the section must not show an empty heading
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyB', bubbles: true }));
+    // R26 — B opens the build ring now; Tab from it is the full panel this test reads
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Tab', bubbles: true }));
     await new Promise(r => setTimeout(r, 300));
     const empty = document.querySelector('#build-ui .build-work')?.textContent || '';
 

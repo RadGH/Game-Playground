@@ -828,10 +828,14 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
     }
     const need = labourNeed(m);
     if (need > 0) {
+      // standing at it pays in exactly what it spends, so a machine you are attending runs with an
+      // EMPTY bank — "nobody is working it" would be a lie told to the person working it
       const secs = Math.round(m.workBank);
+      const running = m.state === 'running';
       out.push({
-        key: 'work', ok: secs > 0,
-        text: secs > 0 ? `Work: ${secs}s paid for — it runs while somebody stands at it. Hold E to go three times faster.`
+        key: 'work', ok: running || secs > 0,
+        text: running ? `Work: being worked right now${secs > 1 ? ` (${secs}s more paid for)` : ''}. Hold E to go three times faster.`
+          : secs > 0 ? `Work: ${secs}s of running time paid for — it runs while somebody stands at it. Hold E to go three times faster.`
           : 'Work: nobody is working it. Stand beside it, or hold E at it.',
       });
     }
@@ -1055,7 +1059,7 @@ export function createHandWork({
       return null;
     }
     if (!m.queue.length) {
-      if (holding) say(m.id, `The ${m.name} has nothing queued. Press B and pick what it should make.`, 'warn');
+      if (holding) say(m.id, `The ${m.name} has nothing queued. Tap E to open it and pick what it should make.`, 'warn');
       return null;
     }
     const cap = m.def.labour?.bankSeconds ?? works.labour.bankSeconds;

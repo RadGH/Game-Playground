@@ -72,7 +72,7 @@ export function drawStationBody(box, {
    * anvil or a garage is the game blaming you for a state that is not a state.
    */
   if (machine && wantsRecipes) {
-    box.append(el('p', { class: 'station-state small', text: works.stateText(machine) }));
+    box.append(el('p', { class: 'station-state small', 'data-live': '1', text: works.stateText(machine) }));
     /**
      * R26 — EVERYTHING IT IS WAITING FOR, AT ONCE.
      *
@@ -84,7 +84,7 @@ export function drawStationBody(box, {
      */
     const list = works.needs?.(machine.id) || [];
     if (list.length) {
-      const ul = el('ul', { class: 'station-needs' });
+      const ul = el('ul', { class: 'station-needs', 'data-live': '1' });
       for (const n of list) {
         ul.append(el('li', {
           class: `station-need ${n.ok ? 'ok' : 'bad'} need-${n.key}`,
@@ -128,12 +128,12 @@ export function drawStationBody(box, {
       // how long the machine may RUN on work already put in. Said in those words now.
       const secs = snap.workBank || 0;
       const paid = secs > 0 ? `${secs >= 90 ? `${Math.round(secs / 6) / 10} min` : `${secs}s`} of running time paid for` : 'No work put in yet';
-      work.append(el('span', { class: 'small', text: order ? `${order.title} · ${order.progress} · ${paid}` : paid }));
+      work.append(el('span', { class: 'small', 'data-live': '1', text: order ? `${order.title} · ${order.progress} · ${paid}` : paid }));
       const frac = order ? order.fraction : Math.min(1, (snap.workBank || 0) / Math.max(1, snap.workBankMax || 1));
-      work.append(el('div', { class: 'build-work-bar' }, el('i', { style: `width:${Math.round(frac * 100)}%` })));
+      work.append(el('div', { class: 'build-work-bar', 'data-live': '1' }, el('i', { style: `width:${Math.round(frac * 100)}%` })));
       const credit = order?.credit || snap.lastCredit;
       work.append(el('span', {
-        class: 'muted small build-work-credit',
+        class: 'muted small build-work-credit', 'data-live': '1',
         text: credit ? (order?.credit ? credit : `last shift: ${credit}`) : 'Nobody has worked this yet.',
       }));
       /**
@@ -424,6 +424,53 @@ function drawYardPanel(box, { shipyard, redraw }) {
  * already handed by js/main.js — which is exactly why this screen can be created from inside
  * build-ui.js and needs no wiring of its own.
  */
+/** R26 — the parts of a node tree that are not `data-live`, as a string: equal means "same buttons". */
+function shape(node) {
+  if (!node || node.nodeType !== 1) return node?.nodeType === 3 ? String(node.data ?? node.textContent ?? '') : '';
+  if (node.getAttribute?.('data-live')) return '<live>';
+  const kids = [...(node.childNodes || node.children || [])];
+  const inner = kids.length ? kids.map(shape).join('') : (node.textContent || '');
+  return `<${node.tagName} ${node.className || ''} ${node.getAttribute?.('title') || ''} ${node.disabled ? 'd' : ''}>${inner}</>`;
+}
+/** R26 — every `data-live` node, in document order. */
+function liveNodes(node, out) {
+  for (const k of [...(node?.children || [])]) {
+    if (k.getAttribute?.('data-live')) out.push(k);
+    else liveNodes(k, out);
+  }
+  return out;
+}
+
+/**
+ * R26 — REDRAW A BOX WITHOUT THROWING AWAY BUTTONS THAT DID NOT CHANGE.
+ *
+ * `fn()` redraws `box` the old way (replaceChildren and append). Afterwards, if what it drew has
+ * the same SHAPE as last time — same elements, classes, titles and text, ignoring `data-live`
+ * parts — the old nodes go back in and only the live parts are swapped for the new ones. A button
+ * that is the same button keeps being the same node, so a click that spans a redraw still lands.
+ *
+ * js/build-ui.js's panel redrew five sections of buttons EVERY FRAME, which made every button in
+ * them unclickable by a real mouse (a press and a release on two different nodes is not a click).
+ */
+export function steadyRedraw(box, fn) {
+  if (!box) return fn();
+  const old = [...(box.childNodes || box.children || [])];
+  const oldSig = box._steadySig;
+  const out = fn();
+  const sig = shape(box);
+  if (sig === oldSig && old.length && typeof box.replaceChildren === 'function') {
+    const newLive = liveNodes(box, []);
+    box.replaceChildren(...old);
+    const oldLive = liveNodes(box, []);
+    if (oldLive.length === newLive.length && oldLive.every(n => typeof n.replaceWith === 'function')) {
+      oldLive.forEach((n, i) => n.replaceWith(newLive[i]));
+    }
+  } else {
+    box._steadySig = sig;
+  }
+  return out;
+}
+
 export function createStationScreen({
   catalogue = null, works = null, store = null, build = null, tools = null, garage = null,
   shipyard = null, workboard = null, onLog = null, onClose = null, mount = null,
@@ -479,14 +526,31 @@ export function createStationScreen({
     // a furnace with eleven recipes is taller than the box, and a redraw two and a half times a
     // second that scrolled you back to the top would make the list unusable
     const scrolled = body.scrollTop || 0;
-    body.replaceChildren();
-    drawStationBody(body, {
-      entry, def, works, store, build, tools, garage, shipyard, workboard, onLog,
-      batch, setBatch: n => { batch = n; },
-      redraw: draw,
+    /**
+     * R26 — A REDRAW MUST NOT EAT A CLICK.
+     *
+     * This used to `replaceChildren()` the whole body every 400 ms. A click is a press AND a
+     * release on the SAME element, so any click that straddled a redraw — the press on the old
+     * "Smelt Iron" button, the release on its replacement — did nothing at all. With a furnace
+     * running, every button on the screen was being thrown away two and a half times a second:
+     * part of "I cannot add or remove items". (The Playwright spec found it first: "element was
+     * detached from the DOM, retrying", twenty-two times.) `steadyRedraw` keeps the buttons that
+     * did not change and swaps only the `data-live` parts — the state line, the checklist, the
+     * work text and bar.
+     */
+    if (lastSig === '') body._steadySig = null;           // a new station, or a button was pressed
+    lastSig = 'drawn';
+    steadyRedraw(body, () => {
+      body.replaceChildren();
+      drawStationBody(body, {
+        entry, def, works, store, build, tools, garage, shipyard, workboard, onLog,
+        batch, setBatch: n => { batch = n; },
+        redraw: () => { lastSig = ''; draw(); },
+      });
     });
     body.scrollTop = scrolled;
   }
+  let lastSig = '';
 
   /**
    * A CLOCK OF ITS OWN WHILE IT IS UP, AND THE REASON IS A CALL SITE IN SOMEBODY ELSE'S FILE.
@@ -522,6 +586,7 @@ export function createStationScreen({
       entry = e;
       batch = 1;
       open = true;
+      lastSig = '';
       root.hidden = false;
       document.body?.classList.add('station-open');
       draw();

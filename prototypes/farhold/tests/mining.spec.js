@@ -223,6 +223,8 @@ test('a drill routes itself to the best store, and the Route tool moves it to an
 
     // B, the way a player opens it — which is also what puts the panel on the screen
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyB', bubbles: true }));
+    // R26 — B opens the build ring now; Tab from it is the full panel this test reads
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Tab', bubbles: true }));
     await new Promise(r => setTimeout(r, 200));
     f.build.setTool('smooth'); f.build.setRadius(18);
     for (const dx of [0, 30, 60]) { f.build.aim(node.x + dx, node.z); f.build.paint(); }
@@ -306,6 +308,8 @@ test('a bench you walk up to can be given work, and it makes the thing', async (
     await new Promise(r => setTimeout(r, 400));
 
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyB', bubbles: true }));
+    // R26 — B opens the build ring now; Tab from it is the full panel this test reads
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Tab', bubbles: true }));
     await new Promise(r => setTimeout(r, 200));
     f.build.setTool('smooth'); f.build.setRadius(16);
     f.build.aim(spot.x, spot.z); f.build.paint();

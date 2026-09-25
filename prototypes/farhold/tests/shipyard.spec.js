@@ -50,6 +50,8 @@ test('the shipyard is reachable, and every refusal it gives can be satisfied', a
                       'control_board', 'aether_cell', 'tempered_alloy']) f.bag.add(id, 90);
 
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyB', bubbles: true }));
+    // R26 — B opens the build ring now; Tab from it is the full panel this test reads
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Tab', bubbles: true }));
     await new Promise(r => setTimeout(r, 200));
     f.build.setTool('smooth'); f.build.setRadius(20);
     for (const [dx, dz] of [[0, 0], [14, 0], [-14, 0], [0, 14], [0, -14]]) {
@@ -212,6 +214,8 @@ test('the orbital yard is reachable once you have a hauler, and the panel says w
     await new Promise(r => setTimeout(r, 400));
 
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyB', bubbles: true }));
+    // R26 — B opens the build ring now; Tab from it is the full panel this test reads
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Tab', bubbles: true }));
     await new Promise(r => setTimeout(r, 200));
     f.build.setTool('smooth'); f.build.setRadius(20);
     for (const [dx, dz] of [[0, 0], [13, 0], [-13, 0], [0, 13], [0, -13]]) { f.build.aim(spot.x + dx, spot.z + dz); f.build.paint(); }

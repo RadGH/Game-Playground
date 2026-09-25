@@ -63,6 +63,8 @@ test('a motorcycle is built at a bench, ridden with G, and burns what it drinks'
      * costs, which benches have to be in reach, G getting on it — is unchanged.
      */
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyB', bubbles: true }));
+    // R26 — B opens the build ring now; Tab from it is the full panel this test reads
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Tab', bubbles: true }));
     await new Promise(r => setTimeout(r, 250));
     const awayFromBench = document.querySelector('#build-ui .build-garage')?.textContent || '';
 

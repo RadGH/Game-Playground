@@ -971,6 +971,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       if ((!key || key === 'sunfx') && sunfx) sunfx.setEnabled(v.sunfx);
       // R23: Off / Low / High (js/gfx.js). `?quality=low` holds it at Off and `?graphics=` wins over both.
       if (!key || key === 'graphics') graphics.setLevel(v.graphics, { explicit: key === 'graphics' });
+      if (!key || key === 'grassDistance') graphics.setGrassDistance?.(v.grassDistance);
       // D15: the field of view. settings.js used to reach for `window.farhold.camera` on a timer,
       // because the agent that added it could not edit this file — it has the camera handed to it.
       if ((!key || key === 'fov') && camera?.isPerspectiveCamera && camera.fov !== v.fov) {
@@ -5209,7 +5210,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       .map(id => (resourceData?.materials?.[id]?.name || id).toLowerCase())
       .slice(0, 3).join(', ');
     const tool = (resourceData?.tools?.[toolTierFor(player)]?.name || 'bare hands').toLowerCase();
-    return `<b>E</b> or swing to ${about.verb || 'work'} the ${name}`
+    return `<b>E</b> to ${about.verb || 'work'} the ${name}`
       + (gives ? ` · ${gives}` : '') + ` · ${tool}`;
   }
 
@@ -9116,7 +9117,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
          */
         : near.kind === 'machine' ? `<b>E</b> work the ${(near.machine.name || 'machine').toLowerCase()}`
           + (near.works ? ` · ${works.stateText(near.works)}` : '')
-        : near.kind === 'seam' ? `<b>E</b> or swing to work the ${(resourceData?.materials?.[near.seam.resource]?.name || near.seam.resource).toLowerCase()}`
+        : near.kind === 'seam' ? `<b>E</b> to work the ${(resourceData?.materials?.[near.seam.resource]?.name || near.seam.resource).toLowerCase()}`
           + ` · ${(resourceData?.richnessBands?.find(b => b.key === near.seam.band)?.name || near.seam.band || '').toLowerCase()}`
           + ` · ${(resourceData?.tools?.[toolTierFor(player)]?.name || 'bare hands').toLowerCase()}`
         /**

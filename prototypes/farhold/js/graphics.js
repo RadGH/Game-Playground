@@ -26,7 +26,7 @@ import { createWind } from './wind.js';
 import { setWind, setAtmosphere, setAtmosphereFeatures, refreshMaterials, ATMO } from './atmosphere.js';
 import { fogFor, gradeFor } from './sky-palette.js';
 import { createPostFx } from './postfx.js';
-import { createGpuGrass } from './grass-gpu.js';
+import { createGpuGrass, GRASS_DISTANCES, DEFAULT_GRASS_DISTANCE } from './grass-gpu.js';
 import { BIOMES } from '../../../worldgen/js/biomes.js';
 
 export function createGraphics({ renderer, scene, camera, settings = null, lowQuality = false, seed = 1, override = null, world = () => ({}) } = {}) {
@@ -34,6 +34,7 @@ export function createGraphics({ renderer, scene, camera, settings = null, lowQu
   const wind = createWind({ seed });
   const post = createPostFx(renderer, gfx);
   let grass = null, grassFor = null;
+  let grassDistance = settings?.get?.('grassDistance') || DEFAULT_GRASS_DISTANCE;
   let fogBase = null, fogBaseAt = [Infinity, Infinity], fogBaseClock = 0;
   let wet = 0, lastSunY = 0, rising = true;
   let lastMode = 'ground';
@@ -68,7 +69,9 @@ export function createGraphics({ renderer, scene, camera, settings = null, lowQu
     const want = gfx.gpuGrass && w.terrain && w.view;
     if (grass && (!want || grassFor !== w.terrain)) { grass.dispose(); grass = null; grassFor = null; }
     if (want && !grass) {
-      grass = createGpuGrass(scene, { terrain: w.terrain, view: w.view, props: w.props, features: w.features, gfx });
+      // R25 — the Grass distance setting picks the radius and the blade budget (grass-gpu.js)
+      const dist = GRASS_DISTANCES[grassDistance] || GRASS_DISTANCES[DEFAULT_GRASS_DISTANCE];
+      grass = createGpuGrass(scene, { terrain: w.terrain, view: w.view, props: w.props, features: w.features, gfx: { ...gfx, grassRadius: dist.radius, grassBlades: dist.blades } });
       grassFor = w.terrain;
     }
     w.props?.setGrassMode?.(grass ? 'gpu' : 'cpu', lastXZ?.[0], lastXZ?.[1]);
@@ -105,6 +108,14 @@ export function createGraphics({ renderer, scene, camera, settings = null, lowQu
       gfx = next;
       if (changed || !api._applied) { api._applied = true; applyLevel(); }
       return gfx.level;
+    },
+    /** R25 — the Grass distance setting: rebuild the field at the new radius. */
+    setGrassDistance(key) {
+      if (!GRASS_DISTANCES[key] || key === grassDistance) return grassDistance;
+      grassDistance = key;
+      if (grass) { grass.dispose(); grass = null; grassFor = null; }
+      ensureGrass();
+      return grassDistance;
     },
     /** The weather view is built after this, and rebuilt on every new world. */
     setWeatherView(v) { weatherView = v; v?.setGfx?.(gfx); },

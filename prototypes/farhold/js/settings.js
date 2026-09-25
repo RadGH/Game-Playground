@@ -27,6 +27,7 @@ export const DEFAULTS = {
   viewDistance: 1,             // a multiplier on how far the ground is drawn, 0.5x to 6x
   density: 1,                  // how thick the scatter is, up to 6x on a strong card
   grass: true,
+  grassDistance: 'veryFar',    // R25 — see GRASS_DISTANCES in js/grass-gpu.js
   sunfx: true,                 // god rays, lens flare and the sunset wash
   /**
    * R23 — GRAPHICS EFFECTS: off, low or high (js/gfx.js says what each one turns on).
@@ -213,6 +214,12 @@ const FIELDS = [
   { key: 'viewDistance', label: 'View distance', kind: 'range', min: 1, max: 6, step: 0.5, unit: '×', group: 'Picture' },
   { key: 'density', label: 'Trees and rocks', kind: 'range', min: 0, max: 6, step: 0.25, unit: '×', group: 'Picture' },
   { key: 'grass', label: 'Grass', kind: 'toggle', group: 'Picture' },
+  // R25 — "have it less dense but go 3-4 times further… or add a Grass distance slider (with
+  // options to go really far)". Needs Graphics effects on High (the GPU grass).
+  { key: 'grassDistance', label: 'Grass distance', kind: 'choice', group: 'Picture', options: [
+    ['near', 'Near (38 m)'], ['medium', 'Medium (70 m)'], ['far', 'Far (110 m)'],
+    ['veryFar', 'Very far (150 m)'], ['extreme', 'Extreme (200 m)'],
+  ] },
   { key: 'graphics', label: 'Graphics effects', kind: 'choice', options: [['off', 'Off'], ['low', 'Low'], ['high', 'High']], group: 'Picture' },
   { key: 'sunfx', label: 'Sun rays and flare', kind: 'toggle', group: 'Picture' },
   { key: 'damageNumbers', label: 'Damage numbers', kind: 'toggle', group: 'Picture' },

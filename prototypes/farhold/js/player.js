@@ -608,6 +608,7 @@ export function createController(terrainIn, balance = {}, camera, {
             self.swing = 0.35;
             self.swingClip = hold === 'draw' ? 'shoot' : 'castStaff';
             feel.swing.clip = self.swingClip;
+            feel.swing.seq = (feel.swing.seq || 0) + 1;
             landMain();
           }
           self.charge = null;
@@ -643,6 +644,7 @@ export function createController(terrainIn, balance = {}, camera, {
           self.swing = Math.max(0.2, wind + recover + 0.12);
           self.swingClip = sp?.clip || 'attack';
           feel.swing.clip = self.swingClip;
+          feel.swing.seq = (feel.swing.seq || 0) + 1;      // R25: a new swing restarts its clip
           // stretch the clip to the swing it is actually playing, so a hasted character speeds up
           self.swingRate = sp?.clipSeconds > 0 ? Math.max(0.35, Math.min(2.6, sp.clipSeconds / Math.max(0.12, wind + recover))) : 1;
           if (wind <= 0) landMain();
@@ -665,6 +667,7 @@ export function createController(terrainIn, balance = {}, camera, {
           // main hand's last swing, so a second weapon never visibly swung
           self.swingClip = sp?.clip || 'offSlash';
           feel.swing.clip = self.swingClip;
+          feel.swing.seq = (feel.swing.seq || 0) + 1;
           self.swingRate = sp?.clipSeconds > 0 ? Math.max(0.35, Math.min(2.6, sp.clipSeconds / Math.max(0.12, wind * 1.45))) : 1;
           if (wind <= 0) landOff();
         }

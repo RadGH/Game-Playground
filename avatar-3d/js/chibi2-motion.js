@@ -54,7 +54,7 @@ export const CHIBI2_WORK_ANIMS = ['pickSwing', 'chopSwing', 'forage'];
 export const CHIBI2_MELEE_ANIMS = [
   'chop', 'hack', 'smash', 'uppercut', 'stab', 'flurry', 'bash', 'block', 'parry',
   'offSlash', 'offThrust', 'crossSlash', 'twinCleave', 'twinSlam', 'spinSweep', 'thrust2h',
-  'punch', 'kick', 'throw', 'castBook',
+  'punch', 'kick', 'throw', 'castBook', 'whirl',
 ];
 
 /**
@@ -117,7 +117,7 @@ const LENGTHS = {
   pickSwing: 1, chopSwing: 0.85, forage: 1.4,
   chop: 0.72, hack: 0.6, smash: 0.9, uppercut: 0.6, stab: 0.42, flurry: 0.6, bash: 0.55, block: 1.6,
   parry: 0.45, offSlash: 0.5, offThrust: 0.42, crossSlash: 0.7, twinCleave: 0.95, twinSlam: 1.1,
-  spinSweep: 1.0, thrust2h: 0.55, punch: 0.4, kick: 0.6, throw: 0.7, castBook: 1.1,
+  spinSweep: 1.0, whirl: 0.34, thrust2h: 0.55, punch: 0.4, kick: 0.6, throw: 0.7, castBook: 1.1,
   cheer: 1.6, bowGreet: 1.8, point: 1.4, shrug: 1.2, nod: 1.0, headShake: 1.2, laugh: 1.6, clap: 1.4,
   salute: 1.6, kneel: 3, sitGround: 3.4, pray: 3, dance: 1.6, lookAround: 3.2, crossArms: 3,
   stretch: 2.2, drink: 2.2, sleep: 3.6,
@@ -510,7 +510,7 @@ const CLIPS = {
     p.kneeL[0] += 0.25 * strike * rec;
     if (ctx.hold.left === 'shield') { p.armL = [-0.45 * rec, 0.9 * rec, 0.05]; p.elbowL = [-1.35 * rec - 0.2, -0.4 * rec, 0]; }
     // the blade goes back over the head on the wind, and the wrist snaps it through on the strike
-    return { R: [(-3.4 * up - 0.4 * strike - 1.0 * (1 - wind)) * rec - 0.95 * (1 - rec), (0.4 * up - 0.2 * strike) * rec, 0] };
+    return { R: [(-3.4 * up - 1.2 * strike - 1.0 * (1 - wind)) * rec - 0.95 * (1 - rec), (0.4 * up - 0.2 * strike) * rec, 0] };
   },
   attack(p, u, cy, ctx, o) { return CLIPS[attackFor(ctx.hold)](p, u, cy, ctx, o); },
   slash(p, u, cy, ctx, o, dir = 1) {
@@ -674,7 +674,7 @@ const CLIPS = {
     p.chest[2] = (0.1 * up - 0.12 * strike) * rec;
     p.kneeL[0] += 0.3 * strike * rec; p.armL[0] = (-0.6 + 0.3 * strike) * rec; p.elbowL[0] = -0.9 * rec - 0.16;
     if (ctx.hold.left === 'shield') { p.armL = [-0.45 * rec, 0.9 * rec, 0.05]; p.elbowL = [-1.35 * rec - 0.2, -0.4 * rec, 0]; }
-    return { R: [(-3.2 * up - 0.5 * strike - 1.2 * (1 - wind)) * rec - 0.55 * (1 - rec), (0.3 * up) * rec, (0.5 * up - 0.4 * strike) * rec] };
+    return { R: [(-3.2 * up - 1.15 * strike - 1.2 * (1 - wind)) * rec - 0.55 * (1 - rec), (0.3 * up) * rec, (0.5 * up - 0.4 * strike) * rec] };
   },
   hack(p, u, cy, ctx, o) {
     // a flat hack at waist height, the body turning through it
@@ -695,7 +695,7 @@ const CLIPS = {
     p.kneeL[0] += 0.45 * strike * rec; p.kneeR[0] += 0.4 * strike * rec;
     p.armL[0] = (-0.7 * up + 0.2 * strike) * rec; p.armL[2] = -0.14 - 0.4 * up * rec; p.elbowL[0] = -0.7 * rec - 0.16;
     if (ctx.hold.left === 'shield') { p.armL = [-0.45 * rec, 0.9 * rec, 0.05]; p.elbowL = [-1.35 * rec - 0.2, -0.4 * rec, 0]; }
-    return { R: [(-3.5 * up - 0.3 * strike - 1.0 * (1 - wind)) * rec - 0.55 * (1 - rec), 0, 0] };
+    return { R: [(-3.5 * up - 1.25 * strike - 1.0 * (1 - wind)) * rec - 0.55 * (1 - rec), 0, 0] };   // the head lands at body height, not at the feet
   },
   uppercut(p, u, cy, ctx, o) {
     const load = ss(u, 0, 0.3), rise = ss(u, 0.3, 0.52), rec = 1 - ss(u, 0.7, 1);
@@ -783,7 +783,7 @@ const CLIPS = {
     p.chest[1] += ((0.5 * upR - 0.6 * b) - (0.5 * upL - 0.6 * d) * 1) * rec; p.hips[1] += p.chest[1] * 0.4;
     p.chest[0] += (0.35 * b * (1 - c) + 0.35 * d - 0.15 * (upR + upL)) * rec;
     p.kneeL[0] += 0.3 * (b + d) * rec * 0.5; p.kneeR[0] += 0.3 * (b + d) * rec * 0.5;
-    return { R: [(-3.3 * upR - 0.5 * b - 1.3 * (1 - a)) * rec + END(ctx) * (1 - rec), 0, 0.3 * upR * rec], L: [(-3.3 * upL - 0.5 * d - 1.3 * (1 - c)) * rec + END(ctx) * (1 - rec), 0, -0.3 * upL * rec] };
+    return { R: [(-3.3 * upR - 1.1 * b - 1.3 * (1 - a)) * rec + END(ctx) * (1 - rec), 0, 0.3 * upR * rec], L: [(-3.3 * upL - 1.1 * d - 1.3 * (1 - c)) * rec + END(ctx) * (1 - rec), 0, -0.3 * upL * rec] };
   },
   twinSlam(p, u, cy, ctx, o) {
     // both arms up and held, then down together — two two-handers, or one held in both hands
@@ -806,6 +806,16 @@ const CLIPS = {
     p.armR = [-1.1 * out, 0, 0.6 * out + 0.12]; p.elbowR[0] = -0.3 * out - 0.16;
     p.armL = [-1.0 * out, 0, -0.5 * out - 0.12]; p.chest[0] += 0.15 * out;
     return { R: [-1.6 * out * rec - 0.95 * (1 - out * rec), 0, -0.6 * out] };
+  },
+  whirl(p, u, cy, ctx, o) {
+    // a LOOPING spin: one full turn per cycle, weapon out at arm's length — Farhold's Whirlwind
+    // plays it for as many spins as the skill makes (a one-turn clip restarted every spin never
+    // finished its turn)
+    o.bob = stance(p, 0.9) - 0.02;
+    p.root[1] = -u * PI * 2;
+    p.armR = [-1.15, 0, 0.7]; p.elbowR[0] = -0.25;
+    p.armL = [-1.0, 0, -0.6]; p.chest[0] += 0.12; p.head[1] = 0.15;
+    return REST_PITCH[ctx.hold.right] ? { R: [-1.6, 0, -0.5] } : {};
   },
   thrust2h(p, u, cy, ctx, o) {
     // A POLEARM with both hands: the rear hand drives, the front hand guides

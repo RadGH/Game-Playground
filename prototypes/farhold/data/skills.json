@@ -140,7 +140,7 @@
    "radius": 4.5,
    "cooldown": 7,
    "mp": 6,
-   "desc": "Strikes everything within 4.5 m of you for 115% weapon damage. 6 mana, 7s cooldown."
+   "desc": "Strikes everything within 4.5 m of you for 143% weapon damage. 6 mana, 7s cooldown."
   },
   "sunder": {
    "name": "Sunder",
@@ -152,7 +152,7 @@
    "status": "weaken",
    "cooldown": 9,
    "mp": 8,
-   "desc": "Strikes everything in an 80° arc 3.2 m in front of you for 160% weapon damage. Leaves the target Weakened: the target deals 35% less damage for 7s. 8 mana, 9s cooldown."
+   "desc": "Strikes everything in an 80° arc 3.2 m in front of you for 224% weapon damage. Leaves the target Weakened: the target deals 35% less damage for 7s. 8 mana, 9s cooldown."
   },
   "shield_bash": {
    "name": "Shield Bash",
@@ -164,17 +164,20 @@
    "status": "web",
    "cooldown": 8,
    "mp": 6,
-   "desc": "Strikes everything in a 126° arc 2.8 m in front of you for 130% weapon damage. Leaves the target Snared: the target moves 80% slower for 3s. 6 mana, 8s cooldown."
+   "desc": "Strikes everything in a 126° arc 2.8 m in front of you for 172% weapon damage. Leaves the target Snared: the target moves 80% slower for 3s. 6 mana, 8s cooldown."
   },
   "whirlwind": {
    "name": "Whirlwind",
    "shape": "around",
    "element": "physical",
-   "mult": 1.6,
+   "mult": 0.8,
    "radius": 5.5,
    "cooldown": 12,
    "mp": 14,
-   "desc": "Strikes everything within 5.5 m of you for 160% weapon damage. 14 mana, 12s cooldown."
+   "desc": "Spins 5 times, striking everything within 5.5 m of you for 131% weapon damage on every spin. Leaves the target Bleeding: a further 72% weapon damage over 6s. 14 mana, 12s cooldown.",
+   "repeats": 5,
+   "repeatEvery": 0.32,
+   "status": "bleed"
   },
   "charge": {
    "name": "Charge",
@@ -185,7 +188,8 @@
    "splash": 2.4,
    "cooldown": 10,
    "mp": 10,
-   "desc": "Carries you 12 m forward, striking everything within 2.4 m of your path for 170% weapon damage. 10 mana, 10s cooldown."
+   "desc": "Carries you 12 m forward, striking everything within 2.4 m of your path for 252% weapon damage. Leaves the target Weakened: the target deals 35% less damage for 7s. 10 mana, 10s cooldown.",
+   "status": "weaken"
   },
   "execute": {
    "name": "Execute",
@@ -196,7 +200,8 @@
    "arc": 1.2,
    "cooldown": 14,
    "mp": 12,
-   "desc": "Strikes everything in a 69° arc 3 m in front of you for 320% weapon damage. 12 mana, 14s cooldown."
+   "desc": "Strikes everything in a 69° arc 3 m in front of you for 576% weapon damage. Leaves the target Weakened: the target deals 35% less damage for 7s. 12 mana, 14s cooldown.",
+   "status": "weaken"
   },
   "aimed_shot": {
    "name": "Aimed Shot",
@@ -207,7 +212,7 @@
    "splash": 1.2,
    "cooldown": 5,
    "mp": 4,
-   "desc": "Looses one shot out to 42 m for 220% weapon damage, splashing everything within 1.2 m of where the shot lands. 4 mana, 5s cooldown."
+   "desc": "Looses one shot out to 42 m for 238% weapon damage, splashing everything within 1.2 m of where the shot lands. 4 mana, 5s cooldown."
   },
   "multi_shot": {
    "name": "Multi Shot",
@@ -218,7 +223,7 @@
    "splash": 1.6,
    "cooldown": 8,
    "mp": 10,
-   "desc": "Looses 5 shots in an 11° fan out to 34 m, each for 80% weapon damage, splashing everything within 1.6 m of where a shot lands. 10 mana, 8s cooldown.",
+   "desc": "Looses 5 shots in an 11° fan out to 34 m, each for 106% weapon damage, splashing everything within 1.6 m of where a shot lands. 10 mana, 8s cooldown.",
    "projectiles": 5,
    "spread": 0.2
   },
@@ -232,7 +237,7 @@
    "status": "web",
    "cooldown": 9,
    "mp": 8,
-   "desc": "Looses 2 shots in a 5° fan out to 38 m, each for 100% weapon damage, splashing everything within 1.4 m of where a shot lands. Leaves the target Snared: the target moves 80% slower for 3s. 8 mana, 9s cooldown.",
+   "desc": "Looses 2 shots in a 5° fan out to 38 m, each for 140% weapon damage, splashing everything within 1.4 m of where a shot lands. Leaves the target Snared: the target moves 80% slower for 3s. 8 mana, 9s cooldown.",
    "projectiles": 2,
    "spread": 0.09
   },
@@ -245,7 +250,8 @@
    "radius": 6.5,
    "cooldown": 14,
    "mp": 16,
-   "desc": "Falls on a spot up to 32 m away, striking everything within 6.5 m of that spot for 150% weapon damage. 16 mana, 14s cooldown."
+   "desc": "Falls on a spot up to 32 m away, striking everything within 6.5 m of that spot for 270% weapon damage. Leaves the target Snared: the target moves 80% slower for 3s. 16 mana, 14s cooldown.",
+   "status": "web"
   },
   "poison_dart": {
    "name": "Poison Dart",
@@ -257,7 +263,7 @@
    "status": "poison",
    "cooldown": 5,
    "mp": 6,
-   "desc": "Looses one bolt out to 34 m for 110% weapon damage as poison, splashing everything within 1.5 m of where the bolt lands. Leaves the target Poisoned: a further 144% weapon damage over 8s. 6 mana, 5s cooldown.",
+   "desc": "Looses one bolt out to 34 m for 119% weapon damage as poison, splashing everything within 1.5 m of where the bolt lands. Leaves the target Poisoned: a further 156% weapon damage over 8s. 6 mana, 5s cooldown.",
    "statusMult": 1.8
   },
   "shadowstep": {
@@ -269,7 +275,7 @@
    "splash": 2,
    "cooldown": 9,
    "mp": 10,
-   "desc": "Carries you 14 m forward, striking everything within 2 m of your path for 210% weapon damage as shadow. 10 mana, 9s cooldown."
+   "desc": "Carries you 14 m forward, striking everything within 2 m of your path for 294% weapon damage as shadow. 10 mana, 9s cooldown."
   },
   "eviscerate": {
    "name": "Eviscerate",
@@ -281,7 +287,7 @@
    "status": "bleed",
    "cooldown": 7,
    "mp": 8,
-   "desc": "Strikes everything in a 63° arc 2.8 m in front of you for 240% weapon damage. Leaves the target Bleeding: a further 131% weapon damage over 6s. 8 mana, 7s cooldown."
+   "desc": "Strikes everything in a 63° arc 2.8 m in front of you for 298% weapon damage. Leaves the target Bleeding: a further 162% weapon damage over 6s. 8 mana, 7s cooldown."
   },
   "smoke": {
    "name": "Smoke",
@@ -314,7 +320,7 @@
    "status": "burn",
    "cooldown": 13,
    "mp": 18,
-   "desc": "Falls on a spot up to 30 m away, striking everything within 6 m of that spot for 180% weapon damage as fire. Leaves the target Burning: a further 95% weapon damage over 5s. 18 mana, 13s cooldown."
+   "desc": "Falls on a spot up to 30 m away, striking everything within 6 m of that spot for 310% weapon damage as fire. Leaves the target Burning: a further 163% weapon damage over 5s. 18 mana, 13s cooldown."
   },
   "frost_nova": {
    "name": "Frost Nova",
@@ -325,7 +331,7 @@
    "status": "chill",
    "cooldown": 9,
    "mp": 14,
-   "desc": "Strikes everything within 6 m of you for 120% weapon damage as ice. Leaves the target Chilled: the target moves 45% slower for 4s. 14 mana, 9s cooldown."
+   "desc": "Strikes everything within 6 m of you for 168% weapon damage as ice. Leaves the target Chilled: the target moves 45% slower for 4s. 14 mana, 9s cooldown."
   },
   "ice_lance": {
    "name": "Ice Lance",
@@ -337,7 +343,7 @@
    "status": "chill",
    "cooldown": 7,
    "mp": 12,
-   "desc": "Fires a 1.8 m wide beam 26 m straight ahead, striking everything in the line for 190% weapon damage as ice. Leaves the target Chilled: the target moves 45% slower for 4s. 12 mana, 7s cooldown."
+   "desc": "Fires a 1.8 m wide beam 26 m straight ahead, striking everything in the line for 236% weapon damage as ice. Leaves the target Chilled: the target moves 45% slower for 4s. 12 mana, 7s cooldown."
   },
   "chain_bolt": {
    "name": "Chain Bolt",
@@ -349,7 +355,7 @@
    "status": "shock",
    "cooldown": 7,
    "mp": 12,
-   "desc": "Looses 3 bolts in an 8° fan out to 40 m, each for 110% weapon damage as lightning, splashing everything within 3.2 m of where a bolt lands. Leaves the target Shocked: the target takes 30% more damage for 5s. 12 mana, 7s cooldown.",
+   "desc": "Looses 3 bolts in an 8° fan out to 40 m, each for 136% weapon damage as lightning, splashing everything within 3.2 m of where a bolt lands. Leaves the target Shocked: the target takes 30% more damage for 5s. 12 mana, 7s cooldown.",
    "projectiles": 3,
    "spread": 0.14
   },
@@ -362,7 +368,7 @@
    "status": "shock",
    "cooldown": 12,
    "mp": 18,
-   "desc": "Strikes everything within 7 m of you for 170% weapon damage as lightning. Leaves the target Shocked: the target takes 30% more damage for 5s. 18 mana, 12s cooldown."
+   "desc": "Strikes everything within 7 m of you for 279% weapon damage as lightning. Leaves the target Shocked: the target takes 30% more damage for 5s. 18 mana, 12s cooldown."
   },
   "storm_beam": {
    "name": "Storm Beam",
@@ -373,7 +379,8 @@
    "width": 2.4,
    "cooldown": 11,
    "mp": 20,
-   "desc": "Fires a 2.4 m wide beam 30 m straight ahead, striking everything in the line for 220% weapon damage as lightning. 20 mana, 11s cooldown."
+   "desc": "Fires a 2.4 m wide beam 30 m straight ahead, striking everything in the line for 343% weapon damage as lightning. Leaves the target Shocked: the target takes 30% more damage for 5s. 20 mana, 11s cooldown.",
+   "status": "shock"
   },
   "shadow_lance": {
    "name": "Shadow Lance",
@@ -384,7 +391,7 @@
    "splash": 2,
    "cooldown": 5,
    "mp": 10,
-   "desc": "Looses one bolt out to 38 m for 190% weapon damage as shadow, splashing everything within 2 m of where the bolt lands. 10 mana, 5s cooldown."
+   "desc": "Looses one bolt out to 38 m for 205% weapon damage as shadow, splashing everything within 2 m of where the bolt lands. 10 mana, 5s cooldown."
   },
   "curse": {
    "name": "Curse",
@@ -396,7 +403,7 @@
    "status": "curse",
    "cooldown": 12,
    "mp": 14,
-   "desc": "Looses one bolt out to 34 m for 80% weapon damage as shadow, splashing everything within 5 m of where the bolt lands. Leaves the target Cursed: the target takes 25% more damage and moves 15% slower for 8s. 14 mana, 12s cooldown."
+   "desc": "Looses one bolt out to 34 m for 131% weapon damage as shadow, splashing everything within 5 m of where the bolt lands. Leaves the target Cursed: the target takes 25% more damage and moves 15% slower for 8s. 14 mana, 12s cooldown."
   },
   "drain": {
    "name": "Drain",
@@ -408,7 +415,7 @@
    "heal": 0.12,
    "cooldown": 9,
    "mp": 12,
-   "desc": "Fires a 1.6 m wide beam 22 m straight ahead, striking everything in the line for 150% weapon damage as shadow. Heals you for 12% of the damage dealt. 12 mana, 9s cooldown."
+   "desc": "Fires a 1.6 m wide beam 22 m straight ahead, striking everything in the line for 210% weapon damage as shadow. Heals you for 12% of the damage dealt. 12 mana, 9s cooldown."
   },
   "arcane_burst": {
    "name": "Arcane Burst",
@@ -419,7 +426,8 @@
    "radius": 5,
    "cooldown": 10,
    "mp": 18,
-   "desc": "Falls on a spot up to 34 m away, striking everything within 5 m of that spot for 230% weapon damage as arcane. 18 mana, 10s cooldown."
+   "desc": "Falls on a spot up to 34 m away, striking everything within 5 m of that spot for 340% weapon damage as arcane. Leaves the target Cursed: the target takes 25% more damage and moves 15% slower for 8s. 18 mana, 10s cooldown.",
+   "status": "curse"
   },
   "meteor": {
    "name": "Fallstone",
@@ -431,7 +439,7 @@
    "status": "burn",
    "cooldown": 22,
    "mp": 30,
-   "desc": "Falls on a spot up to 36 m away, striking everything within 8 m of that spot for 340% weapon damage as fire. Leaves the target Burning: a further 179% weapon damage over 5s. 30 mana, 22s cooldown."
+   "desc": "Falls on a spot up to 36 m away, striking everything within 8 m of that spot for 830% weapon damage as fire. Leaves the target Burning: a further 436% weapon damage over 5s. 30 mana, 22s cooldown."
   },
   "mend": {
    "name": "Mend",
@@ -506,7 +514,7 @@
    "heal": 0.15,
    "cooldown": 16,
    "mp": 20,
-   "desc": "Strikes everything within 6.5 m of you for 140% weapon damage as holy. Heals you for 15% of your maximum health. 20 mana, 16s cooldown."
+   "desc": "Strikes everything within 6.5 m of you for 274% weapon damage as holy. Heals you for 15% of your maximum health. 20 mana, 16s cooldown."
   },
   "raise_thrall": {
    "name": "Raise Thrall",
@@ -800,5 +808,6 @@
    "quicken",
    "meteor"
   ]
- }
+ },
+ "_r25Doc": "R25: a skill's damage share is multiplied by js/skills.js effectiveMult — its unlock level (x1.0 at 1 to x2.0 at 24) and its cooldown (+8% per second past 4) — so a long wait and a late unlock buy a bigger hit. The late damage skills that had no debuff got one (Storm Beam shock, Arcane Burst curse, Rain of Arrows web, Whirlwind bleed, Execute and Charge weaken). Whirlwind spins five times at 80% (was one hit at 160%)."
 }

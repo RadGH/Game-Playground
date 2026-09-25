@@ -931,7 +931,7 @@ export const CLIP_SECONDS = {
   castStaff: 0.7, channel: 1.6, attack: 0.85, cast: 1.25,
   // 2026-09-24, avatar-3d/js/chibi2-motion.js CHIBI2_MELEE_ANIMS
   chop: 0.72, hack: 0.6, smash: 0.9, stab: 0.42, offSlash: 0.5, offThrust: 0.42,
-  twinCleave: 0.95, twinSlam: 1.1, thrust2h: 0.55, bash: 0.55, throw: 0.7, castBook: 1.1,
+  twinCleave: 0.95, twinSlam: 1.1, thrust2h: 0.55, bash: 0.55, throw: 0.7, castBook: 1.1, whirl: 0.34,
 };
 
 /**

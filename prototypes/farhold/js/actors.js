@@ -109,7 +109,7 @@ const COMBAT_CLIPS = {
   shoot: 'attack', reload: 'attack', castPoint: 'cast', castStaff: 'cast', channel: 'cast',
   // 2026-09-24 — the weapon families (avatar-3d/js/chibi2-motion.js CHIBI2_MELEE_ANIMS)
   chop: 'attack', hack: 'attack', smash: 'attack', stab: 'attack', offSlash: 'attack', offThrust: 'attack',
-  twinCleave: 'attack', twinSlam: 'attack', thrust2h: 'attack', bash: 'attack', throw: 'attack', castBook: 'cast',
+  twinCleave: 'attack', twinSlam: 'attack', thrust2h: 'attack', bash: 'attack', throw: 'attack', castBook: 'cast', whirl: 'attack',
 };
 
 /** Animation names differ slightly between the two builders; this is the translation. */
@@ -126,9 +126,15 @@ function anim(actor, name) {
    * clip is substituted here, for the player's body only. `feel.swing.clip` is posted by the
    * controller when the swing starts, which is the frame the animation should start on.
    */
-  if (name === 'attack' && actor.playerDriven && feel.swing.clip) name = feel.swing.clip;
+  // R25 — a NEW swing restarts its clip; the same swing asked for again next frame does not (the
+  // restart-every-frame is what froze every strike on its first frames — see chibi2.js `play`)
+  let restart = false;
+  if (name === 'attack' && actor.playerDriven && feel.swing.clip) {
+    name = feel.swing.clip;
+    if ((feel.swing.seq || 0) !== actor._swingSeq) { actor._swingSeq = feel.swing.seq || 0; restart = true; }
+  }
   if (COMBAT_CLIPS[name] && !actor.combatClips) name = COMBAT_CLIPS[name];
-  actor.setAnim(name);
+  actor.setAnim(name, undefined, restart);
 }
 export { anim as setActorAnim };
 

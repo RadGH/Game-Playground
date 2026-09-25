@@ -1636,6 +1636,33 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       spellfx.aoe({ points, element: plan.element, stagger: 0.04 });
       const hits = field.strikeArea(control.x, control.z, plan.radius, player, { falloff: 0.6, ...strikeOpts });
       skillSound(plan, hits);
+      /**
+       * R25 — WHIRLWIND SPINS FIVE TIMES. "Work like it does currently but at half damage, but now
+       * repeats 5 times so that you continually slash around in circles… It's OK (and preferred) if
+       * it hits the same enemy each strike, but not multiple times per strike." Each repeat is one
+       * whole `strikeArea` where you are standing NOW (you can walk while you spin), and one
+       * strikeArea hits each body once — so one hit per enemy per spin, by construction.
+       */
+      if (plan.repeats > 1) {
+        feel.swing.clip = 'whirl';
+        for (let k = 1; k < plan.repeats; k++) {
+          setTimeout(() => {
+            if (!state.running || player.hp <= 0) return;
+            const ring = [];
+            for (let q = 0; q < 8; q++) {
+              const ang = (q / 8) * Math.PI * 2 + k * 0.4;
+              const px = control.x + Math.cos(ang) * plan.radius * 0.75, pz = control.z + Math.sin(ang) * plan.radius * 0.75;
+              ring.push(new THREE.Vector3(px, terrain.heightAt(px, pz) + 0.1, pz));
+            }
+            spellfx.aoe({ points: ring, element: plan.element, stagger: 0.02 });
+            fx.swipe?.({ x: control.x, y: control.y, z: control.z, yaw: control.yaw + k * 1.3, reach: plan.radius, arc: Math.PI * 2 });
+            skillSound(plan, field.strikeArea(control.x, control.z, plan.radius, player, { falloff: 0.6, ...strikeOpts }));
+            feel.swing.clip = 'whirl';
+            control.swing = Math.max(control.swing, (plan.repeatEvery || 0.32) + 0.05);
+          }, k * (plan.repeatEvery || 0.32) * 1000);
+        }
+        control.swing = Math.max(control.swing, (plan.repeatEvery || 0.32) + 0.05);
+      }
       // `linger` is offered on the nova tree too, and a nova leaves its pool where you stood
       if (plan.ground > 0) {
         dropPool({

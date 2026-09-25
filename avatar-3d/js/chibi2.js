@@ -429,11 +429,19 @@ export async function createChibi2Character(avatar, opts = {}) {
     asset.mixer.addEventListener('finished', e => { if (e.action === action && anim !== 'dead') play('idle'); });
     play('idle', 0); group.userData.fxHeight = asset.rig.height;
   }
-  function play(name, fade = 0.12) {
+  /**
+   * `restart` (2026-09-24): a one-shot that is ALREADY PLAYING is left alone unless the caller asks
+   * for it again on purpose. Farhold asks for its attack clip every frame of a swing, and a one-shot
+   * used to restart on every ask — so the strike never got past its first frames, which is a large
+   * part of why attacks looked stiff. A game that wants back-to-back swings passes `restart: true`
+   * when a NEW swing begins (Farhold counts swings on `feel.swing.seq`).
+   */
+  function play(name, fade = 0.12, restart = false) {
     if (disposed) return;
     if (!anims.includes(name)) name = 'idle';
     const next = asset.actions[name];
     if (next === action && !ONE_SHOTS.has(name)) return;
+    if (next === action && ONE_SHOTS.has(name) && !restart && next.isRunning()) return;
     const previous = action;
     next.reset().setEffectiveTimeScale(1).setEffectiveWeight(1);
     next.setLoop(ONE_SHOTS.has(name) ? THREE.LoopOnce : THREE.LoopRepeat, Infinity);

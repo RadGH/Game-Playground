@@ -162,8 +162,11 @@ test('spell power and the outgoing buff are each applied exactly once', () => {
   assert.match(rpgSrc, /element !== 'physical' && a\?\.spellPower\) amount \*= 1 \+ a\.spellPower/);
   assert.match(rpgSrc, /attacker\.equipment && !defender\.equipment\) amount \*= outgoingFrom\(attacker\) \* incomingFrom\(defender\)/);
 
-  // …so the plan handed to strikeArea carries the skill's own multiplier and nothing else
-  assert.match(skills, /\n\s*mult: s\.mult \|\| 1,/);
+  // …so the plan handed to strikeArea carries the skill's own multiplier and nothing else.
+  // R25: that multiplier is `effectiveMult` (unlock level x cooldown) — still no spell power in it
+  assert.match(skills, /\n\s*mult: share,/);
+  assert.match(skills, /const share = s\.mult \? effectiveMult\(s, s\.unlockAt\) : 1;/);
+  assert.equal(/export function effectiveMult[\s\S]{0,200}spellPower/.test(skills), false, 'spell power crept into the skill share');
   assert.match(main, /const power = plan\.mult;/);
   assert.equal(/const power = plan\.mult \* outgoingFrom/.test(main), false,
     'castSkill is multiplying by the outgoing buff that strike already applies');

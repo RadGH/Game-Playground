@@ -133,7 +133,10 @@ function shapeSentence(skill) {
     case 'melee':
       return `Strikes everything in ${article(arc)} ${arc} arc ${metres(skill.reach ?? 3)} in front of you for ${dmg}.`;
     case 'around':
-      return `Strikes everything within ${metres(skill.radius ?? 4)} of you for ${dmg}.`;
+      // R25 — Whirlwind spins five times: say so, and say it is per spin
+      return skill.repeats > 1
+        ? `Spins ${skill.repeats} times, striking everything within ${metres(skill.radius ?? 4)} of you for ${dmg} on every spin.`
+        : `Strikes everything within ${metres(skill.radius ?? 4)} of you for ${dmg}.`;
     case 'beam':
       return `Fires ${article(width)} ${width} wide beam ${metres(skill.range ?? 20)} straight ahead, striking everything in the line for ${dmg}.`;
     case 'ground':
@@ -217,8 +220,10 @@ function healSentence(skill) {
  * @returns {string} e.g. "Strikes everything within 4.5 m of you for 115% weapon damage.
  *                        6 mana, 7s cooldown."
  */
-export function describeSkill(skill, statuses = {}, { cost = true } = {}) {
+export function describeSkill(skill, statuses = {}, { cost = true, unlockAt = 1 } = {}) {
   if (!skill) return '';
+  // R25 — the card says what it will actually hit for (cooldown and unlock level included)
+  if (skill.mult && skill.shape !== 'self' && skill.shape !== 'summon') skill = { ...skill, mult: effectiveMult(skill, unlockAt) };
   const spec = skill.status ? statuses[skill.status] : null;
   const parts = [shapeSentence(skill), statusSentence(skill, spec), healSentence(skill)].filter(Boolean);
   if (cost) {
@@ -250,6 +255,35 @@ export function describeSkills(data) {
     skill.descShort = describeSkill(skill, data.statuses || {}, { cost: false });
   }
   return data;
+}
+
+/**
+ * R25 — WHAT A SKILL IS WORTH, BY WHEN YOU GET IT AND HOW LONG YOU WAIT FOR IT.
+ *
+ *   "Some skills available at level 1 are about as powerful as those unlocked at level 24. Higher
+ *    level spells should have more interesting effects, extra debuffs, or at the very least should
+ *    do more damage. If they do about the same damage, what is the longer cooldown for?"
+ *
+ * Two factors on a skill's damage share (`mult`), multiplied together:
+ *
+ *   unlockPower  from the slot's unlock level: 1.0 at level 1 rising in a straight line to 2.0 at
+ *                level 24. The same skill is worth more to a class that waits longer for it.
+ *   cooldownPower from the skill's own cooldown: a 4-second skill is the baseline and every second
+ *                past that adds 8%, so a 12-second Whirlwind is x1.64 and a 22-second Fallstone
+ *                x2.44. A long wait now buys a big hit — which is the whole of the question above.
+ *
+ * Heals, shields and summons are untouched: this is about damage per press.
+ */
+export const UNLOCK_POWER_TOP = 2.0;
+export function unlockPower(level = 1) {
+  return 1 + (Math.max(1, Math.min(24, level)) - 1) / 23 * (UNLOCK_POWER_TOP - 1);
+}
+export function cooldownPower(cooldown = 4) {
+  return 1 + Math.max(0, (cooldown ?? 4) - 4) * 0.08;
+}
+/** The damage share a skill in a slot that opens at `unlockAt` actually hits for. */
+export function effectiveMult(skill, unlockAt = 1) {
+  return (skill?.mult || 1) * cooldownPower(skill?.cooldown) * unlockPower(unlockAt);
 }
 
 /**
@@ -444,6 +478,11 @@ export function createSkillBar({ data, player, rpg, unlocks = null, canSummon = 
       ready: slots[i]?.ready ?? 0,
       unlockAt: unlockAt[i] ?? 1,
     }));
+    // R25 — the card on the bar quotes the share for THIS slot's unlock level
+    for (const sl of next) if (!sl.empty && data.skills[sl.id]) {
+      sl.desc = describeSkill(data.skills[sl.id], data.statuses || {}, { unlockAt: sl.unlockAt });
+      sl.descShort = describeSkill(data.skills[sl.id], data.statuses || {}, { cost: false, unlockAt: sl.unlockAt });
+    }
     slots.length = 0;
     slots.push(...next);
   }
@@ -576,14 +615,18 @@ export function createSkillBar({ data, player, rpg, unlocks = null, canSummon = 
      * it wants to be roughly what the cast will land for — once.
      */
     const magic = s.element && s.element !== 'physical' ? 1 + (d.spellPower || 0) : 1;
-    const mid = ((d.damage[0] + d.damage[1]) / 2) * (s.mult || 1) * magic;
+    // R25 — unlock level and cooldown (see `effectiveMult`)
+    const share = s.mult ? effectiveMult(s, s.unlockAt) : 1;
+    const mid = ((d.damage[0] + d.damage[1]) / 2) * share * magic;
     const plan = {
       ok: true,
       skill: s,
       kind: s.shape,
       element: s.element || 'physical',
-      mult: s.mult || 1,
+      mult: share,
       damage: Math.max(1, Math.round(mid)),
+      // R25 — Whirlwind: the whole strike again, `repeats` times, `repeatEvery` seconds apart
+      repeats: Math.max(1, s.repeats || 1), repeatEvery: s.repeatEvery ?? 0.32,
       reach: s.reach ?? 3, arc: s.arc ?? 1.5,
       radius: s.radius ?? 0, range: s.range ?? 0, splash: s.splash ?? 0, width: s.width ?? 1.8,
       // a bolt can be a fan of several: Multi Shot firing one arrow was not a multi shot

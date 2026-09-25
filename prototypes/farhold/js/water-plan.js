@@ -208,8 +208,28 @@ export function roadDeck(points, heights, width, { thick = 0.45, lift = 0.06 } =
   for (let i = 0; i < n; i++) {
     const prev = points[Math.max(0, i - 1)], next = points[Math.min(n - 1, i + 1)];
     const dx = next[0] - prev[0], dz = next[1] - prev[1];
-    const len = Math.hypot(dx, dz) || 1;
-    edge.push({ nx: -dz / len, nz: dx / len, y: heights[i] + lift });
+    const len = Math.hypot(dx, dz);
+    edge.push({ nx: len > 1e-6 ? -dz / len : NaN, nz: len > 1e-6 ? dx / len : NaN, y: heights[i] + lift });
+  }
+  /**
+   * R26 — A REPEATED POINT HAS NO DIRECTION, SO IT BORROWS ITS NEIGHBOUR'S.
+   *
+   * "A large black square fills my interface" (seed 19629, Thinareik, x 13318 z 2171). A road
+   * polyline can carry the same point twice in a row, and then `prev` and `next` are one point, the
+   * direction is (0, 0), and the old `|| 1` turned it into an edge normal of (0, 0). The two side
+   * walls below hand that straight to the GPU as a zero-length vertex normal, the lighting
+   * normalises it — 0/0 — and writes a NaN pixel. On its own that is one dead pixel; the bloom pass
+   * then blurs it across its whole mip chain, which is the black square. (js/postfx.js now refuses
+   * a NaN as well, but a road should not be making one.)
+   */
+  const good = edge.findIndex(e => Number.isFinite(e.nx));
+  for (let i = 0; i < n; i++) {
+    if (Number.isFinite(edge[i].nx)) continue;
+    // the nearest earlier point that has a direction, else the first one after it, else "north"
+    let j = i - 1;
+    while (j >= 0 && !Number.isFinite(edge[j].nx)) j--;
+    const from = j >= 0 ? edge[j] : (good >= 0 ? edge[good] : { nx: 1, nz: 0 });
+    edge[i].nx = from.nx; edge[i].nz = from.nz;
   }
   // top, then the two sides hanging off it, then the underside — four strips over the same spine
   const strip = (yOf, nrm, flip) => {

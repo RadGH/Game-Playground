@@ -66,8 +66,9 @@ for (const [classId, seed] of [['fighter', 11], ['custom', 7]]) {
 
 test('the overhead ribbon falls from over the head to the ground in front, in the plane of your facing', async ({ page }) => {
   const errors = watch(page);
-  await page.goto(BASE + '?auto&class=fighter&seed=11&quality=low&sound=off');
+  await page.goto(BASE + '?auto&class=fighter&seed=11&sound=off');
   await page.waitForFunction(() => document.body.dataset.ready === '1' && !!window.farhold, null, { timeout: 120000 });
+  await page.waitForTimeout(1000);
   const out = await page.evaluate(() => {
     const f = window.farhold, c = f.control, T = f.THREE;
     const reach = 3.45;
@@ -110,5 +111,79 @@ test('the overhead ribbon falls from over the head to the ground in front, in th
   expect(out.minFwd).toBeLessThan(0);
   // what is shown at the start of the swing is the high part, not the low part
   expect(out.firstShownUp).toBeGreaterThan(2);
+  expect(errors).toEqual([]);
+});
+
+/**
+ * 3. "When I stand nearby and look at these coordinates, a large black square fills my interface"
+ *    (seed 19629, Thinareik, Grassland, x 13318 z 2171 — the Super tiny planet size). A road deck's
+ *    side wall had a zero-length normal, the lighting made one NaN pixel of it, and the bloom
+ *    blurred that NaN across the screen. See tests/round26-nan.test.js for the geometry.
+ *
+ * `frameStats` draws one frame through the real pipeline (js/postfx.js on the current Graphics
+ * level) and copies the canvas inside the same task, which is the only moment a WebGL canvas can be
+ * read back, then counts the pixels that are pure black.
+ */
+const frameStats = page => page.evaluate(() => new Promise(resolve => {
+  // registered between frames, so it runs right after the game's own tick has drawn the next one
+  requestAnimationFrame(() => {
+    const c = window.farhold.renderer.domElement, w = 160, h = Math.round(160 * c.height / c.width);
+    const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+    const g = cv.getContext('2d'); g.drawImage(c, 0, 0, w, h);
+    const d = g.getImageData(0, 0, w, h).data;
+    let black = 0;
+    for (let i = 0; i < d.length; i += 4) if (d[i] < 4 && d[i + 1] < 4 && d[i + 2] < 4) black++;
+    resolve({ black: black / (w * h), level: document.body.dataset.graphics });
+  });
+}));
+
+test('the reported spot on Thinareik draws a picture, not a black square, with every graphics effect on', async ({ page }) => {
+  const errors = watch(page);
+  await page.goto(BASE + '?auto&class=fighter&seed=19629&sound=off&scale=0.1');
+  await page.waitForFunction(() => document.body.dataset.ready === '1' && !!window.farhold, null, { timeout: 120000 });
+  await page.evaluate(() => { window.farhold.graphics.setLevel('high'); window.farhold.teleport(13318, 2171); });
+  await page.waitForTimeout(4000);
+  const worst = [];
+  for (const yaw of [0, Math.PI / 2, Math.PI, Math.PI * 1.5]) {
+    await page.evaluate(y => { window.farhold.control.yaw = y; }, yaw);
+    await page.waitForTimeout(600);
+    worst.push((await frameStats(page)).black);
+  }
+  // the report was ~100% black facing east (yaw pi/2); a normal frame here is well under 1%
+  expect(Math.max(...worst), `black share by heading: ${worst.map(b => b.toFixed(3)).join(', ')}`).toBeLessThan(0.05);
+  expect(errors).toEqual([]);
+});
+
+test('a NaN from any material stays one pixel: it is not blurred into a square by the bloom', async ({ page }) => {
+  const errors = watch(page);
+  await page.goto(BASE + '?auto&class=fighter&seed=11&sound=off');
+  await page.waitForFunction(() => document.body.dataset.ready === '1' && !!window.farhold, null, { timeout: 120000 });
+  await page.evaluate(() => window.farhold.graphics.setLevel('high'));
+  await page.waitForTimeout(1000);
+  const before = await frameStats(page);
+  await page.evaluate(() => {
+    const f = window.farhold, T = f.THREE, cam = f.camera;
+    /**
+     * The real fault, reproduced on purpose: a lit surface whose vertex normals are zero. The
+     * lighting normalises (0, 0, 0) and writes NaN, exactly as the road deck's side wall did.
+     */
+    const g = new T.PlaneGeometry(0.3, 0.3);
+    g.attributes.normal.array.fill(0);
+    const bad = new T.Mesh(g, new T.MeshLambertMaterial({ color: 0xffffff }));
+    bad.name = 'test-nan';
+    cam.updateMatrixWorld();
+    const dir = new T.Vector3(); cam.getWorldDirection(dir);
+    bad.position.copy(cam.position).addScaledVector(dir, 6);
+    bad.quaternion.copy(cam.quaternion);
+    bad.frustumCulled = false;
+    f.scene.add(bad);
+  });
+  await page.waitForTimeout(300);
+  const stats = await frameStats(page);
+  await page.evaluate(() => { const f = window.farhold; f.scene.remove(f.scene.getObjectByName('test-nan')); });
+  // the patch itself is a fraction of a percent of the frame; without the guard the bloom turned it
+  // into a black square many times its size
+  expect(stats.level).toBe('high');
+  expect(stats.black - before.black, `black share ${before.black.toFixed(3)} without the patch, ${stats.black.toFixed(3)} with it`).toBeLessThan(0.01);
   expect(errors).toEqual([]);
 });

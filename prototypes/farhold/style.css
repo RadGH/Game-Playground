@@ -2535,3 +2535,8 @@ body.building canvas { cursor: crosshair; }
 }
 .hud-notice.show { opacity: 1; translate: -50% 0; }
 .hud-notice.good { border-color: #6aa84f; color: #dff5d4; }
+
+/* R25 — the log's filter toggles (hud.drawLogHistory) */
+.log-filters { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 6px 12px 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); font-size: 13px; }
+.log-filters .log-filter { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; opacity: 0.9; }
+.log-filters .log-filter input { accent-color: #d9b477; }

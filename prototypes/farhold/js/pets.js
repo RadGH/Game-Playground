@@ -692,20 +692,22 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
         if (result.dead) { field?.kill(victim); if (p.target === victim) p.target = null; }
         return result;
       };
+      // R25 — add up what the ability did, so the log can say it (hooks.onPetCast)
+      let dealt = 0;
       if (ab.radius && field) {
         for (const e of field.enemies) {
           if (e.dying != null || e.removed) continue;
           if (Math.hypot(e.x - target.x, e.z - target.z) > ab.radius) continue;
-          hit(e);
+          dealt += hit(e)?.amount || 0;
         }
       } else {
-        hit(target);
+        dealt += hit(target)?.amount || 0;
       }
       // `tithe` and its kind pay the owner back a share of what they took
       if (ab.heal && p.owner?.hp != null) {
         p.owner.hp = Math.min(p.owner.maxHp, p.owner.hp + Math.round((p.owner.maxHp || 0) * ab.heal));
       }
-      hooks.onPetCast?.(p, ab, { at: target });
+      hooks.onPetCast?.(p, ab, { at: target, amount: dealt });
       return;                                     // one spell a frame, however many are ready
     }
   }

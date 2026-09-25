@@ -2038,11 +2038,11 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   function reportHit(enemy, result) {
     const at = new THREE.Vector3(enemy.x, (enemy.y ?? 0) + (enemy.height || 1.7) * 0.9, enemy.z);
     if (result.dodged) {
-      hud.log(`${enemy.name} dodges.`);
+      hud.log(`${enemy.name} dodges.`, '', 'dealt');
       hud.hit(at, 'miss', 'miss', camera);
       return;
     }
-    hud.log(`You hit ${enemy.name} for ${result.amount}${result.crit ? ' (critical)' : ''}.`, result.crit ? 'good' : '');
+    hud.log(`You hit ${enemy.name} for ${result.amount}${result.crit ? ' (critical)' : ''}.`, result.crit ? 'good' : '', 'dealt');
     hud.hit(at, result.amount, result.crit ? 'crit' : '', camera);
   }
 
@@ -2450,7 +2450,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     hud.log(award > 0
       ? `${e.name} falls. +${award} xp, +${coin} gold.`
       : `${e.name} falls. Too far beneath you to learn from. +${coin} gold.`,
-    e.rank && e.rank !== 'normal' ? 'loot' : 'good');
+    e.rank && e.rank !== 'normal' ? 'loot' : 'good', 'reward');
     if (levels) {
       /**
        * NAME THE CURRENCY THE GAME ACTUALLY PAYS IN.
@@ -8828,7 +8828,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     field.update(dt, control, player, {
 
       onStatusDamage: (e, amount) => {
-        if (amount > 0.6) hud.log(`${e.name} takes ${amount.toFixed(0)}.`);
+        if (amount > 0.6) hud.log(`${e.name} takes ${amount.toFixed(0)}.`, '', 'dealt');
       },
       onBossPhase: (e, phase) => {
         hud.log(phase.say || `${e.name} changes.`, 'bad');
@@ -8858,11 +8858,14 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         }
         if (e.onHit?.length) field.statusOnHit(e, victim, skillData.statuses);
         if (victim !== player) {
-          if (result.dead) { pets.fall(victim); hud.log(`${victim.name} goes down.`, 'bad'); }
+          // R25 — damage a companion takes is in the log now, under its own filter
+          if (result.dodged) hud.log(`${victim.name} dodges ${e.name}.`, '', 'petTaken');
+          else hud.log(`${e.name} hits ${victim.name} for ${result.amount}.`, '', 'petTaken');
+          if (result.dead) { pets.fall(victim); hud.log(`${victim.name} goes down.`, 'bad', 'petTaken'); }
           return;
         }
-        if (result.dodged) { hud.log(`You dodge ${e.name}.`); return; }
-        hud.log(`${e.name} hits you for ${result.amount}${result.absorbed ? ` (${result.absorbed} on the barrier)` : ''}.`, 'bad');
+        if (result.dodged) { hud.log(`You dodge ${e.name}.`, '', 'taken'); return; }
+        hud.log(`${e.name} hits you for ${result.amount}${result.absorbed ? ` (${result.absorbed} on the barrier)` : ''}.`, 'bad', 'taken');
         /**
          * R18 — AND IT MIGHT PUT YOU ON THE GROUND, so `cond_mountCalm` means something.
          *
@@ -8907,7 +8910,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
             if (victim === player) {
               // R23 — the same answers a melee hit gets; Frost Skin alone asks `ranged` and stays out
               uniquesAfterDamaged(uniqueEnv, result, e);
-              hud.log(`${e.name} hits you for ${result.amount}.`, 'bad');
+              hud.log(`${e.name} hits you for ${result.amount}.`, 'bad', 'taken');
               hud.hit(new THREE.Vector3(control.x, control.y + 1.9, control.z), result.amount, 'taken', camera);
               if (player.hp <= 0) respawn(e);
             } else if (result.dead) { pets.fall(victim); hud.log(`${victim.name} goes down.`, 'bad'); }
@@ -8918,7 +8921,15 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
     // companions, treasure, and everything the round-4 systems need every frame
     pets.update(dt, control, player, {
-      onPetHit: (p, target, result) => { if (result.crit) hud.log(`${p.name} lands a critical.`, 'good'); },
+      // R25 — every companion hit is logged, with its number, under the 'Pet damage dealt' filter
+      onPetHit: (p, target, result) => {
+        if (result.dodged) hud.log(`${target.name} dodges ${p.name}.`, '', 'petDealt');
+        else hud.log(`${p.name} hits ${target.name} for ${result.amount}${result.crit ? ' (critical)' : ''}.`, result.crit ? 'good' : '', 'petDealt');
+      },
+      onPetCast: (p, ab, out) => {
+        if (out?.healed) hud.log(`${p.name}: ${ab.name || 'a mend'} heals you for ${out.healed}.`, 'good', 'petDealt');
+        else if (out?.amount) hud.log(`${p.name}'s ${ab.name || 'ability'} hits for ${out.amount}.`, '', 'petDealt');
+      },
       onFallen: p => { hud.log(`${p.name} will come back.`, ''); },
       // …and say so when it does. `reviveSeconds` was dead data, so "will come back" was a lie.
       onReturned: p => { hud.log(`${p.name} is back.`, 'good'); },

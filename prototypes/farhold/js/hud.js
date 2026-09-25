@@ -39,6 +39,13 @@ import { zoneTone } from './zones.js';
 import { treeFor, picksFor, talentSummary, tiersOpen, TIER_LEVELS } from './skilltalents.js';
 import { ARMS, NODE_KINDS, RINGS, pointsFor, pointsLeft, spentBy, takenOf, canTake, canRefund, linksOf, armProgress } from './perks.js';
 
+/** R25 — what a log line can be, in the order the filter toggles show them. */
+export const LOG_KINDS = [
+  ['dealt', 'Damage you deal'], ['taken', 'Damage you take'],
+  ['petDealt', 'Pet damage dealt'], ['petTaken', 'Pet damage taken'],
+  ['reward', 'XP and gold'], ['loot', 'Loot'], ['other', 'Everything else'],
+];
+
 /**
  * HOW CLOSE YOU HAVE TO BE FOR A SHOP OR A JOB TO APPEAR ON THE MINIMAP.
  *
@@ -557,14 +564,49 @@ export class Hud {
     this.log(text, kind);
   }
 
-  log(text, cls = '') {
-    this.lines.unshift({ text, cls });
-    if (this.lines.length > 12) this.lines.pop();
-    this.history.unshift({ text, cls });
-    if (this.history.length > 50) this.history.pop();
-    const box = $('log');
-    box.replaceChildren(...this.lines.map(l => el('div', l.cls, l.text)));
+  /**
+   * R25 — EVERY LINE HAS A KIND, AND THE KINDS CAN BE SWITCHED OFF.
+   *
+   *   "Add pet damage (taken and received) to the combat log. On the combat log full page… add
+   *    filters at the top so you can toggle what appears in there… These filters should affect the
+   *    combat log in game as well as in the menu, so if the damage text is annoying you can just
+   *    simply turn it off."
+   *
+   * `kind` is one of LOG_KINDS; a caller that does not say is 'loot' for a loot-coloured line and
+   * 'other' for everything else. Hidden kinds are still KEPT (so switching one back on shows what
+   * you missed), just not drawn — in the corner log and on the sheet's Log tab alike. The choice
+   * is remembered per browser.
+   */
+  log(text, cls = '', kind = null) {
+    const k = kind || (cls === 'loot' ? 'loot' : 'other');
+    this.lines.unshift({ text, cls, kind: k });
+    if (this.lines.length > 60) this.lines.pop();
+    this.history.unshift({ text, cls, kind: k });
+    if (this.history.length > 200) this.history.pop();
+    this.drawLog();
     if (this.sheetOpen && this.tab === 'log') this.drawLogHistory();
+  }
+
+  get logHidden() {
+    if (!this._logHidden) {
+      let saved = [];
+      try { saved = JSON.parse(localStorage.getItem('farhold.logHidden') || '[]'); } catch { /* private window */ }
+      this._logHidden = new Set(Array.isArray(saved) ? saved : []);
+    }
+    return this._logHidden;
+  }
+  setLogShown(kind, on) {
+    const h = this.logHidden;
+    if (on) h.delete(kind); else h.add(kind);
+    try { localStorage.setItem('farhold.logHidden', JSON.stringify([...h])); } catch { /* fine */ }
+    this.drawLog();
+    this.drawLogHistory();
+  }
+  drawLog() {
+    const box = $('log');
+    if (!box) return;
+    const shown = this.lines.filter(l => !this.logHidden.has(l.kind)).slice(0, 12);
+    box.replaceChildren(...shown.map(l => el('div', l.cls, l.text)));
   }
 
   /**
@@ -591,9 +633,23 @@ export class Hud {
   drawLogHistory() {
     const box = $('log-history-lines');
     if (!box) return;
-    box.replaceChildren(...(this.history.length
-      ? this.history.map(l => el('div', l.cls, l.text))
-      : [el('div', 'muted small', 'Nothing has happened yet.')]));
+    // the filter toggles across the top of the page (R25)
+    const bar = $('log-filters');
+    if (bar && !bar.childElementCount) {
+      for (const [kind, label] of LOG_KINDS) {
+        const input = el('input');
+        input.type = 'checkbox'; input.dataset.kind = kind;
+        input.addEventListener('change', () => this.setLogShown(kind, input.checked));
+        const lab = el('label', 'log-filter');
+        lab.append(input, document.createTextNode(' ' + label));
+        bar.append(lab);
+      }
+    }
+    if (bar) for (const input of bar.querySelectorAll('input')) input.checked = !this.logHidden.has(input.dataset.kind);
+    const shown = this.history.filter(l => !this.logHidden.has(l.kind));
+    box.replaceChildren(...(shown.length
+      ? shown.map(l => el('div', l.cls, l.text))
+      : [el('div', 'muted small', this.history.length ? 'Everything here is filtered out — switch a kind back on above.' : 'Nothing has happened yet.')]));
   }
 
   /** The one-line "press E to…" strip above the hint. */

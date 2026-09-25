@@ -3896,3 +3896,29 @@ three stat nodes (js/perks.js `BRANCHES`), ending in keystones. 169 nodes became
 Orbs live on `player.skillAuras`, read by `rpg.auraList`, so js/uniques.js `tickAuras` runs them
 like every other pulsing power; `always: true` lets a CAST aura fire before a fight has formally
 started (the gate exists so a lamp never starts a fight with a grazing deer).
+
+### The spell effects overhaul (#18, second half)
+
+`avatar-3d/js/spellfx.js` gives every element a signature no other shares — fire: white core, rising
+embers, smoke and a scorch mark; ice: mist, flakes, a shard burst and a lingering spiked frost ring;
+lightning: thick forked bolts, a white flash and ground forks; poison: drips, a hanging haze and a
+bubbling puddle; shadow: normal-blended dark smoke that implodes then bursts; holy: orbiting motes
+and a pillar of light; arcane: orbiting glyphs and rune rings; nature: a leaf spiral. Area attacks
+get one themed fill instead of a stack of per-point bursts. Six new pieces carry the new skills:
+`breath` (Flamethrower), `orbitOrb` (Storm Orbs), `pillar` (Judgement), `vortex` (Void Rift),
+`storm` (Blizzard; a rolling cloud for poison) and `footfall` (Ember Stride). 14 new sprites in
+`assets/data/fx/`. Farhold wraps `impact`/`aoe`/`cast` to pass `ground: terrain.heightAt(...)`, because
+the floor marks otherwise guess the floor at 0.9 m under the hit and land underground. Two faults
+found on the way: `lights()` returned nothing under load (it found effects by list position while the
+running-effect cap was trimming the list), and an orb cast before the sprite textures had loaded
+built no sprites at all and never retried (it dresses itself lazily now).
+
+### Browser tests at the end of round 25
+
+253 of 258 Farhold specs pass. Of the five red: the scanner sweep (R16.8), the Town Hall rod (R16.15)
+and the sun-rays occlusion test (round3-queued) fail the same way on the code from BEFORE this round
+(checked by serving commit 9258673 on a spare port and running the same specs against it), so they
+are older than round 25 and still open. The bow-seam spec only ran out of time — landing at full
+quality under the software renderer is slower with the longer default grass — and passes with a
+longer timeout. "The world is busy" counts spawns over nine wall-clock seconds and swings either
+side of its threshold run to run (4 on the old code, 9 on the new, in two probes).

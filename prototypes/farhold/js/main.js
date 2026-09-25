@@ -238,7 +238,7 @@ async function boot() {
     loadJSON('data/crafting.json'),
     loadJSON('data/encounters.json'),
     // Name Forge, so the folk in a dwarf town have dwarf names
-    NameGen.load('/namegen/data/').catch(() => null),
+    NameGen.load(new URL('../../../namegen/data/', import.meta.url).href).catch(() => null),
     // The Territory expansion
     loadJSON('data/factions.json'),
     loadJSON('data/job-frames.json'),

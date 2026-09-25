@@ -34,7 +34,7 @@ const ROLE_VOICE = {
 
 const INTENTS = ['greet', 'farewell', 'smalltalk'];
 
-export async function createSpeech({ base = '/lingo/data/', enabled = true } = {}) {
+export async function createSpeech({ base = new URL('../../../lingo/data/', import.meta.url).href, enabled = true } = {}) {
   let lingo = null;
   let failure = null;
   let voiceOn = enabled;

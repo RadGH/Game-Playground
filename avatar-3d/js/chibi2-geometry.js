@@ -127,6 +127,24 @@ export class SkinBuilder {
     }
     geometry.applyMatrix4(bone.matrixWorld);
     geometry.deleteAttribute('uv');
+    /**
+     * NO ZERO-LENGTH NORMALS (2026-09-25). A ring of radius ~0 (a blade's point, a hat's apex, a
+     * profile that closes) gives its vertex a normal of length zero; lighting turns that into NaN,
+     * and Farhold's bloom smeared one NaN pixel across the whole screen. Such a vertex takes the
+     * direction out from the piece's own centre instead — at a point, that is the way it faces.
+     */
+    const nrm = geometry.attributes.normal;
+    if (nrm) {
+      let centre = null;
+      for (let i = 0; i < count; i++) {
+        const x = nrm.getX(i), y = nrm.getY(i), z = nrm.getZ(i);
+        if (x * x + y * y + z * z > 1e-10 && Number.isFinite(x + y + z)) continue;
+        if (!centre) { geometry.computeBoundingBox(); centre = geometry.boundingBox.getCenter(new THREE.Vector3()); }
+        const v = new THREE.Vector3(p.getX(i), p.getY(i), p.getZ(i)).sub(centre);
+        if (v.lengthSq() < 1e-12) v.set(0, 1, 0);
+        v.normalize(); nrm.setXYZ(i, v.x, v.y, v.z);
+      }
+    }
     if (!geometry.index) geometry.setIndex(Array.from({ length: count }, (_, i) => i));
     geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
     geometry.setAttribute('skinIndex', new THREE.Uint16BufferAttribute(skinIndices, 4));

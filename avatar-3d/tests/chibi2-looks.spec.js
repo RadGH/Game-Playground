@@ -67,3 +67,39 @@ test('a bob haircut has nothing floating above the head', async ({ page }) => {
   expect(r.bob - r.short, 'something of the bob stands above the head').toBeLessThan(0.05);
   expect(errors).toEqual([]);
 });
+
+test('the overhead winds up BEHIND the head and chops down in front', async ({ page }) => {
+  // "The third attack (Overhead) still plays the animation that looks like the character is
+  // swinging into the air." The old wind lifted the blade up through the front, slowly, and chopped
+  // down in a twentieth of a second — the lift was what anybody saw.
+  test.setTimeout(90_000);
+  const errors = await modulePage(page);
+  const track = await page.evaluate(async () => {
+    const THREE = await import('three');
+    const M = await import('/avatar-3d/js/chibi2-motion.js');
+    const { createChibi2Character } = await import('/avatar-3d/js/chibi2.js');
+    const anims = [...new Set([...M.CHIBI2_ANIMS, ...M.CHIBI2_MELEE_ANIMS, ...M.CHIBI2_COMBAT_ANIMS])];
+    const ch = await createChibi2Character({ body: { height: 0.5, width: 0.5, headSize: 0.5 }, held: { id: 'fh_longsword', color: '#ccc' } }, { anims });
+    ch.setAnim('overhead', 0, true);
+    const grip = ch.parts.gripR, head = ch.parts.head, v = new THREE.Vector3(), d = new THREE.Vector3(), h = new THREE.Vector3();
+    const out = [];
+    for (let i = 0; i <= 17; i++) {
+      ch.group.updateMatrixWorld(true);
+      grip.getWorldPosition(v); head.getWorldPosition(h);
+      d.set(0, -1, 0).transformDirection(grip.matrixWorld);
+      const tip = v.clone().addScaledVector(d, 0.81);
+      out.push({ y: tip.y, z: tip.z, headTop: h.y + 0.54 });
+      ch.update(0.05);
+    }
+    ch.dispose();
+    return out;
+  });
+  const top = track.reduce((a, b) => (b.y > a.y ? b : a));
+  expect(top.y, 'the blade never gets above the head').toBeGreaterThan(top.headTop);
+  const before = track.slice(0, track.indexOf(top));
+  const risingInFront = before.filter(t => t.y > 1.0 && t.z > 0.3);
+  expect(risingInFront.length, 'the blade rises through the front of the body').toBe(0);
+  const end = track.at(-8);
+  expect(end.z, 'the chop does not finish in front').toBeGreaterThan(0.4);
+  expect(errors).toEqual([]);
+});

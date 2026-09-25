@@ -514,8 +514,17 @@ const CLIPS = {
     p.armL[0] = (-0.5 + 0.35 * strike) * rec; p.elbowL[0] = -0.9 * rec - 0.16;
     p.kneeL[0] += 0.25 * strike * rec;
     if (ctx.hold.left === 'shield') { p.armL = [-0.45 * rec, 0.9 * rec, 0.05]; p.elbowL = [-1.35 * rec - 0.2, -0.4 * rec, 0]; }
-    // the blade goes back over the head on the wind, and the wrist snaps it through on the strike
-    return { R: [(-3.4 * up - 1.2 * strike - 1.0 * (1 - wind)) * rec - 0.95 * (1 - rec), (0.4 * up - 0.2 * strike) * rec, 0] };
+    /**
+     * ONE BACKWARD CIRCLE (2026-09-25). The wind used to lift the blade forward and up THROUGH THE
+     * FRONT — slowly, in full view — and then chop down in a twentieth of a second, so what a player
+     * saw was the lift: "the overhead looks like the character is swinging into the air". Now the
+     * point trails down and BEHIND as the arm rises (pitch climbing from the rest angle through
+     * straight down, back, and up behind the head), and the strike carries on the same way over the
+     * top and down in front. The pitch only ever increases, so there is no reversal to read as a
+     * second swing; it ends a full turn later at the rest angle.
+     */
+    const REST = -0.95, pitch = REST + 3.85 * wind + 2.2 * strike + (2 * PI - 6.05) * (1 - rec);
+    return { R: [pitch, (0.25 * up - 0.15 * strike) * rec, 0] };
   },
   attack(p, u, cy, ctx, o) { return CLIPS[attackFor(ctx.hold)](p, u, cy, ctx, o); },
   slash(p, u, cy, ctx, o, dir = 1) {

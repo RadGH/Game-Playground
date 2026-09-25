@@ -8,6 +8,7 @@
 // Only the visible tab is rebuilt, so opening the sheet is cheap whatever is in the bag.
 
 import { itemScore, SLOTS, describeAffix, xpForLevel, displayName } from './rpg.js';
+import { EFFECTS } from './effects.js';
 
 /** What each talent tier is for. Tier 1 is how it is thrown, 2 what happens when it lands, 3 what it
  *  does to the fight — it was written down in a comment and never shown to the player. */
@@ -2060,6 +2061,8 @@ export class Hud {
         }
       }
       for (const id of player.legendaryPowers || []) {
+        // R25 — a branched keystone's power rides the same list; name it as the perk it is
+        if (id.startsWith('perk:')) { lines.push({ from: 'keystone', text: EFFECTS[id]?.desc?.() || id.slice(5).replace(/_/g, ' '), rarity: 'rarity-rare' }); continue; }
         lines.push({ from: 'set or legendary', text: id.replace('legendary:', '').replace(/_/g, ' '), rarity: 'rarity-legendary' });
       }
       powers.replaceChildren(...(lines.length ? lines.map(l => {
@@ -2817,9 +2820,12 @@ export class Hud {
     ctx.fillText('you began here', cx, cy + 22 * dpr);
     keep('you began here', cx, cy + 22 * dpr, 11 * dpr, 4 * dpr);
     // …and so does each arm, out past its rim so the label never sits on a node
+    // R25 — out past its OWN rim: two arms branch well past the rest now, and a short arm's name
+    // written at the long arms' radius landed on the branched paths next door
     for (const arm of ARMS) {
-      const ax = cx + Math.cos(arm.angle) * (span * scale + 20 * dpr);
-      const ay = cy + Math.sin(arm.angle) * (span * scale + 20 * dpr);
+      const own = forest.nodes.reduce((m, n) => (n.arm === arm.key ? Math.max(m, Math.hypot(n.x, n.y)) : m), 0) || span;
+      const ax = cx + Math.cos(arm.angle) * (own * scale + 34 * dpr);
+      const ay = cy + Math.sin(arm.angle) * (own * scale + 34 * dpr);
       const px = Math.max(60 * dpr, Math.min(canvas.width - 60 * dpr, ax));
       const py = Math.max(14 * dpr, Math.min(canvas.height - 6 * dpr, ay));
       ctx.fillStyle = arm.color;

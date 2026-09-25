@@ -357,9 +357,9 @@ export function resolveAttack(env, mods, hits = [], where = {}) {
   return out;
 }
 
-/** What a kill's powers asked for: Rot passes on, Siphon heals. Returns a record for the tests. */
+/** What a kill's powers asked for: Rot passes on, Siphon heals, a keystone bursts / shatters / spreads. Returns a record for the tests. */
 export function afterKill(env, post, e) {
-  const out = { rotted: [], siphon: false };
+  const out = { rotted: [], siphon: false, burst: [], shards: [], spread: [] };
   if (!env || !post) return out;
   if (post.spreadRot && e) {
     const s = post.spreadRot;
@@ -367,6 +367,36 @@ export function afterKill(env, post, e) {
       if (other === e || other.dying != null) continue;
       env.applyStatus(other, 'rot', { perSecond: s.perSecond, seconds: s.seconds, element: 'poison', name: 'Rot', kind: 'damage' }, s.power);
       out.rotted.push(other);
+    }
+  }
+  // R25 — the elemental keystones (js/effects.js `perk:*`): a body that bursts, one that shatters
+  // into shards, and a status that moves on to whoever stood near
+  if (post.burst && e) {
+    const b = post.burst;
+    env.burstFx?.(e.x, e.z, b.radius, b.element);
+    for (const h of env.strikeArea(e.x, e.z, b.radius, { power: b.power, element: b.element, falloff: 0.7 }) || []) {
+      if (h.enemy === e) continue;
+      if (b.status && env.statusSpec?.(b.status) && h.result?.amount > 0) env.applyStatus(h.enemy, b.status, env.statusSpec(b.status), Math.max(1, h.result.amount * 0.5));
+      out.burst.push(h.enemy);
+    }
+  }
+  if (post.shards && e) {
+    const used = new Set([e]);
+    for (let i = 0; i < post.shards.count; i++) {
+      const next = nextTarget(env, e, post.shards.range, used);
+      if (!next) break;
+      used.add(next);
+      env.arc?.(e, next, post.shards.element);
+      env.strikeOne(next, { power: post.shards.power, element: post.shards.element });
+      out.shards.push(next);
+    }
+  }
+  if (post.spread && e) {
+    const spec = env.statusSpec?.(post.spread.type);
+    for (const other of (spec && env.near(e.x, e.z, post.spread.radius, e)) || []) {
+      if (other === e || other.dying != null) continue;
+      env.applyStatus(other, post.spread.type, spec, post.spread.power);
+      out.spread.push(other);
     }
   }
   if (post.selfStatus && env.applySelf) {
@@ -421,7 +451,13 @@ export function tickAuras(env, rpg, player, dt, { fighting = false } = {}) {
     const hit = [];
     if (a.nearestOnly) {
       const e = nextTarget(env, me, a.radius, new Set());
-      if (e) { env.arc?.(me, e, a.element); env.strikeOne(e, { power: a.power, element: a.element }); hit.push(e); }
+      if (e) {
+        env.arc?.(me, e, a.element);
+        const res = env.strikeOne(e, { power: a.power, element: a.element });
+        // R25 — Storm Within's spark Shocks what it strikes
+        if (a.status && env.statusSpec?.(a.status) && res?.amount > 0) env.applyStatus(e, a.status, env.statusSpec(a.status), Math.max(1, res.amount * 0.7));
+        hit.push(e);
+      }
     } else if (a.power > 0) {
       for (const h of env.strikeArea(me.x, me.z, a.radius, { power: a.power, element: a.element, falloff: 1 }) || []) {
         hit.push(h.enemy);

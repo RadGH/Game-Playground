@@ -921,6 +921,8 @@ export class Rpg {
     }
     // set bonuses, legendary powers and every affix, from the one registry
     unit.legendaryPowers = this.legendaryPowers(unit);
+    // R25 — a branched keystone's power (js/effects.js `perk:*`) runs through the same hooks
+    if (unit.perks && this.forest) unit.legendaryPowers.push(...perkBonuses(unit, this.forest).powers);
     this.fx.refresh(unit);
     this.fx.derive(unit, d);
     for (const [key, value] of Object.entries(this.setBonuses(unit))) {

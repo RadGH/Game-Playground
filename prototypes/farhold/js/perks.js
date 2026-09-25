@@ -367,10 +367,86 @@ export const KEYSTONES = [
      * tree — the playground's one hard content rule is that nothing player-facing borrows a name
      * from somebody else's game. `RENAMED_PERKS` below keeps a save made under the old id working.
      */
-    id: 'doubled_grasp', arm: 'melee', name: 'Doubled Grasp', flag: 'doubleGrip',
+    id: 'doubled_grasp', arm: 'melee', branch: 'two_weights', name: 'Doubled Grasp', flag: 'doubleGrip',
     desc: 'Hold a two-handed weapon in each hand. +18% attack area.',
     cost: '−20% attack speed.',
     grants: { haste: -20, areaPct: 18 },
+  },
+  /**
+   * R25 — THE CLOSE GROUND'S OTHER THREE BUILDS. Each keystone is for ONE pair of hands, and both
+   * halves of it — the stat grant (`when` + `whenGrants`, gated in `perkBonuses`) and the power
+   * (js/effects.js `perk:*`, gated by `handsOf`) — do nothing in any other pair. So the card says
+   * which hands, and the sheet's numbers move when you change weapons.
+   */
+  {
+    id: 'full_swing', arm: 'melee', branch: 'one_weight', name: 'Full Swing', flag: 'fullSwing', power: 'perk:full_swing',
+    when: 'twoOne',
+    desc: 'With a two-handed weapon and nothing in the other hand: +30% damage, and every 3rd swing lands as a slam that hits everything within 3.5 metres for 60% and throws it back.',
+    cost: '−12% attack speed with those hands.',
+    whenGrants: { damagePct: 30, haste: -12 },
+  },
+  {
+    id: 'flurry', arm: 'melee', branch: 'twin_edges', name: 'Flurry', flag: 'flurry', power: 'perk:flurry',
+    when: 'dualOne',
+    desc: 'With a one-handed weapon in each hand: +20% attack speed, and every hit has a 25% chance to land again for 50%.',
+    cost: '−25% armour with those hands.',
+    whenGrants: { haste: 20, armorPct: -25 },
+  },
+  {
+    id: 'shield_wall', arm: 'melee', branch: 'sword_board', name: 'Shield Wall', flag: 'shieldWall', power: 'perk:shield_wall',
+    when: 'swordBoard',
+    desc: 'With a one-handed weapon and a shield: +15% chance to block, a block stops 30 more damage, and every block answers with a shockwave that hits everything within 3.2 metres for 70%.',
+    cost: '−10% damage with those hands.',
+    whenGrants: { blockChance: 15, blockPower: 30, damagePct: -10 },
+  },
+  /**
+   * R25 — ONE KEYSTONE PER ELEMENT, and each one CHANGES WHAT A FIGHT LOOKS LIKE rather than adding
+   * a percentage: a crowd that burns down in a chain, a death that throws shards, a spark that
+   * fights for you, a poison or a curse that walks from body to body, a ring of light, a skill that
+   * goes off twice. The shared cost — 20% less damage of every other kind — is what makes it a
+   * choice of element rather than a free power. All the work is in js/effects.js `perk:*`.
+   */
+  {
+    id: 'pyre_heart', arm: 'arcane', branch: 'flame_frost', name: 'Pyre Heart', flag: 'pyreHeart', power: 'perk:pyre_heart',
+    desc: 'A Burning enemy that dies bursts, hitting everything within 4 metres for 80% as fire and setting it Burning — a crowd burns down in a chain. Your Burning lasts 3s longer.',
+    cost: '−20% damage of every kind but fire.',
+    grants: { spellPower: 0.06 },
+  },
+  {
+    id: 'shatter', arm: 'arcane', branch: 'flame_frost', name: 'Shatter', flag: 'shatter', power: 'perk:shatter',
+    desc: 'A Chilled enemy takes 30% more from you, and one that dies Chilled throws 3 shards at the nearest enemies within 7 metres for 70% each.',
+    cost: '−20% damage of every kind but ice.',
+    grants: { spellPower: 0.06 },
+  },
+  {
+    id: 'storm_within', arm: 'arcane', branch: 'storm_venom', name: 'Storm Within', flag: 'stormWithin', power: 'perk:storm_within',
+    desc: 'In a fight, lightning leaves you on its own every 1.5s and strikes the nearest enemy within 10 metres for 50%, Shocking it.',
+    cost: '−20% damage of every kind but lightning.',
+    grants: { spellPower: 0.06 },
+  },
+  {
+    id: 'plague_bearer', arm: 'arcane', branch: 'storm_venom', name: 'Plague Bearer', flag: 'plagueBearer', power: 'perk:plague_bearer',
+    desc: 'A Poisoned enemy that dies passes its poison to every enemy within 5 metres, 25% stronger each time it moves on.',
+    cost: '−20% damage of every kind but poison.',
+    grants: { spellPower: 0.06 },
+  },
+  {
+    id: 'hollow_pact', arm: 'arcane', branch: 'dusk_dawn', name: 'Hollow Pact', flag: 'hollowPact', power: 'perk:hollow_pact',
+    desc: 'A Cursed enemy that dies passes its curse to every enemy within 5 metres, and every hit of shadow damage you land heals you for 8% of it.',
+    cost: '−20% damage of every kind but shadow.',
+    grants: { spellPower: 0.06 },
+  },
+  {
+    id: 'halo', arm: 'arcane', branch: 'dusk_dawn', name: 'Halo', flag: 'halo', power: 'perk:halo',
+    desc: 'Every 2.5s in a fight a ring of light burns every enemy within 5 metres for 50% as holy and Weakens it, and every hit of holy damage you land heals you for 5% of it.',
+    cost: '−20% damage of every kind but holy.',
+    grants: { spellPower: 0.06 },
+  },
+  {
+    id: 'overflow', arm: 'arcane', branch: 'inner_study', name: 'Overflow', flag: 'overflow', power: 'perk:overflow',
+    desc: 'Every 3rd skill you cast goes off a second time for 60%, free. +10% spell damage.',
+    cost: 'Skills cost 25% more mana.',
+    grants: { spellPower: 0.10 },
   },
   {
     id: 'far_shot', arm: 'ranged', name: 'Far Shot', flag: 'farShot',
@@ -381,7 +457,7 @@ export const KEYSTONES = [
     grants: { critChance: 5 },
   },
   {
-    id: 'blood_magic', arm: 'arcane', name: 'Blood Price', flag: 'bloodMagic',
+    id: 'blood_magic', arm: 'arcane', branch: 'inner_study', name: 'Blood Price', flag: 'bloodMagic',
     desc: 'Skills are paid for in health instead of mana, and never fail for want of mana. +14% spell damage.',
     cost: 'Your mana pool stops mattering, and a skill can leave you on 1 health.',
     grants: { spellPower: 0.14 },      // R18 — a share, not 1400%
@@ -433,6 +509,62 @@ export const KEYSTONES = [
 ];
 
 // ---------------------------------------------------------------------------- building the tree
+
+/**
+ * R25 — TWO ARMS BRANCH. "Change 'The Close Ground' and 'The Deep Study' to each branch into 3-5
+ * separate paths, with another 3-5 nodes total."
+ *
+ * Past ring 6 those two arms stop being one road. Each fans out into four PATHS of three stat nodes
+ * that end in the path's keystone(s): four melee builds with one keystone each, and four arcane
+ * paths that end in a FORK of two keystones — seven elements and Blood Price are eight keystones,
+ * and eight separate roads of four nodes would not fit in a quarter of the screen.
+ *
+ * The paths sit OUTSIDE ring 7, where no other arm has anything, so they can fan wider than the
+ * arm's own slice without landing on a neighbour (`BRANCH_SPREAD`, checked in the round-25 test).
+ *
+ * THE TWO OLD KEYSTONES KEEP THEIR IDS. A save holds `melee:7:0` for Doubled Grasp and `arcane:7:0`
+ * for Blood Price, so the keystone at the end of those two paths is given exactly that id; a save
+ * that owned one keeps it (it sits at the end of its path now rather than straight after ring 6,
+ * and every grant, flag and power still applies whether or not the path to it is walked).
+ */
+export const BRANCHES = {
+  melee: [
+    { key: 'two_weights', name: 'Two Great Weights', nodes: [['str', 5, '+5 Strength (heavy weapon damage)'], ['areaPct', 10, '+10% attack area'], ['damagePct', 8, '+8% damage']] },
+    { key: 'one_weight', name: 'The Single Weight', nodes: [['critDamage', 12, '+12% critical damage'], ['str', 8, '+8 Strength (heavy weapon damage)'], ['damagePct', 8, '+8% damage']] },
+    { key: 'twin_edges', name: 'Twin Edges', nodes: [['haste', 5, '+5% attack speed'], ['critChance', 4, '+4% critical chance'], ['dex', 8, '+8 Dexterity (ranged and light weapon damage)']] },
+    { key: 'sword_board', name: 'Sword and Board', nodes: [['blockChance', 5, '+5% chance to block'], ['armorPct', 12, '+12% armour'], ['maxHp', 40, '+40 maximum health']] },
+  ],
+  arcane: [
+    { key: 'flame_frost', name: 'Flame and Frost', nodes: [['spellPower', 0.05, '+5% spell damage'], ['int', 6, '+6 Intellect (+12 mana, wand and staff damage)'], ['critChance', 4, '+4% critical chance']] },
+    { key: 'storm_venom', name: 'Storm and Venom', nodes: [['haste', 5, '+5% attack speed'], ['spellPower', 0.05, '+5% spell damage'], ['cooldownReduction', 4, '−4% skill cooldowns']] },
+    { key: 'dusk_dawn', name: 'Dusk and Dawn', nodes: [['magicResist', 10, '+10 magic resistance'], ['spellPower', 0.05, '+5% spell damage'], ['hpRegen', 1.5, '+1.5 health a second']] },
+    { key: 'inner_study', name: 'The Inner Study', nodes: [['maxMp', 30, '+30 maximum mana'], ['mpRegen', 0.8, '+0.8 mana a second'], ['spellPower', 0.06, '+6% spell damage']] },
+  ],
+};
+/** Radians either side of the arm's centreline that the outermost path sits at. The arcane fan is
+ *  wider because its paths end in PAIRS of keystones, which need the room side by side. */
+export const BRANCH_SPREAD = { melee: 0.47, arcane: 0.6 };
+/** The radius the first path node sits at; each step is one unit further, the keystones one more. */
+const BRANCH_START = 8;
+/** Angular half-gap between the two keystones at the end of an arcane path's fork. */
+const FORK_HALF = 0.1;
+/** The ids a save made before round 25 already holds for these two keystones. */
+const LEGACY_KEYSTONE_IDS = { doubled_grasp: 'melee:7:0', blood_magic: 'arcane:7:0' };
+
+/**
+ * Which hands a melee keystone's `when` names, asked of the character's own equipment — the same
+ * four shapes js/effects.js `handsOf` answers.
+ */
+export function handsFit(player, when) {
+  if (!when) return true;
+  const main = player?.equipment?.weapon, off = player?.equipment?.offhand;
+  if (!main) return false;
+  const offWeapon = off?.type === 'weapon';
+  if (when === 'twoOne') return !!main.twoHanded && !off;
+  if (when === 'dualOne') return !main.twoHanded && offWeapon && !off.twoHanded;
+  if (when === 'swordBoard') return !main.twoHanded && !!off?.isShield;
+  return false;
+}
 
 /**
  * Rings of the forest, outward from the hub — evenly spaced, one unit apart.
@@ -492,6 +624,46 @@ export function ringStep(radius, per) {
 }
 
 /**
+ * R25 — grow one arm's paths past ring 6: `per` paths spread evenly across ±BRANCH_SPREAD, three
+ * stat nodes each (minor, major, major), then the path's keystone — or, where a path carries two,
+ * a fork of two keystones side by side. The first node joins the nearest ring-6 node.
+ */
+function growBranches(arm, lastRing, add, link) {
+  const paths = BRANCHES[arm.key];
+  paths.forEach((path, p) => {
+    const spread = BRANCH_SPREAD[arm.key] ?? 0.47;
+    const angle = arm.angle + (paths.length > 1 ? -spread + (2 * spread) * p / (paths.length - 1) : 0);
+    let prev = null;
+    path.nodes.forEach(([stat, value, desc], step) => {
+      const radius = BRANCH_START + step;
+      const node = add({
+        id: `${arm.key}:path:${path.key}:${step}`, arm: arm.key, ring: 7 + step, kind: step === 0 ? 'minor' : 'major',
+        branch: path.key, x: Math.cos(angle) * radius, y: Math.sin(angle) * radius,
+        name: desc, desc, grants: { [stat]: value }, major: step > 0 || undefined,
+      });
+      if (!prev) {
+        let best = null, bd = Infinity;
+        for (const n of lastRing) { const d = Math.hypot(n.x - node.x, n.y - node.y); if (d < bd) { bd = d; best = n; } }
+        link(best, node);
+      } else link(prev, node);
+      prev = node;
+    });
+    const stones = KEYSTONES.filter(k => k.arm === arm.key && k.branch === path.key);
+    const radius = BRANCH_START + path.nodes.length;
+    stones.forEach((k, i) => {
+      const a = angle + (stones.length > 1 ? (i - (stones.length - 1) / 2) * 2 * FORK_HALF : 0);
+      const node = add({
+        id: LEGACY_KEYSTONE_IDS[k.id] || `${arm.key}:key:${k.id}`, arm: arm.key, ring: 7 + path.nodes.length, kind: 'keystone',
+        branch: path.key, x: Math.cos(a) * radius, y: Math.sin(a) * radius,
+        name: k.name, desc: k.desc, cost: k.cost, grants: k.grants || {}, flag: k.flag, keystoneId: k.id,
+        power: k.power || null, when: k.when || null, whenGrants: k.whenGrants || null,
+      });
+      link(prev, node);
+    });
+  });
+}
+
+/**
  * Grow the forest.
  *
  * Every class gets the same one — "it should be the same for every class starting from the center" —
@@ -515,6 +687,8 @@ export function buildForest() {
   for (const arm of ARMS) {
     let previousRing = [start];
     for (const ring of RINGS) {
+      // R25 — a branching arm's keystones are at the ends of its paths, not on ring 7
+      if (ring.kind === 'keystone' && BRANCHES[arm.key]) continue;
       const made = [];
       const step = ringStep(ring.radius, ring.per);
       for (let i = 0; i < ring.per; i++) {
@@ -559,6 +733,7 @@ export function buildForest() {
       for (let i = 1; i < made.length; i++) link(made[i - 1], made[i]);
       previousRing = made;
     }
+    if (BRANCHES[arm.key]) growBranches(arm, previousRing, add, link);
   }
 
   /**
@@ -596,7 +771,7 @@ export function buildForest() {
     });
     // the two nearest non-oddball nodes, which will be on different arms
     const near = nodes
-      .filter(n => n !== node && !n.oddball && n.id !== 'start')
+      .filter(n => n !== node && !n.oddball && !n.branch && n.id !== 'start')
       .map(n => ({ n, d: Math.hypot(n.x - node.x, n.y - node.y) }))
       .sort((a, b) => a.d - b.d)
       .slice(0, 2);
@@ -791,17 +966,23 @@ export function perkBonuses(player, forest) {
   const flags = {};
   const talents = [];
   const keystones = [];
+  const powers = [];
   for (const id of takenOf(player)) {
     const node = forest.byId.get(id);
     if (!node) continue;
     for (const [stat, value] of Object.entries(node.grants || {})) {
       stats[stat] = (stats[stat] || 0) + value;
     }
+    // R25 — a melee keystone's numbers only count in the hands it was written for
+    if (node.whenGrants && handsFit(player, node.when)) {
+      for (const [stat, value] of Object.entries(node.whenGrants)) stats[stat] = (stats[stat] || 0) + value;
+    }
     if (node.flag) flags[node.flag] = true;
     if (node.talentId) talents.push(node.talentId);
     if (node.keystoneId) keystones.push(node.keystoneId);
+    if (node.power) powers.push(node.power);
   }
-  return { stats, flags, talents, keystones };
+  return { stats, flags, talents, keystones, powers };
 }
 
 /** A short line for the sheet: how far down each arm you have walked. */

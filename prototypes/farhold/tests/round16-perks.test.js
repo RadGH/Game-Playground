@@ -26,7 +26,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 import {
-  ARMS, ODDBALLS, TALENT_NODES, KEYSTONES, RINGS, NODE_KINDS,
+  ARMS, ODDBALLS, TALENT_NODES, KEYSTONES, RINGS, NODE_KINDS, BRANCHES, BRANCH_SPREAD,
   buildForest, ringStep, pointsFor, canTake, allocate, perkBonuses,
 } from '../js/perks.js';
 // R17 — the derived keys js/followers.js declares it reads. See the note in the grant test below.
@@ -96,9 +96,18 @@ test('there are eight arms, one per corner and compass point, and no two look al
 test('every arm ends in exactly one keystone and passes two talents', () => {
   for (const arm of ARMS) {
     const stones = KEYSTONES.filter(k => k.arm === arm.key);
-    // `buildForest` does `KEYSTONES.find(...)` with no guard, so a missing one throws on load
-    assert.equal(stones.length, 1, `${arm.key} has ${stones.length} keystones, and it must have one`);
-    assert.ok(stones[0].desc && stones[0].cost, `${stones[0].id} is a gift with no cost`);
+    if (BRANCHES[arm.key]) {
+      // R25 — a branching arm has a keystone (or a fork of two) at the end of every path instead
+      for (const path of BRANCHES[arm.key]) {
+        const mine = stones.filter(k => k.branch === path.key);
+        assert.ok(mine.length >= 1 && mine.length <= 2, `${arm.key}'s ${path.key} path ends in ${mine.length} keystones`);
+      }
+      assert.ok(stones.every(k => BRANCHES[arm.key].some(p => p.key === k.branch)), `a ${arm.key} keystone names no path`);
+    } else {
+      // `buildForest` does `KEYSTONES.find(...)` with no guard, so a missing one throws on load
+      assert.equal(stones.length, 1, `${arm.key} has ${stones.length} keystones, and it must have one`);
+    }
+    for (const k of stones) assert.ok(k.desc && k.cost, `${k.id} is a gift with no cost`);
 
     const talents = TALENT_NODES.filter(t => t.arm === arm.key);
     assert.ok(talents.length >= 2, `${arm.key} has ${talents.length} talents; ring 5 wants two`);
@@ -115,16 +124,20 @@ test('every arm ends in exactly one keystone and passes two talents', () => {
 
 // ---------------------------------------------------------------- 2. the count
 
-test('the forest is one hub, eight arms of twenty, and eight oddballs', () => {
+test('the forest is one hub, eight arms of twenty (two of them branching), and eight oddballs', () => {
   const perArm = RINGS.reduce((sum, r) => sum + r.per, 0);
   assert.equal(perArm, 20, 'an arm is twenty nodes; the rings no longer add up to that');
-  assert.equal(forest.nodes.length, 1 + ARMS.length * perArm + ODDBALLS.length);
-  assert.equal(forest.nodes.length, 169, 'the node count moved without the test being told');
+  // R25 — a branching arm drops its ring-7 keystone and grows paths of stat nodes + keystones
+  const armSize = arm => BRANCHES[arm.key]
+    ? perArm - 1 + BRANCHES[arm.key].reduce((n, p) => n + p.nodes.length, 0) + KEYSTONES.filter(k => k.arm === arm.key).length
+    : perArm;
+  assert.equal(forest.nodes.length, 1 + ARMS.reduce((n, a) => n + armSize(a), 0) + ODDBALLS.length);
+  assert.equal(forest.nodes.length, 203, 'the node count moved without the test being told');
 
   for (const arm of ARMS) {
     const mine = forest.nodes.filter(n => n.arm === arm.key);
-    assert.equal(mine.length, perArm, `${arm.key} grew ${mine.length} nodes`);
-    assert.equal(mine.filter(n => n.kind === 'keystone').length, 1);
+    assert.equal(mine.length, armSize(arm), `${arm.key} grew ${mine.length} nodes`);
+    assert.equal(mine.filter(n => n.kind === 'keystone').length, KEYSTONES.filter(k => k.arm === arm.key).length);
     assert.equal(mine.filter(n => n.kind === 'talent').length, 2);
   }
   assert.equal(forest.nodes.filter(n => n.oddball).length, ODDBALLS.length);
@@ -159,6 +172,13 @@ test('an arm keeps its nodes inside its own slice of the circle', () => {
     }
     for (const node of forest.nodes.filter(n => n.arm === arm.key)) {
       const off = angleBetween(Math.atan2(node.y, node.x), arm.angle);
+      if (node.branch) {
+        // R25 — a path fans wider than the slice, but only OUTSIDE every ring, where no other arm
+        // has anything to land on
+        assert.ok(Math.hypot(node.x, node.y) > Math.max(...RINGS.map(r => r.radius)) - 1e-9, `${node.id} is inside the rings`);
+        assert.ok(off <= BRANCH_SPREAD[arm.key] + 0.11, `${node.id} is ${off.toFixed(3)} rad off its own arm`);
+        continue;
+      }
       assert.ok(off <= half + 1e-9, `${node.id} is ${off.toFixed(3)} rad off its own arm`);
     }
   }

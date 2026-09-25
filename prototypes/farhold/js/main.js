@@ -1248,6 +1248,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     applySelf: (type, spec) => applyStatus(player, type, spec, 1),
     statusSpec: type => skillData.statuses[type] || null,
     kill: e => field.kill(e),
+    // R25 — a keystone burst (Pyre Heart) is drawn as a ring of its element where the body fell
+    burstFx(x, z, r, element) { spellfx.aoe({ points: ringPoints(x, z, r), element, stagger: 0.02 }); },
     arc(from, to, element) {
       if (!from || !to) return;
       const y0 = (from.y ?? terrain.heightAt(from.x, from.z)) + 1, y1 = (to.y ?? terrain.heightAt(to.x, to.z)) + 1;

@@ -1316,3 +1316,103 @@ def('legendary:archivist', 'The Archivist\'s Regalia: every fourth skill you cas
     if (n % 4 === 0) { c.refund = true; c.echoCast = 0.5; }
   },
 });
+
+// ---------------------------------------------------------------------------------------------
+// R25 — THE BRANCHED KEYSTONES. "Change 'The Close Ground' and 'The Deep Study' to each branch into
+// 3-5 separate paths… a keystone fitting different builds: 2h dual wielder, 2h single wield, dual
+// 1h, 1h + shield; and for the magic side let's add a keystone for each element type that does
+// something extraordinary and new, and keep the current 'Blood price' as an option too."
+//
+// A keystone in js/perks.js names one of these as its `power`; js/rpg.js `derive` puts the taken
+// ones on `unit.legendaryPowers`, so they run through exactly the hooks — and the readers — every
+// legendary power already has. A melee keystone only works with the hands it was written for, so
+// each hook asks `handsFit` first; the stat half of the same keystone is gated the same way in
+// js/perks.js `perkBonuses`.
+
+/** Which pair of hands a character is holding, in the four shapes the melee keystones name. */
+export function handsOf(unit) {
+  const main = unit?.equipment?.weapon, off = unit?.equipment?.offhand;
+  const offWeapon = off?.type === 'weapon';
+  if (!main) return 'none';
+  if (main.twoHanded && offWeapon && off.twoHanded) return 'twoTwo';
+  if (main.twoHanded && !off) return 'twoOne';
+  if (!main.twoHanded && offWeapon && !off.twoHanded) return 'dualOne';
+  if (!main.twoHanded && (off?.isShield)) return 'swordBoard';
+  return 'other';
+}
+
+export const PERK_KS = {
+  fullSwing: { every: 3, radius: 3.5, power: 0.6, push: 2.5 },
+  flurry: { chance: 0.25, power: 0.5, ms: 150 },
+  shieldWall: { radius: 3.2, power: 0.7 },
+  pyre: { radius: 4, power: 0.8, longer: 3 },
+  shatter: { shards: 3, range: 7, power: 0.7, takeMore: 0.3 },
+  storm: { every: 1.5, radius: 10, power: 0.5 },
+  plague: { radius: 5, power: 1.25 },
+  hollow: { radius: 5, drain: 0.08 },
+  halo: { every: 2.5, radius: 5, power: 0.5, heal: 0.05 },
+  overflow: { every: 3, echo: 0.6, costMore: 0.25 },
+  offElement: 0.8,
+};
+/** "−20% damage in every other element" — the elemental keystones' shared cost. */
+const offElementCost = mine => (v, c) => ((c.element || 'physical') === mine ? 1 : PERK_KS.offElement);
+
+def('perk:full_swing', `With a two-handed weapon and nothing in the other hand, every ${PERK_KS.fullSwing.every}rd swing lands as a slam: everything within ${PERK_KS.fullSwing.radius} metres takes ${pct(PERK_KS.fullSwing.power)} of your damage and is thrown back ${PERK_KS.fullSwing.push} metres.`, {
+  onAttack: (v, c) => {
+    if (c.kind !== 'melee' || handsOf(c.self) !== 'twoOne') return;
+    if (countAttack(c, 'fullSwing') % PERK_KS.fullSwing.every === 0) c.slam = { radius: PERK_KS.fullSwing.radius, power: PERK_KS.fullSwing.power, push: PERK_KS.fullSwing.push };
+  },
+});
+def('perk:flurry', `With a one-handed weapon in each hand, every hit has a ${pct(PERK_KS.flurry.chance)} chance to land again a beat later for ${pct(PERK_KS.flurry.power)} damage.`, {
+  onAttack: (v, c) => {
+    if (c.kind !== 'melee' || handsOf(c.self) !== 'dualOne') return;
+    c.echo = { chance: PERK_KS.flurry.chance, power: PERK_KS.flurry.power, ms: PERK_KS.flurry.ms };
+  },
+});
+def('perk:shield_wall', `With a one-handed weapon and a shield, every blow you block answers with a shockwave: everything within ${PERK_KS.shieldWall.radius} metres takes ${pct(PERK_KS.shieldWall.power)} of your damage.`, {
+  onDamaged: (v, c) => {
+    if (!c.blocked || handsOf(c.self) !== 'swordBoard') return;
+    (c.procs || (c.procs = [])).push({ kind: 'nova', radius: PERK_KS.shieldWall.radius, power: PERK_KS.shieldWall.power, element: 'physical' });
+  },
+});
+
+def('perk:pyre_heart', `A Burning enemy that dies bursts: everything within ${PERK_KS.pyre.radius} metres takes ${pct(PERK_KS.pyre.power)} of your damage as fire and is set Burning, so a crowd burns down in a chain. Your Burning lasts ${PERK_KS.pyre.longer}s longer. You deal 20% less damage of every other kind.`, {
+  onKill: (v, c) => { if (c.target?.statuses?.burn) c.burst = { radius: PERK_KS.pyre.radius, power: PERK_KS.pyre.power, element: 'fire', status: 'burn' }; },
+  statusLonger: (v, c) => (c.type === 'burn' ? PERK_KS.pyre.longer : 0),
+  dmgOut: offElementCost('fire'),
+});
+def('perk:shatter', `A Chilled enemy takes ${pct(PERK_KS.shatter.takeMore)} more from you, and one that dies Chilled shatters: ${PERK_KS.shatter.shards} shards fly at the nearest enemies within ${PERK_KS.shatter.range} metres for ${pct(PERK_KS.shatter.power)} of your damage each. You deal 20% less damage of every other kind.`, {
+  onKill: (v, c) => { if (c.target?.statuses?.chill) c.shards = { count: PERK_KS.shatter.shards, range: PERK_KS.shatter.range, power: PERK_KS.shatter.power, element: 'ice' }; },
+  dmgOut: (v, c) => offElementCost('ice')(v, c) * (c.target?.statuses?.chill ? 1 + PERK_KS.shatter.takeMore : 1),
+});
+def('perk:storm_within', `In a fight, lightning leaves you on its own every ${PERK_KS.storm.every}s and strikes the nearest enemy within ${PERK_KS.storm.radius} metres for ${pct(PERK_KS.storm.power)} of your damage, Shocking it. You deal 20% less damage of every other kind.`, {
+  aura: (v, c) => { c.auras.push({ id: 'storm_within', every: PERK_KS.storm.every, radius: PERK_KS.storm.radius, power: PERK_KS.storm.power, element: 'lightning', nearestOnly: true, status: 'shock' }); },
+  dmgOut: offElementCost('lightning'),
+});
+def('perk:plague_bearer', `A Poisoned enemy that dies passes its poison to every enemy within ${PERK_KS.plague.radius} metres, ${pct(PERK_KS.plague.power - 1)} stronger each time it moves on. You deal 20% less damage of every other kind.`, {
+  onKill: (v, c) => { const st = c.target?.statuses?.poison; if (st) c.spread = { type: 'poison', radius: PERK_KS.plague.radius, power: (st.power || 1) * PERK_KS.plague.power }; },
+  dmgOut: offElementCost('poison'),
+});
+def('perk:hollow_pact', `A Cursed enemy that dies passes its curse to every enemy within ${PERK_KS.hollow.radius} metres, and every hit of shadow damage you land heals you for ${pct(PERK_KS.hollow.drain)} of it. You deal 20% less damage of every other kind.`, {
+  onKill: (v, c) => { const st = c.target?.statuses?.curse; if (st) c.spread = { type: 'curse', radius: PERK_KS.hollow.radius, power: st.power || 1 }; },
+  onHit: (v, c) => {
+    if (c.element !== 'shadow' || !(c.amount > 0) || c.self?.hp == null) return;
+    c.self.hp = Math.min(c.self.maxHp || c.self.hp, c.self.hp + Math.max(1, Math.round(c.amount * PERK_KS.hollow.drain)));
+  },
+  dmgOut: offElementCost('shadow'),
+});
+def('perk:halo', `A ring of light goes with you: every ${PERK_KS.halo.every}s in a fight it burns every enemy within ${PERK_KS.halo.radius} metres for ${pct(PERK_KS.halo.power)} of your damage as holy and Weakens them, and every hit of holy damage you land heals you for ${pct(PERK_KS.halo.heal)} of it. You deal 20% less damage of every other kind.`, {
+  aura: (v, c) => { c.auras.push({ id: 'halo', every: PERK_KS.halo.every, radius: PERK_KS.halo.radius, power: PERK_KS.halo.power, element: 'holy', status: 'weaken' }); },
+  onHit: (v, c) => {
+    if (c.element !== 'holy' || !(c.amount > 0) || c.self?.hp == null) return;
+    c.self.hp = Math.min(c.self.maxHp || c.self.hp, c.self.hp + Math.max(1, Math.round(c.amount * PERK_KS.halo.heal)));
+  },
+  dmgOut: offElementCost('holy'),
+});
+def('perk:overflow', `Every ${PERK_KS.overflow.every}rd skill you cast goes off a second time for ${pct(PERK_KS.overflow.echo)}, free. Skills cost ${pct(PERK_KS.overflow.costMore)} more mana.`, {
+  onCast: (v, c) => {
+    const n = (c.rt.overflow = (c.rt.overflow || 0) + 1);
+    if (n % PERK_KS.overflow.every === 0) c.echoCast = Math.max(c.echoCast || 0, PERK_KS.overflow.echo);
+  },
+  derive: (v, d) => { d.skillCostPct = (d.skillCostPct || 0) - PERK_KS.overflow.costMore; },
+});

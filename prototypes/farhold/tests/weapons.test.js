@@ -251,7 +251,8 @@ test('the forest has a hub, four arms, oddballs between them and a keystone at e
   const kinds = {};
   for (const n of forest.nodes) kinds[n.kind] = (kinds[n.kind] || 0) + 1;
   assert.equal(kinds.hub, 1);
-  assert.equal(kinds.keystone, ARMS.length, 'one keystone an arm');
+  // R25: six arms end in one keystone; the melee and arcane arms branch into paths that end in 4 and 8
+  assert.equal(kinds.keystone, KEYSTONES.length, 'every keystone is in the forest once');
   assert.ok(kinds.talent >= ARMS.length, 'not every arm has a talent node');
   assert.ok(kinds.minor > kinds.major, 'majors should be rarer than minors');
   // every arm is represented, and the oddballs belong to none of them

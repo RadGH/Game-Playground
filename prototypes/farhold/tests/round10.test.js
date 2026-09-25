@@ -112,7 +112,9 @@ test('the forest is a lattice: even rings, even angles, no jitter', () => {
    * count is 1 hub + 8 arms x 20 + 8 oddballs. It is asserted rather than derived on purpose: a
    * forest that quietly changes size is a forest where somebody's saved points moved.
    */
-  assert.equal(forest.nodes.length, 169, 'the node count should not have moved');
+  // R25: The Close Ground and The Deep Study branch past ring 6 (+16 and +20, minus their two old
+  // ring-7 keystones, which moved to the ends of their paths with their ids) — 203.
+  assert.equal(forest.nodes.length, 203, 'the node count should not have moved');
 
   // every node sits exactly on its ring
   for (const node of forest.nodes) {
@@ -128,6 +130,11 @@ test('the forest is a lattice: even rings, even angles, no jitter', () => {
         `${node.id} is at radius ${r.toFixed(3)}, which is a ring — it should be between two`);
       continue;
     }
+    if (node.branch) {
+      // a branch node sits one unit further out per step, the same "radius = ring + 1" as the rings
+      assert.ok(Math.abs(r - (node.ring + 1)) < 1e-9, `${node.id} is at radius ${r.toFixed(3)}, not ${node.ring + 1}`);
+      continue;
+    }
     const wanted = [RINGS.find(x => x.at === node.ring)?.radius];
     assert.ok(wanted.some(w => Math.abs(r - w) < 1e-9),
       `${node.id} is at radius ${r.toFixed(3)}, not ${wanted.join(' or ')}`);
@@ -137,7 +144,7 @@ test('the forest is a lattice: even rings, even angles, no jitter', () => {
   for (const ring of RINGS) {
     if (ring.per < 3) continue;
     const step = ringStep(ring.radius, ring.per);
-    const arm = forest.nodes.filter(n => n.ring === ring.at && n.arm === 'melee' && !n.oddball);
+    const arm = forest.nodes.filter(n => n.ring === ring.at && n.arm === 'melee' && !n.oddball && !n.branch);
     assert.equal(arm.length, ring.per);
     const gaps = [];
     for (let i = 1; i < arm.length; i++) gaps.push(Math.hypot(arm[i].x - arm[i - 1].x, arm[i].y - arm[i - 1].y));

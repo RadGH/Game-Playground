@@ -84,17 +84,20 @@ def drone(dur, f0, f1, q=0.8, color='pink', gain=0.6, lfo=0.13, depth=0.5, ftype
 # element voices: (launch layers, travel layers, impact layers)
 
 def element_recipes(el):
+    # 2026-09-24: the spell voices are sine / triangle only — sawtooth read as grinding metal
     """Returns dict phase -> (dur, layers) for one element."""
     R = {}
     if el == 'fire':
-        R['launch'] = (0.34, [noise(0.30, 900, 2600, 1.1, color='brown', gain=0.85),
-                              tone(0.22, 160, 320, 'sawtooth', gain=0.25),
-                              grain(0.30, 10, 1200, 4000, noisy=True, gain=0.3)])
+        # 2026-09-24: was a sawtooth and noisy grains up to 4 kHz — "firebolt sounds like metal
+        # scraping". Now a soft low whoosh (low-passed, rising), a low thump and a gentle crackle.
+        R['launch'] = (0.42, [noise(0.40, 280, 1300, 0.7, ftype='lowpass', color='brown', gain=0.9, a=0.03),
+                              tone(0.22, 95, 62, 'sine', gain=0.35),
+                              grain(0.36, 6, 380, 1300, 0.01, 0.03, gain=0.18, delay=0.05)])
         R['travel'] = (1.20, [drone(1.20, 420, 1500, 0.9, 'brown', gain=0.7, lfo=3.1, depth=0.55),
                               drone(1.20, 90, 180, 1.4, 'pink', gain=0.35, lfo=1.7, depth=0.4)])
-        R['impact'] = (0.72, [noise(0.60, 2200, 260, 0.9, color='brown', gain=1.0),
+        R['impact'] = (0.72, [noise(0.60, 1400, 220, 0.8, ftype='lowpass', color='brown', gain=1.0),
                               tone(0.36, 120, 44, 'sine', gain=0.85),
-                              grain(0.70, 22, 700, 3800, noisy=True, gain=0.45, delay=0.03)])
+                              grain(0.60, 12, 450, 1800, 0.01, 0.04, gain=0.28, delay=0.03)])
     elif el == 'ice':
         R['launch'] = (0.30, [noise(0.26, 5200, 2400, 3.0, gain=0.7),
                               tone(0.22, 2600, 1700, 'triangle', gain=0.35)])
@@ -105,10 +108,10 @@ def element_recipes(el):
                               tone(0.20, 140, 70, 'sine', gain=0.4)])
     elif el == 'shadow':
         R['launch'] = (0.42, [noise(0.40, 300, 120, 1.4, ftype='lowpass', color='brown', gain=0.8),
-                              tone(0.34, 210, 92, 'sawtooth', gain=0.4)])
+                              tone(0.34, 210, 92, 'triangle', gain=0.4)])
         R['travel'] = (1.20, [drone(1.20, 130, 420, 1.1, 'brown', gain=0.7, lfo=0.9, depth=0.6),
                               drone(1.20, 900, 1800, 3.0, 'pink', gain=0.2, lfo=2.6, depth=0.7)])
-        R['impact'] = (0.95, [tone(0.70, 180, 38, 'sawtooth', gain=0.8),
+        R['impact'] = (0.95, [tone(0.70, 180, 38, 'triangle', gain=0.8),
                               noise(0.80, 600, 90, 0.8, ftype='lowpass', color='brown', gain=0.85),
                               tone(0.55, 305, 147, 'triangle', gain=0.3, delay=0.04),
                               grain(0.60, 9, 200, 800, 0.03, 0.09, gain=0.3, delay=0.05)])
@@ -185,12 +188,12 @@ STATUS_RECIPE = {
     'confused': ('arcane', [fm(0.60, 380, 260, ratio=1.41, index=420, index1=120, gain=0.5), tone(0.55, 520, 700, 'triangle', gain=0.25, vib=(7, 0.1))]),
     'dazed':    ('physical', [tone(0.60, 520, 380, 'sine', gain=0.45, vib=(6, 0.08)), noise(0.25, 1600, 700, 1.4, gain=0.35)]),
     'blind':    ('shadow', [noise(0.60, 2400, 220, 0.7, ftype='lowpass', gain=0.7), tone(0.40, 180, 90, 'sine', gain=0.35)]),
-    'slow':     ('shadow', [tone(0.75, 330, 110, 'sawtooth', gain=0.45), noise(0.60, 700, 200, 1.0, ftype='lowpass', gain=0.35)]),
+    'slow':     ('shadow', [tone(0.75, 330, 110, 'triangle', gain=0.45), noise(0.60, 700, 200, 1.0, ftype='lowpass', gain=0.35)]),
     'marked':   ('physical', [tone(0.22, 880, 880, 'square', gain=0.35), tone(0.22, 1320, 1320, 'square', gain=0.3, delay=0.14)]),
     'barrier':  ('holy', [chord(0.70, [392, 587.33, 784], 'sine', gain=0.5, stagger=0.04), noise(0.35, 1400, 3200, 1.2, ftype='highpass', gain=0.3)]),
     'regen':    ('nature', [chord(0.75, [523.25, 659.25, 880], 'triangle', gain=0.45, stagger=0.07), pluck(0.60, 440, 0.5, gain=0.35)]),
     'sunder':   ('physical', [noise(0.30, 1800, 300, 0.8, color='brown', gain=0.85), tone(0.30, 130, 55, 'sine', gain=0.6), grain(0.35, 8, 400, 1600, 0.01, 0.04, gain=0.4)]),
-    'curse':    ('shadow', [tone(0.85, 155, 58, 'sawtooth', gain=0.6), fm(0.70, 110, 82, ratio=2.51, index=300, gain=0.4), noise(0.60, 600, 140, 0.8, ftype='lowpass', gain=0.45)]),
+    'curse':    ('shadow', [tone(0.85, 155, 58, 'triangle', gain=0.6), fm(0.70, 110, 82, ratio=2.51, index=300, gain=0.4), noise(0.60, 600, 140, 0.8, ftype='lowpass', gain=0.45)]),
     'silence':  ('shadow', [noise(0.45, 3000, 180, 0.6, ftype='lowpass', gain=0.6), tone(0.35, 440, 110, 'sine', gain=0.3)]),
     'disarm':   ('physical', [noise(0.30, 3000, 900, 2.2, gain=0.6), tone(0.35, 700, 260, 'triangle', gain=0.4), grain(0.35, 6, 1200, 3600, 0.008, 0.03, gain=0.35)]),
     'root':     ('nature', [noise(0.50, 700, 180, 1.0, ftype='lowpass', color='brown', gain=0.7), pluck(0.45, 147, 0.35, gain=0.45), grain(0.45, 10, 300, 1100, 0.015, 0.05, gain=0.35)]),
@@ -421,6 +424,13 @@ def build():
         noise(0.12, 1200, 300, 1.0, color='brown', gain=0.7),
         noise(0.22, 400, 160, 1.4, ftype='lowpass', gain=0.4, delay=0.01),
         grain(0.20, 5, 600, 2400, 0.006, 0.02, gain=0.3, noisy=True)], trim=-3.0))
+    # 2026-09-24: footsteps on grass and earth — "too loud and do not sound like running on
+    # grass/dirt". Synth only (no recorded sample, so every method makes the same soft thing):
+    # a low, short, muffled thud and the faintest brush of grass, trimmed well under the old step.
+    out.append(entry('travel.step.soft', 'world', 'Travel step (grass / earth)', 0.20, [
+        noise(0.09, 260, 110, 0.8, ftype='lowpass', color='brown', gain=0.75, a=0.006),
+        noise(0.12, 2600, 3400, 0.9, ftype='highpass', color='pink', gain=0.07, a=0.02, delay=0.01),
+        tone(0.06, 70, 52, 'sine', gain=0.18)], trim=-9.0))
     out.append(entry('camp.fire', 'ambience', 'Campfire (loop)', 2.40, [
         drone(2.40, 260, 900, 0.9, 'brown', gain=0.55, lfo=0.7, depth=0.5),
         grain(2.40, 26, 900, 4200, 0.004, 0.02, gain=0.35, noisy=True),

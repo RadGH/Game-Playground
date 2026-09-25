@@ -120,35 +120,35 @@
    "loop": false,
    "trim": 0.0,
    "synth": {
-    "dur": 0.34,
+    "dur": 0.42,
     "jitter": 0.06,
     "layers": [
      {
       "type": "noise",
       "color": "brown",
-      "dur": 0.3,
+      "dur": 0.4,
       "delay": 0.0,
-      "gain": 0.85,
+      "gain": 0.9,
       "filter": {
-       "type": "bandpass",
-       "f0": 900,
-       "f1": 2600,
-       "q": 1.1
+       "type": "lowpass",
+       "f0": 280,
+       "f1": 1300,
+       "q": 0.7
       },
       "env": {
-       "a": 0.004,
-       "d": 0.3,
+       "a": 0.03,
+       "d": 0.4,
        "curve": "exp"
       }
      },
      {
       "type": "tone",
-      "wave": "sawtooth",
+      "wave": "sine",
       "dur": 0.22,
       "delay": 0.0,
-      "gain": 0.25,
-      "f0": 160,
-      "f1": 320,
+      "gain": 0.35,
+      "f0": 95,
+      "f1": 62,
       "env": {
        "a": 0.003,
        "d": 0.22,
@@ -157,22 +157,22 @@
      },
      {
       "type": "grain",
-      "dur": 0.3,
-      "delay": 0.0,
-      "gain": 0.3,
-      "n": 10,
+      "dur": 0.36,
+      "delay": 0.05,
+      "gain": 0.18,
+      "n": 6,
       "freq": [
-       1200,
-       4000
+       380,
+       1300
       ],
       "gdur": [
        0.01,
-       0.035
+       0.03
       ],
       "wave": "sine",
       "spread": 1.0,
       "sweep": 1.0,
-      "noisy": true
+      "noisy": false
      }
     ]
    },
@@ -247,10 +247,10 @@
       "delay": 0.0,
       "gain": 1.0,
       "filter": {
-       "type": "bandpass",
-       "f0": 2200,
-       "f1": 260,
-       "q": 0.9
+       "type": "lowpass",
+       "f0": 1400,
+       "f1": 220,
+       "q": 0.8
       },
       "env": {
        "a": 0.004,
@@ -274,22 +274,22 @@
      },
      {
       "type": "grain",
-      "dur": 0.7,
+      "dur": 0.6,
       "delay": 0.03,
-      "gain": 0.45,
-      "n": 22,
+      "gain": 0.28,
+      "n": 12,
       "freq": [
-       700,
-       3800
+       450,
+       1800
       ],
       "gdur": [
        0.01,
-       0.035
+       0.04
       ],
       "wave": "sine",
       "spread": 1.0,
       "sweep": 1.0,
-      "noisy": true
+      "noisy": false
      }
     ]
    },
@@ -515,7 +515,7 @@
      },
      {
       "type": "tone",
-      "wave": "sawtooth",
+      "wave": "triangle",
       "dur": 0.34,
       "delay": 0.0,
       "gain": 0.4,
@@ -595,7 +595,7 @@
     "layers": [
      {
       "type": "tone",
-      "wave": "sawtooth",
+      "wave": "triangle",
       "dur": 0.7,
       "delay": 0.0,
       "gain": 0.8,
@@ -2875,7 +2875,7 @@
     "layers": [
      {
       "type": "tone",
-      "wave": "sawtooth",
+      "wave": "triangle",
       "dur": 0.75,
       "delay": 0.0,
       "gain": 0.45,
@@ -2926,7 +2926,7 @@
     "layers": [
      {
       "type": "tone",
-      "wave": "sawtooth",
+      "wave": "triangle",
       "dur": 0.375,
       "delay": 0.0,
       "gain": 0.248,
@@ -3333,7 +3333,7 @@
     "layers": [
      {
       "type": "tone",
-      "wave": "sawtooth",
+      "wave": "triangle",
       "dur": 0.85,
       "delay": 0.0,
       "gain": 0.6,
@@ -3401,7 +3401,7 @@
     "layers": [
      {
       "type": "tone",
-      "wave": "sawtooth",
+      "wave": "triangle",
       "dur": 0.425,
       "delay": 0.0,
       "gain": 0.33,
@@ -6351,6 +6351,75 @@
     "pitch": [
      0.94,
      1.06
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "noise",
+    "dur": 0.12,
+    "loop": false
+   }
+  },
+  {
+   "id": "travel.step.soft",
+   "category": "world",
+   "label": "Travel step (grass / earth)",
+   "loop": false,
+   "trim": -9.0,
+   "synth": {
+    "dur": 0.2,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "brown",
+      "dur": 0.09,
+      "delay": 0.0,
+      "gain": 0.75,
+      "filter": {
+       "type": "lowpass",
+       "f0": 260,
+       "f1": 110,
+       "q": 0.8
+      },
+      "env": {
+       "a": 0.006,
+       "d": 0.09,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "pink",
+      "dur": 0.12,
+      "delay": 0.01,
+      "gain": 0.07,
+      "filter": {
+       "type": "highpass",
+       "f0": 2600,
+       "f1": 3400,
+       "q": 0.9
+      },
+      "env": {
+       "a": 0.02,
+       "d": 0.12,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.06,
+      "delay": 0.0,
+      "gain": 0.18,
+      "f0": 70,
+      "f1": 52,
+      "env": {
+       "a": 0.003,
+       "d": 0.06,
+       "curve": "exp"
+      }
+     }
     ]
    },
    "retro": {

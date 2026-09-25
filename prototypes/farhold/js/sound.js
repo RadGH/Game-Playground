@@ -92,6 +92,14 @@ export async function createSound({ balance = {}, method = null, volume = null, 
    * Footsteps at the cadence you are actually moving. `control` is the player controller.
    * Swimming and riding get their own sounds rather than boots on gravel.
    */
+  /**
+   * R25 — "Footsteps are too loud and do not sound like running on grass/dirt." On natural ground
+   * (grass, forest, earth, sand, snow) a step is the muffled `travel.step.soft`; the harder recorded
+   * step is kept for stone, roads and town streets. Every step also plays well under its catalog
+   * level — a footstep is the most repeated sound in the game and should sit under everything.
+   */
+  let ground = 'soft';
+  function setGround(kind) { ground = kind === 'hard' ? 'hard' : 'soft'; }
   function step(dt, control) {
     if (!ready || muted || !control) return false;
     if (control.swimming || !control.grounded || control.moving <= 0) { stepPhase = 0; return false; }
@@ -100,7 +108,15 @@ export async function createSound({ balance = {}, method = null, volume = null, 
     if (stepPhase < 1) return false;
     stepPhase -= 1;
     // alternate feet across the stereo field
-    return play('travel.step', { pan: (stepPhase > 0.5 ? 0.18 : -0.18) });
+    const id = ground === 'hard' || control.mounted ? 'travel.step' : 'travel.step.soft';
+    return play(id, { pan: (stepPhase > 0.5 ? 0.18 : -0.18), gain: ground === 'hard' ? 0.45 : 0.6 });
+  }
+
+  /** R25 — a spell's own voice: its element's launch as it leaves the hand, its impact where it lands. */
+  const SPELL_ELEMENTS = new Set(['fire', 'ice', 'shadow', 'holy', 'nature', 'arcane', 'lightning', 'physical', 'poison', 'bleed', 'true']);
+  const spellEl = el => (SPELL_ELEMENTS.has(el) ? el : el === 'frost' || el === 'cold' ? 'ice' : el === 'void' ? 'shadow' : 'arcane');
+  function spell(element, phase = 'launch', { pan = 0 } = {}) {
+    return play(`spell.${spellEl(element)}.${phase}`, { pan, gain: phase === 'impact' ? 0.7 : 0.8 });
   }
 
   /** The noises a fight makes. */
@@ -129,7 +145,7 @@ export async function createSound({ balance = {}, method = null, volume = null, 
     get muted() { return muted; },
     get bed() { return bed; },
     get failure() { return lastFailure; },
-    play, place, step, combat, loot, ui,
+    play, place, step, combat, loot, ui, spell, setGround,
     coin: () => play('coin'),
     equip: () => play('equip'),
     levelUp: () => play('levelup'),

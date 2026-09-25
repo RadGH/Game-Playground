@@ -1387,7 +1387,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         spellfx.impact({ at, element: plan.element });
         const splash = plan.splash * (rpg.fx.sum(player, 'boltSplash') || 1);
         const hits = field.strikeArea(at.x, at.z, splash, player, { falloff: 0.5, ...strikeOpts });
-        if (hits.length && loud) sound.combat('hit', { crit: hits.some(h => h.result.crit) });
+        // R25 — a spell lands with its element's own sound, not a sword hitting armour
+        if (loud) { if (plan.element && plan.element !== 'physical') sound.spell(plan.element, 'impact'); else if (hits.length) sound.combat('hit', { crit: hits.some(h => h.result.crit) }); }
         // R23 — the attack's powers, where the bolt burst: shards, the pull, a chain, a patch. Only the
         // first bolt of a chain carries them, so a hop is not a fresh attack with fresh procs.
         if (plan.mods && !hop) resolveAttack(uniqueEnv, plan.mods, hits, { x: control.x, z: control.z, at: { x: at.x, z: at.z }, element: plan.element });
@@ -1465,6 +1466,12 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   }
 
   /** Fire skill slot `i`. Returns the plan it ran, or null if it could not. */
+  /** R25 — the sound a skill's hits make: its element's impact, or the melee hit for a physical one. */
+  function skillSound(plan, hits) {
+    if (plan.element && plan.element !== 'physical') { if (hits.length) sound.spell(plan.element, 'impact'); }
+    else sound.combat(hits.length ? 'hit' : 'swing', { crit: hits.some(h => h.result?.crit) });
+  }
+
   function castSkill(i, { echo = false } = {}) {
     const plan = echo ? i : skills.use(i);
     if (!plan.ok) { if (plan.why) hud.log(plan.why); return null; }
@@ -1490,6 +1497,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       reportHit(enemy, result);
     };
     const strikeOpts = { power, element: plan.element, skill: plan.skill?.id, onHit, applyStatus: statusHook };
+    // R25 — every cast has a voice: its element's launch now, and its impact if it caught anything
+    // (a physical skill keeps the melee swing and hit). Only bows had a sound before.
+    if (plan.element && plan.element !== 'physical' && !['self', 'summon'].includes(plan.kind)) sound.spell(plan.element, 'launch');
 
     /**
      * R18 — BULWARK. `plan.barrier` was written by js/skilltalents.js and read by nobody, while
@@ -1564,7 +1574,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       spellfx.aoe({ points: ringPoints(spot.x, spot.z, plan.radius), element: plan.element, stagger: 0.05 });
       spellfx.impact({ at: new THREE.Vector3(spot.x, spot.y + 0.6, spot.z), element: plan.element });
       const hits = field.strikeArea(spot.x, spot.z, plan.radius, player, { falloff: 0.55, ...strikeOpts });
-      sound.combat(hits.length ? 'hit' : 'swing', { crit: hits.some(h => h.result.crit) });
+      skillSound(plan, hits);
       // `linger`: the ground keeps burning after the cast
       if (plan.ground > 0) {
         dropPool({
@@ -1589,7 +1599,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       }
       control.teleport(control.x + a.dx * dist, control.z + a.dz * dist);
       control.swing = Math.max(control.swing, 0.35);
-      sound.combat(hits.length ? 'hit' : 'swing');
+      skillSound(plan, hits);
     } else if (plan.kind === 'self') {
       if (plan.heal) {
         const before = player.hp;
@@ -1612,7 +1622,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     } else if (plan.kind === 'melee') {
       fx.swipe({ x: control.x, y: control.y, z: control.z, yaw: control.yaw, reach: plan.reach, arc: plan.arc });
       const hits = field.strike(control, player, { reach: plan.reach, arc: plan.arc, ...strikeOpts });
-      sound.combat(hits.length ? 'hit' : 'swing', { crit: hits.some(h => h.result.crit) });
+      skillSound(plan, hits);
       for (const h of hits) spellfx.impact({ at: new THREE.Vector3(h.enemy.x, h.enemy.y + 0.9, h.enemy.z), element: plan.element, crit: h.result.crit });
       control.swing = Math.max(control.swing, 0.35);
     } else if (plan.kind === 'around') {
@@ -1625,7 +1635,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       }
       spellfx.aoe({ points, element: plan.element, stagger: 0.04 });
       const hits = field.strikeArea(control.x, control.z, plan.radius, player, { falloff: 0.6, ...strikeOpts });
-      sound.combat(hits.length ? 'hit' : 'swing');
+      skillSound(plan, hits);
       // `linger` is offered on the nova tree too, and a nova leaves its pool where you stood
       if (plan.ground > 0) {
         dropPool({
@@ -8489,7 +8499,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         const a = aim();
         const base = Math.max(1, Math.round((player.derived.damage[1] || 6) * (spell.mult || 1) * share));
         const radius = (spell.radius || spell.width || 3) * shape.scale;
-        sound.combat('cast');
+        sound.spell(element, 'launch');
         // R15: `cast` takes { at, element, ms } — `scale` was silently dropped, so a wide-area
         // build's flourish was the same size as everybody else's. A bigger charge holds longer,
         // which is the only feedback the cast itself gives.
@@ -9077,6 +9087,13 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     folk.update(dt, control, { field, level: player.level, onLog: (t, c) => hud.log(t, c) });
     // R22 — put a real person on the road for every wanderer you are close enough to see
     keepWandererBodies(dt);
+    // R25 — soft steps on natural ground, the harder step on roads, rock and in dungeons
+    if (state.frames % 20 === 0) {
+      const bk = BIOMES[terrain.biomeIdAt?.(control.x, control.z)]?.key || '';
+      const hard = !!dungeon || (terrain.roadAt?.(control.x, control.z) || 0) > 0.5
+        || ['mountains', 'snowyPeaks', 'volcanic', 'badlands', 'glimmerwaste', 'crystalFields'].includes(bk);
+      sound.setGround(hard ? 'hard' : 'soft');
+    }
     sound.step(dt, control);
     // the survey counts the ground you actually cover
     const stepped = Math.hypot(control.x - lastPos[0], control.z - lastPos[1]);

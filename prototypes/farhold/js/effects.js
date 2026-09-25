@@ -1248,3 +1248,71 @@ export class Effects {
   /** Does any effect on this character offer this hook at all? */
   has(unit, name) { return this.effects(unit).some(({ e }) => !!e[name]); }
 }
+
+// ---------------------------------------------------------------------------------------------
+// R25 — THE CASTER'S OFF HAND. "Book/tome should be an off-hand for casters to use along with a
+// wand. They should have their own distinct feature… drastically different compared to using a 2nd
+// wand or a shield." Four foci (js/foci.js puts the bases in), each doing a job nothing else does:
+// the Grimoire adds a page to your bolts, the Seer's Orb keeps a mote that fights for you, the
+// Reliquary answers a blow with light, and the Effigy makes every curse you lay last and bite.
+// Built only from hooks that already have readers: `twin` on a bolt, a `nearestOnly` aura, a
+// `nova` proc on being hit, `statusLonger` / `statusPower`, and `derive`.
+
+/** Your weapon's element, for a focus that fights in it. */
+const focusElement = unit => unit?.equipment?.weapon?.brand || unit?.equipment?.weapon?.castElement || 'arcane';
+export const FOCI = {
+  grimoire: { every: 3, page: 0.6, pageMs: 170, manaCut: 0.15 },
+  orb: { every: 1.4, radius: 9, power: 0.3 },
+  relic: { chance: 0.25, radius: 4.5, power: 0.6, heal: 0.04, barrierRegen: 2 },
+  idol: { longer: 2, power: 0.25 },
+};
+
+def('affix:cond_focusGrimoire', () => `Every ${FOCI.grimoire.every}rd bolt from your wand throws a page with it: a second bolt of the same element for ${pct(FOCI.grimoire.page)} damage. Your skills cost ${pct(FOCI.grimoire.manaCut)} less mana.`, {
+  onAttack: (v, c) => {
+    if (c.kind !== 'bolt') return;
+    if (countAttack(c, 'pageCount') % FOCI.grimoire.every === 0) c.twin = { ms: FOCI.grimoire.pageMs, power: FOCI.grimoire.page * (v > 1 ? v : 1) };
+  },
+  derive: (v, d) => { d.skillCostPct = Math.min(0.6, (d.skillCostPct || 0) + FOCI.grimoire.manaCut); },
+});
+def('affix:cond_focusOrb', () => `A mote circles you in a fight and strikes the nearest enemy within ${FOCI.orb.radius} metres every ${FOCI.orb.every}s for ${pct(FOCI.orb.power)} of your damage, in your weapon's element.`, {
+  aura: (v, c) => { c.auras.push({ id: 'focus_mote', every: FOCI.orb.every / (v > 1 ? v : 1), radius: FOCI.orb.radius, power: FOCI.orb.power, element: focusElement(c.self), nearestOnly: true }); },
+});
+def('affix:cond_focusRelic', () => `When you are hit, a ${pct(FOCI.relic.chance)} chance the relic answers: holy light strikes everything within ${FOCI.relic.radius} metres for ${pct(FOCI.relic.power)} of your damage and heals you for ${pct(FOCI.relic.heal)} of your maximum health. +${FOCI.relic.barrierRegen} barrier regeneration.`, {
+  onDamaged: (v, c) => {
+    if (!(c.amount > 0) || (c.rng ? c.rng() : Math.random()) >= FOCI.relic.chance * (v > 1 ? v : 1)) return;
+    (c.procs || (c.procs = [])).push({ kind: 'nova', radius: FOCI.relic.radius, power: FOCI.relic.power, element: 'holy' });
+    if (c.self?.hp != null) c.self.hp = Math.min(c.self.maxHp || c.self.hp, c.self.hp + Math.round((c.self.maxHp || 0) * FOCI.relic.heal));
+  },
+  derive: (v, d) => { d.barrierRegen = (d.barrierRegen || 0) + FOCI.relic.barrierRegen; },
+});
+def('affix:cond_focusIdol', () => `Every status you lay on an enemy lasts ${FOCI.idol.longer}s longer and does ${pct(FOCI.idol.power)} more.`, {
+  statusLonger: () => FOCI.idol.longer,
+  statusPower: () => 1 + FOCI.idol.power,
+});
+
+// the unique powers the foci carry (js/foci.js)
+def('legendary:page_storm', 'Every other bolt from your wand throws a page, and a page is worth as much as the bolt it follows.', {
+  onAttack: (v, c) => { if (c.kind === 'bolt' && countAttack(c, 'stormPages') % 2 === 0) c.twin = { ms: 140, power: 1 }; },
+});
+def('legendary:twin_motes', `Two motes circle you, each striking the nearest enemy every ${FOCI.orb.every}s, and reaching 2 metres further than one mote.`, {
+  aura: (v, c) => {
+    c.auras.push({ id: 'mote_a', every: FOCI.orb.every, radius: FOCI.orb.radius + 2, power: FOCI.orb.power * 1.2, element: focusElement(c.self), nearestOnly: true });
+    c.auras.push({ id: 'mote_b', every: FOCI.orb.every * 1.13, radius: FOCI.orb.radius + 2, power: FOCI.orb.power * 1.2, element: focusElement(c.self), nearestOnly: true });
+  },
+});
+def('legendary:sanctuary', 'Every blow you take has a 40% chance to be answered by a wider holy burst that also leaves every enemy it touches Weakened.', {
+  onDamaged: (v, c) => {
+    if (!(c.amount > 0) || (c.rng ? c.rng() : Math.random()) >= 0.4) return;
+    (c.procs || (c.procs = [])).push({ kind: 'nova', radius: 6.5, power: 0.8, element: 'holy', status: 'weaken' });
+  },
+});
+def('legendary:hexbound', 'Every status you lay lasts twice as long, and an enemy carrying two or more of your statuses takes 30% more from you.', {
+  statusLonger: (v, c) => Math.max(2, (c.spec?.seconds || 4)),
+  dmgOut: (v, c) => (Object.keys(c.target?.statuses || {}).length >= 2 ? 1.3 : 1),
+});
+def('legendary:archivist', 'The Archivist\'s Regalia: every fourth skill you cast costs nothing and goes off a second time for half.', {
+  onCast: (v, c) => {
+    const n = (c.rt.archivist = (c.rt.archivist || 0) + 1);
+    if (n % 4 === 0) { c.refund = true; c.echoCast = 0.5; }
+  },
+});

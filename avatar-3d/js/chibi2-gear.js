@@ -238,7 +238,45 @@ export function buildOffhand(a, c) {
     add(new THREE.BoxGeometry(0.004, 0.09, 0.012), L, '#b03030', { position: [B[0], B[1] - 0.15, B[2] + 0.02] });
     return;
   }
-  if (id === 'orb') { add(new THREE.SphereGeometry(0.11, 10, 6), L, oc, { position: [0, 0.16, 0.12], metal: true }); return; }
+  if (id === 'orb') {
+    // A SEER'S ORB on a claw cradle: a glassy sphere, a brighter core showing through it, a thin ring
+    // around its waist and three brass claws holding it up out of the fist.
+    const P = [0, 0.17, 0.10], glass = oc || '#8fd0ff', brass = '#c8a040';
+    add(new THREE.SphereGeometry(0.1, 14, 10), L, glass, { position: P, metal: true });
+    add(new THREE.SphereGeometry(0.045, 10, 8), L, lift(glass, 0.6), { position: P });
+    add(new THREE.TorusGeometry(0.118, 0.007, 4, 20), L, lift(glass, 0.4), { position: P, rotation: [1.2, 0, 0.35] });
+    add(new THREE.CylinderGeometry(0.03, 0.022, 0.08, 8), L, brass, { position: [0, 0.05, 0.10], metal: true });
+    for (let k = 0; k < 3; k++) {
+      const t = k / 3 * Math.PI * 2;
+      add(new THREE.ConeGeometry(0.012, 0.09, 5), L, brass, { position: [Math.sin(t) * 0.06, 0.1, 0.10 + Math.cos(t) * 0.06], rotation: [Math.cos(t) * 0.5, 0, -Math.sin(t) * 0.5], metal: true });
+    }
+    return;
+  }
+  if (id === 'relic') {
+    // A RELIQUARY: a little gilded house-shrine on a short handle, a window of pale light in its face
+    // (a bone behind glass) and a cross-finial on the roof.
+    const gold = oc || '#c8a040', glow = '#fff0b8';
+    add(new THREE.CylinderGeometry(0.018, 0.018, 0.12, 6), L, tone(gold, 0.6), { position: [0, 0.02, 0.10], metal: true });
+    add(new THREE.BoxGeometry(0.12, 0.13, 0.09), L, gold, { position: [0, 0.14, 0.10], metal: true });
+    add(new THREE.ConeGeometry(0.095, 0.08, 4), L, tone(gold, 0.85), { position: [0, 0.245, 0.10], rotation: [0, Math.PI / 4, 0], metal: true });
+    add(new THREE.BoxGeometry(0.07, 0.08, 0.01), L, glow, { position: [0, 0.14, 0.147] });
+    add(new THREE.BoxGeometry(0.012, 0.06, 0.012), L, gold, { position: [0, 0.31, 0.10], metal: true });
+    add(new THREE.BoxGeometry(0.04, 0.012, 0.012), L, gold, { position: [0, 0.32, 0.10], metal: true });
+    for (const x of [-1, 1]) add(new THREE.SphereGeometry(0.014, 6, 4), L, '#d04040', { position: [x * 0.06, 0.2, 0.147], metal: true });
+    return;
+  }
+  if (id === 'idol') {
+    // An EFFIGY: a bound straw figure held by its legs, arms out, a clay head with two dark eyes and
+    // red cord wound round it. The one caster focus that looks like it could bite.
+    const straw = oc || '#b89a58', cord = '#8a1c1c';
+    add(new THREE.CylinderGeometry(0.035, 0.05, 0.2, 7), L, straw, { position: [0, 0.1, 0.10] });
+    add(new THREE.CylinderGeometry(0.018, 0.018, 0.2, 5), L, straw, { position: [0, 0.14, 0.10], rotation: [0, 0, Math.PI / 2] });
+    add(new THREE.SphereGeometry(0.045, 10, 8), L, '#8a6a4a', { position: [0, 0.245, 0.10] });
+    for (const x of [-1, 1]) add(new THREE.SphereGeometry(0.009, 5, 4), L, '#140808', { position: [x * 0.017, 0.25, 0.14] });
+    for (const y of [0.05, 0.12, 0.19]) add(new THREE.TorusGeometry(0.045, 0.006, 4, 12), L, cord, { position: [0, y, 0.10], rotation: [Math.PI / 2, 0, 0] });
+    for (const x of [-1, 1]) add(new THREE.ConeGeometry(0.015, 0.05, 4), L, tone(straw, 0.8), { position: [x * 0.115, 0.14, 0.10], rotation: [0, 0, x * Math.PI / 2] });
+    return;
+  }
   if (id === 'torch') { add(profile([[-0.28, 0.018, 0.018], [0.18, 0.018, 0.018]], 6), L, leather, { position: [0, 0.02, 0.08] }); add(new THREE.ConeGeometry(0.11, 0.22, 6), L, '#ff8c2a', { position: [0, 0.29, 0.08], metal: true }); return; }
   if (id === 'quiver') {
     // Worn on the back, top over the right shoulder, with a strap across the chest.

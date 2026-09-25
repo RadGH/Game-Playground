@@ -95,6 +95,7 @@ export const ENGINE_UNIT = {
   cond_levelReqReduce: 'flat',
   // flags — present or absent, the value is ignored
   cond_extraSetPiece: 'flag', cond_setThresholdReduce: 'flag',
+  cond_focusGrimoire: 'flag', cond_focusOrb: 'flag', cond_focusRelic: 'flag', cond_focusIdol: 'flag',
   // round 6: the light, mount and quiver slots' own properties (js/gear.js)
   cond_lightRange: 'flat', cond_lightBase: 'flat',
   // R18 — a SHARE: the only consumer is `1 + revealRange` on the minimap span. See js/effects.js.

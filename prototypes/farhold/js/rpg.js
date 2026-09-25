@@ -16,6 +16,7 @@
 // rather than swallowed (`derived.inert`), which is the guard that found the dead ones.
 
 import { Loot } from '../../emberveil/js/loot.js';
+import { focusLook } from './foci.js';
 import { makeRng } from '../../emberveil/js/rng.js';
 import { tuneAffixData, affixAllowed, rollAffixValue, itemLevelFor, requirementFor, tierFor, capValue, roundFor, scrubRetired, FARHOLD_AFFIXES } from './affixes.js';
 import { SLOT_AFFIX_LIST, startingVehicles } from './gear.js';
@@ -615,9 +616,16 @@ export function heldLookFor(item) {
     : item.rarity === 'legendary' ? '#ffb040' : item.rarity === 'rare' ? '#e8d020' : '#b9c2cc';
   return { id, color, quality, element: el || null };
 }
+/** A focus's model colour, plain then legendary. */
+const FOCUS_COLOURS = { book: ['#4a2a5a', '#6a2a6a'], orb: ['#8fd0ff', '#d08fff'], relic: ['#c8a040', '#f0d060'], idol: ['#b89a58', '#6a4a3a'] };
+
 export function offhandLookFor(item) {
   if (!item) return { id: 'none' };
   if (item.look?.offhand) return { id: item.look.offhand, color: item.look.color || '#9aa3ad' };
+  // R25 — a caster FOCUS (grimoire, seer's orb, reliquary, effigy) and the old orb/warded foci are
+  // held up in the left hand as themselves, not drawn as a kite shield
+  const focus = focusLook(item);
+  if (focus) return { id: focus, color: FOCUS_COLOURS[focus]?.[item.rarity === 'legendary' ? 1 : 0] };
   // strapped to the forearm, not gripped in the fist — see chibi2-weapons.js
   if (item.isShield || item.isMagicShield) return { id: item.isMagicShield ? 'fh_kite_shield' : 'fh_heater_shield', color: '#8d97a3', quality: item.rarity === 'legendary' ? 3 : item.rarity === 'rare' ? 2 : 0 };
   /**

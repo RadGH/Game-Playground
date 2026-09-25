@@ -534,7 +534,9 @@ export function createSkillBar({ data, player, rpg, unlocks = null, canSummon = 
   /** …and cost less with `cond_skillMpCostReduce`, which is a FLAT saving, not a percentage. */
   function costFor(s) {
     const off = rpg?.fx ? rpg.fx.sum(player, 'costFlat') : 0;
-    return Math.max(0, Math.round((s.mp || 0) - off));
+    // R25 — the Grimoire's "skills cost 15% less mana" (js/effects.js cond_focusGrimoire)
+    const cut = Math.min(0.6, player.derived?.skillCostPct || 0);
+    return Math.max(0, Math.round(((s.mp || 0) - off) * (1 - cut)));
   }
 
   /**

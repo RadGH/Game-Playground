@@ -128,6 +128,7 @@ import { Hud, SLOT_LABELS, MINIMAP_NEAR } from './hud.js';
 import { mat as matAmount } from '../../../shared/format.js';
 import { createSkillBar, applyStatus, tickStatuses, slowOf, buffsOf, outgoingFrom, incomingFrom, STATUS_POWER_SHARE } from './skills.js';
 // R23 — Farhold's own uniques and the requests their powers make (see js/uniques.js)
+import { installFoci } from './foci.js';
 import { installUniques, resolveAttack, afterKill as uniquesAfterKill, afterDamaged as uniquesAfterDamaged, tickAuras } from './uniques.js';
 import { EFFECTS as FX_TABLE } from './effects.js';
 // round 4: the RPG expansion
@@ -283,6 +284,8 @@ async function boot() {
       loadJSON('data/tools.json').catch(() => null),
     ]);
     installUniques(items, uniqueData, { tools: uniqueTools, describe: id => FX_TABLE['legendary:' + id]?.desc?.() || null });
+    // R25 — the caster's off hand: four foci, eight uniques and the Archivist's set (js/foci.js)
+    installFoci(items, { describe: id => FX_TABLE['legendary:' + id]?.desc?.() || null, balance });
   }
 
   /**
@@ -1190,7 +1193,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   function landStatus(type, spec, enemy, power = 1) {
     if (!type || !spec) return;
     const first = !enemy.statuses?.[type];
-    const longer = rpg.fx.sum(player, 'statusLonger', { type });
+    const longer = rpg.fx.sum(player, 'statusLonger', { type, spec });
     const strength = rpg.fx.product(player, 'statusPower', { type });
     applyStatus(enemy, type, spec, power, { longer, strength });
     if (first) hud.log(`${enemy.name} is ${(spec.name || type).toLowerCase()}.`, 'good');
@@ -1521,6 +1524,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     // every "when you cast" affix and legendary gets its turn first
     if (!echo) {
       const cast = rpg.fx.onCast({ self: player, skill: plan.skill, applyStatus: statusHook });
+      // R25 — the Archivist's Regalia: every fourth cast is free and goes off again for half
+      if (cast.refund && plan.spent > 0) { if (plan.paidWith === 'health') player.hp = Math.min(player.maxHp, player.hp + plan.spent); else player.mp = Math.min(player.maxMp, player.mp + plan.spent); }
+      if (cast.echoCast > 0) setTimeout(() => castSkill({ ...plan, mult: plan.mult * cast.echoCast, damage: Math.round(plan.damage * cast.echoCast) }, { echo: true }), 300);
       if (cast.shockwave) {
         spellfx.aoe({ points: ringPoints(control.x, control.z, 7), element: 'arcane', stagger: 0.03 });
         field.strikeArea(control.x, control.z, 7, player, { element: 'arcane', power: 1.2, onHit });

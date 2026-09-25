@@ -65,7 +65,7 @@ const TWO_HANDED = new Set(['greatsword', 'greataxe', 'warhammer', 'fh_greatswor
 const LEFT_KIND = {
   heater_shield: 'shield', kite_shield: 'shield', round_shield: 'shield', tower_shield: 'shield', buckler: 'shield',
   fh_heater_shield: 'shield', fh_kite_shield: 'shield', fh_tower_shield: 'shield',
-  dagger: 'dagger', book: 'book', orb: 'orb', torch: 'torch', map: 'caster', quiver: 'none', none: 'none',
+  dagger: 'dagger', book: 'book', orb: 'orb', relic: 'orb', idol: 'orb', torch: 'torch', map: 'caster', quiver: 'none', none: 'none',
 };
 
 /**

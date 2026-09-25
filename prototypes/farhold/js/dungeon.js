@@ -470,12 +470,22 @@ export function createGates(scene, terrain, {
      */
     mesh: group,
     get visible() { return shown; },
-    /** The mouth you are standing in front of, or null. */
-    nearest: (x, z, range = 4.5) => {
-      let best = null, bestD = range;
+    /**
+     * The mouth you are standing in front of, or null.
+     *
+     * R26 — `blockers` is the list of obstacle fields something else may have built OVER a mouth
+     * (a beast den's earth bank is a 7 m disc on the very same spot). The reach is measured from
+     * the edge of the widest one covering the mouth, not from its centre, which nobody can stand
+     * on — see `ObstacleField.coverAt` in js/collide.js. Returns the same node object as before.
+     */
+    nearest: (x, z, range = 4.5, blockers = null) => {
+      let best = null, bestGap = Infinity;
       for (const n of shown) {
+        let cover = 0;
+        for (const f of blockers || []) cover = Math.max(cover, f?.coverAt?.(n.x, n.z) || 0);
         const d = Math.hypot(n.x - x, n.z - z);
-        if (d < bestD) { bestD = d; best = n; }
+        const gap = d - cover;
+        if (d < range + cover && gap < bestGap) { bestGap = gap; best = n; }
       }
       return best;
     },

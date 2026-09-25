@@ -5037,6 +5037,31 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         field.addRanked(def, level, x, z, rank);
       }
     }
+    /**
+     * R26 — THE THINGS A JOB SENT YOU HERE FOR ARE HERE.
+     *
+     * "Clear the Mauran Undercroft: 6 Moor Hounds have made a home of it." The rooms were filled
+     * from the biome's pool, which need not include the job's target at all — so the kill count
+     * could never be made down here. Whatever an open `clear` job at this mouth still wants is put
+     * in the rooms, spread across them, before anything else is.
+     */
+    {
+      const rooms = dungeon.rooms.filter(r => r.kind !== 'entrance' && r.kind !== 'boss');
+      const spots = rooms.length ? rooms : dungeon.rooms;
+      for (const q of questLog.active || []) {
+        if (q.done || q.kind !== 'clear' || !q.place) continue;
+        const here = Math.hypot((q.place.x ?? Infinity) - node.x, (q.place.z ?? Infinity) - node.z) <= 200
+          || (q.place.name && q.place.name === node.name);
+        if (!here) continue;
+        const def = bestiary.enemies.find(d => d.id === q.target);
+        if (!def) continue;
+        const left = Math.max(0, (q.count || 0) - (q.progress || 0));
+        for (let i = 0; i < left && spots.length; i++) {
+          const room = spots[i % spots.length];
+          await field.add(def, level, room.x + (field.rng() - 0.5) * (room.w - 3), room.z + (field.rng() - 0.5) * (room.h - 3));
+        }
+      }
+    }
     if (dungeon.bossRoom !== dungeon.entrance) {
       /**
        * An instance may NAME its boss — that is what makes a dragon's lair a dragon's lair and not
@@ -5247,7 +5272,11 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       if (g.revealZone && hud.here) { map.revealZone?.(hud.here.id); hud.log(`${hud.here.name} goes on your chart.`, 'good'); }
     }
     campaign.onKill('dungeon_cleared');
-    for (const q of questLog.onClear?.({ name: dungeon.name }) || []) hud.log(`${q.title}: cleared.`, 'good');
+    // R26: `onClear` exists now (js/quests.js) — matched by where the mouth is as well as its name
+    for (const q of questLog.onClear?.({ name: dungeon.name, x: node?.x, z: node?.z }) || []) {
+      hud.log(`${q.title}: cleared.`, 'good');
+      markers.syncQuests?.(questLog.active);
+    }
     sound.questDone();
     rewards({
       title: 'Dungeon cleared', subtitle: `${dungeon.name} is quiet now.`,
@@ -5269,7 +5298,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     const chest = chests.nearest(control.x, control.z);
     if (chest) return { kind: 'chest', chest };
     if (!dungeon) {
-      const gate = gates.nearest(control.x, control.z);
+      // R26: measured from the edge of anything built over the mouth (a den's earth bank is 7 m
+      // across on the very same spot, and E used to ask for 4.5 m from its middle)
+      const gate = gates.nearest(control.x, control.z, 4.5, [siteSolids, features?.solids, props?.solids]);
       if (gate) return { kind: 'dungeon', gate };
       const who = folk.nearest(control.x, control.z);
       if (who) return { kind: 'talk', who };

@@ -187,3 +187,99 @@ test('a NaN from any material stays one pixel: it is not blurred into a square b
   expect(stats.black - before.black, `black share ${before.black.toFixed(3)} without the patch, ${stats.black.toFixed(3)} with it`).toBeLessThan(0.01);
   expect(errors).toEqual([]);
 });
+
+/**
+ * 4. "I got a quest 'Clear the Mauran Undercroft' … a big rock thing there that looks like maybe a
+ *    cave entrance … despite the yellow arrow pointing to it, I cannot interact with it in any way."
+ *    js/sites.js builds a beast den on the mouth, and its earth bank is ~7 m of solid around the
+ *    very point `E` measured 4.5 m from. Stood at from eight sides, on the mouths
+ *    nearest the start of seed 3 that a job could name (World Forge's dungeons and the instance
+ *    mouths) — then a clear job is taken, the place is entered, and killing its boss finishes it.
+ */
+test('every dungeon mouth a job can send you to has a door you can walk up to, and clearing it finishes the job', async ({ page }) => {
+  test.setTimeout(420000);
+  const errors = watch(page);
+  await page.goto(BASE + '?auto&class=fighter&seed=3&sound=off&quality=low');
+  await page.waitForFunction(() => document.body.dataset.ready === '1' && !!window.farhold, null, { timeout: 120000 });
+  // nobody gets killed and nothing gets in the way while we walk
+  await page.evaluate(() => {
+    const f = window.farhold;
+    window.__guard = setInterval(() => {
+      f.player.hp = f.player.maxHp = 1e7;
+      if (!f.dungeon) for (const e of f.field.enemies) e.hp = 0;
+    }, 50);
+  });
+  const mouths = await page.evaluate(() => {
+    const f = window.farhold, c = f.control;
+    const all = f.gates.nodes
+      .map(n => ({ id: n.id, name: n.name, kind: n.kind, x: n.x, z: n.z, d: Math.hypot(n.x - c.x, n.z - c.z) }))
+      .sort((a, b) => a.d - b.d);
+    // World Forge's own dungeons (a beast den is often built right on top of one — the report) and
+    // the instance mouths js/sites.js adds
+    return [...all.filter(n => n.kind !== 'instance').slice(0, 3), ...all.filter(n => n.kind === 'instance').slice(0, 2)];
+  });
+  expect(mouths.length).toBeGreaterThan(0);
+  /**
+   * Stand where a player walking up to the mouth would end up: on each of eight bearings, the
+   * nearest spot to the mouth that none of the game's own obstacle fields refuses. (Walking there
+   * with the keys is the same thing slower, and a straight walk can snag on a cairn a player would
+   * simply step round.) Then ask the game what E does from there.
+   */
+  const results = [];
+  for (const m of mouths) {
+    await page.evaluate(m => window.farhold.teleport(m.x, m.z + 20), m);
+    await page.waitForTimeout(1200);
+    results.push(await page.evaluate(m => {
+      const f = window.farhold, c = f.control, body = 0.4;
+      const fields = c.obstacles || [];
+      const free = (x, z) => fields.every(fl => !fl?.blocked?.(x, z, body));
+      const rows = [];
+      for (let k = 0; k < 8; k++) {
+        const a = (k / 8) * Math.PI * 2;
+        let d = 0;
+        while (d < 20 && !free(m.x + Math.sin(a) * d, m.z + Math.cos(a) * d)) d += 0.25;
+        const x = m.x + Math.sin(a) * d, z = m.z + Math.cos(a) * d;
+        if (f.terrain.waterAt?.(x, z)) continue;          // a bearing into a river is not an approach
+        c.teleport(x, z);
+        const it = f.interactTarget();
+        rows.push({ a: +a.toFixed(2), d: +d.toFixed(2), ok: it?.kind === 'dungeon' && it.gate?.name === m.name });
+      }
+      return { name: m.name, rows };
+    }, m));
+  }
+  const tried = results.flatMap(r => r.rows);
+  expect(tried.length, 'no bearing to any mouth could be tried').toBeGreaterThan(8);
+  // the reported fault: on at least one of these a den's bank keeps you further from the middle
+  // than the old 4.5 m reach on EVERY side
+  const walled = results.filter(r => r.rows.length && r.rows.every(x => x.d > 4.6));
+  expect(walled.length, 'nothing here is built over a mouth — the test is not testing the bug').toBeGreaterThan(0);
+  for (const r of results) {
+    const good = r.rows.filter(x => x.ok).length;
+    expect(good, `${r.name}: E works from ${good} of ${r.rows.length} sides — ${JSON.stringify(r.rows)}`).toBeGreaterThanOrEqual(Math.ceil(r.rows.length * 0.75));
+  }
+
+  // now the job: a clear job on the nearest mouth, enter it, find its targets, drop the boss
+  const out = await page.evaluate(async m => {
+    const f = window.farhold;
+    const def = f.field.defs.find(d => (d.minLevel ?? 1) <= 3) || f.field.defs[0];
+    const q = {
+      id: 'q_test_clear', kind: 'clear', giverId: 1, giverName: 'Ada', progress: 0, done: false, turnedIn: false,
+      reward: { gold: 10, xp: 10, kind: 'coin' }, target: def.id, targetName: def.name, count: 3,
+      place: { x: m.x, z: m.z, name: m.name }, title: `Clear ${m.name}`, text: '',
+    };
+    f.questLog.add(q);
+    const node = f.gates.nodes.find(n => n.id === m.id);
+    await f.enterDungeon(node);
+    const targets = f.field.enemies.filter(e => e.defId === def.id || e.def?.id === def.id || e.id === def.id).length;
+    const boss = f.bossUnit;
+    if (boss) { boss.hp = 0; f.field.kill(boss); }
+    await new Promise(r => setTimeout(r, 400));
+    return { inside: !!f.dungeon, targets, boss: !!boss, done: f.questLog.active.find(j => j.id === q.id)?.done ?? null };
+  }, mouths[0]);
+  await page.evaluate(() => clearInterval(window.__guard));
+  expect(out.inside, 'the mouth did not open onto a dungeon').toBe(true);
+  expect(out.targets, 'the job\'s quarry was not put inside').toBeGreaterThanOrEqual(3);
+  expect(out.boss).toBe(true);
+  expect(out.done, 'the boss went down and the clear job did not finish').toBe(true);
+  expect(errors).toEqual([]);
+});

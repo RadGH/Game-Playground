@@ -3922,3 +3922,55 @@ are older than round 25 and still open. The bow-seam spec only ran out of time �
 quality under the software renderer is slower with the longer default grass — and passes with a
 longer timeout. "The world is busy" counts spawns over nine wall-clock seconds and swings either
 side of its threshold run to run (4 on the old code, 9 on the new, in two probes).
+
+## Round 26 — races: body presets and the enemy warbands (2026-09-25)
+
+Chibi 2's nine races (`avatar-3d/js/chibi2-races.js`) split in two: four you can **be**, five you
+**fight**.
+
+**Body presets** (`js/bodypresets.js`, wired in `js/appearance.js`'s Body tab). Four buttons —
+Human, Elf, Dwarf, Halfling — each stamp `body.race` and move the sliders to the middle of that
+race's ranges (height, build, head size) with the race's own roundness, a race skin if the current
+one is not, pointed ears on an elf, a beard on a beardless dwarf. The face, hair and clothes you built
+stay. The Race dropdown under them ("Race only") now lists the same four; an old save carrying an
+enemy race keeps it as a fifth option. Randomise rolls within the playable four. The race lives in
+`avatar.body`, which the shared normaliser keeps, so it reaches `player.avatar` and the save with no
+other change.
+
+**Enemy warbands** (`js/warbands.js`, `data/warbands.json`, generator `tools/build-warbands.py`).
+Each warband is five ordinary bestiary entries drawn as that race's Chibi 2 body, injected into the
+bestiary at load (enemies.json untouched):
+
+| Warband | Race | Levels | melee (brute) | rogue (skirmisher) | ranged (archer) | caster | leader |
+|---|---|---|---|---|---|---|---|
+| The Sootwick Gang | goblin | 1-16 | Basher (mace + buckler) | Knifer (two daggers, bleed) | Slinger (crossbow) | Hexer (poison) | Ringleader (cleaver) |
+| The Ashtusk Horde | orc | 5-24 | Brute (greataxe) | Raider (two axes, bleed) | Spearthrower (javelin) | Bonecaller (fire) | Warchief (maul + shield) |
+| The Thornmane Packs | beastkin | 9-28 | Mauler (greataxe) | Prowler (twin blades, bleed) | Tracker (bow) | Moonseer (lightning) | Packlord (halberd) |
+| The Unburied Legion | undead | 14-36 | Bonesoldier (sword + shield) | Gravecreeper (daggers, poison) | Deadeye (bow) | Mournweaver (shadow, curse) | Deathmarshal (greatsword) |
+| The Stonehide Clans | giant | 20-50 | Smasher (maul) | Stalker (spear) | Hurler (javelin) | Frostsayer (ice, chill) | Mountainlord (greataxe + tower shield) |
+
+Everything the bestiary does applies unchanged: ranks, champion/rare modifiers, packs, a leader's
+escort (`leads`), the role AI, drops from `dropBases`, set-piece encounters (they ask
+`field.defsFor`), night lights. What is new is **where**: a zone is HELD by at most one warband —
+seeded on seed + zone id, only when the zone's middle level is inside the warband's band, 55% of
+qualifying zones (`claimShare`), 3x likelier on a biome the warband `prefers`, never the starting
+zone. Inside a held zone the spawner draws from that warband 65% of the time (`spawnShare`,
+js/actors.js `spawnNear`); outside it a member never spawns (`defsFor`/`rareDefsFor`). The first
+visit to a held zone logs "The Ashtusk Horde hold …". A rare is named in the warband's own Name Forge
+language (`nameRace`). Jobs and quests only name enemies that can actually spawn in that zone
+(`huntableIn` in main.js), so no notice asks you to cull orcs where there are none.
+
+Tests: `tests/round26-races.test.js` (presets; warband data, looks survive the normaliser, drops are
+real items; real `createWorld` + `buildZones` + `EnemyField.spawnNear` over six seeds — members come
+out inside held zones and never outside) and `tests/round26-races.spec.js` (each preset changes the
+figure, the dwarf reaches `player.avatar.body.race` and the save; all 25 members build as humanoids of
+their race — a giant > 1.15x a bandit's height, a goblin < 0.93x — and the live spawner puts a
+warband member down in a held zone).
+
+Notes for the next agent:
+* A goblin comes out only ~10% shorter than a human bandit even at height 0: the race's big head
+  (`head: 1.18`) eats most of the short legs. If they should read smaller, that is a
+  `chibi2-races.js` change (owned by the avatar-3d work), not a Farhold one.
+* The player's camera, capsule and seats still assume a human body (see Round 24 follow-up 1); a
+  dwarf or halfling player works but the camera sits where a human's head would be.
+* Raidable warband bases are on the wishlist: `FUTURE_SYSTEM_BRAINSTORM.md` §7b.

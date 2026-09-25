@@ -25,7 +25,8 @@
 import { PARTS, SLOTS, SLOT_LABELS, partIds } from '../../../avatar-2d/js/parts/index.js';
 import { renderSVG, normalizeAvatar, DEFAULT_AVATAR } from '../../../avatar-2d/js/render.js';
 import { randomAvatar, makeRng } from '../../../avatar-2d/js/random.js';
-import { CHIBI2_RACES, CHIBI2_RACE_IDS, randomChibi2, roundOf } from '../../../avatar-3d/js/chibi2-races.js';
+import { CHIBI2_RACES, randomChibi2, roundOf } from '../../../avatar-3d/js/chibi2-races.js';
+import { PLAYABLE_RACES, applyBodyPreset, presetOf } from './bodypresets.js';
 
 const PRESETS_URL = new URL('../../../avatar-2d/data/presets.json', import.meta.url).href;
 
@@ -194,11 +195,29 @@ export function openAppearance({ avatar, classAvatar = null, race = 'human', onC
          * proportions — a dwarf is short and broad, a giant a head taller than anyone — and live in
          * `body.race`, which survives every normalise in the game. Roundness is the belly slider.
          */
+        /**
+         * R26 — THE BODY PRESETS: Human, Elf, Dwarf, Halfling. One click puts the race on AND moves
+         * the sliders to where that race sits (js/bodypresets.js) — a dwarf short, broad and round,
+         * an elf tall and slim — while the face, hair and clothes you built stay put. The other five
+         * Chibi 2 races are the enemy warbands (js/warbands.js), so they are not offered here; an
+         * avatar that already carries one (an old save) keeps it and shows it as a sixth choice.
+         */
+        const on = presetOf(current);
+        const presetRow = el('div', { class: 'ap-presets', role: 'group', 'aria-label': 'Body presets' },
+          ...PLAYABLE_RACES.map(id => el('button', {
+            type: 'button', class: 'ap-preset' + (on === id ? ' on' : ''), id: `ap-preset-${id}`,
+            'data-race': id, 'aria-pressed': on === id ? 'true' : 'false', text: CHIBI2_RACES[id].name,
+            'data-tip': `${CHIBI2_RACES[id].name} proportions: height, build, head size and roundness`,
+            onclick: () => { current = applyBodyPreset(current, id); drawControls(); touch(); },
+          })));
+        rows.push(el('div', { class: 'ap-row ap-row-wide' }, el('span', { class: 'ap-label', text: 'Body' }), presetRow));
+        const raceIds = PLAYABLE_RACES.includes(current.body.race || 'human') ? PLAYABLE_RACES : [...PLAYABLE_RACES, current.body.race];
         const raceSel = el('select', { class: 'ap-select', id: 'ap-race', 'aria-label': 'Race' },
-          ...CHIBI2_RACE_IDS.map(id => el('option', { value: id, text: CHIBI2_RACES[id].name })));
-        raceSel.value = current.body.race || race || 'human';
+          ...raceIds.map(id => el('option', { value: id, text: CHIBI2_RACES[id]?.name || id })));
+        raceSel.value = current.body.race || (PLAYABLE_RACES.includes(race) ? race : 'human');
+        // the bare race, sliders untouched — for somebody who wants an elf with a dwarf's build
         raceSel.addEventListener('change', () => { current.body.race = raceSel.value; delete current.body.round; drawControls(); touch(); });
-        rows.push(el('div', { class: 'ap-row' }, el('span', { class: 'ap-label', text: 'Race' }), raceSel));
+        rows.push(el('div', { class: 'ap-row' }, el('span', { class: 'ap-label', text: 'Race only' }), raceSel));
         rows.push(slider('Height', () => current.body.height ?? 0.5, v => { current.body.height = v; }, 0, 1, 0.01));
         rows.push(slider('Build', () => current.body.width ?? 0.5, v => { current.body.width = v; }, 0, 1, 0.01));
         rows.push(slider('Head size', () => current.body.headSize ?? 0.5, v => { current.body.headSize = v; }, 0, 1, 0.01));
@@ -248,7 +267,7 @@ export function openAppearance({ avatar, classAvatar = null, race = 'human', onC
         onclick: () => {
           // a fresh seed every click, and the race's weights keep an elf looking like an elf
           const r = current.body?.race || race || 'human';
-          current = randomChibi2(randomAvatar, data, { race: CHIBI2_RACES[r] ? r : 'human', seed: (Math.random() * 1e9) | 0, base: current, makeRng, known: (slot, id) => partIds(slot).includes(id) });
+          current = randomChibi2(randomAvatar, data, { race: PLAYABLE_RACES.includes(r) ? r : 'human', seed: (Math.random() * 1e9) | 0, base: current, makeRng, known: (slot, id) => partIds(slot).includes(id) });
           drawControls(); touch();
         },
       }),

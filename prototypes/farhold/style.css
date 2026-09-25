@@ -2474,6 +2474,14 @@ body.building canvas { cursor: crosshair; }
 .ap-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
 .ap-row-wide { align-items: flex-start; }
 .ap-label { flex: 0 0 116px; color: #9fb0c8; font-size: 13px; }
+/* R26 — the four body presets (js/bodypresets.js) */
+.ap-presets { flex: 1 1 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.ap-preset {
+  flex: 1 1 70px; background: #121826; color: #9fb0c8; border: 1px solid #2c3a52; border-radius: 6px;
+  padding: 6px 8px; font: inherit; font-size: 13px; cursor: pointer;
+}
+.ap-preset:hover { border-color: #2f7ba8; color: #dff2ff; }
+.ap-preset.on { background: #1b4a6a; border-color: #2f7ba8; color: #dff2ff; }
 .ap-select {
   flex: 1 1 0; min-width: 0; background: #121826; color: #e6e6e6;
   border: 1px solid #2c3a52; border-radius: 6px; padding: 5px 7px; font: inherit; font-size: 13px;

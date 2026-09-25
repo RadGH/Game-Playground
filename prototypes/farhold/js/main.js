@@ -129,6 +129,7 @@ import { mat as matAmount } from '../../../shared/format.js';
 import { createSkillBar, applyStatus, tickStatuses, slowOf, buffsOf, outgoingFrom, incomingFrom, STATUS_POWER_SHARE } from './skills.js';
 // R23 — Farhold's own uniques and the requests their powers make (see js/uniques.js)
 import { installFoci } from './foci.js';
+import { installWarbands, createWarbandMap } from './warbands.js';
 import { installUniques, resolveAttack, afterKill as uniquesAfterKill, afterDamaged as uniquesAfterDamaged, tickAuras } from './uniques.js';
 import { EFFECTS as FX_TABLE } from './effects.js';
 // round 4: the RPG expansion
@@ -286,6 +287,14 @@ async function boot() {
     installUniques(items, uniqueData, { tools: uniqueTools, describe: id => FX_TABLE['legendary:' + id]?.desc?.() || null });
     // R25 — the caster's off hand: four foci, eight uniques and the Archivist's set (js/foci.js)
     installFoci(items, { describe: id => FX_TABLE['legendary:' + id]?.desc?.() || null, balance });
+    /**
+     * R26 — the five enemy warbands (js/warbands.js): goblin, orc, beastkin, undead and giant
+     * humanoids, put into the bestiary in memory so enemies.json stays as it is. The raw data rides
+     * on `bestiary.warbands` because `makeField` is what needs it, and it already holds `bestiary`.
+     */
+    const warbandData = await loadJSON('data/warbands.json').catch(() => null);
+    installWarbands(bestiary, warbandData);
+    bestiary.warbands = warbandData;
   }
 
   /**
@@ -2691,6 +2700,18 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       onKill: onEnemyKilled,
       // a rare gets a real name, in the language of the region it turned up in
       nameRare,
+      /**
+       * R26 — who holds each zone of THIS world. Built per field, because a landing builds new
+       * zones and the claims are remembered against the zone objects. A zone's biome for a
+       * warband's `prefers` is read at the middle of its region.
+       */
+      warbands: bestiary.warbands ? createWarbandMap(bestiary.warbands, {
+        seed,
+        biomeOf: z => {
+          const cell = forTerrain.metresPerCell || 640;
+          return z?.center ? familiesOf(forTerrain.biomeIdAt(z.center.x * cell, z.center.y * cell)) : [];
+        },
+      }) : null,
     });
     /**
      * R22 — THE COMPANIONS THIS FIELD CAN BE MADE TO LOOK AT.
@@ -2724,8 +2745,21 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      * a foe had never once reached this line.
      */
     if (!namegen) return null;
-    const race = zones.at(control.x, control.z)?.race || 'human';
+    // R26 — a warband rare is named in its own tongue (an orc chief has an orc name in a human valley)
+    const race = def?.nameRace || zones.at(control.x, control.z)?.race || 'human';
     return namegen.generate('person.full', { race, seed: Math.floor(rng() * 1e9) })?.text?.split(' ')[0] || null;
+  }
+
+  /**
+   * R26 — THE ENEMIES A JOB MAY NAME, HERE. A warband's members only spawn in the zones it holds
+   * (js/warbands.js), so a notice asking you to cull Ashtusk Raiders in a valley no orc has ever
+   * stood in would be a promise the world cannot keep. Everything else in the bestiary is as it was.
+   */
+  function huntableIn(zone) {
+    // try: `field` is a `let` further down, and reading it early is a TDZ throw, `?.` or not
+    let held = null;
+    try { held = field?.warbands?.of?.(zone)?.id || null; } catch { held = null; }
+    return (bestiary.enemies || []).filter(d => !d.warband || d.warband === held);
   }
 
   let field = makeField();
@@ -5048,7 +5082,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       if (H.quest && questLog?.add && makeQuest) {
         const q = makeQuest('clear', {
           rng: rpg.rng, level, giver: null,
-          enemies: bestiary.enemies, nodes: [], terrain,
+          enemies: huntableIn(zones.at(node.x, node.z)), nodes: [], terrain,
           from: node.name, at: { x: node.x, z: node.z },
           wrapM: terrain.widthM, zoneAt: (x, z) => zones.at(x, z),
         });
@@ -5908,7 +5942,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       gatherable: quest => gatherable(quest, player.bag),
       lastCrate, lastCrateLifted,
       bag: player.bag,
-      offer: folk.questFrom(npc, { level: player.level, enemies: bestiary.enemies, nodes: world.nodes }),
+      offer: folk.questFrom(npc, { level: player.level, enemies: huntableIn(hud.here), nodes: world.nodes }),
       /**
        * §6.5 — somebody in this town who would come and work at your holding.
        *
@@ -7311,6 +7345,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     const record = holdings.visit(zone.id);
     // R17 — exploring pays for research, and `visits` is 1 the first time only
     if (record?.visits === 1) sharedResearch().award('region', 1);
+    // R26 — say who holds the ground, once, the first time you walk into it
+    const heldBy = field?.warbands?.of?.(zone);
+    if (heldBy && record?.visits === 1) hud.log(`${heldBy.name} hold ${zone.name} — ${heldBy.blurb}.`, 'warn');
 
     /**
      * R16 — EVERY LANDMARK IN THIS ZONE GETS A MODEL, AND EVERY MODEL GETS A LEDGER.
@@ -7365,7 +7402,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
     // the board. Everything on it names something that is actually in this zone right now.
     const candidates = candidatesFrom({
-      zone, territory: holdings, bestiary: bestiary.enemies || [], nodes: world.nodes || [],
+      zone, territory: holdings, bestiary: huntableIn(zone), nodes: world.nodes || [],
       landmarks: holdings.landmarksIn(zone.id),
       npcs: roadFolk.candidates(zone.id),
       caravans: trade.candidates(zone.id),
@@ -7414,7 +7451,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     localBoard = jobs.offer({
       zone, level: player.level, want: 5,
       candidates: candidatesFrom({
-        zone, territory: holdings, bestiary: bestiary.enemies || [], nodes: world.nodes || [],
+        zone, territory: holdings, bestiary: huntableIn(zone), nodes: world.nodes || [],
         landmarks: holdings.landmarksIn(zone.id),
         npcs: roadFolk.candidates(zone.id),
         caravans: trade.candidates(zone.id),

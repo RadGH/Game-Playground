@@ -73,6 +73,26 @@ export function drawStationBody(box, {
    */
   if (machine && wantsRecipes) {
     box.append(el('p', { class: 'station-state small', text: works.stateText(machine) }));
+    /**
+     * R26 — EVERYTHING IT IS WAITING FOR, AT ONCE.
+     *
+     * "It just says '2 min of work banked' and Smelt Iron is still listed as 0/1 two times. It is
+     * not making the iron… I'm not sure why." The state line names the FIRST thing wrong; this
+     * names every one of them with a tick or a cross — the job, each input and where it is looking
+     * for it, the fuel, the work, and whether a store is in reach — so the answer is on screen
+     * before the question is asked. `works.needs` (js/refine.js) writes the sentences.
+     */
+    const list = works.needs?.(machine.id) || [];
+    if (list.length) {
+      const ul = el('ul', { class: 'station-needs' });
+      for (const n of list) {
+        ul.append(el('li', {
+          class: `station-need ${n.ok ? 'ok' : 'bad'} need-${n.key}`,
+          text: `${n.key === 'store' ? '•' : n.ok ? '✓' : '✗'} ${n.text}`,
+        }));
+      }
+      box.append(ul);
+    }
   }
 
   // ---------------------------------------------------------------- the switch and the queue order
@@ -104,7 +124,11 @@ export function drawStationBody(box, {
     if (snap.needsWorking) {
       const order = workboard?.at?.(machine.id) || null;
       const work = el('div', { class: 'build-bench-work' });
-      work.append(el('span', { class: 'small', text: order ? `${order.title} · ${order.progress}` : `${snap.minutesLeft} min of work banked` }));
+      // R26 — "2 min of work banked" read as "2 minutes until your iron", which it never was: it is
+      // how long the machine may RUN on work already put in. Said in those words now.
+      const secs = snap.workBank || 0;
+      const paid = secs > 0 ? `${secs >= 90 ? `${Math.round(secs / 6) / 10} min` : `${secs}s`} of running time paid for` : 'No work put in yet';
+      work.append(el('span', { class: 'small', text: order ? `${order.title} · ${order.progress} · ${paid}` : paid }));
       const frac = order ? order.fraction : Math.min(1, (snap.workBank || 0) / Math.max(1, snap.workBankMax || 1));
       work.append(el('div', { class: 'build-work-bar' }, el('i', { style: `width:${Math.round(frac * 100)}%` })));
       const credit = order?.credit || snap.lastCredit;
@@ -138,7 +162,12 @@ export function drawStationBody(box, {
       const r = works.recipes[job.recipe];
       const row = el('div', { class: 'build-job' },
         el('span', { text: r?.name || job.recipe }),
-        el('span', { class: 'muted small', text: job.left === Infinity ? 'repeating' : `${job.done}/${job.done + job.left}` }));
+        el('span', { class: 'muted small', text: job.left === Infinity ? `repeating · ${job.done} made` : `${job.done} of ${job.done + job.left} made` }));
+      // R26 — "I cannot add or remove items": the count on a queued job moves both ways now
+      if (job.left !== Infinity && works.adjust) {
+        row.append(el('button', { class: 'small', text: '−', title: 'One fewer', onclick: () => { works.adjust(machine.id, i, -1); redraw(); } }));
+        row.append(el('button', { class: 'small', text: '+', title: 'One more', onclick: () => { works.adjust(machine.id, i, 1); redraw(); } }));
+      }
       row.append(el('button', { class: 'small', text: '×', title: 'Take this off the queue', onclick: () => { works.cancel(machine.id, i); redraw(); } }));
       box.append(row);
     }
@@ -179,8 +208,10 @@ export function drawStationBody(box, {
           const out = works.queue(machine.id, r.id, batch);
           if (!out.ok) onLog?.(out.why, 'warn');
           else {
-            onLog?.(batch === 0
+            const job = out.job;
+            onLog?.(batch === 0 || job?.left === Infinity
               ? `${machine.name}: ${r.name}, on a standing order — it will keep making them.`
+              : out.merged ? `${machine.name}: ${r.name} — ${job.left} to go now.`
               : `${machine.name}: ${batch} × ${r.name} queued.`, 'good');
           }
           redraw();
@@ -216,7 +247,10 @@ export function drawStationBody(box, {
      * exactly "tip the pack into the store", and it reuses the one purse in the game that already
      * knows the order those two things come in.
      */
-    if (build?.plan?.pay && build?.plan?.giveBack) {
+    // R26 — only where there IS a store to tip into. With none in reach the machine reads your pack
+    // directly (js/refine.js `bag`), and this button used to take everything out of the pack and put
+    // it straight back — a button that visibly did nothing.
+    if (build?.plan?.pay && build?.plan?.giveBack && works.snapshot(machine.id)?.pooled) {
       const wanted = new Set();
       for (const id of station.recipes) {
         const r = works.recipes[id];

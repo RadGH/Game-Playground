@@ -344,7 +344,9 @@ test('R16.5 — batches and standing orders: `queue` has always taken a count, a
   const b = bench();
   b.works.place({ id: 'f1', type: 'furnace', x: 0, z: 0 });
   assert.equal(b.works.queue('f1', 'smelt_iron', 20).job.left, 20);
-  assert.equal(b.works.queue('f1', 'smelt_iron', 0).job.left, Infinity, 'a standing order');
+  // R26 — the same recipe again merges into the row above, so the standing order is a DIFFERENT
+  // recipe here; see tests/round26-onboarding.test.js for the merge itself
+  assert.equal(b.works.queue('f1', 'smelt_copper', 0).job.left, Infinity, 'a standing order');
   const jobs = b.works.allJobs();
   assert.equal(jobs.length, 2);
   assert.equal(jobs[0].left, 20);

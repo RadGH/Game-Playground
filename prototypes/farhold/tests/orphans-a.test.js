@@ -335,7 +335,7 @@ test('R19 §4 a machine checks its own badge against the declared list', () => {
   shipped.get('f1').state = 'unworked';
   const good = shipped.snapshot('f1');
   assert.equal(good.declared, true, 'a state data/power.json declares came back as undeclared');
-  assert.equal(good.stateText, 'Standing cold — nobody is working this');
+  assert.match(good.stateText, /^Standing cold — nobody is working this/);
 
   // the same machine, in the same state, against a grid whose data does not admit the word. The
   // sentence is unchanged (the switch has a case for it) but the snapshot now says it is off-list,

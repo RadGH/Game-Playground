@@ -151,8 +151,9 @@ test('THE ONE THAT MATTERS — land with nothing, and get an iron ingot without 
   // 4. A STORAGE BOX out of six of them, and no metal anywhere in the price.
   const box = g.build('storage_crate', 4, 0);
   assert.ok(box.ok, `the storage box would not go down: ${box.why}`);
-  assert.equal(Object.keys(realCost(RAW_BY_ID.storage_crate.cost)).join(), 'plank',
-    'the Storage Box costs something other than planks');
+  // R26 — six LOGS, not planks: "the basic one should just require 6 regular wood NOT plank"
+  assert.equal(Object.keys(realCost(RAW_BY_ID.storage_crate.cost)).join(), 'log',
+    'the Storage Box costs something other than logs');
 
   // 5. A FURNACE: sixteen stone and six clay, both off the ground.
   const furnace = g.build('furnace', 8, 0);
@@ -461,7 +462,7 @@ test('the Storage Box is six slots and the Chest is twenty, and the old id did n
 
   assert.equal(box.name, 'Storage Box');
   assert.equal(box.store.slots, 6);
-  assert.deepEqual(box.cost, { plank: 6 }, 'the Box costs something besides six planks');
+  assert.deepEqual(realCost(box.cost), { log: 6 }, 'the Box costs something besides six logs (R26)');
 
   assert.equal(chest.name, 'Storage Chest');
   assert.equal(chest.store.slots, 20);

@@ -2964,6 +2964,18 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      * node tests still drive the module they have always driven.
      */
     labour: colonyData?.labour || null,
+    /**
+     * R26 — THE PACK. A furnace with no box in reach used to see nothing at all, so queued iron
+     * never smelted while the ore sat in your pack. It now takes from its stores first and your pack
+     * second — the pack always when there is no store, and otherwise only while you are standing
+     * at it (12 m), so a furnace across the base never quietly eats what you are carrying.
+     */
+    bag: {
+      count: id => materials.count(id),
+      take: (id, n) => { const got = Math.min(n, materials.count(id)); if (got > 0) materials.spend({ [id]: got }); return got; },
+      put: (id, n) => { materials.add(id, n); return n; },
+    },
+    bagReach: m => !!control && Math.hypot(control.x - m.x, control.z - m.z) <= 12,
   });
   /**
    * The benches, their queues, and which recipes you have unlocked by doing them.

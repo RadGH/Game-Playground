@@ -76,9 +76,11 @@ export const STEPS = [
      * costs six logs and two stone and carries its own shelf. Both halves are in the `why`, because
      * a hint that names a thing you cannot yet make is the fault this file exists to prevent.
      */
+    // R26 — six LOGS now. "The storage box, the basic one, should just require 6 regular wood NOT
+    // plank." The plank price sent players hunting for a sawmill that costs iron.
     text: 'Build a Storage Box.',
-    why: 'Six planks, no metal. Planks are split from logs at a Crafting Table — six logs and two stone, and it keeps a shelf of its own so it works before you own any store at all.',
-    where: 'Build mode (B) · Workshop, then Storage',
+    why: 'Six logs, nothing else — no bench, no planks, no metal. Anything within reach of it shares its pile, and a furnace beside it drops its ingots straight in.',
+    where: 'Build mode (B) · Storage',
   },
   {
     id: 'clay',
@@ -97,7 +99,7 @@ export const STEPS = [
   {
     id: 'fuel',
     when: c => c.hasSmelter && !c.hasFuel,
-    text: 'Put fuel in the store beside the furnace.',
+    text: 'Carry something to burn to the furnace.',
     why: 'A furnace burns charcoal, coal or plain logs. With nothing to burn it stands cold however much ore you give it.',
     where: 'Chop wood, or burn logs to charcoal at a campfire',
   },
@@ -111,8 +113,8 @@ export const STEPS = [
   {
     id: 'smelt',
     when: c => c.have('iron_ore') >= 1 && !c.smelting,
-    text: 'Press E on the Furnace and queue Iron Ingot.',
-    why: 'You have ore and nothing is smelting it. E on any machine opens what it can make.',
+    text: 'Press E on the Furnace and queue Smelt Iron.',
+    why: 'You have ore and nothing is smelting it. E on any machine opens what it can make; it takes the ore and fuel from your pack or the box beside it, and it runs while you stand there (hold E to go faster).',
     where: 'Walk up to the furnace',
   },
   {

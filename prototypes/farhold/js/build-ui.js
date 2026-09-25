@@ -126,9 +126,11 @@ const FIRST_STEPS = [
    * came off a Sawmill, which cost eight iron ingots, which came out of the Furnace. The Crafting
    * Table is the rung that was missing: logs and stone, its own shelf, and it splits planks.
    */
-  'Pick Place and put down a Crafting Table — six logs and two stone. Walk up to it, press E, and split some logs into planks.',
-  'Build a Storage Box out of six of those planks, then a Furnace beside it. Anything within reach of a store shares its pile.',
-  'Press E at the Furnace, queue Smelt Iron, and hold E to work it. That is your first ingot — and a Storage Chest after it.',
+  /* R26 — the Storage Box is six LOGS now, so the Crafting Table is no longer a step on the way to
+     the first ingot. It is still the bench for planks and tools; it just is not in the way. */
+  'Build a Storage Box — six logs, nothing else. Anything within reach of it shares its pile.',
+  'Dig clay at the water\'s edge and build a Furnace beside the box — sixteen stone and six clay.',
+  'Press E at the Furnace and queue Smelt Iron. It takes ore and a log to burn from your pack or the box, and runs while you stand beside it — hold E to go faster.',
   'Pick Scan to find the seams around you, then put a Small Drill on one — it finds its own way to your store.',
   'Far from home? Put a box out there too and link it back. The load takes a while; a road makes it much quicker.',
 ];

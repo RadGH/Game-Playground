@@ -436,7 +436,7 @@ test('§2 a machine with nothing to work with stops and says what it wants', () 
   r.works.catchUp(120);
   const snap = r.works.snapshot('m1');
   assert.equal(snap.state, 'starved');
-  assert.equal(snap.stateText, 'Waiting for Iron Ore');
+  assert.match(snap.stateText, /^Waiting for Iron Ore/);  // R26 adds where it looked
   assert.ok(r.log.some(l => /no Iron Ore/.test(l)));
 });
 
@@ -444,7 +444,7 @@ test('§2 a furnace with no fuel goes out', () => {
   const r = rig({ stock: { iron_ore: 20 } });
   r.works.queue('m1', 'smelt_iron', 3);
   r.works.catchUp(120);
-  assert.equal(r.works.snapshot('m1').stateText, 'Out of fuel');
+  assert.match(r.works.snapshot('m1').stateText, /^Out of fuel/);  // R26 adds where it looked
 });
 
 test('§2.18 recipes unlock by doing, and nothing else', () => {

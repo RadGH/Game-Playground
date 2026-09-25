@@ -84,7 +84,7 @@ test('THE ONE THAT MATTERS — a furnace nobody is working makes nothing, and it
   assert.equal(works.get('m1').state, 'unworked');
   assert.equal(stores.count(pool(), 'iron_ore'), oreBefore,
     'the furnace ate ore it was never allowed to work — labour must be checked BEFORE the inputs are taken');
-  assert.equal(works.stateText(works.get('m1')), 'Standing cold — nobody is working this');
+  assert.match(works.stateText(works.get('m1')), /^Standing cold — nobody is working this/);
 });
 
 test('…and ten units of work is five minutes of furnace, which is eighteen ingots', () => {

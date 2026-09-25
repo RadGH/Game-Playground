@@ -99,13 +99,48 @@ export function statusFxOf(type) {
   return STATUS_FX[String(type || '').toLowerCase()] || { sprites: ['glow'], color: 0xc0c0d0, where: 'body', style: 'orbit', label: String(type || 'status') };
 }
 
+/**
+ * Colour ramps each element's particles are drawn with (2026-09-25 overhaul). A particle is born at
+ * `hot`, cools through `mid` and dies at `deep`; `smoke` is the colour of anything drawn with NORMAL
+ * blending (dark smoke, shadow tendrils, toxic cloud) so it reads against a bright sky as well as a
+ * dark dungeon. Most of the new sprites are drawn white on purpose so one sprite serves every element.
+ */
+export const ELEMENT_PALETTE = {
+  fire:      { hot: 0xfff2c0, mid: 0xff8a1a, deep: 0xc0240a, smoke: 0x2a201c },
+  ice:       { hot: 0xffffff, mid: 0xaee6ff, deep: 0x3f9cff, smoke: 0xd8f0ff },
+  lightning: { hot: 0xffffff, mid: 0xfff07a, deep: 0x8fa0ff, smoke: 0x3a3c50 },
+  poison:    { hot: 0xe4ffa0, mid: 0x7ae04a, deep: 0x2a8a1a, smoke: 0x22401a },
+  shadow:    { hot: 0xe6d0ff, mid: 0x9458e0, deep: 0x3a1470, smoke: 0x0e0816 },
+  holy:      { hot: 0xffffff, mid: 0xffe69a, deep: 0xffa830, smoke: 0xfff4d0 },
+  arcane:    { hot: 0xf6e4ff, mid: 0xb070ff, deep: 0x5a28d0, smoke: 0x2a1648 },
+  nature:    { hot: 0xeeffb8, mid: 0x86d850, deep: 0x2f8a28, smoke: 0x3a5020 },
+  physical:  { hot: 0xffffff, mid: 0xdfe3ee, deep: 0x9aa0b0, smoke: 0x8a8274 },
+  bleed:     { hot: 0xff9090, mid: 0xd02020, deep: 0x700a0a, smoke: 0x4a0808 },
+  true:      { hot: 0xffffff, mid: 0xf0f0ff, deep: 0xb0b8ff, smoke: 0xc0c0d0 },
+};
+const palOf = el => ELEMENT_PALETTE[el] || ELEMENT_PALETTE.arcane;
+const GLYPHS = ['glyph_a', 'glyph_b', 'glyph_c'];
+const NORMAL = THREE.NormalBlending;
+const ADD = THREE.AdditiveBlending;
+/** A random unit vector; `upBias` pushes it toward +Y (0 = uniform sphere). */
+function randDir(upBias = 0) {
+  const v = new THREE.Vector3(rnd(-1, 1), rnd(-1, 1) + upBias, rnd(-1, 1));
+  return v.lengthSq() < 1e-6 ? v.set(0, 1, 0) : v.normalize();
+}
+/** A random point on a flat disc of radius r around `c` (uniform over the area, not bunched in the middle). */
+function onDisc(c, r, y = c.y) {
+  const a = rnd(0, Math.PI * 2), d = Math.sqrt(Math.random()) * r;
+  return new THREE.Vector3(c.x + Math.cos(a) * d, y, c.z + Math.sin(a) * d);
+}
+const easeOut = k => 1 - Math.pow(1 - k, 3);
+
 // ---------------------------------------------------------------------------------------------
 // disposal helpers
 
 function disposeObj(obj) {
   obj.traverse(o => {
     if (o.userData?.poolKey) return;     // a pooled trail sprite: its material is reused, not thrown away
-    if (o.geometry) o.geometry.dispose();
+    if (o.geometry && !o.geometry.userData?.shared) o.geometry.dispose();   // shared unit shapes stay
     const mats = o.material ? (Array.isArray(o.material) ? o.material : [o.material]) : [];
     for (const m of mats) m.dispose();   // textures are shared: never disposed here
   });
@@ -166,6 +201,279 @@ class Trail {
 
 // ---------------------------------------------------------------------------------------------
 
+/**
+ * A pooled particle system (2026-09-25). Every sprite comes out of SpellFx's pool and is counted in
+ * its particle budget, so a stage full of effects thins out instead of stalling. Sizes and positions
+ * are WORLD units (the fx `scale` is undone here, so a 3 m storm is 3 m at any scale).
+ *
+ * add(id, o) options: pos, vel, life, size, size1 (end size as a multiple), color, color1 (colour
+ * at death), opacity, blending, gravity (m/s², + is up), drag (1/s), spin, rot, fadeIn (fraction of
+ * life), fadePow, delay (s), swirl { cx, cz, w, pull, lift } (orbit a vertical axis while moving in
+ * or out), wobble (sideways flutter, m/s), stretch (streak along the screen-space velocity),
+ * flicker (0..1 random dimming), onDie(p).
+ */
+class Particles {
+  constructor(fx) { this.fx = fx; this.group = new THREE.Group(); this.parts = []; this._stretch = false; }
+  add(id, o = {}) {
+    const fx = this.fx;
+    if (fx._particles >= fx.maxParticles || !o.pos) return null;
+    const s = fx._sprite(id, { size: (o.size ?? 0.2) / (fx.scale || 1), color: o.color ?? 0xffffff, opacity: 0, blending: o.blending ?? ADD, pooled: true });
+    if (!s) return null;
+    fx._particles++;
+    s.position.copy(o.pos);
+    s.material.rotation = o.rot ?? rnd(0, Math.PI * 2);
+    s.visible = !(o.delay > 0);
+    this.group.add(s);
+    const p = {
+      s, age: -(o.delay || 0), life: Math.max(0.02, o.life ?? 0.5),
+      v: o.vel ? o.vel.clone() : new THREE.Vector3(), g: o.gravity ?? 0, drag: o.drag ?? 0,
+      base: s.scale.x, size1: o.size1 ?? 0.4, op: o.opacity ?? 1, fadeIn: o.fadeIn ?? 0.08, fadePow: o.fadePow ?? 2,
+      spin: o.spin ?? 0, c0: o.color1 != null ? new THREE.Color(o.color ?? 0xffffff) : null, c1: o.color1 != null ? new THREE.Color(o.color1) : null,
+      swirl: o.swirl || null, wob: o.wobble || 0, wobF: rnd(3, 7), ph: rnd(0, 6.28),
+      stretch: o.stretch || 0, flicker: o.flicker || 0, onDie: o.onDie || null,
+    };
+    if (p.stretch) this._stretch = true;
+    this.parts.push(p);
+    return p;
+  }
+  update(dt) {
+    let rx = 1, ry = 0, rz = 0, ux = 0, uy = 1, uz = 0;
+    const cam = this.fx.camera;
+    if (this._stretch && cam) { const e = cam.matrixWorld.elements; rx = e[0]; ry = e[1]; rz = e[2]; ux = e[4]; uy = e[5]; uz = e[6]; }
+    for (let i = this.parts.length - 1; i >= 0; i--) {
+      const p = this.parts[i], s = p.s;
+      p.age += dt;
+      if (p.age < 0) continue;
+      const k = p.age / p.life;
+      if (k >= 1) {
+        this.parts.splice(i, 1);
+        if (p.onDie) { try { p.onDie(p); } catch { /* decoration */ } }
+        this.fx._freeSprite(s);
+        continue;
+      }
+      s.visible = true;
+      if (p.g) p.v.y += p.g * dt;
+      if (p.drag) p.v.multiplyScalar(Math.max(0, 1 - p.drag * dt));
+      const pos = s.position;
+      if (p.swirl) {
+        const w = p.swirl, dx = pos.x - w.cx, dz = pos.z - w.cz;
+        const r = Math.hypot(dx, dz), a = Math.atan2(dz, dx) + (w.w || 0) * dt;
+        const nr = Math.max(0, r + (w.pull || 0) * dt);
+        pos.x = w.cx + Math.cos(a) * nr; pos.z = w.cz + Math.sin(a) * nr; pos.y += (w.lift || 0) * dt;
+      }
+      pos.addScaledVector(p.v, dt);
+      if (p.wob) { const a = p.age * p.wobF + p.ph; pos.x += Math.cos(a) * p.wob * dt; pos.z += Math.sin(a * 1.3) * p.wob * dt; }
+      const fi = p.fadeIn > 0 ? Math.min(1, k / p.fadeIn) : 1;
+      let op = p.op * fi * (1 - Math.pow(k, p.fadePow));
+      if (p.flicker) op *= 1 - p.flicker * Math.random();
+      s.material.opacity = op;
+      if (p.c1) s.material.color.copy(p.c0).lerp(p.c1, k);
+      const sc = p.base * (1 + (p.size1 - 1) * k);
+      if (p.stretch) {
+        const vx = p.v.x * rx + p.v.y * ry + p.v.z * rz, vy = p.v.x * ux + p.v.y * uy + p.v.z * uz;
+        const sp = Math.hypot(vx, vy);
+        if (sp > 1e-3) s.material.rotation = Math.atan2(-vx, vy);
+        s.scale.set(sc, sc * (1 + p.stretch * sp * 10), 1);
+      } else {
+        s.material.rotation += p.spin * dt;
+        s.scale.set(sc, sc, sc);
+      }
+    }
+  }
+  get count() { return this.parts.length; }
+  dispose() { for (const p of this.parts) this.fx._freeSprite(p.s); this.parts.length = 0; }
+}
+
+/**
+ * A jagged, camera-facing ribbon: lightning that is thicker than a one-pixel GL line. A wide faint
+ * strip in the element colour under a thin white core. `set(a, b)` re-rolls the zigzag.
+ */
+class Jag {
+  constructor(fx, { segs = 12, width = 0.05, color = 0xfff07a, opacity = 1, jitter = 0.12, taper = 0.5 } = {}) {
+    this.fx = fx; this.segs = segs; this.width = width; this.jitter = jitter; this.taper = taper;
+    this.group = new THREE.Group(); this.group.frustumCulled = false;
+    const mk = (col, op) => {
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.Float32BufferAttribute(new Float32Array((segs + 1) * 2 * 3), 3));
+      const idx = []; for (let i = 0; i < segs; i++) { const a = i * 2; idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); }
+      g.setIndex(idx);
+      const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: op, blending: ADD, depthWrite: false, side: THREE.DoubleSide, toneMapped: false }));
+      m.frustumCulled = false; this.group.add(m); return m;
+    };
+    this.glow = mk(color, 0.55 * opacity); this.core = mk(0xffffff, opacity);
+    this.pts = Array.from({ length: segs + 1 }, () => new THREE.Vector3());
+    this.opacity = opacity;
+  }
+  set(a, b, jitter = this.jitter) {
+    const dir = new THREE.Vector3().subVectors(b, a);
+    const len = dir.length() || 1;
+    const s1 = new THREE.Vector3().crossVectors(dir, Math.abs(dir.y / len) > 0.9 ? new THREE.Vector3(1, 0, 0) : UP).normalize();
+    const s2 = new THREE.Vector3().crossVectors(dir, s1).normalize();
+    for (let i = 0; i <= this.segs; i++) {
+      const t = i / this.segs, w = Math.sin(t * Math.PI) * jitter;
+      this.pts[i].lerpVectors(a, b, t).addScaledVector(s1, rnd(-w, w)).addScaledVector(s2, rnd(-w, w));
+    }
+    this._build();
+  }
+  _build() {
+    const cam = this.fx.camera, camPos = new THREE.Vector3(0, 0, 1e4);
+    if (cam) cam.getWorldPosition(camPos);
+    const tan = new THREE.Vector3(), view = new THREE.Vector3(), side = new THREE.Vector3();
+    for (const [mesh, wm] of [[this.glow, 3.2], [this.core, 1]]) {
+      const pos = mesh.geometry.attributes.position;
+      for (let i = 0; i <= this.segs; i++) {
+        const p = this.pts[i];
+        tan.subVectors(this.pts[Math.min(this.segs, i + 1)], this.pts[Math.max(0, i - 1)]);
+        view.subVectors(camPos, p);
+        side.crossVectors(tan, view).normalize();
+        const f = i / this.segs;   // pinched at both ends so the strip never ends in a flat edge
+        const w = this.width * wm * 0.5 * (1 - this.taper * f) * Math.min(1, 0.15 + f * 5, 0.15 + (1 - f) * 5);
+        pos.setXYZ(i * 2, p.x + side.x * w, p.y + side.y * w, p.z + side.z * w);
+        pos.setXYZ(i * 2 + 1, p.x - side.x * w, p.y - side.y * w, p.z - side.z * w);
+      }
+      pos.needsUpdate = true;
+    }
+  }
+  fade(k) { this.glow.material.opacity = 0.55 * this.opacity * k; this.core.material.opacity = this.opacity * k; }
+}
+
+/**
+ * One composite effect = ONE live entry, however many pieces it has (2026-09-25). An impact used
+ * to register eight separate entries, which ate the `maxLive` cap and the light slots in a big fight.
+ * Pieces are timed tasks (`anim`, `emit`, `burst`, `once`) plus a pooled particle system; the entry
+ * finishes when every task has run and the last particle is gone. All sizes are world units.
+ */
+class Effect {
+  constructor(fx, { at, life = 3, density = 1 } = {}) {
+    this.fx = fx; this.at = at.clone(); this.maxLife = life; this.age = 0;
+    this.density = density * (fx._density || 1);
+    // a thinned burst inside an aoe: the area signature carries the big pieces, so the per-point
+    // bursts skip their beams, standing discs, spikes and camera-facing rings
+    this.lite = this.density < 0.999;
+    this.group = new THREE.Group();
+    this.P = new Particles(fx); this.group.add(this.P.group);
+    this.tasks = [];
+  }
+  /** Run fn(k, dt, localAge) from t0 for dur seconds. `obj` is added to the group and shown only in that window. */
+  anim(t0, dur, fn, obj = null) {
+    if (obj) { this.group.add(obj); obj.visible = false; }
+    this.tasks.push({ t0, dur: Math.max(1e-3, dur), fn, obj });
+    return obj;
+  }
+  /** Call spawn(P, k) `rate` times a second (budget-scaled) between t0 and t0 + dur. */
+  emit(t0, dur, rate, spawn) { this.tasks.push({ t0, dur, emit: true, rate, spawn, acc: 0 }); }
+  /** Spawn n particles at once at time t0 (budget-scaled). */
+  burst(t0, n, spawn) { this.tasks.push({ t0, once: () => { const m = this.fx._n(n, this.density); for (let i = 0; i < m; i++) spawn(this.P, i, m); } }); }
+  once(t0, fn) { this.tasks.push({ t0, once: fn }); }
+
+  /** A camera-facing flash sprite that swells and fades. */
+  flash(pos, { id = 'soft', size = 1, color = 0xffffff, t0 = 0, life = 0.16, opacity = 1, grow = 1.5, blending = ADD } = {}) {
+    const s = this.fx._sprite(id, { size: size / (this.fx.scale || 1), color, opacity: 0, blending });
+    if (!s) return null;
+    s.position.copy(pos); s.material.rotation = rnd(0, 6.28);
+    const base = s.scale.x;
+    return this.anim(t0, life, k => { s.material.opacity = opacity * (k < 0.15 ? k / 0.15 : Math.pow(1 - (k - 0.15) / 0.85, 1.5)); s.scale.setScalar(base * (0.6 + grow * easeOut(k))); }, s);
+  }
+  /** A flat textured decal on the ground (scorch, frost ring, rune ring...). */
+  decal(id, pos, { size = 1, color = 0xffffff, opacity = 1, blending = ADD, t0 = 0, life = 1, fadeIn = 0.06, fadeOut = 0.4, spin = 0, s0 = 0.5, s1 = 1, growT = 0.25, yaw = rnd(0, 6.28) } = {}) {
+    const map = this.fx.texture(id); if (!map) return null;
+    const m = new THREE.Mesh(this.fx._shared('plane'), new THREE.MeshBasicMaterial({ map, color, transparent: true, opacity: 0, blending, depthWrite: false, side: THREE.DoubleSide, toneMapped: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }));
+    m.rotation.set(-Math.PI / 2, 0, yaw); m.position.copy(pos);
+    return this.anim(t0, life, (k, dt) => {
+      const g = k < growT ? easeOut(k / growT) : 1;
+      m.scale.setScalar(size * (s0 + (s1 - s0) * g));
+      m.material.opacity = opacity * (k < fadeIn ? k / fadeIn : k > 1 - fadeOut ? (1 - k) / fadeOut : 1);
+      m.rotation.z += spin * dt;
+    }, m);
+  }
+  /** A camera-facing textured disc (a rune ring standing up at the hit point). */
+  disc(id, pos, { size = 1, color = 0xffffff, opacity = 1, t0 = 0, life = 0.5, spin = 2, s0 = 0.3, s1 = 1 } = {}) {
+    const map = this.fx.texture(id); if (!map || this.lite) return null;
+    const m = new THREE.Mesh(this.fx._shared('plane'), new THREE.MeshBasicMaterial({ map, color, transparent: true, opacity: 0, blending: ADD, depthWrite: false, side: THREE.DoubleSide, toneMapped: false }));
+    m.position.copy(pos);
+    let rot = rnd(0, 6.28);
+    return this.anim(t0, life, (k, dt) => {
+      rot += spin * dt;
+      if (this.fx.camera) m.quaternion.copy(this.fx.camera.quaternion);
+      m.rotateZ(rot);
+      m.scale.setScalar(size * (s0 + (s1 - s0) * easeOut(k)));
+      m.material.opacity = opacity * (k < 0.12 ? k / 0.12 : 1 - (k - 0.12) / 0.88);
+    }, m);
+  }
+  /** An expanding torus. axis 'ground' lies flat, 'camera' faces the viewer. */
+  ring(pos, color, { r0 = 0.1, r1 = 1, t0 = 0, life = 0.4, axis = 'ground', tube = 0.03, opacity = 1, rise = 0 } = {}) {
+    if (this.lite && axis === 'camera') return null;
+    const m = new THREE.Mesh(new THREE.TorusGeometry(1, tube / Math.max(0.05, r0, r1), 6, 48), this.fx._basic(color, 0));
+    m.position.copy(pos); if (axis === 'ground') m.rotation.x = -Math.PI / 2;
+    return this.anim(t0, life, k => {
+      m.scale.setScalar(r0 + (r1 - r0) * easeOut(k));
+      m.material.opacity = opacity * (1 - k);
+      if (rise) m.position.y = pos.y + rise * k;
+      if (axis === 'camera' && this.fx.camera) m.quaternion.copy(this.fx.camera.quaternion);
+    }, m);
+  }
+  /** A jagged arc that re-rolls every `every` seconds. `ends()` returns [a, b] each time (so they can move). */
+  arc(ends, { t0 = 0, life = 0.3, every = 0.05, width = 0.04, color = 0xfff07a, jitter = 0.15, segs = 10, taper = 0.4, opacity = 1 } = {}) {
+    const j = new Jag(this.fx, { segs, width, color, jitter, taper, opacity });
+    let next = 0;
+    return this.anim(t0, life, (k, dt) => {
+      next -= dt;
+      if (next <= 0) { const [a, b] = ends(); j.set(a, b); next = every; }
+      j.fade((1 - k) * (0.7 + Math.random() * 0.3));
+    }, j.group);
+  }
+  /** A vertical beam of light standing on `pos` (holy pillar, a judgement column). */
+  beam(pos, { radius = 0.3, height = 3, color = 0xffe69a, t0 = 0, life = 0.6, opacity = 1, drop = 0, narrow = 0.8 } = {}) {
+    if (this.lite) return null;
+    const g = new THREE.Group(); g.position.copy(pos);
+    const outer = new THREE.Mesh(this.fx._shared('beam'), new THREE.MeshBasicMaterial({ color, vertexColors: true, transparent: true, opacity: 0, blending: ADD, depthWrite: false, side: THREE.DoubleSide, toneMapped: false }));
+    const inner = new THREE.Mesh(this.fx._shared('beam'), new THREE.MeshBasicMaterial({ color: 0xffffff, vertexColors: true, transparent: true, opacity: 0, blending: ADD, depthWrite: false, side: THREE.DoubleSide, toneMapped: false }));
+    g.add(outer, inner);
+    return this.anim(t0, life, (k, dt) => {
+      // `drop`: the first part of the life the beam spends slamming down from the sky
+      const dk = drop > 0 ? Math.min(1, k / drop) : 1;
+      const hk = drop > 0 ? easeOut(dk) : 1;
+      const after = drop > 0 ? Math.max(0, (k - drop) / (1 - drop)) : k;
+      const w = radius * (dk < 1 ? 0.6 : 1 + 0.35 * Math.max(0, 1 - after * 6)) * (1 - narrow * after);
+      outer.scale.set(w, height * hk, w); inner.scale.set(w * 0.38, height * hk, w * 0.38);
+      // hung from the top while it falls, standing on the ground once it lands
+      outer.position.y = inner.position.y = height * (1 - hk);
+      const op = opacity * (after < 0.1 ? 1 : 1 - (after - 0.1) / 0.9);
+      outer.material.opacity = op * 0.8; inner.material.opacity = op;
+      outer.rotation.y += dt * 2; inner.rotation.y -= dt * 3;
+    }, g);
+  }
+  start({ onDone = null, lightLife = null, lightPos = null } = {}) {
+    const e = this.fx._add(this.group, this.maxLife, dt => this.step(dt), () => { this.P.dispose(); if (onDone) onDone(); });
+    e.main = true; e.lightPos = lightPos || this.at; if (lightLife != null) e.lightLife = lightLife;
+    return e;
+  }
+  step(dt) {
+    this.age += dt;
+    let busy = false;
+    for (const t of this.tasks) {
+      if (t.done) continue;
+      const local = this.age - t.t0;
+      if (local < 0) { busy = true; continue; }
+      if (t.once) { t.done = true; try { t.once(); } catch (err) { console.warn('spellfx piece failed', err); } continue; }
+      if (t.emit) {
+        t.acc += dt * t.rate * this.fx.budgetScale() * this.density;
+        while (t.acc >= 1) { t.acc -= 1; t.spawn(this.P, clamp(local / Math.max(1e-3, t.dur), 0, 1)); }
+        if (local >= t.dur) t.done = true; else busy = true;
+        continue;
+      }
+      const k = Math.min(1, local / t.dur);
+      if (t.obj) t.obj.visible = true;
+      t.fn(k, dt, local);
+      if (k >= 1) { t.done = true; if (t.obj) t.obj.visible = false; } else busy = true;
+    }
+    this.P.update(dt);
+    return !busy && this.P.count === 0;
+  }
+}
+
+// ---------------------------------------------------------------------------------------------
+
 export class SpellFx {
   /**
    * @param {THREE.Scene} scene       where world-space effects are added
@@ -194,6 +502,41 @@ export class SpellFx {
     this._pool = new Map();         // "id|blending" -> [Sprite]
     this._pooled = 0;
     this._dropped = 0;              // effects skipped because the stage was already full
+    this._density = 1;              // aoe() lowers this while it fires many impacts at once
+    this._geos = new Map();         // shared unit shapes (decal plane, beam, spike) — never disposed per effect
+  }
+  /** Budget-scaled particle count: n at full budget, fewer when the stage is busy, 0 at the cap. */
+  _n(n, density = 1) {
+    const b = this.budgetScale();
+    if (b <= 0 || n <= 0) return 0;
+    return Math.max(1, Math.round(n * b * density));
+  }
+  /** A shared unit geometry by name. Marked shared so disposing one effect never frees it. */
+  _shared(name) {
+    let g = this._geos.get(name);
+    if (g) return g;
+    if (name === 'plane') g = new THREE.PlaneGeometry(1, 1);
+    else if (name === 'beam') {
+      // an open cylinder, radius 1, from y = 0 to y = 1, bright at the foot and black (= invisible
+      // under additive blending) at the top, so a beam fades into the sky instead of ending in a lid
+      g = new THREE.CylinderGeometry(1, 1, 1, 24, 6, true); g.translate(0, 0.5, 0);
+      const pos = g.attributes.position, col = new Float32Array(pos.count * 3);
+      for (let i = 0; i < pos.count; i++) { const f = Math.pow(1 - pos.getY(i), 1.4); col[i * 3] = col[i * 3 + 1] = col[i * 3 + 2] = f; }
+      g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+    } else if (name === 'spike') { g = new THREE.ConeGeometry(1, 1, 5); g.translate(0, 0.5, 0); }
+    else g = new THREE.OctahedronGeometry(1, 0);
+    g.userData.shared = true;
+    this._geos.set(name, g);
+    return g;
+  }
+  /**
+   * Where the floor is under a point. Stages (Emberveil, the gallery) stand on y = 0 and hand in
+   * points about a body's height above it; an open world (Farhold) hands in points far above 0, so
+   * there the floor is taken as `drop` metres under the point. Pass `ground` to any call to be exact.
+   */
+  _groundY(at, ground = null, drop = 0.9) {
+    if (ground != null && isFinite(ground)) return ground;
+    return (at.y > 2.4 || at.y < -0.2) ? at.y - drop : 0;
   }
   /**
    * How much of its normal output a trail should emit right now: 1 while there is room, tapering to
@@ -283,13 +626,20 @@ export class SpellFx {
    */
   _add(obj, life, step, onDone = null) {
     if (obj && !obj.parent) this.root.add(obj);
-    const e = { obj, life, step, onDone, age: 0 };
+    const e = { obj, life, step, onDone, age: 0, seq: (this._seq = (this._seq || 0) + 1) };
     this.live.push(e);
-    while (this.live.length > this.maxLive) { this._dropped++; this._end(this.live[0]); }
+    while (this.live.length > this.maxLive) {
+      // the oldest effect that is not a persistent handle (an orbiting orb lives until its owner says so)
+      const old = this.live.find(x => !x.persistent);
+      if (!old || old === e) break;
+      this._dropped++; this._end(old);
+    }
     return e;
   }
   _end(e) {
     const i = this.live.indexOf(e); if (i >= 0) this.live.splice(i, 1);
+    else if (e.ended) return;
+    e.ended = true;
     if (e.obj) disposeObj(e.obj);
     if (e.onDone) { const f = e.onDone; e.onDone = null; f(); }
   }
@@ -301,30 +651,30 @@ export class SpellFx {
    * @returns {Promise<void>} resolves the frame the projectile lands (so a caller can chain an impact).
    */
   projectile({ from, to, element = 'arcane', shape = null, speed = null, arc = null, ms = null, crit = false } = {}) {
-    const E = elementOf(element);
+    const el = elementName(element);
+    const E = ELEMENTS[el];
     const kind = shape || E.shape;
     const a = from.clone(), b = to.clone();
-    if (kind === 'bolt') return this._bolt(a, b, E, crit, ms);
+    if (kind === 'bolt') return this._bolt(a, b, E, crit, ms, el);
 
     const dist = Math.max(0.2, a.distanceTo(b));
     const dur = ms != null ? ms / 1000 : clamp(dist / (speed || E.speed), 0.16, 0.45);
     const arcH = (arc != null ? arc : E.arc) * clamp(dist * 0.45, 0.2, 1.1);
 
     const head = this._head(kind, E, crit);
+    const deco = this._decorateHead(head.group, el, crit);
     const group = new THREE.Group(); group.add(head.group); group.position.copy(a);
     const tids = (E.trail || []).filter(id => this.hasTexture(id));
     const trail = new Trail(this, {
       ids: tids.length ? tids : ['glow'],
-      size: kind === 'ribbon' ? 0.2 : 0.15, color: E.accent, life: 0.3, rate: 60, spread: 0.03,
+      size: kind === 'ribbon' ? 0.2 : 0.15, color: E.accent, life: 0.3, rate: 45, spread: 0.03,
       rise: kind === 'bubbles' ? 0.35 : kind === 'drops' ? -0.5 : 0.05,
     });
     this.root.add(trail.group);
-
-    // fire also smoulders: dark smoke puffs that read against a bright backdrop
-    const smoke = kind === 'cone' && this.hasTexture('smoke')
-      ? new Trail(this, { ids: ['smoke'], size: 0.22, color: 0x8a8a92, life: 0.55, rate: 14, spread: 0.05, rise: 0.5, blending: THREE.NormalBlending, opacity: 0.5 })
-      : null;
-    if (smoke) this.root.add(smoke.group);
+    // the element's own wake: embers + smoke for fire, mist + flakes for ice, drips + haze for
+    // poison, tendrils for shadow... (see _flightStreams). Pooled and budget-scaled like the trail.
+    const P = new Particles(this); this.root.add(P.group);
+    const streams = this._flightStreams(el, crit);
 
     const at = t => new THREE.Vector3().lerpVectors(a, b, t).addScaledVector(UP, arcH * 4 * t * (1 - t));
     const wobble = kind === 'ribbon' ? 0.13 : 0;
@@ -338,17 +688,108 @@ export class SpellFx {
       const dir = at(Math.min(1, k + 0.02)).sub(at(Math.max(0, k - 0.02)));
       if (dir.lengthSq() > 1e-8) group.quaternion.setFromUnitVectors(UP, dir.normalize());
       head.update(dt, this._t, k);
+      if (deco) deco(dt, this._t);
       trail.emit(p, dt); trail.update(dt);
-      if (smoke) { smoke.emit(p, dt); smoke.update(dt); }
+      const budget = this.budgetScale();
+      for (const s of streams) {
+        s.acc += dt * s.rate * budget;
+        while (s.acc >= 1) { s.acc -= 1; s.spawn(P, p, dir); }
+      }
+      P.update(dt);
       return false;
     }, () => {
       // let the tail catch up and fade out on its own
       trail.emitting = false;
       this._add(trail.group, trail.life * 1.3, dt => { trail.update(dt); return trail.count === 0; }, () => trail.dispose());
-      if (smoke) { smoke.emitting = false; this._add(smoke.group, smoke.life * 1.4, dt => { smoke.update(dt); return smoke.count === 0; }, () => smoke.dispose()); }
+      this._add(P.group, 2.5, dt => { P.update(dt); return P.count === 0; }, () => P.dispose());
       resolve();
     });
     return done;
+  }
+
+  /**
+   * What each element sheds while it flies: a list of { rate, spawn(P, pos, dir) }. `dir` is the
+   * unit flight direction. Everything is world units, multiplied by the fx scale so a zoomed-out
+   * stage still sees it.
+   */
+  _flightStreams(el, crit = false) {
+    const sc = this.scale * (crit ? 1.25 : 1), c = palOf(el);
+    const J = (p, r) => p.clone().add(randDir().multiplyScalar(r * sc));
+    const st = (rate, spawn) => ({ rate, spawn, acc: rnd(0, 1) });
+    switch (el) {
+      case 'fire': return [
+        st(40, (P, p) => P.add('soft', { pos: J(p, 0.05), vel: new THREE.Vector3(rnd(-0.4, 0.4), rnd(0.4, 1.2), rnd(-0.4, 0.4)).multiplyScalar(sc), size: rnd(0.05, 0.09) * sc, size1: 0.3, life: rnd(0.4, 0.8), color: 0xffe080, color1: c.deep, gravity: 0.8, flicker: 0.35 })),
+        st(22, (P, p) => P.add('flame', { pos: J(p, 0.03), vel: new THREE.Vector3(0, 0.6 * sc, 0), size: rnd(0.16, 0.24) * sc, size1: 0.2, life: 0.28, color: c.hot, color1: c.deep, spin: rnd(-3, 3) })),
+        st(13, (P, p) => P.add('puff', { pos: J(p, 0.06), vel: new THREE.Vector3(rnd(-0.1, 0.1), rnd(0.35, 0.7), rnd(-0.1, 0.1)).multiplyScalar(sc), size: 0.16 * sc, size1: 2.6, life: rnd(0.6, 0.9), color: c.smoke, blending: NORMAL, opacity: 0.5, fadeIn: 0.3, spin: rnd(-1, 1) })),
+      ];
+      case 'ice': return [
+        st(28, (P, p) => P.add('puff', { pos: J(p, 0.05), vel: randDir().multiplyScalar(0.15 * sc), size: 0.14 * sc, size1: 2.8, life: rnd(0.45, 0.7), color: 0xcfeeff, opacity: 0.32, fadeIn: 0.2, spin: rnd(-1, 1) })),
+        st(16, (P, p) => P.add('snowflake', { pos: J(p, 0.08), vel: new THREE.Vector3(0, -0.3 * sc, 0), size: rnd(0.07, 0.11) * sc, size1: 0.6, life: rnd(0.7, 1.0), gravity: -0.8, wobble: 0.5, spin: rnd(-3, 3) })),
+        st(18, (P, p) => P.add('flare', { pos: J(p, 0.1), size: rnd(0.08, 0.14) * sc, size1: 0.2, life: 0.22, color: 0xffffff, color1: c.mid, spin: 4 })),
+      ];
+      case 'poison': return [
+        st(16, (P, p) => P.add('soft', { pos: J(p, 0.04), vel: new THREE.Vector3(0, -0.4 * sc, 0), size: rnd(0.06, 0.09) * sc, size1: 0.6, life: 0.55, color: c.hot, color1: c.deep, gravity: -5, stretch: 0.05 })),
+        st(22, (P, p) => P.add('puff', { pos: J(p, 0.05), vel: randDir().multiplyScalar(0.12 * sc), size: 0.16 * sc, size1: 3.0, life: rnd(0.8, 1.2), color: 0x4ac030, opacity: 0.3, fadeIn: 0.25, spin: rnd(-0.8, 0.8) })),
+        st(10, (P, p) => P.add('bubble', { pos: J(p, 0.08), vel: new THREE.Vector3(0, 0.4 * sc, 0), size: rnd(0.05, 0.1) * sc, size1: 1.4, life: 0.5, blending: NORMAL, opacity: 0.85, wobble: 0.4 })),
+      ];
+      case 'shadow': return [
+        st(30, (P, p) => P.add('tendril', { pos: J(p, 0.06), vel: randDir(0.4).multiplyScalar(0.3 * sc), size: rnd(0.18, 0.26) * sc, size1: 2.0, life: rnd(0.45, 0.7), color: c.smoke, blending: NORMAL, opacity: 0.8, fadeIn: 0.15, spin: rnd(-2.5, 2.5) })),
+        st(14, (P, p) => P.add('soft', { pos: J(p, 0.08), vel: randDir(0.5).multiplyScalar(0.3 * sc), size: 0.14 * sc, size1: 1.5, life: 0.5, color: c.mid, color1: c.deep, opacity: 0.7 })),
+      ];
+      case 'holy': return [
+        st(34, (P, p) => P.add('flare', { pos: J(p, 0.08), vel: randDir(0.6).multiplyScalar(0.25 * sc), size: rnd(0.08, 0.15) * sc, size1: 0.2, life: rnd(0.35, 0.6), color: c.hot, color1: c.deep, flicker: 0.3, spin: 2 })),
+        st(8, (P, p) => P.add('feather', { pos: J(p, 0.06), vel: new THREE.Vector3(0, -0.2 * sc, 0), size: 0.12 * sc, size1: 0.8, life: 0.8, gravity: -0.3, wobble: 0.6, spin: rnd(-2, 2) })),
+      ];
+      case 'arcane': return [
+        st(14, (P, p) => P.add(pick(GLYPHS), { pos: J(p, 0.05), vel: randDir().multiplyScalar(0.2 * sc), size: 0.13 * sc, size1: 0.5, life: 0.55, color: c.hot, color1: c.mid, spin: rnd(-3, 3), drag: 2 })),
+        st(22, (P, p) => P.add('soft', { pos: J(p, 0.04), size: 0.16 * sc, size1: 1.8, life: 0.4, color: c.mid, color1: c.deep, opacity: 0.55 })),
+      ];
+      case 'nature': return [
+        st(14, (P, p) => P.add('leaf', { pos: J(p, 0.06), vel: randDir().multiplyScalar(0.3 * sc), size: rnd(0.1, 0.14) * sc, size1: 0.8, life: rnd(0.7, 1.0), blending: NORMAL, gravity: -0.8, wobble: 0.7, spin: rnd(-6, 6) })),
+        st(18, (P, p) => P.add('soft', { pos: J(p, 0.08), vel: randDir(0.5).multiplyScalar(0.2 * sc), size: 0.05 * sc, size1: 0.5, life: 0.6, color: c.hot, flicker: 0.5 })),
+      ];
+      case 'bleed': return [
+        st(16, (P, p) => P.add('drop', { pos: J(p, 0.04), vel: new THREE.Vector3(0, -0.2 * sc, 0), size: rnd(0.06, 0.09) * sc, size1: 0.7, life: 0.5, blending: NORMAL, gravity: -6 })),
+      ];
+      case 'physical': return [
+        st(24, (P, p) => P.add('soft', { pos: J(p, 0.02), size: 0.05 * sc, size1: 0.3, life: 0.2, color: 0xffffff, opacity: 0.5 })),
+      ];
+      default: return [
+        st(25, (P, p) => P.add('flare', { pos: J(p, 0.05), size: 0.1 * sc, size1: 0.2, life: 0.3, color: c.hot, color1: c.mid })),
+      ];
+    }
+  }
+
+  /** Extra glow on the flying body so each element has its own silhouette of light. */
+  _decorateHead(g, el, crit = false) {
+    const c = palOf(el), k = (crit ? 1.35 : 1) * 1.4;
+    const add = (id, size, color, opacity = 1, blending = ADD) => { const s = this._sprite(id, { size: size * k, color, opacity, blending }); if (s) g.add(s); return s; };
+    if (el === 'fire') {
+      const halo = add('soft', 0.55, 0xff5a10, 0.7), core = add('soft', 0.26, 0xfff4d0, 1);
+      return (dt, t) => { const f = 1 + Math.sin(t * 41) * 0.12 + Math.sin(t * 17) * 0.08; if (halo) halo.scale.setScalar(0.55 * k * this.scale * f); if (core) core.scale.setScalar(0.26 * k * this.scale * (2 - f)); };
+    }
+    if (el === 'ice') { add('soft', 0.5, c.mid, 0.5); const gl = add('flare', 0.4, 0xffffff, 0.9); return dt => { if (gl) gl.material.rotation += dt * 3; }; }
+    if (el === 'poison') { add('soft', 0.5, 0x5ad030, 0.55); return null; }
+    if (el === 'shadow') {
+      // a void at the heart of it: a NORMAL-blended dark blob, then a violet rim around it
+      const rim = add('soft', 0.62, c.mid, 0.6); const dark = add('soft', 0.34, 0x000000, 0.9, NORMAL);
+      if (dark) dark.renderOrder = 2;
+      return (dt, t) => { if (rim) rim.material.opacity = 0.45 + Math.sin(t * 9) * 0.15; };
+    }
+    if (el === 'holy' || el === 'arcane') {
+      // motes (holy) or glyphs (arcane) orbiting the flight axis
+      add('soft', 0.5, c.mid, 0.55);
+      const orbit = [];
+      for (let i = 0; i < 3; i++) { const s = add(el === 'holy' ? 'flare' : GLYPHS[i], el === 'holy' ? 0.14 : 0.13, el === 'holy' ? c.hot : c.hot, 1); if (s) orbit.push(s); }
+      return (dt, t) => orbit.forEach((s, i) => {
+        const a = t * (el === 'holy' ? 9 : 6) + i * 2.094, r = 0.2 * this.scale * k * 0.7;
+        s.position.set(Math.cos(a) * r, Math.sin(a * 2) * 0.03, Math.sin(a) * r);
+        s.material.rotation = -a;
+      });
+    }
+    if (el === 'nature') { add('soft', 0.45, c.mid, 0.45); return null; }
+    if (el === 'true') { add('flare', 0.4, 0xffffff, 0.9); return null; }
+    return null;
   }
 
   /** Builds the flying body. Everything points along +Y; the caller rotates +Y onto the flight path. */
@@ -467,120 +908,284 @@ export class SpellFx {
     return { group: g, update: dt => { m.rotation.x += dt * 6; m.rotation.y += dt * 9; } };
   }
 
-  /** Lightning: a jagged polyline re-drawn a handful of times, then sparks at the far end. */
-  _bolt(a, b, E, crit = false, ms = null) {
-    const SEG = 14, LINES = 3;
-    const group = new THREE.Group();
-    const lines = [];
-    for (let i = 0; i < LINES; i++) {
-      const geo = new THREE.BufferGeometry();
-      geo.setAttribute('position', new THREE.Float32BufferAttribute(new Float32Array((SEG + 1) * 3), 3));
-      const mat = new THREE.LineBasicMaterial({ color: i === 0 ? E.accent : E.color, transparent: true, opacity: i === 0 ? 1 : 0.6, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false });
-      const line = new THREE.Line(geo, mat); line.frustumCulled = false; group.add(line); lines.push(line);
-    }
-    const motes = [];
-    for (let i = 0; i < 5; i++) { const s = this._sprite('bolt', { size: 0.22, color: 0xffffff, opacity: 0.9 }); if (s) { group.add(s); motes.push(s); } }
-
+  /**
+   * Lightning: thick camera-facing zigzags (a white core inside a coloured glow) that re-roll eight
+   * times, two or three forks peeling off the main stroke, a flash at both ends and crackles
+   * flickering along the path. No travel time — the promise resolves when the stroke ends.
+   */
+  _bolt(a, b, E, crit = false, ms = null, el = 'lightning') {
+    const life = ms != null ? ms / 1000 : 0.26;
+    const c = palOf(el), sc = this.scale * (crit ? 1.3 : 1);
+    const fx = new Effect(this, { at: b, life: life + 1.2 });
     const dir = new THREE.Vector3().subVectors(b, a);
-    const side = dir.clone().cross(UP).normalize();
-    const up2 = dir.clone().cross(side).normalize();
     const jitter = (crit ? 0.16 : 0.11) * clamp(dir.length() * 0.4, 0.4, 1.4);
-    const scatter = () => {
-      for (const line of lines) {
-        const pos = line.geometry.attributes.position;
-        for (let i = 0; i <= SEG; i++) {
-          const t = i / SEG;
-          const p = new THREE.Vector3().lerpVectors(a, b, t);
-          const w = Math.sin(t * Math.PI) * jitter;
-          p.addScaledVector(side, rnd(-w, w)).addScaledVector(up2, rnd(-w, w));
-          pos.setXYZ(i, p.x, p.y, p.z);
-        }
-        pos.needsUpdate = true; line.geometry.computeBoundingSphere();
-      }
-      motes.forEach((m, i) => { const t = 0.25 + (i / motes.length) * 0.7; m.position.lerpVectors(a, b, t).addScaledVector(side, rnd(-jitter, jitter)).addScaledVector(up2, rnd(-jitter, jitter)); m.material.rotation = rnd(0, 6.28); });
-    };
-    scatter();
-
-    const life = ms != null ? ms / 1000 : 0.26; let next = 0, frames = 0;
+    const every = life / 8;
+    fx.arc(() => [a, b], { life, every, width: 0.07 * sc, color: E.color, jitter, segs: 16, taper: 0.2 });
+    fx.arc(() => [a, b], { life: life * 0.8, every, width: 0.035 * sc, color: c.deep, jitter: jitter * 1.6, segs: 14, taper: 0.3, opacity: 0.7 });
+    const forks = crit ? 3 : 2;
+    for (let i = 0; i < forks; i++) {
+      fx.arc(() => {
+        const s = new THREE.Vector3().lerpVectors(a, b, rnd(0.25, 0.8));
+        return [s, s.clone().add(randDir(-0.3).multiplyScalar(rnd(0.35, 0.7) * sc))];
+      }, { t0: rnd(0, life * 0.3), life: life * 0.6, every: every * 1.5, width: 0.03 * sc, color: E.color, jitter: 0.08 * sc, segs: 6, taper: 0.8 });
+    }
+    fx.flash(a, { id: 'flare', size: 0.5 * sc, color: c.hot, life: 0.12 });
+    fx.flash(b, { id: 'flare', size: 0.9 * sc, color: 0xffffff, life: 0.14, t0: 0.02 });
+    fx.flash(b, { id: 'soft', size: 1.2 * sc, color: E.color, life: 0.22, opacity: 0.8 });
+    fx.emit(0, life, 45, P => P.add('crackle', { pos: new THREE.Vector3().lerpVectors(a, b, Math.random()).add(randDir().multiplyScalar(0.12 * sc)), size: rnd(0.16, 0.26) * sc, size1: 1.2, life: 0.1, color: 0xffffff, color1: E.color, flicker: 0.5, fadePow: 1 }));
     let resolve; const done = new Promise(r => { resolve = r; });
-    this._add(group, life, (dt, k) => {
-      next -= dt;
-      if (next <= 0 && frames < 8) { scatter(); frames++; next = life / 8; }
-      for (const l of lines) l.material.opacity = (1 - k) * (l === lines[0] ? 1 : 0.6);
-      for (const m of motes) m.material.opacity = 1 - k;
-      return false;
-    }, () => resolve());
+    fx.once(life, () => { if (resolve) { resolve(); resolve = null; } });
+    fx.start({ onDone: () => { if (resolve) { resolve(); resolve = null; } }, lightLife: life + 0.1, lightPos: new THREE.Vector3().lerpVectors(a, b, 0.5) });
     return done;
   }
 
   // ---- impacts --------------------------------------------------------------------------------
 
-  /** A burst where a spell lands. Returns immediately; the effect cleans itself up. */
-  impact({ at, element = 'arcane', crit = false, scale = 1, height = 1.8 } = {}) {
-    const E = elementOf(element);
+  /**
+   * A burst where a spell lands. Returns immediately; the effect cleans itself up.
+   * Each element has a signature no other shares (2026-09-25): fire leaves a scorch and a column of
+   * dark smoke, ice a lingering frost ring with spikes, lightning forks into the ground, poison a
+   * haze and a puddle that bubbles, shadow implodes before it bursts, holy drops a pillar of light,
+   * arcane opens a rune ring, nature spirals leaves up, physical and bleed stay on the ground.
+   * `ground` (optional) is the floor height under the hit; see _groundY for the default.
+   */
+  impact({ at, element = 'arcane', crit = false, scale = 1, height = 1.8, ground = null, density = 1 } = {}) {
+    const el = elementName(element);
+    const E = ELEMENTS[el], c = palOf(el);
     const p = at.clone();
     const s = scale * (crit ? 1.5 : 1) * 1.25;
-    const kind = E.impact;
+    const S = s * this.scale;                     // world size of this burst
     const bodyH = Math.max(0.4, height);
+    const gy = this._groundY(p, ground) + 0.02;
+    const g0 = new THREE.Vector3(p.x, gy, p.z);   // the floor right under the hit
+    const fx = new Effect(this, { at: p, life: 4, density });
+    const pos = (r = 0.1) => p.clone().add(randDir().multiplyScalar(r * S));
 
-    const floor = v => new THREE.Vector3(v.x, 0.02, v.z);   // decals lie on the stage floor (y = 0)
-
-    if (kind === 'fire') {
-      this._expandRing(p, E.color, { r0: 0.1 * s, r1: 0.8 * s, life: 0.4, axis: 'camera', tube: 0.035 * s });
-      this._burst(p, { ids: ['flame', 'ember'], n: Math.round(16 * s), color: 0xffffff, size: 0.2 * s, speed: 2.1 * s, life: 0.46, gravity: -1.2 });
-      this._puff(p, { n: Math.round(4 * s), color: 0x9a8a80, size: 0.3 * s, life: 0.7 });
-      this._expandRing(floor(p), E.accent, { r0: 0.1, r1: 0.55 * s, life: 0.45, axis: 'ground', tube: 0.02, opacity: 0.55 });
-    } else if (kind === 'ice') {
-      this._discFlash(p, 'frost_ring', 0xffffff, { size: 0.8 * s, life: 0.4, spin: 2, ground: false, opacity: 0.9 });
-      this._expandRing(p, E.accent, { r0: 0.08 * s, r1: 0.6 * s, life: 0.35, axis: 'camera', tube: 0.022 * s });
-      this._shardSpray(p, E, s);
-    } else if (kind === 'shadow') {
-      this._converge(p, { ids: ['shadow_claw'], n: Math.round(6 * s), color: 0xffffff, size: 0.32 * s, from: 0.8 * s, life: 0.36 });
-      this._riser(p, { id: 'skull', color: 0xffffff, size: 0.34 * s, rise: 0.55, life: 0.6 });
-      this._expandRing(p, E.color, { r0: 0.55 * s, r1: 0.06, life: 0.3, axis: 'camera', tube: 0.025, opacity: 0.8 });
-    } else if (kind === 'holy') {
-      this._discFlash(floor(p), 'holy_rune', 0xffffff, { size: 1.0 * s, life: 0.5, spin: -1.6, ground: true, opacity: 0.85 });
-      this._burst(p, { ids: ['holy_mote', 'feather'], n: Math.round(13 * s), color: 0xffffff, size: 0.17 * s, speed: 1.1 * s, life: 0.65, gravity: 1.4, upward: true });
-      this._expandRing(p, E.accent, { r0: 0.05, r1: 0.7 * s, life: 0.4, axis: 'camera', tube: 0.02 });
-    } else if (kind === 'nature') {
-      this._burst(p, { ids: ['leaf', 'thorn'], n: Math.round(15 * s), color: 0xffffff, size: 0.21 * s, speed: 1.8 * s, life: 0.75, gravity: -0.9, blending: THREE.NormalBlending, spin: 7 });
-      this._expandRing(floor(p), E.color, { r0: 0.08, r1: 0.6 * s, life: 0.45, axis: 'ground', tube: 0.022 });
-      this._expandRing(p, E.accent, { r0: 0.06, r1: 0.45 * s, life: 0.3, axis: 'camera', tube: 0.018, opacity: 0.7 });
-    } else if (kind === 'arcane') {
-      this._expandRing(p, E.color, { r0: 0.06, r1: 0.7 * s, life: 0.35, axis: 'camera', tube: 0.022 });
-      this._discFlash(floor(p), 'arcane_rune', 0xffffff, { size: 0.85 * s, life: 0.45, spin: 3, ground: true, opacity: 0.8 });
-      this._burst(p, { ids: ['arcane_shard', 'spark'], n: Math.round(13 * s), color: 0xffffff, size: 0.18 * s, speed: 2.0 * s, life: 0.45, gravity: -0.5, spin: 9 });
-    } else if (kind === 'lightning') {
-      this._burst(p, { ids: ['spark', 'bolt'], n: Math.round(16 * s), color: 0xffffff, size: 0.19 * s, speed: 3.2 * s, life: 0.3, gravity: -2 });
-      this._discFlash(floor(p), 'crack', 0xfff0b0, { size: 0.7 * s, life: 0.5, spin: 0, ground: true, world: true, opacity: 0.5 });
-      this._expandRing(floor(p), E.accent, { r0: 0.05, r1: 0.8 * s, life: 0.28, axis: 'ground', tube: 0.018 });
-    } else if (kind === 'poison') {
-      this._discFlash(p, 'glow', E.color, { size: 0.95 * s, life: 0.4, spin: 1.5, ground: false, opacity: 0.75 });   // the splash
-      this._burst(p, { ids: ['bubble'], n: Math.round(20 * s), color: 0xffffff, size: 0.26 * s, speed: 1.5 * s, life: 0.85, gravity: 0.9, blending: THREE.NormalBlending, upward: true });
-      this._expandRing(p, E.accent, { r0: 0.07 * s, r1: 0.6 * s, life: 0.34, axis: 'camera', tube: 0.022 * s });
-      this._expandRing(floor(p), E.color, { r0: 0.06, r1: 0.6 * s, life: 0.5, axis: 'ground', tube: 0.024, opacity: 0.8 });
-    } else if (kind === 'bleed') {
-      this._burst(p, { ids: ['drop'], n: Math.round(13 * s), color: 0xffffff, size: 0.17 * s, speed: 1.9 * s, life: 0.55, gravity: -3.2, blending: THREE.NormalBlending });
+    if (el === 'fire') {
+      fx.flash(p, { size: 1.3 * S, color: 0xfff0c0, life: 0.16 });
+      fx.flash(p, { id: 'flare', size: 0.8 * S, color: 0xffffff, life: 0.1 });
+      fx.ring(p, c.mid, { r0: 0.1 * S, r1: 0.75 * S, life: 0.32, axis: 'camera', tube: 0.03 * S });
+      fx.burst(0, 26, P => P.add(Math.random() < 0.7 ? 'flame' : 'soft', { pos: pos(0.12), vel: randDir(0.3).multiplyScalar(rnd(1.4, 3.0) * S), drag: 3.0, gravity: 1.8, size: rnd(0.3, 0.45) * S, size1: 0.35, life: rnd(0.35, 0.6), color: c.hot, color1: c.deep, spin: rnd(-3, 3) }));
+      fx.burst(0, 16, P => P.add('soft', { pos: pos(0.05), vel: randDir(0.8).multiplyScalar(rnd(1.5, 3.5) * S), drag: 1.4, gravity: 0.6, size: rnd(0.04, 0.07) * S, size1: 0.4, life: rnd(0.6, 1.1), color: 0xffe080, color1: 0xff2a00, stretch: 0.05, flicker: 0.35 }));
+      fx.emit(0.06, 0.4, 24, P => P.add('puff', { pos: pos(0.15), vel: new THREE.Vector3(rnd(-0.2, 0.2), rnd(0.5, 1.1), rnd(-0.2, 0.2)).multiplyScalar(S), drag: 0.6, size: rnd(0.28, 0.4) * S, size1: 2.6, life: rnd(1.0, 1.5), color: c.smoke, blending: NORMAL, opacity: 0.6, fadeIn: 0.25, spin: rnd(-1, 1) }));
+      fx.decal('scorch', g0, { size: 1.3 * S, color: 0x140a06, blending: NORMAL, opacity: 0.75, life: 2.8, s0: 0.5, growT: 0.08, fadeOut: 0.5 });
+      fx.decal('soft', g0.clone().setY(gy + 0.01), { size: 1.4 * S, color: 0xff6a10, opacity: 0.9, life: 0.9, s0: 0.3, growT: 0.15, fadeOut: 0.7 });
+      fx.ring(g0, c.hot, { r0: 0.1 * S, r1: 0.9 * S, life: 0.45, tube: 0.025 * S, opacity: 0.7 });
+    } else if (el === 'ice') {
+      fx.flash(p, { id: 'flare', size: 1.0 * S, color: 0xffffff, life: 0.14 });
+      fx.flash(p, { size: 1.1 * S, color: c.mid, life: 0.25, opacity: 0.7 });
+      fx.disc('frost_ring', p, { size: 0.9 * S, life: 0.4, spin: 2 });
+      this._iceShards(fx, p, S, 10);
+      fx.burst(0, 12, P => P.add('ice_shard', { pos: pos(0.05), vel: randDir(0.2).multiplyScalar(rnd(1.5, 3) * S), drag: 1.5, gravity: -4, size: rnd(0.12, 0.2) * S, size1: 0.6, life: rnd(0.4, 0.6), spin: rnd(-8, 8) }));
+      fx.burst(0.05, 14, P => P.add('snowflake', { pos: pos(0.35).setY(p.y + rnd(0, 0.4) * S), vel: new THREE.Vector3(rnd(-0.2, 0.2), -0.2, rnd(-0.2, 0.2)).multiplyScalar(S), gravity: -0.3, wobble: 0.5, size: rnd(0.07, 0.12) * S, size1: 0.6, life: rnd(1.0, 1.6), spin: rnd(-2, 2) }));
+      fx.emit(0, 0.35, 36, P => P.add('puff', { pos: new THREE.Vector3(p.x, rnd(gy, p.y), p.z).add(randDir().multiplyScalar(0.2 * S)), vel: new THREE.Vector3(rnd(-1, 1), 0, rnd(-1, 1)).multiplyScalar(0.6 * S), drag: 1.8, size: 0.3 * S, size1: 2.8, life: rnd(1.1, 1.6), color: 0xcfeeff, opacity: 0.28, fadeIn: 0.25, spin: rnd(-0.6, 0.6) }));
+      // the frost ring stays on the floor after everything else has gone
+      fx.decal('frost_ring', g0, { size: 1.5 * S, color: 0xe8f8ff, opacity: 0.95, life: 2.2, s0: 0.3, growT: 0.1, spin: 0.3, fadeOut: 0.45 });
+      fx.decal('soft', g0, { size: 1.6 * S, color: c.mid, opacity: 0.35, life: 2.0, s0: 0.3, growT: 0.1 });
+      this._iceSpikes(fx, g0, 0.5 * S, 6, 0.35 * S, 1.8, c);
+    } else if (el === 'lightning') {
+      fx.flash(p, { id: 'flare', size: 1.6 * S, color: 0xffffff, life: 0.1, grow: 1 });
+      fx.flash(p, { size: 2.0 * S, color: c.mid, life: 0.22, opacity: 0.85 });
+      // forks: from the hit into the floor, then crawling across it
+      for (let i = 0; i < 4; i++) {
+        const ang = rnd(0, 6.28), r = rnd(0.5, 1.0) * S;
+        const end = new THREE.Vector3(g0.x + Math.cos(ang) * r, gy + 0.03, g0.z + Math.sin(ang) * r);
+        fx.arc(() => [p, end], { t0: i * 0.03, life: 0.3, every: 0.045, width: 0.045 * S, color: c.mid, jitter: 0.12 * S, segs: 8, taper: 0.6 });
+        const end2 = end.clone().add(new THREE.Vector3(Math.cos(ang + rnd(-0.6, 0.6)), 0, Math.sin(ang + rnd(-0.6, 0.6))).multiplyScalar(rnd(0.3, 0.6) * S));
+        fx.arc(() => [end, end2], { t0: i * 0.03 + 0.04, life: 0.3, every: 0.05, width: 0.03 * S, color: c.deep, jitter: 0.08 * S, segs: 6, taper: 0.8 });
+      }
+      fx.burst(0, 18, P => P.add('streak', { pos: pos(0.05), vel: randDir(0.2).multiplyScalar(rnd(3, 5.5) * S), gravity: -7, drag: 1, size: rnd(0.07, 0.1) * S, size1: 0.5, life: rnd(0.25, 0.45), color: 0xffffff, color1: c.mid, stretch: 0.06 }));
+      fx.emit(0, 0.4, 40, P => P.add('crackle', { pos: pos(0.35), size: rnd(0.2, 0.32) * S, size1: 1.2, life: 0.09, color: 0xffffff, color1: c.mid, flicker: 0.5, fadePow: 1 }));
+      fx.decal('crack', g0, { size: 1.1 * S, color: 0xfff0b0, opacity: 0.6, life: 0.9, s0: 0.6, growT: 0.05 });
+      fx.decal('scorch', g0, { size: 0.8 * S, color: 0x101018, blending: NORMAL, opacity: 0.5, life: 1.5, s0: 0.8, growT: 0.05 });
+      fx.ring(g0, c.hot, { r0: 0.05, r1: 0.9 * S, life: 0.25, tube: 0.02 * S });
+    } else if (el === 'poison') {
+      fx.flash(p, { size: 1.1 * S, color: 0x9aff60, life: 0.2, opacity: 0.8 });
+      fx.burst(0, 16, P => P.add('soft', { pos: pos(0.05), vel: randDir(0.9).multiplyScalar(rnd(1.4, 3) * S), gravity: -8, size: rnd(0.08, 0.13) * S, size1: 0.6, life: rnd(0.45, 0.7), color: c.hot, color1: c.deep, stretch: 0.04 }));
+      fx.burst(0, 8, P => P.add('bubble', { pos: pos(0.1), vel: randDir(0.6).multiplyScalar(rnd(0.8, 1.6) * S), drag: 2, gravity: 0.5, size: rnd(0.12, 0.2) * S, size1: 1.3, life: rnd(0.5, 0.8), blending: NORMAL, opacity: 0.9 }));
+      // the haze hangs around after the splash
+      fx.emit(0, 0.6, 26, P => P.add('puff', { pos: new THREE.Vector3(p.x, rnd(gy + 0.1, p.y), p.z).add(randDir().multiplyScalar(0.35 * S)), vel: new THREE.Vector3(rnd(-0.25, 0.25), rnd(0, 0.12), rnd(-0.25, 0.25)).multiplyScalar(S), size: rnd(0.35, 0.5) * S, size1: 2.2, life: rnd(1.6, 2.2), color: 0x48c030, opacity: 0.32, fadeIn: 0.3, spin: rnd(-0.5, 0.5) }));
+      fx.emit(0.15, 1.4, 12, P => P.add('bubble', { pos: onDisc(g0, 0.5 * S, gy + 0.03), vel: new THREE.Vector3(0, rnd(0.3, 0.6) * S, 0), wobble: 0.3, size: rnd(0.06, 0.12) * S, size1: 1.6, life: rnd(0.6, 0.9), blending: NORMAL, opacity: 0.9,
+        onDie: q => fx.P.add('soft', { pos: q.s.position, size: 0.08 * S, size1: 2, life: 0.12, color: c.hot }) }));
+      fx.decal('splat', g0, { size: 1.3 * S, color: 0x2e8a1c, blending: NORMAL, opacity: 0.8, life: 2.6, s0: 0.3, growT: 0.08 });
+      fx.decal('splat', g0.clone().setY(gy + 0.005), { size: 1.35 * S, color: 0x70ff40, opacity: 0.45, life: 2.2, s0: 0.3, growT: 0.08 });
+      fx.ring(p, c.hot, { r0: 0.07 * S, r1: 0.6 * S, life: 0.3, axis: 'camera', tube: 0.025 * S });
+    } else if (el === 'shadow') {
+      // implosion: tendrils and a dark ring close in, a void core swells, THEN it bursts out
+      const tIn = 0.26;
+      fx.burst(0, 12, P => {
+        const off = randDir().multiplyScalar(0.9 * S);
+        return P.add('tendril', { pos: p.clone().add(off), vel: off.clone().multiplyScalar(-1 / tIn), size: rnd(0.3, 0.42) * S, size1: 0.3, life: tIn, color: c.smoke, blending: NORMAL, opacity: 0.9, fadeIn: 0.3, fadePow: 4, spin: rnd(-4, 4) });
+      });
+      // violet motes riding in with the dark, so the pull reads on a dark stage too
+      fx.burst(0, 10, P => {
+        const off = randDir().multiplyScalar(rnd(0.7, 1.0) * S);
+        return P.add(Math.random() < 0.5 ? 'wisp' : 'soft', { pos: p.clone().add(off), vel: off.clone().multiplyScalar(-1 / tIn), size: rnd(0.14, 0.22) * S, size1: 0.4, life: tIn, color: c.hot, color1: c.mid, opacity: 0.95, fadeIn: 0.3, fadePow: 4 });
+      });
+      fx.flash(p, { size: 1.5 * S, color: c.deep, life: tIn, opacity: 0.6, grow: -0.5 });
+      fx.ring(p, c.mid, { r0: 0.8 * S, r1: 0.05, life: tIn, axis: 'camera', tube: 0.03 * S });
+      const core = this._sprite('soft', { size: 0.8 * S / this.scale, color: 0x000000, opacity: 0, blending: NORMAL });
+      if (core) { core.position.copy(p); core.renderOrder = 3; const base = core.scale.x; fx.anim(0, tIn + 0.35, k => { const kk = k * (tIn + 0.35); const grow = kk < tIn ? kk / tIn : 1 - (kk - tIn) / 0.35; core.scale.setScalar(base * (0.2 + 0.9 * grow)); core.material.opacity = 0.95 * grow; }, core); }
+      fx.flash(p, { size: 1.4 * S, color: c.mid, t0: tIn, life: 0.3 });
+      fx.ring(p, c.hot, { r0: 0.1 * S, r1: 0.9 * S, t0: tIn, life: 0.35, axis: 'camera', tube: 0.025 * S });
+      fx.burst(tIn, 14, P => P.add('puff', { pos: pos(0.1), vel: randDir(0.3).multiplyScalar(rnd(0.8, 1.8) * S), drag: 2.2, gravity: 0.5, size: rnd(0.3, 0.45) * S, size1: 2.2, life: rnd(0.8, 1.2), color: c.smoke, blending: NORMAL, opacity: 0.7, spin: rnd(-1.5, 1.5) }));
+      fx.burst(tIn, 10, P => P.add(Math.random() < 0.5 ? 'wisp' : 'tendril', { pos: pos(0.1), vel: randDir(0.8).multiplyScalar(rnd(0.6, 1.4) * S), drag: 1.5, gravity: 0.9, size: rnd(0.2, 0.3) * S, size1: 1.2, life: rnd(0.7, 1.1), color: c.hot, color1: c.mid, spin: rnd(-2, 2) }));
+      fx.burst(tIn + 0.05, 1, P => P.add('skull', { pos: p.clone(), vel: new THREE.Vector3(0, 0.6 * S, 0), size: 0.3 * S, size1: 1.2, life: 0.7, fadeIn: 0.25 }));
+      fx.decal('soft', g0, { size: 1.6 * S, color: 0x000000, blending: NORMAL, opacity: 0.55, life: 1.6, s0: 0.2, growT: 0.3 });
+    } else if (el === 'holy') {
+      fx.flash(p, { id: 'flare', size: 1.3 * S, color: 0xffffff, life: 0.16 });
+      fx.beam(g0, { radius: 0.3 * S, height: Math.max(2.4, (p.y - gy) + 1.6 * S), color: c.mid, life: 0.7, drop: 0.12 });
+      fx.decal('holy_rune', g0, { size: 1.3 * S, opacity: 0.9, life: 1.0, s0: 0.4, growT: 0.2, spin: -1.6 });
+      fx.decal('soft', g0, { size: 1.6 * S, color: c.deep, opacity: 0.6, life: 0.9, s0: 0.4 });
+      fx.burst(0.05, 16, P => { const q = onDisc(g0, 0.35 * S, gy + 0.05); return P.add(Math.random() < 0.5 ? 'holy_mote' : 'flare', { pos: q, vel: new THREE.Vector3(0, rnd(1.0, 2.2) * S, 0), drag: 0.8, size: rnd(0.1, 0.17) * S, size1: 0.4, life: rnd(0.7, 1.1), color: c.hot, color1: c.deep, spin: 2 }); });
+      fx.burst(0.1, 5, P => P.add('feather', { pos: pos(0.3).setY(p.y + 0.3 * S), vel: new THREE.Vector3(0, -0.1, 0), gravity: -0.35, wobble: 0.6, size: 0.14 * S, size1: 0.8, life: rnd(1.1, 1.5), spin: rnd(-2, 2) }));
+      fx.ring(p, c.hot, { r0: 0.05, r1: 0.75 * S, life: 0.4, axis: 'camera', tube: 0.022 * S });
+      fx.ring(g0, c.mid, { r0: 0.3 * S, r1: 0.6 * S, life: 0.8, tube: 0.02 * S, rise: 1.4 * S, opacity: 0.8 });
+    } else if (el === 'arcane' || el === 'true') {
+      const col = el === 'true' ? 0xffffff : c.mid;
+      fx.flash(p, { size: 1.1 * S, color: col, life: 0.2 });
+      fx.flash(p, { id: 'flare', size: 0.7 * S, color: 0xffffff, life: 0.1 });
+      fx.disc('rune_ring', p, { size: 1.3 * S, color: el === 'true' ? 0xffffff : c.hot, life: 0.5, spin: 3, s0: 0.2 });
+      fx.decal('rune_ring', g0, { size: 1.6 * S, color: col, opacity: 0.95, life: 1.0, s0: 0.2, growT: 0.3, spin: 2.2 });
+      fx.decal('arcane_rune', g0, { size: 1.0 * S, opacity: 0.7, life: 0.8, s0: 0.4, growT: 0.2, spin: -3 });
+      // glyphs thrown out that then circle the hit before they fade
+      fx.burst(0, 10, P => { const off = randDir(0.3).multiplyScalar(0.2 * S); return P.add(pick(GLYPHS), { pos: p.clone().add(off), vel: new THREE.Vector3(0, 0.3 * S, 0), swirl: { cx: p.x, cz: p.z, w: rnd(3, 5), pull: 0.9 * S }, drag: 0.5, size: rnd(0.13, 0.19) * S, size1: 0.6, life: rnd(0.7, 0.95), color: c.hot, color1: col, spin: rnd(-2, 2) }); });
+      fx.burst(0, 10, P => P.add('arcane_shard', { pos: pos(0.05), vel: randDir().multiplyScalar(rnd(1.8, 3) * S), drag: 3, size: rnd(0.12, 0.18) * S, size1: 0.4, life: 0.45, spin: rnd(-9, 9), color: el === 'true' ? 0xffffff : 0xffffff }));
+      fx.ring(p, col, { r0: 0.06, r1: 0.7 * S, life: 0.35, axis: 'camera', tube: 0.022 * S });
+    } else if (el === 'nature') {
+      fx.flash(p, { size: 0.9 * S, color: c.mid, life: 0.2, opacity: 0.7 });
+      // a spiral of leaves winding up out of the hit
+      fx.burst(0, 16, P => { const q = onDisc(g0, 0.3 * S, rnd(gy + 0.05, p.y)); return P.add('leaf', { pos: q, swirl: { cx: p.x, cz: p.z, w: rnd(4, 6), pull: 0.45 * S, lift: rnd(0.9, 1.5) * S }, size: rnd(0.14, 0.2) * S, size1: 0.8, life: rnd(0.8, 1.1), blending: NORMAL, spin: rnd(-6, 6) }); });
+      fx.burst(0, 8, P => P.add('thorn', { pos: pos(0.05), vel: randDir(0.2).multiplyScalar(rnd(2, 3.2) * S), gravity: -4, size: rnd(0.12, 0.17) * S, size1: 0.7, life: 0.45, blending: NORMAL, spin: rnd(-6, 6) }));
+      fx.emit(0, 0.6, 24, P => P.add('soft', { pos: onDisc(g0, 0.5 * S, rnd(gy, p.y)), vel: new THREE.Vector3(0, rnd(0.2, 0.5) * S, 0), size: rnd(0.04, 0.07) * S, size1: 0.5, life: rnd(0.7, 1.1), color: 0xeaff80, flicker: 0.5 }));
+      fx.decal('root_vine', g0, { size: 1.2 * S, blending: NORMAL, opacity: 0.9, life: 1.4, s0: 0.2, growT: 0.25 });
+      fx.ring(g0, c.mid, { r0: 0.08 * S, r1: 0.75 * S, life: 0.5, tube: 0.022 * S });
+    } else if (el === 'bleed') {
+      fx.burst(0, 14, P => P.add('drop', { pos: pos(0.05), vel: randDir(0.5).multiplyScalar(rnd(1.4, 2.6) * S), gravity: -9, size: rnd(0.1, 0.16) * S, size1: 0.8, life: rnd(0.45, 0.7), blending: NORMAL }));
+      fx.burst(0, 4, P => P.add('puff', { pos: pos(0.08), vel: randDir().multiplyScalar(0.4 * S), drag: 2, size: 0.25 * S, size1: 1.8, life: 0.55, color: c.deep, blending: NORMAL, opacity: 0.5 }));
+      fx.decal('splat', g0, { size: 0.8 * S, color: 0x7a0808, blending: NORMAL, opacity: 0.85, life: 2.4, t0: 0.15, s0: 0.3, growT: 0.1 });
       this._crossSlashes(p, 0xff6060, s, 2, bodyH * 0.5);
     } else { // physical
+      fx.flash(p, { id: 'flare', size: 0.6 * S, color: 0xffffff, life: 0.08 });
       this._crossSlashes(p, 0xffffff, s, crit ? 3 : 2, bodyH * 0.62);
-      this._burst(p, { ids: ['spark'], n: Math.round(11 * s), color: 0xffffff, size: 0.16 * s, speed: 2.4 * s, life: 0.3, gravity: -2.5 });
-      this._puff(floor(p), { n: 5, color: 0xa39a8e, size: 0.42 * s, life: 0.7 });
+      fx.burst(0, 12, P => P.add('streak', { pos: pos(0.03), vel: randDir(0.3).multiplyScalar(rnd(2.5, 4.5) * S), gravity: -9, size: rnd(0.06, 0.09) * S, size1: 0.5, life: rnd(0.2, 0.35), color: 0xffffff, color1: 0xffc060, stretch: 0.05 }));
+      fx.burst(0, 5, P => P.add('puff', { pos: onDisc(g0, 0.2 * S, gy + 0.1), vel: new THREE.Vector3(rnd(-1, 1), rnd(0.1, 0.4), rnd(-1, 1)).multiplyScalar(0.6 * S), drag: 1.8, size: 0.35 * S, size1: 2, life: 0.8, color: c.smoke, blending: NORMAL, opacity: 0.5, fadeIn: 0.2 }));
     }
     if (crit) {
       // a second, wider shockwave a beat later so a crit reads as bigger
-      const holder = new THREE.Object3D();
-      this._add(holder, 0.11, () => false, () => this._expandRing(p, E.accent, { r0: 0.1 * s, r1: 0.55 * s, life: 0.4, axis: 'camera', tube: 0.022 * s }));
+      fx.ring(p, E.accent, { r0: 0.1 * S, r1: 0.6 * S, t0: 0.11, life: 0.4, axis: 'camera', tube: 0.025 * S });
+    }
+    fx.start({ lightLife: el === 'poison' ? 1.2 : 0.6 });
+  }
+
+  /** Crystal shards thrown out of an ice hit (shared shape, one material each so they fade alone). */
+  _iceShards(fx, p, S, n = 8) {
+    const m = this._n(n, fx.density);
+    const c = palOf('ice');
+    for (let i = 0; i < m; i++) {
+      const mesh = new THREE.Mesh(this._shared('octa'), this._basic(i % 2 ? c.hot : c.mid, 0.95));
+      const sz = rnd(0.035, 0.06) * S; mesh.scale.set(sz, sz * rnd(1.8, 3.2), sz);
+      mesh.position.copy(p);
+      const v = randDir(0.3).multiplyScalar(rnd(1.2, 2.6) * S), ax = randDir(), sp = rnd(5, 14);
+      fx.anim(0, 0.55, (k, dt) => { v.y -= 4 * dt; mesh.position.addScaledVector(v, dt); mesh.rotateOnAxis(ax, sp * dt); mesh.material.opacity = 0.95 * (1 - k); }, mesh);
     }
   }
 
-  /** Several impacts at once (a zone skill). */
-  aoe({ points = [], element = 'arcane', crit = false, stagger = 0.05 } = {}) {
+  /** Ice spikes that punch up out of the floor in a ring, hold, then sink. */
+  _iceSpikes(fx, g0, r, n, h, life, c = palOf('ice'), t0 = 0) {
+    if (fx.lite) return;
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2 + rnd(-0.2, 0.2);
+      const mesh = new THREE.Mesh(this._shared('spike'), this._basic(i % 2 ? c.hot : c.mid, 0.85));
+      const rr = r * rnd(0.8, 1.15), hh = h * rnd(0.7, 1.3), w = hh * 0.22;
+      mesh.position.set(g0.x + Math.cos(a) * rr, g0.y, g0.z + Math.sin(a) * rr);
+      // leaning outward, like crystals shoved up by the blast
+      mesh.rotation.set(Math.sin(a) * 0.35, 0, -Math.cos(a) * 0.35);
+      const delay = rnd(0, 0.08);
+      fx.anim(t0 + delay, life, k => {
+        const up = k < 0.08 ? easeOut(k / 0.08) : k > 0.7 ? 1 - (k - 0.7) / 0.3 : 1;
+        mesh.scale.set(w, hh * Math.max(0.001, up), w);
+        mesh.material.opacity = 0.85 * (k > 0.75 ? (1 - k) / 0.25 : 1);
+      }, mesh);
+    }
+  }
+
+  /**
+   * Several impacts at once (a zone skill). When the points outline an area (3 or more), the area
+   * gets its own element signature first — a ring of flame, a frost field with spikes, lightning
+   * chained point to point, a toxic haze, a collapsing shadow swirl, a rising halo, a spinning rune
+   * ring, a leaf spiral — and each point's burst is thinned so a 12-point ring costs about what four
+   * single hits do.
+   */
+  aoe({ points = [], element = 'arcane', crit = false, stagger = 0.05, ground = null } = {}) {
+    if (!points.length) return;
+    const n = points.length;
+    const density = n <= 2 ? 1 : clamp(2.2 / Math.sqrt(n), 0.3, 1);
+    let gy = ground;
+    if (n >= 3) {
+      const c = new THREE.Vector3(); for (const q of points) c.add(q); c.divideScalar(n);
+      let r = 0, minY = Infinity; for (const q of points) { r += Math.hypot(q.x - c.x, q.z - c.z); minY = Math.min(minY, q.y); }
+      r = Math.max(0.3, r / n);
+      if (gy == null) gy = (minY > 2.4 || minY < -0.2) ? minY - 0.1 : 0;
+      this._area(c, r, elementName(element), gy, points, n * stagger);
+    }
     points.forEach((pt, i) => {
-      if (!i) return this.impact({ at: pt, element, crit });
+      const fire = () => this.impact({ at: pt, element, crit, ground: gy, density });
+      if (!i) return fire();
       const holder = new THREE.Object3D();
-      this._add(holder, i * stagger, () => false, () => this.impact({ at: pt, element, crit }));
+      this._add(holder, i * stagger, () => false, fire);
     });
+  }
+
+  /** The area signature under an aoe (see aoe). `pts` are the burst points in order around the ring. */
+  _area(center, R, el, gy, pts = [], span = 0.3) {
+    const c = palOf(el);
+    const g0 = new THREE.Vector3(center.x, gy + 0.03, center.z);
+    const fx = new Effect(this, { at: g0.clone().setY(gy + 0.6), life: 4 });
+    const rim = (f = 1) => { const a = rnd(0, 6.28), r = R * f * rnd(0.85, 1.08); return new THREE.Vector3(g0.x + Math.cos(a) * r, gy + 0.04, g0.z + Math.sin(a) * r); };
+    const life = Math.max(0.6, span + 0.5);
+    fx.ring(g0, c.mid, { r0: R * 0.2, r1: R * 1.05, life: 0.5, tube: Math.max(0.03, R * 0.02) });
+    if (el === 'fire') {
+      fx.emit(0, life, 60 * clamp(R / 2, 0.6, 2), P => P.add(Math.random() < 0.75 ? 'flame' : 'soft', { pos: rim(), vel: new THREE.Vector3(0, rnd(1.0, 2.2), 0), gravity: 0.6, size: rnd(0.3, 0.5), size1: 0.3, life: rnd(0.45, 0.7), color: c.hot, color1: c.deep, spin: rnd(-2, 2) }));
+      fx.decal('scorch', g0, { size: R * 2.3, color: 0x140a06, blending: NORMAL, opacity: 0.55, life: 2.8, s0: 0.3, growT: 0.15 });
+      fx.decal('soft', g0.clone().setY(gy + 0.035), { size: R * 2.4, color: 0xff5a10, opacity: 0.55, life: 1.2, s0: 0.3, growT: 0.2 });
+    } else if (el === 'ice') {
+      fx.decal('frost_ring', g0, { size: R * 2.3, color: 0xe8f8ff, opacity: 0.95, life: 2.4, s0: 0.2, growT: 0.15, spin: 0.2 });
+      fx.decal('soft', g0.clone().setY(gy + 0.035), { size: R * 2.4, color: c.mid, opacity: 0.35, life: 2.2, s0: 0.2, growT: 0.15 });
+      this._iceSpikes(fx, g0, R * 0.95, clamp(Math.round(R * 5), 6, 16), clamp(R * 0.3, 0.35, 0.9), 1.9, c, 0.05);
+      fx.emit(0, life, 30, P => P.add('puff', { pos: rim(rnd(0.2, 1)), vel: new THREE.Vector3(rnd(-0.3, 0.3), 0.05, rnd(-0.3, 0.3)), size: rnd(0.5, 0.8), size1: 2, life: rnd(1.2, 1.8), color: 0xcfeeff, opacity: 0.25, fadeIn: 0.3 }));
+    } else if (el === 'lightning') {
+      // arcs chained from each burst point to the next, crackling around the ring
+      const m = pts.length;
+      for (let i = 0; i < m; i++) {
+        const a = pts[i], b = pts[(i + 1) % m];
+        fx.arc(() => [a, b], { t0: i * span / m, life: 0.45, every: 0.05, width: 0.045, color: c.mid, jitter: 0.18, segs: 10, taper: 0.1 });
+      }
+      fx.decal('crack', g0, { size: R * 1.8, color: 0xfff0b0, opacity: 0.5, life: 1.0, s0: 0.6, growT: 0.05 });
+    } else if (el === 'poison') {
+      fx.emit(0, life + 0.4, 34 * clamp(R / 2, 0.6, 1.8), P => P.add('puff', { pos: rim(rnd(0, 1)).setY(gy + rnd(0.1, 0.8)), vel: new THREE.Vector3(rnd(-0.2, 0.2), rnd(0, 0.15), rnd(-0.2, 0.2)), size: rnd(0.6, 1.0), size1: 2.0, life: rnd(1.8, 2.4), color: Math.random() < 0.6 ? 0x48c030 : 0x2a6a18, blending: Math.random() < 0.6 ? ADD : NORMAL, opacity: 0.32, fadeIn: 0.3, spin: rnd(-0.4, 0.4) }));
+      fx.decal('splat', g0, { size: R * 2.2, color: 0x2e8a1c, blending: NORMAL, opacity: 0.6, life: 2.8, s0: 0.3, growT: 0.15 });
+    } else if (el === 'shadow') {
+      fx.decal('swirl', g0, { size: R * 2.4, color: 0x000000, blending: NORMAL, opacity: 0.75, life: 1.1, s0: 1.1, s1: 0.1, growT: 1, spin: -5 });
+      fx.decal('swirl', g0.clone().setY(gy + 0.035), { size: R * 2.4, color: c.mid, opacity: 0.8, life: 1.0, s0: 1.1, s1: 0.1, growT: 1, spin: -4 });
+      fx.burst(0, 20, P => P.add('tendril', { pos: rim(), vel: new THREE.Vector3(0, 0.3, 0), swirl: { cx: g0.x, cz: g0.z, w: -3.5, pull: -R / 0.8 }, size: rnd(0.3, 0.45), size1: 0.6, life: 0.8, color: c.smoke, blending: NORMAL, opacity: 0.85, fadeIn: 0.2, spin: rnd(-3, 3) }));
+    } else if (el === 'holy') {
+      fx.decal('holy_rune', g0, { size: R * 2.2, opacity: 0.9, life: 1.2, s0: 0.3, growT: 0.2, spin: -0.8 });
+      fx.ring(g0, c.hot, { r0: R, r1: R * 1.1, life: 1.0, tube: 0.04, rise: 1.8, opacity: 0.9 });
+      fx.ring(g0, c.mid, { r0: R * 0.9, r1: R, t0: 0.15, life: 1.0, tube: 0.03, rise: 1.3, opacity: 0.7 });
+      fx.emit(0, life, 40, P => P.add(Math.random() < 0.5 ? 'holy_mote' : 'flare', { pos: rim(), vel: new THREE.Vector3(0, rnd(1, 2), 0), size: rnd(0.12, 0.2), size1: 0.4, life: rnd(0.7, 1.0), color: c.hot, color1: c.deep }));
+    } else if (el === 'arcane' || el === 'true') {
+      fx.decal('rune_ring', g0, { size: R * 2.3, color: el === 'true' ? 0xffffff : c.mid, opacity: 1, life: 1.2, s0: 0.2, growT: 0.3, spin: 1.6 });
+      fx.decal('arcane_rune', g0.clone().setY(gy + 0.035), { size: R * 1.4, opacity: 0.6, life: 1.0, s0: 0.3, growT: 0.3, spin: -2.5 });
+      fx.burst(0, 14, P => P.add(pick(GLYPHS), { pos: rim().setY(gy + rnd(0.2, 0.6)), swirl: { cx: g0.x, cz: g0.z, w: 2.5, lift: 0.4 }, size: rnd(0.18, 0.26), size1: 0.6, life: rnd(0.9, 1.2), color: c.hot, color1: c.mid }));
+    } else if (el === 'nature') {
+      fx.burst(0, 24, P => P.add('leaf', { pos: rim(), swirl: { cx: g0.x, cz: g0.z, w: 3, pull: -R * 0.3, lift: 1.3 }, size: rnd(0.16, 0.24), size1: 0.8, life: rnd(0.9, 1.3), blending: NORMAL, spin: rnd(-6, 6) }));
+      fx.decal('root_vine', g0, { size: R * 1.8, blending: NORMAL, opacity: 0.8, life: 1.5, s0: 0.2, growT: 0.25 });
+    } else {
+      fx.burst(0, 14, P => P.add('puff', { pos: rim(), vel: new THREE.Vector3(0, rnd(0.2, 0.5), 0), drag: 1, size: rnd(0.4, 0.6), size1: 2, life: rnd(0.7, 1.0), color: c.smoke, blending: NORMAL, opacity: 0.5, fadeIn: 0.2 }));
+      if (el === 'bleed') fx.decal('splat', g0, { size: R * 1.4, color: 0x7a0808, blending: NORMAL, opacity: 0.7, life: 2.2, s0: 0.3, growT: 0.1 });
+    }
+    fx.start({ lightLife: life });
   }
 
   // ---- impact building blocks ------------------------------------------------------------------
@@ -745,24 +1350,70 @@ export class SpellFx {
 
   // ---- casts, heals, revives -------------------------------------------------------------------
 
-  /** A brief flare at the caster while a spell is being spoken: a rune on the floor and motes rising. */
-  cast({ at, element = 'arcane', ms = 380 } = {}) {
-    const E = elementOf(element);
+  /**
+   * A brief flare at the caster while a spell is being spoken: a rune on the floor (holy script,
+   * a frost ring, a rune ring... by element), the element's own motes rising round the caster and a
+   * ring drawing in. `ground` (optional) is the floor height; see _groundY.
+   */
+  cast({ at, element = 'arcane', ms = 380, ground = null } = {}) {
+    const el = elementName(element);
+    const E = ELEMENTS[el], c = palOf(el);
     const p = at.clone();
-    const runeId = element === 'holy' ? 'holy_rune' : this.hasTexture('arcane_rune') ? 'arcane_rune' : 'ring';
-    const disc = this._plane(runeId, { size: 1.0, color: E.accent, opacity: 0.95 });
-    disc.rotation.x = -Math.PI / 2; disc.position.copy(p).setY(0.02);
+    const gy = this._groundY(p, ground, 0.4) + 0.02;
+    const g0 = new THREE.Vector3(p.x, gy, p.z);
     const life = ms / 1000;
-    this._add(disc, life, (dt, k) => {
-      disc.rotation.z += dt * 3.4;
-      disc.scale.setScalar(0.5 + 0.7 * Math.min(1, k * 2));
-      disc.material.opacity = k < 0.3 ? k * 3 : 1 - (k - 0.3) / 0.7;
-      return false;
+    const runeId = { holy: 'holy_rune', ice: 'frost_ring', arcane: 'rune_ring', nature: 'root_vine', shadow: 'swirl', poison: 'splat', fire: 'arcane_rune', lightning: 'arcane_rune' }[el]
+      || (this.hasTexture('arcane_rune') ? 'arcane_rune' : 'ring');
+    const S = this.scale;
+    const fx = new Effect(this, { at: g0.clone().setY(gy + 0.5), life: life + 2 });
+    fx.decal(runeId, g0, { size: 1.0 * S, color: el === 'shadow' || el === 'poison' ? c.mid : E.accent, opacity: 0.95, life, s0: 0.5, s1: 1.2, growT: 0.5, fadeIn: 0.3, fadeOut: 0.7, spin: el === 'shadow' ? -5 : 3.4 });
+    fx.decal('soft', g0.clone().setY(gy + 0.005), { size: 1.4 * S, color: c.mid, opacity: 0.45, life, s0: 0.4, growT: 0.4, fadeIn: 0.3, fadeOut: 0.6 });
+    fx.ring(g0.clone().setY(gy + 0.01), E.color, { r0: 0.55 * S, r1: 0.12 * S, life, tube: 0.02 * S, opacity: 0.8 });
+    fx.emit(0, life * 0.8, 20, P => {
+      const a = rnd(0, 6.28), r = rnd(0.25, 0.45) * S;
+      this._mote(P, el, { pos: new THREE.Vector3(p.x + Math.cos(a) * r, gy + rnd(0.05, 0.3) * S, p.z + Math.sin(a) * r), vel: new THREE.Vector3(0, rnd(0.6, 1.2) * S, 0), size: 0.15 * S, life: life * 1.3, gravity: el === 'bleed' || el === 'physical' ? -2 : 0.8, swirl: { cx: p.x, cz: p.z, w: 3, pull: -0.2 * S } });
     });
-    const motes = (E.trail || []).filter(id => this.hasTexture(id));
-    this._burst(p.clone().setY(p.y + 0.1), { ids: motes.length ? motes : ['glow'], n: 7, color: 0xffffff, size: 0.15, speed: 0.7, life: life * 1.4, gravity: 1.6, upward: true });
-    this._expandRing(p.clone().setY(0.03), E.color, { r0: 0.55, r1: 0.12, life, axis: 'ground', tube: 0.02, opacity: 0.8 });
+    fx.start({ lightLife: life });
     return new Promise(r => setTimeout(r, ms));
+  }
+
+  /**
+   * One of an element's own particles (used by cast, pillar, vortex, storm, the orb...).
+   * `o`: pos, vel, size, life, delay, gravity (overrides the element's own), swirl. World units.
+   */
+  _mote(P, el, { pos, vel = null, size = 0.16, life = 0.7, delay = 0, gravity = null, swirl = null } = {}) {
+    const c = palOf(el);
+    const base = { pos, vel, life, delay, swirl };
+    const g = v => (gravity ?? v);
+    switch (el) {
+      case 'fire': return Math.random() < 0.65
+        ? P.add('flame', { ...base, size: size * 1.5, size1: 0.25, color: c.hot, color1: c.deep, gravity: g(1.6), spin: rnd(-2, 2) })
+        : P.add('soft', { ...base, size: size * 0.5, size1: 0.3, color: 0xffd070, color1: 0xff3000, gravity: g(1.0), flicker: 0.4 });
+      case 'ice': return Math.random() < 0.55
+        ? P.add('snowflake', { ...base, size, size1: 0.6, gravity: g(-0.5), wobble: 0.5, spin: rnd(-2, 2) })
+        : P.add('ice_shard', { ...base, size: size * 0.9, size1: 0.5, color: 0xffffff, color1: c.mid, gravity: g(-2), spin: rnd(-6, 6) });
+      case 'lightning': return Math.random() < 0.5
+        ? P.add('crackle', { ...base, size: size * 1.6, size1: 1.2, color: 0xffffff, color1: c.mid, flicker: 0.6, gravity: g(0), fadePow: 1 })
+        : P.add('streak', { ...base, size: size * 0.6, size1: 0.4, color: 0xffffff, color1: c.mid, gravity: g(-4), stretch: 0.08 });
+      case 'poison': return Math.random() < 0.55
+        ? P.add('bubble', { ...base, size, size1: 1.3, blending: NORMAL, opacity: 0.9, gravity: g(0.8), wobble: 0.4 })
+        : P.add('soft', { ...base, size: size * 0.6, size1: 0.5, color: c.hot, color1: c.deep, gravity: g(-4), stretch: 0.04 });
+      case 'shadow': return Math.random() < 0.6
+        ? P.add('tendril', { ...base, size: size * 1.8, size1: 1.6, color: c.smoke, blending: NORMAL, opacity: 0.8, gravity: g(0.6), spin: rnd(-2, 2), fadeIn: 0.2 })
+        : P.add('wisp', { ...base, size: size * 1.2, size1: 0.6, gravity: g(0.8) });
+      case 'holy': return Math.random() < 0.5
+        ? P.add('holy_mote', { ...base, size, size1: 0.5, gravity: g(0.8) })
+        : P.add('flare', { ...base, size: size * 1.2, size1: 0.3, color: c.hot, color1: c.deep, gravity: g(0.6), flicker: 0.3, spin: 2 });
+      case 'arcane': return Math.random() < 0.6
+        ? P.add(pick(GLYPHS), { ...base, size: size * 1.1, size1: 0.6, color: c.hot, color1: c.mid, gravity: g(0.2), spin: rnd(-2, 2), drag: 1.5 })
+        : P.add('arcane_shard', { ...base, size, size1: 0.4, gravity: g(-0.5), spin: rnd(-8, 8), drag: 1 });
+      case 'nature': return Math.random() < 0.7
+        ? P.add('leaf', { ...base, size: size * 1.1, size1: 0.8, blending: NORMAL, gravity: g(-0.6), wobble: 0.8, spin: rnd(-6, 6) })
+        : P.add('soft', { ...base, size: size * 0.4, size1: 0.4, color: c.hot, gravity: g(0.4), flicker: 0.5 });
+      case 'bleed': return P.add('drop', { ...base, size: size * 0.8, size1: 0.7, blending: NORMAL, gravity: g(-7) });
+      case 'physical': return P.add('streak', { ...base, size: size * 0.6, size1: 0.4, color: 0xffffff, color1: 0xffd080, gravity: g(-8), stretch: 0.06 });
+      default: return P.add('flare', { ...base, size, size1: 0.3, color: c.hot, color1: c.mid, gravity: g(0) });
+    }
   }
 
   /** Green-gold motes spiralling up out of the ground with a ring at the feet. */
@@ -811,6 +1462,327 @@ export class SpellFx {
     }
     this._burst(p.clone().setY(p.y + 0.15), { ids: ['feather', 'holy_mote'], n: 12, color: 0xffffff, size: 0.18, speed: 0.8, life: 1.0, gravity: 1.1, upward: true, spin: 3 });
     this._discFlash(p.clone().setY(0.02), 'holy_rune', 0xffffff, { size: 1.1, life: 0.7, spin: -2, ground: true });
+  }
+
+  // ---- channelled and area spells (2026-09-25) -------------------------------------------------
+
+  /**
+   * One pulse of a breath / flamethrower cone from `from` along `dir` (flattened to horizontal),
+   * `length` metres long and `arc` radians wide. A game calls it ~4 times a second while the skill
+   * channels; each pulse emits for `ms` and its particles live a little longer, so pulses overlap
+   * into one continuous stream.
+   */
+  breath({ from, dir, length = 7, arc = 0.9, element = 'fire', ms = 300 } = {}) {
+    if (!from || !dir) return;
+    const el = elementName(element), c = palOf(el), sc = this.scale;
+    const d = new THREE.Vector3(dir.x, 0, dir.z);
+    if (d.lengthSq() < 1e-8) d.set(0, 0, 1);
+    d.normalize();
+    const side = new THREE.Vector3(-d.z, 0, d.x);
+    const dur = Math.max(0.05, ms / 1000);
+    const L = Math.max(0.5, length);
+    const life = el === 'lightning' ? 0.3 : el === 'poison' ? 0.95 : el === 'shadow' ? 0.7 : 0.55;
+    const speed = L / life;
+    const wEnd = clamp(2 * L * Math.tan(Math.min(1.4, arc) / 2) * 0.55, 0.5, 5);   // particle size at the far end
+    const mouth = from.clone().addScaledVector(d, 0.2);
+    const fx = new Effect(this, { at: from.clone().addScaledVector(d, L * 0.4), life: dur + life + 1.5 });
+    const dirIn = (spread = 1) => {
+      const yaw = rnd(-arc / 2, arc / 2) * spread;
+      return d.clone().multiplyScalar(Math.cos(yaw)).addScaledVector(side, Math.sin(yaw)).add(new THREE.Vector3(0, rnd(-0.05, 0.1), 0)).normalize();
+    };
+    const J = r => mouth.clone().add(randDir().multiplyScalar(r * sc));
+    const grow = s0 => wEnd / Math.max(0.05, s0);
+    fx.flash(mouth, { size: 0.5 * sc, color: c.hot, life: dur, opacity: 0.8, grow: 0.4 });
+    if (el === 'fire') {
+      fx.emit(0, dur, 80, P => { const s0 = rnd(0.22, 0.32) * sc; return P.add(Math.random() < 0.65 ? 'flame' : 'soft', { pos: J(0.05), vel: dirIn().multiplyScalar(speed * rnd(0.75, 1.05)), drag: 0.5, gravity: 1.2, size: s0, size1: grow(s0), life: life * rnd(0.85, 1.1), color: 0xfff0b0, color1: 0xb82008, opacity: 0.9, fadeIn: 0.04, fadePow: 1.6, spin: rnd(-2, 2) }); });
+      fx.emit(0, dur, 25, P => P.add('soft', { pos: J(0.05), vel: dirIn(1.2).multiplyScalar(speed * rnd(0.6, 1.1)).add(new THREE.Vector3(0, rnd(0.3, 1), 0)), drag: 0.8, gravity: 1, size: rnd(0.04, 0.07) * sc, size1: 0.4, life: life * 1.4, color: 0xffe080, color1: 0xff2a00, stretch: 0.04, flicker: 0.4 }));
+      fx.emit(0.08, dur, 9, P => P.add('puff', { pos: mouth.clone().addScaledVector(dirIn(), L * rnd(0.55, 0.95)), vel: new THREE.Vector3(0, rnd(0.6, 1.1), 0), size: wEnd * 0.5, size1: 2, life: rnd(0.8, 1.1), color: c.smoke, blending: NORMAL, opacity: 0.4, fadeIn: 0.35, spin: rnd(-1, 1) }));
+    } else if (el === 'ice') {
+      fx.emit(0, dur, 55, P => { const s0 = rnd(0.2, 0.3) * sc; return P.add('puff', { pos: J(0.05), vel: dirIn().multiplyScalar(speed * rnd(0.7, 1.0)), drag: 0.6, size: s0, size1: grow(s0), life: life * rnd(0.9, 1.15), color: 0xdcf4ff, opacity: 0.45, fadeIn: 0.08, spin: rnd(-1, 1) }); });
+      fx.emit(0, dur, 30, P => P.add(Math.random() < 0.5 ? 'snowflake' : 'ice_shard', { pos: J(0.05), vel: dirIn(0.9).multiplyScalar(speed * rnd(0.8, 1.2)), drag: 0.4, gravity: -1, size: rnd(0.1, 0.16) * sc, size1: 0.7, life: life * 1.1, color: 0xffffff, color1: c.mid, spin: rnd(-6, 6) }));
+      fx.emit(0, dur, 18, P => P.add('flare', { pos: mouth.clone().addScaledVector(dirIn(), L * rnd(0.1, 0.9)), size: rnd(0.1, 0.18) * sc, size1: 0.2, life: 0.2, color: 0xffffff, color1: c.mid, spin: 4 }));
+    } else if (el === 'poison') {
+      fx.emit(0, dur, 45, P => { const s0 = rnd(0.25, 0.35) * sc; return P.add('puff', { pos: J(0.05), vel: dirIn().multiplyScalar(speed * rnd(0.6, 0.95)), drag: 1.1, gravity: -0.25, size: s0, size1: grow(s0) * 1.2, life: life * rnd(0.9, 1.2), color: Math.random() < 0.65 ? 0x58d038 : 0x264a18, blending: Math.random() < 0.65 ? ADD : NORMAL, opacity: 0.42, fadeIn: 0.1, spin: rnd(-0.8, 0.8) }); });
+      fx.emit(0, dur, 14, P => P.add('bubble', { pos: J(0.05), vel: dirIn().multiplyScalar(speed * rnd(0.4, 0.8)), drag: 1.2, gravity: 0.4, size: rnd(0.08, 0.14) * sc, size1: 1.4, life: life * 0.9, blending: NORMAL, opacity: 0.85 }));
+      fx.emit(0, dur, 12, P => P.add('soft', { pos: J(0.05), vel: dirIn().multiplyScalar(speed * rnd(0.3, 0.6)), gravity: -6, size: 0.08 * sc, size1: 0.6, life: 0.5, color: c.hot, color1: c.deep, stretch: 0.04 }));
+    } else if (el === 'shadow') {
+      fx.emit(0, dur, 45, P => { const s0 = rnd(0.25, 0.35) * sc; return P.add(Math.random() < 0.6 ? 'tendril' : 'puff', { pos: J(0.05), vel: dirIn().multiplyScalar(speed * rnd(0.7, 1.0)), drag: 0.8, size: s0, size1: grow(s0), life: life * rnd(0.85, 1.1), color: c.smoke, blending: NORMAL, opacity: 0.8, fadeIn: 0.08, spin: rnd(-2, 2) }); });
+      fx.emit(0, dur, 30, P => { const s0 = rnd(0.18, 0.26) * sc; return P.add(Math.random() < 0.5 ? 'wisp' : 'soft', { pos: J(0.05), vel: dirIn().multiplyScalar(speed * rnd(0.7, 1.05)), drag: 0.6, size: s0, size1: grow(s0) * 0.6, life: life * 0.9, color: c.hot, color1: c.deep, opacity: 0.8, spin: rnd(-2, 2) }); });
+    } else if (el === 'arcane' || el === 'true') {
+      fx.emit(0, dur, 45, P => { const s0 = rnd(0.2, 0.28) * sc; return P.add('soft', { pos: J(0.05), vel: dirIn().multiplyScalar(speed * rnd(0.75, 1.0)), drag: 0.5, size: s0, size1: grow(s0) * 0.8, life: life * rnd(0.9, 1.1), color: c.hot, color1: c.deep, opacity: 0.6 }); });
+      fx.emit(0, dur, 24, P => { const v = dirIn().multiplyScalar(speed * rnd(0.7, 1.0)); return P.add(pick(GLYPHS), { pos: J(0.05), vel: v, drag: 0.4, size: rnd(0.14, 0.22) * sc, size1: 1.6, life: life, color: c.hot, color1: c.mid, spin: rnd(-4, 4) }); });
+      fx.emit(0, dur, 18, P => P.add('arcane_shard', { pos: J(0.05), vel: dirIn(1.1).multiplyScalar(speed * rnd(0.9, 1.3)), size: rnd(0.1, 0.15) * sc, size1: 0.6, life: life * 0.8, spin: rnd(-8, 8) }));
+    } else if (el === 'lightning') {
+      // arcs that fork out of the mouth to points inside the cone, re-rolled every frame or two
+      for (let i = 0; i < 3; i++) {
+        let tip = null;
+        fx.arc(() => { tip = mouth.clone().addScaledVector(dirIn(), L * rnd(0.55, 1.0)); return [mouth, tip]; }, { t0: i * dur / 3, life: Math.max(0.12, dur * 0.8), every: 0.045, width: 0.055 * sc, color: c.mid, jitter: 0.08 * L, segs: 12, taper: 0.5 });
+      }
+      fx.emit(0, dur, 40, P => P.add('crackle', { pos: mouth.clone().addScaledVector(dirIn(), L * rnd(0.1, 1.0)), size: rnd(0.25, 0.45) * sc, size1: 1.2, life: 0.1, color: 0xffffff, color1: c.mid, flicker: 0.5, fadePow: 1 }));
+      fx.emit(0, dur, 30, P => P.add('streak', { pos: J(0.05), vel: dirIn().multiplyScalar(speed * rnd(0.8, 1.2)), size: rnd(0.07, 0.1) * sc, size1: 0.5, life: life * 0.8, color: 0xffffff, color1: c.mid, stretch: 0.03 }));
+    } else {
+      // holy / nature / physical / bleed: the element's own motes carried down the cone
+      fx.emit(0, dur, 50, P => this._mote(P, el, { pos: J(0.05), vel: dirIn().multiplyScalar(speed * rnd(0.7, 1.05)), size: rnd(0.16, 0.24) * sc, life: life, gravity: 0 }));
+      fx.emit(0, dur, 30, P => { const s0 = rnd(0.2, 0.3) * sc; return P.add('soft', { pos: J(0.05), vel: dirIn().multiplyScalar(speed * rnd(0.7, 1.0)), drag: 0.5, size: s0, size1: grow(s0) * 0.7, life: life, color: c.mid, color1: c.deep, opacity: el === 'physical' ? 0.3 : 0.55 }); });
+    }
+    fx.start({ lightLife: dur + 0.15 });
+  }
+
+  /**
+   * A glowing orb a caller moves every frame (it orbits the player and zaps things). Returns
+   * { group, setPosition(vec3), pulse(), dispose() }. `pulse()` flashes it when it strikes. The orb
+   * reports its glow through lights() for as long as it exists, and is never retired by the
+   * maxLive cap — its owner has to dispose() it.
+   */
+  orbitOrb({ element = 'lightning', size = 0.25 } = {}) {
+    const el = elementName(element), c = palOf(el), sc = this.scale;
+    const g = new THREE.Group(); g.name = 'spellfx-orb';
+    const sz = size / sc;
+    // Built lazily: an orb cast in the first second after load arrives before the sprite textures do,
+    // and `_sprite` gives back null without one — so keep trying until the textures are in.
+    let halo = null, flare = null, core = null, rim = null, dressed = false;
+    const bits = [];
+    const dress = () => {
+      if (dressed || !this.hasTexture('soft')) return;
+      dressed = true;
+      // strong enough to read against daylit ground, where a pale additive glow washes out
+      halo = this._sprite('soft', { size: sz * 3.2, color: c.mid, opacity: 0.9 });
+      flare = el === 'shadow' ? null : this._sprite('flare', { size: sz * 2.4, color: c.mid, opacity: 0.95 });
+      core = el === 'shadow'
+        ? this._sprite('soft', { size: sz * 1.3, color: 0x000000, opacity: 0.9, blending: NORMAL })
+        : this._sprite('soft', { size: sz * 1.4, color: c.hot, opacity: 1 });
+      rim = el === 'shadow' ? this._sprite('soft', { size: sz * 1.9, color: c.hot, opacity: 0.7 }) : null;
+      if (halo) g.add(halo); if (flare) g.add(flare); if (rim) g.add(rim); if (core) { core.renderOrder = 2; g.add(core); }
+      const bitId = { lightning: 'crackle', fire: 'flame', ice: 'snowflake', poison: 'bubble', shadow: 'wisp', holy: 'flare', arcane: null, nature: 'leaf', bleed: 'drop', physical: 'spark' }[el] || 'flare';
+      for (let i = 0; i < 3; i++) {
+        const id = bitId || GLYPHS[i];
+        const normal = el === 'poison' || el === 'nature' || el === 'bleed';
+        const b = this._sprite(id, { size: sz * (el === 'lightning' ? 2.2 : 0.9), color: el === 'arcane' ? c.hot : 0xffffff, opacity: 0.9, blending: normal ? NORMAL : ADD });
+        if (b) { g.add(b); bits.push({ s: b, a: (i / 3) * Math.PI * 2, tilt: rnd(-0.8, 0.8) }); }
+      }
+    };
+    dress();
+    const P = new Particles(this); this.root.add(P.group);
+    let pulse = 0, acc = 0, flick = 0;
+    const lastPos = new THREE.Vector3(); let hasLast = false;
+    const e = this._add(g, 0, dt => {
+      if (!dressed) dress();
+      const t = this._t;
+      pulse = Math.max(0, pulse - dt * 3.5);
+      const boost = 1 + pulse * 1.3;
+      const breathe = 1 + Math.sin(t * 7) * 0.08 + (el === 'lightning' || el === 'fire' ? (Math.random() - 0.5) * 0.12 : 0);
+      if (halo) { halo.scale.setScalar(sz * 3.2 * sc * breathe * boost); halo.material.opacity = 0.8 + pulse * 0.2; }
+      if (flare) { flare.scale.setScalar(sz * 2.4 * sc * breathe * boost); flare.material.rotation += dt * 2; }
+      if (core) core.scale.setScalar(sz * 1.4 * sc * (el === 'shadow' ? 1 : breathe) * (1 + pulse * 0.5));
+      if (rim) rim.scale.setScalar(sz * 1.9 * sc * breathe);
+      flick -= dt;
+      const reroll = flick <= 0; if (reroll) flick = 0.06;
+      for (const b of bits) {
+        if (el === 'lightning') {
+          // crackles snap to a new angle every few frames instead of orbiting smoothly
+          if (reroll) { b.s.material.rotation = rnd(0, 6.28); b.s.position.copy(randDir()).multiplyScalar(size * 0.35); }
+          b.s.material.opacity = Math.random() < 0.8 ? 0.9 : 0.2;
+        } else {
+          b.a += dt * (el === 'shadow' ? -4 : 4.5);
+          const r = size * 0.9;
+          b.s.position.set(Math.cos(b.a) * r, Math.sin(b.a) * r * b.tilt * 0.5, Math.sin(b.a) * r);
+          b.s.material.rotation += dt * 3;
+        }
+      }
+      // a short wake of the element's own motes, so the orbit reads as a path
+      if (hasLast && lastPos.distanceToSquared(g.position) > 1e-6) {
+        acc += dt * 16 * this.budgetScale();
+        while (acc >= 1) { acc -= 1; this._mote(P, el, { pos: g.position.clone().add(randDir().multiplyScalar(size * 0.4)), size: size * 0.45, life: 0.4, gravity: el === 'fire' ? 1 : 0 }); }
+      }
+      lastPos.copy(g.position); hasLast = true;
+      P.update(dt);
+      if (e.glow) e.glow.intensity = 1.6 * (1 + pulse * 2);
+      return false;
+    }, () => { P.dispose(); disposeObj(P.group); });
+    e.persistent = true;
+    e.glow = { color: '#' + new THREE.Color(ELEMENTS[el].color).getHexString(), range: 6, intensity: 1.6, moving: true };
+    const self = this;
+    return {
+      group: g,
+      setPosition(v) { if (v) g.position.copy(v); },
+      pulse() {
+        pulse = 1;
+        const m = self._n(8);
+        for (let i = 0; i < m; i++) {
+          if (el === 'lightning') P.add('streak', { pos: g.position.clone(), vel: randDir().multiplyScalar(rnd(2, 4) * sc), size: 0.08 * sc, size1: 0.4, life: 0.25, color: 0xffffff, color1: c.mid, stretch: 0.05 });
+          else self._mote(P, el, { pos: g.position.clone(), vel: randDir().multiplyScalar(rnd(1, 2) * sc), size: size * 0.6, life: 0.4 });
+        }
+        const f = self._sprite('flare', { size: sz * 3, color: c.hot, opacity: 1 });
+        if (f) { g.add(f); let k = 0; self._add(new THREE.Object3D(), 0.16, dt => { k += dt / 0.16; f.material.opacity = 1 - k; f.scale.setScalar(sz * 3 * sc * (0.6 + k)); return false; }, () => { g.remove(f); f.material.dispose(); }); }
+      },
+      dispose() { self._end(e); },
+    };
+  }
+
+  /**
+   * A column of light slamming down onto a spot (a judgement strike), `radius` metres across at the
+   * ground ring. The beam drops out of the sky in the first ~12% of `ms`, flashes, throws the
+   * element's motes out, then narrows and fades. Colours and floor mark follow the element.
+   */
+  pillar({ at, radius = 3, element = 'holy', ms = 700 } = {}) {
+    if (!at) return;
+    const el = elementName(element), c = palOf(el);
+    const dur = Math.max(0.2, ms / 1000);
+    const gy = at.y + 0.03;
+    const g0 = new THREE.Vector3(at.x, gy, at.z);
+    const R = Math.max(0.3, radius);
+    const H = clamp(R * 3, 6, 14);
+    const tHit = dur * 0.12;
+    const fx = new Effect(this, { at: g0.clone().setY(gy + 1), life: dur + 3 });
+    fx.beam(g0, { radius: R * 0.3, height: H, color: el === 'shadow' ? c.mid : c.mid, life: dur, drop: 0.12, narrow: 0.85 });
+    if (el === 'lightning') {
+      for (let i = 0; i < 3; i++) fx.arc(() => [new THREE.Vector3(g0.x + rnd(-0.3, 0.3) * R, gy + H, g0.z + rnd(-0.3, 0.3) * R), g0.clone().add(new THREE.Vector3(rnd(-0.2, 0.2) * R, 0, rnd(-0.2, 0.2) * R))], { t0: tHit * 0.6 + i * 0.05, life: dur * 0.6, every: 0.05, width: 0.12, color: c.mid, jitter: 0.6, segs: 18, taper: 0.1 });
+    }
+    // the slam
+    fx.flash(g0.clone().setY(gy + Math.max(0.5, R * 0.5)), { id: 'flare', size: R * 1.5, color: 0xffffff, t0: tHit, life: 0.18, grow: 1 });
+    fx.flash(g0.clone().setY(gy + 0.4), { size: R * 2.4, color: c.mid, t0: tHit, life: 0.35 });
+    fx.ring(g0, c.hot, { r0: R * 0.15, r1: R, t0: tHit, life: 0.45, tube: Math.max(0.04, R * 0.025) });
+    fx.ring(g0, c.mid, { r0: R * 0.3, r1: R * 1.2, t0: tHit + 0.08, life: 0.6, tube: Math.max(0.03, R * 0.015), opacity: 0.7 });
+    const mark = { holy: 'holy_rune', arcane: 'rune_ring', true: 'rune_ring', ice: 'frost_ring', fire: 'scorch', poison: 'splat', shadow: 'swirl', lightning: 'crack', nature: 'root_vine', bleed: 'splat', physical: 'crack' }[el] || 'ring';
+    const dark = mark === 'scorch' || el === 'shadow' || el === 'bleed' || el === 'nature';
+    fx.decal(mark, g0, { size: R * 2, color: dark ? (el === 'nature' ? 0xffffff : 0x0c0608) : el === 'poison' ? 0x2e8a1c : 0xffffff, blending: dark || el === 'poison' ? NORMAL : ADD, opacity: 0.9, t0: tHit, life: dur - tHit + 1.2, s0: 0.3, growT: 0.12, spin: el === 'shadow' ? -3 : el === 'holy' || el === 'arcane' ? -0.8 : 0 });
+    fx.decal('soft', g0.clone().setY(gy + 0.01), { size: R * 2.4, color: c.mid, opacity: 0.6, t0: tHit, life: dur, s0: 0.3, growT: 0.1 });
+    if (el === 'ice') this._iceSpikes(fx, g0, R * 0.85, clamp(Math.round(R * 4), 6, 14), clamp(R * 0.3, 0.4, 1), dur + 0.6, c, tHit);
+    // debris / motes thrown out of the slam, then motes climbing the column while it holds
+    fx.burst(tHit, 28, P => this._mote(P, el, { pos: onDisc(g0, R * 0.3, gy + 0.1), vel: randDir(0.8).multiplyScalar(rnd(2, 4)).setY(rnd(1.5, 4)), size: rnd(0.18, 0.28), life: rnd(0.6, 1.0), gravity: -3 }));
+    fx.emit(tHit, dur - tHit, 30, P => this._mote(P, el, { pos: onDisc(g0, R * 0.28, gy + 0.1), vel: new THREE.Vector3(0, rnd(2, 4), 0), size: rnd(0.14, 0.22), life: rnd(0.6, 1.0), gravity: 0 }));
+    fx.start({ lightLife: dur + 0.2, lightPos: g0.clone().setY(gy + 1.2) });
+  }
+
+  /**
+   * A swirling rift on the ground (a pull spell): two counter-spinning swirl discs, a rim, and the
+   * element's particles spiralling in from the rim to vanish at the centre. Shadow draws a real dark
+   * hole (normal blending); the others glow.
+   */
+  vortex({ at, radius = 4, element = 'shadow', ms = 1500 } = {}) {
+    if (!at) return;
+    const el = elementName(element), c = palOf(el);
+    const dur = Math.max(0.3, ms / 1000);
+    const gy = at.y + 0.03, R = Math.max(0.3, radius);
+    const g0 = new THREE.Vector3(at.x, gy, at.z);
+    const fx = new Effect(this, { at: g0.clone().setY(gy + 0.8), life: dur + 2 });
+    const fade = (fadeIn = 0.12) => ({ fadeIn: Math.min(0.4, fadeIn / dur), fadeOut: Math.min(0.4, 0.3 / dur) });
+    const darkHole = el === 'shadow' || el === 'arcane';
+    if (darkHole) fx.decal('soft', g0, { size: R * 2.1, color: 0x000000, blending: NORMAL, opacity: 0.85, life: dur, s0: 0.2, growT: 0.15 / dur, ...fade() });
+    fx.decal('swirl', g0.clone().setY(gy + 0.005), { size: R * 2.2, color: darkHole ? c.smoke : c.deep, blending: NORMAL, opacity: 0.7, life: dur, s0: 0.3, growT: 0.2 / dur, spin: -4.5, ...fade() });
+    fx.decal('swirl', g0.clone().setY(gy + 0.01), { size: R * 2.0, color: c.mid, opacity: 0.85, life: dur, s0: 0.3, growT: 0.2 / dur, spin: -2.6, ...fade() });
+    fx.decal(el === 'arcane' ? 'rune_ring' : 'ring', g0.clone().setY(gy + 0.015), { size: R * 2.1, color: c.hot, opacity: 0.8, life: dur, s0: 0.5, growT: 0.2 / dur, spin: 1.2, ...fade() });
+    // particles born on the rim that spiral in and die at the middle
+    const inT = 0.9;
+    fx.emit(0, dur - inT * 0.5, 70 * clamp(R / 3, 0.6, 1.6), P => {
+      const a = rnd(0, 6.28), r = R * rnd(0.85, 1.1);
+      const pos = new THREE.Vector3(g0.x + Math.cos(a) * r, gy + rnd(0.05, 0.4), g0.z + Math.sin(a) * r);
+      const swirl = { cx: g0.x, cz: g0.z, w: -rnd(3, 4.5), pull: -r / inT, lift: rnd(0.1, 0.5) };
+      if (el === 'shadow') return Math.random() < 0.65
+        ? P.add('tendril', { pos, swirl, size: rnd(0.35, 0.55), size1: 0.3, life: inT, color: c.smoke, blending: NORMAL, opacity: 0.85, fadeIn: 0.2, fadePow: 3, spin: rnd(-3, 3) })
+        : P.add('soft', { pos, swirl, size: rnd(0.15, 0.25), size1: 0.3, life: inT, color: c.hot, color1: c.mid, opacity: 0.9, fadeIn: 0.2 });
+      return this._mote(P, el, { pos, swirl, size: rnd(0.16, 0.24), life: inT, gravity: 0 });
+    });
+    // the centre: a dark core for shadow, a hot one for the rest, throbbing
+    const core = this._sprite('soft', { size: R * 0.7 / this.scale, color: el === 'shadow' ? 0x000000 : c.hot, opacity: 0, blending: el === 'shadow' ? NORMAL : ADD });
+    if (core) { core.position.copy(g0).setY(gy + 0.3); core.renderOrder = 3; const b = core.scale.x; fx.anim(0, dur, (k, dt, t) => { core.scale.setScalar(b * (0.8 + Math.sin(t * 9) * 0.12)); core.material.opacity = 0.9 * (k < 0.1 ? k / 0.1 : k > 0.85 ? (1 - k) / 0.15 : 1); }, core); }
+    fx.ring(g0.clone().setY(gy + 0.05), c.mid, { r0: R * 1.1, r1: R * 0.1, t0: dur - 0.35, life: 0.35, tube: 0.04 });
+    fx.flash(g0.clone().setY(gy + 0.4), { size: R * 1.2, color: c.hot, t0: dur - 0.05, life: 0.3 });
+    fx.start({ lightLife: dur });
+  }
+
+  /**
+   * Weather over a circle for `ms`: hail and snow with a frost field for ice, a rolling toxic cloud
+   * for poison, strikes from a dark cloud for lightning, falling cinders for fire, and the element's
+   * own motes raining down for the rest.
+   */
+  storm({ at, radius = 5, element = 'ice', ms = 3000 } = {}) {
+    if (!at) return;
+    const el = elementName(element), c = palOf(el);
+    const dur = Math.max(0.3, ms / 1000);
+    const gy = at.y + 0.03, R = Math.max(0.5, radius);
+    const g0 = new THREE.Vector3(at.x, gy, at.z);
+    const top = gy + clamp(R * 0.9, 3.2, 6);
+    const area = clamp((R / 5) * (R / 5), 0.6, 2.2);   // spawn rates scale with the area, capped
+    const fx = new Effect(this, { at: g0.clone().setY(gy + 1.5), life: dur + 3.5 });
+    const f = { fadeIn: Math.min(0.3, 0.3 / dur), fadeOut: Math.min(0.35, 0.6 / dur) };
+    const cloud = (col, op, rate = 8) => fx.emit(0, dur - 0.4, rate * clamp(area, 0.5, 1.5), P => P.add('puff', { pos: onDisc(g0, R * 0.9, top + rnd(-0.3, 0.4)), vel: new THREE.Vector3(rnd(-0.3, 0.3), 0, rnd(-0.3, 0.3)), size: rnd(1.6, 2.4) * clamp(R / 5, 0.6, 1.4), size1: 1.4, life: rnd(1.6, 2.2), color: col, blending: NORMAL, opacity: op, fadeIn: 0.3, spin: rnd(-0.3, 0.3) }));
+    if (el === 'poison') {
+      // no rain: a thick cloud rolling round the circle at knee to head height
+      fx.emit(0, dur - 0.6, 26 * area, P => {
+        const q = onDisc(g0, R * 0.9, gy + rnd(0.15, 1.3));
+        const add = Math.random() < 0.55;
+        return P.add('puff', { pos: q, vel: new THREE.Vector3(rnd(-0.2, 0.2), rnd(0, 0.1), rnd(-0.2, 0.2)), swirl: { cx: g0.x, cz: g0.z, w: 0.35 }, size: rnd(0.35, 0.5) * R, size1: 1.6, life: rnd(2.0, 2.8), color: add ? 0x4cc034 : 0x203e14, blending: add ? ADD : NORMAL, opacity: add ? 0.3 : 0.42, fadeIn: 0.3, spin: rnd(-0.3, 0.3) });
+      });
+      fx.emit(0.2, dur - 0.4, 14 * area, P => P.add('bubble', { pos: onDisc(g0, R * 0.9, gy + 0.05), vel: new THREE.Vector3(0, rnd(0.3, 0.7), 0), wobble: 0.3, size: rnd(0.1, 0.2), size1: 1.6, life: rnd(0.7, 1.1), blending: NORMAL, opacity: 0.9, onDie: q => fx.P.add('soft', { pos: q.s.position, size: 0.14, size1: 2, life: 0.12, color: c.hot }) }));
+      fx.decal('splat', g0, { size: R * 2.1, color: 0x2e8a1c, blending: NORMAL, opacity: 0.55, life: dur + 0.8, s0: 0.3, growT: 0.1, ...f });
+      fx.decal('soft', g0.clone().setY(gy + 0.01), { size: R * 2.4, color: 0x60ff40, opacity: 0.25, life: dur + 0.5, s0: 0.3, growT: 0.1, ...f });
+    } else if (el === 'ice') {
+      cloud(0x6a7890, 0.55);
+      const splash = q => { fx.P.add('flare', { pos: q.s.position.clone().setY(gy + 0.05), size: 0.3, size1: 0.3, life: 0.12, color: 0xffffff, color1: c.mid }); fx.P.add('puff', { pos: q.s.position.clone().setY(gy + 0.1), vel: new THREE.Vector3(0, 0.3, 0), size: 0.25, size1: 2, life: 0.5, color: 0xdff4ff, opacity: 0.3 }); };
+      fx.emit(0.25, dur - 0.5, 50 * area, P => { const q = onDisc(g0, R, top); const fall = top - gy, vy = rnd(9, 12); return P.add(Math.random() < 0.7 ? 'streak' : 'ice_shard', { pos: q, vel: new THREE.Vector3(0.8, -vy, 0.3), size: rnd(0.14, 0.22), size1: 1, life: fall / vy, color: 0xeaf8ff, color1: c.mid, fadeIn: 0.05, fadePow: 8, stretch: 0.025, onDie: splash }); });
+      fx.emit(0, dur - 0.3, 22 * area, P => P.add('snowflake', { pos: onDisc(g0, R, rnd(gy + 0.5, top)), vel: new THREE.Vector3(0.3, -rnd(0.7, 1.2), 0.1), wobble: 0.6, size: rnd(0.12, 0.2), size1: 0.8, life: rnd(1.4, 2.2), spin: rnd(-2, 2) }));
+      fx.emit(0.3, dur - 0.5, 8 * area, P => P.add('puff', { pos: onDisc(g0, R * 0.9, gy + 0.15), vel: new THREE.Vector3(rnd(-0.2, 0.2), 0.03, rnd(-0.2, 0.2)), size: rnd(0.9, 1.3), size1: 1.6, life: rnd(1.6, 2.2), color: 0xdcf2ff, opacity: 0.22, fadeIn: 0.3 }));
+      fx.decal('frost_ring', g0, { size: R * 2.1, color: 0xe8f8ff, opacity: 0.8, life: dur + 1, s0: 0.2, growT: 0.4 / (dur + 1), spin: 0.12, ...f });
+      fx.decal('soft', g0.clone().setY(gy + 0.01), { size: R * 2.4, color: c.mid, opacity: 0.35, life: dur + 1, s0: 0.2, growT: 0.4 / (dur + 1), ...f });
+    } else if (el === 'lightning') {
+      cloud(0x2a2c3c, 0.7, 10);
+      // strikes: a bolt from the cloud to a random point, with a flash and crackles where it lands
+      const n = Math.max(3, Math.round(dur * 4 * clamp(area, 0.6, 1.6)));
+      for (let i = 0; i < n; i++) {
+        const t0 = 0.35 + (i / n) * (dur - 0.6) + rnd(-0.05, 0.05);
+        const hit = onDisc(g0, R * 0.95, gy);
+        const sky = hit.clone().add(new THREE.Vector3(rnd(-0.6, 0.6), top - gy, rnd(-0.6, 0.6)));
+        fx.arc(() => [sky, hit], { t0, life: 0.22, every: 0.04, width: 0.1, color: c.mid, jitter: 0.5, segs: 16, taper: 0.2 });
+        fx.flash(hit.clone().setY(gy + 0.6), { id: 'flare', size: 1.1, color: 0xffffff, t0, life: 0.12 });
+        fx.burst(t0, 6, P => P.add('streak', { pos: hit.clone().setY(gy + 0.1), vel: randDir(0.6).multiplyScalar(rnd(2, 4)), gravity: -8, size: 0.1, size1: 0.5, life: 0.35, color: 0xffffff, color1: c.mid, stretch: 0.04 }));
+        fx.decal('crack', hit, { size: 1.2, color: 0xfff0b0, opacity: 0.6, t0, life: 0.8, s0: 0.7, growT: 0.05 });
+      }
+      fx.decal('soft', g0, { size: R * 2.2, color: 0x6070c0, opacity: 0.25, life: dur, s0: 0.5, growT: 0.1, ...f });
+    } else if (el === 'fire') {
+      cloud(0x2a201c, 0.6);
+      const ember = q => { fx.P.add('flame', { pos: q.s.position.clone().setY(gy + 0.1), vel: new THREE.Vector3(0, 0.8, 0), size: 0.35, size1: 0.3, life: 0.35, color: c.hot, color1: c.deep }); };
+      fx.emit(0.25, dur - 0.5, 45 * area, P => { const q = onDisc(g0, R, top), fall = top - gy, vy = rnd(6, 8); return P.add('streak', { pos: q, vel: new THREE.Vector3(0.6, -vy, 0.2), size: rnd(0.16, 0.26), size1: 1, life: fall / vy, color: 0xffe080, color1: c.mid, fadeIn: 0.05, fadePow: 8, stretch: 0.03, onDie: ember }); });
+      fx.decal('scorch', g0, { size: R * 2.1, color: 0x140a06, blending: NORMAL, opacity: 0.5, life: dur + 1, s0: 0.3, growT: 0.2, ...f });
+      fx.decal('soft', g0.clone().setY(gy + 0.01), { size: R * 2.4, color: 0xff5a10, opacity: 0.3, life: dur, s0: 0.3, growT: 0.2, ...f });
+    } else {
+      // holy light, arcane glyphs, shadow ash, falling leaves, red rain...: the element's motes falling
+      if (el === 'shadow' || el === 'bleed' || el === 'physical') cloud(c.smoke, 0.55);
+      fx.emit(0.1, dur - 0.4, 40 * area, P => this._mote(P, el, { pos: onDisc(g0, R, rnd(gy + 1, top)), vel: new THREE.Vector3(rnd(-0.2, 0.2), -rnd(1.2, 2.2), rnd(-0.2, 0.2)), size: rnd(0.18, 0.28), life: rnd(1.2, 1.8), gravity: -0.5 }));
+      fx.decal(el === 'holy' ? 'holy_rune' : el === 'arcane' || el === 'true' ? 'rune_ring' : 'soft', g0, { size: R * 2.1, color: el === 'holy' || el === 'arcane' || el === 'true' ? c.mid : c.deep, opacity: 0.6, life: dur + 0.5, s0: 0.3, growT: 0.2, spin: 0.2, ...f });
+    }
+    fx.start({ lightLife: dur });
+  }
+
+  /**
+   * A small elemental footprint patch left on the ground (a fire-walking trail): lasts ~2.5 s and
+   * fades. `yaw` (optional) turns the print to the walking direction; `dir` (optional vec3) works too.
+   */
+  footfall({ at, element = 'fire', yaw = null, dir = null, size = 0.45 } = {}) {
+    if (!at) return;
+    const el = elementName(element), c = palOf(el);
+    const gy = at.y + 0.03;
+    const g0 = new THREE.Vector3(at.x, gy, at.z);
+    const fx = new Effect(this, { at: g0.clone().setY(gy + 0.3), life: 3.2 });
+    const y = yaw != null ? yaw : dir ? Math.atan2(dir.x, dir.z) + Math.PI : rnd(0, 6.28);
+    const life = 2.5;
+    const darkId = el === 'fire' || el === 'lightning' ? 'scorch' : null;
+    // a charred or stained print under a glowing one that fades faster
+    fx.decal('footprint', g0, { size, color: darkId ? 0x160c08 : c.deep, blending: NORMAL, opacity: darkId ? 0.7 : 0.55, life, s0: 0.85, growT: 0.05, fadeOut: 0.5, yaw: y });
+    fx.decal('footprint', g0.clone().setY(gy + 0.005), { size: size * 1.05, color: el === 'fire' ? 0xff6a10 : c.mid, opacity: 0.95, life: life * 0.6, s0: 0.9, growT: 0.05, fadeOut: 0.7, yaw: y });
+    fx.decal('soft', g0.clone().setY(gy + 0.008), { size: size * 1.8, color: c.mid, opacity: 0.35, life: life * 0.5, s0: 0.6, growT: 0.1, fadeOut: 0.7 });
+    const over = () => onDisc(g0, size * 0.3, gy + 0.05);
+    if (el === 'fire') {
+      fx.emit(0, 1.5, 7, P => P.add('flame', { pos: over(), vel: new THREE.Vector3(0, rnd(0.4, 0.8), 0), size: rnd(0.14, 0.22), size1: 0.3, life: rnd(0.35, 0.55), color: c.hot, color1: c.deep, spin: rnd(-1, 1) }));
+      fx.emit(0, 2, 3, P => P.add('soft', { pos: over(), vel: new THREE.Vector3(rnd(-0.2, 0.2), rnd(0.5, 1), rnd(-0.2, 0.2)), size: 0.05, size1: 0.4, life: 0.8, color: 0xffe080, color1: 0xff3000, flicker: 0.4 }));
+    } else if (el === 'ice') {
+      fx.emit(0, 1.5, 4, P => P.add('puff', { pos: over(), vel: new THREE.Vector3(0, 0.1, 0), size: 0.3, size1: 1.8, life: 1.0, color: 0xdcf2ff, opacity: 0.3, fadeIn: 0.3 }));
+    } else if (el === 'poison') {
+      fx.emit(0, 1.6, 4, P => P.add('bubble', { pos: over(), vel: new THREE.Vector3(0, 0.3, 0), size: rnd(0.06, 0.1), size1: 1.5, life: 0.6, blending: NORMAL, opacity: 0.9 }));
+    } else {
+      fx.emit(0, 1.5, 4, P => this._mote(P, el, { pos: over(), vel: new THREE.Vector3(0, rnd(0.3, 0.6), 0), size: 0.12, life: 0.7, gravity: 0 }));
+    }
+    fx.start({ lightLife: 1.2 });
   }
 
   // ---- status auras -----------------------------------------------------------------------------
@@ -1133,17 +2105,30 @@ export class SpellFx {
    * in every lit material's shader and only the game knows its budget). A projectile glows at full
    * strength the whole flight; a burst, a nova or a cast flares and fades over its life.
    */
-  _tagGlow(before, element, { range = 10, intensity = 2.4, moving = false } = {}) {
+  _tagGlow(seq0, element, { range = 10, intensity = 2.4, moving = false } = {}) {
     const E = elementOf(element), color = '#' + new THREE.Color(E.color).getHexString();
-    for (let i = before; i < this.live.length; i++) if (!this.live[i].glow) this.live[i].glow = { color, range, intensity, moving };
+    // ONE light per public call: the composite entry if there is one (it carries its own light
+    // position and life), else the first new entry. A burst used to tag every piece it added, so a
+    // single impact could take all six of a game's light slots.
+    let pickE = null;
+    // entries are found by serial number, not array index: the maxLive cap can retire old entries
+    // DURING the call, which shifts the array under an index
+    for (let i = 0; i < this.live.length; i++) {
+      const e = this.live[i];
+      if (e.seq <= seq0 || e.glow) continue;
+      if (e.main) { pickE = e; break; }
+      if (!pickE) pickE = e;
+    }
+    if (pickE) pickE.glow = { color, range, intensity, moving };
   }
   lights(max = 6) {
     const out = [], v = new THREE.Vector3();
     for (let i = this.live.length - 1; i >= 0 && out.length < max; i--) {
       const e = this.live[i];
       if (!e.glow || !e.obj) continue;
-      e.obj.getWorldPosition(v);
-      const k = e.life ? Math.min(1, e.age / e.life) : 0;
+      if (e.lightPos) v.copy(e.lightPos); else e.obj.getWorldPosition(v);
+      const lifeL = e.lightLife ?? e.life;
+      const k = lifeL ? Math.min(1, e.age / lifeL) : 0;
       const fade = e.glow.moving ? 1 : Math.max(0, 1 - k) * (k < 0.15 ? k / 0.15 : 1);
       if (fade <= 0.02) continue;
       out.push({ x: v.x, y: v.y + 0.3, z: v.z, color: e.glow.color, range: e.glow.range, intensity: e.glow.intensity * fade, flicker: false, priority: 6 });
@@ -1180,6 +2165,8 @@ export class SpellFx {
     this._statuses.clear();
     if (this.root.parent) this.root.parent.remove(this.root);
     disposeObj(this.root);
+    for (const g of this._geos.values()) g.dispose();
+    this._geos.clear();
   }
 }
 
@@ -1201,9 +2188,9 @@ export default SpellFx;
     const inner = SpellFx.prototype[name];
     if (!inner) return;
     SpellFx.prototype[name] = function (args = {}, ...rest) {
-      const before = this.live.length;
+      const seq0 = this._seq || 0;
       const out = inner.call(this, args, ...rest);
-      try { this._tagGlow(before, args.element || 'arcane', opts(args)); } catch { /* a glow is decoration */ }
+      try { this._tagGlow(seq0, args.element || 'arcane', opts(args)); } catch { /* a glow is decoration */ }
       return out;
     };
   };
@@ -1211,4 +2198,8 @@ export default SpellFx;
   wrap('impact', a => ({ range: 11 * (a.scale || 1), intensity: a.crit ? 4 : 3 }));
   wrap('aoe', a => ({ range: 13, intensity: 3.2 }));
   wrap('cast', () => ({ range: 7, intensity: 2 }));
+  wrap('breath', a => ({ range: Math.min(12, 3 + (a.length || 7)), intensity: 2.2 }));
+  wrap('pillar', a => ({ range: 10 + (a.radius || 3) * 2, intensity: 5 }));
+  wrap('vortex', a => ({ range: 6 + (a.radius || 4) * 1.5, intensity: 2.6 }));
+  wrap('storm', a => ({ range: 6 + (a.radius || 5) * 1.5, intensity: 1.8 }));
 }

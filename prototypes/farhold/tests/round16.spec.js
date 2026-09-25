@@ -43,6 +43,9 @@ test('R16.8 — the wheel turns through what you own, and only what you own', as
 });
 
 test('R16.8 — a bow-carrying character can work a seam, which is the whole complaint', async ({ page }) => {
+  // R25 — the default grass reaches 150 m now, and at full quality under the software renderer
+  // these specs run on, landing alone can take most of a minute
+  test.setTimeout(180000);
   const errors = await land(page);
   const out = await page.evaluate(async () => {
     const f = window.farhold;

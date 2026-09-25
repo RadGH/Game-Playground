@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "note": "Index of every reusable art file in this library. Paths are relative to assets/data/. Scenery svgs are standalone files with viewBox='0 0 100 100' preserveAspectRatio='none', drawn so the bottom third stays clear for characters standing in front of them. 'night: true' means the art is already a night scene, so the loader does not add its dark overlay. 'fx' entries are 64\u00d764 particle sprites on a transparent background, meant to be rasterized to a texture (Assets.fxTexture) and drawn with additive blending by a 3D effects layer. 'ui' entries are the themed interface art used by prototypes (frames, ornaments, HUD/tab/slot/stat icons, rarity gems): the ones drawn with fill='currentColor' are meant to be used as a CSS mask-image so they take the surrounding text colour, the rest as plain backgrounds or <img> tags.",
+  "note": "Index of every reusable art file in this library. Paths are relative to assets/data/. Scenery svgs are standalone files with viewBox='0 0 100 100' preserveAspectRatio='none', drawn so the bottom third stays clear for characters standing in front of them. 'night: true' means the art is already a night scene, so the loader does not add its dark overlay. 'fx' entries are 64\u00d764 particle sprites on a transparent background, meant to be rasterized to a texture (Assets.fxTexture) and drawn with additive blending by a 3D effects layer. Entries tagged 'tint' are drawn white so the effects layer can colour them per element. 'ui' entries are the themed interface art used by prototypes (frames, ornaments, HUD/tab/slot/stat icons, rarity gems): the ones drawn with fill='currentColor' are meant to be used as a CSS mask-image so they take the surrounding text colour, the rest as plain backgrounds or <img> tags.",
   "scenery": {
     "prologue": { "file": "scenery/prologue.svg", "tags": ["outdoor", "road", "grassland", "day", "act1", "emberveil", "start"] },
     "border_roads": { "file": "scenery/border_roads.svg", "tags": ["outdoor", "road", "grassland", "day", "act1", "emberveil", "farmland"] },
@@ -87,7 +87,21 @@
     "mute": { "file": "fx/mute.svg", "tags": ["silence", "status", "head"] },
     "root_vine": { "file": "fx/root_vine.svg", "tags": ["root", "nature", "status", "feet"] },
     "ring": { "file": "fx/ring.svg", "tags": ["generic", "ring", "impact", "neutral"] },
-    "glow": { "file": "fx/glow.svg", "tags": ["generic", "soft", "particle", "neutral"] }
+    "glow": { "file": "fx/glow.svg", "tags": ["generic", "soft", "particle", "neutral"] },
+    "soft": { "file": "fx/soft.svg", "tags": ["generic", "soft", "glow", "particle", "tint"] },
+    "flare": { "file": "fx/flare.svg", "tags": ["generic", "flash", "star", "particle", "tint"] },
+    "streak": { "file": "fx/streak.svg", "tags": ["spark", "streak", "motion", "particle", "tint"] },
+    "puff": { "file": "fx/puff.svg", "tags": ["smoke", "mist", "cloud", "particle", "tint"] },
+    "tendril": { "file": "fx/tendril.svg", "tags": ["shadow", "smoke", "tendril", "particle", "tint"] },
+    "glyph_a": { "file": "fx/glyph_a.svg", "tags": ["arcane", "glyph", "rune", "particle", "tint"] },
+    "glyph_b": { "file": "fx/glyph_b.svg", "tags": ["arcane", "glyph", "rune", "particle", "tint"] },
+    "glyph_c": { "file": "fx/glyph_c.svg", "tags": ["arcane", "glyph", "rune", "particle", "tint"] },
+    "scorch": { "file": "fx/scorch.svg", "tags": ["fire", "decal", "ground", "burn", "tint"] },
+    "splat": { "file": "fx/splat.svg", "tags": ["poison", "bleed", "decal", "ground", "tint"] },
+    "footprint": { "file": "fx/footprint.svg", "tags": ["fire", "decal", "ground", "trail", "tint"] },
+    "rune_ring": { "file": "fx/rune_ring.svg", "tags": ["arcane", "ring", "disc", "ground", "tint"] },
+    "crackle": { "file": "fx/crackle.svg", "tags": ["lightning", "arc", "particle", "tint"] },
+    "swirl": { "file": "fx/swirl.svg", "tags": ["shadow", "vortex", "disc", "ground", "tint"] }
   },
   "props": {},
 

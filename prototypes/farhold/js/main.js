@@ -1104,6 +1104,25 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   // background; until they arrive every effect draws its geometry and nothing throws.
   const spellfx = new SpellFx(scene, { camera, scale: 1.15, maxParticles: 260, maxLive: 36 });
   const nightLights = createNightLights();          // R25 — torches carried at night
+  /**
+   * R25 — the effects overhaul draws floor marks (scorch, frost ring, rune ring, puddle) ON THE
+   * FLOOR, and away from a stage's y = 0 it can only guess where the floor is. Every impact, area and
+   * cast here is handed the real ground height under it, so a mark never lands underground.
+   */
+  {
+    const groundUnder = p => { try { return p ? terrain.heightAt(p.x, p.z) : null; } catch { return null; } };
+    for (const name of ['impact', 'aoe', 'cast']) {
+      const raw = spellfx[name].bind(spellfx);
+      spellfx[name] = (opts = {}) => {
+        if (opts.ground == null) {
+          const p = name === 'aoe' ? opts.points?.[0] : opts.at;
+          const g = groundUnder(p);
+          if (g != null) opts = { ...opts, ground: g };
+        }
+        return raw(opts);
+      };
+    }
+  }
   Assets.open(new URL('../../../assets/', import.meta.url).href)
     .then(a => a.fxTextures(THREE, { size: 128 }))
     .then(t => spellfx.setTextures(t))
@@ -4800,7 +4819,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       // staggered, so three orbs crack one after another rather than all at once
       clock[id] = -k * (o.every / o.count);
       player.skillAuras.push({ id, left: o.seconds, every: o.every, radius: o.radius, power: plan.mult, element: plan.element, nearestOnly: true, status: o.status || null, always: true });
-      const handle = spellfx.orbitOrb?.({ element: plan.element, size: 0.25 }) || null;
+      const handle = spellfx.orbitOrb?.({ element: plan.element, size: 0.35 }) || null;
       orbs.push({ id, handle, phase: (k / o.count) * Math.PI * 2 });
     }
     hud.log(`${plan.skill.name}: ${o.count} orbs circle you for ${o.seconds}s.`, 'good');

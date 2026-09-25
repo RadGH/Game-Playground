@@ -82,7 +82,7 @@ circle in the firelight, and rolls it across the stage during a crossing
 
 ## Spell effects — `js/spellfx.js`, demo `spellfx.html`
 
-Combat effects for a 3D stage: **projectiles** that fly between two points, **impacts** that burst where they land, **cast** flashes, **heal**/**revive**, and looping **status auras** stuck to a body. Everything is built from shaped geometry (cones, spinning shard clusters, expanding torus rings, ground rune discs, tumbling planes, jagged lines) and the 35 particle sprites in `assets/data/fx/` drawn as additive billboards — deliberately **no glowing spheres**.
+Combat effects for a 3D stage: **projectiles** that fly between two points, **impacts** that burst where they land, **cast** flashes, **heal**/**revive**, and looping **status auras** stuck to a body. Everything is built from shaped geometry (cones, spinning shard clusters, expanding torus rings, ground rune discs, tumbling planes, jagged lines) and the 49 particle sprites in `assets/data/fx/` drawn as billboards — deliberately **no glowing spheres**. Bright parts are additive with tone mapping off so they stay vivid; smoke, shadow and toxic cloud use normal blending so they read as dark against a bright sky.
 
 The module knows nothing about any game. It needs a `THREE.Scene`, a way to fetch a sprite texture, and one `update(dt)` call per frame.
 
@@ -92,7 +92,7 @@ import { SpellFx, ELEMENTS, STATUS_FX, elementName } from '/avatar-3d/js/spellfx
 import { Assets } from '/assets/js/assets.js';
 
 const assets = await Assets.open('/assets/');
-const textures = await assets.fxTextures(THREE);        // { flame: CanvasTexture, ember: …, 35 of them }
+const textures = await assets.fxTextures(THREE);        // { flame: CanvasTexture, ember: …, 49 of them }
 const fx = new SpellFx(scene.scene, { textures, camera: scene.camera });
 scene.addTicker(dt => fx.update(dt));                   // drive it from the frame loop
 
@@ -102,6 +102,13 @@ fx.status(targetGroup, 'burn', true);                   // aura parented to the 
 fx.clearStatus(targetGroup);                            // or clearStatuses(target)
 fx.heal({ at: feet }); fx.revive({ at: feet }); fx.cast({ at: feet, element: 'holy' });
 fx.aoe({ points: [a, b, c], element: 'arcane' });
+fx.breath({ from: mouth, dir: facing, length: 7, arc: 0.9, element: 'fire' });   // call ~4x a second while channelling
+const orb = fx.orbitOrb({ element: 'lightning', size: 0.25 });                     // move it yourself every frame
+orb.setPosition(p); orb.pulse(); orb.dispose();
+fx.pillar({ at: feet, radius: 3, element: 'holy' });
+fx.vortex({ at: feet, radius: 4, element: 'shadow' });
+fx.storm({ at: feet, radius: 5, element: 'ice' });                                 // 'poison' = a rolling toxic cloud
+fx.footfall({ at: step, element: 'fire', dir: walkDir });
 fx.dispose();
 ```
 
@@ -113,19 +120,25 @@ fx.dispose();
 
 `elementName(x)` maps a game's damage type or skill type onto one of these (`cold`/`frost` → ice, `magic` → arcane, `melee`/`ranged` → physical, and so on — see `ELEMENT_ALIASES`); unknown names fall back to arcane.
 
-| Element | Projectile | Impact |
-|---|---|---|
-| `fire` | flame cone (hollow outer + bright inner) with a flame/ember trail and smoke puffs | camera-facing shockwave ring, flame/ember burst, smoke, scorch ring on the floor |
-| `ice` | 3–5 tumbling octahedral shards with a snowflake trail | frost-ring flash, shard spray with a hex plate, shockwave ring |
-| `shadow` | a soul-wisp head with two claws sweeping round it, undulating off the straight line, claw trail | claws converging inward, a skull rising, a ring collapsing |
-| `holy` | a spinning sigil with a halo and a spearpoint of light, high arc, mote trail | rune disc on the floor, motes and feathers rising, shockwave ring |
-| `nature` | leaves and thorns wound into a drilling helix | leaf/thorn burst, ground ring and a small shockwave |
-| `arcane` | two counter-wound strands of shards around a rune | shockwave ring, rune disc on the floor, shard scatter |
-| `lightning` | instant jagged polyline (3 lines re-randomised 8 times) with bolt motes — no travel time | spark burst, crack decal on the floor, fast ground ring |
-| `physical` | an arrow (shaft + tip + three fletchings); `shape: 'axe'` gives tumbling blades instead | 2–3 crossing slashes sized to the body, sparks, a dust puff at the feet |
-| `poison` | a big bubble with three smaller ones orbiting, rising as it flies | a green splash disc, a thick burst of bubbles, a shockwave and a ground ring |
-| `bleed` | a heavy drop with three trailing, falling arc | falling drops and two red slashes |
-| `true` | white shard cluster | the arcane burst in white |
+Every element has a look no other element shares (the 2026-09-25 overhaul). Colours come from `ELEMENT_PALETTE` (`hot` → `mid` → `deep`, plus `smoke` for dark normal-blended parts).
+
+| Element | In flight | Impact | Zone (`aoe` with 3+ points) |
+|---|---|---|---|
+| `fire` | flame cone with a white-hot core, rising embers, dark smoke | white-yellow flash, fireball, embers, a column of dark smoke, a scorch mark that stays ~2.5 s | a ring of flame round the edge over a scorch |
+| `ice` | tumbling shards, frost mist, falling flakes, glints | white flash, a crystal shard burst, snow drifting down, mist settling, a frost ring with ice spikes that stays ~2 s | a frost field with a ring of spikes |
+| `lightning` | instant thick zigzag (white core in a yellow glow) with forks, crackles along it, flashes at both ends | white flash, forks from the hit into the floor and across it, spark streaks, crackles, a crack mark | arcs chained point to point round the ring |
+| `poison` | a big bubble dripping globules, a green haze trail | splash of globules, a haze that hangs ~2 s, a puddle that keeps bubbling | a thick rolling haze and a stain |
+| `shadow` | a dark void core with a violet rim, claws, dark tendrils (normal blending) | implosion (tendrils and a ring close in, a dark core swells) then a burst of dark smoke and wisps, a skull, a shadow pool | a dark swirl collapsing, tendrils spiralling in |
+| `holy` | a spinning sigil with motes orbiting it, golden sparkles, feathers | a beam of light drops onto the spot, rune on the floor, motes climbing, feathers | a rune disc and golden halos rising |
+| `arcane` | shards round a rune, glyphs orbiting and shed as a trail | an expanding rune ring standing up plus one on the floor, glyphs thrown out that circle the hit | a big spinning rune ring, glyphs circling |
+| `nature` | a drilling helix of leaves and thorns, leaves shed, pollen | leaves spiralling up, thorns, pollen, vines on the floor | a spiral of leaves round the edge |
+| `physical` | an arrow (or `shape: 'axe'`), a faint wake | slashes, spark streaks, dust at the feet | dust ring |
+| `bleed` | a heavy drop trailing drops | falling drops, red mist, two red slashes, a blood splat | dust ring and a stain |
+| `true` | white shard cluster | the arcane burst in white | white rune ring |
+
+A zone thins each point's burst (roughly `2.2 / √points`) and skips the heavy pieces (beams, standing rings, spikes) because the zone signature carries them, so a 12-point ring costs about what four single hits do.
+
+**Floor height.** Decals (scorch, frost ring, rune ring…) lie on the floor. On a stage the floor is y = 0; if a point is far from 0 (an open world), the floor is taken as ~0.9 m under an impact point (0.4 m under a `cast` point). Pass `ground: y` to `impact`, `aoe` or `cast` to be exact. The new methods below put their ground pieces at `at.y` + a few cm.
 
 `projectile()` takes `{ from, to, element, shape?, speed?, arc?, ms?, crit? }`. Flight is clamped to **160–450 ms** so a fight stays readable (pass `ms` to override, e.g. for screenshots). `shape` overrides the element's default: `cone`, `shards`, `ribbon`, `rune`, `spiral`, `helix`, `bolt`, `arrow`, `axe`, `bubbles`, `drops`.
 
@@ -158,6 +171,23 @@ fx.dispose();
 | `enchant` | three shards orbiting the chest inside a faint hoop |
 | `deflect` | a tilted halo above the head with motes riding it |
 
+### Channelled and area spells
+
+All positions are world-space `THREE.Vector3`; sizes are in metres. Each returns nothing unless stated.
+
+| Call | What it draws |
+|---|---|
+| `breath({ from, dir, length = 7, arc = 0.9, element = 'fire', ms = 300 })` | one pulse of a cone stream along `dir` (flattened to horizontal), `length` m long and `arc` radians wide. Call it ~4 times a second while a skill channels; pulses overlap into a continuous stream. Fire: flame and embers with smoke at the far end. Ice: frost mist, flakes, shards. Poison: a heavy green gas that sinks, bubbles. Shadow: dark tendrils with violet wisps. Arcane: glyphs and shards in a violet haze. Lightning: forked arcs re-rolled every few frames plus crackles. Others carry their own motes. |
+| `orbitOrb({ element = 'lightning', size = 0.25 })` → `{ group, setPosition(v), pulse(), dispose() }` | a glowing orb (core + halo + crackles/flames/glyphs/wisps by element, and a short wake of motes when it moves). You move it every frame; `pulse()` flashes it when it strikes. It reports a light through `lights()` for as long as it exists and is never retired by the `maxLive` cap, so its owner must call `dispose()`. |
+| `pillar({ at, radius = 3, element = 'holy', ms = 700 })` | a column that slams down out of the sky in the first ~12% of `ms`, a flash and ground rings out to `radius`, a floor mark by element, motes thrown out then climbing the column while it narrows and fades. Lightning adds bolts down the column; ice adds spikes. |
+| `vortex({ at, radius = 4, element = 'shadow', ms = 1500 })` | a swirling rift: two counter-spinning swirl discs and a rim, particles born on the rim that spiral in and vanish in the middle, a throbbing core, a collapse flash at the end. Shadow (and arcane) draw a real dark hole. |
+| `storm({ at, radius = 5, element = 'ice', ms = 3000 })` | weather over the circle. Ice: a cloud, hail streaks that splash on the ground, snow, a frost field. Poison: a rolling toxic cloud at knee-to-head height, bubbling ground. Lightning: strikes from a dark cloud. Fire: falling cinders that flare where they land. Others: the element's motes raining down. Spawn rates follow the area. |
+| `footfall({ at, element = 'fire', yaw?, dir?, size = 0.45 })` | a footprint patch that lasts ~2.5 s: a charred/stained print under a glowing one, with a few small flames (fire), mist (ice), bubbles (poison) or motes. `yaw` or `dir` turns it to the walking direction. |
+
+### Budget and lights
+
+Every new particle comes from the sprite pool and counts against `maxParticles`; `budgetScale()` thins emission to half at 60% of the cap, a quarter at 85% and none at the cap, so a big fight thins out instead of stalling. Each impact, zone or new-method call is **one** live entry however many pieces it has (so `maxLive` is not eaten by one burst), and `lights()` hands out **one** light per call — the call's main entry, found by serial number so the `maxLive` cap retiring old entries mid-call cannot hide it. Ground decals and beams share their geometry.
+
 Other helpers: `statusesOn(target)`, `pulseStatus(target, type)` (one swell, for a damage-over-time tick), `liveCount` (running effects, handy in tests).
 
 ### Adding an element
@@ -170,7 +200,7 @@ Other helpers: `statusesOn(target)`, `pulseStatus(target, type)` (one swell, for
 
 ### Gallery — `spellfx.html`
 
-Two chibi bodies on a stage, element chips, cast/projectile/impact/heal/revive/zone buttons, a status checkbox per body, and **Play everything** which fires all 11 elements then all 23 auras in order. `window.spellfxDemo` exposes the same API for tests, plus `freeze()` / `unfreeze()` / `step(sec, n)` — the effects layer stops advancing while the scene keeps rendering, which is how the screenshot tools catch a burst at its peak.
+Two chibi bodies on a stage, element chips, cast/projectile/impact/heal/revive/zone buttons, a **Channelled & area** panel (breath for 2 s, an orbiting orb that zaps the other body, pillar, vortex, storm, a line of footprints — all with the selected element), a status checkbox per body, and **Play everything** which fires all 11 elements then all 23 auras in order. `window.spellfxDemo` exposes the same API for tests, plus `breath(id, sec)`, `breathPulse(id)`, `orb(id)` (toggle), `pillar(id)`, `vortex(id)`, `storm(id)`, `footsteps(id)`, `footfall(id, x, z)`, `stats()`, `lights()`, and `freeze()` / `unfreeze()` / `step(sec, n)` — the effects layer stops advancing while the scene keeps rendering, which is how the screenshot tools catch a burst at its peak.
 
 ## Quick use from a game
 

@@ -1241,3 +1241,97 @@ in one place was renamed in the other, or that a `const` is not read above its o
 of which this project has shipped. It caught one on its first run: `drawStationBody` opened with
 `box.replaceChildren()`, which silently wiped the heading and the "Open the Furnace" button the build
 panel had just put above it.
+
+## Round 26 — building
+
+> *"The onboarding is still bad. It says 'Build a storage box' but that requires plank, which
+> requires a sawmill, which requires iron ingots, which requires a smelter… The storage box, the
+> basic one, should just require 6 regular wood NOT plank. I built a furnace and queued up 2 iron
+> ingot. However it just says '2 min of work banked' and Smelt Iron is still listed as 0/1 two
+> times. It is not making the iron, and I cannot add or remove items… The build menu needs
+> redesigned, maybe into a radial menu."*
+
+### 26.1 The chain, from an empty field
+
+| Step (data/onboarding.json) | What it needs | Where that comes from |
+|---|---|---|
+| Take the job | talk to a town's quest-giver | — |
+| Cut timber and break stone | 8 log, 20 stone | a tree and a boulder, with the Knapped Tool every character lands holding |
+| Put a storage box on the ground | **6 log** (was 6 plank) | the step above |
+| Dig clay and raise a furnace | 16 stone, 6 clay | the timber step + a clay bank at the water's edge (hardness 0) |
+| Smelt your first iron | 2 iron ore a batch, 1 log to burn | an ore outcrop (hardness 1, open ground) |
+
+The plank price was not a real loop — R17's Crafting Table splits logs into planks for six logs and
+two stone — but nothing in the onboarding said so, so the player read "plank", found the Sawmill,
+saw it cost iron, and quite reasonably concluded there was no way in. The Box is **six logs** now
+(`data/structures.json` `storage_crate`, id unchanged for old saves), and the Crafting Table is no
+longer on the path to the first ingot. Nothing on the path is behind research. `js/nextstep.js`
+and the panel's first-steps list say the same thing.
+
+`tests/round26-onboarding.test.js` walks the line against the real data: start with what the
+starting tool can take off OPEN ground (no dungeon seams, nothing placed by events), then each step
+in order — a structure step must be payable from what you already have and not research-locked, its
+recipes then add to what you have, and the smelting step must run on a machine an EARLIER step built.
+Put the plank price back and it fails with *"storage_crate needs plank, which nothing before step
+'store' produces"*.
+
+### 26.2 The furnace that never smelted — three bugs, one screen
+
+1. **It could not reach the ore.** A machine drew only from the storage pool it stood in. No box, no
+   pool: every input read as zero while the ore sat in the pack. The screen's "Load it from your
+   pack" button tipped the pack into the stores — and with no stores, `giveBack` put it all straight
+   back into the pack. Nothing could ever go in. `createWorks` takes a `bag` now (js/main.js hands
+   in the materials bag): a machine takes from its pool first and then your pack, and puts what it
+   makes into the pool first and then your pack. With no store in reach the pack is always used;
+   with a store it is used only while you stand within 12 m (`bagReach`), so a furnace across the
+   base never quietly eats what you are carrying.
+2. **"Smelt Iron 0/1" twice** was two clicks of ×1 pushing two separate one-item jobs. Queueing the
+   same recipe as the last job now adds to it ("0 of 2 made"), and a queued job has − and + buttons.
+3. **Clicks did not land.** The station body was rebuilt every 400 ms and the build panel rebuilt
+   its bench, work-board, holding, drill and shipyard sections EVERY FRAME. A click is a press and
+   a release on the same element; a redraw between them swallows it. `steadyRedraw` (js/station-ui.js)
+   draws off to the side and keeps the old nodes when nothing but the `data-live` parts (state line,
+   checklist, work text and bar) changed. The Playwright spec found this one — "element was detached
+   from the DOM, retrying" twenty-two times.
+
+"2 min of work banked" was never a timer for your iron: it is how long the machine may RUN on work
+already put in. The screen now opens with a checklist (`works.needs(id)` in js/refine.js), every
+line ticked or crossed — the job, each input and where it looked for it, the fuel, the work, the
+power if it wants any, and whether a store is in reach — so "why is it not making anything" is
+answered before it is asked. Standing at a machine pays in exactly what it spends, so a furnace you
+are attending runs on an empty bank; the work line says "being worked right now" then, not "nobody
+is working it".
+
+### 26.3 The build ring — js/build-radial.js, buildradial.css
+
+B puts build mode up with a ring in the middle of the screen instead of the long panel: groups
+first (Storage, Workshop, Refining first, then the rest, then Tools), then the pieces of the group
+you picked, cheapest and unlocked first, each with its price and whether you can pay it now
+(green / orange / struck through when research-locked). Hover shows the price against what you
+hold and the description in the middle. Pick one and the ring closes; the ghost follows the cursor
+as before, and a card at the bottom keeps the price, what you hold and the live reason the ghost is
+red.
+
+| Key | Does |
+|---|---|
+| B | build mode on with the ring up; B again leaves build mode |
+| click, 1–9, 0 | pick (0 is the tenth); ← → and Enter too |
+| Backspace / Esc | back to the groups (Esc on the groups ring leaves build mode, as before) |
+| Tab | the full panel — first steps, the bench you are at, drills, work board, holding, shipyard |
+| right-click | the ring again while placing; right-click on the ring puts it away |
+
+The panel has a **Ring** button back. Under 640 px wide the ring becomes a two-column grid of the
+same buttons with the detail pinned at the top — thirteen labels round a small circle overlap, and
+a finger needs a bigger target. (Placing itself still wants a mouse: the game has no touch
+controls.) The ring is created by js/build-ui.js, so js/main.js only changed what B opens.
+
+Eight older specs that pressed B and read the panel now press Tab after it.
+
+### 26.4 Tests
+
+* `tests/round26-onboarding.test.js` (node, 10) — the chain above; the furnace with no box smelting
+  out of the pack and filling the pack; one row for the same recipe twice; − / +; the checklist; a
+  furnace beside a box ignoring the pack of a player who is not there; six logs buying a box.
+* `tests/round26-build.spec.js` (Playwright, 2) — B → ring → Storage → Storage Box → click the
+  ground: built, six logs gone, right-click/Tab/Ring/1/Backspace/B all do what the table says; and a
+  furnace with no box in the real page: one row "0 of 2 made", the checklist, two ingots in the pack.

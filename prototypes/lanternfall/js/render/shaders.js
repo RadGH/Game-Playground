@@ -38,7 +38,7 @@ void main(){
   // background: wall or sky with parallax city
   vec3 back;
   uint bgm = inside ? texelFetch(bgTex, w, 0).r : 1u;
-  if (bgm != 0u) { back = ramp(bgm, uint(hash(vec2(w))*8.0)) * 0.5; // mortar lines on brick walls
+  if (bgm != 0u) { float bn = vnoise(vec2(w)*0.11)*0.7 + vnoise(vec2(w)*0.37)*0.3; back = ramp(bgm, uint(bn*5.0)) * (0.42 + 0.16*bn); // mortar lines on brick walls
     if (bgm == 3u) { float by = mod(float(w.y), 4.0); float bx = mod(float(w.x) + (mod(floor(float(w.y)/4.0),2.0)*4.0), 8.0); if (by < 0.9 || bx < 0.9) back *= 0.7; }
   } else {
     float sy = float(w.y)/max(1.0,roomSize.y); back = mix(skyTop, skyBot, clamp(sy,0.0,1.0));

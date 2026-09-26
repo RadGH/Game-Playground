@@ -23,6 +23,7 @@ export function createLoop({ tick, render, raf = globalThis.requestAnimationFram
     pause(on) { paused = on; }, get paused() { return paused; },
     setSpeed(x) { speed = x; },
     stepOnce() { tick(); render(1, STEP); },
+    stepRender() { render(1, STEP); },
     stats,
   };
 }

@@ -11,6 +11,7 @@ import { buildFrame } from './render/frame.js';
 import { hexToRgb01 } from './core/math.js';
 import { createCaster } from './spells/cast.js';
 import { createActor } from './entities/actor.js';
+import { createBench } from './debug/bench.js';
 
 const params = new URLSearchParams(location.search);
 const canvas = document.getElementById('view');
@@ -54,15 +55,20 @@ try {
   canvas.addEventListener('contextmenu', e => e.preventDefault());
   canvas.addEventListener('mousemove', e => { const r = canvas.getBoundingClientRect(); input.mouse.x = e.clientX - r.left; input.mouse.y = e.clientY - r.top; });
   const sky = { top: hexToRgb01(theme.sky?.top || '#10141d'), bottom: hexToRgb01(theme.sky?.bottom || '#06080c'), sil: hexToRgb01(theme.sky?.sil || '#161a24') };
+  const bench = params.has('bench') ? createBench(game, cam) : null; LF.perf = { get bench() { return bench?.rec.report || null; } };
+  game.shake = t => cam.shake(t);
   const loop = createLoop({
     tick() {
       const dpr = canvas.width / innerWidth;
       input.mouse.wx = cam.x + input.mouse.x * dpr / cam.scale; input.mouse.wy = cam.y + input.mouse.y * dpr / cam.scale;
       game.aim = { x: input.mouse.wx, y: input.mouse.wy };
+      const t0 = performance.now();
       tickGame(game, input.poll(), cam.view());
+      if (bench) bench.tick(performance.now() - t0);
       cam.update(game.player, game.grid, 1 / 60);
     },
     render(alpha, dt) {
+      if (bench) bench.frame(dt * 1000);
       const f = buildFrame(game, cam, atlas, alpha);
       game.ripples.setOffset(0);
       const x0 = Math.max(0, Math.floor(cam.x) - 1);
@@ -76,6 +82,8 @@ try {
   });
   LF.game = game; LF.input = input; LF.cam = cam; LF.renderer = renderer; LF.loop = loop;
   LF.player = () => { const p = game.player; return { x: p.x, y: p.y, vx: p.vx, vy: p.vy, grounded: p.grounded, state: p.state, anim: p.anim, hp: p.hp }; };
+  LF.stepTimed = () => { game.aim = game.aim || { x: 0, y: 0 }; const t0 = performance.now(); tickGame(game, input.poll(), cam.view()); if (bench) bench.tick(performance.now() - t0); cam.update(game.player, game.grid, 1 / 60); };
+  LF.renderOnce = () => loop.stepRender ? loop.stepRender() : null;
   LF.step = n => { for (let k = 0; k < n; k++) { tickGame(game, input.poll(), cam.view()); cam.update(game.player, game.grid, 1 / 60); } };
   loop.start();
   bootEl.classList.add('gone'); LF.ready = true;

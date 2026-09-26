@@ -5,6 +5,8 @@ import { compileRoom } from '../world/roomload.js';
 import { createParticles } from '../entities/particles.js';
 import { createRain, createRipples } from '../world/rain.js';
 import { createPlayerBody } from '../entities/player.js';
+import { createSupport } from '../world/support.js';
+import { createFragments } from '../world/fragments.js';
 
 export function createGame({ data, mode = 'campaign', seed = 1, save = null }) {
   const game = {
@@ -27,6 +29,7 @@ export function enterRoom(game, roomJson, entryId, opts = {}) {
   c.world.wind = game.rain.wind;
   game.rain.drips = [...game.rain.findDrips(), ...c.things.filter(t => t.t === 'drip').map(t => ({ x: t.at[0], y: t.at[1], every: t.every || [1.2, 4], t: Math.random() }))];
   game.ripples = createRipples(c.grid.W);
+  c.world.game = game; game.support = createSupport(c.world); game.fragments = createFragments(c.world); c.grid.supportQueue.length = 0;
   const entry = c.entries[entryId] || Object.values(c.entries)[0] || { at: [40, 40], face: 'r' };
   if (!game.player) game.player = createPlayerBody(entry.at[0], entry.at[1] + 1, opts.cls);
   const p = game.player; p.x = entry.at[0]; p.y = entry.at[1] + 1; p.px = p.x; p.py = p.y; p.vx = 0; p.vy = 0; p.facing = entry.face === 'l' ? -1 : 1; p.fallStartY = p.y;

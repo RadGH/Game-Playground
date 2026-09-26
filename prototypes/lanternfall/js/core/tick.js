@@ -35,6 +35,8 @@ export function tickGame(game, intent, view) {
   const simView = view ? { x0: view.x0 - 96, y0: view.y0 - 96, x1: view.x1 + 96, y1: view.y1 + 96 } : null;
   stepCells(w, simView); stepThermal(w); stepLiquids(w); stepShock(w);
   for (const b of game.room.basins) stepBasin(w, b);
+  // 10-11: support queue -> fragments; fragments fall
+  if (game.support) { for (const grp of game.support.process(12000)) game.fragments.detach(grp); game.fragments.step([p, ...game.entities].filter(Boolean)); }
   // 12: rain, drips, particles
   if (view) game.rain.step(game.particles, view, DT, game.ripples);
   stepParticles(game.particles, w, DT, {

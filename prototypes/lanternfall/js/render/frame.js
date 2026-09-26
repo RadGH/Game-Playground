@@ -45,6 +45,8 @@ export function buildFrame(game, cam, atlas, alpha) {
     else sprites.push({ x: P.x[i], y: P.y[i], w: 1, h: 1, tint: [c[0], c[1], c[2], 1] });
   }
   spellVisuals(game, { sprites, additive, lights, overlays }, atlas);
+  // falling fragments: one quad per cell, coloured from the material ramp
+  if (game.fragments) { const R = game.data.mats.ramps; for (const f of game.fragments.list) for (let r = 0; r < f.h; r++) for (let c = 0; c < f.w; c++) { const k = r * f.w + c, m = f.mat[k]; if (!m) continue; const ramp = R[m], col = ramp[(f.shade[k] & 7) % ramp.length]; sprites.push({ x: f.x + c, y: f.fy + r, w: 1, h: 1, tint: [col[0] / 255, col[1] / 255, col[2] / 255, 1] }); } }
   // actors (enemies, npcs, dummies): sprite if the atlas has one, else a lit block
   for (const e of game.entities) {
     const x = e.px + (e.x - e.px) * alpha, y = e.py + (e.y - e.py) * alpha;

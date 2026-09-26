@@ -20,6 +20,8 @@
 // Its own file and its own stylesheet, for the reason js/civics-ui.js is its own file: js/hud.js is
 // three and a half thousand lines and carries nine screens already.
 
+import { wallTier } from './town-plan.js';   // R27 M2
+
 const CSS_HREF = 'civics.css';
 
 function el(tag, attrs = {}, kids = []) {
@@ -176,7 +178,8 @@ export function createTownHall({ read = () => ({}), onRecruit = null, onTakeJob 
     const kids = [
       pane('This place', [
         row('People living here', T.headcount ?? '\u2014'),
-        row('Size', T.size ?? '\u2014', T.size >= 4 ? 'walled' : 'open'),
+        // R27 M2: the town's own answer (main.js fills `walled` from `townExtent`), the tier rule if not
+        row('Size', T.size ?? '\u2014', (T.walled ?? (wallTier(T.size || 1) === 'wall')) ? 'walled' : 'open'),
         T.factionName ? row('Held by', T.factionName, T.standingWord || null) : null,
       ].filter(Boolean)),
       pane('Who is here', (T.roles || []).length

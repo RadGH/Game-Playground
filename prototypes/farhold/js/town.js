@@ -26,7 +26,7 @@ export { hireOffer, HIRE_ROLE_WORDS } from './hire.js';
 import { hireOffer as buildHireOffer } from './hire.js';
 // R23: townsfolk stand on bridge decks (js/ground.js), and a walled town posts guards at its gates
 import { groundAt, wetAt } from './ground.js';
-import { sentryPosts } from './town-plan.js';
+import { sentryPosts, townExtent } from './town-plan.js';
 
 /**
  * The little badge that floats over somebody worth talking to. Drawn into a canvas once per glyph
@@ -190,6 +190,9 @@ export function createTownFolk(scene, terrain, opts = {}) {
   const guardReach = cfg.guardReach ?? 42;
 
   const live = new Map();          // settlement id -> [npc]
+  // R27 M2: which towns have finished populating, and which have had their gate guards posted
+  const ready = new Set();
+  const posted = new Set();
   let pending = 0;
 
   /** The roles a settlement of this size gets, deterministic from its id. */
@@ -349,10 +352,34 @@ export function createTownFolk(scene, terrain, opts = {}) {
      * using the same code as the watch in the square — with a `post`: when there is nothing to fight
      * they walk back to it and stand facing out along the road instead of wandering off.
      */
-    const posts = sentryPosts(features.gatesOf?.(node.id) || []);
+    // R27 M2: the gate guards are their own step now, so a town populated before its wall was
+    // built can have them posted later (see `postGateGuards` and the retry in `update`)
+    await postGateGuards(node, rng, people);
+    live.set(node.id, people);
+    ready.add(node.id);
+  }
+
+  /**
+   * R27 M2 — STAND A GUARD EITHER SIDE OF EVERY GATE THE TOWN HAS RIGHT NOW.
+   *
+   * `populate` used to read `features.gatesOf` once, inline. Features build out to 2600 m and folk
+   * populate at 900 m, so in ordinary travel the wall already exists — but on the first frame, or
+   * after a teleport, a town could be peopled before its wall was filed, read an empty list, and
+   * stand no gate guard for as long as it stayed loaded. Returns false when there were no gates to
+   * post at yet, and `update` asks again until there are.
+   *
+   * A gate standing in a river gets no guards (`wet`), and neither does a post that lands in water:
+   * a guard up to his neck beside a gate nobody can walk through is not guarding anything.
+   */
+  async function postGateGuards(node, rng, people) {
+    const gates = features.gatesOf?.(node.id) || [];
+    if (!gates.length) return false;
+    posted.add(node.id);
+    const posts = sentryPosts(gates)
+      .filter(p => !gates[p.gate]?.wet && !terrain.waterAt(p.x, p.z) && !(terrain.riverAt?.(p.x, p.z) > 0.3));
     const guardRole = ROLES.find(r => r.key === 'guard');
     for (const [k, post] of posts.entries()) {
-      if (!live.has(node.id)) return;              // the town was let go while we were building
+      if (!live.has(node.id)) return true;         // the town was let go while we were building
       const { name, gender } = nameFor(node, guardRole, rng);
       const look = looks.length ? looks[Math.floor(rng() * looks.length)] : null;
       const body = peopleOf(node, rng);
@@ -385,7 +412,7 @@ export function createTownFolk(scene, terrain, opts = {}) {
       setActorAnim(actor, 'idle');
       people.push(npc);
     }
-    live.set(node.id, people);
+    return true;
   }
 
   /**
@@ -439,6 +466,7 @@ export function createTownFolk(scene, terrain, opts = {}) {
 
   function depopulate(id) {
     const people = live.get(id);
+    posted.delete(id); ready.delete(id);           // R27 M2
     if (!people) return;
     for (const npc of people) {
       scene.remove(npc.actor.group);
@@ -525,6 +553,11 @@ export function createTownFolk(scene, terrain, opts = {}) {
         const d = Math.hypot(s.wx - player.x, s.wz - player.z);
         if (d < radius && !live.has(s.id)) populate(s);
         else if (d > radius * 1.6 && live.has(s.id)) depopulate(s.id);
+        // R27 M2 — a walled town peopled before its gates were filed: post them the moment they are
+        else if (ready.has(s.id) && !posted.has(s.id) && townExtent(s).walled && features.gatesOf?.(s.id)?.length) {
+          posted.add(s.id);
+          postGateGuards(s, rosterFor(s).rng, live.get(s.id));
+        }
       }
 
       for (const people of live.values()) {
@@ -703,9 +736,13 @@ export function createTownFolk(scene, terrain, opts = {}) {
      * quiet ground genuinely starts before the gate rather than somewhere in the market.
      */
     safeZones: () => features.settlements.map(s => {
-      const size = s.size || 1;
-      const ring = 16 + size * 13;                 // the same ring buildSettlement lays out to
-      const wall = size >= 4 ? ring + 14 : ring;   // …and the wall a city puts round it
+      /**
+       * R27 M2 — the town's REAL extent: the planner's own wall when the town has been planned
+       * (it grows a crowded site's ring 1.3x or 1.65x), the unscaled footprint as a floor before.
+       * This used to be `16 + size * 13` worked out here a second time, which stopped 44 m short
+       * of a grown size-5 city's wall — room for a whole pack to spawn inside it.
+       */
+      const { wall } = townExtent(s);
       /**
        * Just outside the gate, and no further.
        *
@@ -756,6 +793,12 @@ export function createTownFolk(scene, terrain, opts = {}) {
 
     /** Everyone currently in the world, for the debug menu and the tests. */
     roster: () => [...live.values()].flat(),
+    /**
+     * R27 M2 — the guard BODIES standing in one settlement right now (its watch and its gate
+     * guards). The muster's defence count reads this; it used to count YOUR colony's guards, so a
+     * city with a dozen men on the walls mustered as if it had none.
+     */
+    guardsOf: id => (live.get(id) || []).filter(n => n.guards).length,
 
     /**
      * R16 — YOUR OWN PEOPLE, as opposed to everybody standing in a market somewhere.

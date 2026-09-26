@@ -17,6 +17,8 @@
 
 import * as THREE from 'three';
 import { BUILDING_INFO, streetLanes, settlementAnchor, footprintOf } from './town-plan.js';
+// R27 M2 — one answer to "how big is this town", and one to "does it have a wall"
+import { townExtent, rememberPlan, forgetPlans, wallTier } from './town-plan.js';
 import { laneRibbon, ringCrossings } from './roadplan.js';
 import { planTown, cultureFor } from '../../../proctown/js/townplan.js';
 import { padSpotFor, boardSpotFor } from './waypoints.js';
@@ -352,12 +354,94 @@ export const BUILDING_KEYS = Object.keys(BUILDINGS);
  */
 
 
+// ---------------------------------------------------------------- R27 M2: the planner's gates
+
+/** Two gates within this bearing of each other are one gate (the road's, sized to the road). */
+export const GATE_MERGE = 0.12;
+const angleApart = (a, b) => Math.abs(((a - b + Math.PI * 3) % (Math.PI * 2)) - Math.PI);
+
+/**
+ * Is the street gate `pg` the same opening as the (road) gate `c`? Within `GATE_MERGE` of bearing
+ * AND close enough that the street arrives inside the road gate's opening, give or take two metres.
+ * The bearing alone is not enough on a big wall: 0.12 rad is 15 m at a grown city's 124 m, and a
+ * street merged into a road gate 8 m away runs into the masonry beside it.
+ */
+function sameGate(c, pg, wallR) {
+  const apart = angleApart(c.angle, pg.angle);
+  if (apart >= GATE_MERGE) return false;
+  const radial = [Math.cos(c.angle), Math.sin(c.angle)];
+  const slant = (c.tx || c.tz) ? Math.max(0.55, Math.abs(c.tx * radial[0] + c.tz * radial[1])) : 1;
+  const openHalf = Math.min(8, ((c.half ?? 3) + 1.2) / slant);
+  return apart * wallR <= openHalf + 2;
+}
+
+/** The widest a single gate opening may be, in metres (the gatehouse model scales up to this). */
+const GATE_WIDEST = 16;
+
+/**
+ * Can road gate `c` be widened to take in street gate `pg` as well? Within `GATE_MERGE` of bearing
+ * and the two openings together no wider than `GATE_WIDEST`. (The two would otherwise be cut as
+ * separate gates whose runs share a stretch of wall, which the builder cannot do.)
+ */
+function absorb(c, pg, wallR) {
+  const apart = angleApart(c.angle, pg.angle);
+  if (apart >= GATE_MERGE) return false;
+  const radial = [Math.cos(c.angle), Math.sin(c.angle)];
+  const slant = (c.tx || c.tz) ? Math.max(0.55, Math.abs(c.tx * radial[0] + c.tz * radial[1])) : 1;
+  const openHalf = Math.min(8, ((c.half ?? 3) + 1.2) / slant);
+  return apart * wallR + openHalf + pg.half + 1.2 <= GATE_WIDEST;
+}
+
+/**
+ * The gates the town PLAN asks for, as crossings the wall builder can cut: first `plan.wall.gates`
+ * (the planner's own two to four, one per main street end plus a lesser street if it had too
+ * few), then every other main-street end that reaches the wall — a main street that ends on the
+ * wall must end in an opening, whatever the planner's cap of four said.
+ *
+ * Each carries the street's own direction and half-width where it meets the wall, so the gate
+ * code sizes the opening for a street arriving at a slant exactly as it does for a road. World
+ * coordinates, on the final `wallR`.
+ */
+export function plannerGates(plan, cx, cz, wallR) {
+  if (!plan?.wall) return [];
+  const planR = Number.isFinite(plan.wallRadius) ? plan.wallRadius : wallR;
+  const ends = [];
+  for (const st of plan.streets || []) {
+    const pts = st.pts || [];
+    if (pts.length < 2) continue;
+    for (const [e, prev] of [[pts[0], pts[1]], [pts[pts.length - 1], pts[pts.length - 2]]]) {
+      if (Math.abs(Math.hypot(e[0], e[1]) - planR) > 3) continue;
+      const len = Math.hypot(e[0] - prev[0], e[1] - prev[1]) || 1;
+      const angle = Math.atan2(e[1], e[0]);
+      ends.push({
+        angle, x: cx + Math.cos(angle) * wallR, z: cz + Math.sin(angle) * wallR,
+        dx: e[0], dz: e[1],
+        tx: (e[0] - prev[0]) / len, tz: (e[1] - prev[1]) / len,
+        half: (st.width ?? 5) / 2, main: st.cls === 'main', planner: true,
+      });
+    }
+  }
+  const out = [];
+  const push = c => { if (!out.some(o => angleApart(o.angle, c.angle) < GATE_MERGE)) out.push(c); };
+  for (const g of plan.wall.gates || []) {
+    let best = null, bd = 0.02;
+    for (const e of ends) { const d = angleApart(e.angle, g.angle); if (d < bd) { bd = d; best = e; } }
+    push(best || {
+      angle: g.angle, x: cx + Math.cos(g.angle) * wallR, z: cz + Math.sin(g.angle) * wallR,
+      tx: 0, tz: 0, half: 2.5, planner: true,
+    });
+  }
+  for (const e of ends) if (e.main) push(e);
+  return out;
+}
+
 export function createFeatures(scene, terrain, opts = {}) {
   const world = terrain.world;
   const palette = opts.palette || {};
   const radius = opts.radius ?? 2600;
   const refreshEvery = opts.refreshEvery ?? 260;
   const seed = (opts.seed ?? 1) >>> 0;
+  forgetPlans();                                   // R27 M2: a new world, so every town id is a new town
   /**
    * F15: which waypoint pads have been lit.
    *
@@ -851,6 +935,8 @@ export function createFeatures(scene, terrain, opts = {}) {
       // the two are the same number, and `planTown` slides a link out with its own ring if it has
       // to grow the town to fit it on the ground
       links: roadLinksFor(cx, cz, wallR),
+      // R27 M2 — …and asked again on the radius the plan really walls at, when it grows the town
+      linksAt: r => roadLinksFor(cx, cz, r),
       // the real ground, so "follows the terrain" means this hillside and not a stand-in
       heightAt: (lx, lz) => terrain.heightAt(cx + lx, cz + lz),
       /**
@@ -902,6 +988,9 @@ export function createFeatures(scene, terrain, opts = {}) {
      */
     if (Number.isFinite(plan.ring)) ring = plan.ring;
     if (Number.isFinite(plan.wallRadius)) wallR = plan.wallRadius;
+    // R27 M2 — …and so does everybody else: js/town.js's safe circle, the waypoint boundary, "you
+    // are in town", the town hall and the muster all read this through `townExtent`
+    rememberPlan(node, plan);
 
     const toWorld = (lx, lz) => [cx + lx, cz + lz];
     const cultKit = CULTURE_KIT.cultures[culture] || CULTURE_KIT.cultures.human;
@@ -1118,8 +1207,8 @@ export function createFeatures(scene, terrain, opts = {}) {
       solids.add(x, z, radiusOf(desc), Math.max(2.5, top));
     }
 
-    // a city gets a wall and towers
-    if (size >= 4) {
+    // a city gets a wall and towers (R27 M2: the one tier rule, not a sixth copy of `size >= 4`)
+    if (wallTier(size) === 'wall') {
       // Walk the ring corner to corner: each segment spans the CHORD between two ring points and is
       // placed at that chord's midpoint, stretched slightly so it overlaps its neighbour. Spacing
       // segments by arc length (and giving each its own ground height) is what left gaps.
@@ -1144,8 +1233,32 @@ export function createFeatures(scene, terrain, opts = {}) {
        * still a way through.
        */
       const crossings = ringCrossings(roads, cx, cz, wallR);
-      // always at least one way in, even on a settlement no road reaches
-      if (!crossings.length) crossings.push({ angle: rng() * TAU, half: 2.5, tx: 0, tz: 0 });
+      /**
+       * R27 M2 — AND WHEREVER THE TOWN'S OWN MAIN STREETS REACH IT.
+       *
+       * The planner has always cut a gate at the end of every main street (`plan.wall.gates`, two
+       * to four of them) and this file never read one: the only openings were where a WORLD road
+       * crossed, so every high street that did not happen to line up with a road ran straight into
+       * masonry, and a walled town with no road at all got one gate at `rng() * TAU` — a hole in a
+       * random stretch of wall leading onto somebody's back yard.
+       *
+       * The planner's gates, and then any other main-street end that reaches the wall, are added
+       * AFTER the road crossings, so the road's gate (sized to the carriageway) is the one kept when
+       * two land on the same bearing, and the first four gatehouses go to roads. Everything is on
+       * the final `wallR` — round 22's high street sat 7 degrees off its gate because the two were
+       * asked about different circles.
+       */
+      for (const pg of plannerGates(plan, cx, cz, wallR)) {
+        if (crossings.some(c => sameGate(c, pg, wallR))) continue;
+        // close to a road gate but not inside it: one wider gate covering both, when that stays
+        // a gate rather than a missing stretch of wall
+        const host = crossings.find(c => !c.planner && absorb(c, pg, wallR));
+        if (host) { (host.covers ||= []).push({ angle: pg.angle, half: pg.half + 1.2 }); continue; }
+        crossings.push(pg);
+      }
+      // a plan always has a wall with at least two gates at this tier — this is the last resort
+      // for a town whose wall the planner did not build (it cannot happen today; it must not strand)
+      if (!crossings.length) crossings.push({ angle: rng() * TAU, half: 2.5, tx: 0, tz: 0, planner: true });
 
       /**
        * ROUND 23 — ONE WALL, ONE RULE FOR WHERE IT STANDS.
@@ -1207,10 +1320,26 @@ export function createFeatures(scene, terrain, opts = {}) {
       const gates = [];
       const cleared = new Set();
       for (const [n, c] of crossings.entries()) {
-        const g = c.angle;
+        let g = c.angle;
+        const planned = !!c.planner;
         const radial = [Math.cos(g), Math.sin(g)];
         const slant = (c.tx || c.tz) ? Math.max(0.55, Math.abs(c.tx * radial[0] + c.tz * radial[1])) : 1;
-        const open = Math.min(16, (2 * ((c.half ?? 3) + 1.2)) / slant);
+        let open = Math.min(16, (2 * ((c.half ?? 3) + 1.2)) / slant);
+        /**
+         * R27 M2 — a road gate that took in a street arriving a few metres along the wall (see
+         * `absorb` below) is widened to cover both, and its middle moves to the middle of the two,
+         * so neither the road nor the street runs into the masonry beside the other.
+         */
+        if (c.covers?.length) {
+          let a = -open / 2, b = open / 2;
+          for (const cv of c.covers) {
+            const along = (((cv.angle - g + Math.PI * 3) % TAU) - Math.PI) * wallR;
+            a = Math.min(a, along - cv.half); b = Math.max(b, along + cv.half);
+          }
+          open = Math.min(GATE_WIDEST, b - a);
+          g += ((a + b) / 2) / wallR;
+          c.x = cx + Math.cos(g) * wallR; c.z = cz + Math.sin(g) * wallR;
+        }
         const wide = Math.max(1, open / GATE_OPEN);
         const span = GATE_SPAN * wide;
         // every segment the gatehouse's span overlaps, plus a metre either side
@@ -1219,10 +1348,37 @@ export function createFeatures(scene, terrain, opts = {}) {
         let lo = Math.floor(base - (halfA / TAU) * segments);
         let hi = Math.floor(base + (halfA / TAU) * segments);
         // …and the kerb beside it, which the old code dropped without a word
-        for (let k = 0; k < 4 && spots[wrapSeg(lo - 1)].kind === 'road'; k++) lo--;
-        for (let k = 0; k < 4 && spots[wrapSeg(hi + 1)].kind === 'road'; k++) hi++;
+        // (R27 M2: not for a street's gate — the road beside it belongs to the road's own gate,
+        // and a road segment outside every run is still walled below)
+        for (let k = 0; !planned && k < 4 && spots[wrapSeg(lo - 1)].kind === 'road'; k++) lo--;
+        for (let k = 0; !planned && k < 4 && spots[wrapSeg(hi + 1)].kind === 'road'; k++) hi++;
+        // R27 M2: a street's gate whose run would share a segment with a gate already cut is
+        // already served by that opening — two gatehouses cannot stand on one stretch of wall
+        // — so it slides a segment or two clear of that run if it can (the opening is re-centred on
+        // the street within the chord below, so it moves by less than the slide), and only if it
+        // cannot is it left to the gate already there
+        let tight = false;
+        if (planned) {
+          const clash = (a, b) => { for (let i = a; i <= b; i++) if (cleared.has(wrapSeg(i))) return true; return false; };
+          if (clash(lo, hi)) {
+            // trim the run back from whichever end is shared; what is left must still hold the
+            // opening, and a trimmed gate is a plain gap (no room for a gatehouse's towers)
+            const fromLo = cleared.has(wrapSeg(lo));
+            while (lo <= hi && cleared.has(wrapSeg(lo))) lo++;
+            while (hi >= lo && cleared.has(wrapSeg(hi))) hi--;
+            const segLen = (TAU * wallR) / segments;
+            // …growing on the free side if the trim left too little to walk through
+            for (let k = 0; k < 2 && (hi - lo + 1) * segLen < open + 1; k++) {
+              if (fromLo && !cleared.has(wrapSeg(hi + 1))) hi++;
+              else if (!fromLo && !cleared.has(wrapSeg(lo - 1))) lo--;
+            }
+            if (hi < lo || clash(lo, hi) || (hi - lo + 1) * segLen < open + 1) continue;
+            tight = true;
+          }
+        }
         for (let i = lo; i <= hi; i++) cleared.add(wrapSeg(i));
-        gates.push({ n, g, c, open, wide, span, lo, hi });
+        // R27 M2: numbered by the gates KEPT, so the four gatehouses go to the first four kept
+        gates.push({ n: gates.length, g, c, open, wide, span, lo, hi, tight });
       }
 
       /** Put a length of wall between two points, drawn and solid on exactly the same line. */
@@ -1251,7 +1407,11 @@ export function createFeatures(scene, terrain, opts = {}) {
        */
       const records = [];
       for (const gate of gates) {
-        const { g, c, open, wide, span, lo, hi } = gate;
+        const { g, c, open, wide, span, lo, hi, tight } = gate;
+        // R27 M2: the first four kept gates get a gatehouse, unless a street's gate had to be
+        // trimmed to fit beside another one — then it is a plain opening
+        const wantHouse = gate.n < 4 && !tight;
+        const hold = wantHouse ? span / 2 : open / 2;
         // the chord from the wall end before the run to the wall end after it — the two points the
         // neighbouring wall pieces end on, so the gate cannot help but meet them
         const [ax, az] = ringPoint(lo), [bx, bz] = ringPoint(hi + 1);
@@ -1262,7 +1422,7 @@ export function createFeatures(scene, terrain, opts = {}) {
         if (((ax + bx) / 2 - cx) * ox + ((az + bz) / 2 - cz) * oz < 0) { ox = -ox; oz = -oz; }
         // centre the opening on the road where it meets this chord, kept inside the chord
         const rx = c.x ?? cx + Math.cos(g) * wallR, rz = c.z ?? cz + Math.sin(g) * wallR;
-        const along = Math.max(span / 2, Math.min(chord - span / 2, (rx - ax) * ux + (rz - az) * uz));
+        const along = Math.max(hold, Math.min(chord - hold, (rx - ax) * ux + (rz - az) * uz));
         const gx = ax + ux * along, gz = az + uz * along;
         const yaw = Math.atan2(ox, oz);                    // +Z points out along the road
         const lowGate = Math.min(terrain.heightAt(gx - ux * span / 2, gz - uz * span / 2),
@@ -1271,7 +1431,7 @@ export function createFeatures(scene, terrain, opts = {}) {
         // R21: a gate is the ONE thing that belongs on the road, so it opts out of `place`'s road
         // test. R23: tinted with the town's own wall colour — "the gray part of the gate should
         // match the green color of the walls"; it was hard-coded STONE while the wall was tinted.
-        const built = gate.n < 4 && !wet && place('gatehouse', gx, gz, yaw, [wide, 1, 1], 0.9, lowGate,
+        const built = wantHouse && !wet && place('gatehouse', gx, gz, yaw, [wide, 1, 1], 0.9, lowGate,
           { solid: false, onRoad: true, tint: wallTint });
 
         // what the gatehouse does not cover (or all of the run but the opening, if there is no
@@ -1308,6 +1468,9 @@ export function createFeatures(scene, terrain, opts = {}) {
         }
         records.push({
           x: gx, z: gz, yaw, open, span, depth: GATE_DEPTH, gatehouse: !!built,
+          // R27 M2: which list it came from, and whether its middle is dry (town.js posts no
+          // guards at a gate standing in a river)
+          source: c.planner ? 'street' : 'road', wet: !!wet,
           tx: ux, tz: uz, ox, oz, ground: terrain.heightAt(gx, gz),
           // the stretch of wall this gate replaced, end to end — the two points its neighbours end on
           run: [ax, az, bx, bz], lo, hi,
@@ -1350,6 +1513,11 @@ export function createFeatures(scene, terrain, opts = {}) {
     const counts = {};
     for (const key of BUILDING_KEYS) counts[key] = 0;
     solids.clear();
+    // R27 M2: the gate and wall books describe what is built RIGHT NOW. They were never emptied, so
+    // a town rebuilt with different gates kept its old list, and one let go kept a list of gates
+    // that no longer exist (js/town.js stands guards from it)
+    gateRecords.clear();
+    wallRecords.clear();
     // ROUND 14: every town's streets go into one ribbon buffer — see buildSettlement
     const streets = { position: [], normal: [], color: [], index: [] };
 
@@ -1475,7 +1643,14 @@ export function createFeatures(scene, terrain, opts = {}) {
     /** Am I standing in a settlement? Returns the node, for the HUD. */
     settlementAt(x, z) {
       for (const s of settlements) {
-        const r = 30 + (s.size || 1) * 15;
+        /**
+         * R27 M2 — "you are in town" is the WALL for a walled town. It was `30 + size * 15`, which
+         * for a grown size-5 city (a 157 m wall) said you had left town while you were still 50 m
+         * inside it — no muster, no town hall. An open settlement keeps the old, generous circle
+         * (a hamlet has no edge to agree with), floored at its real ring.
+         */
+        const ext = townExtent(s);
+        const r = ext.walled ? ext.wall + 2 : Math.max(30 + (s.size || 1) * 15, ext.ring);
         if (Math.hypot(s.wx - x, s.wz - z) < r) return s;
       }
       return null;

@@ -42,6 +42,8 @@
 // travel to it. Keeping the two apart is what stops "can I go there?" from needing to know
 // anything about foundations.
 
+import { townExtent } from './town-plan.js';   // R27 M2
+
 /**
  * How far from the middle of a settlement counts as "inside it".
  *
@@ -50,9 +52,8 @@
  * `js/town.js` uses for its watch.
  */
 export function boundaryOf(node) {
-  const size = node.size || 1;
-  const ring = 16 + size * 13;
-  return (size >= 4 ? ring + 14 : ring) + 24;
+  // R27 M2: the town's real extent (its planned wall, or the footprint before it is planned)
+  return townExtent(node).wall + 24;
 }
 
 /**

@@ -4016,3 +4016,64 @@ Tests: `tests/round26-classlooks.test.js` (every class starts in its own look sl
 helm is the fighter's alone; the four starting kits; the Psalter), `avatar-3d/tests/class-outfits.test.js`,
 `avatar-3d/tests/chibi2-looks.spec.js`, `tests/round26-fixes.spec.js`, `tests/round26-skills.test.js`,
 `tests/round26-nan.test.js`, `tests/round26-dungeon.test.js`.
+
+## Round 27
+
+### Round 27 — One town size, and the planner's own gates (M2)
+
+**Six answers to "how big is this town".** The planner (`proctown/js/townplan.js`) grows a crowded
+site's ring 1.3x or 1.65x and reports the wall it really built as `plan.wallRadius`. Since R22
+js/features.js read it; nobody else did. js/town.js's no-spawn circle, js/waypoints.js's
+`boundaryOf`, features' own `settlementAt`, the town hall's walled/open label and js/sites.js's
+keep-clear gap all worked it out again from `16 + size * 13`. On seeds 25392 / 7 / 47 that let
+**1,648 of 9,019** live `spawnNear` bodies land inside a walled town's wall (Gukgruzcrown: 208 of
+500, a 135 m wall with a 100 m safe circle). Now `townExtent(node)` in js/town-plan.js is the one
+answer: the planner's own ring and wall, filed per town by `rememberPlan` when features plans it,
+with the unscaled footprint as a floor for anyone who asks first. All five callers use it; the
+keep-clear gap stays `190 + 120 * size` but is floored at `wall + 60`. After: **0 of 9,019**.
+"You are in town" is the wall (+2 m) for a walled town, so it no longer says you have left while
+you are 50 m inside a grown city.
+
+**One wall rule.** `size >= 4` was written out in six places. `wallTier(size)` (`'none' | 'low' |
+'wall'`, in the planner, re-exported by js/town-plan.js along with the planner's `footprintOf`,
+which Farhold had been carrying a copy of) is the only copy; `'low'` is reserved for M3's fences.
+The walled set is unchanged, and a test fails if any of the five modules grows its own copy back.
+
+**The muster** was reading `town.walled` (set by nothing, so the walled bonus never applied),
+YOUR colony's guards, and the town's size as its plot count. `musterFacts(town, guards)` gives the
+plan's plot count, the town's own guard bodies (`folk.guardsOf`) and the real wall; main.js and
+`tests/civilization.test.js` both go through it (the test used to pass `walled: true` by hand).
+
+**The planner's gates were thrown away.** Farhold opened the wall only where a world road
+crossed; a walled town with no road got one gate at `rng() * TAU`. Three faults under it:
+- The blocks are cut from a square `ring` across and the wall stands at `ring + 14`, so an
+  ordinary main street stopped fourteen metres short of the wall and the planner's gate at its
+  bearing opened onto grass. `buildWall` now carries an outward-heading street end along its own
+  line to the wall and cuts the gate where it arrives (the band between the last plot and the
+  wall has no plots, and `overlaps()` stays at zero over 840 plans); a lesser street is tried
+  before the widest-gap fallback.
+- A high street laid in from a road (`linkRoads`) was placed where the road crosses the
+  UNGROWN wall and slid out along its bearing when the town grew. A road arriving at a slant
+  crosses the bigger wall somewhere else, so the high street hit masonry 5-23 m from its gate.
+  The planner now takes `linksAt(radius)` and asks again at the radius it really builds.
+- `buildWall` returned `{ kind: radius }` — the radius filed as the wall kind. It is
+  `{ kind: <culture wall>, radius }` now.
+
+features.js merges the plan's gates (`plannerGates`) with the road crossings on the final
+`wallR`: the road's gate is kept when a street arrives inside its opening; a street a few metres
+along is absorbed by widening the road gate to cover both (up to 16 m); otherwise the street
+gets its own gate, trimmed back off any stretch of wall another gate already uses (a trimmed
+gate is a plain opening). Gatehouses go to the first four kept gates, roads first.
+
+**Gate guards and load order.** `populate` read `gatesOf` once. A town peopled before its wall
+was filed (first frame, a teleport) never got its gate guards; `update` now posts them the first
+time the gates exist. The gate book is emptied on every rebuild (it was a `Map` never cleared),
+and no guard is posted at a gate standing in water or on a post in water.
+
+Measured, 6 seeds x scale 0.1 and 1 (**`tests/round27-towns.test.js`**, 10 tests, real worlds):
+every settlement's safe circle >= wall + 10, "in town" at wall - 1 m on 16 bearings, waypoint
+boundary >= wall; 0 spawns inside a wall; every main-street end on the wall passes within 4 m of
+an opening, every walled town has 2-6 gates, both no-road walled towns (Leltudhold, Datitcrown)
+have every gate at a street end; a flood fill over the live colliders reaches every dry gate from
+the square; the muster is walled for exactly the size-4+ towns. Screenshots:
+`research/round27-towns/`.

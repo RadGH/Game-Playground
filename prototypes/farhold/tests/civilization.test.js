@@ -677,10 +677,23 @@ test('the cooldown is per rank and per place', () => {
   assert.equal(m.start({ placeId: 'ironmoor', tier: 'prowlers', base: BASE, level: 5, at: 10 }).ok, false);
 });
 
-test('a walled city musters a harder fight than a hamlet, with arithmetic that was already written', () => {
+test('a walled city musters a harder fight than a hamlet, with arithmetic that was already written', async () => {
+  // R27 M2: through the real path — the planner plans both towns, the plans are filed the way
+  // js/features.js files them, and `musterFacts` is the very call main.js makes. This used to pass
+  // `walled: true` by hand, which is why nobody noticed the game itself always passed false.
+  const { planTown } = await import('../../../proctown/js/townplan.js');
+  const { rememberPlan, musterFacts } = await import('../js/town-plan.js');
+  const cityNode = { id: 9001, size: 5 }, hamletNode = { id: 9002, size: 1 };
+  rememberPlan(cityNode, planTown({ seed: 11, size: 5, culture: 'human' }));
+  rememberPlan(hamletNode, planTown({ seed: 12, size: 1, culture: 'human' }));
+  const cityFacts = musterFacts(cityNode, 12), hamletFacts = musterFacts(hamletNode, 1);
+  assert.equal(cityFacts.walled, true, 'a size-5 city does not muster as walled');
+  assert.equal(hamletFacts.walled, false);
+  assert.ok(cityFacts.plots > hamletFacts.plots && hamletFacts.plots > 0, 'plots are not the plan\'s own count');
   const m = createMuster({ data: RAIDS, civics: COLONY, bestiary: BESTIARY });
-  const city = m.baseForTown({ size: 5 }, { guards: 12, walled: true });
-  const hamlet = m.baseForTown({ size: 1 }, { guards: 1, walled: false });
+  const city = m.baseForTown(cityNode, cityFacts);
+  const hamlet = m.baseForTown(hamletNode, hamletFacts);
+  assert.ok(city.defences > m.baseForTown(cityNode, { ...cityFacts, walled: false }).defences, 'the walled bonus did not apply');
   assert.ok(city.defences > hamlet.defences);
   assert.ok(city.citizens > hamlet.citizens);
   assert.ok(m.notoriety(city) > m.notoriety(hamlet));

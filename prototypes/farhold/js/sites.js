@@ -41,6 +41,7 @@ import { makeRng } from '../../../worldgen/js/noise.js';
 import { BIOMES } from '../../../worldgen/js/biomes.js';
 import { brazierBody, currentChests } from './chests.js';
 import { M_PER_CELL } from './planet.js';
+import { townExtent } from './town-plan.js';   // R27 M2
 
 function mergeParts(parts) {
   let total = 0;
@@ -451,7 +452,7 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
   /** Every settlement and port, with the ring of ground it keeps clear. See `townGap`. */
   const towns = ((terrain.world?.nodes) || [])
     .filter(n => n.type === 'settlement' || n.type === 'port')
-    .map(n => ({ x: n.x * cell, z: n.y * cell, guard: 190 + (n.size ?? 1) * 120 }));
+    .map(n => ({ x: n.x * cell, z: n.y * cell, guard: 190 + (n.size ?? 1) * 120, node: n }));
 
   // The warm path — the cache is already full, so there is no wait and no empty first frame.
   let ready = Promise.resolve(null);
@@ -552,7 +553,11 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
   function townGap(x, z) {
     let best = Infinity;
     for (const t of towns) {
-      const d = Math.hypot(t.x - x, t.z - z) - t.guard;
+      // R27 M2: the keep-clear gap is legitimately wider than the town, but never narrower than
+      // its real wall plus a margin — asked each time, because a town is planned after this list
+      // is made and the planner may have grown it
+      const guard = Math.max(t.guard, townExtent(t.node).wall + 60);
+      const d = Math.hypot(t.x - x, t.z - z) - guard;
       if (d < best) best = d;
     }
     return best;

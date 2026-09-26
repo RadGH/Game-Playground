@@ -48,6 +48,7 @@ import { createCaravans } from './caravans.js';
 import { createWanderers } from './wanderers.js';
 import { createRumours } from './rumours.js';
 import { createWaypoints, boardSpotFor, hallSpotFor } from './waypoints.js';
+import { townExtent, musterFacts } from './town-plan.js';   // R27 M2
 import { createCommand } from './command.js';
 import { createTownHall } from './townhall.js';
 import { population, recruitRefusal, populationText } from './population.js';
@@ -3322,6 +3323,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       return {
         town: {
           name: town.name, kind: town.kind || 'settlement', size: town.size || 1,
+          walled: townExtent(town).walled,               // R27 M2
           headcount: here.length,
           factionName: holder ? (factionData?.factions?.find(f => f.key === holder)?.name || holder) : null,
           standingWord: holder ? (standings.band(holder)?.name || null) : null,
@@ -3499,11 +3501,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       if (town) {
         return {
           placeId: 't' + town.id, placeName: town.name,
-          base: civics.muster.baseForTown(town, {
-            plots: town.size || 0,
-            guards: colony.guards?.() || 0,
-            walled: !!town.walled,
-          }),
+          // R27 M2: the TOWN's numbers — its planned plots, its own guard bodies, its real wall.
+          // `town.walled` was set by nothing, so the walled bonus never applied anywhere
+          base: civics.muster.baseForTown(town, musterFacts(town, folk.guardsOf?.(town.id) ?? 0)),
           level: player.level, at: state.elapsed,
         };
       }

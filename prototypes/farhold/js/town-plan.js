@@ -8,6 +8,7 @@
 // The geometry lives in `features.js`; the FACTS about each building live here.
 
 import { planLane, resample, LANE_SPACING } from './roadplan.js';
+import { footprintOf, wallTier } from '../../../proctown/js/townplan.js';
 
 /**
  * Every building a settlement may contain.
@@ -81,11 +82,90 @@ export const NEW_BUILDINGS = [
  * longer true anywhere.
  */
 
-/** How wide a settlement's footprint is, which is also where its quiet ground starts. */
-export function footprintOf(size = 1) {
-  const ring = 16 + size * 13;
-  const wall = size >= 4 ? ring + 14 : ring;
-  return { ring, wall, walled: size >= 4 };
+/**
+ * How wide a settlement's footprint is, and what kind of edge it has. R27 M2: these are the
+ * PLANNER's own functions, re-exported. This file used to carry a byte-for-byte copy of
+ * `footprintOf`, and the "size >= 4 is a wall" rule was written out in six places across the two
+ * projects. There is one of each now, in proctown/js/townplan.js.
+ */
+export { footprintOf, wallTier };
+
+// ---------------------------------------------------------------------------- R27 M2: one town size
+
+/**
+ * THE PLANS WE HAVE SEEN, so a caller that is not js/features.js can ask how big a town REALLY is.
+ *
+ * `planTown` retries a crowded site at 1.3x or 1.65x its ring, and only the plan knows which one it
+ * took. Before this, six systems each worked a town's size out from `16 + size * 13` and never saw
+ * the growth — so a size-5 wall stood at 157 m while the enemies' no-spawn circle stopped at 113 m,
+ * and a pack could spawn and wander forty metres inside a city's wall.
+ *
+ * Filed two ways: on the node object itself (features' settlements are what town.js, waypoints.js
+ * and main.js pass around), and by id for callers holding a different copy of the same node
+ * (js/sites.js reads `terrain.world.nodes`). The id table belongs to one world at a time and is
+ * emptied by `forgetPlans()` when js/features.js is built for a new one.
+ */
+const planByNode = new WeakMap();
+let planById = new Map();
+
+/** File a town's plan, once js/features.js has made it. */
+export function rememberPlan(node, plan) {
+  if (!node || !plan) return;
+  if (typeof node === 'object') planByNode.set(node, plan);
+  if (node.id != null) planById.set(node.id, plan);
+}
+
+/** A new world: every id means a different town now. */
+export function forgetPlans() { planById = new Map(); }
+
+/** The plan filed for this node, if the town has been planned yet. */
+export function planOf(node) {
+  if (!node) return null;
+  return (typeof node === 'object' && planByNode.get(node)) || planById.get(node.id) || null;
+}
+
+/**
+ * HOW FAR A TOWN REACHES: `{ ring, wall, walled, tier, plots, planned }`.
+ *
+ *   ring    metres from the centre to the outermost plot
+ *   wall    metres to the wall — or to the ring, for a settlement with none
+ *   walled  whether there is a real wall (a `'wall'` tier)
+ *   tier    `wallTier(size)`
+ *   plots   how many plots the plan cut, or null before it has been planned
+ *
+ * Reads the planner's real `plan.ring` / `plan.wallRadius` when the town has been planned, and the
+ * unscaled footprint otherwise. The footprint is a FLOOR, never an answer that wins over the plan:
+ * the planner only ever grows a town, so an early caller (js/sites.js keeping its castles clear,
+ * before any town has been planned) gets a smaller number than the truth, never a bigger one.
+ *
+ *   import { townExtent } from './town-plan.js';
+ *   const { wall, walled } = townExtent(node);
+ */
+export function townExtent(node = {}, plan = null) {
+  const size = node?.size || 1;
+  const fp = footprintOf(size);
+  const tier = wallTier(size);
+  const p = plan || planOf(node);
+  const ring = Math.max(fp.ring, Number.isFinite(p?.ring) ? p.ring : 0);
+  const wall = Math.max(fp.wall, ring, Number.isFinite(p?.wallRadius) ? p.wallRadius : 0);
+  return {
+    ring, wall, walled: tier === 'wall', tier,
+    plots: p?.plots ? p.plots.length : null,
+    planned: !!p,
+  };
+}
+
+/**
+ * R27 M2 — WHAT A TOWN BRINGS TO A MUSTER: its planned plot count, its own guard bodies and its
+ * real wall, for js/muster.js `baseForTown`. main.js used to hand over `town.size` as the plot
+ * count, YOUR colony's guards, and `town.walled` — which nothing ever set — so the walled bonus
+ * never applied anywhere. One function, so the test builds its town through the same path.
+ *
+ *   civics.muster.baseForTown(town, musterFacts(town, folk.guardsOf(town.id)))
+ */
+export function musterFacts(node, guards = 0) {
+  const ext = townExtent(node);
+  return { plots: ext.plots ?? 0, guards: guards || 0, walled: ext.walled };
 }
 
 // ---------------------------------------------------------------------------- streets as lanes

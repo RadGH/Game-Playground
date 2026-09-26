@@ -1496,6 +1496,7 @@ export class Rpg {
       dropBonus: (def.dropBonus || 0) + (R.dropBonus || 0), dropMult,
       dropRarity: (def.dropRarity || 1) * (R.dropRarity ?? 1),
       look: def.look || null, dropBases: def.dropBases || null,
+      uniqueDrop: def.uniqueDrop || null,   // R27 M10 — a warlord's warband unique
       scale: rank === 'champion' ? 1.18 : rank === 'rare' ? 1.35 : 1,
     };
   }
@@ -1904,12 +1905,24 @@ export class Rpg {
       const act = Math.max(1, Math.min(6, Math.ceil(level / 5)));
       const set = this.loot.maybeSetItem(act, rng, this.b.loot?.setChance ?? 0.35);
       if (set) return attuneWeapon(set);
-      const uniques = (this.items.uniques || []).filter(u => (u.act ?? 1) <= act);
+      // R27 M10 — a warband's own unique drops from that warband only (`uniqueItem`), never at random
+      const uniques = (this.items.uniques || []).filter(u => (u.act ?? 1) <= act && !u.warband);
       if (uniques.length && rng() < 0.5) return attuneWeapon(this.loot.generateUnique(rng.pick(uniques).id, rng));
     }
     const pool = bases || this.basesFor(level);
     const baseKey = rng.pick(this.loot.basesForAct(pool, Math.ceil(level / 5)));
     return attuneWeapon(this.loot.generate(baseKey, rarity, this.qualityFor(level), { rng }));
+  }
+
+  /**
+   * R27 M10 — one named unique, generated through the ordinary unique path (so it is stamped, dressed
+   * and attuned like any other). For a warband's own unique, which only its war-chest and its
+   * warlord ever give up. Null if the id is not installed.
+   */
+  uniqueItem(id, { level = 1, rng = this.rng } = {}) {
+    if (!(this.items.uniques || []).some(u => u.id === id)) return null;
+    this.lastDropLevel = level;
+    return attuneWeapon(this.loot.generateUnique(id, rng));
   }
 
   /**
@@ -1928,6 +1941,11 @@ export class Rpg {
         floor: enemy.rank === 'boss' && i === 0 ? 'rare' : enemy.rank === 'rare' && i === 0 ? 'magic' : null,
       });
       if (item) out.push(item);
+    }
+    // R27 M10 — a warlord may give up its warband's own unique (balance.warbands.warlordUniqueChance)
+    if (enemy.uniqueDrop && rng() < (this.b.warbands?.warlordUniqueChance ?? 0.1)) {
+      const u = this.uniqueItem(enemy.uniqueDrop, { level: enemy.level, rng });
+      if (u) out.push(u);
     }
     return out;
   }

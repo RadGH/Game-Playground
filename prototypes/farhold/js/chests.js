@@ -425,8 +425,14 @@ export function createChests(scene, terrain, { seed = 1, balance = {}, zones = n
         level: lvl, rng: rpg.rng, magicFind, chance: 1,
         rarityBoost: spec.rarityBoost || 1,
         floor: i === 0 ? spec.floor || null : null,
+        bases: chest.bases || null,          // R27 M10 — a war-chest rolls from its warband's drop list
       });
       if (item) items.push(item);
+    }
+    // R27 M10 — …and may hold that warband's own unique (`chest.unique = { id, chance }`)
+    if (rpg && chest.unique?.id && r() < (chest.unique.chance ?? 0)) {
+      const u = rpg.uniqueItem?.(chest.unique.id, { level: lvl });
+      if (u) items.push(u);
     }
     const gold = spec.gold
       ? Math.round((spec.gold[0] + r() * (spec.gold[1] - spec.gold[0])) * (1 + lvl * 0.12))

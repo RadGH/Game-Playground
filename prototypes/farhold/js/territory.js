@@ -19,7 +19,7 @@
 // the DELTAS (grip, which sites are cleared, open incidents, visit counts) are saved, which is a few
 // hundred bytes a zone rather than a world of furniture.
 
-import { holderFor, factionOf } from './factions.js';
+import { holderFor, factionOf, RIVAL_SHARE } from './factions.js';
 
 /**
  * Does this landmark belong on this ground? Reads the same `descriptor` sentence the holder picker
@@ -105,6 +105,14 @@ export function createTerritory({
   landmarks: landmarkData = null,
   /** `(zone) => [{ x, y, type }]` — the map nodes inside a zone, so a landmark sits on a real one. */
   nodesFor = null,
+  /**
+   * R27 M9 — `(zone) => warband row | null` (js/warbands.js `createWarbandMap().of`), or
+   * `undefined` when the caller cannot answer yet (js/main.js builds this file ~2000 lines above the
+   * enemy field that holds the claims). A record built without an answer is not kept.
+   */
+  warbandOf = null,
+  /** R27 M9 — data/balance.json `warbands`: gripRegen (a game day) and the four grip drops. */
+  warbandCfg = null,
 } = {}) {
   const landmarkKinds = landmarkData?.landmarks || [];
   const records = new Map();
@@ -121,13 +129,29 @@ export function createTerritory({
     const h = hash(seed, 'zone', zone.id);
     const rng = rngFrom(h);
 
+    /**
+     * R27 M9 — ONE HOSTILE HOLDER PER ZONE.
+     *
+     * A zone a warband holds (js/warbands.js, seeded per zone) already has its enemy: the warband.
+     * Before this, the faction picker ran blind to it, so an Ashtusk valley could also be held by
+     * the Ashen Pact, with raid-band patrols and bandit camps laid over the orcs — two sets of
+     * enemies both claiming the same ground and neither knowing. So the warband takes the hostile
+     * slot and the human side of the record — holder AND contested — is drawn only from the
+     * factions that are not hostile on sight (`hostileAtStart`). That is the whole rule, here,
+     * where the holder is picked; nothing downstream reconciles.
+     */
+    let band = null, unknown = false;
+    try { band = warbandOf ? warbandOf(zone) : null; } catch { band = undefined; }
+    if (band === undefined) { unknown = true; band = null; }
+    const hostileKeys = band ? (data?.factions || []).filter(f => f.hostileAtStart).map(f => f.key) : [];
+
     // The Hollowed never hold the world a character starts on the doorstep of — it would mean a
     // level-1 zone with something in it that does not talk and does not stop.
-    const exclude = zone.home || (zone.minLevel ?? 1) <= 4 ? ['hollowed'] : [];
+    const exclude = [...(zone.home || (zone.minLevel ?? 1) <= 4 ? ['hollowed'] : []), ...hostileKeys];
     // `descriptor` is the sentence World Forge wrote about the region ("a wide stretch of mild, green
     // open grass…"), which is the only description of what the ground is made of that a zone carries
     const holder = holderFor(data, { ...zone, biome: zone.biome || zone.descriptor || '' }, h, { exclude });
-    const rivalKey = (holder?.rivals || []).find(k => factionOf(data, k)) || null;
+    const rivalKey = (holder?.rivals || []).find(k => factionOf(data, k) && !hostileKeys.includes(k)) || null;
 
     const sites = [];
     const kinds = holder?.sites || [];
@@ -236,6 +260,12 @@ export function createTerritory({
       heat: 0,
       visits: 0,
       lastVisit: null,
+      // R27 M9 — the warband holding this ground, and how much of it it still holds (1 = the seeded
+      // claim, 0 = driven out). Saved as a delta like `grip`; an old save has none and reads 1.
+      warband: band?.id || null,
+      warbandName: band?.name || null,
+      warGrip: band ? 1 : 0,
+      _unknown: unknown,
       // only the fields below ever reach the save
       _dirty: false,
     };
@@ -244,8 +274,10 @@ export function createTerritory({
     if (saveRow) {
       if (Number.isFinite(saveRow.grip)) record.grip = clamp01(saveRow.grip);
       if (Number.isFinite(saveRow.claim)) record.claim = clamp01(saveRow.claim);
-      if (saveRow.holder) record.holder = saveRow.holder;
-      if (saveRow.contested !== undefined) record.contested = saveRow.contested;
+      // R27 M9 — a save from before the one-holder rule may name a hostile faction on warband ground
+      if (saveRow.holder && !hostileKeys.includes(saveRow.holder)) record.holder = saveRow.holder;
+      if (saveRow.contested !== undefined && !hostileKeys.includes(saveRow.contested)) record.contested = saveRow.contested;
+      if (band && Number.isFinite(saveRow.warGrip)) record.warGrip = clamp01(saveRow.warGrip);
       if (Number.isFinite(saveRow.heat)) record.heat = saveRow.heat;
       if (Number.isFinite(saveRow.visits)) record.visits = saveRow.visits;
       if (Array.isArray(saveRow.incidents)) record.incidents = saveRow.incidents.map(i => ({ ...i }));
@@ -274,8 +306,80 @@ export function createTerritory({
   function of(zoneOrId) {
     const zone = typeof zoneOrId === 'object' ? zoneOrId : (zones?.byId?.(zoneOrId) || null);
     if (!zone || zone.id == null) return null;
-    if (!records.has(zone.id)) records.set(zone.id, build(zone));
+    if (!records.has(zone.id)) {
+      const record = build(zone);
+      // R27 M9 — asked before the claims exist: answer, but build it again next time
+      if (record._unknown) return record;
+      records.set(zone.id, record);
+    }
     return records.get(zone.id);
+  }
+
+  /**
+   * R27 M9 — THE WARBAND'S GRIP.
+   *
+   * `warGrip` is the warband's hold on a zone, separate from `grip` (which is the human holder's —
+   * the two sides are not the same fight, and a camp of the Reach going down must not loosen the
+   * orcs). It falls for what you do there and creeps back a game day at a time (`tick`). At 0 the
+   * zone is free: js/warbands.js `holds()` goes null, so nothing of theirs spawns, and the claim
+   * reads "driven out".
+   */
+  const GRIP_DROP = { kill: 'killGrip', patrol: 'patrolGrip', camp: 'campGrip', warlord: 'warlordGrip' };
+  const GRIP_DEED = { patrol: 'patrol_killed', camp: 'stronghold_taken', warlord: 'stronghold_taken' };
+  function warGrip(zoneOrId) {
+    const record = of(zoneOrId);
+    /**
+     * The territory ledger is keyed by zone id and outlives a landing, so after you fly to another
+     * world its zone 3 would read THIS world's zone-3 row. A zone object whose name is not the
+     * row's is somebody else's ground: nothing has touched it, so its warband is at its full claim.
+     */
+    if (record && typeof zoneOrId === 'object' && zoneOrId?.name && record.zoneName && record.zoneName !== zoneOrId.name) return 1;
+    return record?.warband ? record.warGrip : 0;
+  }
+  /**
+   * Something went against the warband here: `what` is kill / patrol / camp / warlord, and the
+   * size of the drop is data/balance.json `warbands.<what>Grip`. A deed against a warband is felt
+   * by the human factions whose ground it sits on — the holder and whoever contests it — as the
+   * opposite of that deed at a third (js/factions.js `RIVAL_SHARE`, the same third every deed
+   * spreads to rivals). A warband has no standing row of its own; the 12-faction screen is unchanged.
+   */
+  function warbandLoss(zoneId, what = 'kill', { times = 1 } = {}) {
+    const record = of(zoneId);
+    if (!record?.warband) return null;
+    const drop = (warbandCfg?.[GRIP_DROP[what]] ?? 0) * times;
+    const before = record.warGrip;
+    record.warGrip = clamp01(record.warGrip - drop);
+    touch(record);
+    const deed = GRIP_DEED[what];
+    const amount = deed ? (data?.deeds || {})[deed] : null;
+    if (standings && Number.isFinite(amount)) {
+      for (const key of [record.holder, record.contested]) {
+        if (key && factionOf(data, key)) standings.add(key, Math.round(-amount * times * RIVAL_SHARE * 10) / 10, { spread: false });
+      }
+    }
+    return { warband: record.warband, grip: record.warGrip, drivenOut: before > 0 && record.warGrip <= 0 };
+  }
+  /** Set the grip outright — the debug menu and the tests. */
+  function setWarGrip(zoneId, value) {
+    const record = of(zoneId);
+    if (!record?.warband) return null;
+    record.warGrip = clamp01(value);
+    touch(record);
+    return record.warGrip;
+  }
+  /**
+   * Who is hostile on this ground: the warband, and any faction that shoots on sight holding or
+   * contesting it. The one-holder rule is that this is never longer than one.
+   */
+  function hostiles(zoneOrId) {
+    const record = of(zoneOrId);
+    if (!record) return [];
+    const out = [];
+    if (record.warband) out.push({ kind: 'warband', id: record.warband, grip: record.warGrip });
+    for (const key of [record.holder, record.contested]) {
+      if (key && factionOf(data, key)?.hostileAtStart) out.push({ kind: 'faction', id: key });
+    }
+    return out;
   }
 
   /** Mark a record so its deltas get written. */
@@ -382,8 +486,20 @@ export function createTerritory({
     if (hours <= 0) return [];
     clock += hours;
     const events = [];
+    // R27 M9 — a zone thinned in an earlier session regrows too, not only the ones walked into since
+    for (const [id, row] of Object.entries(deltas)) {
+      if (Number.isFinite(row?.warGrip) && row.warGrip < 1 && !records.has(Number(id))) of(Number(id));
+    }
+    const regen = (warbandCfg?.gripRegen ?? 0) * hours / 24;
     for (const record of records.values()) {
       let moved = false;
+      // R27 M9 — the warband creeps back, `gripRegen` a game day, up to its seeded claim
+      if (record.warband && record.warGrip < 1 && regen > 0) {
+        const was = record.warGrip;
+        record.warGrip = clamp01(record.warGrip + regen);
+        moved = true;
+        if (was <= 0 && record.warGrip > 0) events.push({ kind: 'warband-returned', zoneId: record.zoneId, warband: record.warband });
+      }
       for (const site of record.sites) {
         if (!site.cleared || !site.respawnHours) continue;
         if (clock - (site.clearedAt ?? 0) < site.respawnHours) continue;
@@ -551,6 +667,7 @@ export function createTerritory({
 
   return {
     of, visit, clearSite, championKilled, press, tick, addIncident, resolveIncident,
+    warGrip, warbandLoss, setWarGrip, hostiles, // R27 M9
     workLandmark, visitLandmark, takeLandmark, adoptLandmark, standingOffer,
     /**
      * The row a landmark should use, whichever of the two systems it came from. A set-piece
@@ -597,6 +714,8 @@ export function createTerritory({
           holder: record.holder, contested: record.contested,
           heat: Math.round(record.heat * 1000) / 1000,
           visits: record.visits,
+          // R27 M9 — only for warband ground; an old save has none and loads at 1
+          warGrip: record.warband ? Math.round(record.warGrip * 10000) / 10000 : undefined,
           cleared: record.sites.filter(s => s.cleared).map(s => ({ id: s.id, at: s.clearedAt })),
           /**
            * R16: `taken` goes in the save now. It never did — so the one-shot gate that stopped a

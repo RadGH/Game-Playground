@@ -1151,3 +1151,285 @@ function rebuildAs(desc, base, roof, culture, seed) {
   };
   return out;
 }
+
+// ---------------------------------------------------------------------------- R27 M3: town edges
+
+/**
+ * R27 M3 — WHAT A TOWN'S EDGE IS MADE OF, ONE KIT PER WALL KIND.
+ *
+ * `CULTURES[*].wall` in townplan.js (and `townWall.kind` in cultures.json) has named a wall
+ * material for every culture since the planner went in — stone, cutstone, palisade, hedge, bone,
+ * mudbrick — and nothing ever read it: Farhold drew the same masonry ring round an orc war camp and
+ * an elf grove and only changed its colour. These are the six edges, as part lists in the same unit
+ * shapes a building is made of, so the gallery (kit.html, "Town edges") draws exactly what the game
+ * instances.
+ *
+ * Every piece is in its OWN frame and the frames are fixed contracts with js/features.js:
+ *
+ *   wall       a length of wall along +Z, `WALL_SEG` (6 m) long, z = -3..3, base at y = 0. The game
+ *              stretches it along Z to the chord it stands on. Collision is NOT read from here — it
+ *              is the same straight `addSegment` for every kind (round 23), so a hedge and a curtain
+ *              of masonry stop you on exactly the same line.
+ *   tower      centred on the origin, footprint inside a 5 m circle (the `tower` collider is 2.6 m).
+ *   gatehouse  the opening runs along Z through x = -2.1..2.1 and is clear to 4.9 m; the two sides
+ *              stand in x = +/-2.1..3.7 and z = +/-1.7 (3.4 deep). The game scales X only, so the
+ *              opening scales with the whole, and files its colliders from those same numbers.
+ *   fence      a length of low fence along +Z, `FENCE_SEG` (5 m) long — decoration, no collider.
+ *   boundary   one standing stone.
+ *
+ * Colours are near-white on purpose: the game tints each instance with the culture's wall colour
+ * (so an orc palisade is brown and an elf hedge green), and the shades here only pick out a cap or a
+ * rail from the body it sits on.
+ */
+export const WALL_KINDS = ['stone', 'cutstone', 'palisade', 'hedge', 'bone', 'mudbrick'];
+export const FENCE_KINDS = ['rail', 'hedge', 'stake'];
+export const WALL_SEG = 6;
+export const FENCE_SEG = 5;
+
+/** A rail fence is wood whatever the town's wall is; a hedge or a stake fence is the wall's colour. */
+export const FENCE_WOOD = '#7a6048';
+export function fenceTintFor(fenceKind, wallColour) {
+  return fenceKind === 'rail' ? FENCE_WOOD : wallColour;
+}
+
+/** Which low fence a village of this wall culture puts up. */
+export function fenceKindFor(wallKind) {
+  if (wallKind === 'hedge') return 'hedge';
+  if (wallKind === 'palisade' || wallKind === 'bone') return 'stake';
+  return 'rail';
+}
+
+const W = '#ffffff', W2 = '#e6e6e6', W3 = '#c8c8c8', W4 = '#a8a8a8';
+const part = (mesh, x, y, z, w, h, d, colour = W, tag = 'edge', yaw = 0) => ({ mesh, x, y, z, w, h, d, yaw, colour, tag });
+
+/** A stepped arch in the Y-Z plane (the plane of a wall along +Z), from z0 to z1, springing at y. */
+function ribArch(z0, z1, y, rise, x = 0, block = 0.34, colour = W) {
+  const out = [];
+  const zc = (z0 + z1) / 2, r = Math.abs(z1 - z0) / 2;
+  for (let i = 0; i <= 6; i++) {
+    const t = (i / 6) * Math.PI;
+    out.push(part('box', x, y + Math.sin(t) * rise, zc + Math.cos(t) * r, block, block, block * 1.3, colour));
+  }
+  return out;
+}
+
+const WALL_PIECES = {
+  stone: () => [
+    part('box', 0, 0, 0, 1.1, 3.8, 6),
+    ...[-2, 0, 2].map(z => part('box', 0, 3.7, z, 1.2, 0.6, 0.9)),
+  ],
+  // crisper: a plinth, a flat coping that overhangs both faces, and four square merlons
+  cutstone: () => [
+    part('box', 0, 0, 0, 1.45, 0.6, 6, W3),
+    part('box', 0, 0.55, 0, 1.15, 3.4, 6, W2),
+    part('box', 0, 3.9, 0, 1.4, 0.24, 6, W),
+    ...[-2.25, -0.75, 0.75, 2.25].map(z => part('box', 0, 4.12, z, 1.25, 0.8, 0.8, W)),
+  ],
+  // sharpened log posts, shoulder to shoulder, on two rails
+  palisade: () => [
+    ...Array.from({ length: 10 }, (_, i) => part('cyl', 0, 0, -2.7 + i * 0.6, 0.64, 3.7, 0.64, i % 2 ? W : W2)),
+    ...Array.from({ length: 10 }, (_, i) => part('cone', 0, 3.7, -2.7 + i * 0.6, 0.64, 0.85, 0.64, W2)),
+    part('box', -0.38, 1.0, 0, 0.22, 0.26, 6, W4),
+    part('box', -0.38, 2.7, 0, 0.22, 0.26, 6, W4),
+  ],
+  // a green rounded mass: a core, and three swells along the top so it never reads as a box
+  hedge: () => [
+    part('box', 0, 0, 0, 1.45, 2.7, 6.1, W2),
+    ...[-2, 0, 2].map((z, i) => part('dome', 0, 2.35, z, 1.75, 1.4, 2.3, i === 1 ? W : W2)),
+    ...[-1.5, 1.5].map(z => part('dome', 0, 0, z, 1.6, 0.9, 3.1, W3)),
+  ],
+  // posts with rib arches between them, over a low footing and a screen of thin ribs
+  bone: () => [
+    part('box', 0, 0, 0, 0.95, 1.2, 6, W3),
+    ...[-3, -1, 1, 3].map(z => part('cyl', 0, 0, z, 0.5, 4.1, 0.5, W)),
+    ...[-3, -1, 1, 3].map(z => part('cone', 0, 4.1, z, 0.42, 0.7, 0.42, W2)),
+    ...[[-3, -1], [-1, 1], [1, 3]].flatMap(([a, b]) => ribArch(a, b, 3.0, 0.95)),
+    ...Array.from({ length: 11 }, (_, i) => part('box', 0, 1.1, -2.5 + i * 0.5, 0.16, 2.3, 0.16, W2)),
+  ],
+  // thick and rendered, with a darker footing band and rounded merlons
+  mudbrick: () => [
+    part('box', 0, 0, 0, 1.5, 3.6, 6, W),
+    part('box', 0, 0, 0, 1.62, 0.5, 6.02, W3),
+    part('box', 0, 3.55, 0, 1.62, 0.26, 6.02, W2),
+    ...[-2, 0, 2].map(z => part('dome', 0, 3.78, z, 1.25, 0.95, 1.25, W)),
+  ],
+};
+
+const TOWER_PIECES = {
+  stone: () => [
+    part('cyl', 0, 0, 0, 4.8, 10, 4.8),
+    part('cyl', 0, 9.95, 0, 5.8, 0.7, 5.8, W2),
+    part('hip', 0, 10.6, 0, 3.9, 3, 3.9, W3),
+  ],
+  cutstone: () => [
+    part('box', 0, 0, 0, 5.0, 0.8, 5.0, W3),
+    part('box', 0, 0.75, 0, 4.4, 10.4, 4.4, W2),
+    part('box', 0, 11.1, 0, 5.0, 0.3, 5.0, W),
+    ...[[-1, -1], [-1, 1], [1, -1], [1, 1], [0, -1], [0, 1], [-1, 0], [1, 0]].map(([a, b]) =>
+      part('box', a * 2.05, 11.4, b * 2.05, 0.9, 0.95, 0.9, W)),
+  ],
+  // a timber watch platform on four legs, with a steep roof
+  palisade: () => [
+    ...[[-1, -1], [-1, 1], [1, -1], [1, 1]].map(([a, b]) => part('cyl', a * 1.6, 0, b * 1.6, 0.6, 10.8, 0.6, W2)),
+    part('box', 0, 7.8, 0, 4.2, 0.35, 4.2, W),
+    ...[[0, -2], [0, 2]].map(([a, b]) => part('box', a, 8.15, b, 4.2, 1.0, 0.18, W3)),
+    ...[[-2, 0], [2, 0]].map(([a, b]) => part('box', a, 8.15, b, 0.18, 1.0, 4.2, W3)),
+    part('hip', 0, 10.7, 0, 5.0, 2.6, 5.0, W4),
+    ...Array.from({ length: 6 }, (_, i) => part('cyl', Math.cos(i) * 2.2, 0, Math.sin(i) * 2.2, 0.55, 5.2, 0.55, W)),
+    ...Array.from({ length: 6 }, (_, i) => part('cone', Math.cos(i) * 2.2, 5.2, Math.sin(i) * 2.2, 0.55, 0.8, 0.55, W2)),
+  ],
+  // a clipped topiary tower
+  hedge: () => [
+    part('cyl', 0, 0, 0, 4.4, 6.8, 4.4, W2),
+    part('dome', 0, 6.3, 0, 4.9, 2.8, 4.9, W),
+    part('cyl', 0, 8.6, 0, 1.2, 1.0, 1.2, W3),
+    part('dome', 0, 9.3, 0, 2.3, 2.0, 2.3, W),
+  ],
+  // a bone pillar with a crown of tusks
+  bone: () => [
+    part('cyl', 0, 0, 0, 3.4, 1.0, 3.4, W3),
+    part('cyl', 0, 0.9, 0, 2.6, 8.0, 2.6, W),
+    part('cyl', 0, 8.8, 0, 3.6, 0.6, 3.6, W2),
+    part('dome', 0, 9.3, 0, 2.6, 2.2, 2.6, W),
+    ...Array.from({ length: 6 }, (_, i) => {
+      const a = (i / 6) * Math.PI * 2;
+      return part('cone', Math.cos(a) * 1.55, 9.3, Math.sin(a) * 1.55, 0.55, 3.0, 0.55, W2);
+    }),
+    ...ribArch(-1.6, 1.6, 4.2, 1.4, 1.35),
+    ...ribArch(-1.6, 1.6, 4.2, 1.4, -1.35),
+  ],
+  // a tapering rendered tower with a parapet and a small dome
+  mudbrick: () => [
+    part('frustum', 0, 0, 0, 4.8, 10.2, 4.8, W),
+    part('box', 0, 0, 0, 5.0, 0.6, 5.0, W3),
+    part('box', 0, 10.1, 0, 2.7, 0.7, 2.7, W2),
+    part('dome', 0, 10.75, 0, 2.3, 1.7, 2.3, W),
+  ],
+};
+
+/**
+ * The gatehouses. The ONE rule they all keep: nothing inside x = -2.1..2.1 below 4.9 m, and
+ * nothing outside z = +/-1.9. The door leaves (a separate mesh in the game) hang in that opening.
+ */
+const GATE_SIDES = [-2.9, 2.9];
+const GATEHOUSE_PIECES = {
+  stone: () => [
+    ...GATE_SIDES.map(x => part('box', x, 0, 0, 1.6, 6, 3.4)),
+    part('box', 0, 4.9, 0, 7.4, 1.4, 3.4),
+    ...GATE_SIDES.map(x => part('box', x, 6.25, 0, 1.8, 0.5, 3.6, W2)),
+  ],
+  cutstone: () => [
+    ...GATE_SIDES.map(x => part('box', x, 0, 0, 1.6, 6.4, 3.4, W2)),
+    ...GATE_SIDES.map(x => part('box', x + Math.sign(x) * 0.1, 0, 0, 1.6, 0.8, 3.7, W3)),
+    part('box', 0, 4.9, 0, 7.4, 1.5, 3.4, W2),
+    part('box', 0, 6.4, 0, 7.8, 0.3, 3.7, W),
+    ...[-3.2, -1.6, 0, 1.6, 3.2].flatMap(x => [
+      part('box', x, 6.7, -1.45, 0.9, 0.9, 0.7, W),
+      part('box', x, 6.7, 1.45, 0.9, 0.9, 0.7, W),
+    ]),
+  ],
+  palisade: () => [
+    ...GATE_SIDES.flatMap(s => [-0.5, 0, 0.5].flatMap(dx => [-1.1, 0, 1.1].map(z =>
+      part('cyl', s + dx, 0, z, 0.55, 6.6 + (dx === 0 ? 0.6 : 0), 0.55, z === 0 ? W : W2)))),
+    ...GATE_SIDES.flatMap(s => [-1.1, 1.1].map(z => part('cone', s, 7.2, z, 0.55, 0.9, 0.55, W2))),
+    part('box', 0, 4.95, -1.2, 7.6, 0.55, 0.55, W3),
+    part('box', 0, 4.95, 1.2, 7.6, 0.55, 0.55, W3),
+    part('box', 0, 5.5, 0, 7.4, 0.3, 3.2, W4),
+  ],
+  hedge: () => [
+    ...GATE_SIDES.map(x => part('box', x, 0, 0, 1.6, 5.2, 3.3, W2)),
+    ...GATE_SIDES.map(x => part('dome', x, 5.0, 0, 1.9, 1.6, 3.5, W)),
+    part('box', 0, 4.9, 0, 7.4, 1.0, 3.0, W2),
+    part('dome', 0, 5.6, 0, 7.6, 1.8, 3.3, W),
+  ],
+  bone: () => [
+    ...GATE_SIDES.flatMap(x => [-1.2, 1.2].map(z => part('cyl', x, 0, z, 0.75, 6.8, 0.75, W))),
+    ...GATE_SIDES.map(x => part('box', x, 0, 0, 1.3, 1.6, 3.2, W3)),
+    ...GATE_SIDES.flatMap(x => [-1.2, 1.2].map(z => part('cone', x, 6.8, z, 0.6, 1.4, 0.6, W2))),
+    // the rib arches run ACROSS the road here, so they are laid in the X-Y plane: built along Z,
+    // then swung a quarter turn (a box's yaw is enough, since each block is square in plan)
+    ...[-1.2, 0, 1.2].flatMap(z => ribArch(-2.9, 2.9, 5.1, 1.3, 0, 0.45).map(p =>
+      ({ ...p, x: p.z, z, yaw: Math.PI / 2 }))),
+  ],
+  mudbrick: () => [
+    ...GATE_SIDES.map(x => part('box', x < 0 ? -2.95 : 2.95, 0, 0, 1.7, 6.2, 3.8, W)),
+    ...GATE_SIDES.map(x => part('box', x < 0 ? -2.95 : 2.95, 0, 0, 1.7, 0.6, 3.9, W3)),
+    part('box', 0, 4.9, 0, 7.6, 1.6, 3.6, W),
+    part('box', 0, 6.45, 0, 7.8, 0.3, 3.8, W2),
+    ...[-2.9, 0, 2.9].map(x => part('dome', x, 6.7, 0, 1.3, 1.0, 1.3, W)),
+  ],
+};
+
+const FENCE_PIECES = {
+  rail: () => [
+    ...[-2.45, 0, 2.45].map(z => part('box', 0, 0, z, 0.18, 1.25, 0.18, W2)),
+    part('box', 0, 0.45, 0, 0.09, 0.13, 5, W),
+    part('box', 0, 0.95, 0, 0.09, 0.13, 5, W),
+  ],
+  hedge: () => [
+    part('box', 0, 0, 0, 0.85, 0.85, 5.1, W2),
+    ...[-1.3, 1.3].map(z => part('dome', 0, 0.7, z, 1.0, 0.55, 2.8, W)),
+  ],
+  stake: () => [
+    ...Array.from({ length: 8 }, (_, i) => part('cyl', 0, 0, -2.2 + i * 0.63, 0.22, 1.15, 0.22, i % 2 ? W : W2)),
+    ...Array.from({ length: 8 }, (_, i) => part('cone', 0, 1.15, -2.2 + i * 0.63, 0.22, 0.32, 0.22, W2)),
+    part('box', -0.14, 0.6, 0, 0.09, 0.12, 5, W3),
+  ],
+};
+
+/** One piece of a town's edge: `piece` is 'wall' | 'tower' | 'gatehouse', `kind` a WALL_KINDS. */
+export function wallKitParts(kind = 'stone', piece = 'wall') {
+  const table = piece === 'tower' ? TOWER_PIECES : piece === 'gatehouse' ? GATEHOUSE_PIECES : WALL_PIECES;
+  return (table[kind] || table.stone)();
+}
+
+/** A length of low fence (`FENCE_KINDS`). */
+export function fenceParts(kind = 'rail') {
+  return (FENCE_PIECES[kind] || FENCE_PIECES.rail)();
+}
+
+/** A boundary stone: a footing, a dressed stone and a pointed cap. */
+export function boundaryStoneParts() {
+  return [
+    part('box', 0, 0, 0, 1.2, 0.25, 0.9, W3),
+    part('frustum', 0, 0.2, 0, 0.8, 1.5, 0.8, W),
+    part('hip', 0, 1.62, 0, 0.44, 0.35, 0.44, W2),
+  ];
+}
+
+/** Multiply a part list's colours by a tint — what an instance colour does to a white mesh. */
+export function tintParts(parts, tint) {
+  const t = parseInt(String(tint).replace('#', ''), 16);
+  const tr = ((t >> 16) & 255) / 255, tg = ((t >> 8) & 255) / 255, tb = (t & 255) / 255;
+  return parts.map(p => {
+    const c = parseInt(String(p.colour).replace('#', ''), 16);
+    const ch = (v, k) => Math.round(((c >> v) & 255) * k).toString(16).padStart(2, '0');
+    return { ...p, colour: '#' + ch(16, tr) + ch(8, tg) + ch(0, tb) };
+  });
+}
+
+/** Move and turn a part list as one piece (for the gallery's little scenes). */
+export function placeParts(parts, dx = 0, dz = 0, yaw = 0) {
+  const c = Math.cos(yaw), s = Math.sin(yaw);
+  return parts.map(p => ({
+    ...p,
+    x: dx + p.x * c + p.z * s, z: dz - p.x * s + p.z * c,
+    yaw: (p.yaw || 0) + yaw,
+  }));
+}
+
+/**
+ * The gallery's scene for one culture: a gatehouse, wall either side, and a tower at each end —
+ * the same pieces, spacing and tint the game uses.
+ */
+export function edgeScene(kind = 'stone', tint = '#8a8275') {
+  const parts = [...wallKitParts(kind, 'gatehouse')];
+  for (const side of [-1, 1]) {
+    // the wall runs along +Z in its own frame; the gate's wall runs along X, so turn it a quarter
+    for (let i = 0; i < 2; i++) {
+      parts.push(...placeParts(wallKitParts(kind, 'wall'), side * (3.7 + WALL_SEG / 2 + i * WALL_SEG), 0, Math.PI / 2));
+    }
+    parts.push(...placeParts(wallKitParts(kind, 'tower'), side * (3.7 + WALL_SEG * 2 + 2.2), 0));
+  }
+  return tintParts(parts, tint);
+}

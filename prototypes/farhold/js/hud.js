@@ -701,7 +701,7 @@ export class Hud {
    * This is the one piece of Hack/Mine's presentation worth copying outright: without it the bands
    * exist only on the map, and a player who never opens the map never learns the world has any.
    */
-  announceZone(zone, playerLevel) {
+  announceZone(zone, playerLevel, held = '') { // R27 M9 — `held`: js/warbands.js holderLine()
     const box = $('zone-banner');
     if (!box || !zone) return false;
     if (this.announcedZone === zone.id) return false;
@@ -712,7 +712,7 @@ export class Hud {
     box.querySelector('.zb-name').textContent = zone.name;
     box.querySelector('.zb-level').textContent = `level ${zone.minLevel}\u2013${zone.maxLevel}`;
     box.querySelector('.zb-level').className = 'zb-level zone-' + tone;
-    box.querySelector('.zb-danger').textContent = zone.danger + ' · ' + TONE_WORDS[tone];
+    box.querySelector('.zb-danger').textContent = zone.danger + ' · ' + TONE_WORDS[tone] + (held ? ' · ' + held : '');
     box.className = 'hud zb-' + tone;
     box.classList.remove('hidden');
     // restart the animation even if the banner is already up
@@ -722,6 +722,36 @@ export class Hud {
     clearTimeout(this.zoneTimer);
     this.zoneTimer = setTimeout(() => box.classList.add('hidden'), 5200);
     this.log(`${zone.name} — level ${zone.minLevel}\u2013${zone.maxLevel}, ${zone.danger.toLowerCase()}.`, tone === 'deadly' ? 'bad' : 'level');
+    return true;
+  }
+
+  /**
+   * R27 M3 — THE ARRIVAL CARD. The zone banner's own box and animation, saying where you have just
+   * walked into: "Dearbigate — town — held by the Cutwater — market, smith, inn". `card` is
+   * js/town-plan.js `arrivalCard()`; WHEN it fires (once per entry, on the town's real edge) is
+   * decided there too, by `arrivalAt`, so this only draws.
+   */
+  announceTown(card) {
+    const box = $('zone-banner');
+    if (!box || !card) return false;
+    const services = (card.services || []).join(', ');
+    box.querySelector('.zb-name').textContent = card.name;
+    const size = box.querySelector('.zb-level');
+    size.textContent = card.size || '';
+    size.className = 'zb-level zb-town-size';
+    box.querySelector('.zb-danger').textContent = [card.holder ? `held by ${card.holder}` : null, services || null]
+      .filter(Boolean).join(' \u2014 ');
+    box.className = 'hud zb-town';
+    box.classList.remove('hidden');
+    box.style.animation = 'none';
+    void box.offsetWidth;
+    box.style.animation = '';
+    clearTimeout(this.zoneTimer);
+    this.zoneTimer = setTimeout(() => box.classList.add('hidden'), 5200);
+    const line = [card.name, card.size, card.holder ? `held by ${card.holder}` : null, services || null]
+      .filter(Boolean).join(' \u2014 ');
+    this.lastArrival = { ...card, line, at: Date.now() };
+    this.log(line + '.', 'level');
     return true;
   }
 

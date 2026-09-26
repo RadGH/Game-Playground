@@ -27,7 +27,9 @@ import { feel, staggerFor, pushFor, COMBAT_FEEL } from './combat-feel.js';
 import { traitsOf } from './weapons.js';
 import { CHIBI2_COMBAT_RIDE } from '../../../avatar-3d/js/chibi2-motion.js';
 // R23: a body stands on a bridge deck, not on the river bed under it — see js/ground.js
-import { groundAt, wetAt } from './ground.js';
+import { groundAt, wetAt, cliffStep, climbable } from './ground.js';
+import { leaderModifier, fitsRoom } from './warbands.js';   // R27 M10
+import { compactCreature } from './mesh-merge.js';            // R27 M8
 
 /** `bleed` out of data/skills.json — the field applies it without owning the skill data. */
 const BLEED = { name: 'Bleeding', kind: 'damage', element: 'physical', perSecond: 0.26, seconds: 6 };
@@ -53,6 +55,8 @@ export async function makeActor(look = {}) {
   if (look.creature) {
     const actor = await createCreature(look.creature);
     actor.beast = true;
+    // R27 M8 — one draw call per moving part, not one per eye and toe (js/mesh-merge.js)
+    actor.compacted = compactCreature(actor);
     return actor;
   }
   const avatar = normalizeAvatar ? normalizeAvatar(look.avatar || {}) : (look.avatar || {});
@@ -93,6 +97,30 @@ export async function makeActor(look = {}) {
     actor.setRate = k => { actor.playerDriven = true; rate(k); };
   }
   return actor;
+}
+
+/**
+ * R27 M8 — HOW MUCH OF A DISTANT PERSON IS WORTH A DRAW CALL.
+ *
+ * A Chibi 2 body is two draw calls (cloth and metal) and a townsperson worth talking to carries a
+ * badge sprite, a third. Standing at a city gate on seed 47 there were 21 people in view, most of
+ * them 100-560 m away across the rooftops, and they were 53 of the scene's 144 calls. Past
+ * `METAL_FAR` the metal (a buckle, a blade, a helm rim) is a pixel or two and is not drawn; past
+ * `BODY_FAR` the whole person is under eight pixels tall and is not drawn at all. Nothing about them
+ * stops updating — they walk, work and talk exactly as before — they are only not DRAWN.
+ */
+export const LOD = { METAL_FAR: 70, BODY_FAR: 200 };
+export function lodBody(actor, dist) {
+  const g = actor?.group;
+  if (!g) return;
+  const show = dist < LOD.BODY_FAR;
+  if (g.visible !== show) g.visible = show;
+  // (a test's stand-in body is a plain object with no scene graph: nothing to find, nothing to hide)
+  if (actor.metalMesh === undefined) actor.metalMesh = g.getObjectByName?.('chibi2-metal') || null;
+  if (actor.metalMesh) {
+    const metal = dist < LOD.METAL_FAR;
+    if (actor.metalMesh.visible !== metal) actor.metalMesh.visible = metal;
+  }
 }
 
 /**
@@ -139,6 +167,29 @@ function anim(actor, name) {
 export { anim as setActorAnim };
 
 /**
+ * R27 M10 — A STANDARD-BEARER'S COLOURS: a pole strapped across the back with the warband's cloth
+ * at the top, so the one to kill first is the one you can see over the others' heads. Built in the
+ * body's own group (it scales, turns and dies with it). Pole, crossbar and a two-part cloth.
+ */
+function backBanner(colour = '#b8402a') {
+  const g = new THREE.Group();
+  g.name = 'warband-banner';
+  const wood = new THREE.MeshLambertMaterial({ color: '#4a3a28' });
+  const cloth = new THREE.MeshLambertMaterial({ color: colour, side: THREE.DoubleSide });
+  const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 2.6, 6), wood);
+  pole.position.set(0, 1.75, -0.32);
+  const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.8, 5), wood);
+  bar.rotation.z = Math.PI / 2; bar.position.set(0, 2.95, -0.32);
+  const flag = new THREE.Mesh(new THREE.PlaneGeometry(0.76, 0.9), cloth);
+  flag.position.set(0, 2.48, -0.34);
+  const tail = new THREE.Mesh(new THREE.ConeGeometry(0.38, 0.4, 3), cloth);
+  tail.rotation.set(Math.PI, 0, 0); tail.scale.z = 0.05; tail.position.set(0, 1.84, -0.34);
+  g.add(pole, bar, flag, tail);
+  g.userData.dispose = () => { for (const m of [pole, bar, flag, tail]) m.geometry.dispose(); wood.dispose(); cloth.dispose(); };
+  return g;
+}
+
+/**
  * The ring of light a champion or rare wears, so "that one is different" reads from 40 m away
  * without a nameplate. Cheap: one additive ring per enemy, no light, no shader.
  */
@@ -180,6 +231,7 @@ export class EnemyField {
     this.scene = scene; this.terrain = terrain; this.rpg = rpg; this.defs = defs;
     /** R26 — who holds each zone (js/warbands.js `createWarbandMap`), or null for no warbands at all. */
     this.warbands = warbands;
+    this.warbandCfg = balance.warbands || {};   // R27 M10 — leaderAura, routChance, routSeconds
     this.bosses = bosses; this.modifiers = modifiers; this.zones = zones;
     this.cfg = balance.spawn || {};
     this.baseAlive = this.cfg.maxAlive ?? 14;   // what `setBudget(null)` goes back to
@@ -255,7 +307,9 @@ export class EnemyField {
    */
   warbandAt(x, z) {
     if (!this.warbands || !this.zones) return null;
-    return this.warbands.of(this.zones.at(x, z)) || null;
+    // R27 M9 — a warband driven out of a zone (grip 0) puts nobody down in it, whatever the claim
+    const zone = this.zones.at(x, z);
+    return (this.warbands.holds ? this.warbands.holds(zone) : this.warbands.of(zone)) || null;
   }
 
   /** The table entries that belong in the biome the player is standing in, at this level. */
@@ -281,6 +335,37 @@ export class EnemyField {
       const biomeOk = (d.biomes || ['any']).includes('any') || d.biomes.some(f => families.includes(f));
       return biomeOk && (d.minLevel ?? 1) <= level + 3 && (d.maxLevel ?? 99) >= level - 4;
     });
+  }
+
+  /**
+   * R27 M4 — `nightSpawn` IS READ. An incident's effects can carry `nightSpawn: '<family>'`
+   * (data/incidents.json `restless_dead` -> 'undead'); js/incidents.js merged it and nothing read
+   * it. main.js hands it here after dark, as an OPTION on what spawns — never a second multiplier on
+   * how much: `{ family, share = 0.5, reach = 400 }`, or null to switch it off.
+   */
+  setNightSpawn(spec = null) {
+    this.nightSpawn = spec?.family ? { family: spec.family, share: spec.share ?? 0.5, reach: spec.reach ?? 400 } : null;
+    return this.nightSpawn;
+  }
+
+  /**
+   * R27 M4 — the spawn pool at a point with `nightSpawn` applied: within `reach` metres of a town's
+   * watch (`safeZones`, which main.js fills from the towns' real extents), `share` of rolls draw
+   * from the night family instead. The family is taken from the whole bestiary nearest the zone's
+   * level — the dead do not care what biome the town is in — so a grassland town still gets them.
+   * The rng is drawn only when a night family is set AND the point is near a town, so every other
+   * spawn rolls exactly the sequence it always did.
+   */
+  nightPool(pool, x, z, level) {
+    const ns = this.nightSpawn;
+    if (!ns) return pool;
+    if (!this.safeZones.some(s => Math.hypot(x - s.x, z - s.z) - s.r <= ns.reach)) return pool;
+    if (this.rng() >= ns.share) return pool;
+    const kin = this.defs.filter(d => d.family === ns.family && !d.rareOnly && !d.warband);
+    if (!kin.length) return pool;
+    const off = d => Math.max(0, (d.minLevel ?? 1) - level, level - (d.maxLevel ?? 99));
+    const best = Math.min(...kin.map(off));
+    return kin.filter(d => off(d) <= Math.max(best, this.cfg.levelSpread ?? 2));
   }
 
   /** Is this point far enough from anywhere with a watch on it to put something hostile? */
@@ -322,7 +407,7 @@ export class EnemyField {
     if (!this.wild(cx, cz)) return null;            // not inside a town's watch
 
     const level = this.levelAt(cx, cz, playerLevel);
-    let pool = this.defsFor(cx, cz, level);
+    let pool = this.nightPool(this.defsFor(cx, cz, level), cx, cz, level);   // R27 M4
     if (!pool.length) return null;
     /**
      * R26 — IN A HELD ZONE, THE WARBAND IS MOST OF WHAT YOU MEET. Its five members against the
@@ -331,7 +416,17 @@ export class EnemyField {
      * a warband here, so every unheld zone rolls exactly the sequence it always did.
      */
     const own = pool.filter(d => d.warband);
-    if (own.length && own.length < pool.length && this.rng() < (this.warbands?.spawnShare ?? 0.65)) pool = own;
+    /**
+     * R27 M9 — AND THE SHARE IS THE WARBAND'S GRIP ON THE ZONE (js/warbands.js `warbandShare`), the
+     * one helper encounters.js reads too. The other side of the roll is the zone's wildlife ONLY:
+     * leaving members in the mixed pool made the real share `s + (1-s) x own/pool`, which no knob
+     * said, and a thinned valley would have gone on meeting orcs out of the wildlife half.
+     */
+    if (own.length) {
+      const rest = pool.filter(d => !d.warband);
+      // (a zone whose band has nothing but the warband in it keeps meeting the warband)
+      pool = this.rng() < (this.warbands?.share?.(this.zones?.at?.(cx, cz)) ?? 0) || !rest.length ? own : rest;
+    }
     const def = this.rng.pick(pool);
 
     const rank = this.rpg.rollRank(this.rng, { bonus: this.rankBonus });
@@ -351,15 +446,30 @@ export class EnemyField {
     }
     // a leader-type brings its own escort, whatever the pack roll said
     if (def.leads?.length) {
+      const escort = [];   // R27 M10
       for (const id of def.leads) {
         const sub = this.defs.find(d => d.id === id);
         if (!sub) continue;
         for (let i = 0; i < 2; i++) {
           const a = this.rng() * Math.PI * 2, r = 3 + this.rng() * radius;
           const [fx, fz] = this.terrain.clampToWorld(cx + Math.cos(a) * r, cz + Math.sin(a) * r);
-          if (!this.terrain.underwater(fx, fz) && this.wild(fx, fz)) made.push(await this.addRanked(sub, level, fx, fz, 'normal'));
+          if (!this.terrain.underwater(fx, fz) && this.wild(fx, fz)) {
+            const u = await this.addRanked(sub, level, fx, fz, 'normal');
+            made.push(u); escort.push(u);
+          }
         }
       }
+      // R27 M10 — …and its standard-bearer, and every one of them now knows who it follows
+      const bearer = def.bearer && this.defs.find(d => d.id === def.bearer);
+      if (bearer) {
+        const a = this.rng() * Math.PI * 2;
+        const [fx, fz] = this.terrain.clampToWorld(cx + Math.cos(a) * 3, cz + Math.sin(a) * 3);
+        if (!this.terrain.underwater(fx, fz) && this.wild(fx, fz)) {
+          const u = await this.addRanked(bearer, level, fx, fz, this.rpg.rollRank(this.rng, { bonus: this.rankBonus }));
+          made.push(u); escort.push(u);
+        }
+      }
+      if (made[0]) this.linkEscort(made[0], escort);
     }
     const leader = made.find(Boolean);
     if (leader && rank !== 'normal') {
@@ -382,7 +492,9 @@ export class EnemyField {
 
   /** Add a specific enemy at a specific spot (packs, bosses, the tests and the console use this). */
   async add(def, level, x, z, { rank = 'normal', modifiers = [], name = null, boss = false } = {}) {
-    const unit = this.rpg.makeEnemy(def, level, this.rng, { rank: boss ? 'boss' : rank, modifiers, name });
+    // R27 M1 — a placed boss is rank 'boss' unless its caller named another rank on purpose (an
+    // instance whose `holds.boss.rank` says champion or rare — see `placeBoss`)
+    const unit = this.rpg.makeEnemy(def, level, this.rng, { rank: boss && rank === 'normal' ? 'boss' : rank, modifiers, name });
     unit.x = x; unit.z = z; unit.y = groundAt(this.terrain, x, z);
     unit.state = 'wander'; unit.wanderTimer = 0; unit.swingTimer = 0; unit.hitFlash = 0;
     // round 14: the physics book — knockback in flight, stagger left, armour stripped, recoil
@@ -446,6 +558,8 @@ export class EnemyField {
     unit.actor = actor;
     if (unit.scale !== 1 && !actor.beast) actor.group.scale.setScalar(unit.scale);
     actor.group.position.set(x, unit.y, z);
+    // R27 M10 — the standard-bearer carries its warband's colours
+    if (def.banner && !actor.beast) { unit.banner = backBanner(def.banner); actor.group.add(unit.banner); }
 
     // the aura ring, for anything that is not an ordinary body
     const auraColour = unit.auras?.[0] || (boss ? '#ffd24a' : null);
@@ -466,22 +580,96 @@ export class EnemyField {
     return unit;
   }
 
-  /** Place a boss, awake and waiting, with its arena cleared of anything else. */
-  async placeBoss(bossDef, level, x, z) {
+  /**
+   * Place a boss, awake and waiting, with its arena cleared of anything else.
+   *
+   * R27 M1 — `rank` and `modifiers` are what an instance's `holds.boss` and a stronghold's `boss`
+   * block say about it, and until now nothing read either: every boss came out bare. `modifiers` is
+   * a count (rolled off this field's own table) or a list already picked, and it goes in through
+   * `add`, which is the exact path a rolled champion's modifiers take — `rpg.makeEnemy` folds them
+   * in once. There is no second multiplier here.
+   */
+  async placeBoss(bossDef, level, x, z, { rank = 'normal', modifiers = 0, name = null } = {}) {
     const [cx, cz] = this.terrain.clampToWorld(x, z);
-    const unit = await this.add(bossDef, level, cx, cz, { boss: true });
+    const mods = Array.isArray(modifiers) ? modifiers
+      : this.rpg.pickModifiers(this.modifiers, Math.max(0, Math.round(modifiers || 0)), this.rng);
+    const unit = await this.add(bossDef, level, cx, cz, { boss: true, rank, modifiers: mods, name });
     if (unit) { unit.boss = true; unit.aggroRange = bossDef.aggroRange ?? 44; }
     return unit;
   }
 
-  /** The boss that belongs at this level, or null. */
-  bossFor(level, x, z) {
+  /**
+   * The boss that belongs at this level. Never null while the bestiary holds a boss at all.
+   *
+   * R27 M1 — THIS RETURNED NULL ABOVE LEVEL 30, AND EVERY CALLER FELL BACK TO `bosses[0]`.
+   *
+   * The top of the boss list stops at 30 and the default level cap is 50, so every lair and every
+   * instance above 30 held the Warden of the First Hollow, a level 4-12 construct. Now: a boss whose
+   * band holds the level if one fits the biome; otherwise the one whose band is NEAREST the level,
+   * biome first and then any biome. The body is still built at the level asked for, so a level-40
+   * lair holds a level-40 boss — only which boss is chosen by the band.
+   */
+  bossFor(level, x, z, { family = null, room = null } = {}) {
     const families = familiesOf(this.terrain.biomeIdAt(x, z));
-    const pool = this.bosses.filter(b => {
-      const biomeOk = (b.biomes || ['any']).includes('any') || b.biomes.some(f => families.includes(f));
-      return biomeOk && (b.minLevel ?? 1) <= level && (b.maxLevel ?? 99) >= level;
-    });
-    return pool.length ? this.rng.pick(pool) : null;
+    // `family` (an instance's `holds.boss.family`) narrows it to bosses of that family — and then
+    // null is a real answer, because the caller has a stand-in rule for a family with no boss
+    let all = family ? this.bosses.filter(b => b.family === family) : this.bosses;
+    /**
+     * R27 M10 — A WARLORD IS A BOSS ON ITS OWN GROUND, OR WHERE NOTHING ELSE REACHES.
+     *
+     * Five warlords went into `bosses` (js/warbands.js). Left loose, a beast lair in goblin country
+     * would hold the Ashtusk Overchief. So: a warlord only where its warband holds the zone — or
+     * where no other boss's band holds this level at all, which is the empty top of the ladder
+     * above 30 the Gravemarshal and the Peak-King exist to fill. `room` (an instance's corridor and
+     * wall height) keeps any boss out of a place whose door it could not walk through.
+     */
+    if (room) all = all.filter(b => fitsRoom(b, room));
+    if (all.some(b => b.warlord)) {
+      const held = this.warbandAt(x, z)?.id || null;
+      const inBand = b => (b.minLevel ?? 1) <= level && (b.maxLevel ?? 99) >= level;
+      const plain = all.filter(b => !b.warlord);
+      const topless = !plain.some(inBand);
+      all = all.filter(b => !b.warlord || b.warband === held || (topless && inBand(b)));
+    }
+    const biomeOk = b => (b.biomes || ['any']).includes('any') || b.biomes.some(f => families.includes(f));
+    const gap = b => Math.max(0, (b.minLevel ?? 1) - level, level - (b.maxLevel ?? 99));
+    const nearest = list => {
+      if (!list.length) return null;
+      const best = Math.min(...list.map(gap));
+      return this.rng.pick(list.filter(b => gap(b) === best));
+    };
+    return nearest(all.filter(biomeOk)) || nearest(all);
+  }
+
+  /**
+   * R27 M1 — WHO KEEPS AN INSTANCE: `holds.boss` from data/instances.json → `{ def, rank }`.
+   *
+   * The named `id` if the bestiary has it; else a hand-written boss of `family`, nearest the level;
+   * else a STAND-IN — that family's own leader (or its nearest-band body) from this ground, then
+   * from the whole bestiary — at the rank `holds.boss.rank` names. A stand-in is an ordinary body,
+   * and rank 'boss' multiplies by 1 (a hand-written boss is big by itself), so a stand-in asked to
+   * be a boss is made a rare. With no `holds.boss` at all, any boss for the level. `def` is null
+   * only if the bestiary holds nothing at all.
+   */
+  bossForHolds(want, level, x, z, { room = null } = {}) {
+    if (want?.id) {
+      const named = this.bosses.concat(this.defs).find(b => b.id === want.id);
+      if (named) return { def: named, rank: 'normal' };
+    }
+    if (want?.family) {
+      const boss = this.bossFor(level, x, z, { family: want.family, room }); // R27 M10 — `room`: the door
+      if (boss) return { def: boss, rank: 'normal' };
+      const here = this.defsFor(x, z, level).filter(d => d.family === want.family);
+      const kin = here.length ? here : this.defs.filter(d => d.family === want.family && !d.warband && !d.rareOnly);
+      const leaders = kin.filter(d => d.role === 'leader');
+      const pool = leaders.length ? leaders : kin;
+      if (pool.length) {
+        const gap = d => Math.max(0, (d.minLevel ?? 1) - level, level - (d.maxLevel ?? 99));
+        const best = Math.min(...pool.map(gap));
+        return { def: this.rng.pick(pool.filter(d => gap(d) === best)), rank: want.rank === 'champion' ? 'champion' : 'rare' };
+      }
+    }
+    return { def: this.bossFor(level, x, z, { room }), rank: 'normal' };
   }
 
   /**
@@ -599,6 +787,18 @@ export class EnemyField {
     const list = this._tickList || (this._tickList = []);
     list.length = 0;
     for (const e of this.enemies) list.push(e);
+    /**
+     * R27 M10 — THE ESCORT WAKES WITH ITS LEADER. The pack wake below only ever matched `defId`,
+     * so hitting a leader's brute left its archers and the leader standing about. A band is the
+     * leader's id; any member of it in a chase this frame wakes every other member this frame.
+     */
+    const awakeBands = this._awakeBands || (this._awakeBands = new Set());
+    awakeBands.clear();
+    for (const e of list) {
+      if (e.state !== 'chase' || e.dying != null) continue;
+      const band = e.leader ?? (e.leads ? e.id : null);
+      if (band != null) awakeBands.add(band);
+    }
     for (let i = list.length - 1; i >= 0; i--) {
       const e = list[i];
       if (e.removed) continue;
@@ -670,7 +870,9 @@ export class EnemyField {
           const nx = e.x + p.dx * step, nz = e.z + p.dz * step;
           let [cx, cz] = this.terrain.clampToWorld(nx, nz);
           if (!e.hover) [cx, cz] = this.unstick(cx, cz, (e.reach || 2) * 0.28);
-          if (!wetAt(this.terrain, cx, cz, e.y) && Math.hypot(cx - e.x, cz - e.z) > step * 0.4) {
+          // R27 M7 — a cliff behind it is a wall too: knocked into a face, it takes the slam
+          if (!wetAt(this.terrain, cx, cz, e.y) && (e.hover || climbable(this.terrain, cx, cz, e.x, e.z, 0, e.y))
+            && Math.hypot(cx - e.x, cz - e.z) > step * 0.4) {
             e.x = cx; e.z = cz;
           } else if (!p.walled) {
             // slammed into something: the blow had nowhere to go, so it went into the body
@@ -709,7 +911,9 @@ export class EnemyField {
             if (sub) for (let n = 0; n < (e.spawns.count || 2); n++) {
               const a = this.rng() * Math.PI * 2, r = 4 + this.rng() * 6;
               const [sx, sz] = this.terrain.clampToWorld(e.x + Math.cos(a) * r, e.z + Math.sin(a) * r);
-              this.add(sub, e.level, sx, sz, {});
+              // R27 M10 — a warlord's adds are its own people: in its band, and already coming
+              const called = this.add(sub, e.level, sx, sz, {});
+              if (e.leads) called.then(u => { if (u && e.dying == null) { this.linkEscort(e, [u]); u.state = 'chase'; u.calledBy = e.id; } });
             }
           }
         }
@@ -734,7 +938,8 @@ export class EnemyField {
       }
       if (e.state === 'flee') {
         e.fleeFor = (e.fleeFor || 0) - dt;
-        if (e.fleeFor <= 0 && this.wild(e.x, e.z)) e.state = 'wander';
+        // R27 M10 — a routed body gets its nerve back and comes again
+        if (e.fleeFor <= 0 && this.wild(e.x, e.z)) { e.state = e.routed ? 'chase' : 'wander'; e.routed = false; }
       }
 
       // decide
@@ -753,6 +958,8 @@ export class EnemyField {
           if (mate === e || mate.dying != null || mate.state === 'chase') continue;
           if (mate.defId === e.defId && Math.hypot(mate.x - e.x, mate.z - e.z) < 14) mate.state = 'chase';
         }
+      } else if (e.state !== 'chase' && e.state !== 'flee' && awakeBands.has(e.leader ?? (e.leads ? e.id : null))) {
+        e.state = 'chase';   // R27 M10 — somebody of its leader's band is already fighting: so is it
       } else if (e.state === 'chase' && dist > notice * 2.2 && !e.boss) {
         e.state = 'wander';
       }
@@ -780,6 +987,13 @@ export class EnemyField {
        * the notice range are about — an enemy fighting your wolf thirty metres away must not be
        * culled for being thirty metres from you.
        */
+      // R27 M10 — a leader POINTS you out to its band, once, the first time it comes for you
+      if (e.leads && e.state === 'chase' && !e.pointed && !e.actor.beast) {
+        e.pointed = true;
+        e.emoteFor = 1.2;
+        anim(e.actor, 'point');
+      }
+      if (e.emoteFor > 0) e.emoteFor -= dt;
       const aim = this.aimOf(e, player, dist, dt);
       const adx = aim.x - e.x, adz = aim.z - e.z;
       const adist = Math.hypot(adx, adz);
@@ -809,7 +1023,7 @@ export class EnemyField {
          * a minute, whichever way you come at it. Without this you sidestep once and it runs
          * cheerfully back into your swing, and "catch it before it gets away" is not a chase.
          */
-        if (e.quarry) e.facing = Math.atan2(-dx, -dz);
+        if (e.quarry || e.routed) e.facing = Math.atan2(-dx, -dz);   // R27 M10 — a rout runs from you too
       } else if (e.state === 'chase') {
         // R22 — everything from here down is about the thing it is FIGHTING, which is usually you
         // and is sometimes the companion that just bit it.
@@ -850,6 +1064,13 @@ export class EnemyField {
         let [cx, cz] = this.terrain.clampToWorld(nx, nz);
         // Walls, trees and houses stop a body the same way they stop the player. Anything airborne
         // is allowed over them — a bat that cannot cross a wall is a worse bat.
+        /**
+         * R27 M7 — THE SAME CLIFF RULE AS THE PLAYER (js/ground.js `cliffStep`, one helper for both).
+         * Enemies had no slope term at all, so a wolf ran up a 20 m face at full speed while you
+         * crawled up it. Now the part of its step up a face is refused, the part along the foot is
+         * kept (so a chase finds its way round), and after three seconds pinned it scrambles.
+         */
+        if (!e.hover) [cx, cz] = cliffStep(this.terrain, e, cx, cz, dt, { feet: e.y }, this._cliffOut || (this._cliffOut = [0, 0]));
         if (!e.hover) [cx, cz] = this.unstick(cx, cz, (e.reach || 2) * 0.28);
         if (!wetAt(this.terrain, cx, cz, e.y)) {
           // if the push put it back where it started it is up against something: turn and try again
@@ -864,7 +1085,7 @@ export class EnemyField {
       this.placeBody(e, y);
       e.actor.group.rotation.y = e.facing;
       if (e.aura) e.aura.rotation.y += dt * 0.9;
-      if (e.swingTimer <= 0 || e.state !== 'chase') {
+      if ((e.swingTimer <= 0 || e.state !== 'chase') && !(e.emoteFor > 0)) {   // R27 M10 — let the point play
         anim(e.actor, speed > e.speed * 0.6 ? 'run' : speed > 0 ? 'walk' : 'idle');
       }
       e.actor.update(dt);
@@ -960,11 +1181,17 @@ export class EnemyField {
     e.actor.group.position.set(e.x, e.y + (e.hover || 0), e.z);
   }
 
-  /** Turn a modifier on mid-fight (a boss phase does this). */
+  /**
+   * Turn a modifier on mid-fight (a boss phase does this).
+   *
+   * R27 M10 — `id` may also be a modifier OBJECT that is not in the rollable table (the leader
+   * aura, js/warbands.js `leaderModifier`), so the aura rides this exact path. A modifier that says
+   * `exact` keeps the unrounded damage so `removeModifier` can take it back off to the last decimal.
+   */
   applyModifier(e, id) {
-    const m = this.modifiers.find(x => x.id === id);
+    const m = typeof id === 'object' && id ? id : this.modifiers.find(x => x.id === id);
     if (!m) return;
-    e.dmg = e.dmg.map(v => Math.round(v * (m.dmg ?? 1)));
+    e.dmg = e.dmg.map(v => (m.exact ? v * (m.dmg ?? 1) : Math.round(v * (m.dmg ?? 1))));
     e.armor = Math.round(e.armor * (m.armor ?? 1));
     e.speed *= m.speed ?? 1;
     e.attackEvery *= m.attackEvery ?? 1;
@@ -984,6 +1211,79 @@ export class EnemyField {
       (e.fx || (e.fx = [])).push(m.fx);
       this.spellfx?.status(e.actor.group, m.fx, true);
     }
+  }
+
+  // ---------------------------------------------------------------- R27 M10: leaders that lead
+
+  /**
+   * Take an `exact` modifier back off (the leader aura is the only one): the damage it multiplied
+   * is divided back, so an escort whose leader has fallen hits for exactly what it did before.
+   */
+  removeModifier(e, id) {
+    const held = e?.heldMods?.[id];
+    if (!held) return false;
+    e.dmg = e.dmg.map(v => v / (held.dmg ?? 1));
+    delete e.heldMods[id];
+    e.modifiers = (e.modifiers || []).filter(x => x !== id);
+    return true;
+  }
+
+  /**
+   * THE LEADER'S PEOPLE.
+   *
+   * `leads` has spawned an escort since round 4 and nothing tied it to the body it came with: the
+   * pack woke only by `defId`, the "leader buffs its pack" in data/enemies.json's `_doc` was never
+   * true, and killing the leader changed nothing. Each escort now carries `leader` (the leader's
+   * unit id) and, while the leader stands, the leader aura through `applyModifier`. A standard-
+   * bearer is an escort with `bearer` set: its death ends the aura early (`breakAura`).
+   */
+  linkEscort(leader, escort = []) {
+    if (!leader) return;
+    leader.leads = true;
+    const aura = { ...leaderModifier(this.warbandCfg), exact: true };
+    for (const u of escort) {
+      if (!u || u === leader || u.leader) continue;
+      u.leader = leader.id;
+      if (u.defId && this.defs.find(d => d.id === u.defId)?.banner) u.bearer = true;
+      if (!leader.auraBroken && Array.isArray(u.dmg)) {
+        this.applyModifier(u, aura);
+        (u.heldMods || (u.heldMods = {})).leader = aura;
+      }
+    }
+  }
+
+  /** Everyone following this leader id, alive. */
+  followersOf(leaderId) {
+    if (leaderId == null) return [];
+    return this.enemies.filter(u => u.leader === leaderId && u.dying == null && !u.removed);
+  }
+
+  /** The aura is gone (the leader or its standard-bearer fell): every follower hits as it did. */
+  breakAura(leaderId) {
+    const lead = this.enemies.find(u => u.id === leaderId);
+    if (lead) lead.auraBroken = true;
+    for (const u of this.followersOf(leaderId)) this.removeModifier(u, 'leader');
+  }
+
+  /**
+   * THE ROUT. The leader is down: each follower rolls `routChance` to break and run for
+   * `routSeconds` (the town-line flee, timed), then comes back to the fight. At least one always
+   * breaks, so killing a leader is never a dice roll that shows you nothing. A runner keeps its
+   * drop and is still one of the camp's (a strongbox stays sealed until it is down).
+   */
+  rout(leaderId) {
+    const cfg = this.warbandCfg || {};
+    const chance = cfg.routChance ?? 0.5, secs = cfg.routSeconds ?? 6;
+    const list = this.followersOf(leaderId);
+    const broke = list.filter(() => this.rng() < chance);
+    if (!broke.length && list.length) broke.push(list.reduce((a, b) => (a.hp / a.maxHp <= b.hp / b.maxHp ? a : b)));
+    for (const u of broke) {
+      u.state = 'flee';
+      u.routed = true;
+      u.fleeFor = Math.max(u.fleeFor || 0, secs);
+    }
+    for (const u of list) u.leader = null;
+    return broke;
   }
 
   /**
@@ -1292,6 +1592,9 @@ export class EnemyField {
     if (e.dying != null) return;
     e.dying = 0;
     anim(e.actor, 'dead');
+    // R27 M10 — a standard-bearer takes the aura down with it; a leader takes the aura AND the nerve
+    if (e.bearer && e.leader != null) this.breakAura(e.leader);
+    if (e.leads) { this.breakAura(e.id); this.rout(e.id); }
     /**
      * A DEATH DREW NOTHING. `onEnemyKilled` in main.js has one `spellfx` call in it and it is
      * behind a legendary. The moment a thing dies is the moment most worth marking, so it gets the
@@ -1323,6 +1626,7 @@ export class EnemyField {
     this.scene.remove(e.actor.group);
     e.aura?.geometry.dispose();
     e.aura?.material.dispose();
+    e.banner?.userData?.dispose?.();   // R27 M10
     e.actor.dispose?.();
     const i = this.enemies.indexOf(e);
     if (i >= 0) this.enemies.splice(i, 1);
@@ -1350,5 +1654,7 @@ export class EnemyField {
   /** Is anything actually fighting the player right now? Conditional affixes need to know. */
   get engaged() { return this.enemies.some(e => e.dying == null && e.state === 'chase'); }
 
-  clear() { while (this.enemies.length) this.removeUnit(this.enemies[this.enemies.length - 1]); }
+  // R27 M1 — over a copy, then empty: a unit already `removed` but still on the list (a spec put one
+  // back) made `removeUnit` return early without splicing, and this loop spun for ever
+  clear() { for (const e of [...this.enemies]) this.removeUnit(e); this.enemies.length = 0; }
 }

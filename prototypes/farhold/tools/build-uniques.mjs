@@ -395,11 +395,31 @@ OTHER.forEach(([type, base, act, name, power, lore], i) => {
   push({ ...u, ...otherAffixes(type, act, i) });
 });
 
+// ---------------------------------------------------------------------------- R27 M10: the warbands' own
+//
+// One unique per warband, reusing powers that already exist (round 23 found every unique's power ran
+// twice, so no new powers this round). `warband` keeps it out of the ordinary legendary roll
+// (js/rpg.js `rollDrop`): only that warband's war-chest and its warlord ever give it up. The ids are
+// the ones tools/build-warbands.py names in each warband's `unique`.
+const WARBAND = [
+  ['dagger', 'dagger', 2, "Gutterking's Shiv", 'venom_stack', 'sootwick', 'A goblin knife that has been in more pockets than it has sheaths. Every cut it makes goes green.'],
+  ['greataxe', 'axe2h', 3, 'Ashtusk Headtaker', 'quake_slam', 'ashtusk', 'The Horde carries it in front of the Overchief. Where it comes down, the ground remembers.'],
+  ['halberd', 'halberd', 4, 'Moonhook', 'opportunist', 'thornmane', 'A Thornmane hunting hook, notched once for every one that ran.'],
+  ['greatsword', 'sword2h', 5, "Gravemarshal's Oath", 'curse_spreads', 'unburied', 'Sworn to a king nobody remembers, and still keeping its word. What it cuts passes the curse on.'],
+  ['warhammer', 'warhammer', 6, 'Peakbreaker', 'critical_armorpen', 'stonehide', "A giant's hammer with a slab of the mountain for a head. Armour is only another stone."],
+];
+WARBAND.forEach(([type, base, act, name, power, warband, lore], i) => {
+  if (!items.weaponBases[base]) throw new Error('no weapon base ' + base);
+  push({ id: 'fh_' + slug(name), name, type, slot: 'weapon', baseItemId: base, act, quality: qualityFor(act),
+    ...weaponAffixes(base, act, i), legendaryEffect: power, lore, warband });
+});
+
 const doc = 'Round 23 — Farhold\'s own uniques. Built by tools/build-uniques.mjs from its rows (edit those, not this file). '
   + 'Loaded at boot and put into items.uniques IN MEMORY by js/uniques.js installUniques: items.json is shared with Emberveil, '
   + 'which has no registry entry for any of these powers. `type` is the taxonomy key from js/uniques.js UNIQUE_TYPES; '
   + '`element`, `wandBehaviour` and `staffSpell` are written onto the item by dressUnique; `gearBase` / `toolBase` name a '
   + 'js/gear.js or data/tools.json base for the four slots that have no items.json base. Units are Farhold engine units '
-  + '(js/affixes.js ENGINE_UNIT). See research/round23-uniques.md.';
+  + '(js/affixes.js ENGINE_UNIT). See research/round23-uniques.md. '
+  + 'R27 M10: the rows carrying `warband` are that warband\'s own unique; they drop only from its war-chest and its warlord.';
 writeFileSync(join(here, '../data/uniques.json'), JSON.stringify({ _doc: doc, uniques: out }, null, 1) + '\n');
 console.log(`wrote ${out.length} uniques`);

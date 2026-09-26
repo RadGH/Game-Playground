@@ -8,6 +8,9 @@
 // The geometry lives in `features.js`; the FACTS about each building live here.
 
 import { planLane, resample, LANE_SPACING } from './roadplan.js';
+import { footprintOf, wallTier } from '../../../proctown/js/townplan.js';
+// R27 M3 — the town-edge kinds live with the rest of the building kit
+import { WALL_KINDS, FENCE_KINDS } from '../../../proctown/js/buildkit.js';
 
 /**
  * Every building a settlement may contain.
@@ -58,7 +61,48 @@ export const BUILDING_INFO = {
   waysigil: { cap: 60, solid: [0, 0], from: 0, role: null },
   /** The town's notice board — a real object you walk up to, not the whole settlement. */
   noticeboard: { cap: 60, solid: [0.9, 2.4], from: 1, role: null },
+
+  // ---- R27 M8: the roadside (js/roadside.js) — signposts and their arms, milestones, lamps
+  signpost: { cap: 160, solid: [0.35, 2.4], from: 0, role: null },
+  signarm: { cap: 640, solid: [0, 0], from: 0, role: null },
+  milestone: { cap: 120, solid: [0.4, 0.9], from: 0, role: null },
+  lamppost: { cap: 900, solid: [0.25, 3.3], from: 0, role: null },
+  lampglow: { cap: 900, solid: [0, 0], from: 0, role: null },
+
+  // ---- R27 M3: town edges by culture (see `edgeKey` below and proctown/js/buildkit.js)
+  ...edgeCatalogue(),
 };
+
+/**
+ * R27 M3 — ONE INSTANCED MESH PER WALL KIND, EACH WITH THE STONE WALL'S OWN BUDGET.
+ *
+ * The stone kit keeps the plain keys (`wall`, `tower`, `gatehouse`) so every test and system that
+ * already looks those up still finds a human town's wall where it always was; the other five kinds
+ * are `wall_palisade`, `tower_hedge`, `gatehouse_bone` and so on. Same caps and same collision
+ * shapes as stone, because the collider never varies by kind — only the drawing does.
+ *
+ * The low edges are DECORATION ONLY and say so with `solid: [0, 0]`: a fence round a village you
+ * could not step over would be a trap (a quest giver on the far side of a fence with no gap), so
+ * none of these files a collider anywhere — features.js places them with `solid: false`.
+ */
+function edgeCatalogue() {
+  const out = {};
+  for (const kind of WALL_KINDS) {
+    if (kind === 'stone') continue;
+    out[`wall_${kind}`] = { cap: 1400, solid: [3.2, 4], from: 4, role: null };
+    out[`tower_${kind}`] = { cap: 200, solid: [2.6, 12], from: 4, role: null };
+    out[`gatehouse_${kind}`] = { cap: 80, solid: [4.0, 7], from: 4, role: null };
+  }
+  for (const kind of FENCE_KINDS) out[`fence_${kind}`] = { cap: 2400, solid: [0, 0], from: 2, role: null };
+  out.boundstone = { cap: 400, solid: [0, 0], from: 1, role: null };
+  out.banner = { cap: 240, solid: [0, 0], from: 1, role: null };
+  return out;
+}
+
+/** The mesh a piece of a town's edge goes into: `edgeKey('palisade', 'tower')` -> 'tower_palisade'. */
+export function edgeKey(kind = 'stone', piece = 'wall') {
+  return kind === 'stone' || !WALL_KINDS.includes(kind) ? piece : `${piece}_${kind}`;
+}
 
 /** The twelve added in round 8, for the tests and the docs. */
 export const NEW_BUILDINGS = [
@@ -81,11 +125,90 @@ export const NEW_BUILDINGS = [
  * longer true anywhere.
  */
 
-/** How wide a settlement's footprint is, which is also where its quiet ground starts. */
-export function footprintOf(size = 1) {
-  const ring = 16 + size * 13;
-  const wall = size >= 4 ? ring + 14 : ring;
-  return { ring, wall, walled: size >= 4 };
+/**
+ * How wide a settlement's footprint is, and what kind of edge it has. R27 M2: these are the
+ * PLANNER's own functions, re-exported. This file used to carry a byte-for-byte copy of
+ * `footprintOf`, and the "size >= 4 is a wall" rule was written out in six places across the two
+ * projects. There is one of each now, in proctown/js/townplan.js.
+ */
+export { footprintOf, wallTier };
+
+// ---------------------------------------------------------------------------- R27 M2: one town size
+
+/**
+ * THE PLANS WE HAVE SEEN, so a caller that is not js/features.js can ask how big a town REALLY is.
+ *
+ * `planTown` retries a crowded site at 1.3x or 1.65x its ring, and only the plan knows which one it
+ * took. Before this, six systems each worked a town's size out from `16 + size * 13` and never saw
+ * the growth — so a size-5 wall stood at 157 m while the enemies' no-spawn circle stopped at 113 m,
+ * and a pack could spawn and wander forty metres inside a city's wall.
+ *
+ * Filed two ways: on the node object itself (features' settlements are what town.js, waypoints.js
+ * and main.js pass around), and by id for callers holding a different copy of the same node
+ * (js/sites.js reads `terrain.world.nodes`). The id table belongs to one world at a time and is
+ * emptied by `forgetPlans()` when js/features.js is built for a new one.
+ */
+const planByNode = new WeakMap();
+let planById = new Map();
+
+/** File a town's plan, once js/features.js has made it. */
+export function rememberPlan(node, plan) {
+  if (!node || !plan) return;
+  if (typeof node === 'object') planByNode.set(node, plan);
+  if (node.id != null) planById.set(node.id, plan);
+}
+
+/** A new world: every id means a different town now. */
+export function forgetPlans() { planById = new Map(); }
+
+/** The plan filed for this node, if the town has been planned yet. */
+export function planOf(node) {
+  if (!node) return null;
+  return (typeof node === 'object' && planByNode.get(node)) || planById.get(node.id) || null;
+}
+
+/**
+ * HOW FAR A TOWN REACHES: `{ ring, wall, walled, tier, plots, planned }`.
+ *
+ *   ring    metres from the centre to the outermost plot
+ *   wall    metres to the wall — or to the ring, for a settlement with none
+ *   walled  whether there is a real wall (a `'wall'` tier)
+ *   tier    `wallTier(size)`
+ *   plots   how many plots the plan cut, or null before it has been planned
+ *
+ * Reads the planner's real `plan.ring` / `plan.wallRadius` when the town has been planned, and the
+ * unscaled footprint otherwise. The footprint is a FLOOR, never an answer that wins over the plan:
+ * the planner only ever grows a town, so an early caller (js/sites.js keeping its castles clear,
+ * before any town has been planned) gets a smaller number than the truth, never a bigger one.
+ *
+ *   import { townExtent } from './town-plan.js';
+ *   const { wall, walled } = townExtent(node);
+ */
+export function townExtent(node = {}, plan = null) {
+  const size = node?.size || 1;
+  const fp = footprintOf(size);
+  const tier = wallTier(size);
+  const p = plan || planOf(node);
+  const ring = Math.max(fp.ring, Number.isFinite(p?.ring) ? p.ring : 0);
+  const wall = Math.max(fp.wall, ring, Number.isFinite(p?.wallRadius) ? p.wallRadius : 0);
+  return {
+    ring, wall, walled: tier === 'wall', tier,
+    plots: p?.plots ? p.plots.length : null,
+    planned: !!p,
+  };
+}
+
+/**
+ * R27 M2 — WHAT A TOWN BRINGS TO A MUSTER: its planned plot count, its own guard bodies and its
+ * real wall, for js/muster.js `baseForTown`. main.js used to hand over `town.size` as the plot
+ * count, YOUR colony's guards, and `town.walled` — which nothing ever set — so the walled bonus
+ * never applied anywhere. One function, so the test builds its town through the same path.
+ *
+ *   civics.muster.baseForTown(town, musterFacts(town, folk.guardsOf(town.id)))
+ */
+export function musterFacts(node, guards = 0) {
+  const ext = townExtent(node);
+  return { plots: ext.plots ?? 0, guards: guards || 0, walled: ext.walled };
 }
 
 // ---------------------------------------------------------------------------- streets as lanes
@@ -350,4 +473,80 @@ export function sentryPosts(gates = []) {
     }
   }
   return out;
+}
+
+// ---------------------------------------------------------------------------- R27 M3: arrival
+
+/** Metres past the edge you have to walk back out before the arrival card can fire again. */
+export const ARRIVAL_REARM = 30;
+
+/**
+ * Where "arriving" happens: the wall for a walled town, the ring for an open one — from
+ * `townExtent`, and from nowhere else (a third answer to "where does this town end" is exactly the
+ * fault round 21 and M2 spent two rounds removing).
+ */
+export function arrivalRadius(node) {
+  const ext = townExtent(node);
+  return ext.walled ? ext.wall : ext.ring;
+}
+
+/**
+ * R27 M3 — THE ARRIVAL CARD FIRES ONCE PER ENTRY.
+ *
+ * `step(x, z, towns)` returns the town you have just walked INTO, or null. A town fires when you
+ * cross its `arrivalRadius` inwards; it re-arms only when you are `rearm` metres back OUT past that
+ * radius, so walking round the market, or along the inside of the wall, never fires it twice. A town
+ * you are already inside the first time the watch sees it (a load, a waypoint jump) is marked as
+ * entered without a card — you did not walk in.
+ *
+ * State is per node object (a WeakMap), so a new world's settlements start fresh with no reset call.
+ */
+export function createArrivalWatch({ rearm = ARRIVAL_REARM, radiusOf = arrivalRadius } = {}) {
+  let inside = new WeakMap();
+  return {
+    step(x, z, towns = []) {
+      let fired = null;
+      for (const t of towns) {
+        const r = radiusOf(t);
+        const d = Math.hypot((t.wx ?? t.x) - x, (t.wz ?? t.z) - z);
+        const was = inside.get(t);
+        if (was === undefined) { inside.set(t, d < r); continue; }
+        if (!was && d < r) { inside.set(t, true); if (!fired) fired = t; }
+        else if (was && d > r + rearm) inside.set(t, false);
+      }
+      return fired;
+    },
+    reset() { inside = new WeakMap(); },
+  };
+}
+
+/** The game's one watch — main.js asks it once a frame. */
+const sharedArrivals = createArrivalWatch();
+export const arrivalAt = (x, z, towns) => sharedArrivals.step(x, z, towns);
+
+/** What each role in a town is to a traveller, in the fewest words. */
+const SERVICE_WORD = {
+  merchant: 'market', smith: 'smith', innkeeper: 'inn', elder: 'elder', gambler: 'gambler',
+  broker: 'mercenaries', unbinder: 'unbinder',
+};
+
+/**
+ * The arrival card's facts: `{ name, size, holder, services }`.
+ *
+ *   size      the settlement's own tier word (hamlet / village / town / city / capital)
+ *   holder    the display name of whoever holds the zone, or null
+ *   services  one word per kind of person in js/town.js's roster who does something for you
+ */
+export function arrivalCard(node, { roster = [], holder = null } = {}) {
+  const services = [];
+  for (const role of roster || []) {
+    const word = SERVICE_WORD[role?.key];
+    if (word && !services.includes(word)) services.push(word);
+  }
+  return {
+    name: node?.name || 'a settlement',
+    size: node?.kind || node?.tier || (wallTier(node?.size || 1) === 'wall' ? 'city' : 'village'),
+    holder: holder || null,
+    services,
+  };
 }

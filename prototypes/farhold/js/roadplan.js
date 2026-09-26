@@ -259,11 +259,19 @@ function crownLane(points, heights, reach, heightAt, ramp) {
  * the ground insists. Fifteen terrain samples per point, and none at all when no `groundAt` is
  * passed, so the tests that drive this as a pure transform still can.
  */
-export function laneRibbon(lane, { lift = 0.06, color = null, groundAt = null } = {}) {
+export function laneRibbon(lane, { lift = 0.06, color = null, groundAt = null, profile = null } = {}) {
   const position = [], normal = [], index = [];
   // a town draws every street of every culture out of ONE mesh, so the colour has to travel with the
   // vertices rather than with the material
-  const colour = color ? [] : null;
+  /**
+   * R27 M8 — A CROSS-SECTION WITH A LOOK. `profile` is a list of `[u, [r, g, b]]` columns from one
+   * edge (u = 1) to the other (u = -1), u a fraction of the half-width: a highway's darker kerb, a
+   * trail's grass crown. Two columns at the same `u` make a crisp colour edge (the quad between
+   * them has no width). The height is the cross-section's one height either way, so a profiled
+   * ribbon stands exactly where the plain two-column one did; without `profile` nothing changes.
+   */
+  const cols = profile && profile.length >= 2 ? profile : null;
+  const colour = color || cols ? [] : null;
   const points = lane?.points || [];
   const heights = lane?.surface || [];
   // both edges of every cross-section first, so a vertex can look at its neighbour on its own side
@@ -322,18 +330,30 @@ export function laneRibbon(lane, { lift = 0.06, color = null, groundAt = null } 
     }
     return top;
   };
+  const nc = cols ? cols.length : 2;
   for (let i = 0; i < points.length; i++) {
     // one height for the whole cross-section, so a road stays flat across its width
     const y = groundAt ? Math.max(heights[i] ?? 0, clearAt(i)) : (heights[i] ?? 0);
-    for (let s = 0; s < 2; s++) {
+    if (cols) {
+      const [a, b] = sides[i];
+      for (const [u, c] of cols) {
+        const k = (1 - u) / 2;                           // u = 1 is side 0, u = -1 is side 1
+        position.push(a[0] + (b[0] - a[0]) * k, y + lift, a[1] + (b[1] - a[1]) * k);
+        normal.push(0, 1, 0);
+        colour.push(c[0], c[1], c[2]);
+      }
+    } else for (let s = 0; s < 2; s++) {
       const here = sides[i][s];
       position.push(here[0], y + lift, here[1]);
       normal.push(0, 1, 0);
       if (colour) colour.push(color[0], color[1], color[2]);
     }
     if (i > 0) {
-      const a = (i - 1) * 2, b = a + 1, c = i * 2, d = c + 1;
-      index.push(a, c, b, b, c, d);
+      for (let j = 0; j + 1 < nc; j++) {
+        if (cols && cols[j][0] === cols[j + 1][0]) continue;   // a colour edge: no quad to draw
+        const a = (i - 1) * nc + j, b = a + 1, c = i * nc + j, d = c + 1;
+        index.push(a, c, b, b, c, d);
+      }
     }
   }
   return colour ? { position, normal, index, color: colour } : { position, normal, index };
@@ -500,7 +520,9 @@ export function createRoadBook({ terrain = null, terraform = null, saved = null 
       }
     }
   }
-  function reindex() { index.clear(); for (const l of lanes) indexLane(l); }
+  function reindex() { index.clear(); for (const l of lanes) indexLane(l); version++; }
+  /** R27 M8 — bumped on every lay, remove and load, so a baked layer (the grass) knows to re-ask. */
+  let version = 0;
 
   const api = {
     get lanes() { return lanes; },
@@ -521,6 +543,7 @@ export function createRoadBook({ terrain = null, terraform = null, saved = null 
       if (level && terraform) lane.levelled = levelLane(lane, terraform, { claim }).painted;
       lanes.push(lane);
       indexLane(lane);
+      version++;   // R27 M8
       return { ok: true, lane };
     },
 
@@ -541,6 +564,31 @@ export function createRoadBook({ terrain = null, terraform = null, saved = null 
         for (let i = 0; i + 1 < lane.points.length; i++) {
           const d = segDist(x, z, lane.points[i][0], lane.points[i][1], lane.points[i + 1][0], lane.points[i + 1][1]);
           if (d <= within && (!best || d < best.dist)) best = { lane, dist: d, i };
+        }
+      }
+      return best;
+    },
+
+    /** R27 M8 — see `version` above. */
+    get version() { return version; },
+    /**
+     * R27 M8 — PLAYER ROADS ARE ROADS. The same 0..1 falloff js/planet.js `roadAt` gives a world
+     * road (1 on the paving, easing to 0 at `reach`), for the nearest lane here, read through the
+     * bucket index so the grass and the props can ask it on their hot path. 0 with no lanes at all.
+     */
+    roadAt(x, z) {
+      if (!lanes.length) return 0;
+      const list = index.get(bkey(Math.floor(x / BUCKET), Math.floor(z / BUCKET)));
+      if (!list) return 0;
+      let best = 0;
+      for (const lane of list) {
+        const reach = lane.reach || lane.half + 6;
+        for (let i = 0; i + 1 < lane.points.length; i++) {
+          const d = segDist(x, z, lane.points[i][0], lane.points[i][1], lane.points[i + 1][0], lane.points[i + 1][1]);
+          if (d >= reach) continue;
+          const t = Math.max(0, Math.min(1, (d - lane.half) / (reach - lane.half)));
+          const v = 1 - t * t * (3 - 2 * t);
+          if (v > best) best = v;
         }
       }
       return best;

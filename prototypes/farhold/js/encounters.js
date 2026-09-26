@@ -301,8 +301,21 @@ export function createEncounters({ field, zones, terrain, balance = {}, data = {
    * own preference wins — a beast hunt near a fort is still a beast hunt.
    */
   function poolFor(spec, x, z, level, owner = null, caller = null) {
-    const all = field.defsFor(x, z, level);
+    let all = field.defsFor(x, z, level);
     if (!all.length) return [];
+    /**
+     * R27 M9 — IN A HELD ZONE, A SET PIECE IS THE WARBAND'S AS OFTEN AS AN AMBIENT SPAWN IS.
+     *
+     * This ignored the warband's share entirely, so a set piece in a held valley drew members at
+     * whatever fraction of the table they happened to be (a warband is five rows against thirty
+     * beasts). The roll is the same one `spawnNear` makes, off the same helper — js/warbands.js
+     * `warbandShare`, spawnShare x grip — so a valley you have thinned is thinner here too.
+     */
+    const own = all.filter(d => d.warband);
+    if (own.length) {
+      const rest = all.filter(d => !d.warband);
+      all = field.rng() < (field.warbands?.share?.(field.zones?.at?.(x, z)) ?? 0) || !rest.length ? own : rest;
+    }
     const fits = (list, want) => list.filter(d =>
       (!want.families || want.families.includes(d.family)) &&
       (!want.roles || want.roles.includes(d.role)));
@@ -335,7 +348,23 @@ export function createEncounters({ field, zones, terrain, balance = {}, data = {
     const made = [];
 
     // the headline body: the rare, the champion, the captain
-    const leaders = spec.leader ? pool.filter(d => d.role === 'leader') : [];
+    /**
+     * R27 M1 — THE LEADER COMES FROM EVERYTHING THAT LIVES HERE, NOT FROM THE NARROWED POOL.
+     *
+     * The warband spec narrows its pool to skirmishers and archers — and then looked for a leader
+     * INSIDE that, which by construction holds none, so every "warband with a captain at the front"
+     * was led by one more skirmisher. The leader is looked for in the whole of `defsFor`: first
+     * one of the same warband as the bodies it leads, then one of the same family, then any.
+     */
+    let leaders = [];
+    if (spec.leader) {
+      const all = field.defsFor(x, z, level).filter(d => d.role === 'leader');
+      const bands = new Set(pool.map(d => d.warband).filter(Boolean));
+      const families = new Set(pool.map(d => d.family));
+      const sameBand = all.filter(d => d.warband && bands.has(d.warband));
+      const sameFamily = all.filter(d => families.has(d.family));
+      leaders = sameBand.length ? sameBand : sameFamily.length ? sameFamily : all;
+    }
     const headDef = leaders.length ? rng.pick(leaders) : rng.pick(pool);
     /**
      * R19 — A CALLED BEAST IS THE RANK THE DATA NAMED.
@@ -705,6 +734,7 @@ export function createEncounters({ field, zones, terrain, balance = {}, data = {
 
   return {
     update, run, pick, table,
+    poolFor, // R27 M9 — for the share test: what one set piece would draw from, here
     /** Hand over the site field so a set piece near a stronghold is that stronghold's patrol. */
     setSites(s) { siteField = s; },
     /** Hand over the chest field, so the events that put a real box on the ground can. */

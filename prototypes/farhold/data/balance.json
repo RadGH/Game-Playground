@@ -385,6 +385,15 @@
     "radius": 900,
     "_doc": "How close you must stand to talk to somebody, and how far from the player settlements keep their people."
   },
+  "gates": {
+    "_doc": "R27 M4 \u2014 gates that open and shut (js/town.js `gateVerdict`, js/features.js `setGateShut`). A walled town's gatehouses shut while a siege camp that is not taken stands within `siegeReach` metres of its wall, or while you are Hunted by whoever holds the zone \u2014 never in the town you respawn in or where a quest giver of yours lives. E at a shut gate asks the guard: Known or better opens it for `knockSeconds`, Disliked pays `knockFee` gold for the same, Hunted is refused. `greetRange` is how close a gate guard lets you get before speaking. `nightSpawnShare` / `nightSpawnReach`: while a zone's incident carries `nightSpawn` (restless_dead -> undead), that share of night spawns within that many metres of a town's watch are that family.",
+    "knockFee": 25,
+    "knockSeconds": 60,
+    "siegeReach": 1400,
+    "greetRange": 9,
+    "nightSpawnShare": 0.5,
+    "nightSpawnReach": 400
+  },
   "ranks": {
     "_doc": "Every spawn rolls a rank. A champion takes one modifier and a rare takes two plus a name of its own, which is where 'go and kill the glowing one' comes from. Bosses are placed, never rolled.",
     "championChance": 0.11,
@@ -629,5 +638,28 @@
     "hoverPush": 16,
     "_doc": "Flying the ship inside the atmosphere. W and S are the throttle and the mouse steers, so the nose is where you are looking and the ship goes where the nose points. `liftMax` is how much of the ship's weight the wing carries at `liftSpeedFull`: at or above 1 the ship holds its altitude in level flight, which is what lets you cross a continent with one hand. `hoverFloor` is a soft floor over the terrain so looking at the scenery does not fly you into it - you can still dive into a hill deliberately. `ceiling` is where the air ends and js/space.js takes over."
   },
-  "_r18Mount": "R18 \u2014 the gallop and the throw. Three mount affixes (`cond_mountStamina`, `cond_mountTrample`, `cond_mountCalm`) landed in derived fields nothing read, because the mechanics they describe did not exist. These are those mechanics' knobs: `gallopSeconds` is how long a mount can run flat out before dropping back (extended by mountStamina), `gallopBonus` how much faster that is, `gallopRecover` how fast it gets its wind back, and `mountThrowChance` the chance a hit while riding throws you (reduced by mountCalm)."
+  "_r18Mount": "R18 \u2014 the gallop and the throw. Three mount affixes (`cond_mountStamina`, `cond_mountTrample`, `cond_mountCalm`) landed in derived fields nothing read, because the mechanics they describe did not exist. These are those mechanics' knobs: `gallopSeconds` is how long a mount can run flat out before dropping back (extended by mountStamina), `gallopBonus` how much faster that is, `gallopRecover` how fast it gets its wind back, and `mountThrowChance` the chance a hit while riding throws you (reduced by mountCalm).",
+  "warbands": {
+    "_doc": "R27 M9 \u2014 a warband's grip on a zone it holds (js/territory.js `warGrip`, saved as a delta). 1 is the seeded claim; at 0 the zone is free and none of theirs spawn. `gripRegen` is how much it creeps back per GAME day (balance.sky.dayLengthSeconds). The four drops are what one of each costs it: a member killed in the zone, a patrol wiped, the camp taken and the warlord slain (the last two are M10's). js/warbands.js `warbandShare` = spawnShare x grip is the one place the spawn share is worked out. `patrolSpawnRadius` is how close you walk to a patrol's clock position before its bodies are put on the field; they go again on the set-piece leash (`encounters.keepRadius`).",
+    "gripRegen": 0.1,
+    "killGrip": 0.02,
+    "patrolGrip": 0.1,
+    "campGrip": 0.35,
+    "warlordGrip": 0.4,
+    "patrolSpawnRadius": 150,
+    "patrolSize": [3, 5],
+    "_m10Doc": "R27 M10 — leaders that lead. `leaderAura` is the damage factor an escort carries while its leader (a pack leader or a camp's warlord) stands, applied once through js/actors.js applyModifier; killing the standard-bearer ends it early. On the leader's death each escort rolls `routChance` to flee for `routSeconds` (at least one always breaks), then comes back. `campUniqueChance` / `warlordUniqueChance` are the odds a war camp's strongbox / a slain warlord gives up that warband's own unique (data/uniques.json rows carrying `warband`).",
+    "leaderAura": 1.15,
+    "routChance": 0.5,
+    "routSeconds": 6,
+    "campUniqueChance": 0.15,
+    "warlordUniqueChance": 0.1
+  },
+  "roads": {
+    "_doc": "R27 M7 \u2014 the road is the quick way. Read by js/player.js in the legs-and-hooves branch ONLY: on a road (terrain.roadAt past threshold) walking is x walk, riding x mount, and a highway (terrain.roadClassAt) x highway on top. A ground vehicle is not touched here: its speed is replaced by js/vehicles.js speedOn, which has its own spec.road.",
+    "threshold": 0.45,
+    "walk": 1.15,
+    "mount": 1.25,
+    "highway": 1.1
+  }
 }

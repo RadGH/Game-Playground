@@ -21,6 +21,28 @@ import * as THREE from 'three';
 import { M_PER_CELL, M_PER_CELL_DEFAULT } from './planet.js';
 
 /**
+ * R27 M7 — A CLIFF IS GREY FROM ANY DISTANCE.
+ *
+ * A ring measures steepness across two of its own quads, and a quad is 2, 6, 18, 54 or 162 m. A
+ * round-21 cliff face is 2-4 m across at Super tiny (it scales with the map cell), so from the third
+ * ring out the face fell between two vertices, read as a gentle hill and was painted grass: the rock
+ * band on a mountainside vanished as you walked away from it. So a ring whose quads are wider than
+ * the probe ALSO asks the ground itself across `probe` metres and takes the steeper of the two.
+ *
+ * The probe is a thirty-second of a map cell (2 m at Super tiny, 20 m at full size), which is the
+ * width of a face at that planet size — so the finer rings, which already resolve a face, pay
+ * nothing. Centred, not forward off the height the ring already has: a forward difference from the
+ * foot of a face looks out across the flat and misses it (two of twenty cliff points did).
+ */
+export function rockSteep(terrain, x, z, cell, own) {
+  const probe = (terrain.metresPerCell || M_PER_CELL) / 32;
+  if (cell <= probe) return own;
+  // no cliff country, no cliff: most of the world stops here for a couple of table reads
+  if (terrain.cliffCountryAt && terrain.cliffCountryAt(x, z) < 0.02) return own;
+  return Math.max(own, terrain.slopeAt(x, z, probe));
+}
+
+/**
  * One ring: a square grid of `res` x `res` quads covering `extent` metres, with the middle
  * `hole` metres left out. Positions are rebuilt whenever the ring's snapped centre changes.
  */
@@ -140,7 +162,8 @@ class Ring {
         const len = Math.hypot(nx, ny, nz) || 1;
         N[o] = nx / len; N[o + 1] = ny / len; N[o + 2] = nz / len;
         nrm[1] = ny / len;
-        const steep = Math.hypot(r - l, d - u) / (2 * cell);
+        // R27 M7 — the far rings keep their cliffs grey (see `rockSteep`)
+        const steep = rockSteep(terrain, wx, wz, cell, Math.hypot(r - l, d - u) / (2 * cell));
         terrain.colorAt(wx, wz, height, steep, rgb);
         C[o] = rgb[0]; C[o + 1] = rgb[1]; C[o + 2] = rgb[2];
       }

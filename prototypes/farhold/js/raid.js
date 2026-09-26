@@ -108,9 +108,18 @@ export function tierFor({ base = {}, data = null } = {}) {
  * falls back to "anything" if this ground has nothing in it — which on a crystal or void world it
  * sometimes genuinely does.
  */
-export function raidersFor({ enemies = [], biome = 'any', level = 1, levelOffset = 0 } = {}) {
+export function raidersFor({ enemies = [], biome = 'any', level = 1, levelOffset = 0, heldBy = null } = {}) {
   const want = level + levelOffset;
   const ground = String(biome || 'any').toLowerCase();
+  /**
+   * R27 M1 — A WARBAND RAIDS ONLY WHERE IT HOLDS THE GROUND.
+   *
+   * Warband members carry `biomes: ['any']`, so the whole bestiary handed in here let the Stonehide
+   * Clans raid a base in a valley no warband holds — the one place js/actors.js makes sure they
+   * never spawn. `heldBy` is the id of the warband holding the base's zone (`field.warbands.of`),
+   * or null; a member of any OTHER warband is not a raider here, and every fallback below keeps it.
+   */
+  enemies = enemies.filter(e => !e.warband || (heldBy != null && e.warband === heldBy));
   const inBand = e => (e.minLevel ?? 1) <= want + 4 && (e.maxLevel ?? 99) >= want - 3;
   const here = enemies.filter(e => inBand(e) && (e.biomes || ['any']).some(b => b === 'any' || ground.includes(b)));
   if (here.length) return here;
@@ -144,6 +153,8 @@ export function raidOffer({
    * already keeps keeps itself for free.
    */
   forceTier = null, drill = false,
+  // R27 M1 — the warband holding this ground, if any (see `raidersFor`)
+  heldBy = null,
 } = {}) {
   if (!enabled) return null;
   const D = data || FALLBACK;
@@ -155,7 +166,7 @@ export function raidOffer({
   } else ({ tier, notoriety, why } = tierFor({ base, data: D }));
   if (!tier) return { ok: false, tier: null, notoriety, why };
 
-  const pool = raidersFor({ enemies, biome, level, levelOffset: tier.levelOffset || 0 });
+  const pool = raidersFor({ enemies, biome, level, levelOffset: tier.levelOffset || 0, heldBy });
   if (!pool.length) return { ok: false, tier: null, notoriety, why: 'Nothing lives out here that would come for you.' };
 
   const waves = [];

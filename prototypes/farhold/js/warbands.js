@@ -23,9 +23,9 @@
 //     A zone qualifies when its middle level sits inside the warband's `levels`; `claimShare` of the
 //     qualifying zones are actually held, a warband is three times as likely to take ground whose
 //     biome it `prefers`, and the starting zone is never held.
-//   * INSIDE a held zone the spawner draws from that warband `spawnShare` of the time (the rest is
-//     the zone's ordinary wildlife); OUTSIDE it, a warband member never spawns. That is the whole
-//     rule, and it lives in two lines of js/actors.js (`defsFor` and `spawnNear`).
+//   * INSIDE a held zone the spawner draws from that warband `spawnShare x grip` of the time (the
+//     rest is the zone's ordinary wildlife); OUTSIDE it, a warband member never spawns. The share
+//     is `warbandShare` below (R27 M9), asked by js/actors.js `spawnNear` and js/encounters.js.
 //
 //   import { installWarbands, createWarbandMap } from './warbands.js';
 //   installWarbands(bestiary, warbandData);                          // once, at load
@@ -68,7 +68,57 @@ export function installWarbands(bestiary, data) {
     have.add(d.id);
     added++;
   }
+  // R27 M10 — and the five warlords, as bosses: `bossFor` then finds them like any other boss (and
+  // the Gravemarshal and the Peak-King are what fills the empty boss band above level 30)
+  bestiary.bosses = bestiary.bosses || [];
+  const bossIds = new Set(bestiary.bosses.map(b => b.id));
+  for (const w of data.warlords || []) {
+    if (bossIds.has(w.id)) continue;
+    bestiary.bosses.push({ ...w });
+    bossIds.add(w.id);
+    added++;
+  }
   return added;
+}
+
+// ---------------------------------------------------------------------------- R27 M10
+
+/** The warlord row of a warband (by warband id), or null. */
+export function warlordOf(data, bandId) {
+  const band = warbandById(data, bandId);
+  return (data?.warlords || []).find(w => w.id === band?.warlord) || null;
+}
+
+/**
+ * R27 M10 — DOES THIS BODY FIT THROUGH THAT DOOR?
+ *
+ * A warlord is 1.6-2.2 times the size of its kin, and an instance's corridors are 2.4-6.5 m wide
+ * under walls 3.4-9.5 m high (data/instances.json `interior`, js/dungeon-plan.js). `room` is
+ * `{ corridor, wallHeight }`; a def with no `scale`/`bodyHeight` is an ordinary body and always fits.
+ * `bodyHeight`/`bodyWidth` are metres at scale 1 (tools/build-warbands.py BODY; the spec measures
+ * the real body against them).
+ */
+export function fitsRoom(def, room) {
+  if (!def || !room) return true;
+  const k = def.scale ?? 1;
+  const tall = (def.bodyHeight ?? 1.8) * k, wide = (def.bodyWidth ?? 0.9) * k;
+  if (Number.isFinite(room.wallHeight) && tall > room.wallHeight) return false;
+  if (Number.isFinite(room.corridor) && wide > room.corridor) return false;
+  return true;
+}
+
+/**
+ * R27 M10 — THE LEADER'S AURA, AS A MODIFIER.
+ *
+ * data/enemies.json's `_doc` has said "leader buffs its pack" since round 4 and nothing did. This is
+ * the modifier an escort carries while its leader stands, handed to js/actors.js `applyModifier` —
+ * the very path a boss phase and a champion's roll take — so it is folded into the escort's own
+ * `dmg` ONCE and never becomes a second multiplier in `strike`. `balance.warbands.leaderAura` is
+ * the factor. Not in the rollable modifier table: nothing can roll "led".
+ */
+export function leaderModifier(cfg = {}) {
+  const k = Number.isFinite(cfg?.leaderAura) ? cfg.leaderAura : 1.15;
+  return { id: 'leader', name: 'Led', dmg: k, desc: 'fights harder while its leader stands' };
 }
 
 /** The warband row by id. */
@@ -96,14 +146,47 @@ export function claimFor(zone, data, { seed = 1, biomeOf = null } = {}) {
 }
 
 /**
+ * R27 M9 — HOW MUCH OF WHAT YOU MEET IN A HELD ZONE IS THE WARBAND.
+ *
+ * `spawnShare` (data/warbands.json) is the share at a full grip, and the grip is how much of the
+ * zone the warband still holds (js/territory.js `warGrip`, 1 at the seeded claim, 0 once you have
+ * driven it out). This is the ONLY place `spawnShare` is read: `js/actors.js` `spawnNear` and
+ * `js/encounters.js` `poolFor` both ask this, so a thinned valley is thinner for the ambient
+ * spawner and the set pieces alike, and the factor cannot end up applied twice (round 22's
+ * lesson). `tests/round27-warbands.test.js` greps for any other reader.
+ */
+export function warbandShare(data, grip = 1) {
+  const g = Number.isFinite(grip) ? Math.max(0, Math.min(1, grip)) : 1;
+  return (data?.spawnShare ?? 0.65) * g;
+}
+
+/** R27 M9 — a grip in words, for the zone banner, the map legend and the rumours. */
+export function gripWord(grip) {
+  if (!(grip > 0)) return 'driven out';
+  if (grip >= 0.67) return 'firm';
+  if (grip >= 0.34) return 'shaken';
+  return 'broken';
+}
+
+/** "held by the Ashtusk Horde — shaken", or "the Ashtusk Horde driven out". */
+export function holderLine(band, grip = 1) {
+  if (!band) return '';
+  const name = String(band.name || band.id).replace(/^The /, 'the ');
+  return grip > 0 ? `held by ${name} \u2014 ${gripWord(grip)}` : `${name} driven out`;
+}
+
+/**
  * The claims for one world, remembered per zone object. A new world builds a new map (its zones
  * are new objects), so a landing never inherits the last planet's warbands.
+ *
+ * R27 M9 — `gripOf(zone)` (optional) is how much of that zone the warband still holds, 0..1. The
+ * claim (`of`) never changes — a zone you have driven a warband out of is still ITS ground on the
+ * map, reading "driven out" — but `holds` and `share` fall to nothing with the grip.
  */
-export function createWarbandMap(data, { seed = 1, biomeOf = null } = {}) {
+export function createWarbandMap(data, { seed = 1, biomeOf = null, gripOf = null } = {}) {
   const cache = new WeakMap();
   return {
     data,
-    spawnShare: data?.spawnShare ?? 0.65,
     of(zone) {
       if (!zone || typeof zone !== 'object') return null;
       if (cache.has(zone)) return cache.get(zone);
@@ -111,9 +194,26 @@ export function createWarbandMap(data, { seed = 1, biomeOf = null } = {}) {
       cache.set(zone, band);
       return band;
     },
+    /** R27 M9 — 0..1; 1 when nothing tracks it, 0 for a zone no warband claims. */
+    grip(zone) {
+      if (!this.of(zone)) return 0;
+      let g = 1;
+      try { g = gripOf ? gripOf(zone) : 1; } catch { g = 1; }
+      return Number.isFinite(g) ? Math.max(0, Math.min(1, g)) : 1;
+    },
+    /** R27 M9 — the warband row while it still holds any of this zone, else null. */
+    holds(zone) {
+      const band = this.of(zone);
+      return band && this.grip(zone) > 0 ? band : null;
+    },
+    /** R27 M9 — `warbandShare` for this zone: spawnShare x grip, 0 if nobody holds it. */
+    share(zone) {
+      return this.of(zone) ? warbandShare(data, this.grip(zone)) : 0;
+    },
     /** Every held zone of a zone list, for the map legend and the tests. */
     held(zones = []) {
-      return zones.map(z => ({ zone: z, band: this.of(z) })).filter(r => r.band);
+      return zones.map(z => ({ zone: z, band: this.of(z) })).filter(r => r.band)
+        .map(r => ({ ...r, grip: this.grip(r.zone) }));
     },
   };
 }

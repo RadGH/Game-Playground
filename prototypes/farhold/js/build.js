@@ -275,6 +275,8 @@ export function createBuild(scene, {
    * nothing, and putting ninety boxes in the ledger meant ninety overlap tests on every ghost frame.
    */
   const roads = createRoadBook({ terrain, terraform });
+  // R27 M8 — and the world asks it: `terrain.roadAt` counts these lanes as road (pace, grass, hauls)
+  terrain?.setLaneBook?.(roads);
 
   const root = new THREE.Group();
   root.name = 'farhold-build';

@@ -17,6 +17,7 @@ import { el, panel, button } from '../../../shared/ui.js';
 import { locationLine, copyTextVia, COPY_WORDS } from './debug.js';
 import { layersPanel } from '../../../worldgen/js/layers-panel.js';
 import { zoneTone } from './zones.js';
+import { gripWord } from './warbands.js';   // R27 M9 — the warband layer's grip words
 import { MARKER_LOOKS, MARKER_VIEWS, distanceText, worldKey } from './markers.js';
 // R17 — item 20: an outpost's marker is made and kept in step by the module that knows what an
 // outpost IS, not by this screen. See `syncOutpostMarkers` for why it is locked.
@@ -544,6 +545,8 @@ import { weatherAt, weatherOdds } from '../../../worldgen/js/weather.js';
 import { M_PER_CELL } from './planet.js';
 
 export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onTeleport = null, seed = 1, markers = null, zones = null, getLevel = () => 1, sites = null, gates = null, meteors = null, showCoords = () => false, rumours = null, waypoints = null, allowDebugTeleport = () => true, bases = null,
+  /** R27 M9 — `() => createWarbandMap()` (the enemy field's), for the warband layer. */
+  warbands = null,
   /**
    * R14 — FINDING THINGS. The other half of the map's job.
    *
@@ -676,6 +679,27 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
   const knows = id => id != null && id >= 0 && known.has(id);
 
   /**
+   * R27 M9 — THE WARBAND LAYER: every zone a warband holds that you KNOW — walked into, or named by
+   * a rumour (the same `known` store the region names use, so a rumour that a valley is orc ground
+   * reveals it here with no second list). The first game caller of `createWarbandMap().held()`.
+   * Each row's `colour` is the warband's own `colour` from data/warbands.json, read live.
+   */
+  function warbandRows() {
+    const map = typeof warbands === 'function' ? warbands() : warbands;
+    if (!map?.held || !zones) return [];
+    heardOf();
+    return map.held(zones.zones).filter(r => knows(r.zone.id)).map(r => ({
+      zoneId: r.zone.id, zone: r.zone.name, band: r.band.id, name: r.band.name,
+      colour: r.band.colour || '#c0503a', grip: r.grip, word: gripWord(r.grip),
+    }));
+  }
+  const hexRgb = hex => {
+    const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || ''));
+    const n = m ? parseInt(m[1], 16) : 0xc0503a;
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  };
+
+  /**
    * The world handed to World Forge's renderer, with the names of unknown regions taken out.
    *
    * `renderWorld()` draws region names straight off `world.regions[i].name` and there is no knob to
@@ -701,6 +725,8 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
     // the map so players can see at a glance and plan their route" — and it is on by default,
     // because deciding where to walk next is the whole point of banding the regions.
     levels: true,
+    // R27 M9 — the warband layer: who holds what, on the regions you know. On by default.
+    warbandLayer: true,
     // The map is a whole planet at once, which is unreadable for anything closer than "which
     // continent". The wheel steps through five zooms, centred on the player.
     zoom: 1,
@@ -1052,6 +1078,17 @@ let findFavOnly = false;
       });
       chip.onclick = () => { state.levels = !state.levels; buildSide(); draw(); };
       if (chips) chips.append(chip); else side.append(chip);
+      // R27 M9 — the warband layer, beside the levels chip
+      if (warbands) {
+        const band = el('span', {
+          class: 'chip' + (state.warbandLayer ? ' on' : ''),
+          text: 'warbands',
+          title: 'Wash every region you know a warband holds in that warband\'s colour.',
+          dataset: { layer: 'warbands' },
+        });
+        band.onclick = () => { state.warbandLayer = !state.warbandLayer; buildSide(); draw(); };
+        if (chips) chips.append(band); else side.append(band);
+      }
     }
 
     // R15: everything from here to the fold at the bottom belongs to one tab or another.
@@ -1946,6 +1983,35 @@ let findFavOnly = false;
       ctx.textBaseline = 'alphabetic';
     }
 
+    // ---- R27 M9: the warband layer — each held zone you know, washed in its warband's colour.
+    // Only the visible part of the world rectangle is read back, as with the level overlay above.
+    const bandRows = state.warbandLayer ? warbandRows() : [];
+    if (bandRows.length && !details.length) {
+      const tint = new Map(bandRows.map(r => [r.zoneId, { rgb: hexRgb(r.colour), a: r.grip > 0 ? 0.42 : 0.16 }]));
+      const x0 = Math.max(0, Math.floor(ox)), y0 = Math.max(0, Math.floor(oy));
+      const x1 = Math.min(canvas.width, Math.ceil(ox + world.width * scale));
+      const y1 = Math.min(canvas.height, Math.ceil(oy + world.height * scale));
+      if (x1 > x0 && y1 > y0 && world.region) {
+        const img = ctx.getImageData(x0, y0, x1 - x0, y1 - y0);
+        const px = img.data, w = img.width, h = img.height;
+        for (let y = 0; y < h; y++) {
+          const cy = Math.min(world.height - 1, Math.max(0, Math.floor((y + y0 - oy) / scale)));
+          const row = cy * world.width;
+          for (let x = 0; x < w; x++) {
+            const cx = Math.min(world.width - 1, Math.max(0, Math.floor((x + x0 - ox) / scale)));
+            const t = tint.get(world.region[row + cx]);
+            if (!t) continue;
+            const i = (y * w + x) * 4, k = 1 - t.a;
+            px[i] = px[i] * k + t.rgb[0] * t.a;
+            px[i + 1] = px[i + 1] * k + t.rgb[1] * t.a;
+            px[i + 2] = px[i + 2] * k + t.rgb[2] * t.a;
+          }
+        }
+        ctx.putImageData(img, x0, y0);
+      }
+    }
+    state.warbandDrawn = bandRows;
+
     // ---- every place on this world, in one pass, so a route can be planned around what is on it
     drawPlaces(ctx, scale, ox, oy);
 
@@ -2131,6 +2197,20 @@ let findFavOnly = false;
       if (ramp.length) rows.push(el('span', { class: 'sw muted' }, `${LAYER_WORDS[state.layer] || state.layer}:`), ...ramp);
     }
 
+    // R27 M9 — and who holds what, one swatch per warband on the layer, in its own colour
+    if (state.warbandLayer) {
+      const byBand = new Map();
+      for (const r of state.warbandDrawn || []) {
+        const b = byBand.get(r.band) || { ...r, zones: [] };
+        b.zones.push(`${r.zone} (${r.word})`);
+        byBand.set(r.band, b);
+      }
+      if (byBand.size) rows.push(el('span', { class: 'sw muted' }, 'held by:'));
+      for (const b of byBand.values()) {
+        rows.push(el('span', { class: 'sw warband-sw', dataset: { band: b.band }, title: b.zones.join(', ') },
+          el('i', { style: { background: b.colour } }), `${b.name} \u2014 ${b.zones.length === 1 ? b.zones[0] : `${b.zones.length} regions`}`));
+      }
+    }
     legendBox.replaceChildren(...rows);
     const parts = legendRows(world, state.layer)
       .filter(r => r.share > 0.004)
@@ -3216,6 +3296,10 @@ let findFavOnly = false;
     ZOOMS, DETAIL_FROM,
     /** Turn the level overlay on or off (the checkbox, the debug menu and the tests). */
     setLevels(on) { state.levels = !!on; buildSide(); draw(); },
+    /** R27 M9 — the warband layer's rows as drawn (held AND known), and its switch. */
+    warbandLayer: () => warbandRows(),
+    get warbandDrawn() { return state.warbandDrawn || []; },
+    setWarbands(on) { state.warbandLayer = !!on; buildSide(); draw(); },
     get isOpen() { return state.open; },
     toggle, draw, addPin, removePin,
     /** The same action a click on a pad runs, for main.js's handle and the tests. */

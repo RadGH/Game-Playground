@@ -149,10 +149,14 @@ export function createLight(scene, { balance = {} } = {}) {
 
     // the nearest sources get a light each
     // R25 — `priority` lets a spell's flash or a carried torch win a slot over a far brazier
+    // R27 M8 — `tier` first: a road lamp (tier -1) is only lit once every spell, torch, brazier
+    // and sconce in range has its light, however close the lamp is. Everything else is tier 0 and
+    // sorts exactly as before. (The player's own lamp is not in the pool at all — it is `torch`.)
     const near = sources
       .map(s => ({ s, d: (s.x - at.x) ** 2 + (s.z - at.z) ** 2 }))
       .filter(o => o.d < 260 * 260)
-      .sort((a, b) => a.d / (a.s.priority || 1) ** 2 - b.d / (b.s.priority || 1) ** 2)
+      .sort((a, b) => ((b.s.tier || 0) - (a.s.tier || 0))
+        || a.d / (a.s.priority || 1) ** 2 - b.d / (b.s.priority || 1) ** 2)
       .slice(0, maxLights);
 
     for (let i = 0; i < pool.length; i++) {

@@ -4016,3 +4016,920 @@ Tests: `tests/round26-classlooks.test.js` (every class starts in its own look sl
 helm is the fighter's alone; the four starting kits; the Psalter), `avatar-3d/tests/class-outfits.test.js`,
 `avatar-3d/tests/chibi2-looks.spec.js`, `tests/round26-fixes.spec.js`, `tests/round26-skills.test.js`,
 `tests/round26-nan.test.js`, `tests/round26-dungeon.test.js`.
+
+## Round 27
+
+### Round 27 — One town size, and the planner's own gates (M2)
+
+**Six answers to "how big is this town".** The planner (`proctown/js/townplan.js`) grows a crowded
+site's ring 1.3x or 1.65x and reports the wall it really built as `plan.wallRadius`. Since R22
+js/features.js read it; nobody else did. js/town.js's no-spawn circle, js/waypoints.js's
+`boundaryOf`, features' own `settlementAt`, the town hall's walled/open label and js/sites.js's
+keep-clear gap all worked it out again from `16 + size * 13`. On seeds 25392 / 7 / 47 that let
+**1,648 of 9,019** live `spawnNear` bodies land inside a walled town's wall (Gukgruzcrown: 208 of
+500, a 135 m wall with a 100 m safe circle). Now `townExtent(node)` in js/town-plan.js is the one
+answer: the planner's own ring and wall, filed per town by `rememberPlan` when features plans it,
+with the unscaled footprint as a floor for anyone who asks first. All five callers use it; the
+keep-clear gap stays `190 + 120 * size` but is floored at `wall + 60`. After: **0 of 9,019**.
+"You are in town" is the wall (+2 m) for a walled town, so it no longer says you have left while
+you are 50 m inside a grown city.
+
+**One wall rule.** `size >= 4` was written out in six places. `wallTier(size)` (`'none' | 'low' |
+'wall'`, in the planner, re-exported by js/town-plan.js along with the planner's `footprintOf`,
+which Farhold had been carrying a copy of) is the only copy; `'low'` is reserved for M3's fences.
+The walled set is unchanged, and a test fails if any of the five modules grows its own copy back.
+
+**The muster** was reading `town.walled` (set by nothing, so the walled bonus never applied),
+YOUR colony's guards, and the town's size as its plot count. `musterFacts(town, guards)` gives the
+plan's plot count, the town's own guard bodies (`folk.guardsOf`) and the real wall; main.js and
+`tests/civilization.test.js` both go through it (the test used to pass `walled: true` by hand).
+
+**The planner's gates were thrown away.** Farhold opened the wall only where a world road
+crossed; a walled town with no road got one gate at `rng() * TAU`. Three faults under it:
+- The blocks are cut from a square `ring` across and the wall stands at `ring + 14`, so an
+  ordinary main street stopped fourteen metres short of the wall and the planner's gate at its
+  bearing opened onto grass. `buildWall` now carries an outward-heading street end along its own
+  line to the wall and cuts the gate where it arrives (the band between the last plot and the
+  wall has no plots, and `overlaps()` stays at zero over 840 plans); a lesser street is tried
+  before the widest-gap fallback.
+- A high street laid in from a road (`linkRoads`) was placed where the road crosses the
+  UNGROWN wall and slid out along its bearing when the town grew. A road arriving at a slant
+  crosses the bigger wall somewhere else, so the high street hit masonry 5-23 m from its gate.
+  The planner now takes `linksAt(radius)` and asks again at the radius it really builds.
+- `buildWall` returned `{ kind: radius }` — the radius filed as the wall kind. It is
+  `{ kind: <culture wall>, radius }` now.
+
+features.js merges the plan's gates (`plannerGates`) with the road crossings on the final
+`wallR`: the road's gate is kept when a street arrives inside its opening; a street a few metres
+along is absorbed by widening the road gate to cover both (up to 16 m); otherwise the street
+gets its own gate, trimmed back off any stretch of wall another gate already uses (a trimmed
+gate is a plain opening). Gatehouses go to the first four kept gates, roads first.
+
+**Gate guards and load order.** `populate` read `gatesOf` once. A town peopled before its wall
+was filed (first frame, a teleport) never got its gate guards; `update` now posts them the first
+time the gates exist. The gate book is emptied on every rebuild (it was a `Map` never cleared),
+and no guard is posted at a gate standing in water or on a post in water.
+
+Measured, 6 seeds x scale 0.1 and 1 (**`tests/round27-towns.test.js`**, 10 tests, real worlds):
+every settlement's safe circle >= wall + 10, "in town" at wall - 1 m on 16 bearings, waypoint
+boundary >= wall; 0 spawns inside a wall; every main-street end on the wall passes within 4 m of
+an opening, every walled town has 2-6 gates, both no-road walled towns (Leltudhold, Datitcrown)
+have every gate at a street end; a flood fill over the live colliders reaches every dry gate from
+the square; the muster is walled for exactly the size-4+ towns. Screenshots:
+`research/round27-towns/`.
+
+### Round 27 — Strongholds pay once, and keep their promises (M1)
+
+**Root causes.** A stronghold had two payers and neither was guarded. `freePrisonersOf` paid the
+whole `gives` block whenever the boss of a site with prisoners died, and its only guard was
+emptying `heldFolk` — which `sites.relax()` (420 m) + `due()` + `populateSite` refilled, along with a
+fresh boss, every time you walked away and back: a castle's legendary chest and perk point on a
+loop. It also only ran for a site that held somebody, so a bandit camp's boss paid nothing.
+`creditKill` (the territory deed counter) paid the `gives` of whatever `sites.nearest(x, z, 40)`
+returned, with no kind filter, so a LANDMARK's xp, loot and perk point were paid for clearing a
+territory camp that happened to stand near it (4 of 473 camps over the six standard worlds), again
+every time the camp re-armed. `gives.clears` was read by nobody, `opensDungeon` was three log
+lines, instance bosses read only `id`/`family` and came out bare, and `bossFor` returned null above
+level 30 so every caller fell back to `bosses[0]` — the level 4-12 Warden in every lair above 30.
+
+**What changed.**
+- `js/sites.js` `take(key)` is the one guard: it marks the stronghold `taken`, and answers null the
+  second time. `populate` on a taken site puts up no boss, no prisoners and no strongbox.
+  `heldBy(unit)` says which site a boss holds (`unit.holdsSite`). `takenKeys()` + the `taken`
+  option carry it through a save (`strongholds` in js/save.js, filed per `systemSeed:planetId`
+  because every world uses the same slot keys). An old save has none and loads every site untaken.
+- `js/main.js`: any stronghold's boss death (`freePrisonersOf`, which also now covers lairs and
+  sites without prisoners) → `sites.take` → `payStronghold`, the only payer. `creditKill` pays
+  nothing any more: it counts deeds and clears the territory record, which is all it is for.
+- `gives.clears` is READ: taking a site calls the existing `sites.clear()` (never called before), so
+  it never refills. With `clears` off, ordinary bodies may return but never a boss, prisoners or a
+  strongbox (tested by flipping it).
+- `opensDungeon` files a real mouth. It is an instance id now (`castle` → `windward_gaol`; `true`
+  still means the vault), placed 18-34 m from the keep on dry, walkable, uncovered ground, handed to
+  the gates through `sites.mouths()` exactly like round 16's instance mouths, so E at it runs the
+  ordinary `enterDungeon`. A landmark's `opensDungeon` gets the same mouth (`sites.openStair`).
+- `EnemyField.placeBoss(def, level, x, z, { rank, modifiers })` passes the data's rank and
+  modifiers through `add`, the same path a rolled champion's modifiers take (no second multiplier).
+  `bossForHolds(holds.boss, …)` picks an instance's keeper: the named id; else a boss of that family
+  nearest the level; else a STAND-IN — that family's own leader from this ground — at the rank the
+  data names ('boss' becomes 'rare' for a stand-in, because the boss rank multiplies by 1). A
+  stronghold's boss-rank keeper gets its modifiers too.
+- `bossFor` returns the boss whose band is nearest the level, biome first, then any biome; never
+  null while a boss exists. The three `bosses[0]` / `enemies[0]` fallbacks are gone.
+- `beast_moved_in` binds: `candidatesFrom` ranks live champions/rares off the field first (`live`),
+  then any beast def that can roll champion (the spawner's own rule). The frame asked for a rank no
+  def carried, so it had never once been offered.
+- A warband encounter's leader comes from the whole `defsFor` pool (same warband, then same family),
+  not from the skirmisher/archer pool that by construction held none.
+- `raidersFor({ heldBy })`: a warband member raids only a base inside a zone its warband holds;
+  `defence.offer` passes the holder. (The muster's town drill passes nothing, so no warband member
+  joins a drill — its call site is M2's region and was left alone.)
+- Two side fixes found on the way: the cold data path in `createSites` never set `instanceData`
+  (the first world built before the files arrived had no instances), and a const read above its
+  declaration (`STAIR_ID_BASE`) that the new node test caught before the game did.
+
+**Measured.** Scripted take on real worlds (seeds 7/101/4477, three prisoner strongholds each where
+present): gives paid exactly once over three away-and-back visits, one boss ever, prisoners never
+refilled; seven stronghold kinds each taken once. In the browser (prisoners.spec.js, seed 11): the
+spoils chest, perk points and xp are paid once and a 520 m walk away and back pays nothing and puts
+up no boss; clearing every territory camp on the world moves xp, perk points and the bag by zero.
+Nine stairs over six worlds, all within 40 m and dry; on seed 101 E at the castle's stair goes down
+into Windward Gaol, kept by a rare Sootwick Ringleader with 3 modifiers (a humanoid, as the data
+names), and a save/reload keeps the castle taken and the stair enterable. `bossFor` non-null and
+nearest-band for every level 1-50 in every biome. `beast_moved_in` offered 71 times in 504 jobs over
+six worlds (was 0). Warband encounters in held zones led by a leader 200 of 200.
+
+**Tests.** New `tests/round27-strongholds.test.js` (14 node tests); `tests/prisoners.spec.js` gains
+the revisit, the landmark sweep and a new stair/reload test; `tests/save.test.js` gains the ledger
+round trip. Found by the stair spec hanging: `field.clear()` with a unit that was already removed and then
+pushed back on `field.enemies` used to spin for ever (the old prisoner spec does exactly that);
+`EnemyField.clear()` now walks a copy and empties the list, so it cannot hang the page.
+
+### Round 27 — Walls by culture, fences by size, and a banner at the gate (M3)
+
+**Root causes.**
+- `CULTURES[*].wall` in proctown/js/townplan.js (and `townWall.kind` in cultures.json) has named a
+  wall material for every culture since the planner went in. Nothing read it. Farhold drew one
+  masonry ring round an orc war camp and an elf grove and only changed its colour.
+- A settlement under size 4 had no edge at all. The houses just stopped.
+- Towers stood at `gate ± 0.26 rad` plus four fixed quarter bearings, cut at ten. At a 157 m wall
+  that put a tower 41 m from its gate. The quarters landed on top of each other or in a river, and a
+  big city's far side had no tower at all.
+- Nothing told you where you had arrived.
+
+**What changed.**
+- **Culture walls.** proctown/js/buildkit.js has a part list per wall kind for the wall length,
+  the tower and the gatehouse (`wallKitParts`), in the same unit shapes a building uses. The kinds are:
+  - stone: today's masonry
+  - cutstone: a plinth, an overhanging coping and square merlons
+  - palisade: sharpened logs on rails, and a timber watch platform as the tower
+  - hedge: a rounded green mass, and a topiary tower
+  - bone: posts with rib arches, and a tusked pillar
+  - mudbrick: a thick rendered wall with rounded merlons, and a tapering tower
+
+  Each kind is its own InstancedMesh (`edgeKey(kind, piece)`). Stone keeps the plain
+  `wall`/`tower`/`gatehouse` keys, and the caps come from `BUILDING_INFO` (`edgeCatalogue`).
+  Farhold picks the kind from the plan's own `plan.wall.kind`. **The collider does not change:** it
+  is round 23's `addSegment` on the drawn line for every kind. The kit gallery (`proctown/kit.html`)
+  has a "Town edges" view that draws the same lists.
+- **Villages get a fence, hamlets get boundary stones.** `wallTier` returns `'low'` for size 2-3.
+  - A village gets a rail, hedge or stake fence, chosen by culture (`fenceKindFor`), at
+    `townExtent(...).ring + 4`.
+  - The fence has a gap at every world road that crosses it (`ringCrossings`) and at every *drawn*
+    street end that reaches it heading out. Streets the pruning pass drops get no gap.
+  - A piece that runs into the water stops at the waterline.
+  - A hamlet gets two boundary stones at each road in. Each stone slides up to 16 m off the kerb,
+    because `roadAt` reads 0.9 three metres off a road's centre line.
+  - **All of it is decoration only, with no collider.** A fence you could not step over would trap a
+    player the first time a quest giver stood on the far side of it.
+- **Towers by spacing.**
+  - The ring is cut into stretches of standing wall: between gates, and between a gate and the water.
+  - Each stretch gets a flank tower 3 m in from each end, and the stretch between is filled at about
+    45 m (never more than 60).
+  - A tower spot on water, a river or a kerb slides along the wall up to 6 m, and never closer than
+    25 m to the last tower. Only if nothing fits is it dropped.
+  - Found on the way: `wallPiece` dropped a whole piece whose middle was in the water, even when one
+    end was dry. Planned as a dwarf hold, Dearbigate had 2 m of open wall beside its gate because of
+    it. The piece is now cut at the waterline, the way `spotOf` cuts a ring segment.
+- **Banners.**
+  - js/sites.js's `banner` model (`PIECES.banner`, already exported) has a white cloth. Each
+    instance is tinted with the culture's `palette.accent`.
+  - Each gatehouse gets one banner outside, beside a tower. It slides along the wall off a road that
+    hugs the wall, and falls back to the inside if it has to.
+  - Each fence or boundary-stone road entrance gets a banner too.
+  - Fences, stones and banners are drawn only for towns within 600 m (`DECOR_RANGE`).
+- **Arrival card.** js/town-plan.js has `createArrivalWatch` / `arrivalAt`.
+  - The card fires when you cross `arrivalRadius(node)` inwards. That is `townExtent`'s wall for a
+    walled town and its ring otherwise, never a third radius.
+  - It re-arms only when you are 30 m back out past that radius.
+  - A town you are already standing in when the watch first sees it (a load, a waypoint jump) is
+    marked as entered without a card.
+  - `arrivalCard` builds the text from the town's tier word, the zone holder and a word for each
+    js/town.js roster role, and `hud.announceTown` shows it in the zone banner's box. For example:
+    "Fenkeep — city — held by the Reach — market, elder, unbinder, smith, inn, gambler, mercenaries".
+  - main.js gets 4 lines next to the zone-banner call.
+
+**Budget.** Scene draw calls (`stats().drawCalls`), measured standing 24 m outside a gate on seed 47
+at scale 0.1 with `quality=low`, on a clean HEAD tree against HEAD + M3:
+
+| Town | Wall kind | Before | After |
+|---|---|---|---|
+| Fenkeep | hedge | 170 (features 30) | 173 (features 33) |
+| Cindercrown | stone, with a hedge city in view | 179 (features 32) | 184 (features 37) |
+
+The plan's "< 95 at a town" cannot hold at a town gate on this world: the count was already 170-179
+there before M3. `phase2.spec.js`'s own < 95 check, at the landing spot, still passes. The extra
+calls are one mesh per kind in view. Before the 600 m decoration range they were +4 and +7.
+
+**Tests.**
+- New `tests/round27-walls.test.js`, 9 node tests on seeds 25392, 7 and 47 at scale 0.1, plus 4477
+  at scale 1:
+  - All 21 culture × seed pairs draw their wall, tower and gatehouse in the mesh
+    `CULTURES[culture].wall` names, tinted with the culture's wall colour.
+  - Round 23's ring walk passes for all 7 cultures.
+  - Towers: 30 towns and 232 pairs, 28.4-59.9 m apart (median 44.2) except across a gate or water.
+    None stand in water or on the road, and every gatehouse has a flank tower.
+  - Fences: 122 villages and 727 street ends, each with a gap within 2 m. 15,239 street points on
+    the fence line, none of them blocked. Worst coverage of the fenceable ring is 82%.
+  - Stones: 61 hamlets and 113 road entrances, with a stone on every side that has ground for one.
+  - Banners: at every gatehouse, in the accent colour, clear of the opening.
+  - The arrival card fires exactly once per walk in, along a real road, within 2 m of the edge, for
+    a walled town, a village and a hamlet. It does not fire walking round the market, and it re-arms
+    only past 30 m.
+- `proctown/tests/buildkit.test.js` has 4 new tests: every named kind is buildable and distinct, the
+  pieces keep the frames the game places them by, every gatehouse keeps x -2.1..2.1 clear below
+  4.9 m, and fence kind and tint.
+- New `tests/round27-walls.spec.js`:
+  - Walks in through the gates of Fenkeep (hedge) and Cindercrown (stone), reads the draw calls,
+    sees the card, and checks that walking about inside does not fire it again.
+  - Screenshots every wall kind, a village fence and a hamlet's stones into
+    `research/round27-walls/`.
+- `round23-bridge-gate.test.js` and `round3.spec.js` now look a town's wall up through
+  `wallOf(id).keys`, because a hedge town's gatehouse is in `gatehouse_hedge`.
+
+### Round 27 — Warbands hold ground (M9)
+
+Round 26 gave every zone a warband claim (`js/warbands.js`) and then did almost nothing with it: one
+log line on the first visit, a spawn share the set pieces ignored, and patrols that were a position
+and a clock with no body — `near`, `killed`, `reaction` and `loseOne` had no caller in the game, and
+`createWarbandMap().held()` had one caller, a spec.
+
+**Root causes**
+- **Two hostile holders.** `js/territory.js` picked a zone's human holder and rival blind to the
+  warband, so an orc valley was also "held by the Ashen Pact" with raid-band patrols on top. Over
+  the six standard seeds, 136 of 161 held zones had a second hostile claimant.
+- **The share was not the share.** `spawnNear` rolled `spawnShare` for "members only" but left the
+  members in the other half of the roll too, so the real share was `s + (1-s)·own/pool`; and
+  `encounters.js` `poolFor` never read it at all.
+- **Nothing persisted.** Nothing the player did to a warband was remembered.
+
+**What changed**
+- **One holder** (`territory.js` `build`): on warband ground the warband takes the hostile slot, and
+  holder and contested are drawn only from factions that are not hostile on sight. `hostiles(zone)`
+  reports who is hostile there (never more than one). Deeds against a warband go to its rivals — the
+  zone's holder and contester — at `RIVAL_SHARE` (now exported from `js/factions.js`, the same third
+  every deed spreads). No new standing rows.
+- **Grip** (`warGrip`, separate from the human holder's `grip`): 1 at the seeded claim, saved as a
+  delta in the territory snapshot (an old save reads 1). `warbandLoss(zone, kill|patrol|camp|warlord)`
+  drops it by `balance.json` `warbands.<what>Grip`; `tick` regrows it by `gripRegen` per game day. At
+  0 the claim reads "driven out" and `holds()` goes null, so nothing of theirs spawns (spawner, set
+  pieces, jobs, raids, drills).
+- **One helper**: `warbandShare(data, grip)` is the only reader of `spawnShare`; `spawnNear` and
+  `poolFor` both ask `map.share(zone)`, and the other half of the roll is wildlife only.
+- **Map layer** (`js/map.js`): a "warbands" chip (on by default) washes each held zone you KNOW in
+  its warband's `colour`, with a "held by" legend. Known means the same reveal store the region
+  names use — walked into, or named in a rumour — so the new `warband_holds` rumour
+  (`js/rumours.js`) reveals a valley without a second list.
+- **Banner**: `hud.announceZone` takes a third argument, `holderLine()` ("held by the Ashtusk Horde —
+  shaken"); the first-visit log line is gone, and the "held by <faction>" log line on warband ground
+  now reads "<faction> country, overrun by <warband>".
+- **Patrols with bodies** (`js/patrols.js`): on held ground the patrols are war parties (a leader and
+  `warbands.patrolSize` members) plus one human watch, which a warband makes go quiet on your first
+  visit (`loseOne`, so `patrol_gone_quiet` can bind). Routes follow the zone's longest stretch of real
+  road (`routeAlongRoads`, there and back) instead of straight lines between towns.
+  `createPatrolBodies` puts a hostile patrol's bodies on the enemy field within
+  `patrolSpawnRadius` (150 m) of its clock position, never inside a town watch; they march the route
+  while nothing has their attention, sit on the set-piece leash, and a wiped patrol calls `killed()`
+  once (a warband patrol costs `patrolGrip`). Friendly and wary patrols stay clocks — the enemy field
+  has no friendly bodies.
+- **Job** `thin_their_patrols` binds only to a live war party of the zone's own warband with its
+  leader up; the goal is that leader.
+- **Leftover from M1**: a town drill (`muster.start`) now takes `heldBy`, so a drill on warband ground
+  draws that warband.
+
+**Measured** (tests/round27-warbands.test.js, 12 tests, six standard seeds): one hostile holder in
+every zone; member share at grip 0.3 = 0.213 from `spawnNear` (want 0.195 ± 0.05) and 0.178 from
+`poolFor` (± 0.07); 0 of 1000 at grip 0; a day restores exactly `gripRegen` (checked at 0.037); save
+and old-save load; a war party's bodies all within 30 m of the road, credited once, no duplicate on
+walking away and back; 33 "Thin their patrols" in 591 jobs, every one bound to a live party of the
+right warband. `tests/round26-races.spec.js` checks the live map layer (held ∩ revealed, the odd
+colour in the legend and in the canvas pixel), the banner and a war party with real bodies.
+`tests/save.test.js` checks the grip through `snapshot()`.
+
+**Not done / notes**: patrol bodies march by steering their stroll, not with a new movement mode, so
+they amble rather than march. The territory ledger is keyed by zone id and is not reset on landing
+(true before this round); `warGrip` ignores a row whose zone name does not match so another world's
+warbands are not suppressed.
+
+### Round 27 — Roads that fit the land (M5)
+
+**What was measured first.** The grade probe (`gradeWindows` / `classifySteep` in
+`tests/round27-roads.test.js`) walks every road's drawn deck in 10 m windows. On the user's world
+(seed 25392) before this milestone:
+
+| scale | road over 30% | over 20% | worst | what the >20% segments were |
+|---|---|---|---|---|
+| 0.1 (Super tiny) | 4.4% | 7.2% | 117% | 61 of 62 the ground itself, 1 a junction fade on flat ground |
+| 1 (full size) | 6.2% | 11.0% | 161% | 91 of 92 the ground, 1 junction fade |
+
+So the roast's suspicion (that the 167% segment must be a lift ramp or a floor step) was wrong:
+it was the land. World Forge routes on map cells and never sees what `planet.js` adds on top —
+the `coarse` knobs (±27 m every ~180 m on rugged ground at full size), `fine`, and round 21's
+cliff creases — and it cannot fold a road inside a cell.
+
+**What changed** (all `js/planet.js` road pipeline + lakes, and a new pure `js/road-fold.js`):
+
+- **Switchbacks** (`foldClimbs`, run after `mergeRoadNetwork`, before `connectRoadNetwork`).
+  Climbs over 12% held over the detection window are re-routed by a lattice A* whose leg cost is
+  `len × (1 + (grade/0.10)^4)`, inside a corridor around the old line. The search carries a
+  heading and may turn one notch (~22°) a step, so a hairpin is ~5 steps across (a plain lattice
+  A* laid legs 7 m apart with 3 m of height between them — the carve then stepped the hillside
+  through both carriageways). It must leave the way the road came in and arrive the way it goes
+  on. Legs keep off water (lattice ends pad by 1.12 steps so an edge cannot hop a river), off
+  `cliffAt(x, z)` (new, exported for M7), off other roads' corridors (no weave), and out of town
+  rings (`footprintOf(size).wall × 1.65`; **R27: switch to `townExtent`**) except on the road's
+  own line. Narrow corridor (0.5 cell) first, the full 1.5 cells only when that is not gentle
+  enough. A fold is kept only if it is gentler over the window and no steeper point to point;
+  ≤ 6 legs. What cannot be folded is marked `steep` on its points (`path.steep`). Every length
+  is in cells, so a full-size world folds exactly as a Super tiny one scaled ×10.
+  - **The plan said ±0.35 cell. That is far too narrow**: the Dearbigate ridge on the user's
+    world (64 m of climb at Super tiny) needs about 640 m of road at 10%, which cannot fit in a
+    44 m wide corridor. 1.5 cells does it.
+  - **Calm ground near roads** (`roadCalmAt` in `naturalHeightAt`): within 0.35 cell of a road's
+    line (and of any fold leg) the knobs drop to a quarter, `fine` to half, and a cliff face is
+    breached, fading back over another 0.35 cell. Without it the full-size world could not pass
+    at all: every fold wove round 50 m knobs. This is the one change outside the road region.
+  - A fold renumbers a trunk's points, and merge joins are filed by segment index, so every join
+    onto a folded trunk is found again on the new line (and the join points themselves are pinned
+    unless the fold passes within 2 m of them). Before that fix a branch took its junction height
+    from forty points away — a 74% ramp at the mouth of road 10.
+- **Crossroads** (`fileCrossroads`, after `connectRoadNetwork`): any two segments of different
+  roads that cross are cut there, both halves filed as joins, and the trunk eased halfway so the
+  crossing is the mean of the two heights. **Finding:** on the five standard seeds at both scales
+  World Forge produces *no* transversal crossings at all (its routes share cells and merge); the
+  only one filed is where a fold leg crosses another road (seed 4477, Super tiny).
+- **Junction landings** (`landJunctions`): the drawn roads at a junction disagreed by up to
+  2.1 m (seed 101, before this milestone) although their graded heights were equal — `laneRibbon`
+  lifts each cross-section to clear the ground across it and half a step towards its neighbour,
+  and at a junction that ground is the other road climbing away. Each junction now gets a level
+  landing (vertices at the junction and ± the other road's width + 1 m on the trunk, one on the
+  branch), with the step eased out to a shoulder vertex. Now every arm agrees within 0.1 m,
+  except junctions held up by water (a floor above the junction height — 41 of 331 at Super
+  tiny), which keep the floor's height (`join.onBridge`) exactly as round 17 left them.
+- **Road class widths, one owner:** `ROAD_CLASS` (exported) — highway **9 m**, road 7 m, trail
+  **4.5 m (not the plan's 4)**: at 4 m one bridge on seed 4477 (12185, 1351 at Super tiny, a
+  trail joining another in the middle of its crossing) files a deck piece 0.55 m above its drawn
+  deck — `js/bridge-plan.js`'s landing ramp overlapping its flat pieces. That is M6's module;
+  narrow the trail there. Waystones (`half + footing + 1`) and waypoint pads re-measured on the
+  built meshes: 222 pads and 880 approach stones, none in a carriageway.
+- **Scale knobs:** `rampGrade` (m/m, derived from `rampPerPoint` at a fifth of a cell) is what a
+  folded stretch ramps at; the map's own points keep their half metre a point (per metre
+  everywhere moved one junction-on-a-bridge on seed 4477). `JOIN_REACH = max(8, 16 · cell/640)`.
+- **Lakes** use `elevationToMetresExact` (surface and `lakeSurfaceAt`).
+- **Deleted:** `meshHalf()` / `meshHalfLength`, `path.bridgeCells`. README says bridges come from
+  `findCrossings`.
+- New on the terrain: `junctions` (every filed junction as a place with one height — M8's
+  signposts read this), `roadCrossroads`, `roadFolds`, `path.steep`, `path.folded`.
+
+**Acceptance, measured** (drawn deck, 10 m windows, seed 25392):
+
+| scale | over 30% | over 20% unmarked | marked steep | worst unmarked |
+|---|---|---|---|---|
+| 0.1 | 0.00% (≤0.5) | 0.05% (≤2) | 2.13% (≤3) | 23% (≤30) |
+| 1 | 0.05% | 0.04% | 1.77% | 24% |
+
+Subset rule: seeds 7 and 4477 keep every point of every unfolded road (hashes from commit
+225de22 in the test; 52 and 98 roads identical). Crossings not filed as junctions: 0 on five
+seeds. Every lake sits at the exact metres of its lowest cell.
+
+**Not met: the worldgen time budget (+15%).** `makeTerrain` for 25392 at full size went from
+~106 ms to ~280 ms on a quiet machine (the switchback pass ~150 ms of it; calm + landings +
+crossroads ~25 ms). The search is a real A* with a heading per state; the corridor has to be 1.5
+cells for the user's ridge. `createWorld` itself is ~1.5 s, so this is ~10% of world generation.
+If it matters, the fold result is a pure function of (seed, scale) and could be cached.
+
+**Not done (stays todo in the test):** a stronghold `junction` slot does not stand on a B3
+crossroads — `js/sites.js` `slotsFrom` still finds junctions from map cells two roads share,
+which after the merge lie 2-12 cells from the filed junctions. It should read
+`terrain.junctions`; sites.js was M1/M2's file this wave. The crossing-record orphan test
+(`klass`, `roadHalf`, `river`) is a todo for M6.
+
+**Tests:** `tests/round27-roads.test.js` (15: 13 pass + 2 todo). Rule-not-number changes to
+older tests: `planet.test.js` weave run in metres (a landing adds vertices by definition),
+`round22-roads.test.js` shared-ground in metres (11.1 km before, 11.7 km after, bar 15 km),
+`round23-bridge-gate.test.js` finds Fenkeep's west gate as the nearest gate (the 9 m highway
+grew the plan and moved it 31 m along the same road). Must-stay-green all pass: planet, water,
+roadgap, round16-roads, round17-worldgen, round22-roads, round23-bridge-gate, round21-town,
+planet-lod.spec, round23-title.spec.
+
+### Round 27 — Gates that open and shut, and guards who notice you (M4)
+
+**Root causes.** A gate was scenery. The door leaves were drawn once, open, with colliders filed
+along the passage walls, and `js/collide.js` had no way to take a collider back (no delete, no
+toggle — `addSegment` returned the field, not a handle), so nothing could ever shut. That left
+data/strongholds.json's siege camp blurb ("a town a mile off that has stopped opening its gate")
+untrue, standing had no face at a town's edge, `BUILDING_INFO.role` had no reader, and
+`restless_dead`'s `nightSpawn: 'undead'` was merged by js/incidents.js and read by nobody.
+
+**What changed.**
+- `js/collide.js`: `addSegment(..., { id, enabled })` returns the segment as a handle;
+  `setEnabled(idOrHandle, bool)` / `isEnabled(id)`. The `enabled` flag is one boolean checked inside
+  the existing loops (`blocked`, both passes of `resolve`); `clear()` also forgets the ids.
+- `js/features.js` (gate door block): each gatehouse files two sets of door colliders by id — the
+  open leaves along the passage, and one door across it between the hinges — and remembers each
+  gate's swing in `doorState` (outlives a rebuild, never saved). `setGateShut(id, bool)` switches the
+  colliders at once; `tickGates(dt)` swings the two instance matrices per gate over `GATE_SWING`
+  (0.8 s). A gate record carries `doors` and a derived `shut` — not `open`, which was already the
+  opening's WIDTH and is read everywhere. A plain opening (no gatehouse: gate 5+, a trimmed street
+  gate, a wet gate) has no doors and never shuts. `postsOf(id)` files every built building whose
+  `BUILDING_INFO` has a `role` — the field's first reader.
+- `js/town.js`: `besiegedTowns` (a standing, not-taken `siege_camp` besieges the ONE town nearest it,
+  measured to the real wall, within `gates.siegeReach`), `gateVerdict` (siege or Hunted shuts; the
+  respawn town and any town holding an active quest giver never shuts — the siege blurb still shows;
+  a knock opens a non-Hunted gate), `guardTargetsPlayer` (Hunted AND outside the wall line AND within
+  the guard's reach), `knockOutcome`, `watchPosts`. Re-derived twice a second from what main.js
+  hands `folk.update` as `gates`; the log says when a nearby town shuts, bars, stays open for you, or
+  reopens. Gate guards greet once per approach with a line by band, salute a Trusted/Sworn player
+  at an open gate (the Chibi 2 `salute` clip, started once — the post branch does not ask for idle
+  until it has played), and when you are Hunted chase and hit you outside the wall only. Every
+  watchpost gets a guard at its door; barracks guards stay inside. `gateAt` / `gatePrompt` / `knock`
+  are E at a shut gate.
+- `js/speech.js`: `gateLine(band, faction)` — Known is the holder's own `greeting` from
+  data/factions.json, the other bands name the holder.
+- `js/actors.js`: `setNightSpawn({ family, share, reach })` and `nightPool` — within `reach` m of a
+  town's watch, `share` of rolls draw that family from the whole bestiary nearest the level (the
+  grassland town's ordinary table has no undead at all). An option on WHAT spawns, not a second
+  multiplier on how much; the rng is only drawn when it applies, so everything else rolls the same.
+- `js/main.js` (13 lines, all `// R27 M4`): the `gates` context on the existing `folk.update` call,
+  `kind: 'gate'` in `interactTarget`, the E branch, the prompt, and `setNightSpawn` next to
+  `spawnMult` in `applyIncidents`.
+- `data/balance.json` `gates`: `knockFee` 25, `knockSeconds` 60, `siegeReach` 1400, `greetRange` 9,
+  `nightSpawnShare` 0.5, `nightSpawnReach` 400.
+
+**Measured.** Seed 1337 (full size): the real player controller walking into a shut gate stops
+outside the door line; the same walk goes in after M1's `sites.take`, after a knock, and after the
+gate reopens. The leaves are half-way at 0.4 s and across the opening at 0.8 s. Restless dead at
+Duskreach: 0.0% undead without it, 48.4% with it over 500 spawns within 400 m; the family moved to
+`construct` gives 49.6% constructs; share 0.9 gives 90.4%; switched off, the spawn sequence is
+identical to never having set it. In the game (seed 47, Fenkeep): shut by a siege 90 m out, the
+walker stopped, the take opened it, E at the re-shut gate opened it for 60 s, a Hunted player was
+chased outside and left alone inside, a Trusted one was greeted and saluted, and every watchpost
+had a guard within 2 m.
+
+**Not done / notes.** No standard seed places a siege camp near a WALLED town on its own (every one
+lands by a hamlet), so the tests move one of the world's own camp records next to a walled town.
+Only gatehouses shut; a plain gap in the wall stays open. A knock is not saved (a reload re-derives
+the gate and you knock again).
+
+**Tests.** New `tests/round27-gates.test.js` (11: collide toggle, doors + real player walker, siege +
+take, respawn/quest-giver exemption, Hunted targeting + refused knock, knock with odd
+`knockFee`/`knockSeconds`, reload from M1's saved keys, guard line + one salute, watchposts,
+`nightSpawn` with odd family and share, verdict table). `tests/round23-bridge-gate.spec.js` gains
+the shut-gate walk in the real game, and its older gate test now finds Fenkeep's west gate as the
+nearest one (M5 moved it 31 m, as the node test already says).
+
+### Round 27 — War camps, warlords and leaders that lead (M10)
+
+**What was wrong.** A warband (round 26) held ground and nothing else: no place of its own, nobody
+at the top, and the pecking order inside a pack was a lie. `leads` spawned an escort that nothing
+tied to the leader — the pack wake matched `defId` only, so hitting a brute left its archers and
+the leader standing about; data/enemies.json's `_doc` has said "leader buffs its pack" since round 4
+and no code did; killing the leader changed nothing. Above level 30 there was no boss at all (M1
+made `bossFor` fall back to the nearest band, but the band above 30 was empty). And the Thornmane
+Packlord had no hat.
+
+**What changed.**
+- **A war camp per held zone** (`js/sites.js` `placeWarCamps`, after instances and world bosses
+  have had their pick, so their slots are exactly what they were — the test compares them with
+  and without camps). A camp takes a garrison slot in the zone (never a castle: a keep with a
+  stair down stays a keep), else the first free slot, off the road if it can, else — for the
+  quarter of 25392's zones with no node or road in them — a dry, level cell of the zone clear of
+  towns and of every other place (`wc<zoneId>`). 159 camps over 161 held zones on the six seeds.
+  Five `data/strongholds.json` rows (`warcamp_<band>`, `faction` = the warband id, never rolled)
+  and five `data/setpieces.json` layouts: the Sootwick junk wall, the Ashtusk palisade (M3's orc
+  wall out of the proctown kit, via `kitPiece`) with bone totems, the Thornmane thorn ring and hide
+  tents, the Unburied barrow-fort (earth banks, M3's bone wall at the gate, an opened barrow), the
+  Stonehide ring of standing slabs. Eight new pieces; the banner is `warbanner`, white cloth tinted
+  per instance with the warband's `colour`. The ring turns so its gate faces the nearest road, a
+  wall piece that would stand on the carriageway is left out, and a banner is stepped along the
+  ring until it flanks the road instead of standing in it.
+- **The garrison is pure** (`garrisonPool`): the warband's own members at the camp's level, then
+  the members nearest the level, and only then the zone's wildlife — flagged on the site
+  (`garrisonFallback`) and counted by the test (0 fallbacks over 1,347 bodies). One standard-bearer
+  always, the warlord in the middle, everyone linked into the warlord's band.
+- **Taking a camp** is the LAST guard falling, not the boss: `sites.warDeath(unit)` answers
+  `{ warlord, cleared }`; main.js (≤ 20 lines, all `// R27 M10`) drops the grip by
+  `warbands.warlordGrip` on the warlord and files it slain as `wl:<key>` in M1's stronghold ledger
+  (no new save field), and on `cleared` calls `sites.take` → `payStronghold` (M1's one payer) and
+  drops the grip by `warbands.campGrip`. The war-chest stays sealed until then (round 25's
+  `guards`), rolls from the warband's own drop list (`chest.bases`) and holds its unique at
+  `warbands.campUniqueChance`. A routed runner is still standing, so it still has to be caught.
+- **Warlords**: five injected bosses (`tools/build-warbands.py` → `data/warbands.json` `warlords`,
+  put into `bestiary.bosses` by `installWarbands`; data/enemies.json untouched) — humanoid bodies of
+  the warband's race at 1.6-2.2x, 2-3 phases in the existing `{ at, modifier, say }` shape, `spawns`
+  of their own members (the Overchief roars at half health and calls two brutes), a Name Forge name
+  in the warband's tongue (seeded per camp, so a job can name it before you have been there).
+  The Gravemarshal (22-36) and the Peak-King (30-50) fill the boss band above 30. `bossFor` keeps a
+  warlord to its own ground — or to levels no other boss's band reaches — so a beast lair in goblin
+  country still holds a beast; `bossForHolds(…, { room })` keeps any boss out of an instance whose
+  corridor or ceiling it would not fit (`fitsRoom`, `bodyHeight`/`bodyWidth` per race).
+- **Leaders that lead** (`js/actors.js`): `linkEscort` stamps `leader` on every escort (and on a
+  warlord's phase adds) and puts the aura on through the EXISTING `applyModifier` — which now also
+  takes a modifier object, and an `exact` one keeps unrounded damage so `removeModifier` can take
+  it back off to the last decimal. `balance.warbands.leaderAura` is the factor. The standard-bearer
+  (a sixth member, champion-capable, a banner on its back in the warband colour) ends the aura early
+  (`breakAura`). A band wakes together: any member in a chase this frame wakes the rest this frame.
+  The leader plays `point` once on aggro (and the walk cycle waits for it). On the leader's death
+  every follower rolls `routChance` to flee for `routSeconds` — at least one always breaks — then
+  comes back into the fight.
+- **Helms**: Ringleader and Warchief `war_helm`, Packlord `wolf_helm` (its first hat), Deathmarshal
+  and Mountainlord `rune_helm`, bearers `bone_headdress`/`war_helm`, warlords `war_helm`,
+  `bone_headdress`, `wolf_helm`, `plate_helm`, `great_helm`. Data only.
+- **Jobs and rumours**: `break_the_camp` and `bring_down_warlord` bind only to what
+  `sites.warCandidates(zoneId)` lists — an untaken camp, a living warlord of an untaken camp — and a
+  `warlord_seen` rumour ("<name> was seen at <camp>") is built from the same list. A taken camp
+  finishes its job through `questLog.onClear` in `payStronghold`.
+- **Uniques**: five warband rows in `tools/build-uniques.mjs` (Gutterking's Shiv, Ashtusk Headtaker,
+  Moonhook, Gravemarshal's Oath, Peakbreaker) on powers that already existed, marked `warband` so
+  `rollDrop`'s ordinary legendary roll never picks one; `rpg.uniqueItem(id)` makes one for the
+  war-chest, and `rollDrops` gives a warlord's up at `warbands.warlordUniqueChance`.
+
+**Files outside the plan's list, and why:** `js/rpg.js` (the `!u.warband` filter, `uniqueItem`,
+`uniqueDrop` carried through `makeEnemy`, the warlord roll in `rollDrops`) and `js/chests.js` (two
+lines: `bases` and `unique` on a placed chest) — the plan asks for the chest and the warlord to roll
+from the warband's list and nothing else could carry it. `tests/poi.test.js` accepts a warband id as
+a camp's holder; `tests/round16-instances.test.js` counts 28 site pieces.
+
+**Tests.** `tests/round27-warcamps.test.js` (16, real worlds on the six seeds, the real field, real
+territory, real jobgen, real chests): camps per held zone and none elsewhere; world-boss and
+instance slots unchanged; pure garrisons; sealed chest + forced unique; one take and a grip drop of
+exactly `campGrip` (0.337) and `warlordGrip` (0.211); save keys; warlord data; `bossFor` 31-50 never
+null; the door check bites; a scripted phase fight (every phase once, in order, adds of its own);
+the aura at 1.37 measured through the real `strike` at 1.37 ± 0.001 (not 1.37²) and back to 1
+after the bearer dies; the band wakes on the next frame, a rout within 2 s and everyone back by
+8 s; over 500 jobs both frames offered and all bound to something standing; the rumour; the
+uniques. Extended: `round26-races.test.js` (six members + warlord, class helms through the
+normaliser), `round23-uniques.test.js` (the five rows, existing powers, each hook ≤ once per hit),
+`save.test.js` (`wl:` rides the ledger). Browser: `tests/round27-warcamps.spec.js` walks up to a
+camp, checks banners, walls and a pure garrison, kills the warlord and watches the rout and the
+return; screenshots in `research/round27-warcamps/`.
+
+### Round 27 — Bridges by kind, solid piers, fords and lake spans (M6)
+
+**The trail width first, because it was not what M5 thought.** M5 held trails at 4.5 m because at 4 m
+one bridge on seed 4477 (12157, 1343 at Super tiny) looked as if it filed a deck collider 0.55 m
+over its drawn deck. Measured, the deck colliders matched the drawn deck to a millimetre. The thing
+0.55 m proud was a **market stall**: that bridge's road ends over the water, so `planBridge` gives
+it a *landing* — the deck carries straight on past the crossing's footprint down to the far bank
+(round 23) — and every placement check asks `terrain.bridgedAt`, which only knew the footprint. A
+narrower trail dropped `roadAt` at the stall's spot to 0.43, under the 0.45 a stall checks, so the
+stall went up in the middle of the ramp you walk down. Fix at the root: `bridgedAt` now answers for
+the whole drawn deck, landings included (`plannedAt` at the bottom of `makeTerrain`, over the
+terrain's own lazily made `bridgePlans()`; while the plans are being made it answers with the
+footprint alone, which is what `planBridge` always saw, so a plan comes out the same whoever asks
+first). js/ground.js's walker index reads the same plans, so there is one plan per bridge in the
+game. **Trails are 4 m** (`ROAD_CLASS`).
+
+**Three styles** (`bridgeStyle` in js/bridge-plan.js, from the record: `klass`, the span, `over`):
+a highway over 40 m or less is a **stone arch** (cut-stone deck and parapets, piers splitting the
+deep stretch into bays of at most 14 m, a segmental arch filled in under the deck between them);
+anything over 60 m, and every lake span, is a **timber trestle** (bents every 6 m, one post per
+2.2 m of road — `crossing.roadHalf` — a cap beam and alternating braces); everything else is the
+round-23 **plank** bridge. The deck is the same list of samples in all three; only the underside,
+the piers and the rails change, and the rail collider is filed from the same style dimensions it is
+drawn with.
+
+**Solid piers** (`piersOf` / `filePiers`): one list for the drawn pier and its collider. A pier
+reaches across the whole deck, stands along the river's current (`crossing.river` — a road crossing
+at forty degrees gets skewed piers, a lake squares them to the deck), finds its footing at its four
+footprint corners and stands on the lowest, and runs up to the deck's underside. Its collider is a
+height-banded segment (the round-23 rail pattern): solid for feet between the bed and the underside,
+so a swimmer or a boat stops, a walker on the deck does not. One trap found on the way: a skewed
+pier reaches along the deck too, and on a landing ramp its far end came up through the planks by
+0.76 m — its top is now the lowest underside anywhere over its footprint.
+
+**Fords.** World Forge already calls a road over a river narrower than 2 a `ford` and makes it a
+node; nothing in Farhold read it. A ford is honoured when the river is narrow, the road is not a
+highway, a World Forge ford node is within 1.5 cells, no junction is within 24 m, no other river
+is near (at a confluence the other river's bridge would open a hole under the stones), the land
+stands at most 3.5 m over the stream, and the stones would be at least 0.5 m over the sea. Such a
+road is **not lifted** over that river (so `findCrossings` finds no bridge), and `fordDips` lays it
+into the water: vertices every 2 m across the channel at 0.3 m under the river's own surface there,
+and a straight 10% ramp out to the road it was. `heightAt` then grades the channel to it like any
+other road. Two findings: **most fords are a road that ENDS at the ford node** in mid-river (a spur
+to the landmark with nothing on the far side — round 23 gave these bridges a landing); a ford now
+carries such a road straight on across the water and 30 m up the far bank (`farBank`, decided in
+the lift pass so a ford that cannot reach a bank stays a bridge). And a road that ends at a node
+another road also ends at simply has its stones run to that end. js/bridge-plan.js `fordGeometry`
+draws the flagstones (never less than 0.25 m of water over one) and a row of marker stones either
+side standing out of the water, since the river sheet hides the flags. **Wading** (js/ground.js
+`WADE_DEPTH` 0.5, `wadeable`): water you can wade is not water an enemy, companion or townsperson
+refuses (`wetAt`), and js/player.js walks it at `wadeSpeed` 0.65 of the pace — on foot, mounted or
+driving. Swimming still needs 1.3 m.
+
+**Lake spans.** Where a road is raised over more than 25 m of open lake (a lake cell, the road
+above the water and above the land, and within 6 m of the water — a causeway), the run is cut into
+straight pieces (a piece ends where the road strays a metre off its chord, or at 60 m) and each is
+a crossing with `over: 'lake'`, built as a trestle; `heightAt` leaves its footprint as lake
+(`lakeCut`, taken out of `heightAt` so both read the same basin). Shorter runs keep round 17's
+causeway and get two culvert mouths (`terrain.causeways`, `culvertGeometry`, dressing only).
+**Finding: no standard world has one.** World Forge keeps roads off lakes and towns drain them; the
+only long "plug" found was seed 47 at full size, where a lake's cells sit 57 m under the land they
+are in (lake 147.7 m, ground 204 m) and the road runs along the hill between two 66 m pits. That is
+a lake/relief mismatch, not a causeway, and a 66 m trestle is not a lake narrows, so it is left
+alone (parked: the pit itself). The test lays three lake cells across real roads to prove the rule.
+
+**Acceptance, measured** (tests/round27-bridges.test.js, seeds 47 / 7 / 4477 / 1337 / 101 at
+Super tiny, fords and lakes also at full size):
+
+| | measured | bar |
+|---|---|---|
+| drawn deck vs what you stand on, every crossing (208), 56,562 points, all solids | 0.0008 m worst | ≤ 0.05 |
+| styles built | arch 1, trestle 84, plank 123; the one highway crossing ≤ 40 m is an arch | ≥ 1 each |
+| walker on js/player.js across each style | 1 arch, 8 trestles, 8 planks, none fell or swam | all |
+| swimmer and boat into a pier / between piers, 5 bridges | stopped / passed | — |
+| pier footing vs `heightAt` at its lowest corner, 1,494 piers | 0.100 m | ≤ 0.2 |
+| water over a ford, every metre (22 fords, 441 steps) | 0.30-0.34 m (300 steps on a drawn flag, all ≥ 0.25) | 0.2-0.5 |
+| walker across every ford | never swims; 0.65 of the pace on foot, mounted and driving | — |
+| fords on a highway | 0 | 0 |
+| causeway over lake water > 25 m | 0 on 8 worlds; laid lakes: 16 trestle spans, 1 culverted causeway, 3 walked | 0 |
+
+`makeTerrain` time is unchanged within noise (the bridge plans are made on the first `bridgedAt`).
+
+**Tests:** new `tests/round27-bridges.test.js` (13) and `tests/round27-bridges.spec.js` (one
+screenshot per style and of a ford, then a walk across the ford on the real keys; screenshots in
+`research/round27-bridges/`). `round23-bridge-gate.test.js`'s mesh-buffer loop now requires all
+three styles. `round27-roads.test.js`: the crossing-field orphan test is real (no exceptions; `over`
+included) and a second one checks `klass` / `roadHalf` / `river` are read as crossing fields; the
+subset-hash test excludes `ford` vertices by name, as it does landings; trails assert 4 m.
+`round17-worldgen.test.js`: a ford counts as covering the road over a river, and the deck-clearance
+rule is for rivers (a lake span is low by design). Still todo, not M6's file: the stronghold
+junction slot (`js/sites.js`).
+
+### Round 27 — Cliffs are rock, and roads are faster (M7)
+
+**What was wrong.** Round 21 put real cliff faces into the ground — at Super tiny a face is 2-4 m
+across and 5-20 m tall, slope 6-10 where it is steepest, and the very steepest part of the crease
+drops six metres in a few centimetres. Nothing treated them as anything but a hill:
+- the player divided their pace by `1 + steep·1.6` and crawled up a 20 m face;
+- enemies had **no slope term at all** (js/actors.js) and ran up it at full speed, so the wolf
+  chasing you reached the top first;
+- `props.js` refuses anything on ground steeper than 0.75, so a face rose bare out of the grass;
+- a terrain ring measures steepness across two of its own quads (2 … 162 m), so from the third ring
+  out a face fell between vertices and was painted grass;
+- **no peak on any standard world was ever painted snow.** The snow line (700 m + 5200 m ×
+  temperature) is World Forge's *raw* relief (land to ~6,000 m) and was never brought down when
+  `reliefScale` (0.22 × `M_PER_CELL / 640`) arrived: the top 5% of land runs 68-168 m at Super tiny
+  and 600-1,700 m at full size, and a cold peak's snow line was 2,100 m. The only white was the
+  snowyPeaks biome's own colour.
+
+**The cliff rule** (js/ground.js — `CLIFF`, `cliffGrade`, `steepAt`, `climbable`, `cliffStep`,
+`cliffSlide`; one helper for the player and every enemy):
+- The line is round 21's cliff band: 63° (`tan 63` = 1.96). A mount's `mountSlope` adds 10° a whole
+  point, capped at 70°.
+- A step is refused when it goes uphill and the ground **along the step**, over the metre ahead of
+  where it lands, is past the line — or the step itself rises faster than the line by more than a
+  kerb (0.35 m), for a horse covering two metres a frame. *Along the step*, not the steepest way,
+  because a road beside a bridge's hole or a river's channel is steep the steepest way and flat the
+  way you walk it: measured the steepest way, 42 road points on five worlds refused a walker going up
+  to a bridge. *The metre ahead*, not a centred difference, because a 20 cm face sits between the two
+  samples of a centred one and averages away.
+- Refused, the step keeps its part along the face and loses the part up it, so a body pushing
+  diagonally slides along the foot and a chase finds its way round.
+- A body standing ON a face (steep both above and below it — the edge of a bridge's hole is not)
+  slides back down the terrain's `normalAt`, the terraform-aware one.
+- **Escape:** pinned for 3 s, a body earns 1.2 m of climb a second and takes the step once it has
+  earned the step's rise. *Earned*, not "scaled to climb no faster than": the first cut did that and
+  a wolf went up a 6 m wall in one frame when its tiny step crossed the near-vertical part.
+- **A road is always a way up.** Where two roads' graded surfaces meet at different heights,
+  `heightAt` has a step in it (1.4 m at Stonecrown, seed 7 — a finding for the road pipeline, not
+  fixed here), and a road must never pin anyone, so ground with `roadAt` over 0.45 is never refused.
+  No cliff is ever on a road (M5's calm corridor breaches the face), so this costs the rule nothing.
+- Knockback into a face is a wall slam, the same as knockback into a wall.
+- The player's rule is off while swimming; a ground vehicle obeys it too (a truck does not climb a
+  63° face either — its own `maxSlope` stops it long before).
+
+**Roads are faster** (js/player.js, `balance.json` `roads`): walking ×1.15, riding ×1.25, a highway
+×1.1 on top, on `roadAt` > 0.45 (the class comes from the new `terrain.roadClassAt`). In the
+legs-and-hooves branch **only**: a ground vehicle's speed is replaced from js/vehicles.js
+`speedOn`, which has its own `spec.road`, so the road is paid once. The other speed readers were
+checked: main.js's vehicle surface (`roadAt > 0.45` → `spec.road`, replaced not multiplied), the
+mount sheet (`paceNote`, display only), the stride rate (reads the resulting `control.moving`) and
+js/pets.js (follows the owner's pace).
+
+**Scree** (js/props.js `screeFor`): each cell's ground on an 8 m lattice, every edge that drops a
+face's worth (the line × a thirty-second of a map cell) walked a metre at a time from its low end
+with the walkers' own `steepAt`; the first point past the line is the foot of the face. Two to four
+rocks per face point, fanned 35° either side of the face's downhill normal within 12 m, nearer the
+foot more often; a boulder sometimes. Never on a road (`roadAt` < 0.35), never where `plantable` says
+no, never off a river channel or a bridge hole, never on a face, never uphill of its own face. Own
+random stream (`seed ^ 0x5c1e`); the list is cached per cell (emptied when `clearedVersion` moves).
+**No new draw calls, not even an empty mesh's:** the rubble goes into the existing `rock` and
+`boulder` meshes after every ordinary prop in the radius, so an instance index that held a rock still
+holds the same rock; where no ordinary boulder is in view the scree boulder is a rock at 2.4× (an
+empty InstancedMesh costs nothing, switching one on costs a call — the first test run caught it at
+8 → 9); where there are no rocks at all, no scree. Boulders are solid through `solids.add`. Cliff
+country is found first with the new `terrain.cliffCountryAt` (`cliffAt`'s two gates without the
+crease), so most of a world costs a few table reads; ~0.3 ms per new cell, then cached.
+
+**Rock band at distance** (js/terrain.js `rockSteep`): a ring whose quads are wider than a face
+(a thirty-second of a map cell: 2 m at Super tiny, 20 m at full size) also takes
+`slopeAt(x, z, probe)` in cliff country. Ring rebuilds at a cliff on the user's world: rings 3 and 4
+go from 7.5 / 7.8 ms to 12.4 / 14.3 ms (they rebuild every 17 / 51 m walked); rings 0-2 are within
+0.7 ms.
+
+**Snow and sand** (js/planet.js `colorAt`): the snow line is multiplied by `reliefScale` itself (the
+fraction of a mountain that is white is what World Forge meant, and the same on every planet size);
+the 9 m beach band keeps its full-size look and shrinks with the planet (`M_PER_CELL / 640`). Both
+measured up from the sea. The plan said "the same factor as reliefScale (`M_PER_CELL / 640`)" for
+both; for snow that is still ten times too high and would have left every peak bare.
+
+**Acceptance, measured** (tests/round27-cliffs.test.js):
+
+| | measured | bar |
+|---|---|---|
+| land past 63°, Super tiny | 25392 1.26%, 7 0.08%, 4477 0.14%, 101 0.96%, 1337 0.08% | ≤ 3% |
+| road lane points (5 seeds, edges + middle) | steepest 58.1° of 48,915; 4,071,322 steps walked both ways, 0 refused | all under |
+| player pushing uphill 5 s, 20 faces each (7, 25392, 25392 full size) | ends ≥ 6.0 / 7.3 / 5.0 m under the lip; before this, 5 / 4 / 1 of 20 reached the top | under the lip |
+| wolf on the real EnemyField chasing up the same faces | ≥ 6.0 / 7.3 / 5.0 m under the lip | under the lip |
+| walking along the foot, 80 walks | 0.00% off the same walk with the rule off | ≤ 5% |
+| three-sided gully, pushing at the dead end | walker out in 5.85 s, wolf 6.37 s; never, with the escape off | ≤ 8 s |
+| road pace | exactly ×1.15 walk, ×1.25 ride, ×1.265 highway; knobs moved to 1.37 / 1.61 / 1.29 read exactly | exact |
+| driver on a road with every knob moved | unchanged to 3 decimals | unchanged |
+| scree, 6 cliff spots | 2,801 instances (191 boulders): every one within 12 m and below a face past the line, off roads and water; every other instance byte-identical with scree off; draw calls equal (13/13, 11/11, 12/12, 17/17, 8/8, 12/12) | — |
+| scree falloff | a far cell keeps 27 of 39, all of them in the near set | subset |
+| rock weight ring 0 vs ring 4, 20 cliff points | 0.000 (1.000 without the probe) | ≤ 0.15 |
+| snow share of the top 5% of land, 0.1 / 1 | 25392 37.4 / 37.6%, 4477 63.1 / 61.1%, 7 3.0 / 3.2% | ±10 points |
+
+**In the game** (tests/round27-cliffs.spec.js, seed 25392 at Super tiny; screenshots in
+`research/round27-cliffs/`): rubble along the foot of the nearest face, the escarpments grey from
+200 m, the highest peak white, and the player holding W into a face for 2.5 s stays under the lip.
+
+**Not done / found:**
+- `tests/phase2.spec.js`'s whole-scene `drawCalls < 95` is red — **at HEAD before this milestone
+  too** (100-104 on seed 7, measured on a worktree of 02019c3). Props draw calls are 11 either way and
+  scree is 0 at that spawn. Something from an earlier round-27 milestone pushed the scene over.
+- The road-surface step where two roads meet at different heights (above) belongs to the road
+  pipeline (M5/M8).
+- Companions (js/pets.js, not this milestone's file) still have no slope rule; they are pulled back
+  to their owner when they fall behind, so they cannot be stranded.
+- main.js's mount row still says "climbs anything" (pinned by round17-ui.test.js and
+  round15.spec.js); true against the vehicles it is listed with, not against a cliff.
+
+**Tests:** new `tests/round27-cliffs.test.js` (12) and `tests/round27-cliffs.spec.js` (1). Must stay
+green, all pass: stride, planet, round23-graphics, vehicles, round22-threat, round27-bridges,
+round27-gates, round27-warcamps, water, round27-roads, save; density.spec, megaflora.spec,
+round23-title.spec; phase2.spec 10 of 11 (the one above).
+
+### Round 27 — Roads you can read (M8), and the round's leftovers
+
+The last milestone of the round. It owns the plan's M8 (road looks, signposts, milestones, lamps,
+player roads) and six things earlier milestones found and left: the draw-call budget, the step where
+two roads meet, companions on cliffs, the mount row's "climbs anything", the stronghold junction slot,
+and the cost of the switchback pass.
+
+**Three kinds of road** (js/features.js `ROAD_LOOKS` / `roadProfile`, js/roadplan.js `laneRibbon`
+`profile`). The world's road ribbon is vertex-coloured now, still one mesh and one material. A
+cross-section is a list of columns edge to edge: a highway is pale paving with a darker kerb strip on
+its outer 0.4 m (two columns at the same offset make the crisp edge), a road is gravel with slightly
+darker shoulders, a trail is dark dirt with a grass crown down the middle. A lifted deck is painted
+the class's main colour. Streets and rivers call `laneRibbon` without a profile and are unchanged.
+Measured off the drawn triangles (area-weighted, so what you see from a few metres off): highway vs
+trail ΔE 31.4, road vs trail 17.0, highway vs road 16.2.
+
+**Signposts** (new js/roadside.js, pure placement). The road network is a graph: nodes are the filed
+junctions (`terrain.junctions`), every settlement a road passes within its ring of, and loose road
+ends; edges are the stretches between, weighted by length along the road. A road is cut at its sea
+lanes first (the ribbon's own wet rule) — a sign must not send you across water nobody drew a road
+over. Every arm is a Dijkstra walk out along that branch, never back through the post, to the FIRST
+settlement reached; a branch that reaches none gets no arm. Posts stand at every junction outside a
+town and at every town link (where a road leaves a town's edge, 12 m out), in the widest gap between
+the roads through that point, clear of every carriageway by `half + footing` (the waystone rule).
+Two traps found on the way: a link post splits an edge in two, and the unsplit edge had to come out of
+the network while it was split, or a walk left down one half and came back along the whole, straight
+through the post (seed 7, Krokskoshhaven: an arm said "Krokskoshhaven 0.7 km" pointing away from it);
+and a town's wall is only known once it is planned, so which posts and lamps stand is asked at every
+rebuild against the extents as they are then. E at a post prints its arms to the log ("west:
+Frostcross 0.2 km · south-east: ? 1.7 km"), and a place in a region you have not entered or heard of
+reads "?" — js/map.js's own `knows`, so the sign and the map cannot disagree. Drawn as two instanced
+kinds, `signpost` and `signarm` (one arm per road, turned to point down it), with caps.
+
+- **The plan said "within 8 m of its junction and `roadAt(post) < 0.3`".** Those cannot both hold:
+  `roadAt` is 1 - smoothstep(half, half + 16), so 0.3 is about ten metres past the kerb. The rule
+  measured instead is the one that matters: clear of every carriageway by its footing, and the
+  furthest post is 8.9 m from its junction (a four-way crossing's nearest clear corner is 8.3 m out).
+- The arm test does not trust the planner: it floods the drawn carriageways on a 2 m grid from the
+  arm's start with the post's own spot blocked, and checks the named town is reached. 554 posts and
+  1,201 arms on five worlds, every one reached.
+
+**Milestones** every 2 km along every highway and road lane, beside it on the verge, shifted up to
+40 m along the road where the verge is wet or taken. 148 at full size on two worlds, every one within
+50 m of its 2 km mark; a Super tiny world has a handful (its lanes are mostly under 2 km).
+
+**Lamps** every 30 m along each road from a size-3+ town's wall out to 400 m past it, alternating
+verges, the bracket reaching out over the road. 1,937 on the approaches to 87 towns on five worlds:
+none within `half + 1` of any road's centre line, none inside any town's edge. At night the glass
+(`lampglow`, the one Basic-material kind) glows through `features.setNight`, and the lamps hand
+js/light.js sources with `tier: -1`: js/light.js now sorts by tier first, so a lamp only gets a pool
+light after every spell, carried torch, brazier and sconce in range has one; the player's own lamp is
+the separate `torch` and never in the pool. Measured on the real pool (12) with 30 lamps, a spell and
+two torches: both torches and the spell lit, 12 of 12 used. In the game at night on Stormgate's
+approach: 10 of 11 pool lights were lamps, the torch burning.
+
+**Player roads are roads** (js/planet.js `roadAt`, js/roadplan.js `roadAt` / `version`). The lane
+book is a second index: `terrain.setLaneBook(book)` (js/build.js hands it over) and `roadAt` takes
+the larger of the two, never the sum, returning early with no lanes. Lanes are NOT added to
+`roadPaths`. So road pace (M7), the vehicle surface, the grass (`grassAt` reads `road`; the bake
+re-samples when `terrain.laneVersion` moves) and props all see them. js/logistics.js counts a haul
+point as road when EITHER index says so: a haul over your lane is quoted at 8.84 m/s, one over a world
+road at 8.84, one over your lane laid ON a world road at 8.84 (bare ground 3.40). The book is loaded
+before the first scatter at boot. `road_dirt` / `road_cobble` copy now says what is true (road pace,
+road speed for hauls, no grass; caravans and signposts keep to the world's roads).
+
+**Leftover 1 — draw calls.** `phase2.spec.js`'s `< 95` was red at 104 on seed 7's landing. A
+per-object count (hooking `renderBufferDirect` and keeping only calls that incremented
+`info.render.calls`) showed the budget was already over before this round: 97 at 225de22 (the round's
+first commit), 98 after M3, 104 after M5 (towns and a townsperson shifted into view). The bisect was
+not the useful part — the breakdown was: **a hunting cat by the player was 34 of the 104.**
+avatar-3d/js/creatures.js builds a beast out of one Mesh per eye, pupil, ear and toe. New
+js/mesh-merge.js `compactCreature` (called from `makeActor` for every beast): it PROBES by playing
+every clip and leaves alone any leaf that moves, blinks or glows on its own (an elemental's shards, a
+snake's tongue), then folds every other leaf of one material kind into ONE SkinnedMesh whose bones are
+the creature's own groups — creatures.js keeps turning the same hip, knee and jaw, the skeleton reads
+their matrices. 41 creature types: 1,377 meshes to 86; the test checks the folded body has the same
+bounds and every colour, and still moves. Also: the fourteen town footings are one InstancedMesh
+(`farhold-building-footings`; the per-want meshes stay as the bookkeeping and are not drawn); a
+quest beacon is one dynamic mesh single-pass instead of five meshes drawn twice; and townsfolk past
+70 m skip their metal mesh and past 200 m are not drawn at all (`lodBody`; nothing stops updating).
+
+| where | before (HEAD 34f7c19) | after |
+|---|---|---|
+| seed 7 landing (phase2.spec) | 104 | 72 |
+| seed 7, Stormgate approach at night (lamps lit) | 98 | 72 |
+| seed 47 Super tiny, 24 m outside Fenkeep's gate | 165 | 96 |
+| seed 47 Super tiny, 24 m outside Cindercrown's gate | 178 | 112 |
+
+The town gates are down 40-70 but still over 95: what is left there is ~20 building kinds and ~20
+site kinds (one InstancedMesh per geometry) plus the ore seams (two material groups each). Merging
+different geometries into one call needs a BatchedMesh, whose fallback without `WEBGL_multi_draw` is
+one call per instance — parked, not guessed at.
+
+**Leftover 2 — the step where two roads meet** (js/planet.js `conformOverlaps`, `heightAt`'s seam).
+Measured first: 1.37 m at Stonecrown (seed 7; road 18 held up by water onto road 42 — a junction
+M5's landing skipped as `onBridge`), 0.83 m and 0.47 m where a branch comes in at a shallow angle and
+runs inside the trunk's carriageway for 10-20 m before the landing, and 0.52 m on seed 25392. Two
+fixes: (1) every road is walked a metre at a time wherever another road's carriageway overlaps it; of
+the two, the one that outranks (class, then the trunk of a join, then the longer) keeps its surface
+and the other takes it, with vertices every 2 m and a ramp out to its own next vertex adding at most
+3% of grade; where the lower road's water floor holds it up, the other road comes up to meet it. (2)
+`heightAt` took the NEAREST road's surface, so wherever two roads' reaches overlapped the ground
+jumped on the line where "nearest" changed hands — at an angle on a slope that is a step even when
+both surfaces agree on their own centre lines. Within `ROAD_SEAM` (3 m) of that line the two blends
+are now mixed, half and half on the line, and so is the deck's last-word clamp (it had put the step
+straight back). `makePathIndex` gained `nearestTwo` (one pass). A road that ends inside a landing's
+ease now ends level (M5's `level` left the tip at its old height: 0.66 m over the last metre of road
+11 on seed 25392). Worst step now, five seeds at both sizes: 0.089 m (seed 101 Super tiny); turned off,
+the Stonecrown step comes back (the test checks that too). `heightAt` is ~9% slower near roads.
+
+**Leftover 3 — companions on cliffs.** js/pets.js steps through js/ground.js `cliffStep`, the same
+helper the player and every enemy use (refused up a face, it slides along the foot; pinned 3 s it
+scrambles). 12 measured faces on seed 7: 0 climbed in 5 s with the rule, 6 without.
+
+**Leftover 4 — the mount row** says "climbs slopes up to 63°" from the cliff rule itself
+(js/ground.js `climbDegrees(mountSure(item))` — a Surefooted mount says more), and a vehicle its own
+`maxSlope` in degrees. round17-ui.test.js now asserts there is one mount-row builder, and
+round15.spec.js that the horse's number is the rule's and steeper than the motorcycle's.
+
+**Leftover 5 — stronghold junction slots** (js/sites.js `slotsFrom`) come from `terrain.junctions` at
+the junction's own point. Not thinned one in three any more: most filed junctions are in or beside a
+town (seed 7: 55 of 75 within 130 m) where no stronghold may stand. The todo test is real: every
+junction site on five worlds stands on a filed junction (the ids keep their cell form).
+
+**Leftover 6 — the switchback cache** (js/planet.js `foldCacheKey` / `FOLD_CACHE_VERSION`). The fold
+result is kept by a hash of the map, the metres a cell is, the terrain knobs and the merged roads, in
+memory and in `localStorage` (last three worlds, try/catch). Seed 25392 full size: first
+`makeTerrain` 286 ms (fold 155), second 104-120 ms (fold 1-2), identical roads; a changed fold knob
+misses the cache.
+
+**Tests.** New `tests/round27-roadside.test.js` (15) and `tests/round27-roadside.spec.js` (3: lamps at
+night in budget, E at a signpost, screenshots in `research/round27-roadside/`). round27-roads.test's
+junction-slot test is real. Rule-not-text: round17-ui.test, round15.spec. Unit suite 2,474 pass,
+2 skipped (Frontier Foundry's six-hour sims). Specs run: round27-roadside, phase2 (11/11, the budget
+green again), round23-title, round15, build-mode, round27-walls, round3, round27-cliffs,
+round27-bridges, round27-warcamps, planet-lod, density, megaflora.
+
+**Found, not changed:** `window.farhold` has two `setTime` keys (a fraction at ~7950 and elapsed
+seconds at ~10569; the later wins and four specs rely on it) — the round-11 duplicate-key fault; the
+first is dead code. The new spec sets the clock by the sun instead.
+
+### Round 27 — parked (bring these up when the round is done)
+
+From the plan's "What this plan deliberately does not do":
+- A6 triplanar rock shader, A7 waterfalls, A8 ground decals.
+- C3 the single `townOrigin()` refactor (with the `markers.js:490` / `main.js:2014` half-cell offset).
+- C4 toll bridges; night-closing gates.
+- D7 outskirts.
+- Warband sets, plantable banners, trophies; warband counter-raids; E14 warband-vs-warband wars.
+- F2 enemy weapon patterns; F5 warband codex.
+- Roadside waystations and shrines (B6's other half); wall walkers.
+
+Parked by the milestones themselves:
+- M6: seed 47 at full size has a lake whose cells sit 57 m under the land they are in (a lake/relief
+  mismatch; the road runs along the hill between two 66 m pits). The pit itself, not a causeway.
+- M5: the first build of a world still pays the switchback pass (~150 ms at full size on 25392); only
+  the second and later builds skip it (M8's cache).
+- M3/M8: draw calls at a town gate are 96-112 against the 95 the landing is held to — merging
+  different building geometries into one call needs a BatchedMesh (see Leftover 1).
+- M8: the duplicate `setTime` key in `window.farhold` (above).
+- M9 and M10's own "not done / notes" (patrol bodies steer by strolling rather than a movement mode; no
+  standard seed puts a siege camp by a walled town on its own) — see their sections.

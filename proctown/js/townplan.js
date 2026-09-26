@@ -158,11 +158,26 @@ export const WANT_FROM = {
   stable: 2, warehouse: 3, barracks: 4, mill: 2, watchpost: 3, shrine: 0,
 };
 
+/**
+ * WHAT KIND OF EDGE A SETTLEMENT OF THIS SIZE HAS: `'none'`, `'low'` or `'wall'`.
+ *
+ * R27 — "size >= 4 means a wall" was written out in six places (this file, and five in Farhold),
+ * and six copies of one rule is six chances for them to disagree. This is the one copy; Farhold's
+ * js/town-plan.js re-exports it. `'low'` (a fence, a ring of boundary stones) is reserved for the
+ * smaller settlements and is decoration only — it never changes `walled`.
+ */
+export function wallTier(size = 1) {
+  // R27 M3 — a village or a small town (size 2-3) gets a low fence or hedge ring; a hamlet gets
+  // boundary stones at the road ('none'). Both are decoration only: `walled` is still size 4+.
+  return size >= 4 ? 'wall' : size >= 2 ? 'low' : 'none';
+}
+
 /** How wide a settlement's footprint is, which is also where its quiet ground starts. */
 export function footprintOf(size = 1) {
   const ring = 16 + size * 13;
-  const wall = size >= 4 ? ring + 14 : ring;
-  return { ring, wall, walled: size >= 4 };
+  const walled = wallTier(size) === 'wall';
+  const wall = walled ? ring + 14 : ring;
+  return { ring, wall, walled };
 }
 
 // ---------------------------------------------------------------------------- oriented boxes
@@ -539,6 +554,8 @@ function planOnce({
    * Farhold works these out from where the inter-town route crosses the settlement's ring.
    */
   links = [],
+  /** R27 — `(radius) => links`, asked at the radius this attempt really builds to. Wins over `links`. */
+  linksAt = null,
 } = {}) {
   const base = CULTURES[culture] || CULTURES.human;
   const cfg = { ...base, ...(squeeze || {}), followGround: followGround ?? 0.35 };
@@ -564,7 +581,15 @@ function planOnce({
    * each one out along its own bearing to the wall this plan actually built. Nothing moves when
    * `ringScale` is 1, which is every town on an ordinary site.
    */
-  const linkPoints = ringScale === 1 ? links : links.map(([lx, lz]) => {
+  /**
+   * R27 — …OR BETTER, ASK THE CALLER AGAIN. Sliding along the bearing is right for a road that
+   * arrives square-on and wrong for one that arrives at a slant: the road crosses the bigger wall
+   * somewhere else entirely, so the high street ended on the wall 7 to 23 m from where the road
+   * (and so the gate) actually came through, and ran into masonry. `links` may be a function of the
+   * radius the plan really walls at (`linksAt(radius)`); Farhold passes one, and a plain `links` list
+   * still slides as before.
+   */
+  const linkPoints = linksAt ? linksAt(walled ? wall : ring) : ringScale === 1 ? links : links.map(([lx, lz]) => {
     const d = Math.hypot(lx, lz);
     if (d < 1e-6) return [lx, lz];
     const want = walled ? wall : ring;
@@ -685,7 +710,7 @@ function planOnce({
   for (const p of out.plots) if (!p.want) p.want = p.district === 'residential' ? 'house' : 'hut';
 
   out.blocked = out.blocked || 0;
-  out.wall = walled ? buildWall(wall, out.streets, rng) : null;
+  out.wall = walled ? buildWall(wall, out.streets, rng, cfg.wall, ring) : null;
   out.ring = ring;
   out.wallRadius = wall;
   out.culture = culture;
@@ -731,7 +756,7 @@ function clipSegmentToCircle(p1, p2, r) {
  * A gate exists BECAUSE a road crosses the wall line, and its angle is taken from the street that
  * made it — which is the fix for gates that sit at ninety degrees to the wall and do not meet it.
  */
-function buildWall(radius, streets, rng) {
+function buildWall(radius, streets, rng, kind = 'stone', ring = radius) {
   const poly = [];
   for (let i = 0; i < 16; i++) {
     const a = (i / 16) * Math.PI * 2;
@@ -739,26 +764,71 @@ function buildWall(radius, streets, rng) {
   }
   const gates = [];
   const apart = (x, y) => Math.abs(((x - y + Math.PI * 3) % (Math.PI * 2)) - Math.PI);
+  const free = angle => gates.length < 4 && !gates.some(g => apart(g.angle, angle) < 0.7);
   const add = angle => {
-    if (gates.some(g => apart(g.angle, angle) < 0.7)) return false;
+    if (!free(angle)) return false;
     gates.push({ angle, road: true, x: Math.cos(angle), z: Math.sin(angle) });
+    return true;
+  };
+
+  /**
+   * R27 — A GATE AT A STREET'S END, AND THE STREET CARRIED OUT TO IT.
+   *
+   * The blocks are cut from a square `ring` across and the wall stands at `ring + 14`, so an
+   * ordinary main street stops at the edge of the houses, fourteen metres short of the masonry,
+   * and the gate this function cut at its bearing opened onto a strip of grass. (Only a high
+   * street laid in from a world road ever reached the wall.) Now a street end at the edge of the
+   * town that is heading OUTWARD is extended along its own line to the wall — through the band
+   * between the last plot and the wall, where there are no plots to land on — and the gate is cut
+   * where it arrives. An end deep inside the town (a T-junction) gets neither.
+   */
+  const reach = (s, first) => {
+    const pts = s.pts;
+    const end = first ? pts[0] : pts[pts.length - 1];
+    const inner = first ? pts[1] : pts[pts.length - 2];
+    const r = Math.hypot(end[0], end[1]);
+    if (r >= radius - 0.5) return { at: end, extend: null };
+    if (r < ring * 0.85 || !inner) return null;
+    const len = Math.hypot(end[0] - inner[0], end[1] - inner[1]);
+    if (len < 1e-6) return null;
+    const dx = (end[0] - inner[0]) / len, dz = (end[1] - inner[1]) / len;
+    const b = end[0] * dx + end[1] * dz;
+    if (b / r < 0.35) return null;                       // running along the wall, not towards it
+    const t = -b + Math.sqrt(b * b - (r * r - radius * radius));
+    const at = [end[0] + dx * t, end[1] + dz * t];
+    return { at, extend: at };
+  };
+  const gateAt = (s, first) => {
+    const hit = reach(s, first);
+    if (!hit || !add(Math.atan2(hit.at[1], hit.at[0]))) return false;
+    // the extension runs along the last span's own line, so the end point simply moves out — a
+    // straight street stays a two-point street
+    if (hit.extend) { s.pts[first ? 0 : s.pts.length - 1] = hit.extend; s.toWall = true; }
     return true;
   };
 
   const mains = streets.filter(s => s.cls === 'main');
   mains.sort((a, b) => streetLength(b) - streetLength(a));
-  for (const s of mains) {
-    for (const end of [s.pts[0], s.pts[s.pts.length - 1]]) add(Math.atan2(end[1], end[0]));
-  }
+  for (const s of mains) { gateAt(s, true); gateAt(s, false); }
 
   /**
    * A town with one way in is a cul-de-sac, not a town.
    *
    * On a small or lopsided footprint the split can leave very few full-width main streets, and the
    * first pass then finds one gate or none — which would strand the player outside. So the wall
-   * insists on at least two, at the widest gaps left in the ring, and never more than four, because
-   * every gate is a hole somebody has to guard.
+   * insists on at least two: R27 — first at the end of the longest lesser street that heads out
+   * (carried to the wall the same way, so the gate still leads onto a street), and only then at the
+   * widest gaps left in the ring, and never more than four, because every gate is a hole somebody
+   * has to guard.
    */
+  if (gates.length < 2) {
+    const lesser = streets.filter(s => s.cls !== 'main').sort((a, b) => streetLength(b) - streetLength(a));
+    for (const s of lesser) {
+      if (gates.length >= 2) break;
+      if (!gateAt(s, true) && gates.length < 2) gateAt(s, false);
+    }
+  }
+
   let guard = 0;
   while (gates.length < 2 && guard++ < 24) {
     if (!gates.length) { add(rng() * Math.PI * 2); continue; }
@@ -771,8 +841,9 @@ function buildWall(radius, streets, rng) {
     }
     add(at);
   }
-  if (gates.length > 4) gates.length = 4;
-  return { kind: radius, poly, gates };
+  // R27: this used to be `{ kind: radius, … }` — the radius filed under the culture's wall KIND.
+  // `kind` is the culture's wall material ('stone', 'hedge', 'palisade' …) and `radius` the metres
+  return { kind, radius, poly, gates };
 }
 
 // ---------------------------------------------------------------------------- one network

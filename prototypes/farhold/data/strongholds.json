@@ -7,7 +7,7 @@
     "garrison": "{ count: [min,max], rankBonus, prefer: { roles, families } } — what js/sites.js asks the enemy field for",
     "boss": "{ rank, modifiers, epithets } — every one of these gets a Name Forge given name and an epithet from this list",
     "chest": "{ kind } — a key from balance.json's chests.kinds",
-    "gives": "the reward hooks. At least one must be present or the POI test fails.",
+    "gives": "the reward hooks. At least one must be present or the POI test fails. R27: paid ONCE, when the boss goes down (js/sites.js `take`). `clears` = taking it clears the site for good (no garrison ever comes back; off, ordinary bodies may return but never a boss, prisoners or the strongbox). `opensDungeon` = an instance id from data/instances.json (or true for the vault) whose mouth opens within 40 m of the keep.",
     "icon": "8.17 — the map glyph for this kind, so a fort and a lair are not the same dot. js/sites.js puts it on `site.pin.glyph`."
   },
   "_chanceDoc": "How often a slot of each type grows a garrison rather than a landmark. A road has three slots and a crossroads turns up every third shared cell, so those two have to stay low or the road becomes a gauntlet; a pass or a lair node is a place somebody would fortify, so those are close to even.",
@@ -275,7 +275,7 @@
       "gives": {
         "loot": "legendary",
         "prisoners": 2,
-        "opensDungeon": true,
+        "opensDungeon": "windward_gaol",
         "standing": "stonecount",
         "xp": 400,
         "clears": true,
@@ -446,6 +446,256 @@
         ]
       },
       "icon": "siege"
+    },
+    {
+      "kind": "warcamp_sootwick",
+      "name": "Sootwick Junkyard",
+      "tier": 2,
+      "weight": 0,
+      "on": [
+        "landmark",
+        "pass",
+        "dungeon",
+        "crossing",
+        "road",
+        "junction"
+      ],
+      "minBand": 1,
+      "faction": "sootwick",
+      "warband": "sootwick",
+      "icon": "warcamp_sootwick",
+      "blurb": "A wall of broken carts, crates and stolen doors, and a goblin gang behind it counting what it took.",
+      "garrison": {
+        "count": [
+          5,
+          7
+        ],
+        "rankBonus": 2
+      },
+      "boss": {
+        "rank": "boss",
+        "modifiers": 1,
+        "epithets": [
+          "the Gutterking",
+          "Crate-Crowned",
+          "Keeper of the Heap"
+        ]
+      },
+      "plan": "warcamp_sootwick",
+      "chest": {
+        "kind": "gilded"
+      },
+      "gives": {
+        "loot": "rare",
+        "xp": 120,
+        "clears": true,
+        "warCamp": true,
+        "uses": [
+          "break_the_camp",
+          "bring_down_warlord"
+        ]
+      },
+      "_r27": "R27 M10 — a warband war camp. Never rolled onto a slot: js/sites.js placeWarCamps puts one in every zone this warband claims, after instances and world bosses. The garrison is the warband's own members, the boss its warlord (data/warbands.json `warlords`), the strongbox rolls from the warband's drop list with its own unique at balance.warbands.campUniqueChance. Taken when the LAST of them falls."
+    },
+    {
+      "kind": "warcamp_ashtusk",
+      "name": "Ashtusk Warcamp",
+      "tier": 3,
+      "weight": 0,
+      "on": [
+        "landmark",
+        "pass",
+        "dungeon",
+        "crossing",
+        "road",
+        "junction"
+      ],
+      "minBand": 2,
+      "faction": "ashtusk",
+      "warband": "ashtusk",
+      "icon": "warcamp_ashtusk",
+      "blurb": "A ring of sharpened logs, skull-hung totems and a fire you can see from the next valley. The Horde is home.",
+      "garrison": {
+        "count": [
+          6,
+          8
+        ],
+        "rankBonus": 2
+      },
+      "boss": {
+        "rank": "boss",
+        "modifiers": 1,
+        "epithets": [
+          "the Overchief",
+          "Burner of Roads",
+          "First Tusk"
+        ]
+      },
+      "plan": "warcamp_ashtusk",
+      "chest": {
+        "kind": "gilded"
+      },
+      "gives": {
+        "loot": "rare",
+        "xp": 180,
+        "clears": true,
+        "warCamp": true,
+        "uses": [
+          "break_the_camp",
+          "bring_down_warlord"
+        ]
+      },
+      "_r27": "R27 M10 — a warband war camp. Never rolled onto a slot: js/sites.js placeWarCamps puts one in every zone this warband claims, after instances and world bosses. The garrison is the warband's own members, the boss its warlord (data/warbands.json `warlords`), the strongbox rolls from the warband's drop list with its own unique at balance.warbands.campUniqueChance. Taken when the LAST of them falls."
+    },
+    {
+      "kind": "warcamp_thornmane",
+      "name": "Thornmane Den-Ring",
+      "tier": 3,
+      "weight": 0,
+      "on": [
+        "landmark",
+        "pass",
+        "dungeon",
+        "crossing",
+        "road",
+        "junction"
+      ],
+      "minBand": 2,
+      "faction": "thornmane",
+      "warband": "thornmane",
+      "icon": "warcamp_thornmane",
+      "blurb": "A ring of cut thorn as high as a man, hide tents inside it, and bones outside it.",
+      "garrison": {
+        "count": [
+          6,
+          8
+        ],
+        "rankBonus": 2
+      },
+      "boss": {
+        "rank": "boss",
+        "modifiers": 1,
+        "epithets": [
+          "the Greatfang",
+          "Moon-Caller",
+          "Leader of the Run"
+        ]
+      },
+      "plan": "warcamp_thornmane",
+      "chest": {
+        "kind": "gilded"
+      },
+      "gives": {
+        "loot": "rare",
+        "xp": 180,
+        "clears": true,
+        "warCamp": true,
+        "uses": [
+          "break_the_camp",
+          "bring_down_warlord"
+        ]
+      },
+      "_r27": "R27 M10 — a warband war camp. Never rolled onto a slot: js/sites.js placeWarCamps puts one in every zone this warband claims, after instances and world bosses. The garrison is the warband's own members, the boss its warlord (data/warbands.json `warlords`), the strongbox rolls from the warband's drop list with its own unique at balance.warbands.campUniqueChance. Taken when the LAST of them falls."
+    },
+    {
+      "kind": "warcamp_unburied",
+      "name": "Unburied Barrow-Fort",
+      "tier": 3,
+      "weight": 0,
+      "on": [
+        "landmark",
+        "pass",
+        "dungeon",
+        "crossing",
+        "road",
+        "junction"
+      ],
+      "minBand": 2,
+      "faction": "unburied",
+      "warband": "unburied",
+      "icon": "warcamp_unburied",
+      "blurb": "Earth banks thrown up round an opened barrow, and a dead army standing its watch on them.",
+      "garrison": {
+        "count": [
+          6,
+          9
+        ],
+        "rankBonus": 2
+      },
+      "boss": {
+        "rank": "boss",
+        "modifiers": 1,
+        "epithets": [
+          "the Gravemarshal",
+          "Oath-Keeper",
+          "Lord of the Long Watch"
+        ]
+      },
+      "plan": "warcamp_unburied",
+      "chest": {
+        "kind": "gilded"
+      },
+      "gives": {
+        "loot": "rare",
+        "xp": 180,
+        "clears": true,
+        "warCamp": true,
+        "uses": [
+          "break_the_camp",
+          "bring_down_warlord"
+        ]
+      },
+      "_r27": "R27 M10 — a warband war camp. Never rolled onto a slot: js/sites.js placeWarCamps puts one in every zone this warband claims, after instances and world bosses. The garrison is the warband's own members, the boss its warlord (data/warbands.json `warlords`), the strongbox rolls from the warband's drop list with its own unique at balance.warbands.campUniqueChance. Taken when the LAST of them falls."
+    },
+    {
+      "kind": "warcamp_stonehide",
+      "name": "Stonehide Slab-Hold",
+      "tier": 3,
+      "weight": 0,
+      "on": [
+        "landmark",
+        "pass",
+        "dungeon",
+        "crossing",
+        "road",
+        "junction"
+      ],
+      "minBand": 2,
+      "faction": "stonehide",
+      "warband": "stonehide",
+      "icon": "warcamp_stonehide",
+      "blurb": "Standing slabs a giant set up by hand, in a ring, with the clan fire in the middle of it.",
+      "garrison": {
+        "count": [
+          5,
+          7
+        ],
+        "rankBonus": 2
+      },
+      "boss": {
+        "rank": "boss",
+        "modifiers": 1,
+        "epithets": [
+          "the Peak-King",
+          "Stone-Setter",
+          "the Last Height"
+        ]
+      },
+      "plan": "warcamp_stonehide",
+      "chest": {
+        "kind": "gilded"
+      },
+      "gives": {
+        "loot": "rare",
+        "xp": 180,
+        "clears": true,
+        "warCamp": true,
+        "uses": [
+          "break_the_camp",
+          "bring_down_warlord"
+        ]
+      },
+      "_r27": "R27 M10 — a warband war camp. Never rolled onto a slot: js/sites.js placeWarCamps puts one in every zone this warband claims, after instances and world bosses. The garrison is the warband's own members, the boss its warlord (data/warbands.json `warlords`), the strongbox rolls from the warband's drop list with its own unique at balance.warbands.campUniqueChance. Taken when the LAST of them falls."
     }
   ],
   "_r18Uses": "R18 — the `uses` lists say which job frames a place can host, and were read by NOTHING; js/jobgen.js now prefers a frame a nearby landmark uses. Three of the eleven ids named no frame at all: `burn_it_out` -> push_them_out, `cull` -> thin_the_pack, and `hold_the_line`, which is a MERCENARY ABILITY id from data/mercenaries.json rather than a frame -> the_claim. A guard test now fails on any `uses` id that is not a real frame, so the join cannot dangle again."

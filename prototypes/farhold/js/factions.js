@@ -12,7 +12,7 @@
 // is felt by their enemy. That is what turns twelve factions from a checklist into a set of choices:
 // there is no state where everybody likes you, so "who do I work for round here" is a real question.
 
-const RIVAL_SHARE = 1 / 3;   // a rival feels the opposite of a deed, at a third of the size
+export const RIVAL_SHARE = 1 / 3;   // a rival feels the opposite of a deed, at a third of the size
 const FLOOR = -100, CEIL = 100;
 
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));

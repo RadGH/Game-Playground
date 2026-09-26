@@ -99,6 +99,18 @@ function fits(need, candidate, ctx) {
   // `rival` means "belongs to whoever is pushing in", which is a fact about the territory record
   if (need.rival && candidate.faction !== ctx.contested) return false;
   /**
+   * R27 M9 — `warband` means "a war party of the warband holding THIS zone", with its leader still
+   * standing (the job is to put the leader down). The zone's warband is the territory record's.
+   */
+  if (need.warband && (!candidate.warband || candidate.warband !== ctx.warband)) return false;
+  if (need.warband && candidate.type === 'patrol' && (candidate.leaderDown || !candidate.leaderId)) return false;
+  /**
+   * R27 M10 — a war camp binds only while it is untaken, and a warlord only while it lives: both
+   * come from js/sites.js `warCandidates`, which lists nothing else, and these are the belt to that.
+   */
+  if (candidate.type === 'camp' && candidate.taken) return false;
+  if (candidate.type === 'warlord' && (candidate.slain || candidate.campTaken)) return false;
+  /**
    * R14 — THE DISTANCE BUDGET.
    *
    * `ctx.maxMetres` comes from the frame's own scope (see SCOPE_METRES). A candidate that does not
@@ -220,7 +232,7 @@ export function createJobGen({ frames: data, territory = null, factions = null, 
   function offer({ zone, level = 1, candidates = [], want = 4, exclude = [] } = {}) {
     if (!zone) return [];
     const record = territory?.of?.(zone.id) || null;
-    const ctx = { contested: record?.contested || null, holder: record?.holder || null };
+    const ctx = { contested: record?.contested || null, holder: record?.holder || null, warband: (record?.warGrip > 0 && record?.warband) || null };
     const rng = rngFrom(hash(seed, zone.id, record?.visits ?? 0, offers++));
     // the zone you are standing in is a candidate in its own right, and it is nought borders away
     const pool = candidates.concat([{ type: 'zone', ...zone, name: zone.name, adjacent: false, zoneHops: 0 }]);
@@ -471,6 +483,10 @@ export function createJobGen({ frames: data, territory = null, factions = null, 
 export function candidatesFrom({
   zone, territory = null, bestiary = [], nodes = [], landmarks = [], npcs = [],
   caravans = [], patrols = [], named = [], items = [], metresPerCell = 640, level = 1,
+  // R27 M10 — this zone's untaken war camp and its living warlord (js/sites.js `warCandidates`)
+  camps = [],
+  // R27 M1 — the enemy field's live units, so a champion that is really out there binds first
+  live = [],
   /**
    * R14 — WHERE THE BOARD IS STANDING, AND HOW BIG THE WORLD IS.
    *
@@ -545,15 +561,38 @@ export function candidatesFrom({
   for (const n of npcs) out.push(placed({ ...n, type: 'npc' }));
   for (const c of caravans) out.push(placed({ ...c, type: 'caravan' }));
   for (const p of patrols) out.push(placed({ ...p, type: 'patrol' }));
+  for (const c of camps) if (c?.type === 'camp' || c?.type === 'warlord') out.push(placed({ ...c }));   // R27 M10
   for (const f of named) out.push({ ...f, type: 'named' });
   for (const it of items) out.push({ ...it, type: 'item' });
 
+  /**
+   * R27 M1 — "A BEAST HAS MOVED IN" COULD NEVER BE OFFERED.
+   *
+   * The rank came from `e.boss` / `e.champion`, and no bestiary def carries either: a champion is
+   * not a KIND of enemy, it is a rank any ordinary spawn can roll (js/actors.js `spawnNear` →
+   * `rollRank` → `addRanked`). So the one frame that asks for `rank: 'champion'` never bound.
+   *
+   * Two honest sources now. A LIVE champion or rare out on the field right now (`live`, the enemy
+   * field's own units) comes first — that one is really there. Then every def that CAN roll
+   * champion — a beast (the frame's slot is a beast), not a pet or a boss, not `rareOnly` — which is
+   * the same rule the spawner applies. The kill goal is the def id, so any of its kind counts.
+   */
+  const seenLive = new Set();
+  for (const u of live) {
+    if (!u || u.dying != null || u.removed) continue;
+    if (u.rank !== 'champion' && u.rank !== 'rare') continue;
+    if (u.kind === 'humanoid' || u.boss || seenLive.has(u.defId)) continue;
+    seenLive.add(u.defId);
+    out.push(placed({ type: 'enemy', id: u.defId, name: u.baseName || u.name, rank: 'champion', element: !!u.element, live: true, x: u.x, z: u.z }));
+  }
   // the enemies that actually live at this level, with their rank, so "a champion" means one
   for (const e of bestiary) {
     if ((e.minLevel ?? 1) > level + 3 || (e.maxLevel ?? 99) < level - 1) continue;
+    if (seenLive.has(e.id)) continue;
+    const canChampion = !e.boss && !e.rareOnly && (e.kind || 'beast') !== 'humanoid';
     out.push({
       type: 'enemy', id: e.id, name: e.name,
-      rank: e.boss ? 'boss' : e.champion ? 'champion' : 'common',
+      rank: e.boss ? 'boss' : (e.champion || canChampion) ? 'champion' : 'common',
       element: !!e.element,
     });
   }

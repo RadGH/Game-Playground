@@ -7,6 +7,8 @@
 import {
   KIT, CULTURE_KIT, describeBuilding, describeSpecimen, partsFor, describeStall, stallParts,
   BASE_KEYS, ROOF_KEYS, CULTURE_KEYS, heightOf, roofsCover,
+  // R27 M3 — the town edges: six wall kinds, three fences, the boundary stone
+  wallKitParts, fenceParts, fenceKindFor, boundaryStoneParts, tintParts, placeParts, edgeScene, FENCE_SEG, fenceTintFor,
 } from './buildkit.js';
 import { drawBuilding, drawSwatches } from './drawkit.js';
 
@@ -117,6 +119,32 @@ function render() {
         grid.append(box);
       }
     }
+  } else if (view === 'edges') {
+    // R27 M3 — what each culture puts round its towns: the walled edge (gate, wall, towers), the
+    // tower and the wall on their own, and the low fence a village of that culture gets instead
+    const cultures = onlyCulture ? [culture] : CULTURE_KEYS;
+    const add = (parts, caption, note) => {
+      const box = document.createElement('figure');
+      box.className = 'kit-tile';
+      const cv = canvasFor(size);
+      drawBuilding(cv.getContext('2d'), parts, { width: cv.width, height: cv.height });
+      const cap = document.createElement('figcaption');
+      cap.innerHTML = `<b>${caption}</b><span>${note}</span>`;
+      box.append(cv, cap);
+      grid.append(box);
+    };
+    for (const c of cultures) {
+      const cult = CULTURE_KIT.cultures[c];
+      const kind = cult.townWall.kind, tint = cult.townWall.colour;
+      add(edgeScene(kind, tint), `${cult.name} gate`, `${kind} wall`);
+      add(tintParts(wallKitParts(kind, 'tower'), tint), `${cult.name} tower`, kind);
+      add(tintParts([0, 1, 2].flatMap(i => placeParts(wallKitParts(kind, 'wall'), 0, i * 6)), tint),
+        `${cult.name} wall`, `three ${kind} lengths`);
+      const fk = fenceKindFor(kind);
+      add(tintParts([0, 1, 2].flatMap(i => placeParts(fenceParts(fk), 0, i * FENCE_SEG)), fenceTintFor(fk, tint)),
+        `${cult.name} village fence`, `${fk} (no collider)`);
+    }
+    add(tintParts(boundaryStoneParts(), '#9a9284'), 'Boundary stone', 'a hamlet, beside each road');
   } else if (view === 'palette') {
     grid.classList.add('wide');
     for (const key of CULTURE_KEYS) {

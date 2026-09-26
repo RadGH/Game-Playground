@@ -1,5 +1,5 @@
 {
- "_doc": "Farhold R26 \u2014 the enemy WARBANDS: the five Chibi 2 races a player cannot be (avatar-3d/js/chibi2-races.js), each an enemy faction of humanoid NPCs drawn as that race's body (`look.avatar.body.race`). js/warbands.js injects every member into the bestiary at load (data/enemies.json is untouched) and gives each zone at most one warband: a zone is HELD when its middle level sits inside the warband's `levels` and a seeded roll under `claimShare` says so (the starting zone is never held). Inside a held zone that warband's members make up `spawnShare` of what the spawner puts down; outside it they never spawn. `type` is the job in the fight (melee / rogue / ranged / caster / leader) and `role` is the existing AI it runs on (brute / skirmisher / archer / caster / leader) \u2014 a rogue is a skirmisher that is quick, light and makes you bleed. Stats are level-1 values like the bestiary's, compounded by balance.json enemies.perLevel. `prefers` lists World Forge biome families a warband is three times as likely to claim. `nameRace` is the Name Forge language a rare of theirs is named in. Original names only.",
+ "_doc": "Farhold R26 \u2014 the enemy WARBANDS: the five Chibi 2 races a player cannot be (avatar-3d/js/chibi2-races.js), each an enemy faction of humanoid NPCs drawn as that race's body (`look.avatar.body.race`). js/warbands.js injects every member into the bestiary at load (data/enemies.json is untouched) and gives each zone at most one warband: a zone is HELD when its middle level sits inside the warband's `levels` and a seeded roll under `claimShare` says so (the starting zone is never held). Inside a held zone that warband's members make up `spawnShare` of what the spawner puts down; outside it they never spawn. `type` is the job in the fight (melee / rogue / ranged / caster / leader) and `role` is the existing AI it runs on (brute / skirmisher / archer / caster / leader) \u2014 a rogue is a skirmisher that is quick, light and makes you bleed. Stats are level-1 values like the bestiary's, compounded by balance.json enemies.perLevel. `prefers` lists World Forge biome families a warband is three times as likely to claim. `nameRace` is the Name Forge language a rare of theirs is named in. R27 M10: a sixth member, the standard-bearer (`type: bearer`, carries `banner` in the warband colour; the leader names it in `bearer`); leaders, bearers and warlords wear the round-26 class helms; `warlords` are five named bosses (installed into bestiary.bosses) with `phases`, `spawns` of their own members, `scale` 1.6-2.2 and `bodyHeight`/`bodyWidth` for the instance-door check; each warband row names its `warlord`, its `unique` (data/uniques.json), its `drops` (the war-chest's list) and its `camp`. Original names only.",
  "claimShare": 0.55,
  "spawnShare": 0.65,
  "warbands": [
@@ -22,12 +22,14 @@
     "rock"
    ],
    "colour": "#c8a040",
+   "bearer": "sootwick_bearer",
    "members": [
     "sootwick_basher",
     "sootwick_knifer",
     "sootwick_slinger",
     "sootwick_hexer",
-    "sootwick_ringleader"
+    "sootwick_ringleader",
+    "sootwick_bearer"
    ],
    "defs": [
     {
@@ -461,6 +463,7 @@
       "sootwick_basher",
       "sootwick_slinger"
      ],
+     "bearer": "sootwick_bearer",
      "hp": 125,
      "dmg": [
       13,
@@ -527,8 +530,8 @@
         "color": "#332a20"
        },
        "hat": {
-        "id": "top_hat",
-        "color": "#2a2420"
+        "id": "war_helm",
+        "color": "#6a6e74"
        },
        "cape": {
         "id": "tattered_cape",
@@ -556,8 +559,138 @@
       "gold_signet",
       "necklace"
      ]
+    },
+    {
+     "id": "sootwick_bearer",
+     "name": "Sootwick Flag-Runner",
+     "kind": "humanoid",
+     "family": "humanoid",
+     "role": "brute",
+     "type": "bearer",
+     "warband": "sootwick",
+     "biomes": [
+      "any"
+     ],
+     "minLevel": 4,
+     "maxLevel": 16,
+     "pack": [
+      1,
+      1
+     ],
+     "banner": "#c8a040",
+     "hp": 99,
+     "dmg": [
+      11,
+      17
+     ],
+     "armor": 10,
+     "speed": 3.67,
+     "reach": 2.9,
+     "aggroRange": 30,
+     "attackEvery": 1.8,
+     "xp": 60,
+     "gold": 34,
+     "look": {
+      "avatar": {
+       "body": {
+        "race": "goblin",
+        "skin": "#7fa86a",
+        "height": 0.05,
+        "width": 0.55,
+        "headSize": 0.65,
+        "round": 0.35
+       },
+       "headShape": "round",
+       "ears": {
+        "id": "big"
+       },
+       "nose": {
+        "id": "long"
+       },
+       "eyes": {
+        "id": "wide",
+        "color": "#e0c040"
+       },
+       "mouth": {
+        "id": "grin"
+       },
+       "brows": {
+        "id": "angry",
+        "color": "#2a2a2a"
+       },
+       "hair": {
+        "id": "spiky",
+        "color": "#2a2a2a"
+       },
+       "top": {
+        "id": "rags",
+        "color": "#5a4a38"
+       },
+       "bottom": {
+        "id": "shorts",
+        "color": "#4a3e30"
+       },
+       "shoes": {
+        "id": "wraps",
+        "color": "#6a5a44"
+       },
+       "hat": {
+        "id": "bone_headdress",
+        "color": "#c8a040"
+       },
+       "decor": {
+        "id": "belt_pouches",
+        "color": "#5a4632"
+       },
+       "held": {
+        "id": "fh_spear",
+        "color": "#8a8a8a"
+       },
+       "cape": {
+        "id": "cape",
+        "color": "#c8a040"
+       }
+      }
+     },
+     "dropBases": [
+      "sword",
+      "battleaxe",
+      "medium_chest",
+      "medium_helm"
+     ]
     }
-   ]
+   ],
+   "warlord": "sootwick_gutterking",
+   "unique": "fh_gutterkings_shiv",
+   "drops": [
+    "iron_mace",
+    "hammer",
+    "light_chest",
+    "light_boots",
+    "ring",
+    "dagger",
+    "rapier",
+    "light_gauntlets",
+    "crossbow",
+    "shortbow",
+    "quiver",
+    "light_helm",
+    "staff",
+    "wand",
+    "cloth_chest",
+    "cloth_helm",
+    "necklace",
+    "sword",
+    "battleaxe",
+    "medium_chest",
+    "medium_helm",
+    "gold_signet"
+   ],
+   "camp": {
+    "name": "Junkyard",
+    "walls": "junk wall",
+    "kind": "warcamp_sootwick"
+   }
   },
   {
    "id": "ashtusk",
@@ -579,12 +712,14 @@
     "tundra"
    ],
    "colour": "#b8402a",
+   "bearer": "ashtusk_bearer",
    "members": [
     "ashtusk_brute",
     "ashtusk_raider",
     "ashtusk_spearthrower",
     "ashtusk_bonecaller",
-    "ashtusk_warchief"
+    "ashtusk_warchief",
+    "ashtusk_bearer"
    ],
    "defs": [
     {
@@ -1011,6 +1146,7 @@
       "ashtusk_brute",
       "ashtusk_spearthrower"
      ],
+     "bearer": "ashtusk_bearer",
      "hp": 227,
      "dmg": [
       19,
@@ -1073,7 +1209,7 @@
         "color": "#33383e"
        },
        "hat": {
-        "id": "horned_helm",
+        "id": "war_helm",
         "color": "#4a4e54"
        },
        "cape": {
@@ -1102,8 +1238,142 @@
       "gold_signet",
       "silver_amulet"
      ]
+    },
+    {
+     "id": "ashtusk_bearer",
+     "name": "Ashtusk Standard-Bearer",
+     "kind": "humanoid",
+     "family": "humanoid",
+     "role": "brute",
+     "type": "bearer",
+     "warband": "ashtusk",
+     "biomes": [
+      "any"
+     ],
+     "minLevel": 8,
+     "maxLevel": 24,
+     "pack": [
+      1,
+      1
+     ],
+     "banner": "#b8402a",
+     "hp": 170,
+     "dmg": [
+      15,
+      23
+     ],
+     "armor": 13,
+     "speed": 3.4,
+     "reach": 2.9,
+     "aggroRange": 30,
+     "attackEvery": 1.8,
+     "xp": 75,
+     "gold": 40,
+     "look": {
+      "avatar": {
+       "body": {
+        "race": "orc",
+        "skin": "#7fa86a",
+        "height": 0.85,
+        "width": 0.95,
+        "headSize": 0.45,
+        "round": 0.3
+       },
+       "headShape": "square",
+       "ears": {
+        "id": "pointed"
+       },
+       "nose": {
+        "id": "wide"
+       },
+       "eyes": {
+        "id": "angry",
+        "color": "#c83a2a"
+       },
+       "mouth": {
+        "id": "tusks"
+       },
+       "brows": {
+        "id": "thick",
+        "color": "#1a1a1a"
+       },
+       "hair": {
+        "id": "mohawk",
+        "color": "#111111"
+       },
+       "extras": {
+        "id": "warpaint",
+        "color": "#b8402a"
+       },
+       "top": {
+        "id": "harness",
+        "color": "#3a2a20"
+       },
+       "bottom": {
+        "id": "loincloth",
+        "color": "#4a3020"
+       },
+       "shoes": {
+        "id": "wraps",
+        "color": "#5a4632"
+       },
+       "decor": {
+        "id": "pauldrons",
+        "color": "#5a5e64"
+       },
+       "held": {
+        "id": "fh_halberd",
+        "color": "#8a8e94"
+       },
+       "hat": {
+        "id": "bone_headdress",
+        "color": "#e0d8c0"
+       },
+       "cape": {
+        "id": "cape",
+        "color": "#b8402a"
+       }
+      }
+     },
+     "dropBases": [
+      "warhammer",
+      "axe2h",
+      "heavy_chest",
+      "heavy_helm"
+     ]
     }
-   ]
+   ],
+   "warlord": "ashtusk_overchief",
+   "unique": "fh_ashtusk_headtaker",
+   "drops": [
+    "axe2h",
+    "battleaxe",
+    "medium_chest",
+    "heavy_gauntlets",
+    "ring",
+    "dagger",
+    "light_chest",
+    "medium_boots",
+    "pathfinder_javelin",
+    "shortbow",
+    "quiver",
+    "medium_helm",
+    "necklace",
+    "staff",
+    "scepter",
+    "cloth_chest",
+    "cloth_helm",
+    "silver_amulet",
+    "warhammer",
+    "heavy_chest",
+    "heavy_helm",
+    "gold_signet"
+   ],
+   "camp": {
+    "name": "Warcamp",
+    "walls": "palisade and bone totems",
+    "kind": "warcamp_ashtusk"
+   }
   },
   {
    "id": "thornmane",
@@ -1123,12 +1393,14 @@
     "tundra"
    ],
    "colour": "#7aa84a",
+   "bearer": "thornmane_bearer",
    "members": [
     "thornmane_mauler",
     "thornmane_prowler",
     "thornmane_tracker",
     "thornmane_moonseer",
-    "thornmane_packlord"
+    "thornmane_packlord",
+    "thornmane_bearer"
    ],
    "defs": [
     {
@@ -1538,6 +1810,7 @@
       "thornmane_mauler",
       "thornmane_tracker"
      ],
+     "bearer": "thornmane_bearer",
      "hp": 262,
      "dmg": [
       22,
@@ -1609,6 +1882,10 @@
        "held": {
         "id": "fh_halberd",
         "color": "#a8b0b8"
+       },
+       "hat": {
+        "id": "wolf_helm",
+        "color": "#6b5a44"
        }
       }
      },
@@ -1620,8 +1897,134 @@
       "gold_signet",
       "necklace"
      ]
+    },
+    {
+     "id": "thornmane_bearer",
+     "name": "Thornmane Totem-Bearer",
+     "kind": "humanoid",
+     "family": "humanoid",
+     "role": "brute",
+     "type": "bearer",
+     "warband": "thornmane",
+     "biomes": [
+      "any"
+     ],
+     "minLevel": 12,
+     "maxLevel": 28,
+     "pack": [
+      1,
+      1
+     ],
+     "banner": "#7aa84a",
+     "hp": 199,
+     "dmg": [
+      17,
+      26
+     ],
+     "armor": 14,
+     "speed": 3.81,
+     "reach": 2.9,
+     "aggroRange": 30,
+     "attackEvery": 1.8,
+     "xp": 90,
+     "gold": 46,
+     "look": {
+      "avatar": {
+       "body": {
+        "race": "beast",
+        "skin": "#8d5524",
+        "height": 0.8,
+        "width": 0.9,
+        "headSize": 0.5,
+        "round": 0.2
+       },
+       "headShape": "wide",
+       "ears": {
+        "id": "pointed"
+       },
+       "nose": {
+        "id": "snout"
+       },
+       "eyes": {
+        "id": "slit",
+        "color": "#e0c040"
+       },
+       "mouth": {
+        "id": "fangs"
+       },
+       "brows": {
+        "id": "thick",
+        "color": "#3b2a1a"
+       },
+       "hair": {
+        "id": "horns_hair",
+        "color": "#3b2a1a"
+       },
+       "top": {
+        "id": "harness",
+        "color": "#3a2a1a"
+       },
+       "bottom": {
+        "id": "loincloth",
+        "color": "#4a3a22"
+       },
+       "shoes": {
+        "id": "hooves"
+       },
+       "cape": {
+        "id": "cape",
+        "color": "#7aa84a"
+       },
+       "held": {
+        "id": "fh_spear",
+        "color": "#a8b0b8"
+       },
+       "hat": {
+        "id": "bone_headdress",
+        "color": "#eeeeee"
+       }
+      }
+     },
+     "dropBases": [
+      "halberd",
+      "axe2h",
+      "scaled_chest",
+      "scaled_legs"
+     ]
     }
-   ]
+   ],
+   "warlord": "thornmane_greatfang",
+   "unique": "fh_moonhook",
+   "drops": [
+    "axe2h",
+    "battleaxe",
+    "medium_chest",
+    "heavy_boots",
+    "ring",
+    "dagger",
+    "rapier",
+    "light_chest",
+    "runed_boots",
+    "bow",
+    "roadwarden_bow",
+    "quiver",
+    "light_helm",
+    "necklace",
+    "staff",
+    "wand",
+    "orb",
+    "cloth_chest",
+    "silver_amulet",
+    "halberd",
+    "scaled_chest",
+    "scaled_legs",
+    "gold_signet"
+   ],
+   "camp": {
+    "name": "Den-Ring",
+    "walls": "thorn ring and hide tents",
+    "kind": "warcamp_thornmane"
+   }
   },
   {
    "id": "unburied",
@@ -1643,12 +2046,14 @@
     "tundra"
    ],
    "colour": "#7ae0ff",
+   "bearer": "unburied_bearer",
    "members": [
     "unburied_bonesoldier",
     "unburied_gravecreeper",
     "unburied_deadeye",
     "unburied_mournweaver",
-    "unburied_deathmarshal"
+    "unburied_deathmarshal",
+    "unburied_bearer"
    ],
    "defs": [
     {
@@ -2088,6 +2493,7 @@
       "unburied_bonesoldier",
       "unburied_deadeye"
      ],
+     "bearer": "unburied_bearer",
      "hp": 340,
      "dmg": [
       27,
@@ -2149,7 +2555,7 @@
         "color": "#33383e"
        },
        "hat": {
-        "id": "crown",
+        "id": "rune_helm",
         "color": "#8a8e94"
        },
        "cape": {
@@ -2174,8 +2580,139 @@
       "gold_signet",
       "silver_amulet"
      ]
+    },
+    {
+     "id": "unburied_bearer",
+     "name": "Unburied Colour-Sergeant",
+     "kind": "humanoid",
+     "family": "undead",
+     "role": "brute",
+     "type": "bearer",
+     "warband": "unburied",
+     "biomes": [
+      "any"
+     ],
+     "minLevel": 17,
+     "maxLevel": 36,
+     "pack": [
+      1,
+      1
+     ],
+     "banner": "#7ae0ff",
+     "hp": 260,
+     "dmg": [
+      22,
+      32
+     ],
+     "armor": 23,
+     "speed": 3.23,
+     "reach": 2.9,
+     "aggroRange": 30,
+     "attackEvery": 1.8,
+     "xp": 109,
+     "gold": 54,
+     "look": {
+      "avatar": {
+       "body": {
+        "race": "undead",
+        "skin": "#c9cfc3",
+        "height": 0.55,
+        "width": 0.25,
+        "headSize": 0.55,
+        "round": 0
+       },
+       "headShape": "long",
+       "ears": {
+        "id": "normal"
+       },
+       "nose": {
+        "id": "none"
+       },
+       "eyes": {
+        "id": "hollow",
+        "color": "#7ae0ff"
+       },
+       "mouth": {
+        "id": "stitched"
+       },
+       "brows": {
+        "id": "none"
+       },
+       "hair": {
+        "id": "bald",
+        "color": "#888888"
+       },
+       "extras": {
+        "id": "undead_skin",
+        "color": "#8a94a0"
+       },
+       "top": {
+        "id": "chainmail",
+        "color": "#5a5e64",
+        "color2": "#2a4a48"
+       },
+       "bottom": {
+        "id": "ragged",
+        "color": "#3a3e40"
+       },
+       "shoes": {
+        "id": "boots",
+        "color": "#33383e"
+       },
+       "hat": {
+        "id": "war_helm",
+        "color": "#5a5e64"
+       },
+       "cape": {
+        "id": "cape",
+        "color": "#7ae0ff"
+       },
+       "held": {
+        "id": "fh_halberd",
+        "color": "#9aa4b0"
+       }
+      }
+     },
+     "dropBases": [
+      "greatsword",
+      "sword2h",
+      "plate_helm",
+      "heavy_chest"
+     ]
     }
-   ]
+   ],
+   "warlord": "unburied_gravemarshal",
+   "unique": "fh_gravemarshals_oath",
+   "drops": [
+    "sword",
+    "heavy_chest",
+    "heavy_helm",
+    "medium_boots",
+    "ring",
+    "dagger",
+    "rapier",
+    "light_chest",
+    "light_boots",
+    "bow",
+    "crossbow",
+    "quiver",
+    "light_helm",
+    "necklace",
+    "staff",
+    "wand",
+    "tome",
+    "cloth_chest",
+    "silver_amulet",
+    "greatsword",
+    "sword2h",
+    "plate_helm",
+    "gold_signet"
+   ],
+   "camp": {
+    "name": "Barrow-Fort",
+    "walls": "barrow-fort",
+    "kind": "warcamp_unburied"
+   }
   },
   {
    "id": "stonehide",
@@ -2196,12 +2733,14 @@
     "grass"
    ],
    "colour": "#a8c0d8",
+   "bearer": "stonehide_bearer",
    "members": [
     "stonehide_smasher",
     "stonehide_stalker",
     "stonehide_hurler",
     "stonehide_frostsayer",
-    "stonehide_mountainlord"
+    "stonehide_mountainlord",
+    "stonehide_bearer"
    ],
    "defs": [
     {
@@ -2624,6 +3163,7 @@
       "stonehide_smasher",
       "stonehide_hurler"
      ],
+     "bearer": "stonehide_bearer",
      "hp": 553,
      "dmg": [
       36,
@@ -2686,7 +3226,7 @@
         "color": "#3a4452"
        },
        "hat": {
-        "id": "horned_helm",
+        "id": "rune_helm",
         "color": "#8a9aaa"
        },
        "cape": {
@@ -2715,7 +3255,912 @@
       "gold_signet",
       "silver_amulet"
      ]
+    },
+    {
+     "id": "stonehide_bearer",
+     "name": "Stonehide Stone-Herald",
+     "kind": "humanoid",
+     "family": "humanoid",
+     "role": "brute",
+     "type": "bearer",
+     "warband": "stonehide",
+     "biomes": [
+      "any"
+     ],
+     "minLevel": 23,
+     "maxLevel": 50,
+     "pack": [
+      1,
+      1
+     ],
+     "banner": "#a8c0d8",
+     "hp": 425,
+     "dmg": [
+      29,
+      44
+     ],
+     "armor": 25,
+     "speed": 3.13,
+     "reach": 3.5,
+     "aggroRange": 30,
+     "attackEvery": 1.8,
+     "xp": 132,
+     "gold": 63,
+     "look": {
+      "avatar": {
+       "body": {
+        "race": "giant",
+        "skin": "#b8a18a",
+        "height": 0.9,
+        "width": 0.95,
+        "headSize": 0.3,
+        "round": 0.5
+       },
+       "headShape": "square",
+       "ears": {
+        "id": "normal"
+       },
+       "nose": {
+        "id": "wide"
+       },
+       "eyes": {
+        "id": "narrow",
+        "color": "#5a6a8a"
+       },
+       "mouth": {
+        "id": "frown"
+       },
+       "brows": {
+        "id": "thick",
+        "color": "#6b4a2a"
+       },
+       "hair": {
+        "id": "bald",
+        "color": "#6b4a2a"
+       },
+       "facialHair": {
+        "id": "braided_beard",
+        "color": "#6b4a2a"
+       },
+       "top": {
+        "id": "fur_tunic",
+        "color": "#7a8ea4"
+       },
+       "bottom": {
+        "id": "kilt",
+        "color": "#4a5668"
+       },
+       "shoes": {
+        "id": "wraps",
+        "color": "#6a7a8a"
+       },
+       "decor": {
+        "id": "bedroll_pack",
+        "color": "#5a4a38"
+       },
+       "held": {
+        "id": "fh_spear",
+        "color": "#b8c8d8"
+       },
+       "hat": {
+        "id": "war_helm",
+        "color": "#6a7a8a"
+       },
+       "cape": {
+        "id": "cape",
+        "color": "#a8c0d8"
+       }
+      }
+     },
+     "dropBases": [
+      "axe2h",
+      "warhammer",
+      "heavy_chest",
+      "plate_helm"
+     ]
     }
+   ],
+   "warlord": "stonehide_peakking",
+   "unique": "fh_peakbreaker",
+   "drops": [
+    "warhammer",
+    "hammer",
+    "heavy_chest",
+    "heavy_gauntlets",
+    "ring",
+    "halberd",
+    "pathfinder_javelin",
+    "medium_chest",
+    "medium_boots",
+    "crossbow",
+    "quiver",
+    "medium_helm",
+    "necklace",
+    "staff",
+    "orb",
+    "wand",
+    "cloth_chest",
+    "silver_amulet",
+    "axe2h",
+    "plate_helm",
+    "gold_signet"
+   ],
+   "camp": {
+    "name": "Slab-Hold",
+    "walls": "standing-slab ring",
+    "kind": "warcamp_stonehide"
+   }
+  }
+ ],
+ "warlords": [
+  {
+   "id": "sootwick_gutterking",
+   "name": "Sootwick Gutterking",
+   "kind": "humanoid",
+   "family": "humanoid",
+   "role": "boss",
+   "warband": "sootwick",
+   "warlord": true,
+   "nameRace": "goblin",
+   "biomes": [
+    "any"
+   ],
+   "minLevel": 6,
+   "maxLevel": 16,
+   "arena": 16,
+   "scale": 1.6,
+   "bodyHeight": 1.35,
+   "bodyWidth": 0.8,
+   "hp": 656,
+   "dmg": [
+    21,
+    31
+   ],
+   "armor": 17,
+   "speed": 3.67,
+   "reach": 3.2,
+   "aggroRange": 46,
+   "attackEvery": 1.7,
+   "xp": 728,
+   "gold": 400,
+   "dropBonus": 3,
+   "dropRarity": 2.0,
+   "phases": [
+    {
+     "at": 0.6,
+     "modifier": "fleet",
+     "say": "The Gutterking whistles through his teeth, and the gang comes running."
+    },
+    {
+     "at": 0.3,
+     "modifier": "vicious",
+     "say": "He stops grinning."
+    }
+   ],
+   "spawns": {
+    "id": "sootwick_basher",
+    "count": 2,
+    "at": [
+     0.6,
+     0.3
+    ]
+   },
+   "leads": [
+    "sootwick_basher",
+    "sootwick_slinger"
+   ],
+   "bearer": "sootwick_bearer",
+   "uniqueDrop": "fh_gutterkings_shiv",
+   "look": {
+    "avatar": {
+     "body": {
+      "race": "goblin",
+      "skin": "#7fa86a",
+      "height": 0.15,
+      "width": 0.6,
+      "headSize": 0.7,
+      "round": 0.45
+     },
+     "headShape": "round",
+     "ears": {
+      "id": "big"
+     },
+     "nose": {
+      "id": "long"
+     },
+     "eyes": {
+      "id": "angry",
+      "color": "#e0a040"
+     },
+     "mouth": {
+      "id": "grin"
+     },
+     "brows": {
+      "id": "angry",
+      "color": "#2a2a2a"
+     },
+     "hair": {
+      "id": "bald",
+      "color": "#111111"
+     },
+     "extras": {
+      "id": "scar",
+      "color": "#9a5a4a"
+     },
+     "accessory": {
+      "id": "earrings",
+      "color": "#e0c040"
+     },
+     "top": {
+      "id": "coat",
+      "color": "#6a2a1a",
+      "color2": "#c8a040"
+     },
+     "bottom": {
+      "id": "baggy",
+      "color": "#3e3428"
+     },
+     "shoes": {
+      "id": "boots",
+      "color": "#332a20"
+     },
+     "hat": {
+      "id": "war_helm",
+      "color": "#c8a040"
+     },
+     "cape": {
+      "id": "cape",
+      "color": "#c8a040"
+     },
+     "decor": {
+      "id": "trophy_belt",
+      "color": "#5a4632"
+     },
+     "held": {
+      "id": "cleaver",
+      "color": "#c0c6cc"
+     },
+     "offhand": {
+      "id": "buckler",
+      "color": "#c8a040"
+     }
+    }
+   },
+   "dropBases": [
+    "iron_mace",
+    "hammer",
+    "light_chest",
+    "light_boots",
+    "ring",
+    "dagger",
+    "rapier",
+    "light_gauntlets",
+    "crossbow",
+    "shortbow",
+    "quiver",
+    "light_helm",
+    "staff",
+    "wand",
+    "cloth_chest",
+    "cloth_helm",
+    "necklace",
+    "sword",
+    "battleaxe",
+    "medium_chest",
+    "medium_helm",
+    "gold_signet"
+   ]
+  },
+  {
+   "id": "ashtusk_overchief",
+   "name": "Ashtusk Overchief",
+   "kind": "humanoid",
+   "family": "humanoid",
+   "role": "boss",
+   "warband": "ashtusk",
+   "warlord": true,
+   "nameRace": "orc",
+   "biomes": [
+    "any"
+   ],
+   "minLevel": 12,
+   "maxLevel": 24,
+   "arena": 16,
+   "scale": 1.9,
+   "bodyHeight": 1.95,
+   "bodyWidth": 1.0,
+   "hp": 1091,
+   "dmg": [
+    28,
+    42
+   ],
+   "armor": 23,
+   "speed": 3.4,
+   "reach": 3.2,
+   "aggroRange": 46,
+   "attackEvery": 1.7,
+   "xp": 978,
+   "gold": 496,
+   "dropBonus": 3,
+   "dropRarity": 2.0,
+   "phases": [
+    {
+     "at": 0.5,
+     "modifier": "frenzied",
+     "say": "The Overchief roars, and the brutes come to it."
+    },
+    {
+     "at": 0.25,
+     "modifier": "vicious",
+     "say": "Blood in its tusks now. It will not stop."
+    }
+   ],
+   "spawns": {
+    "id": "ashtusk_brute",
+    "count": 2,
+    "at": [
+     0.5,
+     0.25
+    ]
+   },
+   "leads": [
+    "ashtusk_brute",
+    "ashtusk_spearthrower"
+   ],
+   "bearer": "ashtusk_bearer",
+   "uniqueDrop": "fh_ashtusk_headtaker",
+   "look": {
+    "avatar": {
+     "body": {
+      "race": "orc",
+      "skin": "#6e8f5a",
+      "height": 1.0,
+      "width": 1.0,
+      "headSize": 0.45,
+      "round": 0.25
+     },
+     "headShape": "square",
+     "ears": {
+      "id": "pointed"
+     },
+     "nose": {
+      "id": "wide"
+     },
+     "eyes": {
+      "id": "angry",
+      "color": "#c83a2a"
+     },
+     "mouth": {
+      "id": "tusks"
+     },
+     "brows": {
+      "id": "thick",
+      "color": "#1a1a1a"
+     },
+     "hair": {
+      "id": "mohawk",
+      "color": "#111111"
+     },
+     "extras": {
+      "id": "scar_cheek",
+      "color": "#8a4a3a"
+     },
+     "top": {
+      "id": "chainmail",
+      "color": "#4a4e54",
+      "color2": "#b8402a"
+     },
+     "bottom": {
+      "id": "greaves",
+      "color": "#3e4248"
+     },
+     "shoes": {
+      "id": "heavy",
+      "color": "#33383e"
+     },
+     "hat": {
+      "id": "bone_headdress",
+      "color": "#e0d8c0"
+     },
+     "cape": {
+      "id": "cape",
+      "color": "#b8402a"
+     },
+     "decor": {
+      "id": "pauldrons",
+      "color": "#6a2a1a"
+     },
+     "held": {
+      "id": "fh_maul",
+      "color": "#8a8e94"
+     },
+     "offhand": {
+      "id": "round_shield",
+      "color": "#6a2a1a"
+     }
+    }
+   },
+   "dropBases": [
+    "axe2h",
+    "battleaxe",
+    "medium_chest",
+    "heavy_gauntlets",
+    "ring",
+    "dagger",
+    "light_chest",
+    "medium_boots",
+    "pathfinder_javelin",
+    "shortbow",
+    "quiver",
+    "medium_helm",
+    "necklace",
+    "staff",
+    "scepter",
+    "cloth_chest",
+    "cloth_helm",
+    "silver_amulet",
+    "warhammer",
+    "heavy_chest",
+    "heavy_helm",
+    "gold_signet"
+   ]
+  },
+  {
+   "id": "thornmane_greatfang",
+   "name": "Thornmane Greatfang",
+   "kind": "humanoid",
+   "family": "humanoid",
+   "role": "boss",
+   "warband": "thornmane",
+   "warlord": true,
+   "nameRace": "troll",
+   "biomes": [
+    "any"
+   ],
+   "minLevel": 16,
+   "maxLevel": 28,
+   "arena": 16,
+   "scale": 1.9,
+   "bodyHeight": 1.95,
+   "bodyWidth": 1.0,
+   "hp": 1176,
+   "dmg": [
+    30,
+    45
+   ],
+   "armor": 23,
+   "speed": 3.81,
+   "reach": 3.2,
+   "aggroRange": 46,
+   "attackEvery": 1.7,
+   "xp": 1144,
+   "gold": 560,
+   "dropBonus": 3,
+   "dropRarity": 2.0,
+   "phases": [
+    {
+     "at": 0.66,
+     "modifier": "fleet",
+     "say": "The Greatfang howls, and the ring answers."
+    },
+    {
+     "at": 0.33,
+     "modifier": "vicious",
+     "say": "It drops to all fours."
+    }
+   ],
+   "spawns": {
+    "id": "thornmane_mauler",
+    "count": 2,
+    "at": [
+     0.66,
+     0.33
+    ]
+   },
+   "leads": [
+    "thornmane_mauler",
+    "thornmane_tracker"
+   ],
+   "bearer": "thornmane_bearer",
+   "uniqueDrop": "fh_moonhook",
+   "look": {
+    "avatar": {
+     "body": {
+      "race": "beast",
+      "skin": "#5c3a1e",
+      "height": 1.0,
+      "width": 1.0,
+      "headSize": 0.5,
+      "round": 0.2
+     },
+     "headShape": "wide",
+     "ears": {
+      "id": "pointed"
+     },
+     "nose": {
+      "id": "snout"
+     },
+     "eyes": {
+      "id": "slit",
+      "color": "#e0c040"
+     },
+     "mouth": {
+      "id": "fangs"
+     },
+     "brows": {
+      "id": "thick",
+      "color": "#3b2a1a"
+     },
+     "hair": {
+      "id": "horns_hair",
+      "color": "#eeeeee"
+     },
+     "extras": {
+      "id": "war_stripe",
+      "color": "#eeeeee"
+     },
+     "top": {
+      "id": "scale_plate",
+      "color": "#4a5a3a",
+      "color2": "#7aa84a"
+     },
+     "bottom": {
+      "id": "kilt",
+      "color": "#3a2a1a"
+     },
+     "shoes": {
+      "id": "hooves"
+     },
+     "cape": {
+      "id": "cape",
+      "color": "#7aa84a"
+     },
+     "decor": {
+      "id": "bone_charms",
+      "color": "#e0d8c0"
+     },
+     "held": {
+      "id": "fh_halberd",
+      "color": "#a8b0b8"
+     },
+     "hat": {
+      "id": "wolf_helm",
+      "color": "#eeeeee"
+     }
+    }
+   },
+   "dropBases": [
+    "axe2h",
+    "battleaxe",
+    "medium_chest",
+    "heavy_boots",
+    "ring",
+    "dagger",
+    "rapier",
+    "light_chest",
+    "runed_boots",
+    "bow",
+    "roadwarden_bow",
+    "quiver",
+    "light_helm",
+    "necklace",
+    "staff",
+    "wand",
+    "orb",
+    "cloth_chest",
+    "silver_amulet",
+    "halberd",
+    "scaled_chest",
+    "scaled_legs",
+    "gold_signet"
+   ]
+  },
+  {
+   "id": "unburied_gravemarshal",
+   "name": "Unburied Gravemarshal",
+   "kind": "humanoid",
+   "family": "undead",
+   "role": "boss",
+   "warband": "unburied",
+   "warlord": true,
+   "nameRace": "undead",
+   "biomes": [
+    "any"
+   ],
+   "minLevel": 22,
+   "maxLevel": 36,
+   "arena": 16,
+   "scale": 2.0,
+   "bodyHeight": 1.85,
+   "bodyWidth": 0.8,
+   "hp": 1469,
+   "dmg": [
+    36,
+    55
+   ],
+   "armor": 35,
+   "speed": 3.23,
+   "reach": 3.2,
+   "aggroRange": 46,
+   "attackEvery": 1.7,
+   "xp": 1394,
+   "gold": 656,
+   "dropBonus": 3,
+   "dropRarity": 2.0,
+   "phases": [
+    {
+     "at": 0.7,
+     "modifier": "ironclad",
+     "say": "The Gravemarshal raises its blade, and the ranks close."
+    },
+    {
+     "at": 0.4,
+     "modifier": "leeching",
+     "say": "It begins to drink the fight."
+    },
+    {
+     "at": 0.15,
+     "modifier": "unyielding",
+     "say": "It will not lie down."
+    }
+   ],
+   "spawns": {
+    "id": "unburied_bonesoldier",
+    "count": 2,
+    "at": [
+     0.7,
+     0.4
+    ]
+   },
+   "leads": [
+    "unburied_bonesoldier",
+    "unburied_deadeye"
+   ],
+   "bearer": "unburied_bearer",
+   "uniqueDrop": "fh_gravemarshals_oath",
+   "look": {
+    "avatar": {
+     "body": {
+      "race": "undead",
+      "skin": "#a8b0a0",
+      "height": 0.8,
+      "width": 0.35,
+      "headSize": 0.5,
+      "round": 0
+     },
+     "headShape": "long",
+     "ears": {
+      "id": "normal"
+     },
+     "nose": {
+      "id": "none"
+     },
+     "eyes": {
+      "id": "glow",
+      "color": "#7ae0ff"
+     },
+     "mouth": {
+      "id": "stitched"
+     },
+     "brows": {
+      "id": "none"
+     },
+     "hair": {
+      "id": "bald",
+      "color": "#888888"
+     },
+     "extras": {
+      "id": "undead_skin",
+      "color": "#8a94a0"
+     },
+     "top": {
+      "id": "plate",
+      "color": "#4a5058",
+      "color2": "#7ae0ff"
+     },
+     "bottom": {
+      "id": "greaves",
+      "color": "#3e444c"
+     },
+     "shoes": {
+      "id": "heavy",
+      "color": "#33383e"
+     },
+     "hat": {
+      "id": "plate_helm",
+      "color": "#6a7078"
+     },
+     "cape": {
+      "id": "cape",
+      "color": "#7ae0ff"
+     },
+     "decor": {
+      "id": "rune_halo",
+      "color": "#7ae0ff"
+     },
+     "held": {
+      "id": "fh_greatsword",
+      "color": "#9ab0c8"
+     }
+    }
+   },
+   "dropBases": [
+    "sword",
+    "heavy_chest",
+    "heavy_helm",
+    "medium_boots",
+    "ring",
+    "dagger",
+    "rapier",
+    "light_chest",
+    "light_boots",
+    "bow",
+    "crossbow",
+    "quiver",
+    "light_helm",
+    "necklace",
+    "staff",
+    "wand",
+    "tome",
+    "cloth_chest",
+    "silver_amulet",
+    "greatsword",
+    "sword2h",
+    "plate_helm",
+    "gold_signet"
+   ]
+  },
+  {
+   "id": "stonehide_peakking",
+   "name": "Stonehide Peak-King",
+   "kind": "humanoid",
+   "family": "humanoid",
+   "role": "boss",
+   "warband": "stonehide",
+   "warlord": true,
+   "nameRace": "giant",
+   "biomes": [
+    "any"
+   ],
+   "minLevel": 30,
+   "maxLevel": 50,
+   "arena": 16,
+   "scale": 1.7,
+   "bodyHeight": 2.35,
+   "bodyWidth": 1.1,
+   "hp": 2352,
+   "dmg": [
+    49,
+    73
+   ],
+   "armor": 38,
+   "speed": 3.13,
+   "reach": 3.8,
+   "aggroRange": 46,
+   "attackEvery": 1.7,
+   "xp": 1726,
+   "gold": 784,
+   "dropBonus": 3,
+   "dropRarity": 2.0,
+   "phases": [
+    {
+     "at": 0.6,
+     "modifier": "unyielding",
+     "say": "The Peak-King plants its feet like a mountain."
+    },
+    {
+     "at": 0.3,
+     "modifier": "vicious",
+     "say": "Stone cracks under it. It is done being patient."
+    }
+   ],
+   "spawns": {
+    "id": "stonehide_smasher",
+    "count": 2,
+    "at": [
+     0.6,
+     0.3
+    ]
+   },
+   "leads": [
+    "stonehide_smasher",
+    "stonehide_hurler"
+   ],
+   "bearer": "stonehide_bearer",
+   "uniqueDrop": "fh_peakbreaker",
+   "look": {
+    "avatar": {
+     "body": {
+      "race": "giant",
+      "skin": "#9aa4b0",
+      "height": 1.0,
+      "width": 1.0,
+      "headSize": 0.3,
+      "round": 0.4
+     },
+     "headShape": "square",
+     "ears": {
+      "id": "normal"
+     },
+     "nose": {
+      "id": "wide"
+     },
+     "eyes": {
+      "id": "narrow",
+      "color": "#5a6a8a"
+     },
+     "mouth": {
+      "id": "frown"
+     },
+     "brows": {
+      "id": "thick",
+      "color": "#6b4a2a"
+     },
+     "hair": {
+      "id": "braids",
+      "color": "#eeeeee"
+     },
+     "facialHair": {
+      "id": "braided_beard",
+      "color": "#eeeeee"
+     },
+     "top": {
+      "id": "scale_plate",
+      "color": "#5a6a7a",
+      "color2": "#a8c0d8"
+     },
+     "bottom": {
+      "id": "greaves",
+      "color": "#4a5668"
+     },
+     "shoes": {
+      "id": "heavy",
+      "color": "#3a4452"
+     },
+     "hat": {
+      "id": "great_helm",
+      "color": "#8a9aaa"
+     },
+     "cape": {
+      "id": "cape",
+      "color": "#a8c0d8"
+     },
+     "decor": {
+      "id": "pauldrons",
+      "color": "#5a6a7a"
+     },
+     "held": {
+      "id": "fh_greataxe",
+      "color": "#b8c8d8"
+     },
+     "offhand": {
+      "id": "fh_tower_shield",
+      "color": "#4a5668"
+     }
+    }
+   },
+   "dropBases": [
+    "warhammer",
+    "hammer",
+    "heavy_chest",
+    "heavy_gauntlets",
+    "ring",
+    "halberd",
+    "pathfinder_javelin",
+    "medium_chest",
+    "medium_boots",
+    "crossbow",
+    "quiver",
+    "medium_helm",
+    "necklace",
+    "staff",
+    "orb",
+    "wand",
+    "cloth_chest",
+    "silver_amulet",
+    "axe2h",
+    "plate_helm",
+    "gold_signet"
    ]
   }
  ]

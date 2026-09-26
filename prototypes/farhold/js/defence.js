@@ -205,7 +205,7 @@ export function createDefence({
     },
 
     /** Somebody out there has decided your base is worth coming for. Still only an OFFER. */
-    offer({ level = 1, biome = 'any' } = {}) {
+    offer({ level = 1, biome = 'any', heldBy = null } = {}) {
       if (quest && quest.state !== 'won' && quest.state !== 'lost' && quest.state !== 'declined') {
         return { ok: false, why: 'You already have one of these on.' };
       }
@@ -213,7 +213,7 @@ export function createDefence({
         base: baseOf(), level, biome,
         enemies: bestiary?.enemies || [], bosses: bestiary?.bosses || [],
         modifiers: bestiary?.modifiers || [],
-        rng, data,
+        rng, data, heldBy, // R27 M1
       });
       if (!out.ok) return out;
       quest = out;

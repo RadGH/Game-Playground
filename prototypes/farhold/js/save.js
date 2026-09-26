@@ -93,6 +93,8 @@ export function createSaves() {
 export function snapshot({
   id, name, seed, classId, player, control, elapsed, playtime, markers, at, place, weather,
   materials, dungeonsCleared,
+  // R27 M1 — the strongholds you have taken, per world: `{ 'systemSeed:planetId': [siteKey, …] }`
+  strongholds = null,
   // ---- these three were being PASSED and then dropped on the floor. See the note below.
   world, quests, campaign,
   // ---- The Territory expansion: who likes you, what you have knocked over, what you have heard
@@ -238,6 +240,12 @@ export function snapshot({
     // round 4: the materials bag and which dungeons you have already emptied
     materials: materials || {},
     dungeonsCleared: [...(dungeonsCleared || [])],
+    /**
+     * R27 M1 — WHICH STRONGHOLDS ARE TAKEN. Without it a reload stood every boss back up and the
+     * pay-once rule was a pay-once-per-session rule. Filed per world, because every world uses the
+     * same slot keys; an old save has none, and every site on it loads untaken.
+     */
+    strongholds: strongholds && typeof strongholds === 'object' ? JSON.parse(JSON.stringify(strongholds)) : {},
 
     /**
      * THE THREE FIELDS THAT WERE BEING THROWN AWAY.

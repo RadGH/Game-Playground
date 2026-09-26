@@ -62,6 +62,9 @@ export const TRAVEL_DEFAULTS = {
   loadCap: 200,
 };
 
+/** R27 M8 — `terrain.roadAt` over this is road (the same line js/player.js paces on). */
+const ROAD_ON = 0.45;
+
 /**
  * `stores` is a js/stores.js network. `roads` is a js/roadplan.js book (optional — no book means no
  * road speed-up, which is correct for a base that has not laid any). `power` is data/power.json, for
@@ -124,7 +127,7 @@ export function createLogistics({
     if (path.metres > T.maxMetres) {
       return { ok: false, why: `That is ${Math.round(path.metres)} m of walking. Put a store somewhere in between.` };
     }
-    const roadFraction = roads?.fractionOnRoad ? roads.fractionOnRoad(path.points) : 0;
+    const roadFraction = onAnyRoad(path.points);   // R27 M8
     const boost = 1 + roadFraction * (T.roadFactor - 1);
     const speed = Math.max(0.2, (h.speed || 3.4) * boost);
     const seconds = Math.max(T.minSeconds, HANDLING + path.metres / speed);
@@ -138,6 +141,31 @@ export function createLogistics({
       text: `${Math.round(path.metres)} m — about ${secsText(seconds)} a load`
         + (roadFraction > 0.05 ? `, ${Math.round(roadFraction * 100)}% of it on your road` : ', none of it on a road'),
     };
+  }
+
+  /**
+   * R27 M8 — HOW MUCH OF A HAUL RUNS ON ROAD, any road: the world's or one you laid. Per sample it
+   * is road if EITHER says so — the larger of the two, never the sum — so a lane laid along a world
+   * road does not make the cart twice as fast, and a haul over a world road you did not build is
+   * quoted exactly as one over a lane of the same length. `terrain.roadAt` already takes the max of
+   * the two indexes (js/planet.js); asking the book as well keeps a terrain without that overlay
+   * (a test double) honest.
+   */
+  function onAnyRoad(points) {
+    if (!terrain?.roadAt) return roads?.fractionOnRoad ? roads.fractionOnRoad(points) : 0;
+    let on = 0, total = 0;
+    for (let i = 0; i + 1 < (points?.length || 0); i++) {
+      const [ax, az] = points[i], [bx, bz] = points[i + 1];
+      const len = Math.hypot(bx - ax, bz - az);
+      if (len <= 1e-9) continue;
+      const steps = Math.max(1, Math.ceil(len / 6));
+      for (let k = 0; k < steps; k++) {
+        const t = (k + 0.5) / steps, x = ax + (bx - ax) * t, z = az + (bz - az) * t;
+        total += len / steps;
+        if (terrain.roadAt(x, z) > ROAD_ON || roads?.onRoad?.(x, z)) on += len / steps;
+      }
+    }
+    return total > 0 ? on / total : 0;
   }
 
   /** "2 m 10 s". One place, so every screen says it the same way. */

@@ -30,7 +30,8 @@ import { tickStatuses, slowOf, applyStatus } from './skills.js';
 // drive it. See `scaleFollower` there; this file is the only caller.
 import { scaleFollower } from './followers.js';
 // R23: companions stand on bridge decks too — see js/ground.js
-import { groundAt, wetAt } from './ground.js';
+import { groundAt, wetAt, cliffStep } from './ground.js';   // R27 M8: cliffStep
+const cliffOut = [0, 0];
 
 /**
  * Which pets a class brings, and what it calls them. Data rather than code because the class list
@@ -612,6 +613,14 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
         const nx = p.x + Math.sin(p.facing) * speed * dt;
         const nz = p.z + Math.cos(p.facing) * speed * dt;
         let [cx, cz] = currentTerrain.clampToWorld(nx, nz);
+        /**
+         * R27 M8 — A COMPANION OBEYS A CLIFF THE WAY AN ENEMY DOES (js/ground.js `cliffStep`, the
+         * one helper the player and every enemy already use): refused up a face past the line, it
+         * slides along the foot, and pinned for `CLIFF.escape` seconds it scrambles up at
+         * `CLIFF.scramble` m/s. A flier ignores it. It is still pulled back to you when it falls
+         * far behind, so a face can slow a companion down but never strand it.
+         */
+        if (!p.hover) [cx, cz] = cliffStep(currentTerrain, p, cx, cz, dt, { feet: p.y }, cliffOut);
         if (!p.hover && field) [cx, cz] = field.unstick(cx, cz, (p.reach || 2) * 0.28);
         if (!wetAt(currentTerrain, cx, cz, p.y)) { p.x = cx; p.z = cz; }
         else { p.x = at.x; p.z = at.z; }        // a companion will not drown chasing you across a river

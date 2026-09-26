@@ -2648,7 +2648,7 @@
         "kind": "flat",
         "color": "#6a5a44"
       },
-      "desc": "Painted, not placed. Flattens under itself and joins the world's own road graph."
+      "desc": "Painted, not placed. Levels the ground under itself. On it you walk and ride at road pace, your carts haul at road speed and no grass grows. It is your road, not the world's: caravans and signposts keep to the roads that were here before you."
     },
     {
       "id": "road_gravel",
@@ -2696,7 +2696,7 @@
         "kind": "flat",
         "color": "#8e8a80"
       },
-      "desc": "Set stone with a kerb. Traffic from the real road will use it."
+      "desc": "Set stone, half as wide again as a track. Underfoot it is a road like any other: road pace for feet and hooves, road speed for your hauls, no grass. Caravans and signposts keep to the world's own roads."
     },
     {
       "id": "claim_stone",

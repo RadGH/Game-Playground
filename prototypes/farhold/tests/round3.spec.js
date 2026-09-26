@@ -429,10 +429,15 @@ test('M opens a map with the player, layers and pins on it', async ({ page }) =>
    * on a layout decision rather than on anything about layers.
    */
   await page.evaluate(() => { const d = document.querySelector('#map-screen .map-ref'); if (d) d.open = true; });
+  // R27 (found by M8's run): the rule is that every layer chip says which layer it is, and the
+  // count grew with R27 M9's warband layer — so it asserts the rule and names the new one, rather
+  // than pinning a number the next layer will break again
   const chips = page.locator('#map-screen .chips.layers .chip');
-  await expect(chips).toHaveCount(11);
+  await expect(page.locator('#map-screen .chip[data-layer="warbands"]')).toHaveCount(1);
+  const all = await chips.count();
+  expect(all).toBeGreaterThanOrEqual(12);
   const named = await page.locator('#map-screen .chips.layers .chip[data-layer]').count();
-  expect(named, 'a layer chip does not say which layer it is').toBe(11);
+  expect(named, 'a layer chip does not say which layer it is').toBe(all);
   await expect(page.locator('#map-screen .chip[data-layer="levels"]')).toBeVisible();
   await page.locator('#map-screen .chip[data-layer="elevation"]').click();
   expect(await page.evaluate(() => window.farhold.map.state.layer)).toBe('elevation');

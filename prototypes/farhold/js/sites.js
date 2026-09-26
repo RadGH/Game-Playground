@@ -619,6 +619,31 @@ export function createSites(scene, terrain, {
       }
       rid++;
     }
+    /**
+     * R27 M8 — A JUNCTION SLOT IS A FILED JUNCTION.
+     *
+     * The slot used to be a map cell two World Forge roads share. After round 27's merge those cells
+     * lie 2-12 cells from where the roads on the ground actually meet (the merge joins a lower road
+     * onto its trunk wherever it enters the trunk's corridor), so a toll "at the crossroads" stood in
+     * a field. `terrain.junctions` is every junction planet.js filed, at its real point, so the slot
+     * is that point. They are NOT thinned the way the shared cells were (one in three): a corridor
+     * two roads share was dozens of cells, a filed junction is one point, and most of them are in or
+     * beside a town where no stronghold may stand anyway (seed 7: 55 of 75 within 130 m of one).
+     * Crossroads (`kind: 'cross'`) go first. The key and id keep the cell form, so nothing
+     * downstream that files a site by key changes shape.
+     */
+    const filed = terrain?.junctions;
+    if (Array.isArray(filed) && filed.length && w) {
+      const used = new Set();
+      const order = [...filed.filter(q => q.kind === 'cross'), ...filed.filter(q => q.kind !== 'cross')];
+      for (const q of order) {
+        const cx = Math.floor(q.x / cell), cy = Math.floor(q.z / cell), c = cy * w + cx;
+        if (used.has(c)) continue;
+        used.add(c);
+        out.push({ key: `j${c}`, on: 'junction', x: q.x, z: q.z, cell: { x: cx, y: cy }, name: null, biome: null, tags: ['road', 'junction'], id: 20000 + c, junction: q.kind });
+      }
+      return out;
+    }
     let j = 0;
     for (const [c, mark] of seen) {
       if (mark !== -1 || !w) continue;

@@ -549,22 +549,28 @@ test('klass, roadHalf and river on a crossing are read as crossing fields, not o
   assert.deepEqual(orphans, []);
 });
 
-test('a stronghold junction slot stands on a filed junction', { todo: 'js/sites.js slotsFrom still finds junctions from shared map cells, not terrain.junctions — see RPG.md R27 M5' }, async () => {
+test('a stronghold junction slot stands on a filed junction (R27 M8: slotsFrom reads terrain.junctions)', async () => {
   const { createSites } = await import('../js/sites.js');
   const data = {
     strongholds: read('../data/strongholds.json'), setpieces: read('../data/setpieces.json'),
     landmarks: read('../data/landmarks.json'), worldbosses: read('../data/worldbosses.json'),
     instances: read('../data/instances.json'),
   };
-  let onOne = 0;
+  let placed = 0, off = [];
   for (const seed of SEEDS) {
     const { terrain } = at(seed, 0.1);
     const sites = createSites({ add() {}, remove() {} }, terrain, { seed, balance, data });
-    for (const s of sites.sites.filter(q => String(q.key).startsWith('j'))) {
-      if (terrain.junctions.some(j => j.kind === 'cross' && Math.hypot(j.x - s.x, j.z - s.z) < terrain.metresPerCell)) onOne++;
+    for (const s of sites.sites.filter(q => /^j\d+$/.test(String(q.key)))) {
+      placed++;
+      const d = Math.min(...terrain.junctions.map(j => Math.hypot(j.x - s.x, j.z - s.z)));
+      // the site is filed AT the junction; 8 m is the signpost rule's own reach
+      if (d > 8) off.push(`seed ${seed} ${s.key} ${d.toFixed(0)} m`);
     }
   }
-  assert.ok(onOne >= 1);
+  // most filed junctions are in or beside a town, where no stronghold may stand (seed 7: 55 of 75
+  // within 130 m), so a junction site is rare; the rule is WHERE it stands, and at least one must
+  assert.ok(placed >= 1, `only ${placed} junction sites on ${SEEDS.length} worlds`);
+  assert.deepEqual(off, [], 'junction sites that are not on a filed junction');
 });
 
 test('worldgen time on the user\'s world at full size (logged, for RPG.md)', () => {

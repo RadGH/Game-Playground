@@ -29,6 +29,7 @@ import { CHIBI2_COMBAT_RIDE } from '../../../avatar-3d/js/chibi2-motion.js';
 // R23: a body stands on a bridge deck, not on the river bed under it — see js/ground.js
 import { groundAt, wetAt, cliffStep, climbable } from './ground.js';
 import { leaderModifier, fitsRoom } from './warbands.js';   // R27 M10
+import { compactCreature } from './mesh-merge.js';            // R27 M8
 
 /** `bleed` out of data/skills.json — the field applies it without owning the skill data. */
 const BLEED = { name: 'Bleeding', kind: 'damage', element: 'physical', perSecond: 0.26, seconds: 6 };
@@ -54,6 +55,8 @@ export async function makeActor(look = {}) {
   if (look.creature) {
     const actor = await createCreature(look.creature);
     actor.beast = true;
+    // R27 M8 — one draw call per moving part, not one per eye and toe (js/mesh-merge.js)
+    actor.compacted = compactCreature(actor);
     return actor;
   }
   const avatar = normalizeAvatar ? normalizeAvatar(look.avatar || {}) : (look.avatar || {});
@@ -94,6 +97,30 @@ export async function makeActor(look = {}) {
     actor.setRate = k => { actor.playerDriven = true; rate(k); };
   }
   return actor;
+}
+
+/**
+ * R27 M8 — HOW MUCH OF A DISTANT PERSON IS WORTH A DRAW CALL.
+ *
+ * A Chibi 2 body is two draw calls (cloth and metal) and a townsperson worth talking to carries a
+ * badge sprite, a third. Standing at a city gate on seed 47 there were 21 people in view, most of
+ * them 100-560 m away across the rooftops, and they were 53 of the scene's 144 calls. Past
+ * `METAL_FAR` the metal (a buckle, a blade, a helm rim) is a pixel or two and is not drawn; past
+ * `BODY_FAR` the whole person is under eight pixels tall and is not drawn at all. Nothing about them
+ * stops updating — they walk, work and talk exactly as before — they are only not DRAWN.
+ */
+export const LOD = { METAL_FAR: 70, BODY_FAR: 200 };
+export function lodBody(actor, dist) {
+  const g = actor?.group;
+  if (!g) return;
+  const show = dist < LOD.BODY_FAR;
+  if (g.visible !== show) g.visible = show;
+  // (a test's stand-in body is a plain object with no scene graph: nothing to find, nothing to hide)
+  if (actor.metalMesh === undefined) actor.metalMesh = g.getObjectByName?.('chibi2-metal') || null;
+  if (actor.metalMesh) {
+    const metal = dist < LOD.METAL_FAR;
+    if (actor.metalMesh.visible !== metal) actor.metalMesh.visible = metal;
+  }
 }
 
 /**

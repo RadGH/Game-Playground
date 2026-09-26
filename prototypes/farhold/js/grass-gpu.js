@@ -373,6 +373,7 @@ export function createGpuGrass(scene, { terrain, view, props = null, features = 
     return true;
   }
 
+  let laneVersion = 0;   // R27 M8
   return {
     mesh, material, uniforms, stats, count, cell,
     get visible() { return visible; },
@@ -391,6 +392,9 @@ export function createGpuGrass(scene, { terrain, view, props = null, features = 
       }
       const cv = props?.clearedVersion ?? 0;
       if (cv !== clearedVersion) { clearedVersion = cv; held.fill(-2147483648); }
+      // R27 M8 — a road the player lays (or lifts, or loads) is road to the grass too
+      const lv = terrain.laneVersion ?? 0;
+      if (lv !== laneVersion) { laneVersion = lv; held.fill(-2147483648); }
       refreshMask(px, pz, MASK_N > 128 ? 3000 : 1500);
       const oc = [Math.round(px / cell), Math.round(pz / cell)];
       uniforms.uOriginCell.value.set(oc[0], oc[1]);

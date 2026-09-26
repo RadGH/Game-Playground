@@ -4770,3 +4770,166 @@ both; for snow that is still ten times too high and would have left every peak b
 green, all pass: stride, planet, round23-graphics, vehicles, round22-threat, round27-bridges,
 round27-gates, round27-warcamps, water, round27-roads, save; density.spec, megaflora.spec,
 round23-title.spec; phase2.spec 10 of 11 (the one above).
+
+### Round 27 — Roads you can read (M8), and the round's leftovers
+
+The last milestone of the round. It owns the plan's M8 (road looks, signposts, milestones, lamps,
+player roads) and six things earlier milestones found and left: the draw-call budget, the step where
+two roads meet, companions on cliffs, the mount row's "climbs anything", the stronghold junction slot,
+and the cost of the switchback pass.
+
+**Three kinds of road** (js/features.js `ROAD_LOOKS` / `roadProfile`, js/roadplan.js `laneRibbon`
+`profile`). The world's road ribbon is vertex-coloured now, still one mesh and one material. A
+cross-section is a list of columns edge to edge: a highway is pale paving with a darker kerb strip on
+its outer 0.4 m (two columns at the same offset make the crisp edge), a road is gravel with slightly
+darker shoulders, a trail is dark dirt with a grass crown down the middle. A lifted deck is painted
+the class's main colour. Streets and rivers call `laneRibbon` without a profile and are unchanged.
+Measured off the drawn triangles (area-weighted, so what you see from a few metres off): highway vs
+trail ΔE 31.4, road vs trail 17.0, highway vs road 16.2.
+
+**Signposts** (new js/roadside.js, pure placement). The road network is a graph: nodes are the filed
+junctions (`terrain.junctions`), every settlement a road passes within its ring of, and loose road
+ends; edges are the stretches between, weighted by length along the road. A road is cut at its sea
+lanes first (the ribbon's own wet rule) — a sign must not send you across water nobody drew a road
+over. Every arm is a Dijkstra walk out along that branch, never back through the post, to the FIRST
+settlement reached; a branch that reaches none gets no arm. Posts stand at every junction outside a
+town and at every town link (where a road leaves a town's edge, 12 m out), in the widest gap between
+the roads through that point, clear of every carriageway by `half + footing` (the waystone rule).
+Two traps found on the way: a link post splits an edge in two, and the unsplit edge had to come out of
+the network while it was split, or a walk left down one half and came back along the whole, straight
+through the post (seed 7, Krokskoshhaven: an arm said "Krokskoshhaven 0.7 km" pointing away from it);
+and a town's wall is only known once it is planned, so which posts and lamps stand is asked at every
+rebuild against the extents as they are then. E at a post prints its arms to the log ("west:
+Frostcross 0.2 km · south-east: ? 1.7 km"), and a place in a region you have not entered or heard of
+reads "?" — js/map.js's own `knows`, so the sign and the map cannot disagree. Drawn as two instanced
+kinds, `signpost` and `signarm` (one arm per road, turned to point down it), with caps.
+
+- **The plan said "within 8 m of its junction and `roadAt(post) < 0.3`".** Those cannot both hold:
+  `roadAt` is 1 - smoothstep(half, half + 16), so 0.3 is about ten metres past the kerb. The rule
+  measured instead is the one that matters: clear of every carriageway by its footing, and the
+  furthest post is 8.9 m from its junction (a four-way crossing's nearest clear corner is 8.3 m out).
+- The arm test does not trust the planner: it floods the drawn carriageways on a 2 m grid from the
+  arm's start with the post's own spot blocked, and checks the named town is reached. 554 posts and
+  1,201 arms on five worlds, every one reached.
+
+**Milestones** every 2 km along every highway and road lane, beside it on the verge, shifted up to
+40 m along the road where the verge is wet or taken. 148 at full size on two worlds, every one within
+50 m of its 2 km mark; a Super tiny world has a handful (its lanes are mostly under 2 km).
+
+**Lamps** every 30 m along each road from a size-3+ town's wall out to 400 m past it, alternating
+verges, the bracket reaching out over the road. 1,937 on the approaches to 87 towns on five worlds:
+none within `half + 1` of any road's centre line, none inside any town's edge. At night the glass
+(`lampglow`, the one Basic-material kind) glows through `features.setNight`, and the lamps hand
+js/light.js sources with `tier: -1`: js/light.js now sorts by tier first, so a lamp only gets a pool
+light after every spell, carried torch, brazier and sconce in range has one; the player's own lamp is
+the separate `torch` and never in the pool. Measured on the real pool (12) with 30 lamps, a spell and
+two torches: both torches and the spell lit, 12 of 12 used. In the game at night on Stormgate's
+approach: 10 of 11 pool lights were lamps, the torch burning.
+
+**Player roads are roads** (js/planet.js `roadAt`, js/roadplan.js `roadAt` / `version`). The lane
+book is a second index: `terrain.setLaneBook(book)` (js/build.js hands it over) and `roadAt` takes
+the larger of the two, never the sum, returning early with no lanes. Lanes are NOT added to
+`roadPaths`. So road pace (M7), the vehicle surface, the grass (`grassAt` reads `road`; the bake
+re-samples when `terrain.laneVersion` moves) and props all see them. js/logistics.js counts a haul
+point as road when EITHER index says so: a haul over your lane is quoted at 8.84 m/s, one over a world
+road at 8.84, one over your lane laid ON a world road at 8.84 (bare ground 3.40). The book is loaded
+before the first scatter at boot. `road_dirt` / `road_cobble` copy now says what is true (road pace,
+road speed for hauls, no grass; caravans and signposts keep to the world's roads).
+
+**Leftover 1 — draw calls.** `phase2.spec.js`'s `< 95` was red at 104 on seed 7's landing. A
+per-object count (hooking `renderBufferDirect` and keeping only calls that incremented
+`info.render.calls`) showed the budget was already over before this round: 97 at 225de22 (the round's
+first commit), 98 after M3, 104 after M5 (towns and a townsperson shifted into view). The bisect was
+not the useful part — the breakdown was: **a hunting cat by the player was 34 of the 104.**
+avatar-3d/js/creatures.js builds a beast out of one Mesh per eye, pupil, ear and toe. New
+js/mesh-merge.js `compactCreature` (called from `makeActor` for every beast): it PROBES by playing
+every clip and leaves alone any leaf that moves, blinks or glows on its own (an elemental's shards, a
+snake's tongue), then folds every other leaf of one material kind into ONE SkinnedMesh whose bones are
+the creature's own groups — creatures.js keeps turning the same hip, knee and jaw, the skeleton reads
+their matrices. 41 creature types: 1,377 meshes to 86; the test checks the folded body has the same
+bounds and every colour, and still moves. Also: the fourteen town footings are one InstancedMesh
+(`farhold-building-footings`; the per-want meshes stay as the bookkeeping and are not drawn); a
+quest beacon is one dynamic mesh single-pass instead of five meshes drawn twice; and townsfolk past
+70 m skip their metal mesh and past 200 m are not drawn at all (`lodBody`; nothing stops updating).
+
+| where | before (HEAD 34f7c19) | after |
+|---|---|---|
+| seed 7 landing (phase2.spec) | 104 | 72 |
+| seed 7, Stormgate approach at night (lamps lit) | 98 | 72 |
+| seed 47 Super tiny, 24 m outside Fenkeep's gate | 165 | 96 |
+| seed 47 Super tiny, 24 m outside Cindercrown's gate | 178 | 112 |
+
+The town gates are down 40-70 but still over 95: what is left there is ~20 building kinds and ~20
+site kinds (one InstancedMesh per geometry) plus the ore seams (two material groups each). Merging
+different geometries into one call needs a BatchedMesh, whose fallback without `WEBGL_multi_draw` is
+one call per instance — parked, not guessed at.
+
+**Leftover 2 — the step where two roads meet** (js/planet.js `conformOverlaps`, `heightAt`'s seam).
+Measured first: 1.37 m at Stonecrown (seed 7; road 18 held up by water onto road 42 — a junction
+M5's landing skipped as `onBridge`), 0.83 m and 0.47 m where a branch comes in at a shallow angle and
+runs inside the trunk's carriageway for 10-20 m before the landing, and 0.52 m on seed 25392. Two
+fixes: (1) every road is walked a metre at a time wherever another road's carriageway overlaps it; of
+the two, the one that outranks (class, then the trunk of a join, then the longer) keeps its surface
+and the other takes it, with vertices every 2 m and a ramp out to its own next vertex adding at most
+3% of grade; where the lower road's water floor holds it up, the other road comes up to meet it. (2)
+`heightAt` took the NEAREST road's surface, so wherever two roads' reaches overlapped the ground
+jumped on the line where "nearest" changed hands — at an angle on a slope that is a step even when
+both surfaces agree on their own centre lines. Within `ROAD_SEAM` (3 m) of that line the two blends
+are now mixed, half and half on the line, and so is the deck's last-word clamp (it had put the step
+straight back). `makePathIndex` gained `nearestTwo` (one pass). A road that ends inside a landing's
+ease now ends level (M5's `level` left the tip at its old height: 0.66 m over the last metre of road
+11 on seed 25392). Worst step now, five seeds at both sizes: 0.089 m (seed 101 Super tiny); turned off,
+the Stonecrown step comes back (the test checks that too). `heightAt` is ~9% slower near roads.
+
+**Leftover 3 — companions on cliffs.** js/pets.js steps through js/ground.js `cliffStep`, the same
+helper the player and every enemy use (refused up a face, it slides along the foot; pinned 3 s it
+scrambles). 12 measured faces on seed 7: 0 climbed in 5 s with the rule, 6 without.
+
+**Leftover 4 — the mount row** says "climbs slopes up to 63°" from the cliff rule itself
+(js/ground.js `climbDegrees(mountSure(item))` — a Surefooted mount says more), and a vehicle its own
+`maxSlope` in degrees. round17-ui.test.js now asserts there is one mount-row builder, and
+round15.spec.js that the horse's number is the rule's and steeper than the motorcycle's.
+
+**Leftover 5 — stronghold junction slots** (js/sites.js `slotsFrom`) come from `terrain.junctions` at
+the junction's own point. Not thinned one in three any more: most filed junctions are in or beside a
+town (seed 7: 55 of 75 within 130 m) where no stronghold may stand. The todo test is real: every
+junction site on five worlds stands on a filed junction (the ids keep their cell form).
+
+**Leftover 6 — the switchback cache** (js/planet.js `foldCacheKey` / `FOLD_CACHE_VERSION`). The fold
+result is kept by a hash of the map, the metres a cell is, the terrain knobs and the merged roads, in
+memory and in `localStorage` (last three worlds, try/catch). Seed 25392 full size: first
+`makeTerrain` 286 ms (fold 155), second 104-120 ms (fold 1-2), identical roads; a changed fold knob
+misses the cache.
+
+**Tests.** New `tests/round27-roadside.test.js` (15) and `tests/round27-roadside.spec.js` (3: lamps at
+night in budget, E at a signpost, screenshots in `research/round27-roadside/`). round27-roads.test's
+junction-slot test is real. Rule-not-text: round17-ui.test, round15.spec. Unit suite 2,474 pass,
+2 skipped (Frontier Foundry's six-hour sims). Specs run: round27-roadside, phase2 (11/11, the budget
+green again), round23-title, round15, build-mode, round27-walls, round3, round27-cliffs,
+round27-bridges, round27-warcamps, planet-lod, density, megaflora.
+
+**Found, not changed:** `window.farhold` has two `setTime` keys (a fraction at ~7950 and elapsed
+seconds at ~10569; the later wins and four specs rely on it) — the round-11 duplicate-key fault; the
+first is dead code. The new spec sets the clock by the sun instead.
+
+### Round 27 — parked (bring these up when the round is done)
+
+From the plan's "What this plan deliberately does not do":
+- A6 triplanar rock shader, A7 waterfalls, A8 ground decals.
+- C3 the single `townOrigin()` refactor (with the `markers.js:490` / `main.js:2014` half-cell offset).
+- C4 toll bridges; night-closing gates.
+- D7 outskirts.
+- Warband sets, plantable banners, trophies; warband counter-raids; E14 warband-vs-warband wars.
+- F2 enemy weapon patterns; F5 warband codex.
+- Roadside waystations and shrines (B6's other half); wall walkers.
+
+Parked by the milestones themselves:
+- M6: seed 47 at full size has a lake whose cells sit 57 m under the land they are in (a lake/relief
+  mismatch; the road runs along the hill between two 66 m pits). The pit itself, not a causeway.
+- M5: the first build of a world still pays the switchback pass (~150 ms at full size on 25392); only
+  the second and later builds skip it (M8's cache).
+- M3/M8: draw calls at a town gate are 96-112 against the 95 the landing is held to — merging
+  different building geometries into one call needs a BatchedMesh (see Leftover 1).
+- M8: the duplicate `setTime` key in `window.farhold` (above).
+- M9 and M10's own "not done / notes" (patrol bodies steer by strolling rather than a movement mode; no
+  standard seed puts a siege camp by a walled town on its own) — see their sections.

@@ -179,7 +179,9 @@ test('there is exactly one mount control, and one place that computes its speed'
   assert.match(hud, /'Mount \/ ride \(H\)'/);
   // and the only m/s figure for a mount is built in ground(), through one formatter
   assert.match(main, /const paceNote = \(ms, tail\) =>/);
-  assert.equal((main.match(/'climbs anything'/g) || []).length, 1);
+  // one mount row, built in one place (R27 M8: its note states the cliff rule's own number, so the
+  // assertion is on the one builder, not on a sentence)
+  assert.equal((main.match(/paceNote\(\(m\.speed/g) || []).length, 1);
   // the sheet never computes a mount speed of its own
   assert.equal(/mountNote\(worn\) \{/.test(hud), false);
 });

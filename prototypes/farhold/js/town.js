@@ -15,7 +15,7 @@
 import { CHIBI2_RACES } from '../../../avatar-3d/js/chibi2-races.js';
 import * as THREE from 'three';
 import { makeRng } from '../../emberveil/js/rng.js';
-import { makeActor, setActorAnim } from './actors.js';
+import { makeActor, setActorAnim, lodBody } from './actors.js';
 import { makeQuest } from './quests.js';
 import { M_PER_CELL } from './planet.js';
 import { attuneWeapon } from './rpg.js';
@@ -776,6 +776,7 @@ export function createTownFolk(scene, terrain, opts = {}) {
         for (const npc of people) {
           const dx = player.x - npc.x, dz = player.z - npc.z;
           const dist = Math.hypot(dx, dz);
+          lodBody(npc.actor, dist);   // R27 M8 — far folk are not drawn (js/actors.js LOD)
 
           /**
            * R27 M4 — A GATE GUARD NOTICES YOU. A line by your standing as you walk up, and — when

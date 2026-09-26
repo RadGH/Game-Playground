@@ -45,6 +45,26 @@ const BEAM_FROM = 10.5;
 const CHEVRON = new THREE.ConeGeometry(1.1, 1.6, 4);
 const RING = new THREE.RingGeometry(1.6, 2.0, 24);
 
+/**
+ * R27 M8 — ONE MESH A BEACON, NOT FIVE. The shaft, the three chevrons and the ring share one
+ * material and were five meshes (and, transparent and double-sided, ten draw calls). They are one
+ * buffer now: each part's own vertices, laid end to end, and the two parts that move on their own
+ * (the chevrons bob, the ring pulses) are rewritten each frame from their rest shape — about a
+ * hundred vertices, which costs nothing next to the draw calls it saves.
+ */
+function restOf(geometry, matrix) {
+  const g = geometry.index ? geometry.toNonIndexed() : geometry.clone();
+  g.applyMatrix4(matrix);
+  return Float32Array.from(g.attributes.position.array);
+}
+const REST = {
+  shaft: restOf(SHAFT, new THREE.Matrix4().makeTranslation(0, BEAM_FROM + 13 / 2, 0)),
+  // pointing DOWN, at the origin; each is lifted to its own height every frame
+  chevron: restOf(CHEVRON, new THREE.Matrix4().makeRotationX(Math.PI)),
+  // lying flat on the ground (its local x/y become world x/z), scaled about its middle every frame
+  ring: restOf(RING, new THREE.Matrix4().makeRotationX(-Math.PI / 2)),
+};
+
 function makeOne() {
   const group = new THREE.Group();
   group.visible = false;
@@ -56,34 +76,36 @@ function makeOne() {
     transparent: true, opacity: 0.4, depthWrite: false, fog: false,
     side: THREE.DoubleSide,
   });
+  // R27 M8 — a transparent double-sided material draws every mesh TWICE (back faces, then front)
+  // unless told otherwise. One pass is plenty for a faint column.
+  mat.forceSinglePass = true;
 
-  const shaft = new THREE.Mesh(SHAFT, mat);
-  // centred half its own height above where it starts, so its BOTTOM sits at BEAM_FROM
-  shaft.position.y = BEAM_FROM + 13 / 2;
-  group.add(shaft);
-
-  // three chevrons pointing DOWN, chasing each other toward the ground
-  const chevrons = [];
-  for (let i = 0; i < 3; i++) {
-    const c = new THREE.Mesh(CHEVRON, mat);
-    c.rotation.x = Math.PI;              // point down
-    c.position.y = 5 + i * 1.9;
-    group.add(c);
-    chevrons.push(c);
-  }
+  const nS = REST.shaft.length, nC = REST.chevron.length, nR = REST.ring.length;
+  const pos = new Float32Array(nS + nC * 3 + nR);
+  pos.set(REST.shaft, 0);
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3).setUsage(THREE.DynamicDrawUsage));
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.frustumCulled = false;      // it is rewritten every frame and scaled up to 6x; never worth culling
+  group.add(mesh);
 
   /**
-   * The ring stays on the ground, because it is the only thing that says WHERE, exactly — the beam
-   * says which way and the arrows say "down here", and neither of them is a position. It is a flat
-   * disc lying on the surface rather than a pillar standing on it, which is not what the complaint
-   * was about.
+   * The chevrons at heights `ys`, the ring at `pulse`. The chevrons sit at 5 → 8.8 (three of them
+   * chasing each other toward the ground) and the beam starts at `BEAM_FROM`, above all three —
+   * R15's rule, so the beacon never stands ON the spot. The ring stays on the ground at 0.12: it is
+   * the only part that says WHERE, exactly.
    */
-  const ring = new THREE.Mesh(RING, mat);
-  ring.rotation.x = -Math.PI / 2;
-  ring.position.y = 0.12;
-  group.add(ring);
-
-  return { group, mat, shaft, chevrons, ring, key: null, ground: 0 };
+  function pose(ys, pulse) {
+    let o = nS;
+    for (const y of ys) {
+      for (let i = 0; i < nC; i += 3) { pos[o + i] = REST.chevron[i]; pos[o + i + 1] = REST.chevron[i + 1] + y; pos[o + i + 2] = REST.chevron[i + 2]; }
+      o += nC;
+    }
+    for (let i = 0; i < nR; i += 3) { pos[o + i] = REST.ring[i] * pulse; pos[o + i + 1] = 0.12; pos[o + i + 2] = REST.ring[i + 2] * pulse; }
+    geo.attributes.position.needsUpdate = true;
+  }
+  pose([5, 6.9, 8.8], 1);
+  return { group, mat, mesh, pose, key: null, ground: 0 };
 }
 
 export function createBeacons(scene, { max = MAX, heightAt = null } = {}) {
@@ -143,19 +165,15 @@ export function createBeacons(scene, { max = MAX, heightAt = null } = {}) {
         b.group.scale.setScalar(k);
         b.group.position.y = b.ground + 1.2 * k;
         b.group.rotation.y = t * 0.6;
-        // the chevrons chase downward, a fifth of a cycle apart
-        for (let i = 0; i < b.chevrons.length; i++) {
-          b.chevrons[i].position.y = 5 + i * 1.9 + Math.sin(t * 2.4 - i * 0.2) * 0.5;
-        }
-        const pulse = 1 + Math.sin(t * 2.0) * 0.12;
-        b.ring.scale.set(pulse, pulse, 1);
+        // the chevrons chase downward, a fifth of a cycle apart, and the ring pulses
+        b.pose([0, 1, 2].map(i => 5 + i * 1.9 + Math.sin(t * 2.4 - i * 0.2) * 0.5), 1 + Math.sin(t * 2.0) * 0.12);
         b.mat.opacity = 0.28 + (Math.sin(t * 2.0) * 0.5 + 0.5) * 0.22;
       }
     },
 
     clear() { for (const b of pool) { b.group.visible = false; b.key = null; } live = 0; },
     dispose() {
-      for (const b of pool) { scene.remove(b.group); b.mat.dispose(); }
+      for (const b of pool) { scene.remove(b.group); b.mat.dispose(); b.mesh.geometry.dispose(); }
       pool.length = 0;
     },
   };

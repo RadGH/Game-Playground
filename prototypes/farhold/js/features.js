@@ -20,6 +20,7 @@ import { BUILDING_INFO, streetLanes, settlementAnchor, footprintOf } from './tow
 // R27 M2 — one answer to "how big is this town", and one to "does it have a wall"
 import { townExtent, rememberPlan, forgetPlans, wallTier } from './town-plan.js';
 import { laneRibbon, ringCrossings } from './roadplan.js';
+import { createRoadside } from './roadside.js';   // R27 M8
 import { planTown, cultureFor } from '../../../proctown/js/townplan.js';
 import { padSpotFor, boardSpotFor } from './waypoints.js';
 import {
@@ -96,6 +97,35 @@ const mat4 = (x, y, z, sx, sy, sz, ry = 0) => new THREE.Matrix4().compose(
 );
 const BOX = new THREE.BoxGeometry(1, 1, 1);
 const CYL = new THREE.CylinderGeometry(1, 1, 1, 8);
+
+/**
+ * R27 M8 — WHAT EACH ROAD CLASS LOOKS LIKE, as sRGB hex. `kerb` is the highway's outer 0.4 m,
+ * `edge` a road's gravel shoulder, `crown` the grass strip down the middle of a trail. Exported so a
+ * test can read the drawn vertex colours back against these and measure how far apart they are.
+ */
+export const ROAD_LOOKS = {
+  highway: { main: '#a59c8b', kerb: '#57504a' },
+  road: { main: '#7c7060', edge: '#665a4b' },
+  trail: { main: '#4f3d2b', crown: '#5f6c37' },
+};
+/** A road class's colours as linear [r, g, b] (what a vertex colour is). */
+export function roadLook(klass) {
+  const L = ROAD_LOOKS[klass] || ROAD_LOOKS.trail;
+  const rgb = hex => { const c = new THREE.Color(hex); return [c.r, c.g, c.b]; };
+  return Object.fromEntries(Object.entries(L).map(([k, v]) => [k, rgb(v)]));
+}
+/** KERB — how wide the highway's kerb strip is, in metres. */
+export const KERB = 0.4;
+/** The cross-section `laneRibbon` draws for a class (see its `profile`), edge to edge. */
+export function roadProfile(klass, half) {
+  const L = roadLook(klass);
+  if (klass === 'highway') {
+    const k = Math.max(0, 1 - KERB / Math.max(half, KERB * 2));
+    return [[1, L.kerb], [k, L.kerb], [k, L.main], [-k, L.main], [-k, L.kerb], [-1, L.kerb]];
+  }
+  if (klass === 'road') return [[1, L.edge], [0.7, L.main], [-0.7, L.main], [-1, L.edge]];
+  return [[1, L.main], [0.45, L.main], [0.14, L.crown], [-0.14, L.crown], [-0.45, L.main], [-1, L.main]];
+}
 const CONE4 = new THREE.ConeGeometry(1, 1, 4);
 // what is left of the fixed palette: the four things still modelled here (wall, gatehouse,
 // well, bridge) rather than assembled by the kit
@@ -275,6 +305,41 @@ export const BUILDINGS = {
    * different. What is left here is one footing per want (see `WANT_FOOTINGS` above), which is where
    * the cap and the count still live.
    */
+  /**
+   * R27 M8 — THE ROADSIDE (js/roadside.js), ported from highdef-3d's kit `signpost` and
+   * `stone_marker` (a two-metre post with pointed boards; a squat waymark with a chiselled band),
+   * rebuilt from this file's boxes and cylinders. A signpost's ARMS are their own mesh because a
+   * post has one per road out of its junction, each turned to point down that road; the lamp's
+   * glass is its own mesh because it is the one part that lights up at night.
+   */
+  signpost: { cap: BUILDING_INFO.signpost.cap, build: () => mergeParts([
+    { geometry: CYL, color: '#6b4a2e', matrix: mat4(0, 1.2, 0, 0.07, 2.4, 0.07) },            // the post
+    { geometry: CYL, color: '#8a6a44', matrix: mat4(0, 2.44, 0, 0.1, 0.08, 0.1) },            // its cap
+    { geometry: BOX, color: '#5a3e26', matrix: mat4(0, 0.12, 0, 0.3, 0.24, 0.3) },            // a footing stone
+  ]) },
+  signarm: { cap: BUILDING_INFO.signarm.cap, build: () => mergeParts([
+    // a board running out along +Z from the post, with a diamond at its end for the point
+    { geometry: BOX, color: '#c7ab7e', matrix: mat4(0, 0, 0.44, 0.04, 0.17, 0.72) },
+    { geometry: BOX, color: '#c7ab7e', matrix: new THREE.Matrix4().compose(new THREE.Vector3(0, 0, 0.8),
+      new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.PI / 4, 0, 0)), new THREE.Vector3(0.04, 0.12, 0.12)) },
+  ]) },
+  milestone: { cap: BUILDING_INFO.milestone.cap, build: () => mergeParts([
+    { geometry: BOX, color: '#8f8b83', matrix: mat4(0, 0.36, 0, 0.5, 0.72, 0.3) },           // the stone
+    { geometry: CYL, color: '#8f8b83', matrix: new THREE.Matrix4().compose(new THREE.Vector3(0, 0.72, 0),
+      new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.PI / 2, 0, 0)), new THREE.Vector3(0.25, 0.3, 0.25)) },  // the round top
+    { geometry: BOX, color: '#55524d', matrix: mat4(0, 0.5, 0, 0.52, 0.06, 0.32) },          // the chiselled band
+    { geometry: BOX, color: '#6f6b64', matrix: mat4(0, 0.03, 0, 0.62, 0.06, 0.4) },          // its plinth
+  ]) },
+  lamppost: { cap: BUILDING_INFO.lamppost.cap, build: () => mergeParts([
+    { geometry: BOX, color: '#3a3632', matrix: mat4(0, 0.15, 0, 0.26, 0.3, 0.26) },           // base
+    { geometry: CYL, color: '#2e2b28', matrix: mat4(0, 1.65, 0, 0.055, 3.3, 0.055) },        // pole
+    { geometry: BOX, color: '#2e2b28', matrix: mat4(0, 3.2, 0.26, 0.05, 0.05, 0.56) },        // bracket
+    { geometry: BOX, color: '#2e2b28', matrix: mat4(0, 3.13, 0.5, 0.3, 0.05, 0.3) },          // lantern roof
+    { geometry: BOX, color: '#2e2b28', matrix: mat4(0, 2.78, 0.5, 0.26, 0.04, 0.26) },        // lantern floor
+  ]) },
+  lampglow: { cap: BUILDING_INFO.lampglow.cap, basic: true, build: () => mergeParts([
+    { geometry: BOX, color: '#ffd68a', matrix: mat4(0, 2.8, 0.5, 0.22, 0.31, 0.22) },         // the glass
+  ]) },
   /**
    * THE WAYPOINT PAD — one design everywhere.
    *
@@ -532,7 +597,12 @@ export function createFeatures(scene, terrain, opts = {}) {
     color: new THREE.Color(palette.sea || terrain.planet?.seaColor || '#2a6fa8'),
     transparent: true, opacity: 0.86,
   });
-  const roadMat = new THREE.MeshLambertMaterial({ color: new THREE.Color('#6b5c49') });
+  /**
+   * R27 M8 — THREE KINDS OF ROAD YOU CAN TELL APART. One mesh and one material still: the colour
+   * rides on the vertices (`ROAD_LOOKS` + `roadProfile`), a highway pale paving with a darker kerb
+   * strip on its outer 0.4 m, a road gravel, a trail dark dirt with a lighter grass crown.
+   */
+  const roadMat = new THREE.MeshLambertMaterial({ vertexColors: true });
   const riverMesh = new THREE.Mesh(new THREE.BufferGeometry(), waterMat);
   const roadMesh = new THREE.Mesh(new THREE.BufferGeometry(), roadMat);
   /**
@@ -591,7 +661,9 @@ export function createFeatures(scene, terrain, opts = {}) {
   for (const key of BUILDING_KEYS) {
     const mesh = new THREE.InstancedMesh(
       BUILDINGS[key].build(),
-      new THREE.MeshLambertMaterial({ vertexColors: true }),
+      // R27 M8: a lamp's glass is not lit by the scene, it IS the light (dim by day, `setNight`)
+      BUILDINGS[key].basic ? new THREE.MeshBasicMaterial({ vertexColors: true })
+        : new THREE.MeshLambertMaterial({ vertexColors: true }),
       BUILDINGS[key].cap,
     );
     mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
@@ -600,6 +672,39 @@ export function createFeatures(scene, terrain, opts = {}) {
     mesh.name = 'farhold-building-' + key;
     scene.add(mesh);
     instanced[key] = mesh;
+  }
+  /**
+   * R27 M8 — EVERY FOOTING IN ONE DRAW CALL.
+   *
+   * The fourteen want meshes (hut, house, forge …) are the same unit box in the same material; they
+   * are kept apart because that is where each want's cap and count live, and the tests and the debug
+   * stats ask "how many forges". Drawing them apart cost fourteen draw calls at every town for one
+   * slab each. So they stay as the BOOKKEEPING (their instances are written exactly as before and a
+   * test can read any of them), are never drawn themselves, and this one mesh draws the lot: after a
+   * rebuild each want's instances are copied into it end to end.
+   */
+  const FOOTING_KEYS = BUILDING_KEYS.filter(k => BUILDINGS[k].footing);
+  const footingMesh = new THREE.InstancedMesh(unitMesh('box'), new THREE.MeshLambertMaterial({ vertexColors: true }),
+    FOOTING_KEYS.reduce((n, k) => n + BUILDINGS[k].cap, 0));
+  footingMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+  footingMesh.setColorAt(0, new THREE.Color(1, 1, 1));
+  footingMesh.count = 0;
+  footingMesh.frustumCulled = false;
+  footingMesh.name = 'farhold-building-footings';
+  scene.add(footingMesh);
+  for (const k of FOOTING_KEYS) instanced[k].visible = false;
+  function drawFootings() {
+    let n = 0;
+    for (const k of FOOTING_KEYS) {
+      const m = instanced[k], c = m.count;
+      if (!c) continue;
+      footingMesh.instanceMatrix.array.set(m.instanceMatrix.array.subarray(0, c * 16), n * 16);
+      if (m.instanceColor) footingMesh.instanceColor.array.set(m.instanceColor.array.subarray(0, c * 3), n * 3);
+      n += c;
+    }
+    footingMesh.count = n;
+    footingMesh.instanceMatrix.needsUpdate = true;
+    footingMesh.instanceColor.needsUpdate = true;
   }
 
   const solids = new ObstacleField();
@@ -654,12 +759,18 @@ export function createFeatures(scene, terrain, opts = {}) {
     };
 
     const water = { position: [], normal: [], index: [] };
-    const road = { position: [], normal: [], index: [] };
-    const push = (target, part) => {
+    const road = { position: [], normal: [], index: [], color: [] };
+    const push = (target, part, fill = null) => {
       const base = target.position.length / 3;
       target.position.push(...part.position);
       target.normal.push(...part.normal);
       for (const i of part.index) target.index.push(i + base);
+      // R27 M8 — the road mesh is vertex-coloured, so a part that carries no colour (a deck) is
+      // painted the class's main colour
+      if (target.color) {
+        if (part.color) target.color.push(...part.color);
+        else for (let k = 0; k < part.position.length / 3; k++) target.color.push(fill[0], fill[1], fill[2]);
+      }
     };
 
     for (const r of rivers) {
@@ -731,9 +842,10 @@ export function createFeatures(scene, terrain, opts = {}) {
             const end = Math.min(to, e + 1);
             const pts = r.points.slice(k, end), hs = r.surface.slice(k, end);
             if (pts.length >= 2) {
-              if (up) push(road, roadDeck(pts, hs, r.half * 2, { thick: 0.5, lift: 0.06 }));
+              const look = roadLook(r.klass);
+              if (up) push(road, roadDeck(pts, hs, r.half * 2, { thick: 0.5, lift: 0.06 }), look.main);
               // R22: the ribbon clears the ground it is drawn on — see the note on `ribbon`
-              else push(road, ribbon(pts, hs, r.half * 2, { lift: 0.06, groundAt: roadGroundAt }));
+              else push(road, ribbon(pts, hs, r.half * 2, { lift: 0.06, groundAt: roadGroundAt, profile: roadProfile(r.klass, r.half) }));
             }
             k = e;
           }
@@ -755,6 +867,7 @@ export function createFeatures(scene, terrain, opts = {}) {
       if (data.position.length) {
         geom.setAttribute('position', new THREE.BufferAttribute(new Float32Array(data.position), 3));
         geom.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(data.normal), 3));
+        if (data.color) geom.setAttribute('color', new THREE.BufferAttribute(new Float32Array(data.color), 3));
         geom.setIndex(data.index);
       }
       mesh.geometry = geom;
@@ -1832,6 +1945,7 @@ export function createFeatures(scene, terrain, opts = {}) {
       if (Math.hypot(node.wx - px, node.wz - pz) > radius) continue;
       buildSettlement(node, counts, px, pz, streets);
     }
+    buildRoadside(px, pz, counts);   // R27 M8 — after the towns, so each one's wall is known
     /**
      * THE BRIDGE, AND THE THING THAT CARRIES YOU ACROSS IT — ONE PLAN FOR BOTH.
      *
@@ -1886,6 +2000,7 @@ export function createFeatures(scene, terrain, opts = {}) {
       mesh.instanceMatrix.needsUpdate = true;
       if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
     }
+    drawFootings();   // R27 M8
 
     // the streets, as one ribbon mesh
     streetMesh.geometry.dispose();
@@ -1900,6 +2015,56 @@ export function createFeatures(scene, terrain, opts = {}) {
     streetMesh.visible = visible && streets.position.length > 0;
   }
 
+  /**
+   * R27 M8 — STAND THE ROADSIDE UP: signposts with an arm per road out, milestones, and the lamps
+   * on the approach to every town of size 3+ in range. Placement is js/roadside.js's; this only
+   * turns it into instances and colliders, and keeps what it built for the E prompt and the lights.
+   */
+  const roadsidePlan = createRoadside({ terrain, settlements, extentOf: s => townExtent(s) });
+  let roadsideBuilt = { posts: [], milestones: [], lamps: [] };
+  let lampNight = 0;
+  const upright = (key, x, y, z, yaw, counts) => {
+    if (counts[key] >= BUILDINGS[key].cap) return false;
+    matrix.compose(new THREE.Vector3(x, y, z), new THREE.Quaternion().setFromEuler(new THREE.Euler(0, yaw, 0)), new THREE.Vector3(1, 1, 1));
+    instanced[key].setMatrixAt(counts[key], matrix);
+    instanced[key].setColorAt(counts[key], colour.setScalar(1));
+    counts[key]++;
+    const solid = BUILDING_SOLIDS[key];
+    if (solid && solid[0] > 0) solids.add(x, z, solid[0], solid[1]);
+    return true;
+  };
+  function buildRoadside(px, pz, counts) {
+    const built = { posts: [], milestones: [], lamps: [] };
+    if (visible) {
+      const inRange = o => Math.hypot(o.x - px, o.z - pz) <= radius;
+      for (const post of roadsidePlan.posts()) {
+        if (!inRange(post)) continue;
+        if (counts.signarm + post.arms.length > BUILDINGS.signarm.cap) break;
+        const y = terrain.heightAt(post.x, post.z) - 0.05;
+        if (!upright('signpost', post.x, y, post.z, post.yaw, counts)) break;
+        post.arms.forEach((arm, i) => upright('signarm', post.x, y + 2.08 - i * 0.26, post.z, arm.yaw, counts));
+        built.posts.push(post);
+      }
+      for (const m of roadsidePlan.milestones()) {
+        if (!inRange(m)) continue;
+        if (!upright('milestone', m.x, terrain.heightAt(m.x, m.z) - 0.05, m.z, m.yaw, counts)) break;
+        built.milestones.push(m);
+      }
+      for (const s of settlements) {
+        if (Math.hypot(s.wx - px, s.wz - pz) > radius) continue;
+        for (const lamp of roadsidePlan.lampsFor(s)) {
+          const y = terrain.heightAt(lamp.x, lamp.z) - 0.05;
+          // the bracket reaches out over the verge toward the road (+Z of the lamp is its yaw)
+          const yaw = lamp.face;
+          if (!upright('lamppost', lamp.x, y, lamp.z, yaw, counts)) break;
+          upright('lampglow', lamp.x, y, lamp.z, yaw, counts);
+          built.lamps.push({ ...lamp, y, glow: [lamp.x + Math.sin(yaw) * 0.5, y + 2.8, lamp.z + Math.cos(yaw) * 0.5] });
+        }
+      }
+    }
+    roadsideBuilt = built;
+  }
+
   function rebuild(px, pz) {
     rebuilds++;
     buildRibbons(px, pz);
@@ -1908,6 +2073,33 @@ export function createFeatures(scene, terrain, opts = {}) {
 
   return {
     rivers, roads, bridges, settlements, instanced, riverMesh, roadMesh, streetMesh, bridgeMesh, solids,
+    /** R27 M8 — the roadside planner (js/roadside.js) and what the last rebuild stood up from it. */
+    roadside: roadsidePlan,
+    get roadsideBuilt() { return roadsideBuilt; },
+    /** R27 M8 — the signpost within `reach` metres of a point (for E), or null. */
+    signpostNear(x, z, reach = 3.5) {
+      let best = null, bd = reach;
+      for (const p of roadsideBuilt.posts) { const d = Math.hypot(p.x - x, p.z - z); if (d < bd) { bd = d; best = p; } }
+      return best;
+    },
+    /**
+     * R27 M8 — the lamps within `r` metres as js/light.js sources, at the lowest priority there is
+     * (`tier: -1`): they get a pool light only after every spell, torch and brazier in range has one.
+     */
+    lampSources(x, z, r = 200) {
+      if (lampNight < 0.2) return [];
+      const out = [];
+      for (const l of roadsideBuilt.lamps) {
+        if (Math.hypot(l.x - x, l.z - z) > r) continue;
+        out.push({ x: l.glow[0], y: l.glow[1], z: l.glow[2], color: '#ffc877', range: 16, intensity: 1.3 * lampNight, tier: -1, flicker: false, lamp: true });
+      }
+      return out;
+    },
+    /** R27 M8 — 0 day … 1 night: the lamps' glass glows with it (one material colour, no rebuild). */
+    setNight(n) {
+      lampNight = Math.max(0, Math.min(1, n || 0));
+      instanced.lampglow.material.color.setScalar(0.28 + 0.72 * lampNight);
+    },
     /** A walled settlement's entrances (see `gateRecords`), or [] for one with no wall. */
     gatesOf: id => gateRecords.get(id) || [],
     /** A walled settlement's ring as it was built: `{ cx, cz, r, segments, kinds, gates }`. */
@@ -2015,7 +2207,8 @@ export function createFeatures(scene, terrain, opts = {}) {
 
     stats() {
       let buildings = 0, drawCalls = 0;
-      for (const key of BUILDING_KEYS) { buildings += instanced[key].count; if (instanced[key].count) drawCalls++; }
+      for (const key of BUILDING_KEYS) { buildings += instanced[key].count; if (instanced[key].count && instanced[key].visible) drawCalls++; }
+      if (footingMesh.count) drawCalls++;   // R27 M8 — every footing is one call
       if (riverMesh.visible) drawCalls++;
       if (roadMesh.visible) drawCalls++;
       return {
@@ -2031,7 +2224,7 @@ export function createFeatures(scene, terrain, opts = {}) {
         const m = instanced[key];
         scene.remove(m); m.geometry.dispose(); m.material.dispose(); m.dispose();
       }
-      for (const m of [riverMesh, roadMesh, streetMesh, bridgeMesh]) { scene.remove(m); m.geometry.dispose(); m.material.dispose(); }
+      for (const m of [riverMesh, roadMesh, streetMesh, bridgeMesh, footingMesh]) { scene.remove(m); m.geometry.dispose(); m.material.dispose(); }
     },
   };
 }

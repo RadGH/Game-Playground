@@ -248,8 +248,12 @@ test('the horse and every vehicle you own are one choice, and H honours it', asy
   const after = rideable(out.after);
   expect(after.length).toBe(2);
   expect(after[1].name).toMatch(/Scrambler|Motorcycle/i);
-  // the note has to say what each is FOR — the horse is the one that climbs
-  expect(after[0].note).toMatch(/climbs anything/);
+  // the note has to say what each is FOR — the horse is the one that climbs, and R27 M8: how
+  // steep, which is the cliff rule's own number (js/ground.js), steeper than the motorcycle's
+  const climb = n => Number((/up to (\d+)°/.exec(n) || [])[1]);
+  const rule = await page.evaluate(async () => (await import('/prototypes/farhold/js/ground.js')).climbDegrees(0));
+  expect(climb(after[0].note)).toBeGreaterThanOrEqual(rule);
+  expect(climb(after[0].note)).toBeGreaterThan(climb(after[1].note));
   expect(after[1].note).toMatch(/m\/s/);
   // …and every row is in the same unit, which is what the two dropdowns used to disagree about
   for (const r of out.after) expect(r.note).toMatch(/m\/s/);

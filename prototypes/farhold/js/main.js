@@ -121,6 +121,8 @@ import {
 } from './shipyard.js';
 import { createInput, createController, KEY_HELP } from './player.js';
 import { EnemyField, makeActor, setActorAnim } from './actors.js';
+import { readSign } from './roadside.js';   // R27 M8
+import { climbDegrees, mountSure } from './ground.js';   // R27 M8 — the mount row states the cliff rule
 import { Rpg, heldLookFor, offhandLookFor, attuneWeapon, elementOf, statusOf, CAST_ELEMENTS, bandForPlanet, PLANET_BANDS, setLevelCap, levelCap, xpForLevel, eventXp, itemScore, displayName } from './rpg.js';
 import { Hud, SLOT_LABELS, MINIMAP_NEAR } from './hud.js';
 // R17: one rule for printing a quantity of a material. Ore, timber and clay are all floats —
@@ -1910,7 +1912,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       const options = mounts.map(m => ({
         key: `mount:${m.id}`,
         name: displayName(m),
-        note: paceNote((m.speed ?? 1.6) * walk, 'climbs anything'),
+        // R27 M8 — what it climbs is the cliff rule's own number (js/ground.js), not a boast
+        note: paceNote((m.speed ?? 1.6) * walk, `climbs slopes up to ${climbDegrees(mountSure(m))}°`),
       }));
       for (const key of player.vehicles?.owned?.ground || []) {
         const v = GROUND_VEHICLES[key];
@@ -1918,7 +1921,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         options.push({
           key,
           name: v.name,
-          note: paceNote(v.speed, v.maxSlope < 0.35 ? 'flat ground only' : 'takes rough ground'),
+          note: paceNote(v.speed, `climbs slopes up to ${Math.round(Math.atan(v.maxSlope ?? 0) * 180 / Math.PI)}°`),   // R27 M8
         });
       }
       options.push({ key: 'foot', name: '— on foot —', note: paceNote(walk, 'nothing in the mount slot') });
@@ -1927,7 +1930,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         : (worn ? `mount:${worn.id}` : 'foot');
       const hint = options.length <= 2
         ? 'A motorcycle, a car or a truck is built at an assembler and appears in this list. '
-          + 'All three are faster than a horse; only a horse climbs anything steep.'
+          + `All three are faster than a horse; a horse climbs slopes up to ${climbDegrees(0)}°, steeper than any of them.`   // R27 M8
         : '';
       return { options, active: options.some(o => o.key === active) ? active : 'foot', hint };
     },
@@ -5381,6 +5384,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
        */
       const met = roadFolk.near(control.x, control.z, WANDERER_TALK)[0];
       if (met) return { kind: 'wanderer', met };
+      const sign = features?.signpostNear?.(control.x, control.z);   // R27 M8
+      if (sign) return { kind: 'signpost', sign };
       const mark = hud.here && holdings.landmarksIn(hud.here.id)
         .find(l => l.state !== 'done' && Math.hypot(l.x - control.x, l.z - control.z) < 14);
       if (mark) return { kind: 'landmark', mark };
@@ -8270,6 +8275,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         else if (it.kind === 'dungeon') enterDungeon(it.gate);
         else if (it.kind === 'leave') leaveDungeon();
         else if (it.kind === 'wanderer') meetOnTheRoad(it.met);
+        else if (it.kind === 'signpost') hud.log(readSign(it.sign, { settlements: features.settlements, zoneOf: (x, z) => zones.at(x, z), knowsZone: id => map.knows?.(id) }));   // R27 M8
         else if (it.kind === 'gate') { const r = folk.knock(it, player); hud.log(r.text, r.ok ? 'good' : 'bad'); hud.setPlayer(player); } // R27 M4
         else if (it.kind === 'landmark') atLandmark(it.mark);
         // the town's notice board: the one place work is taken from now
@@ -9473,9 +9479,11 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         bodies.push({ key: (e.__torchKey ??= String(e.id ?? Math.random())), actor: e.actor, kind: 'enemy' });
       }
       nightLights.update(bodies, dungeon ? 1 : night, state.elapsed);
+      features.setNight?.(night);   // R27 M8 — the road lamps' glass
     }
     light.setSources([
-      ...(dungeon ? dungeon.lights() : [...chests.lights(), ...gates.lights(), ...sites.lights(), ...(build.lights?.() || [])]),
+      ...(dungeon ? dungeon.lights() : [...chests.lights(), ...gates.lights(), ...sites.lights(), ...(build.lights?.() || []),
+        ...(features.lampSources?.(control.x, control.z) || [])]),   // R27 M8 — tier -1: lit last
       ...nightLights.sources(), ...(spellfx.lights?.() || []),
     ]);
     light.setRange(player.equipment.light?.range || null);
@@ -9498,6 +9506,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         : near.kind === 'dungeon' ? `<b>E</b> go down into ${near.gate.name}${near.gate.zone ? ` · level ${near.gate.zone.minLevel}–${near.gate.zone.maxLevel}` : ''}`
         : near.kind === 'leave' ? '<b>E</b> climb back out'
         : near.kind === 'wanderer' ? `<b>E</b> speak to ${near.met.name}, ${near.met.kindName.toLowerCase()}`
+        : near.kind === 'signpost' ? '<b>E</b> read the signpost'   // R27 M8
         : near.kind === 'landmark' ? `<b>E</b> ${near.mark.steps ? 'work on' : 'look at'} ${near.mark.name}`
           + (near.mark.steps ? ` · ${near.mark.done}/${near.mark.steps}` : '')
         /**

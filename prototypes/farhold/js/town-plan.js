@@ -62,6 +62,13 @@ export const BUILDING_INFO = {
   /** The town's notice board — a real object you walk up to, not the whole settlement. */
   noticeboard: { cap: 60, solid: [0.9, 2.4], from: 1, role: null },
 
+  // ---- R27 M8: the roadside (js/roadside.js) — signposts and their arms, milestones, lamps
+  signpost: { cap: 160, solid: [0.35, 2.4], from: 0, role: null },
+  signarm: { cap: 640, solid: [0, 0], from: 0, role: null },
+  milestone: { cap: 120, solid: [0.4, 0.9], from: 0, role: null },
+  lamppost: { cap: 900, solid: [0.25, 3.3], from: 0, role: null },
+  lampglow: { cap: 900, solid: [0, 0], from: 0, role: null },
+
   // ---- R27 M3: town edges by culture (see `edgeKey` below and proctown/js/buildkit.js)
   ...edgeCatalogue(),
 };

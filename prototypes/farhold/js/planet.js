@@ -375,7 +375,107 @@ function makePathIndex(paths, bucket = 220, padOverride = null) {
       if (!best) return null;
       return { dist: Math.sqrt(bestD2), path: best.seg.path, i: best.seg.i, t: best.t };
     },
+    /**
+     * R27 M8 — the nearest point, and the nearest point on a DIFFERENT path (or null). One pass
+     * over the same bucket, for `heightAt`'s seam between two roads.
+     */
+    nearestTwo(x, z) {
+      const bx = Math.floor(x / bucket), bz = Math.floor(z / bucket);
+      const list = buckets.get(key(bx, bz));
+      if (!list) return null;
+      let a = null, aD2 = Infinity, b = null, bD2 = Infinity;
+      for (const seg of list) {
+        const dx = seg.x2 - seg.x1, dz = seg.z2 - seg.z1;
+        const len2 = dx * dx + dz * dz;
+        let t = len2 > 0 ? ((x - seg.x1) * dx + (z - seg.z1) * dz) / len2 : 0;
+        t = t < 0 ? 0 : t > 1 ? 1 : t;
+        const px = seg.x1 + dx * t, pz = seg.z1 + dz * t;
+        const d2 = (x - px) * (x - px) + (z - pz) * (z - pz);
+        if (d2 < aD2) {
+          if (a && a.seg.path !== seg.path) { b = a; bD2 = aD2; }
+          a = { seg, t }; aD2 = d2;
+        } else if (d2 < bD2 && seg.path !== a.seg.path) { b = { seg, t }; bD2 = d2; }
+      }
+      if (!a) return null;
+      if (b && b.seg.path === a.seg.path) b = null;
+      return [
+        { dist: Math.sqrt(aD2), path: a.seg.path, i: a.seg.i, t: a.t },
+        b ? { dist: Math.sqrt(bD2), path: b.seg.path, i: b.seg.i, t: b.t } : null,
+      ];
+    },
   };
+}
+
+/**
+ * R27 M8 — THE SWITCHBACK CACHE.
+ *
+ * M5's fold pass (js/road-fold.js) is a real A* per steep road and costs ~150 ms of world
+ * generation on the user's world at full size (106 -> 280 ms for `makeTerrain`). Its answer
+ * depends only on the world (the map and its seed), the metres a cell is, the terrain knobs and the
+ * roads as they come out of the merge, so the answer is kept: in memory for this session, and in
+ * `localStorage` so a reload of the same world skips it too. The key is a hash of exactly those
+ * inputs plus `FOLD_CACHE_VERSION`, which is bumped whenever js/road-fold.js changes what it
+ * answers — a stale entry can then never be read, only ignored. A test that passes `foldLog` (to
+ * watch the search) never touches the cache.
+ */
+export const FOLD_CACHE_VERSION = 1;
+const foldMemo = new Map();
+const FOLD_LS_PREFIX = 'farhold.folds.';
+function hashText(s, h = 2166136261) {
+  for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619);
+  return h >>> 0;
+}
+function foldCacheKey(world, opts, paths) {
+  let h = hashText(`${FOLD_CACHE_VERSION}|${M_PER_CELL}|${world.width}x${world.height}|${JSON.stringify(opts || {})}`);
+  const el = world.elevation;
+  if (el) for (let i = 0; i < el.length; i += 97) h = Math.imul(h ^ Math.round(el[i] * 1e6), 16777619);
+  for (const p of paths) {
+    let s = `${p.id}:${p.klass}:${p.points.length}:`;
+    for (const q of p.points) s += `${q[0].toFixed(2)},${q[1].toFixed(2)};`;
+    h = hashText(s, h);
+  }
+  return `${M_PER_CELL}.${h.toString(36)}`;
+}
+function foldCacheGet(key) {
+  if (foldMemo.has(key)) return foldMemo.get(key);
+  try {
+    const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(FOLD_LS_PREFIX + key) : null;
+    if (raw) { const v = JSON.parse(raw); foldMemo.set(key, v); return v; }
+  } catch { /* storage off or full: fold again */ }
+  return null;
+}
+function foldCachePut(key, value) {
+  foldMemo.set(key, value);
+  try {
+    if (typeof localStorage === 'undefined') return;
+    // keep the last few worlds only — a fold set is tens of kilobytes
+    const mine = [];
+    for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k?.startsWith(FOLD_LS_PREFIX)) mine.push(k); }
+    for (const k of mine.slice(0, Math.max(0, mine.length - 3))) localStorage.removeItem(k);
+    localStorage.setItem(FOLD_LS_PREFIX + key, JSON.stringify(value));
+  } catch { /* storage off or full: the memory copy still serves this session */ }
+}
+/** For the tests: forget every cached fold (memory only; `localStorage` too when asked). */
+export function clearFoldCache({ storage = false } = {}) {
+  foldMemo.clear();
+  if (!storage) return;
+  try {
+    const mine = [];
+    for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k?.startsWith(FOLD_LS_PREFIX)) mine.push(k); }
+    for (const k of mine) localStorage.removeItem(k);
+  } catch { /* nothing to clear */ }
+}
+/** A road point is [x, z] plus whatever flags the fold put on it (`fold`, …). */
+function packPoint(q) {
+  const extra = {};
+  let any = false;
+  for (const k of Object.keys(q)) if (k !== '0' && k !== '1') { extra[k] = q[k]; any = true; }
+  return any ? [q[0], q[1], extra] : [q[0], q[1]];
+}
+function unpackPoint(r) {
+  const q = [r[0], r[1]];
+  if (r[2]) Object.assign(q, r[2]);
+  return q;
 }
 
 /**
@@ -1055,11 +1155,27 @@ export function makeTerrain(world, planet = null, opts = {}) {
   }
   let roadFolds = 0;
   const foldT0 = performance.now();
-  for (const path of roadPaths) {
+  // R27 M8 — the fold result is a pure function of the world and the knobs; the second build of
+  // the same world (a reload, a load, landing back) takes it from the cache (see `foldCacheKey`)
+  const foldKey = opts.foldLog ? null : foldCacheKey(world, opts, roadPaths);
+  const foldHit = foldKey ? foldCacheGet(foldKey) : null;
+  if (foldHit) {
+    for (const path of roadPaths) {
+      const got = foldHit[String(path.id)];
+      if (!got) continue;
+      path.points = got.points.map(unpackPoint);
+      if (got.folds) { path.folded = got.folds; roadFolds += got.folds; refolded.add(path); }
+    }
+  }
+  const foldStore = foldKey && !foldHit ? {} : null;
+  if (!foldHit) for (const path of roadPaths) {
     const got = foldClimbs(path.points, {
       heightAt: foldGround, blocked: foldBlockedFor(path), pinned: foldPins.get(path), pinSlack: 2 * foldScale, step: foldStep, window: foldWindow, mergeGap: 160 * foldScale,
       corridor: foldCells * M_PER_CELL, corridors: [Math.min(foldCells, opts.foldNarrowCells ?? 0.5), foldCells].map(c => c * M_PER_CELL), power: opts.foldPower ?? 4, greed: opts.foldGreed ?? 1, maxLegs: opts.foldLegs ?? 6, log: opts.foldLog ? (opts.foldLog[path.id] = []) : null,
     });
+    // R27 M8 — kept when the fold changed the line OR marked a climb it could not fold as steep
+    // (that flag is written onto the points in place, even with no fold)
+    if (foldStore && (got.folds || got.steep)) foldStore[String(path.id)] = { folds: got.folds, points: got.points.map(packPoint) };
     if (got.folds) {
       path.points = got.points; path.folded = got.folds; roadFolds += got.folds;
       // the next road's fold has to keep off THIS road's new legs, not the line they replaced
@@ -1068,6 +1184,7 @@ export function makeTerrain(world, planet = null, opts = {}) {
     }
     if (opts.foldLog) (opts.foldLog.stats ||= []).push([path.id, got.tried, got.grid, got.expanded]);
   }
+  if (foldStore) foldCachePut(foldKey, foldStore);   // R27 M8
   const foldMs = performance.now() - foldT0;
   /**
    * A merge junction is filed as a SEGMENT INDEX on its trunk, and a fold renumbers the trunk's
@@ -1871,7 +1988,12 @@ export function makeTerrain(world, planet = null, opts = {}) {
           }
           if (k < 0) {
             const at = edge + side * ease * 4;
-            if (at <= 0.35 || at >= L - 0.35) continue;
+            /**
+             * R27 M8 — AND A ROAD THAT ENDS INSIDE THE EASE ENDS LEVEL. There is no road past the
+             * end to ramp over, and skipping the shoulder left the tip at its old height: 0.66 m
+             * over the last metre of road 11 on seed 25392, a step at the mouth of the junction.
+             */
+            if (at <= 0.35 || at >= L - 0.35) { if (Math.abs(edge - (side < 0 ? 0 : L)) > 0.35) shoulders.push({ at: side < 0 ? -1e-3 : L + 1e-3, y }); continue; }
             k = vertexAt(path, at);
           }
           shoulders.push({ at: arcs(path.points)[k], y: path.surface[k] });
@@ -1955,6 +2077,194 @@ export function makeTerrain(world, planet = null, opts = {}) {
   }
   if (opts.landJunctions !== false) landJunctions(roadPaths);
   const fordList = fordDips(roadPaths);   // R27 M6
+  const roadMeets = opts.conformRoads === false ? { runs: 0, lifts: 0 } : conformOverlaps(roadPaths);   // R27 M8
+
+  /**
+   * R27 M8 — WHERE TWO CARRIAGEWAYS OVERLAP, THEY ARE ONE SURFACE.
+   *
+   * M5's landings level every filed junction, but only over the trunk's own width either side of
+   * the junction point (`dB` on the branch). A branch that comes in at a shallow angle runs INSIDE
+   * the trunk's carriageway for much longer than that — 10-20 m before it reaches the junction — at
+   * its own graded height, and `heightAt` takes whichever road is nearer, so the ground has a step
+   * wherever "nearer" changes hands. Measured on seed 7 at Super tiny: 0.83 m (a trail onto road
+   * 14) and 0.47 m (road 51 onto 54). And where the branch is held up by water (a floor) the
+   * landing was skipped outright (`onBridge`), leaving 1.37 m at Stonecrown (road 18 onto 42) —
+   * the step M7's cliff rule had to excuse.
+   *
+   * So every road is walked a metre at a time wherever another road is close enough for the two
+   * carriageways to touch (`A.half + B.half + 0.25`); the verges beyond are `heightAt`'s seam. Of any two, the one that OUTRANKS (class,
+   * then the trunk of a join between them, then the longer) keeps its surface and the other takes
+   * it: the overlapping stretch gets a vertex every two metres at the other road's height, and a
+   * shoulder vertex eases it back to its own height, adding 3% of grade at most. Where the lower road's FLOOR
+   * (water it must clear) stands above the other road there, the meeting height is the floor, and
+   * it is the higher-ranked road that comes up to it over a landing with the same easing. A
+   * bridge deck is left alone (a road joining mid-bridge is still round 17's `onBridge` case), and
+   * so are fords.
+   */
+  function conformOverlaps(paths) {
+    const rank = p => (p.klass === 'highway' ? 3 : p.klass === 'road' ? 2 : 1);
+    const trunkOf = new Map();
+    for (const p of paths) for (const j of p.joins || []) { if (!trunkOf.has(p)) trunkOf.set(p, new Set()); trunkOf.get(p).add(j.trunk); }
+    const outranks = (b, a) => rank(b) !== rank(a) ? rank(b) > rank(a)
+      : trunkOf.get(a)?.has(b) ? true : trunkOf.get(b)?.has(a) ? false
+        : b.points.length !== a.points.length ? b.points.length > a.points.length : String(b.id) < String(a.id);
+    let maxHalf = 0;
+    for (const p of paths) maxHalf = Math.max(maxHalf, p.half || 0);
+    const arcsOf = path => {
+      const S = [0];
+      for (let k = 1; k < path.points.length; k++) S.push(S[k - 1] + Math.hypot(path.points[k][0] - path.points[k - 1][0], path.points[k][1] - path.points[k - 1][1]));
+      return S;
+    };
+    const at = (path, S, s) => {
+      let k = 0;
+      while (k + 1 < S.length - 1 && S[k + 1] < s) k++;
+      const u = clamp((s - S[k]) / ((S[k + 1] - S[k]) || 1), 0, 1);
+      return { k, u };
+    };
+    const val = (arr, k, u) => (arr ? arr[k] + ((arr[k + 1] ?? arr[k]) - arr[k]) * u : null);
+    const insertAt = (path, S, s) => {
+      const { k, u } = at(path, S, s);
+      if (Math.abs(S[k] - s) < 0.3) return k;
+      if (Math.abs(S[k + 1] - s) < 0.3) return k + 1;
+      const a = path.points[k], b = path.points[k + 1];
+      path.points.splice(k + 1, 0, Object.assign([a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u], { landing: true, steep: a.steep && b.steep }));
+      for (const key of ['surface', 'lift', 'floor', 'ground']) {
+        const arr = path[key];
+        if (!arr) continue;
+        const v = arr[k] === -Infinity || arr[k + 1] === -Infinity ? Math.max(arr[k], arr[k + 1]) : arr[k] + (arr[k + 1] - arr[k]) * u;
+        arr.splice(k + 1, 0, v);
+      }
+      if (path.wet) path.wet.splice(k + 1, 0, path.wet[k] || path.wet[k + 1]);
+      S.splice(k + 1, 0, s);
+      return k + 1;
+    };
+    /** Set [from, to] to follow `height(s)`, with a vertex every `every` metres, eased out both sides. */
+    const follow = (path, from, to, height, every = 2) => {
+      for (const key of ['surface', 'lift', 'floor', 'ground']) if (path[key]) path[key] = Array.from(path[key]);
+      const S = arcsOf(path), L = S[S.length - 1];
+      const hFrom = height(from), hTo = height(to);
+      // 3% of extra grade at most on top of whatever the road already climbs there (a landing's own
+      // ramp may already be adding some: the junction-fade test allows 8 points over the ground)
+      const easeFor = (h, s) => { const { k, u } = at(path, S, s); return Math.max(10, Math.abs(h - val(path.surface, k, u)) / 0.03); };
+      const eLo = easeFor(hFrom, from), eHi = easeFor(hTo, to);
+      // each ramp runs to the first EXISTING vertex at least that far out, so it is spread over the
+      // whole of the road's own segment there rather than bent in the middle of it; a road that ends
+      // inside the ease ends level (there is no road beyond to ramp over)
+      let kLo = -1, kHi = -1;
+      for (let k = 0; k < S.length; k++) if (S[k] <= from - eLo) kLo = k;
+      for (let k = S.length - 1; k >= 0; k--) if (S[k] >= to + eHi) kHi = k;
+      const sLo = kLo >= 0 ? S[kLo] : 0, sHi = kHi >= 0 ? S[kHi] : L;
+      const yLo = kLo >= 0 ? path.surface[kLo] : hFrom;
+      const yHi = kHi >= 0 ? path.surface[kHi] : hTo;
+      const marks = [from, to];
+      for (let s = from; s < to; s += every) marks.push(s);
+      for (const m of marks) if (m > 0.35 && m < L - 0.35) insertAt(path, S, m);
+      for (let k = 0; k < S.length; k++) {
+        const sk = S[k];
+        if (path.points[k].ford) continue;
+        let want = null;
+        if (sk >= from - 0.35 && sk <= to + 0.35) want = height(clamp(sk, from, to));
+        else if (sk < from && (kLo < 0 || sk > sLo)) want = kLo < 0 ? hFrom : lerp(yLo, hFrom, (sk - sLo) / (from - sLo || 1));
+        else if (sk > to && (kHi < 0 || sk < sHi)) want = kHi < 0 ? hTo : lerp(hTo, yHi, (sk - to) / (sHi - to || 1));
+        if (want !== null) path.surface[k] = Math.max(want, path.floor?.[k] ?? -Infinity);
+      }
+    };
+    let runs = 0, lifts = 0;
+    for (let pass = 0; pass < 4; pass++) {
+      const index = makePathIndex(paths, 220, maxHalf * 2 + 2);
+      const nearestOther = (x, z, self) => {
+        const list = index.buckets.get(index.key(Math.floor(x / index.bucket), Math.floor(z / index.bucket)));
+        if (!list) return null;
+        let best = null;
+        for (const seg of list) {
+          if (seg.path === self || !seg.path.surface) continue;
+          const dx = seg.x2 - seg.x1, dz = seg.z2 - seg.z1, l2 = dx * dx + dz * dz;
+          let t = l2 > 0 ? ((x - seg.x1) * dx + (z - seg.z1) * dz) / l2 : 0;
+          t = t < 0 ? 0 : t > 1 ? 1 : t;
+          const d = Math.hypot(x - seg.x1 - dx * t, z - seg.z1 - dz * t);
+          if (!best || d < best.d) best = { d, path: seg.path, i: seg.i, t };
+        }
+        return best;
+      };
+      const requests = [];
+      for (const A of paths) {
+        if (!A.surface || A.points.length < 2) continue;
+        const S = arcsOf(A), L = S[S.length - 1];
+        // one run at a time of samples where A overlaps a road that outranks it
+        let run = null;
+        const close = () => { if (run && run.to - run.from >= 0) requests.push(run); run = null; };
+        for (let k = 0; k + 1 < A.points.length; k++) {
+          const a = A.points[k], b = A.points[k + 1];
+          const len = S[k + 1] - S[k];
+          const mid = nearestOther((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, A);
+          if (!mid || mid.d - len / 2 > A.half + maxHalf + 0.25) { close(); continue; }
+          const n = Math.max(1, Math.ceil(len));
+          for (let q = 0; q <= n; q++) {
+            if (q === n && k + 2 < A.points.length) break;         // the next segment starts here
+            const u = q / n, x = a[0] + (b[0] - a[0]) * u, z = a[1] + (b[1] - a[1]) * u, s = S[k] + len * u;
+            const hit = nearestOther(x, z, A);
+            const B = hit?.path;
+            const lap = B && hit.d < A.half + B.half + 0.25 && outranks(B, A)
+              // a bridge deck is left alone — unless this road is a deck there as well (two
+              // causeways meeting over the same water), when they are one surface like any other
+              && (!((B.lift?.[hit.i] ?? 0) > 0.5 && (B.lift?.[hit.i + 1] ?? 0) > 0.5) || ((A.lift?.[k] ?? 0) > 0.5 && (A.lift?.[k + 1] ?? 0) > 0.5))
+              && !a.ford && !b.ford && !B.points[hit.i].ford && !B.points[hit.i + 1]?.ford;
+            if (!lap) { close(); continue; }
+            if (run && run.B !== B) close();
+            if (!run) run = { A, B, from: s, to: s, samples: [] };
+            run.to = s;
+            const yB = val(B.surface, hit.i, hit.t);
+            const fA = val(A.floor, k, u) ?? -Infinity;
+            run.samples.push({ s, y: Math.max(yB, Number.isFinite(fA) ? fA : -Infinity), yB, hit });
+          }
+        }
+        close();
+      }
+      let moved = false;
+      for (const r of requests) {
+        const { A, B } = r;
+        const worst = Math.max(...r.samples.map(q => Math.abs(q.y - val(A.surface, ...Object.values(at(A, arcsOf(A), q.s))))));
+        const up = r.samples.filter(q => q.y > q.yB + 0.05);
+        if (worst < 0.05 && !up.length) continue;
+        moved = true;
+        const sam = r.samples.slice().sort((p, q) => p.s - q.s);
+        const height = s => {
+          let j = 0;
+          while (j + 1 < sam.length && sam[j + 1].s < s) j++;
+          const p = sam[j], q = sam[Math.min(sam.length - 1, j + 1)];
+          return q.s > p.s ? lerp(p.y, q.y, clamp((s - p.s) / (q.s - p.s), 0, 1)) : p.y;
+        };
+        follow(A, r.from, r.to, height);
+        if (opts.conformLog) opts.conformLog.push({ pass, A: A.id, B: B.id, from: r.from, to: r.to, worst, up: up.length });
+        runs++;
+        // A's floor holds it above B there: B comes up to meet it over its own landing
+        if (up.length) {
+          const SB = arcsOf(B);
+          const sBs = up.map(q => SB[q.hit.i] + (SB[q.hit.i + 1] - SB[q.hit.i]) * q.hit.t);
+          const top = Math.max(...up.map(q => q.y));
+          const lo = Math.min(...sBs) - (A.half + 1), hi = Math.max(...sBs) + (A.half + 1);
+          follow(B, Math.max(0, lo), Math.min(SB[SB.length - 1], hi), () => top);
+          lifts++;
+        }
+      }
+      if (!moved) break;
+    }
+    // the new vertices renumbered some roads, so every join finds its segment again (as the
+    // landings do): the junction list and the tests read a join's height off `trunk.surface[i]`
+    if (runs) for (const path of paths) for (const join of path.joins || []) {
+      const pts = join.trunk.points;
+      let best = null;
+      for (let k = 0; k + 1 < pts.length; k++) {
+        const [ax, az] = pts[k], [bx, bz] = pts[k + 1];
+        const vx = bx - ax, vz = bz - az, l2 = vx * vx + vz * vz;
+        const t = l2 > 0 ? clamp(((join.point[0] - ax) * vx + (join.point[1] - az) * vz) / l2, 0, 1) : 0;
+        const d = Math.hypot(ax + vx * t - join.point[0], az + vz * t - join.point[1]);
+        if (!best || d < best.d) best = { d, k, t };
+      }
+      if (best) { join.i = best.k; join.t = best.t; }
+    }
+    return { runs, lifts };
+  }
 
   /**
    * R27 M6 — LAY A FORDED ROAD DOWN INTO THE WATER.
@@ -2178,6 +2488,8 @@ export function makeTerrain(world, planet = null, opts = {}) {
    * instead of from `half` — and a verge is what a real road has anyway.
    */
   const roadVerge = opts.roadVerge ?? 2.5;
+  /** R27 M8 — how wide the mixed seam is where two roads' ground meets (see `heightAt`). */
+  const ROAD_SEAM = opts.roadSeam ?? 3;
   /**
    * ROUND 16 — the quay, and how square a crossing has to be before it counts as one.
    *
@@ -2280,15 +2592,35 @@ export function makeTerrain(world, planet = null, opts = {}) {
     let height = naturalHeightAt(x, z);
 
     // a road flattens the ground it runs over, and its shoulders blend back into the land
-    const road = roadIndex.nearest(x, z);
+    const pair = roadIndex.nearestTwo(x, z);
+    const road = pair ? pair[0] : null;
     let deck = null;
     let verge = 0;
+    let seam = null;   // R27 M8 — the second road and its share, where two roads' ground meets
     if (road && road.dist < road.path.reach) {
+      const natural = height;
       const graded = surfaceOfHit(road);
       deck = graded;
       verge = road.path.half + roadVerge;
       const t = smoothstep(verge, road.path.reach, road.dist);   // 0 on the road, 1 off it
       height = lerp(graded, height, t);
+      /**
+       * R27 M8 — THE SEAM BETWEEN TWO ROADS. Where two roads' reaches overlap, the ground used to
+       * belong to whichever was nearer, so it jumped by the difference of their two blends on the
+       * line where "nearer" changed hands: a step wherever two roads meet on a slope at an angle
+       * (0.28 m at seed 25392's road 10 / 13 junction, with both surfaces made to agree on their own
+       * centre lines by `conformOverlaps`), and between switchback legs. Within `ROAD_SEAM` metres
+       * of that line the two blends are mixed, half and half on the line itself, so the ground is
+       * continuous there. Anywhere one road is clearly the nearer, nothing changes.
+       */
+      const other = pair[1];
+      if (other && other.dist < other.path.reach && other.dist - road.dist < ROAD_SEAM) {
+        const g2 = surfaceOfHit(other);
+        const t2 = smoothstep(other.path.half + roadVerge, other.path.reach, other.dist);
+        const w = 0.5 * (1 - smoothstep(0, ROAD_SEAM, other.dist - road.dist));
+        height = lerp(height, lerp(g2, natural, t2), w);
+        seam = { hit: other, deck: g2, w };
+      }
     }
 
     // a lake sits in its own basin
@@ -2491,12 +2823,15 @@ export function makeTerrain(world, planet = null, opts = {}) {
      * shaping pass that cannot be measured against its own absence is decoration. The verge is for
      * dry ground; the river's own bank already has an owner.
      */
-    const band = (riverSurface === null || spanned) ? verge : road.path.half;
-    if (road.dist < band + deckGrip) {
-      const t = smoothstep(band, band + deckGrip, road.dist);
-      height = Math.max(height, lerp(deck, height, t));
-    }
-    return height;
+    // R27 M8 — the clamp for each of the two roads at a seam, mixed with the seam's own share, so
+    // the deck's last word cannot put back the step the mix above took out
+    const clampTo = (hit, top, h) => {
+      const band = (riverSurface === null || spanned) ? hit.path.half + roadVerge : hit.path.half;
+      if (hit.dist >= band + deckGrip) return h;
+      return Math.max(h, lerp(top, h, smoothstep(band, band + deckGrip, hit.dist)));
+    };
+    const mine = clampTo(road, deck, height);
+    return seam ? lerp(mine, clampTo(seam.hit, seam.deck, height), seam.w) : mine;
   }
 
   // ------------------------------------------------------------- where a road really crosses a river
@@ -3096,10 +3431,18 @@ export function makeTerrain(world, planet = null, opts = {}) {
     if (!hit || hit.dist >= hit.path.reach) return 0;
     return 1 - smoothstep(hit.path.half, hit.path.reach, hit.dist);
   }
+  /**
+   * R27 M8 — THE PLAYER'S ROADS ARE A SECOND INDEX, NOT MORE `roadPaths`. js/build.js hands its lane
+   * book over with `setLaneBook`; `roadAt` takes the larger of the two answers (never the sum), so a
+   * lane laid on top of a world road is still one road. Grading, crossings and junction landings
+   * never see a lane — they run once, at world build, and a live edit must not re-run them.
+   */
+  let laneBook = null;
   function roadAt(x, z) {
     const hit = roadIndex.nearest(x, z);
-    if (!hit || hit.dist >= hit.path.reach) return 0;
-    return 1 - smoothstep(hit.path.half, hit.path.reach, hit.dist);
+    const world = !hit || hit.dist >= hit.path.reach ? 0 : 1 - smoothstep(hit.path.half, hit.path.reach, hit.dist);
+    if (!laneBook || !laneBook.count || world >= 1) return world;
+    return Math.max(world, laneBook.roadAt(x, z));
   }
 
   /**
@@ -3320,6 +3663,8 @@ export function makeTerrain(world, planet = null, opts = {}) {
     junctions: roadJunctionList,
     /** R27 M5: how many crossroads were filed, and how many overshoot stubs they cut off. */
     roadCrossroads: crossroads.count,
+    /** R27 M8: overlapping carriageways made one surface (`conformOverlaps`), and trunks lifted to a branch's floor. */
+    roadMeets,
     roadCrossStubs: crossroads.dropped,
     /** R27 M5: how many climbs were folded into switchbacks. */
     roadFolds,
@@ -3359,6 +3704,12 @@ export function makeTerrain(world, planet = null, opts = {}) {
     cliffAt, cliffCountryAt,
 
     /** The graded height of the road at a point — already lifted clear of any river. Null off-road. */
+    /** R27 M8 — the player's lane book (js/roadplan.js `createRoadBook`), read by `roadAt`. */
+    setLaneBook(book) { laneBook = book || null; },
+    /** R27 M8 — changes whenever a lane is laid, removed or loaded (the grass bake watches it). */
+    get laneVersion() { return laneBook ? laneBook.version : 0; },
+    /** R27 M8 — for the tests and the step probe: the two roads nearest a point. */
+    roadPairAt(x, z) { const p = roadIndex.nearestTwo(x, z); return p ? p.map(h => h && { id: h.path.id, dist: h.dist, surface: surfaceOfHit(h) }) : null; },
     roadSurfaceAt(x, z) {
       const hit = roadIndex.nearest(x, z);
       if (!hit || hit.dist >= hit.path.reach) return null;

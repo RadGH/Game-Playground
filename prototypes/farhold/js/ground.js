@@ -129,6 +129,20 @@ export function cliffGrade(sure = 0) {
   return Math.tan(deg * Math.PI / 180);
 }
 
+/**
+ * R27 M8 — the steepest slope, in whole degrees, a walker with this much `sure` may walk up: the
+ * number a mount's row on the character sheet prints ("climbs up to 63°"), from the same rule.
+ */
+export function climbDegrees(sure = 0) {
+  return Math.round(Math.min(CLIFF.capDeg, CLIFF.deg + Math.max(0, Math.min(0.8, sure || 0)) * CLIFF.perSure));
+}
+/** R27 M8 — one mount item's own `mountSlope`: the sum of its `cond_mountSlope` affixes. */
+export function mountSure(item) {
+  let v = 0;
+  for (const a of item?.affixes || []) if (a?.stat === 'cond_mountSlope') v += Number(a.value) || 0;
+  return Math.max(0, Math.min(0.8, v));
+}
+
 /** How steep the ground is here, measured the way the cliff rule measures it. */
 export const steepAt = (terrain, x, z) => terrain.slopeAt(x, z, CLIFF.sample);
 

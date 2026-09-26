@@ -14,6 +14,11 @@
   "movesets",
   "enemies",
   "bindings",
-  "classes"
+  "classes",
+  "items",
+  "affixes",
+  "loot",
+  "shops",
+  "difficulty"
  ]
 }

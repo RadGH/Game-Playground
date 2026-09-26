@@ -32,8 +32,16 @@ export function tickGame(game, intent, view) {
     stepStatuses(game, p, DT);
     if (p.hurtT > 0) p.hurtT -= DT; if (p.invuln > 0) p.invuln -= DT;
   }
+  if (game.things) game.things.step();
   // exits: touching an exit rect asks main.js to change room (it loads the next room's JSON)
   if (p && !game.pendingExit && !p.dead) for (const x of game.room.exits) { const [rx, ry, rw, rh] = x.rect; if (p.x + 3 > rx && p.x - 3 < rx + rw && p.y > ry && p.y - p.h < ry + rh && !(x.requires && !game.flags[x.requires])) { game.pendingExit = x; break; } }
+  // interaction: nearest interactable gets a prompt; E acts (hold E for valves / cranks)
+  if (p && game.things && !p.dead) {
+    const T = game.things.interactTarget(p);
+    game.prompt = T ? { x: T.x, y: T.y - (T.def.rect ? T.def.rect[3] : 12), text: verbFor(T), key: 'E' } : null;
+    if (T && intent.pressed?.interact) { const r = game.things.interact(T, false); if (r?.refused) game.prompt.refused = true; }
+    else if (T && intent.interact) game.things.interact(T, true);
+  }
   for (const s of game.systems || []) s(game, intent);
   stepAI(game);
   stepSpells(game);
@@ -64,4 +72,14 @@ export function tickGame(game, intent, view) {
   game.ripples.step();
   if (game.lightGrid && game.tick % 4 === 0) { if (game.tick % 60 === 0) game.lightGrid.rebuildOpacity(); game.lightGrid.update(collectLights(game)); }
   game.bus.flush();
+}
+
+function verbFor(T) {
+  switch (T.t) {
+    case 'lever': return T.locked ? 'Locked' : 'Pull lever'; case 'valve': return 'Turn wheel (hold)'; case 'door': return T.latched ? 'Close' : 'Open';
+    case 'lamp_post': return T.lit ? 'Rest' : 'Light the lamp-post'; case 'rekindle': return 'Rekindle this room'; case 'chest': return 'Open';
+    case 'npc': return 'Talk'; case 'shopkeeper': return 'Trade'; case 'sign': return 'Read'; case 'lift': return T.def.crank ? 'Crank (hold)' : 'Call lift';
+    case 'crate': return 'Push'; case 'oil_barrel': return T.leak > 0 ? 'Refuel' : 'Oil barrel'; case 'great_lamp': return T.lit ? 'The Lamp burns' : 'Relight the Great Lamp'; case 'bell': return 'Ring';
+    case 'lamp_socket': return T.lit ? 'Lit' : 'Light'; default: return 'Use';
+  }
 }

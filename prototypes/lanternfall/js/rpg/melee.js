@@ -80,7 +80,7 @@ function hitWith(game, p, mv) {
   }
   // cells: heavy breaks soft cells; the lantern touches cells with the selected flame
   if (!Mm.cellsDone) {
-    Mm.cellsDone = true; const g = game.grid;
+    Mm.cellsDone = true; game.things?.poleHit(box); const g = game.grid;
     const breaks = mv.breaks ?? (Mm.move === 'heavy' ? set.heavyBreaks : 0);
     if (breaks) for (let y = Math.floor(box.y); y < box.y + box.h; y++) for (let x = Math.floor(box.x); x < box.x + box.w; x++) { if (!g.inside(x, y)) continue; const m = g.mat[y * g.W + x]; if (HARDNESS[m] !== undefined && HARDNESS[m] <= breaks && !(g.flags[y * g.W + x] & 16)) g.set(x, y, game.rng.spell.next() < 0.4 ? (m === 2 ? 20 : 0) : 0); }
     if (Mm.touchT <= 0 && p.lantern) { const w = game.hero?.wicks?.[p.cast?.slot ?? 0]; if (w) { applyElement(game, p.lantern.x + p.facing * 3, p.lantern.y + 2, 2, w.flame, { maxCells: 12 }); Mm.touchT = 0.5; } }

@@ -10,6 +10,8 @@ import { createFragments } from '../world/fragments.js';
 import { createLightGrid } from '../world/lightgrid.js';
 import { createCurrents, createFloodline } from '../world/currents.js';
 import { spawnEnemy } from '../ai/brain.js';
+import { createThings } from '../entities/things.js';
+import { castPlan } from '../spells/instances.js';
 
 export function createGame({ data, mode = 'campaign', seed = 1, save = null }) {
   const game = {
@@ -17,8 +19,9 @@ export function createGame({ data, mode = 'campaign', seed = 1, save = null }) {
     rng: { loot: createRng(hashSeed(seed, 'loot')), spell: createRng(hashSeed(seed, 'spell')), ai: createRng(hashSeed(seed, 'ai')), talk: createRng(hashSeed(seed, 'talk')) },
     bus: createBus(), room: null, world: null, grid: null, entities: [], particles: createParticles(4000),
     spells: [], pending: [], fields: [], shockZones: [], flashes: [], arcs: [], climbLines: [],
-    player: null, hero: save?.hero || null, flags: { swimming: false }, story: {}, perf: {}, lights: [],
+    player: null, hero: save?.hero || null, castPlan: null, flags: { swimming: false }, story: {}, perf: {}, lights: [],
   };
+  game.castPlan = (c, plan, aim, meta) => castPlan(game, c, plan, aim, meta);
   return game;
 }
 
@@ -51,6 +54,11 @@ export function enterRoom(game, roomJson, entryId, opts = {}) {
       }
     }
   }
+  // a Rekindle post at the first entry of puzzle / lesson / flood / trap rooms if the author did not place one
+  if (['puzzle', 'lesson', 'set_piece', 'trap'].includes(roomJson.kind) || roomJson.tags?.some(t => t === 'trap' || t === 'flood')) {
+    if (!c.things.some(t => t.t === 'rekindle')) { const en = Object.values(c.entries)[0]; if (en) c.things.push({ t: 'rekindle', id: 'rekindle_auto', at: [en.at[0] + (en.face === 'l' ? -14 : 14), en.at[1]] }); }
+  }
+  game.things = createThings(game);
   game.bus.emit('room.enter', { roomId: roomJson.id, entryId });
   return c;
 }

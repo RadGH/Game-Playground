@@ -14,6 +14,7 @@ let NEXT = 1;
 /** Targets an instance can hit: enemies for the player, the player (and allies) for enemies. */
 function targetsFor(game, inst) {
   if (inst.team === 'player') return game.entities.filter(e => (e.kind === 'enemy' || e.kind === 'boss' || e.kind === 'dummy') && !e.dead && !e.intangible);
+  if (inst.team === 'trap') return [game.player, ...game.entities.filter(e => (e.kind === 'enemy' || e.kind === 'ally') && !e.dead)].filter(Boolean); // traps hit anything
   return [game.player, ...game.entities.filter(e => e.kind === 'ally' && !e.dead)].filter(Boolean);
 }
 function boxOf(e) { return { x: e.x - e.w / 2, y: e.y - e.h, w: e.w, h: e.h }; }
@@ -23,7 +24,7 @@ function circleHits(e, x, y, r) { const b = boxOf(e); const cx = Math.max(b.x, M
 /** Spawn every instance for one cast of a compiled plan. */
 export function castPlan(game, caster, plan, aim, meta = {}) {
   const inst = [];
-  const base = { team: caster === game.player || caster.team === 'player' ? 'player' : 'enemy', caster, plan, wickId: meta.wickId, wickName: meta.wickName, depth: meta.depth || 0, children: 0, knot: meta.knot || null, power: meta.power ?? 1 };
+  const base = { team: caster === game.player || caster.team === 'player' ? 'player' : caster.team === 'trap' ? 'trap' : 'enemy', caster, plan, wickId: meta.wickId, wickName: meta.wickName, depth: meta.depth || 0, children: 0, knot: meta.knot || null, power: meta.power ?? 1 };
   const ox = aim.ox, oy = aim.oy, ang = Math.atan2(aim.y - oy, aim.x - ox);
   const n = plan.count;
   for (let k = 0; k < n; k++) {
@@ -241,6 +242,7 @@ function burst(game, I, x, y, radiusOverride, mult = 1) {
   combosFromCells(game, I, x, y, res);
   game.flashes.push({ x, y, r: r * 3, color: hexToRgb01(P.color), i: 1.5, t: 0.25, max: 0.25 });
   if (P.enemyOnLand?.voidZone) spawnVoidZone(game, P.enemyOnLand.voidZone, x, y, { source: I.caster });
+  if (I.team === 'player') game.things?.spellHit(x, y, P.flame, P.shape);
   game.bus?.emit('spell.burst', { x, y, flame: P.flame, r });
   if (P.shape === 'rune' || P.shape === 'lob') game.shake?.(0.12);
   endInstance(game, I, true, x, y, true);
@@ -289,6 +291,7 @@ function fireKnot(game, I, x, y) {
 
 export function endInstance(game, I, impact = false, x = I.x, y = I.y, burstDone = false) {
   if (!I.alive) return; I.alive = false; const P = I.plan;
+  if (impact && I.team === 'player') game.things?.spellHit(x, y, P.flame, P.shape);
   if (impact && !burstDone) game.flashes.push({ x, y, r: (P.light?.r || 26) * 1.5, color: hexToRgb01(P.color), i: 1.2, t: 0.15, max: 0.15 });
   if (P.volatile && !burstDone) { burst(game, { ...I, alive: true, plan: { ...P, volatile: 0 } }, x, y, P.volatile, 0.6); }
   if (P.linger) game.fields.push({ x, y, r: P.shape === 'bolt' ? 6 : Math.max(8, P.size * 0.7), t: P.linger, tickT: 0, dmg: P.damage * 0.25 * (I.power || 1), flame: P.flame, status: P.status, caster: I.caster, team: I.team, wickId: I.wickId, wickName: I.wickName, color: P.color });

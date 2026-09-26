@@ -29,7 +29,7 @@ export function dealDamage(game, hit) {
   if (t.kind === 'player' && game.difficulty) amount *= game.difficulty.damageTaken ?? 1;
   if (t.shield > 0) { const a = Math.min(t.shield, amount); t.shield -= a; amount -= a; }
   amount = Math.max(0, amount);
-  const before = t.hp; t.hp = Math.max(0, t.hp - amount);
+  const before = t.hp; t.hp = Math.max(0, t.hp - amount); if (amount > 0) t.lastSource = hit.source;
   const overkill = Math.max(0, amount - before);
   const killingBlow = before > 0 && t.hp <= 0;
   if (hit.knock && t.kind !== 'boss') { const kb = 1 - (t.kbResist || 0); t.vx += hit.knock.x * kb; t.vy += hit.knock.y * kb; if (t.kind === 'player') t.knockT = 0.2; }

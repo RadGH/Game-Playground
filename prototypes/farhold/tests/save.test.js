@@ -146,3 +146,24 @@ test('the four that were being dropped are stored, and the perks come back', () 
   assert.deepEqual(out.research.taken, ['ironworking'],
     'the research tree is not saved: all 31 tech-gated structures re-lock on reload');
 });
+
+/**
+ * R27 M1 — the taken strongholds. A reload that forgot them stood every boss back up, so the
+ * pay-once rule would have been a pay-once-per-session rule.
+ */
+test('the taken strongholds survive a save, and an old save loads with none taken', () => {
+  const base = {
+    id: 's1', name: 'Probe', seed: 1, classId: 'ranger', control: { x: 0, z: 0, yaw: 0, pitch: 0 },
+    player: { level: 1, attrs: {}, equipment: {}, bag: [] },
+  };
+  const ledger = { '7:2': [4012, 9031], '7:5': [12] };
+  const out = JSON.parse(JSON.stringify(snapshot({ ...base, strongholds: ledger })));
+  assert.deepEqual(out.strongholds, ledger);
+  // the snapshot is a copy: taking another one later does not rewrite a save already written
+  ledger['7:2'].push(1);
+  assert.deepEqual(out.strongholds['7:2'], [4012, 9031]);
+  // a save written before round 27 has no field at all
+  const old = snapshot(base);
+  assert.deepEqual(old.strongholds, {});
+  assert.ok(/save\?\.strongholds/.test(mainSrc), 'main.js never reads the ledger back out of a save');
+});

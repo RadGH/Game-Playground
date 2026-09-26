@@ -383,6 +383,8 @@ const cap = s => (s ? s[0].toUpperCase() + s.slice(1) : s);
  * handed out for anyone who wants to be certain.
  */
 let CACHE = null;
+/** R27 M1 — a stair's gate id: past the instance mouths (40000+) and the world's own node ids. */
+const STAIR_ID_BASE = 60000;
 const grab = name => fetch(new URL(`../data/${name}.json`, import.meta.url)).then(r => r.json());
 const SITE_DATA = Promise.all([
   grab('strongholds'), grab('setpieces'), grab('landmarks'), grab('worldbosses'),
@@ -397,7 +399,15 @@ const SITE_DATA = Promise.all([
 
 // ---------------------------------------------------------------------------- the sites
 
-export function createSites(scene, terrain, { seed = 1, balance = {}, zones = null, collide = null, radius = 2600, data = null } = {}) {
+export function createSites(scene, terrain, {
+  seed = 1, balance = {}, zones = null, collide = null, radius = 2600, data = null,
+  /**
+   * R27 M1 — the keys of the strongholds already TAKEN on this world, out of the save. A taken
+   * site never refills its boss, its prisoners or its strongbox and never pays again; one whose
+   * `gives.clears` is set is cleared outright and stays empty. See `take()`.
+   */
+  taken = null,
+} = {}) {
   // The LIVE cell size, not the 640 that `data/balance.json` still writes down: the title screen's
   // planet-scale knob moves it, and a camp placed at `cell * 640` on a 128 m-per-cell world lands
   // five times outside the map.
@@ -458,13 +468,18 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
   let ready = Promise.resolve(null);
   if (strongholds && setpieces && landmarkData) {
     sites = buildSites();
+    restoreTaken();
   } else {
     // …and the cold one, for a page that reached here before the three files came back.
     ready = SITE_DATA.then(d => {
       if (!d) return null;
       strongholds = d.strongholds; setpieces = d.setpieces; landmarkData = d.landmarks;
       worldBossData = d.worldbosses;
+      // R27 M1 — the instance list too: the cold path never set it, so the first world built before
+      // the files came back had no instances at all, and a stair had no instance to open
+      instanceData = instanceData || d.instances;
       sites = buildSites();
+      restoreTaken();
       if (lastPoint) update(lastPoint[0], lastPoint[1], true);
       return d;
     });
@@ -1084,6 +1099,10 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
     const rng = field.rng;
 
     if (!site.hostile || !spec?.garrison) return out;
+    // R27 M1 — a taken stronghold is somewhere you already won. Bodies may come back to it (only
+    // when its `gives.clears` is off — otherwise `due()` never hands it back at all), but no boss,
+    // no prisoners and no strongbox: those are what taking it paid for, and they are paid once.
+    const won = !!site.taken;
 
     const all = field.defsFor(site.x, site.z, lvl);
     if (!all.length) return out;
@@ -1095,9 +1114,12 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
 
     // the boss first, in the middle of it
     const bossSpec = spec.boss || {};
-    if (bossSpec.rank === 'boss') {
+    if (won) {
+      // nobody in charge any more
+    } else if (bossSpec.rank === 'boss') {
       const def = field.bossFor(lvl, site.x, site.z);
-      if (def) out.boss = await field.placeBoss(def, lvl, site.x, site.z);
+      // R27 M1 — with the modifiers the data gives it, through the same path a champion's take
+      if (def) out.boss = await field.placeBoss(def, lvl, site.x, site.z, { modifiers: bossSpec.modifiers ?? 0 });
     } else {
       const leaders = pool.filter(d => d.role === 'leader');
       const def = rng.pick(leaders.length ? leaders : pool);
@@ -1106,7 +1128,7 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
         rank: bossSpec.rank || 'champion', modifiers, name: bossName(site, def, nameFor, rng),
       });
     }
-    if (out.boss) out.boss.siteKey = site.key;
+    if (out.boss) { out.boss.siteKey = site.key; out.boss.holdsSite = site.key; }
 
     const span = spec.garrison.count || [4, 6];
     const n = span[0] + Math.floor(rng() * (span[1] - span[0] + 1));
@@ -1120,15 +1142,85 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
     }
 
     // and the chest it is all standing around
-    if (chests && spec.chest?.kind) {
+    if (chests && spec.chest?.kind && !won) {
       const a = rng() * Math.PI * 2, r = 3 + (spec.tier || 1);
       out.chest = chests.place(spec.chest.kind, site.x + Math.cos(a) * r, site.z + Math.sin(a) * r,
         { level: lvl, facing: rng() * Math.PI * 2, name: `${site.name}: the Strongbox` });
       // R25 — the strongbox belongs to the garrison: it stays shut until they are down
       if (out.chest) out.chest.guards = [...out.garrison, ...(out.boss ? [out.boss] : [])];
     }
-    out.prisoners = site.gives?.prisoners || 0;
+    out.prisoners = won ? 0 : (site.gives?.prisoners || 0);
     return out;
+  }
+
+  // ---------------------------------------------------------------- R27 M1: taking one
+
+  /**
+   * THE STAIR DOWN, for a stronghold whose `gives.opensDungeon` says there is one.
+   *
+   * `opensDungeon` was three log lines ("Behind the keep, a stair goes down"). A stair is a mouth:
+   * the same `{ id, name, kind, x, z, instance }` node `mouths()` hands js/dungeon.js's
+   * `createGates`, so `E` at it runs the ordinary `enterDungeon` with an instance entry from
+   * data/instances.json — a string names the instance, `true` falls back to the vault.
+   *
+   * Placed 14-34 m from the centre, on dry, walkable ground that no set-piece collider covers,
+   * searched in a fixed order from the site's own seed so a reload puts it in the same place.
+   */
+  function stairFor(site) {
+    const want = site.gives?.opensDungeon;
+    if (!want) return null;
+    const list = instanceData?.instances || [];
+    const spec = (typeof want === 'string' && list.find(i => i.id === want))
+      || list.find(i => i.id === 'sealed_strongroom') || list[0] || null;
+    if (!spec) return null;
+    const rng = makeRng((seed ^ (Number(site.id) * 2246822519) ^ 0x57a1) >>> 0);
+    const start = rng() * Math.PI * 2;
+    let spot = null;
+    for (let r = 18; r <= 34 && !spot; r += 4) {
+      for (let k = 0; k < 12 && !spot; k++) {
+        const a = start + (k / 12) * Math.PI * 2;
+        const [x, z] = terrain.clampToWorld(site.x + Math.cos(a) * r, site.z + Math.sin(a) * r);
+        if (terrain.underwater?.(x, z)) continue;
+        if ((terrain.slopeAt?.(x, z, 3) ?? 0) > 0.6) continue;
+        if (collide?.blocked?.(x, z, 3)) continue;
+        spot = { x, z };
+      }
+    }
+    if (!spot) {
+      // all the way round is water or wall: stand it at the nearest dry step off the centre
+      const [x, z] = terrain.clampToWorld(site.x + Math.cos(start) * 14, site.z + Math.sin(start) * 14);
+      spot = { x, z };
+    }
+    return {
+      id: STAIR_ID_BASE + (Number(site.id) % 20000),
+      name: `The stair under ${site.name}`,
+      kind: 'instance', x: spot.x, z: spot.z, zone: site.zone,
+      arch: spec.arch || 'stone', instance: spec, siteKey: site.key, stair: true,
+    };
+  }
+
+  /** Mark one cleared, so it stops refilling. A function declaration so `restoreTaken` can run first. */
+  function clearKey(key) {
+    const s = sites.find(v => v.key === key);
+    if (s) { s.cleared = true; s.populated = true; }
+    return s || null;
+  }
+
+  /** Everything that makes a site taken, in one place, so the save and a live take agree. */
+  function markTakenStronghold(s) {
+    s.taken = true;
+    s.heldFolk = [];
+    s.bossUnit = null;
+    // `gives.clears`: taking it CLEARS it — the existing `clear()` below, which nothing called
+    if (s.gives?.clears) clearKey(s.key);
+    if (s.gives?.opensDungeon && !s.stair) s.stair = stairFor(s);
+    if (s.pin) s.pin = { ...s.pin, color: '#8a8a8a' };
+  }
+
+  function restoreTaken() {
+    if (!taken) return;
+    const keys = new Set([...(taken || [])].map(String));
+    for (const s of sites) if (s.family === 'stronghold' && keys.has(String(s.key))) markTakenStronghold(s);
   }
 
   /** `<a Name Forge given name> <epithet>`, or something that still reads as a name without one. */
@@ -1394,7 +1486,7 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
     }
   }
 
-  return {
+  const api = {
     get sites() { return sites; },
     /** Resolves once the four data files are in and the site list is built. */
     ready,
@@ -1412,7 +1504,11 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
         id: 40000 + (s.id % 20000), name: s.name, kind: 'instance',
         x: s.x, z: s.z, zone: s.zone, cleared: !!s.cleared,
         arch: s.arch, instance: s.instance, siteKey: s.key,
-      }));
+      // R27 M1 — and the stair a taken stronghold opened
+      })).concat(sites.filter(s => s.stair || (s.taken && s.gives?.opensDungeon))
+        .map(s => (s.stair = s.stair || stairFor(s)))
+        .filter(Boolean)
+        .map(st => ({ ...st, cleared: false })));
     },
     /** The ones that are up right now, with their swarm. */
     liveBosses: () => waves.map(w => ({
@@ -1429,7 +1525,41 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
       return best;
     },
     /** Mark one cleared, so it stops refilling. */
-    clear(key) { const s = sites.find(v => v.key === key); if (s) { s.cleared = true; s.populated = true; } return s || null; },
+    clear: clearKey,
+
+    /**
+     * R27 M1 — TAKE A STRONGHOLD, ONCE.
+     *
+     * The one guard on the payout. js/main.js's `payStronghold` asks this and pays exactly what it
+     * hands back; a second call — the boss of a refilled site, a second path, a reload — gets null.
+     * Before this the only guard was emptying `heldFolk`, and `relax()` + `due()` + `populateSite`
+     * refilled it every time you walked 420 m away and back: a castle's legendary chest and perk
+     * point on a loop.
+     */
+    take(key) {
+      const s = sites.find(v => String(v.key) === String(key));
+      if (!s || s.family !== 'stronghold' || s.taken) return null;
+      markTakenStronghold(s);
+      return { site: s, gives: { ...(s.gives || {}) }, stair: s.stair || null };
+    },
+    /**
+     * R27 M1 — the stair a LANDMARK's `gives.opensDungeon` promises. A landmark's once-only rule is
+     * the territory record's (`takeLandmark`), so this only files the mouth; the caller rebuilds
+     * the gates. Null if the site promises no stair.
+     */
+    openStair(key) {
+      const s = sites.find(v => String(v.key) === String(key));
+      if (!s || !s.gives?.opensDungeon) return null;
+      s.stair = s.stair || stairFor(s);
+      return s.stair;
+    },
+    /** The keys of every stronghold taken on this world, for the save. */
+    takenKeys: () => sites.filter(s => s.family === 'stronghold' && s.taken).map(s => s.key),
+    /** The site a boss holds, if it holds one — how main.js knows a kill was a take. */
+    heldBy(unit) {
+      if (!unit || unit.holdsSite == null) return null;
+      return sites.find(s => s.key === unit.holdsSite && s.family === 'stronghold') || null;
+    },
 
     /** Every instance kind this file knows about, including the ones it will not scatter. */
     instanceKinds: () => (instanceData?.instances || []),
@@ -1612,4 +1742,5 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
       scene.remove(fireMesh); fireMesh.geometry.dispose(); fireMesh.material.dispose(); fireMesh.dispose();
     },
   };
+  return api;
 }

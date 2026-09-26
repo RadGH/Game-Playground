@@ -2475,46 +2475,16 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       sound.questDone();
 
       /**
-       * …AND WHOEVER WAS BEING HELD IN IT WALKS OUT.
+       * R27 M1 — AND THAT IS ALL A CLEARED CAMP DOES.
        *
-       * They stop being captives, they say something worth hearing, and the standing moves — a
-       * faction remembers people you got out far longer than it remembers a cleared camp. Without
-       * this, freeing prisoners was a line of data that only the zone record ever saw.
+       * This used to go on to pay the `gives` of whatever `sites.nearest(site.x, site.z, 40)` found:
+       * no kind filter, so a LANDMARK's xp, loot and perk point were paid for clearing a territory
+       * camp that happened to stand near it, and again every time `respawnHours` re-armed the camp.
+       * The territory record and js/sites.js's set pieces are two lists that do not share
+       * coordinates; a stronghold is paid when its boss dies (`freePrisonersOf` → `payStronghold`),
+       * a landmark by `atLandmark`, and this counts deeds for standing and the zone's grip — nothing
+       * else.
        */
-      /**
-       * AND THE REST OF THE STRONGHOLD'S `gives`, WHICH NOBODY READ EITHER.
-       *
-       * `data/strongholds.json` pays out in xp, loot, standing, perk points, an opened dungeon, a
-       * revealed zone and a lifted siege. `territory.clearSite` moves the grip and the claim — that
-       * part worked — and every one of these went straight in the bin, so the difference between
-       * clearing a bandit camp and taking a Stonecount keep was two lines in the log.
-       */
-      const near = sites.nearest?.(site.x, site.z, 40) || null;
-      const pays = site.gives || site.spec?.gives || near?.gives || near?.spec?.gives || {};
-      if (pays.xp) {
-        const paid = eventXp(pays.xp, { zoneLevel: zoneLevelAt(site.x, site.z), kind: 'event', cfg: xpCfg });
-        const levels = rpg.gainXp(player, paid);
-        hud.log(`${paid} experience for taking ${site.name}.`, 'level');
-        if (levels > 0) { hud.log(`Level ${player.level}.`, 'level'); }
-      }
-      if (pays.loot) {
-        // a guaranteed grade, dropped where the boss fell rather than into the bag, so it is found
-        chests.place(pays.loot === 'legendary' ? 'gilded' : 'iron', site.x + 2, site.z + 2,
-          { level: player.level, floor: pays.loot, name: `${site.name}: the spoils` });
-        hud.log(`Something ${pays.loot} is in there.`, 'loot');
-      }
-      if (pays.perkPoint) {
-        player.bonusPerks = (player.bonusPerks || 0) + pays.perkPoint;
-        hud.log(`A perk point for taking ${site.name}.`, 'level');
-      }
-      if (pays.standing) standings.deed(pays.standing, 'stronghold_taken');
-      if (pays.revealZone) { map.revealZone?.(here.id); hud.log(`${here.name} goes on your chart.`, 'good'); }
-      if (pays.opensDungeon) hud.log('Behind the keep, a stair goes down. It was not there before.', 'loot');
-      if (pays.liftsSiege) {
-        holdings.press?.(here.id, 0.18, { claim: 0.1 });
-        hud.log(`The siege on ${here.name} lifts.`, 'level');
-      }
-
       rumours.add(`${site.name} in ${here.name} has been cleared out`, { zone: here, from: 'you, mostly' });
       autoSave();
       return;
@@ -2903,7 +2873,11 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   });
 
   // camps with a fire in them, and the lairs the world bosses keep
-  let sites = createSites(scene, terrain, { seed, balance, zones, collide: siteSolids, radius: balance.features?.radius ?? 2600 });
+  // R27 M1 — which strongholds you have TAKEN, per world (`systemSeed:planetId`), out of the save.
+  // An old save has none, so every site loads untaken.
+  const strongholdLedger = { ...(save?.strongholds || {}) };
+  const strongholdWorld = () => `${systemSeed}:${planet?.id ?? 0}`;
+  let sites = createSites(scene, terrain, { seed, balance, zones, collide: siteSolids, radius: balance.features?.radius ?? 2600, taken: strongholdLedger[strongholdWorld()] || null });
   /**
    * A set piece near a stronghold is that stronghold's people.
    *
@@ -4698,11 +4672,15 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   async function populateSite(site) {
     const level = site.level || player.level;
     if (site.kind === 'lair') {
-      const bossDef = field.bossFor(level, site.x, site.z) || (bestiary.bosses || [])[0];
+      // R27 M1 — a taken lair has nobody in charge; `bossFor` never returns null any more, so the
+      // `bosses[0]` fallback (the level 4-12 Warden in every lair above 30) is gone
+      if (site.taken) return;
+      const bossDef = field.bossFor(level, site.x, site.z);
       if (!bossDef) return;
-      const unit = await field.placeBoss(bossDef, level, site.x, site.z);
+      const unit = await field.placeBoss(bossDef, level, site.x, site.z, { modifiers: site.spec?.boss?.modifiers ?? 0 });
       if (unit) {
         bossUnit = unit;
+        unit.holdsSite = site.key; site.bossUnit = unit;   // R27 M1 — its death takes the lair
         hud.log(`${unit.name} keeps this place.`, 'bad');
         sound.combat('death', { beast: true });
       }
@@ -4723,6 +4701,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      * down, which is checked in `creditKill`.
      */
     const held = filled?.prisoners || 0;
+    // R27 M1 — the one in charge, whether or not anybody is held: its death is what takes the place
+    if (filled?.boss) site.bossUnit = filled.boss;
     if (held > 0) {
       site.heldFolk = [];
       /**
@@ -4764,7 +4744,6 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         });
         if (who) { who.captive = true; site.heldFolk.push(who); }
       }
-      site.bossUnit = filled?.boss || null;
       if (site.heldFolk.length) {
         hud.log(`Somebody is being held in ${site.name}. ${site.heldFolk.length === 1 ? 'One of them.' : `${site.heldFolk.length} of them.`}`, 'bad');
       }
@@ -4783,28 +4762,57 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
    */
   function freePrisonersOf(unit) {
     if (!unit) return;
-    const site = (sites.sites || []).find(s => (s.heldFolk || []).length && s.bossUnit === unit);
+    /**
+     * R27 M1 — ONE PAYER, AND IT PAYS ONCE.
+     *
+     * This was guarded only by emptying `heldFolk` — and `sites.relax()` un-populated the site at
+     * 420 m, `due()` handed it back, and `populateSite` refilled the cells and stood the boss up
+     * again, so walking away and back paid the whole `gives` block (a castle's legendary chest and
+     * perk point) as often as you liked. It also only ran for a site that HELD somebody, so a
+     * bandit camp's boss paid nothing at all. Now any stronghold's boss takes it, and
+     * `sites.take()` is the guard: it marks the site `taken` (saved per world), and answers null the
+     * second time.
+     */
+    const site = sites.heldBy?.(unit)
+      || (sites.sites || []).find(s => s.family === 'stronghold' && s.bossUnit === unit);
     if (!site) return;
-    const freed = site.heldFolk;
-    site.heldFolk = [];
+    const freed = site.heldFolk || [];
+    const took = sites.take?.(site.key);
+    if (!took) return;
+    payStronghold(took, freed);
+  }
+
+  /** R27 M1 — what taking a stronghold pays. Called by `freePrisonersOf` only, after `sites.take`. */
+  function payStronghold({ site, gives: pays, stair }, freed = []) {
+    // the ledger the save carries, per world, so a reload keeps it taken
+    const wk = strongholdWorld();
+    strongholdLedger[wk] = [...new Set([...(strongholdLedger[wk] || []), site.key])];
     for (const who of freed) {
       who.captive = false;
       who.roleName = 'freed';
       who.greeting = 'You came. I had stopped expecting anybody.';
     }
-    player.freed = (player.freed || 0) + freed.length;
-    // R22: was `40 × freed × playerLevel`, the one award in the game that scaled LINEARLY with your
-    // own level and so paid a level-40 character ten times what it paid a level-4 one for the same
-    // door. It is an event like any other now, priced by the zone it happened in.
-    rpg.gainXp(player, eventXp(40 * freed.length, { zoneLevel: zoneLevelAt(site.x, site.z), kind: 'event', cfg: xpCfg }));
-    hud.log(freed.length === 1
-      ? `${freed[0].name} walks out of ${site.name} behind you.`
-      : `${freed.length} walk out of ${site.name} behind you.`, 'level');
+    if (freed.length) {
+      player.freed = (player.freed || 0) + freed.length;
+      // R22: was `40 × freed × playerLevel`, the one award in the game that scaled LINEARLY with your
+      // own level and so paid a level-40 character ten times what it paid a level-4 one for the same
+      // door. It is an event like any other now, priced by the zone it happened in.
+      rpg.gainXp(player, eventXp(40 * freed.length, { zoneLevel: zoneLevelAt(site.x, site.z), kind: 'event', cfg: xpCfg }));
+      hud.log(freed.length === 1
+        ? `${freed[0].name} walks out of ${site.name} behind you.`
+        : `${freed.length} walk out of ${site.name} behind you.`, 'level');
+    } else {
+      hud.log(`${site.name} is yours.`, 'level');
+    }
     sound.questDone();
 
-    // the rest of what the stronghold pays, which nothing read either — see BUILD-MODE.md §19
-    const pays = site.gives || site.spec?.gives || {};
-    if (pays.xp) rpg.gainXp(player, eventXp(pays.xp, { zoneLevel: zoneLevelAt(site.x, site.z), kind: 'event', cfg: xpCfg }));
+    // the rest of what the stronghold pays — see BUILD-MODE.md §19
+    if (pays.xp) {
+      const paid = eventXp(pays.xp, { zoneLevel: zoneLevelAt(site.x, site.z), kind: 'event', cfg: xpCfg });
+      const levels = rpg.gainXp(player, paid);
+      hud.log(`${paid} experience for taking ${site.name}.`, 'level');
+      if (levels > 0) hud.log(`Level ${player.level}.`, 'level');
+    }
     if (pays.loot) {
       chests.place(pays.loot === 'legendary' ? 'gilded' : 'iron', site.x + 2, site.z + 2,
         { level: player.level, floor: pays.loot, name: `${site.name}: the spoils` });
@@ -4817,13 +4825,20 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     if (pays.standing) standings.deed(pays.standing, 'stronghold_taken');
     const here = zones.at(site.x, site.z);
     if (pays.revealZone && here) { map.revealZone?.(here.id); hud.log(`${here.name} goes on your chart.`, 'good'); }
-    if (pays.opensDungeon) hud.log('Behind the keep, a stair goes down. It was not there before.', 'loot');
+    // R27 M1 — a real stair: `sites.take` filed the mouth, and the gates are rebuilt to show it
+    if (pays.opensDungeon && stair) {
+      openMouths();
+      hud.log('Behind the keep, a stair goes down. It was not there before.', 'loot');
+    }
     if (pays.liftsSiege && here) {
       holdings.press?.(here.id, 0.18, { claim: 0.1 });
       hud.log(`The siege on ${here.name} lifts.`, 'level');
     }
-    if (here) rumours.add(`somebody got ${freed.length === 1 ? 'a prisoner' : 'prisoners'} out of ${site.name}`,
-      { zone: here, from: 'one of them' });
+    if (here) {
+      rumours.add(freed.length
+        ? `somebody got ${freed.length === 1 ? 'a prisoner' : 'prisoners'} out of ${site.name}`
+        : `${site.name} has been taken`, { zone: here, from: freed.length ? 'one of them' : 'you, mostly' });
+    }
     hud.setPlayer(player);
     autoSave();
   }
@@ -5078,16 +5093,20 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
        * bestiary falls back rather than leaving the far room empty.
        */
       const want = inst?.holds?.boss || null;
-      const named = want?.id ? (bestiary.bosses || []).concat(bestiary.enemies || []).find(b => b.id === want.id) : null;
-      const byFamily = !named && want?.family
-        ? (bestiary.bosses || []).filter(b => b.family === want.family)
-        : [];
-      const bossDef = named
-        || (byFamily.length ? field.rng.pick(byFamily) : null)
-        || field.bossFor(level, node.x, node.z)
-        || (bestiary.bosses || [])[0];
+      /**
+       * R27 M1 — THE FAMILY AND THE RANK THE DATA NAMED, AND NO WARDEN FALLBACK.
+       *
+       * Only `id` and `family` were read, a family with no hand-written boss (undead, humanoid)
+       * fell through to whatever `bossFor` found — any family — and then to `bosses[0]`, the level
+       * 4-12 Warden. Now: the named id; else a boss of that family nearest the level; else a
+       * STAND-IN, the family's own leader (or strongest-fitting body) from this ground, at the rank
+       * `holds.boss.rank` says. A stand-in is an ordinary body, so 'boss' rank (whose multipliers
+       * are 1 — a hand-written boss is big by itself) becomes 'rare' for it.
+       */
+      const { def: bossDef, rank } = field.bossForHolds(want, level, node.x, node.z);
       if (bossDef) {
-        bossUnit = await field.placeBoss(bossDef, level, dungeon.bossRoom.x, dungeon.bossRoom.z);
+        bossUnit = await field.placeBoss(bossDef, level, dungeon.bossRoom.x, dungeon.bossRoom.z,
+          { rank, modifiers: want?.modifiers ?? 0 });
       }
     }
 
@@ -5769,7 +5788,12 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     if (gives.perkPoint) { player.bonusPerks = (player.bonusPerks || 0) + gives.perkPoint; hud.log('A perk point, for the trouble.', 'level'); }
     if (gives.loot) { for (const it of rpg.loot.roll?.(gives.loot, player.level) || []) player.bag.push(it); }
     if (gives.callsBeast) hud.log('Bait on the hook. Something bigger than usual will come.', 'bad');
-    if (gives.opensDungeon) hud.log('The mouth is open. Something is down there.', 'loot');
+    // R27 M1 — a real mouth, filed on the set piece this mark adopted, not only a log line
+    if (gives.opensDungeon) {
+      const key = row?.siteKey ?? mark.siteKey;
+      if (key != null && sites.openStair?.(key)) openMouths();
+      hud.log('The mouth is open. Something is down there.', 'loot');
+    }
 
     /**
      * THE SEVEN `gives` KEYS NOTHING READ.
@@ -5799,7 +5823,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     }
     if (gives.namesFoe) {
       // the thing that lives here gets a NAME, which is what makes it worth coming back for
-      const def = field.bossFor?.(player.level + 2, mark.x, mark.z) || (bestiary.enemies || [])[0];
+      const def = field.bossFor?.(player.level + 2, mark.x, mark.z); // R27 M1 — never null; no enemies[0] fallback
       if (def) {
         const named = nameRare(def);
         // the campaign's own nemesis book: `onDeath` is what names one, and a stone that names a
@@ -6671,7 +6695,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     gates.dispose();
     gates = createGates(scene, terrain, { balance, zones, radius: balance.features?.radius ?? 2600, collide: gateSolids });
     sites.dispose();
-    sites = createSites(scene, terrain, { seed, balance, zones, collide: siteSolids, radius: balance.features?.radius ?? 2600 });
+    sites = createSites(scene, terrain, { seed, balance, zones, collide: siteSolids, radius: balance.features?.radius ?? 2600, taken: strongholdLedger[strongholdWorld()] || null }); // R27 M1
     handOverChests();
     openMouths();
     clearWandererBodies();
@@ -7437,6 +7461,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      * landmark and looking at a landmark are the same place.
      */
     sites.claimLandmarks?.(holdings.landmarksIn(zone.id));
+    // R27 M1 — a landmark taken in an earlier session that opened a stair gets its mouth back
+    if ((sites.sites || []).some(s => s.taken && s.gives?.opensDungeon && !s.stair)) openMouths();
     const cell = terrain.metresPerCell;
     const inZone = n => zones.at(n.x * cell, n.y * cell)?.id === zone.id;
     const nodes = (world.nodes || []).filter(inZone);
@@ -7478,7 +7504,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
     // the board. Everything on it names something that is actually in this zone right now.
     const candidates = candidatesFrom({
-      zone, territory: holdings, bestiary: huntableIn(zone), nodes: world.nodes || [],
+      zone, territory: holdings, bestiary: huntableIn(zone), nodes: world.nodes || [], live: field.enemies, // R27 M1
       landmarks: holdings.landmarksIn(zone.id),
       npcs: roadFolk.candidates(zone.id),
       caravans: trade.candidates(zone.id),
@@ -7527,7 +7553,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     localBoard = jobs.offer({
       zone, level: player.level, want: 5,
       candidates: candidatesFrom({
-        zone, territory: holdings, bestiary: huntableIn(zone), nodes: world.nodes || [],
+        zone, territory: holdings, bestiary: huntableIn(zone), nodes: world.nodes || [], live: field.enemies, // R27 M1
         landmarks: holdings.landmarksIn(zone.id),
         npcs: roadFolk.candidates(zone.id),
         caravans: trade.candidates(zone.id),
@@ -7741,6 +7767,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       // them — so they are gone rather than added to a list of exceptions.
       materials: craft.materials.toJSON(),
       dungeonsCleared,
+      strongholds: strongholdLedger, // R27 M1 — taken strongholds, per world
       world: worldOpts,
       // a save taken underground is in the dungeon's own coordinates — carry the way back out
       inDungeon: !!dungeon,
@@ -8237,7 +8264,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         else if (it.kind === 'bell') {
           const st = defence.standing();
           if (!st.state || st.state === 'won' || st.state === 'lost' || st.state === 'declined') {
-            const offer = defence.offer({ level: player.level, biome: terrain.biomeAt(control.x, control.z).key });
+            const offer = defence.offer({ level: player.level, biome: terrain.biomeAt(control.x, control.z).key,
+              heldBy: field.warbands?.of?.(zones.at(control.x, control.z))?.id ?? null }); // R27 M1
             if (!offer.ok) hud.log(offer.why, 'warn');
             else {
               hud.log(`${offer.tier.name}: ${offer.waves.length} waves. Press E again to take it on.`, 'level');

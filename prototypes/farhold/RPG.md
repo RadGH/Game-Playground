@@ -4077,3 +4077,70 @@ an opening, every walled town has 2-6 gates, both no-road walled towns (Leltudho
 have every gate at a street end; a flood fill over the live colliders reaches every dry gate from
 the square; the muster is walled for exactly the size-4+ towns. Screenshots:
 `research/round27-towns/`.
+
+### Round 27 — Strongholds pay once, and keep their promises (M1)
+
+**Root causes.** A stronghold had two payers and neither was guarded. `freePrisonersOf` paid the
+whole `gives` block whenever the boss of a site with prisoners died, and its only guard was
+emptying `heldFolk` — which `sites.relax()` (420 m) + `due()` + `populateSite` refilled, along with a
+fresh boss, every time you walked away and back: a castle's legendary chest and perk point on a
+loop. It also only ran for a site that held somebody, so a bandit camp's boss paid nothing.
+`creditKill` (the territory deed counter) paid the `gives` of whatever `sites.nearest(x, z, 40)`
+returned, with no kind filter, so a LANDMARK's xp, loot and perk point were paid for clearing a
+territory camp that happened to stand near it (4 of 473 camps over the six standard worlds), again
+every time the camp re-armed. `gives.clears` was read by nobody, `opensDungeon` was three log
+lines, instance bosses read only `id`/`family` and came out bare, and `bossFor` returned null above
+level 30 so every caller fell back to `bosses[0]` — the level 4-12 Warden in every lair above 30.
+
+**What changed.**
+- `js/sites.js` `take(key)` is the one guard: it marks the stronghold `taken`, and answers null the
+  second time. `populate` on a taken site puts up no boss, no prisoners and no strongbox.
+  `heldBy(unit)` says which site a boss holds (`unit.holdsSite`). `takenKeys()` + the `taken`
+  option carry it through a save (`strongholds` in js/save.js, filed per `systemSeed:planetId`
+  because every world uses the same slot keys). An old save has none and loads every site untaken.
+- `js/main.js`: any stronghold's boss death (`freePrisonersOf`, which also now covers lairs and
+  sites without prisoners) → `sites.take` → `payStronghold`, the only payer. `creditKill` pays
+  nothing any more: it counts deeds and clears the territory record, which is all it is for.
+- `gives.clears` is READ: taking a site calls the existing `sites.clear()` (never called before), so
+  it never refills. With `clears` off, ordinary bodies may return but never a boss, prisoners or a
+  strongbox (tested by flipping it).
+- `opensDungeon` files a real mouth. It is an instance id now (`castle` → `windward_gaol`; `true`
+  still means the vault), placed 18-34 m from the keep on dry, walkable, uncovered ground, handed to
+  the gates through `sites.mouths()` exactly like round 16's instance mouths, so E at it runs the
+  ordinary `enterDungeon`. A landmark's `opensDungeon` gets the same mouth (`sites.openStair`).
+- `EnemyField.placeBoss(def, level, x, z, { rank, modifiers })` passes the data's rank and
+  modifiers through `add`, the same path a rolled champion's modifiers take (no second multiplier).
+  `bossForHolds(holds.boss, …)` picks an instance's keeper: the named id; else a boss of that family
+  nearest the level; else a STAND-IN — that family's own leader from this ground — at the rank the
+  data names ('boss' becomes 'rare' for a stand-in, because the boss rank multiplies by 1). A
+  stronghold's boss-rank keeper gets its modifiers too.
+- `bossFor` returns the boss whose band is nearest the level, biome first, then any biome; never
+  null while a boss exists. The three `bosses[0]` / `enemies[0]` fallbacks are gone.
+- `beast_moved_in` binds: `candidatesFrom` ranks live champions/rares off the field first (`live`),
+  then any beast def that can roll champion (the spawner's own rule). The frame asked for a rank no
+  def carried, so it had never once been offered.
+- A warband encounter's leader comes from the whole `defsFor` pool (same warband, then same family),
+  not from the skirmisher/archer pool that by construction held none.
+- `raidersFor({ heldBy })`: a warband member raids only a base inside a zone its warband holds;
+  `defence.offer` passes the holder. (The muster's town drill passes nothing, so no warband member
+  joins a drill — its call site is M2's region and was left alone.)
+- Two side fixes found on the way: the cold data path in `createSites` never set `instanceData`
+  (the first world built before the files arrived had no instances), and a const read above its
+  declaration (`STAIR_ID_BASE`) that the new node test caught before the game did.
+
+**Measured.** Scripted take on real worlds (seeds 7/101/4477, three prisoner strongholds each where
+present): gives paid exactly once over three away-and-back visits, one boss ever, prisoners never
+refilled; seven stronghold kinds each taken once. In the browser (prisoners.spec.js, seed 11): the
+spoils chest, perk points and xp are paid once and a 520 m walk away and back pays nothing and puts
+up no boss; clearing every territory camp on the world moves xp, perk points and the bag by zero.
+Nine stairs over six worlds, all within 40 m and dry; on seed 101 E at the castle's stair goes down
+into Windward Gaol, kept by a rare Sootwick Ringleader with 3 modifiers (a humanoid, as the data
+names), and a save/reload keeps the castle taken and the stair enterable. `bossFor` non-null and
+nearest-band for every level 1-50 in every biome. `beast_moved_in` offered 71 times in 504 jobs over
+six worlds (was 0). Warband encounters in held zones led by a leader 200 of 200.
+
+**Tests.** New `tests/round27-strongholds.test.js` (14 node tests); `tests/prisoners.spec.js` gains
+the revisit, the landmark sweep and a new stair/reload test; `tests/save.test.js` gains the ledger
+round trip. Found by the stair spec hanging: `field.clear()` with a unit that was already removed and then
+pushed back on `field.enemies` used to spin for ever (the old prisoner spec does exactly that);
+`EnemyField.clear()` now walks a copy and empties the list, so it cannot hang the page.

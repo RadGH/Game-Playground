@@ -471,6 +471,8 @@ export function createJobGen({ frames: data, territory = null, factions = null, 
 export function candidatesFrom({
   zone, territory = null, bestiary = [], nodes = [], landmarks = [], npcs = [],
   caravans = [], patrols = [], named = [], items = [], metresPerCell = 640, level = 1,
+  // R27 M1 — the enemy field's live units, so a champion that is really out there binds first
+  live = [],
   /**
    * R14 — WHERE THE BOARD IS STANDING, AND HOW BIG THE WORLD IS.
    *
@@ -548,12 +550,34 @@ export function candidatesFrom({
   for (const f of named) out.push({ ...f, type: 'named' });
   for (const it of items) out.push({ ...it, type: 'item' });
 
+  /**
+   * R27 M1 — "A BEAST HAS MOVED IN" COULD NEVER BE OFFERED.
+   *
+   * The rank came from `e.boss` / `e.champion`, and no bestiary def carries either: a champion is
+   * not a KIND of enemy, it is a rank any ordinary spawn can roll (js/actors.js `spawnNear` →
+   * `rollRank` → `addRanked`). So the one frame that asks for `rank: 'champion'` never bound.
+   *
+   * Two honest sources now. A LIVE champion or rare out on the field right now (`live`, the enemy
+   * field's own units) comes first — that one is really there. Then every def that CAN roll
+   * champion — a beast (the frame's slot is a beast), not a pet or a boss, not `rareOnly` — which is
+   * the same rule the spawner applies. The kill goal is the def id, so any of its kind counts.
+   */
+  const seenLive = new Set();
+  for (const u of live) {
+    if (!u || u.dying != null || u.removed) continue;
+    if (u.rank !== 'champion' && u.rank !== 'rare') continue;
+    if (u.kind === 'humanoid' || u.boss || seenLive.has(u.defId)) continue;
+    seenLive.add(u.defId);
+    out.push(placed({ type: 'enemy', id: u.defId, name: u.baseName || u.name, rank: 'champion', element: !!u.element, live: true, x: u.x, z: u.z }));
+  }
   // the enemies that actually live at this level, with their rank, so "a champion" means one
   for (const e of bestiary) {
     if ((e.minLevel ?? 1) > level + 3 || (e.maxLevel ?? 99) < level - 1) continue;
+    if (seenLive.has(e.id)) continue;
+    const canChampion = !e.boss && !e.rareOnly && (e.kind || 'beast') !== 'humanoid';
     out.push({
       type: 'enemy', id: e.id, name: e.name,
-      rank: e.boss ? 'boss' : e.champion ? 'champion' : 'common',
+      rank: e.boss ? 'boss' : (e.champion || canChampion) ? 'champion' : 'common',
       element: !!e.element,
     });
   }

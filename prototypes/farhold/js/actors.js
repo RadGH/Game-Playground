@@ -382,7 +382,9 @@ export class EnemyField {
 
   /** Add a specific enemy at a specific spot (packs, bosses, the tests and the console use this). */
   async add(def, level, x, z, { rank = 'normal', modifiers = [], name = null, boss = false } = {}) {
-    const unit = this.rpg.makeEnemy(def, level, this.rng, { rank: boss ? 'boss' : rank, modifiers, name });
+    // R27 M1 — a placed boss is rank 'boss' unless its caller named another rank on purpose (an
+    // instance whose `holds.boss.rank` says champion or rare — see `placeBoss`)
+    const unit = this.rpg.makeEnemy(def, level, this.rng, { rank: boss && rank === 'normal' ? 'boss' : rank, modifiers, name });
     unit.x = x; unit.z = z; unit.y = groundAt(this.terrain, x, z);
     unit.state = 'wander'; unit.wanderTimer = 0; unit.swingTimer = 0; unit.hitFlash = 0;
     // round 14: the physics book — knockback in flight, stagger left, armour stripped, recoil
@@ -466,22 +468,79 @@ export class EnemyField {
     return unit;
   }
 
-  /** Place a boss, awake and waiting, with its arena cleared of anything else. */
-  async placeBoss(bossDef, level, x, z) {
+  /**
+   * Place a boss, awake and waiting, with its arena cleared of anything else.
+   *
+   * R27 M1 — `rank` and `modifiers` are what an instance's `holds.boss` and a stronghold's `boss`
+   * block say about it, and until now nothing read either: every boss came out bare. `modifiers` is
+   * a count (rolled off this field's own table) or a list already picked, and it goes in through
+   * `add`, which is the exact path a rolled champion's modifiers take — `rpg.makeEnemy` folds them
+   * in once. There is no second multiplier here.
+   */
+  async placeBoss(bossDef, level, x, z, { rank = 'normal', modifiers = 0, name = null } = {}) {
     const [cx, cz] = this.terrain.clampToWorld(x, z);
-    const unit = await this.add(bossDef, level, cx, cz, { boss: true });
+    const mods = Array.isArray(modifiers) ? modifiers
+      : this.rpg.pickModifiers(this.modifiers, Math.max(0, Math.round(modifiers || 0)), this.rng);
+    const unit = await this.add(bossDef, level, cx, cz, { boss: true, rank, modifiers: mods, name });
     if (unit) { unit.boss = true; unit.aggroRange = bossDef.aggroRange ?? 44; }
     return unit;
   }
 
-  /** The boss that belongs at this level, or null. */
-  bossFor(level, x, z) {
+  /**
+   * The boss that belongs at this level. Never null while the bestiary holds a boss at all.
+   *
+   * R27 M1 — THIS RETURNED NULL ABOVE LEVEL 30, AND EVERY CALLER FELL BACK TO `bosses[0]`.
+   *
+   * The top of the boss list stops at 30 and the default level cap is 50, so every lair and every
+   * instance above 30 held the Warden of the First Hollow, a level 4-12 construct. Now: a boss whose
+   * band holds the level if one fits the biome; otherwise the one whose band is NEAREST the level,
+   * biome first and then any biome. The body is still built at the level asked for, so a level-40
+   * lair holds a level-40 boss — only which boss is chosen by the band.
+   */
+  bossFor(level, x, z, { family = null } = {}) {
     const families = familiesOf(this.terrain.biomeIdAt(x, z));
-    const pool = this.bosses.filter(b => {
-      const biomeOk = (b.biomes || ['any']).includes('any') || b.biomes.some(f => families.includes(f));
-      return biomeOk && (b.minLevel ?? 1) <= level && (b.maxLevel ?? 99) >= level;
-    });
-    return pool.length ? this.rng.pick(pool) : null;
+    // `family` (an instance's `holds.boss.family`) narrows it to bosses of that family — and then
+    // null is a real answer, because the caller has a stand-in rule for a family with no boss
+    const all = family ? this.bosses.filter(b => b.family === family) : this.bosses;
+    const biomeOk = b => (b.biomes || ['any']).includes('any') || b.biomes.some(f => families.includes(f));
+    const gap = b => Math.max(0, (b.minLevel ?? 1) - level, level - (b.maxLevel ?? 99));
+    const nearest = list => {
+      if (!list.length) return null;
+      const best = Math.min(...list.map(gap));
+      return this.rng.pick(list.filter(b => gap(b) === best));
+    };
+    return nearest(all.filter(biomeOk)) || nearest(all);
+  }
+
+  /**
+   * R27 M1 — WHO KEEPS AN INSTANCE: `holds.boss` from data/instances.json → `{ def, rank }`.
+   *
+   * The named `id` if the bestiary has it; else a hand-written boss of `family`, nearest the level;
+   * else a STAND-IN — that family's own leader (or its nearest-band body) from this ground, then
+   * from the whole bestiary — at the rank `holds.boss.rank` names. A stand-in is an ordinary body,
+   * and rank 'boss' multiplies by 1 (a hand-written boss is big by itself), so a stand-in asked to
+   * be a boss is made a rare. With no `holds.boss` at all, any boss for the level. `def` is null
+   * only if the bestiary holds nothing at all.
+   */
+  bossForHolds(want, level, x, z) {
+    if (want?.id) {
+      const named = this.bosses.concat(this.defs).find(b => b.id === want.id);
+      if (named) return { def: named, rank: 'normal' };
+    }
+    if (want?.family) {
+      const boss = this.bossFor(level, x, z, { family: want.family });
+      if (boss) return { def: boss, rank: 'normal' };
+      const here = this.defsFor(x, z, level).filter(d => d.family === want.family);
+      const kin = here.length ? here : this.defs.filter(d => d.family === want.family && !d.warband && !d.rareOnly);
+      const leaders = kin.filter(d => d.role === 'leader');
+      const pool = leaders.length ? leaders : kin;
+      if (pool.length) {
+        const gap = d => Math.max(0, (d.minLevel ?? 1) - level, level - (d.maxLevel ?? 99));
+        const best = Math.min(...pool.map(gap));
+        return { def: this.rng.pick(pool.filter(d => gap(d) === best)), rank: want.rank === 'champion' ? 'champion' : 'rare' };
+      }
+    }
+    return { def: this.bossFor(level, x, z), rank: 'normal' };
   }
 
   /**
@@ -1350,5 +1409,7 @@ export class EnemyField {
   /** Is anything actually fighting the player right now? Conditional affixes need to know. */
   get engaged() { return this.enemies.some(e => e.dying == null && e.state === 'chase'); }
 
-  clear() { while (this.enemies.length) this.removeUnit(this.enemies[this.enemies.length - 1]); }
+  // R27 M1 — over a copy, then empty: a unit already `removed` but still on the list (a spec put one
+  // back) made `removeUnit` return early without splicing, and this loop spun for ever
+  clear() { for (const e of [...this.enemies]) this.removeUnit(e); this.enemies.length = 0; }
 }

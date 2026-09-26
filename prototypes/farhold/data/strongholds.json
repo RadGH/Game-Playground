@@ -7,7 +7,7 @@
     "garrison": "{ count: [min,max], rankBonus, prefer: { roles, families } } — what js/sites.js asks the enemy field for",
     "boss": "{ rank, modifiers, epithets } — every one of these gets a Name Forge given name and an epithet from this list",
     "chest": "{ kind } — a key from balance.json's chests.kinds",
-    "gives": "the reward hooks. At least one must be present or the POI test fails.",
+    "gives": "the reward hooks. At least one must be present or the POI test fails. R27: paid ONCE, when the boss goes down (js/sites.js `take`). `clears` = taking it clears the site for good (no garrison ever comes back; off, ordinary bodies may return but never a boss, prisoners or the strongbox). `opensDungeon` = an instance id from data/instances.json (or true for the vault) whose mouth opens within 40 m of the keep.",
     "icon": "8.17 — the map glyph for this kind, so a fort and a lair are not the same dot. js/sites.js puts it on `site.pin.glyph`."
   },
   "_chanceDoc": "How often a slot of each type grows a garrison rather than a landmark. A road has three slots and a crossroads turns up every third shared cell, so those two have to stay low or the road becomes a gauntlet; a pass or a lair node is a place somebody would fortify, so those are close to even.",
@@ -275,7 +275,7 @@
       "gives": {
         "loot": "legendary",
         "prisoners": 2,
-        "opensDungeon": true,
+        "opensDungeon": "windward_gaol",
         "standing": "stonecount",
         "xp": 400,
         "clears": true,

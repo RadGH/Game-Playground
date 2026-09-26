@@ -70,7 +70,11 @@ function firstRun(root, ctx, s) {
   const done = () => {
     v.menu_scale = +sel.value;
     s.text = { ...s.text, menu_scale: v.menu_scale, subtitles: v.subtitles }; s.video = { ...s.video, flash_reduction: v.flash_reduction, screen_shake: v.screen_shake }; s.firstRunDone = true;
-    saveSettings(s); ctx.settings = s; ctx.applySettings?.(s); document.querySelector('.lf-menus')?.style.setProperty('--m-scale', v.menu_scale); card.remove();
+    // the card always closes: a failed save (private browsing) or a settings hook must never trap the player here
+    card.remove();
+    try { saveSettings(s); } catch (e) { console.warn('settings not saved', e); }
+    try { if (ctx.applySettings) ctx.applySettings(s); else ctx.settings = s; } catch (e) { console.warn(e); }
+    document.querySelector('.lf-menus')?.style.setProperty('--m-scale', v.menu_scale);
   };
   card._cancel = done; root.append(card);
 }

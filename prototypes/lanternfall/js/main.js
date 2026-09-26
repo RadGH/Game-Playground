@@ -139,7 +139,7 @@ try {
 
   // ---------- menus ----------
   const ctx = {
-    get game() { return game; }, data, hero: () => game?.hero, get profile() { return profile; }, get settings() { return settings; },
+    get game() { return game; }, data, hero: () => game?.hero, get profile() { return profile; }, get settings() { return settings; }, set settings(v) { settings = v; },
     saves: { list: () => saves.list().map(s => s.empty ? null : { ...s, playTime: s.playtime, lastPlayed: s.updated }), load: n => loadSlot(n), remove: n => saves.remove(n) },
     get meter() { return game?.meter; }, get act() { return game?.act; }, get atLampPost() { return !!game?.atLampPost; }, builderUnlocked: () => !!game?.hero?.unlocked?.mechanics?.includes('wick_builder'),
     canRekindle: () => !game ? 'No room.' : game.entities.some(e => e.kind === 'enemy' && !e.dead && e.brain?.state === 'attack') ? 'Not while you are fighting.' : true,

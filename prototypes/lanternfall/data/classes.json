@@ -1,0 +1,271 @@
+{
+ "_doc": "The five classes (canon v2 \u00a77, docs/04 \u00a76). attrs = the starting 25-point spread (Might/Wick/Draught/Nerve/Knack).",
+ "version": 1,
+ "list": [
+  {
+   "id": "lamplighter",
+   "name": "Lamplighter",
+   "role": "balanced caster-duelist",
+   "unlock": {
+    "default": true
+   },
+   "attrs": {
+    "might": 5,
+    "wick": 7,
+    "draught": 6,
+    "nerve": 4,
+    "knack": 3
+   },
+   "hpMult": 1.0,
+   "oilMult": 1.2,
+   "armour": 0,
+   "walk": 60,
+   "run": 95,
+   "apex": 34,
+   "dodge": {
+    "kind": "roll",
+    "dist": 44,
+    "iframes": 0.18
+   },
+   "resist": {
+    "gleam": 10
+   },
+   "weapon": "wpn_pole",
+   "lantern": "lantern_guild",
+   "startWicks": [
+    {
+     "flame": "ember",
+     "shape": "bolt"
+    },
+    {
+     "flame": "gleam",
+     "shape": "ring"
+    }
+   ],
+   "ability": "ability_beacon",
+   "passive": "ll_fresh_wick",
+   "oilOnHit": 2.5,
+   "voiceRole": "villager",
+   "movement": {},
+   "desc": "The Guild's own. A pole that feeds the lantern, a lantern that feeds the pole."
+  },
+  {
+   "id": "sluicewarden",
+   "name": "Sluicewarden",
+   "role": "tank, water control",
+   "unlock": {
+    "default": true
+   },
+   "attrs": {
+    "might": 6,
+    "wick": 4,
+    "draught": 4,
+    "nerve": 8,
+    "knack": 3
+   },
+   "hpMult": 1.1,
+   "oilMult": 1.0,
+   "armour": 5,
+   "walk": 55,
+   "run": 85,
+   "apex": 30,
+   "dodge": {
+    "kind": "brace",
+    "dist": 0,
+    "iframes": 0
+   },
+   "resist": {
+    "tide": 25,
+    "rime": 10,
+    "spark": -15
+   },
+   "weapon": "wpn_hookstaff",
+   "lantern": "lantern_hook",
+   "startWicks": [
+    {
+     "flame": "rime",
+     "shape": "wave"
+    },
+    {
+     "flame": "tide",
+     "shape": "arc",
+     "dry": true
+    }
+   ],
+   "ability": "ability_floodwall",
+   "passive": "sw_warden",
+   "oilOnHit": 1.5,
+   "voiceRole": "knight",
+   "movement": {
+    "runMult": 0.9,
+    "swimMult": 1.2,
+    "breathMult": 1.33,
+    "kbTaken": 0.7
+   },
+   "desc": "A tank who turns water into terrain. Braces instead of rolling."
+  },
+  {
+   "id": "tinker",
+   "name": "Tinker",
+   "role": "builder, traps, turret",
+   "unlock": {
+    "default": true
+   },
+   "attrs": {
+    "might": 4,
+    "wick": 5,
+    "draught": 5,
+    "nerve": 4,
+    "knack": 7
+   },
+   "hpMult": 1.0,
+   "oilMult": 1.0,
+   "armour": 0,
+   "walk": 60,
+   "run": 90,
+   "apex": 32,
+   "dodge": {
+    "kind": "roll",
+    "dist": 40,
+    "iframes": 0.16
+   },
+   "resist": {
+    "spark": 15
+   },
+   "weapon": "wpn_wrench",
+   "lantern": "lantern_wrench",
+   "startWicks": [
+    {
+     "flame": "spark",
+     "shape": "rune"
+    },
+    {
+     "flame": "ember",
+     "shape": "lob"
+    }
+   ],
+   "ability": "ability_turret",
+   "passive": "tk_handy",
+   "oilOnHit": 1.5,
+   "voiceRole": "tinker",
+   "movement": {
+    "buildMult": 1.5
+   },
+   "desc": "Builds faster, carries more, hijacks traps, and plants a turret."
+  },
+  {
+   "id": "chimneysweep",
+   "name": "Chimneysweep",
+   "role": "agile skirmisher, rope master",
+   "unlock": {
+    "challenge": "sweep_rope_2000",
+    "trial": "trial_rope_gauntlet"
+   },
+   "attrs": {
+    "might": 5,
+    "wick": 4,
+    "draught": 4,
+    "nerve": 4,
+    "knack": 8
+   },
+   "hpMult": 0.85,
+   "oilMult": 1.0,
+   "armour": 0,
+   "walk": 64,
+   "run": 105,
+   "apex": 38,
+   "dodge": {
+    "kind": "roll",
+    "dist": 50,
+    "iframes": 0.18
+   },
+   "resist": {
+    "ember": 15
+   },
+   "weapon": "wpn_brushspear",
+   "lantern": "lantern_tin",
+   "startWicks": [
+    {
+     "flame": "ember",
+     "shape": "arc"
+    },
+    {
+     "flame": "spark",
+     "shape": "tether"
+    }
+   ],
+   "ability": "ability_flue_dash",
+   "passive": "cs_soot",
+   "oilOnHit": 1.5,
+   "voiceRole": "swashbuckler",
+   "movement": {
+    "doubleJump": true,
+    "wallRun": true,
+    "runMult": 1.1
+   },
+   "desc": "Double jump, wall-run, and a rope in every hand. Unlocked by swinging 2,000 m on ropes."
+  },
+  {
+   "id": "moth_oracle",
+   "name": "Moth Oracle",
+   "role": "light-sight, crits in darkness",
+   "unlock": {
+    "challenge": "moth_lantern_lit",
+    "trial": "trial_hooded_crossing"
+   },
+   "attrs": {
+    "might": 3,
+    "wick": 7,
+    "draught": 5,
+    "nerve": 4,
+    "knack": 6
+   },
+   "hpMult": 0.95,
+   "oilMult": 1.05,
+   "armour": 0,
+   "walk": 62,
+   "run": 97,
+   "apex": 34,
+   "dodge": {
+    "kind": "flutter",
+    "dist": 48,
+    "iframes": 0.2
+   },
+   "resist": {
+    "gleam": 15,
+    "shade": 15
+   },
+   "weapon": "wpn_mothlamp_rod",
+   "lantern": "lantern_moth",
+   "startWicks": [
+    {
+     "flame": "gleam",
+     "shape": "bolt"
+    },
+    {
+     "flame": "rime",
+     "shape": "rune"
+    }
+   ],
+   "ability": "ability_foresight",
+   "passive": "mo_darksight",
+   "oilOnHit": 1.5,
+   "voiceRole": "oracle",
+   "movement": {
+    "glide": true
+   },
+   "desc": "Sees in the dark and crits there. Unlocked by crossing Blackwater with the lantern never out."
+  }
+ ],
+ "xp": {
+  "formula": "round10(60*L^1.6 + 40*L)",
+  "cap": 30
+ },
+ "attrCaps": {
+  "might": 20,
+  "wick": 25,
+  "draught": 20,
+  "nerve": 25,
+  "knack": 20
+ }
+}

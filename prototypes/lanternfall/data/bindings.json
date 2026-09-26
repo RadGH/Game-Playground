@@ -1,0 +1,229 @@
+{
+ "_doc": "Default key and pad bindings. Generated from docs/02-CONTROLS-UI.md §2-§3 (02 owns the values, 10 owns the shape). keys.<context>: action -> [KeyboardEvent.code ...]; mouse buttons are 'Mouse0' (left), 'Mouse1' (middle), 'Mouse2' (right); the wheel is 'WheelUp' / 'WheelDown'. gamepad.<context>: action -> [Standard Gamepad button names]. A context with meta.contexts.<name>.inherits uses its parent's bindings too, except that any code or button the child binds hides every parent action on that code (build mode's Digit1 is a part, not wick_1). Pad names: south/east/west/north, lb/rb/lt/rt, l3/r3, view/menu, dpad_*, ls/rs (sticks); '_tap' is a press under 0.2 s, '_hold' is held 0.5 s. js/core/input.js is re-pointed at this file in M5 (the built defaults swap cast/pole and use other screen keys).",
+ "schema": 1,
+ "keys": {
+  "play": {
+   "move_left": ["KeyA", "ArrowLeft"],
+   "move_right": ["KeyD", "ArrowRight"],
+   "look_up": ["KeyW", "ArrowUp"],
+   "look_down": ["KeyS", "ArrowDown"],
+   "jump": ["Space"],
+   "run": ["ShiftLeft", "ShiftRight"],
+   "dodge": ["KeyQ"],
+   "interact": ["KeyE"],
+   "cast": ["Mouse0"],
+   "pole": ["Mouse2"],
+   "wick_1": ["Digit1"],
+   "wick_2": ["Digit2"],
+   "wick_3": ["Digit3"],
+   "wick_4": ["Digit4"],
+   "wick_next": ["WheelDown"],
+   "wick_prev": ["WheelUp"],
+   "belt_1": ["KeyZ"],
+   "belt_2": ["KeyX"],
+   "belt_3": ["KeyC"],
+   "belt_4": ["KeyV"],
+   "quick_heal": ["KeyH"],
+   "hood": ["KeyY"],
+   "class_ability": ["KeyR"],
+   "grapple": ["KeyF"],
+   "build_mode": ["KeyG"],
+   "gravity_lantern": ["KeyT"],
+   "inspect": ["Tab"],
+   "ping": ["Mouse1"],
+   "pause": ["Escape"],
+   "inventory": ["KeyI"],
+   "character": ["KeyP"],
+   "skills": ["KeyK"],
+   "wick_builder": ["KeyB"],
+   "map": ["KeyM"],
+   "ledger": ["KeyL"],
+   "journal": ["KeyJ"],
+   "help": ["F1"],
+   "minimap_zoom_in": ["Equal", "NumpadAdd"],
+   "minimap_zoom_out": ["Minus", "NumpadSubtract"],
+   "minimap_toggle": ["KeyN"],
+   "subtitle_log": ["KeyU"],
+   "screenshot": ["F2"],
+   "perf_overlay": ["F3"],
+   "debug_console": ["Backquote"]
+  },
+  "build": {
+   "build_place": ["Mouse0"],
+   "build_cancel": ["Mouse2"],
+   "build_rotate_ccw": ["WheelUp"],
+   "build_rotate_cw": ["WheelDown"],
+   "build_part_1": ["Digit1"],
+   "build_part_2": ["Digit2"],
+   "build_part_3": ["Digit3"],
+   "build_part_4": ["Digit4"],
+   "build_part_5": ["Digit5"],
+   "build_part_6": ["Digit6"],
+   "build_part_7": ["Digit7"],
+   "build_part_8": ["Digit8"],
+   "build_part_9": ["Digit9"],
+   "build_part_10": ["Digit0"],
+   "build_mode": ["KeyG"]
+  },
+  "menu": {
+   "focus_up": ["ArrowUp", "KeyW"],
+   "focus_down": ["ArrowDown", "KeyS"],
+   "focus_left": ["ArrowLeft", "KeyA"],
+   "focus_right": ["ArrowRight", "KeyD"],
+   "focus_next": ["Tab"],
+   "confirm": ["Enter", "Space", "Mouse0"],
+   "back": ["Escape"],
+   "tab_prev": ["KeyQ"],
+   "tab_next": ["KeyE"],
+   "subtab_prev": ["BracketLeft"],
+   "subtab_next": ["BracketRight"],
+   "secondary": ["KeyX"],
+   "tertiary": ["KeyY"],
+   "compare": ["ShiftLeft", "ShiftRight"],
+   "scroll_up": ["WheelUp", "PageUp"],
+   "scroll_down": ["WheelDown", "PageDown"],
+   "tab_1": ["Digit1"],
+   "tab_2": ["Digit2"],
+   "tab_3": ["Digit3"],
+   "tab_4": ["Digit4"],
+   "tab_5": ["Digit5"],
+   "tab_6": ["Digit6"]
+  },
+  "dialogue": {
+   "reply_1": ["Digit1"],
+   "reply_2": ["Digit2"],
+   "reply_3": ["Digit3"],
+   "reply_4": ["Digit4"],
+   "advance": ["KeyE", "Space", "Enter", "Mouse0"],
+   "focus_up": ["ArrowUp"],
+   "focus_down": ["ArrowDown"],
+   "back": ["Escape"]
+  },
+  "sandbox": {
+   "cast": ["Mouse0"],
+   "wick_1": ["Digit1"],
+   "wick_2": ["Digit2"],
+   "wick_3": ["Digit3"],
+   "wick_4": ["Digit4"]
+  },
+  "text": {
+   "back": ["Escape"],
+   "confirm": ["Enter"]
+  },
+  "rebind": {
+   "cancel": ["Escape"]
+  }
+ },
+ "gamepad": {
+  "play": {
+   "move": ["ls"],
+   "aim": ["rs"],
+   "jump": ["south"],
+   "dodge": ["east"],
+   "pole": ["west"],
+   "interact": ["north"],
+   "cast": ["rt"],
+   "aim_steady": ["lt"],
+   "grapple": ["rb"],
+   "class_ability": ["lb_tap"],
+   "tool_wheel": ["lb_hold"],
+   "wick_prev": ["dpad_left"],
+   "wick_next": ["dpad_right"],
+   "wick_1": ["dpad_up"],
+   "quick_heal": ["dpad_down"],
+   "run_or_hood": ["l3"],
+   "soft_lock": ["r3"],
+   "map": ["view_tap"],
+   "inspect": ["view_hold"],
+   "pause": ["menu"]
+  },
+  "tool_wheel": {
+   "wedges": ["belt_1", "belt_2", "belt_3", "belt_4", "build_mode", "gravity_lantern", "hood", "ping"]
+  },
+  "build": {
+   "build_move_ghost": ["rs"],
+   "build_place": ["rt"],
+   "build_cancel": ["west"],
+   "build_mode": ["east"],
+   "build_rotate_ccw": ["lb"],
+   "build_rotate_cw": ["rb"],
+   "build_part_prev": ["dpad_left"],
+   "build_part_next": ["dpad_right"]
+  },
+  "menu": {
+   "focus": ["dpad", "ls"],
+   "confirm": ["south"],
+   "back": ["east"],
+   "tab_prev": ["lb"],
+   "tab_next": ["rb"],
+   "subtab_prev": ["lt"],
+   "subtab_next": ["rt"],
+   "secondary": ["west"],
+   "tertiary": ["north"],
+   "scroll": ["rs"],
+   "close_all": ["menu"]
+  },
+  "dialogue": {
+   "focus": ["dpad"],
+   "advance": ["south"],
+   "back": ["east"]
+  },
+  "sandbox": {
+   "cast": ["rt"],
+   "aim": ["rs"]
+  }
+ },
+ "options": {
+  "overchargeNeedsKey": {
+   "_doc": "Settings > Accessibility 'Overcharge needs a key' (default off). With it on, holding cast alone never overcharges; hold this key while pressing cast.",
+   "keys": { "overcharge_key": ["ShiftLeft", "ShiftRight"] },
+   "with": "cast",
+   "gamepad": { "overcharge_key": ["lt"] }
+  },
+  "aimWithKeys": {
+   "_doc": "Settings > Controls 'Aim with keys' (default off). With it on the arrow keys aim instead of moving (WASD still moves).",
+   "keys": {
+    "aim_up": ["ArrowUp"],
+    "aim_left": ["ArrowLeft"],
+    "aim_down": ["ArrowDown"],
+    "aim_right": ["ArrowRight"],
+    "soft_lock": ["Semicolon"]
+   },
+   "removes": {
+    "move_left": ["ArrowLeft"],
+    "move_right": ["ArrowRight"],
+    "look_up": ["ArrowUp"],
+    "look_down": ["ArrowDown"]
+   }
+  }
+ },
+ "meta": {
+  "contexts": {
+   "play": {},
+   "build": { "inherits": "play", "_doc": "movement, jump, dodge, interact and the screen keys still work; cast/pole/digits/wheel are replaced" },
+   "menu": {},
+   "dialogue": {},
+   "text": {},
+   "rebind": {},
+   "sandbox": { "_doc": "mouse over the Wick builder's test chamber; aim follows the mouse" }
+  },
+  "hold": ["move_left", "move_right", "look_up", "look_down", "run", "cast", "pole", "grapple", "interact", "inspect", "jump", "overcharge_key"],
+  "toggleable": ["run", "overcharge_key", "grapple", "look_down", "look_up", "tool_wheel"],
+  "combos": { "drop_through": ["look_down", "jump"] },
+  "fixed": { "_doc": "never rebindable, so a player cannot lock themselves out (02 §1 rule 3); mouse move (aim) is fixed too", "keys": ["pause", "help"], "gamepad": ["menu", "view"] },
+  "unlock": {
+   "wick_2": "a1_n03",
+   "wick_builder": "a1_n03",
+   "build_mode": "a1_n06",
+   "class_ability": "act1_relight",
+   "grapple": "a2_n02",
+   "skills": "a2_n06",
+   "overcharge": "a2_n06",
+   "wick_3": "a3_n02",
+   "hood": "a4_n01",
+   "wick_4": "a5_n02",
+   "gravity_lantern": "a5_n03"
+  }
+ },
+ "reserved": ["Control+KeyW", "Control+KeyT", "Control+KeyN", "Control+KeyQ", "Control+Tab", "Alt+F4", "F5", "F11", "F12", "Control+Shift+KeyI", "Meta+*", "ControlLeft", "ControlRight", "AltLeft", "AltRight"]
+}

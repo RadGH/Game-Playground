@@ -1,0 +1,12 @@
+{
+ "_doc": "Lanternfall's extra Lingo memory event types (docs/01 §12.5, R26), merged over lingo/data/events.json's `types` by js/talk/lingo-bridge.js (the core file is never edited). sold_item: Hollis Crane remembers every item you sold him; recalled through the intent pawn_recall with bindings item, price, days. Importance 0.3 (+0.2 for rare or better is the game's to add), half-life 30 in-game days.",
+ "version": 1,
+ "types": {
+  "sold_item": {
+   "importance": 0.3, "halfLifeDays": 30, "valence": 0.1, "intent": "pawn_recall", "tags": ["trade", "money"], "mergeKeys": ["item"],
+   "traitWeights": { "greedy": 1.5, "sarcastic": 1.1 },
+   "bindings": { "item": { "type": "item" } },
+   "details": { "price": [4, 60] }
+  }
+ }
+}

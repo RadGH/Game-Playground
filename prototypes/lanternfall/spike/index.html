@@ -1,0 +1,37 @@
+<!doctype html><meta charset="utf-8"><title>Lanternfall spike</title>
+<style>html,body{margin:0;background:#000;overflow:hidden}canvas{display:block;image-rendering:pixelated}#s{position:fixed;left:8px;top:8px;color:#9cf;font:12px monospace;white-space:pre}</style>
+<canvas id="c"></canvas><div id="s"></div>
+<script type="module">
+import { World, AIR, STONE, SAND, WATER, OIL, STEAM, WOOD, FIRE } from './cells-spike.js';
+import { GLRender } from './render-spike.js';
+const VW = 480, VH = 270, W = 1024, H = 512;
+const w = new World(W, H);
+for (let x = 0; x < W; x++) for (let y = 0; y < H; y++) { const g = 400 + Math.sin(x * 0.02) * 30 + Math.sin(x * 0.07) * 8; if (y > g || x < 4 || x > W - 5) w.set(x, y, STONE); }
+for (let x = 120; x < 360; x++) for (let y = 330; y < 440; y++) if (w.mat[y * W + x] === AIR) w.set(x, y, WATER);
+for (let x = 380; x < 460; x++) for (let y = 200; y < 260; y++) w.set(x, y, SAND);
+for (let x = 500; x < 520; x++) for (let y = 250; y < 420; y++) w.set(x, y, STONE);
+for (let x = 540; x < 700; x++) for (let y = 300; y < 330; y++) w.set(x, y, OIL);
+for (let x = 180; x < 300; x++) for (let y = 300; y < 304; y++) w.set(x, y, WOOD);
+const PAL = { [AIR]: [14, 18, 26, 0], [STONE]: [58, 64, 78, 128], [SAND]: [120, 104, 80, 128], [WATER]: [24, 48, 80, 191], [OIL]: [40, 30, 20, 191], [STEAM]: [120, 130, 140, 40], [WOOD]: [80, 56, 36, 128], [FIRE]: [255, 150, 60, 255] };
+const cv = document.getElementById('c'); const R = new GLRender(cv, VW, VH);
+let cam = { x: 100, y: 190 }, t = 0, sim = 0, ren = 0, frames = 0, act = 0; const drops = [];
+function fit() { const s = Math.max(1, Math.floor(Math.min(innerWidth / VW, innerHeight / VH))); cv.width = VW * s; cv.height = VH * s; }
+addEventListener('resize', fit); fit();
+function frame() {
+  t += 1 / 60; const a = performance.now();
+  for (let k = 0; k < 6; k++) drops.push({ x: cam.x + Math.random() * VW * 1.2 - 40, y: cam.y - 10, vy: 280 + Math.random() * 80 });
+  for (let k = drops.length - 1; k >= 0; k--) { const d = drops[k]; d.y += d.vy / 60; d.x += 0.6; const i = (d.y | 0) * W + (d.x | 0); if (d.y >= H - 1 || w.mat[i] !== AIR) { if (Math.random() < 0.15 && w.mat[i - W] === AIR) w.set(d.x | 0, (d.y | 0) - 1, WATER); drops.splice(k, 1); } }
+  if (frames % 20 === 0) for (let k = 0; k < 30; k++) w.set(600 + (Math.random() * 20 | 0), 290 + (Math.random() * 6 | 0), FIRE);
+  act = w.step(); const b = performance.now(); sim = sim * 0.95 + (b - a) * 0.05;
+  cam.x = 100 + Math.sin(t * 0.2) * 150;
+  const px = R.pix, cx = cam.x | 0, cy = cam.y | 0;
+  for (let y = 0; y < VH; y++) for (let x = 0; x < VW; x++) { const wi = (y + cy) * W + x + cx, m = w.mat[wi], p = PAL[m], v = (w.var[wi] & 15) - 8, o = ((VH - 1 - y) * VW + x) * 4; px[o] = p[0] + v; px[o + 1] = p[1] + v; px[o + 2] = p[2] + v; px[o + 3] = p[3]; }
+  for (const d of drops) { const x = (d.x - cx) | 0, y = (d.y - cy) | 0; for (let s = 0; s < 3; s++) { const yy = y - s; if (x >= 0 && x < VW && yy >= 0 && yy < VH) { const o = ((VH - 1 - yy) * VW + x) * 4; px[o] = 110; px[o + 1] = 130; px[o + 2] = 160; px[o + 3] = 20; } } }
+  const lights = [{ x: 240 + Math.sin(t) * 120, y: VH - 120, r: 140, i: 1.6, c: [1.0, 0.54, 0.16] }, { x: 60, y: VH - 60, r: 110, i: 1.2, c: [0.25, 0.9, 1.0] }, { x: 400, y: VH - 150, r: 120, i: 1.3, c: [0.7, 0.36, 1.0] }];
+  for (let k = 0; k < 20; k++) lights.push({ x: (k * 53) % VW, y: VH - 200 + (k * 17) % 80, r: 40, i: 0.6, c: [1, 1, 0.5] });
+  R.draw(lights, t, cv.width, cv.height); const c = performance.now(); ren = ren * 0.95 + (c - b) * 0.05;
+  frames++; if (frames % 10 === 0) document.getElementById('s').textContent = `sim ${sim.toFixed(2)}ms  cpu-render ${ren.toFixed(2)}ms  active chunks ${act}/${w.cw * w.ch}  drops ${drops.length}`;
+  window.__stats = { sim, ren, act, frames }; requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>

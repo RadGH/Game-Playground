@@ -1,0 +1,744 @@
+{
+ "_doc": "Cell materials for the Lanternfall world. Ids are fixed forever. Rules: docs/06-PHYSICS-RENDER.md \u00a75. Fields: cls empty|static|powder|liquid|gas|fire; density (air 1, water 10); hp = cell life for solids/powders; flam = ignition chance x100 per tick next to fire; support none|island|span|hang (+span reach); melt/freeze/boil/ignite temps in C; transmit = light through one cell; emit = self light; ramp = unlit albedo, dark to light.",
+ "version": 1,
+ "list": [
+  {
+   "id": 0,
+   "key": "air",
+   "name": "Air",
+   "cls": "empty",
+   "density": 1,
+   "hp": 0,
+   "flam": 0,
+   "ramp": [
+    "#000000"
+   ]
+  },
+  {
+   "id": 1,
+   "key": "bedrock",
+   "name": "Bedrock",
+   "cls": "static",
+   "density": 99,
+   "hp": 255,
+   "flam": 0,
+   "ramp": [
+    "#0b0d12",
+    "#10131a",
+    "#151923",
+    "#1a1f2b"
+   ],
+   "support": "none"
+  },
+  {
+   "id": 2,
+   "key": "stone",
+   "name": "Stone",
+   "cls": "static",
+   "density": 99,
+   "hp": 60,
+   "flam": 0,
+   "ramp": [
+    "#1f2530",
+    "#262d3a",
+    "#2e3645",
+    "#353e4f",
+    "#3d4758",
+    "#465163"
+   ],
+   "support": "island",
+   "conduct": 0.08,
+   "brokenTo": "rubble"
+  },
+  {
+   "id": 3,
+   "key": "brick",
+   "name": "Brick",
+   "cls": "static",
+   "density": 99,
+   "hp": 40,
+   "flam": 0,
+   "ramp": [
+    "#2a2330",
+    "#32293a",
+    "#3a3044",
+    "#2b2f3d"
+   ],
+   "support": "span",
+   "span": 24,
+   "brokenTo": "rubble"
+  },
+  {
+   "id": 4,
+   "key": "metal",
+   "name": "Metal",
+   "cls": "static",
+   "density": 99,
+   "hp": 120,
+   "flam": 0,
+   "ramp": [
+    "#2c3440",
+    "#384352",
+    "#455266",
+    "#56657b"
+   ],
+   "support": "span",
+   "span": 40,
+   "conduct": 0.45,
+   "brokenTo": "rust"
+  },
+  {
+   "id": 5,
+   "key": "glass",
+   "name": "Glass",
+   "cls": "static",
+   "density": 99,
+   "hp": 10,
+   "flam": 0,
+   "ramp": [
+    "#2f4a55",
+    "#3d5f6c",
+    "#507886"
+   ],
+   "support": "span",
+   "span": 6,
+   "meltAt": 1200,
+   "meltTo": "molten_glass",
+   "transmit": 0.85,
+   "brokenTo": "sand"
+  },
+  {
+   "id": 6,
+   "key": "wood",
+   "name": "Wood",
+   "cls": "static",
+   "density": 99,
+   "hp": 30,
+   "flam": 6,
+   "ramp": [
+    "#2b2019",
+    "#35281f",
+    "#3f3026",
+    "#4a392d"
+   ],
+   "support": "span",
+   "span": 16,
+   "igniteAt": 280,
+   "burnRate": 6,
+   "burnsTo": [
+    {
+     "to": "ember",
+     "p": 0.3
+    },
+    {
+     "to": "ash",
+     "p": 0.7
+    }
+   ],
+   "conduct": 0.06,
+   "brokenTo": "rubble"
+  },
+  {
+   "id": 7,
+   "key": "plank",
+   "name": "Plank",
+   "cls": "static",
+   "density": 99,
+   "hp": 22,
+   "flam": 8,
+   "ramp": [
+    "#4a3726",
+    "#56402d",
+    "#634a34"
+   ],
+   "support": "span",
+   "span": 12,
+   "igniteAt": 260,
+   "burnRate": 4,
+   "burnsTo": [
+    {
+     "to": "ember",
+     "p": 0.5
+    },
+    {
+     "to": "air",
+     "p": 0.5
+    }
+   ],
+   "brokenTo": "rubble"
+  },
+  {
+   "id": 8,
+   "key": "wax",
+   "name": "Wax",
+   "cls": "static",
+   "density": 99,
+   "hp": 18,
+   "flam": 3,
+   "ramp": [
+    "#5a5448",
+    "#6b6455",
+    "#7d7563",
+    "#8f8672"
+   ],
+   "support": "span",
+   "span": 10,
+   "meltAt": 60,
+   "meltTo": "molten_wax",
+   "transmit": 0.2,
+   "conduct": 0.1,
+   "brokenTo": "wax"
+  },
+  {
+   "id": 9,
+   "key": "ice",
+   "name": "Ice",
+   "cls": "static",
+   "density": 99,
+   "hp": 20,
+   "flam": 0,
+   "ramp": [
+    "#6f8fa8",
+    "#86a6bf",
+    "#9fc0d8"
+   ],
+   "support": "span",
+   "span": 20,
+   "meltAt": 1,
+   "meltTo": "water",
+   "transmit": 0.7,
+   "conduct": 0.2,
+   "brokenTo": "water",
+   "friction": 0.1
+  },
+  {
+   "id": 10,
+   "key": "moss",
+   "name": "Moss",
+   "cls": "static",
+   "density": 99,
+   "hp": 6,
+   "flam": 2,
+   "ramp": [
+    "#1f3a2c",
+    "#274735",
+    "#30553f"
+   ],
+   "support": "none",
+   "igniteAt": 180,
+   "burnRate": 3,
+   "burnsTo": [
+    {
+     "to": "ash",
+     "p": 1
+    }
+   ]
+  },
+  {
+   "id": 11,
+   "key": "glowmoss",
+   "name": "Glowmoss",
+   "cls": "static",
+   "density": 99,
+   "hp": 6,
+   "flam": 1,
+   "ramp": [
+    "#1c4a44",
+    "#25605a",
+    "#2f7870"
+   ],
+   "support": "none",
+   "igniteAt": 200,
+   "burnRate": 3,
+   "burnsTo": [
+    {
+     "to": "ash",
+     "p": 1
+    }
+   ],
+   "emit": {
+    "color": "#4fd6b8",
+    "power": 0.35
+   }
+  },
+  {
+   "id": 12,
+   "key": "rope",
+   "name": "Rope",
+   "cls": "static",
+   "density": 99,
+   "hp": 8,
+   "flam": 10,
+   "ramp": [
+    "#4b3f30",
+    "#5a4b39"
+   ],
+   "support": "hang",
+   "igniteAt": 180,
+   "burnRate": 2,
+   "burnsTo": [
+    {
+     "to": "air",
+     "p": 1
+    }
+   ],
+   "transmit": 0.5,
+   "climbable": true
+  },
+  {
+   "id": 13,
+   "key": "web",
+   "name": "Web",
+   "cls": "static",
+   "density": 99,
+   "hp": 3,
+   "flam": 20,
+   "ramp": [
+    "#6c6f7a",
+    "#83868f"
+   ],
+   "support": "hang",
+   "igniteAt": 120,
+   "burnRate": 1,
+   "burnsTo": [
+    {
+     "to": "air",
+     "p": 1
+    }
+   ],
+   "transmit": 0.6,
+   "slow": 0.35
+  },
+  {
+   "id": 14,
+   "key": "bone",
+   "name": "Bone",
+   "cls": "static",
+   "density": 99,
+   "hp": 30,
+   "flam": 0,
+   "ramp": [
+    "#6a665c",
+    "#7d786c",
+    "#908a7c"
+   ],
+   "support": "island",
+   "brokenTo": "ash"
+  },
+  {
+   "id": 15,
+   "key": "cloudstuff",
+   "name": "Cloudstuff",
+   "cls": "static",
+   "density": 99,
+   "hp": 50,
+   "flam": 0,
+   "ramp": [
+    "#5a6478",
+    "#6a7489",
+    "#7c879b",
+    "#8f9aae"
+   ],
+   "support": "island",
+   "transmit": 0.4
+  },
+  {
+   "id": 16,
+   "key": "dirt",
+   "name": "Dirt",
+   "cls": "powder",
+   "density": 15,
+   "hp": 8,
+   "flam": 0,
+   "ramp": [
+    "#2a241f",
+    "#322b24",
+    "#3a3229"
+   ],
+   "repose": 2
+  },
+  {
+   "id": 17,
+   "key": "sand",
+   "name": "Sand",
+   "cls": "powder",
+   "density": 18,
+   "hp": 5,
+   "flam": 0,
+   "ramp": [
+    "#4a4436",
+    "#57503f",
+    "#645c49"
+   ],
+   "repose": 1,
+   "meltAt": 1200,
+   "meltTo": "molten_glass"
+  },
+  {
+   "id": 18,
+   "key": "silt",
+   "name": "Silt",
+   "cls": "powder",
+   "density": 13,
+   "hp": 4,
+   "flam": 0,
+   "ramp": [
+    "#343632",
+    "#3d403a",
+    "#464a43"
+   ],
+   "repose": 4
+  },
+  {
+   "id": 19,
+   "key": "ash",
+   "name": "Ash",
+   "cls": "powder",
+   "density": 4,
+   "hp": 2,
+   "flam": 0,
+   "ramp": [
+    "#3a3a3e",
+    "#47474c",
+    "#55555b"
+   ],
+   "repose": 1
+  },
+  {
+   "id": 20,
+   "key": "rubble",
+   "name": "Rubble",
+   "cls": "powder",
+   "density": 22,
+   "hp": 10,
+   "flam": 0,
+   "ramp": [
+    "#2a303a",
+    "#343b47",
+    "#3f4755"
+   ],
+   "repose": 3
+  },
+  {
+   "id": 21,
+   "key": "ember",
+   "name": "Ember",
+   "cls": "powder",
+   "density": 5,
+   "hp": 4,
+   "flam": 0,
+   "ramp": [
+    "#6b2410",
+    "#9a3a14",
+    "#d8601c"
+   ],
+   "repose": 1,
+   "freezeAt": 150,
+   "freezeTo": "ash",
+   "temp": 700,
+   "emit": {
+    "color": "#ff7a20",
+    "power": 0.9
+   }
+  },
+  {
+   "id": 22,
+   "key": "water",
+   "name": "Water",
+   "cls": "liquid",
+   "density": 10,
+   "hp": 0,
+   "flam": 0,
+   "ramp": [
+    "#0d1a2a",
+    "#10213a",
+    "#14294a"
+   ],
+   "dispersion": 5,
+   "boilAt": 100,
+   "boilTo": "steam",
+   "freezeAt": -5,
+   "freezeTo": "ice",
+   "transmit": 0.8,
+   "conduct": 0.25,
+   "absorb": 0.06,
+   "reflect": 0.55
+  },
+  {
+   "id": 23,
+   "key": "oil",
+   "name": "Lamp oil",
+   "cls": "liquid",
+   "density": 8,
+   "hp": 0,
+   "flam": 30,
+   "ramp": [
+    "#1d1a14",
+    "#29241a",
+    "#352e20"
+   ],
+   "dispersion": 3,
+   "igniteAt": 200,
+   "burnRate": 3,
+   "burnsTo": [
+    {
+     "to": "air",
+     "p": 1
+    }
+   ],
+   "transmit": 0.5,
+   "absorb": 0.2,
+   "reflect": 0.7
+  },
+  {
+   "id": 24,
+   "key": "molten_wax",
+   "name": "Molten wax",
+   "cls": "liquid",
+   "density": 9,
+   "hp": 0,
+   "flam": 4,
+   "ramp": [
+    "#9c8a5e",
+    "#b39f6d"
+   ],
+   "dispersion": 1,
+   "freezeAt": 50,
+   "freezeTo": "wax",
+   "temp": 90,
+   "transmit": 0.4,
+   "emit": {
+    "color": "#ffcf6a",
+    "power": 0.35
+   },
+   "hurt": {
+    "amount": 4,
+    "every": 10,
+    "flame": "ember"
+   }
+  },
+  {
+   "id": 25,
+   "key": "bile",
+   "name": "Bile",
+   "cls": "liquid",
+   "density": 12,
+   "hp": 0,
+   "flam": 0,
+   "ramp": [
+    "#2f4a14",
+    "#3d6019",
+    "#4b761f"
+   ],
+   "dispersion": 3,
+   "boilAt": 100,
+   "boilTo": "miasma",
+   "transmit": 0.6,
+   "absorb": 0.1,
+   "reflect": 0.35,
+   "emit": {
+    "color": "#8dff4a",
+    "power": 0.12
+   },
+   "hurt": {
+    "amount": 3,
+    "every": 15,
+    "flame": "bile"
+   }
+  },
+  {
+   "id": 26,
+   "key": "ichor",
+   "name": "Ichor",
+   "cls": "liquid",
+   "density": 11,
+   "hp": 0,
+   "flam": 1,
+   "ramp": [
+    "#2a0c10",
+    "#3a1016",
+    "#4a141c"
+   ],
+   "dispersion": 2,
+   "boilAt": 100,
+   "boilTo": "smoke",
+   "transmit": 0.3
+  },
+  {
+   "id": 27,
+   "key": "mud",
+   "name": "Mud",
+   "cls": "liquid",
+   "density": 16,
+   "hp": 0,
+   "flam": 0,
+   "ramp": [
+    "#2b251d",
+    "#332b21"
+   ],
+   "dispersion": 1,
+   "boilAt": 100,
+   "boilTo": "dirt",
+   "slow": 0.6,
+   "absorb": 0.5,
+   "reflect": 0.2
+  },
+  {
+   "id": 28,
+   "key": "molten_glass",
+   "name": "Molten glass",
+   "cls": "liquid",
+   "density": 25,
+   "hp": 0,
+   "flam": 0,
+   "ramp": [
+    "#c2561a",
+    "#e2782a"
+   ],
+   "dispersion": 1,
+   "freezeAt": 900,
+   "freezeTo": "glass",
+   "temp": 1300,
+   "transmit": 0.5,
+   "emit": {
+    "color": "#ff8a2a",
+    "power": 1.2
+   },
+   "hurt": {
+    "amount": 10,
+    "every": 10,
+    "flame": "ember"
+   }
+  },
+  {
+   "id": 29,
+   "key": "steam",
+   "name": "Steam",
+   "cls": "gas",
+   "density": 0.3,
+   "hp": 0,
+   "flam": 0,
+   "ramp": [
+    "#8a96a8",
+    "#a3aebd"
+   ],
+   "alpha": 0.35,
+   "lifeMin": 480,
+   "lifeMax": 960,
+   "freezeAt": 90,
+   "freezeTo": "water",
+   "temp": 110,
+   "transmit": 0.75
+  },
+  {
+   "id": 30,
+   "key": "smoke",
+   "name": "Smoke",
+   "cls": "gas",
+   "density": 0.6,
+   "hp": 0,
+   "flam": 0,
+   "ramp": [
+    "#1d2026",
+    "#262a31"
+   ],
+   "alpha": 0.6,
+   "lifeMin": 360,
+   "lifeMax": 800,
+   "transmit": 0.85
+  },
+  {
+   "id": 31,
+   "key": "miasma",
+   "name": "Miasma",
+   "cls": "gas",
+   "density": 1.6,
+   "hp": 0,
+   "flam": 25,
+   "ramp": [
+    "#3e4a26",
+    "#4c5a2e"
+   ],
+   "alpha": 0.45,
+   "lifeMin": 1200,
+   "lifeMax": 2000,
+   "igniteAt": 150,
+   "transmit": 0.8,
+   "emit": {
+    "color": "#8dff4a",
+    "power": 0.08
+   }
+  },
+  {
+   "id": 32,
+   "key": "fire",
+   "name": "Fire",
+   "cls": "fire",
+   "density": 0.2,
+   "hp": 0,
+   "flam": 0,
+   "ramp": [
+    "#ff5a1a",
+    "#ff8a2a",
+    "#ffc04a",
+    "#fff0a0"
+   ],
+   "lifeMin": 12,
+   "lifeMax": 40,
+   "transmit": 1,
+   "emit": {
+    "color": "#ff8a2a",
+    "power": 1.4
+   },
+   "temp": 500
+  },
+  {
+   "id": 33,
+   "key": "spark",
+   "name": "Spark",
+   "cls": "fire",
+   "density": 0.2,
+   "hp": 0,
+   "flam": 0,
+   "ramp": [
+    "#fff27a",
+    "#ffffff"
+   ],
+   "lifeMin": 3,
+   "lifeMax": 8,
+   "transmit": 1,
+   "emit": {
+    "color": "#fff27a",
+    "power": 1.6
+   }
+  },
+  {
+   "id": 34,
+   "key": "rust",
+   "name": "Rust",
+   "cls": "powder",
+   "density": 14,
+   "hp": 3,
+   "flam": 0,
+   "ramp": [
+    "#4a2a1a",
+    "#5a3420"
+   ],
+   "repose": 2
+  },
+  {
+   "id": 35,
+   "key": "salt",
+   "name": "Brine salt",
+   "cls": "powder",
+   "density": 12,
+   "hp": 3,
+   "flam": 0,
+   "ramp": [
+    "#7a7c80",
+    "#8c8e92"
+   ],
+   "repose": 2
+  }
+ ]
+}

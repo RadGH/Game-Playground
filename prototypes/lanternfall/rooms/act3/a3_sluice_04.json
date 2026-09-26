@@ -1,0 +1,596 @@
+{
+ "format": 1,
+ "id": "a3_sluice_04",
+ "name": "The Weir Stair",
+ "act": "act3",
+ "kind": "puzzle",
+ "size": [
+  960,
+  544
+ ],
+ "block": 16,
+ "seed": 88031,
+ "theme": "sluice_vault",
+ "rain": {
+  "density": 0
+ },
+ "ambient": {
+  "color": "#1a2a40",
+  "power": 0.45,
+  "bottomMult": 0.5
+ },
+ "legend": {
+  "Q": {
+   "mat": "brick",
+   "cracked": true
+  }
+ },
+ "map": [
+  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+  "XX###################BBBBBBBBBBBBBBBBBBBBBBBBBBBBBB#######XX",
+  "XX###################..............................#######XX",
+  "XX###################.....................................XX",
+  "XX###################.......................................",
+  "......................................BBB...................",
+  "............................................................",
+  "..............................BBB...........................",
+  "............................................................",
+  "XXBBBBBBBBBBBBBBBBBBB..............................BBBBB##XX",
+  "XX###############..................................#######XX",
+  "XX###############.....BB......................BB...#######XX",
+  "XX###############.....BB......................BB...#######XX",
+  "XX###################.BB~~~~~~~~~~~~~~~~~~~~~~BB...#######XX",
+  "XX###################.BB~~~~~~~~~~~~~~~~~~~~~~BB...#######XX",
+  "XX###################.BB~~~~~~~~~~~~~~~~~~~~~~BB...#######XX",
+  "XX###################.BB~~~~~~~~~~~~~~~~~~~~~~BB...#######XX",
+  "XX#########...........BB~~~~~~~~~~~~~~~~~~~~~~BB........##XX",
+  "XX#########...........BB~~~~~~~~~~~~~~~~~~~~~~BB........##XX",
+  "XX#########...........BB~~~~~~~~~~~~~~~~~~~~~~GG........##XX",
+  "XX#########...........BB~~~~~~~~~~~~~~~~~~~~~~GG........##XX",
+  "XX#########...........BB~~~~~~~~~~~~~~~~~~~~~~GG........##XX",
+  "XX#########...........BB~~~~~~~~~~~~~~~~~~~~~~BB..........XX",
+  "XX##......Q...........BB~~~~~~~~~~~~~~~~~~~~~~BB............",
+  "XX##......Q...........BB~~~~~~~~~~~~~~~~~~~~~~BB............",
+  "XX##......Q...........BB~~~~~~~~~~~~~~~~~~~~~~BB............",
+  "XX##......Qdddddddddd.BB~~iiiiiiii~~~~~~~~~~~~BB............",
+  "XX#########BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBMMMMMMMMMMXX",
+  "XX####################BBBBBBBBBBBBBBBBBBBBBBBBBBMMMMMMMMMMXX",
+  "XX########################################################XX",
+  "XX########################################################XX",
+  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+ ],
+ "ops": [
+  {
+   "op": "poly",
+   "mat": "brick",
+   "points": [
+    [
+     336,
+     48
+    ],
+    [
+     400,
+     48
+    ],
+    [
+     336,
+     96
+    ]
+   ],
+   "note": "vault corner fillet, left"
+  },
+  {
+   "op": "poly",
+   "mat": "brick",
+   "points": [
+    [
+     816,
+     48
+    ],
+    [
+     752,
+     48
+    ],
+    [
+     816,
+     96
+    ]
+   ],
+   "note": "vault corner fillet, right"
+  },
+  {
+   "op": "rect",
+   "rect": [
+    352,
+    192,
+    32,
+    256
+   ],
+   "mat": "brick",
+   "pin": true,
+   "note": "pin the basin's left wall so a drained basin never collapses it"
+  },
+  {
+   "op": "rect",
+   "rect": [
+    736,
+    192,
+    32,
+    256
+   ],
+   "mat": "brick",
+   "pin": true
+  },
+  {
+   "op": "basin",
+   "id": "weir",
+   "rect": [
+    384,
+    224,
+    352,
+    224
+   ],
+   "level": 224,
+   "mode": "controlled",
+   "rate": 90,
+   "inlets": [
+    [
+     440,
+     64
+    ]
+   ],
+   "drains": [
+    [
+     744,
+     440
+    ]
+   ]
+  },
+  {
+   "op": "line",
+   "from": [
+    432,
+    48
+   ],
+   "to": [
+    432,
+    64
+   ],
+   "thick": 6,
+   "mat": "metal",
+   "note": "inlet pipe stub in the vault"
+  },
+  {
+   "op": "rope",
+   "from": [
+    560,
+    48
+   ],
+   "length": 380,
+   "note": "hangs from the vault to 20 cells above the basin floor: the way back up when drained"
+  },
+  {
+   "op": "rope",
+   "from": [
+    336,
+    176
+   ],
+   "length": 256,
+   "note": "hangs beside the gallery's end, down the shaft into the lower-left room"
+  },
+  {
+   "op": "carve",
+   "rect": [
+    48,
+    176,
+    128,
+    96
+   ],
+   "only": [
+    "stone"
+   ],
+   "noise": {
+    "scale": 18,
+    "threshold": 0.6,
+    "octaves": 3
+   },
+   "keepFloor": 4,
+   "note": "a small cave pocket in the left rock mass, flavour only"
+  },
+  {
+   "op": "vein",
+   "from": [
+    60,
+    300
+   ],
+   "to": [
+    150,
+    360
+   ],
+   "mat": "glowmoss",
+   "thick": 2,
+   "wobble": 6
+  },
+  {
+   "op": "scatter",
+   "rect": [
+    180,
+    420,
+    150,
+    12
+   ],
+   "mat": "rubble",
+   "count": 4,
+   "size": [
+    4,
+    10
+   ]
+  },
+  {
+   "op": "clear_decor",
+   "rect": [
+    736,
+    368,
+    48,
+    80
+   ],
+   "note": "sluice gate slot must be exact"
+  }
+ ],
+ "things": [
+  {
+   "t": "entry",
+   "id": "w",
+   "at": [
+    12,
+    159
+   ],
+   "face": "r"
+  },
+  {
+   "t": "exit",
+   "id": "exit_w",
+   "rect": [
+    0,
+    96,
+    4,
+    64
+   ],
+   "to": "a3_sluice_03",
+   "entry": "e"
+  },
+  {
+   "t": "entry",
+   "id": "ne",
+   "at": [
+    900,
+    159
+   ],
+   "face": "l"
+  },
+  {
+   "t": "exit",
+   "id": "exit_ne",
+   "rect": [
+    956,
+    80,
+    4,
+    80
+   ],
+   "to": "a3_cistern_hub",
+   "entry": "sw"
+  },
+  {
+   "t": "entry",
+   "id": "se",
+   "at": [
+    940,
+    447
+   ],
+   "face": "l"
+  },
+  {
+   "t": "exit",
+   "id": "exit_se",
+   "rect": [
+    956,
+    384,
+    4,
+    64
+   ],
+   "to": "a3_sluice_05",
+   "entry": "w"
+  },
+  {
+   "t": "lamp_post",
+   "id": "lp_a3_04",
+   "at": [
+    248,
+    431
+   ]
+  },
+  {
+   "t": "lever",
+   "id": "lv_sluice",
+   "at": [
+    296,
+    223
+   ],
+   "state": false
+  },
+  {
+   "t": "sign",
+   "id": "sign_weir",
+   "at": [
+    280,
+    223
+   ],
+   "text": "sign.a3_04.weir"
+  },
+  {
+   "t": "sluice",
+   "id": "gate_1",
+   "rect": [
+    736,
+    384,
+    32,
+    64
+   ],
+   "basin": "weir",
+   "mat": "metal"
+  },
+  {
+   "t": "plate",
+   "id": "plate_1",
+   "rect": [
+    600,
+    444,
+    24,
+    4
+   ],
+   "weight": 1
+  },
+  {
+   "t": "timed_door",
+   "id": "door_low",
+   "rect": [
+    896,
+    368,
+    16,
+    80
+   ],
+   "mat": "metal",
+   "open": 12
+  },
+  {
+   "t": "grapple_point",
+   "id": "gp_1",
+   "at": [
+    480,
+    50
+   ]
+  },
+  {
+   "t": "grapple_point",
+   "id": "gp_2",
+   "at": [
+    640,
+    50
+   ]
+  },
+  {
+   "t": "grapple_point",
+   "id": "gp_3",
+   "at": [
+    744,
+    50
+   ]
+  },
+  {
+   "t": "chest",
+   "id": "chest_secret",
+   "at": [
+    112,
+    431
+   ],
+   "loot": "loot_chest_a3_secret"
+  },
+  {
+   "t": "pickup",
+   "id": "pearl_basin",
+   "kind": "pearls",
+   "amount": 1,
+   "at": [
+    424,
+    447
+   ]
+  },
+  {
+   "t": "spawn",
+   "id": "sp_eels",
+   "enemy": "sluice_eel",
+   "count": 3,
+   "rect": [
+    400,
+    260,
+    320,
+    150
+   ],
+   "when": "enter"
+  },
+  {
+   "t": "spawn",
+   "id": "sp_rats",
+   "enemy": "drip_rat",
+   "count": 2,
+   "rect": [
+    190,
+    400,
+    120,
+    30
+   ],
+   "when": "enter"
+  },
+  {
+   "t": "light",
+   "id": "lt_lp",
+   "at": [
+    248,
+    400
+   ],
+   "color": "#ffc46a",
+   "r": 96,
+   "intensity": 1.2,
+   "shadow": true,
+   "flicker": 0.04,
+   "sprite": "none"
+  },
+  {
+   "t": "light",
+   "id": "lt_vault_a",
+   "at": [
+    420,
+    70
+   ],
+   "color": "#6fb0ff",
+   "r": 90,
+   "intensity": 0.5,
+   "shadow": true,
+   "flicker": 0.02,
+   "sprite": "sluice_lamp_cold"
+  },
+  {
+   "t": "light",
+   "id": "lt_vault_b",
+   "at": [
+    700,
+    70
+   ],
+   "color": "#6fb0ff",
+   "r": 90,
+   "intensity": 0.5,
+   "shadow": true,
+   "flicker": 0.02,
+   "sprite": "sluice_lamp_cold"
+  },
+  {
+   "t": "light",
+   "id": "lt_trench",
+   "at": [
+    860,
+    380
+   ],
+   "color": "#ffb060",
+   "r": 70,
+   "intensity": 0.8,
+   "shadow": true,
+   "flicker": 0.1,
+   "sprite": "wall_lantern"
+  },
+  {
+   "t": "drip",
+   "id": "drip_inlet",
+   "at": [
+    432,
+    66
+   ],
+   "every": [
+    0.2,
+    0.2
+   ],
+   "stream": true
+  },
+  {
+   "t": "zone",
+   "id": "zone_drained",
+   "rect": [
+    384,
+    400,
+    352,
+    48
+   ],
+   "on": "enter",
+   "once": true
+  },
+  {
+   "t": "camzone",
+   "id": "cam_hall",
+   "rect": [
+    336,
+    32,
+    480,
+    432
+   ],
+   "lock": "none",
+   "wide": true
+  },
+  {
+   "t": "npc",
+   "id": "npc_warden_ghost",
+   "npc": "weirwarden_ashe",
+   "at": [
+    872,
+    159
+   ],
+   "face": "l"
+  }
+ ],
+ "wires": [
+  {
+   "from": "lv_sluice",
+   "to": "gate_1",
+   "do": "open",
+   "when": "on"
+  },
+  {
+   "from": "lv_sluice",
+   "to": "gate_1",
+   "do": "close",
+   "when": "off"
+  },
+  {
+   "from": "lv_sluice",
+   "to": "weir",
+   "do": "drain",
+   "when": "on"
+  },
+  {
+   "from": "lv_sluice",
+   "to": "weir",
+   "do": "fill",
+   "when": "off"
+  },
+  {
+   "from": "plate_1",
+   "to": "door_low",
+   "do": "open",
+   "when": "on"
+  },
+  {
+   "from": "weir",
+   "to": "npc_warden_ghost",
+   "do": "say",
+   "line": "weir_drained_comment",
+   "when": {
+    "levelBelow": 420
+   }
+  },
+  {
+   "from": "zone_drained",
+   "to": "sp_rats",
+   "do": "spawn",
+   "note": "two more rats come out of the drain once you walk the basin floor"
+  }
+ ],
+ "decor": {
+  "erode": 0.25,
+  "moss": 0.35,
+  "glow": 0.1,
+  "cracks": 0.2,
+  "grime": 0.4,
+  "drips": 10
+ },
+ "notes": "Routes. (1) Drained: gallery -> rope down the shaft (x 336) -> lever alcove at y 223 -> pull -> the gate opens and the basin empties in ~15 s (78,800 cells at 90/tick) -> drop into the basin (256 cells; the vault rope at x 560 gives a way down and back up) -> step on the plate at x 600 -> door_low opens for 12 s -> run through the open gate (x 736..767) and along the trench to x 896: ~300 cells, about 3.5 s. (2) Flooded: swim the basin surface (y 224), climb the right wall top (y 192), grapple gp_3 and swing to the NE shelf (floor y 160). The cracked brick column (Q, x 160..175) hides the chest in the lower-left room; Ember or melee breaks it. Controlled drain: cells are removed at the drain point, and the outflow through the open gate is drawn as fading particles, so the trench stays walkable."
+}

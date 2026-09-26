@@ -1,0 +1,241 @@
+{
+ "format": 1,
+ "id": "a1_n01_r0",
+ "name": "The Guild Hall",
+ "act": "act1",
+ "kind": "hub",
+ "size": [
+  480,
+  272
+ ],
+ "block": 8,
+ "seed": 101,
+ "theme": "wax_chapel",
+ "rain": {
+  "density": 90,
+  "wind": 0.15,
+  "maxDeposit": 2000
+ },
+ "decor": {
+  "erode": 0.1,
+  "moss": 0.1,
+  "cracks": 0.05,
+  "waxDrips": 0.4
+ },
+ "notes": "Act 1 hub (docs/09). Safe room: no spawns. Floor y 224. East floor exit -> a1_n02; upper east exit -> a1_n09 (locked: grapple). West balcony (jump steps) holds a welcome chest. Balcony by two jumps: a plank at y 192, then the balcony at y 160.",
+ "map": [
+  "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::",
+  "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::",
+  "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::",
+  "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::",
+  "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::",
+  "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::",
+  "XXBBBBBBBBBBBBBBBBBBBBBBBBGGGGGGGGBBBBBBBBBBBBBBBBBBBBBBBBXX",
+  "XX....................==..................................XX",
+  "XX....................==..................................XX",
+  "XX....................==..................................XX",
+  "XX....................==..................................XX",
+  "XX....................==..................................XX",
+  "XX....................==..................................XX",
+  "XX....................==....................................",
+  "XX....................==....................................",
+  "XX....................==....................................",
+  "XX....................==........................WWWWWWWWWWWW",
+  "XX....................==..................................XX",
+  "XX....................==..................................XX",
+  "XX....................==..................................XX",
+  "XXWWWWWWW.................................................XX",
+  "XX........................................................XX",
+  "XX........................................................XX",
+  "XX........................................................XX",
+  "XX..........WWWW..........................................XX",
+  "XX..........................................................",
+  "XX..........................................................",
+  "XX..........................................................",
+  "############################################################",
+  "############################################################",
+  "############################################################",
+  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+ ],
+ "ops": [
+  {
+   "op": "rect",
+   "rect": [
+    176,
+    152,
+    8,
+    72
+   ],
+   "mat": "air",
+   "note": "pillar ends above the balcony line"
+  }
+ ],
+ "things": [
+  {
+   "t": "entry",
+   "id": "w",
+   "at": [
+    24,
+    223
+   ],
+   "face": "r"
+  },
+  {
+   "t": "entry",
+   "id": "e",
+   "at": [
+    456,
+    223
+   ],
+   "face": "l"
+  },
+  {
+   "t": "exit",
+   "id": "exit_e0",
+   "rect": [
+    476,
+    200,
+    4,
+    24
+   ],
+   "to": "@next",
+   "entry": "w"
+  },
+  {
+   "t": "exit",
+   "id": "exit_e1",
+   "rect": [
+    476,
+    104,
+    4,
+    24
+   ],
+   "to": "@next:1",
+   "entry": "w",
+   "needsVerb": "grapple"
+  },
+  {
+   "t": "lamp_post",
+   "id": "lp_guild",
+   "at": [
+    56,
+    223
+   ],
+   "lit": true
+  },
+  {
+   "t": "shopkeeper",
+   "id": "keeper_wick",
+   "shop": "shop_wick",
+   "npc": "npc_odile",
+   "at": [
+    208,
+    223
+   ]
+  },
+  {
+   "t": "shopkeeper",
+   "id": "keeper_pawn",
+   "shop": "shop_pawn",
+   "npc": "npc_hollis",
+   "at": [
+    264,
+    223
+   ]
+  },
+  {
+   "t": "npc",
+   "id": "person_aldra",
+   "npc": "npc_aldra",
+   "intents": [
+    "greet",
+    "smalltalk"
+   ],
+   "lines": [
+    "Go down, find the Chapel, relight the Crown Lamp. The drips will show you the way.",
+    "Lamp-posts keep your place. Touch one whenever you see it lit."
+   ],
+   "at": [
+    330,
+    223
+   ]
+  },
+  {
+   "t": "npc",
+   "id": "person_seld",
+   "npc": "npc_seld",
+   "intents": [
+    "greet"
+   ],
+   "lines": [
+    "Mother Tallow melts when she burns. Keep your flame on her and watch the floor."
+   ],
+   "at": [
+    380,
+    223
+   ]
+  },
+  {
+   "t": "sign",
+   "id": "sign_guild",
+   "at": [
+    440,
+    223
+   ],
+   "text": "East: The First Step. High door: Beneath the Crown (you will need a grapple)."
+  },
+  {
+   "t": "chest",
+   "id": "chest_welcome",
+   "at": [
+    40,
+    159
+   ],
+   "loot": "lt_chest_plain"
+  },
+  {
+   "t": "light",
+   "id": "lt_hall1",
+   "at": [
+    120,
+    120
+   ],
+   "color": "#ffc46a",
+   "r": 80,
+   "intensity": 0.9,
+   "shadow": true,
+   "flicker": 0.08,
+   "sprite": "wall_lantern"
+  },
+  {
+   "t": "light",
+   "id": "lt_hall2",
+   "at": [
+    300,
+    120
+   ],
+   "color": "#ffc46a",
+   "r": 80,
+   "intensity": 0.9,
+   "shadow": true,
+   "flicker": 0.08,
+   "sprite": "wall_lantern"
+  },
+  {
+   "t": "light",
+   "id": "lt_hall3",
+   "at": [
+    430,
+    190
+   ],
+   "color": "#ffd27a",
+   "r": 50,
+   "intensity": 0.7,
+   "shadow": true,
+   "flicker": 0.15,
+   "sprite": "candle_cluster"
+  }
+ ]
+}

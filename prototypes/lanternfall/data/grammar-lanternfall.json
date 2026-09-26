@@ -1,0 +1,3824 @@
+{
+ "_doc": "Lanternfall's grammar extension for Lingo (docs/01 §12.4; shape docs/10 §5.11), merged into the core grammar at boot by js/talk/lingo-bridge.js — the core file is never edited. `symbols`: an intent with a core name EXTENDS it (new lines appended, each tagged; a speaker turns on its own family tag and every other family tag is zeroed), a new name is one of the 12 new intents in `meta.intents` (no more than 12), `meta.noRepeat` are the NR ones (joined to Lingo's session anti-repeat). `bind` fills a missing binding from the lexicon (pack lingo/data/packs/lanternfall.json). `defaults` are values the bridge supplies when the game did not (numbers and strings Lingo cannot bind), `aliases` rename the game's binding names (08 says dish1). `lines` are the FIXED lines by id (boss lines bl_*, Kindling hints hint_*, Marl's deal, the Narrator's first-trap and Rekindle remarks): played once as written through talk.line(id), and later replays draw from the pools above with the same tag. `voiceOf` = speak this line in another speaker's voice (the Widow's stolen voices), `fx` = voice fx override for this line, `when` = the flag that selects this variant. All text original (no third-party names). Generated 2026-09-26; edit by hand from now on.",
+ "version": 1,
+ "meta": {
+  "intents": [
+   "odile_names_wick",
+   "pawn_recall",
+   "soup_menu",
+   "boss_low",
+   "idle_chatter",
+   "rain_talk",
+   "lamp_relit",
+   "ledger_arrival",
+   "ledger_relight",
+   "flood_warning",
+   "hush_chirr",
+   "kindling_hint"
+  ],
+  "intentDoc": {
+   "odile_names_wick": "Odile's comment when she tastes the wick you hold out (the NAME comes from 08's dish-name rule). Bindings flame, shape (spell entries), charm (optional).",
+   "pawn_recall": "Hollis remembers something you sold him (memory type sold_item). Bindings item, price, days.",
+   "soup_menu": "Brisket reads the day's menu. Bindings dish, dish2 (food entries; 08's dish1/dish2 are aliases).",
+   "boss_low": "A boss below 25% health. Tag = the boss (tallow, gnaw, widow, bellfather, ossery).",
+   "idle_chatter": "Hub townsfolk in passing. Tags: the act (act1..act6) and the Lamp state (lit / dark).",
+   "rain_talk": "Anyone, about the Rain (replaces core weathertalk for this game).",
+   "lamp_relit": "An NPC on your first visit after a relight. Binding lamp (a Great Lamp item entry).",
+   "ledger_arrival": "The Narrator on first entry into a named place. Binding place.",
+   "ledger_relight": "The Narrator after the fixed relight line.",
+   "flood_warning": "Voss over the pipes. Bindings gate (a string such as \"the top gate\"), sec (number).",
+   "hush_chirr": "Hush's babble gloss. Tag = trigger: wall, grapple, oil, dark, hurt, happy, scared, idle.",
+   "kindling_hint": "A Kindling hint replayed from Chat. Tag = the flag id; the first line of each tag is the fixed hint (hint_<flag>)."
+  },
+  "noRepeat": [
+   "odile_names_wick",
+   "pawn_recall",
+   "boss_low",
+   "ledger_arrival",
+   "flood_warning",
+   "hush_chirr",
+   "kindling_hint"
+  ],
+  "familyTags": [
+   "knell",
+   "knell_order",
+   "lampbreaker",
+   "drowned",
+   "choir",
+   "unlit",
+   "tallow",
+   "gnaw",
+   "sluicemaw",
+   "widow",
+   "bellfather",
+   "ossery"
+  ],
+  "worldTag": "lanternfall"
+ },
+ "aliases": {
+  "soup_menu": {
+   "dish": "dish1"
+  }
+ },
+ "defaults": {
+  "odile_names_wick": {
+   "charm": null
+  },
+  "pawn_recall": {
+   "price": 12,
+   "days": 3
+  },
+  "flood_warning": {
+   "gate": "the top gate",
+   "sec": 10
+  }
+ },
+ "symbols": {
+  "odile_names_wick": [
+   {
+    "id": "lf_odile_names_wick_1",
+    "t": "{flame.sg} in {shape.a}. Tastes like a struck match on a cold morning.",
+    "tags": [],
+    "bind": {
+     "flame": {
+      "type": "spell",
+      "tags": [
+       "flame"
+      ]
+     },
+     "shape": {
+      "type": "spell",
+      "tags": [
+       "shape"
+      ]
+     }
+    }
+   },
+   {
+    "id": "lf_odile_names_wick_2",
+    "t": "Oh, that's {flame.adj}. Very {flame.adj}. Almost rude.",
+    "tags": [],
+    "bind": {
+     "flame": {
+      "type": "spell",
+      "tags": [
+       "flame"
+      ]
+     },
+     "shape": {
+      "type": "spell",
+      "tags": [
+       "shape"
+      ]
+     }
+    }
+   },
+   {
+    "id": "lf_odile_names_wick_3",
+    "t": "{shape.a.cap}? Bold. I'd have braided it tighter, but I'm not the one getting bitten.",
+    "tags": [],
+    "bind": {
+     "flame": {
+      "type": "spell",
+      "tags": [
+       "flame"
+      ]
+     },
+     "shape": {
+      "type": "spell",
+      "tags": [
+       "shape"
+      ]
+     }
+    }
+   },
+   {
+    "id": "lf_odile_names_wick_4",
+    "t": "Smoky finish. Somebody's been overcharging.",
+    "tags": [],
+    "bind": {
+     "flame": {
+      "type": "spell",
+      "tags": [
+       "flame"
+      ]
+     },
+     "shape": {
+      "type": "spell",
+      "tags": [
+       "shape"
+      ]
+     }
+    }
+   },
+   {
+    "id": "lf_odile_names_wick_5",
+    "t": "That one's got a kick like cheap brandy. I approve.",
+    "tags": [],
+    "bind": {
+     "flame": {
+      "type": "spell",
+      "tags": [
+       "flame"
+      ]
+     },
+     "shape": {
+      "type": "spell",
+      "tags": [
+       "shape"
+      ]
+     }
+    }
+   },
+   {
+    "id": "lf_odile_names_wick_6",
+    "t": "{flame.sg} and {charm.or(nothing else)}. Simple. Simple's honest.",
+    "tags": [],
+    "bind": {
+     "flame": {
+      "type": "spell",
+      "tags": [
+       "flame"
+      ]
+     },
+     "shape": {
+      "type": "spell",
+      "tags": [
+       "shape"
+      ]
+     }
+    }
+   },
+   {
+    "id": "lf_odile_names_wick_7",
+    "t": "Hold it under my nose. No — closer. Ah. Wet wool and lightning.",
+    "tags": [],
+    "bind": {
+     "flame": {
+      "type": "spell",
+      "tags": [
+       "flame"
+      ]
+     },
+     "shape": {
+      "type": "spell",
+      "tags": [
+       "shape"
+      ]
+     }
+    }
+   },
+   {
+    "id": "lf_odile_names_wick_8",
+    "t": "Did you braid this in the rain? You can taste the rain.",
+    "tags": [],
+    "bind": {
+     "flame": {
+      "type": "spell",
+      "tags": [
+       "flame"
+      ]
+     },
+     "shape": {
+      "type": "spell",
+      "tags": [
+       "shape"
+      ]
+     }
+    }
+   },
+   {
+    "id": "lf_odile_names_wick_9",
+    "t": "That's a sad little wick. Feed it more oil, darling, it's starving.",
+    "tags": [],
+    "bind": {
+     "flame": {
+      "type": "spell",
+      "tags": [
+       "flame"
+      ]
+     },
+     "shape": {
+      "type": "spell",
+      "tags": [
+       "shape"
+      ]
+     }
+    }
+   },
+   {
+    "id": "lf_odile_names_wick_10",
+    "t": "Ooh. That one's going to burn somebody's eyebrows off. Possibly yours.",
+    "tags": [],
+    "bind": {
+     "flame": {
+      "type": "spell",
+      "tags": [
+       "flame"
+      ]
+     },
+     "shape": {
+      "type": "spell",
+      "tags": [
+       "shape"
+      ]
+     }
+    }
+   },
+   {
+    "id": "lf_odile_names_wick_11",
+    "t": "It tastes like the Lamp did, when I was a girl.",
+    "tags": [],
+    "bind": {
+     "flame": {
+      "type": "spell",
+      "tags": [
+       "flame"
+      ]
+     },
+     "shape": {
+      "type": "spell",
+      "tags": [
+       "shape"
+      ]
+     }
+    }
+   },
+   {
+    "id": "lf_odile_names_wick_12",
+    "t": "Too much {charm.or(charm)}. Like salt in tea. Still, you'll drink it.",
+    "tags": [],
+    "bind": {
+     "flame": {
+      "type": "spell",
+      "tags": [
+       "flame"
+      ]
+     },
+     "shape": {
+      "type": "spell",
+      "tags": [
+       "shape"
+      ]
+     }
+    }
+   }
+  ],
+  "pawn_recall": [
+   {
+    "id": "lf_pawn_recall_13",
+    "t": "You sold me {item.a} for {price} pennies. I sold it for four times that. Just so you know.",
+    "tags": [],
+    "bind": {
+     "item": {
+      "type": "item"
+     }
+    }
+   },
+   {
+    "id": "lf_pawn_recall_14",
+    "t": "Ah, the {item.sg} person. I remember.",
+    "tags": [],
+    "bind": {
+     "item": {
+      "type": "item"
+     }
+    }
+   },
+   {
+    "id": "lf_pawn_recall_15",
+    "t": "Still miss that {item.sg}? I don't. Found a good home. Mine.",
+    "tags": [],
+    "bind": {
+     "item": {
+      "type": "item"
+     }
+    }
+   },
+   {
+    "id": "lf_pawn_recall_16",
+    "t": "Last time you were here you practically gave me {item.a}. Do it again, would you?",
+    "tags": [],
+    "bind": {
+     "item": {
+      "type": "item"
+     }
+    }
+   },
+   {
+    "id": "lf_pawn_recall_17",
+    "t": "{days, plural, one{Yesterday} other{# days ago}}, {item.a}. You're a creature of habit.",
+    "tags": [],
+    "bind": {
+     "item": {
+      "type": "item"
+     }
+    }
+   },
+   {
+    "id": "lf_pawn_recall_18",
+    "t": "That {item.sg} you pawned? A drowned fellow tried to buy it. Tried.",
+    "tags": [],
+    "bind": {
+     "item": {
+      "type": "item"
+     }
+    }
+   },
+   {
+    "id": "lf_pawn_recall_19",
+    "t": "I've got your {item.sg} in the back. Want it? Twice the price. Sentiment's extra.",
+    "tags": [],
+    "bind": {
+     "item": {
+      "type": "item"
+     }
+    }
+   },
+   {
+    "id": "lf_pawn_recall_20",
+    "t": "You don't haggle like somebody who sold {item.a} for {price}.",
+    "tags": [],
+    "bind": {
+     "item": {
+      "type": "item"
+     }
+    }
+   },
+   {
+    "id": "lf_pawn_recall_21",
+    "t": "I keep a book. You're in it. Several pages.",
+    "tags": [],
+    "bind": {
+     "item": {
+      "type": "item"
+     }
+    }
+   },
+   {
+    "id": "lf_pawn_recall_22",
+    "t": "Selling again? Your {item.sg} was the last thing I bought that didn't leak.",
+    "tags": [],
+    "bind": {
+     "item": {
+      "type": "item"
+     }
+    }
+   },
+   {
+    "id": "lf_pawn_recall_23",
+    "t": "The {item.sg}. Yes. I remember your face when you let it go. Priceless. Well — {price} pennies.",
+    "tags": [],
+    "bind": {
+     "item": {
+      "type": "item"
+     }
+    }
+   },
+   {
+    "id": "lf_pawn_recall_24",
+    "t": "Every time you walk in I think, what's this one going to cost me? Then I remember: nothing, it's you.",
+    "tags": [],
+    "bind": {
+     "item": {
+      "type": "item"
+     }
+    }
+   }
+  ],
+  "soup_menu": [
+   {
+    "id": "lf_soup_menu_25",
+    "t": "Today it's {dish.sg} and {dish2.sg}. Or the mystery bowl, if you're feeling lucky.",
+    "tags": [],
+    "bind": {
+     "dish": {
+      "type": "food",
+      "tags": [
+       "dish"
+      ]
+     },
+     "dish2": {
+      "type": "food",
+      "tags": [
+       "dish"
+      ]
+     }
+    }
+   },
+   {
+    "id": "lf_soup_menu_26",
+    "t": "{dish.sg.cap}, fresh as it gets down here, which isn't very.",
+    "tags": [],
+    "bind": {
+     "dish": {
+      "type": "food",
+      "tags": [
+       "dish"
+      ]
+     },
+     "dish2": {
+      "type": "food",
+      "tags": [
+       "dish"
+      ]
+     }
+    }
+   },
+   {
+    "id": "lf_soup_menu_27",
+    "t": "I've got {dish.sg}. Don't make that face, it's good for you.",
+    "tags": [],
+    "bind": {
+     "dish": {
+      "type": "food",
+      "tags": [
+       "dish"
+      ]
+     },
+     "dish2": {
+      "type": "food",
+      "tags": [
+       "dish"
+      ]
+     }
+    }
+   },
+   {
+    "id": "lf_soup_menu_28",
+    "t": "Mystery bowl's bubbling. It bubbled back at me earlier. Your call.",
+    "tags": [],
+    "bind": {
+     "dish": {
+      "type": "food",
+      "tags": [
+       "dish"
+      ]
+     },
+     "dish2": {
+      "type": "food",
+      "tags": [
+       "dish"
+      ]
+     }
+    }
+   },
+   {
+    "id": "lf_soup_menu_29",
+    "t": "Sit. {dish.sg.cap}. Eat. Then argue.",
+    "tags": [],
+    "bind": {
+     "dish": {
+      "type": "food",
+      "tags": [
+       "dish"
+      ]
+     },
+     "dish2": {
+      "type": "food",
+      "tags": [
+       "dish"
+      ]
+     }
+    }
+   },
+   {
+    "id": "lf_soup_menu_30",
+    "t": "The eels were biting this morning. Well. The eels were biting me. Either way, {dish.sg}.",
+    "tags": [],
+    "bind": {
+     "dish": {
+      "type": "food",
+      "tags": [
+       "dish"
+      ]
+     },
+     "dish2": {
+      "type": "food",
+      "tags": [
+       "dish"
+      ]
+     }
+    }
+   },
+   {
+    "id": "lf_soup_menu_31",
+    "t": "You look thin. Two bowls. No, I'm not charging for the second. Yes I am.",
+    "tags": [],
+    "bind": {
+     "dish": {
+      "type": "food",
+      "tags": [
+       "dish"
+      ]
+     },
+     "dish2": {
+      "type": "food",
+      "tags": [
+       "dish"
+      ]
+     }
+    }
+   },
+   {
+    "id": "lf_soup_menu_32",
+    "t": "There's {dish.sg} for the brave and {dish2.sg} for the sensible.",
+    "tags": [],
+    "bind": {
+     "dish": {
+      "type": "food",
+      "tags": [
+       "dish"
+      ]
+     },
+     "dish2": {
+      "type": "food",
+      "tags": [
+       "dish"
+      ]
+     }
+    }
+   },
+   {
+    "id": "lf_soup_menu_33",
+    "t": "Don't ask what's in the mystery bowl. I don't ask it either.",
+    "tags": [],
+    "bind": {
+     "dish": {
+      "type": "food",
+      "tags": [
+       "dish"
+      ]
+     },
+     "dish2": {
+      "type": "food",
+      "tags": [
+       "dish"
+      ]
+     }
+    }
+   },
+   {
+    "id": "lf_soup_menu_34",
+    "t": "Hot soup, cold rain, that's the whole of wisdom.",
+    "tags": [],
+    "bind": {
+     "dish": {
+      "type": "food",
+      "tags": [
+       "dish"
+      ]
+     },
+     "dish2": {
+      "type": "food",
+      "tags": [
+       "dish"
+      ]
+     }
+    }
+   },
+   {
+    "id": "lf_soup_menu_35",
+    "t": "I'd do you a pie, but the oven's underwater again.",
+    "tags": [],
+    "bind": {
+     "dish": {
+      "type": "food",
+      "tags": [
+       "dish"
+      ]
+     },
+     "dish2": {
+      "type": "food",
+      "tags": [
+       "dish"
+      ]
+     }
+    }
+   },
+   {
+    "id": "lf_soup_menu_36",
+    "t": "Last one who skipped supper went down the Brickgut and came back a rat. Eat.",
+    "tags": [],
+    "bind": {
+     "dish": {
+      "type": "food",
+      "tags": [
+       "dish"
+      ]
+     },
+     "dish2": {
+      "type": "food",
+      "tags": [
+       "dish"
+      ]
+     }
+    }
+   }
+  ],
+  "boss_low": [
+   {
+    "id": "lf_boss_low_37",
+    "t": "So warm. Why is it so warm.",
+    "tags": [
+     "tallow"
+    ]
+   },
+   {
+    "id": "lf_boss_low_38",
+    "t": "Put me out gently. Please.",
+    "tags": [
+     "tallow"
+    ]
+   },
+   {
+    "id": "lf_boss_low_39",
+    "t": "I was a statue. I was only a statue.",
+    "tags": [
+     "tallow"
+    ]
+   },
+   {
+    "id": "lf_boss_low_40",
+    "t": "[The Choir falters. One voice keeps singing.]",
+    "tags": [
+     "gnaw"
+    ]
+   },
+   {
+    "id": "lf_boss_low_41",
+    "t": "[Saint Gnaw screams a note no rat can hold.]",
+    "tags": [
+     "gnaw"
+    ]
+   },
+   {
+    "id": "lf_boss_low_42",
+    "t": "[The swarm scatters mid-song.]",
+    "tags": [
+     "gnaw"
+    ]
+   },
+   {
+    "id": "lf_boss_low_43",
+    "t": "Sister? Is that you?",
+    "tags": [
+     "widow"
+    ]
+   },
+   {
+    "id": "lf_boss_low_44",
+    "t": "Too bright. Too bright.",
+    "tags": [
+     "widow"
+    ]
+   },
+   {
+    "id": "lf_boss_low_45",
+    "t": "Let it go out. Let it all go out.",
+    "tags": [
+     "widow"
+    ]
+   },
+   {
+    "id": "lf_boss_low_46",
+    "t": "…TOLL…",
+    "tags": [
+     "bellfather"
+    ]
+   },
+   {
+    "id": "lf_boss_low_47",
+    "t": "…RING…",
+    "tags": [
+     "bellfather"
+    ]
+   },
+   {
+    "id": "lf_boss_low_48",
+    "t": "…kneel…",
+    "tags": [
+     "bellfather"
+    ]
+   },
+   {
+    "id": "lf_boss_low_49",
+    "t": "One more day. I only wanted one more day.",
+    "tags": [
+     "ossery"
+    ]
+   },
+   {
+    "id": "lf_boss_low_50",
+    "t": "I can't remember how to open my hand.",
+    "tags": [
+     "ossery"
+    ]
+   },
+   {
+    "id": "lf_boss_low_51",
+    "t": "Is it morning?",
+    "tags": [
+     "ossery"
+    ]
+   }
+  ],
+  "idle_chatter": [
+   {
+    "id": "lf_idle_chatter_52",
+    "t": "Lamp's flickering again.",
+    "tags": [
+     "act1",
+     "dark"
+    ]
+   },
+   {
+    "id": "lf_idle_chatter_53",
+    "t": "Candles cost a week's wage now.",
+    "tags": [
+     "act1",
+     "dark"
+    ]
+   },
+   {
+    "id": "lf_idle_chatter_54",
+    "t": "My gran says the Stair used to be warm.",
+    "tags": [
+     "act1",
+     "dark"
+    ]
+   },
+   {
+    "id": "lf_idle_chatter_55",
+    "t": "Did you see it flare? Whole street cheered.",
+    "tags": [
+     "act1",
+     "lit"
+    ]
+   },
+   {
+    "id": "lf_idle_chatter_56",
+    "t": "Wax is setting nice and hard now.",
+    "tags": [
+     "act1",
+     "lit"
+    ]
+   },
+   {
+    "id": "lf_idle_chatter_57",
+    "t": "I slept a whole night.",
+    "tags": [
+     "act1",
+     "lit"
+    ]
+   },
+   {
+    "id": "lf_idle_chatter_58",
+    "t": "Hear the singing? Don't listen.",
+    "tags": [
+     "act2",
+     "dark"
+    ]
+   },
+   {
+    "id": "lf_idle_chatter_59",
+    "t": "Rats took the Pottle boy's boots. With him in them.",
+    "tags": [
+     "act2",
+     "dark"
+    ]
+   },
+   {
+    "id": "lf_idle_chatter_60",
+    "t": "Keep to the chains.",
+    "tags": [
+     "act2",
+     "dark"
+    ]
+   },
+   {
+    "id": "lf_idle_chatter_61",
+    "t": "Rats won't come in the light. Can you believe it.",
+    "tags": [
+     "act2",
+     "lit"
+    ]
+   },
+   {
+    "id": "lf_idle_chatter_62",
+    "t": "Market stays open past dark now. Past dark!",
+    "tags": [
+     "act2",
+     "lit"
+    ]
+   },
+   {
+    "id": "lf_idle_chatter_63",
+    "t": "Smell that? Somebody is frying something.",
+    "tags": [
+     "act2",
+     "lit"
+    ]
+   },
+   {
+    "id": "lf_idle_chatter_64",
+    "t": "Top gate first. Everybody knows.",
+    "tags": [
+     "act3"
+    ]
+   },
+   {
+    "id": "lf_idle_chatter_65",
+    "t": "The water's warm now. Warm.",
+    "tags": [
+     "act3"
+    ]
+   },
+   {
+    "id": "lf_idle_chatter_66",
+    "t": "I saw the Pale singing under the gauge tower.",
+    "tags": [
+     "act3"
+    ]
+   },
+   {
+    "id": "lf_idle_chatter_67",
+    "t": "Don't whistle in the dark.",
+    "tags": [
+     "act4"
+    ]
+   },
+   {
+    "id": "lf_idle_chatter_68",
+    "t": "Oil's cheaper if you don't ask where from.",
+    "tags": [
+     "act4"
+    ]
+   },
+   {
+    "id": "lf_idle_chatter_69",
+    "t": "Light your lamp and they come. Put it out and they wait.",
+    "tags": [
+     "act4"
+    ]
+   },
+   {
+    "id": "lf_idle_chatter_70",
+    "t": "The bells stopped. Doesn't feel right.",
+    "tags": [
+     "act5"
+    ]
+   },
+   {
+    "id": "lf_idle_chatter_71",
+    "t": "My feet keep wanting to go up.",
+    "tags": [
+     "act5"
+    ]
+   },
+   {
+    "id": "lf_idle_chatter_72",
+    "t": "Tithe-folk aren't all bad. Just most.",
+    "tags": [
+     "act5"
+    ]
+   },
+   {
+    "id": "lf_idle_chatter_73",
+    "t": "Is that — is that a star?",
+    "tags": [
+     "act6"
+    ]
+   },
+   {
+    "id": "lf_idle_chatter_74",
+    "t": "It's so quiet. I hate it. I love it.",
+    "tags": [
+     "act6"
+    ]
+   },
+   {
+    "id": "lf_idle_chatter_75",
+    "t": "Forty years of rain in my boots.",
+    "tags": [
+     "act6"
+    ]
+   }
+  ],
+  "rain_talk": [
+   {
+    "id": "lf_rain_talk_76",
+    "t": "Forty years. You'd think it'd get tired.",
+    "tags": []
+   },
+   {
+    "id": "lf_rain_talk_77",
+    "t": "My roof has more holes than roof.",
+    "tags": []
+   },
+   {
+    "id": "lf_rain_talk_78",
+    "t": "My mother says she remembers dry. I think she's making it up.",
+    "tags": []
+   },
+   {
+    "id": "lf_rain_talk_79",
+    "t": "It's not raining harder. You're just deeper.",
+    "tags": []
+   },
+   {
+    "id": "lf_rain_talk_80",
+    "t": "Rain's got a sound down here. Like somebody breathing.",
+    "tags": []
+   },
+   {
+    "id": "lf_rain_talk_81",
+    "t": "Don't drink it. Well. Don't drink it much.",
+    "tags": []
+   },
+   {
+    "id": "lf_rain_talk_82",
+    "t": "I've stopped owning dry socks. It's freeing, in a way.",
+    "tags": []
+   },
+   {
+    "id": "lf_rain_talk_83",
+    "t": "It rained on my wedding. It rained on my christening. It'll rain on my funeral, I expect.",
+    "tags": []
+   },
+   {
+    "id": "lf_rain_talk_84",
+    "t": "Some nights I swear it's crying.",
+    "tags": []
+   },
+   {
+    "id": "lf_rain_talk_85",
+    "t": "When it stops — if — what'll we even talk about?",
+    "tags": []
+   },
+   {
+    "id": "lf_rain_talk_86",
+    "t": "Rain keeps the dust down. That's the one good thing. I've been looking for forty years.",
+    "tags": []
+   },
+   {
+    "id": "lf_rain_talk_87",
+    "t": "The Cloudwardens did this. Don't say that too loud.",
+    "tags": []
+   }
+  ],
+  "lamp_relit": [
+   {
+    "id": "lf_lamp_relit_88",
+    "t": "You did it. You actually lit {lamp.the}.",
+    "tags": [],
+    "bind": {
+     "lamp": {
+      "type": "item",
+      "tags": [
+       "great_lamp"
+      ]
+     }
+    }
+   },
+   {
+    "id": "lf_lamp_relit_89",
+    "t": "I cried. Don't tell anybody. I cried.",
+    "tags": [],
+    "bind": {
+     "lamp": {
+      "type": "item",
+      "tags": [
+       "great_lamp"
+      ]
+     }
+    }
+   },
+   {
+    "id": "lf_lamp_relit_90",
+    "t": "{lamp.sg.cap}! My kids had never seen it lit.",
+    "tags": [],
+    "bind": {
+     "lamp": {
+      "type": "item",
+      "tags": [
+       "great_lamp"
+      ]
+     }
+    }
+   },
+   {
+    "id": "lf_lamp_relit_91",
+    "t": "The whole tier's warm. I'd forgotten warm.",
+    "tags": [],
+    "bind": {
+     "lamp": {
+      "type": "item",
+      "tags": [
+       "great_lamp"
+      ]
+     }
+    }
+   },
+   {
+    "id": "lf_lamp_relit_92",
+    "t": "They'll write you in the Ledger for that.",
+    "tags": [],
+    "bind": {
+     "lamp": {
+      "type": "item",
+      "tags": [
+       "great_lamp"
+      ]
+     }
+    }
+   },
+   {
+    "id": "lf_lamp_relit_93",
+    "t": "I thought it was a story. {lamp.sg.cap}, lit. Look at it.",
+    "tags": [],
+    "bind": {
+     "lamp": {
+      "type": "item",
+      "tags": [
+       "great_lamp"
+      ]
+     }
+    }
+   },
+   {
+    "id": "lf_lamp_relit_94",
+    "t": "Took you long enough. Thank you. Took you long enough.",
+    "tags": [],
+    "bind": {
+     "lamp": {
+      "type": "item",
+      "tags": [
+       "great_lamp"
+      ]
+     }
+    }
+   },
+   {
+    "id": "lf_lamp_relit_95",
+    "t": "I can see my hands. Isn't that silly? I can see my hands.",
+    "tags": [],
+    "bind": {
+     "lamp": {
+      "type": "item",
+      "tags": [
+       "great_lamp"
+      ]
+     }
+    }
+   },
+   {
+    "id": "lf_lamp_relit_96",
+    "t": "How many more? Don't tell me. Just go light them.",
+    "tags": [],
+    "bind": {
+     "lamp": {
+      "type": "item",
+      "tags": [
+       "great_lamp"
+      ]
+     }
+    }
+   },
+   {
+    "id": "lf_lamp_relit_97",
+    "t": "Some of the old folk went down to the rail just to stare at it.",
+    "tags": [],
+    "bind": {
+     "lamp": {
+      "type": "item",
+      "tags": [
+       "great_lamp"
+      ]
+     }
+    }
+   },
+   {
+    "id": "lf_lamp_relit_98",
+    "t": "Every window on the Face lit up at once. Like the Face was smiling.",
+    "tags": [],
+    "bind": {
+     "lamp": {
+      "type": "item",
+      "tags": [
+       "great_lamp"
+      ]
+     }
+    }
+   },
+   {
+    "id": "lf_lamp_relit_99",
+    "t": "I'll never complain about the lamp tax again. Probably.",
+    "tags": [],
+    "bind": {
+     "lamp": {
+      "type": "item",
+      "tags": [
+       "great_lamp"
+      ]
+     }
+    }
+   }
+  ],
+  "ledger_arrival": [
+   {
+    "id": "lf_ledger_arrival_100",
+    "t": "{place.sg.cap}. The Ledger has no entry here for forty years.",
+    "tags": [],
+    "bind": {
+     "place": {
+      "type": "place"
+     }
+    }
+   },
+   {
+    "id": "lf_ledger_arrival_101",
+    "t": "{place.sg.cap}. Water stands in every doorway.",
+    "tags": [],
+    "bind": {
+     "place": {
+      "type": "place"
+     }
+    }
+   },
+   {
+    "id": "lf_ledger_arrival_102",
+    "t": "{place.sg.cap}. Somebody lived here. Somebody left in a hurry.",
+    "tags": [],
+    "bind": {
+     "place": {
+      "type": "place"
+     }
+    }
+   },
+   {
+    "id": "lf_ledger_arrival_103",
+    "t": "{place.sg.cap}. The rain is louder here.",
+    "tags": [],
+    "bind": {
+     "place": {
+      "type": "place"
+     }
+    }
+   },
+   {
+    "id": "lf_ledger_arrival_104",
+    "t": "{place.sg.cap}. A lamp-hook on every wall, and no lamps.",
+    "tags": [],
+    "bind": {
+     "place": {
+      "type": "place"
+     }
+    }
+   },
+   {
+    "id": "lf_ledger_arrival_105",
+    "t": "{place.sg.cap}. The air smells of old oil.",
+    "tags": [],
+    "bind": {
+     "place": {
+      "type": "place"
+     }
+    }
+   },
+   {
+    "id": "lf_ledger_arrival_106",
+    "t": "{place.sg.cap}. Nothing moves. Nothing that wants to be seen.",
+    "tags": [],
+    "bind": {
+     "place": {
+      "type": "place"
+     }
+    }
+   },
+   {
+    "id": "lf_ledger_arrival_107",
+    "t": "{place.sg.cap}. The last Lamplighter's mark on the lintel is thirty years old.",
+    "tags": [],
+    "bind": {
+     "place": {
+      "type": "place"
+     }
+    }
+   },
+   {
+    "id": "lf_ledger_arrival_108",
+    "t": "{place.sg.cap}. Even the dark here is damp.",
+    "tags": [],
+    "bind": {
+     "place": {
+      "type": "place"
+     }
+    }
+   },
+   {
+    "id": "lf_ledger_arrival_109",
+    "t": "{place.sg.cap}, where the city went to be forgotten.",
+    "tags": [],
+    "bind": {
+     "place": {
+      "type": "place"
+     }
+    }
+   },
+   {
+    "id": "lf_ledger_arrival_110",
+    "t": "{place.sg.cap}. Something has been eating the candles.",
+    "tags": [],
+    "bind": {
+     "place": {
+      "type": "place"
+     }
+    }
+   },
+   {
+    "id": "lf_ledger_arrival_111",
+    "t": "{place.sg.cap}. The Ledger opens a new page.",
+    "tags": [],
+    "bind": {
+     "place": {
+      "type": "place"
+     }
+    }
+   }
+  ],
+  "ledger_relight": [
+   {
+    "id": "lf_ledger_relight_112",
+    "t": "The tier breathes out.",
+    "tags": []
+   },
+   {
+    "id": "lf_ledger_relight_113",
+    "t": "Somewhere above, somebody opens a window.",
+    "tags": []
+   },
+   {
+    "id": "lf_ledger_relight_114",
+    "t": "The water catches the colour and holds it.",
+    "tags": []
+   },
+   {
+    "id": "lf_ledger_relight_115",
+    "t": "The rain goes on. It looks different now.",
+    "tags": []
+   },
+   {
+    "id": "lf_ledger_relight_116",
+    "t": "The Ledger's ink is warm.",
+    "tags": []
+   },
+   {
+    "id": "lf_ledger_relight_117",
+    "t": "One more light in the Hollow.",
+    "tags": []
+   },
+   {
+    "id": "lf_ledger_relight_118",
+    "t": "The dark steps back. Not far.",
+    "tags": []
+   },
+   {
+    "id": "lf_ledger_relight_119",
+    "t": "Children who have never seen the colour are looking at it now.",
+    "tags": []
+   },
+   {
+    "id": "lf_ledger_relight_120",
+    "t": "The old brass remembers its work.",
+    "tags": []
+   },
+   {
+    "id": "lf_ledger_relight_121",
+    "t": "Forty years of dark, and it took one wick.",
+    "tags": []
+   },
+   {
+    "id": "lf_ledger_relight_122",
+    "t": "A gutter that has run black for years runs gold for a minute.",
+    "tags": []
+   },
+   {
+    "id": "lf_ledger_relight_123",
+    "t": "On every tier, someone stops and looks up.",
+    "tags": []
+   }
+  ],
+  "flood_warning": [
+   {
+    "id": "lf_flood_warning_124",
+    "t": "Water in {sec} seconds! Get high!",
+    "tags": []
+   },
+   {
+    "id": "lf_flood_warning_125",
+    "t": "{gate.cap}! Now! Pull it now!",
+    "tags": []
+   },
+   {
+    "id": "lf_flood_warning_126",
+    "t": "Top gate first! Always the top gate first!",
+    "tags": []
+   },
+   {
+    "id": "lf_flood_warning_127",
+    "t": "It's filling — you've got {sec}, maybe less.",
+    "tags": []
+   },
+   {
+    "id": "lf_flood_warning_128",
+    "t": "Don't touch the red wheel! The other red wheel!",
+    "tags": []
+   },
+   {
+    "id": "lf_flood_warning_129",
+    "t": "She's draining! Mind the undertow!",
+    "tags": []
+   },
+   {
+    "id": "lf_flood_warning_130",
+    "t": "The Maw's coming up with the water — get off the floor!",
+    "tags": []
+   },
+   {
+    "id": "lf_flood_warning_131",
+    "t": "Close {gate.sg}! Close it or you'll drown the lot of us!",
+    "tags": []
+   },
+   {
+    "id": "lf_flood_warning_132",
+    "t": "Hear that groan? That's the gate. Move.",
+    "tags": []
+   },
+   {
+    "id": "lf_flood_warning_133",
+    "t": "Level's dropping. Now's your chance, go go go!",
+    "tags": []
+   },
+   {
+    "id": "lf_flood_warning_134",
+    "t": "Twenty-eight years I've watched that gauge. It's never been that high.",
+    "tags": []
+   },
+   {
+    "id": "lf_flood_warning_135",
+    "t": "Stop swimming and start pulling!",
+    "tags": []
+   }
+  ],
+  "hush_chirr": [
+   {
+    "id": "lf_hush_chirr_136",
+    "t": "wall! wall!",
+    "tags": [
+     "wall"
+    ]
+   },
+   {
+    "id": "lf_hush_chirr_137",
+    "t": "tap tap — hollow?",
+    "tags": [
+     "wall"
+    ]
+   },
+   {
+    "id": "lf_hush_chirr_138",
+    "t": "up! hook up!",
+    "tags": [
+     "grapple"
+    ]
+   },
+   {
+    "id": "lf_hush_chirr_139",
+    "t": "there — swing!",
+    "tags": [
+     "grapple"
+    ]
+   },
+   {
+    "id": "lf_hush_chirr_140",
+    "t": "hungry lamp…",
+    "tags": [
+     "oil"
+    ]
+   },
+   {
+    "id": "lf_hush_chirr_141",
+    "t": "oil low. low.",
+    "tags": [
+     "oil"
+    ]
+   },
+   {
+    "id": "lf_hush_chirr_142",
+    "t": "dark. dark. stay close.",
+    "tags": [
+     "dark"
+    ]
+   },
+   {
+    "id": "lf_hush_chirr_143",
+    "t": "something breathing",
+    "tags": [
+     "dark"
+    ]
+   },
+   {
+    "id": "lf_hush_chirr_144",
+    "t": "ow — you ow?",
+    "tags": [
+     "hurt"
+    ]
+   },
+   {
+    "id": "lf_hush_chirr_145",
+    "t": "hurt. hide.",
+    "tags": [
+     "hurt"
+    ]
+   },
+   {
+    "id": "lf_hush_chirr_146",
+    "t": "bright! bright!",
+    "tags": [
+     "happy"
+    ]
+   },
+   {
+    "id": "lf_hush_chirr_147",
+    "t": "warm!",
+    "tags": [
+     "happy"
+    ]
+   },
+   {
+    "id": "lf_hush_chirr_148",
+    "t": "no no no",
+    "tags": [
+     "scared"
+    ]
+   },
+   {
+    "id": "lf_hush_chirr_149",
+    "t": "it sees us",
+    "tags": [
+     "scared"
+    ]
+   },
+   {
+    "id": "lf_hush_chirr_150",
+    "t": "sleepy",
+    "tags": [
+     "idle"
+    ]
+   },
+   {
+    "id": "lf_hush_chirr_151",
+    "t": "home?",
+    "tags": [
+     "idle"
+    ]
+   }
+  ],
+  "kindling_hint": [
+   {
+    "id": "hint_tallow_cooled",
+    "t": "She was only ever cold. If you must put her out — put her out with something cold. Please.",
+    "tags": [
+     "tallow_cooled"
+    ]
+   },
+   {
+    "id": "lf_kindling_hint_152",
+    "t": "Cold, not cruel. That's all I ask.",
+    "tags": [
+     "tallow_cooled"
+    ]
+   },
+   {
+    "id": "lf_kindling_hint_153",
+    "t": "Rime or the water. Not fire. She's had enough fire.",
+    "tags": [
+     "tallow_cooled"
+    ]
+   },
+   {
+    "id": "hint_pim_trusted",
+    "t": "That sweep girl follows you like a moth. Give her something to carry and she'll carry it for life.",
+    "tags": [
+     "pim_trusted"
+    ]
+   },
+   {
+    "id": "lf_kindling_hint_154",
+    "t": "The sweep wants a lantern post. Let her carry one.",
+    "tags": [
+     "pim_trusted"
+    ]
+   },
+   {
+    "id": "lf_kindling_hint_155",
+    "t": "Trust that child with something heavy. She'll grow into it.",
+    "tags": [
+     "pim_trusted"
+    ]
+   },
+   {
+    "id": "hint_hollis_lantern",
+    "t": "My brother went down the rat pipes with a lantern. Never pawned it. Never came back up with it either.",
+    "tags": [
+     "hollis_lantern"
+    ]
+   },
+   {
+    "id": "lf_kindling_hint_156",
+    "t": "Abel's lantern is still down there somewhere. Not that I care.",
+    "tags": [
+     "hollis_lantern"
+    ]
+   },
+   {
+    "id": "lf_kindling_hint_157",
+    "t": "A brass lantern with a crane on the lid isn't for sale. If you find it, bring it here.",
+    "tags": [
+     "hollis_lantern"
+    ]
+   },
+   {
+    "id": "hint_pale_kept",
+    "t": "If the dry ones open the valve, we go out with the water. Leave it, dry one. Leave it shut.",
+    "tags": [
+     "pale_kept"
+    ]
+   },
+   {
+    "id": "lf_kindling_hint_158",
+    "t": "The valve stays shut, dry one. Please.",
+    "tags": [
+     "pale_kept"
+    ]
+   },
+   {
+    "id": "lf_kindling_hint_159",
+    "t": "Drain our market and we drain with it.",
+    "tags": [
+     "pale_kept"
+    ]
+   },
+   {
+    "id": "hint_nell_alive",
+    "t": "Nell went into Stilt Town on her own. Stubborn girl. Somebody ought to go after her before it's too late.",
+    "tags": [
+     "nell_alive"
+    ]
+   },
+   {
+    "id": "lf_kindling_hint_160",
+    "t": "Nell's out in Stilt Town. Alone. That girl.",
+    "tags": [
+     "nell_alive"
+    ]
+   },
+   {
+    "id": "lf_kindling_hint_161",
+    "t": "Take her a bowl, and take her home, if you can.",
+    "tags": [
+     "nell_alive"
+    ]
+   },
+   {
+    "id": "hint_widow_mercy",
+    "t": "If you finish her, finish her in gold light. She always wanted to see it once more.",
+    "tags": [
+     "widow_mercy"
+    ]
+   },
+   {
+    "id": "lf_kindling_hint_162",
+    "t": "Gold light, at the end. That's all she'd want.",
+    "tags": [
+     "widow_mercy"
+    ]
+   },
+   {
+    "id": "lf_kindling_hint_163",
+    "t": "Don't finish my sister in the dark. Please.",
+    "tags": [
+     "widow_mercy"
+    ]
+   },
+   {
+    "id": "hint_knell_spared",
+    "t": "The Knell kneel, if you let them. Folk down here remember who let them get back up.",
+    "tags": [
+     "knell_spared"
+    ]
+   },
+   {
+    "id": "lf_kindling_hint_164",
+    "t": "A Knell on his knees is still a man.",
+    "tags": [
+     "knell_spared"
+    ]
+   },
+   {
+    "id": "lf_kindling_hint_165",
+    "t": "Let one walk away and see who remembers.",
+    "tags": [
+     "knell_spared"
+    ]
+   },
+   {
+    "id": "hint_corvin_freed",
+    "t": "Something in the root still carries a lantern. I see it glow at night, halfway up.",
+    "tags": [
+     "corvin_freed"
+    ]
+   },
+   {
+    "id": "lf_kindling_hint_166",
+    "t": "There is a lantern in the root. It never goes out.",
+    "tags": [
+     "corvin_freed"
+    ]
+   },
+   {
+    "id": "lf_kindling_hint_167",
+    "t": "Halfway up the root, a light. Somebody's still keeping it.",
+    "tags": [
+     "corvin_freed"
+    ]
+   }
+  ],
+  "enemy_opener": [
+   {
+    "id": "lf_enemy_opener_168",
+    "t": "Kneel, and fall the right way!",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_enemy_opener_169",
+    "t": "The Toll hears you, heretic.",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_enemy_opener_170",
+    "t": "Ring out!",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_enemy_opener_171",
+    "t": "Your light is a noise. We are the only noise.",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_enemy_opener_172",
+    "t": "Down! Down is holy!",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_enemy_opener_173",
+    "t": "Toll or kneel, Lamplighter.",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_enemy_opener_174",
+    "t": "The Bellfather counts your steps.",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_enemy_opener_175",
+    "t": "Every bell asks. Answer!",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_enemy_opener_176",
+    "t": "Silence the lantern!",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_enemy_opener_177",
+    "t": "Fall with us, it's so much easier.",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_enemy_opener_178",
+    "t": "The last bell is coming.",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_enemy_opener_179",
+    "t": "Put it out and walk away.",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_enemy_opener_180",
+    "t": "Come down where it's quiet.",
+    "tags": [
+     "drowned"
+    ]
+   },
+   {
+    "id": "lf_enemy_opener_181",
+    "t": "Breathe in. It stops hurting.",
+    "tags": [
+     "drowned"
+    ]
+   },
+   {
+    "id": "lf_enemy_opener_182",
+    "t": "You're so loud up there.",
+    "tags": [
+     "drowned"
+    ]
+   },
+   {
+    "id": "lf_enemy_opener_183",
+    "t": "Stay. Stay. Stay.",
+    "tags": [
+     "drowned"
+    ]
+   },
+   {
+    "id": "lf_enemy_opener_184",
+    "t": "We had lamps once.",
+    "tags": [
+     "drowned"
+    ]
+   },
+   {
+    "id": "lf_enemy_opener_185",
+    "t": "The water's warm, if you wait long enough.",
+    "tags": [
+     "drowned"
+    ]
+   },
+   {
+    "id": "lf_enemy_opener_186",
+    "t": "Put the light out, it stings.",
+    "tags": [
+     "drowned"
+    ]
+   },
+   {
+    "id": "lf_enemy_opener_187",
+    "t": "One more for the deep.",
+    "tags": [
+     "drowned"
+    ]
+   },
+   {
+    "id": "lf_enemy_opener_188",
+    "t": "You'll float. Everyone floats.",
+    "tags": [
+     "drowned"
+    ]
+   },
+   {
+    "id": "lf_enemy_opener_189",
+    "t": "Sink, Lamplighter.",
+    "tags": [
+     "drowned"
+    ]
+   }
+  ],
+  "combat_bark": [
+   {
+    "id": "lf_combat_bark_190",
+    "t": "Ring!",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_combat_bark_191",
+    "t": "The Toll!",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_combat_bark_192",
+    "t": "Down with the lantern!",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_combat_bark_193",
+    "t": "Fall, heretic!",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_combat_bark_194",
+    "t": "Bell and bone!",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_combat_bark_195",
+    "t": "Hear it? That's your end ringing!",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_combat_bark_196",
+    "t": "Kneel!",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_combat_bark_197",
+    "t": "For the Toll!",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_combat_bark_198",
+    "t": "Silence!",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_combat_bark_199",
+    "t": "The Bellfather sees!",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_combat_bark_200",
+    "t": "Toll, toll, toll!",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_combat_bark_201",
+    "t": "Every step is a prayer!",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_combat_bark_202",
+    "t": "Close in!",
+    "tags": [
+     "knell_order"
+    ]
+   },
+   {
+    "id": "lf_combat_bark_203",
+    "t": "Bell to me!",
+    "tags": [
+     "knell_order"
+    ]
+   },
+   {
+    "id": "lf_combat_bark_204",
+    "t": "Hookmen, up!",
+    "tags": [
+     "knell_order"
+    ]
+   },
+   {
+    "id": "lf_combat_bark_205",
+    "t": "Break the light!",
+    "tags": [
+     "knell_order"
+    ]
+   },
+   {
+    "id": "lf_combat_bark_206",
+    "t": "Flank the lantern!",
+    "tags": [
+     "knell_order"
+    ]
+   },
+   {
+    "id": "lf_combat_bark_207",
+    "t": "Hold the line — toll together!",
+    "tags": [
+     "knell_order"
+    ]
+   },
+   {
+    "id": "lf_combat_bark_208",
+    "t": "Ropes! Get above!",
+    "tags": [
+     "knell_order"
+    ]
+   },
+   {
+    "id": "lf_combat_bark_209",
+    "t": "Maul to the front!",
+    "tags": [
+     "knell_order"
+    ]
+   },
+   {
+    "id": "lf_combat_bark_210",
+    "t": "Drive it to the edge!",
+    "tags": [
+     "knell_order"
+    ]
+   },
+   {
+    "id": "lf_combat_bark_211",
+    "t": "Ring the charge!",
+    "tags": [
+     "knell_order"
+    ]
+   },
+   {
+    "id": "lf_combat_bark_212",
+    "t": "Out it goes.",
+    "tags": [
+     "lampbreaker"
+    ]
+   },
+   {
+    "id": "lf_combat_bark_213",
+    "t": "Dark's kinder.",
+    "tags": [
+     "lampbreaker"
+    ]
+   },
+   {
+    "id": "lf_combat_bark_214",
+    "t": "No more lamps.",
+    "tags": [
+     "lampbreaker"
+    ]
+   },
+   {
+    "id": "lf_combat_bark_215",
+    "t": "Snuff it.",
+    "tags": [
+     "lampbreaker"
+    ]
+   },
+   {
+    "id": "lf_combat_bark_216",
+    "t": "One less light.",
+    "tags": [
+     "lampbreaker"
+    ]
+   },
+   {
+    "id": "lf_combat_bark_217",
+    "t": "Hush now, little flame.",
+    "tags": [
+     "lampbreaker"
+    ]
+   },
+   {
+    "id": "lf_combat_bark_218",
+    "t": "The Toll likes it dark.",
+    "tags": [
+     "lampbreaker"
+    ]
+   },
+   {
+    "id": "lf_combat_bark_219",
+    "t": "There. Quiet.",
+    "tags": [
+     "lampbreaker"
+    ]
+   }
+  ],
+  "combat_flee": [
+   {
+    "id": "lf_combat_flee_220",
+    "t": "Enough — enough, I yield!",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_combat_flee_221",
+    "t": "I'll go. I'll go, just let me go.",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_combat_flee_222",
+    "t": "Mercy, Lamplighter.",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_combat_flee_223",
+    "t": "I kneel! See? I'm kneeling!",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_combat_flee_224",
+    "t": "Don't — I've a sister in the Tithe Hall!",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_combat_flee_225",
+    "t": "The Toll can have me later. Not today.",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_combat_flee_226",
+    "t": "Take the bell. Take it, I don't want it.",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_combat_flee_227",
+    "t": "I never liked the dark anyway.",
+    "tags": [
+     "knell"
+    ]
+   }
+  ],
+  "combat_taunt": [
+   {
+    "id": "lf_combat_taunt_228",
+    "t": "Your oil won't last, heretic.",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_combat_taunt_229",
+    "t": "Every step down is a step closer to the Toll.",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_combat_taunt_230",
+    "t": "Kneel now and it won't hurt.",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_combat_taunt_231",
+    "t": "Hear that? Your little light is shaking.",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_combat_taunt_232",
+    "t": "The dark is patient. So are we.",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_combat_taunt_233",
+    "t": "Put it out yourself. Save us the trouble.",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_combat_taunt_234",
+    "t": "Bleed quietly, Lamplighter.",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_combat_taunt_235",
+    "t": "You fall like a proper bell.",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_combat_taunt_236",
+    "t": "Sink a little. Just a little.",
+    "tags": [
+     "drowned"
+    ]
+   },
+   {
+    "id": "lf_combat_taunt_237",
+    "t": "Your breath is so short.",
+    "tags": [
+     "drowned"
+    ]
+   },
+   {
+    "id": "lf_combat_taunt_238",
+    "t": "The water remembers you.",
+    "tags": [
+     "drowned"
+    ]
+   },
+   {
+    "id": "lf_combat_taunt_239",
+    "t": "Lie down in it.",
+    "tags": [
+     "drowned"
+    ]
+   }
+  ],
+  "combat_hurt": [
+   {
+    "id": "lf_combat_hurt_240",
+    "t": "It rings — it rings in my teeth!",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_combat_hurt_241",
+    "t": "Toll take you!",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_combat_hurt_242",
+    "t": "That's — that's only a bruise!",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_combat_hurt_243",
+    "t": "Bell and bone, that stings!",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_combat_hurt_244",
+    "t": "Burned! I'm burned!",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_combat_hurt_245",
+    "t": "Hold — hold steady!",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_combat_hurt_246",
+    "t": "Cold… colder…",
+    "tags": [
+     "drowned"
+    ]
+   },
+   {
+    "id": "lf_combat_hurt_247",
+    "t": "Why do you still burn?",
+    "tags": [
+     "drowned"
+    ]
+   },
+   {
+    "id": "lf_combat_hurt_248",
+    "t": "It stings, it stings.",
+    "tags": [
+     "drowned"
+    ]
+   }
+  ],
+  "combat_kill": [
+   {
+    "id": "lf_combat_kill_249",
+    "t": "The Toll takes another.",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_combat_kill_250",
+    "t": "Down, like all the rest.",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_combat_kill_251",
+    "t": "Ring for this one.",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_combat_kill_252",
+    "t": "The dark says thank you.",
+    "tags": [
+     "knell"
+    ]
+   },
+   {
+    "id": "lf_combat_kill_253",
+    "t": "Float now. Float.",
+    "tags": [
+     "drowned"
+    ]
+   },
+   {
+    "id": "lf_combat_kill_254",
+    "t": "Welcome beneath.",
+    "tags": [
+     "drowned"
+    ]
+   },
+   {
+    "id": "lf_combat_kill_255",
+    "t": "Quiet at last.",
+    "tags": [
+     "drowned"
+    ]
+   },
+   {
+    "id": "lf_combat_kill_325",
+    "t": "Sleep, little wick. Mother's here.",
+    "tags": [
+     "tallow"
+    ]
+   },
+   {
+    "id": "lf_combat_kill_326",
+    "t": "There. Warm at last.",
+    "tags": [
+     "tallow"
+    ]
+   },
+   {
+    "id": "lf_combat_kill_327",
+    "t": "[The Choir sings over you, softly.]",
+    "tags": [
+     "gnaw"
+    ]
+   },
+   {
+    "id": "lf_combat_kill_328",
+    "t": "[The swarm closes like a hymn.]",
+    "tags": [
+     "gnaw"
+    ]
+   },
+   {
+    "id": "lf_combat_kill_329",
+    "t": "Delicious.",
+    "tags": [
+     "widow"
+    ]
+   },
+   {
+    "id": "lf_combat_kill_330",
+    "t": "Hush now. Lights out.",
+    "tags": [
+     "widow"
+    ]
+   },
+   {
+    "id": "lf_combat_kill_331",
+    "t": "FALLEN.",
+    "tags": [
+     "bellfather"
+    ]
+   },
+   {
+    "id": "lf_combat_kill_332",
+    "t": "KNELT.",
+    "tags": [
+     "bellfather"
+    ]
+   },
+   {
+    "id": "lf_combat_kill_333",
+    "t": "Rest. It will rain on you, too, for a while.",
+    "tags": [
+     "ossery"
+    ]
+   },
+   {
+    "id": "lf_combat_kill_334",
+    "t": "Another candle out. I am sorry.",
+    "tags": [
+     "ossery"
+    ]
+   }
+  ],
+  "beast_snarl": [
+   {
+    "id": "lf_beast_snarl_256",
+    "t": "[The rats sing: \"Feed.\"]",
+    "tags": [
+     "choir"
+    ]
+   },
+   {
+    "id": "lf_beast_snarl_257",
+    "t": "[A hundred small voices, one note.]",
+    "tags": [
+     "choir"
+    ]
+   },
+   {
+    "id": "lf_beast_snarl_258",
+    "t": "[The swarm hums, rising.]",
+    "tags": [
+     "choir"
+    ]
+   },
+   {
+    "id": "lf_beast_snarl_259",
+    "t": "[Squeaking, in harmony. It's worse in harmony.]",
+    "tags": [
+     "choir"
+    ]
+   },
+   {
+    "id": "lf_beast_snarl_260",
+    "t": "[\"Saint, saint, saint,\" the rats seem to say.]",
+    "tags": [
+     "choir"
+    ]
+   },
+   {
+    "id": "lf_beast_snarl_261",
+    "t": "[The singing stops. Everything stops.]",
+    "tags": [
+     "choir"
+    ]
+   },
+   {
+    "id": "lf_beast_snarl_262",
+    "t": "[One rat sings off-key. The others turn on it.]",
+    "tags": [
+     "choir"
+    ]
+   },
+   {
+    "id": "lf_beast_snarl_263",
+    "t": "[The chorus swells behind the wall.]",
+    "tags": [
+     "choir"
+    ]
+   },
+   {
+    "id": "lf_beast_snarl_264",
+    "t": "[Tiny claws keep time on the pipes.]",
+    "tags": [
+     "choir"
+    ]
+   },
+   {
+    "id": "lf_beast_snarl_265",
+    "t": "[The swarm sings the note the Lamp used to hum.]",
+    "tags": [
+     "choir"
+    ]
+   },
+   {
+    "id": "lf_beast_snarl_266",
+    "t": "[A high thin descant from the ceiling.]",
+    "tags": [
+     "choir"
+    ]
+   },
+   {
+    "id": "lf_beast_snarl_267",
+    "t": "[They're singing your footsteps back to you.]",
+    "tags": [
+     "choir"
+    ]
+   },
+   {
+    "id": "lf_beast_snarl_268",
+    "t": "[Something in the dark: \"…warm…\"]",
+    "tags": [
+     "unlit"
+    ]
+   },
+   {
+    "id": "lf_beast_snarl_269",
+    "t": "[A wet whisper: \"give it.\"]",
+    "tags": [
+     "unlit"
+    ]
+   },
+   {
+    "id": "lf_beast_snarl_270",
+    "t": "[The dark says your name.]",
+    "tags": [
+     "unlit"
+    ]
+   },
+   {
+    "id": "lf_beast_snarl_271",
+    "t": "[Breathing, very close.]",
+    "tags": [
+     "unlit"
+    ]
+   },
+   {
+    "id": "lf_beast_snarl_272",
+    "t": "[A voice like a drain: \"light… light…\"]",
+    "tags": [
+     "unlit"
+    ]
+   },
+   {
+    "id": "lf_beast_snarl_273",
+    "t": "[Something laughs under the water.]",
+    "tags": [
+     "unlit"
+    ]
+   },
+   {
+    "id": "lf_beast_snarl_274",
+    "t": "[Many whispers at once: \"put it out.\"]",
+    "tags": [
+     "unlit"
+    ]
+   },
+   {
+    "id": "lf_beast_snarl_275",
+    "t": "[A child's voice that isn't: \"come play in the dark.\"]",
+    "tags": [
+     "unlit"
+    ]
+   },
+   {
+    "id": "lf_beast_snarl_276",
+    "t": "[The whisper stops when your lantern flares.]",
+    "tags": [
+     "unlit"
+    ]
+   },
+   {
+    "id": "lf_beast_snarl_277",
+    "t": "[It hums the Guild oath, backwards.]",
+    "tags": [
+     "unlit"
+    ]
+   },
+   {
+    "id": "lf_beast_snarl_278",
+    "t": "[Something drips from the ceiling, and it's talking.]",
+    "tags": [
+     "unlit"
+    ]
+   },
+   {
+    "id": "lf_beast_snarl_279",
+    "t": "[\"We were lamplighters too,\" says the dark.]",
+    "tags": [
+     "unlit"
+    ]
+   }
+  ],
+  "named_beast": [
+   {
+    "id": "lf_named_beast_280",
+    "t": "The Sluicemaw circles, and the water follows.",
+    "tags": [
+     "sluicemaw"
+    ]
+   },
+   {
+    "id": "lf_named_beast_281",
+    "t": "Something the size of a barge turns under the surface.",
+    "tags": [
+     "sluicemaw"
+    ]
+   },
+   {
+    "id": "lf_named_beast_282",
+    "t": "The gauges jump. The Maw is rising.",
+    "tags": [
+     "sluicemaw"
+    ]
+   },
+   {
+    "id": "lf_named_beast_283",
+    "t": "The reservoir heaves, and a mouth opens in it.",
+    "tags": [
+     "sluicemaw"
+    ]
+   }
+  ],
+  "boss_opener": [
+   {
+    "id": "lf_boss_opener_284",
+    "t": "Little wick. Come in out of the rain.",
+    "tags": [
+     "tallow"
+    ]
+   },
+   {
+    "id": "lf_boss_opener_285",
+    "t": "They fed me nine years of candles. I'm still so cold.",
+    "tags": [
+     "tallow"
+    ]
+   },
+   {
+    "id": "lf_boss_opener_286",
+    "t": "Sit by the Mother. Sit.",
+    "tags": [
+     "tallow"
+    ]
+   },
+   {
+    "id": "lf_boss_opener_287",
+    "t": "[The Choir: \"Feed! Feed! Feed!\"]",
+    "tags": [
+     "gnaw"
+    ]
+   },
+   {
+    "id": "lf_boss_opener_288",
+    "t": "[Saint Gnaw raises a claw; the swarm falls silent.]",
+    "tags": [
+     "gnaw"
+    ]
+   },
+   {
+    "id": "lf_boss_opener_289",
+    "t": "[The Choir hums a note you feel in your teeth.]",
+    "tags": [
+     "gnaw"
+    ]
+   },
+   {
+    "id": "lf_boss_opener_290",
+    "t": "Come home, apprentice.",
+    "tags": [
+     "widow"
+    ]
+   },
+   {
+    "id": "lf_boss_opener_291",
+    "t": "Put the lamp down. You're safe now.",
+    "tags": [
+     "widow"
+    ]
+   },
+   {
+    "id": "lf_boss_opener_292",
+    "t": "I loved the light more than anyone.",
+    "tags": [
+     "widow"
+    ]
+   },
+   {
+    "id": "lf_boss_opener_293",
+    "t": "KNEEL.",
+    "tags": [
+     "bellfather"
+    ]
+   },
+   {
+    "id": "lf_boss_opener_294",
+    "t": "Forty years, and they send a child with a candle.",
+    "tags": [
+     "ossery"
+    ]
+   },
+   {
+    "id": "lf_boss_opener_295",
+    "t": "Do you know what a dry sky looked like? I don't. Not anymore.",
+    "tags": [
+     "ossery"
+    ]
+   },
+   {
+    "id": "lf_boss_opener_296",
+    "t": "Turn back. It's only rain.",
+    "tags": [
+     "ossery"
+    ]
+   }
+  ],
+  "boss_phase": [
+   {
+    "id": "lf_boss_phase_297",
+    "t": "You're hurting me. I'll hold you tighter.",
+    "tags": [
+     "tallow",
+     "p2"
+    ]
+   },
+   {
+    "id": "lf_boss_phase_298",
+    "t": "I'm melting — I'm melting into you.",
+    "tags": [
+     "tallow",
+     "p3"
+    ]
+   },
+   {
+    "id": "lf_boss_phase_299",
+    "t": "Every drop of me will find you.",
+    "tags": [
+     "tallow"
+    ]
+   },
+   {
+    "id": "lf_boss_phase_300",
+    "t": "[The Choir changes key.]",
+    "tags": [
+     "gnaw"
+    ]
+   },
+   {
+    "id": "lf_boss_phase_301",
+    "t": "[Saint Gnaw conducts faster.]",
+    "tags": [
+     "gnaw"
+    ]
+   },
+   {
+    "id": "lf_boss_phase_302",
+    "t": "[The swarm sings your name, wrongly.]",
+    "tags": [
+     "gnaw",
+     "p3"
+    ]
+   },
+   {
+    "id": "lf_boss_phase_303",
+    "t": "Your lantern is delicious.",
+    "tags": [
+     "widow",
+     "p2"
+    ]
+   },
+   {
+    "id": "lf_boss_phase_304",
+    "t": "Dark, dark, dark — isn't it restful?",
+    "tags": [
+     "widow"
+    ]
+   },
+   {
+    "id": "lf_boss_phase_305",
+    "t": "I'll wear your light.",
+    "tags": [
+     "widow"
+    ]
+   },
+   {
+    "id": "lf_boss_phase_306",
+    "t": "FALL.",
+    "tags": [
+     "bellfather",
+     "p1"
+    ]
+   },
+   {
+    "id": "lf_boss_phase_307",
+    "t": "RING.",
+    "tags": [
+     "bellfather",
+     "p2"
+    ]
+   },
+   {
+    "id": "lf_boss_phase_308",
+    "t": "TOLL.",
+    "tags": [
+     "bellfather",
+     "p3"
+    ]
+   },
+   {
+    "id": "lf_boss_phase_309",
+    "t": "You've lit their Lamps. You think that makes it day?",
+    "tags": [
+     "ossery",
+     "p2"
+    ]
+   },
+   {
+    "id": "lf_boss_phase_310",
+    "t": "Elsbet hated the rain. I keep it for her. I keep it.",
+    "tags": [
+     "ossery",
+     "p3"
+    ]
+   },
+   {
+    "id": "lf_boss_phase_311",
+    "t": "Listen. Do you hear that? Nothing.",
+    "tags": [
+     "ossery",
+     "p4"
+    ]
+   },
+   {
+    "id": "lf_boss_phase_312",
+    "t": "You took the Lamplighter out of my root. He was good company.",
+    "tags": [
+     "ossery",
+     "p2"
+    ],
+    "cond": "flags.corvin_freed",
+    "w": 4
+   }
+  ],
+  "last_words": [
+   {
+    "id": "lf_last_words_313",
+    "t": "Put me out gently. Please.",
+    "tags": [
+     "tallow"
+    ]
+   },
+   {
+    "id": "lf_last_words_314",
+    "t": "The wick's gone out. Oh, that's nicer.",
+    "tags": [
+     "tallow"
+    ]
+   },
+   {
+    "id": "lf_last_words_315",
+    "t": "So cool. So quiet. Thank you, little wick.",
+    "tags": [
+     "tallow"
+    ],
+    "cond": "flags.tallow_cooled",
+    "w": 6
+   },
+   {
+    "id": "lf_last_words_316",
+    "t": "[The Choir falters. One voice keeps singing, then stops.]",
+    "tags": [
+     "gnaw"
+    ]
+   },
+   {
+    "id": "lf_last_words_317",
+    "t": "[The last rat stops singing.]",
+    "tags": [
+     "gnaw"
+    ]
+   },
+   {
+    "id": "lf_last_words_318",
+    "t": "[A single squeak, and then the pipes are quiet.]",
+    "tags": [
+     "gnaw"
+    ]
+   },
+   {
+    "id": "lf_last_words_319",
+    "t": "Sister? Is that you?",
+    "tags": [
+     "widow"
+    ]
+   },
+   {
+    "id": "lf_last_words_320",
+    "t": "Keep it lit. For me.",
+    "tags": [
+     "widow"
+    ]
+   },
+   {
+    "id": "lf_last_words_321",
+    "t": "Oh. That's what it looked like.",
+    "tags": [
+     "widow"
+    ],
+    "cond": "flags.widow_mercy",
+    "w": 6
+   },
+   {
+    "id": "lf_last_words_322",
+    "t": "…kneel…",
+    "tags": [
+     "bellfather"
+    ]
+   },
+   {
+    "id": "lf_last_words_323",
+    "t": "…ring…",
+    "tags": [
+     "bellfather"
+    ]
+   },
+   {
+    "id": "lf_last_words_324",
+    "t": "…toll…",
+    "tags": [
+     "bellfather"
+    ]
+   }
+  ],
+  "greet": [
+   {
+    "id": "lf_greet_335",
+    "t": "Keep it lit.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_greet_336",
+    "t": "Evening. It's always evening down here.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_greet_337",
+    "t": "Still dry? No. Nobody is.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_greet_338",
+    "t": "Oil in the lamp, I see. Good.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_greet_339",
+    "t": "There's the Lamplighter.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_greet_340",
+    "t": "Come in out of the rain, {listener.name}.",
+    "tags": [
+     "lanternfall"
+    ]
+   }
+  ],
+  "farewell": [
+   {
+    "id": "lf_farewell_341",
+    "t": "Mind the oil.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_farewell_342",
+    "t": "Keep it lit.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_farewell_343",
+    "t": "Mind the drop.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_farewell_344",
+    "t": "Don't let the rain in your lantern.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_farewell_345",
+    "t": "Go on, then. The dark's waiting.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_farewell_346",
+    "t": "Light first. Everything after.",
+    "tags": [
+     "lanternfall"
+    ]
+   }
+  ],
+  "warning": [
+   {
+    "id": "lf_warning_347",
+    "t": "Lantern's low!",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_warning_348",
+    "t": "Water's rising!",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_warning_349",
+    "t": "Mind the edge — it's a long drop!",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_warning_350",
+    "t": "Something's in the dark!",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_warning_351",
+    "t": "Watch the ceiling, it's loose!",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_warning_352",
+    "t": "Your light — keep your light up!",
+    "tags": [
+     "lanternfall"
+    ]
+   }
+  ],
+  "rally": [
+   {
+    "id": "lf_rally_353",
+    "t": "No tier left dark!",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_rally_354",
+    "t": "Light them up!",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_rally_355",
+    "t": "For the Guild!",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_rally_356",
+    "t": "Keep the lamp high!",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_rally_357",
+    "t": "Burn them back!",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_rally_358",
+    "t": "Stand in the light!",
+    "tags": [
+     "lanternfall"
+    ]
+   }
+  ],
+  "relief": [
+   {
+    "id": "lf_relief_359",
+    "t": "Dry ground. Well — drier.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_relief_360",
+    "t": "Still lit. Still here.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_relief_361",
+    "t": "That was close. Too close.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_relief_362",
+    "t": "Breathe. We're out.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_relief_363",
+    "t": "The dark backed off. For now.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_relief_364",
+    "t": "Oil left. Good.",
+    "tags": [
+     "lanternfall"
+    ]
+   }
+  ],
+  "fear": [
+   {
+    "id": "lf_fear_365",
+    "t": "Don't let the light go out.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_fear_366",
+    "t": "It's too dark. It's far too dark.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_fear_367",
+    "t": "I can hear it breathing.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_fear_368",
+    "t": "The lamp's shaking. Is it the lamp or me?",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_fear_369",
+    "t": "Stay in the light. Please.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_fear_370",
+    "t": "What if it never stops raining?",
+    "tags": [
+     "lanternfall"
+    ]
+   }
+  ],
+  "thanks": [
+   {
+    "id": "lf_thanks_371",
+    "t": "You're a proper Lamplighter.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_thanks_372",
+    "t": "Bless your wick.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_thanks_373",
+    "t": "I'll remember that when the lamps are lit.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_thanks_374",
+    "t": "Thank you. Truly. Mind the oil.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_thanks_375",
+    "t": "You've got a good light in you.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_thanks_376",
+    "t": "That's a kindness I won't forget.",
+    "tags": [
+     "lanternfall"
+    ]
+   }
+  ],
+  "trade_haggle": [
+   {
+    "id": "lf_trade_haggle_377",
+    "t": "Pennies, not promises.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_trade_haggle_378",
+    "t": "Everything's dear in the dark.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_trade_haggle_379",
+    "t": "Oil costs what oil costs.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_trade_haggle_380",
+    "t": "You want it cheap, go and find it in a flood.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_trade_haggle_381",
+    "t": "I'll knock off a penny. One.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_trade_haggle_382",
+    "t": "Price goes down when the Lamp goes up.",
+    "tags": [
+     "lanternfall"
+    ]
+   }
+  ],
+  "trade_refuse": [
+   {
+    "id": "lf_trade_refuse_383",
+    "t": "I don't take wet coin.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_trade_refuse_384",
+    "t": "Not for that price. Not in this rain.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_trade_refuse_385",
+    "t": "Come back when your purse is heavier.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_trade_refuse_386",
+    "t": "No. And don't drip on the counter.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_trade_refuse_387",
+    "t": "That's not money, that's a puddle.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_trade_refuse_388",
+    "t": "Not today, Lamplighter.",
+    "tags": [
+     "lanternfall"
+    ]
+   }
+  ],
+  "pray": [
+   {
+    "id": "lf_pray_389",
+    "t": "By the Ledger.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_pray_390",
+    "t": "Ledger keep us.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_pray_391",
+    "t": "Let the Lamp hold.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_pray_392",
+    "t": "Keep the wick dry, keep the flame true.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_pray_393",
+    "t": "By the old oil and the new light.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_pray_394",
+    "t": "Let the Rain pass over us.",
+    "tags": [
+     "lanternfall"
+    ]
+   }
+  ],
+  "observe": [
+   {
+    "id": "lf_observe_395",
+    "t": "Lamp-hook. No lamp.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_observe_396",
+    "t": "Wax on the floor. Somebody came this way.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_observe_397",
+    "t": "The water's higher than last time.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_observe_398",
+    "t": "Old oil. You can smell it.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_observe_399",
+    "t": "Soot on the walls — something burned here.",
+    "tags": [
+     "lanternfall"
+    ]
+   },
+   {
+    "id": "lf_observe_400",
+    "t": "That drip's been going forty years.",
+    "tags": [
+     "lanternfall"
+    ]
+   }
+  ]
+ },
+ "lines": {
+  "bl_tallow_open": {
+   "speaker": "boss_tallow",
+   "text": "Little wick. Come in out of the rain.",
+   "boss": "tallow",
+   "slot": "open",
+   "kind": "boss"
+  },
+  "bl_tallow_p1": {
+   "speaker": "boss_tallow",
+   "text": "They fed me nine years of candles. I'm still so cold.",
+   "boss": "tallow",
+   "slot": "p1",
+   "kind": "boss"
+  },
+  "bl_tallow_p2": {
+   "speaker": "boss_tallow",
+   "text": "You're hurting me. I'll hold you tighter.",
+   "boss": "tallow",
+   "slot": "p2",
+   "kind": "boss"
+  },
+  "bl_tallow_p3": {
+   "speaker": "boss_tallow",
+   "text": "I'm melting — I'm melting into you.",
+   "boss": "tallow",
+   "slot": "p3",
+   "kind": "boss"
+  },
+  "bl_tallow_death": {
+   "speaker": "boss_tallow",
+   "text": "Put me out gently. Please.",
+   "boss": "tallow",
+   "slot": "death",
+   "kind": "boss"
+  },
+  "bl_gnaw_open": {
+   "speaker": "boss_gnaw",
+   "text": "[The Choir: \"Feed! Feed! Feed!\"]",
+   "boss": "gnaw",
+   "slot": "open",
+   "kind": "boss",
+   "gloss": true
+  },
+  "bl_gnaw_p1": {
+   "speaker": "boss_gnaw",
+   "text": "[Saint Gnaw raises a claw; the swarm falls silent.]",
+   "boss": "gnaw",
+   "slot": "p1",
+   "kind": "boss",
+   "gloss": true
+  },
+  "bl_gnaw_p2": {
+   "speaker": "boss_gnaw",
+   "text": "[The Choir changes key.]",
+   "boss": "gnaw",
+   "slot": "p2",
+   "kind": "boss",
+   "gloss": true
+  },
+  "bl_gnaw_p3": {
+   "speaker": "boss_gnaw",
+   "text": "[The swarm sings your name, wrongly.]",
+   "boss": "gnaw",
+   "slot": "p3",
+   "kind": "boss",
+   "gloss": true
+  },
+  "bl_gnaw_death": {
+   "speaker": "boss_gnaw",
+   "text": "[The Choir falters. One voice keeps singing, then stops.]",
+   "boss": "gnaw",
+   "slot": "death",
+   "kind": "boss",
+   "gloss": true
+  },
+  "bl_sluicemaw_open": {
+   "speaker": "narrator",
+   "text": "The Sluicemaw rolls in the dark water, and the gauges on the wall all jump at once.",
+   "boss": "sluicemaw",
+   "slot": "open",
+   "kind": "boss",
+   "narration": true
+  },
+  "bl_sluicemaw_p1": {
+   "speaker": "narrator",
+   "text": "It circles. The water circles with it.",
+   "boss": "sluicemaw",
+   "slot": "p1",
+   "kind": "boss",
+   "narration": true
+  },
+  "bl_sluicemaw_p2": {
+   "speaker": "narrator",
+   "text": "The reservoir drops, and the Maw goes down with it, hungry.",
+   "boss": "sluicemaw",
+   "slot": "p2",
+   "kind": "boss",
+   "narration": true
+  },
+  "bl_sluicemaw_p3": {
+   "speaker": "narrator",
+   "text": "Every gate in the Ward groans at once.",
+   "boss": "sluicemaw",
+   "slot": "p3",
+   "kind": "boss",
+   "narration": true
+  },
+  "bl_sluicemaw_death": {
+   "speaker": "narrator",
+   "text": "The Sluicemaw sinks. For the first time in twenty-eight years, the gauges read still.",
+   "boss": "sluicemaw",
+   "slot": "death",
+   "kind": "boss",
+   "narration": true
+  },
+  "bl_widow_open": {
+   "speaker": "boss_widow",
+   "text": "Come home, apprentice.",
+   "boss": "widow",
+   "slot": "open",
+   "kind": "boss",
+   "voiceOf": "npc_aldra"
+  },
+  "bl_widow_p1": {
+   "speaker": "boss_widow",
+   "text": "Put the lamp down. You're safe now.",
+   "boss": "widow",
+   "slot": "p1",
+   "kind": "boss"
+  },
+  "bl_widow_p2": {
+   "speaker": "boss_widow",
+   "text": "Your lantern is delicious.",
+   "boss": "widow",
+   "slot": "p2",
+   "kind": "boss",
+   "voiceOf": "npc_aldra"
+  },
+  "bl_widow_p3": {
+   "speaker": "boss_widow",
+   "text": "Too bright. Too bright.",
+   "boss": "widow",
+   "slot": "p3",
+   "kind": "boss"
+  },
+  "bl_widow_death": {
+   "speaker": "boss_widow",
+   "text": "Sister? Is that you?",
+   "boss": "widow",
+   "slot": "death",
+   "kind": "boss"
+  },
+  "bl_bellfather_open": {
+   "speaker": "boss_bellfather",
+   "text": "KNEEL.",
+   "boss": "bellfather",
+   "slot": "open",
+   "kind": "boss"
+  },
+  "bl_bellfather_p1": {
+   "speaker": "boss_bellfather",
+   "text": "FALL.",
+   "boss": "bellfather",
+   "slot": "p1",
+   "kind": "boss"
+  },
+  "bl_bellfather_p2": {
+   "speaker": "boss_bellfather",
+   "text": "RING.",
+   "boss": "bellfather",
+   "slot": "p2",
+   "kind": "boss"
+  },
+  "bl_bellfather_p3": {
+   "speaker": "boss_bellfather",
+   "text": "TOLL.",
+   "boss": "bellfather",
+   "slot": "p3",
+   "kind": "boss"
+  },
+  "bl_bellfather_death": {
+   "speaker": "boss_bellfather",
+   "text": "…kneel…",
+   "boss": "bellfather",
+   "slot": "death",
+   "kind": "boss",
+   "fx": {
+    "robot": 0
+   }
+  },
+  "bl_ossery_open": {
+   "speaker": "boss_ossery",
+   "text": "Forty years, and they send a child with a candle.",
+   "boss": "ossery",
+   "slot": "open",
+   "kind": "boss"
+  },
+  "bl_ossery_p1": {
+   "speaker": "boss_ossery",
+   "text": "Turn back. It's only rain.",
+   "boss": "ossery",
+   "slot": "p1",
+   "kind": "boss",
+   "phase": "p1"
+  },
+  "bl_ossery_p2": {
+   "speaker": "boss_ossery",
+   "text": "You've lit their Lamps. You think that makes it day?",
+   "boss": "ossery",
+   "slot": "p2",
+   "kind": "boss",
+   "phase": "p2"
+  },
+  "bl_ossery_p3": {
+   "speaker": "boss_ossery",
+   "text": "Elsbet hated the rain. I keep it for her. I keep it.",
+   "boss": "ossery",
+   "slot": "p3",
+   "kind": "boss",
+   "phase": "p3"
+  },
+  "bl_ossery_p4": {
+   "speaker": "boss_ossery",
+   "text": "Listen. Do you hear that? Nothing. I had forgotten what nothing sounded like.",
+   "boss": "ossery",
+   "slot": "p4",
+   "kind": "boss",
+   "phase": "p4"
+  },
+  "bl_ossery_freeze": {
+   "speaker": "boss_ossery",
+   "text": "One more day. I only wanted one more day.",
+   "boss": "ossery",
+   "slot": "freeze",
+   "kind": "boss"
+  },
+  "bl_ossery_refuse": {
+   "speaker": "boss_ossery",
+   "text": "You don't know what it's like to let go.",
+   "boss": "ossery",
+   "slot": "refuse",
+   "kind": "boss"
+  },
+  "bl_ossery_kill": {
+   "speaker": "boss_ossery",
+   "text": "Rest. It will rain on you, too, for a while.",
+   "boss": "ossery",
+   "slot": "kill",
+   "kind": "boss"
+  },
+  "bl_tallow_death_cooled": {
+   "speaker": "boss_tallow",
+   "text": "So cool. So quiet. Thank you, little wick.",
+   "boss": "tallow",
+   "slot": "death",
+   "kind": "boss",
+   "when": "tallow_cooled"
+  },
+  "bl_widow_death_gleam": {
+   "speaker": "boss_widow",
+   "text": "Oh. That's what it looked like.",
+   "boss": "widow",
+   "slot": "death",
+   "kind": "boss",
+   "when": "widow_mercy"
+  },
+  "bl_ossery_p2_corvin": {
+   "speaker": "boss_ossery",
+   "text": "You took the Lamplighter out of my root. He was good company.",
+   "boss": "ossery",
+   "slot": "p2",
+   "kind": "boss",
+   "phase": "p2",
+   "when": "corvin_freed"
+  },
+  "hint_tallow_cooled": {
+   "speaker": "npc_seld",
+   "text": "She was only ever cold. If you must put her out — put her out with something cold. Please.",
+   "kind": "story",
+   "flag": "tallow_cooled"
+  },
+  "hint_pim_trusted": {
+   "speaker": "npc_aldra",
+   "text": "That sweep girl follows you like a moth. Give her something to carry and she'll carry it for life.",
+   "kind": "story",
+   "flag": "pim_trusted"
+  },
+  "hint_hollis_lantern": {
+   "speaker": "npc_hollis",
+   "text": "My brother went down the rat pipes with a lantern. Never pawned it. Never came back up with it either.",
+   "kind": "story",
+   "flag": "hollis_lantern"
+  },
+  "hint_pale_kept": {
+   "speaker": "npc_unna",
+   "text": "If the dry ones open the valve, we go out with the water. Leave it, dry one. Leave it shut.",
+   "kind": "story",
+   "flag": "pale_kept"
+  },
+  "hint_nell_alive": {
+   "speaker": "npc_brisket",
+   "text": "Nell went into Stilt Town on her own. Stubborn girl. Somebody ought to go after her before it's too late.",
+   "kind": "story",
+   "flag": "nell_alive"
+  },
+  "hint_widow_mercy": {
+   "speaker": "npc_mothwife",
+   "text": "If you finish her, finish her in gold light. She always wanted to see it once more.",
+   "kind": "story",
+   "flag": "widow_mercy"
+  },
+  "hint_knell_spared": {
+   "speaker": "npc_wenna",
+   "text": "The Knell kneel, if you let them. Folk down here remember who let them get back up.",
+   "kind": "story",
+   "flag": "knell_spared"
+  },
+  "hint_corvin_freed": {
+   "speaker": "npc_merrit",
+   "text": "Something in the root still carries a lantern. I see it glow at night, halfway up.",
+   "kind": "story",
+   "flag": "corvin_freed"
+  },
+  "marl_deal_named": {
+   "speaker": "npc_marl",
+   "text": "Ten of mine have walked away from you. Make it ten, Lamplighter, and I'll call you a friend of the Toll.",
+   "kind": "story",
+   "flag": "knell_spared"
+  },
+  "marl_deal_5": {
+   "speaker": "npc_marl",
+   "text": "Five of mine walked home last week and swore a Lamplighter let them. Five. The flock is counting, child.",
+   "kind": "story",
+   "flag": "knell_spared"
+  },
+  "marl_deal_9": {
+   "speaker": "npc_marl",
+   "text": "Nine. One more, and the Tithe Hall rings for you instead of against you.",
+   "kind": "story",
+   "flag": "knell_spared"
+  },
+  "nr_first_trap_kill": {
+   "speaker": "narrator",
+   "text": "Entered in the Ledger, under The Hollow: one enemy, killed by the city itself. The city approves.",
+   "kind": "story",
+   "narration": true
+  },
+  "nr_rekindle_1": {
+   "speaker": "narrator",
+   "text": "Entered in the Ledger: a room, put back. The Ledger has seen worse.",
+   "kind": "story",
+   "narration": true,
+   "group": "rekindle"
+  },
+  "nr_rekindle_2": {
+   "speaker": "narrator",
+   "text": "The wax remembers. So does the Ledger.",
+   "kind": "story",
+   "narration": true,
+   "group": "rekindle"
+  },
+  "nr_rekindle_3": {
+   "speaker": "narrator",
+   "text": "Again, then.",
+   "kind": "story",
+   "narration": true,
+   "group": "rekindle"
+  },
+  "nr_rekindle_4": {
+   "speaker": "narrator",
+   "text": "The Ledger turns back a page. Only one.",
+   "kind": "story",
+   "narration": true,
+   "group": "rekindle"
+  },
+  "nr_rekindle_5": {
+   "speaker": "narrator",
+   "text": "Put right. The rain did not notice.",
+   "kind": "story",
+   "narration": true,
+   "group": "rekindle"
+  },
+  "nr_rekindle_6": {
+   "speaker": "narrator",
+   "text": "Once more, with feeling.",
+   "kind": "story",
+   "narration": true,
+   "group": "rekindle"
+  },
+  "nr_rekindle_7": {
+   "speaker": "narrator",
+   "text": "A room, as it was. You, as you are.",
+   "kind": "story",
+   "narration": true,
+   "group": "rekindle"
+  },
+  "nr_rekindle_8": {
+   "speaker": "narrator",
+   "text": "The Ledger does not judge. It only counts.",
+   "kind": "story",
+   "narration": true,
+   "group": "rekindle"
+  },
+  "nr_rekindle_9": {
+   "speaker": "narrator",
+   "text": "Every stone back where it fell from. Mostly.",
+   "kind": "story",
+   "narration": true,
+   "group": "rekindle"
+  },
+  "nr_rekindle_10": {
+   "speaker": "narrator",
+   "text": "Rekindled. Try the other way this time.",
+   "kind": "story",
+   "narration": true,
+   "group": "rekindle"
+  },
+  "nr_rekindle_11": {
+   "speaker": "narrator",
+   "text": "The city resets its trap. Politely.",
+   "kind": "story",
+   "narration": true,
+   "group": "rekindle"
+  },
+  "nr_rekindle_12": {
+   "speaker": "narrator",
+   "text": "Entered twice. The second entry is shorter.",
+   "kind": "story",
+   "narration": true,
+   "group": "rekindle"
+  }
+ }
+}

@@ -1,0 +1,176 @@
+{
+ "_doc": "Player movement numbers. Units: cells, cells/s, cells/s\u00b2, seconds. See 07-TRAVERSAL-PUZZLES.md \u00a72.",
+ "body": {
+  "w": 6,
+  "h": 12,
+  "crouchH": 7,
+  "hurtW": 4,
+  "hurtH": 10,
+  "stepUp": 2,
+  "stepUpRun": 3,
+  "stepUpAir": 4,
+  "stepDown": 3,
+  "cornerFix": 3
+ },
+ "run": {
+  "walk": 60,
+  "run": 95,
+  "accel": 750,
+  "runAccel": 500,
+  "decel": 1200,
+  "turn": 1800,
+  "airAccel": 450,
+  "airDecel": 180
+ },
+ "jump": {
+  "v": 248,
+  "gravity": 900,
+  "fallGravity": 1170,
+  "apexHangVy": 40,
+  "apexHangScale": 0.5,
+  "cut": 0.4,
+  "minHoldFrames": 3,
+  "terminal": 420,
+  "fastFallGravity": 1440,
+  "fastFallTerminal": 520,
+  "coyote": 0.1,
+  "buffer": 0.12
+ },
+ "land": {
+  "lagAbove": 100,
+  "lag": 0.12,
+  "safeFall": 160,
+  "dmgPer20": 0.05,
+  "dmgCap": 0.6,
+  "tuckWindow": 0.1
+ },
+ "wall": {
+  "rowsNeeded": 8,
+  "slide": 70,
+  "slideWet": 90,
+  "slideSoot": 50,
+  "stick": 0.15,
+  "jumpVx": 120,
+  "jumpVy": 230,
+  "lock": 0.14,
+  "coyote": 0.08,
+  "regrab": 0.2
+ },
+ "ledge": {
+  "handRows": 5,
+  "handReach": 2,
+  "minVy": -60,
+  "freeAbove": 12,
+  "freeWide": 6,
+  "climb": 0.3,
+  "hopVx": 90,
+  "hopVy": 200,
+  "shimmy": 20
+ },
+ "crouch": {
+  "crawl": 28,
+  "slideV": 130,
+  "slideEnd": 60,
+  "slideTime": 0.35,
+  "slideMinSpeed": 80,
+  "slideCooldown": 0.5
+ },
+ "dropThrough": {
+  "ignore": 0.2,
+  "hold": 0.3
+ },
+ "swim": {
+  "buoyancy": 120,
+  "speed": 50,
+  "strokeV": 90,
+  "strokeTime": 0.25,
+  "strokeCd": 0.4,
+  "dive": 55,
+  "drag": 4,
+  "surfaceJump": 200,
+  "strokeJump": 240,
+  "breath": 12,
+  "breathRefill": 4,
+  "drown": 0.08,
+  "flowShare": 0.6,
+  "paddle": 28
+ },
+ "climb": {
+  "ladderUp": 45,
+  "ladderDown": 60,
+  "ladderFast": 140,
+  "ropeUp": 40,
+  "ropeDown": 55,
+  "ropeFast": 120,
+  "offVy": 180,
+  "offVx": 60
+ },
+ "carry": {
+  "maxWeight": 1,
+  "maxSize": 10,
+  "walk": 48,
+  "jumpScale": 0.8,
+  "throwV": 180,
+  "throwUp": 60,
+  "push": [
+   30,
+   18,
+   10
+  ]
+ },
+ "wind": {
+  "airResponse": 6,
+  "groundResponse": 2,
+  "maxAccel": 240
+ },
+ "knock": {
+  "control": 0.3,
+  "time": 0.2,
+  "wallStagger": 160,
+  "staggerTime": 0.3
+ },
+ "surfaces": {
+  "ice": {
+   "accel": 0.2,
+   "decel": 0.07,
+   "max": 1.1
+  },
+  "oil": {
+   "accel": 0.4,
+   "decel": 0.15,
+   "max": 1.05
+  },
+  "molten_wax": {
+   "accel": 0.6,
+   "decel": 1,
+   "max": 0.6,
+   "jump": 0.8
+  },
+  "sand": {
+   "accel": 0.7,
+   "decel": 1.2,
+   "max": 0.7,
+   "jump": 0.9
+  },
+  "ash": {
+   "accel": 0.7,
+   "decel": 1.2,
+   "max": 0.7,
+   "jump": 0.9
+  },
+  "mud": {
+   "accel": 0.6,
+   "decel": 1.5,
+   "max": 0.6,
+   "jump": 0.8
+  },
+  "wet": {
+   "accel": 0.8,
+   "decel": 0.6,
+   "max": 1
+  }
+ },
+ "pogo": {
+  "v": 208
+ }
+}

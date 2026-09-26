@@ -1,0 +1,303 @@
+{
+ "_doc": "Room kit parameters (docs/09 \u00a74.2, 05 \u00a77.3): spawn tables per act (id, weight, tier, group size) and the budget per room by act.",
+ "version": 1,
+ "spawnTables": {
+  "act1": [
+   {
+    "id": "wax_mite",
+    "w": 35,
+    "tier": "fodder",
+    "group": 3
+   },
+   {
+    "id": "soot_pigeon",
+    "w": 25,
+    "tier": "fodder"
+   },
+   {
+    "id": "dripling",
+    "w": 25,
+    "tier": "standard"
+   },
+   {
+    "id": "tallow_hound",
+    "w": 15,
+    "tier": "standard"
+   }
+  ],
+  "act2": [
+   {
+    "id": "gutter_rat",
+    "w": 30,
+    "tier": "fodder",
+    "group": 6
+   },
+   {
+    "id": "rat_chorister",
+    "w": 12,
+    "tier": "standard"
+   },
+   {
+    "id": "rope_scuttler",
+    "w": 15,
+    "tier": "standard"
+   },
+   {
+    "id": "fatberg",
+    "w": 8,
+    "tier": "heavy"
+   },
+   {
+    "id": "wax_mite",
+    "w": 5,
+    "tier": "fodder",
+    "group": 3
+   },
+   {
+    "id": "tallow_hound",
+    "w": 5,
+    "tier": "standard"
+   },
+   {
+    "id": "knell_novice",
+    "w": 17,
+    "tier": "standard"
+   },
+   {
+    "id": "knell_hookman",
+    "w": 8,
+    "tier": "standard"
+   }
+  ],
+  "act3": [
+   {
+    "id": "maw_fry",
+    "w": 25,
+    "tier": "fodder",
+    "group": 6
+   },
+   {
+    "id": "sluice_eel",
+    "w": 18,
+    "tier": "standard"
+   },
+   {
+    "id": "sluice_crab",
+    "w": 18,
+    "tier": "standard"
+   },
+   {
+    "id": "drowned_lockkeeper",
+    "w": 10,
+    "tier": "heavy"
+   },
+   {
+    "id": "gutter_rat",
+    "w": 7,
+    "tier": "fodder",
+    "group": 6
+   },
+   {
+    "id": "knell_novice",
+    "w": 10,
+    "tier": "standard"
+   },
+   {
+    "id": "knell_hookman",
+    "w": 5,
+    "tier": "standard"
+   },
+   {
+    "id": "knell_lampbreaker",
+    "w": 7,
+    "tier": "standard"
+   }
+  ],
+  "act4": [
+   {
+    "id": "oilback",
+    "w": 20,
+    "tier": "heavy"
+   },
+   {
+    "id": "lampeater",
+    "w": 20,
+    "tier": "standard"
+   },
+   {
+    "id": "sluice_eel",
+    "w": 10,
+    "tier": "standard"
+   },
+   {
+    "id": "gutter_rat",
+    "w": 8,
+    "tier": "fodder",
+    "group": 6
+   },
+   {
+    "id": "knell_novice",
+    "w": 12,
+    "tier": "standard"
+   },
+   {
+    "id": "knell_hookman",
+    "w": 10,
+    "tier": "standard"
+   },
+   {
+    "id": "knell_lampbreaker",
+    "w": 20,
+    "tier": "standard"
+   }
+  ],
+  "act5": [
+   {
+    "id": "clapperling",
+    "w": 25,
+    "tier": "fodder"
+   },
+   {
+    "id": "tumbler",
+    "w": 15,
+    "tier": "standard"
+   },
+   {
+    "id": "echo_bat",
+    "w": 18,
+    "tier": "standard"
+   },
+   {
+    "id": "bronze_sentinel",
+    "w": 7,
+    "tier": "heavy"
+   },
+   {
+    "id": "rope_scuttler",
+    "w": 5,
+    "tier": "standard"
+   },
+   {
+    "id": "knell_novice",
+    "w": 8,
+    "tier": "standard"
+   },
+   {
+    "id": "knell_hookman",
+    "w": 7,
+    "tier": "standard"
+   },
+   {
+    "id": "knell_lampbreaker",
+    "w": 7,
+    "tier": "standard"
+   },
+   {
+    "id": "knell_maulbearer",
+    "w": 8,
+    "tier": "heavy"
+   }
+  ],
+  "act6": [
+   {
+    "id": "stormgull",
+    "w": 20,
+    "tier": "standard"
+   },
+   {
+    "id": "rainwraith",
+    "w": 18,
+    "tier": "standard"
+   },
+   {
+    "id": "rootgnarl",
+    "w": 15,
+    "tier": "heavy"
+   },
+   {
+    "id": "hailstone_golem",
+    "w": 7,
+    "tier": "heavy"
+   },
+   {
+    "id": "echo_bat",
+    "w": 8,
+    "tier": "standard"
+   },
+   {
+    "id": "lampeater",
+    "w": 7,
+    "tier": "standard"
+   },
+   {
+    "id": "oilback",
+    "w": 5,
+    "tier": "heavy"
+   },
+   {
+    "id": "sluice_crab",
+    "w": 5,
+    "tier": "standard"
+   },
+   {
+    "id": "knell_lampbreaker",
+    "w": 8,
+    "tier": "standard"
+   },
+   {
+    "id": "knell_maulbearer",
+    "w": 7,
+    "tier": "heavy"
+   }
+  ],
+  "unlit": [
+   {
+    "id": "unlit_creeper",
+    "w": 40,
+    "tier": "standard"
+   },
+   {
+    "id": "unlit_hound",
+    "w": 30,
+    "tier": "standard",
+    "group": 3
+   },
+   {
+    "id": "unlit_stalker",
+    "w": 15,
+    "tier": "heavy"
+   },
+   {
+    "id": "unlit_wickthief",
+    "w": 15,
+    "tier": "standard"
+   }
+  ]
+ },
+ "budget": {
+  "act1": [
+   6,
+   12
+  ],
+  "act2": [
+   10,
+   16
+  ],
+  "act3": [
+   12,
+   18
+  ],
+  "act4": [
+   12,
+   20
+  ],
+  "act5": [
+   14,
+   22
+  ],
+  "act6": [
+   16,
+   24
+  ]
+ }
+}

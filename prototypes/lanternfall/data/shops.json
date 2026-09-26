@@ -1,0 +1,482 @@
+{
+ "_doc": "The five shops (docs/08 §16). Every row is data; js/rpg/shops.js has one hook per `quirk`. Shop seed = hash(runSeed, shopId, restock) so a reload shows the same shelf. qty null = unlimited.",
+ "version": 1,
+ "list": [
+  {
+   "id": "shop_wick",
+   "name": "Wick & Tallow",
+   "keeper": "npc_odile",
+   "where": "every act hub",
+   "fromAct": 1,
+   "currency": "pennies",
+   "buyMult": 1,
+   "buys": [
+    "strand",
+    "lantern"
+   ],
+   "buyback": 10,
+   "quirk": "names_wicks",
+   "restock": "boss_path_clear",
+   "tabs": [
+    "Tasting",
+    "Season"
+   ],
+   "rows": [
+    {
+     "row": "fixed",
+     "id": "lamp_oil",
+     "qty": null
+    },
+    {
+     "row": "strands"
+    },
+    {
+     "row": "random",
+     "count": 2,
+     "slot": "lantern",
+     "rarity": {
+      "early": {
+       "common": 1
+      },
+      "late": {
+       "fine": 70,
+       "rare": 30
+      }
+     }
+    }
+   ],
+   "pricing": {
+    "unlit": 1,
+    "relit": 0.75,
+    "perEarlierRelit": 0.03,
+    "appliesTo": [
+     "strand",
+     "lamp_oil",
+     "lantern"
+    ]
+   },
+   "taste": {
+    "adjectives": {
+     "ember": "Smoky",
+     "rime": "Chilled",
+     "spark": "Fizzing",
+     "bile": "Sour",
+     "gleam": "Honeyed",
+     "tide": "Salted",
+     "shade": "Bitter"
+    },
+    "dishes": {
+     "bolt": "Skewer",
+     "arc": "Slice",
+     "lob": "Dumpling",
+     "beam": "Drizzle",
+     "ring": "Tart",
+     "rune": "Preserve",
+     "wave": "Broth",
+     "tether": "Noodle"
+    },
+    "garnishes": {
+     "split": "for Two",
+     "bounce": "Twice-Baked",
+     "heavy": "Stuffed",
+     "swift": "to Go",
+     "linger": "Slow-Cooked",
+     "seek": "Hunter-Style",
+     "echo": "Leftovers",
+     "volatile": "Flambé"
+    },
+    "intent": "odile_names_wick",
+    "tags": {
+     "bland": 0.9,
+     "superb": 1.2
+    }
+   },
+   "season": {
+    "dust": 1,
+    "penniesPerLevel": 50,
+    "share": 0.25,
+    "perWickPerAct": 2
+   }
+  },
+  {
+   "id": "shop_pawn",
+   "name": "Crane's Pawn",
+   "keeper": "npc_hollis",
+   "where": "every act hub",
+   "fromAct": 1,
+   "currency": "pennies",
+   "buyMult": 1,
+   "buys": [
+    "gear",
+    "relic",
+    "consumable",
+    "meal",
+    "strand",
+    "material",
+    "sealed"
+   ],
+   "quirk": "remembers_sales",
+   "restock": "new_act",
+   "tabs": [
+    "Ledger",
+    "Parts",
+    "Temper"
+   ],
+   "rows": [
+    {
+     "row": "random",
+     "count": 6,
+     "slot": "any",
+     "rarity": {
+      "early": {
+       "common": 1
+      },
+      "late": {
+       "common": 40,
+       "fine": 45,
+       "rare": 15
+      }
+     }
+    },
+    {
+     "row": "fixed",
+     "id": "tonic_small",
+     "qty": 5
+    },
+    {
+     "row": "fixed",
+     "id": "bomb_ember",
+     "qty": 3
+    },
+    {
+     "row": "fixed",
+     "id": "lamp_oil",
+     "qty": 10
+    },
+    {
+     "row": "ledger"
+    },
+    {
+     "row": "parts",
+     "id": "scrap",
+     "bundle": 10,
+     "price": 15,
+     "qty": null
+    },
+    {
+     "row": "parts",
+     "id": "bomb_ember",
+     "qty": 5
+    },
+    {
+     "row": "parts",
+     "id": "bomb_rime",
+     "qty": 5,
+     "fromAct": 2
+    },
+    {
+     "row": "parts",
+     "id": "bomb_spark",
+     "qty": 5,
+     "fromAct": 2
+    },
+    {
+     "row": "satchel"
+    }
+   ],
+   "pricing": {
+    "opinionBuy": -0.15,
+    "opinionSell": 0.4,
+    "ledgerMult": 3,
+    "ledgerCap": 200,
+    "scrapIt": 5
+   },
+   "memory": {
+    "type": "sold_item",
+    "recall": "pawn_recall"
+   },
+   "questItem": "hollis_brother_lantern"
+  },
+  {
+   "id": "shop_soup",
+   "name": "Brisket's Soup Barge",
+   "keeper": "npc_brisket",
+   "where": "hubs from Act 2",
+   "fromAct": 2,
+   "currency": "pennies",
+   "buyMult": 1,
+   "buys": [],
+   "quirk": "rotating_menu",
+   "restock": "visit",
+   "tabs": [
+    "Today's Pot"
+   ],
+   "rows": [
+    {
+     "row": "menu",
+     "meals": [
+      "meal_eel_pie",
+      "meal_ember_stew",
+      "meal_rime_sorbet",
+      "meal_lamp_porridge"
+     ],
+     "size": 3
+    },
+    {
+     "row": "fixed",
+     "id": "meal_mystery",
+     "qty": null
+    }
+   ],
+   "mealTime": 600,
+   "intent": "soup_menu",
+   "mystery": [
+    {
+     "id": "strong_meal",
+     "w": 30,
+     "strength": 1.5
+    },
+    {
+     "id": "meal",
+     "w": 20,
+     "strength": 1
+    },
+    {
+     "id": "pennies",
+     "w": 15,
+     "perAct": 50
+    },
+    {
+     "id": "consumables",
+     "w": 15,
+     "count": 2
+    },
+    {
+     "id": "nausea",
+     "w": 10,
+     "first": {
+      "time": 60,
+      "buff": {
+       "moveSpeed": -0.1
+      }
+     },
+     "then": {
+      "buff": {
+       "meleePct": 0.1,
+       "wickPct": 0.1
+      }
+     }
+    },
+    {
+     "id": "rare_trinket",
+     "w": 8
+    },
+    {
+     "id": "secret",
+     "w": 2,
+     "health": 5,
+     "once": true
+    }
+   ]
+  },
+  {
+   "id": "shop_gamble",
+   "name": "The Mothwife's Gamble",
+   "keeper": "npc_mothwife",
+   "where": "a3_n05 (Drowned Market), then a4_n01, a5_n02, a6_n01",
+   "fromAct": 3,
+   "nodes": [
+    "a4_n01",
+    "a5_n02",
+    "a6_n01"
+   ],
+   "currency": "pennies",
+   "buyMult": 1,
+   "buys": [],
+   "quirk": "sealed_lanterns",
+   "restock": "hub_enter",
+   "tabs": [
+    "Pearls"
+   ],
+   "sealed": {
+    "perSlot": 5,
+    "prices": {
+     "weapon": 90,
+     "lantern": 90,
+     "coat": 70,
+     "boots": 55,
+     "trinket": 65,
+     "any": 50
+    },
+    "pearlPrices": {
+     "weapon": 3,
+     "lantern": 3,
+     "coat": 3,
+     "boots": 2,
+     "trinket": 2,
+     "any": 2
+    },
+    "rarity": {
+     "common": 35,
+     "fine": 45,
+     "rare": 20
+    },
+    "ilvlBonus": [
+     0,
+     2
+    ],
+    "glow": {
+     "common": {
+      "grey": 60,
+      "blue": 30,
+      "amber": 10
+     },
+     "fine": {
+      "blue": 60,
+      "grey": 20,
+      "amber": 20
+     },
+     "rare": {
+      "amber": 65,
+      "blue": 35
+     }
+    },
+    "glowColors": {
+     "grey": "#9aa3ad",
+     "blue": "#8fc7ff",
+     "amber": "#ffb347"
+    },
+    "mothSight": {
+     "knack": 15,
+     "classes": [
+      "moth_oracle"
+     ]
+    },
+    "darkRareMult": 1.25
+   },
+   "pearlShelf": {
+    "node": "a3_n05",
+    "keeper": "npc_unna",
+    "movesTo": [
+     "a4_n01",
+     "a5_n02",
+     "a6_n01"
+    ],
+    "movedFlag": "market_drained",
+    "minRarity": "fine",
+    "rows": [
+     {
+      "row": "sealed_pearl"
+     },
+     {
+      "row": "rare_pearl",
+      "price": 6,
+      "count": 1
+     },
+     {
+      "row": "fixed",
+      "id": "tonic_breath",
+      "price": 1,
+      "per": 3,
+      "qty": 10,
+      "currency": "pearls"
+     },
+     {
+      "row": "exchange",
+      "id": "pearl_buy",
+      "price": 150,
+      "currency": "pennies",
+      "gives": {
+       "pearls": 1
+      }
+     },
+     {
+      "row": "exchange",
+      "id": "pearl_sell",
+      "price": 1,
+      "currency": "pearls",
+      "gives": {
+       "pennies": 90
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "shop_ferry",
+   "name": "The Ferry",
+   "keeper": "npc_wenna",
+   "where": "a dock at a2_n01, then every hub",
+   "fromAct": 2,
+   "currency": "pennies",
+   "buyMult": 1,
+   "buys": [],
+   "quirk": "pays_in_health",
+   "restock": null,
+   "tabs": [
+    "Toll"
+   ],
+   "debtCap": 0.2,
+   "capLine": "The river can wait for the rest.",
+   "services": [
+    {
+     "id": "ferry_reveal",
+     "name": "Reveal this act's map",
+     "pennies": {
+      "perAct": 150
+     },
+     "healthPct": 0.05
+    },
+    {
+     "id": "ferry_reveal_secret",
+     "name": "Reveal the secret",
+     "pennies": {
+      "perAct": 300
+     },
+     "healthPct": 0.08
+    },
+    {
+     "id": "ferry_travel",
+     "name": "Travel",
+     "pennies": {
+      "perActCrossed": 40,
+      "min": 40
+     },
+     "healthPct": 0.02
+    },
+    {
+     "id": "ferry_respec_points",
+     "name": "Reset attribute points",
+     "pennies": {
+      "perLevelFifth": 200
+     },
+     "healthPct": 0.08
+    },
+    {
+     "id": "ferry_respec_skills",
+     "name": "Reset the skill board",
+     "pennies": {
+      "perLevelFifth": 250
+     },
+     "healthPct": 0.1
+    },
+    {
+     "id": "ferry_respec_full",
+     "name": "Reset both",
+     "pennies": {
+      "perLevelFifth": 400
+     },
+     "healthPct": 0.15
+    },
+    {
+     "id": "ferry_burn_in_move",
+     "name": "Move a burn-in track",
+     "pennies": {
+      "flat": 300
+     },
+     "healthPct": 0.08
+    }
+   ]
+  }
+ ]
+}

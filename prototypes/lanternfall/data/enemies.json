@@ -1,0 +1,2228 @@
+{
+ "_doc": "Monsters (docs/05). Numbers per 05 \u00a79-16; tiers set poise/stagger/token cost (05 \u00a72.2, \u00a75.1). attacks: kind contact|melee|lunge|dive|projectile, range [min,max] cells, windup/active/recovery ms, cooldown s. Resist is percent (+ = takes less).",
+ "version": 1,
+ "list": [
+  {
+   "id": "wax_mite",
+   "name": "Wax Mite",
+   "act": [
+    "act1",
+    "act2"
+   ],
+   "size": [
+    5,
+    4
+   ],
+   "hp": 10,
+   "dmg": 5,
+   "speed": 50,
+   "move": "crawler",
+   "tier": "fodder",
+   "role": "swarm",
+   "family": "wax",
+   "resist": {
+    "ember": -50
+   },
+   "tags": [
+    "flammable",
+    "floats",
+    "wax",
+    "curious"
+   ],
+   "sight": 80,
+   "hearing": 1,
+   "reaction": 200,
+   "attacks": [
+    {
+     "id": "nip",
+     "kind": "contact",
+     "range": [
+      0,
+      4
+     ],
+     "windup": 250,
+     "active": 100,
+     "recovery": 300,
+     "cooldown": 0.8,
+     "dmg": 5,
+     "knock": 40,
+     "telegraph": {
+      "part": "eyes",
+      "color": "#ffb347"
+     }
+    }
+   ],
+   "xp": 2,
+   "loot": "lt_act1_fodder",
+   "pennies": [
+    0,
+    1
+   ],
+   "eyes": "#ffb347",
+   "sprite": "en_wax_mite",
+   "corpse": "wax",
+   "voice": null
+  },
+  {
+   "id": "soot_pigeon",
+   "name": "Soot Pigeon",
+   "act": [
+    "act1"
+   ],
+   "size": [
+    6,
+    5
+   ],
+   "hp": 12,
+   "dmg": 6,
+   "speed": 110,
+   "move": "flyer",
+   "tier": "fodder",
+   "role": "rusher",
+   "family": "bird",
+   "resist": {
+    "spark": -25,
+    "tide": -25
+   },
+   "tags": [
+    "fears_fire",
+    "curious"
+   ],
+   "sight": 140,
+   "reaction": 200,
+   "fleeAt": 0.3,
+   "attacks": [
+    {
+     "id": "dive",
+     "kind": "dive",
+     "range": [
+      20,
+      120
+     ],
+     "windup": 500,
+     "active": 600,
+     "recovery": 800,
+     "cooldown": 2.5,
+     "dmg": 6,
+     "knock": 80,
+     "speed": 220,
+     "telegraph": {
+      "part": "line",
+      "color": "#e8e2d0"
+     }
+    }
+   ],
+   "xp": 2,
+   "loot": "lt_act1_fodder",
+   "pennies": [
+    1,
+    1
+   ],
+   "eyes": "#ff7a2a",
+   "sprite": "en_soot_pigeon",
+   "voice": {
+    "role": "goblin",
+    "babble": true,
+    "pitch": 0.8
+   }
+  },
+  {
+   "id": "dripling",
+   "name": "Dripling",
+   "act": [
+    "act1"
+   ],
+   "size": [
+    7,
+    12
+   ],
+   "hp": 30,
+   "dmg": 10,
+   "speed": 40,
+   "move": "walker",
+   "tier": "standard",
+   "role": "rusher",
+   "family": "wax",
+   "resist": {
+    "rime": -50,
+    "tide": -100
+   },
+   "tags": [
+    "flammable",
+    "floats",
+    "wax",
+    "drinks_flame"
+   ],
+   "sight": 120,
+   "reaction": 350,
+   "attacks": [
+    {
+     "id": "drip_lash",
+     "kind": "melee",
+     "range": [
+      0,
+      18
+     ],
+     "windup": 400,
+     "active": 120,
+     "recovery": 450,
+     "cooldown": 1.2,
+     "dmg": 10,
+     "knock": 70,
+     "hitbox": [
+      18,
+      10
+     ],
+     "telegraph": {
+      "part": "head",
+      "color": "#ffc46a"
+     }
+    },
+    {
+     "id": "candle_toss",
+     "kind": "projectile",
+     "range": [
+      40,
+      100
+     ],
+     "windup": 600,
+     "active": 50,
+     "recovery": 500,
+     "cooldown": 2.8,
+     "dmg": 8,
+     "knock": 40,
+     "speed": 150,
+     "gravity": 500,
+     "onLand": {
+      "voidZone": "vz_molten_wax_small"
+     },
+     "telegraph": {
+      "part": "head",
+      "color": "#fff0b0"
+     }
+    }
+   ],
+   "xp": 5,
+   "loot": "lt_act1_standard",
+   "pennies": [
+    1,
+    3
+   ],
+   "eyes": "#ffb347",
+   "light": {
+    "r": 24,
+    "color": "#ff9a3a"
+   },
+   "sprite": "en_dripling",
+   "corpse": "wax",
+   "voice": {
+    "role": "goblin",
+    "babble": true,
+    "pitch": 0.6
+   }
+  },
+  {
+   "id": "tallow_hound",
+   "name": "Tallow Hound",
+   "act": [
+    "act1",
+    "act2"
+   ],
+   "size": [
+    14,
+    9
+   ],
+   "hp": 55,
+   "dmg": 13,
+   "speed": 85,
+   "move": "walker",
+   "tier": "standard",
+   "role": "flanker",
+   "family": "beast",
+   "resist": {
+    "ember": -25
+   },
+   "tags": [
+    "flammable",
+    "floats",
+    "smell",
+    "fears_fire",
+    "curious"
+   ],
+   "sight": 160,
+   "reaction": 350,
+   "fleeAt": 0.25,
+   "attacks": [
+    {
+     "id": "lunge",
+     "kind": "lunge",
+     "range": [
+      20,
+      70
+     ],
+     "windup": 550,
+     "active": 330,
+     "recovery": 600,
+     "cooldown": 2.2,
+     "dmg": 13,
+     "knock": 100,
+     "speed": 220,
+     "dist": 70,
+     "telegraph": {
+      "part": "body",
+      "color": "#ffb347"
+     }
+    },
+    {
+     "id": "snap",
+     "kind": "melee",
+     "range": [
+      0,
+      12
+     ],
+     "windup": 300,
+     "active": 100,
+     "recovery": 350,
+     "cooldown": 1.0,
+     "dmg": 9,
+     "knock": 60,
+     "hitbox": [
+      12,
+      8
+     ],
+     "telegraph": {
+      "part": "head",
+      "color": "#e8e2d0"
+     }
+    }
+   ],
+   "xp": 5,
+   "loot": "lt_act1_standard",
+   "pennies": [
+    2,
+    4
+   ],
+   "eyes": "#ff5a1f",
+   "sprite": "en_tallow_hound",
+   "voice": null
+  },
+  {
+   "id": "gutter_rat",
+   "name": "Gutter Rat",
+   "act": [
+    "act2",
+    "act3",
+    "act4"
+   ],
+   "size": [
+    6,
+    4
+   ],
+   "hp": 9,
+   "dmg": 5,
+   "speed": 80,
+   "move": "crawler",
+   "tier": "fodder",
+   "role": "swarm",
+   "family": "beast",
+   "resist": {
+    "bile": 50
+   },
+   "tags": [
+    "swims",
+    "smell",
+    "fears_fire",
+    "curious"
+   ],
+   "sight": 110,
+   "reaction": 200,
+   "attacks": [
+    {
+     "id": "bite",
+     "kind": "contact",
+     "range": [
+      0,
+      4
+     ],
+     "windup": 250,
+     "active": 100,
+     "recovery": 300,
+     "cooldown": 0.8,
+     "dmg": 5,
+     "knock": 40,
+     "telegraph": {
+      "part": "head",
+      "color": "#f0ead8"
+     }
+    }
+   ],
+   "xp": 2,
+   "loot": "lt_act2",
+   "pennies": [
+    0,
+    1
+   ],
+   "eyes": "#ff5a3a",
+   "color": "#5a4a3e",
+   "voice": null
+  },
+  {
+   "id": "rat_chorister",
+   "name": "Rat Chorister",
+   "act": [
+    "act2"
+   ],
+   "size": [
+    7,
+    10
+   ],
+   "hp": 40,
+   "dmg": 8,
+   "speed": 45,
+   "move": "walker",
+   "tier": "standard",
+   "role": "support",
+   "family": "beast",
+   "resist": {
+    "spark": -25,
+    "bile": 50,
+    "gleam": -25
+   },
+   "tags": [
+    "smell"
+   ],
+   "sight": 140,
+   "reaction": 350,
+   "attacks": [
+    {
+     "id": "censer_swing",
+     "kind": "melee",
+     "range": [
+      0,
+      16
+     ],
+     "windup": 450,
+     "active": 120,
+     "recovery": 450,
+     "cooldown": 1.4,
+     "dmg": 8,
+     "knock": 90,
+     "telegraph": {
+      "part": "head",
+      "color": "#e8e2d0"
+     },
+     "hitbox": [
+      16,
+      10
+     ]
+    },
+    {
+     "id": "hymn_of_teeth",
+     "kind": "projectile",
+     "range": [
+      40,
+      110
+     ],
+     "windup": 1000,
+     "active": 50,
+     "recovery": 600,
+     "cooldown": 4.0,
+     "dmg": 6,
+     "knock": 30,
+     "telegraph": {
+      "part": "head",
+      "color": "#e8d24a"
+     },
+     "speed": 140,
+     "color": "#e8d24a",
+     "flame": "bile"
+    }
+   ],
+   "xp": 5,
+   "loot": "lt_act2",
+   "pennies": [
+    3,
+    6
+   ],
+   "eyes": "#e8d24a",
+   "color": "#6b5a4a",
+   "voice": null,
+   "_note": "Hymn of Teeth (a rat buff) and Summon the Pews are not supported by brain.js; Hymn is a bile lob here, summoning is omitted."
+  },
+  {
+   "id": "rope_scuttler",
+   "name": "Rope Scuttler",
+   "act": [
+    "act2",
+    "act5"
+   ],
+   "size": [
+    8,
+    6
+   ],
+   "hp": 30,
+   "dmg": 9,
+   "speed": 70,
+   "move": "crawler",
+   "tier": "standard",
+   "role": "flanker",
+   "family": "beast",
+   "resist": {
+    "ember": -25
+   },
+   "tags": [],
+   "sight": 140,
+   "reaction": 350,
+   "attacks": [
+    {
+     "id": "pounce",
+     "kind": "lunge",
+     "range": [
+      16,
+      70
+     ],
+     "windup": 450,
+     "active": 330,
+     "recovery": 600,
+     "cooldown": 2.2,
+     "dmg": 9,
+     "knock": 80,
+     "telegraph": {
+      "part": "body",
+      "color": "#e8e2d0"
+     },
+     "speed": 200,
+     "dist": 60
+    }
+   ],
+   "xp": 5,
+   "loot": "lt_act2",
+   "pennies": [
+    2,
+    4
+   ],
+   "eyes": "#ff3b30",
+   "color": "#4a3a2a",
+   "voice": null,
+   "_note": "rope_climber movement mapped to crawler; Cut (severs ropes) is omitted."
+  },
+  {
+   "id": "fatberg",
+   "name": "Fatberg",
+   "act": [
+    "act2"
+   ],
+   "size": [
+    22,
+    14
+   ],
+   "hp": 220,
+   "dmg": 22,
+   "speed": 18,
+   "move": "crawler",
+   "tier": "heavy",
+   "role": "rusher",
+   "family": "wax",
+   "resist": {
+    "ember": -75,
+    "rime": 25,
+    "bile": -25
+   },
+   "tags": [
+    "flammable",
+    "floats",
+    "slow"
+   ],
+   "sight": 140,
+   "reaction": 500,
+   "attacks": [
+    {
+     "id": "engulf",
+     "kind": "lunge",
+     "range": [
+      10,
+      40
+     ],
+     "windup": 800,
+     "active": 400,
+     "recovery": 900,
+     "cooldown": 3.5,
+     "dmg": 22,
+     "knock": 120,
+     "telegraph": {
+      "part": "body",
+      "color": "#ff3b30"
+     },
+     "speed": 90,
+     "dist": 30
+    }
+   ],
+   "xp": 12,
+   "loot": "lt_act2",
+   "pennies": [
+    6,
+    12
+   ],
+   "eyes": "#ffcf6a",
+   "color": "#c9c08a",
+   "voice": null,
+   "_note": "Engulf grab mapped to a slow lunge; Grease Slick trail and rat absorption omitted."
+  },
+  {
+   "id": "knell_novice",
+   "name": "Knell Novice",
+   "act": [
+    "act2",
+    "act3",
+    "act4",
+    "act5"
+   ],
+   "size": [
+    6,
+    12
+   ],
+   "hp": 40,
+   "dmg": 9,
+   "speed": 60,
+   "move": "walker",
+   "tier": "fodder",
+   "role": "rusher",
+   "family": "knell",
+   "resist": {},
+   "tags": [
+    "human",
+    "subduable"
+   ],
+   "sight": 140,
+   "reaction": 200,
+   "attacks": [
+    {
+     "id": "bell_swing",
+     "kind": "melee",
+     "range": [
+      0,
+      14
+     ],
+     "windup": 400,
+     "active": 120,
+     "recovery": 400,
+     "cooldown": 1.1,
+     "dmg": 9,
+     "knock": 60,
+     "telegraph": {
+      "part": "head",
+      "color": "#e8e2d0"
+     },
+     "hitbox": [
+      14,
+      10
+     ]
+    },
+    {
+     "id": "knife_lunge",
+     "kind": "lunge",
+     "range": [
+      14,
+      40
+     ],
+     "windup": 550,
+     "active": 300,
+     "recovery": 600,
+     "cooldown": 2.4,
+     "dmg": 9,
+     "knock": 70,
+     "telegraph": {
+      "part": "body",
+      "color": "#e8e2d0"
+     },
+     "speed": 180,
+     "dist": 30
+    }
+   ],
+   "xp": 2,
+   "loot": "lt_knell",
+   "pennies": [
+    1,
+    3
+   ],
+   "eyes": "#e8e2d0",
+   "color": "#3b3a44",
+   "voice": null
+  },
+  {
+   "id": "knell_hookman",
+   "name": "Knell Hookman",
+   "act": [
+    "act2",
+    "act3",
+    "act4",
+    "act5"
+   ],
+   "size": [
+    6,
+    12
+   ],
+   "hp": 70,
+   "dmg": 12,
+   "speed": 65,
+   "move": "walker",
+   "tier": "standard",
+   "role": "flanker",
+   "family": "knell",
+   "resist": {},
+   "tags": [
+    "human",
+    "subduable"
+   ],
+   "sight": 140,
+   "reaction": 350,
+   "attacks": [
+    {
+     "id": "gaff_pull",
+     "kind": "projectile",
+     "range": [
+      30,
+      100
+     ],
+     "windup": 600,
+     "active": 50,
+     "recovery": 600,
+     "cooldown": 3.0,
+     "dmg": 12,
+     "knock": -160,
+     "telegraph": {
+      "part": "head",
+      "color": "#ff3b30"
+     },
+     "speed": 220,
+     "color": "#b0a898"
+    },
+    {
+     "id": "hook_slash",
+     "kind": "melee",
+     "range": [
+      0,
+      16
+     ],
+     "windup": 450,
+     "active": 120,
+     "recovery": 450,
+     "cooldown": 1.2,
+     "dmg": 10,
+     "knock": 60,
+     "telegraph": {
+      "part": "head",
+      "color": "#e8e2d0"
+     },
+     "hitbox": [
+      16,
+      10
+     ]
+    }
+   ],
+   "xp": 5,
+   "loot": "lt_knell",
+   "pennies": [
+    2,
+    5
+   ],
+   "eyes": "#ff3b30",
+   "color": "#44383a",
+   "voice": null,
+   "_note": "Gaff Pull mapped to a fast straight projectile with negative knock (pulls toward it); rope climbing omitted."
+  },
+  {
+   "id": "maw_fry",
+   "name": "Maw Fry",
+   "act": [
+    "act3"
+   ],
+   "size": [
+    6,
+    3
+   ],
+   "hp": 12,
+   "dmg": 6,
+   "speed": 120,
+   "move": "swimmer",
+   "tier": "fodder",
+   "role": "swarm",
+   "family": "fish",
+   "resist": {
+    "rime": -50,
+    "spark": -50,
+    "tide": 50
+   },
+   "tags": [
+    "swims",
+    "curious"
+   ],
+   "sight": 120,
+   "reaction": 200,
+   "attacks": [
+    {
+     "id": "nip",
+     "kind": "contact",
+     "range": [
+      0,
+      4
+     ],
+     "windup": 250,
+     "active": 100,
+     "recovery": 300,
+     "cooldown": 0.8,
+     "dmg": 6,
+     "knock": 30,
+     "telegraph": {
+      "part": "body",
+      "color": "#dfe8f0"
+     }
+    }
+   ],
+   "xp": 2,
+   "loot": "lt_act3",
+   "pennies": [
+    0,
+    1
+   ],
+   "eyes": "#dfe8f0",
+   "color": "#9aa8b0",
+   "voice": null,
+   "_note": "Leap from the surface omitted."
+  },
+  {
+   "id": "sluice_eel",
+   "name": "Sluice Eel",
+   "act": [
+    "act3",
+    "act4"
+   ],
+   "size": [
+    18,
+    4
+   ],
+   "hp": 60,
+   "dmg": 14,
+   "speed": 110,
+   "move": "swimmer",
+   "tier": "standard",
+   "role": "ambusher",
+   "family": "fish",
+   "resist": {
+    "ember": 50,
+    "rime": -25,
+    "tide": 50
+   },
+   "tags": [
+    "swims"
+   ],
+   "sight": 140,
+   "reaction": 350,
+   "attacks": [
+    {
+     "id": "coil_strike",
+     "kind": "lunge",
+     "range": [
+      10,
+      60
+     ],
+     "windup": 500,
+     "active": 300,
+     "recovery": 600,
+     "cooldown": 2.0,
+     "dmg": 14,
+     "knock": 90,
+     "telegraph": {
+      "part": "body",
+      "color": "#fff27a"
+     },
+     "speed": 240,
+     "dist": 50
+    }
+   ],
+   "xp": 5,
+   "loot": "lt_act3",
+   "pennies": [
+    3,
+    6
+   ],
+   "eyes": "#fff27a",
+   "color": "#3e5a4a",
+   "voice": null,
+   "_note": "Charge the Water (water-wide spark zone) omitted; spark_immune_wet not modelled."
+  },
+  {
+   "id": "sluice_crab",
+   "name": "Sluice Crab",
+   "act": [
+    "act3",
+    "act6"
+   ],
+   "size": [
+    14,
+    8
+   ],
+   "hp": 110,
+   "dmg": 18,
+   "speed": 55,
+   "move": "walker",
+   "tier": "standard",
+   "role": "rusher",
+   "family": "crustacean",
+   "resist": {
+    "spark": -50,
+    "bile": -50,
+    "tide": 50
+   },
+   "tags": [
+    "armoured"
+   ],
+   "sight": 140,
+   "reaction": 350,
+   "attacks": [
+    {
+     "id": "pincer",
+     "kind": "melee",
+     "range": [
+      0,
+      16
+     ],
+     "windup": 500,
+     "active": 120,
+     "recovery": 500,
+     "cooldown": 1.5,
+     "dmg": 18,
+     "knock": 90,
+     "telegraph": {
+      "part": "head",
+      "color": "#e8e2d0"
+     },
+     "hitbox": [
+      16,
+      8
+     ]
+    }
+   ],
+   "xp": 5,
+   "loot": "lt_act3",
+   "pennies": [
+    3,
+    7
+   ],
+   "eyes": "#ffd08a",
+   "color": "#8a4a3a",
+   "voice": null,
+   "armour": 40,
+   "_note": "Armoured front (4) mapped to armour 40 all round; Bury omitted."
+  },
+  {
+   "id": "drowned_lockkeeper",
+   "name": "Drowned Lockkeeper",
+   "act": [
+    "act3"
+   ],
+   "size": [
+    8,
+    14
+   ],
+   "hp": 170,
+   "dmg": 22,
+   "speed": 45,
+   "move": "walker",
+   "tier": "heavy",
+   "role": "support",
+   "family": "drowned",
+   "resist": {
+    "spark": -25,
+    "gleam": -25,
+    "tide": 50,
+    "shade": 25
+   },
+   "tags": [
+    "armoured",
+    "swims"
+   ],
+   "sight": 140,
+   "reaction": 500,
+   "attacks": [
+    {
+     "id": "hook_swipe",
+     "kind": "melee",
+     "range": [
+      0,
+      22
+     ],
+     "windup": 550,
+     "active": 150,
+     "recovery": 600,
+     "cooldown": 1.6,
+     "dmg": 22,
+     "knock": -120,
+     "telegraph": {
+      "part": "head",
+      "color": "#e8e2d0"
+     },
+     "hitbox": [
+      22,
+      12
+     ]
+    },
+    {
+     "id": "lamp_toss",
+     "kind": "projectile",
+     "range": [
+      40,
+      120
+     ],
+     "windup": 700,
+     "active": 50,
+     "recovery": 600,
+     "cooldown": 3.5,
+     "dmg": 16,
+     "knock": 50,
+     "telegraph": {
+      "part": "head",
+      "color": "#3f7bff"
+     },
+     "speed": 150,
+     "gravity": 500,
+     "color": "#6a6a5a"
+    }
+   ],
+   "xp": 12,
+   "loot": "lt_act3",
+   "pennies": [
+    8,
+    14
+   ],
+   "eyes": "#3f7bff",
+   "color": "#3a4a5a",
+   "voice": null,
+   "armour": 20,
+   "_note": "Pull the Lever omitted; hook pull mapped to negative knock."
+  },
+  {
+   "id": "knell_lampbreaker",
+   "name": "Lampbreaker",
+   "act": [
+    "act3",
+    "act4",
+    "act5",
+    "act6"
+   ],
+   "size": [
+    6,
+    12
+   ],
+   "hp": 60,
+   "dmg": 10,
+   "speed": 75,
+   "move": "walker",
+   "tier": "standard",
+   "role": "support",
+   "family": "knell",
+   "resist": {
+    "ember": 25,
+    "tide": 50
+   },
+   "tags": [
+    "human",
+    "oilskin",
+    "subduable"
+   ],
+   "sight": 140,
+   "reaction": 350,
+   "attacks": [
+    {
+     "id": "douse",
+     "kind": "projectile",
+     "range": [
+      20,
+      90
+     ],
+     "windup": 700,
+     "active": 50,
+     "recovery": 700,
+     "cooldown": 4.0,
+     "dmg": 10,
+     "knock": 40,
+     "telegraph": {
+      "part": "head",
+      "color": "#3f7bff"
+     },
+     "speed": 140,
+     "gravity": 400,
+     "flame": "tide",
+     "color": "#3f7bff"
+    },
+    {
+     "id": "club",
+     "kind": "melee",
+     "range": [
+      0,
+      14
+     ],
+     "windup": 400,
+     "active": 120,
+     "recovery": 400,
+     "cooldown": 1.2,
+     "dmg": 10,
+     "knock": 60,
+     "telegraph": {
+      "part": "head",
+      "color": "#e8e2d0"
+     },
+     "hitbox": [
+      14,
+      10
+     ]
+    }
+   ],
+   "xp": 5,
+   "loot": "lt_knell",
+   "pennies": [
+    2,
+    5
+   ],
+   "eyes": "#3f7bff",
+   "color": "#2e3a4a",
+   "voice": null,
+   "_note": "Douse water splash mapped to a tide lob; lamp-snuffing omitted."
+  },
+  {
+   "id": "oilback",
+   "name": "Oilback",
+   "act": [
+    "act4",
+    "act6"
+   ],
+   "size": [
+    10,
+    5
+   ],
+   "hp": 50,
+   "dmg": 12,
+   "speed": 45,
+   "move": "crawler",
+   "tier": "standard",
+   "role": "ambusher",
+   "family": "oil",
+   "resist": {
+    "ember": -100,
+    "tide": 25
+   },
+   "tags": [
+    "floats",
+    "oil",
+    "swims"
+   ],
+   "sight": 140,
+   "reaction": 350,
+   "attacks": [
+    {
+     "id": "oil_spray",
+     "kind": "projectile",
+     "range": [
+      16,
+      60
+     ],
+     "windup": 600,
+     "active": 50,
+     "recovery": 700,
+     "cooldown": 3.0,
+     "dmg": 8,
+     "knock": 20,
+     "telegraph": {
+      "part": "head",
+      "color": "#b56a1a"
+     },
+     "speed": 160,
+     "gravity": 300,
+     "color": "#2a2016",
+     "onLand": {
+      "voidZone": "vz_oil_slick"
+     }
+    }
+   ],
+   "xp": 5,
+   "loot": "lt_act4",
+   "pennies": [
+    3,
+    6
+   ],
+   "eyes": "#b56a1a",
+   "color": "#2a2420",
+   "voice": null,
+   "_note": "Cone spray mapped to a lob that leaves a flammable oil pool."
+  },
+  {
+   "id": "lampeater",
+   "name": "Lamp-Eater Moth",
+   "act": [
+    "act4",
+    "act6"
+   ],
+   "size": [
+    9,
+    7
+   ],
+   "hp": 45,
+   "dmg": 10,
+   "speed": 90,
+   "move": "flyer",
+   "tier": "standard",
+   "role": "flanker",
+   "family": "moth",
+   "resist": {
+    "ember": -50,
+    "gleam": -50,
+    "shade": 50
+   },
+   "tags": [
+    "flammable",
+    "drawn_to_light"
+   ],
+   "sight": 140,
+   "reaction": 350,
+   "attacks": [
+    {
+     "id": "drink_the_light",
+     "kind": "dive",
+     "range": [
+      20,
+      110
+     ],
+     "windup": 500,
+     "active": 600,
+     "recovery": 800,
+     "cooldown": 3.0,
+     "dmg": 10,
+     "knock": 40,
+     "telegraph": {
+      "part": "line",
+      "color": "#ff3b30"
+     },
+     "speed": 200
+    },
+    {
+     "id": "dust_burst",
+     "kind": "melee",
+     "range": [
+      0,
+      20
+     ],
+     "windup": 400,
+     "active": 120,
+     "recovery": 500,
+     "cooldown": 4.0,
+     "dmg": 4,
+     "knock": 20,
+     "telegraph": {
+      "part": "body",
+      "color": "#c8b89a"
+     },
+     "hitbox": [
+      24,
+      20
+     ],
+     "flame": "shade"
+    }
+   ],
+   "xp": 5,
+   "loot": "lt_act4",
+   "pennies": [
+    3,
+    5
+   ],
+   "eyes": "#ff3b30",
+   "color": "#8a7a6a",
+   "voice": null,
+   "_note": "Drink (steals oil from the lantern) mapped to a dive; light-radius debuff omitted."
+  },
+  {
+   "id": "clapperling",
+   "name": "Clapperling",
+   "act": [
+    "act5"
+   ],
+   "size": [
+    6,
+    6
+   ],
+   "hp": 45,
+   "dmg": 14,
+   "speed": 70,
+   "move": "walker",
+   "tier": "fodder",
+   "role": "rusher",
+   "family": "construct",
+   "resist": {
+    "ember": 25,
+    "spark": -50,
+    "bile": -50
+   },
+   "tags": [
+    "armoured",
+    "metal",
+    "construct",
+    "curious"
+   ],
+   "sight": 140,
+   "reaction": 200,
+   "attacks": [
+    {
+     "id": "clang",
+     "kind": "lunge",
+     "range": [
+      8,
+      40
+     ],
+     "windup": 400,
+     "active": 300,
+     "recovery": 500,
+     "cooldown": 1.6,
+     "dmg": 14,
+     "knock": 90,
+     "telegraph": {
+      "part": "body",
+      "color": "#e8e2d0"
+     },
+     "speed": 180,
+     "dist": 30
+    }
+   ],
+   "xp": 2,
+   "loot": "lt_act5",
+   "pennies": [
+    1,
+    3
+   ],
+   "eyes": "#ffe0a0",
+   "color": "#b0894a",
+   "voice": null,
+   "armour": 20,
+   "_note": "Toll Burst omitted."
+  },
+  {
+   "id": "tumbler",
+   "name": "Tumbler",
+   "act": [
+    "act5"
+   ],
+   "size": [
+    8,
+    8
+   ],
+   "hp": 70,
+   "dmg": 18,
+   "speed": 80,
+   "move": "flyer",
+   "tier": "standard",
+   "role": "flanker",
+   "family": "construct",
+   "resist": {
+    "shade": -25
+   },
+   "tags": [
+    "gravity_bound"
+   ],
+   "sight": 140,
+   "reaction": 350,
+   "attacks": [
+    {
+     "id": "ram",
+     "kind": "dive",
+     "range": [
+      20,
+      110
+     ],
+     "windup": 500,
+     "active": 600,
+     "recovery": 800,
+     "cooldown": 2.6,
+     "dmg": 18,
+     "knock": 110,
+     "telegraph": {
+      "part": "line",
+      "color": "#e8e2d0"
+     },
+     "speed": 220
+    }
+   ],
+   "xp": 5,
+   "loot": "lt_act5",
+   "pennies": [
+    3,
+    6
+   ],
+   "eyes": "#8a7bff",
+   "color": "#6a5aa0",
+   "voice": null,
+   "_note": "Local Flip (gravity box) omitted."
+  },
+  {
+   "id": "echo_bat",
+   "name": "Echo Bat",
+   "act": [
+    "act5",
+    "act6"
+   ],
+   "size": [
+    7,
+    5
+   ],
+   "hp": 40,
+   "dmg": 12,
+   "speed": 130,
+   "move": "flyer",
+   "tier": "fodder",
+   "role": "ranged",
+   "family": "beast",
+   "resist": {
+    "spark": -25,
+    "gleam": -50,
+    "tide": -25
+   },
+   "tags": [],
+   "sight": 180,
+   "reaction": 200,
+   "attacks": [
+    {
+     "id": "ping",
+     "kind": "projectile",
+     "range": [
+      60,
+      160
+     ],
+     "windup": 400,
+     "active": 50,
+     "recovery": 600,
+     "cooldown": 2.8,
+     "dmg": 6,
+     "knock": 20,
+     "telegraph": {
+      "part": "head",
+      "color": "#cfe8ff"
+     },
+     "speed": 200,
+     "color": "#cfe8ff"
+    },
+    {
+     "id": "dive_bite",
+     "kind": "dive",
+     "range": [
+      16,
+      100
+     ],
+     "windup": 450,
+     "active": 600,
+     "recovery": 700,
+     "cooldown": 3.0,
+     "dmg": 12,
+     "knock": 70,
+     "telegraph": {
+      "part": "line",
+      "color": "#e8e2d0"
+     },
+     "speed": 230
+    }
+   ],
+   "xp": 2,
+   "loot": "lt_act5",
+   "pennies": [
+    1,
+    2
+   ],
+   "eyes": "#cfe8ff",
+   "color": "#3a3440",
+   "voice": null,
+   "_note": "Ping marks the player in the original; here it is a light projectile."
+  },
+  {
+   "id": "bronze_sentinel",
+   "name": "Bronze Sentinel",
+   "act": [
+    "act5"
+   ],
+   "size": [
+    14,
+    22
+   ],
+   "hp": 480,
+   "dmg": 40,
+   "speed": 35,
+   "move": "walker",
+   "tier": "heavy",
+   "role": "rusher",
+   "family": "construct",
+   "resist": {
+    "ember": 50,
+    "rime": 25,
+    "spark": -50,
+    "bile": -50,
+    "tide": 25
+   },
+   "tags": [
+    "armoured",
+    "metal",
+    "construct",
+    "steadfast"
+   ],
+   "sight": 140,
+   "reaction": 500,
+   "attacks": [
+    {
+     "id": "gong_bash",
+     "kind": "melee",
+     "range": [
+      0,
+      22
+     ],
+     "windup": 700,
+     "active": 150,
+     "recovery": 800,
+     "cooldown": 2.2,
+     "dmg": 40,
+     "knock": 160,
+     "telegraph": {
+      "part": "head",
+      "color": "#e8e2d0"
+     },
+     "hitbox": [
+      22,
+      16
+     ]
+    },
+    {
+     "id": "stomp",
+     "kind": "melee",
+     "range": [
+      0,
+      20
+     ],
+     "windup": 600,
+     "active": 150,
+     "recovery": 700,
+     "cooldown": 3.0,
+     "dmg": 26,
+     "knock": 120,
+     "telegraph": {
+      "part": "body",
+      "color": "#e8e2d0"
+     },
+     "hitbox": [
+      28,
+      10
+     ]
+    }
+   ],
+   "xp": 12,
+   "loot": "lt_act5",
+   "pennies": [
+    16,
+    24
+   ],
+   "eyes": "#ffd08a",
+   "color": "#8a6a3a",
+   "voice": null,
+   "armour": 60,
+   "_note": "Gong front block/reflect and Resonance ring omitted."
+  },
+  {
+   "id": "knell_maulbearer",
+   "name": "Maulbearer",
+   "act": [
+    "act5",
+    "act6"
+   ],
+   "size": [
+    9,
+    14
+   ],
+   "hp": 220,
+   "dmg": 30,
+   "speed": 45,
+   "move": "walker",
+   "tier": "heavy",
+   "role": "rusher",
+   "family": "knell",
+   "resist": {
+    "rime": 25,
+    "spark": -25,
+    "bile": -25
+   },
+   "tags": [
+    "human",
+    "armoured",
+    "subduable"
+   ],
+   "sight": 140,
+   "reaction": 500,
+   "attacks": [
+    {
+     "id": "tolling_maul",
+     "kind": "melee",
+     "range": [
+      0,
+      26
+     ],
+     "windup": 850,
+     "active": 150,
+     "recovery": 900,
+     "cooldown": 2.2,
+     "dmg": 30,
+     "knock": 140,
+     "telegraph": {
+      "part": "head",
+      "color": "#e8e2d0"
+     },
+     "hitbox": [
+      26,
+      12
+     ]
+    }
+   ],
+   "xp": 12,
+   "loot": "lt_knell",
+   "pennies": [
+    8,
+    14
+   ],
+   "eyes": "#e8e2d0",
+   "color": "#5a4a30",
+   "voice": null,
+   "armour": 40
+  },
+  {
+   "id": "stormgull",
+   "name": "Stormgull",
+   "act": [
+    "act6"
+   ],
+   "size": [
+    10,
+    6
+   ],
+   "hp": 90,
+   "dmg": 24,
+   "speed": 150,
+   "move": "flyer",
+   "tier": "fodder",
+   "role": "rusher",
+   "family": "bird",
+   "resist": {
+    "spark": "heal",
+    "tide": -25
+   },
+   "tags": [],
+   "sight": 200,
+   "reaction": 200,
+   "attacks": [
+    {
+     "id": "lightning_dive",
+     "kind": "dive",
+     "range": [
+      20,
+      140
+     ],
+     "windup": 700,
+     "active": 600,
+     "recovery": 800,
+     "cooldown": 2.4,
+     "dmg": 24,
+     "knock": 90,
+     "telegraph": {
+      "part": "line",
+      "color": "#fff27a"
+     },
+     "speed": 260,
+     "flame": "spark"
+    }
+   ],
+   "xp": 2,
+   "loot": "lt_act6",
+   "pennies": [
+    2,
+    4
+   ],
+   "eyes": "#fff27a",
+   "color": "#c8ccd4",
+   "voice": null,
+   "_note": "Spark heals it (in-rain rule simplified to always)."
+  },
+  {
+   "id": "rainwraith",
+   "name": "Rainwraith",
+   "act": [
+    "act6"
+   ],
+   "size": [
+    8,
+    14
+   ],
+   "hp": 170,
+   "dmg": 28,
+   "speed": 70,
+   "move": "flyer",
+   "tier": "standard",
+   "role": "flanker",
+   "family": "water",
+   "resist": {
+    "ember": -50,
+    "rime": -50,
+    "bile": 75,
+    "tide": "heal"
+   },
+   "tags": [
+    "water"
+   ],
+   "sight": 140,
+   "reaction": 350,
+   "attacks": [
+    {
+     "id": "rain_lash",
+     "kind": "melee",
+     "range": [
+      0,
+      24
+     ],
+     "windup": 500,
+     "active": 150,
+     "recovery": 600,
+     "cooldown": 1.6,
+     "dmg": 28,
+     "knock": 100,
+     "telegraph": {
+      "part": "head",
+      "color": "#3f7bff"
+     },
+     "hitbox": [
+      24,
+      12
+     ],
+     "flame": "tide"
+    },
+    {
+     "id": "downpour",
+     "kind": "projectile",
+     "range": [
+      20,
+      120
+     ],
+     "windup": 900,
+     "active": 50,
+     "recovery": 700,
+     "cooldown": 4.0,
+     "dmg": 20,
+     "knock": 40,
+     "telegraph": {
+      "part": "head",
+      "color": "#6fb0ff"
+     },
+     "speed": 120,
+     "gravity": 600,
+     "flame": "tide",
+     "color": "#6fb0ff",
+     "onLand": {
+      "voidZone": "vz_downpour"
+     }
+    }
+   ],
+   "xp": 5,
+   "loot": "lt_act6",
+   "pennies": [
+    5,
+    9
+   ],
+   "eyes": "#6fb0ff",
+   "color": "#4a6a9a",
+   "voice": null,
+   "_note": "Downpour column mapped to a lob that opens a rain column void zone."
+  },
+  {
+   "id": "rootgnarl",
+   "name": "Rootgnarl",
+   "act": [
+    "act6"
+   ],
+   "size": [
+    12,
+    10
+   ],
+   "hp": 240,
+   "dmg": 32,
+   "speed": 50,
+   "move": "walker",
+   "tier": "standard",
+   "role": "ambusher",
+   "family": "root",
+   "resist": {
+    "ember": -50,
+    "rime": 25,
+    "bile": -25
+   },
+   "tags": [
+    "flammable",
+    "digs"
+   ],
+   "sight": 140,
+   "reaction": 350,
+   "attacks": [
+    {
+     "id": "root_spear",
+     "kind": "melee",
+     "range": [
+      0,
+      20
+     ],
+     "windup": 700,
+     "active": 150,
+     "recovery": 700,
+     "cooldown": 2.0,
+     "dmg": 32,
+     "knock": 110,
+     "telegraph": {
+      "part": "body",
+      "color": "#9adf8a"
+     },
+     "hitbox": [
+      20,
+      16
+     ]
+    },
+    {
+     "id": "bark_shards",
+     "kind": "projectile",
+     "range": [
+      30,
+      120
+     ],
+     "windup": 600,
+     "active": 50,
+     "recovery": 700,
+     "cooldown": 3.2,
+     "dmg": 12,
+     "knock": 40,
+     "telegraph": {
+      "part": "head",
+      "color": "#9adf8a"
+     },
+     "speed": 180,
+     "color": "#6a5a3a"
+    }
+   ],
+   "xp": 5,
+   "loot": "lt_act6",
+   "pennies": [
+    5,
+    10
+   ],
+   "eyes": "#9adf8a",
+   "color": "#4a3a24",
+   "voice": null,
+   "_note": "Ceiling ambush and ground-targeted spear mapped to walker melee; 5-shard fan is a single shard."
+  },
+  {
+   "id": "hailstone_golem",
+   "name": "Hailstone Golem",
+   "act": [
+    "act6"
+   ],
+   "size": [
+    18,
+    24
+   ],
+   "hp": 720,
+   "dmg": 55,
+   "speed": 30,
+   "move": "walker",
+   "tier": "heavy",
+   "role": "rusher",
+   "family": "ice",
+   "resist": {
+    "ember": -75,
+    "rime": 100,
+    "shade": 25
+   },
+   "tags": [
+    "armoured",
+    "ice",
+    "steadfast"
+   ],
+   "sight": 140,
+   "reaction": 500,
+   "attacks": [
+    {
+     "id": "hail_fist",
+     "kind": "melee",
+     "range": [
+      0,
+      24
+     ],
+     "windup": 800,
+     "active": 150,
+     "recovery": 900,
+     "cooldown": 2.4,
+     "dmg": 55,
+     "knock": 160,
+     "telegraph": {
+      "part": "head",
+      "color": "#6fe3ff"
+     },
+     "hitbox": [
+      24,
+      16
+     ],
+     "flame": "rime"
+    },
+    {
+     "id": "frost_stamp",
+     "kind": "melee",
+     "range": [
+      0,
+      40
+     ],
+     "windup": 1100,
+     "active": 150,
+     "recovery": 900,
+     "cooldown": 5.0,
+     "dmg": 30,
+     "knock": 120,
+     "telegraph": {
+      "part": "body",
+      "color": "#6fe3ff"
+     },
+     "hitbox": [
+      48,
+      10
+     ],
+     "flame": "rime"
+    }
+   ],
+   "xp": 12,
+   "loot": "lt_act6",
+   "pennies": [
+    20,
+    30
+   ],
+   "eyes": "#6fe3ff",
+   "color": "#b8dcec",
+   "voice": null,
+   "armour": 50,
+   "_note": "Chill stacks and Shed Hail omitted."
+  },
+  {
+   "id": "unlit_creeper",
+   "name": "Creeper",
+   "act": [
+    "act4"
+   ],
+   "size": [
+    10,
+    5
+   ],
+   "hp": 90,
+   "dmg": 18,
+   "speed": 70,
+   "move": "crawler",
+   "tier": "standard",
+   "role": "hunter",
+   "family": "unlit",
+   "resist": {
+    "ember": -25,
+    "gleam": -100,
+    "shade": "heal"
+   },
+   "tags": [
+    "smell",
+    "unlit"
+   ],
+   "sight": 140,
+   "reaction": 350,
+   "attacks": [
+    {
+     "id": "drop_bite",
+     "kind": "lunge",
+     "range": [
+      8,
+      50
+     ],
+     "windup": 500,
+     "active": 300,
+     "recovery": 600,
+     "cooldown": 2.0,
+     "dmg": 18,
+     "knock": 70,
+     "telegraph": {
+      "part": "body",
+      "color": "#e6ecff"
+     },
+     "speed": 180,
+     "dist": 40
+    }
+   ],
+   "xp": 5,
+   "loot": "lt_unlit",
+   "pennies": [
+    0,
+    2
+   ],
+   "eyes": "#e6ecff",
+   "color": "#10131a",
+   "voice": null,
+   "_note": "Ceiling Drop Bite mapped to a lunge; light-speed rules omitted."
+  },
+  {
+   "id": "unlit_hound",
+   "name": "Gloamhound",
+   "act": [
+    "act4"
+   ],
+   "size": [
+    12,
+    8
+   ],
+   "hp": 70,
+   "dmg": 16,
+   "speed": 120,
+   "move": "walker",
+   "tier": "fodder",
+   "role": "hunter",
+   "family": "unlit",
+   "resist": {
+    "ember": -25,
+    "gleam": -100,
+    "shade": "heal"
+   },
+   "tags": [
+    "smell",
+    "curious",
+    "unlit"
+   ],
+   "sight": 140,
+   "reaction": 200,
+   "attacks": [
+    {
+     "id": "rim_lunge",
+     "kind": "lunge",
+     "range": [
+      16,
+      60
+     ],
+     "windup": 450,
+     "active": 330,
+     "recovery": 600,
+     "cooldown": 2.0,
+     "dmg": 16,
+     "knock": 90,
+     "telegraph": {
+      "part": "body",
+      "color": "#e6ecff"
+     },
+     "speed": 230,
+     "dist": 60
+    }
+   ],
+   "xp": 2,
+   "loot": "lt_unlit",
+   "pennies": [
+    0,
+    2
+   ],
+   "eyes": "#e6ecff",
+   "color": "#10131a",
+   "voice": null
+  },
+  {
+   "id": "unlit_stalker",
+   "name": "Stalker",
+   "act": [
+    "act4"
+   ],
+   "size": [
+    8,
+    18
+   ],
+   "hp": 200,
+   "dmg": 34,
+   "speed": 90,
+   "move": "walker",
+   "tier": "heavy",
+   "role": "hunter",
+   "family": "unlit",
+   "resist": {
+    "gleam": -75,
+    "shade": 100
+   },
+   "tags": [
+    "unlit"
+   ],
+   "sight": 140,
+   "reaction": 500,
+   "attacks": [
+    {
+     "id": "reap",
+     "kind": "melee",
+     "range": [
+      0,
+      30
+     ],
+     "windup": 700,
+     "active": 150,
+     "recovery": 800,
+     "cooldown": 2.2,
+     "dmg": 34,
+     "knock": 110,
+     "telegraph": {
+      "part": "head",
+      "color": "#e6ecff"
+     },
+     "hitbox": [
+      30,
+      16
+     ]
+    }
+   ],
+   "xp": 12,
+   "loot": "lt_unlit",
+   "pennies": [
+    2,
+    5
+   ],
+   "eyes": "#e6ecff",
+   "color": "#10131a",
+   "voice": null,
+   "_note": "Moves only when unseen \u2014 not modelled."
+  },
+  {
+   "id": "unlit_wickthief",
+   "name": "Wick-Thief",
+   "act": [
+    "act4"
+   ],
+   "size": [
+    6,
+    10
+   ],
+   "hp": 60,
+   "dmg": 4,
+   "speed": 150,
+   "move": "walker",
+   "tier": "standard",
+   "role": "flanker",
+   "family": "unlit",
+   "resist": {
+    "gleam": -100,
+    "shade": 50
+   },
+   "tags": [
+    "unlit"
+   ],
+   "sight": 140,
+   "reaction": 350,
+   "attacks": [
+    {
+     "id": "snatch",
+     "kind": "lunge",
+     "range": [
+      10,
+      50
+     ],
+     "windup": 400,
+     "active": 250,
+     "recovery": 500,
+     "cooldown": 2.4,
+     "dmg": 4,
+     "knock": 50,
+     "telegraph": {
+      "part": "body",
+      "color": "#ff3b30"
+     },
+     "speed": 260,
+     "dist": 40
+    }
+   ],
+   "xp": 5,
+   "loot": "lt_unlit",
+   "pennies": [
+    1,
+    4
+   ],
+   "eyes": "#e6ecff",
+   "color": "#10131a",
+   "voice": null,
+   "fleeAt": 0.6,
+   "_note": "Snatch steals oil in the design; here it is a light-damage lunge (dmg 0 would make it harmless)."
+  }
+ ],
+ "tiers": {
+  "fodder": {
+   "poise": 10,
+   "stagger": 0.6,
+   "token": 0
+  },
+  "standard": {
+   "poise": 30,
+   "stagger": 0.7,
+   "token": 1
+  },
+  "heavy": {
+   "poise": 80,
+   "stagger": 0.9,
+   "token": 2
+  },
+  "miniboss": {
+   "poise": 250,
+   "stagger": 1.2,
+   "token": 9
+  },
+  "boss": {
+   "poise": 400,
+   "stagger": 1.5,
+   "token": 9
+  }
+ },
+ "voidZones": {
+  "vz_molten_wax_small": {
+   "shape": "pool",
+   "w": 6,
+   "h": 2,
+   "warmup": 500,
+   "duration": 3000,
+   "dps": 6,
+   "flame": "ember",
+   "rim": "#ff8a2a",
+   "mat": "molten_wax",
+   "cells": 12
+  },
+  "vz_oil_slick": {
+   "shape": "pool",
+   "w": 8,
+   "h": 2,
+   "warmup": 600,
+   "duration": 4000,
+   "dps": 3,
+   "flame": "bile",
+   "rim": "#b56a1a",
+   "mat": "oil",
+   "cells": 14
+  },
+  "vz_downpour": {
+   "shape": "column",
+   "w": 20,
+   "warmup": 700,
+   "duration": 1500,
+   "dps": 14,
+   "flame": "tide",
+   "rim": "#6fb0ff"
+  }
+ },
+ "baseLevel": {
+  "act1": 2,
+  "act2": 7,
+  "act3": 12,
+  "act4": 17,
+  "act5": 22,
+  "act6": 27
+ }
+}

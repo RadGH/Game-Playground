@@ -1,0 +1,14 @@
+:root {
+  --ink: #0b0d12; --panel: #141722; --panel-2: #1b1f2d; --line: #2c3246; --text: #d9d3c4; --dim: #8e8a80; --gold: #e8b96a; --ember: #ff8a2a;
+  --rime: #6fe3ff; --spark: #fff27a; --bile: #8dff4a; --gleam: #ffe6b0; --tide: #3f7bff; --shade: #b25cff; --danger: #ff5a4a; --heal: #7ee08a;
+  --font-title: 'Cinzel', Georgia, serif; --font-body: 'Spectral', Georgia, serif; --font-ui: 'Spectral', Georgia, serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: #000; color: var(--text); font-family: var(--font-body); overflow: hidden; }
+canvas#view { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; image-rendering: pixelated; }
+.boot { position: fixed; inset: 0; display: grid; place-items: center; font-family: var(--font-title); letter-spacing: .2em; color: var(--gold); background: #000; transition: opacity .6s; z-index: 50; }
+.boot.gone { opacity: 0; pointer-events: none; }
+.boot.error { color: var(--danger); font-family: monospace; white-space: pre-wrap; padding: 2em; place-items: start; overflow: auto; letter-spacing: 0; }
+button { font-family: var(--font-ui); }
+.fade { position: fixed; inset: 0; background: #000; opacity: 0; pointer-events: none; transition: opacity .25s; z-index: 20; }
+.fade.on { opacity: 1; }

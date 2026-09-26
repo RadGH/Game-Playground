@@ -1,0 +1,1118 @@
+{
+ "_doc": "The six act maps (docs/09 \u00a76): nodes (type, rooms as hand-authored A or kit K), edges [from, to, opts]. Room ids are <node>_r<k>; hand-authored rooms live in rooms/<act>/<id>.json. Exits inside a room may point at @next (first next node), @next:1, @prev, @in (the next room in this node).",
+ "version": 1,
+ "list": [
+  {
+   "id": "act1",
+   "name": "Lanterncrown & the Wax Stair",
+   "lamp": "the Crown Lamp",
+   "theme": "wax_chapel",
+   "levels": [
+    1,
+    6
+   ],
+   "boss": "boss_tallow",
+   "climbed": false,
+   "ambient": {
+    "top": "#2a3348",
+    "power": 0.55,
+    "lit": "#5a4a3a",
+    "litPower": 0.7
+   },
+   "rain": {
+    "density": 60,
+    "wind": 0.15
+   },
+   "nodes": [
+    {
+     "id": "a1_n01",
+     "name": "The Guild Hall",
+     "type": "hub",
+     "rooms": [
+      {
+       "kind": "A"
+      }
+     ],
+     "lampPost": true,
+     "trial": "trial_no_oil",
+     "showcase": true
+    },
+    {
+     "id": "a1_n02",
+     "name": "The First Step",
+     "type": "lesson",
+     "rooms": [
+      {
+       "kind": "A"
+      },
+      {
+       "kind": "K",
+       "kit": "fight_small"
+      }
+     ]
+    },
+    {
+     "id": "a1_n03",
+     "name": "Candlemarket",
+     "type": "lesson",
+     "rooms": [
+      {
+       "kind": "A"
+      },
+      {
+       "kind": "K",
+       "kit": "corridor_run"
+      }
+     ],
+     "trial": "trial_first_flame"
+    },
+    {
+     "id": "a1_n04",
+     "name": "Chandlers' Lane",
+     "type": "fight",
+     "rooms": [
+      {
+       "kind": "K",
+       "kit": "fight_small"
+      },
+      {
+       "kind": "K",
+       "kit": "corridor_run"
+      },
+      {
+       "kind": "K",
+       "kit": "fight_tall"
+      }
+     ]
+    },
+    {
+     "id": "a1_n05",
+     "name": "The Slate Roofs",
+     "type": "fight",
+     "rooms": [
+      {
+       "kind": "K",
+       "kit": "bridge_gap"
+      },
+      {
+       "kind": "K",
+       "kit": "fight_tall"
+      },
+      {
+       "kind": "K",
+       "kit": "shaft"
+      }
+     ]
+    },
+    {
+     "id": "a1_n06",
+     "name": "The Drip Gallery",
+     "type": "lesson",
+     "rooms": [
+      {
+       "kind": "A"
+      },
+      {
+       "kind": "K",
+       "kit": "fight_small"
+      }
+     ],
+     "lampPost": true
+    },
+    {
+     "id": "a1_n07",
+     "name": "The Melting Stair",
+     "type": "flood",
+     "rooms": [
+      {
+       "kind": "A"
+      },
+      {
+       "kind": "A"
+      }
+     ]
+    },
+    {
+     "id": "a1_n08",
+     "name": "The Tallow Chapel",
+     "type": "boss",
+     "rooms": [
+      {
+       "kind": "A"
+      },
+      {
+       "kind": "A"
+      }
+     ],
+     "lampPost": true
+    },
+    {
+     "id": "a1_n09",
+     "name": "Beneath the Crown",
+     "type": "secret",
+     "rooms": [
+      {
+       "kind": "A"
+      }
+     ]
+    }
+   ],
+   "edges": [
+    [
+     "a1_n01",
+     "a1_n02"
+    ],
+    [
+     "a1_n02",
+     "a1_n03"
+    ],
+    [
+     "a1_n03",
+     "a1_n04"
+    ],
+    [
+     "a1_n03",
+     "a1_n05"
+    ],
+    [
+     "a1_n04",
+     "a1_n06"
+    ],
+    [
+     "a1_n05",
+     "a1_n06"
+    ],
+    [
+     "a1_n06",
+     "a1_n07"
+    ],
+    [
+     "a1_n07",
+     "a1_n08"
+    ],
+    [
+     "a1_n01",
+     "a1_n09",
+     {
+      "locked": "grapple"
+     }
+    ]
+   ]
+  },
+  {
+   "id": "act2",
+   "name": "The Gutterways",
+   "lamp": "the Gutter Lamp",
+   "theme": "gutter_tunnels",
+   "levels": [
+    5,
+    11
+   ],
+   "boss": "boss_gnaw",
+   "climbed": false,
+   "ambient": {
+    "top": "#1e2a33",
+    "power": 0.45,
+    "lit": "#3a4a3a",
+    "litPower": 0.6
+   },
+   "rain": {
+    "density": 70,
+    "wind": 0.05
+   },
+   "nodes": [
+    {
+     "id": "a2_n01",
+     "name": "The Dripmarket",
+     "type": "hub",
+     "rooms": [
+      {
+       "kind": "A"
+      }
+     ],
+     "lampPost": true
+    },
+    {
+     "id": "a2_n02",
+     "name": "Hookwright's Forge",
+     "type": "lesson",
+     "rooms": [
+      {
+       "kind": "A"
+      },
+      {
+       "kind": "K",
+       "kit": "shaft"
+      }
+     ]
+    },
+    {
+     "id": "a2_n03",
+     "name": "Pickering's Lockhouse",
+     "type": "lesson",
+     "rooms": [
+      {
+       "kind": "A"
+      },
+      {
+       "kind": "A"
+      }
+     ]
+    },
+    {
+     "id": "a2_n04",
+     "name": "The Long Chain",
+     "type": "fight",
+     "rooms": [
+      {
+       "kind": "A"
+      },
+      {
+       "kind": "K",
+       "kit": "bridge_gap"
+      },
+      {
+       "kind": "K",
+       "kit": "shaft"
+      }
+     ],
+     "trial": "trial_rope_gauntlet"
+    },
+    {
+     "id": "a2_n05",
+     "name": "The Brickgut",
+     "type": "puzzle",
+     "rooms": [
+      {
+       "kind": "A"
+      },
+      {
+       "kind": "K",
+       "kit": "fight_small"
+      }
+     ]
+    },
+    {
+     "id": "a2_n06",
+     "name": "The Charmwife's Niche",
+     "type": "lesson",
+     "rooms": [
+      {
+       "kind": "A"
+      },
+      {
+       "kind": "K",
+       "kit": "fight_small"
+      }
+     ],
+     "lampPost": true
+    },
+    {
+     "id": "a2_n07",
+     "name": "The Crank Room",
+     "type": "elite",
+     "rooms": [
+      {
+       "kind": "K",
+       "kit": "fight_tall"
+      },
+      {
+       "kind": "A"
+      }
+     ]
+    },
+    {
+     "id": "a2_n08",
+     "name": "The Gutter Cathedral",
+     "type": "boss",
+     "rooms": [
+      {
+       "kind": "A"
+      }
+     ],
+     "lampPost": true
+    },
+    {
+     "id": "a2_n09",
+     "name": "Rat-Pipe Warren",
+     "type": "secret",
+     "rooms": [
+      {
+       "kind": "A"
+      }
+     ]
+    }
+   ],
+   "edges": [
+    [
+     "a2_n01",
+     "a2_n02"
+    ],
+    [
+     "a2_n02",
+     "a2_n03"
+    ],
+    [
+     "a2_n03",
+     "a2_n04"
+    ],
+    [
+     "a2_n03",
+     "a2_n05"
+    ],
+    [
+     "a2_n04",
+     "a2_n06"
+    ],
+    [
+     "a2_n05",
+     "a2_n06"
+    ],
+    [
+     "a2_n06",
+     "a2_n07"
+    ],
+    [
+     "a2_n07",
+     "a2_n08"
+    ],
+    [
+     "a2_n05",
+     "a2_n09",
+     {
+      "hidden": true
+     }
+    ]
+   ]
+  },
+  {
+   "id": "act3",
+   "name": "The Sluice Ward",
+   "lamp": "the Sluice Lamp",
+   "theme": "sluice_vault",
+   "levels": [
+    10,
+    16
+   ],
+   "boss": "boss_sluicemaw",
+   "climbed": false,
+   "ambient": {
+    "top": "#1a2a40",
+    "power": 0.5,
+    "lit": "#2f4f6a",
+    "litPower": 0.65
+   },
+   "rain": {
+    "density": 90,
+    "wind": 0.1
+   },
+   "nodes": [
+    {
+     "id": "a3_n01",
+     "name": "The First Cistern",
+     "type": "lesson",
+     "rooms": [
+      {
+       "kind": "A"
+      },
+      {
+       "kind": "K",
+       "kit": "flooded_hall"
+      }
+     ]
+    },
+    {
+     "id": "a3_n02",
+     "name": "The Pumpworks",
+     "type": "hub",
+     "rooms": [
+      {
+       "kind": "A"
+      },
+      {
+       "kind": "A"
+      }
+     ],
+     "lampPost": true
+    },
+    {
+     "id": "a3_n03",
+     "name": "Cistern Row",
+     "type": "fight",
+     "rooms": [
+      {
+       "kind": "K",
+       "kit": "flooded_hall"
+      },
+      {
+       "kind": "K",
+       "kit": "fight_small"
+      },
+      {
+       "kind": "K",
+       "kit": "corridor_run"
+      }
+     ],
+     "trial": "trial_pacifist_sluice"
+    },
+    {
+     "id": "a3_n04",
+     "name": "The Long Channel",
+     "type": "fight",
+     "rooms": [
+      {
+       "kind": "A"
+      },
+      {
+       "kind": "K",
+       "kit": "flooded_hall"
+      },
+      {
+       "kind": "K",
+       "kit": "bridge_gap"
+      }
+     ]
+    },
+    {
+     "id": "a3_n05",
+     "name": "The Drowned Market",
+     "type": "event",
+     "rooms": [
+      {
+       "kind": "A"
+      },
+      {
+       "kind": "A"
+      }
+     ],
+     "lampPost": true
+    },
+    {
+     "id": "a3_n06",
+     "name": "The Three-Lock House",
+     "type": "elite",
+     "rooms": [
+      {
+       "kind": "K",
+       "kit": "flooded_hall"
+      },
+      {
+       "kind": "A"
+      }
+     ]
+    },
+    {
+     "id": "a3_n07",
+     "name": "The Spillway",
+     "type": "flood",
+     "rooms": [
+      {
+       "kind": "A"
+      },
+      {
+       "kind": "A"
+      },
+      {
+       "kind": "A"
+      }
+     ]
+    },
+    {
+     "id": "a3_n08",
+     "name": "The Great Reservoir",
+     "type": "boss",
+     "rooms": [
+      {
+       "kind": "A"
+      },
+      {
+       "kind": "A"
+      }
+     ],
+     "lampPost": true
+    }
+   ],
+   "edges": [
+    [
+     "a3_n01",
+     "a3_n02"
+    ],
+    [
+     "a3_n02",
+     "a3_n03"
+    ],
+    [
+     "a3_n02",
+     "a3_n04"
+    ],
+    [
+     "a3_n03",
+     "a3_n05"
+    ],
+    [
+     "a3_n04",
+     "a3_n05"
+    ],
+    [
+     "a3_n05",
+     "a3_n06"
+    ],
+    [
+     "a3_n06",
+     "a3_n07"
+    ],
+    [
+     "a3_n07",
+     "a3_n08"
+    ],
+    [
+     "a3_n05",
+     "a3_n08",
+     {
+      "oneWay": true,
+      "needsFlag": "market_drained"
+     }
+    ]
+   ]
+  },
+  {
+   "id": "act4",
+   "name": "Blackwater",
+   "lamp": "the Deep Lamp",
+   "theme": "blackwater",
+   "levels": [
+    15,
+    21
+   ],
+   "boss": "boss_widow",
+   "climbed": false,
+   "ambient": {
+    "top": "#0a0d14",
+    "power": 0.2,
+    "lit": "#302a40",
+    "litPower": 0.5,
+    "floor": 0.04
+   },
+   "rain": {
+    "density": 110,
+    "wind": 0.05
+   },
+   "nodes": [
+    {
+     "id": "a4_n01",
+     "name": "The Last Derrick",
+     "type": "hub",
+     "rooms": [
+      {
+       "kind": "A"
+      },
+      {
+       "kind": "A"
+      }
+     ],
+     "lampPost": true
+    },
+    {
+     "id": "a4_n02",
+     "name": "The Knot House",
+     "type": "lesson",
+     "rooms": [
+      {
+       "kind": "A"
+      },
+      {
+       "kind": "K",
+       "kit": "fight_small"
+      }
+     ]
+    },
+    {
+     "id": "a4_n03",
+     "name": "The Oil Pits",
+     "type": "puzzle",
+     "rooms": [
+      {
+       "kind": "A"
+      },
+      {
+       "kind": "K",
+       "kit": "corridor_run"
+      }
+     ]
+    },
+    {
+     "id": "a4_n04",
+     "name": "Lampless Lane",
+     "type": "fight",
+     "rooms": [
+      {
+       "kind": "K",
+       "kit": "corridor_run"
+      },
+      {
+       "kind": "K",
+       "kit": "fight_small"
+      },
+      {
+       "kind": "K",
+       "kit": "fight_tall"
+      }
+     ],
+     "trial": "trial_hooded_crossing",
+     "dark": true
+    },
+    {
+     "id": "a4_n05",
+     "name": "The Hanging Houses",
+     "type": "fight",
+     "rooms": [
+      {
+       "kind": "A"
+      },
+      {
+       "kind": "K",
+       "kit": "shaft"
+      },
+      {
+       "kind": "K",
+       "kit": "bridge_gap"
+      }
+     ],
+     "lampPost": true
+    },
+    {
+     "id": "a4_n06",
+     "name": "Stilt Town Hunt",
+     "type": "event",
+     "rooms": [
+      {
+       "kind": "A"
+      },
+      {
+       "kind": "K",
+       "kit": "fight_small"
+      }
+     ]
+    },
+    {
+     "id": "a4_n07",
+     "name": "The Wick Loft",
+     "type": "elite",
+     "rooms": [
+      {
+       "kind": "K",
+       "kit": "fight_tall"
+      },
+      {
+       "kind": "A"
+      }
+     ]
+    },
+    {
+     "id": "a4_n08",
+     "name": "The Moth Nave",
+     "type": "boss",
+     "rooms": [
+      {
+       "kind": "A"
+      },
+      {
+       "kind": "A"
+      }
+     ],
+     "lampPost": true
+    }
+   ],
+   "edges": [
+    [
+     "a4_n01",
+     "a4_n02"
+    ],
+    [
+     "a4_n02",
+     "a4_n03"
+    ],
+    [
+     "a4_n02",
+     "a4_n04"
+    ],
+    [
+     "a4_n03",
+     "a4_n05"
+    ],
+    [
+     "a4_n04",
+     "a4_n05"
+    ],
+    [
+     "a4_n05",
+     "a4_n07"
+    ],
+    [
+     "a4_n05",
+     "a4_n06"
+    ],
+    [
+     "a4_n06",
+     "a4_n07"
+    ],
+    [
+     "a4_n07",
+     "a4_n08"
+    ]
+   ]
+  },
+  {
+   "id": "act5",
+   "name": "The Bellwell",
+   "lamp": "the Bell Lamp",
+   "theme": "bellwell",
+   "levels": [
+    20,
+    25
+   ],
+   "boss": "boss_bellfather",
+   "climbed": false,
+   "ambient": {
+    "top": "#2a2433",
+    "power": 0.45,
+    "lit": "#4a3a52",
+    "litPower": 0.6
+   },
+   "rain": {
+    "density": 130,
+    "wind": 0.1
+   },
+   "nodes": [
+    {
+     "id": "a5_n01",
+     "name": "The Nine Valves",
+     "type": "puzzle",
+     "rooms": [
+      {
+       "kind": "A"
+      },
+      {
+       "kind": "K",
+       "kit": "shaft"
+      }
+     ]
+    },
+    {
+     "id": "a5_n02",
+     "name": "The Tithe Hall",
+     "type": "hub",
+     "rooms": [
+      {
+       "kind": "A"
+      }
+     ],
+     "lampPost": true
+    },
+    {
+     "id": "a5_n03",
+     "name": "The Bellwright's Foundry",
+     "type": "lesson",
+     "rooms": [
+      {
+       "kind": "A"
+      },
+      {
+       "kind": "K",
+       "kit": "fight_tall"
+      }
+     ]
+    },
+    {
+     "id": "a5_n04",
+     "name": "The Upside Chapel",
+     "type": "fight",
+     "rooms": [
+      {
+       "kind": "A"
+      },
+      {
+       "kind": "K",
+       "kit": "fight_small"
+      },
+      {
+       "kind": "K",
+       "kit": "fight_tall"
+      }
+     ]
+    },
+    {
+     "id": "a5_n05",
+     "name": "The Ring Galleries",
+     "type": "fight",
+     "rooms": [
+      {
+       "kind": "K",
+       "kit": "corridor_run"
+      },
+      {
+       "kind": "K",
+       "kit": "fight_tall"
+      },
+      {
+       "kind": "K",
+       "kit": "bridge_gap"
+      }
+     ]
+    },
+    {
+     "id": "a5_n06",
+     "name": "The Long Drop",
+     "type": "flood",
+     "rooms": [
+      {
+       "kind": "A"
+      },
+      {
+       "kind": "A"
+      },
+      {
+       "kind": "A"
+      }
+     ],
+     "lampPost": true
+    },
+    {
+     "id": "a5_n07",
+     "name": "The Bellwell Bottom",
+     "type": "boss",
+     "rooms": [
+      {
+       "kind": "A"
+      }
+     ]
+    }
+   ],
+   "edges": [
+    [
+     "a5_n01",
+     "a5_n02"
+    ],
+    [
+     "a5_n02",
+     "a5_n03"
+    ],
+    [
+     "a5_n03",
+     "a5_n04"
+    ],
+    [
+     "a5_n03",
+     "a5_n05"
+    ],
+    [
+     "a5_n04",
+     "a5_n06"
+    ],
+    [
+     "a5_n05",
+     "a5_n06"
+    ],
+    [
+     "a5_n06",
+     "a5_n07"
+    ]
+   ]
+  },
+  {
+   "id": "act6",
+   "name": "The Cloudroot",
+   "lamp": "the Sky Lamp",
+   "theme": "cloudroot",
+   "levels": [
+    25,
+    30
+   ],
+   "boss": "boss_ossery",
+   "climbed": true,
+   "ambient": {
+    "top": "#3a4458",
+    "power": 0.6,
+    "lit": "#8a8fa8",
+    "litPower": 0.9,
+    "floor": 0.12
+   },
+   "rain": {
+    "density": 160,
+    "wind": 0.3
+   },
+   "nodes": [
+    {
+     "id": "a6_n01",
+     "name": "Understar Well",
+     "type": "hub",
+     "rooms": [
+      {
+       "kind": "A"
+      }
+     ],
+     "lampPost": true
+    },
+    {
+     "id": "a6_n02",
+     "name": "The Empty Socket",
+     "type": "lesson",
+     "rooms": [
+      {
+       "kind": "A"
+      },
+      {
+       "kind": "K",
+       "kit": "corridor_run"
+      }
+     ]
+    },
+    {
+     "id": "a6_n03",
+     "name": "The First Coil",
+     "type": "fight",
+     "rooms": [
+      {
+       "kind": "K",
+       "kit": "fight_tall"
+      },
+      {
+       "kind": "K",
+       "kit": "shaft"
+      },
+      {
+       "kind": "K",
+       "kit": "bridge_gap"
+      }
+     ]
+    },
+    {
+     "id": "a6_n04",
+     "name": "Corvin's Hollow",
+     "type": "event",
+     "rooms": [
+      {
+       "kind": "A"
+      },
+      {
+       "kind": "K",
+       "kit": "fight_small"
+      }
+     ]
+    },
+    {
+     "id": "a6_n05",
+     "name": "The Last Wall",
+     "type": "lamppost",
+     "rooms": [
+      {
+       "kind": "A"
+      }
+     ],
+     "lampPost": true
+    },
+    {
+     "id": "a6_n06",
+     "name": "The Storm's Eye",
+     "type": "boss",
+     "rooms": [
+      {
+       "kind": "A"
+      }
+     ]
+    },
+    {
+     "id": "a6_n07",
+     "name": "The Falling Flood",
+     "type": "flood",
+     "rooms": [
+      {
+       "kind": "A"
+      },
+      {
+       "kind": "A"
+      },
+      {
+       "kind": "A"
+      }
+     ],
+     "forced": true
+    },
+    {
+     "id": "a6_n08",
+     "name": "The Dry Root",
+     "type": "fight",
+     "rooms": [
+      {
+       "kind": "A"
+      },
+      {
+       "kind": "A"
+      }
+     ],
+     "forced": true
+    },
+    {
+     "id": "a6_n09",
+     "name": "The Dry Eye",
+     "type": "boss",
+     "rooms": [
+      {
+       "kind": "A",
+       "reuse": "a6_n06_r0",
+       "state": "dry"
+      }
+     ],
+     "forced": true
+    }
+   ],
+   "edges": [
+    [
+     "a6_n01",
+     "a6_n02"
+    ],
+    [
+     "a6_n02",
+     "a6_n03"
+    ],
+    [
+     "a6_n02",
+     "a6_n04"
+    ],
+    [
+     "a6_n03",
+     "a6_n05"
+    ],
+    [
+     "a6_n04",
+     "a6_n05"
+    ],
+    [
+     "a6_n05",
+     "a6_n06"
+    ],
+    [
+     "a6_n06",
+     "a6_n07",
+     {
+      "forced": true
+     }
+    ],
+    [
+     "a6_n07",
+     "a6_n08",
+     {
+      "forced": true
+     }
+    ],
+    [
+     "a6_n08",
+     "a6_n09",
+     {
+      "forced": true
+     }
+    ]
+   ]
+  }
+ ]
+}

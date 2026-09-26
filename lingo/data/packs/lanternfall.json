@@ -1,0 +1,3189 @@
+{
+ "_doc": "Lanternfall vocabulary for the Lingo talk engine (prototypes/lanternfall/docs/01 §12.2): the places of Vessmere and the Hollow (tags carry the act so a line can bind 'a place in this act'), the 9 factions, the 19 creature FAMILY words plus one creature entry per monster id (each with a `family` field; where a monster id equals its family id the family entry is the monster's), the bosses, flames (ids flame_*, adj = the flame's colour word), shapes (ids shape_*) and charms (ids charm_*), items and the six Great Lamps, Brisket's meals (08's meal ids), the 18 people, titles, concepts, weather and the three oaths (type deity). Proper names carry pron.respell (capitals = stressed syllable); js/talk/lingo-bridge.js splits multi-word respellings word by word so a short name ('Aldra') is not read as the full one. Load: `for (const e of pack.entries) lingo.lexicon.add(e); lingo.invalidatePronunciations();`. The lines themselves live in prototypes/lanternfall/data/grammar-lanternfall.json, not here. Generated from 01's tables 2026-09-26; edit by hand from now on.",
+ "version": 1,
+ "entries": [
+  {
+   "id": "vessmere",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "Vessmere",
+    "adj": "Vessmere"
+   },
+   "tags": [
+    "city"
+   ],
+   "pron": {
+    "respell": "VESS-meer"
+   }
+  },
+  {
+   "id": "the_hollow",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Hollow",
+    "adj": "Hollow"
+   },
+   "tags": [
+    "chasm"
+   ],
+   "pron": {
+    "respell": "HOL-oh"
+   }
+  },
+  {
+   "id": "sunward_face",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Sunward Face",
+    "adj": "Sunward Face"
+   },
+   "tags": [
+    "wall"
+   ],
+   "pron": {
+    "respell": "SUN-werd FAYSS"
+   }
+  },
+  {
+   "id": "shadeward_face",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Shadeward Face",
+    "adj": "Shadeward Face"
+   },
+   "tags": [
+    "wall"
+   ],
+   "pron": {
+    "respell": "SHAYD-werd FAYSS"
+   }
+  },
+  {
+   "id": "brinkhold",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "Brinkhold",
+    "adj": "Brinkhold"
+   },
+   "tags": [
+    "history"
+   ],
+   "pron": {
+    "respell": "BRINK-hohld"
+   }
+  },
+  {
+   "id": "lanterncrown",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "Lanterncrown",
+    "adj": "Lanterncrown"
+   },
+   "tags": [
+    "act1",
+    "town",
+    "lit"
+   ],
+   "pron": {
+    "respell": "LAN-tern-krown"
+   }
+  },
+  {
+   "id": "wax_stair",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Wax Stair",
+    "adj": "Wax Stair"
+   },
+   "tags": [
+    "act1"
+   ],
+   "pron": {
+    "respell": "WAKS STAIR"
+   }
+  },
+  {
+   "id": "gutterways",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Gutterways",
+    "adj": "Gutterways"
+   },
+   "tags": [
+    "act2"
+   ],
+   "pron": {
+    "respell": "GUT-er-wayz"
+   }
+  },
+  {
+   "id": "sluice_ward",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Sluice Ward",
+    "adj": "Sluice Ward"
+   },
+   "tags": [
+    "act3"
+   ],
+   "pron": {
+    "respell": "SLOOSS WARD"
+   }
+  },
+  {
+   "id": "blackwater",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "Blackwater",
+    "adj": "Blackwater"
+   },
+   "tags": [
+    "act4",
+    "dark"
+   ],
+   "pron": {
+    "respell": "BLAK-waw-ter"
+   }
+  },
+  {
+   "id": "bellwell",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Bellwell",
+    "adj": "Bellwell"
+   },
+   "tags": [
+    "act5"
+   ],
+   "pron": {
+    "respell": "BEL-wel"
+   }
+  },
+  {
+   "id": "understar",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "Understar",
+    "adj": "Understar"
+   },
+   "tags": [
+    "act6",
+    "town"
+   ],
+   "pron": {
+    "respell": "UN-der-star"
+   }
+  },
+  {
+   "id": "cloudroot",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Cloudroot",
+    "adj": "Cloudroot"
+   },
+   "tags": [
+    "act6"
+   ],
+   "pron": {
+    "respell": "KLOWD-root"
+   }
+  },
+  {
+   "id": "deep_springs",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Deep Springs",
+    "adj": "Deep Springs"
+   },
+   "tags": [
+    "act4"
+   ],
+   "pron": {
+    "respell": "DEEP SPRINGZ"
+   }
+  },
+  {
+   "id": "dry_rim",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Dry Rim",
+    "adj": "Dry Rim"
+   },
+   "tags": [
+    "ending"
+   ],
+   "pron": {
+    "respell": "DRY RIM"
+   }
+  },
+  {
+   "id": "a1_guild_hall",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Guild Hall",
+    "adj": "Guild Hall"
+   },
+   "tags": [
+    "act1",
+    "hub"
+   ]
+  },
+  {
+   "id": "a1_wick_tallow",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "Wick & Tallow",
+    "adj": "Wick & Tallow"
+   },
+   "tags": [
+    "act1",
+    "market"
+   ]
+  },
+  {
+   "id": "a1_cranes_pawn",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "Crane's Pawn",
+    "adj": "Crane's Pawn"
+   },
+   "tags": [
+    "act1",
+    "market"
+   ]
+  },
+  {
+   "id": "a1_crown_lamp",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Crown Lamp",
+    "adj": "Crown Lamp"
+   },
+   "tags": [
+    "act1",
+    "lit"
+   ]
+  },
+  {
+   "id": "a1_first_step",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the First Step",
+    "adj": "First Step"
+   },
+   "tags": [
+    "act1",
+    "lesson"
+   ]
+  },
+  {
+   "id": "a1_candlemarket",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "Candlemarket",
+    "adj": "Candlemarket"
+   },
+   "tags": [
+    "act1",
+    "lesson",
+    "market"
+   ],
+   "pron": {
+    "respell": "KAN-dul-mar-kit"
+   }
+  },
+  {
+   "id": "a1_chandlers_lane",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "Chandlers' Lane",
+    "adj": "Chandlers' Lane"
+   },
+   "tags": [
+    "act1"
+   ]
+  },
+  {
+   "id": "a1_slate_roofs",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Slate Roofs",
+    "adj": "Slate Roofs"
+   },
+   "tags": [
+    "act1"
+   ]
+  },
+  {
+   "id": "a1_drip_gallery",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Drip Gallery",
+    "adj": "Drip Gallery"
+   },
+   "tags": [
+    "act1",
+    "lesson"
+   ]
+  },
+  {
+   "id": "a1_melting_stair",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Melting Stair",
+    "adj": "Melting Stair"
+   },
+   "tags": [
+    "act1"
+   ]
+  },
+  {
+   "id": "a1_tallow_chapel",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Tallow Chapel",
+    "adj": "Tallow Chapel"
+   },
+   "tags": [
+    "act1",
+    "church"
+   ]
+  },
+  {
+   "id": "a1_beneath_crown",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "Beneath the Crown",
+    "adj": "Beneath the Crown"
+   },
+   "tags": [
+    "act1",
+    "secret"
+   ]
+  },
+  {
+   "id": "a2_dripmarket",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Dripmarket",
+    "adj": "Dripmarket"
+   },
+   "tags": [
+    "act2",
+    "hub",
+    "market"
+   ],
+   "pron": {
+    "respell": "DRIP-mar-kit"
+   }
+  },
+  {
+   "id": "a2_soup_mooring",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Soup Barge's mooring",
+    "adj": "Soup Barge's mooring"
+   },
+   "tags": [
+    "act2",
+    "hub"
+   ]
+  },
+  {
+   "id": "a2_hook_forge",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "Hookwright's Forge",
+    "adj": "Hookwright's Forge"
+   },
+   "tags": [
+    "act2",
+    "lesson"
+   ]
+  },
+  {
+   "id": "a2_lockhouse",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "Pickering's Lockhouse",
+    "adj": "Pickering's Lockhouse"
+   },
+   "tags": [
+    "act2",
+    "lesson"
+   ]
+  },
+  {
+   "id": "a2_widows_span",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Long Chain",
+    "adj": "Long Chain"
+   },
+   "tags": [
+    "act2"
+   ]
+  },
+  {
+   "id": "a2_brickgut",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Brickgut",
+    "adj": "Brickgut"
+   },
+   "tags": [
+    "act2"
+   ],
+   "pron": {
+    "respell": "BRIK-gut"
+   }
+  },
+  {
+   "id": "a2_charm_shrine",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Charmwife's Niche",
+    "adj": "Charmwife's Niche"
+   },
+   "tags": [
+    "act2",
+    "lesson"
+   ]
+  },
+  {
+   "id": "a2_crank_room",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Crank Room",
+    "adj": "Crank Room"
+   },
+   "tags": [
+    "act2"
+   ]
+  },
+  {
+   "id": "a2_gutter_cathedral",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Gutter Cathedral",
+    "adj": "Gutter Cathedral"
+   },
+   "tags": [
+    "act2",
+    "church",
+    "dark"
+   ]
+  },
+  {
+   "id": "a2_rat_pipe_warren",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Rat-Pipe Warren",
+    "adj": "Rat-Pipe Warren"
+   },
+   "tags": [
+    "act2",
+    "secret",
+    "dark"
+   ]
+  },
+  {
+   "id": "a3_first_cistern",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the First Cistern",
+    "adj": "First Cistern"
+   },
+   "tags": [
+    "act3",
+    "lesson"
+   ]
+  },
+  {
+   "id": "a3_voss_pumphouse",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "Voss's Pump House",
+    "adj": "Voss's Pump House"
+   },
+   "tags": [
+    "act3",
+    "hub"
+   ]
+  },
+  {
+   "id": "a3_tide_font",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Tide Font",
+    "adj": "Tide Font"
+   },
+   "tags": [
+    "act3"
+   ]
+  },
+  {
+   "id": "a3_gauge_tower",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Gauge Tower",
+    "adj": "Gauge Tower"
+   },
+   "tags": [
+    "act3",
+    "hub"
+   ]
+  },
+  {
+   "id": "a3_cistern_row",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "Cistern Row",
+    "adj": "Cistern Row"
+   },
+   "tags": [
+    "act3"
+   ]
+  },
+  {
+   "id": "a3_long_channel",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Long Channel",
+    "adj": "Long Channel"
+   },
+   "tags": [
+    "act3"
+   ]
+  },
+  {
+   "id": "a3_drowned_market",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Drowned Market",
+    "adj": "Drowned Market"
+   },
+   "tags": [
+    "act3",
+    "market"
+   ]
+  },
+  {
+   "id": "a3_three_lock_house",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Three-Lock House",
+    "adj": "Three-Lock House"
+   },
+   "tags": [
+    "act3"
+   ]
+  },
+  {
+   "id": "a3_spillway",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Spillway",
+    "adj": "Spillway"
+   },
+   "tags": [
+    "act3"
+   ]
+  },
+  {
+   "id": "a3_great_reservoir",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Great Reservoir",
+    "adj": "Great Reservoir"
+   },
+   "tags": [
+    "act3",
+    "dark"
+   ]
+  },
+  {
+   "id": "a3_pumpworks",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Pumpworks",
+    "adj": "Pumpworks"
+   },
+   "tags": [
+    "act3",
+    "hub"
+   ],
+   "pron": {
+    "respell": "PUMP-werks"
+   }
+  },
+  {
+   "id": "a4_last_derrick",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Last Derrick",
+    "adj": "Last Derrick"
+   },
+   "tags": [
+    "act4",
+    "hub"
+   ]
+  },
+  {
+   "id": "a4_mothwife_tent",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Mothwife's tent",
+    "adj": "Mothwife's tent"
+   },
+   "tags": [
+    "act4",
+    "hub",
+    "market"
+   ]
+  },
+  {
+   "id": "a4_knot_house",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Knot House",
+    "adj": "Knot House"
+   },
+   "tags": [
+    "act4",
+    "lesson"
+   ]
+  },
+  {
+   "id": "a4_oil_pits",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Oil Pits",
+    "adj": "Oil Pits"
+   },
+   "tags": [
+    "act4",
+    "dark"
+   ]
+  },
+  {
+   "id": "a4_no_light_lane",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "Lampless Lane",
+    "adj": "Lampless Lane"
+   },
+   "tags": [
+    "act4",
+    "dark"
+   ],
+   "pron": {
+    "respell": "LAMP-liss LAYN"
+   }
+  },
+  {
+   "id": "a4_hanging_houses",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Hanging Houses",
+    "adj": "Hanging Houses"
+   },
+   "tags": [
+    "act4",
+    "dark"
+   ]
+  },
+  {
+   "id": "a4_stilt_town",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "Stilt Town",
+    "adj": "Stilt Town"
+   },
+   "tags": [
+    "act4",
+    "dark"
+   ]
+  },
+  {
+   "id": "a4_wick_loft",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Wick Loft",
+    "adj": "Wick Loft"
+   },
+   "tags": [
+    "act4",
+    "dark"
+   ]
+  },
+  {
+   "id": "a4_moth_nave",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Moth Nave",
+    "adj": "Moth Nave"
+   },
+   "tags": [
+    "act4",
+    "church",
+    "dark"
+   ],
+   "pron": {
+    "respell": "MAWTH NAYV"
+   }
+  },
+  {
+   "id": "a5_drain_valves",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Nine Valves",
+    "adj": "Nine Valves"
+   },
+   "tags": [
+    "act5"
+   ]
+  },
+  {
+   "id": "a5_tithe_hall",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Tithe Hall",
+    "adj": "Tithe Hall"
+   },
+   "tags": [
+    "act5",
+    "hub",
+    "church"
+   ],
+   "pron": {
+    "respell": "TYDH HAWL"
+   }
+  },
+  {
+   "id": "a5_bellwright_forge",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Bellwright's Foundry",
+    "adj": "Bellwright's Foundry"
+   },
+   "tags": [
+    "act5",
+    "lesson"
+   ]
+  },
+  {
+   "id": "a5_upside_chapel",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Upside Chapel",
+    "adj": "Upside Chapel"
+   },
+   "tags": [
+    "act5",
+    "church"
+   ]
+  },
+  {
+   "id": "a5_galleries",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Ring Galleries",
+    "adj": "Ring Galleries"
+   },
+   "tags": [
+    "act5"
+   ]
+  },
+  {
+   "id": "a5_long_drop",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Long Drop",
+    "adj": "Long Drop"
+   },
+   "tags": [
+    "act5"
+   ]
+  },
+  {
+   "id": "a5_bellwell_bottom",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Bellwell Bottom",
+    "adj": "Bellwell Bottom"
+   },
+   "tags": [
+    "act5",
+    "dark"
+   ]
+  },
+  {
+   "id": "a6_understar_well",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "Understar Well",
+    "adj": "Understar Well"
+   },
+   "tags": [
+    "act6",
+    "hub"
+   ],
+   "pron": {
+    "respell": "UN-der-star WEL"
+   }
+  },
+  {
+   "id": "a6_sky_socket",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Empty Socket",
+    "adj": "Empty Socket"
+   },
+   "tags": [
+    "act6",
+    "lesson"
+   ]
+  },
+  {
+   "id": "a6_first_coil",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the First Coil",
+    "adj": "First Coil"
+   },
+   "tags": [
+    "act6"
+   ]
+  },
+  {
+   "id": "a6_corvins_cell",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "Corvin's Hollow",
+    "adj": "Corvin's Hollow"
+   },
+   "tags": [
+    "act6"
+   ]
+  },
+  {
+   "id": "a6_last_wall",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Last Wall",
+    "adj": "Last Wall"
+   },
+   "tags": [
+    "act6"
+   ]
+  },
+  {
+   "id": "a6_storm_eye",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Storm's Eye",
+    "adj": "Storm's Eye"
+   },
+   "tags": [
+    "act6"
+   ]
+  },
+  {
+   "id": "a6_falling_flood",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Falling Flood",
+    "adj": "Falling Flood"
+   },
+   "tags": [
+    "act6"
+   ]
+  },
+  {
+   "id": "a6_dry_root",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Dry Root",
+    "adj": "Dry Root"
+   },
+   "tags": [
+    "act6"
+   ]
+  },
+  {
+   "id": "a6_dry_eye",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Dry Eye",
+    "adj": "Dry Eye"
+   },
+   "tags": [
+    "act6"
+   ]
+  },
+  {
+   "id": "a6_dry_rim",
+   "type": "place",
+   "proper": true,
+   "forms": {
+    "sg": "the Dry Rim",
+    "adj": "Dry Rim"
+   },
+   "tags": [
+    "act6",
+    "ending"
+   ]
+  },
+  {
+   "id": "f_guild",
+   "type": "faction",
+   "proper": true,
+   "forms": {
+    "sg": "the Lamplighters' Guild",
+    "pl": "Lamplighters",
+    "adj": "Guild",
+    "people": "the Lamplighters",
+    "member": "Lamplighter"
+   },
+   "tags": [
+    "guild",
+    "friendly"
+   ],
+   "pron": {
+    "respell": "LAMP-ly-terz GILD"
+   }
+  },
+  {
+   "id": "f_sweeps",
+   "type": "faction",
+   "proper": true,
+   "forms": {
+    "sg": "the Sweeps",
+    "pl": "Sweeps",
+    "adj": "Sweep",
+    "people": "the Sweeps",
+    "member": "sweep"
+   },
+   "tags": [
+    "friendly"
+   ],
+   "pron": {
+    "respell": "SWEEPS"
+   }
+  },
+  {
+   "id": "f_ratcatchers",
+   "type": "faction",
+   "proper": true,
+   "forms": {
+    "sg": "the Ratcatchers",
+    "pl": "Ratcatchers",
+    "adj": "Ratcatcher",
+    "people": "the Ratcatchers",
+    "member": "ratcatcher"
+   },
+   "tags": [
+    "act2"
+   ],
+   "pron": {
+    "respell": "RAT-kach-erz"
+   }
+  },
+  {
+   "id": "f_rat_choir",
+   "type": "faction",
+   "proper": true,
+   "forms": {
+    "sg": "the Rat Choir",
+    "pl": "Choir",
+    "adj": "Choir",
+    "people": "the Choir",
+    "member": "chorister"
+   },
+   "tags": [
+    "act2",
+    "hostile"
+   ],
+   "pron": {
+    "respell": "RAT KWY-er"
+   }
+  },
+  {
+   "id": "f_sluicemen",
+   "type": "faction",
+   "proper": true,
+   "forms": {
+    "sg": "the Sluicemen",
+    "pl": "Sluicemen",
+    "adj": "Sluicemen",
+    "people": "the Sluicemen",
+    "member": "sluiceman"
+   },
+   "tags": [
+    "act3"
+   ],
+   "pron": {
+    "respell": "SLOOSS-men"
+   }
+  },
+  {
+   "id": "f_pale",
+   "type": "faction",
+   "proper": true,
+   "forms": {
+    "sg": "the Pale Congregation",
+    "pl": "Pale",
+    "adj": "Pale",
+    "people": "the Pale",
+    "member": "one of the Pale"
+   },
+   "tags": [
+    "act3"
+   ],
+   "pron": {
+    "respell": "PAYL"
+   }
+  },
+  {
+   "id": "f_knell",
+   "type": "faction",
+   "proper": true,
+   "forms": {
+    "sg": "the Knell",
+    "pl": "Knell",
+    "adj": "Knell",
+    "people": "the Knell",
+    "member": "Knell"
+   },
+   "tags": [
+    "act2",
+    "act3",
+    "act4",
+    "act5",
+    "act6",
+    "cult",
+    "hostile"
+   ],
+   "pron": {
+    "respell": "NEL"
+   }
+  },
+  {
+   "id": "f_cloudwardens",
+   "type": "faction",
+   "proper": true,
+   "forms": {
+    "sg": "the Cloudwardens",
+    "pl": "Cloudwardens",
+    "adj": "Cloudwarden",
+    "people": "the Cloudwardens",
+    "member": "cloudwarden"
+   },
+   "tags": [
+    "act6"
+   ],
+   "pron": {
+    "respell": "KLOWD-war-denz"
+   }
+  },
+  {
+   "id": "f_unlit",
+   "type": "faction",
+   "proper": true,
+   "forms": {
+    "sg": "the Unlit",
+    "pl": "Unlit",
+    "adj": "Unlit",
+    "people": "the Unlit",
+    "member": "unlit thing"
+   },
+   "tags": [
+    "act4",
+    "hostile",
+    "dark"
+   ],
+   "pron": {
+    "respell": "un-LIT"
+   }
+  },
+  {
+   "id": "wax_thing",
+   "type": "creature",
+   "forms": {
+    "sg": "wax-thing",
+    "pl": "wax-things"
+   },
+   "tags": [
+    "family",
+    "act1",
+    "wax"
+   ],
+   "pron": {
+    "respell": "WAKS-thing"
+   }
+  },
+  {
+   "id": "soot_bird",
+   "type": "creature",
+   "forms": {
+    "sg": "soot-bird",
+    "pl": "soot-birds"
+   },
+   "tags": [
+    "family",
+    "act1"
+   ],
+   "pron": {
+    "respell": "SOOT-berd"
+   }
+  },
+  {
+   "id": "rat",
+   "type": "creature",
+   "forms": {
+    "sg": "rat",
+    "pl": "rats"
+   },
+   "tags": [
+    "family",
+    "act2",
+    "swarm",
+    "vermin"
+   ]
+  },
+  {
+   "id": "choir_rat",
+   "type": "creature",
+   "forms": {
+    "sg": "choir-rat",
+    "pl": "choir-rats"
+   },
+   "tags": [
+    "family",
+    "act2",
+    "rat"
+   ],
+   "pron": {
+    "respell": "KWY-er-rat"
+   }
+  },
+  {
+   "id": "scuttler",
+   "type": "creature",
+   "forms": {
+    "sg": "scuttler",
+    "pl": "scuttlers"
+   },
+   "tags": [
+    "family",
+    "act2"
+   ],
+   "pron": {
+    "respell": "SKUT-ler"
+   }
+  },
+  {
+   "id": "fatberg",
+   "type": "creature",
+   "forms": {
+    "sg": "fatberg",
+    "pl": "fatbergs"
+   },
+   "tags": [
+    "family",
+    "act2",
+    "sewer"
+   ],
+   "pron": {
+    "respell": "FAT-berg"
+   },
+   "family": "fatberg",
+   "monster": true
+  },
+  {
+   "id": "knell",
+   "type": "creature",
+   "forms": {
+    "sg": "Knell",
+    "pl": "Knell"
+   },
+   "tags": [
+    "family",
+    "cult",
+    "person"
+   ],
+   "pron": {
+    "respell": "NEL"
+   }
+  },
+  {
+   "id": "maw_fry",
+   "type": "creature",
+   "forms": {
+    "sg": "maw-fry",
+    "pl": "maw-fry"
+   },
+   "tags": [
+    "family",
+    "act3",
+    "beast"
+   ],
+   "pron": {
+    "respell": "MAW-fry"
+   },
+   "family": "maw_fry",
+   "monster": true
+  },
+  {
+   "id": "eel",
+   "type": "creature",
+   "forms": {
+    "sg": "eel",
+    "pl": "eels"
+   },
+   "tags": [
+    "family",
+    "act3",
+    "beast"
+   ]
+  },
+  {
+   "id": "sluice_crab",
+   "type": "creature",
+   "forms": {
+    "sg": "sluice-crab",
+    "pl": "sluice-crabs"
+   },
+   "tags": [
+    "family",
+    "act3",
+    "beast"
+   ],
+   "pron": {
+    "respell": "SLOOSS-krab"
+   },
+   "family": "sluice_crab",
+   "monster": true
+  },
+  {
+   "id": "drowned_one",
+   "type": "creature",
+   "forms": {
+    "sg": "drowned one",
+    "pl": "drowned ones"
+   },
+   "tags": [
+    "family",
+    "act3",
+    "drowned"
+   ],
+   "pron": {
+    "respell": "DROWND WUN"
+   }
+  },
+  {
+   "id": "unlit",
+   "type": "creature",
+   "forms": {
+    "sg": "unlit thing",
+    "pl": "unlit things"
+   },
+   "tags": [
+    "family",
+    "act4",
+    "unlit",
+    "dark"
+   ],
+   "pron": {
+    "respell": "un-LIT"
+   }
+  },
+  {
+   "id": "oilback",
+   "type": "creature",
+   "forms": {
+    "sg": "oilback",
+    "pl": "oilbacks"
+   },
+   "tags": [
+    "family",
+    "act4"
+   ],
+   "pron": {
+    "respell": "OYL-bak"
+   },
+   "family": "oilback",
+   "monster": true
+  },
+  {
+   "id": "moth",
+   "type": "creature",
+   "forms": {
+    "sg": "moth",
+    "pl": "moths"
+   },
+   "tags": [
+    "family",
+    "act4",
+    "moth"
+   ],
+   "pron": {
+    "respell": "MAWTH"
+   }
+  },
+  {
+   "id": "bell_thing",
+   "type": "creature",
+   "forms": {
+    "sg": "bell-thing",
+    "pl": "bell-things"
+   },
+   "tags": [
+    "family",
+    "act5",
+    "bell",
+    "construct"
+   ],
+   "pron": {
+    "respell": "BEL-thing"
+   }
+  },
+  {
+   "id": "echo_bat",
+   "type": "creature",
+   "forms": {
+    "sg": "echo-bat",
+    "pl": "echo-bats"
+   },
+   "tags": [
+    "family",
+    "act5"
+   ],
+   "pron": {
+    "respell": "EK-oh-bat"
+   },
+   "family": "echo_bat",
+   "monster": true
+  },
+  {
+   "id": "stormgull",
+   "type": "creature",
+   "forms": {
+    "sg": "stormgull",
+    "pl": "stormgulls"
+   },
+   "tags": [
+    "family",
+    "act6",
+    "cloud"
+   ],
+   "pron": {
+    "respell": "STORM-gul"
+   },
+   "family": "stormgull",
+   "monster": true
+  },
+  {
+   "id": "rainwraith",
+   "type": "creature",
+   "forms": {
+    "sg": "rainwraith",
+    "pl": "rainwraiths"
+   },
+   "tags": [
+    "family",
+    "act6",
+    "cloud"
+   ],
+   "pron": {
+    "respell": "RAYN-rayth"
+   },
+   "family": "rainwraith",
+   "monster": true
+  },
+  {
+   "id": "root_thing",
+   "type": "creature",
+   "forms": {
+    "sg": "root-thing",
+    "pl": "root-things"
+   },
+   "tags": [
+    "family",
+    "act6",
+    "cloud"
+   ],
+   "pron": {
+    "respell": "ROOT-thing"
+   }
+  },
+  {
+   "id": "wax_mite",
+   "type": "creature",
+   "monster": true,
+   "family": "wax_thing",
+   "forms": {
+    "sg": "wax mite",
+    "pl": "wax mites",
+    "name": "wax mite"
+   },
+   "tags": [
+    "wax_thing",
+    "act1"
+   ]
+  },
+  {
+   "id": "soot_pigeon",
+   "type": "creature",
+   "monster": true,
+   "family": "soot_bird",
+   "forms": {
+    "sg": "soot pigeon",
+    "pl": "soot pigeons",
+    "name": "soot pigeon"
+   },
+   "tags": [
+    "soot_bird",
+    "act1"
+   ]
+  },
+  {
+   "id": "dripling",
+   "type": "creature",
+   "monster": true,
+   "family": "wax_thing",
+   "forms": {
+    "sg": "dripling",
+    "pl": "driplings",
+    "name": "dripling"
+   },
+   "tags": [
+    "wax_thing",
+    "act1"
+   ]
+  },
+  {
+   "id": "tallow_hound",
+   "type": "creature",
+   "monster": true,
+   "family": "wax_thing",
+   "forms": {
+    "sg": "tallow hound",
+    "pl": "tallow hounds",
+    "name": "tallow hound"
+   },
+   "tags": [
+    "wax_thing",
+    "act1"
+   ]
+  },
+  {
+   "id": "gutter_rat",
+   "type": "creature",
+   "monster": true,
+   "family": "rat",
+   "forms": {
+    "sg": "gutter rat",
+    "pl": "gutter rats",
+    "name": "gutter rat"
+   },
+   "tags": [
+    "rat",
+    "act2"
+   ]
+  },
+  {
+   "id": "rat_chorister",
+   "type": "creature",
+   "monster": true,
+   "family": "choir_rat",
+   "forms": {
+    "sg": "rat chorister",
+    "pl": "rat choristers",
+    "name": "rat chorister"
+   },
+   "tags": [
+    "choir_rat",
+    "act2"
+   ]
+  },
+  {
+   "id": "rope_scuttler",
+   "type": "creature",
+   "monster": true,
+   "family": "scuttler",
+   "forms": {
+    "sg": "rope scuttler",
+    "pl": "rope scuttlers",
+    "name": "rope scuttler"
+   },
+   "tags": [
+    "scuttler",
+    "act2"
+   ]
+  },
+  {
+   "id": "sluice_eel",
+   "type": "creature",
+   "monster": true,
+   "family": "eel",
+   "forms": {
+    "sg": "sluice eel",
+    "pl": "sluice eels",
+    "name": "sluice eel"
+   },
+   "tags": [
+    "eel",
+    "act3"
+   ]
+  },
+  {
+   "id": "drowned_lockkeeper",
+   "type": "creature",
+   "monster": true,
+   "family": "drowned_one",
+   "forms": {
+    "sg": "Drowned Lockkeeper",
+    "pl": "Drowned Lockkeepers",
+    "name": "Drowned Lockkeeper"
+   },
+   "tags": [
+    "drowned_one",
+    "act3"
+   ]
+  },
+  {
+   "id": "lampeater",
+   "type": "creature",
+   "monster": true,
+   "family": "moth",
+   "forms": {
+    "sg": "lamp-eater moth",
+    "pl": "lamp-eater moths",
+    "name": "lamp-eater moth"
+   },
+   "tags": [
+    "moth",
+    "act4"
+   ]
+  },
+  {
+   "id": "clapperling",
+   "type": "creature",
+   "monster": true,
+   "family": "bell_thing",
+   "forms": {
+    "sg": "clapperling",
+    "pl": "clapperlings",
+    "name": "clapperling"
+   },
+   "tags": [
+    "bell_thing",
+    "act5"
+   ]
+  },
+  {
+   "id": "tumbler",
+   "type": "creature",
+   "monster": true,
+   "family": "bell_thing",
+   "forms": {
+    "sg": "tumbler",
+    "pl": "tumblers",
+    "name": "tumbler"
+   },
+   "tags": [
+    "bell_thing",
+    "act5"
+   ]
+  },
+  {
+   "id": "bronze_sentinel",
+   "type": "creature",
+   "monster": true,
+   "family": "bell_thing",
+   "forms": {
+    "sg": "bronze sentinel",
+    "pl": "bronze sentinels",
+    "name": "bronze sentinel"
+   },
+   "tags": [
+    "bell_thing",
+    "act5"
+   ]
+  },
+  {
+   "id": "rootgnarl",
+   "type": "creature",
+   "monster": true,
+   "family": "root_thing",
+   "forms": {
+    "sg": "rootgnarl",
+    "pl": "rootgnarls",
+    "name": "rootgnarl"
+   },
+   "tags": [
+    "root_thing",
+    "act6"
+   ]
+  },
+  {
+   "id": "hailstone_golem",
+   "type": "creature",
+   "monster": true,
+   "family": "root_thing",
+   "forms": {
+    "sg": "hailstone golem",
+    "pl": "hailstone golems",
+    "name": "hailstone golem"
+   },
+   "tags": [
+    "root_thing",
+    "act6"
+   ]
+  },
+  {
+   "id": "unlit_creeper",
+   "type": "creature",
+   "monster": true,
+   "family": "unlit",
+   "forms": {
+    "sg": "Creeper",
+    "pl": "Creepers",
+    "name": "Creeper"
+   },
+   "tags": [
+    "unlit",
+    "act4"
+   ]
+  },
+  {
+   "id": "unlit_hound",
+   "type": "creature",
+   "monster": true,
+   "family": "unlit",
+   "forms": {
+    "sg": "Gloamhound",
+    "pl": "Gloamhounds",
+    "name": "Gloamhound"
+   },
+   "tags": [
+    "unlit",
+    "act4"
+   ],
+   "pron": {
+    "respell": "GLOHM-hownd"
+   }
+  },
+  {
+   "id": "unlit_stalker",
+   "type": "creature",
+   "monster": true,
+   "family": "unlit",
+   "forms": {
+    "sg": "Stalker",
+    "pl": "Stalkers",
+    "name": "Stalker"
+   },
+   "tags": [
+    "unlit",
+    "act4"
+   ]
+  },
+  {
+   "id": "unlit_wickthief",
+   "type": "creature",
+   "monster": true,
+   "family": "unlit",
+   "forms": {
+    "sg": "Wick-Thief",
+    "pl": "Wick-Thieves",
+    "name": "Wick-Thief"
+   },
+   "tags": [
+    "unlit",
+    "act4"
+   ]
+  },
+  {
+   "id": "knell_novice",
+   "type": "creature",
+   "monster": true,
+   "family": "knell",
+   "forms": {
+    "sg": "Knell novice",
+    "pl": "Knell novices",
+    "name": "Knell novice"
+   },
+   "tags": [
+    "knell",
+    "act2"
+   ]
+  },
+  {
+   "id": "knell_hookman",
+   "type": "creature",
+   "monster": true,
+   "family": "knell",
+   "forms": {
+    "sg": "Knell hookman",
+    "pl": "Knell hookmans",
+    "name": "Knell hookman"
+   },
+   "tags": [
+    "knell",
+    "act2"
+   ]
+  },
+  {
+   "id": "knell_lampbreaker",
+   "type": "creature",
+   "monster": true,
+   "family": "knell",
+   "forms": {
+    "sg": "lampbreaker",
+    "pl": "lampbreakers",
+    "name": "Lampbreaker"
+   },
+   "tags": [
+    "knell",
+    "act3"
+   ]
+  },
+  {
+   "id": "knell_maulbearer",
+   "type": "creature",
+   "monster": true,
+   "family": "knell",
+   "forms": {
+    "sg": "maulbearer",
+    "pl": "maulbearers",
+    "name": "Maulbearer"
+   },
+   "tags": [
+    "knell",
+    "act5"
+   ]
+  },
+  {
+   "id": "mother_tallow",
+   "type": "creature",
+   "proper": true,
+   "boss": true,
+   "pronouns": "she",
+   "forms": {
+    "sg": "Mother Tallow",
+    "short": "Mother Tallow"
+   },
+   "tags": [
+    "boss",
+    "act1"
+   ],
+   "pron": {
+    "respell": "MUDH-er TAL-oh"
+   }
+  },
+  {
+   "id": "saint_gnaw",
+   "type": "creature",
+   "proper": true,
+   "boss": true,
+   "pronouns": "it",
+   "forms": {
+    "sg": "Saint Gnaw",
+    "short": "Saint Gnaw"
+   },
+   "tags": [
+    "boss",
+    "act2"
+   ],
+   "pron": {
+    "respell": "SAYNT NAW"
+   }
+  },
+  {
+   "id": "sluicemaw",
+   "type": "creature",
+   "proper": true,
+   "boss": true,
+   "pronouns": "it",
+   "forms": {
+    "sg": "the Sluicemaw",
+    "short": "Sluicemaw"
+   },
+   "tags": [
+    "boss",
+    "act3"
+   ],
+   "pron": {
+    "respell": "SLOOSS-maw"
+   }
+  },
+  {
+   "id": "lampless_widow",
+   "type": "creature",
+   "proper": true,
+   "boss": true,
+   "pronouns": "she",
+   "forms": {
+    "sg": "the Lampless Widow",
+    "short": "Lampless Widow"
+   },
+   "tags": [
+    "boss",
+    "act4"
+   ],
+   "pron": {
+    "respell": "LAMP-liss WID-oh"
+   }
+  },
+  {
+   "id": "bellfather",
+   "type": "creature",
+   "proper": true,
+   "boss": true,
+   "pronouns": "he",
+   "forms": {
+    "sg": "the Bellfather",
+    "short": "Bellfather"
+   },
+   "tags": [
+    "boss",
+    "act5"
+   ],
+   "pron": {
+    "respell": "BEL-fah-dher"
+   }
+  },
+  {
+   "id": "lanternmoth",
+   "type": "creature",
+   "forms": {
+    "sg": "lanternmoth",
+    "pl": "lanternmoths"
+   },
+   "tags": [
+    "moth",
+    "companion"
+   ],
+   "pron": {
+    "respell": "LAN-tern-mawth"
+   }
+  },
+  {
+   "id": "flame_ember",
+   "type": "spell",
+   "forms": {
+    "sg": "Ember",
+    "pl": "Embers",
+    "adj": "amber"
+   },
+   "tags": [
+    "flame",
+    "ember"
+   ],
+   "pron": {
+    "respell": "EM-ber"
+   }
+  },
+  {
+   "id": "flame_rime",
+   "type": "spell",
+   "forms": {
+    "sg": "Rime",
+    "pl": "Rimes",
+    "adj": "cyan"
+   },
+   "tags": [
+    "flame",
+    "rime"
+   ],
+   "pron": {
+    "respell": "RYM"
+   }
+  },
+  {
+   "id": "flame_spark",
+   "type": "spell",
+   "forms": {
+    "sg": "Spark",
+    "pl": "Sparks",
+    "adj": "white"
+   },
+   "tags": [
+    "flame",
+    "spark"
+   ]
+  },
+  {
+   "id": "flame_bile",
+   "type": "spell",
+   "forms": {
+    "sg": "Bile",
+    "pl": "Biles",
+    "adj": "green"
+   },
+   "tags": [
+    "flame",
+    "bile"
+   ],
+   "pron": {
+    "respell": "BYL"
+   }
+  },
+  {
+   "id": "flame_gleam",
+   "type": "spell",
+   "forms": {
+    "sg": "Gleam",
+    "pl": "Gleams",
+    "adj": "gold"
+   },
+   "tags": [
+    "flame",
+    "gleam"
+   ],
+   "pron": {
+    "respell": "GLEEM"
+   }
+  },
+  {
+   "id": "flame_tide",
+   "type": "spell",
+   "forms": {
+    "sg": "Tide",
+    "pl": "Tides",
+    "adj": "blue"
+   },
+   "tags": [
+    "flame",
+    "tide"
+   ],
+   "pron": {
+    "respell": "TYD"
+   }
+  },
+  {
+   "id": "flame_shade",
+   "type": "spell",
+   "forms": {
+    "sg": "Shade",
+    "pl": "Shades",
+    "adj": "violet"
+   },
+   "tags": [
+    "flame",
+    "shade"
+   ],
+   "pron": {
+    "respell": "SHAYD"
+   }
+  },
+  {
+   "id": "shape_bolt",
+   "type": "spell",
+   "forms": {
+    "sg": "bolt",
+    "pl": "bolts"
+   },
+   "tags": [
+    "shape",
+    "bolt"
+   ]
+  },
+  {
+   "id": "shape_arc",
+   "type": "spell",
+   "forms": {
+    "sg": "arc",
+    "pl": "arcs"
+   },
+   "tags": [
+    "shape",
+    "arc"
+   ]
+  },
+  {
+   "id": "shape_lob",
+   "type": "spell",
+   "forms": {
+    "sg": "lob",
+    "pl": "lobs"
+   },
+   "tags": [
+    "shape",
+    "lob"
+   ]
+  },
+  {
+   "id": "shape_beam",
+   "type": "spell",
+   "forms": {
+    "sg": "beam",
+    "pl": "beams"
+   },
+   "tags": [
+    "shape",
+    "beam"
+   ]
+  },
+  {
+   "id": "shape_ring",
+   "type": "spell",
+   "forms": {
+    "sg": "ring",
+    "pl": "rings"
+   },
+   "tags": [
+    "shape",
+    "ring"
+   ]
+  },
+  {
+   "id": "shape_rune",
+   "type": "spell",
+   "forms": {
+    "sg": "rune",
+    "pl": "runes"
+   },
+   "tags": [
+    "shape",
+    "rune"
+   ]
+  },
+  {
+   "id": "shape_wave",
+   "type": "spell",
+   "forms": {
+    "sg": "wave",
+    "pl": "waves"
+   },
+   "tags": [
+    "shape",
+    "wave"
+   ]
+  },
+  {
+   "id": "shape_tether",
+   "type": "spell",
+   "forms": {
+    "sg": "tether",
+    "pl": "tethers"
+   },
+   "tags": [
+    "shape",
+    "tether"
+   ]
+  },
+  {
+   "id": "charm_split",
+   "type": "spell",
+   "forms": {
+    "sg": "split",
+    "pl": "split charms"
+   },
+   "tags": [
+    "charm",
+    "split"
+   ]
+  },
+  {
+   "id": "charm_bounce",
+   "type": "spell",
+   "forms": {
+    "sg": "bounce",
+    "pl": "bounce charms"
+   },
+   "tags": [
+    "charm",
+    "bounce"
+   ]
+  },
+  {
+   "id": "charm_linger",
+   "type": "spell",
+   "forms": {
+    "sg": "linger",
+    "pl": "linger charms"
+   },
+   "tags": [
+    "charm",
+    "linger"
+   ]
+  },
+  {
+   "id": "charm_heavy",
+   "type": "spell",
+   "forms": {
+    "sg": "heavy",
+    "pl": "heavy charms"
+   },
+   "tags": [
+    "charm",
+    "heavy"
+   ]
+  },
+  {
+   "id": "charm_swift",
+   "type": "spell",
+   "forms": {
+    "sg": "swift",
+    "pl": "swift charms"
+   },
+   "tags": [
+    "charm",
+    "swift"
+   ]
+  },
+  {
+   "id": "charm_seek",
+   "type": "spell",
+   "forms": {
+    "sg": "seek",
+    "pl": "seek charms"
+   },
+   "tags": [
+    "charm",
+    "seek"
+   ]
+  },
+  {
+   "id": "charm_echo",
+   "type": "spell",
+   "forms": {
+    "sg": "echo",
+    "pl": "echo charms"
+   },
+   "tags": [
+    "charm",
+    "echo"
+   ]
+  },
+  {
+   "id": "charm_volatile",
+   "type": "spell",
+   "forms": {
+    "sg": "volatile",
+    "pl": "volatile charms"
+   },
+   "tags": [
+    "charm",
+    "volatile"
+   ]
+  },
+  {
+   "id": "pole_lantern",
+   "type": "item",
+   "forms": {
+    "sg": "pole-lantern",
+    "pl": "pole-lanterns"
+   },
+   "tags": [
+    "tool",
+    "player"
+   ]
+  },
+  {
+   "id": "grapple_hook",
+   "type": "item",
+   "forms": {
+    "sg": "grapple hook",
+    "pl": "grapple hooks"
+   },
+   "tags": [
+    "tool"
+   ]
+  },
+  {
+   "id": "wick",
+   "type": "item",
+   "forms": {
+    "sg": "wick",
+    "pl": "wicks"
+   },
+   "tags": [
+    "spell"
+   ]
+  },
+  {
+   "id": "charm",
+   "type": "item",
+   "forms": {
+    "sg": "charm",
+    "pl": "charms"
+   },
+   "tags": [
+    "spell"
+   ]
+  },
+  {
+   "id": "knot",
+   "type": "item",
+   "forms": {
+    "sg": "knot",
+    "pl": "knots"
+   },
+   "tags": [
+    "spell"
+   ]
+  },
+  {
+   "id": "lamp_oil",
+   "type": "item",
+   "mass": true,
+   "forms": {
+    "sg": "lamp-oil"
+   },
+   "tags": [
+    "oil"
+   ]
+  },
+  {
+   "id": "wellblack",
+   "type": "item",
+   "mass": true,
+   "forms": {
+    "sg": "wellblack"
+   },
+   "tags": [
+    "oil",
+    "old"
+   ],
+   "pron": {
+    "respell": "WEL-blak"
+   }
+  },
+  {
+   "id": "penny",
+   "type": "item",
+   "forms": {
+    "sg": "penny",
+    "pl": "pennies"
+   },
+   "tags": [
+    "coin"
+   ]
+  },
+  {
+   "id": "pearl",
+   "type": "item",
+   "forms": {
+    "sg": "pearl",
+    "pl": "pearls"
+   },
+   "tags": [
+    "coin",
+    "act3"
+   ]
+  },
+  {
+   "id": "guild_mark",
+   "type": "item",
+   "forms": {
+    "sg": "Guild mark",
+    "pl": "Guild marks"
+   },
+   "tags": [
+    "coin"
+   ]
+  },
+  {
+   "id": "scrap",
+   "type": "item",
+   "mass": true,
+   "forms": {
+    "sg": "scrap"
+   },
+   "tags": [
+    "build"
+   ]
+  },
+  {
+   "id": "plank",
+   "type": "item",
+   "forms": {
+    "sg": "plank",
+    "pl": "planks"
+   },
+   "tags": [
+    "build"
+   ]
+  },
+  {
+   "id": "wax",
+   "type": "item",
+   "mass": true,
+   "forms": {
+    "sg": "wax"
+   },
+   "tags": [
+    "act1"
+   ]
+  },
+  {
+   "id": "heartwick",
+   "type": "item",
+   "forms": {
+    "sg": "heartwick",
+    "pl": "heartwicks"
+   },
+   "tags": [
+    "lamp",
+    "story"
+   ],
+   "pron": {
+    "respell": "HART-wik"
+   }
+  },
+  {
+   "id": "sealed_lantern",
+   "type": "item",
+   "forms": {
+    "sg": "sealed lantern",
+    "pl": "sealed lanterns"
+   },
+   "tags": [
+    "gamble"
+   ]
+  },
+  {
+   "id": "gravity_lantern",
+   "type": "item",
+   "forms": {
+    "sg": "gravity lantern",
+    "pl": "gravity lanterns"
+   },
+   "tags": [
+    "act5"
+   ]
+  },
+  {
+   "id": "mystery_bowl",
+   "type": "item",
+   "forms": {
+    "sg": "mystery bowl",
+    "pl": "mystery bowls"
+   },
+   "tags": [
+    "food"
+   ]
+  },
+  {
+   "id": "hollis_brother_lantern",
+   "type": "item",
+   "proper": true,
+   "forms": {
+    "sg": "the Crane lantern"
+   },
+   "tags": [
+    "quest",
+    "act2"
+   ]
+  },
+  {
+   "id": "sky_flame",
+   "type": "item",
+   "proper": true,
+   "forms": {
+    "sg": "the Sky Lamp's flame"
+   },
+   "tags": [
+    "story",
+    "act6"
+   ]
+  },
+  {
+   "id": "crown_lamp",
+   "type": "item",
+   "proper": true,
+   "forms": {
+    "sg": "the Crown Lamp"
+   },
+   "tags": [
+    "lamp",
+    "great_lamp",
+    "act1"
+   ]
+  },
+  {
+   "id": "gutter_lamp",
+   "type": "item",
+   "proper": true,
+   "forms": {
+    "sg": "the Gutter Lamp"
+   },
+   "tags": [
+    "lamp",
+    "great_lamp",
+    "act2"
+   ]
+  },
+  {
+   "id": "sluice_lamp",
+   "type": "item",
+   "proper": true,
+   "forms": {
+    "sg": "the Sluice Lamp"
+   },
+   "tags": [
+    "lamp",
+    "great_lamp",
+    "act3"
+   ]
+  },
+  {
+   "id": "deep_lamp",
+   "type": "item",
+   "proper": true,
+   "forms": {
+    "sg": "the Deep Lamp"
+   },
+   "tags": [
+    "lamp",
+    "great_lamp",
+    "act4"
+   ]
+  },
+  {
+   "id": "bell_lamp",
+   "type": "item",
+   "proper": true,
+   "forms": {
+    "sg": "the Bell Lamp"
+   },
+   "tags": [
+    "lamp",
+    "great_lamp",
+    "act5"
+   ]
+  },
+  {
+   "id": "sky_lamp",
+   "type": "item",
+   "proper": true,
+   "forms": {
+    "sg": "the Sky Lamp"
+   },
+   "tags": [
+    "lamp",
+    "great_lamp",
+    "act6"
+   ]
+  },
+  {
+   "id": "meal_eel_pie",
+   "type": "food",
+   "forms": {
+    "sg": "eel pie",
+    "pl": "eel pies"
+   },
+   "tags": [
+    "meal",
+    "dish",
+    "lanternfall"
+   ]
+  },
+  {
+   "id": "meal_ember_stew",
+   "type": "food",
+   "forms": {
+    "sg": "pepperpot",
+    "pl": "pepperpots"
+   },
+   "tags": [
+    "meal",
+    "dish",
+    "lanternfall"
+   ]
+  },
+  {
+   "id": "meal_rime_sorbet",
+   "type": "food",
+   "forms": {
+    "sg": "frost sorbet",
+    "pl": "frost sorbets"
+   },
+   "tags": [
+    "meal",
+    "dish",
+    "lanternfall"
+   ]
+  },
+  {
+   "id": "meal_lamp_porridge",
+   "type": "food",
+   "mass": true,
+   "proper": false,
+   "forms": {
+    "sg": "lamp porridge"
+   },
+   "tags": [
+    "meal",
+    "dish",
+    "lanternfall"
+   ]
+  },
+  {
+   "id": "meal_mystery",
+   "type": "food",
+   "mass": false,
+   "proper": true,
+   "forms": {
+    "sg": "the mystery bowl"
+   },
+   "tags": [
+    "meal",
+    "lanternfall"
+   ]
+  },
+  {
+   "id": "npc_aldra",
+   "type": "person",
+   "proper": true,
+   "pronouns": "she",
+   "title": "lampwarden",
+   "forms": {
+    "sg": "Aldra Crake",
+    "short": "Aldra"
+   },
+   "tags": [
+    "guild",
+    "act1"
+   ],
+   "pron": {
+    "respell": "AL-dra KRAYK"
+   }
+  },
+  {
+   "id": "npc_odile",
+   "type": "person",
+   "proper": true,
+   "pronouns": "she",
+   "title": "chandler",
+   "forms": {
+    "sg": "Odile Pennywax",
+    "short": "Odile"
+   },
+   "tags": [
+    "shop"
+   ],
+   "pron": {
+    "respell": "oh-DEEL PEN-ee-waks"
+   }
+  },
+  {
+   "id": "npc_hollis",
+   "type": "person",
+   "proper": true,
+   "pronouns": "he",
+   "title": "pawnbroker",
+   "forms": {
+    "sg": "Hollis Crane",
+    "short": "Crane"
+   },
+   "tags": [
+    "shop"
+   ],
+   "pron": {
+    "respell": "HOL-iss KRAYN"
+   }
+  },
+  {
+   "id": "npc_seld",
+   "type": "person",
+   "proper": true,
+   "pronouns": "he",
+   "title": "monk",
+   "forms": {
+    "sg": "Brother Seld",
+    "short": "Seld"
+   },
+   "tags": [
+    "act1"
+   ],
+   "pron": {
+    "respell": "BRUDH-er SELD"
+   }
+  },
+  {
+   "id": "npc_pim",
+   "type": "person",
+   "proper": true,
+   "pronouns": "she",
+   "title": "sweep",
+   "forms": {
+    "sg": "Pim Rooke",
+    "short": "Pim"
+   },
+   "tags": [
+    "child"
+   ],
+   "pron": {
+    "respell": "PIM ROOK"
+   }
+  },
+  {
+   "id": "npc_brisket",
+   "type": "person",
+   "proper": true,
+   "pronouns": "she",
+   "title": "cook",
+   "forms": {
+    "sg": "Mother Brisket",
+    "short": "Brisket"
+   },
+   "tags": [
+    "shop"
+   ],
+   "pron": {
+    "respell": "MUDH-er BRIS-kit"
+   }
+  },
+  {
+   "id": "npc_nell",
+   "type": "person",
+   "proper": true,
+   "pronouns": "she",
+   "title": "ratcatcher",
+   "forms": {
+    "sg": "Nell Gutterby",
+    "short": "Nell"
+   },
+   "tags": [
+    "act2"
+   ],
+   "pron": {
+    "respell": "NEL GUT-er-bee"
+   }
+  },
+  {
+   "id": "npc_wenna",
+   "type": "person",
+   "proper": true,
+   "pronouns": "she",
+   "title": "ferrywoman",
+   "forms": {
+    "sg": "Old Wenna",
+    "short": "Wenna"
+   },
+   "tags": [
+    "shop"
+   ],
+   "pron": {
+    "respell": "OHLD WEN-a"
+   }
+  },
+  {
+   "id": "npc_voss",
+   "type": "person",
+   "proper": true,
+   "pronouns": "he",
+   "title": "sluicemaster",
+   "forms": {
+    "sg": "Hendry Voss",
+    "short": "Voss"
+   },
+   "tags": [
+    "act3"
+   ],
+   "pron": {
+    "respell": "HEN-dree VOSS"
+   }
+  },
+  {
+   "id": "npc_unna",
+   "type": "person",
+   "proper": true,
+   "pronouns": "she",
+   "title": "cantor",
+   "forms": {
+    "sg": "Sister Unna",
+    "short": "Unna"
+   },
+   "tags": [
+    "pale"
+   ],
+   "pron": {
+    "respell": "SIS-ter OO-na"
+   }
+  },
+  {
+   "id": "npc_mothwife",
+   "type": "person",
+   "proper": true,
+   "pronouns": "she",
+   "title": "gambler",
+   "forms": {
+    "sg": "the Mothwife",
+    "short": "Mothwife"
+   },
+   "tags": [
+    "shop"
+   ],
+   "pron": {
+    "respell": "MAWTH-wyf"
+   }
+  },
+  {
+   "id": "npc_marl",
+   "type": "person",
+   "proper": true,
+   "pronouns": "he",
+   "title": "deacon",
+   "forms": {
+    "sg": "Deacon Marl",
+    "short": "Marl"
+   },
+   "tags": [
+    "knell"
+   ],
+   "pron": {
+    "respell": "DEE-kun MARL"
+   }
+  },
+  {
+   "id": "npc_merrit",
+   "type": "person",
+   "proper": true,
+   "pronouns": "she",
+   "title": "cloudwarden",
+   "forms": {
+    "sg": "Merrit Vane",
+    "short": "Merrit"
+   },
+   "tags": [
+    "act6"
+   ],
+   "pron": {
+    "respell": "MAIR-it VAYN"
+   }
+  },
+  {
+   "id": "npc_corvin",
+   "type": "person",
+   "proper": true,
+   "pronouns": "he",
+   "title": "lampwarden",
+   "forms": {
+    "sg": "Corvin Crake",
+    "short": "Corvin"
+   },
+   "tags": [
+    "guild",
+    "act6"
+   ],
+   "pron": {
+    "respell": "KOR-vin KRAYK"
+   }
+  },
+  {
+   "id": "npc_hush",
+   "type": "person",
+   "proper": true,
+   "pronouns": "it",
+   "forms": {
+    "sg": "Hush",
+    "short": "Hush"
+   },
+   "tags": [
+    "companion"
+   ],
+   "pron": {
+    "respell": "HUSH"
+   }
+  },
+  {
+   "id": "ossery_vane",
+   "type": "person",
+   "proper": true,
+   "pronouns": "he",
+   "title": "cloudwarden",
+   "forms": {
+    "sg": "Ossery Vane",
+    "short": "Ossery"
+   },
+   "tags": [
+    "boss",
+    "act6"
+   ],
+   "pron": {
+    "respell": "OSS-er-ee VAYN"
+   }
+  },
+  {
+   "id": "elsbet_vane",
+   "type": "person",
+   "proper": true,
+   "pronouns": "she",
+   "forms": {
+    "sg": "Elsbet Vane",
+    "short": "Elsbet"
+   },
+   "tags": [
+    "history"
+   ],
+   "pron": {
+    "respell": "ELZ-bet VAYN"
+   }
+  },
+  {
+   "id": "hollis_brother",
+   "type": "person",
+   "proper": true,
+   "pronouns": "he",
+   "forms": {
+    "sg": "Abel Crane",
+    "short": "Abel"
+   },
+   "tags": [
+    "history",
+    "act2"
+   ],
+   "pron": {
+    "respell": "AY-bul KRAYN"
+   }
+  },
+  {
+   "id": "lampwarden",
+   "type": "title",
+   "forms": {
+    "sg": "Lampwarden",
+    "pl": "Lampwardens"
+   },
+   "tags": [
+    "lanternfall"
+   ],
+   "pron": {
+    "respell": "LAMP-war-den"
+   }
+  },
+  {
+   "id": "lamplighter",
+   "type": "title",
+   "forms": {
+    "sg": "Lamplighter",
+    "pl": "Lamplighters"
+   },
+   "tags": [
+    "lanternfall"
+   ]
+  },
+  {
+   "id": "apprentice",
+   "type": "title",
+   "forms": {
+    "sg": "apprentice",
+    "pl": "apprentices"
+   },
+   "tags": [
+    "lanternfall"
+   ]
+  },
+  {
+   "id": "sweep",
+   "type": "title",
+   "forms": {
+    "sg": "sweep",
+    "pl": "sweeps"
+   },
+   "tags": [
+    "lanternfall"
+   ]
+  },
+  {
+   "id": "ratcatcher",
+   "type": "title",
+   "forms": {
+    "sg": "ratcatcher",
+    "pl": "ratcatchers"
+   },
+   "tags": [
+    "lanternfall"
+   ]
+  },
+  {
+   "id": "sluicemaster",
+   "type": "title",
+   "forms": {
+    "sg": "Sluicemaster",
+    "pl": "Sluicemasters"
+   },
+   "tags": [
+    "lanternfall"
+   ],
+   "pron": {
+    "respell": "SLOOSS-mas-ter"
+   }
+  },
+  {
+   "id": "cloudwarden",
+   "type": "title",
+   "forms": {
+    "sg": "cloudwarden",
+    "pl": "cloudwardens"
+   },
+   "tags": [
+    "lanternfall"
+   ],
+   "pron": {
+    "respell": "KLOWD-war-den"
+   }
+  },
+  {
+   "id": "cantor",
+   "type": "title",
+   "forms": {
+    "sg": "cantor",
+    "pl": "cantors"
+   },
+   "tags": [
+    "lanternfall"
+   ]
+  },
+  {
+   "id": "deacon",
+   "type": "title",
+   "forms": {
+    "sg": "deacon",
+    "pl": "deacons"
+   },
+   "tags": [
+    "lanternfall"
+   ]
+  },
+  {
+   "id": "ferrywoman",
+   "type": "title",
+   "forms": {
+    "sg": "ferrywoman",
+    "pl": "ferrywomen"
+   },
+   "tags": [
+    "lanternfall"
+   ]
+  },
+  {
+   "id": "the_rain",
+   "type": "concept",
+   "proper": true,
+   "forms": {
+    "sg": "the Rain"
+   },
+   "tags": [
+    "lanternfall"
+   ]
+  },
+  {
+   "id": "the_binding",
+   "type": "concept",
+   "proper": true,
+   "forms": {
+    "sg": "the Binding"
+   },
+   "tags": [
+    "lanternfall"
+   ]
+  },
+  {
+   "id": "the_dark",
+   "type": "concept",
+   "proper": true,
+   "forms": {
+    "sg": "the dark"
+   },
+   "tags": [
+    "lanternfall"
+   ]
+  },
+  {
+   "id": "the_toll",
+   "type": "concept",
+   "proper": true,
+   "forms": {
+    "sg": "the Toll"
+   },
+   "tags": [
+    "lanternfall"
+   ]
+  },
+  {
+   "id": "no_tier_left_dark",
+   "type": "concept",
+   "proper": true,
+   "forms": {
+    "sg": "No tier left dark"
+   },
+   "tags": [
+    "lanternfall"
+   ]
+  },
+  {
+   "id": "the_keeper",
+   "type": "concept",
+   "proper": true,
+   "forms": {
+    "sg": "the keeper"
+   },
+   "tags": [
+    "lanternfall"
+   ]
+  },
+  {
+   "id": "drizzle",
+   "type": "weather",
+   "mass": true,
+   "forms": {
+    "sg": "drizzle"
+   },
+   "tags": [
+    "lanternfall"
+   ]
+  },
+  {
+   "id": "downpour",
+   "type": "weather",
+   "mass": true,
+   "forms": {
+    "sg": "downpour"
+   },
+   "tags": [
+    "lanternfall"
+   ]
+  },
+  {
+   "id": "surge",
+   "type": "weather",
+   "mass": true,
+   "forms": {
+    "sg": "surge"
+   },
+   "tags": [
+    "lanternfall"
+   ]
+  },
+  {
+   "id": "the_dry",
+   "type": "weather",
+   "proper": true,
+   "forms": {
+    "sg": "the Dry"
+   },
+   "tags": [
+    "lanternfall"
+   ]
+  },
+  {
+   "id": "the_toll_deity",
+   "type": "deity",
+   "proper": true,
+   "forms": {
+    "sg": "the Toll",
+    "adj": "Toll"
+   },
+   "tags": [
+    "lanternfall",
+    "knell"
+   ]
+  },
+  {
+   "id": "the_mother",
+   "type": "deity",
+   "proper": true,
+   "forms": {
+    "sg": "the Mother",
+    "adj": "Mother's"
+   },
+   "tags": [
+    "lanternfall",
+    "tallow"
+   ]
+  },
+  {
+   "id": "the_ledger",
+   "type": "deity",
+   "proper": true,
+   "forms": {
+    "sg": "the Ledger",
+    "adj": "Ledger"
+   },
+   "tags": [
+    "lanternfall",
+    "guild"
+   ]
+  }
+ ]
+}

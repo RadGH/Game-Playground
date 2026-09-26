@@ -6979,6 +6979,1943 @@
     "dur": 1.2,
     "loop": true
    }
+  },
+  {
+   "id": "ambience.rain.light",
+   "category": "ambience",
+   "label": "Rain (light, loop)",
+   "loop": true,
+   "trim": 0.0,
+   "synth": {
+    "dur": 3.0,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "drone",
+      "dur": 3.0,
+      "gain": 0.45,
+      "color": "pink",
+      "filter": {
+       "type": "highpass",
+       "f0": 3200,
+       "f1": 7200,
+       "q": 0.7
+      },
+      "lfo": 0.21,
+      "depth": 0.35
+     },
+     {
+      "type": "grain",
+      "dur": 3.0,
+      "delay": 0.0,
+      "gain": 0.3,
+      "n": 40,
+      "freq": [
+       2400,
+       7000
+      ],
+      "gdur": [
+       0.002,
+       0.008
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 1.0,
+      "noisy": true
+     },
+     {
+      "type": "drone",
+      "dur": 3.0,
+      "gain": 0.18,
+      "color": "pink",
+      "filter": {
+       "type": "bandpass",
+       "f0": 500,
+       "f1": 1400,
+       "q": 0.8
+      },
+      "lfo": 0.09,
+      "depth": 0.4
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "hum",
+    "wave": "triangle",
+    "dur": 1.2,
+    "loop": true
+   }
+  },
+  {
+   "id": "ambience.rain.heavy",
+   "category": "ambience",
+   "label": "Rain (heavy, loop)",
+   "loop": true,
+   "trim": 0.0,
+   "synth": {
+    "dur": 3.0,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "drone",
+      "dur": 3.0,
+      "gain": 0.5,
+      "color": "white",
+      "filter": {
+       "type": "bandpass",
+       "f0": 900,
+       "f1": 6000,
+       "q": 0.5
+      },
+      "lfo": 0.17,
+      "depth": 0.45
+     },
+     {
+      "type": "grain",
+      "dur": 3.0,
+      "delay": 0.0,
+      "gain": 0.35,
+      "n": 90,
+      "freq": [
+       1600,
+       6500
+      ],
+      "gdur": [
+       0.002,
+       0.01
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 1.0,
+      "noisy": true
+     },
+     {
+      "type": "drone",
+      "dur": 3.0,
+      "gain": 0.35,
+      "color": "brown",
+      "filter": {
+       "type": "bandpass",
+       "f0": 60,
+       "f1": 220,
+       "q": 1.0
+      },
+      "lfo": 0.07,
+      "depth": 0.5
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "hum",
+    "wave": "triangle",
+    "dur": 1.2,
+    "loop": true
+   }
+  },
+  {
+   "id": "rain.tick.metal",
+   "category": "world",
+   "label": "Rain on metal",
+   "loop": false,
+   "trim": -4.0,
+   "synth": {
+    "dur": 0.3,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.2,
+      "delay": 0.0,
+      "gain": 0.35,
+      "f0": 2600,
+      "f1": 2500,
+      "env": {
+       "a": 0.001,
+       "d": 0.2,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.24,
+      "delay": 0.01,
+      "gain": 0.2,
+      "f0": 3900,
+      "f1": 3800,
+      "env": {
+       "a": 0.001,
+       "d": 0.24,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.05,
+      "delay": 0.0,
+      "gain": 0.3,
+      "filter": {
+       "type": "bandpass",
+       "f0": 6000,
+       "f1": 5000,
+       "q": 3.0
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.05,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "noise",
+    "dur": 0.12,
+    "loop": false
+   }
+  },
+  {
+   "id": "water.splash.small",
+   "category": "world",
+   "label": "Splash (small)",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.45,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.3,
+      "delay": 0.0,
+      "gain": 0.8,
+      "filter": {
+       "type": "bandpass",
+       "f0": 2600,
+       "f1": 700,
+       "q": 0.9
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.3,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "grain",
+      "dur": 0.4,
+      "delay": 0.04,
+      "gain": 0.35,
+      "n": 10,
+      "freq": [
+       700,
+       2600
+      ],
+      "gdur": [
+       0.01,
+       0.04
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 0.6,
+      "noisy": false
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.12,
+      "delay": 0.0,
+      "gain": 0.25,
+      "f0": 420,
+      "f1": 180,
+      "env": {
+       "a": 0.003,
+       "d": 0.12,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "noise",
+    "dur": 0.12,
+    "loop": false
+   }
+  },
+  {
+   "id": "water.splash.big",
+   "category": "impact",
+   "label": "Splash (big)",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.95,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "pink",
+      "dur": 0.7,
+      "delay": 0.0,
+      "gain": 0.9,
+      "filter": {
+       "type": "bandpass",
+       "f0": 1800,
+       "f1": 300,
+       "q": 0.7
+      },
+      "env": {
+       "a": 0.006,
+       "d": 0.7,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.25,
+      "delay": 0.0,
+      "gain": 0.45,
+      "filter": {
+       "type": "bandpass",
+       "f0": 5200,
+       "f1": 1500,
+       "q": 1.2
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.25,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "grain",
+      "dur": 0.85,
+      "delay": 0.06,
+      "gain": 0.4,
+      "n": 22,
+      "freq": [
+       400,
+       2200
+      ],
+      "gdur": [
+       0.012,
+       0.05
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 0.5,
+      "noisy": false
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.3,
+      "delay": 0.0,
+      "gain": 0.55,
+      "f0": 110,
+      "f1": 45,
+      "env": {
+       "a": 0.003,
+       "d": 0.3,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "hit",
+    "wave": "noise",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "water.pour",
+   "category": "world",
+   "label": "Water pouring",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 1.6,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "pink",
+      "dur": 1.55,
+      "delay": 0.0,
+      "gain": 0.7,
+      "filter": {
+       "type": "bandpass",
+       "f0": 900,
+       "f1": 1300,
+       "q": 0.8
+      },
+      "env": {
+       "a": 0.15,
+       "d": 1.55,
+       "curve": "lin"
+      }
+     },
+     {
+      "type": "grain",
+      "dur": 1.55,
+      "delay": 0.0,
+      "gain": 0.3,
+      "n": 30,
+      "freq": [
+       500,
+       1800
+      ],
+      "gdur": [
+       0.01,
+       0.04
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 1.2,
+      "noisy": false
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "noise",
+    "dur": 0.12,
+    "loop": false
+   }
+  },
+  {
+   "id": "water.drain",
+   "category": "world",
+   "label": "Water draining",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 1.8,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "pink",
+      "dur": 1.75,
+      "delay": 0.0,
+      "gain": 0.7,
+      "filter": {
+       "type": "bandpass",
+       "f0": 1400,
+       "f1": 260,
+       "q": 1.2
+      },
+      "env": {
+       "a": 0.2,
+       "d": 1.75,
+       "curve": "lin"
+      }
+     },
+     {
+      "type": "grain",
+      "dur": 1.75,
+      "delay": 0.0,
+      "gain": 0.45,
+      "n": 18,
+      "freq": [
+       180,
+       700
+      ],
+      "gdur": [
+       0.03,
+       0.09
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 0.4,
+      "noisy": false
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 1.4,
+      "delay": 0.0,
+      "gain": 0.25,
+      "f0": 220,
+      "f1": 70,
+      "env": {
+       "a": 0.003,
+       "d": 1.4,
+       "curve": "exp"
+      },
+      "vib": {
+       "rate": 6,
+       "depth": 0.08
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "noise",
+    "dur": 0.12,
+    "loop": false
+   }
+  },
+  {
+   "id": "steam.hiss",
+   "category": "world",
+   "label": "Steam hiss",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 1.1,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 1.05,
+      "delay": 0.0,
+      "gain": 0.8,
+      "filter": {
+       "type": "highpass",
+       "f0": 4200,
+       "f1": 2600,
+       "q": 0.8
+      },
+      "env": {
+       "a": 0.03,
+       "d": 1.05,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.8,
+      "delay": 0.05,
+      "gain": 0.25,
+      "filter": {
+       "type": "bandpass",
+       "f0": 1800,
+       "f1": 900,
+       "q": 1.4
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.8,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "noise",
+    "dur": 0.12,
+    "loop": false
+   }
+  },
+  {
+   "id": "fire.whoosh",
+   "category": "world",
+   "label": "Fire whoosh",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.7,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "brown",
+      "dur": 0.65,
+      "delay": 0.0,
+      "gain": 0.9,
+      "filter": {
+       "type": "lowpass",
+       "f0": 250,
+       "f1": 1400,
+       "q": 0.7
+      },
+      "env": {
+       "a": 0.08,
+       "d": 0.65,
+       "curve": "lin"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.4,
+      "delay": 0.0,
+      "gain": 0.3,
+      "f0": 70,
+      "f1": 110,
+      "env": {
+       "a": 0.003,
+       "d": 0.4,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "grain",
+      "dur": 0.55,
+      "delay": 0.1,
+      "gain": 0.2,
+      "n": 8,
+      "freq": [
+       500,
+       1600
+      ],
+      "gdur": [
+       0.01,
+       0.03
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 1.0,
+      "noisy": false
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "noise",
+    "dur": 0.12,
+    "loop": false
+   }
+  },
+  {
+   "id": "fire.crackle",
+   "category": "ambience",
+   "label": "Fire crackle (loop)",
+   "loop": true,
+   "trim": 0.0,
+   "synth": {
+    "dur": 2.4,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "grain",
+      "dur": 2.4,
+      "delay": 0.0,
+      "gain": 0.4,
+      "n": 34,
+      "freq": [
+       900,
+       4800
+      ],
+      "gdur": [
+       0.003,
+       0.016
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 1.0,
+      "noisy": true
+     },
+     {
+      "type": "drone",
+      "dur": 2.4,
+      "gain": 0.4,
+      "color": "brown",
+      "filter": {
+       "type": "bandpass",
+       "f0": 180,
+       "f1": 700,
+       "q": 0.9
+      },
+      "lfo": 0.9,
+      "depth": 0.5
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "hum",
+    "wave": "triangle",
+    "dur": 1.2,
+    "loop": true
+   }
+  },
+  {
+   "id": "ice.form",
+   "category": "world",
+   "label": "Ice forming",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.8,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "grain",
+      "dur": 0.75,
+      "delay": 0.0,
+      "gain": 0.45,
+      "n": 22,
+      "freq": [
+       2400,
+       7200
+      ],
+      "gdur": [
+       0.004,
+       0.015
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 1.6,
+      "noisy": false
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.6,
+      "delay": 0.0,
+      "gain": 0.35,
+      "filter": {
+       "type": "bandpass",
+       "f0": 5200,
+       "f1": 2600,
+       "q": 2.0
+      },
+      "env": {
+       "a": 0.1,
+       "d": 0.6,
+       "curve": "lin"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.5,
+      "delay": 0.0,
+      "gain": 0.18,
+      "f0": 1760,
+      "f1": 2349,
+      "env": {
+       "a": 0.003,
+       "d": 0.5,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "noise",
+    "dur": 0.12,
+    "loop": false
+   }
+  },
+  {
+   "id": "ice.crack",
+   "category": "impact",
+   "label": "Ice cracking",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.6,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.08,
+      "delay": 0.0,
+      "gain": 1.0,
+      "filter": {
+       "type": "bandpass",
+       "f0": 5000,
+       "f1": 2200,
+       "q": 0.6
+      },
+      "env": {
+       "a": 0.001,
+       "d": 0.08,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "grain",
+      "dur": 0.5,
+      "delay": 0.02,
+      "gain": 0.5,
+      "n": 14,
+      "freq": [
+       1600,
+       6000
+      ],
+      "gdur": [
+       0.003,
+       0.012
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 1.0,
+      "noisy": false
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.25,
+      "delay": 0.0,
+      "gain": 0.45,
+      "f0": 180,
+      "f1": 80,
+      "env": {
+       "a": 0.003,
+       "d": 0.25,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "hit",
+    "wave": "noise",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "stone.crumble",
+   "category": "world",
+   "label": "Stone crumbling",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 1.2,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "grain",
+      "dur": 1.15,
+      "delay": 0.0,
+      "gain": 0.6,
+      "n": 26,
+      "freq": [
+       180,
+       1400
+      ],
+      "gdur": [
+       0.01,
+       0.05
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 0.6,
+      "noisy": true
+     },
+     {
+      "type": "noise",
+      "color": "brown",
+      "dur": 1.0,
+      "delay": 0.0,
+      "gain": 0.55,
+      "filter": {
+       "type": "lowpass",
+       "f0": 700,
+       "f1": 180,
+       "q": 0.9
+      },
+      "env": {
+       "a": 0.05,
+       "d": 1.0,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "noise",
+    "dur": 0.12,
+    "loop": false
+   }
+  },
+  {
+   "id": "fragment.crash.small",
+   "category": "impact",
+   "label": "Fragment crash (small)",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.45,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "brown",
+      "dur": 0.36000000000000004,
+      "delay": 0.0,
+      "gain": 0.8,
+      "filter": {
+       "type": "bandpass",
+       "f0": 2700,
+       "f1": 300.0,
+       "q": 0.8
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.36000000000000004,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.225,
+      "delay": 0.0,
+      "gain": 0.8,
+      "f0": 180.0,
+      "f1": 64.28571428571429,
+      "env": {
+       "a": 0.003,
+       "d": 0.225,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "grain",
+      "dur": 0.405,
+      "delay": 0.03,
+      "gain": 0.45,
+      "n": 15,
+      "freq": [
+       250,
+       2200
+      ],
+      "gdur": [
+       0.01,
+       0.05
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 1.0,
+      "noisy": true
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "hit",
+    "wave": "noise",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "fragment.crash.medium",
+   "category": "impact",
+   "label": "Fragment crash (medium)",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.75,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "brown",
+      "dur": 0.6000000000000001,
+      "delay": 0.0,
+      "gain": 0.9,
+      "filter": {
+       "type": "bandpass",
+       "f0": 1800,
+       "f1": 200.0,
+       "q": 0.8
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.6000000000000001,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.375,
+      "delay": 0.0,
+      "gain": 0.8,
+      "f0": 120.0,
+      "f1": 42.857142857142854,
+      "env": {
+       "a": 0.003,
+       "d": 0.375,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "grain",
+      "dur": 0.675,
+      "delay": 0.03,
+      "gain": 0.45,
+      "n": 20,
+      "freq": [
+       250,
+       2200
+      ],
+      "gdur": [
+       0.01,
+       0.05
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 1.0,
+      "noisy": true
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "hit",
+    "wave": "noise",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "fragment.crash.large",
+   "category": "impact",
+   "label": "Fragment crash (large)",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 1.2,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "brown",
+      "dur": 0.96,
+      "delay": 0.0,
+      "gain": 1.0,
+      "filter": {
+       "type": "bandpass",
+       "f0": 1140,
+       "f1": 126.66666666666667,
+       "q": 0.8
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.96,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.6,
+      "delay": 0.0,
+      "gain": 0.8,
+      "f0": 76.0,
+      "f1": 27.142857142857142,
+      "env": {
+       "a": 0.003,
+       "d": 0.6,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "grain",
+      "dur": 1.08,
+      "delay": 0.03,
+      "gain": 0.45,
+      "n": 27,
+      "freq": [
+       250,
+       2200
+      ],
+      "gdur": [
+       0.01,
+       0.05
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 1.0,
+      "noisy": true
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "hit",
+    "wave": "noise",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "lever.pull",
+   "category": "world",
+   "label": "Lever pull",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.55,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.3,
+      "delay": 0.0,
+      "gain": 0.6,
+      "filter": {
+       "type": "bandpass",
+       "f0": 1800,
+       "f1": 700,
+       "q": 1.8
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.3,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "triangle",
+      "dur": 0.12,
+      "delay": 0.3,
+      "gain": 0.35,
+      "f0": 900,
+      "f1": 700,
+      "env": {
+       "a": 0.003,
+       "d": 0.12,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.12,
+      "delay": 0.32,
+      "gain": 0.5,
+      "filter": {
+       "type": "bandpass",
+       "f0": 3000,
+       "f1": 1200,
+       "q": 2.0
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.12,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "noise",
+    "dur": 0.12,
+    "loop": false
+   }
+  },
+  {
+   "id": "door.grind",
+   "category": "world",
+   "label": "Door grinding",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 1.6,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "brown",
+      "dur": 1.55,
+      "delay": 0.0,
+      "gain": 0.8,
+      "filter": {
+       "type": "bandpass",
+       "f0": 300,
+       "f1": 520,
+       "q": 2.5
+      },
+      "env": {
+       "a": 0.1,
+       "d": 1.55,
+       "curve": "lin"
+      }
+     },
+     {
+      "type": "fm",
+      "wave": "sine",
+      "dur": 1.5,
+      "delay": 0.0,
+      "gain": 0.35,
+      "f0": 70,
+      "f1": 62,
+      "ratio": 1.41,
+      "index": 160,
+      "index1": 60,
+      "env": {
+       "a": 0.004,
+       "d": 1.5,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "grain",
+      "dur": 1.5,
+      "delay": 0.0,
+      "gain": 0.35,
+      "n": 16,
+      "freq": [
+       200,
+       900
+      ],
+      "gdur": [
+       0.02,
+       0.07
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 1.0,
+      "noisy": true
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "noise",
+    "dur": 0.12,
+    "loop": false
+   }
+  },
+  {
+   "id": "sluice.open",
+   "category": "world",
+   "label": "Sluice opening",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 2.0,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.4,
+      "delay": 0.0,
+      "gain": 0.6,
+      "filter": {
+       "type": "bandpass",
+       "f0": 1500,
+       "f1": 600,
+       "q": 1.6
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.4,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "pink",
+      "dur": 1.6,
+      "delay": 0.35,
+      "gain": 0.8,
+      "filter": {
+       "type": "bandpass",
+       "f0": 400,
+       "f1": 1500,
+       "q": 0.7
+      },
+      "env": {
+       "a": 0.5,
+       "d": 1.6,
+       "curve": "lin"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 1.2,
+      "delay": 0.3,
+      "gain": 0.35,
+      "f0": 55,
+      "f1": 48,
+      "env": {
+       "a": 0.003,
+       "d": 1.2,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "noise",
+    "dur": 0.12,
+    "loop": false
+   }
+  },
+  {
+   "id": "rope.creak",
+   "category": "world",
+   "label": "Rope creak",
+   "loop": false,
+   "trim": -3.0,
+   "synth": {
+    "dur": 0.7,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "fm",
+      "wave": "sine",
+      "dur": 0.6,
+      "delay": 0.0,
+      "gain": 0.4,
+      "f0": 240,
+      "f1": 180,
+      "ratio": 2.01,
+      "index": 120,
+      "index1": 30,
+      "env": {
+       "a": 0.004,
+       "d": 0.6,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.55,
+      "delay": 0.0,
+      "gain": 0.3,
+      "filter": {
+       "type": "bandpass",
+       "f0": 1200,
+       "f1": 800,
+       "q": 4.0
+      },
+      "env": {
+       "a": 0.1,
+       "d": 0.55,
+       "curve": "lin"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "noise",
+    "dur": 0.12,
+    "loop": false
+   }
+  },
+  {
+   "id": "grapple.fire",
+   "category": "world",
+   "label": "Grapple fire",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.5,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.08,
+      "delay": 0.0,
+      "gain": 0.9,
+      "filter": {
+       "type": "bandpass",
+       "f0": 3000,
+       "f1": 1400,
+       "q": 1.0
+      },
+      "env": {
+       "a": 0.001,
+       "d": 0.08,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.4,
+      "delay": 0.04,
+      "gain": 0.45,
+      "filter": {
+       "type": "bandpass",
+       "f0": 1800,
+       "f1": 5200,
+       "q": 1.2
+      },
+      "env": {
+       "a": 0.02,
+       "d": 0.4,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "grain",
+      "dur": 0.4,
+      "delay": 0.05,
+      "gain": 0.3,
+      "n": 12,
+      "freq": [
+       2400,
+       5200
+      ],
+      "gdur": [
+       0.004,
+       0.01
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 1.0,
+      "noisy": false
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "noise",
+    "dur": 0.12,
+    "loop": false
+   }
+  },
+  {
+   "id": "lamp.relight",
+   "category": "sting",
+   "label": "Great Lamp relit",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 2.6,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "brown",
+      "dur": 0.7,
+      "delay": 0.0,
+      "gain": 0.8,
+      "filter": {
+       "type": "lowpass",
+       "f0": 200,
+       "f1": 1800,
+       "q": 0.7
+      },
+      "env": {
+       "a": 0.15,
+       "d": 0.7,
+       "curve": "lin"
+      }
+     },
+     {
+      "type": "chord",
+      "dur": 2.4,
+      "delay": 0.3,
+      "gain": 0.55,
+      "freqs": [
+       146.83,
+       220,
+       293.66,
+       440
+      ],
+      "wave": "sine",
+      "stagger": 0.18,
+      "env": {
+       "a": 0.05,
+       "d": 2.4,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 1.6,
+      "delay": 0.4,
+      "gain": 0.2,
+      "filter": {
+       "type": "highpass",
+       "f0": 3000,
+       "f1": 7000,
+       "q": 1.0
+      },
+      "env": {
+       "a": 0.6,
+       "d": 1.6,
+       "curve": "lin"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "fanfare",
+    "wave": "square",
+    "dur": 0.7,
+    "loop": false
+   }
+  },
+  {
+   "id": "lamp.post",
+   "category": "sting",
+   "label": "Lamp-post lit",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 1.2,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "brown",
+      "dur": 0.35,
+      "delay": 0.0,
+      "gain": 0.7,
+      "filter": {
+       "type": "lowpass",
+       "f0": 300,
+       "f1": 1300,
+       "q": 0.8
+      },
+      "env": {
+       "a": 0.04,
+       "d": 0.35,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "chord",
+      "dur": 1.0,
+      "delay": 0.15,
+      "gain": 0.45,
+      "freqs": [
+       293.66,
+       440
+      ],
+      "wave": "sine",
+      "stagger": 0.08,
+      "env": {
+       "a": 0.01,
+       "d": 1.0,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "fanfare",
+    "wave": "square",
+    "dur": 0.7,
+    "loop": false
+   }
+  },
+  {
+   "id": "lantern.out",
+   "category": "world",
+   "label": "Lantern goes out",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.6,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "pink",
+      "dur": 0.45,
+      "delay": 0.0,
+      "gain": 0.7,
+      "filter": {
+       "type": "lowpass",
+       "f0": 1400,
+       "f1": 180,
+       "q": 0.8
+      },
+      "env": {
+       "a": 0.01,
+       "d": 0.45,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.4,
+      "delay": 0.0,
+      "gain": 0.3,
+      "f0": 330,
+      "f1": 110,
+      "env": {
+       "a": 0.003,
+       "d": 0.4,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "noise",
+    "dur": 0.12,
+    "loop": false
+   }
+  },
+  {
+   "id": "bell.toll",
+   "category": "sting",
+   "label": "Bell toll",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 4.0,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 3.9,
+      "delay": 0.0,
+      "gain": 0.7,
+      "f0": 110,
+      "f1": 110,
+      "env": {
+       "a": 0.004,
+       "d": 3.9,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 3.2,
+      "delay": 0.0,
+      "gain": 0.4,
+      "f0": 303.6,
+      "f1": 303.6,
+      "env": {
+       "a": 0.004,
+       "d": 3.2,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 2.4,
+      "delay": 0.0,
+      "gain": 0.25,
+      "f0": 594,
+      "f1": 594,
+      "env": {
+       "a": 0.004,
+       "d": 2.4,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 1.6,
+      "delay": 0.0,
+      "gain": 0.15,
+      "f0": 924,
+      "f1": 924,
+      "env": {
+       "a": 0.003,
+       "d": 1.6,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.06,
+      "delay": 0.0,
+      "gain": 0.5,
+      "filter": {
+       "type": "bandpass",
+       "f0": 2200,
+       "f1": 900,
+       "q": 1.2
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.06,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "fanfare",
+    "wave": "square",
+    "dur": 0.7,
+    "loop": false
+   }
+  },
+  {
+   "id": "gutter.burst",
+   "category": "impact",
+   "label": "Wick guttering burst",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.7,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "brown",
+      "dur": 0.5,
+      "delay": 0.0,
+      "gain": 0.9,
+      "filter": {
+       "type": "bandpass",
+       "f0": 2200,
+       "f1": 300,
+       "q": 0.7
+      },
+      "env": {
+       "a": 0.002,
+       "d": 0.5,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.35,
+      "delay": 0.0,
+      "gain": 0.7,
+      "f0": 140,
+      "f1": 50,
+      "env": {
+       "a": 0.003,
+       "d": 0.35,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "grain",
+      "dur": 0.55,
+      "delay": 0.02,
+      "gain": 0.4,
+      "n": 16,
+      "freq": [
+       800,
+       3600
+      ],
+      "gdur": [
+       0.005,
+       0.02
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 1.0,
+      "noisy": true
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "hit",
+    "wave": "noise",
+    "dur": 0.22,
+    "loop": false
+   }
+  },
+  {
+   "id": "rekindle",
+   "category": "sting",
+   "label": "Rekindle",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 1.4,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 1.2,
+      "delay": 0.0,
+      "gain": 0.4,
+      "f0": 180,
+      "f1": 540,
+      "env": {
+       "a": 0.3,
+       "d": 1.2,
+       "curve": "lin"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 1.1,
+      "delay": 0.0,
+      "gain": 0.35,
+      "filter": {
+       "type": "bandpass",
+       "f0": 400,
+       "f1": 2600,
+       "q": 1.0
+      },
+      "env": {
+       "a": 0.4,
+       "d": 1.1,
+       "curve": "lin"
+      }
+     },
+     {
+      "type": "chord",
+      "dur": 0.7,
+      "delay": 0.65,
+      "gain": 0.3,
+      "freqs": [
+       587.33,
+       880
+      ],
+      "wave": "sine",
+      "stagger": 0.05,
+      "env": {
+       "a": 0.01,
+       "d": 0.7,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "fanfare",
+    "wave": "square",
+    "dur": 0.7,
+    "loop": false
+   }
+  },
+  {
+   "id": "oil.pickup",
+   "category": "loot",
+   "label": "Oil pickup",
+   "loop": false,
+   "trim": -2.0,
+   "synth": {
+    "dur": 0.45,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.2,
+      "delay": 0.0,
+      "gain": 0.45,
+      "f0": 520,
+      "f1": 780,
+      "env": {
+       "a": 0.005,
+       "d": 0.2,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "grain",
+      "dur": 0.35,
+      "delay": 0.05,
+      "gain": 0.35,
+      "n": 6,
+      "freq": [
+       600,
+       1400
+      ],
+      "gdur": [
+       0.02,
+       0.05
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 1.0,
+      "noisy": false
+     },
+     {
+      "type": "noise",
+      "color": "pink",
+      "dur": 0.2,
+      "delay": 0.0,
+      "gain": 0.25,
+      "filter": {
+       "type": "bandpass",
+       "f0": 900,
+       "f1": 500,
+       "q": 1.6
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.2,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "rise",
+    "wave": "triangle",
+    "dur": 0.3,
+    "loop": false
+   }
+  },
+  {
+   "id": "pearl.pickup",
+   "category": "loot",
+   "label": "Pearl pickup",
+   "loop": false,
+   "trim": -2.0,
+   "synth": {
+    "dur": 0.6,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "chord",
+      "dur": 0.55,
+      "delay": 0.0,
+      "gain": 0.45,
+      "freqs": [
+       1318.5,
+       1975.5
+      ],
+      "wave": "sine",
+      "stagger": 0.06,
+      "env": {
+       "a": 0.01,
+       "d": 0.55,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 0.2,
+      "delay": 0.1,
+      "gain": 0.15,
+      "f0": 2637,
+      "f1": 2637,
+      "env": {
+       "a": 0.003,
+       "d": 0.2,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "retro": {
+    "pattern": "rise",
+    "wave": "triangle",
+    "dur": 0.3,
+    "loop": false
+   }
   }
  ]
 }

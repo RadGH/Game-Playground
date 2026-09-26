@@ -1,0 +1,1421 @@
+{
+ "_doc": "The 12-node skill boards (docs/04 §7-§15, canon v2). Three branches of four (tier 1, 2, 3, capstone=tier 4). effect.kind is one of stat, flameMult, shapeMult, status, ability, move, rule, unlock (04 §7.3). `text` is a template: {key} reads effect[key]; {value} is the per-rank value times the rank, formatted by effect.unit (pct/num/x/s); {key:pct|signpct|sign|s|x} formats a single number. The board screen generates every line from these numbers (02 §16.1). Written by js/rpg/boards.js readers; costs/ranks per 04 §7.2.",
+ "version": 1,
+ "rules": {
+  "tierCost": [
+   1,
+   2,
+   3,
+   4
+  ],
+  "capstoneNeedsBranchPoints": 5,
+  "oneCapstone": true,
+  "opensAt": "a2_n06"
+ },
+ "boards": [
+  {
+   "id": "board_lamplighter",
+   "class": "lamplighter",
+   "branches": [
+    "Wickcraft",
+    "Guild",
+    "Pole"
+   ],
+   "nodes": [
+    {
+     "id": "ll_b2",
+     "name": "Trimmed Wick",
+     "branch": 0,
+     "tier": 1,
+     "pos": [
+      0,
+      0
+     ],
+     "cost": 1,
+     "ranks": 3,
+     "capstone": false,
+     "requires": [],
+     "effect": {
+      "kind": "stat",
+      "stat": "oilCostPct",
+      "value": -0.04,
+      "unit": "pct"
+     },
+     "text": "wick oil cost {value}"
+    },
+    {
+     "id": "ll_b3",
+     "name": "Quick Braid",
+     "branch": 0,
+     "tier": 2,
+     "pos": [
+      0,
+      1
+     ],
+     "cost": 2,
+     "ranks": 3,
+     "capstone": false,
+     "requires": [
+      "ll_b2"
+     ],
+     "effect": {
+      "kind": "stat",
+      "stat": "cooldownPct",
+      "value": -0.04,
+      "unit": "pct"
+     },
+     "text": "wick cooldowns {value}"
+    },
+    {
+     "id": "ll_b4",
+     "name": "Guild Temper",
+     "branch": 0,
+     "tier": 3,
+     "pos": [
+      0,
+      2
+     ],
+     "cost": 3,
+     "ranks": 1,
+     "capstone": false,
+     "requires": [
+      "ll_b3"
+     ],
+     "effect": {
+      "kind": "stat",
+      "stat": "overchargeSafe",
+      "value": 0.1,
+      "unit": "x"
+     },
+     "text": "overcharge safe line {value}"
+    },
+    {
+     "id": "ll_a7",
+     "name": "Lanternheart",
+     "branch": 0,
+     "tier": 4,
+     "pos": [
+      0,
+      3
+     ],
+     "cost": 4,
+     "ranks": 1,
+     "capstone": true,
+     "requires": [
+      "ll_b3"
+     ],
+     "effect": {
+      "kind": "rule",
+      "rule": "ll_lanternheart",
+      "every": 20,
+      "power": 0.2
+     },
+     "text": "once every {every:s}, a cast released past the safe line cannot gutter and gets {power:signpct} power"
+    },
+    {
+     "id": "ll_c2",
+     "name": "Oil Habit",
+     "branch": 1,
+     "tier": 1,
+     "pos": [
+      1,
+      0
+     ],
+     "cost": 1,
+     "ranks": 3,
+     "capstone": false,
+     "requires": [],
+     "effect": {
+      "kind": "stat",
+      "stat": "oil",
+      "value": 8,
+      "unit": "num"
+     },
+     "text": "{value} max oil"
+    },
+    {
+     "id": "ll_c3",
+     "name": "Wide Lantern",
+     "branch": 1,
+     "tier": 2,
+     "pos": [
+      1,
+      1
+     ],
+     "cost": 2,
+     "ranks": 3,
+     "capstone": false,
+     "requires": [
+      "ll_c2"
+     ],
+     "effect": {
+      "kind": "stat",
+      "stat": "lightRadiusPct",
+      "value": 0.08,
+      "unit": "pct"
+     },
+     "text": "lantern light radius {value}"
+    },
+    {
+     "id": "ll_c5",
+     "name": "Beacon Keeper",
+     "branch": 1,
+     "tier": 3,
+     "pos": [
+      1,
+      2
+     ],
+     "cost": 3,
+     "ranks": 1,
+     "capstone": false,
+     "requires": [
+      "ll_c3"
+     ],
+     "effect": {
+      "kind": "ability",
+      "ability": "ability_beacon",
+      "duration": 18,
+      "radius": 110
+     },
+     "text": "Beacon lasts {duration:s}, radius {radius}"
+    },
+    {
+     "id": "ll_c7",
+     "name": "Sixfold Light",
+     "branch": 1,
+     "tier": 4,
+     "pos": [
+      1,
+      3
+     ],
+     "cost": 4,
+     "ranks": 1,
+     "capstone": true,
+     "requires": [
+      "ll_c3"
+     ],
+     "effect": {
+      "kind": "rule",
+      "rule": "ll_sixfold",
+      "healPct": 0.03,
+      "oilCut": 0.25
+     },
+     "text": "Beacon heals you {healPct:pct} max health per second, and your wicks cost {oilCut:pct} less inside it"
+    },
+    {
+     "id": "ll_d2",
+     "name": "Pole Drill",
+     "branch": 2,
+     "tier": 1,
+     "pos": [
+      2,
+      0
+     ],
+     "cost": 1,
+     "ranks": 3,
+     "capstone": false,
+     "requires": [],
+     "effect": {
+      "kind": "move",
+      "move": "light",
+      "stat": "damagePct",
+      "value": 0.06,
+      "unit": "pct"
+     },
+     "text": "light combo damage {value}"
+    },
+    {
+     "id": "ll_d4",
+     "name": "Flare Crack",
+     "branch": 2,
+     "tier": 2,
+     "pos": [
+      2,
+      1
+     ],
+     "cost": 2,
+     "ranks": 1,
+     "capstone": false,
+     "requires": [
+      "ll_d2"
+     ],
+     "effect": {
+      "kind": "move",
+      "move": "heavy",
+      "rule": "ll_flare_crack",
+      "radius": 12,
+      "power": 0.6,
+      "cooldown": 4
+     },
+     "text": "Heavy releases a burst of your selected wick's flame, radius {radius}, {power:pct} of that wick's power, 0 oil (cooldown {cooldown:s})"
+    },
+    {
+     "id": "ll_d5",
+     "name": "Spellblade",
+     "branch": 2,
+     "tier": 3,
+     "pos": [
+      2,
+      2
+     ],
+     "cost": 3,
+     "ranks": 1,
+     "capstone": false,
+     "requires": [
+      "ll_d4"
+     ],
+     "effect": {
+      "kind": "rule",
+      "rule": "ll_spellblade",
+      "perHit": 0.1,
+      "maxPerSwing": 0.3
+     },
+     "text": "each pole hit takes {perHit:s} off all wick cooldowns (max {maxPerSwing:s} per swing)"
+    },
+    {
+     "id": "ll_e7",
+     "name": "Lamp-Pole Master",
+     "branch": 2,
+     "tier": 4,
+     "pos": [
+      2,
+      3
+     ],
+     "cost": 4,
+     "ranks": 1,
+     "capstone": true,
+     "requires": [
+      "ll_d4"
+     ],
+     "effect": {
+      "kind": "rule",
+      "rule": "ll_lamp_pole",
+      "power": 0.5,
+      "cooldown": 2
+     },
+     "text": "Light 3 also casts your selected wick for free at {power:pct} power (cooldown {cooldown:s}, no overcharge)"
+    }
+   ]
+  },
+  {
+   "id": "board_sluicewarden",
+   "class": "sluicewarden",
+   "branches": [
+    "Tidecaller",
+    "Warden",
+    "Hook"
+   ],
+   "nodes": [
+    {
+     "id": "sw_b2",
+     "name": "Wet Hands",
+     "branch": 0,
+     "tier": 1,
+     "pos": [
+      0,
+      0
+     ],
+     "cost": 1,
+     "ranks": 3,
+     "capstone": false,
+     "requires": [],
+     "effect": {
+      "kind": "flameMult",
+      "flames": [
+       "tide",
+       "rime"
+      ],
+      "value": 0.05,
+      "unit": "pct"
+     },
+     "text": "Tide and Rime damage {value}"
+    },
+    {
+     "id": "sw_a5",
+     "name": "Riptide",
+     "branch": 0,
+     "tier": 2,
+     "pos": [
+      0,
+      1
+     ],
+     "cost": 2,
+     "ranks": 3,
+     "capstone": false,
+     "requires": [
+      "sw_b2"
+     ],
+     "effect": {
+      "kind": "status",
+      "status": "soaked",
+      "stat": "takenPct",
+      "value": 0.05,
+      "unit": "pct"
+     },
+     "text": "Soaked enemies take {value} from all your damage"
+    },
+    {
+     "id": "sw_b3",
+     "name": "Cold Water",
+     "branch": 0,
+     "tier": 3,
+     "pos": [
+      0,
+      2
+     ],
+     "cost": 3,
+     "ranks": 1,
+     "capstone": false,
+     "requires": [
+      "sw_a5"
+     ],
+     "effect": {
+      "kind": "status",
+      "status": "chill",
+      "freezeAt": 4,
+      "freezeAtSoaked": 2
+     },
+     "text": "your Rime freezes at {freezeAt} chill stacks ({freezeAtSoaked} if Soaked) instead of 5 (3)"
+    },
+    {
+     "id": "sw_a7",
+     "name": "Tidewright",
+     "branch": 0,
+     "tier": 4,
+     "pos": [
+      0,
+      3
+     ],
+     "cost": 4,
+     "ranks": 1,
+     "capstone": true,
+     "requires": [
+      "sw_a5"
+     ],
+     "effect": {
+      "kind": "rule",
+      "rule": "sw_tidewright",
+      "tideCap": 85,
+      "healPct": 0.05
+     },
+     "text": "Tide resist cap {tideCap}; your Tide hits heal you {healPct:pct} of their damage while you stand in water"
+    },
+    {
+     "id": "sw_c2",
+     "name": "Brace Up",
+     "branch": 1,
+     "tier": 1,
+     "pos": [
+      1,
+      0
+     ],
+     "cost": 1,
+     "ranks": 3,
+     "capstone": false,
+     "requires": [],
+     "effect": {
+      "kind": "stat",
+      "stat": "armour",
+      "value": 4,
+      "unit": "num"
+     },
+     "text": "{value} armour"
+    },
+    {
+     "id": "sw_c4",
+     "name": "Perfect Seal",
+     "branch": 1,
+     "tier": 2,
+     "pos": [
+      1,
+      1
+     ],
+     "cost": 2,
+     "ranks": 1,
+     "capstone": false,
+     "requires": [
+      "sw_c2"
+     ],
+     "effect": {
+      "kind": "move",
+      "move": "brace",
+      "perfectMs": 220
+     },
+     "text": "perfect-block window 150 → {perfectMs} ms"
+    },
+    {
+     "id": "sw_c5",
+     "name": "Floodwall II",
+     "branch": 1,
+     "tier": 3,
+     "pos": [
+      1,
+      2
+     ],
+     "cost": 3,
+     "ranks": 1,
+     "capstone": false,
+     "requires": [
+      "sw_c4"
+     ],
+     "effect": {
+      "kind": "ability",
+      "ability": "ability_floodwall",
+      "height": 36,
+      "duration": 25,
+      "hpMult": 1.5
+     },
+     "text": "Floodwall {height} tall, lasts {duration:s}, health ×{hpMult}"
+    },
+    {
+     "id": "sw_c7",
+     "name": "Unbreaking Dam",
+     "branch": 1,
+     "tier": 4,
+     "pos": [
+      1,
+      3
+     ],
+     "cost": 4,
+     "ranks": 1,
+     "capstone": true,
+     "requires": [
+      "sw_c4"
+     ],
+     "effect": {
+      "kind": "rule",
+      "rule": "sw_unbreaking",
+      "reflect": 0.3
+     },
+     "text": "while bracing you cannot be staggered, and {reflect:pct} of blocked damage goes back to the attacker"
+    },
+    {
+     "id": "sw_d2",
+     "name": "Hook Reach",
+     "branch": 2,
+     "tier": 1,
+     "pos": [
+      2,
+      0
+     ],
+     "cost": 1,
+     "ranks": 2,
+     "capstone": false,
+     "requires": [],
+     "effect": {
+      "kind": "move",
+      "move": "all",
+      "stat": "reach",
+      "value": 2,
+      "unit": "num"
+     },
+     "text": "hook-staff reach {value}"
+    },
+    {
+     "id": "sw_d4",
+     "name": "Gaff Throw",
+     "branch": 2,
+     "tier": 2,
+     "pos": [
+      2,
+      1
+     ],
+     "cost": 2,
+     "ranks": 1,
+     "capstone": false,
+     "requires": [
+      "sw_d2"
+     ],
+     "effect": {
+      "kind": "move",
+      "move": "heavy",
+      "rule": "sw_gaff_throw",
+      "range": 60
+     },
+     "text": "Heavy can be released early to throw the hook {range} cells (pulls the target, or you to a wall)"
+    },
+    {
+     "id": "sw_d5",
+     "name": "Drag Under",
+     "branch": 2,
+     "tier": 3,
+     "pos": [
+      2,
+      2
+     ],
+     "cost": 3,
+     "ranks": 1,
+     "capstone": false,
+     "requires": [
+      "sw_d4"
+     ],
+     "effect": {
+      "kind": "status",
+      "status": "soaked",
+      "rule": "sw_drag_under"
+     },
+     "text": "hooked enemies become Soaked"
+    },
+    {
+     "id": "sw_e7",
+     "name": "Leviathan's Hook",
+     "branch": 2,
+     "tier": 4,
+     "pos": [
+      2,
+      3
+     ],
+     "cost": 4,
+     "ranks": 1,
+     "capstone": true,
+     "requires": [
+      "sw_d4"
+     ],
+     "effect": {
+      "kind": "rule",
+      "rule": "sw_leviathan",
+      "again": 1.5
+     },
+     "text": "the hook drags heavies and elites; a dragged target takes the heavy hit again at {again:pct} on arrival"
+    }
+   ]
+  },
+  {
+   "id": "board_tinker",
+   "class": "tinker",
+   "branches": [
+    "Sparkwright",
+    "Engineer",
+    "Carpenter"
+   ],
+   "nodes": [
+    {
+     "id": "tk_b2",
+     "name": "Wiring",
+     "branch": 0,
+     "tier": 1,
+     "pos": [
+      0,
+      0
+     ],
+     "cost": 1,
+     "ranks": 3,
+     "capstone": false,
+     "requires": [],
+     "effect": {
+      "kind": "flameMult",
+      "flames": [
+       "spark"
+      ],
+      "value": 0.05,
+      "unit": "pct"
+     },
+     "text": "Spark damage {value}"
+    },
+    {
+     "id": "tk_b5",
+     "name": "Trap Engineer",
+     "branch": 0,
+     "tier": 2,
+     "pos": [
+      0,
+      1
+     ],
+     "cost": 2,
+     "ranks": 3,
+     "capstone": false,
+     "requires": [
+      "tk_b2"
+     ],
+     "effect": {
+      "kind": "shapeMult",
+      "shape": "rune",
+      "value": 0.08,
+      "unit": "pct"
+     },
+     "text": "rune damage {value}"
+    },
+    {
+     "id": "tk_hijack",
+     "name": "Hijack",
+     "branch": 0,
+     "tier": 3,
+     "pos": [
+      0,
+      2
+     ],
+     "cost": 3,
+     "ranks": 1,
+     "capstone": false,
+     "requires": [
+      "tk_b5"
+     ],
+     "effect": {
+      "kind": "rule",
+      "rule": "tk_hijack",
+      "hold": 20
+     },
+     "text": "pole-hit a trap to take its trigger for {hold:s}: your class ability fires that trap once instead of deploying a turret. One trap at a time"
+    },
+    {
+     "id": "tk_a7",
+     "name": "Storm Engine",
+     "branch": 0,
+     "tier": 4,
+     "pos": [
+      0,
+      3
+     ],
+     "cost": 4,
+     "ranks": 1,
+     "capstone": true,
+     "requires": [
+      "tk_b5"
+     ],
+     "effect": {
+      "kind": "rule",
+      "rule": "tk_storm_engine",
+      "power": 0.6
+     },
+     "text": "every rune detonation and hijacked trap firing also fires a free Spark Bolt at {power:pct} at the nearest enemy"
+    },
+    {
+     "id": "tk_c3",
+     "name": "Oiled Gears",
+     "branch": 1,
+     "tier": 1,
+     "pos": [
+      1,
+      0
+     ],
+     "cost": 1,
+     "ranks": 3,
+     "capstone": false,
+     "requires": [],
+     "effect": {
+      "kind": "ability",
+      "ability": "ability_turret",
+      "stat": "fireRatePct",
+      "value": 0.08,
+      "unit": "pct"
+     },
+     "text": "turret fire rate {value}"
+    },
+    {
+     "id": "tk_c4",
+     "name": "Selector Switch",
+     "branch": 1,
+     "tier": 2,
+     "pos": [
+      1,
+      1
+     ],
+     "cost": 2,
+     "ranks": 1,
+     "capstone": false,
+     "requires": [
+      "tk_c3"
+     ],
+     "effect": {
+      "kind": "ability",
+      "ability": "ability_turret",
+      "rule": "tk_selector"
+     },
+     "text": "turrets fire your selected wick's flame and, if it is a bolt, lob or ring, its shape"
+    },
+    {
+     "id": "tk_c5",
+     "name": "Twin Turrets",
+     "branch": 1,
+     "tier": 3,
+     "pos": [
+      1,
+      2
+     ],
+     "cost": 3,
+     "ranks": 1,
+     "capstone": false,
+     "requires": [
+      "tk_c4"
+     ],
+     "effect": {
+      "kind": "ability",
+      "ability": "ability_turret",
+      "maxOut": 3
+     },
+     "text": "max turrets 2 → {maxOut}"
+    },
+    {
+     "id": "tk_c7",
+     "name": "Walking Turret",
+     "branch": 1,
+     "tier": 4,
+     "pos": [
+      1,
+      3
+     ],
+     "cost": 4,
+     "ranks": 1,
+     "capstone": true,
+     "requires": [
+      "tk_c4"
+     ],
+     "effect": {
+      "kind": "rule",
+      "rule": "tk_walking_turret",
+      "speed": 60,
+      "hop": 16
+     },
+     "text": "your newest turret follows you ({speed} cells/s along the ground, hops {hop} cells) and never times out"
+    },
+    {
+     "id": "tk_d2",
+     "name": "Quick Hammer",
+     "branch": 2,
+     "tier": 1,
+     "pos": [
+      2,
+      0
+     ],
+     "cost": 1,
+     "ranks": 3,
+     "capstone": false,
+     "requires": [],
+     "effect": {
+      "kind": "stat",
+      "stat": "buildSpeedPct",
+      "value": 0.1,
+      "unit": "pct"
+     },
+     "text": "build speed {value}"
+    },
+    {
+     "id": "tk_d3",
+     "name": "Braces",
+     "branch": 2,
+     "tier": 2,
+     "pos": [
+      2,
+      1
+     ],
+     "cost": 2,
+     "ranks": 2,
+     "capstone": false,
+     "requires": [
+      "tk_d2"
+     ],
+     "effect": {
+      "kind": "stat",
+      "stat": "plankHoldPct",
+      "value": 0.25,
+      "unit": "pct",
+      "span": 2
+     },
+     "text": "planks hold {value} weight; support span +{span} cells"
+    },
+    {
+     "id": "tk_d5",
+     "name": "Scaffold",
+     "branch": 2,
+     "tier": 3,
+     "pos": [
+      2,
+      2
+     ],
+     "cost": 3,
+     "ranks": 1,
+     "capstone": false,
+     "requires": [
+      "tk_d3"
+     ],
+     "effect": {
+      "kind": "unlock",
+      "unlock": "scaffold",
+      "pieces": 3
+     },
+     "text": "place {pieces} ladder pieces as one ladder in one placement"
+    },
+    {
+     "id": "tk_e7",
+     "name": "Master Builder",
+     "branch": 2,
+     "tier": 4,
+     "pos": [
+      2,
+      3
+     ],
+     "cost": 4,
+     "ranks": 1,
+     "capstone": true,
+     "requires": [
+      "tk_d3"
+     ],
+     "effect": {
+      "kind": "rule",
+      "rule": "tk_master_builder",
+      "buildHpPct": 1.0
+     },
+     "text": "planks cost no scrap; your builds have {buildHpPct:signpct} health; you can build in the air"
+    }
+   ]
+  },
+  {
+   "id": "board_moth_oracle",
+   "class": "moth_oracle",
+   "branches": [
+    "Seer",
+    "Moth",
+    "Rod"
+   ],
+   "nodes": [
+    {
+     "id": "mo_b2",
+     "name": "Moonlit",
+     "branch": 0,
+     "tier": 1,
+     "pos": [
+      0,
+      0
+     ],
+     "cost": 1,
+     "ranks": 3,
+     "capstone": false,
+     "requires": [],
+     "effect": {
+      "kind": "flameMult",
+      "flames": [
+       "gleam"
+      ],
+      "value": 0.05,
+      "unit": "pct"
+     },
+     "text": "Gleam damage {value}"
+    },
+    {
+     "id": "mo_a3",
+     "name": "Afterglow",
+     "branch": 0,
+     "tier": 2,
+     "pos": [
+      0,
+      1
+     ],
+     "cost": 2,
+     "ranks": 2,
+     "capstone": false,
+     "requires": [
+      "mo_b2"
+     ],
+     "effect": {
+      "kind": "status",
+      "status": "afterglow",
+      "stat": "duration",
+      "value": 3,
+      "unit": "s"
+     },
+     "text": "Gleam afterglow {value}"
+    },
+    {
+     "id": "mo_a4",
+     "name": "Searing Light",
+     "branch": 0,
+     "tier": 3,
+     "pos": [
+      0,
+      2
+     ],
+     "cost": 3,
+     "ranks": 1,
+     "capstone": false,
+     "requires": [
+      "mo_a3"
+     ],
+     "effect": {
+      "kind": "status",
+      "status": "radiant",
+      "extra": 3,
+      "vsUnlit": 2.3
+     },
+     "text": "Radiant lasts +{extra:s}; Gleam vs the Unlit ×{vsUnlit} (was ×2)"
+    },
+    {
+     "id": "mo_a7",
+     "name": "Sunmoth",
+     "branch": 0,
+     "tier": 4,
+     "pos": [
+      0,
+      3
+     ],
+     "cost": 4,
+     "ranks": 1,
+     "capstone": true,
+     "requires": [
+      "mo_a3"
+     ],
+     "effect": {
+      "kind": "rule",
+      "rule": "mo_sunmoth",
+      "burn": 5
+     },
+     "text": "Gleam afterglow tiles burn the Unlit {burn}/s, and anything Radiant standing in them"
+    },
+    {
+     "id": "mo_c2",
+     "name": "Night Adapted",
+     "branch": 1,
+     "tier": 1,
+     "pos": [
+      1,
+      0
+     ],
+     "cost": 1,
+     "ranks": 3,
+     "capstone": false,
+     "requires": [],
+     "effect": {
+      "kind": "stat",
+      "stat": "darkBurnPct",
+      "value": -0.08,
+      "unit": "pct"
+     },
+     "text": "lantern dark burn {value}"
+    },
+    {
+     "id": "mo_c4",
+     "name": "Omen",
+     "branch": 1,
+     "tier": 2,
+     "pos": [
+      1,
+      1
+     ],
+     "cost": 2,
+     "ranks": 1,
+     "capstone": false,
+     "requires": [
+      "mo_c2"
+     ],
+     "effect": {
+      "kind": "rule",
+      "rule": "mo_omen",
+      "earlyMs": 150
+     },
+     "text": "marked enemies' telegraphs light {earlyMs} ms earlier, all the time"
+    },
+    {
+     "id": "mo_c5",
+     "name": "Knotweaver",
+     "branch": 1,
+     "tier": 3,
+     "pos": [
+      1,
+      2
+     ],
+     "cost": 3,
+     "ranks": 1,
+     "capstone": false,
+     "requires": [
+      "mo_c4"
+     ],
+     "effect": {
+      "kind": "stat",
+      "stat": "knotPower",
+      "set": 0.7
+     },
+     "text": "knot child power 0.60 → {set}"
+    },
+    {
+     "id": "mo_c7",
+     "name": "Twice-Tied",
+     "branch": 1,
+     "tier": 4,
+     "pos": [
+      1,
+      3
+     ],
+     "cost": 4,
+     "ranks": 1,
+     "capstone": true,
+     "requires": [
+      "mo_c4"
+     ],
+     "effect": {
+      "kind": "rule",
+      "rule": "mo_twice_tied",
+      "power": 0.8,
+      "children": 6
+     },
+     "text": "your knot children fire at {power} power, and each instance may spawn {children} children instead of 3"
+    },
+    {
+     "id": "mo_d2",
+     "name": "Keen Eyes",
+     "branch": 2,
+     "tier": 1,
+     "pos": [
+      2,
+      0
+     ],
+     "cost": 1,
+     "ranks": 3,
+     "capstone": false,
+     "requires": [],
+     "effect": {
+      "kind": "stat",
+      "stat": "critChance",
+      "value": 0.01,
+      "unit": "pct"
+     },
+     "text": "crit chance {value}"
+    },
+    {
+     "id": "mo_d4",
+     "name": "Moth Kiss",
+     "branch": 2,
+     "tier": 2,
+     "pos": [
+      2,
+      1
+     ],
+     "cost": 2,
+     "ranks": 3,
+     "capstone": false,
+     "requires": [
+      "mo_d2"
+     ],
+     "effect": {
+      "kind": "stat",
+      "stat": "critMult",
+      "value": 0.08,
+      "unit": "pct"
+     },
+     "text": "crit damage {value}"
+    },
+    {
+     "id": "mo_d5",
+     "name": "Unseen Blade",
+     "branch": 2,
+     "tier": 3,
+     "pos": [
+      2,
+      2
+     ],
+     "cost": 3,
+     "ranks": 1,
+     "capstone": false,
+     "requires": [
+      "mo_d4"
+     ],
+     "effect": {
+      "kind": "move",
+      "move": "backstab",
+      "critMult": 2
+     },
+     "text": "Backstab crits ×{critMult}"
+    },
+    {
+     "id": "mo_e7",
+     "name": "Eclipse",
+     "branch": 2,
+     "tier": 4,
+     "pos": [
+      2,
+      3
+     ],
+     "cost": 4,
+     "ranks": 1,
+     "capstone": true,
+     "requires": [
+      "mo_d4"
+     ],
+     "effect": {
+      "kind": "rule",
+      "rule": "mo_eclipse",
+      "radius": 40
+     },
+     "text": "against targets in the dark your crit chance is doubled, and every crit refreshes marks on enemies within {radius} cells"
+    }
+   ]
+  },
+  {
+   "id": "board_chimneysweep",
+   "class": "chimneysweep",
+   "branches": [
+    "Soot",
+    "Rigger",
+    "Spear"
+   ],
+   "nodes": [
+    {
+     "id": "cs_b2",
+     "name": "Soot Wick",
+     "branch": 0,
+     "tier": 1,
+     "pos": [
+      0,
+      0
+     ],
+     "cost": 1,
+     "ranks": 3,
+     "capstone": false,
+     "requires": [],
+     "effect": {
+      "kind": "flameMult",
+      "flames": [
+       "ember"
+      ],
+      "value": 0.05,
+      "unit": "pct"
+     },
+     "text": "Ember damage {value}"
+    },
+    {
+     "id": "cs_b3",
+     "name": "Chimney Draft",
+     "branch": 0,
+     "tier": 2,
+     "pos": [
+      0,
+      1
+     ],
+     "cost": 2,
+     "ranks": 1,
+     "capstone": false,
+     "requires": [
+      "cs_b2"
+     ],
+     "effect": {
+      "kind": "rule",
+      "rule": "cs_draft",
+      "lift": 50
+     },
+     "text": "fire you start makes an updraft above it (lifts you {lift} cells/s, like steam)"
+    },
+    {
+     "id": "cs_b6",
+     "name": "Hot Brush",
+     "branch": 0,
+     "tier": 3,
+     "pos": [
+      0,
+      2
+     ],
+     "cost": 3,
+     "ranks": 1,
+     "capstone": false,
+     "requires": [
+      "cs_b3"
+     ],
+     "effect": {
+      "kind": "status",
+      "status": "burn",
+      "stacks": 1,
+      "rule": "cs_hot_brush"
+     },
+     "text": "spear hits apply {stacks} burn stack"
+    },
+    {
+     "id": "cs_a7",
+     "name": "Chimney Fire",
+     "branch": 0,
+     "tier": 4,
+     "pos": [
+      0,
+      3
+     ],
+     "cost": 4,
+     "ranks": 1,
+     "capstone": true,
+     "requires": [
+      "cs_b3"
+     ],
+     "effect": {
+      "kind": "rule",
+      "rule": "cs_chimney_fire",
+      "free": 1
+     },
+     "text": "{free} Ember wick cast per rope swing is free (resets when you grab a new rope)"
+    },
+    {
+     "id": "cs_c2",
+     "name": "Sure Grip",
+     "branch": 1,
+     "tier": 1,
+     "pos": [
+      1,
+      0
+     ],
+     "cost": 1,
+     "ranks": 3,
+     "capstone": false,
+     "requires": [],
+     "effect": {
+      "kind": "stat",
+      "stat": "climbPct",
+      "value": 0.08,
+      "unit": "pct"
+     },
+     "text": "grapple reel-in and rope climb {value}"
+    },
+    {
+     "id": "cs_c3",
+     "name": "Swing Momentum",
+     "branch": 1,
+     "tier": 2,
+     "pos": [
+      1,
+      1
+     ],
+     "cost": 2,
+     "ranks": 3,
+     "capstone": false,
+     "requires": [
+      "cs_c2"
+     ],
+     "effect": {
+      "kind": "stat",
+      "stat": "ropeLaunchPct",
+      "value": 0.07,
+      "unit": "pct"
+     },
+     "text": "rope release launch {value}"
+    },
+    {
+     "id": "cs_c5",
+     "name": "Grapple Master",
+     "branch": 1,
+     "tier": 3,
+     "pos": [
+      1,
+      2
+     ],
+     "cost": 3,
+     "ranks": 1,
+     "capstone": false,
+     "requires": [
+      "cs_c3"
+     ],
+     "effect": {
+      "kind": "stat",
+      "stat": "grappleRange",
+      "value": 40,
+      "unit": "num"
+     },
+     "text": "grapple range {value} cells and it re-fires with no cooldown"
+    },
+    {
+     "id": "cs_c7",
+     "name": "Spider-Sweep",
+     "branch": 1,
+     "tier": 4,
+     "pos": [
+      1,
+      3
+     ],
+     "cost": 4,
+     "ranks": 1,
+     "capstone": true,
+     "requires": [
+      "cs_c3"
+     ],
+     "effect": {
+      "kind": "rule",
+      "rule": "cs_spider_sweep",
+      "maxOut": 3
+     },
+     "text": "your tethers cost 0 oil (cast and upkeep), last until replaced, and you may have {maxOut}"
+    },
+    {
+     "id": "cs_d2",
+     "name": "Brush Flurry",
+     "branch": 2,
+     "tier": 1,
+     "pos": [
+      2,
+      0
+     ],
+     "cost": 1,
+     "ranks": 3,
+     "capstone": false,
+     "requires": [],
+     "effect": {
+      "kind": "stat",
+      "stat": "meleeSpeedPct",
+      "value": 0.04,
+      "unit": "pct"
+     },
+     "text": "melee attack speed {value}"
+    },
+    {
+     "id": "cs_d4",
+     "name": "Rope Strike",
+     "branch": 2,
+     "tier": 2,
+     "pos": [
+      2,
+      1
+     ],
+     "cost": 2,
+     "ranks": 2,
+     "capstone": false,
+     "requires": [
+      "cs_d2"
+     ],
+     "effect": {
+      "kind": "move",
+      "move": "swing_strike",
+      "stat": "damagePct",
+      "value": 0.15,
+      "unit": "pct"
+     },
+     "text": "Swing Strike {value}"
+    },
+    {
+     "id": "cs_d5",
+     "name": "Vault",
+     "branch": 2,
+     "tier": 3,
+     "pos": [
+      2,
+      2
+     ],
+     "cost": 3,
+     "ranks": 1,
+     "capstone": false,
+     "requires": [
+      "cs_d4"
+     ],
+     "effect": {
+      "kind": "rule",
+      "rule": "cs_vault"
+     },
+     "text": "a plunge pogo also restores the air dodge and one Flue Dash charge"
+    },
+    {
+     "id": "cs_e7",
+     "name": "Soot Devil",
+     "branch": 2,
+     "tier": 4,
+     "pos": [
+      2,
+      3
+     ],
+     "cost": 4,
+     "ranks": 1,
+     "capstone": true,
+     "requires": [
+      "cs_d4"
+     ],
+     "effect": {
+      "kind": "ability",
+      "ability": "ability_flue_dash",
+      "damage": 2.5,
+      "rule": "cs_soot_devil"
+     },
+     "text": "Flue Dash deals {damage:pct}, and a kill during a dash refunds its charge"
+    }
+   ]
+  }
+ ]
+}

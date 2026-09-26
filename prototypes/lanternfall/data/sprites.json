@@ -1,0 +1,952 @@
+{
+ "_doc": "ASCII pixel sprites. One char = one pixel; palette values '#rrggbb' or '#rrggbb!' (emissive). anchor = [x, y] of the feet (bottom-centre) inside the frame. Built into one atlas by js/render/sprites.js.",
+ "version": 1,
+ "palettes": {
+  "hero": {
+   "k": "#0d1017",
+   "c": "#2e3148",
+   "d": "#23253a",
+   "h": "#443c5e",
+   "f": "#caa98a",
+   "e": "#fff2c0!",
+   "b": "#1a1c28",
+   "s": "#6b5a44"
+  },
+  "npc": {
+   "k": "#0d1017",
+   "c": "#3a3226",
+   "d": "#2a241c",
+   "h": "#5a4a36",
+   "f": "#caa98a",
+   "e": "#1a1a1a",
+   "a": "#8a6a44",
+   "w": "#d8c8a8"
+  },
+  "wax": {
+   "k": "#1a1510",
+   "w": "#d8cfae",
+   "s": "#8c8266",
+   "b": "#2a2218",
+   "e": "#ffb347!",
+   "f": "#ffd070!",
+   "F": "#fff6d0!"
+  },
+  "soot": {
+   "k": "#0d0e12",
+   "g": "#2c2f36",
+   "h": "#4b5260",
+   "e": "#ff7a2a!",
+   "b": "#8a8070"
+  },
+  "tallow": {
+   "k": "#1a150e",
+   "t": "#b9ab88",
+   "d": "#6f644c",
+   "w": "#3a3024",
+   "e": "#ff5a1f!",
+   "g": "#ffb347!"
+  },
+  "fontpal": {
+   "w": "#ffffff"
+  },
+  "glyph": {
+   "w": "#ffffff",
+   "g": "#9a9a9a"
+  }
+ },
+ "frames": {},
+ "sprites": {
+  "hero": {
+   "palette": "hero",
+   "anchor": [
+    4,
+    13
+   ],
+   "anims": {
+    "idle": {
+     "fps": 2,
+     "frames": [
+      [
+       "..kkk...",
+       ".khhhk..",
+       ".khffk..",
+       ".khfek..",
+       "..kcck..",
+       ".kcccck.",
+       ".kccdck.",
+       ".kccdck.",
+       ".kcccck.",
+       "..kcck..",
+       "..kbbk..",
+       "..kbbk..",
+       ".kk..kk."
+      ],
+      [
+       "........",
+       "..kkk...",
+       ".khhhk..",
+       ".khffk..",
+       ".khfek..",
+       "..kcck..",
+       ".kcccck.",
+       ".kccdck.",
+       ".kcccck.",
+       "..kcck..",
+       "..kbbk..",
+       "..kbbk..",
+       ".kk..kk."
+      ]
+     ]
+    },
+    "walk": {
+     "fps": 10,
+     "frames": [
+      [
+       "..kkk...",
+       ".khhhk..",
+       ".khffk..",
+       ".khfek..",
+       "..kcck..",
+       ".kcccck.",
+       ".kccdck.",
+       ".kccdck.",
+       ".kcccck.",
+       "..kcck..",
+       "..kbbk..",
+       ".kb..bk.",
+       "kk....kk"
+      ],
+      [
+       "..kkk...",
+       ".khhhk..",
+       ".khffk..",
+       ".khfek..",
+       "..kcck..",
+       ".kcccck.",
+       ".kccdck.",
+       ".kccdck.",
+       ".kcccck.",
+       "..kcck..",
+       "..kbbk..",
+       "..kbk...",
+       "..kkk..."
+      ],
+      [
+       "..kkk...",
+       ".khhhk..",
+       ".khffk..",
+       ".khfek..",
+       "..kcck..",
+       ".kcccck.",
+       ".kccdck.",
+       ".kccdck.",
+       ".kcccck.",
+       "..kcck..",
+       "..kbbk..",
+       ".kb..bk.",
+       "kk....kk"
+      ],
+      [
+       "..kkk...",
+       ".khhhk..",
+       ".khffk..",
+       ".khfek..",
+       "..kcck..",
+       ".kcccck.",
+       ".kccdck.",
+       ".kccdck.",
+       ".kcccck.",
+       "..kcck..",
+       "..kbbk..",
+       "...kbk..",
+       "...kkk.."
+      ]
+     ]
+    },
+    "run": {
+     "fps": 14,
+     "frames": [
+      [
+       "...kkk..",
+       "..khhhk.",
+       "..khffk.",
+       "..khfek.",
+       "..kcck..",
+       ".kccccck",
+       "kccdcck.",
+       ".kcdcck.",
+       ".kcccck.",
+       "..kcck..",
+       ".kbbbk..",
+       "kb...bk.",
+       "k.....kk"
+      ],
+      [
+       "...kkk..",
+       "..khhhk.",
+       "..khffk.",
+       "..khfek.",
+       "..kcck..",
+       ".kccccck",
+       "kccdcck.",
+       ".kcdcck.",
+       ".kcccck.",
+       "..kcck..",
+       "..kbbk..",
+       "..kbk...",
+       "..kk...."
+      ],
+      [
+       "...kkk..",
+       "..khhhk.",
+       "..khffk.",
+       "..khfek.",
+       "..kcck..",
+       ".kccccck",
+       "kccdcck.",
+       ".kcdcck.",
+       ".kcccck.",
+       "..kcck..",
+       ".kbbbk..",
+       "kk...bk.",
+       "......kk"
+      ],
+      [
+       "...kkk..",
+       "..khhhk.",
+       "..khffk.",
+       "..khfek.",
+       "..kcck..",
+       ".kccccck",
+       "kccdcck.",
+       ".kcdcck.",
+       ".kcccck.",
+       "..kcck..",
+       "..kbbk..",
+       "...kbk..",
+       "....kk.."
+      ]
+     ]
+    },
+    "jump": {
+     "fps": 6,
+     "frames": [
+      [
+       "..kkk...",
+       ".khhhk..",
+       ".khffk..",
+       ".khfek..",
+       "k.kcck.k",
+       "kcccccck",
+       ".kccdck.",
+       ".kccdck.",
+       ".kcccck.",
+       "..kcck..",
+       ".kbbbbk.",
+       ".kb..bk.",
+       "........"
+      ]
+     ]
+    },
+    "fall": {
+     "fps": 6,
+     "frames": [
+      [
+       "k.kkk..k",
+       "kkhhhkk.",
+       ".khffk..",
+       ".khfek..",
+       "..kcck..",
+       ".kcccck.",
+       ".kccdck.",
+       ".kccdck.",
+       ".kcccck.",
+       "..kcck..",
+       ".kbbbbk.",
+       "kb....bk",
+       "k......k"
+      ]
+     ]
+    },
+    "wall": {
+     "fps": 6,
+     "frames": [
+      [
+       "..kkk...",
+       ".khhhk.k",
+       ".khffkkk",
+       ".khfek..",
+       "..kcck..",
+       ".kcccck.",
+       ".kccdck.",
+       ".kccdck.",
+       ".kcccck.",
+       "..kcck..",
+       "..kbbk..",
+       "..kbbkk.",
+       "..kk...."
+      ]
+     ]
+    },
+    "ledge_hang": {
+     "fps": 6,
+     "frames": [
+      [
+       "......kk",
+       "..kkk.kk",
+       ".khhhkk.",
+       ".khffk..",
+       ".khfek..",
+       "..kcck..",
+       ".kcccck.",
+       ".kccdck.",
+       ".kcccck.",
+       "..kcck..",
+       "..kbbk..",
+       "..kbbk..",
+       "..k..k.."
+      ]
+     ]
+    },
+    "ledge_climb": {
+     "fps": 12,
+     "frames": [
+      [
+       "..kkk...",
+       ".khhhk..",
+       ".khffk..",
+       ".khfek..",
+       "..kcckk.",
+       ".kcccckk",
+       ".kccdck.",
+       ".kcccck.",
+       "..kbbk..",
+       "..kbbk..",
+       "..k..k..",
+       "........",
+       "........"
+      ]
+     ]
+    },
+    "crouch": {
+     "fps": 2,
+     "frames": [
+      [
+       "..kkk...",
+       ".khhhk..",
+       ".khffk..",
+       ".khfek..",
+       ".kcccck.",
+       "kccccdck",
+       ".kbbbbk."
+      ]
+     ]
+    },
+    "crawl": {
+     "fps": 8,
+     "frames": [
+      [
+       "...kkk..",
+       "..khhhk.",
+       "..khfek.",
+       ".kcccck.",
+       "kccccdck",
+       "kbk..kbk",
+       "........"
+      ],
+      [
+       "...kkk..",
+       "..khhhk.",
+       "..khfek.",
+       ".kcccck.",
+       "kccccdck",
+       ".kbkkbk.",
+       "........"
+      ]
+     ]
+    },
+    "slide": {
+     "fps": 6,
+     "frames": [
+      [
+       "........",
+       "....kkk.",
+       "...khhhk",
+       "..kkhfek",
+       ".kcccck.",
+       "kccdcccb",
+       "kbbbbbk."
+      ]
+     ]
+    },
+    "climb": {
+     "fps": 8,
+     "frames": [
+      [
+       "..kkk...",
+       ".khhhk..",
+       ".khhhk..",
+       ".khhhk..",
+       "kkcckkk.",
+       ".kcccck.",
+       ".kccdck.",
+       ".kccdck.",
+       ".kcccck.",
+       "..kcck..",
+       "..kbbk..",
+       "..kbk...",
+       "..kk...."
+      ],
+      [
+       "..kkk...",
+       ".khhhk..",
+       ".khhhk..",
+       ".khhhk..",
+       ".kcckk..",
+       "kkcccckk",
+       ".kccdck.",
+       ".kccdck.",
+       ".kcccck.",
+       "..kcck..",
+       "..kbbk..",
+       "...kbk..",
+       "....kk.."
+      ]
+     ]
+    },
+    "climb_idle": {
+     "fps": 2,
+     "frames": [
+      [
+       "..kkk...",
+       ".khhhk..",
+       ".khhhk..",
+       ".khhhk..",
+       "kkcckkk.",
+       ".kcccck.",
+       ".kccdck.",
+       ".kccdck.",
+       ".kcccck.",
+       "..kcck..",
+       "..kbbk..",
+       "..kbbk..",
+       "..k..k.."
+      ]
+     ]
+    },
+    "swim": {
+     "fps": 6,
+     "frames": [
+      [
+       "........",
+       "........",
+       "........",
+       "..kkk...",
+       ".khhhk..",
+       ".khfek..",
+       "kkcccckk",
+       ".kccdcck",
+       "..kbbbk.",
+       "...k.k..",
+       "........",
+       "........",
+       "........"
+      ],
+      [
+       "........",
+       "........",
+       "........",
+       "..kkk...",
+       ".khhhk..",
+       ".khfek..",
+       ".kcccck.",
+       "kkccdckk",
+       "..kbbbk.",
+       "..k...k.",
+       "........",
+       "........",
+       "........"
+      ]
+     ]
+    },
+    "hurt": {
+     "fps": 6,
+     "frames": [
+      [
+       "k.kkk...",
+       ".khhhk..",
+       ".khffk.k",
+       ".khfek..",
+       "..kcck..",
+       ".kcccck.",
+       "kkccdck.",
+       ".kccdck.",
+       ".kcccck.",
+       "..kcck..",
+       "..kbbk..",
+       ".kb..bk.",
+       ".k....k."
+      ]
+     ]
+    },
+    "dead": {
+     "fps": 6,
+     "loop": false,
+     "frames": [
+      [
+       "........",
+       "........",
+       "........",
+       "........",
+       "........",
+       "........",
+       "........",
+       "........",
+       "........",
+       "..kkkkk.",
+       ".kcccchk",
+       "kbbccdhk",
+       ".kkkkkk."
+      ]
+     ]
+    }
+   }
+  },
+  "en_wax_mite": {
+   "palette": "wax",
+   "anchor": [
+    2,
+    4
+   ],
+   "anims": {
+    "idle": {
+     "fps": 3,
+     "frames": [
+      [
+       ".bb..",
+       "swwwe",
+       "wwwww",
+       "s.s.s"
+      ],
+      [
+       ".bb..",
+       "swwwe",
+       "wwwww",
+       ".s.s."
+      ]
+     ]
+    },
+    "walk": {
+     "fps": 10,
+     "frames": [
+      [
+       ".bb..",
+       "swwwe",
+       "wwwww",
+       "s.s.s"
+      ],
+      [
+       ".b...",
+       "swwwe",
+       "wwwww",
+       ".s.s."
+      ]
+     ]
+    },
+    "windup": {
+     "fps": 8,
+     "frames": [
+      [
+       ".bb..",
+       "swwwe",
+       "wwwwe",
+       "s.s.s"
+      ]
+     ]
+    }
+   }
+  },
+  "en_soot_pigeon": {
+   "palette": "soot",
+   "anchor": [
+    3,
+    5
+   ],
+   "anims": {
+    "idle": {
+     "fps": 2,
+     "frames": [
+      [
+       "..gg..",
+       ".gge..",
+       "gggggb",
+       "hgggg.",
+       ".k.k.."
+      ],
+      [
+       "..gg..",
+       ".gge..",
+       "gggggb",
+       ".gggg.",
+       ".k.k.."
+      ]
+     ]
+    },
+    "fly": {
+     "fps": 10,
+     "frames": [
+      [
+       "h....h",
+       "hg..gh",
+       "ggeegg",
+       ".gggb.",
+       "......"
+      ],
+      [
+       "......",
+       "..ge..",
+       "hggggh",
+       "h.gg.h",
+       "......"
+      ]
+     ]
+    },
+    "windup": {
+     "fps": 10,
+     "frames": [
+      [
+       "h.gg.h",
+       "hggegh",
+       "gggggb",
+       ".gggg.",
+       "......"
+      ]
+     ]
+    }
+   }
+  },
+  "en_dripling": {
+   "palette": "wax",
+   "anchor": [
+    3,
+    12
+   ],
+   "anims": {
+    "idle": {
+     "fps": 6,
+     "frames": [
+      [
+       "...f...",
+       "..fFf..",
+       "...b...",
+       "..www..",
+       ".wwwww.",
+       ".weswe.",
+       ".wwwww.",
+       ".wswww.",
+       "wwwwsww",
+       "wswww.w",
+       ".ww.ww.",
+       ".s...s."
+      ],
+      [
+       "..f....",
+       "..fFf..",
+       "...b...",
+       "..www..",
+       ".wwwww.",
+       ".weswe.",
+       ".wwwww.",
+       ".wswww.",
+       "wwwwsww",
+       "wswww.w",
+       ".ww.ww.",
+       ".s...s."
+      ]
+     ]
+    },
+    "walk": {
+     "fps": 6,
+     "frames": [
+      [
+       "...f...",
+       "..fFf..",
+       "...b...",
+       "..www..",
+       ".wwwww.",
+       ".weswe.",
+       ".wwwww.",
+       ".wswww.",
+       "wwwwsww",
+       "wswww.w",
+       ".ww.ww.",
+       "s.....s"
+      ],
+      [
+       "...f...",
+       "..fFf..",
+       "...b...",
+       "..www..",
+       ".wwwww.",
+       ".weswe.",
+       ".wwwww.",
+       ".wswww.",
+       "wwwwsww",
+       "wswww.w",
+       ".wwww..",
+       "..ss..."
+      ]
+     ]
+    },
+    "windup": {
+     "fps": 8,
+     "frames": [
+      [
+       "..fFf..",
+       ".fFFFf.",
+       "..fFf..",
+       "..www..",
+       ".wwwww.",
+       ".weswe.",
+       "wwwwwww",
+       ".wswww.",
+       "wwwwsww",
+       "wswww.w",
+       ".ww.ww.",
+       ".s...s."
+      ]
+     ]
+    }
+   }
+  },
+  "en_tallow_hound": {
+   "palette": "tallow",
+   "anchor": [
+    7,
+    9
+   ],
+   "anims": {
+    "idle": {
+     "fps": 3,
+     "frames": [
+      [
+       "..........kk..",
+       "ddwdwdw..ktte.",
+       "dtttttttttttk.",
+       "tttttttttttt..",
+       ".ttttttttttd..",
+       ".tt.tt..tt.tt.",
+       ".t..t....t..t.",
+       ".d..d....d..d.",
+       ".............."
+      ]
+     ]
+    },
+    "walk": {
+     "fps": 10,
+     "frames": [
+      [
+       "..........kk..",
+       "ddwdwdw..ktte.",
+       "dtttttttttttk.",
+       "tttttttttttt..",
+       ".ttttttttttd..",
+       "tt..tt..tt..t.",
+       "t...t....t...t",
+       "d...d....d...d",
+       ".............."
+      ],
+      [
+       "..........kk..",
+       "ddwdwdw..ktte.",
+       "dtttttttttttk.",
+       "tttttttttttt..",
+       ".ttttttttttd..",
+       ".ttt..tt..tt..",
+       "..t...t....t..",
+       "..d...d....d..",
+       ".............."
+      ]
+     ]
+    },
+    "windup": {
+     "fps": 8,
+     "frames": [
+      [
+       "..............",
+       "..........kk..",
+       "dgwgwgw..ktte.",
+       "dtttttttttttk.",
+       "tttttttttttt..",
+       "ttttttttttttd.",
+       "tt.tt..tt..tt.",
+       "dd.dd..dd..dd.",
+       ".............."
+      ]
+     ]
+    }
+   }
+  },
+  "glyphs": {
+   "palette": "glyph",
+   "anchor": [
+    0,
+    0
+   ],
+   "anims": {
+    "bolt": {
+     "fps": 1,
+     "frames": [
+      [
+       "............",
+       "............",
+       "........ww..",
+       "......wwww..",
+       "wwwwwwwwwww.",
+       "wwwwwwwwwwww",
+       "......wwww..",
+       "........ww..",
+       "............",
+       "............",
+       "............",
+       "............"
+      ]
+     ]
+    },
+    "arc": {
+     "fps": 1,
+     "frames": [
+      [
+       "....wwww....",
+       "..ww....ww..",
+       ".w........w.",
+       "w..........w",
+       "w..........w",
+       "............",
+       "............",
+       "......ww....",
+       "......ww....",
+       "............",
+       "............",
+       "............"
+      ]
+     ]
+    },
+    "lob": {
+     "fps": 1,
+     "frames": [
+      [
+       "............",
+       "....www.....",
+       "..ww...w....",
+       ".w......w...",
+       ".w.......w..",
+       "w.........w.",
+       "w.........w.",
+       "..........ww",
+       "..........ww",
+       "............",
+       "............",
+       "............"
+      ]
+     ]
+    },
+    "beam": {
+     "fps": 1,
+     "frames": [
+      [
+       "............",
+       "............",
+       "............",
+       "............",
+       "ww..........",
+       "wwwwwwwwwwww",
+       "wwwwwwwwwwww",
+       "ww..........",
+       "............",
+       "............",
+       "............",
+       "............"
+      ]
+     ]
+    },
+    "ring": {
+     "fps": 1,
+     "frames": [
+      [
+       "....wwww....",
+       "..ww....ww..",
+       ".w........w.",
+       ".w........w.",
+       "w....ww....w",
+       "w...wwww...w",
+       "w...wwww...w",
+       "w....ww....w",
+       ".w........w.",
+       ".w........w.",
+       "..ww....ww..",
+       "....wwww...."
+      ]
+     ]
+    },
+    "rune": {
+     "fps": 1,
+     "frames": [
+      [
+       "............",
+       "....w..w....",
+       "...w.ww.w...",
+       "..w..ww..w..",
+       ".w...ww...w.",
+       "..w..ww..w..",
+       "...w....w...",
+       "....wwww....",
+       "............",
+       "wwwwwwwwwwww",
+       "wwwwwwwwwwww",
+       "............"
+      ]
+     ]
+    },
+    "wave": {
+     "fps": 1,
+     "frames": [
+      [
+       "............",
+       "............",
+       "............",
+       "..ww........",
+       ".w..w.......",
+       "w....w....w.",
+       "......w..w..",
+       ".......ww...",
+       "............",
+       "wwwwwwwwwwww",
+       "............",
+       "............"
+      ]
+     ]
+    },
+    "tether": {
+     "fps": 1,
+     "frames": [
+      [
+       "ww..........",
+       "ww..........",
+       "..w.........",
+       "...w........",
+       "....w.......",
+       ".....w......",
+       "......w.....",
+       ".......w....",
+       "........w...",
+       ".........w..",
+       "..........ww",
+       "..........ww"
+      ]
+     ]
+    }
+   }
+  }
+ }
+}

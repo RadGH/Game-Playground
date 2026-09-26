@@ -1,0 +1,411 @@
+{
+ "format": 1,
+ "id": "a1_wax_stair_02",
+ "name": "The Guttering Steps",
+ "act": "act1",
+ "kind": "lesson",
+ "size": [
+  480,
+  272
+ ],
+ "block": 8,
+ "seed": 1702,
+ "theme": "wax_chapel",
+ "rain": {
+  "density": 90,
+  "wind": 0.2,
+  "deposit": 0.07,
+  "maxDeposit": 3000
+ },
+ "map": [
+  "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::",
+  "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::",
+  "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::",
+  "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::",
+  "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::",
+  "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::",
+  "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::",
+  "XX#############.........###...............################XX",
+  "XX#############...........................################XX",
+  "XX........................................................XX",
+  "XX..........................................................",
+  "XX..........................................................",
+  "XX..........................................................",
+  "XX..........................................................",
+  "XX................................................BBBBBBBBXX",
+  "XX................................................BBBBBBBBXX",
+  "XX................................................BBBBBBBBXX",
+  "XX.................xxxWWWW.......WWWW#............BBBBBBBBXX",
+  "XX.................xxxxx.............#BBBBBBBB....BBBBBBBBXX",
+  "...................xxxxx.............#BBBBBBBBBBBBBBBBBBBBXX",
+  "................xxxxx................#####################XX",
+  "................xxxxx................#####################XX",
+  "................xxxxx................#####################XX",
+  "............xxxxxxxxx................#####################XX",
+  "............xxxxxxxxx................#####################XX",
+  "ddddddddddddxxxxxxxxx................#####################XX",
+  "XX####################...............#####################XX",
+  "XX####################~~~~~~~~~~~~~~~#####################XX",
+  "XX####################~~~~~~~~~~~~~~~#####################XX",
+  "XX########################################################XX",
+  "XX########################################################XX",
+  "XX########################################################XX",
+  "XX########################################################XX",
+  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+ ],
+ "ops": [
+  {
+   "op": "stairs",
+   "from": [
+    76,
+    199
+   ],
+   "steps": 5,
+   "rise": 3,
+   "run": 4,
+   "dir": "r",
+   "mat": "wax",
+   "note": "a walkable ramp from the dirt floor (y 200) up to the first wax block (y 184); rises of 3 are within step-up"
+  },
+  {
+   "op": "circle",
+   "at": [
+    200,
+    64
+   ],
+   "r": 10,
+   "mat": "stone",
+   "note": "hanging rock under the ceiling gap"
+  },
+  {
+   "op": "poly",
+   "mat": "stone",
+   "points": [
+    [
+     192,
+     64
+    ],
+    [
+     208,
+     64
+    ],
+    [
+     201,
+     84
+    ]
+   ],
+   "note": "stalactite tip; drips form here"
+  },
+  {
+   "op": "carve",
+   "rect": [
+    168,
+    208,
+    136,
+    32
+   ],
+   "only": [
+    "stone"
+   ],
+   "noise": {
+    "scale": 10,
+    "threshold": 0.62,
+    "octaves": 2
+   },
+   "note": "ragged cistern walls; 'only' keeps the water untouched"
+  },
+  {
+   "op": "fill",
+   "at": [
+    232,
+    229
+   ],
+   "mat": "water",
+   "level": 214,
+   "max": 3000,
+   "note": "refill any carved pockets below y 214, so the surface sits 6 cells under the lip"
+  },
+  {
+   "op": "rect",
+   "rect": [
+    176,
+    136,
+    32,
+    3
+   ],
+   "mat": "air",
+   "only": [
+    "wood"
+   ],
+   "note": "thin both beams from 8 to 5 cells tall"
+  },
+  {
+   "op": "rect",
+   "rect": [
+    264,
+    136,
+    32,
+    3
+   ],
+   "mat": "air",
+   "only": [
+    "wood"
+   ]
+  },
+  {
+   "op": "stairs",
+   "from": [
+    368,
+    151
+   ],
+   "steps": 3,
+   "rise": 12,
+   "run": 10,
+   "dir": "r",
+   "mat": "brick",
+   "note": "three hop-up steps (tops y 139/127/115) to the ruin roof at y 112"
+  },
+  {
+   "op": "rect",
+   "rect": [
+    400,
+    112,
+    64,
+    40
+   ],
+   "mat": "air",
+   "only": [
+    "brick"
+   ],
+   "note": "hollow out the chandlery ruin"
+  },
+  {
+   "op": "frame",
+   "rect": [
+    400,
+    112,
+    64,
+    40
+   ],
+   "thick": 3,
+   "mat": "brick"
+  },
+  {
+   "op": "rect",
+   "rect": [
+    400,
+    136,
+    3,
+    13
+   ],
+   "mat": "air",
+   "note": "doorway in the ruin's left wall (inside floor is y 149, 3 up from outside)"
+  },
+  {
+   "op": "scatter",
+   "rect": [
+    306,
+    140,
+    40,
+    4
+   ],
+   "mat": "rubble",
+   "count": 3,
+   "size": [
+    4,
+    9
+   ]
+  },
+  {
+   "op": "clear_decor",
+   "rect": [
+    176,
+    132,
+    120,
+    12
+   ],
+   "note": "the jump distance is the lesson; keep the beam ends exact"
+  }
+ ],
+ "things": [
+  {
+   "t": "entry",
+   "id": "w",
+   "at": [
+    8,
+    199
+   ],
+   "face": "r"
+  },
+  {
+   "t": "exit",
+   "id": "exit_w",
+   "rect": [
+    0,
+    152,
+    4,
+    48
+   ],
+   "to": "a1_wax_stair_01",
+   "entry": "e"
+  },
+  {
+   "t": "entry",
+   "id": "e",
+   "at": [
+    468,
+    111
+   ],
+   "face": "l"
+  },
+  {
+   "t": "exit",
+   "id": "exit_e",
+   "rect": [
+    476,
+    80,
+    4,
+    32
+   ],
+   "to": "a1_wax_stair_03",
+   "entry": "w"
+  },
+  {
+   "t": "lamp_post",
+   "id": "lp_a1_02",
+   "at": [
+    40,
+    199
+   ]
+  },
+  {
+   "t": "pickup",
+   "id": "scrap_1",
+   "kind": "scrap",
+   "amount": 2,
+   "at": [
+    64,
+    199
+   ]
+  },
+  {
+   "t": "pickup",
+   "id": "scrap_2",
+   "kind": "scrap",
+   "amount": 2,
+   "at": [
+    160,
+    135
+   ]
+  },
+  {
+   "t": "sign",
+   "id": "sign_plank",
+   "at": [
+    168,
+    135
+   ],
+   "text": "sign.a1_02.plank"
+  },
+  {
+   "t": "lesson",
+   "id": "lesson_plank",
+   "mechanic": "plank_kit",
+   "hint": "lesson.plank.gap",
+   "at": [
+    176,
+    135
+   ]
+  },
+  {
+   "t": "zone",
+   "id": "zone_gap",
+   "rect": [
+    176,
+    96,
+    32,
+    40
+   ],
+   "on": "inside",
+   "once": true
+  },
+  {
+   "t": "light",
+   "id": "lt_ruin",
+   "at": [
+    432,
+    124
+   ],
+   "color": "#ffc46a",
+   "r": 64,
+   "intensity": 0.9,
+   "shadow": true,
+   "flicker": 0.1,
+   "sprite": "wall_lantern"
+  },
+  {
+   "t": "light",
+   "id": "lt_wax",
+   "at": [
+    150,
+    120
+   ],
+   "color": "#ffd27a",
+   "r": 40,
+   "intensity": 0.6,
+   "shadow": true,
+   "flicker": 0.15,
+   "sprite": "candle_cluster"
+  },
+  {
+   "t": "spawn",
+   "id": "sp_mites",
+   "enemy": "wax_mite",
+   "count": 2,
+   "rect": [
+    312,
+    120,
+    60,
+    20
+   ],
+   "when": "enter"
+  },
+  {
+   "t": "drip",
+   "id": "drip_stal",
+   "at": [
+    201,
+    85
+   ],
+   "every": [
+    1.2,
+    2.4
+   ]
+  },
+  {
+   "t": "pickup",
+   "id": "oil_ruin",
+   "kind": "oil",
+   "amount": 20,
+   "at": [
+    440,
+    148
+   ]
+  }
+ ],
+ "wires": [
+  {
+   "from": "zone_gap",
+   "to": "lesson_plank",
+   "do": "pulse",
+   "note": "shows the plank prompt when the player stands at the gap"
+  }
+ ],
+ "decor": {
+  "erode": 0.3,
+  "moss": 0.15,
+  "cracks": 0.1,
+  "waxDrips": 0.5
+ },
+ "notes": "Beam gap is 56 cells (x 208..263): a running jump clears ~52, so it fails without a plank unless the player is very precise. The cistern catches rain; by the time a slow player arrives it has visibly risen a little (maxDeposit keeps it from overflowing the lip)."
+}

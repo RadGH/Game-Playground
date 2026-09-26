@@ -1,0 +1,172 @@
+{
+ "_doc": "Status effects: the one table (docs/03 \u00a74, canon v2). 14 statuses. Times in seconds; pct as fractions.",
+ "version": 1,
+ "list": [
+  {
+   "id": "burn",
+   "name": "Burning",
+   "flame": "ember",
+   "maxStacks": 5,
+   "perStackPct": 0.2,
+   "tick": 0.5,
+   "duration": 3.0,
+   "color": "#ff8a2a",
+   "soakedBlocks": true,
+   "igniteEvery": 0.25,
+   "panicSpreadPerSecond": 1
+  },
+  {
+   "id": "chill",
+   "name": "Chilled",
+   "flame": "rime",
+   "maxStacks": 5,
+   "slowPerStack": 0.1,
+   "duration": 4.0,
+   "freezeAt": 5,
+   "color": "#6fe3ff",
+   "freezeAtSoaked": 3,
+   "attackSlowPerStack": 0.1
+  },
+  {
+   "id": "frozen",
+   "name": "Frozen",
+   "flame": "rime",
+   "duration": 1.5,
+   "color": "#bff4ff",
+   "eliteDuration": 1.0,
+   "mudTrapDuration": 2.0,
+   "bosses": "numbed",
+   "then": "thawing"
+  },
+  {
+   "id": "numbed",
+   "name": "Numbed",
+   "flame": "rime",
+   "duration": 2.0,
+   "slow": 0.5,
+   "then": "thawing",
+   "bossOnly": true,
+   "color": "#9fdcef"
+  },
+  {
+   "id": "thawing",
+   "name": "Thawing",
+   "flame": "rime",
+   "duration": 4.0,
+   "immuneTo": [
+    "chill"
+   ],
+   "color": "#cfeaf2"
+  },
+  {
+   "id": "shocked",
+   "name": "Shocked",
+   "flame": "spark",
+   "amp": 0.15,
+   "duration": 2.0,
+   "chain": 2,
+   "chainRange": 48,
+   "chainMult": 0.7,
+   "color": "#fff27a",
+   "metalStun": 0.3,
+   "metalStunEvery": 3
+  },
+  {
+   "id": "corrode",
+   "name": "Corroded",
+   "flame": "bile",
+   "maxStacks": 6,
+   "armourPerStack": 8,
+   "dotPct": 0.1,
+   "tick": 1.0,
+   "duration": 6.0,
+   "color": "#8dff4a",
+   "resistPerStack": 5,
+   "shieldBreakAt": 4
+  },
+  {
+   "id": "radiant",
+   "name": "Radiant",
+   "flame": "gleam",
+   "duration": 5.0,
+   "unlitMult": 2,
+   "color": "#ffe6b0",
+   "allyHeal": 0.6,
+   "unlitNoRegen": true
+  },
+  {
+   "id": "soaked",
+   "name": "Soaked",
+   "flame": "tide",
+   "duration": 5.0,
+   "sparkMult": 1.5,
+   "knock": 140,
+   "color": "#3f7bff",
+   "freezeAt": 3,
+   "blocksBurn": true,
+   "waterDepth": 8,
+   "rainSoaks": false
+  },
+  {
+   "id": "drained",
+   "name": "Drained",
+   "flame": "shade",
+   "duration": 3.0,
+   "dmgDown": 0.15,
+   "heal": 0.06,
+   "oil": 0.04,
+   "color": "#b25cff"
+  },
+  {
+   "id": "dazzled",
+   "name": "Dazzled",
+   "flame": "gleam",
+   "duration": 2.0,
+   "targetTag": "unlit",
+   "flee": "dark",
+   "immuneAfter": 4.0,
+   "neverOn": [
+    "boss",
+    "steadfast"
+   ],
+   "color": "#fff4d6"
+  },
+  {
+   "id": "dimmed",
+   "name": "Dimmed",
+   "flame": "shade",
+   "playerOnly": true,
+   "lanternRadius": -0.3,
+   "whileInside": true,
+   "color": "#6b3fa0"
+  },
+  {
+   "id": "staggered",
+   "name": "Staggered",
+   "flame": null,
+   "duration": {
+    "player": 0.4,
+    "wall": 0.3,
+    "fodder": 0.8,
+    "standard": 0.8,
+    "heavy": 0.6,
+    "elite": 0.6,
+    "boss": 1.5
+   },
+   "wallSpeed": 160,
+   "color": "#e0e0e0"
+  },
+  {
+   "id": "knocked_out",
+   "name": "Knocked out",
+   "flame": null,
+   "duration": "room",
+   "needsTag": "subduable",
+   "xp": 1.0,
+   "countsAs": "knell_spared",
+   "color": "#a0a0a0"
+  }
+ ],
+ "statusCap": 6,
+ "steadfastDurationMult": 0.5
+}

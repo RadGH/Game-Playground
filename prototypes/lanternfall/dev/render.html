@@ -1,0 +1,58 @@
+<!doctype html><meta charset="utf-8"><title>Lanternfall render test</title>
+<style>html,body{margin:0;background:#000;overflow:hidden}canvas{display:block;width:100vw;height:100vh}#s{position:fixed;left:8px;top:8px;color:#9cf;font:12px monospace;white-space:pre;text-shadow:0 1px 2px #000}</style>
+<canvas id="c"></canvas><div id="s"></div>
+<script type="module">
+import { buildMaterials, M } from '../js/world/materials.js';
+import { createGrid } from '../js/world/grid.js';
+import { stepCells, ignite } from '../js/world/cellsim.js';
+import { stepThermal } from '../js/world/thermal.js';
+import { stepLiquids, electrify } from '../js/world/liquids.js';
+import { createWebGL2Renderer } from '../js/render/webgl2.js';
+const mats = buildMaterials(await (await fetch('../data/materials.json')).json());
+const W = 1024, H = 544, g = createGrid(W, H, mats), world = { grid: g, steamDebt: 0, wind: 0.3 };
+const R = (x, y, w, h, m, o) => { for (let yy = y; yy < y + h; yy++) for (let xx = x; xx < x + w; xx++) g.set(xx, yy, m, o); };
+for (let x = 0; x < W; x++) for (let y = 0; y < H; y++) { const gy = 470 + Math.sin(x * 0.013) * 14 + Math.sin(x * 0.05) * 4; if (y > gy) g.set(x, y, y > 520 ? M.BEDROCK : M.STONE); }
+R(0, 0, 8, H, M.BEDROCK); R(W - 8, 0, 8, H, M.BEDROCK);
+for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (y > 120 && x > 40 && x < 980) g.bg[y * W + x] = (x > 500 ? 3 : 2);
+R(20, 260, 280, 200, M.WATER); R(20, 248, 280, 12, M.OIL); R(300, 250, 12, 220, M.BRICK); R(8, 250, 12, 220, M.BRICK);
+R(420, 330, 120, 10, M.OIL); R(410, 340, 140, 12, M.STONE);
+for (let k = 0; k < 3; k++) R(600, 300 + k * 40, 200, 4, M.WOOD); for (let k = 0; k < 5; k++) R(600 + k * 48, 300, 4, 140, M.WOOD);
+R(840, 380, 60, 60, M.SAND); R(900, 360, 40, 30, M.GLASS); R(700, 460, 80, 8, M.METAL);
+R(100, 140, 260, 16, M.STONE); for (let x = 110; x < 350; x += 17) R(x, 156, 3, 6 + (x % 5), M.STONE);
+R(360, 180, 40, 6, M.GLOWMOSS); R(560, 460, 30, 10, M.MOLTEN_WAX);
+const cv = document.getElementById('c'); const r = createWebGL2Renderer(cv, { mats }); r.setRoom(g);
+const cam = { x: 0, y: 200 }; let t = 0, frame = 0, simMs = 0, renMs = 0;
+function fit() { cv.width = innerWidth * devicePixelRatio | 0; cv.height = innerHeight * devicePixelRatio | 0; }
+addEventListener('resize', fit); fit();
+const drops = [];
+const params = new URLSearchParams(location.search);
+function loop() {
+  t += 1 / 60; frame++;
+  const s = Math.max(1, Math.round(cv.height / 270)), VW = Math.ceil(cv.width / s), VH = Math.ceil(cv.height / s);
+  cam.x = Math.max(0, Math.min(W - VW, 260 + Math.sin(t * 0.15) * 300)); cam.y = Math.max(0, Math.min(H - VH, 200));
+  const a = performance.now();
+  if (frame === 120) R(300, 300, 12, 170, M.AIR); // break the dam
+  if (frame === 240) { for (let y = 432; y < 440; y++) for (let x = 610; x < 640; x++) ignite(g, y * W + x, x, y); R(430, 320, 20, 10, M.FIRE); }
+  if (frame === 420) electrify(world, 400, 465);
+  // near rain
+  for (let k = 0; k < 8; k++) drops.push({ x: cam.x - 40 + Math.random() * (VW + 80), y: cam.y - 8, vy: 420 + Math.random() * 80 });
+  for (let k = drops.length - 1; k >= 0; k--) { const d = drops[k]; d.y += d.vy / 60; d.x += 0.3 * 1.5; const xi = d.x | 0, yi = d.y | 0; if (yi >= H - 1 || g.get(xi, yi) !== 0) { if (Math.random() < 0.07 && g.get(xi, yi - 1) === 0) { g.set(xi, yi - 1, M.WATER); } if (g.get(xi, yi) !== 22) g.wet(xi, yi, 255); drops.splice(k, 1); } }
+  stepCells(world, { x0: cam.x - 96, y0: cam.y - 96, x1: cam.x + VW + 96, y1: cam.y + VH + 96 }); stepThermal(world); stepLiquids(world);
+  const b = performance.now(); simMs = simMs * 0.95 + (b - a) * 0.05;
+  const lights = [
+    { x: 150 + Math.sin(t) * 100, y: 230, r: 140, color: [1, 0.54, 0.16], i: 1.6, shadow: true, flicker: 0.06 },
+    { x: 460, y: 300, r: 110, color: [0.25, 0.9, 1], i: 1.3, shadow: true },
+    { x: 700, y: 250, r: 150, color: [0.7, 0.36, 1], i: 1.2, shadow: true },
+    { x: 920, y: 320, r: 90, color: [1, 0.95, 0.5], i: 1.0, shadow: true },
+  ];
+  const sprites = [], overlays = [];
+  for (const d of drops) overlays.push({ x: d.x, y: d.y - 3, w: 1, h: 3, tint: [0.56, 0.65, 0.77, 0.55] });
+  const rip = new Float32Array(VW + 2); for (let x = 0; x < rip.length; x++) rip[x] = Math.sin(x * 0.3 + t * 3) * 0.3;
+  r.render({ cam, view: { w: VW, h: VH }, scale: s, time: t, lights, sprites, overlays, ripple: rip, ambient: { top: [0.10, 0.12, 0.18], bottom: [0.05, 0.06, 0.09], floor: 0.06 }, rain: { alpha: 1, wind: 0.3 }, bloom: 0.35 });
+  renMs = renMs * 0.95 + (performance.now() - b) * 0.05;
+  if (frame % 15 === 0) document.getElementById('s').textContent = `sim ${simMs.toFixed(2)}ms  render ${renMs.toFixed(2)}ms  active ${world.cellStats.active}+${world.cellStats.slow}  scanned ${world.cellStats.scanned}  upload ${r.stats.uploadCells}  draws ${r.stats.draws}  water ${g.counters.waterCells}`;
+  window.__stats = { simMs, renMs, frame, active: world.cellStats.active, water: g.counters.waterCells };
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>

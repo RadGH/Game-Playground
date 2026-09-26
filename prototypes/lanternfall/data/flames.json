@@ -1,0 +1,169 @@
+{
+ "_doc": "The 7 flames (docs/03 \u00a73, canon v2). power = base damage; oilMult multiplies the shape oil; status id from statuses.json; tether = the flame's tether kind and life (s); gutter = what a gutter does at your feet (\u00a79.3).",
+ "version": 1,
+ "list": [
+  {
+   "id": "ember",
+   "name": "Ember",
+   "power": 12,
+   "oilMult": 1.0,
+   "color": "#ff8a2a",
+   "lightMult": 1.1,
+   "lightIntensity": 1.0,
+   "flicker": [
+    0.12,
+    8
+   ],
+   "status": "burn",
+   "unlock": "start",
+   "meterType": "fire",
+   "desc": "Burns. Lights oil, wood and wax. Boils water into steam.",
+   "tether": {
+    "kind": "fuse",
+    "life": 6,
+    "crossDamageMult": 1.5
+   },
+   "gutter": "fire_at_feet"
+  },
+  {
+   "id": "rime",
+   "name": "Rime",
+   "power": 10,
+   "oilMult": 1.0,
+   "color": "#6fe3ff",
+   "lightMult": 1.0,
+   "lightIntensity": 0.85,
+   "flicker": [
+    0,
+    0
+   ],
+   "status": "chill",
+   "unlock": "act1",
+   "meterType": "frost",
+   "desc": "Chills and freezes. Turns water to ice, puts out fire.",
+   "tether": {
+    "kind": "ice_span",
+    "life": 20,
+    "walkable": true,
+    "climbable": false
+   },
+   "gutter": "frozen_feet"
+  },
+  {
+   "id": "spark",
+   "name": "Spark",
+   "power": 11,
+   "oilMult": 1.1,
+   "color": "#fff27a",
+   "lightMult": 1.2,
+   "lightIntensity": 1.1,
+   "flicker": [
+    0.35,
+    20
+   ],
+   "status": "shocked",
+   "unlock": "act2",
+   "meterType": "lightning",
+   "desc": "Shocks and chains. Electrifies water and metal, powers machines.",
+   "tether": {
+    "kind": "live_wire",
+    "life": 12,
+    "powers": true
+   },
+   "gutter": "shocked_self"
+  },
+  {
+   "id": "bile",
+   "name": "Bile",
+   "power": 8,
+   "oilMult": 0.9,
+   "color": "#8dff4a",
+   "lightMult": 0.8,
+   "lightIntensity": 0.7,
+   "flicker": [
+    0.15,
+    1
+   ],
+   "status": "corrode",
+   "unlock": "act2",
+   "meterType": "poison",
+   "desc": "Corrodes armour. Dissolves metal, brick and bone.",
+   "tether": {
+    "kind": "gut_vine",
+    "life": 12,
+    "slow": 0.4
+   },
+   "gutter": "bile_pool"
+  },
+  {
+   "id": "gleam",
+   "name": "Gleam",
+   "power": 10,
+   "oilMult": 1.0,
+   "color": "#ffe6b0",
+   "lightMult": 1.5,
+   "lightIntensity": 1.25,
+   "flicker": [
+    0.04,
+    4
+   ],
+   "status": "radiant",
+   "unlock": "act4",
+   "meterType": "holy",
+   "desc": "Holy light. Sears the Unlit, heals allies, lights the dark longest.",
+   "tether": {
+    "kind": "light_rope",
+    "life": 12,
+    "healPerSecond": 3
+   },
+   "gutter": "flash_heal",
+   "unlitStatus": "dazzled"
+  },
+  {
+   "id": "tide",
+   "name": "Tide",
+   "power": 8,
+   "oilMult": 0.9,
+   "color": "#3f7bff",
+   "lightMult": 0.7,
+   "lightIntensity": 0.6,
+   "flicker": [
+    0.1,
+    3
+   ],
+   "status": "soaked",
+   "unlock": "act3",
+   "meterType": "water",
+   "desc": "Soaks and shoves. Makes water (a Guild-braided Tide is dry until the Act 3 lesson), puts out fire.",
+   "tether": {
+    "kind": "stream",
+    "life": 12
+   },
+   "gutter": "knockback_self",
+   "dryUntil": "a3_n02"
+  },
+  {
+   "id": "shade",
+   "name": "Shade",
+   "power": 13,
+   "oilMult": 1.25,
+   "color": "#b25cff",
+   "lightMult": -0.8,
+   "lightIntensity": 0.5,
+   "flicker": [
+    0.2,
+    2
+   ],
+   "status": "drained",
+   "unlock": "act4",
+   "meterType": "shadow",
+   "desc": "Drains life and oil, ignores armour, eats light.",
+   "tether": {
+    "kind": "umbral_line",
+    "life": 12,
+    "hideFromUnlit": true
+   },
+   "gutter": "lantern_out"
+  }
+ ]
+}

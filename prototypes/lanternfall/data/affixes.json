@@ -1,0 +1,204 @@
+{
+ "_doc": "The 12 affixes (docs/08 §6). lo/hi = value at ilvl 1 / ilvl 30 (fractions for pct); the value is the straight line between, rolled ±rollSpread once and rounded to `step`. flame_dmg_pct rolls one flame, gated by flameGate (the act a flame opens). Rolled only from loot.json affixFromAct.",
+ "version": 1,
+ "flameGate": {
+  "ember": 1,
+  "rime": 1,
+  "spark": 1,
+  "bile": 2,
+  "gleam": 2,
+  "tide": 3,
+  "shade": 4
+ },
+ "list": [
+  {
+   "id": "wick_power_pct",
+   "kind": "prefix",
+   "name": "Bright",
+   "slots": [
+    "lantern",
+    "trinket"
+   ],
+   "stat": "wickPct",
+   "unit": "pct",
+   "lo": 0.04,
+   "hi": 0.2,
+   "weight": 100,
+   "text": "{v} Wick power"
+  },
+  {
+   "id": "flame_dmg_pct",
+   "kind": "prefix",
+   "name": "Elemental",
+   "slots": [
+    "lantern",
+    "weapon",
+    "trinket"
+   ],
+   "stat": "flame_{flame}",
+   "unit": "pct",
+   "lo": 0.06,
+   "hi": 0.28,
+   "weight": 100,
+   "text": "{v} {Flame} damage",
+   "names": {
+    "ember": "Smouldering",
+    "rime": "Frosted",
+    "spark": "Crackling",
+    "bile": "Festering",
+    "gleam": "Hallowed",
+    "tide": "Surging",
+    "shade": "Hollow"
+   }
+  },
+  {
+   "id": "melee_dmg_pct",
+   "kind": "prefix",
+   "name": "Cruel",
+   "slots": [
+    "weapon"
+   ],
+   "stat": "meleePct",
+   "unit": "pct",
+   "lo": 0.1,
+   "hi": 0.4,
+   "weight": 100,
+   "text": "{v} melee damage"
+  },
+  {
+   "id": "max_health_flat",
+   "kind": "prefix",
+   "name": "Stout",
+   "slots": [
+    "coat",
+    "boots",
+    "trinket"
+   ],
+   "stat": "health",
+   "unit": "flat",
+   "lo": 8,
+   "hi": 60,
+   "weight": 100,
+   "text": "{v} max health"
+  },
+  {
+   "id": "armour_pct",
+   "kind": "prefix",
+   "name": "Plated",
+   "slots": [
+    "coat",
+    "boots"
+   ],
+   "stat": "armourPct",
+   "unit": "pct",
+   "lo": 0.12,
+   "hi": 0.48,
+   "weight": 100,
+   "text": "{v} armour"
+  },
+  {
+   "id": "max_oil_flat",
+   "kind": "prefix",
+   "name": "Brimming",
+   "slots": [
+    "lantern",
+    "coat"
+   ],
+   "stat": "oil",
+   "unit": "flat",
+   "lo": 6,
+   "hi": 40,
+   "weight": 100,
+   "text": "{v} max oil"
+  },
+  {
+   "id": "oil_cost_pct",
+   "kind": "prefix",
+   "name": "Thrifty",
+   "slots": [
+    "lantern",
+    "trinket"
+   ],
+   "stat": "oilCostPct",
+   "unit": "pct",
+   "lo": -0.02,
+   "hi": -0.11,
+   "weight": 60,
+   "text": "{v} oil cost of your wicks"
+  },
+  {
+   "id": "light_radius_pct",
+   "kind": "prefix",
+   "name": "Beaming",
+   "slots": [
+    "lantern"
+   ],
+   "stat": "lightRadiusPct",
+   "unit": "pct",
+   "lo": 0.06,
+   "hi": 0.32,
+   "weight": 100,
+   "text": "{v} light radius"
+  },
+  {
+   "id": "crit_chance",
+   "kind": "suffix",
+   "name": "of the Keen",
+   "slots": [
+    "weapon",
+    "trinket"
+   ],
+   "stat": "critChance",
+   "unit": "pct",
+   "lo": 0.015,
+   "hi": 0.075,
+   "weight": 60,
+   "text": "{v} crit chance"
+  },
+  {
+   "id": "cast_speed",
+   "kind": "suffix",
+   "name": "of Quickwicks",
+   "slots": [
+    "lantern",
+    "trinket"
+   ],
+   "stat": "castSpeed",
+   "unit": "pct",
+   "lo": 0.035,
+   "hi": 0.14,
+   "weight": 100,
+   "text": "{v} cast speed"
+  },
+  {
+   "id": "move_speed",
+   "kind": "suffix",
+   "name": "of the Gutter-Runner",
+   "slots": [
+    "boots"
+   ],
+   "stat": "moveSpeed",
+   "unit": "pct",
+   "lo": 0.035,
+   "hi": 0.115,
+   "weight": 100,
+   "text": "{v} move speed"
+  },
+  {
+   "id": "oil_on_kill",
+   "kind": "suffix",
+   "name": "of the Wick-Thief",
+   "slots": [
+    "weapon",
+    "lantern"
+   ],
+   "stat": "oilOnKill",
+   "unit": "flat",
+   "lo": 1.5,
+   "hi": 9,
+   "weight": 100,
+   "text": "{v} oil on kill",
+   "step": 0.5
+  }
+ ]
+}

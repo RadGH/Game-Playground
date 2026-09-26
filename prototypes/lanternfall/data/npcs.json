@@ -1,0 +1,221 @@
+{
+ "_doc": "Speakers (docs/01 §6, §7, §8, §12; shape docs/10 §5.11). The 14 NPCs, Hush, the Narrator and the 6 bosses as Lingo speakers. `speech` is the Lingo speaker block (shared/character-schema.md): traits are only Lingo's 25 real traits, tics only its 14 real tics, sliders 0..1, custom slots use {~a|b|c}. `speech.family` is the grammar tag this speaker turns on (its own lines win, every other family tag is zeroed; js/talk/lingo-bridge.js). `voice` feeds shared/voices.js voiceFor({ role, gender, seed }) and then `tweaks` are applied on top (Object.assign) plus `fx`; `engine: \"babble\"` speakers skip voiceFor. `intents` lists every intent the game asks this speaker for (tests/unit/talk.test.js speaks each one and fails on a stray '{'). `color` is the bubble border / subtitle name colour (01 §12.7: the speaker's light colour). `bark` is 01 §12.8's one bark table (js/talk/barks.js reads it). `enemyVoices` are the talking / babbling enemy kinds: which pack creature families belong to each, their Lingo personality and voice; a Knell gets a voice seed per spawn.",
+ "version": 1,
+ "bark": {
+  "perSpeaker": 4,
+  "perEnemy": 6,
+  "global": 1.5,
+  "perRoomIntent": 6,
+  "enemyBubbles": 2,
+  "voices": 2,
+  "idle": [12, 25],
+  "idleRadius": 160,
+  "greetRepeat": 60,
+  "onTime": { "min": 1.6, "perChar": 0.06, "pad": 0.8 },
+  "prerender": { "enemy_opener": 4, "combat_taunt": 3, "combat_hurt": 2, "combat_bark": 3, "beast_snarl": 3, "idle_chatter": 3, "rain_talk": 2 },
+  "chance": { "enemy_opener": 0.6, "combat_taunt": 0.35, "combat_hurt": 0.5, "combat_flee": 1, "combat_kill": 1, "beast_snarl": 1, "ally_bark": 0.5 },
+  "bigHit": 0.2,
+  "hush": { "hurtBelow": 0.3, "oilBelow": 0.2, "cooldown": 20 },
+  "priority": { "story": 5, "boss": 4, "npc": 3, "bark": 2, "idle": 1 }
+ },
+ "familyTags": ["knell", "knell_order", "lampbreaker", "drowned", "choir", "unlit", "tallow", "gnaw", "sluicemaw", "widow", "bellfather", "ossery", "goblin", "bandit", "cultist", "undead", "demon", "void", "dragon", "knight", "tank", "healer", "caster", "rogue", "ranger"],
+ "enemyVoices": {
+  "knell": {
+   "families": ["knell"], "talks": true, "color": "#ff5a4a",
+   "speech": { "traits": ["pious", "cruel"], "formality": 0.7, "verbosity": 0.4, "cheer": 0.2, "aggression": 0.7, "confidence": 0.75, "family": "knell", "tagWeights": { "cultist": 1.5 } },
+   "voice": { "role": "cultist", "gender": "m", "seedPerSpawn": true, "seed": 3100 }
+  },
+  "drowned": {
+   "families": ["drowned_one"], "talks": true, "color": "#ff5a4a",
+   "speech": { "traits": ["grieving", "archaic"], "formality": 0.6, "verbosity": 0.3, "cheer": 0.05, "aggression": 0.5, "confidence": 0.6, "mood": -0.5, "family": "drowned" },
+   "voice": { "role": "cultist", "gender": "n", "seed": 3200, "fx": { "lowpass": 1500, "chorus": 0.3, "reverb": 0.5 } }
+  },
+  "choir": {
+   "families": ["rat", "choir_rat"], "talks": false, "gloss": true, "color": "#ff5a4a",
+   "speech": { "traits": ["hungry"], "family": "choir" },
+   "voice": { "engine": "babble", "babbleMode": "simlish", "pitch": 0.9, "speed": 0.8, "depth": 0.3, "seedPerSpawn": true, "seed": 3300 }
+  },
+  "unlit": {
+   "families": ["unlit"], "talks": false, "gloss": true, "color": "#ff5a4a",
+   "speech": { "traits": ["cruel"], "family": "unlit" },
+   "voice": { "engine": "babble", "babbleMode": "syllables", "pitch": 0.25, "depth": 0.9, "breath": 0.9, "speed": 0.4, "seed": 3400, "fx": { "lowpass": 1800, "reverb": 0.6 } }
+  },
+  "moth": {
+   "families": ["moth"], "talks": false, "color": "#ff5a4a",
+   "speech": { "traits": ["hungry"] },
+   "voice": { "engine": "babble", "babbleMode": "letters", "pitch": 0.95, "depth": 0.1, "seed": 3500 }
+  }
+ },
+ "list": [
+  {
+   "id": "npc_aldra", "name": "Lampwarden Aldra Crake", "kind": "npc", "role": "head of the Guild, your mentor", "gender": "f", "color": "#ffb347",
+   "lexicon": "npc_aldra", "places": ["a1_n01"], "place": "a1_guild_hall",
+   "relation": { "warmth": 0.1, "respect": 0.3, "trust": 0.5 },
+   "speech": { "traits": ["honorable", "gruff", "grieving"], "formality": 0.7, "verbosity": 0.35, "cheer": 0.3, "aggression": 0.4, "confidence": 0.8, "tics": ["clipped"],
+    "custom": { "greeting": "{~Apprentice|Lamplighter|You}", "farewell": "{~Keep it lit|Mind the oil|Down you go}", "catchphrase": "{~No tier left dark.|A Lamp is only a promise with oil in it.|Light first. Questions after.|Corvin would have liked you. Don't let it go to your head.}", "yes": "Aye", "no": "No.", "curse": "Drowned hells" } },
+   "voice": { "role": "elder", "seed": 1101, "tweaks": { "speed": 0.4, "rough": 0.28, "intonation": 0.45 } },
+   "intents": ["greet", "farewell", "smalltalk", "lore", "rain_talk", "idle_chatter", "worried", "lamp_relit", "thanks", "warning", "rally", "kindling_hint"]
+  },
+  {
+   "id": "npc_odile", "name": "Odile Pennywax", "kind": "npc", "role": "keeper of Wick & Tallow", "gender": "f", "color": "#ffd27a", "shop": "shop_wick",
+   "lexicon": "npc_odile", "places": ["a1_n01"], "place": "a1_wick_tallow",
+   "speech": { "traits": ["jolly", "scholar", "romantic"], "formality": 0.55, "verbosity": 0.75, "cheer": 0.8, "aggression": 0.15, "confidence": 0.7, "tics": ["flowery"],
+    "custom": { "greeting": "{~Darling|Ooh, a customer|Lamplighter, my candle}", "farewell": "{~Burn bright|Don't gutter|Come back smelling of smoke}", "catchphrase": "{~Every flame has a flavour.|Hold still, I want to taste that.|Smoke never lies about what burned.}" } },
+   "voice": { "role": "merchant", "seed": 1104, "tweaks": { "intonation": 0.7, "tone": 0.72 } },
+   "intents": ["greet", "farewell", "smalltalk", "gossip", "rain_talk", "idle_chatter", "lamp_relit", "trade_offer", "trade_haggle", "trade_accept", "trade_refuse", "odile_names_wick"]
+  },
+  {
+   "id": "npc_hollis", "name": "Hollis Crane", "kind": "npc", "role": "pawnbroker", "gender": "m", "color": "#c9a25a", "shop": "shop_pawn",
+   "lexicon": "npc_hollis", "places": ["a1_n01", "a2_n01"], "place": "a1_cranes_pawn",
+   "speech": { "traits": ["greedy", "sarcastic", "paranoid"], "formality": 0.35, "verbosity": 0.55, "cheer": 0.4, "aggression": 0.35, "confidence": 0.75, "tics": ["drawl"],
+    "custom": { "greeting": "{~Well well|Look who's selling|Mind the counter}", "no": "Not a chance", "catchphrase": "{~Everything's worth something to somebody.|I remember that one. You sold it cheap.|A pawn's just a promise that didn't come back.}" } },
+   "voice": { "role": "merchant", "seed": 1105, "tweaks": { "speed": 0.45, "pitch": 0.44, "rough": 0.2 } },
+   "intents": ["greet", "farewell", "gossip", "rain_talk", "idle_chatter", "lamp_relit", "trade_offer", "trade_haggle", "trade_accept", "trade_refuse", "pawn_recall", "kindling_hint"]
+  },
+  {
+   "id": "npc_seld", "name": "Brother Seld", "kind": "npc", "role": "wax-monk of the Tallow Chapel", "gender": "m", "color": "#f3e2b8",
+   "lexicon": "npc_seld", "places": ["a1_n03", "a1_n08", "a1_n01"], "place": "a1_candlemarket",
+   "speech": { "traits": ["pious", "nervous", "grieving"], "formality": 0.75, "verbosity": 0.5, "cheer": 0.25, "aggression": 0.05, "confidence": 0.2, "tics": ["whisper"],
+    "custom": { "oath": "By the Mother's wick", "catchphrase": "{~She was only a statue. Once.|We fed her candles. We didn't know.|Wax remembers every hand that warmed it.}" } },
+   "voice": { "role": "priest", "seed": 1106, "tweaks": { "breath": 0.5, "pitch": 0.48 } },
+   "intents": ["greet", "farewell", "lore", "pray", "rain_talk", "idle_chatter", "worried", "lamp_relit", "kindling_hint"]
+  },
+  {
+   "id": "npc_pim", "name": "Pim Rooke", "kind": "npc", "role": "apprentice sweep, eleven", "gender": "f", "color": "#9fd3ff",
+   "lexicon": "npc_pim", "places": ["a1_n06", "a1_n01", "a5_n06"], "place": "a1_drip_gallery",
+   "speech": { "traits": ["brave", "hungry", "jolly"], "formality": 0.05, "verbosity": 0.6, "cheer": 0.9, "aggression": 0.3, "confidence": 0.8,
+    "custom": { "greeting": "{~Hiya|It's you!|Lamp!}", "catchphrase": "{~I'm not scared, I'm just shaking.|Can I hold the lantern? Just once?|Mum says the rain's crying. I think it's just rain.}" } },
+   "voice": { "role": "child", "seed": 1108, "tweaks": { "speed": 0.68 } },
+   "intents": ["greet", "farewell", "smalltalk", "rain_talk", "idle_chatter", "worried", "lamp_relit", "thanks"]
+  },
+  {
+   "id": "npc_brisket", "name": "Mother Brisket", "kind": "npc", "role": "Soup Barge cook", "gender": "f", "color": "#ff9b6a", "shop": "shop_soup",
+   "lexicon": "npc_brisket", "places": ["a2_n01", "a3_n02", "a4_n01", "a5_n02", "a6_n01"], "place": "a2_soup_mooring",
+   "speech": { "traits": ["kind", "jolly", "hungry"], "formality": 0.3, "verbosity": 0.7, "cheer": 0.85, "aggression": 0.1, "confidence": 0.75,
+    "custom": { "greeting": "{~Sit, sit|There's my skinny one|Bowl's hot}", "farewell": "{~Eat something|Take a heel of bread|Mind you're back for supper}", "catchphrase": "{~Soup fixes most things. The rest needs more soup.|Don't ask what's in the mystery bowl. I don't ask it either.|Nobody fights well hungry.}" } },
+   "voice": { "role": "villager", "seed": 1109, "tweaks": { "depth": 0.62, "pitch": 0.5, "breath": 0.3 } },
+   "intents": ["greet", "farewell", "smalltalk", "gossip", "rain_talk", "idle_chatter", "worried", "lamp_relit", "trade_offer", "soup_menu", "kindling_hint"]
+  },
+  {
+   "id": "npc_nell", "name": "Nell Gutterby", "kind": "npc", "role": "head ratcatcher", "gender": "f", "color": "#b7e36b", "ally": true,
+   "lexicon": "npc_nell", "places": ["a2_n01", "a4_n06"], "place": "a2_dripmarket",
+   "speech": { "traits": ["abrasive", "brave", "cruel"], "formality": 0.1, "verbosity": 0.4, "cheer": 0.45, "aggression": 0.8, "confidence": 0.9, "tics": ["curses"], "tagWeights": { "ranger": 3, "tank": 0, "healer": 0, "caster": 0, "rogue": 0 },
+    "custom": { "greeting": "{~What|You again|Keep your boots up}", "catchphrase": "{~Rats don't sing. Something's teaching them.|Every rat's a copper. Every big rat's two.|Burn the nest. Then burn where the nest was.}" } },
+   "voice": { "role": "ranger", "seed": 1113, "tweaks": { "rough": 0.25, "pitch": 0.55 } },
+   "intents": ["greet", "farewell", "gossip", "rain_talk", "idle_chatter", "lamp_relit", "combat_bark", "warning", "rally", "ally_down", "relief"]
+  },
+  {
+   "id": "npc_wenna", "name": "Old Wenna", "kind": "npc", "role": "the ferrywoman", "gender": "f", "color": "#7fb7c9", "shop": "shop_ferry",
+   "lexicon": "npc_wenna", "places": ["a2_n01", "a3_n02", "a4_n01", "a5_n02", "a6_n02"], "place": "a2_dripmarket",
+   "speech": { "traits": ["sarcastic", "greedy", "scholar"], "formality": 0.45, "verbosity": 0.5, "cheer": 0.5, "aggression": 0.2, "confidence": 0.85,
+    "custom": { "greeting": "{~Fare's up front|In you get|Evening. It's always evening}", "catchphrase": "{~Coin or blood, dearie. I'm not fussy.|I've ferried everybody once.|The river's short. The waiting's long.}" } },
+   "voice": { "role": "elder", "seed": 1120, "tweaks": { "speed": 0.4, "tone": 0.35 } },
+   "intents": ["greet", "farewell", "lore", "gossip", "rain_talk", "idle_chatter", "lamp_relit", "trade_offer", "trade_haggle", "trade_refuse", "kindling_hint"]
+  },
+  {
+   "id": "npc_voss", "name": "Sluicemaster Hendry Voss", "kind": "npc", "role": "last engineer of the Sluice Works", "gender": "m", "color": "#4fd1c5",
+   "lexicon": "npc_voss", "places": ["a3_n02", "a3_n08"], "place": "a3_voss_pumphouse",
+   "speech": { "traits": ["gruff", "paranoid", "scholar"], "formality": 0.55, "verbosity": 0.7, "cheer": 0.25, "aggression": 0.45, "confidence": 0.85, "tics": ["clipped"],
+    "custom": { "catchphrase": "{~Water is a machine. Nobody listens.|Shut the top gate first. Always the top gate first.|Twenty-eight years I've been right in here.}" } },
+   "voice": { "role": "mage", "seed": 1115, "tweaks": { "speed": 0.5, "depth": 0.62, "rough": 0.18 } },
+   "intents": ["greet", "farewell", "lore", "rain_talk", "idle_chatter", "lamp_relit", "warning", "flood_warning"]
+  },
+  {
+   "id": "npc_unna", "name": "Sister Unna of the Pale", "kind": "npc", "role": "voice of the Pale; keeps the Drowned Market stall", "gender": "f", "color": "#cfe8ff",
+   "lexicon": "npc_unna", "places": ["a3_n05"], "place": "a3_drowned_market", "underwater": true,
+   "speech": { "traits": ["archaic", "kind", "paranoid"], "formality": 0.85, "verbosity": 0.4, "cheer": 0.35, "aggression": 0.1, "confidence": 0.5, "tics": ["archaic", "whisper"],
+    "custom": { "greeting": "{~Breathe slow, dry one|Welcome beneath}", "catchphrase": "{~Pearls are only tears that held still.|We are not dead. We are waiting.|The surface is so loud.}" } },
+   "voice": { "role": "cleric", "seed": 1119, "tweaks": { "pitch": 0.58, "speed": 0.34 }, "fx": { "lowpass": 2200, "chorus": 0.4, "reverb": 0.4 } },
+   "intents": ["greet", "farewell", "lore", "rain_talk", "trade_offer", "trade_haggle", "trade_refuse", "kindling_hint"]
+  },
+  {
+   "id": "npc_mothwife", "name": "the Mothwife", "kind": "npc", "role": "gambler with sealed lanterns", "gender": "f", "color": "#d6b3ff", "shop": "shop_gamble",
+   "lexicon": "npc_mothwife", "places": ["a4_n01", "a4_n08", "a3_n05"], "place": "a4_mothwife_tent",
+   "speech": { "traits": ["romantic", "sarcastic", "paranoid"], "formality": 0.6, "verbosity": 0.55, "cheer": 0.55, "aggression": 0.1, "confidence": 0.75, "tics": ["whisper"],
+    "custom": { "catchphrase": "{~Every lantern's a question. Pay to hear the answer.|Moths know which light is lying.|Shake it. Listen. Then decide.}" } },
+   "voice": { "role": "mage", "seed": 1122, "tweaks": { "breath": 0.55, "flutter": 0.2, "pitch": 0.58 }, "fx": { "tremolo": 0.15, "tremoloHz": 7 } },
+   "intents": ["greet", "farewell", "gossip", "lore", "rain_talk", "idle_chatter", "lamp_relit", "trade_offer", "trade_haggle", "trade_accept", "kindling_hint"]
+  },
+  {
+   "id": "npc_marl", "name": "Deacon Marl", "kind": "npc", "role": "deacon of the Knell", "gender": "m", "color": "#e0a060",
+   "lexicon": "npc_marl", "places": ["a5_n02"], "place": "a5_tithe_hall",
+   "speech": { "traits": ["pious", "greedy", "pompous"], "formality": 0.85, "verbosity": 0.7, "cheer": 0.4, "aggression": 0.2, "confidence": 0.8, "tics": ["posh"],
+    "custom": { "oath": "By the Toll", "catchphrase": "{~Every bell asks. Every bell is answered.|A blessing is a debt the sky pays. A curse is one you pay.|The price rises with the dead, child. Mine, specifically.}" } },
+   "voice": { "role": "cultist", "seed": 1124, "tweaks": { "tone": 0.55, "intonation": 0.62 }, "fx": { "reverb": 0.3 } },
+   "intents": ["greet", "farewell", "lore", "pray", "gossip", "rain_talk", "idle_chatter", "lamp_relit"]
+  },
+  {
+   "id": "npc_merrit", "name": "Merrit Vane", "kind": "npc", "role": "Ossery's daughter", "gender": "f", "color": "#a9c7ff",
+   "lexicon": "npc_merrit", "places": ["a6_n01"], "place": "a6_understar_well",
+   "speech": { "traits": ["grieving", "kind", "cynical"], "formality": 0.6, "verbosity": 0.65, "cheer": 0.3, "aggression": 0.15, "confidence": 0.6,
+    "custom": { "catchphrase": "{~He isn't a monster. He's a man who wouldn't put the umbrella down.|I was eleven when it started raining. I'm fifty-one.|Keepers have to let go. That's the whole job.}" } },
+   "voice": { "role": "stormcaller", "seed": 1127, "tweaks": { "speed": 0.44, "rough": 0.12 } },
+   "intents": ["greet", "farewell", "lore", "rain_talk", "idle_chatter", "lamp_relit", "kindling_hint"]
+  },
+  {
+   "id": "npc_corvin", "name": "Corvin Crake", "kind": "npc", "role": "Aldra's husband, lost in the root", "gender": "m", "color": "#ffcf8a",
+   "lexicon": "npc_corvin", "places": ["a6_n04"], "place": "a6_corvins_cell",
+   "speech": { "traits": ["loyal", "grieving", "brave"], "formality": 0.6, "verbosity": 0.4, "cheer": 0.3, "aggression": 0.3, "confidence": 0.5, "tics": ["hesitant"],
+    "custom": { "catchphrase": "{~Is it still raining? It's always still raining.|Tell Aldra I kept the oath. Mostly.|Eighteen years. It felt like a long night.}" } },
+   "voice": { "role": "elder", "seed": 1128, "tweaks": { "breath": 0.55, "speed": 0.35 }, "fx": { "reverb": 0.5, "lowpass": 3200 } },
+   "intents": ["greet", "farewell", "lore", "rain_talk", "thanks", "relief"]
+  },
+  {
+   "id": "npc_hush", "name": "Hush", "kind": "companion", "role": "companion lanternmoth", "gender": "n", "color": "#ffe6b0",
+   "lexicon": "npc_hush", "places": ["a1_n06"], "gloss": true,
+   "speech": { "traits": ["jolly", "loyal", "hungry"], "formality": 0.1, "verbosity": 0.1, "cheer": 0.8, "aggression": 0.05, "confidence": 0.5 },
+   "voice": { "engine": "babble", "babbleMode": "letters", "seed": 1130, "pitch": 0.95, "speed": 0.85, "depth": 0.1, "tone": 0.8 },
+   "intents": ["hush_chirr"]
+  },
+  {
+   "id": "narrator", "name": "the Lamp Ledger", "kind": "narrator", "role": "the Narrator", "gender": "n", "color": null,
+   "lexicon": "the_ledger", "places": [], "narration": true,
+   "speech": { "traits": ["scholar"], "formality": 0.75, "verbosity": 0.5, "cheer": 0.35, "aggression": 0.1, "confidence": 0.8, "tagWeights": { "choir": 0, "unlit": 0 } },
+   "voice": { "role": "narrator", "seed": 40 },
+   "intents": ["ledger_arrival", "ledger_relight", "named_beast", "beast_snarl"]
+  },
+  {
+   "id": "boss_tallow", "name": "Mother Tallow", "kind": "boss", "role": "boss, Act 1", "gender": "f", "color": "#ff8c42",
+   "lexicon": "mother_tallow", "places": ["a1_n08"],
+   "speech": { "traits": ["pious", "kind", "cruel"], "formality": 0.7, "verbosity": 0.6, "cheer": 0.5, "aggression": 0.6, "confidence": 0.9, "family": "tallow" },
+   "voice": { "role": "cultist", "seed": 2001, "tweaks": { "depth": 0.9, "pitch": 0.35, "speed": 0.3 }, "fx": { "reverb": 0.5, "lowpass": 3500 } },
+   "intents": ["boss_opener", "boss_phase", "boss_low", "last_words", "combat_kill"]
+  },
+  {
+   "id": "boss_gnaw", "name": "Saint Gnaw", "kind": "boss", "role": "boss, Act 2", "gender": "n", "color": "#9be36b", "gloss": true,
+   "lexicon": "saint_gnaw", "places": ["a2_n08"],
+   "speech": { "traits": ["pious", "bloodlust", "pompous"], "formality": 0.8, "verbosity": 0.5, "cheer": 0.4, "aggression": 0.9, "confidence": 1, "family": "gnaw" },
+   "voice": { "engine": "babble", "babbleMode": "simlish", "seed": 2002, "pitch": 0.9, "speed": 0.8, "depth": 0.3, "fx": { "chorus": 0.8, "reverb": 0.4 }, "choir": [0, 0.06, 0.12, -0.06, -0.12, 0.18] },
+   "intents": ["boss_opener", "boss_phase", "boss_low", "last_words", "combat_kill"]
+  },
+  {
+   "id": "boss_sluicemaw", "name": "the Sluicemaw", "kind": "boss", "role": "boss, Act 3 (does not speak; the Narrator reads its lines)", "gender": "n", "color": "#6fb4ff",
+   "lexicon": "sluicemaw", "places": ["a3_n08"], "narratedBy": "narrator",
+   "speech": { "traits": [], "family": "sluicemaw" },
+   "voice": { "engine": "none" },
+   "intents": []
+  },
+  {
+   "id": "boss_widow", "name": "the Lampless Widow", "kind": "boss", "role": "boss, Act 4", "gender": "f", "color": "#c18cff",
+   "lexicon": "lampless_widow", "places": ["a4_n08"],
+   "speech": { "traits": ["cruel", "romantic", "grieving"], "formality": 0.6, "verbosity": 0.4, "cheer": 0.2, "aggression": 0.7, "confidence": 0.8, "family": "widow" },
+   "voice": { "stolen": true, "role": "mage", "seed": 2004, "fx": { "pitchShift": -3, "reverb": 0.6, "tremolo": 0.3 } },
+   "intents": ["boss_opener", "boss_phase", "boss_low", "last_words", "combat_kill"]
+  },
+  {
+   "id": "boss_bellfather", "name": "the Bellfather", "kind": "boss", "role": "boss, Act 5", "gender": "m", "color": "#d9a441",
+   "lexicon": "bellfather", "places": ["a5_n07"],
+   "speech": { "traits": ["pious"], "formality": 1, "verbosity": 0.1, "cheer": 0, "aggression": 0.8, "confidence": 1, "family": "bellfather" },
+   "voice": { "role": "brute", "seed": 2005, "tweaks": { "depth": 1, "speed": 0.25 }, "fx": { "robot": 0.6, "robotHz": 40, "reverb": 0.7 } },
+   "intents": ["boss_opener", "boss_phase", "boss_low", "last_words", "combat_kill"]
+  },
+  {
+   "id": "boss_ossery", "name": "Ossery Vane", "kind": "boss", "role": "boss, Act 6", "gender": "m", "color": "#8fd0ff",
+   "lexicon": "ossery_vane", "places": ["a6_n06", "a6_n09"],
+   "speech": { "traits": ["grieving", "pompous", "archaic"], "formality": 0.85, "verbosity": 0.7, "cheer": 0.15, "aggression": 0.5, "confidence": 0.7, "family": "ossery" },
+   "voice": { "role": "stormcaller", "seed": 2006, "tweaks": { "depth": 0.7, "speed": 0.4, "flutter": 0.2 },
+    "fxByPhase": { "p1": { "reverb": 0.3 }, "p2": { "reverb": 0.3, "echo": 0.3 }, "p3": { "reverb": 0.3, "echo": 0.3, "robot": 0.2 }, "p4": {} }, "fx": { "reverb": 0.3 } },
+   "intents": ["boss_opener", "boss_phase", "boss_low", "combat_kill"]
+  }
+ ]
+}

@@ -169,6 +169,22 @@ test('the taken strongholds survive a save, and an old save loads with none take
 });
 
 /**
+ * R27 M10 — a warlord slain in a war camp you have not finished taking rides the same ledger as
+ * `wl:<siteKey>` (js/sites.js `restoreTaken`), so it stays dead across a reload. No new save field:
+ * an old save simply has none, and every warlord is standing.
+ */
+test('a slain warlord rides the stronghold ledger as wl:<key> and survives a save', () => {
+  const base = {
+    id: 's1', name: 'Probe', seed: 1, classId: 'ranger', control: { x: 0, z: 0, yaw: 0, pitch: 0 },
+    player: { level: 1, attrs: {}, equipment: {}, bag: [] },
+  };
+  const ledger = { '7:2': ['n14', 'wl:wc31'] };
+  const out = JSON.parse(JSON.stringify(snapshot({ ...base, strongholds: ledger })));
+  assert.deepEqual(out.strongholds['7:2'], ['n14', 'wl:wc31']);
+  assert.ok(/'wl:' \+ war\.site\.key/.test(mainSrc), 'main.js never files a slain warlord in the ledger');
+});
+
+/**
  * R27 M9 — a warband's grip on a zone rides in the territory deltas. A save that dropped it would
  * stand every thinned valley back up at full strength on reload; a save from before round 27 has
  * no `warGrip` and must load at the full seeded claim.

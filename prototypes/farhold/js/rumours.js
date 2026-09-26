@@ -99,6 +99,16 @@ export const KINDS = [
       + (c.warGrip >= 0.67 ? ', and nobody has shifted them' : c.warGrip >= 0.34 ? ', though somebody has been thinning them' : ', but only just'),
   },
   {
+    /**
+     * R27 M10 — a warlord out there. Only ever built from `extra.warlord` / `extra.warlordAt`, which
+     * js/main.js fills from js/sites.js `warCandidates` — a living warlord of an untaken camp — so a
+     * rumour cannot name one that is dead or a camp that has been taken.
+     */
+    key: 'warlord_seen', weight: 9,
+    holds: c => !!c.warlord && !!c.warlordAt,
+    say: c => `${c.warlord} was seen at ${c.warlordAt}`,
+  },
+  {
     key: 'fair', weight: 5,
     holds: c => !!c.fair,
     say: c => `there is a fair on in ${c.zone} and for one day everything is cheap`,
@@ -141,6 +151,8 @@ export function createRumours({ territory = null, factions = null, seed = 1, max
       warbandName: String(record.warbandName || record.warband || '').replace(/^The /, 'the '),
       warGrip: record.warband ? record.warGrip ?? 1 : 0,
       fair: (record.incidents || []).some(i => i.kind === 'fair_day'),
+      warlord: extra.warlord || null,        // R27 M10
+      warlordAt: extra.warlordAt || null,
     };
   }
 

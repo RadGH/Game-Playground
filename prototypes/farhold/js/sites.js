@@ -42,6 +42,7 @@ import { BIOMES } from '../../../worldgen/js/biomes.js';
 import { brazierBody, currentChests } from './chests.js';
 import { M_PER_CELL } from './planet.js';
 import { townExtent } from './town-plan.js';   // R27 M2
+import { wallKitParts, tintParts } from '../../../proctown/js/buildkit.js';   // R27 M10: M3's palisade and bone walls
 
 function mergeParts(parts) {
   let total = 0;
@@ -330,7 +331,90 @@ export const PIECES = {
     { geometry: BOX, color: '#6a6055', matrix: tilt(2.6, 8.2, 0.9, 1.6, 1.2, 0.12, 0, 0.3, 0.5) },
     { geometry: ICO, color: '#6e675c', matrix: at(-3.4, 0.5, 3.6, 1.4, 0.8, 1.2) },
   ]) },
+
+  // R27 M10 — the five warbands' camp pieces (data/setpieces.json `warcamp_*`). The palisade and the
+  // bone wall are M3's own culture walls out of the kit (`kitPiece` below); the rest are new because
+  // nothing in the game was a heap of junk, a thorn hedge, a barrow bank, a standing slab or a totem.
+  /** M3's orc palisade, 6 m of sharpened logs. */
+  warpalisade: { tall: 4.6, cap: 90, solid: [3.2, 3.8], build: () => kitPiece(wallKitParts('palisade', 'wall'), '#8a6a48') },
+  /** M3's bone wall: posts, rib arches, a screen of thin ribs. */
+  bonewall: { tall: 5, cap: 60, solid: [3.2, 4], build: () => kitPiece(wallKitParts('bone', 'wall'), '#d8cfb4') },
+  /** A goblin wall: crates, barrels, a cart wheel and planks, heaped as high as they would go. */
+  junkwall: { tall: 3, cap: 70, solid: [3.1, 2.6], build: (wood = '#6a5238') => mergeParts([
+    { geometry: BOX, color: wood, matrix: at(-2.2, 0.6, 0, 1.3, 1.2, 1.2, 0.2) },
+    { geometry: BOX, color: '#5a4632', matrix: at(-0.6, 0.55, 0.1, 1.1, 1.1, 1.1, -0.3) },
+    { geometry: CYL10, color: '#4a3a28', matrix: at(0.9, 0.7, 0, 0.55, 1.4, 0.55) },
+    { geometry: CYL10, color: '#3f3a36', matrix: at(2.2, 0.55, 0.1, 0.5, 1.1, 0.5) },
+    { geometry: BOX, color: '#7a6048', matrix: at(-1.4, 1.5, 0, 1.0, 0.9, 1.0, 0.5) },
+    { geometry: CYL10, color: '#4a3a28', matrix: tilt(0.4, 1.8, 0.35, 0.9, 0.12, 0.9, Math.PI / 2, 0, 0.2) },
+    { geometry: BOX, color: '#8a7050', matrix: tilt(0, 2.3, -0.1, 6.0, 0.14, 0.4, 0, 0, 0.08) },
+    { geometry: BOX, color: '#6a5238', matrix: tilt(1.6, 1.6, 0, 0.18, 2.6, 0.3, 0, 0, -0.3) },
+  ]) },
+  /** An orc or beastkin totem: a post hung with skulls under a crossbar of horn. */
+  totem: { tall: 5.4, cap: 50, solid: [0.5, 5], build: (wood = '#4a3a28', bone = '#e0d8c0') => mergeParts([
+    { geometry: CYL, color: wood, matrix: at(0, 2.6, 0, 0.18, 5.2, 0.18) },
+    { geometry: CYL, color: wood, matrix: tilt(0, 4.4, 0, 0.1, 2.2, 0.1, 0, 0, Math.PI / 2) },
+    { geometry: SPH, color: bone, matrix: at(0, 4.9, 0.12, 0.42, 0.38, 0.4) },
+    { geometry: CONE, color: bone, matrix: tilt(-0.5, 5.2, 0, 0.12, 0.7, 0.12, 0, 0, 0.8) },
+    { geometry: CONE, color: bone, matrix: tilt(0.5, 5.2, 0, 0.12, 0.7, 0.12, 0, 0, -0.8) },
+    { geometry: SPH, color: bone, matrix: at(-0.95, 3.9, 0.05, 0.26, 0.26, 0.26) },
+    { geometry: SPH, color: bone, matrix: at(0.95, 3.9, 0.05, 0.26, 0.26, 0.26) },
+    { geometry: SPH, color: bone, matrix: at(0, 3.3, 0.16, 0.3, 0.3, 0.3) },
+    { geometry: BOX, color: '#3a3028', matrix: at(0, 0.18, 0, 0.8, 0.36, 0.8) },
+  ]) },
+  /** A length of thorn hedge: three bramble masses and a bristle of long spines. */
+  thorns: { tall: 3, cap: 90, solid: [3.1, 2.4], build: (green = '#4a5a2e') => mergeParts([
+    ...[-2, 0, 2].map((x, i) => ({ geometry: ICO, color: i === 1 ? green : '#3e4a26', matrix: at(x, 1.1, 0, 1.5, 1.2, 1.1, i) })),
+    ...Array.from({ length: 12 }, (_, i) => {
+      const x = -2.7 + i * 0.5, up = i % 3 === 0;
+      return { geometry: CONE, color: '#6b5a3a', matrix: tilt(x, up ? 2.2 : 1.4, (i % 2 ? 0.8 : -0.8), 0.07, 1.3, 0.07, (i % 2 ? 0.9 : -0.9), 0, (i % 4 - 1.5) * 0.3) };
+    }),
+  ]) },
+  /** A barrow bank: a long earth mound with a kerb of grey stones. */
+  barrowbank: { tall: 3, cap: 60, solid: [3.3, 2.6], build: (earth = '#55503f', stone = '#8a8a82') => mergeParts([
+    { geometry: ICO, color: earth, matrix: at(0, 0.8, 0, 3.8, 1.9, 1.9) },
+    ...[-2.6, -0.9, 0.9, 2.6].map((x, i) => ({ geometry: BOX, color: stone, matrix: tilt(x, 0.6, 1.5, 0.9, 1.3, 0.35, 0.15, i * 0.2, 0.05) })),
+    { geometry: BOX, color: stone, matrix: at(0.4, 2.3, 0, 0.5, 1.4, 0.5, 0.4) },
+  ]) },
+  /** A giant's standing slab: a flat dressed stone taller than a house, on a footing. */
+  slab: { tall: 6.2, cap: 60, solid: [1.4, 6], build: (stone = '#8e939a') => mergeParts([
+    { geometry: TAPER, color: stone, matrix: at(0, 3.0, 0, 1.2, 6.0, 0.55, Math.PI / 4) },
+    { geometry: BOX, color: '#6e737a', matrix: at(0, 0.25, 0, 2.2, 0.5, 1.3) },
+    { geometry: BOX, color: '#a8c0d8', matrix: at(0, 4.2, 0.36, 0.5, 0.9, 0.06) },
+  ]) },
+  /** A warband's banner: white cloth on a grey pole, tinted per instance with the warband's colour. */
+  warbanner: { tall: 9.2, cap: 40, solid: [0.4, 9], tinted: true, build: () => PIECES.banner.build('#8a8a8a', '#ffffff') },
 };
+
+// ---------------------------------------------------------------------------- R27 M10: war camps
+
+/**
+ * A proctown kit part list (proctown/js/buildkit.js — M3's town-edge walls) as one of these pieces.
+ * Kit parts stand on their base and a kit WALL runs along +Z; these pieces run along +X, so the
+ * list is turned a quarter round as it is merged. `tint` multiplies the near-white kit colours.
+ */
+const KIT_UNIT = {};
+function kitUnit(kind) {
+  if (KIT_UNIT[kind]) return KIT_UNIT[kind];
+  let g;
+  switch (kind) {
+    case 'cyl': g = new THREE.CylinderGeometry(0.5, 0.5, 1, 8); g.translate(0, 0.5, 0); break;
+    case 'cone': g = new THREE.ConeGeometry(0.5, 1, 8); g.translate(0, 0.5, 0); break;
+    case 'dome': g = new THREE.SphereGeometry(0.5, 10, 4, 0, Math.PI * 2, 0, Math.PI / 2); g.scale(1, 2, 1); break;
+    case 'hip': g = new THREE.ConeGeometry(Math.SQRT1_2, 1, 4); g.rotateY(Math.PI / 4); g.translate(0, 0.5, 0); break;
+    case 'frustum': g = new THREE.CylinderGeometry(0.225 * Math.SQRT2, 0.5 * Math.SQRT2, 1, 4); g.rotateY(Math.PI / 4); g.translate(0, 0.5, 0); break;
+    default: g = new THREE.BoxGeometry(1, 1, 1); g.translate(0, 0.5, 0); break;
+  }
+  return (KIT_UNIT[kind] = g);
+}
+function kitPiece(parts, tint, turn = Math.PI / 2) {
+  const outer = new THREE.Matrix4().makeRotationY(turn);
+  return mergeParts(tintParts(parts, tint).map(p => ({
+    geometry: kitUnit(p.mesh), color: p.colour,
+    matrix: outer.clone().multiply(new THREE.Matrix4().compose(new THREE.Vector3(p.x, p.y, p.z),
+      new THREE.Quaternion().setFromEuler(new THREE.Euler(0, p.yaw || 0, 0)), new THREE.Vector3(p.w, p.h, p.d))),
+  })));
+}
 
 export const PIECE_KEYS = Object.keys(PIECES);
 
@@ -407,6 +491,11 @@ export function createSites(scene, terrain, {
    * `gives.clears` is set is cleared outright and stays empty. See `take()`.
    */
   taken = null,
+  /**
+   * R27 M10 — who holds each zone (js/warbands.js `createWarbandMap`, the enemy field's own). Every
+   * zone a warband claims gets one war camp of that warband. Null: no camps, the world as it was.
+   */
+  warbands = null,
 } = {}) {
   // The LIVE cell size, not the 640 that `data/balance.json` still writes down: the title screen's
   // planet-scale knob moves it, and a camp placed at `cell * 640` on a 128 m-per-cell world lands
@@ -447,6 +536,8 @@ export function createSites(scene, terrain, {
     m.count = 0; m.visible = false; m.frustumCulled = false;
     m.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
     m.name = 'farhold-site-' + key;
+    // R27 M10 — a tinted piece has its colour buffer from the start, so the shader is built with it
+    if (PIECES[key].tinted) m.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(PIECES[key].cap * 3).fill(1), 3);
     scene.add(m);
     meshes[key] = m;
   }
@@ -458,6 +549,7 @@ export function createSites(scene, terrain, {
 
   const fires = [];
   const m4 = new THREE.Matrix4();
+  const tintColour = new THREE.Color();   // R27 M10
 
   /** Every settlement and port, with the ring of ground it keeps clear. See `townGap`. */
   const towns = ((terrain.world?.nodes) || [])
@@ -600,7 +692,7 @@ export function createSites(scene, terrain, {
         const d = Math.hypot(x - px, z - pz);
         if (d >= bestD) continue;
         bestD = d;
-        best = { heading: Math.atan2(dz, dx), half: path.half ?? 3.5, distance: d };
+        best = { heading: Math.atan2(dz, dx), half: path.half ?? 3.5, distance: d, px, pz };
       }
     }
     return best;
@@ -642,7 +734,8 @@ export function createSites(scene, terrain, {
 
   /** Turn the slots into real places: what stands here, what it gives, and what band it belongs to. */
   function buildSites() {
-    const kinds = strongholds?.kinds || [];
+    // R27 M10 — the warband camps are never rolled onto a slot; `placeWarCamps` puts them down after
+    const kinds = (strongholds?.kinds || []).filter(k => !k.warband);
     const layouts = setpieces?.layouts || {};
     const marks = landmarkData?.landmarks || [];
     const chance = strongholds?.chance || { landmark: 0.45, pass: 0.5, dungeon: 0.5, crossing: 0.35, road: 0.16, junction: 0.45 };
@@ -828,7 +921,99 @@ export function createSites(scene, terrain, {
         populated: false, cleared: false,
       });
     }
+    placeWarCamps(out);   // R27 M10 — after every instance and world boss has had its pick
     return out;
+  }
+
+  /**
+   * R27 M10 — A WAR CAMP PER HELD ZONE.
+   *
+   * "Each warband has a place." One slot in every zone a warband claims becomes that warband's
+   * camp (data/strongholds.json `warcamp_<id>`, dressed from data/setpieces.json). It runs AFTER the
+   * rest of `buildSites`, so an instance or a world boss has already taken what it wanted and keeps
+   * it: the camp takes a stronghold slot in the zone if there is one (converting a garrison that was
+   * going to stand there anyway), else the first free slot that fits its walls, and a zone with no
+   * room for one simply has none. Deterministic — the same world, the same camps — so nothing about
+   * WHERE is saved; only `taken` and `warlordSlain` are.
+   */
+  function placeWarCamps(out) {
+    const data = warbands?.data;
+    if (!data || !zones || !warbands?.of) return;
+    const specFor = id => (strongholds?.kinds || []).find(k => k.warband === id) || null;
+    const layouts = setpieces?.layouts || {};
+    const byZone = new Map();
+    const want = (zone, entry) => {
+      const band = warbands.of(zone);
+      if (!band) return;
+      const spec = specFor(band.id);
+      if (!spec || !layouts[spec.plan]) return;
+      if (townGap(entry.x, entry.z) <= layoutRadius(spec.plan) + 30) return;
+      if (!byZone.has(zone.id)) byZone.set(zone.id, { zone, band, spec, stronghold: [], free: [] });
+      byZone.get(zone.id)[entry.site ? 'stronghold' : 'free'].push(entry);
+    };
+    for (const s of out) {
+      // a castle keeps its keep and its stair down: it is never the one turned into a camp
+      if (s.family === 'stronghold' && s.zone && !s.gives?.opensDungeon && (s.tier || 1) < 4) want(s.zone, { site: s, x: s.x, z: s.z, key: s.key, id: s.id });
+    }
+    const used = new Set(out.map(s => String(s.key)));
+    for (const slot of slotsFrom(terrain.world)) {
+      if (used.has(String(slot.key))) continue;
+      if (terrain.underwater?.(slot.x, slot.z) || terrain.bridgedAt?.(slot.x, slot.z, 12)) continue;
+      const zone = zones.at(slot.x, slot.z);
+      if (zone) want(zone, { slot, x: slot.x, z: slot.z, key: slot.key, id: slot.id });
+    }
+    /**
+     * A held zone with no slot in it at all (a moor with no node and no road through it — a quarter
+     * of the user's world is like that) still gets its camp: on a dry, level cell of the zone clear
+     * of the towns and of every place already standing, the first of them in a seeded order. Keyed
+     * by the zone (`wc<id>`), so the same world puts it in the same place and the save finds it.
+     */
+    const cell = terrain.metresPerCell || M_PER_CELL;
+    const W = terrain.world?.width || 0, region = terrain.world?.region || null;
+    if (region && W) {
+      for (const z of zones.list?.() || []) {
+        const band = warbands.of(z);
+        const spec = band && specFor(band.id);
+        if (!spec || !layouts[spec.plan] || byZone.has(z.id)) continue;
+        const cells = [];
+        for (let i = 0; i < region.length; i++) if (region[i] === z.id) cells.push(i);
+        const order = cells.map(i => ({ i, h: makeRng((seed ^ (i * 2246822519) ^ (z.id * 0x9e37)) >>> 0)() })).sort((a, b) => a.h - b.h);
+        const rad = layoutRadius(spec.plan);
+        for (const { i } of order.slice(0, 160)) {
+          const x = ((i % W) + 0.5) * cell, zz = (Math.floor(i / W) + 0.5) * cell;
+          if (zones.at(x, zz)?.id !== z.id) continue;
+          if (terrain.underwater?.(x, zz) || terrain.bridgedAt?.(x, zz, 12)) continue;
+          if ((terrain.slopeAt?.(x, zz, rad) ?? 0) > 0.45) continue;
+          if (townGap(x, zz) <= rad + 30) continue;
+          if (out.some(s => Math.hypot(s.x - x, s.z - zz) < rad + 60)) continue;
+          byZone.set(z.id, { zone: z, band, spec, stronghold: [], free: [{ slot: { key: `wc${z.id}`, id: 50000 + z.id, x, z: zz, cell: { x: i % W, y: Math.floor(i / W) }, on: 'open', name: null }, x, z: zz, key: `wc${z.id}`, id: 50000 + z.id }] });
+          break;
+        }
+      }
+    }
+    for (const { zone, band, spec, stronghold, free } of byZone.values()) {
+      const list = stronghold.length ? stronghold : free;
+      // the same camp every time: the lowest seeded hash, never the order the slots came in — and
+      // off the road if there is anywhere off the road (a road slot is a cell ON the carriageway)
+      const onRoad = e => (e.slot && (e.slot.on === 'road' || e.slot.on === 'junction') ? 1 : 0);
+      const pick = list.map(e => ({ e, h: onRoad(e) + makeRng((seed ^ (Number(e.id) * 2654435761) ^ 0xca3b) >>> 0)() }))
+        .sort((a, b) => a.h - b.h)[0]?.e;
+      if (!pick) continue;
+      const src = pick.site || pick.slot;
+      const camp = {
+        id: src.id, key: src.key,
+        kind: 'camp', type: spec.kind, family: 'stronghold', plan: spec.plan, spec,
+        warCamp: true, warband: band.id, bannerColour: band.colour,
+        name: `The ${band.short} ${band.camp?.name || 'Camp'}` + (pick.slot?.name ? ` at ${pick.slot.name}` : ''),
+        blurb: spec.blurb, gives: spec.gives || {}, faction: band.id,
+        tier: spec.tier || 3, hostile: true,
+        x: src.x, z: src.z, cell: src.cell, zone, level: zone?.midLevel ?? 1,
+        pin: { color: band.colour, r: 2.6 + (spec.tier || 3) * 0.7, glyph: spec.icon || 'camp' },
+        populated: false, cleared: false,
+      };
+      if (pick.site) out[out.indexOf(pick.site)] = camp;
+      else out.push(camp);
+    }
   }
 
   // ---------------------------------------------------------------- building one place
@@ -856,6 +1041,8 @@ export function createSites(scene, terrain, {
         new THREE.Quaternion().setFromEuler(new THREE.Euler(0, yaw, 0)),
         new THREE.Vector3(scale, scale, scale));
       mesh.setMatrixAt(n, m4);
+      // R27 M10 — a tinted piece (the warband banner) takes the site's colour per instance
+      if (PIECES[piece].tinted) { mesh.setColorAt(n, tintColour.set(site.bannerColour || '#b8402a')); mesh.instanceColor.needsUpdate = true; }
       counts[piece] = n + 1;
       const solid = PIECES[piece].solid, legs = PIECES[piece].solids;
       /**
@@ -903,18 +1090,36 @@ export function createSites(scene, terrain, {
     }
     if (!full) return;
 
+    /**
+     * R27 M10 — A WAR CAMP OPENS ONTO ITS ROAD. The whole ring is turned so its gate (every camp
+     * layout skips piece 0) faces the nearest road, and a wall piece that would stand on the
+     * carriageway is left out — a road through a camp goes in one gap and out of another.
+     */
+    let spin = 0, campRoad = false;
+    if (site.warCamp) {
+      const road = roadNear(cx, cz, 160);
+      if (road) { spin = Math.atan2(road.pz - cz, road.px - cx) / (Math.PI * 2); campRoad = true; }
+    }
     for (const ring of layout.rings || []) {
       const count = ring.count || 1;
       for (let i = 0; i < count; i++) {
         if ((ring.skip || []).includes(i)) continue;
-        const turn = ring.angle != null && count === 1
+        const turn = (ring.angle != null && count === 1
           ? ring.angle
-          : (i / count) + (ring.offset || 0);
+          : (i / count) + (ring.offset || 0)) + spin;
         const a = turn * Math.PI * 2;
         const jitter = ring.jitter || 0;
         const r = ring.radius + (jitter ? (rng() - 0.5) * jitter * 2 : 0);
+        let ang = a;
+        if (campRoad && terrain.roadAt) {
+          if (PIECES[ring.piece]?.tinted) {
+            // a banner flanks the road: step it out along the ring, away from the gate, until it is off the carriageway
+            const away = Math.sign(Math.sin(a - spin * Math.PI * 2)) || 1;
+            for (let k = 0; k < 12 && terrain.roadAt(cx + Math.cos(ang) * r, cz + Math.sin(ang) * r) > 0.3; k++) ang += away * 0.012 * Math.PI * 2;
+          } else if (terrain.roadAt(cx + Math.cos(a) * r, cz + Math.sin(a) * r) > 0.3) continue;
+        }
         put(ring.piece,
-          cx + Math.cos(a) * r, cz + Math.sin(a) * r,
+          cx + Math.cos(ang) * r, cz + Math.sin(ang) * r,
           yawFor(ring.rotate || 'in', a, rng),
           (ring.scale ?? 1) * (jitter ? 0.9 + rng() * 0.2 : 1), ring.y || 0);
       }
@@ -1094,6 +1299,7 @@ export function createSites(scene, terrain, {
     // keep the chest field: the monument caches in `furnishLandmarks` have no other way to get one
     if (chests) chestField = chests;
     if (site.family === 'worldboss') return populateWorldBoss(site, { field, chests: chests || theChests(), level });
+    if (site.warCamp) return populateWarCamp(site, { field, chests, nameFor, level });   // R27 M10
     const spec = site.spec;
     const lvl = level ?? site.level ?? 1;
     const rng = field.rng;
@@ -1151,6 +1357,130 @@ export function createSites(scene, terrain, {
     }
     out.prisoners = won ? 0 : (site.gives?.prisoners || 0);
     return out;
+  }
+
+  // ---------------------------------------------------------------- R27 M10: a war camp
+
+  /** The warband row a camp belongs to. */
+  const bandOf = site => (warbands?.data?.warbands || []).find(b => b.id === site?.warband) || null;
+
+  /**
+   * The warlord's own name, the same every time for the same camp (seeded off the site), so a job
+   * and a rumour can name it before you have ever been there. `nameFor` is Name Forge (main.js
+   * `nameRare`), in the warlord's own tongue; without it, the title alone.
+   */
+  function warlordNameOf(site, nameFor = null) {
+    if (site.warlordName) return site.warlordName;
+    const band = bandOf(site);
+    const def = (warbands?.data?.warlords || []).find(w => w.id === band?.warlord);
+    if (!def) return null;
+    const given = nameFor ? nameFor(def, makeRng((seed ^ (Number(site.id) * 374761393) ^ 0x7a1d) >>> 0)) : null;
+    site.warlordName = given ? `${given}, the ${def.name}` : def.name;
+    return site.warlordName;
+  }
+
+  /**
+   * THE GARRISON IS PURE: the warband's own members at this level (`d.warband === held.id`) and
+   * nobody else's. If the level band leaves none, the members nearest the level; only if the
+   * warband has no member at all does it fall back to what lives here — and says so on the site
+   * (`garrisonFallback`), which tests/round27-warcamps.test.js counts rather than letting it pass
+   * in silence.
+   */
+  function garrisonPool(site, field, lvl) {
+    const spread = balance.spawn?.levelSpread ?? 2;
+    const own = (field.defs || []).filter(d => d.warband === site.warband && !d.rareOnly);
+    const fits = own.filter(d => (d.minLevel ?? 1) <= lvl + spread && (d.maxLevel ?? 99) >= lvl - spread);
+    if (fits.length) return { pool: fits, fallback: null };
+    if (own.length) {
+      const off = d => Math.max(0, (d.minLevel ?? 1) - lvl, lvl - (d.maxLevel ?? 99));
+      const best = Math.min(...own.map(off));
+      return { pool: own.filter(d => off(d) === best), fallback: 'nearest-level' };
+    }
+    return { pool: field.defsFor(site.x, site.z, lvl), fallback: 'full-pool' };
+  }
+
+  /**
+   * FILL A WAR CAMP: the warlord in the middle, one standard-bearer, the rest of the garrison, all
+   * of them in the warlord's band (js/actors.js `linkEscort`: the aura, the wake, the rout), and the
+   * strongbox sealed until the last of them is down. The boss is handed back as `warlord`, NOT
+   * `boss`: a camp is taken when its LAST guard falls (`warDeath`), not the moment its boss does,
+   * so main.js's boss-takes-the-place path (`freePrisonersOf`) never sees it.
+   */
+  async function populateWarCamp(site, { field, chests, nameFor, level }) {
+    const out = { boss: null, warlord: null, chest: null, garrison: [], prisoners: 0, warCamp: true };
+    const spec = site.spec, band = bandOf(site);
+    if (!spec || !band) return out;
+    const lvl = Math.max(1, Math.round(level ?? site.level ?? 1));
+    const rng = field.rng;
+    const won = !!site.taken;
+    const { pool: all, fallback } = garrisonPool(site, field, lvl);
+    site.garrisonFallback = fallback;
+    if (!all.length) return out;
+    const bearerDef = all.find(d => d.id === band.bearer) || (field.defs || []).find(d => d.id === band.bearer) || null;
+    const pool = all.filter(d => d.id !== band.bearer);
+
+    if (!won && !site.warlordSlain) {
+      const def = (field.bosses || []).find(b => b.id === band.warlord);
+      if (def) {
+        out.warlord = await field.placeBoss(def, lvl, site.x, site.z, { name: warlordNameOf(site, nameFor), modifiers: spec.boss?.modifiers ?? 0 });
+        if (out.warlord) {
+          out.warlord.warCamp = site.key; out.warlord.isWarlord = true; out.warlord.siteKey = site.key;
+          field.onLog?.(`${out.warlord.name} holds ${site.name}.`, 'bad');
+        }
+      }
+    }
+
+    const span = spec.garrison?.count || [5, 7];
+    const n = span[0] + Math.floor(rng() * (span[1] - span[0] + 1));
+    const ring = r => {
+      const a = rng() * Math.PI * 2;
+      return terrain.clampToWorld(site.x + Math.cos(a) * r, site.z + Math.sin(a) * r);
+    };
+    const put = async (def, rank) => {
+      // a camp on a lake shore: walk round until the spot is dry rather than losing the body
+      let x, z, tries = 0;
+      do { [x, z] = ring(5 + rng() * (8 + (spec.tier || 3) * 3)); } while (terrain.underwater(x, z) && ++tries < 8);
+      if (terrain.underwater(x, z)) return null;
+      const unit = await field.addRanked(def, lvl, x, z, rank);
+      if (unit) { unit.siteKey = site.key; unit.warCamp = site.key; out.garrison.push(unit); }
+      return unit;
+    };
+    if (!won && bearerDef) await put(bearerDef, field.rpg.rollRank(rng, { bonus: spec.garrison?.rankBonus || 1 }));
+    for (let i = 0; i < n && pool.length; i++) {
+      await put(rng.pick(pool), i === 0 ? field.rpg.rollRank(rng, { bonus: spec.garrison?.rankBonus || 1 }) : 'normal');
+    }
+    if (out.warlord) field.linkEscort?.(out.warlord, out.garrison);
+    site.roster = [...out.garrison, ...(out.warlord ? [out.warlord] : [])];
+
+    // the strongbox: sealed until the last of them is down, and it rolls from the warband's own drops
+    if (chests && spec.chest?.kind && !won) {
+      const a = rng() * Math.PI * 2, r = 3 + (spec.tier || 3);
+      out.chest = chests.place(spec.chest.kind, site.x + Math.cos(a) * r, site.z + Math.sin(a) * r,
+        { key: `warcamp:${site.key}`, level: lvl, facing: rng() * Math.PI * 2, name: `${site.name}: the War-Chest` });
+      if (out.chest) {
+        out.chest.guards = site.roster.slice();
+        out.chest.bases = band.drops || null;
+        out.chest.unique = band.unique ? { id: band.unique, chance: balance.warbands?.campUniqueChance ?? 0.15 } : null;
+      }
+    }
+    site.chest = out.chest;
+    return out;
+  }
+
+  /**
+   * One of a camp's own has died. Returns `{ site, warlord, cleared }` — `warlord` when it was the
+   * warlord (main.js drops the grip by `warbands.warlordGrip` and files it slain), `cleared` when
+   * nobody of the roster is left standing (main.js takes the camp through M1's payer and drops the
+   * grip by `warbands.campGrip`). A routed runner is still standing, so it still has to be caught.
+   */
+  function warDeath(unit) {
+    if (!unit || unit.warCamp == null) return null;
+    const site = sites.find(s => s.warCamp && String(s.key) === String(unit.warCamp));
+    if (!site || site.taken) return null;
+    const warlord = !!unit.isWarlord;
+    if (warlord) site.warlordSlain = true;
+    const standing = (site.roster || []).filter(u => u && u !== unit && !u.removed && u.dying == null);
+    return { site, warlord, cleared: standing.length === 0 };
   }
 
   // ---------------------------------------------------------------- R27 M1: taking one
@@ -1221,6 +1551,8 @@ export function createSites(scene, terrain, {
     if (!taken) return;
     const keys = new Set([...(taken || [])].map(String));
     for (const s of sites) if (s.family === 'stronghold' && keys.has(String(s.key))) markTakenStronghold(s);
+    // R27 M10 — a slain warlord rides the same ledger as `wl:<key>`, so it stays dead
+    for (const s of sites) if (s.warCamp && keys.has('wl:' + s.key)) s.warlordSlain = true;
   }
 
   /** `<a Name Forge given name> <epithet>`, or something that still reads as a name without one. */
@@ -1552,6 +1884,30 @@ export function createSites(scene, terrain, {
       if (!s || !s.gives?.opensDungeon) return null;
       s.stair = s.stair || stairFor(s);
       return s.stair;
+    },
+    /** R27 M10 — a war camp's roster lost one: `{ site, warlord, cleared }` or null. */
+    warDeath,
+    /** R27 M10 — every war camp on this world. */
+    get warCamps() { return sites.filter(s => s.warCamp); },
+    warlordName: warlordNameOf,
+    /**
+     * R27 M10 — the camps and living warlords of one zone, as js/jobgen.js candidates. Only what
+     * exists: an untaken camp; a warlord whose camp is untaken and who has not been slain.
+     */
+    warCandidates(zoneId, nameFor = null) {
+      const out = [];
+      for (const s of sites) {
+        if (!s.warCamp || s.taken || s.zone?.id !== zoneId) continue;
+        const band = bandOf(s);
+        const cell = s.cell || null;
+        out.push({ type: 'camp', id: 'camp:' + s.key, siteKey: s.key, name: s.name, warband: s.warband,
+          warbandName: band?.name || null, x: s.x, z: s.z, cell, hostile: true });
+        if (!s.warlordSlain && band?.warlord) {
+          out.push({ type: 'warlord', id: band.warlord, siteKey: s.key, name: warlordNameOf(s, nameFor),
+            warband: s.warband, campName: s.name, x: s.x, z: s.z, cell, hostile: true });
+        }
+      }
+      return out;
     },
     /** The keys of every stronghold taken on this world, for the save. */
     takenKeys: () => sites.filter(s => s.family === 'stronghold' && s.taken).map(s => s.key),

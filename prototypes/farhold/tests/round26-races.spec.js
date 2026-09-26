@@ -94,7 +94,8 @@ test('the enemy warbands build as race bodies and the live spawner puts them in 
 
   const ids = await page.evaluate(() => window.farhold.bestiaryIds);
   const bands = ['sootwick', 'ashtusk', 'thornmane', 'unburied', 'stonehide'];
-  for (const b of bands) expect(ids.filter(id => id.startsWith(b + '_')).length, `${b} is not in the bestiary`).toBe(5);
+  // R27 M10: six members each (the standard-bearer is the sixth)
+  for (const b of bands) expect(ids.filter(id => id.startsWith(b + '_')).length, `${b} is not in the bestiary`).toBe(6);
 
   // every member, built for real, next to an ordinary human bandit for scale
   const bodies = await page.evaluate(async bands => {

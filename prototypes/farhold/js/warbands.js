@@ -68,7 +68,57 @@ export function installWarbands(bestiary, data) {
     have.add(d.id);
     added++;
   }
+  // R27 M10 — and the five warlords, as bosses: `bossFor` then finds them like any other boss (and
+  // the Gravemarshal and the Peak-King are what fills the empty boss band above level 30)
+  bestiary.bosses = bestiary.bosses || [];
+  const bossIds = new Set(bestiary.bosses.map(b => b.id));
+  for (const w of data.warlords || []) {
+    if (bossIds.has(w.id)) continue;
+    bestiary.bosses.push({ ...w });
+    bossIds.add(w.id);
+    added++;
+  }
   return added;
+}
+
+// ---------------------------------------------------------------------------- R27 M10
+
+/** The warlord row of a warband (by warband id), or null. */
+export function warlordOf(data, bandId) {
+  const band = warbandById(data, bandId);
+  return (data?.warlords || []).find(w => w.id === band?.warlord) || null;
+}
+
+/**
+ * R27 M10 — DOES THIS BODY FIT THROUGH THAT DOOR?
+ *
+ * A warlord is 1.6-2.2 times the size of its kin, and an instance's corridors are 2.4-6.5 m wide
+ * under walls 3.4-9.5 m high (data/instances.json `interior`, js/dungeon-plan.js). `room` is
+ * `{ corridor, wallHeight }`; a def with no `scale`/`bodyHeight` is an ordinary body and always fits.
+ * `bodyHeight`/`bodyWidth` are metres at scale 1 (tools/build-warbands.py BODY; the spec measures
+ * the real body against them).
+ */
+export function fitsRoom(def, room) {
+  if (!def || !room) return true;
+  const k = def.scale ?? 1;
+  const tall = (def.bodyHeight ?? 1.8) * k, wide = (def.bodyWidth ?? 0.9) * k;
+  if (Number.isFinite(room.wallHeight) && tall > room.wallHeight) return false;
+  if (Number.isFinite(room.corridor) && wide > room.corridor) return false;
+  return true;
+}
+
+/**
+ * R27 M10 — THE LEADER'S AURA, AS A MODIFIER.
+ *
+ * data/enemies.json's `_doc` has said "leader buffs its pack" since round 4 and nothing did. This is
+ * the modifier an escort carries while its leader stands, handed to js/actors.js `applyModifier` —
+ * the very path a boss phase and a champion's roll take — so it is folded into the escort's own
+ * `dmg` ONCE and never becomes a second multiplier in `strike`. `balance.warbands.leaderAura` is
+ * the factor. Not in the rollable modifier table: nothing can roll "led".
+ */
+export function leaderModifier(cfg = {}) {
+  const k = Number.isFinite(cfg?.leaderAura) ? cfg.leaderAura : 1.15;
+  return { id: 'leader', name: 'Led', dmg: k, desc: 'fights harder while its leader stands' };
 }
 
 /** The warband row by id. */

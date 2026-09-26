@@ -647,6 +647,12 @@
     "campGrip": 0.35,
     "warlordGrip": 0.4,
     "patrolSpawnRadius": 150,
-    "patrolSize": [3, 5]
+    "patrolSize": [3, 5],
+    "_m10Doc": "R27 M10 — leaders that lead. `leaderAura` is the damage factor an escort carries while its leader (a pack leader or a camp's warlord) stands, applied once through js/actors.js applyModifier; killing the standard-bearer ends it early. On the leader's death each escort rolls `routChance` to flee for `routSeconds` (at least one always breaks), then comes back. `campUniqueChance` / `warlordUniqueChance` are the odds a war camp's strongbox / a slain warlord gives up that warband's own unique (data/uniques.json rows carrying `warband`).",
+    "leaderAura": 1.15,
+    "routChance": 0.5,
+    "routSeconds": 6,
+    "campUniqueChance": 0.15,
+    "warlordUniqueChance": 0.1
   }
 }

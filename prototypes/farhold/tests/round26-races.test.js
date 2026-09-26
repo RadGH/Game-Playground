@@ -82,7 +82,8 @@ test('a preset stamps the race and moves the body to where that race sits, and k
 test('every race a player cannot be is an enemy warband, with melee, rogue, ranged, caster and leader', () => {
   const enemyRaces = CHIBI2_RACE_IDS.filter(r => !PLAYABLE_RACES.includes(r));
   assert.deepEqual(warbands.warbands.map(b => b.race).sort(), [...enemyRaces].sort());
-  const roleFor = { melee: 'brute', rogue: 'skirmisher', ranged: 'archer', caster: 'caster', leader: 'leader' };
+  // R27 M10 — and a sixth: the standard-bearer, a brute that carries the colours
+  const roleFor = { melee: 'brute', rogue: 'skirmisher', ranged: 'archer', caster: 'caster', leader: 'leader', bearer: 'brute' };
   for (const band of warbands.warbands) {
     const types = band.defs.map(d => d.type).sort();
     assert.deepEqual(types, Object.keys(roleFor).sort(), `${band.id} is missing a job`);
@@ -99,8 +100,34 @@ test('every race a player cannot be is an enemy warband, with melee, rogue, rang
   }
 });
 
+test('R27 M10 — six members and a warlord per warband; leaders, bearers and warlords wear the round-26 class helms', async () => {
+  const { CLASS_HATS } = await import('../../../avatar-3d/js/chibi2-hats.js');
+  const partsSrc = readFileSync(join(here, '../../../avatar-2d/js/parts/chibi2-parts.js'), 'utf8');
+  const helms = new Set(CLASS_HATS);
+  for (const band of warbands.warbands) {
+    assert.equal(band.defs.length, 6, `${band.id} has ${band.defs.length} members`);
+    const bearer = band.defs.find(d => d.type === 'bearer');
+    const leader = band.defs.find(d => d.type === 'leader');
+    const warlord = warbands.warlords.find(w => w.id === band.warlord);
+    assert.ok(bearer && bearer.banner === band.colour, `${band.id}'s bearer carries no colours`);
+    assert.equal(leader.bearer, bearer.id, `${band.id}'s leader has no standard-bearer`);
+    assert.ok(warlord, `${band.id} has no warlord`);
+    for (const d of [leader, bearer, warlord]) {
+      const hat = d.look.avatar.hat?.id;
+      assert.ok(helms.has(hat), `${d.id} wears ${hat}, not a class helm`);
+      // a hat id the shared 2D registry does not know is dropped by the normaliser
+      assert.ok(new RegExp(`\\b${hat}\\b`).test(partsSrc) || ['great_helm', 'plate_helm'].includes(hat), `${hat} is not in chibi2-parts.js`);
+      assert.equal(normalizeAvatar(d.look.avatar).hat?.id, hat, `${d.id}'s ${hat} did not survive the normaliser`);
+    }
+  }
+  // the four the plan names are all in use, and the Packlord has a hat at last
+  const worn = new Set([...warbands.warbands.flatMap(b => b.defs), ...warbands.warlords].map(d => d.look.avatar.hat?.id));
+  for (const h of ['war_helm', 'bone_headdress', 'wolf_helm', 'rune_helm']) assert.ok(worn.has(h), `nobody wears ${h}`);
+  assert.ok(warbands.warbands.find(b => b.id === 'thornmane').defs.find(d => d.id === 'thornmane_packlord').look.avatar.hat?.id);
+});
+
 test('every warband look survives the shared normaliser whole: race, and every part id', () => {
-  for (const d of warbandDefs(warbands)) {
+  for (const d of [...warbandDefs(warbands), ...(warbands.warlords || [])]) {   // R27 M10: the warlords too
     const a = d.look.avatar;
     const n = normalizeAvatar(a);
     assert.equal(n.body.race, a.body.race, `${d.id} lost its race`);
@@ -120,7 +147,9 @@ test('every warband drop base is an item that exists, and every id is new to the
     for (const b of d.dropBases) assert.ok(bases.has(b), `${d.id} drops '${b}', which is not an item`);
   }
   const copy = { enemies: bestiary.enemies.slice() };
-  assert.equal(installWarbands(copy, warbands), 25);
+  // R27 M10 — six members per warband now (the standard-bearer), and the five warlords into `bosses`
+  assert.equal(installWarbands(copy, warbands), 35);
+  assert.equal(copy.bosses.length, 5);
   assert.equal(installWarbands(copy, warbands), 0, 'installing twice doubled the bestiary');
   assert.ok(copy.enemies.find(e => e.id === 'ashtusk_brute').warband === 'ashtusk');
 });

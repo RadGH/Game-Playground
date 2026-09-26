@@ -125,7 +125,8 @@ test('R23.1 — the taxonomy adds up to the rule: 4 per plain weapon, 2 per cast
   assert.equal(UNIQUE_TYPES.filter(t => t.group === 'caster').length, 5, 'the five casters are wand, staff, sceptre, orb and tome');
   assert.deepEqual(CASTER_ELEMENTS, ['fire', 'ice', 'lightning', 'poison', 'shadow', 'arcane']);
   assert.equal(UNIQUE_TARGET, 184);
-  assert.equal(uniqueData.uniques.length, UNIQUE_TARGET);
+  // R27 M10 — the five warband uniques sit outside the per-type rule (one per warband, not per type)
+  assert.equal(uniqueData.uniques.filter(u => !u.warband).length, UNIQUE_TARGET);
 });
 
 test('R23.1 — every type holds exactly its share, and every unique is the type the game treats it as', () => {
@@ -133,6 +134,7 @@ test('R23.1 — every type holds exactly its share, and every unique is the type
   const counts = new Map();
   for (const u of uniqueData.uniques) {
     const t = typeOfUnique(u, items, WEAPON_PATTERNS);
+    if (u.warband) { assert.ok(t && t.key === u.type, `${u.id} is not the type it says`); continue; }   // R27 M10
     assert.ok(t, `${u.id} is no type at all`);
     assert.equal(t.key, u.type, `${u.id} says it is a ${u.type}; the game would treat it as a ${t.key}`);
     const key = t.element ? `${t.key}/${t.element}` : t.key;
@@ -754,5 +756,31 @@ test('the older caster uniques always drop as the element their lore promises', 
       seen.add(attuneWeapon(dressUnique(raw, u)).castElement);
     }
     assert.deepEqual([...seen], [element], `${id} came out as ${[...seen].join(', ')}`);
+  }
+});
+
+// ================================================================ R27 M10: the warbands' own
+
+test('R27 M10 — five warband uniques, one per warband, on powers that already exist, each power once per hit', () => {
+  const warbandData = read('data/warbands.json');
+  const rows = uniqueData.uniques.filter(u => u.warband);
+  assert.equal(rows.length, 5);
+  assert.deepEqual(rows.map(u => u.id).sort(), warbandData.warbands.map(b => b.unique).sort());
+  const older = new Set([...uniqueData.uniques.filter(u => !u.warband).map(u => u.legendaryEffect), ...SHARED_POWERS]);
+  for (const u of rows) {
+    assert.ok(older.has(u.legendaryEffect), `${u.id} carries ${u.legendaryEffect}, a power nothing else had — no new powers this round`);
+    assert.ok(!(freshItems().uniques || []).some(x => x.id === u.id), `${u.id} is on disk in the shared items.json`);
+    const { r, p } = wearing(u.legendaryEffect, { uniqueId: u.id });
+    const mine = r.fx.effects(p).filter(e => e.id === 'legendary:' + u.legendaryEffect);
+    assert.equal(mine.length, 1, `${u.id}'s power is registered ${mine.length} times`);
+    // count every hook of that power across ONE real hit
+    const calls = {};
+    for (const [k, v] of Object.entries(mine[0])) {
+      if (typeof v !== 'function') continue;
+      mine[0][k] = (...a) => { calls[k] = (calls[k] || 0) + 1; return v.apply(mine[0], a); };
+    }
+    const e = foe(r, 1, 0);
+    r.strike(p, e, makeRng(5), { applyStatus: statusFn });
+    for (const [k, n] of Object.entries(calls)) assert.ok(n <= 1, `${u.id}: ${k} ran ${n} times on one hit`);
   }
 });

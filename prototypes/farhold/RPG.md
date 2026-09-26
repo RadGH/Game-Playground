@@ -4477,3 +4477,89 @@ take, respawn/quest-giver exemption, Hunted targeting + refused knock, knock wit
 `nightSpawn` with odd family and share, verdict table). `tests/round23-bridge-gate.spec.js` gains
 the shut-gate walk in the real game, and its older gate test now finds Fenkeep's west gate as the
 nearest one (M5 moved it 31 m, as the node test already says).
+
+### Round 27 — War camps, warlords and leaders that lead (M10)
+
+**What was wrong.** A warband (round 26) held ground and nothing else: no place of its own, nobody
+at the top, and the pecking order inside a pack was a lie. `leads` spawned an escort that nothing
+tied to the leader — the pack wake matched `defId` only, so hitting a brute left its archers and
+the leader standing about; data/enemies.json's `_doc` has said "leader buffs its pack" since round 4
+and no code did; killing the leader changed nothing. Above level 30 there was no boss at all (M1
+made `bossFor` fall back to the nearest band, but the band above 30 was empty). And the Thornmane
+Packlord had no hat.
+
+**What changed.**
+- **A war camp per held zone** (`js/sites.js` `placeWarCamps`, after instances and world bosses
+  have had their pick, so their slots are exactly what they were — the test compares them with
+  and without camps). A camp takes a garrison slot in the zone (never a castle: a keep with a
+  stair down stays a keep), else the first free slot, off the road if it can, else — for the
+  quarter of 25392's zones with no node or road in them — a dry, level cell of the zone clear of
+  towns and of every other place (`wc<zoneId>`). 159 camps over 161 held zones on the six seeds.
+  Five `data/strongholds.json` rows (`warcamp_<band>`, `faction` = the warband id, never rolled)
+  and five `data/setpieces.json` layouts: the Sootwick junk wall, the Ashtusk palisade (M3's orc
+  wall out of the proctown kit, via `kitPiece`) with bone totems, the Thornmane thorn ring and hide
+  tents, the Unburied barrow-fort (earth banks, M3's bone wall at the gate, an opened barrow), the
+  Stonehide ring of standing slabs. Eight new pieces; the banner is `warbanner`, white cloth tinted
+  per instance with the warband's `colour`. The ring turns so its gate faces the nearest road, a
+  wall piece that would stand on the carriageway is left out, and a banner is stepped along the
+  ring until it flanks the road instead of standing in it.
+- **The garrison is pure** (`garrisonPool`): the warband's own members at the camp's level, then
+  the members nearest the level, and only then the zone's wildlife — flagged on the site
+  (`garrisonFallback`) and counted by the test (0 fallbacks over 1,347 bodies). One standard-bearer
+  always, the warlord in the middle, everyone linked into the warlord's band.
+- **Taking a camp** is the LAST guard falling, not the boss: `sites.warDeath(unit)` answers
+  `{ warlord, cleared }`; main.js (≤ 20 lines, all `// R27 M10`) drops the grip by
+  `warbands.warlordGrip` on the warlord and files it slain as `wl:<key>` in M1's stronghold ledger
+  (no new save field), and on `cleared` calls `sites.take` → `payStronghold` (M1's one payer) and
+  drops the grip by `warbands.campGrip`. The war-chest stays sealed until then (round 25's
+  `guards`), rolls from the warband's own drop list (`chest.bases`) and holds its unique at
+  `warbands.campUniqueChance`. A routed runner is still standing, so it still has to be caught.
+- **Warlords**: five injected bosses (`tools/build-warbands.py` → `data/warbands.json` `warlords`,
+  put into `bestiary.bosses` by `installWarbands`; data/enemies.json untouched) — humanoid bodies of
+  the warband's race at 1.6-2.2x, 2-3 phases in the existing `{ at, modifier, say }` shape, `spawns`
+  of their own members (the Overchief roars at half health and calls two brutes), a Name Forge name
+  in the warband's tongue (seeded per camp, so a job can name it before you have been there).
+  The Gravemarshal (22-36) and the Peak-King (30-50) fill the boss band above 30. `bossFor` keeps a
+  warlord to its own ground — or to levels no other boss's band reaches — so a beast lair in goblin
+  country still holds a beast; `bossForHolds(…, { room })` keeps any boss out of an instance whose
+  corridor or ceiling it would not fit (`fitsRoom`, `bodyHeight`/`bodyWidth` per race).
+- **Leaders that lead** (`js/actors.js`): `linkEscort` stamps `leader` on every escort (and on a
+  warlord's phase adds) and puts the aura on through the EXISTING `applyModifier` — which now also
+  takes a modifier object, and an `exact` one keeps unrounded damage so `removeModifier` can take
+  it back off to the last decimal. `balance.warbands.leaderAura` is the factor. The standard-bearer
+  (a sixth member, champion-capable, a banner on its back in the warband colour) ends the aura early
+  (`breakAura`). A band wakes together: any member in a chase this frame wakes the rest this frame.
+  The leader plays `point` once on aggro (and the walk cycle waits for it). On the leader's death
+  every follower rolls `routChance` to flee for `routSeconds` — at least one always breaks — then
+  comes back into the fight.
+- **Helms**: Ringleader and Warchief `war_helm`, Packlord `wolf_helm` (its first hat), Deathmarshal
+  and Mountainlord `rune_helm`, bearers `bone_headdress`/`war_helm`, warlords `war_helm`,
+  `bone_headdress`, `wolf_helm`, `plate_helm`, `great_helm`. Data only.
+- **Jobs and rumours**: `break_the_camp` and `bring_down_warlord` bind only to what
+  `sites.warCandidates(zoneId)` lists — an untaken camp, a living warlord of an untaken camp — and a
+  `warlord_seen` rumour ("<name> was seen at <camp>") is built from the same list. A taken camp
+  finishes its job through `questLog.onClear` in `payStronghold`.
+- **Uniques**: five warband rows in `tools/build-uniques.mjs` (Gutterking's Shiv, Ashtusk Headtaker,
+  Moonhook, Gravemarshal's Oath, Peakbreaker) on powers that already existed, marked `warband` so
+  `rollDrop`'s ordinary legendary roll never picks one; `rpg.uniqueItem(id)` makes one for the
+  war-chest, and `rollDrops` gives a warlord's up at `warbands.warlordUniqueChance`.
+
+**Files outside the plan's list, and why:** `js/rpg.js` (the `!u.warband` filter, `uniqueItem`,
+`uniqueDrop` carried through `makeEnemy`, the warlord roll in `rollDrops`) and `js/chests.js` (two
+lines: `bases` and `unique` on a placed chest) — the plan asks for the chest and the warlord to roll
+from the warband's list and nothing else could carry it. `tests/poi.test.js` accepts a warband id as
+a camp's holder; `tests/round16-instances.test.js` counts 28 site pieces.
+
+**Tests.** `tests/round27-warcamps.test.js` (16, real worlds on the six seeds, the real field, real
+territory, real jobgen, real chests): camps per held zone and none elsewhere; world-boss and
+instance slots unchanged; pure garrisons; sealed chest + forced unique; one take and a grip drop of
+exactly `campGrip` (0.337) and `warlordGrip` (0.211); save keys; warlord data; `bossFor` 31-50 never
+null; the door check bites; a scripted phase fight (every phase once, in order, adds of its own);
+the aura at 1.37 measured through the real `strike` at 1.37 ± 0.001 (not 1.37²) and back to 1
+after the bearer dies; the band wakes on the next frame, a rout within 2 s and everyone back by
+8 s; over 500 jobs both frames offered and all bound to something standing; the rumour; the
+uniques. Extended: `round26-races.test.js` (six members + warlord, class helms through the
+normaliser), `round23-uniques.test.js` (the five rows, existing powers, each hook ≤ once per hit),
+`save.test.js` (`wl:` rides the ledger). Browser: `tests/round27-warcamps.spec.js` walks up to a
+camp, checks banners, walls and a pure garrison, kills the warlord and watches the rout and the
+return; screenshots in `research/round27-warcamps/`.

@@ -1,5 +1,5 @@
 {
- "_doc": "Round 23 — Farhold's own uniques. Built by tools/build-uniques.mjs from its rows (edit those, not this file). Loaded at boot and put into items.uniques IN MEMORY by js/uniques.js installUniques: items.json is shared with Emberveil, which has no registry entry for any of these powers. `type` is the taxonomy key from js/uniques.js UNIQUE_TYPES; `element`, `wandBehaviour` and `staffSpell` are written onto the item by dressUnique; `gearBase` / `toolBase` name a js/gear.js or data/tools.json base for the four slots that have no items.json base. Units are Farhold engine units (js/affixes.js ENGINE_UNIT). See research/round23-uniques.md.",
+ "_doc": "Round 23 — Farhold's own uniques. Built by tools/build-uniques.mjs from its rows (edit those, not this file). Loaded at boot and put into items.uniques IN MEMORY by js/uniques.js installUniques: items.json is shared with Emberveil, which has no registry entry for any of these powers. `type` is the taxonomy key from js/uniques.js UNIQUE_TYPES; `element`, `wandBehaviour` and `staffSpell` are written onto the item by dressUnique; `gearBase` / `toolBase` name a js/gear.js or data/tools.json base for the four slots that have no items.json base. Units are Farhold engine units (js/affixes.js ENGINE_UNIT). See research/round23-uniques.md. R27 M10: the rows carrying `warband` are that warband's own unique; they drop only from its war-chest and its warlord.",
  "uniques": [
   {
    "id": "fh_nettlepin",
@@ -5400,6 +5400,151 @@
      "max": 0.24
     }
    ]
+  },
+  {
+   "id": "fh_gutterkings_shiv",
+   "name": "Gutterking's Shiv",
+   "type": "dagger",
+   "slot": "weapon",
+   "baseItemId": "dagger",
+   "act": 2,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 9
+    },
+    {
+     "stat": "critChance",
+     "value": 5
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 13,
+     "max": 24
+    }
+   ],
+   "legendaryEffect": "venom_stack",
+   "lore": "A goblin knife that has been in more pockets than it has sheaths. Every cut it makes goes green.",
+   "warband": "sootwick"
+  },
+  {
+   "id": "fh_ashtusk_headtaker",
+   "name": "Ashtusk Headtaker",
+   "type": "greataxe",
+   "slot": "weapon",
+   "baseItemId": "axe2h",
+   "act": 3,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 11
+    },
+    {
+     "stat": "dmg",
+     "value": 8
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hp",
+     "min": 32,
+     "max": 58
+    }
+   ],
+   "legendaryEffect": "quake_slam",
+   "lore": "The Horde carries it in front of the Overchief. Where it comes down, the ground remembers.",
+   "warband": "ashtusk"
+  },
+  {
+   "id": "fh_moonhook",
+   "name": "Moonhook",
+   "type": "halberd",
+   "slot": "weapon",
+   "baseItemId": "halberd",
+   "act": 4,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 14
+    },
+    {
+     "stat": "critDamage",
+     "value": 32
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 4,
+     "max": 8
+    }
+   ],
+   "legendaryEffect": "opportunist",
+   "lore": "A Thornmane hunting hook, notched once for every one that ran.",
+   "warband": "thornmane"
+  },
+  {
+   "id": "fh_gravemarshals_oath",
+   "name": "Gravemarshal's Oath",
+   "type": "greatsword",
+   "slot": "weapon",
+   "baseItemId": "sword2h",
+   "act": 5,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 16
+    },
+    {
+     "stat": "lifeSteal",
+     "value": 6
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "dmg",
+     "min": 6,
+     "max": 14
+    }
+   ],
+   "legendaryEffect": "curse_spreads",
+   "lore": "Sworn to a king nobody remembers, and still keeping its word. What it cuts passes the curse on.",
+   "warband": "unburied"
+  },
+  {
+   "id": "fh_peakbreaker",
+   "name": "Peakbreaker",
+   "type": "warhammer",
+   "slot": "weapon",
+   "baseItemId": "warhammer",
+   "act": 6,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 18
+    },
+    {
+     "stat": "initiative",
+     "value": 4
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 29,
+     "max": 52
+    }
+   ],
+   "legendaryEffect": "critical_armorpen",
+   "lore": "A giant's hammer with a slab of the mountain for a head. Armour is only another stone.",
+   "warband": "stonehide"
   }
  ]
 }

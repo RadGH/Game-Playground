@@ -169,6 +169,107 @@ T['members'] = [
 ]
 W.append(T)
 
+# ---------------------------------------------------------------- R27 M10: bearers, helms, warlords, camps
+#
+# "Each warband has a place, a face and a pecking order." Everything below is DATA: js/warbands.js
+# injects it at load (data/enemies.json is never written), js/actors.js reads `bearer`, `banner` and
+# `leads`, js/sites.js reads `camp`, and tools/build-uniques.mjs owns the five uniques named here.
+
+TPL['bearer'] = dict(role='brute', hp=95, dmg=[10,15], armor=9, speed=3.4, reach=2.9, aggroRange=30, attackEvery=1.8, xp=48, gold=30, pack=[1,1])
+
+# the round-26 class helms (avatar-3d/js/chibi2-hats.js CLASS_HATS), on every leader and elite
+HELMS = {
+ 'sootwick_ringleader':   ('war_helm', '#6a6e74'),
+ 'ashtusk_warchief':      ('war_helm', '#4a4e54'),
+ 'thornmane_packlord':    ('wolf_helm', '#6b5a44'),   # it had no hat at all before R27
+ 'unburied_deathmarshal': ('rune_helm', '#8a8e94'),
+ 'stonehide_mountainlord':('rune_helm', '#8a9aaa'),
+}
+for band in W:
+    for m in band['members']:
+        if m['id'] in HELMS:
+            hid, col = HELMS[m['id']]
+            m['look']['hat'] = {'id': hid, 'color': col}
+
+# how tall a body of each race stands at scale 1, in metres, and how wide at the shoulder — what the
+# instance doorway check reads (js/warbands.js `fitsRoom`). tests/round27-warcamps.spec.js measures
+# the real built body against these.
+BODY = {'goblin': (1.35, 0.8), 'orc': (1.95, 1.0), 'beast': (1.95, 1.0), 'undead': (1.85, 0.8), 'giant': (2.35, 1.1)}
+
+# one standard-bearer per warband: the melee body, a helm, a polearm and the warband's banner
+BEARER = {
+ 'sootwick':  dict(name='Sootwick Flag-Runner',    minLevel=4,  hat=('bone_headdress', '#c8a040'), held=('fh_spear', '#8a8a8a')),
+ 'ashtusk':   dict(name='Ashtusk Standard-Bearer', minLevel=8,  hat=('bone_headdress', '#e0d8c0'), held=('fh_halberd', '#8a8e94')),
+ 'thornmane': dict(name='Thornmane Totem-Bearer',  minLevel=12, hat=('bone_headdress', '#eeeeee'), held=('fh_spear', '#a8b0b8')),
+ 'unburied':  dict(name='Unburied Colour-Sergeant',minLevel=17, hat=('war_helm', '#5a5e64'), held=('fh_halberd', '#9aa4b0')),
+ 'stonehide': dict(name='Stonehide Stone-Herald',  minLevel=23, hat=('war_helm', '#6a7a8a'), held=('fh_spear', '#b8c8d8')),
+}
+for band in W:
+    b = BEARER[band['id']]
+    melee = next(m for m in band['members'] if m['type'] == 'melee')
+    leader = next(m for m in band['members'] if m['type'] == 'leader')
+    look = json.loads(json.dumps(melee['look']))
+    look['hat'] = {'id': b['hat'][0], 'color': b['hat'][1]}
+    look['held'] = {'id': b['held'][0], 'color': b['held'][1]}
+    look.pop('offhand', None)
+    look['cape'] = {'id': 'cape', 'color': band['colour']}
+    bid = band['id'] + '_bearer'
+    band['members'].append(dict(type='bearer', id=bid, name=b['name'], minLevel=b['minLevel'], maxLevel=band['levels'][1],
+        look=look, banner=band['colour'], dropBases=list(leader['dropBases'][:4])))
+    leader['bearer'] = bid
+    band['bearer'] = bid
+
+# the warlords: one named boss per warband, of its race, with phases and adds of its own members
+WARLORD = {
+ 'sootwick':  dict(id='sootwick_gutterking', name='Sootwick Gutterking', levels=[6,16], scale=1.6, hat=('war_helm', '#c8a040'),
+   phases=[(0.6, 'fleet', 'The Gutterking whistles through his teeth, and the gang comes running.'), (0.3, 'vicious', 'He stops grinning.')],
+   spawns=('sootwick_basher', 2, [0.6, 0.3]), camp='Junkyard', walls='junk wall'),
+ 'ashtusk':   dict(id='ashtusk_overchief', name='Ashtusk Overchief', levels=[12,24], scale=1.9, hat=('bone_headdress', '#e0d8c0'),
+   phases=[(0.5, 'frenzied', 'The Overchief roars, and the brutes come to it.'), (0.25, 'vicious', 'Blood in its tusks now. It will not stop.')],
+   spawns=('ashtusk_brute', 2, [0.5, 0.25]), camp='Warcamp', walls='palisade and bone totems'),
+ 'thornmane': dict(id='thornmane_greatfang', name='Thornmane Greatfang', levels=[16,28], scale=1.9, hat=('wolf_helm', '#eeeeee'),
+   phases=[(0.66, 'fleet', 'The Greatfang howls, and the ring answers.'), (0.33, 'vicious', 'It drops to all fours.')],
+   spawns=('thornmane_mauler', 2, [0.66, 0.33]), camp='Den-Ring', walls='thorn ring and hide tents'),
+ 'unburied':  dict(id='unburied_gravemarshal', name='Unburied Gravemarshal', levels=[22,36], scale=2.0, hat=('plate_helm', '#6a7078'),
+   phases=[(0.7, 'ironclad', 'The Gravemarshal raises its blade, and the ranks close.'), (0.4, 'leeching', 'It begins to drink the fight.'), (0.15, 'unyielding', 'It will not lie down.')],
+   spawns=('unburied_bonesoldier', 2, [0.7, 0.4]), camp='Barrow-Fort', walls='barrow-fort'),
+ 'stonehide': dict(id='stonehide_peakking', name='Stonehide Peak-King', levels=[30,50], scale=1.7, hat=('great_helm', '#8a9aaa'),
+   phases=[(0.6, 'unyielding', 'The Peak-King plants its feet like a mountain.'), (0.3, 'vicious', 'Stone cracks under it. It is done being patient.')],
+   spawns=('stonehide_smasher', 2, [0.6, 0.3]), camp='Slab-Hold', walls='standing-slab ring'),
+}
+UNIQUE = {'sootwick': 'fh_gutterkings_shiv', 'ashtusk': 'fh_ashtusk_headtaker', 'thornmane': 'fh_moonhook',
+          'unburied': 'fh_gravemarshals_oath', 'stonehide': 'fh_peakbreaker'}
+
+def warlord_row(band, mods):
+    w = WARLORD[band['id']]
+    leader = next(m for m in band['members'] if m['type'] == 'leader')
+    look = json.loads(json.dumps(leader['look']))
+    look['hat'] = {'id': w['hat'][0], 'color': w['hat'][1]}
+    look['cape'] = {'id': 'cape', 'color': band['colour']}
+    L = w['levels'][0]
+    h, wd = BODY[band['race']]
+    drops = []
+    for m in band['members']:
+        for d in m['dropBases']:
+            if d not in drops: drops.append(d)
+    return dict(
+        id=w['id'], name=w['name'], kind='humanoid', family=band['family'], role='boss', warband=band['id'], warlord=True,
+        nameRace=band.get('nameRace') or band['race'], biomes=['any'], minLevel=w['levels'][0], maxLevel=w['levels'][1],
+        arena=16, scale=w['scale'], bodyHeight=h, bodyWidth=wd,
+        hp=round(640 * (1 + 0.05*(L-1)) * mods.get('hp',1)),
+        dmg=[round(v * (1 + 0.04*(L-1)) * mods.get('dmg',1)) for v in (18, 27)],
+        armor=round(16 * (1 + 0.04*(L-1)) * mods.get('armor',1)),
+        speed=round(3.4 * mods.get('speed',1), 2), reach=round(3.2 + mods.get('reach',0), 2),
+        aggroRange=46, attackEvery=1.7,
+        xp=round(520 * (1 + 0.08*(L-1))), gold=round(320 * (1 + 0.05*(L-1))),
+        dropBonus=3, dropRarity=2.0,
+        phases=[dict(at=a, modifier=mo, say=say) for a, mo, say in w['phases']],
+        spawns=dict(id=w['spawns'][0], count=w['spawns'][1], at=w['spawns'][2]),
+        leads=list(leader['leads']), bearer=band['id'] + '_bearer',
+        uniqueDrop=UNIQUE[band['id']],
+        look={'avatar': look}, dropBases=drops,
+    )
+
 # ---------------------------------------------------------------- stats
 def stats(band, m):
     t = TPL[m['type']]
@@ -179,6 +280,8 @@ def stats(band, m):
     d = dict(id=m['id'], name=m['name'], kind='humanoid', family=band['family'], role=t['role'], type=m['type'],
              warband=band['id'], biomes=['any'], minLevel=m['minLevel'], maxLevel=m['maxLevel'], pack=t['pack'])
     if 'leads' in m: d['leads'] = m['leads']
+    if 'bearer' in m: d['bearer'] = m['bearer']        # R27 M10 — the leader's standard-bearer
+    if 'banner' in m: d['banner'] = m['banner']        # R27 M10 — the bearer carries the colours
     d['hp'] = round(t['hp']*hpk)
     d['dmg'] = [round(v*dk) for v in t['dmg']]
     d['armor'] = round(t['armor']*(1+0.07*(L-1))*mods.get('armor',1))
@@ -197,16 +300,26 @@ def stats(band, m):
     return d
 
 out = {
- '_doc': "Farhold R26 — the enemy WARBANDS: the five Chibi 2 races a player cannot be (avatar-3d/js/chibi2-races.js), each an enemy faction of humanoid NPCs drawn as that race's body (`look.avatar.body.race`). js/warbands.js injects every member into the bestiary at load (data/enemies.json is untouched) and gives each zone at most one warband: a zone is HELD when its middle level sits inside the warband's `levels` and a seeded roll under `claimShare` says so (the starting zone is never held). Inside a held zone that warband's members make up `spawnShare` of what the spawner puts down; outside it they never spawn. `type` is the job in the fight (melee / rogue / ranged / caster / leader) and `role` is the existing AI it runs on (brute / skirmisher / archer / caster / leader) — a rogue is a skirmisher that is quick, light and makes you bleed. Stats are level-1 values like the bestiary's, compounded by balance.json enemies.perLevel. `prefers` lists World Forge biome families a warband is three times as likely to claim. `nameRace` is the Name Forge language a rare of theirs is named in. Original names only.",
+ '_doc': "Farhold R26 — the enemy WARBANDS: the five Chibi 2 races a player cannot be (avatar-3d/js/chibi2-races.js), each an enemy faction of humanoid NPCs drawn as that race's body (`look.avatar.body.race`). js/warbands.js injects every member into the bestiary at load (data/enemies.json is untouched) and gives each zone at most one warband: a zone is HELD when its middle level sits inside the warband's `levels` and a seeded roll under `claimShare` says so (the starting zone is never held). Inside a held zone that warband's members make up `spawnShare` of what the spawner puts down; outside it they never spawn. `type` is the job in the fight (melee / rogue / ranged / caster / leader) and `role` is the existing AI it runs on (brute / skirmisher / archer / caster / leader) — a rogue is a skirmisher that is quick, light and makes you bleed. Stats are level-1 values like the bestiary's, compounded by balance.json enemies.perLevel. `prefers` lists World Forge biome families a warband is three times as likely to claim. `nameRace` is the Name Forge language a rare of theirs is named in. R27 M10: a sixth member, the standard-bearer (`type: bearer`, carries `banner` in the warband colour; the leader names it in `bearer`); leaders, bearers and warlords wear the round-26 class helms; `warlords` are five named bosses (installed into bestiary.bosses) with `phases`, `spawns` of their own members, `scale` 1.6-2.2 and `bodyHeight`/`bodyWidth` for the instance-door check; each warband row names its `warlord`, its `unique` (data/uniques.json), its `drops` (the war-chest's list) and its `camp`. Original names only.",
  'claimShare': 0.55,
  'spawnShare': 0.65,
  'warbands': [],
+ # R27 M10 — one named boss per warband (js/warbands.js installWarbands puts them in bestiary.bosses)
+ 'warlords': [],
 }
 for band in W:
-    members = band.pop('members')
+    members = band['members']
     mods = band.pop('mods')
+    wl = warlord_row(band, mods)                       # R27 M10 — reads the members' looks and drops
+    band.pop('members')
     band['members'] = [m['id'] for m in members]
     band['defs'] = [stats({**band, 'mods': mods}, m) for m in members]
+    # R27 M10 — the warband's place, face and loot
+    band['warlord'] = wl['id']
+    band['unique'] = UNIQUE[band['id']]
+    band['drops'] = wl['dropBases']
+    band['camp'] = dict(name=WARLORD[band['id']]['camp'], walls=WARLORD[band['id']]['walls'], kind='warcamp_' + band['id'])
+    out['warlords'].append(wl)
     out['warbands'].append(band)
 json.dump(out, open(OUT,'w'), indent=1)
-print('ok', sum(len(b['defs']) for b in out['warbands']))
+print('ok', sum(len(b['defs']) for b in out['warbands']), 'members,', len(out['warlords']), 'warlords')

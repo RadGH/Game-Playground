@@ -56,7 +56,8 @@ const PIECES = Object.fromEntries(
 const PIECE_KEYS = new Set(Object.keys(PIECES));
 
 test('the piece table was read, and it is the one js/sites.js exports', () => {
-  assert.equal(PIECE_KEYS.size, 20, `read ${PIECE_KEYS.size} pieces out of js/sites.js`);
+  // R27 M10 added eight war-camp pieces (warpalisade, bonewall, junkwall, totem, thorns, barrowbank, slab, warbanner)
+  assert.equal(PIECE_KEYS.size, 28, `read ${PIECE_KEYS.size} pieces out of js/sites.js`);
   assert.ok(SITES.includes('export const PIECE_KEYS = Object.keys(PIECES);'),
     'PIECE_KEYS is gone — this test is reading a table that no longer feeds the world');
   for (const key of ['den', 'hut', 'menhir', 'bonepile', 'rubble']) assert.ok(PIECE_KEYS.has(key), `no "${key}" piece`);

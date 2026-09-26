@@ -2513,6 +2513,15 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     // R27 M9 — one of a warband's own, killed on its own ground, loosens its grip there
     const band = !dungeon && bestiary.enemies.find(d => d.id === e.defId)?.warband;
     if (band && band === holdings.of(zones.at(e.x, e.z)?.id)?.warband) holdings.warbandLoss(zones.at(e.x, e.z).id, 'kill');
+    // R27 M10 — a warlord's death is a grip drop of its own (and it stays dead: `wl:` in the ledger);
+    // a war camp is TAKEN when the last of its roster falls, through the one payer, and that is the camp's drop
+    const war = !dungeon && sites.warDeath?.(e);
+    if (war) {
+      const wz = war.site.zone?.id ?? zones.at(e.x, e.z)?.id, wk = strongholdWorld();
+      if (war.warlord) { holdings.warbandLoss(wz, 'warlord'); strongholdLedger[wk] = [...new Set([...(strongholdLedger[wk] || []), 'wl:' + war.site.key])]; }
+      const took = war.cleared && sites.take(war.site.key);
+      if (took) { holdings.warbandLoss(wz, 'camp'); payStronghold(took, []); }
+    }
     sound.combat('death', { beast: e.kind !== 'humanoid' });
     /**
      * R17 — a boss is worth researching. A world boss is its own tier (`data/worldbosses.json`
@@ -2887,7 +2896,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   // An old save has none, so every site loads untaken.
   const strongholdLedger = { ...(save?.strongholds || {}) };
   const strongholdWorld = () => `${systemSeed}:${planet?.id ?? 0}`;
-  let sites = createSites(scene, terrain, { seed, balance, zones, collide: siteSolids, radius: balance.features?.radius ?? 2600, taken: strongholdLedger[strongholdWorld()] || null });
+  let sites = createSites(scene, terrain, { seed, balance, zones, collide: siteSolids, radius: balance.features?.radius ?? 2600, taken: strongholdLedger[strongholdWorld()] || null, warbands: field.warbands }); // R27 M10: war camps
   /**
    * A set piece near a stronghold is that stronghold's people.
    *
@@ -4793,6 +4802,12 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     payStronghold(took, freed);
   }
 
+  /** R27 M10 — a living warlord in this zone for the rumour book, or nothing (never a dead one). */
+  function warlordRumour(zone) {
+    const w = (sites.warCandidates?.(zone?.id, nameRare) || []).find(c => c.type === 'warlord');
+    return w ? { warlord: w.name, warlordAt: w.campName } : {};
+  }
+
   /** R27 M1 — what taking a stronghold pays. Called by `freePrisonersOf` only, after `sites.take`. */
   function payStronghold({ site, gives: pays, stair }, freed = []) {
     // the ledger the save carries, per world, so a reload keeps it taken
@@ -4841,6 +4856,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       openMouths();
       hud.log('Behind the keep, a stair goes down. It was not there before.', 'loot');
     }
+    for (const q of questLog.onClear?.({ name: site.name, x: site.x, z: site.z }) || []) hud.log(`${q.title}: done.`, 'good'); // R27 M10
     if (pays.liftsSiege && here) {
       holdings.press?.(here.id, 0.18, { claim: 0.1 });
       hud.log(`The siege on ${here.name} lifts.`, 'level');
@@ -5114,7 +5130,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
        * `holds.boss.rank` says. A stand-in is an ordinary body, so 'boss' rank (whose multipliers
        * are 1 — a hand-written boss is big by itself) becomes 'rare' for it.
        */
-      const { def: bossDef, rank } = field.bossForHolds(want, level, node.x, node.z);
+      const { def: bossDef, rank } = field.bossForHolds(want, level, node.x, node.z, { room: dungeon.shape }); // R27 M10: the door
       if (bossDef) {
         bossUnit = await field.placeBoss(bossDef, level, dungeon.bossRoom.x, dungeon.bossRoom.z,
           { rank, modifiers: want?.modifiers ?? 0 });
@@ -6709,7 +6725,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     gates.dispose();
     gates = createGates(scene, terrain, { balance, zones, radius: balance.features?.radius ?? 2600, collide: gateSolids });
     sites.dispose();
-    sites = createSites(scene, terrain, { seed, balance, zones, collide: siteSolids, radius: balance.features?.radius ?? 2600, taken: strongholdLedger[strongholdWorld()] || null }); // R27 M1
+    sites = createSites(scene, terrain, { seed, balance, zones, collide: siteSolids, radius: balance.features?.radius ?? 2600, taken: strongholdLedger[strongholdWorld()] || null, warbands: field.warbands }); // R27 M1 (M10: war camps)
     handOverChests();
     openMouths();
     clearWandererBodies();
@@ -7525,6 +7541,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       npcs: roadFolk.candidates(zone.id),
       caravans: trade.candidates(zone.id),
       patrols: patrols.candidates(zone.id),
+      camps: sites.warCandidates?.(zone.id, nameRare) || [], // R27 M10
       named: campaign.nemesis ? [{ id: campaign.nemesis.id || 'nemesis', name: campaign.nemesis.name, state: 'grudge' }] : [],
       metresPerCell: cell, level: player.level,
       /**
@@ -7543,7 +7560,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     const neighbours = zones.list().filter(z => z.id !== zone.id && Math.abs(z.minLevel - zone.minLevel) <= 6);
     if (neighbours.length) {
       const pick = neighbours[Math.floor(Math.random() * neighbours.length)];
-      rumours.hear(pick, { from: rumourSource(zone), extra: { unvisitedLandmarks: 2 } });
+      rumours.hear(pick, { from: rumourSource(zone), extra: { unvisitedLandmarks: 2, ...warlordRumour(pick) } }); // R27 M10
     }
 
     // R27 M9 — on warband ground the human faction is the one it is taking the ground FROM
@@ -7575,6 +7592,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         npcs: roadFolk.candidates(zone.id),
         caravans: trade.candidates(zone.id),
         patrols: patrols.candidates(zone.id),
+        camps: sites.warCandidates?.(zone.id, nameRare) || [], // R27 M10
         named: campaign.nemesis ? [{ id: campaign.nemesis.id || 'nemesis', name: campaign.nemesis.name, state: 'grudge' }] : [],
         metresPerCell: cell, level: player.level,
         from: { x: control.x, z: control.z },

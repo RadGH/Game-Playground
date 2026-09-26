@@ -102,7 +102,14 @@ function fits(need, candidate, ctx) {
    * R27 M9 — `warband` means "a war party of the warband holding THIS zone", with its leader still
    * standing (the job is to put the leader down). The zone's warband is the territory record's.
    */
-  if (need.warband && (!candidate.warband || candidate.warband !== ctx.warband || candidate.leaderDown || !candidate.leaderId)) return false;
+  if (need.warband && (!candidate.warband || candidate.warband !== ctx.warband)) return false;
+  if (need.warband && candidate.type === 'patrol' && (candidate.leaderDown || !candidate.leaderId)) return false;
+  /**
+   * R27 M10 — a war camp binds only while it is untaken, and a warlord only while it lives: both
+   * come from js/sites.js `warCandidates`, which lists nothing else, and these are the belt to that.
+   */
+  if (candidate.type === 'camp' && candidate.taken) return false;
+  if (candidate.type === 'warlord' && (candidate.slain || candidate.campTaken)) return false;
   /**
    * R14 — THE DISTANCE BUDGET.
    *
@@ -476,6 +483,8 @@ export function createJobGen({ frames: data, territory = null, factions = null, 
 export function candidatesFrom({
   zone, territory = null, bestiary = [], nodes = [], landmarks = [], npcs = [],
   caravans = [], patrols = [], named = [], items = [], metresPerCell = 640, level = 1,
+  // R27 M10 — this zone's untaken war camp and its living warlord (js/sites.js `warCandidates`)
+  camps = [],
   // R27 M1 — the enemy field's live units, so a champion that is really out there binds first
   live = [],
   /**
@@ -552,6 +561,7 @@ export function candidatesFrom({
   for (const n of npcs) out.push(placed({ ...n, type: 'npc' }));
   for (const c of caravans) out.push(placed({ ...c, type: 'caravan' }));
   for (const p of patrols) out.push(placed({ ...p, type: 'patrol' }));
+  for (const c of camps) if (c?.type === 'camp' || c?.type === 'warlord') out.push(placed({ ...c }));   // R27 M10
   for (const f of named) out.push({ ...f, type: 'named' });
   for (const it of items) out.push({ ...it, type: 'item' });
 

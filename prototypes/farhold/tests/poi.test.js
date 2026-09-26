@@ -288,6 +288,8 @@ test('8.6 — the Field of Cairns is made of cairns, and they are taller than a 
 test('7.14 — a faction-owned structure names a faction that exists', () => {
   const factions = read('../data/factions.json');
   const keys = new Set((factions.factions || []).map(f => f.key));
+  // R27 M10 — a war camp is held by its warband (data/warbands.json), which is not a trading faction
+  for (const b of read('../data/warbands.json').warbands || []) keys.add(b.id);
   for (const p of POIS) {
     if (!p.spec.faction) continue;
     assert.ok(keys.has(p.spec.faction), `${p.kind} is held by "${p.spec.faction}", who are nobody`);

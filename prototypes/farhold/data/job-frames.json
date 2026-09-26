@@ -230,6 +230,26 @@
       "goal": { "kind": "visit", "count": 1, "at": "{there}" },
       "reward": { "gold": [110, 260], "xp": [120, 280], "standing": 9 },
       "onDone": { "rumour": "somebody has been over to {there.name}" }
+    },
+    {
+      "id": "break_the_camp", "scope": "local", "weight": 10,
+      "_r27": "R27 M10 — binds only to an untaken war camp of the warband holding this zone (js/sites.js warCandidates). Done when the camp is taken — its last guard down — through the one stronghold payer (js/main.js payStronghold -> questLog.onClear).",
+      "needs": [{ "slot": "camp", "type": "camp", "warband": true }],
+      "title": "Break {camp.name}",
+      "text": "{camp.warbandName} have dug in at {camp.name}. Put every one of them down and the war-chest is yours.",
+      "goal": { "kind": "clear", "target": "{camp.id}", "count": 1, "at": "{camp}" },
+      "reward": { "gold": [150, 320], "xp": [180, 380], "standing": 10 },
+      "onDone": { "rumour": "{camp.name} has been broken" }
+    },
+    {
+      "id": "bring_down_warlord", "scope": "local", "weight": 10,
+      "_r27": "R27 M10 — binds only to a living warlord whose camp is untaken (js/sites.js warCandidates). The kill is the warlord's def id; there is one per camp.",
+      "needs": [{ "slot": "warlord", "type": "warlord", "warband": true }],
+      "title": "Bring down {warlord.name}",
+      "text": "{warlord.name} holds {warlord.campName}. Nothing on this road is safe while it stands.",
+      "goal": { "kind": "kill", "target": "{warlord.id}", "count": 1, "at": "{warlord}" },
+      "reward": { "gold": [180, 360], "xp": [200, 420], "standing": 10, "kind": "pick3" },
+      "onDone": { "rumour": "somebody brought down {warlord.name}" }
     }
   ]
 }

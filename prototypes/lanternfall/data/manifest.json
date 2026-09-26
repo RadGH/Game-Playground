@@ -19,6 +19,8 @@
   "affixes",
   "loot",
   "shops",
-  "difficulty"
+  "difficulty",
+  "acts",
+  "kits"
  ]
 }

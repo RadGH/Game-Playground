@@ -28,7 +28,7 @@ export function buildReachGraph(g, movement, verbs = {}, extra = {}) {
   for (let x = 3; x < W - 3; x += STEP) {
     for (let y = bh; y < H; y++) {
       const feet = y; // feet row is y-1, floor row is y
-      const grounded = solid(x - 2, y) || solid(x, y) || solid(x + 2, y);
+      const grounded = rectSolid(x - 3, y, x + 3, y + 1) > 0; // any cell under the 6-wide body
       if (grounded && !solid(x, y - 1) && fits(x, y)) add(x, y, 'stand');
       else if (!grounded && fits(x, y) && wet(x, y) && (y % 6 === 0)) add(x, y, 'swim');
       else if (!grounded && fits(x, y) && climb(x, y - 6) && (y % 6 === 0)) add(x, y, 'climb');

@@ -29,8 +29,8 @@ export function stepCasting(game, p, I, aim) {
   if (!wick || !p.canCast) { C.charging = false; C.hold = 0; return; }
   const tip = p.lantern || { x: p.x + p.facing * 6, y: p.y - 16 };
   // beam: held
-  if (C.beam) { C.beam.holding = !!I.cast && C.beam.alive; if (!C.beam.alive || !I.cast) { if (C.beam.oilSpent) wick.burn = (wick.burn || 0) + C.beam.oilSpent; C.beam.holding = false; C.cds[C.slot] = 0.3; C.beam = null; } return; }
-  const plan0 = compileWick(wick, game.data, p.stats, { still: p.stillT > 0.3 });
+  if (C.beam) { C.beam.holding = !!I.cast && C.beam.alive; if (!C.beam.alive || !I.cast) { if (C.beam.oilSpent) addBurn(game, wick, C.beam.oilSpent); C.beam.holding = false; C.cds[C.slot] = 0.3; C.beam = null; } return; }
+  const plan0 = compileWick(wick, game.data, p.stats, { still: p.stillT > 0.3, burn: H.burn });
   if (I.cast && !C.charging && C.cds[C.slot] <= 0 && C.gap <= 0 && C.lockout <= 0) {
     if (plan0.shape === 'beam') {
       if (p.oil < 2) { fizzle(game, p); return; }
@@ -62,9 +62,12 @@ function fizzle(game, p) { game.bus.emit('cast.fizzle', { caster: p }); }
 
 export function release(game, p, wick, c, tip, aim) {
   const C = p.cast, H = game.hero;
-  const plan = compileWick(wick, game.data, p.stats, { overcharge: c, still: p.stillT > 0.3 });
-  if (p.oil < plan.oil) { fizzle(game, p); return false; }
-  p.oil -= plan.oil; wick.burn = (wick.burn || 0) + plan.oil;
+  const plan = compileWick(wick, game.data, p.stats, { overcharge: c, still: p.stillT > 0.3, burn: H.burn });
+  const free = p.freshWick && p.freshWickReady; // Lamplighter passive: first wick after 3 s costs no base oil
+  const cost = free ? plan.oil - plan.oil / c : plan.oil;
+  if (p.oil < cost) { fizzle(game, p); return false; }
+  p.oil -= cost; addBurn(game, wick, plan.oil); if (free) { p.freshWickReady = false; game.bus.emit('passive', { id: 'll_fresh_wick' }); }
+  p.lastCastT = game.time;
   C.cds[C.slot] = plan.cooldown; C.gap = 0.1;
   // gutter roll
   const safe = Math.min(1.7, OC.safe + (plan.steady ? 0.1 : 0) + (p.stats?.overchargeSafe || 0));
@@ -86,4 +89,14 @@ function gutter(game, p, plan, c, tip, wick) {
   p.cast.lockout = OC.lockout;
   game.flashes.push({ x: tip.x, y: tip.y, r: r * 4, color: hexRgb(plan.color), i: 2, t: 0.3, max: 0.3 });
   game.bus.emit('cast.gutter', { caster: p, plan, x: tip.x, y: tip.y });
+}
+
+/** Burn-in: oil spent through a wick feeds its flame track and its shape track (docs/03 §10). */
+export function addBurn(game, wick, oil) {
+  const H = game.hero; H.burn ||= { flame: {}, shape: {} };
+  const before = [H.burn.flame[wick.flame] || 0, H.burn.shape[wick.shape] || 0];
+  H.burn.flame[wick.flame] = before[0] + oil; H.burn.shape[wick.shape] = before[1] + oil;
+  const T = [0, 200, 600, 1500, 3500], lv = v => T.filter(x => v >= x).length;
+  if (lv(H.burn.flame[wick.flame]) > lv(before[0])) game.bus.emit('burnin', { track: 'flame', id: wick.flame, level: lv(H.burn.flame[wick.flame]) });
+  if (lv(H.burn.shape[wick.shape]) > lv(before[1])) game.bus.emit('burnin', { track: 'shape', id: wick.shape, level: lv(H.burn.shape[wick.shape]) });
 }

@@ -14,6 +14,8 @@ import { createActor } from './entities/actor.js';
 import { createBench } from './debug/bench.js';
 import { createMelee } from './rpg/melee.js';
 import { spawnEnemy } from './ai/brain.js';
+import { fontSprites } from './render/font5x7.js';
+import { createHud } from './ui/hud.js';
 
 const params = new URLSearchParams(location.search);
 const canvas = document.getElementById('view');
@@ -26,6 +28,7 @@ try {
   LF.data = data;
   const renderer = createWebGL2Renderer(canvas, { mats: data.mats });
   if (!renderer) throw new Error('WebGL2 is not available in this browser.');
+  data.sprites.sprites.font = fontSprites();
   const atlas = buildAtlas(data.sprites); renderer.setAtlas(atlas.rgba, atlas.w, atlas.h);
   const input = createInput(bindingsFrom(data.bindings)); const cam = createCamera();
   const game = createGame({ data, seed: +(params.get('seed') || 1) });
@@ -43,7 +46,8 @@ try {
     { id: 'w2', flame: params.get('f2') || 'rime', shape: params.get('s2') || 'lob', charms: (params.get('c2') || '').split(',').filter(Boolean) },
     { id: 'w3', flame: params.get('f3') || 'spark', shape: params.get('s3') || 'ring', charms: [] },
     { id: 'w4', flame: params.get('f4') || 'tide', shape: params.get('s4') || 'wave', charms: [] } ],
-    unlocked: { wickSlots: 4, overcharge: true, gutter: true } };
+    unlocked: { wickSlots: 4, overcharge: true, gutter: true }, burn: { flame: {}, shape: {} }, currency: { pennies: 0, pearls: 0 }, xp: 0, xpNext: 100, level: 1 };
+  const hud = createHud(game); LF.hud = hud;
   if (params.get('spawn')) for (const [k, id] of params.get('spawn').split(',').entries()) { const x = game.player.x + 60 + k * 40; spawnEnemy(game, id, x, findFloor(game.grid, x, game.player.y - 60, game.grid.H) ?? game.player.y, { pack: 'test' }); }
   if (params.has('dummies')) for (let k = 0; k < 4; k++) game.entities.push(createActor('dummy', { name: 'Training Dummy', x: game.player.x + 60 + k * 30, y: game.player.y - 20, w: 6, h: 11, hp: 200, color: [0.55, 0.45, 0.35], eyes: [1, 0.8, 0.4] }));
   const theme = game.room.theme;
@@ -93,6 +97,7 @@ try {
         lights: f.lights, sprites: f.sprites, overlays: f.overlays, additive: f.additive,
         ripple: game.ripples.h.subarray(x0, x0 + cam.vw + 2),
         ambient: { top: [0.16, 0.18, 0.26], bottom: [0.08, 0.09, 0.13], floor: 0.1 }, sky, rain: { alpha: 1, wind: game.rain.wind }, bloom: 0.35,
+        hud: hud.build(atlas, { w: cam.vw, h: cam.vh }, { x: cam.x, y: cam.y }),
       });
     },
   });

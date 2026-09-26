@@ -208,6 +208,12 @@ export function createWebGL2Renderer(canvas, { mats }) {
     gl.uniform2f(fu.outOffset, ox, oy);
     gl.uniform1f(fu.flash, f.flash?.a || 0); gl.uniform3fv(fu.flashCol, f.flash?.color || [1, 1, 1]);
     draw();
+    // 9. HUD in screen space (logical cells of the visible view, no camera, no light, no bloom)
+    if (f.hud && f.hud.length) {
+      gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+      gl.viewport(Math.floor((canvas.width - VW * s) / 2), canvas.height - Math.floor((canvas.height - VH * s) / 2) - VH * s, VW * s, VH * s);
+      drawBatch(P.overlay, f.hud, [0, 0], VW, VH); gl.disable(gl.BLEND);
+    }
     return stats;
   }
 

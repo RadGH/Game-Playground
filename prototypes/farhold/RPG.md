@@ -4411,3 +4411,69 @@ older tests: `planet.test.js` weave run in metres (a landing adds vertices by de
 grew the plan and moved it 31 m along the same road). Must-stay-green all pass: planet, water,
 roadgap, round16-roads, round17-worldgen, round22-roads, round23-bridge-gate, round21-town,
 planet-lod.spec, round23-title.spec.
+
+### Round 27 — Gates that open and shut, and guards who notice you (M4)
+
+**Root causes.** A gate was scenery. The door leaves were drawn once, open, with colliders filed
+along the passage walls, and `js/collide.js` had no way to take a collider back (no delete, no
+toggle — `addSegment` returned the field, not a handle), so nothing could ever shut. That left
+data/strongholds.json's siege camp blurb ("a town a mile off that has stopped opening its gate")
+untrue, standing had no face at a town's edge, `BUILDING_INFO.role` had no reader, and
+`restless_dead`'s `nightSpawn: 'undead'` was merged by js/incidents.js and read by nobody.
+
+**What changed.**
+- `js/collide.js`: `addSegment(..., { id, enabled })` returns the segment as a handle;
+  `setEnabled(idOrHandle, bool)` / `isEnabled(id)`. The `enabled` flag is one boolean checked inside
+  the existing loops (`blocked`, both passes of `resolve`); `clear()` also forgets the ids.
+- `js/features.js` (gate door block): each gatehouse files two sets of door colliders by id — the
+  open leaves along the passage, and one door across it between the hinges — and remembers each
+  gate's swing in `doorState` (outlives a rebuild, never saved). `setGateShut(id, bool)` switches the
+  colliders at once; `tickGates(dt)` swings the two instance matrices per gate over `GATE_SWING`
+  (0.8 s). A gate record carries `doors` and a derived `shut` — not `open`, which was already the
+  opening's WIDTH and is read everywhere. A plain opening (no gatehouse: gate 5+, a trimmed street
+  gate, a wet gate) has no doors and never shuts. `postsOf(id)` files every built building whose
+  `BUILDING_INFO` has a `role` — the field's first reader.
+- `js/town.js`: `besiegedTowns` (a standing, not-taken `siege_camp` besieges the ONE town nearest it,
+  measured to the real wall, within `gates.siegeReach`), `gateVerdict` (siege or Hunted shuts; the
+  respawn town and any town holding an active quest giver never shuts — the siege blurb still shows;
+  a knock opens a non-Hunted gate), `guardTargetsPlayer` (Hunted AND outside the wall line AND within
+  the guard's reach), `knockOutcome`, `watchPosts`. Re-derived twice a second from what main.js
+  hands `folk.update` as `gates`; the log says when a nearby town shuts, bars, stays open for you, or
+  reopens. Gate guards greet once per approach with a line by band, salute a Trusted/Sworn player
+  at an open gate (the Chibi 2 `salute` clip, started once — the post branch does not ask for idle
+  until it has played), and when you are Hunted chase and hit you outside the wall only. Every
+  watchpost gets a guard at its door; barracks guards stay inside. `gateAt` / `gatePrompt` / `knock`
+  are E at a shut gate.
+- `js/speech.js`: `gateLine(band, faction)` — Known is the holder's own `greeting` from
+  data/factions.json, the other bands name the holder.
+- `js/actors.js`: `setNightSpawn({ family, share, reach })` and `nightPool` — within `reach` m of a
+  town's watch, `share` of rolls draw that family from the whole bestiary nearest the level (the
+  grassland town's ordinary table has no undead at all). An option on WHAT spawns, not a second
+  multiplier on how much; the rng is only drawn when it applies, so everything else rolls the same.
+- `js/main.js` (13 lines, all `// R27 M4`): the `gates` context on the existing `folk.update` call,
+  `kind: 'gate'` in `interactTarget`, the E branch, the prompt, and `setNightSpawn` next to
+  `spawnMult` in `applyIncidents`.
+- `data/balance.json` `gates`: `knockFee` 25, `knockSeconds` 60, `siegeReach` 1400, `greetRange` 9,
+  `nightSpawnShare` 0.5, `nightSpawnReach` 400.
+
+**Measured.** Seed 1337 (full size): the real player controller walking into a shut gate stops
+outside the door line; the same walk goes in after M1's `sites.take`, after a knock, and after the
+gate reopens. The leaves are half-way at 0.4 s and across the opening at 0.8 s. Restless dead at
+Duskreach: 0.0% undead without it, 48.4% with it over 500 spawns within 400 m; the family moved to
+`construct` gives 49.6% constructs; share 0.9 gives 90.4%; switched off, the spawn sequence is
+identical to never having set it. In the game (seed 47, Fenkeep): shut by a siege 90 m out, the
+walker stopped, the take opened it, E at the re-shut gate opened it for 60 s, a Hunted player was
+chased outside and left alone inside, a Trusted one was greeted and saluted, and every watchpost
+had a guard within 2 m.
+
+**Not done / notes.** No standard seed places a siege camp near a WALLED town on its own (every one
+lands by a hamlet), so the tests move one of the world's own camp records next to a walled town.
+Only gatehouses shut; a plain gap in the wall stays open. A knock is not saved (a reload re-derives
+the gate and you knock again).
+
+**Tests.** New `tests/round27-gates.test.js` (11: collide toggle, doors + real player walker, siege +
+take, respawn/quest-giver exemption, Hunted targeting + refused knock, knock with odd
+`knockFee`/`knockSeconds`, reload from M1's saved keys, guard line + one salute, watchposts,
+`nightSpawn` with odd family and share, verdict table). `tests/round23-bridge-gate.spec.js` gains
+the shut-gate walk in the real game, and its older gate test now finds Fenkeep's west gate as the
+nearest one (M5 moved it 31 m, as the node test already says).

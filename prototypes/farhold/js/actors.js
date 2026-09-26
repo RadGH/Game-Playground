@@ -285,6 +285,37 @@ export class EnemyField {
     });
   }
 
+  /**
+   * R27 M4 — `nightSpawn` IS READ. An incident's effects can carry `nightSpawn: '<family>'`
+   * (data/incidents.json `restless_dead` -> 'undead'); js/incidents.js merged it and nothing read
+   * it. main.js hands it here after dark, as an OPTION on what spawns — never a second multiplier on
+   * how much: `{ family, share = 0.5, reach = 400 }`, or null to switch it off.
+   */
+  setNightSpawn(spec = null) {
+    this.nightSpawn = spec?.family ? { family: spec.family, share: spec.share ?? 0.5, reach: spec.reach ?? 400 } : null;
+    return this.nightSpawn;
+  }
+
+  /**
+   * R27 M4 — the spawn pool at a point with `nightSpawn` applied: within `reach` metres of a town's
+   * watch (`safeZones`, which main.js fills from the towns' real extents), `share` of rolls draw
+   * from the night family instead. The family is taken from the whole bestiary nearest the zone's
+   * level — the dead do not care what biome the town is in — so a grassland town still gets them.
+   * The rng is drawn only when a night family is set AND the point is near a town, so every other
+   * spawn rolls exactly the sequence it always did.
+   */
+  nightPool(pool, x, z, level) {
+    const ns = this.nightSpawn;
+    if (!ns) return pool;
+    if (!this.safeZones.some(s => Math.hypot(x - s.x, z - s.z) - s.r <= ns.reach)) return pool;
+    if (this.rng() >= ns.share) return pool;
+    const kin = this.defs.filter(d => d.family === ns.family && !d.rareOnly && !d.warband);
+    if (!kin.length) return pool;
+    const off = d => Math.max(0, (d.minLevel ?? 1) - level, level - (d.maxLevel ?? 99));
+    const best = Math.min(...kin.map(off));
+    return kin.filter(d => off(d) <= Math.max(best, this.cfg.levelSpread ?? 2));
+  }
+
   /** Is this point far enough from anywhere with a watch on it to put something hostile? */
   wild(x, z, margin = 0) {
     for (const s of this.safeZones) {
@@ -324,7 +355,7 @@ export class EnemyField {
     if (!this.wild(cx, cz)) return null;            // not inside a town's watch
 
     const level = this.levelAt(cx, cz, playerLevel);
-    let pool = this.defsFor(cx, cz, level);
+    let pool = this.nightPool(this.defsFor(cx, cz, level), cx, cz, level);   // R27 M4
     if (!pool.length) return null;
     /**
      * R26 — IN A HELD ZONE, THE WARBAND IS MOST OF WHAT YOU MEET. Its five members against the

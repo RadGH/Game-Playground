@@ -107,7 +107,10 @@ test('the reported gate: the wall beside it stops you, the opening lets you thro
     f.teleport(13212, 2916);
     f.features.update(13212, 2916, true);
     const t = f.features.settlements.find(s => s.name === 'Fenkeep');
-    const g = f.features.gatesOf(t.id).find(q => Math.hypot(q.x - 13212, q.z - 2916) < 6);
+    // R27 M5 moved this gate 31 m along the same road (a wider highway grew the plan — see the node
+    // test); it is still the nearest gate to the reported spot
+    const g = f.features.gatesOf(t.id).map(q => ({ q, d: Math.hypot(q.x - 13212, q.z - 2916) }))
+      .filter(e => e.d < 40).sort((a, b) => a.d - b.d)[0]?.q;
     return g && { ...g, town: t.id };
   });
   expect(gate, 'no gate at the reported spot').toBeTruthy();
@@ -165,5 +168,130 @@ test('the reported gate: the wall beside it stops you, the opening lets you thro
     if (!g.target) expect(g.atPost, 'an idle gate guard has left the gate').toBeLessThan(2);
   }
   await page.screenshot({ path: SHOTS + 'after-gate-guards.png' });
+  expect(errors).toEqual([]);
+});
+
+// R27 M4 — the reported gate again, shut this time. A siege camp is put 90 m outside Fenkeep's wall
+// (none of the standard seeds places one by a walled town on its own; see round27-gates.test.js), the real player walks into
+// the shut gate on the real keys, M1's take lifts the siege, E knocks a re-shut gate open, a Hunted
+// player finds the guards coming for him outside the wall and not inside, a Trusted one gets a
+// salute, and every watchpost in town has a guard at its door.
+test('R27 M4 — a besieged gate is shut: the walker stops, the take and a knock open it, Hunted guards come out', async ({ page }) => {
+  test.setTimeout(420000);
+  const errors = await land(page);
+  const gate = await page.evaluate(async () => {
+    const f = window.farhold;
+    f.teleport(13212, 2916);
+    f.features.update(13212, 2916, true);
+    const t = f.features.settlements.find(s => s.name === 'Fenkeep');
+    const g = f.features.gatesOf(t.id).find(q => Math.hypot(q.x - 13212, q.z - 2916) < 40 && q.doors);
+    // nothing about this town may exempt it: wake somewhere else, and drop any job from here
+    f.control.spawn.x = t.wx + 20000; f.control.spawn.z = t.wz;
+    for (const q of [...f.questLog.active]) if (String(q.giverId ?? '').split(':')[0] === String(t.id)) q.giverId = null;
+    // a siege camp, shaped as js/sites.js makes one, 90 m outside the wall on the far side — on a
+    // Super tiny world the next town is only a few hundred metres off, and a camp besieges its NEAREST
+    const src = f.sites.sites.find(s => s.family === 'stronghold');
+    const wall = f.features.wallOf(t.id).r;
+    f.sites.sites.push({ ...src, key: 'm4-siege', id: 'm4-siege', type: 'siege_camp', family: 'stronghold', taken: false,
+      populated: true, cleared: true, x: t.wx - (wall + 90), z: t.wz, name: 'Siege Camp of the Test' });
+    return g && { x: g.x, z: g.z, ox: g.ox, oz: g.oz, tx: g.tx, tz: g.tz, yaw: g.yaw, open: g.open, span: g.span, depth: g.depth, index: g.index, town: t.id, cx: t.wx, cz: t.wz, wall };
+  });
+  expect(gate, 'no gatehouse with doors at the reported spot').toBeTruthy();
+  const out = s => (s.x - gate.x) * gate.ox + (s.z - gate.z) * gate.oz;
+  const verdict = () => page.evaluate(id => { const v = window.farhold.folk.gateOf(id); return v && { shut: v.shut, reason: v.reason, exempt: v.exempt, band: v.band }; }, gate.town);
+  const waitShut = async want => {
+    for (let i = 0; i < 60; i++) { const v = await verdict(); if (v && v.shut === want) return v; await page.waitForTimeout(250); }
+    return verdict();
+  };
+  const inward = Math.atan2(-gate.ox, -gate.oz);
+  const pos = () => { const c = window.farhold.control; return { x: c.x, z: c.z }; };
+
+  // 1. shut by the siege: the real walker stops at the gate line
+  expect((await waitShut(true))?.reason).toBe('siege');
+  await stand(page, gate.x + gate.ox * 10, gate.z + gate.oz * 10, inward);
+  await page.waitForTimeout(1200);                                   // the leaves take 0.8 s to swing
+  await page.screenshot({ path: SHOTS + 'r27-gate-shut-siege.png' });
+  let trail = await walk(page, 12000, pos);
+  expect(out(trail[trail.length - 1]), 'walked through a shut gate').toBeGreaterThan(0.5);
+
+  // 2. M1's take lifts the siege: the same walk goes in
+  await page.evaluate(() => window.farhold.sites.take('m4-siege'));
+  expect((await waitShut(false))?.shut).toBe(false);
+  await stand(page, gate.x + gate.ox * 10, gate.z + gate.oz * 10, inward);
+  trail = await walk(page, 30000, pos, s => out(s) < -8);
+  expect(out(trail[trail.length - 1]), 'the siege is lifted and the gate still stops you').toBeLessThan(-6);
+
+  // 3. the camp back: shut again, and E at the gate — Known — opens it for a minute
+  await page.evaluate(() => { window.farhold.sites.sites.find(s => s.key === 'm4-siege').taken = false; });
+  expect((await waitShut(true))?.shut).toBe(true);
+  await stand(page, gate.x + gate.ox * 3, gate.z + gate.oz * 3, inward);
+  expect(await page.evaluate(() => window.farhold.interactTarget()?.kind)).toBe('gate');
+  await page.keyboard.press('KeyE');
+  expect((await waitShut(false))?.shut, 'the knock did not open it').toBe(false);
+  await page.waitForTimeout(1200);
+  await page.screenshot({ path: SHOTS + 'r27-gate-knocked-open.png' });
+  await stand(page, gate.x + gate.ox * 10, gate.z + gate.oz * 10, inward);
+  trail = await walk(page, 30000, pos, s => out(s) < -8);
+  expect(out(trail[trail.length - 1]), 'a knocked-open gate still stops you').toBeLessThan(-6);
+  await page.evaluate(() => { window.farhold.sites.sites.find(s => s.key === 'm4-siege').taken = true; });
+
+  // 4. Hunted: barred, and the gate guards come for you OUTSIDE the wall only
+  const holder = await page.evaluate(({ cx, cz }) => {
+    const f = window.farhold;
+    const k = f.holdings.of(f.zones.at(cx, cz)?.id)?.holder;
+    if (k) f.standings.add(k, -200, { spread: false });
+    f.player && (f.player.hp = f.player.maxHp);
+    return k;
+  }, gate);
+  expect(holder, 'Fenkeep\'s zone has no holder to be hunted by').toBeTruthy();
+  expect((await waitShut(true))?.reason).toBe('hunted');
+  await stand(page, gate.x + gate.ox * 9, gate.z + gate.oz * 9, inward);
+  const hunting = await page.evaluate(async ({ town }) => {
+    const f = window.farhold, t0 = Date.now();
+    const guards = () => f.folk.roster().filter(n => n.node?.id === town && n.post?.gate != null);
+    while (!guards().some(n => n.huntingPlayer) && Date.now() - t0 < 20000) await new Promise(r => setTimeout(r, 200));
+    return guards().filter(n => n.huntingPlayer).length;
+  }, gate);
+  expect(hunting, 'no gate guard went for a Hunted player outside the wall').toBeGreaterThan(0);
+  await page.screenshot({ path: SHOTS + 'r27-gate-hunted-outside.png' });
+  // inside the wall (teleported past the shut door): left alone
+  await stand(page, gate.cx, gate.cz, inward);
+  const inside = await page.evaluate(async ({ town }) => {
+    const f = window.farhold;
+    await new Promise(r => setTimeout(r, 1500));
+    return f.folk.roster().filter(n => n.node?.id === town && n.huntingPlayer).length;
+  }, gate);
+  expect(inside, 'a guard went for the player inside the wall').toBe(0);
+
+  // 5. Trusted: an open gate, a greeting and a salute
+  await page.evaluate(({ holder }) => { const st = window.farhold.standings; st.add(holder, 40 - st.get(holder), { spread: false }); }, { holder });
+  expect((await waitShut(false))?.band).toBe('trusted');
+  await stand(page, gate.x + gate.ox * 20, gate.z + gate.oz * 20, inward);
+  await page.waitForTimeout(800);
+  await page.keyboard.down('KeyW');
+  const saluted = await page.evaluate(async ({ town }) => {
+    const f = window.farhold, t0 = Date.now();
+    while (Date.now() - t0 < 15000) {
+      if (f.folk.roster().some(n => n.node?.id === town && n.saluteLeft > 0)) return true;
+      await new Promise(r => setTimeout(r, 100));
+    }
+    return false;
+  }, gate);
+  await page.keyboard.up('KeyW');
+  await page.screenshot({ path: SHOTS + 'r27-gate-salute.png' });
+  expect(saluted, 'no salute for a Trusted player at an open gate').toBe(true);
+
+  // 6. the watchposts are manned: a guard body within 2 m of every one this town built
+  const watch = await page.evaluate(async ({ town }) => {
+    const f = window.farhold, t0 = Date.now();
+    const posts = f.features.postsOf(town).filter(p => p.key === 'watchpost');
+    const manned = () => posts.filter(p => f.folk.roster().some(n => n.post?.watch != null && Math.hypot(n.x - p.x, n.z - p.z) - p.r <= 2));
+    while (manned().length < posts.length && Date.now() - t0 < 20000) await new Promise(r => setTimeout(r, 250));
+    return { posts: posts.length, manned: manned().length };
+  }, gate);
+  expect(watch.manned).toBe(watch.posts);
+  // nothing new went into the save
+  const snap = await page.evaluate(() => JSON.stringify(window.farhold.snapshot?.() || {}));
+  expect(snap).not.toMatch(/doorState|knock|gateShut/);
   expect(errors).toEqual([]);
 });

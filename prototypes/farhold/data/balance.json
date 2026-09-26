@@ -385,6 +385,15 @@
     "radius": 900,
     "_doc": "How close you must stand to talk to somebody, and how far from the player settlements keep their people."
   },
+  "gates": {
+    "_doc": "R27 M4 \u2014 gates that open and shut (js/town.js `gateVerdict`, js/features.js `setGateShut`). A walled town's gatehouses shut while a siege camp that is not taken stands within `siegeReach` metres of its wall, or while you are Hunted by whoever holds the zone \u2014 never in the town you respawn in or where a quest giver of yours lives. E at a shut gate asks the guard: Known or better opens it for `knockSeconds`, Disliked pays `knockFee` gold for the same, Hunted is refused. `greetRange` is how close a gate guard lets you get before speaking. `nightSpawnShare` / `nightSpawnReach`: while a zone's incident carries `nightSpawn` (restless_dead -> undead), that share of night spawns within that many metres of a town's watch are that family.",
+    "knockFee": 25,
+    "knockSeconds": 60,
+    "siegeReach": 1400,
+    "greetRange": 9,
+    "nightSpawnShare": 0.5,
+    "nightSpawnReach": 400
+  },
   "ranks": {
     "_doc": "Every spawn rolls a rank. A champion takes one modifier and a rare takes two plus a name of its own, which is where 'go and kill the glowing one' comes from. Bosses are placed, never rolled.",
     "championChance": 0.11,

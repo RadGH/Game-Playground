@@ -5341,6 +5341,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       // across on the very same spot, and E used to ask for 4.5 m from its middle)
       const gate = gates.nearest(control.x, control.z, 4.5, [siteSolids, features?.solids, props?.solids]);
       if (gate) return { kind: 'dungeon', gate };
+      const shut = folk.gateAt?.(control.x, control.z);           // R27 M4 — a shut gate: ask the guard
+      if (shut) return { kind: 'gate', ...shut };
       const who = folk.nearest(control.x, control.z);
       if (who) return { kind: 'talk', who };
       /**
@@ -7685,6 +7687,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      */
     const dark = sky.dayFraction < 0.25 || sky.dayFraction > 0.78;
     const warded = dark && rpg.fx.sum(player, 'noAmbush') > 0 ? 0.25 : 1;
+    // R27 M4 — `nightSpawn` (restless_dead -> undead): WHAT spawns near a town after dark, not how much
+    field.setNightSpawn?.(dark && zoneEffects.nightSpawn ? { family: zoneEffects.nightSpawn, share: balance.gates?.nightSpawnShare, reach: balance.gates?.nightSpawnReach } : null);
     const want = Math.round((spawnCfg.maxAlive ?? 38) * zoneEffects.spawnMult * soft * warded);
     if (want !== lastBudget) { lastBudget = want; field.setBudget?.(want); }
   }
@@ -8248,6 +8252,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         else if (it.kind === 'dungeon') enterDungeon(it.gate);
         else if (it.kind === 'leave') leaveDungeon();
         else if (it.kind === 'wanderer') meetOnTheRoad(it.met);
+        else if (it.kind === 'gate') { const r = folk.knock(it, player); hud.log(r.text, r.ok ? 'good' : 'bad'); hud.setPlayer(player); } // R27 M4
         else if (it.kind === 'landmark') atLandmark(it.mark);
         // the town's notice board: the one place work is taken from now
         else if (it.kind === 'board') hud.openNoticeBoard({ where: it.town.name });
@@ -9394,7 +9399,14 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     rebuildWorldAround(false);
     // The watch: the spawner keeps out of these circles, and the guards inside them fight.
     field.safeZones = dungeon ? [] : folk.safeZones();
-    folk.update(dt, control, { field, level: player.level, onLog: (t, c) => hud.log(t, c) });
+    folk.update(dt, control, { field, level: player.level, onLog: (t, c) => hud.log(t, c),
+      // R27 M4 — gates: the siege camps, your standing where a town stands, the towns that never shut
+      gates: dungeon ? null : {
+        camps: sites.sites, spawn: control.spawn, givers: questLog.active.map(q => q.giverId),
+        standingAt: t => (k => k && { band: standings.band(k)?.key, faction: (factionData.factions || []).find(f => f.key === k) })(holdings.of(zones.at(t.wx, t.wz)?.id)?.holder),
+        say: (npc, text) => speech.say(npc, text),
+        hurt: (npc, n) => { player.hp = Math.max(0, player.hp - n); hud.hit(new THREE.Vector3(control.x, control.y + 1.9, control.z), n, 'taken', camera); hud.log(`${npc.name} hits you for ${n}.`, 'bad', 'taken'); if (player.hp <= 0) respawn(null); },
+      } });
     // R22 — put a real person on the road for every wanderer you are close enough to see
     keepWandererBodies(dt);
     // R25 — soft steps on natural ground, the harder step on roads, rock and in dungeons
@@ -9461,6 +9473,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     const near = talk.isOpen || rewardsOpen() || map.isOpen ? null : interactTarget();
     hud.prompt(near
       ? near.kind === 'portal' ? `<b>E</b> step through the portal`
+      : near.kind === 'gate' ? folk.gatePrompt(near) // R27 M4
       : near.kind === 'hall' ? `<b>E</b> go into the Town Hall`
       : near.kind === 'board' ? `<b>E</b> read the notice board`
       : near.kind === 'chest' ? `<b>E</b> open the ${near.chest.name.toLowerCase()}`

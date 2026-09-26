@@ -18,6 +18,8 @@ export class ObstacleField {
     this.bucket = bucket;
     this.buckets = new Map();
     this.count = 0;
+    /** R27 M4 — segments filed with an `id`, so a gate's door can be switched on and off. */
+    this.byId = new Map();
     /**
      * How high the ground is under an obstacle. Needed because a cylinder is filed with a HEIGHT
      * and no base, and "can I jump over this" is a question about its top. Set once by whoever owns
@@ -49,7 +51,7 @@ export class ObstacleField {
 
   _key(bx, bz) { return bx * 73856093 ^ bz * 19349663; }
 
-  clear() { this.buckets.clear(); this.count = 0; }
+  clear() { this.buckets.clear(); this.byId.clear(); this.count = 0; }
 
   /** File a solid cylinder. `height` is only used so a game can let you jump onto low things. */
   add(x, z, radius, height = 3) {
@@ -129,11 +131,17 @@ export class ObstacleField {
    * are square (see `segPush`), so a length of wall stops where its drawn masonry stops.
    *
    *   field.addSegment(ax, az, bx, bz, half, height);
+   *
+   * R27 M4 — A SEGMENT THAT CAN BE SWITCHED OFF: a gate's door. Filed with `{ id }` (and
+   * `enabled: false` to start switched off), it is turned on and off with `setEnabled(id, bool)`.
+   * The field has no delete — `clear()` wipes everything, and features.js rebuilds the lot — so a
+   * door that opens and shuts between rebuilds is a segment with a flag, checked in the same loops
+   * as everything else. Returns the segment itself, which `setEnabled` also takes.
    */
-  addSegment(ax, az, bx, bz, half = 0.6, height = 4, { band = null } = {}) {
+  addSegment(ax, az, bx, bz, half = 0.6, height = 4, { band = null, id = null, enabled = true } = {}) {
     const len = Math.hypot(bx - ax, bz - az) || 1e-6;
     const item = {
-      seg: true, ax, az, bx, bz, half, h: height,
+      seg: true, ax, az, bx, bz, half, h: height, id, enabled: enabled !== false,
       /**
        * R23b — A WALL THAT IS ONLY THERE AT ONE HEIGHT: a bridge rail. `[lo, hi]` in world metres;
        * the segment is solid only for a body whose feet are inside that band, so a rail keeps you
@@ -164,7 +172,28 @@ export class ObstacleField {
       }
     }
     this.count++;
-    return this;
+    if (id != null) {
+      let group = this.byId.get(id);
+      if (!group) this.byId.set(id, group = []);
+      group.push(item);
+    }
+    return item;
+  }
+
+  /**
+   * R27 M4 — switch a filed segment on or off, by its `id` or by the handle `addSegment` returned.
+   * Returns how many segments it touched (0 for an id nobody filed, e.g. after a rebuild).
+   */
+  setEnabled(idOrHandle, on) {
+    const list = idOrHandle && typeof idOrHandle === 'object' ? [idOrHandle] : this.byId.get(idOrHandle) || [];
+    for (const o of list) o.enabled = !!on;
+    return list.length;
+  }
+
+  /** R27 M4 — is the segment filed under this id switched on? (null when there is none) */
+  isEnabled(id) {
+    const list = this.byId.get(id);
+    return list?.length ? list.some(o => o.enabled) : null;
   }
 
   /**
@@ -243,7 +272,7 @@ export class ObstacleField {
     for (const o of list) {
       if (o.deck) continue;                      // you walk ON a deck, never into it
       if (o.seg) {
-        if (o.band) continue;                    // a rail needs feet to know if it applies
+        if (o.band || !o.enabled) continue;      // a rail needs feet to know if it applies; R27 M4: an open door is not there
         if (this.segPush(o, x, z, radius)) return true;
         continue;
       }
@@ -271,7 +300,7 @@ export class ObstacleField {
       const list = this.near(x, z);
       if (list) {
         for (const o of list) {
-          if (!o.seg || !this.inBand(o, feet)) continue;
+          if (!o.seg || !o.enabled || !this.inBand(o, feet)) continue;   // R27 M4: `enabled`
           // the wall's normal, and each end's signed distance from its centre line
           const nx = -o.uz, nz = o.ux;
           const s0 = (from[0] - o.ax) * nx + (from[1] - o.az) * nz;
@@ -302,7 +331,7 @@ export class ObstacleField {
       for (const o of list) {
         if (o.deck) continue;                    // a deck never pushes you out; it holds you up
         if (o.seg) {
-          if (!this.inBand(o, feet)) continue;
+          if (!o.enabled || !this.inBand(o, feet)) continue;           // R27 M4: `enabled`
           const push = this.segPush(o, out[0], out[1], radius);
           if (!push) continue;
           out[0] += push[0]; out[1] += push[1];

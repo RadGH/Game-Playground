@@ -34,6 +34,30 @@ const ROLE_VOICE = {
 
 const INTENTS = ['greet', 'farewell', 'smalltalk'];
 
+/**
+ * R27 M4 — WHAT A GATE GUARD SAYS TO YOU, BY YOUR STANDING WITH WHOEVER HOLDS THE GROUND.
+ *
+ * One line per band. `Known` is the faction's own `greeting` out of data/factions.json — that is
+ * the line they wrote for a stranger with coin — and the others name the faction the way the rest
+ * of the game does (`short`, "the Reach"), so the guard is plainly theirs. Plain sentences (see
+ * WORDING.md): a challenge says what happens, not how it feels.
+ */
+export const GATE_LINES = {
+  hunted: 'You are wanted by {short}. The gate stays shut, and we will cut you down outside it.',
+  disliked: '{Short} has no love for you. Pay the gate fee or walk on.',
+  known: null,
+  trusted: 'Welcome back. {Short} keeps a place for you here.',
+  sworn: 'Make way — sworn to {short}. The gate is yours.',
+};
+
+/** A gate guard's line for this band. `faction` is a data/factions.json row (or null). */
+export function gateLine(band, faction = null) {
+  const short = faction?.short || faction?.name || 'the watch';
+  const cap = short.charAt(0).toUpperCase() + short.slice(1);
+  if (band === 'known' || !GATE_LINES[band]) return faction?.greeting || 'State your business at the gate.';
+  return GATE_LINES[band].replace('{short}', short).replace('{Short}', cap);
+}
+
 export async function createSpeech({ base = new URL('../../../lingo/data/', import.meta.url).href, enabled = true } = {}) {
   let lingo = null;
   let failure = null;

@@ -106,6 +106,8 @@ const DECOR_RANGE = 600;
 const WALL_HALF = 0.6;
 /** A gate door leaf: how thick, and how tall — the passage under the span is 4.9 m clear. */
 const DOOR_THICK = 0.24, DOOR_HEIGHT = 4.5;
+/** R27 M4 — seconds a gate's doors take to swing from open to shut, or back. */
+export const GATE_SWING = 0.8;
 
 // ---------------------------------------------------------------------------- the building kit
 //
@@ -565,6 +567,16 @@ export function createFeatures(scene, terrain, opts = {}) {
   const wallRecords = new Map();
   /** R27 M3 — a village's fence or a hamlet's stones: `{ cx, cz, r, tier, kind, key, gaps, pieces, stones, banners }`. */
   const fenceRecords = new Map();
+  /**
+   * R27 M4 — GATES THAT OPEN AND SHUT. `doorState` is how far each gate's doors have swung (0 open,
+   * 1 shut) and where they are going, by `<settlement id>:<gate index>`. It outlives a rebuild, so a
+   * shut gate is built shut again; it is never saved (js/town.js derives it from the world every
+   * half second). `doorsBuilt` is the doors standing right now, with their two instance slots.
+   */
+  const doorState = new Map();
+  let doorsBuilt = [];
+  /** R27 M4 — the buildings with a `role` (js/town-plan.js BUILDING_INFO) as built, per settlement. */
+  const postRecords = new Map();
 
   /** Append one ribbon's triangles to a growing buffer, offsetting its indices. */
   function pushRibbon(into, part) {
@@ -599,6 +611,27 @@ export function createFeatures(scene, terrain, opts = {}) {
   let visible = true;
   const matrix = new THREE.Matrix4();
   const colour = new THREE.Color();
+
+  /**
+   * R27 M4 — put one gate's two leaves at a swing of `t` (0 open along the passage walls, 1 shut
+   * across it). Each leaf turns about its own hinge by a quarter turn toward the middle; shut, it is
+   * trimmed to the inset so the two meet edge to edge instead of overlapping (and flickering).
+   */
+  const doorQuat = new THREE.Quaternion(), doorEuler = new THREE.Euler(), doorPos = new THREE.Vector3(), doorSize = new THREE.Vector3();
+  function swingDoor(door, t) {
+    for (const lf of door.leaves) {
+      // local +Z along the wall toward this leaf's own side, so -Z (the leaf) points to the middle
+      const shutYaw = Math.atan2(lf.side * door.ux, lf.side * door.uz);
+      let turn = shutYaw - door.yaw;
+      turn = Math.atan2(Math.sin(turn), Math.cos(turn));
+      doorEuler.set(0, door.yaw + turn * t, 0);
+      doorQuat.setFromEuler(doorEuler);
+      doorPos.set(lf.hx, lf.y, lf.hz);
+      doorSize.set(1, DOOR_HEIGHT, door.leaf - (door.leaf - door.inset - 0.005) * t);
+      matrix.compose(doorPos, doorQuat, doorSize);
+      instanced.gatedoor.setMatrixAt(lf.slot, matrix);
+    }
+  }
 
 
   /**
@@ -1232,6 +1265,11 @@ export function createFeatures(scene, terrain, opts = {}) {
 
       // collision from the footprint the kit actually chose, rather than one number per building type
       solids.add(x, z, radiusOf(desc), Math.max(2.5, top));
+      // R27 M4 — `BUILDING_INFO.role`'s first reader: js/town.js mans the watchposts from this
+      if (BUILDING_INFO[key]?.role) {
+        if (!postRecords.has(node.id)) postRecords.set(node.id, []);
+        postRecords.get(node.id).push({ key, role: BUILDING_INFO[key].role, x, z, yaw, r: radiusOf(desc) });
+      }
     }
 
     // a city gets a wall and towers (R27 M2: the one tier rule, not a sixth copy of `size >= 4`)
@@ -1524,17 +1562,40 @@ export function createFeatures(scene, terrain, opts = {}) {
            */
           const leaf = open / 2;
           const hingeOut = GATE_DEPTH / 2 - 0.35;
+          /**
+           * R27 M4 — …AND SHUT. A siege camp outside, or a town that hunts you, swings the leaves
+           * across the opening (js/town.js decides; `setGateShut` below). Each leaf keeps its
+           * instance slot, so a swing is two `setMatrixAt`s and nothing is rebuilt. The colliders
+           * are two sets filed once, switched by id: the open leaves along the passage walls, and
+           * one door segment across the passage between the hinges when shut.
+           */
+          const inset = open / 2 - DOOR_THICK / 2 - 0.02;
+          const key = `${node.id}:${records.length}`;
+          const st = doorState.get(key) || { t: 0, want: 0 };
+          doorState.set(key, st);
+          const door = { key, node: node.id, yaw, ux, uz, ox, oz, leaf, inset, leaves: [] };
           for (const side of [-1, 1]) {
-            const inset = open / 2 - DOOR_THICK / 2 - 0.02;
             const hx = gx + ux * side * inset + ox * hingeOut, hz = gz + uz * side * inset + oz * hingeOut;
             const ground = terrain.heightAt(hx, hz);
             // the leaf model runs along its local -Z from the hinge; yaw = the gate's, so -Z is inward
-            placeFree('gatedoor', hx, ground - 0.1, hz, yaw, [1, DOOR_HEIGHT, leaf]);
-            solids.addSegment(hx, hz, hx - ox * leaf, hz - oz * leaf, DOOR_THICK / 2 + 0.05, DOOR_HEIGHT);
+            const slot = counts.gatedoor;
+            if (placeFree('gatedoor', hx, ground - 0.1, hz, yaw, [1, DOOR_HEIGHT, leaf])) door.leaves.push({ slot, side, hx, hz, y: ground - 0.1 });
+            solids.addSegment(hx, hz, hx - ox * leaf, hz - oz * leaf, DOOR_THICK / 2 + 0.05, DOOR_HEIGHT,
+              { id: key + ':open', enabled: st.want === 0 });
           }
+          // shut: hinge to hinge, across the passage at the outer end
+          solids.addSegment(gx - ux * inset + ox * hingeOut, gz - uz * inset + oz * hingeOut,
+            gx + ux * inset + ox * hingeOut, gz + uz * inset + oz * hingeOut, DOOR_THICK / 2 + 0.05, DOOR_HEIGHT,
+            { id: key + ':shut', enabled: st.want === 1 });
+          doorsBuilt.push(door);
+          if (st.t > 0) swingDoor(door, st.t);
         }
         records.push({
           x: gx, z: gz, yaw, open, span, depth: GATE_DEPTH, gatehouse: !!built,
+          // R27 M4 — `open` above is the opening's WIDTH (read everywhere), so the state is `shut`:
+          // derived, never saved. Only a gatehouse has doors; a plain gap cannot shut.
+          doors: !!built, get shut() { return !!built && (doorState.get(`${node.id}:${this.index}`)?.want === 1); },
+          index: records.length,
           // R27 M2: which list it came from, and whether its middle is dry (town.js posts no
           // guards at a gate standing in a river)
           source: c.planner ? 'street' : 'road', wet: !!wet,
@@ -1754,6 +1815,8 @@ export function createFeatures(scene, terrain, opts = {}) {
     gateRecords.clear();
     wallRecords.clear();
     fenceRecords.clear();                              // R27 M3
+    doorsBuilt = [];                                   // R27 M4 (doorState is kept: a shut gate is rebuilt shut)
+    postRecords.clear();
     // ROUND 14: every town's streets go into one ribbon buffer — see buildSettlement
     const streets = { position: [], normal: [], color: [], index: [] };
 
@@ -1835,6 +1898,46 @@ export function createFeatures(scene, terrain, opts = {}) {
     wallOf: id => wallRecords.get(id) || null,
     /** R27 M3 — an unwalled settlement's edge as built (fence or boundary stones), or null. */
     edgeOf: id => fenceRecords.get(id) || null,
+    /** R27 M4 — the buildings with a `role` in one settlement, as built: `[{ key, role, x, z, yaw, r }]`. */
+    postsOf: id => postRecords.get(id) || [],
+    /**
+     * R27 M4 — shut or open every gatehouse of one settlement. The colliders switch at once (a door
+     * you are standing in pushes you out to one side); the leaves swing over `GATE_SWING` seconds in
+     * `tickGates`. Returns true when anything changed.
+     */
+    setGateShut(id, shut) {
+      const want = shut ? 1 : 0;
+      let changed = false;
+      for (const g of gateRecords.get(id) || []) {
+        if (!g.doors) continue;
+        const key = `${id}:${g.index}`;
+        const st = doorState.get(key);
+        if (!st || st.want === want) continue;
+        st.want = want;
+        solids.setEnabled(key + ':shut', want === 1);
+        solids.setEnabled(key + ':open', want === 0);
+        changed = true;
+      }
+      return changed;
+    },
+    /** R27 M4 — is any gatehouse of this settlement shut (or shutting)? */
+    gateShut: id => (gateRecords.get(id) || []).some(g => g.shut),
+    /** R27 M4 — swing any doors that are between open and shut. Cheap when nothing is moving. */
+    tickGates(dt) {
+      let moved = false;
+      for (const door of doorsBuilt) {
+        const st = doorState.get(door.key);
+        if (!st || st.t === st.want) continue;
+        const step = dt / GATE_SWING;
+        st.t = st.want > st.t ? Math.min(st.want, st.t + step) : Math.max(st.want, st.t - step);
+        swingDoor(door, st.t);
+        moved = true;
+      }
+      if (moved) instanced.gatedoor.instanceMatrix.needsUpdate = true;
+      return moved;
+    },
+    /** R27 M4 — how far one gate's doors have swung, 0 open to 1 shut (tests and the debug menu). */
+    doorSwing: (id, index) => doorState.get(`${id}:${index}`)?.t ?? null,
     /** The bridges drawn right now, as js/bridge-plan.js plans (samples + deck pieces). */
     get bridgePlans() { return bridgePlans; },
 

@@ -27,6 +27,9 @@ import { hireOffer as buildHireOffer } from './hire.js';
 // R23: townsfolk stand on bridge decks (js/ground.js), and a walled town posts guards at its gates
 import { groundAt, wetAt } from './ground.js';
 import { sentryPosts, townExtent } from './town-plan.js';
+// R27 M4 — a gate guard's line by your standing, and the emote a friendly one gives you
+import { gateLine } from './speech.js';
+import { CHIBI2_EMOTE_ANIMS } from '../../../avatar-3d/js/chibi2-motion.js';
 
 /**
  * The little badge that floats over somebody worth talking to. Drawn into a canvas once per glyph
@@ -169,6 +172,84 @@ export const STOCK_COUNT = { weapon: 8, armor: 8, other: 6 };
  */
 const GUARD = { hp: 260, dmg: [14, 22], armor: 22, speed: 5.2, reach: 3, attackEvery: 1.2, perLevel: 1.17 };
 
+// ------------------------------------------------------------------ R27 M4: gates that open and shut
+
+/**
+ * The `gates` block of data/balance.json, with the numbers it falls back to. `siegeReach` is metres
+ * from a town's WALL: js/sites.js puts a siege camp within 700 m of a keep-clear gap that is itself
+ * 500-650 m outside a walled town's wall, so 1400 m covers every camp it places "near a settlement".
+ */
+export const GATE_DEFAULTS = { knockFee: 25, knockSeconds: 60, siegeReach: 1400, greetRange: 9 };
+
+/** The salute a friendly guard gives, if the Chibi 2 emote list has one (it does — round 25). */
+const SALUTE = CHIBI2_EMOTE_ANIMS.includes('salute') ? 'salute' : null;
+const SALUTE_SECONDS = 1.6;
+
+/**
+ * WHICH TOWNS A STANDING SIEGE CAMP IS BESIEGING: `Map(town id -> { camp, gap })`.
+ *
+ * A camp besieges the ONE town nearest it (measured to that town's real wall, `townExtent`), and
+ * only while it is within `reach` of it and not taken (js/sites.js `taken`, M1). This is what makes
+ * data/strongholds.json's siege blurb — "a town a mile off that has stopped opening its gate" — true.
+ */
+export function besiegedTowns(towns = [], camps = [], reach = GATE_DEFAULTS.siegeReach) {
+  const out = new Map();
+  for (const c of camps || []) {
+    if (!c || c.type !== 'siege_camp' || c.taken) continue;
+    let best = null, gap = Infinity;
+    for (const t of towns) {
+      const d = Math.hypot(t.wx - c.x, t.wz - c.z) - townExtent(t).wall;
+      if (d < gap) { gap = d; best = t; }
+    }
+    if (best && gap <= reach && !out.has(best.id)) out.set(best.id, { camp: c, gap: Math.max(0, gap) });
+  }
+  return out;
+}
+
+/**
+ * IS THIS TOWN'S GATE SHUT, AND WHY. Derived every time from the world — never saved.
+ *
+ *   siege    a standing siege camp is besieging it (`besiegedTowns`)
+ *   band     your standing with whoever holds the zone (data/factions.json band key)
+ *   exempt   the town holds your respawn point or an active quest giver: NEVER shut (a softlock)
+ *   knocked  a guard opened it for you in the last `knockSeconds` — which a Hunted player never gets
+ */
+export function gateVerdict({ siege = null, band = null, exempt = false, knocked = false } = {}) {
+  const hunted = band === 'hunted';
+  const reason = hunted ? 'hunted' : siege ? 'siege' : null;
+  const opened = !!knocked && !hunted;
+  return { shut: !!reason && !exempt && !opened, reason, hunted, siege: !!siege, exempt: !!reason && !!exempt, knocked: opened };
+}
+
+/**
+ * DOES A GATE GUARD GO FOR THE PLAYER? Only when the player is Hunted, only OUTSIDE the wall line,
+ * and only within the guard's own reach of the post. Inside the wall a Hunted player is left alone:
+ * a town that holds your respawn point must never become a place you die again the moment you wake.
+ */
+export function guardTargetsPlayer({ hunted = false, player, centre, wallR, home, reach = 42 }) {
+  if (!hunted || !player) return false;
+  if (Math.hypot(player.x - centre[0], player.z - centre[1]) <= wallR) return false;
+  return Math.hypot(player.x - home[0], player.z - home[1]) < reach;
+}
+
+/** What a knock at a shut gate gets you: `{ ok, fee, why }`. Known or better is free. */
+export function knockOutcome(band, gold = 0, fee = GATE_DEFAULTS.knockFee) {
+  if (band === 'hunted') return { ok: false, fee: 0, why: 'hunted' };
+  if (band === 'disliked') return gold >= fee ? { ok: true, fee, why: null } : { ok: false, fee, why: 'gold' };
+  return { ok: true, fee: 0, why: null };
+}
+
+/**
+ * WHERE A WATCHPOST'S GUARD STANDS: at its door, a step out onto the street it faces (+Z of the
+ * building is the street side — see features.js `placePart`). Barracks guards stay inside.
+ */
+export function watchPosts(records = []) {
+  return records.filter(r => r.key === 'watchpost').map((r, i) => ({
+    post: i, facing: r.yaw, of: r,
+    x: r.x + Math.sin(r.yaw) * (r.r + 0.9), z: r.z + Math.cos(r.yaw) * (r.r + 0.9),
+  }));
+}
+
 export function createTownFolk(scene, terrain, opts = {}) {
   const {
     features, rpg, namegen = null, looks = [], seed = 1, radius = 900, balance = {},
@@ -193,7 +274,15 @@ export function createTownFolk(scene, terrain, opts = {}) {
   // R27 M2: which towns have finished populating, and which have had their gate guards posted
   const ready = new Set();
   const posted = new Set();
+  const watched = new Set();       // R27 M4: …and which have had their watchposts manned
   let pending = 0;
+
+  // R27 M4 — the gate state, re-derived twice a second; none of it is saved
+  const gcfg = { ...GATE_DEFAULTS, ...(balance.gates || {}) };
+  const verdicts = new Map();      // town id -> gateVerdict + { town, band, faction, gap, why }
+  const knocks = new Map();        // town id -> gate clock second a knock's opening runs out
+  const greeted = new Map();       // `${town}:${gate}` -> the guard who spoke
+  let gateClock = 0, gateTick = 0;
 
   /** The roles a settlement of this size gets, deterministic from its id. */
   function rosterFor(node) {
@@ -355,8 +444,118 @@ export function createTownFolk(scene, terrain, opts = {}) {
     // R27 M2: the gate guards are their own step now, so a town populated before its wall was
     // built can have them posted later (see `postGateGuards` and the retry in `update`)
     await postGateGuards(node, rng, people);
+    await postWatch(node, rng, people);          // R27 M4
     live.set(node.id, people);
     ready.add(node.id);
+  }
+
+  /**
+   * R27 M4 — A GUARD AT EVERY WATCHPOST. The first reader of `BUILDING_INFO.role === 'guard'`:
+   * features.js files each built building that has a role (`postsOf`), and a watchpost gets a body
+   * at its door facing the street. A barracks has the same role and keeps its guards inside.
+   */
+  async function postWatch(node, rng, people) {
+    const records = features.postsOf?.(node.id) || [];
+    if (!records.length) return false;
+    watched.add(node.id);
+    const guardRole = ROLES.find(r => r.key === 'guard');
+    for (const spot of watchPosts(records)) {
+      if (!live.has(node.id)) return true;
+      if (terrain.waterAt(spot.x, spot.z) || terrain.riverAt?.(spot.x, spot.z) > 0.3) continue;
+      const { name, gender } = nameFor(node, guardRole, rng);
+      const look = looks.length ? looks[Math.floor(rng() * looks.length)] : null;
+      const body = peopleOf(node, rng);
+      pending++;
+      let actor = null;
+      try {
+        const avatar = look ? JSON.parse(JSON.stringify(look)) : {};
+        if (body) avatar.body = { ...(avatar.body || {}), ...body };
+        actor = await makeActor({ avatar });
+      } catch { /* a body we cannot build is a guard we skip */ }
+      finally { pending--; }
+      if (!actor) continue;
+      const npc = {
+        id: `${node.id}:watch${spot.post}`,
+        name, role: 'guard', roleName: 'Watch Guard', gender,
+        guards: true, guardTimer: 0, target: null,
+        greeting: guardRole.greeting,
+        trades: false, givesQuests: false, gambles: false, brokers: false, retrains: false,
+        node, x: spot.x, z: spot.z, y: groundAt(terrain, spot.x, spot.z),
+        facing: spot.facing, home: [spot.x, spot.z],
+        post: { facing: spot.facing, watch: spot.post },
+        wanderTimer: 0, actor, stock: null, offered: null,
+      };
+      actor.group.position.set(npc.x, npc.y, npc.z);
+      actor.group.rotation.y = npc.facing;
+      scene.add(actor.group);
+      setActorAnim(actor, 'idle');
+      people.push(npc);
+    }
+    return true;
+  }
+
+  /**
+   * R27 M4 — WORK OUT EVERY WALLED TOWN'S GATE, AND SWING ITS DOORS TO MATCH. `gates` is what
+   * main.js knows and this module does not: the stronghold list, your standing where a town stands,
+   * where you respawn and who has given you work. Says so in the log when a town near you changes.
+   */
+  function refreshGates(player, gates, onLog) {
+    const towns = features.settlements;
+    const siege = besiegedTowns(towns, gates.camps || [], gcfg.siegeReach);
+    // never shut: the town you wake in, and any town whose people have given you work
+    const keep = new Map();
+    const spawn = gates.spawn;
+    if (spawn) {
+      for (const t of towns) {
+        if (Math.hypot(t.wx - spawn.x, t.wz - spawn.z) <= townExtent(t).wall + 10) { keep.set(t.id, 'you wake here when you fall'); break; }
+      }
+    }
+    for (const g of gates.givers || []) {
+      const id = Number(String(g ?? '').split(':')[0]);
+      if (Number.isFinite(id) && !keep.has(id)) keep.set(id, 'someone here has work for you');
+    }
+    for (const t of towns) {
+      if (!features.gatesOf?.(t.id)?.length) { verdicts.delete(t.id); continue; }
+      const who = gates.standingAt?.(t) || null;
+      const s = siege.get(t.id) || null;
+      const v = gateVerdict({ siege: s, band: who?.band || null, exempt: keep.has(t.id), knocked: (knocks.get(t.id) || 0) > gateClock });
+      Object.assign(v, { town: t, band: who?.band || null, faction: who?.faction || null, gap: s?.gap ?? null, why: keep.get(t.id) || null });
+      const was = verdicts.get(t.id);
+      verdicts.set(t.id, v);
+      features.setGateShut?.(t.id, v.shut);
+      // the log, once per change, for a town close enough to matter
+      const state = `${v.shut}|${v.reason}|${v.exempt}`;
+      if (!onLog || state === was?.state || Math.hypot(t.wx - player.x, t.wz - player.z) > 900) { v.state = state; continue; }
+      v.state = state;
+      const who2 = v.faction?.short || 'the holders';
+      if (v.shut && v.reason === 'siege') onLog(`${t.name} has shut its gates: a siege camp stands ${Math.round(v.gap)} m from the wall.`, 'bad');
+      else if (v.shut && v.reason === 'hunted') onLog(`${t.name} has barred its gate to you: ${who2} want you dead.`, 'bad');
+      else if (v.exempt && v.reason === 'siege') onLog(`A siege camp stands ${Math.round(v.gap)} m from ${t.name}. The gate stays open for you: ${v.why}.`, '');
+      else if (v.exempt && v.reason === 'hunted') onLog(`${t.name} will not bar its gate to you: ${v.why}. Its guards will still come for you outside the wall.`, 'bad');
+      else if (was?.shut && !v.shut && !v.knocked) onLog(`${t.name} opens its gates.`, 'good');
+    }
+  }
+
+  /** R27 M4 — the gate guard who greets you, once per approach, and the salute for a friend. */
+  function greetAtGate(npc, dist, gates, onLog) {
+    const key = `${npc.node.id}:${npc.post.gate}`;
+    if (greeted.get(key) === npc && dist > gcfg.greetRange * 3) { greeted.delete(key); return; }
+    if (dist > gcfg.greetRange || greeted.has(key)) return;
+    greeted.set(key, npc);
+    const v = verdicts.get(npc.node.id);
+    const text = gateLine(v?.band || null, v?.faction || null);
+    onLog?.(`${npc.name}: "${text}"`, v?.hunted ? 'bad' : '');
+    gates.say?.(npc, text);
+    // Trusted and Sworn get a salute from both guards at an open gate — ONE clip, never a per-frame
+    // restart (round 25's clip rule); the post branch leaves the body alone until it has played
+    if (SALUTE && !v?.shut && (v?.band === 'trusted' || v?.band === 'sworn')) {
+      for (const other of [...live.values()].flat()) {
+        if (other.node !== npc.node || other.post?.gate !== npc.post.gate || other.saluteLeft > 0) continue;
+        other.saluteLeft = SALUTE_SECONDS;
+        other.facing = Math.atan2(gates.player?.x - other.x || 0, gates.player?.z - other.z || 1);
+        setActorAnim(other.actor, SALUTE);
+      }
+    }
   }
 
   /**
@@ -467,6 +666,7 @@ export function createTownFolk(scene, terrain, opts = {}) {
   function depopulate(id) {
     const people = live.get(id);
     posted.delete(id); ready.delete(id);           // R27 M2
+    watched.delete(id);                            // R27 M4
     if (!people) return;
     for (const npc of people) {
       scene.remove(npc.actor.group);
@@ -547,7 +747,7 @@ export function createTownFolk(scene, terrain, opts = {}) {
     rosterFor,
 
     /** Keep the people near the player, and let them shuffle about. */
-    update(dt, player, { field = null, level = 1, onLog = null } = {}) {
+    update(dt, player, { field = null, level = 1, onLog = null, gates = null } = {}) {
       // bring settlements in range to life, and let the far ones go
       for (const s of features.settlements) {
         const d = Math.hypot(s.wx - player.x, s.wz - player.z);
@@ -558,12 +758,63 @@ export function createTownFolk(scene, terrain, opts = {}) {
           posted.add(s.id);
           postGateGuards(s, rosterFor(s).rng, live.get(s.id));
         }
+        // R27 M4 — …and the same for a town's watchposts
+        else if (ready.has(s.id) && !watched.has(s.id) && features.postsOf?.(s.id)?.some(r => r.key === 'watchpost')) {
+          postWatch(s, rosterFor(s).rng, live.get(s.id));
+        }
       }
+      // R27 M4 — the gates: re-derived twice a second, and the doors swung every frame
+      gateClock += dt;
+      if (gates) {
+        gates.player = player;
+        gateTick -= dt;
+        if (gateTick <= 0) { gateTick = 0.5; refreshGates(player, gates, onLog); }
+      }
+      features.tickGates?.(dt);
 
       for (const people of live.values()) {
         for (const npc of people) {
           const dx = player.x - npc.x, dz = player.z - npc.z;
           const dist = Math.hypot(dx, dz);
+
+          /**
+           * R27 M4 — A GATE GUARD NOTICES YOU. A line by your standing as you walk up, and — when
+           * the town hunts you — the guards come for you, but only OUTSIDE the wall line.
+           */
+          if (gates && npc.post?.gate != null) {
+            const v = verdicts.get(npc.node.id);
+            const ring = features.wallOf?.(npc.node.id);
+            npc.huntingPlayer = guardTargetsPlayer({
+              hunted: !!v?.hunted, player,
+              centre: ring ? [ring.cx, ring.cz] : [npc.node.wx, npc.node.wz],
+              wallR: ring?.r ?? townExtent(npc.node).wall, home: npc.home, reach: guardReach,
+            });
+            if (!npc.huntingPlayer) greetAtGate(npc, dist, gates, onLog);
+            else {
+              if (npc.guardTimer > 0) npc.guardTimer -= dt;
+              npc.target = null;
+              npc.facing = Math.atan2(dx, dz);
+              if (dist > GUARD.reach) {
+                const step = GUARD.speed * dt;
+                const nx = npc.x + Math.sin(npc.facing) * step, nz = npc.z + Math.cos(npc.facing) * step;
+                if (Math.hypot(nx - npc.home[0], nz - npc.home[1]) < guardReach && !wetAt(terrain, nx, nz, npc.y, { test: 'waterAt' })) {
+                  npc.x = nx; npc.z = nz;
+                }
+                setActorAnim(npc.actor, 'run');
+              } else if (npc.guardTimer <= 0) {
+                npc.guardTimer = GUARD.attackEvery;
+                setActorAnim(npc.actor, 'attack');
+                const scale = Math.pow(GUARD.perLevel, Math.max(0, level - 1));
+                const hit = Math.round((GUARD.dmg[0] + Math.random() * (GUARD.dmg[1] - GUARD.dmg[0])) * scale);
+                gates.hurt?.(npc, hit);
+              }
+              npc.y = groundAt(terrain, npc.x, npc.z, npc.y);
+              npc.actor.group.position.set(npc.x, npc.y, npc.z);
+              npc.actor.group.rotation.y = npc.facing;
+              npc.actor.update(dt);
+              continue;
+            }
+          }
 
           // ---- a guard does a guard's job
           if (npc.guards && field) {
@@ -643,7 +894,11 @@ export function createTownFolk(scene, terrain, opts = {}) {
            */
           if (npc.post) {
             npc.facing = dist < talkRange * 2.4 ? Math.atan2(dx, dz) : npc.post.facing;
-            setActorAnim(npc.actor, 'idle');
+            // R27 M4 — a salute plays once through; the idle is asked for again only after it
+            if (npc.saluteLeft > 0) {
+              npc.saluteLeft -= dt;
+              if (npc.saluteLeft <= 0) setActorAnim(npc.actor, 'idle');
+            } else setActorAnim(npc.actor, 'idle');
             npc.y = groundAt(terrain, npc.x, npc.z, npc.y);
             npc.actor.group.position.set(npc.x, npc.y, npc.z);
             npc.actor.group.rotation.y = npc.facing;
@@ -774,6 +1029,7 @@ export function createTownFolk(scene, terrain, opts = {}) {
       let best = null, bd = range;
       for (const people of live.values()) {
         for (const npc of people) {
+          if (npc.huntingPlayer) continue;           // R27 M4: a guard cutting at you is not a chat
           const d = Math.hypot(npc.x - x, npc.z - z);
           if (d < bd) { bd = d; best = npc; }
         }
@@ -793,6 +1049,57 @@ export function createTownFolk(scene, terrain, opts = {}) {
 
     /** Everyone currently in the world, for the debug menu and the tests. */
     roster: () => [...live.values()].flat(),
+
+    /** R27 M4 — the last gate verdict for a town (see `gateVerdict`), or null for one with no gates. */
+    gateOf: id => verdicts.get(id) || null,
+    /**
+     * R27 M4 — a SHUT gate within `range` of a point, for E: `{ town, index, gate, verdict }`.
+     * Asked from either side of the wall, so a gate that shut behind you can be knocked open again.
+     */
+    gateAt(x, z, range = 6) {
+      let best = null, bd = range;
+      for (const [id, v] of verdicts) {
+        if (!v.shut) continue;
+        for (const g of features.gatesOf?.(id) || []) {
+          if (!g.doors) continue;
+          const d = Math.hypot(g.x - x, g.z - z);
+          if (d < bd) { bd = d; best = { town: v.town, index: g.index, gate: g, verdict: v }; }
+        }
+      }
+      return best;
+    },
+    /** R27 M4 — the E prompt at a shut gate. */
+    gatePrompt(hit) {
+      const v = hit?.verdict;
+      if (v?.hunted) return `<b>E</b> call up to the guard · ${hit.town.name} has barred its gate to you`;
+      const fee = v?.band === 'disliked' ? ` · ${gcfg.knockFee} gold` : '';
+      return `<b>E</b> ask the guard to open the gate${fee}`;
+    },
+    /**
+     * R27 M4 — KNOCK. Known or better opens a shut gate for `knockSeconds`; Disliked pays
+     * `knockFee` gold for the same; Hunted is refused. The gold comes off `player.gold` here.
+     * Returns `{ ok, text, fee }`, worded for the log.
+     */
+    knock(hit, player) {
+      const v = hit?.verdict || verdicts.get(hit?.town?.id);
+      if (!v || !v.shut) return { ok: true, fee: 0, text: 'The gate is already open.' };
+      const out = knockOutcome(v.band, player?.gold || 0, gcfg.knockFee);
+      if (!out.ok) {
+        return out.why === 'hunted'
+          ? { ok: false, fee: 0, text: `The guard: "${gateLine('hunted', v.faction)}"` }
+          : { ok: false, fee: out.fee, text: `The gate fee is ${out.fee} gold and you have ${player?.gold || 0}.` };
+      }
+      if (out.fee) player.gold -= out.fee;
+      knocks.set(v.town.id, gateClock + gcfg.knockSeconds);
+      v.shut = false; v.knocked = true;
+      features.setGateShut?.(v.town.id, false);
+      gateTick = 0;
+      return {
+        ok: true, fee: out.fee,
+        text: out.fee ? `You pay ${out.fee} gold. The gate opens for ${gcfg.knockSeconds}s.`
+          : `The guard knows you. The gate opens for ${gcfg.knockSeconds}s.`,
+      };
+    },
     /**
      * R27 M2 — the guard BODIES standing in one settlement right now (its watch and its gate
      * guards). The muster's defence count reads this; it used to count YOUR colony's guards, so a

@@ -27,7 +27,7 @@ import { feel, staggerFor, pushFor, COMBAT_FEEL } from './combat-feel.js';
 import { traitsOf } from './weapons.js';
 import { CHIBI2_COMBAT_RIDE } from '../../../avatar-3d/js/chibi2-motion.js';
 // R23: a body stands on a bridge deck, not on the river bed under it — see js/ground.js
-import { groundAt, wetAt } from './ground.js';
+import { groundAt, wetAt, cliffStep, climbable } from './ground.js';
 import { leaderModifier, fitsRoom } from './warbands.js';   // R27 M10
 
 /** `bleed` out of data/skills.json — the field applies it without owning the skill data. */
@@ -843,7 +843,9 @@ export class EnemyField {
           const nx = e.x + p.dx * step, nz = e.z + p.dz * step;
           let [cx, cz] = this.terrain.clampToWorld(nx, nz);
           if (!e.hover) [cx, cz] = this.unstick(cx, cz, (e.reach || 2) * 0.28);
-          if (!wetAt(this.terrain, cx, cz, e.y) && Math.hypot(cx - e.x, cz - e.z) > step * 0.4) {
+          // R27 M7 — a cliff behind it is a wall too: knocked into a face, it takes the slam
+          if (!wetAt(this.terrain, cx, cz, e.y) && (e.hover || climbable(this.terrain, cx, cz, e.x, e.z, 0, e.y))
+            && Math.hypot(cx - e.x, cz - e.z) > step * 0.4) {
             e.x = cx; e.z = cz;
           } else if (!p.walled) {
             // slammed into something: the blow had nowhere to go, so it went into the body
@@ -1035,6 +1037,13 @@ export class EnemyField {
         let [cx, cz] = this.terrain.clampToWorld(nx, nz);
         // Walls, trees and houses stop a body the same way they stop the player. Anything airborne
         // is allowed over them — a bat that cannot cross a wall is a worse bat.
+        /**
+         * R27 M7 — THE SAME CLIFF RULE AS THE PLAYER (js/ground.js `cliffStep`, one helper for both).
+         * Enemies had no slope term at all, so a wolf ran up a 20 m face at full speed while you
+         * crawled up it. Now the part of its step up a face is refused, the part along the foot is
+         * kept (so a chase finds its way round), and after three seconds pinned it scrambles.
+         */
+        if (!e.hover) [cx, cz] = cliffStep(this.terrain, e, cx, cz, dt, { feet: e.y }, this._cliffOut || (this._cliffOut = [0, 0]));
         if (!e.hover) [cx, cz] = this.unstick(cx, cz, (e.reach || 2) * 0.28);
         if (!wetAt(this.terrain, cx, cz, e.y)) {
           // if the push put it back where it started it is up against something: turn and try again

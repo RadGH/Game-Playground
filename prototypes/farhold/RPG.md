@@ -4655,3 +4655,118 @@ subset-hash test excludes `ford` vertices by name, as it does landings; trails a
 `round17-worldgen.test.js`: a ford counts as covering the road over a river, and the deck-clearance
 rule is for rivers (a lake span is low by design). Still todo, not M6's file: the stronghold
 junction slot (`js/sites.js`).
+
+### Round 27 — Cliffs are rock, and roads are faster (M7)
+
+**What was wrong.** Round 21 put real cliff faces into the ground — at Super tiny a face is 2-4 m
+across and 5-20 m tall, slope 6-10 where it is steepest, and the very steepest part of the crease
+drops six metres in a few centimetres. Nothing treated them as anything but a hill:
+- the player divided their pace by `1 + steep·1.6` and crawled up a 20 m face;
+- enemies had **no slope term at all** (js/actors.js) and ran up it at full speed, so the wolf
+  chasing you reached the top first;
+- `props.js` refuses anything on ground steeper than 0.75, so a face rose bare out of the grass;
+- a terrain ring measures steepness across two of its own quads (2 … 162 m), so from the third ring
+  out a face fell between vertices and was painted grass;
+- **no peak on any standard world was ever painted snow.** The snow line (700 m + 5200 m ×
+  temperature) is World Forge's *raw* relief (land to ~6,000 m) and was never brought down when
+  `reliefScale` (0.22 × `M_PER_CELL / 640`) arrived: the top 5% of land runs 68-168 m at Super tiny
+  and 600-1,700 m at full size, and a cold peak's snow line was 2,100 m. The only white was the
+  snowyPeaks biome's own colour.
+
+**The cliff rule** (js/ground.js — `CLIFF`, `cliffGrade`, `steepAt`, `climbable`, `cliffStep`,
+`cliffSlide`; one helper for the player and every enemy):
+- The line is round 21's cliff band: 63° (`tan 63` = 1.96). A mount's `mountSlope` adds 10° a whole
+  point, capped at 70°.
+- A step is refused when it goes uphill and the ground **along the step**, over the metre ahead of
+  where it lands, is past the line — or the step itself rises faster than the line by more than a
+  kerb (0.35 m), for a horse covering two metres a frame. *Along the step*, not the steepest way,
+  because a road beside a bridge's hole or a river's channel is steep the steepest way and flat the
+  way you walk it: measured the steepest way, 42 road points on five worlds refused a walker going up
+  to a bridge. *The metre ahead*, not a centred difference, because a 20 cm face sits between the two
+  samples of a centred one and averages away.
+- Refused, the step keeps its part along the face and loses the part up it, so a body pushing
+  diagonally slides along the foot and a chase finds its way round.
+- A body standing ON a face (steep both above and below it — the edge of a bridge's hole is not)
+  slides back down the terrain's `normalAt`, the terraform-aware one.
+- **Escape:** pinned for 3 s, a body earns 1.2 m of climb a second and takes the step once it has
+  earned the step's rise. *Earned*, not "scaled to climb no faster than": the first cut did that and
+  a wolf went up a 6 m wall in one frame when its tiny step crossed the near-vertical part.
+- **A road is always a way up.** Where two roads' graded surfaces meet at different heights,
+  `heightAt` has a step in it (1.4 m at Stonecrown, seed 7 — a finding for the road pipeline, not
+  fixed here), and a road must never pin anyone, so ground with `roadAt` over 0.45 is never refused.
+  No cliff is ever on a road (M5's calm corridor breaches the face), so this costs the rule nothing.
+- Knockback into a face is a wall slam, the same as knockback into a wall.
+- The player's rule is off while swimming; a ground vehicle obeys it too (a truck does not climb a
+  63° face either — its own `maxSlope` stops it long before).
+
+**Roads are faster** (js/player.js, `balance.json` `roads`): walking ×1.15, riding ×1.25, a highway
+×1.1 on top, on `roadAt` > 0.45 (the class comes from the new `terrain.roadClassAt`). In the
+legs-and-hooves branch **only**: a ground vehicle's speed is replaced from js/vehicles.js
+`speedOn`, which has its own `spec.road`, so the road is paid once. The other speed readers were
+checked: main.js's vehicle surface (`roadAt > 0.45` → `spec.road`, replaced not multiplied), the
+mount sheet (`paceNote`, display only), the stride rate (reads the resulting `control.moving`) and
+js/pets.js (follows the owner's pace).
+
+**Scree** (js/props.js `screeFor`): each cell's ground on an 8 m lattice, every edge that drops a
+face's worth (the line × a thirty-second of a map cell) walked a metre at a time from its low end
+with the walkers' own `steepAt`; the first point past the line is the foot of the face. Two to four
+rocks per face point, fanned 35° either side of the face's downhill normal within 12 m, nearer the
+foot more often; a boulder sometimes. Never on a road (`roadAt` < 0.35), never where `plantable` says
+no, never off a river channel or a bridge hole, never on a face, never uphill of its own face. Own
+random stream (`seed ^ 0x5c1e`); the list is cached per cell (emptied when `clearedVersion` moves).
+**No new draw calls, not even an empty mesh's:** the rubble goes into the existing `rock` and
+`boulder` meshes after every ordinary prop in the radius, so an instance index that held a rock still
+holds the same rock; where no ordinary boulder is in view the scree boulder is a rock at 2.4× (an
+empty InstancedMesh costs nothing, switching one on costs a call — the first test run caught it at
+8 → 9); where there are no rocks at all, no scree. Boulders are solid through `solids.add`. Cliff
+country is found first with the new `terrain.cliffCountryAt` (`cliffAt`'s two gates without the
+crease), so most of a world costs a few table reads; ~0.3 ms per new cell, then cached.
+
+**Rock band at distance** (js/terrain.js `rockSteep`): a ring whose quads are wider than a face
+(a thirty-second of a map cell: 2 m at Super tiny, 20 m at full size) also takes
+`slopeAt(x, z, probe)` in cliff country. Ring rebuilds at a cliff on the user's world: rings 3 and 4
+go from 7.5 / 7.8 ms to 12.4 / 14.3 ms (they rebuild every 17 / 51 m walked); rings 0-2 are within
+0.7 ms.
+
+**Snow and sand** (js/planet.js `colorAt`): the snow line is multiplied by `reliefScale` itself (the
+fraction of a mountain that is white is what World Forge meant, and the same on every planet size);
+the 9 m beach band keeps its full-size look and shrinks with the planet (`M_PER_CELL / 640`). Both
+measured up from the sea. The plan said "the same factor as reliefScale (`M_PER_CELL / 640`)" for
+both; for snow that is still ten times too high and would have left every peak bare.
+
+**Acceptance, measured** (tests/round27-cliffs.test.js):
+
+| | measured | bar |
+|---|---|---|
+| land past 63°, Super tiny | 25392 1.26%, 7 0.08%, 4477 0.14%, 101 0.96%, 1337 0.08% | ≤ 3% |
+| road lane points (5 seeds, edges + middle) | steepest 58.1° of 48,915; 4,071,322 steps walked both ways, 0 refused | all under |
+| player pushing uphill 5 s, 20 faces each (7, 25392, 25392 full size) | ends ≥ 6.0 / 7.3 / 5.0 m under the lip; before this, 5 / 4 / 1 of 20 reached the top | under the lip |
+| wolf on the real EnemyField chasing up the same faces | ≥ 6.0 / 7.3 / 5.0 m under the lip | under the lip |
+| walking along the foot, 80 walks | 0.00% off the same walk with the rule off | ≤ 5% |
+| three-sided gully, pushing at the dead end | walker out in 5.85 s, wolf 6.37 s; never, with the escape off | ≤ 8 s |
+| road pace | exactly ×1.15 walk, ×1.25 ride, ×1.265 highway; knobs moved to 1.37 / 1.61 / 1.29 read exactly | exact |
+| driver on a road with every knob moved | unchanged to 3 decimals | unchanged |
+| scree, 6 cliff spots | 2,801 instances (191 boulders): every one within 12 m and below a face past the line, off roads and water; every other instance byte-identical with scree off; draw calls equal (13/13, 11/11, 12/12, 17/17, 8/8, 12/12) | — |
+| scree falloff | a far cell keeps 27 of 39, all of them in the near set | subset |
+| rock weight ring 0 vs ring 4, 20 cliff points | 0.000 (1.000 without the probe) | ≤ 0.15 |
+| snow share of the top 5% of land, 0.1 / 1 | 25392 37.4 / 37.6%, 4477 63.1 / 61.1%, 7 3.0 / 3.2% | ±10 points |
+
+**In the game** (tests/round27-cliffs.spec.js, seed 25392 at Super tiny; screenshots in
+`research/round27-cliffs/`): rubble along the foot of the nearest face, the escarpments grey from
+200 m, the highest peak white, and the player holding W into a face for 2.5 s stays under the lip.
+
+**Not done / found:**
+- `tests/phase2.spec.js`'s whole-scene `drawCalls < 95` is red — **at HEAD before this milestone
+  too** (100-104 on seed 7, measured on a worktree of 02019c3). Props draw calls are 11 either way and
+  scree is 0 at that spawn. Something from an earlier round-27 milestone pushed the scene over.
+- The road-surface step where two roads meet at different heights (above) belongs to the road
+  pipeline (M5/M8).
+- Companions (js/pets.js, not this milestone's file) still have no slope rule; they are pulled back
+  to their owner when they fall behind, so they cannot be stranded.
+- main.js's mount row still says "climbs anything" (pinned by round17-ui.test.js and
+  round15.spec.js); true against the vehicles it is listed with, not against a cliff.
+
+**Tests:** new `tests/round27-cliffs.test.js` (12) and `tests/round27-cliffs.spec.js` (1). Must stay
+green, all pass: stride, planet, round23-graphics, vehicles, round22-threat, round27-bridges,
+round27-gates, round27-warcamps, water, round27-roads, save; density.spec, megaflora.spec,
+round23-title.spec; phase2.spec 10 of 11 (the one above).

@@ -10,7 +10,7 @@
 import * as THREE from 'three';
 import { feel, COMBAT_FEEL } from './combat-feel.js';
 import { drawPower, chargeAt, STAFF_CHARGE } from './weapons.js';
-import { groundAt } from './ground.js';
+import { groundAt, cliffStep, cliffSlide } from './ground.js';
 
 export const KEY_HELP = 'WASD move · Shift run · Space jump · click attack · 1-6 skills · V first person (hold: look around) · E talk/open/enter · L light · B build · H horse · G drive · J ship · M map · I sheet · K log · O settings · ` debug';
 
@@ -217,6 +217,9 @@ export function createController(terrainIn, balance = {}, camera, {
 
   const forward = new THREE.Vector3();
   const right = new THREE.Vector3();
+  /** R27 M7 — a mount's `mountSlope` lets it take a little more than 63 degrees (js/ground.js). */
+  const cliffOut = [0, 0];
+  const cliffSure = () => (self.mounted && !self.driving ? Math.max(0, Math.min(0.8, sheet().mountSlope || 0)) : 0);
   const resolved = [0, 0];
 
   /**
@@ -418,6 +421,18 @@ export function createController(terrainIn, balance = {}, camera, {
           // …and a surefooted mount loses less of it to a hill, which is what the Dray Elk is FOR
           const sure = self.mounted ? Math.max(0, Math.min(0.8, sheet().mountSlope || 0)) : 0;
           speed *= 1 / (1 + Math.max(0, steep) * 1.6 * (1 - sure));
+          /**
+           * R27 M7 — THE ROAD IS THE QUICK WAY. On a road (`roadAt` past `roads.threshold`) feet go
+           * `roads.walk` faster and hooves `roads.mount`, and a highway adds `roads.highway` on top.
+           * HERE AND NOWHERE ELSE: this is the legs-and-hooves branch. A ground vehicle's speed is
+           * REPLACED above from js/vehicles.js `speedOn`, which already has its own `spec.road`
+           * factor, so putting the road on it here would pay the road twice.
+           */
+          const roads = balance.roads || {};
+          if ((terrain.roadAt?.(self.x, self.z) || 0) > (roads.threshold ?? 0.45)) {
+            speed *= self.mounted ? (roads.mount ?? 1.25) : (roads.walk ?? 1.15);
+            if (terrain.roadClassAt?.(self.x, self.z) === 'highway') speed *= roads.highway ?? 1.1;
+          }
         }
       }
       /**
@@ -438,6 +453,9 @@ export function createController(terrainIn, balance = {}, camera, {
       let nx = self.x + (dx / len) * speed * dt;
       let nz = self.z + (dz / len) * speed * dt;
       [nx, nz] = terrain.clampToWorld(nx, nz);
+      // R27 M7 — a cliff is a wall (js/ground.js `cliffStep`): the part of the step up a face past
+      // 63 degrees is refused, the part along it is kept, and three seconds of pushing scrambles up
+      if (!self.swimming) [nx, nz] = cliffStep(terrain, self, nx, nz, dt, { sure: cliffSure(), feet: self.y }, cliffOut);
       // R23: say where the step started, so a thin wall cannot be stepped through in one frame
       [nx, nz] = unstick(nx, nz, self.y, self.x, self.z);
       [self.x, self.z] = terrain.clampToWorld(nx, nz);
@@ -445,6 +463,13 @@ export function createController(terrainIn, balance = {}, camera, {
       // even standing still, never be left inside something that was just built around you
       const [cx, cz] = unstick(self.x, self.z, self.y);
       self.x = cx; self.z = cz;
+    }
+    // R27 M7 — standing ON a face (a landing, an edit, a spawn) slides you back down it
+    if (!frozen && !self.swimming && cliffSlide(terrain, self, dt, { sure: cliffSure(), feet: self.y })) {
+      const [sx, sz] = unstick(...terrain.clampToWorld(self.x, self.z), self.y);
+      [self.x, self.z] = terrain.clampToWorld(sx, sz);
+      // …ON the face, not off the edge of it: the feet follow the slope down
+      self.y = Math.min(self.y, groundAt(terrain, self.x, self.z, self.y));
     }
     self.moving = speed;
     self.running = !!(input && input.run && speed > 0 && !self.swimming && commitK >= 1);

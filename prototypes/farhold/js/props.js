@@ -19,6 +19,8 @@ import * as THREE from 'three';
 import { makeRng, clamp } from '../../../worldgen/js/noise.js';
 import { BIOMES, isWater } from '../../../worldgen/js/biomes.js';
 import { ObstacleField, PROP_SOLIDS } from './collide.js';
+// R27 M7 — the cliff line the walkers obey is the one the scree falls from
+import { cliffGrade, steepAt } from './ground.js';
 // R17 — the no-dependency registry js/tools.js reads the gather clock and the work clip out of.
 import { harvestInfo } from './harvestinfo.js';
 // R23 — the plants bend in the wind (the one wind, js/wind.js, through js/atmosphere.js)
@@ -624,6 +626,8 @@ export function createProps(scene, terrain, opts = {}) {
     grassRadius: opts.grassRadius ?? 2,
     grassPerCell: opts.grassPerCell ?? 150,
     structures: opts.structures !== false,
+    // R27 M7 — rubble at the foot of every cliff (see `screeFor`); off only for the tests' A/B
+    scree: opts.scree !== false,
   };
 
   // one InstancedMesh per kind
@@ -779,6 +783,130 @@ export function createProps(scene, terrain, opts = {}) {
     if (isWater(id)) return null;
     const key = BIOMES[id]?.key;
     return { list: KITS[key] || KITS.default, leaf: LEAF_TINT[key] || null, biomeKey: key };
+  }
+
+  /**
+   * R27 M7 — SCREE AND BOULDERS AT THE FOOT OF THE CLIFFS.
+   *
+   * `props.js` has always refused anything on ground steeper than 0.75, so round 21's cliffs were
+   * bare faces rising out of grass. A real face sheds rock: this finds the faces in a cell and
+   * scatters rubble down the fan below each one, with a boulder now and then.
+   *
+   * Finding them: the cell's ground on an 8 m lattice, and every pair of neighbours that drops more
+   * than two metres of cliff line (js/ground.js `cliffGrade`, 63 degrees — ~3.9 m) may have a face
+   * between them. That is only a sieve: the edge is walked a metre at a time with the same `steepAt`
+   * the walkers use, so a rock is only ever placed below something the player cannot walk up. A
+   * face point within 6 m of one already taken is the same face. ~0.3 ms a new cell, then cached.
+   *
+   * Placing: two to four rocks per face point, within `SCREE_REACH` (12 m) horizontally, down the
+   * face's own normal and fanned 35 degrees either side, nearer the foot more often than not. Never
+   * on a road (`roadAt < 0.35`), never where `plantable` says no (water), never on a face itself and
+   * never uphill of the face it fell from.
+   *
+   * RULES THIS KEEPS:
+   * - OWN RANDOM STREAM (`seed ^ 0x5c1e`, the megaflora pattern). The cell's rng feeds the props,
+   *   the ruin roll, the giants and the grass, in that order, and one extra draw moves all of them.
+   * - NO NEW DRAW CALLS. The rubble goes into the existing `rock` and `boulder` meshes, after every
+   *   ordinary prop in the whole radius has been placed — so an instance index that held a rock
+   *   before still holds the same rock, and scree only ever uses what is left of the cap.
+   * - A THINNED CELL IS A SUBSET: each cell's list is fixed and far cells take the first few of it.
+   * The list is a pure function of the cell (and the ground), so it is cached; an edit to the ground
+   * bumps `clearedVersion`, which empties the cache.
+   */
+  const SCREE_REACH = 12;
+  const BIG_ROCK = 2.4;
+  const screeCache = new Map();
+  let screeVersion = 0, screeCount = 0;
+  function screeFor(cx, cz) {
+    const key = cx * 100003 + cz;
+    const hit = screeCache.get(key);
+    if (hit) return hit;
+    if (screeCache.size > 900) screeCache.clear();
+    const out = [];
+    screeCache.set(key, out);
+    const baseX = cx * CELL, baseZ = cz * CELL;
+    const kit = kitAt(baseX, baseZ);
+    if (!kit) return out;
+    const grade = cliffGrade(0);
+    const STEP = 8, N = CELL / STEP + 1;
+    const x0 = baseX - CELL / 2, z0 = baseZ - CELL / 2;
+    // cliffs come from round 21's crease, and only in cliff country (js/planet.js `cliffCountryAt`)
+    if (terrain.cliffCountryAt) {
+      let country = 0;
+      for (const [ox, oz] of [[0, 0], [-0.5, -0.5], [0.5, -0.5], [-0.5, 0.5], [0.5, 0.5]]) {
+        country = Math.max(country, terrain.cliffCountryAt(baseX + ox * CELL, baseZ + oz * CELL));
+      }
+      if (country < 0.02) return out;
+    }
+    // a quick look first: a cell with less than one face's worth of relief has no face in it
+    let lo = Infinity, hi = -Infinity;
+    for (let j = 0; j <= 4; j++) for (let i = 0; i <= 4; i++) {
+      const y = terrain.heightAt(x0 + i * 16, z0 + j * 16);
+      if (y < lo) lo = y; if (y > hi) hi = y;
+    }
+    // The sieve: the drop a face makes across an edge. A face is about a thirty-second of a map
+    // cell across (2 m at Super tiny, 20 m at full size — the same probe js/terrain.js
+    // `rockSteep` uses), so an edge crossing one drops at least the line times that, or times the
+    // edge if the face is wider than the edge. Only a sieve: `steepAt` decides.
+    const sieve = grade * Math.min(STEP, (terrain.metresPerCell || 64) / 32);
+    if (hi - lo < sieve) return out;
+    const hs = new Float32Array(N * N);
+    for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) hs[j * N + i] = terrain.heightAt(x0 + i * STEP, z0 + j * STEP);
+    const faces = [];
+    const tryEdge = (ax, az, ay, bx, bz, by) => {
+      if (Math.abs(by - ay) < sieve) return;
+      // the same face as one already found: nothing to learn here
+      const mx = (ax + bx) / 2, mz = (az + bz) / 2;
+      for (const f of faces) if ((f[0] - mx) ** 2 + (f[1] - mz) ** 2 < 36) return;
+      // walk the edge a metre at a time from its LOW end; the first point past the line is the
+      // foot of the face (`steepAt` spans 2 m, so a metre's step cannot jump a face)
+      let best = null;
+      const up = by > ay;
+      for (let k = 1; k < 8 && !best; k++) {
+        const t = up ? k / 8 : 1 - k / 8;
+        const x = ax + (bx - ax) * t, z = az + (bz - az) * t;
+        if (steepAt(terrain, x, z) >= grade) best = [x, z];
+      }
+      if (!best) return;
+      for (const f of faces) if ((f[0] - best[0]) ** 2 + (f[1] - best[1]) ** 2 < 36) return;
+      faces.push(best);
+    };
+    for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+      const x = x0 + i * STEP, z = z0 + j * STEP, y = hs[j * N + i];
+      if (i + 1 < N) tryEdge(x, z, y, x + STEP, z, hs[j * N + i + 1]);
+      if (j + 1 < N) tryEdge(x, z, y, x, z + STEP, hs[(j + 1) * N + i]);
+    }
+    if (!faces.length) return out;
+    const srng = makeRng(cellSeed(seed ^ 0x5c1e, cx, cz));
+    const nrm = [0, 1, 0];
+    for (const [fx, fz] of faces) {
+      // a river's channel and a bridge's hole are steep too, and nothing falls off them
+      const wetFace = (terrain.riverAt?.(fx, fz) || 0) > 0 || terrain.bridgedAt?.(fx, fz, 4);
+      const top = terrain.heightAt(fx, fz);
+      terrain.normalAt(fx, fz, 1, nrm);
+      const hl = Math.hypot(nrm[0], nrm[2]) || 1;
+      const down = Math.atan2(nrm[0] / hl, nrm[2] / hl);
+      const n = 2 + Math.floor(srng() * 3) + (srng() < 0.3 ? 1 : 0);
+      for (let k = 0; k < n; k++) {
+        // every number is drawn before anything is tested, so a refusal cannot shift the next rock
+        const boulder = k === n - 1 && srng() < 0.3;
+        const a = down + (srng() - 0.5) * 1.2;
+        const d = 1.5 + (SCREE_REACH - 1.5) * srng() ** 1.6;
+        const scale = boulder ? 0.45 + srng() * 0.4 : 0.45 + srng() * 0.7;
+        const yaw = srng() * Math.PI * 2, tilt = (srng() - 0.5) * 0.5, squash = 0.7 + srng() * 0.45;
+        const shade = 0.78 + srng() * 0.3;
+        if (wetFace) continue;
+        const x = fx + Math.sin(a) * d, z = fz + Math.cos(a) * d;
+        if (!terrain.plantable(x, z)) continue;
+        if ((terrain.roadAt(x, z) || 0) >= 0.35) continue;
+        if (terrain.bridgedAt?.(x, z)) continue;
+        const y = terrain.heightAt(x, z);
+        if (y >= top) continue;
+        if (steepAt(terrain, x, z) >= grade) continue;
+        out.push({ kind: boulder ? 'boulder' : 'rock', x, z, y: y - 0.12 * scale, scale, yaw, tilt, squash, shade, face: [fx, fz] });
+      }
+    }
+    return out;
   }
 
   /** Fill every instanced mesh from the cells around (px, pz). */
@@ -1084,6 +1212,50 @@ export function createProps(scene, terrain, opts = {}) {
       }
     }
 
+    // R27 M7 — the rubble at the foot of the cliffs, into what is left of the rock and boulder caps
+    screeCount = 0;
+    /**
+     * NOT ONE NEW DRAW CALL — not even the one an empty mesh costs. An InstancedMesh with no
+     * instances is skipped by the renderer, so a boulder on a meadow that had none would switch
+     * the boulder mesh on. Where this rebuild placed no ordinary boulders the scree boulder goes into
+     * the rock mesh instead, at `BIG_ROCK` times the size (a rock that big reads as a boulder); where
+     * there are no rocks at all there is no scree.
+     */
+    const had = { rock: counts.rock > 0, boulder: counts.boulder > 0 };
+    if (cfg.scree && had.rock) {
+      if (screeVersion !== clearedVersion) { screeCache.clear(); screeVersion = clearedVersion; }
+      for (const [dx, dz] of spiralOffsets(cfg.radius)) {
+        const cx = cx0 + dx, cz = cz0 + dz;
+        const list = screeFor(cx, cz);
+        if (!list.length) continue;
+        // the same falloff as the rest of the cell, and the same subset rule: the first `keep`
+        const want = list.length * thinAt(dx, dz) * Math.min(1, cfg.density);
+        const keep = want <= 0 ? 0 : Math.max(1, Math.round(want));
+        const cellCleared = clearedNear(cx * CELL, cz * CELL);
+        for (let i = 0; i < keep && i < list.length; i++) {
+          const r = list[i];
+          const kind = r.kind === 'boulder' && !had.boulder ? 'rock' : r.kind;
+          const scale = kind === r.kind ? r.scale : r.scale * BIG_ROCK;
+          if (counts[kind] >= PROP_KINDS[kind].cap) continue;
+          const id = propKey(kind, r.x, r.z);
+          if (felled.has(id) || (cellCleared.length && insideCleared(r.x, r.z, cellCleared))) continue;
+          matrix.compose(
+            new THREE.Vector3(r.x, r.y, r.z),
+            new THREE.Quaternion().setFromEuler(new THREE.Euler(r.tilt, r.yaw, 0)),
+            new THREE.Vector3(scale, scale * r.squash, scale),
+          );
+          meshes[kind].setMatrixAt(counts[kind], matrix);
+          meshes[kind].setColorAt(counts[kind], colour.setScalar(r.shade));
+          // a boulder is solid through the props' own field, the way every rock and boulder is
+          const solid = PROP_SOLIDS[kind];
+          if (solid) solids.add(r.x, r.z, solid[0] * scale, solid[1] * scale);
+          counts[kind]++;
+          screeCount++;
+          standing.push({ id, kind, x: r.x, z: r.z, y: r.y, scale, scree: true });
+        }
+      }
+    }
+
     for (const key of PROP_KEYS) {
       const mesh = meshes[key];
       mesh.count = visible ? counts[key] : 0;
@@ -1360,6 +1532,10 @@ export function createProps(scene, terrain, opts = {}) {
      * would have done nothing. A slider that lies is the bug this round keeps finding.
      */
     setDensity(d, x, z) { cfg.density = clamp(d, 0, 6); rebuild(x, z); },
+    /** R27 M7 — the rubble below the cliffs on or off (the tests' A/B; nothing else turns it off). */
+    setScree(on, x, z) { cfg.scree = !!on; rebuild(x, z); },
+    /** R27 M7 — the scree a cell would drop, for the tests: `{ kind, x, z, y, face: [x, z] }`. */
+    screeFor: (cx, cz) => screeFor(cx, cz),
     /**
      * How far out props are placed, in prop cells.
      *
@@ -1414,7 +1590,7 @@ export function createProps(scene, terrain, opts = {}) {
         triangles += mesh.count * (mesh.geometry.attributes.position.count / 3);
       }
       if (grassMesh.count) { drawCalls++; instances += grassMesh.count; triangles += grassMesh.count * (grassGeom.attributes.position.count / 3); }
-      return { instances, drawCalls, triangles: Math.round(triangles), grass: grassMesh.count, giants, rebuilds, density: cfg.density, solids: solids.count };
+      return { instances, drawCalls, triangles: Math.round(triangles), grass: grassMesh.count, giants, rebuilds, density: cfg.density, solids: solids.count, scree: screeCount };
     },
     dispose() {
       for (const key of PROP_KEYS) {

@@ -645,6 +645,21 @@ export function makeTerrain(world, planet = null, opts = {}) {
     return Math.abs(r - 0.5) < cliffBand * 1.5;
   }
 
+  /**
+   * R27 M7 — COULD THERE BE A CLIFF HERE AT ALL? `cliffAt`'s two gates without the crease: how
+   * rugged the ground is times how much this region is cliff country, 0..1. The calm near a road is
+   * left out, so this never says "no" where `cliffAt` could say "yes". It is a few table reads (and
+   * one slow noise only on broken ground), so the far terrain rings and the scree ask it before
+   * paying for a slope probe — most of any world is 0 and costs almost nothing.
+   */
+  function cliffCountryAt(x, z) {
+    const fx = x / M_PER_CELL, fy = z / M_PER_CELL;
+    const broken = clamp(layer(world.slope, fx, fy), 0, 1);
+    const rugged = smoothstep(cliffBroken[0], cliffBroken[1], broken);
+    if (rugged <= 0) return 0;
+    return rugged * smoothstep(cliffMaskAt[0], cliffMaskAt[1], fbm(n5, x * cliffMaskFreq, z * cliffMaskFreq, { octaves: 2 }));
+  }
+
   // ---------------------------------------------------------------- rivers and roads as paths
   const toMetres = i => [(i % w) * M_PER_CELL, Math.floor(i / w) * M_PER_CELL];
 
@@ -3102,11 +3117,31 @@ export function makeTerrain(world, planet = null, opts = {}) {
       r = clamp(r + mottle, 0, 1); g = clamp(g + mottle * 0.9, 0, 1); b = clamp(b + mottle * 0.7, 0, 1);
       const rock = smoothstep(0.32, 0.85, steep);
       if (rock > 0) { r = lerp(r, ROCK_RGB[0], rock); g = lerp(g, ROCK_RGB[1], rock); b = lerp(b, ROCK_RGB[2], rock); }
-      const snowStart = 700 + temperatureAt(x, z) * 5200;
-      const snow = smoothstep(snowStart, snowStart + 550, height) * (1 - rock * 0.5);
+      /**
+       * R27 M7 — THE SNOW LINE AND THE BEACH FOLLOW THE RELIEF. Both were absolute metres while
+       * every height on the planet is multiplied by `reliefScale` (0.22 x `M_PER_CELL / 640`).
+       *
+       * The snow line's numbers (700 m + 5200 m x temperature) are World Forge's RAW relief — its
+       * land runs to ~6,000 m — and were never brought down when `reliefScale` arrived. Measured:
+       * the top 5% of land runs 68-168 m at Super tiny and 600-1,700 m at full size, the snow line
+       * at a cold peak was 2,100 m, and NO peak on any standard world was ever painted snow (the only
+       * white was the snowyPeaks biome's own colour). So the snow line is multiplied by
+       * `reliefScale` itself: the fraction of a mountain that is white is what World Forge meant,
+       * and it is the same fraction on every planet size.
+       *
+       * The beach band (9 m) was tuned by eye at full size, so it keeps its full-size look and
+       * shrinks with the planet: `k` is `M_PER_CELL / 640` as it was when this terrain was made
+       * (the module-level `M_PER_CELL` may have moved since). Both are measured up from the sea.
+       */
+      const k = reliefScale / (opts.reliefScale ?? 0.22);
+      const snowStart = seaLevel + (700 + temperatureAt(x, z) * 5200) * reliefScale;
+      const snowLine = smoothstep(snowStart, snowStart + 550 * reliefScale, height);
+      const snow = snowLine * (1 - rock * 0.5);
+      // R27 M7 — a longer `out` also gets the two weights, for the tests (and nothing else)
+      if (out.length > 4) { out[3] = snowLine; out[4] = rock; }
       if (snow > 0) { r = lerp(r, SNOW_RGB[0], snow); g = lerp(g, SNOW_RGB[1], snow); b = lerp(b, SNOW_RGB[2], snow); }
-      if (hasSea && height < 9) {
-        const sand = (1 - smoothstep(1, 9, height)) * (1 - rock);
+      if (hasSea && height < seaLevel + 9 * k) {
+        const sand = (1 - smoothstep(seaLevel + 1 * k, seaLevel + 9 * k, height)) * (1 - rock);
         r = lerp(r, SAND_RGB[0], sand); g = lerp(g, SAND_RGB[1], sand); b = lerp(b, SAND_RGB[2], sand);
       }
       // a river drags sand and mud onto its banks
@@ -3311,6 +3346,17 @@ export function makeTerrain(world, planet = null, opts = {}) {
      * read these rather than planning their own, so there is one plan per bridge in the game.
      */
     bridgePlans: () => bridgePlanList(),
+
+    /**
+     * R27 M7 — the class of the road at a point ('highway' / 'road' / 'trail'), or null off-road.
+     * js/player.js reads it for the highway's extra pace; the reach is `roadAt`'s own.
+     */
+    roadClassAt(x, z) {
+      const hit = roadIndex.nearest(x, z);
+      return hit && hit.dist < hit.path.reach ? hit.path.klass : null;
+    },
+    /** R27 M5's cliff predicate (the crease the noise lays down), and M7's cheap gate in front of it. */
+    cliffAt, cliffCountryAt,
 
     /** The graded height of the road at a point — already lifted clear of any river. Null off-road. */
     roadSurfaceAt(x, z) {

@@ -21,8 +21,6 @@ export function applyStatus(game, target, id, { source, hitDamage = 0, stacks = 
     if (target.kind === 'boss') S.numbed = { stacks: 1, t: 2 };
     else { S.frozen = { stacks: 1, t: target.elite ? 1.0 : game.data.statuses.byId.frozen.duration }; game.bus?.emit('frozen', { target }); }
   }
-  // thermal crack: burn + chill together
-  if ((id === 'burn' && S.chill) || (id === 'chill' && S.burn)) { delete S.burn; delete S.chill; S.cracked = { stacks: 1, t: 4 }; game.bus?.emit('combo', { id: 'thermal_crack', target }); }
   game.meter?.record({ t: game.tick / 60, source: source?.id || 'world', sourceName: source?.name || '', target: target.id, targetName: target.name, kind: 'status', amount: 0, status: id, duration: dur, dtype: 'physical', via: via || 'status', viaName: viaName || def.name });
   game.bus?.emit('status.apply', { target, id, stacks: s.stacks });
 }

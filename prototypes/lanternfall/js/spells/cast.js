@@ -22,7 +22,9 @@ export function stepCasting(game, p, I, aim) {
   p.oil = Math.min(p.maxOil, p.oil + (p.oilRegen || 3) * (game.oilRegenMult ?? 1) * DT);
   // slot selection
   for (let k = 0; k < 4; k++) if (I.pressed?.['wick' + (k + 1)] && k < (H.unlocked?.wickSlots ?? 2)) C.slot = k;
-  if (I.pressed?.nextWick) C.slot = (C.slot + 1) % Math.max(1, Math.min(H.unlocked?.wickSlots ?? 2, H.wicks.length));
+  const nSlots = Math.max(1, Math.min(H.unlocked?.wickSlots ?? 2, H.wicks.length));
+  if (I.pressed?.nextWick) C.slot = (C.slot + 1) % nSlots;
+  if (I.pressed?.prevWick) C.slot = (C.slot + nSlots - 1) % nSlots;
   const wick = H.wicks[H.loadout?.[C.slot] ?? C.slot]; game.flameColor = wick ? hexRgb(game.data.flames.byId[wick.flame].color) : [1, 0.54, 0.16];
   if (!wick || !p.canCast) { C.charging = false; C.hold = 0; return; }
   const tip = p.lantern || { x: p.x + p.facing * 6, y: p.y - 16 };

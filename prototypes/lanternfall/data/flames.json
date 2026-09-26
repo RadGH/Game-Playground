@@ -1,5 +1,5 @@
 {
- "_doc": "The 7 flames (docs/03 \u00a73). power = base damage; oilMult multiplies the shape oil; status id from statuses.json.",
+ "_doc": "The 7 flames (docs/03 \u00a73, canon v2). power = base damage; oilMult multiplies the shape oil; status id from statuses.json; tether = the flame's tether kind and life (s); gutter = what a gutter does at your feet (\u00a79.3).",
  "version": 1,
  "list": [
   {
@@ -17,7 +17,13 @@
    "status": "burn",
    "unlock": "start",
    "meterType": "fire",
-   "desc": "Burns. Lights oil, wood and wax. Boils water into steam."
+   "desc": "Burns. Lights oil, wood and wax. Boils water into steam.",
+   "tether": {
+    "kind": "fuse",
+    "life": 6,
+    "crossDamageMult": 1.5
+   },
+   "gutter": "fire_at_feet"
   },
   {
    "id": "rime",
@@ -34,7 +40,14 @@
    "status": "chill",
    "unlock": "act1",
    "meterType": "frost",
-   "desc": "Chills and freezes. Turns water to ice, puts out fire."
+   "desc": "Chills and freezes. Turns water to ice, puts out fire.",
+   "tether": {
+    "kind": "ice_span",
+    "life": 20,
+    "walkable": true,
+    "climbable": false
+   },
+   "gutter": "frozen_feet"
   },
   {
    "id": "spark",
@@ -51,7 +64,13 @@
    "status": "shocked",
    "unlock": "act2",
    "meterType": "lightning",
-   "desc": "Shocks and chains. Electrifies water and metal, powers machines."
+   "desc": "Shocks and chains. Electrifies water and metal, powers machines.",
+   "tether": {
+    "kind": "live_wire",
+    "life": 12,
+    "powers": true
+   },
+   "gutter": "shocked_self"
   },
   {
    "id": "bile",
@@ -68,7 +87,13 @@
    "status": "corrode",
    "unlock": "act2",
    "meterType": "poison",
-   "desc": "Corrodes armour. Dissolves metal, brick and bone."
+   "desc": "Corrodes armour. Dissolves metal, brick and bone.",
+   "tether": {
+    "kind": "gut_vine",
+    "life": 12,
+    "slow": 0.4
+   },
+   "gutter": "bile_pool"
   },
   {
    "id": "gleam",
@@ -85,7 +110,14 @@
    "status": "radiant",
    "unlock": "act4",
    "meterType": "holy",
-   "desc": "Holy light. Sears the Unlit, heals allies, lights the dark longest."
+   "desc": "Holy light. Sears the Unlit, heals allies, lights the dark longest.",
+   "tether": {
+    "kind": "light_rope",
+    "life": 12,
+    "healPerSecond": 3
+   },
+   "gutter": "flash_heal",
+   "unlitStatus": "dazzled"
   },
   {
    "id": "tide",
@@ -102,7 +134,13 @@
    "status": "soaked",
    "unlock": "act3",
    "meterType": "water",
-   "desc": "Soaks and shoves. Makes water, puts out fire."
+   "desc": "Soaks and shoves. Makes water (a Guild-braided Tide is dry until the Act 3 lesson), puts out fire.",
+   "tether": {
+    "kind": "stream",
+    "life": 12
+   },
+   "gutter": "knockback_self",
+   "dryUntil": "a3_n02"
   },
   {
    "id": "shade",
@@ -119,7 +157,13 @@
    "status": "drained",
    "unlock": "act4",
    "meterType": "shadow",
-   "desc": "Void. Drains life and oil, ignores armour, eats light."
+   "desc": "Drains life and oil, ignores armour, eats light.",
+   "tether": {
+    "kind": "umbral_line",
+    "life": 12,
+    "hideFromUnlit": true
+   },
+   "gutter": "lantern_out"
   }
  ]
 }

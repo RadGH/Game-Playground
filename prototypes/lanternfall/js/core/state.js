@@ -9,6 +9,7 @@ import { createSupport } from '../world/support.js';
 import { createFragments } from '../world/fragments.js';
 import { createLightGrid } from '../world/lightgrid.js';
 import { createCurrents, createFloodline } from '../world/currents.js';
+import { spawnEnemy } from '../ai/brain.js';
 
 export function createGame({ data, mode = 'campaign', seed = 1, save = null }) {
   const game = {
@@ -36,6 +37,22 @@ export function enterRoom(game, roomJson, entryId, opts = {}) {
   const entry = c.entries[entryId] || Object.values(c.entries)[0] || { at: [40, 40], face: 'r' };
   if (!game.player) game.player = createPlayerBody(entry.at[0], entry.at[1] + 1, opts.cls);
   const p = game.player; p.x = entry.at[0]; p.y = entry.at[1] + 1; p.px = p.x; p.py = p.y; p.vx = 0; p.vy = 0; p.facing = entry.face === 'l' ? -1 : 1; p.fallStartY = p.y;
+  // enemies are placed at room load (docs/05 §7.1); killed placed enemies stay dead for the save
+  game.act1Grace = roomJson.act === 'act1';
+  const diff = game.difficulty || {}; game.tokens = { melee: game.act1Grace ? 1 : (diff.meleeTokens ?? 2), ranged: diff.rangedTokens ?? 2, usedMelee: 0, usedRanged: 0 };
+  game.voidZones = []; game.noises = [];
+  if (game.data.enemies && roomJson.kind !== 'lesson' && roomJson.kind !== 'hub') {
+    const rs = game.roomState?.[roomJson.id] || {};
+    for (const t of c.things) if (t.t === 'spawn' && t.when !== 'signal' && !rs[t.id]?.cleared) {
+      const n = t.count || 1; for (let k = 0; k < n; k++) {
+        const [rx, ry, rw, rh] = t.rect || [t.at[0] - 4, t.at[1] - 10, 8, 10];
+        const x = rx + (rw * (k + 0.5) / n), y = findFloor(c.grid, x, ry, ry + rh + 40) ?? (ry + rh);
+        try { const e = spawnEnemy(game, t.enemy, x, y, { pack: t.id, elite: t.elite, level: t.level }); e.spawnId = t.id; } catch (err) { game.warnings = [...(game.warnings || []), String(err.message)]; }
+      }
+    }
+  }
   game.bus.emit('room.enter', { roomId: roomJson.id, entryId });
   return c;
 }
+
+export function findFloor(g, x, y0, y1) { x = Math.round(x); for (let y = Math.max(1, Math.round(y0)); y < Math.min(g.H, y1); y++) { const c = g.mats.cls[g.mat[y * g.W + x]]; if ((c === 1 || c === 2) && g.mat[(y - 1) * g.W + x] === 0) return y; } return null; }

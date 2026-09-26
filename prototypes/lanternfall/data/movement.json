@@ -126,7 +126,7 @@
  "knock": {
   "control": 0.3,
   "time": 0.2,
-  "wallStagger": 200,
+  "wallStagger": 160,
   "staggerTime": 0.3
  },
  "surfaces": {
@@ -171,6 +171,6 @@
   }
  },
  "pogo": {
-  "v": 220
+  "v": 208
  }
 }

@@ -11,6 +11,9 @@ import { stepStatuses } from '../rpg/status.js';
 import { lanternPos } from '../render/frame.js';
 import { collectLights } from '../world/lightgrid.js';
 import { stepCurrents, stepFloodline } from '../world/currents.js';
+import { stepAI } from '../ai/brain.js';
+import { stepVoidZones } from '../rpg/voidzones.js';
+import { stepMelee } from '../rpg/melee.js';
 
 export const DT = 1 / 60;
 
@@ -25,13 +28,17 @@ export function tickGame(game, intent, view) {
     p.stillT = Math.abs(p.vx) < 1 && p.grounded ? (p.stillT || 0) + DT : 0;
     p.canCast = !p.dead && p.state !== 'ledge' && !p.carry;
     if (p.cast && game.hero) stepCasting(game, p, intent, game.aim || { x: p.x + p.facing * 60, y: p.y - 10 });
+    if (p.melee && !p.dead) stepMelee(game, p, intent);
     stepStatuses(game, p, DT);
     if (p.hurtT > 0) p.hurtT -= DT; if (p.invuln > 0) p.invuln -= DT;
   }
   // exits: touching an exit rect asks main.js to change room (it loads the next room's JSON)
   if (p && !game.pendingExit && !p.dead) for (const x of game.room.exits) { const [rx, ry, rw, rh] = x.rect; if (p.x + 3 > rx && p.x - 3 < rx + rw && p.y > ry && p.y - p.h < ry + rh && !(x.requires && !game.flags[x.requires])) { game.pendingExit = x; break; } }
   for (const s of game.systems || []) s(game, intent);
+  stepAI(game);
   stepSpells(game);
+  stepVoidZones(game);
+  game.noises = [];
   for (const e of game.entities) stepActorPhysics(game, e);
   stepSpellLeftovers(game);
   game.entities = game.entities.filter(e => !e.dead || e.deadT < (e.corpseTime ?? 1.2));

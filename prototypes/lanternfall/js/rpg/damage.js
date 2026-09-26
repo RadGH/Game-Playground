@@ -11,6 +11,8 @@ export function dealDamage(game, hit) {
   const t = hit.target; if (!t || t.dead || t.hp <= 0) return 0;
   if (t.invuln > 0 && !hit.dot) return 0;
   const flame = hit.flame || 'physical';
+  // 'heal' resistance: this flame heals the target instead (docs/03 §14)
+  if (t.resist?.[flame] === 'heal') { heal(game, hit.source || { id: 'world', name: '' }, t, hit.amount, hit.via, hit.viaName); game.bus?.emit('resist.heal', { target: t, flame }); return 0; }
   const res = (t.resist?.[flame] ?? 0) + (t.statuses?.corrode ? -5 * t.statuses.corrode.stacks : 0);
   let armour = Math.max(0, (t.armour || 0) - (t.statuses?.corrode ? 8 * t.statuses.corrode.stacks : 0) - (hit.armourPierce || 0));
   if (t.statuses?.cracked) armour = Math.max(0, armour - 20);
@@ -32,6 +34,7 @@ export function dealDamage(game, hit) {
   const killingBlow = before > 0 && t.hp <= 0;
   if (hit.knock && t.kind !== 'boss') { const kb = 1 - (t.kbResist || 0); t.vx += hit.knock.x * kb; t.vy += hit.knock.y * kb; if (t.kind === 'player') t.knockT = 0.2; }
   if (amount > 0 && !hit.dot) t.hurtFlash = 0.12;
+  if (t.kind === 'player' && amount > 0 && !hit.dot) { t.invuln = game.data?.movesets?.shared?.invulnAfterHit ?? 0.6; t.hurtT = 0.2; }
   // meter
   const src = hit.source || { id: 'world', name: 'The Hollow' };
   game.meter?.record({ t: game.tick / 60, source: src.id, sourceName: src.name, target: t.id, targetName: t.name, kind: 'damage', amount, overkill, crit,

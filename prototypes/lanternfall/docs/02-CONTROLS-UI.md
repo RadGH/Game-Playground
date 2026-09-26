@@ -330,7 +330,7 @@ state** (`down`, `pressed`, `released`, `heldFor`, `axis`). The game never reads
 ```
  Title ──► Save slots ──► (new) Class select ──► New game options ──► intro cutscene ──► PLAY
    │            └──► (continue) ─────────────────────────────────────────────────────────► PLAY
-   ├──► Modes (Floodgate / Long Descent / Daily Wick / Boss Rush / Trials)  — page 09
+   ├──► Modes (Floodgate / Long Descent + Daily Wick / Boss Rush / Trials)  — 09
    ├──► Guild Hall (meta unlocks, 09 §15)   ├──► Settings   └──► Credits
 
  PLAY ──Esc──► Pause ──► Resume / Satchel / Map / Status / Rekindle this room / Controls / Settings / quit
@@ -946,13 +946,13 @@ tab, **Journal** (§18), because View's hold is `inspect`. Pausing: yes.
 ### 13.2 Room map tab
 
 ```
-┌─ THE BRICKGUT ─ a2_n05 · 3 rooms ───────────────── [●Room map] [Act map] ───┐
+┌─ THE BRICKGUT ─ a2_n05 · 2 rooms ───────────────── [●Room map] [Act map] ───┐
 │ ┌───────────────┐                                                            │
 │ │ ░░▓▓▓▓▓▓▓░░░░ │╶┐     (room outlines, revealed tiles, live water)           │
 │ │ ░▓▓   ▸  ▓▓░ ├─┤                                                           │
 │ │ ░▓▓≈≈≈≈≈≈▓▓░ │ │  ┌──────────────────┐                                      │
 │ └───────────────┘ └──┤ ▓▓▓▓  ✚  ▓▓▓▓   │                                      │
-│                      │ ▓▓   ◇     ▓▓▓  ├── ⚿ (locked: Sluice Key)              │
+│                      │ ▓▓   ◇     ▓▓▓  ├── ⚿ (locked: dissolve the grate)      │
 │                      └──────────────────┘                                     │
 │  Zoom: [−] 1:4 [+]    Layers: ☑ water ☑ pins ☑ doors ☐ grid                    │
 │  Pins: 4/30 in this act      [Add pin at cursor] [Clear all pins in act]       │
@@ -975,10 +975,10 @@ tab, **Journal** (§18), because View's hold is `inspect`. Pausing: yes.
 | Great Lamp | big lantern | dark / gold after relight |
 | Shop | coin | `--ink-gold` |
 | NPC | speech mark | NPC colour |
-| Locked door (key) | padlock | red |
+| Locked door | padlock | red |
 | Needs mechanic | the mechanic's icon (hook, wheel, lantern-dark, gravity arrows, snowflake) | violet |
+| Rekindle post | small brass lantern | brass `--brass` |
 | Chest (unopened / opened) | box | gold / grey |
-| Silent Bell (found & rung / found, not rung) | bell | gold / white |
 | Secret (found) | `?` | white |
 | Trial door | hourglass | teal |
 | Boss arena | crown | red |
@@ -998,28 +998,29 @@ tab, **Journal** (§18), because View's hold is `inspect`. Pausing: yes.
 - Available only **while sitting at a lamp-post** (the lamp-post menu has a `[Fast travel]` button that
   opens the Act map in travel mode).
 - Destinations: any **lit** lamp-post (one you have rested at) **in the current act**, free, instant, with a
-  2 s fade and the `travel.step` sound. Other acts' lamp-posts need **The Ferry** (page 08 `shop_ferry`),
-  which charges pennies or max health.
-- Not available during a boss fight, a rising-water set piece, or in any mode other than Campaign.
+  2 s fade and the `travel.step` sound. Other acts' lamp-posts need **The Ferry** (08 `shop_ferry`, from
+  Act 2), which charges pennies or max health (§23.2: capped at 20% of max health, refunded at the next
+  Great Lamp).
+- Not available during a boss fight, a flood node, or in any mode other than Campaign.
 - Travel mode highlights valid destinations in gold and greys out the rest.
 
 ---
 
 ## 14. Inventory and equipment
 
-The **Inventory** tab of the Satchel frame. Page 08 owns every item, rarity, stack size and stat; this
-section owns the screen.
+The **Inventory** tab of the Satchel frame. 08 owns every item, rarity, stack size and stat; this section owns
+the screen.
 
 ```
 ┌ Satchel ── [●Inventory] Wicks  Skills  Attributes  Ledger  Journal ──────────────────┐
 │ ┌─ Worn ──────────────────┐ ┌─ Satchel (14/20) ──────────────┐ Filter: [All▾]         │
-│ │         [Hood]          │ │ [▣][▣][▣][▣][▣]                │ Sort:   [Type▾]        │
+│ │                         │ │ [▣][▣][▣][▣][▣]                │ Sort:   [Type▾]        │
 │ │ [Weapon] (figure) [Lant.]│ │ [▣][▣][▣][▣][▣]                │ ☐ Hide junk            │
 │ │         [Coat]          │ │ [▣][▣][▣][▣][ ]                │                        │
-│ │ [Oil flask]     [Boots] │ │ [ ][ ][ ][ ][ ]                │ [+ row at Scrapwright's]│
-│ │ [Trinket 1] [Trinket 2] │ └────────────────────────────────┘                        │
-│ └─────────────────────────┘ Belt: [Z ▣ 4] [X ▣ 2] [C ▣ 7] [V ─]                         │
-│ ┌─ Summary ──────────────┐  Key ring (3) ▸   Strand Case (14) ▸   Scrap Sack (212) ▸   │
+│ │ [Trinket]       [Boots] │ │ [ ][ ][ ][ ][ ]                │ [+ row at Crane's Pawn]│
+│ └─────────────────────────┘ └────────────────────────────────┘                        │
+│  Belt: [Z ⚱ flask ●●] [X ▣ 2] [C ▣ 7] [V ─]                                           │
+│ ┌─ Summary ──────────────┐  Key ring (1) ▸   Strand Case (14) ▸   Scrap Sack (212) ▸   │
 │ │ Health 180  Oil 100     │                                                            │
 │ │ Armour 22   Wick +14%   │  ● 1,284 pennies   ◆ 3 pearls                              │
 │ │ Crit 8%  Oil regen 4/s  │                                                            │
@@ -1027,52 +1028,55 @@ section owns the screen.
 └──────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 14.1 Slots, not weight (08-ITEMS-SHOPS.md §2 owns the numbers)
+### 14.1 Slots, not weight (08 §2 owns the numbers)
 
-- **Satchel: 5 columns × 4 rows = 20 slots** at the start; each Scrapwright upgrade adds a row, max 35
-  (the grid grows downward and the panel scrolls past row 5). Every item takes one slot.
-- **No weight system.** Might does not limit carrying (see §29 for what "carry" means instead).
-- **Stacking** per 08: consumables 10, materials/scrap 99, strands 5, keys never, gear never. Stack count in
-  the cell's corner.
+- **Satchel: 5 columns × 4 rows = 20 slots** at the start; extra rows are bought at Crane's Pawn (08; the
+  Guild Hall's `gh_satchel_row` starts a save with row 5). The grid grows downward and the panel scrolls
+  past row 5. Every item takes one slot.
+- **No weight system.** Might's "carry" means **tonic capacity** and **plank capacity** (04), shown on the
+  Attributes screen, not here.
+- **Stacking** per 08 (`lamp_oil` stacks to 10; keys and gear never stack). Stack count in the cell's corner.
 - **Belt:** 4 quick slots (`Z` `X` `C` `V`, §2.2) that point at satchel stacks; they hold nothing of their
-  own. Shown under the grid and on the HUD (§11.9).
+  own. Shown under the grid and on the HUD (§11.9). The **Guild flask** is a belt item with 2 charges
+  (refilled only at lamp-posts); it is not a gear slot (R32).
 - **Key ring**, **Strand Case** (learned strands, 03 §15.3) and the **Scrap Sack** overflow are separate
   lists opened by the three links under the belt; none cost satchel slots.
-- **Full satchel:** a pickup that does not fit stays on the ground glowing (08 §2.2) with the toast
+- **Full satchel:** a pickup that does not fit stays on the ground glowing (08) with the toast
   "Satchel full" in `--bad`.
 
 ### 14.2 Gear slots (paper doll; 08 §3)
 
+**Five slots** (R32):
+
 | Slot (id) | Holds |
 |---|---|
-| `weapon` | the class weapon family (pole lantern, hook-staff, wrench, oar-staff, maul, anchor-blade, moth-lamp, brush-spear); off-class weapons show "−20% damage (not your family)" in the card |
+| `weapon` | the class weapon family (two bases per class, 08); off-class weapons show "−20% damage (not your family)" in the card |
 | `lantern` | light radius, oil burn in darkness, Wick power % |
-| `hood` | head |
 | `coat` | body (the biggest armour) |
 | `boots` | move / jump / swim |
-| `trinket1`, `trinket2` | trinkets; the same unique cannot sit in both (the drop is refused with that reason) |
-| `oil_flask` | reserve oil; a small fill bar on the slot shows the reserve |
+| `trinket` | one trinket |
 
-The figure in the middle is the real player sprite at 6×, re-rendered live as gear changes (hood shape,
-coat colour, lantern colour = wick 1's flame).
+There is **no hood slot**: hooding is an action (`hood`, §2.2). The figure in the middle is the real player
+sprite at 6×, re-rendered live as gear changes (palette swap plus one overlay per slot, 00 §4; lantern
+colour = wick 1's flame).
 
 ### 14.3 Item cells and tooltips
 
 - Cell 40 × 40 px (DOM), 1px border in rarity colour, icon drawn from the item's pixel-art bitmap at 3×.
 - Stack count bottom-right (Spectral 12px bold), new-item dot top-left (cleared on hover).
 - Tooltip: `data-tip-render="item"` with `data-tip-item="<instance id>"` (not `data-item-id`; one attribute
-  name for every renderer). Card: name (rarity colour), type, item level, stats, flame affinity, set/quirk
-  text, sell price, flavour line in italic.
+  name for every renderer). Card: name (rarity colour), type, item level, stats, flame affinity, relic/quirk
+  text, sell price, flavour line in italic. Affixes appear on loot from Act 2 (Act 1 drops are plain bases, 08).
 
 ### 14.4 Compare tooltips
 
 - Hovering a gear item shows **its card and the card of the item in that slot side by side** (worn on the
-  right, labelled "Worn"). Trinkets compare against the weaker of the two worn trinkets.
+  right, labelled "Worn").
 - **Deltas** on the hovered card: each stat line gets `+4` green / `−2` red / `=` grey against worn, via
   `format.sign()`. Stats only on one side show as full gain/loss.
 - Summary line at the bottom: "Health +12 · Wick power −3% · Oil regen +0.4/s" — the *derived* totals from
   the character sheet computed as if equipped (page 04 formulas), not just the item's own lines.
-- Holding `Shift` (gamepad North) swaps what it compares against (second trinket; or pinned compare).
+- Holding `Shift` (gamepad North) swaps what it compares against (a pinned compare item).
   The card updates in place with `refreshTip()` from `shared/tooltip.js`.
 
 ### 14.5 Actions
@@ -1099,16 +1103,21 @@ space. Page 03 owns every number the readouts show; this section owns the screen
 
 ### 15.1 When it can open
 
+- The builder first opens at the Candlemarket (`a1_n03`); before that `B` shows the "not learned" hint.
 - `B` opens the Wicks tab anywhere **out of combat** (no hostile within 160 cells that has noticed you, not
-  in a boss arena, not in a rising-water set piece). Refused otherwise with the toast "Not with enemies near".
-- **Away from a lamp-post** the tab opens in **swap mode** (03-SPELLS.md §15.1): you can equip saved wicks
-  into slots, read every number and run the test chamber, but the strand sockets are locked with the note
-  "Braid at a lamp-post or Lamp shrine".
-- **At a lamp-post or Lamp shrine** (lamp-post menu → `[Braid wicks]`, or `B` while sitting) the tab opens in
-  **braid mode** and everything is editable.
-- Burn-in belongs to the **core** (Flame + Shape, 03 §10): changing charms or the knot keeps it; changing the
-  flame or shape switches to that core's own saved burn-in. The builder shows the core's level beside the
-  Flame and Shape sockets so the player sees this before they drop a new strand.
+  in a boss arena, not in a flood node). Refused otherwise with the toast "Not with enemies near".
+- **Away from a lamp-post** the tab opens in **swap mode** (03 §15.1): you can equip saved wicks into slots,
+  read every number and run the test chamber, but the strand sockets are locked with the note "Braid at a
+  lamp-post".
+- **At a lamp-post** (lamp-post menu → `[Braid wicks]`, or `B` while sitting) the tab opens in **braid mode**
+  and everything is editable.
+- **Burn-in has two tracks** (R38, 03 §10): one per **flame** and one per **shape**, shared by every wick that
+  uses them. Changing charms, the knot, the shape or the flame never loses anything: a new pairing simply
+  shows the two tracks it already has (so a fresh pairing of two trained strands starts half-trained). The
+  builder shows each track's level on its socket so the player sees this before dropping a new strand.
+- **Mastery** (Act 6, R17): the mastered wick has a **gold border** everywhere it is drawn (socket frame,
+  library chip, HUD slot). Which wick is mastered is changed only from the lamp-post menu's `Move mastery`
+  (§6), free, not from this screen.
 
 ### 15.2 Layout
 
@@ -1132,9 +1141,9 @@ space. Page 03 owns every number the readouts show; this section owns the screen
 ││                        ││ │ Expected DPS   41.0                   │ ││  Burn uptime   62%        ││
 ││                        ││ │ Damage / oil   2.9                    │ ││  Cells burned  412        ││
 ││                        ││ │ Light radius   44 cells  amber        │ ││                          ││
-││                        ││ │ Overcharge: safe to 1.4× · +45%       │ ││                          ││
-││                        ││ │ Effects: burn 3/s 3s · ignites oil    │ ││                          ││
-││                        ││ │ ⚠ 1.62× median damage/oil (see note)   │ ││                          ││
+││                        ││ │ Overcharge: safe to 1.4× (from Act 2) │ ││                          ││
+││                        ││ │ Burn-in: Ember ▪▪▪▫▫  Bolt ▪▫▫▫▫      │ ││                          ││
+││                        ││ │ Effects: burn · ignites oil           │ ││                          ││
 ││                        ││ └───────────────────────────────────────┘ ││                          ││
 │└────────────────────────┘└──────────────────────────────────────────┘└──────────────────────────┘│
 │┌─ Your wicks (9/24) ────────────────────────────────────────────────────────────────────────────┐│
@@ -1148,21 +1157,23 @@ space. Page 03 owns every number the readouts show; this section owns the screen
 
 | Element | Rule |
 |---|---|
-| Strand list | 4 tabs (Flames, Shapes, Charms, Knots; Knots tab appears at Act 4). Each strand row: icon in its colour, name, a one-line effect summary. **Owned** strands are lit; **known-but-not-owned** ones (seen in a shop or on the canon list for acts reached) are dim with "Sold at Wick & Tallow" or "Act 3" as the reason; strands of acts not yet reached are **not listed at all** (the pool grows slowly, per the verdict). |
-| Sockets | Flame (1), Shape (1), Charm 1–3 (locked sockets show a padlock and the act that opens them: "A2", "A3", "A6"), Knot (Act 4+). |
+| Strand list | 4 tabs (Flames, Shapes, Charms, Knots; the Charms tab appears at `a2_n06`, Knots at Act 4). Each strand row: icon in its colour, name, a one-line effect summary. **Owned** strands are lit; **known-but-not-owned** ones (seen in a shop or on the canon list for acts reached) are dim with where to get them from 09 §6.0 ("Sold at Wick & Tallow", "The Brickgut"); strands of acts not yet reached are **not listed at all** (the pool grows slowly). The 00 canon lists are the whole pool: 7 flames, 8 shapes, 8 charms, 2 knots. |
+| Sockets | Flame (1), Shape (1), Charm 1–3 (locked sockets show a padlock and the act that opens them: "A2", "A3", "A6"), Knot (Act 4+, one per wick). |
 | Drag and drop | Pointer events (works for mouse and touch). Drop a strand onto a matching socket; dropping on the wrong kind snaps back with `ui.error` and "That's a Charm; drop it on a charm socket". Drag a socket's strand out to empty it. |
 | Keyboard / pad | Focus a strand, `Enter` → the socket of its kind lights; arrows pick which (for charms), `Enter` places. `Delete` / West empties the focused socket. |
 | Braid animation | When both Flame and Shape are set, the two sockets are joined by a braided rope drawn in both colours; each charm adds a thin strand twisting in (pure CSS/SVG, 60 fps, off with reduced motion). Sound on each placement: `ui.click`; completing a valid wick: the flame's `spell.<element>.launch` at −14 dB (§25.5 maps flames to elements). |
-| Conflicts | Page 03's rule table (e.g. two travel charms that cannot coexist). A conflicting drop is allowed but the socket turns red, the readout says why, and Save is disabled until fixed. |
-| Name | Auto-named by 03 §16.2's rule (`<Flame> <Shape>`, plus ` of the <noun>` with 2+ charms: "Ember Bolt of the Choir") until renamed. Rename: 1–24 characters. At burn-in 5, Odile Pennywax's Lingo name (her shop quirk) is offered as a chip `Odile calls it: "Candlewick Hail"` that you can click to accept. |
+| Conflicts | 03's charm × shape table (bans only). A conflicting drop is allowed but the socket turns red, the readout says why, and Save is disabled until fixed. |
+| Changed meanings | Only **split, bounce, echo and volatile** change what they do by shape (R44). When one of them sits on a shape where it means something different, the charm socket shows a small `≈` and the readout gives the one-line changed rule from 03 ("Split on a ring: two rings, 60% each"). No other charm shows a note. |
+| Name | Default `<Flame> <Shape>` ("Ember Bolt") until renamed. Rename: 1–24 characters. **Odile's names** come from her shop screen any visit, free (§23.2, R25; the name is 08's dish-name rule, her comment is 01's `odile_names_wick`); an accepted name shows here and in the Journal's Wick Book (§18). |
 | Lock 🔒 | A locked wick cannot be edited, overwritten or deleted. Unlock with one click. |
 
 ### 15.4 The test chamber (sandbox)
 
 - A **160 × 90-cell** chamber drawn at 2× inside the panel (320 × 180 CSS px at 1×, scales with the panel).
-  It is a separate, tiny instance of the real cell simulation and renderer (page 06), so what you see is
+  It is a separate, tiny instance of the real cell simulation and renderer (06), so what you see is
   exactly what the wick does in the world — including light, rain and reflections.
-- **Contents** (`data/rooms/sandbox_*.json`, picked by the Materials dropdown):
+- **Contents** (six small preset rooms, files per 10; picked by the Materials dropdown). The same set is 03's
+  wick-sim physics set (R79), so the builder and the balance sim test on the same cells:
 
 | Preset (id) | What is in it |
 |---|---|
@@ -1173,12 +1184,12 @@ space. Page 03 owns every number the readouts show; this section owns the screen
 | `sandbox_air` | a flying dummy bobbing on a sine path (seek, lob) |
 | `sandbox_boss` | a large armoured dummy (armour, corrosion, shield break) |
 
-- **Dummy** (`dummy_training`): 03 §16.1's dummy loops a cast every 2 s and resets. For the Measured column
+- **Dummy** (`dummy_training`, 03). For the Measured column
   the chamber swaps in an unkillable variant: 10,000 health that refills after 3 s of no damage, armour 0 by
   default; target dropdown: Dummy (0 armour), Armoured (40), Unlit (weak to light), Swarm (5 × 60 health,
   respawning), Flying.
-- **Controls** (context `sandbox`): with the mouse over the chamber, `cast` and `overcharge` fire the wick
-  from the chamber's player with aim at the mouse; `1`–`4` swap equipped wicks for side-by-side testing.
+- **Controls** (context `sandbox`): with the mouse over the chamber, `cast` (tap, or hold to overcharge from
+  Act 2) fires the wick from the chamber's player with aim at the mouse; `1`–`4` swap equipped wicks for side-by-side testing.
   `[▶ Auto-cast]` casts the wick at the dummy every cooldown (or holds a beam) so the numbers fill on their
   own. `[Reset]` rebuilds the chamber (restores burned wood, refills water).
 - **Oil** in the chamber is unlimited but **counted**, so damage per oil is real.
@@ -1188,41 +1199,56 @@ space. Page 03 owns every number the readouts show; this section owns the screen
 
 ### 15.5 Readouts
 
-Two columns: **Expected** (computed from page 03 formulas at your current stats and gear) and **Measured**
+Two columns: **Expected** (computed from 03's formulas at your current stats and gear) and **Measured**
 (recorded in the chamber over a rolling 10 s window, through a private `Meter` instance from `meters/`).
 
 | Readout | Source | Format |
 |---|---|---|
-| Oil per cast | page 03 cost formula; the breakdown by strand in the tooltip ("Bolt 8 + Ember ×1.25 + Split +2 = 12") | `fmt`, whole |
-| Cast time / cooldown | page 03 | `secs` |
+| Oil per cast | 03's cost formula; the breakdown by strand in the tooltip ("Bolt 8 + Ember ×1.25 + Split +2 = 12") | `fmt`, whole |
+| Cast time / cooldown | 03 | `secs` |
 | Damage per hit | min–max after Wick attribute and gear; multi-projectile shapes say "×3 bolts" | `range` |
 | Expected DPS | per-hit × hits/s at 100% hit rate on the dummy, including DoT | `fmt` (2 decimals max) |
 | Damage per oil | expected damage per cast ÷ oil per cast | `fmt` |
-| Light radius and colour | page 06 light numbers | whole cells + colour swatch |
-| Overcharge | safe line (× cost) and max bonus at that line | "safe to 1.4× · +45%" |
-| Effects | status, terrain interactions (page 03's material table rows that apply, e.g. "ignites oil", "freezes water") | short phrases |
-| Burn-in | level and uses to next | pips + "142 / 300 casts" |
-| Balance flag | the page-03/10 headless ranking: if this wick's damage/oil is over 1.5× the median of all wicks available at this act, a small `⚠` note: "Strong for Act 2 — enjoy it". Informational only; a player-facing brag, and a debugging aid. | |
+| Light radius and colour | 06's light numbers | whole cells + colour swatch |
+| Overcharge | safe line (× cost) and the bonus at that line, from Act 2 (03 §9) | "safe to 1.4× · +45%" |
+| Effects | status, terrain interactions (03's flame × material rows that apply, e.g. "ignites oil", "freezes water"), and any of the 8 combos this wick can start | short phrases |
+| Burn-in | **two bars** (R38): the flame's track and the shape's track, each with its level and the oil burned toward the next threshold | two pip rows + "Ember 820 / 1,500 oil · Bolt 150 / 200 oil" |
+| Balance flag | 03's `wick-rank` result: if this wick's damage/oil is over 1.5× the median of all wicks available at this act, a small `⚠` note: "Strong for Act 2 — enjoy it". Utility shapes (ring, rune, wave, tether, beam used on terrain) are judged by 03's **utility score** instead and show "Utility: 412 cells changed". Informational only. | |
 | **Measured** | DPS, hits, damage/oil, crit rate, status uptime, cells changed (burned, frozen, dissolved) | same formats |
 
 ### 15.6 Your wicks (library)
 
 - Up to **24 saved wicks** per save (+2 from the First Flame trial, 09 §14).
 - The strip shows equipped slots first (`1`–`4`, filled dot), then the saved list. Each chip: flame colour
-  swatch, name, burn-in pips, a lock icon if locked.
+  swatch, name, burn-in pips (two rows), a lock icon if locked, and a gold border on the mastered wick.
 - Buttons: **Save** (overwrite the selected unlocked wick), **Save as new**, **Duplicate**, **Delete**
   (confirm, refused if locked), **Equip to 1/2/3/4** (or drag a chip onto a slot in the strip).
 - Sort: Recent, Name, Flame, Burn-in.
-- Burn-in belongs to the core (Flame + Shape), not the slot or the saved wick: two saved wicks with the same
-  core share one burn-in level (03 §10).
-- Export a wick as a short code (base64 of its JSON, `LF1-…`) to share or paste back in: `[Copy code]` /
-  `[Paste code]` — refused if it uses strands you do not own ("You have not found Linger yet").
+- Burn-in belongs to the flame and to the shape, not the slot or the saved wick: every wick using Ember shares
+  Ember's track, and every wick using Bolt shares Bolt's (03 §10).
+- **Wick codes** (B15): export a wick as a short code (`LF1-…`, format owned by 10) to share or paste back in:
+  `[Copy code]` / `[Paste code]` — refused if it uses strands you do not own ("You have not found Linger
+  yet"). The same codes fill the Journal's **Wick Book** (§18) and the Daily's share line (09 §12).
+
+### 15.7 First-time guided overlay (R88)
+
+The first time the Wicks tab opens in a save (at the Candlemarket), a **4-step overlay** walks through one
+wick. Each step dims everything but one area, shows one line of text, and waits for the action; `[Skip]` is
+always shown and `Esc` skips all four. It never shows again in that save (a Settings → Gameplay button
+"Show the builder guide again" re-arms it).
+
+| Step | Highlights | Text | Done when |
+|---|---|---|---|
+| 1 | the Flames tab and the Flame socket | "Drag a Flame onto the braid." | a flame is socketed |
+| 2 | the Shapes tab and the Shape socket | "Now a Shape: how it travels." | a shape is socketed (the braid animation plays) |
+| 3 | the test chamber | "Try it. Cast into the chamber." | one cast lands in the chamber |
+| 4 | the library strip | "Save it and put it in slot 2." | the wick is saved and equipped |
 
 ---
 
 ## 16. Skill board and attribute screen
 
-Page 04 owns the classes' boards, attributes and formulas.
+04 owns the classes' boards, attributes and formulas.
 
 ### 16.1 Skill board (`K`, Skills tab)
 
@@ -1230,26 +1256,29 @@ Page 04 owns the classes' boards, attributes and formulas.
 ┌ Satchel ── Inventory Wicks [●Skills] Attributes Ledger Journal ───────────────────────┐
 │ Skill points: 2                         Class: Lamplighter  Level 9                    │
 │ ┌──────────────────────────────────────────────────────────────┐ ┌─ Selected ────────┐ │
-│ │        (a board of hex/diamond nodes, 5 columns × 7 rows,     │ │ Steady Hands      │ │
-│ │         wired; three branches per class named by page 04)     │ │ Rank 1 / 3        │ │
-│ │   ◇───◆───◇         ◆ taken   ◇ available   · locked          │ │ Overcharge safe   │ │
-│ │   │   │   │         ✦ keystone (one per branch)               │ │ line +0.1× per    │ │
-│ │   ·───◇───·                                                   │ │ rank.             │ │
-│ │       │                                                       │ │ Next: +0.2×       │ │
-│ │       ✦                                                       │ │ Requires: 2 points│ │
-│ └──────────────────────────────────────────────────────────────┘ │ in "Wickcraft"    │ │
-│ Branches: Wickcraft 5 · Pole 2 · Lamplight 0                      │ [Take rank ▸]     │ │
-│                                                                    └───────────────────┘ │
+│ │   Wickcraft          Pole             Lamplight               │ │ Steady Hands      │ │
+│ │   ◆ tier 1           ◆ tier 1         ◇ tier 1                │ │ Rank 1 / 3        │ │
+│ │   │                  │                │                       │ │ Overcharge safe   │ │
+│ │   ◇ tier 2           ◇ tier 2         · tier 2                │ │ line +0.1× per    │ │
+│ │   │                  │                │                       │ │ rank.             │ │
+│ │   · tier 3           · tier 3         · tier 3                │ │ Next: +0.2×       │ │
+│ │   │                  │                │                       │ │ Requires: 2 points│ │
+│ │   ✦ capstone         ✦ capstone       ✦ capstone              │ │ in "Wickcraft"    │ │
+│ └──────────────────────────────────────────────────────────────┘ │ [Take rank ▸]     │ │
+│ ◆ taken  ◇ available  · locked  ✦ capstone (one at a time)        └───────────────────┘ │
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
+- **12 nodes per class**: three branches of four (tier 1, tier 2, tier 3, capstone), branch names from 04.
+  Rank counts, point costs and the "one capstone at a time" rule are 04's.
+- **The board opens in Act 2** (the Charmwife's Niche, `a2_n06`). In Act 1 `K` opens this tab with the board
+  greyed and one line: "Skill points: 2 (banked — the board opens in Act 2)". Skill points bank from level 2.
 - Nodes: 24px, taken = filled gold, available = gold outline, locked = grey dot. Wires light between taken
-  nodes. Keystones are larger (36px) star shapes.
+  nodes. Capstones are larger (36px) star shapes.
 - Select a node → the side panel shows name, rank x/y, what the next rank does (**generated from the numbers**
   on the node, not free text, so the text cannot lie — the Farhold lesson), the requirement, and `[Take rank]`.
 - Taking a rank asks no confirmation but can be undone until the screen closes (`[Undo]` in the footer;
-  changes commit on close). Undo after that is a paid **respec** at The Ferry (page 08).
-- Pan/zoom as for the map if the board is larger than the panel.
+  changes commit on close). Undo after that is a paid **respec** at The Ferry (08).
 
 ### 16.2 Attributes (`P`, Attributes tab)
 
@@ -1258,7 +1287,7 @@ Page 04 owns the classes' boards, attributes and formulas.
 │  WREN — Lamplighter, Level 9     XP 4,120 / 5,300  ▰▰▰▰▰▰▰▰▱▱                           │
 │  Points to spend: 3                                                                   │
 │  ┌──────────────┬────┬──────┬──────────────────────────────────────────────┐          │
-│  │ Might        │ 12 │ [−][+]│ Pole damage +24% · knockback +12 · flasks 5   │          │
+│  │ Might        │ 12 │ [−][+]│ Pole damage +24% · tonics 5 · planks 6        │          │
 │  │ Wick         │ 21 │ [−][+]│ Spell power +42%                              │          │
 │  │ Draught      │ 15 │ [−][+]│ Max oil 130 · oil regen 4.5/s                 │          │
 │  │ Nerve        │ 10 │ [−][+]│ Max health 180 · stagger resist 20%           │          │
@@ -1275,7 +1304,9 @@ Page 04 owns the classes' boards, attributes and formulas.
 ```
 
 - `+` / `−` stage points (`−` only removes points staged this visit). Confirm commits (`levelup` sound at
-  −8 dB). Numbers on the right are computed by the page 04 formulas with the staged values.
+  −8 dB). Numbers on the right are computed by 04's formulas with the staged values (the mockup's numbers
+  are only an example). Might's "carry" shows as tonic and plank capacity (04).
+- The derived panel reads movement numbers from `movement.json` (07) rather than printing its own.
 - Every derived stat has a `data-tip` explaining its sources ("Oil regen 4.5/s = 3.0 base + Draught 15 ×
   0.1"). No stat without a tooltip.
 
@@ -1293,9 +1324,14 @@ The **Ledger** tab: the `meters/` component (`renderMeter(meter, el, state)`) in
 - Every hit records `source: 'player'`, `via: 'wick:<savedWickId>'` with `viaName` the wick's name (so
   **each wick is a source**, canon), `pole` swings as `via: 'attack'`, traps/planks you built as
   `via: 'build:<part>'`, environmental kills you caused (dropped a crate, flooded a room) as
-  `via: 'env:<kind>'`, knot follow-ups as `via: 'knot:<wickId>'`. `dtype` = the flame id (`ember`, `rime`,
-  `spark`, `bile`, `gleam`, `tide`, `shade`) or `physical`. `itemId` = the pole or lantern responsible.
-- Summons (Ferrywitch Oarsmen, Tinker turrets) are their own actors in the meter.
+  `via: 'env:<kind>'`, knot follow-ups as `via: 'knot:<wickId>'`, and each of 03's 8 **combos** as its own
+  source, `via: 'combo:<id>'` (`combo:steam_burst`, `combo:shatter` …). `dtype` = the flame id (`ember`,
+  `rime`, `spark`, `bile`, `gleam`, `tide`, `shade`) or `physical`. `itemId` = the pole or lantern responsible.
+- **"The Hollow"** (B6): kills by traps (enemies caught in `trap_*`, 07) and by the world (falls, floods,
+  collapses, burning oil you did not light) are recorded under a separate actor named **The Hollow**, so
+  the Damage mode shows a row "The Hollow — 3 kills, 610 damage". Those kills pay +50% XP (04); the first
+  one in a save gets a Narrator line (01). The Ledger's run stats also count "Rooms rekindled" (B8).
+- Summons (Tinker turrets) are their own actors in the meter. Turret shots never trigger knots (R80).
 
 ### 17.2 Modes (the meter's six + ours)
 
@@ -1317,7 +1353,7 @@ own `report(mode, scope)` does not need to change.
 ### 17.3 Scope
 
 `This room · This node · This act · Whole run` (the meter's `fight`/`all` plus two groupings we build by
-filtering fights by `nodeId`/`actId` stored in the fight's label, `"act2/n2_3/room1"`).
+filtering fights by `nodeId`/`actId` stored in the fight's label, `"act2/a2_n05/room1"`).
 
 ### 17.4 Layout
 
@@ -1327,6 +1363,7 @@ filtering fights by `nodeId`/`actId` stored in the fight's label, `"act2/n2_3/ro
 │ ┌──────────────────────────────────────────────────────────────────────────────────┐ │
 │ │ Wren          ██████████████████████████████████████  2,410 (88%) 23.6/s  ▁▃▅▇▅▃ │ │
 │ │ Tinker turret ████                                        330 (12%)  3.2/s  ▁▁▂▂▁ │ │
+│ │ The Hollow    ██                                          190 (7%)   3 kills      │ │
 │ └──────────────────────────────────────────────────────────────────────────────────┘ │
 │ click a bar → sources: Ember Bolt 1,420 · Gleam Ring 610 · Pole 380 …                │
 │ click a source → every hit with time, target, crit, overkill, flame                  │
@@ -1334,25 +1371,27 @@ filtering fights by `nodeId`/`actId` stored in the fight's label, `"act2/n2_3/ro
 └──────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-Retention: the meter keeps the last 2,000 records per fight (its own rule); the run keeps the last
-**200 rooms** of fights, older ones merged into per-act totals so the save stays small.
+Retention: the meter keeps the last 2,000 records per fight (its own rule); the save keeps the last
+**50 rooms** of fights (R64), older ones merged into per-act totals so the slot stays inside its budget.
 
 ---
 
 ## 18. Journal, bestiary, codex
 
-The **Journal** tab; sub-tabs switch with `[`/`]` (LT/RT).
+The **Journal** tab (on a gamepad also the map frame's third tab, §13); sub-tabs switch with `[`/`]` (LT/RT).
 
 | Sub-tab | Contents |
 |---|---|
-| **Story** | Current objective at the top; a timeline of story beats reached (page 01) as short entries dated by in-game day and act. |
-| **Quests** | Active / done lists (page 01/08 own quests). Each: giver, place, steps with checkboxes, reward. `[Track]` sets the HUD objective. Keyring (keys and quest items) at the bottom. |
-| **Bestiary** | Every monster met (page 05 ids): sprite at 4× animated idle, name, family, where met, kills. **Knowledge ranks** reveal lines by kills: 1 kill → description; 5 → health & armour; 15 → flame weaknesses/resistances as a 7-flame row of icons (✔ weak / — normal / ✖ resists / ☐ immune); 30 → drops; 50 → a lore line and the "Studied" gold border. Bosses: phases seen, your best time, deaths to it. Unmet monsters are a silhouette with "???" only if another entry mentions them. |
-| **Codex** | Lore pages found in the world (page 01), grouped by district; unread ones have a gold dot. Material pages: every material you have seen with the flame interactions you have witnessed (a 7-column grid that fills in as you see e.g. Ember hit oil → "ignites"). This is how the physics rules get taught. |
-| **People** | NPCs met (page 01): portrait, name, where, disposition (Lingo relations: a word, not a number, "warm", "wary"), last thing they said to you. |
+| **Story** | Current objective at the top; a timeline of story beats reached (01) as short entries dated by in-game day and act. |
+| **Quests** | Active / done lists (01 and 08 own quests). Each: giver, place, steps with checkboxes, reward. `[Track]` sets the HUD objective. Keyring (keys and quest items) at the bottom. |
+| **Bestiary** | Every monster met (05 ids): sprite at 4× animated idle, name, family, where met, kills. **Knowledge ranks** reveal lines by kills: 1 kill → description; 5 → health & armour; 15 → flame weaknesses/resistances as a 7-flame row of icons (✔ weak / — normal / ✖ resists / ☐ immune); 30 → drops; 50 → a lore line and the "Studied" gold border. Bosses: phases seen, your best time, deaths to it. Unmet monsters are a silhouette with "???" only if another entry mentions them. |
+| **Codex** | Lore plaques found in the world (01: 24 of them), grouped by district; unread ones have a gold dot. Material pages: every material you have seen with the flame interactions you have witnessed (a 7-column grid that fills in as you see e.g. Ember hit oil → "ignites"). This is how the physics rules get taught. Each of the 8 combos gets its own page once seen (R44). |
+| **People** | NPCs met (01): portrait, name, where, disposition (Lingo relations: a word, not a number, "warm", "wary"), last thing they said to you. |
+| **People you could still help** (R76) | One row per Kindling flag whose NPC hint line you have heard and whose choice is still open (01's hint table): who, where (node name), and a one-line reminder in the NPC's words ("Seld wants her put out gently"). A row leaves the list when the choice is made either way. Flags you have not been hinted about are never listed, and the list never says how many there are. |
+| **Wick Book** (B15) | Every wick Odile has named (§23.2): her name for it, the strands, the date, her one-line comment, and its wick code with `[Copy code]`. Also any wick you pin here from the library. |
 | **Lamps** | The six Great Lamps: dark/relit, date relit, the district palette swatch before/after. Lamp-posts per act found/lit. |
-| **Challenges** | Class unlock challenges with the same progress lines as §9.1, Trials cleared with best times, Silent Bells 12-pip row. |
-| **Achievements** | Profile-wide (09 §16): name, how, date earned; hidden ones show "???" until earned. |
+| **Challenges** | The two class unlock challenges with the same progress lines as §9.1, and the 5 Trials with medals and best times (09 §14). |
+| **Achievements** | Profile-wide, 20 of them (09 §16): name, how, date earned; hidden ones show "???" until earned. |
 
 ---
 
@@ -1372,13 +1411,15 @@ values from when the screen opened. Saved to the profile (`store.js` key `settin
 | `rain_density` | Off, Light (25%), Medium (50%), Heavy (100%) | Heavy | Both rain layers. Off still keeps puddles and wet sheen. Act 6 after the Rain stops ignores it. |
 | `reflection_quality` | Off, Low (half-res, no ripple), Medium (full-res, ripple), High (full-res, ripple + wet-ground sheen) | Medium | Page 06 owns the passes. |
 | `bloom` | Off, Low, High | Low | |
-| `light_quality` | Low (light buffer at 1/4 res, 32 lights), Medium (1/2 res, 64 lights), High (full res, 128 lights, soft shadows) | Medium | Page 06. |
+| `light_quality` | Low / Medium / High (the drawn light buffer's resolution, light count and soft shadows, 06) | Medium | Drawing only: the CPU light grid that decides gameplay (tiers) never changes. |
 | `particles` | Low / Medium / High | Medium | Sparks, embers, spray caps (page 06). |
 | `screen_shake` | 0–100% in 10% steps | 70% | 0 also removes camera kicks on casts. |
 | `flash_reduction` | on/off | off | Caps full-screen brightness change to 10% per frame, no strobing (spark chains, bell tolls, lightning in Act 6 become soft fades), no lantern flicker. |
 | `camera_lookahead` | 0 / 40 / 80 cells | 40 | How far the camera leads in the facing direction. |
-| `perf_auto` | on/off | on | If frame time exceeds 20 ms for 3 s, step down rain → reflections → light quality one notch each, with a toast saying which. |
+| `perf_auto` | on/off | on | If frame time exceeds 20 ms for 3 s, step down rain → reflections → light quality → physics detail one notch each, with a toast saying which. |
 | `show_fps` | on/off | off | Same as F3's first line. |
+| `physics_detail` | Full / Reduced | Full | Reduced draws fewer debris fragments, spray and ember particles and caps decorative loose cells (06). It never changes a puzzle cell, a `PINNED` cell, liquid levels or anything the rules read. |
+| `brightness_floor` | 0.08 (default) / 0.12 / 0.16 | 0.08 | Raises how dark the **picture** can get, for dim screens. The room floor for gameplay stays 0.08 (00 §13): light tiers, the Unlit and the oil economy are unaffected. |
 
 ### 19.2 Audio
 
@@ -1389,7 +1430,7 @@ The sfx engine has three buses (`sfx`, `ui`, `ambience`) plus master; Lanternfal
 | Setting | Range | Default |
 |---|---|---|
 | Master | 0–100% | 80% |
-| Music | 0–100% | 60% |
+| Music (the procedural score, 10) | 0–100% | 60% |
 | Effects (`sfx` bus) | 0–100% | 80% |
 | Interface (`ui` bus) | 0–100% | 60% |
 | Ambience (`ambience` bus, rain lives here) | 0–100% (still capped by sfx's 0.6 ceiling) | 70% |
@@ -1441,7 +1482,9 @@ numbers / auto), "Run by stick push", "Always run", "Aim with keys" (§4.2).
 |---|---|---|---|
 | `flame_patterns` | on/off | off | Colour-blind **flame patterns** (§27.2) on projectiles, lights' rims, HUD icons, damage numbers. |
 | `colour_filter` | none / red-weak / green-weak / blue-weak | none | Shifts the 7 flame colours to a set that stays distinct for that type (table §27.2). Does not recolour the world ramp. |
-| `hold_to_toggle` | per action: run, overcharge, grapple, crouch, climb, build mode (already toggle), tool wheel | all hold | |
+| `hold_to_toggle` | per action: run, overcharge, grapple, crouch, climb, tool wheel, inspect | all hold | |
+| `overcharge_needs_key` | on/off | off | R16. With it on, holding `cast` alone never overcharges; overcharge = hold **`Shift` + `cast`** (pad: hold **LT** + RT). For players who kept guttering by accident. `Shift` still runs. |
+| `slow_build` | on/off | off | R19. "Slow time while building": build mode and the gamepad tool wheel run the game at **35%** speed. Off on every difficulty by default. |
 | `aim_assist_pad` | 0–3 | 1 | §4.3 |
 | `aim_assist_mouse` | 0–3 | 0 | |
 | `slow_mode` | 100% / 85% / 70% / 50% game speed | 100% | Scales the fixed timestep's game-time per step (the sim still steps 60/s; each step advances less game time). Achievements and scores are not blocked; Trials and Daily Wick record "slow mode" on the score. |
@@ -1458,12 +1501,13 @@ numbers / auto), "Run by stick push", "Always run", "Aim with keys" (§4.2).
 
 Difficulty (only via lamp-posts, shown read-only here with the reason), camera lookahead, "Aim guides"
 (lob arcs and bolt lines always on), minimap size and zoom default, objective line on/off, auto-pickup
-pennies (on), auto-pickup items (off / common only / all).
+pennies (on), auto-pickup items (off / common only / all), "Show the builder guide again" (§15.7).
 
 ### 19.8 Data
 
 Export profile, import profile, export all slots, "Delete everything" (type `LANTERNFALL` to confirm),
-storage used (bytes, via `format.fmt`).
+storage used (bytes, via `format.fmt`) against the budgets in 00 §13 (slot ≤ 64 KB, profile ≤ 16 KB,
+total ≤ 420 KB).
 
 ---
 
@@ -1471,13 +1515,14 @@ storage used (bytes, via `format.fmt`).
 
 ```
 ┌──────────────────────────── PAUSED ────────────────────────────┐
-│  Act 3 — The Sluice Ward · Node: Cistern Row (2/3 rooms)      │
+│  Act 3 — The Sluice Ward · Node: Cistern Row (2/3 rooms)       │
 │  Seed 48213977 · Lamplighter difficulty · 3h 41m                │
 │                                                                 │
 │   ▸ Resume                                                      │
 │     Satchel (Inventory · Wicks · Skills · …)                    │
 │     Map                                                         │
 │     Status panel   (what every icon on you means right now)     │
+│     Rekindle this room   (greyed while a fight is live)         │
 │     Controls                                                    │
 │     Settings                                                    │
 │     Return to last lamp-post   (costs what dying costs, §21)    │
@@ -1488,12 +1533,20 @@ storage used (bytes, via `format.fmt`).
 ```
 
 - Opens with `Esc`/Menu; the world is dimmed to 40% and desaturated behind it (a shader uniform, not a blur).
-- **Status panel:** every active status with icon, name, source, time left, and exact effect text.
+- **Status panel:** every active status with icon, name, source, time left, and exact effect text (03's
+  table), plus the Guild flask's charges and whether the ambient tier is dark (oil is not coming back).
+- **Rekindle this room** (R10, B8): streams the current room back to its authored state plus its saved
+  prefab state (levers, doors, built parts); killed enemies stay dead; items on the floor move to the
+  room's `lootSafe`. Free, no confirm beyond one "Rekindle?" prompt. **Greyed** with the reason "Not while
+  you are fighting" whenever a fight is live (any enemy has noticed you, or a boss arena is locked). Same
+  effect as touching the room's Rekindle post (07 §9.5); the Narrator's dry remark plays; the Ledger counts
+  "Rooms rekindled".
 - **Return to last lamp-post:** the "I am stuck" button; applies the death penalty (09 §8.2) minus the
   death count, after a confirm.
 - **Save and quit:** saves only if at a lamp-post; elsewhere it says "Progress since your last lamp-post
   (12m ago) will be kept only up to that lamp-post" and asks to confirm. (Quitting mid-room restores you
   at the last lamp-post — a room is never saved half-done.)
+- No pause-menu item has a timer, and breath does not drain while paused (R74).
 - Iron Wick saves: "Save and quit" suspends the game at the current spot instead (a one-time resume save
   that is deleted on load, so quitting is not a way round death).
 
@@ -1506,8 +1559,8 @@ storage used (bytes, via `format.fmt`).
 │                           THE LAMP GUTTERS                                    │
 │          (the last frame, frozen, fading to the drowned palette)              │
 │                                                                              │
-│   Killed by  Rat Chorister (elite: Plagued, Swift)  with "Choir Note" (spark) │
-│   in         Culvert Crossing, room 2 · after 3m 12s in the room              │
+│   Killed by  Rat Chorister (elite: Blighted, Swift)  with "Choir Note"        │
+│   in         The Brickgut, room 2 · after 3m 12s in the room                  │
 │                                                                              │
 │   Last 5 hits taken:      Your best wick this room:                          │
 │    −22 Choir Note           Ember Bolt — 410 dmg, 38% of yours                │
@@ -1519,22 +1572,22 @@ storage used (bytes, via `format.fmt`).
 │   Lost: 77 pennies (25%) — left in a purse where you fell (pick it back up)  │
 │   Kept: all XP, items, wicks, strands                                        │
 │                                                                              │
-│      [Rekindle at Choir Lamp-post ▸]   [Ledger for this room]   [Quit]       │
+│   [Return to the Charmwife's Niche lamp-post ▸]  [Ledger for this room] [Quit]│
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
 
 | Element | Rule |
 |---|---|
-| Title | Random pick from 6 lines in `data/ui/death-titles.json` ("THE LAMP GUTTERS", "SNUFFED", "THE WATER TAKES YOU" if drowned, "LOST TO THE DARK" if killed by an Unlit in darkness…), chosen by cause. |
+| Title | Random pick from 6 lines in `strings.json` (02's file) ("THE LAMP GUTTERS", "SNUFFED", "THE WATER TAKES YOU" if drowned, "LOST TO THE DARK" if killed by an Unlit in darkness…), chosen by cause. |
 | Killer line | Killer's name with elite affixes, the attack's name and flame; environment deaths name the thing ("Drowned in the Sluice Ward", "Crushed by a falling bell"). |
 | Last 5 hits | From the meter's Deaths mode. |
 | Room recap | From the meter scoped to this room: best wick by damage, totals. |
-| Tip | One tip from `data/ui/tips.json`, chosen by cause tag (drowned, burned, boss id, void zone, fall). Never the same tip twice in a row. |
+| Tip | One tip from `strings.json`, chosen by cause tag (drowned, burned, boss id, void zone, fall). Never the same tip twice in a row. |
 | Losses | 09 §8.2 decides what is lost; this screen says it plainly with numbers. |
-| Rekindle | Respawn at the last lamp-post rested at. 1.5 s fade. The death count goes up. |
+| Return | Respawn at the last lamp-post rested at. 1.5 s fade. The death count goes up. (The button says "Return", not "Rekindle": Rekindle is the room-reset post, §20.) |
 | Iron Wick | Title "THE LAMP IS OUT"; buttons `[To the Hall of Snuffed Wicks]` and `[Title]`. |
-| Modes | Floodgate/Long Descent/Daily/Boss Rush/Trials show their own end screen instead (page 09). |
-| Sound | Music cuts; `death.humanoid` for you, then 1.5 s of rain only (`ambience.void` at −6 dB). |
+| Modes | Floodgate, the Long Descent (and Daily), Boss Rush and Trials show their own end screen instead (09). |
+| Sound | The score cuts; `death.humanoid` for you, then 1.5 s of rain only (`ambience.void` at −6 dB). |
 
 ---
 
@@ -1547,14 +1600,18 @@ Not a pause. A centred banner in the play layer for 2.5 s, then a small reminder
             ║        LEVEL 10              ║   (2× pixel font, gold, rising 8 cells)
             ║  +3 attribute points          ║
             ║  +1 skill point               ║
-            ║  Max health +6 · Max oil +4   ║   (the automatic per-level gains, page 04)
+            ║  Max health +6 · Max oil +4   ║   (the automatic per-level gains, 04)
             ╚══════════════════════════════╝
 ```
 
+In **Act 1** the skill line reads `+1 skill point (banked until Act 2)`; the level-1 → 2 banner is the first
+place a player learns that points bank (00 §6.2).
+
 - Sound `levelup`; a ring of gold light expands from the player (a light event, not a damage ring).
-- Heals **nothing** (so a level-up never saves a fight by surprise; page 04 may change this).
-- After the banner: the Satchel tab rail gets badges on Attributes and Skills, and a tiny HUD reminder
-  under the XP line `▲3 ◆1` (points, skill points) stays until they are spent.
+- Heals **nothing** (so a level-up never saves a fight by surprise; 04 owns this).
+- After the banner: the Satchel tab rail gets badges on Attributes and (from Act 2) Skills, and a tiny HUD
+  reminder under the XP line `▲3 ◆1` (points, skill points) stays until they are spent. In Act 1 the `◆`
+  count shows dim, since it cannot be spent yet.
 - New unlocks at that level (a class feature, a new board row) are listed on the banner as a 4th line.
 - Multiple levels at once show one banner "LEVEL 10 → 12" with summed points.
 
@@ -1574,13 +1631,13 @@ Opened from a shopkeeper's dialogue (§24) with `[Trade]`. The world is paused.
 │ [●Buy]  [Sell]  [Buyback]  [Quirk: Taste a wick]                             │
 │ Categories: [All] [Flames] [Shapes] [Charms] [Oil & tonics]                  │
 │ ┌──────────────────────────────────────────────┐ ┌─ Selected ────────────┐  │
-│ │ ◉ Rime (Flame)             320 ●  owned: no   │ │ RIME                  │  │
-│ │ ➶ Lob (Shape)              180 ●  owned: no   │ │ cyan · chill, freeze  │  │
-│ │ • Linger (Charm)           450 ●  ▲ upgrade   │ │ (strand card)         │  │
-│ │ ⚱ Tonic ×1                  25 ●  (4/6)       │ │ Price 320 (−20% Lamp) │  │
-│ │ ◈ Lamp oil flask ×1         12 ●              │ │ [Buy]  [Buy ×5]       │  │
+│ │ ◠ Arc (Shape)              180 ●  new         │ │ ARC                   │  │
+│ │ ◯ Ring (Shape)             220 ●  new         │ │ a close sweep         │  │
+│ │ ◇ Strand Dust ×1            60 ●              │ │ (strand card)         │  │
+│ │ ⚱ Tonic ×1                  25 ●  (4/6)       │ │ Price 180 (−20% Lamp) │  │
+│ │ ◈ Lamp oil ×1               12 ●              │ │ [Buy]                 │  │
 │ └──────────────────────────────────────────────┘ └───────────────────────┘  │
-│ Price change: Crown Lamp relit −20%  · Your Knack 11: −2%                    │
+│ Price change: Crown Lamp relit −20%  (numbers illustrative; prices are 08's) │
 │                                                     [Leave]                  │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -1589,29 +1646,24 @@ Opened from a shopkeeper's dialogue (§24) with `[Trade]`. The world is paused.
 |---|---|
 | Header | Shop name, keeper, the player's currencies (only those the shop uses in bold). |
 | Portrait + line | Keeper portrait 64 × 64 (pixel art at 1:1 × 2), a Lingo line picked by context (first visit, returning, sold them something last time, district relit, you are hurt). Voiced (§19.3). |
-| Tabs | Buy, Sell, Buyback (last 12 things sold this visit and the previous one, at the sell price), plus one **Quirk** tab per shop (§23.2). |
+| Tabs | Buy, Sell, Buyback (last 12 things sold this visit and the previous one, at the sell price), plus the shop's quirk tabs (§23.2). |
 | Rows | Icon, name, kind, price (with the currency glyph), owned/equipped mark, and an **upgrade mark** (`▲` green if better than worn for gear; for strands: "owned"/"new"). Unaffordable rows: price in red, still readable. |
 | Selected card | Full item/strand card (same renderer as the tooltip), price breakdown, `Buy` / `Buy ×5` / `Buy max` for stackables. |
 | Sell tab | Your pack grid; click to sell 1, `Shift`+click stack; `[Sell all junk]` button with the total shown first. |
-| Price breakdown | Every modifier listed (district relit, Knack, quirks, curses). |
+| Price breakdown | Every modifier listed (district relit, Hollis's opinion, other quirks; 08's formula). |
 | Sounds | Buy/sell: `coin`; refused: `ui.error`; opening: `ui.open`. |
 
 ### 23.2 Quirk extras per shop
 
-Page 08 owns the rules and numbers; this is what each quirk adds to the screen.
+08 owns the rules and numbers; this is what each of the **five shops'** quirks adds to the screen (R31).
 
 | Shop | Quirk tab / extra UI |
 |---|---|
-| `shop_wick` Wick & Tallow | **Taste a wick**: pick one of your saved wicks; Odile "tastes" it (a 2 s braid animation in her hands) and gives it a name (Lingo name generator over flame + shape + charms), shown as a chip you can accept (renames the wick). A header strip shows the **price drop per relit Lamp** as 6 pips. |
-| `shop_pawn` Crane's Pawn | **Ledger of sales**: Hollis's book of everything you ever sold him (name, date, price he paid), with `[Buy back at his price]` for items he still has. A **mood meter** (a face glyph + a word from Lingo relations: "sour", "fair", "generous") that sets the haggle range; a **Haggle** button on each row: 3 dialogue choices (flatter / threaten / walk away) that move the price ±5–20% by mood. |
-| `shop_drowned` The Drowned Market | Prices in **pearls** only (penny column hidden). A water-level strip at the top: the shop's stalls are only open while the room is flooded above the line; if it drains mid-visit (it cannot while paused), nothing changes until you leave. A **Pearl exchange** row (sell items for pearls at 1 per 150 pennies of value, floor). |
-| `shop_soup` Brisket's Soup Barge | **Today's menu**: 4 bowls from a seeded rotation (seed = save seed + visit count), each a timed buff card with duration (`secs`) and an ingredient list; one **Mystery bowl** with a `?` card and a hint word. Only one meal buff at a time; buying another shows "Replaces: Eel Chowder (4m 12s left)". |
-| `shop_gamble` The Mothwife's Gamble | **Sealed lanterns**: a shelf of 6 lanterns glowing in colours that hint rarity (page 08 table), with price by slot type (hood, coat, pole…). Buying plays a 1.2 s unsealing: the glow flares, the item card flips in. A running "luck" line: lanterns opened, best result. |
-| `shop_scrap` Scrapwright's | **Trade-in**: sell parts for credit toward blueprints. **Build a gadget**: 3 part sockets (drag parts from your materials), a live preview card of the gadget the combination makes (page 08 recipe table), `[Build]`. Unknown combinations show "???" until built once. |
-| `shop_tithe` The Bell Tithe | **Blessings / Curses** tabs. A tally line "Bell-cultists slain: 14 — prices +28%". Curse rows show what they **pay you** in green and the downside in red; one active curse max per slot type (page 08). |
-| `shop_ferry` The Ferry | **Map reveals** (per act: shows which nodes it would reveal), **Fast travel** (the Act map in travel mode across all acts), **Respec** (attributes / skills / both). Each price has a toggle `[Pay in pennies] [Pay in max health]` — the max-health price shows the permanent loss ("Max health 180 → 172") in red and needs a hold-to-confirm (1 s). |
-
----
+| `shop_wick` Wick & Tallow (`npc_odile`) | **Taste a wick** (R25): pick any saved wick, **any visit, free, no burn-in needed**. Odile "tastes" it (a 2 s braid animation in her hands) and names it by 08's dish-name rule (the same wick always gets the same name); her one-line comment is 01's `odile_names_wick` pool, voiced. The name shows as a chip you can accept (renames the wick) and the wick is filed in the Journal's **Wick Book** (§18) either way. A header strip shows the **price drop per relit Lamp** as 6 pips. |
+| `shop_pawn` Crane's Pawn (`npc_hollis`) | **Ledger of sales**: Hollis's book of everything you ever sold him (name, date, price he paid; his Lingo memory type `sold_item`), with `[Buy back at his price]` for items he still has. His **mood face** (a face glyph + a word from Lingo `opinion()`: "sour", "fair", "warm") sits in the header and sets his prices (08's formula); there is **no haggle button** (R26). Two more tabs (R31): **Parts** (build parts and scrap, and the satchel row upgrade) and **Temper** (raise a worn or carried item +1…+5; the cost and the before/after card side by side). |
+| `shop_soup` Brisket's Soup Barge (`npc_brisket`) | **Today's menu**: bowls from a seeded rotation (08: seed = save seed + visit count), each a timed buff card with duration (`secs`) and an ingredient list; one **Mystery bowl** with a `?` card and a hint word. Only one meal buff at a time; buying another shows "Replaces: Eel Chowder (4m 12s left)". |
+| `shop_gamble` The Mothwife's Gamble (`npc_mothwife`) | **Sealed lanterns**: a shelf of lanterns glowing in colours that hint rarity (08 table), priced by slot type (weapon, coat, boots, trinket, lantern). Buying plays a 1.2 s unsealing: the glow flares, the item card flips in. A running "luck" line: lanterns opened, best result. **Pearls shelf:** when the frame is opened at the **Drowned Market** stall (`a3_n05`, kept by `npc_unna`, who speaks the lines), the header shows only pearls, prices are in pearls, and a **Pearls** tab holds the pearl-only stock (08). The shelf closes for good if the Market Cistern is drained (09 §6.3). |
+| `shop_ferry` The Ferry (`npc_wenna`) | **Map reveals** (per act: shows which nodes it would reveal), **Fast travel** (the Act map in travel mode across all acts), **Respec** (attributes / skills / both). Each price has a toggle `[Pay in pennies] [Pay in max health]`. The max-health price shows the permanent loss in red ("Max health 180 → 172"), the **debt meter** "Health owed: 8% of 20% cap", and the line **"Refunded at the next Great Lamp"** (R75); a price that would pass the 20% cap is refused with that reason. Paying in health needs a hold-to-confirm (1 s; a hold, not a timer). |
 
 ## 24. Dialogue box
 
@@ -1712,11 +1764,11 @@ only extended, never changed.
 | Refused / error | `ui.error` | −10 dB |
 | Buy / sell / penny pickup | `coin` | −8 dB |
 | Equip gear | `equip` | −8 dB |
-| Loot pickup by rarity | `loot.common` … `loot.legendary` (page 08 maps rarities) | −6 dB |
+| Loot pickup by rarity | `loot.common` … `loot.legendary` (08 maps its four rarities onto them) | −6 dB |
 | Level up | `levelup` | −4 dB |
 | Quest / objective complete | `quest.complete` | −6 dB |
 | Wick slot change | `ui.tab` | −14 dB |
-| Wick completed in builder | `spell.<element>.launch` (ember→fire, rime→ice, spark→lightning, bile→poison, gleam→holy, tide→nature *for now*, shade→shadow) | −14 dB |
+| Wick completed in builder | `spell.<element>.launch` (ember→fire, rime→ice, spark→lightning, bile→poison, gleam→holy, tide→water (else nature), shade→shadow) | −14 dB |
 | Cooldown ready | `ui.click` | −18 dB |
 | Fast travel | `travel.step` | −6 dB |
 | Lamp-post rest | `camp.fire` | −8 dB |
@@ -1727,10 +1779,13 @@ only extended, never changed.
 | Overcharge past safe line (loop) | **new** `lf.overcharge.warn` | −12 dB |
 | Gutter burst | **new** `lf.overcharge.gutter` | −4 dB |
 | Pin placed | **new** `lf.map.pin` | −14 dB |
-| Silent Bell rung | **new** `lf.bell.silent` | −4 dB |
+| Rekindle a room (the 0.6 s rewind shimmer, B8) | **new** `lf.room.rekindle` | −8 dB |
+| Lantern guttered out (last drop, B4) | **new** `lf.lantern.out` | −6 dB |
+| Flood clock under 5 s (one tick per second) | **new** `lf.flood.tick` | −14 dB |
 | Low oil warning | **new** `lf.oil.low` | −10 dB |
 
-Tide mapping to `nature` is a stopgap until page 06/10 add a `water` element set (see §29).
+Tide sounds use `spell.water.*`, added through the Lanternfall sfx bridge; until that set exists they fall back
+to `spell.nature.*` (10 owns the bridge).
 
 ---
 
@@ -1798,7 +1853,11 @@ DOM text (§28).
 - **Screen reader basics:** the DOM layer uses headings and labelled regions; toasts and level-ups are
   mirrored into an `aria-live="polite"` region; subtitles into another. The canvas has
   `aria-label="Lanternfall game view"`. Full play by screen reader is a non-goal.
-- **Timers never kill a menu:** no menu auto-closes except the level-up banner (not a menu).
+- **Timers never kill a menu:** no menu auto-closes except the level-up banner (not a menu), no menu has a
+  countdown, and breath does not drain while one is open (R74).
+- **Desktop + gamepad only** (R92): phones and tablets get the "Desktop recommended" card (§1); the title,
+  every menu and the phone card itself must still lay out without overlap or sideways scrolling at
+  **390 px** wide (the house rule: test mobile), checked by `menu-fit.spec.js` (§28).
 
 ### 27.2 Colour-blind flame patterns
 
@@ -1825,7 +1884,8 @@ mark, so they cost a lookup, not new art per wick. Damage numbers get the patter
   a second signal (icon, sign, word, or border pattern).
 - **Audio cues have visual pairs**: every telegraph sound has a visual telegraph; sound captions cover the
   rest.
-- **Slow mode, aim assist and hold-to-toggle** never lock content.
+- **Slow mode, aim assist, hold-to-toggle, "Overcharge needs a key" and "Slow time while building"** never
+  lock content.
 
 ---
 
@@ -1833,36 +1893,434 @@ mark, so they cost a lookup, not new art per wick. Damage numbers get the patter
 
 | Test | Kind | Checks |
 |---|---|---|
-| `tests/bindings.test.js` | node | No two actions in one context share a key; every action has a default; every `rebind:false` action is one of the four fixed ones; every key the input code listens for is in `bindings.json`; no reserved chord is a default. |
-| `tests/format-screens.spec.js` | Playwright | Opens every screen with fixture saves (fresh, mid-Act 3, late Act 6) and fails on `hasLongDecimal`, `NaN`, `undefined`, `[object` in visible text. |
-| `tests/focus.spec.js` | Playwright | Each screen: Tab/arrow through every control without a trap; `Esc` closes back to the opener; focus returns. |
-| `tests/hud-layout.spec.js` | Playwright | Screenshots of the HUD at ×2, ×3, ×4 and HUD text 2×; no HUD element overlaps another; nothing within 6 cells of an edge. |
-| `tests/builder.spec.js` | Playwright | Drag Ember+Bolt → readout shows cost; sandbox auto-cast fills Measured DPS within 3 s; keyboard-only build of the same wick gives the same JSON. |
-| `tests/minimap-fog.test.js` | node | 8 × 8 tile reveal from a lit-cell mask; darkness reveals only lit tiles; bitset round-trips through the save. |
-| `tests/tooltips.spec.js` | Playwright | Every `data-tip-render` name has a registered renderer; every renderer reads its one attribute. |
-| `tests/difficulty.test.js` | node | `difficulty.json` has every knob for all three levels; the rules module reads each knob (set it to an odd value and ask the module — comparing the file to a constant passes against an orphan). |
+| `tests/unit/bindings.test.js` | node | `data/bindings.json` holds exactly the defaults in §2–§3 (the test parses this page's tables); no two actions in one context share a key or pad button (after inheritance: a child's code hides the parent's); every action has a default; every `rebind:false` action is one of the four fixed ones; every key the input code listens for is in `bindings.json`; no reserved chord is a default; **no other page in `docs/` prints a key table** (R18: it fails on a markdown table with a Key/Default column outside 02). |
+| `tests/e2e/format-screens.spec.js` | Playwright | Opens every screen with fixture saves (fresh, mid-Act 3, late Act 6) and fails on `hasLongDecimal`, `NaN`, `undefined`, `[object` in visible text. |
+| `tests/e2e/focus.spec.js` | Playwright | Each screen: Tab/arrow through every control without a trap; `Esc` closes back to the opener; focus returns. |
+| `tests/e2e/hud-layout.spec.js` | Playwright | Screenshots of the HUD at **427×240, 512×288 and 640×360** visible cells and with HUD text 2×; no HUD element overlaps another; nothing within 6 cells of an edge; the flood clock and boss bar both fit at 427×240 (R78). |
+| `tests/e2e/menu-fit.spec.js` | Playwright | Title, every menu and the phone card at 390, 768 and 1080 px wide: no overlap, no sideways scroll (R92). |
+| `tests/e2e/builder.spec.js` | Playwright | Drag Ember+Bolt → readout shows cost and two burn-in bars; sandbox auto-cast fills Measured DPS within 3 s; keyboard-only build of the same wick gives the same JSON; the guided overlay shows once and `[Skip]` ends it (R88). |
+| `tests/unit/minimap-fog.test.js` | node | 8 × 8 tile reveal from a light-grid mask; darkness reveals only lit tiles; the 16 × 16 saved blocks round-trip through the save and a campaign's fog fits in 8 KB. |
+| `tests/e2e/tooltips.spec.js` | Playwright | Every `data-tip-render` name has a registered renderer; every renderer reads its one attribute. |
+| `tests/unit/difficulty.test.js` | node | `difficulty.json` has every knob for all three levels, including Tallow's third phase; the rules module reads each knob (set it to an odd value and ask the module — comparing the file to a constant passes against an orphan). |
+| `tests/e2e/pause-rekindle.spec.js` | Playwright | "Rekindle this room" is greyed while an enemy has noticed you and works when none has; prefab state survives it; breath does not drain while paused. |
 
 ---
 
-## 29. Proposed canon changes
+## 29. v2 changes (applied in v2)
 
-1. **Might's "carry"** (00-OVERVIEW §9) has no pack weight to act on, because this page uses slots, not
-   weight. Proposal: "carry" means **tonic flask capacity** and **plank kit capacity** (page 04 to confirm).
-2. **Two extra audio buses** (`music`, `voice`) live in Lanternfall's own audio wrapper rather than in
-   `sfx/`. No change to the shared sfx module.
-3. **A water sound element**: `tide` borrows `spell.nature.*` until a `spell.water.*` set is added to the
-   sfx catalog via the Lanternfall bridge. Page 10 to own.
-4. **Satchel frame**: Inventory, Wicks, Skills, Attributes, Ledger and Journal are tabs of one frame rather
-   than six separate screens (the hotkeys still open each tab directly).
-5. **Difficulty names.** 05-BESTIARY-BOSSES.md §2.4 proposed four tiers named `lamplit / normal / guttering /
-   drowned`. The brief for this page fixes three menu names: **Wick-lit / Lamplighter / Lampless**
-   (`wicklit / lamplighter / lampless`), using 05's enemy numbers for the first three rows, with `drowned`
-   kept as a post-campaign unlock (§10.1). 05 should rename its ids to match, or keep its ids as aliases in
-   `data/difficulty.json` (`"aliases": { "lamplit": "wicklit", "guttering": "lampless" }`).
-6. **Belt keys.** 08-ITEMS-SHOPS.md §2.1 put the belt on keys `1`–`4`; those keys select wicks (canon: wick
-   slots are the main verb). The belt moves to `Z X C V`; the character sheet moves to `P`; the hood to `Y`.
-7. **Shop footer keys.** 08's shop mockup says "Tab switch tab"; in menus `Tab` moves focus (§27.1) and tabs
-   switch with `Q`/`E`. 08's "Haggle (H)" stays (menu context, no clash).
-8. **Overcharge input.** 03-SPELLS.md §9 is followed: holding `cast` overcharges. The `R` modifier is an
-   opt-in accessibility setting only.
+What changed from v1, with the review finding that decided it (REVIEW.md):
 
+- **R18** Final key map (§2–§3): `cast` mouse left / RT, `pole` mouse right / West, `dodge` Q / East, `jump`
+  Space / South, `interact` E / North, `class_ability` **R** / tap LB (hold LB = tool wheel), `inspect` hold
+  Tab / hold View, `grapple` F / RB, `build_mode` G / wheel wedge, `wick_builder` B, `wick_1..4` 1–4, wheel =
+  next/prev wick, belt Z X C V, `quick_heal` H, `hood` Y, `gravity_lantern` T, `character` P, `skills` K,
+  `journal` J (pad: a tab of the map screen), `ledger` L, `map` M / View tap. Build mode: 1–8 parts (9, 0 for
+  the Tinker's), wheel / LB·RB rotate 45°, `cast` places, `pole` cancels. Written out as `data/bindings.json`;
+  `input.js` is re-pointed at it in M5. Keyboard-only aim moved to the arrow keys so no screen key moves.
+- **R16** `overcharge_mod` on `R` deleted; overcharge = hold `cast`, from `a2_n06`. Accessibility "Overcharge
+  needs a key" = hold Shift + cast / LT.
+- **R19** Build mode runs at full speed; the "Build-mode time scale" row left §10.1; accessibility "Slow time
+  while building" (35%, default off).
+- **R15** One difficulty table: `wicklit` / `lamplighter` / `lampless` + Iron Wick; new row "Mother Tallow's
+  third phase: no / no / yes"; the Act 1 grace applies on top. Drowned parked.
+- **R35** Unlock column: `wick_builder` + `wick_2` at `a1_n03`, `build_mode` at `a1_n06`, `class_ability` at
+  the Act 1 relight, `grapple` Act 2 start, the skill board in Act 2 (Act 1 shows banked points), overcharge at
+  `a2_n06`, `wick_3` Act 3, `hood` Act 4, `wick_4` and `gravity_lantern` Act 5.
+- **R17** The mastered wick has a gold border; "Move mastery" is a lamp-post menu action.
+- **R25, R38, R44** Odile names wicks from her shop screen any time, free; two burn-in bars (flame, shape);
+  changed-meaning notes only for split, bounce, echo, volatile.
+- **R26** Haggle deleted; Crane's panel shows his opinion as a mood face.
+- **R30** Five classes on class select; progress lines only for Chimneysweep and Moth Oracle (with their trial
+  alternatives); lamp-post entry "Answer the call" at the next act hub after an unlock.
+- **R31** Quirk extras for the five shops only; Crane's frame gains Parts and Temper tabs; the Mothwife's frame
+  has a Pearls shelf at the Drowned Market.
+- **R32** Paper doll of 5 slots (`lantern`, `weapon`, `coat`, `boots`, `trinket`); the Guild flask is a belt
+  item with 2 charges; hood is only an action.
+- **R64** 3 slots + 1 backup each; Ledger history 50 rooms.
+- **R74, R75** No menu timers; breath pauses in menus; Ferry health payments show the 20% cap and "Refunded at
+  the next Great Lamp".
+- **R76, B15** Journal pages "People you could still help" and "Wick Book".
+- **R78** HUD anchored to edges; tested at 427×240, 512×288, 640×360.
+- **R88** 4-step skippable guided overlay the first time the builder opens (§15.7).
+- **R92** Desktop + gamepad only; a phone card; menus pass a 390 px layout test.
+- **B14** Flood clock on the minimap during flood nodes (§12.5).
+- **B6** Ledger source "The Hollow" for trap and world kills; combos are sources.
+- **Small items** Settings gain "Physics detail" and "Brightness floor"; "Lamp shrine" / "rest point" → lamp-post;
+  pause menu gains "Rekindle this room" (greyed during a fight); the level-up banner says skill points bank in
+  Act 1; §5.1's JSON shape → 10; `bindings.test.js` also fails on a key table printed on another page.
+- **Found while editing:** the v1 fog-of-war bitset (8 × 8 tiles, every room) would have cost roughly 100 KB
+  per save, over the 64 KB slot budget; fog is now saved at 16 × 16-cell blocks, run-length packed (§12.3).
+  10 should list fog in the save format under that budget.
+
+v1's "Proposed canon changes" resolved as follows: (1) Might's "carry" = tonic and plank capacity — confirmed by
+04; (2) `music` and `voice` buses in Lanternfall's own audio wrapper — adopted (R14, 10); (3) a `spell.water.*`
+set through the bridge — adopted (10); (4) the Satchel frame of tabs — kept; (5) difficulty names — R15;
+(6) belt on Z X C V, character on P, hood on Y — R18; (7) 08's shop footer keys and "Haggle (H)" — footer keys
+follow §2.5, haggle deleted (R26); (8) hold `cast` to overcharge — R16.
+
+---
+
+## Parked (v2)
+
+Kept for later, not deleted (00 §17, REVIEW §c). Each block names the finding that cut it and what replaced it.
+
+### Parked by R18, R16, R19, R54: the v1 key and pad tables
+
+Replaced by §2–§3 and `data/bindings.json`. v1 put `overcharge_mod` on `R` (R16: now the class ability), rotated build parts by 15° with 4 parts on `1`–`4` and slowed build mode to 35% (R19), used `I J K L` for keyboard aim, used a tap of LB to repeat the last wheel wedge and held View for the Journal, and printed movement numbers that are 07's (R54). Kept as v1 wrote it:
+
+##### (v1) 2.1 Movement and body
+
+| Action (id) | Default | Alt default | Hold/tap | Rebindable | Unlock | Notes |
+|---|---|---|---|---|---|---|
+| `move_left` | `A` | `←` | hold | yes | start | Walk 60 cells/s. |
+| `move_right` | `D` | `→` | hold | yes | start | |
+| `look_up` / `climb_up` | `W` | `↑` | hold | yes | start | Climbs ladders/ropes 40 cells/s; on flat ground, holding it for 0.4 s pans the camera up 60 cells. |
+| `look_down` / `climb_down` | `S` | `↓` | hold | yes | start | Crouch (height 12 → 8 cells, walk 30 cells/s). Hold 0.4 s pans the camera down 60 cells. |
+| `jump` | `Space` | — | tap / hold | yes | start | Tap = short hop (apex ~18 cells). Hold up to 0.22 s = full jump (apex ~34 cells). |
+| `drop_through` | `S` + `Space` | — | combo | follows its parts | start | Falls through one-way platforms, planks and rope bridges. |
+| `run` | `Shift` (left) | — | hold (toggle option) | yes | start | 95 cells/s. Setting "Always run" inverts it (Shift walks). |
+| `dodge` | `Q` | — | tap | yes | start | Short roll: 44 cells in 0.28 s, the first 0.18 s cannot be hit (page 04 owns the exact window per class). 0.6 s recovery. |
+| `swim_up` / `swim_down` | `W` / `S` (+ `Space` = kick) | | hold | follows its parts | Act 3 | Swimming reuses the movement keys; `Space` is a strong kick (+40 cells/s up, 0.5 s cooldown). |
+| `interact` | `E` | — | tap (hold where marked) | yes | start | Talk, open, pick up, pull lever, sit at lamp-post. Hold 0.6 s for "hold" interactions (turning a sluice wheel, carrying a body, relighting a Great Lamp). |
+
+##### (v1) 2.2 Combat and spells
+
+| Action (id) | Default | Hold/tap | Rebindable | Unlock | Notes |
+|---|---|---|---|---|---|
+| `cast` | **Mouse left** | tap / hold | yes | start | A **tap** (released in under 0.15 s) casts the selected wick. **Holding** overcharges it (03-SPELLS.md §9): the charge ring fills, release to fire. Beam and tether do not overcharge — for them, holding is simply firing. Overcharge does nothing until Act 1 room 5 (03 §15.1), so before that a hold is a tap. |
+| `overcharge_mod` | `R` (hold) — **only if** Settings → Controls → "Overcharge needs a key" is on (default off) | hold (toggle option) | yes | Act 1 room 5 | Optional. With the setting on, holding `cast` alone never overcharges; you hold `R` (or LT) as well. For players who kept guttering by accident. |
+| `pole` | **Mouse right** | tap / hold | yes | start | Melee swing with the lantern pole (or the class weapon). Hold 0.35 s = heavy swing. |
+| `wick_1` … `wick_4` | `1` `2` `3` `4` | tap | yes | slot 1 start, 2 at Act 1 room 3, 3 at Act 3, 4 at Act 5 | Selects the wick slot. The lantern light turns that wick's flame colour over 0.15 s. |
+| `wick_next` / `wick_prev` | **Mouse wheel down / up** | tap | yes (can be moved to keys) | Act 1 room 3 | Skips empty and locked slots. Setting "Wheel direction" inverts it. |
+| `belt_1` … `belt_4` | `Z` `X` `C` `V` | tap | yes | start | Uses the consumable on belt slot 1–4 (08-ITEMS-SHOPS.md §2.1: the belt points at a satchel stack). The number row stays with the wicks, which you swap far more often. |
+| `quick_heal` | `H` | tap | yes | start | Drinks the first **healing** tonic on the belt, or if none is belted, the first in the satchel (08 §9.2). 0.8 s drink, you can walk but not cast. |
+| `hood` | `Y` | tap (toggle) | yes | Act 4 | Hoods the lantern: light radius 18 cells, oil drain ×0.25, the Unlit lose you (page 05). Press again to unhood. |
+
+##### (v1) 2.3 Tools and building
+
+| Action (id) | Default | Hold/tap | Rebindable | Unlock | Notes |
+|---|---|---|---|---|---|
+| `grapple` | `F` | tap / hold | yes | Act 2 start | Fires the hook toward the aim point (max 150 cells). Hold = stay attached and swing; release = let go. Tap while attached = let go. `W`/`S` while attached reel in/out 70 cells/s. |
+| `build_mode` | `G` | tap (toggle) | yes | Act 1 mid (plank kit) | Enters build mode: time runs at 35% speed (not paused, see page 07), a ghost plank follows the cursor. `cast` places, `pole` cancels, wheel rotates 15°, `1`–`4` pick the part (plank / brace / step / wedge; parts in page 07). |
+| `gravity_lantern` | `T` | tap | yes | Act 5 start | Throws a gravity lantern to the aim point (page 07). Tap again near a placed one (within 24 cells) to pick it up; hold `T` 0.5 s to flip every placed lantern at once. |
+| `ping` | `Mouse middle` | tap | yes | start | Drops a temporary 8 s marker at the aim point that also shows on the minimap. Useful for screenshots and notes. |
+
+##### (v1) 2.4 Screens
+
+| Action (id) | Default | Rebindable | Unlock | Opens |
+|---|---|---|---|---|
+| `pause` | `Esc` | **no** | start | Pause menu (§20). In any other screen, `Esc` goes back one level. |
+| `inventory` | `I` | yes | start | Inventory (§14) |
+| `character` | `P` | yes | start | Attributes (§16.2) |
+| `skills` | `K` | yes | start | Skill board (§16.1) |
+| `wick_builder` | `B` | yes | Act 1 room 3 | Wick builder (§15). Refused in combat (§15.1). |
+| `map` | `M` | yes | start | Full-screen map, room tab (§13). Press `M` again for the act tab. |
+| `ledger` | `L` | yes | start | Ledger (§17) |
+| `journal` | `J` | yes | start | Journal (§18) |
+| `help` | `F1` | **no** | start | Controls help overlay: the live binding table, drawn from `data/bindings.json`. |
+| `minimap_zoom` | `+` / `-` (numpad and main row) | yes | start | Minimap zoom (§12.4) |
+| `minimap_toggle` | `N` | yes | start | Minimap size cycle S → M → L → hidden |
+| `subtitle_log` | `U` | yes | start | Last 50 subtitle lines (§11.13) |
+| `screenshot` | `F2` | yes | start | Saves a PNG of the play layer at 1× and 4× (`canvas.toBlob`, download). |
+| `perf_overlay` | `F3` | yes | start | Frame time, sim ms, cells awake, draw calls (page 10 budget). |
+| `debug_console` | `` ` `` | yes | only with `?debug=1` in the URL | Debug console (page 10). |
+
+##### (v1) 2.5 Keys inside menus (menu context)
+
+| Action | Keys | Gamepad |
+|---|---|---|
+| Move focus | arrows, `W A S D`, `Tab` / `Shift+Tab` | D-pad, left stick |
+| Confirm / activate | `Enter`, `Space`, mouse left | South (A) |
+| Back / close | `Esc`, mouse right on empty space | East (B) |
+| Previous / next tab | `Q` / `E` | LB / RB |
+| Previous / next sub-tab | `[` / `]` | LT / RT |
+| Secondary action on focused item (mark junk in the satchel, sell 1 in a shop, clear a socket in the builder) | `X` | West (X) |
+| Tertiary action (compare, details, lock) | `Y` or hold `Shift` for compare | North (Y) |
+| Scroll a long list | mouse wheel, `PageUp`/`PageDown` | right stick |
+| Close every screen at once | `Esc` held 0.5 s | Menu |
+
+Menu keys are a **separate context** from gameplay, so `Q` means "previous tab" in a menu and "dodge" in
+play without clashing (§5).
+
+##### (v1) 3.1 Gameplay
+
+| Input | Action | Notes |
+|---|---|---|
+| Left stick | move; up/down climb, crouch, swim | Deflection > 0.85 runs (setting: "Run by stick push", default on; off = hold L3 to run). Dead zone 0.18 radial, setting 0.05–0.40. |
+| Right stick | aim (§4.3) | Dead zone 0.20. With no aim input for 0.6 s, aim returns to the facing direction. |
+| South (A) | `jump` | hold = full jump |
+| East (B) | `dodge` | |
+| West (X) | `pole` | hold = heavy swing |
+| North (Y) | `interact` | hold for hold-interactions |
+| RT | `cast` | Analogue: a half pull (>0.3) casts; beam follows the trigger. |
+| LT | `overcharge_mod` (only with "Overcharge needs a key" on); otherwise **aim steady**: while held, the right stick moves the aim at 40% speed for fine lob/rune placement | |
+| RB | `grapple` | hold to stay attached |
+| LB (hold) | **tool wheel** (radial) | 8 wedges: belt 1, belt 2, belt 3, belt 4, build mode, gravity lantern, hood, ping. (Quick heal is D-pad down.) Flick the right stick to a wedge, release LB to use it. Time slows to 35% while open (Wick-lit and slow mode: 0%). Tap LB (<0.2 s) = repeat the last wedge used. |
+| D-pad left / right | `wick_prev` / `wick_next` | |
+| D-pad up / down | `wick_1` / `quick_heal` | Up selects slot 1 (the "panic button" back to your main wick). Minimap size is on the View button's hold menu. |
+| L3 (left stick click) | run toggle (if "Run by stick push" off) or `hood` (if on) | |
+| R3 (right stick click) | **soft lock**: aim snaps to the nearest visible enemy in a 60° cone; click again to release | See §4.3. |
+| View / Select | `map` | hold 0.5 s = Journal |
+| Menu / Start | `pause` | **not rebindable** |
+
+##### (v1) 3.2 Build mode on a gamepad
+
+| Input | Action |
+|---|---|
+| Right stick | move the ghost part (it snaps to the 2-cell build grid, page 07) |
+| RT | place |
+| West (X) or East (B) | cancel / leave build mode |
+| LB / RB | rotate −15° / +15° |
+| D-pad | pick part (up plank, right brace, down step, left wedge) |
+
+
+### Parked by R18: v1 keyboard-only aim
+
+Replaced by §4.2 (the arrow keys aim, so no screen key moves).
+
+##### (v1) 4.2 Keyboard-only aim
+
+Setting "Aim with keys" (§19.6). Adds context actions `aim_up/left/down/right`, default `I J K L`
+(re-bindable; they only take these keys while the option is on — otherwise `I` is inventory, and the
+inventory moves to `O`). Aim then snaps to **16 directions**, and holding two keys gives the diagonals.
+Lob range is set by holding the aim key: 0.1 s = 30% range … 0.8 s = 100%. Soft lock (`;` default) works as
+on the gamepad.
+
+### Parked by R4: v1 `data/bindings.json` shape
+
+Replaced by §5.1: the file exists as `data/bindings.json`, and its field shape is 10's.
+
+##### (v1) 5.1 `data/bindings.json` shape
+
+```json
+{
+  "schema": 1,
+  "contexts": {
+    "play": {
+      "jump":        { "keys": ["Space"], "pad": ["south"], "mode": "hold", "rebind": true,  "unlock": "start" },
+      "cast":        { "keys": ["Mouse0"], "pad": ["rt"],   "mode": "hold", "rebind": true,  "unlock": "start" },
+      "overcharge_mod": { "keys": ["KeyR"], "pad": ["lt"], "mode": "hold", "toggleable": true, "rebind": true, "unlock": "act1_room5", "onlyIf": "settings.overchargeNeedsKey" },
+      "pause":       { "keys": ["Escape"], "pad": ["menu"], "mode": "tap",  "rebind": false, "unlock": "start" }
+    },
+    "menu": { "tab_prev": { "keys": ["KeyQ"], "pad": ["lb"], "mode": "tap", "rebind": true } }
+  },
+  "reserved": ["Control+KeyW", "Control+KeyT", "Control+KeyN", "Control+KeyQ", "Control+Tab", "Alt+F4", "F5", "F11", "F12"]
+}
+```
+
+
+### Parked by R30: the v1 eight-class select and three challenge rows
+
+Replaced by §9 (five classes; progress lines for Chimneysweep and Moth Oracle only). Ferrywitch, Bellringer and Drowned Knight are parked with their kits (04). The v1 class grid:
+
+```
+┌─ Who goes down? ────────────────────────────────────────────────────────────┐
+│ ┌──────┬──────┬──────┬──────┐   ┌──────────────────────────────────────────┐ │
+│ │LAMP- │SLUICE│TINKER│ FERRY│   │  [ animated 3× sprite: idle, then a cast  │ │
+│ │LIGHTR│WARDEN│      │ WITCH│   │    of each starting wick into a dummy,    │ │
+│ │  ◉   │  ◉   │  ◉   │  🔒  │   │    in a 160×90 chamber with rain ]        │ │
+│ ├──────┼──────┼──────┼──────┤   │                                          │ │
+│ │ BELL │DROWND│ MOTH │CHIMNY│   │  LAMPLIGHTER — balanced caster-duelist   │ │
+│ │RINGER│KNIGHT│ORACLE│SWEEP │   │  Starts with: pole lantern, +20% oil     │ │
+│ │  🔒  │  🔒  │  🔒  │  🔒  │   │  Wicks: Ember Bolt · Gleam Ring          │ │
+│ └──────┴──────┴──────┴──────┘   │  Might ▮▮▯▯▯  Wick ▮▮▮▮▯  Draught ▮▮▮▮▯   │ │
+│                                  │  Nerve ▮▮▯▯▯  Knack ▮▮▮▯▯                  │ │
+│  Name: [ Wren________ ] [🎲]     │  Plays like: keep your distance, braid     │ │
+│  Look: [◂ hood 1/6 ▸] [◂ coat colour 3/8 ▸] [◂ lantern 1/4 ▸]            │ │
+│                                  │  big wicks, use the pole when crowded.   │ │
+│                  [Back]  [Choose ▸]                                         │ │
+└──────────────────────────────────────────────────────────────────────────────┘
+```
+
+| Element | Behaviour |
+|---|---|
+| Class grid | 8 cards in canon order (00-OVERVIEW §7). Unlocked: coloured portrait. Locked: silhouette in `--ink-dim`, a padlock, and the card still selectable to read about it. |
+| Preview pane | Real-engine mini chamber (reuses the Wick builder sandbox, §15.4) playing the class's idle and each starting wick on a dummy. Locked classes play it too, greyed, so the player sees what they are working toward. |
+| Attribute bars | 5 bars of 5 pips from the class's starting attributes (page 04), rounded to the nearest pip. |
+| "Plays like" | 2 sentences from `data/classes.json` `blurb`. |
+| **Locked class panel** | Replaces "Choose" with the **unlock challenge** and live **progress** from the profile (table below). `[Track]` pins the challenge to the HUD objective line (§11.12) in every save. |
+| Name | 1–16 characters, letters, spaces, `'` and `-`. `🎲` rolls a name from Name Forge (`namegen/`) with the `human` language. |
+| Look | Hood shape (6), coat colour (8 muted ramps), lantern style (4, cosmetic; more from Guild Hall). |
+| Choose | → New game options (§10). |
+
+##### (v1) 9.1 Locked class progress display
+
+| Class | Challenge (canon) | Progress line shown | Tracked counters (profile) |
+|---|---|---|---|
+| `ferrywitch` | Defeat the Sluicemaw without leaving the water for more than 10 s at a time | "Best attempt: longest time out of water 14.2 s (need ≤ 10 s). Sluicemaw beaten 1×." or "You have not reached the Sluicemaw." | `ch_ferry_best_dry` (lowest max-dry-seconds in a Sluicemaw win), `sluicemaw_wins` |
+| `bellringer` | Ring all 12 Silent Bells hidden across Acts 1–4 | "Silent Bells rung: 5 / 12" + 12 bell pips, filled per bell, each pip's tooltip names the act once rung ("Act 2 — Choir Loft") | `silent_bells` (array of 12 ids; see 01-WORLD-STORY.md §4 for where each hangs and 09 §6 for their nodes) |
+| `drowned_knight` | Die 3 times underwater and then clear an act without dying | Two steps: "Drowned: 2 / 3" then "Now clear an act without dying (current act: 0 deaths so far ✔)" | `ch_knight_drownings`, `ch_knight_armed` (true after 3), `ch_knight_clean_act` |
+| `moth_oracle` | Clear Blackwater (Act 4) without your lantern ever going out | "Blackwater cleared with lantern lit: not yet. Best: lantern went out 2× in your cleanest clear." | `ch_moth_best_outs` |
+| `chimneysweep` | Swing 2,000 m on ropes in one run, or finish the Rope Gauntlet | "Most rope swung in one run: 1,240 m / 2,000 m (1 m = 8 cells) · Rope Gauntlet: not cleared" | `ch_sweep_best_rope_m`, `trial_rope_gauntlet` |
+
+"One run" for the Chimneysweep challenge means one save slot from new game to its current point (a death
+does not reset it); the counter shown is the best across slots. 1 metre = 8 cells everywhere in the UI
+(the player is 12 cells ≈ 1.5 m).
+
+### Parked by R15 and R19: v1 difficulty rows and the Drowned tier
+
+Replaced by §10.1 (three levels + Iron Wick; Tallow's third phase row; build mode at full speed on every difficulty). The v1 table mapped 02's names onto 05's `lamplit / normal / guttering / drowned` rows; those aliases are gone.
+
+| Maps to 05 §2.4 row | `lamplit` | `normal` | `guttering` |
+| Build-mode time scale | 0% (paused) | 35% | 50% |
+
+**Drowned** (05 §2.4's fourth row: enemy health ×1.8, damage ×1.6, speed ×1.15, telegraphs ×0.8, elites 30%,
+one extra boss attack per phase) is **not** on this menu at first. It appears as a fourth radio button,
+"Drowned — for those who have been down before", once the profile has finished the campaign on Lampless
+(09 §9). Its player-side rows copy Lampless except pennies lost 75% and marks ×1.6.
+
+### Parked by R78: v1 fixed-coordinate HUD table
+
+Replaced by §11.1's edge anchors.
+
+| Element | Position (x, y) | Size (cells) | Section |
+|---|---|---|---|
+| Health bar | 8, 6 | 96 × 6 (+ label) | §11.2 |
+| Oil bar | 8, 15 | 96 × 4 (+ label) | §11.3 |
+| XP line | 8, 21 | 96 × 1 | §11.2 |
+| Status icons | 8, 25 | 9 × 9 each, 10 per row, 2 rows | §11.7 |
+| Boss bar | 120, 16 (name at 120, 7) | 240 × 6 | §11.8 |
+| Minimap | 376, 6 (size M) | 96 × 54 | §12 |
+| Currencies | right-aligned to 472, 64 | pixel font | §11.11 |
+| Objective line | right-aligned to 472, 74 | max 2 lines × 24 chars | §11.12 |
+| Pickup toasts | right-aligned to 472, 100 → down | 4 max | §11.14 |
+| Interaction prompt | world space | — | §11.10 |
+| Subtitles | DOM, bottom centre, 78% up from bottom edge of wick row | — | §11.13 |
+| Wick slots | 8, 238 | 4 × (24 × 24), gap 4 | §11.4 |
+| Belt (4 quick slots) | 124, 246 | 4 × (16 × 16), gap 3 | §11.9 |
+| Save glyph | 466, 258 | 7 × 7 | §8.2 |
+
+### Parked by R7, R8, R34: v1 act-map mockup with shop, treasure and trial node types
+
+Replaced by §13.1 (09's ten node types; trial doors sit inside nodes).
+
+```
+┌─ ACT 2 — THE GUTTERWAYS ───────────────────────── [Room map] [●Act map] ────┐
+│                        (⌂ The Dripmarket ✚)          ✓                        │
+│                                 │                                            │
+│                        (✎ Hookwright's Forge)        ✓                        │
+│                                 │                                            │
+│                        (✎ Pickering's Lockhouse)     ✓                        │
+│              ┌──────────────────┼──────────────────┐                         │
+│     (⚔ The Long Chain)   (◉⚔ The Brickgut)   (! The Ratcatchers' Den)        │
+│         ┆ chest              │   ┆                   ┆ npc                   │
+│     (· ?)               (· ?)   (⚔ Plague Wash) ░░ needs Sluice ░░ (·)         │
+│              └──────────────────┼──────────────────┘                         │
+│                        (⚙ The Gutter Cistern ✚)  strand                       │
+│                                 ┆  …                                         │
+│  YOU ARE HERE: The Brickgut (3/3 rooms)   Rooms cleared 14/31            │
+│  ┌ Legend ───────────────────────────────────────────────────────────────┐   │
+│  │ ⌂ hub  ⚔ fight  ☠ elite  ✎ lesson  ⚙ puzzle  ◈ shop  ✚ lamp-post  ! event│   │
+│  │ ◇ treasure  ? secret  ⌛ trial  ♛ boss  ≋ flood  ░ locked route          │   │
+│  └────────────────────────────────────────────────────────────────────────┘   │
+│  [Fast travel ▸] (only from a lamp-post)   [Pins]   [Legend on/off]          │
+└──────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Parked by R32: v1 paper doll (hood, oil flask and second trinket slots) and Scrapwright satchel rows
+
+Replaced by §14 (five slots; the Guild flask is a belt item; satchel rows at Crane's Pawn; Might's carry is tonic and plank capacity).
+
+```
+┌ Satchel ── [●Inventory] Wicks  Skills  Attributes  Ledger  Journal ──────────────────┐
+│ ┌─ Worn ──────────────────┐ ┌─ Satchel (14/20) ──────────────┐ Filter: [All▾]         │
+│ │         [Hood]          │ │ [▣][▣][▣][▣][▣]                │ Sort:   [Type▾]        │
+│ │ [Weapon] (figure) [Lant.]│ │ [▣][▣][▣][▣][▣]                │ ☐ Hide junk            │
+│ │         [Coat]          │ │ [▣][▣][▣][▣][ ]                │                        │
+│ │ [Oil flask]     [Boots] │ │ [ ][ ][ ][ ][ ]                │ [+ row at Scrapwright's]│
+│ │ [Trinket 1] [Trinket 2] │ └────────────────────────────────┘                        │
+│ └─────────────────────────┘ Belt: [Z ▣ 4] [X ▣ 2] [C ▣ 7] [V ─]                         │
+│ ┌─ Summary ──────────────┐  Key ring (3) ▸   Strand Case (14) ▸   Scrap Sack (212) ▸   │
+│ │ Health 180  Oil 100     │                                                            │
+│ │ Armour 22   Wick +14%   │  ● 1,284 pennies   ◆ 3 pearls                              │
+│ │ Crit 8%  Oil regen 4/s  │                                                            │
+│ └─────────────────────────┘  [Enter] Equip/Use  [X] Junk  [Del] Drop  [F] Belt  [Shift] Compare │
+└──────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+
+- **Satchel: 5 columns × 4 rows = 20 slots** at the start; each Scrapwright upgrade adds a row, max 35
+  (the grid grows downward and the panel scrolls past row 5). Every item takes one slot.
+- **No weight system.** Might does not limit carrying (see §29 for what "carry" means instead).
+
+##### (v1) 14.2 Gear slots (paper doll; 08 §3)
+
+| Slot (id) | Holds |
+|---|---|
+| `weapon` | the class weapon family (pole lantern, hook-staff, wrench, oar-staff, maul, anchor-blade, moth-lamp, brush-spear); off-class weapons show "−20% damage (not your family)" in the card |
+| `lantern` | light radius, oil burn in darkness, Wick power % |
+| `hood` | head |
+| `coat` | body (the biggest armour) |
+| `boots` | move / jump / swim |
+| `trinket1`, `trinket2` | trinkets; the same unique cannot sit in both (the drop is refused with that reason) |
+| `oil_flask` | reserve oil; a small fill bar on the slot shows the reserve |
+
+The figure in the middle is the real player sprite at 6×, re-rendered live as gear changes (hood shape,
+coat colour, lantern colour = wick 1's flame).
+
+### Parked by R38 and R25: core burn-in and the burn-in-5 naming chip
+
+Replaced by §15.1/§15.6 (two burn-in tracks) and §23.2 (Odile names any wick, any visit).
+
+- Burn-in belongs to the **core** (Flame + Shape, 03 §10): changing charms or the knot keeps it; changing the
+  flame or shape switches to that core's own saved burn-in. The builder shows the core's level beside the
+  Flame and Shape sockets so the player sees this before they drop a new strand.
+
+| Name | Auto-named by 03 §16.2's rule (`<Flame> <Shape>`, plus ` of the <noun>` with 2+ charms: "Ember Bolt of the Choir") until renamed. Rename: 1–24 characters. At burn-in 5, Odile Pennywax's Lingo name (her shop quirk) is offered as a chip `Odile calls it: "Candlewick Hail"` that you can click to accept. |
+
+- Burn-in belongs to the core (Flame + Shape), not the slot or the saved wick: two saved wicks with the same
+  core share one burn-in level (03 §10).
+
+### Parked by R64: three rotating backups and 200 rooms of Ledger history
+
+Replaced by 1 backup per slot (§8.1) and 50 rooms (§17.4).
+
+│  Autosave backups: each slot keeps its last 3 lamp-post saves  [Restore…]   │
+
+| Backups | Every lamp-post save rotates `slotN.bak1..3`. "Restore…" lists them with timestamp, act, node. |
+
+Retention: the meter keeps the last 2,000 records per fight (its own rule); the run keeps the last
+**200 rooms** of fights, older ones merged into per-act totals so the save stays small.
+
+### Parked by R69, R31, R26: Silent Bells, the Bell Tithe, Scrapwright, the separate Drowned Market and haggling on screens
+
+Silent Bells are parked with the Bellringer (01 §4 parked); the Bell Tithe and Scrapwright's are parked shops (Crane's Pawn took parts and tempering); the Drowned Market is now the Mothwife's Pearls shelf; haggling is replaced by Hollis's mood face. Sets are parked (08), so item cards say "relic/quirk" instead of "set/quirk". The v1 lines:
+
+| Node tooltip | `data-tip-render="node"`: name, type, room count, cleared rooms, what it rewarded or rewards (if known), the unlock needed for locked exits, silent bell found here (if any). |
+
+| Route reward hint | Unvisited nodes adjacent to visited ones show their reward kind as a small icon (page 09 §5.2: e.g. "a Charm", "pearls", "a Silent Bell rumour"). |
+
+| Silent Bell (found & rung / found, not rung) | bell | gold / white |
+
+| **Challenges** | Class unlock challenges with the same progress lines as §9.1, Trials cleared with best times, Silent Bells 12-pip row. |
+
+Page 08 owns the rules and numbers; this is what each quirk adds to the screen.
+
+| Shop | Quirk tab / extra UI |
+|---|---|
+| `shop_wick` Wick & Tallow | **Taste a wick**: pick one of your saved wicks; Odile "tastes" it (a 2 s braid animation in her hands) and gives it a name (Lingo name generator over flame + shape + charms), shown as a chip you can accept (renames the wick). A header strip shows the **price drop per relit Lamp** as 6 pips. |
+| `shop_pawn` Crane's Pawn | **Ledger of sales**: Hollis's book of everything you ever sold him (name, date, price he paid), with `[Buy back at his price]` for items he still has. A **mood meter** (a face glyph + a word from Lingo relations: "sour", "fair", "generous") that sets the haggle range; a **Haggle** button on each row: 3 dialogue choices (flatter / threaten / walk away) that move the price ±5–20% by mood. |
+| `shop_drowned` The Drowned Market | Prices in **pearls** only (penny column hidden). A water-level strip at the top: the shop's stalls are only open while the room is flooded above the line; if it drains mid-visit (it cannot while paused), nothing changes until you leave. A **Pearl exchange** row (sell items for pearls at 1 per 150 pennies of value, floor). |
+| `shop_soup` Brisket's Soup Barge | **Today's menu**: 4 bowls from a seeded rotation (seed = save seed + visit count), each a timed buff card with duration (`secs`) and an ingredient list; one **Mystery bowl** with a `?` card and a hint word. Only one meal buff at a time; buying another shows "Replaces: Eel Chowder (4m 12s left)". |
+| `shop_gamble` The Mothwife's Gamble | **Sealed lanterns**: a shelf of 6 lanterns glowing in colours that hint rarity (page 08 table), with price by slot type (hood, coat, pole…). Buying plays a 1.2 s unsealing: the glow flares, the item card flips in. A running "luck" line: lanterns opened, best result. |
+| `shop_scrap` Scrapwright's | **Trade-in**: sell parts for credit toward blueprints. **Build a gadget**: 3 part sockets (drag parts from your materials), a live preview card of the gadget the combination makes (page 08 recipe table), `[Build]`. Unknown combinations show "???" until built once. |
+| `shop_tithe` The Bell Tithe | **Blessings / Curses** tabs. A tally line "Bell-cultists slain: 14 — prices +28%". Curse rows show what they **pay you** in green and the downside in red; one active curse max per slot type (page 08). |
+| `shop_ferry` The Ferry | **Map reveals** (per act: shows which nodes it would reveal), **Fast travel** (the Act map in travel mode across all acts), **Respec** (attributes / skills / both). Each price has a toggle `[Pay in pennies] [Pay in max health]` — the max-health price shows the permanent loss ("Max health 180 → 172") in red and needs a hold-to-confirm (1 s). |
+
+| Silent Bell rung | **new** `lf.bell.silent` | −4 dB |
+
+- Summons (Ferrywitch Oarsmen, Tinker turrets) are their own actors in the meter.
+
+### Parked by R14: the title theme and the jukebox
+
+Replaced by the procedural score (§7, 10). v1 02 had no jukebox screen and no NG+ button on the save card, so nothing else of either is parked here (09 parks NG+ and the Guild Gramophone).
+
+| Music | Title theme on the `music` bus; ambience `ambience.void` under it at −12 dB. |
+
+### Parked by R32: v1 class-select look combinations
+
+Replaced by palette swaps plus a lantern skin (§9). v1 offered hood shape (6) × coat colour (8) × lantern style (4); hood shapes need per-class art beyond one overlay per slot (00 §4):
+
+│  Look: [◂ hood 1/6 ▸] [◂ coat colour 3/8 ▸] [◂ lantern 1/4 ▸]            │ │
+
+| Look | Hood shape (6), coat colour (8 muted ramps), lantern style (4, cosmetic; more from Guild Hall). |

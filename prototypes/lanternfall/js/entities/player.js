@@ -28,6 +28,23 @@ export function stepPlayerMovement(game, p, I) {
   p.px = p.x; p.py = p.y; p.stateT += DT; p.animT += DT;
   for (const k of ['coyote', 'jumpBuf', 'wallCoyote', 'wallLock', 'regrab', 'landLag', 'slideCd', 'strokeCd', 'strokeT', 'knockT', 'staggerT', 'hurtT', 'dropT']) if (p[k] > 0) p[k] = Math.max(0, p[k] - DT);
   if (I.jumpPressed) p.jumpBuf = M.jump.buffer;
+  // dodge roll (docs/04 §2): 44 cells in 0.28 s, invulnerable for the first 0.18 s, 0.6 s before the next,
+  // once per airtime; cancels melee recovery (after 60%) and a cast in progress
+  const D = game.data.movesets?.shared?.dodge;
+  if (p.dodgeCd > 0) p.dodgeCd -= DT;
+  if (D && I.pressed?.dodge && p.dodgeCd <= 0 && !p.dodgeT && (p.grounded || !p.dodgeAirUsed) && p.state !== 'ledge' && p.state !== 'climb' && !p.swimming && (!p.melee?.move || p.meleeCancel)) {
+    const dir = ((I.right ? 1 : 0) - (I.left ? 1 : 0)) || p.facing;
+    p.dodgeT = D.time; p.dodgeDir = dir; p.facing = dir; p.invuln = Math.max(p.invuln || 0, D.iframes); p.dodgeCd = D.time + D.recovery;
+    if (!p.grounded) p.dodgeAirUsed = true; if (p.melee) { p.melee.move = null; p.melee.phase = null; }
+    if (p.cast?.casting) p.cast.casting = null; game.bus?.emit('player.dodge', { x: p.x, y: p.y, dir });
+  }
+  if (p.grounded) p.dodgeAirUsed = false;
+  if (p.dodgeT > 0) {
+    p.dodgeT = Math.max(0, p.dodgeT - DT); p.vx = p.dodgeDir * (D.dist / D.time); if (!p.grounded) p.vy = Math.min(p.vy, 30);
+    setCrouch(game.grid, p, true); move(game, p, M, p.grounded); p.anim = 'slide'; p.grounded = grounded(game.grid, p);
+    if (p.dodgeT === 0) { p.dodgeT = 0; p.vx *= 0.4; setCrouch(game.grid, p, false); }
+    return;
+  }
   const dir = (I.right ? 1 : 0) - (I.left ? 1 : 0);
   const control = p.knockT > 0 ? M.knock.control : 1;
   if (p.staggerT > 0) { applyGravity(p, M, 1); move(game, p, M, false); return; }

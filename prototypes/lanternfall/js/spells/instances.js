@@ -6,6 +6,7 @@ import { applyStatus } from '../rpg/status.js';
 import { CLS } from '../world/materials.js';
 import { isSolidCell } from '../world/collide.js';
 import { hexToRgb01 } from '../core/math.js';
+import { spawnVoidZone } from '../rpg/voidzones.js';
 
 const DT = 1 / 60;
 let NEXT = 1;
@@ -169,6 +170,7 @@ function stepOne(game, I) {
     }
     case 'tether': {
       I.tickT += DT; const every = 1 / (P.tickRate || 5);
+      if (I.team === 'player') { I.caster.oil -= (P.upkeep ?? 1) * DT; if (I.caster.oil <= 0) { I.caster.oil = 0; endInstance(game, I, false); break; } } // tether upkeep (docs/03)
       if (!isSolidCell(g, I.ax, I.ay)) { endInstance(game, I, false); break; }
       if (I.tickT >= every) { I.tickT -= every; for (const e of targetsFor(game, I)) if (segHits(e, I.ax, I.ay, I.bx, I.by, 1)) hitTarget(game, I, e, 1); }
       if (I.t >= I.life) endInstance(game, I, false);
@@ -235,9 +237,10 @@ function electrifiedWater(game, I, x, y) {
 function burst(game, I, x, y, radiusOverride, mult = 1) {
   const P = I.plan; const r = radiusOverride || Math.max(P.size, P.shape === 'rune' ? 16 : 14) * (P.charms.includes('vast') ? 1.6 : 1);
   for (const e of targetsFor(game, I)) { if (!circleHits(e, x, y, r)) continue; const d = Math.hypot(e.x - x, e.y - e.h / 2 - y); const f = d <= r / 2 ? 1 : 0.6; hitTarget(game, I, e, f * mult, { x: (e.x - x) / (d || 1) * 120 * P.knock, y: -90 }); }
-  const res = applyElement(game, x, y, Math.round(r * 0.7), P.flame, { dig: Math.max(1, P.dig), fromPlayer: I.team === 'player', water: 40 });
+  const res = I.team === 'player' ? applyElement(game, x, y, Math.round(r * 0.7), P.flame, { dig: Math.max(1, P.dig), fromPlayer: true, water: 40 }) : {};
   combosFromCells(game, I, x, y, res);
   game.flashes.push({ x, y, r: r * 3, color: hexToRgb01(P.color), i: 1.5, t: 0.25, max: 0.25 });
+  if (P.enemyOnLand?.voidZone) spawnVoidZone(game, P.enemyOnLand.voidZone, x, y, { source: I.caster });
   game.bus?.emit('spell.burst', { x, y, flame: P.flame, r });
   if (P.shape === 'rune' || P.shape === 'lob') game.shake?.(0.12);
   endInstance(game, I, true, x, y, true);

@@ -3,6 +3,7 @@
 import { PK } from '../entities/particles.js';
 import { hexToRgb01 } from '../core/math.js';
 import { collectLights } from '../world/lightgrid.js';
+import { voidZoneVisuals } from '../rpg/voidzones.js';
 
 const rgb = n => [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
 
@@ -45,6 +46,7 @@ export function buildFrame(game, cam, atlas, alpha) {
     else sprites.push({ x: P.x[i], y: P.y[i], w: 1, h: 1, tint: [c[0], c[1], c[2], 1] });
   }
   spellVisuals(game, { sprites, additive, lights, overlays }, atlas);
+  voidZoneVisuals(game, overlays, additive, lights);
   // falling fragments: one quad per cell, coloured from the material ramp
   if (game.fragments) { const R = game.data.mats.ramps; for (const f of game.fragments.list) for (let r = 0; r < f.h; r++) for (let c = 0; c < f.w; c++) { const k = r * f.w + c, m = f.mat[k]; if (!m) continue; const ramp = R[m], col = ramp[(f.shade[k] & 7) % ramp.length]; sprites.push({ x: f.x + c, y: f.fy + r, w: 1, h: 1, tint: [col[0] / 255, col[1] / 255, col[2] / 255, 1] }); } }
   // actors (enemies, npcs, dummies): sprite if the atlas has one, else a lit block
@@ -56,6 +58,12 @@ export function buildFrame(game, cam, atlas, alpha) {
     else sprites.push({ x: x - e.w / 2, y: y - e.h, w: e.w, h: e.h, tint: e.color ? [...e.color, flash[3]].map((v, i) => i < 3 ? v * flash[i] : v) : flash });
     if (e.eyes && !e.dead) { overlays.push({ x: x + (e.facing > 0 ? 1 : -2), y: y - e.h + (e.eyeY ?? 2), w: 1, h: 1, tint: [...e.eyes, 1], emit: 1 }); lights.push({ x, y: y - e.h + 2, r: 10, color: e.eyes, i: 0.4, shadow: false }); }
     if (e.statuses?.burn) lights.push({ x, y: y - e.h / 2, r: 18, color: [1, 0.5, 0.15], i: 0.8, shadow: false, flicker: 0.3 });
+    if (e.telegraph && !e.dead) { // readable danger: the telegraph glows through any darkness (unlit overlay)
+      const T = e.telegraph, c = T.color, k = Math.min(1, T.t), a = 0.4 + 0.6 * k;
+      if (T.part === 'line' && T.aim) { const len = Math.hypot(T.aim.x - x, T.aim.y - (y - e.h / 2)); for (let s2 = 0; s2 < len; s2 += 2) additive.push({ x: x + (T.aim.x - x) * s2 / len, y: y - e.h / 2 + (T.aim.y - (y - e.h / 2)) * s2 / len, w: 1, h: 1, tint: [c[0], c[1], c[2], a * 0.8], emit: 1.5 }); }
+      else { const ox = T.part === 'head' ? 0 : 0, oy = T.part === 'head' ? -e.h + 1 : T.part === 'body' ? -e.h / 2 : -e.h + 2; additive.push({ x: x - e.w / 2 - 1, y: y + oy - 1, w: e.w + 2, h: T.part === 'body' ? e.h / 2 : 3, tint: [c[0], c[1], c[2], a * 0.5], emit: 1.5 }); }
+      lights.push({ x, y: y - e.h / 2, r: 16 + 12 * k, color: c, i: 0.9 * k, shadow: false });
+    }
   }
   for (const s of game.extraSprites || []) sprites.push(s);
   for (const l of game.extraLights || []) lights.push(l);

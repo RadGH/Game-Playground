@@ -1,9 +1,9 @@
 // Boot: load data, pick the renderer, build the game, start the loop, route screens (docs/10 §3).
 import { loadData, loadRoom } from './core/data.js';
-import { createGame, enterRoom } from './core/state.js';
+import { createGame, enterRoom, findFloor } from './core/state.js';
 import { tickGame } from './core/tick.js';
 import { createLoop } from './core/loop.js';
-import { createInput } from './core/input.js';
+import { createInput, bindingsFrom } from './core/input.js';
 import { createCamera } from './render/camera.js';
 import { createWebGL2Renderer } from './render/webgl2.js';
 import { buildAtlas } from './render/sprites.js';
@@ -12,6 +12,8 @@ import { hexToRgb01 } from './core/math.js';
 import { createCaster } from './spells/cast.js';
 import { createActor } from './entities/actor.js';
 import { createBench } from './debug/bench.js';
+import { createMelee } from './rpg/melee.js';
+import { spawnEnemy } from './ai/brain.js';
 
 const params = new URLSearchParams(location.search);
 const canvas = document.getElementById('view');
@@ -25,7 +27,7 @@ try {
   const renderer = createWebGL2Renderer(canvas, { mats: data.mats });
   if (!renderer) throw new Error('WebGL2 is not available in this browser.');
   const atlas = buildAtlas(data.sprites); renderer.setAtlas(atlas.rgba, atlas.w, atlas.h);
-  const input = createInput(); const cam = createCamera();
+  const input = createInput(bindingsFrom(data.bindings)); const cam = createCamera();
   const game = createGame({ data, seed: +(params.get('seed') || 1) });
   game.flags.swimming = params.has('swim');
   game.hurtPlayer = (amount, info) => { game.player.hp = Math.max(info?.noKill ? 1 : 0, (game.player.hp ?? 100) - amount); game.player.hurtT = 0.5; cam.shake(0.2); };
@@ -35,13 +37,14 @@ try {
   renderer.setRoom(game.grid);
   // test hero until classes/saves land (M8+)
   const p = game.player; Object.assign(p, { name: 'Wren', hp: 100, maxHp: 100, oil: 80, maxOil: 80, oilRegen: 4, stats: { level: 1 }, team: 'player' });
-  createCaster(p);
+  createCaster(p); createMelee(p, data.movesets.classes[params.get('class') || 'lamplighter']);
   game.hero = { wicks: [
     { id: 'w1', flame: params.get('f1') || 'ember', shape: params.get('s1') || 'bolt', charms: (params.get('c1') || '').split(',').filter(Boolean) },
     { id: 'w2', flame: params.get('f2') || 'rime', shape: params.get('s2') || 'lob', charms: (params.get('c2') || '').split(',').filter(Boolean) },
     { id: 'w3', flame: params.get('f3') || 'spark', shape: params.get('s3') || 'ring', charms: [] },
     { id: 'w4', flame: params.get('f4') || 'tide', shape: params.get('s4') || 'wave', charms: [] } ],
     unlocked: { wickSlots: 4, overcharge: true, gutter: true } };
+  if (params.get('spawn')) for (const [k, id] of params.get('spawn').split(',').entries()) { const x = game.player.x + 60 + k * 40; spawnEnemy(game, id, x, findFloor(game.grid, x, game.player.y - 60, game.grid.H) ?? game.player.y, { pack: 'test' }); }
   if (params.has('dummies')) for (let k = 0; k < 4; k++) game.entities.push(createActor('dummy', { name: 'Training Dummy', x: game.player.x + 60 + k * 30, y: game.player.y - 20, w: 6, h: 11, hp: 200, color: [0.55, 0.45, 0.35], eyes: [1, 0.8, 0.4] }));
   const theme = game.room.theme;
   function fit() { const dpr = Math.min(2, window.devicePixelRatio || 1); canvas.width = Math.round(innerWidth * dpr); canvas.height = Math.round(innerHeight * dpr); cam.fit(canvas.width, canvas.height); }
@@ -53,6 +56,7 @@ try {
   canvas.addEventListener('mousedown', e => input.onKey('Mouse' + e.button, true));
   addEventListener('mouseup', e => input.onKey('Mouse' + e.button, false));
   canvas.addEventListener('contextmenu', e => e.preventDefault());
+  canvas.addEventListener('wheel', e => { const c = e.deltaY > 0 ? 'WheelDown' : 'WheelUp'; input.onKey(c, true); setTimeout(() => input.onKey(c, false), 30); e.preventDefault(); }, { passive: false });
   canvas.addEventListener('mousemove', e => { const r = canvas.getBoundingClientRect(); input.mouse.x = e.clientX - r.left; input.mouse.y = e.clientY - r.top; });
   const sky = { top: hexToRgb01(theme.sky?.top || '#10141d'), bottom: hexToRgb01(theme.sky?.bottom || '#06080c'), sil: hexToRgb01(theme.sky?.sil || '#161a24') };
   const bench = params.has('bench') ? createBench(game, cam) : null; LF.perf = { get bench() { return bench?.rec.report || null; } };

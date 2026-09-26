@@ -2,7 +2,7 @@
 // CastPlan of numbers. Pure; the same function feeds the game, the builder preview and the balance sim.
 
 // Burn-in (canon v2): two tracks, one per flame and one per shape, 5 levels each, +3% power per level.
-export const BURN_THRESHOLDS = [0, 400, 1200, 3000, 7000];
+export const BURN_THRESHOLDS = [0, 200, 600, 1500, 3500];
 export function burnLevel(oilSpent = 0) { let l = 1; for (let k = 1; k < BURN_THRESHOLDS.length; k++) if (oilSpent >= BURN_THRESHOLDS[k]) l = k + 1; return l; }
 /** burn = { flame: { ember: oil }, shape: { bolt: oil } } on the hero; returns the two levels. */
 export function burnLevels(burn, flame, shape) { return { flame: burnLevel(burn?.flame?.[flame] || 0), shape: burnLevel(burn?.shape?.[shape] || 0) }; }

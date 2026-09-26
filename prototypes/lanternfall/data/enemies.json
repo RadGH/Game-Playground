@@ -1,0 +1,359 @@
+{
+ "_doc": "Monsters (docs/05). Numbers per 05 \u00a79-16; tiers set poise/stagger/token cost (05 \u00a72.2, \u00a75.1). attacks: kind contact|melee|lunge|dive|projectile, range [min,max] cells, windup/active/recovery ms, cooldown s. Resist is percent (+ = takes less).",
+ "version": 1,
+ "list": [
+  {
+   "id": "wax_mite",
+   "name": "Wax Mite",
+   "act": [
+    "act1",
+    "act2"
+   ],
+   "size": [
+    5,
+    4
+   ],
+   "hp": 10,
+   "dmg": 5,
+   "speed": 50,
+   "move": "crawler",
+   "tier": "fodder",
+   "role": "swarm",
+   "family": "wax",
+   "resist": {
+    "ember": -50
+   },
+   "tags": [
+    "flammable",
+    "floats",
+    "wax",
+    "curious"
+   ],
+   "sight": 80,
+   "hearing": 1,
+   "reaction": 200,
+   "attacks": [
+    {
+     "id": "nip",
+     "kind": "contact",
+     "range": [
+      0,
+      4
+     ],
+     "windup": 250,
+     "active": 100,
+     "recovery": 300,
+     "cooldown": 0.8,
+     "dmg": 5,
+     "knock": 40,
+     "telegraph": {
+      "part": "eyes",
+      "color": "#ffb347"
+     }
+    }
+   ],
+   "xp": 2,
+   "loot": "lt_act1_fodder",
+   "pennies": [
+    0,
+    1
+   ],
+   "eyes": "#ffb347",
+   "sprite": "en_wax_mite",
+   "corpse": "wax",
+   "voice": null
+  },
+  {
+   "id": "soot_pigeon",
+   "name": "Soot Pigeon",
+   "act": [
+    "act1"
+   ],
+   "size": [
+    6,
+    5
+   ],
+   "hp": 12,
+   "dmg": 6,
+   "speed": 110,
+   "move": "flyer",
+   "tier": "fodder",
+   "role": "rusher",
+   "family": "bird",
+   "resist": {
+    "spark": -25,
+    "tide": -25
+   },
+   "tags": [
+    "fears_fire",
+    "curious"
+   ],
+   "sight": 140,
+   "reaction": 200,
+   "fleeAt": 0.3,
+   "attacks": [
+    {
+     "id": "dive",
+     "kind": "dive",
+     "range": [
+      20,
+      120
+     ],
+     "windup": 500,
+     "active": 600,
+     "recovery": 800,
+     "cooldown": 2.5,
+     "dmg": 6,
+     "knock": 80,
+     "speed": 220,
+     "telegraph": {
+      "part": "line",
+      "color": "#e8e2d0"
+     }
+    }
+   ],
+   "xp": 2,
+   "loot": "lt_act1_fodder",
+   "pennies": [
+    1,
+    1
+   ],
+   "eyes": "#ff7a2a",
+   "sprite": "en_soot_pigeon",
+   "voice": {
+    "role": "goblin",
+    "babble": true,
+    "pitch": 0.8
+   }
+  },
+  {
+   "id": "dripling",
+   "name": "Dripling",
+   "act": [
+    "act1"
+   ],
+   "size": [
+    7,
+    12
+   ],
+   "hp": 30,
+   "dmg": 10,
+   "speed": 40,
+   "move": "walker",
+   "tier": "standard",
+   "role": "rusher",
+   "family": "wax",
+   "resist": {
+    "rime": -50,
+    "tide": -100
+   },
+   "tags": [
+    "flammable",
+    "floats",
+    "wax",
+    "drinks_flame"
+   ],
+   "sight": 120,
+   "reaction": 350,
+   "attacks": [
+    {
+     "id": "drip_lash",
+     "kind": "melee",
+     "range": [
+      0,
+      18
+     ],
+     "windup": 400,
+     "active": 120,
+     "recovery": 450,
+     "cooldown": 1.2,
+     "dmg": 10,
+     "knock": 70,
+     "hitbox": [
+      18,
+      10
+     ],
+     "telegraph": {
+      "part": "head",
+      "color": "#ffc46a"
+     }
+    },
+    {
+     "id": "candle_toss",
+     "kind": "projectile",
+     "range": [
+      40,
+      100
+     ],
+     "windup": 600,
+     "active": 50,
+     "recovery": 500,
+     "cooldown": 2.8,
+     "dmg": 8,
+     "knock": 40,
+     "speed": 150,
+     "gravity": 500,
+     "onLand": {
+      "voidZone": "vz_molten_wax_small"
+     },
+     "telegraph": {
+      "part": "head",
+      "color": "#fff0b0"
+     }
+    }
+   ],
+   "xp": 5,
+   "loot": "lt_act1_standard",
+   "pennies": [
+    1,
+    3
+   ],
+   "eyes": "#ffb347",
+   "light": {
+    "r": 24,
+    "color": "#ff9a3a"
+   },
+   "sprite": "en_dripling",
+   "corpse": "wax",
+   "voice": {
+    "role": "goblin",
+    "babble": true,
+    "pitch": 0.6
+   }
+  },
+  {
+   "id": "tallow_hound",
+   "name": "Tallow Hound",
+   "act": [
+    "act1",
+    "act2"
+   ],
+   "size": [
+    14,
+    9
+   ],
+   "hp": 55,
+   "dmg": 13,
+   "speed": 85,
+   "move": "walker",
+   "tier": "standard",
+   "role": "flanker",
+   "family": "beast",
+   "resist": {
+    "ember": -25
+   },
+   "tags": [
+    "flammable",
+    "floats",
+    "smell",
+    "fears_fire",
+    "curious"
+   ],
+   "sight": 160,
+   "reaction": 350,
+   "fleeAt": 0.25,
+   "attacks": [
+    {
+     "id": "lunge",
+     "kind": "lunge",
+     "range": [
+      20,
+      70
+     ],
+     "windup": 550,
+     "active": 330,
+     "recovery": 600,
+     "cooldown": 2.2,
+     "dmg": 13,
+     "knock": 100,
+     "speed": 220,
+     "dist": 70,
+     "telegraph": {
+      "part": "body",
+      "color": "#ffb347"
+     }
+    },
+    {
+     "id": "snap",
+     "kind": "melee",
+     "range": [
+      0,
+      12
+     ],
+     "windup": 300,
+     "active": 100,
+     "recovery": 350,
+     "cooldown": 1.0,
+     "dmg": 9,
+     "knock": 60,
+     "hitbox": [
+      12,
+      8
+     ],
+     "telegraph": {
+      "part": "head",
+      "color": "#e8e2d0"
+     }
+    }
+   ],
+   "xp": 5,
+   "loot": "lt_act1_standard",
+   "pennies": [
+    2,
+    4
+   ],
+   "eyes": "#ff5a1f",
+   "sprite": "en_tallow_hound",
+   "voice": null
+  }
+ ],
+ "tiers": {
+  "fodder": {
+   "poise": 10,
+   "stagger": 0.6,
+   "token": 0
+  },
+  "standard": {
+   "poise": 30,
+   "stagger": 0.7,
+   "token": 1
+  },
+  "heavy": {
+   "poise": 80,
+   "stagger": 0.9,
+   "token": 2
+  },
+  "miniboss": {
+   "poise": 250,
+   "stagger": 1.2,
+   "token": 9
+  },
+  "boss": {
+   "poise": 400,
+   "stagger": 1.5,
+   "token": 9
+  }
+ },
+ "voidZones": {
+  "vz_molten_wax_small": {
+   "shape": "pool",
+   "w": 6,
+   "h": 2,
+   "warmup": 500,
+   "duration": 3000,
+   "dps": 6,
+   "flame": "ember",
+   "rim": "#ff8a2a",
+   "mat": "molten_wax",
+   "cells": 12
+  }
+ },
+ "baseLevel": {
+  "act1": 2,
+  "act2": 7,
+  "act3": 12,
+  "act4": 17,
+  "act5": 22,
+  "act6": 27
+ }
+}

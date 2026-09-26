@@ -4,9 +4,16 @@ export const DEFAULT_BINDINGS = {
   left: ['KeyA', 'ArrowLeft'], right: ['KeyD', 'ArrowRight'], up: ['KeyW', 'ArrowUp'], down: ['KeyS', 'ArrowDown'],
   jump: ['Space'], run: ['ShiftLeft', 'ShiftRight'], attack: ['Mouse0', 'KeyJ'], cast: ['Mouse2', 'KeyK'],
   interact: ['KeyE'], grapple: ['KeyF'], build: ['KeyB'], wick1: ['Digit1'], wick2: ['Digit2'], wick3: ['Digit3'], wick4: ['Digit4'],
-  nextWick: ['KeyQ'], ability: ['KeyR'], map: ['KeyM'], inventory: ['KeyI', 'Tab'], builder: ['KeyO'], skills: ['KeyP'], ledger: ['KeyL'],
+  nextWick: ['KeyT'], dodge: ['KeyQ', 'ControlLeft'], ability: ['KeyR'], map: ['KeyM'], inventory: ['KeyI', 'Tab'], builder: ['KeyO'], skills: ['KeyP'], ledger: ['KeyL'],
   journal: ['KeyN'], pause: ['Escape'], belt1: ['KeyZ'], belt2: ['KeyX'], belt3: ['KeyC'], belt4: ['KeyV'], quick: ['KeyH'],
 };
+// data/bindings.json (02 owns the keys) uses canonical action names; the sim reads short intent names.
+export const ALIASES = { move_left: 'left', move_right: 'right', look_up: 'up', look_down: 'down', pole: 'attack', wick_1: 'wick1', wick_2: 'wick2', wick_3: 'wick3', wick_4: 'wick4', wick_next: 'nextWick', wick_prev: 'prevWick', class_ability: 'ability', build_mode: 'build', belt_1: 'belt1', belt_2: 'belt2', belt_3: 'belt3', belt_4: 'belt4', quick_heal: 'quick', wick_builder: 'builder', character: 'character' };
+/** Build the play-context binding table from data/bindings.json (falls back to DEFAULT_BINDINGS). */
+export function bindingsFrom(json, context = 'play') {
+  const src = json?.keys?.[context]; if (!src) return DEFAULT_BINDINGS;
+  const out = {}; for (const [a, codes] of Object.entries(src)) out[ALIASES[a] || a] = codes; return out;
+}
 export function createInput(bindings = DEFAULT_BINDINGS) {
   let binds = structuredClone(bindings); const down = new Set(); const pressed = new Set(); const released = new Set();
   const codeToActions = () => { const m = new Map(); for (const [a, codes] of Object.entries(binds)) for (const c of codes) { if (!m.has(c)) m.set(c, []); m.get(c).push(a); } return m; };

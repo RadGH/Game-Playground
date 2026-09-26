@@ -1,0 +1,598 @@
+{
+ "_doc": "Melee movesets per class (docs/04 \u00a78-15): startup/active/recovery in ms, dmg = fraction of the weapon roll, hitbox [w,h] cells in front of the body at chest height (below the feet for plunges), kb = knockback multiplier of the weapon's kb, poise damage.",
+ "version": 1,
+ "classes": {
+  "lamplighter": {
+   "weapon": {
+    "id": "wpn_pole",
+    "name": "Lamplighter's Pole",
+    "dmg": [
+     10,
+     14
+    ],
+    "kb": 60,
+    "reach": 18
+   },
+   "oilOnHit": 2.5,
+   "heavyBreaks": 1,
+   "moves": {
+    "light1": {
+     "startup": 110,
+     "active": 60,
+     "recovery": 250,
+     "dmg": 1.0,
+     "hitbox": [
+      18,
+      6
+     ],
+     "kb": 1.0,
+     "poise": 8,
+     "name": "Jab"
+    },
+    "light2": {
+     "startup": 130,
+     "active": 70,
+     "recovery": 260,
+     "dmg": 1.1,
+     "hitbox": [
+      18,
+      14
+     ],
+     "kb": 1.0,
+     "poise": 8,
+     "name": "Sweep"
+    },
+    "light3": {
+     "startup": 180,
+     "active": 80,
+     "recovery": 340,
+     "dmg": 1.6,
+     "hitbox": [
+      20,
+      14
+     ],
+     "kb": 2.3,
+     "poise": 18,
+     "name": "Lantern Crack",
+     "ignite": true
+    },
+    "heavy": {
+     "startup": 120,
+     "active": 90,
+     "recovery": 380,
+     "dmg": 2.5,
+     "hitbox": [
+      22,
+      16
+     ],
+     "kb": 3.3,
+     "poise": 35,
+     "name": "Guild Swing",
+     "charge": 350,
+     "subdue": true,
+     "breaks": 1
+    },
+    "air": {
+     "startup": 90,
+     "active": 60,
+     "recovery": 200,
+     "dmg": 0.9,
+     "hitbox": [
+      18,
+      10
+     ],
+     "kb": 1.0,
+     "poise": 6,
+     "name": "Hook Swing",
+     "perAir": 2
+    },
+    "plunge": {
+     "startup": 120,
+     "active": 0,
+     "recovery": 220,
+     "dmg": 1.8,
+     "hitbox": [
+      10,
+      8
+     ],
+     "kb": 2.0,
+     "poise": 20,
+     "name": "Pole Vault",
+     "below": true,
+     "fall": 300,
+     "pogo": 24
+    },
+    "run": {
+     "startup": 90,
+     "active": 100,
+     "recovery": 300,
+     "dmg": 1.3,
+     "hitbox": [
+      20,
+      6
+     ],
+     "kb": 2.0,
+     "poise": 14,
+     "name": "Charge Poke",
+     "carry": 20
+    }
+   }
+  },
+  "sluicewarden": {
+   "weapon": {
+    "id": "wpn_hookstaff",
+    "name": "Hook-Staff",
+    "dmg": [
+     11,
+     15
+    ],
+    "kb": 90,
+    "reach": 20
+   },
+   "oilOnHit": 1.5,
+   "heavyBreaks": 1,
+   "moves": {
+    "light1": {
+     "startup": 130,
+     "active": 60,
+     "recovery": 290,
+     "dmg": 1.0,
+     "hitbox": [
+      20,
+      6
+     ],
+     "kb": 1.0,
+     "poise": 10,
+     "name": "Gaff",
+     "pull": 12
+    },
+    "light2": {
+     "startup": 150,
+     "active": 80,
+     "recovery": 300,
+     "dmg": 1.1,
+     "hitbox": [
+      20,
+      16
+     ],
+     "kb": 1.2,
+     "poise": 10,
+     "name": "Staff Sweep"
+    },
+    "light3": {
+     "startup": 160,
+     "active": 70,
+     "recovery": 380,
+     "dmg": 1.4,
+     "hitbox": [
+      12,
+      12
+     ],
+     "kb": 2.5,
+     "poise": 30,
+     "name": "Shield Bash"
+    },
+    "heavy": {
+     "startup": 150,
+     "active": 100,
+     "recovery": 420,
+     "dmg": 2.3,
+     "hitbox": [
+      24,
+      10
+     ],
+     "kb": -1.5,
+     "poise": 30,
+     "name": "Sluice Hook",
+     "charge": 350,
+     "subdue": true,
+     "pull": 30
+    },
+    "air": {
+     "startup": 110,
+     "active": 60,
+     "recovery": 220,
+     "dmg": 0.9,
+     "hitbox": [
+      20,
+      10
+     ],
+     "kb": 1.0,
+     "poise": 8,
+     "name": "Hook Down",
+     "perAir": 1
+    },
+    "plunge": {
+     "startup": 150,
+     "active": 0,
+     "recovery": 300,
+     "dmg": 1.6,
+     "hitbox": [
+      14,
+      8
+     ],
+     "kb": 2.0,
+     "poise": 25,
+     "name": "Anchor Drop",
+     "below": true,
+     "fall": 300,
+     "pogo": 20
+    },
+    "run": {
+     "startup": 110,
+     "active": 90,
+     "recovery": 320,
+     "dmg": 1.2,
+     "hitbox": [
+      20,
+      6
+     ],
+     "kb": 1.8,
+     "poise": 12,
+     "name": "Rushing Gaff",
+     "carry": 16
+    }
+   }
+  },
+  "tinker": {
+   "weapon": {
+    "id": "wpn_wrench",
+    "name": "Tinker's Wrench",
+    "dmg": [
+     9,
+     13
+    ],
+    "kb": 50,
+    "reach": 14
+   },
+   "oilOnHit": 1.5,
+   "heavyBreaks": 2,
+   "moves": {
+    "light1": {
+     "startup": 90,
+     "active": 50,
+     "recovery": 220,
+     "dmg": 1.0,
+     "hitbox": [
+      14,
+      6
+     ],
+     "kb": 0.8,
+     "poise": 6,
+     "name": "Tap"
+    },
+    "light2": {
+     "startup": 100,
+     "active": 60,
+     "recovery": 230,
+     "dmg": 1.05,
+     "hitbox": [
+      14,
+      10
+     ],
+     "kb": 0.8,
+     "poise": 6,
+     "name": "Twist"
+    },
+    "light3": {
+     "startup": 150,
+     "active": 70,
+     "recovery": 320,
+     "dmg": 1.7,
+     "hitbox": [
+      16,
+      12
+     ],
+     "kb": 2.0,
+     "poise": 18,
+     "name": "Spanner Clout"
+    },
+    "heavy": {
+     "startup": 120,
+     "active": 80,
+     "recovery": 360,
+     "dmg": 2.4,
+     "hitbox": [
+      16,
+      14
+     ],
+     "kb": 2.5,
+     "poise": 30,
+     "name": "Overhand",
+     "charge": 350,
+     "subdue": true,
+     "breaks": 2
+    },
+    "air": {
+     "startup": 80,
+     "active": 50,
+     "recovery": 200,
+     "dmg": 0.85,
+     "hitbox": [
+      14,
+      10
+     ],
+     "kb": 0.8,
+     "poise": 5,
+     "name": "Flip",
+     "perAir": 2
+    },
+    "plunge": {
+     "startup": 120,
+     "active": 0,
+     "recovery": 260,
+     "dmg": 1.7,
+     "hitbox": [
+      12,
+      8
+     ],
+     "kb": 2.0,
+     "poise": 20,
+     "name": "Hammer Drop",
+     "below": true,
+     "fall": 300,
+     "pogo": 24
+    },
+    "run": {
+     "startup": 90,
+     "active": 80,
+     "recovery": 280,
+     "dmg": 1.2,
+     "hitbox": [
+      14,
+      6
+     ],
+     "kb": 1.6,
+     "poise": 10,
+     "name": "Spanner Rush",
+     "carry": 14
+    }
+   }
+  },
+  "moth_oracle": {
+   "weapon": {
+    "id": "wpn_mothlamp_rod",
+    "name": "Moth-Rod",
+    "dmg": [
+     9,
+     14
+    ],
+    "kb": 40,
+    "reach": 16
+   },
+   "oilOnHit": 1.5,
+   "heavyBreaks": 1,
+   "moves": {
+    "light1": {
+     "startup": 90,
+     "active": 50,
+     "recovery": 240,
+     "dmg": 1.0,
+     "hitbox": [
+      16,
+      6
+     ],
+     "kb": 0.6,
+     "poise": 5,
+     "name": "Flick"
+    },
+    "light2": {
+     "startup": 100,
+     "active": 60,
+     "recovery": 240,
+     "dmg": 1.0,
+     "hitbox": [
+      16,
+      12
+     ],
+     "kb": 0.6,
+     "poise": 5,
+     "name": "Wingbeat"
+    },
+    "light3": {
+     "startup": 140,
+     "active": 80,
+     "recovery": 300,
+     "dmg": 1.5,
+     "hitbox": [
+      20,
+      12
+     ],
+     "kb": 1.0,
+     "poise": 10,
+     "name": "Dust Lash"
+    },
+    "heavy": {
+     "startup": 100,
+     "active": 60,
+     "recovery": 340,
+     "dmg": 2.6,
+     "hitbox": [
+      18,
+      4
+     ],
+     "kb": 1.0,
+     "poise": 20,
+     "name": "Pin",
+     "charge": 350,
+     "subdue": true
+    },
+    "air": {
+     "startup": 80,
+     "active": 60,
+     "recovery": 200,
+     "dmg": 0.9,
+     "hitbox": [
+      16,
+      10
+     ],
+     "kb": 0.6,
+     "poise": 5,
+     "name": "Flutter Strike",
+     "perAir": 2
+    },
+    "plunge": {
+     "startup": 100,
+     "active": 0,
+     "recovery": 220,
+     "dmg": 1.5,
+     "hitbox": [
+      10,
+      8
+     ],
+     "kb": 1.0,
+     "poise": 12,
+     "name": "Dive",
+     "below": true,
+     "fall": 300,
+     "pogo": 30
+    },
+    "run": {
+     "startup": 80,
+     "active": 80,
+     "recovery": 260,
+     "dmg": 1.2,
+     "hitbox": [
+      16,
+      6
+     ],
+     "kb": 1.2,
+     "poise": 8,
+     "name": "Moth Rush",
+     "carry": 14
+    }
+   }
+  },
+  "chimneysweep": {
+   "weapon": {
+    "id": "wpn_brushspear",
+    "name": "Brush-Spear",
+    "dmg": [
+     10,
+     15
+    ],
+    "kb": 50,
+    "reach": 24
+   },
+   "oilOnHit": 1.5,
+   "heavyBreaks": 1,
+   "moves": {
+    "light1": {
+     "startup": 80,
+     "active": 50,
+     "recovery": 210,
+     "dmg": 1.0,
+     "hitbox": [
+      24,
+      4
+     ],
+     "kb": 0.8,
+     "poise": 5,
+     "name": "Thrust"
+    },
+    "light2": {
+     "startup": 90,
+     "active": 60,
+     "recovery": 220,
+     "dmg": 0.95,
+     "hitbox": [
+      20,
+      12
+     ],
+     "kb": 0.8,
+     "poise": 5,
+     "name": "Brush Sweep"
+    },
+    "light3": {
+     "startup": 110,
+     "active": 80,
+     "recovery": 280,
+     "dmg": 1.5,
+     "hitbox": [
+      28,
+      6
+     ],
+     "kb": 1.5,
+     "poise": 12,
+     "name": "Flue Lunge",
+     "lunge": 16
+    },
+    "heavy": {
+     "startup": 90,
+     "active": 80,
+     "recovery": 320,
+     "dmg": 2.3,
+     "hitbox": [
+      26,
+      6
+     ],
+     "kb": 2.0,
+     "poise": 22,
+     "name": "Chimney Pole",
+     "charge": 350,
+     "subdue": true,
+     "launch": true
+    },
+    "air": {
+     "startup": 70,
+     "active": 90,
+     "recovery": 180,
+     "dmg": 0.8,
+     "hitbox": [
+      20,
+      20
+     ],
+     "kb": 0.8,
+     "poise": 5,
+     "name": "Spin",
+     "perAir": 3,
+     "around": true
+    },
+    "plunge": {
+     "startup": 90,
+     "active": 0,
+     "recovery": 180,
+     "dmg": 1.6,
+     "hitbox": [
+      8,
+      8
+     ],
+     "kb": 1.2,
+     "poise": 14,
+     "name": "Chimney Drop",
+     "below": true,
+     "fall": 300,
+     "pogo": 30
+    },
+    "run": {
+     "startup": 80,
+     "active": 90,
+     "recovery": 250,
+     "dmg": 1.3,
+     "hitbox": [
+      24,
+      4
+     ],
+     "kb": 1.8,
+     "poise": 10,
+     "name": "Running Thrust",
+     "carry": 20
+    }
+   }
+  }
+ },
+ "shared": {
+  "comboWindow": 300,
+  "buffer": 150,
+  "heavyHold": 350,
+  "hitStopTicks": 3,
+  "maxOilHits": 3,
+  "invulnAfterHit": 0.6,
+  "dodge": {
+   "dist": 44,
+   "time": 0.28,
+   "iframes": 0.18,
+   "recovery": 0.6
+  }
+ }
+}

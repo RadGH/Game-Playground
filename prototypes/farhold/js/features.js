@@ -1679,7 +1679,15 @@ export function createFeatures(scene, terrain, opts = {}) {
         let last = null;
         for (const s0 of want) {
           let placed = null;
-          for (let k = 0; k <= TOWER_SLIDE * 2 && !placed; k++) {
+          /**
+           * R27 — A LONGER SLIDE BEFORE GIVING UP. A spot on a road that runs along the inside of
+           * the wall (roads got wider in M5) could not find ground within 6 m and the tower was
+           * dropped, leaving 88 m of bare wall at Cindergate (seed 4477). It now keeps looking out to
+           * half the spacing; `TOWER_MIN` still holds against the last tower, so the gap either side
+           * stays inside 25-70 m.
+           */
+          const reach = Math.max(TOWER_SLIDE, TOWER_EVERY / 2);
+          for (let k = 0; k <= reach * 4 && !placed; k++) {
             const off = (k % 2 ? 1 : -1) * Math.ceil(k / 2) * 0.5;
             const s1 = s0 + off;
             if (!whole && (s1 < TOWER_FOOT || s1 > L - TOWER_FOOT)) continue;

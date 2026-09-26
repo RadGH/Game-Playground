@@ -1,0 +1,166 @@
+{
+ "format": 1,
+ "id": "a1_n08_r1",
+ "name": "The Tallow Chapel",
+ "act": "act1",
+ "kind": "boss",
+ "size": [
+  640,
+  272
+ ],
+ "block": 8,
+ "seed": 808,
+ "theme": "wax_chapel",
+ "rain": {
+  "density": 0,
+  "wind": 0
+ },
+ "decor": {
+  "erode": 0.1,
+  "moss": 0.05,
+  "cracks": 0.1,
+  "waxDrips": 0.8
+ },
+ "notes": "Mother Tallow arena (docs/05 \u00a719). Floor is wax over stone (y 224): her drips and pools build up on it. Two wooden balconies (y 168) let you hop over the wax wave; they burn, so a careless ember wick takes your dodge away. The Crown Lamp stands east, past the arena; the east door stays shut until she is out (arena lock).",
+ "map": [
+  "XXBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBXX",
+  "XXBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBXX",
+  "XXBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBXX",
+  "XX............................................................................XX",
+  "XX............................................................................XX",
+  "XX............................................................................XX",
+  "XX............................................................................XX",
+  "XX............................................................................XX",
+  "XX............................................................................XX",
+  "XX............................................................................XX",
+  "XX............................................................................XX",
+  "XX............................................................................XX",
+  "XX............................................................................XX",
+  "XX............................................................................XX",
+  "XX............................................................................XX",
+  "XX............................................................................XX",
+  "XX............................................................................XX",
+  "XX............................................................................XX",
+  "XX............................................................................XX",
+  "XX............................................................................XX",
+  "XX............................................................................XX",
+  "XX........WWWWWWWWWW....................................WWWWWWWWWW............XX",
+  "XX............................................................................XX",
+  "XX............................................................................XX",
+  "XX............................................................................XX",
+  "................................................................................",
+  ".....................................######.....................................",
+  ".....................................######.....................................",
+  "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "################################################################################",
+  "################################################################################",
+  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+ ],
+ "ops": [],
+ "things": [
+  {
+   "t": "entry",
+   "id": "w",
+   "at": [
+    20,
+    223
+   ],
+   "face": "r"
+  },
+  {
+   "t": "entry",
+   "id": "e",
+   "at": [
+    610,
+    223
+   ],
+   "face": "l"
+  },
+  {
+   "t": "exit",
+   "id": "exit_back",
+   "rect": [
+    0,
+    200,
+    3,
+    24
+   ],
+   "to": "@prev",
+   "entry": "e"
+  },
+  {
+   "t": "exit",
+   "id": "exit_e0",
+   "rect": [
+    637,
+    200,
+    3,
+    24
+   ],
+   "to": "@next",
+   "entry": "w"
+  },
+  {
+   "t": "boss",
+   "id": "boss_tallow",
+   "boss": "boss_tallow",
+   "at": [
+    400,
+    223
+   ]
+  },
+  {
+   "t": "great_lamp",
+   "id": "great_lamp",
+   "act": "act1",
+   "at": [
+    580,
+    223
+   ]
+  },
+  {
+   "t": "light",
+   "id": "lt_c1",
+   "at": [
+    120,
+    100
+   ],
+   "color": "#ffb347",
+   "r": 90,
+   "intensity": 0.9,
+   "shadow": true,
+   "flicker": 0.12,
+   "sprite": "candle_cluster"
+  },
+  {
+   "t": "light",
+   "id": "lt_c2",
+   "at": [
+    320,
+    90
+   ],
+   "color": "#ffb347",
+   "r": 90,
+   "intensity": 0.9,
+   "shadow": true,
+   "flicker": 0.12,
+   "sprite": "candle_cluster"
+  },
+  {
+   "t": "light",
+   "id": "lt_c3",
+   "at": [
+    500,
+    100
+   ],
+   "color": "#ffb347",
+   "r": 90,
+   "intensity": 0.9,
+   "shadow": true,
+   "flicker": 0.12,
+   "sprite": "candle_cluster"
+  }
+ ]
+}

@@ -6,6 +6,16 @@
    "file": "bench/bench_flood.json",
    "act": "none",
    "kind": "bench"
+  },
+  "a1_n01_r0": {
+   "file": "act1/a1_n01_r0.json",
+   "act": "act1",
+   "kind": "hub"
+  },
+  "a1_n08_r1": {
+   "file": "act1/a1_n08_r1.json",
+   "act": "act1",
+   "kind": "boss"
   }
  },
  "examples": {

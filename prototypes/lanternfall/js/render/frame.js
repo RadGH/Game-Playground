@@ -1,6 +1,7 @@
 // Turns game state into a render frame: sprites, lights, overlays (docs/06 §14, §16). Browser-side but
 // DOM-free.
 import { PK } from '../entities/particles.js';
+import { drawBoss } from '../ai/bosses.js';
 import { hexToRgb01 } from '../core/math.js';
 import { collectLights } from '../world/lightgrid.js';
 import { voidZoneVisuals } from '../rpg/voidzones.js';
@@ -13,7 +14,7 @@ export function buildFrame(game, cam, atlas, alpha) {
   // world lights (the same list the CPU light grid uses), minus the lantern which is drawn below
   for (const l of collectLights(game)) if (!l.own) lights.push(l);
   // player
-  if (p) {
+  if (p && !p.hidden) {
     const x = p.px + (p.x - p.px) * alpha, y = p.py + (p.y - p.py) * alpha;
     const r = atlas.rect('hero', p.anim, p.animT) || atlas.rect('hero', 'idle', 0);
     const an = atlas.meta.hero.anchor;
@@ -48,10 +49,13 @@ export function buildFrame(game, cam, atlas, alpha) {
   spellVisuals(game, { sprites, additive, lights, overlays }, atlas);
   voidZoneVisuals(game, overlays, additive, lights);
   game.things?.draw({ sprites, additive, lights, overlays }, atlas);
+  game.builder?.draw({ overlays });
   // falling fragments: one quad per cell, coloured from the material ramp
   if (game.fragments) { const R = game.data.mats.ramps; for (const f of game.fragments.list) for (let r = 0; r < f.h; r++) for (let c = 0; c < f.w; c++) { const k = r * f.w + c, m = f.mat[k]; if (!m) continue; const ramp = R[m], col = ramp[(f.shade[k] & 7) % ramp.length]; sprites.push({ x: f.x + c, y: f.fy + r, w: 1, h: 1, tint: [col[0] / 255, col[1] / 255, col[2] / 255, 1] }); } }
   // actors (enemies, npcs, dummies): sprite if the atlas has one, else a lit block
+  drawBoss(game, { sprites, additive, lights, overlays }, alpha);
   for (const e of game.entities) {
+    if (e.kind === 'boss') continue;
     const x = e.px + (e.x - e.px) * alpha, y = e.py + (e.y - e.py) * alpha;
     const spr = e.sprite && atlas.rect(e.sprite, e.anim || 'idle', e.animT || 0);
     const flash = e.hurtFlash > 0 ? [3, 3, 3, 1] : e.statuses?.frozen ? [0.7, 1.2, 1.5, 1] : [1, 1, 1, e.dead ? Math.max(0, 1 - e.deadT) : 1];

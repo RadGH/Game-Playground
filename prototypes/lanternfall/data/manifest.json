@@ -21,6 +21,11 @@
   "shops",
   "difficulty",
   "acts",
-  "kits"
+  "kits",
+  "npcs",
+  "score",
+  "sfx-map",
+  "boards",
+  "events-lanternfall"
  ]
 }

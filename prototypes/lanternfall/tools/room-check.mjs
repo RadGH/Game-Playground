@@ -24,7 +24,7 @@ for (const id of ids) {
   for (const wr of room.wires || []) { if (!tids.has(wr.from) && !(room.ops || []).some(o => o.id === wr.from)) errs.push(`wire from unknown '${wr.from}'`); if (!tids.has(wr.to) && !(room.ops || []).some(o => o.id === wr.to)) errs.push(`wire to unknown '${wr.to}'`); }
   const exits = (room.things || []).filter(t => t.t === 'exit'), entries = (room.things || []).filter(t => t.t === 'entry');
   if (!entries.length && room.kind !== 'test') errs.push('no entry');
-  for (const x of exits) { const other = idx.rooms[x.to]; if (!other) { (room.kind === 'bench' || room.kind === 'test' ? warns : errs).push(`exit ${x.id} goes to unknown room '${x.to}'`); continue; } const o = JSON.parse(readFileSync(new URL('rooms/' + other.file, here))); if (!(o.things || []).some(t => t.t === 'entry' && t.id === x.entry)) errs.push(`exit ${x.id} -> ${x.to} has no entry '${x.entry}' there`); }
+  for (const x of exits) { if (x.to?.startsWith('@')) continue; /* act-map exits resolve at run time (actmap.js) */ const other = idx.rooms[x.to]; if (!other) { (room.kind === 'bench' || room.kind === 'test' ? warns : errs).push(`exit ${x.id} goes to unknown room '${x.to}'`); continue; } const o = JSON.parse(readFileSync(new URL('rooms/' + other.file, here))); if (!(o.things || []).some(t => t.t === 'entry' && t.id === x.entry)) errs.push(`exit ${x.id} -> ${x.to} has no entry '${x.entry}' there`); }
   if (room.kind === 'lesson' && (room.things || []).some(t => t.t === 'spawn')) errs.push('a lesson room spawns enemies (lessons have no enemies)');
   const known = data.enemies?.byId; if (known) for (const t of room.things || []) if (t.t === 'spawn' && !known[t.enemy]) errs.push(`spawn ${t.id}: unknown enemy '${t.enemy}'`);
   const npcs = data.npcs?.byId; if (npcs) for (const t of room.things || []) if (t.t === 'npc' && !npcs[t.npc]) errs.push(`npc ${t.id}: unknown npc '${t.npc}'`);
@@ -39,7 +39,7 @@ for (const id of ids) {
     for (const en of entries) {
       const start = nearestNodes(graph, en.at[0], en.at[1] + 1, 10); if (!start.length) { errs.push(`entry ${en.id}: no standing spot near ${en.at}`); continue; }
       const seen = reachable(graph, start);
-      for (const x of exits) { if (x.requires) continue; const ns = nodesInRect(graph, x.rect); if (!ns.some(i => seen[i])) errs.push(`exit ${x.id} unreachable from entry ${en.id} with ${room.act} verbs`); }
+      for (const x of exits) { if (x.requires || (x.needsVerb && !verbs[x.needsVerb])) continue; const ns = nodesInRect(graph, x.rect); if (!ns.some(i => seen[i])) errs.push(`exit ${x.id} unreachable from entry ${en.id} with ${room.act} verbs`); }
     }
     reachInfo = ` reach graph ${graph.nodes.length} nodes`;
   }

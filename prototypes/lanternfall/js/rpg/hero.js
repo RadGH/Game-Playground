@@ -27,17 +27,19 @@ export function deriveStats(hero, data) {
   const e = k => effAttr(hero.attrs[k] || 0, caps[k]);
   const gear = {}; for (const s of SLOTS) { const it = hero.equipped[s]; if (!it) continue; for (const [k, v] of Object.entries(it.implicit || {})) gear[k] = (gear[k] || 0) + v; for (const a of it.affixes || []) gear[a.stat] = (gear[a.stat] || 0) + a.value; }
   for (const [k, v] of Object.entries(hero.buffs || {})) gear[k] = (gear[k] || 0) + v;
+  for (const [k, v] of Object.entries(hero.perm || {})) gear[k] = (gear[k] || 0) + v;
   const L = hero.level;
   const maxHp = ((60 + 8 * e('nerve') + 6 * (L - 1)) * cls.hpMult + (gear.health || 0)) * (1 + (gear.healthPct || 0)) - (hero.maxHpDebt || 0);
-  const maxOil = (75 + 5 * e('draught') + 4 * (L - 1)) * cls.oilMult + (gear.oil || 0);
+  const maxOil = ((75 + 5 * e('draught') + 4 * (L - 1)) * cls.oilMult + (gear.oil || 0)) * (1 + (gear.oilPct || 0));
   const resist = { ...cls.resist }; for (const f of ['ember', 'rime', 'spark', 'bile', 'gleam', 'tide', 'shade']) resist[f] = Math.min(75, (resist[f] || 0) + Math.min(15, 0.5 * e('nerve')) + (gear['resist_' + f] || 0) + (gear.resistAll || 0));
   const s = {
     level: L, maxHp: Math.round(maxHp), maxOil: Math.round(maxOil), oilRegen: (3.0 + 0.1 * e('draught')) * (1 + (gear.oilRegenPct || 0)),
-    armour: (cls.armour || 0) + (gear.armour || 0), resist, critChance: 0.05 + 0.003 * e('knack') + (gear.critChance || 0), critMult: 1.5 + 0.01 * e('might') + (gear.critMult || 0),
+    armour: ((cls.armour || 0) + (gear.armour || 0)) * (1 + (gear.armourPct || 0)), resist, critChance: 0.05 + 0.003 * e('knack') + (gear.critChance || 0), critMult: 1.5 + 0.01 * e('might') + (gear.critMult || 0),
     meleeMult: 1 + 0.02 * e('might') + (gear.meleePct || 0), spellPower: 0.02 * e('wick') + (gear.wickPct || 0), statusPotency: 1 + 0.01 * e('wick'),
     gearSpellPct: gear.spellPct || 0, flamePct: Object.fromEntries(Object.entries(gear).filter(([k]) => k.startsWith('flame_')).map(([k, v]) => [k.slice(6), v])),
-    haste: gear.castSpeed || 0, lightRadius: 64 * (1 + (gear.lightRadiusPct || 0)) + (gear.lightRadius || 0), darkBurn: 1 * Math.max(0.7, 1 - 0.01 * e('draught')), lootFind: 0.01 * e('knack') + (gear.lootFind || 0),
-    poise: 30 + 2 * e('nerve'), buildSpeed: (1 + 0.01 * e('knack')) * (cls.movement?.buildMult || 1), oilOnHit: cls.oilOnHit ?? 1.5, lifeSteal: gear.lifeSteal || 0,
+    haste: gear.castSpeed || 0, lightRadius: (hero.equipped.lantern?.lantern?.radius ?? 64) * (1 + (gear.lightRadiusPct || 0)) + (gear.lightRadius || 0), darkBurn: (hero.equipped.lantern?.lantern?.darkBurn ?? 2.5) * Math.max(0.7, 1 - 0.01 * e('draught')), lootFind: 0.01 * e('knack') + (gear.lootFind || 0),
+    oilCostPct: gear.oilCostPct || 0, oilOnKill: gear.oilOnKill || 0, swimSpeed: gear.swimSpeed || 0, ropeClimb: gear.ropeClimb || 0, jumpApex: gear.jumpApex || 0, penniesFind: gear.penniesFind || 0, xpPct: gear.xpPct || 0, breath: 12 + (gear.breath || 0), chillDur: gear.chillDur || 0,
+    poise: 30 + 2 * e('nerve'), buildSpeed: (1 + 0.01 * e('knack') + (gear.buildSpeedPct || 0)) * (cls.movement?.buildMult || 1), oilOnHit: cls.oilOnHit ?? 1.5, lifeSteal: gear.lifeSteal || 0,
     walk: cls.walk * (1 + (gear.moveSpeed || 0)), run: cls.run * (1 + (gear.moveSpeed || 0)),
   };
   hero.stats = s; return s;

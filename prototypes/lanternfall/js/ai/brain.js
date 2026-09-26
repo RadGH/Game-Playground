@@ -20,7 +20,7 @@ export function spawnEnemy(game, id, x, y, opts = {}) {
   const e = createActor('enemy', { name: def.name, x, y, w: def.size[0], h: def.size[1], hp, resist: def.resist || {}, armour: def.armour || 0, tags: def.tags || [], flying: def.move === 'flyer', swims: def.move === 'swimmer', stepUp: 3,
     extra: { def, level: L, dmgMult: Math.pow(1.09, dL) * (diff.enemyDamage ?? 1), sprite: def.sprite, eyes: def.eyes ? hexToRgb01(def.eyes) : null, maxPoise: tier.poise, poise: tier.poise, staggerTime: tier.stagger, tokenCost: tier.token,
       anchor: { x, y }, brain: { state: 'idle', t: Math.random() * 3, react: 0, attack: null, phase: null, pt: 0, cds: {}, lastSeen: null, lostT: 0, token: false, thinkT: Math.random() * 0.1, pack: opts.pack || null },
-      light: def.light ? { r: def.light.r, color: hexToRgb01(def.light.color), i: 0.8 } : null, elite: !!opts.elite, flipSprite: false } });
+      light: def.light ? { r: def.light.r, color: hexToRgb01(def.light.color), i: 0.8 } : null, color: def.color ? hexToRgb01(def.color) : null, elite: !!opts.elite, flipSprite: false } });
   e.facing = -1;
   game.entities.push(e);
   return e;

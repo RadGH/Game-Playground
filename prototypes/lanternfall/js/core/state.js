@@ -12,6 +12,7 @@ import { createCurrents, createFloodline } from '../world/currents.js';
 import { spawnEnemy } from '../ai/brain.js';
 import { createThings } from '../entities/things.js';
 import { castPlan } from '../spells/instances.js';
+import { spawnBoss } from '../ai/bosses.js';
 
 export function createGame({ data, mode = 'campaign', seed = 1, save = null }) {
   const game = {
@@ -43,7 +44,8 @@ export function enterRoom(game, roomJson, entryId, opts = {}) {
   // enemies are placed at room load (docs/05 §7.1); killed placed enemies stay dead for the save
   game.act1Grace = roomJson.act === 'act1';
   const diff = game.difficulty || {}; game.tokens = { melee: game.act1Grace ? 1 : (diff.meleeTokens ?? 2), ranged: diff.rangedTokens ?? 2, usedMelee: 0, usedRanged: 0 };
-  game.voidZones = []; game.noises = [];
+  game.voidZones = []; game.noises = []; game.boss = null; game.arenaLocked = false; if (roomJson.act && roomJson.act !== 'none') game.act = roomJson.act;
+  for (const t of c.things) if (t.t === 'boss') { const y = findFloor(c.grid, t.at[0], t.at[1] - 40, t.at[1] + 40) ?? t.at[1]; spawnBoss(game, t.boss, t.at[0], y, t.flag || t.boss); }
   if (game.data.enemies && roomJson.kind !== 'lesson' && roomJson.kind !== 'hub') {
     const rs = game.roomState?.[roomJson.id] || {};
     for (const t of c.things) if (t.t === 'spawn' && t.when !== 'signal' && !rs[t.id]?.cleared) {

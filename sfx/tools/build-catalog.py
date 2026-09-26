@@ -463,7 +463,132 @@ def build():
     for k, layers in AMB.items():
         out.append(entry('ambience.%s' % k, 'ambience', 'Ambience: %s' % k, 3.0, layers, loop=True))
 
+    out.extend(world_sounds())
     return out
+
+
+# ---------------------------------------------------------------------------------------------
+# 2026-09-26, ADD-ONLY: world sounds for Lanternfall (prototypes/lanternfall, docs/10 §10.4): rain beds,
+# water, steam, fire, ice, stone, levers and doors, ropes, lamps and bells, pickups. Generic enough for
+# any game; nothing above this line changed. Tide's spell.water.* is NOT here: the node test allows only
+# the elements spellfx.js draws, so Lanternfall registers those recipes itself (its data/sfx-map.json).
+
+def world_sounds():
+    W = []
+    # rain: two beds the score crossfades by density. Light = a fine high hiss with sparse drops;
+    # heavy = a broad roar, denser drops, a low rumble under it.
+    W.append(entry('ambience.rain.light', 'ambience', 'Rain (light, loop)', 3.0, [
+        drone(3.0, 3200, 7200, 0.7, 'pink', gain=0.45, lfo=0.21, depth=0.35, ftype='highpass'),
+        grain(3.0, 40, 2400, 7000, 0.002, 0.008, gain=0.3, noisy=True),
+        drone(3.0, 500, 1400, 0.8, 'pink', gain=0.18, lfo=0.09, depth=0.4)], loop=True))
+    W.append(entry('ambience.rain.heavy', 'ambience', 'Rain (heavy, loop)', 3.0, [
+        drone(3.0, 900, 6000, 0.5, 'white', gain=0.5, lfo=0.17, depth=0.45),
+        grain(3.0, 90, 1600, 6500, 0.002, 0.01, gain=0.35, noisy=True),
+        drone(3.0, 60, 220, 1.0, 'brown', gain=0.35, lfo=0.07, depth=0.5)], loop=True))
+    W.append(entry('rain.tick.metal', 'world', 'Rain on metal', 0.30, [
+        tone(0.20, 2600, 2500, 'sine', gain=0.35, a=0.001),
+        tone(0.24, 3900, 3800, 'sine', gain=0.2, a=0.001, delay=0.01),
+        noise(0.05, 6000, 5000, 3.0, gain=0.3)], trim=-4.0))
+    # water
+    W.append(entry('water.splash.small', 'world', 'Splash (small)', 0.45, [
+        noise(0.30, 2600, 700, 0.9, gain=0.8, a=0.004),
+        grain(0.40, 10, 700, 2600, 0.01, 0.04, gain=0.35, sweep=0.6, delay=0.04),
+        tone(0.12, 420, 180, 'sine', gain=0.25)]))
+    W.append(entry('water.splash.big', 'impact', 'Splash (big)', 0.95, [
+        noise(0.70, 1800, 300, 0.7, color='pink', gain=0.9, a=0.006),
+        noise(0.25, 5200, 1500, 1.2, gain=0.45),
+        grain(0.85, 22, 400, 2200, 0.012, 0.05, gain=0.4, sweep=0.5, delay=0.06),
+        tone(0.30, 110, 45, 'sine', gain=0.55)]))
+    W.append(entry('water.pour', 'world', 'Water pouring', 1.60, [
+        noise(1.55, 900, 1300, 0.8, color='pink', gain=0.7, a=0.15, curve='lin'),
+        grain(1.55, 30, 500, 1800, 0.01, 0.04, gain=0.3, sweep=1.2)]))
+    W.append(entry('water.drain', 'world', 'Water draining', 1.80, [
+        noise(1.75, 1400, 260, 1.2, color='pink', gain=0.7, a=0.2, curve='lin'),
+        grain(1.75, 18, 180, 700, 0.03, 0.09, gain=0.45, sweep=0.4),
+        tone(1.40, 220, 70, 'sine', gain=0.25, vib=(6, 0.08))]))
+    W.append(entry('steam.hiss', 'world', 'Steam hiss', 1.10, [
+        noise(1.05, 4200, 2600, 0.8, ftype='highpass', gain=0.8, a=0.03),
+        noise(0.80, 1800, 900, 1.4, gain=0.25, delay=0.05)]))
+    # fire
+    W.append(entry('fire.whoosh', 'world', 'Fire whoosh', 0.70, [
+        noise(0.65, 250, 1400, 0.7, ftype='lowpass', color='brown', gain=0.9, a=0.08, curve='lin'),
+        tone(0.40, 70, 110, 'sine', gain=0.3),
+        grain(0.55, 8, 500, 1600, 0.01, 0.03, gain=0.2, delay=0.1)]))
+    W.append(entry('fire.crackle', 'ambience', 'Fire crackle (loop)', 2.40, [
+        grain(2.40, 34, 900, 4800, 0.003, 0.016, gain=0.4, noisy=True),
+        drone(2.40, 180, 700, 0.9, 'brown', gain=0.4, lfo=0.9, depth=0.5)], loop=True))
+    # ice
+    W.append(entry('ice.form', 'world', 'Ice forming', 0.80, [
+        grain(0.75, 22, 2400, 7200, 0.004, 0.015, gain=0.45, sweep=1.6),
+        noise(0.60, 5200, 2600, 2.0, gain=0.35, a=0.1, curve='lin'),
+        tone(0.50, 1760, 2349, 'sine', gain=0.18)]))
+    W.append(entry('ice.crack', 'impact', 'Ice cracking', 0.60, [
+        noise(0.08, 5000, 2200, 0.6, gain=1.0, a=0.001),
+        grain(0.50, 14, 1600, 6000, 0.003, 0.012, gain=0.5, delay=0.02),
+        tone(0.25, 180, 80, 'sine', gain=0.45)]))
+    # stone and falling pieces
+    W.append(entry('stone.crumble', 'world', 'Stone crumbling', 1.20, [
+        grain(1.15, 26, 180, 1400, 0.01, 0.05, gain=0.6, noisy=True, sweep=0.6),
+        noise(1.00, 700, 180, 0.9, ftype='lowpass', color='brown', gain=0.55, a=0.05)]))
+    for size, dur, f0, g in (('small', 0.45, 900, 0.8), ('medium', 0.75, 600, 0.9), ('large', 1.20, 380, 1.0)):
+        W.append(entry('fragment.crash.%s' % size, 'impact', 'Fragment crash (%s)' % size, dur, [
+            noise(dur * 0.8, f0 * 3, f0 / 3, 0.8, color='brown', gain=g),
+            tone(dur * 0.5, f0 / 5, f0 / 14, 'sine', gain=0.8),
+            grain(dur * 0.9, int(8 + dur * 16), 250, 2200, 0.01, 0.05, gain=0.45, noisy=True, delay=0.03)]))
+    # machines
+    W.append(entry('lever.pull', 'world', 'Lever pull', 0.55, [
+        noise(0.30, 1800, 700, 1.8, gain=0.6),
+        tone(0.12, 900, 700, 'triangle', gain=0.35, delay=0.30),
+        noise(0.12, 3000, 1200, 2.0, gain=0.5, delay=0.32)]))
+    W.append(entry('door.grind', 'world', 'Door grinding', 1.60, [
+        noise(1.55, 300, 520, 2.5, color='brown', gain=0.8, a=0.1, curve='lin'),
+        fm(1.50, 70, 62, ratio=1.41, index=160, index1=60, gain=0.35),
+        grain(1.50, 16, 200, 900, 0.02, 0.07, gain=0.35, noisy=True)]))
+    W.append(entry('sluice.open', 'world', 'Sluice opening', 2.00, [
+        noise(0.40, 1500, 600, 1.6, gain=0.6),
+        noise(1.60, 400, 1500, 0.7, color='pink', gain=0.8, a=0.5, curve='lin', delay=0.35),
+        tone(1.20, 55, 48, 'sine', gain=0.35, delay=0.3)]))
+    W.append(entry('rope.creak', 'world', 'Rope creak', 0.70, [
+        fm(0.60, 240, 180, ratio=2.01, index=120, index1=30, gain=0.4),
+        noise(0.55, 1200, 800, 4.0, gain=0.3, a=0.1, curve='lin')], trim=-3.0))
+    W.append(entry('grapple.fire', 'world', 'Grapple fire', 0.50, [
+        noise(0.08, 3000, 1400, 1.0, gain=0.9, a=0.001),
+        noise(0.40, 1800, 5200, 1.2, gain=0.45, a=0.02, delay=0.04),
+        grain(0.40, 12, 2400, 5200, 0.004, 0.01, gain=0.3, delay=0.05)]))
+    # lamps and bells
+    W.append(entry('lamp.relight', 'sting', 'Great Lamp relit', 2.60, [
+        noise(0.70, 200, 1800, 0.7, ftype='lowpass', color='brown', gain=0.8, a=0.15, curve='lin'),
+        chord(2.40, [146.83, 220, 293.66, 440], 'sine', gain=0.55, stagger=0.18, a=0.05, delay=0.3),
+        noise(1.60, 3000, 7000, 1.0, ftype='highpass', gain=0.2, a=0.6, curve='lin', delay=0.4)]))
+    W.append(entry('lamp.post', 'sting', 'Lamp-post lit', 1.20, [
+        noise(0.35, 300, 1300, 0.8, ftype='lowpass', color='brown', gain=0.7, a=0.04),
+        chord(1.00, [293.66, 440], 'sine', gain=0.45, stagger=0.08, delay=0.15)]))
+    W.append(entry('lantern.out', 'world', 'Lantern goes out', 0.60, [
+        noise(0.45, 1400, 180, 0.8, ftype='lowpass', color='pink', gain=0.7, a=0.01),
+        tone(0.40, 330, 110, 'sine', gain=0.3)]))
+    W.append(entry('bell.toll', 'sting', 'Bell toll', 4.00, [
+        tone(3.90, 110, 110, 'sine', gain=0.7, a=0.004),
+        tone(3.20, 303.6, 303.6, 'sine', gain=0.4, a=0.004),
+        tone(2.40, 594, 594, 'sine', gain=0.25, a=0.004),
+        tone(1.60, 924, 924, 'sine', gain=0.15, a=0.003),
+        noise(0.06, 2200, 900, 1.2, gain=0.5)]))
+    W.append(entry('gutter.burst', 'impact', 'Wick guttering burst', 0.70, [
+        noise(0.50, 2200, 300, 0.7, color='brown', gain=0.9, a=0.002),
+        tone(0.35, 140, 50, 'sine', gain=0.7),
+        grain(0.55, 16, 800, 3600, 0.005, 0.02, gain=0.4, noisy=True, delay=0.02)]))
+    W.append(entry('rekindle', 'sting', 'Rekindle', 1.40, [
+        tone(1.20, 180, 540, 'sine', gain=0.4, a=0.3, curve='lin'),
+        noise(1.10, 400, 2600, 1.0, gain=0.35, a=0.4, curve='lin'),
+        chord(0.70, [587.33, 880], 'sine', gain=0.3, delay=0.65)]))
+    # pickups
+    W.append(entry('oil.pickup', 'loot', 'Oil pickup', 0.45, [
+        tone(0.20, 520, 780, 'sine', gain=0.45, a=0.005),
+        grain(0.35, 6, 600, 1400, 0.02, 0.05, gain=0.35, delay=0.05),
+        noise(0.20, 900, 500, 1.6, color='pink', gain=0.25)], trim=-2.0))
+    W.append(entry('pearl.pickup', 'loot', 'Pearl pickup', 0.60, [
+        chord(0.55, [1318.5, 1975.5], 'sine', gain=0.45, stagger=0.06),
+        tone(0.20, 2637, 2637, 'sine', gain=0.15, delay=0.1)], trim=-2.0))
+    return W
 
 
 def main():

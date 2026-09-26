@@ -108,3 +108,34 @@ export async function rekindleRoom(game, loadRoom) {
   game.stats = game.stats || {}; game.stats.rekindled = (game.stats.rekindled || 0) + 1;
   game.bus.emit('rekindle', { roomId: id }); game.bus.emit('narrate', { line: 'narr_rekindle' });
 }
+
+/** What each lesson / hub node hands over the first time you enter it (docs/09 §6.0, canon ladder 00 §6.2). */
+export const NODE_GIFTS = {
+  a1_n03: { flames: ['rime'], shapes: ['lob'], wickSlots: 2, mechanics: ['wick_builder'], say: 'Brother Seld presses a Rime strand into your hand. The Wick builder is yours: braid at any lamp-post.' },
+  a1_n06: { mechanics: ['plank_kit', 'heavy', 'plunge'], say: 'The plank kit, and the heavy swing: hold the pole button.' },
+  a2_n02: { shapes: ['tether'], mechanics: ['grapple'], say: 'The Hookwright fits a grapple to your belt.' },
+  a2_n03: { flames: ['spark'], mechanics: ['wiring', 'traps'] },
+  a2_n05: { flames: ['bile'] },
+  a2_n06: { charms: ['split'], charmSlots: 1, overcharge: true, gutter: true, mechanics: ['skill_board', 'affixes'], say: 'One charm socket, and overcharge: hold cast to pour in more oil.' },
+  a3_n01: { mechanics: ['swimming'] },
+  a3_n02: { flames: ['tide'], wickSlots: 3, charmSlots: 2, mechanics: ['sluices', 'currents'] },
+  a3_n06: { charms: ['linger'] },
+  a4_n01: { flames: ['gleam'], mechanics: ['darkness', 'hood'] },
+  a4_n02: { knots: ['on_hit', 'on_kill'] },
+  a4_n05: { flames: ['shade'] },
+  a5_n02: { wickSlots: 4 },
+  a5_n03: { charms: ['echo'], mechanics: ['gravity', 'bells'] },
+  a6_n02: { charmSlots: 3, mechanics: ['mastery', 'wind'] },
+};
+export function giveNodeGifts(game, nodeId) {
+  const g = NODE_GIFTS[nodeId], h = game.hero; if (!g || !h || h.flags?.[`gift_${nodeId}`]) return null;
+  h.flags ||= {}; h.flags[`gift_${nodeId}`] = true; const U = h.unlocked;
+  for (const k of ['flames', 'shapes', 'charms', 'knots', 'mechanics']) for (const id of g[k] || []) if (!U[k].includes(id)) { U[k].push(id); game.bus.emit('unlock', { kind: k.slice(0, -1), id, name: id.replace(/_/g, ' ') }); }
+  if (g.wickSlots) U.wickSlots = Math.max(U.wickSlots, g.wickSlots);
+  if (g.charmSlots) U.charmSlots = Math.max(U.charmSlots, g.charmSlots);
+  if (g.overcharge) U.overcharge = true; if (g.gutter) U.gutter = true;
+  if (U.mechanics.includes('grapple')) game.flags.have_grapple = true;
+  if (nodeId === 'a1_n03' && h.wicks.length < 2) h.wicks.push({ id: 'w2', flame: 'rime', shape: 'lob', charms: [] });
+  if (g.flames?.includes('tide')) for (const w of h.wicks) w.dry = false;
+  return g;
+}

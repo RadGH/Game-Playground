@@ -34,6 +34,8 @@ export function generateKitRoom(kit, opts) {
   if (propRng.chance(0.35) && room.sockets.floor.length) { const s = propRng.pick(room.sockets.floor); room.things.push({ t: 'crate', id: 'crate_1', at: [s[0], s[1]] }); }
   if (opts.chest && room.sockets.floor.length) { const s = room.sockets.floor[room.sockets.floor.length - 1]; room.things.push({ t: 'chest', id: 'chest_kit', at: [s[0] + 8, s[1]], loot: opts.chestLoot || `lt_${opts.act}_chest` }); }
   for (const t of opts.pinned || []) room.things.push(t);
+  if (opts.kind) room.kind = opts.kind;
+  if (opts.dress) opts.dress(room, propRng); // stand-ins for missing hand-made rooms place their things on the kit's floor sockets
   delete room.sockets; delete room.sky;
   return room;
 }

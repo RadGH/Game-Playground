@@ -88,6 +88,8 @@ export function createHud(game) {
     if (game.prompt) { const pr = game.prompt; const s = `[${pr.key || 'E'}] ${pr.text}`; const x = pr.x - cam.x, y = pr.y - cam.y - 14; rect(x - measure(s) / 2 - 2, y - 2, measure(s) + 4, 11, [0, 0, 0, 0.6]); text(s, x, y, pr.refused ? [1, 0.54, 0.48, 1] : C.ink, 1, 'center'); }
     // --- breath pips ---
     if (p.headUnder && p.breath < (game.data.movement.swim.breath - 0.05)) { const f = p.breath / game.data.movement.swim.breath; for (let k = 0; k < 6; k++) { const on = k < Math.ceil(f * 6); rect(p.x - cam.x - 9 + k * 3, p.y - cam.y - 20, 2, 2, on ? (k === 0 && f < 0.2 ? C.red : [0.7, 0.85, 1, 1]) : [0.2, 0.25, 0.3, 0.6]); } }
+    // --- build mode strip
+    const Bm = game.builder; if (Bm?.on) { const P = { bp_plank: 'Plank', bp_brace: 'Brace', bp_crate: 'Crate' }; const s = `BUILD — [1] Plank 2  [2] Brace 2  [3] Crate 4 · scrap ${hero.scrap || 0} · wheel/T rotate · click place · G done`; rect(W / 2 - measure(s) / 2 - 3, Hh - 50, measure(s) + 6, 10, [0, 0, 0, 0.65]); text(s, W / 2, Hh - 49, C.gold, 1, 'center'); if (Bm.reason) text(Bm.reason, W / 2, Hh - 39, [1, 0.54, 0.48, 1], 1, 'center'); }
     // --- subtitle line (short, bottom centre) ---
     if (game.subtitle && t - game.subtitle.t < game.subtitle.dur) { const lines = wrap(`${game.subtitle.who ? game.subtitle.who.toUpperCase() + ': ' : ''}${game.subtitle.text}`, Math.floor(W * 0.6 / 6)); let y = Hh - 60 - lines.length * 9; for (const l of lines) { rect(W / 2 - measure(l) / 2 - 3, y - 2, measure(l) + 6, 10, [0, 0, 0, 0.62]); text(l, W / 2, y, game.subtitle.color || C.ink, 1, 'center'); y += 9; } }
     return q;

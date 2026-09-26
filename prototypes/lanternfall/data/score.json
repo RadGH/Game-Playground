@@ -1,0 +1,17 @@
+{
+ "_doc": "The procedural score (docs/10 §10.5, R14/B11; canon: the rain is the score). No recorded music: js/audio/score.js builds it on the sfx engine's own AudioContext and plays it through the `music` bus (the rain beds go on the `ambience` bus). `rain`: the two catalog beds and how their gains follow rain intensity 0..1 (light fades in first, heavy takes over from `heavyFrom`). `drone`: shared drone knobs (gain, detune in cents between the two oscillators of a voice, attack/release seconds, a slow filter LFO). `acts`: per act, the key, the drone notes, `voicesPerLamp` (one note ADDED to the drone for each Great Lamp relit so far, in order — the relight sweep), the low-pass filter (Hz; darker acts sit lower), the oscillator wave, and `motifShift` (semitones to transpose the Guild motif into the act's key). `motif`: the 6-note Guild bell motif (lamp-posts, title cards, relights) — notes, tempo (beats per minute, one note per beat), timbre bell partials and decay. `boss.pulse`: one bpm per phase (1..4), a low drum (pitch sweep in Hz, decay seconds). `rainStops`: fade-out seconds when the Rain stops (cs_rain_stops) and whether the score goes fully silent. Note names are scientific pitch (A4 = 440 Hz).",
+ "version": 1,
+ "rain": { "light": "ambience.rain.light", "heavy": "ambience.rain.heavy", "heavyFrom": 0.45, "lightMax": 1.0, "heavyMax": 1.0, "fade": 1.5 },
+ "drone": { "gain": 0.16, "voiceGain": 0.5, "detune": 5, "attack": 3.0, "release": 4.0, "lfoRate": 0.05, "lfoDepth": 0.35, "lampAttack": 6.0 },
+ "acts": {
+  "act1": { "key": "D", "drone": ["D2", "A2"], "voicesPerLamp": ["F3", "A3", "D4", "E4", "F4", "A4"], "filter": 900, "wave": "triangle", "motifShift": 0 },
+  "act2": { "key": "C", "drone": ["C2", "G2"], "voicesPerLamp": ["Eb3", "G3", "C4", "D4", "Eb4", "G4"], "filter": 800, "wave": "triangle", "motifShift": -2 },
+  "act3": { "key": "E", "drone": ["E2", "B2"], "voicesPerLamp": ["G3", "B3", "E4", "F#4", "G4", "B4"], "filter": 1000, "wave": "sine", "motifShift": 2 },
+  "act4": { "key": "B", "drone": ["B1", "F#2"], "voicesPerLamp": ["D3", "F#3", "B3", "C#4", "D4", "F#4"], "filter": 600, "wave": "sine", "motifShift": -3 },
+  "act5": { "key": "G", "drone": ["G1", "D2"], "voicesPerLamp": ["Bb2", "D3", "G3", "A3", "Bb3", "D4"], "filter": 750, "wave": "triangle", "motifShift": 5 },
+  "act6": { "key": "A", "drone": ["A1", "E2"], "voicesPerLamp": ["C#3", "E3", "A3", "B3", "C#4", "E4"], "filter": 1100, "wave": "sine", "motifShift": 7 }
+ },
+ "motif": { "notes": ["D4", "F4", "A4", "G4", "F4", "D4"], "tempo": 60, "timbre": "bell", "partials": [1, 2.0, 2.76, 5.4], "partialGains": [1, 0.5, 0.35, 0.15], "decay": 2.4, "gain": 0.3 },
+ "boss": { "pulse": { "bpm": [72, 88, 104, 120], "timbre": "low_drum", "sweep": [95, 42], "decay": 0.35, "gain": 0.55, "accent": 1.35 } },
+ "rainStops": { "fadeOut": 4.0, "silence": true }
+}

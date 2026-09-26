@@ -146,10 +146,10 @@ void main(){ vec2 uv = gl_FragCoord.xy/size; o = vec4(texture(src,uv).rgb + text
 export const COMPOSITE_FS = `#version 300 es
 ${COMMON}
 uniform sampler2D albedoT; uniform sampler2D emisT; uniform sampler2D lightT; uniform highp usampler2D cells;
-uniform vec2 cam0; uniform vec2 target; uniform vec2 lsize; uniform float margin; uniform float floorL; uniform float time; uniform vec2 roomSize;
+uniform vec2 cam0; uniform vec2 target; uniform vec2 lsize; uniform float margin; uniform float floorL; uniform float time; uniform vec2 roomSize; uniform float gain;
 out vec4 o;
 void main(){ ivec2 p = ivec2(gl_FragCoord.xy); vec4 a = texelFetch(albedoT, p, 0); vec3 e = texelFetch(emisT, p, 0).rgb;
-  vec2 lp = (vec2(p) + 0.5 + vec2(margin, margin)) / 2.0; vec3 L = texture(lightT, lp/lsize).rgb;
+  vec2 lp = (vec2(p) + 0.5 + vec2(margin, margin)) / 2.0; vec3 L = texture(lightT, lp/lsize).rgb * gain;
   vec3 lit = a.rgb * (L + floorL) + e;
   // wet sheen on solids whose flags carry WET, on top faces
   ivec2 w = ivec2(cam0) + ivec2(p.x, int(target.y)-1-p.y);

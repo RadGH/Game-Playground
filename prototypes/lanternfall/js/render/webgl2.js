@@ -175,7 +175,7 @@ export function createWebGL2Renderer(canvas, { mats }) {
     // 4. composite
     fb(T.lit); useFS(P.comp); const cu = P.comp.u;
     bindTex(P.comp, 'albedoT', T.scene.texs[0], 0); bindTex(P.comp, 'emisT', T.scene.texs[1], 1); bindTex(P.comp, 'lightT', T.light.tex, 2); bindTex(P.comp, 'cells', cellTex, 3);
-    gl.uniform2f(cu.cam0, cam0[0], cam0[1]); gl.uniform2f(cu.target, TW, TH); gl.uniform2f(cu.lsize, T.LW, T.LH); gl.uniform1f(cu.margin, MARGIN); gl.uniform1f(cu.floorL, amb.floor ?? 0.1); gl.uniform1f(cu.time, f.time); gl.uniform2f(cu.roomSize, room.W, room.H);
+    gl.uniform2f(cu.cam0, cam0[0], cam0[1]); gl.uniform2f(cu.target, TW, TH); gl.uniform2f(cu.lsize, T.LW, T.LH); gl.uniform1f(cu.margin, MARGIN); gl.uniform1f(cu.floorL, amb.floor ?? 0.1); gl.uniform1f(cu.gain, f.lightGain ?? 2.4); gl.uniform1f(cu.time, f.time); gl.uniform2f(cu.roomSize, room.W, room.H);
     draw();
     // 5. water
     const rip = f.ripple; if (rip) { gl.bindTexture(gl.TEXTURE_2D, rippleTex); gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, Math.min(1024, rip.length), 1, gl.RED, gl.FLOAT, rip.length > 1024 ? rip.subarray(0, 1024) : rip); }

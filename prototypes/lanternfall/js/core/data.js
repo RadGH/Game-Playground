@@ -15,7 +15,8 @@ async function readJson(url) {
 
 export async function loadData() {
   const data = { errors: [] };
-  await Promise.all([...DATA_FILES, ...OPTIONAL].map(async f => {
+  const manifest = await readJson(dataUrl('manifest'));
+  await Promise.all(manifest.files.map(async f => {
     try { data[f.replace('-', '_')] = await readJson(dataUrl(f)); }
     catch (e) { if (DATA_FILES.includes(f)) data.errors.push(`${f}: ${e.message}`); }
   }));

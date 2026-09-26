@@ -701,7 +701,7 @@ export class Hud {
    * This is the one piece of Hack/Mine's presentation worth copying outright: without it the bands
    * exist only on the map, and a player who never opens the map never learns the world has any.
    */
-  announceZone(zone, playerLevel) {
+  announceZone(zone, playerLevel, held = '') { // R27 M9 — `held`: js/warbands.js holderLine()
     const box = $('zone-banner');
     if (!box || !zone) return false;
     if (this.announcedZone === zone.id) return false;
@@ -712,7 +712,7 @@ export class Hud {
     box.querySelector('.zb-name').textContent = zone.name;
     box.querySelector('.zb-level').textContent = `level ${zone.minLevel}\u2013${zone.maxLevel}`;
     box.querySelector('.zb-level').className = 'zb-level zone-' + tone;
-    box.querySelector('.zb-danger').textContent = zone.danger + ' · ' + TONE_WORDS[tone];
+    box.querySelector('.zb-danger').textContent = zone.danger + ' · ' + TONE_WORDS[tone] + (held ? ' · ' + held : '');
     box.className = 'hud zb-' + tone;
     box.classList.remove('hidden');
     // restart the animation even if the banner is already up

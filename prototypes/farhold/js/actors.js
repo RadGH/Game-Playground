@@ -255,7 +255,9 @@ export class EnemyField {
    */
   warbandAt(x, z) {
     if (!this.warbands || !this.zones) return null;
-    return this.warbands.of(this.zones.at(x, z)) || null;
+    // R27 M9 — a warband driven out of a zone (grip 0) puts nobody down in it, whatever the claim
+    const zone = this.zones.at(x, z);
+    return (this.warbands.holds ? this.warbands.holds(zone) : this.warbands.of(zone)) || null;
   }
 
   /** The table entries that belong in the biome the player is standing in, at this level. */
@@ -331,7 +333,17 @@ export class EnemyField {
      * a warband here, so every unheld zone rolls exactly the sequence it always did.
      */
     const own = pool.filter(d => d.warband);
-    if (own.length && own.length < pool.length && this.rng() < (this.warbands?.spawnShare ?? 0.65)) pool = own;
+    /**
+     * R27 M9 — AND THE SHARE IS THE WARBAND'S GRIP ON THE ZONE (js/warbands.js `warbandShare`), the
+     * one helper encounters.js reads too. The other side of the roll is the zone's wildlife ONLY:
+     * leaving members in the mixed pool made the real share `s + (1-s) x own/pool`, which no knob
+     * said, and a thinned valley would have gone on meeting orcs out of the wildlife half.
+     */
+    if (own.length) {
+      const rest = pool.filter(d => !d.warband);
+      // (a zone whose band has nothing but the warband in it keeps meeting the warband)
+      pool = this.rng() < (this.warbands?.share?.(this.zones?.at?.(cx, cz)) ?? 0) || !rest.length ? own : rest;
+    }
     const def = this.rng.pick(pool);
 
     const rank = this.rpg.rollRank(this.rng, { bonus: this.rankBonus });

@@ -99,6 +99,11 @@ function fits(need, candidate, ctx) {
   // `rival` means "belongs to whoever is pushing in", which is a fact about the territory record
   if (need.rival && candidate.faction !== ctx.contested) return false;
   /**
+   * R27 M9 — `warband` means "a war party of the warband holding THIS zone", with its leader still
+   * standing (the job is to put the leader down). The zone's warband is the territory record's.
+   */
+  if (need.warband && (!candidate.warband || candidate.warband !== ctx.warband || candidate.leaderDown || !candidate.leaderId)) return false;
+  /**
    * R14 — THE DISTANCE BUDGET.
    *
    * `ctx.maxMetres` comes from the frame's own scope (see SCOPE_METRES). A candidate that does not
@@ -220,7 +225,7 @@ export function createJobGen({ frames: data, territory = null, factions = null, 
   function offer({ zone, level = 1, candidates = [], want = 4, exclude = [] } = {}) {
     if (!zone) return [];
     const record = territory?.of?.(zone.id) || null;
-    const ctx = { contested: record?.contested || null, holder: record?.holder || null };
+    const ctx = { contested: record?.contested || null, holder: record?.holder || null, warband: (record?.warGrip > 0 && record?.warband) || null };
     const rng = rngFrom(hash(seed, zone.id, record?.visits ?? 0, offers++));
     // the zone you are standing in is a candidate in its own right, and it is nought borders away
     const pool = candidates.concat([{ type: 'zone', ...zone, name: zone.name, adjacent: false, zoneHops: 0 }]);

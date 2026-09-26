@@ -75,6 +75,16 @@
       "onDone": { "grip": 0.04 }
     },
     {
+      "id": "thin_their_patrols", "scope": "local", "weight": 9,
+      "_r27": "R27 M9 \u2014 binds only to a live war party of the warband holding this zone (js/jobgen.js `need.warband`), whose leader is still up. Killing that leader is the job; wiping the whole party costs the warband grip (js/patrols.js).",
+      "needs": [{ "slot": "patrol", "type": "patrol", "warband": true }],
+      "title": "Thin their patrols",
+      "text": "{patrol.warbandName} walk the {zone.name} road as if they own it. Find {patrol.name} and put its leader down.",
+      "goal": { "kind": "kill", "target": "{patrol.leaderId}", "count": 1, "at": "{patrol}" },
+      "reward": { "gold": [60, 130], "xp": [70, 150], "standing": 6 },
+      "onDone": { "rumour": "the {zone.name} road is quieter since somebody broke up a war party on it" }
+    },
+    {
       "id": "patrol_gone_quiet", "scope": "local", "weight": 7,
       "needs": [
         { "slot": "patrol", "type": "patrol", "state": "missing" },

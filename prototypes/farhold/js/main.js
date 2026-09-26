@@ -43,7 +43,7 @@ import { createStandings, ranked as rankedFactions, createIntroducer } from './f
 import { createTerritory } from './territory.js';
 import { createJobGen, candidatesFrom } from './jobgen.js';
 import { createIncidents, NO_EFFECT } from './incidents.js';
-import { createPatrols } from './patrols.js';
+import { createPatrols, createPatrolBodies, routeAlongRoads } from './patrols.js'; // R27 M9
 import { createCaravans } from './caravans.js';
 import { createWanderers } from './wanderers.js';
 import { createRumours } from './rumours.js';
@@ -133,7 +133,7 @@ import { createSkillBar, applyStatus, tickStatuses, slowOf, buffsOf, outgoingFro
 import { installFoci } from './foci.js';
 import { dressClassLooks, wearClassLook } from './classwear.js';
 import { loadClassOutfits } from '../../../avatar-3d/js/class-outfits.js';
-import { installWarbands, createWarbandMap } from './warbands.js';
+import { installWarbands, createWarbandMap, holderLine } from './warbands.js';
 import { installUniques, resolveAttack, afterKill as uniquesAfterKill, afterDamaged as uniquesAfterDamaged, tickAuras } from './uniques.js';
 import { EFFECTS as FX_TABLE } from './effects.js';
 // round 4: the RPG expansion
@@ -614,9 +614,12 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     // so a wayshrine stands on a real landmark node rather than in the middle of a field
     nodesFor: zone => (world.nodes || []).filter(n =>
       zones.at(n.x * terrain.metresPerCell, n.y * terrain.metresPerCell)?.id === zone.id),
+    // R27 M9 — the warband claims live on the enemy field (a `let` far below: until it exists this
+    // throws, and territory.js takes a throw as "not known yet" and does not keep the record)
+    warbandOf: zone => (field.warbands ? field.warbands.of(zone) : null), warbandCfg: balance.warbands,
   });
   const trouble = createIncidents({ data: incidentData, territory: holdings, factions: factionData, seed });
-  const patrols = createPatrols({ territory: holdings, factions: factionData, standings, seed });
+  const patrols = createPatrols({ territory: holdings, factions: factionData, standings, seed, warbands: bestiary.warbands, sizes: balance.warbands?.patrolSize }); // R27 M9
   const trade = createCaravans({ territory: holdings, factions: factionData, standings, seed });
   const roadFolk = createWanderers({ data: wandererData, territory: holdings, standings, seed });
 
@@ -2507,6 +2510,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       }
     }
     if (!dungeon) creditKill(e.x ?? control.x, e.z ?? control.z);
+    // R27 M9 — one of a warband's own, killed on its own ground, loosens its grip there
+    const band = !dungeon && bestiary.enemies.find(d => d.id === e.defId)?.warband;
+    if (band && band === holdings.of(zones.at(e.x, e.z)?.id)?.warband) holdings.warbandLoss(zones.at(e.x, e.z).id, 'kill');
     sound.combat('death', { beast: e.kind !== 'humanoid' });
     /**
      * R17 — a boss is worth researching. A world boss is its own tier (`data/worldbosses.json`
@@ -2687,7 +2693,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
        * warband's `prefers` is read at the middle of its region.
        */
       warbands: bestiary.warbands ? createWarbandMap(bestiary.warbands, {
-        seed,
+        seed, gripOf: z => holdings.warGrip(z), // R27 M9 — the saved grip, so a thinned zone spawns thinner
         biomeOf: z => {
           const cell = forTerrain.metresPerCell || 640;
           return z?.center ? familiesOf(forTerrain.biomeIdAt(z.center.x * cell, z.center.y * cell)) : [];
@@ -2744,6 +2750,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   }
 
   let field = makeField();
+  // R27 M9 — a hostile patrol gets bodies when you are near its clock position (js/patrols.js)
+  const patrolBodies = createPatrolBodies({ patrols, field: () => field, radius: balance.warbands?.patrolSpawnRadius ?? 150,
+    onWiped: p => hud.log(p.warband ? `${p.name} is broken — ${holderLine(field.warbands?.of?.(zones.byId(p.zoneId)), p.credit?.grip ?? 1)}.` : `${p.name} is wiped out.`, 'level') });
   // whatever stops the player stops an enemy too
   field.solids = [props.solids, features.solids, buildSolids, gateSolids, siteSolids];
 
@@ -3493,6 +3502,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         placeId: spot.placeId, placeName: spot.placeName, tier, base: spot.base,
         level: player.level, biome: terrain.biomeAt(control.x, control.z).key,
         at: state.elapsed, hour: sky.dayFraction * 24,
+        heldBy: field.warbands?.holds?.(zones.at(control.x, control.z))?.id ?? null, // R27 M9 — a drill on warband ground
       });
       if (!out.ok) { hud.log(out.why || 'Not now.', 'bad'); return out; }
       defence.adopt(out.quest);
@@ -6461,6 +6471,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       terrain, seed,
       getPlayer: () => control,
       getEnemies: () => field.enemies,
+      warbands: () => field.warbands, // R27 M9 — the warband layer
       onTeleport: (x, z) => { control.teleport(x, z); rebuildWorldAround(true); field.clear(); },
       markers,
       // round 4: the level-band overlay, and the dungeon mouths and camps to plan a route around
@@ -7447,8 +7458,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     // R17 — exploring pays for research, and `visits` is 1 the first time only
     if (record?.visits === 1) sharedResearch().award('region', 1);
     // R26 — say who holds the ground, once, the first time you walk into it
-    const heldBy = field?.warbands?.of?.(zone);
-    if (heldBy && record?.visits === 1) hud.log(`${heldBy.name} hold ${zone.name} — ${heldBy.blurb}.`, 'warn');
+    // (R27 M9: said on the zone banner now — hud.announceZone's holder line — not in the log)
+    if (record?.warband && record.warGrip >= 0.5 && record.visits === 1) patrols.loseOne(zone.id, { human: true }); // R27 M9
 
     /**
      * R16 — EVERY LANDMARK IN THIS ZONE GETS A MODEL, AND EVERY MODEL GETS A LEDGER.
@@ -7471,7 +7482,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
     // a patrol walks between real places: the zone's settlements, landmarks and passes
     const route = nodes.filter(n => ['settlement', 'port', 'landmark', 'pass'].includes(n.type)).map(spot);
-    const stops = route.length >= 2 ? route
+    // R27 M9 — along the zone's real road where it has one, so a patrol's bodies stand on a road
+    const onRoad = routeAlongRoads(terrain.roadPaths, (x, z) => zones.at(x, z)?.id === zone.id, { name: `the ${zone.name} road` });
+    const stops = onRoad.length >= 2 ? onRoad : route.length >= 2 ? route
       : holdings.sitesIn(zone.id).map(si => ({ x: si.x, z: si.z, name: si.name }));
     if (stops.length >= 2) patrols.enter(zone, stops);
 
@@ -7531,7 +7544,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       rumours.hear(pick, { from: rumourSource(zone), extra: { unvisitedLandmarks: 2 } });
     }
 
-    if (record?.holder) hud.log(`${zone.name} is held by ${intro.nameFor(record.holder)}.`, '');
+    // R27 M9 — on warband ground the human faction is the one it is taking the ground FROM
+    if (record?.holder) hud.log(record.warband && record.warGrip > 0 ? `${zone.name} is ${intro.nameFor(record.holder)} country, overrun by ${String(record.warbandName).replace(/^The /, 'the ')}.` : `${zone.name} is held by ${intro.nameFor(record.holder)}.`, '');
     // R14: a tier-C zone event costs four of the purse's four points, so it cannot happen twice in
     // two minutes however much the world wants it to
     if (started) {
@@ -7699,6 +7713,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     }
     lastPhase = phase;
     patrols.update(seconds, { night });
+    if (!dungeon) patrolBodies.update(control.x, control.z); // R27 M9 — bodies within 150 m of a hostile patrol
     for (const event of trade.update(seconds, { playerNear: { x: control.x, z: control.z } })) {
       /**
        * R14: a load being taken apart is something you can run to, so it is an activity and it
@@ -8266,7 +8281,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
           const st = defence.standing();
           if (!st.state || st.state === 'won' || st.state === 'lost' || st.state === 'declined') {
             const offer = defence.offer({ level: player.level, biome: terrain.biomeAt(control.x, control.z).key,
-              heldBy: field.warbands?.of?.(zones.at(control.x, control.z))?.id ?? null }); // R27 M1
+              heldBy: field.warbands?.holds?.(zones.at(control.x, control.z))?.id ?? null }); // R27 M1 (M9: holds — not once driven out)
             if (!offer.ok) hud.log(offer.why, 'warn');
             else {
               hud.log(`${offer.tier.name}: ${offer.waves.length} waves. Press E again to take it on.`, 'level');
@@ -9648,7 +9663,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     const here = dungeon ? null : zones.atOrLast(control.x, control.z);
     hud.here = here;
     // crossing a border announces the new region on screen, with its band
-    if (here && !zones.isOpenWater(here)) hud.announceZone(here, player.level);
+    if (here && !zones.isOpenWater(here)) hud.announceZone(here, player.level, holderLine(field.warbands?.of?.(here), holdings.warGrip(here))); // R27 M9
     // R27 M3 — the arrival card: on the town's own edge (townExtent), once per walk in
     const arrived = dungeon ? null : arrivalAt(control.x, control.z, features.settlements);
     if (arrived) hud.announceTown(arrivalCard(arrived, { roster: folk?.rosterFor?.(arrived)?.roster,
@@ -10304,6 +10319,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     get townHall() { return townHall; },
     /** The territory layer, so a spec can read a landmark's own ledger row rather than guess. */
     get holdings() { return holdings; },
+    get patrolBodies() { return patrolBodies; }, // R27 M9 (`patrols` is further down)
     /** The landmark join: a set piece and its ledger row are the same place now. */
     landmarkAudit: () => (sites.sites || [])
       .filter(s => s.family === 'landmark')

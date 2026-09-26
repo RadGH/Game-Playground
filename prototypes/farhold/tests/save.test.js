@@ -167,3 +167,31 @@ test('the taken strongholds survive a save, and an old save loads with none take
   assert.deepEqual(old.strongholds, {});
   assert.ok(/save\?\.strongholds/.test(mainSrc), 'main.js never reads the ledger back out of a save');
 });
+
+/**
+ * R27 M9 — a warband's grip on a zone rides in the territory deltas. A save that dropped it would
+ * stand every thinned valley back up at full strength on reload; a save from before round 27 has
+ * no `warGrip` and must load at the full seeded claim.
+ */
+test('the warband grip survives a save through the territory deltas, and an old save loads at full grip', async () => {
+  const { createTerritory } = await import('../js/territory.js');
+  const factions = JSON.parse(readFileSync(new URL('../data/factions.json', import.meta.url), 'utf8'));
+  const zone = { id: 3, name: 'Probe Vale', minLevel: 8, maxLevel: 12, midLevel: 10, danger: 'wild', cells: [] };
+  const zones = { byId: id => (id === 3 ? zone : null) };
+  const band = { id: 'ashtusk', name: 'The Ashtusk Horde' };
+  const make = saved => createTerritory({ zones, seed: 9, factions, saved, warbandOf: () => band, warbandCfg: { gripRegen: 0.1, patrolGrip: 0.1 } });
+  const land = make(null);
+  land.warbandLoss(3, 'patrol');
+  land.warbandLoss(3, 'patrol');
+  const base = {
+    id: 's1', name: 'Probe', seed: 1, classId: 'ranger', control: { x: 0, z: 0, yaw: 0, pitch: 0 },
+    player: { level: 1, attrs: {}, equipment: {}, bag: [] },
+  };
+  const out = JSON.parse(JSON.stringify(snapshot({ ...base, territory: land.toJSON() })));
+  assert.equal(out.territory.zones[3].warGrip, 0.8);
+  assert.equal(make(out.territory).warGrip(3), 0.8, 'the grip did not come back from the save');
+  delete out.territory.zones[3].warGrip;
+  assert.equal(make(out.territory).warGrip(3), 1, 'an old save did not load at full grip');
+  assert.equal(make(null).warGrip(3), 1);
+  assert.ok(/territory: holdings\.toJSON\(\)/.test(mainSrc) && /saved: save\?\.territory/.test(mainSrc), 'main.js no longer saves or loads the territory deltas');
+});

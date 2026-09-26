@@ -4246,3 +4246,67 @@ calls are one mesh per kind in view. Before the 600 m decoration range they were
     `research/round27-walls/`.
 - `round23-bridge-gate.test.js` and `round3.spec.js` now look a town's wall up through
   `wallOf(id).keys`, because a hedge town's gatehouse is in `gatehouse_hedge`.
+
+### Round 27 — Warbands hold ground (M9)
+
+Round 26 gave every zone a warband claim (`js/warbands.js`) and then did almost nothing with it: one
+log line on the first visit, a spawn share the set pieces ignored, and patrols that were a position
+and a clock with no body — `near`, `killed`, `reaction` and `loseOne` had no caller in the game, and
+`createWarbandMap().held()` had one caller, a spec.
+
+**Root causes**
+- **Two hostile holders.** `js/territory.js` picked a zone's human holder and rival blind to the
+  warband, so an orc valley was also "held by the Ashen Pact" with raid-band patrols on top. Over
+  the six standard seeds, 136 of 161 held zones had a second hostile claimant.
+- **The share was not the share.** `spawnNear` rolled `spawnShare` for "members only" but left the
+  members in the other half of the roll too, so the real share was `s + (1-s)·own/pool`; and
+  `encounters.js` `poolFor` never read it at all.
+- **Nothing persisted.** Nothing the player did to a warband was remembered.
+
+**What changed**
+- **One holder** (`territory.js` `build`): on warband ground the warband takes the hostile slot, and
+  holder and contested are drawn only from factions that are not hostile on sight. `hostiles(zone)`
+  reports who is hostile there (never more than one). Deeds against a warband go to its rivals — the
+  zone's holder and contester — at `RIVAL_SHARE` (now exported from `js/factions.js`, the same third
+  every deed spreads). No new standing rows.
+- **Grip** (`warGrip`, separate from the human holder's `grip`): 1 at the seeded claim, saved as a
+  delta in the territory snapshot (an old save reads 1). `warbandLoss(zone, kill|patrol|camp|warlord)`
+  drops it by `balance.json` `warbands.<what>Grip`; `tick` regrows it by `gripRegen` per game day. At
+  0 the claim reads "driven out" and `holds()` goes null, so nothing of theirs spawns (spawner, set
+  pieces, jobs, raids, drills).
+- **One helper**: `warbandShare(data, grip)` is the only reader of `spawnShare`; `spawnNear` and
+  `poolFor` both ask `map.share(zone)`, and the other half of the roll is wildlife only.
+- **Map layer** (`js/map.js`): a "warbands" chip (on by default) washes each held zone you KNOW in
+  its warband's `colour`, with a "held by" legend. Known means the same reveal store the region
+  names use — walked into, or named in a rumour — so the new `warband_holds` rumour
+  (`js/rumours.js`) reveals a valley without a second list.
+- **Banner**: `hud.announceZone` takes a third argument, `holderLine()` ("held by the Ashtusk Horde —
+  shaken"); the first-visit log line is gone, and the "held by <faction>" log line on warband ground
+  now reads "<faction> country, overrun by <warband>".
+- **Patrols with bodies** (`js/patrols.js`): on held ground the patrols are war parties (a leader and
+  `warbands.patrolSize` members) plus one human watch, which a warband makes go quiet on your first
+  visit (`loseOne`, so `patrol_gone_quiet` can bind). Routes follow the zone's longest stretch of real
+  road (`routeAlongRoads`, there and back) instead of straight lines between towns.
+  `createPatrolBodies` puts a hostile patrol's bodies on the enemy field within
+  `patrolSpawnRadius` (150 m) of its clock position, never inside a town watch; they march the route
+  while nothing has their attention, sit on the set-piece leash, and a wiped patrol calls `killed()`
+  once (a warband patrol costs `patrolGrip`). Friendly and wary patrols stay clocks — the enemy field
+  has no friendly bodies.
+- **Job** `thin_their_patrols` binds only to a live war party of the zone's own warband with its
+  leader up; the goal is that leader.
+- **Leftover from M1**: a town drill (`muster.start`) now takes `heldBy`, so a drill on warband ground
+  draws that warband.
+
+**Measured** (tests/round27-warbands.test.js, 12 tests, six standard seeds): one hostile holder in
+every zone; member share at grip 0.3 = 0.213 from `spawnNear` (want 0.195 ± 0.05) and 0.178 from
+`poolFor` (± 0.07); 0 of 1000 at grip 0; a day restores exactly `gripRegen` (checked at 0.037); save
+and old-save load; a war party's bodies all within 30 m of the road, credited once, no duplicate on
+walking away and back; 33 "Thin their patrols" in 591 jobs, every one bound to a live party of the
+right warband. `tests/round26-races.spec.js` checks the live map layer (held ∩ revealed, the odd
+colour in the legend and in the canvas pixel), the banner and a war party with real bodies.
+`tests/save.test.js` checks the grip through `snapshot()`.
+
+**Not done / notes**: patrol bodies march by steering their stroll, not with a new movement mode, so
+they amble rather than march. The territory ledger is keyed by zone id and is not reset on landing
+(true before this round); `warGrip` ignores a row whose zone name does not match so another world's
+warbands are not suppressed.

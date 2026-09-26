@@ -118,7 +118,7 @@ export function createMuster({ data = null, civics = null, bestiary = null, rng 
    * Take a rank off the board and ring it. One call, because a drill you accepted and did not
    * start would just be a raid with extra steps.
    */
-  function start({ placeId = 'here', placeName = 'here', tier = null, base = {}, level = 1, biome = 'any', at = 0, hour = 12 } = {}) {
+  function start({ placeId = 'here', placeName = 'here', tier = null, base = {}, level = 1, biome = 'any', at = 0, hour = 12, heldBy = null } = {}) {
     if (quest && quest.state === 'running') return { ok: false, why: 'One is already on the field.' };
     const row = TIERS.find(t => t.key === tier);
     if (!row) return { ok: false, why: 'No such muster.' };
@@ -129,6 +129,7 @@ export function createMuster({ data = null, civics = null, bestiary = null, rng 
       enemies: bestiary?.enemies || [], bosses: bestiary?.bosses || [], modifiers: bestiary?.modifiers || [],
       rng, data: D, at, placeName, place: placeId,
       forceTier: tier, drill: true,
+      heldBy, // R27 M9 — a drill in warband ground draws that warband (js/raid.js raidersFor)
     });
     if (!offer?.ok) return { ok: false, why: offer?.why || 'Nothing would come.' };
     acceptRaid(offer, { at });

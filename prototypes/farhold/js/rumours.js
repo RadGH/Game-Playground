@@ -88,6 +88,17 @@ export const KINDS = [
     say: c => `everything green in ${c.zone} came up at once. It will not last`,
   },
   {
+    /**
+     * R27 M9 — who holds the valley over the hill. A rumour is filed under its zone, and the map's
+     * reveal store (js/map.js `heardOf`) reads every zone the rumour book names — so hearing this is
+     * also what puts that valley's warband on the map's warband layer. One store, not a second list.
+     */
+    key: 'warband_holds', weight: 8,
+    holds: c => !!c.warband && c.warGrip > 0,
+    say: c => `${c.warbandName} ${c.warGrip >= 0.67 ? 'hold' : 'still hold'} ${c.zone}`
+      + (c.warGrip >= 0.67 ? ', and nobody has shifted them' : c.warGrip >= 0.34 ? ', though somebody has been thinning them' : ', but only just'),
+  },
+  {
     key: 'fair', weight: 5,
     holds: c => !!c.fair,
     say: c => `there is a fair on in ${c.zone} and for one day everything is cheap`,
@@ -125,6 +136,10 @@ export function createRumours({ territory = null, factions = null, seed = 1, max
       grudge: extra.grudge || null,
       wreck: extra.wreck || null,
       bloom: (record.incidents || []).some(i => i.kind === 'bloom'),
+      // R27 M9 — the warband holding it, if one does, and how firmly
+      warband: record.warband || null,
+      warbandName: String(record.warbandName || record.warband || '').replace(/^The /, 'the '),
+      warGrip: record.warband ? record.warGrip ?? 1 : 0,
       fair: (record.incidents || []).some(i => i.kind === 'fair_day'),
     };
   }

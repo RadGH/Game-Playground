@@ -11,21 +11,21 @@ export function createRain(world, spec = {}) {
       R.acc += R.density * R.scale * (view.x1 - view.x0 + 128) / 100 * dt;
       while (R.acc >= 1) {
         R.acc -= 1;
-        const x = view.x0 - 64 + Math.random() * (view.x1 - view.x0 + 128) | 0;
+        const x = view.x0 - 64 + world.grid.rand() * (view.x1 - view.x0 + 128) | 0;
         if (x < 0 || x >= g.W || skyTop[x] < 0) continue;
         if (P.counts[PK.RAIN] > 1800) break;
-        P.spawn(PK.RAIN, x, Math.max(0, view.y0 - 8), R.wind * 90, 420 + (Math.random() - 0.5) * 80, 3, 0x8fa6c4, 0, 0);
+        P.spawn(PK.RAIN, x, Math.max(0, view.y0 - 8), R.wind * 90, 420 + (world.grid.rand() - 0.5) * 80, 3, 0x8fa6c4, 0, 0);
       }
     }
     // drips
-    for (const d of R.drips) { d.t -= dt; if (d.t <= 0) { d.t = d.every[0] + Math.random() * (d.every[1] - d.every[0]); P.spawn(PK.DRIP, d.x + 0.5, d.y + 1, 0, 10, 4, 0x9fb8d4, 0, 900); } }
+    for (const d of R.drips) { d.t -= dt; if (d.t <= 0) { d.t = d.every[0] + world.grid.rand() * (d.every[1] - d.every[0]); P.spawn(PK.DRIP, d.x + 0.5, d.y + 1, 0, 10, 4, 0x9fb8d4, 0, 900); } }
   };
   R.onHit = function (x, y, px, py, m, kind, ripples) {
     const g = world.grid, c = g.mats.cls[m];
     if (c === CLS.LIQUID) { ripples?.impulse(x, kind === PK.DRIP ? -1 : -0.6); return 'splashL'; }
     g.wet(x, y, 255);
     const chance = kind === PK.DRIP ? 0.25 : R.deposit;
-    if (R.deposited < R.maxDeposit && Math.random() < chance && g.get(px, py) === 0) { g.set(px, py, 22); R.deposited++; }
+    if (R.deposited < R.maxDeposit && world.grid.rand() < chance && g.get(px, py) === 0) { g.set(px, py, 22); R.deposited++; }
     return 'splash';
   };
   /** Find drip points under ledges near open sky or wet cells (max 48). */
@@ -33,9 +33,9 @@ export function createRain(world, spec = {}) {
     const g = world.grid, W = g.W, out = [];
     for (let y = 2; y < g.H - 2 && out.length < limit * 4; y += 1) for (let x = 2; x < W - 2; x += 3) {
       const i = y * W + x; if (g.mats.cls[g.mat[i]] !== CLS.STATIC || g.mat[i + W] !== 0) continue;
-      if ((g.mat[i - 1] !== 0 || g.mat[i + 1] !== 0) && g.mat[i + W * 2] === 0 && g.mat[i + W * 3] === 0 && Math.random() < 0.08) out.push({ x, y, every: [1.2, 4.0], t: Math.random() * 3 });
+      if ((g.mat[i - 1] !== 0 || g.mat[i + 1] !== 0) && g.mat[i + W * 2] === 0 && g.mat[i + W * 3] === 0 && world.grid.rand() < 0.08) out.push({ x, y, every: [1.2, 4.0], t: world.grid.rand() * 3 });
     }
-    return out.sort(() => Math.random() - 0.5).slice(0, limit);
+    return out.sort(() => world.grid.rand() - 0.5).slice(0, limit);
   };
   return R;
 }

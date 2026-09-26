@@ -17,7 +17,7 @@ export const HARDNESS = { [STONE]: 4, [BRICK]: 3, [WOOD]: 2, [PLANK]: 2, [WAX]: 
  * @param opts  { dig, power, fromPlayer, maxCells, falloff }
  */
 export function applyElement(game, cx, cy, r, flame, opts = {}) {
-  const g = game.grid, W = g.W, H = g.H, mats = g.mats, rng = game.rng?.spell || { next: Math.random, chance: p => Math.random() < p };
+  const g = game.grid, W = g.W, H = g.H, mats = g.mats, rng = game.rng?.spell || { next: () => g.rand(), chance: p => g.rand() < p };
   const res = { boiled: 0, frozen: 0, ignited: 0, dissolved: 0, water: 0, shockedWater: false, touched: 0, sand: 0, wet: 0 };
   const dig = opts.dig ?? 0; let budget = opts.maxCells ?? 400;
   cx = Math.round(cx); cy = Math.round(cy); r = Math.max(1, Math.round(r));
@@ -96,17 +96,18 @@ export function applyElement(game, cx, cy, r, flame, opts = {}) {
 
 /** Explosion (docs/06 §13): carve by blast resist, throw liquids as particles, debris, events. */
 export function explode(game, cx, cy, r, power, opts = {}) {
+  const R = () => game.grid.rand();
   const g = game.grid, W = g.W, H = g.H, mats = g.mats, P = game.particles;
   r = Math.min(48, Math.round(r)); let debris = 0, thrown = 0;
   for (let y = cy - r; y <= cy + r; y++) for (let x = cx - r; x <= cx + r; x++) {
     if (x < 1 || y < 1 || x >= W - 1 || y >= H - 1) continue;
     const d2 = (x - cx) ** 2 + (y - cy) ** 2; if (d2 > r * r) continue;
     const f = 1 - d2 / (r * r), i = y * W + x, m = g.mat[i], c = mats.cls[m];
-    if (c === CLS.LIQUID) { if (thrown < 300 && P) { const d = Math.sqrt(d2) || 1; P.spawn(3, x, y, (x - cx) / d * (100 + Math.random() * 150), (y - cy) / d * (100 + Math.random() * 150) - 60, 2, 0x4070b0, m, 900); g.set(x, y, AIR); thrown++; } continue; }
+    if (c === CLS.LIQUID) { if (thrown < 300 && P) { const d = Math.sqrt(d2) || 1; P.spawn(3, x, y, (x - cx) / d * (100 + R() * 150), (y - cy) / d * (100 + R() * 150) - 60, 2, 0x4070b0, m, 900); g.set(x, y, AIR); thrown++; } continue; }
     if (c === CLS.STATIC || c === CLS.POWDER) {
       if (g.flags[i] & F.PINNED) continue;
       const destroyed = g.damage(x, y, power * f, 0);
-      if (destroyed && debris < 120 && P && Math.random() < 0.3) { const ramp = mats.ramps[m][0]; const d = Math.sqrt(d2) || 1; P.spawn(7, x, y, (x - cx) / d * (120 + Math.random() * 200), (y - cy) / d * (120 + Math.random() * 200) - 80, 1.5, (ramp[0] << 16) | (ramp[1] << 8) | ramp[2], mats.brokenTo[m] === m ? 0 : mats.brokenTo[m], 900); debris++; }
+      if (destroyed && debris < 120 && P && R() < 0.3) { const ramp = mats.ramps[m][0]; const d = Math.sqrt(d2) || 1; P.spawn(7, x, y, (x - cx) / d * (120 + R() * 200), (y - cy) / d * (120 + R() * 200) - 80, 1.5, (ramp[0] << 16) | (ramp[1] << 8) | ramp[2], mats.brokenTo[m] === m ? 0 : mats.brokenTo[m], 900); debris++; }
     }
     if (opts.heat) g.heat(x, y, power * f * opts.heat);
   }

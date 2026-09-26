@@ -30,7 +30,7 @@ export function createFragments(world) {
   };
 
   function powderise(cells) {
-    for (const i of cells) { const m = g.mat[i]; const to = mats.brokenTo[m]; const cls = mats.cls[to]; g.set(i % W, (i / W) | 0, cls === CLS.POWDER || cls === CLS.LIQUID ? to : (Math.random() < 0.6 ? 20 : 0)); }
+    for (const i of cells) { const m = g.mat[i]; const to = mats.brokenTo[m]; const cls = mats.cls[to]; g.set(i % W, (i / W) | 0, cls === CLS.POWDER || cls === CLS.LIQUID ? to : (g.rand() < 0.6 ? 20 : 0)); }
   }
 
   function blocked(f, dy) { // would moving down by dy hit a solid/powder?
@@ -43,7 +43,7 @@ export function createFragments(world) {
       // find the first air above the fragment top in this column
       let ty = Math.floor(f.fy) + (f.top[c] === 32767 ? 0 : f.top[c]) - 1; while (ty > 0 && g.mat[ty * W + x] !== 0) ty--;
       if (ty > 0 && n < 400) { g.set(x, ty, m); n++; } g.set(x, y, 0);
-      if (n >= 400 && world.game?.particles) world.game.particles.spawn(3, x, y - 2, (Math.random() - 0.5) * 120, -150 - Math.random() * 100, 1.5, 0x3a6aa0, m, 900);
+      if (n >= 400 && world.game?.particles) world.game.particles.spawn(3, x, y - 2, (g.rand() - 0.5) * 120, -150 - g.rand() * 100, 1.5, 0x3a6aa0, m, 900);
     }
     return n;
   }
@@ -53,7 +53,7 @@ export function createFragments(world) {
     for (let r = 0; r < f.h; r++) for (let c = 0; c < f.w; c++) {
       const k = r * f.w + c, m = f.mat[k]; if (!m) continue;
       let x = f.x + c, y = yb + r; while (y > 0 && g.mat[y * W + x] !== 0 && mats.cls[g.mat[y * W + x]] !== CLS.GAS && mats.cls[g.mat[y * W + x]] !== CLS.LIQUID) y--;
-      const broken = Math.random() < shatter ? mats.brokenTo[m] : m;
+      const broken = g.rand() < shatter ? mats.brokenTo[m] : m;
       g.set(x, y, broken, { shade: f.shade[k], temp: f.temp[k], flags: f.flags[k] & (F.BUILT | F.FROM_WATER | F.WET) });
       if (broken === m) g.supportQueue.push(y * W + x);
     }

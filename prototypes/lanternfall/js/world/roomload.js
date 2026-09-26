@@ -134,7 +134,7 @@ export function compileRoom(room, data, opts = {}) {
   for (let c = 0; c < g.NC; c++) g.hotNext[c] = 1;
   const world = { grid: g, steamDebt: 0, wind: room.rain?.wind ?? 0, basins, room };
   // 8. settle
-  const settle = opts.settle ?? 120;
+  const settle = opts.settle ?? 30; // v2: rooms must settle within 30 ticks (room-check enforces)
   for (let k = 0; k < settle; k++) { stepCells(world, null); stepThermal(world); stepLiquids(world); }
   g.allGfxDirty();
   const things = (room.things || []).map(t => ({ ...t }));

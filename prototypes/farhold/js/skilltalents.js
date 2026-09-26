@@ -384,7 +384,19 @@ export function talentPlan(player, skillId, plan) {
     if (m.speed) out.speed = (out.speed || 1) * m.speed;
     if (m.pierce) out.pierce = (out.pierce || 0) + m.pierce;
     if (m.homing) out.homing = (out.homing || 0) + m.homing;
-    if (m.radiusPct) { out.radius = (out.radius || 0) * (1 + m.radiusPct / 100); out.splash = (out.splash || 0) * (1 + m.radiusPct / 100); }
+    if (m.radiusPct) {
+      out.radius = (out.radius || 0) * (1 + m.radiusPct / 100);
+      out.splash = (out.splash || 0) * (1 + m.radiusPct / 100);
+      /**
+       * 2026-09-26 — "Wider" is offered on the melee (swipe) board, and a melee plan has no
+       * `radius`: it multiplied zero and did nothing. On a swing it widens the arc (capped at the
+       * same 1.6 pi a basic swing's area stat stops at) and lengthens the reach by a third as much.
+       */
+      if (out.kind === 'melee') {
+        if (out.arc) out.arc = Math.min(Math.PI * 1.6, out.arc * (1 + m.radiusPct / 100));
+        if (out.reach) out.reach *= 1 + m.radiusPct / 300;
+      }
+    }
     if (m.cooldownPct) out.cooldown = Math.max(0.3, (out.cooldown || 1) * (1 + m.cooldownPct / 100));
     if (m.splash) out.splash = Math.max(out.splash || 0, m.splash);
     if (m.chains) { out.chains = (out.chains || 0) + m.chains; out.chainFalloff = m.chainFalloff ?? 0.7; }

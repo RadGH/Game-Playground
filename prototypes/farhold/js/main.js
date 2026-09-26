@@ -1713,6 +1713,42 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
           else spellfx.aoe({ points: [mouth.clone().addScaledVector(dir, plan.reach * 0.6)], element: plan.element, stagger: 0 });
         } else fx.swipe({ x: control.x, y: control.y, z: control.z, yaw: control.yaw, reach: plan.reach, arc: plan.arc });
         const hits = field.strike(control, player, { reach: plan.reach, arc: plan.arc, ...strikeOpts });
+        /**
+         * 2026-09-26 — THE SPLASH A BASIC SWING HAS AND A MELEE SKILL DID NOT.
+         *
+         *   "Power Strike still does not deal damage, even when an enemy is in my normal attack range."
+         *
+         * `swingWith` lands its arc AND a circle just ahead of it, so "in my normal attack range"
+         * includes bodies only that circle reaches. The skill now lands the same circle
+         * (`plan.splash` from `meleeSpanOf`, widened by the attack-area stat and by the Burst talent,
+         * which was never read on a melee skill before), at the skill's own power.
+         */
+        if (!plan.breath && plan.splash > 0) {
+          const [sx, sz] = control.facing();
+          const already = new Set(hits.map(h => h.enemy));
+          for (const h of field.strikeArea(control.x + sx * plan.reach * 0.6, control.z + sz * plan.reach * 0.6, plan.splash, player, { falloff: 0.3, ...strikeOpts })) {
+            if (!already.has(h.enemy)) hits.push(h);
+          }
+        }
+        /**
+         * …and when it still catches nobody while something is close, SAY WHERE IT WAS, the way the
+         * staff nova and cone already do. "Does no damage" has been reported twice and never
+         * reproduced; this line is the measurement from the player's own screen.
+         */
+        if (first && !hits.length) {
+          let near = null;
+          for (const e of field.enemies) {
+            if (e.dying != null) continue;
+            const d = Math.hypot(e.x - control.x, e.z - control.z);
+            if (d < 10 && (!near || d < near.d)) near = { e, d };
+          }
+          if (near) {
+            let off = Math.atan2(near.e.x - control.x, near.e.z - control.z) - control.yaw;
+            off = Math.atan2(Math.sin(off), Math.cos(off));
+            const side = Math.abs(off) < 0.05 ? 'straight ahead' : `${Math.round(Math.abs(off) * 180 / Math.PI)}° to your ${off > 0 ? 'left' : 'right'}`;
+            hud.log(`${plan.skill?.name || 'The swing'} reaches ${plan.reach.toFixed(1)} m across ${Math.round(plan.arc * 180 / Math.PI)}° and catches nobody. ${near.e.name || 'The nearest enemy'} is ${near.d.toFixed(1)} m away, ${side}.`, '', 'dealt');
+          }
+        }
         skillSound(plan, hits);
         if (first || !plan.breath) for (const h of hits) spellfx.impact({ at: new THREE.Vector3(h.enemy.x, h.enemy.y + 0.9, h.enemy.z), element: plan.element, crit: h.result.crit });
         control.swing = Math.max(control.swing, plan.repeats > 1 ? (plan.repeatEvery || 0.32) + 0.05 : 0.35);

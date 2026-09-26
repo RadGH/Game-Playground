@@ -4933,3 +4933,27 @@ Parked by the milestones themselves:
 - M8: the duplicate `setTime` key in `window.farhold` (above).
 - M9 and M10's own "not done / notes" (patrol bodies steer by strolling rather than a movement mode; no
   standard seed puts a siege camp by a walled town on its own) — see their sections.
+
+## 2026-09-26 — Power Strike, second report
+
+"Power Strike still does not deal damage, even when an enemy is in my normal attack range" — default
+Warrior, longsword + a focus, playing the GitHub Pages build (which did carry R26's reach fix).
+
+**Not reproduced.** In the page, with real key presses: every one of the 57 weapon bases, at the edge
+of every swing in its pattern; each of the five foci in the off hand; levels 1, 8, 15 and 30; every
+talent on the melee board; a paladin and a warrior; a live fight with hounds. Power Strike always
+landed, at ~1.9x a basic swing (10.7 vs 20.3 on a moor hound, 8.1 vs 16.3 on a stone sentinel).
+
+What WAS different between the two, and is now the same:
+- the **attack-area stat** grows every basic swing through `withArea` and never reached the skill —
+  `meleeSpanOf(item, areaPct)` applies the same arithmetic (without `withArea`'s post to the feel
+  channel);
+- a basic swing lands a **splash circle** just ahead of its arc; the skill now lands the same circle
+  (`plan.splash`, js/main.js castSkill melee branch);
+- the **Wider** talent (`radiusPct`) multiplied a melee plan's radius of 0, and **Burst** (`splash`)
+  was read only by bolts and dashes — both now act on a melee skill.
+
+And the measurement: a melee skill that catches nobody while an enemy is within 10 m logs
+"Power Strike reaches 3.5 m across 92° and catches nobody. X is 4.1 m away, 60° to your left." If the
+report comes back, that line is the answer. Tests: tests/round26-skills.test.js (area, Wider),
+tests/power-strike.spec.js (key 1 with a focus; the miss line).

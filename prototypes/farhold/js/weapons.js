@@ -1029,16 +1029,27 @@ export function strikeAt(item, step = 0) {
  * bow, a wand or a staff, whose "swing" is not a blade and should not stretch a melee skill.
  * Pure: `strikeAt` is read, never `withArea`, which posts a swing to the feel channel.
  */
-export function meleeSpanOf(item) {
+export function meleeSpanOf(item, areaPct = 0) {
   const p = profileOf(item);
   if (p.ranged || isStaff(item) || isWand(item)) return null;
-  let reach = 0, arc = 0;
+  /**
+   * 2026-09-26 — AND THE ATTACK-AREA STAT, which grows every basic swing through `withArea` and
+   * never reached the skill: "Power Strike still does not deal damage, even when an enemy is in my
+   * normal attack range." Same arithmetic as `withArea`, spelled out here because `withArea` posts
+   * the swing to the feel channel and this must stay side-effect free. `splash` is the circle a
+   * basic swing also lands just ahead of the arc (js/main.js `swingWith`), so a melee skill can
+   * cover it too.
+   */
+  const k = 1 + Math.max(0, areaPct) / 100;
+  const reachK = 1 + (k - 1) * 0.45;
+  let reach = 0, arc = 0, splash = 0;
   for (let i = 0; i < p.pattern.length; i++) {
     const s = strikeAt(item, i);
-    reach = Math.max(reach, s.reach || 0);
-    arc = Math.max(arc, s.arc || 0);
+    reach = Math.max(reach, (s.reach || 0) * reachK);
+    arc = Math.max(arc, Math.min(Math.PI * 1.6, (s.arc || 0) * k));
+    splash = Math.max(splash, (s.splash || 1) * k);
   }
-  return reach > 0 ? { reach, arc } : null;
+  return reach > 0 ? { reach, arc, splash } : null;
 }
 
 // ---------------------------------------------------------------------------- hands

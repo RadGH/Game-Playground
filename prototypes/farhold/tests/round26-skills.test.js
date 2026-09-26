@@ -133,3 +133,29 @@ test('a melee skill keeps its own numbers when they are already bigger than the 
   assert.equal(plan.reach, skillData.skills.eviscerate.reach ?? 3);
   assert.equal(plan.arc, skillData.skills.eviscerate.arc ?? 1.5);
 });
+
+/**
+ * 2026-09-26 — "Power Strike still does not deal damage, even when an enemy is in my normal attack
+ * range." (warrior, longsword + a focus). The basic swing is grown by the attack-area stat and lands
+ * a splash circle ahead of its arc; the skill had neither. The skill now carries both, and the
+ * Wider talent — offered on the melee board — widens a swing instead of multiplying a radius of 0.
+ */
+test('a melee skill grows with the attack-area stat, exactly as the basic swing does', () => {
+  const { r, player } = character('warrior', 'longsword');
+  const base = createSkillBar({ data: skillData, player, rpg: r }).use(0);
+  player.derived.areaPct = 40;
+  const grown = createSkillBar({ data: skillData, player, rpg: r }).use(0);
+  assert.equal(base.skill?.id ?? 'power_strike', 'power_strike');
+  assert.ok(grown.reach > base.reach, `reach ${base.reach} -> ${grown.reach}`);
+  assert.ok(grown.arc > base.arc, `arc ${base.arc} -> ${grown.arc}`);
+  assert.ok(grown.splash > base.splash && base.splash >= 1, `splash ${base.splash} -> ${grown.splash}`);
+});
+
+test('the Wider talent widens a melee skill', () => {
+  const { r, player } = character('warrior', 'longsword');
+  const plain = createSkillBar({ data: skillData, player, rpg: r }).use(0);
+  player.skillTalents = { power_strike: { 1: 'wide' } };
+  const wide = createSkillBar({ data: skillData, player, rpg: r }).use(0);
+  assert.ok(wide.arc > plain.arc, `arc ${plain.arc} -> ${wide.arc}`);
+  assert.ok(wide.reach > plain.reach, `reach ${plain.reach} -> ${wide.reach}`);
+});

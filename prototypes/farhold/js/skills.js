@@ -701,10 +701,11 @@ export function createSkillBar({ data, player, rpg, unlocks = null, canSummon = 
      * spell cone, not a blade, and keeps its own shape.
      */
     if (plan.kind === 'melee' && !plan.breath) {
-      const span = meleeSpanOf(handsOf(player).main);
+      const span = meleeSpanOf(handsOf(player).main, player.derived?.areaPct || 0);
       if (span) {
         plan.reach = Math.max(plan.reach, span.reach);
         plan.arc = Math.max(plan.arc, span.arc);
+        plan.splash = Math.max(plan.splash || 0, span.splash);
       }
     }
 

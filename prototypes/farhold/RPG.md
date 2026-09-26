@@ -4144,3 +4144,105 @@ the revisit, the landmark sweep and a new stair/reload test; `tests/save.test.js
 round trip. Found by the stair spec hanging: `field.clear()` with a unit that was already removed and then
 pushed back on `field.enemies` used to spin for ever (the old prisoner spec does exactly that);
 `EnemyField.clear()` now walks a copy and empties the list, so it cannot hang the page.
+
+### Round 27 — Walls by culture, fences by size, and a banner at the gate (M3)
+
+**Root causes.**
+- `CULTURES[*].wall` in proctown/js/townplan.js (and `townWall.kind` in cultures.json) has named a
+  wall material for every culture since the planner went in. Nothing read it. Farhold drew one
+  masonry ring round an orc war camp and an elf grove and only changed its colour.
+- A settlement under size 4 had no edge at all. The houses just stopped.
+- Towers stood at `gate ± 0.26 rad` plus four fixed quarter bearings, cut at ten. At a 157 m wall
+  that put a tower 41 m from its gate. The quarters landed on top of each other or in a river, and a
+  big city's far side had no tower at all.
+- Nothing told you where you had arrived.
+
+**What changed.**
+- **Culture walls.** proctown/js/buildkit.js has a part list per wall kind for the wall length,
+  the tower and the gatehouse (`wallKitParts`), in the same unit shapes a building uses. The kinds are:
+  - stone: today's masonry
+  - cutstone: a plinth, an overhanging coping and square merlons
+  - palisade: sharpened logs on rails, and a timber watch platform as the tower
+  - hedge: a rounded green mass, and a topiary tower
+  - bone: posts with rib arches, and a tusked pillar
+  - mudbrick: a thick rendered wall with rounded merlons, and a tapering tower
+
+  Each kind is its own InstancedMesh (`edgeKey(kind, piece)`). Stone keeps the plain
+  `wall`/`tower`/`gatehouse` keys, and the caps come from `BUILDING_INFO` (`edgeCatalogue`).
+  Farhold picks the kind from the plan's own `plan.wall.kind`. **The collider does not change:** it
+  is round 23's `addSegment` on the drawn line for every kind. The kit gallery (`proctown/kit.html`)
+  has a "Town edges" view that draws the same lists.
+- **Villages get a fence, hamlets get boundary stones.** `wallTier` returns `'low'` for size 2-3.
+  - A village gets a rail, hedge or stake fence, chosen by culture (`fenceKindFor`), at
+    `townExtent(...).ring + 4`.
+  - The fence has a gap at every world road that crosses it (`ringCrossings`) and at every *drawn*
+    street end that reaches it heading out. Streets the pruning pass drops get no gap.
+  - A piece that runs into the water stops at the waterline.
+  - A hamlet gets two boundary stones at each road in. Each stone slides up to 16 m off the kerb,
+    because `roadAt` reads 0.9 three metres off a road's centre line.
+  - **All of it is decoration only, with no collider.** A fence you could not step over would trap a
+    player the first time a quest giver stood on the far side of it.
+- **Towers by spacing.**
+  - The ring is cut into stretches of standing wall: between gates, and between a gate and the water.
+  - Each stretch gets a flank tower 3 m in from each end, and the stretch between is filled at about
+    45 m (never more than 60).
+  - A tower spot on water, a river or a kerb slides along the wall up to 6 m, and never closer than
+    25 m to the last tower. Only if nothing fits is it dropped.
+  - Found on the way: `wallPiece` dropped a whole piece whose middle was in the water, even when one
+    end was dry. Planned as a dwarf hold, Dearbigate had 2 m of open wall beside its gate because of
+    it. The piece is now cut at the waterline, the way `spotOf` cuts a ring segment.
+- **Banners.**
+  - js/sites.js's `banner` model (`PIECES.banner`, already exported) has a white cloth. Each
+    instance is tinted with the culture's `palette.accent`.
+  - Each gatehouse gets one banner outside, beside a tower. It slides along the wall off a road that
+    hugs the wall, and falls back to the inside if it has to.
+  - Each fence or boundary-stone road entrance gets a banner too.
+  - Fences, stones and banners are drawn only for towns within 600 m (`DECOR_RANGE`).
+- **Arrival card.** js/town-plan.js has `createArrivalWatch` / `arrivalAt`.
+  - The card fires when you cross `arrivalRadius(node)` inwards. That is `townExtent`'s wall for a
+    walled town and its ring otherwise, never a third radius.
+  - It re-arms only when you are 30 m back out past that radius.
+  - A town you are already standing in when the watch first sees it (a load, a waypoint jump) is
+    marked as entered without a card.
+  - `arrivalCard` builds the text from the town's tier word, the zone holder and a word for each
+    js/town.js roster role, and `hud.announceTown` shows it in the zone banner's box. For example:
+    "Fenkeep — city — held by the Reach — market, elder, unbinder, smith, inn, gambler, mercenaries".
+  - main.js gets 4 lines next to the zone-banner call.
+
+**Budget.** Scene draw calls (`stats().drawCalls`), measured standing 24 m outside a gate on seed 47
+at scale 0.1 with `quality=low`, on a clean HEAD tree against HEAD + M3:
+
+| Town | Wall kind | Before | After |
+|---|---|---|---|
+| Fenkeep | hedge | 170 (features 30) | 173 (features 33) |
+| Cindercrown | stone, with a hedge city in view | 179 (features 32) | 184 (features 37) |
+
+The plan's "< 95 at a town" cannot hold at a town gate on this world: the count was already 170-179
+there before M3. `phase2.spec.js`'s own < 95 check, at the landing spot, still passes. The extra
+calls are one mesh per kind in view. Before the 600 m decoration range they were +4 and +7.
+
+**Tests.**
+- New `tests/round27-walls.test.js`, 9 node tests on seeds 25392, 7 and 47 at scale 0.1, plus 4477
+  at scale 1:
+  - All 21 culture × seed pairs draw their wall, tower and gatehouse in the mesh
+    `CULTURES[culture].wall` names, tinted with the culture's wall colour.
+  - Round 23's ring walk passes for all 7 cultures.
+  - Towers: 30 towns and 232 pairs, 28.4-59.9 m apart (median 44.2) except across a gate or water.
+    None stand in water or on the road, and every gatehouse has a flank tower.
+  - Fences: 122 villages and 727 street ends, each with a gap within 2 m. 15,239 street points on
+    the fence line, none of them blocked. Worst coverage of the fenceable ring is 82%.
+  - Stones: 61 hamlets and 113 road entrances, with a stone on every side that has ground for one.
+  - Banners: at every gatehouse, in the accent colour, clear of the opening.
+  - The arrival card fires exactly once per walk in, along a real road, within 2 m of the edge, for
+    a walled town, a village and a hamlet. It does not fire walking round the market, and it re-arms
+    only past 30 m.
+- `proctown/tests/buildkit.test.js` has 4 new tests: every named kind is buildable and distinct, the
+  pieces keep the frames the game places them by, every gatehouse keeps x -2.1..2.1 clear below
+  4.9 m, and fence kind and tint.
+- New `tests/round27-walls.spec.js`:
+  - Walks in through the gates of Fenkeep (hedge) and Cindercrown (stone), reads the draw calls,
+    sees the card, and checks that walking about inside does not fire it again.
+  - Screenshots every wall kind, a village fence and a hamlet's stones into
+    `research/round27-walls/`.
+- `round23-bridge-gate.test.js` and `round3.spec.js` now look a town's wall up through
+  `wallOf(id).keys`, because a hedge town's gatehouse is in `gatehouse_hedge`.

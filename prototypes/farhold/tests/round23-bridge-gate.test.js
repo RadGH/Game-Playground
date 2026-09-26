@@ -356,13 +356,14 @@ test('a gate is the colour of its own town\'s wall — green in Fenkeep, and rig
       const want = CULTURE_KIT.cultures[cultureFor({ race: t.race, biome: t.biome })]?.townWall?.colour
         || CULTURE_KIT.cultures.human.townWall.colour;
       for (const g of ring.gates.filter(x => x.gatehouse)) {
-        const gh = instanceNear(w.features, 'gatehouse', g.x, g.z, 1);
+        // R27 M3: each wall kind is its own mesh — the ring record says which one this town's is in
+        const gh = instanceNear(w.features, ring.keys?.gatehouse || 'gatehouse', g.x, g.z, 1);
         assert.ok(gh, `${t.name}: no gatehouse instance at its record`);
         // the geometry is white, so the instance colour IS the colour
         assert.equal(gh.colour, new THREE.Color(want).getHexString().replace(/^/, '#'), `${t.name}: gate is ${gh.colour}, wall is ${want}`);
         // and it matches the wall pieces either side of it, which are what the eye compares it to
         const [ax, az] = g.run;
-        const wall = instanceNear(w.features, 'wall', ax + g.tx * 3, az + g.tz * 3, 6);
+        const wall = instanceNear(w.features, ring.keys?.wall || 'wall', ax + g.tx * 3, az + g.tz * 3, 6);
         if (wall) assert.equal(gh.colour, wall.colour, `${t.name}: gate ${gh.colour} beside wall ${wall.colour}`);
       }
       if (t.name === 'Fenkeep') assert.equal(want, '#4d6b42', 'Fenkeep is a halfling town with a green hedge wall');

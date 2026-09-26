@@ -301,7 +301,8 @@ test('a city wall is a closed ring, not a dotted line', async ({ page }) => {
     f.teleport(city.wx, city.wz);
     await new Promise(r => setTimeout(r, 350));
     const THREE = await import('three');
-    const mesh = f.features.instanced.wall;
+    // R27 M3: a city's wall is in the mesh for its culture's wall kind
+    const mesh = f.features.instanced[f.features.wallOf(city.id)?.keys?.wall || 'wall'];
     const m = new THREE.Matrix4(), pos = new THREE.Vector3();
     const angles = [];
     for (let i = 0; i < mesh.count; i++) {

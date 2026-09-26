@@ -726,6 +726,36 @@ export class Hud {
   }
 
   /**
+   * R27 M3 — THE ARRIVAL CARD. The zone banner's own box and animation, saying where you have just
+   * walked into: "Dearbigate — town — held by the Cutwater — market, smith, inn". `card` is
+   * js/town-plan.js `arrivalCard()`; WHEN it fires (once per entry, on the town's real edge) is
+   * decided there too, by `arrivalAt`, so this only draws.
+   */
+  announceTown(card) {
+    const box = $('zone-banner');
+    if (!box || !card) return false;
+    const services = (card.services || []).join(', ');
+    box.querySelector('.zb-name').textContent = card.name;
+    const size = box.querySelector('.zb-level');
+    size.textContent = card.size || '';
+    size.className = 'zb-level zb-town-size';
+    box.querySelector('.zb-danger').textContent = [card.holder ? `held by ${card.holder}` : null, services || null]
+      .filter(Boolean).join(' \u2014 ');
+    box.className = 'hud zb-town';
+    box.classList.remove('hidden');
+    box.style.animation = 'none';
+    void box.offsetWidth;
+    box.style.animation = '';
+    clearTimeout(this.zoneTimer);
+    this.zoneTimer = setTimeout(() => box.classList.add('hidden'), 5200);
+    const line = [card.name, card.size, card.holder ? `held by ${card.holder}` : null, services || null]
+      .filter(Boolean).join(' \u2014 ');
+    this.lastArrival = { ...card, line, at: Date.now() };
+    this.log(line + '.', 'level');
+    return true;
+  }
+
+  /**
    * The space reticles: a bracket round every world in view, with a card beside the one the
    * crosshair is on. `marks` comes from `space.marks()`, `under` is the targeted body and `card` is
    * `space.describe(under)` — which always says whether you can land, and if not, why not.

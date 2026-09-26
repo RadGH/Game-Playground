@@ -49,6 +49,7 @@ import { createWanderers } from './wanderers.js';
 import { createRumours } from './rumours.js';
 import { createWaypoints, boardSpotFor, hallSpotFor } from './waypoints.js';
 import { townExtent, musterFacts } from './town-plan.js';   // R27 M2
+import { arrivalAt, arrivalCard } from './town-plan.js';   // R27 M3
 import { createCommand } from './command.js';
 import { createTownHall } from './townhall.js';
 import { population, recruitRefusal, populationText } from './population.js';
@@ -9648,6 +9649,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     hud.here = here;
     // crossing a border announces the new region on screen, with its band
     if (here && !zones.isOpenWater(here)) hud.announceZone(here, player.level);
+    // R27 M3 — the arrival card: on the town's own edge (townExtent), once per walk in
+    const arrived = dungeon ? null : arrivalAt(control.x, control.z, features.settlements);
+    if (arrived) hud.announceTown(arrivalCard(arrived, { roster: folk?.rosterFor?.(arrived)?.roster,
+      holder: (k => k && intro.nameFor(k))(holdings.of(zones.at(arrived.wx, arrived.wz)?.id)?.holder) }));
     if (here && here.id !== boardZone) enterTerritory(here);
     /**
      * …and R14's other half: dusk and dawn used to set `boardZone = null` to get the notice board

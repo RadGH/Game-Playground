@@ -408,3 +408,73 @@ test('topRect is the rectangle the roof was given, jetties and tapers included',
   const s = spire.masses[0];
   if (s.storeys > 1 && s.taper > 0) assert.ok(topRect(s).w < s.w, 'a tapered top storey is not narrower');
 });
+
+// ---------------------------------------------------------------------------- R27 M3: town edges
+
+import {
+  WALL_KINDS, FENCE_KINDS, WALL_SEG, FENCE_SEG, wallKitParts, fenceParts, boundaryStoneParts,
+  fenceKindFor, tintParts, edgeScene,
+} from '../js/buildkit.js';
+
+test('R27 M3: every culture\'s wall kind has its own wall, tower and gatehouse', () => {
+  // the kinds the planner names are exactly the kinds the kit can build
+  const named = new Set(Object.values(CULTURES).map(c => c.wall));
+  for (const kind of named) assert.ok(WALL_KINDS.includes(kind), `the planner names a ${kind} wall the kit cannot build`);
+  for (const key of CULTURE_KEYS) assert.ok(WALL_KINDS.includes(CULTURE_KIT.cultures[key].townWall.kind), key);
+  // and no two kinds are the same drawing
+  for (const piece of ['wall', 'tower', 'gatehouse']) {
+    const shapes = WALL_KINDS.map(k => JSON.stringify(wallKitParts(k, piece)));
+    assert.equal(new Set(shapes).size, WALL_KINDS.length, `two kinds share a ${piece}`);
+  }
+});
+
+test('R27 M3: the pieces keep the frames the game places them by — no NaN, walls 6 m along +Z', () => {
+  const finite = p => [p.x, p.y, p.z, p.w, p.h, p.d, p.yaw].every(Number.isFinite) && p.w > 0 && p.h > 0 && p.d > 0;
+  for (const kind of WALL_KINDS) {
+    for (const piece of ['wall', 'tower', 'gatehouse']) {
+      const parts = wallKitParts(kind, piece);
+      assert.ok(parts.length > 0 && parts.every(finite), `${kind} ${piece}`);
+      assert.ok(parts.every(p => MESHES.includes(p.mesh)), `${kind} ${piece} uses a shape the game has no mesh for`);
+    }
+    // a wall length runs WALL_SEG along +Z and stays near the line it is drawn on
+    for (const p of wallKitParts(kind, 'wall')) {
+      assert.ok(Math.abs(p.z) + p.d / 2 <= WALL_SEG / 2 + 0.25, `${kind} wall piece reaches past its ends`);
+      assert.ok(Math.abs(p.x) + p.w / 2 <= 0.95, `${kind} wall piece is thicker than 1.9 m`);
+    }
+    // a tower stands inside a 3.6 m radius (its collider is 2.6; a cap may overhang it)
+    for (const p of wallKitParts(kind, 'tower')) {
+      const reach = p.mesh === 'box' ? Math.hypot(Math.abs(p.x) + p.w / 2, Math.abs(p.z) + p.d / 2)
+        : Math.hypot(p.x, p.z) + Math.max(p.w, p.d) / 2;
+      assert.ok(reach <= 3.6, `${kind} tower reaches ${reach.toFixed(2)} m`);
+    }
+  }
+  for (const kind of FENCE_KINDS) {
+    const parts = fenceParts(kind);
+    assert.ok(parts.every(finite));
+    for (const p of parts) assert.ok(Math.abs(p.z) + p.d / 2 <= FENCE_SEG / 2 + 0.2 && p.y + p.h <= 1.6, `${kind} fence is not low`);
+  }
+  assert.ok(boundaryStoneParts().every(finite));
+  assert.ok(edgeScene('bone', '#c4bca4').every(finite));
+});
+
+test('R27 M3: every gatehouse keeps its opening clear — nothing in x -2.1..2.1 below 4.9 m, 3.8 m deep at most', () => {
+  for (const kind of WALL_KINDS) {
+    for (const p of wallKitParts(kind, 'gatehouse')) {
+      // a part's footprint, turned by its own yaw
+      const c = Math.abs(Math.cos(p.yaw || 0)), s = Math.abs(Math.sin(p.yaw || 0));
+      const hx = (p.w / 2) * c + (p.d / 2) * s, hz = (p.w / 2) * s + (p.d / 2) * c;
+      const inOpening = Math.abs(p.x) - hx < 2.1 - 1e-6 && p.y < 4.9 - 1e-6;
+      assert.ok(!inOpening, `${kind} gatehouse: a part at x ${p.x.toFixed(2)}, y ${p.y.toFixed(2)} is in the passage`);
+      assert.ok(Math.abs(p.z) + hz <= 1.95, `${kind} gatehouse is ${(2 * (Math.abs(p.z) + hz)).toFixed(2)} m deep`);
+    }
+  }
+});
+
+test('R27 M3: a village fence follows the wall culture, and a tint multiplies like an instance colour', () => {
+  assert.equal(fenceKindFor('hedge'), 'hedge');
+  assert.equal(fenceKindFor('palisade'), 'stake');
+  assert.equal(fenceKindFor('bone'), 'stake');
+  assert.equal(fenceKindFor('stone'), 'rail');
+  const [p] = tintParts([{ mesh: 'box', x: 0, y: 0, z: 0, w: 1, h: 1, d: 1, colour: '#ffffff' }], '#4d6b42');
+  assert.equal(p.colour, '#4d6b42');
+});

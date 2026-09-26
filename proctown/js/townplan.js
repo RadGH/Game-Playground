@@ -167,7 +167,9 @@ export const WANT_FROM = {
  * smaller settlements and is decoration only — it never changes `walled`.
  */
 export function wallTier(size = 1) {
-  return size >= 4 ? 'wall' : 'none';
+  // R27 M3 — a village or a small town (size 2-3) gets a low fence or hedge ring; a hamlet gets
+  // boundary stones at the road ('none'). Both are decoration only: `walled` is still size 4+.
+  return size >= 4 ? 'wall' : size >= 2 ? 'low' : 'none';
 }
 
 /** How wide a settlement's footprint is, which is also where its quiet ground starts. */

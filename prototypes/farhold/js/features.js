@@ -25,7 +25,12 @@ import { padSpotFor, boardSpotFor } from './waypoints.js';
 import {
   describeBuilding, partsFor, describeStall, stallParts, stallsFor,
   radiusOf, mix, MESHES, CULTURE_KIT,
+  // R27 M3 — the town edges, by the culture's wall kind
+  wallKitParts, fenceParts, boundaryStoneParts, fenceKindFor, fenceTintFor,
+  WALL_KINDS, FENCE_KINDS, WALL_SEG, FENCE_SEG,
 } from '../../../proctown/js/buildkit.js';
+import { edgeKey } from './town-plan.js';     // R27 M3
+import { PIECES as SITE_PIECES } from './sites.js';          // R27 M3: the banner model
 import { waterRibbon, lakeSheet, roadDeck } from './water-plan.js';
 import { makeRng } from '../../../worldgen/js/noise.js';
 import { M_PER_CELL } from './planet.js';
@@ -95,6 +100,8 @@ const CONE4 = new THREE.ConeGeometry(1, 1, 4);
 // what is left of the fixed palette: the four things still modelled here (wall, gatehouse,
 // well, bridge) rather than assembled by the kit
 const BEAM = '#5a4632', ROOF = '#7a4a3a', STONE = '#8a8275';
+/** R27 M3: how near a town has to be for its fence, boundary stones and banners to be drawn. */
+const DECOR_RANGE = 600;
 /** Round 23: a town wall's collider, half its thickness (the drawn wall is 1.1-1.2 m thick). */
 const WALL_HALF = 0.6;
 /** A gate door leaf: how thick, and how tall — the passage under the span is 4.9 m clear. */
@@ -206,33 +213,53 @@ const WANT_FOOTINGS = Object.fromEntries(WANT_KEYS.map(key => [
   key, { cap: BUILDING_INFO[key].cap, footing: true, build: () => unitMesh('box') },
 ]));
 
+/** R27 M3 — a kit part list (unit shapes, base origin) as one merged geometry. */
+function kitGeometry(parts) {
+  return mergeParts(parts.map(p => ({
+    geometry: unitMesh(p.mesh), color: p.colour,
+    matrix: mat4(p.x, p.y, p.z, p.w, p.h, p.d, p.yaw || 0),
+  })));
+}
+
+/** R27 M3 — every town-edge mesh: wall/tower/gatehouse per wall kind, the fences, the stones, the banner. */
+function edgeBuildings() {
+  const out = {};
+  for (const kind of WALL_KINDS) {
+    for (const piece of ['wall', 'tower', 'gatehouse']) {
+      const key = edgeKey(kind, piece);
+      out[key] = { cap: BUILDING_INFO[key].cap, edge: kind, build: () => kitGeometry(wallKitParts(kind, piece)) };
+    }
+  }
+  // decoration only: no collider is ever filed for these (see `edgeCatalogue` in js/town-plan.js)
+  for (const kind of FENCE_KINDS) {
+    out['fence_' + kind] = { cap: BUILDING_INFO['fence_' + kind].cap, build: () => kitGeometry(fenceParts(kind)) };
+  }
+  out.boundstone = { cap: BUILDING_INFO.boundstone.cap, build: () => kitGeometry(boundaryStoneParts()) };
+  // js/sites.js's own banner, with a white cloth so the instance colour is the culture's
+  out.banner = { cap: BUILDING_INFO.banner.cap, build: () => SITE_PIECES.banner.build('#8a8a8a', '#ffffff') };
+  return out;
+}
+
 /** The buildings a settlement is made of. All small, all procedural, all instanced. */
 export const BUILDINGS = {
   ...WANT_FOOTINGS,
   ...KIT_PARTS,
-  // a wall tower: still a model, because it is the same tower in every town and it is placed by the
-  // wall's own geometry rather than by a plot. White, so the culture's own stone colours it.
-  tower: { cap: BUILDING_INFO.tower.cap, build: () => whiteGeometry(mergeParts([
-    { geometry: CYL, color: '#ffffff', matrix: mat4(0, 5, 0, 2.4, 10, 2.4) },
-    { geometry: CYL, color: '#ffffff', matrix: mat4(0, 10.3, 0, 2.9, 0.7, 2.9) },
-    { geometry: CONE4, color: '#ffffff', matrix: mat4(0, 12, 0, 2.7, 3, 2.7, Math.PI / 4) },
-  ])) },
   /**
-   * A wall segment, built along **+Z** — the axis `yaw` points down, the same as the bridges.
+   * R27 M3 — THE TOWN EDGE, ONE MESH PER WALL KIND.
    *
-   * It used to be modelled along X while being rotated by a +Z yaw, so every piece came out turned
-   * ninety degrees: the segments stood parallel to each other like a row of fence panels instead of
-   * joining end to end into a wall. (Reported with a screenshot of a city that looked like it was
-   * built out of dominoes.)
+   * The wall, the tower and the gatehouse used to be one model each, and every culture's town was
+   * ringed by the same masonry in a different colour. `CULTURES[*].wall` has named a material for
+   * each culture since the planner went in (stone, cutstone, palisade, hedge, bone, mudbrick) and
+   * nothing read it. The pieces are part lists in proctown/js/buildkit.js now — the kit gallery
+   * draws the same lists — and each kind gets its own InstancedMesh (`edgeKey`), stone keeping the
+   * plain `wall` / `tower` / `gatehouse` keys.
+   *
+   * All of them are built white-ish and tinted per instance with the culture's `townWall.colour`,
+   * and all of them keep the frames the placement code below relies on: a wall piece runs `WALL_SEG`
+   * along +Z; a gatehouse's opening is x = -2.1..2.1, clear to 4.9 m, 3.4 m deep. COLLISION NEVER
+   * VARIES BY KIND — it is the round-23 `addSegment` on the drawn line, for every one of them.
    */
-  // White, like the tower: a palisade is not the colour of a bone wall is not the colour of a living
-  // hedge, and a culture you can name from the next hill is most of what section 6 is asking for.
-  wall: { cap: BUILDING_INFO.wall.cap, build: () => whiteGeometry(mergeParts([
-    { geometry: BOX, color: '#ffffff', matrix: mat4(0, 1.9, 0, 1.1, 3.8, 6) },
-    { geometry: BOX, color: '#ffffff', matrix: mat4(0, 4, -2, 1.2, 0.6, 0.9) },
-    { geometry: BOX, color: '#ffffff', matrix: mat4(0, 4, 0, 1.2, 0.6, 0.9) },
-    { geometry: BOX, color: '#ffffff', matrix: mat4(0, 4, 2, 1.2, 0.6, 0.9) },
-  ])) },
+  ...edgeBuildings(),
   /**
    * WHERE THE TWELVE MODELS WENT.
    *
@@ -295,28 +322,9 @@ export const BUILDINGS = {
     { geometry: BOX, color: BEAM, matrix: mat4(0, 2.3, 0.12, 2.2, 0.14, 0.5) },
   ]) },
 
-  /**
-   * THE GATEHOUSE, WHITE — so the town's own wall colour is its colour, as it is the wall's.
-   *
-   * Round 23: *"the gray part of the gate should match the green color of the walls (in this
-   * particular town)"*. The wall and the towers were built white and tinted with the culture's
-   * `townWall.colour`; the gatehouse alone was modelled in a fixed STONE grey and given a random
-   * grey instance colour, so a halfling town's green hedge-wall had a grey stone gate in it.
-   *
-   * *"The gate doors appear closed"* — the portcullis box across the middle of the passage is gone.
-   * The doors are their own mesh (`gatedoor`, below) so they keep the colour of wood, and they
-   * stand open.
-   *
-   * Proportions: towers at x = +/-2.9, 1.6 wide, so the opening between them is 4.2 of the 7.4
-   * across — `buildSettlement` scales X until that opening clears the road.
-   */
-  gatehouse: { cap: BUILDING_INFO.gatehouse.cap, build: () => whiteGeometry(mergeParts([
-    { geometry: BOX, color: '#ffffff', matrix: mat4(-2.9, 3, 0, 1.6, 6, 3.4) },
-    { geometry: BOX, color: '#ffffff', matrix: mat4(2.9, 3, 0, 1.6, 6, 3.4) },
-    { geometry: BOX, color: '#ffffff', matrix: mat4(0, 5.6, 0, 7.4, 1.4, 3.4) },         // the span over the road
-    { geometry: BOX, color: '#ffffff', matrix: mat4(-2.9, 6.5, 0, 1.8, 0.5, 3.6) },
-    { geometry: BOX, color: '#ffffff', matrix: mat4(2.9, 6.5, 0, 1.8, 0.5, 3.6) },
-  ])) },
+  // (THE GATEHOUSE, WHITE — round 23: *"the gray part of the gate should match the green color of
+  // the walls"*. It is one of the town-edge meshes above now, still white and still tinted with the
+  // town's own wall colour, one per wall kind.)
   /**
    * One door leaf, hinged at its local origin and running along -Z, one unit long and one tall —
    * `buildSettlement` scales it to half the opening and to `DOOR_HEIGHT`. Planks with two iron
@@ -555,6 +563,8 @@ export function createFeatures(scene, terrain, opts = {}) {
   const gateRecords = new Map();
   /** …and the whole ring, for the tests: centre, radius, segment count and what each segment is. */
   const wallRecords = new Map();
+  /** R27 M3 — a village's fence or a hamlet's stones: `{ cx, cz, r, tier, kind, key, gaps, pieces, stones, banners }`. */
+  const fenceRecords = new Map();
 
   /** Append one ribbon's triangles to a growing buffer, offsetting its indices. */
   function pushRibbon(into, part) {
@@ -901,6 +911,15 @@ export function createFeatures(scene, terrain, opts = {}) {
      */
     const STRUCTURE = new Set(['wall', 'roof', 'eave', 'trim', 'door', 'chimney']);
     const near = Math.hypot(cx - px, cz - pz) < 230;
+    /**
+     * R27 M3 — the town-edge DECORATION (a village fence, a hamlet's stones, the banners) is drawn
+     * for towns within `DECOR_RANGE` only. None of it reads from a kilometre off, and each kind is its
+     * own mesh, so a far village costs a draw call for a fence nobody can see. Walls and towers are
+     * the silhouette and stay at the full feature radius. 600 m, not less: the layer rebuilds every
+     * `refreshEvery` (260 m) of travel, so a village just outside the range at one rebuild can be
+     * 340 m off before the next one draws its fence — far enough that the pop-in is not seen.
+     */
+    const decor = Math.hypot(cx - px, cz - pz) < DECOR_RANGE;
 
     /**
      * THE TOWN PLAN — now from `proctown/js/townplan.js`, which is the one true planner.
@@ -1023,6 +1042,8 @@ export function createFeatures(scene, terrain, opts = {}) {
      * four: it follows the hillside rather than cutting into it, which is the right answer when
      * nothing is going to carve the hill for it.
      */
+    // R27 M3 — where the streets actually DRAWN end, so a village fence leaves a gap for each
+    const drawnStreetEnds = [];
     if (streets) {
       const tint = new THREE.Color(cultKit.street.colour);
       for (const lane of streetLanes(plan, {
@@ -1052,6 +1073,12 @@ export function createFeatures(scene, terrain, opts = {}) {
           || !!terrain.bridgedAt?.(x, z) || terrain.roadAt(x, z) > 0.45,
       })) {
         pushRibbon(streets, laneRibbon(lane, { lift: 0.12, color: [tint.r, tint.g, tint.b] }));
+        const lp = lane.points;
+        if (lp.length >= 2) {
+          drawnStreetEnds.push({ x: lp[0][0], z: lp[0][1], half: lane.half, px: lp[1][0], pz: lp[1][1] });
+          drawnStreetEnds.push({ x: lp[lp.length - 1][0], z: lp[lp.length - 1][1], half: lane.half,
+            px: lp[lp.length - 2][0], pz: lp[lp.length - 2][1] });
+        }
       }
     }
 
@@ -1208,7 +1235,14 @@ export function createFeatures(scene, terrain, opts = {}) {
     }
 
     // a city gets a wall and towers (R27 M2: the one tier rule, not a sixth copy of `size >= 4`)
-    if (wallTier(size) === 'wall') {
+    // R27 M3 — …built in its culture's own material: the plan's wall kind picks the mesh
+    const tier = wallTier(size);
+    const edgeKind = WALL_KINDS.includes(plan.wall?.kind) ? plan.wall.kind
+      : WALL_KINDS.includes(cultKit.townWall?.kind) ? cultKit.townWall.kind : 'stone';
+    const EK = { wall: edgeKey(edgeKind, 'wall'), tower: edgeKey(edgeKind, 'tower'), gatehouse: edgeKey(edgeKind, 'gatehouse') };
+    const bannerTint = cultKit.palette?.accent || '#7a2e2a';
+    if (tier !== 'wall' && decor) buildLowEdge(tier);
+    if (tier === 'wall') {
       // Walk the ring corner to corner: each segment spans the CHORD between two ring points and is
       // placed at that chord's midpoint, stretched slightly so it overlaps its neighbour. Spacing
       // segments by arc length (and giving each its own ground height) is what left gaps.
@@ -1386,14 +1420,31 @@ export function createFeatures(scene, terrain, opts = {}) {
         const len = Math.hypot(bx - ax, bz - az);
         if (len < 0.25) return false;
         const mx = (ax + bx) / 2, mz = (az + bz) / 2;
-        if (terrain.underwater(mx, mz) || terrain.bridgedAt?.(mx, mz)) return false;
+        /**
+         * R27 M3 — a piece whose MIDDLE is in the water but one end is dry keeps its dry part, cut at
+         * the waterline, the way `spotOf` already cuts a ring segment. It used to drop the whole
+         * piece, which left the dry metres between a gatehouse and a river open (found by M3's ring
+         * walk across all seven cultures: Dearbigate planned as a dwarf hold had 2 m of it).
+         */
+        if (terrain.underwater(mx, mz)) {
+          const dryA = !terrain.underwater(ax, az), dryB = !terrain.underwater(bx, bz);
+          if (dryA === dryB) return false;
+          const [sx, sz] = dryA ? [ax, az] : [bx, bz], [ex, ez] = dryA ? [bx, bz] : [ax, az];
+          let lo = 0, hi = 0.5;
+          for (let k = 0; k < 10; k++) {
+            const t = (lo + hi) / 2;
+            if (!terrain.underwater(sx + (ex - sx) * t, sz + (ez - sz) * t)) lo = t; else hi = t;
+          }
+          return wallPiece(sx, sz, sx + (ex - sx) * lo, sz + (ez - sz) * lo);
+        }
+        if (terrain.bridgedAt?.(mx, mz)) return false;
         // sit the piece on the LOWER of its two ends and make it taller, so a step in the ground
         // is hidden under the wall instead of opening a gap beneath it
         const ha = terrain.heightAt(ax, az), hb = terrain.heightAt(bx, bz);
         const low = Math.min(ha, hb), lean = Math.abs(ha - hb);
         // the mesh runs along +Z, so the LENGTH scale goes on Z and the yaw is the standard one.
         // It is stretched 6% so neighbours overlap; the collider covers that same length.
-        if (!place('wall', mx, mz, Math.atan2(bx - ax, bz - az), [1, 1 + lean / 3.8, (len / SEG) * 1.06],
+        if (!place(EK.wall, mx, mz, Math.atan2(bx - ax, bz - az), [1, 1 + lean / 3.8, (len / SEG) * 1.06],
           0.9, low, { tint: wallTint, solid: false, onRoad: true, bank: true, foot: 0 })) return false;
         const ux = (bx - ax) / len, uz = (bz - az) / len, over = len * 0.03;
         solids.addSegment(ax - ux * over, az - uz * over, bx + ux * over, bz + uz * over, WALL_HALF, 4 * (1 + lean / 3.8));
@@ -1431,8 +1482,24 @@ export function createFeatures(scene, terrain, opts = {}) {
         // R21: a gate is the ONE thing that belongs on the road, so it opts out of `place`'s road
         // test. R23: tinted with the town's own wall colour — "the gray part of the gate should
         // match the green color of the walls"; it was hard-coded STONE while the wall was tinted.
-        const built = wantHouse && !wet && place('gatehouse', gx, gz, yaw, [wide, 1, 1], 0.9, lowGate,
+        const built = wantHouse && !wet && place(EK.gatehouse, gx, gz, yaw, [wide, 1, 1], 0.9, lowGate,
           { solid: false, onRoad: true, tint: wallTint });
+        // R27 M3 — the town's banner, just outside the gatehouse beside its tower. No collider (a
+        // pole in front of a gate is a snag, and the guards stand here); it slides clear of the road
+        let banner = null;
+        if (built && decor) {
+          // outside first, either tower, sliding along the wall off a road that hugs it; then inside
+          for (const out of [GATE_DEPTH / 2 + 0.7, -(GATE_DEPTH / 2 + 0.7)]) {
+            for (let k = 0; k <= 16 && !banner; k++) {
+              for (const side of [-1, 1]) {
+                if (banner) break;
+                const along = span / 2 + 0.9 + k * 0.5;
+                const bx2 = gx + side * ux * along + ox * out, bz2 = gz + side * uz * along + oz * out;
+                if (place('banner', bx2, bz2, yaw, 1, 0.2, null, { solid: false, tint: bannerTint, foot: 0.4 })) banner = [bx2, bz2];
+              }
+            }
+          }
+        }
 
         // what the gatehouse does not cover (or all of the run but the opening, if there is no
         // gatehouse) is ordinary wall on the same chord
@@ -1471,13 +1538,18 @@ export function createFeatures(scene, terrain, opts = {}) {
           // R27 M2: which list it came from, and whether its middle is dry (town.js posts no
           // guards at a gate standing in a river)
           source: c.planner ? 'street' : 'road', wet: !!wet,
-          tx: ux, tz: uz, ox, oz, ground: terrain.heightAt(gx, gz),
+          tx: ux, tz: uz, ox, oz, ground: terrain.heightAt(gx, gz), banner,
           // the stretch of wall this gate replaced, end to end — the two points its neighbours end on
           run: [ax, az, bx, bz], lo, hi,
         });
       }
       gateRecords.set(node.id, records);
-      wallRecords.set(node.id, { cx, cz, r: wallR, segments, kinds: spots.map(sp => sp.kind), gates: records });
+      // R27 M3: `kind` and `keys` say which meshes this town's edge went into; `towers` is filled below
+      const towers = [];
+      wallRecords.set(node.id, {
+        cx, cz, r: wallR, segments, kinds: spots.map(sp => sp.kind), gates: records,
+        kind: edgeKind, keys: EK, towers,
+      });
 
       // …and only then the wall itself
       for (let i = 0; i < segments; i++) {
@@ -1494,17 +1566,180 @@ export function createFeatures(scene, terrain, opts = {}) {
         wallPiece(spot.a[0], spot.a[1], spot.b[0], spot.b[1]);
       }
 
-      // towers beside every gate, and at the quarters — never inside a gate's run
-      const inRun = a => {
-        const i = wrapSeg(Math.floor(((((a % TAU) + TAU) % TAU) / TAU) * segments));
-        return cleared.has(i);
+      /**
+       * R27 M3 — TOWERS BY SPACING, NOT BY FIXED ANGLES.
+       *
+       * They were `gate +/- 0.26 rad` plus four quarter bearings, cut at ten: at a 157 m wall that
+       * is a tower 41 m from its gate, the "quarters" landing on top of each other or in a river,
+       * and a big city's far side with no tower at all. Now the ring is cut into STRETCHES of
+       * standing wall (between gates, and between a gate and the water), a tower flanks each end of
+       * every stretch three metres in, and the stretch between is filled at about `TOWER_EVERY` m.
+       * A spot on water or on a kerb slides along the wall — up to `TOWER_SLIDE` m, never out of its
+       * stretch, never nearer than `TOWER_MIN` to the last tower — instead of being dropped.
+       */
+      const TOWER_EVERY = 45, TOWER_MIN = 25, TOWER_MAX = 60, TOWER_SLIDE = 6, TOWER_FOOT = 2.6;
+      const broken = i => {
+        const k = wrapSeg(i);
+        return cleared.has(k) || spots[k].kind === 'water' || spots[k].kind === 'bridge';
       };
-      const towerAngles = [...gates.flatMap(({ g }) => [g - 0.26, g + 0.26]),
-        ...[0, 1, 2, 3].map(i => (i / 4) * TAU + 0.4)];
-      for (const a of towerAngles.slice(0, 10)) {
-        if (inRun(a)) continue;
-        place('tower', cx + Math.cos(a) * wallR, cz + Math.sin(a) * wallR, 0, 1, 1.1, null,
-          { tint: wallTint });
+      const towerOk = (x, z) => terrain.riverAt(x, z) <= 0.3 && terrain.roadAt(x, z) <= 0.45
+        && !terrain.bridgedAt?.(x, z) && dryFor(x, z, TOWER_FOOT);
+      const stretches = [];
+      const start = [...Array(segments).keys()].find(i => broken(i) && !broken(i + 1));
+      if (start === undefined) stretches.push([0, segments]);           // no break at all: the whole ring
+      else {
+        let i = start + 1;
+        while (i < start + 1 + segments) {
+          if (broken(i)) { i++; continue; }
+          let j = i;
+          while (j < start + 1 + segments && !broken(j)) j++;
+          stretches.push([i, j]);                                      // segments [i, j)
+          i = j;
+        }
+      }
+      const segLen = (TAU * wallR) / segments;
+      for (const [si, [i0, i1]] of stretches.entries()) {
+        const L = (i1 - i0) * segLen;
+        const whole = i1 - i0 >= segments;
+        const want = [];
+        if (whole) {
+          const n = Math.max(3, Math.round(L / TOWER_EVERY));
+          for (let k = 0; k < n; k++) want.push((k / n) * L);
+        } else if (L < 8) {
+          continue;
+        } else if (L < TOWER_MIN + 6) {
+          want.push(L / 2);
+        } else {
+          const inner = L - 6;
+          let n = Math.max(1, Math.round(inner / TOWER_EVERY));
+          while (inner / n > TOWER_MAX) n++;
+          for (let k = 0; k <= n; k++) want.push(3 + (k / n) * inner);
+        }
+        let last = null;
+        for (const s0 of want) {
+          let placed = null;
+          for (let k = 0; k <= TOWER_SLIDE * 2 && !placed; k++) {
+            const off = (k % 2 ? 1 : -1) * Math.ceil(k / 2) * 0.5;
+            const s1 = s0 + off;
+            if (!whole && (s1 < TOWER_FOOT || s1 > L - TOWER_FOOT)) continue;
+            if (last != null && s1 - last < TOWER_MIN) continue;
+            const a = (i0 * segLen + s1) / wallR;
+            const x = cx + Math.cos(a) * wallR, z = cz + Math.sin(a) * wallR;
+            if (!towerOk(x, z)) continue;
+            if (place(EK.tower, x, z, 0, 1, 1.1, null, { tint: wallTint, foot: TOWER_FOOT })) {
+              placed = s1;
+              towers.push({ x, z, angle: ((a % TAU) + TAU) % TAU, stretch: si, at: s1 });
+            }
+          }
+          if (placed != null) last = placed;
+        }
+      }
+    }
+
+    /**
+     * R27 M3 — A VILLAGE GETS A FENCE, A HAMLET GETS BOUNDARY STONES.
+     *
+     * Before this a settlement under size 4 had no edge at all: the houses simply stopped. A size
+     * 2-3 settlement (`wallTier` 'low') now gets a low fence — a hedge, a stake fence or a rail fence
+     * by culture — at `townExtent(...).ring + 4`, with a gap wherever a world road or one of the
+     * town's own streets reaches it. A hamlet (size 1) gets two boundary stones either side of each
+     * road into it.
+     *
+     * DECORATION ONLY. None of it files a collider: a fence you cannot step over round a village is
+     * a trap the first time a quest giver stands on the wrong side of it, so these are placed with
+     * `solid: false` and `BUILDING_INFO` gives them `solid: [0, 0]`.
+     */
+    function buildLowEdge(lowTier) {
+      const R = townExtent(node).ring + 4;
+      const TAU = Math.PI * 2;
+      const fkind = fenceKindFor(edgeKind);
+      const fkey = 'fence_' + fkind;
+      const ftint = fenceTintFor(fkind, cultKit.townWall?.colour || '#8a8275');
+      const apart = (a, b) => Math.abs(((a - b + Math.PI * 3) % TAU) - Math.PI);
+      // the openings: every world road through the ring, then every street end that reaches it
+      const gaps = [];
+      for (const c of ringCrossings(roads, cx, cz, R)) {
+        const radial = [Math.cos(c.angle), Math.sin(c.angle)];
+        const slant = (c.tx || c.tz) ? Math.max(0.55, Math.abs(c.tx * radial[0] + c.tz * radial[1])) : 1;
+        gaps.push({ angle: c.angle, half: ((c.half ?? 3) + 1.5) / slant, source: 'road' });
+      }
+      // a street end counts when it is drawn (the pruned alleys are not), within 6 m of the fence
+      // line, and heading OUT of the town rather than running along the edge
+      for (const e of drawnStreetEnds) {
+        const lx = e.x - cx, lz = e.z - cz, r = Math.hypot(lx, lz);
+        if (r < R - 6) continue;
+        const dx = e.x - e.px, dz = e.z - e.pz, dl = Math.hypot(dx, dz) || 1;
+        if ((lx * dx + lz * dz) / (r * dl) < 0.35) continue;
+        const angle = Math.atan2(lz, lx);
+        if (gaps.some(g => apart(g.angle, angle) * R < g.half)) continue;
+        gaps.push({ angle, half: e.half + 1.5, source: 'street' });
+      }
+      const inGap = (a, pad = 0) => gaps.some(g => apart(g.angle, a) * R < g.half + pad);
+      const record = { cx, cz, r: R, tier: lowTier, kind: lowTier === 'low' ? fkind : 'stones', key: lowTier === 'low' ? fkey : 'boundstone', gaps, pieces: [], stones: [], banners: [] };
+      fenceRecords.set(node.id, record);
+
+      /**
+       * Slide a piece of decoration along the ring, away from the road, until it can stand. Up to
+       * 16 m: `roadAt` reads 0.9 three metres off a road's centre line and only falls under
+       * `place()`'s 0.45 at the far side of the kerb, so a stone started at the carriageway's edge
+       * has most of a kerb to cross before it is off the road.
+       */
+      const slidePlace = (key, angle, dir, opts, yaw = null) => {
+        for (let k = 0; k <= 32; k++) {
+          const a = angle + dir * (k * 0.5) / R;
+          const x = cx + Math.cos(a) * R, z = cz + Math.sin(a) * R;
+          if (place(key, x, z, yaw ?? -a, 1, 0.15, null, { solid: false, ...opts })) return [x, z];
+        }
+        return null;
+      };
+      const bannerAt = g => {
+        // beside the opening on whichever side has ground for it (two roads can fork into one gap)
+        const b = slidePlace('banner', g.angle + (g.half + 1.2) / R, 1, { tint: bannerTint, foot: 0.4 }, Math.PI / 2 - g.angle)
+          || slidePlace('banner', g.angle - (g.half + 1.2) / R, -1, { tint: bannerTint, foot: 0.4 }, Math.PI / 2 - g.angle);
+        if (b) record.banners.push(b);
+      };
+
+      if (lowTier === 'low') {
+        const n = Math.max(12, Math.round((TAU * R) / FENCE_SEG));
+        const pieceHalf = Math.PI / n;
+        for (let i = 0; i < n; i++) {
+          const a0 = (i / n) * TAU, a1 = ((i + 1) / n) * TAU, am = (a0 + a1) / 2;
+          if (inGap(am, pieceHalf * R)) continue;
+          let ax = cx + Math.cos(a0) * R, az = cz + Math.sin(a0) * R;
+          let bx = cx + Math.cos(a1) * R, bz = cz + Math.sin(a1) * R;
+          // like the wall: a piece running into the water stops at the waterline
+          const wetA = terrain.underwater(ax, az), wetB = terrain.underwater(bx, bz);
+          if (wetA && wetB) continue;
+          if (wetA || wetB) {
+            const [sx, sz] = wetA ? [bx, bz] : [ax, az], [ex, ez] = wetA ? [ax, az] : [bx, bz];
+            let lo = 0, hi = 1;
+            for (let k = 0; k < 8; k++) {
+              const t = (lo + hi) / 2;
+              if (!terrain.underwater(sx + (ex - sx) * t, sz + (ez - sz) * t)) lo = t; else hi = t;
+            }
+            if (lo < 0.2) continue;
+            [ax, az, bx, bz] = [sx, sz, sx + (ex - sx) * lo, sz + (ez - sz) * lo];
+          }
+          const len = Math.hypot(bx - ax, bz - az);
+          const ha = terrain.heightAt(ax, az), hb = terrain.heightAt(bx, bz);
+          const lean = Math.abs(ha - hb);
+          if (place(fkey, (ax + bx) / 2, (az + bz) / 2, Math.atan2(bx - ax, bz - az),
+            [1, 1 + lean / 1.25, (len / FENCE_SEG) * 1.03], 0.15, Math.min(ha, hb),
+            { solid: false, tint: ftint, foot: 0.6 })) record.pieces.push([ax, az, bx, bz]);
+        }
+        // a banner at each road into the village (or, with no road, at its first opening)
+        const roadGaps = gaps.filter(g => g.source === 'road');
+        for (const g of (roadGaps.length ? roadGaps : gaps.slice(0, 1))) bannerAt(g);
+      } else {
+        // a hamlet: two stones at each road in (or, with none, at each street that reaches the edge)
+        const roadGaps = gaps.filter(g => g.source === 'road');
+        for (const g of (roadGaps.length ? roadGaps : gaps.slice(0, 2))) {
+          for (const side of [-1, 1]) {
+            const st = slidePlace('boundstone', g.angle + side * g.half / R, side, { tint: '#9a9284', foot: 0.6 });
+            if (st) record.stones.push({ x: st[0], z: st[1], gap: gaps.indexOf(g), side });
+          }
+          bannerAt(g);
+        }
       }
     }
   }
@@ -1518,6 +1753,7 @@ export function createFeatures(scene, terrain, opts = {}) {
     // that no longer exist (js/town.js stands guards from it)
     gateRecords.clear();
     wallRecords.clear();
+    fenceRecords.clear();                              // R27 M3
     // ROUND 14: every town's streets go into one ribbon buffer — see buildSettlement
     const streets = { position: [], normal: [], color: [], index: [] };
 
@@ -1597,6 +1833,8 @@ export function createFeatures(scene, terrain, opts = {}) {
     gatesOf: id => gateRecords.get(id) || [],
     /** A walled settlement's ring as it was built: `{ cx, cz, r, segments, kinds, gates }`. */
     wallOf: id => wallRecords.get(id) || null,
+    /** R27 M3 — an unwalled settlement's edge as built (fence or boundary stones), or null. */
+    edgeOf: id => fenceRecords.get(id) || null,
     /** The bridges drawn right now, as js/bridge-plan.js plans (samples + deck pieces). */
     get bridgePlans() { return bridgePlans; },
 

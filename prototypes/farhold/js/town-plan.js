@@ -9,6 +9,8 @@
 
 import { planLane, resample, LANE_SPACING } from './roadplan.js';
 import { footprintOf, wallTier } from '../../../proctown/js/townplan.js';
+// R27 M3 — the town-edge kinds live with the rest of the building kit
+import { WALL_KINDS, FENCE_KINDS } from '../../../proctown/js/buildkit.js';
 
 /**
  * Every building a settlement may contain.
@@ -59,7 +61,41 @@ export const BUILDING_INFO = {
   waysigil: { cap: 60, solid: [0, 0], from: 0, role: null },
   /** The town's notice board — a real object you walk up to, not the whole settlement. */
   noticeboard: { cap: 60, solid: [0.9, 2.4], from: 1, role: null },
+
+  // ---- R27 M3: town edges by culture (see `edgeKey` below and proctown/js/buildkit.js)
+  ...edgeCatalogue(),
 };
+
+/**
+ * R27 M3 — ONE INSTANCED MESH PER WALL KIND, EACH WITH THE STONE WALL'S OWN BUDGET.
+ *
+ * The stone kit keeps the plain keys (`wall`, `tower`, `gatehouse`) so every test and system that
+ * already looks those up still finds a human town's wall where it always was; the other five kinds
+ * are `wall_palisade`, `tower_hedge`, `gatehouse_bone` and so on. Same caps and same collision
+ * shapes as stone, because the collider never varies by kind — only the drawing does.
+ *
+ * The low edges are DECORATION ONLY and say so with `solid: [0, 0]`: a fence round a village you
+ * could not step over would be a trap (a quest giver on the far side of a fence with no gap), so
+ * none of these files a collider anywhere — features.js places them with `solid: false`.
+ */
+function edgeCatalogue() {
+  const out = {};
+  for (const kind of WALL_KINDS) {
+    if (kind === 'stone') continue;
+    out[`wall_${kind}`] = { cap: 1400, solid: [3.2, 4], from: 4, role: null };
+    out[`tower_${kind}`] = { cap: 200, solid: [2.6, 12], from: 4, role: null };
+    out[`gatehouse_${kind}`] = { cap: 80, solid: [4.0, 7], from: 4, role: null };
+  }
+  for (const kind of FENCE_KINDS) out[`fence_${kind}`] = { cap: 2400, solid: [0, 0], from: 2, role: null };
+  out.boundstone = { cap: 400, solid: [0, 0], from: 1, role: null };
+  out.banner = { cap: 240, solid: [0, 0], from: 1, role: null };
+  return out;
+}
+
+/** The mesh a piece of a town's edge goes into: `edgeKey('palisade', 'tower')` -> 'tower_palisade'. */
+export function edgeKey(kind = 'stone', piece = 'wall') {
+  return kind === 'stone' || !WALL_KINDS.includes(kind) ? piece : `${piece}_${kind}`;
+}
 
 /** The twelve added in round 8, for the tests and the docs. */
 export const NEW_BUILDINGS = [
@@ -430,4 +466,80 @@ export function sentryPosts(gates = []) {
     }
   }
   return out;
+}
+
+// ---------------------------------------------------------------------------- R27 M3: arrival
+
+/** Metres past the edge you have to walk back out before the arrival card can fire again. */
+export const ARRIVAL_REARM = 30;
+
+/**
+ * Where "arriving" happens: the wall for a walled town, the ring for an open one — from
+ * `townExtent`, and from nowhere else (a third answer to "where does this town end" is exactly the
+ * fault round 21 and M2 spent two rounds removing).
+ */
+export function arrivalRadius(node) {
+  const ext = townExtent(node);
+  return ext.walled ? ext.wall : ext.ring;
+}
+
+/**
+ * R27 M3 — THE ARRIVAL CARD FIRES ONCE PER ENTRY.
+ *
+ * `step(x, z, towns)` returns the town you have just walked INTO, or null. A town fires when you
+ * cross its `arrivalRadius` inwards; it re-arms only when you are `rearm` metres back OUT past that
+ * radius, so walking round the market, or along the inside of the wall, never fires it twice. A town
+ * you are already inside the first time the watch sees it (a load, a waypoint jump) is marked as
+ * entered without a card — you did not walk in.
+ *
+ * State is per node object (a WeakMap), so a new world's settlements start fresh with no reset call.
+ */
+export function createArrivalWatch({ rearm = ARRIVAL_REARM, radiusOf = arrivalRadius } = {}) {
+  let inside = new WeakMap();
+  return {
+    step(x, z, towns = []) {
+      let fired = null;
+      for (const t of towns) {
+        const r = radiusOf(t);
+        const d = Math.hypot((t.wx ?? t.x) - x, (t.wz ?? t.z) - z);
+        const was = inside.get(t);
+        if (was === undefined) { inside.set(t, d < r); continue; }
+        if (!was && d < r) { inside.set(t, true); if (!fired) fired = t; }
+        else if (was && d > r + rearm) inside.set(t, false);
+      }
+      return fired;
+    },
+    reset() { inside = new WeakMap(); },
+  };
+}
+
+/** The game's one watch — main.js asks it once a frame. */
+const sharedArrivals = createArrivalWatch();
+export const arrivalAt = (x, z, towns) => sharedArrivals.step(x, z, towns);
+
+/** What each role in a town is to a traveller, in the fewest words. */
+const SERVICE_WORD = {
+  merchant: 'market', smith: 'smith', innkeeper: 'inn', elder: 'elder', gambler: 'gambler',
+  broker: 'mercenaries', unbinder: 'unbinder',
+};
+
+/**
+ * The arrival card's facts: `{ name, size, holder, services }`.
+ *
+ *   size      the settlement's own tier word (hamlet / village / town / city / capital)
+ *   holder    the display name of whoever holds the zone, or null
+ *   services  one word per kind of person in js/town.js's roster who does something for you
+ */
+export function arrivalCard(node, { roster = [], holder = null } = {}) {
+  const services = [];
+  for (const role of roster || []) {
+    const word = SERVICE_WORD[role?.key];
+    if (word && !services.includes(word)) services.push(word);
+  }
+  return {
+    name: node?.name || 'a settlement',
+    size: node?.kind || node?.tier || (wallTier(node?.size || 1) === 'wall' ? 'city' : 'village'),
+    holder: holder || null,
+    services,
+  };
 }

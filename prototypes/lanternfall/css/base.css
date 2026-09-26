@@ -10,3 +10,5 @@ canvas#view { position: fixed; inset: 0; width: 100vw; height: 100vh; display: b
 .boot.gone { opacity: 0; pointer-events: none; }
 .boot.error { color: var(--danger); font-family: monospace; white-space: pre-wrap; padding: 2em; place-items: start; overflow: auto; letter-spacing: 0; }
 button { font-family: var(--font-ui); }
+.fade { position: fixed; inset: 0; background: #000; opacity: 0; pointer-events: none; transition: opacity .25s; z-index: 20; }
+.fade.on { opacity: 1; }

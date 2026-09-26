@@ -2,15 +2,15 @@
 // DOM-free.
 import { PK } from '../entities/particles.js';
 import { hexToRgb01 } from '../core/math.js';
+import { collectLights } from '../world/lightgrid.js';
 
 const rgb = n => [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
 
 export function buildFrame(game, cam, atlas, alpha) {
   const sprites = [], overlays = [], additive = [], lights = [];
   const p = game.player, room = game.room;
-  // static lights from the room
-  for (const t of room.things) if (t.t === 'light') lights.push({ x: t.at[0], y: t.at[1], r: t.r || 64, color: hexToRgb01(t.color || '#ffc46a'), i: t.intensity ?? 1, shadow: t.shadow !== false, flicker: t.flicker || 0 });
-  for (const t of room.things) if (t.t === 'lamp_post') lights.push({ x: t.at[0], y: t.at[1] - 22, r: 96, color: [1, 0.77, 0.42], i: 1.2, shadow: true, flicker: 0.04 });
+  // world lights (the same list the CPU light grid uses), minus the lantern which is drawn below
+  for (const l of collectLights(game)) if (!l.own) lights.push(l);
   // player
   if (p) {
     const x = p.px + (p.x - p.px) * alpha, y = p.py + (p.y - p.py) * alpha;
@@ -31,7 +31,7 @@ export function buildFrame(game, cam, atlas, alpha) {
     sprites.push({ x: Math.round(lp.x) - 1, y: Math.round(lp.y), w: 3, h: 1, tint: [0.12, 0.12, 0.15, 1] });
     sprites.push({ x: Math.round(lp.x) - 1, y: Math.round(lp.y) + 1, w: 3, h: 3, tint: [flame[0], flame[1], flame[2], 1], emit: 1.4 });
     sprites.push({ x: Math.round(lp.x), y: Math.round(lp.y) + 2, w: 1, h: 1, tint: [1, 1, 0.9, 1], emit: 2 });
-    lights.push({ x: lp.x, y: lp.y + 2, r: game.lanternRadius || 72, color: flame, i: 1.1, shadow: true, flicker: 0.05 });
+    if (!p.lanternOut) lights.push({ x: lp.x, y: lp.y + 2, r: game.lanternRadius || 72, color: flame, i: p.hooded ? 0.35 : 1.1, shadow: true, flicker: 0.05 });
     game._lantern = lp;
   }
   // particles
@@ -120,6 +120,5 @@ export function spellVisuals(game, out, atlas) {
     }
   }
   for (const f of game.fields) { const c = col(f.color); for (let k = 0; k < 10; k++) { const a = Math.random() * Math.PI * 2, r = Math.random() * f.r; additive.push({ x: f.x + Math.cos(a) * r, y: f.y + Math.sin(a) * r * 0.5, w: 1, h: 1, tint: [c[0], c[1], c[2], 0.6], emit: 1 }); } lights.push({ x: f.x, y: f.y, r: f.r + 8, color: c, i: 0.6, shadow: false, flicker: 0.3 }); }
-  for (const f of game.flashes) lights.push({ x: f.x, y: f.y, r: f.r, color: f.color, i: f.i * (f.t / f.max), shadow: false });
   for (const a of game.arcs) { const c = col(a.color); const len = Math.hypot(a.x1 - a.x0, a.y1 - a.y0); let jx = 0; for (let s = 0; s <= len; s++) { jx += (Math.random() - 0.5) * 1.5; jx *= 0.8; additive.push({ x: a.x0 + (a.x1 - a.x0) * s / len + jx, y: a.y0 + (a.y1 - a.y0) * s / len + jx, w: 1, h: 1, tint: [c[0], c[1], c[2], 1], emit: 2 }); } lights.push({ x: (a.x0 + a.x1) / 2, y: (a.y0 + a.y1) / 2, r: 30, color: c, i: 1, shadow: false }); }
 }

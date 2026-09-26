@@ -1,11 +1,25 @@
 # LANTERNFALL — 06: Physics and Rendering
 
+> Canon v2 — edited per EDIT-ORDERS.md (2026-09-26).
+
 > How the world is stored, how every pixel moves, burns, freezes and floods, how rain, light and reflections
 > are made, and what each frame is allowed to cost.
 
-This page is the spec for `js/world/` and `js/render/`. Module names and file paths are fixed in
-`10-TECH-DATA.md` §3; spell numbers (damage, radius, oil) live in `03-SPELLS.md`; this page only says what a
-spell does *to cells*. Canon (names, acts, flames) is `00-OVERVIEW.md`.
+This page is the spec for `js/world/` and `js/render/`. **06 owns** (00 §3): materials, cell rules, liquids,
+height-field floods, current zones, the gravity-band cell rule, light (sources, the CPU light grid, tiers),
+rendering, the camera, room transitions, art formats and the performance budget. It does **not** own: file
+names, folders and JSON field shapes (10 §3, §5), spell numbers (03), movement numbers (07, `data/movement.json`),
+statuses (03), monster behaviour and boss camzones (05), keys and settings screens (02). Where those come up,
+this page links to them. Canon names, acts and flames are `00-OVERVIEW.md`.
+
+**Built already** (commits `1080613`, `d6bd82d`, `c0ef340`): the grid, chunks and dirty rects
+(`js/world/grid.js`), both cell passes (`cellsim.js`), the thermal pass (`thermal.js`), the equaliser, basins and
+shock (`liquids.js`), the support rules (`support.js`, written but not yet called from the tick), entity
+collision (`collide.js`), near rain, drips and ripples (`rain.js`), flame-on-cells and `explode()`
+(`elements.js`), the room compiler and decorator (`roomload.js`, `decor.js`), the 36 materials
+(`data/materials.json`), and the WebGL2 pipeline (`js/render/webgl2.js`, `shaders.js`). Where this page and the
+code disagree on a small constant, the code's value is written here or flagged; where a section describes
+something not built yet, it says **planned** and names the milestone (REVIEW §d).
 
 ## Contents
 
@@ -25,14 +39,19 @@ spell does *to cells*. Canon (names, acts, flames) is `00-OVERVIEW.md`.
 14. [Lighting](#14-lighting)
 15. [Reflections and wet sheen](#15-reflections-and-wet-sheen)
 16. [The WebGL2 render pipeline, pass by pass](#16-the-webgl2-render-pipeline-pass-by-pass)
-17. [Canvas2D fallback](#17-canvas2d-fallback)
+17. [Canvas2D debug view](#17-canvas2d-debug-view)
 18. [Particles](#18-particles)
-19. [Camera](#19-camera)
+19. [Camera and room transitions](#19-camera-and-room-transitions)
 20. [Performance budget](#20-performance-budget)
 21. [Benchmark room for milestone 1](#21-benchmark-room-for-milestone-1)
 22. [What we learned from Tiny RTS](#22-what-we-learned-from-tiny-rts)
-23. [Build order inside this page](#23-build-order-inside-this-page)
-24. [Proposed canon changes](#24-proposed-canon-changes)
+23. [Build order](#23-build-order)
+24. [Applied in v2 — v2 changes](#24-applied-in-v2--v2-changes)
+25. [Art formats](#25-art-formats)
+26. [Parked (v2)](#parked-v2)
+
+New in v2: §8.9 height-field floods, §8.10 current zones, §10.7 gravity bands, §14.7 the CPU light grid and
+tiers, §19.5 room transitions, §25 art formats.
 
 ---
 
@@ -41,10 +60,12 @@ spell does *to cells*. Canon (names, acts, flames) is `00-OVERVIEW.md`.
 | Quantity | Value | Notes |
 |---|---|---|
 | 1 cell | 1 art pixel | the only length unit in the sim; "cells" below |
+| 1 metre | 8 cells | shared number (EDIT-ORDERS §0); used only for player-facing distances (rope metres, the Chimneysweep unlock) |
 | Visible view | 480 × 270 cells at 1080p | flexes a little with window shape, see §19.4 |
 | Sim tick | 1/60 s, fixed | `DT = 1/60`; the sim never runs a variable step |
-| Gravity (entities, particles, fragments) | 900 cells/s² | cells use their own per-tick rules (§6) |
-| Player | 6 × 12 cells, walk 60 cells/s, run 95, jump apex ≈ 34 cells | from the doc brief; movement feel is `07-TRAVERSAL-PUZZLES.md` |
+| Threads | one (the main thread) | canon (00 §13): no Worker, no `SharedArrayBuffer`. Sim, AI, spells, ropes, talk and audio share it |
+| Gravity (particles, fragments) | 900 cells/s² | the player's gravity and every other movement number are `data/movement.json` (07 §2); cells use their own per-tick rules (§6) |
+| Player body | 6 × 12 cells | 00 §4; speeds, jump and step-up are 07's |
 | Room size | min 480 × 270, max 2048 × 2048 cells | 2048 is the smallest texture limit WebGL2 guarantees (§16.2) |
 | Chunk | 64 × 64 cells | §3 |
 | Temperature | whole °C, `Int16` | ambient in the rain is **12 °C** |
@@ -85,7 +106,7 @@ jittering, and costs nothing.
 | 1 | `WET` | surface is wet: draws the sheen (§15.3), resists ignition (×0.25 chance), set by rain/splash, cleared by timer in `aux` or heat ≥ 60 °C |
 | 2 | `SHOCK` | this water/metal cell is carrying Spark current (§7.6); timer in `aux` |
 | 3 | `BUILT` | placed by the player (planks, braces, frozen bridges from Rime) — shown with a faint outline in build mode, counted for the Tinker's build cap |
-| 4 | `PINNED` | never detaches or falls (authored anchors, doors' frames, Great Lamp mounts). Set by the room loader |
+| 4 | `PINNED` | never detaches or falls, and `explode()` skips it (built). Authored anchors, doors' frames, Great Lamp mounts, and **every puzzle-critical cell** (00 §13 soft-lock rule). Set by the room loader from the legend's `%` / `=` or an op's `"pin": true`. Drawn with a faint **brass rim** in the overlay pass (§16.8) so it reads even in the dark; this is what the v1 idea "lampstone" became (§5.5) |
 | 5 | `FROM_WATER` | this ice/steam cell came from water, so it turns back into water (not into its default melt product) — keeps water totals stable across freeze/thaw |
 | 6 | `SETTLED` | liquid only: has not moved for 30 ticks; skipped until a neighbour changes (§8.2) |
 | 7 | `LIT_STATIC` | cell is a static light emitter this frame (glowmoss, lamp glass); set by the loader, used by the emissive pass |
@@ -111,6 +132,12 @@ g.snapshot(rect) / g.restore(snap) // tests and the room editor
 
 `set` and `swap` are the only writers. Both call `touch(x, y)` (§3.2). Tests assert that no other module
 writes to the arrays directly (a grep test in `10-TECH-DATA.md` §9.1).
+
+As built, `damage(x, y, amount, kind)` takes `kind` as an index into `RESIST_KINDS`
+(`['blast','cut','heat','acid','crush']`), `countIn(x0, y0, w, h)` takes a rect as four numbers, and the grid
+also exposes `touchGfx`, `markHot`, `wakeRect`, `wakeAll`, `allGfxDirty`, `beginTick` and `rand` (the per-tick
+xorshift of §4.4). The exact signatures are listed in 10 §3.2. (Known exceptions to "only writers": the room
+compiler writes arrays directly before the first tick, and the equaliser's move is a `set` pair — both allowed.)
 
 ### 2.4 Room edges
 
@@ -165,9 +192,11 @@ that the entity disturbed this tick (swimming, digging).
 | Outside the window, asleep | nothing |
 | Hard cap | if more than **160 chunks** are awake inside the window, the ones furthest from the player drop into the slow lane for that tick and `perf.chunkOverflow` counts it |
 
-Cells never freeze in mid-air forever: the slow lane always gets to them. Tiny RTS stepped every awake
-chunk on the whole map every tick; that was fine at 30 Hz with 32 × 32 chunks on a small map but will not
-hold for 4-million-cell rooms at 60 Hz.
+Cells never freeze in mid-air forever: the slow lane always gets to them (the one deliberate exception is a
+cell **held** by a flipped gravity band, §10.7). Tiny RTS stepped every awake chunk on the whole map every
+tick; that was fine at 30 Hz with 32 × 32 chunks on a small map but will not hold for 4-million-cell rooms at
+60 Hz. The sim window, the slow lane and the stagger `(cx + cy + tick) % 4` are built (`cellsim.js`); the
+160-chunk hard cap is planned (M1).
 
 ---
 
@@ -177,21 +206,24 @@ hold for 4-million-cell rooms at 60 Hz.
 
 | # | Step | Module | Notes |
 |---|---|---|---|
-| 1 | input → player intent | `entities/player.js` | intent is a plain object, recorded for replays |
-| 2 | wiring and prefabs (levers, doors, sluices, timers) | `entities/wiring.js` | may call `grid.set` (a door is cells, §12.6) |
-| 3 | spells: cast, move projectiles, apply cell effects | `spells/*` | cell effects go through `grid.*` only |
-| 4 | AI think + move enemies | `ai/*`, `entities/physics.js` | |
-| 5 | player move | `entities/physics.js` | after enemies so the player never gets pushed into a wall by an update-order accident |
-| 6 | **cell pass A** — powders and liquids, bottom-up | `world/cellsim.js` | §4.2 |
-| 7 | **cell pass B** — gases and fire, top-down | `world/cellsim.js` | §4.2 |
-| 8 | thermal pass (hot chunks only) + reactions | `world/thermal.js` | §7 |
-| 9 | liquid level equaliser (every 8th tick) + basins | `world/liquids.js` | §8.4–8.5 |
-| 10 | support queue (budgeted) → new fragments | `world/support.js` | §10 |
-| 11 | fragments fall / land | `world/fragments.js` | §10.5 |
-| 12 | rain + drips + particles | `world/rain.js`, `render/particles.js` (sim half) | particles that turn into cells call `grid.set` |
-| 13 | damage resolution, deaths, loot | `rpg/damage.js` | meter records (`10-TECH-DATA.md` §10.3) |
-| 14 | swap `awake`/`dirty` buffers, clear `awakeNext` | `world/chunks.js` | |
-| 15 | events out (`bus.flush()`) | `core/bus.js` | UI, audio and speech listen here |
+| 1 | input → player intent | player movement | intent is a plain object, recorded for replays |
+| 2 | wiring and prefabs (levers, doors, sluices, timers) | wiring (planned, M16) | may call `grid.set` (a door is cells, §12.6) |
+| 3 | spells: cast, move projectiles, apply cell effects | spells | cell effects go through `grid.*` only |
+| 4 | AI think + move enemies; current zones and gravity bands push bodies | AI, actor physics | §8.10, §10.7 |
+| 5 | player move | player movement | after enemies so the player never gets pushed into a wall by an update-order accident |
+| 6 | **cell pass A** — powders and liquids, bottom-up | cell passes | §4.2; cells held by a flipped band are skipped (§10.7) |
+| 7 | **cell pass B** — gases and fire, top-down | cell passes | §4.2 |
+| 8 | thermal pass (hot chunks only) + reactions | thermal | §7 |
+| 9 | liquid level equaliser (every 8th tick) + basins + height-field levels | liquids | §8.4–8.5, §8.9 |
+| 10 | support queue (budgeted) → new fragments | support (built, not yet called) | §10 |
+| 11 | fragments fall / land | fragments (planned, M1) | §10.5 |
+| 12 | rain + drips + particles | rain, particle pool | particles that turn into cells call `grid.set` |
+| 13 | damage resolution, deaths, loot | damage | meter records (`10-TECH-DATA.md` §10.3) |
+| 14 | swap `awake`/`dirty` buffers, clear `awakeNext` | grid (`beginTick`, built into the start of step 6) | |
+| 15 | events out (`bus.flush()`) | bus | UI, audio and speech listen here |
+
+The file behind each step is listed in 10 §3. As built, `js/core/tick.js` runs steps 1, 3, 4 (actors), 6–9,
+12 and 15 in this order, and `grid.beginTick()` does step 14's buffer swap at the start of pass A.
 
 ### 4.2 Scan order inside the cell passes
 
@@ -212,8 +244,8 @@ tick, which nobody can see. (Same trick as Tiny RTS's `moved` array, but one byt
 
 ### 4.4 Randomness in cell rules
 
-Cell rules never call `Math.random`. They use `world.rng`, an xorshift32 seeded from `room.seed ^ tick`
-at the start of each tick. Same room + same inputs = same result, which makes replays, the balance sim and
+Cell rules never call `Math.random`. They use `grid.rand()` (built), an xorshift32 seeded from the room seed
+at compile time and re-mixed with the tick number at the start of each tick (`beginTick`). Same room + same inputs = same result, which makes replays, the balance sim and
 cell-rule unit tests exact. The cheap variant used inside inner loops is `r = (r ^ (r << 13)); r ^= r >>> 17;
 r ^= r << 5;` kept in a local variable and written back at the end of the pass.
 
@@ -234,6 +266,10 @@ r ^= r << 5;` kept in a local variable and written back at the end of the pass.
 
 ### 5.2 The materials (ids fixed; `data/materials.json`)
 
+**The 36 built materials below are the list** (R60). Ids 0–35 never change (saves and rooms store numbers).
+Anything the other pages call by another name maps onto one of these (§5.5); a genuinely new material, if one
+is ever needed, **appends from id 36** and is logged in `CHANGELOG.md`.
+
 Density is relative (air = 1, water = 10). "Flam." is the chance per tick (×100) that a neighbouring
 fire or burning cell ignites it. "HP" is `life` for solids and powders (255 = cannot be damaged).
 Temperatures are °C. "Transmit" is how much light passes through one cell (0 = opaque, 1 = clear).
@@ -250,12 +286,12 @@ Temperatures are °C. "Transmit" is how much light passes through one cell (0 = 
 | 7 | `plank` | Plank (player-built) | STATIC | — | 22 | 8 | ignites 260 | — | 0 | always has `BUILT`; span 12; see `07-TRAVERSAL-PUZZLES.md` for building |
 | 8 | `wax` | Wax | STATIC | — | 18 | 3 | 60 → `molten_wax` | — | 0.2 | Act 1 terrain; span 10; softly translucent at edges |
 | 9 | `ice` | Ice | STATIC | — | 20 | 0 | 1 → `water` (after 90 ticks above) | — | 0.7 | span 20; slippery (friction 0.1); Rime makes it |
-| 10 | `moss` | Moss | STATIC | — | 6 | 2 | ignites 180 | — | 0 | grows on stone/brick next to water (§7.7); soft landing (−40% fall damage) |
-| 11 | `glowmoss` | Glowmoss | STATIC | — | 6 | 1 | ignites 200 | — | 0 | emits pale teal light (`#4fd6b8`, 0.15 per cell); Act 3–4 decoration |
+| 10 | `moss` | Moss | STATIC | — | 6 | 2 | ignites 180 | — | 0 | grows on stone/brick next to water (§7.7); a soft landing (the fall-damage rule itself is 07's) |
+| 11 | `glowmoss` | Glowmoss | STATIC | — | 6 | 1 | ignites 200 | — | 0 | emits pale teal light (`#4fd6b8`, power 0.35 in `materials.json`); Act 3–4 decoration |
 | 12 | `rope` | Rope cell | STATIC | — | 8 | 10 | ignites 180 | — | 0.5 | climbable; support rule "hang" (§10.3); Tether shape makes it |
 | 13 | `web` | Web | STATIC | — | 3 | 20 | ignites 120 | — | 0.6 | Act 4 (Widow's silk); entities inside move at 35% speed |
 | 14 | `bone` | Bone | STATIC | — | 30 | 0 | — | — | 0 | Act 2 ossuaries; crush → `ash` |
-| 15 | `cloudstuff` | Cloudstuff | STATIC | — | 50 | 0 | — | — | 0.4 | Act 6 only: the bound cloud. When the Rain stops it converts to `water` in a sweep (§8.7) |
+| 15 | `cloudstuff` | Cloudstuff | STATIC | — | 50 | 0 | — | — | 0.4 | Act 6 only: the bound cloud. When the Rain stops it dissolves into falling water (§8.7) |
 | 16 | `dirt` | Dirt | POWDER | 15 | 8 | 0 | — | — | 0 | repose: slides if the diagonal is free 1 in 2 ticks |
 | 17 | `sand` | Sand | POWDER | 18 | 5 | 0 | 1200 → `molten_glass` | — | 0 | repose: always slides (loose) |
 | 18 | `silt` | Silt | POWDER | 13 | 4 | 0 | — | — | 0 | settles out of moving water (§8.6); slides 1 in 4 ticks (cakes) |
@@ -263,22 +299,22 @@ Temperatures are °C. "Transmit" is how much light passes through one cell (0 = 
 | 20 | `rubble` | Rubble | POWDER | 22 | 10 | 0 | — | — | 0 | what broken stone/brick/bone becomes; slides 1 in 3 |
 | 21 | `ember` | Ember | POWDER | 5 | 4 | — | — | cools to `ash` below 150 | 0 | a glowing coal; starts at 700 °C; emits amber light; ignites what it touches |
 | 22 | `water` | Water | LIQUID | 10 | — | 0 | 100 → `steam` | −5 → `ice` | 0.8 | dispersion 5; puts out fire; conducts Spark |
-| 23 | `oil` | Lamp oil | LIQUID | 8 | — | 30 | ignites 200 | — | 0.5 | **floats on water**; dispersion 3; burns hot and long; the player can collect it (see `08-ITEMS-SHOPS.md`) |
-| 24 | `molten_wax` | Molten wax | LIQUID | 9 | — | 4 | — | < 50 → `wax` | 0.4 | dispersion 1; hurts entities (Tallow's void zone, `05-BESTIARY-BOSSES.md`); starts 90 °C |
+| 23 | `oil` | Lamp oil | LIQUID | 8 | — | 30 | ignites 200 | — | 0.5 | **floats on water**; dispersion 3; burns hot and long; how the player collects it is 07/08's |
+| 24 | `molten_wax` | Molten wax | LIQUID | 9 | — | 4 | — | < 50 → `wax` | 0.4 | dispersion 1; hurts entities (`hurt` block in the JSON; Tallow's void zone, 05); starts 90 °C |
 | 25 | `bile` | Bile | LIQUID | 12 | — | 0 | 100 → `miasma` | — | 0.6 | dissolves `metal`, `brick`, `bone`, `glass` (§7.5); diluted by water (§8.6) |
 | 26 | `ichor` | Ichor | LIQUID | 11 | — | 1 | 100 → `smoke` | — | 0.3 | blood of the drowned things; dispersion 2; stains `bg` dark red where it touches; fades to nothing after 1,800 ticks |
 | 27 | `mud` | Mud | LIQUID | 16 | — | 0 | 100 → `dirt` | — | 0 | dispersion 1 (slow); entities move at 60% |
 | 28 | `molten_glass` | Molten glass | LIQUID | 25 | — | 0 | — | < 900 → `glass` | 0.5 | dispersion 1; 1300 °C; emits orange light; rare (overcharged Ember on sand) |
 | 29 | `steam` | Steam | GAS | 0.3 | 120t–240t | 0 | — | < 90 → `water` 25% / air 75% | 0.75 | lifts entities (§12.5); scalds (1 dmg/10 ticks) above 90 °C |
 | 30 | `smoke` | Smoke | GAS | 0.6 | 90t–200t | 0 | — | — | 0.85 | fades to air; darkens light |
-| 31 | `miasma` | Miasma | GAS | 1.6 | 300t–500t | 25 | ignites 150 (flash) | — | 0.8 | **heavier than air**, pools in dips; poisons (see `05`); flashes into fire |
+| 31 | `miasma` | Miasma | GAS | 1.6 | 300t–500t | 25 | ignites 150 (flash) | — | 0.8 | **heavier than air**, pools in dips; poisons (the status is 03's); flashes into fire |
 | 32 | `fire` | Fire | FIRE | 0.2 | 12t–40t | — | — | — | 1.0 | emits light (colour by fuel, §7.3); becomes `smoke` 40% on death |
 | 33 | `spark` | Spark cell | FIRE | 0.2 | 3t–8t | — | — | — | 1.0 | Spark flame's crackle on metal/water surfaces; purely visual + `SHOCK` trigger |
 | 34 | `rust` | Rust | POWDER | 14 | 3 | 0 | — | — | 0 | what Bile leaves of metal |
 | 35 | `salt` | Brine salt | POWDER | 12 | 3 | 0 | — | — | 0 | left when bile+water dries; melts ice it touches (turns ice to water) |
 
-("t" = ticks of lifetime, stored in `life` ÷ 4.) Ids 36–63 are reserved for later acts; ids 64–255 are
-free. The renderer's palette texture has 64 rows, so ids above 63 need a palette resize.
+("t" = ticks of lifetime, stored in `life` ÷ 4.) New ids append from 36 (R60). The renderer's palette and
+material-info textures have 64 rows, so ids above 63 would need them resized; nothing planned comes close.
 
 ### 5.3 Lookup tables built from the JSON
 
@@ -286,7 +322,9 @@ free. The renderer's palette texture has 64 rows, so ids above 63 need a palette
 of length 256, one per property: `cls`, `density` (float), `hp`, `flam` (0–100), `meltAt`, `meltTo`,
 `freezeAt`, `freezeTo`, `boilAt`, `boilTo`, `igniteAt`, `transmit` (float), `conduct` (float),
 `dispersion`, `repose` (1 in N), `lifeMin`, `lifeMax`, `supportRule` (0 none, 1 island, 2 span, 3 hang),
-`span`, `emit` (packed RGB) and `resist[kind]` (5 floats). The JSON schema is in `10-TECH-DATA.md` §5.1.
+`span`, `emit` (RGB + power), `temp0`, `brokenTo`, `burnsTo`, `hurt`, `slow`, `climbable`, `alpha`, `absorb`,
+`reflect`, `friction`, `ramps` and `resist[kind]` (5 floats). The JSON field shapes are in `10-TECH-DATA.md`
+§5.1; the values are this page's.
 
 ### 5.4 Colour ramps (unlit albedo)
 
@@ -340,6 +378,24 @@ Any cell above 350 °C gets a glow value `g = clamp((temp − 350) / 950, 0, 1)`
 alpha channel (§16.3). The shader adds `mix(#ff3a0a, #ffd070, g) × g × 1.6` as emission. So heated metal
 visibly reddens, embers pulse as they cool, and molten glass is almost white.
 
+### 5.5 Other names for the same materials (R60)
+
+Pages and v1 drafts used material names that are not in the list. Each maps onto a built material, a grid flag
+or something that is not a cell at all:
+
+| Name used elsewhere | What it is in the engine |
+|---|---|
+| `lampstone` (unbreakable puzzle stone) | any material with the `PINNED` flag, drawn with the brass rim (§2.2, §16.8) |
+| cracked / rotten / crust | the legend's `cracked` flag: the cell starts at half life (built in the compiler) |
+| slag | `rust` |
+| gravel | `rubble` |
+| soot | `ash` |
+| plank / brace / crate / ladder wood (build parts) | `plank` (always `BUILT`) |
+| fuse | a run of `rope` cells with an end probe (07 owns the probe) |
+| frost | an `ice` skin one or two cells thick |
+| flesh | not needed: bodies and corpses are entities, not cells |
+| `tar` | parked (see Parked) |
+
 ---
 
 ## 6. Movement rules by behaviour class
@@ -347,6 +403,12 @@ visibly reddens, embers pulse as they cool, and molten glass is almost white.
 All rules below run on one cell at index `i` during its pass. "Free" means the target cell is a material the
 mover may **swap with**: air, a gas, or a liquid/powder of lower density. Swaps are always a full `swap(i, j)`
 so nothing is created or destroyed by movement.
+
+The constants in §6–§9 are the design values. The built passes are tuned in a few places, and the code's value
+is what runs: fire rises with chance 0.5 and drifts sideways with chance 0.3; a fire cell ignites a flammable
+neighbour with `p = flam / 25` per tick (burning cells spread with `flam / 100 × 0.6`); a liquid that has
+wandered 24 cells sideways on a flat surface stops and is handed to the equaliser (`FLAT_LIMIT`). M1's
+benchmark pass writes the final numbers back into this page.
 
 ### 6.1 POWDER
 
@@ -443,8 +505,10 @@ molten material. After the diffusion step the same loop checks **state changes**
 
 ### 7.4 Flame-vs-material rules (cell side only)
 
-`03-SPELLS.md` owns the numbers and the list per flame; this is how each flame is applied to cells.
-All go through `js/world/elements.js` `applyElement(grid, x, y, r, flame, power)`:
+`03-SPELLS.md` owns the numbers and the full flame × material reaction list; this is how each flame is
+applied to cells. All go through `applyElement(game, x, y, r, flame, opts)` (built, `js/world/elements.js`;
+`opts` = `{ power, dig, fromPlayer, maxCells, water }`, and it returns a summary — cells boiled, frozen,
+ignited, dissolved — that 03's combos read):
 
 | Flame | What it does to cells in radius `r` |
 |---|---|
@@ -564,9 +628,12 @@ a named rectangle plus a target water level `y`. A basin controller:
 - ignores cells that are not water (oil floats up as the water drains — which is a puzzle);
 - reports `basin.level` to the wiring system so a door can open when the water reaches a line.
 
-The Sluicemaw's flood/drain cycle (`05-BESTIARY-BOSSES.md`) is two basins in the arena driven by the boss
-script. **Cheaper fallback** if a basin still costs too much: fill/drain by whole rows at once every
-4 ticks.
+Basins are built (`createBasin`, `stepBasin` in `liquids.js`: default rate 120 cells/tick, modes `idle` /
+`fill` / `drain`, `surface` reported each tick). They are for rooms whose water fits under the awake-liquid cap
+(§20). **Any body bigger than that is a height-field flood (§8.9)**, and a basin can drive one: the Sluicemaw's
+flood/drain cycle (05) is the Great Reservoir's height-field level, moved by the boss script through the same
+`fill` / `drain` / `stop` wiring actions. **Cheaper fallback** if a basin still costs too much: fill/drain by
+whole rows at once every 4 ticks.
 
 ### 8.6 Mixing
 
@@ -584,11 +651,20 @@ script. **Cheaper fallback** if a basin still costs too much: fill/drain by whol
 
 ### 8.7 When the Rain stops (Act 6)
 
-The Act 6 set piece (`01-WORLD-STORY.md`, `09-MODES-MAP.md`) makes every held body of water fall. The
-room script calls `liquids.release(region, speedRows)`: it converts `cloudstuff` in the region to water
-from the top down, **speedRows = 2 rows per tick**, and deletes `PINNED` flags on authored water holders
-(cloud dams), so the ordinary rules take over. Budget: the chunk cap (§3.4) still applies; the scene is
-authored so that no more than ~250,000 liquid cells are in the sim window at once.
+After the Storm's Eye (`a6_n06`) comes `cs_rain_stops` (00 §12), and control returns mid-fall in the
+**Falling Flood** (`a6_n07`, three forced rooms): the cloudroot lets go of every lake it holds and the player
+falls down its inside while the lakes pour past. The room script calls `liquids.release(region, speedRows)`:
+
+- `cloudstuff` in the region dissolves from the top down at **2 rows per tick** — the cells become falling
+  water drawn as `liquid` particles and height-field sheets, not awake cells;
+- each authored lake in the region is a **height-field flood** (§8.9) whose level `release` drops at its own
+  rate, so a lake "pours out" as its level falls and its thin band of real cells spills over the lip;
+- `PINNED` flags on authored cloud dams are cleared so the ordinary support rules take over.
+
+**Budget: the Falling Flood is authored to the cap** — at most **60,000 awake liquid cells** in the scene at any
+moment (00 §13), everything else height-field. `room-check` measures the peak over the scripted fall and fails
+the room above it. (The v1 figure of ~250,000 cells is parked.) The Dry Root (`a6_n08`) and the Dry Eye
+(`a6_n09`) that follow are dry rooms: rain density 0, no rain deposits, and held water is gone.
 
 ### 8.8 Conservation
 
@@ -599,8 +675,80 @@ Water must not multiply. Rules that turn water into something else keep it count
 - water → ice keeps `FROM_WATER`, and ice with the flag always melts back to water;
 - rain deposits are capped per room (§11.3).
 
-`tests/cells.test.js` asserts total water + steamDebt + ice(FROM_WATER) is constant over 2,000 ticks of a
-boil/freeze room.
+`tests/unit/cells.test.js` asserts total water + steamDebt + ice(FROM_WATER) is constant over 2,000 ticks of a
+boil/freeze room. Height-field water (§8.9) keeps its own volume and is outside this count; converting
+between the two (a band cell sinking into the body, the level rising to absorb it) is one-for-one.
+
+### 8.9 Height-field floods
+
+Every big water in the game — Floodgate's rising water, the Long Descent floodline, the Sluicemaw's Great
+Reservoir, the Spillway (`a3_n07`) and the Falling Flood (`a6_n07`) — is a **height-field flood**: the water is
+stored as a **level** (a surface height), not as cells, so a flood of any size costs about the same.
+
+**What it is.** A `flood` record per room, or one per **column band** (a vertical strip of the room, for water
+that stands at different heights in different parts):
+
+```js
+flood = { id, x0, x1,            // columns it covers (a whole room, or a band)
+          level,                 // surface y in cells (float; smaller = higher)
+          floor,                 // y below which the body is solid ground (the bottom of the pit)
+          rate,                  // rows per second: + rising, − falling, 0 still
+          target,                // level it moves toward, then rate → 0
+          band: 8,               // rows of real water cells kept at the surface (≤ 8)
+          mat: 'water' }         // any liquid id; oil floods are allowed
+```
+
+**The band.** Inside the sim window (§3.4), the top `band` rows under `level` (**at most 8**) are real water cells,
+so everything that needs cells works at the surface: rain ripples, splashes, Rime freezing a skin, Ember
+boiling steam, oil floating on top, Spark electrifying the top layer, a thrown body splashing. Below the band the
+body is **not cells**: the water shader draws it (depth tint and absorption from the level, §15.1), and entities
+treat any point below `level` as water.
+
+**Entities.** For swim, breath and soak (07 and 03 own those rules) an entity is "in water" if its box overlaps
+the band's cells **or** lies below `level` inside `x0..x1`. `sampleBox` (built, `collide.js`) adds the
+height-field part to its liquid fraction; the head test uses `level` directly.
+
+**Moving the level.** `rate` is in **rows per second** (Floodgate and the floodline: 0.5–8 rows/s, set by 09's
+wave data; the Sluicemaw cycle by 05's script). Each tick the level moves by `rate × DT`; each whole row it
+crosses, the band is rebuilt: rising adds a row of cells at the top of the band and absorbs its bottom row into
+the height field; falling does the reverse. Any cell the new band row would overwrite (a plank, a crate's
+cells, sand) is left alone and the water flows round it. The whole rebuild is one row of `set` calls per
+crossed row, well under the §20 budget (a 400-wide room rising 8 rows/s costs about 3,200 `set`s a second).
+
+**Outside the sim window** the band is not kept as cells at all: the renderer draws the water from the level,
+and the band is rebuilt when those columns come into the window.
+
+**Drains and release.** `drain(id, rate)` / `fill(id, rate)` / `stop(id)` are wiring actions (10 §6.6).
+`release(region)` (Act 6) sets every flood in the region falling at its authored rate and turns its band into a
+pour over the region's lip (§8.7).
+
+**Loading mid-flood.** A room that starts flooded loads with the height-field level in place and its band
+already level (§19.5): nothing has to pour in.
+
+Status: **planned** (M4). Acceptance: a flood raises 8 rows/s across 400 cells in ≤ 2 ms/tick (REVIEW M4).
+
+### 8.10 Current zones
+
+Falling-sand water has no velocity, so it cannot push anything. **Gameplay flow is authored**: a **current**
+is a room thing (10 §6.5, type `current`):
+
+```json
+{ "t": "current", "id": "cur_channel", "rect": [320, 400, 480, 64], "vector": [140, 0], "strength": 0.8,
+  "wire": "lv_pump" }
+```
+
+- `vector` is the flow in cells per second; `strength` 0–1 scales it; `wire` (optional) names a thing whose
+  `on` / `off` turns the current on and off (a pump, a sluice).
+- **Entities** in the rect are pushed toward `vector × strength`, applied as a velocity they accelerate toward:
+  the **player at 60%** of it, the Sluicewarden **immune** (a class passive, 04), enemies by their
+  `swim` type (05), floats and crates at 100%.
+- **Loose cells** (liquid and powder) inside the rect prefer the side move along the vector: when pass A picks
+  a sideways direction for them, the vector's side wins with chance `0.5 + 0.4 × strength`. So silt drifts
+  downstream and water visibly leans, but no cell is created or moved faster than its normal rule.
+- Cell water is **cosmetic for flow**. Anything that reads "flow" (a water wheel, a floating plank's drift, the
+  Long Channel's current, 07's puzzles) reads a current zone or a basin's drain rate, never the cells.
+
+Status: **planned** (M4). Acceptance: a current zone pushes a body at 60% (REVIEW M4).
 
 ---
 
@@ -626,13 +774,17 @@ fall with a bottom profile, shatter on landing) but with three changes: natural 
 rule, falling pieces become proper objects that hurt what they land on and push water aside, and there is
 an even cheaper fallback when the budget runs out.
 
+Status: the three support rules are **built** in `js/world/support.js` (`createSupport(world)` → `process(budget)`
+returns loose groups; `grid.set` already queues every changed static cell), but nothing calls it from the tick
+yet. Fragments, landing and powderise are **planned** for M1 (REVIEW §d), with a collapse test.
+
 ### 10.1 Support rules per material
 
 | Rule | Materials | Holds if… |
 |---|---|---|
-| `none` | bedrock, powders, liquids, gases | (bedrock is always an anchor; powders just fall) |
+| `none` | bedrock, moss, glowmoss, powders, liquids, gases | (bedrock is always an anchor; powders just fall; moss is a skin held by whatever it grows on) |
 | `island` | stone, cloudstuff, bone | the 4-connected group of `island` + `span` cells it belongs to touches **bedrock, the room edge or a `PINNED` cell**. Stone has no span limit: a stone ceiling holds however wide it is, as long as it connects to the room frame somewhere |
-| `span` | brick 24, wood 16, plank 12, wax 10, ice 20, metal 40, glass 6, moss 0 (moss is `hang`-like: always held by what it grows on) | reaching sideways or hanging below costs 1 per cell from the nearest anchor, standing on a cell costs 0 (Tiny RTS's rule). Anchors: a cell resting on stone/bedrock/powder/`PINNED`/any held `span` cell below, or pressed from the side against stone/bedrock |
+| `span` | brick 24, wood 16, plank 12, wax 10, ice 20, metal 40, glass 6 | reaching sideways or hanging below costs 1 per cell from the nearest anchor, standing on a cell costs 0 (Tiny RTS's rule). Anchors: a cell resting on stone/bedrock/powder/`PINNED`/any held `span` cell below, or pressed from the side against stone/bedrock |
 | `hang` | rope, web | connected (8-neighbour) through `hang` cells to any solid non-`hang` cell. No span limit, no weight. Cut the top and the whole strand drops |
 
 The in-game rule the Tinker learns (`07-TRAVERSAL-PUZZLES.md` building): *"Straight up is free. Every cell
@@ -708,10 +860,33 @@ Sideways push from explosions: `vx` from the blast (§13.1), blocked by any soli
 
 **Cheap fallback ("powderise")**: instead of a rigid fragment, every loose cell is converted in place to its
 broken form (rubble, sand, water…) and falling-sand rules take over. It looks like a crumble rather than a
-slab falling, costs nothing extra, and is the path taken on the Canvas2D fallback and when the setting
-*Physics detail* is `low` (`02-CONTROLS-UI.md` settings).
+slab falling, costs nothing extra, and is the path taken when the setting *Physics detail* is `low`
+(02's settings screen) or when the over-budget ladder drops it (§20.4).
 
 No rotation. Fragments fall straight; spinning debris is left to particles.
+
+### 10.7 Gravity bands (Act 5)
+
+A **gravity band** is a horizontal strip of a room where "down" points another way while a gravity lantern
+or a bell toll says so (07 owns the lanterns, bells and puzzles; 05 owns the Bellfather's bands). The cell rule
+is deliberately simple (R13):
+
+- **What a band moves:** entities (the player, enemies, pickups, crates), live fragments, particles and rain.
+  Inside the band their gravity vector is the band's direction (`up`, `down`, `left`, `right`) at the same
+  magnitude.
+- **What a band holds:** cells. While a band is flipped (any direction but `down`), every powder, liquid and gas
+  cell inside it is **held**: pass A and pass B skip it after one row test (no flag bit is used; the grid's 8 flag bits are full), the thermal pass still runs (so a
+  held pool can freeze or boil), and nothing else changes. Water hangs in the air as a still sheet — a better
+  image than a buggy up-fall, and it cannot desync.
+- **Flip back:** when the band returns to `down`, every chunk it covers is woken (`wakeRect`) and the held cells
+  fall under the ordinary rules on the next tick.
+- **Snap:** band edges snap to **8-cell rows** (one room block at block 8), so a band edge never splits a cell
+  row and the held test is one comparison per row.
+- **Readability:** every band draws its state on screen (an arrow rim in the overlay pass, §16.8) for at least
+  700 ms before it acts (05's Bellfather rule).
+
+Data: a `gravity_band` room thing (10 §6.5): `{ "t": "gravity_band", "id", "rect", "dir", "wire" }`.
+Status: **planned** (M28). Acceptance: held cells are unchanged across a flip; band edges snap to 8 (REVIEW M28).
 
 ---
 
@@ -724,17 +899,19 @@ No rotation. Fragments fall straight; spinning debris is left to particles.
 | **Near rain** | particles in the sim (§18) | yes: hits cells, wets surfaces, ripples water, can deposit water |
 | **Far rain** | streaks drawn by a shader over the background parallax (§16.4) | no; free |
 
-Canon: rain is on in every act until the Rain stops in Act 6.
+Canon: rain is on in every act until the Rain stops **mid-Act 6**, after the Storm's Eye (`cs_rain_stops`,
+00 §12). From then on near and far rain are off (density 0) for the rest of the campaign.
 
 ### 11.2 Near rain numbers
 
 | Setting | Value |
 |---|---|
-| Spawn rate | `rain.density` drops per second per 100 columns of view. Defaults: act1 90, act2 60 (mostly under cover), act3 120, act4 70, act5 100, act6 160 → 0 after the Rain stops. At 480 columns and density 120 that is 576 drops/s ≈ 10 per tick |
+| Spawn rate | `rain.density` drops per second per 100 columns of view. **By act: act1 60, act2 70, act3 90, act4 110, act5 130, act6 160; 0 after `cs_rain_stops`** (R59, 00 §4). Rooms can override (indoors 0). At 480 columns and density 90 that is 432 drops/s ≈ 7 per tick |
 | Spawn where | a random x across view + 64 cells either side, y = view top − 8; **only in columns open to the sky** (`room.skyTop[x]`: the first solid y from the top of the room at load, updated when a chunk in the top band changes). Indoor columns spawn nothing |
 | Fall speed | 420 cells/s ± 40, plus `wind × 90` sideways (wind per room, −1…1) |
 | Drawn as | a 1 × 3-cell streak, colour `#8fa6c4` at 55% alpha, brighter where lit (they pick up the light map, §16.6) |
 | Particle cap | 1,800 rain particles alive |
+| Perfect dodge | when the player dodges in the last 100 ms before a hit (04's rule), every rain streak in view **freezes for 0.2 s** and the player's rim flashes (B21): the rain particles skip their move for 12 ticks, drawn at full alpha |
 
 ### 11.3 On impact (raycast per tick from last to new position through the grid)
 
@@ -742,7 +919,7 @@ Canon: rain is on in every act until the Rain stops in Act 6.
 |---|---|
 | a solid/powder cell | set `WET` on it with a 900-tick timer (a sheen that lasts 15 s after the rain stops reaching it); spawn **2 splash particles** (1 × 1, up and outward, 40–90 cells/s, life 0.25 s); with chance `rain.deposit` (default **1/14**) place one water cell in the air cell above the hit. |
 | a liquid surface | push an impulse of −0.6 into the ripple buffer at that x (§15.2); 1 splash particle; no deposit |
-| an entity | 1 splash particle off its top; entity gets `wet` status for 3 s (cosmetic drip; Spark bonus vs wet targets is in `03-SPELLS.md`) |
+| an entity | 1 splash particle off its top and a 3 s cosmetic drip. Whether standing in rain applies `soaked` (the status that absorbed v1's `wet`) is 03's rule |
 | a fire cell | fire life −4 |
 
 **Deposit cap:** a room can gain at most `rain.maxDeposit` water cells from rain (default **8,000**, 0 for
@@ -775,12 +952,19 @@ with a 1/4 deposit chance. Drips also happen indoors — that is where they matt
 Authors can place fixed drips (`drip` prefab, `10-TECH-DATA.md` §6.5) and **streams** (a drip point that
 emits a continuous 1-wide trickle of water cells at 20 cells/s, used for leaking pipes).
 
+Built today (`js/world/rain.js`): sky-column spawning, the 1,800 cap, wetting, splashes, ripples, the deposit
+chance and cap, and drip points (found at room load, merged with authored `drip` things). Two gaps M4 closes:
+the rain and drip rolls use `Math.random`, so a deposit can differ between two runs of the same seed — they
+move to a seeded stream (10 §4.4); and the soak/evaporate extras of §11.4 and the drain refund are not built yet.
+
 ### 11.6 Sound hook
 
 Rain loudness follows spawn rate × fraction of sky columns in view; two ambience loops
 `ambience.rain.heavy` / `ambience.rain.light` crossfade (`10-TECH-DATA.md` §10.4). Every 6th splash on metal
 plays a tiny `rain.tick.metal` at low volume, capped at 8 per second. These three ids are **new** — the
-shared `sfx/` catalog has no rain yet; `10-TECH-DATA.md` §10.4 lists what must be added to it.
+shared `sfx/` catalog has no rain yet; `10-TECH-DATA.md` §10.4 lists what must be added to it. The rain is also
+the bed of the procedural score (00 §13, 10 §10.5): it is the one sound that is always there until the Rain
+stops, and the silence after `cs_rain_stops` is the score's biggest moment.
 
 ---
 
@@ -792,18 +976,21 @@ Every entity (player, enemy, NPC, pickup, projectile with a body) has an axis-al
 float cells, where `(x, y)` is the **bottom-centre** (feet). Solid for movement = `STATIC` or `POWDER`
 cells, closed door cells, and live fragments. Liquids, gases and fire never block.
 
-### 12.2 Moving (`physics.move(e, dx, dy)`)
+### 12.2 Moving (`moveBox(grid, body, dx, dy, opts)`, built in `collide.js`)
 
-Move along x, then along y, in **1-cell sub-steps** (at 95 cells/s and 60 Hz the player moves 1.6
-cells/tick, so this is 1–2 checks per axis; a fast knockback at 400 cells/s is 7). Each sub-step tests the
+Move along x, then along y, in **1-cell sub-steps** (a body at 95 cells/s moves 1.6 cells a tick, so this is
+1–2 checks per axis; a fast knockback at 400 cells/s is 7). Each sub-step tests the
 column of cells the leading edge enters (`h` cells for x moves, `w` cells for y moves) — a 12-cell test, not
 a whole-box test.
 
-- **Step-up:** when an x step is blocked, test whether the obstruction's top is ≤ **3 cells** above the feet
-  (player; enemies have `stepUp` in `enemies.json`) and the box fits 3 cells higher. If so, raise the
-  entity and continue. This makes rough pixel slopes walkable at full speed without slope maths.
-- **Step-down:** when grounded last tick and the next x step leaves the ground, snap down up to 3 cells if
-  there is floor. Walking down a rubble slope stays glued instead of hopping.
+- **Step-up:** when an x step is blocked, find the lowest lift up to `opts.stepUp` cells at which the whole box
+  fits; if there is one, raise the entity and continue. The player's values are `movement.json` `body.stepUp`
+  / `stepUpRun` / `stepUpAir` (07 §2; built as 2 walking, 3 running, 4 in the air); enemies carry `stepUp` in
+  `enemies.json` (05). This makes rough pixel slopes walkable at full speed without slope maths.
+- **Step-down:** when grounded last tick and the next x step leaves the ground, snap down up to
+  `opts.stepDown` cells (player: `body.stepDown`) if there is floor. Walking down a rubble slope stays glued
+  instead of hopping.
+- **Powders are solid** for bodies (built, R6); the slow-down on loose top layers is 07's number.
 - **Ceiling:** a blocked upward step zeroes `vy`.
 - **Grounded** = any solid cell directly under the box's bottom row (w cells tested).
 
@@ -827,20 +1014,24 @@ Each tick, count cells in the entity's box (`grid.countIn`): `water`, other liqu
 | Fraction of the box | Effect |
 |---|---|
 | liquid ≥ 0.15 | "wading": speed × 0.8 (mud 0.6) |
-| liquid ≥ 0.55 | **swimming** (from Act 3; before Act 3 the player *can* swim clumsily — see `07-TRAVERSAL-PUZZLES.md`): gravity × 0.2, buoyancy `−(frac − 0.5) × 700 cells/s²`, drag `v × 0.9` per tick, breath timer starts when the head cell is in liquid |
-| head cell in liquid | breath; the player drowns at 0 (numbers in `07`) — the Drowned Knight never does |
-| oil ≥ 0.3 | "oily" status (flammable ×2, from `03-SPELLS.md`) |
+| liquid ≥ 0.55 | **swimming**: the switch into the swim state. The swim forces, the pre-Act-3 clumsy float and breath are 07's (`movement.json` `swim`) |
+| head cell in liquid (or head below a height-field level, §8.9) | breath runs; drowning rules and breath pausing in menus are 07's |
+| oil ≥ 0.3 | the body is tagged `oily` for 03's `vs` multipliers (a tag, not one of 00's statuses) |
 | steam ≥ 0.2 | **steam lift**: `vy −= 1400 × steamFrac × DT`, upward speed capped at 90 cells/s (verdict steal 7) |
 | web ≥ 0.1 | speed × 0.35, jump × 0.5 |
 | any `SHOCK` cell | Spark damage tick (§7.6) |
-| molten_wax / molten_glass / bile | damage per 10 ticks from `05-BESTIARY-BOSSES.md` void-zone table |
+| inside a current zone | pushed along its vector (§8.10) |
+| inside a flipped gravity band | gravity points the band's way (§10.7) |
+| molten_wax / molten_glass / bile | damage per 10 ticks from the material's `hurt` block; where the pool is a boss's void zone, 05's numbers win |
 
 Entities entering or leaving a surface add a ripple impulse `± speed/200` and 3–8 splash particles.
 
 ### 12.6 Doors, gates, platforms
 
-Doors, sluice gates and portcullises are **cells** (material `metal` or `wood` with `PINNED`) written and
-erased by their prefab (`07-TRAVERSAL-PUZZLES.md`). Opening = the prefab erases one row per 2 ticks
+Doors (`door`, `timed_door`, `light_door`), sluice gates (`sluice_gate`) and portcullises (`portcullis`) are
+**cells** (material `metal` or `wood` with `PINNED`) written and erased by their prefab (07 owns the kinds and
+timings; 10 §6.5 the thing shapes). Their open/closed state is prefab state, so it persists (00 §13); the cells
+are rebuilt from it on load. Opening = the prefab erases one row per 2 ticks
 (animated slide); closing writes rows back and **pushes** liquid cells out of the way (they go into the
 nearest free cell above — the gate cuts the flow) and crushes entities under it (5/tick, the gate stops if
 blocked more than 20 ticks). Moving platforms and lifts are entities with a solid box, not cells.
@@ -848,7 +1039,8 @@ blocked more than 20 ticks). Moving platforms and lifts are entities with a soli
 ### 12.7 Projectiles
 
 Projectiles are points or small boxes moved with a per-tick **grid raycast** (DDA: step cell by cell along
-the segment, first cell that stops it wins, `js/world/raycast.js`). What stops a projectile is per-shape:
+the segment, first cell that stops it wins; a planned `raycast()` helper, 10 §3.2 — today each shape handler in
+`js/spells/instances.js` walks its own path). What stops a projectile is per-shape:
 `bolt` stops at solids and powders; `lob` bounces off solids with 0.4 restitution (twice) then detonates;
 `beam` is a raycast every tick up to its range, stopping at solids, **passing through glass** with
 power × 0.7; `wave` follows the ground surface using step-up of 6. Liquids slow projectiles (×0.5 speed)
@@ -858,7 +1050,7 @@ except Tide ones. Full shape behaviour is `03-SPELLS.md`.
 
 ## 13. Explosions and debris
 
-### 13.1 `explode(x, y, r, power, opts)` (`js/world/explode.js`)
+### 13.1 `explode(game, x, y, r, power, opts)` (built, in `js/world/elements.js`)
 
 1. For each cell within radius `r` (disc), falloff `f = 1 − (d / r)²`:
    - damage `power × f` with kind `blast` (materials' `resist.blast` applies: stone 0.6, brick 0.8,
@@ -872,7 +1064,11 @@ except Tide ones. Full shape behaviour is `03-SPELLS.md`.
 5. Light flash (§14.2 transient light: radius `r × 3`, 0.15 s) and camera shake `trauma += power / 150`.
 6. Events: `bus.emit('explode', {x, y, r, power, source})` for sound and AI hearing.
 
-Hard caps per explosion: **r ≤ 48**, **debris particles ≤ 120**, **liquid thrown ≤ 300 cells**.
+Hard caps per explosion: **r ≤ 48**, **debris particles ≤ 120**, **liquid thrown ≤ 300 cells**. `PINNED` cells
+are skipped entirely (built), which is what makes pinned puzzle geometry safe from blasts (00 §13).
+
+Built today: steps 1 (carve by blast resist, debris, thrown liquid, heat) and 6 (the event). Steps 2–5 (entity
+damage is done by the spell that caused the blast, fragments, support queue, flash and shake) land with M1/M6.
 
 ### 13.2 Debris particles
 
@@ -891,8 +1087,10 @@ no budget), which is how a blast in a pool throws a sheet of water over the room
 ### 13.4 Digging and melee
 
 The player's pole melee and the "dig out" action call `grid.damage` on a small arc of cells (kind `cut`),
-numbers in `04-CLASSES-PROGRESSION.md`. Only powders, moss, web, rope, wax and wood are cut by melee;
-stone needs spells or tools.
+the swing numbers are 04's. How hard each material is to dig is the built `HARDNESS` table in
+`js/world/elements.js` (sand, ash, rubble, web, rust 0; wax, dirt, silt, moss, rope 1; wood, plank, ice, glass,
+bone 2; brick, cloudstuff 3; stone 4; metal 5); a shape or melee with `dig` ≥ a cell's hardness can cut it.
+Melee alone cuts powders, moss, web, rope, wax and wood; stone needs spells or tools.
 
 ---
 
@@ -901,112 +1099,162 @@ stone needs spells or tools.
 ### 14.1 The idea
 
 The albedo world is dull blue-grey (§5.4). A **light map** (how much coloured light reaches each spot)
-is computed every frame and multiplied in. Colour enters the game only through light (canon §3). Light is
-additive: an Ember bolt passing a Gleam ring makes warm gold where they overlap.
+is computed every frame on the GPU and multiplied in. Colour enters the game only through light (00 §4). Light
+is additive: an Ember bolt passing a Gleam ring makes warm gold where they overlap.
+
+There are two readings of the same lights (R45): the **GPU light map** is what you see; the **CPU light grid**
+(§14.7) is what the game believes. Both are built from one light list with the same falloff and the same
+opaque test, so they agree; only the CPU grid is ever read by gameplay.
 
 ### 14.2 Light sources
 
-A light is `{x, y, r, color(RGB 0–1), intensity, flicker, shadow: bool, cone?: {dir, spread}}`.
-All live lights are gathered each frame into one array (`js/render/lights.js` `collectLights()`).
+A light is `{x, y, r, color: [r, g, b] 0–1, i, flicker, shadow: bool, cone?: {dx, dy, spread}}` (the built frame
+format, `js/render/frame.js` `buildFrame()`). All live lights are gathered each frame into one array.
 
 | Source | Radius (cells) | Intensity | Shadows | Flicker | Notes |
 |---|---|---|---|---|---|
-| Player's pole lantern | 72 (Act 4: `40 + oil% × 50`) | 1.0 | yes | 0.06 | colour = equipped flame of the selected wick; see darkness §14.7 |
-| Great Lamp (lit) | 360 | 2.2 | yes | 0.02 | fills a district's hub room; relighting animates r 0 → 360 over 3 s |
-| Lamp post (save point) | 96 | 1.2 | yes | 0.04 | warm `#ffc46a` |
-| Wall lantern / brazier | 64 | 0.9 | yes | 0.1 | |
-| Spell projectile | 24–48 by shape (`03-SPELLS.md`) | 0.8 | **no** | 0 | colour = flame colour; burn-in level raises intensity +0.1/level |
+| Player's pole lantern | **the equipped lantern item's radius** (08); from Act 4, while `ambientTier` is `dark`, × the oil factor below; **hooded: 18** | 1.1 | yes | 0.05 | colour = the flame of the selected wick (built: `game.lanternRadius`, default 72 until items land) |
+| Great Lamp (lit) | 360 | 2.2 | yes | 0.02 | fills a district's hub room; relighting grows r 0 → 360 over 3 s and starts the relight sweep (§14.6) |
+| Lamp-post | 96 | 1.2 | yes | 0.04 | warm `#ffc46a` (built) |
+| Wall lantern / brazier (`light` thing) | 64 | 0.9 | yes | 0.1 | |
+| Spell projectile | 24–48 by shape (`shapes.json` `light`, 03) | 0.8 | **no** | 0 | colour = flame colour; burn-in raises intensity (03) |
 | Spell impact flash | r × 3 | 1.5 → 0 over 0.15 s | no | — | transient |
-| Beam | a line light: 6 point lights spread along it, r 20 | 0.5 each | no | 0.15 | |
+| Beam | a line light: 6 point lights along it, r 20 | 0.5 each | no | 0.15 | |
 | Fire cells | aggregated (§14.5) | — | up to 8 shadowed | — | |
-| Enemy eyes, telegraphs, void-zone rims | 8–20 | 0.6 | no | 0 | **always present** (pillar 5) |
-| Glowmoss, glowing water, molten | emissive pass only (§14.5) | — | no | — | |
+| Enemy eyes, telegraphs, void-zone rims | 8–20 | 0.4–0.6 | no | 0 | **always present** (pillar 5) |
+| Glowmoss, glowing water, molten | emissive pass only (§14.4) | — | no | — | |
 | Shocked water | emissive flicker | — | no | 0.5 | |
 
-Budgets: **24 shadowed lights** and **96 unshadowed lights** per frame. Past that, the dimmest by
-`intensity × r / distance-to-camera` are dropped (shadowed ones first become unshadowed).
+**Lantern oil factor (Act 4 on, dark only):** `radius × (0.5 + 0.5 × oil / maxOil)`, so an empty-ish lantern
+lights half its radius. The oil it burns in the dark is 08's number (shared table: 2.5 oil/s base, hooded ×0.25).
 
-### 14.3 The light map (WebGL2)
+**Last drop (B4).** When oil reaches 0 in the dark the lantern **gutters out**: over **0.4 s** its radius and
+intensity fall to 0 with an ease-in curve (a short flare to 1.2× at the start, then collapse), a hiss plays, and
+the lantern light is removed from the list. It can be relit only at a lamp-post, a sconce, or by striking a
+burning cell with the pole (07 owns the relight actions; 05 owns the Unlit converging on you).
 
-- **Resolution:** half of the view in each axis (240 × 135 at 1080p), **plus a 32-cell margin** so lights just
-  off-screen still light the edge (so 272 × 167 texels). Format `RGBA16F` (needs `EXT_color_buffer_float`,
-  present on nearly every WebGL2 device; fallback `RGBA8` with intensities scaled by 0.25 and rescaled in
-  composite).
-- **Occlusion texture:** built each frame from the cell texture at the same half resolution: each texel = the
-  **transmittance** of the 2 × 2 cells it covers, per colour channel (`transmit` × tint for glass, 0 for
-  opaque solids, water 0.8 with a blue tint `(0.6, 0.8, 1.0)`, smoke 0.85). Done by a tiny shader pass.
-- **Ambient:** clear the light map to the district's ambient colour (§14.6).
-- **Shadowed lights:** for each, draw a quad covering its radius with additive blending. The fragment shader
-  **marches from the texel toward the light** through the occlusion texture: `steps = min(32, ceil(dist / 1.5))`,
-  multiplying transmittance; stop early when it drops below 0.02. The texel receives
-  `color × intensity × falloff(dist/r) × transmittance`, with `falloff(t) = (1 − t²)²` (smooth to zero at r).
-  The light's own occluder texel is skipped (a lantern inside a wall's edge still shines).
-- **Unshadowed lights:** batched into one instanced draw, falloff only.
-- **Cone lights** (spotlights, the lantern held forward in Act 4): multiply by
-  `smoothstep(cos(spread), cos(spread×0.7), dot(dir, toTexel))`.
-- **Surface bleed:** solid texels that are 1 texel inside an edge receive 60% of the light of their lit
-  neighbour, so the lit face of a wall shows (otherwise a wall's face texels are "inside" the occluder and
-  go black). Done in the march by allowing the first 1.5 cells of solid at the *end* of the ray.
+**Budgets:** the built light pass reads up to **128 lights** a frame (`MAX_LIGHTS`). Inside that, at most
+**24 shadowed**; past either cap the dimmest by `intensity × r / distance-to-camera` are dropped (shadowed
+ones first become unshadowed).
 
-Cost check: a shadowed light of radius 72 covers ~ π × 36² ≈ 4,100 half-res texels × ≤ 32 samples ≈ 130 k
-texture reads; 24 such lights ≈ 3.2 M reads, about 1 ms on a mid laptop GPU. A Great Lamp at r 360 is
-~100 k texels × 32 = 3.2 M on its own, which is why it gets its own path: **big lights (r > 160) march at
-quarter resolution** into a separate buffer that is upsampled.
+### 14.3 The GPU light map (built)
 
-**Cheaper fallback (if the light pass is over its 2.0 ms budget, measured with timer queries when
-available, otherwise by frame time):** switch shadowed lights to a **1D shadow map** per light
-(render 256 angle rays once into a 256 × 1 row, then each texel compares its distance to the stored
-blocker distance). Loses partial transmission through glass/water, keeps hard shadows, costs a tenth.
+- **Resolution:** half of the view in each axis **plus a 32-cell margin** on every side (so lights just
+  off-screen still light the edge): for the 482 × 272 scene target, 273 × 168 texels. Format `RGBA16F` when
+  `EXT_color_buffer_float` exists, else `RGBA8`.
+- **Light list:** uploaded each frame into a 128 × 3 `RGBA32F` texture (row 0 position + radius, row 1 colour +
+  intensity with flicker applied, row 2 cone + shadow flag).
+- **One pass for all lights:** a full-screen shader over the light map. Each texel starts at the ambient colour
+  (a top-to-bottom gradient, §14.6) and loops over the lights: `falloff(t) = (1 − t²)²` with `t = dist / r`
+  (smooth to zero at `r`), times the cone term for cone lights
+  (`smoothstep(cos(spread), cos(spread × 0.7), dot(dir, toTexel))`).
+- **Shadows:** for a shadowed light the shader **marches from the texel toward the light** through the cell
+  texture (`steps = min(32, ceil(dist / 1.5))`), reading each cell's `transmit` from the material-info
+  texture. Clear cells multiply by `mix(1, transmit, 0.85)`; the first 2.5 cells of solid at the end of the ray
+  are free (so a wall's lit face shows), then an opaque cell zeroes the ray. Stops early below 0.02.
+- **Glow:** the emission buffer (§14.4) is added after the lights.
+
+Cost check: the built pass is one draw; its cost is texels × lights × march steps. At 128 lights it is the most
+expensive pass, which is why the shadowed count is capped at 24. **Planned fallbacks** if the light pass goes
+over its 2.0 ms GPU budget (measured with timer queries when available): (1) big lights (r > 160) march at
+quarter resolution into their own buffer; (2) shadowed lights switch to a 1D shadow map each (256 angle rays into
+a 256 × 1 row, texels compare distance to the stored blocker) — hard shadows, no partial transmission, a tenth
+of the cost.
 
 ### 14.4 Emission and glow
 
-Emissive cells (fire, ember, molten wax/glass, spark, glowmoss, hot metal glow §5.5, shocked water, lit lamp
-glass) write colour into an **emissive buffer** in the scene pass (§16.5). For lighting their surroundings:
-the emissive buffer is downsampled to the light-map resolution, blurred with a 2-pass separable 9-tap blur
-(radius ~12 cells), and **added to the light map** (no occlusion — a cheap glow that bleeds a little round
-corners, which reads as warmth). This is how a burning scaffold lights the room without 2,000 lights.
+Emissive cells (fire, ember, molten wax/glass, spark, glowmoss, hot metal glow §5.5, burning and shocked cells,
+lit lamp glass) and emissive sprite pixels write colour into the **emission** target of the scene pass (§16.5).
+For lighting their surroundings, the emission target is downsampled to the light-map resolution, blurred with a
+separable blur (two passes), and **added to the light map** (no occlusion — a cheap glow that bleeds a little
+round corners, which reads as warmth). This is how a burning scaffold lights the room without 2,000 lights.
+Built.
 
-### 14.5 Aggregated fire lights
+### 14.5 Aggregated fire lights (planned, M3)
 
-For shadows from big fires, `lights.aggregateFire()` runs every 4 frames: split the view into 32 × 32-cell
-blocks, count burning/fire/ember cells per block, and turn the **8 blocks with the most fire** (min 12 cells)
-into shadowed lights at the block's fire centroid, radius `24 + 6 × sqrt(count)` (cap 110), intensity
+For shadows from big fires, `aggregateFire()` runs every 4 frames: split the view into 32 × 32-cell blocks,
+count burning/fire/ember cells per block, and turn the **8 blocks with the most fire** (min 12 cells) into
+shadowed lights at the block's fire centroid, radius `24 + 6 × sqrt(count)` (cap 110), intensity
 `0.4 + count/200` (cap 1.4), colour from the dominant fuel (§7.3), flicker 0.25.
 
-### 14.6 Ambient per district
+### 14.6 Ambient per district and the relight sweep
 
-| District | Ambient before relighting | After the Great Lamp is lit | Min-light floor |
-|---|---|---|---|
-| act1 Lanterncrown & the Wax Stair | `#2a3348` × 0.55 | `#5a4a3a` × 0.7 (warm) | 0.10 |
-| act2 Gutterways | `#1e2a33` × 0.45 | `#3a4a3a` × 0.6 | 0.10 |
-| act3 Sluice Ward | `#1a2a40` × 0.5 | `#2f4f6a` × 0.65 | 0.10 |
-| act4 Blackwater | `#0a0d14` × 0.2 | `#302a40` × 0.5 | **0.04** (rooms) / 0.10 (menus, telegraphs) |
-| act5 Bellwell | `#2a2433` × 0.45 | `#4a3a52` × 0.6 | 0.10 |
-| act6 Cloudroot | `#3a4458` × 0.6 → after the Rain stops `#8a8fa8` × 0.9 | (n/a — the Sky Lamp ends the game) | 0.12 |
+| District | Ambient before relighting | After the Great Lamp is lit |
+|---|---|---|
+| act1 Lanterncrown & the Wax Stair | `#2a3348` × 0.55 | `#5a4a3a` × 0.7 (warm) |
+| act2 Gutterways | `#1e2a33` × 0.45 | `#3a4a3a` × 0.6 |
+| act3 Sluice Ward | `#1a2a40` × 0.5 | `#2f4f6a` × 0.65 |
+| act4 Blackwater | `#0a0d14` × 0.2 | `#302a40` × 0.5 |
+| act5 Bellwell | `#2a2433` × 0.45 | `#4a3a52` × 0.6 |
+| act6 Cloudroot | `#3a4458` × 0.6 → after `cs_rain_stops` `#8a8fa8` × 0.9 | (n/a — the Sky Lamp ends the game) |
 
-Ambient also has a slight **vertical gradient** per room (`ambientTop`, `ambientBottom`; default bottom =
-top × 0.6) — deep rooms darken downward. The **min-light floor** is added after everything (terrain
-silhouettes never go pure black; verdict risk 1). Values live in `data/acts.json` (`10-TECH-DATA.md` §5).
+Ambient has a slight **vertical gradient** per room (`ambientTop`, `ambientBottom`; default bottom = top × 0.6)
+— deep rooms darken downward (built: the light pass takes `ambTop` / `ambBot`). The **light floor is 0.08 in
+every room** (shared table, R46): the composite adds it after lighting so terrain silhouettes never go pure
+black. The 02 setting "Brightness floor" raises it by up to +0.1. (The built boot passes `floor: 0.1` for the test
+hero; M3 sets 0.08 and the dark-screenshot spec tests it.) Act 4 is dark because of its ambient, not because of
+a lower floor. The values live in each act file's `ambient` block (`data/acts/actN.json`, 10 §5); rooms can
+override.
 
-### 14.7 Darkness as gameplay (Act 4 onward)
+**Relight sweep (B3).** When a Great Lamp is relit, the district's ambient ramp moves from its "before" colour to
+its "after" colour as a **wave that runs down the district over 3 s**: each texel's ambient is
+`mix(before, after, smoothstep(0, 1, (t × speed − depthInDistrict) / 0.4))`, where `depthInDistrict` is the
+room's normalised depth in its act (0 at the top) plus the texel's height in the room. At the moment the wave
+front passes, every puddle and water-surface reflection **pulses** (reflectivity +0.3 for 0.5 s, §15.1), and the
+score adds the district's new drone voice (10 §10.5). It is two uniforms and a timer; no new pass. The hub
+room plays it in full; other rooms of the act simply load with the "after" ambient.
 
-- `lighting.lightAt(x, y)` on the CPU (the renderer's light map is never read back — that stalls the GPU)
-  estimates luminance by summing the frame's light list with a **grid raycast occlusion test**
-  (§12.7 raycast, opaque solids only) and falloff, plus ambient. Cached per 4 × 4-cell tile per 4 ticks,
-  called only by AI (the Unlit prefer to stay where `lightAt < 0.15` and flee above 0.5) and by the
-  player's "in the dark" status (Moth Oracle crits in darkness: `lightAt(player) < 0.2`).
-- The player's lantern radius shrinks with oil in Act 4 (table above); **Shade** spells cast on a light
-  source dim static emitters for 8 s (§7.4).
-- **Readability rule (pillar 5):** enemy eyes, attack telegraphs and void-zone rims are drawn in the
-  **unlit overlay** (§16.8), after lighting, so no amount of darkness hides them. Only terrain and
-  bodies go dark.
-- Settings "Brightness floor" (`02-CONTROLS-UI.md`) raises the floor up to +0.1 for accessibility.
+### 14.7 The CPU light grid and light tiers (gameplay truth)
+
+The GPU light map is never read by gameplay (a readback stalls the GPU). Instead:
+
+- **The grid.** A CPU light grid at **1/8 resolution** of the room (one value per 8 × 8 cells), updated
+  **every 4 ticks** for the sim window. It uses **the same light list, the same falloff `(1 − t²)²`, the same
+  ambient gradient and the same opaque test** as the shader (cells with `transmit` < 0.05 block; others
+  multiply), marching at 8-cell steps. It stores luminance plus the same value **without the player's own
+  lantern**.
+- **Tiers** (shared table, 00 §13):
+
+| Tier | Luminance | Meaning |
+|---|---|---|
+| `dark` | < 0.2 | Unlit hunt here; oil regen stops (Act 4+); Moth Oracle's darkness crits |
+| `dim` | 0.2 – 0.5 | |
+| `lit` | ≥ 0.5 | Unlit flee |
+| `bright` | ≥ 0.8 | |
+
+  Floor 0.08 (§14.6). Everything that asks "how light is it here" asks for a **tier**, never a raw number.
+- **Two readings.** `lightTier(x, y)` counts all light. `ambientTier(x, y)` leaves out the player's own
+  lantern — it drives the oil economy and the hood (a lantern cannot light its own way out of "the dark"). What
+  each tier *does* belongs to its owners: AI senses (05), oil and lantern burn (08, 03), Moth Oracle (04).
+- **Agreement test.** A test-only async readback of the GPU light map at 1/8 resolution (one frame, in
+  Playwright) must put **≥ 95% of tiles** in the same tier as the CPU grid (REVIEW M3).
+- **Readability rule (pillar 5):** enemy eyes, attack telegraphs, void-zone rims, band arrows and the brass rim
+  of pinned cells are drawn in the **unlit overlay** (§16.8), after lighting, so no amount of darkness hides them.
+  Only terrain and bodies go dark.
+- **Shade** spells cast on a light source dim static emitters for 8 s (§7.4); that removal shows in both the
+  GPU map and the CPU grid because both read the same list.
+
+Status: GPU side built; the CPU grid, tiers and the agreement test are **planned** (M3).
 
 ---
 
 ## 15. Reflections and wet sheen
 
-### 15.1 Water reflection (screen space, in one shader pass)
+Water is where the game shows off (R81). Three tricks carry it, and each has a cheap, bounded cost:
+
+1. **Surface ripples** — a spring chain per screen column (§15.2) that rain, drips, splashes and bodies
+   disturb; the only place ripples move real pixels is the surface line (±2 cells).
+2. **Pour and jet particles** — water leaving a basin, a burst dam or a thrown blast travels as `liquid`
+   particles (§13.3, §18) and becomes cells again only where it lands, so a gush reads as a gush without
+   thousands of awake cells in flight.
+3. **Height-field floods** — big water is a level, not cells (§8.9); the shader draws the body below the
+   thin band of real cells with depth tint and reflections as if it were cells.
+
+**One showcase room per act** is about water or light looking good (B2, R81); 09 names the room. Act 1's is
+the Guild Hall balcony over the chasm: the guttering Crown Lamp, both rain layers, puddle reflections and the
+city's dead lamps below.
+
+### 15.1 Water reflection (screen space, in one shader pass; built)
 
 For every screen texel whose cell is a liquid (from the cell texture), the water shader:
 
@@ -1026,6 +1274,12 @@ For every screen texel whose cell is a liquid (from the cell texture), the water
 5. **Glints:** where the light map at the surface is bright (> 0.6) add sparkle
    `step(0.985, hash(x, floor(time × 8)))` × light colour — a few twinkling points under each lantern.
 
+Built values differ slightly: reflectivity water 0.55, oil 0.7, bile 0.35, mud 0.2 (others 0); the Fresnel
+fade runs over 26 rows; the transmitted side is the lit scene darkened by `exp(−depth × 0.02)`; the waterline
+highlight is `light × 0.55`. Below a height-field band (§8.9) the shader takes `depth` from the flood level
+instead of stepping up through cells. During a relight sweep (§14.6) reflectivity is raised by 0.3 for 0.5 s as
+the wave passes.
+
 Reflections of reflections are not attempted. Things above the view top can't be reflected; near the top
 of the screen the reflection fades out over 16 texels.
 
@@ -1035,8 +1289,8 @@ A **1D ripple height array per visible surface run** (from `liquids.surfaceSpans
 the CPU as a simple spring chain: `v[i] += (h[i−1] + h[i+1] − 2h[i]) × 0.3 − h[i] × 0.02; v[i] *= 0.985;
 h[i] += v[i]`. Impulses: rain (−0.6), drips (−1.0), entities entering/leaving (±speed/200, cap 3), splashes
 from explosions (−4 near centre). Run lengths are capped at the view width (surfaces off-screen don't ripple).
-The combined array for the view is uploaded each frame as a **480 × 1 `R16F` texture** (one height per
-screen column, for the surface nearest the camera's middle row where two surfaces share a column — rare,
+The combined array for the view is uploaded each frame into a **1024 × 1 `R32F` texture** (built; one
+height per screen column, for the surface nearest the camera's middle row where two surfaces share a column — rare,
 acceptable). The visible surface line itself is displaced by `round(h)` cells (±2 max) — the only place
 ripples move actual pixels.
 
@@ -1058,159 +1312,158 @@ The wet mask comes from the cell texture's flag channel (§16.3) so it costs no 
 
 ## 16. The WebGL2 render pipeline, pass by pass
 
-### 16.1 Targets and sizes (1080p example)
+The pipeline is **built** (`js/render/webgl2.js`, all shaders in `js/render/shaders.js`, helpers in `gl.js`;
+file list in 10 §3.3). This section describes it as it is, then marks what is planned.
+
+### 16.1 Targets and sizes (1080p example: view 480 × 270, targets are view + 2 cells)
 
 | Target | Size | Format | Contents |
 |---|---|---|---|
-| `cellTex` | room size (≤ 2048²) | `RGBA8` | R material, G shade, B flags (WET/SHOCK/BURNING/BUILT bits), A heat glow |
-| `bgTex` | room size | `R8` | background-wall material (uploaded once at room load + scorch updates) |
+| `cellTex` | room size (≤ 2048²) | `RGBA8UI` (integer) | R material, G shade, B flags (the §2.2 bits), A heat glow |
+| `bgTex` | room size | `R8UI` | background-wall material (uploaded at room load and on scorch updates) |
 | `paletteTex` | 8 × 64 | `RGBA8` | ramp colours per material (row = material id) |
-| `sceneTex` + `emisTex` | view + 2 cells (482 × 272) | `RGBA8` ×2 (MRT) | lit-less albedo; emission |
-| `occTex` | half view + margin (272 × 167) | `RGBA8` | transmittance |
-| `lightTex` | 272 × 167 | `RGBA16F` | light map |
-| `bigLightTex` | 136 × 84 | `RGBA16F` | big lights (r > 160) |
-| `litTex` | 482 × 272 | `RGBA16F` | composite (lit scene) |
-| `waterTex` | 482 × 272 | `RGBA16F` | lit scene with water/reflections applied |
-| `bloomTex[0..3]` | 241×136, 121×68, 61×34, 31×17 | `RGBA16F` | bloom chain |
-| `rippleTex` | 482 × 1 | `R16F` | ripple heights |
+| `matInfoTex` | 64 × 1 | `RGBA32F` | per material: alpha, `transmit`, emissive power, ramp length ÷ 8 |
+| light list | 128 × 3 | `RGBA32F` | §14.3 |
+| scene (MRT) | 482 × 272 | `RGBA16F` × 2 | albedo (alpha = a marker: 1 solid, 0.5 liquid, 0.3 see-through, 0.1 sky); emission |
+| `light` | half view + 32-cell margin (273 × 168) | `RGBA16F` | light map |
+| `emisS` / `emisB` | same as `light` | `RGBA16F` | emission downsampled and blurred (§14.4) |
+| `lit` | 482 × 272 | `RGBA16F` | composite (lit scene) |
+| `water` | 482 × 272 | `RGBA16F` | lit scene with water and reflections applied; overlays drawn on it |
+| `bloom[0..3]` / `bloomUp[0..2]` | ½, ¼, ⅛, 1/16 of the target | `RGBA16F` | bloom chain |
+| `rippleTex` | 1024 × 1 | `R32F` | ripple heights (§15.2) |
 | canvas | window | default | final |
 
-Everything world-space is rendered at **logical resolution** (1 texel = 1 cell). Only the very last pass
-touches window pixels.
+`RGBA16F` targets fall back to `RGBA8` when `EXT_color_buffer_float` is missing. Everything world-space is
+rendered at **logical resolution** (1 texel = 1 cell). Only the last pass touches window pixels.
 
 ### 16.2 Room texture size
 
 `cellTex` is room-sized so the camera just moves a window over it. WebGL2 guarantees 2048 as the smallest
-max texture size, hence the 2048 × 2048 room cap (§1). If a device reports more, nothing changes.
-Memory: 2048² × 4 B = 16.8 MB of GPU memory; typical rooms 2 MB.
+max texture size, hence the 2048 × 2048 room cap (§1). Memory: 2048² × 4 B = 16.8 MB of GPU memory; typical rooms
+2 MB. Long vertical places (the Bellwell, the Cloudroot climb) are split into stacked rooms (09).
 
 ### 16.3 Pass 0 — upload (CPU → GPU)
 
-For each chunk with a non-empty `gfxDirty` rect **that intersects the view + 64 cells**, pack the rect into
-a staging `Uint8Array` (4 bytes a cell) and `texSubImage2D` it. Dirty rects outside the view stay dirty
-until they come into view. Budget: **≤ 0.8 ms**, normally ~40 k cells a frame (a busy scene) ≈ 160 KB.
-If more than **250 k cells** are dirty in view (a huge flood), upload the worst 250 k by rect size and carry
-the rest to next frame (a single frame of lag on some water is invisible).
+For each chunk with a non-empty `gfx` dirty rect **that intersects the view + 64 cells**, pack the rect into a
+staging `Uint8Array` (mat, shade, flags, glow — 4 bytes a cell) and `texSubImage2D` it. Dirty rects outside the
+view stay dirty until they come into view. Budget: **≤ 0.8 ms**, normally ~40 k cells a frame in a busy scene
+(≈ 160 KB). **Planned:** a 250 k-cell cap per frame (upload the biggest rects first, carry the rest) — the built
+upload has no cap yet.
 
-Fragments upload their own small textures once at creation. Particles and sprites are instanced (§16.5).
+Particles and sprites are instanced (§16.5). Fragments (planned) upload their own small textures once.
 
-### 16.4 Pass 1 — background
+### 16.4 Pass 1 — scene (albedo + emission, MRT, one full-screen shader + instanced batches)
 
-1. **Sky/void gradient** per room (`room.bgGradient`), a full-screen quad.
-2. **Three parallax layers** (far city silhouettes, mid chasm wall, near pipes/arches) as per-act
-   pre-generated textures (made by `render/backdrops.js` at act load from seeded noise + a small shape
-   library, 1024 × 512 each, tiled horizontally), scroll factors **0.15, 0.35, 0.6**, each tinted by the
-   act's ambient × 0.7 and lit by a very blurred copy of the light map (so a Great Lamp lights the
-   distant city).
-3. **Far rain streaks** shader: procedural diagonal streaks from a hash per 3 × 40-cell cell of a scrolling
-   grid; two layers at speeds 380 and 260 cells/s, alpha 0.12 and 0.07, slant = wind. Zero cost to the sim.
+One full-screen shader (`SCENE_FS`) draws, per texel:
 
-### 16.5 Pass 2 — scene (albedo + emission, MRT)
+1. **Background:** where the cell is air or see-through: the `bgTex` wall through its ramp × 0.5 (brick gets
+   mortar lines from `(x, y)`); where there is no wall (sky), a **sky gradient** (theme `sky.top` / `sky.bottom`),
+   **three parallax silhouette layers** (scroll factors **0.15, 0.35, 0.6**, drawn procedurally from a hash, with a
+   few lit windows as emission) and **far rain streaks** (two layers at 380 and 260 cells/s, slant = wind,
+   alpha scaled by the rain setting). Zero cost to the sim.
+2. **Cells:** `paletteTex[mat][shade & 7]` (wrapped to the ramp length), ±4% grain from the shade's high bits,
+   brick mortar and plank grain from `(x, y)`; mixed over the background by the material's alpha.
+3. **Emission:** emissive materials, heat glow (§5.5), burning cells (flicker), shocked cells (crackle).
+4. **Marker:** the albedo alpha tells later passes what the texel is (liquid 0.5, see-through 0.3, sky 0.1).
 
-1. **Background wall:** where `cellTex` is air or `transmit > 0`, draw `bgTex`'s material through its ramp
-   × 0.55 (walls behind are darker than walls in front).
-2. **Cells:** one full-screen quad; the shader samples `cellTex` at `camera + fragCoord`, looks up
-   `paletteTex[mat][shade & 7]`, adds per-cell grain from the shade's high bits (±4% value), writes albedo;
-   for emissive materials and heat glow, writes emission; gases are blended over the background with their
-   alpha (§5.4); water writes a flag so the water pass knows (alpha channel of albedo = 0.5 marker).
-   Brick mortar and plank grain are computed from `(x, y)` patterns in the shader, not stored.
-3. **Fragments:** textured quads using the same palette shader.
-4. **Sprites:** entities, NPCs, prefabs (levers, doors' frames, lamps) — one texture atlas, one instanced
-   draw per layer (behind-cells, in-front). Sprites write albedo and optional emission (glowing eyes to
-   emission *and* to the unlit overlay list).
-5. **Particles** (§18): instanced `1 × 1`/`1 × 3` quads, albedo or emission by type.
+Then **sprites and particles** are drawn into the same two targets as instanced quads from one atlas
+(`BATCH_VS` / `BATCH_FS`, up to 8,192 per draw): albedo, plus emission for emissive sprites and for atlas pixels
+marked emissive (§25.1).
 
-### 16.6 Pass 3 — occlusion, light, composite
+**Planned:** pre-rendered per-act parallax textures (`backdrops`) to replace the procedural skyline, lit by a
+blurred copy of the light map so a Great Lamp lights the distant city.
 
-1. `occTex` from `cellTex` (§14.3).
-2. `lightTex`: clear to ambient gradient → shadowed lights → unshadowed batch → blurred emission add.
-3. `bigLightTex` if any big lights; added in step 4.
-4. **Composite** into `litTex`: `lit = albedo × (light + floor) + emission`; sheen and puddle mirror (§15.3)
-   added here using `lightTex`. Light is sampled bilinearly (it is half-res; bilinear hides the texels).
+### 16.5 Pass 2 — glow
+
+Downsample the emission target to the light-map size (with the 32-cell margin), then a two-pass separable blur
+(§14.4).
+
+### 16.6 Pass 3 — light, then composite
+
+1. **Light** (§14.3): ambient gradient → every light (shadowed ones march) → blurred emission added.
+2. **Composite** into `lit`: `lit = albedo × (light × gain + floor) + emission`, with `gain` 2.4 (built) and
+   `floor` the room floor (0.08, §14.6). The light map is sampled bilinearly (it is half-res; bilinear hides the
+   texels). **Wet sheen** (§15.3) is added here from the flags channel of `cellTex`.
 
 ### 16.7 Pass 4 — water
 
-Full-screen pass over `litTex` → `waterTex`, doing §15.1 only on texels flagged as liquid (others copy
-through). Skipped entirely (copy) when no chunk in view has `liquidCount > 0`.
+Full-screen pass over `lit` → `water`, doing §15.1 only on texels the scene marked as liquid (others copy
+through). **Planned:** skip the pass (copy) when no chunk in view holds liquid.
 
 ### 16.8 Pass 5 — overlays that ignore light
 
-Unlit overlay list, drawn on `waterTex` with plain alpha: enemy eyes, telegraph shapes, void-zone rims
-(pillar 5), pickup outlines, the build-mode ghost, in-world 5 × 7 font text (damage numbers are DOM/2D
-overlay, `02-CONTROLS-UI.md`). Near-rain particles are drawn here too, but *sampling the light map* so they
-glint where lit.
+Drawn onto `water` after lighting, so darkness never hides them (pillar 5):
+
+- **Alpha overlays:** enemy eyes, telegraph shapes, void-zone rims, pickup outlines, the build-mode ghost,
+  in-world 5 × 7 text, and **near-rain streaks, splashes and drips** (built: rain is drawn here as 1 × 3
+  streaks at 50% alpha).
+- **Additive overlays:** sparks, embers, glints, moths.
+- **Brass rim (planned, M9):** every `PINNED` cell that borders air gets a 1-cell rim in brass `#b08a4a` at
+  35% alpha, so puzzle-critical cells read as "safe, unbreakable" in any light (00 §13, B9).
+- **Gravity-band arrows (planned, M28):** each band's edge draws its current direction (§10.7).
+- **Rekindle shimmer (planned, M9):** §19.5.
+
+Damage numbers are DOM, not this pass (02).
 
 ### 16.9 Pass 6 — bloom
 
-Threshold `luma > 0.85` (soft knee 0.2) → 4-level dual-filter downsample → upsample (the cheap blur that
-halves the size each step and back) → add at strength **0.35** (setting: off / 0.2 / 0.35 / 0.5). Crisp
-pixels are kept because bloom is only added on top; the base image is never blurred (canon §3).
+Threshold at luma 0.85 with a soft knee (0.2), four downsamples, three upsamples adding each level back, then
+added in the final pass at strength **0.35** (settings: off / 0.2 / 0.35 / 0.5, 02). Crisp pixels are kept because
+bloom is only added on top; the base image is never blurred.
 
 ### 16.10 Pass 7 — final
 
-1. **Tone curve:** `x / (1 + x)` on luminance with a per-act lift/gamma/gain grade (numbers in `acts.json`
-   `grade`), then a very light vignette (0.12).
-2. **Integer upscale:** draw `waterTex` to the canvas with `NEAREST` sampling at scale `s` (§19.4),
-   offset by the camera's **sub-cell remainder × s** screen pixels (we render 482 × 272, 1 extra cell each
-   side, so smooth scrolling at 60 fps never shimmers — the cells move in whole screen pixels at scale 4).
-3. DOM HUD sits over the canvas (`02-CONTROLS-UI.md`).
+1. **Bloom add**, then a **soft shoulder** tone curve (values above 0.8 are compressed), a per-act
+   lift/gamma/gain grade (numbers in the act file's `grade` block), a light vignette (0.12) and an optional
+   full-screen flash (colour + amount, capped by the reduced-flashes setting).
+2. **Integer upscale:** the `water` target is drawn to the canvas with nearest sampling at scale `s` (§19.4),
+   offset by the camera's **sub-cell remainder × s** screen pixels (the targets are view + 2 cells, one extra on
+   each side, so smooth scrolling never shimmers), centred in the canvas.
+3. The DOM HUD sits over the canvas (02).
 
-### 16.11 Shaders list (`js/render/shaders/*.js`, GLSL ES 3.00 in template strings)
+### 16.11 Shader programs (all in `js/render/shaders.js`, GLSL ES 3.00 in template strings)
 
-| File | Pass | Inputs → output |
+| Export | Pass | Inputs → output |
 |---|---|---|
-| `fullscreen.vert.js` | all full-screen passes | — |
-| `bg-gradient.frag.js` | 1 | uniforms → scene |
-| `parallax.frag.js` | 1 | layer tex, blurred light → scene |
-| `farrain.frag.js` | 1 | time, wind → scene (additive) |
-| `cells.frag.js` | 2 | cellTex, bgTex, paletteTex → albedo, emission |
-| `sprite.vert.js` / `sprite.frag.js` | 2, 5 | atlas, instance buffer → albedo, emission |
-| `particle.vert.js` / `particle.frag.js` | 2, 5 | instance buffer |
-| `occlusion.frag.js` | 3 | cellTex → occTex |
-| `light-shadow.frag.js` | 3 | occTex, light uniforms → lightTex (additive) |
-| `light-flat.vert.js` / `.frag.js` | 3 | instanced lights |
-| `blur9.frag.js` | 3, 6 | separable blur |
-| `composite.frag.js` | 3 | albedo, emission, lightTex, cellTex flags → litTex |
-| `water.frag.js` | 4 | litTex, cellTex, rippleTex → waterTex |
-| `bloom-down.frag.js` / `bloom-up.frag.js` | 6 | |
-| `final.frag.js` | 7 | waterTex, bloom → canvas |
+| `FULL_VS` | every full-screen pass | — |
+| `SCENE_FS` | 1 | `cellTex`, `bgTex`, palette, matInfo → albedo + emission |
+| `BATCH_VS` / `BATCH_FS` | 1 | atlas, instance buffer → albedo + emission |
+| `DOWN_FS` / `BLUR_FS` | 2, 6 | downsample (with optional threshold) / separable blur |
+| `LIGHT_FS` | 3 | `cellTex`, matInfo, light list, blurred emission → light map |
+| `COMPOSITE_FS` | 3 | albedo, emission, light, `cellTex` flags → `lit` |
+| `WATER_FS` | 4 | `lit`, light, `cellTex`, ripple, matInfo → `water` |
+| `OVERLAY_FS` (with `BATCH_VS`) | 5 | atlas, instances → `water` (alpha and additive) |
+| `UP_FS` | 6 | bloom upsample |
+| `FINAL_FS` | 7 | `water`, bloom → canvas |
 
-Each shader module exports `{ vert, frag, uniforms: [...] }`; `render/gl.js` compiles, caches and reports
-compile errors with the file name to the debug overlay.
+`gl.js` `compile(gl, vs, fs, name)` compiles and links, and throws with the program name on any error (the boot
+panel shows it).
 
 ### 16.12 Context loss
 
-On `webglcontextlost`: pause the render loop, keep simulating paused. On restore: recreate every target,
-mark every chunk `gfxDirty`, re-upload. A Playwright spec forces this with `WEBGL_lose_context`.
+Built: `webglcontextlost` is caught and `stats.lost` set. **Planned (M2):** on restore, recreate every target,
+mark every chunk `gfx` dirty and re-upload; a Playwright spec forces this with `WEBGL_lose_context`.
 
 ---
 
-## 17. Canvas2D fallback
+## 17. Canvas2D debug view
 
-Used when WebGL2 is missing, with `?renderer=2d`, and by the Node-less Playwright specs that must not
-depend on GPU (e.g. swiftshader timing).
+The game needs **WebGL2** (R33). Without it the boot panel shows a plain **"Lanternfall needs WebGL2"** card
+(what to try: a current desktop Chrome, Firefox or Edge, hardware acceleration on) instead of the title screen.
 
-| Step | Canvas2D way |
-|---|---|
-| Cells | one `ImageData` of the view (480 × 270); loop over view cells, look up an `Uint32Array` palette (pre-packed ABGR per material × step) — only re-paint dirty chunk rects in view |
-| Background | parallax layers as pre-rendered `OffscreenCanvas` blits; no far-rain shader (draw 60 streaks with `fillRect`) |
-| Lighting | CPU light map at **quarter** resolution (120 × 68): ambient + each light (max 12) with a DDA occlusion test from texel to light through opaque cells only; multiply per pixel while filling the ImageData (bilinear) |
-| Reflections | water texels copy the mirrored pixel above at 40%, no ripple distortion |
-| Emission / bloom | emission adds directly; no bloom |
-| Fragments / sprites / particles | `drawImage` / `fillRect` |
-| Upscale | `imageSmoothingEnabled = false`, `drawImage` at integer scale |
-
-Target: 60 fps at 480 × 270 on a desktop with a lighter scene; it is allowed to drop to 30 fps in heavy
-rooms (it is a fallback). Visual tests compare structure (pixel sums of regions), not exact colours, so
-both renderers pass the same spec.
+Canvas2D exists only as a **flat-colour debug and test view** (planned, M2): one `ImageData` of the view, each
+cell painted its material's middle ramp colour, no lights, no reflections, no bloom, no particles beyond rain as
+dots. It is opened with `?view=flat` (and by the debug overlay's "material ids" toggle), and Node tools use the
+same flat colours for room thumbnails (10 §6.11). It is never a second renderer: no spec compares it to the
+WebGL2 picture, and no feature is ever built for it. (The v1 fallback renderer is in Parked.)
 
 ---
 
 ## 18. Particles
 
-One pool, struct-of-arrays in typed arrays (`x, y, vx, vy, life, maxLife, kind, color, mat, flags`),
-**4,000 max**. Updated in the sim step (they can turn into cells, so they must be deterministic and
-fixed-step); drawn with one instanced draw per blend mode.
+One pool, struct-of-arrays in typed arrays (built, `js/entities/particles.js`: `x, y, vx, vy, life, max, kind,
+mat, col, g`), **4,000 max**. Updated in the sim step (they can turn into cells, so they must be deterministic
+and fixed-step); drawn through the scene, overlay and additive batches (§16).
 
 | Kind | Budget | Looks | Physics | Becomes |
 |---|---|---|---|---|
@@ -1222,15 +1475,19 @@ fixed-step); drawn with one instanced draw per blend mode.
 | `ember` | 250 | 1 × 1 emissive amber, flickers | rises −30 cells/s ± 20, drifts with wind, life 1–3 s | nothing (landing in oil ignites it) |
 | `debris` | 400 | 1 × 1 cell colour | gravity 900, 1 bounce 0.3 | powder cell within 60/s budget (§13.2) |
 | `dust` | 150 | 1 × 1, 25% alpha | slow drift, lit only | nothing (ambient motes in light beams) |
-| `moth` | 40 | 2 × 1 wing flap sprite, pale | steers toward the nearest light within 120 cells (seek 60 cells/s, wobble), orbits at 6–12 cells | nothing; `lightAt` shade attracts them in Act 4 |
-| `smokepuff` | 150 | 3 × 3 soft blot, 30% alpha | rises, grows | nothing (cosmetic puffs where cells can't be spared) |
+| `moth` | 40 | 2 × 1 wing flap sprite, pale | steers toward the nearest light within 120 cells (seek 60 cells/s, wobble), orbits at 6–12 cells | nothing; cosmetic, never an AI signal |
+| `smoke` | 150 | 3 × 3 soft blot, 30% alpha | rises, grows | nothing (cosmetic puffs where cells can't be spared) |
+| `glint` | 60 | 1 × 1 additive, light colour | still, life 0.1–0.2 s | nothing (sparkles on wet stone and water) |
 
-Overflow: new particles of a kind at budget replace the oldest of that kind. The Settings *Particles*
-option scales every budget (low 40%, medium 70%, high 100%).
+Overflow: rain stops spawning at its 1,800 budget (built); when the whole pool is full a new particle takes a
+random slot (built). **Planned:** per-kind budgets replacing the oldest of that kind. The *Particles* setting
+(02) scales every budget (low 40%, medium 70%, high 100%). Cosmetic kinds that never become cells (`splash`,
+`spark`, `ember`, `dust`, `moth`, `smoke`, `glint`) may use `Math.random`; kinds that can become cells (`rain`,
+`drip`, `liquid`, `debris`) must use a seeded stream (10 §4.4).
 
 ---
 
-## 19. Camera
+## 19. Camera and room transitions
 
 ### 19.1 Follow
 
@@ -1240,14 +1497,16 @@ option scales every budget (low 40%, medium 70%, high 100%).
   0.25 s (turning briefly doesn't swing the camera).
 - **Look-ahead y** = +30 cells (camera looks down) when `vy > 250` (falling fast), −20 when climbing a rope
   upward, 0 otherwise.
-- **Smoothing:** critically damped spring, `stiffness 55`, `damping 2√stiffness` (no overshoot). In Act 6
-  (climbing up) the default look-ahead y is −30.
+- **Smoothing:** a critically damped follow with no overshoot (built: `smoothDamp` with 0.18 s on x and 0.20 s on
+  y). **Planned:** in Act 6 (climbing up) the default look-ahead y is −30.
 
 ### 19.2 Room bounds and framing
 
 The camera is clamped to the room rectangle (it never shows outside the room). Rooms smaller than the view
-in an axis are centred with the leftover drawn as bedrock/void. **Camera zones** (`10-TECH-DATA.md` §6.5,
-prefab `camzone`) can lock an axis, set a fixed frame (boss arenas) or a different look-ahead.
+in an axis are centred with the leftover drawn as bedrock/void. **Camera zones** (the `camzone` thing, 10 §6.5)
+can lock an axis, set a fixed frame or a different look-ahead, or switch to wide view. **Every boss's camzone
+row (lock, wide, vertical follow) is 05's** (R89); this page only supplies the mechanism. Built: `cam.lock`
+with an x and/or y.
 
 ### 19.3 Shake
 
@@ -1258,45 +1517,84 @@ landings (`mass/2000`, cap 0.4), the player taking > 20% max HP in one hit (0.3)
 
 ### 19.4 Scale and zoom
 
-- **Scale** `s = max(1, round(windowHeight / 270))`; view in cells = `ceil(canvasW / s) × ceil(canvasH / s)`,
-  clamped to 400…600 wide and 225…340 high. 1080p → s 4 → 480 × 270; 1440p → s 5 → 512 × 288; 768p →
-  s 3 → 456 × 256; 720p → s 3 → 427 × 240.
-- **Wide view** (boss arenas and the Floodgate mode only): `s − 1`, giving 640 × 360 at 1080p. Transitions
-  are a cut on a room change, never a smooth zoom (non-integer scales would blur pixels).
+- **Scale** `s = max(1, round(canvasHeight / 270))` where the canvas is in device pixels (built: the canvas is
+  sized at up to 2× device-pixel ratio); view in cells = `ceil(canvasW / s) × ceil(canvasH / s)`, clamped
+  (built) to 320…720 wide and 200…400 high. 1080p → s 4 → 480 × 270; 1440p → s 5 → 512 × 288; 768p → s 3 →
+  456 × 256; 720p → s 3 → 427 × 240. The HUD is tested at 427 × 240, 512 × 288 and 640 × 360 (02).
+- **Wide view** (boss arenas and the Floodgate mode only): `s − 1`, giving 640 × 360 at 1080p (built:
+  `cam.fit(w, h, wide)`). Wide view is entered **by a cut, never a zoom** (non-integer scales would blur
+  pixels): on a room change, and on a **boss phase transition** when 05's camzone row asks for it (R72) — the
+  transition's hit-stop covers the cut.
 - The sim window (§3.4) is computed from the current view, so wide view costs ~1.8× sim area; boss arenas
   are authored small enough to afford it (≤ 960 × 540).
+
+### 19.5 Room transitions (R50)
+
+Touching an `exit` changes room in four steps:
+
+1. **Fade out, 0.25 s** to black (the sim keeps running under it; input is ignored).
+2. **Load:** compile the target room (10 §6.9), apply its saved prefab state (00 §13), place the player at the
+   entry. A room that **starts mid-flood** loads with its height-field level already in place (§8.9), so nothing
+   has to pour in. There is **no settle run at load** in v2 (the v1 120-tick settle is deleted): the compiler
+   places liquids already level and powders already on support, and `room-check` **fails any room that needs more
+   than 30 ticks to go quiet** (no cell moves in the sim window). The built compiler still runs a 120-tick settle
+   (`roomload.js` `opts.settle`); M2 removes it with the check.
+3. **Fade in, 0.25 s.** The camera snaps to its target (no swoop).
+4. **Followers:** enemies that follow you through doors (the Unlit, and any elite with `mod_relentless`; 05
+   decides who) arrive **at the entry 1.5 s later**, announced by a sound cue at the door (and a door-shadow
+   telegraph in the overlay) so the arrival is never a surprise hit.
+
+Budget: compile + load inside the 0.25 s fade-out on the reference laptop for a 960 × 540 room.
+
+**Rekindle shimmer (B8).** A Rekindle (the free Guild lantern at the entry of puzzle, lesson, flood and trap
+rooms, or the pause-menu entry; 07 owns the rule) streams the room back to its template plus saved prefab state.
+Visually, over **0.6 s**, every cell that differs from the template is redrawn from its current material to its
+template material in a sweep outward from the Rekindle post (a soft gold edge at the wave front, drawn in the
+overlay pass); the swap itself is done at the start of the sweep, so this is **visual only** and costs one
+full re-upload. The Narrator's remark and the Ledger's "Rooms rekindled" stat are 01's and 10's.
+
+Status: fades, the follower timer and the Rekindle shimmer are **planned** (M2, M9).
 
 ---
 
 ## 20. Performance budget
 
 Target: **60 fps at 1080p on a mid laptop** (reference: 4-core ~2020 laptop CPU, Intel Iris Xe or similar
-integrated GPU, Chrome). Frame = 16.7 ms.
+integrated GPU, Chrome). Frame = 16.7 ms. **Single thread is a constraint, not a choice we revisit** (00 §13):
+no Worker, no `SharedArrayBuffer` (GitHub Pages cannot send the headers those need), so the sim, AI, spells,
+ropes, talk and audio all share one main thread and one budget.
 
-### 20.1 Per-frame budget (ms, main thread unless noted)
+### 20.1 Measured (R11)
 
-| Item | Normal room | Worst case (flood + fire + 30 enemies) | Notes |
-|---|---|---|---|
-| Cell pass A (powder/liquid) | 1.2 | 3.5 | ~88 chunks in window, dirty rects only |
-| Cell pass B (gas/fire) | 0.2 | 0.8 | gas cap 6,000 |
-| Thermal (every 2nd tick) | 0.1 | 0.6 | hot chunks only |
-| Liquids equaliser + basins | 0.1 | 0.4 | every 8th tick |
-| Support + fragments | 0.05 | 0.8 | budget 12 k visited cells |
-| Entities + AI + physics | 0.6 | 1.5 | |
-| Spells + particles sim | 0.3 | 0.8 | 4,000 particle cap |
-| Ripples + light list + CPU `lightAt` | 0.1 | 0.3 | |
-| **Sim total** | **2.7** | **8.7** | hard ceiling 9.0; see §20.3 |
-| Upload (texSubImage) | 0.2 | 0.8 | 250 k cells cap |
-| Render CPU (draw calls, uniforms) | 0.6 | 1.0 | ≈ 30–45 draw calls |
-| UI (DOM HUD updates, throttled to 10 Hz for text) | 0.2 | 0.4 | |
-| **CPU total** | **3.7** | **10.9** | |
-| GPU: scene + background | 0.6 | 0.8 | |
-| GPU: light (occlusion + shadowed + flat + glow) | 1.2 | 2.5 | falls back to 1D shadow maps above 2.0 |
-| GPU: composite + water | 0.6 | 0.9 | |
-| GPU: bloom + final | 0.5 | 0.6 | |
-| **GPU total** | **2.9** | **4.8** | runs in parallel with the CPU |
+Headless Chromium with a software GPU, the built engine, a **1024 × 544 room holding 56,000 water cells plus
+oil, sand, fire and rain** (the `dev/render.html` scene, §21):
 
-### 20.2 What sleeps
+| Measure | Result |
+|---|---|
+| Sim per tick (all cell passes, thermal, equaliser, rain) | **1.4–1.8 ms** |
+| Render CPU per frame (upload + draw calls) | **0.5 ms** |
+| Chunks awake | **20–150** |
+
+That is better than a 2× margin on the sim budget below with a software GPU, so the real-laptop run (M39) is a
+check, not a gate.
+
+### 20.2 The p95 budget (canon, 00 §13)
+
+Per frame, measured as the 95th percentile over a room:
+
+| Slice | p95 budget | Holds |
+|---|---|---|
+| **Sim** | **≤ 4 ms** | cell passes A + B (~2.0), thermal (~0.3), equaliser + basins + height-field bands (~0.4), support + fragments (~0.4), rain + drips + particle sim (~0.3), ripples + CPU light grid (~0.2), current zones + bands (~0.1), slack 0.3 |
+| **AI + spells + ropes** | **≤ 3 ms** | entities and AI (~1.5; 05's AI budget sits inside this), spell instances (~1.0), ropes (~0.5) |
+| **Render CPU** | **≤ 2 ms** | frame build (~0.4), upload (~0.8), draw calls and uniforms (~0.6), DOM HUD throttled to 10 Hz for text (~0.2) |
+| **Talk + audio** | **≤ 1 ms** | Lingo lines (pre-rendered per room, 01/10), voice scheduling, sfx cues, the score |
+| GPU (in parallel) | ~3 ms typical, 5 ms worst | scene 0.6, light 1.2 (falls back per §14.3 above 2.0), composite + water 0.6, bloom + final 0.5 |
+
+**The awake-liquid cap.** No scene holds more than **60,000 awake liquid cells** (00 §13). Every big water is a
+height-field flood with a band of at most 8 rows of real cells (§8.9). `room-check` measures the peak for every
+room (including scripted set pieces like the Falling Flood, §8.7) and fails the room above the cap.
+
+### 20.3 What sleeps
 
 | Thing | Sleeps when |
 |---|---|
@@ -1305,37 +1603,42 @@ integrated GPU, Chrome). Frame = 16.7 ms.
 | thermal pass for a chunk | all within 4 °C of ambient, no hot materials |
 | off-window chunks | slow lane, every 4th tick |
 | water body in the equaliser | until one of its cells changes |
+| height-field body | outside the sim window: no band cells at all, only the level (§8.9) |
+| cells in a flipped gravity band | held until the band flips back (§10.7) |
 | ripple runs | when all |h| < 0.01 |
-| enemies | outside view + 160 cells and not alerted: AI thinks at 4 Hz, physics only if airborne |
-| water render pass | no liquid in view |
+| enemies | outside view + 160 cells and not alerted: AI thinks at 4 Hz, physics only if airborne (05 §3.4) |
+| water render pass | no liquid in view (planned, §16.7) |
 | drip points | beyond 48 nearest |
 
-### 20.3 When over budget (automatic, in this order)
+### 20.4 When over budget (automatic, in this order)
 
-1. Measure sim time as a rolling 30-frame average (`perf.simMs`).
-2. Above **9 ms**: move the furthest in-window awake chunks to the slow lane until under.
-3. Above **11 ms** for 60 frames: particles to 70%, rain density to 60%.
-4. Above **13 ms** for 120 frames: `Physics detail` drops to `low` automatically (fragments powderise, thermal
+1. Measure sim time as a rolling 30-frame average (`perf.simMs`; the built loop records `stats.simMs` each frame).
+2. Sim above **4 ms**: move the furthest in-window awake chunks to the slow lane until under.
+3. Above **6 ms** for 60 frames: particles to 70%, rain density to 60%.
+4. Above **8 ms** for 120 frames: *Physics detail* drops to `low` automatically (fragments powderise, thermal
    every 4th tick) and a small toast says so.
-5. If the frame accumulator hits the 5-step cap (`10-TECH-DATA.md` §4.1), the game slows down rather
-   than skipping sim steps (the sim never runs more than 5 steps in one frame).
+5. If the frame accumulator hits the 5-step cap (built, `js/core/loop.js`), the game slows down rather than
+   skipping sim steps (the sim never runs more than 5 steps in one frame).
 
-### 20.4 Active chunk numbers
+### 20.5 Active chunk numbers
 
 | View | Sim window | Chunks in window | Typical awake | Hard cap |
 |---|---|---|---|---|
 | 480 × 270 | 672 × 462 | ≤ 88 | 10–40 | 160 |
 | 640 × 360 (wide) | 832 × 552 | ≤ 126 | 20–60 | 160 |
 
-Worst case the inner loop visits 160 × 4,096 = 655 k cells per tick if every rect were full; with dirty
-rects the flood benchmark measures ~180 k.
+Worst case the inner loop visits 160 × 4,096 = 655 k cells per tick if every rect were full; with dirty rects the
+56k-water scene above scans far less.
 
 ---
 
 ## 21. Benchmark room for milestone 1
 
-Build this **before any content** (verdict risk 2). Room id `bench_flood`, file `rooms/bench/bench_flood.json`,
-opened with `index.html?room=bench_flood&bench=1`.
+Build this **before any content** (verdict risk 2). Room id `bench_flood`, file `rooms/bench/bench_flood.json`
+(listed in `rooms/index.json`), opened with `index.html?room=bench_flood&bench=1` and run headless by
+`tools/bench.mjs` (10 §9.4). The measured numbers in §20.1 came from its predecessor, the hand-built scene in
+`dev/render.html`. The room holds 56,000 water cells, inside the 60,000 awake-liquid cap: **every flood room is
+authored to that cap**, the Falling Flood included (§8.7), and the cap is what `room-check` measures.
 
 ### 21.1 Layout (1024 × 544 cells)
 
@@ -1382,7 +1685,8 @@ particles:{max}, fragments:{max}, waterTotalStart, waterTotalEnd }`.
 | Measure | Pass line (reference laptop) |
 |---|---|
 | frame time p95 | ≤ 16.7 ms |
-| sim time p95 | ≤ 7.0 ms; max ≤ 12 ms |
+| sim time p95 | ≤ 4.0 ms (00 §13); max ≤ 8 ms |
+| awake liquid cells, peak | ≤ 60,000 |
 | water conserved | `waterTotalEnd + steamDebt + ice(FROM_WATER)` = start ± 0 |
 | chunk overflow events | 0 |
 | visible checks (screenshot) | flood reaches x ≥ 700 by t = 6; fire visible on scaffold at t = 9; ice bridge at t = 11; fragment landed by t = 18 |

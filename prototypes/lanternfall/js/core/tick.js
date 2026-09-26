@@ -9,6 +9,8 @@ import { stepSpells, stepSpellLeftovers } from '../spells/instances.js';
 import { stepActorPhysics } from '../entities/actor.js';
 import { stepStatuses } from '../rpg/status.js';
 import { lanternPos } from '../render/frame.js';
+import { collectLights } from '../world/lightgrid.js';
+import { stepCurrents, stepFloodline } from '../world/currents.js';
 
 export const DT = 1 / 60;
 
@@ -26,6 +28,8 @@ export function tickGame(game, intent, view) {
     stepStatuses(game, p, DT);
     if (p.hurtT > 0) p.hurtT -= DT; if (p.invuln > 0) p.invuln -= DT;
   }
+  // exits: touching an exit rect asks main.js to change room (it loads the next room's JSON)
+  if (p && !game.pendingExit && !p.dead) for (const x of game.room.exits) { const [rx, ry, rw, rh] = x.rect; if (p.x + 3 > rx && p.x - 3 < rx + rw && p.y > ry && p.y - p.h < ry + rh && !(x.requires && !game.flags[x.requires])) { game.pendingExit = x; break; } }
   for (const s of game.systems || []) s(game, intent);
   stepSpells(game);
   for (const e of game.entities) stepActorPhysics(game, e);
@@ -35,6 +39,8 @@ export function tickGame(game, intent, view) {
   const simView = view ? { x0: view.x0 - 96, y0: view.y0 - 96, x1: view.x1 + 96, y1: view.y1 + 96 } : null;
   stepCells(w, simView); stepThermal(w); stepLiquids(w); stepShock(w);
   for (const b of game.room.basins) stepBasin(w, b);
+  if (game.currents?.length) stepCurrents(game, game.currents);
+  for (const f of game.floodlines || []) stepFloodline(game, f);
   // 10-11: support queue -> fragments; fragments fall
   if (game.support) { for (const grp of game.support.process(12000)) game.fragments.detach(grp); game.fragments.step([p, ...game.entities].filter(Boolean)); }
   // 12: rain, drips, particles
@@ -49,5 +55,6 @@ export function tickGame(game, intent, view) {
   });
   if (game.tick % 60 === 0) game._debris = 0;
   game.ripples.step();
+  if (game.lightGrid && game.tick % 4 === 0) { if (game.tick % 60 === 0) game.lightGrid.rebuildOpacity(); game.lightGrid.update(collectLights(game)); }
   game.bus.flush();
 }

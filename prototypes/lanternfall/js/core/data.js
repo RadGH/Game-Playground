@@ -30,7 +30,7 @@ export async function loadData() {
 
 export async function loadRoom(data, id) {
   const index = data.roomIndex || (data.roomIndex = await readJson(roomUrl('index.json')));
-  const entry = index.rooms[id]; if (!entry) throw new Error(`unknown room ${id}`);
+  const entry = index.rooms[id] || (index.examples?.[id] ? { file: index.examples[id] } : null); if (!entry) throw new Error(`unknown room ${id}`);
   return readJson(roomUrl(entry.file));
 }
 export { readJson };

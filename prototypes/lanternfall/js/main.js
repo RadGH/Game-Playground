@@ -57,6 +57,17 @@ try {
   const sky = { top: hexToRgb01(theme.sky?.top || '#10141d'), bottom: hexToRgb01(theme.sky?.bottom || '#06080c'), sil: hexToRgb01(theme.sky?.sil || '#161a24') };
   const bench = params.has('bench') ? createBench(game, cam) : null; LF.perf = { get bench() { return bench?.rec.report || null; } };
   game.shake = t => cam.shake(t);
+  // room transitions (fade 0.25 s out, load, fade in)
+  const fade = document.createElement('div'); fade.className = 'fade'; document.body.appendChild(fade);
+  let changing = false;
+  async function goRoom(id, entryId) {
+    changing = true; fade.classList.add('on'); await new Promise(r => setTimeout(r, 250));
+    try { const json = await loadRoom(data, id); enterRoom(game, json, entryId); renderer.setRoom(game.grid); cam.snap(game.player.x, game.player.y, game.grid); Object.assign(sky, skyOf(game.room.theme)); LF.room = id; }
+    catch (e) { console.error(e); LF.errors.push(String(e)); }
+    game.pendingExit = null; fade.classList.remove('on'); changing = false;
+  }
+  function skyOf(theme) { return { top: hexToRgb01(theme.sky?.top || '#10141d'), bottom: hexToRgb01(theme.sky?.bottom || '#06080c'), sil: hexToRgb01(theme.sky?.sil || '#161a24') }; }
+  LF.goRoom = goRoom;
   const loop = createLoop({
     tick() {
       const dpr = canvas.width / innerWidth;
@@ -66,6 +77,7 @@ try {
       tickGame(game, input.poll(), cam.view());
       if (bench) bench.tick(performance.now() - t0);
       cam.update(game.player, game.grid, 1 / 60);
+      if (game.pendingExit && !changing) goRoom(game.pendingExit.to, game.pendingExit.entry);
     },
     render(alpha, dt) {
       if (bench) bench.frame(dt * 1000);

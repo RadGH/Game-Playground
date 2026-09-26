@@ -1,21 +1,15 @@
 {
- "_doc": "Every room: id -> file (relative to rooms/), act, kind. Tools and the game read this.",
+ "_doc": "Every room: id -> file (relative to rooms/), act, kind. 'examples' are the two worked examples from docs/10 \u00a76.13-6.14, kept as format references (not played).",
  "version": 1,
  "rooms": {
-  "a1_wax_stair_02": {
-   "file": "act1/a1_wax_stair_02.json",
-   "act": "act1",
-   "kind": "lesson"
-  },
-  "a3_sluice_04": {
-   "file": "act3/a3_sluice_04.json",
-   "act": "act3",
-   "kind": "puzzle"
-  },
   "bench_flood": {
    "file": "bench/bench_flood.json",
    "act": "none",
    "kind": "bench"
   }
+ },
+ "examples": {
+  "a1_wax_stair_02": "act1/a1_wax_stair_02.json",
+  "a3_sluice_04": "act3/a3_sluice_04.json"
  }
 }

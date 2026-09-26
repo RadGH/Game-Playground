@@ -34,7 +34,8 @@ export const titleScreen = {
       if (used.length) items[0].append(el('span', { class: 'note', text: summaryLine(used[0]) }));
       items.push(btn('New Game', () => router.open('slots', { mode: 'new' }), used.length ? {} : { 'data-autofocus': '' }));
       items.push(btn('Load', () => router.open('slots', { mode: 'load' }), { disabled: used.length ? null : 'No saves yet.' }));
-      const anyMode = MODES.some(m => p.modes?.[m.id]);
+      const modeOpen = id => Array.isArray(p.modes) ? p.modes.includes(id) : !!p.modes?.[id]; // profile.modes defaults to []
+      const anyMode = MODES.some(m => modeOpen(m.id));
       const modes = btn(el('span', {}, 'Modes'), () => router.open('modes'));
       if (!anyMode) modes.append(el('span', { class: 'note lf-lock', text: 'locked' }));
       items.push(modes);
@@ -145,7 +146,7 @@ export const modesScreen = {
     root.append(el('div', { class: 'lf-frame small' },
       el('div', { class: 'lf-frame-head' }, el('h2', { class: 'lf-title', text: 'Modes' }), el('button', { class: 'lf-close', type: 'button', 'aria-label': 'Back', text: '✕', onclick: () => router.back() })),
       el('div', { class: 'lf-frame-body lf-menulist' }, MODES.map(m => {
-        const open = !!p.modes?.[m.id];
+        const open = Array.isArray(p.modes) ? p.modes.includes(m.id) : !!p.modes?.[m.id];
         const b = btn(el('span', { class: open ? '' : 'lf-lock' }, m.name), () => ctx.actions.startMode?.(m.id), { disabled: open ? null : m.rule, tip: open ? m.desc : null });
         b.append(el('span', { class: 'note', text: open ? (p.best?.[m.id] ? `best ${hp(p.best[m.id])}` : '') : m.rule })); return b;
       }), el('p', { class: 'dim small', text: 'Unlocks belong to your profile and carry across every save.' }))));

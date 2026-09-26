@@ -83,11 +83,11 @@ export function relightGreatLamp(game, act, saves) {
 }
 
 /** Death: purse of pennies left where you fell, then respawn at the last lamp-post (loadRoom injected). */
-export function onDeath(game) {
+export function onDeath(game, { countDeath = true } = {}) {
   const h = game.hero, pct = game.difficulty?.purse ?? 0.25;
   const lost = Math.floor((h.currency.pennies || 0) * pct);
   if (lost > 0 && game.room) { h.currency.pennies -= lost; game.purse = { room: game.room.room.id, x: game.player.x, y: game.player.y - 4, amount: lost }; }
-  game.stats = game.stats || {}; game.stats.deaths = (game.stats.deaths || 0) + 1;
+  game.stats = game.stats || {}; if (countDeath) game.stats.deaths = (game.stats.deaths || 0) + 1;
   return lost;
 }
 export async function respawn(game, loadRoom, saves) {

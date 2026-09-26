@@ -96,7 +96,7 @@ export const classSelect = {
       const n = CS.name.trim(); if (!NAME_OK.test(n)) { toast('Names are 1-16 letters, spaces, \' or -.', 'bad'); nameIn.focus(); return; }
       router.open('newgame', { slot: args.slot, classId: CS.pick, name: n, palette: CS.palette });
     };
-    const confirmSwitch = async () => { if (await confirmBox(root, { title: 'Answer the call?', text: `Become a ${D.classes.byId[CS.pick].name}. This is 04's class switch rule.`, yes: 'Answer' })) { ctx.actions.switchClass?.(CS.pick); router.closeAll(); } };
+    const confirmSwitch = async () => { if (await confirmBox(root, { title: 'Answer the call?', text: `Become a ${D.classes.byId[CS.pick].name}. This is 04's class switch rule.`, yes: 'Answer' })) { if (ctx.actions.switchClass) { ctx.actions.switchClass(CS.pick); router.closeAll(); } else toast('Class switching opens with its milestone (docs/HANDOFF.md, M34).', 'bad'); } };
     const footer = el('div', { class: 'row end' });
     const look = el('div', { class: 'row small' }, 'Coat', btn('◂', () => { CS.palette = (CS.palette + 7) % 8; lookLbl.textContent = `palette ${CS.palette + 1}/8`; }, { cls: 'small', 'aria-label': 'previous palette' }),
       el('span', { text: `palette ${CS.palette + 1}/8` }), btn('▸', () => { CS.palette = (CS.palette + 1) % 8; lookLbl.textContent = `palette ${CS.palette + 1}/8`; }, { cls: 'small', 'aria-label': 'next palette' }));

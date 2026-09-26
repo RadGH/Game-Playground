@@ -88,3 +88,33 @@ fine for a stable prototype, but anyone continuing needs to know which parts are
 - **Leaving an act.** The last node's `@next` goes to the next act's first room only once `flags.lamp_<act>` is set. Before that, the player gets "Relight the Great Lamp before you go on." After Act 6 the result is `{ ending: true }`.
 - **An exit can be verb-gated.** Give it `needsVerb: 'grapple'` and the room checker skips it for acts that do not have that verb yet.
 - **Arena lock.** `game.arenaLocked` blocks exits while a boss is awake. The Great Lamp refuses you until the boss is dead.
+
+## Code review, 2026-09-26 (fixed and released)
+
+A review of the whole prototype found 12 bugs, plus one reported from an iPhone. Everything that affects a built
+feature is fixed, and each fix has a test (`tests/unit/review-fixes.test.js`, `tests/e2e/campaign.spec.js`,
+`tests/e2e/firstrun.spec.js`).
+
+| # | Bug | Fix |
+|---|---|---|
+| — | **"Before you start" → Done did nothing, on every device.** `ctx.settings` had a getter and no setter, so `done()` threw before the card closed, and every first launch was stuck behind it. | The setter now exists, and the card closes first no matter what fails after. A phone e2e taps from the first launch to the Guild Hall. |
+| 1 | Swimming never unlocked in the campaign (the player only read `flags.swimming`) | `player.js` also reads `hero.unlocked.mechanics` ('swimming', the a3_n01 gift) |
+| 2 | Using a consumable deleted it and did nothing; the belt keys did nothing | New `js/rpg/consume.js`: tonics heal over time, oil, Gillwater, Clearwater, thrown pots; belt keys Z/X/C/V |
+| 3 | An Iron Wick death did not delete the save | The death screen's button calls `respawn`, which deletes the slot |
+| 4 | The death purse was never put back in the world | It is spawned when you re-enter that room; picking it up clears it |
+| 5 | Loading dropped play time, stats, the purse, visited rooms and the bestiary | Saved and restored |
+| 6 | The act maps (~31 KB) were written into every save | Removed; they are rebuilt from the seed |
+| 7 | Screen shake and bloom read in the wrong units (shake was ~0, bloom always off) | Shake is 0–1; bloom maps off/low/high |
+| 8 | "Return to the lamp-post" counted a death | The purse drops, but no death is counted |
+| 9 | Save-slot cards showed a blank class, 0 lamps and 0 deaths; the character totals were always 0 | Filled in from the save and the run |
+
+**Findings that touch unbuilt features** (only made to stop failing silently):
+
+| # | Finding | What was done / what the milestone must do |
+|---|---|---|
+| 10 | Class switch ("Answer the call") called a missing action and silently closed | It now says it opens with M34. **M34** must add `ctx.actions.switchClass` and `trackChallenge`. |
+| 11 | Modes can never unlock (`profile.modes` is an array; the title read it as an object; nothing writes the profile), and starting a missing mode showed no message on the title | The title reads both shapes, and a missing mode shows a message. **M20/M24/M34/M35** must write `profile.modes` when a boss dies and add `js/modes/<id>.js`. |
+| 12 | The mode API held the boot-time settings | It is now a getter. Matters once any mode exists. |
+
+**Phones:** there are no touch controls. A phone can get through every menu into the game, but cannot play it
+(the "Desktop recommended" card says so). Touch play would be its own milestone.

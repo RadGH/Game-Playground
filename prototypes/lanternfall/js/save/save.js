@@ -19,7 +19,8 @@ export function snapshot(game, extra = {}) {
     schema: SCHEMA, game: 'lanternfall', slot: game.slot ?? 1, updated: new Date().toISOString(), playtime: Math.round((game.playtime || 0) * 10) / 10,
     mode: game.mode, seed: game.seed, difficulty: game.difficultyId || 'lamplighter', ironWick: !!game.ironWick,
     hero: { ...h, stats: undefined },
-    world: { act: game.act || 'act1', room: game.room?.room?.id, entry: game.lastEntry, lampPost: game.lampPost || null, lampsLit: Object.keys(game.flags).filter(k => k.startsWith('lamp_') && game.flags[k]), roomState: game.roomState || {}, actMaps: game.actMaps || {}, fog: game.fog || {} },
+    world: { act: game.act || 'act1', room: game.room?.room?.id, entry: game.lastEntry, lampPost: game.lampPost || null, lampsLit: Object.keys(game.flags).filter(k => k.startsWith('lamp_') && game.flags[k]), roomState: game.roomState || {}, fog: game.fog || {}, purse: game.purse || null, visitedRooms: Object.keys(game.visited || {}) }, // act maps are rebuilt from the seed, never saved (they were ~31 KB)
+    bestiary: game.bestiary || {},
     story: { flags: game.flags, kindling: h.kindling || {}, npcs: game.npcState || {} },
     stats: game.stats || {},
     ledger: game.meter?.toJSON ? trimLedger(game.meter.toJSON()) : null,
@@ -31,7 +32,7 @@ function trimLedger(j) { if (j?.fights?.length > 50) j.fights = j.fights.slice(-
 
 export function createSaves(store) {
   const S = {
-    list() { return [1, 2, 3].map(n => { const s = safeParse(store.get(`slot${n}`)); return s ? { slot: n, name: s.hero?.name, class: s.hero?.class, level: s.hero?.level, act: s.world?.act, room: s.world?.room, playtime: s.playtime, updated: s.updated, difficulty: s.difficulty } : { slot: n, empty: true }; }); },
+    list() { return [1, 2, 3].map(n => { const s = safeParse(store.get(`slot${n}`)); return s ? { slot: n, name: s.hero?.name, class: s.hero?.class, level: s.hero?.level, act: s.world?.act, room: s.world?.room, playtime: s.playtime, updated: s.updated, difficulty: s.difficulty, lampsLit: (s.world?.lampsLit || []).length, deaths: s.stats?.deaths || 0 } : { slot: n, empty: true }; }); },
     write(n, save) {
       let json = JSON.stringify(save);
       if (json.length > SLOT_BUDGET && save.ledger) { save.ledger.fights = (save.ledger.fights || []).slice(-10); json = JSON.stringify(save); }

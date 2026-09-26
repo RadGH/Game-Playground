@@ -58,3 +58,27 @@ test('lamp-post saves and the slot loads back; death respawns at the lamp-post',
   expect(r.dead).toBe(true); expect(r.alive).toBe(true);
   expect(errors).toEqual([]);
 });
+
+test('the death purse waits where you fell; an Iron Wick death deletes the slot', async ({ page }) => {
+  test.setTimeout(120000);
+  const errors = await boot(page);
+  const r = await page.evaluate(async () => {
+    const L = lanternfall; await L.newGame({ classId: 'lamplighter', seed: 9, slot: 3 });
+    let g = L.game; await L.interact(g.things.list.find(t => t.t === 'lamp_post'));
+    await L.takeExit(g.room.exits.find(x => x.to === '@next')); const room = g.room.room.id;
+    g.hero.currency.pennies = 200; g.player.invuln = 0; g.bus.emit('player.die', { source: 'test' }); g.bus.flush(); await new Promise(r => setTimeout(r, 1100));
+    const purse = g.purse?.amount; L.router.closeAll(); await L.ctx.actions.respawn();
+    await L.takeExit(L.game.room.exits.find(x => x.to === '@next')); g = L.game; L.step(2); // bus events (room.ready) run at the end of a tick
+    const bag = g.entities.find(e => e.kind === 'pickup' && e.drop?.id === 'purse'); const before = g.hero.currency.pennies;
+    if (bag) { g.player.x = bag.x; g.player.y = bag.y; } L.step(120);
+    const found = { room, purse, bagSeen: !!bag, gained: g.hero.currency.pennies - before, cleared: g.purse === null };
+    // Iron Wick: a death ends the save
+    await L.newGame({ classId: 'lamplighter', seed: 9, slot: 3, ironWick: true }); L.save();
+    const had = !!L.ctx.saves.list()[2]; L.game.bus.emit('player.die', { source: 'test' }); L.game.bus.flush(); await new Promise(r => setTimeout(r, 1100));
+    document.querySelector('#screens .lf-death button')?.click(); await new Promise(r => setTimeout(r, 600));
+    return { ...found, had, after: L.ctx.saves.list()[2] };
+  });
+  expect(r.purse).toBe(50); expect(r.bagSeen).toBe(true); expect(r.gained).toBeGreaterThanOrEqual(50); expect(r.cleared).toBe(true);
+  expect(r.had).toBe(true); expect(r.after).toBeNull();
+  expect(errors).toEqual([]);
+});

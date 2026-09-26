@@ -1,0 +1,1477 @@
+{
+ "_doc": "Everything you can carry (docs/08): 30 gear bases (type gear), 8 relics, 12 consumables + the mystery bowl, strands, scrap and dust, keys, the quest item, the Guild flask, sealed lanterns. Gear: `core` (armour/health) and `weapon.dmg` scale with item level; `implicit` is fixed; `powers` are rules other systems read by id. Relic `stats` are [lo, hi] at ilvl 1 and scale. Percent stats are fractions (0.05 = 5%). `economy` holds 08's knobs (move to balance.json when 10 lands it).",
+ "version": 1,
+ "slots": [
+  "weapon",
+  "lantern",
+  "coat",
+  "boots",
+  "trinket"
+ ],
+ "rarities": [
+  {
+   "id": "common",
+   "name": "Common",
+   "affixes": 0,
+   "color": "#9aa3ad",
+   "valueMult": 1,
+   "glow": null,
+   "beam": 0,
+   "sound": "loot.common"
+  },
+  {
+   "id": "fine",
+   "name": "Fine",
+   "affixes": 1,
+   "color": "#8fc7ff",
+   "valueMult": 2.5,
+   "glow": "#8fc7ff",
+   "beam": 8,
+   "sound": "loot.uncommon"
+  },
+  {
+   "id": "rare",
+   "name": "Rare",
+   "affixes": 2,
+   "color": "#ffb347",
+   "valueMult": 6,
+   "glow": "#ffb347",
+   "beam": 24,
+   "sound": "loot.rare"
+  },
+  {
+   "id": "relic",
+   "name": "Relic",
+   "affixes": 0,
+   "color": "#c58cff",
+   "valueMult": 20,
+   "glow": "#c58cff",
+   "beam": 48,
+   "light": 16,
+   "sound": "loot.epic"
+  }
+ ],
+ "economy": {
+  "ilvlScale": 0.11,
+  "ilvlMax": 30,
+  "rollSpread": 0.15,
+  "actMaxLevel": [
+   5,
+   10,
+   15,
+   20,
+   25,
+   30
+  ],
+  "slotBase": {
+   "lantern": 30,
+   "weapon": 28,
+   "coat": 20,
+   "boots": 14,
+   "trinket": 18
+  },
+  "affixValueBonus": 0.25,
+  "temperValueBonus": 0.1,
+  "temperStatBonus": 0.08,
+  "sellShare": 0.25,
+  "materialBuyMult": 2,
+  "knack": {
+   "from": 5,
+   "per": 0.02,
+   "cap": 1.6
+  },
+  "offClassMult": 0.8,
+  "relicRepeatChance": 0.15,
+  "rareNameChance": 0.25,
+  "stacks": {
+   "consumable": 10,
+   "material": 99,
+   "strand": 5
+  },
+  "satchel": {
+   "start": 20,
+   "rowSize": 5,
+   "rowPrices": [
+    400,
+    1500,
+    4000
+   ],
+   "max": 35
+  },
+  "scrapSack": 500,
+  "caps": {
+   "pennies": 999999,
+   "pearls": 999,
+   "marks": 9999,
+   "scrap": 99,
+   "strandDust": 99
+  },
+  "temper": [
+   {
+    "pennies": 40,
+    "scrap": 5
+   },
+   {
+    "pennies": 80,
+    "scrap": 10
+   },
+   {
+    "pennies": 150,
+    "scrap": 15
+   },
+   {
+    "pennies": 260,
+    "scrap": 20
+   },
+   {
+    "pennies": 420,
+    "scrap": 25,
+    "strandDust": 1
+   }
+  ]
+ },
+ "rareNouns": [
+  "Vessel",
+  "Wickholder",
+  "Glimmer",
+  "Keepsake",
+  "Beacon",
+  "Taper",
+  "Cinderwork",
+  "Lampwright's Pride",
+  "Night-Guard",
+  "Rainbreaker"
+ ],
+ "list": [
+  {
+   "id": "lantern_tin",
+   "type": "gear",
+   "slot": "lantern",
+   "name": "Tin Pole-Lantern",
+   "short": "Lantern",
+   "req": 1,
+   "class": "chimneysweep",
+   "lantern": {
+    "radius": 64,
+    "darkBurn": 3
+   },
+   "implicit": {},
+   "powers": []
+  },
+  {
+   "id": "lantern_guild",
+   "type": "gear",
+   "slot": "lantern",
+   "name": "Guild Pole-Lantern",
+   "short": "Lantern",
+   "req": 1,
+   "class": "lamplighter",
+   "lantern": {
+    "radius": 72,
+    "darkBurn": 2.5
+   },
+   "implicit": {
+    "wickPct": 0.05,
+    "oilPct": 0.2
+   },
+   "powers": []
+  },
+  {
+   "id": "lantern_hook",
+   "type": "gear",
+   "slot": "lantern",
+   "name": "Hook-Staff Lamp",
+   "short": "Lamp",
+   "req": 1,
+   "class": "sluicewarden",
+   "lantern": {
+    "radius": 60,
+    "darkBurn": 2.8
+   },
+   "implicit": {
+    "wickPct": 0.03,
+    "armour": 10
+   },
+   "powers": []
+  },
+  {
+   "id": "lantern_wrench",
+   "type": "gear",
+   "slot": "lantern",
+   "name": "Wrenchlight",
+   "short": "Lamp",
+   "req": 1,
+   "class": "tinker",
+   "lantern": {
+    "radius": 56,
+    "darkBurn": 2.8
+   },
+   "implicit": {
+    "wickPct": 0.03,
+    "buildSpeedPct": 0.15
+   },
+   "powers": []
+  },
+  {
+   "id": "lantern_moth",
+   "type": "gear",
+   "slot": "lantern",
+   "name": "Moth-Lamp",
+   "short": "Lamp",
+   "req": 4,
+   "class": "moth_oracle",
+   "lantern": {
+    "radius": 48,
+    "darkBurn": 2.2
+   },
+   "implicit": {
+    "wickPct": 0.06
+   },
+   "powers": [
+    {
+     "id": "dark_sight",
+     "value": 40,
+     "text": "You see terrain in darkness 40 cells beyond your light."
+    }
+   ]
+  },
+  {
+   "id": "lantern_cage",
+   "type": "gear",
+   "slot": "lantern",
+   "name": "Caged Wisp",
+   "short": "Wisp",
+   "req": 4,
+   "lantern": {
+    "radius": 96,
+    "darkBurn": 2
+   },
+   "implicit": {
+    "wickPct": 0.08
+   },
+   "powers": [
+    {
+     "id": "unlit_vuln",
+     "value": 0.15,
+     "text": "The Unlit take 15% more damage inside your light."
+    }
+   ]
+  },
+  {
+   "id": "wpn_pole",
+   "type": "gear",
+   "slot": "weapon",
+   "name": "Lamplighter's Pole",
+   "short": "Pole",
+   "req": 1,
+   "family": "pole",
+   "class": "lamplighter",
+   "weapon": {
+    "dmg": [
+     10,
+     14
+    ],
+    "swing": 420,
+    "reach": 18,
+    "kb": 60
+   },
+   "implicit": {},
+   "powers": []
+  },
+  {
+   "id": "wpn_pole_brass",
+   "type": "gear",
+   "slot": "weapon",
+   "name": "Brass-Shod Pole",
+   "short": "Pole",
+   "req": 3,
+   "family": "pole",
+   "class": "lamplighter",
+   "weapon": {
+    "dmg": [
+     14,
+     20
+    ],
+    "swing": 440,
+    "reach": 20,
+    "kb": 80
+   },
+   "implicit": {
+    "wickPct": 0.05
+   },
+   "powers": []
+  },
+  {
+   "id": "wpn_hookstaff",
+   "type": "gear",
+   "slot": "weapon",
+   "name": "Hook-Staff",
+   "short": "Hook",
+   "req": 1,
+   "family": "hookstaff",
+   "class": "sluicewarden",
+   "weapon": {
+    "dmg": [
+     11,
+     15
+    ],
+    "swing": 480,
+    "reach": 20,
+    "kb": 90
+   },
+   "implicit": {},
+   "powers": [
+    {
+     "id": "hook_pull",
+     "value": 12,
+     "text": "Pulls small enemies 12 cells toward you."
+    }
+   ]
+  },
+  {
+   "id": "wpn_hookstaff_tide",
+   "type": "gear",
+   "slot": "weapon",
+   "name": "Tidegate Hook",
+   "short": "Hook",
+   "req": 3,
+   "family": "hookstaff",
+   "class": "sluicewarden",
+   "weapon": {
+    "dmg": [
+     15,
+     22
+    ],
+    "swing": 500,
+    "reach": 22,
+    "kb": 110
+   },
+   "implicit": {},
+   "powers": [
+    {
+     "id": "vs_soaked",
+     "value": 0.2,
+     "text": "+20% damage to soaked targets."
+    }
+   ]
+  },
+  {
+   "id": "wpn_wrench",
+   "type": "gear",
+   "slot": "weapon",
+   "name": "Tinker's Wrench",
+   "short": "Wrench",
+   "req": 1,
+   "family": "wrench",
+   "class": "tinker",
+   "weapon": {
+    "dmg": [
+     9,
+     13
+    ],
+    "swing": 360,
+    "reach": 14,
+    "kb": 50
+   },
+   "implicit": {},
+   "powers": [
+    {
+     "id": "repair_construct",
+     "value": 8,
+     "text": "Hitting your own construct repairs 8 health."
+    }
+   ]
+  },
+  {
+   "id": "wpn_wrench_arc",
+   "type": "gear",
+   "slot": "weapon",
+   "name": "Sparking Wrench",
+   "short": "Wrench",
+   "req": 3,
+   "family": "wrench",
+   "class": "tinker",
+   "weapon": {
+    "dmg": [
+     12,
+     18
+    ],
+    "swing": 360,
+    "reach": 14,
+    "kb": 50
+   },
+   "implicit": {},
+   "powers": [
+    {
+     "id": "chain_spark",
+     "value": 6,
+     "chance": 0.1,
+     "text": "10% chance to chain a 6-damage spark."
+    }
+   ]
+  },
+  {
+   "id": "wpn_brushspear",
+   "type": "gear",
+   "slot": "weapon",
+   "name": "Brush-Spear",
+   "short": "Spear",
+   "req": 1,
+   "family": "spear",
+   "class": "chimneysweep",
+   "weapon": {
+    "dmg": [
+     10,
+     15
+    ],
+    "swing": 340,
+    "reach": 24,
+    "kb": 50
+   },
+   "implicit": {},
+   "powers": [
+    {
+     "id": "rope_damage",
+     "value": 0.1,
+     "text": "+10% damage while on a rope."
+    }
+   ]
+  },
+  {
+   "id": "wpn_flue_spear",
+   "type": "gear",
+   "slot": "weapon",
+   "name": "Flue Lance",
+   "short": "Lance",
+   "req": 5,
+   "family": "spear",
+   "class": "chimneysweep",
+   "weapon": {
+    "dmg": [
+     15,
+     23
+    ],
+    "swing": 340,
+    "reach": 28,
+    "kb": 60
+   },
+   "implicit": {},
+   "powers": [
+    {
+     "id": "wallrun_time",
+     "value": 0.3,
+     "text": "Wall-runs last 0.3 s longer."
+    }
+   ]
+  },
+  {
+   "id": "wpn_mothlamp_rod",
+   "type": "gear",
+   "slot": "weapon",
+   "name": "Moth-Rod",
+   "short": "Rod",
+   "req": 1,
+   "family": "rod",
+   "class": "moth_oracle",
+   "weapon": {
+    "dmg": [
+     9,
+     14
+    ],
+    "swing": 380,
+    "reach": 16,
+    "kb": 40
+   },
+   "implicit": {},
+   "powers": [
+    {
+     "id": "crit_marked",
+     "value": 0.1,
+     "text": "+10% crit chance on marked targets."
+    }
+   ]
+  },
+  {
+   "id": "wpn_mothlamp_silk",
+   "type": "gear",
+   "slot": "weapon",
+   "name": "Silkbound Rod",
+   "short": "Rod",
+   "req": 5,
+   "family": "rod",
+   "class": "moth_oracle",
+   "weapon": {
+    "dmg": [
+     13,
+     20
+    ],
+    "swing": 380,
+    "reach": 18,
+    "kb": 40
+   },
+   "implicit": {},
+   "powers": [
+    {
+     "id": "mark_time",
+     "value": 2,
+     "text": "Marks last 2 s longer."
+    }
+   ]
+  },
+  {
+   "id": "coat_guild",
+   "type": "gear",
+   "slot": "coat",
+   "name": "Guild Longcoat",
+   "short": "Longcoat",
+   "req": 1,
+   "core": {
+    "armour": 9,
+    "health": 12
+   },
+   "implicit": {
+    "oilRegenPct": 0.05
+   },
+   "powers": []
+  },
+  {
+   "id": "coat_bulwark",
+   "type": "gear",
+   "slot": "coat",
+   "name": "Bulwark Mantle",
+   "short": "Mantle",
+   "req": 1,
+   "core": {
+    "armour": 12,
+    "health": 15
+   },
+   "implicit": {},
+   "powers": [
+    {
+     "id": "frontal_block",
+     "value": 0.2,
+     "text": "Blocks 20% of damage from the front."
+    }
+   ]
+  },
+  {
+   "id": "coat_wader",
+   "type": "gear",
+   "slot": "coat",
+   "name": "Wader's Chest-Suit",
+   "short": "Chest-Suit",
+   "req": 3,
+   "core": {
+    "armour": 11,
+    "health": 16
+   },
+   "implicit": {
+    "swimSpeed": 0.15
+   },
+   "powers": []
+  },
+  {
+   "id": "coat_widow",
+   "type": "gear",
+   "slot": "coat",
+   "name": "Silk Duster",
+   "short": "Duster",
+   "req": 4,
+   "core": {
+    "armour": 9,
+    "health": 12
+   },
+   "implicit": {},
+   "powers": [
+    {
+     "id": "unlit_dodge",
+     "value": 0.15,
+     "text": "15% chance to dodge the Unlit."
+    }
+   ]
+  },
+  {
+   "id": "coat_bronze",
+   "type": "gear",
+   "slot": "coat",
+   "name": "Bronze-Scale Coat",
+   "short": "Coat",
+   "req": 5,
+   "core": {
+    "armour": 18,
+    "health": 22
+   },
+   "implicit": {
+    "moveSpeed": -0.05
+   },
+   "powers": []
+  },
+  {
+   "id": "boots_guild",
+   "type": "gear",
+   "slot": "boots",
+   "name": "Guild Boots",
+   "short": "Boots",
+   "req": 1,
+   "core": {
+    "armour": 3
+   },
+   "implicit": {
+    "moveSpeed": 0.03
+   },
+   "powers": []
+  },
+  {
+   "id": "boots_hobnail",
+   "type": "gear",
+   "slot": "boots",
+   "name": "Hobnail Boots",
+   "short": "Boots",
+   "req": 1,
+   "core": {
+    "armour": 4
+   },
+   "implicit": {},
+   "powers": [
+    {
+     "id": "no_slip",
+     "value": 1,
+     "text": "No slipping on ice or wax."
+    }
+   ]
+  },
+  {
+   "id": "boots_rope",
+   "type": "gear",
+   "slot": "boots",
+   "name": "Rope-Soled Shoes",
+   "short": "Shoes",
+   "req": 2,
+   "core": {
+    "armour": 2
+   },
+   "implicit": {
+    "ropeClimb": 0.15
+   },
+   "powers": []
+  },
+  {
+   "id": "boots_fins",
+   "type": "gear",
+   "slot": "boots",
+   "name": "Webbed Galoshes",
+   "short": "Galoshes",
+   "req": 3,
+   "core": {
+    "armour": 3
+   },
+   "implicit": {
+    "swimSpeed": 0.2
+   },
+   "powers": []
+  },
+  {
+   "id": "boots_spring",
+   "type": "gear",
+   "slot": "boots",
+   "name": "Spring-Heel Boots",
+   "short": "Boots",
+   "req": 5,
+   "core": {
+    "armour": 3
+   },
+   "implicit": {
+    "jumpApex": 4
+   },
+   "powers": []
+  },
+  {
+   "id": "trk_penny_charm",
+   "type": "gear",
+   "slot": "trinket",
+   "name": "Lucky Penny",
+   "short": "Charm",
+   "req": 1,
+   "implicit": {
+    "penniesFind": 0.1
+   },
+   "powers": []
+  },
+  {
+   "id": "trk_guild_badge",
+   "type": "gear",
+   "slot": "trinket",
+   "name": "Apprentice's Badge",
+   "short": "Badge",
+   "req": 1,
+   "implicit": {
+    "xpPct": 0.05
+   },
+   "powers": []
+  },
+  {
+   "id": "trk_moth_pin",
+   "type": "gear",
+   "slot": "trinket",
+   "name": "Moth Pin",
+   "short": "Pin",
+   "req": 4,
+   "implicit": {
+    "lightRadiusPct": 0.1
+   },
+   "powers": []
+  },
+  {
+   "id": "trk_cloud_bead",
+   "type": "gear",
+   "slot": "trinket",
+   "name": "Cloud Bead",
+   "short": "Bead",
+   "req": 6,
+   "implicit": {
+    "wickPct": 0.05
+   },
+   "powers": []
+  },
+  {
+   "id": "relic_tallow_heart",
+   "type": "relic",
+   "slot": "trinket",
+   "name": "Tallow Heart",
+   "short": "Tallow Heart",
+   "stats": {
+    "health": [
+     20,
+     30
+    ],
+    "flame_ember": [
+     0.1,
+     0.1
+    ]
+   },
+   "power": {
+    "id": "molten_wax",
+    "text": "Every Ember wick hit spills molten wax that hardens into a walkable ledge. It burns enemies standing in it."
+   },
+   "source": "boss_tallow",
+   "table": "lt_boss_act1"
+  },
+  {
+   "id": "relic_choir_bone",
+   "type": "relic",
+   "slot": "trinket",
+   "name": "Choir Bone",
+   "short": "Choir Bone",
+   "stats": {
+    "castSpeed": [
+     0.08,
+     0.08
+    ],
+    "critChance": [
+     0.05,
+     0.05
+    ]
+   },
+   "power": {
+    "id": "choir_rats",
+    "text": "Every 5th hit calls 3 choir rats to fight for you for 6 s."
+   },
+   "source": "boss_gnaw",
+   "table": "lt_boss_act2"
+  },
+  {
+   "id": "relic_maw_tooth",
+   "type": "relic",
+   "slot": "trinket",
+   "name": "Sluicemaw's Tooth",
+   "short": "Sluicemaw's Tooth",
+   "stats": {
+    "flame_tide": [
+     0.15,
+     0.15
+    ],
+    "breath": [
+     4,
+     4
+    ]
+   },
+   "power": {
+    "id": "deep_fury",
+    "text": "While swimming you deal 30% more damage, and your bolt wicks keep full speed underwater."
+   },
+   "source": "boss_sluicemaw",
+   "table": "lt_boss_act3"
+  },
+  {
+   "id": "relic_mb_act3",
+   "type": "relic",
+   "slot": "trinket",
+   "name": "Floodgate Seal",
+   "short": "Floodgate Seal",
+   "stats": {
+    "oil": [
+     20,
+     20
+    ]
+   },
+   "power": {
+    "id": "lever_ward",
+    "text": "Pulling a lever, valve or sluice makes you untouchable for 1.5 s and refills 15 oil (8 s cooldown)."
+   },
+   "source": "mb_lockmaster",
+   "table": "lt_miniboss"
+  },
+  {
+   "id": "relic_mb_act4",
+   "type": "relic",
+   "slot": "coat",
+   "name": "Lamp-Eater's Lung",
+   "short": "Lamp-Eater's Lung",
+   "stats": {
+    "armour": [
+     14,
+     14
+    ],
+    "health": [
+     20,
+     20
+    ]
+   },
+   "power": {
+    "id": "burn_health",
+    "text": "When your oil runs out you can burn health instead: 1 health per 2 oil, never below 10% health."
+   },
+   "source": "mb_lampeater_mother",
+   "table": "lt_miniboss"
+  },
+  {
+   "id": "relic_widow_veil",
+   "type": "relic",
+   "slot": "coat",
+   "name": "Widow's Veil",
+   "short": "Widow's Veil",
+   "stats": {
+    "armour": [
+     10,
+     10
+    ],
+    "lightRadiusPct": [
+     0.15,
+     0.15
+    ]
+   },
+   "power": {
+    "id": "unseen",
+    "text": "When your lantern goes out: +40% crit chance until it is lit again, and the Unlit cannot see you for 4 s (20 s cooldown)."
+   },
+   "source": "boss_widow",
+   "table": "lt_boss_act4"
+  },
+  {
+   "id": "relic_bell_clapper",
+   "type": "relic",
+   "slot": "weapon",
+   "name": "Bell Clapper",
+   "short": "Bell Clapper",
+   "stats": {},
+   "weapon": {
+    "dmg": [
+     20,
+     30
+    ],
+    "swing": 600,
+    "reach": 18,
+    "kb": 120
+   },
+   "anyClass": true,
+   "power": {
+    "id": "toll",
+    "text": "1 in 4 hits tolls the bell: every enemy within 40 cells is staggered for 0.5 s."
+   },
+   "source": "boss_bellfather",
+   "table": "lt_boss_act5"
+  },
+  {
+   "id": "relic_first_lamp",
+   "type": "relic",
+   "slot": "lantern",
+   "name": "The First Lamplighter's Lantern",
+   "short": "The First Lamplighter's Lantern",
+   "stats": {
+    "wickPct": [
+     0.1,
+     0.1
+    ]
+   },
+   "lantern": {
+    "radius": 90,
+    "darkBurn": 2
+   },
+   "power": {
+    "id": "lamp_mend",
+    "text": "Relighting a Great Lamp or lighting a lamp-post heals you fully and refills your oil and your Guild flask."
+   },
+   "source": "a1_n09",
+   "table": null
+  },
+  {
+   "id": "tonic_small",
+   "type": "consumable",
+   "group": "tonic",
+   "name": "Small Mending Tonic",
+   "price": 15,
+   "stack": 10,
+   "cast": 0.3,
+   "use": {
+    "healPct": 0.35,
+    "over": 2
+   },
+   "text": "Heals 35% of your max health over 2 s."
+  },
+  {
+   "id": "tonic_large",
+   "type": "consumable",
+   "group": "tonic",
+   "name": "Mending Tonic",
+   "price": 40,
+   "stack": 10,
+   "cast": 0.4,
+   "use": {
+    "healPct": 0.7,
+    "over": 2
+   },
+   "text": "Heals 70% of your max health over 2 s."
+  },
+  {
+   "id": "tonic_breath",
+   "type": "consumable",
+   "group": "tonic",
+   "name": "Gillwater",
+   "price": 25,
+   "stack": 10,
+   "cast": 0.3,
+   "use": {
+    "breath": 20,
+    "swimPct": 0.2,
+    "time": 60
+   },
+   "text": "Adds 20 s of breath and swims 20% faster for 60 s.",
+   "minAct": 3
+  },
+  {
+   "id": "tonic_clear",
+   "type": "consumable",
+   "group": "cleanse",
+   "name": "Clearwater",
+   "price": 18,
+   "stack": 10,
+   "cast": 0,
+   "use": {
+    "cleanse": true
+   },
+   "text": "Removes every harmful status on you."
+  },
+  {
+   "id": "lamp_oil",
+   "type": "consumable",
+   "group": "oil",
+   "name": "Lamp Oil",
+   "price": 6,
+   "stack": 10,
+   "cast": 0,
+   "use": {
+    "oil": 40
+   },
+   "text": "Pours 40 oil into your lantern. Anything past full is lost."
+  },
+  {
+   "id": "bomb_ember",
+   "type": "consumable",
+   "group": "bomb",
+   "name": "Ember Pot",
+   "price": 20,
+   "stack": 10,
+   "cast": 0,
+   "use": {
+    "flame": "ember",
+    "damagePerAct": 12,
+    "radius": 14,
+    "fuse": 1.5
+   },
+   "text": "Thrown. Bursts into Ember fire (12 damage per act) over 14 cells."
+  },
+  {
+   "id": "bomb_rime",
+   "type": "consumable",
+   "group": "bomb",
+   "name": "Rime Pot",
+   "price": 30,
+   "stack": 10,
+   "cast": 0,
+   "use": {
+    "flame": "rime",
+    "damagePerAct": 15,
+    "radius": 20,
+    "fuse": 1.5
+   },
+   "text": "Thrown. Bursts into Rime frost (15 damage per act) over 20 cells and freezes water.",
+   "minAct": 2
+  },
+  {
+   "id": "bomb_spark",
+   "type": "consumable",
+   "group": "bomb",
+   "name": "Spark Pot",
+   "price": 30,
+   "stack": 10,
+   "cast": 0,
+   "use": {
+    "flame": "spark",
+    "damagePerAct": 10,
+    "radius": 18,
+    "fuse": 1.5
+   },
+   "text": "Thrown. Bursts into Spark (10 damage per act) over 18 cells and electrifies water.",
+   "minAct": 2
+  },
+  {
+   "id": "meal_eel_pie",
+   "type": "meal",
+   "name": "Eel Pie",
+   "price": 30,
+   "buff": {
+    "healthPct": 0.15
+   },
+   "text": "+15% max health."
+  },
+  {
+   "id": "meal_ember_stew",
+   "type": "meal",
+   "name": "Pepperpot",
+   "price": 35,
+   "buff": {
+    "flame_ember": 0.1,
+    "flame_spark": 0.1
+   },
+   "text": "+10% Ember and Spark damage."
+  },
+  {
+   "id": "meal_rime_sorbet",
+   "type": "meal",
+   "name": "Frost Sorbet",
+   "price": 30,
+   "buff": {
+    "flame_rime": 0.12,
+    "chillDur": 1
+   },
+   "text": "+12% Rime damage; the chill you apply lasts 1 s longer."
+  },
+  {
+   "id": "meal_lamp_porridge",
+   "type": "meal",
+   "name": "Lamp Porridge",
+   "price": 20,
+   "buff": {
+    "oil": 10,
+    "oilRegenPct": 0.25
+   },
+   "text": "+10 max oil and 25% faster oil regen (still none in the dark)."
+  },
+  {
+   "id": "meal_mystery",
+   "type": "meal",
+   "name": "Mystery Bowl",
+   "price": 25,
+   "mystery": true,
+   "text": "Whatever was at the bottom of the pot today."
+  },
+  {
+   "id": "strand_flame_ember",
+   "type": "strand",
+   "part": "flame",
+   "ref": "ember",
+   "name": "Ember Strand",
+   "price": 0,
+   "stack": 5,
+   "soldFrom": null,
+   "text": "Learn it to braid Ember into any wick."
+  },
+  {
+   "id": "strand_flame_rime",
+   "type": "strand",
+   "part": "flame",
+   "ref": "rime",
+   "name": "Rime Strand",
+   "price": 150,
+   "stack": 5,
+   "soldFrom": null,
+   "text": "Learn it to braid Rime into any wick."
+  },
+  {
+   "id": "strand_flame_spark",
+   "type": "strand",
+   "part": "flame",
+   "ref": "spark",
+   "name": "Spark Strand",
+   "price": 150,
+   "stack": 5,
+   "soldFrom": null,
+   "text": "Learn it to braid Spark into any wick."
+  },
+  {
+   "id": "strand_flame_bile",
+   "type": "strand",
+   "part": "flame",
+   "ref": "bile",
+   "name": "Bile Strand",
+   "price": 220,
+   "stack": 5,
+   "soldFrom": 2,
+   "text": "Learn it to braid Bile into any wick."
+  },
+  {
+   "id": "strand_flame_gleam",
+   "type": "strand",
+   "part": "flame",
+   "ref": "gleam",
+   "name": "Gleam Strand",
+   "price": 180,
+   "stack": 5,
+   "soldFrom": 2,
+   "text": "Learn it to braid Gleam into any wick."
+  },
+  {
+   "id": "strand_flame_tide",
+   "type": "strand",
+   "part": "flame",
+   "ref": "tide",
+   "name": "Tide Strand",
+   "price": 300,
+   "stack": 5,
+   "soldFrom": null,
+   "text": "Learn it to braid Tide into any wick."
+  },
+  {
+   "id": "strand_flame_shade",
+   "type": "strand",
+   "part": "flame",
+   "ref": "shade",
+   "name": "Shade Strand",
+   "price": 450,
+   "stack": 5,
+   "soldFrom": null,
+   "text": "Learn it to braid Shade into any wick."
+  },
+  {
+   "id": "strand_shape_bolt",
+   "type": "strand",
+   "part": "shape",
+   "ref": "bolt",
+   "name": "Bolt Strand",
+   "price": 0,
+   "stack": 5,
+   "soldFrom": null,
+   "text": "Learn it to braid Bolt into any wick."
+  },
+  {
+   "id": "strand_shape_arc",
+   "type": "strand",
+   "part": "shape",
+   "ref": "arc",
+   "name": "Arc Strand",
+   "price": 80,
+   "stack": 5,
+   "soldFrom": 1,
+   "text": "Learn it to braid Arc into any wick."
+  },
+  {
+   "id": "strand_shape_lob",
+   "type": "strand",
+   "part": "shape",
+   "ref": "lob",
+   "name": "Lob Strand",
+   "price": 100,
+   "stack": 5,
+   "soldFrom": null,
+   "text": "Learn it to braid Lob into any wick."
+  },
+  {
+   "id": "strand_shape_beam",
+   "type": "strand",
+   "part": "shape",
+   "ref": "beam",
+   "name": "Beam Strand",
+   "price": 260,
+   "stack": 5,
+   "soldFrom": 3,
+   "text": "Learn it to braid Beam into any wick."
+  },
+  {
+   "id": "strand_shape_ring",
+   "type": "strand",
+   "part": "shape",
+   "ref": "ring",
+   "name": "Ring Strand",
+   "price": 140,
+   "stack": 5,
+   "soldFrom": 1,
+   "text": "Learn it to braid Ring into any wick."
+  },
+  {
+   "id": "strand_shape_rune",
+   "type": "strand",
+   "part": "shape",
+   "ref": "rune",
+   "name": "Rune Strand",
+   "price": 200,
+   "stack": 5,
+   "soldFrom": 2,
+   "text": "Learn it to braid Rune into any wick."
+  },
+  {
+   "id": "strand_shape_wave",
+   "type": "strand",
+   "part": "shape",
+   "ref": "wave",
+   "name": "Wave Strand",
+   "price": 160,
+   "stack": 5,
+   "soldFrom": 2,
+   "text": "Learn it to braid Wave into any wick."
+  },
+  {
+   "id": "strand_shape_tether",
+   "type": "strand",
+   "part": "shape",
+   "ref": "tether",
+   "name": "Tether Strand",
+   "price": 320,
+   "stack": 5,
+   "soldFrom": null,
+   "text": "Learn it to braid Tether into any wick."
+  },
+  {
+   "id": "strand_charm_split",
+   "type": "strand",
+   "part": "charm",
+   "ref": "split",
+   "name": "Split Strand",
+   "price": 180,
+   "stack": 5,
+   "soldFrom": null,
+   "text": "Learn it to braid Split into any wick."
+  },
+  {
+   "id": "strand_charm_bounce",
+   "type": "strand",
+   "part": "charm",
+   "ref": "bounce",
+   "name": "Bounce Strand",
+   "price": 180,
+   "stack": 5,
+   "soldFrom": 2,
+   "text": "Learn it to braid Bounce into any wick."
+  },
+  {
+   "id": "strand_charm_linger",
+   "type": "strand",
+   "part": "charm",
+   "ref": "linger",
+   "name": "Linger Strand",
+   "price": 260,
+   "stack": 5,
+   "soldFrom": 3,
+   "soldIf": "market_drained",
+   "text": "Learn it to braid Linger into any wick."
+  },
+  {
+   "id": "strand_charm_heavy",
+   "type": "strand",
+   "part": "charm",
+   "ref": "heavy",
+   "name": "Heavy Strand",
+   "price": 220,
+   "stack": 5,
+   "soldFrom": 2,
+   "text": "Learn it to braid Heavy into any wick."
+  },
+  {
+   "id": "strand_charm_swift",
+   "type": "strand",
+   "part": "charm",
+   "ref": "swift",
+   "name": "Swift Strand",
+   "price": 200,
+   "stack": 5,
+   "soldFrom": 2,
+   "text": "Learn it to braid Swift into any wick."
+  },
+  {
+   "id": "strand_charm_seek",
+   "type": "strand",
+   "part": "charm",
+   "ref": "seek",
+   "name": "Seek Strand",
+   "price": 320,
+   "stack": 5,
+   "soldFrom": 3,
+   "text": "Learn it to braid Seek into any wick."
+  },
+  {
+   "id": "strand_charm_echo",
+   "type": "strand",
+   "part": "charm",
+   "ref": "echo",
+   "name": "Echo Strand",
+   "price": 500,
+   "stack": 5,
+   "soldFrom": null,
+   "text": "Learn it to braid Echo into any wick."
+  },
+  {
+   "id": "strand_charm_volatile",
+   "type": "strand",
+   "part": "charm",
+   "ref": "volatile",
+   "name": "Volatile Strand",
+   "price": 600,
+   "stack": 5,
+   "soldFrom": 5,
+   "text": "Learn it to braid Volatile into any wick."
+  },
+  {
+   "id": "scrap",
+   "type": "material",
+   "name": "Scrap",
+   "stack": 99,
+   "sell": 1,
+   "text": "Bent metal. Builds parts; pays for tempering."
+  },
+  {
+   "id": "strand_dust",
+   "type": "material",
+   "name": "Strand Dust",
+   "stack": 99,
+   "sell": 10,
+   "text": "What a strand you already know turns into. Odile seasons wicks with it."
+  },
+  {
+   "id": "great_wick_act1",
+   "type": "key",
+   "name": "the Crown Wick",
+   "from": "boss_tallow",
+   "act": 1,
+   "text": "Relights the Crown Lamp."
+  },
+  {
+   "id": "great_wick_act2",
+   "type": "key",
+   "name": "the Gutter Wick",
+   "from": "boss_gnaw",
+   "act": 2,
+   "text": "Relights the Gutter Lamp."
+  },
+  {
+   "id": "great_wick_act3",
+   "type": "key",
+   "name": "the Sluice Wick",
+   "from": "boss_sluicemaw",
+   "act": 3,
+   "text": "Relights the Sluice Lamp."
+  },
+  {
+   "id": "great_wick_act4",
+   "type": "key",
+   "name": "the Deep Wick",
+   "from": "boss_widow",
+   "act": 4,
+   "text": "Relights the Deep Lamp."
+  },
+  {
+   "id": "great_wick_act5",
+   "type": "key",
+   "name": "the Bell Wick",
+   "from": "boss_bellfather",
+   "act": 5,
+   "text": "Relights the Bell Lamp."
+  },
+  {
+   "id": "great_wick_act6",
+   "type": "key",
+   "name": "the Sky Wick",
+   "from": "boss_ossery",
+   "act": 6,
+   "text": "Lights the Sky Lamp."
+  },
+  {
+   "id": "key_lockhouse",
+   "type": "key",
+   "name": "Lockhouse Key",
+   "act": 3,
+   "single": true,
+   "from": "drowned_lockkeeper",
+   "text": "Opens the lock-house door of the room it was found in."
+  },
+  {
+   "id": "hollis_brother_lantern",
+   "type": "quest",
+   "name": "A Dented Guild Lantern",
+   "for": "npc_hollis",
+   "sellPrice": 300,
+   "flag": "hollis_lantern",
+   "text": "Someone carried this a long way. Crane might know whose it was."
+  },
+  {
+   "id": "guild_flask",
+   "type": "tool",
+   "name": "Guild Flask",
+   "charges": 2,
+   "oil": 40,
+   "pour": 0.4,
+   "refill": "lamp_post",
+   "text": "Pours 40 oil into your lantern. Refills only at a lamp-post."
+  },
+  {
+   "id": "sealed_lantern_lantern",
+   "type": "sealed",
+   "gambleSlot": "lantern",
+   "name": "Sealed Lantern (lantern)",
+   "text": "Something glows inside. Break the seal at any shop to find out what."
+  },
+  {
+   "id": "sealed_lantern_weapon",
+   "type": "sealed",
+   "gambleSlot": "weapon",
+   "name": "Sealed Lantern (weapon)",
+   "text": "Something glows inside. Break the seal at any shop to find out what."
+  },
+  {
+   "id": "sealed_lantern_coat",
+   "type": "sealed",
+   "gambleSlot": "coat",
+   "name": "Sealed Lantern (coat)",
+   "text": "Something glows inside. Break the seal at any shop to find out what."
+  },
+  {
+   "id": "sealed_lantern_boots",
+   "type": "sealed",
+   "gambleSlot": "boots",
+   "name": "Sealed Lantern (boots)",
+   "text": "Something glows inside. Break the seal at any shop to find out what."
+  },
+  {
+   "id": "sealed_lantern_trinket",
+   "type": "sealed",
+   "gambleSlot": "trinket",
+   "name": "Sealed Lantern (trinket)",
+   "text": "Something glows inside. Break the seal at any shop to find out what."
+  },
+  {
+   "id": "sealed_lantern_any",
+   "type": "sealed",
+   "gambleSlot": "any",
+   "name": "Sealed Lantern",
+   "text": "Something glows inside. Break the seal at any shop to find out what."
+  }
+ ]
+}

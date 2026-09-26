@@ -9,6 +9,8 @@ import { createWebGL2Renderer } from './render/webgl2.js';
 import { buildAtlas } from './render/sprites.js';
 import { buildFrame } from './render/frame.js';
 import { hexToRgb01 } from './core/math.js';
+import { createCaster } from './spells/cast.js';
+import { createActor } from './entities/actor.js';
 
 const params = new URLSearchParams(location.search);
 const canvas = document.getElementById('view');
@@ -30,6 +32,16 @@ try {
   const roomJson = await loadRoom(data, roomId);
   enterRoom(game, roomJson, params.get('entry') || undefined);
   renderer.setRoom(game.grid);
+  // test hero until classes/saves land (M8+)
+  const p = game.player; Object.assign(p, { name: 'Wren', hp: 100, maxHp: 100, oil: 80, maxOil: 80, oilRegen: 4, stats: { level: 1 }, team: 'player' });
+  createCaster(p);
+  game.hero = { wicks: [
+    { id: 'w1', flame: params.get('f1') || 'ember', shape: params.get('s1') || 'bolt', charms: (params.get('c1') || '').split(',').filter(Boolean) },
+    { id: 'w2', flame: params.get('f2') || 'rime', shape: params.get('s2') || 'lob', charms: (params.get('c2') || '').split(',').filter(Boolean) },
+    { id: 'w3', flame: params.get('f3') || 'spark', shape: params.get('s3') || 'ring', charms: [] },
+    { id: 'w4', flame: params.get('f4') || 'tide', shape: params.get('s4') || 'wave', charms: [] } ],
+    unlocked: { wickSlots: 4, overcharge: true, gutter: true } };
+  if (params.has('dummies')) for (let k = 0; k < 4; k++) game.entities.push(createActor('dummy', { name: 'Training Dummy', x: game.player.x + 60 + k * 30, y: game.player.y - 20, w: 6, h: 11, hp: 200, color: [0.55, 0.45, 0.35], eyes: [1, 0.8, 0.4] }));
   const theme = game.room.theme;
   function fit() { const dpr = Math.min(2, window.devicePixelRatio || 1); canvas.width = Math.round(innerWidth * dpr); canvas.height = Math.round(innerHeight * dpr); cam.fit(canvas.width, canvas.height); }
   addEventListener('resize', fit); fit();
@@ -46,6 +58,7 @@ try {
     tick() {
       const dpr = canvas.width / innerWidth;
       input.mouse.wx = cam.x + input.mouse.x * dpr / cam.scale; input.mouse.wy = cam.y + input.mouse.y * dpr / cam.scale;
+      game.aim = { x: input.mouse.wx, y: input.mouse.wy };
       tickGame(game, input.poll(), cam.view());
       cam.update(game.player, game.grid, 1 / 60);
     },

@@ -67,14 +67,24 @@ export function electrify(world, x, y, ticks = 30, budget = 20000) {
   const g = world.grid, W = g.W, H = g.H; x |= 0; y |= 0; if (!g.inside(x, y)) return 0;
   const start = y * W + x, m = g.mat[start]; if (m !== 22 && m !== 4 && m !== 25) return 0;
   const visit = world._visit || (world._visit = new Uint32Array(g.n)); const vid = world._visitId = (world._visitId || 0) + 1;
-  const stack = [start]; visit[start] = vid; let n = 0;
+  const stack = [start]; visit[start] = vid; let n = 0; const list = [];
   while (stack.length && n < budget) {
-    const i = stack.pop(); n++;
-    g.flags[i] |= F.SHOCK; g.aux[i] = ticks; const cx = i % W, cy = (i / W) | 0; g.touch(cx, cy); g.markHot(cx, cy);
+    const i = stack.pop(); n++; list.push(i);
+    g.flags[i] |= F.SHOCK; const cx = i % W, cy = (i / W) | 0; g.touchGfx(cx, cy);
     const nb = [cx > 0 ? i - 1 : -1, cx < W - 1 ? i + 1 : -1, cy > 0 ? i - W : -1, cy < H - 1 ? i + W : -1];
     for (const j of nb) { if (j < 0 || visit[j] === vid) continue; const t = g.mat[j]; if (t === 22 || t === 4 || t === 25) { visit[j] = vid; stack.push(j); } }
   }
+  (world.shocked || (world.shocked = [])).push({ until: g.tick + ticks, cells: list });
   return n;
+}
+/** Clear SHOCK flags whose time is up. */
+export function stepShock(world) {
+  const g = world.grid; if (!world.shocked?.length) return;
+  const keep = [];
+  for (const s of world.shocked) { if (s.until > g.tick) { keep.push(s); continue; } for (const i of s.cells) { g.flags[i] &= ~F.SHOCK; g.touchGfx(i % g.W, (i / g.W) | 0); } }
+  // re-apply live ones (an expired list may have cleared cells another zone still holds)
+  for (const s of keep) for (const i of s.cells) g.flags[i] |= F.SHOCK;
+  world.shocked = keep;
 }
 
 /**
@@ -108,7 +118,3 @@ export function stepBasin(world, b) {
   b.surface = lvl;
 }
 
-/** Tick SHOCK timers down (docs/06 §7.6). Called from the thermal/hot loop owner. */
-export function stepShock(world, list) {
-  // list of indices is not tracked; shock timers are decremented by the renderer upload loop cheaply
-}

@@ -1,2 +1,15 @@
-{ "_doc": "Every data file the game loads at boot (without .json). js/core/data.js reads this list; data-check validates each.", "version": 1,
-  "files": ["materials", "legend", "themes", "movement", "sprites"] }
+{
+ "_doc": "Every data file the game loads at boot (without .json). js/core/data.js reads this list; data-check validates each.",
+ "version": 1,
+ "files": [
+  "materials",
+  "legend",
+  "themes",
+  "movement",
+  "sprites",
+  "flames",
+  "shapes",
+  "charms",
+  "statuses"
+ ]
+}

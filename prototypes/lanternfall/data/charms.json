@@ -1,0 +1,115 @@
+{
+ "_doc": "The 8 charms (canon v2, docs/03 \u00a76). dmg/oil/cd/speed/size/life/cast multiply; notOn = shapes it cannot go on; exclusive = pairs that cannot share a wick.",
+ "version": 1,
+ "list": [
+  {
+   "id": "split",
+   "name": "Split",
+   "unlock": "act2",
+   "dmg": 0.55,
+   "oil": 1.3,
+   "size": 0.8,
+   "desc": "Three weaker copies in a fan."
+  },
+  {
+   "id": "bounce",
+   "name": "Bounce",
+   "unlock": "act2",
+   "dmg": 1.0,
+   "oil": 1.15,
+   "bounces": 2,
+   "bounceMult": 0.85,
+   "desc": "Rebounds off walls and enemies twice.",
+   "notOn": [
+    "arc",
+    "ring",
+    "rune",
+    "tether"
+   ]
+  },
+  {
+   "id": "linger",
+   "name": "Linger",
+   "unlock": "act3",
+   "dmg": 1.0,
+   "oil": 1.25,
+   "field": 3.0,
+   "fieldPct": 0.25,
+   "desc": "Leaves a burning field where it ends."
+  },
+  {
+   "id": "heavy",
+   "name": "Heavy",
+   "unlock": "act2",
+   "dmg": 1.5,
+   "oil": 1.3,
+   "cd": 1.25,
+   "speed": 0.6,
+   "size": 1.2,
+   "dig": 1,
+   "knock": 2,
+   "desc": "Slow, hard-hitting, digs."
+  },
+  {
+   "id": "swift",
+   "name": "Swift",
+   "unlock": "act2",
+   "dmg": 0.85,
+   "oil": 1.0,
+   "cd": 0.7,
+   "speed": 1.6,
+   "cast": 0.5,
+   "desc": "Fast and cheap to repeat."
+  },
+  {
+   "id": "seek",
+   "name": "Seek",
+   "unlock": "act3",
+   "dmg": 0.9,
+   "oil": 1.15,
+   "life": 1.25,
+   "turn": 240,
+   "desc": "Homes on the nearest enemy.",
+   "notOn": [
+    "arc",
+    "ring",
+    "wave",
+    "tether"
+   ]
+  },
+  {
+   "id": "echo",
+   "name": "Echo",
+   "unlock": "act5",
+   "dmg": 1.0,
+   "oil": 1.35,
+   "cd": 1.1,
+   "echoDelay": 0.35,
+   "echoPower": 0.6,
+   "desc": "Casts itself again a moment later.",
+   "notOn": [
+    "beam",
+    "tether"
+   ]
+  },
+  {
+   "id": "volatile",
+   "name": "Volatile",
+   "unlock": "act5",
+   "dmg": 1.0,
+   "oil": 1.2,
+   "burst": 16,
+   "burstPct": 0.6,
+   "desc": "Explodes at the end of its flight.",
+   "notOn": [
+    "arc"
+   ]
+  }
+ ],
+ "exclusive": [
+  [
+   "heavy",
+   "swift"
+  ]
+ ]
+}

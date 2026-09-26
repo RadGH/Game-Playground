@@ -1,0 +1,82 @@
+{
+ "_doc": "Status effects (docs/03 \u00a74).",
+ "version": 1,
+ "list": [
+  {
+   "id": "burn",
+   "name": "Burning",
+   "flame": "ember",
+   "maxStacks": 5,
+   "perStackPct": 0.2,
+   "tick": 0.5,
+   "duration": 3.0,
+   "color": "#ff8a2a"
+  },
+  {
+   "id": "chill",
+   "name": "Chilled",
+   "flame": "rime",
+   "maxStacks": 5,
+   "slowPerStack": 0.1,
+   "duration": 4.0,
+   "freezeAt": 5,
+   "color": "#6fe3ff"
+  },
+  {
+   "id": "frozen",
+   "name": "Frozen",
+   "flame": "rime",
+   "duration": 1.5,
+   "color": "#bff4ff"
+  },
+  {
+   "id": "shocked",
+   "name": "Shocked",
+   "flame": "spark",
+   "amp": 0.15,
+   "duration": 2.0,
+   "chain": 2,
+   "chainRange": 48,
+   "chainMult": 0.7,
+   "color": "#fff27a"
+  },
+  {
+   "id": "corrode",
+   "name": "Corroded",
+   "flame": "bile",
+   "maxStacks": 6,
+   "armourPerStack": 8,
+   "dotPct": 0.1,
+   "tick": 1.0,
+   "duration": 6.0,
+   "color": "#8dff4a"
+  },
+  {
+   "id": "radiant",
+   "name": "Radiant",
+   "flame": "gleam",
+   "duration": 5.0,
+   "unlitMult": 2,
+   "color": "#ffe6b0"
+  },
+  {
+   "id": "soaked",
+   "name": "Soaked",
+   "flame": "tide",
+   "duration": 5.0,
+   "sparkMult": 1.5,
+   "knock": 140,
+   "color": "#3f7bff"
+  },
+  {
+   "id": "drained",
+   "name": "Drained",
+   "flame": "shade",
+   "duration": 3.0,
+   "dmgDown": 0.15,
+   "heal": 0.06,
+   "oil": 0.04,
+   "color": "#b25cff"
+  }
+ ]
+}

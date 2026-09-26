@@ -100,6 +100,7 @@ function stepPowder(world, g, i, x, y, m) {
 
 function stepLiquid(world, g, i, x, y, m) {
   const W = g.W, mat = g.mat, mats = g.mats, cls = mats.cls, dens = mats.density, aux = g.aux;
+  if ((g.flags[i] & F.SHOCK) && g.rand() < 0.03) g.flags[i] &= ~F.SHOCK;
   if (y >= g.H - 1 || x === 0 || x === W - 1) { if (drainCheck(world, g, i, x, y)) return; }
   if (y < g.H - 1) {
     const b = i + W, fb = freeFor(cls, dens, m, mat[b]);

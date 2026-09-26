@@ -1,9 +1,14 @@
 // The tick order (docs/06 §4.1). One call = one 1/60 s step of the whole game. Pure.
 import { stepCells } from '../world/cellsim.js';
 import { stepThermal } from '../world/thermal.js';
-import { stepLiquids, stepBasin } from '../world/liquids.js';
+import { stepLiquids, stepBasin, stepShock } from '../world/liquids.js';
 import { stepParticles, PK } from '../entities/particles.js';
 import { stepPlayerMovement } from '../entities/player.js';
+import { stepCasting } from '../spells/cast.js';
+import { stepSpells, stepSpellLeftovers } from '../spells/instances.js';
+import { stepActorPhysics } from '../entities/actor.js';
+import { stepStatuses } from '../rpg/status.js';
+import { lanternPos } from '../render/frame.js';
 
 export const DT = 1 / 60;
 
@@ -12,11 +17,23 @@ export function tickGame(game, intent, view) {
   game.tick++; game.time += DT;
   const w = game.world, p = game.player;
   // 1-5: input, wiring, spells, AI, player
-  if (p) stepPlayerMovement(game, p, intent);
+  if (p) {
+    if (!p.dead) stepPlayerMovement(game, p, intent);
+    p.lantern = lanternPos(p, p.x, p.y);
+    p.stillT = Math.abs(p.vx) < 1 && p.grounded ? (p.stillT || 0) + DT : 0;
+    p.canCast = !p.dead && p.state !== 'ledge' && !p.carry;
+    if (p.cast && game.hero) stepCasting(game, p, intent, game.aim || { x: p.x + p.facing * 60, y: p.y - 10 });
+    stepStatuses(game, p, DT);
+    if (p.hurtT > 0) p.hurtT -= DT; if (p.invuln > 0) p.invuln -= DT;
+  }
   for (const s of game.systems || []) s(game, intent);
+  stepSpells(game);
+  for (const e of game.entities) stepActorPhysics(game, e);
+  stepSpellLeftovers(game);
+  game.entities = game.entities.filter(e => !e.dead || e.deadT < (e.corpseTime ?? 1.2));
   // 6-9: cells
   const simView = view ? { x0: view.x0 - 96, y0: view.y0 - 96, x1: view.x1 + 96, y1: view.y1 + 96 } : null;
-  stepCells(w, simView); stepThermal(w); stepLiquids(w);
+  stepCells(w, simView); stepThermal(w); stepLiquids(w); stepShock(w);
   for (const b of game.room.basins) stepBasin(w, b);
   // 12: rain, drips, particles
   if (view) game.rain.step(game.particles, view, DT, game.ripples);

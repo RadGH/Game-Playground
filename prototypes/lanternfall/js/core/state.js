@@ -11,6 +11,7 @@ export function createGame({ data, mode = 'campaign', seed = 1, save = null }) {
     data, mode, seed, tick: 0, freezeTicks: 0, time: 0,
     rng: { loot: createRng(hashSeed(seed, 'loot')), spell: createRng(hashSeed(seed, 'spell')), ai: createRng(hashSeed(seed, 'ai')), talk: createRng(hashSeed(seed, 'talk')) },
     bus: createBus(), room: null, world: null, grid: null, entities: [], particles: createParticles(4000),
+    spells: [], pending: [], fields: [], shockZones: [], flashes: [], arcs: [], climbLines: [],
     player: null, hero: save?.hero || null, flags: { swimming: false }, story: {}, perf: {}, lights: [],
   };
   return game;
@@ -20,7 +21,7 @@ export function createGame({ data, mode = 'campaign', seed = 1, save = null }) {
 export function enterRoom(game, roomJson, entryId, opts = {}) {
   const c = compileRoom(roomJson, game.data, opts);
   game.room = c; game.world = c.world; game.grid = c.grid; c.world.skyTop = c.skyTop;
-  game.entities = []; game.particles.n = 0; game.particles.counts.fill(0);
+  game.entities = []; game.particles.n = 0; game.particles.counts.fill(0); game.spells = []; game.pending = []; game.fields = []; game.shockZones = []; game.flashes = []; game.arcs = []; game.climbLines = [];
   const rain = roomJson.rain || {};
   game.rain = createRain(c.world, { density: rain.density ?? 90, wind: rain.wind ?? 0.15, deposit: rain.deposit, maxDeposit: rain.maxDeposit });
   c.world.wind = game.rain.wind;

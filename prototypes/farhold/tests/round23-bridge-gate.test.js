@@ -300,7 +300,12 @@ test('Fenkeep\'s west gate — the reported one — meets its wall at both ends,
   w.features.update(13212, 2916, true);
   const t = w.features.settlements.find(s => s.name === 'Fenkeep');
   const ring = w.features.wallOf(t.id);
-  const gate = ring.gates.find(g => Math.hypot(g.x - 13212, g.z - 2916) < 6);
+  // R27 M5: the west gate is where road 1 crosses the wall, and the wall is where the planner put
+  // it — a 9 m highway through Fenkeep takes more of its ground, the plan grew, and the crossing
+  // moved 31 m out along the same road. The nearest gate to the reported spot is still that gate.
+  const gate = ring.gates
+    .map(g => ({ g, d: Math.hypot(g.x - 13212, g.z - 2916) }))
+    .filter(e => e.d < 40).sort((a, b) => a.d - b.d)[0]?.g;
   assert.ok(gate?.gatehouse, 'no gatehouse at the reported spot');
   // the old gap: the kerb segment at 152.7 degrees was dropped by `place()`'s road test. Walk the
   // whole run from end to end along the wall line and count the metres you could walk through

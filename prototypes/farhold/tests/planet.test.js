@@ -198,13 +198,25 @@ test('roads merge into one corridor instead of weaving beside each other', () =>
          * couple of hundred metres once on a 163 km world are two roads, not a weave. What this is
          * looking for is the reported symptom: two lines travelling together for a long way.
          */
-        for (let k = 2; k < roads[i].points.length - 2; k++) {
-          run = distTo(roads[i].points[k], roads[j]) < merge * 0.5 ? run + 1 : 0;
+        //
+        // R27 M5: the run is counted in METRES, not points. A junction now has a landing — a few
+        // vertices on the trunk either side of where the branch meets it, all a few metres apart
+        // and all (by definition) right beside the branch — so four points in a row near another
+        // road is a junction, not a weave. Three points at the map's own spacing (a fifth of a
+        // cell each) is the same bar it always was.
+        const pts = roads[i].points;
+        let was = false;
+        for (let k = 2; k < pts.length - 2; k++) {
+          const inside = distTo(pts[k], roads[j]) < merge * 0.5;
+          // the length of road between the first and the last point of the run
+          run = inside ? (was ? run + Math.hypot(pts[k][0] - pts[k - 1][0], pts[k][1] - pts[k - 1][1]) : 0) : 0;
+          was = inside;
           worst = Math.max(worst, run);
         }
       }
     }
-    assert.ok(worst <= 3, `seed ${seed} still has ${worst} points of one road running inside another's corridor`);
+    assert.ok(worst <= 3 * 0.2 * M_PER_CELL,
+      `seed ${seed} still has ${worst.toFixed(0)} m of one road running inside another's corridor`);
   }
   assert.ok(networks > 0, 'none of the test worlds had a road network to check');
 });

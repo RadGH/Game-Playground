@@ -166,7 +166,13 @@ test('A — the GRADED deck is close to the ground too, so the ribbon is not pap
             if (Math.hypot(q[0] - pts[i][0], q[1] - pts[i][1]) < road.half + other.half + 8) { shared = true; break; }
           }
         }
-        if (shared) { crossroads++; continue; }
+        if (shared) {
+          // R27 M5: in METRES of road, not points — a junction now carries a landing (a few extra
+          // vertices a few metres apart), which multiplied the points here without adding a metre
+          const a = pts[Math.max(0, i - 1)], b = pts[Math.min(pts.length - 1, i + 1)];
+          crossroads += Math.hypot(b[0] - a[0], b[1] - a[1]) / 2;
+          continue;
+        }
         for (let s = -1; s <= 1.0001; s += 0.2) {
           const x = pts[i][0] - dz * road.half * s, z = pts[i][1] + dx * road.half * s;
           if (terrain.bridgedAt?.(x, z)) continue;
@@ -182,7 +188,9 @@ test('A — the GRADED deck is close to the ground too, so the ribbon is not pap
   // road tests use), and 0.64 m on these five
   assert.ok(worst < 0.75,
     `the ground stands ${worst.toFixed(3)} m over the graded deck (${where}) — the grading is broken, not the drawing`);
-  assert.ok(crossroads < 1200, `${crossroads} road points share their ground with another road`);
+  // was `< 1200` POINTS (about 15 km at these worlds' 12.8 m spacing); measured 11.1 km before
+  // round 27's landings and 11.7 km after
+  assert.ok(crossroads < 15000, `${crossroads.toFixed(0)} m of road shares its ground with another road`);
 });
 
 test('A — a town street clears the hillside it is laid on', () => {

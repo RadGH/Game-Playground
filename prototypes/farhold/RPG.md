@@ -4310,3 +4310,104 @@ colour in the legend and in the canvas pixel), the banner and a war party with r
 they amble rather than march. The territory ledger is keyed by zone id and is not reset on landing
 (true before this round); `warGrip` ignores a row whose zone name does not match so another world's
 warbands are not suppressed.
+
+### Round 27 — Roads that fit the land (M5)
+
+**What was measured first.** The grade probe (`gradeWindows` / `classifySteep` in
+`tests/round27-roads.test.js`) walks every road's drawn deck in 10 m windows. On the user's world
+(seed 25392) before this milestone:
+
+| scale | road over 30% | over 20% | worst | what the >20% segments were |
+|---|---|---|---|---|
+| 0.1 (Super tiny) | 4.4% | 7.2% | 117% | 61 of 62 the ground itself, 1 a junction fade on flat ground |
+| 1 (full size) | 6.2% | 11.0% | 161% | 91 of 92 the ground, 1 junction fade |
+
+So the roast's suspicion (that the 167% segment must be a lift ramp or a floor step) was wrong:
+it was the land. World Forge routes on map cells and never sees what `planet.js` adds on top —
+the `coarse` knobs (±27 m every ~180 m on rugged ground at full size), `fine`, and round 21's
+cliff creases — and it cannot fold a road inside a cell.
+
+**What changed** (all `js/planet.js` road pipeline + lakes, and a new pure `js/road-fold.js`):
+
+- **Switchbacks** (`foldClimbs`, run after `mergeRoadNetwork`, before `connectRoadNetwork`).
+  Climbs over 12% held over the detection window are re-routed by a lattice A* whose leg cost is
+  `len × (1 + (grade/0.10)^4)`, inside a corridor around the old line. The search carries a
+  heading and may turn one notch (~22°) a step, so a hairpin is ~5 steps across (a plain lattice
+  A* laid legs 7 m apart with 3 m of height between them — the carve then stepped the hillside
+  through both carriageways). It must leave the way the road came in and arrive the way it goes
+  on. Legs keep off water (lattice ends pad by 1.12 steps so an edge cannot hop a river), off
+  `cliffAt(x, z)` (new, exported for M7), off other roads' corridors (no weave), and out of town
+  rings (`footprintOf(size).wall × 1.65`; **R27: switch to `townExtent`**) except on the road's
+  own line. Narrow corridor (0.5 cell) first, the full 1.5 cells only when that is not gentle
+  enough. A fold is kept only if it is gentler over the window and no steeper point to point;
+  ≤ 6 legs. What cannot be folded is marked `steep` on its points (`path.steep`). Every length
+  is in cells, so a full-size world folds exactly as a Super tiny one scaled ×10.
+  - **The plan said ±0.35 cell. That is far too narrow**: the Dearbigate ridge on the user's
+    world (64 m of climb at Super tiny) needs about 640 m of road at 10%, which cannot fit in a
+    44 m wide corridor. 1.5 cells does it.
+  - **Calm ground near roads** (`roadCalmAt` in `naturalHeightAt`): within 0.35 cell of a road's
+    line (and of any fold leg) the knobs drop to a quarter, `fine` to half, and a cliff face is
+    breached, fading back over another 0.35 cell. Without it the full-size world could not pass
+    at all: every fold wove round 50 m knobs. This is the one change outside the road region.
+  - A fold renumbers a trunk's points, and merge joins are filed by segment index, so every join
+    onto a folded trunk is found again on the new line (and the join points themselves are pinned
+    unless the fold passes within 2 m of them). Before that fix a branch took its junction height
+    from forty points away — a 74% ramp at the mouth of road 10.
+- **Crossroads** (`fileCrossroads`, after `connectRoadNetwork`): any two segments of different
+  roads that cross are cut there, both halves filed as joins, and the trunk eased halfway so the
+  crossing is the mean of the two heights. **Finding:** on the five standard seeds at both scales
+  World Forge produces *no* transversal crossings at all (its routes share cells and merge); the
+  only one filed is where a fold leg crosses another road (seed 4477, Super tiny).
+- **Junction landings** (`landJunctions`): the drawn roads at a junction disagreed by up to
+  2.1 m (seed 101, before this milestone) although their graded heights were equal — `laneRibbon`
+  lifts each cross-section to clear the ground across it and half a step towards its neighbour,
+  and at a junction that ground is the other road climbing away. Each junction now gets a level
+  landing (vertices at the junction and ± the other road's width + 1 m on the trunk, one on the
+  branch), with the step eased out to a shoulder vertex. Now every arm agrees within 0.1 m,
+  except junctions held up by water (a floor above the junction height — 41 of 331 at Super
+  tiny), which keep the floor's height (`join.onBridge`) exactly as round 17 left them.
+- **Road class widths, one owner:** `ROAD_CLASS` (exported) — highway **9 m**, road 7 m, trail
+  **4.5 m (not the plan's 4)**: at 4 m one bridge on seed 4477 (12185, 1351 at Super tiny, a
+  trail joining another in the middle of its crossing) files a deck piece 0.55 m above its drawn
+  deck — `js/bridge-plan.js`'s landing ramp overlapping its flat pieces. That is M6's module;
+  narrow the trail there. Waystones (`half + footing + 1`) and waypoint pads re-measured on the
+  built meshes: 222 pads and 880 approach stones, none in a carriageway.
+- **Scale knobs:** `rampGrade` (m/m, derived from `rampPerPoint` at a fifth of a cell) is what a
+  folded stretch ramps at; the map's own points keep their half metre a point (per metre
+  everywhere moved one junction-on-a-bridge on seed 4477). `JOIN_REACH = max(8, 16 · cell/640)`.
+- **Lakes** use `elevationToMetresExact` (surface and `lakeSurfaceAt`).
+- **Deleted:** `meshHalf()` / `meshHalfLength`, `path.bridgeCells`. README says bridges come from
+  `findCrossings`.
+- New on the terrain: `junctions` (every filed junction as a place with one height — M8's
+  signposts read this), `roadCrossroads`, `roadFolds`, `path.steep`, `path.folded`.
+
+**Acceptance, measured** (drawn deck, 10 m windows, seed 25392):
+
+| scale | over 30% | over 20% unmarked | marked steep | worst unmarked |
+|---|---|---|---|---|
+| 0.1 | 0.00% (≤0.5) | 0.05% (≤2) | 2.13% (≤3) | 23% (≤30) |
+| 1 | 0.05% | 0.04% | 1.77% | 24% |
+
+Subset rule: seeds 7 and 4477 keep every point of every unfolded road (hashes from commit
+225de22 in the test; 52 and 98 roads identical). Crossings not filed as junctions: 0 on five
+seeds. Every lake sits at the exact metres of its lowest cell.
+
+**Not met: the worldgen time budget (+15%).** `makeTerrain` for 25392 at full size went from
+~106 ms to ~280 ms on a quiet machine (the switchback pass ~150 ms of it; calm + landings +
+crossroads ~25 ms). The search is a real A* with a heading per state; the corridor has to be 1.5
+cells for the user's ridge. `createWorld` itself is ~1.5 s, so this is ~10% of world generation.
+If it matters, the fold result is a pure function of (seed, scale) and could be cached.
+
+**Not done (stays todo in the test):** a stronghold `junction` slot does not stand on a B3
+crossroads — `js/sites.js` `slotsFrom` still finds junctions from map cells two roads share,
+which after the merge lie 2-12 cells from the filed junctions. It should read
+`terrain.junctions`; sites.js was M1/M2's file this wave. The crossing-record orphan test
+(`klass`, `roadHalf`, `river`) is a todo for M6.
+
+**Tests:** `tests/round27-roads.test.js` (15: 13 pass + 2 todo). Rule-not-number changes to
+older tests: `planet.test.js` weave run in metres (a landing adds vertices by definition),
+`round22-roads.test.js` shared-ground in metres (11.1 km before, 11.7 km after, bar 15 km),
+`round23-bridge-gate.test.js` finds Fenkeep's west gate as the nearest gate (the 9 m highway
+grew the plan and moved it 31 m along the same road). Must-stay-green all pass: planet, water,
+roadgap, round16-roads, round17-worldgen, round22-roads, round23-bridge-gate, round21-town,
+planet-lod.spec, round23-title.spec.

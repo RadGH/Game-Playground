@@ -224,13 +224,19 @@ same toxic world. The same function colours the neighbours' cloud decks in the s
 
 - **Rivers** — traced polylines smoothed through the cell centres, laid as a water ribbon whose
   heights are forced downhill so a river never flows up a slope.
-- **Roads** — the A* network, as a ribbon in the cutting the terrain carved for it.
-- **Bridges** — World Forge already records where a road had to cross water (`road.bridges`), which
-  is the list to trust. (Looking for a road cell that is also a river cell finds almost nothing:
-  those overlaps are at road *ends*, because towns are founded on rivers.) A bridge sits at the
-  road's own lifted height, is built with its deck along **+Z** — the axis `yaw` points down, like
-  every other body in the game — and is stretched along that axis to span the channel and both
-  banks. Built across +X instead, it lay *across* the river rather than spanning it.
+- **Roads** — the A* network, as a ribbon in the cutting the terrain carved for it. Three widths
+  (R27): a highway is 9 m, a road 7 m, a trail 4.5 m, from
+  `ROAD_CLASS` in `js/planet.js`, which is the only place a road's width is set. A road that meets a
+  hill it cannot take straight is folded into switchbacks (`js/road-fold.js`), and where two roads
+  cross they meet at a filed crossroads with one height.
+- **Bridges** — come from `findCrossings()` in `js/planet.js`, which walks every road over the
+  river network and records a crossing wherever the carriageway is over water and the deck is clear
+  of it (the lift pass raises the road to meet it). World Forge's own `road.bridges` cells are NOT
+  used: they only mark where the map's A* stepped onto a water cell, which misses a river passing
+  between two road points and found almost nothing anyway (those overlaps are at road *ends*,
+  because towns are founded on rivers). Each crossing is built from its plan by
+  `js/bridge-plan.js` — the deck follows the road's own rise and fall and is filed as a walkable
+  deck collider — with its long axis along **+Z**, the axis `yaw` points down.
 - **Settlements** — the map's own nodes, sized from `node.size`: a village is a well and a ring of
   huts, a city adds a hall, a wall with a gate gap and four towers. All instanced. Nothing is built
   in the channel or on the bank, so a riverside town sits *beside* its river. The wall is walked

@@ -1,0 +1,5 @@
+{ "_doc": "Every room: id -> file (relative to rooms/), act, kind. Tools and the game read this.", "version": 1,
+  "rooms": {
+    "a1_wax_stair_02": { "file": "act1/a1_wax_stair_02.json", "act": "act1", "kind": "lesson" },
+    "a3_sluice_04": { "file": "act3/a3_sluice_04.json", "act": "act3", "kind": "puzzle" }
+  } }

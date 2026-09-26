@@ -1,0 +1,7 @@
+{ "_doc": "Default room map characters (docs/10 §6.3). Each char is one block of cells. A value is a material key or { mat, pin, cracked, sky, bg }.", "version": 1,
+  "chars": {
+    ".": "air", ":": { "mat": "air", "sky": true }, "X": "bedrock", "#": "stone", "B": "brick", "M": "metal", "G": "glass", "W": "wood", "x": "wax",
+    "I": "ice", "m": { "mat": "stone", "skin": "moss" }, "k": "bone", "c": "cloudstuff", "d": "dirt", "s": "sand", "i": "silt", "r": "rubble",
+    "~": "water", "o": "oil", "b": "bile", "u": "mud", "q": "molten_wax", "e": "web", "g": { "mat": "stone", "skin": "glowmoss" },
+    "%": { "mat": "stone", "pin": true }, "=": { "mat": "brick", "pin": true }, "?": { "mat": "stone", "cracked": true }, "w": "water"
+  } }

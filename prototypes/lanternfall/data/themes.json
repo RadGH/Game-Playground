@@ -1,0 +1,11 @@
+{ "_doc": "Room themes: background wall material, sky colours, decorator defaults (docs/10 §5.21). Keys are theme ids used by rooms.", "version": 1,
+  "themes": {
+    "bench": { "act": "none", "backWall": "stone", "sky": { "top": "#10141d", "bottom": "#06080c", "sil": "#161a24" }, "decor": { "erode": 0.3, "round": 2, "moss": 0.1, "cracks": 0.1, "grime": 0.3, "drips": 6 } },
+    "crown_streets": { "act": "act1", "backWall": "brick", "sky": { "top": "#1c2233", "bottom": "#0b0e16", "sil": "#1f2433" }, "decor": { "erode": 0.3, "round": 2, "moss": 0.12, "cracks": 0.12, "grime": 0.3, "drips": 8 } },
+    "wax_chapel": { "act": "act1", "backWall": "brick", "sky": { "top": "#1a1f2e", "bottom": "#0a0c12", "sil": "#1b1f2c" }, "decor": { "erode": 0.35, "round": 2, "moss": 0.1, "cracks": 0.15, "grime": 0.3, "drips": 6, "waxDrips": 0.4 } },
+    "gutter_tunnels": { "act": "act2", "backWall": "brick", "sky": { "top": "#131a1f", "bottom": "#070a0c", "sil": "#141b20" }, "decor": { "erode": 0.3, "round": 2, "moss": 0.25, "cracks": 0.2, "grime": 0.5, "drips": 10 } },
+    "sluice_vault": { "act": "act3", "backWall": "brick", "sky": { "top": "#122033", "bottom": "#060b12", "sil": "#13202e" }, "decor": { "erode": 0.25, "round": 2, "moss": 0.35, "glow": 0.1, "cracks": 0.2, "grime": 0.4, "drips": 10 } },
+    "blackwater": { "act": "act4", "backWall": "stone", "sky": { "top": "#07090e", "bottom": "#030405", "sil": "#0b0d13" }, "decor": { "erode": 0.4, "round": 3, "moss": 0.15, "glow": 0.2, "cracks": 0.2, "grime": 0.5, "drips": 8 } },
+    "bellwell": { "act": "act5", "backWall": "metal", "sky": { "top": "#1a1624", "bottom": "#0a080e", "sil": "#1c1826" }, "decor": { "erode": 0.25, "round": 2, "moss": 0.08, "cracks": 0.2, "grime": 0.35, "drips": 6 } },
+    "cloudroot": { "act": "act6", "backWall": "cloudstuff", "sky": { "top": "#2a3246", "bottom": "#121622", "sil": "#262d40" }, "decor": { "erode": 0.4, "round": 3, "moss": 0.05, "cracks": 0.1, "grime": 0.2, "drips": 12 } }
+  } }

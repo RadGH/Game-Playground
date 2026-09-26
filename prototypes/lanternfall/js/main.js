@@ -73,7 +73,7 @@ try {
       hud.toast(`${b.name} is out. Relight the lamp.`, [1, 0.85, 0.5, 1], true); saveNow();
     };
     g.bus.on('kill', e => { onKill(g, e.target); if (e.target.def) g.bestiary[e.target.def.id] = (g.bestiary[e.target.def.id] || 0) + 1; if (g.player.stats?.oilOnKill) g.player.oil = Math.min(g.player.maxOil, g.player.oil + g.player.stats.oilOnKill); });
-    g.bus.on('player.die', e => { if (g.player.dead) return; g.player.dead = true; g.player.anim = 'dead'; const purse = onDeath(g); setTimeout(() => router.open('death', { by: typeof e.source === 'string' ? e.source : e.source?.name, purse }), 900); });
+    g.bus.on('player.die', e => { if (g.player.dead) return; if (g.onModeDeath?.(e)) return; g.player.dead = true; g.player.anim = 'dead'; const purse = onDeath(g); setTimeout(() => router.open('death', { by: typeof e.source === 'string' ? e.source : e.source?.name, purse }), 900); });
     g.bus.on('room.ready', e => { g.meter.startFight?.(`${e.act}/${g.actMaps.nodeOf(e.roomId) || e.roomId}/${e.roomId}`); const n = g.actMaps.nodeOf(e.roomId); if (n) { g.visitedNodes[n] = true; g.flags[`found_${n}`] = true; const gift = giveNodeGifts(g, n); if (gift?.say) say('narrator', null, gift.say); } const a = data.acts.byId?.[e.act]; if (a) g.objective = a.lamp ? `Relight ${a.lamp}` : null; score?.setAct?.(e.act, Object.keys(g.flags).filter(k => k.startsWith('lamp_act')).length); });
     return g;
   }
@@ -154,11 +154,28 @@ try {
       returnToLampPost: async () => { if (!game) return; onDeath(game); await respawn(game, roomLoader); renderer.setRoom(game.grid); cam.snap(game.player.x, game.player.y, game.grid); },
       respawn: async () => { if (!game) return; if (game.ironWick) { saves.remove(game.slot); toTitle(); return; } await respawn(game, roomLoader); renderer.setRoom(game.grid); cam.snap(game.player.x, game.player.y, game.grid); },
       quitToTitle: () => toTitle(), openMap: () => router.open('map'),
-      startMode: id => hud?.toast(`${id} opens in a later milestone — see docs/HANDOFF.md.`),
+      startMode: (id, opts = {}) => startMode(id, opts),
     },
     onPause: paused => { if (game) game.paused = paused; },
   };
   const router = createScreens({ root: document.getElementById('screens'), ctx }); LF.router = router; LF.ctx = ctx;
+  // ---------- modes (js/modes/<id>.js exports startMode(api, opts)) ----------
+  // A mode builds its own game from makeGame(), puts rooms in with enter(), adds per-tick systems to g.systems,
+  // and may take over exits (g.onExit(exit) -> true when handled) and death (g.onModeDeath() -> true when handled).
+  const modeApi = {
+    data, saves, settings, router, LF, say, toTitle: () => toTitle(), get hud() { return hud; }, get game() { return game; },
+    makeGame: seed => makeGame(seed), setDifficulty, newHero, ensureInventory, giveStartingGear, applyStats, meleeWeapon, roomLoader, readRoomFile,
+    enter(g, json, entry) { enterRoom(g, json, entry); g.act = json.act && json.act !== 'none' ? json.act : g.act; if (game !== g) attachGame(g); else { renderer.setRoom(g.grid); cam.snap(g.player.x, g.player.y, g.grid); applyTheme(); } g.bus.emit('room.ready', { roomId: json.id, act: json.act, kind: json.kind, name: json.name }); return g; },
+    async goTo(g, id, entry) { await goToRoom(g, roomLoader, id, entry); if (game !== g) attachGame(g); else { renderer.setRoom(g.grid); cam.snap(g.player.x, g.player.y, g.grid); applyTheme(); } return g; },
+    save: () => saveNow(),
+  };
+  LF.modeApi = modeApi;
+  async function startMode(id, opts) {
+    router.closeAll();
+    try { const m = await import(`./modes/${id}.js`); if (!m.startMode) throw new Error('no startMode'); await m.startMode(modeApi, opts); LF.mode = id; }
+    catch (e) { console.error(e); LF.warnings.push(`mode ${id}: ${e.message}`); if (!game || game.titleScreen) router.open('title'); hud?.toast(`${id.replace(/_/g, ' ')} is not ready yet.`); }
+  }
+  LF.startMode = startMode;
   async function toTitle() {
     router.closeAll(); const g = makeGame(1); newHero(g, 'lamplighter', {}); g.player.hidden = true; g.titleScreen = true;
     try { await goToRoom(g, roomLoader, 'a1_n01_r0', 'w'); } catch (e) { const json = await loadRoom(data, 'bench_flood'); enterRoom(g, json); }
@@ -186,9 +203,10 @@ try {
   // ---------- the loop ----------
   let exitCooldown = 0, changing = false;
   async function takeExit(x) {
+    if (game.onExit?.(x)) { game.pendingExit = null; exitCooldown = 30; return; }
     const to = game.actMaps.resolveExit(game.room.room.id, x, game.flags) ?? (x.to && !x.to.startsWith('@') ? { room: x.to, entry: x.entry } : null);
     if (!to) { game.pendingExit = null; exitCooldown = 30; return; }
-    if (to.ending) { game.pendingExit = null; exitCooldown = 120; if (!game.flags.game_complete) { game.flags.game_complete = true; saveNow(); } hud?.toast('Six lamps burn. Far above, for the first time in forty years, the Rain thins.', [1, 0.85, 0.5, 1], true); say('narrator', null, 'Vessmere is lit, top to bottom. The Guild will argue for a year about who gets the credit. You know.'); return; }
+    if (to.ending) { game.pendingExit = null; exitCooldown = 120; if (!game.flags.game_complete) { game.flags.game_complete = true; saveNow(); } if (router.has?.('ending')) router.open('ending', { flags: game.flags, hero: game.hero, stats: game.stats }); else { hud?.toast('Six lamps burn. Far above, for the first time in forty years, the Rain thins.', [1, 0.85, 0.5, 1], true); say('narrator', null, 'Vessmere is lit, top to bottom. The Guild will argue for a year about who gets the credit. You know.'); } return; }
     if (to.blocked) { hud?.toast(to.blocked === 'grapple' ? 'You would need a grapple to reach that.' : to.blocked === 'lamp' ? 'Relight the Great Lamp before you go on.' : 'The way is shut.'); game.pendingExit = null; exitCooldown = 60; return; }
     changing = true; const fade = document.querySelector('.fade'); fade.classList.add('on'); await new Promise(r => setTimeout(r, 250));
     try { await goToRoom(game, roomLoader, to.room, to.entry); renderer.setRoom(game.grid); cam.snap(game.player.x, game.player.y, game.grid); applyTheme(); game.atLampPost = false; LF.room = to.room; }

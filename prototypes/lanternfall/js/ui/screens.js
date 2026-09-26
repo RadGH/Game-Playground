@@ -34,6 +34,9 @@ export const MODULES = {};
 for (const m of [title, classselect, pause, inventory, character, wickbuilder, ledger, settings, death, journal, shop, dialogue, map])
   for (const s of m.screens || [m]) if (s?.id) MODULES[s.id] = s;
 
+/** Add a screen at run time (modes load their own screens this way, without editing this file). */
+export function registerScreen(mod) { if (mod?.id) MODULES[mod.id] = mod; }
+
 const FOCUSABLE = 'button:not([disabled]),a[href],input:not([disabled]),select:not([disabled]),textarea,[tabindex]:not([tabindex="-1"])';
 const visible = n => !!(n.offsetWidth || n.offsetHeight || n.getClientRects().length) && getComputedStyle(n).visibility !== 'hidden';
 
@@ -52,6 +55,7 @@ export function createScreens({ root = document.getElementById('screens'), ctx =
 
   const router = {
     ctx, stack,
+    has: name => !!MODULES[ALIAS[name] || name],
     /** Open a screen (or switch the Satchel frame's tab). args are passed to render. */
     open(name, args = {}) {
       name = ALIAS[name] || name;

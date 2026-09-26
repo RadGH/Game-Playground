@@ -29,6 +29,7 @@ import { BIOMES, isWater } from '../../../worldgen/js/biomes.js';
 import { makeNoise2D, fbm, ridged, subSeed, clamp, lerp, makeRng, smoothstep, blur } from '../../../worldgen/js/noise.js';
 // R27 M5
 import { foldClimbs } from './road-fold.js';
+import { planBridge } from './bridge-plan.js';   // R27 M6: the bridge's own extent, for `bridgedAt`
 import { footprintOf } from '../../../proctown/js/townplan.js';
 
 /** Metres across one world-map cell. The one number that sets the size of the planet. */
@@ -43,12 +44,12 @@ import { footprintOf } from '../../../proctown/js/townplan.js';
  * R27 M5 — how wide each class of world road is, in metres. The one owner of a road's width:
  * `makeTerrain` sets `path.half` from it and nothing reads a width any other way.
  *
- * The plan asked for a 4 m trail. It stays 4.5 m (what it always was) for now: at 4 m one bridge on
- * seed 4477 (x 12185, z 1351 on Super tiny, a trail joining another in the middle of its crossing)
- * files a deck piece half a metre above the drawn deck — a fault in how js/bridge-plan.js overlaps
- * its landing ramp with the flat pieces, which M6 owns. Narrow it there.
+ * R27 M6: a trail is the plan's 4 m. M5 held it at 4.5 because one bridge on seed 4477 looked as if
+ * its deck collider stood half a metre over its drawn deck at 4 m; it was a market stall standing
+ * on the bridge's landing, which `bridgedAt` did not know about (see `plannedAt` at the bottom of
+ * `makeTerrain`).
  */
-export const ROAD_CLASS = { highway: { width: 9 }, road: { width: 7 }, trail: { width: 4.5 } };
+export const ROAD_CLASS = { highway: { width: 9 }, road: { width: 7 }, trail: { width: 4 } };
 
 export let M_PER_CELL = 640;
 export const M_PER_CELL_DEFAULT = 640;
@@ -1356,6 +1357,87 @@ export function makeTerrain(world, planet = null, opts = {}) {
     }
     return out;
   };
+  /**
+   * R27 M6 — FORDS. World Forge already decides that a road over a narrow river (width < 2) is a
+   * FORD and not a bridge (worldgen/js/roads.js, the `crossing` nodes), and nothing in Farhold read
+   * it: every stream got a plank bridge lifted 2.4 m over it. A ford is honoured where the map put
+   * one: the river is narrow, the road is not a highway, a World Forge ford node is within
+   * `FORD_MATCH` of the water, no junction is near enough to be dragged into the water with it,
+   * and the land does not stand so far above the stream that the approach would be a trench.
+   *
+   * Such a road is NOT lifted over that river (the lift below skips it), so `findCrossings` finds
+   * no bridge there; `fordDips` then lays the road down to a flagstone causeway `FORD_WATER` under
+   * the surface, and `heightAt` grades the channel to it like any other road.
+   */
+  const FORD_MATCH = 1.5 * M_PER_CELL;
+  const FORD_WATER = opts.fordWater ?? 0.3;       // metres of water over the stones
+  const FORD_RISE = opts.fordRise ?? 3.5;         // the most the land may stand over the stream
+  const FORD_GRADE = opts.fordGrade ?? 0.1;       // how steeply the road comes down to the water
+  const FORD_CLEAR = 24;                          // metres a ford keeps from any junction
+  const fordNodes = (world.nodes || []).filter(n => n.type === 'crossing' && n.kind === 'ford')
+    .map(n => [n.x * M_PER_CELL, n.y * M_PER_CELL]);
+  const joinPoints = [], roadEnds = [];
+  for (const path of roadPaths) for (const j of path.joins || []) joinPoints.push(j.point);
+  for (const path of roadPaths) {
+    if (!path.points?.length) continue;
+    roadEnds.push([path.points[0][0], path.points[0][1], path], [path.points.at(-1)[0], path.points.at(-1)[1], path]);
+  }
+  /**
+   * The far bank for a road that STOPS in a river (see `extendAcross` in `fordDips`): the points of
+   * the road carried straight on from that end, across the water and thirty metres up the far side,
+   * each at the ground it crosses — or null when the end is not a dead end in this river, or there is
+   * no far bank to reach (the sea, another river, or open water for ninety metres).
+   */
+  function farBank(path, atEnd, riverId) {
+    const pts = path.points, n = pts.length;
+    if (n < 2) return null;
+    const e = atEnd ? pts[n - 1] : pts[0], prev = atEnd ? pts[n - 2] : pts[1];
+    const hit = riverIndex.nearest(e[0], e[1]);
+    if (!hit || hit.path.id !== riverId || hit.dist > hit.path.half + 2) return null;
+    if ((path.joins || []).some(j => j.at === (atEnd ? 'end' : 'start'))) return null;
+    if (roadEnds.some(([ex, ez, other]) => other !== path && Math.hypot(ex - e[0], ez - e[1]) < 6)) return null;
+    const l = Math.hypot(e[0] - prev[0], e[1] - prev[1]) || 1;
+    const ux = (e[0] - prev[0]) / l, uz = (e[1] - prev[1]) / l;
+    const add = [];
+    let dry = 0;
+    for (let k = 1; k <= 45 && dry < 30; k++) {
+      const x = e[0] + ux * k * 2, z = e[1] + uz * k * 2;
+      const h = riverIndex.nearest(x, z);
+      if (h && h.path.id !== riverId && h.dist <= h.path.reach) return null;       // another river
+      const nat = naturalHeightAt(x, z);
+      if (hasSea && nat < seaLevel + 1) return null;                                 // the shore
+      const own = h && h.path.id === riverId && h.dist < h.path.reach;
+      if (!own || h.dist > h.path.half + 1) dry += 2;
+      // graded like any road: on the natural ground (the dip then lays the wet part on the stones,
+      // and `heightAt` shapes the bank to the road the way it does for every road beside a river)
+      add.push({ x, z, ground: nat });
+    }
+    return dry >= 8 ? add : null;
+  }
+  const fordRiverFor = (path, x, z, hit) => hit && hit.dist <= hit.path.half
+    && hit.path.width < 2 && path.klass !== 'highway'
+    && fordNodes.some(([fx, fz]) => Math.hypot(fx - x, fz - z) < FORD_MATCH)
+    && !joinPoints.some(([jx, jz]) => Math.hypot(jx - x, jz - z) < FORD_CLEAR)
+    // A road that ENDS in the ford's water is a road that stops at World Forge's ford NODE (a ford
+    // is a node, and routes are drawn to it), so the stones simply run to that end — unless the end
+    // is a junction, whose one height is somebody else's; that stays a bridge.
+    && ![0, path.points.length - 1].some(k => {
+      const p = path.points[k];
+      if (Math.hypot(p[0] - x, p[1] - z) >= hit.path.reach * 2) return false;
+      const e = riverIndex.nearest(p[0], p[1]);
+      if (!e || e.path.id !== hit.path.id || e.dist > hit.path.half + 2) return false;
+      if ((path.joins || []).some(j => j.at === (k === 0 ? 'start' : 'end'))) return true;
+      // another road ends here too: a real node, and the stones run to it
+      if (roadEnds.some(([ex, ez, other]) => other !== path && Math.hypot(ex - p[0], ez - p[1]) < 6)) return false;
+      // a dead end: fine if the road can be carried on to a far bank, a bridge (with its landing) if not
+      return !farBank(path, k !== 0, hit.path.id);
+    })
+    && naturalHeightAt(x, z) - surfaceOfHit(hit) <= FORD_RISE
+    // …and above the tide: stones laid under sea level are in the sea as soon as you step off them
+    && !(hasSea && surfaceOfHit(hit) - FORD_WATER < seaLevel + 0.5)
+    // …and only one river here: at a confluence the other river's bridge would open the channel
+    // under the stones (its footprint is a hole in the ground), so both keep their bridges
+    && !riverPaths.some(r => r !== hit.path && r.points.some(q => Math.hypot(q[0] - x, q[1] - z) < r.reach + hit.path.reach + 20));
   for (const path of roadPaths) {
     const raw = path.points.map(p => naturalHeightAt(p[0], p[1]));
     const smooth = raw.slice();
@@ -1434,7 +1516,26 @@ export function makeTerrain(world, planet = null, opts = {}) {
       }
       return out;
     };
-    const riverNeed = needs(riverSurfaceNear);
+    // R27 M6: find this road's fords first — a sample over the water of a river World Forge fords
+    path.fordAt = [];
+    for (let i = 0; i + 1 < path.points.length; i++) {
+      const [ax, az] = path.points[i], [bx, bz] = path.points[i + 1];
+      const len = Math.hypot(bx - ax, bz - az);
+      const steps = Math.max(1, Math.ceil(len / GRADE_STEP));
+      for (let st = 0; st <= steps; st++) {
+        const x = ax + ((bx - ax) * st) / steps, z = az + ((bz - az) * st) / steps;
+        const hit = riverIndex.nearest(x, z);
+        if (!fordRiverFor(path, x, z, hit)) continue;
+        if (path.fordAt.some(f => f.river === hit.path.id && Math.hypot(f.x - x, f.z - z) < hit.path.reach * 2)) continue;
+        path.fordAt.push({ x, z, river: hit.path.id });
+      }
+    }
+    // …and the lift leaves that river alone anywhere near its ford: it is crossed IN the water
+    const riverNeed = needs(path.fordAt.length ? (x, z) => {
+      const hit = riverIndex.nearest(x, z);
+      if (hit && path.fordAt.some(f => f.river === hit.path.id && Math.hypot(f.x - x, f.z - z) < hit.path.reach + 12)) return null;
+      return riverSurfaceNear(x, z);
+    } : riverSurfaceNear);
     for (let i = 0; i < path.points.length; i++) {
       if (riverNeed[i] === -Infinity) continue;
       lift[i] = Math.max(lift[i], riverNeed[i] + bridgeClearance - smooth[i]);
@@ -1838,6 +1939,177 @@ export function makeTerrain(world, planet = null, opts = {}) {
     }
   }
   if (opts.landJunctions !== false) landJunctions(roadPaths);
+  const fordList = fordDips(roadPaths);   // R27 M6
+
+  /**
+   * R27 M6 — LAY A FORDED ROAD DOWN INTO THE WATER.
+   *
+   * The road over a ford was left unlifted above, but it still runs at the graded height of the
+   * land either side, which over the channel is a plank in the air (and `heightAt` would fill the
+   * channel up to it: a dam). So the road gets vertices across the water, every two metres, at
+   * `FORD_WATER` under the river's own surface there — the flagstones — and a straight ramp at
+   * `FORD_GRADE` out to where it meets the road it was. The inserted vertices carry `ford`, the
+   * lift over them is zero (they are drawn as a draped ribbon, not a deck) and they have no floor.
+   *
+   * Returns the fords, one record each, for `terrain.fords`.
+   */
+  function fordDips(paths) {
+    const out = [];
+    for (const path of paths) {
+      if (!path.fordAt?.length || !path.surface) continue;
+      for (const key of ['surface', 'lift', 'floor', 'ground']) if (path[key]) path[key] = Array.from(path[key]);
+      const arcsOf = () => {
+        const S = [0];
+        for (let k = 1; k < path.points.length; k++) S.push(S[k - 1] + Math.hypot(path.points[k][0] - path.points[k - 1][0], path.points[k][1] - path.points[k - 1][1]));
+        return S;
+      };
+      const posAt = (S, s) => {
+        let k = 0;
+        while (k + 1 < S.length - 1 && S[k + 1] < s) k++;
+        const u = clamp((s - S[k]) / ((S[k + 1] - S[k]) || 1), 0, 1);
+        const a = path.points[k], b = path.points[k + 1];
+        return { k, u, x: a[0] + (b[0] - a[0]) * u, z: a[1] + (b[1] - a[1]) * u, y: path.surface[k] + (path.surface[k + 1] - path.surface[k]) * u };
+      };
+      for (const f of path.fordAt) {
+        extendAcross(path, f);
+        let S = arcsOf();
+        const L = S[S.length - 1];
+        // where along the road the ford point is
+        let s0 = 0, best = Infinity;
+        for (let s = 0; s <= L; s += 1) {
+          const p = posAt(S, s), d = Math.hypot(p.x - f.x, p.z - f.z);
+          if (d < best) { best = d; s0 = s; }
+        }
+        const wetAt = s => {
+          const p = posAt(S, s), hit = riverIndex.nearest(p.x, p.z);
+          return hit && hit.path.id === f.river && hit.dist <= hit.path.half + 1 ? surfaceOfHit(hit) : null;
+        };
+        if (wetAt(s0) === null) continue;
+        let sA = s0, sB = s0;
+        while (sA - 0.5 > 0 && sA > s0 - 60 && wetAt(sA - 0.5) !== null) sA -= 0.5;
+        while (sB + 0.5 < L && sB < s0 + 60 && wetAt(sB + 0.5) !== null) sB += 0.5;
+        // the road ends in the water (at the ford node): the stones run to its end, no ramp there
+        const endA = sA - 0.5 <= 0, endB = sB + 0.5 >= L;
+        if (endA) sA = 0;
+        if (endB) sB = L;
+        // the water itself (the record's length), and the stones, which run a metre up each bank
+        let wA = sA, wB = sB;
+        const inChannel = s => { const p = posAt(S, s), hit = riverIndex.nearest(p.x, p.z); return !!hit && hit.path.id === f.river && hit.dist <= hit.path.half; };
+        while (wA < wB && !inChannel(wA)) wA += 0.5;
+        while (wB > wA && !inChannel(wB)) wB -= 0.5;
+        if (!endA) sA = Math.max(0.35, sA - 1);
+        if (!endB) sB = Math.min(L - 0.35, sB + 1);
+        const stoneAt = s => {
+          const p = posAt(S, s), hit = riverIndex.nearest(p.x, p.z);
+          return (hit && hit.path.id === f.river ? surfaceOfHit(hit) : wetAt(s0)) - FORD_WATER;
+        };
+        // the ramps: straight out to where the old road is within FORD_GRADE of the stones
+        const edgeA = stoneAt(sA), edgeB = stoneAt(sB);
+        let eA = 0, eB = 0;
+        while (eA < 80 && sA - eA - 1 > 0 && Math.abs(posAt(S, sA - eA - 1).y - edgeA) > FORD_GRADE * (eA + 1)) eA += 1;
+        while (eB < 80 && sB + eB + 1 < L && Math.abs(posAt(S, sB + eB + 1).y - edgeB) > FORD_GRADE * (eB + 1)) eB += 1;
+        // a ramp that would run off the road's end stops AT the end, at the end's own height: a
+        // little steeper, never a step, and a junction there keeps its one height
+        let rA = endA ? 0 : sA - eA - 1, rB = endB ? L : sB + eB + 1;
+        if (rA < 0.35) rA = 0;
+        if (rB > L - 0.35) rB = L;
+        const yA = posAt(S, rA).y, yB = posAt(S, rB).y;
+        // the heights to lay, worked out on the road as it is BEFORE any vertex goes in
+        const want = s => (endA && s <= sA) || (endB && s >= sB) ? stoneAt(clamp(s, 0.01, L - 0.01)) : (s < sA ? yA + (edgeA - yA) * ((s - rA) / ((sA - rA) || 1))
+          : s > sB ? edgeB + (yB - edgeB) * ((s - sB) / ((rB - sB) || 1)) : stoneAt(s));
+        const stops = endA ? [0] : [rA, sA];
+        for (let s = sA + 2; s < sB - 0.5; s += 2) stops.push(s);
+        if (endB) stops.push(L); else stops.push(sB, rB);
+        const heights = stops.map(want);
+        // the vertices: insert each stop (or reuse a vertex within 0.3 m of it)
+        const idx = [];
+        for (const s of stops) {
+          S = arcsOf();
+          let k = 0;
+          while (k + 1 < S.length - 1 && S[k + 1] < s) k++;
+          if (Math.abs(S[k] - s) < 0.3) { idx.push(k); continue; }
+          if (Math.abs(S[k + 1] - s) < 0.3) { idx.push(k + 1); continue; }
+          const u = (s - S[k]) / ((S[k + 1] - S[k]) || 1);
+          const a = path.points[k], b = path.points[k + 1];
+          path.points.splice(k + 1, 0, Object.assign([a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u], { ford: true, steep: a.steep && b.steep }));
+          for (const key of ['surface', 'lift', 'floor', 'ground']) {
+            const arr = path[key];
+            if (!arr) continue;
+            const v = arr[k] === -Infinity || arr[k + 1] === -Infinity ? Math.max(arr[k], arr[k + 1]) : arr[k] + (arr[k + 1] - arr[k]) * u;
+            arr.splice(k + 1, 0, v);
+          }
+          if (path.wet) path.wet.splice(k + 1, 0, false);
+          idx.push(k + 1);
+        }
+        // every vertex from the first ramp foot to the last is laid on the line
+        S = arcsOf();
+        const k0 = idx[0], k1 = idx[idx.length - 1];
+        for (let k = k0; k <= k1; k++) {
+          path.surface[k] = want(S[k]);
+          if (path.lift) path.lift[k] = 0;
+          if (path.floor) path.floor[k] = -Infinity;
+          if (path.wet) path.wet[k] = false;
+        }
+        const a = posAt(S, wA), b = posAt(S, wB), m = posAt(S, (wA + wB) / 2);
+        const ea = posAt(S, sA), eb = posAt(S, sB);
+        const len = Math.hypot(b.x - a.x, b.z - a.z) || 1;
+        const lenS = Math.hypot(eb.x - ea.x, eb.z - ea.z) || 1;
+        out.push({
+          // `halfLength` is the water; `stonesHalf` the causeway, a metre up each bank
+          kind: 'ford', x: m.x, z: m.z, tx: (eb.x - ea.x) / lenS, tz: (eb.z - ea.z) / lenS,
+          halfLength: len / 2, stonesHalf: lenS / 2, halfWidth: path.half, stone: m.y, water: m.y + FORD_WATER,
+          road: path.id, klass: path.klass, river: f.river,
+        });
+      }
+    }
+    /**
+     * A ROAD THAT STOPS IN THE FORD CARRIES ON ACROSS IT.
+     *
+     * World Forge makes its fords NODES, and some Farhold roads end at one: in the middle of the
+     * river, with nothing on the far side. (Round 23 gave such a road's bridge a LANDING that carried
+     * the deck on to the far bank.) A ford does the same with the road itself: the line is carried
+     * straight on, across the water and thirty metres up the far bank, at the height of the ground it
+     * crosses — and the dip below then lays it into the water and ramps it out like any other ford.
+     * Only a dead end: an end another road also ends at is a real node, and the stones run to it.
+     */
+    function extendAcross(path, f) {
+      for (const atEnd of [true, false]) {
+        const add = farBank(path, atEnd, f.river);
+        if (!add) continue;
+        const pts = path.points;
+        for (const q of add) {
+          const pt = Object.assign([q.x, q.z], { ford: true });
+          const at = atEnd ? pts.length : 0;
+          pts.splice(at, 0, pt);
+          path.surface.splice(at, 0, q.ground);
+          if (path.lift) path.lift.splice(at, 0, 0);
+          if (path.floor) path.floor.splice(at, 0, -Infinity);
+          if (path.ground) path.ground.splice(at, 0, q.ground);
+          if (path.wet) path.wet.splice(at, 0, false);
+        }
+        // this path's own joins sit at its ends and are not moved (a dead end has none); joins onto
+        // it as a trunk are found again below
+      }
+    }
+
+    // the vertices renumbered some trunks, so every join finds its segment again
+    for (const path of paths) {
+      for (const join of path.joins || []) {
+        const pts = join.trunk?.points;
+        if (!pts) continue;
+        let best = null;
+        for (let k = 0; k + 1 < pts.length; k++) {
+          const [ax, az] = pts[k], [bx, bz] = pts[k + 1];
+          const vx = bx - ax, vz = bz - az, l2 = vx * vx + vz * vz;
+          const t = l2 > 0 ? clamp(((join.point[0] - ax) * vx + (join.point[1] - az) * vz) / l2, 0, 1) : 0;
+          const d = Math.hypot(ax + vx * t - join.point[0], az + vz * t - join.point[1]);
+          if (!best || d < best.d) best = { d, k, t };
+        }
+        if (best) { join.i = best.k; join.t = best.t; }
+      }
+    }
+    return out;
+  }
 
   // R27 M5: steep marks travel on the points (a fold or a split never loses them); published per path
   for (const path of roadPaths) path.steep = path.points.map(p => !!p.steep);
@@ -1968,6 +2240,24 @@ export function makeTerrain(world, planet = null, opts = {}) {
   }
 
   /**
+   * The lake basin at a point: `{ surface, bed }`, or null where there is no lake. Full depth inside
+   * a real lake cell, with the blurred field only shaping the rim outside it. R27 M6 took it out of
+   * `heightAt` so `findCrossings` can ask where a road is over open lake water with the same numbers.
+   */
+  function lakeCut(x, z) {
+    if (!anyLake) return null;
+    const fx = x / M_PER_CELL, fy = z / M_PER_CELL;
+    const cell = IDX(w, cellX(x), cellY(z));
+    const inLake = world.water[cell] === 2 ? 1 : 0;
+    const lake = Math.max(inLake, layer(lakeField, fx, fy));
+    if (lake <= 0.05) return null;
+    // the lake's OWN level where there is one, so the bed is dug from the water line and not
+    // from whatever the map happened to say this corner of the basin was
+    const surface = inLake ? lakeLevel[cell] : lakeSurfaceAt(fx, fy);
+    return { surface, bed: surface - lakeDepth * smoothstep(0.05, 0.6, lake) };
+  }
+
+  /**
    * Ground height in metres above sea level (or above the datum on a dry world), with the road
    * graded in and the river valley cut.
    */
@@ -1987,20 +2277,8 @@ export function makeTerrain(world, planet = null, opts = {}) {
     }
 
     // a lake sits in its own basin
-    if (anyLake) {
-      const fx = x / M_PER_CELL, fy = z / M_PER_CELL;
-      // full depth inside a real lake cell, with the blurred field only shaping the rim outside it
-      const cell = IDX(w, cellX(x), cellY(z));
-      const inLake = world.water[cell] === 2 ? 1 : 0;
-      const lake = Math.max(inLake, layer(lakeField, fx, fy));
-      if (lake > 0.05) {
-        // the lake's OWN level where there is one, so the bed is dug from the water line and not
-        // from whatever the map happened to say this corner of the basin was
-        const surface = inLake ? lakeLevel[cell] : lakeSurfaceAt(fx, fy);
-        const bed = surface - lakeDepth * smoothstep(0.05, 0.6, lake);
-        height = Math.min(height, bed);
-      }
-    }
+    const lakeHere = lakeCut(x, z);
+    if (lakeHere) height = Math.min(height, lakeHere.bed);
 
     // a river cuts a channel with a flat bed and banks either side
     const river = riverIndex.nearest(x, z);
@@ -2113,8 +2391,14 @@ export function makeTerrain(world, planet = null, opts = {}) {
      * `standAt`. ONE list decides both, so the thing you can see and the thing you can stand on can
      * never disagree — which is how the old version ended up with a deck 9.3 m above its collision.
      */
-    const spanned = riverSurface !== null && spannedAt(x, z);
-    if (spanned && height < riverSurface) return height;
+    /**
+     * R27 M6 — …AND A LAKE SPAN IS A BRIDGE TOO. A road over more than `LAKE_SPAN` metres of open
+     * lake is a trestle crossing now (see `findLakeSpans`), and its footprint is left as lake the
+     * same way a river's is. A shorter one is still the causeway round 17 intended.
+     */
+    const waterTop = riverSurface !== null ? riverSurface : lakeHere ? lakeHere.surface : null;
+    const spanned = waterTop !== null && spannedAt(x, z);
+    if (spanned && height < waterTop) return height;
 
     /**
      * A QUAY WHERE THE ROAD RUNS ALONGSIDE THE WATER.
@@ -2453,7 +2737,10 @@ export function makeTerrain(world, planet = null, opts = {}) {
            * was called "alongside" because it met the water at 41 degrees. With no crossing recorded
            * the deck clamp raised the ground to the road, which is the plug the user reported.
            */
-          if (hit && hit.dist <= hit.path.half) {
+          // R27 M6: a ford's own water is crossed on the stones, never bridged
+          const forded = hit && fordList.some(f => f.road === path.id && f.river === hit.path.id
+            && Math.hypot(f.x - x, f.z - z) < f.stonesHalf + hit.path.reach);
+          if (hit && hit.dist <= hit.path.half && !forded) {
             const surf = surfaceOfHit(hit);
             const deckHere = lerp(path.surface[i], path.surface[i + 1], u);
             if (deckHere >= surf + bridgeClearance * 0.6) {
@@ -2471,6 +2758,116 @@ export function makeTerrain(world, planet = null, opts = {}) {
   }
 
   const crossings = findCrossings();
+
+  /**
+   * R27 M6 — A ROAD OVER A LAKE IS A BRIDGE WHEN THE WATER IS WIDE.
+   *
+   * Round 17 lifts a road clear of a lake and the deck clamp in `heightAt` then raises the ground to
+   * it: a causeway. Across a narrow neck of water that is what a causeway is, and it stays. Across
+   * more than `LAKE_SPAN` metres it reads as a dam, so the run is recorded as a crossing
+   * (`over: 'lake'`, built as a low trestle by js/bridge-plan.js) and the footprint is left as lake.
+   *
+   * "Over the lake" is the same test `heightAt` digs with (`lakeCut`): the bed is more than half a
+   * metre under the lake's surface. The sea is not a lake — a sea lane stays a sea lane.
+   */
+  const LAKE_SPAN = opts.lakeSpan ?? 25;
+  const LAKE_LOW = opts.lakeLow ?? 6;         // a causeway is at most this far over its water
+  const causewayList = [];
+  function findLakeSpans() {
+    if (!anyLake) return;
+    // (the bucket grid `spannedAt` reads is built below, from the finished list)
+    const riverSpans = crossings.slice();
+    for (const path of roadPaths) {
+      const pts = path.points;
+      if (!pts || pts.length < 2 || !path.surface) continue;
+      let run = null;
+      /**
+       * A run is cut into STRAIGHT pieces before it becomes bridges: a crossing is a rectangle along
+       * one tangent, and a road that bends over a lake would otherwise have its deck run out over
+       * the water where the road is not (round 17's "a bridge where the road is not"). A piece ends
+       * where the road strays a metre off its chord, or at 60 m; the pieces overlap by a couple of
+       * metres, and each end of the run lands six metres up the shore.
+       */
+      const close = () => {
+        if (!run) return;
+        const { pts: rp, surf } = run;
+        run = null;
+        if (rp.length < 2) return;
+        const total = (rp.length - 1) * CROSS_STEP;
+        const chord = (a, b) => {
+          const len = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
+          return { len, tx: (b[0] - a[0]) / len, tz: (b[1] - a[1]) / len };
+        };
+        if (total <= LAKE_SPAN) {
+          const { len, tx, tz } = chord(rp[0], rp[rp.length - 1]);
+          const mx = (rp[0][0] + rp[rp.length - 1][0]) / 2, mz = (rp[0][1] + rp[rp.length - 1][1]) / 2;
+          const mid = roadIndex.nearest(mx, mz);
+          const top = mid && mid.dist < mid.path.reach ? surfaceOfHit(mid) : surf + 0.9;
+          causewayList.push({ x: mx, z: mz, tx, tz, halfLength: len / 2, halfWidth: path.half, top, surf, road: path.id });
+          return;
+        }
+        let i0 = 0;
+        while (i0 < rp.length - 1) {
+          let i1 = i0 + 1;
+          for (let k = i0 + 2; k < rp.length; k++) {
+            const { len, tx, tz } = chord(rp[i0], rp[k]);
+            if (len > 60) break;
+            let ok = true;
+            for (let q = i0 + 1; q < k && ok; q++) {
+              ok = Math.abs((rp[q][0] - rp[i0][0]) * -tz + (rp[q][1] - rp[i0][1]) * tx) <= 1;
+            }
+            if (!ok) break;
+            i1 = k;
+          }
+          const A = rp[i0], B = rp[i1];
+          const { len, tx, tz } = chord(A, B);
+          const mx = (A[0] + B[0]) / 2, mz = (A[1] + B[1]) / 2;
+          const mid = roadIndex.nearest(mx, mz);
+          const deck = mid && mid.dist < mid.path.reach ? surfaceOfHit(mid) : surf + 0.9;
+          const back = i0 === 0 ? Math.min(6, roadRunFrom(A[0], A[1], tx, tz, -1) + CROSS_STEP) : 2;
+          const fwd = i1 === rp.length - 1 ? Math.min(6, roadRunFrom(B[0], B[1], tx, tz, 1) + CROSS_STEP) : 2;
+          // centred on the stretch it covers, the shore landings included
+          const shift = (fwd - back) / 2;
+          crossings.push({
+            x: mx + tx * shift, z: mz + tz * shift, angle: Math.atan2(tx, tz), tx, tz, surf, deck,
+            halfLength: len / 2 + (back + fwd) / 2,
+            halfWidth: path.half + deckGrip + SPAN_PAD,
+            roadHalf: path.half, klass: path.klass, road: path.id, river: null, over: 'lake',
+          });
+          i0 = i1;
+        }
+      };
+      for (let i = 0; i + 1 < pts.length; i++) {
+        const [ax, az] = pts[i], [bx, bz] = pts[i + 1];
+        const legLen = Math.hypot(bx - ax, bz - az);
+        if (legLen < 1e-6) continue;
+        const steps = Math.max(1, Math.ceil(legLen / CROSS_STEP));
+        for (let st = 0; st < steps; st++) {
+          const u = st / steps;
+          const x = ax + (bx - ax) * u, z = az + (bz - az) * u;
+          const lake = lakeCut(x, z);
+          // over OPEN lake water, with the road genuinely above it (a road the lift never raised is
+          // not a causeway, it is a road under a lake — not this pass's business)
+          const deckHere = lerp(path.surface[i], path.surface[i + 1], u);
+          // (a LAKE CELL, as `waterAt` asks — the blurred rim round a lake only shapes its basin)
+          const over = !!lake && world.water[IDX(w, cellX(x), cellY(z))] === 2
+            && lake.bed < lake.surface - 0.5 && deckHere > lake.surface + 0.3
+            // …and the road is RAISED over it, and LOW — a causeway. A road on a hillside that a lake
+            // basin was dug into (seed 47 at full size has a lake 57 m under the land it sits in)
+            // stands on the land, and a trestle sixty metres tall is not a lake narrows
+            && deckHere > naturalHeightAt(x, z) + 0.5 && deckHere < lake.surface + LAKE_LOW
+            && !(hasSea && lake.surface <= seaLevel + 0.5)
+            && !riverSpans.some(c => Math.abs((x - c.x) * c.tx + (z - c.z) * c.tz) <= c.halfLength
+              && Math.abs((x - c.x) * -c.tz + (z - c.z) * c.tx) <= c.halfWidth);
+          if (!over) { close(); continue; }
+          if (!run) run = { pts: [[x, z]], surf: lake.surface };
+          else { run.pts.push([x, z]); run.surf = Math.max(run.surf, lake.surface); }
+        }
+      }
+      close();
+    }
+  }
+  findLakeSpans();
 
   // a coarse bucket grid, so `heightAt` can ask "am I under a bridge?" without walking the list
   const CROSS_BUCKET = 96;
@@ -2856,7 +3253,7 @@ export function makeTerrain(world, planet = null, opts = {}) {
     return best;
   }
 
-  return {
+  const self = {
     world, planet, relief, hasSea, seaLevel, widthM, depthM, metresPerCell: M_PER_CELL,
     width: w, height: h,
     riverPaths, roadPaths, lakes,
@@ -2866,6 +3263,14 @@ export function makeTerrain(world, planet = null, opts = {}) {
      * channel under each one alone. See `findCrossings`.
      */
     crossings,
+    /**
+     * R27 M6 — every ford: `{ kind: 'ford', x, z, tx, tz, halfLength, halfWidth, stone, water, road,
+     * klass, river }`. The road is laid down to the stones (`fordDips`) and `heightAt` grades the
+     * channel to it; js/features.js draws the flagstones.
+     */
+    fords: fordList,
+    /** R27 M6 — the short lake causeways (a lake span of 25 m or less), for their culvert mouths. */
+    causeways: causewayList,
     /** How many lake cells were pushed out of a settlement's footprint, for the tests. */
     drainedForTowns: drained,
     /** …and how many were a single blue pixel rather than a body of water. */
@@ -2900,7 +3305,12 @@ export function makeTerrain(world, planet = null, opts = {}) {
      * clay bank standing in one is standing in mid-air over a river — which is what the user saw as
      * *"there is a tower inside of the bridge"*. One list, every reader.
      */
-    bridgedAt: (x, z, pad = 0) => spannedAt(x, z, pad),
+    bridgedAt: (x, z, pad = 0) => spannedAt(x, z, pad) || plannedAt(x, z, pad),
+    /**
+     * R27 M6 — every crossing's plan (js/bridge-plan.js), made once. js/ground.js and js/features.js
+     * read these rather than planning their own, so there is one plan per bridge in the game.
+     */
+    bridgePlans: () => bridgePlanList(),
 
     /** The graded height of the road at a point — already lifted clear of any river. Null off-road. */
     roadSurfaceAt(x, z) {
@@ -2944,6 +3354,59 @@ export function makeTerrain(world, planet = null, opts = {}) {
       };
     },
   };
+
+  /**
+   * R27 M6 — A BRIDGE IS AS LONG AS ITS PLAN, NOT AS LONG AS ITS CROSSING.
+   *
+   * M5 left trails at 4.5 m instead of 4 because one bridge on seed 4477 (12157, 1343 at Super tiny)
+   * "filed a deck 0.55 m above its drawn deck". Measured, it did not: the deck colliders matched
+   * the drawn deck to a millimetre. What stood 0.55 m proud was a MARKET STALL. That bridge's road
+   * ends over the water, so `planBridge` gives it a LANDING — the deck carries straight on past the
+   * crossing's footprint and ramps down to the first dry ground (round 23). Everything that places
+   * things on the ground asks `bridgedAt`, and `bridgedAt` only knew the footprint — so the ground
+   * under the landing read as free, and a narrower trail pushed `roadAt` there under the 0.45 a
+   * stall checks. The stall's solid top then stood in the middle of the ramp you walk down.
+   *
+   * So `bridgedAt` answers for the whole drawn deck: the footprint (`spannedAt`, which is also
+   * what `heightAt` leaves open) OR anywhere a plan's deck runs, landings included. The plans are
+   * made lazily from this very terrain, and while they are being made `bridgedAt` answers with
+   * the footprint alone — which is exactly what `planBridge` has always seen, so a plan comes out
+   * the same whoever asks first.
+   */
+  let plansMade = null, planning = false;
+  const planMap = new Map();
+  function bridgePlanList() {
+    if (plansMade) return plansMade;
+    planning = true;
+    try {
+      plansMade = crossings.map(c => planBridge(c, self));
+    } finally { planning = false; }
+    for (const plan of plansMade) {
+      const r = Math.max(-plan.from, plan.to) + plan.halfWidth + CROSS_PAD;
+      const c = plan.crossing;
+      for (let bx = Math.floor((c.x - r) / CROSS_BUCKET); bx <= Math.floor((c.x + r) / CROSS_BUCKET); bx++) {
+        for (let bz = Math.floor((c.z - r) / CROSS_BUCKET); bz <= Math.floor((c.z + r) / CROSS_BUCKET); bz++) {
+          const k = crossKey(bx, bz);
+          if (!planMap.has(k)) planMap.set(k, []);
+          planMap.get(k).push(plan);
+        }
+      }
+    }
+    return plansMade;
+  }
+  function plannedAt(x, z, pad = 0) {
+    if (planning || !crossings.length) return false;
+    bridgePlanList();
+    const list = planMap.get(crossKey(Math.floor(x / CROSS_BUCKET), Math.floor(z / CROSS_BUCKET)));
+    if (!list) return false;
+    for (const plan of list) {
+      const dx = x - plan.crossing.x, dz = z - plan.crossing.z;
+      const along = dx * plan.tx + dz * plan.tz, across = dx * plan.nx + dz * plan.nz;
+      if (along >= plan.from - pad && along <= plan.to + pad && Math.abs(across) <= plan.halfWidth + pad) return true;
+    }
+    return false;
+  }
+  return self;
 }
 
 /** A plain-language line about where you are, for the HUD. */

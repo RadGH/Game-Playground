@@ -55,6 +55,45 @@ export const LANDING_GRADE = 0.16;
 const BEAM = [0x5a / 255, 0x46 / 255, 0x32 / 255];
 const RAIL = [0x4e / 255, 0x3c / 255, 0x2b / 255];
 const STONE = [0x8a / 255, 0x82 / 255, 0x75 / 255];
+const DRESSED = [0x9c / 255, 0x93 / 255, 0x83 / 255];     // an arch's deck and parapet: cut stone
+const TIMBER = [0x4a / 255, 0x3a / 255, 0x2a / 255];      // a trestle's bents: tarred timber
+
+/**
+ * R27 M6 — THREE KINDS OF BRIDGE, chosen from what the crossing record already carries.
+ *
+ *   - `arch`    — a highway over a short span: cut stone, an arched underside, stone parapets
+ *   - `trestle` — anything over a long span, and every lake crossing: timber bents close together
+ *   - `plank`   — everything else (the round-23 bridge)
+ *
+ * THE DECK IS THE SAME IN ALL THREE. Every style's top face is built from `plan.samples`, which is
+ * what the colliders are filed from, so a style can never move where you stand. Only the underside,
+ * the piers and the rails change — tests/round27-bridges.test.js reads the drawn deck back out of
+ * the vertex buffer for every style to hold that.
+ */
+export const ARCH_MAX = 40;          // metres of crossing an arch will span (highways only)
+export const TRESTLE_MIN = 60;       // metres of crossing past which a bridge is a trestle
+export const ARCH_BAY = 14;          // the widest one arch may be before it needs a pier
+export const BRIDGE_STYLES = ['arch', 'trestle', 'plank'];
+
+/** Which style a crossing is built in. `span` is the crossing's full length, bank to bank. */
+export function bridgeStyle(c) {
+  const span = 2 * (c.halfLength ?? 12);
+  if (c.over === 'lake') return 'trestle';
+  if (c.klass === 'highway' && span <= ARCH_MAX) return 'arch';
+  if (span > TRESTLE_MIN) return 'trestle';
+  return 'plank';
+}
+
+/**
+ * What each style is made of. `rail` is BOTH the drawn rail and the rail collider (see
+ * `railRuns`), `pier` is both the drawn pier and its collider (see `piersOf`).
+ */
+export const STYLE_PARTS = {
+  plank: { deck: BEAM, rail: { h: 1.1, t: 0.25, rgb: RAIL }, pier: { every: 9, thick: 0.9, rgb: STONE } },
+  trestle: { deck: BEAM, rail: { h: 1.1, t: 0.25, rgb: RAIL }, pier: { every: 6, thick: 0.45, rgb: TIMBER } },
+  arch: { deck: DRESSED, rail: { h: 0.95, t: 0.45, rgb: DRESSED }, pier: { thick: 1.6, rgb: STONE } },
+};
+const partsOf = plan => STYLE_PARTS[plan.style] || STYLE_PARTS.plank;
 
 const smooth = (a, b, v) => {
   const t = Math.max(0, Math.min(1, (v - a) / (b - a)));
@@ -176,7 +215,27 @@ export function planBridge(crossing, terrain) {
       top: (a.top + b.top) / 2, slope: (b.top - a.top) / len,
     });
   }
+  /**
+   * R27 M6 — WHICH WAY THE WATER RUNS UNDER IT (`crossing.river`). A pier stands along the current,
+   * not along the deck's normal, so a road crossing at forty degrees gets skewed piers the water
+   * flows past rather than walls it runs into. A lake has no current: its piers square to the deck.
+   */
+  let fx = -tz, fz = tx;
+  const water = c.river != null ? terrain.riverPaths?.find(r => r.id === c.river) : null;
+  if (water?.points?.length > 1) {
+    let best = 0, bd = Infinity;
+    for (let k = 0; k + 1 < water.points.length; k++) {
+      const d = Math.hypot(water.points[k][0] - c.x, water.points[k][1] - c.z);
+      if (d < bd) { bd = d; best = k; }
+    }
+    const a = water.points[best], b = water.points[best + 1];
+    const l = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
+    fx = (b[0] - a[0]) / l; fz = (b[1] - a[1]) / l;
+    // never so skewed that a pier runs nearly along the deck
+    if (Math.abs(fx * -tz + fz * tx) < 0.55) { fx = -tz; fz = tx; }
+  }
   return {
+    style: bridgeStyle(c), flow: [fx, fz],
     crossing: c, tx, tz, nx: -tz, nz: tx, halfLength: L, halfWidth: hw, angle, samples, pieces,
     // how far the drawn deck really runs (a landing carries it past the footprint), and what each
     // end meets: 'ground', 'bridge', 'landing' or 'drop'
@@ -206,6 +265,7 @@ export const RAIL_H = 1.1, RAIL_T = 0.25;
  */
 export function railRuns(plan, others = []) {
   const { samples, nx, nz, halfWidth: hw } = plan;
+  const RAIL_T = partsOf(plan).rail.t;
   const inner = plan.halfLength - Math.min(END_RAMP, plan.halfLength / 3);
   const railFrom = plan.ends?.back === 'landing' ? plan.from + 1.5 : -inner;
   const railTo = plan.ends?.fwd === 'landing' ? plan.to - 1.5 : inner;
@@ -233,6 +293,7 @@ export function railRuns(plan, others = []) {
  */
 export function fileRails(plan, field, others = []) {
   const { nx, nz } = plan;
+  const { h: RAIL_H, t: RAIL_T } = partsOf(plan).rail;
   for (const { a, b, o } of railRuns(plan, others)) {
     const lo = Math.min(a.top, b.top) - 0.6, hi = Math.max(a.top, b.top) + RAIL_H;
     field.addSegment(a.x + nx * o, a.z + nz * o, b.x + nx * o, b.z + nz * o, RAIL_T / 2, RAIL_H, { band: [lo, hi] });
@@ -243,6 +304,97 @@ export function fileRails(plan, field, others = []) {
 /** File a plan's deck into an ObstacleField (js/collide.js). */
 export function fileDeck(plan, field) {
   for (const p of plan.pieces) field.addDeck(p.x, p.z, p.angle, p.halfLength, p.halfWidth, p.top, p.slope);
+  return field;
+}
+
+/** Deeper than this under the deck's underside, and a bridge needs holding up. Metres. */
+export const PIER_DEPTH = 0.8;
+
+/**
+ * R27 M6 — EVERY PIER A BRIDGE HAS, ONE LIST FOR THE DRAWN PIER AND ITS COLLIDER.
+ *
+ * Round 23's piers were two 0.8 m posts per bent, drawn and never filed: a swimmer or a boat went
+ * straight through them. A pier now:
+ *
+ *   - spans the DECK (its length along the current covers the whole deck width), so the drawn pier
+ *     and the thing that stops you are the same shape;
+ *   - stands along the current (`plan.flow`), not square to the deck;
+ *   - finds its footing at its four FOOTPRINT CORNERS and stands on the lowest one, so a pier on a
+ *     sloping bank never floats off its downhill side;
+ *   - runs from there up to the deck's underside.
+ *
+ * Each record: `{ d, x, z, ux, uz, len, thick, bottom, top }` — `u` is the pier's long axis
+ * (the current), `len` its half-length along it, `thick` its half-thickness along the deck.
+ * Plank piers stand every 9 m where there is depth; trestle bents every 6 m; an arch's piers
+ * divide its deep stretch into bays of at most `ARCH_BAY`.
+ */
+export function piersOf(plan, terrain) {
+  if (plan._piers && plan._piersFor === terrain) return plan._piers;
+  const { tx, tz, halfWidth: hw } = plan;
+  const c = plan.crossing;
+  const parts = partsOf(plan).pier;
+  const [ux, uz] = plan.flow || [plan.nx, plan.nz];
+  // how far along the current the deck strip runs: its width over the sine of the skew
+  const skew = Math.max(0.55, Math.abs(ux * plan.nx + uz * plan.nz));
+  const len = Math.min(hw * 1.8, (hw - 0.2) / skew);
+  const thick = parts.thick / 2;
+  const at = d => [c.x + tx * d, c.z + tz * d];
+  // A skewed pier reaches along the deck as well as across it, so its top is the LOWEST underside
+  // anywhere over its footprint — on a landing ramp the far end would otherwise come up through the
+  // planks. Sampled every half metre of that reach.
+  const reachAlong = len * Math.abs(ux * tx + uz * tz) + thick * Math.abs(-uz * tx + ux * tz);
+  const under = d => {
+    let lo = Infinity;
+    const n = Math.max(1, Math.ceil((2 * reachAlong) / 0.5));
+    for (let k = 0; k <= n; k++) lo = Math.min(lo, deckTopAlong(plan, d - reachAlong + (2 * reachAlong * k) / n));
+    return lo - DECK_THICK;
+  };
+
+  let ds = [];
+  if (plan.style === 'arch') {
+    // the stretch with real depth under it, split into equal bays
+    let a = null, b = null;
+    for (let d = plan.from; d <= plan.to; d += 1) {
+      const [x, z] = at(d);
+      if (deckTopAlong(plan, d) - DECK_THICK - terrain.heightAt(x, z) >= PIER_DEPTH) { if (a === null) a = d; b = d; }
+    }
+    if (a !== null && b - a > 2) {
+      const n = Math.max(1, Math.ceil((b - a) / ARCH_BAY));
+      plan.bays = { a, b, n };
+      for (let k = 1; k < n; k++) ds.push(a + ((b - a) * k) / n);
+    } else plan.bays = null;
+  } else {
+    const every = parts.every;
+    for (let d = plan.from + every / 2; d <= plan.to - every / 2 + 1e-6; d += every) ds.push(d);
+  }
+  const out = [];
+  for (const d of ds) {
+    const [x, z] = at(d);
+    const top = under(d);
+    // the footing: the lowest of the four corners of the footprint
+    let lowest = Infinity;
+    for (const [su, sv] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]) {
+      const cx = x + ux * len * su - uz * thick * sv, cz = z + uz * len * su + ux * thick * sv;
+      lowest = Math.min(lowest, terrain.heightAt(cx, cz));
+    }
+    if (top - lowest < PIER_DEPTH) continue;
+    out.push({ d, x, z, ux, uz, len, thick, bottom: lowest - 0.1, top, lowest });
+  }
+  plan._piers = out; plan._piersFor = terrain;
+  return out;
+}
+
+/**
+ * File a plan's piers into an ObstacleField as height-banded wall segments — the round-23 rail
+ * pattern. Each is solid only for feet between the river bed and the deck's underside: a swimmer,
+ * a boat or somebody wading under the bridge is stopped; a walker on the deck, whose feet are above
+ * the underside, is not.
+ */
+export function filePiers(plan, field, terrain) {
+  for (const p of piersOf(plan, terrain)) {
+    field.addSegment(p.x - p.ux * p.len, p.z - p.uz * p.len, p.x + p.ux * p.len, p.z + p.uz * p.len,
+      p.thick, p.top - p.bottom, { band: [p.bottom - 2, p.top] });
+  }
   return field;
 }
 
@@ -288,9 +440,10 @@ function pushBox(out, corners, rgb) {
  */
 export function bridgeGeometry(plan, terrain, out = { position: [], normal: [], color: [], index: [] }, others = []) {
   const { samples, nx, nz, halfWidth: hw, tx, tz } = plan;
+  const parts = partsOf(plan);
   const at = (s, side, dy) => [s.x + nx * side, s.top + dy, s.z + nz * side];
 
-  // the deck, one slab per pair of samples
+  // the deck, one slab per pair of samples — the SAME in every style; only its colour changes
   for (let k = 0; k + 1 < samples.length; k++) {
     const a = samples[k], b = samples[k + 1];
     // corners counter-clockwise from above: a-left, b-left, b-right, a-right. With +Z along and
@@ -298,10 +451,11 @@ export function bridgeGeometry(plan, terrain, out = { position: [], normal: [], 
     pushBox(out, orderCCW(
       [at(a, hw, -DECK_THICK), at(b, hw, -DECK_THICK), at(b, -hw, -DECK_THICK), at(a, -hw, -DECK_THICK)],
       [at(a, hw, 0), at(b, hw, 0), at(b, -hw, 0), at(a, -hw, 0)],
-    ), BEAM);
+    ), parts.deck);
   }
 
-  // the rails: a post-and-beam each side, stopping short of the ramps so they never stand on grass
+  // the rails (a parapet on an arch): stopping short of the ramps so they never stand on grass
+  const { h: RAIL_H, t: RAIL_T, rgb: RAIL_RGB } = parts.rail;
   for (const r of railRuns(plan, others)) {
     const { a, b, o, side } = r;
     const lo = side * RAIL_T / 2;
@@ -309,26 +463,186 @@ export function bridgeGeometry(plan, terrain, out = { position: [], normal: [], 
       at(a, o + lo, 0), at(b, o + lo, 0), at(b, o - lo, 0), at(a, o - lo, 0),
     ], [
       at(a, o + lo, RAIL_H), at(b, o + lo, RAIL_H), at(b, o - lo, RAIL_H), at(a, o - lo, RAIL_H),
-    ]), RAIL);
+    ]), RAIL_RGB);
   }
 
-  // piers, where the ground has fallen away far enough under the deck to need holding up
-  const PIER = 0.8, EVERY = 9;
-  for (let d = (plan.from ?? -plan.halfLength) + EVERY / 2; d <= (plan.to ?? plan.halfLength) - EVERY / 2; d += EVERY) {
-    const top = deckTopAlong(plan, d) - DECK_THICK;
-    for (const side of [1, -1]) {
-      const cx = plan.crossing.x + tx * d + nx * side * (hw - 1.0);
-      const cz = plan.crossing.z + tz * d + nz * side * (hw - 1.0);
-      const ground = terrain.heightAt(cx, cz);
-      if (top - ground < 0.8) continue;
-      const h = PIER / 2;
-      const corner = (u, v, y) => [cx + tx * u + nx * v, y, cz + tz * u + nz * v];
-      const bottom = ground - 0.4;
+  const piers = piersOf(plan, terrain);
+  const c = plan.crossing;
+  /** A box standing along the current: centre (x, z), half-length `l` along u, half-thickness `t`. */
+  const pierBox = (x, z, ux, uz, l, t, y0, y1, rgb) => {
+    const corner = (su, sv, y) => [x + ux * l * su - uz * t * sv, y, z + uz * l * su + ux * t * sv];
+    pushBox(out, orderCCW(
+      [corner(-1, 1, y0), corner(1, 1, y0), corner(1, -1, y0), corner(-1, -1, y0)],
+      [corner(-1, 1, y1), corner(1, 1, y1), corner(1, -1, y1), corner(-1, -1, y1)],
+    ), rgb);
+  };
+
+  if (plan.style === 'trestle') {
+    /**
+     * A TRESTLE BENT: posts along the current (as many as the road is wide — `crossing.roadHalf`),
+     * a cap beam under the deck and one diagonal brace per pair of posts. The collider is the whole
+     * bent (see `filePiers`), because a swimmer does not squeeze between the posts of a bent.
+     */
+    const roadHalf = c.roadHalf ?? hw - 1;
+    for (const p of piers) {
+      const posts = Math.max(2, Math.round((2 * roadHalf) / 2.2) + 1);
+      const reach = p.len - 0.25;
+      const at_ = k => -reach + (2 * reach * k) / (posts - 1);
+      for (let k = 0; k < posts; k++) {
+        const o = at_(k);
+        pierBox(p.x + p.ux * o, p.z + p.uz * o, p.ux, p.uz, 0.16, 0.16, p.bottom, p.top, TIMBER);
+      }
+      pierBox(p.x, p.z, p.ux, p.uz, p.len, 0.2, p.top - 0.32, p.top, TIMBER);          // cap beam
+      // the braces: a thin plank from the foot of one post to the head of the next
+      const foot = Math.max(p.bottom + 0.3, p.top - 4);
+      for (let k = 0; k + 1 < posts; k++) {
+        const o0 = at_(k), o1 = at_(k + 1), up = k % 2 === 0;
+        const y0 = up ? foot : p.top - 0.35, y1 = up ? p.top - 0.35 : foot;
+        const P = (o, y, sv) => [p.x + p.ux * o - p.uz * 0.07 * sv, y, p.z + p.uz * o + p.ux * 0.07 * sv];
+        // a parallelogram prism: bottom edge from (o0, y0) to (o1, y1), 0.22 m tall
+        pushBox(out, orderCCW(
+          [P(o0, y0, 1), P(o1, y1, 1), P(o1, y1, -1), P(o0, y0, -1)],
+          [P(o0, y0 + 0.22, 1), P(o1, y1 + 0.22, 1), P(o1, y1 + 0.22, -1), P(o0, y0 + 0.22, -1)],
+        ), TIMBER);
+      }
+    }
+  } else {
+    for (const p of piers) pierBox(p.x, p.z, p.ux, p.uz, p.len, p.thick, p.bottom, p.top, parts.pier.rgb);
+  }
+
+  if (plan.style === 'arch' && plan.bays) {
+    /**
+     * THE ARCHED UNDERSIDE. Stone is filled in under the deck's own underside, down to a curve that
+     * springs from each pier (or bank) and rises to the deck in the middle of the bay. The fill's top
+     * is the deck's underside — never above it — so an arch cannot move where you stand; that is the
+     * rule tests/round27-bridges.test.js holds every style to.
+     */
+    const { a, b, n } = plan.bays;
+    const bay = (b - a) / n;
+    const springAt = d => {
+      const [x, z] = [c.x + tx * d, c.z + tz * d];
+      const water = Number.isFinite(c.surf) ? c.surf + 0.35 : -Infinity;
+      return Math.max(terrain.heightAt(x, z), water);
+    };
+    const STEP = 1;
+    for (let d = a; d < b - 1e-6; d += STEP) {
+      const e = Math.min(b, d + STEP);
+      const k = Math.min(n - 1, Math.floor(((d + e) / 2 - a) / bay));
+      const b0 = a + k * bay, b1 = b0 + bay;
+      const s0 = springAt(b0), s1 = springAt(b1);
+      const curve = x => {
+        const u = Math.max(0, Math.min(1, (x - b0) / bay));
+        const under = deckTopAlong(plan, x) - DECK_THICK;
+        const spring = s0 + (s1 - s0) * u;
+        const rise = Math.max(0, under - spring);
+        // a segmental arch: full at the springing, gone at the crown, a circle's quarter between
+        const w = 1 - Math.sqrt(Math.max(0, 1 - (2 * u - 1) ** 2));
+        return under - rise * w - 0.12;
+      };
+      const S = d2 => ({ x: c.x + tx * d2, z: c.z + tz * d2, top: deckTopAlong(plan, d2) });
+      const sa = S(d), sb = S(e);
+      const ya = curve(d), yb = curve(e);
+      const ua = sa.top - DECK_THICK, ub = sb.top - DECK_THICK;
+      if (ua - ya < 0.05 && ub - yb < 0.05) continue;
+      const pt = (s, side, y) => [s.x + nx * side, y, s.z + nz * side];
+      const w_ = hw - 0.05;
       pushBox(out, orderCCW(
-        [corner(-h, h, bottom), corner(h, h, bottom), corner(h, -h, bottom), corner(-h, -h, bottom)],
-        [corner(-h, h, top), corner(h, h, top), corner(h, -h, top), corner(-h, -h, top)],
+        [pt(sa, w_, ya), pt(sb, w_, yb), pt(sb, -w_, yb), pt(sa, -w_, ya)],
+        [pt(sa, w_, ua), pt(sb, w_, ub), pt(sb, -w_, ub), pt(sa, -w_, ua)],
       ), STONE);
     }
+  }
+  return out;
+}
+
+// ------------------------------------------------------------------ fords and lake causeways
+
+const FLAG = [0x7d / 255, 0x78 / 255, 0x6c / 255];
+const FLAG_DARK = [0x66 / 255, 0x62 / 255, 0x58 / 255];
+const CULVERT = [0x1c / 255, 0x1d / 255, 0x20 / 255];
+/** How far a flagstone's top stands above the ground `heightAt` grades a ford to. */
+export const FLAG_PROUD = 0.06;
+
+/**
+ * R27 M6 — A FORD'S FLAGSTONES. `ford` is a record from `terrain.fords` (js/planet.js `fordDips`).
+ * The road there is laid 0.3 m under the water; each stone sits on `heightAt` at its own centre, a
+ * few centimetres proud, so the water over it is the ford's depth less `FLAG_PROUD` — which is what
+ * tests/round27-bridges.test.js measures, stone by stone. Stones only where the ground is under the
+ * water: up the bank the road ribbon is the path.
+ */
+export function fordGeometry(ford, terrain, out = { position: [], normal: [], color: [], index: [] }) {
+  const { tx, tz } = ford, nx = -tz, nz = tx;
+  const half = ford.stonesHalf ?? ford.halfLength;
+  const across = Math.max(1, Math.round((2 * ford.halfWidth) / 1.1));
+  let k = 0;
+  for (let d = -half; d <= half + 1e-6; d += 0.9) {
+    for (let j = 0; j < across; j++) {
+      k++;
+      // a stone's own small wobble, the same every time for the same ford
+      const h1 = Math.sin((ford.x + d * 13.1 + j * 7.7) * 12.9898) * 43758.5453, r1 = h1 - Math.floor(h1);
+      const o = -ford.halfWidth + (2 * ford.halfWidth * (j + 0.5)) / across + (r1 - 0.5) * 0.18;
+      const x = ford.x + tx * d + nx * o, z = ford.z + tz * d + nz * o;
+      const w = terrain.waterAt?.(x, z);
+      // only on the causeway's own bed: a road that bends across the ford takes its stones with it,
+      // and a stone off the carriageway would be down on the river bed
+      if (!w || w.depth <= 0.26 || w.depth > 0.5) continue;
+      // proud of the bed, but never so proud that less than a quarter metre of water is left over it
+      const g = terrain.heightAt(x, z), top = Math.max(g + 0.01, Math.min(g + FLAG_PROUD, w.surface - 0.25));
+      const a = 0.34 + r1 * 0.08, b = 0.26 + (1 - r1) * 0.08;
+      const corner = (u, v, y) => [x + tx * u + nx * v, y, z + tz * u + nz * v];
+      pushBox(out, orderCCW(
+        [corner(-b, a, g - 0.1), corner(b, a, g - 0.1), corner(b, -a, g - 0.1), corner(-b, -a, g - 0.1)],
+        [corner(-b, a, top), corner(b, a, top), corner(b, -a, top), corner(-b, -a, top)],
+      ), k % 3 ? FLAG : FLAG_DARK);
+    }
+  }
+  /**
+   * …and a row of marker stones either side of the causeway, just off the carriageway, standing a
+   * hand's breadth out of the water — the flags themselves are under 0.2-0.3 m of it, and the river
+   * sheet hides them, so these are what says "cross here" from the bank. Drawn only; nobody walks on
+   * them and they stop nobody.
+   */
+  for (const side of [1, -1]) {
+    for (let d = -half + 0.4; d <= half - 0.4 + 1e-6; d += 1.7) {
+      const o = side * (ford.halfWidth + 0.45);
+      const x = ford.x + tx * d + nx * o, z = ford.z + tz * d + nz * o;
+      const w = terrain.waterAt?.(x, z);
+      if (!w || w.depth <= 0.05) continue;
+      const g = terrain.heightAt(x, z), top = w.surface + 0.22;
+      const r = 0.24;
+      const corner = (u, v, y) => [x + tx * u + nx * v, y, z + tz * u + nz * v];
+      pushBox(out, orderCCW(
+        [corner(-r, r, g - 0.1), corner(r, r, g - 0.1), corner(r, -r, g - 0.1), corner(-r, -r, g - 0.1)],
+        [corner(-r * 0.8, r * 0.8, top), corner(r * 0.8, r * 0.8, top), corner(r * 0.8, -r * 0.8, top), corner(-r * 0.8, -r * 0.8, top)],
+      ), FLAG_DARK);
+    }
+  }
+  return out;
+}
+
+/**
+ * R27 M6 — A SHORT LAKE CAUSEWAY'S TWO CULVERT MOUTHS (dressing only). A road over 25 m or less of
+ * lake keeps round 17's causeway; a stone-framed opening either side at the waterline says that the
+ * embankment lets the water through rather than damming it. `cw` is a record from
+ * `terrain.causeways`.
+ */
+export function culvertGeometry(cw, terrain, out = { position: [], normal: [], color: [], index: [] }) {
+  const { tx, tz } = cw, nx = -tz, nz = tx;
+  const y0 = cw.surf - 0.35, y1 = Math.max(y0 + 0.4, Math.min(cw.top - 0.2, cw.surf + 0.55));
+  for (const side of [1, -1]) {
+    const off = side * (cw.halfWidth + 1.6);
+    const cx = cw.x + nx * off, cz = cw.z + nz * off;
+    const box = (u0, u1, v0, v1, ya, yb, rgb) => {
+      const corner = (u, v, y) => [cx + tx * u + nx * v * side, y, cz + tz * u + nz * v * side];
+      pushBox(out, orderCCW(
+        [corner(u0, v1, ya), corner(u1, v1, ya), corner(u1, v0, ya), corner(u0, v0, ya)],
+        [corner(u0, v1, yb), corner(u1, v1, yb), corner(u1, v0, yb), corner(u0, v0, yb)],
+      ), rgb);
+    };
+    box(-0.9, 0.9, -1.6, 0, y0, y1 - 0.05, CULVERT);          // the dark mouth, back into the bank
+    box(-1.25, -0.9, -1.2, 0.15, y0, y1 + 0.3, STONE);        // a jamb
+    box(0.9, 1.25, -1.2, 0.15, y0, y1 + 0.3, STONE);          // the other
+    box(-1.25, 1.25, -1.2, 0.15, y1, y1 + 0.3, STONE);        // the lintel
   }
   return out;
 }

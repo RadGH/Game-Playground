@@ -35,7 +35,7 @@ import { waterRibbon, lakeSheet, roadDeck } from './water-plan.js';
 import { makeRng } from '../../../worldgen/js/noise.js';
 import { M_PER_CELL } from './planet.js';
 import { ObstacleField, BUILDING_SOLIDS } from './collide.js';
-import { bridgeGeometry, fileDeck, fileRails } from './bridge-plan.js';
+import { bridgeGeometry, fileDeck, fileRails, filePiers, fordGeometry, culvertGeometry } from './bridge-plan.js';
 import { bridgeIndex } from './ground.js';
 
 /**
@@ -1860,6 +1860,14 @@ export function createFeatures(scene, terrain, opts = {}) {
       bridgeGeometry(plan, terrain, bridgeData, bridgePlans);
       fileDeck(plan, solids);
       fileRails(plan, solids, bridgePlans);
+      filePiers(plan, solids, terrain);          // R27 M6: a pier you can see is a pier that stops you
+    }
+    // R27 M6: a ford's flagstones and a short lake causeway's culverts, in the same mesh
+    for (const ford of terrain.fords || []) {
+      if (Math.hypot(ford.x - px, ford.z - pz) <= radius) fordGeometry(ford, terrain, bridgeData);
+    }
+    for (const cw of terrain.causeways || []) {
+      if (Math.hypot(cw.x - px, cw.z - pz) <= radius) culvertGeometry(cw, terrain, bridgeData);
     }
     bridgeMesh.geometry.dispose();
     const bg = new THREE.BufferGeometry();

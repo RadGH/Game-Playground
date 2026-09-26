@@ -257,6 +257,9 @@ test('a road whose carriageway is over a river gets a bridge, whatever the angle
           // a metre of slack at the very edge of a deck: `halfWidth` is measured from the road's
           // centre line and two roads meeting inside one channel put a sample just past it
           if (t.crossings.some(c => covers(c, x, z, 1))) { spanned++; continue; }
+          // R27 M6: a ford World Forge asked for is crossed on its stones — a plug it is not, and
+          // tests/round27-bridges.test.js measures the water over every one of them
+          if ((t.fords || []).some(f => covers({ ...f, halfLength: f.stonesHalf }, x, z, 1))) { spanned++; continue; }
           missed.push(`seed ${seed} road ${r.id} at ${x | 0},${z | 0}`);
         }
       }
@@ -272,7 +275,9 @@ test('every bridge deck is clear above the water it spans', () => {
   // `bridgeClearance`. Anything under the first is not a bridge, it is a ford.
   let checked = 0;
   for (const { seed, t } of worlds) {
-    for (const c of t.crossings) {
+    // R27 M6: a lake span is a LOW trestle by design (the road rides `roadRide` over a lake, which
+    // is still water with no current and no flood); this rule is about rivers
+    for (const c of t.crossings.filter(q => q.over !== 'lake')) {
       checked++;
       assert.ok(c.deck > c.surf + 1.4,
         `seed ${seed}: a "bridge" at ${c.x | 0},${c.z | 0} stands ${(c.deck - c.surf).toFixed(2)} m over its river`);

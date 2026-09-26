@@ -124,6 +124,9 @@ test('seed 47 lands on the reported world, and the reported spot is next to a br
 });
 
 test('the bridge you see is the bridge you stand on — every metre, every bridge, three worlds', () => {
+  // R27 M6: bridges come in three styles now (js/bridge-plan.js `bridgeStyle`) and only their
+  // undersides differ, so the same loop measures all three — and says which it measured
+  const styles = {};
   for (const seed of SEEDS) {
     const w = worldFor(seed);
     const t = w.features.settlements.find(s => (s.size || 1) >= 4) || w.features.settlements[0];
@@ -134,6 +137,7 @@ test('the bridge you see is the bridge you stand on — every metre, every bridg
     let checked = 0, worst = 0, where = '';
     for (const plan of plans) {
       const { crossing: c, halfWidth: hw, nx, nz } = plan;
+      styles[plan.style] = (styles[plan.style] || 0) + 1;
       for (let d = plan.from + 0.05; d <= plan.to - 0.05; d += 0.7) {
         for (const off of [-(hw - 1.2), 0, hw - 1.2]) {
           const x = c.x + plan.tx * d + nx * off, z = c.z + plan.tz * d + nz * off;
@@ -151,6 +155,7 @@ test('the bridge you see is the bridge you stand on — every metre, every bridg
     assert.ok(worst < 0.02, `seed ${seed}: the drawn deck and the collider disagree by ${worst.toFixed(3)} m at ${where}`);
     assert.ok(checked > 200, `seed ${seed}: only ${checked} deck points measured`);
   }
+  for (const style of ['arch', 'trestle', 'plank']) assert.ok(styles[style] > 0, `no ${style} bridge was measured: ${JSON.stringify(styles)}`);
 });
 
 test('the reported bridge: the old flat box stood half a metre over its collider; this one does not', () => {

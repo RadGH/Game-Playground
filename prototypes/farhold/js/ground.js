@@ -38,8 +38,9 @@ export function bridgeIndex(terrain) {
   if (idx) return idx;
   const field = new ObstacleField(32);
   const plans = [];
-  for (const c of terrain.crossings || []) {
-    const plan = planBridge(c, terrain);
+  // R27 M6: the terrain's own plans when it has them, so `bridgedAt` and the decks are one list
+  const made = terrain.bridgePlans?.() || (terrain.crossings || []).map(c => planBridge(c, terrain));
+  for (const plan of made) {
     fileDeck(plan, field);
     plans.push(plan);
   }
@@ -73,7 +74,22 @@ export function groundAt(terrain, x, z, feet = Infinity, radius = 0) {
 export function wetAt(terrain, x, z, feet = Infinity, { test = 'underwater' } = {}) {
   const wet = test === 'waterAt' ? !!terrain.waterAt(x, z) : !!terrain.underwater(x, z);
   if (!wet) return false;
+  // R27 M6: water you can WADE is not water you are in — a ford's stones sit 0.3 m under the
+  // surface, and a wolf that will not follow you across one is a wolf that never leaves its bank
+  if (wadeable(terrain, x, z)) return false;
   return deckAt(terrain, x, z, feet) === null;
+}
+
+/**
+ * R27 M6 — THE WADE RULE, one number for everybody. Water shallower than `WADE_DEPTH` is walked
+ * through (slowly — see js/player.js), never swum: a ford, a beach, the edge of a stream. The
+ * player, a mount, a vehicle, an enemy and a companion all ask this, so a ford is a ford to all of
+ * them. Depth is `terrain.waterAt`'s, the same number the swim test in js/player.js reads.
+ */
+export const WADE_DEPTH = 0.5;
+export function wadeable(terrain, x, z) {
+  const w = terrain.waterAt?.(x, z);
+  return !!w && w.depth < WADE_DEPTH;
 }
 
 export { CLEARANCE };

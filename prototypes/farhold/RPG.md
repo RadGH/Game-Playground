@@ -4563,3 +4563,95 @@ normaliser), `round23-uniques.test.js` (the five rows, existing powers, each hoo
 `save.test.js` (`wl:` rides the ledger). Browser: `tests/round27-warcamps.spec.js` walks up to a
 camp, checks banners, walls and a pure garrison, kills the warlord and watches the rout and the
 return; screenshots in `research/round27-warcamps/`.
+
+### Round 27 — Bridges by kind, solid piers, fords and lake spans (M6)
+
+**The trail width first, because it was not what M5 thought.** M5 held trails at 4.5 m because at 4 m
+one bridge on seed 4477 (12157, 1343 at Super tiny) looked as if it filed a deck collider 0.55 m
+over its drawn deck. Measured, the deck colliders matched the drawn deck to a millimetre. The thing
+0.55 m proud was a **market stall**: that bridge's road ends over the water, so `planBridge` gives
+it a *landing* — the deck carries straight on past the crossing's footprint down to the far bank
+(round 23) — and every placement check asks `terrain.bridgedAt`, which only knew the footprint. A
+narrower trail dropped `roadAt` at the stall's spot to 0.43, under the 0.45 a stall checks, so the
+stall went up in the middle of the ramp you walk down. Fix at the root: `bridgedAt` now answers for
+the whole drawn deck, landings included (`plannedAt` at the bottom of `makeTerrain`, over the
+terrain's own lazily made `bridgePlans()`; while the plans are being made it answers with the
+footprint alone, which is what `planBridge` always saw, so a plan comes out the same whoever asks
+first). js/ground.js's walker index reads the same plans, so there is one plan per bridge in the
+game. **Trails are 4 m** (`ROAD_CLASS`).
+
+**Three styles** (`bridgeStyle` in js/bridge-plan.js, from the record: `klass`, the span, `over`):
+a highway over 40 m or less is a **stone arch** (cut-stone deck and parapets, piers splitting the
+deep stretch into bays of at most 14 m, a segmental arch filled in under the deck between them);
+anything over 60 m, and every lake span, is a **timber trestle** (bents every 6 m, one post per
+2.2 m of road — `crossing.roadHalf` — a cap beam and alternating braces); everything else is the
+round-23 **plank** bridge. The deck is the same list of samples in all three; only the underside,
+the piers and the rails change, and the rail collider is filed from the same style dimensions it is
+drawn with.
+
+**Solid piers** (`piersOf` / `filePiers`): one list for the drawn pier and its collider. A pier
+reaches across the whole deck, stands along the river's current (`crossing.river` — a road crossing
+at forty degrees gets skewed piers, a lake squares them to the deck), finds its footing at its four
+footprint corners and stands on the lowest, and runs up to the deck's underside. Its collider is a
+height-banded segment (the round-23 rail pattern): solid for feet between the bed and the underside,
+so a swimmer or a boat stops, a walker on the deck does not. One trap found on the way: a skewed
+pier reaches along the deck too, and on a landing ramp its far end came up through the planks by
+0.76 m — its top is now the lowest underside anywhere over its footprint.
+
+**Fords.** World Forge already calls a road over a river narrower than 2 a `ford` and makes it a
+node; nothing in Farhold read it. A ford is honoured when the river is narrow, the road is not a
+highway, a World Forge ford node is within 1.5 cells, no junction is within 24 m, no other river
+is near (at a confluence the other river's bridge would open a hole under the stones), the land
+stands at most 3.5 m over the stream, and the stones would be at least 0.5 m over the sea. Such a
+road is **not lifted** over that river (so `findCrossings` finds no bridge), and `fordDips` lays it
+into the water: vertices every 2 m across the channel at 0.3 m under the river's own surface there,
+and a straight 10% ramp out to the road it was. `heightAt` then grades the channel to it like any
+other road. Two findings: **most fords are a road that ENDS at the ford node** in mid-river (a spur
+to the landmark with nothing on the far side — round 23 gave these bridges a landing); a ford now
+carries such a road straight on across the water and 30 m up the far bank (`farBank`, decided in
+the lift pass so a ford that cannot reach a bank stays a bridge). And a road that ends at a node
+another road also ends at simply has its stones run to that end. js/bridge-plan.js `fordGeometry`
+draws the flagstones (never less than 0.25 m of water over one) and a row of marker stones either
+side standing out of the water, since the river sheet hides the flags. **Wading** (js/ground.js
+`WADE_DEPTH` 0.5, `wadeable`): water you can wade is not water an enemy, companion or townsperson
+refuses (`wetAt`), and js/player.js walks it at `wadeSpeed` 0.65 of the pace — on foot, mounted or
+driving. Swimming still needs 1.3 m.
+
+**Lake spans.** Where a road is raised over more than 25 m of open lake (a lake cell, the road
+above the water and above the land, and within 6 m of the water — a causeway), the run is cut into
+straight pieces (a piece ends where the road strays a metre off its chord, or at 60 m) and each is
+a crossing with `over: 'lake'`, built as a trestle; `heightAt` leaves its footprint as lake
+(`lakeCut`, taken out of `heightAt` so both read the same basin). Shorter runs keep round 17's
+causeway and get two culvert mouths (`terrain.causeways`, `culvertGeometry`, dressing only).
+**Finding: no standard world has one.** World Forge keeps roads off lakes and towns drain them; the
+only long "plug" found was seed 47 at full size, where a lake's cells sit 57 m under the land they
+are in (lake 147.7 m, ground 204 m) and the road runs along the hill between two 66 m pits. That is
+a lake/relief mismatch, not a causeway, and a 66 m trestle is not a lake narrows, so it is left
+alone (parked: the pit itself). The test lays three lake cells across real roads to prove the rule.
+
+**Acceptance, measured** (tests/round27-bridges.test.js, seeds 47 / 7 / 4477 / 1337 / 101 at
+Super tiny, fords and lakes also at full size):
+
+| | measured | bar |
+|---|---|---|
+| drawn deck vs what you stand on, every crossing (208), 56,562 points, all solids | 0.0008 m worst | ≤ 0.05 |
+| styles built | arch 1, trestle 84, plank 123; the one highway crossing ≤ 40 m is an arch | ≥ 1 each |
+| walker on js/player.js across each style | 1 arch, 8 trestles, 8 planks, none fell or swam | all |
+| swimmer and boat into a pier / between piers, 5 bridges | stopped / passed | — |
+| pier footing vs `heightAt` at its lowest corner, 1,494 piers | 0.100 m | ≤ 0.2 |
+| water over a ford, every metre (22 fords, 441 steps) | 0.30-0.34 m (300 steps on a drawn flag, all ≥ 0.25) | 0.2-0.5 |
+| walker across every ford | never swims; 0.65 of the pace on foot, mounted and driving | — |
+| fords on a highway | 0 | 0 |
+| causeway over lake water > 25 m | 0 on 8 worlds; laid lakes: 16 trestle spans, 1 culverted causeway, 3 walked | 0 |
+
+`makeTerrain` time is unchanged within noise (the bridge plans are made on the first `bridgedAt`).
+
+**Tests:** new `tests/round27-bridges.test.js` (13) and `tests/round27-bridges.spec.js` (one
+screenshot per style and of a ford, then a walk across the ford on the real keys; screenshots in
+`research/round27-bridges/`). `round23-bridge-gate.test.js`'s mesh-buffer loop now requires all
+three styles. `round27-roads.test.js`: the crossing-field orphan test is real (no exceptions; `over`
+included) and a second one checks `klass` / `roadHalf` / `river` are read as crossing fields; the
+subset-hash test excludes `ford` vertices by name, as it does landings; trails assert 4 m.
+`round17-worldgen.test.js`: a ford counts as covering the road over a river, and the deck-clearance
+rule is for rivers (a lake span is low by design). Still todo, not M6's file: the stronghold
+junction slot (`js/sites.js`).

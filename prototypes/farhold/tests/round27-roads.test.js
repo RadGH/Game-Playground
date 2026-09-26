@@ -211,7 +211,8 @@ test('a fold never touches a gentle road: seeds 7 and 4477 keep every point of e
       assert.ok(pieces, `seed ${seed}: road ${id} is gone`);
       if (pieces.some(r => r.folded || r.rejoined)) { excused++; continue; }
       const pts = [];
-      for (const r of pieces) for (const p of r.points) if (!p.cross && !p.landing) pts.push(p);
+      // R27 M6: a ford lays its own vertices ON the line (flagged `ford`), like a landing
+      for (const r of pieces) for (const p of r.points) if (!p.cross && !p.landing && !p.ford) pts.push(p);
       assert.equal(hash(pts), want, `seed ${seed}: road ${id} moved without being folded`);
       same++;
     }
@@ -336,7 +337,7 @@ test('three road classes, three widths, one owner (and the knob is read)', () =>
   for (const seed of SEEDS) for (const r of at(seed, 0.1).terrain.roadPaths) (halves[r.klass] ||= new Set()).add(r.half);
   assert.deepEqual([...halves.highway], [4.5]);
   assert.deepEqual([...halves.road], [3.5]);
-  assert.deepEqual([...halves.trail], [2.25]);
+  assert.deepEqual([...halves.trail], [2]);   // R27 M6: the plan's 4 m, once the landing fault was found
   const withHighway = SEEDS.find(seed => at(seed, 0.1).terrain.roadPaths.some(r => r.klass === 'highway'));
   // the dead-data rule: move the knob to an odd value and ask the module
   const was = P.ROAD_CLASS.highway.width;
@@ -527,19 +528,24 @@ function readersOutsidePlanet() {
   return readdirSync(dir).filter(f => f.endsWith('.js') && f !== 'planet.js')
     .map(f => readFileSync(new URL(f, dir), 'utf8')).join('\n');
 }
-const LATER = ['klass', 'roadHalf', 'river'];
-
+// R27 M6 gave `klass`, `roadHalf` and `river` their readers (js/bridge-plan.js: the style, a
+// trestle's posts, the piers' current), so nothing is excused any more — and `over`, the lake span's
+// mark, is on the list with them because it is a field on some records
 test('every field on a crossing record has a reader outside planet.js', () => {
   const src = readersOutsidePlanet();
-  const { terrain } = at(7, 0.1);
-  const keys = new Set(terrain.crossings.flatMap(c => Object.keys(c)));
-  const orphans = [...keys].filter(k => !LATER.includes(k) && !new RegExp(`\\.${k}\\b|\\b${k}\\s*[,}:]`).test(src));
+  // `over` is only on a lake span, and none of the standard worlds has one (see round27-bridges'
+  // laid lake), so it is named here rather than found
+  const keys = new Set(['over']);
+  for (const c of at(7, 0.1).terrain.crossings) for (const k of Object.keys(c)) keys.add(k);
+  const orphans = [...keys].filter(k => !new RegExp(`\\.${k}\\b|\\b${k}\\s*[,}:]`).test(src));
   assert.deepEqual(orphans, [], `crossing fields nobody reads: ${orphans.join(', ')}`);
 });
 
-test('klass, roadHalf and river on a crossing have readers', { todo: 'M6 (bridges by kind) gives these their readers' }, () => {
-  const src = readersOutsidePlanet();
-  const orphans = LATER.filter(k => !new RegExp(`\\.${k}\\b`).test(src.replace(/path\.klass|road\.klass|r\.klass/g, '')));
+test('klass, roadHalf and river on a crossing are read as crossing fields, not only as a road\'s', () => {
+  // the words also name a ROAD's fields (`path.klass`, `r.klass`), so a reader that is really a
+  // road's would pass the test above; this one strips those and looks for the crossing's own
+  const src = readersOutsidePlanet().replace(/path\.klass|road\.klass|r\.klass|q\.klass|f\.klass/g, '');
+  const orphans = ['klass', 'roadHalf', 'river'].filter(k => !new RegExp(`\\bc\\.${k}\\b`).test(src));
   assert.deepEqual(orphans, []);
 });
 

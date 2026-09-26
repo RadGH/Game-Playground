@@ -420,6 +420,13 @@ export function createController(terrainIn, balance = {}, camera, {
           speed *= 1 / (1 + Math.max(0, steep) * 1.6 * (1 - sure));
         }
       }
+      /**
+       * R27 M6 — WADING IS A SLOWER WALK. Water over your feet that you are not swimming in — a
+       * ford's stones, a beach, the edge of a stream — costs `wadeSpeed` of the pace, on foot, on
+       * a mount and in a vehicle alike. Swimming still needs `swimDepth` (1.3 m), so a ford
+       * (0.3 m, js/ground.js `WADE_DEPTH` is the most a ford may be) is never swum.
+       */
+      if (!self.swimming && !(self.boating && self.wading) && self.waterDepth > 0.05 && self.y < self.waterSurface + 0.3) speed *= b.wadeSpeed ?? 0.65;
       // the swing you are already committed to takes the legs out from under you
       speed *= commitK;
       forward.set(Math.sin(self.yaw), 0, Math.cos(self.yaw));

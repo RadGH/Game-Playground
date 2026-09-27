@@ -12,7 +12,7 @@ export const death = {
       el('p', { class: 'dim', text: args.by ? `Put out by ${args.by}.` : 'The dark takes you.' }),
       top.length ? el('div', { class: 'col' }, el('h3', { class: 'lf-h', text: 'What hurt you in this room' }), ...top.map(s => el('div', { class: 'row between' }, el('span', { text: s.name }), el('b', { text: hp(s.total) })))) : null,
       args.purse ? el('p', { text: `You dropped a purse of ${hp(args.purse)} pennies where you fell. Go back for it.` }) : null,
-      el('div', { class: 'row end' }, g.ironWick ? btn('Return to title', () => { router.closeAll(); ctx.actions.quitToTitle?.(); }, { cls: 'primary', 'data-autofocus': '' })
+      el('div', { class: 'row end' }, g.ironWick ? btn('Return to title', () => { router.closeAll(); (ctx.actions.respawn || ctx.actions.quitToTitle)?.(); } /* respawn deletes an Iron Wick slot, then goes to the title */, { cls: 'primary', 'data-autofocus': '' })
         : btn('Relight at the lamp-post ▸', () => { router.closeAll(); ctx.actions.respawn?.(); }, { cls: 'primary', 'data-autofocus': '' }))));
   },
 };

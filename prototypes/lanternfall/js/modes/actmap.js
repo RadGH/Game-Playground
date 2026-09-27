@@ -3,6 +3,8 @@
 // the map screen. Pure; loading files is injected (readRoomFile).
 import { generateKitRoom } from '../world/kits.js';
 import { hashSeed } from '../core/rng.js';
+import { REGISTRY as BOSS_SCRIPTS } from '../ai/bosses/index.js';
+const MINIBOSS = { a2_n07: 'mb_sewer_king', a3_n06: 'mb_lockmaster', a4_n07: 'mb_lampeater_mother' };
 
 export function createActMaps(data, runSeed = 1) {
   const acts = data.acts.list, nodes = {}, rooms = {};
@@ -89,6 +91,7 @@ export function standInRoom(data, runSeed, r, n, a, roomId) {
     if (n.lampPost && !bossRoom) put({ t: 'lamp_post', id: 'lamp_post_1', at: at(0) });
     if (T === 'hub') { const P = ACT_PEOPLE[r.act] || ACT_PEOPLE.act1; let k = 1; for (const shop of P.shops) { const sh = data.shops?.byId?.[shop]; if (sh) put({ t: 'shopkeeper', id: `keeper_${shop}`, shop, npc: sh.keeper, at: at(k++) }); } for (const npc of P.npcs) if (data.npcs?.byId?.[npc]) put({ t: 'npc', id: `person_${npc}`, npc, intents: ['greet', 'smalltalk'], at: at(k++) }); put({ t: 'sign', id: 'sign_hub', at: at(k), text: `${n.name}. The lamp-post keeps your place.` }); }
     if (bossRoom) { const W = room.size[0], fl = spots[0]?.[1] ?? room.size[1] - 48; put({ t: 'boss', id: 'boss_1', boss: a.boss, flag: `${a.boss}@${n.id}`, at: [Math.round(W * 0.66), fl] }); put({ t: 'great_lamp', id: 'great_lamp', act: a.id, at: [Math.round(W * 0.85), fl] }); }
+    if (T === 'elite' && last && BOSS_SCRIPTS[MINIBOSS[n.id]]) { const W = room.size[0], fl = spots[0]?.[1] ?? room.size[1] - 48; put({ t: 'boss', id: 'miniboss', boss: MINIBOSS[n.id], flag: `${MINIBOSS[n.id]}@${n.id}`, at: [Math.round(W * 0.7), fl] }); }
     if (T === 'secret') put({ t: 'chest', id: 'chest_secret', at: at(0), loot: 'lt_chest_rare' });
   };
   const room = generateKitRoom(kit, { id: roomId, act: r.act, seed, exits, spawnTable: table, budget: budget * (T === 'lesson' ? 0.4 : T === 'elite' ? 1.4 : 1), name: n.name, dark: n.dark, rainDensity: a.rain?.density, wind: a.rain?.wind, noEnemies: quiet || bossRoom, kind: T === 'hub' ? 'hub' : undefined, dress });

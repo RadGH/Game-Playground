@@ -34,7 +34,8 @@ export const titleScreen = {
       if (used.length) items[0].append(el('span', { class: 'note', text: summaryLine(used[0]) }));
       items.push(btn('New Game', () => router.open('slots', { mode: 'new' }), used.length ? {} : { 'data-autofocus': '' }));
       items.push(btn('Load', () => router.open('slots', { mode: 'load' }), { disabled: used.length ? null : 'No saves yet.' }));
-      const anyMode = MODES.some(m => p.modes?.[m.id]);
+      const modeOpen = id => Array.isArray(p.modes) ? p.modes.includes(id) : !!p.modes?.[id]; // profile.modes defaults to []
+      const anyMode = MODES.some(m => modeOpen(m.id));
       const modes = btn(el('span', {}, 'Modes'), () => router.open('modes'));
       if (!anyMode) modes.append(el('span', { class: 'note lf-lock', text: 'locked' }));
       items.push(modes);
@@ -70,7 +71,11 @@ function firstRun(root, ctx, s) {
   const done = () => {
     v.menu_scale = +sel.value;
     s.text = { ...s.text, menu_scale: v.menu_scale, subtitles: v.subtitles }; s.video = { ...s.video, flash_reduction: v.flash_reduction, screen_shake: v.screen_shake }; s.firstRunDone = true;
-    saveSettings(s); ctx.settings = s; ctx.applySettings?.(s); document.querySelector('.lf-menus')?.style.setProperty('--m-scale', v.menu_scale); card.remove();
+    // the card always closes: a failed save (private browsing) or a settings hook must never trap the player here
+    card.remove();
+    try { saveSettings(s); } catch (e) { console.warn('settings not saved', e); }
+    try { if (ctx.applySettings) ctx.applySettings(s); else ctx.settings = s; } catch (e) { console.warn(e); }
+    document.querySelector('.lf-menus')?.style.setProperty('--m-scale', v.menu_scale);
   };
   card._cancel = done; root.append(card);
 }
@@ -141,7 +146,7 @@ export const modesScreen = {
     root.append(el('div', { class: 'lf-frame small' },
       el('div', { class: 'lf-frame-head' }, el('h2', { class: 'lf-title', text: 'Modes' }), el('button', { class: 'lf-close', type: 'button', 'aria-label': 'Back', text: '✕', onclick: () => router.back() })),
       el('div', { class: 'lf-frame-body lf-menulist' }, MODES.map(m => {
-        const open = !!p.modes?.[m.id];
+        const open = Array.isArray(p.modes) ? p.modes.includes(m.id) : !!p.modes?.[m.id];
         const b = btn(el('span', { class: open ? '' : 'lf-lock' }, m.name), () => ctx.actions.startMode?.(m.id), { disabled: open ? null : m.rule, tip: open ? m.desc : null });
         b.append(el('span', { class: 'note', text: open ? (p.best?.[m.id] ? `best ${hp(p.best[m.id])}` : '') : m.rule })); return b;
       }), el('p', { class: 'dim small', text: 'Unlocks belong to your profile and carry across every save.' }))));

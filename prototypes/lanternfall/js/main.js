@@ -28,6 +28,8 @@ import { installLoot, pickupVisuals, spawnPickup } from './entities/pickups.js';
 import { giveStartingGear, meleeWeapon, ensureInventory, refillFlask, drinkFlask } from './rpg/items.js';
 import { rollLoot } from './rpg/loot.js';
 import { createBuilder } from './entities/build.js';
+import { useConsumable, stepConsumables } from './rpg/consume.js';
+import { toast as menuToast } from './ui/menukit.js';
 import { Meter } from '../../../meters/js/meter.js';
 
 const params = new URLSearchParams(location.search);
@@ -53,6 +55,7 @@ try {
   let game = null, hud = null, bench = null, audio = null, talk = null, barks = null, voices = null, score = null;
   // only rooms listed in rooms/index.json are fetched; anything else is a stand-in built by actmap.js (no 404s)
   const readRoomFile = async (act, id) => { const idx = data.roomIndex || (data.roomIndex = await readJson(roomUrl('index.json'))); if (!idx.rooms?.[id]) throw new Error(`room ${id} not authored`); return loadRoom(data, id); };
+  const BLOOM = { off: 0, low: 0.35, high: 0.7 };
   let made = null; // the game being built (rooms load before attachGame makes it current, and must use ITS act maps + seed)
   const roomLoader = id => (made || game).actMaps.roomJson(id, readRoomFile);
 
@@ -61,10 +64,16 @@ try {
 
   function makeGame(seed) {
     const g = createGame({ data, seed }); g.actMaps = createActMaps(data, seed); made = g; g.flags = {}; g.roomState = {}; g.visitedNodes = {}; g.bestiary = {};
-    g.shake = t => cam.shake(t * ((settings.video?.screen_shake ?? 100) / 100)); g.cam = cam;
+    g.shake = t => cam.shake(t * (+(settings.video?.screen_shake ?? 0.7) || 0)); // stored 0-1 (settings.js) g.cam = cam;
     g.meter = new Meter({ maxFights: 60 });
     g.hurtPlayer = (amount, info) => { const p = g.player; if (p.dead) return; p.hp = Math.max(info?.noKill ? 1 : 0, p.hp - amount); p.hurtT = 0.4; if (p.hp <= 0) g.bus.emit('player.die', { source: info?.kind || 'the Hollow' }); };
     g.onInteract = T => interactWith(g, T);
+    g.systems = [stepConsumables]; // belt keys + timed consumable effects
+    g.bus.on('cast.release', () => { g.stats = g.stats || {}; g.stats.casts = (g.stats.casts || 0) + 1; });
+    // the death purse lies where you fell until you pick it up (dying again first loses it: a new purse replaces it)
+    g.bus.on('room.ready', e => { const P = g.purse; if (P && P.room === e.roomId && P.amount > 0) spawnPickup(g, { kind: 'pennies', amount: P.amount, id: 'purse' }, P.x, P.y); });
+    g.bus.on('pickup', e => { if (e.id === 'purse') { g.purse = null; hud?.toast('You found your purse.', [1, 0.85, 0.5, 1]); } });
+    g.bus.on('item.use', e => { const def = data.items.byId[e.item?.base]; if (def?.use) useConsumable(g, def); });
     g.say = (who, intent) => { try { say(who, intent); } catch { /* talk is optional */ } };
     g.onBossDead = (b, R) => { // XP, pennies, the boss table, then the Great Lamp is free to relight
       const act = +String(g.act).slice(3) || 1; grantXp(g.hero, Math.round((R.xp || 200) * act * (g.difficulty?.xp ?? 1)), data, g.bus); applyStats(g.hero, g.player, data);
@@ -73,7 +82,7 @@ try {
       hud.toast(`${b.name} is out. Relight the lamp.`, [1, 0.85, 0.5, 1], true); saveNow();
     };
     g.bus.on('kill', e => { onKill(g, e.target); if (e.target.def) g.bestiary[e.target.def.id] = (g.bestiary[e.target.def.id] || 0) + 1; if (g.player.stats?.oilOnKill) g.player.oil = Math.min(g.player.maxOil, g.player.oil + g.player.stats.oilOnKill); });
-    g.bus.on('player.die', e => { if (g.player.dead) return; g.player.dead = true; g.player.anim = 'dead'; const purse = onDeath(g); setTimeout(() => router.open('death', { by: typeof e.source === 'string' ? e.source : e.source?.name, purse }), 900); });
+    g.bus.on('player.die', e => { if (g.player.dead) return; if (g.onModeDeath?.(e)) return; g.player.dead = true; g.player.anim = 'dead'; const purse = onDeath(g); setTimeout(() => router.open('death', { by: typeof e.source === 'string' ? e.source : e.source?.name, purse }), 900); });
     g.bus.on('room.ready', e => { g.meter.startFight?.(`${e.act}/${g.actMaps.nodeOf(e.roomId) || e.roomId}/${e.roomId}`); const n = g.actMaps.nodeOf(e.roomId); if (n) { g.visitedNodes[n] = true; g.flags[`found_${n}`] = true; const gift = giveNodeGifts(g, n); if (gift?.say) say('narrator', null, gift.say); } const a = data.acts.byId?.[e.act]; if (a) g.objective = a.lamp ? `Relight ${a.lamp}` : null; score?.setAct?.(e.act, Object.keys(g.flags).filter(k => k.startsWith('lamp_act')).length); });
     return g;
   }
@@ -106,6 +115,7 @@ try {
     applyStats(g.hero, g.player, data); g.player.hp = g.player.maxHp; g.player.oil = g.player.maxOil;
     Object.assign(g.flags, s.story?.flags || {}); g.roomState = s.world?.roomState || {}; g.lampPost = s.world?.lampPost; g.visitedNodes = Object.fromEntries((s.world?.visited || []).map(v => [v, true]));
     if (s.world?.visitedNodes) g.visitedNodes = s.world.visitedNodes;
+    g.playtime = s.playtime || 0; g.stats = s.stats || {}; g.purse = s.world?.purse || null; g.visited = Object.fromEntries((s.world?.visitedRooms || []).map(v => [v, true])); g.bestiary = s.bestiary || {};
     if (s.rng) { g.rng.loot.setState(s.rng.loot); g.rng.spell.setState(s.rng.spell); }
     const w = meleeWeapon(g.hero, data); if (w) g.player.melee.set = { ...g.player.melee.set, weapon: w };
     g.startRoom = 'a1_n01_r0';
@@ -139,8 +149,8 @@ try {
 
   // ---------- menus ----------
   const ctx = {
-    get game() { return game; }, data, hero: () => game?.hero, get profile() { return profile; }, get settings() { return settings; },
-    saves: { list: () => saves.list().map(s => s.empty ? null : { ...s, playTime: s.playtime, lastPlayed: s.updated }), load: n => loadSlot(n), remove: n => saves.remove(n) },
+    get game() { return game; }, data, hero: () => game?.hero, get profile() { return profile; }, get settings() { return settings; }, set settings(v) { settings = v; },
+    saves: { list: () => saves.list().map(s => s.empty ? null : { ...s, playTime: s.playtime, lastPlayed: s.updated, classId: s.class, className: data.classes.byId?.[s.class]?.name || s.class }), load: n => loadSlot(n), remove: n => saves.remove(n) },
     get meter() { return game?.meter; }, get act() { return game?.act; }, get atLampPost() { return !!game?.atLampPost; }, builderUnlocked: () => !!game?.hero?.unlocked?.mechanics?.includes('wick_builder'),
     canRekindle: () => !game ? 'No room.' : game.entities.some(e => e.kind === 'enemy' && !e.dead && e.brain?.state === 'attack') ? 'Not while you are fighting.' : true,
     inCombat: () => !!game?.entities.some(e => e.kind === 'enemy' && !e.dead && e.brain?.state === 'attack'),
@@ -151,14 +161,31 @@ try {
     actions: {
       newGame: opts => newGame(opts), loadSlot: n => loadSlot(n),
       resume: () => {}, rekindle: () => game && interactWith(game, { t: 'rekindle', def: {} }),
-      returnToLampPost: async () => { if (!game) return; onDeath(game); await respawn(game, roomLoader); renderer.setRoom(game.grid); cam.snap(game.player.x, game.player.y, game.grid); },
+      returnToLampPost: async () => { if (!game) return; onDeath(game, { countDeath: false }); await respawn(game, roomLoader); renderer.setRoom(game.grid); cam.snap(game.player.x, game.player.y, game.grid); },
       respawn: async () => { if (!game) return; if (game.ironWick) { saves.remove(game.slot); toTitle(); return; } await respawn(game, roomLoader); renderer.setRoom(game.grid); cam.snap(game.player.x, game.player.y, game.grid); },
       quitToTitle: () => toTitle(), openMap: () => router.open('map'),
-      startMode: id => hud?.toast(`${id} opens in a later milestone — see docs/HANDOFF.md.`),
+      startMode: (id, opts = {}) => startMode(id, opts),
     },
     onPause: paused => { if (game) game.paused = paused; },
   };
   const router = createScreens({ root: document.getElementById('screens'), ctx }); LF.router = router; LF.ctx = ctx;
+  // ---------- modes (js/modes/<id>.js exports startMode(api, opts)) ----------
+  // A mode builds its own game from makeGame(), puts rooms in with enter(), adds per-tick systems to g.systems,
+  // and may take over exits (g.onExit(exit) -> true when handled) and death (g.onModeDeath() -> true when handled).
+  const modeApi = {
+    data, saves, get settings() { return settings; }, router, LF, say, toTitle: () => toTitle(), get hud() { return hud; }, get game() { return game; },
+    makeGame: seed => makeGame(seed), setDifficulty, newHero, ensureInventory, giveStartingGear, applyStats, meleeWeapon, roomLoader, readRoomFile,
+    enter(g, json, entry) { enterRoom(g, json, entry); g.act = json.act && json.act !== 'none' ? json.act : g.act; if (game !== g) attachGame(g); else { renderer.setRoom(g.grid); cam.snap(g.player.x, g.player.y, g.grid); applyTheme(); } g.bus.emit('room.ready', { roomId: json.id, act: json.act, kind: json.kind, name: json.name }); return g; },
+    async goTo(g, id, entry) { await goToRoom(g, roomLoader, id, entry); if (game !== g) attachGame(g); else { renderer.setRoom(g.grid); cam.snap(g.player.x, g.player.y, g.grid); applyTheme(); } return g; },
+    save: () => saveNow(),
+  };
+  LF.modeApi = modeApi;
+  async function startMode(id, opts) {
+    router.closeAll();
+    try { const m = await import(`./modes/${id}.js`); if (!m.startMode) throw new Error('no startMode'); await m.startMode(modeApi, opts); LF.mode = id; }
+    catch (e) { console.error(e); LF.warnings.push(`mode ${id}: ${e.message}`); if (!game || game.titleScreen) router.open('title'); menuToast(`${id.replace(/_/g, ' ')} is not built yet (see docs/HANDOFF.md).`, 'bad'); }
+  }
+  LF.startMode = startMode;
   async function toTitle() {
     router.closeAll(); const g = makeGame(1); newHero(g, 'lamplighter', {}); g.player.hidden = true; g.titleScreen = true;
     try { await goToRoom(g, roomLoader, 'a1_n01_r0', 'w'); } catch (e) { const json = await loadRoom(data, 'bench_flood'); enterRoom(g, json); }
@@ -186,9 +213,10 @@ try {
   // ---------- the loop ----------
   let exitCooldown = 0, changing = false;
   async function takeExit(x) {
+    if (game.onExit?.(x)) { game.pendingExit = null; exitCooldown = 30; return; }
     const to = game.actMaps.resolveExit(game.room.room.id, x, game.flags) ?? (x.to && !x.to.startsWith('@') ? { room: x.to, entry: x.entry } : null);
     if (!to) { game.pendingExit = null; exitCooldown = 30; return; }
-    if (to.ending) { game.pendingExit = null; exitCooldown = 120; if (!game.flags.game_complete) { game.flags.game_complete = true; saveNow(); } hud?.toast('Six lamps burn. Far above, for the first time in forty years, the Rain thins.', [1, 0.85, 0.5, 1], true); say('narrator', null, 'Vessmere is lit, top to bottom. The Guild will argue for a year about who gets the credit. You know.'); return; }
+    if (to.ending) { game.pendingExit = null; exitCooldown = 120; if (!game.flags.game_complete) { game.flags.game_complete = true; saveNow(); } if (router.has?.('ending')) router.open('ending', { flags: game.flags, hero: game.hero, stats: game.stats }); else { hud?.toast('Six lamps burn. Far above, for the first time in forty years, the Rain thins.', [1, 0.85, 0.5, 1], true); say('narrator', null, 'Vessmere is lit, top to bottom. The Guild will argue for a year about who gets the credit. You know.'); } return; }
     if (to.blocked) { hud?.toast(to.blocked === 'grapple' ? 'You would need a grapple to reach that.' : to.blocked === 'lamp' ? 'Relight the Great Lamp before you go on.' : 'The way is shut.'); game.pendingExit = null; exitCooldown = 60; return; }
     changing = true; const fade = document.querySelector('.fade'); fade.classList.add('on'); await new Promise(r => setTimeout(r, 250));
     try { await goToRoom(game, roomLoader, to.room, to.entry); renderer.setRoom(game.grid); cam.snap(game.player.x, game.player.y, game.grid); applyTheme(); game.atLampPost = false; LF.room = to.room; }
@@ -225,7 +253,7 @@ try {
         cam: { x: cam.x + cam.shakeX, y: cam.y + cam.shakeY }, view: { w: cam.vw, h: cam.vh }, scale: cam.scale, time: game.time,
         lights: f.lights, sprites: f.sprites, overlays: f.overlays, additive: f.additive, ripple: game.ripples.h.subarray(x0, x0 + cam.vw + 2),
         ambient: { top: ambC.map(v => v * ambP * 0.9 + 0.04), bottom: ambC.map(v => v * ambP * 0.5 + 0.02), floor: act?.ambient?.floor ?? 0.08 }, sky, rain: { alpha: (game.rain?.density ?? 60) > 0 ? 1 : 0, wind: game.rain?.wind || 0 },
-        bloom: (settings.video?.bloom ?? 35) / 100, hud: hud && !game.titleScreen ? hud.build(atlas, { w: cam.vw, h: cam.vh }, { x: cam.x, y: cam.y }) : [],
+        bloom: BLOOM[settings.video?.bloom ?? 'low'] ?? ((+settings.video?.bloom || 0) / 100), // stored 'off'/'low'/'high' hud: hud && !game.titleScreen ? hud.build(atlas, { w: cam.vw, h: cam.vh }, { x: cam.x, y: cam.y }) : [],
       });
       if ((mmT += dt) > 0.25) { mmT = 0; minimap.update(game.titleScreen || router.isOpen() ? null : game, cam.scale); }
     },

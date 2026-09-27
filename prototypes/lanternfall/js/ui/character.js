@@ -43,7 +43,7 @@ export const attributes = {
         el('span', { class: 'eff', text: attrEffects(a, clone, then, D) })]).flat();
       const changes = spent ? DERIVED.filter(([k]) => Math.abs((then[k] || 0) - (now[k] || 0)) > 1e-6).map(([k, n, f]) => `${n} ${f(now[k])} → ${f(then[k])}`) : [];
       const xpF = H.xpNext ? Math.min(1, H.xp / H.xpNext) : 0;
-      const c = H.counters || {};
+      const G = ctx.game || {}; const c = { deaths: G.stats?.deaths, playTime: G.playtime, rooms: Object.keys(G.visited || {}).length, casts: G.stats?.casts, ...H.counters };
       root.replaceChildren(el('div', { class: 'col' },
         el('div', { class: 'row' }, el('h3', { class: 'lf-h', text: `${(H.name || '').toUpperCase()} — ${cls?.name || cap(H.class)}, Level ${H.level}` }),
           el('span', { class: 'small' }, `XP ${hp(H.xp)} / ${hp(H.xpNext)} `, el('span', { class: 'xpbar', role: 'progressbar', 'aria-valuenow': Math.round(xpF * 100), 'aria-valuemin': 0, 'aria-valuemax': 100 }, el('i', { style: { width: xpF * 100 + '%' } })))),

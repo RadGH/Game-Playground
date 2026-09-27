@@ -10,7 +10,7 @@ should be done. Canon is still `00-OVERVIEW.md` (v2). How to run each tool is in
 the Crown Lamp → Acts 2–6 → the last boss → the ending line. Lamp-post saves load back, death leaves a purse and
 respawns you at your lamp-post, and Rekindle resets a room. `dev/flow.mjs` walks the whole campaign headless, 87
 rooms with no errors. `tests/e2e/campaign.spec.js` walks Act 1 into Act 2 and covers save → load → die → respawn.
-Unit tests: `node --test prototypes/lanternfall/tests/unit/*.test.js` (97 tests).
+Unit tests: `node --test prototypes/lanternfall/tests/unit/*.test.js` (102 tests). Browser: `npx playwright test prototypes/lanternfall/tests/e2e/` (4 tests, incl. a phone first-launch).
 
 **What makes that possible is a stand-in layer.** Most of it is generated or borrowed rather than authored. That is
 fine for a stable prototype, but anyone continuing needs to know which parts are placeholders:
@@ -18,7 +18,7 @@ fine for a stable prototype, but anyone continuing needs to know which parts are
 | Stand-in | Where | How to replace it |
 |---|---|---|
 | **Hand-made rooms.** Only `a1_n01_r0` (Guild Hall) and `a1_n08_r1` (Tallow Chapel) are authored. Every other `A` room is a kit room dressed for its node type. | `js/modes/actmap.js` `standInRoom()`; rooms carry `standIn: true` | Author `rooms/act<N>/<id>.json` (format: `10-TECH-DATA.md` §6), add it to `rooms/index.json`, run `tools/room-check.mjs <id>`. The loader prefers a listed file automatically. |
-| **Bosses 2–6.** Saint Gnaw, the Sluicemaw, the Lampless Widow, the Bellfather and Ossery (twice) run **Mother Tallow's script**, renamed and scaled ×1.9 health and ×1.6 damage per act. | `js/ai/bosses.js` `bossDef()` | Add an entry to `BOSSES` with the same shape (phases, attacks, void zones, rewards) from `05-BESTIARY-BOSSES.md` §20–24. Tallow's entry is the worked example. |
+| **Bosses 2–6.** Saint Gnaw, the Sluicemaw, the Lampless Widow, the Bellfather and Ossery (twice) run **Mother Tallow's script**, renamed and scaled ×1.9 health and ×1.6 damage per act. | `js/ai/bosses.js` `bossDef()`; one empty slot per boss in `js/ai/bosses/<id>.js` (`export const boss = null`) | Fill that boss's file with a definition (hooks: `js/ai/bosskit.js`) from `05-BESTIARY-BOSSES.md` §18, §20–24. Tallow in `bosses.js` is the worked example. The three minibosses have slots too (`mb_*.js`); `standInRoom()` places one in its elite room once its file is non-null. |
 | **Monster abilities.** All 30 monsters exist, but 26 have simplified attacks: rope climbing, pulls, cone sprays, stealing, gong reflect, hail shedding and the Unlit's unseen-only movement are mapped to contact/melee/lunge/dive/projectile. | `data/enemies.json`: each simplification is in a `_note` | Add the missing behaviours to `js/ai/brain.js` (new attack kinds or move types), then remove the `_note`. `tests/unit/bestiary.test.js` checks that the references resolve. |
 | **Monster art.** Only the 4 Act 1 monsters have sprites. The other 26 draw as a coloured block with glowing eyes. | `data/sprites.json` / atlas; `color` on each monster | Add `en_<id>` sprites and set `sprite` on the monster. The renderer prefers the sprite when it exists. |
 | **Hub dressing.** Stand-in hubs for Acts 2–6 place shops and NPCs from a small table. | `ACT_PEOPLE` in `actmap.js` | Superseded as each hub room is authored. |
@@ -88,3 +88,33 @@ fine for a stable prototype, but anyone continuing needs to know which parts are
 - **Leaving an act.** The last node's `@next` goes to the next act's first room only once `flags.lamp_<act>` is set. Before that, the player gets "Relight the Great Lamp before you go on." After Act 6 the result is `{ ending: true }`.
 - **An exit can be verb-gated.** Give it `needsVerb: 'grapple'` and the room checker skips it for acts that do not have that verb yet.
 - **Arena lock.** `game.arenaLocked` blocks exits while a boss is awake. The Great Lamp refuses you until the boss is dead.
+
+## Code review, 2026-09-26 (fixed and released)
+
+A review of the whole prototype found 12 bugs, plus one reported from an iPhone. Everything that affects a built
+feature is fixed, and each fix has a test (`tests/unit/review-fixes.test.js`, `tests/e2e/campaign.spec.js`,
+`tests/e2e/firstrun.spec.js`).
+
+| # | Bug | Fix |
+|---|---|---|
+| — | **"Before you start" → Done did nothing, on every device.** `ctx.settings` had a getter and no setter, so `done()` threw before the card closed, and every first launch was stuck behind it. | The setter now exists, and the card closes first no matter what fails after. A phone e2e taps from the first launch to the Guild Hall. |
+| 1 | Swimming never unlocked in the campaign (the player only read `flags.swimming`) | `player.js` also reads `hero.unlocked.mechanics` ('swimming', the a3_n01 gift) |
+| 2 | Using a consumable deleted it and did nothing; the belt keys did nothing | New `js/rpg/consume.js`: tonics heal over time, oil, Gillwater, Clearwater, thrown pots; belt keys Z/X/C/V |
+| 3 | An Iron Wick death did not delete the save | The death screen's button calls `respawn`, which deletes the slot |
+| 4 | The death purse was never put back in the world | It is spawned when you re-enter that room; picking it up clears it |
+| 5 | Loading dropped play time, stats, the purse, visited rooms and the bestiary | Saved and restored |
+| 6 | The act maps (~31 KB) were written into every save | Removed; they are rebuilt from the seed |
+| 7 | Screen shake and bloom read in the wrong units (shake was ~0, bloom always off) | Shake is 0–1; bloom maps off/low/high |
+| 8 | "Return to the lamp-post" counted a death | The purse drops, but no death is counted |
+| 9 | Save-slot cards showed a blank class, 0 lamps and 0 deaths; the character totals were always 0 | Filled in from the save and the run |
+
+**Findings that touch unbuilt features** (only made to stop failing silently):
+
+| # | Finding | What was done / what the milestone must do |
+|---|---|---|
+| 10 | Class switch ("Answer the call") called a missing action and silently closed | It now says it opens with M34. **M34** must add `ctx.actions.switchClass` and `trackChallenge`. |
+| 11 | Modes can never unlock (`profile.modes` is an array; the title read it as an object; nothing writes the profile), and starting a missing mode showed no message on the title | The title reads both shapes, and a missing mode shows a message. **M20/M24/M34/M35** must write `profile.modes` when a boss dies and add `js/modes/<id>.js`. |
+| 12 | The mode API held the boot-time settings | It is now a getter. Matters once any mode exists. |
+
+**Phones:** there are no touch controls. A phone can get through every menu into the game, but cannot play it
+(the "Desktop recommended" card says so). Touch play would be its own milestone.

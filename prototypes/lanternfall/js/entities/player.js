@@ -77,7 +77,7 @@ export function stepPlayerMovement(game, p, I) {
   }
 
   // ----- swimming -----
-  const canSwim = game.flags?.swimming;
+  const canSwim = game.flags?.swimming || !!game.hero?.unlocked?.mechanics?.includes('swimming'); // the a3_n01 gift, or ?swim on the dev page
   if (env.liquid >= 0.55) {
     if (!p.swimming) { p.swimming = true; game.bus?.emit('player.splash', { x: p.x, y: p.y, v: p.vy }); if (p.vy > 160) p.vy = 160; }
     p.state = 'swim'; p.fallStartY = p.y; p.airJumps = 0;

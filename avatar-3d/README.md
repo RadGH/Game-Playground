@@ -116,6 +116,8 @@ fx.dispose();
 
 `textures` may be a plain object, a `Map`, or a function `(id) => THREE.Texture|null`; a missing sprite is skipped, so an effect degrades to its geometry instead of throwing. `new SpellFx(scene, { textures: null })` is legal — call `fx.setTextures(t)` when an async load finishes (that is what the stages do). `createSpellFx(scene, { assets, camera })` does the load for you.
 
+**No stutter on hits (2026-09-29).** A finished effect lets its materials go without `dispose()`: three.js drops a shader the moment the last material using it is disposed, so the next impact had to compile it again, which cost a dropped frame on every hit. `dispose()` on the whole `SpellFx` still frees everything. Call `fx.warm(renderer, camera)` after `setTextures()` to compile every effect's shader before the first fight (Farhold does). Also, if a game borrows point lights for effects, keep the lights `visible` and set unused ones to intensity 0. three.js counts only visible lights, and a change in that count recompiles every lit material in the scene (Farhold's `js/light.js`).
+
 ### Elements (`ELEMENTS`)
 
 `elementName(x)` maps a game's damage type or skill type onto one of these (`cold`/`frost` → ice, `magic` → arcane, `melee`/`ranged` → physical, and so on — see `ELEMENT_ALIASES`); unknown names fall back to arcane.

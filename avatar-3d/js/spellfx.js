@@ -137,10 +137,20 @@ const easeOut = k => 1 - Math.pow(1 - k, 3);
 // ---------------------------------------------------------------------------------------------
 // disposal helpers
 
-function disposeObj(obj) {
+/*
+ * 2026-09-29 — materials are NOT disposed when an effect ends, only on a full teardown
+ * (`dispose(obj, true)`). three.js frees a shader program the moment the last material using it is
+ * disposed, so every impact that finished took its shader with it and the next impact compiled it
+ * again: 9-17 shader compiles per four swings in Farhold, each one a dropped frame on a real GPU
+ * ("stutters as soon as I deal damage, worse on several targets"). A material that is simply let go
+ * holds nothing on the GPU (its per-material state lives in three's WeakMap and is collected); it
+ * only keeps its program's use count above zero, which is exactly what we want.
+ */
+function disposeObj(obj, materials = false) {
   obj.traverse(o => {
     if (o.userData?.poolKey) return;     // a pooled trail sprite: its material is reused, not thrown away
     if (o.geometry && !o.geometry.userData?.shared) o.geometry.dispose();   // shared unit shapes stay
+    if (!materials) return;
     const mats = o.material ? (Array.isArray(o.material) ? o.material : [o.material]) : [];
     for (const m of mats) m.dispose();   // textures are shared: never disposed here
   });
@@ -561,7 +571,7 @@ export class SpellFx {
     this._particles = Math.max(0, this._particles - 1);
     if (s.parent) s.parent.remove(s);
     const key = s.userData.poolKey;
-    if (!key || this._pooled >= 400) { s.material?.dispose?.(); return; }
+    if (!key || this._pooled >= 400) return;   // let it go; disposing would free its shader (see disposeObj)
     const list = this._pool.get(key) || (this._pool.set(key, []), this._pool.get(key));
     list.push(s); this._pooled++;
   }
@@ -1613,7 +1623,7 @@ export class SpellFx {
           else self._mote(P, el, { pos: g.position.clone(), vel: randDir().multiplyScalar(rnd(1, 2) * sc), size: size * 0.6, life: 0.4 });
         }
         const f = self._sprite('flare', { size: sz * 3, color: c.hot, opacity: 1 });
-        if (f) { g.add(f); let k = 0; self._add(new THREE.Object3D(), 0.16, dt => { k += dt / 0.16; f.material.opacity = 1 - k; f.scale.setScalar(sz * 3 * sc * (0.6 + k)); return false; }, () => { g.remove(f); f.material.dispose(); }); }
+        if (f) { g.add(f); let k = 0; self._add(new THREE.Object3D(), 0.16, dt => { k += dt / 0.16; f.material.opacity = 1 - k; f.scale.setScalar(sz * 3 * sc * (0.6 + k)); return false; }, () => { g.remove(f); }); }
       },
       dispose() { self._end(e); },
     };
@@ -2155,16 +2165,49 @@ export class SpellFx {
     }
   }
 
+  /**
+   * 2026-09-29 — compile every shader the effects use BEFORE the first fight, so the first swings do
+   * not stutter while the GPU builds them. Fires one of each effect kind per element far below the
+   * world, asks three to compile them (compile() ignores the view frustum), then ends them before the
+   * next frame draws. The programs stay cached because finished effects no longer dispose their
+   * materials (see disposeObj). Call after setTextures(): a mapped material is a different shader.
+   * @param {THREE.WebGLRenderer} renderer
+   * @returns {Promise<void>}
+   */
+  warm(renderer, camera = this.camera) {
+    if (!renderer || !camera) return Promise.resolve();
+    const before = new Set(this.live);
+    const at = new THREE.Vector3(0, -5000, 0), to = new THREE.Vector3(4, -5000, 0), ground = -5000;
+    const maxLive = this.maxLive; this.maxLive = 1e6;   // do not let the cap drop half the set
+    for (const element of Object.keys(ELEMENTS)) {
+      for (const make of [
+        () => this.impact({ at, element, ground }),
+        () => this.impact({ at, element, ground, crit: true }),
+        () => this.aoe({ points: [at], element, ground }),
+        () => this.cast({ at, element, ground }),
+        () => this.projectile({ from: at, to, element }),
+      ]) { try { make(); } catch { /* one effect failing to build must not stop the rest */ } }
+    }
+    this.maxLive = maxLive;
+    const fresh = this.live.filter(e => !before.has(e));
+    const done = () => { for (const e of fresh) this._end(e); };
+    try {
+      const p = renderer.compileAsync ? renderer.compileAsync(this.root, camera, this.scene) : (renderer.compile(this.root, camera, this.scene), null);
+      done();   // compile() has already acquired every program; the effects themselves can go now
+      return Promise.resolve(p).then(() => {}, () => {});
+    } catch { done(); return Promise.resolve(); }
+  }
+
   /** How many effects and auras are running (handy in tests). */
   get liveCount() { let n = this.live.length; for (const m of this._statuses.values()) n += m.size; return n; }
 
   /** Drop everything and detach from the scene. Textures are shared and are not disposed. */
   dispose() {
     for (const e of [...this.live]) this._end(e);
-    for (const m of this._statuses.values()) for (const h of m.values()) disposeObj(h.group);
+    for (const m of this._statuses.values()) for (const h of m.values()) disposeObj(h.group, true);
     this._statuses.clear();
     if (this.root.parent) this.root.parent.remove(this.root);
-    disposeObj(this.root);
+    disposeObj(this.root, true);
     for (const g of this._geos.values()) g.dispose();
     this._geos.clear();
   }

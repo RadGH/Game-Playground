@@ -56,9 +56,13 @@ export function buildExtraHat(a, c) {
         head(new THREE.BoxGeometry(0.03, 0.2, 0.14), st, { position: [s * 0.34, 0.2, 0.03], rotation: [0.1, 0, s * 0.1], metal: true });
         head(new THREE.SphereGeometry(0.018, 5, 4), trim, { position: [s * 0.36, 0.27, 0.06], metal: true });
       }
+      // The lining is copied BEFORE the curtain is placed: `head` moves a geometry in place, so a copy
+      // taken afterwards was placed twice and floated a metre over the helm (2026-09-29, same fault
+      // as the bob hair in chibi2.js).
       const g = new THREE.CylinderGeometry(0.36, 0.39, 0.22, 12, 1, true, Math.PI / 2 + 0.7, Math.PI - 1.4);
+      const lining = backfaced(g.clone());
       head(g, darkSteel, { position: [0, 0.29, -0.02], scale: [1, 1, 0.9], metal: true });
-      head(backfaced(g.clone()), tone(darkSteel, 0.6), { position: [0, 0.29, -0.02], scale: [0.99, 1, 0.89], metal: true });
+      head(lining, tone(darkSteel, 0.6), { position: [0, 0.29, -0.02], scale: [0.99, 1, 0.89], metal: true });
       return;
     }
     case 'great_helm': {
@@ -82,12 +86,14 @@ export function buildExtraHat(a, c) {
       const st = a.hat.color || '#b8c0cc', plume = a.hat.color2 || '#c8323a', dk = tone(st, 0.6);
       head(profile([[0.39, 0.358, 0.31], [0.46, 0.35, 0.302], [0.56, 0.28, 0.245], [0.64, 0.16, 0.14], [0.69, 0.02, 0.02]], 16), st, { metal: true });
       const tail = new THREE.CylinderGeometry(0.36, 0.43, 0.14, 14, 1, true, Math.PI / 2 + 0.55, Math.PI - 1.1);
+      const tailLining = backfaced(tail.clone());   // copied before placing — see war_helm
       head(tail, st, { position: [0, 0.34, -0.02], scale: [1, 1, 0.92], metal: true });
-      head(backfaced(tail.clone()), dk, { position: [0, 0.34, -0.02], scale: [0.99, 1, 0.91], metal: true });
+      head(tailLining, dk, { position: [0, 0.34, -0.02], scale: [0.99, 1, 0.91], metal: true });
       // the visor, pushed up: a curved plate standing proud of the brow, pierced with a dark slit
       const visor = new THREE.CylinderGeometry(1, 1, 0.12, 12, 1, true, -0.95, 1.9);
+      const visorLining = backfaced(visor.clone());   // copied before placing — see war_helm
       head(visor, st, { position: [0, 0.48, 0.02], scale: [0.38, 1, 0.37], rotation: [-0.35, 0, 0], metal: true });
-      head(backfaced(visor.clone()), dk, { position: [0, 0.48, 0.02], scale: [0.375, 1, 0.365], rotation: [-0.35, 0, 0], metal: true });
+      head(visorLining, dk, { position: [0, 0.48, 0.02], scale: [0.375, 1, 0.365], rotation: [-0.35, 0, 0], metal: true });
       head(new THREE.CylinderGeometry(1, 1, 0.018, 12, 1, true, -0.7, 1.4), '#101014', { position: [0, 0.475, 0.025], scale: [0.385, 1, 0.375], rotation: [-0.35, 0, 0], metal: true });
       for (const s of [-1, 1]) head(new THREE.SphereGeometry(0.025, 6, 4), trim, { position: [s * 0.37, 0.42, 0.02], metal: true });
       head(profile([[0.66, 0.04, 0.04], [0.73, 0.03, 0.03]], 8), trim, { metal: true });

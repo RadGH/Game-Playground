@@ -88,7 +88,10 @@ export function createLight(scene, { balance = {} } = {}) {
   for (let i = 0; i < maxLights; i++) {
     const l = new THREE.PointLight(0xffffff, 0, 20 * SOFT_EDGE, DECAY);
     l.name = 'farhold-light-' + i;
-    l.visible = false;
+    // 2026-09-29 — ALWAYS visible; an unused light is intensity 0. three.js counts only visible
+    // lights, and a change in that count recompiles every lit material in the world — the terrain,
+    // trees, every body. Spell impacts borrow these lights, so toggling `visible` made every hit
+    // recompile ~10 shaders: the stutter "as soon as I deal damage, worse on several targets".
     scene.add(l);
     pool.push(l);
   }
@@ -162,9 +165,8 @@ export function createLight(scene, { balance = {} } = {}) {
     for (let i = 0; i < pool.length; i++) {
       const l = pool[i];
       const hit = near[i];
-      if (!hit) { l.visible = false; l.intensity = 0; continue; }
+      if (!hit) { l.intensity = 0; continue; }
       const s = hit.s;
-      l.visible = true;
       l.color.set(s.color || '#ff9040');
       l.distance = (s.range ?? 24) * SOFT_EDGE;    // same hard ring as the torch, same fix
       l.position.set(s.x, s.y, s.z);
@@ -214,8 +216,7 @@ export function createLight(scene, { balance = {} } = {}) {
       cfg.spot?.blur ?? 0.55,
       1.1,
     );
-    l.name = 'farhold-spot-' + i;
-    l.visible = false;
+    l.name = 'farhold-spot-' + i;   // always visible, dark when off (see the pool above)
     scene.add(l);
     scene.add(l.target);
     spots.push(l);
@@ -225,7 +226,7 @@ export function createLight(scene, { balance = {} } = {}) {
   /** Turn the landing lights on or off. */
   function setSpots(on) {
     spotsOn = !!on;
-    for (const l of spots) { l.visible = spotsOn; l.intensity = spotsOn ? (cfg.spot?.intensity ?? 9) : 0; }
+    for (const l of spots) { l.intensity = spotsOn ? (cfg.spot?.intensity ?? 9) : 0; }
   }
 
   /**
@@ -260,7 +261,7 @@ export function createLight(scene, { balance = {} } = {}) {
     get torchOn() { return torchOn; },
     get indoors() { return indoors; },
     setNightFloor: v => { nightFloor = v; },
-    stats: () => ({ torch: torchOn, spots: spotsOn, lit: pool.filter(l => l.visible).length, sources: sources.length }),
+    stats: () => ({ torch: torchOn, spots: spotsOn, lit: pool.filter(l => l.intensity > 0).length, sources: sources.length }),
   };
 }
 

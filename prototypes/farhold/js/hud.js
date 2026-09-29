@@ -769,7 +769,7 @@ export class Hud {
    *   "In the world, there should be a large animated pointer above the location or object to help
    *    the player find it, and a radial arrow pointing to it when its off-screen."
    *
-   * The pointer itself is `js/beacon.js`, a column of light over the spot. This is its other half:
+   * The pointer itself is `js/waylight.js`, a column of light over the spot. This is its other half:
    * when the spot is behind you or past the edge, the beacon is doing nothing and an arrow pinned
    * to the rim of the screen is the only thing that can help.
    *

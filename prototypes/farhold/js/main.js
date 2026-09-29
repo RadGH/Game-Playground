@@ -59,7 +59,7 @@ import { createLogistics, createAwayClock } from './logistics.js';
 import { createGrid } from './power.js';
 import { createWorks, createHandWork } from './refine.js';
 import { createNodeWorld, createNodePatch, placedNode, materialIndex, whereToFind, nodeLabel } from './resources.js';
-import { createBeacons, BEACON_RANGE } from './beacon.js';
+import { createBeacons, BEACON_RANGE } from './waylight.js';
 // R17 — the scanner's right-click chooser. See the note where it is constructed.
 import { createScannerChooser } from './scanner-ui.js';
 /**
@@ -3277,7 +3277,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
    *
    * A pool of six, built once and re-aimed, shared by the Nearby panel and the scanner. It lives on
    * the scene rather than being rebuilt per world, and `clear()` is enough when the ground changes —
-   * see js/beacon.js.
+   * see js/waylight.js.
    */
   const beacons = createBeacons(scene, { heightAt: (x, z) => terrain.heightAt(x, z) });
 
@@ -10090,7 +10090,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
        *   "In the world, there should be a large animated pointer above the location or object to
        *    help the player find it, and a radial arrow pointing to it when its off-screen."
        *
-       * One pool of six beacons (js/beacon.js) serves two callers: whatever the Nearby panel is
+       * One pool of six beacons (js/waylight.js) serves two callers: whatever the Nearby panel is
        * pointing at, and — while a sweep is still lit — the deposits it turned up. The scan wins
        * when one is running, because you asked for it in the last couple of minutes and it is the
        * more specific request.
@@ -10155,7 +10155,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
        * every frame, and re-sampling six terrain heights sixty times a second to place six
        * triangles is three hundred and sixty lookups a second for a number that has not moved.
        * `y` is where the ARROW points (six metres up, so it does not aim at somebody's feet);
-       * js/beacon.js asks the terrain for the ground itself, because the two are not the same.
+       * js/waylight.js asks the terrain for the ground itself, because the two are not the same.
        */
       for (const b of beaconRows) b.y = terrain.heightAt(b.x, b.z) + 6;
       beacons.set(beaconRows);

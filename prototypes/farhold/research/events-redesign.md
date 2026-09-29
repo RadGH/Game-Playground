@@ -551,7 +551,7 @@ arrow pointing to it when its off-screen". `js/hud.js:629-647` (`hit()`) is the 
 projects a world position and gives up when it is off screen. The new code is the *else* branch of
 that `if`.
 
-### `js/beacon.js` — the thing over the spot
+### `js/waylight.js` — the thing over the spot
 
 Three.js, one module, one object pool. Never more than **6 beacons**, which is the tier-B cap.
 
@@ -768,7 +768,7 @@ big ones only ever gain a call.
 
 | # | File | Change |
 |---|---|---|
-| 22 | **new** `js/beacon.js` | Six-object pool, `add/remove/update`. ~150 lines. |
+| 22 | **new** `js/waylight.js` | Six-object pool, `add/remove/update`. ~150 lines. |
 | 23 | ⚠ `js/hud.js` (beside `reticles`, ~`:489`) | `edgeArrows(list, camera)` — node pool of five, the behind-camera flip. ~45 lines. |
 | 24 | ⚠ `js/main.js` render loop | `beacons.update(dt, camera)` and `hud.edgeArrows(...)`, both every frame, both no-ops when the list is empty. |
 | 25 | **new** `tests/nearby.spec.js` | Playwright: force an event via `window.farhold`, assert the panel row appears, the beacon mesh is in the scene, the edge arrow is positioned, and the locate button calls `locateOnMap`. |
@@ -787,7 +787,7 @@ big ones only ever gain a call.
 | # | File | Change |
 |---|---|---|
 | 30 | `RPG.md` | A "Round 14 — the ambient layer" section, in the house style: what was reported, what it actually was, what changed. |
-| 31 | `README.md`, `../../CLAUDE.md` | The farhold row gains `js/ambient.js`, `js/nearby.js`, `js/beacon.js`. |
+| 31 | `README.md`, `../../CLAUDE.md` | The farhold row gains `js/ambient.js`, `js/nearby.js`, `js/waylight.js`. |
 
 ---
 

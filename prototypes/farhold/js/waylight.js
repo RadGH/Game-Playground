@@ -1,5 +1,8 @@
 // Farhold — a column of light over the thing you are being told to go to.
 //
+//   (File was js/beacon.js. Renamed 2026-09-29: ad/tracker blockers in Firefox block any script
+//    named beacon.js, which took the whole game down. Do not name a module beacon/analytics/track/pixel.)
+//
 //   "In the world, there should be a large animated pointer above the location or object to help the
 //    player find it, and a radial arrow pointing to it when its off-screen."
 //

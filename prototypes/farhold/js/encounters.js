@@ -555,7 +555,7 @@ export function createEncounters({ field, zones, terrain, balance = {}, data = {
     /**
      * R14: every road event has a clock, a place and a reward, which is the definition of an
      * activity — so this one is always worth its two points, and it also gets a row in the Nearby
-     * panel and a beacon in the world (js/nearby.js, js/beacon.js).
+     * panel and a beacon in the world (js/nearby.js, js/waylight.js).
      */
     const evWhere = zones?.at?.(ev.x, ev.z);
     const evNamed = nameLine(spec, ev.units, { place: evWhere && evWhere.id >= 0 ? evWhere.name : null });

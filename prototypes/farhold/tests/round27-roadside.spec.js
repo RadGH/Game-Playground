@@ -72,7 +72,7 @@ test('night on a town approach: the lamps light through the pool without starvin
     const calls = [];
     for (let i = 0; i < 5; i++) { await new Promise(r => setTimeout(r, 200)); calls.push(f.stats().drawCalls); }
     const pool = f.light.pool;
-    const lit = pool.filter(l => l.visible);
+    const lit = pool.filter(l => l.intensity > 0);
     const built = f.features.roadsideBuilt;
     const lampSet = new Set(built.lamps.map(l => `${l.glow[0].toFixed(2)},${l.glow[2].toFixed(2)}`));
     return {

@@ -1151,6 +1151,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   Assets.open(new URL('../../../assets/', import.meta.url).href)
     .then(a => a.fxTextures(THREE, { size: 128 }))
     .then(t => spellfx.setTextures(t))
+    // 2026-09-29 — build every effect shader now, not on the first hits of the first fight
+    .then(() => spellfx.warm(renderer, camera))
     .catch(() => { /* geometry only, which still reads fine */ });
   const skills = createSkillBar({
     data: skillData, player, rpg,

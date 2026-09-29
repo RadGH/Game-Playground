@@ -1451,7 +1451,7 @@ the line it replaced.
 | `js/ambient.js` | the purse, the no-repeat window, `bind()`. Pure; `tests/ambient.test.js` |
 | `js/nearby.js` | what is worth a row, nearest first, clocks first. Pure; `tests/nearby.test.js` |
 | `js/nearby-ui.js` | the five-row panel under the minimap, at 4 Hz, on a cached node pool |
-| `js/beacon.js` | six columns of light, shared by the Nearby panel and the scanner |
+| `js/waylight.js` | six columns of light, shared by the Nearby panel and the scanner |
 
 The one rule that makes the beacon work: **it is the same size on screen at any distance.** A
 pointer that shrinks is invisible at exactly the range you need it, because you can see the cart at

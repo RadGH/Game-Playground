@@ -2219,7 +2219,7 @@ body.building canvas { cursor: crosshair; }
 }
 
 /* ---------------------------------------------------------------- R14: the radial edge arrows
-   "a radial arrow pointing to it when its off-screen". The in-world pointer is js/beacon.js; this
+   "a radial arrow pointing to it when its off-screen". The in-world pointer is js/waylight.js; this
    is what takes over when the thing is behind you or past the edge of the screen. Pinned to a rim
    just inside the viewport so the whole arrow is visible, and pointer-events: none throughout —
    an arrow that ate a click on the world behind it would be a worse bug than no arrow. */

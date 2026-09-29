@@ -1264,5 +1264,5 @@
    ]
   }
  ],
- "_r14": "R14 — the same as data/encounters.json: a `named` variant with {tokens}, filled from what actually spawned and where. These eleven are the game's best content and were announced in one anonymous line and then never mentioned again — they have a row in the Nearby panel and a beacon in the world now (js/nearby.js, js/beacon.js), so the line only has to start the story."
+ "_r14": "R14 — the same as data/encounters.json: a `named` variant with {tokens}, filled from what actually spawned and where. These eleven are the game's best content and were announced in one anonymous line and then never mentioned again — they have a row in the Nearby panel and a beacon in the world now (js/nearby.js, js/waylight.js), so the line only has to start the story."
 }

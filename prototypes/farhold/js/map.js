@@ -2711,7 +2711,7 @@ let findFavOnly = false;
    *   "The scanner tool should let you select a material and scan for it, displaying it with a
    *    marker in the world for some time and displaying it on the world map as well."
    *
-   * The world half is js/beacon.js, a column of light over each hit. This is the map half: a small
+   * The world half is js/waylight.js, a column of light over each hit. This is the map half: a small
    * diamond in the material's own colour at every hit, for as long as the sweep is lit. They are
    * deliberately NOT markers — a sweep can turn up fifty seams and fifty entries in the marker book
    * would bury the pins you placed by hand. Keep one and it becomes a saved place, which is a

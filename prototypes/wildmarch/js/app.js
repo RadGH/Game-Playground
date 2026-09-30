@@ -162,10 +162,10 @@ function showHome() {
   const c = canon;
   const total = flatDocs.reduce((s, d) => ({ lines: s.lines + d.lines, words: s.words + d.words }), { lines: 0, words: 0 });
   const roleColour = r => c.roles[r] || '#888';
-  const classLink = ([id, name, role, mech]) => {
+  const classLink = ([id, name, role, mech, hybrid, build, resource]) => {
     const has = findDoc(`classes/${id}`);
     return `<a href="${docHref('classes/' + id)}" class="${has ? '' : 'missing'}" style="border-left-color:${roleColour(role)}" title="${has ? '' : 'not written yet'}">
-      <b>${escHtml(name)}</b><span>${escHtml(role)} · ${escHtml(mech)}</span></a>`;
+      <b>${escHtml(name)}</b><span>${escHtml(role)}${hybrid ? ' / ' + escHtml(hybrid) : ''} · ${escHtml(resource || '')} ${escHtml(build || '')}</span><span>${escHtml(mech)}</span></a>`;
   };
   const pct = lvl => ((lvl - 1) / 59) * 100;
   const bands = c.regions.map(([id, name, lo, hi, col]) => {
@@ -176,10 +176,12 @@ function showHome() {
       <div class="bar" style="left:${pct(lo)}%;width:${w}%;background:${col}">${lo === hi ? lo : `${lo}–${hi}`}</div>${pins}</div></div>`;
   }).join('');
   const startHere = [
-    ['WOW-AUDIT', 'WoW audit — your call', '40 things borrowed from World of Warcraft: remove, reshape or keep.'],
-    ['00-OVERVIEW', 'The canon', 'Names, ids, level bands, the class list and the rules every page follows.'],
-    ['07-PROGRESSION', 'Earn every verb', 'The level 1–60 feature-unlock ladder: mounts, dodge, talents, raids.'],
-    ['classes/druid', 'The Druid', 'Caster, Bear, Cat, Owl and Stag — a full spell bar per form.'],
+    ['00-OVERVIEW', 'The canon', 'Names, ids, level bands, the class list, and §12: every round-2 ruling.'],
+    ['08-ITEMS', 'Items and sockets', 'Gems, jewels, souls, gadgets, tags, magic find and five special rarities.'],
+    ['07-PROGRESSION', 'Unlock as you go', 'The level 1–60 feature-unlock ladder: mounts, dodge, talents, Depth.'],
+    ['classes/druid', 'The Druid', 'Bear, Wolf and Heron forms that turn each of the six spells into another.'],
+    ['20-TRAVEL', 'Travel', 'Travel Methods, teleports, the Recall Stone and mounts.'],
+    ['WISHLIST', 'Wishlist', 'Raids and other ideas parked for a later version.'],
     ['11-BOSS-MECHANICS', 'Boss mechanics', 'Void zones, danger zones, soaks and bosses that talk.'],
     ['09-SETS-LEGENDARIES', 'Sets & legendaries', 'Generic sets, legendary powers and the class-set index.'],
     ['QUESTIONS', 'Open questions', 'Decisions waiting on you before anything gets built.'],
@@ -187,7 +189,7 @@ function showHome() {
 
   content.innerHTML = `<div class="home">
     <section class="hero">
-      <span class="status">DOCS ONLY · NOTHING BUILT YET · AWAITING YOUR REVIEW</span>
+      <span class="status">DOCS ONLY · NOTHING BUILT YET · ROUND 2 · AWAITING YOUR REVIEW</span>
       <h1>${escHtml(c.title)}</h1>
       <p class="tag">“${escHtml(c.tagline)}”</p>
       <p>${escHtml(c.pitch)}</p>
@@ -197,7 +199,6 @@ function showHome() {
         <div><b>${c.classes.length}</b><span>classes</span></div>
         <div><b>${c.classes.length * 6}</b><span>bespoke spells</span></div>
         <div><b>${c.instances.filter(i => i[2] === 'dungeon').length}</b><span>dungeons</span></div>
-        <div><b>${c.instances.filter(i => i[2] === 'raid').length}</b><span>raids</span></div>
       </div>
     </section>
     <h2>Start here</h2>
@@ -208,18 +209,17 @@ function showHome() {
     <div class="role-legend">${Object.entries(c.roles).map(([r, col]) => `<span><i style="background:${col}"></i>${r}</span>`).join('')}</div>
     <div class="class-grid">${c.classes.map(classLink).join('')}</div>
     <h2>The road north — level bands</h2>
-    <div class="role-legend"><span><i style="background:var(--fg2)"></i>dungeon</span><span><i style="background:var(--ember)"></i>raid</span></div>
+    <div class="role-legend"><span><i style="background:var(--fg2)"></i>dungeon</span></div>
     <div class="bands">${bands}<div class="axis"><span></span><div><span>1</span><span>15</span><span>30</span><span>45</span><span>60</span></div></div></div>
   </div>`;
   window.scrollTo(0, 0);
 }
 
-/** Which region's band each dungeon/raid pin sits on (mirrors 00-OVERVIEW §8–9). */
+/** Which region's band each dungeon pin sits on (mirrors 00-OVERVIEW §8). */
 const INSTANCE_REGION = {
   d01: 'hearthvale', d02: 'mossfen', d03: 'greyridge', d04: 'greyridge', d05: 'sunscar', d06: 'sunscar',
   d07: 'whisperwood', d08: 'whisperwood', d09: 'cinder_steppe', d10: 'frostmantle', d11: 'drowned_coast',
-  d12: 'riftmarch', d13: 'emberthrone', d14: 'emberthrone', r01: 'greyridge', r02: 'frostmantle',
-  r03: 'drowned_coast', r04: 'emberthrone', r05: 'veilspire',
+  d12: 'riftmarch', d13: 'kingsfire', d14: 'kingsfire', d15: 'kingsfire', d16: 'spire_isle',
 };
 /* ---------------------------------------------------------------- search */
 

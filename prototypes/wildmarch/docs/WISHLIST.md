@@ -1,51 +1,190 @@
-# WILDMARCH — Design Bible, page 13: Raids and World Bosses
+# WILDMARCH — Wishlist: ideas parked for later
 
-> *"Ten of you went down the stair. Count again at the bottom."*
+**Status:** v0.2 draft — 2026-09-30 (round 2 applied). Claude-facing design page.
 
-**Status:** v0.1 draft for review — 2026-09-29. **Nothing is built.** Claude-facing design page.
+The owner parked these ideas in round 2 (2026-09-30), when he answered the WoW audit (`WOW-AUDIT.md`; the
+rulings are in [page 00 §12](00-OVERVIEW.md#12-round-2-rulings-2026-09-30)). **Nothing on this page is built in
+v2**, and no other page may depend on anything here. Each entry says what the idea was, why it was parked, what
+would bring it back, and where the old text lives. Entries marked **removed** are not waiting for a later
+version — the owner said no — and are listed only so nobody adds them again by accident.
 
-**This page owns:** every raid (`r01`–`r05`) — its rules, attunement, layout, trash, bosses, secret boss,
-dialog, hard modes and loot tables — and every **world boss** (the eight regional ones and the seasonal
-ones), their spawn rules, scaling and loot.
-
-**This page reads (and must agree with):** [page 00](00-OVERVIEW.md) (canon: ids, sizes, levels),
-[page 05](05-COMBAT.md) (damage maths, threat, battle resurrection), [page 07](07-PROGRESSION.md) (the
-feature-unlock ladder that opens raids at 30), [page 08](08-ITEMS.md) (item levels, token rules),
-[page 09](09-SETS-LEGENDARIES.md) (it indexes the raid sets, legendaries and uniques named here),
-[page 10](10-BESTIARY.md) (monster families), [page 11](11-BOSS-MECHANICS.md) (the telegraph vocabulary,
-minimum warning times, cast bars, boss dialog banners), [page 14](14-QUESTS-EVENTS.md) (it lists the
-attunement quests named here), [page 15](15-SOCIAL-ONLINE.md) (group finder, raid groups, lockout
-sharing, loot trading), [page 03](03-UI-SCREENS.md) / [page 02](02-CONTROLS.md) / [page 04](04-SETTINGS.md)
-(every screen, key and setting this page introduces is listed in §2.15 so those pages can add it).
-
-**Where the numbers come from.** Page 05 owns the real damage and health maths and did not exist when this
-page was written. So §1.2 fixes a **reference character** per raid (health and damage per second) and every
-number on this page is written against it. If page 05 changes the reference, scale every number on this
-page by the same ratio — the fights are designed in *proportions* (a Danger zone hit = 80% of a non-tank's
-health), and the proportion is the thing to keep.
-
----
+When an idea comes back, move it out of this page into its owner page and log the move in `CHANGELOG.md`.
 
 ## Contents
 
-1. [How to read this page](#1-how-to-read-this-page)
-2. [Raid rules](#2-raid-rules)
-3. [r01 — Crypt of the Barrowking](#3-r01--crypt-of-the-barrowking)
-4. [r02 — The Glacier Throne](#4-r02--the-glacier-throne)
-5. [r03 — The Sunken Choir](#5-r03--the-sunken-choir)
-6. [r04 — The Ember Court](#6-r04--the-ember-court)
-7. [r05 — Veilspire](#7-r05--veilspire)
-8. [World bosses](#8-world-bosses)
-9. [Loot index](#9-loot-index)
-10. [Id index](#10-id-index)
-11. [Reuse map](#11-reuse-map)
-12. [Notes for other pages](#12-notes-for-other-pages)
+1. [Raids](#1-raids) — the round-1 design, archived whole
+2. [Raid frames](#2-raid-frames)
+3. [Mass resurrection](#3-mass-resurrection)
+4. [Attunement](#4-attunement)
+5. [Battle-revive limits (removed)](#5-battle-revive-limits-removed)
+6. [Dungeon, raid and PvP currencies](#6-dungeon-raid-and-pvp-currencies)
+7. [PvP beyond duels](#7-pvp-beyond-duels)
+8. [Renown and Legacy (removed)](#8-renown-and-legacy-removed)
+9. [Daily and weekly quests (removed)](#9-daily-and-weekly-quests-removed)
+10. [Timed dungeon keys (removed)](#10-timed-dungeon-keys-removed)
+11. [The custom class](#11-the-custom-class)
+12. [Housing](#12-housing)
+13. [Hardcore realms](#13-hardcore-realms)
+14. [Other things round 2 parked or removed](#14-other-things-round-2-parked-or-removed)
+15. [The raid archive (round 1, verbatim)](#15-the-raid-archive-round-1-verbatim)
 
 ---
 
-## 1. How to read this page
+## 1. Raids
 
-### 1.1 The ability table
+**What it was.** Five raids for 10 or 20 players (`r01_barrowking` Crypt of the Barrowking, `r02_glacier_throne`
+The Glacier Throne, `r03_sunken_choir` The Sunken Choir, `r04_ember_court` The Ember Court, `r05_veilspire`
+Veilspire), each with 5–10 bosses, a secret boss, dialog opportunities, hard modes, attunement quests, raid
+sets, quartermasters, lockouts, a loot master and flex sizes. The whole design is in §15 below.
+
+**Why parked.** The owner (W6): *"I don't expect to have this many players unless the game itself actually
+succeeds."* v2 is built for groups of at most 5. **Raid-style boss mechanics stay**, re-tuned for five players, in
+the 5-player dungeons ([page 12](12-DUNGEONS.md)); world bosses stay ([page 13](13-WORLD-BOSSES.md)).
+
+**Where the stories went.** The two story raids were rebuilt as 5-player dungeons: r04 *The Ember Court* is now
+**d15 The Fire Court** (the main story's climax) and r05 *Veilspire* is now **d16 The Spire** (the epilogue),
+both on [page 12](12-DUNGEONS.md). r01–r03 have no replacement; page 12 may mine their bosses for dungeons.
+
+**What would bring it back.** Enough concurrent players at level 60 to fill 10-player groups from the finder in
+a few minutes, and a server that has shown it can run 20 bodies with telegraphs in one instance.
+
+**Before you reuse the archive, rename.** §15 is the round-1 text, unchanged. Its names predate round 2:
+
+| In the archive | Now |
+|---|---|
+| Emberthrone (`emberthrone`) | Kingsfire (`kingsfire`) |
+| Veilspire, Veilspire Isle (`veilspire`) | Spire Isle (`spire_isle`) |
+| the Ember King (`b_ember_king_kaedros`) | the Fire King (`b_fire_king_kaedros`) |
+| the Veil | the Mend (the Veil-realm mechanics would need their own new name) |
+| Ember Legion | Kingsfire Legion |
+| Heroic / Mythic difficulties | Challenge (one harder difficulty, no third tier) |
+| Oathstones and every other currency | removed (gold, items and reputation only) |
+| Wednesday 07:00 reset | Monday 06:00 |
+| Moon / Star / Bell / Lamp world markers | Sword, Shield, Anvil, Crown, Leaf, Wave, Key, Eye |
+| bind-on-pickup raid loot, Need / Greed / Pass | everything tradeable; personal loot only |
+| any other name with "ember" or "veil" in it | a new plain name (canon §11 rule 10) |
+
+## 2. Raid frames
+
+**What it was.** A grid of health frames for 10–20 players (`scr_raid_frames`, archive §2.4) with layouts,
+role colours, range fading and the `set.raid.*` frame settings (archive §2.15).
+**Why parked.** Groups are 5; the party frames cover them (W16). World bosses' open groups show only your own
+party (page 13 §3.2). **Back with** raids. The damage meter, boss ability timers, ready check, pull timer and
+world markers are **kept** — they are not on this list.
+
+## 3. Mass resurrection
+
+**What it was.** A cleric spell that raised the whole group after a wipe.
+**Why parked.** W35: the owner moved it to the raid wishlist; in a group of 5 one-by-one revives are enough, and
+the name is another game's. **Back with** raids, under an original name (the banned list, canon §12.5, includes
+"Mass Resurrection").
+
+## 4. Attunement
+
+**What it was.** A quest chain that had to be finished before a raid's door opened (archive §2.9, and the
+"Attunement" section of each raid).
+**Why parked.** W9: shelved with raids. **Dungeons are open**; a dungeon shows in the Dungeon Finder once your
+character has **discovered its entrance** (canon §8), which gives casters' portals and teleports a job.
+**Back with** raids, if at all — the discovery rule may be enough.
+
+## 5. Battle-revive limits (removed)
+
+**What it was.** A cap on in-combat revives per fight (1 per 10 players, +1 every 5 minutes, archive
+§2.7 and §12.3).
+**Why.** W21: the owner said remove it. There is **no limit** on in-combat revives anywhere. Not coming back
+unless raids return and prove they need it.
+
+## 6. Dungeon, raid and PvP currencies
+
+**What it was.** Delver's Marks (dungeons and the old "Delves"), **Oathstones** (`cur_oathstone`, raids and
+world bosses, archive §2.10), **Veil Sigils** (daily and weekly quests), **Glory** and **Laurels** (PvP), each
+spent at its own quartermaster.
+**Why parked.** W19 / W26: *"Still too close to WoW."* v2 has **one coin, gold**, plus reputation standing
+(canon §4). Bosses pay items and gold; faction quartermasters sell for gold at a standing.
+**Back when** there is a clear gap gold cannot fill (for example, a bad-luck token system for Challenge mode).
+The old text lives in git history of `08-ITEMS.md` §17 and in the archive below.
+
+## 7. PvP beyond duels
+
+**What it was.** Battlegrounds with level brackets, rated arenas, **War Mode** (an open-world PvP flag), a
+**Warfront** realm type, a PvP gear set, Glory and Laurels, and a PvP ladder.
+**Why parked.** W1 / W2: v2 has **friendly duels only** (from level 10, no rewards, no gear, no ladder). War
+Mode is **removed** by name (it is WoW's term). **Back when** the PvE game is finished and there is demand; the
+old text lives in git history of `05-COMBAT.md` §21 and `15-SOCIAL-ONLINE.md` §16.
+
+## 8. Renown and Legacy (removed)
+
+The post-60 Renown board (renamed Legacy in the audit) is removed (W13); post-60 play is Depth, Challenge mode,
+sockets, professions, reputation and collections.
+
+## 9. Daily and weekly quests (removed)
+
+**What it was.** Daily quests at every hub (`q_daily_*`), weekly quests (`q_weekly_*`), and a weekly quest per
+world boss (`q_world_boss_<region>`).
+**Why.** W20: *"Cut daily and weekly quests."* The only weekly thing left is the once-a-week loot limit on
+Challenge-mode bosses and world bosses (canon §4). Not coming back as chores; the old text lives in git history
+of `14-QUESTS-EVENTS.md` §12.
+
+## 10. Timed dungeon keys (removed)
+
+**What it was.** Numbered keys that set a dungeon's level, with a run timer, rotating weekly affixes, an
+end-of-run chest scaled by key level and a weekly vault.
+**Why.** W3: replaced by **Depth** — any dungeon you have cleared on Normal can be run at a chosen Depth, with no
+timer and no keys (page 12 owns it). "Keystone" is a banned word (canon §12.5). Not coming back.
+
+## 11. The custom class
+
+**What it was.** Farhold's build-your-own class (R17/R20: a spell tier list, loadouts and point-buy;
+`prototypes/farhold/js/classbuild.js`, `CLASSES.md`).
+**Why parked.** Canon §4 and `QUESTIONS.md` A5: thirty bespoke kits are the point of v2, and a custom class
+would share their spells. **Back** as a possible post-launch mode (for example a "wanderer" class that borrows
+one spell from each of six classes), once all thirty kits are balanced.
+
+## 12. Housing
+
+**What it was.** Three options on `15-SOCIAL-ONLINE.md` §20: none, a personal room, or an instanced guild hall
+(bank, trophy wall, rooms by guild rank).
+**Why parked.** `QUESTIONS.md` F9: not in v2 — Wildmarch drops Farhold's base building. **Back** as a guild hall
+if guilds turn out to need a place to gather; Farhold's build-mode code (`prototypes/farhold/js/build*.js`) is the
+starting point.
+
+## 13. Hardcore realms
+
+**What it was.** A realm type where death is permanent for characters made there (page 03's realm list, page 15
+realm types).
+**Why parked.** `QUESTIONS.md` F7: a test realm yes, hardcore later. Launch has the **Standard** realm only.
+**Back** once the death, revive and follower rules are stable enough that a permanent death feels fair.
+
+## 14. Other things round 2 parked or removed
+
+| Idea | Status | Ruling | Where the old text lives |
+|---|---|---|---|
+| Loot master, Need / Greed / Pass, bonus rolls, weekly vault | removed | W5 / W18: personal loot only | archive §2.10; git history of `08-ITEMS.md` |
+| Binding (bind on pickup / equip, "soulbound") | removed | W18: everything tradeable except quest items | git history of `08-ITEMS.md` |
+| Item levels above 60, item "tracks", a "Veil-touched" tier | removed | W17: item level 1–60 = level needed. More item effects may come later | archive §2.10.2; git history of `08-ITEMS.md` |
+| A third difficulty (Heroic / Mythic tiers) | removed | W4: Normal and Challenge only | archive §1–§7 |
+| Rested XP | removed | W11 | git history of `07-PROGRESSION.md` |
+| Opposing player factions | removed | W25: one player faction | git history of `01-WORLD-LORE.md` |
+| Flight paths ("skyways") | replaced | W15: Travel Methods ([page 20](20-TRAVEL.md)) | git history of `07` / `14` |
+| Day and night, the light slot, torches as gear, the `L` key | removed | canon §12.3: always daylight; dark places are film-set dark | git history of `05`, `08`, `17` |
+| The Last Ember long quest (lighting world-boss shrines for r05's secret boss) | parked with raids | the world-boss shrine row was cut from page 13 | archive §7.16 |
+| World-boss loot once per day | changed | now once per week per boss | page 13 §5 |
+| A world-boss-exclusive legendary per region | open | page 09 may add them; world bosses use page 09's world pool for now | page 13 §9 |
+| An 8-piece raid set with shoulder / back / waist pieces | parked with raids | — | archive §12.6 |
+
+---
+
+## 15. The raid archive (round 1, verbatim)
+
+> **This is the round-1 design (page 13 v0.1, 2026-09-29), kept whole for a later version.** It is not canon and
+> nothing in v2 may depend on it. Names and rules in it **predate round 2** — see the rename table in §1 before
+> reusing anything. Section numbers below are the old page's own (§1–§7 for raids, then the raid rows of its §9–§12).
+> World-boss content was **not** archived; it lives on [page 13](13-WORLD-BOSSES.md). Headings are one level
+> deeper than in the old page so they sit under this section; nothing else was changed.
+
+### 1. How to read this page
+
+#### 1.1 The ability table
 
 Every boss ability is one row with these columns:
 
@@ -64,7 +203,7 @@ cannot be interrupted. Page 11 owns how the bar looks.
 
 **Every 0.5 s:** Void zones tick every 0.5 s (page 11). A number written "400 / tick" is per half-second.
 
-### 1.2 Reference characters (proposal — page 05 owns the final maths)
+#### 1.2 Reference characters (proposal — page 05 owns the final maths)
 
 Raid-ready means: at the raid's level, in gear from the tier before it (dungeons at that band, or the
 previous raid).
@@ -80,7 +219,7 @@ previous raid).
 | r05 Normal | 60 | 4,000 | 7,000 | 900 | 720 |
 | r05 Mythic | 60 | 4,600 | 8,000 | 1,035 | 830 |
 
-### 1.3 How boss health is set
+#### 1.3 How boss health is set
 
 `health = (damage per second of one damage player) × (damage-player equivalents) × (target kill time in seconds)`
 
@@ -94,7 +233,7 @@ previous raid).
 Every boss table lists `Health N / M` (Normal / Mythic). The damage numbers are Normal; **Mythic damage is
 ×1.35** unless a row says otherwise.
 
-### 1.4 Ids
+#### 1.4 Ids
 
 | Thing | Pattern | Example |
 |---|---|---|
@@ -146,9 +285,9 @@ them and is not repeated.
 
 ---
 
-## 2. Raid rules
+### 2. Raid rules
 
-### 2.1 Sizes, difficulties and flex
+#### 2.1 Sizes, difficulties and flex
 
 Canon (page 00 §4, §9): raids are **10 players (Normal)** or **20 players (Mythic)**; difficulties are
 **Normal** and **Mythic**. Page 00 §9 sizes each raid individually, so this page applies it like this:
@@ -175,7 +314,7 @@ starts. A player who joins mid-fight does not change it. Mythic is never flexed.
 Above the level you keep your full power; the raid does not scale down to you. Page 07 may add a
 "raid level sync" option later (§12).
 
-### 2.2 Lockouts
+#### 2.2 Lockouts
 
 - **Weekly reset:** every **Wednesday at 07:00 server time** (canon 00 §4; page 15 owns server time). Every raid
   lockout clears at once.
@@ -193,7 +332,7 @@ Above the level you keep your full power; the raid does not scale down to you. P
   reset countdown, and a **Extend lockout** toggle (keep this week's instance next week, for progression
   guilds; you get no new loot from bosses already dead).
 
-### 2.3 Roles and composition
+#### 2.3 Roles and composition
 
 Roles are canon: **Tank, Healer, Damage, Support** (Support counts as a Damage slot).
 
@@ -216,7 +355,7 @@ Roles are canon: **Tank, Healer, Damage, Support** (Support counts as a Damage s
 - **Group finder:** Normal raids are in the group finder (page 15) with personal loot forced. Mythic is
   premade only (guilds, friends, the raid-listing board).
 
-### 2.4 Raid frames — `scr_raid_frames` (new)
+#### 2.4 Raid frames — `scr_raid_frames` (new)
 
 Raid frames replace the party frames when the group has more than 5 players (or always, per settings).
 
@@ -239,7 +378,7 @@ Layouts (`set.raid.frame_layout`): **Grouped** (default), **By role** (tanks, he
 (no names, 60 × 28 px), **Healer wide** (160 × 44 px, 5 debuffs). Frames can be dragged (unlock in the frame
 menu), scaled 60–150%, and **sorted** by group, role, name or class.
 
-### 2.5 Raid leader tools — `scr_raid_leader` (new)
+#### 2.5 Raid leader tools — `scr_raid_leader` (new)
 
 The **raid leader** (the group leader of a raid) can hand out **Raid assist** to any member. Assists can use
 every tool below except changing loot rules and kicking.
@@ -261,7 +400,7 @@ every tool below except changing loot rules and kicking.
 | **Break timer** | leader | a 5/10/15 min countdown in the corner of every screen | — |
 | **Kick** | leader | removes a player; they are ported out after 60 s | out of combat |
 
-#### 2.5.1 The eight markers
+##### 2.5.1 The eight markers
 
 Same symbols for world markers (on the ground) and target markers (over a head). Colours are chosen so none
 of them is a page 11 telegraph colour — a marker must never be mistaken for a mechanic.
@@ -280,7 +419,7 @@ of them is a page 11 telegraph colour — a marker must never be mistaken for a 
 A world marker is a 1.2 m flat disc with its symbol, a 0.2 m light column and a label; it never blocks
 movement and never glows in the colours of page 11.
 
-#### 2.5.2 The encounter guide — `scr_raid_journal` (new)
+##### 2.5.2 The encounter guide — `scr_raid_journal` (new)
 
 A book tab (Journal → Raids) with one page per raid and per boss: lore paragraph, the body model spinning,
 **every ability** with its icon, kind, shape and a 1-line plain-language counterplay, the phase health
@@ -288,7 +427,7 @@ notches, the enrage time, hard-mode trigger (once found — hard-mode triggers a
 your guild or party has triggered it, then written in), and the loot table with drop chances. Secret bosses
 show as a locked silhouette with one hint line until killed once by anyone on the server.
 
-### 2.6 Arena rules
+#### 2.6 Arena rules
 
 - **Arena lock:** when a boss is pulled, a barrier (the raid's material: bone grate, ice wall, coral, cinder
   portcullis, Veil membrane) closes every door of the arena. Players outside cannot enter until the fight ends.
@@ -304,7 +443,7 @@ show as a locked silhouette with one hint line until killed once by anyone on th
 - **Boss fights disable** mounts, stealth-reset (vanishing to drop combat), follower summons after the pull
   and hearthing.
 
-### 2.7 Wipes and recovery
+#### 2.7 Wipes and recovery
 
 A **wipe** is every player dead in a boss fight.
 
@@ -325,7 +464,7 @@ A **wipe** is every player dead in a boss fight.
 7. **Wipe counter:** the raid frame header shows "Attempt 7" for the current boss; the encounter guide keeps
    the guild's best attempt (lowest health reached) per boss.
 
-### 2.8 Enrage timers
+#### 2.8 Enrage timers
 
 Every raid boss has a **hard enrage**: a clock that starts at the pull. At the enrage time:
 
@@ -337,7 +476,7 @@ The enrage time is printed in the boss table and on the boss frame (a small cloc
 each is listed where it happens. Enrage timers are the same on Normal and Mythic unless the table says
 otherwise. Hard modes may shorten the timer.
 
-### 2.9 Attunement
+#### 2.9 Attunement
 
 The raid door is a **feature unlock** on the ladder (page 07 §Feature ladder): **Raids** unlock at **level 30**
 with the quest `q_attune_barrowking`. Every raid after it needs its own attunement quest. Attunement is
@@ -359,9 +498,9 @@ has to reach the raid's level.
   first boss kill. This keeps a guild from being blocked by one new member.
 - Attunement quest ids are listed on page 14.
 
-### 2.10 Loot
+#### 2.10 Loot
 
-#### 2.10.1 Personal loot and loot master
+##### 2.10.1 Personal loot and loot master
 
 | Rule | How it works |
 |---|---|
@@ -372,7 +511,7 @@ has to reach the raid's level.
 | **Bad luck protection** | each boss kill that gives you no item raises your personal chance at the next boss in the same raid by +10% (resets on an item) |
 | **Once per week** | boss loot is once per lockout. Trash in raids drops ordinary loot plus a 1% chance of any raid-exclusive unique from that raid's list |
 
-#### 2.10.2 Item levels (proposal — page 08 owns item level)
+##### 2.10.2 Item levels (proposal — page 08 owns item level)
 
 | Source | Item level |
 |---|---|
@@ -384,7 +523,7 @@ has to reach the raid's level.
 | Secret bosses | the raid's value + 6 |
 | World bosses | their region band top + 4; at level 60, 62 (tier 1 world bosses) to 70 (Emberthrone) |
 
-#### 2.10.3 Quartermasters
+##### 2.10.3 Quartermasters
 
 Each raid has a quartermaster in its region's hub (NPC ids proposed here; page 01 owns NPCs):
 
@@ -399,7 +538,7 @@ Each raid has a quartermaster in its region's hub (NPC ids proposed here; page 0
 Quartermasters also sell raid cosmetics (tabards, banners) and the raid's **consumable pack** (flasks, food)
 for gold.
 
-### 2.11 Hard modes and feats
+#### 2.11 Hard modes and feats
 
 - **Every raid boss has a hard mode** (`hm_<bossid>`). A hard mode is **armed by doing something in the
   world** — lighting a candle, leaving an object alone, answering a dialog a certain way, killing adds in a
@@ -414,7 +553,7 @@ for gold.
   Finishing **every** hard mode in a raid gives that raid's title (e.g. *"of the Ninefold"*). Page 07 owns
   titles and renown; the feat list is here.
 
-### 2.12 Secret bosses
+#### 2.12 Secret bosses
 
 - Every raid has **one secret boss** (canon: "+ 1 secret").
 - A secret boss **does not exist in the instance** until its unlock condition is met in that lockout. The
@@ -427,7 +566,7 @@ for gold.
   player, a mount at 2% per player (personal loot), and a title the first time.
 - First kill per server is announced to the whole server.
 
-### 2.13 Dialog opportunities
+#### 2.13 Dialog opportunities
 
 Every raid has at least one (most have several). Rules for all of them (page 11 owns the look):
 
@@ -443,7 +582,7 @@ Every raid has at least one (most have several). Rules for all of them (page 11 
    boss's section.
 5. A dialog opportunity happens **once per pull**. On a retry the boss says a shorter line (*"You again."*).
 
-### 2.14 Scaling tables (summary)
+#### 2.14 Scaling tables (summary)
 
 | | r01 | r02 | r03 N | r03 M | r04 N | r04 M | r05 N | r05 M |
 |---|---|---|---|---|---|---|---|---|
@@ -455,7 +594,7 @@ Every raid has at least one (most have several). Rules for all of them (page 11 
 
 r01 uses **2.0 s** warnings on everything (above the 1.5 s floor) because it is the teaching raid.
 
-### 2.15 Screens, keys and settings added by this page
+#### 2.15 Screens, keys and settings added by this page
 
 For pages 03, 02 and 04 to list:
 
@@ -492,9 +631,9 @@ For pages 03, 02 and 04 to list:
 
 ---
 
-## 3. r01 — Crypt of the Barrowking
+### 3. r01 — Crypt of the Barrowking
 
-### 3.1 At a glance
+#### 3.1 At a glance
 
 | Field | Value |
 |---|---|
@@ -521,7 +660,7 @@ roughly one new idea and repeats the ones before it:
 | 5 The Barrowking | three phases, a dialog opportunity, all of the above at once (density 2) | everything |
 | Secret: the Ninth Heir | checkerboard, "cannot be healed" rings, healer-assigned Beneficial zones | everything |
 
-### 3.2 Lore
+#### 3.2 Lore
 
 Before Highcourt had walls there was a hill, and in the hill a king who had himself buried with his eight
 heirs and his whole war-band so that none of them would ever serve another crown. Highcourt was built on top
@@ -534,7 +673,7 @@ The **Ninth Heir** is the child the king had struck from the list of his heirs. 
 every stone. She was buried below the others, alone and unnamed, and she is the reason the Unburied do not stay
 buried.
 
-### 3.3 Attunement — `q_attune_barrowking` "The Key Under Highcourt"
+#### 3.3 Attunement — `q_attune_barrowking` "The Key Under Highcourt"
 
 Given by `npc_sexton_alder` at the Catacomb Gate to any level-30 character (the Raids unlock card on page 07
 points here).
@@ -548,7 +687,7 @@ points here).
 | 5 | Open the Catacomb Gate | Highcourt | a 20 s cinematic: the gate grinds, the ranks of bones inside turn their heads |
 | Reward | Raid unlock card (page 07), 12 Oathstones, `it_sextons_tabard` (cosmetic) | | account-wide attunement |
 
-### 3.4 Layout
+#### 3.4 Layout
 
 ```
                       HIGHCOURT — Chapel of Ash
@@ -610,7 +749,7 @@ in the West Vault, 8 on the Barrow Road under the Herald's banner. Stone 9 is in
 stone at the ninth heir-tomb. Reading a stone is a 2 s interact; the raid shares the count (shown on the raid
 frame header as a small "Names 5/8").
 
-### 3.5 Trash
+#### 3.5 Trash
 
 Trash health is at the reference level (§1.2); "Elite" packs are marked. Families: undead, construct, beast,
 aberration.
@@ -637,7 +776,7 @@ aberration.
 **Respawns:** the Ossuary's walls re-rise 4 Skull Swarms every 10 min while the Warden lives. Nothing else
 respawns in the lockout.
 
-### 3.6 Boss 1 — The Ossuary Warden
+#### 3.6 Boss 1 — The Ossuary Warden
 
 | Field | Value |
 |---|---|
@@ -688,7 +827,7 @@ Ossuary doorway (interact, 1 s) before the pull. The bell tolls once per Bone Sl
 
 **Loot:** see §3.12.
 
-### 3.7 Boss 2 — Sister Candlemourn
+#### 3.7 Boss 2 — Sister Candlemourn
 
 | Field | Value |
 |---|---|
@@ -746,7 +885,7 @@ at the nave door before the pull (interact each 1 s).
 - Grave Chill hits 3 players.
 - Drop: `uq_votive_of_the_last_sister` (§3.12) at 20%. Feat `ft_r01_dark_vigil`.
 
-### 3.8 Boss 3 — The Gravewardens, Hask and Hollin
+#### 3.8 Boss 3 — The Gravewardens, Hask and Hollin
 
 | Field | Value |
 |---|---|
@@ -789,7 +928,7 @@ carried banner slows you 20%).
 - Chains of the Vault links 3 players (a triangle; all three must be 15 m from both others).
 - Drop: `it_gravewarden_pair_banners` (house decoration or a back-cosmetic) at 25%. Feat `ft_r01_stand_together`.
 
-### 3.9 Boss 4 — The Rotmaw
+#### 3.9 Boss 4 — The Rotmaw
 
 | Field | Value |
 |---|---|
@@ -829,7 +968,7 @@ patrol's body, `it_sextons_bell`) into the pit before the pull.
 - Drop: `it_mount_rotmaw_hatchling` (a small worm mount, `creature:worm ×1.2`) at 3% per player. Feat
   `ft_r01_feed_it`.
 
-### 3.10 Boss 5 — The Barrowking, Hrodric Ninefold
+#### 3.10 Boss 5 — The Barrowking, Hrodric Ninefold
 
 | Field | Value |
 |---|---|
@@ -903,7 +1042,7 @@ Barrow Road (he stands aside and follows the raid into the hall). He joins at 70
 - Drop: `it_mount_barrow_charger` (an undead horse: `creature:courser`, bone barding, pale-gold eyes) at 4% per
   player. Feat `ft_r01_heralds_horn`.
 
-### 3.11 Secret boss — The Ninth Heir
+#### 3.11 Secret boss — The Ninth Heir
 
 **Unlock (all in one lockout):**
 1. Read **all eight** named name-stones (§3.4) — raid header shows *Names 8/8*.
@@ -952,7 +1091,7 @@ Barrow Road (he stands aside and follows the raid into the hall). He joins at 70
 **Loot:** guaranteed `leg_crown_of_the_ninth` to one player; `it_mount_heirs_palfrey` (a pale-gold spectral
 pony, `creature:pony`, glow) 2% per player; title *"Who Said Her Name"* (first kill per character).
 
-### 3.12 r01 loot
+#### 3.12 r01 loot
 
 **Raid set — `set_ninefold_oath` "The Ninefold Oath"** (for page 09's index). Six pieces, each made in the
 wearer's armour weight (cloth, light, medium, heavy) when the token is handed in. The bonus you get follows
@@ -1016,9 +1155,9 @@ Candlemourn and still kill her with every candle lit). All hard modes → title 
 
 ---
 
-## 4. r02 — The Glacier Throne
+### 4. r02 — The Glacier Throne
 
-### 4.1 At a glance
+#### 4.1 At a glance
 
 | Field | Value |
 |---|---|
@@ -1044,7 +1183,7 @@ as a blue sliver under their raid frame and a frost rim on their own screen edge
 
 Cold does not rise during the 60 s after a boss dies, or out of combat within 20 m of a checkpoint.
 
-### 4.2 Lore
+#### 4.2 Lore
 
 The Frost Wardens of Rimehold keep a watch on the glacier because of what their grandmothers saw: a woman
 walking up the ice in a crown, and the Stonehide giants (page 10 warbands) walking behind her. **Queen Ysmere**
@@ -1053,7 +1192,7 @@ The Wardens think she is holding the peaks. She is holding something **under** t
 titan of the mountain whose waking would be the end of winter, and of Rimehold with it, as the ice melts in one
 season and the valley floods.
 
-### 4.3 Attunement — `q_attune_glacier_throne` "Word from Rimehold"
+#### 4.3 Attunement — `q_attune_glacier_throne` "Word from Rimehold"
 
 | Step | Objective | Where |
 |---|---|---|
@@ -1064,7 +1203,7 @@ season and the valley floods.
 | 5 | Set the Hearthcoal in the Glacier Gate's brazier | the gate opens |
 | Reward | 12 Oathstones; `it_hearthcoal` (a permanent quest item: you can carry it into the raid, §4.9) | |
 
-### 4.4 Layout
+#### 4.4 Layout
 
 ```
                      RIMEHOLD ─── Rimeglass Pass (attunement walk)
@@ -1106,7 +1245,7 @@ season and the valley floods.
                               └───────────────────┘
 ```
 
-### 4.5 Trash
+#### 4.5 Trash
 
 | id | Name | Body | Where | Health | Abilities |
 |---|---|---|---|---|---|
@@ -1126,7 +1265,7 @@ season and the valley floods.
 | `m_undead_frozen_soldier` | Frozen Soldier | `chibi2:undead/fighter`, frost-rimed | the Throne approach (rise from the ice) | 25,000 | **Shatter** on death — 4 m ice shards Danger zone, 1.8 s, 600 |
 | `m_humanoid_throne_guard` | Throne Guard | `chibi2:giant/knight`, `plate_helm` ice-blue, halberd | the Throne approach (Elite, 4) | 150,000 | **Guard Rank** — the four share damage (split 25% each) while within 10 m; **Pike Sweep** — 180° 8 m, 1,300 |
 
-### 4.6 Boss 1 — Rimefang Matriarch
+#### 4.6 Boss 1 — Rimefang Matriarch
 
 | Field | Value |
 |---|---|
@@ -1152,7 +1291,7 @@ leap *"**She crouches, watching {target}.**"*
 4 m of each other **both** drop a 6 m Warmth zone for 15 s. Drop `it_mount_rimefang_pup` (a white `creature:wolf`
 mount) 4%. Feat `ft_r02_cold_den`.
 
-### 4.7 Boss 2 — Borga the Hailwright
+#### 4.7 Boss 2 — Borga the Hailwright
 
 | Field | Value |
 |---|---|
@@ -1176,7 +1315,7 @@ Lines: pull *"Mind the sparks. They are cold ones."*; Quench *"**Into the water 
 before the pull (a core sits on the forge floor at the entrance). Anvils give no Warmth; ice pillars last 20 s;
 Quench every 30 s. Drop `uq_hailwrights_tongs` 20%. Feat `ft_r02_quench_the_anvils`.
 
-### 4.8 Boss 3 — The Whiteout
+#### 4.8 Boss 3 — The Whiteout
 
 | Field | Value |
 |---|---|
@@ -1205,14 +1344,14 @@ Snuff *"**Little fire, little fire…**"*; 40% *"Two of me. None of you."*
 Hearthcoal (the carrier leaves it at checkpoint 2). Beacons need **two** players channelling together; Snuff every
 20 s. Drop `it_whiteout_cloak` (a back cosmetic of blowing snow) 25%. Feat `ft_r02_no_fire`.
 
-### 4.9 The Hearthcoal (carried through the raid)
+#### 4.9 The Hearthcoal (carried through the raid)
 
 The attunement's `it_hearthcoal` can be **carried by one player** (off hand; they cannot use an off-hand item).
 While lit it is a 6 m aura that lowers Cold by 4/s for everyone near it. It **dims over 180 s** and is relit at any
 brazier or checkpoint (2 s). If the carrier dies it drops (anyone can pick it up in 20 s, else it returns to the
 last checkpoint, unlit). Keeping it **lit from the gate to the throne** in one lockout is half of the secret (§4.12).
 
-### 4.10 Boss 4 — Skathra, the Wind-Mother
+#### 4.10 Boss 4 — Skathra, the Wind-Mother
 
 | Field | Value |
 |---|---|
@@ -1239,7 +1378,7 @@ Stormcall *"**Storm, come to me!**"*; death *"Fly… fly for me."*
 `it_mount_windmother_fledgling` (a white `creature:griffin` winged mount: runs and glides before Riding IV, flies after (page 07, level 60)) 2%.
 Feat `ft_r02_topple`.
 
-### 4.11 Boss 5 — The Council of Cold
+#### 4.11 Boss 5 — The Council of Cold
 
 | Field | Value |
 |---|---|
@@ -1269,7 +1408,7 @@ heard."*; Winter's Circle *"**Come close, little ones. Closer.**"* (the hint to 
 must die **within 10 s of each other**; Last Word happens anyway at each death. Drop `uq_councils_three_rings`
 (a ring) 15%. Feat `ft_r02_one_voice`.
 
-### 4.12 Boss 6 — Queen Ysmere of the Glacier Throne
+#### 4.12 Boss 6 — Queen Ysmere of the Glacier Throne
 
 | Field | Value |
 |---|---|
@@ -1326,7 +1465,7 @@ with the whole raid before the pull. She keeps her Throne Guards: 4 guards stand
 share her damage (25% of every hit on her is passed to the guards — kill guards and they come back after 60 s).
 Drop `it_mount_glacier_stag` (an ice `creature:elk`) 3%. Feat `ft_r02_winter_court`.
 
-### 4.13 Secret boss — Vorm, the Sleeper Under the Glacier
+#### 4.13 Secret boss — Vorm, the Sleeper Under the Glacier
 
 **Unlock:** carry the Hearthcoal **lit** from the Glacier Gate to the throne in one lockout (it may be relit at
 braziers; it must never go out *and be returned to a checkpoint*), pick reply 4 at the Queen, kill her.
@@ -1357,7 +1496,7 @@ cosmetic, a glowing stone heart) 30%. Feat `ft_r02_early_spring`.
 **Loot:** guaranteed `leg_heart_of_the_sleeper`; `it_mount_stoneback_tortoise` (`creature:turtle ×2.2` stone and
 moss) 2% per player; title *"Who Woke the Mountain"*.
 
-### 4.14 r02 loot
+#### 4.14 r02 loot
 
 **Raid set — `set_rimebound_court` "The Rimebound Court"** — tokens `it_token_r02_<slot>`; pieces
 `it_rimebound_crown`, `it_rimebound_mantle` (chest), `it_rimebound_legwraps`, `it_rimebound_gauntlets`,
@@ -1398,9 +1537,9 @@ during the dialog). All hard modes → title *"of the Rimebound Court"*.
 
 ---
 
-## 5. r03 — The Sunken Choir
+### 5. r03 — The Sunken Choir
 
-### 5.1 At a glance
+#### 5.1 At a glance
 
 | Field | Value |
 |---|---|
@@ -1426,7 +1565,7 @@ second.
 teal), Shell ● (mid-low, white), Wave ≈ (mid, blue), Gull ✦ (mid-high, silver), Bell ■ (high, gold). Nothing
 depends on hearing alone or on colour alone.
 
-### 5.2 Lore
+#### 5.2 Lore
 
 The Cathedral of the Deep Choir stood on the headland until the sea took the headland. The choir kept singing as
 the water rose — the Saltmarch fishermen say they could hear it under the waves for a year, and then it stopped,
@@ -1435,7 +1574,7 @@ choir became: the **Choirmaster** was never a person; it is a thing from the dee
 sleep for four hundred years, and when the singing drowned, it woke up and learned the song. The **Unsung** is
 the one note the choir never sang: the note that would have put it back to sleep.
 
-### 5.3 Attunement — `q_attune_sunken_choir` "The Bell That Rings Underwater"
+#### 5.3 Attunement — `q_attune_sunken_choir` "The Bell That Rings Underwater"
 
 | Step | Objective | Where |
 |---|---|---|
@@ -1445,7 +1584,7 @@ the one note the choir never sang: the note that would have put it back to sleep
 | 4 | Read the Choirbook at the Bellwalk: the causeway rises | the raid door opens (at any tide from now on, for you) |
 | Reward | 14 Oathstones; `it_choirbook_page` (the raid's note chart — shows the five note symbols on your HUD in r03) | |
 
-### 5.4 Layout
+#### 5.4 Layout
 
 ```
   SALTMARCH ── Bellwalk causeway (low tide) ──┐
@@ -1493,7 +1632,7 @@ the one note the choir never sang: the note that would have put it back to sleep
 clapper. Interact (2 s) and it sounds one note — the bell's symbol is added to the raid header ("Notes: ▲ ≈ ■ …").
 Bells can only be rung **after** that area's boss is dead.
 
-### 5.5 Trash
+#### 5.5 Trash
 
 | id | Name | Body | Where | Health N / M | Abilities |
 |---|---|---|---|---|---|
@@ -1514,7 +1653,7 @@ Bells can only be rung **after** that area's boss is dead.
 | `m_elemental_brine_elemental` | Brine Elemental | `creature:elemental ×2.2`, water `#3a8ac0`/`#c0f0ff` | Baptistery, Quire | 150k / 430k | **Undertow** — 8 m circle that pulls players in 3 m/s for 3 s; **Salt Spray** — cone 45°, +3 Brine |
 | `m_aberration_quire_tentacle` | Quire Tentacle | `creature:worm ×2.0`, `#2a1f42` suckered | Quire approach (stationary, from grates) | 120k / 340k | **Slam** — 10 m line, 1,800; cannot move; kill or avoid |
 
-### 5.6 Boss 1 — The Saltbound Colossus
+#### 5.6 Boss 1 — The Saltbound Colossus
 
 | Field | Value |
 |---|---|
@@ -1537,7 +1676,7 @@ the nave groans); Slam: the Narrator *"**He lifts both fists.**"*.
 nave door before the pull (they are normally in the way). Starts with 3 walls in the room; walls cannot be broken.
 Drop `it_coral_crown` (head cosmetic) 25%. Feat `ft_r03_let_it_grow`.
 
-### 5.7 Boss 2 — Mother Brinecoil
+#### 5.7 Boss 2 — Mother Brinecoil
 
 | Field | Value |
 |---|---|
@@ -1563,7 +1702,7 @@ garth, reached by swimming) before the pull. She is enraged from the start: Coil
 first sweep of every minute — the raid must be in the water (breath!) as she passes. Drop `uq_brinecoil_fang` 15%.
 Feat `ft_r03_eggs_in_the_garth`.
 
-### 5.8 Boss 3 — The Drowned Cantor
+#### 5.8 Boss 3 — The Drowned Cantor
 
 | Field | Value |
 |---|---|
@@ -1587,7 +1726,7 @@ Lines: pull *"From the top. And — "*; Phrase *"**Listen!**"*; Discord *"**No, 
 pull. Phrases are 5 notes, Rest never happens, and Discord is uninterruptible once per minute (grey bar). Drop
 `it_cantors_baton_toy` (a toy that makes nearby players' characters sing a note) 30%. Feat `ft_r03_encore`.
 
-### 5.9 Boss 4 — Captain Ilse Grimwater and the Last Crew
+#### 5.9 Boss 4 — Captain Ilse Grimwater and the Last Crew
 
 | Field | Value |
 |---|---|
@@ -1628,7 +1767,7 @@ cannons are loaded). No dialog opportunity; the mast has double health. Drop `it
 ghost boat — boats are page 05/08's; if Wildmarch keeps Farhold's boats, `(reuse: js/boat.js)`) 3%. Feat
 `ft_r03_no_quarter`.
 
-### 5.10 Boss 5 — The Pearl Twins, Pearl and Nacre
+#### 5.10 Boss 5 — The Pearl Twins, Pearl and Nacre
 
 | Field | Value |
 |---|---|
@@ -1655,7 +1794,7 @@ touching both the white and black pearl altars at the vault door within 1 s of e
 polarity at the start (grey) and is given one only by Invert. Drop `it_pearl_nacre_earrings` (face cosmetic)
 25%. Feat `ft_r03_one_colour`.
 
-### 5.11 Boss 6 — Abbess Marenne of the Deep Choir
+#### 5.11 Boss 6 — Abbess Marenne of the Deep Choir
 
 | Field | Value |
 |---|---|
@@ -1680,7 +1819,7 @@ Lines: pull *"Come, children. Come down to the water."*; Hymn *"**Sing with us, 
 the Font."** Armed by a player drinking from the font before the pull (they are Charmed at the pull, for 20 s).
 Sanctuary never comes. Drop `uq_abbess_bell_staff` at 15% (8% without hard mode). Feat `ft_r03_drink_from_the_font`.
 
-### 5.12 Boss 7 — The Choirmaster, Who Sings the Sea
+#### 5.12 Boss 7 — The Choirmaster, Who Sings the Sea
 
 | Field | Value |
 |---|---|
@@ -1740,7 +1879,7 @@ Come.**"*; death *"…it is so… quiet…"*
 join the fight, P1). Tentacles regrow in 30 s; P2 needs **5** columns held. Drop `it_mount_choir_leviathan` (a
 swimming mount: `creature:snake ×3`, eyes glowing — water mount per page 05/07) 2%. Feat `ft_r03_full_choir`.
 
-### 5.13 Secret boss — The Unsung
+#### 5.13 Secret boss — The Unsung
 
 **Unlock:** ring all **seven silent bells** (§5.4) in one lockout; at the Choirmaster's dialog pick reply 4 and give
 the notes in the Choirmaster's own order; kill the Choirmaster.
@@ -1771,7 +1910,7 @@ single pure tone) 30%. Feat `ft_r03_a_cappella`.
 **Loot:** guaranteed `leg_the_unsung_note`; `it_mount_still_water_heron` (a pale `creature:owl ×2.2` long-legged,
 white) 2% per player; title *"Who Sang the Last Note"*.
 
-### 5.14 r03 loot
+#### 5.14 r03 loot
 
 **Raid set — `set_drowned_choir` "Vestments of the Drowned Choir"** — tokens `it_token_r03_<slot>` (Mythic tokens
 `it_token_r03m_<slot>`); pieces `it_drowned_choir_cowl`, `…_vestment` (chest), `…_leggings`, `…_gloves`,
@@ -1813,9 +1952,9 @@ white) 2% per player; title *"Who Sang the Last Note"*.
 
 ---
 
-## 6. r04 — The Ember Court
+### 6. r04 — The Ember Court
 
-### 6.1 At a glance
+#### 6.1 At a glance
 
 | Field | Value |
 |---|---|
@@ -1842,7 +1981,7 @@ the King fight (§6.13). Ties go to Ash.
 | Accept Brandt's duel honourably (one player enters the ring) or refuse (the raid rushes the ring) | Castellan Brandt | honourable: Iron +1 · rush: Flame +1 |
 | Return the Consort's egg or smash it | after Vaelkyr | return: Ash +1 · smash: Flame +1 |
 
-### 6.2 Lore
+#### 6.2 Lore
 
 Kaedros was the last king of the old Wildmarch before the Crown Assembly. When the Assembly voted him out, he
 walked into the Emberthrone's caldera with his court and did not come back — until the Ember Legion came down the
@@ -1851,7 +1990,7 @@ mountain with his banner, and the land north of Frostmantle started to burn. He 
 the palace so that his father's crown would never cool. The widowed queen, **Sabeth**, has sat at court ever since
 as a petitioner — asking every year, politely, for her son back.
 
-### 6.3 Attunement — `q_attune_ember_court` "A Petition in Ash"
+#### 6.3 Attunement — `q_attune_ember_court` "A Petition in Ash"
 
 | Step | Objective | Where |
 |---|---|---|
@@ -1862,7 +2001,7 @@ as a petitioner — asking every year, politely, for her son back.
 | 5 | Receive a **Court Writ** (`it_court_writ`) | the palace gate opens for you |
 | Reward | 16 Oathstones; the Court Favour banners unlock on your raid header | |
 
-### 6.4 Layout
+#### 6.4 Layout
 
 ```
   LAST LIGHT ─ Cinder Stair (switchbacks up the caldera wall) ─┐
@@ -1904,7 +2043,7 @@ as a petitioner — asking every year, politely, for her son back.
                               └──────────────────┘
 ```
 
-### 6.5 Trash
+#### 6.5 Trash
 
 | id | Name | Body | Where | Health N / M | Abilities |
 |---|---|---|---|---|---|
@@ -1923,7 +2062,7 @@ as a petitioner — asking every year, politely, for her son back.
 | `m_dragonkin_fire_whelp` | Fire Whelp | `creature:drake ×1.2`, red-gold | Eyrie Crater; Vaelkyr's adds | 45k / 130k | **Whelp Breath** — 30° cone 8 m, 1,200; flies |
 | `m_dragonkin_emberwing_drake` | Emberwing Drake | `creature:drake ×2.6`, `wings` on | Eyrie approach (Elite) | 380k / 1.08M | **Wing Gust** knockback 8 m; **Cinder Breath** — 60° 14 m, 3,000 |
 
-### 6.6 Boss 1 — Cinderjaw, the Gate That Walks
+#### 6.6 Boss 1 — Cinderjaw, the Gate That Walks
 
 | Field | Value |
 |---|---|
@@ -1948,7 +2087,7 @@ and becomes a bridge."*
 end): the road is **60 m** instead of 90 m. Drop `it_cinderjaw_portcullis_shield` (a transmog shield skin) 25%. Feat
 `ft_r04_let_it_walk`.
 
-### 6.7 Boss 2 — Kennelmaster Varro, with Scorch and Soot
+#### 6.7 Boss 2 — Kennelmaster Varro, with Scorch and Soot
 
 | Field | Value |
 |---|---|
@@ -1975,7 +2114,7 @@ Mythic: **Twin Brand** — two players branded, one per hound. Lines: pull *"Hun
 (interact) before the pull. Pack range 15 m; Brand every 20 s. Drop `it_mount_ash_hound` (`creature:hound ×2.2`
 mount, ember eyes) 4%. Feat `ft_r04_muzzles_off`.
 
-### 6.8 Boss 3 — The Three Petitioners
+#### 6.8 Boss 3 — The Three Petitioners
 
 | Field | Value |
 |---|---|
@@ -2017,7 +2156,7 @@ unread."*
 **Hard mode — `hm_b_three_petitioners` "No Side."** Armed by picking reply 1 (say nothing): all three hostile is the
 hard mode (no separate trigger). Drop `uq_petition_of_the_three_houses` 15%. Feat `ft_r04_no_side`.
 
-### 6.9 Boss 4 — Forge-Queen Hesta
+#### 6.9 Boss 4 — Forge-Queen Hesta
 
 | Field | Value |
 |---|---|
@@ -2055,7 +2194,7 @@ Lines: pull *"Out of my forge!"*; Sluices *"**Let it run!**"*; runes *"**Hold st
 **Hard mode — `hm_b_forgequeen_hesta` "Every Rune."** Armed by lighting all six forge braziers before the pull.
 Every rune type lands at once each cycle. Drop `it_hestas_rune_hammer_skin` 25%. Feat `ft_r04_every_rune`.
 
-### 6.10 Boss 5 — Lord Castellan Aurel Brandt
+#### 6.10 Boss 5 — Lord Castellan Aurel Brandt
 
 | Field | Value |
 |---|---|
@@ -2081,7 +2220,7 @@ every 40 s, 20 s long. Drop `uq_brandts_champion_plume` (a helm plume unique) 15
 **If Ash is allied** (the Petitioners reply 2) and Sabeth still lives: Brandt carries **the Prince's Signet**
 (`it_prince_aurel_signet`) — the second half of the secret (§6.14); it drops on his death.
 
-### 6.11 Boss 6 — Vaelkyr, the Emberwing Consort
+#### 6.11 Boss 6 — Vaelkyr, the Emberwing Consort
 
 | Field | Value |
 |---|---|
@@ -2110,7 +2249,7 @@ under my wings survives!**"*; grounded *"**Chains — on ME?**"*; death *"Kaedro
 down only by damage: at 55% and 45%. Drop `it_mount_emberwing_whelp` (a young `creature:dragon ×1.4` winged mount: runs and glides before Riding IV, flies after (page 07, level 60))
 2%. Feat `ft_r04_no_harpoons`.
 
-### 6.12 Boss 7 — The Ashen Herald
+#### 6.12 Boss 7 — The Ashen Herald
 
 | Field | Value |
 |---|---|
@@ -2136,7 +2275,7 @@ Lines (it only screams; the Narrator): *"The pyres lean toward it."*; egg *"**Th
 three times (two eggs). Drop `it_mount_ashen_phoenix` (`creature:phoenix ×2`, grey with ember wings; winged mount: runs and glides before Riding IV, flies after (page 07, level 60)) 1%. Feat
 `ft_r04_three_lives`.
 
-### 6.13 Boss 8 — Kaedros, the Ember King
+#### 6.13 Boss 8 — Kaedros, the Ember King
 
 | Field | Value |
 |---|---|
@@ -2198,7 +2337,7 @@ Lines: pull *"The court is in session. You are the accused."*; Decree *"**By my 
 (say nothing / refuse every choice, and fight all three Petitioners). No house help. Drop `it_mount_ember_throne_titan`
 (a small walking throne on titan legs — a joke mount, `creature:titan ×1.0` with a chair) 2%. Feat `ft_r04_unfavoured`.
 
-### 6.14 Secret boss — Prince Aurel, the Heir in the Kiln
+#### 6.14 Secret boss — Prince Aurel, the Heir in the Kiln
 
 **Unlock:** side with **Ash** at the Petitioners and keep Sabeth alive through that fight; get the **Kiln Key
 Fragment** from Hesta (dialog reply 2); get the **Prince's Signet** from Castellan Brandt (drops only while Ash is
@@ -2240,7 +2379,7 @@ stays outside: no Cry for Mother, but the dialog never comes and the enrage is 8
 **Loot:** guaranteed `leg_kiln_heart`; `it_mount_glass_charger` (a glass-and-fire `creature:courser`) 2% per player;
 title *"Who Opened the Kiln"*.
 
-### 6.15 r04 loot
+#### 6.15 r04 loot
 
 **Raid set — `set_emberlord_regalia` "The Emberlord Regalia"** — tokens `it_token_r04_<slot>` / `it_token_r04m_<slot>`;
 pieces `it_emberlord_crown`, `…_robes` (chest), `…_legguards`, `…_gauntlets`, `…_treads`, `…_chain` (necklace).
@@ -2283,9 +2422,9 @@ title *"of the Ember Court"*. Mythic King → title *"Kingsbane"*.
 
 ---
 
-## 7. r05 — Veilspire
+### 7. r05 — Veilspire
 
-### 7.1 At a glance
+#### 7.1 At a glance
 
 | Field | Value |
 |---|---|
@@ -2313,7 +2452,7 @@ light, 3 m) are in fixed spots; walking into one moves you to the other realm in
 
 The raid frame shows each player's realm (a small white eye icon for Veil players).
 
-### 7.2 Lore
+#### 7.2 Lore
 
 The Veil is the thin place between the Wildmarch and whatever is under it. Veilspire was built by the elves of the
 Moonwell Circle (page 01) as a nail through the Veil to hold it shut, with **Saelith** as its warden. Something on
@@ -2322,7 +2461,7 @@ years: that is what tore the Riftmarch, what woke the Choirmaster, what the Embe
 before this one was fighting its edges. Behind all of it is the **Marchheart** — the land itself, asleep, dreaming
 the Wildmarch; the Unwoven is eating the dream. Page 01 owns the main story; this page owns the fights.
 
-### 7.3 Attunement — `q_attune_veilspire` "The Door With No Wall"
+#### 7.3 Attunement — `q_attune_veilspire` "The Door With No Wall"
 
 | Step | Objective | Where |
 |---|---|---|
@@ -2333,7 +2472,7 @@ the Wildmarch; the Unwoven is eating the dream. Page 01 owns the main story; thi
 | 5 | Open the root door | |
 | Reward | 20 Oathstones; `it_veil_lens` (a HUD overlay: Veil-only telegraphs show faintly even in the Waking **for you**, at 30% opacity — the one advantage the attuned get) | |
 
-### 7.4 Layout
+#### 7.4 Layout
 
 ```
                       THE SPIRE LANDING ── the root door
@@ -2387,7 +2526,7 @@ the Wildmarch; the Unwoven is eating the dream. Page 01 owns the main story; thi
                         └───────────────────────┘
 ```
 
-### 7.5 Trash
+#### 7.5 Trash
 
 | id | Name | Body | Where | Health N / M | Abilities |
 |---|---|---|---|---|---|
@@ -2407,7 +2546,7 @@ the Wildmarch; the Unwoven is eating the dream. Page 01 owns the main story; thi
 | `m_fiend_rift_imp` | Rift Imp | `creature:imp ×1.2`, grey-violet | everywhere, in swarms | 40k / 55k | **Blink Through** — hops between realms; **Spark** 900 |
 | `m_elemental_unwoven_thread` | Loose Thread | `creature:wisp ×1.4`, white thread-trails | the Loom approach | 90k / 125k | **Unravel** — on death, a random player's biggest buff is removed |
 
-### 7.6 Boss 1 — The Threshold
+#### 7.6 Boss 1 — The Threshold
 
 | Field | Value |
 |---|---|
@@ -2434,7 +2573,7 @@ once): pull *"You have a key. Keys are for leaving."*; Slam Shut *"**Shut.**"*; 
 6 in the Veil (Mythic 7); Keyhole fires twice. Drop `it_threshold_key_toy` (opens a 10 s rift anywhere, cosmetic)
 25%. Feat `ft_r05_knock`.
 
-### 7.7 Boss 2 — Grey and Greyer, the Veilhounds
+#### 7.7 Boss 2 — Grey and Greyer, the Veilhounds
 
 | Field | Value |
 |---|---|
@@ -2459,7 +2598,7 @@ howl, and change sides.**"*; death *"The mist goes quiet on both sides."*
 every 25 s. Drop `it_mount_veilhound` (a translucent grey `creature:dire_wolf` mount that trails mist) 3%. Feat
 `ft_r05_off_the_leash`.
 
-### 7.8 Boss 3 — The Horologe
+#### 7.8 Boss 3 — The Horologe
 
 | Field | Value |
 |---|---|
@@ -2483,7 +2622,7 @@ then the chimes; Rewind *"**Again.**"*; death *"…you are… late."*
 **Hard mode — `hm_b_horologe` "Wind It Up."** Armed by winding the great key at the door (interact 5 s). The hand
 sweeps at one segment per 4 s. Drop `uq_horologe_pocketwatch` 15%. Feat `ft_r05_wind_it_up`.
 
-### 7.9 Boss 4 — The Mirror Court
+#### 7.9 Boss 4 — The Mirror Court
 
 | Field | Value |
 |---|---|
@@ -2518,7 +2657,7 @@ practise."*; a Reflection dies *"That one was always the weakest."*; death *"…
 Reflection — **your raid leader's class**. Drop `it_mirror_court_transmog_token` (copy any class set's look you have
 seen in the fight) 20%. Feat `ft_r05_full_court`.
 
-### 7.10 Boss 5 — Anvarr, the Hollow Titan
+#### 7.10 Boss 5 — Anvarr, the Hollow Titan
 
 | Field | Value |
 |---|---|
@@ -2545,7 +2684,7 @@ death *"…it beats… again…"*
 pull. The Heart team is capped at **6** players. Drop `it_anvarr_heart_toy` (a beating stone heart, housing/back)
 25%. Feat `ft_r05_stone_heart`.
 
-### 7.11 Boss 6 — The Curator, in the Gallery of the Fallen
+#### 7.11 Boss 6 — The Curator, in the Gallery of the Fallen
 
 | Field | Value |
 |---|---|
@@ -2577,7 +2716,7 @@ remember them.**"*; death *"The gallery… is closed."*
 wake at 50% at once. Drop `it_gallery_statue_of_you` (a housing statue of your character in its pose on the kill)
 100% to one player. Feat `ft_r05_private_viewing`.
 
-### 7.12 Boss 7 — The Many-Mouthed
+#### 7.12 Boss 7 — The Many-Mouthed
 
 | Field | Value |
 |---|---|
@@ -2601,7 +2740,7 @@ Left/Right *"**The LEFT will eat!**"* (lie ⅓); Babble *"**Listen to me — no,
 **Hard mode — `hm_b_many_mouthed` "Only Lies."** Armed by feeding it a raid member's food item at the pit's edge.
 **Every** warning line lies. Drop `it_many_mouthed_mask` (a face cosmetic full of teeth) 25%. Feat `ft_r05_only_lies`.
 
-### 7.13 Boss 8 — Nhal the Starless
+#### 7.13 Boss 8 — Nhal the Starless
 
 | Field | Value |
 |---|---|
@@ -2629,7 +2768,7 @@ Lines: pull *"I ate the stars over this island. You did not notice."*; Night *"*
 must be solved with **4** lenses. Drop `it_mount_starless_drake` (a black `creature:dragon ×1.6` winged mount: runs and glides before Riding IV, flies after (page 07, level 60); a
 star-field wing) 1%. Feat `ft_r05_eyes_shut`.
 
-### 7.14 Boss 9 — Saelith, the Veilwarden
+#### 7.14 Boss 9 — Saelith, the Veilwarden
 
 | Field | Value |
 |---|---|
@@ -2664,7 +2803,7 @@ Lines: pull *"Turn back. This is the only warning I give."*; Weave *"**Every thr
 pull (you are in the Veil at the pull). No dialog: she fights to 0%; Warden's Sight is gone. Drop `uq_saelith_spindle`
 15% (35% on hard mode). Feat `ft_r05_unanswered`.
 
-### 7.15 Boss 10 — The Unwoven
+#### 7.15 Boss 10 — The Unwoven
 
 | Field | Value |
 |---|---|
@@ -2735,7 +2874,7 @@ the unmaking."*; P3 *"**The floor is only a story you told yourselves.**"*; Cut 
 or kill her). No Warden help, and the P2 split is **12/8** (the Veil side gets fewer). Drop `it_unwoven_thread_cloak`
 (a back cosmetic of drifting white threads) 30%. Feat `ft_r05_nothing_held`.
 
-### 7.16 Secret boss — The Marchheart, the Wildmarch Dreaming
+#### 7.16 Secret boss — The Marchheart, the Wildmarch Dreaming
 
 **Unlock:**
 1. **Every player** in the raid carries a **Hearthvale Ember** (`it_hearthvale_ember`, account-bound): the prize of
@@ -2790,7 +2929,7 @@ the continent's colours) 1% per player, and title *"Walker of Every Road"*. Feat
 the game), then `leg_dream_of_the_march` to one player per kill; `it_mount_marchheart_colossus` 2% per player on
 Normal; title *"Dreamkeeper"*.
 
-### 7.17 r05 loot
+#### 7.17 r05 loot
 
 **Raid set — `set_veilwoven` "The Veilwoven Raiment"** — tokens `it_token_r05_<slot>` / `it_token_r05m_<slot>`; pieces
 `it_veilwoven_circlet`, `…_robe` (chest), `…_leggings`, `…_gloves`, `…_boots`, `…_spindle` (necklace).
@@ -2837,346 +2976,10 @@ Normal; title *"Dreamkeeper"*.
 `ft_r05_mirror_mirror` (win the Mirror Court with a raid of 20 different classes). All hard modes → title *"of the
 Veilwoven"*. Mythic Unwoven → title *"Who Held the Thread"*.
 
----
 
-## 8. World bosses
+**Archived: loot index (raid rows of the round-1 §9)**
 
-### 8.1 What a world boss is
-
-Farhold's `data/worldbosses.json` defines a world boss as three things at once, and Wildmarch keeps all three
-(reuse: `prototypes/farhold/data/worldbosses.json` `_doc`): it is **over-levelled** for the ground it stands on,
-it is **two to three times the size** of anything else there (`scale` 1.9–3.0 on top of the body size), and it
-**keeps calling minions** for as long as it lives (`minions: { first, add, every, max, radius, weaken }`). Farhold
-also gives each a tier (1–4), a map pin, a chest and phases in the `{ at, modifier, say }` shape
-(reuse: `js/actors.js` `applyModifier`, the modifier names in `data/enemies.json` `modifiers`).
-
-**What changes in Wildmarch** (new):
-
-| | Farhold | Wildmarch |
-|---|---|---|
-| Where | rolled onto map slots per seed (landmark, pass, dungeon, crossing) | **one fixed site per region** from region 3 up (hand-placed, page 01 names the landmark), plus seasonal ones |
-| When | always standing | on a **timer** (§8.2), announced |
-| Who | the one player | **open tagging** for any number of players (§8.3) |
-| Size of fight | scaled to one level | **scaled to the number of players** (§8.3) |
-| Mechanics | stat modifiers per phase, minion waves | minion waves **plus** page 11 telegraphs (3–6 abilities each), phases, one dialog line per phase |
-| Loot | a chest in the arena, one kill | a personal chest **once per day** per boss, a weekly bonus (§8.4) |
-
-Tier-1 Farhold world bosses (Bramblecoat, the Reedmother, Gravel-Tusk) are too small for this page; they are good
-**rare elites** for Hearthvale and Mossfen (page 10's call — §12).
-
-### 8.2 Spawn rules and timers
-
-- **Schedule:** each regional world boss spawns **every 2 hours** of real time, the eight regions staggered by
-  15 minutes (Greyridge at :00 of even hours, Sunscar :15, Whisperwood :30, Cinder Steppe :45, Frostmantle at
-  :00 of odd hours, Drowned Coast :15, Riftmarch :30, Emberthrone :45). Somewhere on the continent a world boss is
-  always 15 minutes or less away.
-- **Announcement:** 15 minutes before a spawn, a pin with a countdown appears on that **region's** map and on the
-  world map; a line goes to the region's chat channel (*"The ground at Bellows Scar is shaking. (15:00)"*) and — per
-  `set.raid.world_boss_alerts` — a toast to everyone in the region (or everywhere). At 1 minute: a horn sound for
-  everyone within 400 m.
-- **Window:** it stays **30 minutes**. If it is not killed in that time it leaves (*"…and goes back into the
-  mountain."*) and the next spawn is on schedule.
-- **Reset:** if no eligible player is within **100 m** for **60 s**, it heals 10% per second back to full and its
-  minions despawn. It does not leave its arena (80 m radius leash).
-- **Tracker:** `scr_world_boss_tracker` (a Journal tab): every world boss, its region, its next spawn time (local
-  clock), whether you have looted it today and this week, and a *Guide me* button that sets a map marker.
-- **Seasonal bosses** (§8.6) follow their event's calendar instead.
-
-### 8.3 Open tagging, levels and scaling
-
-- **Open tagging:** no party is needed. Any player who, within the arena, deals damage to the boss or its minions,
-  heals or shields someone fighting it, or takes damage from it — **1% of the boss's health in total, or 45 s in
-  combat inside the arena** — is **credited**: they get the kill, the chest and the quest credit. Parties and raids
-  are credited per member the same way.
-- **Open group (optional):** entering the arena offers *Join the open group for {boss}* (a temporary public raid of
-  up to 60 with raid frames, markers and leader tools; the first 3 players to join get assist). `set.raid.join_open_groups`
-  = Ask / Always / Never.
-- **Level:** a regional world boss is **the region's top level + 3** (Emberthrone's is level 60 with +20% health and
-  damage, an "elite 60"). A player **above** the boss's level is **synced down** to boss level while inside the arena
-  (stats only — spells, talents and perks stay); loot rolls at the player's **real** level. A player **below** it
-  fights at their own level (it is hard, which is the point).
-- **Health scaling:** `health = base × (0.6 + 0.08 × N)` where N = credited players in the arena, recomputed every
-  10 s. It can rise at any time but **falls at most 10% per 10 s** (so leaving to make it weaker does not work).
-  N is capped at 60 (×5.4 base).
-- **Mechanic scaling:** Soak pips = `ceil(N / 5)`, Targeted players = `ceil(N / 8)`, minion waves × `ceil(N / 10)`,
-  capped at the Farhold `max` × 3.
-- **Warnings:** world bosses use **2.0 s** on everything and **3.0 s** on lethal attacks (crowds are messy).
-- **Deaths:** a dead player may be revived by anyone (no combat revive limit in the open world) or release to the
-  nearest graveyard (page 05) and run back.
-
-### 8.4 World boss loot
-
-| Reward | Once per | What |
-|---|---|---|
-| **Personal chest** | day per boss per character | 1 item from the boss's table: Rare floor, 30% Epic, **2%** the boss's unique, **0.5%** a world-boss legendary; gold; region reputation +150 |
-| **Weekly bonus** | week per boss per account | +1 Oathstone and a **warded chest** (Farhold chest kind `warded`, reuse: `data/balance.json` `chests.kinds`) with a guaranteed Epic |
-| **Mount** | per kill | the boss's mount at **0.5%** per credited player |
-| **Title** | first kill of all eight | *"Worldbreaker"* (page 07 titles) |
-| **Ember shrine** | first kill of each | lights that region's shrine for `q_the_last_ember` (§7.16) |
-
-Loot scales to the player's **real** level (a level-60 at the Greyridge boss gets level-60 item levels, at the
-world-boss rate of §2.10.2).
-
-### 8.5 The eight regional world bosses
-
-Numbers: **base health** is for 5 players (N = 5); multiply by `0.6 + 0.08 × N` for more. Damage against a
-reference character **at the boss's level**.
-
-#### 8.5.1 Grief-in-Iron — Greyridge Highlands
-
-| Field | Value |
-|---|---|
-| id | `b_grief_in_iron` (reuse: Farhold `grief_in_iron`, tier 2) |
-| Site | the Bellows Scar, a pass above Anvilgate · level **21** · Farhold `over` +3, `scale` 2.4 |
-| Body | `creature:golem ×2.9` at scale 2.4 (≈7 m), body `#5e5a54`, belly `#7e7a72`, accent `#2e2b28`, eyes `#ff8a20`; `barrier` and `sunder` auras (reuse) |
-| Base health | **180,000** · leaves after 30 min |
-| Phases | 60% *Ironclad* ("Grief-in-Iron shuts its plates and stops caring what you are holding.") — takes 30% less damage from the front; 30% *Vicious* — +25% attack speed (reuse: Farhold `phases`) |
-| Minions | construct and dwarf-mine families: first 5–7, +2–3 every 18 s, max 10, weaken 0.8 — `m_construct_mine_sentry` (golem ×1.2) and `m_humanoid_deepforge_deserter` (`chibi2:dwarf/fighter`) |
-
-| Ability | Kind | Shape / colour | Warning | Damage (vs level-21 non-tank ≈ 900 health) | Counterplay |
-|---|---|---|---|---|---|
-| **Ironmuster** `b_grief_in_iron_muster` | Danger zone | cross, 2 lines 50 m × 5 m, RED | 2.0 s | 700 | diagonals |
-| **Plate Shed** `b_grief_in_iron_plates` | Void zone | 4 iron plates fall (circles 4 m, PURPLE-black, 45 s) | 2.0 s | 60 / tick | step out; plates become cover |
-| **Grinding Grip** `b_grief_in_iron_grip` | Tank | melee | — | 400 + Sunder | swap between players who can take it |
-| **Pass Holder** `b_grief_in_iron_hold` | Soak | ORANGE 6 m, `ceil(N/5)` pips | 3.0 s | 2,000 × N/5 split | enough people stand in it |
-
-Loot: `uq_griefplate_gauntlets` (hands, heavy: blocking gives a 5% armour stack, max 5), `it_mount_mine_crawler`
-(`creature:beetle ×1.6`, iron), Greyridge reputation.
-
-#### 8.5.2 The Glass Wyrm — Sunscar Barrens
-
-| Field | Value |
-|---|---|
-| id | `b_glass_wyrm` (new) |
-| Site | the Shattered Pan, a salt flat south of the Glass Tombs · level **27** · scale 2.6 |
-| Body | `creature:worm ×3.4` at scale 2.6 (≈9 m long out of the ground), body `#d8b070` sand with **glass plates** `#c8f0ff` (`plates` on), eyes `#ffe060` |
-| Base health | **300,000** |
-| Phases | 60% *Scorched* (sand turns to glass under it); 25% *Frenzied* |
-| Minions | `m_beast_sand_skitter` (`creature:beetle ×1.0`), `m_aberration_glass_grub` (`creature:worm ×0.6`) first 6, +3 / 16 s, max 12 |
-
-| Ability | Kind | Shape / colour | Warning | Damage (vs ≈1,100) | Counterplay |
-|---|---|---|---|---|---|
-| **Glass Storm** `b_glass_wyrm_storm` | Void zone | 6 circles 5 m of glass shards, 40 s | 2.0 s | 80 / tick | leave |
-| **Burrow Line** `b_glass_wyrm_burrow` | Danger zone | it dives and a line 40 m × 6 m RED marks where it will breach | 2.5 s | 900 + knock-up | step out |
-| **Sun-Glare** `b_glass_wyrm_glare` | Line of sight | Room-wide flash off its glass plates | 3.0 s | 700 + Blind 4 s | turn your back (face away) or stand behind a mesa rock |
-| **Tail Sweep** `b_glass_wyrm_tail` | Danger zone | cone 120° 14 m behind the head | 2.0 s | 800 | not behind |
-
-Loot: `uq_glasswyrm_scale_ring` (ring: 5% of damage taken is reflected as glass shards), `it_mount_sand_strider`
-(`creature:elk`, desert colours).
-
-#### 8.5.3 The Hungering Brood — Whisperwood
-
-| Field | Value |
-|---|---|
-| id | `b_hungering_brood` (reuse: Farhold `the_hungering_brood`, tier 2) |
-| Site | the Silkfall, a hollow of dead moonwell trees · level **33** · scale 2.2 |
-| Body | `creature:spider ×3.0` at scale 2.2, body `#2a2a30`, accent `#8a2020`, eyes `#e02020`; `poison` and `root` auras (reuse) |
-| Base health | **450,000** |
-| Phases | 45% *Venomous* (reuse) — every bite poisons |
-| Minions | `m_beast_brood_spiderling` (`creature:spider ×0.8`) first 8, +4 / 12 s, max 16 |
-
-| Ability | Kind | Shape / colour | Warning | Damage (vs ≈1,400) | Counterplay |
-|---|---|---|---|---|---|
-| **Brood Web** `b_hungering_brood_web` | Tether | WHITE web strands between `ceil(N/8)` pairs of players; rooted while linked | 2.0 s | 100 / s | a third player cuts the strand (it has 3% of a player's health) |
-| **Egg Sacs** `b_hungering_brood_eggs` | Adds | 4 sacs hatch in 15 s | 15 s | spiderlings | break them first |
-| **Venom Spray** `b_hungering_brood_spray` | Danger zone | cone 60° 16 m | 2.0 s | 900 + poison | sides |
-| **Drop from the Canopy** `b_hungering_brood_drop` | Targeted | circle 6 m YELLOW | 2.0 s | 800 | spread |
-
-Loot: `uq_brood_silk_wraps` (light hands: your roots last 1 s longer), `it_mount_silkfall_spider` (a white
-`creature:spider` mount, if page 07 allows spider mounts).
-
-#### 8.5.4 The Carrion Crown — Cinder Steppe
-
-| Field | Value |
-|---|---|
-| id | `b_carrion_crown` (reuse: Farhold `the_carrion_crown`, tier 4) |
-| Site | the Bone Mesa, above an old Ashtusk battlefield · level **39** · scale 3.0 |
-| Body | `creature:griffin ×3.0` at scale 3.0, carrion colours `#4a3a2a` / `#8a7a5a`, eyes `#ff4020`; `bleed`, `haste`, `marked` auras (reuse) |
-| Base health | **650,000** |
-| Phases | 60% *Fleet*; 30% *Frenzied* (reuse) |
-| Minions | `m_beast_carrion_vulture` (`creature:owl ×1.4`, bald, grey) and Ashtusk raiders (reuse: warband `ashtusk_raider`) first 6, +3 / 15 s, max 12 |
-
-| Ability | Kind | Shape / colour | Warning | Damage (vs ≈1,800) | Counterplay |
-|---|---|---|---|---|---|
-| **Carrion Circles** `b_carrion_crown_circles` | Void zone (moving) | 3 shadows 6 m circle on the ground (it circles overhead), PURPLE-black, moving 4 m/s | 2.0 s | 150 / tick | stay out of the shadows |
-| **Dive** `b_carrion_crown_dive` | Danger zone | line 50 m × 6 m | 2.0 s | 1,300 + bleed | sidestep |
-| **Pick the Weak** `b_carrion_crown_pick` | Targeted | circle 5 m YELLOW on the **lowest-health** players | 2.0 s | 1,000 | heal them up; spread |
-| **Crown of Bones** `b_carrion_crown_crown` | Soak | ORANGE 8 m `ceil(N/5)` pips | 3.0 s | 3,500 × N/5 split | soak |
-
-Loot: `uq_carrion_crown_talons` (medium hands: +10% damage to enemies below 30%), `it_mount_carrion_griffin`
-(`creature:griffin`, ragged; winged mount: runs and glides before Riding IV, flies after (page 07, level 60)).
-
-#### 8.5.5 The Standing Ruin — Frostmantle
-
-| Field | Value |
-|---|---|
-| id | `b_standing_ruin` (reuse: Farhold `the_standing_ruin`, tier 4) |
-| Site | the Broken Circle, a ring of fallen standing stones below Rimehold · level **45** · scale 3.0 |
-| Body | `creature:titan ×3.0` at scale 3.0 (≈11 m), frost-rimed stone `#6a7078`, eyes `#9ad8ff`; `barrier`, `sunder`, `rally` (reuse) |
-| Base health | **900,000** |
-| Phases | reuse Farhold: *Ironclad*, *Unyielding*, *Vicious* at 70/40/20% |
-| Minions | Stonehide warband (reuse: `stonehide_smasher`, `stonehide_hurler`) first 5, +2 / 20 s, max 10 |
-
-| Ability | Kind | Shape / colour | Warning | Damage (vs ≈2,000) | Counterplay |
-|---|---|---|---|---|---|
-| **Standing Stones** `b_standing_ruin_stones` | Danger zone → blocker | 5 circles 5 m RED; a stone stands there 60 s | 2.0 s | 1,500 | out; the stones are cover |
-| **Ruinous Roar** `b_standing_ruin_roar` | Line of sight | Room-wide | 3.5 s | 1,600 + knockback | behind a standing stone |
-| **Frost Stomp** `b_standing_ruin_stomp` | Danger zone | circle 14 m around it | 2.0 s | 1,200 + slow | out |
-| **Hold the Circle** `b_standing_ruin_hold` | Soak | 2 × ORANGE 6 m, `ceil(N/10)` pips each | 3.0 s | split | soak |
-
-Loot: `uq_ruinstone_helm` (heavy head: standing still 2 s gives 15%
-damage reduction until you move), `it_mount_frost_ram` (`creature:deer`, curled horns, white).
-
-#### 8.5.6 The Sallow King — The Drowned Coast
-
-| Field | Value |
-|---|---|
-| id | `b_sallow_king` (reuse: Farhold `the_sallow_king`, tier 3) |
-| Site | the Drowned Barrow, a tidal causeway north of Saltmarch · level **51** · scale 2.6 |
-| Body | `creature:wraith ×3.2` at scale 2.6, `#6a7a6a`, eyes `#c8ff80`; `curse` and `marked` auras (reuse) |
-| Base health | **1,200,000** |
-| Phases | reuse: *Graveborn* 60%, *Leeching* 30% |
-| Minions | `m_undead_drowned_sailor`, `m_undead_drowned_chorister` (r03 trash, weaker) first 6, +3 / 16 s, max 12 |
-
-| Ability | Kind | Shape / colour | Warning | Damage (vs ≈2,600) | Counterplay |
-|---|---|---|---|---|---|
-| **Sallow Tide** `b_sallow_king_tide` | Void zone (rising) | the causeway floods from the edges every 60 s; water ticks 150 and slows | 6 s | 150 / tick | keep to the causeway's crown |
-| **Sallow Curse** `b_sallow_king_curse` | Dispel | a curse on `ceil(N/8)` players: 200/s; spreads to anyone within 4 m when dispelled | — | 200/s | move apart, then remove the curse |
-| **Grasping Dead** `b_sallow_king_grasp` | Tether | WHITE hands grab players' feet, rooting 4 s | 1.5 s | — | break with a movement ability |
-| **King's Lament** `b_sallow_king_lament` | Room-wide | every 45 s | 2.0 s | 1,400 | heal |
-
-Loot: `uq_sallow_crown` (head: your curses last 20% longer and heal you 1% of damage dealt), `it_mount_drowned_horse`
-(`creature:courser`, kelp and bones).
-
-#### 8.5.7 The Unmoored — The Riftmarch
-
-| Field | Value |
-|---|---|
-| id | `b_unmoored` (new) |
-| Site | the Anchorless Field, floating stones above a torn valley · level **57** · scale 2.8 |
-| Body | `creature:horror ×3.4` at scale 2.8, body `#4a3f7a` with orbiting stones (a ring of `shard` bodies ×0.6 circling it), eyes `#e0c0ff`; `enchant` aura |
-| Base health | **1,600,000** |
-| Phases | 60% *Warded*; 30% *Wizened* (reuse modifier names) |
-| Minions | `m_elemental_rift_shard` (r05 trash, weakened 0.6) and `m_fiend_rift_imp`, first 6, +3 / 14 s, max 14 |
-
-| Ability | Kind | Shape / colour | Warning | Damage (vs ≈3,200) | Counterplay |
-|---|---|---|---|---|---|
-| **Gravity Flip** `b_unmoored_flip` | Room-wide / Safe zone | gravity lets go: everyone floats 4 s except inside BLUE anchor circles (`3 × ceil(N/10)` of them, 4 m each) | 3.0 s | floating players take 1,800 on landing | be in an anchor circle |
-| **Drifting Stones** `b_unmoored_stones` | Moving wave | 4 stones cross the field at 5 m/s along drawn lines | 2.0 s | 2,000 | dodge |
-| **Rift Pull** `b_unmoored_pull` | Void zone (pulling) | circle 6 m that pulls within 15 m | 2.0 s | 300 / tick | walk out against it |
-| **Split** `b_unmoored_split` | Adds | at 50%: two copies (15% health each) that must die within 15 s | 3 s | — | split damage |
-
-Loot: `uq_unmoored_anchor` (off-hand: immune to knockback and pull effects 3 s after taking one, 20 s cooldown),
-`it_mount_floating_stone` (a floating slab you ride — a hover mount).
-
-#### 8.5.8 Slagborn — The Emberthrone
-
-| Field | Value |
-|---|---|
-| id | `b_slagborn` (reuse: Farhold `slagborn`, tier 3 → raised to the top tier here) |
-| Site | the Slag Sea, a cooling lava plain under the palace · level **60 elite** · scale 3.0 |
-| Body | `creature:elemental ×3.2` at scale 3.0, body `#ff6a20`, belly `#ffd070`, accent `#7a1a00`; `burn` and `enchant` (reuse) |
-| Base health | **2,000,000** (+20% elite) |
-| Phases | reuse: *Fiery* 60%, *Frenzied* 30% |
-| Minions | Ember Legion (r04 trash, weakened 0.6) and `m_elemental_cinder_elemental`, first 6, +3 / 15 s, max 14 |
-
-| Ability | Kind | Shape / colour | Warning | Damage (vs ≈3,600) | Counterplay |
-|---|---|---|---|---|---|
-| **Slag Rain** `b_slagborn_rain` | Void zone | 8 circles 5 m of lava, 60 s | 2.0 s | 400 / tick | out |
-| **Ember Soak** `b_slagborn_soak` | Soak | ORANGE 7 m, `ceil(N/5)` pips | 3.0 s | 5,000 × N/5 split | soak |
-| **Crust Break** `b_slagborn_crust` | Danger zone (lethal) | a 20 m circle of the plain cracks open | **3.0 s** | **Lethal** | out |
-| **Molten Core** `b_slagborn_core` | Room-wide | every 40 s, +10% each | 2.0 s | 1,800 | heal |
-
-Loot: `uq_slagborn_core` (necklace: fire damage you take is 10% lower and 10% of it is added to your next fire hit),
-`it_mount_magma_salamander` (`creature:crocodile`, lava seams).
-
-### 8.6 Seasonal and event world bosses (new)
-
-Seasonal bosses appear during their event (page 14 owns the calendar) at a fixed site, spawn **every hour** of the
-event, and are **level-synced to the event**: every participant is scaled to the **median level** of the credited
-players (up or down), so a level-8 and a level-60 fight it together and both get loot at their real level.
-
-| id | Name | Event (season) | Site | Body | Base health (at level 60 sync) |
-|---|---|---|---|---|---|
-| `b_harvest_effigy` | The Harvest Effigy | *Harvestide* (autumn, 2 weeks) | Brightwater's fields, Hearthvale | `creature:golem ×3.0` of straw and pumpkins: body `#c8a040`, belly `#e86a20`, accent `#5a3a1a`, eyes `#ffb020` (candle eyes) | 1,400,000 |
-| `b_longnight_stag` | The Longnight Stag | *Longnight* (midwinter, 2 weeks) | the frozen lake at Rimehold, Frostmantle | `creature:elk ×3.4`, white with a lantern hung in each antler (`glow`), eyes `#9ad8ff` | 1,400,000 |
-| `b_bloomtyrant` | The Bloomtyrant | *Firstbloom* (spring, 2 weeks) | the moonwell meadow, Whisperwood | `creature:mushroom ×4.0`, cap `#a64b62` with flowers, `slime` spores | 1,400,000 |
-| `b_sunwake_serpent` | The Sunwake Serpent | *Highsun* (summer, 2 weeks) | the sandbar at Saltmarch, Drowned Coast | `creature:snake ×8.0`, gold and blue `#e8b830` / `#3a8ac0`, `haste` | 1,400,000 |
-| `b_veilstorm_herald` | The Veilstorm Herald | *Veilstorm* (random 3-day event after r05 release; a Veil tear opens in a random region) | a random region's centre | `creature:wraith ×4.0` of white threads (a small cousin of the Unwoven) | 1,800,000 |
-
-**The Harvest Effigy** — `b_harvest_effigy`
-
-| Ability | Kind | Shape / colour | Warning | Damage | Counterplay |
-|---|---|---|---|---|---|
-| **Harvest Ring** `b_harvest_effigy_ring` | Danger zone (donut) | RED from 6 m to 24 m; safe inside | 2.0 s | 50% of a non-tank's health | run in |
-| **Scythe Sweep** `b_harvest_effigy_scythe` | Danger zone | cone 180° 14 m | 2.0 s | 40% | behind |
-| **Scarecrows** `b_harvest_effigy_scarecrows` | Adds | `m_construct_scarecrow` (golem ×1.2, straw) × `ceil(N/5)` | 3 s | — | kill; burn them for double damage |
-| **Bring in the Sheaves** `b_harvest_effigy_sheaves` | Soak | ORANGE 6 m, `ceil(N/5)` pips | 3.0 s | split | soak — each soaker gets a pumpkin (a thrown item, 5% boss health) |
-
-Loot: `it_pumpkin_lantern` (light slot, cosmetic look), `it_harvest_scythe_skin`, `it_mount_haywain_pony`
-(`creature:pony` in harvest ribbons) 1%, `uq_effigys_candle_eyes` (head: +5% damage while in the dark).
-
-**The Longnight Stag** — `b_longnight_stag`
-
-| Ability | Kind | Shape / colour | Warning | Damage | Counterplay |
-|---|---|---|---|---|---|
-| **Lantern Light** `b_longnight_stag_lanterns` | Beneficial | 4 GREEN 6 m lantern-lights drop from its antlers; outside them, **Longnight** cold 3% health/s | — | — | stay in the lights |
-| **Antler Charge** `b_longnight_stag_charge` | Danger zone | line 40 m × 6 m | 2.0 s | 45% | sidestep |
-| **Ice Cracks** `b_longnight_stag_cracks` | Checkerboard | the frozen lake in a 6 m checkerboard, RED squares | 2.0 s | 50% + slow | unlit squares |
-| **Snowfall Hush** `b_longnight_stag_hush` | Interrupt (gold) | cast 4.0 s: puts out 2 lanterns | 4.0 s | — | interrupt |
-
-Loot: `it_longnight_lantern_antlers` (head cosmetic), `it_mount_longnight_stag` (`creature:elk` with lanterns) 1%,
-`uq_stags_lantern` (light: allies in your light take 5% less cold damage).
-
-**The Bloomtyrant** — `b_bloomtyrant`
-
-| Ability | Kind | Shape / colour | Warning | Damage | Counterplay |
-|---|---|---|---|---|---|
-| **Spore Cloud** `b_bloomtyrant_spores` | Void zone | 8 circles 5 m of spores, 30 s; each becomes a `m_aberration_sporeling` if nobody stands in it for 1 s (a soak-to-deny) | 2.0 s | 5% / tick | stand in one briefly to pop it, then leave |
-| **Root Snare** `b_bloomtyrant_roots` | Tether | WHITE roots between the boss and `ceil(N/8)` players; they are pulled 2 m/s | 2.0 s | — | walk out |
-| **Bloom** `b_bloomtyrant_bloom` | Room-wide | every 45 s | 2.0 s | 30% | heal |
-| **Pollen Burst** `b_bloomtyrant_pollen` | Targeted | YELLOW 5 m | 2.0 s | 35% + confused 2 s | spread |
-
-Loot: `it_flower_crown_bloom` (head cosmetic), `it_mount_bloom_toad` (`creature:frog ×2.4`, mossy, flowers) 1%,
-`uq_tyrants_seed` (necklace: your heals leave a 3 m flower that heals 1% per second for 5 s).
-
-**The Sunwake Serpent** — `b_sunwake_serpent`
-
-| Ability | Kind | Shape / colour | Warning | Damage | Counterplay |
-|---|---|---|---|---|---|
-| **Sunwake** `b_sunwake_serpent_wake` | Moving wave | a wave rolls up the sandbar, one BLUE gap | 2.0 s | 45% + knockback | the gap |
-| **Glare** `b_sunwake_serpent_glare` | Line of sight | Room-wide from its golden scales | 3.0 s | 40% + blind | behind the beach rocks or its own coils |
-| **Coil Ring** `b_sunwake_serpent_coil` | Danger zone (donut) | RED outside 10 m | 2.0 s | 50% | in close |
-| **Tide Pools** `b_sunwake_serpent_pools` | Beneficial | 3 GREEN pools: +20% damage for 10 s | — | — | take turns |
-
-Loot: `it_sunwake_parasol` (a held-item toy), `it_mount_sunwake_serpent` (a swimming serpent mount) 1%,
-`uq_sunwake_scale` (ring: +8% movement speed; +20% in water).
-
-**The Veilstorm Herald** — `b_veilstorm_herald`
-
-A preview of r05 for everyone: it teaches the Veil (§7.1) at open-world scale. Players can cross into a local Veil
-through 4 rifts around it; it is **invulnerable unless at least `ceil(N/5)` players are in the Veil**; Veil-only
-telegraphs; the 60 s Veil limit. Abilities: **Loose Threads** (Tether, pulls toward it), **Unravel Line**
-(Danger zone line 40 m), **Fray** (Void zones), **Knot** (Soak `ceil(N/5)`). Loot: `it_veilstorm_thread_cape`
-(cosmetic), `uq_veilstorm_lens` (head: Veil-only telegraphs show faintly for you in the open world), and Oathstones ×1
-per day.
-
-### 8.7 World boss quests and feats
-
-- Each regional world boss has a **weekly** quest from its region's hub (`q_world_boss_<region>` — e.g.
-  `q_world_boss_greyridge` "Iron in the Pass"): kill it once; reward: Oathstone ×1, reputation, 1 region currency.
-  Page 14 lists them.
-- Feats: `ft_wb_<bossid>` per boss, `ft_wb_worldbreaker` (all eight), `ft_wb_seasons` (all four seasonal),
-  `ft_wb_small_army` (be credited on a kill with fewer than 5 players), `ft_wb_big_army` (be in a kill with 60).
-
----
-
-## 9. Loot index
-
-For [page 09](09-SETS-LEGENDARIES.md) to index and [page 08](08-ITEMS.md) to price. Every item here has a source on this
-page (canon rule 4: no orphan loot).
-
-### 9.1 Raid sets
+#### 9.1 Raid sets
 
 | id | Name | Raid | Pieces (6) | Token ids | Bonus shape |
 |---|---|---|---|---|---|
@@ -3189,7 +2992,7 @@ page (canon rule 4: no orphan loot).
 Each piece id takes a weight suffix: `_cloth`, `_light`, `_medium`, `_heavy` (e.g. `it_ninefold_hauberk_heavy`). A
 raid set is **generic** (any class) with a **role-following** bonus; class sets stay on the class pages.
 
-### 9.2 Raid and world-boss legendaries
+#### 9.2 Raid and world-boss legendaries
 
 | id | Source | Chance |
 |---|---|---|
@@ -3211,10 +3014,8 @@ raid set is **generic** (any class) with a **role-following** bonus; class sets 
 | `leg_starless_scale` | r05 Nhal | 3% |
 | `leg_horologe_mainspring` | r05 the Horologe | 3% |
 
-(World bosses drop "a world-boss legendary" at 0.5% from their region's page 09 list — no world-boss-exclusive
-legendary is defined here; page 09 may add one per region.)
 
-### 9.3 Raid and world-boss uniques
+#### 9.3 Raid and world-boss uniques (raid rows)
 
 r01: `uq_votive_of_the_last_sister`, `uq_sextons_lantern`, `uq_gravewarden_oathband`, `uq_gullet_of_the_rotmaw`,
 `uq_ossuary_bonewraps`.
@@ -3226,33 +3027,26 @@ r04: `uq_petition_of_the_three_houses`, `uq_brandts_champion_plume`, `uq_varros_
 `uq_hestas_apprentice_hammer`, `uq_ashen_herald_feather`.
 r05: `uq_saelith_spindle`, `uq_horologe_pocketwatch`, `uq_grey_collar`, `uq_threshold_keystone`,
 `uq_mirror_of_the_court`, `uq_anvarr_heartstone`, `uq_curators_ledger`, `uq_mouth_that_speaks_true`.
-World bosses: `uq_griefplate_gauntlets`, `uq_glasswyrm_scale_ring`, `uq_brood_silk_wraps`, `uq_carrion_crown_talons`,
-`uq_ruinstone_helm`, `uq_sallow_crown`, `uq_unmoored_anchor`, `uq_slagborn_core`.
-Seasonal: `uq_effigys_candle_eyes`, `uq_stags_lantern`, `uq_tyrants_seed`, `uq_sunwake_scale`, `uq_veilstorm_lens`.
 
-### 9.4 Mounts
+#### 9.4 Mounts (raid rows)
 
 r01 `it_mount_rotmaw_hatchling`, `it_mount_barrow_charger`, `it_mount_heirs_palfrey` · r02 `it_mount_rimefang_pup`,
 `it_mount_windmother_fledgling`, `it_mount_glacier_stag`, `it_mount_stoneback_tortoise` · r03
 `it_mount_widows_due_skiff`, `it_mount_choir_leviathan`, `it_mount_still_water_heron` · r04 `it_mount_ash_hound`,
 `it_mount_emberwing_whelp`, `it_mount_ashen_phoenix`, `it_mount_ember_throne_titan`, `it_mount_glass_charger` · r05
-`it_mount_veilhound`, `it_mount_starless_drake`, `it_mount_marchheart_colossus` · world bosses `it_mount_mine_crawler`,
-`it_mount_sand_strider`, `it_mount_silkfall_spider`, `it_mount_carrion_griffin`, `it_mount_frost_ram`,
-`it_mount_drowned_horse`, `it_mount_floating_stone`, `it_mount_magma_salamander` · seasonal `it_mount_haywain_pony`,
-`it_mount_longnight_stag`, `it_mount_bloom_toad`, `it_mount_sunwake_serpent`.
+`it_mount_veilhound`, `it_mount_starless_drake`, `it_mount_marchheart_colossus`.
 
-### 9.5 Currency, keys and quest items
+#### 9.5 Currency, keys and quest items
 
 `cur_oathstone` (raid currency, §2.10) · attunement: `it_barrow_key`, `it_gravemarshal_seal`, `it_sextons_tabard`,
 `it_hearthcoal`, `it_choirbook_page`, `it_legion_tabard`, `it_court_writ`, `it_ninefold_seal`, `it_throne_shard`,
 `it_choirbook_clasp`, `it_crown_ember`, `it_veil_key`, `it_veil_lens` · in-raid: `it_sextons_bell`,
 `it_grimwaters_chart`, `it_kiln_key_fragment`, `it_prince_aurel_signet` · the long quest: `it_hearthvale_ember`.
 
----
 
-## 10. Id index
+**Archived: id index (raid rows of the round-1 §10)**
 
-### 10.1 Bosses
+#### 10.1 Bosses
 
 | Raid | # | id | Name | Body |
 |---|---|---|---|---|
@@ -3297,21 +3091,12 @@ r01 `it_mount_rotmaw_hatchling`, `it_mount_barrow_charger`, `it_mount_heirs_palf
 | r05 | 9 | `b_saelith_veilwarden` | Saelith, the Veilwarden | Chibi 2 elf / oracle |
 | r05 | 10 | `b_unwoven` | The Unwoven | creature horror → wraith |
 | r05 | S | `b_marchheart` | The Marchheart, the Wildmarch Dreaming | creature titan |
-| World | 3 | `b_grief_in_iron` | Grief-in-Iron (Greyridge) | creature golem |
-| World | 4 | `b_glass_wyrm` | The Glass Wyrm (Sunscar) | creature worm |
-| World | 5 | `b_hungering_brood` | The Hungering Brood (Whisperwood) | creature spider |
-| World | 6 | `b_carrion_crown` | The Carrion Crown (Cinder Steppe) | creature griffin |
-| World | 7 | `b_standing_ruin` | The Standing Ruin (Frostmantle) | creature titan |
-| World | 8 | `b_sallow_king` | The Sallow King (Drowned Coast) | creature wraith |
-| World | 9 | `b_unmoored` | The Unmoored (Riftmarch) | creature horror |
-| World | 10 | `b_slagborn` | Slagborn (Emberthrone) | creature elemental |
-| Seasonal | — | `b_harvest_effigy`, `b_longnight_stag`, `b_bloomtyrant`, `b_sunwake_serpent`, `b_veilstorm_herald` | Harvest Effigy, Longnight Stag, Bloomtyrant, Sunwake Serpent, Veilstorm Herald | golem, elk, mushroom, snake, wraith |
 
 Ability ids follow `<bossid>_<snake>` and are listed in each boss's table. Boss lines follow `bl_<bossid>_<snake>`
 (written out in full for r01; later raids give the lines inline and the builder assigns `bl_` ids in the same
 pattern).
 
-### 10.2 Monsters (86)
+#### 10.2 Monsters (86)
 
 `m_aberration_bell_jelly`, `m_aberration_crevasse_crawler`, `m_aberration_deep_lurker`, `m_aberration_glass_grub`,
 `m_aberration_grave_grub`, `m_aberration_loom_spider`, `m_aberration_pearl_mite`, `m_aberration_quire_tentacle`,
@@ -3336,7 +3121,7 @@ pattern).
 `m_undead_grave_acolyte`, `m_undead_heir_shade`, `m_undead_memory_of_the_fallen`, `m_undead_mourner`,
 `m_undead_ossuary_skull_swarm`, `m_undead_powder_monkey`, `m_undead_saltbound_deacon`, `m_undead_weeping_widow`.
 
-### 10.3 Everything else
+#### 10.3 Everything else
 
 - **Raids:** `r01_barrowking`, `r02_glacier_throne`, `r03_sunken_choir`, `r04_ember_court`, `r05_veilspire` (canon).
 - **Quests:** `q_attune_barrowking`, `q_attune_glacier_throne`, `q_attune_sunken_choir`, `q_attune_ember_court`,
@@ -3356,33 +3141,25 @@ pattern).
 - **Screens:** `scr_raid_frames`, `scr_raid_leader`, `scr_raid_lockouts`, `scr_raid_journal`, `scr_loot_master`,
   `scr_dialog_choice`, `scr_world_boss_tracker`.
 
----
 
-## 11. Reuse map
+**Archived: reuse rows (raid-only, from the round-1 §11)**
 
 | What | Reused from | How |
 |---|---|---|
-| World boss shape (tier, over-level, scale, minion waves, phases, chest, pin) | `prototypes/farhold/data/worldbosses.json` (reuse) | the schema carries over; `minions` and `phases` keep their fields; Wildmarch adds `schedule`, `site`, `abilities[]`, `scaling` |
-| Six world bosses by name and body | the same file: `grief_in_iron`, `the_hungering_brood`, `the_sallow_king`, `slagborn`, `the_standing_ruin`, `the_carrion_crown` (reuse) | ids become `b_<snake>`; tiers are replaced by region |
-| Phase modifiers (`ironclad`, `vicious`, `frenzied`, `fleet`, `venomous`, `leeching`, `graveborn`, `warded`, `wizened`, `fiery`, `unyielding`…) | `prototypes/farhold/data/enemies.json` `modifiers`, applied by `js/actors.js` `applyModifier` (reuse) | world-boss phases and every raid boss's stat shifts |
 | Warlords, war camps, leaders that buff their escort, standard-bearers, rout | `prototypes/farhold/js/warbands.js` + `data/warbands.json` (R27 M10) (reuse) | attunement steps kill the Gravemarshal and the Peak-King; Stonehide members are r02 trash; the leader aura (`leaderModifier`, `leaderAura`) is how Varro's *Good Dog* and the Barrow Herald's banner work |
 | Door check for big bodies | `fitsRoom(def, room)` in `js/warbands.js` (reuse) | every raid corridor must pass it for its trash and bosses (raid rooms are built to 8–12 m ceilings) |
 | Room-and-corridor interiors, looks (`barrow`, `crypt`, `cinderworks`, `vault`, `rime`, `flooded`, `hoard`…) | `prototypes/farhold/js/dungeon.js`, `js/dungeon-plan.js` (reuse) | raid interiors are **hand-laid** (fixed layouts, not seeded) but reuse the builder's merged geometry, walls, sconces and looks: r01 `barrow`/`crypt`, r02 `rime`, r03 `flooded`, r04 `cinderworks`/`hoard`, r05 `vault` |
 | Instance mouths, `holds`, `gives`, discovery | `prototypes/farhold/data/instances.json` (reuse) | the raid entrances are instance mouths with `discovery: "quest"` (the attunement) |
 | One-time strongholds payout (`sites.take`) | Farhold R27 M1 (reuse) | the lockout ledger works the same way: a kill is filed once per lockout |
-| Bodies | `avatar-3d/js/creature-types.js` (41 types), Chibi 2 races + `data/class-outfits.json`, `chibi2-hats.js` `CLASS_HATS` (reuse) | every body on this page names one; creature `size` × Farhold world-boss `scale` |
-| Effects | `avatar-3d/js/spellfx.js` `ELEMENTS`, `STATUS_FX`, `breath`, `pillar`, `vortex`, `storm`, `aoe`, `ring`, `beam` (reuse) | every ability's look; telegraph decals are page 11's (new) |
-| Boss voices and lines | `shared/voices.js` `voiceFor({ role, gender, seed })`, Lingo `boss_opener` / `boss_phase` pools, Emberveil `js/talk.js` `narrate` (reuse) | bosses that do not speak use the Narrator |
-| Chests | `data/balance.json` `chests.kinds` (`iron`, `gilded`, `warded`) (reuse) | world-boss weekly chest |
 | Foci | `prototypes/farhold/js/foci.js` (R25 Reliquary, Orb, Grimoire, Effigy) (reuse) | `leg_marrow_reliquary` and other off-hand focus drops |
 | Ideas (not names) | `prototypes/lanternfall/docs/05-BESTIARY-BOSSES.md` | a boss that eats light → Candlemourn's candles and Nhal's star light; a boss that melts into terrain → the Colossus's coral walls and Vorm's ice sheets; the flood cycle → r03 tide; per-boss enrage and phase transitions |
 | **Not** reused | `prototypes/farhold/data/raids.json` | that file is Farhold's **base-defence** raids (waves against your colony), unrelated to group raids — do not import it |
 
----
+**Archived: notes for other pages (round-1 §12, unchanged)**
 
-## 12. Notes for other pages
+### 12. Notes for other pages
 
-### 12.1 Canon change requests (for page 00)
+#### 12.1 Canon change requests (for page 00)
 
 1. **r01 and r02 have no Mythic.** Canon gives them size 10 while also saying Mythic is 20 players. This page reads
    that as "Normal only" and puts the challenge in hard modes. Alternative: give them a level-60 Mythic 20 as a
@@ -3397,12 +3174,12 @@ pattern).
 6. **World boss count:** "one per region from 3 upward" = 8 (regions 3–10). Veilspire Isle (region 11) has none;
    the Veilstorm Herald event covers it. Confirm.
 
-### 12.2 For page 03 / 02 / 04
+#### 12.2 For page 03 / 02 / 04
 
 All screens, proposed keys and settings are in §2.15. New emotes used as triggers: `/kneel` (Queen Ysmere hard mode,
 Ember King dialog), `/knock` (the Threshold hard mode) — page 02/03 should list them in the emote list.
 
-### 12.3 For page 05
+#### 12.3 For page 05
 
 - The **reference character** table (§1.2) must be replaced by page 05's real numbers; scale this page by the ratio.
 - Combat revives in raids: 1 (10) / 2 (20) + 1 per 5 min; shared with revive consumables.
@@ -3410,14 +3187,14 @@ Ember King dialog), `/knock` (the Threshold hard mode) — page 02/03 should lis
 - Damage from a player to a charmed ally: 80% reduced.
 - Boss immunity to knockback has **one exception** (Cinderjaw is a door).
 
-### 12.4 For page 06 (class files)
+#### 12.4 For page 06 (class files)
 
 - The Mirror Court (§7.9) builds a boss from **any** class's six spells and mechanic: every class file should state
   its spells' shapes and numbers precisely enough to scale by 250%.
 - Every raid mechanic asks for one of: interrupt, dispel (magic / curse / poison), crowd control, knockback, movement
   ability, defensive, taunt. Page 06 should keep a coverage matrix so each is available to at least 10 classes.
 
-### 12.5 For page 07
+#### 12.5 For page 07
 
 - Raids unlock at **30** (the ladder); Mythic unlocks per raid by killing its Normal final boss.
 - Titles from this page: *of the Ninefold*, *Who Said Her Name*, *No One's Mourner*, *of the Rimebound Court*, *Who
@@ -3426,7 +3203,7 @@ Ember King dialog), `/knock` (the Threshold hard mode) — page 02/03 should lis
   Road*, *Worldbreaker*.
 - Flying mounts are named here (griffin, whelp, phoenix, drake) — page 07 decides whether flying exists at all. **Resolved (00 §10):** flying is in at 60 through `q_sky_1..5` (Riding IV); before that these winged mounts run and glide (page 08 §20.1).
 
-### 12.6 For page 08
+#### 12.6 For page 08
 
 - Item levels in §2.10.2 are proposals. **No belt, cloak or shoulder slots** are used here (Farhold's `SLOTS`); if
   page 08 adds them, raid sets can grow to 8 pieces. **Resolved (00 §4):** page 08 §2 has 15 slots including `shoulders`, `back` and
@@ -3434,7 +3211,7 @@ Ember King dialog), `/knock` (the Threshold hard mode) — page 02/03 should lis
 - Page 08 should decide whether flails and pistols exist (used by `it_tentacle_lash_whip` and
   `leg_grimwaters_last_broadside`; fall back to mace and off-hand focus if not).
 
-### 12.7 For page 10
+#### 12.7 For page 10
 
 - Families used: Farhold's eight. Giants/orcs are `humanoid`. If page 10 adds `giant`, `veil` or `drowned` families,
   rename the `m_` ids here. **Partly resolved:** page 10 §3 has `giant`, `veil`, `drowned`, `ember` and others;
@@ -3443,7 +3220,7 @@ Ember King dialog), `/knock` (the Threshold hard mode) — page 02/03 should lis
 - Farhold's tier-1 world bosses (Bramblecoat, the Reedmother, Gravel-Tusk) are proposed as **rare elites** for
   Hearthvale and Mossfen.
 
-### 12.8 For page 11
+#### 12.8 For page 11
 
 - New mechanic words used on this page that page 11 should define: **Mind control / Charmed**, **Body-block beam**,
   **Rescue** (free a swallowed/encased player), **Song lanes**, **Polarity**, **Duel ring**, **Cross-realm** (the Veil),
@@ -3452,12 +3229,12 @@ Ember King dialog), `/knock` (the Threshold hard mode) — page 02/03 should lis
 - The Unsung arena **turns off all sound** — page 11 must make sure every warning has a visual form (it already
   should).
 
-### 12.9 For page 14
+#### 12.9 For page 14
 
 - Attunement quests (§2.9, §3.3, §4.3, §5.3, §6.3, §7.3), `q_the_last_ember` (§7.16), `q_world_boss_<region>` (§8.7),
   and the four seasonal events (Harvestide, Longnight, Firstbloom, Highsun) plus the Veilstorm event.
 
-### 12.10 For page 15
+#### 12.10 For page 15
 
 - Raid groups up to 20 (open world-boss groups up to 60), subgroups of 5, raid assist, loot master, the 2-hour
   personal-loot trade window, lockout merging and extension.

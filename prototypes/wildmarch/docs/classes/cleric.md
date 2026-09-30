@@ -17,8 +17,8 @@ spell slots **1 / 4 / 10 / 18 / 28 / 40**, calling quests **6 / 20 / 40**, talen
 - **Targeting** (page 00 §12.1 W8, page 02): **Ally** needs a friendly hard target — yourself (`F1` or your
   own frame) or a party member (`F2`–`F5` or their frame); **Auto-target** casts on your hard enemy target,
   or with none, the valid enemy nearest your aim point in range; **Self** is centred on you; **Ground** is placed
-  at the aim point. If an Ally spell is pressed with an *enemy* targeted, it casts on yourself (page 04 setting
-  `set.gameplay.self_cast_fallback`, default on — see canon requests).
+  at the aim point. If an Ally spell is pressed with no friendly target (or an *enemy* targeted) it refuses with "No friendly
+  target"; the page 04 setting `set.gameplay.self_cast_fallback` (**off by default**, 00 §4) makes it cast on yourself instead.
 - **Tags** are page 05 §Tags ids.
 - "Dispellable" debuffs are the ones page 05 / page 11 mark as removable (poison, curse, disease, magic).
 - Statuses (blind, fear, burn, root, untargetable, barrier) are page 05's.
@@ -246,6 +246,12 @@ None. The cleric's bar never changes. Its Devotion actions (Raise on `Q`, Outpou
 
 **How.** The support cleric stops healing damage *after* it lands and starts making the party hit harder and
 get hit less *before* it lands. It queues as **Support** (a Damage slot in the Dungeon Finder, page 00 §4).
+
+**Role focus** (canon 00 §6): the cleric uses the shared **Role focus** switch in the spellbook (out of combat,
+saved per Loadout). **Hybrid** queues it as Support and makes Scourging Light fill Devotion from damage instead
+of from overheal; everything else below works in either focus (Blessing of Zeal still needs its 90%-health
+condition). **Primary** puts it back to Healer.
+
 The pieces:
 
 | Piece | What it does for the group |
@@ -349,7 +355,7 @@ A talent that changes targeting or shape changes the spell's tags too (noted whe
 ## 8. Class sets
 
 ### `set_cleric_vigil` — Vestments of the Long Vigil (dungeon set)
-Head `d05_glass_tombs` boss 3, chest `d11_saltdeep_cathedral` final boss, legs `d08_moonwell_ruins` boss 3,
+Head `d05_glass_tombs` final boss, chest `d11_saltdeep_cathedral` final boss, legs `d08_moonwell_ruins` final boss,
 hands `d13_cindergate` boss 2, feet `d07_thornheart` boss 2, off hand (reliquary focus `it_vigil_reliquary`)
 `d14_ashen_reliquary` final boss. On **Normal** a piece drops at the dungeon's level; on **Challenge** at 60.
 

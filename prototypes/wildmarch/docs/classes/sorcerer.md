@@ -216,9 +216,10 @@ Both show a glowing border on the slot and a one-line card the first time (page 
 
 ## 5. The hybrid role — Support (the Boon Table)
 
-The sorcerer queues as **Support** (a Damage slot in the Dungeon Finder, 00 §4) when the **Boon Table** is
-switched on. The switch is on the Wheel's panel in the spellbook (`K`), **out of combat only** (3 s to swap,
-no key needed). It unlocks with the gauge at Calling 6.
+**Role focus.** The sorcerer uses the canon **Role focus** switch (00 §6: in the spellbook `K`, out of combat
+only, saved per Loadout). Setting it to **Hybrid** turns on the **Boon Table** (the switch is also shown on the
+Wheel's panel; 3 s to swap; it unlocks with the gauge at Calling 6), and the Dungeon Finder then queues the
+sorcerer as **Support** (a Damage slot, 00 §4).
 
 **While the Boon Table is on:**
 

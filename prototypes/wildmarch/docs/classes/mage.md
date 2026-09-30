@@ -241,6 +241,11 @@ are talents, §7).
 ## 5. The hybrid role — Tank
 
 The owner's example (W7): *a mage who tanks by creating shields, deflecting damage and distracting enemies*.
+
+**Role focus** (canon 00 §6): the mage uses the shared **Role focus** switch in the spellbook (out of combat,
+saved per Loadout). **Hybrid** queues it as **Tank** (from calling 1); **Primary** queues it as Damage. The switch
+is **tied to Wardweaving** (§5.1), the form key that actually turns the tank kit on: Hybrid focus is what the
+Dungeon Finder reads, Wardweaving is what changes the spells, threat and defences in the fight.
 The mage tanks by **absorbing** (wards), **deflecting** (the rune ring turned outward) and **distracting**
 (Stand-ins that enemies attack instead of the group). It has no block and no heavy armour; its health pool
 is small and its shields do the work, so a healer's job is to keep the mage's health full *between* ward
@@ -260,14 +265,14 @@ refreshes rather than to out-heal a steady stream of hits.
 | Resonance fade | slowed: starts **15 s** after the last build (was 10 s) |
 | Damage | −25% spell damage dealt (threat is multiplied after this) |
 | Spells | four spells change (§4) |
-| Dungeon Finder | a mage with calling 1 may queue as **Tank** |
+| Dungeon Finder | a mage with calling 1 and Role focus on **Hybrid** queues as **Tank** |
 | HUD | the ring turns pale blue with a shield (§2.3); nameplate threat colours invert (page 05 §13.7) |
 
 ### 5.2 Holding threat
 
 | Tool | What it does |
 |---|---|
-| **Challenge** (the shared taunt, level 10, page 07) | sets threat to 110% of the top, Taunted 3 s |
+| **Provoke** (the shared taunt, level 10, page 07) | sets threat to 110% of the top, Taunted 3 s |
 | **Gravity Well** (§4, slot 6, level 40) | area taunt in 7 m, 4 s |
 | **Fireball** in Wardweaving | its splash is the mage's "hit everything" tool: 140% + 40% splash × 4 threat |
 | **Orrery** | 10 s of area damage across a 6 m circle keeps a pack on the mage |
@@ -331,16 +336,18 @@ damage over time (cannot be deflected), and a ward on cooldown during a tank-swa
 
 ### `mage_portal` — Portal (travel, out of combat, no slot)
 
-Opens a gate the party can step through to a **town waystone the mage has discovered** (00 §6, W9). Page 20
-owns the exact numbers (cast time, cooldown, how long the gate stays, reagent if any); the brief:
+Opens a gate the party can step through to a **town waystone the mage has discovered** (00 §6, W9). The numbers
+are [page 20](../20-TRAVEL.md) §16.1's; this table repeats them:
 
-| Field | Value (page 20 owns) |
+| Field | Value (page 20 §16.1) |
 |---|---|
-| Unlocks | page 07's ladder (the level page 20 sets for class travel spells) |
-| Cast | a long cast out of combat; any damage cancels it |
-| Where to | a list of the mage's discovered **town** waystones (never a dungeon or a wild landmark) |
-| Who | the mage and up to 4 party members; each steps into the gate with Interact |
-| Discovery | arriving through the gate **counts as discovering that waystone** for everyone who steps through — this is how a mage brings friends to places they have not walked to (00 W9) |
+| Unlocks | **level 12**, with waystones and Travel Methods (page 07) |
+| Targeting | **Self** (the gate opens at your feet) |
+| Cost / cooldown | no mana, no reagent · **15 min** cooldown |
+| Cast | **10 s**, out of combat, open world and towns only (not inside a dungeon or a world-boss arena during its fight); moving or taking damage cancels it |
+| Where to | any **town waystone the mage has discovered** (never a dungeon or a wild landmark), picked in `scr_teleport_picker` before the cast starts |
+| The gate | stands **60 s**; the mage and **party members only** (up to **5 people**, followers included) step through with `E`; it closes after 60 s or when 5 have passed. One gate per mage at a time |
+| Discovery | anyone arriving **discovers that waystone and town (and its station)** — this is how a mage brings friends to places they have not walked to (00 W9) |
 | Looks | a 2.5 m upright ring of turning glyphs (spellfx `vortex` element `arcane`, vertical) |
 | Sound | `ambience.portal` loop, a glass chime as each person passes |
 
@@ -479,7 +486,7 @@ Source: the final boss's chest at **Depth 10 or deeper** ([page 12](../12-DUNGEO
 
 | id | Name | Slot | Power | Source |
 |---|---|---|---|---|
-| `leg_the_unfinished_proof` | **The Unfinished Proof** | off hand (Grimoire) | *Q.E.D.*: max Resonance **+2** (6, or 7 with calling 3); each Resonance above 4 gives **+12%** instead of 8% | secret boss of `d16_the_spire` (Challenge), 8% |
+| `leg_the_unfinished_proof` | **The Unfinished Proof** | off hand (Grimoire) | *Q.E.D.*: max Resonance **+2** (6, or 7 with calling 3); each Resonance above 4 gives **+12%** instead of 8% | secret boss `b_marchheart` of `d16_the_spire` (Challenge), 8% |
 | `leg_orbit_of_edric_vane` | **Orbit of Edric Vane** | staff | *Perpetual Motion*: the **Orrery never ends** while you stand inside it; recasting moves it | final boss of `d12_unmade_workshop` at Depth 10+, 2% |
 | `leg_foldspace_slippers` | **Foldspace Slippers** | feet | *Here and There*: Skip has **3 uses** and each leaves a fold that deals **200%** instead of 60% | the `riftmarch` world boss ([page 13](../13-WORLD-BOSSES.md)), 4% |
 | `leg_heart_of_a_dead_star` | **Heart of a Dead Star** | amulet | *Stellar Core*: Collapsing Star's cooldown is **30 s** and its 7 m pull also **pulls elites** | final boss of `d15_fire_court` (Challenge), 6% |
@@ -500,7 +507,7 @@ Source: the final boss's chest at **Depth 10 or deeper** ([page 12](../12-DUNGEO
 
 | id | Name | Socket in | Requirement | Power | Source |
 |---|---|---|---|---|---|
-| `soul_mirrored_self` | **Soul of the Mirrored Self** | chest (armour) | **Mage only** | every **Skip** leaves a 3 s **Stand-in** (§5.3) at the old spot; in Wardweaving the Stand-in also **copies your next Fireball** at 50% | the secret boss of `d11_saltdeep_cathedral` (Normal or Challenge), 4%; or any monster at 0.02% (great luck) |
+| `soul_mirrored_self` | **Soul of the Mirrored Self** | chest (armour) | **Mage only** | every **Skip** leaves a 3 s **Stand-in** (§5.3) at the old spot; in Wardweaving the Stand-in also **copies your next Fireball** at 50% | the secret boss `b_the_tidewife` of `d11_saltdeep_cathedral` (Normal or Challenge), 4%; or any monster at 0.02% (great luck) |
 | `soul_three_suns` | **Soul of Three Suns** | weapon | **Mage only** | at **4+ Resonance**, Fireball **splits in flight** into three fireballs (the target and the 2 nearest enemies within 12 m), each at **70%** with its own splash; still builds 1 Resonance | quest reward: the Riftmarch story chapter that ends at `d12_unmade_workshop` (page 14), Mage version of the reward; or Depth 15+ final chest, 1% |
 
 ---
@@ -544,7 +551,7 @@ Voice: reuse `shared/voices.js` role **`mage`** (`pitch 0.5, depth 0.5, tone 0.6
 - New **hybrid Tank** role: Wardweaving (Guardian state on `Shift+1`), four tank spell versions (§4), Stand-ins, [tank] talents, a tank set and legendary.
 - **Fireball** added as slot 1 (W34); the old Arcane Dart survives as Fireball's tier-1 talent.
 - **Unweave** is now a class key (`G`), not a talent.
-- **Portal** travel utility added (page 20 owns numbers).
+- **Portal** travel utility added; its numbers are page 20 §16.1's (10 s cast, 60 s gate, 5 people, 15 min cooldown, level 12).
 - Raid, Heroic and Mythic+ sources re-homed to Challenge, Depth and world bosses; a soul pair added.
 
 | Old | New |
@@ -558,3 +565,9 @@ Voice: reuse `shared/voices.js` role **`mage`** (`pitch 0.5, depth 0.5, tone 0.6
 | talent Afterimage (decoy) | **Stand-in** (`mage_skip_t3a`) |
 | `q_mage_calling_1/2/3` | `q_calling_mage_1/2/3` (00 §10) |
 | sources `r05_veilspire`, `r04_ember_court`, `r03_sunken_choir`, Mythic+ | `d16_the_spire` / `d15_fire_court` Challenge, `drowned_coast` world boss, Depth 10+ |
+| soul `soul_second_self` (clashed with the chronomancer's) | `soul_mirrored_self` |
+| `d03_deepdelve` | `d03_shaft_seven` |
+| shared taunt "Challenge" | **Provoke** |
+
+- **Sweep (round 2)**: Portal numbers set to page 20 §16.1; §5 names the canon Role focus switch (tied to
+  Wardweaving); secret-boss drop sources name their bosses (`b_marchheart`, `b_the_tidewife`).

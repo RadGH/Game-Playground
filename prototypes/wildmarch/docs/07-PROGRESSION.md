@@ -246,7 +246,7 @@ Every row below is also multiplied by `(1 + XP gain)`.
 | **Discovering a dungeon entrance** (it appears in the Dungeon Finder) | 0.03 × XP-to-next(dungeon's top level) — also paid when you arrive by a teleport | new |
 | Dungeon boss (Normal) | kill XP × 20 (the boss rank) | placed bosses |
 | Dungeon completion (Normal, **every** clear) | 0.30 × XP-to-next(dungeon's top level), with the grey rule judged on the dungeon's top level | `clearRewardGold` only |
-| **Depth** run below level 60 | as Normal, at the dungeon's **Depth-raised** level (each Depth adds 3 levels up to 60 — page 12). Example: `d03_deepdelve` (13–16) at Depth 5 is a level-31 dungeon | new |
+| **Depth** run below level 60 | as Normal, at the dungeon's **Depth-raised** level (each Depth adds 3 levels up to 60 — page 12). Example: `d03_shaft_seven` (13–16) at Depth 5 is a level-31 dungeon | new |
 | World boss | kill XP × 30, the **first kill of each world boss each week** (Monday 06:00 — the same once-a-week rule as its loot, canon W5) | `worldbosses.json` |
 | Challenge mode, Depth past 60 | level 60 only — there is no XP to earn at 60 | — |
 
@@ -502,11 +502,17 @@ stances, and that a follower takes a group slot. **Card:** "Follower slot 1: hir
 
 #### Unlock: Harvesting and a crafting profession
 
-**Level 9, quest `q_mf_what_the_fen_gives_back`, giver `npc_mf_scrapwright_hesk`** in Reedhollow. Hesk hands you
-a starter harvesting tool for the **tool** slot and has you cut reeds, dig peat and skin a fen lizard — one
-shared **Harvesting** skill (1–300) covers mining, skinning, herbs, timber and fishing, as long as the right tool
-is equipped (canon §12.3). Then you **choose one crafting profession** of seven: **Blacksmithing,
-Leatherworking, Tailoring, Jewelcrafting, Enchanting, Engineering, Alchemy**, each with its own skill (1–300).
+Two quests at level 9, both in Reedhollow (page 14 owns them).
+
+**Harvesting — quest `q_mf_the_right_tool` "The Right Tool", giver `npc_neve_hollis`** (Reedhollow →
+`sz_reedhollow_shallows`). Neve hands you a Common harvesting tool for the **tool** slot and has you pick 3
+bog-myrtle, cut 2 peat-iron lumps and skin 1 marsh wolf — one shared **Harvesting** skill (1–300) covers mining,
+skinning, herbs, timber and fishing, as long as the right tool is equipped (canon §12.3).
+
+**A crafting profession — quest `q_mf_what_the_fen_gives_back` "A Trade of Your Own", giver
+`npc_mf_scrapwright_mabli`** (Reedhollow, the profession stations). Mabli has you salvage 3 items, then you
+**choose one crafting profession** of seven: **Blacksmithing, Leatherworking, Tailoring, Jewelcrafting,
+Enchanting, Engineering, Alchemy**, each with its own skill (1–300), and make its first recipe.
 **Salvage** (break an unwanted item into materials) opens for everyone with this quest. Page 19 owns every
 profession rule, recipe and whether (and how) a profession can be changed later. **Cards:** "Harvesting: equip a
 tool and press [E] on ore, herbs, timber, hides or fish. One skill, 1 to 300." · "Crafting: you are now a
@@ -568,7 +574,8 @@ except quest items (canon W18). **Cards:** "Bank: 48 slots of storage at any ban
 
 #### Unlock: Waystones
 
-**Level 12, quest `q_hc_the_waywardens_oath`, giver `npc_hc_waywarden_liss`** at the Waystone Circle. Every
+**Level 12, quest `q_hc_the_waywardens_oath` "The Wayfarer's Writ", giver `npc_hc_waywarden_liss`** at the
+Waykeepers' Hall (`hc_waykeepers_hall`). The same quest unlocks Travel Methods (below) — it is one unlock. Every
 region has 3–6 waystones (page 01). **Discover** one by touching it (once per character); it lights on your map.
 A discovered waystone is: a place your **Recall Stone** can be bound (if it stands in a town or safe place); a
 destination for **teleport scrolls** and caster **travel spells** ([page 06 §11](06-CLASSES.md#11-utility-spells));
@@ -579,8 +586,10 @@ to discover it. Recall Stones bind to them; portals and scrolls arrive at them."
 
 #### Unlock: Travel Methods
 
-**Level 12, quest `q_unlock_travel_methods` "First Fare", giver `npc_hc_stationmaster_brenna`** (proposed; page
-01 owns NPC ids) at Highcourt's Wagon Yard. Ride your first route, Highcourt → Brightwater by wagon. **Travel
+**Level 12, the same quest `q_hc_the_waywardens_oath`, giver `npc_hc_waywarden_liss`** (page 14). Liss sends
+you to the South Gate station: ride the Kingsroad wagon to Brightwater (it waits up to 30 s for more riders,
+then leaves), then the Wend barge back to the Low Wharf (it runs to a timetable), then buy one Scroll of
+Passage. **Travel
 Methods** replace round 1's fixed flight routes (canon W15; [page 20](20-TRAVEL.md) owns every route and number): wagons, horse
 and creature trails, giant striders, boats, barges, trains, and flyers where needed. They are much faster than
 walking, follow **known routes on real roads**, **protect riders** from weather and enemies, and **snap back onto
@@ -693,14 +702,14 @@ element). **Card:** "Upgrade bench: inscribe, reweave, recast and brand are open
 
 #### Unlock: The Fire Court
 
-**Level 60, quest `q_kf_the_fire_court_gates`, giver `npc_marshal_ansel_crane`** in Last Light. The climax of the
+**Level 60, story quest 11.10 `q_ms_the_fire_court`, giver `npc_marshal_ansel_crane`** in Last Light (page 14). The climax of the
 main story: **The Fire Court** (`d15_fire_court`), a 5-player dungeon where the party faces the Fire King
 (`b_fire_king_kaedros`) — it was raid r04 in round 1 and is rebuilt for five (canon 00 §8). Page 14 owns the
 story; page 12 the dungeon. **Card:** "The Fire Court: the end of the road, for 5 players at level 60."
 
 #### Unlock: Challenge mode
 
-**Level 60, quest `q_kf_the_hard_road`, giver `npc_marshal_ansel_crane`** in Last Light. Every dungeon's
+**Level 60, quest `q_kf_the_harder_road` "Harder Doors", giver `npc_marshal_ansel_crane`** in Last Light. Every dungeon's
 **Challenge** difficulty at level 60 (canon W4): the full boss mechanic set, harder numbers and better loot;
 Challenge-mode bosses drop loot **once a week** per boss (Monday 06:00, canon W5). No followers (page 06 §3.4).
 A dungeon must be discovered to be queued. **Card:** "Challenge mode: every dungeon at level 60 with its full set
@@ -708,7 +717,7 @@ of mechanics, for 5 players. Choose it in the Dungeon Finder."
 
 #### Unlock: Depth past level 60
 
-**Level 60, quest `q_kf_the_deep_count`, giver `npc_kf_depthwarden_orrin`** in Last Light. Depth already opens per
+**Level 60, quest `q_kf_the_deep_road` "How Deep It Goes", giver `npc_kf_depthwarden_orrin`** in Last Light. Depth already opens per
 dungeon when you clear it on Normal (above), raising it 3 levels a Depth until it reaches 60. This quest lets you
 go **past** 60: each further Depth is **substantially harder** (health and damage climb, packs grow) and pays
 **high-tier rewards** (better rarity odds, jewels, souls, special rarities); every **5 Depths** is a **Depth tier**
@@ -718,8 +727,8 @@ brings new enemies."
 
 #### Unlock: Spire Isle and The Spire
 
-**Level 60, chain `q_si_across_the_pale_sea`, giver `npc_si_spirewarden_isaure`** at the Spire Landing, offered
-after The Fire Court's last boss has been killed once. The Cutwater's boats carry you across the Pale Sea. Opens
+**Level 60, story quest 12.2 `q_ms_across_the_pale_sea`, giver `npc_hale_marrow`** in Saltmarch (page 14),
+offered after The Fire Court's last boss has been killed once and the Heartflame carried to Saltmarch (12.1). The Cutwater's boats carry you across the Pale Sea. Opens
 the island (region 11, `spire_isle`) and **The Spire** (`d16_the_spire`, the epilogue — was raid r05, rebuilt for
 five). **Card:** "Spire Isle is open. The Spire: the last dungeon, for 5 players."
 
@@ -795,14 +804,14 @@ One generated tree for every class (Farhold R7), starting at a free hub node in 
 | guard | The Held Line | armour, health, magic resistance, block chance and power, resistance to all, barrier |
 | fortune | The Long Odds | magic find, experience, crafting material on kill, lamp range, minimap range |
 | mend | The Slow Mend | health regen, life steal, mana steal, mana regen, health and mana on kill |
-| rove | The Light Step | move speed, dodge, stealth (smaller enemy notice range), minimap range, DEX |
+| rove | The Light Step | move speed, dodge, smaller enemy notice range (Farhold `stealth`), minimap range, DEX |
 
-Each arm has seven rings (3 minor · 4 minor · 3 major · 4 minor · 2 **talent** · 3 major · 1 **keystone**).
+Each arm has seven rings (3 minor · 4 minor · 3 major · 4 minor · 2 **talent** · 3 major · 1 **capstone**). (Farhold calls the end nodes *keystones*; Wildmarch says **capstone**, because "keystone" is a banned word — canon 00 §12.5.)
 **Eight oddballs** sit on the seams between arms. In R25 the melee and arcane arms **branch** past ring 6 into
-four paths each (melee: Two Great Weights, The Single Weight, Twin Edges, Sword and Board — one keystone per
-hand shape; arcane: Flame and Frost, Storm and Venom, Dusk and Dawn, The Inner Study — two keystones per path,
+four paths each (melee: Two Great Weights, The Single Weight, Twin Edges, Sword and Board — one capstone per
+hand shape; arcane: Flame and Frost, Storm and Venom, Dusk and Dawn, The Inner Study — two capstones per path,
 one per element plus Overflow and Blood Price). A node is taken when something touching it is taken: **the
-shape of the tree is the cost**. Keystones have a gift **and** a cost (e.g. Held Ground: +40% armour, +10%
+shape of the tree is the cost**. Capstones have a gift **and** a cost (e.g. Held Ground: +40% armour, +10%
 resistance to all, block +25 — and −25% move speed). About **203 nodes** in all.
 
 ### What Wildmarch changes `(new)`
@@ -810,19 +819,19 @@ resistance to all, block +25 — and −25% move speed). About **203 nodes** in 
 | Change | Rule | Why |
 |---|---|---|
 | **Points** | **one per level from 2 = 59** (canon). No bonus perk points from bosses or landmarks | Farhold gave `(level − 1) + floor((level − 1) / 5)` plus `bonusPerks` rewards; canon fixes 59 |
-| **Reach** | 59 points take about 29% of the forest: a full arm to its keystone (7–10 points) and some of two or three others | same as Farhold's 58 points at 50 |
-| **Level gates** | ring-5 **talent** nodes need level **15**; the R25 **branch paths** need level **25**; **keystones** need level **30** | a keystone is 7 points from the hub — without a gate a level-8 character could hold one |
+| **Reach** | 59 points take about 29% of the forest: a full arm to its capstone (7–10 points) and some of two or three others | same as Farhold's 58 points at 50 |
+| **Level gates** | ring-5 **talent** nodes need level **15**; the R25 **branch paths** need level **25**; **capstones** need level **30** | a capstone is 7 points from the hub — without a gate a level-8 character could hold one |
 | **Flat nodes grow** | every flat node (health, armour, flat damage, block power, barrier, magic resistance, health/mana on kill, health/mana regen) is worth **× (1 + 0.1 × (level − 1))**; attribute nodes **× (1 + 0.05 × (level − 1))**; percentage nodes never change | "+22 maximum health" is 19% of a level-1 character and 1% of a level-60 one; growing with you keeps a perk worth its point |
 | **Sunder** (melee talent) | the last swing of every pattern strips **3% of base armour** for the fight (Farhold: 8 flat, forever) | page 05 §8.3 |
 | **Riposte** (melee talent) | also armed by rolling through a hit and by a parry | page 05 §3 |
-| **Blood Price** (arcane keystone) | spells cost health instead of their resource: mana spells cost health equal to `cost ÷ 1,000 × 50%` of max HP (a 120-mana spell: 6%); Momentum and Tempo spells 0.2% of max HP per point | Wildmarch's three resources |
+| **Blood Price** (arcane capstone) | spells cost health instead of their resource: mana spells cost health equal to `cost ÷ 1,000 × 50%` of max HP (a 120-mana spell: 6%); Momentum and Tempo spells 0.2% of max HP per point | Wildmarch's three resources |
 | **Echo** (arcane talent) | 1 cast in 6 fires again free — at most once every 4 s | group balance |
 | **The Kept Company / The Pack** | follower slots from perks apply in the **open world**; instances cap bodies at the group size | page 06 §10.5 |
 | **The Long Odds** (fortune arm) | carries the **magic-find** stats (page 08): item quantity, item rarity, gold find, **XP gain**, **reputation gain**, profession skill and profession XP. Farhold's lamp-range nodes are gone (no light, always daylight) and become profession-XP nodes; minimap range stays | canon 00 §12.3 |
 | **The Light Step** (rove arm) | Farhold's `stealth` nodes stay under the plain name **smaller enemy notice range** (page 05 §13.6) | the rogue has no stealth (canon W29) |
-| **Far Shot** (ranged keystone) | unchanged | — |
-| **Doubled Grasp** (melee keystone) | unchanged — two two-handers | — |
-| **Keystone swap** | a keystone in a branch path can only be taken if its hands match right now (Farhold `handsFit`) — unchanged | — |
+| **Far Shot** (ranged capstone) | unchanged | — |
+| **Doubled Grasp** (melee capstone) | unchanged — two two-handers | — |
+| **Capstone swap** | a capstone in a branch path can only be taken if its hands match right now (Farhold `handsFit`) — unchanged | — |
 
 The **Perks** tab of the character screen (`scr_character`, Perks tab — page 03) is Farhold's lattice view with
 zoom and pan (R10), unchanged; nodes show their **current** value at your level.
@@ -1101,7 +1110,7 @@ No title names anything from another game.
 | Spell slots | 1/3/6/12/18/24 | 1/4/10/18/28/40 (canon) |
 | Talent tiers | 3/8/18/28 | 12/22/32/45 (canon) |
 | Attributes | no point-buy, base 6, gear and perks only | automatic class growth each level + gear + perks; 1% per point |
-| Perk points | `(L−1) + floor((L−1)/5)` + bonus points | 59 (canon), level gates on talents/branches/keystones, flat nodes grow with level |
+| Perk points | `(L−1) + floor((L−1)/5)` + bonus points | 59 (canon), level gates on talents/branches/capstones, flat nodes grow with level |
 | Retraining | the Unbinder, gold | same, + newcomer's and patch grace, the **Second Loadout** |
 | Reputation | −100…+100, five bands, many small regional factions | −3,000…+42,000, seven tiers, **seven factions that reach from level 1 to 60**, rewards made at your level, the same rival rule, **reputation gain** |
 | After the cap | nothing | Depth past 60, Challenge mode, sockets, professions, reputation, collections — no point track (canon W13) |

@@ -355,6 +355,12 @@ The druid can queue as **Healer** (from level 6, Heron), **Tank** (from level 20
 level: Grove until 40, Wolf from 40). There is no role lock inside a fight, but the **shared slot cooldowns** mean
 a druid that tanks is not also healing: the Bear's defensives spend the Heron's heals.
 
+**Role focus** (canon 00 §6): the druid uses the shared **Role focus** switch in the spellbook (out of combat,
+saved per Loadout), **tied to its forms**. **Primary** queues it as **Healer** (Heron from level 6); **Hybrid**
+asks for one of its two hybrid roles — **Tank** (Bear, from level 20) or **Damage** (Grove, Wolf from 40) — and
+queues it as that. The switch changes only the queue role; the four versions of each spell come from the form
+the druid is in, and every form stays open in any focus.
+
 ### 5.1 Tank — Bear
 
 | Piece | How it tanks |
@@ -362,7 +368,7 @@ a druid that tanks is not also healing: the Bear's defensives spend the Heron's 
 | Guardian | threat ×4 in Bear form (page 05 §13.2); Heavy Paw doubles its own hit's threat |
 | Heavy Paw / Rending Sweep | single-target and 180° threat, the Sweep's bleed keeps a pack on you |
 | Earthshake Roar | **area taunt** 10 m, 3 s, bosses included, and −25% damage from them for 4 s; 12 s |
-| Shared **Challenge** (`Z`, page 07, level 10) | the single-target taunt |
+| Shared **Provoke** (`Z`, page 07, level 10) | the single-target taunt |
 | Stonepelt | −40% for 6 s every 20 s — a short defensive for every tank buster |
 | Deep Den / The Old Bear Wakes | a 30% self-heal every 90 s; a 12 s wall every 150 s |
 | Mana | the bear earns mana from being hit (0.5% per 1% health lost), so the bar is always ready |
@@ -397,18 +403,19 @@ has only one real escape (Slip the Snare) and every movement phase costs it the 
 
 ## 6. Utility spells
 
-### 6.1 `druid_herons_flight` — Heron's Flight (00 §6; page 20 owns the travel numbers)
+### 6.1 `druid_herons_flight` — Heron's Flight (00 §6; numbers from page 20 §16.4)
 
 | Field | Value |
 |---|---|
 | Unlocks | **level 12** (when waystones and Travel Methods open, page 07), with Heron form known |
 | Uses a slot | no — it is on the **spellbook's Utility tab** (`K`), draggable to any spare bar key |
 | Cost | none |
-| Cast | **6 s** channel, out of combat only; taking damage or moving cancels it |
-| Target | a **discovered waystone** picked from the map (page 20's waystone list); never a dungeon, never an undiscovered place |
-| Who | **the druid alone** (party members are not carried — the Oracle's Guiding Call and the Mage's Portal are the group tools) |
-| Cooldown | **10 minutes** (shares nothing with the Recall Stone) |
-| Travel | the druid becomes the Heron, rises and flies off; the screen fades over 3 s and the druid lands at the waystone as the Heron, then shifts back |
+| Targeting | **Self** |
+| Cast | **3 s** (the druid takes Heron form), then an **8 s** flight scene; out of combat, open world and towns only (not inside a dungeon or a world-boss arena during its fight); moving or taking damage cancels the cast |
+| Target | **any waystone the druid has discovered** — town or landmark — picked in `scr_teleport_picker`; never a dungeon, never an undiscovered place |
+| Who | **the druid alone** (party members are not carried — the Oracle's Guiding Call and the Mage's Portal are the group tools; in a party the druid can go first and anchor a Scroll of Calling, page 20 §17) |
+| Cooldown | **20 minutes** (shares nothing with the Recall Stone) |
+| Travel | the Heron lifts, the camera follows it up and fades; the druid lands at the waystone as the Heron, then shifts back |
 | Tags | `tag_movement` (for completeness; no damage) |
 | Looks / sound | `wingspread` clip, a column of feathers (`pillar` nature, grey); a heron's cry and wingbeats |
 
@@ -442,7 +449,7 @@ A talent for a form you have not unlocked yet can still be picked; it shows "Wor
 | 4 | 1 | **Graft** — Heartwood Ward and Still Water also land on you at 50% when cast on someone else | **Hardened Pelt** — Stonepelt 40 → 55%, 6 → 4 s | **Slippery** — Slip the Snare's dodge 40 → 60% |
 | 4 | 2 | **Sap Return** — Heartwood Ward returns 30 → 50% (no armour bonus); Still Water's unused absorb heals the ally when it ends | **Den Mother** — Stonepelt also covers allies within 6 m at 20% | **Vanishing Trail** — Slip the Snare drops 50% of your threat on every enemy |
 | 4 | 3 | **Transplant** — when either ends, anything it still owed jumps to the lowest-health ally within 20 m | **Stonewalled** — Stonepelt also makes you immune to stun and knock-back | **Second Wind** — Slip the Snare heals you 10% of max health |
-| 4 | 4 | **Ancient Bark** — if the target would die while Heartwood Ward or Still Water is on them, they drop to 1 health instead and it ends (once per cast) | **Rage of the Wild** — every hit taken during Stonepelt takes 0.5 s off slot 4's cooldown (max 8 s) | **Shadow Run** — the first attack after Slip the Snare always crits |
+| 4 | 4 | **Ancient Bark** — if the target would die while Heartwood Ward or Still Water is on them, they drop to 1 health instead and it ends (once per cast) | **Stubborn Hide** — every hit taken during Stonepelt takes 0.5 s off slot 4's cooldown (max 8 s) | **Shadow Run** — the first attack after Slip the Snare always crits |
 | 5 | 1 | **Wide Ring** — Circle and Mirror Pool 8 → 12 m, healing −25% | **Hibernal** — Deep Den heals 30 → 50% and you take no damage in its first 1 s | **Longer Frenzy** — Circling Frenzy 6 → 9 strikes |
 | 5 | 2 | **Shift-Song** — every shift inside the Circle heals everyone inside 60% SP; Mirror Pool catches each ally twice | **Den Guard** — during Deep Den, allies within 6 m take 15% less damage | **Blood Frenzy** — each Frenzy strike on a Torn target heals you 1% of max health |
 | 5 | 3 | **Deep Roots** — allies inside the Circle or the Pool cannot be knocked out of it | **Short Rest** — Deep Den's cooldown 90 → 60 s, healing −20% | **Spinning Wolf** — Frenzy strikes every enemy within 4 m at full damage |

@@ -718,7 +718,7 @@ class file's key wins if it differs, and this table is then corrected.
 | `knight` | **Vow of Protection** on your friendly target (6) | **second Vow** (Oathsworn, 40) | **banners** (20): 1 Bastion · 2 Valor · 3 Mercy |
 | `sorcerer` | **Nudge** (20) | — | — |
 | `runesmith` | — (Speak the Runes is spell 2) | — | — |
-| `shadow_dancer` † | **Shadeswap** (was Veilswap, renamed — no "veil"): you and your newest Shadow trade places | — | — |
+| `shadow_dancer` † | **Shadowswap** (was Veilswap, renamed — no "veil"): you and your newest Shadow trade places | — | — |
 | `tinker` | **Overclock** | — | — (while Climbed In to the Iron Walker, **the spell bar itself** becomes the Walker bar: `1` Haymaker · `2` Rocket Barrage · `3` Steam Vent · `4` Eject; `E` climbs in) |
 | `priest` | **Anchor** (40) | — | — |
 | `enchanter` | **Charm** a target; again = **Release** (Snap from 40) | **Hold Here** (the charmed creature walks to the aim point and stays) | the **borrowed bar**: 1–3 the creature's own abilities · 4 Attack my target / Guard me toggle |

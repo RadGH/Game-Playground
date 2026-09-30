@@ -469,7 +469,7 @@ bug came from two modules describing one surface two ways — a test asserts the
   "where": {
     "region": "mossfen", "x": 812.4, "y": 31.2, "z": 1440.9, "yaw": 1.57,
     "instance": null,                       // { kind, id, entrance: {region,x,z} } when inside one
-    "recallStone": "lm_reedhollow_waystone"  // where the Recall Stone (it_recall_stone) returns you: a town/safe waystone or landmark id, never a dungeon or wild landmark (canon W24)
+    "recallStone": "lm_oakhollow_waystone"  // where the Recall Stone (it_recall_stone) returns you: a town/safe waystone or landmark id, never a dungeon or wild landmark (canon W24); a new character starts bound at its starting town's waystone — lm_first_waystone (Brightwater) or Oakhollow's (page 20 §15)
   },
   "discovered": {                            // canon §8 + W9: the Dungeon Finder and teleports only offer what is here
     "dungeons": ["d01_hollow_barrow", "d02_drowned_mill"],
@@ -483,7 +483,7 @@ bug came from two modules describing one surface two ways — a test asserts the
   "reputation": { "fac_wardens": 1850, "fac_greenhand": 400 },   // the seven player factions (canon 00 §12.2); tiers are page 07's
   "professions": {                           // page 19; §13.7
     "harvesting": { "skill": 112, "xp": 340 },               // one shared gathering skill, 1–300
-    "craft": { "id": "prof_blacksmithing", "skill": 95, "xp": 120, "recipes": ["rc_iron_longsword", "rc_gadget_cog_1"] }   // exactly one crafting profession, or null
+    "craft": { "id": "prof_blacksmithing", "skill": 95, "xp": 120, "recipes": ["rcp_blacksmithing_iron_longsword", "rcp_engineering_gadget_cog_1"] }   // exactly one crafting profession, or null
   },
   "titles": ["the_barrowbreaker"], "titleShown": null,
   "lootLimits": {                            // weekly loot limit, ONLY Challenge-mode bosses and world bosses (canon W5)
@@ -647,7 +647,7 @@ checks every file's shape against the table below on every test run.
 | `job-frames.json`, `incidents.json`, `wanderers.json` | Farhold shapes, copied (reuse) | 14 | Board jobs (§11), timed sub-zone states (§14), people on the road (§13.6) — page 14 §17 "as is" |
 | `events.json` | `{ events: [{ id: "ev_…", region, area, level, trigger, phases: [...], cooldown, scaling, rewards }] }` | 14 | Wildmarch's own dynamic events (page 14 §13, 25 rows); Farhold's road-event `events.json` is reused under another name if kept |
 | `followers.json` | `{ heroes: [...], finderHire: {...} }` + reuse `mercenaries.json` | 15 | Page 15 §21 |
-| `mounts.json` | `{ mounts: [{ id, name, species, creature, speed, swim?, glide?, fly?, level, source }] }` | 07/08/17 | Creature bodies (`avatar-3d/js/creature-types.js`): horses, elk, boars, lizards, beetles, raptor-like runners, a crested plains-strider, giant frogs (`swim: true`, the aquatic hybrid) and others (canon §12.3). `fly` only for the level-60 story chain |
+| `mounts.json` | `{ mounts: [{ id, name, species, creature, speed, swim?, glide?, fly?, level, source }] }` | 07/08/17 | Creature bodies (`avatar-3d/js/creature-types.js`): the species of page 08 §24.2 — horses, elk, boars, lizards, beetles, the Raptor Runner, Crested Strider (two seats) and Horned Grazer dinosaurs, rams, giant frogs and other aquatic hybrids (`swim: true`), the Floating Stone, Clockwork Strider and Longshank Calf (canon §12.3; seven new bodies on page 17 §3.2). `fly` only for the level-60 story chain |
 | `travel/methods.json`, `travel/routes/<tm_id>.json`, `travel/stations.json` | §13.8 | 20 | **(new)** Travel Methods: kinds, routes as polylines, stations, schedules. Replaces the old boats-only `vehicles.json`; models from `avatar-3d/js/vehicles.js` + creature bodies |
 | `weapons.json` | `{ strikes, patterns, traits, familyWind, ranged }` | 05 | Farhold's `STRIKES` / `WEAPON_PATTERNS` / `WEAPON_TRAITS` / `FAMILY_WIND` / `RANGED` tables moved out of code (page 05) |
 | `chat.json` | `{ channels: [...], commands: [...], rate: {...} }` | 15 | Page 15 §9 as data |
@@ -723,17 +723,19 @@ items roll which sockets is `items/rarities.json` `sockets` (page 08).
 // items/gems.json — a gem's effect depends on what it sits in
 {
   "_doc": "Gems. hosts.armour is the old gem table; weapon = damage/spell damage; jewellery = secondary effects and magic find.",
-  "grades": [{ "grade": 1, "level": 1 }, { "grade": 2, "level": 15 }, { "grade": 3, "level": 30 }, { "grade": 4, "level": 45 }, { "grade": 5, "level": 58 }],
+  "grades": [{ "grade": 1, "name": "Chipped", "level": 1 }, { "grade": 2, "name": "Flawed", "level": 15 }, { "grade": 3, "name": "Plain", "level": 30 }, { "grade": 4, "name": "Flawless", "level": 45 }, { "grade": 5, "name": "Radiant", "level": 60 }],
+  // ten kinds (page 08 §13.4): bloodstone, tigereye, lapis, jade, onyx, moonstone, garnet, pearl, amber, peridot.
+  // Item ids are gem_<kind>_<grade> (gem_garnet_3 = Plain Garnet); rough stones are page 19's mat_rough_<kind>_<grade>.
   "gems": [{
-    "id": "gem_garnet",
+    "kind": "garnet",
     "name": "Garnet",
     "colour": "#b3202c",
     "hosts": {                                   // host group = the slot group of the item it is socketed into
-      "armour":    { "stat": "STR",                  "perGrade": [3, 6, 10, 15, 21] },
-      "weapon":    { "stat": "tag_dmg:tag_fire",     "perGrade": [0.02, 0.04, 0.06, 0.08, 0.10] },
-      "jewellery": { "stat": "mf_gold",              "perGrade": [0.03, 0.06, 0.09, 0.12, 0.15] }
+      "armour":    { "stat": "resistAll",            "perGrade": [6, 10, 15, 21, 30] },
+      "weapon":    { "stat": "addedAs:tag_fire",     "perGrade": [0.03, 0.05, 0.07, 0.10, 0.14] },
+      "jewellery": { "stat": "mf_gold",              "perGrade": [0.05, 0.08, 0.12, 0.17, 0.25] }
     }
-  }],
+  }],                                            // values copied from page 08 §13.4, which owns them
   "hostGroups": {                                // slot → host group
     "weapon": "weapon", "offhand": "weapon",
     "head": "armour", "shoulders": "armour", "chest": "armour", "back": "armour", "hands": "armour",
@@ -745,7 +747,7 @@ items roll which sockets is `items/rarities.json` `sockets` (page 08).
 // items/jewels.json — a jewel is a small item that rolls its own affixes and rarity
 {
   "bases": [{ "id": "jwl_prism", "name": "Prism Jewel", "level": 20, "fits": ["weapon", "armour", "jewellery"] }],
-  "rarities": { "magic": { "affixes": [1, 2] }, "rare": { "affixes": [3, 4] }, "unique": { "fixed": true } },
+  "rarities": { "uncommon": { "affixes": [1, 2] }, "rare": { "affixes": [3, 4] }, "unique": { "fixed": true } },
   "affixPool": ["tag_dmg:*", "crit_chance", "crit_mult", "attack_speed", "cast_speed", "mf_*", "…"],   // page 08 owns the pool and ranges
   "uniques": [{ "id": "jwl_uq_the_long_winter", "name": "The Long Winter", "affixes": [["tag_dmg:tag_ice", 0.25]], "power": "pw_…" }]
 }
@@ -773,7 +775,7 @@ items roll which sockets is `items/rarities.json` `sockets` (page 08).
   "gadgets": [{
     "id": "gdg_cog",
     "name": "Tuned Cog",
-    "recipe": "rc_gadget_cog_1",
+    "recipe": "rcp_engineering_gadget_cog_1",
     "level": 25,
     "fits": ["armour", "jewellery"],
     "choose": 2,                                 // how many lines the crafter picks from the menu
@@ -791,13 +793,13 @@ moving it in or out is an ordinary item move and cannot duplicate (§12.1 rule 3
 
 ### 13.3 Special rarities — `data/items/special-rarities.json` (page 08 numbers, page 17 art) (new)
 
-A **special rarity** sits on top of a Magic-or-better item's normal rarity. The icon is an original SVG
+A **special rarity** sits on top of an Uncommon-or-better item's normal rarity. The icon is an original SVG
 (never an emoji) drawn before the item's name in chat, tooltips, loot lines and the Trading Post.
 
 ```jsonc
 {
   "_doc": "Five special rarities. Page 08 owns the numbers, page 17 the card look and the icons.",
-  "minRarity": "uncommon",                      // canon: Magic-or-better
+  "minRarity": "uncommon",                      // canon: Uncommon-or-better
   "rarities": [
     { "id": "sr_electrified", "name": "Electrified", "icon": "ui/sr/electrified.svg", "card": "card_sr_electrified",
       "effect": { "kind": "proc", "on": "hit", "chance": 0.10, "does": "chain lightning, 3 jumps" },
@@ -924,7 +926,7 @@ stat is applied in exactly one function (memory note *one multiplier, two owners
 // professions/recipes.json
 {
   "recipes": [{
-    "id": "rc_iron_longsword", "profession": "prof_blacksmithing", "skill": 60,
+    "id": "rcp_blacksmithing_iron_longsword", "profession": "prof_blacksmithing", "skill": 60,
     "learn": { "trainer": "npc_…", "cost": 12 },  // or { "drop": "table_…" } / { "faction": "fac_deepforge_clans", "tier": "trusted" }
     "needs": { "mat_iron_bar": 6, "mat_leather_strip": 2 }, "bench": "bench_anvil",
     "makes": { "base": "longsword", "rarity": "uncommon" },
@@ -1195,7 +1197,7 @@ be used for **house models** only).
 | `js/rules/targeting.js` | The hard-target rules and `autoTarget` (§13.9) | ✓ | ✓ (prediction, Tab order) |
 | `js/rules/depth.js` | Dungeon level and multipliers from Depth; tier content (§13.10) | ✓ | ✓ (Finder card) |
 | `js/rules/mechanics/<class>.js` | The 30 class mechanics (page 06) | ✓ | ✓ |
-| `js/rules/threat.js` | Threat table (page 05); taunt | ✓ | — |
+| `js/rules/threat.js` | Threat table (page 05); the tank's **Provoke** | ✓ | — |
 | `js/rules/unlocks.js` | The feature ladder | ✓ | ✓ |
 | `js/rules/names.js` | Name rules (page 15 §19) | ✓ | ✓ (instant feedback) |
 | `js/sim/world.js` | Realm: regions, layers, weather, the route clock | ✓ | — |
@@ -1334,7 +1336,7 @@ A bot per class plays **levels 1–60** (quests, kills, spends points by a fixed
 each Normal dungeon with followers, runs Challenge mode and Depth 1–20 with 4 bot players). Reports, per class and overall:
 time to each level (target curve owned by page 07), deaths and what killed them, dungeon clear time
 solo-with-followers vs 5 bots (target ≤ 1.3×, page 15 §21.5), damage share by spell (flags any spell
-over 2× its class average — the "Consecrate did 500" tell), gold per hour, loot rarity mix, every boss's
+over 2× its class average — Farhold round 22's tell, where one holy ground spell hit for 500 against a basic attack's 7), gold per hour, loot rarity mix, every boss's
 wipe rate by mechanic, harvesting and crafting skill per hour, magic-find effect on drops (rarity mix with 0% vs capped `mf_rarity`). A **"perfect dodger"** bot and a **"sloppy"** bot (misses 20% of telegraphs) bound
 the difficulty from both sides.
 

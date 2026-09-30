@@ -303,6 +303,12 @@ Backward heal reads the Ledger (§2.3): Hand Back is a steady small heal with a 
 Rewindable health, Hour of Return replays recent damage as healing, Stillwater spreads damage out so the other
 two catch it, and Unwind is the once-per-30-s big save.
 
+**Role focus** (canon 00 §6): the chronomancer uses the shared **Role focus** switch in the spellbook (out of
+combat, saved per Loadout), **tied to its hourglass direction** (§4.1): **Hybrid** sets **Backward** — slots 1,
+3 and 5 become their healing versions — and queues it as **Healer**; **Primary** sets **Forward** and queues it
+as Support. The stance keys (`Shift+1`/`Shift+2`, §4.1) can still flip the direction mid-fight; the Dungeon
+Finder role follows the switch.
+
 **Rotation (Backward, 5-player dungeon).**
 1. Before the pull: **Stillwater** where the tank will stand. Borrowed Minutes on the tank (more parries and
    faster defensive cooldowns) or on the top damage dealer when the tank is safe.
@@ -344,23 +350,23 @@ and the soul **Soul of the Backward Hour** (§9). Healing affixes (page 08) appl
 ### `chronomancer_retrace` — Retrace (travel, no slot)
 
 Returns the party to **a spot one of them stood on in the last 10 minutes** (00 §6). [Page 20](../20-TRAVEL.md)
-owns the final numbers; the proposal here:
+§16.2 owns the numbers; this table repeats them:
 
 | Rule | Value |
 |---|---|
-| Learned | automatically at **level 12** (the level that opens waystones and Travel Methods, page 07); a short lesson from `npc_archivist_hourne` explains it once |
-| Cost / cooldown | no mana · **5 min** cooldown (proposed; page 20 owns) |
-| Cast | open the **Retrace map**, pick a point, then a **5 s channel** that breaks if you take damage, move or enter combat |
-| Who comes | every party member within **30 m** of the chronomancer gets a prompt *"Retrace with {name}? (Accept / Decline)"* for 10 s; those who accept arrive with you. Followers in the party come automatically. Class companions (tamed beasts, bound demons) follow their owners |
-| What you can pick | any point on the **recorded trail** of any current party member, from 10 s to **10 minutes** ago. The server records one trail point per member every **5 s** (120 points each; about 2 KB per party) |
-| Limits | not in combat; not from or into a **dungeon**, a story instance, a boss room or a world-boss arena while its boss is up; trail points recorded inside those places are never shown; not across the sea to or from **Spire Isle** unless the point is on the same landmass as you; the point must be on walkable ground (a point recorded while swimming or riding a Travel Method snaps to the nearest walkable ground within 30 m, or is greyed out) |
-| Discovery | arriving counts as **discovering** any waystone or dungeon entrance within **30 m** of the arrival point — the way a chronomancer brings friends to an entrance they walked past (00 §12.1 W9) |
+| Learned | automatically at **level 12** (with waystones and Travel Methods, page 07); a short lesson from `npc_archivist_hourne` explains it once |
+| Targeting | **Self** (and the party near you) |
+| Cost / cooldown | no mana, no reagent · **10 min** cooldown |
+| What it records | every **10 s**, the position of every party member (and the chronomancer) — up to **60 marks each** (the last 10 minutes). Marks inside dungeons and world-boss arenas are not recorded; marks are kept only while the party exists |
+| Cast | pick a mark on the timeline, then a **3 s** cast; moving or taking damage cancels it |
+| Who comes | the chronomancer and every party member within **30 m** who stays inside the **green ring** shown for the 3 s cast (stepping out = staying behind) |
+| Arrival | at the chosen mark (± 2 m) |
+| Limits | out of combat; open world and towns only (not inside a dungeon, not in a world-boss arena during its fight) |
+| Discovery | anything the recorded member had discovered **within 60 m** of that mark (a waystone, station, dungeon entrance) is discovered for everyone who arrives — the way a chronomancer brings friends to an entrance they walked past (00 §12.1 W9) |
 
-**The Retrace map** (`scr_retrace_map`, new — add to page 03): the region map, with each party member's last 10
-minutes drawn as a **dotted line in their party colour**, fading from solid (now) to faint (10 min ago). A
-**time scrubber** under the map runs 0–10:00; dragging it moves a pin along every trail at once, showing where
-each member stood at that moment. Clicking a trail point sets the destination; its label says who stood there
-and how long ago ("Marcus — 6:40 ago"). Points that break a limit are grey with the reason on hover.
+**The Retrace timeline** (`scr_retrace_timeline`, page 20 §19.1): a strip of 60 marks per party member, each
+with the place name and how long ago ("Marcus — Mossfen ford, 6 min ago"); hovering a mark shows it on the
+region map as a pin on that member's dotted trail, drawn in their party colour.
 **Looks like**: the party dissolves into violet sand that streams off along the trail line; they reform at the
 point with a gold ring. **Sound**: a long reversed chime.
 
@@ -503,7 +509,7 @@ played through a short reverse-reverb (sfx chain, [page 17](../17-ART-AUDIO.md))
   **dropped**: every one is another class's borrowed skill.
 - **Tech note for [page 16](../16-TECH.md)**: the 5 s recording is 50 samples of position/facing/health/mana
   (about 1 KB per chronomancer); the Ledger adds 80 health samples per group member (about 2 KB per group); the
-  Retrace trails are 120 points per member. The server must own all three, not the client, or Recall, the
+  Retrace trails are 60 marks per member (one every 10 s, page 20 §16.2). The server must own all three, not the client, or Recall, the
   rewinds and Retrace become cheats.
 
 ---
@@ -514,7 +520,7 @@ played through a short reverse-reverb (sfx chain, [page 17](../17-ART-AUDIO.md))
 
 - **Added**: Hybrid role **Healer** (§5) — the Ledger (§2.3), Turn the Glass with three Backward heals
   (`chronomancer_hand_back`, `chronomancer_stillwater`, `chronomancer_hour_of_return`, §4.1), Late-Struck status,
-  healer talents; utility spell **Retrace** (`chronomancer_retrace`, §6) with the Retrace map; two souls.
+  healer talents; utility spell **Retrace** (`chronomancer_retrace`, §6) with the Retrace timeline; two souls.
 - **Changed**: mana costs from % of max to flat numbers on the 1,000 pool; targeting + tags on every spell;
   class key Recall `R` → **`Q`**; Cast from the Past `Z` → hold **`G`**; calling quest ids
   `q_chronomancer_calling_N` → `q_calling_chronomancer_N` (00 §10); Chrono-lock uses page 11's shared 90 s lockout.
@@ -522,3 +528,6 @@ played through a short reverse-reverb (sfx chain, [page 17](../17-ART-AUDIO.md))
   raid drop sources (r03/r05 → world boss / d16 / Depth), Heroic/Mythic+ set copies (→ Challenge mode).
 - **Renamed**: talent "Stored Fury" → **Stored Force**; talent "Mercy Bell" (Echoing Hour 3b) folded into the
   Backward spell Hour of Return and replaced by **Long Replay**.
+- **Sweep (round 2)**: Retrace numbers set to page 20 §16.2 (10 min cooldown, 3 s cast, marks every 10 s, green
+  ring instead of an accept prompt, 60 m discovery; `scr_retrace_map` → `scr_retrace_timeline`); Role focus
+  wording in §5.

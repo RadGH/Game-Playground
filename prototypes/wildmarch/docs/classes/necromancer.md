@@ -14,7 +14,7 @@ Formulas, crowd control and tags: [page 05](../05-COMBAT.md). Boss vocabulary: [
 | **Mana** | page 06 §4.1: a pool of **1,000** + 2 per INT + gear. Costs are **flat** ("80 mana"). In-combat regen 1% of max a second |
 | **Corpse** | the body an enemy leaves when it dies (§2.1) |
 | **Controlled body** | an enemy the necromancer controls for a time through **Control Undead** — either a **raised** corpse or a **seized** living undead (§2.2). Temporary, like mind control. There is no other way to get one |
-| **Undead** | a monster with the page 10 tag **Undead** (the `undead` and `drowned` families, the Unburied warband, every skeleton, ghost and wight) |
+| **Undead** | a monster with the page 10 tag **Undead** (the `undead` family, the drowned **dead** of the `drowned` family — not its crocodiles, shellbacks, slimes, gulls or horrors —, the Unburied warband, every skeleton, ghost and wight; page 10 §3.1) |
 
 ---
 
@@ -309,7 +309,7 @@ it — the reverse of most healers — and is thinnest on a single boss with not
 | Damage | −20% damage dealt (the transfer is taken after this) |
 | Spells | three change (§4.3) |
 | Healing threat | page 05 §13.2 as normal |
-| Dungeon Finder | a necromancer with calling 1 may queue as **Healer** |
+| Role focus | tied to the canon **Role focus** switch (00 §6; spellbook, out of combat, saved per Loadout): setting it to **Hybrid (Healer)** turns Life Thread on when you leave combat and makes the Dungeon Finder queue you as **Healer** (from calling 1); **Primary (Damage)** turns it off. The `Shift+1` toggle still flips Life Thread mid-fight without changing your queued role |
 
 ### 5.2 Talents that turn spells toward healing
 

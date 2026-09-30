@@ -16,7 +16,8 @@ shares one affix, blue names), rares bring **minions** that share their first af
 monsters into real difficulty spikes that drop the matching special rarity more often. Dungeons place rarities
 in **rarity slots** on purpose; the open world rolls them. The Ember Legion is the **Kingsfire Legion**, the
 Ashtusk Horde the **Ashtusk Warhost**, and every monster with "ember" or "veil" in its name or id was renamed
-(§14 lists them).
+(§14 lists them). The consistency sweep added the **Demon** and **Undead** tags (§3.1), the
+**tameable** beasts the ranger reads (§3.2), and demons to bind in every band for the warlock (§3.3).
 
 ---
 
@@ -24,7 +25,7 @@ Ashtusk Horde the **Ashtusk Warhost**, and every monster with "ember" or "veil" 
 
 1. How to read a monster entry (units, bodies, roles)
 2. What Farhold already has (reuse) and what changes
-3. Enemy families
+3. Enemy families, monster tags, tameable beasts, demons by band
 4. Monster roles and the rank ladder
 5. The AI: states, senses, aggro, leash, packs, patrols, group scaling
 6. Region monster lists (11 regions + Highcourt)
@@ -77,7 +78,7 @@ Every monster names one of two bodies (reuse: Farhold `js/actors.js` `makeActor`
 | spider | spider, beetle |
 | bat | bat, owl, moth, phoenix |
 | snake | snake, worm, centipede |
-| biped | golem, titan, imp |
+| biped | golem, titan, imp, **raptor** (new: the biped-runner body shared with page 08's mount raptor; the ranger's tamed raptor uses it too) |
 | float | elemental, wisp, shard, wraith, horror, slime, mushroom, mimic |
 | roller | turret |
 
@@ -87,7 +88,7 @@ Every monster names one of two bodies (reuse: Farhold `js/actors.js` `makeActor`
   rule stands: **no creature below size 1.4** — a knee-high rat is not a fight (reuse: Farhold RPG.md §3).
 - Bodies marked **(+feature)** need one new feature flag in `creatures.js` (an hour of geometry, the
   "variation+" tag of Farhold `BESTIARY-IDEAS.md`). Bodies marked **(bespoke)** need a new type. This page
-  keeps both rare on purpose: **102 of the 108 region monsters are existing types or chibi bodies**; the six that are not are marked.
+  keeps both rare on purpose: of the **116** region monsters, all but the few marked ones are existing types or chibi bodies, plus the two raptors (§6.5, §6.7), which wait on the new `raptor` type.
 
 ### 1.3 Entry format
 
@@ -105,7 +106,7 @@ Each region has a **stat table** then an **abilities list**:
 
 | Farhold (reuse) | File | Wildmarch |
 |---|---|---|
-| 46 enemies, 6 bosses, 11 pets, 22 modifiers (`vicious` … `wizened`, each with `aura`, optional `scale` and `fx`), 8 families | `prototypes/farhold/data/enemies.json` | 108 region monsters + 42 warband/legion members + 6 warlords; Farhold's 46 are the body/stat source for ~30 of them (marked `reuse:` per row). Farhold's 8 `family` values become the **nature** field (below). |
+| 46 enemies, 6 bosses, 11 pets, 22 modifiers (`vicious` … `wizened`, each with `aura`, optional `scale` and `fx`), 8 families | `prototypes/farhold/data/enemies.json` | 116 region monsters + 42 warband/legion members + 6 warlords; Farhold's 46 are the body/stat source for ~30 of them (marked `reuse:` per row). Farhold's 8 `family` values become the **nature** field (below). |
 | ranks normal/champion/rare, chances 0.11 / 0.03, multipliers (champion hp 2.6 / dmg 1.35, rare hp 4.5 / dmg 1.6); a champion takes 1 modifier, a rare 2 + a Name Forge name | `data/balance.json ranks`, `enemies.json _ranksDoc` | Rebuilt as the **monster rarity system** (§7): a champion is now a whole **champion pack** sharing one affix (lower per-body multipliers, since there are 3–6 of them), a rare keeps Farhold's 4.5× and gains **minions**, and **greater rarities** sit on top. Chances are per band (§7.7). |
 | roles skirmisher/brute/archer/caster/leader | `enemies.json _doc`, `js/actors.js` | Six roles: **melee, brute, ranged, caster, healer, swarm** + two **traits** (support, ambusher). Farhold's `skirmisher` = melee, `archer` = ranged, `leader` = a rank inside a warband. |
 | packs `[min,max]`, pack wake within 14 m by `defId` | `js/actors.js` `update` | Pack wake by **pack id** (every member of the spawned pack), plus family social aggro (§5.5). |
@@ -152,16 +153,78 @@ The five race families (`goblin`, `orc`, `beastkin`, `giant`, `undead` for the U
 **enemy warbands** (00 §4). They appear inside regions as the *warband presence* line of each region list
 and are fully listed in §9.
 
-### 3.1 Family tags (new)
+### 3.1 Monster tags (new)
 
 A **tag** is an extra label on a monster row (`"tags": [...]`, §12) that a class or item reads. It sits beside
-`family` and `nature`; this page owns the list.
+`family` and `nature`; this page owns the list. Tags that name what a monster **is** use the page 16 data ids
+(`tag_demon`, `tag_undead`, …) and show in the bestiary journal and tooltips under their plain name.
 
-| Tag | Who carries it | Who reads it |
-|---|---|---|
-| `mindless` | every `construct`; slimes and oozes; every elemental body (`elemental`, `wisp`, `shard`, sand and glass golems); animated objects (`mimic`, `turret`, living weapons) | the Enchanter's Charm and every mind-control effect: **cannot be charmed** ("It has no mind to bend." — [classes/enchanter.md](classes/enchanter.md) §2.2) |
-| `demonic` | the whole `demon` family; rift-spawn of `riftmarch`; the Kingsfire Legion's fiends in `kingsfire`; imps anywhere; anything summoned by an enemy warlock-type caster | the Demon Hunter's Hunter's Oath (+20% damage; [classes/demon_hunter.md](classes/demon_hunter.md) §2.3) and any item that says "against demons" |
-| `command` | every warband **Leader**, **Standard-bearer** and **Warlord** (§9.1), and the Kingsfire Legion's Centurion and Ensign | cannot be charmed or dominated (a command unit answers only to its band); page 11 treats a Warlord as a boss anyway |
+| Tag (shown as) | Data id | Who carries it | Who reads it |
+|---|---|---|---|
+| **Demon** | `tag_demon` | the whole `demon` family (open world, Depth types and wardens, §7.9.2); the Kingsfire **Cinder Imp** (`m_kingsfire_cinder_imp`); the Riftmarch **Phase Hound** (`m_rift_phase_hound`) and **Rift Horror** (`m_rift_rift_horror`); anything an enemy warlock-type caster summons (the Bound Fiend, §3.3). **Not** every imp body: the Thorn Sprite (fae) and the Glass Caller (sand) are not demons | the Demon Hunter (Hunter's Oath, banishing; [classes/demon_hunter.md](classes/demon_hunter.md) §2.3); the Warlock's **Bind Demon** ([classes/warlock.md](classes/warlock.md) §2.3); any item that says "against demons". The full bindable roster by band is §3.3 |
+| **Undead** | `tag_undead` | every `undead`-family monster (incl. the Unburied warband, the Barrow Hound and the Depth types/wardens); and by row: `m_fen_peatwife`, `m_frost_rimebound_dead`, and the Drowned Coast's dead — `m_drowned_tide_thrall`, `m_drowned_salt_wraith`, `m_drowned_bellringer`, `m_drowned_choir_wailer`, `m_drowned_brine_knight`, `m_drowned_tidecaller`, the named `m_drowned_captain_vell` and `m_drowned_the_bell_below`. The Drowned family's **beasts and aberrations** (Reef Crocodile, Shellback, Kelp Slime, Wrackgull, Deep Horror) are **not** undead | the Necromancer's **Control Undead** ([classes/necromancer.md](classes/necromancer.md) §2.2: seize a living Undead, or raise a corpse that is **not** Undead); the Witch Hunter; items that say "against undead" |
+| **Beast** | `tag_beast` | every row whose `nature` is beast (the `beast` family and the beasts of `fen`, `sand`, `frost`, `drowned`) | items that say "against beasts" |
+| `mindless` | `mindless` | every `construct`; slimes and oozes; every elemental body (`elemental`, `wisp`, `shard`, sand and glass golems); animated objects (`mimic`, `turret`, living weapons) | the Enchanter's Charm and every mind-control effect: **cannot be charmed** ("It has no mind to bend." — [classes/enchanter.md](classes/enchanter.md) §2.2) |
+| `command` | `command` | every warband **Leader**, **Standard-bearer** and **Warlord** (§9.1), and the Kingsfire Legion's Centurion and Ensign | cannot be charmed, dominated, seized or bound (a command unit answers only to its band); page 11 treats a Warlord as a boss anyway |
+
+The round-1 tag `demonic` is gone: every reader uses **Demon** (`tag_demon`).
+
+### 3.2 Tameable beasts (the ranger's Tame Beast)
+
+A monster row may carry **`tameable: true`** and a **`tameFamily`** id. Only those rows can be tamed by the
+ranger's **Tame Beast** ([classes/ranger.md](classes/ranger.md) §2.3 owns the rules: level, rank, calling 40
+champions, tricks and leans). The ranger file's 13 families are the list; the family is a field on the row,
+**not** part of the monster id (ids stay `m_<family>_<snake>`, §3 — so a wolf is `m_beast_moor_hound`, not
+`m_wolf_*`). Never tameable: anything tagged Demon or Undead, humanoids and warbands, dragonkin, elementals,
+constructs, `mindless`, the Riftborn and every `rift`/`tear` monster, and any Rare, Named, Boss, elite or
+greater-rarity carrier whatever its row says.
+
+| `tameFamily` | Family (ranger) | Lean | Tameable rows on this page (levels) |
+|---|---|---|---|
+| `tf_wolf` | Wolf | Hunter | `m_beast_moor_hound` (1–5), `m_beast_grey_wolf` (10–16, new), `m_beast_cinder_hound` (30–35), `m_frost_white_wolf` (34–40, new) |
+| `tf_cat` | Great cat | Hunter | `m_beast_steppe_saber` (29–34), `m_frost_frost_stalker` (34–38) |
+| `tf_raptor` | Raptor | Hunter | `m_sand_scrub_raptor` (16–22, new), `m_beast_ash_raptor` (28–34, new) |
+| `tf_hyena` | Hyena | Hunter | `m_beast_ridge_hyena` (10–14), `m_sand_dune_fennec` (16–20), `m_beast_ash_hyena` (28–32) |
+| `tf_boar` | Boar | Guardian | `m_beast_thicket_boar` (2–6), `m_beast_cinderback_boar` (31–36) |
+| `tf_bear` | Bear | Guardian | `m_beast_crag_bear` (12–17), `m_frost_glacier_maw` (35–40) |
+| `tf_crocodile` | Crocodile | Guardian | `m_fen_silt_lurker` (8–12), `m_frost_drift_lurker` (36–42), `m_drowned_reef_crocodile` (40–46) |
+| `tf_beetle` | Beetle | Guardian | `m_beast_ironback_beetle` (10–15), `m_sand_sunscar_stinger` (17–22), `m_drowned_shellback` (40–45) |
+| `tf_elk` | Elk | Guardian | `m_beast_ashhorn_ox` (28–34), `m_frost_rime_elk` (34–40, new) |
+| `tf_hawk` | Hawk (bird of prey) | Tracker | `m_beast_orchard_rook` (2–5), `m_beast_gallows_owl` (10–14), `m_sand_carrion_glider` (16–22), `m_beast_grove_owl` (22–26), `m_frost_ridge_griffin` (36–41) |
+| `tf_spider` | Spider | Tracker | `m_fen_bog_tick` (6–10), `m_fae_shroud_spider` (22–27), `m_frost_glacier_tick` (34–39) |
+| `tf_frog` | Giant frog | Tracker | `m_beast_river_croaker` (1–5) |
+| `tf_serpent` | Serpent | Tracker | `m_fen_reed_serpent` (6–11) |
+
+Rows marked *new* were added in the round-2 sweep so every family has a body in the wild (the new rows are in
+§6.3, §6.5, §6.7 and §6.8). Where the ranger file lists a region this page does not yet stock for a family (for
+example elk in Whisperwood, beetles in the Riftmarch, frogs and serpents above level 12), this page wins until
+a region list adds one; a pack of a tameable kind from Depth (§7.9) is never tameable (Depth types are
+tear-cracked).
+
+### 3.3 Demons in every band (the warlock's Bind Demon)
+
+Demons live mainly in the Kingsfire and the Riftmarch, but Threadcutter cells (page 01 `fac_threadcutters`)
+call lesser ones across the continent, so a warlock finds something to bind in every band. Every row here is
+tagged **Demon**. Bind rules and the bound demon's power are on [classes/warlock.md](classes/warlock.md) §2.3.
+
+| id | Name | Where | Lv | Body | Role | Bestiary row |
+|---|---|---|---|---|---|---|
+| `m_demon_bog_imp` | Bog Imp | Mossfen (the stilt villages' thief; warlock calling 1) | 6–12 | creature: imp ×1.4, peat-brown #5a4a2a, eyes #ffb040 | caster | §6.2 |
+| `m_demon_bound_fiend` | Bound Fiend | beside any Threadcutter caster, at the cell's level | 10–50 | creature: titan ×1.6, horns (+feature), body #4a2030, chain cuffs | melee | below |
+| `m_demon_glass_imp` | Glass Imp | Sunscar (called by Glass Callers) | 16–24 | creature: imp ×1.4, obsidian #1a1a22, glass shards on the back | caster | §6.5 |
+| `m_demon_ash_hound` | Ash Hound | Cinder Steppe | 28–36 | creature: hound ×2.0, ash-grey #2a2420, small horns (+feature) | melee, fast | §6.7 |
+| `m_rift_phase_hound` | Phase Hound | Riftmarch | 46–51 | (§6.10) | melee | §6.10 |
+| `m_rift_rift_horror` | Rift Horror | Riftmarch | 46–52 | (§6.10) | brute | §6.10 |
+| `m_kingsfire_cinder_imp` | Cinder Imp | Kingsfire | 52–56 | (§6.11) | swarm | §6.11 |
+| `m_demon_brimstone_hound` | Brimstone Hound | Kingsfire | 52–57 | (§6.11) | melee | §6.11 |
+| `m_demon_cinder_wraith` | Cinder Wraith | Kingsfire | 55–60 | (§6.11) | caster | §6.11 |
+| `m_demon_ashmaw` | Ashmaw Fiend | Kingsfire | 56–60 | (§6.11) | brute | §6.11 |
+| `m_demon_lava_leech` | Lava Leech | Kingsfire lava | 52–58 | (§6.11) | melee | §6.11 |
+
+**Bound Fiend** (HP ×1.0, hit 6%, temperament hostile; loot `it_demon_horn`) — *Gore*: 2.0 s head-down,
+red line 5 m × 2 m, 12% RH + `bleed` 2% RH/s 6 s. It stands beside the caster that called it and fights until
+the caster dies, then **flees for 6 s** before fading (so a warlock who wants it must beat it while its
+caller still lives, or quickly after). It is not a region monster and is not counted in §6.13.
 
 ---
 
@@ -381,7 +444,7 @@ Farhold's ring model; `js/mesh-merge.js` one mesh per material for creatures).
 
 ## 6. Region monster lists
 
-Legend: ⚑ = warband ground · (reuse: `farhold id`) = body and base stats from Farhold's
+Legend: ⚑ = warband ground · tameable rows are listed in §3.2 and Demon/Undead tags in §3.1 · (reuse: `farhold id`) = body and base stats from Farhold's
 `enemies.json` · **Temp** = temperament (h hostile, t territorial, w wary) · Loot = `bases` (item bases
 reused from Farhold) + reagent/trophy. Every region also rolls its normal regional loot table
 ([page 08](08-ITEMS.md)).
@@ -447,6 +510,7 @@ The first region with void zones (bog pools) and the first interruptible casters
 | `m_fen_rot_kite` | Rot Kite | 7–12 | creature: moth ×1.8, body #8a8a50 | ranged, flying | 0.8 | 5% | h | `it_spore_sac` |
 | `m_fen_sump_crawler` | Sump Crawler | 9–12 | creature: centipede ×2.4, variant burrow_centipede, wet sheen | melee | 1.2 | 6% | h | `it_dune_chitin` |
 | `m_fen_bog_lantern` | Bog Lantern | 8–12 | creature: wisp ×2.0, body #ff9a40 | caster, caller | 0.7 | 7% fire | h | `it_bog_resin` |
+| `m_demon_bog_imp` | Bog Imp | 6–12 | creature: imp ×1.4, peat-brown #5a4a2a, eyes #ffb040 | caster, thief | 0.6 | 6% fire | w | `it_brimstone`, `it_bog_resin` |
 
 ⚑ Warband presence: **Sootwick Gang** on the stilt-village causeways (levels 5–12).
 
@@ -458,7 +522,7 @@ The first region with void zones (bog pools) and the first interruptible casters
 - **Silt Lurker** — hides under water with only its back ridge showing. *Death Roll*: 2.0 s jaw-open
   (red **cone** 4 m, 60°); 18% RH + pulled under (stun 1.5 s, not in deep water — it never drowns you).
   Territorial: tail slaps the water 2.0 s as a warning.
-- **Marsh Wisp** — *Marsh Bolt* 7% RH, 1.5 s cast, **interruptible** (gold border). *Will-o-Blink*: teleports
+- **Marsh Wisp** — *Marsh Bolt* 7% RH, 1.5 s cast, **interruptible** (gold border). *Will-o-Hop*: teleports
   8 m when a player closes to melee, 10 s cooldown.
 - **Mirecap** — *Spore Burst* on death: a **void zone** 4 m, poison, **3% RH every 0.5 s**, lasts 8 s;
   warm-up 1.0 s (rim only). Kill it at range or step out. *Slam*: red circle 3 m, 2.0 s, 10% RH.
@@ -471,6 +535,9 @@ The first region with void zones (bog pools) and the first interruptible casters
   2 m wide × 14 m, poison 2% RH per 0.5 s, 10 s. Warm-up 1.0 s. 12 s cooldown. (reuse: `BESTIARY-IDEAS.md`.)
 - **Sump Crawler** — +40% speed and +20% damage in water; −40% speed on dry ground (fight it on the bank).
 - **Bog Lantern** — *Call the Fen*: caller (2.0 s interruptible, 35 m). *Swamp Fire*: 7% RH fire bolt.
+- **Bog Imp** (tag Demon, §3.3) — a thief from the stilt villages: wary, runs from a player until cornered or hit.
+  *Peat Spark*: 6% RH fire bolt, 1.5 s, interruptible. *Snuff*: a 1.0 s hiss, then cuts the cast of the nearest
+  player casting within 25 m (20 s cooldown). Carries 1–3 stolen village goods (quest items, page 14).
 
 ### 6.3 Greyridge Highlands (10–18) — hills, dwarf mines, quarries
 
@@ -484,10 +551,11 @@ Constructs arrive: armour-facing, frontal shields, first **tank-busters** on eli
 | `m_beast_ironback_beetle` | Ironback Beetle | 10–15 | creature: beetle ×2.2 (reuse: `ironback_beetle`) | brute | 2.0 | 9% | h | `it_dune_chitin`, bases heavy_boots |
 | `m_beast_ridge_hyena` | Ridge Hyena | 10–14 | creature: hyena ×1.9 (reuse: `crag_hyena`) | melee, pack 3–5 | 0.9 | 5% | h | `it_rough_hide` |
 | `m_beast_crag_bear` | Crag Bear | 12–17 | creature: bear ×2.4 | brute | 2.4 | 11% | t | `it_rough_hide`, bases medium_chest |
-| `m_folk_blackdelve_miner` | Blackdelve Miner | 11–16 | chibi: dwarf · runesmith (smith apron, held pick) | melee | 1.1 | 6% | h | `it_stolen_coin`, bases hammer, heavy_gauntlets |
-| `m_folk_blackdelve_powderwife` | Blackdelve Powderwife | 13–18 | chibi: dwarf · tinker (goggles, bandolier) | caster | 0.8 | 8% | h | `it_brass_cog`, bases crossbow, ring |
+| `m_folk_blackshaft_miner` | Blackshaft Miner | 11–16 | chibi: dwarf · runesmith (smith apron, held pick) | melee | 1.1 | 6% | h | `it_stolen_coin`, bases hammer, heavy_gauntlets |
+| `m_folk_blackshaft_powderwife` | Blackshaft Powderwife | 13–18 | chibi: dwarf · tinker (goggles, bandolier) | caster | 0.8 | 8% | h | `it_brass_cog`, bases crossbow, ring |
 | `m_undead_barrow_hound` | Barrow Hound | 13–18 | creature: dire_wolf ×2.0 (reuse: `barrow_hound`) | melee, pack 2–3 | 1.0 | 6% | h | `it_grave_dust`, `it_bone_shard` |
 | `m_beast_gallows_owl` | Gallows Owl | 10–14 | creature: owl ×1.8 (reuse: `gallows_owl`) | melee, flying | 0.9 | 5% | h | `it_rook_feather` |
+| `m_beast_grey_wolf` | Grey Wolf | 10–16 | creature: wolf ×2.0, body #6a6a6a | melee, pack 3–5 | 0.9 | 5% | h | `it_rough_hide`, `it_beast_fang` |
 
 ⚑ Warband presence: **Sootwick Gang** in the mines (to 16); **Unburied Legion** at the barrows (12–18, §9.3).
 
@@ -504,13 +572,15 @@ Constructs arrive: armour-facing, frontal shields, first **tank-busters** on eli
 - **Ridge Hyena** — *Laugh*: when one hyena drops below 30%, the pack gains +20% attack speed 6 s.
 - **Crag Bear** — *Rending Paws*: two claw strikes 0.5 s apart after a 2.0 s rear-up, red cone 4 m 90°, 12% RH each.
   Territorial roar 2.0 s.
-- **Blackdelve Miner** — *Blasting Cap*: throws a charge, red circle 4 m at a player, 2.0 s fill, 12% RH.
-- **Blackdelve Powderwife** — *Powder Keg*: rolls a keg that stops 6–10 m out: red circle 6 m, 3.0 s,
+- **Blackshaft Miner** — *Blasting Cap*: throws a charge, red circle 4 m at a player, 2.0 s fill, 12% RH.
+- **Blackshaft Powderwife** — *Powder Keg*: rolls a keg that stops 6–10 m out: red circle 6 m, 3.0 s,
   **30% RH** + knockback 6 m. A player hitting the keg first detonates it early (it hurts monsters too).
   *Fuse Line*: interruptible 2.0 s cast that lights all kegs at once.
 - **Barrow Hound** — *Howl of the Barrow*: caller (undead family). *Grave Bite*: 6% RH + `curse`
   (−15% healing received 6 s, dispellable curse).
 - **Gallows Owl** — *Dive*: climbs 3 s then dives at a yellow targeted player: 2.0 s, circle 2 m, 10% RH.
+- **Grey Wolf** — *Pack Howl*: when one is hit, the pack's next bites deal +20% for 6 s (a howl the whole valley
+  hears). Packs flank; the last wolf flees at 25% health.
 
 ### 6.4 Highcourt (capital city, any level)
 
@@ -535,6 +605,8 @@ Burrowers, glass that reflects, and heat. The first region where monsters dispel
 | `m_folk_dust_reaver` | Dust Reaver | 17–23 | chibi: human · rogue (headwrap, scimitar sword) | melee, pack 2–3 | 1.0 | 6% | h | `it_stolen_coin`, bases rapier, sword |
 | `m_sand_mirage_walker` | Mirage Walker | 19–24 | chibi: human · shimmering traveller (travel_cloak, heat-haze shader) | caster, ambusher | 0.9 | 8% | h | `it_sunglass` |
 | `m_sand_glass_caller` | Glass Caller | 20–24 | creature: imp ×1.6, obsidian #1a1a22, eyes #ff6030 | support, caller | 0.7 | 4% | h | `it_sunglass` |
+| `m_sand_scrub_raptor` | Scrub Raptor | 16–22 | creature: raptor ×2.0 (new biped-runner body, shared with the mount raptor, page 08), body #b08a5a | melee, pack 2–4 | 0.9 | 6% | h | `it_rough_hide`, `it_beast_fang` |
+| `m_demon_glass_imp` | Glass Imp | 16–24 | creature: imp ×1.4, obsidian #1a1a22, glass shards on the back | caster | 0.6 | 6% fire | h | `it_sunglass`, `it_brimstone` |
 
 ⚑ Warband presence: **Unburied Legion** at the tomb edges (19–24); **Thornmane Packs** on the mesas (20+).
 
@@ -557,7 +629,12 @@ Burrowers, glass that reflects, and heat. The first region where monsters dispel
   turns hostile with *Heat Shimmer*: **dispels 1 beneficial effect** from each player within 8 m (2.0 s,
   visible haze ring, no damage). *Scorch*: 8% RH fire bolt, 1.5 s, interruptible.
 - **Glass Caller** — *Scream*: 2.0 s interruptible; calls the nearest pack within 35 m. No damage worth
-  naming; kill or interrupt first (reuse: `BESTIARY-IDEAS.md` Glass Caller).
+  naming; kill or interrupt first (reuse: `BESTIARY-IDEAS.md` Glass Caller). Its Scream also brings every
+  Glass Imp within 35 m.
+- **Scrub Raptor** — *Rend*: a 3-hit flurry on one player, 0.4 s apart, 4% RH each + `bleed` 1% RH/s 6 s;
+  packs split to hit the two players furthest apart.
+- **Glass Imp** (tag Demon, §3.3) — *Glare*: yellow targeted 2.0 s, `blind` 3 s (look away from it — turning
+  your back to it during the wind-up avoids it). *Glass Spark*: 6% RH fire bolt, 1.5 s, interruptible.
 
 ### 6.6 Whisperwood (22–30) — old elven forest, moonwells
 
@@ -616,9 +693,11 @@ The Ashtusk Warhost's home. Beasts here are big, ride in with orcs, and burn the
 | `m_beast_ashhorn_ox` | Ashhorn Ox | 28–34 | creature: elk ×2.4, body #3a3028, no antlers → horns (+feature) | brute | 2.4 | 11% | w | `it_rough_hide` |
 | `m_beast_cinder_moth` | Cinder Moth | 28–33 | creature: moth ×2.0, body #6a2a10, glow | ranged, flying | 0.8 | 6% fire | h | `it_cinder_core` |
 | `m_undead_burnt_wanderer` | Burnt Wanderer | 30–35 | chibi: undead · rags, charred #2a2020 | melee | 1.1 | 6% + burn | h | `it_grave_dust` |
+| `m_beast_ash_raptor` | Ash Raptor | 28–34 | creature: raptor ×2.2, body #3a3a3a, crest #c05020 | melee, pack 2–4 | 1.0 | 7% | h | `it_rough_hide`, `it_beast_fang` |
+| `m_demon_ash_hound` | Ash Hound | 28–36 | creature: hound ×2.0, ash-grey #2a2420, small horns (+feature) | melee, fast, pack 2–3 | 0.9 | 6% | h | `it_demon_horn`, `it_brimstone` |
 
-⚑ Warband presence: **Ashtusk Warhost** holds most of the region (28–40, §9.5). 9 region monsters + 7 Ashtusk
-members = 16 on the list.
+⚑ Warband presence: **Ashtusk Warhost** holds most of the region (28–40, §9.5). 11 region monsters + 7 Ashtusk
+members = 18 on the list.
 
 **Abilities**
 
@@ -635,6 +714,9 @@ members = 16 on the list.
   (red line 20 m × 6 m, 2.0 s), 15% RH each hit, then flees. Orcs herd them; killing one angers nearby orcs.
 - **Cinder Moth** — *Spark Dust*: 8 m line of falling sparks (void zone, 2% RH per 0.5 s, 6 s).
 - **Burnt Wanderer** — *Flare*: on death, red circle 3 m, 1.5 s fill (open world gets 2.0 s), 10% RH fire.
+- **Ash Raptor** — *Rend* (as the Scrub Raptor, 5% RH per hit). Follows Ashhorn herds; flees into tall grass at 25% health.
+- **Ash Hound** (tag Demon, §3.3) — *Pounce*: leaps up to 15 m at a player, red circle 2 m, 2.0 s, 10% RH +
+  `dazed` 2 s. Comes out of ash vents in twos and threes; the vents close when the pack dies.
 
 ### 6.8 Frostmantle (34–42) — tundra, glaciers, peaks
 
@@ -651,6 +733,8 @@ blizzards. Monsters here slow, freeze and hide in snow.
 | `m_frost_ridge_griffin` | Ridge Griffin | 36–41 | creature: griffin ×2.4 (reuse: `ridge_griffin`) | melee, flying | 1.3 | 7% | t | `it_rook_feather`, bases medium_helm |
 | `m_frost_rime_elemental` | Rime Elemental | 37–42 | creature: elemental ×2.2, body #9ad8ff | caster | 0.9 | 8% ice | h | `it_rime_crystal`, bases orb, wand |
 | `m_frost_rimebound_dead` | Rimebound Dead | 38–42 | chibi: undead · knight (frosted plate #b8d0e0) | melee | 1.3 | 7% | h | `it_grave_dust`, bases plate_helm |
+| `m_frost_white_wolf` | White Wolf | 34–40 | creature: dire_wolf ×2.2, white #e8ecf0 | melee, pack 3–5 | 1.0 | 7% | h | `it_frost_pelt`, `it_beast_fang` |
+| `m_frost_rime_elk` | Rime Elk | 34–40 | creature: elk ×2.4, white-grey, frosted antlers | brute, pack 1–3 | 2.2 | 11% | w | `it_frost_pelt`, bases light_chest |
 | `m_dragon_rime_wyrm` (elite) | Rime Wyrm | 40–42 | creature: dragon ×3.0, white/blue (reuse: `rime_wyrm`) | brute, **elite**, placed at 3 peaks | 4.0 | 14% ice | t | `it_dragon_scale`, bases sword2h |
 
 ⚑ Warband presence: **Stonehide Clans** hold the high passes (34–48, §9.6); **Ashtusk** war parties hold the southern
@@ -672,6 +756,10 @@ passes (to 40).
 - **Rime Elemental** — *Frost Orb*: slow projectile (6 m/s) at a player, on arrival a red circle 3 m,
   1.5 s, 12% RH + `freeze` 1.5 s. *Rime Nova*: 2.5 s interruptible, red circle 8 m, 15% RH + slow.
 - **Rimebound Dead** — *Frozen Grip*: 2.0 s, red cone 3 m, root 2 s + 8% RH.
+- **White Wolf** — *Hamstring*: a bite from behind slows 40% for 4 s. Hunts in the fog; the pack circles
+  once (2.0 s, paw prints in the snow) before it closes in.
+- **Rime Elk** — wary; *Antler Rush*: 2.0 s head-down, red line 12 m × 3 m, 16% RH + knockback 5 m. The
+  herd bolts together when one is struck.
 - **Rime Wyrm** (elite) — *Frost Breath* red cone 12 m 60°, 2.5 s, 30% RH + slow; *Wing Gust* knockback
   cone; *Ice Shards* 4 red circles 3 m at random players, 2.0 s, 12% RH. Uses the page 11 elite mechanic
   budget (2 mechanics). Respawn 12 min.
@@ -718,7 +806,7 @@ pools, currents and a rising tide (page 11 `mech_env_rising_tide`).
 
 ### 6.10 The Riftmarch (46–54) — magic-torn land, floating stone
 
-Space itself is unreliable: rifts open (void zones that teleport), stone floats, monsters blink.
+Space itself is unreliable: rifts open (void zones that teleport), stone floats, monsters flicker from place to place.
 
 | id | Name | Lv | Body | Role | HP× | Hit | Temp | Loot |
 |---|---|---|---|---|---|---|---|---|
@@ -737,7 +825,7 @@ Space itself is unreliable: rifts open (void zones that teleport), stone floats,
 
 **Abilities**
 
-- **Rift Horror** — *Rift Tear*: 2.5 s, red circle 6 m on itself, 18% RH; leaves a **void zone** rift 3 m,
+- **Rift Horror** (tag Demon, §3.3) — *Rift Tear*: 2.5 s, red circle 6 m on itself, 18% RH; leaves a **void zone** rift 3 m,
   3% RH per 0.5 s, 12 s.
 - **Abyssal Prism** — *Prism Beam*: a 20 m **line** at a yellow-targeted player, 2.0 s then channels 3 s
   (void zone line: 4% RH per 0.5 s); turns 20°/s toward the target — keep moving sideways.
@@ -751,7 +839,7 @@ Space itself is unreliable: rifts open (void zones that teleport), stone floats,
   Burst it or pace it. (reuse: `BESTIARY-IDEAS.md` Refraction.)
 - **Waste Wyrm** — like Dune Breacher at 1.2 × damage; *Swallow*: 3.0 s red circle 4 m — a player caught is
   swallowed 3 s (takes 5% RH per 0.5 s, then spat out 8 m). Dealing 15% of its health frees them early.
-- **Phase Hound** — *Blink Bite*: teleports behind its target (1.0 s purple flicker on the spot it will
+- **Phase Hound** (tag Demon, §3.3) — *Phase Bite*: teleports behind its target (1.0 s purple flicker on the spot it will
   appear), 8% RH. 8 s cooldown.
 - **Storm Pyre** — *Chain Spark*: 7% RH lightning jumping to 3 players within 8 m of each other — spread.
 - **Unmade Golem** — *Scatter*: its pieces fly apart (3 red circles 3 m around it, 2.0 s) and reassemble 4 s later.
@@ -780,7 +868,7 @@ The Kingsfire Legion (§9.7) holds most of it. Demons come through fire gates. L
 
 **Abilities**
 
-- **Cinder Imp** — *Pop*: on death, red circle 2 m, 1.0 s fill, 4% RH fire. Page 11 §4.2: a hit of
+- **Cinder Imp** (tag Demon) — *Pop*: on death, red circle 2 m, 1.0 s fill, 4% RH fire. Page 11 §4.2: a hit of
   ≤ 5% RH is exempt from the warning minimum and may warn in 1.0 s.
 - **Magma Golem** — *Eruption*: 3.0 s (it hunches, lava pours), red circle 8 m, **40% RH**; leaves 3 void
   zones 3 m of lava for 15 s. *Molten Fist*: 14% RH + burn.
@@ -843,20 +931,48 @@ Every player-facing name here is new.)
 | Region | Region monsters | + warband/legion members present | Named rares (§8) |
 |---|---|---|---|
 | Hearthvale | 10 | Sootwick 7 | 3 |
-| Mossfen | 10 | Sootwick 7 | 3 |
-| Greyridge | 10 | Sootwick 7, Unburied 7 | 3 |
-| Sunscar | 11 | Unburied 7, Thornmane 7 | 3 |
+| Mossfen | 11 | Sootwick 7 | 3 |
+| Greyridge | 11 | Sootwick 7, Unburied 7 | 3 |
+| Sunscar | 13 | Unburied 7, Thornmane 7 | 3 |
 | Whisperwood | 10 | Thornmane 7 | 3 |
-| Cinder Steppe | 9 | Ashtusk 7 | 3 |
-| Frostmantle | 9 | Stonehide 7, Ashtusk 7 | 3 |
+| Cinder Steppe | 11 | Ashtusk 7 | 3 |
+| Frostmantle | 11 | Stonehide 7, Ashtusk 7 | 3 |
 | Drowned Coast | 10 | Stonehide 7 | 3 |
 | Riftmarch | 10 | Stonehide 7, Kingsfire Legion 7 (forward camps) | 3 |
 | Kingsfire | 9 | Kingsfire Legion 7 | 3 |
 | Spire Isle | 10 | — | 3 |
-| **Total** | **108** | 42 warband/legion ids | **33** |
+| **Total** | **116** (108 + 8 added in the round-2 sweep: 4 tameable beasts, 4 bindable demons) | 42 warband/legion ids | **33** |
 
-Every region has at least 8 own monsters; the two regions at 9 are held by a warband/legion, so their
+The Bound Fiend (§3.3) travels with Threadcutter casters and is not counted here.
+
+Every region has at least 8 own monsters; the one region at 9 (Kingsfire) is held by the Legion, so its
 open-world list is 16.
+
+### 6.14 World-boss minions (page 13) and dungeon monsters (page 12)
+
+World bosses call these; their numbers, waves and caps are on [page 13](13-WORLD-BOSSES.md) §6–§7. This page
+owns the ids and families. They do not spawn on their own and are not counted in §6.13.
+
+| id | Name | Family | Called by | Body |
+|---|---|---|---|---|
+| `m_construct_mine_sentry` | Mine Sentry | construct | Grief-in-Iron (Greyridge) | creature golem ×1.2 |
+| `m_folk_deepforge_deserter` | Deepforge Deserter | folk | Grief-in-Iron | chibi2 dwarf · fighter |
+| `m_sand_skitter` | Sand Skitter | sand (beast) | the Glass Wyrm (Sunscar) | creature beetle ×1.4 |
+| `m_sand_glass_grub` | Glass Grub | sand (beast) | the Glass Wyrm | creature worm ×1.4 |
+| `m_beast_brood_spiderling` | Brood Spiderling | beast | the Hungering Brood (Whisperwood) | creature spider ×1.4 |
+| `m_beast_carrion_vulture` | Carrion Vulture | beast | the Carrion Crown (Cinder Steppe) | creature owl ×1.4, bald, grey |
+| `m_orc_ashtusk_cutthroat` | Ashtusk Cutthroat | orc (§9.5) | the Carrion Crown | (§9.5) |
+| `m_giant_stonehide_smasher`, `m_giant_stonehide_hurler` | (§9.6) | giant | the Standing Ruin (Frostmantle) | (§9.6) |
+| `m_drowned_tide_thrall`, `m_drowned_choir_wailer` | (§6.9) | drowned (Undead) | the Sallow King (Drowned Coast) | (§6.9) |
+| `m_rift_rift_shard` | Rift Shard | rift | the Unmoored (Riftmarch); also d12 | creature shard ×1.4, violet |
+| `m_demon_rift_imp` | Rift Imp | demon (**Demon**) | the Unmoored | creature imp ×1.4, violet-black |
+| `m_kingsfire_cinder_elemental` | Cinder Elemental | kingsfire | Slagborn (Kingsfire); also d15 | creature elemental ×2.4, fire |
+| `m_construct_scarecrow` | Scarecrow | construct | the Harvest Effigy (seasonal) | creature golem ×1.4, straw |
+| `m_fen_sporeling` | Sporeling | fen | the Bloomtyrant (seasonal) | creature mushroom ×1.4 |
+
+Every body here is at least size 1.4 (§1.2; page 13 matches). **Dungeon monsters** (page 12 §21.3, 148 ids) now all use this page's
+families; the demons among them (`m_demon_slag_imp` d04, `m_demon_slagback_hound`, `m_demon_gate_brute` d13,
+`m_demon_cinder_cantor` d14) carry the Demon tag like any other `demon` row.
 
 ---
 
@@ -880,7 +996,7 @@ nameplate and pays better loot. There are two layers:
 |---|---|---|---|---|---|
 | Normal | any spawn | white | — | — | Moor Hound |
 | **Champion pack** | every member of one group (3–6) | **blue** `#5aa0ff` | the shared affix, with its icon | the affix's body aura on every member (§7.4 "Tell") | Moor Hound ×4, all **Toxic** |
-| **Rare** | one monster | **yellow** `#ffd84a`, a Name Forge name + epithet | its 2–3 affixes, with icons | each affix's aura, blended; body ×1.3 | *Grisk the Tallow-Hearted* — Vicious, Blinkstep |
+| **Rare** | one monster | **yellow** `#ffd84a`, a Name Forge name + epithet | its 2–3 affixes, with icons | each affix's aura, blended; body ×1.3 | *Grisk the Tallow-Hearted* — Vicious, Flickerstep |
 | **Minion** | a rare's escort (2–4) | white, with a small yellow pip | the rare's first affix, marked "½" | the first affix's aura at half opacity | Moor Hound (minion of Grisk) |
 | **Named rare** | hand-written (§8) | yellow with a crown pip | its fixed affixes | as rare | Old Gristlejaw |
 | **Greater rarity** | one monster (or rarely a whole group) of any rank above | the greater name(s) **before** the name, in **orange** `#ff8a3d`, each with its badge icon | (unchanged) | scale, particles and aura from §7.5 | **Giant Flaming** Thicket Boar · **Frozen** *Grisk the Tallow-Hearted* |
@@ -980,10 +1096,10 @@ Each is a small [page 11](11-BOSS-MECHANICS.md) mechanic on a body; the data nam
 | id | Name | Element | Tell | Effect (numbers, shape, telegraph) | Counterplay | Not with / not on |
 |---|---|---|---|---|---|---|
 | `mod_scorchtrail` | Scorchtrail *(was Emberwake)* | fire | orange flame flicker on the feet, flame-ring icon | leaves a **void zone** trail 2 m wide, 5 s, 2% RH per 0.5 s (`mech_trail_fire`). On death: **red circle** 5 m, 2.0 s, 25% RH | do not chase through the trail; step out when it dies | swarm; `mod_hoarfast` |
-| `mod_undertow` | Undertow | — | blue-grey spiral on the body, spiral icon | every 12 s: 1.5 s swirl + whoosh, **white tethers** to every player within 20 m, then pulls them to 3 m over 0.4 s; its next basic attack follows 0.5 s later | knockback immunity / root breakers; ranged move past 20 m | flying; `mod_blinkstep` |
+| `mod_undertow` | Undertow | — | blue-grey spiral on the body, spiral icon | every 12 s: 1.5 s swirl + whoosh, **white tethers** to every player within 20 m, then pulls them to 3 m over 0.4 s; its next basic attack follows 0.5 s later | knockback immunity / root breakers; ranged move past 20 m | flying; `mod_flickerstep` |
 | `mod_spellwoven` | Spellwoven | — | violet rune halo, rune-ring icon | a rune at its feet casts a **void beam** 12 m × 1.5 m rotating 40°/s, 4% RH per 0.5 s; shown 1.5 s as an outline first (`mech_rotating_beam`) | walk with the rotation | swarm; below level 10 |
 | `mod_hoarfast` | Hoarfast | ice | white frost shell, snowflake-ring icon | every 10 s: **red circles** 3 m under 3 random players, 2.0 s, 12% RH + frozen (root) 1.5 s. On death: a ring of 6 circles at 6 m (outside is safe) | leave circles; keep moving | `mod_scorchtrail` |
-| `mod_blinkstep` | Blinkstep | — | purple flicker, blink icon | every 8 s: teleports next to the player furthest from it (≤ 30 m); the arrival spot shows a **red circle** 3 m for 2.0 s, 10% RH | ranged stay grouped; melee stay on it | `mod_undertow`, `mod_fleet` |
+| `mod_flickerstep` | Flickerstep | — | purple flicker, flicker-step icon | every 8 s: teleports next to the player furthest from it (≤ 30 m); the arrival spot shows a **red circle** 3 m for 2.0 s, 10% RH | ranged stay grouped; melee stay on it | `mod_undertow`, `mod_fleet` |
 | `mod_aegis_bearer` | Aegis-Bearer | — | gold shield motes, shield icon | every 15 s: 2.0 s gold-border cast, then it and every monster within 12 m get a **gold shell**: immune to damage 3 s (a shell on the body, no ground colour) | interrupt; kill it first; switch targets during the shell | — |
 | `mod_stonecaller` | Stonecaller | — | grey stone flecks, wall icon | every 14 s: a stone wall 10 m × 3 m rises 3–5 m from a player (grey crack line 1.0 s first, no damage), lasts 6 s; blocks movement and projectiles; always leaves a 2 m gap | walk round; wait it out | rooms under 20 m |
 | `mod_steadfast` | Steadfast *(was Unstoppable)* | — | red chevrons on the body, chevron icon | immune to crowd control and knockback, health ×1.4, move ×0.85, +25% damage to shields | burn it down; kite | `mod_wizened`, `mod_mirrorhide`, `grr_unstoppable` |
@@ -1000,7 +1116,7 @@ Each is a small [page 11](11-BOSS-MECHANICS.md) mechanic on a body; the data nam
 | `mod_hollowheart` | Hollowheart | — | black ring motes, donut icon | every 16 s: 2.5 s cast, **red donut** 4–12 m (safe hole within 4 m), 20% RH | step in close | flying |
 | `mod_quakeborn` | Quakeborn | — | cracked-stone skin, crack icon | every 12 s: **red circle** 6 m on itself, 2.0 s, 18% RH + knock up 0.5 s | step out | swarm |
 | `mod_wardbreaker` | Wardbreaker | — | torn-scroll icon | every hit strips one beneficial magic effect from its target (max once per 3 s) | burst it; re-apply after | — |
-| `mod_shrouded` | Shrouded | shadow | none while hidden | invisible beyond 10 m; the first hit after it is revealed +50%; nameplate hidden until revealed | detection effects; move in groups | bosses |
+| `mod_cloaked` | Cloaked | shadow | none while hidden | invisible beyond 10 m; the first hit after it is revealed +50%; nameplate hidden until revealed | detection effects; move in groups | bosses |
 | `mod_packcaller` | Packcaller | — | horn icon | at 50% health: 2.0 s gold-border cast; calls 2 normal monsters of its family from 40 m | interrupt | — |
 | `mod_iron_willed` | Iron-Willed | — | steel circlet icon | cannot be charmed, dominated, slept or feared ("Its will is iron."); no other change | damage and ordinary control instead | `mindless` monsters |
 | `mod_starved` | Starved | — | red mouth icon | heals 10% max health for each player it kills; +30% move while any player is below 30% health | keep everyone topped up | — |
@@ -1031,7 +1147,7 @@ in sync: every mechanic affix names the `mech_*` it uses.
 2. **Ground zones.** A rare may have at most **two** affixes that make ground zones (Scorchtrail, Spellwoven,
    Hoarfast, Blightbearer, Gravesoil, Siegeborn, Hollowheart, Quakeborn, Orbiting, Retaliating, Spiteful),
    never three. A champion pack has only one affix, so it never stacks zones.
-3. **Banned pairs**: Fleet + Blinkstep; Steadfast + Mirrorhide; Thorned + Mirrorhide; Undertow + Siegeborn +
+3. **Banned pairs**: Fleet + Flickerstep; Steadfast + Mirrorhide; Thorned + Mirrorhide; Undertow + Siegeborn +
    Hollowheart together (any two are fine).
 4. **Needs mates**: Cinderchain, Oathsworn, Rallying, Rousing and Quickening re-roll on a monster with no pack
    mates.
@@ -1163,7 +1279,7 @@ base chances and magic find. This page owns **which monster boosts which**.
 | Rule | Value |
 |---|---|
 | Mapped boost | every item a carrier drops rolls its **mapped** special rarity at **×5** page 08's base chance (Ancient carrier: ×8) |
-| Signature drop | a flat chance that one of the carrier's drops is **guaranteed** Magic or better **and** has the mapped special rarity: open world **5%**, dungeon Normal **8%**, Challenge **12%**, Depth tier 3–4 **20%**, tier 5 **30%** |
+| Signature drop | a flat chance that one of the carrier's drops is **guaranteed** Uncommon or better **and** has the mapped special rarity: open world **5%**, dungeon Normal **8%**, Challenge **12%**, Depth tier 3–4 **20%**, tier 5 **30%** |
 | Greater pack | each member ×2 instead of ×5, no signature drop per member; the pack has **one** signature roll |
 | Two mappings | a monster with two greaters boosts both (Giant Electrified: Ancient ×5 and Electrified ×5) |
 | No mapping | the greater gives its **loot lean** instead (always, not a chance) |
@@ -1307,7 +1423,7 @@ cracks on its body (the Tear's light, 00 §12.4).
 | `fae` | **Thorn Bind**: a fae melee's 3rd hit in a row on the same player roots them 1 s | `m_fae_changeling` Changeling · chibi: elf · rogue · melee, ambusher · looks like a friendly traveller (green name) until 10 m, then *Knife in the Back* 14% RH | **Moon's Favour**: fae healers' heals also remove one control effect from the ally | `m_fae_briar_queen` The Briar Queen · chibi: elf ×1.4 · druid · healer/caster · *Bramble Ring*: void ring 8 m, 1.5 m thick, 12 s |
 | `frost` | **Frostbite**: basic hits add Chill; 5 stacks = frozen 1 s | `m_frost_rime_herald` Rime Herald · creature elemental ×2.4 · caster · *Ice Wall*: void line 12 m × 2 m, 8 s (`mech_void_line_wall`) | **Glacial Armour**: at 50% health gains a shell of 15% max health; Fire-tagged damage ×2 against it | `m_frost_hoar_wyrm` Hoar Wyrm · creature dragon ×3.2 · brute · *Frost Breath* (`mech_breath_cone`, 30% RH) |
 | `drowned` | **Standing Water**: each Drowned pull floods the room floor 0.3 m: −10% move for players (cosmetic water + icon) | `m_drowned_tidecaller` Tidecaller · chibi: undead · priest · caster · *Undertow* (`mech_undertow_pool`) | **Barnacle Crust**: −30% damage from hits more than 15 m away | `m_drowned_deepspawn` Deepspawn · creature horror ×3.4 · brute · *Tentacle Field* ×5 in sequence |
-| `rift` | **Phase Slip**: after 3 melee hits inside 3 s, blinks 6 m away (purple flicker at the destination 1.0 s; no damage) | `m_rift_null_eye` Null Eye · creature shard ×2.0 with one eye · caster · *Stare*: `mech_gaze`, dazed 2 s | **Unravelling**: hits stack Unravel (−3% max health, 10 s, max 10) | `m_rift_seam_warden` Seam Warden · creature titan ×3.0, see-through · brute · *Null Field* (`mech_null_field`) |
+| `rift` | **Phase Slip**: after 3 melee hits inside 3 s, flickers 6 m away (purple flicker at the destination 1.0 s; no damage) | `m_rift_null_eye` Null Eye · creature shard ×2.0 with one eye · caster · *Stare*: `mech_gaze`, dazed 2 s | **Unravelling**: hits stack Unravel (−3% max health, 10 s, max 10) | `m_rift_seam_warden` Seam Warden · creature titan ×3.0, see-through · brute · *Null Field* (`mech_null_field`) |
 | `kingsfire` | **Brand Flare**: on death, red circle 3 m, 2.0 s, 10% RH fire | `m_kingsfire_pyre_warden` Pyre Warden · creature golem ×2.6 · brute, support · plants a burning brazier (object add, HP ×0.5) that gives monsters within 10 m +15% damage | **Legion Discipline**: while 3+ members of a pack live, all are immune to knockback | `m_kingsfire_brand_general` Brand-General · chibi: human ×1.6 · knight · leader · *Call the Legion* (2 Legionnaires), *Sunder* (`mech_sundering_blow`) |
 | `demon` | **Brimstone Blood**: each death leaves a fire void 3 m, 6 s, 3% RH per 0.5 s | `m_demon_gate_fiend` Gate Fiend · creature imp ×2.2 · caster, caller · opens a small gate (object add, HP ×0.6) that spawns 2 Cinder Imps every 12 s until destroyed | **Demon Pact**: a demon below 30% health swaps health with the healthiest demon within 15 m (purple link, 1.5 s warning, once each) | `m_demon_pit_tyrant` Pit Tyrant · creature titan ×3.2, horns (+feature) · brute · *Devour* (`mech_grab_hold`), *Stomp* |
 | `tear` | **Tear Pressure**: +3% damage per other tear monster within 15 m (max +15%) | `m_tear_starcaller` Starcaller · chibi: elf · sorcerer · caster · *Falling Star*: soak 4 m, 2 pips, 3.0 s (`mech_soak_meteor`, 100% RH split; under-soaked 40% RH to all) | **Unmade**: takes −25% from whatever damage **tag** hit it last (an icon shows which) | `m_tear_mendbreaker` Mendbreaker · creature titan ×3.4 · brute · *Fold Space* (`mech_swap_places`), *Quake* |
@@ -1355,31 +1471,31 @@ not re-rolled. The Ashen Matron is now **Frozen** (a phoenix of ice, reborn twic
 | `m_fen_one_eyed_nell` | One-Eyed Nell | Mossfen | 10 | Peatwife | Aegis-Bearer, Runed | — | heals every monster within 20 m 8% every 6 s (interruptible) | any stilt village ruin, placeholder for a Peatwife; 30–50 min | Rare staff, 5% `uq_nells_eye` |
 | `m_fen_longjaw` | Longjaw | Mossfen | 12 | Silt Lurker ×1.6 | Steadfast, Hollowed | — | *Death Roll* grabs 2 s; a second player must hit it for 5% health to free | the drowned ferry landing; 45–75 min | Rare boots, 5% `uq_longjaw_hide` |
 | `m_construct_warden_seven` | Warden Seven | Greyridge | 16 | Shale Warden ×1.4, brass bands | Plated, Stonecaller | — | *Seal the Tunnel*: walls off one of 3 exits; the others open | abandoned rail junction; 30–50 min | Rare shield, 5% `uq_seventh_plate` |
-| `m_folk_blackpowder_bess` | Blackpowder Bess | Greyridge | 17 | Blackdelve Powderwife | Siegeborn, Scorchtrail | — | a keg ring: 6 kegs in a circle, one lit every 2 s | quarry floor; 30–60 min | Rare crossbow, 5% `uq_bess_fuse` |
+| `m_folk_blackpowder_bess` | Blackpowder Bess | Greyridge | 17 | Blackshaft Powderwife | Siegeborn, Scorchtrail | — | a keg ring: 6 kegs in a circle, one lit every 2 s | quarry floor; 30–60 min | Rare crossbow, 5% `uq_bess_fuse` |
 | `m_beast_skarn` | Skarn the Grey | Greyridge | 14 | Crag Bear ×1.6, grey | Vital, Frenzied | — | at 30% sleeps 5 s (heals 10% unless hit for 5% of its health) | high meadow den; 40–60 min | Rare chest, 5% `uq_skarn_pelt` |
 | `m_sand_the_glass_widow` | The Glass Widow | Sunscar | 22 | Sunscar Stinger ×1.8, glass body | Mirrorhide, Toxic | — | lays 4 glass eggs that hatch Stingers in 12 s | the glass tombs' outer court; condition: glass-storm weather; 40–60 min | Rare dagger, 5% `uq_glass_widow_fang` |
 | `m_sand_old_thirst` | Old Thirst | Sunscar | 24 | Dune Breacher ×1.4 | Steadfast, Quakeborn | Giant | burrows toward the player who moved least in the last 5 s | the dry sea; condition: sandstorm weather; 60–90 min | Rare belt, 5% `uq_thirst_girdle` |
-| `m_folk_kasra_dustmother` | Kasra Dustmother | Sunscar | 21 | Dust Reaver · chibi human · swashbuckler parts | Blinkstep, Packcaller | — | *Mirage Double*: makes 2 Mirage Walker copies of herself | caravan wreck site; 30–50 min | Rare rapier, 5% `uq_dustmother_shawl` |
+| `m_folk_kasra_dustmother` | Kasra Dustmother | Sunscar | 21 | Dust Reaver · chibi human · swashbuckler parts | Flickerstep, Packcaller | — | *Mirage Double*: makes 2 Mirage Walker copies of herself | caravan wreck site; 30–50 min | Rare rapier, 5% `uq_dustmother_shawl` |
 | `m_fae_hollowhart` | Hollowhart | Whisperwood | 28 | Dread Stag ×1.8, white | Fleet, Hollowheart | — | the forest fog thickens (vision 20 m) during the fight | a ring of standing stones; condition: while the stones glow (1 hour in every 4, server clock); 60–120 min | Rare bow, 8% `uq_hollowhart_antler` |
-| `m_fae_the_gloam_prince` | The Gloam Prince | Whisperwood | 30 | Gloamward Blade · elf rogue, silver hair, circlet | Shrouded, Blinkstep | Twin | *Court Duel*: challenges one player (a white tether 10 m for 8 s — others cannot hit him while it lasts) | a moonwell glade; 45–75 min | Rare dagger, 5% `uq_gloam_circlet` |
+| `m_fae_the_gloam_prince` | The Gloam Prince | Whisperwood | 30 | Gloamward Blade · elf rogue, silver hair, circlet | Cloaked, Flickerstep | Twin | *Court Duel*: challenges one player (a white tether 10 m for 8 s — others cannot hit him while it lasts) | a moonwell glade; 45–75 min | Rare dagger, 5% `uq_gloam_circlet` |
 | `m_fae_mother_of_threads` | Mother of Threads | Whisperwood | 26 | Shroud Spider ×2.0 | Toxic, Shackler | — | webs the glade: 4 web patches (void zones that root 1 s) | canopy nest; 40–60 min | Rare cloak, 5% `uq_threadmother_silk` |
-| `m_beast_ashmane` | Ashmane | Cinder Steppe | 34 | Steppe Saber ×1.6, black mane | Shrouded, Hollowed | Shadowed | stalks the player for 60 s before attacking (a rumble cue every 10 s) | grass sea; 45–75 min | Rare, 5% `uq_ashmane_claw` |
+| `m_beast_ashmane` | Ashmane | Cinder Steppe | 34 | Steppe Saber ×1.6, black mane | Cloaked, Hollowed | Shadowed | stalks the player for 60 s before attacking (a rumble cue every 10 s) | grass sea; 45–75 min | Rare, 5% `uq_ashmane_claw` |
 | `m_dragon_scorchwing` | Scorchwing | Cinder Steppe | 36 | Steppe Drake ×1.8, wings (+feature) | Scorchtrail, Fiery | Flaming | sets the grass alight in a 30 m ring (arena wall of fire 20 s) | the burnt mesa; 60–90 min | Rare, 5% `uq_scorchwing_scale` |
 | `m_beast_the_grey_herd` | The Grey Herd | Cinder Steppe | 32 | 1 Ashhorn Ox bull ×1.6 + 6 cows | Steadfast (bull) | — | *Stampede* every 15 s in a new direction | wanders the east steppe (a moving spawn); 30–60 min | Rare, 5% `uq_herdbull_horn` |
-| `m_frost_whitemaw` | Whitemaw | Frostmantle | 40 | Drift Lurker ×1.5 | Hoarfast, Shrouded | — | the whole 40 m ice field is its ground; surfaces 4 times | the Silent Floe; 60–90 min | Rare, 5% `uq_whitemaw_tooth` |
+| `m_frost_whitemaw` | Whitemaw | Frostmantle | 40 | Drift Lurker ×1.5 | Hoarfast, Cloaked | — | the whole 40 m ice field is its ground; surfaces 4 times | the Silent Floe; 60–90 min | Rare, 5% `uq_whitemaw_tooth` |
 | `m_frost_the_long_winter` | The Long Winter | Frostmantle | 42 | Rime Elemental ×2.6 in a blizzard (fog up) | Frostbound, Spellwoven | Frozen | the arena is the fight: Chill meter fills 2× unless standing in the green beneficial circles it cannot enter | the high col; condition: blizzard; 90–150 min | Rare, 8% `uq_long_winter_shard` (reuse: `BESTIARY-IDEAS.md` The Long Winter) |
 | `m_frost_grandmother_tick` | Grandmother Tick | Frostmantle | 37 | Glacier Tick ×3.0 | Manyfold, Vital | — | births 6 ticks every 15 s until killed | ice caves; 30–50 min | Rare, 5% `uq_tick_carapace` |
 | `m_drowned_captain_vell` | Captain Vell | Drowned Coast | 46 | Brine Knight · chibi undead captain (tricorn) | Undertow, Cinderchain | Undying | calls a Tide Thrall boarding party of 5 at 66% and 33% | the wreck of the *Gull's Oath*; condition: high tide (the coast's 40-minute tide cycle); 45–75 min | Rare, 5% `uq_vells_spyglass` |
 | `m_drowned_the_bell_below` | The Bell Below | Drowned Coast | 48 | Drowned Bellringer ×1.6 | Packcaller, Aegis-Bearer | — | each toll raises the tide 0.5 m (void zone rises from the low ground) | the drowned belfry; condition: low tide; 60–90 min | Rare, 5% `uq_bell_clapper` |
 | `m_drowned_saltmother` | Saltmother | Drowned Coast | 44 | Kelp Slime ×2.4 | Blightbearer, Undertow | — | undertow pools merge into one large pool | tide flats; 30–50 min | Rare, 5% `uq_saltmother_pearl` |
 | `m_rift_the_thing_sewn_wrong` | The Thing Sewn Wrong | Riftmarch | 52 | Stitchwork ×1.6 | Steadfast, Hollowed | Splitting | each Splitting copy is a different body plan (quad, spider, biped) | the butcher's rift; 60–90 min | Rare, 5% `uq_stitchers_needle` |
-| `m_rift_no_one` | No One | Riftmarch | 54 | Absence ×1.4 | Shrouded, Wardbreaker | — | takes a player's mount skill and dodge roll for 20 s on hit | anywhere in the region (moves each spawn); 90–120 min | Rare, 8% `uq_nobodys_mask` |
+| `m_rift_no_one` | No One | Riftmarch | 54 | Absence ×1.4 | Cloaked, Wardbreaker | — | takes a player's mount skill and dodge roll for 20 s on hit | anywhere in the region (moves each spawn); 90–120 min | Rare, 8% `uq_nobodys_mask` |
 | `m_rift_prismatic_warden` | The Prismatic Warden | Riftmarch | 50 | Abyssal Prism ×2.0 | Spellwoven, Mirrorhide | — | 3 beams at once rotating opposite ways | floating slab 7; 40–60 min | Rare, 5% `uq_prism_core` |
 | `m_kingsfire_cinderlord_hask` | Cinderlord Hask | Kingsfire | 57 | Magma Golem ×1.4 | Scorchtrail, Quakeborn | Ancient | erupts 3 times; each leaves more lava | the slag river; 45–75 min | Epic chance ×2, 5% `uq_hask_heart` |
 | `m_demon_the_hungry_gate` | The Hungry Gate | Kingsfire | 59 | Ashmaw Fiend ×1.5 | Starved, Packcaller | — | at 50% the fire gate behind it pours Brimstone Hounds every 10 s until it dies | a fire gate; condition: the gate is open (world event); 60–120 min | Epic chance ×2, 5% `uq_gatejaw` |
 | `m_kingsfire_ashen_matron` | The Ashen Matron | Kingsfire | 60 | Ashen Phoenix ×2.0 | Rimed, Hoarfast | Frozen | reborn twice | the caldera rim; condition: while the caldera erupts (world event); 60–90 min | Epic chance ×2, 5% `uq_matron_feather` |
 | `m_tear_the_hollow_crown` | The Hollow Crown | Spire Isle | 60 | Spire Warden ×1.4 with a crown | Aegis-Bearer, Oathsworn, Stonecaller | Commanding | leads 6 Spire Wardens; each dead warden empowers him | the ruined throne court; 60–90 min | Epic, 8% `uq_hollow_crown` |
-| `m_tear_seer_without_eyes` | The Seer Without Eyes | Spire Isle | 60 | Void Prophet | Blinkstep, Wardbreaker, Spellwoven | Tear-touched | *Foretold*: shows a red danger zone 5 s **before** it happens (unusual reverse telegraph: very long warning, very big hit 60% RH) | the observatory stair; condition: while the observatory lens is lit (world event); 60–90 min | Epic, 8% `uq_eyeless_seal` |
+| `m_tear_seer_without_eyes` | The Seer Without Eyes | Spire Isle | 60 | Void Prophet | Flickerstep, Wardbreaker, Spellwoven | Tear-touched | *Foretold*: shows a red danger zone 5 s **before** it happens (unusual reverse telegraph: very long warning, very big hit 60% RH) | the observatory stair; condition: while the observatory lens is lit (world event); 60–90 min | Epic, 8% `uq_eyeless_seal` |
 | `m_tear_the_last_titan` | The Last Titan | Spire Isle | 60 | Null Titan ×1.3 | Vital, Quakeborn, Siegeborn | Colossal | *Null Field* covers half the arena and swaps sides every 20 s | the broken bridge; 120–180 min | Epic, 10% `uq_titan_knuckle` |
 
 **Rules for named rares.**
@@ -1479,7 +1595,7 @@ Unique: `uq_moonhook`.
 | id | Rank | Name | Lv | Body | HP× | Abilities |
 |---|---|---|---|---|---|---|
 | `m_beastkin_thornmane_ravager` | Grunt | Thornmane Ravager | 20–32 | chibi: beast · barbarian parts (hide, held axe2h) | 1.8 | *Hack and Hew*: 2 hits, red cone 3 m, 2.0 s, 10% RH each |
-| `m_beastkin_thornmane_prowler` | Cutter | Thornmane Prowler | 20–32 | chibi: beast · rogue (claws) | 1.0 | *Hock Cut*: slow 40% 4 s |
+| `m_beastkin_thornmane_skulker` | Cutter | Thornmane Skulker | 20–32 | chibi: beast · rogue (claws) | 1.0 | *Hock Cut*: slow 40% 4 s |
 | `m_beastkin_thornmane_tracker` | Shooter | Thornmane Tracker | 21–32 | chibi: beast · ranger | 0.8 | *Quarry Mark*: marked target takes +10% from the pack 10 s |
 | `m_beastkin_thornmane_moonseer` | Caller | Thornmane Moonseer | 22–32 | chibi: beast · shaman | 0.75 | *Moonbolt Chain*: 7% RH lightning to 3 targets within 8 m |
 | `m_beastkin_thornmane_bonesetter` | Mender | Thornmane Bonesetter | 22–32 | chibi: beast · druid | 0.8 | *Pack Howl*: heals all allies within 10 m 6% (2.0 s, interruptible) |
@@ -1502,7 +1618,7 @@ Unique: `uq_ashtusk_headtaker`.
 | `m_orc_ashtusk_bonecaller` | Caller | Ashtusk Bonecaller | 28–40 | chibi: orc · shaman (bone charms, staff_totem) (reuse look: `ashtusk_bonecaller`) | 0.75 | *Ash Rain*: 4 red circles 3 m, 2.0 s, 12% RH fire |
 | `m_orc_ashtusk_bloodmender` | Mender | Ashtusk Blood-Mender | 28–40 | chibi: orc · shaman (red paint) | 0.8 | *Blood Rite*: heals an ally 15% by spending 5% of its own health |
 | `m_orc_ashtusk_bearer` | Bearer | Ashtusk Standard-Bearer | 29–40 | chibi: orc ×1.2 · banner | 1.8 | banner aura |
-| `m_orc_ashtusk_warchief` | Leader | Ashtusk Warchief | 30–40 | chibi: orc ×1.3 · war_helm | 2.8 | *Warcry*: band +15% attack speed 8 s; *Challenge*: taunts the player with most threat to it 3 s |
+| `m_orc_ashtusk_warchief` | Leader | Ashtusk Warchief | 30–40 | chibi: orc ×1.3 · war_helm | 2.8 | *Warcry*: band +15% attack speed 8 s; *Call Out*: taunts the player with most threat to it 3 s |
 | `b_ashtusk_overchief` | Warlord | the Overchief | 32 / 36 / 40 | chibi: orc ×1.9 | boss | 50% Frenzied + 2 Brutes; 25% Vicious (reuse: `ashtusk_overchief`); *Headtaker*: tank buster 45% tank-RH, red cone 5 m, 2.5 s; *Burn the Camp*: fire ring danger 3.0 s |
 
 ### 9.6 The Stonehide Clans — giants (levels 34–50)
@@ -1606,7 +1722,9 @@ Named rares, warlords and bosses fill on the first kill. Families complete as a 
   "levels": [2, 6],
   "role": "brute",
   "traits": [],
-  "tags": [],
+  "tags": ["tag_beast"],
+  "tameable": true,
+  "tameFamily": "tf_boar",
   "temperament": "territorial",
   "rank": "normal",
   "pack": [1, 2],
@@ -1738,6 +1856,11 @@ sub-zone.
 15. **No third-party names**, and **no "ember" or "veil"** in any monster, affix or rarity `name` or `id`:
     every one passes page 16's IP word list (asset ids from other prototypes, like the creature variant
     `ember_fennec`, are exempt because they are file keys, not names).
+16. **Tags and taming**: every row whose `family` is `demon` carries `tag_demon`; every `undead`-family row
+    carries `tag_undead`; no row carries both `tameable: true` and `tag_demon`/`tag_undead`; every `tameFamily`
+    is one of the 13 ids in §3.2 and has at least one row; no row outside `nature: beast` is tameable; and the
+    ranger's Tame Beast refuses a Rare, Named, elite or greater-rarity carrier of a tameable row.
+17. **Bind roster**: every §3.3 id exists, carries `tag_demon`, and together they cover every level from 6 to 60.
 
 ---
 
@@ -1770,6 +1893,12 @@ sub-zone.
 | `m_orc_ashtusk_raider` Ashtusk Raider | `m_orc_ashtusk_cutthroat` **Ashtusk Cutthroat** | keeps "raid" out of names while raids are parked |
 | Crag Bear *Maul*, `m_beastkin_thornmane_mauler` Thornmane Mauler and its *Maul* | *Rending Paws*, `m_beastkin_thornmane_ravager` **Thornmane Ravager**, *Hack and Hew* | "Maul" is a banned name (§12.5) |
 | affixes `mod_emberwake` Emberwake, `mod_unstoppable` Unstoppable | `mod_scorchtrail` **Scorchtrail**, `mod_steadfast` **Steadfast** | no "ember"; Unstoppable is now a greater rarity |
+| `mod_blinkstep` Blinkstep; Marsh Wisp *Will-o-Blink*; Phase Hound *Blink Bite* | `mod_flickerstep` **Flickerstep**; *Will-o-Hop*; *Phase Bite* | "Blink" is a banned name (§12.5) |
+| `m_folk_blackdelve_miner`, `m_folk_blackdelve_powderwife` (Blackdelve) | `m_folk_blackshaft_miner`, `m_folk_blackshaft_powderwife` (**Blackshaft**) | "delve" is banned |
+| affix `mod_shrouded` Shrouded | `mod_cloaked` **Cloaked** | "Shrouded" is now the Shadow Dancer's own state (page 05) |
+| `m_beastkin_thornmane_prowler` Thornmane Prowler | `m_beastkin_thornmane_skulker` **Thornmane Skulker** | "Prowl" is a banned name (§12.5) |
+| tag `demonic` | tag **Demon** (`tag_demon`); new tag **Undead** (`tag_undead`) | the class files read these names |
+| (warlock request) `m_ember_cinder_imp`, `m_demon_ember_wraith` | `m_kingsfire_cinder_imp`, `m_demon_cinder_wraith` (already renamed above) | the warlock file should copy these |
 | affixes `mod_ironclad`, `mod_warded`, `mod_venomous`, `mod_gilded` | `mod_plated` Plated, `mod_runed` Runed, `mod_toxic` Toxic, `mod_wealthy` Wealthy | those names are now greater rarities |
 | `mod_giant` (Farhold modifier) | greater rarity `grr_giant` | it was always a difficulty spike |
 | "Veil pressure" (+5% per step on the island) | removed (the steps followed the removed item tracks, W17) | W17 |

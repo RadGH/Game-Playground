@@ -321,7 +321,9 @@ Rot is the damage choice; Sap and Numbing are the support choices (§5).
 ## 5. The hybrid role — Support
 
 **How.** A support rogue plays the same six spells with **Sap or Numbing** coated (§4.2) and the support
-talents below; it queues as **Support** in the Dungeon Finder (which counts as a Damage slot, page 00 §4).
+talents below. It uses the canon **Role focus** switch (00 §6; spellbook, out of combat, saved per Loadout): set to
+**Hybrid (Support)**, the Dungeon Finder queues it as **Support** (which counts as a Damage slot, page 00 §4); nothing
+else about the spells changes — the coating and talents do the work.
 Its job: keep the boss **Sapped** (−12% to everyone it hits) or **Numbed**, keep packs **Blinded**, and turn
 Deathwarrant into a party-wide damage window.
 

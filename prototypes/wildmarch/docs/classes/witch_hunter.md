@@ -70,7 +70,7 @@ confused with the generic `branded` status.
 **Gauge UI** (`hud_class_gauge`, page 03): six silver bullets in a row under the health bar (dull grey when empty,
 bright silver when full; a small toggle lamp at the end shows Silvered Shots on/off). Evidence is drawn **on the
 enemy's own target frame** as a thin silver bar under its health, with a **wax-seal icon** that stamps down when it
-hits 100 (Condemned). A Condemned enemy also carries a floating silver noose sigil visible to you only.
+hits 100 (Condemned). A Condemned enemy also carries a floating silver noose glyph visible to you only.
 
 ### 2.3 Witchsight — the class key
 
@@ -147,8 +147,8 @@ Levels 1–5 have no Evidence: the class plays as a straight marksman until the 
   it is **×1.5**, and it **cannot turn invisible** (revealed if it is). One Brand per witch hunter.
 - **Stacking**: Silver-Branded from two witch hunters does not stack (+6% once). It is a different status from the
   ranger's marks and the tactician's Designated, and stacks with them within page 05's group-buff cap.
-- **Looks like**: a glowing silver sigil burns into the target's chest and floats over its head (spellfx status
-  `marked`, recoloured silver, custom `fx_brand_sigil` sprite).
+- **Looks like**: a glowing silver glyph burns into the target's chest and floats over its head (spellfx status
+  `marked`, recoloured silver, custom `fx_brand_glyph` sprite).
 - **Sound**: a hot-iron hiss.
 
 **`witch_hunter_salt_circle` — Salt Circle** · slot 4 · level 18
@@ -234,7 +234,8 @@ open world, Normal dungeons and Depth up to about 10; in Challenge mode a primar
 
 ### 5.1 What Support focus turns on
 
-Choosing **Support** role focus (page 06 §Role focus) gives the shared **Herald** passive (+10% to the strength of
+Setting the canon **Role focus** switch (00 §6: in the spellbook, out of combat only, saved per Loadout; page 06
+§Role focus) to **Hybrid** queues the witch hunter as **Support** in the Dungeon Finder, gives the shared **Herald** passive (+10% to the strength of
 buffs and debuffs you apply) and these class changes; your own damage is **−15%**.
 
 | Change | Rule |

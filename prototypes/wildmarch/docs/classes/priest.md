@@ -182,8 +182,9 @@ suggests a night cycle.)
 
 ## 5. The hybrid role — Damage (Dusk)
 
-The priest queues as **Damage** in the Dungeon Finder by choosing it — there is no switch: a Damage priest is
-a priest who lives at the bottom of the slider. It becomes practical at **Calling 6** (bands).
+The priest uses the canon **Role focus** switch (00 §6; spellbook, out of combat, saved per Loadout). Set to
+**Hybrid (Damage)**, it changes only your Dungeon Finder role (Damage); the spells and the slider work the same, and a Damage
+priest is simply a priest who lives at the bottom of the slider. It becomes practical at **Calling 6** (bands).
 
 | Piece | How it deals damage |
 |---|---|

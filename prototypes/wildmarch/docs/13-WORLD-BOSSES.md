@@ -225,7 +225,7 @@ the boss's level** (its health is in the table header). Sites are page 01's (`wb
 | Body | `creature:golem ×2.9` at scale 2.4 (≈7 m), body `#5e5a54`, belly `#7e7a72`, accent `#2e2b28`, eyes `#ff8a20`; `barrier` and `sunder` auras (reuse) |
 | Base health | **180,000** · leaves after 30 min |
 | Phases | 60% *Ironclad* ("Grief-in-Iron shuts its plates and stops caring what you are holding.") — takes 30% less damage from the front; 30% *Vicious* — +25% attack speed (reuse: Farhold `phases`) |
-| Minions | construct and mine families: first 5–7, +2–3 every 18 s, max 10, weaken 0.8 — `m_construct_mine_sentry` (golem ×1.2) and `m_humanoid_deepforge_deserter` (`chibi2:dwarf/fighter`) |
+| Minions | construct and mine families: first 5–7, +2–3 every 18 s, max 10, weaken 0.8 — `m_construct_mine_sentry` (golem ×1.4) and `m_folk_deepforge_deserter` (`chibi2:dwarf/fighter`) |
 
 | Ability | Kind | Shape / colour | Warning | Damage (vs level-21 non-tank ≈ 900 health) | Counterplay |
 |---|---|---|---|---|---|
@@ -247,7 +247,7 @@ Loot: `uq_griefplate_gauntlets` (heavy hands: blocking gives a 5% armour stack, 
 | Body | `creature:worm ×3.4` at scale 2.6 (≈9 m long out of the ground), body `#d8b070` sand with **glass plates** `#c8f0ff` (`plates` on), eyes `#ffe060` |
 | Base health | **300,000** |
 | Phases | 60% *Scorched* (sand turns to glass under it: the ground it crosses becomes a slippery surface, +30% slide on dodge); 25% *Frenzied* |
-| Minions | `m_beast_sand_skitter` (`creature:beetle ×1.0`), `m_aberration_glass_grub` (`creature:worm ×0.6`), first 6, +3 / 16 s, max 12 |
+| Minions | `m_sand_skitter` (`creature:beetle ×1.4`), `m_sand_glass_grub` (`creature:worm ×1.4`), first 6, +3 / 16 s, max 12 |
 
 | Ability | Kind | Shape / colour | Warning | Damage (vs ≈1,100) | Counterplay |
 |---|---|---|---|---|---|
@@ -269,7 +269,7 @@ Loot: `uq_glasswyrm_scale_ring` (ring: 5% of damage taken is thrown back as glas
 | Body | `creature:spider ×3.0` at scale 2.2, body `#2a2a30`, accent `#8a2020`, eyes `#e02020`; `poison` and `root` auras (reuse) |
 | Base health | **450,000** |
 | Phases | 45% *Venomous* (reuse) — every bite poisons |
-| Minions | `m_beast_brood_spiderling` (`creature:spider ×0.8`), first 8, +4 / 12 s, max 16 |
+| Minions | `m_beast_brood_spiderling` (`creature:spider ×1.4`), first 8, +4 / 12 s, max 16 |
 
 | Ability | Kind | Shape / colour | Warning | Damage (vs ≈1,400) | Counterplay |
 |---|---|---|---|---|---|
@@ -291,7 +291,7 @@ Loot: `uq_brood_silk_wraps` (light hands: your roots last 1 s longer), `it_mount
 | Body | `creature:griffin ×3.0` at scale 3.0, carrion colours `#4a3a2a` / `#8a7a5a`, eyes `#ff4020`; `bleed`, `haste`, `marked` auras (reuse) |
 | Base health | **650,000** |
 | Phases | 60% *Fleet*; 30% *Frenzied* (reuse) |
-| Minions | `m_beast_carrion_vulture` (`creature:owl ×1.4`, bald, grey) and Ashtusk Warhost raiders (reuse: warband `ashtusk_raider`, page 10), first 6, +3 / 15 s, max 12 |
+| Minions | `m_beast_carrion_vulture` (`creature:owl ×1.4`, bald, grey) and Ashtusk Warhost Cutthroats (`m_orc_ashtusk_cutthroat`, page 10 §9.5), first 6, +3 / 15 s, max 12 |
 
 | Ability | Kind | Shape / colour | Warning | Damage (vs ≈1,800) | Counterplay |
 |---|---|---|---|---|---|
@@ -336,7 +336,7 @@ Loot: `uq_ruinstone_helm` (heavy head: standing still 2 s gives 15% damage reduc
 | Body | `creature:wraith ×3.2` at scale 2.6, `#6a7a6a`, eyes `#c8ff80`; `curse` and `marked` auras (reuse) |
 | Base health | **1,200,000** |
 | Phases | reuse: *Graveborn* 60%, *Leeching* 30% |
-| Minions | `m_undead_drowned_sailor`, `m_undead_drowned_chorister` (first written for the parked r03, page 10 adopts them as Drowned Coast undead), first 6, +3 / 16 s, max 12 |
+| Minions | `m_drowned_tide_thrall` and `m_drowned_choir_wailer` (page 10's Drowned Coast dead; they replace the round-1 sailor and chorister ids), first 6, +3 / 16 s, max 12 |
 
 | Ability | Kind | Shape / colour | Warning | Damage (vs ≈2,600) | Counterplay |
 |---|---|---|---|---|---|
@@ -358,7 +358,7 @@ Loot: `uq_sallow_crown` (head: your curses last 20% longer and heal you for 1% o
 | Body | `creature:horror ×3.4` at scale 2.8, body `#4a3f7a` with orbiting stones (a ring of `shard` bodies ×0.6 circling it), eyes `#e0c0ff`; `enchant` aura |
 | Base health | **1,600,000** |
 | Phases | 60% *Warded*; 30% *Wizened* (reuse modifier names) |
-| Minions | `m_elemental_rift_shard` (weaken 0.6) and `m_fiend_rift_imp`, first 6, +3 / 14 s, max 14 (page 10 owns both) |
+| Minions | `m_rift_rift_shard` (weaken 0.6) and `m_demon_rift_imp`, first 6, +3 / 14 s, max 14 (page 10 §6.14 owns both; the imp is tagged Demon, so a warlock may bind one) |
 
 | Ability | Kind | Shape / colour | Warning | Damage (vs ≈3,200) | Counterplay |
 |---|---|---|---|---|---|
@@ -381,7 +381,7 @@ Riftwatch).
 | Body | `creature:elemental ×3.2` at scale 3.0, body `#ff6a20`, belly `#ffd070`, accent `#7a1a00`; `burn` and `enchant` (reuse) |
 | Base health | **2,000,000** (+20% elite) |
 | Phases | reuse: *Fiery* 60%, *Frenzied* 30% |
-| Minions | Kingsfire Legion soldiers (the warband, page 10; weaken 0.6) and `m_elemental_cinder_elemental`, first 6, +3 / 15 s, max 14 |
+| Minions | Kingsfire Legion soldiers (the warband, page 10; weaken 0.6) and `m_kingsfire_cinder_elemental`, first 6, +3 / 15 s, max 14 |
 
 | Ability | Kind | Shape / colour | Warning | Damage (vs ≈3,600) | Counterplay |
 |---|---|---|---|---|---|
@@ -416,7 +416,7 @@ event** instead of per week. They are never Ascendant.
 |---|---|---|---|---|---|
 | **Harvest Ring** `b_harvest_effigy_ring` | Danger zone (donut) | RED from 6 m to 24 m; safe inside | 2.0 s | 50% of a non-tank's health | run in |
 | **Scythe Sweep** `b_harvest_effigy_scythe` | Danger zone | cone 180° 14 m | 2.0 s | 40% | get behind it |
-| **Scarecrows** `b_harvest_effigy_scarecrows` | Adds | `m_construct_scarecrow` (golem ×1.2, straw) × `ceil(N/5)` | 3 s | — | kill them; Fire-tagged hits do double damage to them |
+| **Scarecrows** `b_harvest_effigy_scarecrows` | Adds | `m_construct_scarecrow` (golem ×1.4, straw) × `ceil(N/5)` | 3 s | — | kill them; Fire-tagged hits do double damage to them |
 | **Bring in the Sheaves** `b_harvest_effigy_sheaves` | Soak | ORANGE 6 m, `ceil(N/5)` pips | 3.0 s | split | soak — each soaker gets a pumpkin (a thrown item, 5% of the boss's health) |
 
 Loot: `it_pumpkin_lantern` (a back-slot cosmetic for the wardrobe: a pumpkin lantern on a pole),
@@ -439,7 +439,7 @@ Loot: `it_midwinter_lantern_antlers` (head cosmetic), `it_mount_midwinter_stag` 
 
 | Ability | Kind | Shape / colour | Warning | Damage | Counterplay |
 |---|---|---|---|---|---|
-| **Spore Cloud** `b_bloomtyrant_spores` | Void zone | 8 circles 5 m of spores, 30 s; each becomes a `m_aberration_sporeling` if nobody stands in it for 1 s | 2.0 s | 5% / tick | stand in one briefly to pop it, then leave |
+| **Spore Cloud** `b_bloomtyrant_spores` | Void zone | 8 circles 5 m of spores, 30 s; each becomes a `m_fen_sporeling` if nobody stands in it for 1 s | 2.0 s | 5% / tick | stand in one briefly to pop it, then leave |
 | **Root Snare** `b_bloomtyrant_roots` | Tether | WHITE roots between the boss and `ceil(N/8)` players; they are pulled 2 m/s | 2.0 s | — | walk out |
 | **Bloom** `b_bloomtyrant_bloom` | Room-wide | every 45 s | 2.0 s | 30% | healers heal |
 | **Pollen Burst** `b_bloomtyrant_pollen` | Targeted | YELLOW 5 m | 2.0 s | 35% + Confused 2 s | spread |
@@ -533,11 +533,11 @@ Ability ids follow `<bossid>_<snake>` and are listed in each table. Boss lines f
 
 ### 10.2 Monsters (minions)
 
-`m_construct_mine_sentry`, `m_humanoid_deepforge_deserter`, `m_beast_sand_skitter`, `m_aberration_glass_grub`,
-`m_beast_brood_spiderling`, `m_beast_carrion_vulture`, `m_undead_drowned_sailor`, `m_undead_drowned_chorister`,
-`m_elemental_rift_shard`, `m_fiend_rift_imp`, `m_elemental_cinder_elemental`, `m_construct_scarecrow`,
-`m_aberration_sporeling`; plus warband members by page 10's ids (`ashtusk_raider`, `stonehide_smasher`,
-`stonehide_hurler`, the Kingsfire Legion). Page 10 owns families and may rename the `m_humanoid_*` id.
+`m_construct_mine_sentry`, `m_folk_deepforge_deserter`, `m_sand_skitter`, `m_sand_glass_grub`,
+`m_beast_brood_spiderling`, `m_beast_carrion_vulture`, `m_drowned_tide_thrall`, `m_drowned_choir_wailer`,
+`m_rift_rift_shard`, `m_demon_rift_imp`, `m_kingsfire_cinder_elemental`, `m_construct_scarecrow`,
+`m_fen_sporeling`; plus warband members by page 10's ids (`m_orc_ashtusk_cutthroat`, `m_giant_stonehide_smasher`,
+`m_giant_stonehide_hurler`, the Kingsfire Legion's §9.7 ids). Page 10 lists the minions in its §6.14 and owns their families.
 
 ### 10.3 Everything else
 
@@ -573,21 +573,12 @@ For pages 03 and 04 to list (both already carry them; names as they stand):
 
 ## 13. Notes for other pages
 
-- **Page 07:** the XP line "world boss 30 (once a day)" should read **once a week per boss** (the chest week);
-  repeat kills pay ordinary elite kill XP. Titles and `ach_world_bosses_all` are yours.
-- **Page 08:** match §5 (weekly chest, Epic floor, no Oathstones or tokens, no item level above 60 — the old
-  "ilvl 72 Ascendant" row goes), the special-rarity boost (×3 favoured, ×1.5 others), and remove world-boss
-  drops from the bound-on-pickup row (nothing is bound). Your `it_mount_tidewalker` names the Drowned Coast world
-  boss as its source at 1%; this page's Sallow King drops `it_mount_drowned_horse` — either add the Tidewalker as
-  a second Sallow King mount or move it elsewhere.
-- **Page 09:** `set_trophies_of_the_wild_hunt` is still at ilvl 72 and names `emberthrone`; it should be level 60
-  and `kingsfire`.
-- **Page 10:** adopt the minion ids in §10.2; supply the greater-rarity minion per boss (§3.3).
-- **Page 11 §22.4:** this page follows your budget (no lethal, clamps, 120 m leash, 80 m / 30 s reset, 1% or
-  60 s credit). Health scaling is this page's formula (§3.3), not "× (1 + 0.8 × (present − 1))" — please point
-  to §3.3.
-- **Page 14:** remove `q_weekly_world_bosses` and any `q_world_boss_<region>`; add `it_storm_feather` to `q_sky_1`;
-  rename the midwinter festival if it is still called *Longnight* (always daylight) and *Veilstorm* → *Tearstorm*.
+- **Pages 07, 08, 09 and 14** — resolved in the round-2 sweep: page 07 pays world-boss XP on the first kill
+  of each boss each week; page 08 §16.5/§24.3 match §5 and list this page's mounts (`it_mount_tidewalker` moved
+  to the Cutwater quartermaster); page 09's `set_trophies_of_the_wild_hunt` is level 60 and Ascendant-only;
+  page 14 has no world-boss quests and uses the Midwinter Stag and the Tearstorm Herald.
+- **Page 10:** the minion ids in §10.2 are adopted (page 10 §6.14); supply the greater-rarity minion per boss (§3.3).
+- **Page 11 §22.4** now points to §3.3 for health (resolved in the round-2 sweep).
 - **Page 03:** the tracker shows "looted this week" and "Ascendant", not "looted today".
 
 ## 14. Round 2 changes on this page
@@ -620,3 +611,4 @@ For pages 03 and 04 to list (both already carry them; names as they stand):
 | `it_pumpkin_lantern` (light slot) | the same id, a back-slot cosmetic (the light slot is gone) |
 | `uq_stags_lantern` (light slot) | the same id, a necklace |
 | `uq_effigys_candle_eyes` "+5% damage in the dark" | "+5% damage with Fire-tagged skills" |
+| world-boss minions `m_humanoid_deepforge_deserter`, `m_beast_sand_skitter`, `m_aberration_glass_grub`, `m_elemental_rift_shard`, `m_fiend_rift_imp`, `m_elemental_cinder_elemental`, `m_aberration_sporeling`, `m_undead_drowned_sailor`, `m_undead_drowned_chorister`; minion `ashtusk_raider` | `m_folk_deepforge_deserter`, `m_sand_skitter`, `m_sand_glass_grub`, `m_rift_rift_shard`, `m_demon_rift_imp`, `m_kingsfire_cinder_elemental`, `m_fen_sporeling`, `m_drowned_tide_thrall`, `m_drowned_choir_wailer`; `m_orc_ashtusk_cutthroat` (page 10's families, consistency sweep) |

@@ -581,6 +581,7 @@ quartermaster (the faction and chapter are named in brackets).
 | id | Name | Kind (reuse) | What you do |
 |---|---|---|---|
 | `lm_first_waystone` | The First Waystone | wayshrine (special) | The first waystone on the continent, in Brightwater's square; where Ysolde lit her lamp. **Bindable** (§10.3); every new Brightwater character's Recall Stone starts bound here. |
+| `lm_oakhollow_waystone` | The Burrow Gate Waystone | wayshrine | Oakhollow's waystone, beside the burrow gate. **Bindable** (§10.3); every new Oakhollow character's Recall Stone starts bound here. |
 | `lm_ysoldes_well` | Ysolde's Well | wayshrine | A stone well with a lamp niche; drinking gives *Lampwater* (+5% XP for 30 min, once per real day). |
 | `lm_calling_stones` | The Calling Stones | standing_stones | Thirty worn stones, one carved for each class; where every **first calling quest** (level 6) ends. |
 | `lm_old_mill_wheel` | The Old Wheel | broken_road | A washed-out mill race on the east road; repairing it (a Millbrook side quest) shortens the road by 300 m for everyone for a day (world state, page 14 events). |
@@ -1300,7 +1301,7 @@ drawn arc; no fall damage on landing; mounts dismount on use.
 | `npc_forgewright_sallis` | Sallis | forge-mistress of the resistance | Last Light | `brute` f | Deepforge Clans quartermaster (the Kingsfire forges); top-tier profession recipes (page 19) |
 | `npc_maelor_varn` | Maelor Varn, crowned Kaedros, the Fire King | the antagonist | the Fire Court (projections elsewhere) | `elder` m, pitch −0.1 | Ch 3, 7, 11 projections; d15's final boss `b_fire_king_kaedros` (page 12) |
 | `npc_ysa_varn` | Ysa Varn | the King's daughter, a memory | visions in Ch 11 | `child`→`villager` f | The reason |
-| `npc_the_kindled_three` | The Kindled Three (Lord Castellan Vorhane `b_castellan_vorhane`, Sarn Veydrec, Herald of the Fire King `b_sarn_veydrec_herald`, Lord Castellan Aurel Brandt `b_castellan_brandt`) | the King's lieutenants (enemies) | d13, d14, d15 | `demon`, `cultist`, `warrior` | Bosses; page 12 owns the fights |
+| `npc_the_kindled_three` | The Kindled Three (Lord Castellan Vorhane `b_castellan_vorhane`, Sarn Veydrec, Herald of the Fire King `b_sarn_veydrec_herald`, and Lord Castellan Aurel Brandt, who was a raid boss and appears in v2 only as a name in the story — his fight is parked in `WISHLIST.md`) | the King's lieutenants (enemies) | d13, d14, d15 | `demon`, `cultist`, `warrior` | Bosses; page 12 owns the fights |
 
 **Factions present:** `fac_crown_assembly` (the fort garrisons at Last Light and Cinderwatch) ·
 `fac_deepforge_clans` (the Kingsfire forges, Sallis) · `fac_quiet_wake` (the Reliquary watch) ·
@@ -1540,6 +1541,7 @@ entrance, a wild landmark, a world boss site or a warband camp.
 | Bindable landmark | Region | Why it qualifies |
 |---|---|---|
 | `lm_first_waystone` | Hearthvale (Brightwater's square) | inside Brightwater; every Brightwater starter's stone begins bound here |
+| `lm_oakhollow_waystone` | Hearthvale (Oakhollow) | inside Oakhollow; every Oakhollow starter's stone begins bound here |
 | `lm_stepped_well` | Sunscar (Oasis of Tamar) | inside Tamar |
 | `lm_eastmoon_well` | Whisperwood | a lit moonwell kept by the Moonwell Circle, no hostile spawn within 80 m (bindable once lit in Ch 6) |
 | `lm_westmoon_well` | Whisperwood | the same, once relit at the end of Ch 6 (story 6.10) |

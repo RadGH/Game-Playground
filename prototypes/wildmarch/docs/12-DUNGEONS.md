@@ -35,7 +35,7 @@ everything marked **[D-EXCL]** here), monster families, AI and the **monster rar
 4. [Mechanic ladder: what each dungeon teaches](#4-mechanic-ladder-what-each-dungeon-teaches)
 5. d01 [The Hollow Barrow](#d01--the-hollow-barrow)
 6. d02 [The Drowned Mill](#d02--the-drowned-mill)
-7. d03 [Deepdelve Mines](#d03--deepdelve-mines)
+7. d03 [Shaft Seven Mines](#d03--shaft-seven-mines)
 8. d04 [Bellows Keep](#d04--bellows-keep)
 9. d05 [The Glass Tombs](#d05--the-glass-tombs)
 10. d06 [Vault of the Sandsworn](#d06--vault-of-the-sandsworn)
@@ -82,7 +82,9 @@ Every monster names its body so the builder knows what to draw (reuse: `avatar-3
   `worm`, `golem`, `titan`, `imp`, `elemental`, `wisp`, `shard`, `wraith`, `horror`, `slime`, `mushroom`,
   `mimic`, `beetle`, `centipede`, `crocodile`, `turtle`, `griffin`, `phoenix`, `frog`, `owl`, `moth`,
   `hyena`, `saber_cat`, `drake`, `dragon`, `boar`, `bear`, `hound`, `cat`, `deer`, `elk`, `horse`, `turret`…),
-  scaled by the size factor. New creature types this page needs are listed in §22.
+  scaled by the size factor. New creature types this page needs are listed in §22. **Size floor:** a creature
+  size below ×1.4 on this page is a *relative* size (a small one of its kind); the builder draws it at **×1.4**
+  whatever the number says (page 10 §1.2 and test 3: nothing knee-high).
 - `chibi2 <race>` — a Chibi 2 humanoid (reuse: `avatar-3d/js/chibi2.js`, races from
   `avatar-3d/js/chibi2-races.js`: human, elf, dwarf, halfling, goblin, orc, giant, undead, beastkin), with
   its outfit/weapon noted where it matters. `×<size>` scales the whole body.
@@ -344,7 +346,7 @@ at Deep 1 pays like Normal Deep 11). R tops out at **40** (Challenge Deep 30).
 
 | R | Cache items (per player) | Rarity floor | Rare / Epic / Unique / Set / Legendary odds per cache item | Jewel in the cache | Soul in the cache | Special rarity on each item (page 08) | Bonus magic find for the whole run (item rarity / item quantity / gold find) |
 |---|---|---|---|---|---|---|---|
-| 0 (rising or level-60 depth) | 1 | Rare | 60 / 30 / 5 / 5 / 0 % | 5% (Magic) | — | 0.2% | +0 / +0 / +0 |
+| 0 (rising or level-60 depth) | 1 | Rare | 60 / 30 / 5 / 5 / 0 % | 5% (Uncommon) | — | 0.2% | +0 / +0 / +0 |
 | 5 | 1 | Rare | 55 / 33 / 6 / 5.5 / 0.5 % | 10% | 0.5% | 0.5% | +10% / +5% / +10% |
 | 10 | 2 | Rare | 45 / 38 / 8 / 7.5 / 1.5 % | 15% | 1% | 1% | +20% / +10% / +20% |
 | 15 | 2 | Rare | 35 / 44 / 10 / 9 / 2 % | 20% (Rare possible) | 1.5% | 1.5% | +30% / +15% / +30% |
@@ -436,6 +438,22 @@ is page 08's (it never uses a currency).
 from the **Challenge** bosses of **d15 and d16** (one slot per boss, listed under each dungeon's *Set dropped here*), and an
 **8%** roll in the **Depth Cache from Deep 10**. Class sets that the class files source to "Challenge d13–d16" also drop from
 d13's and d14's Challenge end bosses (a token for any slot, 20% per player per week). Generic sets named `set_<snake>` below drop from any boss in their dungeon on every difficulty.
+
+**Generic uniques with a dungeon source** (page 09 §4.2): some of page 09's headline uniques list a dungeon's
+bosses as an extra source (6% per player per boss, shared with that boss's other listed uniques; e.g.
+`uq_nettlepin` from d01). That roll is **on top of** the boss's own line on this page; page 09 owns which
+unique names which dungeon.
+
+**Class items with a dungeon source** (the class files): each class file lists its own uniques, legendaries and
+souls with a source such as "`d02_drowned_mill` final boss `b_the_grindwheel`, 10%" (e.g. the warlock's
+`uq_marsh_hermits_contract`). **The class file's source line is the rule**: that item is added to that boss's
+table **for a looter of that class only**, at the stated chance, on top of this page's line, and it is not
+repeated in the per-boss loot lines here (about 250 such items across the 30 classes). A class file's boss id must
+be one of this page's (§21.2).
+
+Where a dungeon had a generic set from both pages, **this page's set is the one that
+drops** (page 09 §3.32 retires its duplicates: `set_millrace`, `set_glasswrights_regalia`, `set_thornstalker`,
+`set_moonwell_vestments`, `set_pitfighters_harness`, `set_saltchoir_raiment`, `set_cindergate_bulwark`).
 
 **Re-slotted items (round 2).** Canon has **15 equipment slots** and no trinket, wrist or light slot (00 §4). Every
 item this page had filed as a *trinket* is now a **[D-EXCL] soul** (`soul_<snake>`, a socketable with a new
@@ -599,7 +617,7 @@ dungeon's bosses are held to on **Normal** (Challenge and Deep rows add on top).
 |---|---|---|---|
 | d01 Hollow Barrow | 5–7 | danger zone, void zone, adds, interrupt (**one per boss**) | 1 (+ melee) |
 | d02 Drowned Mill | 9–12 | tether, moving wave, targeted spread | 2 |
-| d03 Deepdelve Mines | 13–16 | soak, line of sight, knockback toward edges | 2 |
+| d03 Shaft Seven Mines | 13–16 | soak, line of sight, knockback toward edges | 2 |
 | d04 Bellows Keep | 16–18 | tank handoff (stacking debuff, page 11 §16), room-wide with safe zone | 2 |
 | d05 Glass Tombs | 19–22 | beams + mirrors, checkerboard, cross | 3 |
 | d06 Vault of the Sandsworn | 22–24 | dispel, puzzles under pressure, pushback walls | 3 |
@@ -687,7 +705,7 @@ starting with the valley's dead. Sergeant Hedda Thorne wants the barrow shut bef
 | `m_beast_cairn_rat` | Cairn Rat | creature rat ×1.6 | 0.3 | **Nip** 2 %HP every 1.2 s. Packs of 5–8. Area spells kill them in a pass. |
 | `m_undead_grave_hound` | Grave Hound | creature hound ×1.3, bone-plated | 1 | **Pounce**: crouches 1.0 s (hound flashes white), leaps up to 8 m at a player, 8 %HP + knocked down 1 s. |
 | `m_undead_bone_mender` | Bone Mender | chibi2 undead, robe, bone staff | 0.8 | **Knit Bones** (i) 2.5 s cast: heals an ally 30% of its health. The first interruptible cast the game shows you — the tip line appears. |
-| `m_humanoid_grave_robber` | Grave Robber | chibi2 human, hood, shovel | 1 | **Throw Dirt**: 6 m cone, 1.5 s, blinds 2 s (misses 50% of attacks). At 30% health runs for the next room to fetch help (stop him: slow, stun, kill). |
+| `m_folk_grave_robber` | Grave Robber | chibi2 human, hood, shovel | 1 | **Throw Dirt**: 6 m cone, 1.5 s, blinds 2 s (misses 50% of attacks). At 30% health runs for the next room to fetch help (stop him: slow, stun, kill). |
 | `m_undead_barrow_guard` | Barrow Guard (elite) | chibi2 undead ×1.3, round shield, hand axe | 3 | **Shield Wall**: takes 70% less damage from the front for 4 s every 15 s (shield glows). **Overhead Chop**: 90° cone 5 m, 1.5 s, 15 %HP. Hit it from behind while the shield is up. |
 | `m_beast_tomb_moth` | Tomb Moth | creature moth ×1.3, grey | 0.5 | **Dust Shed**: on death leaves a 3 m **void zone** for 8 s, 2 %HP every 0.5 s. A gentle preview of B2's mechanic. |
 
@@ -834,7 +852,7 @@ Journal hint (after 3 clears): *"The Thane went into the ground with a ring, a c
 
 | Field | Value |
 |---|---|
-| Body | chibi2 giant (undead skin) ×1.6, peat-brown shroud, antler crown, stone maul |
+| Body | chibi2 giant (undead skin) ×1.6, peat-brown shroud, antler crown, stone hammer |
 | Health | 140 H |
 | Phases | 100–60% · 60–25% · 25–0% |
 | Teaches | the **exam**: all four d01 lessons at once, plus a gentle first **soak** |
@@ -851,7 +869,7 @@ Journal hint (after 3 clears): *"The Thane went into the ground with a ring, a c
 **Dialog:** pull (banner) — "You woke the little king. Now you have woken me." · Breath ⚠ — "Breathe with me, or not at all." · 25% — "The valley grew on my back. I only want it back." · death — "Sleep... is kinder... than you."
 **Challenge:** Peat Dig leaves holes as void zones; Breath needs 3 pips. **Deep tuning:** Wake the Barrow raises 2 Grave Hounds instead of shamblers.
 **Depth list** (page 11 §22.2): ① `mech_rolling_boulders` 3 peat boulders roll across the niche, 30 %HP · ② `mech_pull_in` Deep Breath In: pull 2 m/s for 3 s · ③ `mech_blight_cloud` peat smoke: a 5 m cloud drifting 2 m/s, 3 %HP / 0.5 s.
-**Loot:** `it_antler_crown` (medium helm), `it_sleepers_maul` (two-handed mace), `uq_peat_black_shroud` **[D-EXCL]** — back: +8% maximum health; standing still for 2 s gives a barrier of 5% maximum health (refreshes every 6 s). **`leg_first_sleepers_shroud` [SECRET] [D-EXCL]** — chest legendary (any armour type, takes the wearer's): when you would die, you instead fall asleep for 3 s at 1 health, immune to damage, then wake with 25% health (once every 3 minutes).
+**Loot:** `it_antler_crown` (medium helm), `it_sleepers_hammer` (two-handed mace), `uq_peat_black_shroud` **[D-EXCL]** — back: +8% maximum health; standing still for 2 s gives a barrier of 5% maximum health (refreshes every 6 s). **`leg_first_sleepers_shroud` [SECRET] [D-EXCL]** — chest legendary (any armour type, takes the wearer's): when you would die, you instead fall asleep for 3 s at 1 health, immune to damage, then wake with 25% health (once every 3 minutes).
 
 ### Set dropped here
 
@@ -929,9 +947,9 @@ millpond is *collecting*. Marra Stillwater wants the wheel stopped before Reedho
 | `m_undead_drowned_millhand` | Drowned Millhand | chibi2 undead, waterlogged smock, sack hook | 1 | **Sack Hook**: white **tether** line to a player 10 m away, 1.5 s, pulls 5 m and 5 %HP. Melee 5 %HP. |
 | `m_beast_fen_leech` | Fen Leech | creature worm ×0.5, pale green | 0.4 | **Latch**: jumps on a player (2 m), drains 2 %HP a second and heals itself; knocked off by a dodge roll or any hit on it. |
 | `m_beast_bog_croaker` | Bog Croaker | creature frog ×1.7 | 1 | **Tongue Lash**: red line 1.5 m × 8 m, 1.5 s, 7 %HP + pulled 3 m. **Burst Belly**: on death, a 3 m **void zone** of bile for 6 s, 2 %HP / 0.5 s. |
-| `m_aberration_bog_slime` | Bog Slime | creature slime ×1.3, peat brown | 1.5 | **Engulf** melee 6 %HP + slow 20% 3 s. At 50% **splits** into 2 Slimelings (0.4 H each). |
-| `m_humanoid_fen_poacher` | Fen Poacher | chibi2 human, reed hat, crossbow | 1 | **Net Shot**: yellow **targeted** 3 m circle on a player, 2.0 s, roots everyone inside 2 s. Spread. |
-| `m_elemental_marsh_lure` | Marsh Lure | creature wisp ×1.0, sickly green-white | 0.6 | **Will-o'-Lure** (i) 2.0 s: charms one player to walk toward the lure for 2.5 s (off ledges into water). Interrupt. |
+| `m_fen_bog_slime` | Bog Slime | creature slime ×1.3, peat brown | 1.5 | **Engulf** melee 6 %HP + slow 20% 3 s. At 50% **splits** into 2 Slimelings (0.4 H each). |
+| `m_folk_fen_poacher` | Fen Poacher | chibi2 human, reed hat, crossbow | 1 | **Net Shot**: yellow **targeted** 3 m circle on a player, 2.0 s, roots everyone inside 2 s. Spread. |
+| `m_fen_marsh_lure` | Marsh Lure | creature wisp ×1.0, sickly green-white | 0.6 | **Will-o'-Lure** (i) 2.0 s: charms one player to walk toward the lure for 2.5 s (off ledges into water). Interrupt. |
 | `m_beast_reed_serpent` | Reed Serpent | creature snake ×1.5 | 1 | **Coil Strike** 8 %HP + poison 1 %HP a second for 6 s. |
 | `m_beast_fen_eel` | Fen Eel | creature snake ×1.0, eel-blue, stays in channels | 0.5 | **Spark Bite** at anyone within 3 m of a channel, 6 %HP, jumps to 1 more player within 5 m. Kill from range or keep off the edge. |
 | `m_construct_millstone_roller` | Millstone Roller (elite) | creature golem ×1.5 hugging a millstone | 3 | **Roll**: red **line** 3 m × 20 m, 2.0 s, 25 %HP + knocked aside 5 m. **Grind** melee 10 %HP. |
@@ -1089,17 +1107,17 @@ Journal hint: *"Wren sang her children to sleep. Somebody else was listening."*
 
 ---
 
-## d03 — Deepdelve Mines
+## d03 — Shaft Seven Mines
 
 ### Card
 
 | Field | Value |
 |---|---|
-| id | `d03_deepdelve` |
+| id | `d03_shaft_seven` (was `d03_deepdelve`; "delve" is banned) |
 | Region | Greyridge Highlands (`greyridge`) |
 | Levels | 13–16 (opens at 12) · Challenge 60 · Depth 1–45 (level 60 at Depth 15; §2.4) |
 | Looks | `mine` (new: timber props, rails, hook lanterns and **glowing ore seams** — §22), `cave` (deep seam, lit by blue cave-fungus) |
-| Entrance | **Shaft Seven headframe** on the Greyridge quarry terraces, 3 km north of Anvilgate. A cage lift goes down; the lift is the loading door. |
+| Entrance | **Shaft Seven headframe** on the Greyridge quarry terraces (`sz_shaft_seven_slopes`, page 01), 3 km north of Anvilgate. A cage lift goes down; the lift is the loading door. |
 | Quest giver | `npc_foreman_dagna_coalbright`, Deepforge Clans mine foreman, Anvilgate's Lift Square |
 | Story quest | `q_the_seventh_shaft` — "The Seventh Shaft": drive out the Sootwick Gang and find the four miners still down there |
 | Run time target | Normal 20 min · Challenge 22 min (no timer; the journal records your best time) |
@@ -1171,8 +1189,8 @@ by himself and is counted on the party frame ("Miners freed: 2/4").
 | `m_beast_tunnel_beetle` | Tunnel Beetle | creature beetle ×1.5, rust-brown | 1.2 | **Shell Up**: 60% less damage for 3 s when hit from the front (shell glows). **Burrow Rush**: red line 2 m × 12 m, 1.5 s, 12 %HP. |
 | `m_beast_rock_centipede` | Rock Centipede | creature centipede ×1.6 | 1 | **Venom Bite** 6 %HP + poison 1.5 %HP a second for 6 s. |
 | `m_beast_shaft_bat` | Shaft Bat | creature bat ×1.3 | 0.3 | swarms of 6–8; **Screech** interrupts casts within 4 m once per swarm per 12 s. |
-| `m_elemental_firedamp` | Firedamp Pocket | creature wisp ×1.2, dull orange, does not move | 0.5 | harmless until hit by **fire**: then after 1.5 s it bursts in a 6 m circle for 35 %HP to **players and enemies**. Lure goblins next to it. |
-| `m_aberration_gravelmaw_grub` | Gravelmaw Grub | creature worm ×0.7, grey | 0.4 | **Gnaw** 3 %HP; comes in fours; Stonegullet's young. |
+| `m_construct_firedamp` | Firedamp Pocket | creature wisp ×1.2, dull orange, does not move | 0.5 | harmless until hit by **fire**: then after 1.5 s it bursts in a 6 m circle for 35 %HP to **players and enemies**. Lure goblins next to it. |
+| `m_beast_gravelmaw_grub` | Gravelmaw Grub | creature worm ×0.7, grey | 0.4 | **Gnaw** 3 %HP; comes in fours; Stonegullet's young. |
 
 | # | Room | Pack |
 |---|---|---|
@@ -1294,7 +1312,7 @@ Body: creature beetle ×3.4, iron-grey shell with ore glinting in the seams. Hea
 **Dialog:** none (a worm). The miners, if freed, shout from the Lift Foot over party chat: "Blow the pump horn! It hates the horn!" (the **pump horn** by the Gullet door: any player holds **E** 1 s once per fight; for 20 s Gravel Spew's slow drops to 15%).
 **Challenge:** soaks need 3 pips; Breach targets two holes. **Deep tuning:** a soak that is fully soaked still leaves a 3 m **void zone** of gravel for 20 s.
 **Depth list** (page 11 §22.2): ① `mech_rolling_boulders` 3 ore boulders, 30 %HP · ② `mech_pull_in` Gullet Draw: pull 2 m/s for 3 s · ③ `mech_meteor_rain` cave-in stones in P1 as well.
-**Loot:** `it_gullet_tooth_maul` (two-handed mace), `it_orebelly_girdle` (heavy waist), `it_deep_seam_ring` (ring), `set_deepshaft_harness` pieces (helm, legs), `soul_stonegullets_gizzard` **[D-EXCL]** — soul (armour socket: chest; was the trinket `uq_stonegullets_gizzard_stone`): when a hit takes you below 35% health you swallow the stone: −40% damage taken and immune to knockback for 4 s (90 s cooldown). `leg_worm_king_mandible` **[D-EXCL]** — weapon legendary (two-handed axe or mace, takes the looter's preferred type): your heavy attacks bore into the ground and erupt under the target 1 s later for 60% weapon damage in a 3 m circle.
+**Loot:** `it_gullet_tooth_hammer` (two-handed mace), `it_orebelly_girdle` (heavy waist), `it_deep_seam_ring` (ring), `set_deepshaft_harness` pieces (helm, legs), `soul_stonegullets_gizzard` **[D-EXCL]** — soul (armour socket: chest; was the trinket `uq_stonegullets_gizzard_stone`): when a hit takes you below 35% health you swallow the stone: −40% damage taken and immune to knockback for 4 s (90 s cooldown). `leg_worm_king_mandible` **[D-EXCL]** — weapon legendary (two-handed axe or mace, takes the looter's preferred type): your heavy attacks bore into the ground and erupt under the target 1 s later for 60% weapon damage in a 3 m circle.
 
 ### Secret boss — `b_the_unmined` — The Unmined
 
@@ -1405,24 +1423,24 @@ Free all 8 → the Throne's four war-anvils are sabotaged: Grumvak's **Anvil Rai
 
 | id | Name | Body | H | Abilities |
 |---|---|---|---|---|
-| `m_orc_ashtusk_raider` | Ashtusk Raider | chibi2 orc, hide armour, two axes | 1 | **Double Chop** 2 × 5 %HP. **Howl**: +15% attack speed to orcs within 10 m, 8 s. |
+| `m_orc_ashtusk_cutthroat` | Ashtusk Cutthroat | chibi2 orc, hide armour, two axes | 1 | **Double Chop** 2 × 5 %HP. **Howl**: +15% attack speed to orcs within 10 m, 8 s. |
 | `m_orc_ashtusk_spearman` | Ashtusk Spearman | chibi2 orc, long spear, round shield | 1.2 | **Impale**: red line 2 m × 7 m, 1.5 s, 14 %HP + bleed 1 %HP a second 6 s. |
 | `m_orc_ashtusk_bonecaller` | Ashtusk Bonecaller | chibi2 orc, bone mask, rattle staff | 0.9 | **Mend Flesh** (i) 2.5 s: heals an orc 35%. **Bone Hex**: 3 m **void zone** of bone splinters under a player, 10 s, 3 %HP / 0.5 s. |
 | `m_orc_ashtusk_forgebrute` | Ashtusk Forgebrute (elite) | chibi2 orc ×1.8, smith's apron, sledge | 3.5 | **Hot Iron**: stacks **Seared** on its target (+8% fire damage taken, 12 s, max 5). **Sledge Slam**: 5 m red circle around itself, 2.0 s, 25 %HP. |
 | `m_beast_forge_hound` | Forge Hound | creature hound ×1.4, cinder-coated | 1 | **Cinder Bite** 6 %HP + burn 1 %HP a second 4 s. On death, 2 m fire patch 4 s. |
-| `m_fiend_slag_imp` | Slag Imp | creature imp ×1.0, dripping molten | 0.5 | **Slag Spit** 5 %HP at 20 m. Comes in threes. |
-| `m_elemental_cinder_spawn` | Cinder Spawn | creature elemental ×0.8, fire | 0.8 | **Flare**: 1.5 s, 4 m circle around itself, 12 %HP. Grows +20% size and damage every 10 s alive. |
+| `m_demon_slag_imp` | Slag Imp | creature imp ×1.0, dripping molten | 0.5 | **Slag Spit** 5 %HP at 20 m. Comes in threes. |
+| `m_kingsfire_cinder_spawn` | Cinder Spawn | creature elemental ×0.8, fire | 0.8 | **Flare**: 1.5 s, 4 m circle around itself, 12 %HP. Grows +20% size and damage every 10 s alive. |
 | `m_construct_anvil_sentinel` | Anvil Sentinel (elite) | creature golem ×2.0, anvil-headed dwarf construct in orc chains | 3 | **Anvil Drop**: yellow **targeted** 4 m on a player, 2.5 s, 30 %HP. **Chained**: breaks free at 50% and gains +30% damage. |
 | `m_orc_ashtusk_whipmaster` | Ashtusk Whipmaster | chibi2 orc, whip, keys on belt | 1 | **Lash** 60° cone 7 m, 1.5 s, 10 %HP. Drops a **Pen Key** (frees one smith instantly, no channel). |
 
 | # | Room | Pack |
 |---|---|---|
-| 1 | Barracks Court, bunks | 3 Raiders + 1 Bonecaller |
-| 2 | Barracks Court, drill yard | 2 Spearmen + 2 Raiders + 3 Forge Hounds |
+| 1 | Barracks Court, bunks | 3 Cutthroats + 1 Bonecaller |
+| 2 | Barracks Court, drill yard | 2 Spearmen + 2 Cutthroats + 3 Forge Hounds |
 | 3 | Barracks Court, armoury door | 1 Forgebrute + 1 Bonecaller |
 | 4 | Anvil Gallery, near | 1 Anvil Sentinel + 3 Slag Imps; 2 chained smiths |
 | 5 | Anvil Gallery, far | 2 Spearmen + 1 Whipmaster + 1 Bonecaller |
-| 6 | Smiths' Pens | 2 Whipmasters + 2 Raiders |
+| 6 | Smiths' Pens | 2 Whipmasters + 2 Cutthroats |
 | 7 | Quench Hall | 1 Forgebrute + 2 Cinder Spawns + 3 Slag Imps |
 | 8 | Rampart Walk, near | 3 Spearmen + 1 Bonecaller (wind: −10% ranged accuracy toward the valley side) |
 | 9 | Rampart Walk, far | 2 Forgebrutes (elite pair) |
@@ -1479,7 +1497,7 @@ Body: creature elemental ×2.6, molten slag with a crust (orange/black palette).
 
 **Dialog:** pull — "Fresh ore! Get 'em on the anvil!" · Brand ⚠ — "Hold still. It only hurts forever." · 50% (banner) — "Stoke it hotter!" · death — "The steel... wasn't ready..."
 **Challenge:** Brand max 10, no troughs, handoff at 3–4; Slag Pour on 3 players. **Deep tuning:** her target at 6+ stacks takes a **Branded Blast**: 8 m red circle around the tank, 2.0 s, 40 %HP to everyone near.
-**Depth list** (page 11 §22.2): ① `mech_drop_puddle` Hot Drip: a marked non-tank drops 3 m slag every 3 s for 12 s · ② `mech_add_wave` 2 Ashtusk Raiders · ③ `mech_charge_line` Forge Rush: an 18 m line, 25 %HP.
+**Depth list** (page 11 §22.2): ① `mech_drop_puddle` Hot Drip: a marked non-tank drops 3 m slag every 3 s for 12 s · ② `mech_add_wave` 2 Ashtusk Cutthroats · ③ `mech_charge_line` Forge Rush: an 18 m line, 25 %HP.
 **Loot:** `it_ghorzas_branding_iron` (one-handed mace), `it_forgemasters_apron` (medium chest), `set_kilnbreaker_iron` piece (hands), `uq_orc_steel_pauldrons` **[D-EXCL]** — heavy shoulders: taunting an enemy gives you −15% damage taken from it for 6 s.
 
 #### B2 · `b_the_great_bellows` — The Great Bellows (and Imbrasa, the chained flame)
@@ -1519,7 +1537,7 @@ Body: creature elemental ×2.6, molten slag with a crust (orange/black palette).
 | Whirling Axe | all | 8 m red circle around him | 2.5 s | 35 %HP | everyone but the tank out; the tank takes it with a cooldown (or leaves too) |
 | **Anvil Rain** | P2+ | 4 yellow **targeted** 4 m circles (3 if all smiths freed) | 3.0 s | 40 %HP each | spread across the room |
 | **Kiln Blast** (u) | P2+ | room-wide; blue **safe zones** under the 2 quench cisterns | 4.0 s | 110 %HP | cisterns |
-| War Horn | P3 | 3 Ashtusk Raiders + 1 Bonecaller run in | 1.5 s | — | Bonecaller first (interrupt Mend Flesh) |
+| War Horn | P3 | 3 Ashtusk Cutthroats + 1 Bonecaller run in | 1.5 s | — | Bonecaller first (interrupt Mend Flesh) |
 
 **Dialog:** pull (banner) — "The stunties built it. We FEED it." · Anvil Rain ⚠ — "Catch!" · Kiln Blast ⚠ (banner) — "Open the kiln!" · 30% (banner) — "Ashtusk! To me!" · death — "The Warhost... remembers... this keep..."
 **Challenge:** Kiln Blast's safe zones shrink from 5 m to 3 m over the cast. **Deep tuning:** Whirling Axe moves toward the healer at 2 m/s.
@@ -1631,11 +1649,11 @@ Oren says three caravans have already walked into the mesa and not come out.
 | `m_undead_tomb_attendant` | Tomb Attendant | chibi2 undead, gold collar, oil jar | 0.9 | **Anoint** (i) 2.5 s: heals an ally 30% and gives it +20% damage 10 s. |
 | `m_undead_sun_priest_husk` | Sun-Priest Husk | chibi2 undead, sun-disc headdress | 1 | **Sunflare** (i) 2.0 s: yellow **targeted** 4 m, 16 %HP + blind 2 s. |
 | `m_construct_glass_sentinel` | Glass Sentinel (elite) | creature golem ×1.8, clear glass with a gold core | 3.5 | **Refract**: red line 2 m × 22 m from its chest, 2.0 s, 25 %HP. Takes 50% less damage from light/holy. |
-| `m_elemental_prism_shard` | Prism Shard | creature shard ×1.3, clear with rainbow edges | 0.6 | **Prism Beam**: thin red line 1 m × 18 m, 1.5 s, 12 %HP. |
+| `m_sand_prism_shard` | Prism Shard | creature shard ×1.3, clear with rainbow edges | 0.6 | **Prism Beam**: thin red line 1 m × 18 m, 1.5 s, 12 %HP. |
 | `m_beast_dune_scarab` | Dune Scarab | creature beetle ×0.8, gold | 0.3 | swarms of 8; **Nibble** 2 %HP. |
 | `m_beast_glasstail_skitterer` | Glasstail Skitterer | creature spider ×1.3, sand colour, glass-tipped tail (new feature `stinger`, §22) | 1 | **Sting** 8 %HP + poison 1.5 %HP a second 6 s (dispellable). |
-| `m_humanoid_dunecutter_cutthroat` | Dunecutter Cutthroat | chibi2 human, desert wraps, curved knives | 1 | **Blind Sand**: 5 m cone, 1.5 s, blind 2 s; **Backstab** +100% from behind. |
-| `m_humanoid_dunecutter_sandcaller` | Dunecutter Sandcaller | chibi2 human, face-wrap, staff | 0.9 | **Sand Lash** 30° cone 10 m, 1.5 s, 12 %HP; **Grit Storm** 5 m **void zone** 12 s, 3 %HP / 0.5 s. |
+| `m_folk_dunecutter_cutthroat` | Dunecutter Cutthroat | chibi2 human, desert wraps, curved knives | 1 | **Blind Sand**: 5 m cone, 1.5 s, blind 2 s; **Backstab** +100% from behind. |
+| `m_folk_dunecutter_sandcaller` | Dunecutter Sandcaller | chibi2 human, face-wrap, staff | 0.9 | **Sand Lash** 30° cone 10 m, 1.5 s, 12 %HP; **Grit Storm** 5 m **void zone** 12 s, 3 %HP / 0.5 s. |
 | `m_beast_tomb_asp` | Tomb Asp | creature snake ×1.8, gold and black | 1 | **Spit**: 8 m line, 1.2 s, blind 3 s. |
 
 | # | Room | Pack |
@@ -1784,7 +1802,7 @@ Journal hint: *"Seven Glass Kings are carved on the outer seal. Six tombs were f
 
 **Dialog:** pull (banner, whisper) — "My brother kept the light. I kept everything else." · Cloud the Mirrors ⚠ — "Close your eyes." · death — "Now... you've seen me..."
 **Depth list** (page 11 §22.2): ① `mech_swap_places` Mirror Swap · ② `mech_arrow_pin` Unseen Shot: a 30 m line, root 1 s · ③ `mech_gaze` Do Not Look: dazed 3 s.
-**Loot:** `it_unseen_princes_wraps` (light chest), `it_sun_mirror_of_tamar` (off-hand focus; was `it_lamp_of_tamar`, light slot), `uq_seventh_kings_signet` **[D-EXCL]** — ring: +8% damage while you stand in a beneficial zone, a sun-shaft or a sun-patch; +8% dodge chance while you do not. **`leg_the_unseen_prince` [SECRET] [D-EXCL]** — back (cloak) legendary: after 3 s without taking damage you become **unseen** (enemies further than 8 m lose you); your first attack from unseen deals +60%.
+**Loot:** `it_unseen_princes_wraps` (light chest), `it_sun_mirror_of_tamar` (off-hand focus; was `it_lamp_of_tamar`, light slot), `uq_seventh_kings_signet` **[D-EXCL]** — ring: +8% damage while you stand in a beneficial zone, a sun-shaft or a sun-patch; +8% dodge chance while you do not. **`leg_the_unseen_prince` [SECRET] [D-EXCL]** — back (cloak) legendary: after 3 s without taking damage you become **unseen** (enemies further than 8 m lose you); your first attack from unseen deals +60%. Mount `it_mount_dune_sabrecat` (Dune Sabrecat, a sand-gold sabre cat; page 08 §24.3, also a Quiet Wake *Kindred* reward) **20%** per player.
 
 ### Set dropped here
 
@@ -1860,13 +1878,13 @@ to leave it.
 |---|---|---|---|---|
 | `m_construct_vault_warden` | Vault Warden (elite) | creature golem ×2.0, brass and sandstone, key-shaped head | 3.5 | **Lockdown**: 6 m red circle, 2.0 s, 20 %HP + rooted 2 s. **Seal**: +50% armour when another warden is within 10 m. |
 | `m_construct_brass_scarab` | Brass Scarab | creature beetle ×1.0, brass (construct) | 0.4 | **Drill** 4 %HP; in groups of 6; explode on death 2 m, 1 s, 6 %HP. |
-| `m_elemental_sand_wraith` | Sand Wraith | creature wraith ×1.3, sand-coloured, dissolving hem | 1 | **Scour** 20° cone 8 m, 1.5 s, 12 %HP. Physical damage −30% against it. |
-| `m_elemental_dust_devil` | Dust Devil | creature elemental ×1.0, whirl of sand (new `whirl` variant, §22) | 0.8 | moves on its own at 3 m/s as a 3 m **void zone**, 3 %HP / 0.5 s, knockback 4 m on touch. |
-| `m_humanoid_dunecutter_tunneler` | Dunecutter Tunneler | chibi2 human, goggles, shovel | 1 | **Undermine**: 4 m red circle, 2.0 s, 14 %HP + knocked down. |
-| `m_humanoid_dunecutter_hexblade` | Dunecutter Hexblade | chibi2 human, silver-inlaid scimitar | 1 | **Silver Curse**: a **curse** on a player — −30% healing received, 12 s (**dispel** it). Melee 7 %HP. |
-| `m_humanoid_dunecutter_sandcaller` | Dunecutter Sandcaller | (as d05) | 0.9 | as d05 |
+| `m_sand_sand_wraith` | Sand Wraith | creature wraith ×1.3, sand-coloured, dissolving hem | 1 | **Scour** 20° cone 8 m, 1.5 s, 12 %HP. Physical damage −30% against it. |
+| `m_sand_dust_devil` | Dust Devil | creature elemental ×1.0, whirl of sand (new `whirl` variant, §22) | 0.8 | moves on its own at 3 m/s as a 3 m **void zone**, 3 %HP / 0.5 s, knockback 4 m on touch. |
+| `m_folk_dunecutter_tunneler` | Dunecutter Tunneler | chibi2 human, goggles, shovel | 1 | **Undermine**: 4 m red circle, 2.0 s, 14 %HP + knocked down. |
+| `m_folk_dunecutter_hexblade` | Dunecutter Hexblade | chibi2 human, silver-inlaid scimitar | 1 | **Silver Curse**: a **curse** on a player — −30% healing received, 12 s (**dispel** it). Melee 7 %HP. |
+| `m_folk_dunecutter_sandcaller` | Dunecutter Sandcaller | (as d05) | 0.9 | as d05 |
 | `m_beast_vault_asp` | Vault Asp | creature snake ×1.6, black and gold bands | 1 | **Coil**: roots a player 2 s; **Venom** 1.5 %HP a second 8 s (dispellable poison). |
-| `m_aberration_coin_mimic` | Coin Mimic | creature mimic ×1.1, coin-heap shape | 1.5 | disguised as a coin pile; wakes when looted: **Gulp** 18 %HP + holds the player 2 s. (The only mimics are these, and they glint green on a second look — hover a coin pile for 2 s to see it.) |
+| `m_sand_coin_mimic` | Coin Mimic | creature mimic ×1.1, coin-heap shape | 1.5 | disguised as a coin pile; wakes when looted: **Gulp** 18 %HP + holds the player 2 s. (The only mimics are these, and they glint green on a second look — hover a coin pile for 2 s to see it.) |
 
 | # | Room | Pack |
 |---|---|---|
@@ -1976,7 +1994,7 @@ Body: chibi2 human ×1.5, huge goggles, a sand-auger. Health 28 H. Hask's Tunnel
 **Dialog:** pull (banner, a vast dry voice) — "Thieves and oath-keepers. The vault cannot tell you apart, and nor can I." · Dune Wall ⚠ — "The desert moves." · Storm Eye ⚠ (banner) — "Close your eyes, little ones." · 35% (banner) — "The oath is broken. I am free to bury you." · death — "Bind me... again. Please."
 **Challenge:** Oath of Binding needs 5 pips (everyone). **Deep tuning:** Binding Curse cannot be dispelled for its first 3 s.
 **Depth list** (page 11 §22.2): ① `mech_blight_cloud` a drifting sand cloud 5 m · ② `mech_wind_push` Desert Wind toward a sand-fall · ③ `mech_encase_mark` Sand Coffin: yellow 3 m, encased 2 s.
-**Loot:** `it_key_crown_of_the_sovereign` (medium helm), `it_sandstone_greatmaul` (two-handed mace), `it_bronze_key_ring` (ring), `set_oathkeeper_bronze` pieces (helm, legs), `uq_sovereigns_binding` **[D-EXCL]** — waist (was wrists): dispelling a curse from an ally gives both of you +10% damage for 6 s. `leg_the_unbound_dune` **[D-EXCL]** — boots legendary: every 10 s your next dodge roll leaves a 6 m-long **sand wall** behind you for 4 s that blocks enemy projectiles and pushes enemies 3 m.
+**Loot:** `it_key_crown_of_the_sovereign` (medium helm), `it_sandstone_greathammer` (two-handed mace), `it_bronze_key_ring` (ring), `set_oathkeeper_bronze` pieces (helm, legs), `uq_sovereigns_binding` **[D-EXCL]** — waist (was wrists): dispelling a curse from an ally gives both of you +10% damage for 6 s. `leg_the_unbound_dune` **[D-EXCL]** — boots legendary: every 10 s your next dodge roll leaves a 6 m-long **sand wall** behind you for 4 s that blocks enemy projectiles and pushes enemies 3 m.
 
 ### Secret boss — `b_tamar_the_first` — Tamar the First
 
@@ -2036,7 +2054,7 @@ Journal hint: *"The Coffer sits on something. The face in the wall wants to talk
 | Story quest | `q_the_thorned_heart` — "The Thorned Heart": find why the forest's thorns are growing toward Silverbough |
 | Run time target | Normal 26 min · Challenge 27 min (no timer; the journal records your best time) |
 | Brazier Shrines | Root Gate · after the Sporefather · after Orenn Thornbound |
-| Rarity slots (§2.9) | **C** Rootway (pack 1) · **C** Briar Maze (pack 3 or 5) · **R** Briar Maze (a Mauler of pack 4) · **G** Moonroot Pool (6) · *Challenge:* **C+** the Briar Maze patrol · **R+** Rootway (a Bramble Wolf of pack 2) · **W** Briar Maze (the pack that did not get the champion) · *Depth rooms:* Rootway, Briar Maze. Area rarities (a Giant's stomp, a Flaming burst) hurt Saplings like players' area damage does. |
+| Rarity slots (§2.9) | **C** Rootway (pack 1) · **C** Briar Maze (pack 3 or 5) · **R** Briar Maze (a Ravager of pack 4) · **G** Moonroot Pool (6) · *Challenge:* **C+** the Briar Maze patrol · **R+** Rootway (a Bramble Wolf of pack 2) · **W** Briar Maze (the pack that did not get the champion) · *Depth rooms:* Rootway, Briar Maze. Area rarities (a Giant's stomp, a Flaming burst) hurt Saplings like players' area damage does. |
 | Main family (page 10) | **beastkin** · also beast, fen, fae |
 | New lessons | **spreading damage-over-time** (a DoT that jumps to nearby allies), **beneficial zones** (green: stand in for a buff/heal), **root tethers** |
 
@@ -2091,25 +2109,25 @@ root for the rest of the run. A Sapling that dies wilts with a sound; the party 
 
 | id | Name | Body | H | Abilities |
 |---|---|---|---|---|
-| `m_beastkin_thornmane_mauler` | Thornmane Mauler | chibi2 beastkin (wolf-headed), thorn-wrapped arms | 1.2 | **Rend** 2 × 5 %HP + bleed 1 %HP a second 6 s. |
-| `m_beastkin_thornmane_prowler` | Thornmane Prowler | chibi2 beastkin, lean, bone knives | 1 | **Pounce** from hiding (it waits unseen until 10 m): 12 %HP + knockdown 1 s. |
+| `m_beastkin_thornmane_ravager` | Thornmane Ravager | chibi2 beastkin (wolf-headed), thorn-wrapped arms | 1.2 | **Rend** 2 × 5 %HP + bleed 1 %HP a second 6 s. |
+| `m_beastkin_thornmane_skulker` | Thornmane Skulker | chibi2 beastkin, lean, bone knives | 1 | **Pounce** from hiding (it waits unseen until 10 m): 12 %HP + knockdown 1 s. |
 | `m_beastkin_thornmane_moonseer` | Thornmane Moonseer | chibi2 beastkin, antler headdress, thorn staff | 0.9 | **Thornbind** (i) 2.0 s: roots a player 4 s with a white **tether** to the ground (breaks when a teammate hits the root, 0.3 H). **Blight Mend** (i): heal 30%. |
 | `m_beast_bramble_wolf` | Bramble Wolf | creature wolf ×1.4, thorns grown through the fur | 1 | **Thorn Coat**: melee attackers take 2 %HP per hit. **Bite** 6 %HP. |
 | `m_beast_silkrot_spider` | Silkrot Spider | creature spider ×1.4, grey-violet | 1 | **Web Spit**: yellow **targeted** 3 m, 1.5 s, slow 50% 4 s. **Rot Bite**: **spreading** poison — 1 %HP a second; every 4 s jumps to 1 ally within 4 m. |
-| `m_aberration_blight_sporecap` | Blight Sporecap | creature mushroom ×1.3, violet with grey spots | 0.8 | **Spore Puff**: 4 m cloud, 1.5 s, 3 %HP / 0.5 s for 6 s; the cloud **spreads** a Spore DoT to anyone passing through. |
-| `m_aberration_strangle_vine` | Strangle Vine | creature snake ×2.4, green-black, rooted (does not move) | 1.2 | **Lash** 8 m reach, 10 %HP; **Constrict**: pulls a player in over 2 s (white **tether**) unless the vine is hit for 20% of its health. |
-| `m_elemental_blight_wisp` | Blight Wisp | creature wisp ×1.1, sick green | 0.5 | explodes on death: 4 m **void zone**, 12 s, 3 %HP / 0.5 s. |
+| `m_fae_blight_sporecap` | Blight Sporecap | creature mushroom ×1.3, violet with grey spots | 0.8 | **Spore Puff**: 4 m cloud, 1.5 s, 3 %HP / 0.5 s for 6 s; the cloud **spreads** a Spore DoT to anyone passing through. |
+| `m_fae_strangle_vine` | Strangle Vine | creature snake ×2.4, green-black, rooted (does not move) | 1.2 | **Lash** 8 m reach, 10 %HP; **Constrict**: pulls a player in over 2 s (white **tether**) unless the vine is hit for 20% of its health. |
+| `m_fae_blight_wisp` | Blight Wisp | creature wisp ×1.1, sick green | 0.5 | explodes on death: 4 m **void zone**, 12 s, 3 %HP / 0.5 s. |
 | `m_beast_carrion_moth` | Carrion Moth | creature moth ×1.6, brown | 0.6 | **Dust Wing**: blinds 2 s in a 5 m cone. |
 
 | # | Room | Pack |
 |---|---|---|
-| 1 | Rootway, near | 3 Thornmane Maulers + 1 Moonseer |
-| 2 | Rootway, far | 2 Bramble Wolves + 2 Prowlers (hidden: a shimmer shows at 10 m) |
+| 1 | Rootway, near | 3 Thornmane Ravagers + 1 Moonseer |
+| 2 | Rootway, far | 2 Bramble Wolves + 2 Skulkers (hidden: a shimmer shows at 10 m) |
 | 3 | Briar Maze, north | 3 Blight Sporecaps + 2 Strangle Vines |
-| 4 | Briar Maze, centre | 2 Maulers + 1 Moonseer + 2 Bramble Wolves |
+| 4 | Briar Maze, centre | 2 Ravagers + 1 Moonseer + 2 Bramble Wolves |
 | 5 | Briar Maze, south | 4 Silkrot Spiders + 4 Blight Wisps |
-| 6 | Moonroot Pool | 2 Moonseers + 2 Maulers + 2 Carrion Moths |
-| — | *patrol* Briar Maze | 1 Mauler + 2 Bramble Wolves, 45 s loop |
+| 6 | Moonroot Pool | 2 Moonseers + 2 Ravagers + 2 Carrion Moths |
+| — | *patrol* Briar Maze | 1 Ravager + 2 Bramble Wolves, 45 s loop |
 
 ### Sub-bosses
 
@@ -2325,12 +2343,12 @@ still thirsty.
 | `m_undead_moonwell_sentinel` | Moonwell Sentinel (elite) | chibi2 elf ghost ×1.6, silver plate, glaive (material `ghost_silver`, §22) | 3.5 | **Glaive Arc**: 180° red cone 6 m, 2.0 s, 25 %HP. **Moonward** (Moonlit only): +40% armour. |
 | `m_undead_pale_huntress` | Pale Huntress | chibi2 elf ghost, longbow | 1 | **Silver Arrow**: red line 1 m × 30 m, 2.0 s, 18 %HP. |
 | `m_undead_weeping_acolyte` | Weeping Acolyte | chibi2 elf ghost, robes | 0.9 | **Mourning Hymn** (i) 3.0 s: all enemies within 20 m heal 20%. |
-| `m_elemental_moon_wisp` | Moon Wisp | creature wisp ×1.2, silver-white | 0.5 | **Moonbeam**: 1.5 s, 3 m red circle on a player, 12 %HP. Moonlit: casts twice. |
+| `m_fae_moon_wisp` | Moon Wisp | creature wisp ×1.2, silver-white | 0.5 | **Moonbeam**: 1.5 s, 3 m red circle on a player, 12 %HP. Moonlit: casts twice. |
 | `m_beast_silverwing_owl` | Silverwing Owl | creature owl ×1.8, white | 1 | **Dive**: 1.2 s swoop at a player, 10 %HP + knocked down. |
 | `m_beast_lamp_moth` | Moonmoth | creature moth ×1.5, pale blue | 0.5 | swarms of 4; **Dazzle** 2 s blind in 4 m. |
-| `m_aberration_starless_eye` | Starless Eye | creature horror ×0.9, one great eye, few tentacles | 0.8 | **Gaze**: a white **tether** to a player for 3 s; if unbroken (line of sight), 20 %HP + silence 2 s. Moonless: gaze twice as long. |
-| `m_aberration_well_drinker` | Well-Drinker | creature horror ×1.6, silver-veined black | 1.8 | **Drink Light**: a 5 m **donut** (safe hole at its feet), 2.0 s, 20 %HP outside the hole — get **close**. |
-| `m_elemental_moonshard_cluster` | Moonshard Cluster | creature shard ×1.2, silver | 0.7 | **Shatter**: on death 3 m, 1.5 s, 12 %HP. |
+| `m_fae_starless_eye` | Starless Eye | creature horror ×0.9, one great eye, few tentacles | 0.8 | **Gaze**: a white **tether** to a player for 3 s; if unbroken (line of sight), 20 %HP + silence 2 s. Moonless: gaze twice as long. |
+| `m_fae_well_drinker` | Well-Drinker | creature horror ×1.6, silver-veined black | 1.8 | **Drink Light**: a 5 m **donut** (safe hole at its feet), 2.0 s, 20 %HP outside the hole — get **close**. |
+| `m_fae_moonshard_cluster` | Moonshard Cluster | creature shard ×1.2, silver | 0.7 | **Shatter**: on death 3 m, 1.5 s, 12 %HP. |
 
 | # | Room | Pack |
 |---|---|---|
@@ -2683,6 +2701,8 @@ Body: creature crocodile ×3.8, scarred, a spear-head stuck in her back. Health 
 **Depth list** (page 11 §22.2): ① `mech_hurl_player` Pit Throw: 12 m · ② `mech_rotating_cross` a turning cleaver cross, 30 %HP · ③ `mech_mark_of_prey` Warmaster's Mark.
 **Loot:** `it_ashmane_cleaver` (one-handed axe, 2 drop as a pair), `it_warmasters_banner_cape` (back), `it_pit_victor_band` (ring), `set_pitchampion_leathers` pieces (helm, hands), `uq_favour_of_the_crowd` **[D-EXCL]** — neck: each dodge roll through a danger zone gives **Favour** (+2% damage per stack, 10 s, max 5). `leg_ashmanes_twin_cleavers` **[D-EXCL]** — one-handed axe legendary (a pair: equipping one in each hand counts as one legendary): every 3rd hit with the off-hand cleaver throws it: a 12 m line, 80% weapon damage, returns to your hand.
 
+**Depth Cache extra (d09 only):** from reward depth **R 10**, each Depth Cache here also rolls **1%** per player for the mount `it_mount_warhound` (Warmaster's Hound, an iron-collared war hound; page 08 §24.3).
+
 ### Secret boss — `b_old_gnash_undefeated` — Old Gnash, the Undefeated
 
 **Unlock (no-deaths):** win **all three Pit Rounds with no player deaths** (the Warhost counts; the portcullis to the Champions' Hall opens and a
@@ -2792,9 +2812,9 @@ glacier through Rimehold's wall. Captain Kaija Frostmere has sent two patrols in
 | `m_giant_stonehide_hurler` | Stonehide Hurler | chibi2 giant, sling of ice boulders | 1.5 | **Boulder**: yellow **targeted** 4 m, 2.0 s, 25 %HP. |
 | `m_beast_frost_stalker` | Frost Stalker | creature saber_cat ×1.6, white, blue stripes | 1.2 | hidden (unseen) until 8 m; **Pounce** 15 %HP + slow. |
 | `m_beast_rime_bear` | Rime Bear | creature bear ×1.8, white-blue | 2 | **Crushing Paw** 12 %HP; **Roar**: 6 m, 1.5 s, +2 Chill. |
-| `m_dragonkin_rime_whelp` | Rime Whelp | creature drake ×1.2, white | 1 | **Frost Breath**: 45° cone 8 m, 1.5 s, 12 %HP + 2 Chill. |
-| `m_elemental_frost_shard` | Frost Shard | creature shard ×1.3, blue-white | 0.7 | **Rime Nova**: on death, 4 m, 1.2 s, 10 %HP + 2 Chill. |
-| `m_elemental_snow_wraith` | Snow Wraith | creature wraith ×1.4, white | 1 | **Whiteout**: a 6 m **void zone** of blizzard that follows it, 2 %HP / 0.5 s + 1 Chill a second. |
+| `m_dragon_rime_whelp` | Rime Whelp | creature drake ×1.2, white | 1 | **Frost Breath**: 45° cone 8 m, 1.5 s, 12 %HP + 2 Chill. |
+| `m_frost_frost_shard` | Frost Shard | creature shard ×1.3, blue-white | 0.7 | **Rime Nova**: on death, 4 m, 1.2 s, 10 %HP + 2 Chill. |
+| `m_frost_snow_wraith` | Snow Wraith | creature wraith ×1.4, white | 1 | **Whiteout**: a 6 m **void zone** of blizzard that follows it, 2 %HP / 0.5 s + 1 Chill a second. |
 | `m_beast_ice_worm` | Ice Borer | creature worm ×1.8, white | 1.3 | **Burrow Up**: 4 m red circle under a player, 2.0 s, 20 %HP + knock-up. |
 
 | # | Room | Pack |
@@ -2840,7 +2860,7 @@ Body: chibi2 giant (woman) ×1.6, rune-bone circlet, a staff hung with ice bells
 
 | Field | Value |
 |---|---|
-| Body | chibi2 giant ×2.2, Stonehide chieftain, horned ice helm, a two-handed maul of glacier-blue stone |
+| Body | chibi2 giant ×2.2, Stonehide chieftain, horned ice helm, a two-handed hammer of glacier-blue stone |
 | Health | 118 H |
 | Phases | 100–50% · 50–0% (the whole camp floor becomes ice) |
 | Teaches | **slippery floors** and **falling hazards** |
@@ -2857,7 +2877,7 @@ Body: chibi2 giant (woman) ×1.6, rune-bone circlet, a staff hung with ice bells
 **Dialog:** pull (banner) — "Rimehold's wall will break. Your heads first." · Shatter ⚠ — "Ground breaks!" · Icicle ⚠ — "Look up, little ones!" · death — "Seidra... sing it... louder..."
 **Challenge:** Brazier Kick puts the brazier out for 10 s. **Deep tuning:** Icicle Storm hits 16.
 **Depth list** (page 11 §22.2): ① `mech_rolling_boulders` 3 ice boulders · ② `mech_hurl_player` Icebreaker's Throw: 12 m, onto ice · ③ `mech_encase_mark` Frozen Grip: encased 2 s.
-**Loot:** `it_glacierstone_maul` (two-handed mace), `it_horned_ice_helm` (heavy helm), `set_rimewarden_furs` piece (legs), `uq_icebreakers_cleats` **[D-EXCL]** — feet: immune to slipping on ice; +10% move speed on snow and ice.
+**Loot:** `it_glacierstone_hammer` (two-handed mace), `it_horned_ice_helm` (heavy helm), `set_rimewarden_furs` piece (legs), `uq_icebreakers_cleats` **[D-EXCL]** — feet: immune to slipping on ice; +10% move speed on snow and ice.
 
 #### B2 · `b_rimeweaver_seidra` — Rimeweaver Seidra
 
@@ -3020,9 +3040,9 @@ the bishop is still ringing it.
 | `m_undead_bellringer_ghoul` | Bellringer Ghoul | chibi2 undead, hunched, hand-bell | 0.8 | **Toll**: 8 m circle, 1.5 s, 10 %HP + silence 2 s. |
 | `m_beast_saltshell_crab` | Saltshell Crab | creature beetle ×1.5 re-skinned as a crab (new `crab` type, §22) | 1.2 | **Pincer** 10 %HP + disarm 2 s. Sidesteps behind the tank. |
 | `m_beast_deep_eel` | Deep Eel | creature snake ×2.2, pale | 1 | only in water; **Shock** chains to 2 players within 6 m, 8 %HP each. |
-| `m_aberration_lantern_gulper` | Lantern Gulper | creature frog ×2.2, deep-sea colours, a glowing lure on a stalk (new feature `lure`, §22) | 1.8 | **Lure**: its light charms the nearest player to walk to it 2 s; **Gulp** 25 %HP. Kill the lure (0.3 H) to stop both. |
-| `m_elemental_brine_elemental` | Brine Elemental | creature elemental ×1.5, seawater | 1.5 | **Undertow**: 6 m circle pull toward it over 2 s, then 12 %HP. |
-| `m_aberration_drowned_lamprey` | Salt Lamprey | creature worm ×0.8, grey | 0.4 | latches (as d02's leech), 3 %HP a second. |
+| `m_drowned_lantern_gulper` | Lantern Gulper | creature frog ×2.2, deep-sea colours, a glowing lure on a stalk (new feature `lure`, §22) | 1.8 | **Lure**: its light charms the nearest player to walk to it 2 s; **Gulp** 25 %HP. Kill the lure (0.3 H) to stop both. |
+| `m_drowned_brine_elemental` | Brine Elemental | creature elemental ×1.5, seawater | 1.5 | **Undertow**: 6 m circle pull toward it over 2 s, then 12 %HP. |
+| `m_drowned_salt_lamprey` | Salt Lamprey | creature worm ×0.8, grey | 0.4 | latches (as d02's leech), 3 %HP a second. |
 
 | # | Room | Pack |
 |---|---|---|
@@ -3252,11 +3272,11 @@ the "halls" between them are portals, not corridors.
 | `m_construct_clockwork_hound` | Clockwork Hound | creature hound ×1.4, brass plates, key in its back | 1 | **Wind-Up**: 2 s (key spins), then a 12 m dash line, 18 %HP. |
 | `m_construct_brass_sentry` | Brass Sentry | creature turret ×1.3 | 1.2 | **Burst**: red line 1 m × 25 m, 1.5 s, 3 × 6 %HP. Stationary; deploys where the Tinker-trained Oddrin put it. |
 | `m_construct_scrap_swarm` | Scrap Swarm | creature beetle ×0.7, bolts and springs | 0.4 | swarms of 8; **Nibble** 3 %HP; **Magnetise**: 4 near a player pull them together 2 m. |
-| `m_aberration_rift_tatter` | Rift Tatter | creature wraith ×1.5, violet-black, edges flickering | 1.2 | **Rift Step**: teleports behind a player; **Unmake**: 12 %HP + −10% max health for 10 s (stacks 3). |
-| `m_elemental_rift_shard` | Rift Shard | creature shard ×1.4, violet | 0.8 | **Tear**: opens a 2 m portal under a player: 1.5 s, they drop through and land 10 m away at a random spot. |
-| `m_aberration_unmade_thing` | Unmade Thing | creature horror ×1.6, half-constructed: brass ribs, tentacles | 2 | **Grasp** 12 %HP + root 2 s; **Undoing**: 6 m **void zone** where it dies, 20 s. |
+| `m_rift_rift_tatter` | Rift Tatter | creature wraith ×1.5, violet-black, edges flickering | 1.2 | **Rift Step**: teleports behind a player; **Unmake**: 12 %HP + −10% max health for 10 s (stacks 3). |
+| `m_rift_rift_shard` | Rift Shard | creature shard ×1.4, violet | 0.8 | **Tear**: opens a 2 m portal under a player: 1.5 s, they drop through and land 10 m away at a random spot. |
+| `m_rift_unmade_thing` | Unmade Thing | creature horror ×1.6, half-constructed: brass ribs, tentacles | 2 | **Grasp** 12 %HP + root 2 s; **Undoing**: 6 m **void zone** where it dies, 20 s. |
 | `m_construct_mirror_mannequin` | Mirror Mannequin | chibi2 human ×1.2, mirror-glass skin, no face | 1.2 | **Copy**: copies the last ability a player used on it, once (the ability's shape and damage, at 50%). |
-| `m_humanoid_riftwatch_deserter` | Riftwatch Deserter | chibi2 human (any), Riftwatch coat, rift staff | 1 | **Rift Bolt** 12 %HP; **Step Away** (teleports 10 m) when a melee attacker reaches it. |
+| `m_folk_riftwatch_deserter` | Riftwatch Deserter | chibi2 human (any), Riftwatch coat, rift staff | 1 | **Rift Bolt** 12 %HP; **Step Away** (teleports 10 m) when a melee attacker reaches it. |
 
 | # | Room | Pack |
 |---|---|---|
@@ -3474,16 +3494,16 @@ guarded by the Lord Castellan himself. Open it, and the Fire Court is next.
 | `m_kingsfire_arbalest` | Kingsfire Arbalest | chibi2 human, heavy crossbow | 1.2 | **Bolt**: red line 1 m × 35 m, 2.0 s, 30 %HP. |
 | `m_kingsfire_pyre_priest` | Pyre Priest | chibi2 human, ash-grey robes, a brazier-staff | 1.2 | **Pyre Blessing** (i) 2.5 s: +30% damage and a fire shield (reflects 10%) on an ally, 15 s (dispellable). **Immolate**: 1 player, 3 %HP a second 10 s, **spreading** 4 m. |
 | `m_kingsfire_knight_captain` | Kingsfire Knight-Captain (elite) | chibi2 human ×1.5, great helm, flame-edged greatsword | 4.5 | **Burning Sweep**: 180° red cone 8 m, 2.0 s, 35 %HP. **Rally**: all legionnaires within 15 m +20% damage. |
-| `m_fiend_cinder_imp` | Cinder Imp | creature imp ×1.1 | 0.5 | groups of 4; **Firebolt** 8 %HP; **Hop** 8 m away when hit twice. |
-| `m_fiend_ashhound` | Ashhound | creature hound ×1.8, black with lava cracks | 1.5 | **Scorch Bite** 12 %HP + burn; on death a 3 m fire **void zone** 8 s. |
-| `m_elemental_magma_elemental` | Magma Elemental | creature elemental ×1.8, lava | 2 | **Eruption**: 3 red circles 3 m round a player, 2.0 s, 25 %HP. Takes −50% fire damage. |
-| `m_fiend_gate_brute` | Gate Brute (elite) | creature titan ×1.5, fiendish, chains wrapped round the arms | 5 | **Chain Lash**: 12 m line, 2.0 s, 35 %HP + pull 5 m. **Ground Pound**: 8 m circle, 2.5 s, 40 %HP. |
+| `m_kingsfire_cinder_imp` | Cinder Imp | creature imp ×1.1 | 0.5 | groups of 4; **Firebolt** 8 %HP; **Hop** 8 m away when hit twice. |
+| `m_demon_slagback_hound` | Slagback Hound | creature hound ×1.8, black with lava cracks | 1.5 | **Scorch Bite** 12 %HP + burn; on death a 3 m fire **void zone** 8 s. |
+| `m_kingsfire_magma_elemental` | Magma Elemental | creature elemental ×1.8, lava | 2 | **Eruption**: 3 red circles 3 m round a player, 2.0 s, 25 %HP. Takes −50% fire damage. |
+| `m_demon_gate_brute` | Gate Brute (elite) | creature titan ×1.5, fiendish, chains wrapped round the arms | 5 | **Chain Lash**: 12 m line, 2.0 s, 35 %HP + pull 5 m. **Ground Pound**: 8 m circle, 2.5 s, 40 %HP. |
 | `m_construct_legion_ballista` | Legion Ballista | creature turret ×1.6 (a ballista on wheels) | 1.5 | **Siege Bolt**: red line 3 m × 50 m, 3.0 s, 70 %HP + knockback. |
 
 | # | Room | Pack |
 |---|---|---|
 | 1 | Undercroft, near | 4 Legionnaires (shield wall) + 1 Pyre Priest |
-| 2 | Undercroft, far | 2 Ashhounds + 4 Cinder Imps + 1 Magma Elemental |
+| 2 | Undercroft, far | 2 Slagback Hounds + 4 Cinder Imps + 1 Magma Elemental |
 | 3 | Barracks of Ash, bunks | 1 Knight-Captain + 3 Legionnaires + 2 Arbalests |
 | 4 | Barracks of Ash, forge | 1 Gate Brute + 2 Pyre Priests |
 | 5 | Chain Room | 1 Knight-Captain + 1 Gate Brute + 1 Pyre Priest (the hardest pack in the game before d14; pull the brute away) |
@@ -3689,7 +3709,7 @@ Sarn Veydrec, is waiting in the Reliquary to make sure you don't.
                                             |
                                   (S4) Ashfall Stair
                                             |
-      [seal 5] Phoenix Roost [s2]  == [B3] THE CINDER DOME (Ashwing)
+      [seal 5] Phoenix Nest [s2]  == [B3] THE CINDER DOME (Ashwing)
                                             |
                                           (S3)
                                             |
@@ -3714,7 +3734,7 @@ Sarn Veydrec, is waiting in the Reliquary to make sure you don't.
 | The Ash Altar | 30×30 | B2 Morvaine; S2 before it |
 | Scriptorium | 20×20 | s1 the Ash Scribe (optional), **seal 4** (strips *Burning Word*) |
 | The Cinder Dome | 36×36, open to a shaft of red sky | B3 Ashwing; S3 before it |
-| Phoenix Roost | 20×20, a nest of glowing coals | s2 Cinderbrood (optional), **seal 5** (strips *Rebirth*) |
+| Phoenix Nest | 20×20, a nest of glowing coals | s2 Cinderbrood (optional), **seal 5** (strips *Rebirth*) |
 | Ashfall Stair | 10×30, ash falls like snow | S4, pack 6 |
 | The Herald's Nave | 42×42 | END Sarn Veydrec |
 | The First Fire | 34×34 | secret boss |
@@ -3723,15 +3743,15 @@ Sarn Veydrec, is waiting in the Reliquary to make sure you don't.
 
 | id | Name | Body | H | Abilities |
 |---|---|---|---|---|
-| `m_humanoid_ash_priest` | Ash Priest | chibi2 human, grey skin, eyes sewn shut, a bone censer | 1.3 | **Ash Hymn** (i) 2.5 s: heals allies 25%; **Blind Faith**: can't be blinded or charmed. |
-| `m_humanoid_ash_zealot` | Ash Zealot | chibi2 human, ash-smeared, two burning sickles | 1.5 | **Self-Immolate** at 25%: runs at the nearest player, 3 m burst after 2 s, 40 %HP. Kill or stun. |
+| `m_kingsfire_ash_priest` | Ash Priest | chibi2 human, grey skin, eyes sewn shut, a bone censer | 1.3 | **Ash Hymn** (i) 2.5 s: heals allies 25%; **Blind Faith**: can't be blinded or charmed. |
+| `m_kingsfire_ash_zealot` | Ash Zealot | chibi2 human, ash-smeared, two burning sickles | 1.5 | **Self-Immolate** at 25%: runs at the nearest player, 3 m burst after 2 s, 40 %HP. Kill or stun. |
 | `m_undead_ash_wraith` | Ash Wraith | creature wraith ×1.6, grey ash, coal-red eyes | 1.5 | **Smother**: white **tether** to a player 3 s, silence + 5 %HP a second; break by distance (14 m). |
 | `m_construct_relic_golem` | Relic Golem (elite) | creature golem ×2.4, obsidian with a gold reliquary chest | 5 | **Relic Slam**: 8 m circle, 2.5 s, 40 %HP. **Relic Ward**: soaks the next 20% of its health in damage every 20 s (gold shield). |
-| `m_fiend_cinder_cantor` | Cinder Cantor | creature imp ×1.3, with a tiny bell | 0.8 | **Chant**: +15% haste to fiends within 15 m (dispellable, stacking 3). |
+| `m_demon_cinder_cantor` | Cinder Cantor | creature imp ×1.3, with a tiny bell | 0.8 | **Chant**: +15% haste to fiends within 15 m (dispellable, stacking 3). |
 | `m_beast_ash_phoenixling` | Phoenixling | creature phoenix ×1.0 | 0.7 | **Rekindle**: rises once after death at 50% unless its ash pile is stood on for 1 s. |
 | `m_undead_burned_hero` | Burned Hero (elite) | chibi2 (any race) undead ×1.6 in burned plate — relics of heroes the King burned; each wears a random old dungeon set's look | 4 | **Old Technique**: uses one of: Grave Dig (d01), Tongue tether (d02), Powder Keg soak (d03), Court Dance checkerboard (d05) — shown by the icon over its head. |
-| `m_elemental_cinder_sprite` | Cinder Sprite | creature elemental ×0.8 | 0.5 | **Flare** 3 m, 1.2 s, 12 %HP; grows as d04's Cinder Spawn. |
-| `m_aberration_reliquary_mimic` | Reliquary Mimic | creature mimic ×1.8, a gold reliquary | 3 | disguised as a seal's decoy (2 per seal room, only 1 real seal): **Gulp** 30 %HP. 3 s of looking (hover) reveals it. |
+| `m_kingsfire_cinder_sprite` | Cinder Sprite | creature elemental ×0.8 | 0.5 | **Flare** 3 m, 1.2 s, 12 %HP; grows as d04's Cinder Spawn. |
+| `m_kingsfire_reliquary_mimic` | Reliquary Mimic | creature mimic ×1.8, a gold reliquary | 3 | disguised as a seal's decoy (2 per seal room, only 1 real seal): **Gulp** 30 %HP. 3 s of looking (hover) reveals it. |
 
 | # | Room | Pack |
 |---|---|---|
@@ -3742,7 +3762,7 @@ Sarn Veydrec, is waiting in the Reliquary to make sure you don't.
 | 5 | Bone Gallery, far (seal 3 guards) | 1 Relic Golem + 1 Burned Hero + 1 Reliquary Mimic |
 | 6 | Ashfall Stair | 2 Relic Golems (elite pair) + 4 Phoenixlings |
 | — | Scriptorium (seal 4 guards) | 3 Ash Priests + 1 Burned Hero |
-| — | Phoenix Roost (seal 5 guards) | 6 Phoenixlings + 4 Cinder Sprites |
+| — | Phoenix Nest (seal 5 guards) | 6 Phoenixlings + 4 Cinder Sprites |
 
 ### Sub-bosses
 
@@ -3761,7 +3781,7 @@ Body: chibi2 human ×1.8, grey, a quill of bone as long as a spear, a book of bu
 
 #### s2 · `b_cinderbrood` — Cinderbrood
 
-Body: creature phoenix ×3.6, red-gold, a nest of glowing coals under her. Health 64 H. Phoenix Roost (optional). Enrage 5:00.
+Body: creature phoenix ×3.6, red-gold, a nest of glowing coals under her. Health 64 H. Phoenix Nest (optional). Enrage 5:00.
 
 | Ability | Shape / colour | Warn | Damage | Counterplay |
 |---|---|---|---|---|
@@ -4015,17 +4035,17 @@ has the army of Last Light at the foot of the Cinder Stair. The party goes up fi
 | `m_kingsfire_legionnaire` | Kingsfire Legionnaire | (as d13) | 1.5 | as d13: **Shield Wall** in lines of 3+, **Stab** 10 %HP |
 | `m_kingsfire_arbalest` | Kingsfire Arbalest | (as d13) | 1.2 | as d13: **Bolt** red line 1 m × 35 m, 2.0 s, 30 %HP |
 | `m_kingsfire_pyrecaller` | Legion Pyrecaller | chibi2 orc (an Ashtusk loyalist), fire-binder's robes | 1.2 | **Pyre** (i) 2.5 s: 8 m red circle, 30 %HP. **Ignite Ally**: a Legionnaire's weapon burns, +30% damage (magic **dispel**). |
-| `m_humanoid_court_courtier` | Poisoner Courtier | chibi2 elf, silk court coat, `top_hat` | 1 | **Gift**: a curse on the healer, 3 %HP a second 10 s (curse **dispel**). **Slip Away** at 50%: untargetable 3 s and reappears 10 m away. |
-| `m_humanoid_court_guard` | Court Guard (elite) | chibi2 human ×1.5, gilded `great_helm`, halberd | 5 | **Halberd Sweep**: 180° red cone 8 m, 2.0 s, 35 %HP. **Hold the Door**: immune to knockback; taunts the nearest non-tank if its tank is more than 10 m away. |
+| `m_kingsfire_court_courtier` | Poisoner Courtier | chibi2 elf, silk court coat, `top_hat` | 1 | **Gift**: a curse on the healer, 3 %HP a second 10 s (curse **dispel**). **Slip Away** at 50%: untargetable 3 s and reappears 10 m away. |
+| `m_kingsfire_court_guard` | Court Guard (elite) | chibi2 human ×1.5, gilded `great_helm`, halberd | 5 | **Halberd Sweep**: 180° red cone 8 m, 2.0 s, 35 %HP. **Hold the Door**: immune to knockback; taunts the nearest non-tank if its tank is more than 10 m away. |
 | `m_construct_forged_legionnaire` | Forged Legionnaire | creature golem ×1.8, black iron, orange eyes | 2 | **Forge Heat**: 6 m aura, 2 %HP a second. **Quench Weakness**: takes +50% from Ice- and Water-tagged damage. |
 | `m_construct_obsidian_sentinel` | Obsidian Sentinel (elite) | creature golem ×2.6, obsidian, lava seams | 5.5 | **Obsidian Shards**: 3 yellow **targeted** 5 m circles, 2.0 s, 25 %HP. **Reflect**: while its shield glows (4 s in every 15 s), 30% of spell damage comes back at the caster. |
-| `m_elemental_cinder_elemental` | Cinder Elemental | creature elemental ×2.4, fire | 2 | **Flare** at 30%: 10 m red circle, 2.0 s, 40 %HP; leaves a 10 m **void zone** 10 s. |
-| `m_elemental_living_cinder` | Living Cinder | creature wisp ×1.0, orange | 0.2 | swarms of 6; **Kindle**: explodes on touching a player, 8 %HP. |
-| `m_fiend_cinder_imp` | Cinder Imp | (as d13) | 0.5 | as d13 |
+| `m_kingsfire_cinder_elemental` | Cinder Elemental | creature elemental ×2.4, fire | 2 | **Flare** at 30%: 10 m red circle, 2.0 s, 40 %HP; leaves a 10 m **void zone** 10 s. |
+| `m_kingsfire_living_cinder` | Living Cinder | creature wisp ×1.0, orange | 0.2 | swarms of 6; **Kindle**: explodes on touching a player, 8 %HP. |
+| `m_kingsfire_cinder_imp` | Cinder Imp | (as d13) | 0.5 | as d13 |
 | `m_beast_ash_hound` | Ash Hound | creature hound ×1.8, charcoal with coal-red eyes | 1.2 | **Fixate** a random player 8 s; **Scorched Bite** 10 %HP + burn 1 %HP a second 4 s. |
 | `m_beast_magma_salamander` | Magma Salamander | creature crocodile ×2.0, dark red with lava seams | 2.2 | **Lava Wallow**: untargetable in a lava channel for 4 s. **Spit**: 6 m **void zone**, 15 s, 3 %HP / 0.5 s. |
-| `m_dragonkin_fire_whelp` | Fire Whelp | creature drake ×1.2, red-gold | 0.8 | **Whelp Breath**: 30° cone 8 m, 1.5 s, 14 %HP; flies. |
-| `m_dragonkin_firewing_drake` | Firewing Drake (elite) | creature drake ×2.6, wings on | 5 | **Wing Gust**: knockback 8 m. **Cinder Breath**: 60° cone 14 m, 2.0 s, 40 %HP. |
+| `m_dragon_fire_whelp` | Fire Whelp | creature drake ×1.2, red-gold | 0.8 | **Whelp Breath**: 30° cone 8 m, 1.5 s, 14 %HP; flies. |
+| `m_dragon_firewing_drake` | Firewing Drake (elite) | creature drake ×2.6, wings on | 5 | **Wing Gust**: knockback 8 m. **Cinder Breath**: 60° cone 14 m, 2.0 s, 40 %HP. |
 
 | # | Room | Pack |
 |---|---|---|
@@ -4111,7 +4131,7 @@ which is roughly what holds him still; the rest is damage.
 **Dialog** (the Narrator; he is a gate): pull — *"The gate unhooks itself from the wall and steps forward."* · Grind ⚠ — *"It leans into the road."* · death — *"It falls across the road, and becomes a bridge."*
 **Challenge:** **Molten Jaw** — every 30 s his jaw opens: a 60° red cone 20 m in front, 2.0 s, 45 %HP; the Gatehouse Heat soak is in front of him too, so soakers must time it (soak after the jaw). **Deep tuning:** Portcullis walls stand 30 s.
 **Depth list** (page 11 §22.2): ① `mech_rolling_boulders` 3 rubble blocks roll down the road toward the party · ② `mech_add_shieldbearer` 2 gate wardens: −50% damage to him while they live · ③ `mech_spark_runner` sparks along the lava seams
-**Loot:** `it_obsidian_gate_maul` (two-handed mace), `it_portcullis_greaves` (heavy legs), `it_lava_seam_wand` (wand), `set_kingsfire_regalia` piece (hands), `uq_cinderjaw_grille` **[D-EXCL]** — shield: blocking a hit pushes the attacker back 1.5 m (bosses: 0.5 m, 5 s cooldown).
+**Loot:** `it_obsidian_gate_hammer` (two-handed mace), `it_portcullis_greaves` (heavy legs), `it_lava_seam_wand` (wand), `set_kingsfire_regalia` piece (hands), `uq_cinderjaw_grille` **[D-EXCL]** — shield: blocking a hit pushes the attacker back 1.5 m (bosses: 0.5 m, 5 s cooldown).
 
 #### B2 · `b_three_petitioners` — The Three Petitioners
 
@@ -4453,7 +4473,7 @@ Ysolde's Echo waits at the empty brazier for someone to finish it.
 | `m_folk_spire_seer` | Spire Seer | chibi2 elf, hood, orb | 1.5 | **Foretell** (i) 2.5 s: marks the party — +30% damage taken for 20 s. |
 | `m_beast_moth_of_memory` | Memory Moth | creature moth ×1.4, white wings with eyes | 0.3 | swarms of 4; **Forget**: removes your most recent buff. |
 | `m_tear_the_mouth` | Mouth | creature worm ×2.4, open maw, dark violet | 2 | **Bite**: red 5 m at its head, 2.0 s, 40 %HP. **Whisper**: a warning line that is always a lie. |
-| `m_elemental_rift_shard` | Rift Shard | (as d12) | 0.8 | as d12, and **Opening**: where it dies a 3 m rift stands for 20 s. |
+| `m_rift_rift_shard` | Rift Shard | (as d12) | 0.8 | as d12, and **Opening**: where it dies a 3 m rift stands for 20 s. |
 | `m_tear_loom_spider` | Loom Spider | creature spider ×2.4, white, grey legs | 2.5 | **Thread**: a white **tether** that pulls a player toward the platform's edge at 2 m/s; breaks at 15 m. |
 | `m_tear_loose_thread` | Loose Thread | creature wisp ×1.4, trailing white threads | 0.5 | **Unravel**: on death, a random player's biggest buff is removed. |
 
@@ -4721,7 +4741,7 @@ are made of me. Everything is made of me, one strand wide. Let go, and rest."*
    the prize of page 14's longest quest, **"The Long Carry"** (proposed id `q_the_long_carry`; page 14 owns it): starting at
    Brightwater's hearth in Hearthvale, carry a live coal to a shrine in **each of the eleven regions** (a region with a world
    boss, page 13: the shrine opens after that world boss is killed once; Hearthvale, Mossfen and Spire Isle, which have none:
-   after a named rare of the region, page 10) and back to the Spire. It echoes the pitch: *everyone starts with a torch.*
+   after a named rare of the region, page 10) and back to the Spire. It echoes the pitch: *everyone starts with a small fire to carry.*
 2. At Saelith, the reply "We carry the first fire of the March."
 3. At the Unwoven, the reply "The March is dreaming..." — then kill it.
 
@@ -4916,7 +4936,7 @@ Generated from the sections above (a data test should regenerate and compare, pa
 | `b_unwoven` | The Unwoven | end | d16 |
 | `b_marchheart` | The Marchheart, the Wildmarch Dreaming | secret | d16 |
 
-### 21.3 Every dungeon monster (149 rows, 148 distinct — the Sandcaller is listed in d05 and d06; d15 and d16 reuse d13's Legionnaire, Arbalest and Cinder Imp and d12's Rift Shard without a new row; page 10 owns the families and AI and may move these ids to its 18 families — `m_humanoid_*`, `m_aberration_*`, `m_elemental_*`, `m_fiend_*` and `m_dragonkin_*` are the older prefixes)
+### 21.3 Every dungeon monster (149 rows, 148 distinct — the Sandcaller is listed in d05 and d06; d15 and d16 reuse d13's Legionnaire, Arbalest and Cinder Imp and d12's Rift Shard without a new row; page 10 owns the families and AI; every id now uses one of page 10's 18 families — §21.7 lists the old `m_humanoid_*`/`m_aberration_*`/`m_elemental_*`/`m_fiend_*`/`m_dragonkin_*` ids)
 
 | id | Name | Body | H | First seen |
 |---|---|---|---|---|
@@ -4925,15 +4945,15 @@ Generated from the sections above (a data test should regenerate and compare, pa
 | `m_beast_cairn_rat` | Cairn Rat | creature rat ×1.6 | 0.3 | d01 |
 | `m_undead_grave_hound` | Grave Hound | creature hound ×1.3, bone-plated | 1 | d01 |
 | `m_undead_bone_mender` | Bone Mender | chibi2 undead, robe, bone staff | 0.8 | d01 |
-| `m_humanoid_grave_robber` | Grave Robber | chibi2 human, hood, shovel | 1 | d01 |
+| `m_folk_grave_robber` | Grave Robber | chibi2 human, hood, shovel | 1 | d01 |
 | `m_undead_barrow_guard` | Barrow Guard (elite) | chibi2 undead ×1.3, round shield, hand axe | 3 | d01 |
 | `m_beast_tomb_moth` | Tomb Moth | creature moth ×1.3, grey | 0.5 | d01 |
 | `m_undead_drowned_millhand` | Drowned Millhand | chibi2 undead, waterlogged smock, sack hook | 1 | d02 |
 | `m_beast_fen_leech` | Fen Leech | creature worm ×0.5, pale green | 0.4 | d02 |
 | `m_beast_bog_croaker` | Bog Croaker | creature frog ×1.7 | 1 | d02 |
-| `m_aberration_bog_slime` | Bog Slime | creature slime ×1.3, peat brown | 1.5 | d02 |
-| `m_humanoid_fen_poacher` | Fen Poacher | chibi2 human, reed hat, crossbow | 1 | d02 |
-| `m_elemental_marsh_lure` | Marsh Lure | creature wisp ×1.0, sickly green-white | 0.6 | d02 |
+| `m_fen_bog_slime` | Bog Slime | creature slime ×1.3, peat brown | 1.5 | d02 |
+| `m_folk_fen_poacher` | Fen Poacher | chibi2 human, reed hat, crossbow | 1 | d02 |
+| `m_fen_marsh_lure` | Marsh Lure | creature wisp ×1.0, sickly green-white | 0.6 | d02 |
 | `m_beast_reed_serpent` | Reed Serpent | creature snake ×1.5 | 1 | d02 |
 | `m_beast_fen_eel` | Fen Eel | creature snake ×1.0, eel-blue, stays in channels | 0.5 | d02 |
 | `m_construct_millstone_roller` | Millstone Roller (elite) | creature golem ×1.5 hugging a millstone | 3 | d02 |
@@ -4945,54 +4965,54 @@ Generated from the sections above (a data test should regenerate and compare, pa
 | `m_beast_tunnel_beetle` | Tunnel Beetle | creature beetle ×1.5, rust-brown | 1.2 | d03 |
 | `m_beast_rock_centipede` | Rock Centipede | creature centipede ×1.6 | 1 | d03 |
 | `m_beast_shaft_bat` | Shaft Bat | creature bat ×1.3 | 0.3 | d03 |
-| `m_elemental_firedamp` | Firedamp Pocket | creature wisp ×1.2, dull orange, does not move | 0.5 | d03 |
-| `m_aberration_gravelmaw_grub` | Gravelmaw Grub | creature worm ×0.7, grey | 0.4 | d03 |
-| `m_orc_ashtusk_raider` | Ashtusk Raider | chibi2 orc, hide armour, two axes | 1 | d04 |
+| `m_construct_firedamp` | Firedamp Pocket | creature wisp ×1.2, dull orange, does not move | 0.5 | d03 |
+| `m_beast_gravelmaw_grub` | Gravelmaw Grub | creature worm ×0.7, grey | 0.4 | d03 |
+| `m_orc_ashtusk_cutthroat` | Ashtusk Cutthroat | chibi2 orc, hide armour, two axes | 1 | d04 |
 | `m_orc_ashtusk_spearman` | Ashtusk Spearman | chibi2 orc, long spear, round shield | 1.2 | d04 |
 | `m_orc_ashtusk_bonecaller` | Ashtusk Bonecaller | chibi2 orc, bone mask, rattle staff | 0.9 | d04 |
 | `m_orc_ashtusk_forgebrute` | Ashtusk Forgebrute (elite) | chibi2 orc ×1.8, smith's apron, sledge | 3.5 | d04 |
 | `m_beast_forge_hound` | Forge Hound | creature hound ×1.4, cinder-coated | 1 | d04 |
-| `m_fiend_slag_imp` | Slag Imp | creature imp ×1.0, dripping molten | 0.5 | d04 |
-| `m_elemental_cinder_spawn` | Cinder Spawn | creature elemental ×0.8, fire | 0.8 | d04 |
+| `m_demon_slag_imp` | Slag Imp | creature imp ×1.0, dripping molten | 0.5 | d04 |
+| `m_kingsfire_cinder_spawn` | Cinder Spawn | creature elemental ×0.8, fire | 0.8 | d04 |
 | `m_construct_anvil_sentinel` | Anvil Sentinel (elite) | creature golem ×2.0, anvil-headed dwarf construct in orc chains | 3 | d04 |
 | `m_orc_ashtusk_whipmaster` | Ashtusk Whipmaster | chibi2 orc, whip, keys on belt | 1 | d04 |
 | `m_undead_glass_mummy` | Glass-Wrapped Dead | chibi2 undead, linen wraps studded with glass | 1.2 | d05 |
 | `m_undead_tomb_attendant` | Tomb Attendant | chibi2 undead, gold collar, oil jar | 0.9 | d05 |
 | `m_undead_sun_priest_husk` | Sun-Priest Husk | chibi2 undead, sun-disc headdress | 1 | d05 |
 | `m_construct_glass_sentinel` | Glass Sentinel (elite) | creature golem ×1.8, clear glass with a gold core | 3.5 | d05 |
-| `m_elemental_prism_shard` | Prism Shard | creature shard ×1.3, clear with rainbow edges | 0.6 | d05 |
+| `m_sand_prism_shard` | Prism Shard | creature shard ×1.3, clear with rainbow edges | 0.6 | d05 |
 | `m_beast_dune_scarab` | Dune Scarab | creature beetle ×0.8, gold | 0.3 | d05 |
 | `m_beast_glasstail_skitterer` | Glasstail Skitterer | creature spider ×1.3, sand colour, glass-tipped tail (new feature `stinger`, §22) | 1 | d05 |
-| `m_humanoid_dunecutter_cutthroat` | Dunecutter Cutthroat | chibi2 human, desert wraps, curved knives | 1 | d05 |
-| `m_humanoid_dunecutter_sandcaller` | Dunecutter Sandcaller | chibi2 human, face-wrap, staff | 0.9 | d05 |
+| `m_folk_dunecutter_cutthroat` | Dunecutter Cutthroat | chibi2 human, desert wraps, curved knives | 1 | d05 |
+| `m_folk_dunecutter_sandcaller` | Dunecutter Sandcaller | chibi2 human, face-wrap, staff | 0.9 | d05 |
 | `m_beast_tomb_asp` | Tomb Asp | creature snake ×1.8, gold and black | 1 | d05 |
 | `m_construct_vault_warden` | Vault Warden (elite) | creature golem ×2.0, brass and sandstone, key-shaped head | 3.5 | d06 |
 | `m_construct_brass_scarab` | Brass Scarab | creature beetle ×1.0, brass (construct) | 0.4 | d06 |
-| `m_elemental_sand_wraith` | Sand Wraith | creature wraith ×1.3, sand-coloured, dissolving hem | 1 | d06 |
-| `m_elemental_dust_devil` | Dust Devil | creature elemental ×1.0, whirl of sand (new `whirl` variant, §22) | 0.8 | d06 |
-| `m_humanoid_dunecutter_tunneler` | Dunecutter Tunneler | chibi2 human, goggles, shovel | 1 | d06 |
-| `m_humanoid_dunecutter_hexblade` | Dunecutter Hexblade | chibi2 human, silver-inlaid scimitar | 1 | d06 |
-| `m_humanoid_dunecutter_sandcaller` | Dunecutter Sandcaller | (as d05) | 0.9 | d06 |
+| `m_sand_sand_wraith` | Sand Wraith | creature wraith ×1.3, sand-coloured, dissolving hem | 1 | d06 |
+| `m_sand_dust_devil` | Dust Devil | creature elemental ×1.0, whirl of sand (new `whirl` variant, §22) | 0.8 | d06 |
+| `m_folk_dunecutter_tunneler` | Dunecutter Tunneler | chibi2 human, goggles, shovel | 1 | d06 |
+| `m_folk_dunecutter_hexblade` | Dunecutter Hexblade | chibi2 human, silver-inlaid scimitar | 1 | d06 |
+| `m_folk_dunecutter_sandcaller` | Dunecutter Sandcaller | (as d05) | 0.9 | d06 |
 | `m_beast_vault_asp` | Vault Asp | creature snake ×1.6, black and gold bands | 1 | d06 |
-| `m_aberration_coin_mimic` | Coin Mimic | creature mimic ×1.1, coin-heap shape | 1.5 | d06 |
-| `m_beastkin_thornmane_mauler` | Thornmane Mauler | chibi2 beastkin (wolf-headed), thorn-wrapped arms | 1.2 | d07 |
-| `m_beastkin_thornmane_prowler` | Thornmane Prowler | chibi2 beastkin, lean, bone knives | 1 | d07 |
+| `m_sand_coin_mimic` | Coin Mimic | creature mimic ×1.1, coin-heap shape | 1.5 | d06 |
+| `m_beastkin_thornmane_ravager` | Thornmane Ravager | chibi2 beastkin (wolf-headed), thorn-wrapped arms | 1.2 | d07 |
+| `m_beastkin_thornmane_skulker` | Thornmane Skulker | chibi2 beastkin, lean, bone knives | 1 | d07 |
 | `m_beastkin_thornmane_moonseer` | Thornmane Moonseer | chibi2 beastkin, antler headdress, thorn staff | 0.9 | d07 |
 | `m_beast_bramble_wolf` | Bramble Wolf | creature wolf ×1.4, thorns grown through the fur | 1 | d07 |
 | `m_beast_silkrot_spider` | Silkrot Spider | creature spider ×1.4, grey-violet | 1 | d07 |
-| `m_aberration_blight_sporecap` | Blight Sporecap | creature mushroom ×1.3, violet with grey spots | 0.8 | d07 |
-| `m_aberration_strangle_vine` | Strangle Vine | creature snake ×2.4, green-black, rooted (does not move) | 1.2 | d07 |
-| `m_elemental_blight_wisp` | Blight Wisp | creature wisp ×1.1, sick green | 0.5 | d07 |
+| `m_fae_blight_sporecap` | Blight Sporecap | creature mushroom ×1.3, violet with grey spots | 0.8 | d07 |
+| `m_fae_strangle_vine` | Strangle Vine | creature snake ×2.4, green-black, rooted (does not move) | 1.2 | d07 |
+| `m_fae_blight_wisp` | Blight Wisp | creature wisp ×1.1, sick green | 0.5 | d07 |
 | `m_beast_carrion_moth` | Carrion Moth | creature moth ×1.6, brown | 0.6 | d07 |
 | `m_undead_moonwell_sentinel` | Moonwell Sentinel (elite) | chibi2 elf ghost ×1.6, silver plate, glaive (material `ghost_silver`, §22) | 3.5 | d08 |
 | `m_undead_pale_huntress` | Pale Huntress | chibi2 elf ghost, longbow | 1 | d08 |
 | `m_undead_weeping_acolyte` | Weeping Acolyte | chibi2 elf ghost, robes | 0.9 | d08 |
-| `m_elemental_moon_wisp` | Moon Wisp | creature wisp ×1.2, silver-white | 0.5 | d08 |
+| `m_fae_moon_wisp` | Moon Wisp | creature wisp ×1.2, silver-white | 0.5 | d08 |
 | `m_beast_silverwing_owl` | Silverwing Owl | creature owl ×1.8, white | 1 | d08 |
 | `m_beast_lamp_moth` | Moonmoth | creature moth ×1.5, pale blue | 0.5 | d08 |
-| `m_aberration_starless_eye` | Starless Eye | creature horror ×0.9, one great eye, few tentacles | 0.8 | d08 |
-| `m_aberration_well_drinker` | Well-Drinker | creature horror ×1.6, silver-veined black | 1.8 | d08 |
-| `m_elemental_moonshard_cluster` | Moonshard Cluster | creature shard ×1.2, silver | 0.7 | d08 |
+| `m_fae_starless_eye` | Starless Eye | creature horror ×0.9, one great eye, few tentacles | 0.8 | d08 |
+| `m_fae_well_drinker` | Well-Drinker | creature horror ×1.6, silver-veined black | 1.8 | d08 |
+| `m_fae_moonshard_cluster` | Moonshard Cluster | creature shard ×1.2, silver | 0.7 | d08 |
 | `m_orc_pit_fighter` | Pit Fighter | chibi2 orc, net and trident or axe and buckler | 1.2 | d09 |
 | `m_orc_blood_drummer` | Blood Drummer | chibi2 orc, war drum on its back | 1 | d09 |
 | `m_orc_ashtusk_beastmaster` | Beast-Handler | chibi2 orc, goad and whip | 1 | d09 |
@@ -5007,9 +5027,9 @@ Generated from the sections above (a data test should regenerate and compare, pa
 | `m_giant_stonehide_hurler` | Stonehide Hurler | chibi2 giant, sling of ice boulders | 1.5 | d10 |
 | `m_beast_frost_stalker` | Frost Stalker | creature saber_cat ×1.6, white, blue stripes | 1.2 | d10 |
 | `m_beast_rime_bear` | Rime Bear | creature bear ×1.8, white-blue | 2 | d10 |
-| `m_dragonkin_rime_whelp` | Rime Whelp | creature drake ×1.2, white | 1 | d10 |
-| `m_elemental_frost_shard` | Frost Shard | creature shard ×1.3, blue-white | 0.7 | d10 |
-| `m_elemental_snow_wraith` | Snow Wraith | creature wraith ×1.4, white | 1 | d10 |
+| `m_dragon_rime_whelp` | Rime Whelp | creature drake ×1.2, white | 1 | d10 |
+| `m_frost_frost_shard` | Frost Shard | creature shard ×1.3, blue-white | 0.7 | d10 |
+| `m_frost_snow_wraith` | Snow Wraith | creature wraith ×1.4, white | 1 | d10 |
 | `m_beast_ice_worm` | Ice Borer | creature worm ×1.8, white | 1.3 | d10 |
 | `m_undead_drowned_parishioner` | Drowned Parishioner | chibi2 undead (human), Sunday clothes rotted, barnacles | 1 | d11 |
 | `m_undead_brine_chorister` | Brine Chorister | chibi2 undead, choir robe, a mouth that leaks seawater | 1 | d11 |
@@ -5017,47 +5037,47 @@ Generated from the sections above (a data test should regenerate and compare, pa
 | `m_undead_bellringer_ghoul` | Bellringer Ghoul | chibi2 undead, hunched, hand-bell | 0.8 | d11 |
 | `m_beast_saltshell_crab` | Saltshell Crab | creature beetle ×1.5 re-skinned as a crab (new `crab` type, §22) | 1.2 | d11 |
 | `m_beast_deep_eel` | Deep Eel | creature snake ×2.2, pale | 1 | d11 |
-| `m_aberration_lantern_gulper` | Lantern Gulper | creature frog ×2.2, deep-sea colours, a glowing lure on a stalk (new feature `lure`, §22) | 1.8 | d11 |
-| `m_elemental_brine_elemental` | Brine Elemental | creature elemental ×1.5, seawater | 1.5 | d11 |
-| `m_aberration_drowned_lamprey` | Salt Lamprey | creature worm ×0.8, grey | 0.4 | d11 |
+| `m_drowned_lantern_gulper` | Lantern Gulper | creature frog ×2.2, deep-sea colours, a glowing lure on a stalk (new feature `lure`, §22) | 1.8 | d11 |
+| `m_drowned_brine_elemental` | Brine Elemental | creature elemental ×1.5, seawater | 1.5 | d11 |
+| `m_drowned_salt_lamprey` | Salt Lamprey | creature worm ×0.8, grey | 0.4 | d11 |
 | `m_construct_half_made_golem` | Half-Made Golem (elite) | creature golem ×2.0, one arm missing, wires trailing, violet core | 4 | d12 |
 | `m_construct_clockwork_hound` | Clockwork Hound | creature hound ×1.4, brass plates, key in its back | 1 | d12 |
 | `m_construct_brass_sentry` | Brass Sentry | creature turret ×1.3 | 1.2 | d12 |
 | `m_construct_scrap_swarm` | Scrap Swarm | creature beetle ×0.7, bolts and springs | 0.4 | d12 |
-| `m_aberration_rift_tatter` | Rift Tatter | creature wraith ×1.5, violet-black, edges flickering | 1.2 | d12 |
-| `m_elemental_rift_shard` | Rift Shard | creature shard ×1.4, violet | 0.8 | d12 |
-| `m_aberration_unmade_thing` | Unmade Thing | creature horror ×1.6, half-constructed: brass ribs, tentacles | 2 | d12 |
+| `m_rift_rift_tatter` | Rift Tatter | creature wraith ×1.5, violet-black, edges flickering | 1.2 | d12 |
+| `m_rift_rift_shard` | Rift Shard | creature shard ×1.4, violet | 0.8 | d12 |
+| `m_rift_unmade_thing` | Unmade Thing | creature horror ×1.6, half-constructed: brass ribs, tentacles | 2 | d12 |
 | `m_construct_mirror_mannequin` | Mirror Mannequin | chibi2 human ×1.2, mirror-glass skin, no face | 1.2 | d12 |
-| `m_humanoid_riftwatch_deserter` | Riftwatch Deserter | chibi2 human (any), Riftwatch coat, rift staff | 1 | d12 |
+| `m_folk_riftwatch_deserter` | Riftwatch Deserter | chibi2 human (any), Riftwatch coat, rift staff | 1 | d12 |
 | `m_kingsfire_legionnaire` | Kingsfire Legionnaire | chibi2 human, black plate with red-glass inlay, tower shield, short sword | 1.5 | d13 |
 | `m_kingsfire_arbalest` | Kingsfire Arbalest | chibi2 human, heavy crossbow | 1.2 | d13 |
 | `m_kingsfire_pyre_priest` | Pyre Priest | chibi2 human, ash-grey robes, a brazier-staff | 1.2 | d13 |
 | `m_kingsfire_knight_captain` | Kingsfire Knight-Captain (elite) | chibi2 human ×1.5, great helm, flame-edged greatsword | 4.5 | d13 |
-| `m_fiend_cinder_imp` | Cinder Imp | creature imp ×1.1 | 0.5 | d13 |
-| `m_fiend_ashhound` | Ashhound | creature hound ×1.8, black with lava cracks | 1.5 | d13 |
-| `m_elemental_magma_elemental` | Magma Elemental | creature elemental ×1.8, lava | 2 | d13 |
-| `m_fiend_gate_brute` | Gate Brute (elite) | creature titan ×1.5, fiendish, chains wrapped round the arms | 5 | d13 |
+| `m_kingsfire_cinder_imp` | Cinder Imp | creature imp ×1.1 | 0.5 | d13 |
+| `m_demon_slagback_hound` | Slagback Hound | creature hound ×1.8, black with lava cracks | 1.5 | d13 |
+| `m_kingsfire_magma_elemental` | Magma Elemental | creature elemental ×1.8, lava | 2 | d13 |
+| `m_demon_gate_brute` | Gate Brute (elite) | creature titan ×1.5, fiendish, chains wrapped round the arms | 5 | d13 |
 | `m_construct_legion_ballista` | Legion Ballista | creature turret ×1.6 (a ballista on wheels) | 1.5 | d13 |
-| `m_humanoid_ash_priest` | Ash Priest | chibi2 human, grey skin, eyes sewn shut, a bone censer | 1.3 | d14 |
-| `m_humanoid_ash_zealot` | Ash Zealot | chibi2 human, ash-smeared, two burning sickles | 1.5 | d14 |
+| `m_kingsfire_ash_priest` | Ash Priest | chibi2 human, grey skin, eyes sewn shut, a bone censer | 1.3 | d14 |
+| `m_kingsfire_ash_zealot` | Ash Zealot | chibi2 human, ash-smeared, two burning sickles | 1.5 | d14 |
 | `m_undead_ash_wraith` | Ash Wraith | creature wraith ×1.6, grey ash, coal-red eyes | 1.5 | d14 |
 | `m_construct_relic_golem` | Relic Golem (elite) | creature golem ×2.4, obsidian with a gold reliquary chest | 5 | d14 |
-| `m_fiend_cinder_cantor` | Cinder Cantor | creature imp ×1.3, with a tiny bell | 0.8 | d14 |
+| `m_demon_cinder_cantor` | Cinder Cantor | creature imp ×1.3, with a tiny bell | 0.8 | d14 |
 | `m_beast_ash_phoenixling` | Phoenixling | creature phoenix ×1.0 | 0.7 | d14 |
 | `m_undead_burned_hero` | Burned Hero (elite) | chibi2 (any race) undead ×1.6 in burned plate — relics of heroes the King burned; each wears a random old dungeon set's look | 4 | d14 |
-| `m_elemental_cinder_sprite` | Cinder Sprite | creature elemental ×0.8 | 0.5 | d14 |
-| `m_aberration_reliquary_mimic` | Reliquary Mimic | creature mimic ×1.8, a gold reliquary | 3 | d14 |
+| `m_kingsfire_cinder_sprite` | Cinder Sprite | creature elemental ×0.8 | 0.5 | d14 |
+| `m_kingsfire_reliquary_mimic` | Reliquary Mimic | creature mimic ×1.8, a gold reliquary | 3 | d14 |
 | `m_kingsfire_pyrecaller` | Legion Pyrecaller | chibi2 orc, fire-binder's robes | 1.2 | d15 |
-| `m_humanoid_court_courtier` | Poisoner Courtier | chibi2 elf, silk court coat, `top_hat` | 1 | d15 |
-| `m_humanoid_court_guard` | Court Guard (elite) | chibi2 human ×1.5, gilded `great_helm`, halberd | 5 | d15 |
+| `m_kingsfire_court_courtier` | Poisoner Courtier | chibi2 elf, silk court coat, `top_hat` | 1 | d15 |
+| `m_kingsfire_court_guard` | Court Guard (elite) | chibi2 human ×1.5, gilded `great_helm`, halberd | 5 | d15 |
 | `m_construct_forged_legionnaire` | Forged Legionnaire | creature golem ×1.8, black iron | 2 | d15 |
 | `m_construct_obsidian_sentinel` | Obsidian Sentinel (elite) | creature golem ×2.6, obsidian, lava seams | 5.5 | d15 |
-| `m_elemental_cinder_elemental` | Cinder Elemental | creature elemental ×2.4, fire | 2 | d15 |
-| `m_elemental_living_cinder` | Living Cinder | creature wisp ×1.0, orange | 0.2 | d15 |
+| `m_kingsfire_cinder_elemental` | Cinder Elemental | creature elemental ×2.4, fire | 2 | d15 |
+| `m_kingsfire_living_cinder` | Living Cinder | creature wisp ×1.0, orange | 0.2 | d15 |
 | `m_beast_ash_hound` | Ash Hound | creature hound ×1.8, charcoal | 1.2 | d15 |
 | `m_beast_magma_salamander` | Magma Salamander | creature crocodile ×2.0, lava seams | 2.2 | d15 |
-| `m_dragonkin_fire_whelp` | Fire Whelp | creature drake ×1.2, red-gold | 0.8 | d15 |
-| `m_dragonkin_firewing_drake` | Firewing Drake (elite) | creature drake ×2.6, wings | 5 | d15 |
+| `m_dragon_fire_whelp` | Fire Whelp | creature drake ×1.2, red-gold | 0.8 | d15 |
+| `m_dragon_firewing_drake` | Firewing Drake (elite) | creature drake ×2.6, wings | 5 | d15 |
 | `m_tear_rift_shade` | Rift Shade | creature wraith ×1.6, grey-blue, white outline | 1.5 | d16 |
 | `m_tear_rift_stalker` | Rift Stalker | creature saber_cat ×2.0, translucent white | 2 | d16 |
 | `m_construct_threshold_warden` | Threshold Warden (elite) | creature golem ×2.6, pale stone | 5 | d16 |
@@ -5264,8 +5284,11 @@ Every item here is a **Quest item** (it cannot be traded; canon 00 §12.1 W18). 
 
 | Old | New | Why |
 |---|---|---|
+| the 48 dungeon monster ids with the old prefixes `m_humanoid_*`, `m_aberration_*`, `m_elemental_*`, `m_fiend_*`, `m_dragonkin_*` (e.g. `m_humanoid_grave_robber`, `m_aberration_bog_slime`, `m_fiend_cinder_imp`, `m_fiend_ashhound` Ashhound, `m_elemental_rift_shard`, `m_dragonkin_fire_whelp`) | page 10's 18 families: `humanoid` → `folk` (or `kingsfire` for the Fire King's court and cult), `aberration`/`elemental` → the region's family (`fen`, `sand`, `fae`, `frost`, `drowned`, `rift`, `kingsfire`, `construct`, `beast`), `fiend` → `demon`, `dragonkin` → `dragon`. Two merge into page 10's open-world rows (`m_fen_bog_slime`, `m_kingsfire_cinder_imp`); the Ashhound becomes the **Slagback Hound** `m_demon_slagback_hound` (page 10 has an Ash Hound, `m_demon_ash_hound`, and page 08 an `it_mount_ash_hound`); the Salt Lamprey's id follows its name (`m_drowned_salt_lamprey`). Every §21.3 row shows the new id | page 10 §3/§13: an id's middle must be a page 10 family (consistency sweep) |
+| `m_beastkin_thornmane_prowler` Thornmane Prowler | `m_beastkin_thornmane_skulker` Thornmane Skulker (page 10's id) | "Prowl" is banned |
 | Heroic / Mythic+ rows | **Challenge:** / **Deep tuning:** + **Depth list** | W3, W4 |
 | Ember Shrine (checkpoint) | **Brazier Shrine** | "ember" |
+| `d03_deepdelve` "Deepdelve Mines" (and the zone `sz_deepdelve_slopes`) | `d03_shaft_seven` "Shaft Seven Mines" (`sz_shaft_seven_slopes`, page 01) | "delve" is banned (`_SWEEP_R2` §2) |
 | `set_deepdelver` "Deepdelver's Harness" | `set_deepshaft_harness` "Deepshaft Harness" | "Delver" is banned |
 | `npc_delver_shieldbearer` / `_mender` / `_blade` / `_bow` | `npc_wayfarer_shieldbearer` / `_mender` / `_blade` / `_bow` | same |
 | `set_emberbane_plate` "Emberbane Plate" | `set_firebreaker_plate` "Firebreaker Plate" | "ember" |
@@ -5274,7 +5297,7 @@ Every item here is a **Quest item** (it cannot be traded; canon 00 §12.1 W18). 
 | Forge Hound's **Ember Bite** | **Cinder Bite** | "ember" |
 | Ember Tide (d13, d14 room-wide) | **Flood of Fire** | "ember" |
 | `b_emberbrood` Emberbrood | `b_cinderbrood` Cinderbrood | "ember" |
-| `m_fiend_ember_imp_cantor` Ember Cantor | `m_fiend_cinder_cantor` Cinder Cantor | "ember" |
+| `m_fiend_ember_imp_cantor` Ember Cantor | `m_demon_cinder_cantor` Cinder Cantor | "ember" |
 | Ember Checker, Ember Tithe | Cinder Checker, Fire Tithe | "ember" |
 | `it_ember_nest_ring`, `it_ember_edge_glaive`, `it_ember_king_seal_ring` | `it_coal_nest_ring`, `it_flame_edge_glaive`, `it_fire_king_seal_ring` | "ember" |
 | Ashmother Veyra, Keeper of the First Ember; the room "The First Ember" | Keeper of the **Oldest Coal**; the room "The Hearth Below" | "ember" |
@@ -5287,12 +5310,13 @@ Every item here is a **Quest item** (it cannot be traded; canon 00 §12.1 W18). 
 | d01 Pell's **Snuff** (darkness) | **Smoke Pots** | no darkness mechanics |
 | d08 Gloamwing's Drawn to Light; Oruvel's Swallow the Light | Drawn to Glow; Drink the Glow | same |
 | d08 Archmage's **Starfall** | **Star Scatter** | banned name |
+| `it_sleepers_maul`, `it_gullet_tooth_maul`, `it_sandstone_greatmaul`, `it_glacierstone_maul`, `it_obsidian_gate_maul`; `m_beastkin_thornmane_mauler`; `m_orc_ashtusk_raider`; room Phoenix Roost | `it_sleepers_hammer`, `it_gullet_tooth_hammer`, `it_sandstone_greathammer`, `it_glacierstone_hammer`, `it_obsidian_gate_hammer`; `m_beastkin_thornmane_ravager` (page 10's id); `m_orc_ashtusk_cutthroat` (page 10's id); Phoenix Nest | "maul", "raid", "roost" are on the banned list |
 | Maul (d01 secret, d10 bear), Glacier Maul, Tail Swipe, Blink (d12, d13), Last Stand (d13) | Peat Hammer, Crushing Paw, Glacier Hammer, Tail Sweep, Rift Step / Step Away / Hop, Hold the Line | banned names |
 | trinkets (14) | **souls** `soul_<snake>` (see §21.4) | no trinket slot |
 | wrist items (`it_leechhide_bracers`, `uq_unshattered_vambraces`, `uq_death_roll_bracers`, `it_tidelink_bracers`, `it_tidewife_bangle`, …) | hands / waist / neck / ring (`it_leechhide_gloves`, `uq_unshattered_gauntlets`, `uq_death_roll_girdle`, `it_tidelink_gloves`, `it_tidewife_band`) | no wrist slot |
 | `it_moonwater_veil` | `it_moonwater_hood` | "veil" |
 | Dunecutter Sandcaller's "veil" | face-wrap | "veil" |
-| r04 `b_ember_king_kaedros`, `b_vaelkyr_emberwing`, `leg_emberwing_pinion`, `it_mount_emberwing_whelp`, `set_emberlord_regalia`, `m_ember_pyrecaller`, `m_dragonkin_emberwing_drake` | `b_fire_king_kaedros`, `b_vaelkyr_firewing`, `leg_firewing_pinion`, `it_mount_firewing_whelp`, `set_kingsfire_regalia`, `m_kingsfire_pyrecaller`, `m_dragonkin_firewing_drake` | "ember" |
+| r04 `b_ember_king_kaedros`, `b_vaelkyr_emberwing`, `leg_emberwing_pinion`, `it_mount_emberwing_whelp`, `set_emberlord_regalia`, `m_ember_pyrecaller`, `m_dragonkin_emberwing_drake` | `b_fire_king_kaedros`, `b_vaelkyr_firewing`, `leg_firewing_pinion`, `it_mount_firewing_whelp`, `set_kingsfire_regalia`, `m_kingsfire_pyrecaller`, `m_dragon_firewing_drake` | "ember" |
 | r04 Prince Aurel, the Heir in the Kiln (`b_heir_in_the_kiln`) | **Ysa Varn, the Kindled Child** (`b_ysa_varn_kindled`) | page 01's canon: the King lost a **daughter** |
 | r05 Veil realm, Veil Rifts, Veil Drain, Veil Sickness, `b_veilhound_*`, `b_saelith_veilwarden`, `set_veilwoven`, `it_mount_veilhound`, `m_*_veil_*`, `uq_threshold_keystone` | the **Underside**, rifts, Rift Drain, Rift Sickness, `b_rifthound_*`, `b_saelith_spirewarden`, `set_spirewoven`, `it_mount_rifthound`, `m_tear_*` / `m_folk_spire_*`, `uq_threshold_lodestone` | "veil"; "keystone" is banned |
 | r05 Hearthvale Ember (`it_hearthvale_ember`), `q_the_last_ember` | Hearthvale Coal (`it_hearthvale_coal`), "The Long Carry" (`q_the_long_carry`, proposed) | "ember" |

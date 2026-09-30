@@ -268,7 +268,8 @@ cooldown bigger than 30% less damage taken and its threat depends on standing ne
 
 ### 5.1 What Tank focus turns on
 
-Choosing **Tank** as role focus (page 06 §Role focus; free, 5 s cast, out of combat) gives the shared
+Setting the canon **Role focus** switch (00 §6: in the spellbook, out of combat only, saved per Loadout; page
+06 §Role focus; free, 5 s cast) to **Hybrid** queues the tactician as **Tank** in the Dungeon Finder, gives the shared
 **Stalwart** passive (+10% max health, +10% armour) and makes these class changes:
 
 | Change | Rule |
@@ -279,7 +280,7 @@ Choosing **Tank** as role focus (page 06 §Role focus; free, 5 s cast, out of co
 | Muster Point | becomes **Field Standard** (§5.2) |
 | Hold Fast | becomes **Shield Wall** (§5.3) |
 | Outflank | also **Taunts** the target for 3 s (page 05 §Taunt) |
-| Shared taunt | the tactician is one of the tank-capable classes that gets the shared taunt at level 10 (page 06 §Shared verbs) |
+| Shared taunt | the tactician is one of the tank-capable classes that gets the shared taunt **Provoke** at level 10 (page 07 ladder; page 05 §13.4) |
 
 ### 5.2 Field Standard (Muster Point in Tank focus)
 
@@ -416,7 +417,7 @@ changing a pick costs gold at the Unbinder (reuse: Farhold `js/retrain.js`). Ids
 | `leg_the_last_command` | The Last Command | main hand, crossbow | **Leads From the Front** — every Order you give also applies to **you** at 50% strength | `b_grief_in_iron`, Grief in Iron (world boss, [page 13](../13-WORLD-BOSSES.md)) |
 | `leg_ever_unfolding_map` | The Ever-Unfolding Map | off hand, field map | **Two Camps, One Road** — Muster Point has 2 charges; an ally stepping into one point may jump to the other (once per 10 s per ally) | `b_oddrin_the_unmaker` Vell Oddrin, the Unmaker (`d12_unmade_workshop` end boss, page 12) |
 | `leg_forced_march_sabatons` | Sabatons of the Forced March | feet | **Forced March** — Outflank leaves a 10 m trail for 4 s: allies on it +30% move speed; Forward! lasts 12 s instead of 6 | `b_carrion_crown` The Carrion Crown (`cinder_steppe` world boss, page 13) |
-| `leg_signet_of_seven_armies` | Signet of Seven Armies | ring | **Seven Banners** — +1 follower slot; your followers take 25% less area damage; On My Mark makes each follower's next hit a critical | `b_castellan_brandt` Lord Castellan Aurel Brandt (`d15_fire_court`, was r04; Normal and Challenge) |
+| `leg_signet_of_seven_armies` | Signet of Seven Armies | ring | **Seven Banners** — +1 follower slot; your followers take 25% less area damage; On My Mark makes each follower's next hit a critical | `b_castellan_vorhane` Lord Castellan Vorhane (`d13_cindergate` end boss, page 12; Normal and Challenge) |
 | `uq_quartermasters_coat` | The Quartermaster's Coat | chest | **Stores Opened** — while you stand in your Muster Point or Field Standard circle you regain 10 Tempo a second | `b_razorback_rider_krunn` Round Two: Krunn and Razorback (`d09_warmasters_pit` main boss) |
 | `uq_drillmasters_whistle` | Drillmaster's Whistle | neck | **Sharp Blast** — Initiative fills every **5 s** instead of 6 | `b_oruvel_moon_drinker` Oruvel, That Which Drank the Moon (`d08_moonwell_ruins` end boss) |
 | `uq_turncoat_spur` | The Turncoat's Spur | feet | **Wrong Side of the Line** — Redeploy may target a non-boss enemy (swap places with it); 45 s cooldown when used that way | `d06_sandsworn_vault`, rare elite in the vault's side hall |
@@ -498,5 +499,5 @@ rough 0.1, speed 0.5, jitter 0.06) — a steady, clipped mid voice. Lines go thr
   `soul_standing_orders` and `soul_unbroken_standard`.
 - **Removed**: raid groups, "up to 10 allies", the raid rotation and raid columns; Heroic/Mythic+ set sources.
 - **Re-sourced**: War Table set r04 → Challenge d13–d16 + Depth 10+; The Last Command `b_queen_ysmere` (r02) →
-  `b_grief_in_iron`; Signet `b_castellan_brandt` r04 → `d15_fire_court`; `b_ember_king_kaedros` → `b_fire_king_kaedros`.
+  `b_grief_in_iron`; Signet `b_castellan_brandt` (r04, no longer exists) → `b_castellan_vorhane` (`d13_cindergate`); `b_ember_king_kaedros` → `b_fire_king_kaedros`.
 - Order receiver rule rewritten for tab targeting (your friendly target, `F1`–`F5`) instead of "the ally under the crosshair".

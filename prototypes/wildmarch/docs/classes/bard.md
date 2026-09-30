@@ -247,6 +247,10 @@ The bard heals by **keeping Hearthsong playing all fight** and turning its other
 talents. It is a steady, whole-party healer with one big burst (*Homecoming*) and a cheat-death; it is weak at
 saving one person from a sudden spike, because it has only one targeted heal (*Grace Note*).
 
+**Role focus** (canon 00 §6): the bard uses the shared **Role focus** switch in the spellbook (out of combat,
+saved per Loadout). **Hybrid** queues it as **Healer**; the spells themselves turn into their healer versions
+through the talents in §5.2, which a Hybrid Loadout normally takes. **Primary** queues it as Support.
+
 ### 5.1 The healer kit
 
 | Spell | As a healer | Numbers |
@@ -272,7 +276,7 @@ Spell healing affixes (page 08), a **Lute** off hand (+8% spell healing), the he
 
 ### 5.4 Dungeon Finder and how well it heals
 
-A bard with Hearthsong learned (level 10) may queue as **Healer**.
+A bard with Hearthsong learned (level 10) and Role focus on **Hybrid** queues as **Healer**.
 
 | Content | Bard healer vs a primary healer (cleric, priest, oracle, druid, shaman) |
 |---|---|
@@ -443,7 +447,7 @@ Source: the final boss's chest at **Depth 10 or deeper**, any dungeon ([page 12]
 |---|---|---|---|---|
 | `leg_the_last_string` | **The Last String** | off hand (Lute) | *One String Left*: while the bard's Tempo is under 20, every start counts as **on the beat** and verses build every **2 s** | final boss of `d11_saltdeep_cathedral` (Challenge), 6% |
 | `leg_horn_of_the_gathering` | **Horn of the Gathering** | off hand (Warhorn) | *Call to the Road*: *Forced March* **pulls every ally** within 40 m to your side (a 10 m leap each), then applies | the `cinder_steppe` world boss ([page 13](../13-WORLD-BOSSES.md)), 4% |
-| `leg_crown_of_nine_encores` | **Crown of Nine Encores** | head | *Nine Encores*: Standing Ovation can be held on **2 targets**; its cooldown is 90 → 60 s | secret boss of `d15_fire_court` (Challenge), 10% |
+| `leg_crown_of_nine_encores` | **Crown of Nine Encores** | head | *Nine Encores*: Standing Ovation can be held on **2 targets**; its cooldown is 90 → 60 s | secret boss `b_ysa_varn_kindled` of `d15_fire_court` (Challenge), 10% |
 | `leg_tamsins_metronome` | **Tamsin's Metronome** | amulet | *Perfect Time*: each Finale performed **on the beat** within **1 s** of a boss cast finishing is **+50%** stronger and refunds 2 verses | the final boss's chest at Depth 15+, any dungeon, 1.5% |
 | `leg_requiem_for_a_king` | **Requiem for a King** | main hand (dagger) | *Royal Dirge*: the Dirge's damage-taken bonus **doubles on bosses** and *Last Verse* deals +100% to bosses | the `frostmantle` world boss, 4% |
 
@@ -460,7 +464,7 @@ Source: the final boss's chest at **Depth 10 or deeper**, any dungeon ([page 12]
 
 | id | Name | Socket in | Requirement | Power | Source |
 |---|---|---|---|---|---|
-| `soul_encore` | **Soul of the Encore** | chest (armour) | **Bard only** | every **Finale** plays **again 2 s later at 50%** strength (Forced March, Homecoming, Last Verse; a Medley's extra Finales do not repeat) | the secret boss of `d08_moonwell_ruins` (Normal or Challenge), 4%; or any monster at 0.02% (great luck) |
+| `soul_encore` | **Soul of the Encore** | chest (armour) | **Bard only** | every **Finale** plays **again 2 s later at 50%** strength (Forced March, Homecoming, Last Verse; a Medley's extra Finales do not repeat) | the secret boss `b_the_drowned_moon` of `d08_moonwell_ruins` (Normal or Challenge), 4%; or any monster at 0.02% (great luck) |
 | `soul_steady_hand` | **Soul of the Steady Hand** | jewellery (ring or amulet) | **Bard only** | the beat window widens from ±0.15 s to **±0.25 s**, and reaching **In the Pocket** gives **+1 verse** | quest reward: the Whisperwood story chapter's bard version (page 14); or Depth 15+ final chest, 1% |
 
 ---
@@ -519,3 +523,6 @@ breath 0.22, rough 0.05, speed 0.58, jitter 0.12` (brighter and faster than `mag
 | calling 3 "night performance" | a performance at Rimehold's open-air amphitheatre |
 | `q_bard_calling_1/2/3` | `q_calling_bard_1/2/3` |
 | sources `r04_ember_court`, `r03_sunken_choir`, `r02_glacier_throne`, Mythic+ | `d15_fire_court` Challenge, `d11_saltdeep_cathedral` Challenge, `frostmantle` world boss, Depth 10+/15+ |
+
+- **Sweep (round 2)**: §5 names the canon Role focus switch (Hybrid = Healer); secret-boss drop sources name
+  their bosses (`b_ysa_varn_kindled`, `b_the_drowned_moon`).

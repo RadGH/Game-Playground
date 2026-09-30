@@ -213,8 +213,10 @@ Other players see the charmed creature's nameplate in green with "(charmed by *n
 
 ## 5. The hybrid role — Tank (Many Faces)
 
-The enchanter queues as **Tank** when **Many Faces** is on. The switch is in the spellbook (`K`), **out of combat
-only** (3 s to swap, no key needed); it unlocks at Calling 6. Many Faces is an **illusion tank**: the enchanter
+**Many Faces** is the enchanter's name for the shared **Role focus** switch (canon 00 §6) set to **Hybrid**: it
+is in the spellbook (`K`), **out of combat only** (3 s to swap, no key needed), saved per Loadout, and it unlocks
+at Calling 6. Hybrid queues the enchanter as **Tank** and turns on the Doubles and the Many Faces versions of its
+spells (below); Primary queues it as Support. Many Faces is an **illusion tank**: the enchanter
 stands in a small crowd of copies of itself, and enemies keep hitting the wrong one. It does not wear heavy armour
 and it does not block — it makes enemies **miss the real body** and **want** to hit it.
 
@@ -391,7 +393,7 @@ random piece, 8%) and from the **end chest of any dungeon at Depth 5 or deeper**
 ### Legendaries
 | id | Name | Slot | Power (numbers) | Drop source |
 |---|---|---|---|---|
-| `leg_puppeteers_crossbar` | The Puppeteer's Crossbar | off hand (Effigy) | 2 charms from Calling 20 (3 at Calling 40). | the `d15_fire_court` secret boss (page 12 names it) on Challenge, 4% |
+| `leg_puppeteers_crossbar` | The Puppeteer's Crossbar | off hand (Effigy) | 2 charms from Calling 20 (3 at Calling 40). | `b_ysa_varn_kindled` Ysa Varn, the Kindled Child (`d15_fire_court` secret boss) on Challenge, 4% |
 | `leg_music_box_of_the_drowned_queen` | Music Box of the Drowned Queen | neck | Hush hits 3 targets within 6 m of the first (Beckon: taunts 3). | `b_choir_of_brine` The Choir of Brine (`d11_saltdeep_cathedral` boss 2) on Challenge, 4% |
 | `leg_circlet_of_quiet_hours` | Circlet of Quiet Hours | head | Sleeping enemies do not wake from **area** damage (only single-target hits wake them). | `b_oruvel_moon_drinker` (`d08_moonwell_ruins` end boss) on Challenge, 4%; its Depth end chest 2% |
 | `leg_stringcutter_staff` | Stringcutter Staff | staff | Snap (the Calling 40 release) needs no Calling and deals `Will × 6% SP`. | `b_unmoored` The Unmoored (`riftmarch` world boss, page 13), once a week, 6% |

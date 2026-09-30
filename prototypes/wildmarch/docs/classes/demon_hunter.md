@@ -63,11 +63,11 @@ vs demons; a sight that sees the unseen.* Here: **Hunter's Oath** (+25% vs Demon
 | Level | Range | What you see |
 |---|---|---|
 | 1 | 20 m | Demons show a red outline **through walls** and a red pip on the minimap |
-| calling 1 (6) | 30 m | also **hidden, stealthed and invisible** enemies of any kind, outlined in pale red; the illusions of enemy casters show as hollow outlines |
+| calling 1 (6) | 30 m | also **hidden and invisible** enemies of any kind, outlined in pale red; the illusions of enemy casters show as hollow outlines |
 | calling 2 (20) | 40 m | **party members within 30 m** of you see everything you reveal |
 | calling 3 (40) | 50 m | Demons **disguised** as something else (a cult demon wearing a villager, page 10 "wearing" demons) show their true outline; quest NPCs that are secretly demons (page 14) flag on sight |
 
-Revealing is not a debuff: a revealed enemy is simply drawn and targetable. Stealth rules are page 05's.
+Revealing is not a debuff: a revealed enemy is simply drawn and targetable. The `hidden` status is page 05's (§10.6).
 
 ### 2.3 Weak Points (calling 1)
 
@@ -179,7 +179,7 @@ Revealing is not a debuff: a revealed enemy is simply drawn and targetable. Stea
 | Targeting | **Self** — a pulse round you |
 | Range / shape | **40 m** circle |
 | Tags | `tag_spell` `tag_arcane` `tag_area` `tag_duration` |
-| Effect | every hidden, stealthed or invisible enemy in 40 m is **revealed for 10 s to the whole party**. Every **Demon** in range is **Unmasked** for 10 s: it takes **+10% damage from the party**, cannot turn invisible, phase, teleport or burrow, and a disguised demon drops its disguise. **Your target's Weak Point opens at once** |
+| Effect | every hidden or invisible enemy in 40 m is **revealed for 10 s to the whole party**. Every **Demon** in range is **Unmasked** for 10 s: it takes **+10% damage from the party**, cannot turn invisible, phase, teleport or burrow, and a disguised demon drops its disguise. **Your target's Weak Point opens at once** |
 | Self | immune to **Fear, Charm, Confuse and Blind** for **6 s** |
 | Statuses | `unmasked` (class debuff, a cracked-mask icon) |
 | Visuals | a crimson `ring` pulse r0 1 → r1 40 along the ground (life 0.8); revealed enemies flash white, then keep a red outline; the hunter's eyes glow (Chibi 2 `eyes: glow`) |
@@ -231,7 +231,7 @@ Revealing is not a debuff: a revealed enemy is simply drawn and targetable. Stea
 | **Soak** | can soak like anyone; no special reduction |
 | **Void / danger zones** | **Vault** (8 m, i-frames 0.4 s, 2 charges) |
 | **Mind effects** | **Unmask** — immune to Fear, Charm, Confuse and Blind for 6 s, and breaks them |
-| **Stealthed or invisible adds** | Demonsight and Unmask reveal them to the party |
+| **Hidden or invisible adds** | Demonsight and Unmask reveal them to the party |
 | **A boss that teleports or phases** | if it is a Demon, a trap under it or Unmask stops it |
 | **Adds** | Grinder Trap drags and shreds; Snare roots; Spring fires every trap at once |
 | **Interrupt** | talent `demon_hunter_hunters_bolt_t2b` *Pinning Bolt* (12 s internal cooldown) |
@@ -247,11 +247,12 @@ None. The Demon Hunter has no form, stance or gauge (W27). `Q` (Spring) is a cla
 ## 5. The hybrid role
 
 **None** — canon (00 §6 row 11) makes the Demon Hunter a **Damage-only** class, so it cannot queue as anything
-else. What it brings to a group instead:
+else; the shared **Role focus** switch in its spellbook (00 §6) offers only **Primary**. What it brings to a
+group instead:
 
 | Utility | Numbers |
 |---|---|
-| **Sight** | hidden, stealthed and invisible enemies revealed to the party (calling 2, 30 m; Unmask 40 m for 10 s) |
+| **Sight** | hidden and invisible enemies revealed to the party (calling 2, 30 m; Unmask 40 m for 10 s) |
 | **Called Shot** | party +20% crit chance on the hunter's target during each Weak Point (calling 2) |
 | **Unmask** | +10% party damage on Demons for 10 s; stops demons phasing or teleporting |
 | **Control** | Snare roots (3 s, Demons 5 s), Grinder drag, Spring on demand |
@@ -401,7 +402,7 @@ Source: recipe — Leatherworking 275 ([page 19](../19-PROFESSIONS.md)); the rec
 
 | id | Name | Slot | Power | Source |
 |---|---|---|---|---|
-| `leg_the_lens_of_kael_sorrowend` | **The Lens of Kael Sorrowend** | head | *Never Looks Away*: Weak Points open **every 3 s** on Demons and every 5 s on other targets | secret boss of `d16_the_spire` (Challenge), 8% |
+| `leg_the_lens_of_kael_sorrowend` | **The Lens of Kael Sorrowend** | head | *Never Looks Away*: Weak Points open **every 3 s** on Demons and every 5 s on other targets | secret boss `b_marchheart` of `d16_the_spire` (Challenge), 8% |
 | `leg_mercy_and_doubt` | **Mercy and Doubt** | off hand (hand crossbow) | *A Pair*: with two hand crossbows, Hunter's Bolt fires **both at full damage** (2 × 130%) and builds 18 | the `kingsfire` world boss ([page 13](../13-WORLD-BOSSES.md)), 4% |
 | `leg_jaw_of_the_pit` | **Jaw of the Pit** | belt | *Never Lets Go*: the Grinder Trap **attaches to the first enemy it catches** and follows it for its 6 s (bosses included) | final boss of `d13_cindergate` (Challenge), 6% |
 | `leg_banishers_writ` | **The Banisher's Writ** | amulet | *By Right*: Banishing Shot banishes non-boss Demons under **35%** health, and each banish refunds **30 Momentum** | final boss of `d15_fire_court` (Challenge), 6% |
@@ -420,7 +421,7 @@ Source: recipe — Leatherworking 275 ([page 19](../19-PROFESSIONS.md)); the rec
 
 | id | Name | Socket in | Requirement | Power | Source |
 |---|---|---|---|---|---|
-| `soul_hunters_eye` | **Soul of the Hunter's Eye** | weapon | **Demon Hunter only** | Weak Points also open on **normal** enemies (every 8 s), and each hit you land in a Weak Point **throws a free knife** at another enemy within 10 m for 60% weapon damage | the secret boss of `d12_unmade_workshop` (Normal or Challenge), 4%; or any Demon at 0.02% (great luck) |
+| `soul_hunters_eye` | **Soul of the Hunter's Eye** | weapon | **Demon Hunter only** | Weak Points also open on **normal** enemies (every 8 s), and each hit you land in a Weak Point **throws a free knife** at another enemy within 10 m for 60% weapon damage | the secret boss `b_the_finished_thing` of `d12_unmade_workshop` (Normal or Challenge), 4%; or any Demon at 0.02% (great luck) |
 | `soul_iron_patience` | **Soul of Iron Patience** | jewellery (ring or amulet) | **Demon Hunter only** | a trap that has waited armed for **10 s or more** deals **+100%** and its root or drag lasts twice as long | quest reward: the Riftmarch story chapter's demon-hunter version (page 14); or Depth 15+ final chest, 1% |
 
 ---
@@ -452,7 +453,7 @@ breath 0.3, rough 0.3, speed 0.52, jitter 0.08` (rough, low, unhurried). Lingo t
 | Visual only | Farhold `aimed_shot`, `pinning_shot`, `shadowstep`, `multi_shot` | bolt, snare, vault timings |
 | Combat feel | `prototypes/farhold/js/combat-feel.js` (knockback, hit-stop) | drag, snare, banish |
 | Trap props | Farhold `js/build.js` ghost (placement preview) | trap placement preview |
-| Reveal | page 05 stealth rules; the Chibi 2 outline shader used for Demonsight | outlines through walls |
+| Reveal | page 05's `hidden` status (§10.6); the Chibi 2 outline shader used for Demonsight | outlines through walls |
 | Dropped | the whole v0.1 kit: Fury, Vengeance, Demon Form, Bastion tank, form bar, wings, Glaive Arc, Hellsight, Chain of Binding, Reckoning; Farhold `dire_companion` | W27 |
 
 ---
@@ -479,3 +480,6 @@ old Bastion tank variant is gone).
 | legendaries (Owed Blood, Rift-Lord's Horns, Glaive of the Long Night, Heartseeker Arbalest, Chains of the Warden Below) | Lens of Kael Sorrowend, Mercy and Doubt, Jaw of the Pit, Banisher's Writ, Snarewright Gloves |
 | `uq_scarred_crossbow`, `uq_mourning_scarf` | `uq_scarred_hand_crossbow`, `uq_watchers_scarf` |
 | `q_demon_hunter_calling_1/2/3` | `q_calling_demon_hunter_1/2/3` |
+
+- **Sweep (round 2)**: "stealthed" enemies → **hidden** (page 05 `hidden` status); §5 says the Role focus switch
+  offers only Primary; secret-boss drop sources name their bosses (`b_marchheart`, `b_the_finished_thing`).

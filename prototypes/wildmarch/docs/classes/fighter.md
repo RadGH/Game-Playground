@@ -224,8 +224,11 @@ in Threefold Form).
 
 ## 5. The hybrid role — Tank (Defense stance)
 
-The fighter queues as **Tank** in the Dungeon Finder when a shield is equipped (the queue button greys out
-with the tooltip "Tank needs a shield in the off hand" otherwise).
+The fighter uses the shared **Role focus** switch in the spellbook (canon 00 §6; out of combat, saved per
+Loadout), **tied to Defense stance and a shield**: **Hybrid** queues it as **Tank** in the Dungeon Finder and
+needs a shield in the off hand (the switch greys out with the tooltip "Tank needs a shield in the off hand"
+otherwise). What it changes lives in Defense stance: the Defense riders, the extra threat and the block
+bonus below. **Primary** queues it as Damage; the stance dial works the same in either focus.
 
 | Piece | How it tanks |
 |---|---|
@@ -304,7 +307,7 @@ the spell unlocks, whichever is later. Talents that name a stance only change th
 ### Duellist's Decree
 | Tier | a | b | c |
 |---|---|---|---|
-| 1 (12)\* | **Open Challenge** — two duel targets at once. | **Ring of Honour** — the chalk ring widens to 12 m; the target cannot leave it (boss: no effect). | **Called Shot** — the decree opens with a 200% WD strike. |
+| 1 (12)\* | **Open Duel** — two duel targets at once. | **Ring of Honour** — the chalk ring widens to 12 m; the target cannot leave it (boss: no effect). | **Called Shot** — the decree opens with a 200% WD strike. |
 | 2 (22)\* | **Blood Oath** — heal 3% of the damage you deal to the duel target. | **Pride** — nobody else can taunt your duel target (lock a boss to you). | **Crowd Pleaser** — allies deal +10% to your duel target. |
 | 3 (32)\* | **Winner Takes All** — on a kill, the decree jumps to the nearest enemy with its remaining time. | **Duel's End** — when it ends, a finisher hits for 20% of all damage you dealt it during the duel. | **Changing Forms** — each stance swap during the duel adds 2 s (max 20 s). |
 | 4 (45) | **Champion's Decree** — cooldown 45 s. | **Grand Decree** — every enemy within 8 m becomes a duel target at half the bonus. | — |
@@ -343,7 +346,7 @@ deeper** (one random piece, 8% chance). *(Was a raid set; raids are in `WISHLIST
 ### Legendaries
 | id | Name | Slot / base | Power | Drop source |
 |---|---|---|---|---|
-| `leg_the_drillmasters_word` | The Drillmaster's Word | two-handed sword | **Fourth Answer** — swapping to the stance you are already in (double-tap) fires the current stance's rider on your next *basic* attack, every 6 s. a Challenge-mode `d15_fire_court` boss (page 12 names which) |
+| `leg_the_drillmasters_word` | The Drillmaster's Word | two-handed sword | **Fourth Answer** — swapping to the stance you are already in (double-tap) fires the current stance's rider on your next *basic* attack, every 6 s. | a Challenge-mode `d15_fire_court` boss (page 12 names which) |
 | `leg_counterweight` | Counterweight | one-handed hammer | **Answer in Kind** — Answering Blade's counter deals damage equal to 300% of the parried hit (if larger than 220% WD). | `d10_rimefang_caverns` final boss on Challenge, and its Depth end chest |
 | `leg_honours_edge` | Honour's Edge | one-handed sword | **Unending Duel** — Duellist's Decree has no duration while the target is alive; it ends when it dies or you swap stance twice. | the end chest of any dungeon at **Depth 15+** (1.5%) |
 | `leg_bracers_of_the_dial` | Bracers of the Dial | heavy hands | **Turning Wheel** — every stance swap gives 8 Momentum and resets Measured Cut. | the world boss of `frostmantle` (page 13) |
@@ -353,7 +356,7 @@ deeper** (one random piece, 8% chance). *(Was a raid set; raids are in `WISHLIST
 |---|---|---|---|---|
 | `uq_splitmark_gauntlets` | Splitmark Gauntlets | heavy hands | Plate Splitter stacks last 20 s. | `d04_bellows_keep` boss 2 |
 | `uq_sergeants_whistle` | Sergeant's Whistle | necklace | Closing Step has 2 charges; the second costs no Momentum. | `d02_drowned_mill` final boss (Normal at its level; Challenge and Depth at 60) |
-| `uq_breathing_plate` | Breathing Plate | heavy chest | Veteran's Breath also removes one stun or fear, and can be used while stunned. | `d07_thornheart` boss 3 |
+| `uq_breathing_plate` | Breathing Plate | heavy chest | Veteran's Breath also removes one stun or fear, and can be used while stunned. | `d07_thornheart` final boss |
 
 ### Souls
 A soul goes in a Soul socket (page 08) and adds a behaviour. Both need the wearer to be a **fighter**.

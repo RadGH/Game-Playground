@@ -52,9 +52,9 @@ build Dance stacks, then finish with Last Bow.
 - In the Damage build, enemies do not attack Shadows and Shadows hold no threat (they are not bodies, page 05). **Lead Dancer** (§5) changes this.
 - **Shadowswap** (Calling 6, class key **`Q`** — page 02 §5.16): you and your newest Shadow trade places instantly. 3 s cooldown, no cost, off the GCD, 0.25 s of dodge-immunity (hits that land in those frames miss you). Calling 20: swaps with the Shadow nearest your aim point if there is one.
 - **Dance stacks** (Calling 6): each Shadowswap done within 8 s of the last one adds a stack (max 5): +4% damage and +5% Tempo refill per stack. Stacks fall off 8 s after your last swap.
-- **Unseen** (from Dusk Curtain and a few talents): the dancer uses page 05's `stealth` status (enemies notice you at 25% of their range; broken by attacking, casting or taking damage). The first attack from Unseen is a guaranteed crit.
+- **Shrouded** (from Dusk Curtain and a few talents): page 05's `shrouded` status, which works as `hidden` (enemies notice you at 25% of their range; broken by attacking, casting or taking damage). The first attack from Shrouded is a guaranteed crit.
 
-(Renamed in round 2: *Veilswap* → **Shadowswap**, the *Veiled* state → **Unseen**, the *Unveiled* debuff →
+(Renamed in round 2: *Veilswap* → **Shadowswap**, the *Veiled* state → **Shrouded** (page 05 `shrouded`; "Unseen" is only the rogue's hit type), the *Unveiled* debuff →
 **Revealed** — 00 §12.4. "Veil" is not used in any new name.)
 
 ### 2.2 The gauge (HUD)
@@ -84,7 +84,7 @@ build Dance stacks, then finish with Last Bow.
 | 1 | 1 | `shadow_dancer_pirouette_cut` | Pirouette Cut | 35 Tempo | — | instant | Auto-target | 3 m, 180° arc, 2 hits | `tag_physical` `tag_attack` `tag_melee` `tag_area` | 2 × 70% WD |
 | 2 | 4 | `shadow_dancer_backstep_fade` | Backstep Fade | 30 Tempo | 10 s | instant | Self | 10 m leap (leaves a Shadow) | `tag_physical` `tag_attack` `tag_melee` `tag_area` `tag_movement` | dodge + 90% WD flare in 3 m |
 | 3 | 10 | `shadow_dancer_silhouette_strike` | Silhouette Strike | 55 Tempo | 8 s | instant | Auto-target | 3 m, single target | `tag_physical` `tag_attack` `tag_melee` | 260% / 360% WD flanked |
-| 4 | 18 | `shadow_dancer_dusk_curtain` | Dusk Curtain | 40 Tempo | 45 s | instant, off GCD | Self | 6 m circle, 6 s | `tag_shadow` `tag_area` `tag_duration` | 40% dodge, then Unseen |
+| 4 | 18 | `shadow_dancer_dusk_curtain` | Dusk Curtain | 40 Tempo | 45 s | instant, off GCD | Self | 6 m circle, 6 s | `tag_shadow` `tag_area` `tag_duration` | 40% dodge, then Shrouded |
 | 5 | 28 | `shadow_dancer_mirror_waltz` | Mirror Waltz | 70 Tempo | 20 s | 2.4 s channel | Self | enemies in 10 m, 6 hits | `tag_physical` `tag_attack` `tag_melee` `tag_area` `tag_channel` `tag_movement` | 6 × 80% WD |
 | 6 | 40 | `shadow_dancer_last_bow` | Last Bow | 60 Tempo | 30 s | instant | Needs target | 12 m teleport, single target | `tag_physical` `tag_attack` `tag_melee` `tag_movement` | 400% + 150% per Shadow below 30% |
 
@@ -117,7 +117,7 @@ build Dance stacks, then finish with Last Bow.
 - Tags: `tag_shadow` `tag_area` `tag_duration`.
 - You and allies inside get **40% chance to dodge** attacks (100% against projectiles fired from outside the circle).
   On cast, non-boss enemies targeting you **lose you** (threat on you drops to 0 with them) — except in Lead Dancer, where it does the opposite (§5).
-- If you leave the circle, you are **Unseen** for up to 8 s or until you attack; your first attack from Unseen crits.
+- If you leave the circle, you are **Shrouded** for up to 8 s or until you attack; your first attack from Shrouded crits.
 - Look: a dome of dusk (spellfx `shadow` palette ground disc, smoke particles). Sound: a low wind; the world's audio is muffled for you inside.
 
 **`shadow_dancer_mirror_waltz` — Mirror Waltz** (slot 5, level 28) `(new)` **(leaves a Shadow at the end)**
@@ -161,7 +161,7 @@ build Dance stacks, then finish with Last Bow.
 
 | Trigger | Replaces | Becomes | Numbers |
 |---|---|---|---|
-| **Unseen** (after Dusk Curtain or a talent) | Pirouette Cut | **Curtain Rise** `shadow_dancer_curtain_rise` | Auto-target opener: 300% WD, stuns non-bosses 2 s, leaves a Shadow at your side. Tags `tag_physical` `tag_attack` `tag_melee` |
+| **Shrouded** (after Dusk Curtain or a talent) | Pirouette Cut | **Curtain Rise** `shadow_dancer_curtain_rise` | Auto-target opener: 300% WD, stuns non-bosses 2 s, leaves a Shadow at your side. Tags `tag_physical` `tag_attack` `tag_melee` |
 | 5 Dance stacks | Backstep Fade | **Encore** `shadow_dancer_encore` | Needs target; free, no cooldown, one use: leap to your newest Shadow's side and move every Shadow to the mirrored spot around the target (sets up flanks). Tags `tag_movement` |
 | **Lead Dancer** on | Last Bow | **Curtain Call** `shadow_dancer_curtain_call` | see §5 |
 
@@ -169,8 +169,9 @@ build Dance stacks, then finish with Last Bow.
 
 ## 5. The hybrid role — Tank (Lead Dancer)
 
-The shadow dancer queues as **Tank** when **Lead Dancer** is on. The switch is in the spellbook (`K`), **out
-of combat only** (3 s to swap, no key needed; unlocked at Calling 6). Lead Dancer is an **evasion tank**: it
+**Role focus.** The shadow dancer uses the canon **Role focus** switch (00 §6: in the spellbook `K`, out of
+combat only, saved per Loadout). Setting it to **Hybrid** turns on **Lead Dancer** — the two are one switch
+(3 s to swap; unlocked at Calling 6) — and the Dungeon Finder then queues the dancer as **Tank**. Lead Dancer is an **evasion tank**: it
 does not block or soak with armour — its Shadows pull and absorb attention and the dancer is hard to hit.
 
 **While Lead Dancer is on:**
@@ -233,12 +234,12 @@ Ids `<spellid>_t<tier><a|b|c>`. `(reuse: prototypes/farhold/js/skilltalents.js)`
 | 12 | `shadow_dancer_backstep_fade_t1b` | Short Step | 6 m, 2 charges. |
 | 22 | `shadow_dancer_backstep_fade_t2a` | Decoy | The Shadow taunts non-boss enemies within 6 m for 2 s (the one exception to "Shadows hold no threat" in the Damage build; in Lead Dancer the taunt reaches 10 m). |
 | 22 | `shadow_dancer_backstep_fade_t2b` | Smoke Burst | The flare also blinds non-bosses 2 s (they miss 50%). |
-| 32 | `shadow_dancer_backstep_fade_t3a` | Slip Away | You are Unseen for 3 s after landing. |
+| 32 | `shadow_dancer_backstep_fade_t3a` | Slip Away | You are Shrouded for 3 s after landing. |
 | 32 | `shadow_dancer_backstep_fade_t3b` | Recoil | Shadowswap's cooldown resets on use. |
 | 45 | `shadow_dancer_backstep_fade_t4a` | Fading Line | Leaves a Shadow every 3 m along the leap (up to your cap). |
 | 45 | `shadow_dancer_backstep_fade_t4b` | Undertow | Enemies near the Shadow are pulled 3 m toward it (not bosses). |
 
-(Renamed: *Forward Veil* → **Forward Fade**, *Unseen* (talent) → **Slip Away** — the word Unseen now names the state.)
+(Renamed: *Forward Veil* → **Forward Fade**, *Unseen* (talent) → **Slip Away** — the state is **Shrouded**; "Unseen" belongs to the rogue.)
 
 ### Silhouette Strike
 | Tier | id | Name | What it does |
@@ -250,7 +251,7 @@ Ids `<spellid>_t<tier><a|b|c>`. `(reuse: prototypes/farhold/js/skilltalents.js)`
 | 32 | `shadow_dancer_silhouette_strike_t3a` | Mirror Cut | A flanked strike leaves a new Shadow opposite the one that flanked. |
 | 32 | `shadow_dancer_silhouette_strike_t3b` | Refund | A flanked strike refunds 25 Tempo. |
 | 45 | `shadow_dancer_silhouette_strike_t4a` | Crossfire | Every Shadow that flanks counts: +100% per flanking Shadow. |
-| 45 | `shadow_dancer_silhouette_strike_t4b` | From the Dark | From Unseen, it always counts as flanked and does not break Unseen if it kills. |
+| 45 | `shadow_dancer_silhouette_strike_t4b` | From the Dark | From Shrouded, it always counts as flanked and does not break Shrouded if it kills. |
 
 ### Dusk Curtain
 | Tier | id | Name | What it does |
@@ -284,14 +285,14 @@ Ids `<spellid>_t<tier><a|b|c>`. `(reuse: prototypes/farhold/js/skilltalents.js)`
 | 12 | `shadow_dancer_last_bow_t1a` | Early Curtain | Finisher threshold 35%. |
 | 12 | `shadow_dancer_last_bow_t1b` | Keep Your Shadows | Shadows are not spent (their strikes are 100% each instead). |
 | 22 | `shadow_dancer_last_bow_t2a` | Bouquet | A kill also refills Tempo to 100. |
-| 22 | `shadow_dancer_last_bow_t2b` | Bow Out | After the bow you Shadowswap to your oldest Shadow's former spot and are Unseen 3 s. |
+| 22 | `shadow_dancer_last_bow_t2b` | Bow Out | After the bow you Shadowswap to your oldest Shadow's former spot and are Shrouded 3 s. |
 | 32 | `shadow_dancer_last_bow_t3a` | Encore Bow | A kill lets you cast Last Bow once more within 5 s on a different target. |
 | 32 | `shadow_dancer_last_bow_t3b` | Solo Act | With no Shadows, 500% instead of 400%. |
 | 45 | `shadow_dancer_last_bow_t4a` | Troupe Leader | Troupe works with 2 Shadows. |
 | 45 | `shadow_dancer_last_bow_t4b` | Final Curtain | Against bosses below 10%: 900% WD, 90 s cooldown for that use. |
 
 Curtain Call (the Lead Dancer version) takes the Last Bow talents that make sense for it: *Keep Your Shadows*
-is built in; *Bow Out* makes you Unseen for 0 s (no effect) and instead gives +20% dodge for 3 s.
+is built in; *Bow Out* makes you Shrouded for 0 s (no effect) and instead gives +20% dodge for 3 s.
 
 ---
 
@@ -305,7 +306,7 @@ at the dungeon's level) and **Challenge** (item level 60); their Depth end chest
 |---|---|---|
 | 2 | Echoes are 40% instead of 35%. | Shadows |
 | 4 | Backstep Fade leaves 2 Shadows (one at take-off, one halfway). | `shadow_dancer_backstep_fade` |
-| 6 | Silhouette Strike from Unseen resets Dusk Curtain's cooldown (once per 90 s). | `shadow_dancer_silhouette_strike`, `shadow_dancer_dusk_curtain` |
+| 6 | Silhouette Strike from Shrouded resets Dusk Curtain's cooldown (once per 90 s). | `shadow_dancer_silhouette_strike`, `shadow_dancer_dusk_curtain` |
 
 ### `set_shadow_dancer_choir_of_the_unlit` — Choir of the Unlit (levels 42–45, dungeon set)
 Drops from `d11_saltdeep_cathedral` bosses on **Normal** (15%) and **Challenge** (item level 60), and from the
@@ -338,15 +339,15 @@ page 12 names which) and from the **end chest of any dungeon at Depth 10 or deep
 | id | Name | Slot | Power (numbers) | Drop source |
 |---|---|---|---|---|
 | `leg_twin_of_the_moonwell` | Twin of the Moonwell | dagger (main) | Your newest Shadow **attacks on its own** with your basic attacks at 35% (not only spells). | `b_oruvel_moon_drinker` Oruvel, That Which Drank the Moon (`d08_moonwell_ruins` end boss) on Challenge, 4%; its Depth end chest 2% |
-| `leg_curtainfall_slippers` | Curtainfall Slippers | feet | Every Shadowswap leaves a 3 m patch of dusk for 3 s (Dusk Curtain's dodge, no Unseen). | `b_the_tidewife` The Tidewife (`d11_saltdeep_cathedral` secret boss) on Challenge, 3% |
+| `leg_curtainfall_slippers` | Curtainfall Slippers | feet | Every Shadowswap leaves a 3 m patch of dusk for 3 s (Dusk Curtain's dodge, no Shrouded). | `b_the_tidewife` The Tidewife (`d11_saltdeep_cathedral` secret boss) on Challenge, 3% |
 | `leg_the_understudy` | The Understudy | dagger (off hand) | If you would die, you swap with your newest Shadow instead and it dies in your place (you keep 1 health; 180 s cooldown). | a Challenge-mode `d15_fire_court` boss (page 12 names which), 5% |
-| `leg_lantern_eaters_mask` | Lantern-Eater's Mask | head | While you are Unseen, and for 4 s after you leave it, Shadows echo at 60%. | `b_hungering_brood` The Hungering Brood (`whisperwood` world boss, page 13), once a week, 6% |
+| `leg_lantern_eaters_mask` | Lantern-Eater's Mask | head | While you are Shrouded, and for 4 s after you leave it, Shadows echo at 60%. | `b_hungering_brood` The Hungering Brood (`whisperwood` world boss, page 13), once a week, 6% |
 
 ### Uniques
 | id | Name | Slot | Power | Drop source |
 |---|---|---|---|---|
 | `uq_nettle_waltz` | Nettle Waltz | dagger | Pirouette Cut hits apply Poisoned (50% WD over 6 s, `tag_poison` `tag_duration`). | `b_wren_grist` Wren Grist, the Miller's Wife (`d02_drowned_mill` boss 2) |
-| `uq_dusk_silk_sash` | Dusk-Silk Sash | waist | Dusk Curtain +2 s; Unseen lasts 12 s. | `b_king_sethar_unshattered` King Sethar the Unshattered (`d05_glass_tombs` end boss) |
+| `uq_dusk_silk_sash` | Dusk-Silk Sash | waist | Dusk Curtain +2 s; Shrouded lasts 12 s. | `b_king_sethar_unshattered` King Sethar the Unshattered (`d05_glass_tombs` end boss) |
 | `uq_pinwheel_blades` | Pinwheel Blades | dagger pair (one item fills both hands) | Mirror Waltz hits +2 targets per hop (3 m splash). | `b_warmaster_drogath` Warmaster Drogath Ashmane (`d09_warmasters_pit` end boss) |
 
 ### Souls
@@ -384,7 +385,7 @@ A soul goes in a **Soul** socket (page 08) and adds a behaviour. Both need the w
 | Shadows / Decoys | Chibi 2 actor cloned with a translucent violet material (`avatar-3d/js/chibi2.js`) | a pose copy, no AI; a Decoy is the same mesh given a body and health (`(new)`) |
 | Backstep / Last Bow teleport | Farhold `shadowstep` dash | visuals |
 | Dusk Curtain | Farhold `smoke` + spellfx `shadow` ground disc | a group circle |
-| Unseen | Farhold `stealth` stat as page 05's `stealth` status | same rule |
+| Shrouded | Farhold `stealth` stat as page 05's `shrouded` status (works as `hidden`) | same rule |
 | Mirror Waltz | Farhold `whirlwind` repeat engine (`repeats`) | moving version |
 | Outfit | no `shadow_dancer` row in `class-outfits.json` yet — **add one** (silks, half cape, knife rig, slippers) from Farhold `data/classes.json` `shadow_dancer.look` | See QUESTIONS.md G4 |
 | Talent engine | `prototypes/farhold/js/skilltalents.js` | Wildmarch tier levels |

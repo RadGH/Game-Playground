@@ -60,7 +60,7 @@ is always "do I keep these charges for the boss's next big swing, or cash them i
 | Returned Blow (calling 2) — each charge spent, any weapon | **+8** |
 | Iron Gale, each hit that lands on 3+ enemies | **+3** |
 | Unbroken Stand, each hit taken while it lasts | **+5** |
-| **Spends:** Iron Challenge 10 · Hurled Bulwark 20 · Iron Gale 30 · Faultline 40 · Unbroken Stand 0 | |
+| **Spends:** Iron Call 10 · Hurled Bulwark 20 · Iron Gale 30 · Faultline 40 · Unbroken Stand 0 | |
 
 A tank warrior sits around 40–70 Momentum in a pack fight and 20–40 on a lone boss (fewer hits taken). A
 two-hander warrior gains about 30% more because every spent charge refunds 10.
@@ -77,7 +77,7 @@ all adjacent foes. Unbreakable when outnumbered." — kept as Bulwark Bash, Iron
 | Rule | Value |
 |---|---|
 | Starting cap | **2** charges (level 1) |
-| Gained from | Bulwark Bash (+2), Iron Challenge (+1 per enemy taunted, max 3), Hurled Bulwark (+1 per hit, max 2), Unbreakable (+1 every 4 s) |
+| Gained from | Bulwark Bash (+2), Iron Call (+1 per enemy taunted, max 3), Hurled Bulwark (+1 per hit, max 2), Unbreakable (+1 every 4 s) |
 | What a charge does (shield held) | The next hit that deals **3% or more of your max health** is reduced by **70%**. One charge per hit. Hits smaller than 3% never use a charge, so trash chip damage cannot strip your row. |
 | What a charge does (two-hander) | The same hit is reduced by **40%** and the charge refunds **+10 Momentum** when it is spent. |
 | Direction | Any direction — a charge is not a frontal block. (A frontal *shield* block chance from the weapon's `guard` trait still exists on top; page 05 §3.5.) |
@@ -124,7 +124,7 @@ While **3 or more enemies within 8 m are in combat with you**:
 | Slot | Level | id | Name | Cost | Cooldown | Cast | Target | Shape | Tags | Headline |
 |---|---|---|---|---|---|---|---|---|---|---|
 | 1 | 1 | `warrior_bulwark_bash` | Bulwark Bash | +15 Momentum (builds) | 8 s | instant | Auto-target | 3 m cone, 100° | `tag_physical` `tag_attack` `tag_melee` `tag_area` | 120% WD, stun 1.2 s, **+2 charges**, interrupts |
-| 2 | 4 | `warrior_iron_challenge` | Iron Challenge | 10 Momentum | 10 s | instant | Self | 10 m circle on self | `tag_physical` `tag_area` `tag_duration` | taunt all 4 s, +1 charge per enemy |
+| 2 | 4 | `warrior_iron_call` | Iron Call | 10 Momentum | 10 s | instant | Self | 10 m circle on self | `tag_physical` `tag_area` `tag_duration` | taunt all 4 s, +1 charge per enemy |
 | 3 | 10 | `warrior_iron_gale` | Iron Gale | 30 Momentum | 10 s | channel 1.5 s | Self | 5 m circle on self | `tag_physical` `tag_attack` `tag_melee` `tag_area` `tag_channel` | 5 × 48% WD, bleed |
 | 4 | 18 | `warrior_hurled_bulwark` | Hurled Bulwark | 20 Momentum | 9 s | instant | Auto-target | thrown, 25 m, 3 bounces | `tag_physical` `tag_attack` `tag_ranged` `tag_projectile` | 90% WD each, threat ×4, snare |
 | 5 | 28 | `warrior_unbroken_stand` | Unbroken Stand | 0 | 150 s | instant | Self | self | `tag_physical` `tag_duration` | 45% less damage 10 s, charges not spent |
@@ -147,7 +147,7 @@ While **3 or more enemies within 8 m are in combat with you**:
   `impact` element `physical` with `crit: true` styling; `block` status aura flashes on the warrior 0.3 s.
 - Sound: heavy iron clang + low body thud (sfx `melee.block` + `melee.hit`, reuse `sfx/data/catalog.json`).
 
-**2. `warrior_iron_challenge` — Iron Challenge** (level 4)
+**2. `warrior_iron_call` — Iron Call** (level 4)
 - Cost **10 Momentum**. Cooldown **10 s**. Instant. Circle **10 m** centred on you.
 - Targeting: **Self** (needs no target). The tier-1 talent **Called Out** turns it into **Needs target**.
 - Tags: `tag_physical`, `tag_area`, `tag_duration`.
@@ -214,12 +214,12 @@ While **3 or more enemies within 8 m are in combat with you**:
   as they reach you (+2, stuns the caster). Iron Gale on cooldown while 3+ are alive (Unbreakable keeps
   charges coming). Faultline when you hold 4–5 charges or on the rare. Unbroken Stand only for a rare,
   a greater-rarity monster or a champion pack.
-- **Dungeon, Normal (tank):** pull with Hurled Bulwark (threat ×4 on three bodies), Iron Challenge the moment
+- **Dungeon, Normal (tank):** pull with Hurled Bulwark (threat ×4 on three bodies), Iron Call the moment
   the pack arrives (everything taunted, charges topped up), then Bash → Gale → Bash, Faultline aimed *through*
   the pack so the sideways knock gathers them at the line's edges. Keep Bash for gold-border casts.
 - **Dungeon, Challenge and deep Depth (tank):** charges are for the boss's **tank buster** (the big single hit,
   page 11). Hold 2+ going into it. Unbroken Stand for the enrage or the second tank buster in a row. When a
-  boss needs two tanks (a stacking debuff), the warrior uses **Called Out** (Iron Challenge tier 1) to take
+  boss needs two tanks (a stacking debuff), the warrior uses **Called Out** (Iron Call tier 1) to take
   the boss back from the other tank; otherwise a follower or a hybrid tank (page 00 §6) holds adds.
 - **Damage (two-hander):** see §5.
 
@@ -230,9 +230,9 @@ While **3 or more enemies within 8 m are in combat with you**:
 | Soak (orange, N pips) | **Best soaker in the game.** A soak hit is a normal hit, so a charge cuts 70% of it. With Unbroken Stand up a warrior can take a 2-pip soak alone. |
 | Tank buster | Hold ≥2 charges; or Unbroken Stand; or Last Rampart as the last resort. |
 | Knockback / pull | Immune during Unbroken Stand and while Unbreakable. |
-| Void zone (purple) | No immunity. Movement: dodge roll (page 05) and the tier-1 **Leaping Challenge** talent (12 m leap). |
+| Void zone (purple) | No immunity. Movement: dodge roll (page 05) and the tier-1 **Leaping Call** talent (12 m leap). |
 | Danger zone (red) | Leave on foot / dodge roll. Faultline's 0.6 s wind-up roots you — do not start it in a filling zone. |
-| Adds | Iron Challenge (10 m) or Hurled Bulwark (25 m, 3 bodies) to pick them up. |
+| Adds | Iron Call (10 m) or Hurled Bulwark (25 m, 3 bodies) to pick them up. |
 | Interrupts | Bulwark Bash (8 s) interrupts; tier-2 **Silencing Clang** turns it into a 4 s silence. |
 | Tether (white) | Hurled Bulwark does not break tethers. |
 | Unblockable attacks | Charges do nothing; Unbroken Stand's 45% still applies. |
@@ -255,10 +255,12 @@ Swapping weapons in combat is not allowed (page 08); the version you have is the
 
 ## 5. The hybrid role — Damage (two-hander)
 
-**How.** Equip a two-handed sword or axe. Nothing else has to change: the same six spells, the same bar.
-What changes is the charge (40% soak + 10 Momentum refund, §2.1), Hurled Edge replacing Hurled Bulwark (§4),
-and which talents you pick. A warrior can queue as **Damage** in the Dungeon Finder whenever a two-hander is
-equipped (page 15), and the Second Loadout at 30 (page 07) makes the swap one click.
+**Role focus.** The warrior uses the canon **Role focus** switch (00 §6: in the spellbook, out of combat only,
+saved per Loadout), tied to the weapon: **Hybrid** needs a two-handed sword or axe equipped, and putting a shield
+back in the off hand sets it to Primary. Nothing else has to change: the same six spells, the same bar. What
+Hybrid changes is the charge (40% soak + 10 Momentum refund, §2.1), Hurled Edge replacing Hurled Bulwark (§4),
+and which talents you pick. The Dungeon Finder queues the warrior as **Damage** while Role focus is Hybrid
+(page 15), and the Second Loadout at 30 (page 07) makes the swap one click.
 
 **The damage loop.** Bash (+2 charges, +15 Momentum) → let the pack hit you (each spent charge refunds 10
 Momentum and, from calling 2, Returned Blow hits back for 40% of what it prevented and gives +8 more) →
@@ -304,13 +306,13 @@ targeting changes its tags too (noted where it does).
 | 3 (32) | **Overcharge** — Bash can push you up to 2 charges over the cap; the extra ones fall off after 6 s. | **Resounding** — spending a charge on a hit of 15%+ max health resets Bash's cooldown. | **Ringing Ear** — bashed enemies deal 20% less damage to anyone but you for 6 s. |
 | 4 (45) | **Anvil of the Wall** — hold the key up to 1 s: at full hold 250% WD, stun 2.5 s, +3 charges. | **Wall of Iron** — Bash raises a 4 m wide iron wall in front for 5 s that stops enemy projectiles for anyone behind it. | — |
 
-### Iron Challenge
+### Iron Call
 | Tier | a | b | c |
 |---|---|---|---|
-| 1 (12) | **Leaping Challenge** — Ground: leap to a point up to 12 m away, then challenge there. Adds `tag_movement`. | **Called Out** — Needs target: single-target, 30 m range, taunt 6 s, threat set to 130% of the highest (the tool for taking a boss back from another tank). | **Dragging Challenge** — also pulls every enemy 4 m toward you. |
+| 1 (12) | **Leaping Call** — Ground: leap to a point up to 12 m away, then call there. Adds `tag_movement`. | **Called Out** — Needs target: single-target, 30 m range, taunt 6 s, threat set to 130% of the highest (the tool for taking a boss back from another tank). | **Dragging Call** — also pulls every enemy 4 m toward you. |
 | 2 (22) | **Shoulder to Shoulder** — allies within 10 m take 10% less damage for 5 s. | **Hollow Threat** — taunted enemies deal 15% less damage for 6 s. | **Come Closer** — taunted ranged enemies and casters stop casting and walk into melee. |
-| 3 (32) | **Proven** — +5 Momentum per enemy taunted. | **Second Call** — the challenge repeats itself once, 3 s later, in the same place. | **Grudge** — an enemy that attacks someone else within 6 s of being taunted is struck by a phantom shield for 150% WD. |
-| 4 (45) | **Challenge of Kings** — on a boss, its next single-target attack on you deals 30% less. | **Swollen Pride** — +3% max health per enemy taunted for 10 s (max 15%). | — |
+| 3 (32) | **Proven** — +5 Momentum per enemy taunted. | **Second Call** — the call repeats itself once, 3 s later, in the same place. | **Grudge** — an enemy that attacks someone else within 6 s of being taunted is struck by a phantom shield for 150% WD. |
+| 4 (45) | **Call of Kings** — on a boss, its next single-target attack on you deals 30% less. | **Swollen Pride** — +3% max health per enemy taunted for 10 s (max 15%). | — |
 
 ### Iron Gale
 | Tier | a | b | c |
@@ -363,7 +365,7 @@ Drops from the final bosses of: head `d09_warmasters_pit`, chest `d10_rimefang_c
 | Pieces | Bonus | Changes |
 |---|---|---|
 | 2 | Bulwark Bash gives **3** charges instead of 2. | Bulwark Bash |
-| 4 | Every charge spent cuts Iron Challenge's cooldown by 1 s. | Iron Challenge |
+| 4 | Every charge spent cuts Iron Call's cooldown by 1 s. | Iron Call |
 | 6 | Faultline **no longer spends charges**; instead it deals +40% WD per charge you *hold*. | Faultline |
 
 ### `set_warrior_last_rampart` — Raiment of the Last Rampart (endgame set)
@@ -398,7 +400,7 @@ page 09). Every item below is warrior-only (`classes: ["warrior"]`) and its powe
 | id | Name | Slot | Power | Drop source |
 |---|---|---|---|---|
 | `uq_visor_of_many_blows` | Visor of Many Blows | heavy helm | Block charges last **30 s** instead of 20 s; +4% armour per charge held. | `d03_shaft_seven` boss 2 |
-| `uq_challengers_bell` | Challenger's Bell | necklace | Iron Challenge taunts for **6 s** and reaches **14 m**. | `d06_sandsworn_vault` final boss |
+| `uq_callers_bell` | Caller's Bell | necklace | Iron Call taunts for **6 s** and reaches **14 m**. | `d06_sandsworn_vault` final boss |
 | `uq_faultmaker` | Faultmaker | two-handed axe | Faultline is **24 m** long and leaves a 3 s snare (50%) along it. | `d13_cindergate` boss 2 on **Challenge** |
 | `uq_returning_rim` | Returning Rim | shield | Hurled Bulwark's return trip heals you 4% max health per enemy it hit. | `d08_moonwell_ruins` boss 2 |
 
@@ -409,7 +411,7 @@ does nothing in another class's gear; the card shows it greyed out).
 | id | Name | Socket | Effect | Source |
 |---|---|---|---|---|
 | `soul_stonebound_oath` | Stonebound Oath | armour: chest or shield | **Unbroken Stand leaves a stone.** When Unbroken Stand ends it leaves a waist-high standing stone at your feet for 12 s (a 1.5 m block that stops projectiles and enemy movement). Allies within 4 m of the stone take 10% less damage. The stone has 25% of your max health. | `d10_rimefang_caverns` final boss, 3% on Normal / 8% on Challenge |
-| `soul_thrown_gauntlet` | The Thrown Gauntlet | weapon | **Iron Challenge throws a gauntlet.** Iron Challenge also hurls an iron gauntlet at your hard target up to 30 m (Auto-target): 150% WD, it taunts that enemy for 8 s and marks it — while marked, every block charge you spend on its hits is refunded 50% of the time. Tags gained: `tag_projectile` `tag_ranged`. | quest reward from `q_calling_warrior_3` (first completion), or 1-in-400 from any rare monster level 40+ |
+| `soul_thrown_gauntlet` | The Thrown Gauntlet | weapon | **Iron Call throws a gauntlet.** Iron Call also hurls an iron gauntlet at your hard target up to 30 m (Auto-target): 150% WD, it taunts that enemy for 8 s and marks it — while marked, every block charge you spend on its hits is refunded 50% of the time. Tags gained: `tag_projectile` `tag_ranged`. | quest reward from `q_calling_warrior_3` (first completion), or 1-in-400 from any rare monster level 40+ |
 
 ---
 
@@ -422,7 +424,7 @@ does nothing in another class's gear; the card shows it greyed out).
 | Moment | Lines (samples; Lingo varies them) |
 |---|---|
 | Bulwark Bash | "Down!" · "Stay there." · "Not past me." |
-| Iron Challenge | "Me! Look at ME!" · "Over here, you cowards!" · "Who's first?" |
+| Iron Call | "Me! Look at ME!" · "Over here, you cowards!" · "Who's first?" |
 | Iron Gale | (a roar, no words) · "Clear the floor!" |
 | Unbroken Stand | "I don't break." · "Hit harder." |
 | Faultline | "Split!" · "The ground's on my side." |
@@ -448,3 +450,5 @@ does nothing in another class's gear; the card shows it greyed out).
 | Weapon rhythms and `guard` trait | `prototypes/farhold/js/weapons.js` | basic attacks between spells |
 | Talent engine and card text | `prototypes/farhold/js/skilltalents.js` (`describeMod`) | talent cards; new mod keys needed: `charges`, `taunt`, `redirect`, `wall` |
 | Quest ideas "Five in one swing", "Hold the front" | `prototypes/emberveil/data/class-quests.json` | seeds for the calling quests |
+
+*Round 2 sweep:* the warrior's taunt **Iron Challenge** is renamed **Iron Call** (`warrior_iron_call`; talents Leaping Call, Dragging Call, Call of Kings; `uq_callers_bell`) so it does not clash with Challenge mode.

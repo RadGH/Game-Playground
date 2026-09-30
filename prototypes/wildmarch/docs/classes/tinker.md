@@ -4,15 +4,15 @@
 
 **Status:** v0.2 draft — 2026-09-30 (round 2 applied). Follows the class template in [page 00 §5](../00-OVERVIEW.md).
 Canon facts used (page 00 §6): primary role **Damage**, hybrid role **Healer**, build **ranged** (gun, crossbow),
-**medium** armour, resource **Tempo**, mechanic **Gadgets + sentry — deployables, overclock, scrap; repair drones
+**medium** armour, resource **Tempo**, mechanic **Devices + sentry — deployables, overclock, scrap; repair drones
 heal**, spell slots **1 / 4 / 10 / 18 / 28 / 40**, calling quests **6 / 20 / 40**, talent tiers **12 / 22 / 32 / 45**, cap **60**.
 Owner of this file: every `tinker_*` spell, device, talent, set, legendary, unique and soul.
 
-> **Name note — "Devices", not "Gadgets".** Canon §6 calls the tinker's deployables *gadgets*. On this page
-> (and in the game's text) they are **Devices**, so they can never be confused with the **Gadget** socketables
+> **Name note — "Devices", not "Gadgets".** Canon §6 (round 2) calls the tinker's deployables **Devices**. On this page
+> and in the game's text they are always Devices, so they can never be confused with the **Gadget** socketables
 > (`gdg_`) that the Engineering profession makes ([page 19](../19-PROFESSIONS.md), page 08 sockets). A Device is a
 > thing the tinker throws on the ground in a fight; a Gadget is a crafted item you put in a gear socket.
-> (Listed as a canon change request.)
+> (Settled in round 2: `_SWEEP_R2.md` §2.)
 
 ## How to read the numbers on this page
 
@@ -186,8 +186,10 @@ Keys 5–6 are greyed out. Leaving by Eject or by the Walker's timer puts your n
 
 ## 5. The hybrid role — Healer (the Medic Kit)
 
-The tinker queues as **Healer** when the **Medic Kit** is on. The switch is on the Toolbelt panel
-(`scr_tinker_toolbelt`), **out of combat only** (5 s, like changing a model); it unlocks at Calling 6. The Medic
+**Role focus.** The tinker uses the canon **Role focus** switch (00 §6: in the spellbook, out of combat only,
+saved per Loadout). Setting it to **Hybrid** turns on the **Medic Kit** — the two are one switch, also shown on
+the Toolbelt panel (`scr_tinker_toolbelt`; 5 s, like changing a model; unlocks at Calling 6) — and the Dungeon
+Finder then queues the tinker as **Healer**. The Medic
 Kit swaps every damage Device for its healing twin and turns Rivet Shot into a two-faced shot. Heals are **% WD**,
 so a better gun means better heals.
 

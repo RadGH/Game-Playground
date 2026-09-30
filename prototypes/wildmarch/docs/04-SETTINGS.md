@@ -297,7 +297,7 @@ lets the target frame change by itself (page 02 §2.6).
 | Key | Label | Control | Values / range | Default | What it does | Scope |
 |---|---|---|---|---|---|---|
 | `padEnabled` | Use a gamepad | toggle | | On (does nothing without one) | read a connected controller | D |
-| `padLayout` | Stick layout | dropdown | Default · Southpaw (sticks swapped) · Legacy (move on LS, turn on LS sideways) | Default | | A |
+| `padLayout` | Stick layout | dropdown | Default · Southpaw (sticks swapped) · Classic (move on LS, turn on LS sideways) | Default | | A |
 | `padButtonIcons` | Button icons | dropdown | Automatic · Xbox · PlayStation · Generic (1–4) | Automatic | which icons prompts show | D |
 | `padLeftDeadzone` | Move stick dead zone | slider | 0–30%, step 1 | 12% | how far the stick moves before anything happens | D |
 | `padRightDeadzone` | Look stick dead zone | slider | 0–30%, step 1 | 10% | | D |
@@ -1018,7 +1018,7 @@ should be updated to it. Keys this pass **renamed** to another page's name are l
 | `set.raid.join_open_groups` | old 04, 13 | `set.social.joinMuster` | world bosses use the Muster channel (page 13, page 15) |
 | `set.raid.dialog_vote` | old 04, 13 | **removed** — canon 00 §10 fixes the vote (party votes, tie to the leader) | round 2 |
 | `set.gameplay.aimMode`, `softLockCone`, `tabCone`, `keepTargetRange`, `selfCast`, `mouseoverCast`, `tabRange`, `tabOrder`, `targetOnAttack` | old 04, old 02 | `set.controls.pointerStyle` + the Targeting group §3.1 (`self_cast_fallback`, `mouseover_cast`, `tab_range`, `tab_order`, `target_on_attack`…) | round 2 (W8) |
-| `set.gameplay.autotarget_sets_target`, `ground_at_target`, `self_cast_fallback` | `classes/ranger.md`, `classes/cleric.md` | §3.1 | **`self_cast_fallback` defaults Off here** (the task's rule and W8's "no silent self-cast"); `classes/cleric.md` says On — see §14 Q8 |
+| `set.gameplay.autotarget_sets_target`, `ground_at_target`, `self_cast_fallback` | `classes/ranger.md`, `classes/cleric.md` | §3.1 | **`self_cast_fallback` defaults Off everywhere** (W8: no silent self-cast; decided in the round-2 sweep, the cleric file follows) |
 | `set.gameplay.beast_trick_auto`, `bard_beat_cue`, `bard_beat_sound`, `dh_weakpoint_sound`, `cleric_keeping_vigil` | class files | §3.4 | added in round 2 |
 | `set.gameplay.cleric_auto_mass_res` | old 04 | **removed** (no group revive, W35) | round 2 |
 | `set.controls.aimAssist`, `set.controls.padAimAssist`, `set.combat.aimAssist` | old 04, 05 | **removed** (Tab targeting; page 02 §2.3) | round 2 |
@@ -1046,10 +1046,9 @@ should be updated to it. Keys this pass **renamed** to another page's name are l
 6. **Units** — the owner speaks in feet ("100 or 200 ft", Farhold round 11). Default metres (the data's
    unit) or feet?
 7. **Music** — there is no music system in the playground. The Music slider assumes page 17 adds one.
-8. **(new) Friendly spells with no friendly target** — `set.gameplay.self_cast_fallback` defaults **Off**
-   here (a heal refuses "No friendly target." rather than landing on you by surprise; canon W8's wording).
-   `classes/cleric.md` wrote it as default **On**. *Recommendation: Off, with the first-time tip "Press F1
-   to target yourself" the first time a heal refuses.*
+8. **(decided, round-2 sweep) Friendly spells with no friendly target** — `set.gameplay.self_cast_fallback`
+   defaults **Off** everywhere, the cleric included (a heal refuses "No friendly target." rather than landing
+   on you by surprise; canon W8). The first time a heal refuses, a tip says "Press F1 to target yourself".
 9. **(new) Compare on the item card** — default **While Shift is held** (a shorter card) or **Always**?
    *Recommendation: Shift, as asked.*
 10. **(new) Item portrait on Low graphics** — a still picture (default here) or off entirely?

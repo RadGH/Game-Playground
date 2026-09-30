@@ -99,12 +99,12 @@ lesser ones across the whole continent, so a warlock finds something to bind in 
 | **Bound Fiend** | `m_demon_bound_fiend` *(new — page 10 to add)* | appears beside Threadcutter casters anywhere, 10–50 | melee | 35% every 1.6 s | **Gore** — 120% and Bleeding, 12 s |
 | **Glass Imp** | `m_demon_glass_imp` *(new — page 10 to add; the `sand` family's imp body)* | Sunscar, 16–24 | caster, 25 m | 40% (fire) every 2.0 s | **Glare** — Blinded 3 s on a non-boss, 25 s |
 | **Ash Hound** | `m_demon_ash_hound` *(new — page 10 to add)* | Cinder Steppe, 28–36 | melee, fast | 30% every 1.2 s | **Pounce** — leaps 15 m to your target, Dazed 2 s, 15 s |
-| **Phase Hound** | `m_rift_phase_hound` (if tagged Demon) | Riftmarch, 46–51 | melee, teleports | 30% every 1.2 s | **Phase** — teleports behind its target, next bite +100%, 12 s |
-| **Rift Horror** | `m_rift_rift_horror` (if tagged Demon) | Riftmarch, 46–52 | brute | 30% every 2.2 s, 3 m cleave | **Loom** — taunts non-boss enemies within 8 m for 4 s, 20 s |
-| **Cinder Imp** | `m_ember_cinder_imp` *(page 10 must drop "ember" from the id)* | Kingsfire, 52–56 | caster swarm | 35% (fire) every 1.8 s | **Snuff** (as the Bog Imp) |
+| **Phase Hound** | `m_rift_phase_hound` (tagged Demon, page 10) | Riftmarch, 46–51 | melee, teleports | 30% every 1.2 s | **Phase** — teleports behind its target, next bite +100%, 12 s |
+| **Rift Horror** | `m_rift_rift_horror` (tagged Demon, page 10) | Riftmarch, 46–52 | brute | 30% every 2.2 s, 3 m cleave | **Loom** — taunts non-boss enemies within 8 m for 4 s, 20 s |
+| **Cinder Imp** | `m_kingsfire_cinder_imp` | Kingsfire, 52–56 | caster swarm | 35% (fire) every 1.8 s | **Snuff** (as the Bog Imp) |
 | **Brimstone Hound** | `m_demon_brimstone_hound` | Kingsfire, 52–57 | melee | 35% every 1.2 s | **Burning Bite** — 150% + Burning, 12 s |
 | **Ashmaw Fiend** | `m_demon_ashmaw` | Kingsfire, 56–60 | brute, 70% of your health | 30% every 2.2 s, 3 m cleave | **Loom** (as the Rift Horror) — the tank's demon |
-| **Cinder Wraith** | `m_demon_ember_wraith` *(page 10 to rename)* | Kingsfire, 55–60 | debuffer, 20 m | 30% (shadow) every 2.0 s | **Dread** — the target deals −20% damage for 8 s, 20 s |
+| **Cinder Wraith** | `m_demon_cinder_wraith` | Kingsfire, 55–60 | debuffer, 20 m | 30% (shadow) every 2.0 s | **Dread** — the target deals −20% damage for 8 s, 20 s |
 
 ### 2.4 Demon commands
 
@@ -265,6 +265,11 @@ While **Iron Covenant** is on (§5), three spells change. Same keys; the icons g
 
 ## 5. The hybrid role — Tank
 
+**Role focus.** The warlock uses the canon **Role focus** switch (00 §6: in the spellbook, out of combat only,
+saved per Loadout; available from calling 1, level 6). Setting it to **Hybrid** queues the warlock as **Tank** in
+the Dungeon Finder. In the fight the tank state itself is the **Iron Covenant** toggle (§5.1), which carries
+the armour, the wards and the three spell changes (§4).
+
 The warlock tanks by **paying**. Every Tithe it buys with health becomes armour while held and a ward the moment
 it is bought, and it drinks health back out of whatever it is fighting. It needs a healer who expects its health
 bar to move a lot: the danger is not one big hit (the wards catch those) but a long fight where the warlock
@@ -295,7 +300,7 @@ big hits.
 
 | Tool | What it does |
 |---|---|
-| **Challenge** (the shared taunt, level 10, page 07) | single-target taunt |
+| **Provoke** (the shared taunt, level 10, page 07) | single-target taunt |
 | **Grudge Blight** | spreads threat over a pack as Blight jumps |
 | **Brimstone** | 6 m area damage + Blight on everything with a Tithe |
 | **Gate of Grudges** | area taunt on arrival (level 28) |

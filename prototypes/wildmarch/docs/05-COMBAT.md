@@ -121,7 +121,7 @@ Page 02 owns the keys; this section owns the rules.
 
 ### 2.3 Basic attacks and the target
 
-Basic attacks are not spells and never need a target:
+Basic attacks never need a target (a wand's or staff's included, although those also carry the Spell tag, §22.4):
 
 | Attack | Rule |
 |---|---|
@@ -332,7 +332,7 @@ Every weapon obeys exactly one of two rules:
   own pattern on its own clock**, rolls **its own dice** (Farhold R14) and hits for **60%** (`OFFHAND_DAMAGE`).
   The off hand may only wind up while the main hand is recovering.
 - A **two-handed weapon** empties the off hand, except: a **quiver** stays with a bow (Farhold R22), and the
-  Doubled Grasp keystone allows two two-handers ([page 07 §Perk forest](07-PROGRESSION.md#perk-forest)).
+  Doubled Grasp capstone allows two two-handers ([page 07 §Perk forest](07-PROGRESSION.md#perk-forest)).
 - Bows need both hands to draw and cannot go in the off hand.
 
 ### 4.5 Ranged weapons `(reuse: js/weapons.js RANGED, drawPower)`
@@ -491,7 +491,7 @@ function** (`strike()`, reuse of `js/rpg.js strike` with the changes marked).
 | 1 | **Roll the base** | Weapon hit or physical spell: uniform roll in `[WD_min, WD_max]`. Magical spell, heal or shield: `SP × uniform(0.9, 1.1)`. | Same, SP new |
 | 2 | **× the coefficient** | Basic attack: strike damage share × family damage × hand share (1.0 main, 0.60 off) × draw/charge power. Spell: the % written on the class page (e.g. 140% WD). DoT tick: the tick's share of its total. | Same (`multiplier`) |
 | 2b | **× tag bonuses** | `× (1 + sum of every damage bonus whose tags this hit has ALL of)` — one additive bucket per hit ([§22.3](#223-how-tag-bonuses-stack)). Element bonuses count only for the part of the hit in that element | new (replaces Damage% and spellPower) |
-| 3 | **× position and weapon traits** | Backstab ×2.2 (dagger, rear 100°); Rhythm ×1.08/×1.16 (sword, sabre); Brace ×1.25/×1.35 (spear/polearm vs a body that closed on you this second); Far Shot keystone (×0.75 under 4 m, up to ×1.5 at 46 m) | Same (`js/actors.js strike`) |
+| 3 | **× position and weapon traits** | Backstab ×2.2 (dagger, rear 100°); Rhythm ×1.08/×1.16 (sword, sabre); Brace ×1.25/×1.35 (spear/polearm vs a body that closed on you this second); Far Shot capstone (×0.75 under 4 m, up to ×1.5 at 46 m) | Same (`js/actors.js strike`) |
 | 4 | **+ flat on-hit, × gear conditionals** | `(amount + flatOnHit) × product(gear dmgOut hooks)` — "vs undead", "vs burning", execute, etc. (`js/effects.js dmgOut`) | Same |
 | 5 | **× the attacker's statuses** | `× (1 + sum of damage buffs) × (1 − sum of dealLess, cap 60%)` — Might, Rallied, Weakened… | Same (`outgoingFrom`), cap was 80% |
 | 6 | **Critical?** | `rng < critChance` (+ gear critBonus; Riposte forces it). Crit: `× (1 + critDamage)`. [§7](#7-critical-hits) | Same |
@@ -834,7 +834,7 @@ plus *Over Time*, [§22.4](#224-which-tags-a-basic-attack-and-a-quiver-effect-ca
 | Chrono-locked | boss | current cast bar paused 2 s; shares the 90 s cast-pause lockout (page 11 §12.3) | [classes/chronomancer.md](classes/chronomancer.md) |
 | `silver_branded` Silver-Branded | enemy debuff | +6% damage from the group, 12 s (the Witch Hunter's mark; not the generic `branded`) | [classes/witch_hunter.md](classes/witch_hunter.md) |
 | Condemned | enemy debuff | +10% damage from you, 10 s | [classes/witch_hunter.md](classes/witch_hunter.md) |
-| Sworn | ally link | the Knight's Vow of Protection target | [classes/knight.md](classes/knight.md) |
+| Vowed | ally link | the Knight's Vow of Protection target | [classes/knight.md](classes/knight.md) |
 | Reproached | enemy debuff | deals 8% less damage to anyone but the Knight, 6 s | [classes/knight.md](classes/knight.md) |
 | Intercept | ally buff | the next hit is taken by the Knight, 4 s | [classes/knight.md](classes/knight.md) |
 | Oathbound | self buff | heals 20% of the damage it prevented when it ends | [classes/knight.md](classes/knight.md) |
@@ -844,7 +844,7 @@ plus *Over Time*, [§22.4](#224-which-tags-a-basic-attack-and-a-quiver-effect-ca
 | Runeforged | ally buff | granted by the Runesmith's circle, 10 s | [classes/runesmith.md](classes/runesmith.md) |
 | `shrouded` Shrouded (was "Veiled") | self | the Shadow Dancer's state; works as `hidden` (§10.6) unless the class file says more — renamed in round 2 (no "veil" in names, and not "Unseen", which is the rogue's hit type) | [classes/shadow_dancer.md](classes/shadow_dancer.md) |
 | `revealed` Revealed (was `unveiled` Unveiled, 00 §12.4) | enemy debuff | +12% damage from you, 8 s (the Shadow Dancer's debuff; not the Tactician's Exposed) | [classes/shadow_dancer.md](classes/shadow_dancer.md) |
-| Tagged | enemy debuff | your gadgets prefer it, 6 s | [classes/tinker.md](classes/tinker.md) |
+| Tagged | enemy debuff | your Devices prefer it, 6 s | [classes/tinker.md](classes/tinker.md) |
 | Broken | boss | break bar full (§11.4) | page 05 / [page 11 §12.2](11-BOSS-MECHANICS.md) |
 | Wrath | boss buff (stacks) | soft enrage: +10% damage every 30 s | [page 11 §13](11-BOSS-MECHANICS.md) |
 | Sunder (boss stack) | tank debuff (stacks) | +15% boss melee taken per stack, 30 s — **not** the same as `sunder` (§10.5) | [page 11 §26.10](11-BOSS-MECHANICS.md) `mech_sundering_blow` |
@@ -1477,7 +1477,7 @@ raise it.
 | id | Tag | Meaning |
 |---|---|---|
 | `tag_attack` | Attack | uses **Weapon Damage** (WD) — a swing, a shot, a throw, a weapon technique |
-| `tag_spell` | Spell | uses **Spell Power** (SP) — magic, heals, shields, curses |
+| `tag_spell` | Spell | uses **Spell Power** (SP) — magic, heals, shields, curses. Wand and staff basic attacks carry it too, but keep WD as their base (§22.4) |
 | `tag_basic_attack` | Basic Attack | a basic weapon attack, or a class spell that **fires your equipped weapon's own basic attack** (e.g. a volley of three normal arrows). Only these hits get **quiver effects** and other "basic attacks only" powers (§22.4). Always found together with Attack |
 
 **Delivery tags** — how it reaches the target:
@@ -1577,12 +1577,14 @@ A bonus that names **two elements** ("+10% Fire and Ice damage") is written as *
 | Any melee weapon strike | Attack · Basic Attack · Melee · Physical (or the weapon's element, e.g. a branded or elemental weapon, a sceptre's element) · **Area** on the strikes whose main shape is wide — sweep, cleave, arc, slam, and every strike of a greatsword (§4.1) |
 | Bow, crossbow, hand crossbow, firelock | Attack · Basic Attack · Ranged · Projectile · Physical |
 | Javelin, throwing knives | Attack · Basic Attack · Ranged · Projectile · Physical |
-| Wand | Attack · Basic Attack · Ranged · Projectile · the wand's element · **Chain** for a chaining wand |
-| Staff (charge attack) | Attack · Basic Attack · Ranged · the staff's element · **Area** for cone, nova, wave, ground and field forms (§4.6); **Channel** for the full-charge jet |
+| Wand | Attack · Basic Attack · **Spell** · Ranged · Projectile · the wand's element · **Chain** for a chaining wand |
+| Staff (charge attack) | Attack · Basic Attack · **Spell** · Ranged · the staff's element · **Area** for cone, nova, wave, ground and field forms (§4.6); **Channel** for the full-charge jet |
 | Fists | Attack · Basic Attack · Melee · Physical |
 
-Wands and staves are **Attacks**, not Spells: they use WD (with INT as the weapon attribute), so "+N% damage
-with Spells" does not raise them. That keeps a caster's weapon swings and its spells on separate bonuses.
+Wand and staff basic attacks carry **both** `tag_basic_attack` and `tag_spell` (decided in the round-2 sweep).
+Their base is still WD (with INT as the weapon attribute), but "+N% damage with Spells" **does** raise them, and
+so does anything else that reads the Spell tag. That way a caster's gear keeps paying off between spells.
+They still never need a target (§2.3) and still count as basic attacks for quivers and resources.
 
 **Quiver effects** (page 08 owns the list and numbers) touch **only** hits tagged Basic Attack. The added part
 carries the Basic Attack hit's tags **plus** the effect's own:
@@ -1725,7 +1727,7 @@ Page 16 owns file names; these are the shapes this page needs. All JSON, all dat
 
 ```json
 {
-  "id": "m_wolf_grey_prowler", "baseHealth": 58, "baseHit": [5, 8], "attackEvery": 1.5,
+  "id": "m_beast_grey_wolf", "baseHealth": 58, "baseHit": [5, 8], "attackEvery": 1.5,
   "armourShare": 0.25, "resist": { "ice": 0.2, "fire": -0.1 },
   "notice": 18, "social": 10, "rank": "normal",
   "family": ["beast"], "viewCone": { "width": 110, "length": 20, "turnRate": 300 },
@@ -1753,7 +1755,7 @@ Page 16 owns file names; these are the shapes this page needs. All JSON, all dat
 **A combat event** (server → client, feeds the log and meters; reuse of the `meters/` record):
 
 ```json
-{ "t": 1234.56, "src": "p:Wren", "dst": "m:m_wolf_grey_prowler#88", "via": "ranger_aimed_shot",
+{ "t": 1234.56, "src": "p:Wren", "dst": "m:m_beast_grey_wolf#88", "via": "ranger_aimed_shot",
   "kind": "damage", "element": "physical", "amount": 409, "crit": false,
   "mitigated": 136, "blocked": 0, "absorbed": 0, "overkill": 0, "threat": 409 }
 ```

@@ -43,7 +43,7 @@ before it lands, and colour, shape and sound mean the same thing everywhere** (0
 18. Debuff stacks
 19. Knockbacks and ledges
 20. Environmental hazards
-21. Line of sight, fixates and kiting
+21. Line of sight, fixates, kiting, and facing / turn rates
 22. Scaling: up to 5 players, solo + followers, the open world, world bosses, and rarity monsters
 23. How followers handle mechanics
 24. Puzzle bosses
@@ -737,7 +737,7 @@ shape can deal with it — and the first answer is where the **hybrid** classes 
 
 - The boss's melee applies **Sunder** (`mech_sundering_blow`): +12% damage taken from the boss's melee per
   stack, 20 s, refreshes on each hit. At **4** stacks (Normal) / **3** (Challenge) the next hit is **severe**.
-- **Answer 1 — Handoff.** Anyone with a taunt (a hybrid-tank Mage, Warlock, Fighter, Swashbuckler, Shadow
+- **Answer 1 — Handoff.** Anyone with a taunt (the shared **Provoke** or a class taunt: a hybrid-tank Mage, Warlock, Fighter, Swashbuckler, Shadow
   Dancer, Enchanter, Tactician, a Druid in Bear form, a Dragon Knight, a Runesmith… or a tank follower) taunts
   and holds the boss for **6 s**; while the tank is not being hit, its stacks fall off 1 per 1.5 s. Taunting
   during a tank buster makes the buster hit the new target — shown on the cast bar ("Headtaker → Brannoc").
@@ -821,7 +821,7 @@ Hazards are part of the arena or the open world. They use the same colours when 
 | `mech_env_current` | flowing water / wind lane | arrows on the surface; pushes 2–4 m/s | none (it moves you) | walk against it, use it |
 | `mech_env_falling_rocks` | ceiling debris | **red circles** 2–3 m, 2.0 s, shadows grow under them | 20% RH + stun 1 s | leave the shadows |
 | `mech_env_collapse` | floor tiles that fall | tiles **crack** with a red edge 3.0 s before falling; then gone (a hole) | falling = the ledge rule (§19) | stand on uncracked tiles |
-| `mech_env_darkness` | **Gloom** (a boss-made gloom; the world itself is always daylight, and dark places are only dark-*looking*, 00 §4) | the arena dims to film-set dark: everything stays readable, but **monster nameplates beyond 8 m are hidden** and a thin grey fog sits at knee height | monsters in the gloom gain the Shrouded effect (page 10 `mod_shrouded`) | stand in the **green** brazier circles (beneficial: nameplates within 15 m show); some class spells reveal 12 m (page 06). No torch or lantern item is needed or exists |
+| `mech_env_darkness` | **Gloom** (a boss-made gloom; the world itself is always daylight, and dark places are only dark-*looking*, 00 §4) | the arena dims to film-set dark: everything stays readable, but **monster nameplates beyond 8 m are hidden** and a thin grey fog sits at knee height | monsters in the gloom gain the Cloaked effect (page 10 `mod_cloaked`) | stand in the **green** brazier circles (beneficial: nameplates within 15 m show); some class spells reveal 12 m (page 06). No torch or lantern item is needed or exists |
 | `mech_env_cold` | Chill meter (Frostmantle, frost bosses) | a group or personal meter 0–100 under the boss frame / above the action bar | at 50: −20% move; at 100: frozen 3 s then meter to 50 | stand in **green** warm zones (braziers, a class's fire) to drain 10 per s |
 | `mech_env_heat` | heat (Sunscar, Kingsfire) | personal meter; rises in open sun / near lava | at 100: −30% healing received | shade zones (green) |
 | `mech_env_poison_fog` | poison gas in low ground | green-grey fog volume with a **violet void rim** where it ends | 3% RH per 0.5 s | high ground |
@@ -836,7 +836,7 @@ boss arena).
 
 ---
 
-## 21. Line of sight, fixates and kiting
+## 21. Line of sight, fixates, kiting, and facing / turn rates
 
 ### 21.1 Line of sight (LoS)
 
@@ -860,6 +860,40 @@ boss arena).
 - Fixaters that catch their target do what the mechanic says (explode, stun, feed the boss).
 - **Kiting** rule: an arena with fixaters always has a clear loop of ≥ 40 m circumference with no void zones
   placed on it by default.
+
+### 21.3 Facing and turn rates (new; the rogue's blind spots read this)
+
+A boss's body faces its **current target** (the top of its threat table, page 05 §13) and turns toward it at a
+fixed **turn rate**. How fast it turns decides how long a flank or rear angle lasts when the target moves, so it
+matters to the rogue's view cones and Blind Spots ([classes/rogue.md](classes/rogue.md) §2.1, §2.4: a boss's
+cone is 150° wide, 40 m long), to backstab-style talents, to frontal cones and to tanks who hold a boss turned
+away from the group. Ordinary monsters use the rogue file's family table; this table is for **bosses** (dungeon
+sub-, main, end and secret bosses, warlords, named rares and world bosses).
+
+| Boss size | Examples | Turn rate | A 180° turn takes |
+|---|---|---|---|
+| **Small** — human-sized: chibi ×1.0–1.6, creature up to ×2.4 | Pell the Lantern Thief, the Dunecutter bosses, most humanoid sub-bosses | **120°/s** | 1.5 s |
+| **Medium** — chibi ×1.7–2.4, creature ×2.5–3.4 | the Kingsfire Warmarshal, Krunn on Razorback, Rimeweaver Seidra | **105°/s** | 1.7 s |
+| **Large** — chibi ×2.5 and up, creature ×3.5 and up (titans, dragons, horrors, great beasts) | the Glass Wyrm, Oruvel, the Last Titan | **90°/s** | 2.0 s |
+| **World boss** (any size) | the eight regional and the seasonal world bosses (page 13) | **90°/s** | 2.0 s |
+| **Stationary** — rooted or built into the room (a tree-heart, a bell, an engine) | page 12 marks them (`turnRate: 0`) | **0°/s** — it never turns; its facing (if any) is scripted | — |
+
+Rules:
+
+- **During a cast** a boss does not turn (0°/s) unless the mechanic says it tracks: a cone locks its facing at
+  50% of the warning (§5), a tracking beam uses its own rate (e.g. `mech_rotating_beam` 30–40°/s). After the
+  cast it resumes its turn rate. This is the window a rogue's Blindside and a side-step both use.
+- **Taunts and target changes** (Provoke, a class taunt, a fixate ending) do **not** snap the boss round: it
+  turns at its rate, so a tank who taunts from behind the group still has to walk the boss round.
+- **Charges, leaps and teleports** set the boss's facing to the direction of travel; it then turns normally.
+- **Look Around**: a boss script may include a *Look Around* cast (grey cast bar, 2.0 s, its own banner "It is
+  watching!"): the boss turns a full circle and **every blind spot is closed** while the bar runs. At most one
+  every 30 s. Page 12 marks which bosses have one.
+- **Challenge and Depth do not change turn rates** (a faster turn would silently delete a class's angle; harder
+  content adds mechanics, not twitchiness). A page 12/13 boss entry may set its own `turnRate` inside the
+  90–120°/s band, or 0 for a stationary boss; anything outside the band needs a line saying why.
+- The **Elevated** rule of the rogue file stands: a flying boss or one flagged `sees_all` has no blind spot, and
+  a world boss's 150° cone still leaves a 210° blind arc behind it.
 
 ---
 
@@ -931,9 +965,10 @@ with two players dead needs at most 2).
   whole field).
 - **Adds**: reuse Farhold world-boss `minions` (first/add/every/max/radius), with `max` × (1 + present / 10),
   cap 40.
-- **Health**: × (1 + 0.8 × (present − 1)) up to 40 present, then flat (page 13 tunes).
+- **Health**: page 13 §3.3 owns the formula (`base × (0.6 + 0.08 × N)`, N = credited players, capped at 60;
+  it falls at most 10% per 10 s).
 - **Credit**: any player who dealt, healed or absorbed ≥ 1% of the boss's health, or was in the fight for
-  ≥ 60 s, gets personal loot.
+  ≥ 60 s, gets personal loot (once per boss per week, Monday 06:00; page 13 §5).
 - **No arena lock**; a large leash (120 m). A world boss evades and resets only if **no player** is within 80 m
   for 30 s.
 
@@ -1336,6 +1371,8 @@ A boss script (pages 12/13 write these; reuse shape: Farhold `phases[{ at, modif
 ```json
 {
   "id": "b_kingsfire_warmarshal",
+  "size": "medium",
+  "turnRate": 105,
   "targetTime": 240,
   "enrage": { "soft": "wrath", "hard": true },
   "voice": { "role": "warrior", "gender": "m", "seed": 5521 },
@@ -1411,3 +1448,7 @@ A boss script (pages 12/13 write these; reuse shape: Farhold `phases[{ at, modif
     scripted fight.
 16. **Depth mechanics**: at every Depth tier the §4.1 floors of the chosen difficulty still hold, and no boss
     gains a lethal it did not have.
+17. **Turn rates** (§21.3): every boss script has a `turnRate` equal to its size row (or 0 for a stationary boss,
+    or a value in 90–120°/s with a reason); a simulated boss holding still on a tank while a second player
+    circles it at walk speed reaches a 150°-cone blind spot in the time the table predicts (± 0.1 s); no boss
+    turns while casting a non-tracking mechanic; Challenge and every Depth tier leave `turnRate` unchanged.

@@ -240,3 +240,7 @@ it were accepted. Answer only the ones you disagree with.
 |---|---|---|---|
 | H51 | Allow one 4–5 pip "everyone in" soak per boss fight (most soaks are 1–3)? | yes, one per fight | 11, 12 |
 | H52 | d16: Saelith can die if you pick "Because you can't stop us." | keep | 12 |
+| H53 | `set_barrowwarden` names two different sets (page 09 §3.33 #1). Rename the page-12 one? | yes, rename page 12's | 09, 12 |
+| H54 | `set_reliquary_ash`'s 6-piece bonus lets you survive a one-shot, against page 09's rule that sets never bypass a mechanic. | swap it for a large barrier | 09, 12 |
+| H55 | Page 12 replaced 8 generic dungeon sets with its own. Retire the 8 old ones? | retire them (listed on page 09 §3.32) | 09 |
+| H56 | Page 09's rule "a boss lists at most one generic legendary" is broken by many "any Challenge boss" sources. Loosen it to "at most one per boss, not counting world-pool drops"? | loosen | 09 |

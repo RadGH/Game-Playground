@@ -69,8 +69,10 @@ fights." — kept as Oathbound Strike (always crits demons), **Wave of Mending**
   until calling 20.
 - One paladin's auras do not stack with another paladin's copy of the same aura (a party with two Keeping
   paladins gets 5%, not 10%).
-- **Dungeon Finder role follows the oath**: queue as Tank under Keeping, Healer under Mercy, Damage under
-  Dawnfire. The finder asks you to swear the matching oath before the dungeon starts (page 15).
+- **Role focus is tied to the oath** (the canon Role focus switch, 00 §6): swearing **Keeping** sets Role focus to
+  **Primary (Tank)**, swearing **Mercy** sets it to **Hybrid (Healer)**, and flipping the switch in the spellbook
+  swears the matching oath. **Dawnfire** is a solo oath and leaves Role focus where it was. The Dungeon Finder
+  queues you as your Role focus and asks you to swear the matching oath before the dungeon starts (page 15).
 
 ### 2.2 Sanctity and "Fulfilled" (calling 6)
 
@@ -147,8 +149,8 @@ the Oathbound refund, so a Mercy paladin who never swings runs dry in about 90 s
 
 **2. `paladin_wave_of_mending` — Wave of Mending** (level 4) — **the main heal** (was Hands of Mercy)
 - **6% mana**, cooldown **6 s**, instant, **one ally or yourself within 30 m**.
-- Heals the target **240% SP** and removes **one** poison, curse, disease or magic debuff (the paladin's
-  dispel). Then the heal **washes outward**: a ripple from the target heals the **2 lowest-health allies within
+- Heals the target **240% SP** and removes **one** Poison, Curse or Magic debuff (the paladin's
+  dispel; types per page 05 §10.2). Then the heal **washes outward**: a ripple from the target heals the **2 lowest-health allies within
   6 m of them** for **40%** of that amount (no dispel on the ripple).
 - Targeting: **Needs target** — an ally or yourself (`F1`, `F2`–`F5`, click a frame). It will not cast on an
   enemy target; with an enemy targeted and **Self-cast fallback** on (page 04), it heals you.
@@ -230,8 +232,9 @@ the Oathbound refund, so a Mercy paladin who never swings runs dry in about 90 s
 |---|---|
 | Soak (orange) | Aegis on a soaker absorbs 25% of the paladin's max health of it; Keeping Covenant takes 40% of every soaker's hit. |
 | Tank buster | Aegis on self, Covenant under Keeping. |
+| Tank swap | the Keeping riders taunt (Oathbound Strike, Dawnspear); the shared **Provoke** (page 07, level 10) is the dedicated single-target taunt. |
 | Room-wide damage | Mercy Covenant (cannot drop below 1 health for 4 s) is the group's "stop the wipe" button. |
-| Dispel | Wave of Mending removes one poison/curse/disease/magic debuff every 6 s (two with Mercy's charges). |
+| Dispel | Wave of Mending removes one Poison / Curse / Magic debuff every 6 s (two with Mercy's charges). |
 | Void / danger zones | Slow class: Dawnspear's cast roots walking. Movement only from the tier-1 **Dawnstride** talent and the dodge roll. |
 | Undead/demon bosses | Oathbound ×2 and always crits demons; Dawnfire Dawnspear stuns (interrupts a boss). |
 | Revive | Fulfilled Wave of Mending on a dead ally (in combat, as often as the ring fills), the tier-4 **Past the Threshold** talent, plus page 05's normal out-of-combat revive. No per-fight limit. |
@@ -248,8 +251,11 @@ colours change with the oath (§2.4).
 
 ## 5. The hybrid role — Healer (Oath of Mercy)
 
-**How:** swear **Mercy** (§2.1). Every spell keeps its slot and its base numbers; the Mercy riders turn the bar
-into a healer's bar:
+**How:** set the canon **Role focus** switch (00 §6; spellbook, out of combat, saved per Loadout) to **Hybrid** —
+which is the same as swearing **Mercy** (§2.1; the two are tied). What it changes: the Keeping riders (taunts,
+threat ×3) and the Keeping aura give way to the Mercy riders and aura, Sanctity is built by healing instead of by
+holding threat, and the Dungeon Finder queues you as Healer. Every spell keeps its slot and its base numbers; the
+Mercy riders turn the bar into a healer's bar:
 
 | Spell | Under Mercy it is… |
 |---|---|
@@ -313,8 +319,8 @@ Id = spell id + `_t<tier><letter>`. A tier opens at its level or when the spell 
 | Tier | a | b | c |
 |---|---|---|---|
 | 1 (12) | **Walking Ground** — the circle follows you. | **Thrown Ground** — targeting becomes **Ground**, placed anywhere within 30 m. | **Narrow Ground** — 4 m, but every number ×1.6. |
-| 2 (22) | **Rooted Ground** — the first time an enemy enters, it is rooted 1.5 s. | **Pure Ground** — allies inside are immune to poison and disease. | **Sunwell** — allies inside regain 0.5% mana per second. |
-| 3 (32) | **Growing Ground** — radius +1 m each second (max 12 m). | **Consecrated Blades** — allies inside deal +8% as holy. | **Warding Ground** — each ally entering gets a barrier of 5% max health (once per cast). |
+| 2 (22) | **Rooted Ground** — the first time an enemy enters, it is rooted 1.5 s. | **Pure Ground** — allies inside are immune to Poison-type statuses (page 05 §10.2). | **Sunwell** — allies inside regain 0.5% mana per second. |
+| 3 (32) | **Growing Ground** — radius +1 m each second (max 12 m). | **Sanctified Blades** — allies inside deal +8% as holy. | **Warding Ground** — each ally entering gets a barrier of 5% max health (once per cast). |
 | 4 (45) | **Last Light** — when it ends, it bursts for 150% WD to enemies and 5% max-health heal to allies. | **Twin Grounds** — 2 charges. | — |
 
 ### Aegis of the Vow

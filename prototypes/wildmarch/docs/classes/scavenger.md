@@ -25,7 +25,7 @@ Formulas and tags: [page 05](../05-COMBAT.md). Boss vocabulary: [page 11](../11-
 | out of combat | −5 a second after 5 s |
 
 **Naming rule.** The Tinker's second resource is **Scrap** ([tinker](tinker.md)). The scavenger's is always
-**Junk**, and the scavenger never builds turrets or gadgets that act on their own — junk is thrown, blown up or
+**Junk**, and the scavenger never builds turrets or Devices (the Tinker's deployables) that act on their own — junk is thrown, blown up or
 stacked into a wall, and that is all.
 
 ---
@@ -275,7 +275,7 @@ the Dungeon Finder (00 §4), so a support scavenger still deals most of its dama
 | **Tip Jar** | a **Shiny** can be handed to a party member: target them (**Ally**) and press `Q` (Scrounge is replaced in Quartermaster). Their **next spell** within 15 s is a **critical hit and costs nothing** |
 | **Care Package** | every **10 junk** you pick up, the ally with the lowest resource (by share of their pool) within 30 m gets **+20 Momentum or Tempo, or 60 mana** |
 | Rattled | the three spell versions (§4) |
-| Dungeon Finder | queues as **Support** (a Damage slot) |
+| Role focus | tied to the canon **Role focus** switch (00 §6; spellbook, out of combat, saved per Loadout): setting it to **Hybrid (Support)** turns Quartermaster on when you leave combat and makes the Dungeon Finder queue you as **Support** (a Damage slot); **Primary (Damage)** turns it off. The `Shift+1` toggle still flips Quartermaster mid-fight without changing your queued role |
 
 ### 5.2 Talents that turn spells toward support
 

@@ -34,7 +34,7 @@
 | Resource | **Momentum** + the **Vow** and the **Banner** (§2) |
 | Companion | None. The knight's companion is whoever it has sworn to protect. |
 
-**Playstyle in three sentences.** The knight holds enemies with a shield, a rebuke and a challenge, and it
+**Playstyle in three sentences.** The knight holds enemies with a shield, a rebuke and a thrown gauntlet, and it
 takes a share of the damage meant for one sworn ally through its **Vow of Protection**. It plants a
 **banner** where the group fights; from 20 the banner's colour decides whether it hardens, strengthens or
 heals the people around it. Its signature moments are stepping in front of a blow meant for someone else,
@@ -86,7 +86,7 @@ Tank focus and the **Standard of Valor** in Support focus; after `q_calling_knig
 ### 2.4 Gauge UI
 
 `hud_class_gauge` (page 03): the Momentum bar (deep red) sits under the health bar. To its right a
-**shield-shaped slot** shows the Sworn ally's portrait, name and a thin health bar; the chain icon beside it
+**shield-shaped slot** shows the Vowed ally's portrait, name and a thin health bar; the chain icon beside it
 lights when damage is being moved and greys when the Vow is paused (with the reason on hover: "Out of range",
 "You are below 20%"). A small **pennant** above the Momentum bar shows the banner's colour and its 30 s draining.
 
@@ -135,7 +135,7 @@ banner **cannot be destroyed**.
   (page 05 taunt rule). Works on **bosses** (it is the knight's tank-swap tool). Bosses that are immune to taunt
   are marked as such on pages 11–13.
 - In **Support** focus it becomes **Called Out** instead (§5.2).
-- **Looks like**: you point your sword; a gold gauntlet sigil flies to the enemy and hangs over its head
+- **Looks like**: you point your sword; a gold gauntlet emblem flies to the enemy and hangs over its head
   (spellfx `marked` status, recoloured gold, for 3 s).
 - **Sound**: a gauntlet thrown to the floor; your voice line (§10).
 
@@ -264,7 +264,10 @@ Support brings more.
 
 ### 5.1 What Support focus turns on
 
-Choosing **Support** role focus (page 06 §Role focus; free, 5 s cast, out of combat) gives the shared
+The knight uses the shared **Role focus** switch in the spellbook (canon 00 §6; saved per Loadout): **Primary** is
+the page's "Tank focus" and **Hybrid** is its "Support focus", and the Dungeon Finder queues it as that role. The
+switch is **tied to the shield** — Tank focus's Shield Oath needs one (§2.1) — and to the banner, whose default
+standard follows the focus (§2.3). Choosing **Support** (free, 5 s cast, out of combat) gives the shared
 **Herald** passive (+10% to the strength of buffs and debuffs you apply) and these class changes:
 
 | Change | Rule |
@@ -278,7 +281,7 @@ Choosing **Support** role focus (page 06 §Role focus; free, 5 s cast, out of co
 
 ### 5.2 The Support versions
 
-- **Fearless** (status on the Sworn ally, `tag_duration`): **+8% damage** and **immune to Fear** (non-mechanic)
+- **Fearless** (status on the Vowed ally, `tag_duration`): **+8% damage** and **immune to Fear** (non-mechanic)
   while sworn. The chain turns red-gold. Buff family `sworn_valour` (one per ally).
 - **`knight_called_out` — Called Out** (Gauntlet in Support focus) · 10 Momentum · 8 s cooldown · **Needs target**
   (enemy) · 25 m · **Tags** `tag_spell`, `tag_ranged`, `tag_duration`, `tag_curse`. The enemy is **Called Out**
@@ -323,7 +326,7 @@ tier; retraining at the Unbinder (reuse: Farhold `js/retrain.js`).
 | 1 (12) | **Wide Reproach** — a 3.5 m circle around you | **Shield Throw** — becomes a thrown shield that hits 3 enemies within 20 m (bouncing) and returns (adds `tag_ranged`, `tag_projectile`) | **Pommel Strike** — one target, 180% WD, Reproached lasts 10 s |
 | 2 (22) | **Reproach the Wicked** — +30% damage against demons and undead, and they are Reproached for 12% | **Iron Answer** — Reproach gives a barrier of 3% of max health (up to 12%) | — |
 | 3 (32) | **Shield Slam** — every 3rd Reproach Stuns a non-boss target for 1 s | **Counter-Reproach** — after you block, the next Reproach builds 24 Momentum | — |
-| 4 (45) | **Sworn Blow** — hitting an enemy that is attacking your Sworn ally heals the ally 3% max health | **Reproach of Kings** — Reproached also reduces the enemy's attack speed 15% | — |
+| 4 (45) | **Vowed Blow** — hitting an enemy that is attacking your Vowed ally heals the ally 3% max health | **Reproach of Kings** — Reproached also reduces the enemy's attack speed 15% | — |
 
 **Gauntlet** (`knight_gauntlet`; the same talents apply to Called Out, with "taunted" read as "Called Out")
 | Tier | a | b | c |
@@ -360,7 +363,7 @@ tier; retraining at the Unbinder (reuse: Farhold `js/retrain.js`).
 **Unyielding Oath** (`knight_unyielding_oath`)
 | Tier | a | b | c |
 |---|---|---|---|
-| 1 (40) | **Shared Oath** — your Sworn ally gets the same 50% reduction (not the 1-health floor) | **Oath of Iron** — 15 s long, 40% reduction, no health floor | — |
+| 1 (40) | **Shared Oath** — your Vowed ally gets the same 50% reduction (not the 1-health floor) | **Oath of Iron** — 15 s long, 40% reduction, no health floor | — |
 | 2 (40) | **Rising Oath** — Momentum is filled to 100 and your hits generate threat ×2 more for its duration | **Answering Oath** — 25% of the prevented damage is dealt back to your attackers | — |
 | 3 (40) | **Oath Renewed** — if the health floor saved you, the cooldown is cut by 60 s | **Standing Oath** — it also plants a banner of your current colour at your feet (free) | — |
 | 4 (45) | **Oath of the Order** — every ally within 12 m takes 20% less damage for 6 s (in Support focus: 30%) | **Second Oath** — 2 charges, 240 s each | — |
@@ -377,7 +380,7 @@ tier; retraining at the Unbinder (reuse: Farhold `js/retrain.js`).
 **Plate of the Vowkeeper**
 - **2 pieces** — Vow of Protection moves 30% instead of 25% (40% at the banner from Oathsworn is unchanged).
 - **4 pieces** — each hit moved by the Vow builds +2 Momentum.
-- **6 pieces** — Valiant Charge on your Sworn ally has no cooldown once every 30 s.
+- **6 pieces** — Valiant Charge on your Vowed ally has no cooldown once every 30 s.
 
 **Bannerlord's Harness**
 - **2 pieces** — Raise the Standard's banner lasts 45 s.
@@ -393,7 +396,7 @@ tier; retraining at the Unbinder (reuse: Farhold `js/retrain.js`).
 | id | Name | Slot | Power (named) | Drop source |
 |---|---|---|---|---|
 | `leg_aegis_of_the_unbroken_vow` | Aegis of the Unbroken Vow | shield | **Unbroken Vow** — the Vow moves 35%, and every 2% of your max health moved builds 1 Momentum | `b_slagborn` Slagborn (world boss, [page 13](../13-WORLD-BOSSES.md)) |
-| `leg_hammer_of_the_marching_banner` | Hammer of the Marching Banner | hammer | **Marching Standard** — your banner is carried on your back (8 m aura) and never needs replanting; Raise the Standard instead refreshes it and pulses its effect ×2 for 5 s | `b_kennelmaster_varro` Kennelmaster Varro, with Scorch and Soot (`d15_fire_court`, was r04) |
+| `leg_hammer_of_the_marching_banner` | Hammer of the Marching Banner | hammer | **Marching Standard** — your banner is carried on your back (8 m aura) and never needs replanting; Raise the Standard instead refreshes it and pulses its effect ×2 for 5 s | `b_kennelmaster_varro` Kennelmaster Varro, with Scorch and Soot (`d15_fire_court` sub-boss) |
 | `leg_helm_of_the_sworn_sentinel` | Helm of the Sworn Sentinel | head | **Sentinel's Call** — Gauntlet taunts every enemy within 8 m of its target; cooldown 6 s | `b_standing_ruin` The Standing Ruin (`frostmantle` world boss, page 13) |
 | `leg_gauntlets_of_the_intercessor` | Gauntlets of the Intercessor | hands | **Intercessor** — Intercept takes the next 2 hits and gives the ally 20% less damage for 4 s | `b_castellan_vorhane` Lord Castellan Vorhane (`d13_cindergate` end boss, page 12) |
 | `uq_squires_first_shield` | The Squire's First Shield | shield | **Keen Squire** — Reproach builds 18 Momentum instead of 12 | `b_hollow_thane` The Hollow Thane (`d01_hollow_barrow` end boss; a level-60 copy in Challenge mode) |
@@ -406,8 +409,8 @@ Souls sit in a **Soul socket** (page 08 §Sockets); page 09 catalogues them.
 
 | id | Name | Socket in | Requirement | Behaviour | Source |
 |---|---|---|---|---|---|
-| `soul_oathkeeper` | Soul of the Oathkeeper | shield | Knight | **A new effect**: when your Sworn ally would take a killing blow that is not `unavoidable`, the Vow moves **100%** of that hit to you instead of 25%. Once per 60 s | `b_castellan_vorhane` (`d13_cindergate`), Challenge mode, 4%; any Depth 15+ end chest, 0.5% |
-| `soul_bannerlords_heart` | Soul of the Bannerlord's Heart | chest | Knight | **A spell changes**: Raise the Standard also hangs a **small pennant on your Sworn ally**; it carries a copy of your banner's aura at 50% strength (6 m) wherever they go, for the banner's duration | `b_carrion_crown` (world boss), 2%; `b_the_great_bellows` (page 12), Challenge mode, 4% |
+| `soul_oathkeeper` | Soul of the Oathkeeper | shield | Knight | **A new effect**: when your Vowed ally would take a killing blow that is not `unavoidable`, the Vow moves **100%** of that hit to you instead of 25%. Once per 60 s | `b_castellan_vorhane` (`d13_cindergate`), Challenge mode, 4%; any Depth 15+ end chest, 0.5% |
+| `soul_bannerlords_heart` | Soul of the Bannerlord's Heart | chest | Knight | **A spell changes**: Raise the Standard also hangs a **small pennant on your Vowed ally**; it carries a copy of your banner's aura at 50% strength (6 m) wherever they go, for the banner's duration | `b_carrion_crown` (world boss), 2%; `b_the_great_bellows` (page 12), Challenge mode, 4% |
 
 ---
 
@@ -426,7 +429,7 @@ Souls sit in a **Soul socket** (page 08 §Sockets); page 09 catalogues them.
 | Unyielding Oath | "I will not fall!" · "By my oath!" |
 | Critical hit | "For the Order!" · "Yield!" |
 | Low health | "Hold … hold!" · "I need healing, now!" |
-| Sworn ally dies | "I failed my oath …" · "Forgive me." |
+| Vowed ally dies | "I failed my oath …" · "Forgive me." |
 
 ---
 
@@ -462,3 +465,6 @@ Souls sit in a **Soul socket** (page 08 §Sockets); page 09 catalogues them.
 - **Re-sourced**: Bannerlord's Harness r02/r04 → d11 Normal + Challenge d13–d16 + Depth 10+ (+ a Blacksmithing recipe
   for the hauberk); Aegis `b_barrowking_hrodric` (r01) → `b_slagborn`; Hammer r04 → `d15_fire_court`;
   `b_ember_king_kaedros` → `b_fire_king_kaedros`.
+- **Sweep (round 2)**: §5.1 now names the canon Role focus switch (Primary = Tank focus, Hybrid = Support focus;
+  tied to the shield and the banner); "a challenge" in the playstyle line → "a thrown gauntlet" (the shared
+  taunt is **Provoke**); `leg_hammer_of_the_marching_banner` source note tidied; "gauntlet sigil" → "gauntlet emblem".

@@ -108,7 +108,7 @@ new ranged families — hand crossbow, firelock, throwing knives — are defined
 | 12 | [Scavenger](classes/scavenger.md) | Damage | Support | ranged (thrown) | light | Momentum | The Pack (junk) | DEX / CON | javelin, throwing knives, dagger, hammer, quarterstaff | javelins | — |
 | 13 | [Swashbuckler](classes/swashbuckler.md) | Damage | **Tank** | melee | light | Tempo | Flair | DEX / CON | sword, sabre, rapier, dagger, hand crossbow | rapier | — |
 | 14 | [Dragon Knight](classes/dragon_knight.md) | Damage | Tank | melee | heavy | Momentum | Draconic Aspect (Dragon Form at 40) | STR / CON | greatsword, greataxe, longsword, halberd, shield | longsword | — |
-| 15 | [Pyromancer](classes/pyromancer.md) | Damage | **Healer** | caster | cloth | **Momentum** | Heat (its Momentum) | INT / CON | staff, wand, sceptre, focus | staff | — |
+| 15 | [Pyromancer](classes/pyromancer.md) | Damage | **Healer** | caster | cloth | **Momentum (Heat); no mana bar** | Heat (its Momentum) | INT / CON | staff, wand, sceptre, focus | staff | — |
 | 16 | [Stormcaller](classes/stormcaller.md) | Damage | Support | caster | cloth | Mana | Static + lightning rods | INT / DEX | staff, wand, focus | wand | — |
 | 17 | [Druid](classes/druid.md) | Healer | Tank, Damage | caster / melee | medium | Mana | Shapeshift (Grove, Heron, Bear, Wolf transform the spells) | INT / STR | staff, sceptre, quarterstaff, focus | quarterstaff | — (the druid *is* the beast) |
 | 18 | [Oracle](classes/oracle.md) | Healer | Support | caster | cloth | Mana | Foresight | INT / CON | staff, sceptre, focus | sceptre | — |
@@ -121,7 +121,7 @@ new ranged families — hand crossbow, firelock, throwing knives — are defined
 | 25 | [Sorcerer](classes/sorcerer.md) | Damage | Support | caster | cloth | Mana | Wild Magic | INT / DEX | staff, wand, focus | wand | — |
 | 26 | [Runesmith](classes/runesmith.md) | Tank | Damage | melee | heavy | **Mana** | Runes | STR / CON | hammer, greataxe, mace, shield | hammer + shield | — |
 | 27 | [Shadow Dancer](classes/shadow_dancer.md) | Damage | **Tank** | melee | light | Tempo | Shadows (clones) | DEX / CON | dagger (dual), rapier | two daggers | — (clones are spell objects) |
-| 28 | [Tinker](classes/tinker.md) | Damage | **Healer** | ranged (gun, crossbow) | medium | Tempo | Gadgets + sentry | DEX / INT | firelock, crossbow, shortbow, dagger, hammer | crossbow | — (the sentry is a deployable) |
+| 28 | [Tinker](classes/tinker.md) | Damage | **Healer** | ranged (gun, crossbow) | medium | Tempo | Devices + sentry | DEX / INT | firelock, crossbow, shortbow, dagger, hammer | crossbow | — (the sentry is a deployable) |
 | 29 | [Priest](classes/priest.md) | Healer | Damage | caster | light | Mana | Light/Shadow balance | INT / CON | mace, sceptre, staff, shield, focus | sceptre + shield | — |
 | 30 | [Enchanter](classes/enchanter.md) | Support | **Tank** | caster | light | Mana | Charm + illusions | INT / CON | staff, wand, focus | staff | **charmed enemy** (temporary) |
 
@@ -631,7 +631,7 @@ that the class **tames**, **binds** or **controls**.
 | **Charmed enemy** | enchanter (**Charm**) | dominate a non-boss enemy | **temporary** (typical 20–40 s; the class file sets it) | control ends; it is dead | no |
 | **Follower** (hired) | anyone, from level 8 | hire at a broker ([page 07](07-PROGRESSION.md)) | until dismissed | falls; rises 14 s after combat | **yes** |
 
-**Not pets** (spell objects, with no pet frame, no commands and no revive): the tinker's sentry and gadgets,
+**Not pets** (spell objects, with no pet frame, no commands and no revive): the tinker's sentry and Devices,
 the stormcaller's lightning rods, the runesmith's runes, the knight's banner, the scavenger's junk builds, the
 mage's decoy images, the enchanter's illusions, the shadow dancer's clones. They are tagged **Deployable**
 (page 05 §22) and last as their spell says; threat from decoys is written on the spell.
@@ -755,7 +755,7 @@ the pet frame. The class file decides and says which.
 | **Gauge above the bar** (320 × 36 px at 1080p, in the class colour) — pips | 3–8 round pips that fill | warrior Bulwark (block charges), mage Resonance, monk Breath, swashbuckler Flair, witch hunter Verdict, bard verses |
 | Gauge — bar 0–100 | a horizontal bar with thresholds | cleric Devotion (banked shield), oracle Foresight |
 | Gauge — slider −100…+100 | a bar with a centre notch | priest Light/Shadow balance |
-| Gauge — slots | 2–4 icons that fill with a type | shaman Storm Tales (three tales + the last beast called), runesmith runes, tinker gadgets, sorcerer's current wild-magic roll |
+| Gauge — slots | 2–4 icons that fill with a type | shaman Storm Tales (three tales + the last beast called), runesmith runes, tinker Devices, sorcerer's current wild-magic roll |
 | Gauge — counter | a number with an icon | necromancer corpses nearby, scavenger junk, tactician Orders, shadow dancer clones |
 | Gauge — timeline | a strip of the last 5 s | chronomancer's recorded ghost |
 | **State icon** (on the bar's border) | an icon and a name | fighter stance, druid form, dragon knight aspect, paladin Oath, bard song, knight banner |
@@ -1034,7 +1034,7 @@ Validation (page 16 tests): every spell has `targeting`; every spell has exactly
 **A pet** (tamed beast / bound demon, saved with the character):
 
 ```json
-{ "kind": "tamed", "species": "m_wolf_grey_prowler", "name": "Ash", "ability": "pet_wolf_hamstring",
+{ "kind": "tamed", "species": "m_beast_grey_wolf", "name": "Ash", "ability": "pet_wolf_hamstring",
   "stance": "defensive", "alive": true }
 ```
 

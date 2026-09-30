@@ -497,9 +497,9 @@ in (§8).*
 | 4.2 | `q_ms_thane_ironbraid` | The Thane | (auto on arrival) | `town_anvilgate` | Present the warrant to Thane Hilda Ironbraid [deliver] | 19 g | 12 |
 | 4.3 | `q_ms_steel_sold_north` | Steel Sold North | `npc_hilda_ironbraid` | `town_cutstone` | Search 3 Cutstone warehouses for the buyer's marks [use ×3] | 20 g | 13 |
 | 4.4 | `q_ms_the_kindled_buyer` | The Kindled Buyer | `npc_hilda_ironbraid` | `sz_cutstone_quarries` | Ambush the buyer's escort: kill 5 guards [hunt] and the buyer, Ashen Tomas (Kindled champion) [kill] | 20 g · `crate` Uncommon | 13 |
-| 4.5 | `q_ms_the_broken_seam` | The Broken Seam | `npc_gruna_pickett` | `sz_deepdelve_slopes` | Go down the Old Seam shaft to where the mine broke into a barrow-road [visit] | 22 g · 8 g | 14 |
-| 4.6 | `q_ms_the_deepworn_speak` | The Deepworn Speak | `npc_gruna_pickett` | `sz_deepdelve_slopes` | Talk to Kell Ironjaw [talk] — the Deepworn are neutral for this quest; attacking him fails the step (it restarts after 10 min) | 22 g · `rep` Deepworn +15 | 14 |
-| 4.7 | `q_ms_deepdelve` | Deepdelve | `npc_hilda_ironbraid` | `d03_deepdelve` | Find the entrance and clear Deepdelve Mines [discover → dungeon] | 57 g · `class_pick` Rare | 15 |
+| 4.5 | `q_ms_the_broken_seam` | The Broken Seam | `npc_gruna_pickett` | `sz_shaft_seven_slopes` | Go down the Old Seam shaft to where the mine broke into a barrow-road [visit] | 22 g · 8 g | 14 |
+| 4.6 | `q_ms_the_deepworn_speak` | The Deepworn Speak | `npc_gruna_pickett` | `sz_shaft_seven_slopes` | Talk to Kell Ironjaw [talk] — the Deepworn are neutral for this quest; attacking him fails the step (it restarts after 10 min) | 22 g · `rep` Deepworn +15 | 14 |
+| 4.7 | `q_ms_shaft_seven` (was `q_ms_deepdelve`) | Shaft Seven | `npc_hilda_ironbraid` | `d03_shaft_seven` | Find the entrance and clear Shaft Seven Mines [discover → dungeon] | 57 g · `class_pick` Rare | 15 |
 | 4.8 | `q_ms_the_cairnwifes_warning` | The Cairnwife's Warning | `npc_moira_cairnwife` | `sz_highcairn_moors` | Kill 12 Unburied on the moors [hunt] and take their marching orders from a banner-bearer [gather] | 23 g | 15 |
 | 4.9 | `q_ms_garricks_road` | Garrick's Road | `npc_garrick_holt` | `sz_highcairn_moors` | Escort Garrick through the Unburied lines to the Bellows road [escort] | 24 g · `choice` | 16 |
 | 4.10 | `q_ms_silence_at_bellows` | Silence at Bellows | `npc_bodric_ashlock` | `sz_bellows_heights` | Light 3 signal braziers on the keep's outer wall while its turrets fire on you [use ×3] (turret shots are **danger zones**, 1.5 s warning) | 24 g | 16 |
@@ -620,7 +620,7 @@ in (§8).*
 | 12.4 | `q_ms_the_broken_pin` | The Broken Pin | `npc_ysoldes_echo` | `lm_the_broken_pin` | Climb to the empty brazier [visit; scene]: the Mend is already breached, and Saelith, the Spire's warden, lies wounded beside it [talk]. The climb passes the Spire's door [discover d16]. | 329 g · `rep` Lantern House +20 | 60 |
 | 12.5 | `q_ms_the_spire` (was `q_ms_veilspire`) | The Unwoven | `npc_saelith` | `d16_the_spire` | Clear **d16 The Spire**, the story's epilogue, and defeat the Unwoven (`b_unwoven`, page 12) [discover → dungeon; the entrance was discovered in 12.4] — 5 players, any difficulty; Normal is finishable with followers | 823 g · `class_pick` Epic · title *of the Spire* | 60 |
 | 12.6 | `q_ms_the_last_lamp` | The Last Lamp | `npc_ysoldes_echo` | the Spire | `choose`: **Relight the Lamp** or **Take the Lamp's place** (page 01 §4) | 329 g · title *the Lampbearer's Heir* or *the Held Flame* · Spire flame colour (client) | 60 |
-| 12.7 | `q_ms_home` | Home | `npc_iris_vael` | Brightwater | Return to the First Waystone [visit]; Odile, Garrick, Bram and Pip are there (phase: a small feast in the square) | 329 g · cosmetic *Lamp of Brightwater* (a lantern worn on the back; decoration only, it gives no light) | 60 |
+| 12.7 | `q_ms_home` | Home | `npc_iris_vael` | Brightwater | Return to the First Waystone [visit]; Odile, Garrick, Bram and Pip are there (phase: a small feast in the square) | 329 g · cosmetic *Lamp of Brightwater* (a small lamp worn on the back; decoration only, it gives no light) | 60 |
 
 ### 6.13 Story instances
 
@@ -664,7 +664,7 @@ if you are in their town.
 | 9 | `q_mf_what_the_fen_gives_back` | A Trade of Your Own | `npc_mf_scrapwright_mabli` | Reedhollow, the profession stations | Salvage 3 items at Mabli's bench [use]; visit the seven profession stations in Reedhollow and hear each trainer's one-line pitch [talk ×7, optional — the step ticks after 1]; **choose one crafting profession** [`choose`] and make its first recipe [use] | **Salvage** and **one crafting profession** of the seven (Blacksmithing, Leatherworking, Tailoring, Jewelcrafting, Enchanting, Engineering, Alchemy — page 19 owns the list, recipes and the rule for changing it later) |
 | 10 | *(level only)* | — | — | — | — | Spell slot 3; friendly duels (page 07, page 15) |
 | 10 | `q_hc_saddle_and_bridle` | Trouble in the Stable | `npc_oswin_stablemaster` | `hc_stable_gate` | Catch the runaway horse *Trouble* in the crownlands [chase beat, reuse `events.json` `chase`: 120 s, escape at 60 m] and ride it back [visit] | **Riding I** (+60%, 8.6 m/s) and *Trouble*, a Trail Horse (`it_mount_trail_horse`), as your first mount |
-| 10 | `q_hc_hold_the_line` | Hold the Line | `npc_hc_shieldmaster_varr` | `hc_wardens_yard` barracks | Pull 3 sparring partners off a recruit and hold them for 20 s [defend] — offered only to the tank-capable classes (primary or hybrid Tank, canon 00 §6) | **The taunt** (00 §10 lists it as "Challenge (taunt)"; see §18 — the name clashes with Challenge mode) |
+| 10 | `q_hc_hold_the_line` | Hold the Line | `npc_hc_shieldmaster_varr` | `hc_wardens_yard` barracks | Pull 3 sparring partners off a recruit and hold them for 20 s [defend] — offered only to the tank-capable classes (primary or hybrid Tank, canon 00 §6) | **Provoke**, the shared taunt (renamed from "Challenge" so it never clashes with Challenge mode; page 06 §3.6 owns the numbers) |
 | 11 | `q_hc_keys_to_the_city` | Keys to the City | `npc_hc_herald_aldous` | Highcourt South Gate → `hc_coinhall` | Three stops: deposit 1 item with Ottoline Crane [use]; send 1 letter at the Mailhouse [use]; post 1 listing at the Trading Post with Fitch Marrow [use] | **Bank**, **mail** and the **Trading Post** (the player market) |
 | 12 | `q_unlock_talents` *(explanation only)* | The Second Thought | your class trainer | `hc_hall_of_callings` | Pick your first talent [use] | Talent tier 1 is open by level; this quest is the explanation and pays a free respec token |
 | 12 | `q_hc_the_waywardens_oath` | The Wayfarer's Writ | `npc_hc_waywarden_liss` | `hc_waykeepers_hall` → the South Gate station | Take the Wayfarer's writ from Liss [talk]; read the timetable board [use]; ride the Kingsroad wagon (`tm_wagon_kingsroad_south`) from the South Gate to Brightwater [visit] — it waits up to 30 s for more riders, then leaves; ride the Wend barge (`tm_barge_wend`) back from Brightwater Quay to the Low Wharf [visit] — you wait on the quay for it to arrive; then buy one Scroll of Passage from the waykeeper [use] | **Travel Methods** and **waystones as teleport targets** (page 20 §5, §14). Shows both kinds of line: one that leaves like a bus, one that runs to a timetable. There is no waystone-to-waystone menu |
@@ -678,9 +678,9 @@ if you are in their town.
 | 34 | `q_cs_brands_in_the_ash` | Brands in the Ash | `npc_cs_runewright_gorsa` | `town_fort_ashfall` | Inscribe, reweave, recast or brand 1 item [use] | **The upgrade bench, second voice** |
 | 40 | `q_calling_<class>_3` | (§8) | your trainer | (§8) | (§8) | **Calling III** |
 | 40 | `q_dc_the_tide_steed` | The Tide Steed | `npc_dc_tidewright_morwen` | `town_saltmarch` → a sea cave | Tame a Tide Steed in the cave [use; a 90 s ride to calm it] | **Riding III** (mounts swim and leap) and the Tide Steed (`it_mount_tide_steed`) |
-| 60 | `q_kf_the_harder_road` *(new; replaces `q_el_the_heroic_road`)* | Harder Doors | `npc_marshal_ansel_crane` | `town_last_light` | Needs story 11.10. Clear any 3 dungeons on Normal at level 60 [dungeon ×3] | **Challenge mode** (canon W4: the level-60 harder version of every dungeon with the full boss mechanic set; loot once a week per boss, Monday 06:00 — page 12) |
-| 60 | `q_kf_the_deep_road` *(new; replaces `q_el_the_keystone_vow`)* | How Deep It Goes | `npc_el_deepwarden_orrin` | `town_last_light` | Clear any dungeon at the Depth that brings it to level 60 [dungeon at that Depth] | **Depth past level 60** — the "deep Depths" of the ladder, where each Depth gets substantially harder and pays high-tier rewards (canon W3; page 12 owns the numbers). The Depth dial itself needs no quest: any dungeon can be run at a chosen Depth once you have cleared it on Normal, up to the Depth that raises it to 60 |
-| 60 | `q_sky_1` … `q_sky_5` | The Sky (Kingsfire chain) | `npc_el_skywright_aveline` | `town_last_light` and the Kingsfire peaks | A **story chain** after 11.10 (the Fire Court); no reputation, Depth or dungeon-rank gates. 1 *The First Feather*: bring Aveline a **storm feather** (`it_storm_feather`, a quest item) from 3 different world bosses — while you are on this step, every credited world boss kill you have not yet taken a feather from drops one (page 13 §8); world bosses are open to any number of players, so this is not a group gate · 2 *The Court's Wings*: in d15, the Fire Court's winged guardian (page 12) drops a harness of the King's own riders — clear d15 on any difficulty with the quest [dungeon; the item drops for every holder] · 3 *Ash on the Wind*: ride the rift flyers to the high islands and read the stormwing flight lines from 3 lookouts [visit ×3] · 4 *Feed the Brood*: bring 6 cinder-eels from the lava channels of the Obsidian Fields to the eyrie [gather] · 5 *The Stormwing*: ride a wild Stormwing until it accepts you [a 90 s ride over the caldera; page 07] | **Riding IV — flying** (+150% flying, 13.5 m/s) and a Stormwing mount. Before this, winged mounts run and glide |
+| 60 | `q_kf_the_harder_road` *(new; replaces round 1's hard-mode unlock quest)* | Harder Doors | `npc_marshal_ansel_crane` | `town_last_light` | Needs story 11.10. Clear any 3 dungeons on Normal at level 60 [dungeon ×3] | **Challenge mode** (canon W4: the level-60 harder version of every dungeon with the full boss mechanic set; loot once a week per boss, Monday 06:00 — page 12) |
+| 60 | `q_kf_the_deep_road` *(new; replaces round 1's Depth unlock quest)* | How Deep It Goes | `npc_kf_depthwarden_orrin` | `town_last_light` | Clear any dungeon at the Depth that brings it to level 60 [dungeon at that Depth] | **Depth past level 60** — the "deep Depths" of the ladder, where each Depth gets substantially harder and pays high-tier rewards (canon W3; page 12 owns the numbers). The Depth dial itself needs no quest: any dungeon can be run at a chosen Depth once you have cleared it on Normal, up to the Depth that raises it to 60 |
+| 60 | `q_sky_1` … `q_sky_5` | The Sky (Kingsfire chain) | `npc_kf_skywright_aveline` | `town_last_light` and the Kingsfire peaks | A **story chain** after 11.10 (the Fire Court); no reputation, Depth or dungeon-rank gates. 1 *The First Feather*: bring Aveline a **storm feather** (`it_storm_feather`, a quest item) from 3 different world bosses — while you are on this step, every credited world boss kill you have not yet taken a feather from drops one (page 13 §8); world bosses are open to any number of players, so this is not a group gate · 2 *The Court's Wings*: in d15, the Fire Court's winged guardian (page 12) drops a harness of the King's own riders — clear d15 on any difficulty with the quest [dungeon; the item drops for every holder] · 3 *Ash on the Wind*: ride the rift flyers to the high islands and read the stormwing flight lines from 3 lookouts [visit ×3] · 4 *Feed the Brood*: bring 6 cinder-eels from the lava channels of the Obsidian Fields to the eyrie [gather] · 5 *The Stormwing*: ride a wild Stormwing until it accepts you [a 90 s ride over the caldera; page 07] | **Riding IV — flying** (+150% flying, 13.5 m/s) and a Stormwing mount. Before this, winged mounts run and glide |
 
 **Level-only unlocks** (no quest, only an unlock card; page 07): the perk forest (2), spell slots 2–6
 (4, 10, 18, 28, 40), player trade (5), bag slots (7, 14, 24, 36), friendly duels (10), talent tiers 1–4
@@ -689,7 +689,7 @@ if you are in their town.
 (`q_unlock_skyways`), Highcourt portals (`q_unlock_portals`; page 01 §9), personal boats
 (`q_unlock_boats`; page 20 §3.3), battlegrounds and war mode
 (`q_hc_the_proving_yard`), raid unlocks (`q_hc_the_barrowkings_seal`, `q_fm_frost_under_the_throne`,
-`q_dc_the_choir_calls`, `q_el_the_ember_court_gates`, `q_si_beyond_the_veil`), the Spire Accord
+`q_dc_the_choir_calls`, and the gate quests of the old r04 and r05 raids), the Spire Accord
 (`q_unlock_spire_accord`), and at 60 Renown, rated arenas and daily/weekly quests.
 
 ---
@@ -742,13 +742,13 @@ Places are the class task's main location (sub-zone ids from page 01).
 | tactician | Orders · Brightwater drill yard | The Battle Plan · `sz_kettle_pass` | The General's Table · `sz_rimehold_valley` | commands followers → battle plans (and the tank hybrid's hold-the-line plan) → commands players |
 | chronomancer | The Five-Second Ghost · `lm_old_mill_wheel` | Rewind · `sz_glass_flats` | The Echo of Everything · `sz_rimefang_glacier` | 5 s ghost → rewind → echo spells |
 | monk | Breath from Stillness · `town_oakhollow` | The Flowing Combo · `sz_tamar_oasis` | The Hundred Steps · `lm_giants_stair` | **Breath** (built by strikes, spent on techniques) → flow combos → hundred-step finisher |
-| shaman | The Thunder Ox · `sz_wend_banks` | The Rain Heron and the Wind Hare · `sz_tamar_oasis` | The Great Storm · `sz_rimehold_valley` | **Storm Tales**: call the Thunder Ox → the Rain Heron and the Wind Hare (the last beast called rides your next spells) → telling all three brings the Great Storm (no totems — canon W31) |
+| shaman | The Thunder Ox · `sz_wend_banks` | The Rain Crane and the Wind Hare · `sz_tamar_oasis` | The Great Storm · `sz_rimehold_valley` | **Storm Tales**: call the Thunder Ox → the Rain Crane and the Wind Hare (the last beast called rides your next spells) → telling all three brings the Great Storm (no totems — canon W31) |
 | witch_hunter | Silver · `sz_lantern_marsh` | The Verdict · `sz_hushed_valley` | The Final Purge · `sz_wreckers_shore` | silver marks → Verdict → purge spreads to marked |
 | knight | The Banner · `town_harrow_watch` | The Vow of Protection · `sz_bellows_heights` | The Standard Unbroken · `sz_stonehide_peaks` | the banner → Vow of Protection → banner rallies the fallen |
 | sorcerer | The Wild Roll · `lm_sunken_shrine` | Surge · `sz_dune_sea` | The Chaos Table · `sz_throne_ice` | random element → surges → the chaos table |
-| runesmith | The First Rune · Brightwater forge | Runes Beneath · `sz_deepdelve_slopes` | The Great Detonation · `sz_rimefang_glacier` | weapon rune → ground runes → chained detonation |
+| runesmith | The First Rune · Brightwater forge | Runes Beneath · `sz_shaft_seven_slopes` | The Great Detonation · `sz_rimefang_glacier` | weapon rune → ground runes → chained detonation |
 | shadow_dancer | Two Shadows · `sz_southwood` | The Swap · `sz_redmesa` | The Dance of Many · `sz_whitecairn_tundra` | a shadow clone → swap places, and clones that soak attention (the tank hybrid) → several shadows |
-| tinker | Scrap and Sentry · Brightwater forge | Overclock · `sz_cutstone_quarries` | The Masterwork · `sz_whitecairn_tundra` | sentry → overclock, and repair drones that heal (the healer hybrid) → a masterwork gadget |
+| tinker | Scrap and Sentry · Brightwater forge | Overclock · `sz_cutstone_quarries` | The Masterwork · `sz_whitecairn_tundra` | sentry → overclock, and repair drones that heal (the healer hybrid) → a masterwork Device |
 | priest | Light and Shadow · Brightwater chapel | Tipping the Scale · `sz_hushed_valley` | The Balanced Soul · `sz_sunken_quarter` | the Light/Shadow slider → full swing bonuses → both ends at once for 8 s |
 | enchanter | A Friendly Word · `town_ninewillow` | Sleep · `sz_silverbough_eaves` | The Crown of Will · `sz_sunken_quarter` | charm a weak enemy → sleep/control, and illusions that hold attention (the tank hybrid) → dominate a champion |
 
@@ -774,7 +774,7 @@ can queue — but the story is the normal way a player finds each door.
 |---|---|---|---|
 | `d01_hollow_barrow` | the biggest barrow on the Barrow Downs, 400 m east of Harrow Watch | 1.7 `q_ms_the_hollow_barrow` (and the unlock quest `q_hv_the_barrow_bell`, which teaches the rule) | walking to the fallen doorstone |
 | `d02_drowned_mill` | the mill in Drowned Mill Reach, `sz_drowned_mill_reach` | 2.9 `q_ms_the_drowned_mill` | the mill-race steps |
-| `d03_deepdelve` | the mine head in Deepdelve Slopes | 4.7 `q_ms_deepdelve` (4.5 already takes you down the Old Seam shaft next to it) | the cage-lift at the mine head |
+| `d03_shaft_seven` | the Shaft Seven headframe in Shaft Seven Slopes | 4.7 `q_ms_shaft_seven` (4.5 already takes you down the Old Seam shaft next to it) | the cage-lift at the mine head |
 | `d04_bellows_keep` | the fortress gate on the Bellows Heights, facing the north road | 4.11 `q_ms_bellows_keep` (4.10 lights the braziers on its wall) | the gate |
 | `d05_glass_tombs` | the Glass Flats, `sz_glass_flats` | 5.6 `q_ms_the_glass_tombs` (5.5's trial ends at the door) | the tomb stair |
 | `d06_sandsworn_vault` | the Hushed Valley, `sz_hushed_valley` | 5.9 `q_ms_vault_of_the_sandsworn` | the vault door behind the Sallow Throne |
@@ -849,7 +849,7 @@ real time (the change and its timer are listed).
 | `q_gr_rune_sentinels` | Rogue Sentinels | `npc_jessup_cole` | `sz_cutstone_quarries` | Destroy 4 rogue rune sentinels [kill ×4] and shut their 4 pylons [use ×4] | side · `crate` | 13 |
 | `q_gr_the_old_seam` | Dig It Out | `npc_gruna_pickett` | `lm_old_rail_collapse` | Clear the collapse over 3 visits, one dig a real day [use ×3, a 20 s channel with a rockfall **danger zone**] (reuse: Farhold `dig_it_out` frame) | side_chain_end · opens the Old Seam instance for you | 14 |
 | `q_gr_the_nine_cairns` | The Nine Cairns | `npc_moira_cairnwife` | `lm_highcairn_stones` | Relight the cairns in the order the Cairnwife's rhyme gives [solve] | side · +1 perk point (once) | 15 |
-| `q_gr_gravel_tusk` | Gravel-Tusk **[Group 3]** | `npc_hilda_ironbraid` | `sz_deepdelve_slopes` | Kill Gravel-Tusk (rare elite) [kill] | side_chain_end · `pick3` | 15 |
+| `q_gr_gravel_tusk` | Gravel-Tusk **[Group 3]** | `npc_hilda_ironbraid` | `sz_shaft_seven_slopes` | Kill Gravel-Tusk (rare elite) [kill] | side_chain_end · `pick3` | 15 |
 | `q_gr_branding` | A Brand of Your Own | `npc_bodric_ashlock` | `sz_bellows_heights` | Bring 3 fire essences from Bellows salamanders [gather] | side · `extras.brand` (one free weapon brand, reuse: Farhold branding) | 17 |
 
 ### 10.5 Sunscar (16–24) — `q_ss_*`
@@ -1238,7 +1238,7 @@ player; §13.3 scales them.
 - Rewards; `q_ss_buried_gate` completes here.
 
 **8 · `ev_dunehold_caravan` — The Great Caravan** (17–22)
-- A 5-wagon Sandsworn caravan (Quiet Wake) crosses to Dunehold. P1 Ash Fennec pack ambush (kill 12; `m_sand_ash_fennec`, page 10) · P2 a wagon wheel
+- A 5-wagon Sandsworn caravan (Quiet Wake) crosses to Dunehold. P1 Dune Fennec pack ambush (kill 12; `m_sand_dune_fennec`, page 10) · P2 a wagon wheel
   breaks: hold 90 s while the drivers fix it · P3 sand wyrm under the road (elite).
 - Success: the caravan's traders open a **market** at Dunehold for 30 min (cheaper reagents, a
   gambler).
@@ -1539,25 +1539,24 @@ Event record shape:
 
 ### Canon change requests (for page 00 or the owning page; not applied here)
 
-1. **Page 07 (feature ladder)** — adopt this page's round-2 unlock quest ids: `q_hv_a_bed_by_the_fire`
-   now gives the **Recall Stone** (id kept); **new** `q_mf_the_right_tool` (Harvesting, 9, giver
-   `npc_neve_hollis`); `q_mf_what_the_fen_gives_back` now **chooses a crafting profession** (9, giver
-   renamed `npc_mf_scrapwright_mabli`); `q_hc_the_waywardens_oath` (12) now unlocks **Travel Methods and
-   waystone teleports** (page 20) and replaces `q_unlock_skyways` and `q_unlock_portals`; **new**
-   `q_kf_the_harder_road` (Challenge mode, 60) replaces `q_el_the_heroic_road`; **new**
-   `q_kf_the_deep_road` (Depth past 60, giver `npc_el_deepwarden_orrin`) replaces
-   `q_el_the_keystone_vow`. Removed: `q_unlock_boats` (no personal boats, page 20 §3.3), all raid
-   unlocks, `q_hc_the_proving_yard`, `q_unlock_spire_accord`. Still open from round 1: the giver ids
-   page 07 named differently (dodge `npc_hesk` vs `npc_hv_drillmaster_corran`, Dungeon Finder
-   `npc_odile_marsh` vs `npc_hv_warden_captain_isolde`, Riding I `npc_oswin_stablemaster` vs
-   `npc_hc_stablemaster_oda`, Unbinder `npc_the_unbinder` vs `npc_hc_unbinder_mott`, guild
+1. **Page 07 (feature ladder)** — *applied in the round-2 sweep.* Page 07 now uses this page's unlock quest
+   ids: `q_hv_a_bed_by_the_fire` (Recall Stone, 7), `q_mf_the_right_tool` (Harvesting, 9, giver
+   `npc_neve_hollis`), `q_mf_what_the_fen_gives_back` (choose a crafting profession, 9, giver
+   `npc_mf_scrapwright_mabli`), `q_hc_the_waywardens_oath` (Travel Methods and waystone teleports, 12,
+   giver `npc_hc_waywarden_liss`; it replaces `q_unlock_skyways` and `q_unlock_portals`),
+   `q_kf_the_harder_road` (Challenge mode, 60, giver `npc_marshal_ansel_crane`) and `q_kf_the_deep_road`
+   (Depth past 60, giver `npc_kf_depthwarden_orrin`), each replacing a round-1 unlock quest. Removed:
+   `q_unlock_boats` (no personal boats, page 20 §3.3), all raid unlocks, `q_hc_the_proving_yard`,
+   `q_unlock_spire_accord`. Still open from round 1: a few giver ids page 07 and this page's older drafts
+   named differently (dodge `npc_hesk` vs `npc_hv_drillmaster_corran`, Riding I `npc_oswin_stablemaster`
+   vs `npc_hc_stablemaster_oda`, Unbinder `npc_the_unbinder` vs `npc_hc_unbinder_mott`, guild
    `npc_melisande_hart` vs `npc_hc_registrar_pell`, upgrade bench `npc_bodric_ashlock` vs
-   `npc_gr_forgemaster_brunhild`, Riding II `npc_zelde_marrach` vs `npc_ss_caravan_master_idris`,
-   Challenge `npc_marshal_ansel_crane` vs `npc_el_marshal_ysolde`); the inn is the *Lamp and Ladder*;
-   Calling I comes by courier from Highcourt's Hall of Callings.
-2. **00 §10 ladder — the taunt's name.** "Challenge (taunt) 10" now collides with **Challenge mode**
-   (W4). Suggest renaming the taunt (for example **Provoke**); this page writes "the taunt" until
-   canon picks.
+   `npc_gr_forgemaster_brunhild`, Riding II `npc_zelde_marrach` vs `npc_ss_caravan_master_idris`) —
+   page 01 owns NPC ids and page 07's are the ones in use; the Dungeon Finder giver is `npc_odile_marsh`
+   and the Challenge-mode giver `npc_marshal_ansel_crane`; the inn is the *Lamp and Ladder*; Calling I
+   comes by courier from Highcourt's Hall of Callings.
+2. **The taunt's name** — *resolved in canon (00 §10):* the shared taunt is **Provoke**, so "Challenge"
+   only ever means the difficulty.
 3. **Page 07 (XP)** — adopt §4.1's quest XP shares and the out-levelled rule, and **level sync** for
    events (§13.3).
 4. **Page 08 (economy)** — adopt §4.2's quest gold curve (`10 × 1.061^(L−1)` × tier), which follows
@@ -1575,8 +1574,8 @@ Event record shape:
    (Rootwaker, Fallen Star, Unlit Warden, Old Rimejaw) are dropped; `q_weekly_world_bosses` is gone;
    `q_sky_1` asks for `it_storm_feather`. Page 13's festival names ("the spring festival" etc.) could
    use this page's festival names.
-8. **Page 10 (bestiary)** — `m_sand_ember_fennec` is written here as `m_sand_ash_fennec` (the Ash
-   Fennec; no "ember" in names).
+8. **Page 10 (bestiary)** — *resolved in the round-2 sweep:* the fennec is page 10's `m_sand_dune_fennec`
+   (the Dune Fennec; was Ember Fennec, then Ash Fennec on this page).
 9. **Brief id list** — add `ev_` (events), `si_` (story instances), `ct_` (calling trials) and the
    objective kind `discover` to the conventions (`fest_` is already in 00 §10).
 

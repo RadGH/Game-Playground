@@ -59,7 +59,7 @@ Mana. Speak them all at once for a burst of damage, taunts, stuns and barriers.
 
 | Rune | Carved by | Where | Lasts | When Spoken (100%) | Tags of the burst |
 |---|---|---|---|---|---|
-| Rune of Challenge | Etching Blow | enemy | 15 s | 180% WD to that enemy + stun 1.5 s (bosses: take 8% more from you for 6 s) | `tag_arcane` `tag_spell` |
+| Rune of Defiance | Etching Blow | enemy | 15 s | 180% WD to that enemy + stun 1.5 s (bosses: take 8% more from you for 6 s) | `tag_arcane` `tag_spell` |
 | Rune of Holding | Calling Stone | ground, 6 m | 12 s | pulls enemies inside 4 m toward the centre, 150% WD, **taunts** all of them for 3 s | `tag_arcane` `tag_spell` `tag_area` |
 | Rune of Endurance | Stoneblood Rune | self / ally | 8 s | ends early, heals the wearer for 25% of the damage it prevented | `tag_heal` |
 | Rune of Warding | Ward Stone | ground, 7 m | 12 s | barrier 12% max health on every ally inside for 8 s | `tag_shield` `tag_area` |
@@ -106,7 +106,7 @@ Mana. Speak them all at once for a burst of damage, taunts, stuns and barriers.
 - **Restores 3% Mana** · 4.5 s · instant · 3.4 m reach, 100° arc (or your weapon's swing if bigger — `(reuse: farhold skills melee reach rule)`).
 - Targeting: **Auto-target** — the brand goes on your hard target if it is in the arc, otherwise on the enemy nearest your aim point inside the arc.
 - Tags: `tag_physical` `tag_attack` `tag_melee` `tag_area` (the brand: `tag_duration`).
-- 150% WD to everything in the arc. The **primary target** is carved with a **Rune of Challenge** for 15 s:
+- 150% WD to everything in the arc. The **primary target** is carved with a **Rune of Defiance** for 15 s:
   your damage makes **×3 threat** on it. Re-carving refreshes it (same socket).
 - Look: an overhead hammer chop (Chibi 2 `CHIBI2_MELEE_ANIMS` overhead), a teal glyph scorched onto the enemy's chest, spark shower (spellfx `physical` impact + `arcane` rune sprite). Sound: anvil ring + stone scrape.
 
@@ -161,7 +161,7 @@ Mana. Speak them all at once for a burst of damage, taunts, stuns and barriers.
 | Mechanic | Runesmith answer |
 |---|---|
 | Tank buster | Stoneblood Rune (−40%, crack heal). The ally version lets the runesmith cover the *other* tank or a targeted healer. |
-| Tank swap | Calling Stone's single taunt (8 s cooldown). |
+| Tank swap | Calling Stone's single taunt (8 s cooldown); the shared **Provoke** (page 07, level 10) as a second one. |
 | Adds | Holding rune where they spawn; Speak for the area taunt. |
 | Moving the boss out of void zones | Ground runes stay behind — Portable Holding (Stone t4a) or Walking Ward fix it. |
 | Knockbacks off ledges | Stoneblood (immune), Ward Stone (−50% distance; Grounding talent: immune). |
@@ -175,15 +175,18 @@ Mana. Speak them all at once for a burst of damage, taunts, stuns and barriers.
 
 | Trigger | Replaces | Becomes | Numbers |
 |---|---|---|---|
-| **Runeforged** active (Calling 40, or Grand Inscription) | Etching Blow | **Rune-Driven Blow** `runesmith_rune_driven_blow` | Auto-target, 220% WD, carves Challenge on **every** enemy in the arc (uses 1 socket in total), restores 3% Mana. Tags as Etching Blow |
+| **Runeforged** active (Calling 40, or Grand Inscription) | Etching Blow | **Rune-Driven Blow** `runesmith_rune_driven_blow` | Auto-target, 220% WD, carves Defiance on **every** enemy in the arc (uses 1 socket in total), restores 3% Mana. Tags as Etching Blow |
 | Weapon Rune active (Calling 20, 3 hits after a Speak) | basic attack | etched hits | +40% as arcane rune damage (`tag_arcane`), teal trail on the weapon |
 
 ---
 
 ## 5. The hybrid role — Damage (the Breaker)
 
-The runesmith queues as **Damage** with a **two-hand hammer or greataxe** equipped (with a shield it queues as
-Tank). There is no switch: the build is the weapon plus the talents.
+The runesmith uses the canon **Role focus** switch (00 §6; spellbook, out of combat, saved per Loadout), tied to
+the off hand: **Hybrid (Damage)** needs a **two-hand hammer or greataxe** equipped, **Primary (Tank)** a shield,
+and swapping the weapon out of combat flips the switch to match. What it changes: on Hybrid the brand's ×3 threat is
+off (your damage makes normal threat), Etching Blow restores 4% Mana instead of 3% (below), and the Dungeon Finder
+queues you as Damage. The spells stay the same; the Breaker talents below do the rest.
 
 | Piece | How it deals damage |
 |---|---|
@@ -196,7 +199,7 @@ Tank). There is no switch: the build is the weapon plus the talents.
 | Stoneblood Rune | stays: the Breaker still has the class's one big defensive |
 
 **Loop:** Etch → Stone → Etch → Speak (every 12 s), Grand Inscription on cooldown, lined up with Runeforged.
-A Breaker's Speak with 4 runes (Challenge brand at 260%, Holding 150%×1.35, Resonance line, Weapon Rune) is the
+A Breaker's Speak with 4 runes (Defiance brand at 260%, Holding 150%×1.35, Resonance line, Weapon Rune) is the
 class's burst — about **1,250% WD in one second** against a pack.
 
 **How good it is.** Against the dedicated melee damage classes, a Breaker runesmith lands about **85% of their
@@ -357,7 +360,7 @@ A soul goes in a **Soul** socket (page 08) and adds a behaviour. Both need the w
 
 | id | Name | Socket | Requirement | Effect | Source |
 |---|---|---|---|---|---|
-| `soul_clan_elder` | Soul of the Clan Elder | armour — shield or chest | class: runesmith | When a Rune of Challenge **fade-pops** on its own (not Spoken), it carves a fresh Rune of Challenge on the same enemy at 50% for 8 s (no socket used). The brand chain keeps ×3 threat up through a long move phase. | `b_bellamund_the_cold_smith` (`d04_bellows_keep` secret boss) on Challenge, 3%; the world boss of `greyridge`, 2% |
+| `soul_clan_elder` | Soul of the Clan Elder | armour — shield or chest | class: runesmith | When a Rune of Defiance **fade-pops** on its own (not Spoken), it carves a fresh Rune of Defiance on the same enemy at 50% for 8 s (no socket used). The brand chain keeps ×3 threat up through a long move phase. | `b_bellamund_the_cold_smith` (`d04_bellows_keep` secret boss) on Challenge, 3%; the world boss of `greyridge`, 2% |
 | `soul_unbroken_anvil` | Soul of the Unbroken Anvil | weapon | class: runesmith | Every **third** Speak the Runes also rings the anvil: a 10 m shockwave for 60% WD per rune Spoken (`tag_arcane` `tag_spell` `tag_area`), and each ally inside restores 2% Mana (Tempo / Momentum: 6 points). | end chest at **Depth 15+**, 1%; `b_first_flame_of_the_gate` (`d13_cindergate` secret boss) on Challenge, 3% |
 
 ---

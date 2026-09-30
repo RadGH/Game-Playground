@@ -109,7 +109,9 @@ Farhold's `figure3d.js` (one small renderer, disposed before the game's renderer
 ### 2.5 Class outfits (reuse: `avatar-3d/data/class-outfits.json` + `js/class-outfits.js`)
 
 An outfit is only clothes, headwear and carried items for one class; `dressAs(avatar, outfit)` lays it
-over any body. The 30 classes of canon are exactly the 30 keys in that file. Farhold's `classwear.js`
+over any body. The file has **24 of the 30** class keys today: **`witch_hunter` has no row** and needs one
+(trench coat, `wide_brim` hat, crossbow — `classes/witch_hunter.md` §11), and bard, demon_hunter, scavenger,
+shadow_dancer and swashbuckler are missing too (checked 2026-09-30). Farhold's `classwear.js`
 stamps each **starting armour piece** with the part the class look has in that slot (`item.look.worn`), so
 the character walks out of the creator looking like their class rather than like a generic armour tier.
 Class-distinct headwear already modelled (`CLASS_HATS`): `war_helm` (warrior), `horned_helm` (fighter
@@ -130,7 +132,7 @@ feet, neck, ring ×2, main hand, off hand, **tool**, mount — canon §4; the ol
 | Equipment slot | Avatar slot | Rule |
 |---|---|---|
 | Weapon | `held` | `heldLookFor(item)` — the weapon's model id (`fh_*` procedural weapons in `chibi2-weapons.js`, 18 + the originals) |
-| Off hand | `offhand` | `offhandLookFor(item)` — shield (strapped), dagger/second weapon, focus (grimoire, orb, `relic`, `idol` — Farhold `foci.js`), quiver (worn on the back; a quiver with a basic-attack effect shows it on the arrow tips it holds: fire-tipped, powder-capped, split-fletched — page 08 owns the effects) |
+| Off hand | `offhand` | `offhandLookFor(item)` — shield (strapped), dagger/second weapon, focus (grimoire, orb, `relic`, `idol` — Farhold `foci.js`; the shaman's **hide drum**, §2.8; the War Standard's new `standard` part, page 08), quiver (worn on the back; a quiver with a basic-attack effect shows it on the arrow tips it holds: fire-tipped, powder-capped, split-fletched — page 08 owns the effects) |
 | Head / chest / legs / feet | `hat` / `top` / `bottom` / `shoes` | If the item carries `look.worn` (class starting pieces, **every Set, Unique and Legendary in Wildmarch**), that exact part and colours; otherwise the base's **armour tier** picks a part from the `ARMOUR_LOOK` table and the rarity tints it (Farhold's tints: Uncommon `#4a5a7a`, Rare `#8a7a4a`, Epic and above `#c8a24a`) |
 | Tool (harvesting, page 19) | `decor` on the belt or back; `held` while harvesting | Pickaxe and hatchet on the back, sickle and skinning knife on the belt, rod over the shoulder (reuse: Farhold `js/tools.js` + `data/tools.json` model ids). While a harvest bar runs the tool swaps into the main hand (Farhold's mining clip in `CHIBI2_WORK_ANIMS`) and the weapon goes to its sheathe point (§2.9); it swaps back when the bar ends |
 | Back (page 08's back slot) | `cape` | cape, shoulder_cape, half_cape, fur_mantle, feather_mantle, shawl, travel_cloak, tattered_cape |
@@ -182,8 +184,10 @@ scaled; page 06 and the class files own the rules.
 | Enchanter **Charm** | the charmed enemy's own body | A slow pink `confused`-style glyph orbit over the head (`#ffb0e0`) and nameplate turns friendly green for the duration |
 | Mage **Wards and decoys** | decoy = a Chibi 2 copy of the mage at 55% opacity with an arcane rim (`#b070ff`), sharing the template (no rebuild) | Wards are `barrier` shells on the ally |
 | Shadow Dancer clones | Chibi 2 copy at 45% opacity, desaturated to near-black with a violet rim | Same template sharing |
-| Shaman **Storm Tales** beasts | Thunder Ox = `boar` scaled 1.8 with `horns` and storm-grey colours; Rain Heron = the druid's heron variant in slate blue; Wind Hare = `cat` plan with long ears, pale grey | Semi-transparent (70%) with `lightning` / rain / wind particles; they run through the fight and fade — they are spell effects with bodies, not pets |
-| Tinker's sentry | `turret` (`roller` plan) or `golem` biped with `blocky` boxes, scaled 0.5 | |
+| Shaman **Storm Tales** beasts | Thunder Ox = `boar`/`bear` proportions scaled 1.8 with `horns`; **Rain Crane** = `owl` (`bat` plan) retuned long-legged and long-billed — a crane, not the druid's heron; Wind Hare = `cat`/`rat` quad with long ears | All three use a new **storm-cloud material** (grey-white, soft alpha edges, small `lightning` forks flickering inside, 70% opacity) — they stride out of the clouds, run through the fight and fade; they are spell effects with bodies, not pets (`classes/shaman.md` §11). The Great Storm's `fx_storm_herd` uses the same material on Chibi 2 creature silhouettes |
+| Shaman **hide drum** | new off-hand focus model: a round hide drum at the hip (strap over the shoulder), painted Ox / Crane / Hare figures on the skin; held in the off-hand `offhand` slot as a focus look | Also the shaman's HUD gauge art (page 03). Drum strokes: `sfx_shaman_drum_ox`, `_crane`, `_hare` (§8.2) |
+| **Planted banner** (knight's Banner, tactician's standard, the War Standard, guild Banner Call) | new prop: a tall pole with a square banner in the owner's colours, driven into the ground with a stake-strike dust puff; cloth sways on the shared wind (`wind.js`). Start from Farhold's round-27 gate-banner art. The held version is page 08's `standard` part (the War Standard off hand) | One prop, recoloured per use: class colour (knight, tactician), guild colours (page 15 Banner Call); the planted prop is one draw per banner |
+| Tinker's sentry and other **Devices** | `turret` (`roller` plan) or `golem` biped with `blocky` boxes, scaled 0.5 | "Device" is the tinker's word; Engineering's socketables are **Gadgets** (page 19) |
 
 ### 2.9 What Wildmarch adds to Chibi 2 (new work)
 
@@ -246,17 +250,54 @@ auras at 50% sprite count (e.g. a shielding affix = `barrier` shell, a hasted af
 **Greater rarities** (`grr_`) sit **on top** of the rarity above (canon §12.3). They are a big difficulty
 spike, so they get the strongest monster looks in the game — and they are **never turned down by any
 graphics setting** (they are gameplay information, like telegraphs). The name gains the greater rarity as a
-word before it ("Giant Flaming Ashtusk Brute"), and a **hexagon badge** per greater rarity sits left of the
+word before it, in orange `#ff8a3d` (page 10 §4: "Giant Flaming Ashtusk Brute"), and a **hexagon badge** per greater rarity sits left of the
 rarity badge (hexagons are only ever used for greater rarities, so they cannot be confused with the round
 special-rarity item icons of §11).
 
-| Greater rarity | Body | Aura / particles (reuse: `spellfx.js` `status()`) | Hexagon badge glyph | Sound (§8.2) |
-|---|---|---|---|---|
-| `grr_giant` **Giant** | scale **×1.6** (body, hitbox and `fxHeight` together; the server's reach and radius use the same factor, page 10); footstep camera shake within 15 m (off under `set.graphics.screenShake`) | none — size is the look; a dust `footfall` on each step | three stacked upward chevrons | `grr.giant.step` (low thud) |
-| `grr_flaming` **Flaming** | colour pushed 15% toward `#ff8a1a`; emissive trim on `color2` | permanent `burn` aura (flame licks) + fire element sprites shed from the hands/jaws on each attack | a flame with a hollow core | `grr.flaming.loop` (low crackle, 8 m) |
-| `grr_electrified` **Electrified** | colour pushed 10% toward `#fff07a`; eyes `glow` | `haste` sparks + a `lightning` zigzag that jumps from the body to the ground within 2 m every 1.5–3 s (decoration only; the real damaging arcs get telegraphs, §4.3 rule 4) | a bolt inside the hexagon | `grr.electrified.loop` (buzz, 8 m) |
-| `grr_frozen` **Frozen** | colour pushed 20% toward `#aee6ff`; frost-white on horns, spikes and shoulders | `freeze` shell at 30% opacity (so it never reads as "stunned") + frost mist at the feet + breath puffs every 2 s | a six-arm snowflake | `grr.frozen.loop` (ice creak, 8 m) |
-| any greater rarity page 10 adds | a tint + one body change | one `STATUS_FX` aura or a new one registered in `STATUS_FX` (§5 rule 6) | a new hexagon glyph in the same style | `grr.<id>.loop` |
+All **28** greater rarities of page 10 §7.5.3 get a badge. Every badge is an original SVG in
+`assets/data/icons/grr_<id>.svg` (`viewBox="0 0 24 24"`, readable at 12–24 px, 1 px dark outline `#0b0b10`):
+a **hexagon** with an orange rim (`#ff8a3d`, the greater-rarity name colour of page 10 §4) and the glyph inside
+in its **group colour** — Size bone `#e8e0cc`, Element the element's colour (§4.2), Body steel `#b8c0c8`, Mind
+red `#e05040`, Number silver `#dfe6f2`, Lineage stone-gold `#c9a44a`, Fortune gold `#ffcf5a`. The badge also sits
+at the left of the carrier's cast bar (page 11 §22.5). The body look, scale and aura of each row are **page 10's**
+("Look" column); this page draws them with `spellfx.js` `status()` auras at the sprite counts above.
+
+| Group | Greater rarity | Hexagon badge glyph | Body notes for the art (page 10 owns the numbers) |
+|---|---|---|---|
+| Size | `grr_giant` **Giant** | one tall standing figure | scale ×2.0 (cap 9 m), body, hitbox and `fxHeight` together; dust `footfall` each step; camera shake within 10 m (off under `set.graphics.screenShake`) |
+| Size | `grr_colossal` **Colossal** | two tall figures side by side | scale ×3.0 (cap 12 m); cosmetic ground-crack decals where it stands |
+| Element | `grr_flaming` **Flaming** | a flame with a hollow core | glowing seams `#ff7a20`, `burn` aura along the back, heat shimmer |
+| Element | `grr_electrified` **Electrified** | a bolt | blue-white arcs over the body every 0.5 s (decoration only; real arcs get telegraphs, §4.3 rule 4) |
+| Element | `grr_frozen` **Frozen** | a six-arm snowflake | ice crust (`freeze` shell at 30% so it never reads as "stunned"), frost mist, frozen footprints |
+| Element | `grr_venomous` **Venomous** | a fang with a drop | green drip from mouth and claws; low toxic mist at the feet (cosmetic, not a zone) |
+| Element | `grr_shadowed` **Shadowed** | an eclipse | near-black silhouette with smoking edges, only the eyes lit |
+| Element | `grr_tear_touched` **Tear-touched** | a split ring | a floating violet-white crack over the head, star specks drifting off the body |
+| Element | `grr_plagued` **Plagued** | three spots | olive haze, flies, boils |
+| Body | `grr_ironclad` **Ironclad** | an anvil | four bolted iron plates, each its own panel that clangs off when broken; 4 pips on the nameplate |
+| Body | `grr_spectral` **Spectral** | a ghost | 50% see-through with a ghost trail; Solid/Faded switch shown on the body |
+| Body | `grr_hollow` **Hollow** | a cracked heart | cracked-open chest; a glowing 0.6 m **Heart** orb orbits it (its own small frame) |
+| Body | `grr_warded` **Warded** | a shield rune | a ring of turning runes at the waist; the ring's glyph shows which ward is up |
+| Body | `grr_vampiric` **Vampiric** | a red fang | red mist strands flowing into it; a white tether during Blood Tether |
+| Body | `grr_undying` **Undying** | a looped arrow | bones and ash re-knitting under the skin; gold outline on the collapsed body |
+| Mind | `grr_enraged` **Enraged** | a claw | red eyes, nostril steam, snarling idle |
+| Mind | `grr_swift` **Swift** | a winged arrow | two trailing after-images, dust streaks |
+| Mind | `grr_unstoppable` **Unstoppable** | a double chevron (drawn, not the ⟫ character) | dark red chevron glow over the body |
+| Mind | `grr_cunning` **Cunning** | an eye | a hood of shadow over the eyes; a white shimmer when Sidestep is ready |
+| Mind | `grr_commanding` **Commanding** | a crowned horn | a planted-style war banner on its back (the §2.8 banner prop, scaled), gold motes |
+| Mind | `grr_dreadful` **Dreadful** | a screaming face | a long shadow; a big eye icon over it during Terrify |
+| Number | `grr_twin` **Twin** | two linked rings inside the hexagon (the hexagon keeps it apart from the Twinned item icon, §11.2) | two identical bodies joined by a white tether; revive countdown on the nameplate |
+| Number | `grr_splitting` **Splitting** | a split circle | glowing seams dividing the body; each split lands with a 1.0 s shimmer |
+| Number | `grr_echoing` **Echoing** | a double wave | a faint after-image 1 m behind it |
+| Lineage | `grr_ancient` **Ancient** | a carved rune (the hexagon keeps it apart from the Ancient item icon) | moss or bleached-bone texture, runic scars, body ×1.2, slow idle; a rune flash on Old Knowledge |
+| Lineage | `grr_stormborn` **Stormborn** | a storm cloud | a small storm cloud 6 m above it with rain and wind lines, the ground wet under it (the §2.8 cloud material) |
+| Fortune | `grr_gilded` **Gilded** | a coin | gold-leaf body, coins spilling as it moves |
+| Fortune | `grr_jewelled` **Jewelled** | a faceted gem | gem crystals grown through the hide, catching the light |
+
+**Sounds** (§8.2): every greater rarity gets `grr.<id>.loop` (quiet, 8 m; Giant and Colossal use a
+`grr.<id>.step` thud instead), and `grr.spot` plays the first time one enters 40 m. Every **state change** that
+page 11 §22.5 rule 3 lists (Spectral Solid/Faded, Warded's flip, Cunning's sidestep ready, Hollow's Heart hiding,
+Undying's collapse, Twin's revive countdown) plays the **`tg_rarity_shift`** chime (1.0–1.5 s before the
+switch) together with the body cue — never a ground colour.
 
 Combinations follow page 10's exclusion groups: a size rarity (Giant) stacks with one element rarity
 (Giant Flaming) — the body gets both; two element rarities never appear together, so two element auras
@@ -268,21 +309,34 @@ eight Flaming wolves stays inside the `maxLive` budget of §7.
 
 Every mount is a creature body with a **saddle point** (a `metrics().saddle` position and a heading, new on
 the plans that lack it) where the rider sits on `CHIBI2_RIDE_ANIMS` `sit`. Farhold's mounts (pony, courser,
-elk) are the reuse; the new species below are variants in `creature-variants.json` unless marked **new plan**.
+elk) are the reuse; the species below are variants in `creature-variants.json` unless marked **new body**.
 
-| Species | Body | Size (m, nose–tail) | Gait (land) | Water | Notes |
-|---|---|---:|---|---|---|
-| Pony, Courser (horses) | `pony`, `courser` (reuse) | 1.6 / 2.2 | walk, trot, gallop | wades | starter and faster mounts |
-| Great elk | `elk` (reuse) scaled 1.25, bigger antlers | 2.4 | long bounding canter | wades | |
-| War boar | `boar` scaled 2.0, `tusks`, a leather barding | 2.0 | short heavy trot, head low | wades | |
-| **Raptor runner** (dinosaur) | **new plan `runner`**: two digitigrade legs, a level torso, a stiff counterweight tail, small forelimbs, a head on a short S-neck | 2.6 | bird-like run: body stays level, head bobs 4 cm, tail counter-swings | wades | the first new plan; also used by raptor enemies (page 10) |
-| **Crested plains-strider** (dinosaur) | `quad` with long legs (legLen 1.1), a big head crest (new `crest` feature), a thick tail | 3.4 | slow amble, long stride; rider sits high (saddle at 2.2 m) | wades | |
-| **Giant frog** (swims) | `frog` scaled ×6, saddle on the back | 1.9 | land: a hop every 0.6 s (the `run` clip is the hop); **swims** with paired hind-leg kicks, only the eyes and rider above the waterline | **swims** — the aquatic hybrid (canon §12.3) | the rider plays `sit`, not the swim clip (Farhold R16: the swim clip tips the root back 64°) |
-| Marsh turtle (swims, slow) | `turtle` scaled ×3, a howdah seat | 2.4 | slow plod | **swims** | |
-| Monitor lizard | `crocodile` with longer legs (legLen 0.45), a narrower snout | 2.8 | sideways body sway, tail S-curve | wades | |
-| Shell beetle | `beetle` (`spider` plan) scaled ×3.5, saddle on the thorax | 2.2 | six-leg tripod gait (three legs down at a time) | wades | |
-| Saber cat | `saber_cat` scaled 1.6 | 2.2 | bounding run | wades | |
-| Griffin (flying, level 60 chain) | `griffin` (reuse) scaled 1.5 | 2.4 | walk, run, glide; flies after `q_sky_1..5` | — | before 60, winged mounts run and glide only (canon §10) |
+Page 08 §24.2 owns the species list, jumps, gallop times and tricks; the table below is only how each body
+is built. **Every mount body has two attach points**: `saddle` (where the rider sits, position + heading) and
+`bridle` (where the reins meet the head, so the rider's hands and the reins line up); the Crested Strider also
+has **`saddle_2`** for its second seat (page 08). They are added to `metrics()` on every plan that lacks them,
+and the **seven new bodies** below carry them from the start.
+
+| Species (page 08 §24.2) | Body | New work | Gait / notes |
+|---|---|---|---|
+| Horse (trail horse, courser, destrier, pony) | `horse`, `courser`, `pony` (reuse) | `saddle`/`bridle` points | walk, trot, gallop |
+| Great Elk · Stag | `elk` · `deer` (reuse) | points | long bounding canter |
+| Boar | `boar` (reuse) scaled 2.0, `tusks`, leather barding | points | short heavy trot, head low |
+| **Ram** | **new body `ram`**: a stocky quad with curled horns (page 13's Frost Ram uses `deer` until it exists) | new body + points | sure-footed trot; climbs steeper slopes (page 08) |
+| **Raptor Runner** (dinosaur) | **new body `raptor`**: two digitigrade legs, a forward-leaning level torso, a stiff counterweight tail, small forelimbs, a head on a short S-neck | new body + points; also used by raptor enemies (page 10 `tf_raptor`) | bird-like run: body level, head bobs 4 cm, tail counter-swings |
+| **Crested Strider** (dinosaur) | **new body `strider`**: a tall plains dinosaur on **two legs** with a sail-like crest along its back | new body + `saddle`, **`saddle_2`**, `bridle` | slow long stride; riders sit high (saddle at 2.2 m), the passenger behind |
+| **Horned Grazer** (dinosaur) | **new body `grazer`**: a heavy quad with three horns and a neck frill | new body + points | lumbering trot, head swings |
+| Giant Frog (aquatic hybrid) | `frog` (reuse) scaled ×6 | points | land: a hop every 0.6 s (the `run` clip is the hop); swims with paired hind-leg kicks, only eyes and rider above water. The rider plays `sit`, never the swim clip (Farhold R16: it tips the root back 64°) |
+| Tidewalker Turtle · River Crocodile · Sea Serpent (aquatic hybrids) | `turtle` (howdah seat) · `crocodile` · `snake` long (reuse) | points | swim and dive; the serpent slithers on land with the camera kept level |
+| Dune Lizard · Salamander | `crocodile` (reuse; sand skin with raised legs · lava-seam skin) | points | sideways body sway, tail S-curve; the Salamander's cosmetic fire trail |
+| Mossback Beetle / Scarab Runner | `beetle` (`spider` plan) scaled ×3.5 | points on the thorax | six-leg tripod gait |
+| Sabrecat · Snow Cat | `saber_cat` · `cat` large (reuse) | points | bounding run |
+| Dire Wolf / Warhound · Great Bear · Spider | `dire_wolf`, `hound` · `bear` · `spider` (reuse) | points | |
+| Titan (walking throne) | `titan` (reuse, biped) | a throne seat as `saddle` | heavy footfalls |
+| **Floating Stone** | **new body: hover slab** — a flat carved rock slab floating 0.6 m up, with a slow bob and drifting dust | new body + points (the `bridle` is a rune the rider's hand rests on) | glides at ground speed; over water it hovers, never swims |
+| **Clockwork Strider** | **new body: clockwork biped** — two jointed brass legs under a riding cage, gears turning in the hips (Engineering, page 19 §17.6) | new body + points | stiff mechanical walk; a soft tick loop instead of breathing |
+| **Longshank Calf** | **new body `longshank`** (page 20's Travel Method strider — the calf is the same body at 0.45 scale) | new body + points | long-legged wading walk; wades water up to 3 m |
+| Winged: Griffin · Drake · Dragon · Phoenix · Great Owl | `griffin` · `drake` · `dragon` · `phoenix` · `owl` large (reuse) | points | walk, run, glide; fly at Riding IV (page 08, page 20) |
 
 Rules: each mount keeps its **gait clip clock running** (Farhold R16 bug: calling `setAnim` every frame
 froze every beast on the first 16 ms of its gait); the rider's hips follow the saddle point's height each
@@ -297,15 +351,17 @@ with **seats** (Farhold `avatar-3d/js/vehicles.js` `metrics()` already returns h
 a closed or roofed place for riders (Travel Methods protect riders — canon W15 — so riders are drawn
 **inside** a cabin or behind rails, never exposed on top).
 
-| Kind | Model (reuse / **new**) | Seats | Look | Motion |
+Page 20 §6 owns the seven kinds, their capacities and the model list; this table is how each is built.
+
+| Kind (page 20) | Model (reuse / **new**) | Seats | Look | Motion |
 |---|---|---:|---|---|
-| **Wagon line** | `vehicles.js` `wagon` / `coach` (reuse), the coach's `lanterns` option removed (always daylight) | 4 / 6 | faction colours on the canvas (Wardens green-grey, Crown Assembly blue-gold) | `roll`; the horse walks the route polyline |
-| **Ox caravan** (slow, bus-style) | `vehicles.js` `ox_cart` chained 3 long | 8 | goods crates, a covered passenger cart in the middle | `roll` at walk pace |
-| **Giant strider** | **new variant**: `spider` plan, 4 legs, legLen ×3.2, a howdah (a roofed wooden cabin) on the thorax | 8 | tall and slow-looking but fast (long strides); the classic "big walking beast" silhouette | a stilted high-stepping gait; the howdah sways ±3° |
-| **River barge** | **new** vehicle plan `boat`: a flat hull, a deck house, a pole-man NPC at the stern; built facing +x like the others | 10 | Cutwater colours | bobs 4 cm on the water surface; wake decal |
-| **Coast ferry** | **new** `boat` variant: a single-mast sailing hull with a covered deck | 12 | | pitches ±2° and rolls ±3° with the sea state (weather) |
-| **Rail-hauler** (the train-like one) | **new** plan `rail`: 4 linked open cars with benches and a roof on a timber-and-iron track, pulled by a stone `golem` walking between the rails (Deepforge Clans) | 16 | iron, dark timber, clan banners | cars follow the track polyline with a fixed gap; the golem's walk clip is synced to speed |
-| **Flyer** (where a route must cross a gorge or sea) | **new** vehicle: a wicker gondola slung under a `griffin` pair or a great `bat`-plan bird, roofed | 6 | | flies the route at a fixed height above the polyline; wings loop the `fly` clip |
+| **Wagon line** (`tm_wagon_`) | `vehicles.js` `wagon` / `coach` / `war_wagon` (reuse), the coach's `lanterns` option removed (always daylight) | 6 | faction colours on the canvas (Wardens green-grey, Crown Assembly blue-gold) | `roll`; the horse team walks the route polyline |
+| **Trail** (`tm_trail_`) | riding beasts, one per rider: `deer` as **Moonharts**, `horse` as herd horses, the `dragon_sled` drake sled in snow (reuse) | 5 | a string of beasts nose to tail, each with a small trail saddle-cloth | each beast runs the trail on its own; rider on `sit` at its `saddle` point |
+| **Longshank** (`tm_longshank_`) | **new creature body `longshank`**: a quad plan with legs ×3.5, 9 m to the back, a long grazing neck, plus a roofed wicker **howdah** prop for 8 (the same body at 0.45 scale is page 08's Longshank Calf mount) | 8 | pale hide, painted howdah; stations have a tall mounting stair | a slow rolling stilted gait that covers ground fast; wades water up to 3 m |
+| **River barge** (`tm_barge_`) | **new** hull in `boat.js` style: flat, a deck house, a pole-man NPC at the stern and a small sail | 12 | Cutwater colours | bobs 4 cm on the water surface; wake decal |
+| **Ship** (`tm_ship_`) | **new** hulls in `boat.js` style: a two-masted coaster; a larger one for the Pale Sea | 40 | covered deck, cabin | pitches ±2° and rolls ±3° with the sea state (weather) |
+| **Rail cart line** (`tm_rail_`, the Deepway) | **new** carts from the `vehicles.js` `cart` plan (4 open carts × 6 benches, roofed), pulled by a **construct ox** engine-beast (reuse `golem` parts on an ox frame), on a new rail lane with sleepers and tunnel mouths | 24 | iron, dark timber, Deepforge clan banners | carts follow the rail lane; the construct ox walks between the rails |
+| **Flyer** (`tm_kite_`) | a **kite basket**: a new roofed wicker basket prop slung under two great grey **gale kites** (reuse bird / `griffin` bodies, `bat` plan) | 5 | grey-and-white birds, rope rigging | flies the route at a fixed height above the polyline; wings loop the `fly` clip; used only where no ground route exists |
 
 Every Travel Method model: ≤ 25,000 triangles including its animals and riders' seats, 3–6 draw calls after
 `compactCreature`/merging. Riders sit on `CHIBI2_RIDE_ANIMS` `sit` at the seat points; their weapons are
@@ -553,7 +609,7 @@ fungus beds and moss patches are irregular blobs.
 | **Glowcap mushrooms** (clusters of 3–9) | Mossfen (`d02_drowned_mill` cellars), Greyridge mines, Whisperwood | `#6fd8ff` cyan-blue | 2.0 | 0.8, 7 m on large clusters |
 | **Lantern-lilies** (floating plants) | Mossfen pools, Whisperwood moonwells | `#ffe38a` warm yellow | 1.8 | 0.5, 5 m |
 | **Luminous moss** (floor and wall carpet) | every cave, as fill | `#b6f06a` yellow-green | 0.6 | none (emissive only) |
-| **Crystal veins** | Greyridge (`d03_deepdelve`), Riftmarch (`d12_unmade_workshop`) | `#9aa8ff` blue-violet (Greyridge), `#c080ff` violet (Riftmarch) | 2.2 | 1.0, 8 m |
+| **Crystal veins** | Greyridge (`d03_shaft_seven`), Riftmarch (`d12_unmade_workshop`) | `#9aa8ff` blue-violet (Greyridge), `#c080ff` violet (Riftmarch) | 2.2 | 1.0, 8 m |
 | **Sun-pipes** (daylight through glass or cracks) | Sunscar (`d05_glass_tombs`, `d06_sandsworn_vault`) | `#fff2c8` | light shaft sprite | a spot light 2.0, 14 m, fixed |
 | **Grave-lichen** (on headstones and crypt walls) | every graveyard, `d01`, `d11_saltdeep_cathedral` | `#a8f0d0` pale mint | 1.0 | none |
 | **Moonwell stone** | Whisperwood (`d08_moonwell_ruins`) | `#c8b8ff` lavender | 1.6 | 0.8, 8 m |
@@ -686,16 +742,16 @@ New ids (added in `sfx/tools/build-catalog.py`, then regenerated — never hand-
 
 | Group | Ids |
 |---|---|
-| Telegraphs and boss cues (**page 11 §6 names them and gives the recipe idea**; this page builds the recipes) | `tg_danger`, `tg_danger_lethal`, `tg_void_place`, `tg_void_in`, `tg_soak`, `tg_soak_pip`, `tg_safe`, `tg_target_you`, `tg_target_other`, `tg_benefit`, `tg_tether`, `tg_tether_snap`, `tg_cast_interruptible`, `tg_interrupt_ok`, `tg_interrupt_fail`, `tg_adds`, `tg_enrage`, `tg_phase`, `tg_dialog`, `tg_fixate` |
+| Telegraphs and boss cues (**page 11 §6 names them and gives the recipe idea**; this page builds the recipes) | `tg_danger`, `tg_danger_lethal`, `tg_void_place`, `tg_void_in`, `tg_soak`, `tg_soak_pip`, `tg_safe`, `tg_target_you`, `tg_target_other`, `tg_benefit`, `tg_tether`, `tg_tether_snap`, `tg_cast_interruptible`, `tg_interrupt_ok`, `tg_interrupt_fail`, `tg_adds`, `tg_enrage`, `tg_phase`, `tg_dialog`, `tg_fixate`, **`tg_rarity_shift`** (page 11 §22.5: a 1.0–1.5 s rising chime before a greater-rarity monster changes state, §3.1) |
 | Boss (extra) | `boss.pull` (room lock horn), `boss.defeat` (victory sting) |
 | Movement | `dodge.roll`, `dodge.perfect` (dodged inside the last 0.2 s), `mount.summon`, `mount.gallop` loop, `swim.stroke`, `travel.step.snow`, `travel.step.sand`, `travel.step.wood`, `travel.step.water` |
-| Class mechanics | one `mech.<class>.<event>` per mechanic event page 06 lists (wound opened, heat vent, form shift, song verse, charm break, beast tamed, demon bound…) — about 60 |
+| Class mechanics | the shaman's drum strokes `sfx_shaman_drum_ox`, `_crane`, `_hare` (`classes/shaman.md`); one `mech.<class>.<event>` per mechanic event page 06 lists (wound opened, heat vent, form shift, song verse, charm break, beast tamed, demon bound…) — about 60 |
 | Social | `ui.whisper`, `ui.invite`, `ui.readycheck`, `ui.partywarning` (the party leader's centre-screen warning, page 15; was the raid warning), `ui.groupfound`, `ui.mail`, `ui.sold`, `ui.trade.lock`, `ui.trade.done`, `ui.duel.countdown` |
 | Unlocks and loot | `unlock.feature` (canon rule 5: every unlock has a sound), `unlock.spell`, `unlock.talent`, `calling.complete`, `loot_legendary` (page 08: the Legendary beam's low hum, a loop while the beam stands) |
 | World | `waystone.use`, `portal.open`, `recall.use` (Recall Stone), `chest.open`, `door.dungeon`, `event.start`, `worldboss.horn` |
-| Travel Methods (§3.3, page 20) | `tm.bell` (departure bell: rings at 30 s and 5 s before a bus-style or scheduled departure), `tm.arrive` (a horn for boats, a clank-and-hiss for the rail-hauler), `tm.board`, `tm.snapback` (a soft whoosh), and a travel loop per kind: `tm.wagon.loop`, `tm.strider.loop`, `tm.barge.loop`, `tm.ferry.loop`, `tm.rail.loop`, `tm.flyer.loop` |
-| Mounts (§3.2) | `mount.<species>.step`, `mount.<species>.call`, `mount.<species>.swim` (frog, turtle) |
-| Monster rarities (§3.1) | `mon.champion.spot`, `mon.rare.spot` (a short sting the first time a pack enters 40 m), `grr.<id>.loop` per greater rarity, `grr.spot` (a heavier sting for any greater rarity) |
+| Travel Methods (§3.3, page 20) | `tm.bell` (departure bell: rings at 30 s and 5 s before a bus-style or scheduled departure), `tm.arrive` (a horn for boats, a clank-and-hiss for the rail-hauler), `tm.board`, `tm.snapback` (a soft whoosh), and a travel loop per kind: `tm.wagon.loop`, `tm.trail.loop`, `tm.longshank.loop`, `tm.barge.loop`, `tm.ship.loop`, `tm.rail.loop`, `tm.kite.loop` |
+| Mounts (§3.2) | `mount.<species>.step`, `mount.<species>.call`, `mount.<species>.swim` (frog, turtle, crocodile, serpent); the clockwork strider's `mount.clockwork.tick` loop |
+| Monster rarities (§3.1) | `mon.champion.spot`, `mon.rare.spot` (a short sting the first time a pack enters 40 m), `grr.<id>.loop` per greater rarity (28, §3.1; `grr.giant.step` / `grr.colossal.step` for the size pair), `grr.spot` (a heavier sting for any greater rarity) |
 | Items (§10, §11) | `card.open` (a soft paper flip), `loot.special.<sr_id>` (five: a crackle, a shimmer chord, a doubled chime, a stone knock with a bell tone, a leafy rustle) played on top of the rarity's loot sound; `socket.gem`, `socket.jewel`, `socket.soul`, `socket.gadget` (page 08) |
 | Harvesting (page 19) | `harvest.mine`, `harvest.chop`, `harvest.skin`, `harvest.herb`, `harvest.fish.cast`, `harvest.fish.bite`, `harvest.done` |
 | Ambience | `ambience.farm`, `ambience.city`, `ambience.coast`, `ambience.spire`, `ambience.forest.deep`, `ambience.desert`, `ambience.cold`, `ambience.warcamp`, `ambience.graveyard`, `ambience.cave.glow` (drips + a faint fungal hum), `ambience.lava` |
@@ -857,7 +913,7 @@ colour alone (§4.5).
 
 ## 11. Special rarities — looks and icons (new; canon §12.3 — page 08 owns what each does)
 
-A special rarity (`sr_`) sits **on top of** an item's normal rarity (Magic-or-better). The base rarity's
+A special rarity (`sr_`) sits **on top of** an item's normal rarity (Uncommon-or-better). The base rarity's
 frame stays; the special rarity adds a **card overlay**, a **world look** on the model (on the ground and
 worn), a **loot sound** (§8.2) and an **icon** in front of the name everywhere the name is written — bags,
 chat links, the loot popup, the Trading Post, mail — e.g. *[bolt icon] Electrified Longsword*. The name
@@ -919,7 +975,8 @@ word — already part of the name — carries the meaning.
 2. Font Awesome Pro in the shipped game, or SVG-only?
 3. Dyslexia-friendly font option?
 4. Telegraph sound loudness: page 11's `ui` target (−26 LUFS) or this page's `telegraph` category (−17)?
-5. The raptor runner needs a **new creature plan** (`runner`) — worth it for mounts + enemies, or start
-   with the plains-strider and frog (reused plans) and add raptors later?
+5. Page 08 asks for **seven new mount bodies** (`ram`, `raptor`, `strider`, `grazer`, `longshank`, the hover
+   slab, the clockwork biped). Build all seven with the mount milestone, or start with `raptor` (it also
+   serves raptor enemies) and let the others use reused stand-ins until later?
 6. The item card portrait for **armour** is shown on a stand; would you rather see it worn on a small
    copy of **your own character** (costs a Chibi 2 body per open card)?

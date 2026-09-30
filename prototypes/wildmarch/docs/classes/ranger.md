@@ -85,23 +85,23 @@ leap, which makes it the best kiter in the game.
 
 A monster can be tamed only if page 10 marks its family **tameable** (see the canon request in the report).
 The families below are the ranger's list. Page 10 owns every monster id; any Normal monster whose id starts
-with a prefix below and carries `tameable: true` qualifies.
+whose row carries `tameable: true` and one of the `tameFamily` ids below qualifies (page 10 §3.2 maps each family to its monster ids).
 
-| Family | Id prefix | Found (page 01/10 owns spawns) | Levels in the wild | Lean | Family trick (`G`) | Body (reuse) |
+| Family | Tame family (`tameFamily`, page 10 §3.2) | Found (page 10 §3.2 lists the exact monsters; page 01/10 own spawns) | Levels in the wild | Lean | Family trick (`G`) | Body (reuse) |
 |---|---|---|---|---|---|---|
-| Wolf | `m_wolf_*` | Hearthvale, Greyridge, Frostmantle | 2–42 | Hunter | **Pack Call** | creatures `wolf`, `dire_wolf` |
-| Great cat | `m_cat_*` | Whisperwood, Sunscar, Frostmantle | 20–42 | Hunter | **Stalk** | `cat`, `saber_cat` |
-| Raptor | `m_raptor_*` | Sunscar, Cinder Steppe | 18–36 | Hunter | **Rend** | (new) biped-runner body; shares the mount raptor's rig (page 08 mounts) |
-| Hyena | `m_hyena_*` | Sunscar, Cinder Steppe | 16–36 | Hunter | **Cackle** | `hyena` |
-| Boar | `m_boar_*` | Hearthvale, Mossfen, Cinder Steppe | 3–34 | Guardian | **Gore Charge** | `boar` |
-| Bear | `m_bear_*` | Greyridge, Whisperwood, Frostmantle | 12–42 | Guardian | **Thick Hide** | `bear` |
-| Crocodile | `m_crocodile_*` | Mossfen, Drowned Coast | 8–48 | Guardian | **Death Roll** | `crocodile` |
-| Beetle | `m_beetle_*` | Sunscar, Riftmarch | 18–54 | Guardian | **Shell Up** | `beetle` |
-| Elk | `m_elk_*` | Whisperwood, Frostmantle | 22–42 | Guardian | **Antler Ward** | `deer` (antlered, scaled 1.3) |
-| Hawk (bird of prey) | `m_hawk_*` | every region from Hearthvale to Kingsfire | 3–58 | Tracker | **Eye Above** | `owl` body, hawk head and colours (bat plan) |
-| Spider | `m_spider_*` | Mossfen, Whisperwood, Drowned Coast | 8–48 | Tracker | **Web** | `spider` |
-| Giant frog | `m_frog_*` | Mossfen, Drowned Coast | 6–46 | Tracker | **Tongue Lash** | `frog` |
-| Serpent | `m_serpent_*` | Mossfen, Sunscar, Kingsfire | 8–58 | Tracker | **Venom Spit** | `snake` |
+| Wolf | `tf_wolf` | Hearthvale, Greyridge, Frostmantle | 2–42 | Hunter | **Pack Call** | creatures `wolf`, `dire_wolf` |
+| Great cat | `tf_cat` | Whisperwood, Sunscar, Frostmantle | 20–42 | Hunter | **Stalk** | `cat`, `saber_cat` |
+| Raptor | `tf_raptor` | Sunscar, Cinder Steppe | 18–36 | Hunter | **Rend** | (new) biped-runner body; shares the mount raptor's rig (page 08 mounts) |
+| Hyena | `tf_hyena` | Sunscar, Cinder Steppe | 16–36 | Hunter | **Cackle** | `hyena` |
+| Boar | `tf_boar` | Hearthvale, Mossfen, Cinder Steppe | 3–34 | Guardian | **Gore Charge** | `boar` |
+| Bear | `tf_bear` | Greyridge, Whisperwood, Frostmantle | 12–42 | Guardian | **Thick Hide** | `bear` |
+| Crocodile | `tf_crocodile` | Mossfen, Drowned Coast | 8–48 | Guardian | **Death Roll** | `crocodile` |
+| Beetle | `tf_beetle` | Sunscar, Riftmarch | 18–54 | Guardian | **Shell Up** | `beetle` |
+| Elk | `tf_elk` | Whisperwood, Frostmantle | 22–42 | Guardian | **Antler Ward** | `deer` (antlered, scaled 1.3) |
+| Hawk (bird of prey) | `tf_hawk` | every region from Hearthvale to Kingsfire | 3–58 | Tracker | **Eye Above** | `owl` body, hawk head and colours (bat plan) |
+| Spider | `tf_spider` | Mossfen, Whisperwood, Drowned Coast | 8–48 | Tracker | **Web** | `spider` |
+| Giant frog | `tf_frog` | Mossfen, Drowned Coast | 6–46 | Tracker | **Tongue Lash** | `frog` |
+| Serpent | `tf_serpent` | Mossfen, Sunscar, Kingsfire | 8–58 | Tracker | **Venom Spit** | `snake` |
 
 **Never tameable:** humanoids and warbands, undead, demons, dragonkin (drakes, dragons), elementals,
 constructs, Riftborn and anything else outside the list; and, whatever the family, any **Rare** (yellow),
@@ -338,6 +338,10 @@ no global cooldown, no talents.
 ---
 
 ## 5. The hybrid role — Support
+
+**Role focus.** The ranger uses the canon **Role focus** switch (00 §6; spellbook, out of combat, saved per
+Loadout). Set to **Hybrid (Support)**, it changes only your Dungeon Finder role (Support); the support build below is
+your talent and beast choices, which a Loadout saves alongside the switch.
 
 **What it is.** The ranger queues as **Support** (a Damage slot in the Dungeon Finder, page 00 §4). A
 support ranger still does most of its damage but spends its picks on things that help four other people: a

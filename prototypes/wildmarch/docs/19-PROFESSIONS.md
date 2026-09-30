@@ -61,7 +61,7 @@ them.
 
 | Farhold piece | What it does today | Path | Wildmarch use |
 |---|---|---|---|
-| Tool slot + tool items | A **Tool** is a built item in `player.equipment.tool` with a `toolKey` and a `tier`. Rarity sets `speed` (Normal 1.0 · Magic 1.18 · Rare 1.4 · Legendary 1.75), `yield` (0 / +10% / +22% / +40%), `reach` and `scan`. One tool is pick **and** axe | `prototypes/farhold/js/tools.js` `makeTool`, `data/tools.json` | **reuse**, split into six tool kinds (§6) |
+| Tool slot + tool items | A **Tool** is a built item in `player.equipment.tool` with a `toolKey` and a `tier`. Rarity sets `speed` (Farhold's Normal 1.0 · Magic 1.18 · Rare 1.4 · Legendary 1.75 — Wildmarch calls these Common / Uncommon / Rare / Legendary), `yield` (0 / +10% / +22% / +40%), `reach` and `scan`. One tool is pick **and** axe | `prototypes/farhold/js/tools.js` `makeTool`, `data/tools.json` | **reuse**, split into six tool kinds (§6) |
 | Tool tier vs hardness | `canWork()` passes when the tool's tier ≥ the node's `hardness` (0 hands … 3 powered) | `js/tools.js` `canWork`, `data/resources.json` `tools` | **reuse**: node tier vs tool tier (§7) |
 | Gathering bar | `createGathering()`: a progress bar over the node; base seconds `soft 1.2 / prop 2.4 / seam 3.2`, divided by tool speed; cancelled if you move more than **3.2 m** (`moveCancel`); `onDone` fires once and you press again to keep going | `js/tools.js` `createGathering` | **reuse** (§7.2), plus "damage cancels" |
 | Work clips | `WORK_CLIPS`: `dig` (pickSwing), `chop` (chopSwing), `forage` | `js/tools.js`, `avatar-3d/js/chibi2-motion.js` | **reuse**; new `skin` and `cast` clips (new) |
@@ -179,7 +179,7 @@ Effective skill is used for **three** things and nothing else:
 | Source | `mf_prof_skill` | `mf_prof_xp` | Notes |
 |---|---|---|---|
 | Ring / necklace affix *of the Artisan* / *of Diligence* | +3 … +12 (by item level) | +5% … +20% | page 08 affix table owns the ranges |
-| Gem in a **jewellery** socket (jewellery gems give secondary stats and magic find, canon §12.3) | — | +4% … +12% (Pearl on jewellery, proposed) | page 08 owns gem effects |
+| Gem in a **jewellery** socket (jewellery gems give secondary stats and magic find, canon §12.3) | **Peridot** (`gem_peridot_1`…`_5`): +1 … +5 | **Amber** (`gem_amber_1`…`_5`): +3% … +15% | page 08 §13.4 owns gem effects |
 | Jewel affix | +5 … +15 | +8% … +25% | page 08 |
 | Gadget with a **Fortune core** (§17.3) | +1 per point | +3% per point | Engineer-made |
 | Harvesting tool affix *Prospector's* | +3 … +15 (harvest only) | — | tool only (§6.3) |
@@ -489,12 +489,12 @@ keeps going while you stand near and stops if you walk off; it is not an idle ma
 
 | id | Profession | Makes (headline) | Main inputs | Station |
 |---|---|---|---|---|
-| `prof_blacksmithing` | **Blacksmithing** | metal weapons, heavy armour, shields, whetstones, socket rivets for metal gear | bars, coal, wood, leather | Anvil + Furnace |
+| `prof_blacksmithing` | **Blacksmithing** | metal weapons, heavy armour, shields, whetstones and weightstones | bars, coal, wood, leather | Anvil + Furnace |
 | `prof_leatherworking` | **Leatherworking** | light and medium armour, bows, quivers, mount tack, bags (leather) | leather, scale, fur, wood | Tannery + Leather Bench |
 | `prof_tailoring` | **Tailoring** | cloth armour, cloaks, sashes, bags, the tool roll, profession garb | bolts, silk, dyes | Loom + Tailor's Table |
-| `prof_jewelcrafting` | **Jewelcrafting** | cut gems, rings, necklaces, circlets, Magic jewels, recutting jewels | rough gems, gold, bars | Gem Cutter |
-| `prof_enchanting` | **Enchanting** | item enchants (glyphs), staves, wands, caster off-hands, travel scrolls, portal stones, disenchanting | glimmer/shards/prisms, essence, herbs, wood | Enchanter's Lectern |
-| `prof_engineering` | **Engineering** | **gadgets**, harvesting tools, guns, crossbows, quiver fittings, devices, bombs, a clockwork mount | bars, engineering parts, wood, powder | Workshop |
+| `prof_jewelcrafting` | **Jewelcrafting** | cut gems, rings, necklaces, circlets, Uncommon jewels, polishing and recutting jewels, **adding gem and jewel sockets** | rough gems, gold, bars | Gem Cutter |
+| `prof_enchanting` | **Enchanting** | item enchants (glyphs), staves, wands, caster off-hands, travel scrolls, portal stones, disenchanting, **opening soul sockets** | glimmer/shards/prisms, essence, herbs, wood | Enchanter's Lectern |
+| `prof_engineering` | **Engineering** | **gadgets**, **gadget ports**, harvesting tools, guns, crossbows, quiver fittings, contraptions, bombs, a clockwork mount | bars, engineering parts, wood, powder | Workshop |
 | `prof_alchemy` | **Alchemy** | potions, elixirs, flasks, weapon oils, transmutes | herbs, fish, vials, essence | Alembic |
 
 ### 11.2 Recipe ladder and item level
@@ -548,9 +548,9 @@ faction met at level 5 still matters at 60):
 
 | Faction | Professions it sells recipes for | Signature recipes |
 |---|---|---|
-| `fac_wardens` | Leatherworking, Engineering | Warden's Mail (medium set pieces), the Waywatch Lens device, trap kits |
+| `fac_wardens` | Leatherworking, Engineering | Warden's Mail (medium set pieces), the Waywatch Lens contraption, trap kits |
 | `fac_crown_assembly` | Blacksmithing, Tailoring | Crown plate, tabards, the Highcourt Greatshield |
-| `fac_deepforge_clans` | Blacksmithing, Engineering, Jewelcrafting | **gadget frames** (all six tiers), rune rivets, deep-cut gems |
+| `fac_deepforge_clans` | Blacksmithing, Engineering, Jewelcrafting | **gadget frames** (all six tiers), rune-etched whetstones, deep-cut gems |
 | `fac_greenhand` | Alchemy, Leatherworking, Tailoring | harvest elixirs, profession garb, herbal flasks |
 | `fac_lantern_house` | Enchanting, Jewelcrafting, Engineering | **gadget cores**, rank III glyphs, Portal Stones |
 | `fac_cutwater` | Engineering, Tailoring | fishing rods (Epic), sea-silk robes, tidebrass gadgets |
@@ -567,10 +567,19 @@ faction met at level 5 still matters at 60):
 | Consumables | — | — | stack of 1–5 per craft; masterwork doubles it (§4.1) |
 
 - **Signed.** Crafted gear shows "Made by <name>" on the item card (page 03 item card).
-- **Sockets.** Each profession can add a socket to items of its own family (Blacksmith: metal weapons and
-  heavy armour; Leatherworker: leather; Tailor: cloth; Jewelcrafter: jewellery; Engineer: guns, crossbows,
-  quivers). **Page 08 owns** which socket kinds an item may take and how many; the profession action only
-  performs what page 08 allows. Proposed cost: T6 materials worth about 15 minutes of gathering.
+- **Sockets.** Adding a socket is one of **page 08 §13.2's five actions**, and page 08 owns their rules and
+  costs (one added socket per item in its whole life, never past the rarity's maximum, anyone can commission
+  one through the trade window's Commission tab):
+
+  | Action | Profession and skill | Adds |
+  |---|---|---|
+  | **Bore a Gem Socket** | Jewelcrafting 75 | +1 gem socket (Uncommon+) |
+  | **Fit a Gadget Port** | Engineering 100 | +1 gadget socket (Uncommon+, not jewellery) |
+  | **Set a Jewel Mount** | Jewelcrafting 175 | +1 jewel socket (Rare+) |
+  | **Open a Soul Socket** | Enchanting 225 | +1 soul socket (Epic+, ilvl 30+; costs **Tear-glass Shards**, `mat_tearglass`) |
+  | **Recut a Socket** | Jewelcrafting 250 | turns one empty socket into another kind the item allows |
+
+  Blacksmiths, Leatherworkers, Tailors and Alchemists have no socket action.
 - **No crafted Legendaries or Uniques.** Those stay drops (canon: loot you want to talk about).
 
 ### 11.6 Crafting skill-ups
@@ -582,7 +591,7 @@ level mapped to the nearest recipe band).
 ### 11.7 Crafting time
 
 Every recipe has a work cost in units (reuse `js/work.js`, **1 unit per second**): consumables **2**, gems
-**2**, gear **5**, gadgets **6**, devices **8**. Queue up to **20** of one recipe (reuse `station-ui.js`
+**2**, gear **5**, gadgets **6**, contraptions **8**. Queue up to **20** of one recipe (reuse `station-ui.js`
 `BATCHES [1, 5, 20]`; the standing order `0` is dropped). You must stay within **6 m** of the station; moving
 away pauses the queue. Nothing crafts while you are away.
 
@@ -617,9 +626,9 @@ days. The UI (`scr_prof_change`) shows exactly what you will keep and lose befor
 | Band | Weapons (metal) | Armour | Other |
 |---|---|---|---|
 | 1 / 25 | Tin shortsword, hatchet-axe, mace, spear | heavy: Rough Iron helm, chest, gauntlets | Rough Whetstone (+4% basic-attack damage, 30 min), Field Kit |
-| 50 / 75 | Iron and steel longsword, greatsword, warhammer, halberd, shield | heavy: Steel set (7 slots) | Steel Whetstone (+6%), Weightstone (+6% vs armoured), socket rivet T2 |
+| 50 / 75 | Iron and steel longsword, greatsword, warhammer, halberd, shield | heavy: Steel set (7 slots) | Steel Whetstone (+6%), Weightstone (+6% vs armoured) |
 | 100 / 125 | Redsteel weapons (all metal types), tower shield | heavy: Redsteel plate | Redsteel Whetstone (+8%), crafted set `set_redsteel_vanguard` (page 09) |
-| 150 / 175 | Blacksteel and Rimesteel weapons | heavy: Blacksteel, Rimesteel (+cold resistance) | Frostbite Whetstone (weapon hits Chill), rivets T4 |
+| 150 / 175 | Blacksteel and Rimesteel weapons | heavy: Blacksteel, Rimesteel (+cold resistance) | Frostbite Whetstone (weapon hits Chill), Blacksteel Whetstone (+10%) |
 | 200 / 225 | Saltsteel and Lodestone weapons (Lodestone: +1 m reach on polearms) | heavy: Saltsteel | Lodestone Weight (+10% vs large enemies) |
 | 250 / 275 / 300 | Firegold weapons; Paragon: **Starmetal** weapons (2 chosen affixes) | heavy: Firegold, Starmetal | Firegold Whetstone (+12%), Kingsfire set patterns |
 
@@ -672,15 +681,17 @@ Page 08 owns gems, jewels and sockets. Jewelcrafting is how gems and some jewels
 | Band | Gems | Jewellery | Jewels | Other |
 |---|---|---|---|---|
 | 1 / 25 | — (no gems at T1) | tin ring, bog-iron pendant | — | Field Kit |
-| 50 / 75 | **cut Chipped** gems from rough Chipped (all 8 kinds) | iron rings, steel chains | — | combine 3 Chipped → 1 Flawed (no gold fee; the Jeweller NPC still charges page 08's fee) |
-| 100 / 125 | cut **Flawed** | gold rings and necklaces | **cut Magic jewels** from Rough Jewels (below) | circlets (head, cloth/light) |
-| 150 / 175 | cut **Plain** | Blacksteel and gold settings | **Polish** a jewel (reroll its values, keep its affixes) | |
+| 50 / 75 | **cut Chipped** gems from rough Chipped (all 10 kinds) | iron rings, steel chains | — | combine 3 Chipped → 1 Flawed (no gold fee; the Jeweller NPC still charges page 08's fee); **Bore a Gem Socket** (75, page 08 §13.2) |
+| 100 / 125 | cut **Flawed** | gold rings and necklaces | **cut Uncommon jewels** from Rough Jewels (below) | circlets (head, cloth/light) |
+| 150 / 175 | cut **Plain** | Blacksteel and gold settings | **Polish** a jewel (reroll its values, keep its affixes) | **Set a Jewel Mount** (175, page 08 §13.2) |
 | 200 / 225 | cut **Flawless** | Saltsteel, Lodestone settings | **Recut** a jewel (reroll **one** affix you pick; the new one rolls in the bottom half) | |
-| 250 / 275 / 300 | cut **Radiant**; Paragon: **Prismatic** cut (one gem, page 08 decides if allowed) | Firegold, Starmetal | Recut and Polish work on every jewel rarity; making Rare or Unique jewels is **not** possible — they stay drops | |
+| 250 / 275 / 300 | cut **Radiant**; Paragon: **Prismatic** cut (one gem, page 08 decides if allowed) | Firegold, Starmetal | Recut and Polish work on every jewel rarity; making Rare or Unique jewels is **not** possible — they stay drops | **Recut a Socket** (250, page 08 §13.2) |
 
-- **Rough gems** (`mat_rough_<gem>_<grade>`) come from mining rare finds and rich veins; cut into page 08's
-  `it_gem_<gem>_<grade>` (1 rough → 1 gem, 2 work units).
-- **Rough Jewels** (`it_jewel_rough_t<n>`, a drop from rares and Depth chests, page 08) are cut into a **Magic**
+- **Rough gems** (`mat_rough_<gem>_<grade>`, grade 1–5) come from mining rare finds and rich veins; cut into
+  page 08's `gem_<gem>_<grade>` (1 rough → 1 gem, 2 work units). The ten gems (page 08 §13.4): Bloodstone,
+  Tigereye, Lapis, Jade, Onyx, Moonstone, Garnet, Pearl, **Amber** and **Peridot** — so `mat_rough_amber_2` cuts
+  into `gem_amber_2` (Flawed Amber). Grades: 1 Chipped · 2 Flawed · 3 Plain · 4 Flawless · 5 Radiant.
+- **Rough Jewels** (`it_jewel_rough_t<n>`, a drop from rares and Depth chests, page 08) are cut into an **Uncommon**
   jewel with 2 random jewel affixes. **Rare and Unique jewels are drop-only**, because the owner wants
   finding the right jewel to be the chase.
 - **Polish** costs the tier's gem dust (`mat_gem_dust`, from cutting: every cut gives 1) + gold
@@ -699,7 +710,7 @@ screen).
 | 50 / 75 | Glyph rank I (every glyph in page 08 "Enchanting (glyphs)") | willow and pine staves, a focus orb | **Scroll of Passage** (page 20) |
 | 100 / 125 | rank I+ (half-step: +50% of the gap to rank II) | Moonoak staves, foci | spellthread (from Tailoring's cloth), **Portal Stone** (page 20) |
 | 150 / 175 | **rank II** | Ashwood staves | Scroll of Calling (page 20) |
-| 200 / 225 | rank II+ | Floatwood staves and wands | **Soul transfer** (below) |
+| 200 / 225 | rank II+ | Floatwood staves and wands | **Open a Soul Socket** (225, page 08 §13.2; needs Tear-glass Shards), **Soul transfer** (below) |
 | 250 / 275 / 300 | **rank III**; Paragon glyphs (one new glyph per slot, page 09) | Charheart and Paleheart staves | — |
 
 - **Glyphs** move from the NPC Enchanter to players: page 08's NPC keeps selling **rank I** only (so nobody is
@@ -708,9 +719,9 @@ screen).
   salvage yield of **Essence** and **Dust** (Scrap is not given), plus enchanting materials:
   **Glimmer** (`mat_ench_glimmer`, Uncommon), **Shard** (`mat_ench_shard`, Rare/Epic), **Prism**
   (`mat_ench_prism`, Unique/Set/Legendary). pXP at the item's colour. Everyone else still salvages at the bench.
-- **Soul transfer**: moves a **Soul** from one item to another without breaking it. Page 08 owns what
-  removing a soul normally does; this action exists for the case where page 08 makes removal destructive
-  (see open question §27).
+- **Soul transfer**: moves a **Soul** straight from one item to another in one step, for the same price as page
+  08 §13.3's soul removal (500 gold + 25 gold × level). Page 08 already returns a removed soul whole, so this is a
+  convenience (one step instead of two, and an Enchanter can do it for a customer through a craft order).
 
 ---
 
@@ -718,11 +729,11 @@ screen).
 
 `prof_engineering` · station: Workshop (reuse Farhold "Workshop", "Assembler").
 
-| Band | Gadgets | Tools | Weapons | Devices and other |
+| Band | Gadgets | Tools | Weapons | Contraptions and other |
 |---|---|---|---|---|
 | 1 / 25 | **Tin frame** | Uncommon Flint → Iron tools | — | blasting powder, Field Kit |
 | 50 / 75 | **Iron frame** | Uncommon/Rare Iron tools | light crossbow, blunderbuss | **quiver fittings** I, **Prospector's Lens** |
-| 100 / 125 | **Redsteel frame**, cores I | Rare Redsteel tools | heavy crossbow, long rifle | fishing rods Rare, target dummy |
+| 100 / 125 | **Redsteel frame**, cores I | Rare Redsteel tools | heavy crossbow, long rifle | **Fit a Gadget Port** (100, page 08 §13.2), fishing rods Rare, target dummy |
 | 150 / 175 | **Blacksteel frame** | Epic Blacksteel tools | repeating crossbow | quiver fittings II, bombs |
 | 200 / 225 | **Lodestone frame**, cores II | Epic Lodestone tools | tidebrass rifle | **Clockwork Strider** mount |
 | 250 / 275 / 300 | **Firegold frame**; Paragon cores III | Epic Firegold tools | Firegold hand cannon | Portable Bench, fireworks |
@@ -812,17 +823,20 @@ Engineers make Uncommon, Rare and Epic tools of every kind (§6) from band 1 (Fl
 (Firegold Epic), and the **tool roll** upgrades (8 and 10 slots). Tool affixes roll randomly; one is chosen
 from the recipe's list, like crafted gear.
 
-### 17.6 Devices
+### 17.6 Contraptions
 
-| Device | id | Band | What it does | Reuse |
+Engineering's utility items are **contraptions**, never "devices": **Device** is the tinker's word for its combat
+deployables (`classes/tinker.md`), and **Gadget** is the socketable (§17.1).
+
+| Contraption | id | Band | What it does | Reuse |
 |---|---|---|---|---|
-| **Prospector's Lens** | `it_dev_prospector_lens` | 50 (I), 150 (II), 250 (III) | out of combat, 2 s sweep: shows every node within **110 / 210 / 380 m** for 60 s, colour-coded for your skill; found nodes stay on your map until harvested | Farhold scanner (`createScanner`, the three `devices` ranges) |
-| Target dummy | `it_dev_dummy` | 100 | placeable for 10 min; feeds the damage meter | `meters/` |
+| **Prospector's Lens** | `it_prospector_lens` | 50 (I), 150 (II), 250 (III) | out of combat, 2 s sweep: shows every node within **110 / 210 / 380 m** for 60 s, colour-coded for your skill; found nodes stay on your map until harvested | Farhold scanner (`createScanner`, the three `devices` ranges) |
+| Target dummy | `it_target_dummy` | 100 | placeable for 10 min; feeds the damage meter | `meters/` |
 | Quiver fitting I / II | `it_fitting_<effect>_1/2` | 50 / 150 | adds one **basic-attack effect** to a quiver that has none: Flaming (Burning 20% / 30% over 4 s), Barbed (Bleed), Frost-tipped (Chilled 1 s), Splitting (a second arrow at 35% / 50% to one extra target), Bursting (a 2 m / 3 m burst at 25% / 35%). Basic attacks and skills tagged *Basic Attack* only (canon §12.3) | new |
 | Bombs | `it_bomb_<kind>` | 150 | thrown consumable, 30 s shared cooldown, usable by anyone: Blast (60% of a level-appropriate weapon hit in 4 m), Flash (Blind 2 s), Tar (−40% move 4 s) | new |
 | **Clockwork Strider** | `it_mount_clockwork_strider` | 200 | a mechanical two-legged mount (page 08 "Mounts" lists it); rides like any mount at your riding rank; tradeable | new model |
-| Portable Bench | `it_dev_portable_bench` | 250 | placeable for 5 min; the party can use the everyone-bench (salvage, promote…) in the open world | Farhold bench |
-| Fireworks | `it_dev_fireworks` | 250 | cosmetic | — |
+| Portable Bench | `it_portable_bench` | 250 | placeable for 5 min; the party can use the everyone-bench (salvage, promote…) in the open world | Farhold bench |
+| Fireworks | `it_fireworks` | 250 | cosmetic | — |
 
 ---
 
@@ -949,8 +963,9 @@ Rare find: `mat_hide_pristine_t<n>` (one per tier; counts as 3 hides and is requ
 
 | id | Name | From |
 |---|---|---|
-| `mat_rough_<gem>_<grade>` | rough gems (page 08's 8 gems × grades Chipped … Radiant) | mining rare finds (T2 Chipped, T3 Flawed, T4 Plain, T5 Flawless, T6 Radiant) |
+| `mat_rough_<gem>_<grade>` | rough gems (page 08's 10 gems, incl. Amber and Peridot, × grades 1 Chipped … 5 Radiant) → cut into `gem_<gem>_<grade>` | mining rare finds (T2 Chipped, T3 Flawed, T4 Plain, T5 Flawless, T6 Radiant) |
 | `mat_gem_dust` | Gem Dust | 1 per gem cut |
+| `mat_tearglass` | **Tear-glass Shard** (page 08 owns it) | salvaging ilvl 58+ Epic and better; Challenge end bosses; the Depth Cache; level-60 world-boss chests; Spire Isle rares. Spent on **Open a Soul Socket** and page 08's set reforging |
 | `mat_ench_glimmer` · `mat_ench_shard` · `mat_ench_prism` | Glimmer · Shard · Prism | Disenchanting (§16) |
 | `mat_scrap` · `mat_essence` · `mat_dust` | page 08's bench materials | salvage (bench and §8.6) |
 | `mat_vial` · `mat_flask_crystal` | Vial · Crystal Flask | Alchemy vendors, 1 / 20 gold |
@@ -958,7 +973,7 @@ Rare find: `mat_hide_pristine_t<n>` (one per tier; counts as 3 hides and is requ
 | `mat_thread` · `mat_dye_<colour>` | Thread · Dyes | Tailoring vendors, 1 gold; Alchemy makes dyes |
 
 **Count:** 13 ores and coal, 11 bars, 23 herbs, 7 fibres + silks and wool, 13 bolts, 13 woods + 6 heartwoods,
-13 raw hides + 6 pristine, 11 leathers, 13 fish, 6 parts, 40 rough gems, 5 enchanting/gem materials, 6 bought.
+13 raw hides + 6 pristine, 11 leathers, 13 fish, 6 parts, 50 rough gems, 6 enchanting/gem materials (incl. Tear-glass), 6 bought.
 
 ---
 
@@ -1053,7 +1068,7 @@ Fishing is taught by an optional follow-up at Stillwater Landing (a Cutwater ang
 | `strike` (fishing) | `E` tap while a line is out | same key; context only |
 | `attack` on a node | left mouse | with the tool out, a basic attack on a node starts a pull (reuse Farhold) |
 | `professions` | `Shift+C` (proposed) | opens `scr_sheet_professions` |
-| `prospectorLens` | unbound by default | uses the Lens device if owned |
+| `prospectorLens` | unbound by default | uses the Lens contraption if owned |
 
 ### 24.3 Settings (for page 04)
 
@@ -1161,7 +1176,7 @@ Player profession state (in the save):
 | Gathering bar, move-cancel, work clips | `js/tools.js` `createGathering`, `WORK_CLIPS`; `avatar-3d/js/chibi2-motion.js` | damage cancels; two new clips (`skin`, `cast`) |
 | Personal node ledger | `js/props.js` harvest ledger (`felled`, regrow clocks) | server-side, per player, minutes |
 | Node kinds and art | `data/resources.json` `nodeKinds`, `js/ore-view.js`, `data/megaflora.json` | tiers and ids renamed; richness decay dropped |
-| Prospector's Lens | `js/tools.js` `createScanner` + marker book (`js/markers.js`) | a device an Engineer makes |
+| Prospector's Lens | `js/tools.js` `createScanner` + marker book (`js/markers.js`) | a contraption an Engineer makes |
 | Station screens, batches | `js/station-ui.js` | one station per profession, no standing orders |
 | Craft time | `js/work.js` units | player only (no machines, no workers) |
 | Everyone-bench, materials bag, salvage | `js/craft.js`, `data/crafting.json` | unchanged (page 08) |
@@ -1179,10 +1194,10 @@ salvaging nodes.
 1. **Swimming mount from fishing.** The Mossback Tadpole (0.2% rare catch in T2+ fresh water) grows into a
    **Mossback Frog** mount after 7 real days in your bags — a fishing reward that is also one of the owner's
    aquatic-hybrid mounts. Page 08 owns the mount catalogue; keep it?
-2. **Soul removal.** If page 08 makes taking a Soul out of an item destroy it, Enchanting's **Soul transfer**
-   (§16) is the only safe way to move one. Is that the intended role for Enchanters?
+2. ~~**Soul removal.**~~ Settled by page 08 §13.3: a removed soul comes back whole; **Soul transfer** (§16) is
+   a one-step convenience at the same price.
 3. **Durability.** Page 08's durability system is still proposed. If it stays, Blacksmiths get a **Field Anvil**
-   device (repair all worn items to 100% once per 30 min). If it goes, nothing here changes.
+   contraption (repair all worn items to 100% once per 30 min). If it goes, nothing here changes.
 4. **Cooking.** Food stays a vendor item and a fish trade with innkeepers (§8.5). A Cooking profession would be
    an eighth choice; recommendation: **no** — seven is plenty and food is a minor buff.
 5. **Prismatic gems** (Paragon Jewelcrafting): one gem that fits any socket kind's gem slot with a smaller

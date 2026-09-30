@@ -244,7 +244,7 @@ its sticky fallbacks are **not** reused — they are what Wildmarch's hard targe
   damage, recovery), **dodge roll** (`F`, unlocked at level 5 by `q_hv_fall_and_rise`) with the
   server-granted invulnerable window, block/guard as page 05 defines it. Basic attacks follow the hard
   target when there is one (M2) and swing at the aim point when there is not.
-- Statuses, damage maths, threat table and taunt, death and revive (no limit on in-combat revives —
+- Statuses, damage maths, threat table and the tank's **Provoke**, death and revive (no limit on in-combat revives —
   W21), respawn at the town.
 - Mobs: Hearthvale's families (page 10) with AI and packs, loot hooks (stub drops); the **Sootwick** warband
   where page 10 places it in Hearthvale (band 2–18). Rarity layers are M7.
@@ -435,7 +435,8 @@ voices).
 - Hearthvale's quests (main story opening, side quests, the barrow lead-in), dynamic events (page 14),
   phasing flags, the quest tracker, markers and the map.
 - The **First Waystone** (`lm_first_waystone`) in Brightwater as a landmark; the **Recall Stone**
-  (`it_recall_stone`, level 7) and binding it at a town waystone or safe landmark (never a dungeon or a
+  (`it_recall_stone`, level 7; it starts bound at the starting town — the First Waystone for Brightwater,
+  `lm_oakhollow_waystone` for Oakhollow, page 20 §15) and binding it at a town waystone or safe landmark (never a dungeon or a
   wild landmark — W24). Waystone travel (12), Travel Methods (12) and mounts (10) wait — page 07's ladder.
 - **Discovery**: walking up to a dungeon entrance or a waystone records it on the character (the
   Dungeon Finder list and the travel map both read this record — W9).
@@ -547,7 +548,7 @@ the regions that carry those levels land in Part 4.
 - **The five special rarities** (`sr_` ids, page 08 owns the numbers): `sr_electrified` (lightning procs),
   `sr_starwoven` (one extra affix beyond the normal maximum from a special pool), `sr_twinned` (every
   affix rolled twice, the better kept), `sr_ancient` (every value 10–20% above its normal maximum),
-  `sr_living` (grows stronger with kills, up to a limit). Each sits on top of a Magic-or-better item.
+  `sr_living` (grows stronger with kills, up to a limit). Each sits on top of an Uncommon-or-better item.
 - Each special rarity's **card look** (crackle; holographic deep-space shader; mirrored shimmer; stone-
   and-gold frame; creeping vines) and its **bespoke SVG icon** (bolt, star, two linked rings, carved rune,
   sprout) — original SVGs, never an emoji — shown before the item's name on the card, in chat links, the
@@ -577,10 +578,10 @@ the regions that carry those levels land in Part 4.
 **Scope**
 - Socket kinds and counts per base and slot (page 08 owns which items get which sockets); socketing,
   swapping and removing rules and costs (page 08).
-- **Gems** (`gem_`): one gem, three effects — the armour table (defensive and attribute values), a weapon
+- **Gems** (`gem_<kind>_<grade>`, ten kinds incl. Amber and Peridot, grades 1–5 — page 08 §13.4): one gem, three effects — the armour table (defensive and attribute values), a weapon
   table (damage or spell damage), a jewellery table (secondary effects and magic find); the card shows the
   effect for the item it is in.
-- **Jewels** (`jwl_`): roll their own affixes and rarity (Magic / Rare / Unique); drop sources and odds
+- **Jewels** (`jwl_`): roll their own affixes and rarity (Uncommon / Rare / Unique); drop sources and odds
   from page 08, raised by Depth (M16).
 - **Souls** (`soul_`, catalogue on page 09): a new behaviour each (a new effect, a changed skill, a chance
   to apply an effect), gated by item type, slot or class; built on the same power registry as legendary
@@ -612,10 +613,13 @@ the regions that carry those levels land in Part 4.
   gates node tier; the node's gather bar; the two profession magic-find stats (+profession skill level,
   profession XP gain) finally have their receivers.
 - **Crafting professions** (`prof_` ids): Blacksmithing, Leatherworking, Tailoring, Jewelcrafting,
-  Enchanting, Engineering, Alchemy — each character picks **one** (a change of profession resets its skill,
-  per page 19). Recipes (`rcp_` or page 19's prefix), trainers, recipe drops, crafting stations, salvage.
-- Closing M13's loop: **Engineering makes gadgets**, **Jewelcrafting cuts gems**, Enchanting and the rest
-  make what page 19 lists; the M13 dev gadget vendor is removed.
+  Enchanting, Engineering, Alchemy — each character picks **one** (changing profession freezes the old one
+  at its rank start, page 19 §11.9). Recipes (`rcp_<prof>_<name>`, page 19), trainers, recipe drops, crafting stations, salvage.
+- Closing M13's loop: **Engineering makes gadgets**, **Jewelcrafting cuts gems** (`mat_rough_<kind>_<grade>` →
+  `gem_<kind>_<grade>`), Enchanting and the rest make what page 19 lists; the M13 dev gadget vendor is removed.
+- **Adding sockets**: page 08 §13.2's five actions (Bore a Gem Socket, Set a Jewel Mount, Recut a Socket —
+  Jewelcrafting; Fit a Gadget Port — Engineering; Open a Soul Socket — Enchanting, paid in Tear-glass Shards
+  `mat_tearglass`), once per item.
 - Hearthvale's nodes placed; the level-9 unlock quest wired (met by players in M21 as Mossfen lands).
 
 **Implements** page 19, 08 (salvage, tool items), 07 (profession unlock), 03 (profession screens).
@@ -819,7 +823,7 @@ so every region lands with the classes that can play it. Every dungeon lands wit
   the ranger's **Tame Beast** and the necromancer's **Control Undead** with their revive/expiry rules.
 - Regions `mossfen` (5–12), `greyridge` (10–18), `highcourt` (capital): baked terrain, towns, NPCs,
   quests, events, rare spawns and the first world boss in region 3 (page 13).
-- Dungeons `d02_drowned_mill`, `d03_deepdelve`, `d04_bellows_keep`.
+- Dungeons `d02_drowned_mill`, `d03_shaft_seven`, `d04_bellows_keep`.
 - **The seven player factions** (00 §12.2) with their chapters in these regions and quartermasters that
   sell at your level up to 60; the reputation-gain magic-find stat gets its receiver.
 - **Talent tier 1 (level 12)** for every class that exists; the page 07 ladder from 8 to 18: **first
@@ -853,8 +857,9 @@ tamed/bound companions), creature bodies for new families and mounts.
   and calling 2 (level 20) for every class that exists; wave B gets slots 1–5 and callings 1–2.
 - Page 07 ladder 20–34: calling II + faster mount (20), wardrobe and **follower slot 3** (25),
   **Second Loadout** (30).
-- More Travel Methods: the giant striders of Sunscar, river barges on a timetable, the Cinder Steppe
-  wagon line; dinosaur-like runners and lizards among the mounts.
+- More Travel Methods: the Longshanks of Sunscar, river barges on a timetable, the Cinder Steppe
+  wagon line; the new mount bodies of page 17 §3.2 (Raptor Runner, Crested Strider, Horned Grazer, ram)
+  and lizards among the mounts.
 - Any creature body plan a boss of these regions needs (page 17).
 
 **Implements** page 06, 12 (d05–d09), 13, 20, classes.

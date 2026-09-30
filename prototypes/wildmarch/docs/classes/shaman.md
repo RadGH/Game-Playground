@@ -260,7 +260,8 @@ biggest damage cooldown (Stampede) is on 120 s and half of every Great Storm goe
 
 ### 5.1 What Damage focus turns on
 
-Choosing **Damage** role focus (page 06 §Role focus) gives the shared **Striker** passive (+5% damage) and:
+Setting the canon **Role focus** switch (00 §6: in the spellbook, out of combat only, saved per Loadout; page 06
+§Role focus) to **Hybrid** queues the shaman as **Damage** in the Dungeon Finder, gives the shared **Striker** passive (+5% damage) and:
 
 | Change | Rule |
 |---|---|

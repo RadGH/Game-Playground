@@ -217,8 +217,11 @@ The Stormcaller has no second bar. Instead, **rods change what each spell does**
 
 ## 5. The hybrid role — Support (the conductor)
 
-Support counts as a **Damage** slot in the Dungeon Finder (canon §4). The Stormcaller queues as Support from
-Calling I (level 6). Its support is **speed and safety for the party**, paid for by some of its own damage.
+**Role focus.** The Stormcaller uses the canon **Role focus** switch (00 §6: in the spellbook, out of combat
+only, saved per Loadout; available from Calling I, level 6). Set to **Hybrid**, the Dungeon Finder queues it as
+**Support** (a Damage slot, canon §4). The switch changes no spell: the **Conduit** (§5.1) and the rods'
+Grounding are part of the class in either focus, and the support build is the talent picks in §5.2. Its support
+is **speed and safety for the party**, paid for by some of its own damage (§5.3).
 
 ### 5.1 The Conduit (`G`)
 

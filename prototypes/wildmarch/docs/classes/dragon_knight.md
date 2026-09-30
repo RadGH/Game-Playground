@@ -208,7 +208,7 @@ swing); the `dragon_helm` crest recolours; the tabard (`decor: tabard`) takes th
 | Body | Chibi 2 hidden; a **`drake`** creature (reuse `creature-types.js`: horns, spikes, fangs) at **size 2.4** (≈2.6 m long). With the 6-piece Wyrmlord set or `leg_heart_of_the_fire_wyrm` it becomes the winged **`dragon`** type at size 1.6. Colours by aspect: fire `#8a2a2a`/`#e0b070`, ice `#d8ecf8`/`#6aa0d0`, storm `#3a4250`/`#ffe860`. Pre-built at login (avoids the shader-compile stutter). |
 | Hitbox | Unchanged — the knight's capsule. Only the drawing grows. |
 | Stats | +50% max health (health kept as a %), gear armour ×1.5, **immune to knockback and stun**, Momentum gained ×1.5 |
-| Basic attack | Claw rake every **1.3 s**, 3.5 m, 120° arc, **claw damage** = your weapon's damage per second × 1.3 (`tag_physical` `tag_<aspect>` `tag_attack` `tag_melee` `tag_basic_attack`) |
+| Basic attack | Claw strike every **1.3 s**, 3.5 m, 120° arc, **claw damage** = your weapon's damage per second × 1.3 (`tag_physical` `tag_<aspect>` `tag_attack` `tag_melee` `tag_basic_attack`) |
 | Gear | Weapon and shield hidden. A shield's block value becomes armour. Affixes all work. |
 | Tank | If a shield was equipped when you shifted, you keep the **Guardian** state (threat ×4) in Dragon Form. |
 | Blocked | No potions, no mounting, no interacting with objects (the `E` prompt reads "Not as a dragon"). |
@@ -234,8 +234,11 @@ stamps instead). Sound: the drake's footsteps shake the camera 0.1 s; the Deluge
 
 ## 5. The hybrid role — Tank (shield)
 
-The Dragon Knight queues as **Tank** in the Dungeon Finder when a **shield** is in the off hand (the button is
-grey with "Tank needs a shield in the off hand" otherwise). Available from level 1; it becomes a full kit with
+The Dragon Knight uses the shared **Role focus** switch in the spellbook (00 §6; out of combat, saved per
+Loadout), **tied to its shield**: **Hybrid** queues it as **Tank** in the Dungeon Finder and needs a **shield** in
+the off hand (the switch is grey with "Tank needs a shield in the off hand" otherwise). What it changes comes
+with the shield: Shield Guard (§5.1) and the shield versions of Scalebound and Wyrmcoil Sweep (§5.2).
+**Primary** queues it as Damage. Available from level 1; it becomes a full kit with
 Scalebound at 18.
 
 ### 5.1 Shield Guard (passive, whenever a shield is equipped)
@@ -256,7 +259,7 @@ Scalebound at 18.
 | Drakeleap | the opener: into the pack, 3 m of damage, Rimescale roots or Thunderscale stuns the casters |
 | Scalebound (shield) | **area taunt** 8 m, 3 s, plus −35% damage taken 6 s and 60% resistance to one element; 30 s |
 | Wyrmcoil Sweep (shield) | threat ×2 on a 5 m circle — the pick-up after a taunt |
-| Shared **Challenge** (`Z`, page 07, level 10) | the single-target taunt |
+| Shared **Provoke** (`Z`, page 07, level 10) | the single-target taunt |
 | Aspect swap (20) | **Rimescale** for steady physical bosses (+30% armour with the shield), swap to a boss's element before its big cast and Scalebound through it |
 | Dragon Form (40) | the big defensive: +50% health, ×1.5 armour, knockback and stun immune for 20 s |
 | Talents that help | Wyrmfang t2b **Scale Guard**; Drakeleap t2a **Guardian Leap**; Scalebound t2c **Molten Hide**, t3b **Wyrm Guard**, t4a **Brood Wall**, t4b **Unyielding**; Wyrmcoil t2a **Coil Ward**, t3b **Threatening Coil**; Dragon Form t4b **Iron Wyrm** |

@@ -356,12 +356,12 @@ towns, is discovered within **40 m**.
 | Drowned Coast | `tms_gullrock` | Gullrock sea-stack quay | 19 |
 | Drowned Coast | `tms_brinehollow` | Brinehollow flats jetty | 19 |
 | Drowned Coast | `tms_lampwick_point` | Lampwick Point landing | 19 |
-| Riftmarch | `tms_waystone_camp` | Waystone Camp: wagon yard and kite roost | 13, 14, 22 |
+| Riftmarch | `tms_waystone_camp` | Waystone Camp: wagon yard and kite perch | 13, 14, 22 |
 | Riftmarch | `tms_anchor_hill` | Anchor Hill | 14 |
 | Riftmarch | `tms_shardfall_post` | Shardfall Post (a floating island) | 22 |
 | Riftmarch | `tms_rift_high_islands` | the High Islands landing (outside a town: discovered within 40 m, or by arriving) | 22 |
 | Kingsfire | `tms_cinderwatch` | Cinderwatch fort yard | 14 |
-| Kingsfire | `tms_last_light` | Last Light: convoy yard and kite roost on the ridge | 14, 23 |
+| Kingsfire | `tms_last_light` | Last Light: convoy yard and kite perch on the ridge | 14, 23 |
 | Kingsfire | `tms_kiln_hollow` | Kiln Hollow (after its quest) | 23 |
 | Spire Isle | `tms_spire_landing` | the Spire Landing harbour | 21 |
 
@@ -509,7 +509,7 @@ it is not a consumable and cannot be sold, traded or destroyed).
 | Rule | Value |
 |---|---|
 | Unlock | **level 7**, the innkeeper quest in Brightwater (page 07 row; page 14 owns the quest id, now renamed for the Recall Stone) |
-| Starts bound to | the **First Waystone** (`lm_first_waystone`), Brightwater |
+| Starts bound to | the character's **starting town**: Brightwater starters → the **First Waystone** (`lm_first_waystone`); Oakhollow starters → **the Burrow Gate Waystone** (`lm_oakhollow_waystone`, page 01). The level-7 quest hands the stone over already bound there; binding it at the First Waystone is then optional |
 | Where you can bind it | any **lit waystone in a town**, or any landmark page 01 marks **`bindable`** — which it may only do for a landmark **inside a town boundary**, or a **wayshrine with an NPC keeper and no hostile spawn within 80 m**. **Never** a dungeon entrance, a wild landmark, a world boss site, a warband camp, a Travel Method halt outside a town |
 | Examples of bindable landmarks | the First Waystone (Brightwater), the Stepped Well (Oasis of Tamar), the Eastmoon Well (Whisperwood, once lit in Ch 6); page 01's tables add the `bindable` flag |
 | How to bind | `E` at the waystone or landmark → **Bind Recall Stone here**. The bind dialog (`scr_recall_bind`) shows the current bind and the new one; confirm. **2 s**, free, out of combat. Rebinding at most once every 60 s |

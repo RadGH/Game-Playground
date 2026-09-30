@@ -104,7 +104,7 @@ Placeholders in quoted text use `{braces}`.
 | `scr_stable` | Stable | talk to `npc_stablemaster` | 10 (quest `q_hc_saddle_and_bridle`) | (new; requested by page 08 §20.1) |
 | `scr_trainer` | Trainer and Unbinder | talk to a class trainer or `npc_unbinder_*` | 1 (Unbind tab 12) | (reuse+: farhold `js/retrain.js`, talkui Unbinder block) |
 | `scr_craft_bench` | Profession station (craft + salvage) | `E` at a forge, loom, tannery, bench… | 9 | (reuse+: farhold Crafting + Upgrade tabs; page 19) |
-| `scr_tinker_toolbelt` | Tinker Toolbelt (gadget models) | Tinker only: a Workbench, or the Spellbook's Toolbelt button out of combat | 20 (Tinker Calling II) | (new; requested by `classes/tinker.md` §2.1) |
+| `scr_tinker_toolbelt` | Tinker Toolbelt (Device models) | Tinker only: a Workbench, or the Spellbook's Toolbelt button out of combat | 20 (Tinker Calling II) | (new; requested by `classes/tinker.md` §2.1) |
 | `scr_bank` | Bank | banker NPC | 11 (quest `q_hc_keys_to_the_city`) | (new) |
 | `scr_trade` | Player-to-player trade window | right-click a player → Trade | 5 | (new) |
 | `scr_talk` | NPC conversation | `E` on an NPC | 1 | (reuse+: farhold `js/talkui.js`) |
@@ -1081,7 +1081,7 @@ word. No in-game clock and no sun/moon icon (always daylight, canon 00 §4); a r
 | Profession trainer | the same glyph in a ring | a trainer for one profession | 70 m |
 | Inn | bed #ffb060 | inn (food vendor, a town waystone for your Recall Stone) | 70 m |
 | Stable | horseshoe #c2a98a | mounts | 70 m |
-| Waystone | sigil disc #7fe8ff (discovered) / #5a6a78 (not yet) with a small house mark if your Recall Stone is bound there | a waystone (page 20); discovering one is what portals and Heron's Flight need | always |
+| Waystone | rune disc #7fe8ff (discovered) / #5a6a78 (not yet) with a small house mark if your Recall Stone is bound there | a waystone (page 20); discovering one is what portals and Heron's Flight need | always |
 | Travel Method station | a wagon wheel #e0c080 (a scheduled line: the wheel with a clock) | a station; its routes (page 20) | always |
 | Travel Method in motion | its vehicle glyph moving along the route line | a wagon, strider, boat, train or flyer on its route | 200 m |
 | Dungeon entrance | arched gate #c090ff | 5-player dungeon | always |
@@ -1648,7 +1648,7 @@ weapons along the bottom.
 | Footer | "Item level 34.3 · Armour 4 210 · Set: {name} n/6 · Legendaries n/2" (canon: at most 2 legendaries worn) | — | — |
 | Stats | groups as Farhold: Attributes (STR, DEX, INT, CON — canon), Offence, Defence, Utility, **Magic find**; blank rows hidden with "show {n} more" (reuse) | — | `stat` renderer text (Farhold `STAT_HELP`, rewritten for Wildmarch's formulas on page 05) |
 | **Tag bonuses** (inside Offence) | every "+N% to {tag}" you carry, summed per tag or tag pair: "Ice +22% · Area Spell +20% · Basic Attack +15%" | click a tag: filter the Spellbook to spells with it | the `tag` tooltip: what the tag is on (page 05) and each source item |
-| Powers | what your legendaries, uniques, **souls**, set bonuses and keystone perks actually do (reuse: farhold Powers pane) | — | source item |
+| Powers | what your legendaries, uniques, **souls**, set bonuses and capstone perks actually do (reuse: farhold Powers pane) | — | source item |
 | Set bonuses | each set worn: "{set} {worn}/{total}", each step 2/4/6 with ✓ | — | full set text |
 | Sockets summary | per kind, filled / total across worn gear: **Gem**, **Jewel**, **Soul**, **Gadget** | click: lists every socket and what is in it | — |
 | Companion | class companion frame (tamed beast, bound demon, controlled undead, charmed creature): name, health, stance dropdown (**Assist**, Defend, Passive) | — | — |
@@ -1785,7 +1785,7 @@ card beside it.
 | Rarity | Border | Corners | Header band (behind the name) | Portrait backdrop | Motion |
 |---|---|---|---|---|---|
 | Common | 1 px `--line2` | none | none | flat `--panel2` | none |
-| Uncommon (Magic) | 1 px blue `#7f95ff` | small square studs | a thin blue rule under the name | soft blue vignette | none |
+| Uncommon | 1 px blue `#7f95ff` | small square studs | a thin blue rule under the name | soft blue vignette | none |
 | Rare | 2 px yellow `#e8d020` | small gold corner flourishes (`frame_corner.svg`, 16 px) | a yellow-to-clear gradient band | warm yellow radial glow | none |
 | Epic | 2 px orange `#ff8020` + 1 px inner line | 24 px flourishes | orange band with a tooled-leather texture | orange glow, faint embossed pattern | a slow 6 s light sweep across the frame |
 | Set | 2 px teal `#2fc4b2` + inner line | 24 px flourishes with a set emblem at the top | teal band with the set's name small at the right | teal glow | the set emblem glints once when the card opens |
@@ -1795,7 +1795,7 @@ card beside it.
 `prefers-reduced-motion` and `set.access.reduceMotion` stop every animation above; the looks stay.
 
 **Special rarities** (canon 00 §12.3; page 08 owns the numbers, page 17 the art). One special rarity sits
-**on top of** a Magic-or-better item: the base rarity's frame stays, and the special rarity **adds an
+**on top of** an Uncommon-or-better item: the base rarity's frame stays, and the special rarity **adds an
 overlay**, a line on the card, and its icon before the name everywhere the name is printed.
 
 | Special rarity (`sr_` id) | Icon (bespoke SVG, §14.3.1) | Colour | What it does to the item (page 08 owns the numbers) | What it does to the card |
@@ -1922,7 +1922,7 @@ spell gets one pick at levels 12, 22, 32 and 45."
 (reuse: farhold Perks tab, `js/perks.js` canvas, pan/zoom, search, "Names" toggle, Fit to view, the
 side panel with arm progress, Take it button, Unbinder signpost). Canon: one point per level from 2
 (59 total). Farhold's arm set is replaced by page 07's forest; everything else is unchanged: wheel zoom
-0.6–4×, drag pan, double-click reset, search rings matches gold, ◆ keystone / ■ talent / ● node, "a solid
+0.6–4×, drag pan, double-click reset, search rings matches gold, ◆ capstone / ■ talent / ● node, "a solid
 line means taking one opens the other".
 
 **Empty side panel:** "Click a node. Anything touching something you have already taken can be taken
@@ -2292,7 +2292,7 @@ Guiding Call, a scroll — page 20). A line under the list says how many exist a
 |     (for my level)                |                                                      |
 | [x] The Hollow Barrow   5–7  D≤7  |  Estimated wait: Damage 6 min · Tank 1 min           |
 | [ ] The Drowned Mill    9–12 D≤3  |                                                      |
-| [ ] Deepdelve Mines    13–16  —   |  [ Join the queue ]                                  |
+| [ ] Shaft Seven Mines  13–16  —   |  [ Join the queue ]                                  |
 | 3 of 16 dungeons discovered.      |                                                      |
 | 13 more to find in the world.     |                                                      |
 +-----------------------------------+------------------------------------------------------+
@@ -2634,7 +2634,7 @@ one tier better", and the price at your level. **Buy** opens the crate at once t
 
 (new; [classes/tinker.md](classes/tinker.md) §2.1) **Open:** Tinker only — `E` at any Workbench (towns,
 camps), or the **Toolbelt** button on the Spellbook out of combat. **Unlock:** 20 (Tinker Calling II).
-Three columns, one per gadget — **Cog Sentry**, **Springtrap Mine**, **Iron Walker** — each listing its
+Three columns, one per Device — **Cog Sentry**, **Springtrap Mine**, **Iron Walker** — each listing its
 models as cards with their numbers (from the class file); the chosen one is ticked. Clicking another model
 starts a **5 s** change bar (cancelled by combat). Refusal in combat: "Change models out of combat."
 
@@ -2917,14 +2917,13 @@ Fallbacks: "Palatino Linotype", Georgia, serif. Fonts are loaded from Google Fon
 
 ### 14.3 Rarity colours
 
-Canon rarities with Farhold's colours (Farhold names in brackets). The owner calls the second tier
-**Magic**; canon 00 §4 calls it **Uncommon (blue)** — the card prints "Uncommon" and the doc says both
-until canon settles one word (§15).
+Canon rarities with Farhold's colours (Farhold names in brackets). The second tier is **Uncommon** (blue)
+everywhere — the owner's "magic items"; decided in the round-2 sweep.
 
 | Rarity | Colour | Gem art | Item card frame (§7.2.1) |
 |---|---|---|---|
 | Common [normal] | #c9c2b6 | `rarity_common.svg` | plain: 1 px line, no corners |
-| Uncommon / Magic [magic] | #7f95ff | `rarity_uncommon.svg` | blue line, square studs |
+| Uncommon [magic] | #7f95ff | `rarity_uncommon.svg` | blue line, square studs |
 | Rare | #e8d020 | `rarity_rare.svg` | 2 px, small gold flourishes |
 | Epic [legendary] | #ff8020 orange | `rarity_legendary.svg` (Farhold's legendary gem) | 2 px + inner line, 24 px flourishes, slow light sweep |
 | Set | **#2fc4b2** teal | `rarity_set.svg` | teal, set emblem at the top |
@@ -3088,5 +3087,5 @@ What a phone/tablet gets:
 - **Page 20:** route data for the station board (kinds, departures, waits, schedules, fares, `tms_` ids),
   the Recall Stone's cast time, cooldown and bind points.
 - **Canon (page 00):** (1) the boot tagline still says "torch" although torches are gone — proposed
-  "Everyone starts with a stick. The Wildmarch decides the rest."; (2) the second rarity is called both
-  "Uncommon (blue)" (§4) and "Magic" (§12.3) — pick one word.
+  "Everyone starts with a stick. The Wildmarch decides the rest."; (2) resolved in the round-2 sweep: the
+  blue tier is called **Uncommon** everywhere (the owner's "magic items").

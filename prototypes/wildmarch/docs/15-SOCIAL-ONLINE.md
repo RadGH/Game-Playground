@@ -968,7 +968,7 @@ A follower is one row in the follower book on the character ([page 16 §12](16-T
   "name": "Bryn Ashwell",
   "role": "tank",                 // tank | healer | damage | support
   "level": 14,                    // always = the owner's level (Farhold: "adjust to the player level automatically")
-  "kit": { "weapon": "it_…", "armour": "it_…", "trinket": "it_…" },
+  "kit": { "weapon": "it_…", "armour": "it_…", "jewellery": "it_…" },   // no trinket slot in v2 (page 08 §2: neck/ring)
   "stance": "defensive",
   "hp": 1.0,                      // fraction, so a load does not need the formula
   "downedAt": null,
@@ -986,7 +986,7 @@ A follower is one row in the follower book on the character ([page 16 §12](16-T
 - **A full follower party is weaker than a good human party** on purpose: a Normal dungeon with four
   followers should take about **1.3×** as long as with four average players. The balance bot (page 16
   §16) measures it.
-- **Kit**: three slots — **weapon**, **armour**, **trinket** — equipped from the owner's own bags (any
+- **Kit**: three slots — **weapon**, **armour**, **jewellery** (a necklace or ring; v2 has no trinket slot) — equipped from the owner's own bags (any
   item the follower's role could use). Only the item's **item level** and its **power** (if it has one)
   count; affixes are ignored so follower gearing stays simple. **Proposal**; page 08 confirms.
 
@@ -1000,7 +1000,7 @@ A follower is one row in the follower book on the character ([page 16 §12](16-T
 
 | Role | Behaviour |
 |---|---|
-| **Tank** | Runs to the nearest enemy attacking the player or another follower; **taunts** every 8 s (page 05 threat table; Farhold `EnemyField.taunt` is the reuse); faces enemies away from the group |
+| **Tank** | Runs to the nearest enemy attacking the player or another follower; uses **Provoke** (the taunt) every 8 s (page 05 threat table; Farhold `EnemyField.taunt` is the reuse); faces enemies away from the group |
 | **Healer** | Stays 12–20 m behind the tank; heals the lowest health % ally (players first when tied); cleanses dispellable debuffs; revives a downed ally out of combat |
 | **Damage (melee)** | Attacks the player's target; if none, the tank's target |
 | **Damage (ranged/caster)** | Same, from 15–25 m |

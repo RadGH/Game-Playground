@@ -235,9 +235,11 @@ cost no Tempo and give double Flair.
 
 ## 5. The hybrid role — Tank (Riposte Guard)
 
-The swashbuckler queues as **Tank** in the Dungeon Finder once **Riposte Guard** is unlocked (Calling I,
-level 6) **and** a parrying dagger (any dagger) or a buckler is in the off hand (otherwise the queue button
-is grey with "Tank needs a parrying dagger or buckler in the off hand"). It tanks by **not being hit**:
+**Role focus.** The swashbuckler uses the canon **Role focus** switch (00 §6: in the spellbook, out of combat
+only, saved per Loadout), tied to its off hand: **Hybrid** can be set once **Riposte Guard** is unlocked
+(Calling I, level 6) **and** a parrying dagger (any dagger) or a buckler is in the off hand (otherwise the switch
+is grey with "Tank needs a parrying dagger or buckler in the off hand"). With Hybrid set the Dungeon Finder queues it
+as **Tank**; in the fight, the tank state itself is the **Riposte Guard** toggle (§5.1). It tanks by **not being hit**:
 dodges and parries instead of armour and blocks, smoothed out by **Poise**. *(Reference: an "evasion tank" in
 the classic MMO sense.)*
 
@@ -264,7 +266,7 @@ the classic MMO sense.)*
 |---|---|
 | Needle Flurry | the threat filler; 3 hits = 3 chances for on-hit threat affixes |
 | Mocking Bow (in Guard) | **area taunt**, bosses included, 3 s, plus +40% dodge; 25 s |
-| Shared **Challenge** (`Z`, page 07, level 10) | the single-target taunt every tank-capable class gets |
+| Shared **Provoke** (`Z`, page 07, level 10) | the single-target taunt every tank-capable class gets |
 | En Garde! | the "tank buster" answer: fully negates one parryable boss hit every 10 s |
 | Chandelier Vault | 0.4 s untargetable — dodges one unparryable direct hit if timed |
 | Curtain Cut (Bravura) | a 30% self-heal every time Flair reaches 10 |

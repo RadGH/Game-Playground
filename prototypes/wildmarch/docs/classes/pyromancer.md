@@ -6,7 +6,7 @@
 **Status:** v0.2 draft — 2026-09-30 (round 2 applied). Documentation only — nothing is built.
 Follows the class template in [page 00 §5](../00-OVERVIEW.md). Canon facts used (page 00 §6): primary role
 **Damage**, hybrid role **Healer**, build **caster**, **cloth** armour, resource **Momentum** (the class's
-Momentum is called **Heat** — the game's only Momentum caster), mechanic **Heat — casting builds heat; high
+Momentum is called **Heat** — the game's only Momentum caster; no mana bar), mechanic **Heat — casting builds heat; high
 heat empowers, venting releases it; cauterizing flames heal allies**, spell slots 1 / 4 / 10 / 18 / 28 / 40,
 calling quests 6 / 20 / 40, talent tiers 12 / 22 / 32 / 45, cap 60.
 
@@ -37,7 +37,7 @@ calling quests 6 / 20 / 40, talent tiers 12 / 22 / 32 / 45, cap 60.
 | Armour | Cloth |
 | Weapons | Staff, wand, sceptre (+ a focus off-hand — reuse Farhold `js/foci.js`). Starter: **Charred Staff** (reuse base `staff`). |
 | Primary attribute | INT |
-| Resource | **Heat** (Momentum) |
+| Resource | **Momentum (Heat); no mana bar** |
 | Companion | None. (Round 1's fire familiar is gone — no class summons a creature out of nothing, 00 §6.) |
 | Playstyle | Build Heat with cheap builders, ride the Kindled and Searing bands for bonus power, spend Heat on the big spells, and choose *when* to Overheat (big power, self-burn) and *where* to Vent (a knock-back nova). Burns everywhere, then Backdraft cashes them in. Point the same spells at a friend and they heal. |
 
@@ -245,8 +245,10 @@ Backdraft and Crown of Suns do not change (Crown gets its 5 suns and costs nothi
 
 ## 5. The hybrid role — Healer (the Hearthkeeper)
 
-The pyromancer queues as **Healer** in the Dungeon Finder once Calling I (level 6) is done; the queue turns
-**Hearthkeeper** on for you when the group forms.
+The pyromancer uses the canon **Role focus** switch (00 §6; spellbook, out of combat, saved per Loadout), tied to
+the **Hearthkeeper** toggle: setting Role focus to **Hybrid (Healer)** (from Calling I, level 6) turns
+Hearthkeeper on whenever you leave combat and makes the Dungeon Finder queue you as **Healer**; **Primary (Damage)**
+turns it off. `G` still flips Hearthkeeper mid-fight without changing your queued role.
 
 ### 5.1 Hearthkeeper (`G`, toggle)
 
@@ -391,7 +393,7 @@ Both need the wearer to be a **pyromancer**.
 
 | id | Name | Socket | Requirement | Effect | Source |
 |---|---|---|---|---|---|
-| `soul_kiln_heart` | Soul of the Kiln Heart | armour — chest | class: pyromancer | In **Hearthkeeper**, an ally you heal while you are Searing or Overheated gains **Kiln Warmth** for 6 s: the next damage-over-time tick on them is cancelled and heals them for that amount instead (once per 6 s per ally). | `b_the_sand_sovereign` The Sand Sovereign (`d06_sandsworn_vault` end boss) on Challenge (3%); `b_glass_wyrm` world boss (2%) |
+| `soul_banked_furnace` | Soul of the Banked Furnace | armour — chest | class: pyromancer | In **Hearthkeeper**, an ally you heal while you are Searing or Overheated gains **Kiln Warmth** for 6 s: the next damage-over-time tick on them is cancelled and heals them for that amount instead (once per 6 s per ally). | `b_the_sand_sovereign` The Sand Sovereign (`d06_sandsworn_vault` end boss) on Challenge (3%); `b_glass_wyrm` world boss (2%) |
 | `soul_last_cinder` | Soul of the Last Cinder | weapon | class: pyromancer | When Overheat ends, its automatic Vent leaves you at **40 Heat** instead of 0 and Banked Coals lasts 8 s. | `b_slagborn` world boss (2%); end chest at **Depth 15+** (1%) |
 
 ---

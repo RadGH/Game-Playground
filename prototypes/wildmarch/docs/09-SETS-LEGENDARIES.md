@@ -431,611 +431,615 @@ Random line from: health, crit chance, `follower_might`.
 ---
 ## 3. Class sets index
 
-**Filled from the 30 class files (2026-09-29 reconciliation pass), re-sourced in round 2.** The class file is the
-owner: its text is the fact for every number below, and this index only summarises. Each class has 2–3 class sets
-(`set_<class>_<snake>`), 4–6 class legendaries (`leg_`), 3–4 class uniques (`uq_`) and 2 class souls (`soul_`, indexed
+**Re-synced with the 30 class files on 2026-09-30 (round 2).** The class file is the owner: its text is the fact
+for every id, number and source below, and this index only summarises. Each class has 2–3 class sets
+(`set_<class>_<snake>`), 4–6 class legendaries (`leg_`), 3–5 class uniques (`uq_`) and 2 class souls (`soul_`, indexed
 in §7.3). Legendaries are **Legendary** rarity (violet `#c86bff`), sets are **Set** rarity (`#2fc4b2`), uniques
-**Unique**. Every item is class-locked (`classes: ["<id>"]`) and tradeable (page 08 §15).
+**Unique**. Every item is class-locked (`classes: ["<id>"]`) and tradeable (page 08 §15). **Where a row here and the
+class file disagree, the class file wins.**
 
-**Round 2 re-sync.** The class agents are rewriting the class files at the same time as this page. This index
-applies one rule to every source that named a raid or a removed difficulty, and the class files follow the same
-rule; **where a row here and the class file disagree, the class file wins**, and the next pass re-syncs the
-summaries (several spell names in the 2/4/6 and Power columns are round 1's):
-
-| Round-1 source (old names, for reference) | Round-2 source |
-|---|---|
-| a class **raid set** (`r01`–`r05`) | **`d15_fire_court` / `d16_the_spire` Challenge bosses** as a class set token (page 08 §12.1), and the **Depth Cache at reward depth 10+** (an 8% class roll) |
-| a raid boss's class legendary or unique | the matching **Challenge** dungeon: `r01_barrowking` → `d01_hollow_barrow`, `r02_glacier_throne` → `d10_rimefang_caverns`, `r03_sunken_choir` → `d11_saltdeep_cathedral`, `r04_ember_court` → `d15_fire_court`, `r05_veilspire` → `d16_the_spire` ("any boss", "end boss" or "secret boss" on Challenge); class files may move them to a world boss or the Depth Cache R 15+ instead |
-| Heroic | Challenge |
-| Mythic+ end chest at key *N* | the **Depth Cache** at reward depth *N* |
-| Mythic (raid) | Challenge |
+Sources follow canon W6: no raids, so the old raid sets and raid drops now come from **Challenge**-mode bosses of
+`d15_fire_court` / `d16_the_spire` (and other Challenge dungeons), a world boss, or the **Depth** end chest. The
+class files dropped the kits that left in round 2 (totems, combo points, stealth, the demon form, summoned imps,
+the old cat pet, Cat/Owl/Stag forms), and the items tied to them were rewritten or renamed there; "(was …)" in a
+Name cell gives the old id.
 
 **How to read the tables.**
 - **Pieces · slots**: the slots the class file names. `6*` = the class file does not list slots, so the
   default applies: head, shoulders, chest, hands, legs, feet (rules paragraph at the end of this section).
-- **Band**: the level the set drops at; "60" = the Challenge and Depth copies (page 08 §3).
+- **Band**: the level the set drops at. "31–60 (levelling to 60)" = drops at the dungeon's level on Normal, so it
+  follows you up; "25–30 / 60" = the Normal band, and **60** on Challenge; "60" = level-60 only (page 08 §3).
 - **2 / 4 / 6**: one short line per bonus. The spell ids and exact numbers are in the class file.
-- **Source**: "end" = the dungeon's last boss; "secret" = its secret boss; "Depth Cache R N+" = the chest after a
-  Depth run at reward depth N or deeper; "world boss of X" = that region's world boss (page 13); "rares" = that
-  region's rare monsters (page 10). Percentages are the class file's chance where it gave one.
+- **Source**: "end" / "final" = the dungeon's last boss; "secret" = its secret boss; "Depth N+ end chest" = the
+  chest after a Depth run's end boss at depth N or deeper (page 12); "world boss of X" = that region's world boss
+  (page 13); "rares" = that region's rare monsters (page 10). Percentages are the class file's chance where it gave
+  one. Challenge sets and Challenge-mode bosses follow the Monday 06:00 weekly loot limit (canon W5).
 
 ### 3.0 Totals
 
 | Kind | Count | Notes |
 |---|---|---|
-| Class sets | **73** | 17 classes have 2, 13 classes have 3 |
-| Class legendaries | **139** | 4–6 per class |
-| Class uniques | **105** | 3–4 per class |
+| Class sets | **74** | 16 classes have 2, 14 classes have 3 |
+| Class legendaries | **142** | 4–6 per class |
+| Class uniques | **109** | 3–5 per class |
 | Class souls | **60** | 2 per class (§7.3) |
-| **All class items** | **377** | |
+| **All class items** | **385** | |
 
 | Catalogue-wide totals (if every duplicate in §3.32 is kept as written) | Sets | Legendaries | Uniques | Souls |
 |---|---|---|---|---|
 | Generic, this page (§2, §4, §6, §7) | 14 + Archivist's Regalia = 15 | 84 | 225 in the world pool (94 headline) | 30 |
-| Dungeon-exclusive, page 12 (§3.31) | 14 | 28 | 72 | 15 (page 12's former trinkets) |
+| Dungeon-exclusive, page 12 (§3.31) | 16 | 36 | 84 | 15 (§7.4) |
 | World boss and seasonal, page 13 (§3.31.3) | — (the Wild Hunt set is in §2) | — | 13 | — |
-| Class files (§3.1–§3.30, §7.3) | 73 | 139 | 105 | 60 |
-| **Grand total** | **102** | **251** | **415** | **105** |
+| Class files (§3.1–§3.30, §7.3) | 74 | 142 | 109 | 60 |
+| **Grand total** | **105** | **262** | **431** | **105** |
 
 If the "Keep" column of §3.32 is followed, the 8 generic dungeon sets of §2 that page 12 replaced leave the drop
-tables (they are not deleted from this page until the owner decides), and the grand total of sets becomes **94**.
+tables (they are not deleted from this page until the owner decides), and the grand total of sets becomes **97**.
 
 ### 3.1 [Warrior](classes/warrior.md) — Tank (Damage) · heavy
 
 | Set id | Name | Band | Pieces · slots | Source | 2 / 4 / 6 |
 |---|---|---|---|---|---|
-| `set_warrior_ironbrow` | The Ironbrow Bulwark | 60 (Challenge) | 6 · head, chest, legs, hands, feet, shield `it_ironbrow_wall` | final bosses of Challenge `d09`–`d14`, one slot each | 2: Bulwark Bash gives 3 charges · 4: each charge spent −1 s on Iron Challenge · 6: Faultline keeps charges, +40% WD per charge held |
-| `set_warrior_last_rampart` | Raiment of the Last Rampart | 60 (Challenge) | 6* | `d15_fire_court` / `d16_the_spire` Challenge bosses (class set token, page 08 §12.1); Depth Cache R 10+ (8% class roll) | 2: Unbroken Stand cooldown 110 s · 4: Iron Gale hit on 2+ enemies = +1 charge · 6: at full charges Iron Gale is 7 hits, blocks during it heal 2% |
+| `set_warrior_ironbrow` | The Ironbrow Bulwark | 31–60 (levelling to 60) | 6 · head, chest, legs, hands, feet, shield `it_ironbrow_wall` | final bosses of `d09`–`d14`, one slot each (head `d09` … shield `d14`); Normal at the dungeon's level, Challenge at 60 | 2: Bulwark Bash gives 3 charges · 4: each charge spent −1 s on Iron Call · 6: Faultline keeps its charges, +40% WD per charge held |
+| `set_warrior_last_rampart` | Raiment of the Last Rampart | 60 | 6 · as above | one piece per Challenge boss of `d15_fire_court` / `d16_the_spire`; Depth 10+ end chest, any dungeon (warrior roll, 8%) | 2: Unbroken Stand cooldown 110 s · 4: an Iron Gale hit on 2+ enemies gives +1 charge · 6: at full charges Iron Gale is 7 hits; blocks during it heal 2% |
 
 | Kind | id | Name | Slot | Power | Source |
 |---|---|---|---|---|---|
-| Legendary | `leg_the_unfallen_wall` | The Unfallen Wall | shield | Last Rampart cooldown 90 s; 1.2 s immunity per charge | `d15_fire_court` end boss on Challenge, Challenge only |
-| Legendary | `leg_greyridge_anvil` | Greyridge Anvil | 1H hammer | every 3rd Bulwark Bash: 300% WD in 5 m and +5 charges | `d04_bellows_keep` final, Challenge or the Depth Cache |
-| Legendary | `leg_gale_eater` | Gale-Eater | 2H axe | Iron Gale spins while you have Momentum, 55% WD a hit | world boss of `cinder_steppe` |
-| Legendary | `leg_oath_of_the_breach` | Oath of the Breach | heavy chest | Unbreakable needs 2 enemies; a boss counts as 5 | `d10_rimefang_caverns` any boss on Challenge|
-| Legendary | `leg_faultborn_greatsword` | Faultborn | 2H sword | Faultline fires a 2nd line at 60%, 90° off; spent charges return over 4 s | `d11_saltdeep_cathedral` secret boss on Challenge |
-| Unique | `uq_visor_of_many_blows` | Visor of Many Blows | heavy head | block charges last 30 s; +4% armour per charge | `d03_deepdelve` boss 2 |
-| Unique | `uq_challengers_bell` | Challenger's Bell | necklace | Iron Challenge taunts 6 s, reaches 14 m | `d06_sandsworn_vault` final |
-| Unique | `uq_faultmaker` | Faultmaker | 2H axe | Faultline 24 m long, leaves a 3 s 50% snare | `d01_hollow_barrow` any boss on Challenge|
+| Legendary | `leg_the_unfallen_wall` | The Unfallen Wall | shield | **Wall That Remembers** — Last Rampart cooldown 90 s; 1.2 s immunity per charge spent | `d15_fire_court` final boss, Challenge only |
+| Legendary | `leg_greyridge_anvil` | Greyridge Anvil | 1H hammer | **Anvilstrike** — every 3rd Bulwark Bash: 300% WD in 5 m and +5 charges | `d04_bellows_keep` final boss on Challenge, or its end chest at Depth 5+ |
+| Legendary | `leg_gale_eater` | Gale-Eater | 2H axe | **Endless Gale** — Iron Gale keeps spinning while you have Momentum, 55% WD a hit | world boss of `cinder_steppe` |
+| Legendary | `leg_oath_of_the_breach` | Oath of the Breach | heavy chest | **Breach Holder** — Unbreakable needs 2 enemies; a boss counts as 5 | world boss of `frostmantle` |
+| Legendary | `leg_faultborn_greatsword` | Faultborn | 2H sword | **Second Seam** — Faultline fires a 2nd line at 60%, 90° off; spent charges return over 4 s | Depth 15+ end chest, any dungeon (warrior roll) |
+| Unique | `uq_visor_of_many_blows` | Visor of Many Blows | heavy head | block charges last 30 s; +4% armour per charge | `d03_shaft_seven` boss 2 |
+| Unique | `uq_callers_bell` | Caller's Bell (was `uq_challengers_bell`) | necklace | Iron Call taunts 6 s, reaches 14 m | `d06_sandsworn_vault` final boss |
+| Unique | `uq_faultmaker` | Faultmaker | 2H axe | Faultline 24 m long, leaves a 3 s 50% snare | `d13_cindergate` boss 2 on Challenge |
 | Unique | `uq_returning_rim` | Returning Rim | shield | Hurled Bulwark's return heals 4% per enemy hit | `d08_moonwell_ruins` boss 2 |
 
 ### 3.2 [Fighter](classes/fighter.md) — Damage (Tank) · heavy
 
 | Set id | Name | Band | Pieces · slots | Source | 2 / 4 / 6 |
 |---|---|---|---|---|---|
-| `set_fighter_three_answers` | The Three Answers | 60 (Challenge) | 6 · head, hands, feet, legs, chest, necklace `it_three_answers_torc` | Challenge `d09`–`d14` (one slot each, boss 2/3) | 2: stance swap cooldown 0.5 s · 4: Stance Dance 5 s, covers next 2 spells · 6: Answering Blade parry fires all three riders |
-| `set_fighter_drillmaster` | Harness of the Drillmaster | 50–60 (Challenge) | 6* | `d15_fire_court` / `d16_the_spire` Challenge bosses (class set token, page 08 §12.1); Depth Cache R 10+ (8% class roll) | 2: Duellist's Decree cooldown 40 s · 4: max Split Plate refreshes the decree to 12 s · 6: in Threefold Form every parry hits the duel target for 150% WD |
+| `set_fighter_three_answers` | The Three Answers | 31–60 (levelling to 60) | 6 · head, hands, feet, legs, chest, necklace `it_three_answers_torc` | `d09`–`d12` boss 2, `d13` boss 3, `d14` boss 2 (one slot each); Normal at the dungeon's level, Challenge at 60; Depth runs of these dungeons | 2: stance swap cooldown 0.5 s · 4: Stance Dance 5 s, covers the next 2 spells · 6: an Answering Blade parry fires all three riders |
+| `set_fighter_drillmaster` | Harness of the Drillmaster | 60 | 6* | one piece per Challenge boss of `d15_fire_court` / `d16_the_spire`; Depth 10+ end chest, any dungeon (8%) | 2: Duellist's Decree cooldown 40 s · 4: max Split Plate on the duel target refreshes the decree to 12 s · 6: in Threefold Form every parry hits the duel target for 150% WD |
 
 | Kind | id | Name | Slot | Power | Source |
 |---|---|---|---|---|---|
-| Legendary | `leg_the_drillmasters_word` | The Drillmaster's Word | 2H sword | double-tap your stance: next basic attack fires its rider, every 6 s | `d15_fire_court` any boss on Challenge|
-| Legendary | `leg_counterweight` | Counterweight | 1H hammer | Answering Blade counter = 300% of the parried hit (if above 220% WD) | `d10_rimefang_caverns` final, Challenge or the Depth Cache |
-| Legendary | `leg_honours_edge` | Honour's Edge | 1H sword | Duellist's Decree lasts until the target dies or you swap stance twice | `d10_rimefang_caverns` secret boss on Challenge |
-| Legendary | `leg_bracers_of_the_dial` | Bracers of the Dial | heavy hands | every stance swap: +8 Momentum and resets Measured Cut | world boss of `frostmantle` |
+| Legendary | `leg_the_drillmasters_word` | The Drillmaster's Word | 2H sword | **Fourth Answer** — double-tap your stance: the next basic attack fires its rider, every 6 s | a Challenge-mode `d15_fire_court` boss (page 12 names which) |
+| Legendary | `leg_counterweight` | Counterweight | 1H hammer | **Answer in Kind** — Answering Blade's counter = 300% of the parried hit (if above 220% WD) | `d10_rimefang_caverns` final boss on Challenge, and its Depth end chest |
+| Legendary | `leg_honours_edge` | Honour's Edge | 1H sword | **Unending Duel** — Duellist's Decree lasts until the target dies or you swap stance twice | Depth 15+ end chest, any dungeon (1.5%) |
+| Legendary | `leg_bracers_of_the_dial` | Bracers of the Dial | heavy hands | **Turning Wheel** — every stance swap: +8 Momentum and resets Measured Cut | world boss of `frostmantle` |
 | Unique | `uq_splitmark_gauntlets` | Splitmark Gauntlets | heavy hands | Plate Splitter stacks last 20 s | `d04_bellows_keep` boss 2 |
-| Unique | `uq_sergeants_whistle` | Sergeant's Whistle | necklace | Closing Step 2 charges; the second costs no Momentum | `d02_drowned_mill` final |
-| Unique | `uq_breathing_plate` | Breathing Plate | heavy chest | Veteran's Breath removes a stun/fear, usable while stunned | `d07_thornheart` boss 3 |
+| Unique | `uq_sergeants_whistle` | Sergeant's Whistle | necklace | Closing Step 2 charges; the second costs no Momentum | `d02_drowned_mill` final boss |
+| Unique | `uq_breathing_plate` | Breathing Plate | heavy chest | Veteran's Breath removes a stun or fear, usable while stunned | `d07_thornheart` boss 3 |
 
 ### 3.3 [Paladin](classes/paladin.md) — Tank (Healer) · medium
 
 | Set id | Name | Band | Pieces · slots | Source | 2 / 4 / 6 |
 |---|---|---|---|---|---|
-| `set_paladin_oathkeeper` | Oathkeeper's Harness | 60 (Challenge) | 6 · head, chest, legs, hands, feet, tome `it_oathkeeper_psalter` | Challenge `d05`, `d06`, `d07`, `d08`, `d11`, `d14` (one slot each) | 2: Sanctity builds 25% faster · 4: a Fulfilled spell also fires your other oath's rider at 50% · 6: Hallowed Ground carries both Keeping and Mercy riders |
-| `set_paladin_dawnwarden` | Regalia of the Dawnwarden | 60 (Challenge) | 6* | `d15_fire_court` / `d16_the_spire` Challenge bosses (class set token, page 08 §12.1); Depth Cache R 10+ (8% class roll) | 2: Aegis of the Vow 2 charges · 4: Dawnspear instant under Covenant, fires from every ally inside at 30% · 6: Covenant −10 s per finished vow |
+| `set_paladin_oathkeeper` | Oathkeeper's Harness | 19–60 (levelling to 60) | 6 · head, chest, legs, hands, feet, tome `it_oathkeeper_psalter` | `d05`–`d08`, `d11`, `d14` (one slot each); Normal at the dungeon's level, Challenge at 60 | 2: Sanctity builds 25% faster · 4: a Fulfilled spell also fires your other oath's rider at 50% · 6: Hallowed Ground carries both Keeping and Mercy riders |
+| `set_paladin_dawnwarden` | Regalia of the Dawnwarden | 60 | 6* | one piece per Challenge boss of `d15_fire_court` / `d16_the_spire`; Depth 10+ end chest, any dungeon (8%) | 2: Aegis of the Vow 2 charges · 4: Dawnspear instant under Covenant, fires from every ally inside at 30% · 6: Covenant −10 s per finished vow |
 
 | Kind | id | Name | Slot | Power | Source |
 |---|---|---|---|---|---|
-| Legendary | `leg_the_kept_promise` | The Kept Promise | 1H sword | Sanctity drops to 50 on Fulfilled instead of resetting | `d15_fire_court` end boss on Challenge |
-| Legendary | `leg_sceptre_of_first_light` | Sceptre of First Light | sceptre | Hallowed Ground's first tick heals 15% and hits for 150% WD | `d08_moonwell_ruins` final, Challenge or the Depth Cache |
-| Legendary | `leg_the_martyrs_tabard` | The Martyr's Tabard | medium chest | Keeping Covenant moves 60% onto you; you heal 10% of it | `d11_saltdeep_cathedral` any boss on Challenge(final) |
-| Legendary | `leg_vowbreaker_hymnal` | Hymnal of the Broken Vow | off hand (tome) | breaking a vow fires a holy nova, 100% WD per 10 Sanctity | `d01_hollow_barrow` secret boss on Challenge |
-| Unique | `uq_seal_of_the_first_vow` | Seal of the First Vow | ring | one free oath change in combat before calling 20 | `d01_hollow_barrow` final |
+| Legendary | `leg_the_kept_promise` | The Kept Promise | 1H sword | **Promise Kept** — Sanctity drops to 50 on Fulfilled instead of resetting | `d15_fire_court` final boss, Challenge |
+| Legendary | `leg_sceptre_of_first_light` | Sceptre of First Light | sceptre | **First Light** — Hallowed Ground's first tick heals 15% and hits for 150% WD | `d08_moonwell_ruins` final boss, Challenge or Depth 5+ |
+| Legendary | `leg_the_martyrs_tabard` | The Martyr's Tabard | medium chest | **Willing Martyr** — Keeping Covenant moves 60% onto you; you heal 10% of it | world boss of `drowned_coast` |
+| Legendary | `leg_vowbreaker_hymnal` | Hymnal of the Broken Vow | off hand (tome) | **Penance** — breaking a vow fires a holy nova, 100% WD per 10 Sanctity | Depth 15+ end chest, any dungeon (paladin roll) |
+| Unique | `uq_seal_of_the_first_vow` | Seal of the First Vow | ring | one free oath change in combat before calling 20 | `d01_hollow_barrow` final boss |
 | Unique | `uq_dawnspear_greaves` | Dawnward Greaves | medium legs | Dawnspear 0.5 s cast, 26 m long | `d05_glass_tombs` boss 2 |
-| Unique | `uq_consoling_gauntlets` | Consoling Gauntlets | medium hands | Hands of Mercy on an Aegis target refreshes the Aegis | `d09_warmasters_pit` boss 3 |
+| Unique | `uq_consoling_gauntlets` | Consoling Gauntlets | medium hands | Wave of Mending on an Aegis target refreshes the Aegis | `d09_warmasters_pit` boss 3 |
 
-### 3.4 [Ranger](classes/ranger.md) — Damage · light
+### 3.4 [Ranger](classes/ranger.md) — Damage (Support) · light
 
 | Set id | Name | Band | Pieces · slots | Source | 2 / 4 / 6 |
 |---|---|---|---|---|---|
-| `set_ranger_wildstalker` | The Wildstalker's Garb | 60 (Challenge) | 6 · head, chest, legs, hands, feet, quiver `it_wildstalker_quiver` | Challenge `d05`, `d07`, `d08`, `d09`, `d10`, `d12` (one slot each) | 2: Quarry Arrow +3 stacks · 4: every trap gives the cat a free Stalk · 6: Pounce Order spends up to 10 stacks at +20% each |
-| `set_ranger_apex_hunt` | Trappings of the Apex Hunt | 42 / 60 (Challenge) | 6* | `d15_fire_court` / `d16_the_spire` Challenge bosses (class set token, page 08 §12.1); Depth Cache R 10+ (8% class roll) | 2: Barbed Fan fires 2 Quarry arrows · 4: Bounding Retreat empowers the next 2 arrows · 6: Skyfall Volley keeps half its stacks; cat bites twice as fast inside |
+| `set_ranger_wildstalker` | The Wildstalker's Garb (Damage) | 19–60 (levelling to 60) | 6 · head, chest, legs, hands, feet, quiver `it_wildstalker_quiver` | `d05`, `d07`–`d10`, `d12` (one slot each); Normal at the dungeon's level, Challenge at 60 | 2: Quarry Arrow +3 stacks · 4: every trap gives the beast a free ambush (250% BD) · 6: Command Strike spends up to 10 stacks at +20% each |
+| `set_ranger_apex_hunt` | Trappings of the Apex Hunt (Damage) | 60 | 6* | one piece per Challenge boss of `d15_fire_court` / `d16_the_spire`; Depth 10+ end chest, any dungeon | 2: Barbed Fan fires 2 Quarry arrows, +1 stack each · 4: Bounding Retreat empowers the next 2 arrows, +2 stacks each · 6: Skyfall Volley keeps half its stacks; the beast attacks twice as fast inside |
+| `set_ranger_trailwarden` | The Trailwarden's Kit (Support; crafted) | 20 / 40 / 60 | 6* | **Leatherworking** (page 19); recipes from the `fac_greenhand` quartermaster at Trusted | 2: Hunter's Brand +13%, lasts 5 s after the mark moves · 4: Pack Howl 30 m, 8 s; Tracker trick −15% cooldown · 6: a trap going off or Skyfall ending gives party within 10 m a 6% barrier |
 
 | Kind | id | Name | Slot | Power | Source |
 |---|---|---|---|---|---|
-| Legendary | `leg_the_long_patience` | The Long Patience | longbow | +25% to next Quarry Arrow per 2 s without firing (max +150%) | `d10_rimefang_caverns` end boss on Challenge |
-| Legendary | `leg_greatcats_collar` | The Great-Cat's Collar | necklace | a second, spectral cat at 50% bite | world boss of `whisperwood` |
-| Legendary | `leg_wirewalkers_boots` | Wirewalker's Boots | light feet | stepping on your trap launches a free 12 m Bounding Retreat | `d12_unmade_workshop` final, Challenge or the Depth Cache |
-| Legendary | `leg_skyfall_string` | Skyfall String | bow | Skyfall Volley follows the Quarry | `d16_the_spire` any boss on Challenge|
+| Legendary | `leg_the_long_patience` | The Long Patience | longbow | **Patience** — +25% to the next Quarry Arrow per 2 s without firing (max +150%) | `d14_ashen_reliquary` final boss, Challenge |
+| Legendary | `leg_collar_of_the_twin_trail` | Collar of the Twin Trail (was `leg_greatcats_collar`) | necklace | **Two of Them** — a pale echo of your beast at 50% BD; Command Strike sends both | world boss of `whisperwood` |
+| Legendary | `leg_wirewalkers_boots` | Wirewalker's Boots | light feet | **Walk the Wire** — stepping on your trap launches a free 12 m Bounding Retreat | `d12_unmade_workshop` final boss on Challenge, or any Depth 15+ end chest |
+| Legendary | `leg_skyfall_string` | Skyfall String | bow | **Falling Star** — Skyfall Volley follows the Quarry | `d16_the_spire` final boss, Challenge |
 | Unique | `uq_brightwater_snare_kit` | Brightwater Snare Kit | light hands | Hunter's Snare 3 charges, lasts 120 s | `d02_drowned_mill` boss 2 |
 | Unique | `uq_marking_quiver` | Marking Quiver | quiver | first arrow after a Quarry dies marks the nearest enemy with 3 stacks | `d06_sandsworn_vault` boss 2 |
-| Unique | `uq_whisker_charm` | Whisker Charm | ring | cat +30% health; Heel taunts every 5 s | `d03_deepdelve` final |
+| Unique | `uq_beastbond_charm` | Beastbond Charm (was `uq_whisker_charm`) | ring | beast +30% health; Heel / Guard taunt every 4 s | `d03_shaft_seven` final boss |
+| Unique | `uq_tamers_lure` | Tamer's Lure | necklace | Tame Beast channels in 3 s; ignores the 60% health gate on beasts 5+ levels below you | `fac_greenhand` quest reward at Welcome (page 14 owns the id) |
 
-### 3.5 [Rogue](classes/rogue.md) — Damage · light
+### 3.5 [Rogue](classes/rogue.md) — Damage (Support) · light
 
 | Set id | Name | Band | Pieces · slots | Source | 2 / 4 / 6 |
 |---|---|---|---|---|---|
-| `set_rogue_ledgerkeeper` | The Ledgerkeeper's Leathers | 60 (Challenge) | 6 · head, chest, legs, hands, feet, necklace `it_ledgerkeeper_seal` | Challenge `d06`, `d09`–`d13` (one slot each) | *(round-1 power tied to a removed mechanic; the class file writes the new one)* |
-| `set_rogue_nightfall` | Shroud of the Long Night | 50–60 (Challenge) | 6* | `d15_fire_court` / `d16_the_spire` Challenge bosses (class set token, page 08 §12.1); Depth Cache R 10+ (8% class roll) | *(round-1 power tied to a removed mechanic; the class file writes the new one)* |
+| `set_rogue_ledgerkeeper` | The Ledgerkeeper's Leathers | 22–60 (levelling to 60) | 6 · head, chest, legs, hands, feet, necklace `it_ledgerkeeper_seal` | `d06`, `d09`–`d13` (one slot each); Normal at the dungeon's level, Challenge at 60 | 2: an Unseen Twin Needles opens +1 Wound · 4: Open the Ledger's bleed: +5% from Twin Needles per Wound · 6: each Wound a finisher spends: 10% to reset Slip Away |
+| `set_rogue_long_count` | The Long Count (replaces `set_rogue_nightfall`) | 60 | 6* | one piece per Challenge boss of `d15_fire_court` / `d16_the_spire`; Depth 10+ end chest, any dungeon (rogue roll, 8%) | 2: Blindside cooldown 10 s · 4: Coatings +1 stack per Unseen hit; Knife Tumble lose-track +1 s · 6: Deathwarrant's bill is paid twice |
 
 | Kind | id | Name | Slot | Power | Source |
 |---|---|---|---|---|---|
-| Legendary | `leg_the_debt_collector` | The Debt Collector | dagger | finishers store 10% of their damage; Deathwarrant adds the store | `d15_fire_court` any boss on Challenge|
-| Legendary | `leg_twinfang` | Twinfang | dagger pair (one drop, both hands) | Twin Needles' off-hand stab 100%; both count as backstabs | `d11_saltdeep_cathedral` final, Challenge or the Depth Cache |
-| Legendary | `leg_cloak_of_no_moon` | Cloak of No Moon | light chest | *(round-1 power tied to a removed mechanic; the class file writes the new one)* | world boss of `drowned_coast` |
-| Legendary | `leg_ashen_tallybag` | The Ashen Tally-Bag | light legs | *(round-1 power tied to a removed mechanic; the class file writes the new one)* | `d10_rimefang_caverns` any boss on Challenge|
-| Unique | `uq_mill_rats_knuckles` | Mill-Rat Knuckles | light hands | *(round-1 power tied to a removed mechanic; the class file writes the new one)* | `d02_drowned_mill` final |
+| Legendary | `leg_the_debt_collector` | The Debt Collector | dagger | **Collected** — finishers store 10% of their damage; Deathwarrant's bill adds the store | `d15_fire_court` boss 3, Challenge |
+| Legendary | `leg_twinfang` | Twinfang | dagger pair (one drop, both halves) | **Mirrored** — Twin Needles' off-hand stab 100%; an Unseen cast opens both Wounds even on a boss | `d11_saltdeep_cathedral` final boss on Challenge, or its end chest at Depth 5+ |
+| Legendary | `leg_cloak_of_the_unwatched` | Cloak of the Unwatched (was `leg_cloak_of_no_moon`) | light chest | **Unwatched** — enemy view cones 30° narrower against you; Slip Away cooldown 45 s | world boss of `drowned_coast` |
+| Legendary | `leg_ashen_tallybag` | The Ashen Tally-Bag | light legs | **Ash Ledger** — every enemy blinded by Ashpowder gets 1 Wound | world boss of `frostmantle` |
+| Legendary | `leg_high_perch` | The High Perch | hand crossbow | **Perched** — Elevated needs 1.5 m of height; an Elevated spell hit opens 2 Wounds (1 on a boss) | Depth 15+ end chest, any dungeon (rogue roll) |
+| Unique | `uq_mill_rats_knuckles` | Mill-Rat Knuckles | light hands | Twin Needles on a snared or rooted target opens +1 Wound | `d02_drowned_mill` final boss |
 | Unique | `uq_tumblers_anklets` | Tumbler's Anklets | light feet | Knife Tumble immunity 0.6 s, 10 m | `d05_glass_tombs` boss 2 |
-| Unique | `uq_sealed_writ` | The Sealed Writ | ring | *(round-1 power tied to a removed mechanic; the class file writes the new one)* | `d14_ashen_reliquary` boss 2 |
+| Unique | `uq_sealed_writ` | The Sealed Writ | ring | Deathwarrant lasts 10 s; everyone else's share +4% per Wound | `d14_ashen_reliquary` boss 2 |
+| Unique | `uq_longshot_string` | Longshot String | short bow | Unnoticed first shots reach 45 m and open 4 Wounds (with calling 1) | `d07_thornheart` final boss |
 
-### 3.6 [Cleric](classes/cleric.md) — Healer · light
+### 3.6 [Cleric](classes/cleric.md) — Healer (Support) · light
 
 | Set id | Name | Band | Pieces · slots | Source | 2 / 4 / 6 |
 |---|---|---|---|---|---|
-| `set_cleric_vigil` | Vestments of the Long Vigil | 60 (Challenge) | 6 · head, chest, legs, hands, feet, reliquary focus `it_vigil_reliquary` | Challenge `d05`, `d07`, `d08`, `d11`, `d13`, `d14` (one slot each) | 2: Devotion Wards up to 25% health · 4: Raise costs 35 Devotion, 2 s cast · 6: Wreath of Dawn overheal refills the Devotion Ward |
-| `set_cleric_sunward` | Raiment of the Sunward Choir | 50–60 (Challenge) | 6* | `d15_fire_court` / `d16_the_spire` Challenge bosses (class set token, page 08 §12.1); Depth Cache R 10+ (8% class roll) | 2: Kindled Prayer +20% on a warded ally · 4: Outpouring 20 s, casts a free Wreath · 6: Dawn's Absolution sets every Ward to 15%, +40 Devotion |
+| `set_cleric_vigil` | Vestments of the Long Vigil | 19–60 (levelling to 60) | 6 · head, chest, legs, hands, feet, reliquary focus `it_vigil_reliquary` | `d05`, `d07`, `d08`, `d11`, `d13`, `d14` (one slot each); Normal at the dungeon's level, Challenge at 60 | 2: Devotion Wards up to 25% health · 4: Raise costs 35 Devotion, 2 s cast · 6: Wreath of Dawn overheal refreshes the Devotion Ward |
+| `set_cleric_sunward` | Raiment of the Sunward Choir (Support) | 60 | 6* | one piece per Challenge boss of `d15_fire_court` / `d16_the_spire`; Depth 10+ end chest, any dungeon (cleric roll, 8%) | 2: Brand raises all damage taken by 6% (without Brand: Kindled Prayer +20% on a warded ally) · 4: Outpouring cooldown 20 s, casts a free Wreath · 6: Dawn's Absolution sets every Ward to 15%, +40 Devotion |
 
 | Kind | id | Name | Slot | Power | Source |
 |---|---|---|---|---|---|
-| Legendary | `leg_the_brimming_chalice` | The Brimming Chalice | off hand (reliquary) | Devotion cap 150; above 100 heals +25% | `d11_saltdeep_cathedral` end boss on Challenge |
-| Legendary | `leg_staff_of_the_last_vigil` | Staff of the Last Vigil | staff | *(round-1 power tied to a removed mechanic; the class file writes the new one)* | `d16_the_spire` end boss on Challenge |
-| Legendary | `leg_sealbearers_mantle` | The Sealbearer's Mantle | light chest | Sanctuary Seal also seals you; 60 s cooldown | `d11_saltdeep_cathedral` final, Challenge or the Depth Cache |
-| Legendary | `leg_tamars_wellspring` | Tamar's Wellspring | sceptre | Outpouring leaves a 10 m pool: 2%/s heal, +2 Devotion/s | world boss of `sunscar` |
+| Legendary | `leg_the_brimming_chalice` | The Brimming Chalice | off hand (reliquary) | **Never Empty** — Devotion cap 150; above 100 heals +25% | `d16_the_spire` final boss, Challenge only |
+| Legendary | `leg_staff_of_the_last_vigil` | Staff of the Last Vigil | staff | **Vigil Unbroken** — Keeping Vigil costs 15 Devotion, reaches 60 m, 30 s per-ally lockout | `d15_fire_court` final boss, Challenge only |
+| Legendary | `leg_sealbearers_mantle` | The Sealbearer's Mantle | light chest | **Twin Sanctuary** — Sanctuary Seal also seals you, 60 s cooldown; Keeping Vigil can catch you | `d11_saltdeep_cathedral` final boss on Challenge, or its end chest at Depth 5+ |
+| Legendary | `leg_tamars_wellspring` | Tamar's Wellspring | sceptre | **Wellspring** — Outpouring leaves a 10 m pool: 2%/s heal, +2 Devotion/s | world boss of `sunscar` |
 | Unique | `uq_mill_fire_censer` | Mill-Fire Censer | necklace | first Kindled Prayer on a target below 35% is instant | `d02_drowned_mill` boss 2 |
 | Unique | `uq_gilded_tether` | The Gilded Tether | light hands | Lifeline reaches 35 m, breaks at 45 m | `d04_bellows_keep` boss 2 |
-| Unique | `uq_barrow_candle` | Barrow Candle | wand | Scourging Light heals the two lowest allies at 50% each | `d01_hollow_barrow` final |
+| Unique | `uq_barrow_candle` | Barrow Candle | wand | Scourging Light heals the two lowest allies at 50% each | `d01_hollow_barrow` final boss |
 
 ### 3.7 [Bard](classes/bard.md) — Support (Healer) · light
 
 | Set id | Name | Band | Pieces · slots | Source | 2 / 4 / 6 |
 |---|---|---|---|---|---|
-| `set_bard_road_troupe` | Regalia of the Road Troupe | 30 (levelling) | 6 · head, shoulders, chest, hands, legs, feet | every boss of `d07_thornheart` and `d08_moonwell_ruins` (Normal/Challenge); chest only from `d08` final | 2: Marching Cadence starts with 2 verses · 4: Forced March also +25% damage 5 s · 6: Sharp Note in Forced March fires 3 at once |
-| `set_bard_mourners_choir` | Vestments of the Mourners' Choir | 60 (Challenge) | 6 · as above | `d15_fire_court` / `d16_the_spire` Challenge bosses (class set token, page 08 §12.1); Depth Cache R 10+ (8% class roll) | 2: Dirge strips a buff every 4 s · 4: Last Verse resets Discordant Chord (12 m cone) · 6: Standing Ovation's target gets the Dirge bonus |
-| `set_bard_hearthkeeper` | The Hearthkeeper's Motley | 60 (Depth, healer) | 6 · as above | any Depth Cache R 8+ | 2: Hearthsong ticks every 1.5 s · 4: Homecoming at 5+ verses resurrects one ally at 20% (once a fight) · 6: Grace/Sharp Note on an ally gives a doubled verse 6 s |
+| `set_bard_road_troupe` | Regalia of the Road Troupe | 30 (levelling) | 6 · head, shoulders, chest, hands, legs, feet | every boss of `d07_thornheart` and `d08_moonwell_ruins` (Normal); chest only from `d08` final boss | 2: Marching Cadence starts with 2 verses · 4: Forced March also +25% damage 5 s · 6: Sharp Note in Forced March fires 3 at once |
+| `set_bard_mourners_choir` | Vestments of the Mourners' Choir (Support) | 60 | 6 · as above | bosses of `d15_fire_court` on Challenge (one piece per boss, weekly limit) | 2: Dirge strips a buff every 4 s · 4: Last Verse resets Discordant Chord (12 m cone) · 6: Standing Ovation's target gets the Dirge bonus |
+| `set_bard_hearthkeeper` | The Hearthkeeper's Motley (Healer) | 60 | 6 · as above | Depth 10+ end chest, any dungeon (one piece per chest) | 2: Hearthsong ticks every 1.5 s · 4: Homecoming at 5+ verses revives one ally at 20% (120 s) · 6: Grace Note gives the playing song's effect doubled 6 s |
 
 | Kind | id | Name | Slot | Power | Source |
 |---|---|---|---|---|---|
-| Legendary | `leg_the_last_string` | The Last String | off hand (lute) | under 20% mana: songs free, verses every 2 s | `d11_saltdeep_cathedral` end boss on Challenge (Normal 5%, Challenge 8%) |
-| Legendary | `leg_horn_of_the_gathering` | Horn of the Gathering | off hand (warhorn) | Forced March pulls every ally within 40 m to you | world boss of `cinder_steppe`, 4% |
-| Legendary | `leg_crown_of_nine_encores` | Crown of Nine Encores | head | Standing Ovation on 2 targets; cooldown 60 s | `d15_fire_court` secret boss on Challenge, 10% |
-| Legendary | `leg_tamsins_metronome` | Tamsin's Metronome | necklace | Finale within 1 s of a boss cast ending: +50%, refunds 2 verses | Depth Cache R 12+, any dungeon, 1.5% |
-| Legendary | `leg_requiem_for_a_king` | Requiem for a King | dagger | Dirge bonus doubled on bosses; Last Verse +100% to bosses | `d10_rimefang_caverns` secret boss on Challenge, 6% |
-| Unique | `uq_pipers_reed` | The Piper's Reed | wand | Sharp Note pierces one enemy | `d01_hollow_barrow` final, 12% |
+| Legendary | `leg_the_last_string` | The Last String | off hand (lute) | **One String Left** — under 20 Tempo every start is on the beat; verses every 2 s | `d11_saltdeep_cathedral` final boss (Challenge), 6% |
+| Legendary | `leg_horn_of_the_gathering` | Horn of the Gathering | off hand (warhorn) | **Call to the Road** — Forced March pulls every ally within 40 m to you | world boss of `cinder_steppe`, 4% |
+| Legendary | `leg_crown_of_nine_encores` | Crown of Nine Encores | head | **Nine Encores** — Standing Ovation on 2 targets; cooldown 60 s | `d15_fire_court` secret boss (Challenge), 10% |
+| Legendary | `leg_tamsins_metronome` | Tamsin's Metronome | necklace | **Perfect Time** — an on-beat Finale within 1 s of a boss cast ending: +50%, refunds 2 verses | Depth 15+ end chest, any dungeon, 1.5% |
+| Legendary | `leg_requiem_for_a_king` | Requiem for a King | dagger | **Royal Dirge** — Dirge bonus doubled on bosses; Last Verse +100% to bosses | world boss of `frostmantle`, 4% |
+| Unique | `uq_pipers_reed` | The Piper's Reed | wand | Sharp Note pierces one enemy | `d01_hollow_barrow` final boss, 12% |
 | Unique | `uq_tavern_brawlers_lute` | Tavern Brawler's Lute | off hand (lute) | Discordant Chord heals allies in its cone for 100% | `d04_bellows_keep` `b_the_great_bellows`, 8% |
-| Unique | `uq_mothers_lullaby` | Mother's Lullaby | ring | first Sleep each fight lasts 10 s | `d08_moonwell_ruins` final, 7% |
+| Unique | `uq_mothers_lullaby` | Mother's Lullaby | ring | the first Sleep each fight lasts 10 s | `d08_moonwell_ruins` final boss, 7% |
 | Unique | `uq_drum_of_the_fen_dance` | Drum of the Fen-Dance | off hand (hand drum) | Cadence: +20% jump height, no fall damage in range | rares in `mossfen`, 3% |
 
-### 3.8 [Mage](classes/mage.md) — Damage · cloth
+### 3.8 [Mage](classes/mage.md) — Damage (Tank) · cloth
 
 | Set id | Name | Band | Pieces · slots | Source | 2 / 4 / 6 |
 |---|---|---|---|---|---|
-| `set_mage_sumwrights_robes` | Sumwright's Robes | 34 (levelling) | 6* | `d09_warmasters_pit` bosses (Normal/Challenge); chest from world boss of `cinder_steppe` | 2: Arcane Dart 20% to build 2 charges · 4: Prism Lance at 4 charges also fires backwards at 50% · 6: Fold Step resets on spending 4+ charges |
-| `set_mage_starwright` | Vestments of the Starwright | 60 (Challenge) | 6* | `d15_fire_court` / `d16_the_spire` Challenge bosses (class set token, page 08 §12.1); Depth Cache R 10+ (8% class roll) | 2: Orrery +1 charge per 2 hits · 4: Collapsing Star drops a free Orrery · 6: 5-charge Collapsing Star lands twice |
-| `set_mage_warded_scholar` | Garb of the Warded Scholar | 60 (Depth) | 6* | Depth Cache R 8+ | 2: Runic Ward +10% health · 4: Prism Lance free while Ward holds · 6: Ward break gives 2 charges, resets Prism Lance |
+| `set_mage_sumwrights_robes` | Sumwright's Robes | 34 (levelling) | 6* | bosses of `d09_warmasters_pit` (Normal); chest from the world boss of `cinder_steppe` | 2: Fireball 20% to build 2 Resonance · 4: Prism Lance at 4 Resonance also fires backwards at 50% · 6: Skip resets on spending 4+ Resonance |
+| `set_mage_starwright` | Vestments of the Starwright (Damage) | 60 | 6* | bosses of `d16_the_spire` on Challenge (one piece per boss, weekly limit) | 2: Orrery +1 Resonance per 2 hits · 4: Collapsing Star drops a free Orrery · 6: 5-Resonance Collapsing Star lands twice |
+| `set_mage_warded_scholar` | Garb of the Warded Scholar (Tank) | 60 | 6* | Depth 10+ end chest, any dungeon (one piece per chest) | 2: Runic Ward and Bastion Ward +10% max health · 4: a deflected hit refreshes Bastion Ward by 3% · 6: Gravity Well leaves Stand-ins (up to 3) and resets Prism Wall |
 
 | Kind | id | Name | Slot | Power | Source |
 |---|---|---|---|---|---|
-| Legendary | `leg_the_unfinished_proof` | The Unfinished Proof | off hand (grimoire) | max charges +2; each above 4 gives +12% | `d16_the_spire` secret boss on Challenge, 8% |
-| Legendary | `leg_orbit_of_edric_vane` | Orbit of Edric Vane | staff | the Orrery never ends while you stand in it | `d12_unmade_workshop` final, Depth Cache R 10+, 2% |
-| Legendary | `leg_foldspace_slippers` | Foldspace Slippers | feet | Fold Step 3 uses; each fold deals 200% | world boss of `riftmarch`, 4% |
-| Legendary | `leg_heart_of_a_dead_star` | Heart of a Dead Star | necklace | Collapsing Star 30 s cooldown; pull also pulls elites | `d15_fire_court` end boss on Challenge, 6% |
-| Legendary | `leg_prism_of_the_first_sum` | Prism of the First Sum | off hand (Seer's Orb) | Prism Lance splits to up to 5 enemies at 4+ charges | `d11_saltdeep_cathedral` any boss on Challenge% |
-| Unique | `uq_apprentices_abacus` | Apprentice's Abacus | off hand | charges fade after 20 s | `d02_drowned_mill` final, 10% |
+| Legendary | `leg_the_unfinished_proof` | The Unfinished Proof | off hand (grimoire) | **Q.E.D.** — max Resonance +2; each above 4 gives +12% | `d16_the_spire` secret boss (Challenge), 8% |
+| Legendary | `leg_orbit_of_edric_vane` | Orbit of Edric Vane | staff | **Perpetual Motion** — the Orrery never ends while you stand in it | `d12_unmade_workshop` final boss at Depth 10+, 2% |
+| Legendary | `leg_foldspace_slippers` | Foldspace Slippers | feet | **Here and There** — Skip has 3 uses; each fold deals 200% | world boss of `riftmarch`, 4% |
+| Legendary | `leg_heart_of_a_dead_star` | Heart of a Dead Star | necklace | **Stellar Core** — Collapsing Star 30 s cooldown; the pull also pulls elites | `d15_fire_court` final boss (Challenge), 6% |
+| Legendary | `leg_prism_of_the_first_sum` | Prism of the First Sum | off hand (Seer's Orb) | **Full Spectrum** — Prism Lance splits to up to 5 enemies at 4+ Resonance | world boss of `drowned_coast`, 5% |
+| Legendary | `leg_the_understudys_mask` | The Understudy's Mask | head | **Full Cast** — in Wardweaving one Stand-in stays at your side; it copies your Fireball at 30% | `d14_ashen_reliquary` final boss (Challenge), 6% |
+| Unique | `uq_apprentices_abacus` | Apprentice's Abacus | off hand | Resonance fades after 20 s | `d02_drowned_mill` final boss, 10% |
 | Unique | `uq_glassblowers_rod` | Glassblower's Rod | wand | Prism Lance pierces walls (not doors) | `d05_glass_tombs` boss 2, 7% |
-| Unique | `uq_ward_ring_of_anvilgate` | Ward-Ring of Anvilgate | ring | Ward break pulse +3 m, stuns non-elites 1 s | `d03_deepdelve` final, 8% |
-| Unique | `uq_star_chart_cloak` | Star-Chart Cloak | shoulders | Fold Step free while an Orrery exists | rares in `whisperwood`, 3% |
+| Unique | `uq_ward_ring_of_anvilgate` | Ward-Ring of Anvilgate | ring | Runic Ward's break pulse +3 m, stuns non-elites 1 s | `d03_shaft_seven` final boss, 8% |
+| Unique | `uq_star_chart_cloak` | Star-Chart Cloak | shoulders | Skip costs no mana while an Orrery exists | rares in `whisperwood`, 3% |
+| Unique | `uq_tutors_patience` | Tutor's Patience | chest | Wardweaving deflect +5%; a deflected projectile returns for 100% | `d10_rimefang_caverns` final boss, 7% |
 
-### 3.9 [Necromancer](classes/necromancer.md) — Damage · cloth
-
-| Set id | Name | Band | Pieces · slots | Source | 2 / 4 / 6 |
-|---|---|---|---|---|---|
-| `set_necromancer_sextons_weeds` | The Sexton's Weeds | 30 (Challenge) | 6* | `d15_fire_court` / `d16_the_spire` Challenge bosses (class set token, page 08 §12.1); Depth Cache R 10+ (8% class roll) | 2: corpses last 45 s · 4: Corpse Bloom raises a Shambler · 6: Raise Thrall on a large corpse adds a Bone Archer |
-| `set_necromancer_choir_of_bones` | Regalia of the Choir of Bones | 50–60 (Challenge) | 6* | `d15_fire_court` / `d16_the_spire` Challenge bosses (class set token, page 08 §12.1); Depth Cache R 10+ (8% class roll) | 2: Bone Splinter pierces 2 more · 4: Rot Tide Shamblers explode for 120% · 6: Bone Colossus free with 5 thralls + 5 corpses (once per 60 s) |
-| `set_necromancer_marrowlord` | The Marrowlord's Mantle | 60 (Depth) | 6* | Depth Cache R 8+ | 2: Marrow Armour raises 1 free thrall · 4: thralls +3% per corpse within 20 m · 6: Corpse Bloom on a thrall does not kill it |
-
-| Kind | id | Name | Slot | Power | Source |
-|---|---|---|---|---|---|
-| Legendary | `leg_the_barrowkings_rod` | The Barrowking's Rod | sceptre | thrall cap +2; thralls past 5 are Bone Brutes | `d10_rimefang_caverns` end boss on Challenge, 5% |
-| Legendary | `leg_osric_mournes_ledger` | Osric Mourne's Ledger | off hand (effigy) | bosses leave a bloom-only corpse, 350% cap ×3 | `d15_fire_court` secret boss on Challenge, 8% |
-| Legendary | `leg_shroud_of_the_drowned_host` | Shroud of the Drowned Host | chest | Rot Tide raises every corpse in 22 m; Shamblers 30 s | world boss of `drowned_coast`, 4% |
-| Legendary | `leg_the_hundred_hands` | The Hundred Hands | hands | Crushing Fist no cooldown; costs the Colossus 3 s each | `d16_the_spire` any boss on Challenge% |
-| Legendary | `leg_gravewind_censer` | Gravewind Censer | necklace | every 8 s a corpse within 20 m blooms at 60% | Depth Cache R 12+, 1.5% |
-| Unique | `uq_sextons_spade` | Sexton's Spade | staff | Raise Thrall "from the soil" costs no health | `d01_hollow_barrow` `b_sexton_morrow`, 12% |
-| Unique | `uq_ring_of_the_quiet_field` | Ring of the Quiet Field | ring | Marrow Armour eats corpses from 20 m | `d06_sandsworn_vault` final, 7% |
-| Unique | `uq_bone_archers_quiver_charm` | Bone Archer's Charm | necklace | Bone Archers pierce and fire every 1.5 s | `d11_saltdeep_cathedral` boss 2, 6% |
-| Unique | `uq_marsh_mummers_wrap` | Marsh-Mummer's Wrap | legs | Rot Tide Shamblers are Bone Thralls for 20 s | rares in `mossfen`, 3% |
-
-### 3.10 [Warlock](classes/warlock.md) — Damage · cloth
+### 3.9 [Necromancer](classes/necromancer.md) — Damage (Healer) · cloth
 
 | Set id | Name | Band | Pieces · slots | Source | 2 / 4 / 6 |
 |---|---|---|---|---|---|
-| `set_warlock_debtors_raiment` | The Debtor's Raiment | 36 (levelling) | 6* | `d10_rimefang_caverns` bosses (Normal/Challenge); hands from world boss of `frostmantle` | 2: Hex Brand spreads to +1 on death · 4: Soul Leech heals 75% · 6: Soul Pact's health cost counts double for Tithe |
-| `set_warlock_ashen_covenant` | Vestments of the Ashen Covenant | 60 (Challenge) | 6* | `d15_fire_court` / `d16_the_spire` Challenge bosses (class set token, page 08 §12.1); Depth Cache R 10+ (8% class roll) | 2: Hellbloom with a shard leaves a 6 m pit · 4: 5-shard Harrowing resets Soul Pact · 6: one free Harrowing during Soul Pact |
-| `set_warlock_gatekeeper` | The Gatekeeper's Garb | 60 (Depth) | 6* | Depth Cache R 8+ | 2: Void Gate 20 s cooldown · 4: taking the gate gives a 15% barrier · 6: returning through it refunds 1 shard |
+| `set_necromancer_sextons_weeds` | The Sexton's Weeds | 30 (levelling) | 6* | bosses of `d08_moonwell_ruins` and `d09_warmasters_pit` (Normal); chest from the world boss of `whisperwood` | 2: corpses last 45 s · 4: Corpse Bloom on a Ripe corpse raises a Bone Thrall · 6: Control Undead on a large corpse also raises a Bone Archer |
+| `set_necromancer_choir_of_bones` | Regalia of the Choir of Bones (Damage) | 60 | 6* | bosses of `d11_saltdeep_cathedral` on Challenge (one piece per boss, weekly limit) | 2: Bone Splinter pierces 2 more · 4: a raised body explodes for 120% when its time runs out · 6: Bone Colossus has no cooldown at 5 bodies + 5 corpses (once per 60 s) |
+| `set_necromancer_marrowlord` | The Marrowlord's Mantle (Healer) | 60 | 6* | Depth 10+ end chest, any dungeon | 2: Mending Bloom radius 11 m · 4: Life Thread transfer 45% · 6: Bone Splints also raises a taunting Bone Thrall beside the ally |
 
 | Kind | id | Name | Slot | Power | Source |
 |---|---|---|---|---|---|
-| Legendary | `leg_the_first_contract` | The First Contract | off hand (grimoire) | max shards 7; Harrowing +120% per shard | `d16_the_spire` secret boss on Challenge, 8% |
-| Legendary | `leg_vesna_duskwells_quill` | Vesna Duskwell's Quill | wand | Blood Price 1% health per 1% mana; Tithe caps at 80 | world boss of `riftmarch`, 4% |
-| Legendary | `leg_crown_of_the_hollow_host` | Crown of the Hollow Host | head | Crowned lasts 20 s; each DoT spreads to 2 | `d15_fire_court` end boss on Challenge, 6% |
-| Legendary | `leg_imp_in_a_bottle` | The Imp in a Bottle | necklace | two imps; Devour eats one | `d09_warmasters_pit` final, Depth Cache R 10+, 2% |
-| Legendary | `leg_gate_of_the_nine_doors` | Gate of the Nine Doors | feet | Void Gate no cooldown while one stands; keep 3 gates | `d11_saltdeep_cathedral` any boss on Challenge% |
-| Unique | `uq_marsh_hermits_contract` | Marsh-Hermit's Contract | off hand | imp's Kindled on every 2nd spit | `d02_drowned_mill` final, 10% |
-| Unique | `uq_branding_iron_of_tamar` | Branding Iron of Tamar | staff | Hex Brand's hit +200% | `d06_sandsworn_vault` boss 2, 7% |
-| Unique | `uq_leechbone_ring` | Leechbone Ring | ring | Soul Leech castable while moving | `d07_thornheart` final, 7% |
-| Unique | `uq_ashen_ledger_page` | Ashen Ledger Page | necklace | first Harrowing after a Void Gate return is free | rares in `cinder_steppe`, 3% |
+| Legendary | `leg_the_barrowkings_rod` | The Barrowking's Rod | sceptre | **Crown of the Barrow** — cap +2; each body past 5 is a Bone Brute | `d14_ashen_reliquary` final boss (Challenge), 5% |
+| Legendary | `leg_osric_mournes_ledger` | Osric Mourne's Ledger | off hand (effigy) | **Every Name Written** — bosses leave a corpse that can only be bloomed (350% cap ×3) | `d15_fire_court` secret boss (Challenge), 8% |
+| Legendary | `leg_shroud_of_the_drowned_host` | Shroud of the Drowned Host | chest | **Tide of Dead** — seizing a living Undead also seizes every Undead within 6 m | world boss of `drowned_coast`, 4% |
+| Legendary | `leg_the_hundred_hands` | The Hundred Hands | hands | **Many Fists** — Crushing Fist has no cooldown; each use costs the Colossus 3 s | `d16_the_spire` boss 4 (Challenge), 5% |
+| Legendary | `leg_gravewind_censer` | Gravewind Censer | necklace | **Wind of Graves** — every 8 s a corpse within 20 m blooms by itself at 60% | Depth 15+ end chest, 1.5% |
+| Unique | `uq_sextons_spade` | Sexton's Spade | staff | Control Undead on a corpse costs no mana | `d01_hollow_barrow` `b_sexton_morrow`, 12% |
+| Unique | `uq_ring_of_the_quiet_field` | Ring of the Quiet Field | ring | Marrow Armour and Bone Splints eat corpses from 20 m | `d06_sandsworn_vault` final boss, 7% |
+| Unique | `uq_bone_archers_charm` | Bone Archer's Charm | necklace | Bone Archers pierce and fire every 1.5 s | `d11_saltdeep_cathedral` boss 2, 6% |
+| Unique | `uq_marsh_mummers_wrap` | Marsh-Mummer's Wrap | legs | Rot Tide's Ripe corpses raise +100% longer | rares in `mossfen`, 3% |
 
-### 3.11 [Demon Hunter](classes/demon_hunter.md) — Damage (Tank) · light
+### 3.10 [Warlock](classes/warlock.md) — Damage (Tank) · cloth
 
 | Set id | Name | Band | Pieces · slots | Source | 2 / 4 / 6 |
 |---|---|---|---|---|---|
-| `set_demon_hunter_riftwatch_leathers` | Riftwatch Leathers | 38 (levelling) | 6* | `d10_rimefang_caverns`, `d11_saltdeep_cathedral` bosses (Normal/Challenge) | 2: Glaive Arc brands every enemy hit · 4: Tumbling Shot bolts pierce · 6: Vengeance from kills doubled |
-| `set_demon_hunter_hellborne` | Hellborne Harness (Ravager) | 60 (Challenge) | 6* | `d15_fire_court` / `d16_the_spire` Challenge bosses (class set token, page 08 §12.1); Depth Cache R 10+ (8% class roll) | *(round-1 power tied to a removed mechanic; the class file writes the new one)* |
-| `set_demon_hunter_chainwarden` | Mail of the Chainwarden (Bastion) | 60 (Challenge) | 6* | `d15_fire_court` / `d16_the_spire` Challenge bosses (class set token, page 08 §12.1); Depth Cache R 10+ (8% class roll) | 2: Chain of Binding 10 s cooldown · 4: −10% damage from the tethered enemy · 6: Iron Wings taunts in 8 m, lasts 8 s |
+| `set_warlock_debtors_raiment` | The Debtor's Raiment | 36 (levelling) | 6* | bosses of `d10_rimefang_caverns` (Normal); hands from the world boss of `frostmantle` | 2: Blight spreads on death to +1 · 4: Soul Leech heals 75% of damage · 6: Pay Tithe costs 6% max health |
+| `set_warlock_ashen_covenant` | Vestments of the Ashen Covenant (Damage) | 60 | 6* | bosses of `d15_fire_court` on Challenge (one piece per boss, weekly limit) | 2: Brimstone with a Tithe leaves a 6 m pit · 4: Harrowing at 5 Tithes resets Blood Pact · 6: in Blood Pact one Harrowing costs no Tithes (counts as 5) |
+| `set_warlock_gatekeeper` | The Gatekeeper's Garb (Tank) | 60 | 6* | Depth 10+ end chest, any dungeon | 2: Void Gate and Gate of Grudges cooldown 20 s · 4: taking a gate gives a 15% shield 6 s · 6: in Iron Covenant each Tithe held gives +5% damage reduction |
 
 | Kind | id | Name | Slot | Power | Source |
 |---|---|---|---|---|---|
-| Legendary | `leg_kael_sorrowends_debt` | Kael Sorrowend's Debt | necklace | each party death fills Vengeance to 100 | `d11_saltdeep_cathedral` secret boss on Challenge, 8% |
-| Legendary | `leg_the_riftlords_horns` | The Rift-Lord's Horns | head | *(round-1 power tied to a removed mechanic; the class file writes the new one)* | world boss of `riftmarch`, 4% |
-| Legendary | `leg_glaive_of_the_long_night` | Glaive of the Long Night | off hand (dagger) | Glaive Arc orbits you 8 s at 6 m, 50% every 0.5 s | `d13_cindergate` final, Depth Cache R 10+, 2% |
-| Legendary | `leg_heartseeker_arbalest` | Heartseeker Arbalest | crossbow | 100-Vengeance Reckoning always crits, chains to 2 at 60% | `d16_the_spire` end boss on Challenge, 6% |
-| Legendary | `leg_chains_of_the_warden_below` | Chains of the Warden Below | waist | Chain of Binding tethers 2 targets | `d15_fire_court` any boss on Challenge% |
-| Unique | `uq_imp_catchers_charm` | Imp-Catcher's Charm | ring | Hunter's Oath +35% vs imps and small demons | `d01_hollow_barrow` final, 12% |
-| Unique | `uq_scarred_crossbow` | The Scarred Crossbow | crossbow | Brand Bolt +6 Momentum | `d05_glass_tombs` final, 7% |
-| Unique | `uq_mourning_scarf` | Mourning Scarf | shoulders | allies under 20% give +10 Vengeance | `d08_moonwell_ruins` boss 2, 7% |
-| Unique | `uq_ash_walker_boots` | Ash-Walker Boots | feet | void zones do not hurt you for 1 s after Tumbling Shot lands | rares in `kingsfire`, 3% |
+| Legendary | `leg_the_first_contract` | The First Contract | off hand (grimoire) | **Binding Terms** — max Tithes 7; Harrowing +120% per Tithe | `d16_the_spire` secret boss (Challenge), 8% |
+| Legendary | `leg_vesna_duskwells_quill` | Vesna Duskwell's Quill | wand | **Signed in Red** — Blood Price costs 1% health per 10 mana; each health-paid cast +1 Tithe | world boss of `riftmarch`, 4% |
+| Legendary | `leg_crown_of_the_hollow_host` | Crown of the Hollow Host | head | **Hollow Host** — Crowned lasts 20 s; each DoT spreads to 2 | `d15_fire_court` final boss (Challenge), 6% |
+| Legendary | `leg_kinship_of_debt` | Kinship of Debt | necklace | **Shared Blood** — paying a Tithe heals your bound demon 15%; its next attack +200% | `d09_warmasters_pit` final boss at Depth 10+, 2% |
+| Legendary | `leg_gate_of_the_nine_doors` | Gate of the Nine Doors | feet | **Nine Doors** — Void Gate has no cooldown while a gate stands; keep 3 gates | world boss of `kingsfire`, 5% |
+| Legendary | `leg_the_debt_collar` | The Debt Collar | necklace | **Collateral** — in Iron Covenant Blood Ward is 200% of the health paid, 15 s | `d13_cindergate` final boss (Challenge), 6% |
+| Unique | `uq_marsh_hermits_contract` | Marsh-Hermit's Contract | off hand | Bind Demon channel 1.5 s, cooldown 30 s | `d02_drowned_mill` final boss, 10% |
+| Unique | `uq_blight_iron_of_tamar` | Blight-Iron of Tamar | staff | Blight's hit +200% | `d06_sandsworn_vault` boss 2, 7% |
+| Unique | `uq_leechbone_ring` | Leechbone Ring | ring | Soul Leech castable while moving at full speed | `d07_thornheart` final boss, 7% |
+| Unique | `uq_ashen_ledger_page` | Ashen Ledger Page | necklace | the first Harrowing after a Void Gate return costs no Tithes (counts as 3) | rares in `cinder_steppe`, 3% |
 
-### 3.12 [Scavenger](classes/scavenger.md) — Damage · light
+### 3.11 [Demon Hunter](classes/demon_hunter.md) — Damage · light
 
 | Set id | Name | Band | Pieces · slots | Source | 2 / 4 / 6 |
 |---|---|---|---|---|---|
-| `set_scavenger_ragpickers_rig` | The Rag-Picker's Rig | 32 (levelling) | 6* | `d08_moonwell_ruins`, `d09_warmasters_pit` bosses (Normal/Challenge) | 2: pickups from 6 m · 4: Junk Toss free 30% of the time · 6: Pack Bomb refunds 1 junk per enemy hit (max 3) |
-| `set_scavenger_magpie_crown` | Regalia of the Magpie King | 60 (Challenge) | 6* | `d15_fire_court` / `d16_the_spire` Challenge bosses (class set token, page 08 §12.1); Depth Cache R 10+ (8% class roll) | 2: Shiny chance +3% · 4: top 20% of Big Score rolls crit · 6: a Shiny on Big Score hits twice |
-| `set_scavenger_wreckers_harness` | The Wrecker's Harness | 60 (Depth) | 6* | Depth Cache R 8+ | 2: Barricade +20% health · 4: Rummage 14–16 drops a free Barricade · 6: destroyed Barricade explodes for 250% in 6 m |
+| `set_demon_hunter_riftwatch_leathers` | Riftwatch Leathers | 38 (levelling) | 6* | bosses of `d10_rimefang_caverns` and `d11_saltdeep_cathedral` (Normal) | 2: Hunter's Bolt on a Rooted target +6 Momentum · 4: Vault's bolts pierce · 6: traps last 45 s, +1 trap |
+| `set_demon_hunter_banishers_coat` | The Banisher's Coat | 60 | 6* | bosses of `d15_fire_court` on Challenge (one piece per boss, weekly limit) | 2: Weak Points +0.5 s · 4: Banishing Shot resets on a Demon banish (once per 15 s) · 6: Unmask opens a Weak Point on every Demon in range |
+| `set_demon_hunter_trapwrights_harness` | The Trapwright's Harness (crafted) | 60 | 6* | **Leatherworking** 275 (page 19); recipe from `d13_cindergate` bosses | 2: Spring cooldown 6 s · 4: a triggered trap re-arms once · 6: Grinder Trap triggers every armed Snare within 10 m |
 
 | Kind | id | Name | Slot | Power | Source |
 |---|---|---|---|---|---|
-| Legendary | `leg_the_bottomless_sack` | The Bottomless Sack | waist | pack holds 40; junk spells cost 1 less | `d15_fire_court` secret boss on Challenge, 8% |
-| Legendary | `leg_grits_lucky_penny` | Grit's Lucky Penny | necklace | hold 3 Shinies; spend one on any spell to crit for free | world boss of `sunscar`, 4% |
-| Legendary | `leg_the_jackpot_cleaver` | The Jackpot Cleaver | sword (cleaver) | Big Score rolls 3 times, keeps the best | `d16_the_spire` end boss on Challenge, 6% |
-| Legendary | `leg_door_of_the_last_inn` | Door of the Last Inn | shoulders | Barricade heals allies behind it 2%/s, lasts 40 s | `d11_saltdeep_cathedral` any boss on Challenge% |
-| Legendary | `leg_magpies_eye` | The Magpie's Eye | ring | every 10th pickup is a Shiny | Depth Cache R 12+, 1.5% |
-| Unique | `uq_rusty_horseshoe` | The Rusty Horseshoe | ring | Lucky Swing status chance 40% | `d01_hollow_barrow` sub-boss `b_warren_queen_skritch`, 12% |
+| Legendary | `leg_the_lens_of_kael_sorrowend` | The Lens of Kael Sorrowend | head | **Never Looks Away** — Weak Points open every 3 s on Demons, 5 s on others | `d16_the_spire` secret boss (Challenge), 8% |
+| Legendary | `leg_mercy_and_doubt` | Mercy and Doubt | off hand (hand crossbow) | **A Pair** — with two hand crossbows Hunter's Bolt fires both at full damage | world boss of `kingsfire`, 4% |
+| Legendary | `leg_jaw_of_the_pit` | Jaw of the Pit | waist | **Never Lets Go** — the Grinder Trap attaches to the first enemy and follows it | `d13_cindergate` final boss (Challenge), 6% |
+| Legendary | `leg_banishers_writ` | The Banisher's Writ | necklace | **By Right** — Banishing Shot banishes non-boss Demons under 35%; each banish +30 Momentum | `d15_fire_court` final boss (Challenge), 6% |
+| Legendary | `leg_snarewright_gloves` | Snarewright Gloves | hands | **Chain Reaction** — a triggered trap triggers every other armed trap within 8 m | Depth 10+ end chest, any dungeon, 2% |
+| Unique | `uq_imp_catchers_charm` | Imp-Catcher's Charm | ring | Hunter's Oath +35% vs small Demons | `d01_hollow_barrow` final boss, 12% |
+| Unique | `uq_scarred_hand_crossbow` | The Scarred Hand Crossbow | hand crossbow | Hunter's Bolt builds +6 more | `d05_glass_tombs` final boss, 7% |
+| Unique | `uq_watchers_scarf` | Watcher's Scarf | shoulders | Demonsight +10 m; revealed enemies stay revealed 3 s | `d08_moonwell_ruins` boss 2, 7% |
+| Unique | `uq_ash_walker_boots` | Ash-Walker Boots | feet | after Vault lands, void zones do not hurt you for 1 s | rares in `kingsfire`, 3% |
+
+### 3.12 [Scavenger](classes/scavenger.md) — Damage (Support) · light
+
+| Set id | Name | Band | Pieces · slots | Source | 2 / 4 / 6 |
+|---|---|---|---|---|---|
+| `set_scavenger_ragpickers_rig` | The Rag-Picker's Rig | 32 (levelling) | 6* | bosses of `d08_moonwell_ruins` and `d09_warmasters_pit` (Normal) | 2: pickups from 6 m · 4: Junk Toss free 30% of the time · 6: Pack Bomb refunds 1 junk per enemy hit (max 3) |
+| `set_scavenger_magpie_crown` | Regalia of the Magpie King (Damage) | 60 | 6* | bosses of `d16_the_spire` on Challenge (one piece per boss, weekly limit) | 2: Shiny chance +3% · 4: Big Score's top 20% of rolls crit · 6: a Shiny on Big Score hits twice |
+| `set_scavenger_wreckers_harness` | The Wrecker's Harness (Support) | 60 | 6* | Depth 10+ end chest, any dungeon | 2: Barricade +20% max health · 4: Rummage 14–16 drops a free Barricade · 6: Rattled +10%; a destroyed Barricade explodes for 250% |
+
+| Kind | id | Name | Slot | Power | Source |
+|---|---|---|---|---|---|
+| Legendary | `leg_the_bottomless_sack` | The Bottomless Sack | off hand (satchel) | **No Bottom** — the pack holds 40; junk spells cost 1 less | `d15_fire_court` secret boss (Challenge), 8% |
+| Legendary | `leg_grits_lucky_penny` | Grit's Lucky Penny | necklace | **Heads I Win** — hold 3 Shinies; spend one on any spell to crit, no junk | world boss of `sunscar`, 4% |
+| Legendary | `leg_the_jackpot_javelin` | The Jackpot Javelin | javelin | **Three of a Kind** — Big Score rolls three times, keeps the best | `d16_the_spire` final boss (Challenge), 6% |
+| Legendary | `leg_door_of_the_last_inn` | Door of the Last Inn | shoulders | **Last Orders** — Rigged Barricade heals allies behind it 2%/s, lasts 40 s | world boss of `drowned_coast`, 5% |
+| Legendary | `leg_magpies_eye` | The Magpie's Eye | ring | **Something Glinting** — every 10th pickup is a Shiny | Depth 15+ end chest, any dungeon, 1.5% |
+| Unique | `uq_rusty_horseshoe` | The Rusty Horseshoe | ring | Lucky Throw status chance 40% | `d01_hollow_barrow` `b_warren_queen_skritch`, 12% |
 | Unique | `uq_mudlarks_gloves` | Mudlark's Gloves | hands | pickups in water worth double; pick up from 5 m | `d02_drowned_mill` `b_old_croak`, 8% |
 | Unique | `uq_bellows_apron` | Bellows-Keep Apron | chest | Pack Bomb fuse 0.3 s | `d04_bellows_keep` `b_forgemaster_ghorza`, 7% |
 | Unique | `uq_cracked_dice` | Cracked Dice | necklace | Rummage rolls of 1 become 20 | rares in `cinder_steppe`, 3% |
 
-### 3.13 [Swashbuckler](classes/swashbuckler.md) — Damage · light
+### 3.13 [Swashbuckler](classes/swashbuckler.md) — Damage (Tank) · light
 
 | Set id | Name | Band | Pieces · slots | Source | 2 / 4 / 6 |
 |---|---|---|---|---|---|
-| `set_swashbuckler_crimson_regalia` | Crimson Regalia | 25–34 (levelling) | 6 · head, hands, off-hand dagger `it_crimson_main_gauche`, chest, legs, feet | `d07_thornheart` (head, hands, dagger), `d09_warmasters_pit` (chest, legs, feet); Challenge at 60 | 2: Needle Flurry crit +1 Flair · 4: En Garde! fully refunds on a parry · 6: Curtain Cut at Grandeur leaves 5 Flair |
-| `set_swashbuckler_tidecaptains_finery` | Tidecaptain's Finery | 50 / 60 (Challenge) | 6 · light armour + rapier/sabre or dagger | `d15_fire_court` / `d16_the_spire` Challenge bosses (class set token, page 08 §12.1); Depth Cache R 10+ (8% class roll) | 2: Showstopper +3 Flair, +20 Tempo · 4: Chandelier Vault free, landing counts as a Showstopper · 6: Grand Finale at any Flair, extra strikes above 10 |
+| `set_swashbuckler_crimson_regalia` | Crimson Regalia | 25–34 / 60 | 6 · head, chest, hands, legs, feet, off-hand dagger `it_crimson_main_gauche` | bosses of `d07_thornheart` (head, hands, dagger) and `d09_warmasters_pit` (chest, legs, feet); Normal at the dungeon's level, Challenge at 60; Depth runs | 2: Needle Flurry crit +1 Flair · 4: En Garde! refunds its whole cooldown on a parry · 6: Curtain Cut at 10 Flair leaves 5 Flair |
+| `set_swashbuckler_tidecaptains_finery` | Tidecaptain's Finery | 60 | 6* | one piece per Challenge boss of `d15_fire_court` / `d16_the_spire`; Depth 10+ end chest, any dungeon (8%) | 2: Showstopper dodges +3 Flair, +20 Tempo · 4: Chandelier Vault costs no Tempo, its landing is a Showstopper · 6: Grand Finale at any Flair; each Flair above 10 adds a strike (up to 11) |
 
 | Kind | id | Name | Slot | Power | Source |
 |---|---|---|---|---|---|
-| Legendary | `leg_the_gallants_last_word` | The Gallant's Last Word | rapier | Grandeur leaves an echo duellist for 6 s repeating Needle Flurry at 50% | `d11_saltdeep_cathedral` any boss on Challenge|
-| Legendary | `leg_captains_plumed_hat` | Captain's Plumed Hat | light head | Flair never decays out of combat; keep 5 after a stun | world boss of `drowned_coast` |
-| Legendary | `leg_quicksilver_main_gauche` | Quicksilver Main Gauche | off-hand dagger | En Garde! passive: auto-parry a frontal hit every 8 s | `d11_saltdeep_cathedral` final, Challenge or the Depth Cache |
-| Legendary | `leg_boots_of_the_last_dance` | Boots of the Last Dance | light feet | dodge roll 2 charges; Showstopper refunds one | `d15_fire_court` any boss on Challenge|
-| Legendary | `leg_encore_signet` | Encore Signet | ring | Grand Finale resets once if it kills 3+ (once per 180 s) | `d16_the_spire` secret boss on Challenge |
-| Unique | `uq_duellists_ribbon` | The Duellist's Ribbon | necklace | each Flair +1% attack speed | `d01_hollow_barrow` final |
-| Unique | `uq_saltstained_sabre` | Salt-stained Sabre | sabre | Needle Flurry becomes a 90° slash at 40% to all | `d02_drowned_mill` final |
-| Unique | `uq_parade_gloves` | Parade Gloves | light hands | Mocking Bow +2 Flair | Highcourt fencing hall ladder (`q_swashbuckler_calling_applause`) |
-| Unique | `uq_red_sash` | Red Sash of the Harbour | light legs | at 10+ Flair +15% move, red streak | `d11_saltdeep_cathedral` sub-boss |
+| Legendary | `leg_the_gallants_last_word` | The Gallant's Last Word | rapier | every Grandeur leaves an echo duellist 6 s that repeats Needle Flurry at 50% | `b_choir_of_brine` (`d11_saltdeep_cathedral`) on Challenge |
+| Legendary | `leg_captains_plumed_hat` | Captain's Plumed Hat | light head | Flair does not decay out of combat; keep 5 Flair after a stun | `b_sallow_king` (world boss of `drowned_coast`) |
+| Legendary | `leg_quicksilver_main_gauche` | Quicksilver Main Gauche | off-hand dagger | En Garde! becomes passive: auto-parry the next frontal hit every 8 s | `b_bishop_aldwine` (`d11_saltdeep_cathedral` end boss) on Challenge, and its Depth end chest |
+| Legendary | `leg_boots_of_the_last_dance` | Boots of the Last Dance | light feet | dodge roll 2 charges; a Showstopper refunds one | a Challenge-mode `d15_fire_court` boss (page 12 names which) |
+| Legendary | `leg_encore_signet` | Encore Signet | ring | Grand Finale resets once if it kills 3+ (once per 180 s) | Depth 15+ end chest, any dungeon (1.5%) |
+| Unique | `uq_duellists_ribbon` | The Duellist's Ribbon | necklace | each Flair also +1% attack speed | `b_hollow_thane` (`d01_hollow_barrow` end boss) |
+| Unique | `uq_saltstained_sabre` | Salt-stained Sabre | sabre | Needle Flurry becomes a 90° slash arc, 40% to all in it | `b_the_grindwheel` (`d02_drowned_mill` end boss) |
+| Unique | `uq_parade_gloves` | Parade Gloves | light hands | Mocking Bow gives +2 Flair | quest reward, `q_calling_swashbuckler_2` |
+| Unique | `uq_red_sash` | Red Sash of the Harbour | light legs | at 10+ Flair move +15% | `b_hobb_the_bellringer` (`d11_saltdeep_cathedral` sub-boss) |
+| Unique | `uq_harbour_buckler` | Harbour Buckler | off hand (buckler) | in Riposte Guard a parry staggers the attacker 0.4 s | `b_saltshell_matron` (`d11_saltdeep_cathedral` sub-boss) |
 
 ### 3.14 [Dragon Knight](classes/dragon_knight.md) — Damage (Tank) · heavy
 
 | Set id | Name | Band | Pieces · slots | Source | 2 / 4 / 6 |
 |---|---|---|---|---|---|
-| `set_dragon_knight_brood_scale` | Brood-Scale Harness | 31–39 (levelling) | 6 · head, hands, feet, chest, legs, shield `it_broodscale_kite` | `d09_warmasters_pit` (head, hands, feet), `d10_rimefang_caverns` (chest, legs, shield); Challenge at 60 | 2: Wyrmfang rider on every enemy hit · 4: Drakeleap refunds 15 Momentum per hit (max 45) · 6: Breath of the Elders fires twice |
-| `set_dragon_knight_wyrmlord_plate` | Wyrmlord Plate | 60 (Challenge) | 6 · heavy + weapon or shield | `d15_fire_court` / `d16_the_spire` Challenge bosses (class set token, page 08 §12.1); Depth Cache R 10+ (8% class roll) | 2: aspect swap 10 s, Shedding Scales 300% WD · 4: Wyrmfall +60 Wyrmblood · 6: winged Dragon Form; Deluge becomes a 20 m sweep |
+| `set_dragon_knight_brood_scale` | Brood-Scale Harness | 31–39 / 60 | 6 · head, chest, hands, legs, feet, shield `it_broodscale_kite` | bosses of `d09_warmasters_pit` (head, hands, feet) and `d10_rimefang_caverns` (chest, legs, shield); Normal at the dungeon's level, Challenge at 60; Depth runs | 2: Wyrmfang Strike's rider on every enemy hit · 4: Drakeleap landing +15 Momentum per enemy (max 45) · 6: Breath of the Elders fires twice (second 60%) |
+| `set_dragon_knight_wyrmlord_plate` | Wyrmlord Plate | 60 | 6* | one piece per Challenge boss of `d15_fire_court` / `d16_the_spire`; Depth 10+ end chest, any dungeon (8%) | 2: aspect swap cooldown 10 s, Shedding Scales 300% WD · 4: Wyrmfall +60 Wyrmblood · 6: Dragon Form is the winged dragon; Deluge becomes a 20 m sweeping line |
 
 | Kind | id | Name | Slot | Power | Source |
 |---|---|---|---|---|---|
-| Legendary | `leg_heart_of_the_fire_wyrm` | Heart of the Fire Wyrm (was `leg_heart_of_the_ember_wyrm`) | heavy chest | Dragon Form +8 s and winged; the fire aspect's Deluge leaves molten ground | world boss of `kingsfire` |
-| Legendary | `leg_rimefang_greathelm` | Rimefang Greathelm | heavy head | breath-Frozen enemies shatter for 200% WD in 4 m | `d10_rimefang_caverns` final, Challenge or the Depth Cache |
-| Legendary | `leg_stormcrest_gauntlets` | Stormcrest Gauntlets | heavy hands | Static Scale chains 4 times at 70%, +1 Wyrmblood each | `d11_saltdeep_cathedral` any boss on Challenge|
-| Legendary | `leg_triune_scale` | The Triune Scale | necklace | the old aspect's rider stays 8 s after a swap | `d10_rimefang_caverns` secret boss on Challenge |
-| Legendary | `leg_old_kings_tooth` | The Old King's Tooth | greataxe | every 5th weapon hit is a free Breath of the Elders | `d13_cindergate` final, Challenge or the Depth Cache |
-| Unique | `uq_whelpscale_buckler` | Whelpscale Buckler | shield | Scalebound's taunt also applies the aspect status | `d04_bellows_keep` final |
-| Unique | `uq_cinderhorn_greataxe` | Cinderhorn | greataxe | Wyrmcoil Sweep leaves a 3 s fire ring, 30% WD/s | `d09_warmasters_pit` sub-boss |
-| Unique | `uq_drakeleap_sabatons` | Leaping Sabatons | heavy feet | Drakeleap 20 m, 1 s Scalebound on landing | world boss of `greyridge` |
-| Unique | `uq_gilded_wyrmtooth` | Gilded Wyrmtooth | 2H sword | killing blows +10 Wyrmblood | `d01_hollow_barrow` any boss on Challenge|
+| Legendary | `leg_heart_of_the_fire_wyrm` | Heart of the Fire Wyrm | heavy chest | Dragon Form +8 s as the winged dragon; Firescale Deluge leaves molten ground | `b_slagborn` (world boss of `kingsfire`) |
+| Legendary | `leg_rimefang_greathelm` | Rimefang Greathelm | heavy head | Rimescale: Frozen enemies shatter for 200% WD when struck | `b_rimefang` (`d10_rimefang_caverns` end boss) on Challenge, and its Depth end chest |
+| Legendary | `leg_stormcrest_gauntlets` | Stormcrest Gauntlets | heavy hands | Thunderscale: Static Scale chains up to 4 times, +1 Wyrmblood each | `b_unmoored` (world boss of `riftmarch`) |
+| Legendary | `leg_triune_scale` | The Triune Scale | necklace | after an aspect swap the old rider stays 8 s | Depth 15+ end chest, any dungeon (1.5%) |
+| Legendary | `leg_old_kings_tooth` | The Old King's Tooth | greataxe | every 5th weapon hit is a free Breath of the Elders | `b_castellan_vorhane` (`d13_cindergate` end boss) on Challenge |
+| Unique | `uq_whelpscale_buckler` | Whelpscale Buckler | shield | Scalebound's taunt applies your aspect rider | `b_grumvak_kilnbreaker` (`d04_bellows_keep` end boss) |
+| Unique | `uq_cinderhorn_greataxe` | Cinderhorn | greataxe | Wyrmcoil Sweep leaves a 3 s ring of fire | `b_ogra_beastmaster` (`d09_warmasters_pit` sub-boss) |
+| Unique | `uq_drakeleap_sabatons` | Leaping Sabatons | heavy feet | Drakeleap 20 m, 1 s Scalebound on landing | `b_grief_in_iron` (world boss of `greyridge`) |
+| Unique | `uq_gilded_wyrmtooth` | Gilded Wyrmtooth | 2H sword | killing blows +10 Wyrmblood | `b_warmaster_drogath` (`d09_warmasters_pit` end boss) |
 
-### 3.15 [Pyromancer](classes/pyromancer.md) — Damage · cloth
+### 3.15 [Pyromancer](classes/pyromancer.md) — Damage (Healer) · cloth
 
 | Set id | Name | Band | Pieces · slots | Source | 2 / 4 / 6 |
 |---|---|---|---|---|---|
-| `set_pyromancer_kilnwarden_robes` | Kilnwarden Robes | 19–24 (levelling) | 6 · head, hands, wand `it_kilnwarden_wand`, chest, legs, feet | `d05_glass_tombs` (head, hands, wand), `d06_sandsworn_vault` (chest, legs, feet); Challenge at 60 | 2: Cinder Dart always crits in the Searing band · 4: Slagpool's first second feeds the Familiar 10 Heat · 6: Vent leaves a 6 m Slagpool |
-| `set_pyromancer_sunforged_raiment` | Sunforged Raiment | 60 (Challenge) | 6 · cloth + staff/wand/focus | `d15_fire_court` / `d16_the_spire` Challenge bosses (class set token, page 08 §12.1); Depth Cache R 10+ (8% class roll) | 2: full Pyre Lance +1 s Overheat · 4: Backdraft +5 Heat per enemy detonated · 6: Overheat 14 s; Crown of Suns drops 7 suns |
+| `set_pyromancer_kilnwarden_robes` | Kilnwarden Robes | 19–24 / 60 | 6 · head, chest, hands, legs, feet, wand `it_kilnwarden_wand` | bosses of `d05_glass_tombs` (head, hands, wand) and `d06_sandsworn_vault` (chest, legs, feet); Normal at the dungeon's level, Challenge at 60; Depth runs | 2: Cinder Dart in the Searing band always crits · 4: Slagpool heals 50% more, first second +10 Heat · 6: Vent leaves a 6 m Slagpool |
+| `set_pyromancer_sunforged_raiment` | Sunforged Raiment | 60 | 6* | one piece per Challenge boss of `d15_fire_court` / `d16_the_spire`; Depth 10+ end chest, any dungeon (8%) | 2: full-charge Pyre Lance +1 s Overheat · 4: Backdraft +5 Heat per enemy or ally · 6: Overheat 14 s; Crown of Suns in Overheat drops 7 suns |
 
 | Kind | id | Name | Slot | Power | Source |
 |---|---|---|---|---|---|
-| Legendary | `leg_bellows_heart` | Bellows Heart | necklace | Vent sets Heat to 50; Banked Coals 8 s | `d04_bellows_keep` final, Challenge or the Depth Cache |
-| Legendary | `leg_coldflame_circlet` | Coldflame Circlet | cloth head | fire ignores 50% fire resistance; 60% vs fire-immune | `d15_fire_court` any boss on Challenge|
-| Legendary | `leg_phoenix_quill` | Phoenix Quill | wand | once per 180 s, rise at 40% in Overheat with a 300% Vent | world boss of `kingsfire` |
-| Legendary | `leg_kiln_of_the_first_forge` | Kiln of the First Forge | off-hand focus (orb) | Familiar holds 100 Heat; at 60+ throws Cinder Darts | `d13_cindergate` final, Challenge or the Depth Cache |
-| Legendary | `leg_ashen_sun_staff` | Staff of the Ashen Sun | staff | Crown of Suns +1 sun per 25 Heat (up to +4) | `d16_the_spire` secret boss on Challenge |
-| Unique | `uq_tinderbox_wand` | Tinderbox | wand | wand bolts +3 Heat | `d02_drowned_mill` final |
-| Unique | `uq_smouldering_slippers` | Smouldering Slippers | cloth feet | burning trail 20% SP/s while Kindled or hotter | `d05_glass_tombs` sub-boss |
-| Unique | `uq_cinder_censer` | The Cinder Censer (was `uq_ember_censer`) | off-hand focus | Overheat's self-burn heals for its first 4 s | world boss of `sunscar` |
-| Unique | `uq_slagglass_bangle` | Slagglass Bangle | ring | Slagpool under yourself; melee attackers take double | `d09_warmasters_pit` final |
+| Legendary | `leg_bellows_heart` | Bellows Heart | necklace | Vent sets Heat to 50; Banked Coals 8 s | `b_grumvak_kilnbreaker` (`d04_bellows_keep` end boss) on Challenge, and its Depth end chest |
+| Legendary | `leg_coldflame_circlet` | Coldflame Circlet | cloth head | fire ignores 50% fire resistance; 60% vs fire-immune | a Challenge-mode `d15_fire_court` boss (page 12 names which) |
+| Legendary | `leg_phoenix_quill` | Phoenix Quill | wand | once per 180 s rise from death at 40% in Overheat | `b_slagborn` (world boss of `kingsfire`) |
+| Legendary | `leg_kiln_of_the_first_forge` | Kiln of the First Forge | off-hand focus (orb) | overhealing becomes Heat; Overheat Cautery spreads Cauterized | `b_castellan_vorhane` (`d13_cindergate` end boss) on Challenge |
+| Legendary | `leg_ashen_sun_staff` | Staff of the Ashen Sun | staff | Crown of Suns +1 sun per 25 Heat (up to +4) | Depth 15+ end chest, any dungeon (1.5%) |
+| Unique | `uq_tinderbox_wand` | Tinderbox | wand | wand bolts +3 Heat | `b_the_grindwheel` (`d02_drowned_mill` end boss) |
+| Unique | `uq_smouldering_slippers` | Smouldering Slippers | cloth feet | a burning trail while Kindled or hotter | `b_saffa_knifewind` (`d05_glass_tombs` sub-boss) |
+| Unique | `uq_ash_censer` | The Ash Censer | off-hand focus | Overheat's self-burn heals you for its first 4 s | `b_glass_wyrm` (world boss of `sunscar`) |
+| Unique | `uq_slagglass_bangle` | Slagglass Bangle | ring | Slagpool under yourself, harmless to you; melee attackers in it take double | `b_warmaster_drogath` (`d09_warmasters_pit` end boss) |
 
-### 3.16 [Stormcaller](classes/stormcaller.md) — Damage · cloth
+### 3.16 [Stormcaller](classes/stormcaller.md) — Damage (Support) · cloth
 
 | Set id | Name | Band | Pieces · slots | Source | 2 / 4 / 6 |
 |---|---|---|---|---|---|
-| `set_stormcaller_galewrights_robes` | Galewright's Robes | 42–51 (levelling) | 6 · head, hands, feet, chest, legs, staff `it_galewright_staff` | `d11_saltdeep_cathedral` (head, hands, feet), `d12_unmade_workshop` (chest, legs, staff); Challenge at 60 | 2: Forked Spark may re-hit one enemy · 4: rods 45 s, fences 20 m · 6: Galvanic Tether's snap resets Squall Step, +1 rod charge |
-| `set_stormcaller_eye_of_the_tempest` | Eye of the Tempest | 60 (Challenge) | 6 · cloth + staff/wand/focus | `d15_fire_court` / `d16_the_spire` Challenge bosses (class set token, page 08 §12.1); Depth Cache R 10+ (8% class roll) | 2: Skybreak strikes every rod for a 150% burst · 4: Thunderhead strikes twice a second in your Eye · 6: Stormcrowned fences are walls; fence damage doubled |
+| `set_stormcaller_galewrights_robes` | Galewright's Robes | 42–51 / 60 | 6 · head, chest, hands, legs, feet, staff `it_galewright_staff` | bosses of `d11_saltdeep_cathedral` (head, hands, feet) and `d12_unmade_workshop` (chest, legs, staff); Normal at the dungeon's level, Challenge at 60; Depth runs | 2: Forked Spark can hit the same enemy twice if alone · 4: rods last 45 s, fences reach 20 m · 6: Galvanic Tether's snap resets Squall Step, +1 rod charge |
+| `set_stormcaller_eye_of_the_tempest` | Eye of the Tempest | 60 | 6* | one piece per Challenge boss of `d15_fire_court` / `d16_the_spire`; Depth 10+ end chest, any dungeon (8%) | 2: Skybreak also strikes every rod (5 m, 150% SP) · 4: Thunderhead strikes twice a second inside your Eye of the Storm · 6: Stormcrowned makes fences walls to non-bosses, double fence damage |
 
 | Kind | id | Name | Slot | Power | Source |
 |---|---|---|---|---|---|
-| Legendary | `leg_conductors_spire` | The Conductor's Spire | staff | rods +1; fences join every pair of rods | `d11_saltdeep_cathedral` any boss on Challenge|
-| Legendary | `leg_crown_of_a_hundred_bolts` | Crown of a Hundred Bolts | cloth head | Forked Spark jumps without limit among 3+ Static enemies | world boss of `riftmarch` |
-| Legendary | `leg_skyanchor_boots` | Sky-Anchor Boots | cloth feet | Squall Step 2 charges, plants a free rod | `d12_unmade_workshop` final, Challenge or the Depth Cache |
-| Legendary | `leg_thunderwell_orb` | Thunderwell | off-hand focus (orb) | Overcharge discharges add 1 Static within 8 m | `d15_fire_court` any boss on Challenge|
-| Legendary | `leg_stormglass_heart` | Stormglass Heart | necklace | inside your Eye, every 5th spell free and instant | `d10_rimefang_caverns` any boss on Challenge|
-| Unique | `uq_copperwire_wand` | Copperwire | wand | wand bolts add 1 Static | `d03_deepdelve` final |
-| Unique | `uq_rainslick_cowl` | Rainslick Cowl | cloth head | +15% move in rain; Thunderhead 16 s in rain | rare in `mossfen` |
-| Unique | `uq_thunderjar` | The Thunderjar | off-hand focus | planting a rod: 4 m burst, 100% SP | `d08_moonwell_ruins` sub-boss |
-| Unique | `uq_lodestone_ring` | Lodestone Ring | ring | 5-Static enemies pulled 1 m/s to your nearest rod | `d10_rimefang_caverns` final |
+| Legendary | `leg_conductors_spire` | The Conductor's Spire | staff | rods max +1; fences join every pair of rods | `b_the_gravity_engine` (`d12_unmade_workshop`) on Challenge |
+| Legendary | `leg_crown_of_a_hundred_bolts` | Crown of a Hundred Bolts | cloth head | Forked Spark jumps without limit among enemies with 3+ Static | `b_unmoored` (world boss of `riftmarch`) |
+| Legendary | `leg_skyanchor_boots` | Sky-Anchor Boots | cloth feet | Squall Step 2 charges, plants a free rod on arrival | `b_oddrin_the_unmaker` (`d12_unmade_workshop` end boss) on Challenge, and its Depth end chest |
+| Legendary | `leg_thunderwell_orb` | Thunderwell | off-hand focus (orb) | Overcharge discharges add 1 Static to every enemy within 8 m | a Challenge-mode `d15_fire_court` boss (page 12 names which) |
+| Legendary | `leg_stormglass_heart` | Stormglass Heart | necklace | inside your Eye of the Storm every 5th spell is free and instant | Depth 15+ end chest, any dungeon (1.5%) |
+| Unique | `uq_coilwire_wand` | Coilwire | wand | wand bolts add 1 Static | `b_stonegullet` (`d03_shaft_seven` end boss) |
+| Unique | `uq_rainslick_cowl` | Rainslick Cowl | cloth head | +15% move in rain; Thunderhead 16 s in rain | a `mossfen` rare elite (page 10 names it) |
+| Unique | `uq_thunderjar` | The Thunderjar | off-hand focus | planting a rod releases a 4 m burst of 100% SP | `b_gloamwing` (`d08_moonwell_ruins` sub-boss) |
+| Unique | `uq_lodestone_ring` | Lodestone Ring | ring | non-bosses at 5 Static are pulled toward your nearest rod | `b_rimefang` (`d10_rimefang_caverns` end boss) |
 
 ### 3.17 [Druid](classes/druid.md) — Healer (Tank, Damage) · medium
 
 | Set id | Name | Band | Pieces · slots | Source | 2 / 4 / 6 |
 |---|---|---|---|---|---|
-| `set_druid_grovekeepers_vestments` | Grovekeeper's Vestments | 25–30 (levelling, healer) | 6 · head, hands, staff `it_grovekeepers_crook`, chest, legs, feet | `d07_thornheart` (head, hands, staff), `d08_moonwell_ruins` (chest, legs, feet); Challenge at 60 | 2: Seedbloom's bloom plants a 50% seed · 4: Greenswell leaves heal patches · 6: Elder Circle instant; shifting inside blooms every Seedbloom |
-| `set_druid_hide_of_many` | Hide of Many (forms) | 42 / 60 (Challenge) | 6 · medium + weapon/off hand | `d15_fire_court` / `d16_the_spire` Challenge bosses (class set token, page 08 §12.1); Depth Cache R 10+ (8% class roll) | *(round-1 power tied to a removed mechanic; the class file writes the new one)* |
-| `set_druid_elderhorn_regalia` | Elderhorn Regalia | 60 (Challenge) | 6 · medium + weapon/off hand | `d15_fire_court` / `d16_the_spire` Challenge bosses (class set token, page 08 §12.1); Depth Cache R 10+ (8% class roll) | 2: Wild Heart 10 s · 4: Everbloom −5 s per shift · 6: first shift after Everbloom becomes a 15 s Elderhorn hybrid bar |
+| `set_druid_grovekeepers_vestments` | Grovekeeper's Vestments (healer) | 25–30 / 60 | 6 · head, chest, hands, legs, feet, staff `it_grovekeepers_crook` | bosses of `d07_thornheart` (head, hands, staff) and `d08_moonwell_ruins` (chest, legs, feet); Normal at the dungeon's level, Challenge at 60; Depth runs | 2: a bloom plants a new seed at 50% · 4: Greenswell and Wingwash leave 3 m healing patches · 6: Circle of the Elder Grove and Mirror Pool are instant; shifting inside the Circle blooms every Seedbloom |
+| `set_druid_hide_of_many` | Hide of Many (forms) | 36–45 / 60 | 6 · head, chest, hands, legs, feet, sceptre `it_many_hides_sceptre` | bosses of `d10_rimefang_caverns` (head, hands, feet) and `d11_saltdeep_cathedral` (chest, legs, sceptre); Normal, Challenge at 60 | 2: Bear — Heavy Paw 25% to reset slot 2 · 4: Wolf — Killing Bite on 3+ Torn refunds half of slot 6 · 6: Heron — entering Heron from Bear or Wolf gives 4 s Skybound |
+| `set_druid_elderhorn_regalia` | Elderhorn Regalia | 60 | 6* | one piece per Challenge boss of `d15_fire_court` / `d16_the_spire`; Depth 10+ end chest, any dungeon (8%) | 2: Wild Heart 10 s · 4: Everbloom −5 s per shift · 6: Elder Shape — the first shift after Everbloom makes you an Elderhorn for 15 s (Heron slots 1–3, Bear slots 4–6) |
 
 | Kind | id | Name | Slot | Power | Source |
 |---|---|---|---|---|---|
-| Legendary | `leg_pelt_of_the_first_winter` | Pelt of the First Winter | medium chest | *(round-1 power tied to a removed mechanic; the class file writes the new one)* | `d10_rimefang_caverns` final (Challenge or the Depth Cache) and world boss of `frostmantle` |
-| Legendary | `leg_the_ninth_life` | The Ninth Life | necklace | once per 120 s a killing blow in animal form drops you to caster at 30% and roots 6 m | `d11_saltdeep_cathedral` any boss on Challenge|
-| Legendary | `leg_seedkeepers_crook` | Seedkeeper's Crook | staff | Seedbloom on 3 allies; blooms jump to the lowest ally | `d08_moonwell_ruins` final, Challenge or the Depth Cache |
-| Legendary | `leg_moonfeather_mantle` | Moonfeather Mantle | medium head | Owl: Starseed every 40 Moonsong; Moonfall while moving | `d15_fire_court` any boss on Challenge|
-| Legendary | `leg_crown_of_the_long_road` | Crown of the Long Road | medium head | Stag carries 2; Bound heals 5%; Trackless Path 90 s | world boss of `whisperwood` |
-| Legendary | `leg_heart_of_the_wildwood` | Heart of the Wildwood | ring | +6% damage/healing per form entered in 20 s (max +24%) | `d16_the_spire` secret boss on Challenge |
-| Unique | `uq_thornheart_splinter` | Thornheart Splinter | sceptre | Bramblegrip roots deal 30% SP/s | `d07_thornheart` sub-boss |
-| Unique | `uq_heartwood_wraps` (was `uq_barkskin_wraps`, a banned name) | Heartwood Wraps | medium hands | self-cast Heartwood Ward cooldown 20 s | `d03_deepdelve` boss 1 |
-| Unique | `uq_hollow_horn` | Hollow Horn | off-hand focus | Antler Rush pushes enemies in 8 m back 4 m | rare in `sunscar` |
-| Unique | `uq_mossback_greaves` | Mossback Greaves | medium legs | Bear: standing still 2 s gives 10% damage reduction | `d05_glass_tombs` final |
+| Legendary | `leg_pelt_of_the_first_winter` | Pelt of the First Winter | medium chest | Bear: Heavy Paw crits give a 10% shield (max 30%) | `b_rimefang` (`d10_rimefang_caverns` end boss) on Challenge; `b_standing_ruin` (world boss of `frostmantle`) |
+| Legendary | `leg_the_ninth_life` | The Ninth Life | necklace | once per 120 s a killing blow in Bear or Wolf drops you to Grove at 30%, roots 6 m | `b_choir_of_brine` (`d11_saltdeep_cathedral`) on Challenge |
+| Legendary | `leg_seedkeepers_crook` | Seedkeeper's Crook | staff | Seedbloom lands on 3 allies; a bloom jumps its remaining heal | `b_oruvel_moon_drinker` (`d08_moonwell_ruins` end boss) on Challenge, and its Depth end chest |
+| Legendary | `leg_heronfeather_mantle` | Heronfeather Mantle | medium head | Heron: every 5th Stillwater Touch is instant + free Wingwash; Springflood while walking | a Challenge-mode `d15_fire_court` boss (page 12 names which) |
+| Legendary | `leg_fang_of_the_long_hunt` | Fang of the Long Hunt | ring | Wolf: a killing Killing Bite resets slot 6, 3 Torn on the nearest enemy | `b_hungering_brood` (world boss of `whisperwood`) |
+| Legendary | `leg_heart_of_the_wildwood` | Heart of the Wildwood | ring | +6% damage and healing per different form in the last 20 s (max +24%) | Depth 15+ end chest, any dungeon (1.5%) |
+| Unique | `uq_thornheart_splinter` | Thornheart Splinter | sceptre | Bramblegrip's roots deal 30% SP a second | `b_rakka_bloodbriar` (`d07_thornheart` sub-boss) |
+| Unique | `uq_oakhide_wraps` | Oakhide Wraps | medium hands | slot 4 −10 s when its Grove or Bear version is cast on yourself | `b_foreman_grubnik` (`d03_shaft_seven` sub-boss) |
+| Unique | `uq_hollow_horn` | Hollow Horn | off-hand focus | Wolf: Howl of the Hunt 40 m, Dazes non-bosses within 8 m | a `sunscar` rare elite (page 10 names it) |
+| Unique | `uq_mossback_greaves` | Mossback Greaves | medium legs | Bear: standing still 2 s gives 10% damage reduction | `b_king_sethar_unshattered` (`d05_glass_tombs` end boss) |
 
 ### 3.18 [Oracle](classes/oracle.md) — Healer (Support) · cloth
 
 | Set id | Name | Band | Pieces · slots | Source | 2 / 4 / 6 |
 |---|---|---|---|---|---|
-| `set_oracle_seers_vestments` | Seer's Vestments | 19–24 (levelling) | 6 · head, chest, orb `it_seers_glass_orb`, hands, legs, feet | `d05_glass_tombs` (head, chest, orb), `d06_sandsworn_vault` (hands, legs, feet); Challenge at 60 | 2: Foretold Ward foreseen bonus ×2.5 · 4: Thread-Cut heals 100% of its damage · 6: an Omen on Mended Thread also casts Foretold Ward |
-| `set_oracle_threadwoven_raiment` | Threadwoven Raiment | 50 / 60 (Challenge) | 6 · cloth + sceptre/focus | `d15_fire_court` / `d16_the_spire` Challenge bosses (class set token, page 08 §12.1); Depth Cache R 10+ (8% class roll) | 2: Foresight lead +0.5 s · 4: Fate's Tug leaves a free return thread 6 s · 6: Circle of Prophecy casts Unwritten Hour's save inside |
+| `set_oracle_seers_vestments` | Seer's Vestments | 19–24 / 60 | 6 · head, chest, hands, legs, feet, orb `it_seers_glass_orb` | bosses of `d05_glass_tombs` (head, chest, orb) and `d06_sandsworn_vault` (hands, legs, feet); Normal at the dungeon's level, Challenge at 60; Depth runs | 2: Foretold Ward foreseen-hit bonus ×2.5 · 4: Thread-Cut heals 100% of its damage · 6: an Omen on Mended Thread also casts Foretold Ward |
+| `set_oracle_threadwoven_raiment` | Threadwoven Raiment | 60 | 6* | one piece per Challenge boss of `d15_fire_court` / `d16_the_spire`; Depth 10+ end chest, any dungeon (8%) | 2: Foresight lead +0.5 s · 4: Fate's Tug can pull the ally back within 6 s · 6: Circle of Prophecy casts The Unwritten Hour's save on allies inside |
 
 | Kind | id | Name | Slot | Power | Source |
 |---|---|---|---|---|---|
-| Legendary | `leg_eye_of_the_ninth_morning` | Eye of the Ninth Morning | cloth head | party frames show foreseen damage; lead +0.5 s | `d16_the_spire` secret boss on Challenge |
-| Legendary | `leg_spindle_of_fates` | Spindle of Fates | sceptre | Thread-Cut jumps to 2 more at 70%, each heals an ally | `d11_saltdeep_cathedral` final, Challenge or the Depth Cache |
-| Legendary | `leg_hourglass_of_ashes` | Hourglass of Ashes | off-hand focus (orb) | Unwritten Hour −3 s per Omen gained | `d15_fire_court` any boss on Challenge|
-| Legendary | `leg_shroud_of_the_other_road` | Shroud of the Other Road (was `leg_veil_of_the_other_road`) | cloth chest | once per 60 s an unforeseen 40% hit on an ally is healed back | world boss of `drowned_coast` |
-| Legendary | `leg_prophets_bell` | The Prophet's Bell | necklace | Share the Vision gives the full lead, lasts 18 s | `d10_rimefang_caverns` any boss on Challenge|
-| Unique | `uq_farsight_lens` | Farsight Lens | off-hand focus | intent glyphs shown at 60 m, include elites | `d02_drowned_mill` sub-boss |
-| Unique | `uq_threadbare_slippers` | Threadbare Slippers | cloth feet | after Fate's Tug you move +40% for 3 s | `d07_thornheart` final |
-| Unique | `uq_omen_bell` | Omen Bell | necklace | each Omen heals allies in 10 m for 40% SP | `d08_moonwell_ruins` final |
-| Unique | `uq_glasswalker_sceptre` | Glasswalker's Sceptre | sceptre | Foretold Ward on a ghost telegraph at half strength | world boss of `sunscar` |
+| Legendary | `leg_eye_of_the_ninth_morning` | Eye of the Ninth Morning | cloth head | **Forecast** — party frames show foreseen damage; lead +0.5 s | Depth 15+ end chest, any dungeon (1.5%) |
+| Legendary | `leg_spindle_of_fates` | Spindle of Fates | sceptre | Thread-Cut jumps to 2 more enemies, each jump heals a different ally | `b_bishop_aldwine` (`d11_saltdeep_cathedral` end boss) on Challenge, and its Depth end chest |
+| Legendary | `leg_hourglass_of_ashes` | Hourglass of Ashes | off-hand focus (orb) | The Unwritten Hour −3 s per Omen gained | a Challenge-mode `d15_fire_court` boss (page 12 names which) |
+| Legendary | `leg_mantle_of_the_other_road` | Mantle of the Other Road | cloth chest | once per 60 s an unforeseen hit over 40% on an ally is undone | `b_sallow_king` (world boss of `drowned_coast`) |
+| Legendary | `leg_prophets_bell` | The Prophet's Bell | necklace | Share the Vision gives the full lead, lasts 18 s | `b_old_mother_rime` (`d10_rimefang_caverns` secret boss) on Challenge |
+| Unique | `uq_farsight_lens` | Farsight Lens | off-hand focus | intent glyphs shown 60 m away, include elites | `b_old_pike_sluicewarden` (`d02_drowned_mill` sub-boss) |
+| Unique | `uq_threadbare_slippers` | Threadbare Slippers | cloth feet | after Fate's Tug you move +40% for 3 s | `b_wyllow_blighted_heart` (`d07_thornheart` end boss) |
+| Unique | `uq_omen_bell` | Omen Bell | necklace | every Omen gained heals allies within 10 m for 40% SP | `b_oruvel_moon_drinker` (`d08_moonwell_ruins` end boss) |
+| Unique | `uq_glasswalker_sceptre` | Glasswalker's Sceptre | sceptre | Foretold Ward can be cast on a ghost telegraph at half strength | `b_glass_wyrm` (world boss of `sunscar`) |
 
-### 3.19 [Tactician](classes/tactician.md) — Support · medium
+### 3.19 [Tactician](classes/tactician.md) — Support (Tank) · medium
 
 | Set id | Name | Band | Pieces · slots | Source | 2 / 4 / 6 |
 |---|---|---|---|---|---|
-| `set_tactician_field_marshal` | Field Marshal's Regalia | 32–45 (levelling) | 6 · head, shoulders, chest, hands, legs, feet | `d09_warmasters_pit`, `d10_rimefang_caverns`, `d11_saltdeep_cathedral` bosses; Challenge or the Depth Cache at 60 | 2: Probing Cut's Exposed lasts 2 hits at +25% · 4: an Order costs 1 pip less every 10 s · 6: Decisive Hour 120 s, Orders during it refund pips |
-| `set_tactician_war_table` | Regalia of the War Table | 60 (Challenge) | 6 · as above | `d15_fire_court` / `d16_the_spire` Challenge bosses (class set token, page 08 §12.1); Depth Cache R 10+ (8% class roll) | 2: Double-Time Drill +8% move · 4: Outflank resets when its target dies · 6: Battle Plan aura +50% at full Initiative |
+| `set_tactician_field_marshal` | Field Marshal's Regalia | 32–45 / 60 | 6 · head, shoulders, chest, hands, legs, feet (`it_field_marshal_*`) | bosses of `d09_warmasters_pit`, `d10_rimefang_caverns`, `d11_saltdeep_cathedral` on Normal (one piece per boss); level-60 copies on Challenge | 2: Probing Bolt's Exposed used by up to 2 hits, +25% each · 4: once per 10 s an Order costs 1 pip less · 6: Decisive Hour cooldown 120 s; Orders during it refund their pips |
+| `set_tactician_war_table` | Regalia of the War Table | 60 | 6 · head, shoulders, chest, hands, legs, feet (`it_war_table_*`) | Challenge bosses of `d13_cindergate`–`d16_the_spire`; Depth 10+ end chests; the coat only from `b_fire_king_kaedros` (`d15_fire_court`, Challenge) | 2: Double-Time Drill +8% move · 4: Outflank resets when an Outflanked target dies; Tank focus: Field Standard +6 s · 6: at full Initiative the Battle Plan aura is +50% |
 
 | Kind | id | Name | Slot | Power | Source |
 |---|---|---|---|---|---|
-| Legendary | `leg_baton_of_the_last_command` | Baton of the Last Command | sceptre | every Order also applies to you at 50% | `d10_rimefang_caverns` end boss on Challenge |
-| Legendary | `leg_ever_unfolding_map` | The Ever-Unfolding Map | off hand (field map) | Muster Point 2 charges; allies step between them | `d12_unmade_workshop` final |
-| Legendary | `leg_forced_march_sabatons` | Sabatons of the Forced March | feet | Outflank leaves a +30% move trail; Forward! 12 s | world boss of `cinder_steppe` |
-| Legendary | `leg_signet_of_seven_armies` | Signet of Seven Armies | ring | +1 follower slot; followers −25% area damage | `d15_fire_court` any boss on Challenge|
-| Unique | `uq_quartermasters_coat` | The Quartermaster's Coat | chest | +10 Tempo/s in your Muster Point | `d09_warmasters_pit` boss 2 |
-| Unique | `uq_drillmasters_whistle` | Drillmaster's Whistle | necklace | Initiative fills every 5 s | `d08_moonwell_ruins` final |
-| Unique | `uq_turncoat_spur` | The Turncoat's Spur | feet | Redeploy may swap with a non-boss enemy | `d06_sandsworn_vault` side-hall rare |
+| Legendary | `leg_the_last_command` | The Last Command | crossbow | **Leads From the Front** — every Order also applies to you at 50% | `b_grief_in_iron` (world boss of `greyridge`) |
+| Legendary | `leg_ever_unfolding_map` | The Ever-Unfolding Map | off hand (field map) | **Two Camps, One Road** — Muster Point 2 charges; allies may jump between them | `b_oddrin_the_unmaker` (`d12_unmade_workshop` end boss) |
+| Legendary | `leg_forced_march_sabatons` | Sabatons of the Forced March | feet | **Forced March** — Outflank leaves a +30% move trail; Forward! 12 s | `b_carrion_crown` (world boss of `cinder_steppe`) |
+| Legendary | `leg_signet_of_seven_armies` | Signet of Seven Armies | ring | **Seven Banners** — +1 follower slot; followers take 25% less area damage; On My Mark makes their next hit crit | `b_castellan_vorhane` (`d13_cindergate` end boss; Normal and Challenge) |
+| Unique | `uq_quartermasters_coat` | The Quartermaster's Coat | chest | **Stores Opened** — +10 Tempo a second inside your Muster Point or Field Standard | `b_razorback_rider_krunn` (`d09_warmasters_pit`) |
+| Unique | `uq_drillmasters_whistle` | Drillmaster's Whistle | necklace | **Sharp Blast** — Initiative fills every 5 s | `b_oruvel_moon_drinker` (`d08_moonwell_ruins` end boss) |
+| Unique | `uq_turncoat_spur` | The Turncoat's Spur | feet | **Wrong Side of the Line** — Redeploy can swap with a non-boss enemy (45 s) | `d06_sandsworn_vault`, a rare elite in the side hall |
 
-### 3.20 [Chronomancer](classes/chronomancer.md) — Support (Damage) · cloth
+### 3.20 [Chronomancer](classes/chronomancer.md) — Support (Healer) · cloth
 
 | Set id | Name | Band | Pieces · slots | Source | 2 / 4 / 6 |
 |---|---|---|---|---|---|
-| `set_chronomancer_hourwright` | Vestments of the Hourwright | 42–57 (levelling) | 6 · head, shoulders, chest, hands, legs, feet | `d11_saltdeep_cathedral`, `d12_unmade_workshop`, `d13_cindergate` bosses; Challenge or the Depth Cache at 60 | 2: Second Hand +12 Sand · 4: Recall leaves a Sandfall 4 s · 6: Unwind costs 25 Sand, 2 charges |
-| `set_chronomancer_last_second` | Robes of the Last Second | 50–60 (Challenge) | 6 · as above | `d15_fire_court` / `d16_the_spire` Challenge bosses (class set token, page 08 §12.1); Depth Cache R 10+ (8% class roll) | 2: Echoing Hour's 2nd strike after 2 s · 4: Borrowed Minutes +10% damage · 6: Stilled Moment 120 s; Paradox Echo 50% |
+| `set_chronomancer_hourwright` | Vestments of the Hourwright | 42–57 / 60 | 6 · head, shoulders, chest, hands, legs, feet (`it_hourwright_*`) | Normal bosses of `d11_saltdeep_cathedral`, `d12_unmade_workshop`, `d13_cindergate` (one piece per boss); level-60 copies on Challenge | 2: Second Hand and Hand Back +12 Sand · 4: Recall leaves a Sandfall / Stillwater for 4 s · 6: Unwind costs 25 Sand, 2 charges |
+| `set_chronomancer_last_second` | Robes of the Last Second | 60 | 6 · head, shoulders, chest, hands, legs, feet (`it_last_second_*`) | Challenge bosses of `d13_cindergate`–`d16_the_spire`; Depth 10+ end chests; the robe only from `d16_the_spire` final boss (Challenge) or a Tailoring recipe (page 19) | 2: Echoing Hour and Hour of Return repeat after 2 s · 4: Borrowed Minutes also +10% damage · 6: Stilled Moment 120 s; Paradox Echo 50% |
 
 | Kind | id | Name | Slot | Power | Source |
 |---|---|---|---|---|---|
-| Legendary | `leg_ferrymans_hourglass` | The Ferryman's Hourglass | off-hand focus (hourglass) | Recall 2 charges, 20 Sand | `d11_saltdeep_cathedral` any boss on Challenge|
-| Legendary | `leg_the_unwound_spring` | The Unwound Spring | staff | during Stilled Moment, Second Hand instant and free | `d16_the_spire` any boss on Challenge|
-| Legendary | `leg_band_of_the_long_afternoon` | Band of the Long Afternoon | ring | Borrowed Minutes 12 s, splits to 2 allies at 15% | world boss of `riftmarch` |
-| Legendary | `leg_mantle_of_yesterday` | Mantle of Yesterday | shoulders | your Ghost runs 8 s behind | `d14_ashen_reliquary` final |
-| Unique | `uq_sundial_wand` | The Sundial Wand | wand | Lagging stacks to 5 | `d07_thornheart` boss 2 |
-| Unique | `uq_waterclock_slippers` | Waterclock Slippers | feet | +40% move 3 s after Recall | `d10_rimefang_caverns` final |
-| Unique | `uq_pendulum_amulet` | The Pendulum | necklace | every 30 Sand spent heals 5% | `d05_glass_tombs` final |
+| Legendary | `leg_ferrymans_hourglass` | The Ferryman's Hourglass | off hand (hourglass focus) | **Two Crossings** — Recall 2 charges, costs 20 Sand | `b_sallow_king` (world boss of `drowned_coast`) |
+| Legendary | `leg_the_unwound_spring` | The Unwound Spring | staff | **Twelve Strikes** — in Stilled Moment, Second Hand and Hand Back are instant and free | `d16_the_spire` final boss, Challenge |
+| Legendary | `leg_band_of_the_long_afternoon` | Band of the Long Afternoon | ring | **Long Afternoon** — Borrowed Minutes 12 s, split on 2 allies at 15% | world boss of `riftmarch` |
+| Legendary | `leg_mantle_of_yesterday` | Mantle of Yesterday | shoulders | **Yesterday's Road** — your Ghost runs 8 s behind | `d14_ashen_reliquary` final boss |
+| Unique | `uq_sundial_wand` | The Sundial Wand | wand | **Noon Shadow** — Lagging stacks to 5 | `d07_thornheart` boss 2 |
+| Unique | `uq_waterclock_slippers` | Waterclock Slippers | feet | **Running Water** — after Recall +40% move 3 s | `d10_rimefang_caverns` final boss |
+| Unique | `uq_pendulum_amulet` | The Pendulum | necklace | **Swing Back** — every 30 Sand spent heals you 5% (Backward: the lowest ally) | `d05_glass_tombs` final boss |
 
 ### 3.21 [Monk](classes/monk.md) — Damage (Healer) · cloth
 
 | Set id | Name | Band | Pieces · slots | Source | 2 / 4 / 6 |
 |---|---|---|---|---|---|
-| `set_monk_storm_fist` | Wraps of the Storm Fist | 25–34 (levelling) | 6 · head, shoulders, chest, hands, legs, feet | `d07_thornheart`, `d08_moonwell_ruins`, `d09_warmasters_pit` bosses; Challenge or the Depth Cache at 60 | 2: Rising Palm +1 Breath after River Step · 4: full-Breath Mountain Palm splashes 50% in 5 m · 6: Seven Stars Kata 60 s, full Breath at its end |
-| `set_monk_still_water` | Robes of the Still Water | 42 / 60 (Challenge) | 6 · as above | `d15_fire_court` / `d16_the_spire` Challenge bosses (class set token, page 08 §12.1); Depth Cache R 10+ (8% class roll) | 2: Wellspring heals 2 allies · 4: Still Breath always reaches 5 allies · 6: at 5 Flow, Hundred Petals heal double |
+| `set_monk_storm_fist` | Wraps of the Storm Fist (Damage) | 25–34 / 60 | 6 · head, shoulders, chest, hands, legs, feet (`it_storm_fist_*`) | bosses of `d07_thornheart`, `d08_moonwell_ruins`, `d09_warmasters_pit` on Normal; level-60 copies on Challenge | 2: Rising Palm +1 Breath on its first cast after River Step · 4: full-Breath Mountain Palm hits all within 5 m at 50% · 6: Seven Stars Kata cooldown 60 s, full Breath when it ends |
+| `set_monk_still_water` | Robes of the Still Water (Healer) | 36–45 / 60 | 6 · head, shoulders, chest, hands, legs, feet (`it_still_water_*`) | bosses of `d10_rimefang_caverns`, `d11_saltdeep_cathedral` on Normal; level 60: Challenge bosses of `d13_cindergate`–`d16_the_spire` and Depth 10+ end chests; the robe is also a Tailoring recipe (page 19) | 2: Wellspring heals two allies per hit · 4: Lotus Rest always reaches 5 allies · 6: at 5 Flow Hundred Petals heals double |
 
 | Kind | id | Name | Slot | Power | Source |
 |---|---|---|---|---|---|
-| Legendary | `leg_lotus_of_unbroken_flow` | Lotus of Unbroken Flow | necklace | Flow max 8; one free repeat per 10 s | `d15_fire_court` any boss on Challenge|
-| Legendary | `leg_mountains_own_wraps` | The Mountain's Own Wraps | weapon (wraps) | 6-Breath Mountain Palm: 6 m shockwave, 150% WD | world boss of `greyridge` (scales; re-rolls at 60 on Challenge kills) |
-| Legendary | `leg_sandals_of_the_eighth_star` | Sandals of the Eighth Star | feet | Seven Stars Kata strikes 9 times; kills give Breath | `d16_the_spire` any boss on Challenge|
-| Legendary | `leg_ring_of_the_quiet_tide` | Ring of the Quiet Tide | ring | Still Breath instant; overheal becomes a 6 s barrier | `d13_cindergate` final |
-| Unique | `uq_iron_knuckle_wraps` | Iron-Knuckle Wraps | weapon (wraps) | critical Rising Palm +1 Breath | `d03_deepdelve` boss 2 |
-| Unique | `uq_crane_stance_sash` | Crane-Stance Sash | legs | River Step 2 charges | `d05_glass_tombs` boss 1 |
-| Unique | `uq_bell_of_the_temple` | Bell of the Mountain Temple | necklace | at full Breath, Tempo refills 50% faster | `d04_bellows_keep` final |
+| Legendary | `leg_lotus_of_unbroken_flow` | Lotus of Unbroken Flow | necklace | **Unbroken** — Flow max 8; the first repeated spell in 10 s does not break it | `b_three_petitioners` (`d15_fire_court`) |
+| Legendary | `leg_mountains_own_wraps` | The Mountain's Own Wraps | wraps | **The Mountain Answers** — 6-Breath Mountain Palm sends a 6 m shockwave, 150% WD | `b_grief_in_iron` (world boss of `greyridge`) |
+| Legendary | `leg_sandals_of_the_eighth_star` | Sandals of the Eighth Star | feet | **Eighth Star** — Seven Stars Kata strikes 9 times; kills during it +1 Breath | `d16_the_spire` end chest, Challenge; Depth 15+ end chests |
+| Legendary | `leg_ring_of_the_quiet_tide` | Ring of the Quiet Tide | ring | **Quiet Tide** — Lotus Rest lands at once; overheal becomes a 6 s barrier | `b_castellan_vorhane` (`d13_cindergate` end boss) |
+| Unique | `uq_iron_knuckle_wraps` | Iron-Knuckle Wraps | wraps | **Knuckle Down** — a critical Rising Palm +1 Breath | `b_warden_seven` (`d03_shaft_seven` boss 2) |
+| Unique | `uq_crane_stance_sash` | Crane-Stance Sash | legs | **One Leg** — River Step 2 charges | `b_orrun_the_glassblower` (`d05_glass_tombs` boss 1) |
+| Unique | `uq_bell_of_the_temple` | Bell of the Mountain Temple | necklace | **Bell Note** — at full Breath Tempo refills 50% faster | `b_grumvak_kilnbreaker` (`d04_bellows_keep` end boss) |
 
 ### 3.22 [Shaman](classes/shaman.md) — Healer (Damage) · medium
 
 | Set id | Name | Band | Pieces · slots | Source | 2 / 4 / 6 |
 |---|---|---|---|---|---|
-| `set_shaman_spiritcaller` | Spiritcaller's Hides | 19–28 (levelling) | 6 · head, shoulders, chest, hands, legs, feet | `d05_glass_tombs`, `d06_sandsworn_vault`, `d07_thornheart` bosses; Challenge or the Depth Cache at 60 | *(round-1 power tied to a removed mechanic; the class file writes the new one)* |
-| `set_shaman_old_bones` | Regalia of the Old Bones | 30 / 42 (Challenge) | 6 · as above | `d15_fire_court` / `d16_the_spire` Challenge bosses (class set token, page 08 §12.1); Depth Cache R 10+ (8% class roll) | *(round-1 power tied to a removed mechanic; the class file writes the new one)* |
+| `set_shaman_storyteller` | The Storyteller's Oilskins | 19–28 / 60 | 6 · head, shoulders, chest, hands, legs, feet (`it_storyteller_*`) | bosses of `d05_glass_tombs`, `d06_sandsworn_vault`, `d07_thornheart` on Normal; level-60 copies on Challenge | 2: riders last 1 spell longer · 4: a tale that completes a cycle refunds 60 mana, −5 s on the other two tales · 6: Crane's Rain always carries the Crane rider at 50% |
+| `set_shaman_great_storm` | Regalia of the Great Storm | 36–45 / 60 | 6 · head, shoulders, chest, hands, legs, feet (`it_great_storm_*`) | bosses of `d10_rimefang_caverns`, `d11_saltdeep_cathedral` on Normal; level 60: Challenge bosses of `d13_cindergate`–`d16_the_spire` and Depth 10+ end chests; the hauberk is also a Leatherworking recipe from `b_rimefang` | 2: the Great Storm lasts 4 s longer · 4: Great Storm lockout 60 s; Damage focus: its bolts Stagger · 6: in the Great Storm each spell calls a small storm-beast that repeats its rider at 50% |
 
 | Kind | id | Name | Slot | Power | Source |
 |---|---|---|---|---|---|
-| Legendary | `leg_bonechant_staff` | Bonechant, the Singing Staff | staff | *(round-1 power tied to a removed mechanic; the class file writes the new one)* | `d10_rimefang_caverns` any boss on Challenge|
-| Legendary | `leg_headdress_of_four_winds` | Headdress of the Four Winds | head | *(round-1 power tied to a removed mechanic; the class file writes the new one)* | `d15_fire_court` end boss on Challenge |
-| Legendary | `leg_riverstone_torc` | The Riverstone Torc | necklace | Riverspirit jumps 6 times; last overheal becomes a barrier | world boss of `whisperwood` |
-| Legendary | `leg_pelt_of_the_great_bear` | Pelt of the Great Bear | chest | *(round-1 power tied to a removed mechanic; the class file writes the new one)* | `d10_rimefang_caverns` final |
-| Unique | `uq_rattle_of_cinder_teeth` | Rattle of Cinder Teeth (was `uq_rattle_of_ember_teeth`) | sceptre | *(round-1 power tied to a removed mechanic; the class file writes the new one)* | `d09_warmasters_pit` boss 3 |
-| Unique | `uq_tide_mothers_bracers` | Tide-Mother's Bracers | hands | Springwell heals 3 allies a pulse | `d02_drowned_mill` final |
-| Unique | `uq_windborne_moccasins` | Windborne Moccasins | feet | *(round-1 power tied to a removed mechanic; the class file writes the new one)* | `d06_sandsworn_vault` final |
+| Legendary | `leg_staff_of_the_long_telling` | Staff of the Long Telling | staff | **Long Telling** — riders last 5 spells and 20 s | `d16_the_spire` end boss, Challenge; Depth 15+ end chests |
+| Legendary | `leg_headdress_of_three_skies` | Headdress of Three Skies | head | **Three Skies** — Great Storm lockout 60 s; thunder strikes twice a second | `b_fire_king_kaedros` (`d15_fire_court` end boss, Challenge) |
+| Legendary | `leg_riverstone_torc` | The Riverstone Torc | necklace | **River Never Ends** — while the Crane rides, Rainsong jumps to 3 more allies at 50% | `b_hungering_brood` (world boss of `whisperwood`) |
+| Legendary | `leg_ox_hide_mantle` | The Ox-Hide Mantle | shoulders | **The Ox Stands Over You** — Yoke of the Ox on two allies; its break stamp doubled | `b_rimefang` (`d10_rimefang_caverns` end boss) |
+| Unique | `uq_rattle_of_storm_teeth` | Rattle of Storm Teeth | sceptre | **Loud Teeth** — the Thunder Ox's entrance stamp is 8 m, Staggers 1 s | `b_warmaster_drogath` (`d09_warmasters_pit` end boss) |
+| Unique | `uq_tide_mothers_bracers` | Tide-Mother's Bracers | hands | **Wide Rain** — Crane's Rain circle 11 m | `b_the_grindwheel` (`d02_drowned_mill` end boss) |
+| Unique | `uq_windborne_moccasins` | Windborne Moccasins | feet | **Light Foot** — the Wind Hare tale's cooldown is 6 s | `b_the_sand_sovereign` (`d06_sandsworn_vault` end boss) |
 
-### 3.23 [Witch Hunter](classes/witch_hunter.md) — Damage · medium
+### 3.23 [Witch Hunter](classes/witch_hunter.md) — Damage (Support) · medium
 
 | Set id | Name | Band | Pieces · slots | Source | 2 / 4 / 6 |
 |---|---|---|---|---|---|
-| `set_witch_hunter_inquisitor` | The Inquisitor's Coat | 28–39 (levelling) | 6 · head, shoulders, chest, hands, legs, feet | `d08_moonwell_ruins`, `d09_warmasters_pit`, `d10_rimefang_caverns` bosses; Challenge or the Depth Cache at 60 | 2: Hexbreak 8 s · 4: Inquest Leap +50 Evidence on interrupt · 6: Verdict refunds 2 Silver on a kill |
-| `set_witch_hunter_silver_writ` | Garb of the Silver Writ | 50 / 60 (Challenge) | 6 · as above | `d15_fire_court` / `d16_the_spire` Challenge bosses (class set token, page 08 §12.1); Depth Cache R 10+ (8% class roll) | 2: Silver refills every 3 s · 4: Brand of Guilt Condemns a target below 30% (not bosses) · 6: Verdict needs 70 Evidence on bosses and rares |
+| `set_witch_hunter_inquisitor` | The Inquisitor's Coat | 28–39 / 60 | 6 · head, shoulders, chest, hands, legs, feet (`it_inquisitor_*`) | bosses of `d08_moonwell_ruins`, `d09_warmasters_pit`, `d10_rimefang_caverns` on Normal; level-60 copies on Challenge | 2: Hexbreak cooldown 8 s · 4: Inquest Bolt +50 Evidence on an interrupt · 6: Verdict refunds 2 Silver if it kills |
+| `set_witch_hunter_silver_writ` | Garb of the Silver Writ | 48–51 / 60 | 6 · head, shoulders, chest, hands, legs, feet (`it_silver_writ_*`) | bosses of `d12_unmade_workshop` on Normal; level 60: Challenge bosses of `d13_cindergate`–`d16_the_spire` and Depth 10+ end chests; the coat only from the `d15`/`d16` end bosses (Challenge) or a Leatherworking recipe learned from them | 2: Silver refills every 3 s · 4: Brand of Guilt Condemns a target below 30% at once (not bosses); Support focus: Silver Ward 12 s · 6: Verdict needs 70 Evidence on bosses and rares |
 
 | Kind | id | Name | Slot | Power | Source |
 |---|---|---|---|---|---|
-| Legendary | `leg_the_last_confession` | The Last Confession | crossbow | Verdict pierces a 45 m line, full 900% to each Condemned | `d11_saltdeep_cathedral` end boss on Challenge |
-| Legendary | `leg_saltwrit_longcoat` | The Saltwrit Longcoat | chest | Salt Circle moves with you, 10 m, 12 s | `d11_saltdeep_cathedral` final |
-| Legendary | `leg_brim_of_the_long_hunt` | Brim of the Long Hunt | head | Witchsight always on within 15 m | world boss of `drowned_coast` |
-| Legendary | `leg_nine_silver_nails` | The Nine Silver Nails | ring | Silver max 9; each spent −2 s on Verdict | `d16_the_spire` any boss on Challenge|
-| Unique | `uq_tribunal_hand_crossbow` | Hand Crossbow of the Tribunal | 1H crossbow | Silver Quarrel fires 2 at 70% for 1 Silver | `d06_sandsworn_vault` boss 2 |
-| Unique | `uq_cold_iron_manacles` | Cold-Iron Manacles | hands | Hexbreak's Silence 3 s | `d08_moonwell_ruins` boss 1 |
-| Unique | `uq_gallows_oath` | The Gallows Oath | necklace | Condemned targets take +10% from your whole group | `d11_saltdeep_cathedral` boss 2 |
+| Legendary | `leg_the_last_confession` | The Last Confession | crossbow | **Last Words** — Verdict's bolt pierces a 45 m line, full 900% to each Condemned | `b_hungering_brood` (world boss of `whisperwood`) |
+| Legendary | `leg_saltwrit_longcoat` | The Saltwrit Longcoat | chest | **Walking Circle** — Salt Circle moves with you, 10 m, 12 s | `d11_saltdeep_cathedral` final boss |
+| Legendary | `leg_brim_of_the_long_hunt` | Brim of the Long Hunt | head | **Always Watching** — Witchsight always on within 15 m | world boss of `drowned_coast` |
+| Legendary | `leg_nine_silver_nails` | The Nine Silver Nails | ring | **Nine Nails** — Silver max 9; each Silver spent −2 s on Verdict | `d16_the_spire`, Challenge; Depth 15+ end chests |
+| Unique | `uq_tribunal_hand_crossbow` | Hand Crossbow of the Tribunal | hand crossbow | **Double Writ** — Silver Quarrel fires 2 quarrels at 70% for 1 Silver | `d06_sandsworn_vault` boss 2 |
+| Unique | `uq_cold_iron_manacles` | Cold-Iron Manacles | hands | **Shackled** — Hexbreak's Silence lasts 3 s | `d08_moonwell_ruins` boss 1 |
+| Unique | `uq_gallows_oath` | The Gallows Oath | necklace | **Witnessed** — Condemned targets take +10% from your whole group (Support focus +15%) | `d11_saltdeep_cathedral` boss 2 |
 
 ### 3.24 [Knight](classes/knight.md) — Tank (Support) · heavy
 
 | Set id | Name | Band | Pieces · slots | Source | 2 / 4 / 6 |
 |---|---|---|---|---|---|
-| `set_knight_vowkeeper` | Plate of the Vowkeeper | 13–22 (levelling) | 6 · head, shoulders, chest, hands, legs, feet | `d03_deepdelve`, `d04_bellows_keep`, `d05_glass_tombs` bosses; Challenge or the Depth Cache at 60 | 2: Vow of Protection moves 30% · 4: each Vow-moved hit +2 Momentum · 6: free Valiant Charge on your Sworn ally every 30 s |
-| `set_knight_bannerlord` | Bannerlord's Harness | 42 / 60 (Challenge) | 6 · as above | `d15_fire_court` / `d16_the_spire` Challenge bosses (class set token, page 08 §12.1); Depth Cache R 10+ (8% class roll) | 2: banner 45 s · 4: Line of Shields spreads the banner aura behind you · 6: Unyielding Oath plants the banner; 120 s at the banner |
+| `set_knight_vowkeeper` | Plate of the Vowkeeper | 13–22 / 60 | 6 · head, shoulders, chest, hands, legs, feet (`it_vowkeeper_*`) | bosses of `d03_shaft_seven`, `d04_bellows_keep`, `d05_glass_tombs` on Normal; level-60 copies on Challenge | 2: Vow of Protection moves 30% · 4: each hit moved +2 Momentum · 6: Valiant Charge on your Vowed ally free of cooldown once per 30 s |
+| `set_knight_bannerlord` | Bannerlord's Harness | 42–45 / 60 | 6 · head, shoulders, chest, hands, legs, feet (`it_bannerlord_*`) | bosses of `d11_saltdeep_cathedral` on Normal; level 60: Challenge bosses of `d13_cindergate`–`d16_the_spire` and Depth 10+ end chests; the hauberk only from `b_fire_king_kaedros` (`d15_fire_court`) or a Blacksmithing recipe learned from it | 2: the banner lasts 45 s · 4: Line of Shields gives your banner's aura to everyone behind you · 6: Unyielding Oath plants your banner; 120 s cooldown at the banner |
 
 | Kind | id | Name | Slot | Power | Source |
 |---|---|---|---|---|---|
-| Legendary | `leg_aegis_of_the_unbroken_vow` | Aegis of the Unbroken Vow | shield | Vow moves 35%; 1 Momentum per 2% moved | `d01_hollow_barrow` end boss on Challenge |
-| Legendary | `leg_hammer_of_the_marching_banner` | Hammer of the Marching Banner | hammer | banner carried on your back (8 m aura) | `d15_fire_court` any boss on Challenge|
-| Legendary | `leg_helm_of_the_sworn_sentinel` | Helm of the Sworn Sentinel | head | Gauntlet taunts all within 8 m; 6 s cooldown | world boss of `frostmantle` |
-| Legendary | `leg_gauntlets_of_the_intercessor` | Gauntlets of the Intercessor | hands | Intercept takes 2 hits; ally −20% damage 4 s | `d13_cindergate` final |
-| Unique | `uq_squires_first_shield` | The Squire's First Shield | shield | Reproach +18 Momentum | `d01_hollow_barrow` final |
-| Unique | `uq_pennant_of_brightwater` | Pennant of Brightwater | necklace | banner lasts 45 s | `d02_drowned_mill` boss 2 |
-| Unique | `uq_oathbreakers_greaves` | The Oathbreaker's Greaves | legs | Unyielding Oath 150 s, lasts 8 s | `d09_warmasters_pit` final |
+| Legendary | `leg_aegis_of_the_unbroken_vow` | Aegis of the Unbroken Vow | shield | **Unbroken Vow** — the Vow moves 35%; +1 Momentum per 2% health moved | `b_slagborn` (world boss of `kingsfire`) |
+| Legendary | `leg_hammer_of_the_marching_banner` | Hammer of the Marching Banner | hammer | **Marching Standard** — the banner rides on your back (8 m aura) | `b_kennelmaster_varro` (`d15_fire_court`) |
+| Legendary | `leg_helm_of_the_sworn_sentinel` | Helm of the Sworn Sentinel | head | **Sentinel's Call** — Gauntlet taunts every enemy within 8 m of its target; cooldown 6 s | `b_standing_ruin` (world boss of `frostmantle`) |
+| Legendary | `leg_gauntlets_of_the_intercessor` | Gauntlets of the Intercessor | hands | **Intercessor** — Intercept takes the next 2 hits; the ally takes 20% less for 4 s | `b_castellan_vorhane` (`d13_cindergate` end boss) |
+| Unique | `uq_squires_first_shield` | The Squire's First Shield | shield | **Keen Squire** — Reproach builds 18 Momentum | `b_hollow_thane` (`d01_hollow_barrow` end boss) |
+| Unique | `uq_pennant_of_brightwater` | Pennant of Brightwater | necklace | **Long Watch** — your banner lasts 45 s | `b_wren_grist` (`d02_drowned_mill` boss 2) |
+| Unique | `uq_oathbreakers_greaves` | The Oathbreaker's Greaves | legs | **Broken Promise** — Unyielding Oath 150 s cooldown, lasts 8 s | `b_warmaster_drogath` (`d09_warmasters_pit` end boss) |
 
-### 3.25 [Sorcerer](classes/sorcerer.md) — Damage · cloth
+### 3.25 [Sorcerer](classes/sorcerer.md) — Damage (Support) · cloth
 
 | Set id | Name | Band | Pieces · slots | Source | 2 / 4 / 6 |
 |---|---|---|---|---|---|
-| `set_sorcerer_gamblers_regalia` | The Gambler's Regalia | 25–30 (levelling) | 6 · head, shoulders, chest, hands, legs, feet | `d07_thornheart`, `d08_moonwell_ruins` bosses (Normal 15% each); all six on Challenge | 2: Chaos results 1–2 rerolled; Surge +4% Mana · 4: same-element Prism Spray bands merge for +60% · 6: Sixfold Die never below 3 |
-| `set_sorcerer_vestments_of_the_broken_wheel` | Vestments of the Broken Wheel | 60 (Challenge) | 6 · as above | `d15_fire_court` / `d16_the_spire` Challenge bosses (class set token, page 08 §12.1); Depth Cache R 10+ (8% class roll) | 2: Flux Bolt −0.3 s; every 4th carries 2 riders · 4: Unstable Orb +3 Surge a pulse · 6: Wild Crown on 18–20; Chance Maelstrom no cooldown while crowned |
-| `set_sorcerer_stormglass_robes` | Stormglass Robes | 60 (Depth) | 6 · as above | `d09`–`d14` Depth Cache R 8+ | 2: Nudge 3rd charge · 4: Fortune's Shell lands heads at 3 Nudges · 6: each Nudge +8% to next Wild spell |
+| `set_sorcerer_gamblers_regalia` | The Gambler's Regalia | 25–30 / 60 | 6 · head, shoulders, chest, hands, legs, feet | bosses of `d07_thornheart` and `d08_moonwell_ruins` (Normal 15% per kill; Challenge at 60); Depth runs of both | 2: Chaos 1–2 rerolled; each Flux release +4% Mana · 4: same-element Prism Spray bands merge, +60% · 6: the Sixfold Die never rolls below 3 |
+| `set_sorcerer_broken_wheel` | Vestments of the Broken Wheel | 60 | 6 · as above | one piece per Challenge boss of `d15_fire_court` / `d16_the_spire`; Depth 10+ end chest, any dungeon (8%) | 2: Flux Bolt −0.3 s cast; every 4th carries two riders · 4: Unstable Orb pulses +3 Flux; the pop releases at 60+ Flux · 6: Wild Crown on 18–20; crowned, Chance Maelstrom has no cooldown |
+| `set_sorcerer_wild_pact` | The Wild Pact (Support; crafted) | 60 | 6 · as above | **Tailoring** (page 19); recipe from the `fac_lantern_house` quartermaster at Trusted; each piece needs a Tear-glass shard (Depth 5+ end chests, world bosses of `riftmarch` and `kingsfire`) | 2: Nudge 3rd charge; boons 8 s · 4: Fortune's Shell always heads at 3 Nudges; on an ally also the Blaze boon · 6: each Nudge spent makes the next Wild boon reach two party members, +8% |
 
 | Kind | id | Name | Slot | Power | Source |
 |---|---|---|---|---|---|
-| Legendary | `leg_the_crooked_die` | The Crooked Die | off hand (effigy) | Sixfold Die rolls twice and adds both | `d15_fire_court` end boss on Challenge (Challenge 8%, Normal 3%) |
-| Legendary | `leg_wheelwrights_staff` | Wheelwright's Staff | staff | Wheel shows the next two elements | `d12_unmade_workshop` final, Challenge or the Depth Cache 4% |
-| Legendary | `leg_crown_of_the_mad_magister` | Crown of the Mad Magister | head | Surge threshold 60; Chaos Table uses a d12 | `d16_the_spire` secret boss on Challenge |
-| Legendary | `leg_quadrant_bracers` | Quadrant Bracers | hands | 4 elements in a row: 8 s Quadrant, +40% damage | world boss of `riftmarch`, 6% |
-| Legendary | `leg_orb_of_second_chances` | Orb of Second Chances | off hand (Seer's Orb) | Unstable Orb can be caught and re-thrown once | `d11_saltdeep_cathedral` any boss on Challenge% |
-| Unique | `uq_spinners_wand` | The Spinner's Wand | wand | +12% cast speed; Hollow rolls +1% cast speed (10 stacks) | `d05_glass_tombs` final |
-| Unique | `uq_patchwork_hood` | Patchwork Hood | head | "Wrong Hat" also gives +20% damage 10 s | `d02_drowned_mill` final, 12% |
-| Unique | `uq_coinmaster_sash` | Coinmaster's Sash | legs | Fortune's Shell coin shows early; tails heals +50% | world boss of `greyridge` |
-| Unique | `uq_cinder_rime_signet` | Cinder-Rime Signet (was `uq_ember_rime_signet`) | ring | a Fire spell then an Ice spell (or the reverse) shatters for 100% SP | `d10_rimefang_caverns` boss 2 |
+| Legendary | `leg_the_crooked_die` | The Crooked Die | off hand (effigy) | the Sixfold Die rolls twice and adds both faces | `b_fire_king_kaedros` (`d15_fire_court` end boss), Challenge 6%, Normal 2% |
+| Legendary | `leg_wheelwrights_staff` | Wheelwright's Staff | staff | the Wheel shows the next two elements; Nudge moves either | `b_oddrin_the_unmaker` (`d12_unmade_workshop` end boss), Challenge 4%, its Depth end chest 2% |
+| Legendary | `leg_crown_of_the_mad_magister` | Crown of the Mad Magister | head | Flux threshold 60, the table uses a d12 | `b_marchheart` (`d16_the_spire` secret boss) |
+| Legendary | `leg_quadrant_bracers` | Quadrant Bracers | hands | four Wild spells of four elements in a row: Quadrant, 8 s, +40% | `b_unmoored` (world boss of `riftmarch`), 6% |
+| Legendary | `leg_orb_of_second_chances` | Orb of Second Chances | off hand (Seer's Orb) | Unstable Orb can be caught and thrown again once | world boss of `drowned_coast`, 6% |
+| Unique | `uq_spinners_wand` | The Spinner's Wand | wand | +12% cast speed; Hollow rolls +1% each 10 s (stacks 10) | `b_king_sethar_unshattered` (`d05_glass_tombs` end boss) |
+| Unique | `uq_patchwork_hood` | Patchwork Hood | head | Chaos "Wrong Hat" also +20% damage 10 s | `b_the_grindwheel` (`d02_drowned_mill` end boss), 12% |
+| Unique | `uq_coinmaster_sash` | Coinmaster's Sash | legs | Fortune's Shell's coin shows early; tails heals +50% | `b_grief_in_iron` (world boss of `greyridge`) |
+| Unique | `uq_blaze_rime_signet` | Blaze-and-Rime Signet (was `uq_ember_rime_signet`) | ring | Blaze then Rime (or back) shatters for 100% SP | `b_rimeweaver_seidra` (`d10_rimefang_caverns` boss 2) |
 
 ### 3.26 [Runesmith](classes/runesmith.md) — Tank (Damage) · heavy
 
 | Set id | Name | Band | Pieces · slots | Source | 2 / 4 / 6 |
 |---|---|---|---|---|---|
-| `set_runesmith_forgewardens_plate` | Forgewarden's Plate | 14–18 (levelling) | 6* | `d03_deepdelve`, `d04_bellows_keep` bosses (Normal 15%); complete on Challenge | 2: Etching Blow +20 Momentum · 4: Speak the Runes at 3+ gives a 10% barrier · 6: Holding rune 20 s, 8 m |
-| `set_runesmith_glacier_runes` | Runes of the Glacier Throne | 42 (Challenge) | 6* | `d15_fire_court` / `d16_the_spire` Challenge bosses (class set token, page 08 §12.1); Depth Cache R 10+ (8% class roll) | 2: ground runes slow an extra 10% · 4: Stoneblood Rune carves a Rune of Warding · 6: Spoken Ward Stone freezes non-bosses 2 s |
-| `set_runesmith_cinderforged_aegis` | The Cinderforged Aegis (was `set_runesmith_emberforged_aegis`) | 60 (Challenge) | 6* (6th on Challenge only) | `d15_fire_court` / `d16_the_spire` Challenge bosses (class set token, page 08 §12.1); Depth Cache R 10+ (8% class roll) | 2: +1 Rune Slate socket · 4: Grand Inscription −30 s, rim runes taunt · 6: each Runeforged: party −8% damage taken |
+| `set_runesmith_forgewardens_plate` | Forgewarden's Plate | 14–18 / 60 | 6* | bosses of `d03_shaft_seven` and `d04_bellows_keep` (Normal 15%; Challenge at 60); their Depth end chests | 2: Etching Blow restores 4% Mana · 4: Speak the Runes with 3+ runes gives a 10% barrier · 6: Calling Stone's Holding rune 20 s, 8 m |
+| `set_runesmith_rimefang_runes` | Runes of the Rimefang (was `set_runesmith_glacier_runes`) | 36–39 / 60 | 6* | bosses of `d10_rimefang_caverns` (Normal 15%; Challenge at 60); world boss of `frostmantle` (one piece, 10%) | 2: your ground runes slow +10% · 4: Stoneblood Rune also carves a Rune of Warding · 6: a Spoken Ward Stone freezes non-bosses 2 s |
+| `set_runesmith_anvilborn_aegis` | The Anvilborn Aegis | 60 | 6* | one piece per Challenge boss of `d15_fire_court` / `d16_the_spire`; Depth 10+ end chest, any dungeon (8%) | 2: +1 Rune Slate socket (max 6) · 4: Grand Inscription −30 s; rim runes taunt · 6: every Runeforged gives the party 8% less damage taken |
 
 | Kind | id | Name | Slot | Power | Source |
 |---|---|---|---|---|---|
-| Legendary | `leg_first_hammer_of_anvilgate` | First Hammer of Anvilgate | 1H hammer | Etching Blow brands every enemy in the arc for one socket | `d04_bellows_keep` final, Challenge or the Depth Cache 4% |
-| Legendary | `leg_slate_of_unwritten_names` | Slate of Unwritten Names | shield | 7 sockets; runes past 5 free; blocks +2 s to runes | `d16_the_spire` any boss on Challenge(Challenge 6%) |
-| Legendary | `leg_ironroot_greaves` | Ironroot Greaves | legs | in your own ground rune −12% damage, no Momentum decay | world boss of `frostmantle`, 6% |
-| Legendary | `leg_mountains_patience` | The Mountain's Patience | chest | Stoneblood Rune +1 s per rune Spoken (cap +8 s) | `d10_rimefang_caverns` end boss on Challenge (3%, 5% on re-clears) |
-| Legendary | `leg_the_last_word` | The Last Word | 2H hammer | Speak the Runes at 5+: +25% weapon per rune on the highest-health enemy | `d14_ashen_reliquary` final, Depth Cache R 10+, 5% |
-| Unique | `uq_chisel_of_the_deep` | Chisel of the Deep | 1H hammer | +10% Momentum; brands last 20 s | `d03_deepdelve` final |
+| Legendary | `leg_first_hammer_of_anvilgate` | First Hammer of Anvilgate | 1H hammer | Etching Blow brands every enemy in the arc for one socket | `b_grumvak_kilnbreaker` (`d04_bellows_keep` end boss) on Challenge, 4%; its Depth end chest 2% |
+| Legendary | `leg_slate_of_unwritten_names` | Slate of Unwritten Names | off hand (shield) | 7 sockets; runes past 5 cost no Mana on Speak; blocks +2 s to all runes | a Challenge-mode `d16_the_spire` boss (page 12 names which), 5% |
+| Legendary | `leg_ironroot_greaves` | Ironroot Greaves | legs | in your own ground rune: 12% less damage, +0.5% Mana a second | world boss of `frostmantle`, 6% |
+| Legendary | `leg_mountains_patience` | The Mountain's Patience | chest | Stoneblood Rune +1 s per rune Spoken (cap +8 s) | `b_rimefang` (`d10_rimefang_caverns` end boss) on Challenge, 4% |
+| Legendary | `leg_the_last_word` | The Last Word | 2H hammer | Speak the Runes with 5+ runes: +25% WD per rune to the highest-health enemy | `b_sarn_veydrec_herald` (`d14_ashen_reliquary` end boss) on Challenge, 4%; Depth 15+ end chest, 1% |
+| Unique | `uq_chisel_of_the_deep` | Chisel of the Deep | 1H hammer | +10% Mana regeneration; brands last 20 s | `b_stonegullet` (`d03_shaft_seven` end boss) |
 | Unique | `uq_runecarvers_bracers` | Runecarver's Bracers | hands | fade-pops at 75% | `d06_sandsworn_vault` boss 2 |
-| Unique | `uq_stone_of_the_clan_hall` | Stone of the Clan Hall | shield | Calling Stone taunt 5 s; +5% block | world boss of `greyridge` |
-| Unique | `uq_wardwell_girdle` | Wardwell Girdle | waist | Ward Stone's barrier also on you outside it | `d11_saltdeep_cathedral` boss 1 |
+| Unique | `uq_stone_of_the_clan_hall` | Stone of the Clan Hall | off hand (shield) | Calling Stone's taunt 5 s; +5% block | `b_grief_in_iron` (world boss of `greyridge`) |
+| Unique | `uq_wardwell_girdle` | Wardwell Girdle | waist | Ward Stone's barrier also reaches you outside it | `b_deacon_mourne` (`d11_saltdeep_cathedral` boss 1) |
 
-### 3.27 [Shadow Dancer](classes/shadow_dancer.md) — Damage · light
-
-| Set id | Name | Band | Pieces · slots | Source | 2 / 4 / 6 |
-|---|---|---|---|---|---|
-| `set_shadow_dancer_masquerade_silks` | Masquerade Silks | 22–30 (levelling) | 6* | `d06_sandsworn_vault`, `d07_thornheart`, `d08_moonwell_ruins` bosses (Normal 12%); complete on Challenge | *(round-1 power tied to a removed mechanic; the class file writes the new one)* |
-| `set_shadow_dancer_choir_of_the_unlit` | Choir of the Unlit | 50 (Challenge) | 6* | `d15_fire_court` / `d16_the_spire` Challenge bosses (class set token, page 08 §12.1); Depth Cache R 10+ (8% class roll) | 2: Pirouette Cut 20 Tempo · 4: Mirror Waltz leaves a Shadow at each hit · 6: Dance stacks to 8 |
-| `set_shadow_dancer_duskwoven_garb` | Duskwoven Garb (was `set_shadow_dancer_veilwoven_garb`) | 60 (Challenge) | 6* (6th on Challenge only) | `d15_fire_court` / `d16_the_spire` Challenge bosses (class set token, page 08 §12.1); Depth Cache R 10+ (8% class roll) | 2: Shadow swap 2 s · 4: Last Bow's strikes leave shadow voids · 6: hold 4 Shadows |
-
-| Kind | id | Name | Slot | Power | Source |
-|---|---|---|---|---|---|
-| Legendary | `leg_twin_of_the_moonwell` | Twin of the Moonwell | dagger (main hand) | newest Shadow copies your basic attacks at 35% | `d08_moonwell_ruins` final, Challenge or the Depth Cache 4% |
-| Legendary | `leg_curtainfall_slippers` | Curtainfall Slippers | feet | every shadow swap leaves a 3 m dusk patch 3 s | `d11_saltdeep_cathedral` secret boss on Challenge |
-| Legendary | `leg_the_understudy` | The Understudy | dagger (off hand) | a killing blow swaps you with your newest Shadow (180 s) | `d15_fire_court` any boss on Challenge(Challenge 6%) |
-| Legendary | `leg_lantern_eaters_mask` | Lantern-Eater's Mask | head | in dark places (caves, crypts), Shadows echo at 60% | world boss of `whisperwood`, 6% |
-| Unique | `uq_nettle_waltz` | Nettle Waltz | dagger | Pirouette Cut poisons, 50% weapon over 6 s | `d02_drowned_mill` boss 2 |
-| Unique | `uq_dusk_silk_sash` | Dusk-Silk Sash | waist | Dusk Curtain +2 s; its hidden state lasts 12 s | `d05_glass_tombs` final |
-| Unique | `uq_pinwheel_blades` | Pinwheel Blades | dagger pair (one item) | Mirror Waltz +2 targets per hop | `d09_warmasters_pit` final |
-
-### 3.28 [Tinker](classes/tinker.md) — Damage (Support) · medium
+### 3.27 [Shadow Dancer](classes/shadow_dancer.md) — Damage (Tank) · light
 
 | Set id | Name | Band | Pieces · slots | Source | 2 / 4 / 6 |
 |---|---|---|---|---|---|
-| `set_tinker_workshop_harness` | The Workshop Harness | 13–18 (levelling) | 6* | `d03_deepdelve`, `d04_bellows_keep` bosses (Normal 15%); complete on Challenge | 2: gadgets +20% duration · 4: Cog Sentry shots 10% to drop Scrap · 6: Springtrap Mine throws 4 |
-| `set_tinker_unmade_blueprints` | The Unmade Blueprints | 48–51 (levelling) | 6* | `d12_unmade_workshop` bosses (Normal 15%); complete on Challenge | 2: Overclock costs 2 Scrap · 4: Overloads heal allies in 5 m for 60% weapon · 6: Iron Walker carries a free Cog Sentry |
-| `set_tinker_cinderforge_rig` | Cinderforge Rig (was `set_tinker_emberforge_rig`) | 60 (Challenge) | 6* (6th on Challenge only) | `d15_fire_court` / `d16_the_spire` Challenge bosses (class set token, page 08 §12.1); Depth Cache R 10+ (8% class roll) | 2: Aether Battery 18 s · 4: Patchwork Drone pops at 40%, twice · 6: Contraption every 6 s, needs 4 gadgets |
+| `set_shadow_dancer_masquerade_silks` | Masquerade Silks | 22–30 / 60 | 6* | bosses of `d06_sandsworn_vault`, `d07_thornheart`, `d08_moonwell_ruins` (Normal 12%; Challenge at 60); their Depth end chests | 2: echoes 40% · 4: Backstep Fade leaves 2 Shadows · 6: Silhouette Strike from Shrouded resets Dusk Curtain (once per 90 s) |
+| `set_shadow_dancer_choir_of_the_unlit` | Choir of the Unlit | 42–45 / 60 | 6* | bosses of `d11_saltdeep_cathedral` (Normal 15%; Challenge at 60); `b_sallow_king` (world boss of `drowned_coast`, one piece, 10%) | 2: Pirouette Cut costs 30 Tempo · 4: Mirror Waltz leaves a Shadow at every hit spot · 6: Dance stacks go to 8 |
+| `set_shadow_dancer_duskwoven_garb` | Duskwoven Garb (was `set_shadow_dancer_veilwoven_garb`) | 60 | 6* | one piece per Challenge boss of `d15_fire_court` / `d16_the_spire`; Depth 10+ end chest, any dungeon (8%) | 2: Shadowswap cooldown 2 s · 4: Last Bow's Shadow strikes leave 3 m shadow pools · 6: hold 4 Shadows |
 
 | Kind | id | Name | Slot | Power | Source |
 |---|---|---|---|---|---|
-| Legendary | `leg_perpetual_spring` | The Perpetual Spring | necklace | gadget cap +1 (max 6) | `d12_unmade_workshop` final, Challenge or the Depth Cache 4% |
-| Legendary | `leg_masterwright_goggles` | Masterwright's Goggles | head | Overclocked gadgets never overload; Overclock 4 Scrap | `d16_the_spire` any boss on Challenge(Challenge 6%) |
-| Legendary | `leg_scrapheart_crossbow` | Scrapheart Crossbow | crossbow | Rivet Shot at 5+ Scrap: 300% weapon, 5 m splash | world boss of `riftmarch`, 6% |
-| Legendary | `leg_pocketwatch_of_the_first_cog` | Pocketwatch of the First Cog | necklace | every 30 s the next gadget is built at double effect | `d11_saltdeep_cathedral` any boss on Challenge% |
-| Legendary | `leg_the_walking_forge` | The Walking Forge | chest | Iron Walker −5 s cooldown per Scrap spent | `d15_fire_court` end boss on Challenge (Challenge 5%) |
-| Unique | `uq_brass_knuckle_crossbow` | Brass-Knuckle Crossbow | hand crossbow | Rivet Shot staggers non-bosses 0.5 s | `d01_hollow_barrow` final, 12% |
-| Unique | `uq_clicking_satchel` | The Clicking Satchel | waist | Scrap cap 15 | `d04_bellows_keep` boss 2 |
-| Unique | `uq_mothwing_gloves` | Mothwing Gloves | hands | Patchwork Drone moves double speed, heals +20% | `d07_thornheart` final |
+| Legendary | `leg_twin_of_the_moonwell` | Twin of the Moonwell | dagger (main hand) | your newest Shadow attacks with your basic attacks at 35% | `b_oruvel_moon_drinker` (`d08_moonwell_ruins` end boss) on Challenge, 4%; its Depth end chest 2% |
+| Legendary | `leg_curtainfall_slippers` | Curtainfall Slippers | feet | every Shadowswap leaves a 3 m patch of dusk for 3 s | `b_the_tidewife` (`d11_saltdeep_cathedral` secret boss) on Challenge, 3% |
+| Legendary | `leg_the_understudy` | The Understudy | dagger (off hand) | if you would die you swap with your newest Shadow and it dies instead (180 s) | a Challenge-mode `d15_fire_court` boss (page 12 names which), 5% |
+| Legendary | `leg_lantern_eaters_mask` | Lantern-Eater's Mask | head | while Shrouded and 4 s after, Shadows echo at 60% | `b_hungering_brood` (world boss of `whisperwood`), 6% |
+| Unique | `uq_nettle_waltz` | Nettle Waltz | dagger | Pirouette Cut applies Poisoned (50% WD over 6 s) | `b_wren_grist` (`d02_drowned_mill` boss 2) |
+| Unique | `uq_dusk_silk_sash` | Dusk-Silk Sash | waist | Dusk Curtain +2 s; Shrouded 12 s | `b_king_sethar_unshattered` (`d05_glass_tombs` end boss) |
+| Unique | `uq_pinwheel_blades` | Pinwheel Blades | dagger pair (one item, both hands) | Mirror Waltz hits +2 targets per hop | `b_warmaster_drogath` (`d09_warmasters_pit` end boss) |
+
+### 3.28 [Tinker](classes/tinker.md) — Damage (Healer) · medium
+
+| Set id | Name | Band | Pieces · slots | Source | 2 / 4 / 6 |
+|---|---|---|---|---|---|
+| `set_tinker_workshop_harness` | The Workshop Harness | 13–18 / 60 | 6* | bosses of `d03_shaft_seven` and `d04_bellows_keep` (Normal 15%; Challenge at 60); their Depth end chests | 2: Devices last +20% · 4: Cog Sentry shots 10% to drop 1 Scrap · 6: Springtrap Mine throws 4 mines |
+| `set_tinker_unmade_blueprints` | The Unmade Blueprints | 48–51 / 60 | 6* | bosses of `d12_unmade_workshop` (Normal 15%; Challenge at 60) | 2: Overclock costs 2 Scrap · 4: every overload heals allies within 5 m for 60% WD · 6: Iron Walker builds a free Cog Sentry on its shoulder |
+| `set_tinker_forgefire_rig` | The Forgefire Rig (was `set_tinker_emberforge_rig`) | 60 | 6* | one piece per Challenge boss of `d15_fire_court` / `d16_the_spire`; Depth 10+ end chest, any dungeon (8%); hands and feet also Engineering 280 (page 19) | 2: Aether Battery 18 s · 4: Patchwork Drone pops at 40%, can pop twice · 6: Contraption fires every 6 s, needs 4 linked Devices |
+
+| Kind | id | Name | Slot | Power | Source |
+|---|---|---|---|---|---|
+| Legendary | `leg_perpetual_spring` | The Perpetual Spring | necklace | Device cap +1 (max 6) | `b_oddrin_the_unmaker` (`d12_unmade_workshop` end boss) on Challenge, 4%; its Depth end chest 2% |
+| Legendary | `leg_masterwright_goggles` | Masterwright's Goggles | head | Overclocked Devices no longer overload; Overclock costs 4 Scrap | a Challenge-mode `d16_the_spire` boss (page 12 names which), 5% |
+| Legendary | `leg_scrapheart_crossbow` | Scrapheart Crossbow | crossbow | Rivet Shot at 5+ Scrap spends 1 for 300% WD and a 5 m splash | `b_unmoored` (world boss of `riftmarch`), 6% |
+| Legendary | `leg_pocketwatch_of_the_first_cog` | Pocketwatch of the First Cog | necklace | every 30 s the next Device is built at double effect | `b_the_finished_thing` (`d12_unmade_workshop` secret boss) on Challenge, 3% |
+| Legendary | `leg_the_walking_forge` | The Walking Forge | chest | Iron Walker −5 s per Scrap spent while it cools down | `b_fire_king_kaedros` (`d15_fire_court` end boss) on Challenge, 5% |
+| Unique | `uq_brass_knuckle_crossbow` | Brass-Knuckle Crossbow | hand crossbow | Rivet Shot staggers non-bosses 0.5 s | `b_hollow_thane` (`d01_hollow_barrow` end boss), 12% |
+| Unique | `uq_clicking_satchel` | The Clicking Satchel | waist | Scrap cap 15 | `b_the_great_bellows` (`d04_bellows_keep` boss 2) |
+| Unique | `uq_mothwing_gloves` | Mothwing Gloves | hands | Patchwork Drone moves at double speed, heals +20% | `b_wyllow_blighted_heart` (`d07_thornheart` end boss) |
 
 ### 3.29 [Priest](classes/priest.md) — Healer (Damage) · light
 
 | Set id | Name | Band | Pieces · slots | Source | 2 / 4 / 6 |
 |---|---|---|---|---|---|
-| `set_priest_lampkeepers_vestments` | The Lampkeeper's Vestments | 19–24 (levelling) | 6* | `d05_glass_tombs`, `d06_sandsworn_vault` bosses (Normal 15%); complete on Challenge | 2: every 3rd Wickflame instant · 4: Candle Ward on a full-health ally heals the lowest for 100% SP · 6: Dawn gives +10% Mana regen |
-| `set_priest_regalia_of_the_sunken_choir` | Regalia of the Sunken Choir | 50 (Challenge) | 6* | `d15_fire_court` / `d16_the_spire` Challenge bosses (class set token, page 08 §12.1); Depth Cache R 10+ (8% class roll) | 2: Choir of Lamps heals a 6th ally · 4: Penumbra alternates Dawn/Dusk at 70% · 6: Equinox resets Choir of Lamps |
-| `set_priest_shroud_of_the_twin_lamps` | Shroud of the Twin Lamps (was `set_priest_veil_of_the_twin_lamps`) | 60 (Challenge) | 6* (6th on Challenge only) | `d15_fire_court` / `d16_the_spire` Challenge bosses (class set token, page 08 §12.1); Depth Cache R 10+ (8% class roll) | 2: Deathward also leaves a Candle Ward · 4: Twilight after Eclipse Hymn halves spell costs · 6: Anchor 2 charges |
+| `set_priest_lampkeepers_vestments` | The Lampkeeper's Vestments | 19–24 / 60 | 6* | bosses of `d05_glass_tombs` and `d06_sandsworn_vault` (Normal 15%; Challenge at 60); their Depth end chests | 2: every 3rd Wickflame heal is instant · 4: Candle Ward on a full-health ally heals the lowest ally for 100% SP · 6: entering Dawn +10% Mana regeneration |
+| `set_priest_regalia_of_the_salt_choir` | Regalia of the Salt Choir (was `set_priest_regalia_of_the_sunken_choir`) | 42–45 / 60 | 6* | bosses of `d11_saltdeep_cathedral` (Normal 15%; Challenge at 60); `b_sallow_king` (world boss of `drowned_coast`, one piece, 10%) | 2: Choir of Lamps +15% on its main target · 4: Penumbra's halves alternate every 2 s at 70% · 6: Equinox resets Choir of Lamps |
+| `set_priest_mantle_of_the_twin_lamps` | Mantle of the Twin Lamps (was `set_priest_veil_of_the_twin_lamps`) | 60 | 6* | one piece per Challenge boss of `d15_fire_court` / `d16_the_spire`; Depth 10+ end chest, any dungeon (8%) | 2: Hold the Flame's Deathward also leaves a Candle Ward · 4: Twilight after Eclipse Hymn halves Mana costs · 6: Anchor 2 charges |
 
 | Kind | id | Name | Slot | Power | Source |
 |---|---|---|---|---|---|
-| Legendary | `leg_the_first_lamp` | The First Lamp | off hand (reliquary) | Dawn starts at +30 | `d11_saltdeep_cathedral` final, Challenge or the Depth Cache 4% |
-| Legendary | `leg_censer_of_two_smokes` | Censer of Two Smokes | mace | in Grey: heals and damage +12% | `d11_saltdeep_cathedral` end boss on Challenge (Challenge 6%) |
-| Legendary | `leg_bell_of_the_last_hour` | Bell of the Last Hour | necklace | Hold the Flame resets when Deathward triggers (once per 3 min) | `d10_rimefang_caverns` any boss on Challenge% |
-| Legendary | `leg_mourners_shroud` | Mourner's Shroud (was `leg_mourners_veil`) | head | in Dusk, the shadow heal also heals 3 allies | world boss of `drowned_coast`, 6% |
-| Legendary | `leg_scepter_of_noon_and_midnight` | Scepter of Noon and Midnight | sceptre | Twilight lasts until you leave both bands | `d16_the_spire` secret boss on Challenge |
-| Unique | `uq_wax_saints_hands` | Wax Saint's Hands | hands | Candle Ward absorbs +25% | `d01_hollow_barrow` final, 12% |
-| Unique | `uq_tallow_psalter` | Tallow Psalter | off hand (psalter) | Call Back in combat free, 1.5 s cast | `d08_moonwell_ruins` boss 2 |
-| Unique | `uq_thornlamp_staff` | Thornlamp Staff | staff | Penumbra roots non-bosses 1 s on its first tick | `d07_thornheart` final |
+| Legendary | `leg_the_first_lamp` | The First Lamp | off hand (reliquary) | Dawn starts at +30 instead of +50 | `b_bishop_aldwine` (`d11_saltdeep_cathedral` end boss) on Challenge, 4%; its Depth end chest 2% |
+| Legendary | `leg_censer_of_two_smokes` | Censer of Two Smokes | mace | in Grey (−49 … +49) healing and damage +12% | Depth 15+ end chest, any dungeon, 1.5% |
+| Legendary | `leg_bell_of_the_last_hour` | Bell of the Last Hour | necklace | Hold the Flame resets when Deathward triggers (once per 3 min) | `b_old_mother_rime` (`d10_rimefang_caverns` secret boss) on Challenge, 3% |
+| Legendary | `leg_mourners_shroud` | Mourner's Shroud (was `leg_mourners_veil`) | head | in Dusk Gloamrot's healing hits 3 allies | `b_sallow_king` (world boss of `drowned_coast`), 6% |
+| Legendary | `leg_scepter_of_noon_and_gloam` | Scepter of Noon and Gloam (was `leg_scepter_of_noon_and_midnight`) | sceptre | Twilight lasts until you reach Grey | `b_marchheart` (`d16_the_spire` secret boss) |
+| Unique | `uq_wax_saints_hands` | Wax Saint's Hands | hands | Candle Ward absorbs +25% | `b_hollow_thane` (`d01_hollow_barrow` end boss), 12% |
+| Unique | `uq_tallow_psalter` | Tallow Psalter | off hand (psalter) | Call Back in combat costs no Mana, 1.5 s cast | `d08_moonwell_ruins` boss 2 |
+| Unique | `uq_thornlamp_staff` | Thornlamp Staff | staff | Penumbra roots non-bosses 1 s on its first tick | `b_wyllow_blighted_heart` (`d07_thornheart` end boss) |
 
-### 3.30 [Enchanter](classes/enchanter.md) — Support · light
+### 3.30 [Enchanter](classes/enchanter.md) — Support (Tank) · light
 
 | Set id | Name | Band | Pieces · slots | Source | 2 / 4 / 6 |
 |---|---|---|---|---|---|
-| `set_enchanter_dreamweavers_raiment` | Dreamweaver's Raiment | 25–30 (levelling) | 6* | `d07_thornheart`, `d08_moonwell_ruins` bosses (Normal 15%); complete on Challenge | 2: Hush 30 s on normal enemies · 4: Somnolent Tide 9 m wide · 6: waking enemies are Unsettled at 3 stacks |
-| `set_enchanter_marionettists_finery` | The Marionettist's Finery | 60 (Challenge) | 6* (6th on Challenge only) | `d15_fire_court` / `d16_the_spire` Challenge bosses (class set token, page 08 §12.1); Depth Cache R 10+ (8% class roll) | 2: Will drains 25% slower · 4: charmed creature's abilities −30% cooldown · 6: Crown of Strings charms one Enthralled enemy free when it ends |
-| `set_enchanter_dusksilk_vestments` | Dusksilk Vestments (was `set_enchanter_veilsilk_vestments`) | 60 (Depth) | 6* | `d09`–`d14` Depth Cache R 8+ | 2: Bright Glamour +25% speed · 4: Seed of Discord −5 s per boss interrupt by Hush · 6: Depth trash no longer drains Will faster |
+| `set_enchanter_dreamweavers_raiment` | Dreamweaver's Raiment | 25–30 / 60 | 6* | bosses of `d07_thornheart` and `d08_moonwell_ruins` (Normal 15%; Challenge at 60); their Depth end chests | 2: Hush 30 s on normal enemies · 4: Somnolent Tide 9 m wide · 6: waking enemies are Unsettled at 3 stacks |
+| `set_enchanter_marionettists_finery` | The Marionettist's Finery | 60 | 6* | one piece per Challenge boss of `d15_fire_court` / `d16_the_spire`; Depth 10+ end chest, any dungeon (8%) | 2: Will drains 25% slower · 4: borrowed abilities −30% cooldown · 6: Crown of Strings charms one Enthralled enemy free when it ends |
+| `set_enchanter_gossamer_vestments` | Gossamer Vestments (Many Faces; was `set_enchanter_veilsilk_vestments`) | 60 | 6* | world bosses of `cinder_steppe`, `frostmantle`, `drowned_coast` (one piece, 8%); Depth 5+ end chest, any dungeon (4%) | 2: Bright Glamour +25% speed; a Double every 1.5 s in Many Faces · 4: Seed of Discord −5 s per boss interrupt (Hush) or taunt (Beckon) · 6: Hall of Mirrors 12 s; Crown of Strings (Support) Enthralls 8 s |
 
 | Kind | id | Name | Slot | Power | Source |
 |---|---|---|---|---|---|
-| Legendary | `leg_puppeteers_crossbar` | The Puppeteer's Crossbar | off hand (effigy) | 2 charms from calling II (3 at calling III) | `d15_fire_court` secret boss on Challenge |
-| Legendary | `leg_music_box_of_the_drowned_queen` | Music Box of the Drowned Queen | necklace | Hush hits 3 targets within 6 m | `d11_saltdeep_cathedral` any boss on Challenge(Challenge 6%) |
-| Legendary | `leg_circlet_of_quiet_hours` | Circlet of Quiet Hours | head | sleepers do not wake from area damage | `d08_moonwell_ruins` final, Challenge or the Depth Cache 4% |
-| Legendary | `leg_stringcutter_staff` | Stringcutter Staff | staff | Snap needs no calling; deals Will × 6% SP | world boss of `riftmarch`, 6% |
-| Legendary | `leg_borrowed_crown` | The Borrowed Crown | head | charmed champions keep all modifiers; aura doubled | `d16_the_spire` any boss on Challenge(Challenge 5%) |
-| Unique | `uq_lullaby_wand` | Lullaby Wand | wand | Needling Whisper sleeps a 3-stack non-boss for 4 s | `d02_drowned_mill` final, 12% |
-| Unique | `uq_fen_dog_collar` | Fen-Dog Collar | waist | charmed beasts drain Will 40% slower | `d02_drowned_mill` boss 1 |
-| Unique | `uq_courtiers_gloves` | Courtier's Gloves | hands | Bright Glamour also +8% crit | `d06_sandsworn_vault` final |
+| Legendary | `leg_puppeteers_crossbar` | The Puppeteer's Crossbar | off hand (effigy) | 2 charms from calling 20 (3 at calling 40) | `b_ysa_varn_kindled` (`d15_fire_court` secret boss) on Challenge, 4% |
+| Legendary | `leg_music_box_of_the_drowned_queen` | Music Box of the Drowned Queen | necklace | Hush hits 3 targets within 6 m (Beckon taunts 3) | `b_choir_of_brine` (`d11_saltdeep_cathedral` boss 2) on Challenge, 4% |
+| Legendary | `leg_circlet_of_quiet_hours` | Circlet of Quiet Hours | head | sleepers do not wake from area damage | `b_oruvel_moon_drinker` (`d08_moonwell_ruins` end boss) on Challenge, 4%; its Depth end chest 2% |
+| Legendary | `leg_stringcutter_staff` | Stringcutter Staff | staff | Snap needs no calling; deals Will × 6% SP | `b_unmoored` (world boss of `riftmarch`), 6% |
+| Legendary | `leg_borrowed_crown` | The Borrowed Crown | head | charmed champion-pack members keep all affixes; aura doubled | a Challenge-mode `d16_the_spire` boss (page 12 names which), 5% |
+| Unique | `uq_lullaby_wand` | Lullaby Wand | wand | Needling Whisper sleeps a 3-stack non-boss for 4 s | `b_the_grindwheel` (`d02_drowned_mill` end boss), 12% |
+| Unique | `uq_fen_dog_collar` | Fen-Dog Collar | waist | charmed beasts drain Will 40% slower | `b_old_croak` (`d02_drowned_mill` boss 1) |
+| Unique | `uq_courtiers_gloves` | Courtier's Gloves | hands | Bright Glamour also +8% crit | `d06_sandsworn_vault` end boss |
 
 **Rules the class files follow** (page 08 owns the rules; kept here as the default the `6*` rows use):
 class sets are 6 pieces (head, shoulders, chest, hands, legs, feet) in the class's armour type, or five
@@ -1053,180 +1057,211 @@ whoever uses it.
 
 ### 3.31 Dungeon and world-boss items (from pages 12 and 13)
 
-Pages 12 and 13 own these items: their text is the fact, this is the index. Names are taken from the owner page
-where it gives one, otherwise the id written out. Every row of 3.31.1 is **[D-EXCL]** (drops only in that dungeon);
-`SECRET` = the secret boss's exclusive legendary (page 08 §16.4). **Round 2:** page 12 turned its 15 *trinkets*
-into **dungeon souls** and moved its *wrists* and *light-slot* items to other slots (page 08 §2.3); the ids below
-marked *(proposed)* are this page's suggestion — **page 12's own ids win** where they differ.
+Pages 12 and 13 own these items: their text is the fact, this is the index (re-synced with page 12 §21.4, §21.5
+and each dungeon's loot lines on 2026-09-30). Names are this page's, written out from the id where page 12 gives
+none. Every row of 3.31.1 is **[D-EXCL]** (drops only in that dungeon); `SECRET` = the secret boss's exclusive
+legendary (page 08 §16.4). Page 12 turned its 15 *trinkets* into **dungeon souls** (one of them, The Finished Thing,
+became a hands legendary instead, and d15 added The King's Offer) and moved its *wrists* and *light-slot* items to
+other slots (page 12 §21.7).
 
-#### 3.31.1 Dungeon-exclusive uniques, legendaries and souls — 115 (72 uniques, 28 legendaries, 15 souls)
+#### 3.31.1 Dungeon-exclusive uniques, legendaries and souls — 135 (84 uniques, 36 legendaries of which 17 SECRET, 15 souls)
 
-| Dungeon | Kind | id | Name | Slot | Power | Drops from |
+| Dungeon | Kind | id | Name | Slot | Power (page 12's words) | Drops from |
 |---|---|---|---|---|---|---|
-| d01 | Unique | `uq_crown_of_teeth` | Crown of Teeth | head (light armour) | +6% attack speed; kills within 10 s give +2% move (max 10%) | `b_warren_queen_skritch` |
-| d01 | Unique | `uq_pells_stolen_reliquary` *(proposed; was `uq_pells_hooded_lantern`, light slot)* | Pell's Stolen Reliquary | off-hand focus (reliquary) | +6% damage with Holy; +5% critical chance in dark places (caves, crypts) | `b_pell_lantern_thief` |
-| d01 | Unique | `uq_morrows_ledger` | Morrow's Ledger | off-hand focus | kills add a Plot (max 5); next area spell +6% per Plot | `b_sexton_morrow` |
-| d01 | Unique | `uq_ossels_thimble` | Ossel's Thimble | ring | +4% health; next heal on an ally below 30% +25% (10 s) | `b_mother_ossel` |
-| d01 | Unique | `uq_thanes_ring_of_rest` | Thane's Ring of Rest | ring | +5% damage; kills heal 2% | `b_hollow_thane` |
-| d01 | Legendary | `leg_hollow_crown` | Hollow Crown | head | every 25 s your next damaging spell raises a Hearth-man ally (30% health, 10 s) | `b_hollow_thane` |
-| d01 | Unique | `uq_peat_black_shroud` | Peat-Black Shroud | back | +8% health; standing still 2 s gives a 5% barrier | `b_first_sleeper` |
-| d01 | Legendary · SECRET | `leg_first_sleepers_shroud` | First Sleeper's Shroud | chest (any armour) | a killing blow puts you to sleep 3 s at 1 health, wake at 25% (once per 3 min) | `b_first_sleeper` |
-| d02 | Unique | `uq_bloodgorged_band` | Bloodgorged Band | ring | 2% of damage heals you; doubled below 40% | `b_bloatleech_matron` |
-| d02 | Unique | `uq_sluicewardens_key` | Sluicewarden's Key | necklace | after a dodge, next attack +25% and knocks back 3 m | `b_old_pike_sluicewarden` |
-| d02 | Unique | `uq_wider_than_running` | Wider Than Running | waist | +8% move; +15% more 3 s after breaking a tether or leaving a danger zone | `b_old_croak` |
-| d02 | Unique | `uq_wrens_wedding_ring` | Wren's Wedding Ring | ring | ally below 35% nearby: you both get an 8% barrier (30 s) | `b_wren_grist` |
-| d02 | Unique | `uq_grist_ledger_of_debts` | Grist Ledger of Debts | off-hand focus | Debt stacks on enemies you hit; heal 1% per stack when they die | `b_the_grindwheel` |
-| d02 | Legendary | `leg_millwrights_bargain` | Millwright's Bargain | hands | every 3rd spell free; 20% of its damage paid by you over 3 s | `b_the_grindwheel` |
-| d02 | Unique | `uq_silt_lords_tithe` | Silt Lord's Tithe | ring | 5% of gold kept as Tithe (max 500); spend to heal to full out of combat | `b_the_tithe_below` |
-| d02 | Legendary · SECRET | `leg_ledger_of_the_deep` | Ledger of the Deep | necklace | enemies that hit you gain Debt; at 5 your next hit on it +200% | `b_the_tithe_below` |
-| d03 | Unique | `uq_grubniks_ledger` | Grubnik's Ledger | off-hand focus | buffed ally crits give you +1% haste (max 10%) | `b_foreman_grubnik` |
-| d03 | Unique | `uq_rattlejaws_shell` | Rattlejaw's Shell | shield | frontal hits 10% to give Shell (−30% damage, 3 s) | `b_rattlejaw` |
-| d03 | Unique | `uq_ringleaders_candles` | Ringleader's Candles | head | area spells leave a 2 m burning patch 3 s | `b_nix_candlejaw` |
-| d03 | Unique | `uq_seventh_shift_rune` | Seventh Shift Rune | necklace | breaking line of sight to a caster gives a 6% barrier (10 s) | `b_warden_seven` |
-| d03 | Soul *(proposed id)* | `soul_stonegullets_gizzard_stone` | Stonegullet's Gizzard Stone | soul (any armour); was trinket `uq_stonegullets_gizzard_stone` | when you drop below 35% health: −40% damage taken for 4 s and immune to knockback (once per 90 s) | `b_stonegullet` |
-| d03 | Legendary | `leg_worm_king_mandible` | Worm King Mandible | 2H axe or mace | heavy attacks erupt under the target 1 s later, 60% WD in 3 m | `b_stonegullet` |
-| d03 | Unique | `uq_goldvein_signet` | Goldvein Signet | ring | +10% gold; crits 5% to drop a 5–30 gold shard | `b_the_unmined` |
-| d03 | Legendary · SECRET | `leg_heart_of_the_unmined` | Heart of the Unmined | chest | standing still grows stone skin, −5% damage a stack (max 4) | `b_the_unmined` |
-| d04 | Unique | `uq_matched_tongs` | Matched Tongs | hands | you and a party member hitting one target within 1 s: +8% each | `b_grukk_and_zagga` |
-| d04 | Soul *(proposed id)* | `soul_slag_heart` | Slag Heart | soul (weapon); was trinket `uq_slag_heart_ember` | your Fire hits have a 10% chance to leave a 2 m slag pool | `b_slagmaw` |
-| d04 | Unique | `uq_orc_steel_pauldrons` | Orc-Steel Pauldrons | heavy shoulders | taunting gives −15% damage from that enemy 6 s | `b_forgemaster_ghorza` |
-| d04 | Unique | `uq_chained_flame_link` | Chained Flame Link | ring | fire spells −8% cost; next fire spell +30% after a room-wide hit | `b_the_great_bellows` |
-| d04 | Unique | `uq_throne_of_the_keep_signet` | Throne of the Keep Signet | ring | +6% damage to elites and bosses | `b_grumvak_kilnbreaker` |
-| d04 | Legendary | `leg_kilnbreakers_oath` | Kilnbreaker's Oath | 2H axe | every 4th hit applies Cleft; at 5 your next hit +150% | `b_grumvak_kilnbreaker` |
-| d04 | Unique | `uq_bellamund_hammerhand` | Bellamund's Hammerhand | hands | every 5th hit applies Brittle (+4% physical taken, max 5) | `b_bellamund_the_cold_smith` |
-| d04 | Legendary · SECRET | `leg_the_cold_anvil` | The Cold Anvil | shield | blocks store 30%; next attack releases it as frost in 4 m | `b_bellamund_the_cold_smith` |
-| d05 | Soul *(proposed id)* | `soul_brood_mothers_gilt` | Brood-Mother's Gilt | soul (any armour); was trinket `uq_brood_mothers_gilt` | +8% damage against enemies with a reflect aura; no reflected damage for 3 s after a dodge | `b_gilded_brood_mother` |
-| d05 | Unique | `uq_saffas_bandolier` | Saffa's Bandolier | waist | dodging drops a smoke pot: allies 30% harder to hit | `b_saffa_knifewind` |
-| d05 | Unique | `uq_orruns_first_pane` | Orrun's First Pane | off hand | 20% of beam/line damage taken reflected | `b_orrun_the_glassblower` |
-| d05 | Unique | `uq_second_glass_crown` | Second Glass Crown | head | +6% move; +6% damage after standing still 1 s | `b_queen_ammarel` |
-| d05 | Unique | `uq_unshattered_vambraces` | Unshattered Vambraces | heavy hands (bracers) | hits over 30% of health take 10% less (5 s) | `b_king_sethar_unshattered` |
-| d05 | Legendary | `leg_the_eleventh_century` | The Eleventh Century | off hand (focus or shield) | every 12 s your next beam/line/cone spell bounces back | `b_king_sethar_unshattered` |
-| d05 | Unique | `uq_seventh_kings_signet` | Seventh King's Signet | ring | +8% damage in open ground; +8% dodge in dark places | `b_ithar_the_unseen` |
-| d05 | Legendary · SECRET | `leg_the_unseen_prince` | The Unseen Prince | back | 3 s unhurt makes you unseen; first attack +60% | `b_ithar_the_unseen` |
-| d06 | Unique | `uq_the_coffers_tongue` | The Coffer's Tongue | necklace | +12% gold; +10% gold from enemies you hit | `b_coffer_that_counts` |
-| d06 | Unique | `uq_hasks_lucky_shovel` | Hask's Lucky Shovel | off hand | dodge +2 m; rolling through a wave gives +10% haste | `b_hask_the_tunneler` |
-| d06 | Unique | `uq_true_weight` | True Weight | waist | ally on each side within 10 m: +8% damage, −5% taken | `b_scales_of_tamar` |
-| d06 | Soul *(proposed id)* | `soul_the_stolen_oath` | The Stolen Oath | soul (jewellery); was trinket `uq_the_stolen_oath` | when you or an ally within 15 m is cursed, the curse is removed from both of you (once per 60 s); +5% healing received | `b_qassar_silver_tongued` |
-| d06 | Unique | `uq_sovereigns_binding` | Sovereign's Binding | hands (bracers) | dispelling a curse: both +10% damage 6 s | `b_the_sand_sovereign` |
-| d06 | Legendary | `leg_the_unbound_dune` | The Unbound Dune | feet | every 10 s your dodge leaves a 6 m sand wall 4 s | `b_the_sand_sovereign` |
-| d06 | Unique | `uq_first_oath_signet` | First Oath Signet | ring | +6% healing; heals remove a curse | `b_tamar_the_first` |
-| d06 | Legendary · SECRET | `leg_water_of_tamar` | Water of Tamar | necklace | every 20 s a low ally you heal gets a 4 m beneficial pool | `b_tamar_the_first` |
-| d07 | Unique | `uq_web_of_the_matriarch` | Web of the Matriarch | back | your DoTs jump to 1 more enemy when the target dies | `b_silkrot_matriarch` |
-| d07 | Unique | `uq_scent_of_blood` | Scent of Blood | hands | +10% vs marked enemies; crits mark 4 s | `b_rakka_bloodbriar` |
-| d07 | Unique | `uq_mycelial_ring` | Mycelial Ring | ring | DoTs tick 10% faster; a jump heals you 1% | `b_the_sporefather` |
-| d07 | Unique | `uq_thornlink_band` | Thornlink Band | ring | take 10% of a big hit on a nearby ally | `b_orenn_thornbound` |
-| d07 | Unique | `uq_wyllows_last_leaf` | Wyllow's Last Leaf | necklace | +8% healing; +20% on allies with a DoT | `b_wyllow_blighted_heart` |
-| d07 | Legendary | `leg_blightbreaker` | Blightbreaker | hands | cleansed DoTs tick on the nearest enemy at 200% | `b_wyllow_blighted_heart` |
-| d07 | Soul *(proposed id)* | `soul_seed_of_the_sovereign` | Seed of the Sovereign | soul (weapon); was trinket `uq_seed_of_the_sovereign` | every 60 s your next damaging spell plants a seed: a 5 m spreading damage-over-time, 40% spell power a second for 8 s | `b_gall_sovereign` |
-| d07 | Legendary · SECRET | `leg_wyllows_gratitude` | Wyllow's Gratitude | off-hand focus | every 15 s a healed ally gets a cleansing root-pool | `b_gall_sovereign` |
-| d08 | Unique | `uq_dusk_scale_cloak` | Dusk-Scale Cloak | back | +10% dodge in dark places | `b_gloamwing` |
-| d08 | Unique | `uq_caeliths_last_arrow` | Caelith's Last Arrow | quiver | every 20 s next ranged attack pierces a 30 m line | `b_caelith_pale_huntress` |
-| d08 | Unique | `uq_twin_bond_band` | Twin-Bond Band | ring | +6% damage near an ally; +6% more if they wear one too | `b_twin_wardens` |
-| d08 | Unique | `uq_ilvandors_constant` | Ilvandor's Constant | necklace | spells −5% cost; every 5th free | `b_archmage_ilvandor` |
-| d08 | Unique | `uq_moon_drinkers_tooth` | Moon-Drinker's Tooth | dagger | +10% damage in dark places, heals 1% of damage | `b_oruvel_moon_drinker` |
-| d08 | Legendary | `leg_the_thirst` | The Thirst | necklace | kills +3% damage (max 10); at 10, next spell is a 10 m donut for 150% SP | `b_oruvel_moon_drinker` |
-| d08 | Unique | `uq_crescent_of_lirath` | Crescent of Lirath | off hand | cone and donut spells +12% | `b_the_drowned_moon` |
-| d08 | Legendary · SECRET | `leg_the_moon_returned` | The Moon Returned | ring | personal 45 s moon clock: +12% healing / +12% damage | `b_the_drowned_moon` |
-| d09 | Soul *(proposed id)* | `soul_ogras_whistle` | Ogra's Whistle | soul (jewellery); was trinket `uq_ogras_whistle` | the first time each fight 3+ enemy beasts are within 15 m of you, they fight each other for 5 s (once per 90 s) | `b_ogra_beastmaster` |
-| d09 | Unique | `uq_death_roll_bracers` | Death-Roll Bracers | hands (bracers) | held or stunned: 10% barrier (20 s) | `b_the_moatmother` |
-| d09 | Unique | `uq_broken_chain` | Broken Chain | hands (bracers) | when a movement stop ends: +25% move, +10% damage 3 s | `b_brannoc_the_chained` |
-| d09 | Unique | `uq_bait_and_stake` | Bait and Stake | feet | enemies fixated on you take +10% from allies | `b_razorback_rider_krunn` |
-| d09 | Unique | `uq_favour_of_the_crowd` | Favour of the Crowd | necklace | dodging through a danger zone gives Favour, +2% (max 5) | `b_warmaster_drogath` |
-| d09 | Legendary | `leg_ashmanes_twin_cleavers` | Ashmane's Twin Cleavers | 1H axe pair (counts as one legendary) | every 3rd off-hand hit throws it, 12 m line, 80% WD | `b_warmaster_drogath` |
-| d09 | Unique | `uq_tallows_collar` | Tallow's Collar | necklace | pet/companion −20% damage taken, +10% damage | `b_old_gnash_undefeated` |
-| d09 | Legendary · SECRET | `leg_the_undefeated` | The Undefeated | waist | first drop below 20% each fight: heal to 50%, +20% damage 8 s | `b_old_gnash_undefeated` |
-| d10 | Soul *(proposed id)* | `soul_hibernation_charm` | Hibernation Charm | soul (chest); was trinket `uq_hibernation_charm` | when you drop below 25% health out of a boss fight: heal 30% over 6 s, rooted meanwhile (once per 120 s) | `b_old_whitemaw` |
-| d10 | Unique | `uq_yrsas_bell` | Yrsa's Bell | off hand | interrupts remove 2 stacking-debuff stacks from allies in 10 m | `b_frostsayer_yrsa` |
-| d10 | Unique | `uq_icebreakers_cleats` | Icebreaker's Cleats | feet | no slipping on ice; +10% move on snow and ice | `b_skarr_icebreaker` |
-| d10 | Unique | `uq_song_of_the_rime` | Song of the Rime | necklace | immune to the first Chill each fight; frost spells slow 10% (×3) | `b_rimeweaver_seidra` |
-| d10 | Unique | `uq_rimefang_heartscale` | Rimefang Heartscale | heavy chest | +20% cold resist; 10% of cold taken added to next hit | `b_rimefang` |
-| d10 | Legendary | `leg_breath_of_the_glacier` | Breath of the Glacier | staff or wand | frost spells leave a 3 m ice patch: −30% move, +10% from you | `b_rimefang` |
-| d10 | Unique | `uq_the_quiet_step` | The Quiet Step | feet | enemies beyond 15 m do not notice you unless you attack | `b_old_mother_rime` |
-| d10 | Legendary · SECRET | `leg_mothers_last_winter` | Mother's Last Winter | chest | 4 m warmth aura; every 30 s heals allies inside 10% | `b_old_mother_rime` |
-| d11 | Unique | `uq_ringers_earplugs` | Ringer's Earplugs | head | immune to silence; +10% resist to room-wide damage | `b_hobb_the_bellringer` |
-| d11 | Unique | `uq_matrons_pearl` | Matron's Pearl | necklace | swim 40% faster; no Drowning for 20 s | `b_saltshell_matron` |
-| d11 | Unique | `uq_deacons_litany` | Deacon's Litany | necklace | each successful interrupt −3 s on your interrupt | `b_deacon_mourne` |
-| d11 | Unique | `uq_the_missing_part` | The Missing Part | ring | an ally dies nearby: gain their role bonus 10 s | `b_choir_of_brine` |
-| d11 | Soul *(proposed id)* | `soul_the_full_church` | The Full Church | soul (jewellery); was trinket `uq_the_full_church` | when a boss fight starts, allies within 15 m gain +10% damage for 10 s, +2% per ally past the first | `b_bishop_aldwine` |
-| d11 | Legendary | `leg_bell_of_saltdeep` | Bell of Saltdeep | off hand | every 20 s: allies in 10 m get 8% barrier, enemies silenced 2 s | `b_bishop_aldwine` |
-| d11 | Unique | `uq_what_the_sea_keeps` | What the Sea Keeps | ring | 20% of a 40%+ hit is taken over 4 s instead (30 s) | `b_the_tidewife` |
-| d11 | Legendary · SECRET | `leg_heart_of_the_tidewife` | Heart of the Tidewife | chest | breathe water, swim full speed, spells +15% while swimming | `b_the_tidewife` |
-| d12 | Soul *(proposed id)* | `soul_perpetual_cog` | Perpetual Cog | soul (any armour); was trinket `uq_perpetual_cog` | +2% attack speed every 10 s in a fight (max 10%) | `b_cogheart_warden` |
-| d12 | Unique | `uq_through_the_lens` | Through the Lens | off hand | line spells 50% longer | `b_mira_lensgrinder` |
-| d12 | Unique | `uq_upside_down_charm` | Upside-Down Charm | necklace | no fall damage; +20% damage 4 s after a fall or knock-up | `b_the_gravity_engine` |
-| d12 | Unique | `uq_look_at_yourself` | Look at Yourself | ring | first damaging spell each fight cast twice (2nd at 40%) | `b_mirror_apprentices` |
-| d12 | Soul *(proposed id)* | `soul_oddrins_last_letter` | Oddrin's Last Letter | soul (feet); was trinket `uq_oddrins_last_letter` | your dodge roll, once per 45 s, opens a portal 20 m ahead instead, with a 6 s return portal | `b_oddrin_the_unmaker` |
-| d12 | Legendary | `leg_the_unmaking` | The Unmaking | 2H (staff or weapon) | every 30 s next hit: −30% armour/resist 8 s (bosses −15%) | `b_oddrin_the_unmaker` |
-| d12 | Unique | `uq_cogheart` | Cogheart | necklace | +4% haste; every 20th hit +20% haste 4 s | `b_the_finished_thing` |
-| d12 | Soul · SECRET *(proposed id)* | `soul_the_finished_thing` | The Finished Thing | soul (chest); was a trinket legendary `leg_the_finished_thing` | every 120 s in a boss fight, a brass double of you copies your abilities at 40% for 12 s | `b_the_finished_thing` |
-| d13 | Unique | `uq_torvens_sighting_lens` | Torven's Sighting Lens | necklace | +15% line damage beyond 20 m | `b_torven_ballista_master` |
-| d13 | Unique | `uq_ilsabets_doubt` | Ilsabet's Doubt | ring | −10% fire taken; dispels give a 5% barrier | `b_pyre_priestess_ilsabet` |
-| d13 | Soul *(proposed id)* | `soul_varrows_key` | Varrow's Key | soul (any armour); was trinket `uq_varrows_key` | while you stand in a soak, allies in it take 10% less | `b_gatekeeper_varrow` |
-| d13 | Unique | `uq_quench_seal` | Quench Seal | waist | a stacking debuff about to max is removed; −20% damage 4 s (60 s) | `b_slag_colossus` |
-| d13 | Unique | `uq_never_cold` | Never Cold | heavy hands (bracers) | immune to Chill and freeze; +15% fire damage taken | `b_commander_kaelis` |
-| d13 | Soul *(proposed id)* | `soul_gate_key_of_cinders` | Gate Key of Cinders (was "Gate Key of the Ember") | soul (jewellery); was trinket `uq_gate_key_of_the_ember` | when a boss begins a room-wide cast, you and 4 allies take 20% less damage for 6 s (once per 120 s) | `b_castellan_vorhane` |
-| d13 | Legendary | `leg_the_cindergate` | The Cindergate | shield | blocks build Heat; at 10 next hit is a 12 m cone for 300% WD | `b_castellan_vorhane` |
-| d13 | Unique | `uq_banner_of_last_light` | Banner of Last Light | back | allies in 10 m −5% damage taken; you +5% | `b_first_flame_of_the_gate` |
-| d13 | Legendary · SECRET | `leg_the_first_flame` | The First Flame | 2H (looter's type) | 5 Kindling marks burst for 200% WD in 6 m and spread | `b_first_flame_of_the_gate` |
-| d14 | Unique | `uq_unwritten` | Unwritten | necklace | once per 60 s a killing hit is written off, 2 s immunity to that attacker | `b_the_ash_scribe` |
-| d14 | Unique | `uq_twice_born` | Twice-Born | chest (any armour) | once per fight a killing blow makes you an egg 3 s, hatch at 30% | `b_emberbrood` |
-| d14 | Soul *(proposed id)* | `soul_four_doors` | Four Doors | soul (any armour); was trinket `uq_four_doors` | every 15 s your next spell gets a random bonus | `b_relic_custodian` |
-| d14 | Unique | `uq_eyes_sewn_shut` | Eyes Sewn Shut | head | immune to blind; +10% damage 5 s after an interrupt | `b_high_ashpriest_morvaine` |
-| d14 | Unique | `uq_first_burned_feather` | First Burned Feather | necklace | +10% fire; 5% of fire damage heals the lowest ally | `b_ashwing` |
-| d14 | Soul *(proposed id)* | `soul_the_kings_decree` | The King's Decree | soul (weapon); was trinket `uq_the_kings_decree` | the first time each fight you interrupt a boss, non-boss enemies within 20 m are stunned for 1.5 s (once per 120 s) | `b_sarn_veydrec_herald` |
-| d14 | Legendary | `leg_herald_of_ashes` | Herald of Ashes | off hand (banner/focus) | a self-planting banner: allies in 8 m +8% damage, −8% taken | `b_sarn_veydrec_herald` |
-| d14 | Legendary | `leg_reliquary_heart` | Reliquary Heart | necklace | relic-type buffs 50% stronger | `b_sarn_veydrec_herald` |
-| d14 | Unique | `uq_remember_the_roads` | Remember the Roads | necklace | +2% damage per d01–d14 finished on Challenge (max +28%) | `b_ashmother_veyra` |
-| d14 | Legendary · SECRET | `leg_the_banked_coal` *(proposed; was `leg_the_first_ember`, light slot)* | The Banked Coal | off-hand focus (reliquary) | allies within 10 m take 10% less from room-wide attacks; once every 3 minutes a room-wide attack that would kill an ally within 10 m leaves them at 1 health (never a one-shot mechanic, page 11) | `b_ashmother_veyra` |
+| d01 | Unique | `uq_crown_of_teeth` | Crown of Teeth | head, light | +6% attack speed; each kill within 10 s grants +2% movement speed, stacking to 10%. | `b_warren_queen_skritch` |
+| d01 | Unique | `uq_pells_quiet_hood` | Pell's Quiet Hood | head, light | hits from outside an enemy's view (behind or on its flank) have +5% critical hit chance; +10% movement speed for 3 s after you open a chest. | `b_pell_lantern_thief` |
+| d01 | Unique | `uq_morrows_ledger` | Morrow's Ledger | off-hand focus | each enemy you kill adds a **Plot** (max 5); your next area spell deals +6% damage per Plot and spends them. | `b_sexton_morrow` |
+| d01 | Unique | `uq_ossels_thimble` | Ossel's Thimble | ring | +4% maximum health; when an ally within 20 m falls below 30% health, your next heal on them is +25% (10 s cooldown). | `b_mother_ossel` |
+| d01 | Unique | `uq_thanes_ring_of_rest` | Thane's Ring of Rest | ring | +5% all damage; killing an enemy heals you 2% of your maximum health. | `b_hollow_thane` |
+| d01 | Legendary | `leg_hollow_crown` | Hollow Crown | head | every 25 s your next damaging spell raises a **Hearth-man** (a barrow shambler ally with 30% of your health, 10 s) at the target. | `b_hollow_thane` |
+| d01 | Unique | `uq_peat_black_shroud` | Peat-Black Shroud | back | +8% maximum health; standing still for 2 s gives a barrier of 5% maximum health (refreshes every 6 s). | `b_first_sleeper` |
+| d01 | Legendary · SECRET | `leg_first_sleepers_shroud` | **12** | chest (any armour type, takes the wearer's) | when you would die, you instead fall asleep for 3 s at 1 health, immune to damage, then wake with 25% health (once every 3 minutes). | `b_first_sleeper` |
+| d02 | Unique | `uq_bloodgorged_band` | Bloodgorged Band | ring | 2% of your damage heals you; doubled while you are below 40% health. | `b_bloatleech_matron` |
+| d02 | Unique | `uq_sluicewardens_key` | Sluicewarden's Key | necklace | after you dodge roll, your next attack within 2 s deals +25% damage and knocks back 3 m. | `b_old_pike_sluicewarden` |
+| d02 | Unique | `uq_wider_than_running` | Wider Than Running | waist | +8% movement speed; after you break a tether or leave a danger zone, +15% more for 3 s. | `b_old_croak` |
+| d02 | Unique | `uq_wrens_wedding_ring` | Wren's Wedding Ring | ring | when an ally within 20 m drops below 35% health, you both gain a barrier of 8% of your maximum health (30 s cooldown). | `b_wren_grist` |
+| d02 | Unique | `uq_grist_ledger_of_debts` | Grist Ledger of Debts | off-hand focus | enemies you damage owe a **Debt** (max 10 stacks per enemy); when that enemy dies, you heal 1% of your maximum health per stack. | `b_the_grindwheel` |
+| d02 | Legendary | `leg_millwrights_bargain` | Millwright's Bargain | hands | every 3rd spell cast costs no resource but deals 20% of its damage to you as a debt paid over 3 s. | `b_the_grindwheel` |
+| d02 | Unique | `uq_silt_lords_tithe` | Silt Lord's Tithe | ring | 5% of gold you pick up is kept as **Tithe** (max 500); spend it with a click to heal to full out of combat. | `b_the_tithe_below` |
+| d02 | Legendary · SECRET | `leg_ledger_of_the_deep` | **12** | necklace | each time an enemy hits you, it gains a **Debt**; at 5 Debts your next hit on it deals +200% damage and clears them. | `b_the_tithe_below` |
+| d03 | Unique | `uq_grubniks_ledger` | Grubnik's Ledger | off-hand focus | each time an ally you buffed lands a critical hit, you gain 1% haste (max 10%, 8 s). | `b_foreman_grubnik` |
+| d03 | Unique | `uq_rattlejaws_shell` | Rattlejaw's Shell | off-hand shield | when you take a hit from the front, 10% chance to gain **Shell** (−30% damage taken, 3 s). | `b_rattlejaw` |
+| d03 | Unique | `uq_ringleaders_candles` | Ringleader's Candles | head | your area spells leave a 2 m burning patch for 3 s (6% of the spell's damage per second). | `b_nix_candlejaw` |
+| d03 | Unique | `uq_seventh_shift_rune` | Seventh Shift Rune | necklace | when you break line of sight to an enemy casting at you, you gain a barrier of 6% of your maximum health (10 s cooldown). | `b_warden_seven` |
+| d03 | Soul | `soul_stonegullets_gizzard` | Stonegullet's Gizzard | armour socket: chest | when a hit takes you below 35% health you swallow the stone: −40% damage taken and immune to knockback for 4 s (90 s cooldown). | `b_stonegullet` |
+| d03 | Legendary | `leg_worm_king_mandible` | Worm King Mandible | weapon (two-handed axe or mace, takes the looter's preferred type) | your heavy attacks bore into the ground and erupt under the target 1 s later for 60% weapon damage in a 3 m circle. | `b_stonegullet` |
+| d03 | Unique | `uq_goldvein_signet` | Goldvein Signet | ring | +10% gold found; your critical hits have a 5% chance to drop a shard worth 5–30 gold. | `b_the_unmined` |
+| d03 | Legendary · SECRET | `leg_heart_of_the_unmined` | **12** | chest | every 10 s standing still in combat grows a stone skin: −5% damage taken per stack (max 4); moving 5 m clears it. | `b_the_unmined` |
+| d04 | Unique | `uq_matched_tongs` | Matched Tongs | hands | when you and a party member hit the same target within 1 s, both hits deal +8%. | `b_grukk_and_zagga` |
+| d04 | Soul | `soul_slag_heart` | Slag Heart | weapon socket | your hits tagged Fire have a 10% chance to leave a 2 m slag pool for 4 s (8% of the hit per second). | `b_slagmaw` |
+| d04 | Unique | `uq_orc_steel_pauldrons` | Orc-Steel Pauldrons | heavy shoulders | taunting an enemy gives you −15% damage taken from it for 6 s. | `b_forgemaster_ghorza` |
+| d04 | Unique | `uq_chained_flame_link` | Chained Flame Link | ring | fire spells cost 8% less; if you are hit by a room-wide attack, your next fire spell deals +30%. | `b_the_great_bellows` |
+| d04 | Unique | `uq_throne_of_the_keep_signet` | Throne of the Keep Signet | ring | +6% damage to enemies stronger than you (elite, boss). | `b_grumvak_kilnbreaker` |
+| d04 | Legendary | `leg_kilnbreakers_oath` | Kilnbreaker's Oath | two-handed axe | every 4th hit on the same target applies **Cleft** (−5% armour, max 5); at 5, your next hit deals +150% and clears it. | `b_grumvak_kilnbreaker` |
+| d04 | Unique | `uq_bellamund_hammerhand` | Bellamund's Hammerhand | hands | your every 5th hit on an enemy applies **Brittle** (+4% physical damage taken, max 5). | `b_bellamund_the_cold_smith` |
+| d04 | Legendary · SECRET | `leg_the_cold_anvil` | **12** | off-hand (shield) | blocking an attack stores 30% of it; your next attack within 5 s releases the stored amount as frost damage in a 4 m circle. | `b_bellamund_the_cold_smith` |
+| d05 | Soul | `soul_brood_mothers_gilt` | Brood-Mother's Gilt | any armour socket | +8% damage against enemies with a damage-reflect aura; you take no reflected damage for 3 s after a dodge roll. | `b_gilded_brood_mother` |
+| d05 | Unique | `uq_saffas_bandolier` | Saffa's Bandolier | waist | after you dodge roll, drop a smoke pot: allies inside (4 m, 3 s) are 30% harder to hit. | `b_saffa_knifewind` |
+| d05 | Unique | `uq_orruns_first_pane` | Orrun's First Pane | off-hand | 20% of beam and line damage you take is reflected at the nearest enemy. | `b_orrun_the_glassblower` |
+| d05 | Unique | `uq_second_glass_crown` | Second Glass Crown | head | +6% movement speed; while you stand still for 1 s, +6% damage (lost when you move). | `b_queen_ammarel` |
+| d05 | Unique | `uq_unshattered_gauntlets` | Unshattered Gauntlets | heavy hands | when an enemy hit would take more than 30% of your health, it takes 10% less (5 s cooldown). | `b_king_sethar_unshattered` |
+| d05 | Legendary | `leg_the_eleventh_century` | The Eleventh Century | off-hand (focus or shield) | every 12 s your next beam-, line- or cone-shaped spell bounces once off an invisible mirror at the end of its range and travels back. | `b_king_sethar_unshattered` |
+| d05 | Unique | `uq_seventh_kings_signet` | Seventh King's Signet | ring | +8% damage while you stand in a beneficial zone, a sun-shaft or a sun-patch; +8% dodge chance while you do not. | `b_ithar_the_unseen` |
+| d05 | Legendary · SECRET | `leg_the_unseen_prince` | **12** | cloak | after 3 s without taking damage you become **unseen** (enemies further than 8 m lose you); your first attack from unseen deals +60%. | `b_ithar_the_unseen` |
+| d06 | Unique | `uq_the_coffers_tongue` | The Coffer's Tongue | necklace | +12% gold found; enemies that die within 3 s of your hit drop 10% more gold. | `b_coffer_that_counts` |
+| d06 | Unique | `uq_hasks_lucky_shovel` | Hask's Lucky Shovel | off-hand | dodge roll distance +2 m; rolling through a wave or wall gives +10% haste 3 s. | `b_hask_the_tunneler` |
+| d06 | Unique | `uq_true_weight` | True Weight | waist | while at least one ally stands within 10 m on each side of you (left and right), you deal +8% damage and take 5% less. | `b_scales_of_tamar` |
+| d06 | Soul | `soul_the_stolen_oath` | The Stolen Oath | jewellery socket | once every 60 s, the first curse placed on you or on an ally within 20 m is removed the moment it lands; +5% healing received. | `b_qassar_silver_tongued` |
+| d06 | Unique | `uq_sovereigns_binding` | Sovereign's Binding | waist | dispelling a curse from an ally gives both of you +10% damage for 6 s. | `b_the_sand_sovereign` |
+| d06 | Legendary | `leg_the_unbound_dune` | The Unbound Dune | feet | every 10 s your next dodge roll leaves a 6 m-long **sand wall** behind you for 4 s that blocks enemy projectiles and pushes enemies 3 m. | `b_the_sand_sovereign` |
+| d06 | Unique | `uq_first_oath_signet` | First Oath Signet | ring | +6% healing done; your heals remove one curse. | `b_tamar_the_first` |
+| d06 | Legendary · SECRET | `leg_water_of_tamar` | **12** | necklace | every 20 s, the next ally you heal below 40% health gets a 4 m **beneficial** pool under them for 5 s: +10% healing received and curse immunity. | `b_tamar_the_first` |
+| d07 | Unique | `uq_web_of_the_matriarch` | Web of the Matriarch | back | your damage-over-time effects jump to 1 more enemy within 5 m when the target dies. | `b_silkrot_matriarch` |
+| d07 | Unique | `uq_scent_of_blood` | Scent of Blood | hands | +10% damage against **marked** enemies; your critical hits mark the target for 4 s. | `b_rakka_bloodbriar` |
+| d07 | Unique | `uq_mycelial_ring` | Mycelial Ring | ring | your damage-over-time effects tick 10% faster; when one of them jumps, it heals you 1% of max health. | `b_the_sporefather` |
+| d07 | Unique | `uq_thornlink_band` | Thornlink Band | ring | when an ally within 8 m takes a hit over 20% of their health, you take 10% of it instead and they take 10% less. | `b_orenn_thornbound` |
+| d07 | Unique | `uq_wyllows_last_leaf` | Wyllow's Last Leaf | necklace | +8% healing done; your heals on an ally with a damage-over-time effect heal +20% more. | `b_wyllow_blighted_heart` |
+| d07 | Legendary | `leg_blightbreaker` | Blightbreaker | hands | dispelling or cleansing a damage-over-time effect from an ally turns it around: it ticks on the nearest enemy instead, at 200%. | `b_wyllow_blighted_heart` |
+| d07 | Soul | `soul_seed_of_the_sovereign` | Seed of the Sovereign | weapon socket (casters) | every 60 s your next damaging spell also plants a seed on its target; 3 s later it bursts into a 5 m spreading damage-over-time (40% spell power a second, 8 s). | `b_gall_sovereign` |
+| d07 | Legendary · SECRET | `leg_wyllows_gratitude` | **12** | off-hand focus | every 15 s, the next ally you heal gets a 3 m **beneficial** root-pool under them for 6 s that cleanses one damage-over-time effect a second. | `b_gall_sovereign` |
+| d08 | Unique | `uq_dusk_scale_cloak` | Dusk-Scale Cloak | back | +10% dodge chance while you have not cast a spell in the last 3 s. | `b_gloamwing` |
+| d08 | Unique | `uq_caeliths_last_arrow` | Caelith's Last Arrow | quiver | every 20 s, your next ranged attack pierces through every enemy in a 30 m line. | `b_caelith_pale_huntress` |
+| d08 | Unique | `uq_twin_bond_band` | Twin-Bond Band | ring | +6% damage while an ally is within 5 m of you; if that ally also wears this ring, both of you gain +6% more. | `b_twin_wardens` |
+| d08 | Unique | `uq_ilvandors_constant` | Ilvandor's Constant | necklace | your spells cost 5% less; every 5th spell costs nothing. | `b_archmage_ilvandor` |
+| d08 | Unique | `uq_moon_drinkers_tooth` | Moon-Drinker's Tooth | dagger | your hits on an enemy that stands in a void zone deal +10% and heal you for 1% of the damage dealt. | `b_oruvel_moon_drinker` |
+| d08 | Legendary | `leg_the_thirst` | The Thirst | necklace | killing an enemy drinks its glow: +3% damage for 10 s (max 10 stacks); at 10 stacks your next spell is a 10 m **donut** around you for 150% spell power. | `b_oruvel_moon_drinker` |
+| d08 | Unique | `uq_crescent_of_lirath` | Crescent of Lirath | off-hand | your cone and donut spells deal +12% damage. | `b_the_drowned_moon` |
+| d08 | Legendary · SECRET | `leg_the_moon_returned` | **12** | ring | you carry a personal Moon Clock (45 s / 45 s): Moonlit +12% healing done, Moonless +12% damage done; the ring glows to show which. | `b_the_drowned_moon` |
+| d09 | Soul | `soul_ogras_whistle` | Ogra's Whistle | jewellery socket | the first time each fight an enemy tagged Beast hits you, every enemy beast within 15 m attacks the nearest other enemy for 5 s (90 s cooldown). | `b_ogra_beastmaster` |
+| d09 | Unique | `uq_death_roll_girdle` | Death-Roll Girdle | waist | when you are held or stunned, gain a barrier of 10% max health (20 s cooldown). | `b_the_moatmother` |
+| d09 | Unique | `uq_broken_chain` | Broken Chain | necklace | when a movement-stopping effect ends on you, gain +25% move speed and +10% damage for 3 s. | `b_brannoc_the_chained` |
+| d09 | Unique | `uq_bait_and_stake` | Bait and Stake | feet | an enemy that is fixated on you or chasing you takes +10% damage from your allies. | `b_razorback_rider_krunn` |
+| d09 | Unique | `uq_favour_of_the_crowd` | Favour of the Crowd | necklace | each dodge roll through a danger zone gives **Favour** (+2% damage per stack, 10 s, max 5). | `b_warmaster_drogath` |
+| d09 | Legendary | `leg_ashmanes_twin_cleavers` | Ashmane's Twin Cleavers | 1H axe pair (counts as one legendary) | every 3rd hit with the off-hand cleaver throws it: a 12 m line, 80% weapon damage, returns to your hand. | `b_warmaster_drogath` |
+| d09 | Unique | `uq_tallows_collar` | Tallow's Collar | necklace | your companion or pet takes 20% less damage and deals +10%. | `b_old_gnash_undefeated` |
+| d09 | Legendary · SECRET | `leg_the_undefeated` | **12** | waist | the first time each fight you would drop below 20% health, you instead heal to 50% and gain +20% damage for 8 s. | `b_old_gnash_undefeated` |
+| d10 | Soul | `soul_hibernation` | Hibernation | armour socket: chest or legs | when a hit takes you below 30% health, you curl up and heal 30% of your maximum health over 6 s, unable to move (a dodge roll cancels it; 120 s cooldown). | `b_old_whitemaw` |
+| d10 | Unique | `uq_yrsas_bell` | Yrsa's Bell | off-hand | your interrupts also remove 2 stacks of any stacking debuff from allies within 10 m. | `b_frostsayer_yrsa` |
+| d10 | Unique | `uq_icebreakers_cleats` | Icebreaker's Cleats | feet | immune to slipping on ice; +10% move speed on snow and ice. | `b_skarr_icebreaker` |
+| d10 | Unique | `uq_song_of_the_rime` | Song of the Rime | necklace | you are immune to the first Chill-type slow each fight; your frost spells add −10% move speed to enemies (stacking 3). | `b_rimeweaver_seidra` |
+| d10 | Unique | `uq_rimefang_heartscale` | Rimefang Heartscale | heavy chest | +20% cold resistance; 10% of cold damage you take is added to your next hit. | `b_rimefang` |
+| d10 | Legendary | `leg_breath_of_the_glacier` | Breath of the Glacier | staff/wand | your frost spells leave a 3 m ice floor patch for 6 s: enemies on it are slowed 30% and take +10% damage from you. | `b_rimefang` |
+| d10 | Unique | `uq_the_quiet_step` | The Quiet Step | feet | enemies more than 15 m away do not notice you unless you attack. | `b_old_mother_rime` |
+| d10 | Legendary · SECRET | `leg_mothers_last_winter` | **12** | chest | you carry a 4 m **warmth** aura (allies inside lose 1 Chill-type stack a second and heal 1% a second); every 30 s it flares, healing allies inside 10% of their max health. | `b_old_mother_rime` |
+| d11 | Unique | `uq_ringers_earplugs` | Ringer's Earplugs | head | immune to silence; +10% resistance to room-wide damage. | `b_hobb_the_bellringer` |
+| d11 | Unique | `uq_matrons_pearl` | Matron's Pearl | necklace | while swimming you move 40% faster and take no Drowning for 20 s. | `b_saltshell_matron` |
+| d11 | Unique | `uq_deacons_litany` | Deacon's Litany | necklace | your interrupt's cooldown is reduced by 3 s each time you interrupt successfully. | `b_deacon_mourne` |
+| d11 | Unique | `uq_the_missing_part` | The Missing Part | ring | when an ally near you dies, you gain their role's bonus for 10 s (+15% damage, or +15% healing, or −15% damage taken). | `b_choir_of_brine` |
+| d11 | Soul | `soul_the_full_church` | The Full Church | jewellery socket (Support, Healer) | when a boss fight starts and again at each boss phase change, every ally within 15 m gains +10% damage for 10 s, +2% more for each ally beyond 2 (90 s cooldown). | `b_bishop_aldwine` |
+| d11 | Legendary | `leg_bell_of_saltdeep` | Bell of Saltdeep | off-hand | every 20 s you ring a bell: allies within 10 m gain a barrier of 8% max health and enemies within 10 m are silenced 2 s. | `b_bishop_aldwine` |
+| d11 | Unique | `uq_what_the_sea_keeps` | What the Sea Keeps | ring | when you would take a hit over 40% of your health, 20% of it is taken over 4 s instead (30 s cooldown). | `b_the_tidewife` |
+| d11 | Legendary · SECRET | `leg_heart_of_the_tidewife` | **12** | chest | you breathe water (no Drowning), swim at full speed, and your spells cast while swimming deal +15%. | `b_the_tidewife` |
+| d12 | Soul | `soul_perpetual_cog` | Perpetual Cog | weapon socket | every 10 s in combat, +2% attack speed (max 10%); lost after 5 s out of combat. | `b_cogheart_warden` |
+| d12 | Unique | `uq_through_the_lens` | Through the Lens | off-hand | your line-shaped spells go 50% further. | `b_mira_lensgrinder` |
+| d12 | Unique | `uq_upside_down_charm` | Upside-Down Charm | necklace | fall damage is ignored; after a fall or a knock-up, +20% damage for 4 s. | `b_the_gravity_engine` |
+| d12 | Unique | `uq_look_at_yourself` | Look at Yourself | ring | your first damaging spell each fight is cast twice (the second at 40%). | `b_mirror_apprentices` |
+| d12 | Soul | `soul_oddrins_last_letter` | Oddrin's Last Letter | armour socket: feet | once every 45 s your dodge roll becomes a step through a portal to a point 20 m ahead, leaving a return portal for 6 s. | `b_oddrin_the_unmaker` |
+| d12 | Legendary | `leg_the_unmaking` | The Unmaking | two-handed (staff or weapon, looter's type) | every 30 s your next hit **unmakes** the target's defences: −30% armour and resistances for 8 s (bosses: −15%). | `b_oddrin_the_unmaker` |
+| d12 | Unique | `uq_cogheart` | Cogheart | necklace | +4% haste; every 20th hit you land winds you up: +20% haste for 4 s. | `b_the_finished_thing` |
+| d12 | Legendary · SECRET | `leg_the_finished_thing` | The Finished Thing | hands | every 120 s, the first time you use your slot-6 spell a **brass double** of you steps out for 12 s and copies your abilities at 40% power. | `b_the_finished_thing` |
+| d13 | Unique | `uq_torvens_sighting_lens` | Torven's Sighting Lens | necklace | +15% damage with line-shaped attacks against targets more than 20 m away. | `b_torven_ballista_master` |
+| d13 | Unique | `uq_ilsabets_doubt` | Ilsabet's Doubt | ring | −10% fire damage taken; your dispels also give the target a barrier of 5% max health. | `b_pyre_priestess_ilsabet` |
+| d13 | Soul | `soul_varrows_key` | Varrow's Key | any armour socket | while you stand in a soak, allies in the same soak take 10% less from it. | `b_gatekeeper_varrow` |
+| d13 | Unique | `uq_quench_seal` | Quench Seal | waist | when a stacking debuff on you would reach its maximum, remove it and gain −20% damage taken for 4 s (60 s cooldown). | `b_slag_colossus` |
+| d13 | Unique | `uq_never_cold` | Never Cold | heavy hands | immune to Chill and freeze; +15% fire damage taken (a real trade, marked in red on the tooltip). | `b_commander_kaelis` |
+| d13 | Soul | `soul_gate_key` | The Gate Key | armour socket: shield or chest | when a single hit takes more than 30% of your health, you and the 4 nearest allies take −20% damage for 6 s (120 s cooldown). | `b_castellan_vorhane` |
+| d13 | Legendary | `leg_the_cindergate` | The Cindergate | shield | every block builds **Heat** (max 10); at 10 your next hit releases the Furnace Heart: a 60° cone 12 m for 300% weapon damage. | `b_castellan_vorhane` |
+| d13 | Unique | `uq_banner_of_last_light` | Banner of Last Light | back | allies within 10 m take 5% less damage; you take 5% more. | `b_first_flame_of_the_gate` |
+| d13 | Legendary · SECRET | `leg_the_first_flame` | **12** | two-handed (the looter's type) | your attacks set a **Kindling** mark; at 5 marks the enemy bursts into a 6 m white fire for 200% weapon damage and the fire spreads the marks to everything it hits. | `b_first_flame_of_the_gate` |
+| d14 | Unique | `uq_unwritten` | Unwritten | necklace | once every 60 s, a hit that would kill you is written off: you take none of it and gain 2 s of immunity to that attacker. | `b_the_ash_scribe` |
+| d14 | Unique | `uq_twice_born` | Twice-Born | chest (any type) | once per fight, when you would die, become an egg for 3 s (immune), then hatch at 30% health. | `b_cinderbrood` |
+| d14 | Soul | `soul_four_doors` | Four Doors | weapon socket (casters) | every 15 s your next spell gets a random one of: +30% damage, −50% cost, instant cast, +50% area. | `b_relic_custodian` |
+| d14 | Unique | `uq_eyes_sewn_shut` | Eyes Sewn Shut | head | immune to blind; +10% damage for 5 s after you interrupt. | `b_high_ashpriest_morvaine` |
+| d14 | Unique | `uq_first_burned_feather` | First Burned Feather | necklace | +10% fire damage; 5% of fire damage you deal heals the lowest-health ally within 20 m. | `b_ashwing` |
+| d14 | Soul | `soul_the_kings_decree` | The King's Decree | jewellery socket | once every 120 s, your interrupt also stuns every enemy within 20 m for 1.5 s (bosses: interrupted only). | `b_sarn_veydrec_herald` |
+| d14 | Legendary | `leg_herald_of_ashes` | Herald of Ashes | off-hand (banner/focus) | carry a banner that plants itself when you stand still 2 s: allies within 8 m deal +8% damage and take 8% less; it moves with you when you walk away. | `b_sarn_veydrec_herald` |
+| d14 | Legendary | `leg_reliquary_heart` | Reliquary Heart | necklace | each relic-type buff you receive (dungeon seals, the Fire Court's Favour help, world-boss buffs) is 50% stronger. | `b_sarn_veydrec_herald` |
+| d14 | Unique | `uq_remember_the_roads` | Remember the Roads | necklace | +2% damage for each different d01–d16 dungeon you have finished on Challenge (max +32%). | `b_ashmother_veyra` |
+| d14 | Legendary · SECRET | `leg_the_oldest_coal` | The Oldest Coal | necklace | you carry a 10 m ring of coal-warmth (a faint gold ring on the floor round you): allies inside it take 10% less damage from room-wide attacks, and once every 3 minutes a room-wide attack that would kill an ally inside it leaves them at 1 health. | `b_ashmother_veyra` |
+| d15 | Unique | `uq_varros_leash` | Varro's Leash | hands | your tamed beast, bound demon or controlled undead moves and attacks 15% faster and fixates your target for 4 s after you hit it. | `b_kennelmaster_varro` |
+| d15 | Unique | `uq_ivrettes_gift` | Ivrette's Gift | ring | enemies with one of your damage-over-time effects on them receive 20% less healing. | `b_lady_ivrette` |
+| d15 | Unique | `uq_cinderjaw_grille` | Cinderjaw Grille | shield | blocking a hit pushes the attacker back 1.5 m (bosses: 0.5 m, 5 s cooldown). | `b_cinderjaw` |
+| d15 | Unique | `uq_petition_of_the_three_houses` | Petition of the Three Houses | necklace | when a fight starts you receive one of Ash (a 10% shield), Iron (+10% armour) or Flame (+8% damage) at random for that fight. | `b_three_petitioners` |
+| d15 | Unique | `uq_hestas_apprentice_hammer` | Tobbin's Hammer | 1H mace | every 4th hit inscribes a rune on the target; the 5th hit detonates it for 150% weapon damage in 4 m. | `b_forgequeen_hesta` |
+| d15 | Legendary | `leg_firewing_pinion` | Firewing Pinion | two-handed staff or bow | every 3rd cast sends a Deep Breath line 25 m × 4 m for 350% weapon or spell damage. | `b_vaelkyr_firewing` |
+| d15 | Soul | `soul_the_kings_offer` | The King's Offer | jewellery socket | once per fight, when an ally within 20 m would die, they are left at 1 health instead and you lose 20% of your maximum health. | `b_fire_king_kaedros` |
+| d15 | Legendary | `leg_crown_of_kaedros` | Crown of Kaedros | head | your hits tagged Fire leave a burning 4 m tile under the target for 6 s (30% of the hit a second to enemies on it). | `b_fire_king_kaedros` |
+| d15 | Unique | `uq_ysas_ribbon_band` | Ysa's Ribbon Band | ring | when an ally within 20 m drops below 30% health, your next heal or shield on them is +30% (10 s cooldown). | `b_ysa_varn_kindled` |
+| d15 | Legendary · SECRET | `leg_kiln_heart` | Kiln Heart | off-hand focus or shield | every 15 s your next heal or damaging spell is doubled and turns the target to glass for 2 s (enemies take +30% damage; allies are immune to damage). | `b_ysa_varn_kindled` |
+| d16 | Unique | `uq_grey_collar` | The Grey Collar | necklace | your tamed beast, bound demon or controlled undead can cross rifts with you and deals +15% damage. | `b_grey_and_greyer` |
+| d16 | Unique | `uq_mouth_that_speaks_true` | The Mouth That Speaks True | head | warning lines that lie are marked for you (✕) even on Challenge. | `b_many_mouthed` |
+| d16 | Unique | `uq_threshold_lodestone` | Threshold Lodestone | ring | crossing a rift, or a dodge roll, gives +8% damage for 4 s. | `b_threshold` |
+| d16 | Legendary | `leg_horologe_mainspring` | Horologe Mainspring | ring | once every 60 s, press dodge twice quickly to rewind yourself to where you were 4 s ago, with the health you had. | `b_horologe` |
+| d16 | Unique | `uq_horologe_pocketwatch` | Horologe Pocketwatch | necklace | your cooldowns tick 5% faster; every 12th second your next ability that second is +20%. | `b_horologe` |
+| d16 | Unique | `uq_mirror_of_the_court` | Mirror of the Court | off-hand focus | once every 45 s your next spell is cast a second time by a mirror of you at 40%. | `b_mirror_court` |
+| d16 | Unique | `uq_saelith_spindle` | Saelith's Spindle | staff | your area spells draw white threads between allies inside them; linked allies share 10% of damage taken, evenly. | `b_saelith_spirewarden` |
+| d16 | Legendary | `leg_unwoven_spindle` | The Unwoven Spindle | off-hand focus or shield | every 10 s your next hit ties the target to up to 3 nearby enemies with threads for 6 s; 40% of damage dealt to any of them is dealt to all. | `b_unwoven` |
+| d16 | Legendary · SECRET | `leg_heart_of_the_march` | Heart of the March | necklace (guaranteed once per account) | every ability you use is 2% stronger for each region of the Wildmarch you have fully explored (max +22% for all eleven). | `b_marchheart` |
+| d16 | Legendary · SECRET | `leg_dream_of_the_march` | Dream of the March | any weapon type | every 30 s you gain a region's blessing in turn — Hearthvale (heal 10%), Mossfen (your hits poison), Greyridge (+20% armour), Sunscar (+15% haste), Whisperwood (regeneration), Cinder Steppe (+15% damage), Frostmantle (your hits freeze 0.5 s), Drowned Coast (5% life steal), Riftmarch (your dodge roll teleports), Kingsfire (+30% critical damage), Spire Isle (+10% to all of the above) — each lasts 30 s. | `b_marchheart` |
 
-**Slot notes (round 2).** Canon has 15 slots and no trinket, wrist or light slot (page 08 §2.3). Trinkets became
-dungeon souls (page 12), wrists became hands (bracers bases, page 08 §8.4), and the two light-slot items became
-off-hand foci. Page 12's `it_first_ember_lantern` (a plain light-slot item from the d14 secret boss) becomes
-`it_ashmothers_reliquary` "Ashmother's Reliquary", an off-hand focus *(proposed)*.
+**Slot notes (round 2).** Canon has no trinket, wrist or light slot (page 08 §2.3). Page 12 §21.7 lists every
+move: trinkets → souls, wrists → hands / waist / neck, light-slot items → head, neck or off-hand focus
+(`uq_pells_hooded_lantern` → `uq_pells_quiet_hood`, `leg_the_first_ember` → `leg_the_oldest_coal`,
+`it_first_ember_lantern` → `it_ashmothers_coal_cage`, `leg_first_torch` → `leg_heart_of_the_march`).
 
-#### 3.31.2 Dungeon sets (page 12 §19.5) — 14
+#### 3.31.2 Dungeon sets (page 12 §21.5) — 16
 
-Page 12 gives each set's intent; it asks page 09 to write the final bonus text (not yet done — see §3.32).
+Page 12 gives each set's intent (its "Set dropped here" line); the brief below is page 12's and is the bonus text
+until this page writes final wording (§3.32).
 
 | Set id | Name | Dungeon | Armour | Pieces · slots | Brief (page 12) |
 |---|---|---|---|---|---|
-| `set_barrowwarden` | Barrowwarden's Rest | `d01_hollow_barrow` | medium | 4 · chest, hands, head, legs | 2: +10% damage to undead · 4: killing blow on undead heals 4% |
+| `set_barrowwarden` | Barrowwarden's Rest | `d01_hollow_barrow` | medium | 4 · chest, hands, head, legs | 2: +10% damage to undead · 4: a killing blow on undead heals 4% |
 | `set_fenwader` | Fenwader's Tack | `d02_drowned_mill` | light | 4 · legs, chest, head, feet | 2: +20% move in water and mud · 4: breaking a tether / leaving a void zone +10% damage 5 s |
-| `set_deepdelver` | Deepdelver's Harness | `d03_deepdelve` | heavy | 4 · chest, shoulders, head, legs | 2: +15% knockback resistance · 4: −20% damage from a soak you stand in |
-| `set_kilnbreaker_iron` | Kilnbreaker's Iron | `d04_bellows_keep` | heavy | 4 · hands, chest, head, legs | 2: +10% fire resist · 4: cleared debuff stacks give 3% barrier each |
-| `set_sunglass_regalia` | Sunglass Regalia | `d05_glass_tombs` | cloth | 4 · hands, head, chest, legs | 2: +5% damage and healing with Holy · 4: beneficial zones double on you |
+| `set_deepshaft_harness` | Deepshaft Harness (was `set_deepdelver`) | `d03_shaft_seven` | heavy | 4 · chest, shoulders, head, legs | 2: +15% knockback resistance · 4: −20% damage from a soak you stand in |
+| `set_kilnbreaker_iron` | Kilnbreaker's Iron | `d04_bellows_keep` | heavy | 4 · hands, chest, head, legs | 2: +10% fire resist · 4: cleared debuff stacks give a 3% barrier each |
+| `set_sunglass_regalia` | Sunglass Regalia | `d05_glass_tombs` | cloth | 4 · hands, head, chest, legs | 2: +5% holy and fire damage · 4: beneficial zones double on you |
 | `set_oathkeeper_bronze` | Oathkeeper's Bronze | `d06_sandsworn_vault` | medium | 4 · chest, hands, head, legs | 2: +10% curse resist · 4: being dispelled gives +15% haste 5 s |
 | `set_thornwarden_bark` | Thornwarden's Bark | `d07_thornheart` | medium | 4 · legs, chest, head, hands | 2: +15% poison/bleed resist · 4: in a beneficial zone +10% damage |
-| `set_moonsilver_vigil` | Moonsilver Vigil | `d08_moonwell_ruins` | cloth | 4 · legs, head, chest, hands | 2: +8% damage in dark places · 4: in a donut's safe hole, 10% barrier |
-| `set_pitchampion_leathers` | Pit Champion's Leathers | `d09_warmasters_pit` | light | 4 · legs, chest, head, hands | 2: +10% damage while fixated on · 4: dodging through an attack refunds 50% of the roll |
+| `set_moonsilver_vigil` | Moonsilver Vigil | `d08_moonwell_ruins` | cloth | 4 · legs, head, chest, hands | 2: +8% damage in Moonless, +8% healing in Moonlit (outside d08: +4% damage in a beneficial zone) · 4: in a donut's safe hole, 10% barrier |
+| `set_pitchampion_leathers` | Pit Champion's Leathers | `d09_warmasters_pit` | light | 4 · legs, chest, head, hands | 2: +10% damage while fixated on · 4: dodging through an attack refunds 50% of the roll's cooldown |
 | `set_rimewarden_furs` | Rimewarden's Furs | `d10_rimefang_caverns` | medium | 4 · legs, chest, head, hands | 2: +20% Chill/slow resist · 4: in warmth or a beneficial zone +10% damage and healing |
 | `set_tidebound_vestments` | Tidebound Vestments | `d11_saltdeep_cathedral` | cloth | 4 · legs, hands, chest, head | 2: interrupts −2 s · 4: an interrupt gives the party +5% damage 6 s |
 | `set_unmakers_apron` | The Unmaker's Apron | `d12_unmade_workshop` | medium | 4 · legs, chest, head, hands | 2: +10% damage 4 s after a portal or knock · 4: pass one telegraph unhurt every 20 s |
-| `set_cinderbane_plate` | Cinderbane Plate (was `set_emberbane_plate`) | `d13_cindergate` | heavy | 5 · legs, shoulders, hands, head, chest | 2: +15% fire resist · 4: tank-swap stacks give 2% barrier each · 5: 2+ soakers take −15% |
-| `set_reliquary_ash` | Reliquary Ash | `d14_ashen_reliquary` | adaptive | 6 · legs, hands, head, chest, shoulders, waist | 2: +5% damage and healing in dungeons · 4: your revives on allies are 2 s faster (there is no revive limit, canon W21) · 6: survive the first one-shot each boss fight at 1 health ⚠ |
+| `set_firebreaker_plate` | Firebreaker Plate (was `set_emberbane_plate`) | `d13_cindergate` | heavy | 5 · legs, shoulders, hands, head, chest | 2: +15% fire resist · 4: tank-swap stacks give a 2% barrier each · 5: 2+ soakers take −15% |
+| `set_reliquary_ash` | Reliquary Ash | `d14_ashen_reliquary` | adaptive | 6 · legs, hands, head, chest, shoulders, waist (Challenge only) | 2: +5% damage and healing in dungeons · 4: allies you revive come back at 60% health · 6: survive the first one-shot each boss fight at 1 health ⚠ |
+| `set_kingsfire_regalia` | Kingsfire Regalia (was `set_emberlord_regalia`) | `d15_fire_court` | adaptive | 6 · hands, chest, legs, feet, head, necklace | 2: +8% damage to enemies above 80% health · 4: killing an add refunds 15% of your longest cooldown · 6: every 20 s your next hit brands the target: +10% damage from the party 6 s |
+| `set_spirewoven` | Spirewoven Raiment (was `set_veilwoven`) | `d16_the_spire` | adaptive | 6 · hands, shoulders, legs, chest, head, feet | 2: +5% damage and healing, +10% to enemies in the other realm while in the Underside · 4: first ability after crossing a rift +40% · 6: once per 90 s a killing blow slips you into the Underside for 4 s (untargetable, healing 25% a second) |
 
-⚠ `set_reliquary_ash`'s 6-piece conflicts with this page's check 5 (§9: nothing may reduce a one-shot
+⚠ `set_reliquary_ash`'s 6-piece conflicts with this page's check 5 (§10.1: nothing may reduce a one-shot
 mechanic). Flagged for the owner; page 12's text is not changed here.
 
 #### 3.31.3 World-boss and seasonal uniques (page 13) — 13
 
-Each is 5% of that boss's weekly personal chest (page 08 §16.5). Names are from the id where page 13 gives none.
+Each is 5% of that boss's weekly personal chest (page 13 §5; page 08 §16.5). Page 13 owns the ids, bosses and
+powers; names are written out from the id.
 
 | Source | id | Name | Slot | Power | Drops from |
 |---|---|---|---|---|---|
-| World boss | `uq_griefplate_gauntlets` | Griefplate Gauntlets | heavy hands | blocks give a 5% armour stack (max 5) | Grief-in-Iron (`greyridge`) |
-| World boss | `uq_glasswyrm_scale_ring` | Glasswyrm Scale Ring | ring | 5% of damage taken reflected as shards | the Glass Wyrm (`sunscar`) |
-| World boss | `uq_brood_silk_wraps` | Brood-Silk Wraps | light hands | roots last 1 s longer | the Hungering Brood (`whisperwood`) |
-| World boss | `uq_carrion_crown_talons` | Carrion Crown Talons | medium hands | +10% to enemies below 30% | the Carrion Crown (`cinder_steppe`) |
-| World boss | `uq_ruinstone_helm` | Ruinstone Helm | heavy head | stand still 2 s: −15% damage until you move | the Standing Ruin (`frostmantle`) |
-| World boss | `uq_sallow_crown` | Sallow Crown | head | curses last 20% longer, heal 1% of damage | the Sallow King (`drowned_coast`) |
-| World boss | `uq_unmoored_anchor` | Unmoored Anchor | off hand | immune to knockback/pull 3 s after one (20 s) | the Unmoored (`riftmarch`) |
-| World boss | `uq_slagborn_core` | Slagborn Core | necklace | −10% fire taken; 10% of it added to next fire hit | Slagborn (`kingsfire`) |
-| Seasonal | `uq_effigys_candle_eyes` | Effigy's Candle Eyes | head | +5% damage in dark places (caves, crypts, graveyards) | the Harvest Effigy (`b_harvest_effigy`) |
-| Seasonal | `uq_midwinter_bell` *(proposed; was `uq_stags_lantern`, light slot)* | Midwinter Bell | necklace | allies within 10 m take 5% less cold damage | the Longnight Stag (`b_longnight_stag`) |
-| Seasonal | `uq_tyrants_seed` | Tyrant's Seed | necklace | heals leave a 3 m flower, 1%/s for 5 s | the Bloomtyrant (`b_bloomtyrant`) |
-| Seasonal | `uq_sunwake_scale` | Sunwake Scale | ring | +8% move; +20% in water | the Sunwake Serpent (`b_sunwake_serpent`) |
-| Seasonal | `uq_tearstorm_lens` | Tearstorm Lens (was `uq_veilstorm_lens`) | head | Tear-only telegraphs show faintly in the open world | the Tearstorm Herald (page 13 §7) |
+| World boss | `uq_griefplate_gauntlets` | Griefplate Gauntlets | heavy hands | blocking gives a 5% armour stack (max 5) | Grief-in-Iron `b_grief_in_iron` (`greyridge`) |
+| World boss | `uq_glasswyrm_scale_ring` | Glasswyrm Scale Ring | ring | 5% of damage taken is thrown back as glass shards | the Glass Wyrm `b_glass_wyrm` (`sunscar`) |
+| World boss | `uq_brood_silk_wraps` | Brood-Silk Wraps | light hands | your roots last 1 s longer | the Hungering Brood `b_hungering_brood` (`whisperwood`) |
+| World boss | `uq_carrion_crown_talons` | Carrion Crown Talons | medium hands | +10% damage to enemies below 30% health | the Carrion Crown `b_carrion_crown` (`cinder_steppe`) |
+| World boss | `uq_ruinstone_helm` | Ruinstone Helm | heavy head | standing still 2 s gives 15% damage reduction until you move | the Standing Ruin `b_standing_ruin` (`frostmantle`) |
+| World boss | `uq_sallow_crown` | Sallow Crown | head | your curses last 20% longer and heal you for 1% of their damage | the Sallow King `b_sallow_king` (`drowned_coast`) |
+| World boss | `uq_unmoored_anchor` | Unmoored Anchor | off hand | immune to knockback and pull for 3 s after taking one (20 s) | the Unmoored `b_unmoored` (`riftmarch`) |
+| World boss | `uq_slagborn_core` | Slagborn Core | necklace | −10% fire taken; 10% of it added to your next Fire-tagged hit | Slagborn `b_slagborn` (`kingsfire`) |
+| Seasonal | `uq_effigys_candle_eyes` | Effigy's Candle Eyes | head | +5% damage with Fire-tagged skills | the Harvest Effigy `b_harvest_effigy` |
+| Seasonal | `uq_stags_lantern` | The Stag's Lantern | necklace (was a light-slot item; same id) | allies within 10 m take 5% less cold damage | the Midwinter Stag `b_midwinter_stag` |
+| Seasonal | `uq_tyrants_seed` | Tyrant's Seed | necklace | heals leave a 3 m healing flower | the Bloomtyrant `b_bloomtyrant` |
+| Seasonal | `uq_sunwake_scale` | Sunwake Scale | ring | +8% move; +20% in water | the Sunwake Serpent `b_sunwake_serpent` |
+| Seasonal | `uq_tearstorm_lens` | Tearstorm Lens (was `uq_veilstorm_lens`) | head | telegraphs that only the other side can see show faintly for you | the Tearstorm Herald `b_tearstorm_herald` |
+
+World-boss **mounts** (1% per chest) are page 13's: `it_mount_mine_crawler`, `it_mount_sand_strider`,
+`it_mount_silkfall_spider`, `it_mount_carrion_griffin`, `it_mount_frost_ram`, `it_mount_drowned_horse`,
+`it_mount_floating_stone`, `it_mount_magma_salamander`; seasonal `it_mount_haywain_pony`, `it_mount_midwinter_stag`,
+`it_mount_bloom_toad`, `it_mount_sunwake_serpent`. Page 13 defines no world-boss-exclusive legendary; its chests
+roll this page's world pool (3%, 5% on Ascendant weeks) and `set_trophies_of_the_wild_hunt` (§2.12).
 
 Round 1's **raid sets** (page 13 §9.1), **raid legendaries** (§9.2) and **raid uniques** (§9.3) left this index with
 raids; their ids are listed in §10.2 for `WISHLIST.md`.
@@ -1247,32 +1282,19 @@ Pages 09 and 12 were drafted in parallel, and several dungeons got a set (and a 
 | `d08_moonwell_ruins` | `set_moonwell_vestments` (6, adaptive healer) | `set_moonsilver_vigil` (4, cloth) | **12** | retire; its piece `it_moonwell_circlet` also collides (§3.33 #2) |
 | `d09_warmasters_pit` | `set_pitfighters_harness` (6, heavy) | `set_pitchampion_leathers` (4, light) | **12** | retire |
 | `d11_saltdeep_cathedral` | `set_saltchoir_raiment` (6, adaptive) | `set_tidebound_vestments` (4, cloth) | **12** | retire |
-| `d13_cindergate` | `set_cindergate_bulwark` (6, heavy tank) | `set_cinderbane_plate` (5, heavy) | **12** | retire |
+| `d13_cindergate` | `set_cindergate_bulwark` (6, heavy tank) | `set_firebreaker_plate` (5, heavy) | **12** | retire |
 
 `set_reliquary_keepers` no longer competes with page 12's `set_reliquary_ash`: round 2 moved it to the Depth Cache
 of any dungeon (§2.11). After this, the generic catalogue of §2 keeps **6** sets that no other page competes with:
 `set_wayfarers_heirlooms`, `set_reliquary_keepers`, `set_trophies_of_the_wild_hunt`, `set_journeymans_harness`,
 `set_tearglass_artifice`, `set_mercenary_captains_kit` (+ the Archivist's Regalia). **Follow-up:** write full bonus
-text for page 12's 14 sets from their briefs.
+text for page 12's 16 sets from their briefs.
 
 #### Secret-boss exclusives (one exclusive legendary per secret boss, page 08 §16.4)
 
-| Dungeon | This page (§8) | Page 12 | Keep as the exclusive | What happens to this page's legendary |
-|---|---|---|---|---|
-| d01 | `leg_mantle_of_the_unburied` (was `leg_candle_of_the_unburied`) | `leg_first_sleepers_shroud` | **12** | becomes a normal `d01` end-boss legendary |
-| d02 | `leg_lifebinder_thread` | `leg_ledger_of_the_deep` | **12** | → `d02` end boss |
-| d03 | `leg_trailblazers_compass` (was `leg_trailblazers_lantern`) | `leg_heart_of_the_unmined` | **12** | → `d03` end boss |
-| d04 | `leg_ironroot_sabatons` | `leg_the_cold_anvil` | **12** | → `d04` boss 2 (the end boss already carries `leg_grudgekeeper_helm`) |
-| d05 | — (mount only) | `leg_the_unseen_prince` | **12** | no clash; `it_mount_dune_sabrecat` stays |
-| d06 | `leg_venomheart_ring` | `leg_water_of_tamar` | **12** | → `d06` boss 2 |
-| d07 | `leg_bramblemothers_seed` | `leg_wyllows_gratitude` | **12** | → `d07` boss 2 |
-| d08 | `leg_mercy_bell` | `leg_the_moon_returned` | **12** | → `d08` boss 2 |
-| d09 | `leg_pit_champions_belt` | `leg_the_undefeated` | **12** | → `d09` boss 2 |
-| d10 | `leg_quickfeather_cloak` | `leg_mothers_last_winter` | **12** | → `d10` boss 2 |
-| d11 | `leg_noonforged_gauntlets` (was `leg_sunforged_gauntlets`, §3.33 #10) | `leg_heart_of_the_tidewife` | **12** | → `d11` boss 2 |
-| d12 | `leg_brass_familiar` | `soul_the_finished_thing` (page 12's secret prize is now a soul) | **12** | → `d12` boss 2 |
-| d13 | `leg_bulwark_of_ages` | `leg_the_first_flame` | **12** | → `d13` boss 2 |
-| d14 | `leg_phoenix_feather` | `leg_the_banked_coal` (was `leg_the_first_ember`) | **12** | → `d14` boss 2 |
+**Settled (round 2): page 12's exclusive is kept for every secret boss**, and this page's round-1 secret-boss
+legendaries moved to a normal boss of the same dungeon. §8 has the full table (including `d15`, `d16` and the two
+extra rows, `leg_barrowkings_second_crown` and `leg_heart_of_the_glacier`); §6 carries the new sources.
 
 Titles and guaranteed appearances in §8 are not duplicated by page 12 and stay as written.
 
@@ -1285,7 +1307,7 @@ Checked with a grep of every `` `leg_…` ``, `` `uq_…` ``, `` `set_…` `` an
 |---|---|---|---|---|
 | 1 | `set_barrowwarden` | 09 §2.3 "Barrowwarden's Charge" · 12 d01 "Barrowwarden's Rest" | name, armour, slots, bonuses | 12 keeps the id; if 09's version survives, `set_barrowwarden_charge` |
 | 2 | `it_moonwell_circlet` | 09 §2.7 set piece · page 13 round 1's raid drop (now in the wishlist) | two different items | moot while the raid is parked; if both return, 09's → `it_moonwell_vestments_circlet` |
-| 3 | `soul_second_self` **(new, round 2)** | `classes/chronomancer.md` (jewellery soul) · `classes/mage.md` (chest soul) | two different souls | the mage's → `soul_mirrored_self` "Soul of the Mirrored Self" (the chronomancer's echo fits "second self" better) |
+| 3 | `soul_second_self` **(round 2, settled)** | `classes/chronomancer.md` (jewellery soul) · `classes/mage.md` (chest soul) | two different souls | **applied**: the mage's is `soul_mirrored_self` "Soul of the Mirrored Self"; the chronomancer keeps `soul_second_self` |
 
 **Near-collisions** (different ids, names close enough to confuse a player or a search). Renames are
 recommendations; the owner of each item decides. Renames that were forced by the round-2 name rule (ember / veil /
@@ -1303,8 +1325,9 @@ light slot) are already applied and listed in §10.3.
 | 11 | `leg_herald_of_ashes` (12) · `uq_ashen_herald_feather` (round 1, now parked) | moot while the raid is parked | — |
 | 12 | `set_fighter_drillmaster`, `leg_the_drillmasters_word` (fighter) · `uq_drillmasters_whistle` (tactician) | "Drillmaster" in two classes | tactician's → `uq_field_marshals_whistle` |
 | 13 | `leg_phoenix_feather` (09) · `leg_phoenix_quill` (pyromancer) | both "Phoenix", both cheat death | 09's → `leg_ashborn_feather` "Ashborn Feather" |
-| 14 | `set_priest_regalia_of_the_sunken_choir` (priest) | named after a parked raid | → `set_priest_lamps_of_the_deep` "Lamps of the Deep" |
-| 15 | `leg_the_first_flame` (12, d13) · `soul_last_cinder` (pyromancer) · `leg_the_banked_coal` (12, d14) | three "last fire" items in Kingsfire | none needed; flagged only |
+| 14 | `set_priest_regalia_of_the_sunken_choir` (priest) | named after a parked raid | **applied by the priest file**: → `set_priest_regalia_of_the_salt_choir` "Regalia of the Salt Choir" |
+| 15 | `leg_the_first_flame` (12, d13) · `soul_last_cinder` (pyromancer) · `leg_the_oldest_coal` (12, d14) | three "last fire" items in Kingsfire | none needed; flagged only |
+| 16 | `leg_kiln_heart` (12, d15 secret) · `soul_banked_furnace` "Soul of the Banked Furnace" (pyromancer) | same two words, a legendary and a soul | page 12 or the pyromancer file picks; suggested: the soul → `soul_banked_kiln` "Soul of the Banked Kiln" |
 
 ---
 
@@ -1347,19 +1370,19 @@ is Farhold `initiative` × 4). Powers are in §5.
 | 6 | `uq_tyrants_end` | Tyrant's End | Main hand · longsword | 54 | +18 STR, +96 health | +5–10% crit | `nemesis_hunter` | world pool from 54; `d12_unmade_workshop` bosses 6%; rares in `kingsfire` 3% | *Forged to end one crowned butcher. It never stopped looking for the next.* |
 | 7 | `uq_needle_of_vess` | Needle of Vess | Main hand · rapier | 5 | +6 DEX, +4% crit | +9–17% crit dmg | `stillness` | world pool from 5; `d01_hollow_barrow` bosses 6%; rares in `hearthvale` 3% | *A duellist's needle. Plant your feet, breathe once, and it finds the gap.* |
 | 8 | `uq_riposte_of_glass` | Riposte of Glass | Main hand · rapier | 34 | +14 DEX, +32% crit dmg | +4–8% crit | `glass_heart` | world pool from 34; `d08_moonwell_ruins` bosses 6%; rares in `cinder_steppe` 3% | *Thin as a vow and as easily broken. It strikes like a hammer and leaves you nothing to hide behind.* |
-| 9 | `uq_winterbite` | Winterbite | Main hand · sabre | 14 | +9 DEX, +8% attack speed | +13–24% crit dmg | `frostbite` | world pool from 14; `d03_deepdelve` bosses 6%; rares in `greyridge` 3% | *It numbs before it cuts. Stand against it long enough and you stop moving at all.* |
+| 9 | `uq_winterbite` | Winterbite | Main hand · sabre | 14 | +9 DEX, +8% attack speed | +13–24% crit dmg | `frostbite` | world pool from 14; `d03_shaft_seven` bosses 6%; rares in `greyridge` 3% | *It numbs before it cuts. Stand against it long enough and you stop moving at all.* |
 | 10 | `uq_prism_dancer` | Prism Dancer | Main hand · sabre | 24 | +11 DEX, +54 health | +3.5–7% crit | `alternate_elements` | world pool from 24; `d06_sandsworn_vault` bosses 6%; rares in `sunscar` 3% | *Three flames were quenched in the glass: one red, one pale, and one that crackled.* |
 | 11 | `uq_reavers_due` | Reaver's Due | Main hand · axe | 24 | +11 STR, +4.4% life steal | +4–10 damage | `blood_price` | world pool from 24; `d05_glass_tombs` bosses 6%; rares in `sunscar` 3% | *It drinks from both ends of the haft.* |
 | 12 | `uq_gorewind` | Gorewind | Main hand · axe | 54 | +18 STR, +96 health | +5–10% crit | `vampire_kill` | world pool from 54; `d12_unmade_workshop` bosses 6%; rares in `kingsfire` 3% | *Every life it ends pours a little back into the arm that swung it.* |
-| 13 | `uq_rendmaw` | Rendmaw | Main hand · greataxe | 14 | +9 STR, +5% crit | +13–24% crit dmg | `quake_slam` | world pool from 14; `d03_deepdelve` bosses 6%; rares in `greyridge` 3% | *Heavy enough that every third swing ends in the dirt, and the dirt ends up everywhere.* |
+| 13 | `uq_rendmaw` | Rendmaw | Main hand · greataxe | 14 | +9 STR, +5% crit | +13–24% crit dmg | `quake_slam` | world pool from 14; `d03_shaft_seven` bosses 6%; rares in `greyridge` 3% | *Heavy enough that every third swing ends in the dirt, and the dirt ends up everywhere.* |
 | 14 | `uq_greymarch_headsman` | Greymarch Headsman | Main hand · greataxe | 44 | +16 STR, +38% crit dmg | +4.5–9% crit | `cull` | world pool from 44; `d10_rimefang_caverns` bosses 6%; rares in `drowned_coast` 3% | *The headsman of Greymarch never needed a second stroke.* |
 | 15 | `uq_candlemace` | Candlemace | Main hand · mace | 5 | +6 STR, +8% attack speed | +9–17% crit dmg | `pyre_aura` | world pool from 5; `d01_hollow_barrow` bosses 6%; rares in `hearthvale` 3% | *Its head still holds the coals of the shrine it was stolen from.* |
 | 16 | `uq_bellbreaker` | Bellbreaker | Main hand · mace | 34 | +14 STR, +7% crit | +21–38% crit dmg | `resonance` | world pool from 34; `d08_moonwell_ruins` bosses 6%; rares in `cinder_steppe` 3% | *It rings like a struck bell, and louder for every hurt already on its target.* |
-| 17 | `uq_anvilheart` | Anvilheart | Main hand · hammer | 14 | +9 STR, +20% crit dmg | +3–6% crit | `quake_slam` | world pool from 14; `d03_deepdelve` bosses 6%; rares in `greyridge` 3% | *A smith's hammer that forgot what it was for. The ground remembers.* |
+| 17 | `uq_anvilheart` | Anvilheart | Main hand · hammer | 14 | +9 STR, +20% crit dmg | +3–6% crit | `quake_slam` | world pool from 14; `d03_shaft_seven` bosses 6%; rares in `greyridge` 3% | *A smith's hammer that forgot what it was for. The ground remembers.* |
 | 18 | `uq_thunderhead` | Thunderhead | Main hand · warhammer | 44 | +16 STR, +38% crit dmg, +30% lightning brand | +4.5–9% crit | `static_charge` | world pool from 44; `d10_rimefang_caverns` bosses 6%; rares in `drowned_coast` 3% | *The storm it was forged in never finished. Strike one thing and the rest of the sky comes down.* |
-| 19 | `uq_the_long_scythe` | The Long Scythe | Main hand · greatsword | 14 | +9 STR, +8% attack speed | +13–24% crit dmg | `third_cleave` | world pool from 14; `d03_deepdelve` bosses 6%; rares in `greyridge` 3% | *Too long to swing any way but around.* |
+| 19 | `uq_the_long_scythe` | The Long Scythe | Main hand · greatsword | 14 | +9 STR, +8% attack speed | +13–24% crit dmg | `third_cleave` | world pool from 14; `d03_shaft_seven` bosses 6%; rares in `greyridge` 3% | *Too long to swing any way but around.* |
 | 20 | `uq_grave_harvest` | Grave Harvest | Main hand · greatsword | 24 | +11 STR, +54 health | +3.5–7% crit | `curse_spreads` | world pool from 24; `d06_sandsworn_vault` bosses 6%; rares in `sunscar` 3% | *The blade of the plague-reapers. What it cuts down, it passes on.* |
-| 21 | `uq_longwatch_pike` | Longwatch Pike | Main hand · halberd | 14 | +9 STR, +20% crit dmg | +3–6% crit | `frost_skin` | world pool from 14; `d03_deepdelve` bosses 6%; rares in `greyridge` 3% | *Northern sentries set it in the snow and let the cold do the rest.* |
+| 21 | `uq_longwatch_pike` | Longwatch Pike | Main hand · halberd | 14 | +9 STR, +20% crit dmg | +3–6% crit | `frost_skin` | world pool from 14; `d03_shaft_seven` bosses 6%; rares in `greyridge` 3% | *Northern sentries set it in the snow and let the cold do the rest.* |
 | 22 | `uq_the_sentinels_arc` | The Sentinel's Arc | Main hand · halberd | 44 | +16 STR, +16% attack speed | +25–45% crit dmg | `crescendo` | world pool from 44; `d10_rimefang_caverns` bosses 6%; rares in `drowned_coast` 3% | *A gate-guard's polearm. The longer the siege, the harder it answers.* |
 | 23 | `uq_boarsplitter` | Boarsplitter | Main hand · spear | 5 | +6 DEX, +4% crit | +9–17% crit dmg | `hemorrhage` | world pool from 5; `d01_hollow_barrow` bosses 6%; rares in `hearthvale` 3% | *A hunting spear. Anything that runs from it bleeds harder.* |
 | 24 | `uq_pilgrim_oak` | Pilgrim Oak | Main hand · quarterstaff | 5 | +6 STR, +8% attack speed | +9–17% crit dmg | `crit_heal` | world pool from 5; `d02_drowned_mill` bosses 6%; rares in `hearthvale` 3% | *Cut from the tree at the crossroads shrine. Travellers swear it mends the walker.* |
@@ -1373,7 +1396,7 @@ is Farhold `initiative` × 4). Powers are in §5.
 | 32 | `uq_cinderquill` | Cinderquill | Main hand · wand (fire) | 5 | +6 INT, +9% spell power | +2.5–5% crit | `kindling` | world pool from 5; `d02_drowned_mill` bosses 6%; rares in `hearthvale` 3% | *A burnt feather set in a tin ferrule. It writes in fire, and the words keep burning.* |
 | 33 | `uq_tempest_needle` | Tempest Needle | Main hand · wand (lightning) | 34 | +14 INT, +16% spell power | +4–8% crit | `chain_lightning` | world pool from 34; `d09_warmasters_pit` bosses 6%; rares in `cinder_steppe` 3% | *Thin as a sewing needle. The storm it carries is not.* |
 | 34 | `uq_hailcaller` | Hailcaller | Main hand · wand (ice) | 44 | +16 INT, +2.8 resource/s | +11–21% spell power | `twin_bolt` | world pool from 44; `d10_rimefang_caverns` bosses 6%; rares in `drowned_coast` 3% | *Where one hailstone falls, another follows.* |
-| 35 | `uq_sootcrown` | Sootcrown | Main hand · staff (fire) | 14 | +9 INT, +11% spell power | +24–44 health | `overload` | world pool from 14; `d03_deepdelve` bosses 6%; rares in `greyridge` 3% | *A charred crook topped with a crown of cinders. Every fourth spell it casts comes out enormous.* |
+| 35 | `uq_sootcrown` | Sootcrown | Main hand · staff (fire) | 14 | +9 INT, +11% spell power | +24–44 health | `overload` | world pool from 14; `d03_shaft_seven` bosses 6%; rares in `greyridge` 3% | *A charred crook topped with a crown of cinders. Every fourth spell it casts comes out enormous.* |
 | 36 | `uq_glaciers_spine` | Glacier's Spine | Main hand · staff (ice) | 24 | +11 INT, +6% crit | +8–15% spell power | `shatter` | world pool from 24; `d06_sandsworn_vault` bosses 6%; rares in `sunscar` 3% | *A length of blue ice from the heart of a glacier. What it chills, it breaks.* |
 | 37 | `uq_graveshroud_staff` | Graveshroud Staff | Main hand · staff (shadow) | 54 | +18 INT, +58 resource | +29–52% crit dmg | `curse_spreads` | world pool from 54; `d13_cindergate` bosses 6%; rares in `kingsfire` 3% | *Wrapped in burial linen that never rots. Whatever it curses, the curse remembers.* |
 | 38 | `uq_marsh_kings_sceptre` | Marsh King's Sceptre | Main hand · scepter (poison) | 5 | +6 INT, +9% spell power | +2.5–5% crit | `venom_stack` | world pool from 5; `d02_drowned_mill` bosses 6%; rares in `hearthvale` 3% | *The mire-king's rod of office. His subjects died slowly, and in order.* |
@@ -1393,22 +1416,22 @@ is Farhold `initiative` × 4). Powers are in §5.
 | 52 | `uq_marchwarden_boots` | Marchwarden Boots | Feet · feet:medium | 14 | +8 armour, +7 CON, +34 health | +1.1–2.2 health/s | `second_wind` | world pool from 14; `d04_bellows_keep` bosses 6%; rares in `greyridge` 3% | *The boots of a marchwarden who walked home from a massacre.* |
 | 53 | `uq_parrys_promise` | Parry's Promise | Off hand · shield | 5 | +6 CON, +11 block power, +5% block | +5–9 armour | `bulwark` | world pool from 5; `d01_hollow_barrow` bosses 6%; rares in `hearthvale` 3% | *A duellist's buckler, dented in the centre from ten thousand turned blades.* |
 | 54 | `uq_aegis_of_last_light` | Aegis of Last Light | Off hand · shield | 44 | +14 CON, +31 block power, +9% block | +13–21 armour | `thornmail` | world pool from 44; `d10_rimefang_caverns` bosses 6%; rares in `drowned_coast` 3% | *The shield of the last paladin of the dawn order. It still punishes the wicked.* |
-| 55 | `uq_glimmerward` | Glimmerward | Off hand · ward | 14 | +8 INT, +22 barrier, +3 barrier/s | +8–16 resist all | `barrier_burst` | world pool from 14; `d03_deepdelve` bosses 6%; rares in `greyridge` 3% | *A disc of polished crystal. When its ward shatters, so does everything near it.* |
+| 55 | `uq_glimmerward` | Glimmerward | Off hand · ward | 14 | +8 INT, +22 barrier, +3 barrier/s | +8–16 resist all | `barrier_burst` | world pool from 14; `d03_shaft_seven` bosses 6%; rares in `greyridge` 3% | *A disc of polished crystal. When its ward shatters, so does everything near it.* |
 | 56 | `uq_cinderwing_quiver` (was `uq_emberwing_quiver`) | Cinderwing Quiver | Off hand · quiver | 14 | +9 DEX, +5 arrow damage, +8% damage with Projectile Attacks | +3–6% crit | `kindling` (basic attacks only) | world pool from 14; `d04_bellows_keep` bosses 6%; rares in `greyridge` 3% | *The fletchings are phoenix down, or so the seller swore. They do not stop burning.* |
 | 57 | `uq_band_of_echoes` | Band of Echoes | Ring · ring | 5 | +5 INT, +5 CON | +1.5–3% crit | `echo_strike` | world pool from 5; `d01_hollow_barrow` bosses 6%; rares in `hearthvale` 3% | *A plain iron band that hums a moment after every blow.* |
 | 58 | `uq_signet_of_the_glass_throne` | Signet of the Glass Throne | Ring · ring | 34 | +11 STR, +11 DEX | +3–6% crit | `glass_heart` | world pool from 34; `d08_moonwell_ruins` bosses 6%; rares in `cinder_steppe` 3% | *The seal of a queen who ruled by fear and died by it.* |
-| 59 | `uq_pendant_of_wounds` | Pendant of Wounds | Neck · necklace | 14 | +7 CON, +34 health | +6–12% spell power | `resonance` | world pool from 14; `d03_deepdelve` bosses 6%; rares in `greyridge` 3% | *A string of old arrowheads, one for every wound its owner survived.* |
+| 59 | `uq_pendant_of_wounds` | Pendant of Wounds | Neck · necklace | 14 | +7 CON, +34 health | +6–12% spell power | `resonance` | world pool from 14; `d03_shaft_seven` bosses 6%; rares in `greyridge` 3% | *A string of old arrowheads, one for every wound its owner survived.* |
 | 60 | `uq_veinstone_of_vael` | Veinstone of Vael | Neck · necklace | 44 | +13 CON, +70 health | +11–21% spell power | `crit_ward` | world pool from 44; `d10_rimefang_caverns` bosses 6%; rares in `drowned_coast` 3% | *A red stone that beats. It shields the heart it hangs over.* |
-| 61 | `uq_bell_of_morrow` (was `uq_lantern_of_morrow`, light slot) | Bell of Morrow | Neck · necklace | 14 | +7 CON, +28 health | +7–14 resist all | `dread_lantern` | world pool from 14; `d03_deepdelve` bosses 6%; rares in `greyridge` 3% | *The bell from a haunted lighthouse. Its toll makes brave things falter.* |
+| 61 | `uq_bell_of_morrow` (was `uq_lantern_of_morrow`, light slot) | Bell of Morrow | Neck · necklace | 14 | +7 CON, +28 health | +7–14 resist all | `dread_lantern` | world pool from 14; `d03_shaft_seven` bosses 6%; rares in `greyridge` 3% | *The bell from a haunted lighthouse. Its toll makes brave things falter.* |
 | 62 | `uq_noonstone` (was `uq_sunjar`, light slot) | Noonstone | Neck · necklace | 44 | +13 CON, +58 health | +13–26 resist all | `searing_light` | world pool from 44; `d10_rimefang_caverns` bosses 6%; rares in `drowned_coast` 3% | *A stone that holds noon. Nothing that hates the day can stand near it.* |
-| 63 | `uq_brambleback` | Brambleback | Mount · mount | 14 | +7 CON, +8 s gallop | +14–26% less slowing on slopes | `rider_fury` | world pool from 14; `d03_deepdelve` bosses 6%; rares in `greyridge` 3% | *A bad-tempered moor pony with a scar for every fight it enjoyed.* |
+| 63 | `uq_brambleback` | Brambleback | Mount · mount | 14 | +7 CON, +8 s gallop | +14–26% less slowing on slopes | `mounted_frenzy` | world pool from 14; `d03_shaft_seven` bosses 6%; rares in `greyridge` 3% | *A bad-tempered moor pony with a scar for every fight it enjoyed.* |
 | 64 | `uq_thunderhoof` | Thunderhoof | Mount · mount | 44 | +13 CON, +14 s gallop | +20–35% less slowing on slopes | `stormrider` | world pool from 44; `d10_rimefang_caverns` bosses 6%; rares in `drowned_coast` 3% | *A storm-elk from the high plains. Lightning follows it like a herd.* |
-| 65 | `uq_codex_of_tides` | Codex of Tides | Off hand · grimoire focus | 14 | +8 INT, +8% spell power | +15–30 resource | `page_storm` | world pool from 14; `d03_deepdelve` bosses 6% | *Every page is a sea someone drowned in. Read one aloud and it comes out of the book with you.* |
+| 65 | `uq_codex_of_tides` | Codex of Tides | Off hand · grimoire focus | 14 | +8 INT, +8% spell power | +15–30 resource | `page_storm` | world pool from 14; `d03_shaft_seven` bosses 6% | *Every page is a sea someone drowned in. Read one aloud and it comes out of the book with you.* |
 | 66 | `uq_pilgrims_last_bone` | Pilgrim's Last Bone | Off hand · reliquary focus | 14 | +8 CON, +30 health | +6–12 armour | `sanctuary` | world pool from 14; `d04_bellows_keep` bosses 6% | *The saint walked until only this was left. It is still walking, in a way.* |
 | 67 | `uq_knot_of_nine_grudges` | Knot of Nine Grudges | Off hand · effigy focus | 24 | +10 INT, +6 DEX | +6–12% spell power | `hexbound` | world pool from 24; `d06_sandsworn_vault` bosses 6% | *Nine names are tied into the straw. Eight of them have stopped answering.* |
 | 68 | `uq_wayworn_cloak` | Wayworn Cloak | Back · cloak | 5 | +4 CON, +20 health | +3–5% dodge | `free_move` | world pool from 5; `d01_hollow_barrow` bosses 6% | *Patched so many times that none of the first cloak is left. It still knows the way home.* |
 | 69 | `uq_mantle_of_quiet_ash` | Mantle of Quiet Ash | Shoulders · cloth | 14 | +9 INT, +34 health | +6–12 resist all | `overflow` | world pool from 14; `d04_bellows_keep` bosses 6% | *It smells of a fire that went out politely.* |
-| 70 | `uq_ropemakers_knot` | Ropemaker's Knot | Waist · cloth | 14 | +9 INT, +34 health | +10–20% potion power | `second_wind` | world pool from 14; `d03_deepdelve` bosses 6% | *Tied by someone who expected to be hanging from it.* |
+| 70 | `uq_ropemakers_knot` | Ropemaker's Knot | Waist · cloth | 14 | +9 INT, +34 health | +10–20% potion power | `second_wind` | world pool from 14; `d03_shaft_seven` bosses 6% | *Tied by someone who expected to be hanging from it.* |
 | 71 | `uq_hornbacked_spaulders` | Hornbacked Spaulders | Shoulders · light | 24 | +11 DEX, +46 health | +3–6% crit | `stride` | world pool from 24; `d05_glass_tombs` bosses 6% | *Cut from a beast that never once stood still, and neither will you.* |
 | 72 | `uq_cloak_of_the_hunted_stag` | Cloak of the Hunted Stag | Back · cloak | 24 | +11 DEX, +46 health | +3–6% dodge | `kill_frenzy` | world pool from 24; `d06_sandsworn_vault` bosses 6% | *The stag got away. The cloak did not.* |
 | 73 | `uq_belt_of_many_pouches` | Belt of Many Pouches | Waist · light | 24 | +11 DEX, +46 health, +1 potion belt charge per slot | +10–20% potion power | `vampire_kill` | world pool from 24; `d05_glass_tombs` bosses 6% | *Eleven pouches. Nine of them are empty. Nobody remembers what was in the tenth.* |
@@ -1460,7 +1483,7 @@ bosses (2%, Normal and Challenge). Tier = the tool tier it counts as (page 19 §
 
 | id | Name | Tool · tier | Level | Fixed lines (page 19 tool affixes) | Power | Source | Flavour |
 |---|---|---|---|---|---|---|---|
-| `uq_prospectors_pick` | The Prospector's Pick | pick · Blacksteel (T4) | 30 | Prospector's +8, Swift −10% | `prospector` (Farhold): rare-find chance ×2 on mining nodes, and every node you mine shows the nearest node of the same kind on the minimap for 60 s | Grief-in-Iron (`greyridge` world boss); `d03_deepdelve` secret boss | *It has struck more gold than any man alive, and kept none.* |
+| `uq_prospectors_pick` | The Prospector's Pick | pick · Blacksteel (T4) | 30 | Prospector's +8, Swift −10% | `prospector` (Farhold): rare-find chance ×2 on mining nodes, and every node you mine shows the nearest node of the same kind on the minimap for 60 s | Grief-in-Iron (`greyridge` world boss); `d03_shaft_seven` secret boss | *It has struck more gold than any man alive, and kept none.* |
 | `uq_quick_hands` | Quick Hands | skinning knife · Redsteel (T3) | 20 | Swift −12%, Bountiful +6% | `quick_hands` (Farhold): gathering bars fill 30% faster | the Hungering Brood (`whisperwood` world boss); `d07_thornheart` secret boss | *In and out before the carcass knows it is one.* |
 | `uq_greenthumb_sickle` | The Greenthumb Sickle | sickle · Lodestone (T5) | 42 | Keen-eyed +1.5%, Diligent +12% | `greenthumb`: herb nodes you gather respawn for you 50% sooner | the Standing Ruin (`frostmantle`); `d08_moonwell_ruins` secret boss | *Things grow back where it cuts. Faster, and a little annoyed.* |
 | `uq_heartwood_hatchet` | Heartwood Hatchet | hatchet · Blacksteel (T4) | 30 | Bountiful +7%, Long-hafted +1 m | `heartwood`: 10% of logging pulls also give a rare heartwood of the node's tier | the Carrion Crown (`cinder_steppe`); `d07_thornheart` secret boss | *Cut from the first tree, to cut the rest.* |
@@ -1544,13 +1567,12 @@ their Farhold sentences unchanged except as §4.3 says. `prospector` and `quick_
 Every legendary: tradeable (page 08 §15), **at most two worn** (page 08 §12.2), stat package per §1. "N / 60" =
 Normal item level / the Challenge and Depth copy. Every legendary on a dungeon boss also drops on that dungeon's
 Challenge mode and from its Depth Cache (page 12 §2.4.6), so levelling legendaries have a level-60 copy. Round 1's
-**raid** sources were moved by the §3 rule (`r01` → `d01`, `r02` → `d10`, `r03` → `d11`, `r04` → `d15`, `r05` →
-`d16`, all on **Challenge**, item level 60); round 1's raid boss numbers became "any boss", "end boss" or "secret
-boss".
+raid sources became Challenge-mode dungeon sources (was r01 → `d01`, r02 → `d10`, r03 → `d11`, r04 → `d15`, r05 →
+`d16`, all item level 60); round 1's raid boss numbers became "any boss" or "end boss" (never the secret boss, §8).
 
-Every legendary is **Legendary** rarity, drawn in violet `#c86bff`. **Overlaps with pages 12 and 13 (§3.32):**
-the secret-boss rows below marked "(exclusive)" compete with the secret-boss legendaries page 12 wrote for the
-same bosses; §3.32 recommends where each one moves. The rows are unchanged until the owner decides.
+Every legendary is **Legendary** rarity, drawn in violet `#c86bff`. **Secret bosses (§3.32):** page 12 owns every
+secret boss's exclusive legendary, so the rows below that used to claim a secret boss now drop from the boss §3.32
+names ("moved off the secret boss").
 
 ### 6.1 Movement (9)
 
@@ -1573,7 +1595,7 @@ mechanic survivable, and none work on the boss's enrage.
 
 | # | id | Name | Slot · base | ilvl | Power | Source | Flavour |
 |---|---|---|---|---|---|---|---|
-| 10 | `leg_voidwalker_soles` | Voidwalker Soles | Feet · adaptive | 60 | For the first 1.0 s you stand in each **void zone**, it heals you for what it would have dealt; after that it hurts you 20% less | `d11_saltdeep_cathedral` secret boss on Challenge (exclusive) | *They step where the dark pools, and the dark forgets to bite.* |
+| 10 | `leg_voidwalker_soles` | Voidwalker Soles | Feet · adaptive | 60 | For the first 1.0 s you stand in each **void zone**, it heals you for what it would have dealt; after that it hurts you 20% less | world pool 50+; Depth Cache R 15+, any dungeon (was the `d11` secret boss; page 12's `leg_heart_of_the_tidewife` is that exclusive) | *They step where the dark pools, and the dark forgets to bite.* |
 | 11 | `leg_near_miss_band` | Band of the Near Miss | Ring | 60 | When a **danger zone** finishes filling while you stand outside it within 2 m of its edge: **Near Miss**, +30% damage for 5 s (once per 8 s) | `d11_saltdeep_cathedral` any boss on Challenge | *Close only counts in one game, and this is it.* |
 | 12 | `leg_soakers_oath` | The Soaker's Oath | Chest · adaptive heavy/medium | 60 | Inside a **soak** circle you count as 2 players; you take 20% more from that soak. 30 s cooldown | `d15_fire_court` any boss on Challenge | *Somebody has to stand in it. Might as well be twice.* |
 | 13 | `leg_tetherbreak_torc` | Tetherbreak Torc | Necklace | 60 | **Tethers** on you break at 70% of their normal distance; breaking one gives you a barrier worth 15% of maximum health for 6 s | `d16_the_spire` any boss on Challenge | *Nothing holds what does not want holding.* |
@@ -1582,7 +1604,7 @@ mechanic survivable, and none work on the boss's enrage.
 | 16 | `leg_targets_grace` | Target's Grace | Shoulders · adaptive | 60 | While you are **Targeted** (yellow circle), +30% move speed and your circle is 25% smaller | `d15_fire_court` any boss on Challenge | *If it must find you, make it look hard.* |
 | 17 | `leg_edge_of_ruin` | The Edge of Ruin | Main hand · greatsword | 60 | Each 0.5 s tick of a **void zone** you take gives +8% damage for 6 s (max 5 stacks, +40%); you take 10% more from void zones | `d16_the_spire` any boss on Challenge | *Every edge is closer to the ruin than the handle.* |
 | 18 | `leg_wavebreaker` | Wavebreaker | Off hand · tower shield | 50 / 60 | Blocking a **moving wave** stops it for you and allies within a 3 m cone behind you. 30 s cooldown | world boss of `drowned_coast` | *The sea has one answer. This is the other.* |
-| 19 | `leg_silencers_signet` | Silencer's Signet | Ring | 61 / 60 | Interrupting a **gold-bordered** cast refunds 50% of your interrupt's cooldown and gives 10% of maximum resource | `d14_ashen_reliquary` final | *The last word is the one never spoken.* |
+| 19 | `leg_silencers_signet` | Silencer's Signet | Ring | 60 | Interrupting a **gold-bordered** cast refunds 50% of your interrupt's cooldown and gives 10% of maximum resource | `d14_ashen_reliquary` final | *The last word is the one never spoken.* |
 | 20 | `leg_mirror_of_the_mend` (was `leg_mirror_of_the_veil`) | Mirror of the Mend | Off hand · ward | 60 | Once every 45 s, the first **single-target** spell a boss or rare casts at you is reflected back at it (area spells and ground zones are not) | `d16_the_spire` any boss on Challenge | *Look into it and something else looks out.* |
 
 ### 6.3 Pets and followers (6)
@@ -1591,9 +1613,9 @@ mechanic survivable, and none work on the boss's enrage.
 |---|---|---|---|---|---|---|---|
 | 21 | `leg_kennelmasters_whistle` | Kennelmaster's Whistle | Necklace | scales, 20+ | A spectral war hound fights beside you without taking a follower slot: a bite every 1.5 s for 35% weapon damage, 30% of your maximum health, back 20 s after it falls. If you already have a pet, that pet deals +25% instead | world pool 20+ | *Two notes. The dog knows which one means "now".* |
 | 22 | `leg_crown_of_the_hollow_court` | Crown of the Hollow Court | Head · adaptive | 60 | Enemies you kill have a 20% chance to rise as a Hollow Courtier for 12 s (max 3): a hit every 1.2 s for 40% weapon damage | `d01_hollow_barrow` end boss on Challenge | *The court still sits. It has simply stopped breathing.* |
-| 23 | `leg_brass_familiar` | The Brass Familiar | Shoulders · adaptive | 56 / 60 | A clockwork owl rides your shoulder: every 4 s it marks the lowest-health enemy within 20 m; marked enemies take +10% from your whole group for 4 s | `d12_unmade_workshop` · secret (exclusive) | *It was built to watch. Nobody told it what to stop watching.* |
+| 23 | `leg_brass_familiar` | The Brass Familiar | Shoulders · adaptive | 56 / 60 | A clockwork owl rides your shoulder: every 4 s it marks the lowest-health enemy within 20 m; marked enemies take +10% from your whole group for 4 s | `d12_unmade_workshop` boss 2 (moved off the secret boss, §3.32) | *It was built to watch. Nobody told it what to stop watching.* |
 | 24 | `leg_mercenarys_contract` | The Mercenary's Contract | Ring | scales, 20+ | Your followers gain +40% health and +30% damage; while one is within 8 m of you, you take 10% less damage | world pool 20+ | *Terms: everything. Signed: in something darker than ink.* |
-| 25 | `leg_bramblemothers_seed` | Bramblemother's Seed | Back · cloak | 33 / 60 | Every 15 s in a fight, a thornling sprouts where you stand for 10 s: it cannot move, taunts non-bosses within 6 m and has 25% of your maximum health | `d07_thornheart` · secret (exclusive) | *Plant it anywhere. It will make that anywhere a problem.* |
+| 25 | `leg_bramblemothers_seed` | Bramblemother's Seed | Back · cloak | 33 / 60 | Every 15 s in a fight, a thornling sprouts where you stand for 10 s: it cannot move, taunts non-bosses within 6 m and has 25% of your maximum health | `d07_thornheart` boss 2 (moved off the secret boss, §3.32) | *Plant it anywhere. It will make that anywhere a problem.* |
 | 26 | `leg_twin_moth_brooch` (was `leg_twin_moth_lantern`, light slot) | Twin Moth Brooch | Necklace | 32 / 60 | Two moths circle you in a fight, each striking the nearest enemy within 9 m every 2 s for 30% weapon damage as Arcane | world boss of `whisperwood` | *They were drawn to a flame once. Now they are drawn to whatever you are fighting.* |
 
 ### 6.4 Procs (12)
@@ -1625,7 +1647,7 @@ mechanic survivable, and none work on the boss's enrage.
 | 44 | `leg_executioners_ledger` | The Executioner's Ledger | Main hand · greatsword or greataxe | 58 / 60 | Against enemies below 20% health your attacks deal +60% and cleave everything within 3 m of the target | `d13_cindergate` final | *Every name in it is crossed out but the next one.* |
 | 45 | `leg_opening_gambit` | Opening Gambit | Hands · adaptive | 60 | For the first 4 s of every fight: +50% attack and cast speed | `d10_rimefang_caverns` any boss on Challenge | *The first move is the only one you get to choose.* |
 | 46 | `leg_glasswalkers_robe` | Glasswalker's Robe | Chest · cloth | 23 / 60 | While a barrier or shield is on you: +25% spell damage; with none, you take 10% more damage | `d05_glass_tombs` final | *Walk carefully. Everything here is glass, including you.* |
-| 47 | `leg_pit_champions_belt` | The Pit Champion's Belt | Waist · heavy | 39 / 60 | Every enemy you hit in the last 5 s adds Crowd (max 10): +3% damage and +2% damage reduction each. At 10 you roar: non-bosses within 8 m flee for 2 s (once per 30 s) | `d09_warmasters_pit` · secret (exclusive) | *The crowd chants a name. Today it is yours.* |
+| 47 | `leg_pit_champions_belt` | The Pit Champion's Belt | Waist · heavy | 39 / 60 | Every enemy you hit in the last 5 s adds Crowd (max 10): +3% damage and +2% damage reduction each. At 10 you roar: non-bosses within 8 m flee for 2 s (once per 30 s) | `d09_warmasters_pit` boss 2 (moved off the secret boss, §3.32) | *The crowd chants a name. Today it is yours.* |
 
 ### 6.6 On kill (6)
 
@@ -1636,7 +1658,7 @@ mechanic survivable, and none work on the boss's enrage.
 | 50 | `leg_coal_of_the_pyre_king` (was `leg_ember_of_the_pyre_king`) | Coal of the Pyre King | Ring | 60 | Kills leave a 3 m pyre for 5 s: allies inside +10% haste; enemies inside take 30% of your damage a second as fire | `d16_the_spire` any boss on Challenge | *Every fire is a throne for something.* |
 | 51 | `leg_bloodhound_boots` | Bloodhound Boots | Feet · adaptive | scales, 20+ | Kills give 2 s of +50% move speed and reset your dodge cooldown; once per 6 s | world pool 20+ | *They have the scent. You just have to keep up.* |
 | 52 | `leg_tithe_collector` | The Tithe Collector | Waist · adaptive | scales, 20+ | Kills restore 3% of maximum health and 5% of maximum resource | world pool 20+ | *A tenth of everything. Every time.* |
-| 53 | `leg_skullspire_pauldrons` | Skullspire Pauldrons | Shoulders · adaptive heavy/medium | 62 / 60 | Killing a champion, rare or boss gives a Trophy for 5 min: +5% damage, up to 3 | world boss of `kingsfire` | *Room for three more. Always room for three more.* |
+| 53 | `leg_skullspire_pauldrons` | Skullspire Pauldrons | Shoulders · adaptive heavy/medium | 60 | Killing a champion, rare or boss gives a Trophy for 5 min: +5% damage, up to 3 | world boss of `kingsfire` | *Room for three more. Always room for three more.* |
 
 ### 6.7 On dodge (5)
 
@@ -1644,7 +1666,7 @@ mechanic survivable, and none work on the boss's enrage.
 |---|---|---|---|---|---|---|---|
 | 54 | `leg_mirage_silks` | Mirage Silks | Chest · light | 52 / 60 | Dodging leaves a mirage for 3 s that taunts non-bosses within 6 m, then bursts for 100% weapon damage within 4 m | `d12_unmade_workshop` final | *You were never there. It was never you.* |
 | 55 | `leg_sidestep_bangle` | Sidestep Bangle | Ring | scales, 20+ | A **perfect dodge** (started within 0.25 s before a hit would land) gives +40% critical chance for 3 s | world pool 20+ | *The blow arrives exactly where you used to be.* |
-| 56 | `leg_quickfeather_cloak` | Quickfeather Cloak | Back · cloak | 44 / 60 | Dodge distance +50%; dodge cooldown −25% | `d10_rimefang_caverns` · secret (exclusive) | *Plucked from a bird that was never caught.* |
+| 56 | `leg_quickfeather_cloak` | Quickfeather Cloak | Back · cloak | 44 / 60 | Dodge distance +50%; dodge cooldown −25% | `d10_rimefang_caverns` boss 2 (moved off the secret boss, §3.32) | *Plucked from a bird that was never caught.* |
 | 57 | `leg_razorwind_greaves` | Razorwind Greaves | Legs · light | 60 | Dodging through an enemy deals 120% weapon damage to it and makes it bleed for 60% over 4 s | `d15_fire_court` any boss on Challenge | *The shortest way past is through.* |
 | 58 | `leg_counterweight_gauntlets` | Counterweight Gauntlets | Hands · heavy | 60 | Within 2 s after a dodge, your next melee hit deals +70% and knocks a non-boss down for 1.5 s | `d01_hollow_barrow` any boss on Challenge | *Everything that goes one way comes back the other.* |
 
@@ -1652,30 +1674,30 @@ mechanic survivable, and none work on the boss's enrage.
 
 | # | id | Name | Slot · base | ilvl | Power | Source | Flavour |
 |---|---|---|---|---|---|---|---|
-| 59 | `leg_heart_of_the_glacier` | Heart of the Glacier | Necklace | 60 | All your damage becomes ice; +10% ice damage; Chilled enemies take a further 10% from you | `d10_rimefang_caverns` secret boss on Challenge (exclusive) | *It beats once a century. It is beating now.* |
-| 60 | `leg_noonforged_gauntlets` (was `leg_sunforged_gauntlets`, §3.33 #10) | Noonforged Gauntlets | Hands · adaptive | 50 / 60 | The physical damage of your weapon attacks becomes holy: +20% against undead and fiends, and it heals you for 2% of the damage | `d11_saltdeep_cathedral` · secret (exclusive) | *Hammered at noon on the longest day. They still keep that hour.* |
+| 59 | `leg_heart_of_the_glacier` | Heart of the Glacier | Necklace | 60 | All your damage becomes ice; +10% ice damage; Chilled enemies take a further 10% from you | `d10_rimefang_caverns` boss 3 on Challenge (moved off the secret boss, §3.32) | *It beats once a century. It is beating now.* |
+| 60 | `leg_noonforged_gauntlets` (was `leg_sunforged_gauntlets`, §3.33 #10) | Noonforged Gauntlets | Hands · adaptive | 50 / 60 | The physical damage of your weapon attacks becomes holy: +20% against undead and fiends, and it heals you for 2% of the damage | `d11_saltdeep_cathedral` boss 2 (moved off the secret boss, §3.32) | *Hammered at noon on the longest day. They still keep that hour.* |
 | 61 | `leg_prism_of_the_seventh_hue` | Prism of the Seventh Hue | Off hand · orb (weapon) | 56 / 60 | Your spells cycle fire → ice → lightning → poison → shadow → arcane, each +15% and applying its status; casting all six within 12 s gives **Prismatic**: +30% damage for 6 s | world boss of `riftmarch` | *There are six colours. The seventh is what they make together.* |
-| 62 | `leg_venomheart_ring` | Venomheart Ring | Ring | 29 / 60 | Your damage-over-time effects become poison and may stack twice on one target; poison you apply deals +25% | `d06_sandsworn_vault` · secret (exclusive) | *A drop of it would kill a city. Luckily it only ever gives one drop at a time.* |
+| 62 | `leg_venomheart_ring` | Venomheart Ring | Ring | 29 / 60 | Your damage-over-time effects become poison and may stack twice on one target; poison you apply deals +25% | `d06_sandsworn_vault` boss 2 (moved off the secret boss, §3.32) | *A drop of it would kill a city. Luckily it only ever gives one drop at a time.* |
 | 63 | `leg_voidtouched_diadem` | Voidtouched Diadem | Head · adaptive | 60 | 20% of all damage you deal becomes shadow that ignores armour and resistance | `d16_the_spire` end boss on Challenge | *It does not sit on the head. It sits on everything behind it.* |
 
 ### 6.9 Cheat death and defence (5)
 
 | # | id | Name | Slot · base | ilvl | Power | Source | Flavour |
 |---|---|---|---|---|---|---|---|
-| 64 | `leg_phoenix_feather` | The Phoenix Feather | Necklace | 65 / 60 | A killing blow instead makes you burst into flame: 2 s untargetable, healed to 40%, and 400% weapon damage as fire within 6 m. Once per 180 s (in a dungeon: once per boss fight). Never against a one-shot mechanic (page 11) | `d14_ashen_reliquary` · secret (exclusive) | *Ash is only what fire wears between fires.* |
-| 65 | `leg_barrowkings_second_crown` | The Barrowking's Second Crown | Head · adaptive | 60 | A killing blow leaves you at 1 health in **Shadow Walk** for 3 s: untargetable, 50% slower, unable to attack or cast. Once per 120 s; never against a one-shot mechanic (page 11) | `d01_hollow_barrow` secret boss on Challenge (exclusive) | *He had two. He wore the second one for his funeral, and then again after.* |
+| 64 | `leg_phoenix_feather` | The Phoenix Feather | Necklace | 60 | A killing blow instead makes you burst into flame: 2 s untargetable, healed to 40%, and 400% weapon damage as fire within 6 m. Once per 180 s (in a dungeon: once per boss fight). Never against a one-shot mechanic (page 11) | `d14_ashen_reliquary` boss 2 (moved off the secret boss, §3.32) | *Ash is only what fire wears between fires.* |
+| 65 | `leg_barrowkings_second_crown` | The Barrowking's Second Crown | Head · adaptive | 60 | A killing blow leaves you at 1 health in **Shadow Walk** for 3 s: untargetable, 50% slower, unable to attack or cast. Once per 120 s; never against a one-shot mechanic (page 11) | `d01_hollow_barrow` boss 2 on Challenge (moved off the secret boss, §3.32) | *He had two. He wore the second one for his funeral, and then again after.* |
 | 66 | `leg_stoneskin_mantle` | Stoneskin Mantle | Shoulders · adaptive | 60 | A single hit worth more than 30% of your maximum health gives you a barrier of 20% of maximum health for 6 s; 30 s cooldown | `d10_rimefang_caverns` end boss on Challenge | *The mountain does not flinch. It just gets a little more mountain.* |
-| 67 | `leg_bulwark_of_ages` | Bulwark of Ages | Off hand · tower shield | 62 / 60 | Each block gives 2% damage reduction for 6 s (max 10); at 10, your next block reflects 150% of the blocked hit | `d13_cindergate` · secret (exclusive) | *Every dent is a year. It is very, very old.* |
+| 67 | `leg_bulwark_of_ages` | Bulwark of Ages | Off hand · tower shield | 60 | Each block gives 2% damage reduction for 6 s (max 10); at 10, your next block reflects 150% of the blocked hit | `d13_cindergate` boss 2 (moved off the secret boss, §3.32) | *Every dent is a year. It is very, very old.* |
 | 68 | `leg_undying_bastion` | The Undying Bastion | Chest · heavy | 60 | Every 10 s in a fight, the next hit that would deal more than 20% of your maximum health deals half | `d16_the_spire` any boss on Challenge | *Walls fall. This one has decided not to.* |
 
 ### 6.10 Healing (5)
 
 | # | id | Name | Slot · base | ilvl | Power | Source | Flavour |
 |---|---|---|---|---|---|---|---|
-| 69 | `leg_mercy_bell` | The Mercy Bell | Main hand · sceptre | 35 / 60 | Your heals on allies below 35% health are +40% and give them 15% damage reduction for 4 s | `d08_moonwell_ruins` · secret (exclusive) | *It rings only when somebody is about to be saved.* |
+| 69 | `leg_mercy_bell` | The Mercy Bell | Main hand · sceptre | 35 / 60 | Your heals on allies below 35% health are +40% and give them 15% damage reduction for 4 s | `d08_moonwell_ruins` boss 2 (moved off the secret boss, §3.32) | *It rings only when somebody is about to be saved.* |
 | 70 | `leg_wellspring_chalice` | Wellspring Chalice | Off hand · reliquary focus | 60 | Every 5th heal also heals the 3 lowest-health allies within 20 m for 40% of its amount | `d11_saltdeep_cathedral` any boss on Challenge | *It is never empty. It is sometimes afraid of being.* |
 | 71 | `leg_shepherds_crook` | The Shepherd's Crook | Main hand · staff | 60 | Your heals on an ally standing in a void zone or a danger zone are +50% | `d15_fire_court` any boss on Challenge | *The flock strays. The crook reaches.* |
-| 72 | `leg_lifebinder_thread` | Lifebinder Thread | Ring | 17 / 60 | Your heals link you to the ally you heal most: 10% of the damage they take moves to you, and 10% of the healing you receive is copied to them | `d02_drowned_mill` · secret (exclusive) | *Tie it round two fingers, and two people will never quite be apart.* |
+| 72 | `leg_lifebinder_thread` | Lifebinder Thread | Ring | 17 / 60 | Your heals link you to the ally you heal most: 10% of the damage they take moves to you, and 10% of the healing you receive is copied to them | `d02_drowned_mill` end boss (moved off the secret boss, §3.32) | *Tie it round two fingers, and two people will never quite be apart.* |
 | 73 | `leg_verdant_crown` | The Verdant Crown | Head · adaptive | scales, 20+ | Overhealing plants a seed where the target stands (max 5); an ally who walks over one heals 5% of maximum health | world pool 20+ | *Where it has been, something grows.* |
 
 ### 6.11 Tanking (4)
@@ -1684,7 +1706,7 @@ mechanic survivable, and none work on the boss's enrage.
 |---|---|---|---|---|---|---|---|
 | 74 | `leg_grudgekeeper_helm` | Grudgekeeper Helm | Head · heavy | 19 / 60 | Each enemy attacking you within 8 m gives +5% threat and 1% damage reduction (max 10) | `d04_bellows_keep` final | *It remembers every face that swung at it.* |
 | 75 | `leg_anvil_of_the_last_gate` | Anvil of the Last Gate | Chest · heavy | 60 | While you hold a boss's attention: +10% armour for each phase change you have held it through (max +30%); lost if you lose it for 3 s | `d16_the_spire` any boss on Challenge | *The gate is gone. The anvil stayed.* |
-| 76 | `leg_ironroot_sabatons` | Ironroot Sabatons | Feet · heavy | 23 / 60 | You cannot be knocked back or pulled while standing still; after 2 s standing still, +15% block chance | `d04_bellows_keep` · secret (exclusive) | *Stand. Stand. Stand.* |
+| 76 | `leg_ironroot_sabatons` | Ironroot Sabatons | Feet · heavy | 23 / 60 | You cannot be knocked back or pulled while standing still; after 2 s standing still, +15% block chance | `d04_bellows_keep` boss 2 (moved off the secret boss, §3.32) | *Stand. Stand. Stand.* |
 | 77 | `leg_spitefire_bulwark` | Spitefire Bulwark | Off hand · shield | 60 | Blocked damage is stored; every 6 s, 50% of the store bursts as fire in a 6 m cone ahead of you | `d16_the_spire` any boss on Challenge | *Every blow it takes, it keeps. Then it gives them back.* |
 
 ### 6.12 Utility and mounts (5)
@@ -1692,17 +1714,17 @@ mechanic survivable, and none work on the boss's enrage.
 | # | id | Name | Slot · base | ilvl | Power | Source | Flavour |
 |---|---|---|---|---|---|---|---|
 | 78 | `leg_cartographers_monocle` | The Cartographer's Monocle | Head · adaptive | scales, 20+ | The minimap shows rares, chests and hidden doors within 150 m; +25% gold from chests | world pool 20+ | *Every map is wrong. This one is wrong less.* |
-| 79 | `leg_trailblazers_compass` (was `leg_trailblazers_lantern`, light slot) | Trailblazer's Compass | Necklace | 21 / 60 | Secret doors, clue marks and hidden levers within 20 m of you glow (secret-boss trails, page 12); the minimap points to the nearest one within 60 m | `d03_deepdelve` · secret (exclusive) | *It was carried by someone who went first. It still points the way they went.* |
+| 79 | `leg_trailblazers_compass` (was `leg_trailblazers_lantern`, light slot) | Trailblazer's Compass | Necklace | 21 / 60 | Secret doors, clue marks and hidden levers within 20 m of you glow (secret-boss trails, page 12); the minimap points to the nearest one within 60 m | `d03_shaft_seven` end boss (moved off the secret boss, §3.32) | *It was carried by someone who went first. It still points the way they went.* |
 | 80 | `leg_merchant_princes_signet` | The Merchant Prince's Signet | Ring | scales, 20+ | Vendors sell to you 15% cheaper and repairs cost 50% less | world pool 20+ | *Everybody has a price. This ring knows it.* |
-| 81 | `leg_ashwind_stallion` | The Ashwind Stallion | Mount · courser | 72 / 60 | ×2.6 speed; gallop lasts 40% longer; at full gallop you leave a 2 s fire trail that deals 30% weapon damage a second to enemies crossing it | `d14_ashen_reliquary` Depth Cache R 15+, 0.5% | *It was born in the ash and has never agreed to leave it.* |
-| 82 | `leg_mantle_of_the_unburied` (was `leg_candle_of_the_unburied`, light slot) | Mantle of the Unburied | Back · cloak | 12 / 60 | Enemies within 10 m of you take +10% from you and cannot stay hidden; undead within 10 m deal 10% less damage | `d01_hollow_barrow` · secret (exclusive) — the first legendary most players will ever see | *It was sewn for the ones nobody buried. It has a great deal of work.* |
+| 81 | `leg_ashwind_stallion` | The Ashwind Stallion | Mount · courser | 60 | **Ash Road** — while you ride, you leave a 2 s fire trail that deals 30% weapon damage a second to enemies crossing it, and knockbacks cannot throw you from the saddle; your first hit within 3 s of dismounting deals +50% in a 4 m ring of fire. Speed comes from your riding rank only (page 08 §24.1) | `d14_ashen_reliquary` Depth Cache R 15+, 0.5% | *It was born in the ash and has never agreed to leave it.* |
+| 82 | `leg_mantle_of_the_unburied` (was `leg_candle_of_the_unburied`, light slot) | Mantle of the Unburied | Back · cloak | 12 / 60 | Enemies within 10 m of you take +10% from you and cannot stay hidden; undead within 10 m deal 10% less damage | `d01_hollow_barrow` end boss (moved off the secret boss, §3.32) — the first legendary most players will ever see | *It was sewn for the ones nobody buried. It has a great deal of work.* |
 
 ### 6.13 Story-finale legendaries (2 more)
 
 | # | id | Name | Slot · base | ilvl | Power | Source | Flavour |
 |---|---|---|---|---|---|---|---|
-| 83 | `leg_crown_of_the_ashen_heir` (was `leg_crown_of_the_ember_king`) | Crown of the Ashen Heir | Head · adaptive | 60 | Your attacks and spells on a Burning enemy spread Burning to one more enemy within 6 m; while 5 or more enemies within 20 m burn, +20% damage | `d15_fire_court` secret boss on Challenge (exclusive) | *The heir is not dead. The heir is merely not wearing it.* |
-| 84 | `leg_the_unwritten_page` | The Unwritten Page | Off hand · grimoire focus | 60 | Every 30 s your next spell is **Unwritten**: it costs nothing, its cooldown resets, and it casts again at 60% on up to 2 other enemies within 15 m | `d16_the_spire` secret boss on Challenge (exclusive) | *Whatever you write on it has already happened.* |
+| 83 | `leg_crown_of_the_ashen_heir` (was `leg_crown_of_the_ember_king`) | Crown of the Ashen Heir | Head · adaptive | 60 | Your attacks and spells on a Burning enemy spread Burning to one more enemy within 6 m; while 5 or more enemies within 20 m burn, +20% damage | `d15_fire_court` boss 2 on Challenge (moved off the secret boss, §3.32) | *The heir is not dead. The heir is merely not wearing it.* |
+| 84 | `leg_the_unwritten_page` | The Unwritten Page | Off hand · grimoire focus | 60 | Every 30 s your next spell is **Unwritten**: it costs nothing, its cooldown resets, and it casts again at 60% on up to 2 other enemies within 15 m | `d16_the_spire` boss 2 on Challenge (moved off the secret boss, §3.32) | *Whatever you write on it has already happened.* |
 
 ---
 
@@ -1767,24 +1789,24 @@ whether it is **tag-aware** (it adds tags to what it makes). No soul makes a **o
 | 27 | `soul_long_memory` | Long Memory | necklace | any | **Grudge** — an enemy takes **+5%** from you for each **different** skill of yours that hit it in the last 10 s (max +25%) | `d14_ashen_reliquary` end boss, Challenge 3%; Depth Cache | *It forgets nothing. It forgives less.* |
 | 28 | `soul_tidal_step` | Tidal Step | feet | any | **Undertow** — your dodge roll leaves a wave that pushes non-bosses within 3 m back 3 m and Chills them (−25% move, 3 s) (ICD 6 s). Adds `tag_ice` `tag_area` | `d11_saltdeep_cathedral` secret boss 4% | *Step aside, and the sea steps with you.* |
 | 29 | `soul_gilded_hand` | The Gilded Hand | hands | any | **Windfall** — +15% gold find; each kill has a **5%** chance to drop an extra purse worth 5× that kill's gold | `d06_sandsworn_vault` secret boss 4%; world | *Everything it touches is worth a little more. Including you.* |
-| 30 | `soul_seekers_eye` | The Seeker's Eye | head | any | **Glint** — +20% item rarity; champions and rares within 60 m show on your minimap | `d03_deepdelve` end boss, Challenge 3%; world | *It sees the gleam before the gleam knows it is seen.* |
+| 30 | `soul_seekers_eye` | The Seeker's Eye | head | any | **Glint** — +20% item rarity; champions and rares within 60 m show on your minimap | `d03_shaft_seven` end boss, Challenge 3%; world | *It sees the gleam before the gleam knows it is seen.* |
 
 
 ### 7.3 Class souls — index (60)
 
 Each class file writes two souls (the class template, canon §5 item 9). The class file is the owner; this is the
-index, taken from the class files on 2026-09-30. Requirement: **the class** (a class soul does nothing for another
+index, re-synced from the class files on 2026-09-30. Requirement: **the class** (a class soul does nothing for another
 class), plus the socket shown.
 
 | Class | id | Name | Socket | Source (class file) |
 |---|---|---|---|---|
-| [Bard](classes/bard.md) | `soul_encore` | Soul of the Encore | chest (armour) | the secret boss of `d08_moonwell_ruins` (Normal or Challenge), 4%; or any monster at 0.02% (great luck) |
+| [Bard](classes/bard.md) | `soul_encore` | Soul of the Encore | chest (armour) | the secret boss `b_the_drowned_moon` of `d08_moonwell_ruins` (Normal or Challenge), 4%; or any monster at 0.02% (great luck) |
 | [Bard](classes/bard.md) | `soul_steady_hand` | Soul of the Steady Hand | jewellery (ring or amulet) | quest reward: the Whisperwood story chapter's bard version (page 14); or Depth 15+ final chest, 1% |
 | [Chronomancer](classes/chronomancer.md) | `soul_backward_hour` | Soul of the Backward Hour | weapon (staff or wand) | `b_oddrin_the_unmaker`, `d12_unmade_workshop` end boss, Challenge mode (about 1 in 40 kills) |
 | [Chronomancer](classes/chronomancer.md) | `soul_second_self` | Soul of the Second Self | jewellery (neck or ring) | world boss `b_standing_ruin` (page 13), or a Depth 15+ end chest (rare roll) |
 | [Cleric](classes/cleric.md) | `soul_overflowing_font` | The Overflowing Font | weapon | `d11_saltdeep_cathedral` final boss, 3% Normal / 8% Challenge |
 | [Cleric](classes/cleric.md) | `soul_sun_at_your_back` | The Sun at Your Back | jewellery (necklace or ring) | quest reward from `q_calling_cleric_3` (first completion), or 1-in-400 from any rare monster level 40+ |
-| [Demon Hunter](classes/demon_hunter.md) | `soul_hunters_eye` | Soul of the Hunter's Eye | weapon | the secret boss of `d12_unmade_workshop` (Normal or Challenge), 4%; or any Demon at 0.02% (great luck) |
+| [Demon Hunter](classes/demon_hunter.md) | `soul_hunters_eye` | Soul of the Hunter's Eye | weapon | the secret boss `b_the_finished_thing` of `d12_unmade_workshop` (Normal or Challenge), 4%; or any Demon at 0.02% (great luck) |
 | [Demon Hunter](classes/demon_hunter.md) | `soul_iron_patience` | Soul of Iron Patience | jewellery (ring or amulet) | quest reward: the Riftmarch story chapter's demon-hunter version (page 14); or Depth 15+ final chest, 1% |
 | [Dragon Knight](classes/dragon_knight.md) | `soul_old_wyrm` | Soul of the Old Wyrm | weapon | `b_slagborn` world boss (2%); end chest at **Depth 15+** (1%) |
 | [Dragon Knight](classes/dragon_knight.md) | `soul_scale_warden` | Soul of the Scale Warden | armour — shield | `b_rimefang` (`d10_rimefang_caverns` end boss) on Challenge (3%); `b_standing_ruin` The Standing Ruin (Frostmantle world boss, 2%) |
@@ -1796,7 +1818,7 @@ class), plus the socket shown.
 | [Fighter](classes/fighter.md) | `soul_open_guard` | Soul of the Open Guard | armour — chest | `d09_warmasters_pit` final boss on Challenge (3%); world boss of `cinder_steppe` (page 13, 2%) |
 | [Knight](classes/knight.md) | `soul_bannerlords_heart` | Soul of the Bannerlord's Heart | chest | `b_carrion_crown` (world boss), 2%; `b_the_great_bellows` (page 12), Challenge mode, 4% |
 | [Knight](classes/knight.md) | `soul_oathkeeper` | Soul of the Oathkeeper | shield | `b_castellan_vorhane` (`d13_cindergate`), Challenge mode, 4%; any Depth 15+ end chest, 0.5% |
-| [Mage](classes/mage.md) | `soul_second_self` | Soul of the Second Self | chest (armour) | the secret boss of `d11_saltdeep_cathedral` (Normal or Challenge), 4%; or any monster at 0.02% (great luck) |
+| [Mage](classes/mage.md) | `soul_mirrored_self` | Soul of the Mirrored Self | chest (armour) | the secret boss `b_the_tidewife` of `d11_saltdeep_cathedral` (Normal or Challenge), 4%; or any monster at 0.02% (great luck) |
 | [Mage](classes/mage.md) | `soul_three_suns` | Soul of Three Suns | weapon | quest reward: the Riftmarch story chapter that ends at `d12_unmade_workshop` (page 14), Mage version of the reward; or Depth 15+ final chest, 1% |
 | [Monk](classes/monk.md) | `soul_returning_breath` | Soul of the Returning Breath | weapon (quarterstaff or wraps) | `b_the_unmined` (page 12), Challenge mode, 4%; Depth 15+ end chests, 0.5% |
 | [Monk](classes/monk.md) | `soul_still_pond` | Soul of the Still Pond | neck or ring | `b_sallow_king` The Sallow King (world boss, page 13), 2% |
@@ -1808,7 +1830,7 @@ class), plus the socket shown.
 | [Paladin](classes/paladin.md) | `soul_sworn_ground` | Soul of Sworn Ground | chest | **Challenge-mode `d13_cindergate` final boss, 3%**, and Depth 10+ end chests, 0.5% |
 | [Priest](classes/priest.md) | `soul_lamplighter` | Soul of the Lamplighter | jewellery (neck or ring) | `b_first_sleeper` The First Sleeper (`d01_hollow_barrow` secret boss) on Challenge, 3%; the world boss of `frostmantle` (`b_standing_ruin`), 2% |
 | [Priest](classes/priest.md) | `soul_mourning_bell` | Soul of the Mourning Bell | weapon | end chest at **Depth 15+**, 1%; `b_ashmother_veyra` (`d14_ashen_reliquary` secret boss) on Challenge, 3% |
-| [Pyromancer](classes/pyromancer.md) | `soul_kiln_heart` | Soul of the Kiln Heart | armour — chest | `b_the_sand_sovereign` The Sand Sovereign (`d06_sandsworn_vault` end boss) on Challenge (3%); `b_glass_wyrm` world boss (2%) |
+| [Pyromancer](classes/pyromancer.md) | `soul_banked_furnace` | Soul of the Banked Furnace | armour — chest | `b_the_sand_sovereign` The Sand Sovereign (`d06_sandsworn_vault` end boss) on Challenge (3%); `b_glass_wyrm` world boss (2%) |
 | [Pyromancer](classes/pyromancer.md) | `soul_last_cinder` | Soul of the Last Cinder | weapon | `b_slagborn` world boss (2%); end chest at **Depth 15+** (1%) |
 | [Ranger](classes/ranger.md) | `soul_blood_trail` | Blood Trail | weapon (bow, crossbow, javelin) | `d10_rimefang_caverns` final boss on Challenge (5%), or any beast-family Rare in the open world (1 in 2,000) |
 | [Ranger](classes/ranger.md) | `soul_shared_breath` | Shared Breath | jewellery (necklace or ring) | the world boss of `frostmantle` (page 13), 3% per weekly kill; or Depth 20+ end chests |
@@ -1820,7 +1842,7 @@ class), plus the socket shown.
 | [Scavenger](classes/scavenger.md) | `soul_second_pocket` | Soul of the Second Pocket | waist (armour) | quest reward: the Sunscar story chapter's scavenger version (page 14); or Depth 15+ final chest, 1% |
 | [Shadow Dancer](classes/shadow_dancer.md) | `soul_final_bow` | Soul of the Final Bow | weapon | end chest at **Depth 15+**, 1%; the world boss of `riftmarch` (`b_unmoored`), 2% |
 | [Shadow Dancer](classes/shadow_dancer.md) | `soul_masked_partner` | Soul of the Masked Partner | armour — chest | `b_first_sleeper` The First Sleeper (`d01_hollow_barrow` secret boss) on Challenge, 3%; end chest at **Depth 10+**, 1% |
-| [Shaman](classes/shaman.md) | `soul_heron_who_stayed` | Soul of the Heron Who Stayed | neck or ring | `b_sallow_king` The Sallow King (world boss, page 13), 2%; `b_the_tidewife` (page 12), Challenge mode, 4% |
+| [Shaman](classes/shaman.md) | `soul_crane_who_stayed` | Soul of the Crane Who Stayed | neck or ring | `b_sallow_king` The Sallow King (world boss, page 13), 2%; `b_the_tidewife` (page 12), Challenge mode, 4% |
 | [Shaman](classes/shaman.md) | `soul_ox_thunder_stride` | Soul of the Ox's Thunder Stride | weapon (staff or sceptre) | `b_standing_ruin` The Standing Ruin (world boss, page 13), 2%; Depth 15+ end chests, 0.5% |
 | [Sorcerer](classes/sorcerer.md) | `soul_loaded_bones` | Soul of the Loaded Bones | weapon | `b_the_tithe_below` (`d02_drowned_mill` secret boss) on Challenge, 3%; end chest at **Depth 15+**, 1% |
 | [Sorcerer](classes/sorcerer.md) | `soul_lucky_patron` | Soul of the Lucky Patron | jewellery (neck or ring) | the world boss of `whisperwood` (page 13), 2%; end chest at **Depth 10+**, 1% |
@@ -1831,7 +1853,7 @@ class), plus the socket shown.
 | [Tactician](classes/tactician.md) | `soul_standing_orders` | Soul of Standing Orders | weapon (crossbow or spear) | `b_warmaster_drogath` (`d09_warmasters_pit`), Challenge mode, 4% chance; any Depth 15+ end chest, 0.5% |
 | [Tactician](classes/tactician.md) | `soul_unbroken_standard` | Soul of the Unbroken Standard | off hand (shield) | `b_queen_ammarel` (page 12), Challenge mode, 4%; `b_standing_ruin` (world boss), 2% |
 | [Tinker](classes/tinker.md) | `soul_field_surgeon` | Soul of the Field Surgeon | armour — chest | the world boss of `sunscar` (`b_glass_wyrm`, page 13), 2%; end chest at **Depth 15+**, 1% |
-| [Tinker](classes/tinker.md) | `soul_spare_parts` | Soul of Spare Parts | weapon | `b_the_unmined` The Unmined (`d03_deepdelve` secret boss) on Challenge, 3%; end chest at **Depth 10+**, 1% |
+| [Tinker](classes/tinker.md) | `soul_spare_parts` | Soul of Spare Parts | weapon | `b_the_unmined` The Unmined (`d03_shaft_seven` secret boss) on Challenge, 3%; end chest at **Depth 10+**, 1% |
 | [Warlock](classes/warlock.md) | `soul_creeping_debt` | Soul of Creeping Debt | weapon | quest reward: the Kingsfire story chapter's warlock version (page 14); or Depth 15+ final chest, 1% |
 | [Warlock](classes/warlock.md) | `soul_second_signature` | Soul of the Second Signature | chest (armour) | the secret boss of `d13_cindergate` (Normal or Challenge), 4%; or any Demon at 0.02% (great luck) |
 | [Warrior](classes/warrior.md) | `soul_stonebound_oath` | Stonebound Oath | armour: chest or shield | `d10_rimefang_caverns` final boss, 3% on Normal / 8% on Challenge |
@@ -1839,20 +1861,23 @@ class), plus the socket shown.
 | [Witch Hunter](classes/witch_hunter.md) | `soul_quiet_writ` | Soul of the Quiet Writ | neck or ring | `b_sallow_king` The Sallow King (world boss, page 13), 2% |
 | [Witch Hunter](classes/witch_hunter.md) | `soul_tribunal_bell` | Soul of the Tribunal Bell | weapon (crossbow) | `b_the_ash_scribe` (page 12), Challenge mode, 4%; Depth 15+ end chests, 0.5% |
 
-`soul_second_self` appears twice (chronomancer and mage) — an id collision (§3.33 #3). Class souls whose socket is
-the waist or a shield use the round-2 rule that soul sockets can sit in any armour slot and the off hand (page 08 §2.1).
+The mage's soul is `soul_mirrored_self` and the chronomancer keeps `soul_second_self` (the round-2 collision is
+settled, §3.33 #3). The shaman's `soul_heron_who_stayed` is now `soul_crane_who_stayed` (the Rain Crane). Class
+souls whose socket is the waist or a shield use the round-2 rule that soul sockets can sit in any armour slot and
+the off hand (page 08 §2.1).
 
 ### 7.4 Dungeon souls (15)
 
-Page 12 turned its 15 dungeon **trinkets** into dungeon souls (page 12 §2.7); each drops from the boss that listed
-the trinket (4% Normal, 8% Challenge, page 08 §16.2). The rows, with this page's proposed ids and triggers, are in
-§3.31.1 (marked **Soul**); page 12's own ids and wording win where they differ:
+Page 12 owns these (§21.4): 14 of its former **trinkets** became dungeon souls (the fifteenth, The Finished Thing,
+became a hands legendary) and the Fire King gives a new one, The King's Offer. Each drops from the boss that lists
+it (4% Normal, 8% Challenge, page 08 §16.2). The rows, with page 12's sockets and wording, are in §3.31.1 (marked
+**Soul**):
 
-`soul_stonegullets_gizzard_stone` (d03) · `soul_slag_heart` (d04) · `soul_brood_mothers_gilt` (d05) ·
+`soul_stonegullets_gizzard` (d03) · `soul_slag_heart` (d04) · `soul_brood_mothers_gilt` (d05) ·
 `soul_the_stolen_oath` (d06) · `soul_seed_of_the_sovereign` (d07) · `soul_ogras_whistle` (d09) ·
-`soul_hibernation_charm` (d10) · `soul_the_full_church` (d11) · `soul_perpetual_cog` (d12) ·
-`soul_oddrins_last_letter` (d12) · `soul_the_finished_thing` (d12, the secret boss's prize) · `soul_varrows_key` (d13) ·
-`soul_gate_key_of_cinders` (d13) · `soul_four_doors` (d14) · `soul_the_kings_decree` (d14).
+`soul_hibernation` (d10) · `soul_the_full_church` (d11) · `soul_perpetual_cog` (d12) ·
+`soul_oddrins_last_letter` (d12) · `soul_varrows_key` (d13) · `soul_gate_key` (d13) · `soul_four_doors` (d14) ·
+`soul_the_kings_decree` (d14) · `soul_the_kings_offer` (d15).
 
 ---
 
@@ -1860,30 +1885,28 @@ the trinket (4% Normal, 8% Challenge, page 08 §16.2). The rows, with this page'
 
 Page 08 §16.4: every dungeon secret boss has an exclusive legendary (10% every run on Normal, 15% once a week on
 Challenge, and a quarter of the Depth Cache's legendary column), plus one guaranteed appearance on the first kill.
-Page 12 owns how each secret boss is found.
+Page 12 owns how each secret boss is found **and names its exclusive** (§3.31.1). This page's round-1 secret-boss
+legendaries now drop from the normal boss in the fourth column (§3.32); the mount and appearance columns are this
+page's.
 
-**Superseded in part (§3.32):** page 12 names its own exclusive for every secret boss (`leg_first_sleepers_shroud`
-… `leg_the_banked_coal`). Keep page 12's as the exclusive; the legendary in the second column below moves to a
-normal boss as §3.32 lists. The mount and appearance columns are unaffected. The five raid rows of round 1 left with
-raids (§10.2); `d15_fire_court` and `d16_the_spire` are page 12's to fill.
-
-| Dungeon | Exclusive legendary (this page) | Mount | Guaranteed appearance (a look for the wardrobe) |
-|---|---|---|---|
-| `d01_hollow_barrow` | `leg_mantle_of_the_unburied` (was `leg_candle_of_the_unburied`) | — | Barrow-Candle Hood |
-| `d02_drowned_mill` | `leg_lifebinder_thread` | — | Millwheel Buckler look |
-| `d03_deepdelve` | `leg_trailblazers_compass` (was `leg_trailblazers_lantern`) | — | Deepdelve Miner's Helm look |
-| `d04_bellows_keep` | `leg_ironroot_sabatons` | — | Bellows-Forged Pauldrons look |
-| `d05_glass_tombs` | — (see mount) | `it_mount_dune_sabrecat` (20%) | Glass Pharaoh's Mask look |
-| `d06_sandsworn_vault` | `leg_venomheart_ring` | — | Sandsworn Shroud look |
-| `d07_thornheart` | `leg_bramblemothers_seed` | — | Thornwreath Crown look |
-| `d08_moonwell_ruins` | `leg_mercy_bell` | — | Moonlit Robe look |
-| `d09_warmasters_pit` | `leg_pit_champions_belt` | — | Pit Champion's Helm look |
-| `d10_rimefang_caverns` | `leg_quickfeather_cloak` | — | Rimefang Pelt Cloak look |
-| `d11_saltdeep_cathedral` | `leg_noonforged_gauntlets` (was `leg_sunforged_gauntlets`) | — | Drowned Choirmaster's Stole look |
-| `d12_unmade_workshop` | `leg_brass_familiar` | — | Clockwork Goggles look |
-| `d13_cindergate` | `leg_bulwark_of_ages` | — | Cindergate Tower Shield look |
-| `d14_ashen_reliquary` | `leg_phoenix_feather` | — | Ashen Reliquarist's Mantle look |
-
+| Dungeon | Secret boss | Exclusive legendary (page 12) | This page's legendary, moved to | Mount | Guaranteed appearance (a look for the wardrobe) |
+|---|---|---|---|---|---|
+| `d01_hollow_barrow` | `b_first_sleeper` | `leg_first_sleepers_shroud` | `leg_mantle_of_the_unburied` → end boss; `leg_barrowkings_second_crown` → boss 2 on Challenge | — | Barrow-Candle Hood |
+| `d02_drowned_mill` | `b_the_tithe_below` | `leg_ledger_of_the_deep` | `leg_lifebinder_thread` → end boss | — | Millwheel Buckler look |
+| `d03_shaft_seven` | `b_the_unmined` | `leg_heart_of_the_unmined` | `leg_trailblazers_compass` → end boss | — | Shaft Seven Miner's Helm look |
+| `d04_bellows_keep` | `b_bellamund_the_cold_smith` | `leg_the_cold_anvil` | `leg_ironroot_sabatons` → boss 2 | — | Bellows-Forged Pauldrons look |
+| `d05_glass_tombs` | `b_ithar_the_unseen` | `leg_the_unseen_prince` | — | `it_mount_dune_sabrecat` (20%, page 12 and page 08 §24.3 agree) | Glass Pharaoh's Mask look |
+| `d06_sandsworn_vault` | `b_tamar_the_first` | `leg_water_of_tamar` | `leg_venomheart_ring` → boss 2 | — | Sandsworn Shroud look |
+| `d07_thornheart` | `b_gall_sovereign` | `leg_wyllows_gratitude` | `leg_bramblemothers_seed` → boss 2 | — | Thornwreath Crown look |
+| `d08_moonwell_ruins` | `b_the_drowned_moon` | `leg_the_moon_returned` | `leg_mercy_bell` → boss 2 | — | Moonlit Robe look |
+| `d09_warmasters_pit` | `b_old_gnash_undefeated` | `leg_the_undefeated` | `leg_pit_champions_belt` → boss 2 | — | Pit Champion's Helm look |
+| `d10_rimefang_caverns` | `b_old_mother_rime` | `leg_mothers_last_winter` | `leg_quickfeather_cloak` → boss 2; `leg_heart_of_the_glacier` → boss 3 on Challenge | — | Rimefang Pelt Cloak look |
+| `d11_saltdeep_cathedral` | `b_the_tidewife` | `leg_heart_of_the_tidewife` | `leg_noonforged_gauntlets` → boss 2; `leg_voidwalker_soles` → world pool 50+ and Depth Cache R 15+ | — | Drowned Choirmaster's Stole look |
+| `d12_unmade_workshop` | `b_the_finished_thing` | `leg_the_finished_thing` | `leg_brass_familiar` → boss 2 | — | Clockwork Goggles look |
+| `d13_cindergate` | `b_first_flame_of_the_gate` | `leg_the_first_flame` | `leg_bulwark_of_ages` → boss 2 | — | Cindergate Tower Shield look |
+| `d14_ashen_reliquary` | `b_ashmother_veyra` | `leg_the_oldest_coal` | `leg_phoenix_feather` → boss 2 | — | Ashen Reliquarist's Mantle look |
+| `d15_fire_court` | `b_ysa_varn_kindled` | `leg_kiln_heart` | `leg_crown_of_the_ashen_heir` → boss 2 on Challenge | `it_mount_glass_charger` (2%, page 12) | page 12's |
+| `d16_the_spire` | `b_marchheart` | `leg_heart_of_the_march` (guaranteed once per account), `leg_dream_of_the_march` | `leg_the_unwritten_page` → boss 2 on Challenge | `it_mount_marchheart_colossus` (2%, page 12) | page 12's |
 
 ---
 
@@ -1911,12 +1934,12 @@ The Archivist's Regalia (`js/foci.js`).
 | Generic legendaries | ≥ 60 | **84** |
 | Generic uniques | ≥ 40 | **94 headline** (64 Farhold + 3 Farhold foci + 12 new slot uniques + 9 tag + 6 tool) in a **225** pool |
 | Generic souls | ~30 | **30** (§7.2) |
-| Secret-boss exclusives | every dungeon secret boss | **14 / 14** (d15 and d16 are page 12's) |
-| Class sets / legendaries / uniques / souls | class files | **73 / 139 / 105 / 60** indexed (§3, §7.3) |
-| Dungeon-exclusive (page 12) | indexed here | **72 uniques + 28 legendaries + 15 souls + 14 sets** (§3.31) |
+| Secret-boss exclusives | every dungeon secret boss | **16 / 16**, all page 12's (§8); this page's old ones moved to normal bosses |
+| Class sets / legendaries / uniques / souls | class files | **74 / 142 / 109 / 60** indexed (§3, §7.3) |
+| Dungeon-exclusive (page 12) | indexed here | **84 uniques + 36 legendaries + 15 souls + 16 sets** (§3.31) |
 | World boss and seasonal (page 13) | indexed here | **13 uniques** + the Wild Hunt set (§2.12) |
-| Grand total | — | **102 sets · 251 legendaries · 415 uniques · 105 souls** (94 sets if §3.32 is followed) |
-| Duplicates / collisions | none | **8 set pairs and 13 secret-boss pairs** (§3.32); **3 exact id collisions + 12 near-collisions** (§3.33) |
+| Grand total | — | **105 sets · 262 legendaries · 431 uniques · 105 souls** (97 sets if §3.32 is followed) |
+| Duplicates / collisions | none | **8 set pairs** (§3.32; the secret-boss pairs are settled); **2 open exact id collisions + 13 near-collisions** (§3.33) |
 
 Checks for whoever builds `data/items/*.json` from this page (page 16):
 
@@ -1944,11 +1967,14 @@ version can restore them:
 |---|---|
 | Generic raid sets (this page, round 1) | `set_barrowkings_tithe`, `set_rimecrown_regalia`, `set_choir_of_the_deep`, `set_court_of_embers`, `set_veilborn_ascendance` — with their pieces `it_barrowking_*`, `it_rimecrown_*`, `it_deepchoir_*`, `it_ember_courtier_*`, `it_veilborn_*` |
 | PvP set | `set_open_field_vanguard` (pieces `it_vanguard_*`) |
-| Raid sets (page 13, round 1) | `set_ninefold_oath`, `set_rimebound_court`, `set_drowned_choir`, `set_emberlord_regalia`, `set_veilwoven` |
-| Raid legendaries (page 13, round 1) — 17 | `leg_crown_of_the_ninth`, `leg_kingsblade_of_hrodric`, `leg_marrow_reliquary`, `leg_heart_of_the_sleeper`, `leg_ysmeres_long_winter`, `leg_windmothers_last_feather`, `leg_the_unsung_note`, `leg_choirmasters_ninth_eye`, `leg_grimwaters_last_broadside`, `leg_kiln_heart`, `leg_crown_of_kaedros`, `leg_emberwing_pinion`, `leg_first_torch`, `leg_dream_of_the_march`, `leg_unwoven_spindle`, `leg_starless_scale`, `leg_horologe_mainspring` |
-| Raid uniques (page 13, round 1) — 29 | `uq_votive_of_the_last_sister`, `uq_sextons_lantern`, `uq_gravewarden_oathband`, `uq_gullet_of_the_rotmaw`, `uq_ossuary_bonewraps`, `uq_hailwrights_tongs`, `uq_councils_three_rings`, `uq_rimefang_collar`, `uq_whiteout_lantern`, `uq_glacier_throne_signet`, `uq_brinecoil_fang`, `uq_abbess_bell_staff`, `uq_pearl_and_nacre`, `uq_cantors_tuning_fork`, `uq_saltbound_knuckles`, `uq_petition_of_the_three_houses`, `uq_brandts_champion_plume`, `uq_varros_leash`, `uq_cinderjaw_grille`, `uq_hestas_apprentice_hammer`, `uq_ashen_herald_feather`, `uq_saelith_spindle`, `uq_horologe_pocketwatch`, `uq_grey_collar`, `uq_threshold_keystone`, `uq_mirror_of_the_court`, `uq_anvarr_heartstone`, `uq_curators_ledger`, `uq_mouth_that_speaks_true` |
+| Raid sets (page 13, round 1) | `set_ninefold_oath`, `set_rimebound_court`, `set_drowned_choir` |
+| Raid legendaries (page 13, round 1) — 10 | `leg_crown_of_the_ninth`, `leg_kingsblade_of_hrodric`, `leg_marrow_reliquary`, `leg_heart_of_the_sleeper`, `leg_ysmeres_long_winter`, `leg_windmothers_last_feather`, `leg_the_unsung_note`, `leg_choirmasters_ninth_eye`, `leg_grimwaters_last_broadside`, `leg_starless_scale` |
+| Raid uniques (page 13, round 1) — 19 | `uq_votive_of_the_last_sister`, `uq_sextons_lantern`, `uq_gravewarden_oathband`, `uq_gullet_of_the_rotmaw`, `uq_ossuary_bonewraps`, `uq_hailwrights_tongs`, `uq_councils_three_rings`, `uq_rimefang_collar`, `uq_whiteout_lantern`, `uq_glacier_throne_signet`, `uq_brinecoil_fang`, `uq_abbess_bell_staff`, `uq_pearl_and_nacre`, `uq_cantors_tuning_fork`, `uq_saltbound_knuckles`, `uq_brandts_champion_plume`, `uq_ashen_herald_feather`, `uq_anvarr_heartstone`, `uq_curators_ledger` |
 
-A restored raid version should rename every "ember" / "veil" id above first (canon rule 10).
+A restored raid version should rename every "ember" / "veil" id above first (canon rule 10). The r04 / r05 items that
+page 12 rebuilt for `d15_fire_court` and `d16_the_spire` (`set_kingsfire_regalia`, `set_spirewoven`, `leg_firewing_pinion`,
+`leg_crown_of_kaedros`, `leg_kiln_heart`, `leg_heart_of_the_march`, `leg_dream_of_the_march`, `leg_unwoven_spindle`,
+`leg_horologe_mainspring` and ten uniques) are live again and indexed in §3.31, not parked.
 
 ### 10.3 Renamed in round 2 (old → new)
 
@@ -1973,30 +1999,47 @@ Forced by the name rule (no "ember" or "veil") or by the light slot leaving. Oth
 | `uq_emberwing_quiver` | `uq_cinderwing_quiver` | Cinderwing Quiver | ember |
 | `uq_veil_of_the_moonwell` | `uq_shawl_of_the_moonwell` | Shawl of the Moonwell | veil |
 | `rider_fury` (power id) | `mounted_frenzy` | — | "Fury" is banned |
-| **Page 12's items** (proposed; page 12 wins) | | | |
-| `leg_the_first_ember` (light, d14 secret) | `leg_the_banked_coal` (off-hand focus) | The Banked Coal | ember + light slot |
-| `it_first_ember_lantern` (light, d14 secret) | `it_ashmothers_reliquary` (off-hand focus) | Ashmother's Reliquary | ember + light slot |
-| `uq_pells_hooded_lantern` (light, d01) | `uq_pells_stolen_reliquary` (off-hand focus) | Pell's Stolen Reliquary | light slot |
+| **Page 12's items** (page 12 §21.7 is the list; page 12 wins) | | | |
+| `leg_the_first_ember` (light, d14 secret) | `leg_the_oldest_coal` (necklace) | The Oldest Coal | ember + light slot |
+| `it_first_ember_lantern` (light, d14 secret) | `it_ashmothers_coal_cage` (off-hand focus) | Ashmother's Coal Cage | ember + light slot |
+| `uq_pells_hooded_lantern` (light, d01) | `uq_pells_quiet_hood` (head, light armour) | Pell's Quiet Hood | light slot |
+| `leg_first_torch` (light, d16 secret) | `leg_heart_of_the_march` (necklace) | Heart of the March | light slot |
 | `uq_slag_heart_ember` (trinket, d04) | `soul_slag_heart` | Slag Heart | ember + trinket → soul |
-| `uq_gate_key_of_the_ember` (trinket, d13) | `soul_gate_key_of_cinders` | Gate Key of Cinders | ember + trinket → soul |
-| the other 12 trinkets and `leg_the_finished_thing` | `soul_<same name>` (§7.4) | unchanged names | trinket → soul |
-| `set_emberbane_plate` (d13) | `set_cinderbane_plate` | Cinderbane Plate | ember |
+| `uq_gate_key_of_the_ember` (trinket, d13) | `soul_gate_key` | The Gate Key | ember + trinket → soul |
+| `uq_stonegullets_gizzard_stone`, `uq_hibernation_charm` (trinkets) | `soul_stonegullets_gizzard`, `soul_hibernation` | Stonegullet's Gizzard, Hibernation | trinket → soul |
+| the other 10 trinkets | `soul_<same name>` (§3.31.1) | unchanged names | trinket → soul |
+| `leg_the_finished_thing` (trinket legendary, d12 secret) | `leg_the_finished_thing` (hands) | The Finished Thing | no trinket slot |
+| `uq_unshattered_vambraces`, `uq_death_roll_bracers` (wrists) | `uq_unshattered_gauntlets` (hands), `uq_death_roll_girdle` (waist) | — | no wrist slot |
+| `set_deepdelver` (d03) | `set_deepshaft_harness` | Deepshaft Harness | "Delver" is banned |
+| `set_emberbane_plate` (d13) | `set_firebreaker_plate` | Firebreaker Plate | ember |
+| `set_emberlord_regalia`, `set_veilwoven` (old raid sets, now d15 / d16) | `set_kingsfire_regalia`, `set_spirewoven` | Kingsfire Regalia, Spirewoven Raiment | ember, veil |
+| `leg_emberwing_pinion` (d15) | `leg_firewing_pinion` | Firewing Pinion | ember |
 | **Page 13's items** | | | |
-| `uq_veilstorm_lens` | `uq_tearstorm_lens` | Tearstorm Lens | veil (page 13 already uses it) |
-| `uq_stags_lantern` (light) | `uq_midwinter_bell` (necklace) *(proposed)* | Midwinter Bell | light slot |
-| **Class files** (proposed; the class file wins) | | | |
-| `set_runesmith_emberforged_aegis` | `set_runesmith_cinderforged_aegis` | The Cinderforged Aegis | ember |
-| `set_shadow_dancer_veilwoven_garb` | `set_shadow_dancer_duskwoven_garb` | Duskwoven Garb | veil |
-| `set_tinker_emberforge_rig` | `set_tinker_cinderforge_rig` | Cinderforge Rig | ember |
-| `set_priest_veil_of_the_twin_lamps` | `set_priest_shroud_of_the_twin_lamps` | Shroud of the Twin Lamps | veil |
-| `set_enchanter_veilsilk_vestments` | `set_enchanter_dusksilk_vestments` | Dusksilk Vestments | veil |
-| `leg_heart_of_the_ember_wyrm` | `leg_heart_of_the_fire_wyrm` | Heart of the Fire Wyrm | ember |
-| `leg_veil_of_the_other_road` | `leg_shroud_of_the_other_road` | Shroud of the Other Road | veil |
-| `leg_mourners_veil` | `leg_mourners_shroud` | Mourner's Shroud | veil |
-| `uq_ember_censer` | `uq_cinder_censer` | The Cinder Censer | ember |
-| `uq_rattle_of_ember_teeth` | `uq_rattle_of_cinder_teeth` | Rattle of Cinder Teeth | ember |
-| `uq_ember_rime_signet` | `uq_cinder_rime_signet` | Cinder-Rime Signet | ember |
-| `soul_second_self` (mage) | `soul_mirrored_self` | Soul of the Mirrored Self | id collision with the chronomancer |
+| `uq_veilstorm_lens` | `uq_tearstorm_lens` | Tearstorm Lens | veil |
+| `uq_stags_lantern` (light) | `uq_stags_lantern` (necklace; same id, page 13 wins) | The Stag's Lantern | light slot |
+| **This page's generic items** | | | |
 | `leg_frostlocke_sigil` | `leg_frostlocke_seal` | Frostlocke Seal | "sigil" was a round-1 currency word |
 | `leg_last_stand_girdle` | `leg_girdle_of_the_final_notch` | Girdle of the Final Notch | "Last Stand" is a banned name |
-| `uq_barkskin_wraps` (druid) | `uq_heartwood_wraps` | Heartwood Wraps | "Barkskin" is a banned name |
+| **Class files** (done in the class files; the class file wins) | | | |
+| `set_runesmith_emberforged_aegis` | `set_runesmith_anvilborn_aegis` | The Anvilborn Aegis | ember |
+| `set_runesmith_glacier_runes` | `set_runesmith_rimefang_runes` | Runes of the Rimefang | named after a parked raid |
+| `set_shadow_dancer_veilwoven_garb` | `set_shadow_dancer_duskwoven_garb` | Duskwoven Garb | veil |
+| `set_tinker_emberforge_rig` | `set_tinker_forgefire_rig` | The Forgefire Rig | ember |
+| `set_priest_veil_of_the_twin_lamps` | `set_priest_mantle_of_the_twin_lamps` | Mantle of the Twin Lamps | veil |
+| `set_priest_regalia_of_the_sunken_choir` | `set_priest_regalia_of_the_salt_choir` | Regalia of the Salt Choir | named after a parked raid |
+| `set_enchanter_veilsilk_vestments` | `set_enchanter_gossamer_vestments` | Gossamer Vestments | veil |
+| `set_rogue_nightfall` | `set_rogue_long_count` | The Long Count | its bonuses used removed rogue kit (stealth) |
+| `leg_heart_of_the_ember_wyrm` | `leg_heart_of_the_fire_wyrm` | Heart of the Fire Wyrm | ember |
+| `leg_veil_of_the_other_road` | `leg_mantle_of_the_other_road` | Mantle of the Other Road | veil |
+| `leg_mourners_veil` | `leg_mourners_shroud` | Mourner's Shroud | veil |
+| `leg_scepter_of_noon_and_midnight` | `leg_scepter_of_noon_and_gloam` | Scepter of Noon and Gloam | set by the priest file |
+| `leg_greatcats_collar` | `leg_collar_of_the_twin_trail` | Collar of the Twin Trail | the ranger's beast is no longer a cat |
+| `leg_cloak_of_no_moon` | `leg_cloak_of_the_unwatched` | Cloak of the Unwatched | its power used removed rogue kit (stealth) |
+| `uq_ember_censer` | `uq_ash_censer` | The Ash Censer | ember |
+| `uq_rattle_of_ember_teeth` | `uq_rattle_of_storm_teeth` | Rattle of Storm Teeth | ember |
+| `uq_ember_rime_signet` | `uq_blaze_rime_signet` | Blaze-and-Rime Signet | ember |
+| `uq_whisker_charm` | `uq_beastbond_charm` | Beastbond Charm | the ranger's beast is no longer a cat |
+| `uq_challengers_bell` | `uq_callers_bell` | Caller's Bell | the warrior's Iron Challenge is now Iron Call |
+| `uq_barkskin_wraps` (druid) | `uq_oakhide_wraps` | Oakhide Wraps | "Barkskin" is a banned name |
+| `soul_second_self` (mage) | `soul_mirrored_self` | Soul of the Mirrored Self | id collision with the chronomancer |
+| `soul_heron_who_stayed` (shaman) | `soul_crane_who_stayed` | Soul of the Crane Who Stayed | the shaman's beast is the Rain Crane |

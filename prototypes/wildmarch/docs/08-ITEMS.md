@@ -625,7 +625,7 @@ the weapon's **basic attacks** carry (§7.2).
 **Named variants** (each +10% dice, keeps its Emberveil intrinsic unless noted, first drop level in
 brackets): Forager's Blade (sword, 6) · Lantern Mace (mace, 6) · Pathfinder Javelin (12) · Tithe Dagger (6) ·
 Roadwarden Bow (12) · Pilgrim's Staff (12) · **Cinderbrand Wand** (fire, 12; was Emberbrand Wand) · Rimecut
-Sabre (ice, 12) · Bramble Staff (poison, 12) · Warhorn Maul (hammer, 19) · Breaker's Pick (greataxe, 19) ·
+Sabre (ice, 12) · Bramble Staff (poison, 12) · **Hornhead Hammer** (hammer, 19; was Warhorn Maul — "Maul" is banned) · Breaker's Pick (greataxe, 19) ·
 Hunter's Edge (sword, 19) · Stormpin Crossbow (lightning, 19) · Gravebound Sceptre (shadow, 28) ·
 Dawnwarden Hammer (holy, 28) · Blood Ledger (greatsword, 28) · Covenant Hammer (28) · Grudgebrand (28) ·
 Starwake Bow (36) · Watchfire Glaive (javelin, 36) · the Engineering guns and crossbows of page 19 §17 —
@@ -1587,12 +1587,13 @@ ride it, an **appearance** the first time you equip or loot the item, a **dye** 
 **titles**. Learning adds them to your account's stable, wardrobe or title list for every character; the item
 itself stays an ordinary tradeable item. Nothing is "bound".
 
-### 15.3 Why no need/greed rolls
+### 15.3 Why there are no group loot rolls
 
-A need/greed/pass roll *(reference: older MMOs)* makes a five-player group argue over a drop the whole group could
-see, needs somebody's judgement about who "needs" what, and is awkward with followers filling slots. Personal loot
-plus free trading gives the same "give it to the one who needs it" moment without the arguments. A party-leader
-option "Group loot: Need / Greed" for Normal dungeons only stays a question for the owner (`QUESTIONS.md`).
+A shared roll on a drop *(reference: older MMOs' need/greed/pass)* makes a five-player group argue over a drop the
+whole group could see, needs somebody's judgement about who deserves what, and is awkward with followers filling
+slots. Personal loot plus free trading gives the same "give it to the one who can use it" moment without the
+arguments. **There is no group-roll option anywhere** — not as a party-leader setting, not for Normal dungeons
+(the owner's ruling: personal loot only).
 
 ### 15.4 Loot limits
 
@@ -1639,7 +1640,7 @@ source reads on one row.
 | Dynamic event boss (page 14) | 1 | Rare | 2.0 | ×8 | 5% | 2% | 1 in 400 | 2% | Essence 2–3 | the event's own reward (page 14) |
 | **Greater-rarity monster** (page 10) — applied on top of its row | +1 | one step higher (max Epic) | ×1.5 | ×2 | ×2 | ×2 | ×2 | the mapped special rarity ×5 (§5.5) | ×2 | — |
 
-Legendary and Unique chances are in the rarity roll (§4.1, §14.4). There is **no daily limit** on rares.
+Legendary and Unique chances are in the rarity roll (§4.1, §14.4). Rares have **no kill limit** of any kind.
 
 ### 16.2 Dungeons (Normal and Challenge)
 
@@ -1810,7 +1811,7 @@ Every button is drawn from a `quote()`: a greyed-out button always says why ("ne
 | 1 | `forge_weapon` | Create | a Common weapon of your level; pick the type | 10 Scrap | — | reuse |
 | 2 | `forge_armour` | Create | a Common armour piece, your armour type, pick the slot | 8 Scrap | — | reuse |
 | 3 | `forge_quiver` | Create | a Common quiver; pick a base you have seen drop (§9.2) | 8 Scrap, 2 Essence | — | reuse |
-| 4 | `forge_trinket` | Create | an Uncommon ring or necklace | 6 Scrap, 2 Essence | — | reuse |
+| 4 | `forge_jewellery` | Create | an Uncommon ring or necklace (Farhold's `forge_trinket`; there is no trinket slot) | 6 Scrap, 2 Essence | — | reuse |
 | 5 | `forge_fine` | Create | a Rare of your level, any slot | 14 Scrap, 6 Essence | level 8 | reuse |
 | 6 | `forge_masterwork` | Create | an **Epic** of your level, any slot (Farhold: "legendary") | 20 Scrap, 12 Essence, 6 Dust | level 18 | reuse, renamed rarity |
 | 7 | `forge_pattern` | Create | a crafted-set piece from a **pattern** (page 09 §2) | per pattern | pattern learnt | new |
@@ -2134,7 +2135,7 @@ and chests making up the rest. Gold find (§14) raises all of it.
 
 **Sources:** kills (≈45%), quests (≈30%), selling items and junk (≈15%), chests, trophies and events (≈10%).
 
-**Sinks** (targets as a share of a level-60 player's weekly income):
+**Sinks** (targets as a share of a level-60 player's income over a week of play):
 
 | Sink | Share | Notes |
 |---|---|---|
@@ -2205,6 +2206,7 @@ page 20 §4.2's.
 | Great Bear | `bear` (reuse) | 1.2 | 45 | Snow-runner; Trampling 20 built in | no |
 | Spider | `spider` (reuse) | 1.0 | 30 | climbs slopes up to 60° | no |
 | Salamander | `crocodile` (reuse, lava seams) | 1.2 | 30 | cosmetic fire trail | no |
+| Titan (walking throne, land-giant) | `titan` (reuse, biped; page 12's d15/d16 mounts) | 1.0 | 40 | Trampling 15 built in; cosmetic heavy footfalls | no |
 | Floating Stone | **new** hover slab (page 13) | 1.5 | ∞ | hovers over water at ground speed (it does not swim or dive) | over water, yes |
 | Clockwork Strider | **new** mechanical biped (page 19 §17.6) | 1.2 | ∞ (no stamina) | made by Engineers; tradeable | no |
 | Longshank Calf | **new** `longshank` (page 20's Travel Method strider, young) | 1.0 | 40 | wades water up to 3 m deep without swimming | wades |
@@ -2261,10 +2263,13 @@ page 20 §4.2's.
 | `it_mount_haywain_pony` · `it_mount_midwinter_stag` · `it_mount_bloom_toad` · `it_mount_sunwake_serpent` | seasonal (Haywain Pony, Midwinter Stag, Bloom Toad — aquatic, Sunwake Serpent — aquatic) | pony · great elk · giant frog · sea serpent | page 13 §7's seasonal world bosses, 1% | drop |
 | `it_mount_ashfang` | Ashfang Dire Wolf | dire wolf | Cinder Steppe war-camp warlords, 1% | drop |
 | `it_mount_warhound` | Warmaster's Hound | warhound | `d09_warmasters_pit` Depth Cache, reward depth 10+, 1% | drop |
-| `it_mount_cinder_drake` | Cinder Drake | drake — winged | `d15_fire_court` end boss on Challenge, 1% | drop (round 1's `it_mount_emberdrake`) |
-| `it_mount_rift_griffin` | Riftbound Griffin | griffin — winged | `d16_the_spire` end boss on Challenge, 1% | drop |
-| `it_mount_spire_dragon` | Spire Dragon | dragon — winged | `d16_the_spire` secret boss on Challenge, 1% | drop (round 1's `it_mount_veil_dragon`) |
-| `it_mount_ashwind_stallion` | The Ashwind Stallion (Legendary mount) | courser | page 09 §6.12 | drop |
+| `it_mount_ash_hound` | Ash Hound | warhound, coal-red eyes | `d15_fire_court` s1 `b_kennelmaster_varro`, 2% per player (page 12) | drop |
+| `it_mount_firewing_whelp` | Firewing Whelp | dragon, young (×1.4) — winged | `d15_fire_court` B4 `b_vaelkyr_firewing`, 1% per player (page 12) | drop (replaces this page's round-1 `it_mount_emberdrake` / `it_mount_cinder_drake`) |
+| `it_mount_fire_throne_titan` | Fire Throne Titan | titan, a walking throne | `d15_fire_court` end boss `b_fire_king_kaedros`, 2% per player (page 12) | drop |
+| `it_mount_glass_charger` | Glass Charger | courser, glass and fire | `d15_fire_court` secret boss `b_ysa_varn_kindled`, 2% per player (page 12) | drop |
+| `it_mount_rifthound` | Rifthound | dire wolf, translucent grey, trails mist | `d16_the_spire` s1 `b_grey_and_greyer`, 2% per player (page 12) | drop (was `it_mount_veilhound`) |
+| `it_mount_marchheart_colossus` | Marchheart Colossus | titan, a small land-giant in the continent's colours | `d16_the_spire` secret boss `b_marchheart`, 2% per player (page 12) | drop (replaces this page's `it_mount_spire_dragon`) |
+| `leg_ashwind_stallion` | The Ashwind Stallion (Legendary mount) | courser | page 09 §6 (row 81; page 09 owns the id) | drop |
 
 **Flying (canon §10):** winged mounts glide before Riding IV and fly once you have it, where page 20 §4.4 allows.
 
@@ -2410,8 +2415,8 @@ A named item definition (unique / set piece / legendary) extends Farhold's `uniq
   "tags": [],
   "power": "void_heal",
   "powerNumbers": { "healSeconds": 1.0, "afterReduce": 0.2 },
-  "sources": [ { "kind": "dungeon", "id": "d11_saltdeep_cathedral", "difficulty": "challenge", "boss": "any", "chance": 0.01 } ],
-  "lore": "They step where the dark pools and the dark forgets to bite."
+  "sources": [ { "kind": "dungeon", "id": "d11_saltdeep_cathedral", "difficulty": "challenge", "boss": "secret", "exclusive": true } ],
+  "lore": "They step where the dark pools, and the dark forgets to bite."
 }
 ```
 
@@ -2424,7 +2429,7 @@ A soul definition:
   "socket": ["weapon"],
   "requires": { "build": "caster" },
   "power": "soul_falling_star",
-  "powerNumbers": { "chance": 0.08, "weaponPct": 1.2, "radius": 3, "icd": 2 },
+  "powerNumbers": { "chance": 0.08, "delay": 1.2, "spellPowerPct": 1.2, "radius": 3, "icd": 2 },
   "sources": [ { "kind": "worldboss", "id": "b_glass_wyrm", "chance": 0.04 } ],
   "lore": "It was aimed at something else. It will do."
 }
@@ -2452,7 +2457,7 @@ a second).
 | 07 Progression | riding ranks (§24.1 repeats page 20's table), the Unbinder, standing tiers and the amounts in §16.6 / §16.9 |
 | 09 Sets / legendaries | the souls catalogue (§13.6 rules), tag uniques (§7.4), tool uniques (§10), class set tokens (§12.1) |
 | 10 Bestiary | the special-rarity mapping (§5.5) is page 10's table, repeated; greater-rarity drop modifiers (§16.1) |
-| 12 Dungeons | §16.2–16.4 adopt page 12's chances and add floors, gold and socketables; the Depth Cache table is page 12's |
+| 12 Dungeons | §16.2–16.4 adopt page 12's chances and add floors, gold and socketables; the Depth Cache table is page 12's; §24.3 lists page 12's six d15/d16 mounts and adds two dungeon mounts page 12 does not list yet — `it_mount_dune_sabrecat` (d05 secret boss 20%, page 09 agrees) and `it_mount_warhound` (d09 Depth Cache, reward depth 10+, 1%): adopt or reject them |
 | 13 World bosses | §16.5 matches page 13 §5; world-boss mounts in §24.3; `it_mount_tidewalker` moved to the Cutwater quartermaster |
 | 15 Social | no binding; Trading Post deposit + cut (§15.5); the trade window's **Commission** tab; guild repairs |
 | 16 Tech | the data files in §27; the affix unit test (§6.1); the rarity roll is top-down (§14.4) |
@@ -2479,3 +2484,7 @@ Each line is what went, and where it lives now if anywhere.
 | Fury and Focus resource affixes | W28 | Momentum and Tempo (§6.4) |
 | Bench `bore_socket` | sockets are professions now | §13.2 |
 | Farhold bug write-up | fixed in Farhold round 28 | §28 |
+| Page 08's own d15/d16 mount proposals (`it_mount_cinder_drake`, `it_mount_rift_griffin`, `it_mount_spire_dragon`) | page 12 owns dungeon items (sweep R2) | page 12's six: `it_mount_ash_hound`, `it_mount_firewing_whelp`, `it_mount_fire_throne_titan`, `it_mount_glass_charger`, `it_mount_rifthound`, `it_mount_marchheart_colossus` (§24.3) |
+| The party-leader "Need / Greed" option for Normal dungeons | personal loot only, no group rolls anywhere (sweep R2) | gone (§15.3) |
+| `it_mount_ashwind_stallion` | page 09 owns generic legendaries | `leg_ashwind_stallion` (§24.3) |
+| "Warhorn Maul" (named hammer), bench `forge_trinket` | banned word / no trinket slot | Hornhead Hammer (§8.2), `forge_jewellery` (§17.3) |

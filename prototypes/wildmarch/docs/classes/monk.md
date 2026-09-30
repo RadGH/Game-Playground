@@ -68,8 +68,8 @@ to press next. In the Still Water Way a small portrait of your **Kept** ally (§
 
 ### 2.3 The Ways (from the level-20 calling quest)
 
-The Way follows your **role focus** (page 06 §Role focus): **Damage** focus is the Storm Fist, **Healer** focus
-is the Still Water. Change it at any shrine or out of combat with **`Shift+1`** (Storm Fist) / **`Shift+2`**
+The Way is tied to the canon **Role focus** switch (00 §6; saved per Loadout): **Primary (Damage)** is the Storm
+Fist, **Hybrid (Healer)** is the Still Water. Change it at any shrine or out of combat with **`Shift+1`** (Storm Fist) / **`Shift+2`**
 (Still Water) (page 02, forms and stances) — a 10 s meditation (you sit; any damage cancels) that also switches
 your role focus and your Dungeon Finder role.
 
@@ -233,7 +233,8 @@ primary healer when the group has to spread past 20 m, because Wellspring and mo
 
 ### 5.1 What Healer focus turns on
 
-Choosing **Healer** role focus (page 06 §Role focus) gives the shared **Mender** passive (+10% healing done;
+Setting the canon **Role focus** switch (00 §6) to **Hybrid (Healer)** — from level 20 the same as taking the Still Water
+Way (§2.3; the two are tied) — makes the Dungeon Finder queue you as Healer, gives the shared **Mender** passive (+10% healing done;
 the mana part does nothing for a Tempo class) and:
 
 | Level | What you have |

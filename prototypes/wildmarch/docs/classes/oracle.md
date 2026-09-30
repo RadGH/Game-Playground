@@ -146,8 +146,8 @@ only for enemies within 60 m of her — so a modified client cannot see further 
   "omens": { "maxByCalling": [3, 5, 5], "healBonus": 0.5, "instant": true, "fadeSeconds": 10 },
   "shareVision": { "seconds": 12, "lead": 1.5, "radius": 40, "cooldown": 90 },
   "foretoldDoom": { "seconds": 8, "partyDamage": 0.10, "leadForParty": 2.5 },
-  "guidingCall": { "unlockLevel": 12, "castSeconds": 5, "acceptSeconds": 60, "allyChannel": 3,
-                   "cooldown": 120, "discoverRadius": 30 }
+  "guidingCall": { "unlockLevel": 12, "castSeconds": 5, "acceptSeconds": 60, "arriveWithin": 3,
+                   "cooldown": 300, "discoverRadius": 40 }
 }
 ```
 
@@ -258,7 +258,9 @@ also works:
 
 ## 5. The hybrid role — Support (the Seer)
 
-Support counts as a **Damage** slot in the Dungeon Finder (canon §4). The Oracle queues as Support from level 6.
+The Oracle uses the canon **Role focus** switch (00 §6; spellbook, out of combat, saved per Loadout). Set to
+**Hybrid (Support)** from level 6, it makes an Omen spent on Thread-Cut mark **Foretold Doom** (§5.1) and the
+Dungeon Finder queue you as Support, which counts as a **Damage** slot (canon §4). The six spells are unchanged.
 Its support is **information and timing** turned into damage and safety for the party.
 
 ### 5.1 Foretold Doom (the support engine)
@@ -307,14 +309,14 @@ there one by one, and **arriving counts as discovering** it.
 | Unlocks | **level 12** (when waystones and Travel Methods open, page 07) |
 | Uses a slot | no — it is on the **spellbook's Utility tab** (`K`), draggable to any spare bar key |
 | Cost | none |
-| Target | **Ally** — one **party member** (`F2`–`F5` or their frame); anywhere on the Wildmarch's open world |
+| Target | **Needs target** — one **party member** (`F2`–`F5` or their frame); anywhere on the Wildmarch's open world |
 | Cast | the Oracle channels **5 s**, out of combat; moving or taking damage cancels it |
-| The ally | gets a prompt: **"{Oracle} is calling you to {place}. Go? — Accept / Decline"**, open **60 s**. On Accept they channel **3 s** (out of combat; moving or damage cancels), then arrive **beside the Oracle** with a gold thread fading from their chest |
-| Discovery | on arrival the ally **discovers** everything the Oracle's position would discover for someone walking in: the sub-zone, any **waystone** and any **dungeon entrance within 30 m**. They get the normal discovery card and XP (page 07), exactly as if they had walked there |
-| Cooldown | **2 minutes** for the Oracle (calling a full party of four takes about 6 minutes) |
-| Refused when | either of you is in combat, **inside a dungeon or any instance** (the Oracle may stand at a dungeon's **entrance**, outside it), on a moving Travel Method, dead, or the ally is not in your party; the prompt says which |
+| The ally | gets a prompt (`scr_summon_prompt`): **"{Oracle} is calling you to {place}. Go? — Accept / Decline"**, open **60 s** (`set.gameplay.autoAcceptSummon` can accept automatically from party members). On Accept they arrive **beside the Oracle (within 3 m)** with a gold thread fading from their chest. If they were riding a Travel Method, accepting takes them off it (the fare is not refunded) |
+| Discovery | **arriving counts as being there**: any **dungeon entrance within 40 m** of the Oracle, and the **waystone and station** of the town she stands in, are discovered for the arriving ally, with the normal discovery card and XP (page 07) |
+| Cooldown | **5 minutes** for the Oracle (page 20 §16.3) |
+| Refused when | the Oracle is in combat or the ally is in combat, **inside a dungeon or any instance** (the Oracle may stand at a dungeon's **entrance**, outside it), in a world boss arena during its fight, in the air, dead, or not in your party; the prompt says which |
 | Not a portal | it moves one person, never the Oracle herself and never a group (the Mage's Portal and the Chronomancer's Retrace are the group tools; page 20) |
-| Tags | `tag_arcane` `tag_movement` (no damage) |
+| Tags | `tag_arcane` `tag_movement` `tag_travel` (no damage) |
 | Looks / sound | a pillar of gold thread at the Oracle (`pillar` holy recoloured gold); at the ally, threads wrap them and pull upward. A long harp glissando |
 
 No other utility spells. The Oracle also uses scrolls and the Recall Stone (page 20).

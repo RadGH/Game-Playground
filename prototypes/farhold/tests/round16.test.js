@@ -415,7 +415,9 @@ test('R16.6 — a beast’s gait is not reset sixty times a second', () => {
 
 test('R16.7 — the health bar shows what you are looking at', () => {
   const main = src('main.js');
-  assert.match(main, /const looked = aim\(\)\.target/, 'the bar still guesses from a 2D yaw test');
-  assert.match(main, /lookTarget \|\| field\.target\(control\)/, 'there is no fall-back for what is chewing on you');
+  // R28 moved the choice into js/targetpick.js (behaviour tested in round28-affixes.test.js); this
+  // only checks the bar is still fed by what the crosshair is on, with the fall-backs behind it.
+  assert.match(main, /looked: aim\(\)\.look/, 'the bar no longer reads what the crosshair is on');
+  assert.match(main, /guess: \(\) => field\.target\(control\)/, 'there is no fall-back for what is chewing on you');
   assert.match(main, /target: hit\?\.enemy \|\| null/, 'first person still has no idea what is under the reticle');
 });

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wildmarch — Design Bible</title>
+  <meta name="description" content="Brainstorm and design documentation for Wildmarch, an online action RPG built on the playground's Farhold systems.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap">
+  <link rel="stylesheet" href="css/site.css">
+</head>
+<body>
+  <header class="topbar">
+    <button class="nav-toggle" id="navToggle" aria-label="Show the page list" aria-expanded="false">☰</button>
+    <a class="brand" href="#/"><span class="brand-mark">◆</span> Wildmarch <span class="brand-sub">design bible · draft</span></a>
+    <div class="spacer"></div>
+    <label class="search">
+      <span class="visually-hidden">Search the docs</span>
+      <input id="search" type="search" placeholder="Search every page…  ( / )" autocomplete="off">
+    </label>
+  </header>
+
+  <div class="shell">
+    <nav class="nav" id="nav" aria-label="Documentation pages"></nav>
+    <main class="content" id="content" tabindex="-1"><p class="loading">Loading…</p></main>
+    <aside class="toc" id="toc" aria-label="On this page"></aside>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

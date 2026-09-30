@@ -1,81 +1,487 @@
 {
-  "_doc": "Data the brainstorm home page draws from. It mirrors docs/00-OVERVIEW.md (which is canon — if they disagree, the doc wins and this file is stale). Kept as JSON so the home page has no hard-coded content.",
-  "title": "Wildmarch",
-  "tagline": "Everyone starts with a torch and a stick. The Wildmarch decides the rest.",
-  "pitch": "An online third-person action RPG on one continent. You start in a farming valley with one spell and leave on foot. Every region north is harder, and almost everything that makes a character feel powerful — the dodge roll, the mount, your class's signature trick, talents, fast travel, the raid door — is earned by reaching a level or finishing an important quest. A sibling of Farhold: same Chibi 2 characters, items, perks, voices and combat feel, without the planet sandbox — plus other players, thirty bespoke class kits and boss fights you learn.",
-  "pillars": [
-    ["Earn every verb", "A new character is simple on purpose. The game gets bigger as you do."],
-    ["Thirty classes, thirty kits", "No two classes share a spell. Each has one signature mechanic."],
-    ["Readable danger", "Every attack that can kill you is telegraphed before it lands."],
-    ["Bosses are the normal game", "Void zones, soaks, safe zones and talking bosses in the open world, dungeons and raids."],
-    ["Loot worth talking about", "Class sets that change spells, legendaries that change play, secret-boss drops."],
-    ["Together or alone", "Normal dungeons and all open-world content can be done solo with followers."]
+ "_doc": "Data the brainstorm home page draws from. It mirrors docs/00-OVERVIEW.md (which is canon — if they disagree, the doc wins and this file is stale). Classes: [id, name, primary role, mechanic, hybrid role, build, resource]. Kept as JSON so the home page has no hard-coded content.",
+ "title": "Wildmarch",
+ "tagline": "Everyone starts with a stick and one spell. The Wildmarch decides the rest.",
+ "pitch": "An online action RPG with a shared, MMO-style world on one continent, built for groups of up to five. You start in a farming valley with one spell and leave on foot. Every region north is harder, and most of what makes a character feel powerful — the dodge roll, the mount, your class's signature trick, talents, travel routes, deeper dungeons — unlocks as you level or finish an important quest. A sibling of Farhold: same Chibi 2 characters, items, perks, voices and combat feel, without the planet sandbox — plus other players, thirty bespoke (often hybrid) class kits and boss fights you learn.",
+ "pillars": [
+  [
+   "Unlock as you go",
+   "A new character is simple on purpose; features arrive as you level or finish key quests."
   ],
-  "roles": { "Tank": "#5ab0ff", "Healer": "#5ad48a", "Damage": "#ff6b6b", "Support": "#d9a0ff" },
-  "classes": [
-    ["warrior", "Warrior", "Tank", "Bulwark"],
-    ["fighter", "Fighter", "Damage", "Stances"],
-    ["paladin", "Paladin", "Tank", "Oaths"],
-    ["ranger", "Ranger", "Damage", "Hunting cat + marks"],
-    ["rogue", "Rogue", "Damage", "Combo points + stealth"],
-    ["cleric", "Cleric", "Healer", "Devotion"],
-    ["bard", "Bard", "Support", "Songs"],
-    ["mage", "Mage", "Damage", "Arcane Charge"],
-    ["necromancer", "Necromancer", "Damage", "Corpses + thralls"],
-    ["warlock", "Warlock", "Damage", "Soul shards + pact"],
-    ["demon_hunter", "Demon Hunter", "Damage", "Vengeance + Demon Form"],
-    ["scavenger", "Scavenger", "Damage", "The Pack (junk)"],
-    ["swashbuckler", "Swashbuckler", "Damage", "Flair"],
-    ["dragon_knight", "Dragon Knight", "Damage", "Draconic Aspect"],
-    ["pyromancer", "Pyromancer", "Damage", "Heat"],
-    ["stormcaller", "Stormcaller", "Damage", "Static"],
-    ["druid", "Druid", "Healer", "Shapeshift"],
-    ["oracle", "Oracle", "Healer", "Foresight"],
-    ["tactician", "Tactician", "Support", "Orders"],
-    ["chronomancer", "Chronomancer", "Support", "Timeline"],
-    ["monk", "Monk", "Damage", "Chi"],
-    ["shaman", "Shaman", "Healer", "Totems + spirits"],
-    ["witch_hunter", "Witch Hunter", "Damage", "Silver + Verdict"],
-    ["knight", "Knight", "Tank", "Banner + Vow"],
-    ["sorcerer", "Sorcerer", "Damage", "Wild Magic"],
-    ["runesmith", "Runesmith", "Tank", "Runes"],
-    ["shadow_dancer", "Shadow Dancer", "Damage", "Shadows"],
-    ["tinker", "Tinker", "Damage", "Gadgets + sentry"],
-    ["priest", "Priest", "Healer", "Light/Shadow balance"],
-    ["enchanter", "Enchanter", "Support", "Charm"]
+  [
+   "Thirty classes, thirty kits",
+   "No two classes share a spell. Most can fill a second role — a mage can tank, a pyromancer can heal."
   ],
-  "regions": [
-    ["hearthvale", "Hearthvale", 1, 6, "#7fbf5a"],
-    ["mossfen", "Mossfen", 5, 12, "#5f8f6a"],
-    ["greyridge", "Greyridge Highlands", 10, 18, "#9a9486"],
-    ["sunscar", "Sunscar Barrens", 16, 24, "#d9b25f"],
-    ["whisperwood", "Whisperwood", 22, 30, "#6fae9b"],
-    ["cinder_steppe", "Cinder Steppe", 28, 36, "#b8734a"],
-    ["frostmantle", "Frostmantle", 34, 42, "#a9d4ea"],
-    ["drowned_coast", "The Drowned Coast", 40, 48, "#4f8aa8"],
-    ["riftmarch", "The Riftmarch", 46, 54, "#a07ad9"],
-    ["emberthrone", "The Emberthrone", 52, 60, "#e0603a"],
-    ["veilspire", "Veilspire Isle", 60, 60, "#e8e0ff"]
+  [
+   "Readable danger",
+   "Every attack that can kill you is telegraphed before it lands."
   ],
-  "instances": [
-    ["d01_hollow_barrow", "The Hollow Barrow", "dungeon", 5],
-    ["d02_drowned_mill", "The Drowned Mill", "dungeon", 9],
-    ["d03_deepdelve", "Deepdelve Mines", "dungeon", 13],
-    ["d04_bellows_keep", "Bellows Keep", "dungeon", 16],
-    ["d05_glass_tombs", "The Glass Tombs", "dungeon", 19],
-    ["d06_sandsworn_vault", "Vault of the Sandsworn", "dungeon", 22],
-    ["d07_thornheart", "Thornheart Hollow", "dungeon", 25],
-    ["d08_moonwell_ruins", "Ruins of the Moonwell", "dungeon", 28],
-    ["r01_barrowking", "Crypt of the Barrowking", "raid", 30],
-    ["d09_warmasters_pit", "The Warmaster's Pit", "dungeon", 31],
-    ["d10_rimefang_caverns", "Rimefang Caverns", "dungeon", 36],
-    ["d11_saltdeep_cathedral", "Saltdeep Cathedral", "dungeon", 42],
-    ["r02_glacier_throne", "The Glacier Throne", "raid", 42],
-    ["d12_unmade_workshop", "The Unmade Workshop", "dungeon", 48],
-    ["r03_sunken_choir", "The Sunken Choir", "raid", 50],
-    ["d13_cindergate", "Cindergate Bastion", "dungeon", 54],
-    ["d14_ashen_reliquary", "The Ashen Reliquary", "dungeon", 58],
-    ["r04_ember_court", "The Ember Court", "raid", 60],
-    ["r05_veilspire", "Veilspire", "raid", 60]
+  [
+   "Bosses are the normal game",
+   "Void zones, soaks, safe zones and talking bosses in the open world and in five-player dungeons."
+  ],
+  [
+   "Loot worth talking about",
+   "Sockets, jewels, souls, tags, special rarities, class sets and legendaries that change play."
+  ],
+  [
+   "Together or alone",
+   "The open world and Normal dungeons can be done solo with followers."
   ]
+ ],
+ "roles": {
+  "Tank": "#5ab0ff",
+  "Healer": "#5ad48a",
+  "Damage": "#ff6b6b",
+  "Support": "#d9a0ff"
+ },
+ "classes": [
+  [
+   "warrior",
+   "Warrior",
+   "Tank",
+   "Bulwark",
+   "Damage",
+   "melee",
+   "Momentum"
+  ],
+  [
+   "fighter",
+   "Fighter",
+   "Damage",
+   "Stances",
+   "Tank",
+   "melee",
+   "Momentum"
+  ],
+  [
+   "paladin",
+   "Paladin",
+   "Tank",
+   "Oaths",
+   "Healer",
+   "melee",
+   "Mana"
+  ],
+  [
+   "ranger",
+   "Ranger",
+   "Damage",
+   "Tame Beast + marks",
+   "Support",
+   "ranged",
+   "Tempo"
+  ],
+  [
+   "rogue",
+   "Rogue",
+   "Damage",
+   "Blind Spots + Wounds",
+   "Support",
+   "melee/ranged",
+   "Tempo"
+  ],
+  [
+   "cleric",
+   "Cleric",
+   "Healer",
+   "Devotion",
+   "Support",
+   "caster",
+   "Mana"
+  ],
+  [
+   "bard",
+   "Bard",
+   "Support",
+   "Songs",
+   "Healer",
+   "caster",
+   "Tempo"
+  ],
+  [
+   "mage",
+   "Mage",
+   "Damage",
+   "Resonance + Wards",
+   "Tank",
+   "caster",
+   "Mana"
+  ],
+  [
+   "necromancer",
+   "Necromancer",
+   "Damage",
+   "Corpses + Control Undead",
+   "Healer",
+   "caster",
+   "Mana"
+  ],
+  [
+   "warlock",
+   "Warlock",
+   "Damage",
+   "Tithes + Bind Demon",
+   "Tank",
+   "caster",
+   "Mana"
+  ],
+  [
+   "demon_hunter",
+   "Demon Hunter",
+   "Damage",
+   "Demonsight + Traps",
+   "",
+   "ranged/melee",
+   "Momentum"
+  ],
+  [
+   "scavenger",
+   "Scavenger",
+   "Damage",
+   "The Pack (junk)",
+   "Support",
+   "ranged",
+   "Momentum"
+  ],
+  [
+   "swashbuckler",
+   "Swashbuckler",
+   "Damage",
+   "Flair",
+   "Tank",
+   "melee",
+   "Tempo"
+  ],
+  [
+   "dragon_knight",
+   "Dragon Knight",
+   "Damage",
+   "Draconic Aspect",
+   "Tank",
+   "melee",
+   "Momentum"
+  ],
+  [
+   "pyromancer",
+   "Pyromancer",
+   "Damage",
+   "Heat",
+   "Healer",
+   "caster",
+   "Momentum"
+  ],
+  [
+   "stormcaller",
+   "Stormcaller",
+   "Damage",
+   "Static + lightning rods",
+   "Support",
+   "caster",
+   "Mana"
+  ],
+  [
+   "druid",
+   "Druid",
+   "Healer",
+   "Forms transform the spells",
+   "Tank, Damage",
+   "caster/melee",
+   "Mana"
+  ],
+  [
+   "oracle",
+   "Oracle",
+   "Healer",
+   "Foresight",
+   "Support",
+   "caster",
+   "Mana"
+  ],
+  [
+   "tactician",
+   "Tactician",
+   "Support",
+   "Orders",
+   "Tank",
+   "ranged",
+   "Tempo"
+  ],
+  [
+   "chronomancer",
+   "Chronomancer",
+   "Support",
+   "Timeline",
+   "Healer",
+   "caster",
+   "Mana"
+  ],
+  [
+   "monk",
+   "Monk",
+   "Damage",
+   "Breath",
+   "Healer",
+   "melee",
+   "Tempo"
+  ],
+  [
+   "shaman",
+   "Shaman",
+   "Healer",
+   "Storm Tales",
+   "Damage",
+   "caster",
+   "Mana"
+  ],
+  [
+   "witch_hunter",
+   "Witch Hunter",
+   "Damage",
+   "Silver + Verdict",
+   "Support",
+   "ranged",
+   "Mana"
+  ],
+  [
+   "knight",
+   "Knight",
+   "Tank",
+   "Banner + Vow",
+   "Support",
+   "melee",
+   "Momentum"
+  ],
+  [
+   "sorcerer",
+   "Sorcerer",
+   "Damage",
+   "Wild Magic",
+   "Support",
+   "caster",
+   "Mana"
+  ],
+  [
+   "runesmith",
+   "Runesmith",
+   "Tank",
+   "Runes",
+   "Damage",
+   "melee",
+   "Mana"
+  ],
+  [
+   "shadow_dancer",
+   "Shadow Dancer",
+   "Damage",
+   "Shadows",
+   "Tank",
+   "melee",
+   "Tempo"
+  ],
+  [
+   "tinker",
+   "Tinker",
+   "Damage",
+   "Devices + sentry",
+   "Healer",
+   "ranged",
+   "Tempo"
+  ],
+  [
+   "priest",
+   "Priest",
+   "Healer",
+   "Light/Shadow balance",
+   "Damage",
+   "caster",
+   "Mana"
+  ],
+  [
+   "enchanter",
+   "Enchanter",
+   "Support",
+   "Charm + illusions",
+   "Tank",
+   "caster",
+   "Mana"
+  ]
+ ],
+ "regions": [
+  [
+   "hearthvale",
+   "Hearthvale",
+   1,
+   6,
+   "#7fbf5a"
+  ],
+  [
+   "mossfen",
+   "Mossfen",
+   5,
+   12,
+   "#5f8f6a"
+  ],
+  [
+   "greyridge",
+   "Greyridge Highlands",
+   10,
+   18,
+   "#9a9486"
+  ],
+  [
+   "sunscar",
+   "Sunscar Barrens",
+   16,
+   24,
+   "#d9b25f"
+  ],
+  [
+   "whisperwood",
+   "Whisperwood",
+   22,
+   30,
+   "#6fae9b"
+  ],
+  [
+   "cinder_steppe",
+   "Cinder Steppe",
+   28,
+   36,
+   "#b8734a"
+  ],
+  [
+   "frostmantle",
+   "Frostmantle",
+   34,
+   42,
+   "#a9d4ea"
+  ],
+  [
+   "drowned_coast",
+   "The Drowned Coast",
+   40,
+   48,
+   "#4f8aa8"
+  ],
+  [
+   "riftmarch",
+   "The Riftmarch",
+   46,
+   54,
+   "#a07ad9"
+  ],
+  [
+   "kingsfire",
+   "Kingsfire",
+   52,
+   60,
+   "#e0603a"
+  ],
+  [
+   "spire_isle",
+   "Spire Isle",
+   60,
+   60,
+   "#e8e0ff"
+  ]
+ ],
+ "instances": [
+  [
+   "d01_hollow_barrow",
+   "The Hollow Barrow",
+   "dungeon",
+   5
+  ],
+  [
+   "d02_drowned_mill",
+   "The Drowned Mill",
+   "dungeon",
+   9
+  ],
+  [
+   "d03_shaft_seven",
+   "Shaft Seven Mines",
+   "dungeon",
+   13
+  ],
+  [
+   "d04_bellows_keep",
+   "Bellows Keep",
+   "dungeon",
+   16
+  ],
+  [
+   "d05_glass_tombs",
+   "The Glass Tombs",
+   "dungeon",
+   19
+  ],
+  [
+   "d06_sandsworn_vault",
+   "Vault of the Sandsworn",
+   "dungeon",
+   22
+  ],
+  [
+   "d07_thornheart",
+   "Thornheart Hollow",
+   "dungeon",
+   25
+  ],
+  [
+   "d08_moonwell_ruins",
+   "Ruins of the Moonwell",
+   "dungeon",
+   28
+  ],
+  [
+   "d09_warmasters_pit",
+   "The Warmaster's Pit",
+   "dungeon",
+   31
+  ],
+  [
+   "d10_rimefang_caverns",
+   "Rimefang Caverns",
+   "dungeon",
+   36
+  ],
+  [
+   "d11_saltdeep_cathedral",
+   "Saltdeep Cathedral",
+   "dungeon",
+   42
+  ],
+  [
+   "d12_unmade_workshop",
+   "The Unmade Workshop",
+   "dungeon",
+   48
+  ],
+  [
+   "d13_cindergate",
+   "Cindergate Bastion",
+   "dungeon",
+   54
+  ],
+  [
+   "d14_ashen_reliquary",
+   "The Ashen Reliquary",
+   "dungeon",
+   58
+  ],
+  [
+   "d15_fire_court",
+   "The Fire Court",
+   "dungeon",
+   60
+  ],
+  [
+   "d16_the_spire",
+   "The Spire",
+   "dungeon",
+   60
+  ]
+ ]
 }

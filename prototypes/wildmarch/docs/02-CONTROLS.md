@@ -1,6 +1,6 @@
 # WILDMARCH — Design Bible, page 02: controls
 
-**Status:** v0.1 draft for review — 2026-09-29. **Nothing is built.**
+**Status:** v0.2 draft — 2026-09-30 (round 2 applied). **Nothing is built.**
 **Owns:** the binding table — every key, mouse action and gamepad button, the context each one works in,
 whether it can be rebound, and the level (or quest) that makes it appear.
 **Reads from:** [page 00](00-OVERVIEW.md) (canon: spell ladder, calling quests, talent tiers, group sizes),
@@ -8,7 +8,7 @@ whether it can be rebound, and the level (or quest) that makes it appear.
 keys that canon does not fix, see §3), [page 04](04-SETTINGS.md) (every option that changes how a key
 behaves), [page 03](03-UI-SCREENS.md) (the screens the keys open), [page 05](05-COMBAT.md) (what the
 attacks do), [page 11](11-BOSS-MECHANICS.md) (boss dialog opportunities), [page 15](15-SOCIAL-ONLINE.md)
-(chat channels, parties, raids, trade).
+(chat channels, parties, trade), [page 20](20-TRAVEL.md) (Travel Methods, the Recall Stone).
 
 Rule 6 of page 00 applies: **if a key is added anywhere, it is added here too.**
 
@@ -54,7 +54,7 @@ Everything below was read out of Farhold's code on 2026-09-29, not remembered.
 | `jump` | Space | jump; in the air, climb | **kept**; air/space use dropped |
 | `interact` | E | talk, open, enter, gather (hold) | **kept**, and also loots |
 | `firstPerson` | V | tap: first person on/off; hold: swing the camera round you | **kept** |
-| `torch` | L | light on/off | **kept** (everyone starts with a torch — canon) |
+| `torch` | L | light on/off | **dropped** — always daylight, no light slot, no torch key (canon 00 §12.3). `L` is free |
 | `log` | (none) | "What has happened" — sheet tab 8 | log moves into the chat window, still no key |
 | `holding` | K | the Holding (your colony) | **dropped** (no colonies); `K` becomes Spells & Talents |
 | `scan` | X | scanner sweep | **dropped**; `X` becomes Sit (and Dive when swimming) |
@@ -62,6 +62,7 @@ Everything below was read out of Farhold's code on 2026-09-29, not remembered.
 | `build` | B | build mode | **dropped**; `B` becomes Shoulder Swap |
 | `company` | F | Followers | **moved** into the Social window (`P`); `F` becomes Dodge Roll |
 | `mount` | H | whistle for the horse | **kept** (behind the mount unlock) |
+| (none) | — | — | **new:** `recallStone` on `Home` (§5.1); **Travel Methods**: board with `E`, ride in the `travel` context (§5.18) |
 | `ship` | J | call the space ship | **dropped**; `J` becomes Journal |
 | `garage` | G | get in/out of a vehicle | **dropped**; `G` becomes Class Key 2 |
 | `map` | M | map (star chart off-planet) | **kept**; no star chart |
@@ -82,8 +83,11 @@ Everything below was read out of Farhold's code on 2026-09-29, not remembered.
 | (mouse) | right button | scanner material chooser | **dropped**; right button becomes the weapon's secondary |
 | (mouse) | click the world | take the pointer back (pointer lock) | **kept** |
 
-### 1.3 The four big changes
+### 1.3 The five big changes
 
+0. **Tab targeting replaces free aim as the targeting model** (canon 00 §12.1 W8). Farhold had no target
+   at all — only a bar that guessed which enemy you meant. Wildmarch has one **hard target** that only the
+   player changes (§2).
 1. **Nothing pauses.** Farhold stops the frame loop whenever a panel is open (`uiPaused()`). Wildmarch is
    online: the world keeps running while your map, bags or a vendor are open, so **movement keys keep
    working with most windows open** (§7). The full-screen character sheet is the exception that blocks
@@ -98,37 +102,169 @@ Everything below was read out of Farhold's code on 2026-09-29, not remembered.
 
 ---
 
-## 2. The aim model — how you point at things
+## 2. Targeting — Tab targeting, the one model
 
-This is the most important decision on the page, because it decides what half the keys mean.
-Farhold today is a **free-aim action game**: the pointer is locked, the screen centre is the aim point,
-a melee swing hits whatever its shape covers, a bolt flies along the camera ray and `aim()` does a 3D
-hit test. There is no "target" at all. A game with healers, tanks, focus targets and boss frames needs one.
+This is the most important decision on the page, because it decides what half the keys mean. Canon (00
+§12.1 W8) settles it: **Tab targeting, close to the classic online-RPG model.** There is one model. The
+first draft's Hybrid / Action / Classic split is gone; what survives of it is a small **pointer style**
+option (§2.2), which changes how the mouse steers the camera, not how targets work.
 
-### 2.1 Proposal: **Hybrid** (default)
+### 2.1 What was wrong in Farhold, in principle (so the builder does not repeat it)
+
+The owner's complaint: "Farhold often shows the wrong enemy's health bar." Read out of Farhold's code on
+2026-09-30 (`prototypes/farhold/js/targetpick.js`, round 28's fix, and the round-16 notes before it):
+
+* Farhold's target bar is **worked out again every frame** from the scene — it is a *guess*, not a
+  *choice*. Round 16 fed it `aim()`'s hitscan: "what would a shot down this line hit first". That scan
+  counts any body within about 1.7 m of the line, which is a huge cone close to the camera, so a wolf
+  5 m away and 18° off the crosshair "won" over the champion the crosshair was really on.
+* When nothing was under the crosshair for 1.4 s, the bar fell back to **the last thing you hit**
+  (4 s) and then to **the nearest enemy in front of your feet**. In melee, where the over-the-shoulder
+  crosshair is often not on the body you swing at, the bar swapped to whichever neighbour was more in
+  front of you.
+* Round 28 made the guess much better (smallest angle to the body's silhouette wins), but it is still a
+  guess, and two systems — the bar and the thing your attack hit — can still disagree.
+
+**The rule in Wildmarch:** the target is **state the player sets**, never a value recomputed from the
+scene. Nothing in the game may write `player.target` except the actions in §2.4 (Tab, click, a target
+key, assist, a spell you cast with no target when `set.gameplay.autotarget_sets_target` is on, a slash command)
+and the rules in §2.6 (the target despawns, you change zone). A test (page 16) fails if any module other
+than the targeting module assigns it. The target frame (page 03 §4.4) **only draws** `player.target`; it
+never asks "what is near the crosshair".
+
+### 2.2 The pointer and the aim point
 
 | Piece | How it works |
 |---|---|
-| **Reticle** | A small mark at screen centre (settings: style, size, colour — page 04). Where it points is where you aim. Basic attacks and "skillshot" spells (lines, cones, projectiles, ground circles) go where the reticle is, exactly as in Farhold. |
-| **Soft lock** | Every frame, the enemy **nearest the reticle** inside a cone (default 12° either side, within the spell's range, in line of sight) is the **soft target**. It gets a thin ring under its feet and its frame shows at the top of the screen. A spell that needs a target (a single-target heal, a "strike target" spell) goes to the soft target. Projectiles bend up to 6° toward it (the aim-assist strength, page 04). Nothing is locked: move the mouse and the soft target changes. |
-| **Hard lock** | **Tab** (or clicking an enemy with a free cursor, or `/target`) makes a **hard target**: a thick ring, a name on the target frame, and it stays until it dies, you press Esc, or it is 60 m away. While you have a hard target, targeted spells go to it even if the reticle is elsewhere; skillshots still go where the reticle points. |
-| **Friendly spells** | A heal with no friendly target goes to: the friendly hard target → a party/raid frame under a free cursor (mouse-over) → the friendly soft target (nearest ally to the reticle) → **yourself** (the "self-cast" rule, page 04 `set.gameplay.selfCast`). |
-| **Free cursor** | Hold **Left Alt** to let go of the pointer without closing anything: aim at frames, click a buff, hover a bag. Let go and the pointer locks again. |
+| **Pointer style** (`set.controls.pointerStyle`) | **Mouse-look** (default): the pointer is locked (reuse: Farhold pointer lock), moving the mouse turns the camera, and a small **reticle** sits just above screen centre. **Free cursor**: the pointer is free; hold **right mouse** to turn the camera and the character, hold both buttons to run forward, and `A`/`D` turn instead of strafe unless right mouse is held (`set.controls.adTurns`). Targeting works the same in both. |
+| **Aim point** | where you are pointing: the reticle in Mouse-look, the cursor in Free cursor. It is used by three things only: **Auto-target** spells when you have no valid target (§2.3), **Ground** spells (they land where the aim point meets the ground), and the direction of a projectile or line fired with no target. |
+| **Free cursor, held** | in Mouse-look, hold **Left Alt** to free the pointer without closing anything: click a body, nameplate or frame to target it, click a buff, hover a bag. Let go and the pointer locks again. |
+| **Facing** | when you cast a spell or use a basic attack on a target, the character turns to face it (0.12 s turn, both styles). A target more than 150° behind the camera is refused: "Your target is behind you." |
 
-Why this default: it keeps what makes Farhold's combat feel good (free aim, hit-stop, swing shapes) and
-adds what a group needs (a target, a focus, a frame to heal). The soft lock is what makes single-target
-spells usable without Tab-mashing.
+### 2.3 The four targeting kinds every spell has
 
-### 2.2 The two alternatives (both offered in settings, `set.gameplay.aimMode`)
+Every spell in `classes/*.md` names one of these (00 §5 template, field "targeting"). Heals, buffs and
+cleanses that go to one ally are **Needs target (friendly)**, which the class template writes as **Ally**.
 
-| Mode | What changes | Who it is for |
+| Kind | With a valid hard target | With no valid target | Refusal line |
+|---|---|---|---|
+| **Needs target** (enemy) — single-target finishers, interrupts, marks, debuffs | casts on your target (range and line of sight checked) | **does not cast** | "No enemy target." / "Out of range." / "Not in line of sight." / "Target is dead." |
+| **Needs target (friendly)** = **Ally** — heals, buffs, cleanses, revives on one person | casts on your target if it is friendly | does not cast — **no silent self-cast** unless `set.gameplay.self_cast_fallback` is on (default **off**). With it on, the spell goes to you | "No friendly target." (you have an enemy or nothing targeted) |
+| **Auto-target** — most damage spells, ranged basic attacks | casts on your target | picks **the valid target closest to your aim point** (smallest angle from the aim ray, within `set.gameplay.autotarget_cone`, default 25°), within the spell's range and in line of sight; ties go to the nearer body. If `set.gameplay.autotarget_sets_target` is **on** (default), that body **becomes your hard target**; off, it is hit without changing your target. If nothing qualifies: a projectile, line or cone **fires anyway** along the aim ray (it may hit something on the way); a spell that must land on a body refuses | "No target in range." |
+| **Ground** — circles and walls placed on the floor | lands at the aim point (not on your target) — unless `set.gameplay.ground_at_target` is on, then at your target's feet | lands at the aim point | "Too far away." (the circle turns red beyond range) |
+| **Self** — auras, stances, self-buffs, shouts around you | ignores targets | same | — |
+
+A spell's kind is fixed by its class file; a talent may change it (e.g. a Needs-target heal that becomes
+"heals the ally nearest your aim point"). **Valid** means: alive (or dead, for a revive), the right side
+(enemy / friendly), within range, in line of sight, and not hidden (a hidden enemy — see page 10 — shows
+its frame greyed "Out of sight"). Enemies you cannot see on screen are never picked by Auto-target.
+
+**Friendly spells and an enemy target.** A heal pressed while an enemy is targeted refuses with "No
+friendly target." There are three ways around it, all opt-in except mouse-over:
+
+1. **Mouse-over casting** (`set.gameplay.mouseover_cast`, default **Frames only**): with a free cursor over a
+   party frame (or, on "Frames and the world", over a body or nameplate in the world), a spell key casts
+   on the hovered unit **without changing your target**, if the spell can go to it.
+2. **Target the healer's target of target** (`set.gameplay.heal_target_of_target`, default **off**): a
+   friendly spell with an enemy targeted goes to whoever that enemy is attacking, if friendly.
+3. **Auto self-cast** (`set.gameplay.self_cast_fallback`, default **off**): a friendly spell with no friendly
+   target goes to you.
+
+Plus the F-keys: `F1` targets you, `F2`–`F5` your party (§5.3), which is the healer's normal path.
+
+**Basic attacks.** A **melee** basic attack is a swing with a shape (reuse: Farhold `js/weapons.js`
+patterns): if you have a hard target within reach + 1 m, the character turns to it and swings; otherwise
+it swings at the aim point. The shape hits every enemy it covers either way — melee stays an action game.
+A **ranged** basic attack (bow, crossbow, wand, thrown) is **Auto-target**. With
+`set.gameplay.target_on_attack` on (default), the first enemy your basic attack hits becomes your target —
+**only when you have none**; it never replaces a target you chose.
+
+### 2.4 Choosing a target
+
+| How | What it targets | Notes |
 |---|---|---|
-| **Action** | No soft lock and no hard lock. Every spell is a skillshot or goes to the reticle; targeted spells need the reticle **on** the body (a 3D hit test, Farhold's `aim()`). Tab still exists but only highlights (for reading the boss frame). Heals use mouse-over frames or self. | players who want pure aiming; hardest for healers |
-| **Classic** | The pointer is **free by default** (no pointer lock). Hold **right mouse** to steer the camera and turn the character; hold both buttons to run forward. Left click **selects** a target instead of attacking; basic attacks run on their own against the hard target when you are in range (auto-attack). Ground spells place under the mouse cursor. `A`/`D` turn instead of strafe unless right mouse is held (`set.controls.adTurns`). | players used to classic tab-target online RPGs *(reference: the traditional MMO scheme)*; also easiest on a laptop trackpad |
+| **Tab** | the next enemy (§2.5 order) | also `/targetenemy` |
+| **Shift+Tab** | the previous enemy in the same list | |
+| **Left click** a body, nameplate or frame (free cursor, or Left Alt held) | that unit, friend or foe | never attacks — a click is a click |
+| **F1** | yourself | or click your own frame |
+| **F2–F5** | party member 2–5, in party-frame order (followers count) | or click their frame |
+| **T** (assist) | your target's target; with no target, the party leader's target | |
+| **Watch target** (`Y` sets it) | a second, remembered unit — see §2.7 | *(reference: what other games call a focus target)* |
+| `/target <name>`, `/tar` | the nearest unit with that name within 60 m | |
+| **Esc** | clears the target (after the Esc chain has nothing to close, §7.1) | also `/cleartarget` |
+| a spell with no target | Auto-target spells only, with `autotarget_sets_target` on | §2.3 |
+| a basic attack with no target | only with `target_on_attack` on | §2.3 |
 
-The mode is **per-account** (page 04). A test must check that every spell in `classes/*.md` has a
-defined behaviour in all three modes (the spell's `shape` decides it: `target` → soft/hard target,
-`ground` → reticle or cursor, `self` → nothing to aim).
+### 2.5 The Tab order
+
+Tab looks for **hostile, living enemies that are on screen** (inside the camera's view), in line of sight,
+within `set.gameplay.tab_range` (default 40 m).
+
+1. **First press** (or the first press after the list goes stale): build a **list** of every enemy that
+   qualifies and sort it by **distance from you**, nearest first. Take the first one that is not already
+   your target.
+2. **Each further press** takes the next one down the list; Shift+Tab goes back up. After the last one it
+   wraps to the first.
+3. **The list is kept, not rebuilt,** while you keep pressing: it goes stale 3 s after the last Tab, or
+   when the camera turns more than 60°. This matters: re-sorting on every press makes the cycle jump
+   back and forth between two enemies at almost the same distance (a common fault in tab games). An
+   enemy that walks into view while the list is live is added at the end; one that dies or leaves view
+   is skipped.
+4. **Nothing on screen:** Tab takes the nearest enemy in any direction within range and turns the camera
+   0.3 s toward it (`set.gameplay.tab_behind`, default on). If there is none: "No enemies nearby."
+5. **Options** (`set.gameplay.tab_order`): **Nearest in front of the camera first** (default, above) ·
+   Nearest to the aim point first · Enemies fighting my group first (then nearest) · Lowest health first.
+   `set.gameplay.tab_combat_only` (default off) skips enemies that are not in combat, so Tab never pulls a
+   sleeping pack by accident.
+
+Friendly Tab (`targetNextAlly`, unbound) uses the same rules over players and followers.
+
+### 2.6 When the target changes on its own — and when it does not
+
+**The target frame never changes by itself.** It does not follow the last enemy that hit you, the one you
+hit last, the nearest one, or the one under the reticle. The exhaustive list of things that change or
+clear it without a targeting key:
+
+| Event | What happens |
+|---|---|
+| Your target **dies** | the default (`set.gameplay.on_target_death` = **Keep the body**) keeps it targeted: the frame greys and reads "Dead", so you can loot it, a Necromancer can use the corpse, and nothing jumps to a neighbour. Needs-target spells refuse "Target is dead"; Auto-target spells treat a dead target as **no valid target** and use §2.3's pick. Other values: **Clear the target** (frame empties 1 s after death) · **Take the next enemy** (as if you pressed Tab; the only setting that switches for you) |
+| Your target **despawns** (a body fades, a summon expires) | cleared |
+| Your target is **more than 100 m away** for 5 s, or you change zone or enter a dungeon | cleared |
+| Your target becomes **hidden** | kept, frame greyed "Out of sight"; spells refuse until it is seen again |
+| Your target is a **player who logs out** | cleared |
+| An Auto-target spell with no valid target and `autotarget_sets_target` on | the picked body becomes the target (you pressed a key that asked for it) |
+| A basic attack with no target and `target_on_attack` on | the first enemy hit becomes the target |
+
+Nothing else. Taking damage, a new enemy arriving, a boss phase, an add spawning, a mind-control ending —
+none of them change your target. A **boss that becomes untargetable** (a phase in the air, page 11) stays
+your target with its frame reading "Cannot be targeted"; your spells refuse until it comes back.
+
+### 2.7 Target of target and the watch target
+
+* **Target of target** (`hud_tot`, page 03 §4.4): a small frame beside the target frame showing **whom
+  your target is targeting** (for an enemy: who it is attacking; for a friend: what they have targeted).
+  Click it to target that unit, or press `T` (assist) with the target selected. A tank reads it to see an
+  enemy turn to a healer; a healer reads it to see who the boss is hitting.
+* **Watch target** (new name, original — not "focus"): one extra unit you want to keep an eye on while
+  your hard target is something else, typically the caster you must interrupt. `Y` sets your current
+  target as the watch target (pressed with no target, or on the same unit: clears it). It gets its own
+  small frame with a cast bar (`hud_watch`, page 03 §4.4) and a **violet eye** over its head. It is
+  cleared only on purpose (`Y`, `/clearwatch`), when it despawns, or on a zone change; a dead watch target
+  shows "Dead" and clears after 10 s. `targetWatch` (unbound) makes it your hard target.
+* **Watch casting:** a spell key pressed while **holding `Y`** casts on the watch target instead of your
+  target (for interrupts), if the spell can go to it. `Y` held for 0.25 s never sets or clears it.
+
+### 2.8 Other rules
+
+* **Range and line of sight** are page 05's. A target out of range dims its frame to 55% and tints
+  spell icons red (page 03).
+* **Enemy and ally at once:** a spell that can go to either (a Priest spell that heals an ally or harms an
+  enemy) goes to the target, whichever side it is on.
+* **The target ring:** your target has a **gold ring** under its feet and a gold outline on its nameplate;
+  the watch target a violet eye; nothing else gets a ring (there is no soft target).
+* **One test per spell** (page 16): every spell in `classes/*.md` has a targeting kind from §2.3, and the
+  test walks all four kinds through the three target states (enemy, friendly, none) against the refusal
+  lines above.
 
 ---
 
@@ -140,7 +276,7 @@ proposed (dodge 3, belt 5, mount 12, fast travel 8, mount skills 12/20/30) are r
 
 | Level | What unlocks (page 07) | Keys that come alive | Source |
 |---|---|---|---|
-| 1 | moving, jumping, basic attack, secondary, spell slot 1, interact, loot, light, targeting, chat, pings, emotes, map, character sheet, journal, unlocks screen, social, settings, Quick Heal, Tend the Fallen (hold `E` on a fallen ally) | W A S D, Space, LMB, RMB, 1, E, L, Tab, T, Y, F1–F5, Enter, /, MMB, `.`, M, C, I, K, J, U, P, O, R, `\` | page 07 (day-one kit) |
+| 1 | moving, jumping, basic attack, secondary, spell slot 1, interact, loot, targeting (§2), chat, pings, emotes, map, character sheet, journal, unlocks screen, social, settings, damage meter, Quick Heal, Tend the Fallen (hold `E` on a fallen ally) | W A S D, Space, LMB, RMB, 1, E, Tab, Shift+Tab, T, Y, F1–F5, Enter, /, MMB, `.`, M, C, I, K, J, U, P, O, R, `\`, Shift+M | page 07 (day-one kit) |
 | 2 | the perk forest (first perk point) | N | page 07 (L) |
 | 2 | **sprint**, quest `q_hv_the_long_field` | Left Shift | page 07 (Q) |
 | 3 | **potion belt**, 2 slots, quest `q_hv_the_herbwifes_basket` | 7 8 | page 07 (Q) |
@@ -148,16 +284,18 @@ proposed (dodge 3, belt 5, mount 12, fast travel 8, mount skills 12/20/30) are r
 | 5 | **dodge roll**, quest `q_hv_fall_and_rise` | F | page 07 (Q) |
 | 6 | **class mechanic**, from calling quest 1 | Q, G (if the class uses a second key), Shift+1–4 (if the class has forms, stances or a borrowed bar) — see §5.16 | canon (calling 6) |
 | 6 | **Group finder** (Social window tab) and **dungeon journal**, quest `q_hv_the_barrow_bell` | Shift+J | page 07 (Q) |
+| 7 | **Recall Stone** (`it_recall_stone`, bound at the First Waystone `lm_first_waystone`; page 20) | Home | page 07 |
 | 8 | **first follower slot**, quest `q_mf_coin_for_a_blade` (more at 15, 25, 35) | `,` / Mouse 5 (follower orders, §5.17) | page 07 (Q) |
-| 10 | spell slot 3; **Riding I** (first mount + gallop), quest `q_hc_saddle_and_bridle`; **Challenge** (tank-capable classes), quest `q_hc_hold_the_line` | 3; H; Left Shift while riding = gallop; Z (Challenge) | page 07 |
-| 12 | talent tier 1 (Spellbook gains its Talents tab); **waystones** (fast travel, map clicks), quest `q_hc_the_waywardens_oath` | — (K already opens the Spellbook) | page 07 |
+| 9 | **Harvesting** (needs a tool in the tool slot) and **one crafting profession** (page 19) | hold E on a node (already live); **L** opens Professions | page 07 |
+| 10 | spell slot 3; **Riding I** (first mount + gallop), quest `q_hc_saddle_and_bridle`; **Provoke** (the taunt of tank-capable classes), quest `q_hc_hold_the_line` | 3; H; Left Shift while riding = gallop; Z (Provoke) | page 07 |
+| 12 | talent tier 1 (Spellbook gains its Talents tab); **waystones** and **Travel Methods** (page 20), quest `q_hc_the_waywardens_oath` | E at a station opens its board; the `travel` context keys (§5.18) | page 07 |
 | 16 | potion belt, 4 slots | 9 0 | page 07 (L) |
 | 18 | spell slot 4 | 4 | canon |
 | 20 | calling quest 2; **Riding II** (faster mount), quest `q_ss_the_sand_runners` | (no new key) | page 07 |
 | 28 | spell slot 5 | 5 | canon |
-| 30 | first raid `r01_barrowking` — raid frames, world markers matter | Shift+Num 1–8 already exist; now useful | page 07 |
+| 30 | **Second Loadout** (two saved builds, page 07) | none by default — the sheet header's switch, or `/loadout 1` · `/loadout 2` (`loadoutSwap`, unbound, can be given a key) | page 07 |
 | 40 | spell slot 6; calling quest 3; **Riding III** (swim on the surface, leap), quest `q_dc_the_tide_steed` | 6; Space while galloping = leap 6 m | page 07 |
-| 60 | **Riding IV — the sky** (flying mount), chain `q_sky_1` … `q_sky_5` | Space twice while mounted = take off; Space / X = climb / descend (§5.7) | page 07 |
+| 60 | **Riding IV — the sky** (flying mount), chain `q_sky_1` … `q_sky_5`; **Challenge mode** and deep **Depths** (page 12) | Space twice while mounted = take off; Space / X = climb / descend (§5.7); no new key for Challenge or Depth (chosen in the Dungeon Finder) | page 07 |
 
 **How a locked key behaves:**
 
@@ -184,13 +322,13 @@ proposed (dodge 3, belt 5, mount 12, fast travel 8, mount skills 12/20/30) are r
  │ dev │spl 1│spl 2│spl 3│spl 4│spl 5│spl 6│belt1│belt2│belt3│belt4│mini-│mini+│   -     │
  ├─────┴──┬──┴──┬──┴──┬──┴──┬──┴──┬──┴──┬──┴──┬──┴──┬──┴──┬──┴──┬──┴──┬──┴──┬──┴──┬──────┤
  │  Tab   │  Q  │  W  │  E  │  R  │  T  │  Y  │  U  │  I  │  O  │  P  │  [  │  ]  │  \   │
- │target >│class│ fwd │ use │heal │assst│focus│unlck│ bags│ opts│socl │  -  │  -  │ walk │
+ │target >│class│ fwd │ use │heal │assst│watch│unlck│ bags│ opts│socl │  -  │  -  │ walk │
  ├────────┴┬────┴┬────┴┬────┴┬────┴┬────┴┬────┴┬────┴┬────┴┬────┴┬────┴┬────┴┬────┴──────┤
  │  Caps   │  A  │  S  │  D  │  F  │  G  │  H  │  J  │  K  │  L  │  ;  │  '  │  Enter    │
- │ (never) │left │back │right│dodge│clas2│mount│jrnl │spell│light│  -  │reply│  chat     │
+ │ (never) │left │back │right│dodge│clas2│mount│jrnl │spell│profs│  -  │reply│  chat     │
  ├─────────┴──┬──┴──┬──┴──┬──┴──┬──┴──┬──┴──┬──┴──┬──┴──┬──┴──┬──┴──┬──┴──┬──┴───────────┤
  │ L Shift    │  Z  │  X  │  C  │  V  │  B  │  N  │  M  │  ,  │  .  │  /  │ R Shift      │
- │ sprint     │chlng│ sit │char │1st p│shldr│perks│ map │follw│emote│slash│ sprint (alt) │
+ │ sprint     │prvk │ sit │char │1st p│shldr│perks│ map │follw│emote│slash│ sprint (alt) │
  ├──────┬─────┴┬────┴─┬───┴─────┴─────┴─────┴─────┴────┬┴─────┼─────┴┬────┴─┬────────────┤
  │ Ctrl │ Win  │L Alt │             Space               │R Alt │ Menu │ Ctrl │            │
  │(never│      │free  │             jump                │  -   │      │(never│            │
@@ -198,7 +336,8 @@ proposed (dodge 3, belt 5, mount 12, fast travel 8, mount skills 12/20/30) are r
  └──────┴──────┴──────┴─────────────────────────────────┴──────┴──────┴──────┘            
  Shift + 1..4 = form / stance / borrowed bar 1..4 (§5.16) · Shift + Tab = previous enemy
  Alt + 1..4 = boss-dialog replies (§5.12) · hold G = class layer (Chronomancer, Tactician)
- Shift + J = dungeon & raid journal · Shift + M = damage meter · Shift + P = raid leader tools
+ Shift + J = dungeon journal · Shift + M = damage meter · Shift + P = group leader tools
+ Home = Recall Stone · riding a Travel Method: E = stop at the next station, hold Space = jump off (§5.18)
  Numpad: NumLock = auto-run · 1–8 = target icons · 0 = clear icon · Shift+1–8 = world markers
          Shift+0 = clear all world markers · + / − = minimap zoom (alt)
  Mouse:  left = basic attack (hold repeats) · right = weapon secondary · middle tap = ping,
@@ -208,8 +347,9 @@ proposed (dodge 3, belt 5, mount 12, fast travel 8, mount skills 12/20/30) are r
 ```
 
 Keys marked `-` are **deliberately free** for later features (`[`, `]`, `;`, F6, F7, Backspace, R Alt).
-`Z` is Challenge (tank-capable classes, §5.2), `\` is walk, `,` and Mouse 5 are follower orders (§5.17) —
-all set in the 2026-09-29 reconciliation pass.
+`Z` is Provoke (the taunt of tank-capable classes, §5.2), `\` is walk, `,` and Mouse 5 are follower orders (§5.17) —
+all set in the 2026-09-29 reconciliation pass. Round 2 (2026-09-30): `L` (the old light key) now opens
+**Professions**, `Y` sets the **watch target** (§2.7), `Home` uses the **Recall Stone**.
 
 ---
 
@@ -228,17 +368,17 @@ Columns: **Action id** (also the settings key `set.keybinds.<id>`), **Default**,
 |---|---|---|---|---|---|---|---|
 | `forward` | W | ↑ | LS up | walk/run forward | ✔ | 1 | reuse |
 | `back` | S | ↓ | LS down | walk backward at 70% speed | ✔ | 1 | reuse |
-| `left` | A | ← | LS left | strafe left (Classic mode: turn left unless right mouse held) | ✔ | 1 | reuse |
-| `right` | D | → | LS right | strafe right (Classic: turn right) | ✔ | 1 | reuse |
+| `left` | A | ← | LS left | strafe left (Free cursor pointer style: turn left unless right mouse held, §2.2) | ✔ | 1 | reuse |
+| `right` | D | → | LS right | strafe right (Free cursor: turn right) | ✔ | 1 | reuse |
 | `jump` | Space | — | A (✕) | jump; out of water: climb a ledge up to 1.2 m | ✔ | 1 | reuse |
 | `sprint` | Left Shift (hold) | Right Shift | LS click (toggle) | sprint: ×1.6 run speed, costs no resource, ends when you cast or attack (page 05) | ✔ | 2 (quest `q_hv_the_long_field`, page 07) | reuse (`run`) |
-| `walkToggle` | \ (backslash) | — | (light stick push) | walk at 40% speed until pressed again (for roleplay, sneaking past non-aggressive packs); also `/walk`. *Moved off `Z`, which is now Challenge (§5.2)* | ✔ | 1 | new |
+| `walkToggle` | \ (backslash) | — | (light stick push) | walk at 40% speed until pressed again (for roleplay, sneaking past non-aggressive packs); also `/walk`. *Moved off `Z`, which is now Provoke (§5.2)* | ✔ | 1 | new |
 | `autoRun` | Num Lock | Mouse 4 | — | run forward until `forward`/`back` is pressed or `autoRun` again; steering still works | ✔ | 1 | new |
 | `dodge` | F | — | B (○) | roll 4 m in the direction you are moving (backward if standing), 0.35 s of immunity, 1 charge per 4 s (page 05 owns the numbers) | ✔ | 5 (quest `q_hv_fall_and_rise`, page 07) | new |
 | `sit` | X | — | (emote wheel) | sit / stand. Sitting doubles out-of-combat regeneration (page 05). Any movement stands you up | ✔ | 1 | new |
-| `interact` | E (tap) | — | X (□) | talk, open, loot a body or bag, enter a door, pick up, read a sign, use a waystone, accept a revive | ✔ | 1 | reuse |
-| `interactHold` | E (hold 0.3 s) | — | X hold | gather a node (herb, ore, wood) with the progress bar; **loot all** bodies and bags within 6 m | (moves with `interact`) | 1 | reuse (Farhold hold-E work) |
-| `light` | L | — | D-pad down hold | torch / lantern on and off | ✔ | 1 | reuse (`torch`) |
+| `interact` | E (tap) | — | X (□) | talk, open, loot a body or bag, enter a door, pick up, read a sign, use a waystone, open a Travel Method station's board, board a waiting Travel Method, accept a revive | ✔ | 1 | reuse |
+| `interactHold` | E (hold 0.3 s) | — | X hold | **harvest** a node (ore, herb, timber, hide, fish…) with the progress bar — needs the right tool in the tool slot and Harvesting from level 9 (page 19; refusal "You need a pick in your tool slot."); **loot all** bodies and bags within 6 m | (moves with `interact`) | 1 (loot all) · 9 (harvest) | reuse (Farhold hold-E work, `js/tools.js`) |
+| `recallStone` | Home | — | D-pad down hold | use the **Recall Stone** (`it_recall_stone`): a 10 s cast, broken by damage or moving, that returns you to the waystone or landmark it is bound to; 30 min cooldown (page 20 owns the numbers). Binding it is done at a waystone with `E` → **Bind the Recall Stone here** (page 03 `scr_recall_bind`) | ✔ | 7 (page 07) | new (Farhold's `L` torch slot is gone) |
 | `mount` | H | — | D-pad down | call your mount and ride (1.5 s cast, interrupted by damage); press again to get off | ✔ | 10 (Riding I, quest `q_hc_saddle_and_bridle`, page 07) | reuse |
 | `firstPerson` | V | — | — | tap: first person on/off; hold: swing the camera round you (the character keeps facing the same way; the camera stays where you left it until the mouse moves) | ✔ | 1 | reuse |
 | `shoulderSwap` | B | — | RS click hold 0.5 s | move the camera from the left shoulder to the right, or back | ✔ | 1 | new (Farhold had it as a setting only) |
@@ -255,14 +395,14 @@ Columns: **Action id** (also the settings key `set.keybinds.<id>`), **Default**,
 
 | Action id | Default | Alt | Pad | Does | Rebind | Unlock | Origin |
 |---|---|---|---|---|---|---|---|
-| `attack` | Left mouse (hold) | — | RT (R2) | basic weapon attack at the reticle. Holding keeps attacking at the weapon's own rate; a bow draws while held and looses on release; a staff charges (page 05). Classic mode: click selects, attack is automatic | ✔ | 1 | reuse |
-| `secondary` | Right mouse (hold) | — | LT (L2) | the weapon's secondary: shield → block; two-hander → heavy strike; bow → steady aim (zoom 1.5×, +10% crit, page 05 to confirm); wand/staff → channel; dual wield → off-hand flurry. Classic mode: steer camera | ✔ | 1 | new |
+| `attack` | Left mouse (hold) | — | RT (R2) | basic weapon attack: melee turns to your target if it is within reach + 1 m, else swings at the aim point; ranged goes to your target, else Auto-target (§2.3). Holding keeps attacking at the weapon's own rate; a bow draws while held and looses on release; a staff charges (page 05). Free cursor pointer style: a click on a body targets it, a second click or a hold attacks it, and `set.controls.autoAttack` keeps swinging at your target while it is in reach | ✔ | 1 | reuse |
+| `secondary` | Right mouse (hold) | — | LT (L2) | the weapon's secondary: shield → block; two-hander → heavy strike; bow → steady aim (zoom 1.5×, +10% crit, page 05 to confirm); wand/staff → channel; dual wield → off-hand flurry. Free cursor pointer style: hold to steer the camera (the secondary moves to `Shift`+right mouse) | ✔ | 1 | new |
 | `spell1` … `spell6` | 1 2 3 4 5 6 | — | LB+A, LB+B, LB+X, LB+Y, RB+A, RB+B | cast the spell in that slot | ✔ | 1 / 4 / 10 / 18 / 28 / 40 | reuse (Farhold 1–6, now in the table) |
-| `classKey` | Q (tap; some classes also use a hold) | — | Y (△) | the class mechanic's main action (examples: Druid — tap returns to caster form, hold opens the Form Ring; Rogue — enter stealth; Bard — Finale; Necromancer — tap Assault, hold the command ring). **§5.16 lists what Q does for every class**; each `classes/<id>.md` gives the numbers | ✔ | 6 (class decides) | new |
+| `classKey` | Q (tap; some classes also use a hold) | — | Y (△) | the class mechanic's main action (examples: Druid — tap returns to caster form, hold opens the Form Ring; Mage — Stasis; Bard — Finale; Necromancer — tap Assault, hold the command ring). **§5.16 lists what Q does for every class**; each `classes/<id>.md` gives the numbers | ✔ | 6 (class decides) | new |
 | `classKey2` | G (tap, or **hold as a layer**) | — | RB + X (hold: ring of the layer) | the class mechanic's second action, only for classes that need one (examples: Necromancer — Return; Bard — next song; Warlock — Snuff). For two classes G is a **held layer**: while G is down, `1`–`6` cast the alternate versions instead (Chronomancer — Cast from the Past; Tactician — Orders 1–5). §5.16 lists every class. Unused classes grey the row | ✔ | 6 (class decides) | new |
-| `form1` … `form4` | Shift+1 … Shift+4 | — | Y hold → ring | the **form / stance / borrowed bar** (canon: max 4): switch straight to form, stance, aspect, oath or banner 1–4, or use slot 1–4 of a temporary bar (Druid Bear/Cat/Owl/Stag, Fighter Offense/Defense/Precision, Dragon Knight aspects, Paladin oaths, Knight banners, Shaman totems, Monk Ways, Demon Hunter Demon Form, Necromancer's Colossus bar, **Enchanter's borrowed bar**). §5.16 lists every class. For a class with none, Shift+digit casts the spell as normal. See §10.3 | ✔ | class decides (fighter and paladin from 1; most from 6) | new |
+| `form1` … `form4` | Shift+1 … Shift+4 | — | Y hold → ring | the **form / stance / borrowed bar** (canon: max 4): switch straight to form, stance, aspect, oath or banner 1–4, or use slot 1–4 of a temporary bar (Druid Heron/Bear/Wolf, Fighter Offense/Defense/Precision, Paladin oaths, Rogue coatings, Dragon Knight aspects, Knight banners, Monk Ways, Necromancer's Colossus bar, **Enchanter's borrowed bar**). §5.16 lists every class. For a class with none, Shift+digit casts the spell as normal. See §10.3 | ✔ | class decides (fighter and paladin from 1; most from 6) | new |
 | `quickHeal` | R | — | D-pad up | drink the best health potion in your bags (whether or not it is on the belt); shared potion cooldown (page 08) | ✔ | 1 | new |
-| `challenge` | Z | — | RB + RS click | **Challenge**, the shared taunt of the eight tank-capable classes ([page 06 §3.5](06-CLASSES.md), numbers there): one enemy within 20 m is Taunted 3 s; 8 s cooldown; off the global cooldown. Other classes grey the row | ✔ | 10 (quest `q_hc_hold_the_line`, page 07) | new |
+| `provoke` | Z | — | RB + RS click | **Provoke** (was "Challenge"; renamed in canon so "Challenge" only means the difficulty), the shared taunt of every class with Tank as its primary or hybrid role (13 classes in canon 00 §6; [page 06 §3.5](06-CLASSES.md) owns the numbers): your target (Needs target, §2.3) within 20 m is Taunted 3 s; 8 s cooldown; off the global cooldown. Other classes grey the row. | ✔ | 10 (quest `q_hc_hold_the_line`, page 07) | new |
 | `belt1` … `belt4` | 7 8 9 0 | — | RB + D-pad up / right / down / left | use the consumable in that belt slot (potion, food, scroll, bomb, repair kit). Item ids `belt_1` … `belt_4` on page 08 are these rows | ✔ | 7 8 at 3; 9 0 at 16 (page 07) | new |
 | `cancelCast` | Esc (first press) | move | B (○) | stop a cast or channel. Moving cancels casts that are not "cast while moving" | ✖ (Esc) | 1 | new |
 
@@ -272,36 +412,38 @@ extended from swings to spells). Page 05 owns the global cooldown length.
 
 ### 5.3 Targeting
 
+§2 is the rule book; these are its keys.
+
 | Action id | Default | Alt | Pad | Does | Rebind | Unlock | Origin |
 |---|---|---|---|---|---|---|---|
-| `targetNextEnemy` | Tab | — | D-pad right | hard-target the next enemy: first press takes the one nearest the reticle, then cycles outward by distance within 40 m and a 90° cone in front (page 04 range and cone) | ✔ | 1 | new |
-| `targetPrevEnemy` | Shift+Tab | — | D-pad left | cycle the other way | ✔ | 1 | new |
-| `targetNearestEnemy` | (none) | — | — | hard-target the closest enemy in any direction | ✔ | 1 | new |
-| `targetNextAlly` | (none) | — | — | cycle friendly players and followers | ✔ | 1 | new |
+| `targetNextEnemy` | Tab | — | D-pad right | next enemy in the Tab list: on-screen enemies within 40 m, nearest first, list kept while you keep pressing (§2.5) | ✔ | 1 | new |
+| `targetPrevEnemy` | Shift+Tab | — | D-pad left | previous enemy in the same list | ✔ | 1 | new |
+| `targetNearestEnemy` | (none) | — | — | the closest enemy in any direction within range | ✔ | 1 | new |
+| `targetUnderAim` | (none) | — | RS click | the enemy nearest the aim point (the same pick an Auto-target spell makes, §2.3) — for players who want to point, then lock | ✔ | 1 | new |
+| `targetNextAlly` | (none) | — | — | cycle friendly players and followers (same rules as Tab) | ✔ | 1 | new |
 | `targetNearestAlly` | (none) | — | — | closest friendly | ✔ | 1 | new |
-| `targetSelf` | F1 | — | LB + D-pad up | target yourself | ✔ | 1 | new |
-| `targetParty2` … `targetParty5` | F2 F3 F4 F5 | — | LB + D-pad right/left cycles 2→5 | target party member 2–5 in party-frame order | ✔ | 1 | new (F5 — see §10.4) |
+| `targetSelf` | F1 | — | LB + D-pad up | target yourself (for heals and buffs on you) | ✔ | 1 | new |
+| `targetParty2` … `targetParty5` | F2 F3 F4 F5 | — | LB + D-pad right/left cycles 2→5 | target party member 2–5 in party-frame order (followers count) | ✔ | 1 | new (F5 — see §10.4) |
 | `assist` | T | — | LB + D-pad down | target your target's target (on a friend: whatever they are hitting). With no target: the party leader's target | ✔ | 1 | new |
-| `setFocus` | Y | — | LB + RS click | make your current target your **focus** (its own small frame, cast bar and a purple diamond over it). Pressed with no target: clear focus | ✔ | 1 | new |
-| `targetFocus` | (none) | — | — | make your focus your target | ✔ | 1 | new |
-| `lockOn` | (none; Tab does this) | — | RS click | hard-target the enemy nearest screen centre; press again to drop | ✔ | 1 | new |
+| `setWatch` | Y (tap) | — | LB + RS click | make your target the **watch target** (§2.7). With no target, or on the watch target itself: clear it | ✔ | 1 | new |
+| `castOnWatch` | Y (hold) | — | — | while held, spell keys cast on the watch target instead of your target (§2.7) | (moves with `setWatch`) | 1 | new |
+| `targetWatch` | (none) | — | — | make your watch target your hard target | ✔ | 1 | new |
 | `clearTarget` | Esc (when nothing to close or cancel) | — | B (○) with nothing to cancel | drop your target | ✖ (Esc) | 1 | new |
-| (click) | left click a body, nameplate or frame with a free cursor | — | — | target it (no attack) | ✖ | 1 | new |
-| `targetIcon1` … `targetIcon8` | Num 1 … Num 8 | — | ping wheel | put a **target icon** over your target, seen by your party/raid: Sun, Moon, Star, Flame, Leaf, Anvil, Bell, Crown (page 13 §2.5's set and colours, `wm_sun` … `wm_crown`). In a raid only the leader and assistants can | ✔ | 1 | new |
+| (click) | left click a body, nameplate or frame with a free cursor (Left Alt held, or Free cursor style) | — | — | target it (no attack) | ✖ | 1 | new |
+| `targetIcon1` … `targetIcon8` | Num 1 … Num 8 | — | ping wheel → Icons | put a **target icon** over your target, seen by your party: **Sword, Shield, Anvil, Crown, Leaf, Wave, Key, Eye** (canon 00 §12.1 W23; ids `wm_sword`, `wm_shield`, `wm_anvil`, `wm_crown`, `wm_leaf`, `wm_wave`, `wm_key`, `wm_eye`; page 11 / page 17 own the art and colours, none of them a telegraph colour). Anyone in a party can set one | ✔ | 1 | new |
 | `targetIconClear` | Num 0 | — | — | remove the icon from your target | ✔ | 1 | new |
 
-**Target rules** (the owner asked for clarity): a hard target drops when it dies, when it is more than
-60 m away for 3 s, when it goes into stealth, or on Esc. The soft target never shows a name on the big
-frame, only a ring and a small frame, so the player can always tell which one a targeted spell will hit.
-Page 05 owns line of sight and range.
+The old soft-target row and `lockOn` are gone (there is no soft target). The watch target's violet eye is a
+marker of its own, not one of the eight icons; the Eye **target icon** is drawn open and gold, the watch
+eye half-closed and violet, so the two never read the same.
 
 ### 5.4 Pings, markers and quick chat (new)
 
 | Action id | Default | Alt | Pad | Does | Rebind | Unlock |
 |---|---|---|---|---|---|---|
-| `ping` | Middle mouse (tap) | — | LB + RB (tap) | **smart ping** at the reticle, seen by your party (in a raid: your 5-player group): on an enemy → "Attack this" (red); on an ally → "Help them" (green); on an item or node → "Look here" (white); on the ground → "Go here" (blue). 3 per 5 s, then a 4 s cool-down (anti-spam) | ✔ | 1 |
+| `ping` | Middle mouse (tap) | — | LB + RB (tap) | **smart ping** at the aim point, seen by your party: on an enemy → "Attack this" (red); on an ally → "Help them" (green); on an item or node → "Look here" (white); on the ground → "Go here" (blue). 3 per 5 s, then a 4 s cool-down (anti-spam) | ✔ | 1 |
 | `pingWheel` | Middle mouse (hold 0.25 s) | — | LB + RB (hold) | ring of 8: Enemy here · Go here · **Danger — get out** · Stack on me · Spread out · Need healing · Out of resource · On my way. Each is also said in your character's own formant voice at low volume (page 04 `set.voice.pingVoice`) | ✔ | 1 |
-| `worldMarker1` … `worldMarker8` | Shift+Num 1 … Shift+Num 8 | — | ping wheel → Markers | place a **world marker** on the ground at the reticle, visible to the whole raid: discs with a light column named Sun, Moon, Star, Flame, Leaf, Anvil, Bell, Crown (page 13 owns the art and colours, none of them a telegraph colour; same set as target icons). Page 13 proposed `Ctrl+1`–`8`; Ctrl is never a default (§10.4), so they stay on Shift+Numpad. Leader and assistants only; outside a group they are private practice markers | ✔ | 1 |
+| `worldMarker1` … `worldMarker8` | Shift+Num 1 … Shift+Num 8 | — | ping wheel → Markers | place a **world marker** on the ground at the aim point, visible to your party: discs with a light column, the same eight symbols as the target icons — **Sword, Shield, Anvil, Crown, Leaf, Wave, Key, Eye** (canon 00 §12.1 W23; page 11 / page 17 own the art and colours, none of them a telegraph colour). Ctrl is never a default (§10.4), so they sit on Shift+Numpad. Party leader only (or everyone, if the leader ticks "Everyone can place markers" in `scr_party`); outside a group they are private practice markers | ✔ | 1 |
 | `worldMarkerClear` | Shift+Num 0 | — | — | remove all world markers | ✔ | 1 |
 | `readyCheck` | (none) — `/ready` | — | — | leader: ask everybody "ready?" (a 30 s card with Yes/No) | ✔ | 1 |
 | `pullTimer` | (none) — `/pull 10` | — | — | leader: a big centre-screen countdown for everybody | ✔ | 1 |
@@ -321,7 +463,7 @@ screen. Casting a spell by its key while mounted **gets you off first** and then
 | `jump` | Space | A | mount jump, 2 m | ✔ | 10 (Riding I) |
 | (speed) | — | — | Riding II raises the mount's top speed to 10.8 m/s; no new key | — | 20 (Riding II) |
 | `jump` → **leap** | Space while galloping | A while galloping | leap 6 m forward (page 07 Riding III) | ✔ (uses `jump`) | 40 (Riding III) |
-| (swim) | W S A D in deep water | LS | the mount swims on the surface at +80% (page 07 Riding III); before 40, deep water puts you off | — | 40 (Riding III) |
+| (swim) | W S A D in deep water | LS | the mount swims on the surface at +80% (page 07 Riding III); before 40, deep water puts you off — **except aquatic mounts** (the giant frogs and other swimmers of page 08's mount list), which swim from Riding I; `Space` held dives with them for 10 s | — | 40 (Riding III) · 10 for aquatic mounts |
 | `jump` → **take off** | Space twice (within 0.4 s) while mounted | A twice | flying mounts only, where page 01 allows flight (§5.7) | ✔ (uses `jump`) | 60 (Riding IV) |
 | `mount` | H | D-pad down | get off | ✔ | 10 |
 | `interact` | E | X | talk from the saddle; gathering and looting get you off automatically | ✔ | 10 |
@@ -346,8 +488,8 @@ attacks or spells with a cast time in water; instant spells work (page 05 to con
 ### 5.7 Gliding and flying (Riding IV, level 60)
 
 *Resolved (00 §10): flying mounts are **in**, at 60, through the `q_sky_1..5` chain (page 07 Riding IV).
-Before that, winged mounts run and glide.* Flight works only where page 01 allows it (not in cities,
-dungeons, raids or during war mode).
+Before that, winged mounts run and glide.* Flight works only where page 01 allows it (not in cities or
+dungeons).
 
 | Action | Default | Pad | Does | Unlock |
 |---|---|---|---|---|
@@ -363,8 +505,8 @@ dungeons, raids or during war mode).
 | Action | Default | Pad | Does | Rebind |
 |---|---|---|---|---|
 | `acceptRevive` | E | X | accept a resurrection someone cast on you (the card shows who and the health you come back with) | (uses `interact`) |
-| `release` | R **hold 1.0 s** | Y hold | release to the nearest shrine (open world) or the instance entrance (dungeon/raid). Held so it can never happen by accident | (uses `quickHeal`'s key; context shadow) |
-| `spectateNext` | Tab | D-pad right | in a dungeon or raid, while dead and not released: watch the next living party member | (uses `targetNextEnemy`) |
+| `release` | R **hold 1.0 s** | Y hold | release to the nearest shrine (open world) or the dungeon entrance. Held so it can never happen by accident | (uses `quickHeal`'s key; context shadow) |
+| `spectateNext` | Tab | D-pad right | in a dungeon, while dead and not released: watch the next living party member | (uses `targetNextEnemy`) |
 | `spectatePrev` | Shift+Tab | D-pad left | the other way | |
 | camera | mouse / wheel | RS | orbit the watched player | |
 | chat, map, pings, ping wheel | Enter, M, MMB | — | work as normal — the dead can still call "Danger" | |
@@ -413,12 +555,12 @@ through it while walking.
 | M / Esc | close | reuse |
 | mouse wheel | zoom in 7 steps (1, 1.6, 2.6, 4.2, 6.8, 11, 18×), keeping the point under the pointer still | reuse (map.js `ZOOMS`) |
 | left-drag | pan (a drag under 4 px is still a click) | reuse |
-| left click a waystone | select it; a Travel button appears (waystones, level 12, quest `q_hc_the_waywardens_oath`, page 07) | reuse (map pads) |
+| left click a waystone or a Travel Method station | select it: its card shows whether you have discovered it, where its routes go, the next departure and (for a waystone) whether your Recall Stone is bound there. **The map never teleports you** — there is no flight-path click; travel is by Travel Method, scroll, class spell or the Recall Stone (page 20) | reuse (map pads, without the travel button) |
 | left click anything else | select it and show its card | reuse |
 | Shift+click | drop a pin (quick, throw-away; shared with party if `set.gameplay.sharePins`) | reuse |
 | Ctrl+Shift+click | keep a place (named, starred, listed in the Journal) | reuse |
 | right-click | context menu: Set waypoint (the HUD arrow) · Share with party · Remove pin · Copy location | new |
-| Home | recentre on you | new (Farhold had a button only) |
+| Home | recentre on you (the map context takes `Home` before the world's Recall Stone — a declared shadow, §10.1) | new (Farhold had a button only) |
 | `+` / `-` | zoom (keyboard) | new |
 | W S A D | still walk (the map stays open) | new |
 | F1–F5 | centre the map on that party member | new |
@@ -463,17 +605,15 @@ keys stay on 1–6** and the replies use their own keys (canon 00 §10):
 
 | Action id | Key | Does |
 |---|---|---|
-| `dialogChoice1` … `dialogChoice4` | **Alt+1 … Alt+4** | pick reply 1–4 (page 11's proposed id `key.dialog_choice_1..4` is these rows). Holding Left Alt also frees the cursor (§2.1), so the same hand can click the panel instead |
-| `dialogWheel` | **E (hold)** | alternative for players whose browser takes Alt+digit (Chrome and Firefox on Linux switch tabs with it, §10.4): opens the reply ring over the reticle; while it is held, **1 2 3 4** pick a reply instead of casting |
+| `dialogChoice1` … `dialogChoice4` | **Alt+1 … Alt+4** | pick reply 1–4 (page 11's proposed id `key.dialog_choice_1..4` is these rows). Holding Left Alt also frees the cursor (§2.2), so the same hand can click the panel instead |
+| `dialogWheel` | **E (hold)** | alternative for players whose browser takes Alt+digit (Chrome and Firefox on Linux switch tabs with it, §10.4): opens the reply ring over the aim point; while it is held, **1 2 3 4** pick a reply instead of casting |
 | (click) | with Left Alt free cursor | pick a reply on the panel |
 | (pad) | D-pad + A (page 11), or X hold then A/B/X/Y | same |
 
-Who can answer: in a party the leader's pick counts and the others' picks show as votes; in a raid the
-raid leader or an assistant (page 15), unless the leader set `set.raid.dialog_vote` to Raid votes (page 13,
-page 04). If nobody answers before the timer, the fight takes the default
-branch (page 11).
+Who can answer (canon 00 §10): in a party everyone votes and a tie goes to the party leader; solo, you
+pick. If nobody answers before the timer, the fight takes the default branch (page 11).
 
-### 5.13 Vendor, trade, bank, mail and auction windows
+### 5.13 Vendor, trade, bank, mail and Trading Post windows
 
 These open from an NPC (`E`), sit beside your bags, and **do not stop movement**; walking more than 8 m
 away closes them.
@@ -491,22 +631,23 @@ away closes them.
 | | gold field | type an amount |
 | | **Accept** button | mouse only — **no key accepts a trade** (a key could be pressed by accident or by a macro); any change on either side un-accepts both |
 | | Esc | cancel the trade |
-| **Bank / Mail / Auction** | as bags: right-click moves between bags and bank; Shift+click splits | page 15 owns mail and auction layout |
+| **Bank / Mail / Trading Post** | as bags: right-click moves between bags and bank; Shift+click splits | page 15 owns mail and Trading Post layout |
 
-### 5.14 Party frames, raid frames and click-to-heal
+### 5.14 Party frames and click-to-heal
 
 | Input on a frame (cursor free) | Does | Setting |
 |---|---|---|
 | left click | target that player | — |
-| right click | menu: Whisper, Inspect, Trade, Follow, Invite/Kick, Promote to leader, Promote to assistant, Set target icon, Report | — |
-| hover + a spell key | **mouse-over cast**: the spell goes to the hovered member without changing your target | `set.gameplay.mouseoverCast` (on) |
+| right click | menu: Target, Set as watch target, Whisper, Inspect, Trade, Follow, Invite/Kick, Promote to leader, Set target icon, Report | — |
+| hover + a spell key | **mouse-over cast**: the spell goes to the hovered member without changing your target (§2.3) | `set.gameplay.mouseover_cast` (**Frames only**) |
 | hover + a belt key | use a belt item on them (a bandage, a revive scroll) | same |
 | drag a frame | move the frame group (when `set.interface.framesUnlocked`) | — |
 | F1–F5 | target party members (§5.3) | — |
 
-Healers who want to heal with the pointer locked use the soft lock (nearest ally to the reticle) or the
-F-keys; healers who want to click frames hold Left Alt, or play in **Classic** mode, where the pointer is
-always free.
+Healers who keep the pointer locked heal with the **F-keys** (`F1` yourself, `F2`–`F5` the party) and the
+assist key; healers who want to click frames hold Left Alt, or pick the **Free cursor** pointer style (§2.2),
+where the pointer is always free. **Raid frames are not in v2** (canon 00 §12.1 W16, parked in
+`WISHLIST.md`); five party frames are the whole group.
 
 ### 5.15 Windows and panels (the keys that open screens)
 
@@ -520,12 +661,13 @@ sheet key while the sheet is open switches tab (reuse: Farhold `K`/`F` behaviour
 | `sheetSpells` | K | — | — | **Spellbook**, `scr_sheet_spells`; its Talents tab `scr_sheet_talents` appears at 12 | ✔ | 1 | new (was the Holding) |
 | `sheetPerks` | N | — | — | **Perk forest**, `scr_sheet_perks` | ✔ | 2 | new |
 | `journal` | J | — | — | **Quest journal**, `scr_sheet_journal` | ✔ | 1 | new (was the ship) |
-| `instanceJournal` | Shift+J | — | — | **Dungeon & raid journal** (bosses, their mechanics, their loot), `scr_instance_journal` | ✔ | 6 (quest `q_hv_the_barrow_bell`, page 07) | new |
+| `instanceJournal` | Shift+J | — | — | **Dungeon journal** (bosses, their mechanics, their loot, world bosses), `scr_instance_journal` | ✔ | 6 (quest `q_hv_the_barrow_bell`, page 07) | new |
+| `professions` | L | — | — | **Professions**, `scr_professions` (Harvesting + your crafting profession, page 19) | ✔ | 9 (page 07) | new |
 | `unlocks` | U | — | — | **Unlocks** (the feature ladder), `scr_sheet_unlocks` | ✔ | 1 | new |
-| `social` | P | — | — | **Social** window with tabs: Party (and followers) `scr_party`, Group Finder `scr_group_finder` (tab appears at 6, page 07), Friends `scr_social`, Guild `scr_guild` | ✔ | 1 | new (followers were Farhold `F`) |
+| `social` | P | — | — | **Social** window with tabs: Party (and followers) `scr_party`, Dungeon Finder `scr_group_finder` (tab appears at 6, page 07), Friends `scr_social`, Guild `scr_guild` | ✔ | 1 | new (followers were Farhold `F`) |
 | `map` | M | — | View | **World map**, `scr_map` | ✔ | 1 | reuse |
-| `raidLeader` | Shift+P | — | — | **Raid leader tools** `scr_raid_leader` (page 13 §2.5; leader and assistants — for others the key opens nothing and says why). Page 13 proposed `Shift+R`; `R` is Quick Heal, so the leader panel sits beside Social | ✔ | 30 (first raid) | new |
-| `meter` | Shift+M | — | — | **Damage meter**, `scr_meter` (reuse `meters/`) | ✔ | 1 | new |
+| `leaderTools` | Shift+P | — | — | **Group leader tools** `scr_leader_tools` (ready check, pull timer, world markers, marker permissions — page 03 §10.2.1); for a non-leader the key opens the panel read-only and says "Only the party leader can use these." | ✔ | 1 | new (was `raidLeader`) |
+| `meter` | Shift+M | — | — | **Damage meter**, `scr_meter` (reuse `meters/`, as Emberveil 2 uses it) | ✔ | 1 | new |
 | `settings` | O | F10 | Menu → Settings | **Settings**, `scr_settings` ([page 04](04-SETTINGS.md)) | ✔ | 1 | reuse |
 | (Esc) | Esc | — | Menu | **Game menu** `scr_game_menu` when nothing is open (§7.1) | ✖ | 1 | reuse |
 | `help` | (none) — `/help`, Game menu → Help & keys | — | — | **Help & keys**, `scr_help`, whose key list is built from this table | ✔ | 1 | new |
@@ -537,50 +679,61 @@ a window instead of another window (§10.3).
 
 Every class tool has a slot in one scheme: **`Q`** class key (tap; a few classes also use a hold),
 **`G`** second class key (tap, or held as a layer), **`Shift+1`–`4`** the form / stance / borrowed bar
-(max 4, canon), spells on **`1`–`6`**, the shared **`Z`** Challenge for the eight tank-capable classes.
+(max 4, canon), spells on **`1`–`6`**, the shared **`Z`** Provoke for the 13 tank-capable classes.
 Pet commands follow one pattern: **tap `Q`** = the attack command, **hold `Q`** = the command ring,
 **`G`** = the one command that needs its own key. Where a class file proposed `Z`, `R`, `V`, `X`, `C`,
 `F`, `Alt+`, `Ctrl+` or `Shift+Q/R/Z`, the class's tool moves to the slot in this table (the class files
 are to be updated to match; the change list is in this pass's report). `—` = the key does nothing for that
 class and its Keybinds row is greyed. Unlock levels are the class file's (calling quests 6 / 20 / 40).
 
+Rows marked **†** changed class systems in round 2 (canon 00 §6, §12.1 W27–W37); the class agents are
+rewriting those files now, so a † row is this page's **proposal** for where the new system's tools sit. The
+class file's key wins if it differs, and this table is then corrected.
+
 | Class | `Q` | `G` | `Shift+1`–`4` |
 |---|---|---|---|
 | `warrior` | — (Bulwark is passive) | — | — |
 | `fighter` | cycle to the next stance | — | **stances**: 1 Offense · 2 Defense · 3 Precision (level 1). Calling 40: hold a stance key 1 s = Threefold Form |
 | `paladin` | **oath wheel** (swear out of combat; in combat from calling 20) | — | **oaths**: 1 Keeping · 2 Mercy · 3 Dawnfire (20). Twin Oath (40): a Shift+digit replaces the older of your two oaths |
-| `ranger` | tap **Hunt** · hold = cat command ring (Hunt, Heel, Stalk) | **Stalk** (the cat's ambush; interrupts a boss cast) | — |
-| `rogue` | **Stealth** (out of combat) | **Slip Away** (20) | — |
-| `cleric` | tap **Raise** · hold 0.6 s = **Mass Resurrection** (40) | **Outpouring** (20) | — |
+| `ranger` † | tap = your **tamed beast attacks** your target · hold = **beast command wheel** (Attack, Heel, Stay, Stance) | the beast's **special move** (depends on the species tamed — class file) | — |
+| `rogue` † | — (Blind Spots and Wounds are passive; the finishers that spend Wounds are spells. No stealth, canon W29) | — | **coatings**: 1–3 switch the coating on your blades or bolts (class file names them) |
+| `cleric` | tap **Raise** (revive one ally; there is no group revive, canon W35) | **Outpouring** (20) | — |
 | `bard` | **Finale** | **next song** (Cadence → Hearthsong → Dirge) | — |
-| `mage` | **Stasis**; at 5 charges after calling 40, **Critical Mass** | — | — |
-| `necromancer` | tap **Assault** · hold = command ring (Assault, Hold Here, Return, Stance) | **Return** | the **Colossus bar** while it stands: 1 Crushing Fist · 2 Skull Hurl · 3 Stand Guard · 4 Unmake |
-| `warlock` | tap imp **Attack** · hold = command ring (Attack, Heel/Stay, Snuff, Devour) | **Snuff** (interrupt) | — |
-| `demon_hunter` | **Demon Form** at 100 Vengeance; again = end it early | — | 1 = Demon Form (the single button of the form bar) |
+| `mage` † | **Stasis** (holds your Resonance from fading); at 5 Resonance after calling 40, **Critical Mass** | — (Wards and decoys for the tank hybrid are spells) | — |
+| `necromancer` † | tap = your **controlled undead attack** · hold = command ring (Assault, Hold Here, Return, Stance) | **Return** | the **Colossus bar** while it stands: 1 Crushing Fist · 2 Skull Hurl · 3 Stand Guard · 4 Unmake (if the class file keeps the Colossus) |
+| `warlock` † | tap = your **bound demon attacks** · hold = command ring (Attack, Heel/Stay, Snuff, Devour) | **Snuff** (the demon's interrupt) | — |
+| `demon_hunter` † | **Demonsight** — a 30 m pulse that reveals hidden enemies and marks demon-tagged ones' weak points (no form, no gauge, canon W27) | **Set trap** at the aim point (if the class file puts traps on a key rather than spells) | — |
 | `scavenger` | **Scrounge** | **Junk Avalanche** (40) | — |
-| `swashbuckler` | — (Flair is passive) | — | — |
-| `dragon_knight` | at 100 Wyrmblood: **Scale Surge** (from 6) / **Dragon Form** (40); again = end it early | — | **aspects**: 1 Emberscale · 2 Rimescale · 3 Thunderscale (out of combat from 6; in combat from 20, 20 s cooldown) |
-| `pyromancer` | **Vent** | **Feed the Familiar** (20) | — |
-| `stormcaller` | plant a **storm rod** at the aim point (hold = the 25 m placement preview; release plants) | — | — |
-| `druid` | tap = back to caster form · hold = **Form Ring** | — | **forms**: 1 Bear · 2 Cat · 3 Owl · 4 Stag (6 / 20 / 40) |
+| `swashbuckler` | **Riposte Guard** | — | — |
+| `dragon_knight` † | at 100 Wyrmblood: **Scale Surge** (from 6) / **Dragon Form** (40); again = end it early | — | **aspects**: 1 **Firescale** (was Emberscale, renamed — no "ember", canon §11 rule 10) · 2 Rimescale · 3 Thunderscale (out of combat from 6; in combat from 20, 20 s cooldown) |
+| `pyromancer` † | tap **Vent** (releases Heat) · hold **Controlled Burn** | **Hearthkeeper** | — |
+| `stormcaller` | plant a **storm rod** at the aim point (hold = the 25 m placement preview; release plants) | **Conduit** | — |
+| `druid` † | tap = back to **Grove** form (the default form) · hold = **Form Ring** | — | **forms**: 1 **Heron** · 2 **Bear** · 3 **Wolf** (6 / 20 / 40). A form turns each of the six spells into a different spell (canon W30); the bar keeps `1`–`6` |
 | `oracle` | **Share the Vision** (40) | hold while casting a heal = **keep the Omen** (the file's "hold Alt"; Alt+digit is the dialog key) | — |
 | `tactician` | **Battle Plan** picker (20; out of combat) | **hold = Orders layer**: `1`–`5` give Orders 1–5 (5 from 40); add Shift = every follower and group member within 30 m (+1 pip) | — |
 | `chronomancer` | **Recall** (snap to your Ghost) | **hold = Cast from the Past** (20): `1`–`6` cast that slot from your Ghost | — |
-| `monk` | — | — | **Ways** (20): 1 Storm Fist · 2 Still Water — starts the 10 s meditation, out of combat only *(proposal; the monk file uses the gauge's right-click menu)* |
-| `shaman` | **Totemic Recall** | **totem choice ring** (flip one slot's totem; on the GCD, free) | **plant totems**: 1 Earth · 2 Water · 3 Fire · 4 Air at the aim point (20 m); press twice within 0.4 s = at your feet |
+| `monk` | — | — | **Ways** (20): 1 Storm Fist · 2 Still Water — starts the 10 s meditation, out of combat only *(proposal; the monk file uses the gauge's right-click menu)*. Breath (was Chi) is shown on the gauge |
+| `shaman` † | **Great Storm** — usable once all three storm-beasts have been called (Storm Tales, canon W31) | — | — (the three beasts — Thunder Ox, Rain Crane, Wind Hare — are called by spells; no totems) |
 | `witch_hunter` | **Witchsight** (20) | **Silvered Shots** on / off | — |
 | `knight` | **Vow of Protection** on your friendly target (6) | **second Vow** (Oathsworn, 40) | **banners** (20): 1 Bastion · 2 Valor · 3 Mercy |
 | `sorcerer` | **Nudge** (20) | — | — |
 | `runesmith` | — (Speak the Runes is spell 2) | — | — |
-| `shadow_dancer` | **Veilswap** | — | — |
+| `shadow_dancer` † | **Shadowswap** (was Veilswap, renamed — no "veil"): you and your newest Shadow trade places | — | — |
 | `tinker` | **Overclock** | — | — (while Climbed In to the Iron Walker, **the spell bar itself** becomes the Walker bar: `1` Haymaker · `2` Rocket Barrage · `3` Steam Vent · `4` Eject; `E` climbs in) |
 | `priest` | **Anchor** (40) | — | — |
-| `enchanter` | **Charm** a target; again = **Release** (Snap from 40) | **Hold Here** (the charmed creature walks to the crosshair and stays) | the **borrowed bar**: 1–3 the creature's own abilities · 4 Attack my target / Guard me toggle |
+| `enchanter` | **Charm** a target; again = **Release** (Snap from 40) | **Hold Here** (the charmed creature walks to the aim point and stays) | the **borrowed bar**: 1–3 the creature's own abilities · 4 Attack my target / Guard me toggle |
+
+**Utility spells** (out of combat, no slot — canon 00 §5 item 6 and §6: Mage **Portal**, Chronomancer
+**Retrace**, Oracle **Guiding Call**, Druid **Heron's Flight**, and the rituals that revive a tamed beast or
+a bound demon, **Tame Beast**, **Bind Demon**): they sit on a **utility ring**, `utilityRing` =
+**`Shift+Q`** (hold; release on a wedge to cast), unlock 6 or the class file's level. They are also buttons
+on the Spellbook's Utility strip (page 03 §7.3) and `/cast <name>`. In combat the ring does not open and
+`Shift+Q` falls through to `Q`, so a sprinting player who presses Q still gets the class key (§10.3).
 
 Rules this table follows:
 
-* A bar that **replaces the whole spell bar** (Druid forms, Demon Form, Dragon Form, Pyromancer's Overheat
-  versions, the Tinker's Walker) stays on `1`–`6`; `Shift+1`–`4` only ever *switches* or runs a small
+* A bar that **replaces the whole spell bar** (Druid forms, Dragon Form, Pyromancer's Overheat versions,
+  the Tinker's Walker) stays on `1`–`6`; `Shift+1`–`4` only ever *switches* or runs a small
   second bar.
 * A **held layer** (`G` for Chronomancer and Tactician) is the only place `1`–`6` mean something else while
   a key is down. It is a declared context (`classLayer`, §10.2), so the one-owner test allows it.
@@ -596,15 +749,41 @@ Page 06 §10 gives every follower and pet four commands: **stance** (Aggressive 
 | Action id | Default | Alt | Pad | Does | Rebind | Unlock |
 |---|---|---|---|---|---|---|
 | `followerOrder` | `,` (comma) tap | Mouse 5 tap | LB + RB + A | every follower and pet you own **attacks your target** | ✔ | 8 (first follower slot, page 07) — or 6 for a class whose pet comes with calling 1 |
-| `followerRing` | `,` hold | Mouse 5 hold | LB + RB + A hold | ring of 4: Attack my target · Come back · Stay here (at the reticle) · Stance (cycles) | ✔ | as above |
+| `followerRing` | `,` hold | Mouse 5 hold | LB + RB + A hold | ring of 4: Attack my target · Come back · Stay here (at the aim point) · Stance (cycles) | ✔ | as above |
 | `followerAttack` / `followerReturn` / `followerStay` / `followerStance` | (none) | — | — | the four commands on their own keys, for players who want them | ✔ | as above |
 
 * Class pets answer these too; the class's own `Q` / `G` (§5.16) are shortcuts for its pet only.
-* Page 11 §22's follower commands for dungeons (Hold position, Stack on me, Spread, Focus my target,
+* Page 11 §22's follower commands for dungeons (Hold position, Stack on me, Spread, Attack my target,
   Interrupt on/off, Use defensives now) are **extra wedges** on the same ring inside an instance; the
   Tactician's Orders layer (§5.16) extends them further.
 * Mouse 5 was reserved for push-to-talk (§12 Q5). Voice chat is not in v2; if it is added, push-to-talk
   takes an unbound key and Mouse 5 stays here.
+
+### 5.18 Travel Methods — boarding and riding (new, round 2)
+
+**Travel Methods** replace flight paths (canon 00 §12.1 W15; [page 20](20-TRAVEL.md) owns routes, speeds,
+schedules and the snap-back rule). Some leave like a bus (they wait up to a set time for riders), some run
+to a schedule (trains, boats, barges) and a group boards together. Riders are protected from weather and
+enemies. The keys:
+
+**At a station** (the `world` context):
+
+| Action id | Default | Pad | Does | Unlock |
+|---|---|---|---|---|
+| `interact` | E on the station sign or keeper | X | opens the station board `scr_travel_station` (page 03 §12.17): routes, next departures, riders waiting | 12 (page 07) |
+| `interact` | E near a waiting vehicle | X | **board it** ("[E] Board the wagon to Anvilgate — leaves in 0:42"). Your party members within 30 m get a card "Board with {name}?" (`set.social.boardWithParty`) | 12 |
+| (auto) | — | — | with `set.gameplay.auto_board` on (default **on**) and a route picked on the board, you board by yourself when the vehicle is ready and you stand within 30 m of it | 12 |
+
+**While riding** (a new context, `travel`; it sits above `world` in §10.2):
+
+| Action id | Default | Pad | Does |
+|---|---|---|---|
+| (mouse, wheel) | — | RS | orbit and zoom the camera round the vehicle; you do not steer (the route does) |
+| `travelStop` | E (tap; shadow of `interact`) | X | **get off at the next station** on the route, or cancel that request (a toggle; the HUD strip says "Getting off at Reedhollow") |
+| `travelJumpOff` | Space (hold 1.0 s; shadow of `jump`) | A hold | **step off here**, where the route allows it: refused on a bridge, over deep water, in the air (flyers) and inside the last 50 m of a station ("You can step off once the wagon is on open ground."). You lose the riders' protection at once |
+| W A S D, spells, dodge, mount, Tab | — | — | **do nothing**; the first press shows once "Riding to Anvilgate · E: get off at the next stop · hold Space: step off" |
+| M, I, C, K, J, P, Enter, chat, map, bags, meter | as normal | — | work while riding (nothing pauses) |
+| Esc | Esc | B | the normal Esc chain (§7.1); it never throws you off |
 
 ---
 
@@ -620,9 +799,11 @@ comma are the same command. **Emote names are original.** Page 15 owns what each
 | `/s`, `/say <text>` | speak aloud; heard within 30 m; shown as a speech bubble |
 | `/y`, `/yell <text>` | shout; heard within 150 m |
 | `/p`, `/party <text>` | your party |
-| `/ra`, `/raid <text>` | your raid |
-| `/rw`, `/warn <text>` | raid warning: a centre-screen banner and a sound for the whole raid (leader/assistants) |
-| `/i`, `/instance <text>` | everyone in your dungeon or raid, grouped or not |
+| `/pw <text>` | party warning: a centre-screen banner and a sound for your party (party leader) |
+| `/i`, `/instance <text>` | everyone in your dungeon, grouped or not |
+| `/mu`, `/muster <text>` | the **Muster** channel: everyone in a world-boss area (page 13, page 15) |
+| `/muster lead` | offer to lead the world-boss fight in that area (page 13) |
+| `/car <text>` | the **Carriage** channel: everyone riding the same Travel Method (page 20) |
 | `/g`, `/guild <text>` | your guild |
 | `/o`, `/officer <text>` | guild officers |
 | `/w`, `/whisper`, `/t`, `/tell <name> <text>` | private message |
@@ -643,21 +824,19 @@ comma are the same command. **Emote names are original.** Page 15 owns what each
 
 | Command | Does |
 |---|---|
-| `/inv`, `/invite <name>` | invite to your party (or raid) |
+| `/inv`, `/invite <name>` | invite to your party (max 5, followers included) |
 | `/kick`, `/uninvite <name>` | remove (leader) |
-| `/leave`, `/leaveparty` | leave your party or raid |
+| `/leave`, `/leaveparty` | leave your party |
 | `/lead`, `/promote <name>` | make them the leader |
-| `/assist <name>` (raid) | make them a raid assistant |
-| `/raidify` | turn a party into a raid (leader) |
 | `/ready` | ready check |
 | `/pull <seconds>` | pull countdown (default 10, max 30) |
 | `/countdown <seconds>` | a plain countdown (max 60) |
 | `/roll [max]` | random 1–100 (or 1–max), shown to the group |
-| `/loot <personal\|group\|leader>` | loot rule (page 15) |
-| `/difficulty <normal\|heroic\|mythic>` | set the dungeon/raid difficulty before entering (leader) |
+| `/difficulty <normal\|challenge>` | set the dungeon difficulty before entering (leader; Challenge at 60) |
+| `/depth <n>` | set the Depth before entering (leader; any Depth you have unlocked on that dungeon, page 12) |
 | `/resetdungeons` | reset your saved dungeons (outside, leader) |
 | `/mark <1-8\|clear>` | target icon on your target |
-| `/wm <1-8\|clear>` | world marker at the reticle |
+| `/wm <1-8\|clear>` | world marker at the aim point (1 Sword · 2 Shield · 3 Anvil · 4 Crown · 5 Leaf · 6 Wave · 7 Key · 8 Eye) |
 | `/followers` | open the Party tab of the Social window on your followers |
 | `/dismiss <follower>` | send a follower away |
 | `/order <attack\|hold\|follow>` | follower order, same as the §5.17 ring (page 15 §21.7) |
@@ -669,9 +848,10 @@ comma are the same command. **Emote names are original.** Page 15 owns what each
 |---|---|
 | `/target`, `/tar <name>` | target by name (nearest match within 60 m) |
 | `/targetenemy` | same as Tab |
-| `/assist [name]` (not in a raid) | target their target |
-| `/focus [name]` | set focus (your target if no name) |
-| `/clearfocus` | clear focus |
+| `/assist [name]` | target their target |
+| `/watch [name]` | set the watch target (your target if no name, §2.7) |
+| `/clearwatch` | clear the watch target |
+| `/targetself`, `/targetparty <2-5>` | as `F1`, `F2`–`F5` |
 | `/cleartarget` | clear target |
 
 ### 6.4 Social and status
@@ -688,10 +868,8 @@ comma are the same command. **Emote names are original.** Page 15 owns what each
 | `/ginvite <name>` · `/gkick <name>` · `/gpromote <name>` · `/gdemote <name>` · `/gquit` · `/gmotd <text>` · `/ginfo` | guild commands (page 15) |
 | `/inspect [name]` | view their gear (in 10 m) |
 | `/trade <name>` (with a name) | ask to trade (in 10 m) — without a name it is the trade channel |
-| `/duel <name>` | challenge to a duel (page 15) |
-| `/yield` | concede a duel (page 15 §16.2) |
-| `/pvp` | turn war mode on or off at a hub (page 15 §16.4) |
-| `/feud <guild>` | declare a guild feud (page 15 §16.4) |
+| `/duel <name>` | challenge to a friendly duel — from level 10, no rewards (page 15; the only player-versus-player fighting in v2, canon W1) |
+| `/yield` | concede a duel (page 15) |
 | `/follow [name]` | auto-follow them (breaks when you move) |
 
 ### 6.5 Information and utility
@@ -703,7 +881,7 @@ comma are the same command. **Emote names are original.** Page 15 owns what each
 | `/keys` | print your current key list (built from the live bindings) |
 | `/where`, `/loc` | print your location line: region, zone, x, z, altitude (reuse: Farhold debug `locationLine`) — handy for bug reports |
 | `/played` | time played on this character, and at this level |
-| `/time` | game time of day and real server time |
+| `/time` | real server time and the next Monday 06:00 reset (there is no in-game clock: always daylight, canon 00 §4) |
 | `/ping` | latency to the server now |
 | `/fps` | show/hide the frame-rate counter |
 | `/stuck` | move you to the last safe ground you stood on (10 min cooldown); if that fails, the nearest shrine |
@@ -717,6 +895,13 @@ comma are the same command. **Emote names are original.** Page 15 owns what each
 | `/combatlog [on\|off]` | write the detailed combat log to a downloadable file (page 15) |
 | `/clear` | clear the chat window |
 | `/reload` | reload the interface only (not the page) |
+| `/recall` | use the Recall Stone (as `Home`) |
+| `/board [route]` | board the waiting Travel Method at this station (as `E` near it; with a name, picks that route) |
+| `/stepoff` | step off the Travel Method here, where allowed (as holding Space, §5.18) |
+| `/cast <spell>` | cast a spell or utility spell by name (utility spells, §5.16) |
+| `/loadout <1\|2>` | switch to Second Loadout 1 or 2 (out of combat, level 30, page 07) |
+| `/professions`, `/prof` | open Professions (as `L`) |
+| `/meter [reset\|report]` | open the damage meter, reset it, or post its top 5 to your party |
 
 ### 6.6 Emotes (original set)
 
@@ -733,7 +918,7 @@ page 17) and prints a line. Targeted versions name your target.
 ### 6.7 Developer commands (dev builds only, `?dev=1`)
 
 Not player-facing, never in release. `/dev tp <region|x z>`, `/dev level <n>`, `/dev give <item id>`,
-`/dev spawn <monster id> [n]`, `/dev boss <id> phase <n>`, `/dev weather <key>`, `/dev time <0-1>`,
+`/dev spawn <monster id> [n]`, `/dev boss <id> phase <n>`, `/dev weather <key>`, `/dev depth <n>`,
 `/dev god`, `/dev unlock all`, `/dev report` — they call the same hooks as the debug menu (page 04 §11).
 
 ---
@@ -747,16 +932,17 @@ Each press of **Esc** does the **first** of these that applies, then stops:
 1. close the key-capture prompt in Keybinds (leaves the key as it was)
 2. close a confirm dialog (answers "No")
 3. close the chat box (keeps the draft)
-4. close an open ring (ping wheel, emote wheel, dialog wheel, form ring, class command ring, follower ring)
-5. close the top-most window (settings → trade → vendor/bank/mail/auction → conversation → character
-   sheet → map → social → any other window, most recent first)
+4. close an open ring (ping wheel, emote wheel, dialog wheel, form ring, class command ring, follower ring,
+   utility ring)
+5. close the top-most window (settings → trade → vendor/bank/mail/Trading Post → station board →
+   conversation → character sheet → map → social → any other window, most recent first)
 6. cancel a cast or channel in progress
-7. clear your hard target
-8. clear your focus? **No** — focus is only cleared on purpose (`Y` with no target, or `/clearfocus`)
+7. clear your hard target (§2.4)
+8. clear your watch target? **No** — it is only cleared on purpose (`Y` with no target, or `/clearwatch`)
 9. open the **Game menu** (Resume, Settings, Keybinds, Help & keys, Report a bug, Log out, Quit)
 
 After Esc closes the last window, the pointer is locked again (reuse: Farhold `regrab()`), unless the
-aim mode is Classic.
+pointer style is Free cursor (§2.2).
 
 ### 7.2 Pointer lock (reuse: `js/player.js`)
 
@@ -766,7 +952,7 @@ aim mode is Classic.
   "Click the world to aim again." (reuse: Farhold hud.js `pointerlockerror`).
 * Mouse movements over 110 px in one event are dropped (reuse: `MAX_DELTA`), which stops the view
   jumping straight up or down on some drivers.
-* Classic mode never takes the pointer.
+* The Free cursor pointer style never takes the pointer.
 
 ---
 
@@ -784,9 +970,9 @@ turned into the same actions as the keyboard, so every rule on this page applies
        │   LS click = sprint      Menu = game menu        Y  class  │
        │                                              X use   B dodge│
        │  D-pad: ↑ quick heal                             A  jump    │
-       │         ↓ mount (hold: light)                               │
+       │         ↓ mount (hold: Recall Stone)                        │
        │         ← → target prev/next          RS  camera            │
-       │                                        RS click = lock on    │
+       │                                   RS click = target under aim│
        └──────────────────────────────────────────────────────────┘
 ```
 
@@ -798,9 +984,9 @@ turned into the same actions as the keyboard, so every rule on this page applies
 | Y (△) | class key (hold: form ring) | spell 4 | emote wheel | — |
 | D-pad ↑ | quick heal | target self | belt 1 | — |
 | D-pad → | next enemy | next party member | belt 2 | — |
-| D-pad ↓ | mount (hold: light) | assist | belt 3 | — |
+| D-pad ↓ | mount (hold: Recall Stone) | assist | belt 3 | — |
 | D-pad ← | previous enemy | previous party member | belt 4 | — |
-| RS click | lock on (hold 0.5 s: shoulder swap) | set focus | Challenge (tank-capable classes) | — |
+| RS click | target the enemy under the aim point (hold 0.5 s: shoulder swap) | set watch target | Provoke (tank-capable classes) | — |
 | LS click | sprint toggle | — | — | — |
 | LB + RB tap / hold | — | — | — | ping / ping wheel |
 | View | map (hold 0.5 s: character sheet) | — | — | — |
@@ -823,8 +1009,8 @@ list all read one thing. Page 16 owns the final file name; the proposal is `data
 ```json
 {
   "version": 1,
-  "contexts": ["world", "combat", "mounted", "flying", "swimming", "dead", "sheet", "map", "chat",
-               "dialog", "bossDialog", "trade", "frames", "ring", "classLayer"],
+  "contexts": ["world", "combat", "mounted", "flying", "swimming", "travel", "dead", "sheet", "map",
+               "chat", "dialog", "bossDialog", "trade", "frames", "ring", "classLayer"],
   "actions": [
     {
       "id": "dodge",
@@ -849,7 +1035,7 @@ list all read one thing. Page 16 owns the final file name; the proposal is `data
       "pad": "Y:ring:1",
       "rebindable": true,
       "unlock": { "level": 6, "classOnly": ["druid", "fighter", "dragon_knight", "paladin", "knight",
-                                           "shaman", "monk", "demon_hunter", "necromancer", "enchanter"] },
+                                           "rogue", "monk", "necromancer", "enchanter"] },
       "origin": "new"
     }
   ]
@@ -882,7 +1068,9 @@ list all read one thing. Page 16 owns the final file name; the proposal is `data
    contexts that can never be live at once (`X` = Sit on land, Dive in water, Descend in the air; `R` =
    Quick Heal alive, Release when dead; `Tab` = target alive, spectate when dead; `1`–`9` = spells in the
    world, replies in a conversation, tabs in the sheet, alternate spells while the `G` class layer is held
-   (§5.16); `Space` = jump on foot, leap / take off / climb on a mount), the second row names the first in a
+   (§5.16); `Space` = jump on foot, leap / take off / climb on a mount, hold-to-step-off on a Travel Method;
+   `E` = interact on foot, get off at the next stop on a Travel Method; `Home` = Recall Stone in the world,
+   recentre in the map; `Shift+Q` = utility ring out of combat, `Q` in combat), the second row names the first in a
    `shadows` field. The test allows exactly those pairs.
 4. **Rebinding into a taken key swaps** (reuse: Farhold `bind()`), and the swap is shown: "F is now
    Dodge; Interact moved to E → G".
@@ -892,9 +1080,9 @@ list all read one thing. Page 16 owns the final file name; the proposal is `data
 ### 10.2 Contexts, from the top
 
 A key goes to the first context that is live and has the key:
-`ring` → `chat` (any text box) → `dialog` → `trade` → `sheet` → `map` → `dead` → `classLayer` (while `G`
-is held, Chronomancer and Tactician only) → `bossDialog` (only `Alt+1`–`4`) → `mounted`/`flying`/`swimming`
-→ `combat` → `world`. Movement keys fall through the `map`, `trade` and `dialog` contexts to `world`
+`ring` → `chat` (any text box) → `dialog` → `trade` → `sheet` → `map` → `dead` → `travel` (riding a Travel
+Method, §5.18) → `classLayer` (while `G` is held, Chronomancer and Tactician only) → `bossDialog` (only
+`Alt+1`–`4`) → `mounted`/`flying`/`swimming` → `combat` → `world`. Movement keys fall through the `map`, `trade` and `dialog` contexts to `world`
 (because nothing pauses), but not through `sheet` or `chat`.
 
 ### 10.3 Chords with Shift
@@ -904,7 +1092,8 @@ Shift is the sprint key, so a `Shift+key` chord is pressed by accident whenever 
 * **Allowed default chords:** `Shift+Tab` (previous enemy — harmless if hit by mistake), `Shift+1..4`
   (form keys — see below), `Shift+Numpad` (world markers — leaders place them while standing),
   `Shift+click` (links, pins, stacks — mouse, not movement), `Shift+J`, `Shift+M` and `Shift+P` (windows — a
-  mistaken press opens a window, nothing worse).
+  mistaken press opens a window, nothing worse), and `Shift+Q` (the utility ring — out of combat only; in
+  combat it falls through to `Q`, so a sprinting player's class key still works).
 * **Form keys:** for a class with forms, pressing 1–4 while Shift is held switches form **instead of
   casting**. Casting already ends a sprint (page 05), so players learn to let go of Shift to cast. If the
   owner dislikes this, the page 04 setting `set.controls.formKeys` offers three layouts: `shiftDigits`
@@ -914,13 +1103,14 @@ Shift is the sprint key, so a `Shift+key` chord is pressed by accident whenever 
 * A player may bind any `Shift+key` chord themselves; the Keybinds screen warns "Shift is your sprint key
   — this will fire when you sprint and press G".
 * **Ctrl chords are never defaults** (§10.4). **Alt chords are never defaults except `Alt+1`–`4`** for
-  boss-dialog replies (canon 00 §10): holding Left Alt already frees the cursor (§2.1), so a player reaching
+  boss-dialog replies (canon 00 §10): holding Left Alt already frees the cursor (§2.2), so a player reaching
   for a reply has the pointer free too, and the spell keys stay on `1`–`6`. On Windows (the owner's
   platform) no browser uses `Alt+digit`; on Linux, Chrome and Firefox switch tabs with it and the page cannot
   stop them, so the `E`-hold reply ring (§5.12) is always offered as well. A player may bind other Ctrl/Alt
   chords themselves, with a warning.
 * **Class keys** from the class files that used `Shift+Q`, `Shift+R`, `Shift+Z`, `Ctrl+R`, `Alt+1..5` or a
   held `Z` are replaced by the `Q` / `G` / `Shift+1`–`4` slots of §5.16 — no class needs a chord of its own.
+  (`Shift+Q` is now the shared utility ring, not a class key.)
 
 ### 10.4 Keys the browser owns
 
@@ -954,12 +1144,12 @@ Esc, Ctrl+W and similar): v2 **does not use it**, so the rules above hold in eve
 ### 10.5 Hold, tap and toggle
 
 * A **tap** is a press shorter than 0.25 s; a **hold** is longer (`set.controls.holdThreshold`,
-  0.15–0.6 s). Keys with both (E, Q, G, `,`, MMB, V, Y on a pad) act on release for a tap and at the
-  threshold for a hold. The Cleric's Mass Resurrection on `Q` needs a **0.6 s** hold, whatever the
-  threshold, so a Raise tap can never become a mass resurrection.
+  0.15–0.6 s). Keys with both (E, Q, G, Y, `,`, MMB, V, Shift+Q) act on release for a tap and at the
+  threshold for a hold. (The first draft's 0.6 s Cleric hold for a group revive is gone with that spell,
+  canon W35.)
 * Every hold that the player keeps down for a long time can be a toggle instead (page 04
   `set.access.holdOrToggle`): sprint, walk, secondary (block/aim), free cursor, gather, first-person orbit,
-  attack (auto-repeat).
+  attack (auto-repeat), cast on the watch target (`Y` hold).
 
 ### 10.6 Keyboard layouts
 
@@ -981,43 +1171,46 @@ borrowed later.)* See Questions.
 
 ## 12. Questions for the owner (also to go in `QUESTIONS.md`)
 
-1. **Aim model** — **Resolved (00 §10): Hybrid by default; Action and Classic are options.** Original question: is **Hybrid** (free-aim reticle + soft lock + Tab hard lock) the right default, with
-   Action and Classic as options? Or should the game be one model only (less to test)? *Recommendation:
-   Hybrid default, keep Classic (it is also the laptop-trackpad mode), consider cutting Action to save
-   test time.*
+1. **Aim model** — **Resolved (00 §12.1 W8): Tab targeting is the one model.** The Hybrid / Action /
+   Classic split is gone; a small **pointer style** option (Mouse-look / Free cursor, §2.2) survives
+   because it is how the camera is steered, not how targets work.
 2. **F5 for party member 5** — take F5 (cancel the reload while playing), or keep Farhold's "never take F5"
    and use F1–F4 + a different key for member 5? *Recommendation: take it; the leave-page prompt is the
    safety net.*
-3. **Form keys on Shift+1–4** — **Resolved (00 §10): `Shift+1`–`4`, max 4 per class.** Original question: acceptable given Shift is sprint (§10.3)? *Recommendation: yes, with the
-   `ringOnly` and `functionKeys` alternatives in settings.*
-4. **Unlock levels this page had to propose**: dodge roll 3, belt 5, mount 12, fast travel 8, mount skills
-   12/20/30. **Resolved (00 §10): page 07's ladder — dodge 5, belt 3 (4 slots at 16), mount 10, waystones 12,
-   Riding I/II/III/IV at 10/20/40/60; no mount skill bar (§5.5).**
+3. **Form keys on Shift+1–4** — **Resolved (00 §10).**
+4. **Unlock levels** — **Resolved (00 §10, §12): page 07's ladder.**
 5. **Voice chat** — v2 proposes **none**: text chat, pings, and a quick-chat wheel spoken by your
    character's formant voice. Real voice chat (WebRTC — the browser's built-in person-to-person audio)
-   needs a relay server, moderation and a report path. If wanted, it would be party/raid only with a
+   needs a relay server, moderation and a report path. If wanted, it would be party-only with a
    **push-to-talk** key (row `pushToTalk` already reserved, unbound — Mouse 5 went to follower orders, §5.17). Yes or no?
-6. **Gliding** — **Resolved (00 §10): winged mounts run and glide before 60, and fly at 60 (§5.7).** No
-   separate Glider unlock. Original question: not in canon. A Glider unlock (level 25, jump from any 10 m drop, glide at 1:4) would suit
-   the Riftmarch's floating stone and Frostmantle's peaks. Add it?
+6. **Gliding** — **Resolved (00 §10).**
 7. **Gamepad** — in v2 or later? It costs a second input path to test for every screen.
    *Recommendation: v2 plays with a pad (§8) but menus are mouse-first; full pad menus later.*
-8. **Settings on `O`** is kept from Farhold. Many online games put a Social window on `O`; Wildmarch puts
-   Social on `P`. Keep?
+8. **Settings on `O`** is kept from Farhold. Keep?
 9. **Phones** — confirm "not a v2 target".
+10. **"Challenge" meant two things** — **Resolved (canon, round 2):** the taunt is **Provoke**; "Challenge"
+    now only means Challenge mode.
+11. **(new) Auto-target sets your target** (`set.gameplay.autotarget_sets_target`, §2.3) — on by default here,
+    because a spell cast at the nearest enemy to your aim point is you choosing it. Off means the frame
+    only ever changes by Tab, click or a target key. *Recommendation: on.*
+12. **(new) Keep the target on the body when it dies** (§2.6) — the default keeps the dead body
+    targeted (you loot it; nothing jumps). The alternative most action games use is "clear it".
+    *Recommendation: keep the body.*
+13. **(new) Recall Stone on `Home`** (§5.1) — mnemonic but far from the left hand; it is a 10 s
+    out-of-combat cast, so reach does not matter. The freed `L` went to Professions. Agree?
+14. **(new) Utility ring on `Shift+Q`** (§5.16) — one place for Portal, Retrace, Guiding Call, Heron's
+    Flight and the revive rituals. Agree, or put utility spells in the Spellbook only?
 
 ---
 
 ## 13. Canon change requests (for page 00)
 
-1. **Resolved (00 §10, "Keys" row).** Add to §4 Canon numbers: **"Default keys — owned by page 02"**, with the short list: spells 1–6,
-   class key Q (and G), dodge F, interact E, mount H, map M, sheet I/C/K/N/J/U, social P, settings O,
-   target Tab, ping middle mouse.
-2. **Resolved (00 §10, "Aim model" row).** §4 should name the **aim model** (Hybrid by default) since it changes how every spell in
-   `classes/*.md` is written (targeted vs skillshot). Class writers need to give every spell a `shape`
-   that works in all three modes.
-3. **Resolved (00 §10, "Feature unlocks" row: dodge 5, mount 10).** The **dodge roll** and **mount** are
-   listed in §1 as earned but had no level in canon.
-4. **Resolved (00 §10: max 4 forms or stances per class).** Canon §5 says forms "may swap in alternate
-   spells"; this page assumed at most 4. The enchanter's 5-slot borrowed bar fits by moving Hold Here to
-   `G` (§5.16).
+1. **Provoke** — done in canon (the taunt's old name was "Challenge"). Page 06 §3.5 and page 07's
+   ladder should use `provoke`.
+2. **Name the watch target in canon §4's Targeting row**: "a hard target in one target frame, a target of
+   target, and one **watch target** (Wildmarch's focus)". Other pages (05, 11, classes) still say "focus".
+3. **Add the four targeting states to 00 §5's template** exactly as §2.3 names them: *Needs target* ·
+   *Ally* (Needs target, friendly) · *Auto-target* · *Ground* · *Self*. The template already lists these
+   words; this asks that every class file uses them verbatim so the §2.8 test can read them.
+4. **Recall Stone key and cooldown** — canon §4 could list "Recall Stone: `Home`, 10 s cast, 30 min
+   cooldown" once page 20 confirms the numbers.

@@ -1,6 +1,6 @@
 # WoW audit — what to remove, reshape or keep
 
-**Status:** waiting on the owner's answers · 2026-09-30
+**Status:** **answered 2026-09-30** — the final ruling for every item is in [page 00 §12](00-OVERVIEW.md#12-round-2-rulings-2026-09-30). This page is kept as the record of what was asked; where it and §12 differ, §12 is the decision.
 
 The first drafts leaned hard on World of Warcraft. Some of that you asked for (telegraphed boss fights, void
 zones, danger zones, dungeons and raids). A lot of it you did not (PvP, war mode, timed keystones, WoW's

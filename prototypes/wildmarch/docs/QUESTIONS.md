@@ -10,6 +10,19 @@ pages named in the row.
 **How to answer:** reply with the question number and your choice (e.g. "A3: no, B2: option b"). Anything you
 skip stays on the recommendation.
 
+> **Round 2 (2026-09-30).** The owner's answers to the WoW audit settled or changed these rows — they are
+> **resolved by [page 00 §12](00-OVERVIEW.md#12-round-2-rulings-2026-09-30)** and kept below only for the record:
+> **A8** (the story finales are 5-player dungeons d15/d16, so yes, solo-able with followers) · **B1** (ladder
+> changed: no raids; Travel Methods, professions, Depth) · **B5** (flying = a Kingsfire story chain, no
+> dungeon/reputation gates) · **B8** (Renown removed) · **C1**, **C12** (druid forms now transform the six spells;
+> forms are Bear/Wolf/Heron) · **C4** (pets: tame/bind/control only) · **C5** (mass resurrection removed) · **C10**
+> (the swashbuckler is now a hybrid tank) · **C13**, **C16**, **E5**, **F12**, **F13** (no raids) · **C17** (Flux) ·
+> **D1** (Tab targeting) · **D7** (Normal/Challenge) · **E1**, **F15** (personal loot, and items are not bound, so
+> no trade window is needed) · **E2** (four socket kinds) · **E3** (magic find: page 08) · **E4** (gathering is in:
+> Harvesting) · **E7** (Mythic+ replaced by Depth) · **F2**, **F3** (the Fire King; the ending is in d16) · **F5**
+> (no dailies) · **F18** (duels only) · **G1–G3** (fixed in Farhold round 28). New questions from round 2 are in
+> section H at the end.
+
 ---
 
 ## A. The big ones — these shape the whole game
@@ -138,3 +151,96 @@ These are **bugs in the existing Farhold game**, found by the items writer. Noth
 
 Want these fixed in Farhold now? **Recommendation:** yes, as a small separate round — they are shared-data or
 Farhold-only fixes and do not touch Wildmarch.
+
+---
+
+## H. New questions from round 2 (2026-09-30)
+
+Raised by the agents that applied round 2. As before, each has a recommendation and the docs are written as if
+it were accepted. Answer only the ones you disagree with.
+
+### The ones that matter most
+
+| # | Question | Recommendation | Pages |
+|---|---|---|---|
+| H1 | **Hybrid switch.** Classes switch to their hybrid role with a **Role focus** switch in the spellbook (out of combat, saved per Loadout). Some also tie it to what they already have — the fighter needs a shield to queue as tank, the paladin's oath sets the role. OK? And should it unlock at level 6 (with the Dungeon Finder)? | yes, at 6 | 00 §6, 06, classes |
+| H2 | **Challenge-mode Dungeon Finder** prefers primary tanks/healers when it can, but never refuses a hybrid. Or treat hybrids exactly the same? | prefer primaries, never refuse | 06, 15 |
+| H3 | **Depth numbering.** Low dungeons climb 3 levels per depth before reaching 60, so d01 goes to Depth 48 while d14–d16 top out at 30. Or number depths from level 60 only (and call the climbing part something else)? | keep one number | 12 |
+| H4 | **Followers in Depth** only below level 60 (and to Deep 5), none in Challenge. | yes | 12, 15 |
+| H5 | **Harvest nodes are personal**: everyone sees the same node and each player harvests their own copy (no stealing, no camping). | yes | 19 |
+| H6 | **Waystones don't teleport.** They are places you discover, Recall Stone binds and teleport targets. Instant travel is a priced scroll or a class spell. A free waystone menu would make the Travel Methods pointless. | yes | 07, 20 |
+| H7 | **Starting towns**: Brightwater and a second one, Oakhollow, both in Hearthvale (you mentioned choosing a starting location). | yes | 01 |
+| H8 | **Souls**: 3 active souls per character at most; removing a jewel or soul is safe (costs gold), removing a gadget destroys it. | yes | 08, 19 |
+
+### Classes
+
+| # | Question | Recommendation | Pages |
+|---|---|---|---|
+| H9 | Druid forms arrive Heron 6, Bear 20, Wolf 40 — so no druid tanking before 20. Move Bear earlier? | keep | druid |
+| H10 | Pyromancer has **no mana at all** (Heat is its Momentum) and is weak for the first 6–8 s of a pull by design. | keep | pyromancer |
+| H11 | Shaman's Great Storm revives one fallen ally (~every 90 s) — its battle revive. | keep | shaman |
+| H12 | The ranger's `soul_shared_breath` lets the tamed beast revive **in** combat once per 120 s (bends the out-of-combat rule). | keep, it's a rare soul | ranger |
+| H13 | The warlock soul that lets two bound demons out at once at 70% power each. | keep | warlock |
+| H14 | Bard Tempo refills faster on the beat (±0.15 s window, a beat-cue setting, a soul that widens it). OK online? | keep | bard |
+| H15 | Tactician: crossbow **or** thrown spear, or crossbow only? | both | tactician |
+| H16 | Chronomancer Retrace at 12 (with the other travel spells), range 30 m. | keep | chronomancer, 20 |
+| H17 | Cleric: **Keeping Vigil** (a warded ally survives a killing hit once per 60 s) replaces mass resurrection at 40. | keep | cleric |
+| H18 | Paladin's full-Sanctity revive has no cooldown beyond the ~50 s refill. | add a 3 min cooldown | paladin |
+| H19 | Tamed-pet stable: 4 spare pets (the ranger file says 3/5/7 by calling). | follow the ranger file (3/5/7) | 06, ranger |
+| H20 | Enemy view-cone overlay: on for rogues by default, an option for everyone. | yes | 04, rogue |
+| H21 | Tinker's combat deployables are called **Devices** (Engineering makes **Gadgets**). | yes | tinker, 19 |
+| H22 | Enchanter's illusion tank (Many Faces) is strong against one big hitter, weak against packs. | keep that shape | enchanter |
+
+### Items, loot and professions
+
+| # | Question | Recommendation | Pages |
+|---|---|---|---|
+| H23 | Keep durability (a small gold sink)? | yes | 08 |
+| H24 | Frozen monsters map to the **Ancient** special rarity ("ice keeps a thing old"). | yes | 10 |
+| H25 | Champion packs: each member ×2.0 health (a single Farhold champion was ×2.6). | yes | 10 |
+| H26 | Gilded "runner" monsters that flee and drop gold, open world only. | yes | 10 |
+| H27 | Cooking as an eighth profession? | no | 19 |
+| H28 | Prismatic gems at the top of Jewelcrafting? | later | 19 |
+| H29 | A tadpole caught fishing that grows into a frog mount? | yes, a fun collection | 19, 08 |
+| H30 | Sworn faction quartermasters sell gear made at your level — does that compete with dungeon gear? | keep, one tier below dungeon best | 07, 08 |
+| H31 | Content 3+ levels below you pays half reputation standing. | yes | 07 |
+| H32 | Tag bonuses add into one uncapped pool. | yes | 05 |
+
+### Travel, world and online
+
+| # | Question | Recommendation | Pages |
+|---|---|---|---|
+| H33 | "Longshank" for the giant strider, "the Deepway" for the dwarven rail line? | yes | 20 |
+| H34 | Step off a land Travel Method between stations, or only at stations? | anywhere (hold Space), you lose the protection | 20 |
+| H35 | Do routes cross region borders? | yes | 20 |
+| H36 | Riding past a dungeon on a Travel Method does **not** discover it (you must walk up or teleport there). | yes | 20, 12 |
+| H37 | Wagons open at level 12, not 5. | 12 | 07, 20 |
+| H38 | First Pale Sea crossing free? | yes, once | 20 |
+| H39 | The Finder refuses a premade party unless **every** member has discovered the dungeon. | yes | 14, 15 |
+| H40 | Dynamic events scale only up to 5 players. | yes | 14 |
+| H41 | Keep three new late faction chapters (so every faction has a town at 52+), and the friendly orcs as a Crown Assembly chapter? | yes | 01 |
+| H42 | World bosses: the loose **Muster** channel is enough (no temporary open group with frames). | yes | 13, 15 |
+| H43 | World bosses: two "Ascendant" bosses a week raised to 60; seasonal bosses one chest per event; shared legendary pool (no per-boss legendary). | yes | 13 |
+| H44 | Group duels (up to 5 v 5)? Hardcore realms? | no; later | 15 |
+
+### Interface and targeting
+
+| # | Question | Recommendation | Pages |
+|---|---|---|---|
+| H45 | An Auto-target spell sets your target to what it picked. | yes | 02, 04 |
+| H46 | A dead enemy stays targeted until you change it. | yes | 02 |
+| H47 | Recall Stone on `Home`; professions on `L`; utility spells on a `Shift+Q` ring. | yes | 02 |
+| H48 | Heals with no friendly target refuse ("No friendly target"); self-cast fallback is **off** by default — or on for levels 1–9 only? | off, with a hint card at level 1 | 02, 04 |
+| H49 | Item card compare on `Shift` (short card) rather than always shown. | Shift | 03, 04 |
+| H50 | Item portrait on Low graphics: a still picture. | still picture | 17 |
+
+### Dungeons
+
+| # | Question | Recommendation | Pages |
+|---|---|---|---|
+| H51 | Allow one 4–5 pip "everyone in" soak per boss fight (most soaks are 1–3)? | yes, one per fight | 11, 12 |
+| H52 | d16: Saelith can die if you pick "Because you can't stop us." | keep | 12 |
+| H53 | `set_barrowwarden` names two different sets (page 09 §3.33 #1). Rename the page-12 one? | yes, rename page 12's | 09, 12 |
+| H54 | `set_reliquary_ash`'s 6-piece bonus lets you survive a one-shot, against page 09's rule that sets never bypass a mechanic. | swap it for a large barrier | 09, 12 |
+| H55 | Page 12 replaced 8 generic dungeon sets with its own. Retire the 8 old ones? | retire them (listed on page 09 §3.32) | 09 |
+| H56 | Page 09's rule "a boss lists at most one generic legendary" is broken by many "any Challenge boss" sources. Loosen it to "at most one per boss, not counting world-pool drops"? | loosen | 09 |

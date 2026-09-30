@@ -17,8 +17,28 @@
 //
 // Pure: no DOM, no Three.js, so the node tests drive the whole registry.
 
+import { AFFIX_CAP } from './affixes.js';   // R28 — the caps the three fixed rows are held under
+
 /** Anything that is not `physical` counts as magic for the resist/reduction affixes. */
 export const isMagic = element => !!element && element !== 'physical';
+
+
+/**
+ * R28 — the three affix rows round 28 fixed (see RPG.md "Round 28 — affix fixes").
+ *
+ * An item saved before round 28 still carries the OLD number, so each handler restates it on the
+ * way in: a spell-power value over 1 was a percentage in points (5 → 0.05), and a cheat-death value
+ * of 1 was the old "flag" (→ today's share). Everything is then held under its cap.
+ */
+export const CHEAT_DEATH_SHARE = 0.2;
+/** Seconds between two cheat-death saves. The card prints this constant. */
+export const CHEAT_DEATH_COOLDOWN = 90;
+/** How long `of Laceration`'s bleed lasts; the card prints it. */
+export const BLEED_ON_CRIT_SECONDS = 6;
+const capTo = (stat, v) => Math.min(AFFIX_CAP[stat] ?? Infinity, Math.max(0, v || 0));
+export const skillSpellShare = v => capTo('cond_afterSkillSpellPow', v > 1 ? v / 100 : v);
+export const cheatDeathShare = v => capTo('cond_cheatDeath', v >= 1 ? CHEAT_DEATH_SHARE : v);
+export const bleedShare = v => capTo('cond_bleedOnCrit', v);
 
 const pct = v => `${Math.round(v * 100)}%`;
 /**
@@ -132,9 +152,10 @@ def('affix:castElement', (v, a) => (a?.element
   ? `Every hit deals ${a.element} damage instead of physical${markClause(a.element)}`
   : "Every hit deals this weapon's own element as damage instead of physical, applying that element's status"), {});
 
-def('affix:cond_afterSkillSpellPow', v => `+${n1(v)} spell power for 6s after you use a skill`, {
-  onCast: (v, c) => { c.rt.skillPower = 6; c.rt.skillPowerValue = v; },
-  derive: (v, d, unit, rt) => { if (rt?.skillPower > 0) d.spellPower += v; },
+// R28 — a SHARE, like every other writer of `spellPower` since R18 (it added 3-8 = +300-800%).
+def('affix:cond_afterSkillSpellPow', v => `+${pct(skillSpellShare(v))} spell power for 6s after you use a skill`, {
+  onCast: (v, c) => { c.rt.skillPower = 6; },
+  derive: (v, d, unit, rt) => { if (rt?.skillPower > 0) d.spellPower = (d.spellPower || 0) + skillSpellShare(v); },
 });
 /**
  * R18 — THIS PAID TWICE, ONCE AS FLAT DAMAGE AND ONCE AS A MULTIPLIER.
@@ -149,20 +170,27 @@ def('affix:cond_afterSkillSpellPow', v => `+${n1(v)} spell power for 6s after yo
 def('affix:cond_ambushDmgFlat', v => `+${n1(v)} damage to anything that has not noticed you`, {
   flatOut: (v, c) => (c.target && c.target.state !== 'chase' ? v : 0),
 });
-// The hook sets `perSecond: v` over 6 seconds, so the TOTAL the player gets is `v * 6` — which is
-// the number the standard asks a damage-over-time to print.
-def('affix:cond_bleedOnCrit', v => `Critical hits apply a bleed for ${n1(v * 6)} damage over 6s`, {
-  onCrit: (v, c) => c.applyStatus?.(c.target, 'bleed', { perSecond: v, seconds: 6, name: 'Bleeding', element: 'physical' }),
+// R28 — a SHARE OF THE CRIT, not a flat 0.3-0.6 a second (under four damage in total whatever the
+// hit, so it was inert past level 5). The bleed's total is `v` x the damage the crit did, spread
+// over BLEED_ON_CRIT_SECONDS; the card prints that share and those seconds.
+def('affix:cond_bleedOnCrit', v => `Critical hits make the target bleed for ${pct(bleedShare(v))} of the hit's damage over ${BLEED_ON_CRIT_SECONDS}s`, {
+  onCrit: (v, c) => {
+    const total = (c.amount || 0) * bleedShare(v);
+    if (!(total > 0)) return;
+    c.applyStatus?.(c.target, 'bleed', { perSecond: total / BLEED_ON_CRIT_SECONDS, seconds: BLEED_ON_CRIT_SECONDS, name: 'Bleeding', element: 'physical' });
+  },
 });
 def('affix:cond_burnExtend', v => `Burning damage you apply lasts ${n1(v)}s longer`, {
   statusLonger: (v, c) => (c.type === 'burn' ? v : 0),
 });
-// The cooldown is the `c.rt.cheatDeath = 60` two lines below — 60 seconds, so the card says 60s.
-def('affix:cond_cheatDeath', v => `Every 60s, one killing blow leaves you at ${pct(v)} of your maximum health instead of killing you.`, {
+// R28 — the value is the share of your health a save leaves you on. It was tuned as a FLAG (1), so
+// every save was a full heal. The cooldown and the share are both constants the card prints; the
+// cooldown is counted down by `update()` below (`cheatDeath` is in its timer list).
+def('affix:cond_cheatDeath', v => `Every ${CHEAT_DEATH_COOLDOWN}s, one killing blow leaves you at ${pct(cheatDeathShare(v))} of your maximum health instead of killing you.`, {
   preLethal: (v, c) => {
     if ((c.rt.cheatDeath || 0) > 0) return false;
-    c.rt.cheatDeath = 60;
-    c.survive = Math.max(1, Math.round((c.self.maxHp || 1) * v));
+    c.rt.cheatDeath = CHEAT_DEATH_COOLDOWN;
+    c.survive = Math.max(1, Math.round((c.self.maxHp || 1) * cheatDeathShare(v)));
     return true;
   },
 });
@@ -1113,7 +1141,9 @@ export class Effects {
   update(unit, dt, { fighting = false } = {}) {
     const rt = this.rt(unit);
     rt.inCombat = fighting ? rt.inCombat + dt : 0;
-    if (!fighting) { rt.streak = 0; rt.streakOn = null; rt.hitOnce = new Set(); rt.trance = 0; rt.tranceOn = null; }
+    // R28 — `cheatSpent` is `legendary:cheat_death_once`'s "once a fight"; nothing ever cleared it,
+    // so it was once a SESSION. Out of the fight is when it comes back.
+    if (!fighting) { rt.streak = 0; rt.streakOn = null; rt.hitOnce = new Set(); rt.trance = 0; rt.tranceOn = null; rt.cheatSpent = false; }
     for (const k of ['cheatDeath', 'skillPower', 'killRush', 'openingRush', ...U23_TIMERS]) {
       if (rt[k] > 0) rt[k] = Math.max(0, rt[k] - dt);
     }

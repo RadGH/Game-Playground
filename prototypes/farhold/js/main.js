@@ -138,6 +138,7 @@ import { loadClassOutfits } from '../../../avatar-3d/js/class-outfits.js';
 import { installWarbands, createWarbandMap, holderLine } from './warbands.js';
 import { installUniques, resolveAttack, afterKill as uniquesAfterKill, afterDamaged as uniquesAfterDamaged, tickAuras } from './uniques.js';
 import { EFFECTS as FX_TABLE } from './effects.js';
+import { chooseTarget } from './targetpick.js';   // R28 — which enemy the target bar shows
 // round 4: the RPG expansion
 import { buildZones } from './zones.js';
 import { createChests } from './chests.js';
@@ -1327,7 +1328,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     // say what is under the reticle, or the target bar goes blind the moment you press V.
     if (control.firstPerson) {
       const hit = field.hitScan(eye.x, eye.y, eye.z, lx, ly, lz, { range: AIM_FAR, width: 1.2 });
-      return { ...eye, dx: lx, dy: ly, dz: lz, focus: null, dist: hit?.distance ?? AIM_FAR, target: hit?.enemy || null };
+      const look = field.lookScan(eye.x, eye.y, eye.z, lx, ly, lz, { range: AIM_FAR });
+      return { ...eye, dx: lx, dy: ly, dz: lz, focus: null, dist: hit?.distance ?? AIM_FAR, target: hit?.enemy || null, look };
     }
 
     const cam = camera.position;
@@ -1337,6 +1339,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       if (cam.y + ly * step <= terrain.heightAt(gx, gz)) { t = step; break; }
     }
     // a body under the reticle wins over the hill behind it
+    const groundT = t;
     const under = field.hitScan(cam.x, cam.y, cam.z, lx, ly, lz, { range: Math.min(t, AIM_FAR), width: 1.2 });
     if (under) t = under.distance;
     t = Math.max(AIM_MIN, t);
@@ -1344,7 +1347,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     const px = cam.x + lx * t, py = cam.y + ly * t, pz = cam.z + lz * t;
     const dx = px - eye.x, dy = py - eye.y, dz = pz - eye.z;
     const len = Math.hypot(dx, dy, dz) || 1;
-    return { ...eye, dx: dx / len, dy: dy / len, dz: dz / len, focus: { x: px, y: py, z: pz }, dist: t, target: under?.enemy || null };
+    // R28 — `target` is what a SHOT would hit first; `look` is what the crosshair is ON, for the
+    // target bar (js/targetpick.js). The ground stop plus 3 m, because a body stands on that ground.
+    const look = field.lookScan(cam.x, cam.y, cam.z, lx, ly, lz, { range: Math.min(groundT + 3, AIM_FAR) });
+    return { ...eye, dx: dx / len, dy: dy / len, dz: dz / len, focus: { x: px, y: py, z: pz }, dist: t, target: under?.enemy || null, look };
   }
 
   /** The ground point the player is looking at, for a skill that lands where you aim. */
@@ -7826,7 +7832,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   const saveId = save?.id || saves.newId();
   let sinceSave = 0;
   /** R16: the body under the crosshair, and how long it stays on the target bar after it leaves. */
-  let lookTarget = null, lookTargetFor = 0;
+  const lookPick = { unit: null, for: 0 };   // R28 — js/targetpick.js chooseTarget's memory
   function currentSnapshot() {
     return snapshot({
       id: saveId, name: player.name, seed, classId, player, control,
@@ -9686,15 +9692,18 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      * only once that has expired does the old proximity guess get a turn, which is the right
      * answer for "something is chewing on me and I am not looking at it".
      */
-    const looked = aim().target;
-    if (looked && looked.dying == null) { lookTarget = looked; lookTargetFor = 1.4; }
-    else if (lookTargetFor > 0) {
-      lookTargetFor -= dt;
-      if (lookTargetFor <= 0 || !lookTarget || lookTarget.dying != null || lookTarget.removed) {
-        lookTarget = null; lookTargetFor = 0;
-      }
-    }
-    const targetUnit = lookTarget || field.target(control);
+    /*
+     * R28 — "Farhold often shows the wrong enemy's health bar." Two faults, both in js/targetpick.js's
+     * header: the bar read `aim().target`, which is what a SHOT hits first (a 1.7 m-wide line, so a
+     * wolf close to the camera and well off the crosshair beat the body the crosshair was on), and
+     * once the 1.4 s stick ran out it went straight to the facing guess, skipping the enemy you were
+     * hitting. Now: what the crosshair is on > what it was just on > what you last hit > the guess.
+     */
+    const targetUnit = chooseTarget(lookPick, {
+      looked: aim().look, dt,
+      struck: () => field.lastStruck(control),
+      guess: () => field.target(control),
+    });
     const target = targetUnit ? {
       ...targetUnit,
       distance: Math.hypot(targetUnit.x - control.x, targetUnit.z - control.z),

@@ -89,7 +89,19 @@ export const ENGINE_UNIT = {
   cond_ambushDmgFlat: 'flat', cond_combatStartBarrier: 'flat', cond_hpOnKill: 'flat',
   cond_partyHpOnKill: 'flat', cond_thornsFlat: 'flat', cond_manaOnAttack: 'flat',
   cond_manaOnCrit: 'flat', cond_lowManaRegenBonus: 'flat', cond_skillMpCostReduce: 'flat',
-  cond_burnExtend: 'flat', cond_bleedOnCrit: 'flat', cond_afterSkillSpellPow: 'flat',
+  cond_burnExtend: 'flat',
+  /**
+   * R28 — TWO MORE SHARES THAT WERE FILED AS POINTS.
+   *
+   * `cond_afterSkillSpellPow` adds to `spellPower`, which R18 made a share (0.1 = +10%). Filed
+   * `flat` and tuned 3-8, a roll of 5 added 5.0 — +500% spell power for six seconds after every
+   * skill. It is the R18 bug in the one writer R18 did not move. (items.json's own range, 0.05-0.15,
+   * was a share all along; only Farhold's retune had turned it into points.)
+   *
+   * `cond_bleedOnCrit` was a flat 0.3-0.6 damage a second — under four damage in total, whatever
+   * the hit, so it stopped mattering around level 5. It is a share of the crit that caused it now.
+   */
+  cond_bleedOnCrit: 'frac', cond_afterSkillSpellPow: 'frac',
   // conditionals, read as a percentage point (it is added straight to a percent stat)
   cond_firstHitCritBonus: 'pct',
   cond_levelReqReduce: 'flat',
@@ -179,6 +191,9 @@ export const AFFIX_CAP = {
   cond_physDmgReducePct: 0.5, cond_magicDmgReducePct: 0.5, cond_manaShieldOnHit: 0.5,
   cond_goldOnEliteKill: 3, cond_killInitBonus: 0.6, cond_speedOnFirstHit: 0.5,
   cond_poisonStackPower: 1.5, cond_levelReqReduce: 12,
+  // R28 — see ENGINE_UNIT. A bleed worth the whole crit again is the most it should ever be; a
+  // save at a third of your health is already generous; +30% spell power for 6 s is a big proc.
+  cond_bleedOnCrit: 1.0, cond_cheatDeath: 0.35, cond_afterSkillSpellPow: 0.3,
   // R18 — spellPower had no cap at all while it was (wrongly) flat. As a share, +150% from gear is
   // the ceiling; the perk arm stacks on top of this.
   spellPower: 1.5,
@@ -277,8 +292,10 @@ export const AFFIX_TUNING = {
   low_mana_regen: { min: 0.5, max: 1.5, ilvl: 6 },
   skill_cost_reduce: { min: 1, max: 4, ilvl: 6 },
   burn_extend: { min: 1, max: 2.5, ilvl: 8 },
-  bleed_on_crit: { min: 0.3, max: 0.6, ilvl: 8 },
-  after_skill_sp: { min: 3, max: 8, ilvl: 8 },
+  // R28 — both SHARES now (see ENGINE_UNIT): 30-60% of the crit as a bleed over 6 s, and +5-12%
+  // spell power for 6 s after a skill. They were 0.3-0.6 damage a second and +300-800%.
+  bleed_on_crit: { min: 0.3, max: 0.6, ilvl: 8, growth: 1.2 },
+  after_skill_sp: { min: 0.05, max: 0.12, ilvl: 8 },
 
   // ---- new in round 6: the requirement-lowering affix
   //
@@ -302,7 +319,9 @@ export const AFFIX_TUNING = {
   // ---- flags: the value is ignored, but they are the rarest thing in the pool
   set_piece_bonus: { min: 1, max: 1, ilvl: 10, growth: 1 },
   set_threshold_low: { min: 1, max: 1, ilvl: 10, growth: 1 },
-  cheat_death: { min: 1, max: 1, ilvl: 12, growth: 1 },
+  // R28 — NOT a flag. The handler reads it as the share of your health a save leaves you on, and
+  // at 1 that was a full heal every minute. 20%, the same at every tier.
+  cheat_death: { min: 0.2, max: 0.2, ilvl: 12, growth: 1 },
 };
 
 /**

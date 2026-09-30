@@ -1,11 +1,22 @@
 # WILDMARCH — Design Bible, page 05: Combat
 
-**Status:** v0.1 draft — 2026-09-29. **Owns:** every combat formula, the status list, crowd control and
-diminishing returns, threat, healing and absorb rules, death and revive, durability, regeneration,
-group and level scaling of enemies, PvP combat rules, night danger.
-**Reads from:** [page 00](00-OVERVIEW.md) (canon), [page 06](06-CLASSES.md) (resources, spell rules),
-[page 07](07-PROGRESSION.md) (attributes, levels), [page 08](08-ITEMS.md) (item bases, affixes),
-[page 11](11-BOSS-MECHANICS.md) (telegraphs, boss rules), [page 15](15-SOCIAL-ONLINE.md) (PvP queues, flagging).
+**Status:** v0.2 draft — 2026-09-30 (round 2 applied). **Owns:** every combat formula, **the tag list and
+the tag rule** ([§22](#22-tags)), Tab targeting and the spell targeting kinds as combat rules
+([§2](#2-aiming-and-targeting)), the numbers of the three resources ([§18.3](#183-resources-mana-momentum-tempo)),
+the status list, crowd control and diminishing returns, threat, healing and absorb rules, death and revive,
+durability, regeneration, group and level scaling of enemies, friendly duels.
+**Reads from:** [page 00](00-OVERVIEW.md) (canon), [page 02](02-CONTROLS.md) (keys, targeting keys),
+[page 06](06-CLASSES.md) (spell rules, hybrid roles), [page 07](07-PROGRESSION.md) (attributes, levels),
+[page 08](08-ITEMS.md) (item bases, affixes, quivers), [page 11](11-BOSS-MECHANICS.md) (telegraphs, boss rules),
+[page 12](12-DUNGEONS.md) (Challenge mode and Depth), [page 15](15-SOCIAL-ONLINE.md) (duel invites).
+
+**Round 2 in one paragraph.** Wildmarch uses **Tab targeting**: one hard target that never changes by itself,
+and every spell is *Needs target*, *Auto-target*, *Ground* or *Self*. Every skill, basic attack, item and affix
+carries **tags**, and a bonus applies only to a skill that has **every** tag the bonus names. The three
+resources are **Mana, Momentum and Tempo**. There is **no limit on in-combat revives**, **no night** (always
+daylight), and the only player-versus-player fighting is the **friendly duel**. Everything is tuned for groups
+of at most **5**; only world bosses scale past that. Dungeon difficulties are **Normal** and **Challenge**, with
+**Depth** as a separate dial (page 12).
 
 Everything below is written the same way: **how it works in Farhold today** (with the file it lives in),
 then **what Wildmarch changes**, marked `(reuse: path)` or `(new)`. Farhold paths are relative to
@@ -35,8 +46,8 @@ then **what Wildmarch changes**, marked `(reuse: path)` or `(new)`. Farhold path
 18. [Combat state and regeneration](#18-combat-state-and-regeneration)
 19. [How enemies scale to level](#19-how-enemies-scale-to-level)
 20. [How damage scales in groups](#20-how-damage-scales-in-groups)
-21. [PvP combat rules](#21-pvp-combat-rules)
-22. [Night danger](#22-night-danger)
+21. [Duels](#21-duels)
+22. [Tags](#22-tags)
 23. [Online rules that touch combat](#23-online-rules-that-touch-combat)
 24. [What changed from Farhold, in one table](#24-what-changed-from-farhold-in-one-table)
 25. [Data shapes](#25-data-shapes)
@@ -46,7 +57,8 @@ then **what Wildmarch changes**, marked `(reuse: path)` or `(new)`. Farhold path
 
 ## 1. Combat at a glance
 
-Wildmarch is a **third-person action RPG**: you aim with the camera, attacks land where they are aimed,
+Wildmarch is a **third-person action RPG with Tab targeting**: you pick one enemy (or ally) as your target
+and it stays your target until **you** change it; basic attacks and area spells land where you face and aim,
 and you avoid damage by moving, rolling, blocking and parrying rather than by a hidden avoidance roll.
 Numbers still matter — armour, resistances, crits and statuses are all real — but a player who reads the
 telegraph and rolls out takes **zero** damage from it however bad their gear is.
@@ -70,46 +82,81 @@ The loop of one fight:
 | Time to kill a normal even-level enemy, solo, level-appropriate gear | **4.5 s** (band 3.5–6 s) at every level 1–60 | A fight should be long enough to dodge one attack, short enough to chain packs |
 | Hits a normal enemy needs to kill an even-level cloth wearer who never dodges | **~21 hits (~33 s)** at every level | You can make mistakes against one normal enemy; three at once is a real fight |
 | Same, heavy-armour tank | **~48 hits (~77 s)** | A tank can hold a pack while the group kills it |
-| Champion (1 modifier) | 2.6× health, 1.35× damage (Farhold ranks) | "Kill the glowing one" is a mini-fight |
-| Rare (2 modifiers + name) | 4.5× health, 1.6× damage | A solo player needs cooldowns or a follower |
+| Champion pack member (blue name, one shared affix) | 2.6× health, 1.35× damage each (Farhold ranks) | A blue pack is a real fight for one player |
+| Rare (yellow name, 2–3 affixes, with minions) | 4.5× health, 1.6× damage | A solo player needs cooldowns or a follower |
+| Greater rarity (Giant, Flaming, Electrified, Frozen… on top of any rank) | page 10 owns the numbers; default ×1.8 health, ×1.2 damage per greater rarity | A spike you plan for, usually one monster |
 
 ---
 
 ## 2. Aiming and targeting
 
-### 2.1 Camera and crosshair `(reuse: js/player.js, js/main.js aim())`
+Canon 00 §12.1 W8: **Tab targeting, closer to the classic MMO model.** The owner's complaint about Farhold is
+the fix: Farhold's target frame often showed **the wrong enemy's** health bar, because it followed whatever was
+nearest or was hit last. In Wildmarch the frame shows **one hard target** and only the player changes it.
+Page 02 owns the keys; this section owns the rules.
+
+### 2.1 Camera and aim point `(reuse: js/player.js, js/main.js aim())`
 
 - **Over-the-shoulder camera**, shoulder offset 0.85 m, lift 0.25 m (Farhold `balance.player.shoulderOffset`,
   `cameraLift`). Shoulder side swaps with a key ([page 02](02-CONTROLS.md)). Setting: `set.controls.shoulder` (Left / Right).
-- A **crosshair** sits at screen centre. What it points at is decided by a ray from the camera
-  (Farhold R16 made `aim()` a 3D hitscan from the camera; Wildmarch keeps it).
-- **The character turns to face the crosshair** when an attack starts, never while idle, so you can run
-  one way and look another.
+- A small **aim point** (a dot) sits at screen centre. What it points at is decided by a ray from the camera
+  (Farhold R16 made `aim()` a 3D hitscan from the camera; Wildmarch keeps it). The aim point is used for
+  basic attacks, Auto-target spells with no target ([§2.4](#24-the-spell-targeting-kinds)) and Ground spells.
+- **The character turns to face its target** (or the aim point, with no target) when an attack or spell starts,
+  never while idle, so you can run one way and look another.
 
-### 2.2 Soft lock (aim assist) `(new)`
+### 2.2 The hard target `(new)`
 
-Melee is forgiving; ranged is not.
-
-| Attack | Soft lock rule |
+| Rule | Value |
 |---|---|
-| Melee basic attack or melee spell | If an enemy is within **1.5 × the strike's reach** and within **25°** of the camera's forward line, the character snaps its facing onto that enemy for the swing (turn rate 720°/s). The nearest wins; an enemy you have **hard-locked** always wins. |
-| Ranged basic attack (bow, crossbow, javelin, wand) | The projectile flies at whatever the crosshair ray hits. If the ray passes within **0.6 m** of an enemy's body inside the weapon's range, it counts as aimed at that enemy (projectile curves up to 3° to meet it). |
-| Target-shape spell (`shape: target`) | Needs a target: the hard-locked enemy, else the enemy under the crosshair (0.6 m tolerance), else the refusal "No target." |
-| Ally-shape spell | Hard-locked ally, else ally under the crosshair, else **yourself** (so a healer never casts into nothing). |
-| Ground-shape spell | A ground reticle follows the crosshair out to the spell's range; the spell lands where the reticle is. Quick-cast option places it instantly (`set.combat.quickcastGround`). |
+| How many | **one** at a time, enemy **or** friendly (yourself included) |
+| Shown as | a ring on the ground under it (red enemy, green friendly), a bracket over its nameplate, and the **target frame** (health, cast bar, statuses, your threat %, its target — page 03) |
+| **Changes only when you change it** | `Tab` / `Shift+Tab` (next / previous enemy), clicking a body or a nameplate, `F1` (yourself), `F2`–`F5` (party members, or clicking their party frames), `/target <name>`, the "assist" key (take your target's target), `Esc` (clear). **Nothing else changes it**: not an enemy getting closer, not an enemy hitting you, not your pet's target, not a new pull |
+| When it dies | the frame shows the corpse for 1.5 s, then clears. It does **not** jump to another enemy (setting `set.combat.retargetOnDeath`: Off (default) / Next enemy in front — for players who want it) |
+| When it goes away | beyond **60 m** the frame clears; out of line of sight it stays (greyed) — you keep your target behind a pillar |
+| Tab order | the first press takes the enemy **nearest the aim point**; each further press cycles outward by distance within **40 m** and a **90° cone** in front (page 02 / page 04 own the range and cone); only enemies in line of sight; bodies already in combat with your group first. `Shift+Tab` goes back |
+| Friendly targets | clicking an ally or its frame, `F1`–`F5`. A friendly hard target does not stop your basic attacks — they go at the enemy you face |
+| Mouse-over | with `set.combat.mouseoverCast` On, a spell cast while the cursor is over a unit frame or a body goes to that unit **without** changing your hard target (healers use it on party frames). Default Off |
+| Camera | with `set.combat.lockCamera` on, the camera keeps the hard target on screen (accessibility option; off by default) |
 
-Setting `set.combat.aimAssist`: Off / Melee only (default) / Melee and ranged.
+### 2.3 Basic attacks and the target
 
-### 2.3 Hard lock (Tab target) `(new)`
+Basic attacks never need a target (a wand's or staff's included, although those also carry the Spell tag, §22.4):
 
-- **Tab** cycles hostile targets in front of you, nearest first, within 40 m (Farhold `field.target(maxDistance = 40)`).
-  **Shift+Tab** cycles backwards. **F1–F5** select party members ([page 02](02-CONTROLS.md) owns keys).
-- A hard-locked target shows a **red target ring** on the ground and the **target frame** (health, cast
-  bar, statuses, threat %).
-- With `set.combat.lockCamera` on, the camera also turns to keep the locked target on screen (accessibility option; off by default).
-- A lock breaks when the target dies, goes out of 50 m, or is out of line of sight for 4 s.
+| Attack | Rule |
+|---|---|
+| Melee basic attack | swings along your facing. If your **hard target** is inside **1.5 × the strike's reach** and within **60°** of your facing, the character turns onto it for the swing (720°/s). With no hard target, the aim-assist setting may turn you onto the enemy nearest the aim point within the same reach and **25°** |
+| Ranged basic attack (bows, crossbows, firelock, javelin, thrown knives, wand) | flies at your **hard target** if it is an enemy in range and within 60° of your facing; otherwise at whatever the aim-point ray hits (within **0.6 m** of a body counts as aimed at it; the projectile curves up to 3° to meet it) |
 
-### 2.4 Range, line of sight, facing
+Setting `set.combat.aimAssist`: Off / Melee only (default) / Melee and ranged. It never sets or changes the hard target.
+
+### 2.4 The spell targeting kinds
+
+`(new — canon W8)`
+
+Every spell names **one** targeting kind on its class page (template 00 §5, the "targeting" field). These are
+the only five:
+
+| Kind (card text) | Data id | Used for | What happens when you press it |
+|---|---|---|---|
+| **Needs target** | `target` | single-target finishers, interrupts, debuffs, anything that must land on one chosen enemy | Casts on your hard target if it is a valid **enemy** in range and in line of sight. Otherwise it **refuses** and spends nothing: "No target." / "Out of range." / "Out of sight." / "Not a valid target." |
+| **Needs target (ally)** | `ally` | heals, buffs, shields, dispels, revives | Casts on your hard target (or the mouse-over unit) if it is a valid **friendly** unit — you, a party member, a follower or a pet. With an enemy or nothing targeted it **refuses** ("No friendly target."). Healers target themselves with `F1`. Setting `set.combat.allySelfFallback`: Off (default) / On — On casts on yourself instead of refusing |
+| **Auto-target** | `auto` | most damage spells, projectiles, chains, gap closers | Casts on your hard target if it is a valid enemy in range. **If you have no valid target**, it picks **the valid enemy closest to where you are aiming** (nearest to the aim-point ray, measured at the enemy's distance) within the spell's range and line of sight, and casts on it. With `set.combat.autoTargetSets` On (default) that enemy **becomes** your hard target; Off leaves your target empty. Nothing in range → "No target in range." |
+| **Ground** | `ground` | circles on the ground, walls, traps, rods | A reticle follows the aim point out to the spell's range; click (or press again) to place. `set.combat.quickcastGround` places it at once on the aim point. With `set.combat.groundAtTarget` On, it drops at your hard target's feet instead |
+| **Self** | `self` | cones, lines and circles from your own body, stances, auras, self-buffs | Needs nothing; the shape starts at you along your facing |
+
+**Rules for class writers:**
+
+- A cone, line or circle "from you" is **Self**, never Auto-target. A dash that travels to an enemy is
+  **Auto-target**; a dash in the direction you face is **Self**.
+- A spell that **must** land on one chosen body is **Needs target**; a spell that should still fire in a panic is
+  **Auto-target**. Every heal on one ally is **Needs target (ally)** — never Auto-target (the owner: healing
+  spells should require a distinct target).
+- A group heal around you is **Self**; a heal circle you place is **Ground**.
+- **Global cooldown 1.0 s** (canon; [page 06 §6](06-CLASSES.md#6-the-global-cooldown)). A refused spell does
+  not start the GCD.
+
+### 2.5 Range, line of sight, facing
 
 - **Range** is measured from the edge of your body (radius 0.45 m, Farhold `bodyRadius`) to the edge of the
   target's body. A spell with range 30 m works on a large boss whose centre is 34 m away.
@@ -118,9 +165,9 @@ Setting `set.combat.aimAssist`: Off / Melee only (default) / Melee and ranged.
 - **Facing**: cones, lines and melee strikes aim along your facing; target spells do not need facing (the
   character turns for you).
 
-### 2.5 Friendly fire
+### 2.6 Friendly fire
 
-None. Nothing a player does hurts another player or their followers, except in PvP ([§21](#21-pvp-combat-rules))
+None. Nothing a player does hurts another player or their followers, except in a duel ([§21](#21-duels))
 and except mechanics that a boss turns against the group (page 11, e.g. a charm that makes a player's attacks hit allies).
 
 ---
@@ -240,9 +287,9 @@ radians, `every` in seconds per strike before haste):
 | Dagger | 1 | jab · jab · slash | 2.0 | 1.1 | 0.34 | 70 | ×0.80 | **Backstab ×2.2** from the rear 100°, and the backstab applies Bleeding |
 | Rapier | 1 | thrust · thrust · lunge | 3.3 | 0.7 | 0.52 | 95 | ×1.00 | Guard 10%; thrust pierces 25%, lunge 40% of armour |
 | Spear | 1 | thrust · thrust · sweep | 4.0 | 0.8 | 0.66 | 140 | ×1.00 | **Pierce line** 2 bodies (thrust is a 0.9 m-wide line, 6.2 m long); Brace +25%; guard 5% — keeps the shield |
-| Sabre / scimitar | 1 | slash · slash · arc | 2.7 | 1.5 | 0.46 | 105 | ×1.00 | **Flow**: connect twice and the third strike costs 0.35× its clock; Momentum |
-| Sword | 1 | slash · slash · arc | 2.8 | 1.4 | 0.58 | 120 | ×1.00 | Guard 8%; **Momentum** +8% per consecutive connecting strike, max +16% |
-| Longsword | 1 | slash · slash · overhead | 3.0 | 1.5 | 0.64 | 130 | ×1.00 | Guard 8%; Momentum |
+| Sabre / scimitar | 1 | slash · slash · arc | 2.7 | 1.5 | 0.46 | 105 | ×1.00 | **Flow**: connect twice and the third strike costs 0.35× its clock; Rhythm |
+| Sword | 1 | slash · slash · arc | 2.8 | 1.4 | 0.58 | 120 | ×1.00 | Guard 8%; **Rhythm** +8% per consecutive connecting strike, max +16% (Farhold called this trait "Momentum"; renamed so it never clashes with the resource) |
+| Longsword | 1 | slash · slash · overhead | 3.0 | 1.5 | 0.64 | 130 | ×1.00 | Guard 8%; Rhythm |
 | Axe | 1 | cleave · slash · cleave | 2.6 | 1.3 | 0.68 | 200 | ×1.00 | Cleave applies **Bleeding** |
 | Mace | 1 | overhead · slash · slam | 2.4 | 1.1 | 0.62 | 180 | ×1.00 | **Armour break** 5% per hit |
 | Hammer | 1 | overhead · sweep · slam | 2.5 | 1.2 | 0.66 | 260 | ×1.00 | Armour break 7% per hit |
@@ -276,7 +323,7 @@ Every weapon obeys exactly one of two rules:
 
 | Mode | Weapons | Holding the attack button… |
 |---|---|---|
-| **repeat** | every melee weapon, crossbow, javelin, wand | …swings/shoots/casts on the weapon's clock. Nothing builds. |
+| **repeat** | every melee weapon, crossbow, hand crossbow, firelock, javelin, throwing knives, wand | …swings/shoots/casts on the weapon's clock. Nothing builds. |
 | **charge** | bow (all three), staff | …builds power; releasing fires. At the ceiling the weapon releases itself, so holding gives a stream of full-power shots. |
 
 ### 4.4 Dual wielding and two-handers `(reuse: js/weapons.js handPlans, offhandRefusal, OFFHAND_DAMAGE)`
@@ -285,7 +332,7 @@ Every weapon obeys exactly one of two rules:
   own pattern on its own clock**, rolls **its own dice** (Farhold R14) and hits for **60%** (`OFFHAND_DAMAGE`).
   The off hand may only wind up while the main hand is recovering.
 - A **two-handed weapon** empties the off hand, except: a **quiver** stays with a bow (Farhold R22), and the
-  Doubled Grasp keystone allows two two-handers ([page 07 §Perk forest](07-PROGRESSION.md#perk-forest)).
+  Doubled Grasp capstone allows two two-handers ([page 07 §Perk forest](07-PROGRESSION.md#perk-forest)).
 - Bows need both hands to draw and cannot go in the off hand.
 
 ### 4.5 Ranged weapons `(reuse: js/weapons.js RANGED, drawPower)`
@@ -296,12 +343,23 @@ Every weapon obeys exactly one of two rules:
 | Bow | draw | nock 0.35 s → full 0.95 s; shakes after 1.6 s | 0.55× → 1.60× | 46 m | 0.9 m | 1 |
 | Longbow | draw | nock 0.40 s → full 1.10 s; shakes after 1.8 s | 0.55× → 1.75× | 54 m | 0.9 m | 2 |
 | Crossbow | reload | one bolt, then 1.25 s reload you cannot attack through | 1.80× | 50 m | 0.9 m | 2 |
+| **Hand crossbow** `(new)` | repeat, one-handed | one bolt every 0.55 s; may be dual-wielded or paired with a dagger | 0.75× | 32 m | 0.6 m | 0 |
+| **Firelock** (gun) `(new)` | reload | one shot, then 1.6 s reload; a 0.25 s muzzle delay you can see | 2.10× | 44 m | 0.6 m | 1 |
 | Javelin | throw | 0.75 s | 1.15× | 28 m | 1.4 m | 0 |
+| **Throwing knives** `(new)` | repeat, one-handed | one knife every 0.45 s; may be paired with a dagger (the off hand throws on its own clock) | 0.70× | 24 m | 0.3 m | 0 |
+
+The three `(new)` families exist because canon 00 §6 gives classes hand crossbows (demon hunter, rogue),
+guns (tinker) and thrown weapons (scavenger, rogue). Page 08 owns their bases and item levels.
 
 Past the shake point a drawn bow loses 3% power per extra second held, floored at 50% (Farhold `decay`).
 A release before the nock keeps drawing to the nock and fires the 0.55× shot (Farhold's "nothing you
-pressed is thrown away"). **There is no ammunition** (Farhold R16); a quiver is gear that adds arrow
-damage and arrow behaviours (page 08).
+pressed is thrown away"). **There is no ammunition** (Farhold R16).
+
+**Quivers** (canon 00 §12.3; page 08 owns the items) are the off hand of a bow or crossbow and work like
+Farhold's off-hand foci: a **damage stat-stick** (flat and % damage lines that apply to the whole character,
+by tag — [§22](#22-tags)). Some quivers also roll **one basic-attack effect** (fire arrows, exploding arrows,
+multi-shot…). A quiver effect only ever touches a hit tagged **Basic Attack** — your own basic attacks and
+class spells that carry that tag ([§22.4](#224-which-tags-a-basic-attack-and-a-quiver-effect-carry)).
 
 ### 4.6 Wands, staves and sceptres `(reuse: js/weapons.js WAND_BEHAVIOURS, STAFF_SPELLS, STAFF_CHARGE)`
 
@@ -318,7 +376,7 @@ every 0.60 s), range 34 m. Each wand rolls one behaviour, fixed for that item:
 | heavy | one slow bolt (34 m/s) | 1 | 1.45 | 2.6 m |
 
 **Staff** — a charge-mode caster: its "attack" is a shaped spell of its element (Farhold `STAFF_SPELLS`:
-fire has Flame Cone, Ember Nova, Flame Wave, Exploding Fireball; ice Rime Cone, Frost Nova, Shard Volley;
+fire has Flame Cone, Cinder Nova (Farhold's "Ember Nova", renamed), Flame Wave, Exploding Fireball; ice Rime Cone, Frost Nova, Shard Volley;
 lightning Arc Lash, Storm Nova, Thunderline; poison Spore Cloud, Creeping Blight, Bile Flask; arcane Arc
 Burst, Star Shot, Rift Cone; shadow Gutter Cone, Creeping Dark, Black Pulse; holy Dawnburst, Searing
 Light, Sunlance). Each staff carries one, fixed for that item.
@@ -338,18 +396,21 @@ never built them — page 18 milestone).
 
 **Sceptre** — a one-handed melee pattern (overhead · slash) whose swings carry the sceptre's element.
 
-**Focus** (off-hand grimoire, orb, reliquary, effigy — Farhold R25 `js/foci.js`) — worn, not swung;
-page 08.
+**Focus** (off-hand item: grimoire, orb, reliquary, effigy — Farhold R25 `js/foci.js`; "focus" here is the
+item, not a resource) — worn, not swung; a stat-stick for casters, as a quiver is for bows; page 08.
 
 ### 4.7 What basic attacks give back `(new)`
 
-| Resource ([page 06 §Resources](06-CLASSES.md#4-resources)) | From a connecting basic attack |
-|---|---|
-| Fury | +4 per main-hand hit, +2 per off-hand hit, +8 on a pattern finisher (arc, slam, lunge, overhead-as-last-strike); +1 per 1% of your max HP taken as damage |
-| Focus | nothing (Focus regenerates on its own) |
-| Mana | nothing, except wands and staves: +0.5% of max mana per connecting bolt or cast (at most once per 0.5 s) |
+The full resource rules are in [§18.3](#183-resources-mana-momentum-tempo); this is the basic-attack part.
 
-Class mechanics may add their own (e.g. a rogue's combo point from a basic hit) — the class file says so.
+| Resource | From a connecting basic attack |
+|---|---|
+| **Momentum** | main hand: `round(7 × the weapon's seconds per strike)`, minimum 2 (dagger 2, sword 4, greatsword 7, crossbow 9); off hand half that; a pattern finisher (arc, slam, lunge, a last overhead) ×2 |
+| **Tempo** | nothing (Tempo refills on its own in about 4 s) |
+| **Mana** | nothing, except wands and staves: +0.5% of max mana per connecting bolt or cast (at most once per 0.5 s); and the witch hunter's class rule **Silver Tithe**: +1% of max mana per crossbow basic-attack hit ([classes/witch_hunter.md](classes/witch_hunter.md)) |
+
+Class mechanics may add their own (e.g. a rogue's **Wound** opened by a basic hit from a blind spot) — the
+class file says so.
 
 ---
 
@@ -388,30 +449,36 @@ of spell power" is exact:
 **Weapon Damage (WD)** — what basic attacks and physical spells are a share of `(reuse: js/rpg.js derive, rescaled)`:
 
 ```
-WD_min/max = ( weaponDice_min/max × LevelTerm + FlatDamage ) × AttrScale × (1 + Damage%)
+WD_min/max = ( weaponDice_min/max × LevelTerm + FlatDamage ) × AttrScale
 
 LevelTerm  = 1 + 0.05 × (level − 1)          Farhold: 1 + 0.11 × (level − 1)
 AttrScale  = 1 + 0.01 × weaponAttribute      Farhold: 0.03 per point
              weaponAttribute = STR for heavy weapons, DEX for light and ranged, INT for magic weapons
 FlatDamage = sum of "+N damage" affixes and perk nodes (added AFTER the level term, Farhold R14)
-Damage%    = sum of every "+N% damage" from perks, talents and gear (one additive bucket)
 ```
 
 **Spell Power (SP)** — what magical spells, heals and shields are a share of `(new)`:
 
 ```
-SP = ( spellDice_mid × LevelTerm + FlatSpell ) × (1 + 0.01 × INT) × (1 + SpellDamage%)
+SP = ( spellDice_mid × LevelTerm + FlatSpell ) × (1 + 0.01 × INT)
 
 spellDice  = the main-hand weapon's dice × 1.0 for a magic weapon (wand, staff, sceptre),
              × 0.8 for anything else (a paladin's mace still powers a paladin's spells)
              + the off-hand focus's spell dice if one is worn (page 08)
 FlatSpell  = sum of "+N spell damage" affixes
-SpellDamage% = Farhold's `spellPower` stat, restated as a percentage; gear cap +150% (Farhold AFFIX_CAP)
 ```
 
-SP is a **single number** (the midpoint); spells roll ±10% around it. It is applied **once, here**, and
-never again. `rpg.strike`'s `if (element !== 'physical') amount *= 1 + spellPower` line does **not**
-exist in Wildmarch. A test must fail if any spell's damage is multiplied by `SpellDamage%` in two places.
+SP is a **single number** (the midpoint); spells roll ±10% around it.
+
+**Where the "+N% damage" lines went (round 2).** Round 1 folded every "+N% damage" into WD and Farhold's
+`spellPower` into SP. With tags, a percentage bonus depends on **which skill** is hitting ("+20% damage with
+Area Spells" helps a Blizzard and not a Fireball), so it cannot live in a number the character sheet computes
+once. Every percentage bonus is now a **tag bonus** added up per hit at step 2b of §6.2
+([§22.3](#223-how-tag-bonuses-stack)). An old untagged "+10% damage" is simply a tag bonus that names no tags,
+and Farhold's `spellPower` becomes "+N% damage with Spells". It is applied **once, at step 2b**, and never
+again: `rpg.strike`'s `if (element !== 'physical') amount *= 1 + spellPower` line does **not** exist in
+Wildmarch, and a test must fail if any tag bonus is counted in two places. The character sheet still shows
+WD and SP, plus a **"with your spells"** readout per spell (page 03) that includes the matching tag bonuses.
 
 ### 6.2 One hit, in order
 
@@ -423,7 +490,8 @@ function** (`strike()`, reuse of `js/rpg.js strike` with the changes marked).
 | 0 | **Can it miss?** | Target is rolling (i-frames) → **no effect**. Target is a player with passive dodge → `rng < min(35%, dodge)` → "Dodged", no damage. Enemies never dodge. Boss telegraphs skip this step. | Same dodge roll; i-frames new |
 | 1 | **Roll the base** | Weapon hit or physical spell: uniform roll in `[WD_min, WD_max]`. Magical spell, heal or shield: `SP × uniform(0.9, 1.1)`. | Same, SP new |
 | 2 | **× the coefficient** | Basic attack: strike damage share × family damage × hand share (1.0 main, 0.60 off) × draw/charge power. Spell: the % written on the class page (e.g. 140% WD). DoT tick: the tick's share of its total. | Same (`multiplier`) |
-| 3 | **× position and weapon traits** | Backstab ×2.2 (dagger, rear 100°); Momentum ×1.08/×1.16 (sword, sabre); Brace ×1.25/×1.35 (spear/polearm vs a body that closed on you this second); Far Shot keystone (×0.75 under 4 m, up to ×1.5 at 46 m) | Same (`js/actors.js strike`) |
+| 2b | **× tag bonuses** | `× (1 + sum of every damage bonus whose tags this hit has ALL of)` — one additive bucket per hit ([§22.3](#223-how-tag-bonuses-stack)). Element bonuses count only for the part of the hit in that element | new (replaces Damage% and spellPower) |
+| 3 | **× position and weapon traits** | Backstab ×2.2 (dagger, rear 100°); Rhythm ×1.08/×1.16 (sword, sabre); Brace ×1.25/×1.35 (spear/polearm vs a body that closed on you this second); Far Shot capstone (×0.75 under 4 m, up to ×1.5 at 46 m) | Same (`js/actors.js strike`) |
 | 4 | **+ flat on-hit, × gear conditionals** | `(amount + flatOnHit) × product(gear dmgOut hooks)` — "vs undead", "vs burning", execute, etc. (`js/effects.js dmgOut`) | Same |
 | 5 | **× the attacker's statuses** | `× (1 + sum of damage buffs) × (1 − sum of dealLess, cap 60%)` — Might, Rallied, Weakened… | Same (`outgoingFrom`), cap was 80% |
 | 6 | **Critical?** | `rng < critChance` (+ gear critBonus; Riposte forces it). Crit: `× (1 + critDamage)`. [§7](#7-critical-hits) | Same |
@@ -431,7 +499,7 @@ function** (`strike()`, reuse of `js/rpg.js strike` with the changes marked).
 | 8 | **Level gap** | `× gapFactor` — [§19.4](#194-the-level-gap) | new |
 | 9 | **Mitigation** | Physical: armour ([§8](#8-armour)). Magical: the element's resistance ([§9](#9-elements-and-resistances)). True damage (a few boss mechanics): none. | Formula changed |
 | 10 | **Flat reductions** | `× (1 − resistAll%)` then `× product(defender's gear dmgIn hooks)`, floored so at least **25%** of step 9's result remains | Same floor |
-| 11 | **PvP** | Player vs player (or their pets): `× 0.65` ([§21](#21-pvp-combat-rules)) | new |
+| 11 | **Duel** | Player vs player in a friendly duel (or their pets): `× 0.65` ([§21](#21-duels)) | new |
 | 12 | **Block** | Held block from the front: `× (1 − Block%)`. Else Guard chance: `− Block Power` (flat). Parry: → 0. | Passive block only |
 | 13 | **Round** | `max(1, round(amount))`; a fully blocked or parried hit may be 0 | Same |
 | 14 | **Absorbs** | Shields and barrier take it first, soonest-to-expire first ([§15](#15-absorbs)) | Barrier only |
@@ -448,35 +516,41 @@ the tests assert it.
 |---|---|---|
 | Level term | WD / SP | a spell's own coefficient |
 | Attribute scale | WD / SP | spells, heals (already inside SP) |
-| Damage% / SpellDamage% | WD / SP | step 4, step 5 |
+| Every "+N% damage" / tag bonus (incl. the old Damage% and SpellDamage%) | step 2b | WD, SP, step 4, step 5 |
 | Slot level and cooldown value of a spell | **the number printed on the class page** (the design budget, [page 06 §Spell budget](06-CLASSES.md#8-the-spell-power-budget)) | at run time — Farhold's `effectiveMult` is a *design tool* in Wildmarch, not a runtime multiplier |
 | Status buffs/debuffs on the attacker | step 5 | the class spell's number |
 | Status debuffs on the target | step 7 | step 5 |
 | Crit | step 6 | DoT ticks (they do not crit unless a talent says so) |
-| PvP | step 11 | anywhere else |
+| Duel | step 11 | anywhere else |
 
 ### 6.4 Worked example (level 30)
 
-A level-30 fighter, greatsword `WD 150–186` (midpoint 168), third strike of the pattern (overhead), with a
-+12% "vs beasts" gear conditional, under **Might (+20%)**, into a **Shocked** (+15%) even-level wolf with
-25% physical mitigation, no crit:
+A level-30 fighter, greatsword `WD 150–186` (midpoint 168), third strike of the pattern (overhead), with
+"+10% damage with Melee Attacks" on a ring and "+8% Physical damage" from a perk, a +12% "vs beasts" gear
+conditional, under **Might (+20%)**, into a **Shocked** (+15%) even-level wolf with 25% physical mitigation,
+no crit. The overhead is tagged *Attack, Basic Attack, Melee, Area, Physical*, so both tag bonuses apply:
 
 ```
 168 (mid roll)
 × 1.75 (overhead) × 1.20 (greatsword family)   = 352.8
-× 1.12 (gear conditional)                        = 395.1
-× 1.20 (Might)                                   = 474.1
-× 1.15 (Shocked)                                 = 545.3
-× 1.00 (level gap: even)                         = 545.3
-× 0.75 (armour 220 vs K(30) = 660 → 25%)         = 409
-→ 409 damage. The wolf has 1,585 health: four overheads.
+× 1.18 (tag bonuses: 10% + 8%, added)            = 416.3
+× 1.12 (gear conditional)                        = 466.3
+× 1.20 (Might)                                   = 559.5
+× 1.15 (Shocked)                                 = 643.4
+× 1.00 (level gap: even)                         = 643.4
+× 0.75 (armour 220 vs K(30) = 660 → 25%)         = 483
+→ 483 damage. The wolf has 1,585 health: four overheads.
 ```
 
-A level-30 mage casting a spell written as "210% SP as fire" with SP 172, into an enemy with 20% fire
-resistance, crit (critDamage +50%):
+A level-30 mage casting **Fireball**, written as "210% SP as fire", tagged *Spell, Ranged, Projectile, Fire*,
+with SP 172. The mage wears a ruby in the staff ("+15% Fire damage"), has "+10% damage with Spells" from a
+perk, and the staff's unique line "+20% damage with **Area Spells**" — which does **not** apply, because
+Fireball has no Area tag (its splash does not make it an area spell, [§22.2](#222-the-rule-a-bonus-needs-every-tag-it-names)).
+Into an enemy with 20% fire resistance, crit (critDamage +50%):
 
 ```
-172 × 1.04 (roll) × 2.10 = 375.7  × 1.5 (crit) = 563.5  × 0.80 (resist) = 451 → 451 damage.
+172 × 1.04 (roll) × 2.10 = 375.7  × 1.25 (tags: 15% + 10%) = 469.6
+× 1.5 (crit) = 704.4  × 0.80 (resist) = 564 → 564 damage.
 ```
 
 ---
@@ -619,7 +693,7 @@ elementals 75% fire / −25% ice (a negative resistance **increases** damage, fl
 | **Magic** | a Magic dispel (class spells), the Cleansing Draught | Burning, Chilled, Shocked, Marked, Frozen, Asleep, Feared, Silenced, Snared, Rooted (magical) |
 | **Curse** | a Curse dispel | Cursed, Withered, Doom |
 | **Poison** | a Poison dispel, Antivenom | Poisoned, Venom, Rot |
-| **Bleed** | a Bleed dispel, a Bandage (out of combat), any single heal of 30%+ of max HP | Bleeding, Hemorrhage, Wounded |
+| **Bleed** | a Bleed dispel, a Bandage (out of combat), any single heal of 30%+ of max HP | Bleeding, Hemorrhage, Festering |
 | **Enrage** | an Enrage dispel (enemy buffs only) | Frenzy on an enemy, boss Enrage (page 11) |
 | **Physical** | not dispellable; wait it out or break it (§11) | Stunned, Knocked Down, Staggered, Sundered, Disarmed, Taunted |
 | — (buff) | a Purge (removes one Magic buff from an enemy) | Might, Guarded, Hastened on enemies |
@@ -678,7 +752,7 @@ Special: **Burning** also ends when you are submerged 0.8 m or more in water.
 | `branded` | Branded | takes +20% damage (the Branding talent) | 6 s | 1 | Magic | `fa-stamp` | Farhold talent `brand` |
 | `weaken` | Weakened | deals −25% damage | 7 s | 1 | Curse | `fa-arrow-down` | Farhold 35% |
 | `sunder` | Sundered | −N% of current armour per hit, to −55% | 8 s | stacks by value | Physical | `fa-shield-halved` | Farhold `js/actors.js sunder` |
-| `wounded` | Wounded | −50% healing received | 8 s | 1 | Bleed | `fa-bandage` | new |
+| `festering` | Festering | −50% healing received | 8 s | 1 | Bleed | `fa-bandage` | new (round 1 called it "Wounded"; renamed because the rogue's **Wounded** is a different thing, §10.8) |
 | `broken` | Broken | a boss whose break bar filled: cannot act, current cast cancelled, takes +25% damage (page 11 §12.2 calls this state Broken) | 4 s | 1 | — | `fa-burst` | new ([§11.4](#114-bosses-the-break-bar)); was `exposed` — renamed so it does not clash with the Tactician's Exposed |
 | `shaken` | Shaken | −25% damage and healing done (revived at a shrine) | 3 min (levels 10–19), 5 min (20+) | 1 | — (cannot be removed) | `fa-heart-pulse` | new ([§16](#16-death-revive-corpse-run-release)) |
 
@@ -697,7 +771,7 @@ set bonuses and followers apply (Farhold `data/skills.json statuses`, re-tuned f
 | `rally` | Rallied | +10% damage, −10% damage taken | 8 s | 1 | Magic | `fa-flag` | Farhold +20% / −15% |
 | `frenzy` | Frenzy | +8% attack speed, +4% move speed per stack | 6 s | 5 | Enrage | `fa-fire-flame-simple` | Farhold R23 |
 | `evading` | Evading | the dodge roll's i-frames | 0.30 s | — | — | — | new |
-| `stealth` | Stealthed | enemies notice you at 25% of their range; broken by attacking, casting, taking damage | until broken | 1 | — | `fa-user-secret` | Farhold `stealth` stat (a notice-range multiplier) |
+| `hidden` | Hidden | enemies notice you at 25% of their range; broken by attacking, casting, taking damage. Only a few class spells and consumables grant it (the rogue has **no** stealth — canon W29) | until broken | 1 | — | `fa-user-secret` | Farhold `stealth` stat (a notice-range multiplier); renamed from "Stealthed" in round 2; not called "Unseen" because an **Unseen hit** is the rogue's rule, §13.7 |
 | `well_fed` | Well Fed | food: the food's stat (page 08) | 30 min | 1 | — | `fa-drumstick-bite` | new |
 | `barrier` | Barrier | an absorb ([§15](#15-absorbs)) | until spent / expiry | — | Magic | `fa-circle-half-stroke` | Farhold `barrier` stat |
 | `guardian` | Guardian | a tank state: ×4 threat ([§13](#13-threat-and-aggro)); class pages say what grants it | while active | 1 | — | `fa-shield-heart` | new |
@@ -724,15 +798,28 @@ toward the +30% group-buff cap, but they do count toward the haste cap.
 
 Statuses that a class page or a boss page defines. **The defining page owns the numbers**; this index exists so
 every status id is listed once on page 05, and they all follow §10.1 (ticks, refresh, one copy per attacker)
-and the caps in §10.7.
+and the caps in §10.7. **Round 2:** the class files are being rewritten at the same time as this page (new
+systems for rogue, druid, shaman, warlock, demon hunter, mage). Rows marked *(re-check)* belong to a rebuilt
+class and must be re-synced with its file once it lands; a class file that adds a status adds a row here.
+Every class status also carries tags when it deals damage or heals (its ticks carry the applying spell's tags
+plus *Over Time*, [§22.4](#224-which-tags-a-basic-attack-and-a-quiver-effect-carry)).
 
 | Status | Kind | Short rule (see the defining page) | Defined by |
 |---|---|---|---|
 | `thornseed` | enemy DoT (nature) | ticks nature damage, bursts in a 4 m circle; jumps to the nearest enemy within 8 m if the target dies | [classes/druid.md](classes/druid.md) |
+| `torn` Torn | enemy DoT (physical, stacks) | the druid's Wolf-form bleed: 12% claw damage a second per stack, 6 s, 3 stacks (5 with a talent); a **Bleed** for dispels; icon `fa-teeth`. Ticks carry Attack, Physical, Over Time | [classes/druid.md](classes/druid.md) |
 | `heartwood` | ally buff | armour + damage-to-healing (Heartwood Ward) | [classes/druid.md](classes/druid.md) |
 | `static_scale` | enemy debuff | next hit on it chains 60% WD to one more enemy within 6 m, 5 s | [classes/dragon_knight.md](classes/dragon_knight.md) |
-| `hellsight` | self buff | +20% crit, immune to Blind, Confuse, Fear and Charm, 8 s | [classes/demon_hunter.md](classes/demon_hunter.md) |
-| `pact` | self buff | Soul Pact: DoTs tick ×2 and +30%, 12 s | [classes/warlock.md](classes/warlock.md) |
+| `hellsight` | self buff | +20% crit, immune to Blind, Confuse, Fear and Charm, 8 s *(re-check: the demon hunter was rebuilt around Demonsight and traps, W27; may be retired)* | [classes/demon_hunter.md](classes/demon_hunter.md) |
+| `pact` | self buff | DoTs tick ×2 and +30%, 12 s *(re-check: the warlock was rebuilt around Tithes and Bind Demon, W32)* | [classes/warlock.md](classes/warlock.md) |
+| `blight` Blight | enemy DoT (shadow) | the warlock's slot-1 curse: 20% SP on hit + 150% SP over 12 s; spreads when the target dies; a **Curse** for dispels (§10.2). Tags Spell, Shadow, Curse, Over Time | [classes/warlock.md](classes/warlock.md) |
+| `hunters_brand` Hunter's Brand | enemy debuff (stacks) | +5% damage taken from the demon hunter, stacks to 3, 10 s; consumed by the demon hunter's finisher | [classes/demon_hunter.md](classes/demon_hunter.md) |
+| `unmasked` Unmasked | enemy debuff (Demons only) | +10% damage taken from the party, 10 s; cannot turn invisible, phase, teleport or burrow; a disguised demon drops its disguise | [classes/demon_hunter.md](classes/demon_hunter.md) |
+| `rattled` Rattled | enemy debuff | +6% damage taken from all sources, 8 s (+10% with the scavenger's 6-piece set); counts toward the +50% "takes more" cap | [classes/scavenger.md](classes/scavenger.md) |
+| `wounded` Wounded | enemy debuff (stacks, per rogue) | the rogue's **Wounds**: each Unseen hit (§13.7) opens 1; +3% damage taken **from that rogue** per Wound, cap 5 (8 from calling III), 15 s refreshed; spent by the rogue's finishers. Not the healing debuff (that is `festering`, §10.5) | [classes/rogue.md](classes/rogue.md) §2.3 |
+| `sapped` Sapped | enemy debuff (stacks) | rogue coating: −4% damage dealt per stack, 3 stacks, 8 s; half on a boss. Tags Poison, Curse | [classes/rogue.md](classes/rogue.md) |
+| `numbed` Numbed | enemy debuff | rogue coating: casts 20% slower (boss 10%), an interrupt on it locks the school 2 s longer, 8 s. Tags Poison, Curse | [classes/rogue.md](classes/rogue.md) |
+| `laid_open` Laid Open | enemy debuff | +8% damage taken from the rogue's party, 6 s (a rogue support talent); counts toward the +50% "takes more" cap | [classes/rogue.md](classes/rogue.md) |
 | Exposed | enemy debuff | next hit from anyone but the Tactician +25%, 6 s | [classes/tactician.md](classes/tactician.md) |
 | Outflanked | enemy debuff | +20% from side/behind, cannot turn quickly, 8 s | [classes/tactician.md](classes/tactician.md) |
 | Braced | ally buff | 30% less damage, 3 s | [classes/tactician.md](classes/tactician.md) |
@@ -747,7 +834,7 @@ and the caps in §10.7.
 | Chrono-locked | boss | current cast bar paused 2 s; shares the 90 s cast-pause lockout (page 11 §12.3) | [classes/chronomancer.md](classes/chronomancer.md) |
 | `silver_branded` Silver-Branded | enemy debuff | +6% damage from the group, 12 s (the Witch Hunter's mark; not the generic `branded`) | [classes/witch_hunter.md](classes/witch_hunter.md) |
 | Condemned | enemy debuff | +10% damage from you, 10 s | [classes/witch_hunter.md](classes/witch_hunter.md) |
-| Sworn | ally link | the Knight's Vow of Protection target | [classes/knight.md](classes/knight.md) |
+| Vowed | ally link | the Knight's Vow of Protection target | [classes/knight.md](classes/knight.md) |
 | Reproached | enemy debuff | deals 8% less damage to anyone but the Knight, 6 s | [classes/knight.md](classes/knight.md) |
 | Intercept | ally buff | the next hit is taken by the Knight, 4 s | [classes/knight.md](classes/knight.md) |
 | Oathbound | self buff | heals 20% of the damage it prevented when it ends | [classes/knight.md](classes/knight.md) |
@@ -755,21 +842,21 @@ and the caps in §10.7.
 | Between Steps | self | untargetable, takes no damage | [classes/monk.md](classes/monk.md) |
 | Twilight | self buff | both balance sides' bonuses at full, 8 s | [classes/priest.md](classes/priest.md) |
 | Runeforged | ally buff | granted by the Runesmith's circle, 10 s | [classes/runesmith.md](classes/runesmith.md) |
-| Veiled | self | stealth (as `stealth`, §10.6) | [classes/shadow_dancer.md](classes/shadow_dancer.md) |
-| `unveiled` Unveiled | enemy debuff | +12% damage from you, 8 s (the Shadow Dancer's *Open Wound* debuff; not the Tactician's Exposed) | [classes/shadow_dancer.md](classes/shadow_dancer.md) |
-| Tagged | enemy debuff | your gadgets prefer it, 6 s | [classes/tinker.md](classes/tinker.md) |
+| `shrouded` Shrouded (was "Veiled") | self | the Shadow Dancer's state; works as `hidden` (§10.6) unless the class file says more — renamed in round 2 (no "veil" in names, and not "Unseen", which is the rogue's hit type) | [classes/shadow_dancer.md](classes/shadow_dancer.md) |
+| `revealed` Revealed (was `unveiled` Unveiled, 00 §12.4) | enemy debuff | +12% damage from you, 8 s (the Shadow Dancer's debuff; not the Tactician's Exposed) | [classes/shadow_dancer.md](classes/shadow_dancer.md) |
+| Tagged | enemy debuff | your Devices prefer it, 6 s | [classes/tinker.md](classes/tinker.md) |
 | Broken | boss | break bar full (§11.4) | page 05 / [page 11 §12.2](11-BOSS-MECHANICS.md) |
 | Wrath | boss buff (stacks) | soft enrage: +10% damage every 30 s | [page 11 §13](11-BOSS-MECHANICS.md) |
 | Sunder (boss stack) | tank debuff (stacks) | +15% boss melee taken per stack, 30 s — **not** the same as `sunder` (§10.5) | [page 11 §26.10](11-BOSS-MECHANICS.md) `mech_sundering_blow` |
 | Standing in void | player | shown while inside a void zone | [page 11 §3](11-BOSS-MECHANICS.md) |
-| Deepening Cold / Cold | player gauge | a group meter to 100; at 100 **Frozen** | [page 11 §26.10](11-BOSS-MECHANICS.md), [page 13](13-RAIDS-WORLD-BOSSES.md) r02 |
-| Warmth | zone buff | −10 Cold a second while inside | [page 13](13-RAIDS-WORLD-BOSSES.md) r02 |
+| Deepening Cold / Cold | player gauge | a group meter to 100; at 100 **Frozen** | [page 11 §26.10](11-BOSS-MECHANICS.md) (first written for raid r02, now parked in [WISHLIST.md](WISHLIST.md); reused in 5-player dungeons per page 12) |
+| Warmth | zone buff | −10 Cold a second while inside | as above |
 | Seared | player debuff (stacks) | +8% fire damage taken per stack, 12 s, max 5 | [page 12](12-DUNGEONS.md) d04 |
 
-**Name clashes — Resolved (00 §10):** one name, one meaning. The Witch Hunter's mark is `silver_branded`
-**Silver-Branded** (the generic `branded` in §10.5 keeps its name), and the Shadow Dancer's *Open Wound* debuff
-is `unveiled` **Unveiled** (+12% from you, 8 s; the Tactician's Exposed keeps its name). The class files under
-`classes/` must use these names.
+**Name clashes — Resolved (00 §10, §12.4):** one name, one meaning. The Witch Hunter's mark is `silver_branded`
+**Silver-Branded** (the generic `branded` in §10.5 keeps its name), and the Shadow Dancer's debuff is `revealed`
+**Revealed** (+12% from you, 8 s; the Tactician's Exposed keeps its name). The class files under `classes/`
+must use these names.
 
 ---
 
@@ -777,7 +864,7 @@ is `unveiled` **Unveiled** (+12% from you, 8 s; the Tactician's Exposed keeps it
 
 ### 11.1 Categories `(new)`
 
-| Category | Statuses | Bosses | Elites (dungeon trash) | Champions / rares | Players in PvP |
+| Category | Statuses | Bosses | Elites (dungeon trash) | Champions / rares | Players in a duel |
 |---|---|---|---|---|---|
 | Stun | Stunned, Frozen | immune (break bar instead) | yes, max 2 s | yes | yes, max 4 s |
 | Incapacitate | Asleep, Feared, Charmed, Knocked Down | immune (break bar) | yes (Charmed: no) | yes | yes |
@@ -841,7 +928,7 @@ reconciliation pass.)*
 - Any cast longer than 0.5 s shows a **cast bar** over the caster (enemies: over their nameplate and on the
   target frame; you: above your skill bar).
 - **Grey bar** = cannot be interrupted. **Gold border** = interruptible (page 11 vocabulary).
-- **Interrupting** a gold-bordered cast needs a spell tagged `interrupt` (class pages), a **Silence**, a
+- **Interrupting** a gold-bordered cast needs a spell tagged **Interrupt** (`tag_interrupt`, class pages), a **Silence**, a
   parry of the cast's opening swing, or a stagger ≥ 0.35 s on a non-boss. The cast is lost and the caster is
   **locked out of that element's spells for 3 s**.
 - **Your own casts**: taking damage pushes a cast back by 0.25 s, at most twice per cast (not channels).
@@ -880,10 +967,11 @@ or near it. It attacks whoever is on top, subject to the swap rule.
 
 | Who | Multiplier |
 |---|---:|
-| A player in a **Guardian** state (tank stance/form/mechanic — class pages say which) | ×4 |
+| A player in a **Guardian** state (tank stance/form/mechanic — class pages say which; hybrid tanks get it from their tank loadout, [page 06 §3.3](06-CLASSES.md#33-hybrid-roles)) | ×4 |
 | Anyone else | ×1 |
-| A follower that is a tank (Shield Warden mercenary, a tank companion — page 06) | ×3 |
-| Any other follower or class pet | ×0.5 |
+| A follower that is a tank (Shield Warden mercenary — page 06) or a pet set to its tank behaviour (a warlock's bound demon, a ranger's tamed bear…) | ×3 |
+| Any other follower, pet or controlled body | ×0.5 |
+| An illusion or decoy (mage decoy images, enchanter illusions, shadow dancer clones) | as its spell says — decoys are built to pull attention |
 | Threat-reducing talents / "Fade"-type spells | as written on the class page |
 
 ### 13.3 Who it attacks — the swap rule
@@ -899,7 +987,7 @@ and elites never do).
 
 ### 13.4 Taunt
 
-- A **taunt** (class spells, and the shared **Challenge** — page 07's ladder, level 10, tank-capable classes; **Resolved (00 §10)**) sets the taunter's
+- A **taunt** (class spells tagged **Taunt**, and the shared **Provoke** (renamed from "Challenge" in round 2 so it never clashes with Challenge mode) — page 07's ladder, level 10, the 13 classes whose primary or hybrid role is Tank; **Resolved (00 §10)**) sets the taunter's
   threat to **110% of the current top** and applies **Taunted** for 3 s: the enemy must attack the taunter.
 - Taunts always work on bosses; **no DR**. A boss that is taunted while already Taunted by another tank
   switches (the tank swap, page 11).
@@ -917,18 +1005,37 @@ A resetting enemy runs home **Evading** (takes no damage), heals to full and cle
 
 ### 13.6 Noticing, pulling and social aggro
 
-| Enemy rank | Notice range (day) | Social aggro (allies that join when it is hit) |
+| Enemy rank | Notice range | Social aggro (allies that join when it is hit) |
 |---|---:|---:|
 | Normal | 18 m (Farhold default 26 m; lowered because the online world is denser) | 10 m |
-| Champion | 22 m | 12 m |
-| Rare | 24 m | 12 m |
+| Champion pack | 22 m | the whole pack |
+| Rare (and its minions) | 24 m | the rare and its minions |
 | Dungeon elite | 14 m (packs are linked instead: pull one, pull the pack) | whole pack |
 | Boss | by encounter (page 11) | — |
 
-Stealth multiplies notice range by `1 − stealth` (floor 25%, Farhold rule). Night changes it ([§22](#22-night-danger)).
+A "smaller notice range" stat (Farhold's `stealth`) multiplies notice range by `1 − value` (floor 25%,
+Farhold rule). There is no night, so notice range never changes with the time of day, and dark-looking places
+(caves, crypts, graveyards) use the same numbers as anywhere else.
 An enemy three or more levels **below** you (grey or green) does not notice you at all unless you hit it.
 
-### 13.7 What you see `(new; screens on page 03)`
+### 13.7 View cones and Unseen hits `(new — for the rogue's Blind Spots, canon W29)`
+
+Every monster has a **view cone** — a wedge in front of its body — which is a **combat** rule, separate from
+the notice range above. Its width and length come from the monster's family (humanoids 120° / 25 m, beasts
+110°, undead 90°, insects 200°, all-seeing 360°, bosses 150° — [classes/rogue.md §2.1](classes/rogue.md) owns
+the table until page 10 adopts it as a column). In a fight the body, and so the cone, **turns toward its current
+target** (the top of its threat table) at its turn rate, so a monster held by a tank looks at the tank.
+
+A hit is **Unseen** if, **when it lands**, any of these is true: the attacker is outside the target's cone
+(**blind spot**); the target has not noticed the attacker and has not been hit by it yet (**unnoticed** —
+first hit only); the attacker stands **3 m or more above** the target's feet and 8 m or more away
+(**elevated**; flyers and all-seeing monsters ignore this); or the target is **Blinded** (no cone at all).
+Area hits check each target on its own. **Only a class mechanic reads "Unseen"** — today the rogue's Wounds and
+tempo refund; a hit being Unseen changes no number by itself. Players have no view cone (a player's back is
+not a weakness). The dagger's **Backstab** trait (§4.1) stays a separate rule: rear 100° of the target,
+whoever is looking.
+
+### 13.8 What you see `(new; screens on page 03)`
 
 - **Nameplate threat glow**: none (below 70% of the top), **amber** (70–100%: you are about to pull it), **red**
   (you have it). For a player in a Guardian state the colours invert: red means you have **lost** it.
@@ -947,11 +1054,15 @@ An enemy three or more levels **below** you (grey or green) does not notice you 
 
 ```
 heal = SP × coefficient (class page) × uniform(0.9, 1.1)
-     × (1 + HealingDone%)                       healer's gear, perks, talents, buffs
+     × (1 + sum of healing tag bonuses)         every "+N% healing" whose tags the heal has ALL of (§22.3)
      × crit ? 1.5 : 1
-     × (1 + HealingReceived% − reductions)      target: Wounded −50%, Withered −20%; floor 25%
-     × PvP ? 0.70 : 1
+     × (1 + HealingReceived% − reductions)      target: Festering −50%, Withered −20%; floor 25%
+     × duel ? 0.70 : 1
 ```
+
+Examples of healing tag bonuses: "+10% healing" (no tags — every heal), "+15% healing with Over Time
+effects" (HoTs only), "+12% healing with Area Spells". Shields use their own stat, "+N% shield strength",
+with the same tag rule.
 
 A heal never exceeds the target's missing health — the rest is **overhealing**.
 
@@ -979,7 +1090,7 @@ A heal never exceeds the target's missing health — the rest is **overhealing**
 |---|---|---|
 | Health potion (tiers by level) | restores **35%** of max HP instantly | shared **potion cooldown 60 s** |
 | Mana potion | restores **35%** of max mana | shared potion cooldown |
-| Waking Draught | revives a dead ally at 35% HP (out of combat), or yourself if you die while it is on your belt and it is off cooldown (in dungeons: only out of combat) | 10 min |
+| Waking Draught | revives a dead ally at 35% HP, in or out of combat (a 2 s use, interrupted by damage), or yourself if you die while it is on your belt and it is off cooldown | 10 min |
 | Bandage | out of combat: heals 40% over 8 s, clears Bleed | 30 s |
 | Food / drink | out of combat: 6% HP / mana a second while eating (max 20 s), then Well Fed | — |
 
@@ -1023,7 +1134,7 @@ At 0 HP (after cheat-death effects), you are **Dead**:
 |---|---|---|
 | **Wait for a revive** | always | stay dead; an ally's revive spell or Waking Draught brings you back where you fell ([§16.4](#164-being-revived)) |
 | **Release** | always | you become a **spirit** at the nearest **Shrine of Returning** ([§16.3](#163-release-and-the-corpse-run)) |
-| **Rise here** (Waking Draught on your belt and off cooldown) | open world, or out of combat in instances | you get up at 35% HP; draught spent |
+| **Rise here** (Waking Draught on your belt and off cooldown) | anywhere, in or out of combat | you get up at 35% HP with **Rising**; draught spent |
 
 - **Auto-release** after 6 minutes dead (so nobody is stuck).
 - **No gold is lost** (Farhold's 10% purse cost is removed — in an online game it punishes the player who
@@ -1047,23 +1158,27 @@ At 0 HP (after cheat-death effects), you are **Dead**:
 | Revive | Who | Result |
 |---|---|---|
 | Out-of-combat revive | the shared **Tend the Fallen** verb (page 07's day-one kit; **Resolved (00 §10)**): hold Interact on the body for 8 s, out of combat | 35% HP/mana, Rising |
-| Class revive spell | healer classes (class pages) | as written; typical 50–100% HP |
-| **Battle revive** (in combat) | the classes whose page gives one | as written; limited by charges in instances |
-| Waking Draught | anyone | 35% HP |
+| Class revive spell | the classes whose page gives one (tagged **Revive**, targeting **Needs target (ally)**) | as written; typical 50–100% HP |
+| **Battle revive** (in combat) | the classes whose page gives one | as written |
+| Waking Draught | anyone, in or out of combat | 35% HP |
 
-**Battle-revive charges** in instances (shared by the whole group, across all classes):
+**No limit on in-combat revives** (canon W21). There are no group revive charges anywhere — not in Normal,
+Challenge mode, any Depth or world bosses. What keeps a battle revive precious is its own cost:
 
-| Content | Charges |
+| Rule | Value |
 |---|---|
-| 5-player dungeon (Normal/Heroic) | 1 per boss encounter; unlimited on trash |
-| Mythic+ | 1 at the start, +1 every 10 min, max 3 |
-| 10-player raid | 2 per boss encounter |
-| 20-player raid | 3 per boss encounter |
-| World boss | unlimited (open world) |
+| Cooldown of a class battle revive | **5 min** (page 06's budget table); a class file may not go below 3 min |
+| Cast | 2.0 s cast time (interruptible by the healer being hit hard, pushback rules of §12), or a 1.5 s channel |
+| Revived at | the class page's amount, typically **50–60%** HP and 20% mana, with **Rising** (5 s: cannot be damaged, cannot attack) |
+| Stacked revives on one body | a player revived in the last **10 s** cannot be revived again (stops two healers wasting cooldowns on the same body) |
+| Accept | the dead player must accept (a prompt with a 30 s timer; auto-accept setting `set.combat.autoAcceptRevive`, default On in a group) |
+
+**Mass resurrection does not exist** (canon W35; parked in [WISHLIST.md](WISHLIST.md)). Every revive is one
+body at a time.
 
 ### 16.5 Instances
 
-- Releasing inside a dungeon or raid puts your spirit at the **instance entrance**; you rise at the
+- Releasing inside a dungeon puts your spirit at the **instance entrance**; you rise at the
   entrance at full HP/mana (no Shaken, no extra durability loss).
 - While the group is in a boss fight, the boss room's door is sealed: a released player waits at the
   entrance until the fight ends (win or wipe).
@@ -1076,14 +1191,19 @@ death also shows a one-time card explaining shrines and the corpse run.
 
 ### 16.7 Followers and pets
 
-A follower or pet at 0 HP falls (it is not dead forever). It gets up on its own **14 s** after you leave
-combat (Farhold `pets.reviveSeconds`), at 50% HP. A summoned creature simply vanishes and can be summoned
-again. In instances, a fallen follower rises only between encounters.
+No class **summons** a pet out of thin air (canon 00 §6). What falls at 0 HP, and how it comes back:
 
-**Pets and summons versus boss mechanics (canon 00 §10; page 11 §12.3 owns the rule).** Class pets and
-summons take **no party slot**, leave a **danger zone 0.6 s** after it appears and a **void zone after 0.5 s**
-in one, **never count toward a soak**, and take **25% damage from room-wide hits**. **Followers** are
-different: they take a party slot, **do** count toward soaks and take full damage from mechanics.
+| Body | At 0 HP | Comes back |
+|---|---|---|
+| **Follower** (hired mercenary) | falls | gets up on its own **14 s** after you leave combat (Farhold `pets.reviveSeconds`), at 50% HP. In a dungeon, only between encounters |
+| **Tamed beast** (ranger) or **bound demon** (warlock) — permanent pets | falls and **stays down** | only through the class's **revive ritual**, a utility spell that uses no slot, out of combat ([page 06 §11](06-CLASSES.md#11-utility-spells)); or an in-combat revive spell that targets allies also works on it |
+| **Controlled body** (necromancer's Control Undead, enchanter's Charm) — temporary | the control ends and the body is dead (an undead crumbles; a charmed enemy dies) | never — control another |
+| Deployables, illusions, decoys, sentries | destroyed | recast the spell |
+
+**Pets versus boss mechanics (canon 00 §10; page 11 §12.3 owns the rule).** Tamed, bound and controlled pets
+take **no party slot**, leave a **danger zone 0.6 s** after it appears and a **void zone after 0.5 s** in one,
+**never count toward a soak**, and take **25% damage from room-wide hits**. **Followers** are different: they
+take a party slot, **do** count toward soaks and take full damage from mechanics.
 
 ---
 
@@ -1093,8 +1213,8 @@ different: they take a party slot, **do** count toward soaks and take full damag
 
 | Rule | Value |
 |---|---|
-| Durability per item | 100 points (weapons, off-hands, armour; not rings, necklaces, lights, mounts) |
-| On death | −10% of max on every **equipped** item (none at levels 1–9, none in PvP, none on a wipe past the third in the same boss fight within 30 min) |
+| Durability per item | 100 points (weapons, off-hands, armour; not rings, necklaces, the tool, mounts) |
+| On death | −10% of max on every **equipped** item (none at levels 1–9, none in a duel, none on a wipe past the third in the same boss fight within 30 min) |
 | Rising at the shrine for gold | a further −15% |
 | At 0 | the item is **Broken**: it gives no stats, no armour, no set bonus; a broken weapon swings as fists |
 | Warning | at 25% the paper-doll slot turns yellow; at 10% red, and a HUD icon appears |
@@ -1119,10 +1239,52 @@ The HUD shows crossed swords by the portrait.
 |---|---|---|---|
 | Health | `hpRegen` stat only (gear, perks) — default **0** | **2% of max a second** + `hpRegen`; eating ×3 (6%) | `outOfCombatRegen 0.015` + `hpRegen 0.9` |
 | Mana | 1% of max a second + `mpRegen` | 4% a second; drinking 6% | `mpRegen 1` flat |
-| Fury / Focus / class gauges | [page 06 §Resources](06-CLASSES.md#4-resources) | page 06 | new |
+| Momentum | built, never regenerated ([§18.3](#183-resources-mana-momentum-tempo)) | drains to 0 | new |
+| Tempo | 25 a second (full in 4 s) | 25 a second | new |
+| Class mechanic counters | the class file | the class file | new |
 | Stamina | 25 a second after 0.8 s | 50 a second | new |
 | Barrier | 0 (unless an effect) | 8% of barrier size a second | same |
 | Follower / pet health | its own regen | 3% a second | same idea |
+
+### 18.3 Resources: Mana, Momentum, Tempo
+
+`(new — Farhold had only mana)` Canon 00 §6 fixes the three resources; every class spends exactly one.
+**This section owns their numbers.** [Page 06 §4](06-CLASSES.md#4-resources) owns what each resource means for
+class design (typical costs, which classes, how a class mechanic may bend the rules).
+
+| | **Mana** | **Momentum** | **Tempo** |
+|---|---|---|---|
+| Idea | a big pool that refills slowly — spend it carefully | starts empty, **builds** as you hit and as you are hit, drains away out of combat — spend it on the big moves | a small pool that **refills fast** — spend it constantly |
+| Pool | **1,000** + 2 per INT + gear "+mana" lines | **100** (fixed; a class mechanic may raise it to 120) | **100** (fixed) |
+| Starts a fight | full (whatever you had) | **0** (whatever is left from the last fight) | full |
+| Refills by itself | in combat **1%** of max a second + `mpRegen`; out of combat 4% a second, drinking 6% | **never** | **25 a second, always** (in or out of combat) — an empty bar is full again in **4 s**; × (1 + haste%) |
+| Built by | wand and staff basic hits (+0.5% of max per hit, once per 0.5 s); the witch hunter's Silver Tithe (+1% per crossbow basic hit); mana-return spells and talents | see "Momentum gains" below | a class mechanic may refund Tempo (the bard's beat) |
+| Lost by | spending | spending; the drain below | spending |
+| Drain | none | in combat: after **4 s** with no hit dealt and no hit taken, **−5 a second**; out of combat: **−10 a second** after 2 s | none |
+| Typical spell costs | filler 40–80 · big spell 150–250 · heal 60–200 · long cooldown 0–100 | builders 0 (and build) · spenders 20–60 · a finisher 40–100 | filler 20–30 · strong spell 40–60 · nothing above 75 |
+| Colour on the HUD (page 03) | blue `#4a8cff` | red-orange `#e0602a` | gold `#f2c94c` |
+
+**Momentum gains** (every source adds; the bar caps at its pool and extra is lost unless a class mechanic banks it):
+
+| Source | Momentum |
+|---|---:|
+| Basic attack hit, main hand | `round(7 × the weapon's seconds per strike)`, min 2 (≈ **7 a second** from basic attacks, whatever the weapon) |
+| Basic attack hit, off hand | half the main-hand value |
+| Pattern finisher (arc, slam, lunge, a last overhead) | ×2 of the above |
+| Taking damage | **+1 per 1% of your max HP** taken (after mitigation, before absorbs), at most **+15 from one hit** |
+| Blocking, parrying or rolling through a hit | +5 |
+| A spell that says "builds N Momentum" | N (the class page) |
+| **Casting** (Momentum casters — the pyromancer) | each spell cast that is not a spender builds the Momentum written on it; typical 8–15 per cast. Canon: the pyromancer's **Heat** *is* its Momentum bar |
+
+Design check: a Momentum melee class gets ~7 a second from swings plus ~3 a second from being hit while
+tanking, so it can afford one 40-point spender every ~4–5 s; a Momentum class that stops fighting loses its
+bar in ~20 s. A Tempo class can keep spending ~25 a second — a 25-point filler every GCD, or a 50-point spell every
+other GCD — and a full bar lets it burst two strong spells back to back before it has to slow down. A Mana class runs
+dry in ~90 s of full-rate spending without its class tools (page 06 §4).
+
+**Resources in forms and stances**: a form or stance never switches you to another resource unless the class
+file says so (none do in round 2). **Showing it**: a spell you cannot afford greys out with the reason on hover
+("Not enough Momentum: 40 needed, 25 held.").
 
 ---
 
@@ -1203,36 +1365,46 @@ curves one level is a smaller step, so Wildmarch adds an explicit gap factor (st
 | Rank | Health × | Damage × | Armour × | XP × | Knockback taken | Where | Farhold |
 |---|---:|---:|---:|---:|---:|---|---|
 | Normal | 1 | 1 | 1 | 1 | ×1.0 | everywhere | same |
-| Champion (1 modifier, glow) | 2.6 | 1.35 | 1.4 | 2.4 | ×0.70 | 11% of open-world spawns | same |
-| Rare (2 modifiers, own name) | 4.5 | 1.6 | 1.7 | 4.5 | ×0.50 | 3% of open-world spawns | same |
-| Elite (dungeon/raid trash) | 3.0 | 1.5 | 1.2 | 2.0 | ×0.40 | instances, world-boss adds | new |
+| Champion (a member of a blue champion pack) | 2.6 | 1.35 | 1.4 | 2.4 | ×0.70 | open world (random, common) and placed in dungeons — page 10 | same numbers |
+| Rare (yellow name, 2–3 affixes, own minions) | 4.5 | 1.6 | 1.7 | 4.5 | ×0.50 | as above — page 10 | same numbers |
+| Elite (dungeon trash) | 3.0 | 1.5 | 1.2 | 2.0 | ×0.40 | dungeons, world-boss adds | new |
 | Mini-boss (event, stronghold) | 10 | 1.8 | 1.3 | 8 | ×0.25 | events, strongholds | new |
 | Dungeon boss (5) | 40 (Normal) | 2.2 (on the tank) | 1.3 | 20 | ×0.25 | page 12 | Farhold `boss` placed by hand |
-| Raid boss (10 / 20) | 180 / 340 | 2.6 | 1.4 | 20 below level 60 (first kill per boss per week, [page 07](07-PROGRESSION.md#events-discovery-dungeons-raids)); renown only at 60 | ×0.25 | page 13 | new |
-| World boss | 60 per contributing player, capped at 40 players | 2.4 | 1.4 | 30 (once a day) | ×0.25 | page 13 | Farhold `data/worldbosses.json` |
+| Dungeon boss, **Challenge** (level 60) | 55 | 2.6 (on the tank) | 1.4 | — (level 60: no XP) | ×0.25 | page 12 | new |
+| World boss | 60 per contributing player, capped at 40 players | 2.4 | 1.4 | 30 (first kill of each world boss each week, [page 07](07-PROGRESSION.md)) | ×0.25 | page 13 | Farhold `data/worldbosses.json` |
 
-Pages 11–13 may override any boss row; these are the defaults a boss is written against.
+**Monster rarities** (canon 00 §12.3; page 10 owns the lists and frequencies): a **champion pack** is a whole
+group of Champion-rank monsters with blue names sharing **one** affix; a **Rare** has a yellow name, 2–3 affixes
+and a pack of Normal minions; a **greater rarity** (Giant, Flaming, Electrified, Frozen…) sits on top of any
+rank with the default multipliers in §1 until page 10 sets its own. **Depth** multiplies all of the above
+(page 12 owns the Depth table). Pages 10–13 may override any row; these are the defaults a monster is written
+against.
 
 ### 19.6 Level sync in dungeons `(new)`
 
 A player above a **Normal** dungeon's band who enters it through the group finder is **synced down** to the
 band's top level; gear is treated as item level `bandTop + 3` at most. Entering directly (not through the
 finder) with a party is not synced (so friends can help friends), but the loot and XP then follow the grey
-rule. Heroic and Mythic+ are level 60 only.
+rule. **Challenge mode** is level 60 only. **Depth** raises the dungeon's own level (3 per depth, up to 60,
+then harder past 60 — canon W3); a player above a Depth run's level is synced to it the same way. Page 12 owns
+Depth.
 
 ---
 
 ## 20. How damage scales in groups
 
+**Everything scales to at most 5 players** (canon W39, rule 9). The only exception is **world bosses**.
+
 - **Normal enemies do not scale** with the number of attackers. Three players on one wolf kill it in a third
   of the time; that is the point of grouping.
-- **Champions, rares, event mini-bosses in the open world** scale with the number of **players** who have
-  damaged or healed against them in the last 10 s (followers count as a quarter each): health × `(1 + 0.75 ×
-  (N − 1))`, damage × `(1 + 0.10 × (N − 1))`, N capped at 5.
-- **World bosses**: health = 60 × normal × players tagged, recalculated once a second while the fight is
-  fresh (first 30 s), then locked; damage flat (page 13 owns the rest).
-- **Dungeons and raids are tuned for a full group** (5, 10 or 20) and **do not** scale down. A Normal
-  dungeon is soloable because **followers fill the empty slots** (canon pillar 6).
+- **Champion packs, rares, greater-rarity monsters and event mini-bosses in the open world** scale with the
+  number of **players** who have damaged or healed against them in the last 10 s (followers count as a
+  quarter each): health × `(1 + 0.75 × (N − 1))`, damage × `(1 + 0.10 × (N − 1))`, **N capped at 5** — a sixth
+  player joining makes it no tougher.
+- **World bosses** (the one exception): health = 60 × normal × players tagged, recalculated once a second while
+  the fight is fresh (first 30 s), then locked; damage flat (page 13 owns the rest).
+- **Dungeons are tuned for a full group of 5** on Normal, Challenge and every Depth, and **do not** scale down.
+  A Normal dungeon is soloable because **followers fill the empty slots** (canon pillar 6).
 - **Followers** have their damage capped at 75% of the top of their owner's weapon swing (Farhold R22
   `FOLLOWER_SHARE_CAP`), scale with the owner's level, and in a group of players each follower counts
   against the group size (5 bodies in a 5-player dungeon: 3 players may bring 2 followers).
@@ -1241,49 +1413,245 @@ rule. Heroic and Mythic+ are level 60 only.
 
 ---
 
-## 21. PvP combat rules
+## 21. Duels
 
-`(new — page 15 owns queues, flagging, zones and rewards; these are the combat numbers)`
+`(new)` Canon W1: **friendly duels are the only player-versus-player fighting in v2.** Team battles, ranked
+matches, open-world flagging and any player-versus-player rewards are parked in [WISHLIST.md](WISHLIST.md). Page 15 owns the invite and the
+duel screen; these are the combat rules.
 
 | Rule | Value |
 |---|---|
-| Player damage to players (and their pets/followers) | ×0.65 |
-| Healing on players in PvP combat | ×0.70 |
-| Absorbs on players in PvP combat | ×0.70 |
-| Crit damage vs players | halved: base crit ×1.25 instead of ×1.5 |
+| Who | two players, both level **10+** (page 07's ladder), invited by right-click → Duel; the other must accept |
+| Where | anywhere **outside** towns, hubs and dungeons; a 40 m flag is planted between the two, leaving it for 5 s forfeits |
+| Start | a 3 s countdown; both are set to full health and resources are left as they are |
+| End | the first to reach **1 HP** loses (nobody dies); a forfeit; or 5 minutes (a draw) |
+| After | both are healed to their health before the duel; cooldowns are **not** reset |
+| Stakes | **none**: no gold, no items, no XP, no ranking, no durability loss |
+| Others | nobody else can hit, heal or buff either duellist; each duellist's own pets may fight; followers stand aside |
+| Damage to the other player (and their pets) | ×0.65 (step 11 of §6.2) |
+| Healing and absorbs on a duellist | ×0.70 |
+| Crit damage | base crit ×1.25 instead of ×1.5 |
 | Crowd control | full DR (§11.2); any single CC capped at **4 s** (sleep/fear 6 s) |
-| Knockback | ×0.60 distance |
-| Stagger | max 0.4 s per hit, DR as §5 |
+| Knockback | ×0.60 distance; stagger max 0.4 s per hit |
+| Passive dodge | halved (cap 17.5%) — rolls still fully work |
 | Hit-stop | never on the victim's screen; attacker's screen only |
-| Passive dodge vs players | halved (cap 17.5%) — rolls still fully work |
-| Followers | allowed in open-world PvP at ×0.5 damage; **not** allowed in arenas or battlegrounds (class pets that ARE the class mechanic are allowed at ×0.65 damage) |
-| Level brackets (battlegrounds) | 20–29, 30–39, 40–49, 50–59, 60. Everyone is raised to the **top** of the bracket: stats computed as that level; gear treated as item level ≤ bracket top + 2 |
-| Arenas | level 60, gear item level normalised to a PvP value per slot (page 15) |
-| Duels | anywhere outside towns, from level 10; end at 1 HP; no durability loss |
-| Death in PvP | no durability loss; battlegrounds release to the team's graveyard with a 15 s wave timer (page 15) |
 
 ---
 
-## 22. Night danger
+## 22. Tags
 
-Canon: a day is 60 real minutes, **45 day / 15 night** (page 00). Farhold's night was dayFraction < 0.25 or
-> 0.78 of a 900 s day (47% of the time dark), with a torch carried in the **light** slot, an ambient floor of
-0.16 so night is dark but playable, and the `nightSpawn` family swap near towns (R27).
+`(new — canon 00 §12.3: "every skill, basic attack, item and affix carries tags"; this page owns the list and the rule)`
 
-Wildmarch night rules `(new unless marked)`:
+*(reference)* The idea is Path of Exile's gem tags; the names, the list and the rules below are our own.
 
-| Rule | Value |
+A **tag** is a short word that says what a skill **is**: what element it deals, whether it is a weapon attack
+or a spell, how it reaches its target, and what it leaves behind. Tags exist so that **bonuses can name the
+kind of skill they help** — "+10% Ice damage", "+20% damage with Area Spells", "+15% healing with Over Time
+effects" — and so that the spell card, the item card and the tooltip all speak the same small vocabulary.
+
+### 22.1 The tag list
+
+Every tag has an id `tag_<name>`, a display name (shown on cards in small caps, in this order), and one line of
+meaning. **This is the complete list.** A page that needs a new tag asks for it here first.
+
+**Element tags** — what the damage (or healing) is. A hit's element tags come from its damage type (§9):
+
+| id | Tag | Meaning |
+|---|---|---|
+| `tag_physical` | Physical | deals physical damage (resisted by armour) |
+| `tag_fire` | Fire | deals fire damage |
+| `tag_ice` | Ice | deals ice damage |
+| `tag_lightning` | Lightning | deals lightning damage |
+| `tag_poison` | Poison | deals poison damage |
+| `tag_nature` | Nature | deals nature damage, or heals with living growth (druid, shaman, ranger) |
+| `tag_shadow` | Shadow | deals shadow damage, or drains |
+| `tag_holy` | Holy | deals holy damage, or heals with holy light |
+| `tag_arcane` | Arcane | deals arcane damage (ignores half of resistances) |
+
+A heal carries an element tag only if its class page says it heals *as* that element (the priest's light,
+the druid's growth); most heals carry none. **True** damage (boss mechanics only) has no tag and nothing can
+raise it.
+
+**Kind tags** — every skill has **exactly one** of Attack or Spell:
+
+| id | Tag | Meaning |
+|---|---|---|
+| `tag_attack` | Attack | uses **Weapon Damage** (WD) — a swing, a shot, a throw, a weapon technique |
+| `tag_spell` | Spell | uses **Spell Power** (SP) — magic, heals, shields, curses. Wand and staff basic attacks carry it too, but keep WD as their base (§22.4) |
+| `tag_basic_attack` | Basic Attack | a basic weapon attack, or a class spell that **fires your equipped weapon's own basic attack** (e.g. a volley of three normal arrows). Only these hits get **quiver effects** and other "basic attacks only" powers (§22.4). Always found together with Attack |
+
+**Delivery tags** — how it reaches the target:
+
+| id | Tag | Meaning |
+|---|---|---|
+| `tag_melee` | Melee | lands within weapon reach of your body (≤ 6 m) |
+| `tag_ranged` | Ranged | lands beyond reach: a shot, a thrown weapon, a bolt of magic, a spell cast at a distance |
+| `tag_projectile` | Projectile | travels through the air as an object that can be dodged, blocked by terrain or pierce bodies |
+| `tag_area` | Area | its **main shape** hits everything in a space: cone, line, circle, ring, ground. A projectile's impact **splash does not** make it Area; a chain is not Area |
+| `tag_chain` | Chain | jumps from its first target to more targets |
+| `tag_channel` | Channel | keeps working while you hold still and keep casting (§12) |
+
+**Effect tags** — what it does or leaves behind:
+
+| id | Tag | Meaning |
+|---|---|---|
+| `tag_over_time` | Over Time | damage or healing that **ticks** (a DoT or HoT). The ticks carry this tag; the first hit of the spell does not, unless the spell is only ticks |
+| `tag_duration` | Duration | leaves something that lasts: a ground field, a wall, a buff or debuff with a timer (a bonus to "duration" of Duration skills lengthens it) |
+| `tag_heal` | Heal | restores health |
+| `tag_shield` | Shield | grants an absorb (§15) |
+| `tag_control` | Control | applies crowd control: stun, freeze, root, sleep, fear, knock, silence, disarm, charm (§11) |
+| `tag_curse` | Curse | a debuff that removes by a Curse dispel (§10.2); most warlock, witch-hunter-purgeable and hex spells |
+| `tag_aura` | Aura | a lasting effect centred on you that touches allies or enemies near you (paladin Oath auras, bard songs, banners) |
+| `tag_movement` | Movement | moves you: dash, leap, teleport, swap places, pull yourself |
+| `tag_trap` | Trap | placed on the ground and triggered when an enemy steps on or near it |
+| `tag_deployable` | Deployable | places an object that acts on its own: a sentry, a lightning rod, a rune, a banner, a junk barricade, a decoy |
+| `tag_minion` | Minion | done **by** or **to** your tamed, bound or controlled pet (a pet's own attacks carry it too). The card may read "Minion" or, in prose, "pet" — they mean the same tag |
+| `tag_finisher` | Finisher | spends your class mechanic's built-up stacks (Wounds, Flair, Resonance, Breath, Static…) for a bigger effect |
+
+**Utility tags** — for filters, cooldown bonuses and rules; gear rarely gives damage to these:
+
+| id | Tag | Meaning |
+|---|---|---|
+| `tag_interrupt` | Interrupt | stops a gold-bordered cast (§12) |
+| `tag_dispel` | Dispel | removes a status from an ally or a buff from an enemy (§10.2) |
+| `tag_taunt` | Taunt | forces an enemy to attack you (§13.4) |
+| `tag_revive` | Revive | brings a dead ally or pet back (§16.4) |
+| `tag_travel` | Travel | a travel utility spell (portal, retrace, guiding call — page 20) |
+
+**Target tags are different.** Monsters carry **family tags** — Beast, Undead, Demon, Humanoid, Construct,
+Elemental, Spirit, Giant, Boss… (page 10 owns the list) — which describe the **target**, not the skill. Bonuses
+that read them are written "vs Undead", "vs Demons" and are **conditionals** (step 4 of §6.2), not tag
+bonuses. The necromancer's Control Undead and the warlock's Bind Demon read family tags (page 06 §10).
+
+### 22.2 The rule: a bonus needs every tag it names
+
+A **tag bonus** names a stat, a value and zero or more tags. It applies to a hit **only if the hit has every one
+of the named tags.** The words on the card list the tags joined by spaces:
+
+| Bonus on an item | Tags it names | Applies to | Does not apply to |
+|---|---|---|---|
+| +10% Ice damage | Ice | Blizzard (Ice, Area, Spell, Duration), Frost Arrow's ice part | a physical sword swing |
+| +20% damage with **Area Spells** | Area + Spell | Blizzard, a flame cone | Fireball (Spell, Projectile — no Area), Whirlwind (Area, but an Attack) |
+| +15% damage with **Melee Attacks** | Melee + Attack | every sword swing, Shield Bash | a melee-range spell like Hallowed Ground (Spell) |
+| +12% damage with **Fire Projectiles** | Fire + Projectile | Fireball, a quiver's fire arrow | a flame cone |
+| +8% damage (no tags) | — | **every** damaging hit | — |
+| +15% healing with **Over Time** effects | Over Time | HoT ticks | a direct heal |
+| +25% duration of **Curses** | Curse | how long your curses last | a slow from a Control spell that is not a Curse |
+
+Mixed-element hits: a skill that deals two elements (e.g. "120% WD as physical plus 30% WD as fire") is two
+**parts**. Every non-element tag is shared by both parts; each **element** tag applies only to its own part. A
+"+10% Fire damage" bonus raises only the 30% fire part.
+
+A bonus that names **two elements** ("+10% Fire and Ice damage") is written as **two bonuses** in the data
+(one per element), so the "every tag" rule never asks a hit to be fire *and* ice at once.
+
+### 22.3 How tag bonuses stack
+
+1. **Group by stat.** Every tag bonus is one of these stats: damage, healing, shield strength, crit chance,
+   crit damage, area size, duration, cast speed, cooldown recovery, resource cost, projectile speed.
+2. **Within a stat, add.** For one hit, sum every bonus of that stat whose tags the hit has **all** of — from
+   gear, gems, jewels, gadgets, perks, talents, set 2-piece lines and buffs that say "+N%". One bucket.
+   Example: +10% (no tags) + 15% Melee Attacks + 8% Physical = **+33%**, applied as ×1.33.
+3. **Where it sits.** The damage bucket is **step 2b** of §6.2 — after the coefficient, before gear
+   conditionals, statuses, crit, mitigation. The healing bucket is the second line of §14.1. Crit chance
+   bonuses add to crit chance at step 6; area size multiplies the shape's radius or length; duration multiplies
+   the status or field's time; cast speed and cooldown recovery add to the haste and cooldown-reduction stats
+   **for that skill only** (their caps in §10.7 and page 06 §6 still apply to the total); resource cost
+   reduces the cost (floor 50% of the written cost).
+4. **Multipliers are separate.** A legendary power, a soul, a set 4/6-piece power or a status that says
+   "**×1.2** damage" (a multiplier, not a "+N%") is applied at its own step (gear conditionals at step 4,
+   statuses at steps 5 and 7) and **multiplies** the result. Cards always write a multiplier with "×" and a
+   bonus with "+", so the player can tell them apart.
+5. **Caps.** No cap on the damage bucket itself (each affix has its own roll range on page 08); a sanity check
+   in the simulator flags any character above **+400%** in one bucket. Crit chance keeps its 60% cap,
+   cooldown reduction its 50%, haste its +30%.
+6. **Negative tag bonuses** (a curse on you, a cursed item's drawback) go into the same bucket; the bucket never
+   goes below ×0.25.
+
+### 22.4 Which tags a basic attack and a quiver effect carry
+
+**Basic attacks** carry, automatically:
+
+| Weapon | Tags |
 |---|---|
-| Spawn budget | ×1.30 more enemies alive around you |
-| Night families | 25% of spawns come from the region's night list (undead, shades, dire beasts — page 10) `(reuse idea: balance.gates.nightSpawnShare)` |
-| Champion chance | ×1.5 (11% → 16.5%) |
-| Enemy damage | +10% |
-| Notice range | ×1.25 while your light is lit; ×0.80 with no light — but you see only as far as the moon lets you (≈16 m) |
-| Night-only rares | each region has 2–3 rares that only spawn at night (page 10) |
-| Rewards | **+20% kill XP** and **+15% magic find** at night |
-| Safe ground | within 150 m of a town's lamps, none of the above applies |
-| Light | Farhold's torch (34 m, `balance.light.torch`) in the light slot; L toggles it `(reuse: js/light.js)` |
-| The hint | at night with the light off, one log line: "Press L to light your torch." (Farhold R17) |
+| Any melee weapon strike | Attack · Basic Attack · Melee · Physical (or the weapon's element, e.g. a branded or elemental weapon, a sceptre's element) · **Area** on the strikes whose main shape is wide — sweep, cleave, arc, slam, and every strike of a greatsword (§4.1) |
+| Bow, crossbow, hand crossbow, firelock | Attack · Basic Attack · Ranged · Projectile · Physical |
+| Javelin, throwing knives | Attack · Basic Attack · Ranged · Projectile · Physical |
+| Wand | Attack · Basic Attack · **Spell** · Ranged · Projectile · the wand's element · **Chain** for a chaining wand |
+| Staff (charge attack) | Attack · Basic Attack · **Spell** · Ranged · the staff's element · **Area** for cone, nova, wave, ground and field forms (§4.6); **Channel** for the full-charge jet |
+| Fists | Attack · Basic Attack · Melee · Physical |
+
+Wand and staff basic attacks carry **both** `tag_basic_attack` and `tag_spell` (decided in the round-2 sweep).
+Their base is still WD (with INT as the weapon attribute), but "+N% damage with Spells" **does** raise them, and
+so does anything else that reads the Spell tag. That way a caster's gear keeps paying off between spells.
+They still never need a target (§2.3) and still count as basic attacks for quivers and resources.
+
+**Quiver effects** (page 08 owns the list and numbers) touch **only** hits tagged Basic Attack. The added part
+carries the Basic Attack hit's tags **plus** the effect's own:
+
+| Quiver effect (examples) | What it adds | Extra tags on the added part |
+|---|---|---|
+| Fire arrows | +N% of the hit as fire damage, 20% chance to Burn | Fire (the fire part only); the Burning ticks add Over Time |
+| Exploding arrows | the arrow bursts in a 2.5 m circle for N% | **Area** (the burst only) |
+| Multi-shot | 1 in 4 shots fires 2 extra arrows at 50% each, ±10° | none new |
+| Seeking fletching | arrows curve up to 12° onto the nearest enemy | none new |
+| Frost-tipped | +N% as ice, applies Frostbite | Ice (the ice part) |
+
+A class spell may carry **Basic Attack** only if it **fires your equipped weapon's own basic attack** (same
+projectile, same WD share, same on-hit effects) — for example a ranger volley that looses three normal arrows.
+Such a spell gets quiver effects. It does **not** gain resources as a basic attack (the spell states its own
+gains), and it stays on the global cooldown like any spell.
+
+**Other things that carry tags:**
+
+| Thing | Its tags |
+|---|---|
+| A class spell | written on its class page, **every spell, every version** (a druid form's version has its own tags) — page 06 §7.4 |
+| A DoT or HoT from a spell | the spell's tags + **Over Time** (and minus Area/Projectile/Chain — the ticks do not travel) |
+| A pet's attack | Attack or Spell as it uses, its delivery, its element + **Minion** |
+| A trap or deployable's hit | the placing spell's tags (Trap / Deployable included) |
+| An item | the tags of the bonuses it grants are shown on its card (page 08 draws them) |
+| An affix | `tags: [...]` in its data row (page 08); an affix with no tags applies to everything |
+
+### 22.5 Data shape
+
+A skill's tags (on every spell row, page 06 §20; on every basic-attack row in `data/weapons.json`):
+
+```json
+{ "id": "mage_blizzard", "tags": ["tag_spell", "tag_ice", "tag_area", "tag_duration"],
+  "targeting": "ground",
+  "parts": [ { "element": "ice", "of": "sp", "coefficient": 0.45, "ticks": 8 } ] }
+```
+
+A tag bonus (on an affix, gem, jewel, gadget, perk node, talent, set line or buff):
+
+```json
+{ "stat": "damage", "value": 0.20, "tags": ["tag_area", "tag_spell"] }
+```
+
+```json
+{ "stat": "damage", "value": 0.10, "tags": ["tag_ice"] }
+{ "stat": "healing", "value": 0.15, "tags": ["tag_over_time"] }
+{ "stat": "damage", "value": 0.08, "tags": [] }
+```
+
+The tag list itself (`data/tags.json`, page 16 owns the file name):
+
+```json
+{ "tag_area": { "name": "Area", "group": "delivery", "order": 12,
+                "meaning": "Its main shape hits everything in a space: cone, line, circle, ring, ground." } }
+```
+
+**The one function.** `tagBonus(hit, stat)` = the sum of every active bonus of `stat` whose `tags` are all in
+`hit.tags` (with element tags matched per part). It is called at step 2b (damage), §14.1 (healing) and the
+other places in §22.3, and **nowhere else**. Tests (page 16):
+
+- a bonus naming Area + Spell raises a hit with both, and not a hit with only one of them;
+- a bonus with no tags raises every hit;
+- a two-element hit's fire bonus raises only its fire part;
+- a quiver effect never fires on a hit without Basic Attack;
+- **move a tag bonus's value to an odd number (e.g. 0.137) and check the damage changes by exactly that** —
+  the round-22 lesson that comparing the file to a constant passes against an orphan rule.
 
 ---
 
@@ -1314,14 +1682,18 @@ Page 16 owns netcode; these are the combat-specific rules the server must enforc
 | Resistances | one `magicResist` | one per element + Magic Resistance | enemies have elemental profiles |
 | Avoidance | passive dodge only | dodge roll with i-frames, active block, parry, passive dodge (capped, not vs telegraphs) | action combat |
 | Stamina | none | 100-point bar | sprint/roll/block cost |
-| CC | stagger only, 1 DR rule | 8 categories, 18 s DR, boss break bar | groups and PvP |
+| CC | stagger only, 1 DR rule | 8 categories, 18 s DR, boss break bar | groups and duels |
 | Threat | 5-s attention + body-in-the-way | full threat table, tank ×4, taunt, swap 110/130% | tanks and healers |
 | Heals | self heals, regen buff, life steal | SP-based heals, HoTs, smart heals, overheal | healer role |
 | Absorbs | barrier stat | barrier + spell shields, soonest-first, 100% cap | shield healers |
-| Death | respawn full, −10% gold | release/corpse run/shrine revive, durability, battle revive charges, no gold loss | online game |
+| Death | respawn full, −10% gold | release/corpse run/shrine revive, durability, **no limit on battle revives**, no gold loss | online game; canon W21 |
 | Status numbers | tuned for one player | group-tuned (Shocked 30→15%, Might 30→20%, Guarded 45→30%…) and capped | five players stack them |
-| Night | 47% of a 15-min day, spawn swap near towns | 25% of a 60-min day, more and harder enemies, better rewards | canon day |
-| PvP | none | full rules §21 | online |
+| Night | 47% of a 15-min day, torch in a light slot, spawn swap near towns | **none — always daylight**; dark places are film-set dark (page 17) | canon §12.3 |
+| PvP | none | **friendly duels only** (§21) | canon W1 |
+| Targeting | whatever the crosshair / nearest enemy was (the frame often showed the wrong enemy) | **Tab targeting**: one hard target only the player changes; spells are Needs target / Auto-target / Ground / Self | canon W8 |
+| Resources | mana only | Mana, Momentum, Tempo (§18.3) | canon W28 |
+| Bonuses | one damage % bucket, spell power squared by accident | **tags** and one tag-bonus bucket per hit (§22) | canon §12.3 |
+| Pets | companions rise 14 s after combat; summons | no summons; tamed/bound pets revived by a ritual, controlled bodies temporary | canon W32 |
 
 ---
 
@@ -1355,17 +1727,35 @@ Page 16 owns file names; these are the shapes this page needs. All JSON, all dat
 
 ```json
 {
-  "id": "m_wolf_grey_prowler", "baseHealth": 58, "baseHit": [5, 8], "attackEvery": 1.5,
+  "id": "m_beast_grey_wolf", "baseHealth": 58, "baseHit": [5, 8], "attackEvery": 1.5,
   "armourShare": 0.25, "resist": { "ice": 0.2, "fire": -0.1 },
   "notice": 18, "social": 10, "rank": "normal",
+  "family": ["beast"], "viewCone": { "width": 110, "length": 20, "turnRate": 300 },
   "telegraphs": ["lunge_line_4m"], "statusOnHit": { "id": "bleed", "chance": 0.2 }
+}
+```
+
+**Tags and tag bonuses**: [§22.5](#225-data-shape). **A spell's targeting kind** is one of
+`"target" | "ally" | "auto" | "ground" | "self"` ([§2.4](#24-the-spell-targeting-kinds)).
+
+**The resource knobs** (`data/balance.json`, `resources` block):
+
+```json
+{
+  "resources": {
+    "mana":     { "base": 1000, "perInt": 2, "regenInCombat": 0.01, "regenOutOfCombat": 0.04, "regenDrinking": 0.06 },
+    "momentum": { "pool": 100, "perStrikeSecond": 7, "minPerHit": 2, "offhandShare": 0.5, "finisherMult": 2,
+                  "perPctHpTaken": 1, "maxFromOneHit": 15, "onAvoid": 5,
+                  "idleSeconds": 4, "idleDrain": 5, "outOfCombatDelay": 2, "outOfCombatDrain": 10 },
+    "tempo":    { "pool": 100, "regen": 25, "hasteScales": true }
+  }
 }
 ```
 
 **A combat event** (server → client, feeds the log and meters; reuse of the `meters/` record):
 
 ```json
-{ "t": 1234.56, "src": "p:Wren", "dst": "m:m_wolf_grey_prowler#88", "via": "ranger_aimed_shot",
+{ "t": 1234.56, "src": "p:Wren", "dst": "m:m_beast_grey_wolf#88", "via": "ranger_aimed_shot",
   "kind": "damage", "element": "physical", "amount": 409, "crit": false,
   "mitigated": 136, "blocked": 0, "absorbed": 0, "overkill": 0, "threat": 409 }
 ```
@@ -1374,15 +1764,20 @@ Page 16 owns file names; these are the shapes this page needs. All JSON, all dat
 
 ## 26. Open questions
 
-(Also in `QUESTIONS.md` when that page exists.)
+(Also in `QUESTIONS.md`.)
 
-1. **Dodge key.** Farhold uses Space for jump. Should dodge be its own key (suggested Left Ctrl) or should
-   Space become dodge and jump move? Recommendation: own key, double-tap option. **Resolved (00 §10):** dodge is
-   its own key, `F`; Space stays jump.
-2. **Death cost.** This page removes Farhold's 10% gold loss and uses durability + time. Is that the feel you
+1. **Death cost.** This page removes Farhold's 10% gold loss and uses durability + time. Is that the feel you
    want, or do you want a gold cost back?
-3. **Heavy armour move penalty** of 5% — keep, or none at all?
-4. **Held block on a mouse button** conflicts with right-mouse camera drag if that is kept. Page 02 decides;
-   recommendation: right mouse = block when a shield is worn, camera drag moves to middle mouse. **Resolved
-   (00 §10 — page 02's table):** right mouse (hold) is `secondary`, which is block when a shield is worn.
-5. **Arcane ignoring half of resistances** makes arcane classes strong into resistant bosses. Keep?
+2. **Heavy armour move penalty** of 5% — keep, or none at all?
+3. **Arcane ignoring half of resistances** makes arcane classes strong into resistant bosses. Keep?
+4. **Heals refuse without a friendly target** (canon W8). The setting `set.combat.allySelfFallback` lets a
+   player choose "cast on me instead"; it defaults Off. Should it default On for new players (levels 1–9)?
+5. **Auto-target sets your target** by default (`set.combat.autoTargetSets` On). Recommendation: keep On —
+   the frame then always shows what your spells are hitting.
+6. **Tag bonus bucket has no hard cap** (only a simulator warning at +400%). Recommendation: keep it uncapped
+   and control power through affix ranges on page 08; a cap would make the last few items feel worthless.
+7. **Tempo at 100 / 25 a second** (set in round 2) makes a Tempo class's throughput 25 a second
+   against Momentum's ~7–10. Spell costs on the class pages must be written against those rates (Tempo
+   filler 20–30, Momentum spender 20–60); flagging so the class files and the budget on page 06 agree.
+
+*(Resolved and removed: the dodge key — `F`, 00 §10; held block on right mouse — page 02.)*

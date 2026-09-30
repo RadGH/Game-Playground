@@ -1,9 +1,15 @@
 # WILDMARCH — Design Bible, page 16: technology
 
-**Status:** v0.1 draft — 2026-09-29. **Nothing is built.** Owner of this page: how Wildmarch is put
+**Status:** v0.2 draft — 2026-09-30 (round 2 applied). **Nothing is built.** Owner of this page: how Wildmarch is put
 together — the client, the server, what each one runs, how they talk, how a character is saved, every
 data file and its shape, which playground modules are reused (the **reuse map**, canon pillar 7), the
 tests, the performance budgets, the two servers (dev and stable) and how it is deployed.
+
+**Round 2 (2026-09-30).** Canon 00 §12 removed raids, PvP beyond duels, currencies other than gold,
+binding, rested XP, dailies/weeklies, the day/night clock, the light slot and flight paths. Their tables,
+fields and files are gone from this page (raids and the rest are parked in `WISHLIST.md`). New data and
+JSON shapes: **tags**, the four **socket** kinds, **special rarities**, **monster rarities**, **magic
+find**, **Harvesting and professions**, **Travel Methods**, **targeting state** and **Depth** — §13.1–§13.10.
 
 The short version:
 
@@ -39,6 +45,8 @@ The short version:
 | **VPS** | A rented Linux machine in a data centre ("virtual private server"). |
 | **Durable Object** | A Cloudflare feature: a tiny always-addressable program with its own memory and storage, one per id. |
 | **Schema** | The agreed shape of a piece of data (which fields, which types). |
+| **Hard target** | The one enemy or ally your character has selected, shown in the target frame. Only you change it (canon 00 §12.1 W8; §13.9). |
+| **Polyline** | A path stored as a list of points joined by straight pieces — how a Travel Method route is stored (§13.8). |
 
 ---
 
@@ -177,7 +185,7 @@ two owners* and *farhold water staircase*). In an online game that becomes: **th
 | Other players, NPCs, mobs | Positions, facing, animation state name, health, statuses | Interpolates 100 ms behind; plays the named animation on the Chibi 2 / creature body |
 | Mob and boss AI | All of it: targeting, threat, pathing, ability choice, phases, adds | Draws it |
 | Telegraphs | Creates them with shape, size, position, **server time of resolve**; resolves damage | Draws the ground decal and fill from the synced clock; plays warning sounds |
-| Spells and attacks | Validates cost, cooldown, range, line of sight, target; computes every number; applies statuses | Starts the cast animation and effect at once (prediction); shows the server's damage numbers when they arrive |
+| Spells and attacks | Validates cost, cooldown, range, line of sight, target (and, for Auto-target spells, picks the target by §13.9's rule); computes every number; applies statuses | Starts the cast animation and effect at once (prediction); shows the server's damage numbers when they arrive |
 | Dodge roll | Validates it (cooldown, stamina/charges per page 05) and grants the invulnerable window (§10.4) | Plays the roll at once |
 | Loot | Rolls it (personal loot) with the server's seeded generator | Shows the drop, the beacon, the reward popup (`shared/rewards.js`, reuse) |
 | Inventory, gold, equipment | Owns them; every change is one database step for anything that moves between players | Shows them; drag-and-drop sends an intent |
@@ -185,7 +193,10 @@ two owners* and *farhold water staircase*). In an online game that becomes: **th
 | Quests and events | Owns state, counters, phase flags | Shows the tracker, markers, dialog |
 | NPC speech | Picks the Lingo line (seeded by NPC id + tick) and sends the **text** | Speaks it with the formant voice; bubble; chat line |
 | Chat, parties, guilds, trade, market, mail | All of it | UI |
-| Time of day, weather | Realm clock; weather state per region (`worldgen/js/weather.js` `WeatherClock`, seeded by realm + region + day) | Draws the sky, fog, rain from the state |
+| Weather | Weather state per region (`worldgen/js/weather.js` `WeatherClock`, seeded by realm + region + real date). **There is no time of day**: the sun is fixed per region (canon 00 §4, always daylight) | Draws the sky, fog, rain from the state; the region's fixed sun and grade (page 17) |
+| Hard target | Stores each character's `target` id; changes it **only** on a `target` message or when the target dies/despawns (§13.9) | Draws the target frame from the server's value; Tab cycling is computed on the client and sent as a `target` message |
+| Travel Methods | Moves every vehicle along its route, holds the riders, runs schedules and the snap-back rule (§13.8) | Draws the vehicle and riders; shows the departure board |
+| Harvesting, crafting | Node state, tool check, skill rolls, recipe results (§13.7) | Gather bar, craft screen |
 | Scenery (trees, rocks, grass) | Only **collision** for things that block movement | Everything else, from the same seeded scatter (`highdef-3d/js/scatter.js` pattern) |
 | Sound, effects, camera, UI | — | All of it |
 | Combat feel (hit-stop, shake, knockback look) | Knockback **distance** is server movement; stagger state is server | Hit-stop, shake, recoil are client-only presentation (`prototypes/farhold/js/combat-feel.js`, reuse) |
@@ -215,7 +226,9 @@ two owners* and *farhold water staircase*). In an online game that becomes: **th
 |---|---|---|
 | Players, followers, companions | 150 m | 20 / 10 / 4 Hz by distance (§7) |
 | Mobs | 110 m | same |
-| Bosses and their telegraphs | **Whole encounter area** (a boss is always sent to everyone inside its arena) | 20 Hz |
+| Bosses and their telegraphs | **Whole encounter area** (a boss is always sent to everyone inside its fight area) | 20 Hz |
+| Your hard target | Always, while it exists and is within 150 m (the target frame must never go blank because of interest management) | 10 Hz, health and casts |
+| Travel Method vehicles | 300 m (they are big and people watch for them at stations) | 4 Hz; route + progress only, the client moves it along the known polyline |
 | Telegraphs of normal mobs | 60 m | on create + on resolve only (the client animates the fill) |
 | World objects (chests, nodes, doors) | 110 m | on change only |
 | Chat Say / Emote / Yell | 30 m / 30 m / 150 m | on message |
@@ -224,10 +237,10 @@ two owners* and *farhold water staircase*). In an online game that becomes: **th
 - **Enter/leave messages**: when something enters your area you get its full state once; after that only
   what changed. When it leaves you get `gone`.
 - **Cap**: at most **150 entities** per client snapshot. Past that, the furthest non-party, non-boss
-  entities are dropped first. Party/raid members are always sent (their frames need health) even outside
+  entities are dropped first. Party members are always sent (their frames need health) even outside
   the radius, at 2 Hz, health and position only.
 - **Budget per client**: average **≤ 24 KB/s down** and **≤ 6 KB/s up** in a busy town; **≤ 48 KB/s down**
-  in a 20-player raid.
+  at a world boss with 60 players nearby (the one open-group activity, canon 00 §9).
 
 ---
 
@@ -250,20 +263,25 @@ two owners* and *farhold water staircase*). In an online game that becomes: **th
 |---|---|---|
 | `hello` | `token, version, characterId` | Connect: sign-in ticket, client version (the server refuses a mismatched major version with "Please reload") |
 | `in` | `seq, dt[], move[], yaw[], jump, run` | Batched input samples since the last `in` (seq = input number, for prediction) |
-| `cast` | `seq, slot, target?, at?, dir?, charge?` | Use spell slot 1–6 (or basic attack = 0) at a target id, a ground point or a direction |
+| `cast` | `seq, slot, target?, at?, dir?, aim?, charge?` | Use spell slot 1–6 (or basic attack = 0). `target` = the current hard target (Needs target, Auto-target); `at` = ground point (Ground); `aim` = the aim point and ray, used by Auto-target when there is no valid target (§13.9) |
+| `target` | `id \| null, how` | Set or clear the hard target. `how` = `tab`, `shiftTab`, `click`, `self` (`F1`), `party2`–`party5` (`F2`–`F5`), `clear`. The only message that changes the target |
 | `dodge` | `seq, dir, clientTime` | Dodge roll |
-| `interact` | `id` | Talk, open, loot, gather, enter a door |
+| `interact` | `id` | Talk, open, loot, gather (a harvest node), enter a door, board a Travel Method |
 | `cancel` | — | Stop a cast/channel |
 | `item` | `op, from, to, uid, count?` | Move, equip, unequip, split, destroy, use |
 | `talent` / `perk` / `spellPick` | `spellId, tier, choice` / `nodeId` / `slot, spellId` | Progression choices |
 | `chat` | `ch, text, to?` | Chat message (page 15 §9) |
 | `party` | `op, name?` | invite / accept / decline / leave / kick / promote / ready / role / marker / sync |
-| `finder` | `op, activities?, roles?` | join / leave / accept / decline / vote |
-| `guild` | `op, …` | create / invite / accept / leave / rank / bank / motd / perk |
+| `finder` | `op, activities?, roles?, difficulty?, depth?` | join / leave / accept / decline / vote. `difficulty` = `normal` \| `challenge`; `depth` = 0–N (§13.10). Only **discovered** dungeons are accepted |
+| `guild` | `op, …` | create / invite / accept / leave / rank / bank / motd |
 | `trade` | `op, slot?, uid?, gold?` | open / put / take / gold / lock / accept / cancel |
 | `market` | `op, query?, listing?, uid?, price?, dur?` | search / list / cancel / buy |
 | `mail` | `op, to?, subject?, body?, items?, gold?, cod?, id?` | send / take / return / delete / list |
-| `duel` / `pvp` | `op, name?` | challenge / accept / decline / yield / flag |
+| `duel` | `op, name?` | challenge / accept / decline / yield (friendly duels only, canon 00 §12.1 W1) |
+| `socket` | `op, itemUid, index, socketableUid?` | insert / remove (page 08 owns what removing costs) |
+| `craft` | `op, recipe?, count?, gadget?` | craft / learn / pick profession / configure a gadget's chosen stats (§13.7) |
+| `travel` | `op, station?, route?, stop?` | board / leave / wait (bus-style) / buy a ride (§13.8) |
+| `recall` | `op, lm?` | bind the Recall Stone at a town waystone / use it |
 | `follower` | `op, uid?, order?, stance?` | summon / dismiss / order / stance / kit |
 | `report` / `ticket` | page 15 §18 fields | Moderation |
 | `ping` | `clientTime` | Clock sync |
@@ -272,7 +290,7 @@ two owners* and *farhold water staircase*). In an online game that becomes: **th
 
 | Type | Fields | Meaning |
 |---|---|---|
-| `welcome` | `serverTime, character, region, layer, realmTime, settings` | Full character + where you are |
+| `welcome` | `serverTime, character, region, layer, settings` | Full character + where you are |
 | `snap` | `tick, time, ack, ents[], gone[]` | Snapshot: `ack` = last input seq applied (for prediction replay) |
 | `spawn` | `id, kind, look, name, level, …` | An entity entered your area (its Chibi 2 avatar JSON or creature spec) |
 | `tele` | `id, shape, kind, at, size, dir, start, resolve, follow?, pips?, label?` | A telegraph (page 11 vocabulary; `start`/`resolve` are server times) |
@@ -282,11 +300,13 @@ two owners* and *farhold water staircase*). In an online game that becomes: **th
 | `dmg` | `src, tgt, amount, kind, crit, element, overkill, absorbed, blocked` | A damage/heal event (floating number, combat log, meter record — `meters/js/meter.js` shape, reuse) |
 | `status` | `tgt, type, on, remaining, stacks` | Status applied/removed (aura via `spellfx.status`) |
 | `say` | `id, text, intent, voice?` | NPC or boss line (voice JSON only on first line from that NPC) |
-| `banner` | `text, style, ms` | Centre-screen banner (boss line, raid warning, unlock) |
+| `banner` | `text, style, ms` | Centre-screen banner (boss line, party warning, unlock) |
 | `inv` | `ops[]` | Inventory changes |
 | `stats` | `hp, mp, res, xp, level, gold, …` | Your own numbers when they change |
 | `unlock` | `featureId` | Feature-ladder unlock (card + sound + Unlocks entry) |
 | `quest` | `op, quest` | Quest state change |
+| `target` | `id \| null, reason` | Your hard target as the server holds it. `reason` = `you` (your own change), `died`, `gone` (despawned or out of 150 m). Never any other reason |
+| `travel` | `route, vehicle, progress, stops, departsAt?, riders` | A Travel Method you are at or on: departure board, bus countdown, position |
 | `chat` / `party` / `guild` / `trade` / `market` / `mail` / `finder` / `duel` | per system | Social updates |
 | `move` | `region, layer, at, reason` | Zone change / layer change / teleport |
 | `error` | `code, text` | A refusal, in plain words ("That is still cooling down: 3.2 s") |
@@ -305,8 +325,8 @@ shot that looked like a hit must not miss for no visible reason. The rules, in o
 1. The server sends a telegraph with its **resolve time** in server time (`tele.resolve`). The client
    draws the fill so it **completes exactly at `resolve`** on the synced clock — so every player sees the
    same fill whatever their ping.
-2. Warning times are page 11's minimums (**1.5 s** Normal, **1.2 s** Heroic/Mythic, **3.0 s** for
-   anything that kills in one hit), measured **from the moment the server sends it**. To make sure a
+2. Warning times are page 11's minimums (**1.5 s** Normal, **1.2 s** Challenge and Depth, **3.0 s**
+   for anything that kills in one hit), measured **from the moment the server sends it**. To make sure a
    high-ping player still gets the full window on screen, the server adds the target's **one-way delay
    (half the measured ping, capped at 150 ms)** to that player's check (next point) — never to the
    drawn time.
@@ -330,10 +350,13 @@ shot that looked like a hit must not miss for no visible reason. The rules, in o
   bursts it where the server says it landed (Farhold lesson: burst on where the target **is now**,
   `GAME-GUIDE.md` "real-time skill bar").
 
-### 10.3 Targeted spells (click a target)
+### 10.3 Targeted spells (Needs target and Auto-target)
 
 No rewind needed: range and line of sight are checked with a **+2 m range allowance** and a 200 ms
-line-of-sight grace (if the target was visible within the last 200 ms, it counts).
+line-of-sight grace (if the target was visible within the last 200 ms, it counts). For an **Auto-target**
+spell cast with no valid hard target, the server runs §13.9's `autoTarget` with the aim ray from the
+`cast` message against positions rewound the same way as §10.2 (capped at 200 ms), so the pick matches
+what the player saw.
 
 ### 10.4 Dodge roll
 
@@ -357,10 +380,11 @@ only when the server confirms (no predicted "Interrupted!" that later turns out 
 |---|---|
 | **Gateway** | In the same Node process at first. Checks the sign-in ticket, loads the character, picks a realm process, then a layer (page 15 §4). |
 | **Region layers** | Objects inside the realm process. One `Region` holds the shared, read-only data (heightmap, collision, nav grid, spawn tables); each `Layer` holds only its entities and state. |
-| **Dungeon / raid / arena instances** | Objects inside the realm process, created on entry, destroyed 30 min after empty (page 15 §4.6). A Mythic raid instance id is saved against each member for the lockout. |
+| **Dungeon instances** | Objects inside the realm process, created on entry, destroyed 30 min after empty (page 15 §4). Difficulty (Normal / Challenge) and Depth are fixed when the instance is made. |
+| **Travel Methods** | A realm-wide service inside the realm process: every route's vehicles run whether or not anyone is riding, so schedules stay true (§13.8). A vehicle crossing a region border is handed to the next region's layer with its riders. |
 | **Chat, guild, market, mail, friends** | Realm-wide services inside the realm process. |
 | **Cross-realm group finder** | A small separate Node process per server region that matches queues from all realms and asks the realm processes to open instances. Stage 3+ only. |
-| **Heavy work** | Pathfinding for many mobs, loot tables for a 20-player boss: done in the tick, budgeted; if a tick exceeds budget, the layer's mob AI thinks every 2nd tick (100 ms) — never the movement. |
+| **Heavy work** | Pathfinding for many mobs, loot for a world boss with 60 eligible players: done in the tick, budgeted; if a tick exceeds budget, the layer's mob AI thinks every 2nd tick (100 ms) — never the movement. |
 
 **Region changes.** Canon has one continent in 11 regions + Highcourt. Proposal (for page 01 to
 confirm): regions are **separate maps joined at gates/passes**. Walking through a border runs a
@@ -407,9 +431,13 @@ bug came from two modules describing one surface two ways — a test asserts the
 6. **World state is not saved per character** beyond deltas (Farhold's "a place is generated, not
    stored" — `territory.js`). The world itself is data + seed.
 7. **Items are stored compactly**: `{ uid, base, rarity, quality, ilvl, affixes: [[id, value], …], unique?,
-   set?, legendary?, bound?, look? }` and **rehydrated** with the item tables at load (Emberveil's
+   set?, legendary?, sr?, srState?, sockets?, quest?, look? }` (`sr` = special rarity id, §13.3; `sockets`
+   = §13.2; `quest: true` is the only thing that stops an item moving between players — there is no binding) and **rehydrated** with the item tables at load (Emberveil's
    generated items carry each affix's name/min/max, which is 3–4× larger and goes stale if the table is
    retuned).
+8. **Not saved, on purpose**: the **hard target** (a login starts with none), a Travel Method ride in
+   progress (you log back in at the ride's **next stop**, standing on the platform — `travel.resumeAt`),
+   cast bars, cooldowns under 60 s, threat. Everything else a character carries is in `SAVE_FIELDS`.
 
 ### 12.2 JSON shapes
 
@@ -429,30 +457,42 @@ bug came from two modules describing one surface two ways — a test asserts the
   "pronouns": "she",                // lingo pronoun set id
   "avatar": { },                    // shared character schema `avatar` (shared/character-schema.md), incl. body.race
   "voice": { },                     // voice JSON (voice-lab README), from shared/voices.js voiceFor + player edits
-  "level": 14, "xp": 23150, "restedXp": 4000,
+  "level": 14, "xp": 23150,               // no rested XP (canon 00 §12.1 W11)
   "attrs": { "STR": 12, "DEX": 18, "INT": 30, "CON": 16 },   // page 07
   "perks": ["core", "arc_1", "arc_2"], "bonusPerks": 0,      // perk forest node ids (page 07)
   "spells": {
     "slots": ["druid_thornlash", "druid_mending_bloom", "druid_bear_form", null, null, null],  // ladder 1/4/10/18/28/40
     "talents": { "druid_thornlash": ["druid_thornlash_t1b"] }                                  // tiers 12/22/32/45
   },
-  "mechanic": { "callings": [6], "state": { "form": "caster" } },  // class mechanic, page 06
-  "res": { "hp": 1.0, "mana": 0.82, "fury": 0, "focus": 0 },     // fractions of max
+  "mechanic": { "callings": [6], "state": { "form": "none" }, "bound": null },  // class mechanic, page 06; `bound` = a tamed beast / bound demon id + its revive state
+  "res": { "hp": 1.0, "mana": 0.82 },       // fractions of max; the class's one resource: mana | momentum | tempo (canon §6)
   "where": {
     "region": "mossfen", "x": 812.4, "y": 31.2, "z": 1440.9, "yaw": 1.57,
     "instance": null,                       // { kind, id, entrance: {region,x,z} } when inside one
-    "bind": "reedhollow"                    // town id the hearth returns to
+    "recallStone": "lm_oakhollow_waystone"  // where the Recall Stone (it_recall_stone) returns you: a town/safe waystone or landmark id, never a dungeon or wild landmark (canon W24); a new character starts bound at its starting town's waystone — lm_first_waystone (Brightwater) or Oakhollow's (page 20 §15)
   },
+  "discovered": {                            // canon §8 + W9: the Dungeon Finder and teleports only offer what is here
+    "dungeons": ["d01_hollow_barrow", "d02_drowned_mill"],
+    "waystones": ["lm_first_waystone", "lm_reedhollow_waystone"],
+    "stations": ["tms_brightwater_yard", "tms_reedhollow_landing"]      // Travel Method stations (§13.8)
+  },
+  "travel": { "resumeAt": null },            // a stop id if the player logged out mid-ride (§12.1 rule 8)
   "unlocks": ["unl_sprint", "unl_dodge_roll", "unl_riding_1"],   // feature ladder ids, `unl_` prefix (page 07)
   "phase": ["brightwater_mill_burnt"],                  // page 15 §4.4
-  "gold": 123456,                            // cur_gold held as whole copper: 100 copper = 1 silver, 100 silver = 1 gold (00 §10) → shows 12g 34s 56c
-  "currencies": { "cur_delve": 0, "cur_oathstone": 0, "cur_glory": 0, "cur_laurels": 0, "cur_veil_sigil": 0, "cur_festival": 0, "cur_rep_vale": 3 },   // ids from page 08 §17
-  "reputation": { "vale_wardens": 1850, "fenfolk": 400 },
+  "gold": 1234,                              // whole gold; the only coin (canon 00 §4). No other currencies
+  "reputation": { "fac_wardens": 1850, "fac_greenhand": 400 },   // the seven player factions (canon 00 §12.2); tiers are page 07's
+  "professions": {                           // page 19; §13.7
+    "harvesting": { "skill": 112, "xp": 340 },               // one shared gathering skill, 1–300
+    "craft": { "id": "prof_blacksmithing", "skill": 95, "xp": 120, "recipes": ["rcp_blacksmithing_iron_longsword", "rcp_engineering_gadget_cog_1"] }   // exactly one crafting profession, or null
+  },
   "titles": ["the_barrowbreaker"], "titleShown": null,
-  "lockouts": [{ "raid": "r01_barrowking", "diff": "normal", "bosses": ["b_…"], "resets": "2026-10-07T07:00:00" }],   // weekly reset Wednesday 07:00 server time (canon 00 §4)
-  "keystone": null,                          // Mythic+ key { dungeon, level }
+  "lootLimits": {                            // weekly loot limit, ONLY Challenge-mode bosses and world bosses (canon W5)
+    "resets": "2026-10-05T06:00:00",         // Monday 06:00 server time
+    "bosses": ["b_…"]                        // bosses whose loot this character already took this week
+  },
+  "depth": { "d01_hollow_barrow": 7 },       // highest Depth cleared per dungeon (§13.10); a dungeon needs a Normal clear first
   "stats": { "kills": 812, "deaths": 9, "duels": [3, 1] },
-  "flags": { "pvp": false, "renameRequired": false },
+  "flags": { "renameRequired": false },
   "settingsSynced": { }                      // the subset of set.* that follows the character (page 04)
 }
 ```
@@ -465,14 +505,22 @@ bug came from two modules describing one surface two ways — a test asserts the
   "equipment": {                              // the 15 slots, ids from page 08 §2.1
     "head": "it9a2", "shoulders": null, "chest": "it9a3", "back": null, "hands": null,
     "waist": null, "legs": null, "feet": "it9a4", "necklace": null, "ring": null, "ring2": null,
-    "weapon": "it9a1", "offhand": null, "light": "it9b0", "mount": "it9b1"
+    "weapon": "it9a1", "offhand": null, "tool": "it9b0", "mount": "it9b1"      // `tool` holds the harvesting tool (canon §4); there is no light slot
   },
   "bags": { "slots": 40, "items": ["it9c0", "it9c1", null] },
   "bank": { "slots": 48, "items": [] },           // 48 slots from the level-11 unlock (page 07)
   "items": {                                  // every item this character owns, keyed by uid
     "it9a1": { "uid": "it9a1", "base": "longsword", "rarity": "rare", "quality": "mid", "ilvl": 14,
                "affixes": [["low_hp_dmg", 0.13], ["skill_cost_reduce", 1.96]],
-               "bound": "pickup", "look": null }
+               "sr": "sr_electrified", "srState": null,                  // special rarity (§13.3); Living keeps its kill count in srState
+               "sockets": [                                              // §13.2: kind + what is in it (a socketable uid) or null
+                 { "kind": "gem", "item": "it9d0" },
+                 { "kind": "jewel", "item": null }
+               ],
+               "look": null },
+    "it9d0": { "uid": "it9d0", "base": "gem_garnet_3", "rarity": "common", "ilvl": 20 },    // a socketed gem is an item row too, so removing it is a move
+    "it9e0": { "uid": "it9e0", "base": "jwl_prism", "rarity": "rare", "ilvl": 48,
+               "affixes": [["tag_dmg:tag_ice", 0.12], ["crit_chance", 0.03]] }         // a jewel rolls its own affixes (§13.2)
   },
   "stacks": { "potion_minor_heal": 7, "mat_iron_scrap": 42 }   // consumables and materials by id
 }
@@ -490,8 +538,6 @@ move between players; the blob holds the arrangement (which slot) and the row ho
     "q_hollow_barrow_rumours": { "step": 2, "counters": { "kill_m_undead_barrow_rat": 6 }, "started": 1733…, "tracked": true }
   },
   "done": { "q_first_harvest": 1733…, "q_calling_druid_1": 1734… },   // id → completion time
-  "daily": { "resets": "2026-10-03T15:00:00Z", "done": ["q_daily_fen_eels"] },
-  "weekly": { "resets": "2026-10-07T07:00:00", "done": [] },    // Wednesday 07:00 server time
   "events": { "ev_mill_fire": { "lastSeen": 1734…, "contributed": 0.12 } }
 }
 ```
@@ -503,8 +549,8 @@ move between players; the blob holds the arrangement (which slot) and the row ho
 achievements: {...}, settings: {...} }`.
 
 **Guild** (`guilds` row): `{ id, realm, name, emblem: { shape, color, border, bg }, motd, info, blurb,
-ranks: [{ name, perms: {...}, bank: [{ view, deposit, perDay }] }], renown, rank, perks: [...],
-bankGold, calendar: [...] }` with members in `guild_members (guild_id, character_id, rank, note,
+ranks: [{ name, perms: {...}, bank: [{ view, deposit, perDay }] }], bankGold, calendar: [...] }` (no guild renown or perks — page 15)
+with members in `guild_members (guild_id, character_id, rank, note,
 officerNote, joined)` and bank items as `items` rows owned by the guild.
 
 **Mail** (`mail` row): `{ id, realm, to_character, from_character | from_system, subject, body, gold, cod,
@@ -524,11 +570,10 @@ deposit, listed, expires }`.
 | `mail` | | |
 | `market`, `market_history` | | History = daily median per base+rarity (page 15 §14.2) |
 | `friends`, `kin`, `ignores` | | |
-| `arena_teams`, `arena_ratings` | | |
 | `economy_log` | `id`, `kind` (trade/mail/market/bank/vendor/gm), `from`, `to`, `items`, `gold`, `at`, `realm` | Kept 1 year (page 15 §18.2) |
 | `chat_log` | `realm`, `channel`, `from`, `to`, `text`, `at` | Kept 30 days |
 | `reports`, `tickets`, `mod_actions` | | Page 15 §18 |
-| `realm_state` | `realm`, `key`, `data jsonb` | World deltas: rare timers, event state that outlives a restart |
+| `realm_state` | `realm`, `key`, `data jsonb` | World deltas: rare timers, event state, world boss timers, Travel Method clocks (so a restart does not reset every schedule) |
 
 Migrations are plain `.sql` files in `server/migrations/NNNN_name.sql`, applied in order by
 `server/migrate.mjs` (records applied ones in a `schema_migrations` table).
@@ -536,7 +581,7 @@ Migrations are plain `.sql` files in `server/migrations/NNNN_name.sql`, applied 
 ### 12.4 Offline saves
 
 Offline mode (§15) keeps **the same JSON blobs** in the browser's IndexedDB (`wildmarch.v1` database,
-stores `characters`, `inventory`, `quests`, `followers`, `account`), with localStorage only for the
+stores `characters`, `inventory`, `quests`, `followers`, `account`, `world` — the offline realm's `realm_state`), with localStorage only for the
 "last played" pointer (Farhold's `save.js` pattern: every access wrapped in try/catch). A character can be
 **exported** as one JSON file and, later, **imported to a realm** once (the server re-rolls nothing, but
 checks every item against the tables and caps gold/levels to what the offline build allowed —
@@ -554,56 +599,60 @@ checks every file's shape against the table below on every test run.
 
 | File | Shape (top level) | Owner page | Notes |
 |---|---|---|---|
-| `balance.json` | `{ player, progression: { cap: 60, xpTable }, enemies: { perLevel, ranks }, followers: { perLevel, maxShareOfOwner: 0.75 }, loot, economy, pvp, combat, world: { dayMinutes: 60, nightMinutes: 15 } }` | 05/07/08 | The one knob file (Farhold `balance.json` pattern) |
+| `balance.json` | `{ player, progression: { cap: 60, xpTable }, enemies: { perLevel, ranks }, followers: { perLevel, maxShareOfOwner: 0.75 }, loot, magicFind, economy, combat, duel, depth, lootLimits: { resetDay: "monday", resetHour: 6 } }` | 05/07/08/12 | The one knob file (Farhold `balance.json` pattern). No day/night block — always daylight. `magicFind` caps are §13.6; `depth` is §13.10 |
 | `classes.json` | `{ classes: [{ id, name, role, alsoRoles, armour, weapons, resource, mechanic, companion?, voiceRole, outfit, startKit }] }` | 06 | 30 rows, canon §6 — the index the class picker and tests read |
-| `classes/<id>.json` | page 06 §19 class record: `{ id, name, role, canAlso, armour, resource, primary, secondary, weapons, starter, mechanic: { id, gauge, max }, spells: [6 ids], alternates, callings: [3 quest ids], sets, voice, colour, difficulty }` | 06 | 30 files (requested by page 06 §19); `classes.json` is built from them by a tool so the two cannot drift |
-| `spells/<classId>.json` | `{ classId, mechanic: {...}, spells: [{ id, name, slotLevel, cost, cooldown, cast, range, shape, effect: [...], statuses, fx: { element, kind, shape }, sfx, voice }], alternates: [...], talents: [{ id, spellId, tier, choice, name, changes }] }` | 06 | 30 files, one per class, so class writers never edit the same file |
-| `statuses.json` | `{ statuses: { id: { name, kind: buff/debuff/control, stacks, max, tick, dispel, aura, sfx } } }` | 05 | Aura names from `spellfx.js` `STATUS_FX` |
+| `classes/<id>.json` | page 06 class record: `{ id, name, role, hybrid, build, armour, resource: "mana"\|"momentum"\|"tempo", weapons, starter, mechanic: { id, state }, bind?: { kind: "tame"\|"bind"\|"control", ritual }, spells: [6 ids], utility: [ids], alternates, callings: [3 quest ids], sets, voice, colour, difficulty }` | 06 | 30 files; `classes.json` is built from them by a tool so the two cannot drift. `bind` = Ranger Tame Beast / Warlock Bind Demon (permanent, revived by `ritual`) or Necromancer Control Undead (temporary) — canon W32 |
+| `spells/<classId>.json` | `{ classId, mechanic: {...}, spells: [{ id, name, slotLevel, cost, cooldown, cast, targeting: "needs"\|"auto"\|"ground"\|"self"\|"ally", range, shape, tags: ["tag_…"], effect: [...], statuses, fx: { element, kind, shape }, sfx, voice }], alternates: [...], utility: [...], talents: [{ id, spellId, tier, choice, name, changes, addTags?, removeTags? }] }` | 06 | 30 files, one per class, so class writers never edit the same file. Every spell has `targeting` (§13.9) and `tags` (§13.1); a talent that changes a spell's shape may add or remove tags |
+| `statuses.json` | `{ statuses: { id: { name, kind: buff/debuff/control, stacks, max, tick, dispel, aura, sfx } } }` | 05 | Aura names from `spellfx.js` `STATUS_FX`. A damage-over-time status carries the tags of the spell that laid it (§13.1) |
+| `tags.json` | §13.1 | 05 | **(new)** The tag list and the matching rule |
 | `unlocks.json` | `{ ladder: [{ id, level?, quest?, name, card, explain, screen }] }` | 07 | The feature ladder |
-| `perks.json` | `{ arms: [...], nodes: [{ id, arm, x, y, stat, value, keystone? }] }` or generator knobs | 07 | Farhold generates the forest in `js/perks.js`; Wildmarch may keep the generator (reuse map) |
+| `perks.json` | `{ arms: [...], nodes: [{ id, arm, x, y, stat, value, capstone? }] }` or generator knobs | 07 | Farhold generates the forest in `js/perks.js`; Wildmarch may keep the generator (reuse map) |
 | `items/bases.json` | `{ weaponBases, armorBases }` | 08 | Starts as a copy of Emberveil `items.json` bases + Wildmarch additions |
-| `items/affixes.json` | `{ affixes, affixTiers, units }` | 08 | Units restated per stat (Farhold `affixes.js` lesson: fractions vs percentages) |
-| `items/rarities.json` | `{ order: ["common","uncommon","rare","epic","unique","set","legendary"], colors, gems, affixCount }` | 08 | Canon §4 rarities; colours are page 08's (Set `#2fc4b2`, **Legendary violet `#c86bff`**, canon 00 §4) |
+| `items/affixes.json` | `{ affixes, affixTiers, units }` — an affix may carry `needsTags` (the tags a skill must have for it to apply, §13.1) | 08 | Units restated per stat (Farhold `affixes.js` lesson: fractions vs percentages) |
+| `items/rarities.json` | `{ order: ["common","uncommon","rare","epic","unique","set","legendary"], colors, affixCount, sockets: { <rarity>: { <slotGroup>: { gem, jewel, soul, gadget } } }, cardFrame: { <rarity>: frameId } }` | 08/17 | Canon §4 rarities; colours are page 08's (Set `#2fc4b2`, **Legendary violet `#c86bff`**). `sockets` = how many of each kind an item of that rarity and slot group may roll (page 08 owns the numbers); `cardFrame` names page 17's item-card frame |
+| `items/special-rarities.json` | §13.3 | 08/17 | **(new)** The five `sr_` special rarities |
+| `items/gems.json`, `items/jewels.json`, `items/souls.json`, `items/gadgets.json` | §13.2 | 08/09/19 | **(new)** The four socketable kinds |
+| `items/quivers.json` | `{ bases: [{ id, name, level, dmg: [min, max], tags }], effects: [{ id: "qv_…", name, needsTags: ["tag_basic"], proc, fx }] }` | 08 | **(new)** Quivers as damage stat-sticks for bows and crossbows (the off hand), on par with foci (§14.2); an effect fires only on attacks tagged `tag_basic` |
 | `items/uniques.json` | `{ uniques: [{ id: "uq_…", base, powers, look }] }` | 08/09 | Farhold `data/uniques.json` + `tools/build-uniques.mjs` pattern |
 | `items/legendaries.json` | `{ legendaries: [{ id: "leg_…", slot, power: { id, numbers }, classId? }] }` | 09 | |
 | `items/sets.json` | `{ sets: [{ id: "set_…", classId?, pieces, bonuses: { "2": …, "4": …, "6": … } }] }` | 09 | |
-| `items/consumables.json` | `{ potions, food, scrolls, keys }` | 08 | |
-| `items/currencies.json` | `{ currencies: [{ id: "cur_…", name, earn, weeklyCap, heldCap, spentOn }], coins: { copperPerSilver: 100, silverPerGold: 100 } }` | 08 | Page 08 §17 table (`cur_gold`, `cur_delve` Delver's Marks, `cur_oathstone` Oathstones, `cur_glory`, `cur_laurels`, `cur_veil_sigil`, `cur_festival`, `cur_rep_*`) |
-| `crafting.json` | `{ materials, salvage, recipes, benches }` | 08 | Farhold `crafting.json` shape |
+| `items/consumables.json` | `{ potions, food, scrolls, keys }` | 08 | Scrolls include teleport scrolls to **discovered** waystones (page 20) |
+| `crafting.json` | `{ materials, salvage, benches }` | 08/19 | Farhold `crafting.json` shape for salvage and materials; **recipes live in `professions/recipes.json`** (§13.7) |
+| `professions/professions.json`, `professions/nodes.json`, `professions/recipes.json`, `tools.json` | §13.7 | 19 | **(new)** Harvesting, the seven crafting professions, harvest nodes, recipes. `tools.json` keeps Farhold's shape (reuse) |
+| `magic-find.json` | §13.6 | 08 | **(new)** The seven `mf_` stats and their caps |
 | `vendors.json` | `{ vendors: [{ npc, stock: [{ item, price, limit? }], buyback: true }] }` | 08 | |
-| `loot-tables.json` | `{ tables: { id: [{ item|base|table, weight, rarity? }] } }` | 08/10/12/13 | Every drop source names a table; a test checks "every item has a way to get it" (canon rule 4) |
-| `monsters.json` | `{ families, ranks, monsters: [{ id: "m_…", name, family, nature, region, levels: [min,max], role, traits, tags, temperament, rank, pack: [min,max], night, hp, hit, attackEvery, reach, speed, aggro, leash, fleeAt, abilities: ["a_…"], look, reuse?, loot: { bases, reagent, trophy } }] }` | 10 | Page 10 §12 row shape (grown from Farhold `enemies.json`) |
-| `monster-modifiers.json` | `{ modifiers: [{ id: "mod_…", name, kind: "stat"\|"mechanic", aura, icon, mult: {...}, mechanic?, excludes: [], minRegion }] }` | 10/11 | Champion/rare modifiers (page 10 §12); split out of `monsters.json` |
+| `loot-tables.json` | `{ tables: { id: { picks, gold: [min, max], rarityWeights: {...}, sr?: { <sr_id>: chance }, rows: [{ item\|base\|table, weight, rarity? }] } } }` | 08/10/12/13 | Every drop source names a table; `picks`, `gold` and `rarityWeights` are the numbers magic find moves (§13.6); a test checks "every item has a way to get it" (canon rule 4) |
+| `monsters.json` | `{ families, ranks, monsters: [{ id: "m_…", name, family, nature, region, levels: [min,max], role, traits, tags, temperament, rank, pack: [min,max], hp, hit, attackEvery, reach, speed, aggro, leash, fleeAt, abilities: ["a_…"], look, reuse?, loot: { bases, reagent, trophy }, harvest?: "node_…" }] }` | 10 | Page 10 row shape (grown from Farhold `enemies.json`). `tags` includes `tag_undead`, `tag_demon`, `tag_beast` — what Control Undead, Demonsight and Tame Beast read. **No night field**: nothing spawns by time of day. `harvest` names the skinning node the corpse becomes |
+| `monster-rarities.json` | §13.4 | 10/11 | **(new)** Champion/rare modifiers (`mod_`), greater rarities (`grr_`), exclusion groups, the open-world roll and dungeon placement. Replaces the old `monster-modifiers.json` |
 | `warbands.json` | Farhold `data/warbands.json` shape (reuse) with `members` extended by `mender` and `levels` per sub-zone | 10 | Six warbands at page 10's bands (00 §10) |
 | `abilities.json` | `{ abilities: [{ id: "a_…", mechanic: "mech_…", shape, colour, warn, damage, effects, cooldown, recovery, say }] }` | 10/11 | Page 10 §12 ability row: usually cites a `mechanics.json` row and overrides numbers |
-| `mechanics.json` | `{ kinds: { danger, void, soak, safe, targeted, beneficial, tether }, shapes: [...], warnMin: {...}, palettes: {...}, mechanics: [{ id: "mech_…", name, colour, shape, warn: { normal, heroic, mythic, openWorld }, category, damage, sound, banner, fx, counterplay, tooltip }] }` | 11 | Page 11 §27 row shape. Page 11 owns every colour, palette and warning time — this file holds page 11's values, nothing else restates them. The renderer and the server both read it |
-| `bosses/<b_id>.json` | page 11 §27 boss script: `{ id, name, hp, targetTime, enrage, voice, lines: { open, death, … "bl_…" }, phases: [{ id, until, abilities, adds, dialog }], dialog: { lines, opportunities: ["dlg_…"] }, loot, secret? }` | 11/12/13 | One file per boss (86 dungeon bosses on page 12 §19.2, plus raid and world bosses) |
-| `dungeons.json` | `{ dungeons: [{ id, region, band, map, bosses, secret, difficulties }] }` | 12 | Canon §8 |
-| `dungeons/<id>.json` | page 12 §3 template: `{ id, card: { name, region, band, entrance, quest, par: { normal, heroic, mythicPlus }, shrines, forces }, rooms, halls, doors, packs, bosses: ["b_…"], secret, loot, lights }` | 12 | One file per dungeon (page 12 §3 and §20 ask for this name). Hand-placed; `prototypes/farhold/js/dungeon-plan.js` for procedural filler and the reachability test |
-| `raids.json` + `raids/<id>.json` | `raids.json` `{ raids: [{ id, region, level, size, bosses, secret, attunement: "q_…", difficulties }] }`; `raids/<id>.json` the same shape as a dungeon file (wings, rooms, trash packs, bosses) | 13 | Canon §9. Raid entrances are Farhold `instances.json`-style mouths with `discovery: "quest"` (page 13) |
-| `world-bosses.json` | Farhold `data/worldbosses.json` schema (tier, over-level, scale, `minions`, `phases`, chest, pin) + Wildmarch's `schedule`, `site`, `abilities[]`, `scaling` | 13 | Page 13 keeps the Farhold shape and adds four fields |
+| `mechanics.json` | `{ kinds: { danger, void, soak, safe, targeted, beneficial, tether }, shapes: [...], warnMin: {...}, palettes: {...}, mechanics: [{ id: "mech_…", name, colour, shape, warn: { normal, challenge, openWorld }, category, damage, sound, banner, fx, counterplay, tooltip }] }` | 11 | Page 11 §27 row shape. Page 11 owns every colour, palette and warning time — this file holds page 11's values, nothing else restates them. The renderer and the server both read it |
+| `bosses/<b_id>.json` | page 11 §27 boss script: `{ id, name, hp, targetTime, enrage, voice, lines: { open, death, … "bl_…" }, phases: [{ id, until, abilities, adds, dialog }], dialog: { lines, opportunities: ["dlg_…"] }, loot, secret? }` | 11/12/13 | One file per boss (dungeon bosses on page 12, world bosses on page 13) |
+| `dungeons.json` | `{ dungeons: [{ id, region, band, map, entrance: "lm_…", bosses, secret, difficulties: ["normal","challenge"], depth: true }] }` | 12 | Canon §8, 16 rows (d01–d16). `entrance` is what "discovered" means (canon W9) |
+| `depth.json` | §13.10 | 12 | **(new)** Depth levels, tiers, enemy additions and modifiers |
+| `dungeons/<id>.json` | page 12 template: `{ id, card: { name, region, band, entrance, quest, par: { normal, challenge }, shrines, forces }, rooms, halls, doors, packs, raritySlots, depthPacks, bosses: ["b_…"], secret, loot, glow }` | 12 | One file per dungeon. Hand-placed; `prototypes/farhold/js/dungeon-plan.js` for procedural filler and the reachability test. `raritySlots` = §13.4 dungeon placement; `depthPacks` = packs a Depth tier switches on (§13.10); `glow` = the fixed light sources (fungi, lava, plants; page 17) — never a torch the player carries |
+| `world-bosses.json` | Farhold `data/worldbosses.json` schema (tier, over-level, scale, `minions`, `phases`, chest, pin) + Wildmarch's `schedule`, `site`, `abilities[]`, `scaling`, `lootLimit: "weekly"` | 13 | Page 13 (`13-WORLD-BOSSES.md`) keeps the Farhold shape and adds five fields |
 | `regions.json` | `{ regions: [{ id, name, band, hub, holder, size, gates: [{ to, at }], weather, ambience, palette }] }` | 01/17 | Canon §7 |
 | `world/continent.json` | page 01 recipe: `{ worldgen: { version, seed, method, width, height, metresPerCell, … }, stamps: [...], regions: "world/region-paint.png", pins: "world/pins.json", roads: "world/forced-roads.json" }` | 01 | The fixed seed + hand edits (page 01 option C); `world/region-paint.png` is one colour per region id |
-| `world/pins.json` | `{ pins: [{ id, kind, cell: [x, y], offset: [x, z] }] }` | 01 | Every `town_` / `lm_` / dungeon / raid mouth |
-| `world/forced-roads.json` | `{ roads: [{ id, points: [[x, y], …] }] }` | 01 | The Kingsroad and the Saltroad; the rest is A* |
-| `landmarks.json` + `setpieces.json` | Farhold shapes (reuse) | 01 | `lm_*` kinds and world-boss arena layouts `wb_site_*` (page 01 §22) |
+| `world/pins.json` | `{ pins: [{ id, kind, cell: [x, y], offset: [x, z], safe? }] }` | 01 | Every `town_` / `lm_` / dungeon mouth / Travel Method station. `safe: true` marks a waystone or landmark the Recall Stone may bind to |
+| `world/forced-roads.json` | `{ roads: [{ id, points: [[x, y], …] }] }` | 01 | The Kingsroad and the Saltroad; the rest is A*. Travel Method routes follow these roads where they can (§13.8) |
+| `landmarks.json` + `setpieces.json` | Farhold shapes (reuse) | 01 | `lm_*` kinds and world-boss site layouts `wb_site_*` (page 01 §22) |
 | `regions/<id>/shape.json` | `{ size, spacing, noise, brushes: [...] }` | 01 | Baked to `height.u16`, `water.u8`, `nav.u8`, `surface.u8` (§11) |
 | `regions/<id>/places.json` | `{ towns, pois, spawns, nodes, chests, waystones, phase }` | 01/10/14 | |
 | `towns.json` | `{ towns: [{ id, region, layout, npcs, services }] }` | 01 | |
 | `npcs.json` | `{ npcs: [{ id: "npc_…", name, race, gender, role, look, voice?, speech, town, services }] }` | 01 | `speech` = Lingo personality |
-| `factions.json` | `{ bands, factions: [{ id, name, short, rivals, greeting }] }` | 01/07 | Farhold `factions.json` shape |
-| `quests/story.json`, `quests/side.json`, `quests/calling.json`, `quests/unlock.json`, `quests/attune.json`, `quests/daily.json`, `quests/seasonal.json` | `{ quests: [{ id: "q_…", giver, kind, level, requires, steps, rewards, phase? }] }` (page 14 §3.2 record) | 14 | Page 14 §17's split: 116 story · 84 side · 90 calling (`q_calling_<class>_1..3`) · 19 unlock · 15 attunement · daily/weekly · ~40 seasonal |
+| `factions.json` | `{ bands, factions: [{ id: "fac_…", name, short, rivals, greeting, chapters: [{ id, name, regions }], quartermaster: { npc, stock } }] }` | 01/07 | Farhold `factions.json` shape + chapters (canon 00 §12.2: seven player factions reaching from the starting regions to 60). Standing is run by `js/factions.js` (reuse) |
+| `quests/story.json`, `quests/side.json`, `quests/calling.json`, `quests/unlock.json`, `quests/seasonal.json` | `{ quests: [{ id: "q_…", giver, kind, level, requires, steps, rewards, phase? }] }` (page 14 record) | 14 | Page 14's split: story · side · calling (`q_calling_<class>_1..3`) · unlock · seasonal. No attunement, daily or weekly files (canon W9, W20) |
 | `story-instances.json` | `{ instances: [{ id: "si_…", quest, map, spawns, scaling }] }` | 14 | Page 14 §6.13, 3 rows |
 | `job-frames.json`, `incidents.json`, `wanderers.json` | Farhold shapes, copied (reuse) | 14 | Board jobs (§11), timed sub-zone states (§14), people on the road (§13.6) — page 14 §17 "as is" |
 | `events.json` | `{ events: [{ id: "ev_…", region, area, level, trigger, phases: [...], cooldown, scaling, rewards }] }` | 14 | Wildmarch's own dynamic events (page 14 §13, 25 rows); Farhold's road-event `events.json` is reused under another name if kept |
 | `followers.json` | `{ heroes: [...], finderHire: {...} }` + reuse `mercenaries.json` | 15 | Page 15 §21 |
-| `mounts.json` | `{ mounts: [{ id, creature, speed, source }] }` | 07/08 | Creature bodies `pony`/`courser`/`elk` etc. |
-| `vehicles.json` | Farhold `data/vehicles.json` shape (reuse), boats only | 01/07 | Punt, barge, raft/skiff/cutter (boats unlock at 9, page 07) |
+| `mounts.json` | `{ mounts: [{ id, name, species, creature, speed, swim?, glide?, fly?, level, source }] }` | 07/08/17 | Creature bodies (`avatar-3d/js/creature-types.js`): the species of page 08 §24.2 — horses, elk, boars, lizards, beetles, the Raptor Runner, Crested Strider (two seats) and Horned Grazer dinosaurs, rams, giant frogs and other aquatic hybrids (`swim: true`), the Floating Stone, Clockwork Strider and Longshank Calf (canon §12.3; seven new bodies on page 17 §3.2). `fly` only for the level-60 story chain |
+| `travel/methods.json`, `travel/routes/<tm_id>.json`, `travel/stations.json` | §13.8 | 20 | **(new)** Travel Methods: kinds, routes as polylines, stations, schedules. Replaces the old boats-only `vehicles.json`; models from `avatar-3d/js/vehicles.js` + creature bodies |
 | `weapons.json` | `{ strikes, patterns, traits, familyWind, ranged }` | 05 | Farhold's `STRIKES` / `WEAPON_PATTERNS` / `WEAPON_TRAITS` / `FAMILY_WIND` / `RANGED` tables moved out of code (page 05) |
 | `chat.json` | `{ channels: [...], commands: [...], rate: {...} }` | 15 | Page 15 §9 as data |
 | `emotes.json` | `{ emotes: [{ cmd, aliases, anim, text, textTarget, inCombat }] }` | 15 | Page 15 §12 |
 | `names.json` | `{ rules, blocked, contains, lookalikes }` + generated `reserved-names.json` | 15 | `tools/build-reserved-names.mjs` reads every id file |
-| `arenas.json` | `{ maps: [...], brackets, rating }` | 15 | |
 | `bindings.json` | `{ bindings: [{ action, label, code, context }] }` | 02 | Page 02 §9's name, adopted. One table, as Farhold `settings.js` `BINDINGS` taught (a test fails if code listens for a key not in it) |
 | `settings.json` | `{ tabs: [{ id, fields: [{ key: "set.<tab>.<key>", control, values, default }] }] }` | 04 | |
 | `screens.json` | `{ screens: [{ id: "scr_…", title, opens, key? }] }` | 03 | Lets a test open every screen |
@@ -614,6 +663,407 @@ checks every file's shape against the table below on every test run.
 | `lingo/data/packs/wildmarch.json` (playground path) | Lingo pack `{ entries: [...] }` | 01/17 | Places, factions, NPCs, creatures, items with pronunciations |
 | `conversations` pack `data/topics-wildmarch.json` | conversations topic shape | 15/17 | Follower camp talk |
 | `avatar-3d/data/class-outfits.json`, `avatar-3d/data/creature-variants.json` (playground paths) | shared shapes (reuse) | 06/10/17 | Read, not copied; additive rows only (missing class outfits are `QUESTIONS.md` G4) |
+
+### 13.0 How to read the shapes below
+
+§13.1–§13.10 give the JSON shape of every file the round-2 systems need. **Numbers inside the examples
+are placeholders that show the type and scale; the owner page named in each heading owns the real
+values.** Every shape follows the file conventions above: a `_doc` string, ids with the canon prefix
+(00 §10 "Extra id prefixes"), and every knob with a reader (`dead-data.test.js`).
+
+### 13.1 Tags — `data/tags.json` (page 05 owns the list) (new)
+
+A **tag** is a label on a skill, a basic attack, an item, an affix or a status, such as *Ice*, *Area*,
+*Ranged*, *Spell*. A bonus names the tags it needs; it applies to a hit only if the hit's source carries
+**all** of them.
+
+```jsonc
+{
+  "_doc": "Tag list and matching rule. Page 05 owns the list; ids are tag_<snake>.",
+  "groups": {                                    // for the tooltip order and the Trading Post filter only
+    "element":  ["tag_physical", "tag_fire", "tag_ice", "tag_storm", "tag_poison", "tag_holy", "tag_shadow", "tag_arcane", "tag_nature"],
+    "delivery": ["tag_melee", "tag_ranged", "tag_spell", "tag_basic", "tag_projectile", "tag_channel"],
+    "shape":    ["tag_area", "tag_single", "tag_cone", "tag_line", "tag_ground"],
+    "effect":   ["tag_dot", "tag_heal", "tag_shield", "tag_control", "tag_summon", "tag_trap", "tag_movement"],
+    "creature": ["tag_undead", "tag_demon", "tag_beast", "tag_construct", "tag_elemental", "tag_humanoid"]
+  },
+  "tags": {
+    "tag_ice":   { "name": "Ice",   "icon": "ui/tags/ice.svg" },
+    "tag_area":  { "name": "Area",  "icon": "ui/tags/area.svg" },
+    "tag_basic": { "name": "Basic Attack", "icon": "ui/tags/basic.svg", "note": "weapon swings/shots and any skill classed as a basic attack; the only tag quiver effects read" }
+    // … one row per tag
+  },
+  "rules": {
+    "match": "all",                              // a bonus's needsTags must ALL be on the source (Area + Spell = an area spell)
+    "inherit": ["status", "projectile", "ground"],   // a DoT, a projectile or a ground patch carries the tags of the skill that made it
+    "talentsMayChange": true                     // a talent may addTags/removeTags on its spell (§13 spells row)
+  }
+}
+```
+
+**Where tags live**: `spells/<class>.json` `tags` on every spell; `weapons.json` gives each basic attack
+`tag_basic` + `tag_melee` or `tag_ranged` + its element; `items/*.json` bases carry tags only for search
+and set bonuses; an affix row carries `needsTags`. The one reader is `js/rules/tags.js`
+`bonusFor(sourceTags, stats)`: it sums every `tag_dmg:<tag>[+<tag>…]` stat whose tags are all in
+`sourceTags`. Stat keys encode the needed tags so the save stays a flat `[id, value]` list:
+
+| Stat key | Meaning |
+|---|---|
+| `tag_dmg:tag_ice` | +x% damage from anything tagged Ice |
+| `tag_dmg:tag_area+tag_spell` | +x% damage from anything tagged Area **and** Spell (the unique staff example, canon §12.3) |
+| `tag_cdr:tag_trap` | −x% cooldown on skills tagged Trap |
+| `tag_cost:tag_channel` | −x% resource cost on skills tagged Channel |
+
+### 13.2 Sockets — `data/items/{gems,jewels,souls,gadgets}.json` (page 08 owns the rules) (new)
+
+An item has 0–N sockets, each of one **kind**. A socket only takes a socketable of its own kind. Which
+items roll which sockets is `items/rarities.json` `sockets` (page 08).
+
+```jsonc
+// items/gems.json — a gem's effect depends on what it sits in
+{
+  "_doc": "Gems. hosts.armour is the old gem table; weapon = damage/spell damage; jewellery = secondary effects and magic find.",
+  "grades": [{ "grade": 1, "name": "Chipped", "level": 1 }, { "grade": 2, "name": "Flawed", "level": 15 }, { "grade": 3, "name": "Plain", "level": 30 }, { "grade": 4, "name": "Flawless", "level": 45 }, { "grade": 5, "name": "Radiant", "level": 60 }],
+  // ten kinds (page 08 §13.4): bloodstone, tigereye, lapis, jade, onyx, moonstone, garnet, pearl, amber, peridot.
+  // Item ids are gem_<kind>_<grade> (gem_garnet_3 = Plain Garnet); rough stones are page 19's mat_rough_<kind>_<grade>.
+  "gems": [{
+    "kind": "garnet",
+    "name": "Garnet",
+    "colour": "#b3202c",
+    "hosts": {                                   // host group = the slot group of the item it is socketed into
+      "armour":    { "stat": "resistAll",            "perGrade": [6, 10, 15, 21, 30] },
+      "weapon":    { "stat": "addedAs:tag_fire",     "perGrade": [0.03, 0.05, 0.07, 0.10, 0.14] },
+      "jewellery": { "stat": "mf_gold",              "perGrade": [0.05, 0.08, 0.12, 0.17, 0.25] }
+    }
+  }],                                            // values copied from page 08 §13.4, which owns them
+  "hostGroups": {                                // slot → host group
+    "weapon": "weapon", "offhand": "weapon",
+    "head": "armour", "shoulders": "armour", "chest": "armour", "back": "armour", "hands": "armour",
+    "waist": "armour", "legs": "armour", "feet": "armour",
+    "necklace": "jewellery", "ring": "jewellery", "ring2": "jewellery"
+  }
+}
+
+// items/jewels.json — a jewel is a small item that rolls its own affixes and rarity
+{
+  "bases": [{ "id": "jwl_prism", "name": "Prism Jewel", "level": 20, "fits": ["weapon", "armour", "jewellery"] }],
+  "rarities": { "uncommon": { "affixes": [1, 2] }, "rare": { "affixes": [3, 4] }, "unique": { "fixed": true } },
+  "affixPool": ["tag_dmg:*", "crit_chance", "crit_mult", "attack_speed", "cast_speed", "mf_*", "…"],   // page 08 owns the pool and ranges
+  "uniques": [{ "id": "jwl_uq_the_long_winter", "name": "The Long Winter", "affixes": [["tag_dmg:tag_ice", 0.25]], "power": "pw_…" }]
+}
+
+// items/souls.json — rare; each adds a behaviour, like a legendary power
+{
+  "souls": [{
+    "id": "soul_tidecaller",
+    "name": "Soul of the Tidecaller",
+    "source": ["b_…", "q_…"],                    // where it drops (canon rule 4: every item has a way to get it)
+    "requires": {                                // any field may be absent
+      "hostGroup": "weapon",                     // weapon | armour | jewellery
+      "slot": null,                              // or a single slot, e.g. "chest"
+      "class": null,                             // or a class id
+      "build": null,                             // melee | ranged | caster
+      "tags": ["tag_spell"]                      // the soul's power only affects skills with these tags
+    },
+    "power": { "id": "pw_soul_tidecaller", "kind": "proc", "chance": 0.15, "on": "hit", "does": "…" },   // kind: proc | changeSkill | newEffect (canon §12.3)
+    "limit": 1                                   // at most N of this soul worn at once
+  }]
+}
+
+// items/gadgets.json — crafted by Engineers; the player picks the stats
+{
+  "gadgets": [{
+    "id": "gdg_cog",
+    "name": "Tuned Cog",
+    "recipe": "rcp_engineering_gadget_cog_1",
+    "level": 25,
+    "fits": ["armour", "jewellery"],
+    "choose": 2,                                 // how many lines the crafter picks from the menu
+    "menu": [                                    // each line has a fixed value; stronger than a gem, weaker than a good jewel
+      { "stat": "CON", "value": 12 },
+      { "stat": "tag_dmg:tag_trap", "value": 0.06 },
+      { "stat": "mf_rarity", "value": 0.04 }
+    ]
+  }]
+}
+```
+
+Saved on the host item as `sockets: [{ kind, item }]` (§12.2). A socketed thing is its own item row, so
+moving it in or out is an ordinary item move and cannot duplicate (§12.1 rule 3).
+
+### 13.3 Special rarities — `data/items/special-rarities.json` (page 08 numbers, page 17 art) (new)
+
+A **special rarity** sits on top of an Uncommon-or-better item's normal rarity. The icon is an original SVG
+(never an emoji) drawn before the item's name in chat, tooltips, loot lines and the Trading Post.
+
+```jsonc
+{
+  "_doc": "Five special rarities. Page 08 owns the numbers, page 17 the card look and the icons.",
+  "minRarity": "uncommon",                      // canon: Uncommon-or-better
+  "rarities": [
+    { "id": "sr_electrified", "name": "Electrified", "icon": "ui/sr/electrified.svg", "card": "card_sr_electrified",
+      "effect": { "kind": "proc", "on": "hit", "chance": 0.10, "does": "chain lightning, 3 jumps" },
+      "chanceFrom": { "grr_electrified": 5.0 } },                       // an Electrified monster drops Electrified items more often (×5)
+    { "id": "sr_starwoven",   "name": "Starwoven",   "icon": "ui/sr/starwoven.svg",   "card": "card_sr_starwoven",
+      "effect": { "kind": "extraAffix", "count": 1, "pool": "starwoven" } },   // one affix past the normal maximum, from a special pool
+    { "id": "sr_twinned",     "name": "Twinned",     "icon": "ui/sr/twinned.svg",     "card": "card_sr_twinned",
+      "effect": { "kind": "rollTwice", "keep": "better" } },                   // every affix rolled twice, the better kept
+    { "id": "sr_ancient",     "name": "Ancient",     "icon": "ui/sr/ancient.svg",     "card": "card_sr_ancient",
+      "effect": { "kind": "overRoll", "min": 0.10, "max": 0.20 } },            // every value 10–20% above its normal maximum
+    { "id": "sr_living",      "name": "Living",      "icon": "ui/sr/living.svg",      "card": "card_sr_living",
+      "effect": { "kind": "grows", "per": "kill", "steps": [100, 400, 1000, 2500], "bonusPerStep": 0.04 } }   // srState = kill count
+  ],
+  "baseChance": 0.002,                           // per item roll before magic find; page 08 owns it
+  "depthBonus": "depth.json tiers[].srChance"    // high Depth raises it (§13.10)
+}
+```
+
+The chat link carries `sr` so the server's link check (page 15) proves the icon is real.
+
+### 13.4 Monster rarities — `data/monster-rarities.json` (page 10 owns the lists) (new)
+
+```jsonc
+{
+  "_doc": "Champion/rare modifiers (mod_), greater rarities (grr_), exclusion groups, open-world roll, dungeon placement.",
+  "ranks": {
+    "champion": { "nameColour": "#5b8cff", "mods": 1, "shared": true,  "pack": [3, 5] },    // whole pack, blue names, one shared modifier
+    "rare":     { "nameColour": "#f2c94c", "mods": [2, 3], "minions": [2, 4] }             // yellow name + minions
+  },
+  "modifiers": [                                 // champion/rare affixes
+    { "id": "mod_swift", "name": "Swift", "mult": { "speed": 1.3, "attackEvery": 0.8 }, "group": null, "minLevel": 5 },
+    { "id": "mod_vampiric", "name": "Vampiric", "mechanic": "heal 20% of damage dealt", "group": null, "minLevel": 12 }
+  ],
+  "greater": [                                   // big spikes, layered on top of any rank
+    { "id": "grr_giant",       "name": "Giant",       "group": "size",    "mult": { "hp": 3.0, "hit": 1.6, "scale": 1.8 }, "badge": "ui/grr/giant.svg" },
+    { "id": "grr_flaming",     "name": "Flaming",     "group": "element", "aura": "burn", "mechanic": "mech_fire_trail", "badge": "ui/grr/flaming.svg", "dropsSr": null },
+    { "id": "grr_electrified", "name": "Electrified", "group": "element", "aura": "static", "mechanic": "mech_arc_pulse", "badge": "ui/grr/electrified.svg", "dropsSr": "sr_electrified" },
+    { "id": "grr_frozen",      "name": "Frozen",      "group": "element", "aura": "chill", "mechanic": "mech_frost_ring", "badge": "ui/grr/frozen.svg" }
+  ],
+  "exclusion": {                                 // at most ONE greater rarity per group on a monster
+    "size": 1, "element": 1                      // Giant + Flaming is fine; Flaming + Electrified never
+  },
+  "openWorld": {                                 // rolled at random when a pack spawns
+    "champion": 0.08, "rare": 0.04,
+    "greater": { "single": 0.03, "wholePack": 0.003, "second": 0.15 }   // chance a monster gets one; a whole pack; a second (other group)
+  },
+  "rewards": { "champion": { "picks": 1.5 }, "rare": { "picks": 2.5 }, "greaterEach": { "picks": 1.5, "rarity": 0.25 } }
+}
+```
+
+**Dungeons do not roll at random.** A dungeon file's `raritySlots` places them on purpose — you know a
+rare pack will be in that room, not which one:
+
+```jsonc
+"raritySlots": [
+  { "room": "r3", "pick": 1, "from": ["p3a", "p3b", "p3c"], "rank": "rare" },       // one of these three packs is the rare
+  { "room": "r5", "pick": 1, "from": ["p5a", "p5b"], "rank": "champion", "greater": ["grr_giant"] }
+]
+```
+
+`js/rules/monster-rarity.js` `roll(spawn, rng)` honours `exclusion` for both paths; `monster-rarity.test.js`
+rolls 100,000 open-world spawns and asserts no monster ever carries two `element` greater rarities.
+
+### 13.5 Quivers — `data/items/quivers.json` (page 08 owns the numbers) (new)
+
+A quiver is the off hand of a bow or crossbow user: a **damage stat-stick** (its `dmg` range adds to the
+weapon's basic attack), built the way Farhold's foci are (`js/foci.js` `FOCUS_BASES` + `installFoci`,
+§14.2). Some quivers roll one `qv_` effect — fire arrows, exploding arrows, multi-shot — whose
+`needsTags: ["tag_basic"]` limits it to basic attacks and skills tagged Basic Attack (canon §12.3). The
+effect reader is the same `tags.js` rule as §13.1, so no second check exists.
+
+### 13.6 Magic find — `data/magic-find.json` (page 08 owns the numbers) (new)
+
+```jsonc
+{
+  "_doc": "Seven magic-find stats. Values are fractions (0.10 = +10%) except mf_prof_skill, a flat +N.",
+  "stats": {
+    "mf_gold":       { "name": "Gold find",              "unit": "fraction", "cap": 1.0,  "reads": "loot-tables gold" },
+    "mf_quantity":   { "name": "Item quantity",          "unit": "fraction", "cap": 0.5,  "reads": "loot-tables picks" },
+    "mf_rarity":     { "name": "Item rarity",            "unit": "fraction", "cap": 1.0,  "reads": "loot-tables rarityWeights (shifts weight from common upward)" },
+    "mf_xp":         { "name": "Experience gain",        "unit": "fraction", "cap": 0.3,  "reads": "rpg.killXpFor / eventXp" },
+    "mf_rep":        { "name": "Reputation gain",        "unit": "fraction", "cap": 0.3,  "reads": "factions.adjust" },
+    "mf_prof_skill": { "name": "Profession skill",       "unit": "flat",     "cap": 25,   "reads": "professions effectiveSkill" },
+    "mf_prof_xp":    { "name": "Profession experience",  "unit": "fraction", "cap": 0.5,  "reads": "professions gainXp" }
+  },
+  "diminishing": { "after": 0.5, "rate": 0.5 }   // past +50%, each point counts half (page 08 owns it)
+}
+```
+
+**Where drop tables read it**: `js/sim/loot.js` `roll(table, killer, rng)` reads the killer's summed
+`mf_quantity` (more `picks`), `mf_rarity` (shifts `rarityWeights`) and `mf_gold`. Personal loot means
+every eligible player rolls with **their own** magic find. A `one-owner.test.js` row asserts each `mf_`
+stat is applied in exactly one function (memory note *one multiplier, two owners*).
+
+### 13.7 Harvesting and professions — `data/professions/*.json` + `data/tools.json` (page 19 owns the rules) (new)
+
+```jsonc
+// professions/professions.json
+{
+  "harvesting": {
+    "id": "prof_harvesting", "max": 300,
+    "kinds": ["mine", "skin", "herb", "timber", "fish"],     // one shared skill covers all (canon §12.3)
+    "xpCurve": { "base": 20, "growth": 1.035 },
+    "toolFor": { "mine": "pick", "skin": "knife", "herb": "sickle", "timber": "axe", "fish": "rod" }
+  },
+  "crafting": {
+    "pickOne": true,                             // a character has exactly one; changing it is page 19's rule
+    "max": 300,
+    "list": ["prof_blacksmithing", "prof_leatherworking", "prof_tailoring", "prof_jewelcrafting",
+             "prof_enchanting", "prof_engineering", "prof_alchemy"]
+  }
+}
+
+// professions/nodes.json — what a harvest node is
+{
+  "nodes": [{
+    "id": "node_iron_vein", "kind": "mine", "skill": 75, "toolTier": 2,
+    "yield": { "mat_iron_ore": [2, 4], "gem_rough_garnet": 0.05 },
+    "respawnS": 300, "perPlayer": true,          // personal node taps: each player can harvest the same node once per respawn
+    "regions": ["greyridge", "frostmantle"]
+  }]
+}
+
+// professions/recipes.json
+{
+  "recipes": [{
+    "id": "rcp_blacksmithing_iron_longsword", "profession": "prof_blacksmithing", "skill": 60,
+    "learn": { "trainer": "npc_…", "cost": 12 },  // or { "drop": "table_…" } / { "faction": "fac_deepforge_clans", "tier": "trusted" }
+    "needs": { "mat_iron_bar": 6, "mat_leather_strip": 2 }, "bench": "bench_anvil",
+    "makes": { "base": "longsword", "rarity": "uncommon" },
+    "skillUp": { "orange": 60, "yellow": 75, "green": 90, "grey": 105 }   // skill at which the chance to gain a point falls
+  }]
+}
+```
+
+`data/tools.json` keeps Farhold's shape (tool bases, tiers, speed/yield/reach by rarity) — minus the
+scanner rows. `canWork(player, node)` = the tool in the `tool` slot matches `toolFor[kind]`, its tier
+≥ `node.toolTier`, and `harvesting.skill + mf_prof_skill ≥ node.skill`. The character keeps
+`professions` (§12.2).
+
+### 13.8 Travel Methods — `data/travel/*.json` (page 20 owns the rules) (new)
+
+A **Travel Method** carries riders along a fixed **route** — a polyline (a list of points) over real
+ground — between **stations**. It is faster than walking and the riders cannot be hit or hurt by weather.
+
+```jsonc
+// travel/methods.json — the kinds
+{
+  "methods": {
+    "tm_wagon":   { "name": "Road wagon",     "model": "vehicles:covered_wagon", "speed": 14, "seats": 8,  "depart": "bus",       "busWaitS": 45, "busMinRiders": 1 },
+    "tm_strider": { "name": "Great strider",  "model": "creature:strider",       "speed": 18, "seats": 10, "depart": "bus",       "busWaitS": 60 },
+    "tm_barge":   { "name": "River barge",    "model": "vehicles:barge",         "speed": 12, "seats": 20, "depart": "scheduled" },
+    "tm_rail":    { "name": "Stone rail car", "model": "vehicles:rail_car",      "speed": 26, "seats": 30, "depart": "scheduled" },
+    "tm_flyer":   { "name": "Great flyer",    "model": "creature:griffin",       "speed": 30, "seats": 5,  "depart": "onDemand" }
+  },
+  "_departDoc": "bus = leaves when full or busWaitS after the first rider boards; scheduled = runs a timetable whether or not anyone waits, board while it is docked; onDemand = leaves at once for the party that bought the ride",
+  "protection": { "untargetable": true, "weatherImmune": true, "dismountOnly": "at a stop" },
+  "walkSpeed": 5.4                                // for the 'much faster than walking' check (test asserts speed >= 2.5 × walkSpeed)
+}
+
+// travel/stations.json
+{ "stations": [{ "id": "tms_brightwater_yard", "name": "Brightwater Wagon Yard", "region": "hearthvale", "at": [412.0, 18.4, 903.5], "board": 8, "methods": ["tm_wagon"] }] }
+
+// travel/routes/tm_wagon_kingsroad.json — one file per route
+{
+  "id": "tm_wagon_kingsroad",
+  "method": "tm_wagon",
+  "stops": [                                      // stations in order, with the index of the polyline point they sit on
+    { "station": "tms_brightwater_yard", "point": 0, "dwellS": 20 },
+    { "station": "tms_highcourt_south_gate", "point": 214, "dwellS": 20 }
+  ],
+  "loop": "pingpong",                             // pingpong | loop
+  "polyline": [[412.0, 18.4, 903.5], [415.1, 18.6, 911.0]],   // x, y, z metres, resampled every 3 m (Farhold roadplan LANE_SPACING)
+  "roads": ["kingsroad"],                         // the forced road it follows, if any
+  "schedule": { "firstS": 0, "everyS": 300 },     // scheduled only: seconds after the realm's route clock starts
+  "snapBack": {
+    "maxOffRouteM": 4,                            // further than this from the polyline…
+    "maxDropM": 3,                                // …or falling more than this below the route height…
+    "inWater": true,                              // …or ending up in water the route does not cross
+    "graceS": 0.5,                                // for this long
+    "to": "nearestPointAhead"                     // → put back on the nearest route point not behind its progress
+  },
+  "detour": null                                  // an event may set a temporary polyline (a washed-out bridge); the same rules apply to it
+}
+```
+
+**Run on the server** (`js/sim/travel.js`): each vehicle holds `{ route, progress (metres along the
+polyline), state: docked | running | waiting, riders[] }`. Position = the polyline at `progress`, so a
+vehicle cannot drift by construction; physics (a cart bumped off a bridge by a knockback, a creature
+path around a blocker) only offsets it, and the snap-back rule resets that offset. **Bus-style**: a
+docked bus shows a countdown from the first boarding; it leaves at `busWaitS` or when `seats` are full;
+a party boards together with one `travel board` from its leader (page 15 describes the online flow).
+**Scheduled**: vehicles run on the route clock (`realm_state`); stations show the next arrival; you can
+only board while it is docked. Riders are untargetable and ignore weather. On logout mid-ride the
+character is saved at the next stop (§12.1 rule 8). The **client** is told the route id and `progress`
+at 4 Hz and moves the vehicle along the same polyline itself.
+
+Routes are baked by `tools/bake-routes.mjs` from `world/forced-roads.json` and hand-placed points,
+using Farhold's road code (§14.2): `roadplan.js` (`resample`, `smoothPoints`, `gradeHeights`),
+`road-fold.js` (switchbacks on steep climbs), `bridge-plan.js` + `ground.js` (deck heights, so a
+route over a bridge sits on the deck), and `haulpath.js`'s A* for the parts between forced roads.
+`travel.test.js` asserts: every route's polyline stays on ground or deck (the *water staircase* rule —
+drawn vs measured agree), speed ≥ 2.5× walking, every stop's `point` is within 2 m of its station, and a
+vehicle pushed 10 m off a bridge is back on its route within `graceS` + one tick.
+
+### 13.9 Targeting state (page 02 owns the model) (new)
+
+```jsonc
+// runtime only — never saved (§12.1 rule 8)
+"targeting": {
+  "target": "e_48213",        // the hard target: an entity id, your own id (F1), a party member (F2–F5), or null
+  "setBy": "tab",             // the last thing that set it (for debugging): tab | shiftTab | click | self | party | clear
+  "tabOrder": ["e_48213", "e_48190", "e_48222"]    // client-side Tab order, nearest-in-front first; never sent
+}
+```
+
+Rules (`js/rules/targeting.js`, pure):
+
+1. **Only two things change `target`**: a `target` message from the player, or the target dying /
+   despawning / leaving 150 m (then it becomes `null`, reason `died` or `gone`). Nothing else — not a
+   closer enemy, not whoever hit you last, not an Auto-target cast unless the setting below is on.
+2. Spell targeting kinds (`spells/<class>.json` `targeting`): `needs` (refused without a valid target of
+   the right side — heals and buffs need a friendly one), `auto`, `ground`, `self`, `ally`.
+3. `autoTarget(candidates, aim, spell)` for an `auto` spell with no valid hard target: filter to valid
+   targets within the spell's range and line of sight, then pick the one **closest to the aim point**
+   (the ground point under the reticle, or the closest approach of the aim ray), ties broken by distance
+   from the caster. If `set.combat.autoTargetSetsTarget` (page 04) is on, it becomes the hard target.
+4. Tab order: enemies within 40 m inside a 90° cone in front of the camera, nearest first; Tab walks it,
+   Shift+Tab walks back.
+
+**Reuse**: Farhold's uncommitted `js/targetpick.js` (round 28) is the geometry to copy for "what the
+reticle is on" — `lookedAt(enemies, ray)` (inside the body's silhouette wins, else the smallest angle
+within `LOOK_SLACK`), `bodyCentreY`, `bodyRadius`. Wildmarch uses `lookedAt` for **click targeting and
+the Auto-target aim point only**. Its `chooseTarget` stickiness (look > recently looked > last struck >
+facing guess) is the Farhold model canon W8 rejects, so it is **not** reused: the target frame shows
+the hard target and nothing else. `targeting.test.js` asserts the target never changes across 10,000
+ticks of a scripted fight where closer enemies spawn and other enemies hit the player.
+
+### 13.10 Depth — `data/depth.json` (page 12 owns the numbers) (new)
+
+```jsonc
+{
+  "_doc": "Depth: a dial on any dungeon cleared on Normal. No timer, no keys.",
+  "unlock": { "needs": "normalClear" },          // per dungeon; the Finder offers Depth 1..(highest cleared + 1)
+  "level": { "perDepth": 3, "cap": 60 },         // dungeon level = min(60, band top + 3 × depth)
+  "past60": {                                    // once the dungeon level hits 60, each further depth:
+    "hp": 1.12, "damage": 1.08,                  // multiplied per depth past the one that reached 60
+    "packSize": 0.05                             // +5% monsters per pack per depth, rounded per pack
+  },
+  "tierEvery": 5,                                // depth 5, 10, 15… each adds a tier
+  "tiers": [
+    { "tier": 1, "addPacks": true, "newTypes": ["m_rift_…"], "abilities": ["a_…"], "modifiers": 1, "srChance": 1.5, "rewards": { "rarity": 0.10, "jewel": 0.02, "soul": 0.001 } },
+    { "tier": 2, "modifiers": 2, "srChance": 2.0, "rewards": { "rarity": 0.20, "jewel": 0.04, "soul": 0.002 } }
+  ],
+  "modifiers": [                                 // our own, tied to the Tear (canon W3); rolled per run, shown on the Finder card
+    { "id": "dm_tear_pressure", "name": "Tear Pressure", "does": "void zones last 50% longer" },
+    { "id": "dm_restless",      "name": "Restless Dead", "does": "slain undead rise once at 30% health" },
+    { "id": "dm_split_sky",     "name": "Split Sky",     "does": "every 45 s a storm line crosses the room" }
+  ]
+}
+```
+
+The run's `{ dungeon, difficulty, depth, modifiers }` is fixed when the instance is made (§11). Clearing
+a Depth writes `character.depth[dungeon]` (§12.2).
 
 ---
 
@@ -635,7 +1085,7 @@ prototypes/wildmarch/
   js/offline/             local-server worker entry + IndexedDB saves
   data/                   §13
   server/                 Node-only: main.mjs, gateway, db, migrations, deploy scripts
-  tools/                  bake-region, validate-data, sim-wildmarch, bot-client, build-reserved-names
+  tools/                  bake-region, bake-routes, validate-data, sim-wildmarch, bot-client, build-reserved-names
   tests/                  node tests (*.test.js) and Playwright specs (*.spec.js)
 ```
 
@@ -653,20 +1103,24 @@ reuses" note).
 | Path | What for | Import/copy | Changes needed |
 |---|---|---|---|
 | `prototypes/farhold/js/rpg.js` | Stats, XP, levels, equipment, damage, loot rolls | Copy → `js/rules/rpg.js` | cap 60 on canon's smooth XP curve `600 × 1.107^(L−1)` (page 07) — it **replaces** Farhold's stretched `setLevelCap` curve (00 §4); spell ladder 1/4/10/18/28/40; canon rarities (7) instead of Emberveil's 4 names (page 08 maps them); remove planet bands; `gearLook` stays client-side |
-| `prototypes/farhold/js/skills.js` | Skill bar engine: cooldowns, costs, plans, statuses (`applyStatus`, `tickStatuses`, `slowOf`, `buffsOf`, `outgoingFrom`, `incomingFrom`) | Copy → `js/rules/skills.js` | Six slots on the canon ladder; new shapes (cone, line, ring, ground target, charge, channel, cast time, interruptible); per-class resources Fury/Focus/Mana + class gauges; **keep one owner for every multiplier** (R22's squared spell power) — a test asserts `spellPower` appears in exactly one function |
+| `prototypes/farhold/js/skills.js` | Skill bar engine: cooldowns, costs, plans, statuses (`applyStatus`, `tickStatuses`, `slowOf`, `buffsOf`, `outgoingFrom`, `incomingFrom`) | Copy → `js/rules/skills.js` | Six slots on the canon ladder; new shapes (cone, line, ring, ground target, charge, channel, cast time, interruptible); per-class resources Mana / Momentum / Tempo + class mechanic state; `tags` on every plan (§13.1); Needs target / Auto-target / Ground / Self (§13.9); **keep one owner for every multiplier** (R22's squared spell power) — a test asserts `spellPower` appears in exactly one function |
 | `prototypes/farhold/js/skilltalents.js` | Per-spell talent trees folded into the plan | Copy | Tiers at 12/22/32/45 (canon), 2–3 choices, ids `<spellid>_t<tier><a|b|c>` |
 | `prototypes/farhold/js/perks.js` | The perk forest | Copy | One point per level from 2 (59 total, canon); node set per page 07; "Kept Company" arm becomes follower power (page 15 §21.2) |
-| `prototypes/farhold/js/affixes.js` | Affix units, floors, caps, slot rules, item levels, tiers | Copy | New tiers to item level 60+ |
+| `prototypes/farhold/js/affixes.js` | Affix units, floors, caps, slot rules, item levels, tiers | Copy | Item level 1–60 only (canon: no item level above 60); `tag_dmg:*` stat keys (§13.1); `mf_` stats (§13.6) |
 | `prototypes/farhold/js/effects.js` | Every affix stat and legendary power as real-time hooks | Copy | Wildmarch legendaries/uniques added; keep the "nothing is inert" test |
 | `prototypes/farhold/js/uniques.js` + `data/uniques.json` + `tools/build-uniques.mjs` | Uniques and their powers | Copy | Ids `uq_…`; the "every unique's power ran twice" test (R23) comes too |
-| `prototypes/farhold/js/weapons.js` | Weapon patterns (swing sequences), dual wield, two-handers, staves, wands | Copy | Remove tool/harvest paths; keep `WEAPON_TRAITS` |
+| `prototypes/farhold/js/weapons.js` | Weapon patterns (swing sequences), dual wield, two-handers, staves, wands | Copy | Keep `WEAPON_TRAITS`; every basic attack gets `tag_basic` + its delivery tag (§13.1). Harvesting uses the tool slot (`tools.js`), not the weapon |
 | `prototypes/farhold/js/combat-feel.js` | Hit-stop, shake, knockback, stagger with diminishing returns | Import (pure) | Server uses knockback/stagger numbers; client uses the feel |
-| `prototypes/farhold/js/gear.js` | Mounts, lights, quivers as items | Copy | Drop boats/ships; mounts from `mounts.json` |
-| `prototypes/farhold/js/foci.js` | Caster off-hand foci + set | Import | — |
+| `prototypes/farhold/js/gear.js` | Mounts and quivers as items | Copy | **Drop lights** (no light slot, canon §4) and boats/ships; mounts from `mounts.json`; quivers keep R10's "they add damage, not armour" rule and move to `items/quivers.json` (§13.5) |
+| `prototypes/farhold/js/foci.js` | Caster off-hand foci + set; **the model quivers are built on** (a base table + `installFoci`-style injection at load, balanced as off-hand damage stat-sticks) | Import (foci) + pattern (quivers) | Foci and quivers both give tag bonuses (§13.1) |
 | `prototypes/farhold/js/followers.js` + `hire.js` + `data/mercenaries.json` | Follower rules, slots, scaling, broker board | Copy | Page 15 §21: party-slot followers, follower slots at 8/15/25/35 (page 07; 00 §10), hero kind, finder hire |
 | `prototypes/farhold/js/questrewards.js` | One payer for every turn-in path | Copy | Wildmarch reward kinds |
 | `prototypes/farhold/js/quests.js` | Job model | Copy (partial) | Remove `planet.js` import; quest kinds per page 14 |
-| `prototypes/farhold/js/factions.js` | Standing that spreads to rivals | Import | Wildmarch factions data |
+| `prototypes/farhold/js/factions.js` + `data/factions.json` | Standing that spreads to rivals at a third (`RIVAL_SHARE`), bands, `createStandings`, `ranked` | Import | Seven `fac_` player factions with chapters (canon 00 §12.2); `holderFor` (zone holders) is not used — regions have fixed holders; `mf_rep` multiplies gains in exactly one place |
+| `prototypes/farhold/js/tools.js` + `data/tools.json` | The **tool slot**: `makeTool`, `toolTierOf`, `toolSpeed`, `toolYield`, `toolReach`, `canWork`, `createGathering`, `WORK_CLIPS` (dig/chop/forage animations) | Copy | Harvesting (§13.7): tool kinds pick/knife/sickle/axe/rod; skill check added to `canWork`; drop `buildable`, the scanner (`createScanner`, `SCANNER_DEVICES`) and the held-mode wheel (`HELD_MODES` — removed in Farhold R25 too) |
+| `prototypes/farhold/js/harvestinfo.js`, `props.js` (harvest ledger only) | Gather bar text, felled/cleared ledger | Pattern | Per-player node taps (§13.7) |
+| `prototypes/farhold/js/targetpick.js` (round 28, uncommitted) | `lookedAt`, `bodyCentreY`, `bodyRadius` — which body the reticle is really on | Copy (those three) | Click targeting and the Auto-target aim point only; `chooseTarget`'s sticky fallback is **not** reused (§13.9) |
+| `prototypes/farhold/js/roadplan.js`, `road-fold.js`, `bridge-plan.js`, `ground.js`, `haulpath.js` | Road lanes (`resample`, `smoothPoints`, `gradeHeights`, `planLane`, `ROAD_RANK`), switchbacks (`foldClimbs`), bridge decks, one ground answer (`groundAt`, `deckAt`, `wetAt`), A* over terrain | Copy | Baking Travel Method routes (`tools/bake-routes.mjs`, §13.8) and the server's route/ground answer. `haulpath.js` loses its haul-throughput half |
 | `prototypes/farhold/js/retrain.js` | The Unbinder (take back a spell/perk/talent for gold) | Copy | Page 07 decides whether retraining costs gold |
 | `prototypes/farhold/js/dungeon-plan.js` | Room/corridor layout, pure | Import | Only for procedural filler rooms; bosses are hand-placed |
 | `prototypes/farhold/js/zones.js` | Level bands | — | Not reused: bands are canon data now |
@@ -678,10 +1132,10 @@ reuses" note).
 | `lingo/js/lingo.js`, `memory.js`, `relations.js`, `context.js` | NPC and follower speech, memories, feelings, scenes | Import | Server runs `lingo.speak` to pick lines; Wildmarch vocabulary pack |
 | `conversations/js/conversations.js` | Follower camp talk | Import | Wildmarch topic pack |
 | `namegen/js/namegen.js` | Names for generated NPCs, mercenaries, rare elites | Import | Story NPCs are hand-named (page 01) |
-| `worldgen/js/weather.js` | Weather states and clock from climate | Import | Realm-seeded clock per region |
+| `worldgen/js/weather.js` | Weather states and clock from climate | Import | Realm-seeded clock per region; weather only — the sky has no time of day |
 | `worldgen/js/noise.js` | Noise for region baking | Import (tools) | — |
 | `avatar-3d/js/creature-types.js`, `chibi2-races.js`, `class-outfits.js` | Body plan table, race parameters, class outfits — all Three.js-free | Import | — |
-| `meters/js/meter.js` | Combat record + reports | Import | Fed from server `dmg` events; the raid meter |
+| `meters/js/meter.js` | Combat record + reports (every hit/heal/absorb/status/death, drill-down by source and target) — as used in Emberveil 2 | Import | Fed from server `dmg` events; one record per dungeon fight, per world-boss fight and per run (canon W16) |
 
 **Client only (Three.js / DOM / audio)**
 
@@ -691,15 +1145,15 @@ reuses" note).
 | `avatar-3d/js/chibi2.js` (+ `chibi2-body/face/hats/gear/geometry/motion/weapons/weapon-ids.js`) | Every humanoid: players, NPCs, humanoid enemies | Import | **LOD** (a lower-detail body past 40 m) and a cheap far stand-in do not exist yet (CHIBI2.md "no LOD system") — new work, page 17 §7 |
 | `avatar-3d/js/creatures.js` | Beasts, druid/dragon forms, mounts | Import | New body plans only if page 10 needs them |
 | `avatar-3d/js/spellfx.js` + `spellfx-batched.js` | All spell effects and status auras | Import | `warm()` at load; lights never toggled (memory note *shader recompile stutter*) |
-| `avatar-3d/js/vehicles.js` | — | Not needed | — |
+| `avatar-3d/js/vehicles.js` | Travel Method models: hand cart, covered wagon, ox cart, closed coach… with creature bodies in the shafts, `metrics()` for seat points | Import | New models for barge, rail car and flyer saddles (page 17); seat points for up to 30 riders |
 | `assets/js/assets.js` + `assets/data/fx/*.svg` + `assets/data/ui/` | FX sprites, UI art | Import | New UI art for Wildmarch |
 | `prototypes/farhold/js/actors.js` | One interface over Chibi 2 + creatures; `setActorAnim` | Copy (view half) | Split: AI/threat/`EnemyField` move to `js/sim/` (pure); bodies stay in `js/render/actors.js` |
 | `prototypes/farhold/js/mesh-merge.js` | Fold a creature into one skinned mesh per material (1,377 → 86 meshes) | Import | — |
 | `prototypes/farhold/js/figure3d.js` | Character on the title / select screen | Copy | Realm/character-select layout |
 | `prototypes/farhold/js/appearance.js`, `bodypresets.js`, `classwear.js`, `titlelook.js` | Appearance editor, race presets, class starting look | Copy | Canon four races |
 | `prototypes/farhold/js/combat-fx.js` | Swing arcs, arrows, impact puffs | Copy | Server-driven |
-| `prototypes/farhold/js/light.js`, `nightlights.js` | Torch, world lights, the night floor | Copy | Keep "lights always visible, intensity 0" rule |
-| `prototypes/farhold/js/graphics.js`, `gfx.js`, `postfx.js`, `wind.js`, `rain.js`, `atmosphere.js`, `sky-palette.js`, `grass-gpu.js`, `grass-plan.js` | The picture pipeline: HDR, bloom, shafts, grade, wind, GPU rain/grass, height fog | Copy | Region terrain instead of a planet; presets from `graphics.json` |
+| `prototypes/farhold/js/light.js`, `nightlights.js` | — | **Not reused** | Always daylight: no carried light, no night. Only the rule survives — fixed glow lights (cave fungi, lava) are pooled, always visible, unused at intensity 0 (memory note *shader recompile stutter*) |
+| `prototypes/farhold/js/graphics.js`, `gfx.js`, `postfx.js`, `wind.js`, `rain.js`, `atmosphere.js`, `sky-palette.js`, `grass-gpu.js`, `grass-plan.js` | The picture pipeline: HDR, bloom, shafts, grade, wind, GPU rain/grass, height fog | Copy | Region terrain instead of a planet; presets from `graphics.json`; `sky-palette.js` gives each region one fixed sun position and grade (no day cycle); film-set-dark grades for graveyards and crypts (page 17) |
 | `highdef-3d/js/materials.js` (`enhance`), `sky.js`, `terrain.js`, `water.js`, `grass.js`, `vegetation.js`, `scatter.js`, `kit/trees.js`, `kit/rocks.js`, `kit/textures.js`, `quality.js`, `data/vegetation.json` | Region look: CSM shadows, physical sky + probe, splatted terrain, water, forest, rocks | Copy | Region heightmap input (§11); geometry contract kept |
 | `prototypes/farhold/js/sound.js` | When to ask the Sound Lab for what | Copy | Region beds from `sound-map.json`; 3D positions |
 | `sfx/js/sfx.js`, `loudness.js`, `methods/*`, `data/catalog.json` | Sound effects | Import | New ids (page 17 §8.2); a `voice` and a `music` bus (page 17) — additive change to `sfx.js` |
@@ -712,7 +1166,7 @@ reuses" note).
 | `shared/store.js` | Namespaced localStorage | Import | Client settings only |
 | `meters/js/meter-ui.js` | Damage meter UI | Import | Themed CSS |
 | `prototypes/farhold/js/hud.js`, `map.js`, `talkui.js`, `settings.js` | HUD, map, talk panel, settings with capture-phase rebinding | Copy **parts** | Rewritten around the server; keep `patch()`-style keyed updates and the binding-table guard test |
-| `prototypes/farhold/js/markers.js` | Quest/story/pin markers | Copy | Region ids instead of planet ids |
+| `prototypes/farhold/js/markers.js` | Quest/story/pin markers | Copy | Region ids instead of planet ids; Travel Method stations as pins |
 | `prototypes/farhold/js/waylight.js` | A column of light over the objective | Copy | — |
 | `prototypes/farhold/js/spellshapes.js`, `spellcard.js` | Spell shape glyph + caption from one table | Import | New shapes (cone, line, ring…) |
 | `library/js/library.js` | Dev: sync blueprints to Claude | Import (dev only) | — |
@@ -720,9 +1174,10 @@ reuses" note).
 
 **Not reused** (canon drops them): `planet.js`, `terrain.js` (clipmap rings), `sky.js` (star system),
 `space.js`, `atmos.js`, `warp.js`, `starchart.js`, everything under building/industry/colony
-(`build*.js`, `stores.js`, `power.js`, `refine.js`, `mining.js`, `resources.js`, `haulpath.js`,
-`colony.js`, `civics*.js`, `farm.js`, `terraform.js`, `logistics.js`, `research*.js`, `shipyard.js`,
-`vehicles.js`, `boat.js`), `universe/`, `proctown/` (towns are hand-made; `proctown/js/buildkit.js` may
+(`build*.js`, `stores.js`, `power.js`, `refine.js`, `mining.js` (the seam/ore art may be borrowed for
+harvest nodes, page 17), `resources.js`, `colony.js`, `civics*.js`, `farm.js`, `terraform.js`,
+`logistics.js`, `research*.js`, `shipyard.js`, Farhold's garage `vehicles.js`, `boat.js`), `raid.js`
+(Farhold's base raids — nothing to do with group raids), `light.js`, `nightlights.js`, `universe/`, `proctown/` (towns are hand-made; `proctown/js/buildkit.js` may
 be used for **house models** only).
 
 ### 14.3 New modules
@@ -732,12 +1187,20 @@ be used for **house models** only).
 | `js/rules/protocol.js` | Message types and their fields (§9) | ✓ | ✓ |
 | `js/rules/save-schema.js` | `SAVE_FIELDS`, `snapshot`, `restore`, `migrate` | ✓ | ✓ (offline) |
 | `js/rules/telegraph.js` | Shapes, "is point inside", fill timing, the page 11 vocabulary | ✓ | ✓ |
-| `js/rules/spellbook.js` | Loads `spells/<class>.json`, builds the six-slot ladder, class resources and gauges | ✓ | ✓ |
+| `js/rules/spellbook.js` | Loads `spells/<class>.json`, builds the six-slot ladder, class resources (Mana / Momentum / Tempo) | ✓ | ✓ |
+| `js/rules/tags.js` | Tag matching and `bonusFor(sourceTags, stats)` (§13.1) | ✓ | ✓ (tooltips) |
+| `js/rules/sockets.js` | Which socketable fits which socket; a gem's effect by host group; gadget stat choice (§13.2) | ✓ | ✓ |
+| `js/rules/special-rarity.js` | Rolling an `sr_` and applying its effect; Living growth (§13.3) | ✓ | ✓ |
+| `js/rules/monster-rarity.js` | Champion/rare/greater rolls, exclusion groups, dungeon slots (§13.4) | ✓ | — |
+| `js/rules/magic-find.js` | Summing, diminishing and capping `mf_` stats (§13.6) | ✓ | ✓ (sheet) |
+| `js/rules/professions.js` | Harvesting skill, tool check, recipes, skill-up chance (§13.7) | ✓ | ✓ |
+| `js/rules/targeting.js` | The hard-target rules and `autoTarget` (§13.9) | ✓ | ✓ (prediction, Tab order) |
+| `js/rules/depth.js` | Dungeon level and multipliers from Depth; tier content (§13.10) | ✓ | ✓ (Finder card) |
 | `js/rules/mechanics/<class>.js` | The 30 class mechanics (page 06) | ✓ | ✓ |
-| `js/rules/threat.js` | Threat table (page 05); taunt | ✓ | — |
+| `js/rules/threat.js` | Threat table (page 05); the tank's **Provoke** | ✓ | — |
 | `js/rules/unlocks.js` | The feature ladder | ✓ | ✓ |
 | `js/rules/names.js` | Name rules (page 15 §19) | ✓ | ✓ (instant feedback) |
-| `js/sim/world.js` | Realm: regions, layers, clock, weather | ✓ | — |
+| `js/sim/world.js` | Realm: regions, layers, weather, the route clock | ✓ | — |
 | `js/sim/layer.js` | One region copy: entities, cells, tick | ✓ | — |
 | `js/sim/aoi.js` | Interest management (§8) | ✓ | — |
 | `js/sim/movement.js` | Movement validation, collision, ground from the baked heightmap | ✓ | ✓ (prediction) |
@@ -746,21 +1209,25 @@ be used for **house models** only).
 | `js/sim/boss.js` | Boss scripts from `bosses/*.json`: phases, abilities, dialog, opportunities, enrage | ✓ | — |
 | `js/sim/combat.js` | Cast validation, hit resolution, lag compensation (§10) | ✓ | — |
 | `js/sim/follower-ai.js` | Page 15 §21.7 | ✓ | — |
-| `js/sim/party.js`, `raid.js`, `finder.js`, `guild.js`, `chat.js`, `trade.js`, `market.js`, `mail.js`, `pvp.js`, `social.js` | Page 15 systems | ✓ | — |
-| `js/sim/instance.js`, `lockouts.js` | Instances and weekly resets | ✓ | — |
+| `js/sim/party.js`, `finder.js`, `guild.js`, `chat.js`, `trade.js`, `market.js`, `mail.js`, `duel.js`, `social.js` | Page 15 systems | ✓ | — |
+| `js/sim/travel.js` | Travel Method vehicles, stations, bus waits, schedules, snap-back (§13.8) | ✓ | — |
+| `js/sim/harvest.js` | Node state, per-player taps, respawns (§13.7) | ✓ | — |
+| `js/sim/instance.js`, `lootlimits.js` | Instances (difficulty + Depth fixed at creation) and the Monday 06:00 weekly loot limit for Challenge and world bosses | ✓ | — |
 | `js/sim/quests.js`, `events.js`, `phase.js` | Page 14 + phasing | ✓ | — |
 | `js/sim/loot.js` | Drop tables → items (wraps rules/rpg) | ✓ | — |
 | `js/net/transport.js` | `LocalTransport` (worker) and `SocketTransport` (WebSocket), same interface | — | ✓ |
 | `js/net/clock.js`, `predict.js`, `interp.js` | Clock sync, own-character prediction + replay, entity interpolation | — | ✓ |
 | `js/render/region.js` | Load a region's baked files; terrain, water, scatter, grass via highdef modules | — | ✓ |
 | `js/render/telegraphs.js` | Ground decals for page 11 shapes and colours (page 17 §4.3) | — | ✓ |
-| `js/render/nameplates.js`, `floaters.js` | Names, health bars, cast bars, damage numbers | — | ✓ |
+| `js/render/nameplates.js`, `floaters.js` | Names, health bars, cast bars, damage numbers; monster-rarity name colours and greater-rarity badges (§13.4) | — | ✓ |
+| `js/render/item-portrait.js` | The item card's 3D portrait: a small offscreen scene rendered once per item look and cached (page 17 owns the setup) | — | ✓ |
+| `js/render/travel.js` | Moves a Travel Method vehicle along its polyline from `progress` | — | ✓ |
 | `js/render/lod.js` | Body detail levels and far stand-ins | — | ✓ |
 | `js/ui/*` | Every `scr_*` of page 03 | — | ✓ |
 | `js/audio/soundmap.js`, `voices.js` | `sound-map.json` → sfx; voice JSON per NPC/boss/player | — | ✓ |
 | `js/offline/local-server.js` | Worker entry: builds `js/sim/world.js` with an IndexedDB store | worker | — |
 | `server/main.mjs`, `gateway.mjs`, `db.mjs`, `auth.mjs`, `migrate.mjs` | Node entry, sign-in check (Supabase JWT), database | ✓ | — |
-| `tools/bake-region.mjs`, `validate-data.mjs`, `build-reserved-names.mjs`, `sim-wildmarch.mjs`, `bot-client.mjs` | §11, §13, §16 | node | — |
+| `tools/bake-region.mjs`, `bake-routes.mjs`, `validate-data.mjs`, `build-reserved-names.mjs`, `sim-wildmarch.mjs`, `bot-client.mjs` | §11, §13, §13.8, §16 | node | — |
 
 ---
 
@@ -830,6 +1297,15 @@ node prototypes/wildmarch/tools/bot-client.mjs --bots 200 --url ws://localhost:8
 | `market.test.js`, `trade.test.js`, `mail.test.js`, `guildbank.test.js` | Two actors racing for the same item: exactly one wins; gold is conserved |
 | `followers.test.js` | Limit ladder; scaling; the 75% cap; followers obey every telegraph kind in a scripted room |
 | `bindings.test.js` | Every key the code listens for is in `bindings.json` (Farhold R17 guard) |
+| `tags.test.js` | Every spell has ≥ 1 tag and every tag exists; `bonusFor` needs **all** tags (Area-only spell gets nothing from an Area + Spell bonus); DoTs and projectiles inherit their skill's tags |
+| `sockets.test.js` | A gem gives the armour, weapon or jewellery effect by host; a socket refuses the wrong kind; a soul's `requires` is enforced; gadget stat picks ≤ `choose` |
+| `special-rarity.test.js` | Each `sr_` does its one thing (Twinned ≥ single roll, Ancient 10–20% over max, Starwoven +1 affix past max, Living grows by `steps`) and never lands below `minRarity` |
+| `monster-rarity.test.js` | 100,000 open-world rolls: never two greater rarities from one exclusion group; dungeon `raritySlots` place exactly `pick` packs |
+| `magic-find.test.js` | Each `mf_` stat moves exactly its reader (move the knob to an odd value, memory note *testing dead data rules*) and respects its cap |
+| `professions.test.js` | One crafting profession per character; `canWork` needs the right tool kind, tier and skill; every recipe's inputs are obtainable (Farhold R13 rule: a cost you cannot obtain is a wall) |
+| `travel.test.js` | §13.8's route checks and snap-back |
+| `targeting.test.js` | §13.9: the target never changes by itself; `autoTarget` picks nearest to the aim point; `needs` spells refuse without a target |
+| `depth.test.js` | Level +3 per depth to 60; multipliers only past 60; a tier every 5 |
 | `wording.test.js` | Player-facing text has no stray `{`, no "NaN", no "undefined", numbers go through `shared/format.js` (Farhold `WORDING.md`) |
 
 ### 16.2 Playwright (real browser, against 8401)
@@ -840,10 +1316,12 @@ node prototypes/wildmarch/tools/bot-client.mjs --bots 200 --url ws://localhost:8
 | `classes.spec.js` | Each of the 30 classes boots and casts spell 1 on a dummy |
 | `telegraph.spec.js` | A test boss casts each telegraph kind; the decal appears, fills, resolves; standing in hurts, leaving does not |
 | `lag.spec.js` | With `?lag=150&jitter=40`, a dodge pressed 100 ms before the fill ends (on screen) is safe |
+| `travel.spec.js` | Board a bus-style wagon, wait out the countdown, ride to the next stop; knock the wagon off a bridge in a debug scene and see it snap back |
+| `itemcard.spec.js` | Hover an item of each rarity and each special rarity: the 3D portrait draws, the frame matches `cardFrame`, the `sr_` icon is an SVG, not text |
 | `dungeon.spec.js` | d01 with 4 **finder hires** (page 15 §7.4 — a character's own follower slots only open at level 8, page 07), bot-driven, reaches the last boss (slice acceptance) |
 | `screens.spec.js` | Opens every `scr_*` from `screens.json` and closes it |
 | `stutter.spec.js` | Counts `linkProgram` calls during 30 s of combat after warm-up: **0** (Farhold `hit-stutter.spec.js`) |
-| `budget.spec.js` | Draw calls and triangles in three scenes (open field, town with 40 bots, 20-player raid room) under §17's numbers at `?quality=low` (the Low preset) and High |
+| `budget.spec.js` | Draw calls and triangles in three scenes (open field, town with 40 bots, a world boss with 40 bots) under §17's numbers at `?quality=low` (the Low preset) and High |
 | `save.spec.js` | Play, reload, same place, same bags, same quests |
 | `social.spec.js` (online stage) | Two browser contexts: party, chat, trade, mail through a local Node server |
 
@@ -855,11 +1333,11 @@ stays read.
 
 `tools/sim-wildmarch.mjs` (Farhold `tools/sim-farhold.mjs` pattern): the real `js/sim/` with no renderer.
 A bot per class plays **levels 1–60** (quests, kills, spends points by a fixed priority, re-equips, runs
-each Normal dungeon with followers, runs Heroic with 4 bot players). Reports, per class and overall:
+each Normal dungeon with followers, runs Challenge mode and Depth 1–20 with 4 bot players). Reports, per class and overall:
 time to each level (target curve owned by page 07), deaths and what killed them, dungeon clear time
 solo-with-followers vs 5 bots (target ≤ 1.3×, page 15 §21.5), damage share by spell (flags any spell
-over 2× its class average — the "Consecrate did 500" tell), gold per hour, loot rarity mix, every boss's
-wipe rate by mechanic. A **"perfect dodger"** bot and a **"sloppy"** bot (misses 20% of telegraphs) bound
+over 2× its class average — Farhold round 22's tell, where one holy ground spell hit for 500 against a basic attack's 7), gold per hour, loot rarity mix, every boss's
+wipe rate by mechanic, harvesting and crafting skill per hour, magic-find effect on drops (rarity mix with 0% vs capped `mf_rarity`). A **"perfect dodger"** bot and a **"sloppy"** bot (misses 20% of telegraphs) bound
 the difficulty from both sides.
 
 ### 16.4 Network load test
@@ -902,7 +1380,7 @@ number (`playersDrawn`, `dynamicLights`) this table repeats it and page 04 wins.
 |---|---:|---:|---:|---:|
 | Draw calls (open world) | 150 | 300 | 450 | 600 |
 | Draw calls (town, 40 players) | 180 | 320 | 480 | 650 |
-| Draw calls (20-player raid + boss + effects) | 200 | 350 | 500 | 700 |
+| Draw calls (world boss, 40 players + effects) | 200 | 350 | 500 | 700 |
 | Triangles in view | 0.8 M | 2 M | 4 M | 6 M |
 | Players drawn at all (page 04 `playersDrawn`) | 20 | 40 | 60 | 100 |
 | …of which full detail (Chibi 2, ≤ 8,500 tris, 2 meshes each), nearest first | 8 | 15 | 30 | 40 |
@@ -911,7 +1389,7 @@ number (`playersDrawn`, `dynamicLights`) this table repeats it and page 04 wins.
 | Spell particles (`spellfx-batched` `maxParticles`) | 120 | 200 | 320 | 480 |
 | Live effects (`maxLive`) | 16 | 24 | 36 | 48 |
 | Shader programs compiled after load | **0** | **0** | **0** | **0** |
-| Point lights (page 04 `dynamicLights`) | 4 pooled | 8 pooled | 16 pooled | 32 pooled — always visible, unused at intensity 0 |
+| Point lights (page 04 `dynamicLights`) — spell flashes and fixed cave glow (fungi, lava), never a carried light | 4 pooled | 8 pooled | 16 pooled | 32 pooled — always visible, unused at intensity 0 |
 | JS heap | ≤ 700 MB | ≤ 900 MB | ≤ 1.2 GB | ≤ 1.5 GB |
 
 The Chibi 2 benchmark (CHIBI2.md): 8 fighters with batched effects = 44 draw calls, 67k triangles. A body
@@ -993,4 +1471,8 @@ through `mesh-merge.js` `compactCreature` (one or two draws each).
 3. Allow importing an offline character to an online realm?
 4. Server hosting provider (Hetzner-class vs DigitalOcean-class) and server regions (NA + EU at launch?).
 5. Domain name for the game.
-6. When Wildmarch graduates to its own repo (recommended: at the start of networking, page 18 M9).
+6. When Wildmarch graduates to its own repo (recommended: at the start of networking, page 18).
+7. Travel Method routes that cross a region border: hand the vehicle between region layers (proposed,
+   §11) or end every route at a border station?
+8. Harvest nodes: personal taps (every player can harvest a node once per respawn, proposed §13.7) or
+   first-come shared nodes?

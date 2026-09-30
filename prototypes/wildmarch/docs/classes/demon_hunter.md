@@ -1,18 +1,29 @@
 # Demon Hunter (`demon_hunter`)
 
-> *"I carry every one of them. Every friend who fell. And when it's heavy enough, I let it out."*
+> *"Everyone else sees a stranger in a grey coat. I see what's wearing him."*
 
-**Page owner:** `06-CLASSES.md` + this file. **Status:** v0.1 draft, 2026-09-29. Canon: [page 00](../00-OVERVIEW.md) §6 row 11.
-Formulas: [page 05](../05-COMBAT.md). Boss vocabulary: [page 11](../11-BOSS-MECHANICS.md). Bestiary tags: [page 10](../10-BESTIARY.md).
+**Page owner:** `06-CLASSES.md` + this file. **Status:** v0.2 draft — 2026-09-30 (round 2 applied — class rebuilt, W27). Canon: [page 00](../00-OVERVIEW.md) §6 row 11.
+Formulas and tags: [page 05](../05-COMBAT.md). Boss vocabulary: [page 11](../11-BOSS-MECHANICS.md). Monster tags: [page 10](../10-BESTIARY.md).
 
 ### Units used on this page
 
 | Term | Meaning |
 |---|---|
 | **% weapon damage** | a share of the held weapon's damage roll (reuse: `prototypes/farhold/js/rpg.js` `strike`); page 05 owns it |
-| **Fury** | 0–100. Built by hitting and being hit, decays out of combat (canon §6) |
-| **Vengeance** | 0–100, the class gauge (§2) |
-| **i-frames** | "invulnerable frames": a short window in which nothing can damage you (the dodge roll has them) |
+| **Momentum** | 0–100, starts at 0 (00 §6). Builds as you hit and as you are hit; drains **5 a second** out of combat after 5 s. Base gains (page 06): a basic-attack hit +4 (off hand +2); +1 per 1% of max health taken as damage. Demon hunter extras below |
+| **Demon** | a monster with the page 10 tag **Demon** (the `demon` family, Riftmarch rift-spawn, imps, anything a cult caster calls) |
+| **Trap** | a device the hunter throws onto the ground; it arms, waits and fires on the first enemy that steps in (`tag_trap`) |
+
+**Momentum for this class**
+
+| Source | Momentum |
+|---|---|
+| Hunter's Bolt | **+12** per cast |
+| a hand-crossbow or dagger basic-attack hit | +4 (off-hand hit +2) — page 05 §4.7 |
+| any hit during a **Weak Point** (§2.3) | **+10** extra (max once per 0.5 s) |
+| a trap triggering | **+8** |
+| damage taken | +1 per 1% of max health |
+| out of combat | −5 a second after 5 s |
 
 ---
 
@@ -20,95 +31,86 @@ Formulas: [page 05](../05-COMBAT.md). Boss vocabulary: [page 11](../11-BOSS-MECH
 
 | | |
 |---|---|
-| Fantasy | A hunter of the things that come through the Rift, marked by what they hunt. Every death they witness sits in them as Vengeance, and when it is full they let the demon out |
-| Role | **Damage** (primary), **Tank** (secondary — the Bastion form) |
+| Fantasy | A hunter trained by the Riftwatch to use a narrow, cold magic for one job: **finding** demons — however they hide, whoever they are wearing — and **killing** them where they are weakest. Light armour, hand crossbows, knives and a belt of traps |
+| Primary role | **Damage** (ranged and close; strongest against demons) |
+| Hybrid role | **none** (00 §6 row 11). It brings group utility instead (§5) |
+| Build | ranged + melee: bolts at 30 m, knives close. Every spell says which weapon it uses |
 | Armour | light |
-| Weapons | **crossbow** (two-handed) **or two daggers** (dual wield). With daggers, the ranged spells throw hand-knives (range −15 m) |
-| Resource | **Fury** + **Vengeance** |
-| Companion | none (Farhold's `dire_companion` is dropped, §9) |
-| Playstyle | A fast ranged/melee hybrid that builds Fury with bolts and spends it on glaives and binding chains. Vengeance fills slowly from kills, damage taken and fallen friends; at 100 you choose — **Reckoning**, one enormous shot, or **Demon Form**, 15–20 s as a winged horror with a new spell bar |
+| Weapons | **hand crossbows** (one, or one in each hand), **daggers** (one or two), **throwing knives**. A hand crossbow in the main hand and a dagger in the off hand is the classic pairing |
+| Resource | **Momentum** |
+| Companion | none |
+| Playstyle | Walk into a room and see what is really there. Lay traps where the fight will go, pin the target with a bolt, and wait for its **Weak Point** to open — every hit in that window is a critical hit. Against demons everything is stronger: the hunter's magic makes them visible, stops them slipping away, and finishes them with a banishing shot |
 
-**Hook carried from Emberveil** (reuse: `prototypes/emberveil/data/classes.json` `demon_hunter`): *+50%
-damage vs demons; Vengeance stacks from fallen allies then unleashes a burst; Glaive Toss; Fel Sight.*
-Here: **Hunter's Oath** (+20% vs demonic enemies — scaled for real time), **Vengeance → Reckoning**,
-**Glaive Arc** and **Hellsight**.
+**Hook carried from Emberveil** (reuse: `prototypes/emberveil/data/classes.json` `demon_hunter`): *+50% damage
+vs demons; a sight that sees the unseen.* Here: **Hunter's Oath** (+25% vs Demons — scaled for real time),
+**Demonsight** and **Unmask**. The old gauge, demon form and party-death fuel are gone (W27).
 
 ---
 
-## 2. Class mechanic — Vengeance and Demon Form (new)
+## 2. Class mechanic — Demonsight and Traps (new)
 
-### 2.1 Fury (canon resource)
+### 2.1 Hunter's Oath (passive, level 1)
 
-| Source | Fury |
-|---|---|
-| `demon_hunter_brand_bolt` | +12 |
-| any basic weapon hit | +4 |
-| taking a hit | +2 (max 10 a second) |
-| out of combat | −4 a second after 5 s |
+* **+25% damage to Demons.**
+* A Demon that is **Unmasked** (§3.2) takes another **+10%** from you.
+* A Demon standing in one of your traps' effects **cannot turn invisible, phase, teleport or burrow**.
+* Against everything else the hunter is balanced as an ordinary ranged damage class: its base numbers do not
+  assume the bonus. In Kingsfire and the Riftmarch, and in dungeons full of demons (`d12_unmade_workshop`,
+  `d13_cindergate`, `d15_fire_court`), it is the strongest damage class on the list by about 20%.
 
-### 2.2 Vengeance (0–100)
+### 2.2 Demonsight (passive, grows by calling)
 
-| Source | Vengeance |
-|---|---|
-| you kill a normal enemy | +3 |
-| you kill an elite / champion | +10 |
-| a boss you are fighting loses 10% health | +5 |
-| you lose health | +1 per 2% of max health lost |
-| a **party member dies** within 40 m | **+25** |
-| a party member drops under 20% health within 40 m | +5 (once per ally per 10 s) |
-| Bastion form set (§2.4), each hit taken | +1 extra |
-
-`G` (`classKey2`) is unused by the demon hunter; in Demon Form, `Q` again **ends the form early** (no refund).
-
-Vengeance **does not decay** in combat; out of combat it drains **2 a second after 15 s**.
-
-**Spend it** one of two ways:
-* **Reckoning** (`demon_hunter_reckoning`, slot 6, level 40): needs 30+, spends all as one shot.
-* **Demon Form** (class key **`Q`**, [page 02](../02-CONTROLS.md) `classKey`; also `Shift+1`, the single button on page 03's form bar): needs **100**, spends all.
-
-### 2.3 Hunter's Oath (passive, level 1)
-
-**+20% damage** to enemies with the `demonic` tag (page 10 should tag: rift-spawn of `riftmarch`, the Ember
-Legion's fiends in `emberthrone`, imps, anything summoned by an enemy warlock). While **Hellsight** is up the
-bonus is **+30%**.
-
-### 2.4 Demon Form
-
-| | Lesser (calling 1) | Full (calling 2) | Unchained (calling 3) |
-|---|---|---|---|
-| Duration | 8 s | 15 s | 20 s, killing blows **+1 s** each (max +10) |
-| Bar | slots 1 and 4 swap (Rend, Devour); others greyed | slots 1, 2, 4, 5 swap | all six swap |
-| On entry | — | knocks back enemies in 5 m | also **heals 20%** max health |
-
-**Two variants** (chosen on the Spellbook, `scr_sheet_spells`, a "Form" toggle — only out of combat; page 03 to add it):
-
-| | **Ravager** (Damage) | **Bastion** (Tank) |
+| Level | Range | What you see |
 |---|---|---|
-| In form | +25% damage, +30% move speed, basic attack becomes claws (3 m, 100% weapon every 0.9 s) | +100% armour, +30% max health (while in form), 20% less damage taken, form spells make **×3 threat** |
-| Out of form | — | +15% armour, Vengeance +1 per hit taken, Hellsight also gives **25% damage reduction** |
-| Slot 3 in form | Wing Sweep | Iron Wings (§4) |
+| 1 | 20 m | Demons show a red outline **through walls** and a red pip on the minimap |
+| calling 1 (6) | 30 m | also **hidden and invisible** enemies of any kind, outlined in pale red; the illusions of enemy casters show as hollow outlines |
+| calling 2 (20) | 40 m | **party members within 30 m** of you see everything you reveal |
+| calling 3 (40) | 50 m | Demons **disguised** as something else (a cult demon wearing a villager, page 10 "wearing" demons) show their true outline; quest NPCs that are secretly demons (page 14) flag on sight |
 
-The body: a Chibi 2 body scaled ×1.25 with dark red skin, horns (new `demon_horns` hat part), bat wings
-(new `extras` part — reuse the creature `bat` wing mesh from `avatar-3d/js/creatures.js`), glowing eyes
-(`eyes: glow`, already in the Farhold look).
+Revealing is not a debuff: a revealed enemy is simply drawn and targetable. The `hidden` status is page 05's (§10.6).
+
+### 2.3 Weak Points (calling 1)
+
+1. On a **Demon, elite, champion, rare or boss** you are targeting, a **Weak Point** opens every **6 s** and stays
+   open **2 s** (2.5 s after calling 2; on Demons every **4 s** after calling 3).
+2. It shows as a bright red eye on a body part (spellfx `decal` `eye` sprite, parented to a bone — the chest on a
+   humanoid, the head on a beast) and as a red eye on the **target frame**, with a short rising "tick" 0.5 s
+   before it opens (`dh.weakpoint.warn`) and a click when it opens.
+3. **Every hit you land while it is open is a critical hit** and builds **+10 Momentum**.
+4. Only **your** target has a Weak Point for you. Calling 2 adds **Called Shot**: party members' hits on that target
+   during the window get **+20% critical chance**.
+5. Setting `set.gameplay.dh_weakpoint_sound` (on/off, default on — page 04 to add).
+
+### 2.4 Traps
+
+| Rule | Value |
+|---|---|
+| Placing | thrown onto the ground within **25 m** (Ground targeting); it lands in 0.4 s and **arms 0.5 s** later |
+| Trigger | the first enemy that steps within **1.5 m** (not critters, not allies) |
+| Lasting | **30 s** armed, then it folds away |
+| Most at once | **2** · **3** at calling 2 · **4** at calling 3. A new trap over the limit folds the oldest |
+| On a Demon | +50% trap damage and effect durations (on top of Hunter's Oath) |
+| Seen by | you and your party (a faint amber outline, not a page 11 telegraph colour); enemies do not see them |
+| Bosses | a boss walking over a trap sets it off; control effects add to its break bar instead (page 05 §11.4) |
+| Class key `Q` — **Spring** (calling 1) | fires **every armed trap you own** at once, wherever they are, as if triggered. Cooldown 10 s |
+| Class key `G` | unused |
 
 ### 2.5 Gauge UI
 
 | Element | Where | What it shows |
 |---|---|---|
-| **Fury bar** | the resource slot | red-orange bar 0–100 |
-| **Vengeance sigil** | a round gauge left of the Fury bar, 72 px | a horned sigil that fills from the bottom in dark crimson; tick marks at 30 (Reckoning) and 100 (Demon Form); at 100 the sigil burns and the `Q` key badge appears |
-| **Fallen marker** | on the sigil | when a party member dies, their portrait flashes on the sigil with "+25" |
-| **Form timer** | around the sigil in form | a ring that empties; each killing blow adds a notch (calling 3) |
-| **Bar swap** | spell bar | swapped slots turn crimson with a wing icon; greyed slots show a lock |
+| **Momentum bar** | the resource slot | red bar 0–100 |
+| **Trap tray** | a row of 2–4 small trap icons left of the bar | each lit icon is an armed trap, with a ring for its 30 s; greyed when folded |
+| **Weak Point eye** | on the target frame | closed → a warning flicker → open (red, with a 2 s countdown ring) |
+| **Demonsight** | world and minimap | outlines and pips (§2.2); a tiny eye badge on your frame when calling 2's party sharing is on |
 
-### 2.6 Calling quests (ids proposed; page 14 owns content)
+### 2.6 Calling quests (page 14 owns content)
 
 | Level | Quest id | Name | What it grants |
 |---|---|---|---|
-| 6 | `q_demon_hunter_calling_1` | **The Mark** — a dying Riftwatch hunter at Brightwater passes you his mark and his last target, an imp in `d01_hollow_barrow` | **Vengeance**, **Hunter's Oath**, **Lesser Demon Form** (8 s, 2 spells) |
-| 20 | `q_demon_hunter_calling_2` | **Name the Beast** — learn the name of the demon inside you from a Sandsworn tomb-reader and fight it alone | **Full Demon Form** (15 s, 4 spells), the **Ravager / Bastion** choice, Tumbling Shot **2 charges** |
-| 40 | `q_demon_hunter_calling_3` | **Unchained** — track a rift-lord across Frostmantle and let the demon finish it | **Unchained Form** (20 s + kills, all 6 spells, heal on entry) |
+| 6 | `q_calling_demon_hunter_1` | **The Lens** — a wounded Riftwatch hunter at Brightwater gives you her lens and her last target: an imp wearing the reeve of a Hearthvale farm | **Demonsight 30 m**, **Weak Points**, **Spring** on `Q` |
+| 20 | `q_calling_demon_hunter_2` | **What the Tombs Keep** — learn to read the true outline of a thing from a Sandsworn tomb-reader, then find the demon hiding among the Glass Tombs' dead | **Demonsight 40 m** shared with the party, Weak Point window **2.5 s**, **Called Shot**, **3 traps**, Vault **2 charges** |
+| 40 | `q_calling_demon_hunter_3` | **The Long Hunt** — follow a demon that crossed from a Riftmarch tear down through Frostmantle, wearing a new face in every town | **Demonsight 50 m** (disguises), Weak Points on Demons **every 4 s**, **4 traps** |
 
 ---
 
@@ -116,300 +118,368 @@ The body: a Chibi 2 body scaled ×1.25 with dark red skin, horns (new `demon_hor
 
 ### 3.1 At a glance
 
-| Slot | Level | id | Name | Cost | Cooldown | Cast | Range | Shape | Main effect |
-|---|---|---|---|---|---|---|---|---|---|
-| 1 | 1 | `demon_hunter_brand_bolt` | Brand Bolt | +12 Fury | — | instant | 40 m (25 daggers) | bolt | 130% weapon, Hunter's Brand |
-| 2 | 4 | `demon_hunter_glaive_arc` | Glaive Arc | 25 Fury | 8 s | instant | 15 m out and back | line 2 m wide | 90% each pass, Bleed |
-| 3 | 10 | `demon_hunter_tumbling_shot` | Tumbling Shot | 15 Fury | 10 s (1–2 charges) | instant | 8 m move | dash + 2 bolts | 2 × 80%, 0.4 s i-frames |
-| 4 | 18 | `demon_hunter_hellsight` | Hellsight | 30 Fury | 45 s | instant | self (40 m sight) | self | +20% crit, immunities, reveal |
-| 5 | 28 | `demon_hunter_chain_of_binding` | Chain of Binding | 20 Fury | 16 s | instant | 25 m | target + tether | taunt 6 s, pull 6 m, tether |
-| 6 | 40 | `demon_hunter_reckoning` | Reckoning | all Vengeance (30+) | 45 s | 0.8 s | 30 m | line 2 m wide | 200% + 4.5% per Vengeance |
+| Slot | Level | id | Name | Cost | Cooldown | Cast | Targeting | Range | Shape | Tags | Main effect |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | 1 | `demon_hunter_hunters_bolt` | Hunter's Bolt | builds 12 | — | instant | Auto-target | 30 m (knife 20 m) | bolt | `tag_attack` `tag_physical` `tag_ranged` `tag_projectile` `tag_basic_attack` | 130% weapon, Hunter's Brand |
+| 2 | 4 | `demon_hunter_snare_trap` | Snare Trap | 20 Momentum | 6 s (2 charges) | instant | Ground | 25 m | trap, 1.5 m trigger | `tag_attack` `tag_physical` `tag_trap` `tag_duration` | 80% weapon, Rooted 3 s |
+| 3 | 10 | `demon_hunter_vault` | Vault | 15 Momentum | 10 s (1–2 charges) | instant | Self | 8 m move | leap + 2 bolts | `tag_attack` `tag_physical` `tag_movement` `tag_ranged` `tag_projectile` | 2 × 80%, 0.4 s i-frames |
+| 4 | 18 | `demon_hunter_unmask` | Unmask | 30 Momentum | 40 s | instant | Self | 40 m pulse | self | `tag_spell` `tag_arcane` `tag_area` `tag_duration` | reveals all, Unmasked 10 s, mind immunity 6 s |
+| 5 | 28 | `demon_hunter_grinder_trap` | Grinder Trap | 40 Momentum | 12 s | instant | Ground | 25 m | trap, 4 m circle | `tag_attack` `tag_physical` `tag_trap` `tag_area` `tag_duration` | 50% every 0.5 s for 6 s, Bleeding, drag in |
+| 6 | 40 | `demon_hunter_banishing_shot` | Banishing Shot | 30–60 Momentum | 30 s | 0.8 s | Auto-target | 35 m | line 2 m wide | `tag_attack` `tag_physical` `tag_arcane` `tag_ranged` `tag_projectile` `tag_area` | 200% + 5% per Momentum; banishes weakened demons |
 
 ### 3.2 Spell details
 
-#### `demon_hunter_brand_bolt` — Brand Bolt (slot 1, level 1)
+#### `demon_hunter_hunters_bolt` — Hunter's Bolt (slot 1, level 1)
 
 | Field | Value |
 |---|---|
-| Cost / cooldown | **generates 12 Fury** · none (GCD) |
+| Cost / cooldown | **builds 12 Momentum** · none (GCD) |
 | Cast | instant, usable while moving |
-| Range / shape | bolt 40 m (crossbow) or 25 m (thrown knife with daggers), 0.3 m radius, 45 m/s |
+| Targeting | **Auto-target** — your target, or the enemy nearest the aim point in range |
+| Range / shape | hand crossbow: bolt **30 m**, 0.3 m radius, 45 m/s. Daggers only: a **thrown knife**, 20 m. Two hand crossbows: two bolts at 65% each (same total, two chances to hit a Weak Point) |
+| Tags | `tag_attack` `tag_physical` `tag_ranged` `tag_projectile` `tag_basic_attack` (it counts as a basic attack for quivers and quiver-like effects, 00 §12.3) |
 | Effect | **130% weapon damage** (physical) |
-| Statuses | **Hunter's Brand**: the target takes **+5% damage from you**, stacks to 3, 10 s (spellfx `marked`, red) |
-| Visuals | spellfx `projectile` element `physical` shape `arrow` with a crimson trail (`bleed` colour); knives use the Farhold thrown-dagger head |
-| Sound | crossbow thunk `spell.physical.launch` + `status.marked.apply` on the 3rd stack |
+| Statuses | **Hunter's Brand**: the target takes **+5% damage from you**, stacks to 3, 10 s (class status; a small red hook glyph) |
+| Visuals | spellfx `projectile` element `physical` shape `arrow` scaled 0.6 (a short bolt) with a crimson trail; the knife uses the Farhold thrown-dagger head |
+| Sound | a sharp hand-crossbow snap `dh.bolt` + `status.marked.apply` on the 3rd stack |
 
-#### `demon_hunter_glaive_arc` — Glaive Arc (slot 2, level 4)
+#### `demon_hunter_snare_trap` — Snare Trap (slot 2, level 4)
 
 | Field | Value |
 |---|---|
-| Cost / cooldown | 25 Fury · 8 s |
+| Cost / cooldown | 20 Momentum · 6 s, **2 charges** |
+| Cast | instant throw |
+| Targeting | **Ground**, 25 m |
+| Range / shape | a trap with a 1.5 m trigger; arms 0.5 s after landing; 30 s |
+| Tags | `tag_attack` `tag_physical` `tag_trap` `tag_duration` |
+| Effect | the jaws snap: **80% weapon damage** and a **Hunter's Brand** stack |
+| Statuses | **Rooted** 3 s (Demons **5 s** and cannot phase or teleport) |
+| Visuals | a toothed iron ring with red runes (new prop `dh_snare`); on trigger it springs up round the legs and chains to the ground (spellfx `arc` short, `#c02020`) |
+| Sound | a heavy iron clack `dh.snare` + chain rattle |
+
+#### `demon_hunter_vault` — Vault (slot 3, level 10)
+
+| Field | Value |
+|---|---|
+| Cost / cooldown | 15 Momentum · 10 s; **1 charge** (2 after calling 2) |
 | Cast | instant |
-| Range / shape | a glaive flies **15 m** straight out and returns to you along the same line; **2 m wide** |
-| Effect | **90% weapon damage** on the way out and again on the way back |
-| Statuses | **Bleed 6 s** (20% weapon damage a second) |
-| Mechanic | hitting **3+ enemies** refunds **10 Fury** |
-| Visuals | spinning four-bladed glaive (new held-prop mesh `dh_glaive`, reuse spellfx `projectile` with a custom head), `bleed` impacts |
-| Sound | a whirring blade loop `dh.glaive` + `spell.bleed.impact` |
+| Targeting | **Self** (the shots pick the nearest enemy in 30 m) |
+| Range / shape | a flip **8 m** in the direction held (backwards if none); fires **2 bolts** (or throws 2 knives) during the flip |
+| Tags | `tag_attack` `tag_physical` `tag_movement` `tag_ranged` `tag_projectile` |
+| Effect | **80% weapon damage** each; **0.4 s of i-frames** ("invulnerable frames": nothing can damage you) at the start |
+| Visuals | a Chibi 2 backflip clip (new `flip_back`, reuse the dodge-roll root motion), two short bolts |
+| Sound | cloth whoosh `travel.step.soft` + two `dh.bolt` |
 
-#### `demon_hunter_tumbling_shot` — Tumbling Shot (slot 3, level 10)
-
-| Field | Value |
-|---|---|
-| Cost / cooldown | 15 Fury · 10 s; **1 charge** (2 after calling 2) |
-| Cast | instant |
-| Range / shape | a flip **8 m** in the direction held (backwards if none); fires **2 bolts** at the nearest enemy in 30 m during the flip |
-| Effect | **80% weapon damage** each bolt; **0.4 s of i-frames** at the start of the flip |
-| Visuals | a Chibi 2 backflip clip (new `flip_back`, reuse the dodge-roll root motion), two `projectile` physical bolts |
-| Sound | cloth whoosh `travel.step.soft` + two `spell.physical.launch` |
-
-#### `demon_hunter_hellsight` — Hellsight (slot 4, level 18)
+#### `demon_hunter_unmask` — Unmask (slot 4, level 18)
 
 | Field | Value |
 |---|---|
-| Cost / cooldown | 30 Fury · 45 s |
-| Cast | instant; **not** usable while stunned, but usable while feared, blinded or charmed (it breaks them) |
-| Range / shape | self; reveals within **40 m** |
-| Effect | **8 s**: +20% critical chance; **immune to Blind, Confuse, Fear and Charm**; reveals stealthed and invisible enemies within 40 m (to the whole party); Hunter's Oath rises to +30% |
-| Bastion | also **25% less damage taken** |
-| Statuses | new self-status `hellsight` (eyes glow, screen edge tinted crimson for the DH only) |
-| Visuals | the Chibi 2 `glow` eyes brighten, a crimson `ring` pulse 40 m (axis ground, life 0.8), revealed enemies get a red outline |
-| Sound | a low heartbeat thud + `status.marked.apply` |
+| Cost / cooldown | 30 Momentum · 40 s |
+| Cast | instant; usable while Feared, Charmed, Blinded or Confused (it breaks them), not while Stunned |
+| Targeting | **Self** — a pulse round you |
+| Range / shape | **40 m** circle |
+| Tags | `tag_spell` `tag_arcane` `tag_area` `tag_duration` |
+| Effect | every hidden or invisible enemy in 40 m is **revealed for 10 s to the whole party**. Every **Demon** in range is **Unmasked** for 10 s: it takes **+10% damage from the party**, cannot turn invisible, phase, teleport or burrow, and a disguised demon drops its disguise. **Your target's Weak Point opens at once** |
+| Self | immune to **Fear, Charm, Confuse and Blind** for **6 s** |
+| Statuses | `unmasked` (class debuff, a cracked-mask icon) |
+| Visuals | a crimson `ring` pulse r0 1 → r1 40 along the ground (life 0.8); revealed enemies flash white, then keep a red outline; the hunter's eyes glow (Chibi 2 `eyes: glow`) |
+| Sound | a low bell-and-heartbeat `dh.unmask` |
 
-#### `demon_hunter_chain_of_binding` — Chain of Binding (slot 5, level 28)
-
-| Field | Value |
-|---|---|
-| Cost / cooldown | 20 Fury · 16 s |
-| Cast | instant |
-| Range / shape | one enemy in 25 m |
-| Effect | **taunts** the target for **6 s** and **pulls it 6 m** toward you (not bosses or elites over 3 m tall). A **white tether** (page 11) links you for 8 s while you stay within **15 m**: the target takes **+10% from you** and deals **15% less damage to anyone but you** |
-| Break | the tether snaps if you move more than 15 m apart |
-| Visuals | spellfx `arc` chain: segs 14, width 0.07, colour `#c02020`, jitter 0.05 (a taut chain, not lightning); pull uses the Farhold knockback maths in reverse (reuse: `js/combat-feel.js`) |
-| Sound | chain rattle `dh.chain` + `rope.creak` on the pull |
-
-#### `demon_hunter_reckoning` — Reckoning (slot 6, level 40)
+#### `demon_hunter_grinder_trap` — Grinder Trap (slot 5, level 28)
 
 | Field | Value |
 |---|---|
-| Cost / cooldown | **all Vengeance** (needs 30+) · 45 s |
-| Cast | 0.8 s; cannot be used in Demon Form |
-| Range / shape | a piercing line **30 m long, 2 m wide** |
-| Effect | **200% weapon damage + 4.5% per Vengeance point** (at 100: 650%) to everything on the line; Hunter's Brand stacks on each target are consumed for **+15% each** |
-| Visuals | one bolt wreathed in the faces of the fallen: spellfx `breath` element `shadow` length 30 arc 0.08 recoloured crimson, plus `wisp` sprites; a white flash on each target |
-| Sound | a charged crossbow crack `dh.reckoning` + a whispered chorus |
+| Cost / cooldown | 40 Momentum · 12 s |
+| Cast | instant throw |
+| Targeting | **Ground**, 25 m |
+| Range / shape | a trap with a 1.5 m trigger; when it fires, spinning blades cover a **4 m circle** for **6 s** |
+| Tags | `tag_attack` `tag_physical` `tag_trap` `tag_area` `tag_duration` |
+| Effect | **50% weapon damage every 0.5 s** to every enemy in the circle (12 hits = 600% over 6 s if it stays in) |
+| Statuses | **Bleeding**; enemies inside are **dragged 1 m a second** toward the centre (not bosses or elites) |
+| Visuals | a squat drum with folded blades (new prop `dh_grinder`) that pops up and spins (spellfx `ring` axis ground, `slash` sprites orbiting at 0.4 m) |
+| Sound | a rising saw-whine loop `dh.grinder` |
 
-### 3.3 Rotation / how it plays
+#### `demon_hunter_banishing_shot` — Banishing Shot (slot 6, level 40)
 
-* **Solo:** Brand Bolt ×2–3 → Glaive Arc through the pack → Tumbling Shot when something reaches you.
-  Vengeance builds from kills; at 100 go Demon Form for a whole pack, or hold for Reckoning on an elite.
-* **Dungeon, Damage (Ravager):** keep Brand stacks on the boss, Glaive on adds, Chain to peel an add off
-  the healer. Save Demon Form for the boss's last 30% (and the Vengeance from a party death — the class
-  turns a bad moment into a comeback).
-* **Dungeon, Tank (Bastion):** Chain the caster adds in, Hellsight for the big hit (25% reduction),
-  Demon Form as the long defensive cooldown (+100% armour, +30% health for 15–20 s) with Dread Roar to
-  pick up every add.
-* **Raid:** as Damage, one Reckoning every 45 s at 30–60 Vengeance is steadier than waiting for 100; in
-  a fight with deaths, Vengeance swells — go Form. As an off-tank, Chain + Bastion handles add duty.
+| Field | Value |
+|---|---|
+| Cost / cooldown | spends **30–60 Momentum** (all you have, up to 60; needs 30) · 30 s |
+| Cast | 0.8 s |
+| Targeting | **Auto-target** — aimed at your target, or the enemy nearest the aim point |
+| Range / shape | a piercing line **35 m long, 2 m wide** |
+| Tags | `tag_attack` `tag_physical` `tag_arcane` `tag_ranged` `tag_projectile` `tag_area` |
+| Effect | **200% weapon damage + 5% per Momentum spent** (60: 500%) to everything on the line; each Hunter's Brand stack on a target is consumed for **+15%**. Against **Demons: +50%**, and a **non-boss Demon left under 20% health is banished** — it dies at once, leaving no corpse. A **boss** tagged Demon instead has its break bar filled by **20%** |
+| Visuals | a heavy bolt wrapped in pale fire: spellfx `breath` element `holy` length 35 arc 0.08 recoloured white-crimson; a banished demon folds inward into a crack of light (spellfx `vortex` small, 0.4 s) |
+| Sound | a charged crossbow crack `dh.banish` + a falling hiss on each banish |
+
+### 3.3 How it plays
+
+* **Solo:** Unmask as you enter a demon camp to see every hidden imp. Snare the first enemy that comes, Hunter's
+  Bolt to 30+ Momentum, Grinder Trap where the pack will run, Vault when something reaches you. Save the Banishing
+  Shot for the moment a demon drops near 25% — it will not get up.
+* **Normal dungeon:** pre-place Snares at the tank's pull spot; the pack runs into them. On a boss, keep Hunter's
+  Brand at 3, pace your Hunter's Bolts so the big hits land inside the Weak Point window, and Spring every trap at
+  once on the add wave.
+* **Challenge and Depth:** the Weak Point rhythm is the damage: a hunter who lands Vault and Banishing Shot inside
+  windows does about 30% more than one who does not. Call your Weak Points (calling 2's Called Shot) so the party
+  bursts with you.
 
 ### 3.4 Boss mechanics
 
 | Mechanic | Demon Hunter answer |
 |---|---|
-| **Soak** | yes; Bastion is an excellent soaker (Hellsight 25% reduction, Form +30% health) |
-| **Void / danger zones** | **Tumbling Shot** (8 m, i-frames 0.4 s, 2 charges); in form **Ashen Wings** flies 4 s **immune to ground effects** |
-| **Mind effects** | **Hellsight** — immune to Blind, Confuse, Fear, Charm for 8 s; breaks them if already applied |
-| **Stealthed adds** | Hellsight reveals them for the party |
-| **Tank swap** | Chain of Binding taunts at 25 m |
-| **Tether** | Chain *makes* a white tether (15 m) — do not confuse with the boss's; the HUD draws yours thinner and red-edged |
-| **Interrupt** | talent `demon_hunter_brand_bolt_t2b` *Pinning Bolt* interrupts (12 s internal) |
+| **Soak** | can soak like anyone; no special reduction |
+| **Void / danger zones** | **Vault** (8 m, i-frames 0.4 s, 2 charges) |
+| **Mind effects** | **Unmask** — immune to Fear, Charm, Confuse and Blind for 6 s, and breaks them |
+| **Hidden or invisible adds** | Demonsight and Unmask reveal them to the party |
+| **A boss that teleports or phases** | if it is a Demon, a trap under it or Unmask stops it |
+| **Adds** | Grinder Trap drags and shreds; Snare roots; Spring fires every trap at once |
+| **Interrupt** | talent `demon_hunter_hunters_bolt_t2b` *Pinning Bolt* (12 s internal cooldown) |
 
 ---
 
-## 4. Alternate spells — Demon Form bar
+## 4. Alternate spells
 
-| Slot | Unlocked | id | Name | Cooldown | Effect |
-|---|---|---|---|---|---|
-| 1 | calling 1 | `demon_hunter_form_rend` | Rend | — | claws a **120° arc 3.5 m**: **180% weapon**, Bleed 5 s; +8 Fury |
-| 2 | calling 2 | `demon_hunter_form_ashen_leap` | Ashen Leap | 8 s | leap to a point **15 m** away, slam a **6 m circle** for **200%**, knock non-elites up 1 s |
-| 3 | calling 3 | `demon_hunter_form_wing_sweep` | Wing Sweep (Ravager) | 10 s | **360°, 5 m**: **150%**, knockback 4 m |
-| 3 | calling 3 | `demon_hunter_form_iron_wings` | Iron Wings (Bastion) | 10 s | wings fold round you for **6 s**: **40% less damage**, reflect **20%** of melee damage |
-| 4 | calling 1 | `demon_hunter_form_devour` | Devour | 12 s | bite one enemy **3 m**: **300%**, heal **10% max health**; a kill adds +2 s of form |
-| 5 | calling 2 | `demon_hunter_form_dread_roar` | Dread Roar | 20 s | **taunts every enemy in 12 m** for 4 s (Bastion 6 s; attackers deal 15% less); non-elites are **feared 3 s** |
-| 6 | calling 3 | `demon_hunter_form_ashen_wings` | Ashen Wings | 30 s | **fly for 4 s** at 12 m/s, **immune to ground effects** (void zones, danger zones on the floor, pools, waves along the ground) but not room-wide or air attacks; landing slam **120% in 4 m** |
-
-Visuals: form spells use spellfx `fire` recoloured crimson/black (`#c02020` / `#2a0a0a`), `footfall` fire decals
-while walking in form, `pillar` shadow on entry. Sound: a demonic roar on entry (`dh.form.enter`), heavier
-footsteps (`fragment.crash.small`).
+None. The Demon Hunter has no form, stance or gauge (W27). `Q` (Spring) is a class key, not a spell.
 
 ---
 
-## 5. Talents
+## 5. The hybrid role
 
-Tiers open at **12 / 22 / 32 / 45** (earlier tiers open on learning a later spell). Demon Form spells have no
-talents of their own; talents on the six spells may change them (noted).
+**None** — canon (00 §6 row 11) makes the Demon Hunter a **Damage-only** class, so it cannot queue as anything
+else; the shared **Role focus** switch in its spellbook (00 §6) offers only **Primary**. What it brings to a
+group instead:
 
-### `demon_hunter_brand_bolt`
-
-| Tier | id | Name | Effect |
-|---|---|---|---|
-| 1 | `demon_hunter_brand_bolt_t1a` | Twin Bolts | fires **2 bolts** at 2 targets, 75% each, +8 Fury each |
-| 1 | `demon_hunter_brand_bolt_t1b` | Heavy Quarrel | **+40%**, **pierces** 1 |
-| 2 | `demon_hunter_brand_bolt_t2a` | Deep Brand | Hunter's Brand stacks to **5** |
-| 2 | `demon_hunter_brand_bolt_t2b` | Pinning Bolt | **interrupts** a gold-bordered cast (12 s internal) |
-| 3 | `demon_hunter_brand_bolt_t3a` | Brand of the Fallen | a branded enemy that dies gives **+5 Vengeance** |
-| 3 | `demon_hunter_brand_bolt_t3b` | Ricochet Quarrel | bounces to **1 more** enemy in 10 m at 60% |
-| 4 | `demon_hunter_brand_bolt_t4a` | Hellfire Bolts | in Demon Form, Rend's slot 1 is replaced by **Hellfire Bolt** (the bolt, fire, 220%) — a ranged form |
-| 4 | `demon_hunter_brand_bolt_t4b` | Marked for Death | at 3+ Brand stacks, your **critical hits add +3 Vengeance** |
-
-### `demon_hunter_glaive_arc`
-
-| Tier | id | Name | Effect |
-|---|---|---|---|
-| 1 | `demon_hunter_glaive_arc_t1a` | Boomerang Ring | the glaive **circles you** at 6 m for 2 s instead of flying out |
-| 1 | `demon_hunter_glaive_arc_t1b` | Long Throw | **25 m** out and back |
-| 2 | `demon_hunter_glaive_arc_t2a` | Hooked Blade | on the return, enemies are **pulled 3 m** toward you |
-| 2 | `demon_hunter_glaive_arc_t2b` | Serrated | Bleed stacks to **3** |
-| 3 | `demon_hunter_glaive_arc_t3a` | Twin Glaives | **two glaives** at ±20° |
-| 3 | `demon_hunter_glaive_arc_t3b` | Catch | catching the glaive **resets** Tumbling Shot's cooldown |
-| 4 | `demon_hunter_glaive_arc_t4a` | Hanging Blade | the glaive **stops at the far end for 2 s** spinning (4 m circle, 60% a hit every 0.5 s) |
-| 4 | `demon_hunter_glaive_arc_t4b` | Fel Glaive | usable in Demon Form (slot 2 stays Glaive Arc instead of Ashen Leap), **+50%** in form |
-
-### `demon_hunter_tumbling_shot`
-
-| Tier | id | Name | Effect |
-|---|---|---|---|
-| 1 | `demon_hunter_tumbling_shot_t1a` | Forward Roll | flips **toward** the target and fires point-blank (+30%) |
-| 1 | `demon_hunter_tumbling_shot_t1b` | Long Leap | **14 m**, 1 bolt |
-| 2 | `demon_hunter_tumbling_shot_t2a` | Caltrop Wake | leaves **caltrops** where you started (4 m, −50% move, 4 s) |
-| 2 | `demon_hunter_tumbling_shot_t2b` | Smoke Flip | enemies lose track of you: **drops threat** by 30% (Ravager) |
-| 3 | `demon_hunter_tumbling_shot_t3a` | Hunter's Rhythm | each bolt adds **+1 Brand stack** |
-| 3 | `demon_hunter_tumbling_shot_t3b` | Evasion | i-frames **0.4 → 0.8 s** |
-| 4 | `demon_hunter_tumbling_shot_t4a` | Winged Flip | in Demon Form the flip is a **wing-beat** (12 m, knockback 3 m at the start point) |
-| 4 | `demon_hunter_tumbling_shot_t4b` | Third Charge | **3 charges** |
-
-### `demon_hunter_hellsight`
-
-| Tier | id | Name | Effect |
-|---|---|---|---|
-| 1 | `demon_hunter_hellsight_t1a` | Shared Sight | the **party** in 20 m also gets the immunity to Blind and Fear (not Confuse/Charm) |
-| 1 | `demon_hunter_hellsight_t1b` | Predator's Eye | lasts **12 s**, crit bonus +10% |
-| 2 | `demon_hunter_hellsight_t2a` | Weak Point | the next hit on each enemy while it lasts **critically hits** |
-| 2 | `demon_hunter_hellsight_t2b` | Hate Engine | while it lasts, Vengeance gains are **doubled** |
-| 3 | `demon_hunter_hellsight_t3a` | Unmasking | revealed enemies take **+15% from the party** for 6 s |
-| 3 | `demon_hunter_hellsight_t3b` | Warden's Stare | Bastion: enemies looking at you **deal 10% less** |
-| 4 | `demon_hunter_hellsight_t4a` | Inner Demon | using it at 70+ Vengeance **enters Demon Form** at 70 |
-| 4 | `demon_hunter_hellsight_t4b` | Foresight of the Hunted | while up, **danger zones** targeting you show **0.5 s earlier** (only on your screen) |
-
-### `demon_hunter_chain_of_binding`
-
-| Tier | id | Name | Effect |
-|---|---|---|---|
-| 1 | `demon_hunter_chain_of_binding_t1a` | Chain Lash | the chain **hits up to 3** enemies in a 25 m line, taunts all |
-| 1 | `demon_hunter_chain_of_binding_t1b` | Grappling Chain | aim at terrain or a large enemy to **pull yourself 20 m** instead (a mobility spell) |
-| 2 | `demon_hunter_chain_of_binding_t2a` | Anchor | the tethered target is **rooted 2 s** on arrival |
-| 2 | `demon_hunter_chain_of_binding_t2b` | Chain Leech | while tethered, **heal 1% max health a second** |
-| 3 | `demon_hunter_chain_of_binding_t3a` | Rift Chain | tethered target's buffs are **stripped** one per 2 s |
-| 3 | `demon_hunter_chain_of_binding_t3b` | Pair of Chains | **2 charges** |
-| 4 | `demon_hunter_chain_of_binding_t4a` | Hell's Leash | in Demon Form, Dread Roar **chains** every enemy it taunts (all tethered 8 s) |
-| 4 | `demon_hunter_chain_of_binding_t4b` | Snap | breaking the tether on purpose (moving past 15 m) **deals 200%** to the target |
-
-### `demon_hunter_reckoning`
-
-| Tier | id | Name | Effect |
-|---|---|---|---|
-| 1 | `demon_hunter_reckoning_t1a` | Spread Reckoning | a **40° cone 20 m** instead of a line |
-| 1 | `demon_hunter_reckoning_t1b` | Partial Payment | spends only **up to 50 Vengeance**; cooldown 25 s |
-| 2 | `demon_hunter_reckoning_t2a` | Remembered | each **party death this fight** adds **+30%** |
-| 2 | `demon_hunter_reckoning_t2b` | Echoing Guilt | leaves a **crimson line** for 6 s: enemies on it take 25% a second |
-| 3 | `demon_hunter_reckoning_t3a` | Absolution | heals the **party in 15 m** for 20% of damage dealt |
-| 3 | `demon_hunter_reckoning_t3b` | Rekindled | killing an elite with it refunds **30 Vengeance** |
-| 4 | `demon_hunter_reckoning_t4a` | Last Rite of the Hunt | usable **once in Demon Form**, ending it early for **+100%** |
-| 4 | `demon_hunter_reckoning_t4b` | Endless Grudge | spends all but **20 Vengeance** |
+| Utility | Numbers |
+|---|---|
+| **Sight** | hidden and invisible enemies revealed to the party (calling 2, 30 m; Unmask 40 m for 10 s) |
+| **Called Shot** | party +20% crit chance on the hunter's target during each Weak Point (calling 2) |
+| **Unmask** | +10% party damage on Demons for 10 s; stops demons phasing or teleporting |
+| **Control** | Snare roots (3 s, Demons 5 s), Grinder drag, Spring on demand |
+| **Interrupt** | *Pinning Bolt* talent |
 
 ---
 
-## 6. Class sets
+## 6. Utility spells
+
+### `demon_hunter_hunters_sense` — Hunter's Sense (out of combat, no slot)
+
+| Field | Value |
+|---|---|
+| Unlocks | calling 1 (level 6) |
+| Cost / cooldown | none · 2 min |
+| Cast | 1.5 s, out of combat |
+| Targeting | **Self** |
+| Effect | for **60 s**, marks on your minimap and map every **Demon**, **rare monster**, **champion pack** and **hidden cache** (page 14 secret chests) within **150 m**; a Demon also shows the direction it is facing |
+| Tags | `tag_spell` `tag_arcane` |
+| Looks / sound | the hunter kneels and touches the lens to one eye; a faint crimson ripple runs out along the ground; `dh.sense` |
+
+Travel: scrolls, Travel Methods and the Recall Stone ([page 20](../20-TRAVEL.md)).
+
+---
+
+## 7. Talents
+
+Tiers open at **12 / 22 / 32 / 45** (earlier tiers open on learning a later spell).
+
+### `demon_hunter_hunters_bolt`
+
+| Tier | id | Name | Effect |
+|---|---|---|---|
+| 1 | `demon_hunter_hunters_bolt_t1a` | Twin Bolts | fires at **2 targets**, 75% each, +8 Momentum each |
+| 1 | `demon_hunter_hunters_bolt_t1b` | Heavy Quarrel | **+40%**, **pierces** 1 |
+| 2 | `demon_hunter_hunters_bolt_t2a` | Deep Brand | Hunter's Brand stacks to **5** |
+| 2 | `demon_hunter_hunters_bolt_t2b` | Pinning Bolt | **interrupts** a gold-bordered cast (12 s internal cooldown) |
+| 3 | `demon_hunter_hunters_bolt_t3a` | Knife Hand | with a dagger in either hand, every 3rd cast is a **point-blank knife flurry** (3 m, 3 × 70%, +6 Momentum) instead of a bolt (tags: +`tag_melee` +`tag_area`) |
+| 3 | `demon_hunter_hunters_bolt_t3b` | Ricochet Quarrel | bounces to **1 more** enemy in 10 m at 60% |
+| 4 | `demon_hunter_hunters_bolt_t4a` | Hallowed Tips | against **Demons** the bolt deals **+30%** and spreads Hunter's Brand to Demons within 5 m |
+| 4 | `demon_hunter_hunters_bolt_t4b` | Patient Eye | a bolt that lands inside a Weak Point **refreshes the window by 0.5 s** (max +1 s per window) |
+
+### `demon_hunter_snare_trap`
+
+| Tier | id | Name | Effect |
+|---|---|---|---|
+| 1 | `demon_hunter_snare_trap_t1a` | Wide Jaws | trigger radius **3 m**; roots **every** enemy in it |
+| 1 | `demon_hunter_snare_trap_t1b` | Barbed Jaws | +80% damage and **Bleeding**; root 2 s |
+| 2 | `demon_hunter_snare_trap_t2a` | Chain Anchor | the snared enemy is **tethered** to the trap (white tether, page 11, 6 m) for 6 s after the root ends |
+| 2 | `demon_hunter_snare_trap_t2b` | Tripwire | throw two traps at once, **linked by a wire 8 m long**: the first enemy to cross the wire sets off both |
+| 3 | `demon_hunter_snare_trap_t3a` | Opening | a snared target's **Weak Point opens** at once (once per target every 10 s) |
+| 3 | `demon_hunter_snare_trap_t3b` | Third Charge | **3 charges** |
+| 4 | `demon_hunter_snare_trap_t4a` | Holy Iron | a snared **Demon** takes **10% of its max health** (bosses: 3%) over the root |
+| 4 | `demon_hunter_snare_trap_t4b` | Quick Set | traps **arm instantly** and can be thrown **30 m** |
+
+### `demon_hunter_vault`
+
+| Tier | id | Name | Effect |
+|---|---|---|---|
+| 1 | `demon_hunter_vault_t1a` | Knife Dance | vault **forward through** up to 3 enemies, slashing each for 120% weapon (daggers) or shooting point-blank (+30%) (tags: +`tag_melee`) |
+| 1 | `demon_hunter_vault_t1b` | Long Leap | **14 m**, 1 bolt |
+| 2 | `demon_hunter_vault_t2a` | Caltrop Wake | leaves **caltrops** where you started (4 m, −50% move, 4 s) (tags: +`tag_trap`) |
+| 2 | `demon_hunter_vault_t2b` | Slip Away | enemies lose track of you: **−30% threat** on everything you have hit |
+| 3 | `demon_hunter_vault_t3a` | Drop a Snare | a free **Snare Trap** is left where you started (counts toward the trap limit) |
+| 3 | `demon_hunter_vault_t3b` | Evasion | i-frames **0.4 → 0.8 s** |
+| 4 | `demon_hunter_vault_t4a` | Hunter's Rhythm | each bolt adds **+1 Hunter's Brand** and a Vault inside a Weak Point refunds its charge |
+| 4 | `demon_hunter_vault_t4b` | Third Charge | **3 charges** |
+
+### `demon_hunter_unmask`
+
+| Tier | id | Name | Effect |
+|---|---|---|---|
+| 1 | `demon_hunter_unmask_t1a` | Shared Nerve | the **party** within 20 m also gets the immunity to Fear and Blind (not Charm or Confuse) |
+| 1 | `demon_hunter_unmask_t1b` | Long Look | Unmasked lasts **15 s**, cooldown 50 s |
+| 2 | `demon_hunter_unmask_t2a` | Laid Bare | every enemy hit (not only Demons) takes **+5% from the party** for 10 s |
+| 2 | `demon_hunter_unmask_t2b` | Hunter's Harvest | each Demon Unmasked gives **+8 Momentum** (max +40) |
+| 3 | `demon_hunter_unmask_t3a` | Open Wounds | while Unmasked, a Demon's Weak Point opens **every 3 s** for you |
+| 3 | `demon_hunter_unmask_t3b` | Ward of the Lens | you take **15% less damage from Demons** for 10 s |
+| 4 | `demon_hunter_unmask_t4a` | Stripped | Unmask also **removes one magic buff** from every enemy in range |
+| 4 | `demon_hunter_unmask_t4b` | Early Warning | while Unmasked enemies live, **danger zones targeting you show 0.5 s earlier** (on your screen only) |
+
+### `demon_hunter_grinder_trap`
+
+| Tier | id | Name | Effect |
+|---|---|---|---|
+| 1 | `demon_hunter_grinder_trap_t1a` | Wide Blades | circle **6 m**, 35% a hit |
+| 1 | `demon_hunter_grinder_trap_t1b` | Hungry Blades | circle 3 m, **80% a hit**, no drag |
+| 2 | `demon_hunter_grinder_trap_t2a` | Undertow | drag **2 m a second** |
+| 2 | `demon_hunter_grinder_trap_t2b` | Serrated | Bleeding **stacks to 3** |
+| 3 | `demon_hunter_grinder_trap_t3a` | Rolling Grinder | the grinder **rolls toward the nearest enemy** at 3 m/s while it spins |
+| 3 | `demon_hunter_grinder_trap_t3b` | Scrap Return | when it ends it refunds **15 Momentum** |
+| 4 | `demon_hunter_grinder_trap_t4a` | Pit Jaws | Demons inside are **Rooted** for the whole 6 s |
+| 4 | `demon_hunter_grinder_trap_t4b` | Twin Grinders | **2 charges** |
+
+### `demon_hunter_banishing_shot`
+
+| Tier | id | Name | Effect |
+|---|---|---|---|
+| 1 | `demon_hunter_banishing_shot_t1a` | Spread Shot | a **40° cone 20 m** instead of a line |
+| 1 | `demon_hunter_banishing_shot_t1b` | Quick Draw | spends **exactly 30** Momentum; cooldown 18 s |
+| 2 | `demon_hunter_banishing_shot_t2a` | Deep Banishing | the banish threshold is **30%** instead of 20% |
+| 2 | `demon_hunter_banishing_shot_t2b` | Burning Line | leaves a **crimson line** for 6 s: enemies on it take 25% a second |
+| 3 | `demon_hunter_banishing_shot_t3a` | Exorcism | each banish **heals the party within 15 m** for 5% of their max health |
+| 3 | `demon_hunter_banishing_shot_t3b` | Rekindled | each banish refunds **20 Momentum** and 10 s of cooldown |
+| 4 | `demon_hunter_banishing_shot_t4a` | Point of Weakness | cast inside a Weak Point, the shot **cannot miss, pierces everything** and deals **+50%** |
+| 4 | `demon_hunter_banishing_shot_t4b` | Seal the Tear | the line leaves **Snare Traps** every 8 m along it (up to your limit) |
+
+---
+
+## 8. Class sets
 
 ### `set_demon_hunter_riftwatch_leathers` — Riftwatch Leathers (level 38, levelling)
 
 | Pieces | Bonus | Changes |
 |---|---|---|
-| 2 | Glaive Arc **brands** every enemy it hits (1 stack) | `demon_hunter_glaive_arc` |
-| 4 | Tumbling Shot's bolts **pierce** | `demon_hunter_tumbling_shot` |
-| 6 | Vengeance from kills **doubled** | mechanic |
+| 2 | Hunter's Bolt against a Rooted target **builds +6 more** Momentum | `demon_hunter_hunters_bolt` |
+| 4 | Vault's bolts **pierce** | `demon_hunter_vault` |
+| 6 | traps last **45 s** and you may have **1 more** | traps |
 
-Drop: `d10_rimefang_caverns` and `d11_saltdeep_cathedral` bosses (Normal/Heroic).
+Source: bosses of `d10_rimefang_caverns` and `d11_saltdeep_cathedral` (Normal).
 
-### `set_demon_hunter_hellborne` — Hellborne Harness (level 60, raid, Ravager)
-
-| Pieces | Bonus | Changes |
-|---|---|---|
-| 2 | Demon Form lasts **+4 s** | Demon Form |
-| 4 | Ashen Leap **resets** when Devour kills | `demon_hunter_form_ashen_leap`, `demon_hunter_form_devour` |
-| 6 | leaving Demon Form **fires a free Reckoning** at 50 Vengeance worth | `demon_hunter_reckoning` |
-
-Drop: `r05_veilspire` bosses (tokens), Normal/Mythic.
-
-### `set_demon_hunter_chainwarden` — Mail of the Chainwarden (level 60, raid, Bastion)
+### `set_demon_hunter_banishers_coat` — The Banisher's Coat (level 60)
 
 | Pieces | Bonus | Changes |
 |---|---|---|
-| 2 | Chain of Binding cooldown **16 → 10 s** | `demon_hunter_chain_of_binding` |
-| 4 | while tethered, **you take 10% less** damage from the tethered enemy | `demon_hunter_chain_of_binding` |
-| 6 | Iron Wings also **taunts** everything in 8 m and lasts 8 s | `demon_hunter_form_iron_wings` |
+| 2 | Weak Points last **+0.5 s** | Weak Points |
+| 4 | Banishing Shot **resets** when it banishes a Demon (once per 15 s) | `demon_hunter_banishing_shot` |
+| 6 | Unmask also **opens a Weak Point on every Demon** in range for 3 s (for you and, with Called Shot, the party) | `demon_hunter_unmask` |
 
-Drop: `r04_ember_court` bosses (tokens), Normal/Mythic.
+Source: bosses of `d15_fire_court` on **Challenge** (one piece per boss, once a week per boss, Monday 06:00).
+
+### `set_demon_hunter_trapwrights_harness` — The Trapwright's Harness (level 60, crafted)
+
+| Pieces | Bonus | Changes |
+|---|---|---|
+| 2 | Spring's cooldown **10 → 6 s** | Spring |
+| 4 | a trap that triggers **re-arms once** 2 s later | traps |
+| 6 | Grinder Trap **triggers every armed Snare** within 10 m of it when it fires | `demon_hunter_grinder_trap`, `demon_hunter_snare_trap` |
+
+Source: recipe — Leatherworking 275 ([page 19](../19-PROFESSIONS.md)); the recipe drops from `d13_cindergate` bosses (Normal or Challenge). Reagents: `it_demon_horn`, `it_brimstone` and Riftmarch `it_rift_shard` (page 10).
 
 ---
 
-## 7. Class legendaries and uniques
+## 9. Class legendaries, uniques and souls
 
 ### Legendaries
 
 | id | Name | Slot | Power | Source |
 |---|---|---|---|---|
-| `leg_kael_sorrowends_debt` | **Kael Sorrowend's Debt** | amulet | *Owed Blood*: each **party death** fills Vengeance to **100** at once | secret boss of `r03_sunken_choir`, 8% |
-| `leg_the_riftlords_horns` | **The Rift-Lord's Horns** | head | *Crowned Horror*: Demon Form can be entered at **70 Vengeance** and lasts **+6 s** | `riftmarch` world boss, 4% |
-| `leg_glaive_of_the_long_night` | **Glaive of the Long Night** | off hand (dagger) | *Endless Orbit*: Glaive Arc **never returns**; it orbits you at 6 m for **8 s**, hitting every 0.5 s for 50% | final boss of `d13_cindergate` Mythic+ 10+, 2% |
-| `leg_heartseeker_arbalest` | **Heartseeker Arbalest** | crossbow | *Heartshot*: Reckoning at 100 Vengeance **always crits** and **chains** to 2 more enemies at 60% | final boss of `r05_veilspire` Mythic, 6% |
-| `leg_chains_of_the_warden_below` | **Chains of the Warden Below** | belt | *Twin Tether*: Chain of Binding tethers **2 targets**; each counts as taunted | `r04_ember_court` boss 3, 5% |
+| `leg_the_lens_of_kael_sorrowend` | **The Lens of Kael Sorrowend** | head | *Never Looks Away*: Weak Points open **every 3 s** on Demons and every 5 s on other targets | secret boss `b_marchheart` of `d16_the_spire` (Challenge), 8% |
+| `leg_mercy_and_doubt` | **Mercy and Doubt** | off hand (hand crossbow) | *A Pair*: with two hand crossbows, Hunter's Bolt fires **both at full damage** (2 × 130%) and builds 18 | the `kingsfire` world boss ([page 13](../13-WORLD-BOSSES.md)), 4% |
+| `leg_jaw_of_the_pit` | **Jaw of the Pit** | belt | *Never Lets Go*: the Grinder Trap **attaches to the first enemy it catches** and follows it for its 6 s (bosses included) | final boss of `d13_cindergate` (Challenge), 6% |
+| `leg_banishers_writ` | **The Banisher's Writ** | amulet | *By Right*: Banishing Shot banishes non-boss Demons under **35%** health, and each banish refunds **30 Momentum** | final boss of `d15_fire_court` (Challenge), 6% |
+| `leg_snarewright_gloves` | **Snarewright Gloves** | gloves | *Chain Reaction*: when any of your traps triggers, **every other armed trap within 8 m** triggers too | the final boss's chest at Depth 10+, any dungeon, 2% |
 
 ### Uniques
 
 | id | Name | Slot | Power | Source |
 |---|---|---|---|---|
-| `uq_imp_catchers_charm` | **Imp-Catcher's Charm** | ring | Hunter's Oath is **+35%** vs imps and small demonic enemies | `d01_hollow_barrow` final boss `b_hollow_thane`, 12% |
-| `uq_scarred_crossbow` | **The Scarred Crossbow** | crossbow | Brand Bolt **+6 Fury** (18 total) | `d05_glass_tombs` final boss, 7% |
-| `uq_mourning_scarf` | **Mourning Scarf** | shoulders | allies dropping under 20% give **+10 Vengeance** instead of 5 | `d08_moonwell_ruins` boss 2, 7% |
-| `uq_ash_walker_boots` | **Ash-Walker Boots** | feet | Tumbling Shot **leaves no footprint**: void zones do not damage you for 1 s after landing | `emberthrone` rare elites, 3% |
+| `uq_imp_catchers_charm` | **Imp-Catcher's Charm** | ring | Hunter's Oath is **+35%** vs imps and other small Demons | `d01_hollow_barrow` final boss `b_hollow_thane`, 12% |
+| `uq_scarred_hand_crossbow` | **The Scarred Hand Crossbow** | hand crossbow | Hunter's Bolt **builds +6 more** (18 total) | `d05_glass_tombs` final boss, 7% |
+| `uq_watchers_scarf` | **Watcher's Scarf** | shoulders | Demonsight **+10 m**; revealed enemies stay revealed 3 s after leaving it | `d08_moonwell_ruins` boss 2, 7% |
+| `uq_ash_walker_boots` | **Ash-Walker Boots** | feet | after Vault lands, **void zones do not damage you for 1 s** | `kingsfire` rare monsters (page 10), 3% |
+
+### Souls
+
+| id | Name | Socket in | Requirement | Power | Source |
+|---|---|---|---|---|---|
+| `soul_hunters_eye` | **Soul of the Hunter's Eye** | weapon | **Demon Hunter only** | Weak Points also open on **normal** enemies (every 8 s), and each hit you land in a Weak Point **throws a free knife** at another enemy within 10 m for 60% weapon damage | the secret boss `b_the_finished_thing` of `d12_unmade_workshop` (Normal or Challenge), 4%; or any Demon at 0.02% (great luck) |
+| `soul_iron_patience` | **Soul of Iron Patience** | jewellery (ring or amulet) | **Demon Hunter only** | a trap that has waited armed for **10 s or more** deals **+100%** and its root or drag lasts twice as long | quest reward: the Riftmarch story chapter's demon-hunter version (page 14); or Depth 15+ final chest, 1% |
 
 ---
 
-## 8. Voice and barks
+## 10. Voice and barks
 
 Voice: **new row `demon_hunter`** proposed for `shared/voices.js` — `pitch 0.36, depth 0.7, tone 0.42,
-breath 0.3, rough 0.3, speed 0.52, jitter 0.08` (rough, low). In Demon Form the voice is pitched down
-0.12 and `rough` +0.3 (reuse the voice-lab effects chain, `voice-lab/js/fx.js`). Lingo tag `class:demon_hunter`.
+breath 0.3, rough 0.3, speed 0.52, jitter 0.08` (rough, low, unhurried). Lingo tag `class:demon_hunter`.
 
 | When | Lines |
 |---|---|
-| Brand | "Marked." · "You're mine now." |
-| Ally dies | "I'll carry you." · "Another name to answer for." |
-| Demon Form | "Let it OUT." · "You wanted a monster? Here." |
-| Reckoning | "For every one of them!" · "Reckoning!" |
+| Unmask | "Show me your real face." · "There you are." |
+| Demon spotted | "That one's not what it's wearing." · "I can see you." |
+| Trap set | "Step there. Go on." · "Mind your feet." |
+| Weak Point | "Now." · "There — right there." |
+| Banish | "Back where you came from." · "Gone. For good." |
 | Crit | "Clean." |
-| Low health | "Not yet — I'm not full yet!" · "Hold on, the thing in me's still hungry." |
-| Demonic enemy spotted | "I can smell the Rift on that one." |
+| Low health | "Not yet — it's still breathing!" · "I need a minute and a wall." |
+| Ally Charmed by a demon | "Wake up — that voice isn't yours!" |
 
 ---
 
-## 9. Reuse notes
+## 11. Reuse notes
 
 | Borrowed | From | Used for |
 |---|---|---|
-| Look | `prototypes/farhold/data/classes.json` `demon_hunter.look` (buzz cut, glowing eyes, strapped leather, scar, scarf) | default look |
-| Wings | `avatar-3d/js/creatures.js` bat body plan wing mesh | Demon Form wings |
-| Visual only | Farhold `aimed_shot`, `multi_shot`, `shadowstep`, `pinning_shot`, `execute` | bolt, tumbling, chain, reckoning timings |
-| Combat feel | `prototypes/farhold/js/combat-feel.js` (knockback, hit-stop) | pull, sweep, leap |
-| Dropped | Farhold `dire_companion` pet; Farhold DH kit (aimed_shot, shadowstep, multi_shot, curse, pinning_shot, execute) | the class's power is the form, not a pet |
+| Look | `prototypes/farhold/data/classes.json` `demon_hunter.look` (buzz cut, glowing eyes, strapped leather, scar, scarf); add a monocle-lens `hat` part (new, `dh_lens`) and a trap belt `decor` | default look |
+| Weapons | `avatar-3d/js/chibi2-weapons.js` crossbow (scaled 0.6 as a hand crossbow, new `fh_hand_crossbow`), daggers | weapons |
+| Visual only | Farhold `aimed_shot`, `pinning_shot`, `shadowstep`, `multi_shot` | bolt, snare, vault timings |
+| Combat feel | `prototypes/farhold/js/combat-feel.js` (knockback, hit-stop) | drag, snare, banish |
+| Trap props | Farhold `js/build.js` ghost (placement preview) | trap placement preview |
+| Reveal | page 05's `hidden` status (§10.6); the Chibi 2 outline shader used for Demonsight | outlines through walls |
+| Dropped | the whole v0.1 kit: Fury, Vengeance, Demon Form, Bastion tank, form bar, wings, Glaive Arc, Hellsight, Chain of Binding, Reckoning; Farhold `dire_companion` | W27 |
+
+---
+
+## 12. Round 2 changes
+
+The class was **rebuilt** (W27): it now uses magic to **find and kill demons**, fights with **hand crossbows,
+daggers and traps**, and has **no gauge, no demon form and no Vengeance**. Resource: Momentum. Damage only (the
+old Bastion tank variant is gone).
+
+| Old (v0.1) | New |
+|---|---|
+| Fury | **Momentum** |
+| Vengeance gauge, fed by party deaths | removed |
+| Demon Form (Ravager / Bastion), form bar, all `demon_hunter_form_*` spells | removed |
+| `demon_hunter_brand_bolt` Brand Bolt | `demon_hunter_hunters_bolt` **Hunter's Bolt** (Hunter's Brand kept) |
+| `demon_hunter_glaive_arc` Glaive Arc | removed → `demon_hunter_snare_trap` **Snare Trap** |
+| `demon_hunter_tumbling_shot` Tumbling Shot | `demon_hunter_vault` **Vault** |
+| `demon_hunter_hellsight` Hellsight | `demon_hunter_unmask` **Unmask** + passive **Demonsight** |
+| `demon_hunter_chain_of_binding` Chain of Binding | removed → `demon_hunter_grinder_trap` **Grinder Trap** (the chain survives as the *Chain Anchor* talent) |
+| `demon_hunter_reckoning` Reckoning | `demon_hunter_banishing_shot` **Banishing Shot** |
+| Hunter's Oath +20% (`demonic` tag) | Hunter's Oath **+25%** (monster tag **Demon**) |
+| sets Hellborne Harness, Chainwarden (raid) | **Banisher's Coat** (`d15_fire_court` Challenge), **Trapwright's Harness** (crafted) |
+| legendaries (Owed Blood, Rift-Lord's Horns, Glaive of the Long Night, Heartseeker Arbalest, Chains of the Warden Below) | Lens of Kael Sorrowend, Mercy and Doubt, Jaw of the Pit, Banisher's Writ, Snarewright Gloves |
+| `uq_scarred_crossbow`, `uq_mourning_scarf` | `uq_scarred_hand_crossbow`, `uq_watchers_scarf` |
+| `q_demon_hunter_calling_1/2/3` | `q_calling_demon_hunter_1/2/3` |
+
+- **Sweep (round 2)**: "stealthed" enemies → **hidden** (page 05 `hidden` status); §5 says the Role focus switch
+  offers only Primary; secret-boss drop sources name their bosses (`b_marchheart`, `b_the_finished_thing`).

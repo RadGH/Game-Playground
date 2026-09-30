@@ -1,13 +1,18 @@
 # WILDMARCH — Design Bible, page 04: settings
 
-**Status:** v0.1 draft for review — 2026-09-29. **Nothing is built.**
+**Status:** v0.2 draft — 2026-09-30 (round 2 applied). **Nothing is built.**
 **Owns:** every settings tab, every option, its key (`set.<tab>.<key>`), its control, every value a
 dropdown offers, its default, what it does, and where it is saved.
 **Reads from:** [page 00](00-OVERVIEW.md) (canon), [page 02](02-CONTROLS.md) (every key; the Keybinds tab
 is page 02's table made editable), [page 03](03-UI-SCREENS.md) (the Settings screen `scr_settings` and the
 HUD pieces these options change), [page 11](11-BOSS-MECHANICS.md) (the telegraph colours the palettes
 replace), [page 15](15-SOCIAL-ONLINE.md) (channels, invites, privacy), [page 16](16-TECH.md) (where
-settings are stored), [page 17](17-ART-AUDIO.md) (sound buses, voices, graphics budget).
+settings are stored), [page 17](17-ART-AUDIO.md) (sound buses, voices, graphics budget), [page 19](19-PROFESSIONS.md)
+(professions), [page 20](20-TRAVEL.md) (Travel Methods, the Recall Stone).
+
+**Round 2 (canon 00 §12):** the aim-model split, the soft lock, the light/torch and night options, raid
+frames, raid tools and PvP beyond duels are removed; a **Targeting** group, a **Travel** group, item-card,
+damage-meter and special-rarity options are added; the `set.raid.*` tab is now **Groups** (`set.group.*`).
 
 Rule 6 of page 00 applies: **if an option is added anywhere, it is added here too.**
 
@@ -82,15 +87,15 @@ Read out of `prototypes/farhold/js/settings.js` and the files it feeds on 2026-0
 
 * Opened by **`O`** (alt **F10**), the Game menu's **Settings** button, or `/settings`. It does **not** pause the game
   (nothing pauses online), so it opens as a large window with the world visible behind it.
-* **Tabs down the left** (in this order): Gameplay · Controls · Keybinds · Interface · Combat · Raid & groups ·
-  Graphics · Audio · Voice & Speech · Accessibility · Social · Online · Debug (only in dev builds). *Combat
-  (`set.combat.*`) and Raid & groups (`set.raid.*`) were added in the 2026-09-29 reconciliation pass because
-  pages 05, 11 and 13 wrote keys under those names (§7a, §7b).*
+* **Tabs down the left** (in this order): Gameplay (groups: Targeting, Travel, General, Class) · Controls ·
+  Keybinds · Interface · Combat · Groups · Graphics · Audio · Voice & Speech · Accessibility · Social ·
+  Online · Debug (only in dev builds). *Combat (`set.combat.*`) was added in the 2026-09-29 reconciliation
+  pass; **Groups** (`set.group.*`) replaced "Raid & groups" (`set.raid.*`) in round 2 (§7b).*
 * **A search box** at the top filters every option on every tab by label and by what it does.
 * A **dot** beside any option not at its default; a small ↺ on the row resets that one option.
 * **Every change applies live** (Farhold rule — no Apply button), with two exceptions that take a
   "Keep these settings? Reverting in 15 s" prompt: anything that changes render scale or anti-aliasing,
-  and switching aim mode (both can leave a player unable to reach the button).
+  and switching the pointer style (both can leave a player unable to reach the button).
 * Footer: **Reset this tab** (one click, then "Sure?"), **Reset everything** (two clicks — reuse D15),
   **Export** (downloads `wildmarch-settings.json`), **Import** (reads one back; unknown keys ignored, bad
   values replaced with the default and listed).
@@ -104,7 +109,7 @@ Read out of `prototypes/farhold/js/settings.js` and the files it feeds on 2026-0
 | Scope | Saved | Follows you to | Examples |
 |---|---|---|---|
 | **Device** (D) | this browser's `localStorage`, key `wildmarch.settings.device.v1` | only this computer and browser | graphics, audio output, render scale, gamepad deadzones |
-| **Account** (A) | the server, on your account record | every computer you log in on, every character | aim mode, keybinds (by default), accessibility, social privacy, chat filters |
+| **Account** (A) | the server, on your account record | every computer you log in on, every character | targeting, keybinds (by default), accessibility, social privacy, chat filters |
 | **Character** (C) | the server, on the character record | that character only | show helm, follower stance, action-bar layout choices, the per-character keybinds override |
 
 * A device setting is written the moment it changes (Farhold behaviour). Account and character settings
@@ -121,7 +126,7 @@ Read out of `prototypes/farhold/js/settings.js` and the files it feeds on 2026-0
 ```json
 {
   "version": 1,
-  "tabs": ["gameplay", "controls", "keybinds", "interface", "combat", "raid", "graphics", "audio",
+  "tabs": ["gameplay", "controls", "keybinds", "interface", "combat", "group", "graphics", "audio",
            "voice", "access", "social", "online", "debug"],
   "options": [
     {
@@ -163,38 +168,64 @@ whether it changed — comparing the file to a constant would pass against an or
 | `?quality=low` | boot on the Low preset and ignore saved graphics (the Playwright specs) |
 | `?graphics=low\|medium\|high\|ultra` | boot on that preset |
 | `?dev=1` | show the Debug tab and the `` ` `` debug menu (dev server only; ignored on the live server) |
-| `?aim=hybrid\|action\|classic` | force an aim mode for the session |
+| `?pointer=mouselook\|free` | force a pointer style for the session (page 02 §2.2) |
 | `?palette=<id>` | force a telegraph palette, one of `set.access.telegraph_palette`'s values (for screenshot tests of each palette) |
 
 ---
 
 ## 3. Gameplay (`set.gameplay.*`)
 
+### 3.1 Targeting (new — page 02 §2 owns the rules)
+
+Tab targeting is the one model (canon 00 §12.1 W8). The first draft's `aimMode` (Hybrid / Action /
+Classic), `softLockCone`, `tabCone`, `keepTargetRange` and `selfCast` are **gone**; the only camera choice
+left is `set.controls.pointerStyle` (§4.1). Every option here changes **how a key picks a target**, never
+lets the target frame change by itself (page 02 §2.6).
+
 | Key | Label | Control | Values / range | Default | What it does | Scope | Origin |
 |---|---|---|---|---|---|---|---|
-| `aimMode` | Aim mode | dropdown | **Hybrid** — reticle + soft lock + Tab lock · **Action** — reticle only, no targets · **Classic** — free cursor, click to target, hold right mouse to steer | Hybrid | how you point at things (page 02 §2). Asks to confirm (15 s revert) | A | new |
-| `selfCast` | Heal yourself when | dropdown | No friendly is targeted or hovered · Always, unless a friendly is targeted · Never (the spell waits for a target) | No friendly is targeted or hovered | where a friendly spell goes when nothing friendly is picked | A | new |
-| `mouseoverCast` | Cast on the frame under the cursor | toggle | | On | with a free cursor over a party/raid frame, a spell key casts on that player | A | new |
-| `softLockCone` | Soft lock width | slider | 4°–30°, step 1° | 12° | how far from the reticle an enemy can be and still be the soft target (Hybrid only) | A | new |
-| `tabRange` | Tab targeting range | slider | 20–60 m, step 5 | 40 m | how far Tab looks | A | new |
-| `tabCone` | Tab targeting arc | slider | 60°–360°, step 30° | 90° | how wide in front Tab looks (360 = all round) | A | new |
-| `tabOrder` | Tab picks | dropdown | Nearest to the reticle first · Nearest to me first · Lowest health first · Attacking me first | Nearest to the reticle first | the order Tab cycles in | A | new |
-| `targetOnAttack` | Target what I hit | toggle | | On | with no hard target, the first enemy your basic attack hits becomes your hard target | A | new |
-| `keepTargetRange` | Drop target beyond | slider | 40–100 m, step 10 | 60 m | a hard target further away than this for 3 s is dropped | A | new |
+| `autotarget_sets_target` | Auto-target spells set my target | toggle | | **On** | when an Auto-target spell or ranged basic attack has no valid target and picks the enemy nearest your aim point, that enemy becomes your hard target. Off: it is hit, your target stays empty (page 02 §2.3) | A | new |
+| `autotarget_cone` | Auto-target reach from the aim point | slider | 10°–45°, step 5° | 25° | how far from the aim point (as an angle) an enemy can be and still be picked | A | new |
+| `self_cast_fallback` | Friendly spells fall back to me | toggle | | **Off** | a heal or buff (an **Ally** spell) pressed with no friendly target, or with an enemy targeted, goes to you. Off: it refuses with "No friendly target." (no silent self-cast, canon W8) | A | new |
+| `heal_target_of_target` | Friendly spells on an enemy go to whoever it attacks | toggle | | Off | with an enemy targeted, an Ally spell goes to that enemy's target if it is friendly | A | new |
+| `mouseover_cast` | Mouse-over casting | dropdown | Off · Frames only · Frames and the world | Frames only | with a free cursor over a party frame (or, on "Frames and the world", a body or nameplate), a spell key casts on the hovered unit without changing your target | A | new |
+| `ground_at_target` | Ground spells land on my target | toggle | | Off | a Ground spell lands at your hard target's feet instead of at the aim point | A | new |
+| `target_on_attack` | Target the first enemy my basic attack hits | toggle | | On | only when you have **no** target; never replaces one you chose | A | new |
+| `tab_order` | Tab picks | dropdown | Nearest in front of the camera first · Nearest to the aim point first · Enemies fighting my group first · Lowest health first | Nearest in front of the camera first | the order Tab cycles in (page 02 §2.5) | A | new |
+| `tab_range` | Tab reaches | slider | 20–60 m, step 5 | 40 m | how far Tab looks | A | new |
+| `tab_behind` | Tab turns to enemies behind me when none are in view | toggle | | On | with nothing on screen, Tab takes the nearest enemy in any direction and turns the camera 0.3 s toward it | A | new |
+| `tab_combat_only` | Tab skips enemies that are not fighting | toggle | | Off | so Tab never picks a sleeping pack by accident | A | new |
+| `on_target_death` | When my target dies | dropdown | **Keep the body targeted** · Clear my target · Take the next enemy (as Tab) | Keep the body targeted | the only setting that can switch targets for you is the third value (page 02 §2.6) | A | new |
+| `target_ring` | Ring under my target | dropdown | Gold ring · Gold ring and outline · Outline only | Gold ring and outline | how your hard target is marked in the world | A | new |
+
+### 3.2 Travel (new — page 20 owns routes, fares and the Recall Stone's numbers)
+
+| Key | Label | Control | Values / range | Default | What it does | Scope | Origin |
+|---|---|---|---|---|---|---|---|
+| `auto_board` | Board by myself when my route departs | toggle | | **On** | with a route picked on a station board and you within 30 m, you board when the vehicle is ready (page 02 §5.18, page 03 §12.17) | A | new |
+| `travel_stop_default` | Get off at | dropdown | The end of the line · Ask me on boarding | The end of the line | where you get off unless you pick a stop | A | new |
+| `travel_camera` | Camera while riding | dropdown | Follow the vehicle · Free orbit | Follow the vehicle | the camera behind the wagon / strider / boat, or free to orbit | A | new |
+| `recall_confirm` | Ask before using the Recall Stone | toggle | | Off | a "Return to {place}?" confirm before the 10 s cast | A | new |
+
+(`set.social.boardWithParty` — party members get "Board with {name}?" — is in Social, §11.)
+
+### 3.3 Everything else in Gameplay
+
+| Key | Label | Control | Values / range | Default | What it does | Scope | Origin |
+|---|---|---|---|---|---|---|---|
 | `dismountToCast` | Casting gets me off my mount | toggle | | On | pressing a spell key while riding dismounts and casts; Off = the key does nothing and says so | A | new |
 | `autoLoot` | Loot everything when I open a body | toggle | | Off | On: E on a body takes everything that fits; Off: the loot window opens | A | new |
 | `loot_filter` | Ground loot labels | dropdown | All · Uncommon and up · Rare and up · Epic and up | All | which dropped items show a name label (Left Alt shows every label while held, page 02) — page 08 key | A | new |
 | `autoPickupGold` | Pick up gold by walking over it | toggle | | On | gold within 2 m goes straight into your purse | A | new |
-| `autoPassUnusable` | Pass on group loot I cannot use | toggle | | On | in group loot rolls, items your class cannot equip are passed automatically (page 15) | A | new |
-| `lootNotice` | Show loot as | dropdown | Rewards card (reuse `shared/rewards.js`) · Toast in the corner · Chat line only | Rewards card | how a pickup is announced (Rare and up always get at least a toast) | A | reuse |
-| `confirmSellRarity` | Ask before selling | dropdown | Never · Rare and up · Epic and up · Unique, Set and Legendary only | Epic and up | a "Sure?" before selling items of that rarity or better | A | new |
+| `lootNotice` | Show loot as | dropdown | Rewards card (reuse `shared/rewards.js`) · Toast in the corner · Chat line only | Rewards card | how a pickup is announced (Rare and up, and every special rarity, always get at least a toast) | A | reuse |
+| `confirmSellRarity` | Ask before selling | dropdown | Never · Rare and up · Epic and up · Unique, Set and Legendary only | Epic and up | a "Sure?" before selling items of that rarity or better (special rarities always ask) | A | new |
 | `confirmSalvageRarity` | Ask before salvaging | dropdown | Never · Uncommon and up · Rare and up · Epic and up | Rare and up | same, for salvage (reuse: Farhold recycle, page 08) | A | reuse |
 | `confirmBuyOver` | Ask before buying anything over | dropdown | Never · 100 gold · 1,000 gold · 10,000 gold | 1,000 gold | a "Sure?" before an expensive buy | A | new |
 | `autoSheathe` | Put weapons away out of combat | toggle | | On | weapons go on the back 5 s after combat ends | C | new |
 | `showHelm` | Show my helm | toggle | | On | draw your head slot (others see what you choose) | C | new |
 | `showCloak` | Show my cloak | toggle | | On | same for the back slot | C | new |
 | `showShoulders` | Show my shoulder pieces | toggle | | On | same | C | new |
-| `showLight` | Show my light | toggle | | On | draw the torch or lantern model (the light still shines); page 08 §21 "Hide" asks for head, shoulders, back and light | C | new |
+| `showTool` | Show my tool when not harvesting | toggle | | Off | draw the harvesting tool on your belt or back | C | new |
 | `followerStance` | Followers | dropdown | Aggressive — attack anything near you · Defensive — attack what attacks you or your target · Passive — never attack, just follow | Defensive | how hired and class followers fight (page 05, reuse Farhold `js/followers.js`) | C | reuse |
 | `followerSlots` | Followers fill empty party slots | toggle | | On | when you form a group, followers leave to make room; Off = they leave only when a real player joins | C | new |
 | `auto_accept_shared` | Accept quests shared by my party | toggle | | Off | shared quests are accepted without a card (page 14 §5.7 key; was `autoAcceptShare`) | A | new |
@@ -203,13 +234,23 @@ whether it changed — comparing the file to a constant would pass against an or
 | `unlockCard` | Unlocks appear as | dropdown | Full card with a sound · Toast only | Full card with a sound | how a feature unlock is announced | A | new |
 | `sprintAutoEnd` | Sprint ends when I cast | toggle | | On | page 05 rule; Off keeps sprinting after an instant spell (still ends on cast-time spells) | A | new |
 | `deathRecap` | Show what killed me | toggle | | On | on death, a card listing the last 5 hits (reuse: meters/ drill-down) | A | reuse |
-| **Class options** (shown only to that class; asked for by the class files) ||||||||
-| `bard_song_ring` | Show my song's range ring | toggle | | On | the faint dotted 20 m ring in the song colour, seen only by the bard (`classes/bard.md` §2.2) | C | new |
-| `necro_corpse_markers` | Corpse markers | toggle | | On | a bone glyph with a draining 30 s ring over every usable corpse (`classes/necromancer.md` §2) | C | new |
-| `cleric_auto_mass_res` | Mass Resurrection fires by itself | toggle | | On | when everyone else in your party or raid is dead and you hold 100 Devotion, Mass Resurrection starts on its own (3 s cast); Off = only by the class key (`classes/cleric.md` §2) | C | new |
-| `chrono_ghost_opacity` | Ghost opacity | slider | 0–100%, step 5 | 45% | how solid your 5-second Ghost is drawn (`classes/chronomancer.md` §2) | C | new |
-| `oracle_omen_auto` | Spend Omens automatically | toggle | | On | the next heal spends an Omen (instant, +50%); hold the second class key `G` while casting to keep it (page 02 §5.16; `classes/oracle.md` §2.2) | C | new |
 | `language` | Language | dropdown | English | English | the only language in v2; the dropdown exists so the strings are kept in one place (Lingo) | A | new |
+
+### 3.4 Class options (shown only to that class; asked for by the class files)
+
+| Key | Label | Control | Values / range | Default | What it does | Scope | Origin |
+|---|---|---|---|---|---|---|---|
+| `bard_song_ring` | Show my song's range ring | toggle | | On | the faint dotted 20 m ring in the song colour, seen only by the bard (`classes/bard.md`) | C | new |
+| `bard_beat_cue` | Beat cue | toggle | | On | a shrinking ring on the `Q` / `1`–`6` keys that closes on the beat, plus a soft click (`classes/bard.md`) | C | new |
+| `bard_beat_sound` | Beat click | toggle | | On | the click alone, without the ring | C | new |
+| `necro_corpse_markers` | Corpse markers | toggle | | On | a bone glyph with a draining 30 s ring over every usable corpse (`classes/necromancer.md`) | C | new |
+| `cleric_keeping_vigil` | Keeping Vigil | toggle | | On | the level-40 passive that spends 25 Devotion to leave a warded ally at 1 health instead of dying; Off keeps the Devotion for Raise (`classes/cleric.md` §2.3) | C | new (replaces the first draft's automatic group-revive option, gone with that spell, canon W35) |
+| `chrono_ghost_opacity` | Ghost opacity | slider | 0–100%, step 5 | 45% | how solid your 5-second Ghost is drawn (`classes/chronomancer.md`) | C | new |
+| `oracle_omen_auto` | Spend Omens automatically | toggle | | On | the next heal spends an Omen (instant, +50%); hold the second class key `G` while casting to keep it (page 02 §5.16; `classes/oracle.md`) | C | new |
+| `dh_weakpoint_sound` | Weak-point sound | toggle | | On | the cue when Demonsight reveals a weak point (`classes/demon_hunter.md`) | C | new |
+| `beast_trick_auto` | Defensive beast uses its trick on cooldown | toggle | | Off | a Defensive tamed beast also uses its special move by itself, not only on `G` (`classes/ranger.md`) | C | new |
+| `beast_frame` | Show my tamed beast's frame | toggle | | On | the beast's small frame under yours, with health and its temper (`hud_pet`, page 03) | C | new |
+| `beast_revive_prompt` | Remind me to revive my beast | toggle | | On | when your tamed beast is dead and you leave combat, a one-line prompt to cast its revive ritual | C | new |
 
 ---
 
@@ -219,6 +260,8 @@ whether it changed — comparing the file to a constant would pass against an or
 
 | Key | Label | Control | Values / range | Default | What it does | Scope | Origin |
 |---|---|---|---|---|---|---|---|
+| `pointerStyle` | Pointer style | button row | **Mouse-look** — the pointer is locked, the mouse turns the camera, a reticle marks the aim point · **Free cursor** — the pointer is free; hold right mouse to turn the camera, A/D turn | Mouse-look | page 02 §2.2; targeting works the same in both. Asks to confirm (15 s revert). Replaces the first draft's `set.gameplay.aimMode` | A | new |
+| `autoAttack` | Keep swinging at my target | toggle | | Off (On in Free cursor) | your basic attack repeats on your hard target while it is in reach, without holding the button | A | new |
 | `mouseSensitivity` | Mouse sensitivity | slider | 0.3×–2.5×, step 0.1 | 1.0× | how fast the camera turns (Farhold: 0.0026 rad per px sideways, 0.0022 up/down at 1×) | D | reuse |
 | `mouseSensitivityY` | Up/down sensitivity | slider | 0.5×–2.0× of the above, step 0.1 | 1.0× | separate vertical speed | D | new |
 | `invertY` | Invert look | toggle | | Off | mouse forward looks down | A | reuse |
@@ -231,9 +274,8 @@ whether it changed — comparing the file to a constant would pass against an or
 | `cameraSmoothing` | Camera smoothing | slider | 0–100%, step 5 | 20% | how softly the camera catches up with the character (0 = rigid) | A | new |
 | `cameraAutoFollow` | Camera swings behind me when I run | dropdown | Never · When moving · Only on a mount | Only on a mount | the camera slowly turns to face your direction | A | new |
 | `bossCameraPullback` | Pull the camera back in boss fights | toggle | | On | +3 m of zoom-out allowance during a boss encounter so big telegraphs fit on screen | A | new |
-| `adTurns` | A and D turn instead of strafe | toggle | | Off (On in Classic) | page 02 Classic mode | A | new |
-| `aimAssist` | Aim help (mouse) | slider | 0–100%, step 10 | 50% | how much a projectile bends toward the soft target (100% = 6°); 0 = none | A | new |
-| `reticleStyle` | Reticle | dropdown | Dot · Small cross · Circle · Circle with dot · Chevron | Circle with dot | the aim mark (Farhold uses a dot) | A | reuse |
+| `adTurns` | A and D turn instead of strafe | toggle | | Off (On in Free cursor) | page 02 §2.2 | A | new |
+| `reticleStyle` | Reticle | dropdown | Dot · Small cross · Circle · Circle with dot · Chevron | Circle with dot | the aim point's mark in Mouse-look (Farhold uses a dot); it never targets anything by itself | A | reuse |
 | `reticleSize` | Reticle size | slider | 50–200%, step 10 | 100% | | A | new |
 | `reticleColour` | Reticle colour | colour picker | any | #FFFFFF (with a 1 px dark edge) | | A | new |
 | `reticleHitMarker` | Show a mark when I hit | toggle | | On | the reticle flashes an X for 0.1 s on a hit | A | new |
@@ -242,20 +284,20 @@ whether it changed — comparing the file to a constant would pass against an or
 
 | Key | Label | Control | Values / range | Default | What it does | Scope | Origin |
 |---|---|---|---|---|---|---|---|
-| `holdThreshold` | Hold time | slider | 0.15–0.6 s, step 0.05 | 0.25 s | how long a press counts as a hold (E gather, Q ring, middle-mouse wheel) | A | new |
+| `holdThreshold` | Hold time | slider | 0.15–0.6 s, step 0.05 | 0.25 s | how long a press counts as a hold (E harvest, Q ring, Y watch-cast, Shift+Q utility ring, middle-mouse wheel) | A | new |
 | `formKeys` | Form and stance keys | dropdown | Shift + 1–4 · Class key ring only · F6 and F7, the rest on the ring | Shift + 1–4 | page 02 §10.3 | A | new |
 | `doubleTapDodge` | Double-tap a direction to dodge | toggle | | Off | W W, A A, S S or D D within 0.25 s rolls that way | A | new |
 | `dodgeDirection` | Dodge goes | dropdown | The way I am moving · The way the camera faces · Always backward when standing still | The way I am moving | page 02 `dodge` | A | new |
 | `spellQueueWindow` | Spell queue window | slider | 0–0.5 s, step 0.05 | 0.4 s | how early a spell key is remembered before it can fire (reuse: combat-feel input buffer) | A | reuse |
 | `castOnKeyDown` | Cast when the key goes down | toggle | | On | Off = cast on release (some players prefer it for ground-aimed spells) | A | new |
-| `groundCast` | Ground-aimed spells | dropdown | Cast at the reticle at once · Show a circle, second press to cast · Show a circle while held, cast on release | Show a circle while held, cast on release | how a `ground` shaped spell is placed | A | new |
+| `groundCast` | Ground-aimed spells | dropdown | Cast at the aim point at once · Show a circle, second press to cast · Show a circle while held, cast on release | Show a circle while held, cast on release | how a **Ground** spell is placed (page 02 §2.3; `set.gameplay.ground_at_target` puts it on your target instead) | A | new |
 
 ### 4.3 Gamepad (new — Farhold has none)
 
 | Key | Label | Control | Values / range | Default | What it does | Scope |
 |---|---|---|---|---|---|---|
 | `padEnabled` | Use a gamepad | toggle | | On (does nothing without one) | read a connected controller | D |
-| `padLayout` | Stick layout | dropdown | Default · Southpaw (sticks swapped) · Legacy (move on LS, turn on LS sideways) | Default | | A |
+| `padLayout` | Stick layout | dropdown | Default · Southpaw (sticks swapped) · Classic (move on LS, turn on LS sideways) | Default | | A |
 | `padButtonIcons` | Button icons | dropdown | Automatic · Xbox · PlayStation · Generic (1–4) | Automatic | which icons prompts show | D |
 | `padLeftDeadzone` | Move stick dead zone | slider | 0–30%, step 1 | 12% | how far the stick moves before anything happens | D |
 | `padRightDeadzone` | Look stick dead zone | slider | 0–30%, step 1 | 10% | | D |
@@ -265,7 +307,6 @@ whether it changed — comparing the file to a constant would pass against an or
 | `padCurve` | Look stick response | dropdown | Linear · Exponential (fine aim near the centre) · Dynamic (speeds up when held at the edge) | Exponential | | A |
 | `padTriggerThreshold` | Trigger press point | slider | 10–90%, step 5 | 30% | how far a trigger goes down to count | D |
 | `padVibration` | Vibration | slider | 0–100%, step 10 | 60% | rumble on hits and boss slams (where the browser supports it) | D |
-| `padAimAssist` | Aim help (pad) | slider | 0–100%, step 10 | 70% | as `aimAssist`, stronger by default because sticks are slower | A |
 | `padSprintMode` | Sprint on LS click | dropdown | Toggle · Hold | Toggle | | A |
 | `padLayerHint` | Show spells when LB/RB is held | toggle | | On | page 02 §8 | A |
 
@@ -280,7 +321,7 @@ actions, defaults, contexts and unlocks**; this section owns how the tab behaves
 |---|---|---|---|---|---|---|
 | `<actionId>` (one per page 02 row, e.g. `set.keybinds.dodge`) | the action's label | key capture × 3 columns: **Key**, **Alt key**, **Pad** | any key/chord/mouse button/pad button not reserved | page 02's default | click a cell, press the key; Esc cancels (reuse Farhold) | A (or C, below) |
 | `perCharacter` | Use separate keys for this character | toggle | | Off | On: this character's changes are saved on the character, not the account | C |
-| `preset` | Start from | dropdown | Default · ZQSD (AZERTY keyboards) · ESDF (hand one key right) · Arrow keys (move on arrows, spells on the right-hand keys) · Left-handed (IJKL move, numpad spells) · Classic-style (A/D turn, Q/E strafe) | Default | replaces every key with the preset's (asks first); the player's own changes are then saved as differences from Default | A |
+| `preset` | Start from | dropdown | Default · ZQSD (AZERTY keyboards) · ESDF (hand one key right) · Arrow keys (move on arrows, spells on the right-hand keys) · Left-handed (IJKL move, numpad spells) · Turn keys (A/D turn, Q/E strafe; the class key and interact move to other keys, which the preset lists) | Default | replaces every key with the preset's (asks first); the player's own changes are then saved as differences from Default | A |
 | `showUnlocked` | Show keys I have not unlocked | toggle | | On | locked rows show a padlock and "Unlocks at level 5 (quest: Fall and Rise)"; they can still be rebound (page 02 §3) | A |
 | `resetKeys` | Reset keys | button | | | back to the preset's defaults (one click, reuse Farhold) | — |
 | `exportKeys` / `importKeys` | Export keys / Import keys | buttons | | | `wildmarch-keys.json` on its own | — |
@@ -290,7 +331,7 @@ actions, defaults, contexts and unlocks**; this section owns how the tab behaves
 reserved browser keys cannot be captured (the cell says why: "F11 is the browser's full screen");
 a `Shift+` chord shows the sprint warning; a Ctrl/Alt chord shows the browser warning; the tab has a
 search box and groups (Movement, Combat, Class, Targeting, Pings & markers, Followers, Boss dialog, Windows,
-Chat, Camera, Interface, Mounted).
+Chat, Camera, Interface, Mounted, Travel).
 
 ---
 
@@ -304,23 +345,24 @@ Chat, Camera, Interface, Mounted).
 | `uiOpacity` | Interface opacity out of combat | slider | 30–100%, step 5 | 100% | the HUD fades to this when nothing is happening | A | new |
 | `editLayout` | Move and resize HUD pieces | button | | | unlocks every HUD piece to drag, with a grid; Esc or Done locks it | — | new |
 | `framesUnlocked` | Frames can be dragged | toggle | | Off | leave frames movable while playing | C | new |
-| `layoutPreset` | HUD layout | dropdown | Standard · Centred (bars and frames round the reticle) · Healer (raid frames centre-bottom) · Minimal · Custom | Standard | page 03 owns what each looks like | C | new |
+| `layoutPreset` | HUD layout | dropdown | Standard · Centred (bars and frames round the reticle) · Healer (party frames centre-bottom, larger) · Minimal · Custom | Standard | page 03 owns what each looks like | C | new |
 | `actionBar` | Spell bar | dropdown | Bottom row · Split either side of the centre · Arc under the reticle | Bottom row | | C | reuse (Farhold bar) |
 | `keyHints` | Show keys on the spell bar | toggle | | On | prints the live key on each slot (reuse: Farhold `drawKeyHint`) | A | reuse |
 | `cooldownNumbers` | Cooldown numbers | toggle | | On | seconds left written on a spell on cooldown | A | new |
 | `cooldownSweep` | Cooldown sweep | toggle | | On | the dark clock-hand wipe | A | new |
 | `reticleBars` | Health and resource beside the reticle | dropdown | Off · In combat · Always | In combat | two thin arcs either side of the reticle | A | new |
 | `showCoordinates` | Show coordinates | toggle | | Off | x, z, altitude under the minimap (reuse Farhold `coords`) | A | reuse |
-| `clock` | Clock | dropdown | Off · Game time · Real time · Both | Game time | beside the minimap (day is 60 real minutes, canon) | A | new |
+| `clock` | Clock | toggle | | Off | real time beside the minimap. There is no game clock: always daylight (canon 00 §4) | A | new |
 | `clockFormat` | Clock format | button row | 12-hour · 24-hour | 12-hour | | A | new |
 | `units` | Distances in | button row | Metres · Feet | Metres | every distance on screen (the owner thinks in feet; data stays in metres) | A | new |
 | `numberFormat` | Big numbers | button row | Full (12,345) · Short (12.3k) | Short | (reuse `shared/format.js`) | A | reuse |
-| `xpBar` | Experience bar | dropdown | Off · Bar · Bar with numbers | Bar with numbers | | A | reuse |
+| `xpBar` | Experience bar | dropdown | Off · Bar · Bar with numbers | Bar with numbers | at 60 it shows your tracked reputation (page 03 §4.10); no rested XP | A | reuse |
 | `objectiveTracker` | Objective tracker | toggle | | On | the tracked quest steps on the right (reuse: Farhold round 10 tracked objective) | A | reuse |
 | (quests in the tracker) | see `quest_tracker_max`, §6.11 | | | | *was `trackerMax` (1–10, default 5); replaced by page 14's key* | | |
 | `perkNames` | Names on the perk forest | toggle | | Off | reuse Farhold `#perk-labels` | A | reuse |
 | `itemLevelOnIcons` | Item level on item icons | toggle | | On | | A | new |
 | `rarityLetters` | Rarity letter on item icons | toggle | | Off | C/U/R/E/Q/S/L in a corner (also in Accessibility) | A | new |
+| `specialRarityIcons` | Special-rarity icons in chat | toggle | | On | the bespoke Electrified / Starwoven / Twinned / Ancient / Living icon before an item's name in chat links and chat lines (page 03 §14.3.1). The item card always shows its own | A | new |
 | `screenshotHideUi` | Screenshots without the interface | toggle | | Off | F9 hides the HUD for the one frame | A | new |
 | `damageDirection` | Show which way a hit came from | toggle | | On | a red arc at the screen edge | A | new |
 | `lowHealthEdge` | Low health warning | dropdown | Off · Edge glow · Edge glow + heartbeat sound | Edge glow | below 30% health | A | new |
@@ -330,7 +372,7 @@ Chat, Camera, Interface, Mounted).
 | Key | Label | Control | Values / range | Default | What it does | Scope |
 |---|---|---|---|---|---|---|
 | `plateEnemies` | Enemy nameplates | dropdown | Always · In combat · My target only · Never | Always | the name + health bar over enemies | A |
-| `plateFriendlyPlayers` | Other players | dropdown | Always · Party and raid only · Never | Always | | A |
+| `plateFriendlyPlayers` | Other players | dropdown | Always · Party only · Never | Always | | A |
 | `plateNpcs` | NPC names | dropdown | Always · Within 20 m · Never | Within 20 m | | A |
 | `plateFollowers` | Followers and pets | dropdown | Always · Mine only · Never | Mine only | | A |
 | `plateSelf` | My own name | toggle | | Off | | A |
@@ -338,13 +380,15 @@ Chat, Camera, Interface, Mounted).
 | `plateHealthText` | Health on nameplates | dropdown | None · Percent · Value · Value and percent | Percent | | A |
 | `plateCastBars` | Enemy cast bars on nameplates | toggle | | On | grey = cannot interrupt, gold edge = can (canon vocabulary) | A |
 | `plateMyDebuffs` | My effects on enemy nameplates | toggle | | On | your DoTs and statuses as small icons with timers | A |
-| `plateOverlap` | Nameplates | button row | Stack (never overlap) · Overlap | Stack | | A |
+| `plateOverlap` | Nameplates | button row | Stack (never overlap) · Overlap | Stack | Overlap helps at a crowded world boss | A |
 | `plateGuild` | Guild names | toggle | | On | | A |
 | `plateTitles` | Titles | toggle | | On | "Kaela the Unbent" | A |
 | `plateClassColour` | Player names in class colours | toggle | | On | | A |
 | `plateThreat` | Threat colour on enemy nameplates | toggle | | On (tanks), Off (others) | edge colour: grey = not on you, amber = rising, red = attacking you (page 05) | C |
 | `plateScale` | Nameplate size | slider | 60–160%, step 10 | 100% | | A |
-| `plateRareMarks` | Mark champions, rares and bosses | toggle | | On | gold frame for champions, silver dragon-head for rares, crown for bosses (reuse Farhold champion/rare auras) | A |
+| `plateRareMarks` | Monster rarity on nameplates | toggle | | On | champion packs' blue names and shared affix, rares' yellow names, star and affixes, named titles, boss crowns (page 03 §4.16; reuse Farhold champion/rare auras for the world glow) | A |
+| `plateRarityAffixes` | Show monster affixes on nameplates | dropdown | Off · Champions and rares · Also greater rarities' badges only | Champions and rares | the affix words under the name | A |
+| `plateGreaterBadges` | Greater-rarity badges | toggle | | On | the Giant / Flaming / Electrified / Frozen … badge before the name and the red double edge. Recommended on: a greater rarity is a big difficulty spike | A |
 
 ### 6.3 Damage and healing numbers
 
@@ -367,29 +411,32 @@ Chat, Camera, Interface, Mounted).
 | `castBar` | My cast bar | dropdown | Off · Above the spell bar · Under the reticle | Under the reticle | | A |
 | `castBarLatency` | Show latency on my cast bar | toggle | | On | the red end = the time the server needs, so you can queue the next key | A |
 | `targetCastBar` | Target's cast bar | toggle | | On | under the target frame | A |
-| `focusCastBar` | Focus's cast bar | toggle | | On | on the focus frame; bigger if the focus is casting something interruptible | A |
+| `watchCastBar` | Watch target's cast bar | toggle | | On | on the watch frame (page 02 §2.7); its border pulses gold when the cast can be interrupted | A |
+| `targetOfTarget` | Target-of-target frame | toggle | | On | who your target is targeting (page 03 §4.4) | A |
+| `watchFrame` | Watch frame | toggle | | On | the watch target's frame (hidden when you have none) | A |
 | `bossFrames` | Boss frames | dropdown | Top centre · Right side · Under the target frame | Top centre | up to 5 boss frames (page 03) | C |
 | `bossCastBar` | Boss cast bar | dropdown | Top centre, large · Under the boss frame | Top centre, large | canon: grey = cannot interrupt, gold border = interruptible | A |
 | `bossHealthText` | Boss health | dropdown | Percent · Value · Both | Percent | | A |
-| `boss_timers` | Boss ability timers | dropdown | Off · Next ability only · Full timeline (next 30 s) | Next ability only on **Normal**; Off on Heroic and Mythic (page 11 §4.3) | a small bar per upcoming big mechanic with its countdown, under the boss frame, from page 11's fight scripts; so nobody needs an add-on. Shows **only mechanics this character has seen before** on that boss (page 11: learned, not spoiled). *Page 11's key; was `bossTimeline`* | A |
+| `boss_timers` | Boss ability timers | dropdown | Off · Next ability only · Full timeline (next 30 s) | Next ability only on **Normal**; Off on Challenge (page 11 §4.3) | a small bar per upcoming big mechanic with its countdown, under the boss frame, from page 11's fight scripts; so nobody needs an add-on. Shows **only mechanics this character has seen before** on that boss (page 11: learned, not spoiled). *Page 11's key; was `bossTimeline`* | A |
 | `bossBanner` | Boss speech banner | dropdown | Large, centre · Small, top | Large, centre | canon: a line is often the warning. **Cannot be turned off** | A |
 | `enrageTimer` | Enrage timer | toggle | | On | the countdown on the boss frame | A |
 | `phaseMarks` | Phase marks on the boss health bar | toggle | | On | ticks at the health % where phases change | A |
 
-### 6.5 Party and raid frames
+### 6.5 Party frames
 
 | Key | Label | Control | Values / range | Default | What it does | Scope |
 |---|---|---|---|---|---|---|
-| `partyFrames` | Party frames | dropdown | Left side · Bottom centre · Hidden in a raid | Left side | | C |
+| `partyFrames` | Party frames | dropdown | Left side · Bottom centre · Hidden | Left side | the five party frames (page 03 §4.5). Raid frames are not in v2 (canon W16, `WISHLIST.md`) | C |
 | `partyFramesSolo` | Show party frames when I only have followers | toggle | | On | followers count as party (canon pillar 6) | C |
-| (raid frame layout, size, colour, resource bars, range fade) | moved to **Raid & groups** (`set.raid.*`, §7b) — page 13's keys | | | | *was `raidLayout`, `raidFrameSize`, `raidColour`, `raidResource`, `rangeFade`* | |
-| `raidSort` | Sort raid by | dropdown | Group · Role (tanks, healers, damage) · Name · Class | Group | | C |
-| `raidDebuffs` | Debuffs on raid frames | dropdown | Off · Ones I can remove · Boss debuffs · All | Boss debuffs + ones I can remove | | C |
-| `raidBuffs` | Buffs on raid frames | dropdown | Off · Mine · All | Mine | your heals-over-time and shields | C |
+| `partySort` | Sort party frames by | dropdown | Join order (`F2`–`F5` follow it) · Role (tank, healer, damage) | Join order | the F-key targets follow the order shown | C |
+| `partyDebuffs` | Debuffs on party frames | dropdown | Off · Ones I can remove · Boss debuffs · All | Boss debuffs + ones I can remove | | C |
+| `partyBuffs` | Buffs on party frames | dropdown | Off · Mine · All | Mine | your heals-over-time and shields | C |
+| `partyResource` | Resource bars on party frames | dropdown | Healers only · All · None | All | | C |
+| `rangeFade` | Fade party members out of range | toggle | | On | frames of members beyond 40 m drop to 50% | A |
+| `partyKeyHints` | Show F-keys on party frames | toggle | | On | the small "F2"…"F5" in each row's corner | A |
 | `incomingHeals` | Show incoming heals | toggle | | On | a lighter bar ahead of the health bar | A |
 | `absorbShields` | Show shields | toggle | | On | a striped bar for absorbs | A |
-| `raidFrameFollowers` | Followers in raid frames | toggle | | On | | C |
-| `raidAggro` | Show who has aggro | toggle | | On | red edge on a frame being attacked | A |
+| `partyAggro` | Show who has aggro | toggle | | On | red edge on a frame being attacked by a monster when that member is not a tank | A |
 
 ### 6.6 Buffs and debuffs (your own)
 
@@ -407,7 +454,10 @@ Chat, Camera, Interface, Mounted).
 | `tooltipAnchor` | Tooltips appear | dropdown | Beside the cursor · Bottom-right corner · Above the spell bar | Beside the cursor | | A |
 | `tooltipDelay` | Tooltip delay | slider | 0–1,000 ms, step 50 | 150 ms | reuse: the shared engine's 150 ms | A |
 | `tooltipDetail` | Tooltip detail | dropdown | Short · Full | Full | Short = name, numbers, one line | A |
-| `tooltipCompare` | Compare with what I wear | dropdown | Always · While Shift is held · Never | Always (Shift flips to the other slot) | reuse: Farhold compare + Shift | A |
+| `tooltipCompare` | Compare with what I wear | dropdown | Always · **While Shift is held** · Never | While Shift is held | the Compare block on the item card (page 03 §7.2.1): shown only while Shift is down, so the card stays short; with Always, Shift flips to the other ring / hand instead (reuse: Farhold compare + Shift). Replaces 08's `compare_on_hover` | A |
+| `itemPortrait` | 3D portrait on item cards | dropdown | **On — turning** · On — still picture · Off (flat icon) | On — turning | the item's 3D model at the top of the item card (page 03 §7.2.1). The Low graphics preset forces "still picture" | D |
+| `itemCardEffects` | Item card effects | dropdown | **All** · Reduced (frames and special-rarity looks without motion) · None (plain frames) | All | the rarity frame's shimmer and the special-rarity overlays (arcs, stars, mirror, dust, vines); follows Reduce motion | A |
+| `tooltipTags` | Tags on spell and item tooltips | toggle | | On | the tag chips (page 05's tags) on every spell and item card, with "applies to {n} of your spells" | A |
 | `tooltipInCombat` | Tooltips in combat | dropdown | Show · Hide · Only while Left Alt is held | Show | | A |
 | `tooltipSpellMaths` | Show the numbers behind a spell | toggle | | On | "140% weapon damage = 212" (canon rule 2) | A |
 
@@ -418,10 +468,12 @@ Chat, Camera, Interface, Mounted).
 | `minimap` | Minimap | toggle | | On | | A | reuse |
 | `minimapShape` | Minimap shape | button row | Round · Square | Round | | A | new |
 | `minimapSize` | Minimap size | dropdown | Small · Medium · Large | Medium | | D | new |
-| `minimapRotate` | Rotate the minimap with the camera | toggle | | On | Off = north always up | A | new |
-| `minimapZoom` | Minimap zoom | slider | 8–120 cells, step 1 | 26 | same as `=`/`-` (reuse `hud.minimapSpan`), now saved | A | reuse |
+| `minimapRotate` | Rotate the minimap with the camera | toggle | | Off | Off = north always up (page 03 §4.12) | A | new |
+| `minimapZoom` | Minimap zoom | slider | 80–1,200 m across, step 20 | 240 m | same as `=`/`-` (reuse `hud.minimapSpan`, now in metres and saved; page 03 §4.12) | A | reuse |
 | `minimapReveal` | Show shops and quests within | slider | 30–200 m, step 10 | 70 m | reuse Farhold round 11's 70 m reveal rule | A | reuse |
-| `minimapNodes` | Show gathering spots | toggle | | On | herbs, ore, wood | A | new |
+| `minimapNodes` | Show harvesting nodes | toggle | | On | ore, herbs, timber, hides, fish spots your Harvesting can reach (page 19) | A | new |
+| `minimapTravel` | Show Travel Methods | toggle | | On | stations and vehicles moving on their routes | A | new |
+| `minimapRarities` | Show champion packs and rares | toggle | | On | the blue pips and yellow stars (page 03 §4.12) | A | new |
 | `minimapParty` | Show my party | toggle | | On | | A | new |
 | `mapOpacity` | Map see-through | slider | 50–100%, step 5 | 90% | the world shows behind the map (it does not pause) | A | new |
 | `mapLabels` | Map labels | dropdown | All · Towns and regions · None | All | | A | reuse |
@@ -457,13 +509,13 @@ toggle; all default **On** except where noted.
 | `logHealTaken` | Healing you receive | On | new |
 | `logStatus` | Effects gained and lost | Off | new |
 | `logBoss` | Boss abilities (cast, hit, missed you) | On | new |
-| `logParty` | Your party's and raid's combat | Off | new |
+| `logParty` | Your party's combat | Off | new |
 | `logDeaths` | Deaths | On | new |
 | `logInterrupts` | Interrupts and dispels | On | new |
 | `logLootOthers` | What others looted | Off | new |
 | `logLines` | Lines on the HUD (slider 5–30, step 1) | 12 | reuse (Farhold shows 12) |
 | `logTimestamps` | Timestamps in the log (toggle) | On | new |
-| `meterWindow` | Damage meter window (dropdown: Off · Damage · Healing · Damage taken · Deaths) | Off | reuse (`meters/`) |
+| (damage meter) | its options are §6.13 | | |
 
 ### 6.11 Quests (page 14 §5.7's keys)
 
@@ -494,6 +546,24 @@ Shown only to the class they belong to.
 | `foresight_color` | Foresight colour | dropdown | Cyan · White · Magenta | Cyan | colour of the Oracle's ghost telegraphs; Cyan is the reserved dashed pale cyan `#7fe8ff` (canon 00 §10) — White and Magenta are for colour-blind players | C |
 | `swash_floaters` | "Showstopper!" float text | toggle | | On | the gold float text over a Swashbuckler's head on a Showstopper dodge (`classes/swashbuckler.md` §2.3) | C |
 
+
+### 6.13 Damage meter (reuse: `meters/js/meter.js`, `meter-ui.js`, as in Emberveil 2)
+
+Canon 00 §12.1 W16 keeps the meter. Page 03 §11.1 owns the window.
+
+| Key | Label | Control | Values / range | Default | What it does | Scope | Origin |
+|---|---|---|---|---|---|---|---|
+| `meterShow` | Damage meter | dropdown | Off · Shown when I am in a group · Always | Shown when I am in a group | whether the docked meter is on screen (`Shift+M` toggles it any time) | C | reuse |
+| `meterMode` | Meter opens on | dropdown | Damage done · Healing · Damage taken · Absorbs · Statuses · Deaths · Interrupts · Dispels · Threat · By tag | Damage done | the mode it starts in | C | reuse + new |
+| `meterScope` | Meter shows | dropdown | This fight · Whole dungeon or session | This fight | the default scope | C | reuse |
+| `meterResetOnEnter` | Reset the meter when I enter a dungeon | toggle | | On | | A | new |
+| `meterFoldPets` | Fold followers and pets into their owner | toggle | | On | Off gives them their own bars | A | reuse |
+| `meterPerSecond` | Show per-second numbers | toggle | | On | "{total} ({n}/s)" | A | reuse |
+| `meterSparklines` | Sparklines on bars | toggle | | On | the small graph on each bar | A | reuse |
+| `meterOpacity` | Meter background | slider | 0–100%, step 5 | 60% | | A | new |
+| `meterReportChannel` | Report to | dropdown | Party · Say · Guild · Whisper… | Party | where the Report button and `/meter report` post the top 5 | A | new |
+| `meterShareMine` | Share my numbers with my party | toggle | | On | Off: your party sees you on their meter only as "(private)" (page 15 owns meter privacy) | A | new |
+
 ---
 
 ## 7a. Combat (`set.combat.*`)
@@ -502,31 +572,33 @@ Added in the 2026-09-29 reconciliation pass: pages 05 and 11 wrote these keys un
 
 | Key | Label | Control | Values / range | Default | What it does | Scope | ✔ preset | Origin |
 |---|---|---|---|---|---|---|---|---|
-| `ally_ground_fx` | Other players' spell effects | dropdown | All · Reduced (half the particles) · Party only · Minimal (no particles, only impact flashes; **allied ground effects hidden**) | All (High/Ultra), Reduced (Low/Medium) | thins other players' spells — vital in a 20-player raid. **Enemy telegraphs are never reduced by any setting** (page 11 §3.1 rule 4, page 17). *One key for two: this is page 11's key, and it absorbs the old `set.graphics.otherPlayersEffects` (its values and preset link are kept); page 17 §4.3 should name this key* | D | ✔ | new |
-| `boss_hints` | Beginner warnings | toggle | | On for Normal; Off for Heroic and Mythic | a plain one-line instruction beside a telegraph's icon ("Leave the red") for a boss's first 3 pulls on Normal (page 03 boss banner, page 11) | A | | new |
-| `aimAssist` | Aim help applies to | dropdown | Off · Melee only · Melee and ranged | Melee only | which attacks snap or curve onto an enemy (page 05 §2.2: melee snaps within 1.5× reach and 25°; ranged curves up to 3°). The **strength** of the ranged curve is `set.controls.aimAssist` / `padAimAssist` | A | | new |
-| `lockCamera` | Camera follows my locked target | toggle | | Off | with a hard lock (Tab), the camera turns to keep the target on screen (page 05 §2.3; an accessibility aid) | A | | new |
+| `ally_ground_fx` | Other players' spell effects | dropdown | All · Reduced (half the particles) · Party only · Minimal (no particles, only impact flashes; **allied ground effects hidden**) | All (High/Ultra), Reduced (Low/Medium) | thins other players' spells — mostly for a crowded world boss. **Enemy telegraphs are never reduced by any setting** (page 11 §3.1 rule 4, page 17). *Page 11's key; it absorbs the old `set.graphics.otherPlayersEffects`* | D | ✔ | new |
+| `boss_hints` | Beginner warnings | toggle | | On for Normal; Off for Challenge | a plain one-line instruction beside a telegraph's icon ("Leave the red") for a boss's first 3 pulls on Normal (page 03 boss banner, page 11) | A | | new |
+| `view_cones` | Show enemies' view cones | dropdown | Off · When I am a Rogue · Always | When I am a Rogue | a faint cone on the ground in front of each hostile monster within 30 m, showing where it can see; outside is its blind spot (page 03 `hud_viewcone`; `classes/rogue.md` Blind Spots). Never drawn in a telegraph colour | C | | new |
+| `lockCamera` | Camera follows my target | toggle | | Off | the camera turns to keep your hard target on screen (page 05; an accessibility aid) | A | | new |
 
-## 7b. Raid & groups (`set.raid.*`)
+*Removed in round 2:* `set.combat.aimAssist` (melee snap / ranged curve). With Tab targeting a melee swing
+turns to your target and a ranged attack is Auto-target (page 02 §2.3), so there is nothing left for it to
+do.
 
-Added in the 2026-09-29 reconciliation pass. Page 13 owns what these do (raid frames §2.4, leader tools
-§2.5, world bosses); this is the tab. Party-frame options stay in Interface §6.5.
+## 7b. Groups (`set.group.*`)
+
+Was "Raid & groups" (`set.raid.*`). Raids and raid frames are not in v2 (canon W6, W16, `WISHLIST.md`), so
+the raid-frame layout, size, colour, resource and "use raid frames for a party" options are **gone**;
+party-frame options are in Interface §6.5. Boss dialog voting is fixed by canon (00 §10: the party votes,
+a tie goes to the leader), so `dialog_vote` is gone too.
 
 | Key | Label | Control | Values / range | Default | What it does | Scope |
 |---|---|---|---|---|---|---|
-| `frame_layout` | Raid frames | dropdown | Grouped · By role (tanks, healers, damage) · Compact (no names, 60 × 28 px) · Healer wide (160 × 44 px, 5 debuffs) | Grouped | *replaces `set.interface.raidLayout`* | C |
-| `frame_scale` | Raid frame size | slider | 60–150%, step 5 | 100% | *replaces `raidFrameSize`* | C |
-| `frame_color` | Colour raid bars by | dropdown | Class · Role · Green | Class | *replaces `raidColour`* | A |
-| `show_resource` | Show resource bars | dropdown | Healers only · All · None | Healers only | *replaces `raidResource`* | C |
-| `range_fade` | Fade players out of range | toggle | | On | frames of players out of your healing range drop to 40% opacity (the old `rangeFade` amount) | A |
-| `use_for_party` | Use raid frames in a 5-player group | toggle | | Off | | C |
 | `pull_timer_length` | Pull timer | slider | 5–15 s, step 1 | 10 s | the default for `/pull` with no number (page 02 §6.2) | A |
-| `marker_labels` | World marker labels | toggle | | On | the name under each world marker (page 13 §2.5) | A |
-| `dialog_vote` | Boss dialog replies are chosen by | dropdown | Leader chooses · Raid votes (majority within 10 s; ties go to the leader) | Leader chooses | leader's setting, per boss (page 13 §2.5, page 11 §10) | C |
-| `boss_banner` | Boss-line banners | dropdown | All · Warnings only | All | *page 13 also lists **Off**; page 04 §6.4 `bossBanner` says the banner **cannot be turned off** because a line is often the warning (canon). Off is left out until page 13 confirms — see the report* | A |
+| `marker_labels` | World marker labels | toggle | | On | the name (Sword, Shield, Anvil, Crown, Leaf, Wave, Key, Eye) under each world marker | A |
+| `markers_everyone` | Everyone in my party can place markers | toggle | | Off | the party leader's choice (page 03 §10.2) | C |
+| `boss_banner` | Boss-line banners | dropdown | All · Warnings only | All | a line is often the warning, so there is **no Off** (canon; page 11) | A |
 | `world_boss_alerts` | World boss warnings (15 min ahead) | dropdown | Region · All · Off | Region | a toast to everyone in the region (or everywhere), a horn at 1 minute (page 13) | A |
-| `join_open_groups` | Join a world boss's open group | dropdown | Ask · Always · Never | Ask | on entering a world boss arena, join its temporary public raid of up to 60 (page 13) | A |
 | `loot_popup` | Show others' personal loot in a popup | toggle | | Off | the combat log always shows it (`set.interface.logLootOthers`) | A |
+| `ready_check_sound` | Ready check sound | toggle | | On | the bell when a ready check starts | A |
+
+(The world-boss **Muster** channel is `set.social.joinMuster`, §11.)
 
 ---
 
@@ -594,12 +666,12 @@ depth of field. **Wildmarch merges the two** (reuse both).
 | `weatherParticles` | Off | Low | High | High | F |
 | `rainSheets` | Off | On | On | On | F |
 | `waterQuality` | Low | Medium | High | High | N |
-| `stars` | 700 | 1,400 | 1,800 | 2,600 | H |
 | `spellEffects` | Low | Medium | High | High | N |
 | `set.combat.ally_ground_fx` (was `otherPlayersEffects`) | Reduced | Reduced | All | All | N |
 | `characterDetail` | Low | Medium | High | High | N |
 | `playersDrawn` | 20 | 40 | 60 | 100 | N |
 | `dynamicLights` | 4 | 8 | 16 | 32 | N |
+| `itemPortrait` (Interface) | still picture | turning | turning | turning | N |
 
 Farhold's levels map as: **Off → Low, Low → Medium, High → High**. Ultra is new.
 
@@ -615,16 +687,15 @@ Farhold's levels map as: **Off → Low, Low → Medium, High → High**. Ultra i
 | `hdr` | HDR picture | toggle | | On | the HDR frame + ACES tone mapping (Farhold `postfx`); Off also turns off bloom, shafts, grade, grain, vignette | ✔ | reuse |
 | `antiAliasing` | Anti-aliasing | dropdown | Off · SMAA · MSAA 2× · MSAA 4× · MSAA 4× + SMAA · MSAA 8× + SMAA | MSAA 4× + SMAA | smooths jagged edges; MSAA is costly on big screens. Confirm prompt | ✔ | reuse (F: 4× on High; H: SMAA) |
 | **Lighting** |||||||
-| `shadows` | Shadows | dropdown | Off · Low (1,024 px map, 2 cascades, 110 m) · Medium (2,048 px, 3 cascades, 180 m) · High (2,048 px, 3 cascades, 240 m) · Ultra (4,096 px, 4 cascades, 340 m) | High | sun and moon shadows (cascades = several shadow maps, sharp near you and coarse far away) | ✔ | reuse (highdef-3d; Farhold has none) |
+| `shadows` | Shadows | dropdown | Off · Low (1,024 px map, 2 cascades, 110 m) · Medium (2,048 px, 3 cascades, 180 m) · High (2,048 px, 3 cascades, 240 m) · Ultra (4,096 px, 4 cascades, 340 m) | High | sun shadows (cascades = several shadow maps, sharp near you and coarse far away). Always daylight (canon 00 §4), so there is one sun and no moon | ✔ | reuse (highdef-3d; Farhold has none) |
 | `shadowCasters` | What casts shadows | dropdown | Characters only · Characters and big things · Everything | Characters and big things | small props and grass never cast on Low/Medium | | new |
-| `dynamicLights` | Moving lights | dropdown | 4 · 8 · 16 · 32 | 16 | how many torches, lanterns and spell lights light the world at once; the nearest win (reuse Farhold `light.js`, `nightlights.js`) | ✔ | reuse |
-| `nightTorches` | People carry torches at night | toggle | | On | NPCs and guards with a light at night (Farhold R25) | | reuse |
+| `dynamicLights` | Moving lights | dropdown | 4 · 8 · 16 · 32 | 16 | how many spell lights, lava glows, glowing fungi and plants and town lamps light the world at once; the nearest win (reuse Farhold `light.js`). Dark places are "film-set dark" — they look dark but ambient light keeps everything readable (canon 00 §4), so this only changes how rich the glow is, never whether you can see | ✔ | reuse |
 | `ambientOcclusion` | Ambient occlusion | toggle | | Off | soft contact shadows in corners (SSAO); the model kits already bake most of it, so it is Ultra only | ✔ | reuse (highdef-3d) |
 | **Effects** |||||||
 | `bloom` | Bloom | dropdown | Off · Half · Full | Full | glow round bright things (Farhold `bloomScale` 0.5 / 1) | ✔ | reuse |
 | `lightShafts` | Light shafts | toggle | | On | sunbeams through trees (36 samples) | ✔ | reuse |
 | `sunFlare` | Sun rays and flare | toggle | | On | the lens flare and horizon wash (Farhold `sunfx`) | ✔ | reuse |
-| `colourGrade` | Colour grading | toggle | | On | the colour mood that follows the hour and weather (`sky-palette.js gradeFor`) | ✔ | reuse |
+| `colourGrade` | Colour grading | toggle | | On | the colour mood that follows the region and the weather (`sky-palette.js gradeFor`, held at its daytime entry) | ✔ | reuse |
 | `filmGrain` | Film grain | slider | 0–0.03, step 0.002 | 0.012 | | ✔ | reuse |
 | `vignette` | Vignette | slider | 0–0.5, step 0.02 | 0.22 | darker screen corners | ✔ | reuse |
 | `depthOfField` | Depth of field | toggle | | Off | blurs the background **only** in conversations and boss introductions, never in play | ✔ | reuse (highdef-3d) |
@@ -648,7 +719,6 @@ Farhold's levels map as: **Off → Low, Low → Medium, High → High**. Ultra i
 | `waterQuality` | Water | dropdown | Low (flat colour) · Medium (waves, sky colour) · High (waves, reflections of the sky probe) | High | | ✔ | reuse (highdef-3d `water.js`, Farhold `water-plan.js`) |
 | `textureQuality` | Texture detail | button row | Low (512 px) · High (1,024 px) | High | the generated ground surfaces (reuse highdef-3d `kit/textures.js`) | ✔ | reuse |
 | `anisotropy` | Texture sharpness at an angle | dropdown | 1× · 2× · 4× · 8× · 16× | 16× | | ✔ | reuse |
-| `stars` | Stars | dropdown | 700 · 1,400 · 1,800 · 2,600 | 1,800 | | ✔ | reuse |
 | **Characters** |||||||
 | `characterDetail` | Character detail | dropdown | Low (merged meshes, no face detail beyond 15 m) · Medium · High | High | reuse Chibi 2 and Farhold `mesh-merge.js` | ✔ | reuse |
 | `playersDrawn` | Players drawn in full | dropdown | 20 · 40 · 60 · 100 · All | 60 | beyond this, the furthest are drawn as simple figures in their class colour | ✔ | new |
@@ -683,7 +753,7 @@ an already balanced mix.
 | `soundStyle` | Sound style | dropdown | Hybrid — recorded sounds plus synthesised ones (default) · Synth — every sound made on the fly · Library — recorded CC0 sounds only · Retro — chiptune | Hybrid | the Sound Lab's four makers (reuse `sfx/js/methods/*`) | D | reuse |
 | `combatMusic` | Music changes in combat | toggle | | On | | D | new |
 | `muteInBackground` | Mute when Wildmarch is not the active window | toggle | | On | | D | new |
-| `dynamicRange` | Loudness range | dropdown | Full · Reduced · Night (quiet sounds up, loud ones down) | Full | extra compression on the master limiter | D | reuse (the limiter exists) |
+| `dynamicRange` | Loudness range | dropdown | Full · Reduced · Quiet listening (quiet sounds up, loud ones down) | Full | extra compression on the master limiter | D | reuse (the limiter exists) |
 | `spatial` | Positional sound | dropdown | Stereo (left/right by position) · Off | Stereo | reuse `play(id, { pan })`. Mono lives in Accessibility | D | reuse |
 | `outputDevice` | Output device | dropdown | System default · (each device the browser lists) | System default | only in browsers that allow choosing (Chromium); hidden elsewhere | D | new |
 | `heartbeat` | Heartbeat at low health | toggle | | On | tied to `set.interface.lowHealthEdge` | A | new |
@@ -706,7 +776,7 @@ class/role varied by seed — `voiceFor({ role, gender, seed })`), `lingo/` (wha
 | `npcVoices` | NPCs speak | toggle | | On | townsfolk, quest givers | A | reuse |
 | `ownBarks` | My character speaks | dropdown | Off · Important only (low health, out of resource) · All barks | Important only | cast/crit/low-health barks (class files, template §8) | C | reuse |
 | `partyBarks` | Party chatter | dropdown | Off · Rare · Normal · Chatty | Normal | followers and party members' barks and camp talk (reuse Farhold/Emberveil conversations) | A | reuse |
-| `otherPlayersBarks` | Other players' barks | dropdown | Off · Party and raid · Everyone near me | Party and raid | | A | new |
+| `otherPlayersBarks` | Other players' barks | dropdown | Off · Party · Everyone near me | Party | | A | new |
 | `pingVoice` | Pings are spoken | toggle | | On | the ping wheel line in your character's voice (page 02 §5.4) | A | new |
 | `speakChat` | Read chat aloud | dropdown | Off · Whispers · Party · Party and guild · Everything I can see | Off | chat lines spoken in the sender's character voice (formant), handy for players who cannot watch the chat box in a fight | A | new |
 | `speechRate` | Speaking speed | slider | 0.7×–1.5×, step 0.05 | 1× | all synthesised speech | A | reuse (voice-lab `speed`) |
@@ -788,7 +858,9 @@ The Oracle's early warnings use dashed pale cyan `#7fe8ff`, which no real telegr
 | `textSize` | Text size | dropdown | Small (90%) · Medium (100%) · Large (115%) · Extra large (130%) | Medium | every interface text, on top of `uiScale` |
 | `readableFont` | Easier-to-read font | toggle | | Off | switches to a font designed for dyslexia (an OFL-licensed one, vendored) |
 | `highContrastUi` | High-contrast interface | toggle | | Off | solid dark panels, thicker borders, no see-through |
-| `rarityLetters` | Rarity letters on items | toggle | | Off | C/U/R/E/Q/S/L on every icon and in tooltips, so rarity is not colour-only (mirrors `set.interface.rarityLetters`) |
+| `rarityLetters` | Rarity letters on items | toggle | | Off | C/U/R/E/Q/S/L on every icon and in tooltips, so rarity is not colour-only (mirrors `set.interface.rarityLetters`); special rarities add their word in brackets ("[Twinned]") |
+| `brightDarkPlaces` | Brighter dark places | dropdown | Normal · Brighter (+25% ambient light) · Brightest (+50%) | Normal | caves, crypts and graveyards are "film-set dark" — dark-looking but readable (canon 00 §4); this raises their ambient light further for players who find them hard to read. Telegraphs are unaffected | 
+| `monsterRarityShapes` | Monster rarity shapes | toggle | | On | the champion square frame, rare star, named banner, boss crown and greater-rarity double edge on nameplates, so monster rarity is never colour-only (page 03 §4.16); cannot be turned off while `telegraph_palette` is not `default` |
 | `enemyOutline` | Outline enemies | dropdown | Off · My target · All enemies in combat | Off | a coloured outline that shows through foliage |
 | `outlineColour` | Outline colour | colour picker | any | `#FF4040` | |
 | `cursorSize` | Cursor size | dropdown | Normal · Large · Extra large | Normal | the free cursor |
@@ -832,7 +904,7 @@ unless noted.
 | `partyInvitesFrom` | Group invites from | dropdown | Everyone · Friends, guild and group · Friends only · Nobody | Everyone | |
 | `guildInvitesFrom` | Guild invites from | dropdown | Everyone · Friends only · Nobody | Everyone | |
 | `tradeFrom` | Trade requests from | dropdown | Everyone · Friends, guild and group · Nobody | Everyone | |
-| `duels` | Duel challenges | dropdown | Ask me · Decline automatically | Ask me | page 15 PvP |
+| `duels` | Duel challenges | dropdown | Ask me · Decline automatically | Ask me | friendly duels from level 10 — the only player-versus-player fighting in v2 (canon W1; page 15) |
 | `declineInCombat` | Decline invites and trades while I fight | toggle | | On | they are held and shown when combat ends |
 | `status` | Show me as | dropdown | Online · Away · Busy · Appear offline | Online | (Busy = `/dnd`, Away = `/afk`) |
 | `allowInspect` | Let others inspect my gear | toggle | | On | |
@@ -849,6 +921,9 @@ unless noted.
 | `marketUndercutMail` | Mail me when someone undercuts my listing | toggle | | Off | Character scope (page 15) |
 | `joinNewcomers` | Join the Newcomers channel | toggle | | On (under level 20) | Character scope; leaves itself at level 20 (page 15) |
 | `autoLayer` | Move me to my guild's world copy when I can | toggle | | On | (page 15) |
+| `boardWithParty` | Ask my party to board with me | toggle | | On | when you board a Travel Method, party members at the station get "Board with {name}?" (page 02 §5.18, page 03 §5.10); Character scope |
+| `joinMuster` | Join the Muster channel near world bosses | toggle | | On | `/mu` for everyone in a world-boss area (page 13, page 15) |
+| `joinCarriage` | Join the Carriage channel while riding | toggle | | On | `/car` for everyone on the same Travel Method (page 20) |
 
 ---
 
@@ -882,14 +957,16 @@ plus the `` ` `` debug menu (`js/debug.js`), whose tools become buttons here and
 | `mapTeleport` | Map "Go here" teleport | toggle | | Off | click any spot on the map and stand there (Farhold default On — Off here) | reuse |
 | `showHitboxes` | Show swing hit boxes | toggle | | Off | draw attack shapes on the ground | reuse |
 | `weather` | Weather | dropdown | Auto · (each of the 14 World Forge weather states) | Auto | reuse debug menu Weather group | reuse |
-| `lightning` / `eclipse` | Lightning strike · Solar eclipse · Lunar eclipse | buttons | | | reuse | reuse |
-| `timeOfDay` | Time of day | slider + buttons | 0–1 (Dawn 0.25 · Noon 0.5 · Dusk 0.75 · Midnight 0) | live | reuse | reuse |
+| `lightning` | Lightning strike | button | | | reuse (the eclipse and time-of-day tools are gone: always daylight) | reuse |
 | `density` | Scatter | buttons | Bare 0 · Sparse 0.5 · Normal 1 · Thick 2 | | reuse | reuse |
 | `toggleProps` / `toggleGrass` / `toggleFeatures` | Props / Grass / Roads and rivers on-off | buttons | | | reuse | reuse |
-| `teleport` | Teleport to | buttons | each region hub · each dungeon entrance · each raid entrance · each world boss · a random spot | | replaces Farhold's Nearest town / A city / A river / A road / A peak / Anywhere | reuse |
+| `teleport` | Teleport to | buttons | each region hub · each dungeon entrance · each Travel Method station · each world boss · a random spot | | replaces Farhold's Nearest town / A city / A river / A road / A peak / Anywhere | reuse |
 | `levelUp` / `setLevel` | Level up · Set level (1–60) | button + number | | | | reuse |
 | `heal` | Heal | button | | | | reuse |
-| `give` | Give | buttons | a Rare · an Epic · a Legendary · a set piece · by item id | | | reuse |
+| `give` | Give | buttons | a Rare · an Epic · a Legendary · a set piece · each special rarity · a gem / jewel / soul / gadget · by item id | | | reuse |
+| `discoverAll` | Discover every dungeon, waystone and station | button | | | fills the Dungeon Finder list and the map for testing | new |
+| `setDepth` | Set Depth unlocked | number 0–30 | | | on the dungeon you are in or looking at | new |
+| `professionSkill` | Set Harvesting / profession skill | two numbers 1–300 | | | | new |
 | `spawn` / `clearEnemies` | Spawn enemy (by monster id, count) · Clear enemies | buttons | | | | reuse |
 | `godMode` | Cannot die | toggle | | Off | | new |
 | `unlockAll` | Unlock every feature | button | | | skips the page 07 ladder | new |
@@ -906,7 +983,7 @@ plus the `` ` `` debug menu (`js/debug.js`), whose tools become buttons here and
 
 ---
 
-## 13a. Keys other pages wrote, and where they live (reconciliation pass 2026-09-29)
+## 13a. Keys other pages wrote, and where they live (reconciliation 2026-09-29, updated round 2)
 
 Every `set.` key written on another page resolves to one row on this page. Where another page used a
 different name for an option this page already had, **this page's key is the one to use**, and that page
@@ -918,13 +995,13 @@ should be updated to it. Keys this pass **renamed** to another page's name are l
 | `set.access.palette` | old 04 | `set.access.telegraph_palette` | renamed to page 11's key |
 | `set.graphics.otherPlayersEffects` | old 04, 17 §4.3 | `set.combat.ally_ground_fx` | merged; page 11's key kept |
 | `set.interface.bossTimeline` | old 04 | `set.interface.boss_timers` | renamed to page 11's key |
-| `set.interface.ui_scale` | 03 | `set.interface.uiScale` | 03 says 80–150%; this page's range is 50–200% (unresolved) |
-| `set.interface.minimap_rotate` | 03 §4.12 | `set.interface.minimapRotate` | 03 says default Off; this page says On (unresolved) |
-| `set.interface.tracker_max`, `set.interface.trackerMax` | 03, old 04 | `set.interface.quest_tracker_max` | page 14's key and range (3–12, default 8); 03 says default 5 (unresolved) |
+| `set.interface.ui_scale` | old 03 | `set.interface.uiScale` | resolved in round 2: 50–200% (03 now says so) |
+| `set.interface.minimap_rotate` | old 03 | `set.interface.minimapRotate` | resolved in round 2: default Off (north up) on both pages |
+| `set.interface.tracker_max`, `set.interface.trackerMax` | old 03, old 04 | `set.interface.quest_tracker_max` | page 14's key and range (3–12, default 8); 03 now matches |
 | `set.gameplay.autoTrackQuests` | old 04 | `set.interface.auto_track_new` | page 14's key |
 | `set.gameplay.autoAcceptShare` | old 04 | `set.gameplay.auto_accept_shared` | page 14's key |
 | `set.interface.tips` | 03 | `set.gameplay.tutorialTips` | |
-| `set.combat.quickcastGround` | 05 §2.2 | `set.controls.groundCast` = "Cast at the reticle at once" | |
+| `set.combat.quickcastGround` | 05 §2.2 | `set.controls.groundCast` = "Cast at the aim point at once" | |
 | `set.gameplay.damageNumbers`, `set.combat.damageNumbers` | 05, 17 | `set.interface.damageNumbers` | |
 | `set.gameplay.hitStop`, `set.gameplay.screenShake` | 05 §5 | `set.access.hitStop`, `set.access.screenShake` | |
 | `set.combat.logLootOthers` | 15 | `set.interface.logLootOthers` | |
@@ -935,9 +1012,20 @@ should be updated to it. Keys this pass **renamed** to another page's name are l
 | `set.gameplay.confirm_salvage_from` | 08 | `set.gameplay.confirmSalvageRarity` | same default (Rare and up) |
 | `set.interface.show_item_level` | 08 | `set.interface.itemLevelOnIcons` | |
 | `set.interface.compare_on_hover` | 08 | `set.interface.tooltipCompare` | 08's "off" = "While Shift is held" |
-| `set.appearance.hide_head` / `_shoulders` / `_back` / `_light` | 08 §21 | `set.gameplay.showHelm` / `showShoulders` / `showCloak` / `showLight` | the same switch, the other way up |
+| `set.appearance.hide_head` / `_shoulders` / `_back` | 08 §21 | `set.gameplay.showHelm` / `showShoulders` / `showCloak` | the same switch, the other way up (`_light` / `showLight` removed: no light slot) |
 | `set.social.chatStickyChannel` | 15, old 02 | `set.interface.chatStickyChannel` | |
-| `set.interface.raidLayout` … `rangeFade` | old 04 | `set.raid.*` (§7b) | page 13's keys |
+| `set.interface.raidLayout` … `rangeFade`, all of `set.raid.*` | old 04, 13 | **removed** (raid frames → `WISHLIST.md`); `pull_timer_length`, `marker_labels`, `boss_banner`, `world_boss_alerts`, `loot_popup` moved to `set.group.*` (§7b); `set.interface.rangeFade` is back as a party option | round 2 |
+| `set.raid.join_open_groups` | old 04, 13 | `set.social.joinMuster` | world bosses use the Muster channel (page 13, page 15) |
+| `set.raid.dialog_vote` | old 04, 13 | **removed** — canon 00 §10 fixes the vote (party votes, tie to the leader) | round 2 |
+| `set.gameplay.aimMode`, `softLockCone`, `tabCone`, `keepTargetRange`, `selfCast`, `mouseoverCast`, `tabRange`, `tabOrder`, `targetOnAttack` | old 04, old 02 | `set.controls.pointerStyle` + the Targeting group §3.1 (`self_cast_fallback`, `mouseover_cast`, `tab_range`, `tab_order`, `target_on_attack`…) | round 2 (W8) |
+| `set.gameplay.autotarget_sets_target`, `ground_at_target`, `self_cast_fallback` | `classes/ranger.md`, `classes/cleric.md` | §3.1 | **`self_cast_fallback` defaults Off everywhere** (W8: no silent self-cast; decided in the round-2 sweep, the cleric file follows) |
+| `set.gameplay.beast_trick_auto`, `bard_beat_cue`, `bard_beat_sound`, `dh_weakpoint_sound`, `cleric_keeping_vigil` | class files | §3.4 | added in round 2 |
+| `set.gameplay.cleric_auto_mass_res` | old 04 | **removed** (no group revive, W35) | round 2 |
+| `set.controls.aimAssist`, `set.controls.padAimAssist`, `set.combat.aimAssist` | old 04, 05 | **removed** (Tab targeting; page 02 §2.3) | round 2 |
+| `set.graphics.nightTorches`, `set.graphics.stars`, `set.debug.timeOfDay`, `set.debug.eclipse`, `set.gameplay.showLight` | old 04 | **removed** (always daylight, no light slot) | round 2 |
+| `set.interface.focusCastBar` | old 04 | `set.interface.watchCastBar` | the watch target (page 02 §2.7) |
+| `set.interface.meterWindow` | old 04 | `set.interface.meterShow` + `meterMode` (§6.13) | |
+| `set.travel.autoBoard`, `set.travel.boardWithParty` | early round-2 drafts | `set.gameplay.auto_board`, `set.social.boardWithParty` | |
 
 ---
 
@@ -945,7 +1033,7 @@ should be updated to it. Keys this pass **renamed** to another page's name are l
 
 1. **Scopes** — keybinds per account by default with a per-character override; graphics per device;
    accessibility per account. Agree?
-2. **Built-in boss ability timers** (`set.interface.boss_timers`; page 11 §4.3 sets it on for Normal, off for Heroic/Mythic, and shows only mechanics already seen) — Wildmarch
+2. **Built-in boss ability timers** (`set.interface.boss_timers`; page 11 §4.3 sets it on for Normal, off for Challenge, and shows only mechanics already seen) — Wildmarch
    has no add-ons, so this stands in for what players of other games install. Keep it on by default, or
    make players learn fights without it?
 3. **Read chat aloud** with formant voices — a nice fit for the voice work, but it costs CPU in a busy
@@ -953,11 +1041,17 @@ should be updated to it. Keys this pass **renamed** to another page's name are l
 4. **Region list** — the Online tab proposes four regions. Where will the servers really be (Cloudflare,
    Cloudways, one box)? One region at launch would remove the dropdown.
 5. **Telegraph palettes** — page 11's five fixed palettes are in (§10.1). **Custom is held back** until page 11 adds it. Original question: five fixed palettes + Custom. Should Custom exist, given a custom palette can
-   make a raid harder to call ("stand in the orange")? *Recommendation: keep it; callouts should use kind
+   make a group harder to call ("stand in the orange")? *Recommendation: keep it; callouts should use kind
    names ("soak", "void"), which page 11 already standardises.*
 6. **Units** — the owner speaks in feet ("100 or 200 ft", Farhold round 11). Default metres (the data's
    unit) or feet?
 7. **Music** — there is no music system in the playground. The Music slider assumes page 17 adds one.
+8. **(decided, round-2 sweep) Friendly spells with no friendly target** — `set.gameplay.self_cast_fallback`
+   defaults **Off** everywhere, the cleric included (a heal refuses "No friendly target." rather than landing
+   on you by surprise; canon W8). The first time a heal refuses, a tip says "Press F1 to target yourself".
+9. **(new) Compare on the item card** — default **While Shift is held** (a shorter card) or **Always**?
+   *Recommendation: Shift, as asked.*
+10. **(new) Item portrait on Low graphics** — a still picture (default here) or off entirely?
 
 ---
 
@@ -970,3 +1064,5 @@ should be updated to it. Keys this pass **renamed** to another page's name are l
 3. The `_BRIEF.md` vocabulary lists the danger zone as "RED" and targeted as "YELLOW". With palettes,
    player-facing text (tooltips, boss journal, loading tips) should name **the kind** ("a danger zone"),
    never the colour. Suggest adding that to canon rule 2 or a new rule 9.
+4. **(round 2)** Add to §4's Targeting row the **watch target** and the four targeting kinds' exact words
+   (page 02 §13); and note that the gameplay targeting keys live in `set.gameplay.*` (§3.1).

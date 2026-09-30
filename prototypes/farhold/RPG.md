@@ -4957,3 +4957,45 @@ And the measurement: a melee skill that catches nobody while an enemy is within 
 "Power Strike reaches 3.5 m across 92° and catches nobody. X is 4.1 m away, 60° to your left." If the
 report comes back, that line is the answer. Tests: tests/round26-skills.test.js (area, Wider),
 tests/power-strike.spec.js (key 1 with a focus; the miss line).
+
+## Round 28 — affix fixes (2026-09-30)
+
+Found while writing Wildmarch's item page (`prototypes/wildmarch/docs/08-ITEMS.md` §24): three affix
+rows paid the wrong amount, and the owner's "Farhold often shows the wrong enemy's health bar". Tests:
+`tests/round28-affixes.test.js`.
+
+**of Resonance was +300–800% spell power.** Spell power has been a share (0.1 = +10%) since round 18,
+but this affix was still filed as plain points and tuned 3–8, so a roll of 5 added +500% for six
+seconds after every skill — the round 18 bug in the one writer round 18 didn't move. It is a share
+now, +5–12% at item level 1 (capped at +30%), and the card prints it as a percentage. An old save
+carrying a 3–8 is read as 3–8% (js/effects.js `skillSpellShare`).
+
+**of Second Wind saved you at full health.** It was tuned like an on/off flag (always 1), and the
+save reads the number as the share of health to leave you on — so 1 meant 100%. It is 20% now (capped
+at 35%; an old item carrying 1 reads as 20%). The cooldown was checked: it does count down
+(`Effects.update` ticks it every frame); it moves from 60 to 90 s to match Wildmarch, and the card
+prints the real constant. While in there: the legendary "once a fight" save (`cheat_death_once`) was
+once a SESSION, because nothing ever reset it — it now comes back when the fight ends.
+
+**of Laceration was inert past level 5.** It bled a flat 0.3–0.6 a second for 6 s whatever the hit —
+under four damage in total. It is now a share of the crit that caused it: 30–60% of that crit's damage,
+spread over 6 s (capped at 100%). Emberveil's Duskveil Kiss (0.25) reads as 25% here.
+
+All three are restated in Farhold's own tables (`js/affixes.js` `ENGINE_UNIT`, `AFFIX_TUNING`,
+`AFFIX_CAP`); the shared `items.json` is untouched.
+
+**The target bar showed the wrong enemy — two faults.**
+1. Round 16 made the bar read `aim()`'s scan, but that scan answers "what would an arrow hit first":
+   the nearest body within a fixed 1.7 m of the aiming line. A fixed width in metres is a huge angle
+   close to the camera, so a wolf 5 m out and 1.6 m to the side (about 18° off the crosshair) beat the
+   enemy the crosshair was actually on, 25 m down the same line. The bar now asks a separate question
+   (`js/targetpick.js` `lookedAt`, `EnemyField.lookScan`): which body is the crosshair ON — inside its
+   outline wins (the front one if two overlap), otherwise the smallest angle away, within ~2°. Shots
+   still use the old scan, which is right for them.
+2. When the crosshair was on nothing for 1.4 s, the bar fell straight to the old "what's in front of
+   your feet" guess, skipping the enemy you were hitting — in melee, where the over-the-shoulder
+   crosshair often isn't on your target, it swapped to a neighbour. Order now: what the crosshair is
+   on > what it was just on (1.4 s) > what you last hit (4 s, stamped in `EnemyField.land`) > the guess.
+
+Not done: nothing. The fix for the bar was reproduced and checked in node against the real
+`EnemyField`; it was not play-tested in a browser.

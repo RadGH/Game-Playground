@@ -30,6 +30,7 @@ import { CHIBI2_COMBAT_RIDE } from '../../../avatar-3d/js/chibi2-motion.js';
 import { groundAt, wetAt, cliffStep, climbable } from './ground.js';
 import { leaderModifier, fitsRoom } from './warbands.js';   // R27 M10
 import { compactCreature } from './mesh-merge.js';            // R27 M8
+import { lookedAt, lastStruck } from './targetpick.js';        // R28
 
 /** `bleed` out of data/skills.json — the field applies it without owning the skill data. */
 const BLEED = { name: 'Bleeding', kind: 'damage', element: 'physical', perSecond: 0.26, seconds: 6 };
@@ -1320,6 +1321,9 @@ export class EnemyField {
    */
   land(e, result, { strike = null, fromX = 0, fromZ = 0, element = 'physical', share = 1 } = {}) {
     this.credit(e, result.amount);
+    // R28 — when the player's own side last connected, so the target bar can follow the body you
+    // are actually fighting when the crosshair is not on anything (js/targetpick.js)
+    e.struckAt = this.clock || 0;
     e.hitFlash = 0.18;
     if (e.state !== 'chase') e.state = 'chase';
     if (!(result.amount > 0) && !result.blocked) return;
@@ -1556,6 +1560,20 @@ export class EnemyField {
       if (t < bestT) { bestT = t; best = e; }
     }
     return best ? { enemy: best, distance: bestT } : null;
+  }
+
+  /**
+   * R28 — the body the crosshair is ON, for the target bar. Not `hitScan`, which answers "what would
+   * a shot hit first" with a fixed width in metres — see js/targetpick.js for why that picked the
+   * wrong enemy.
+   */
+  lookScan(x, y, z, dirX, dirY, dirZ, { range = 260 } = {}) {
+    return lookedAt(this.enemies, { x, y, z, dx: dirX, dy: dirY, dz: dirZ, range });
+  }
+
+  /** R28 — the enemy the player's side hit most recently, within a few seconds. */
+  lastStruck(near = null, opts = {}) {
+    return lastStruck(this.enemies, this.clock || 0, { near, ...opts });
   }
 
   /** Everything alive within `radius` of a point — used by breath, curses and spreading statuses. */

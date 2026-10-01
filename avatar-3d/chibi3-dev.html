@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Chibi 3 dev</title>
+<script type="importmap">{ "imports": { "three": "../vendor/three/three.module.js", "three/addons/": "../vendor/three/addons/" } }</script>
+<style>html,body{margin:0;height:100%;background:#222}#stage{width:100vw;height:100vh}</style></head>
+<body><div id="stage"></div>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { createChibi3Character } from './js/chibi3/index.js';
+const q = new URLSearchParams(location.search);
+const r = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true }); r.setPixelRatio(1);
+r.toneMapping = THREE.ACESFilmicToneMapping; r.outputColorSpace = THREE.SRGBColorSpace; r.shadowMap.enabled = true; r.shadowMap.type = THREE.PCFShadowMap;
+document.getElementById('stage').append(r.domElement); r.setSize(innerWidth, innerHeight);
+const scene = new THREE.Scene(); scene.background = new THREE.Color(0x30343a);
+const cam = new THREE.PerspectiveCamera(30, innerWidth / innerHeight, 0.05, 50);
+const view = q.get('view') || 'full';
+const views = { full: [[0, 1.1, 4.6], [0, 0.95, 0]], face: [[0.0, 1.66, 0.75], [0, 1.64, 0]], eye: [[0.07, 1.67, 0.3], [0.033, 1.655, 0.06]], face34: [[0.45, 1.68, 0.62], [0, 1.64, 0]], hand: [[0.55, 0.85, 0.5], [0.28, 0.8, 0]], back: [[0, 1.2, -4.6], [0, 0.95, 0]], side: [[4.6, 1.1, 0], [0, 0.95, 0]] };
+const [cp, ct] = views[view]; cam.position.set(...cp);
+const ctl = new OrbitControls(cam, r.domElement); ctl.target.set(...ct); ctl.update();
+scene.add(new THREE.HemisphereLight(0xdde8ff, 0x403830, 1.2));
+const key = new THREE.DirectionalLight(0xfff1e0, 2.6); key.position.set(2, 4, 3); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0003; key.shadow.normalBias = 0.02; scene.add(key);
+const rim = new THREE.DirectionalLight(0xa8c8ff, 1.6); rim.position.set(-2, 2.5, -3); scene.add(rim);
+const floor = new THREE.Mesh(new THREE.CircleGeometry(3, 48), new THREE.MeshStandardMaterial({ color: 0x55585e, roughness: 1 })); floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
+const avatar = q.get('a') ? JSON.parse(q.get('a')) : { body: { race: q.get('race') || 'human', skin: q.get('skin') || '#e2b08a' }, hair: { id: 'bald' }, eyes: { color: '#4a7a9a' } };
+const t0 = performance.now();
+const hero = await createChibi3Character(avatar, { lod: q.has('lod') ? +q.get('lod') : 0 });
+window.buildMs = performance.now() - t0; window.stats = hero.stats();
+scene.add(hero.group);
+if (q.get('anim')) hero.setAnim(q.get('anim'));
+let last = performance.now();
+r.setAnimationLoop(() => { const now = performance.now(); hero.update((now - last) / 1000); last = now; ctl.update(); r.render(scene, cam); });
+window.hero = hero; window.ready = true;
+</script></body></html>

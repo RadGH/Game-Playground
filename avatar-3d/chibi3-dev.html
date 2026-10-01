@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Chibi 3 dev</title>
+<script type="importmap">{ "imports": { "three": "../vendor/three/three.module.js", "three/addons/": "../vendor/three/addons/" } }</script>
+<style>html,body{margin:0;height:100%;background:#222}#stage{width:100vw;height:100vh}</style></head>
+<body><div id="stage"></div>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { createChibi3Character } from './js/chibi3/index.js';
+import { createStage } from './js/chibi3/stage.js';
+import { Assembler } from './js/chibi3/index.js';
+const q = new URLSearchParams(location.search);
+Assembler.debug.noSimplify = q.has('nosimplify'); Assembler.debug.noHide = q.has('nohide'); Assembler.debug.skip = (q.get('skip') || '').split(',').filter(Boolean);
+const r = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true }); r.setPixelRatio(1);
+r.toneMapping = THREE.ACESFilmicToneMapping; r.outputColorSpace = THREE.SRGBColorSpace; r.shadowMap.enabled = true; r.shadowMap.type = THREE.PCFShadowMap;
+document.getElementById('stage').append(r.domElement); r.setSize(innerWidth, innerHeight);
+const scene = new THREE.Scene(); scene.background = new THREE.Color(0x30343a);
+const cam = new THREE.PerspectiveCamera(30, innerWidth / innerHeight, 0.05, 50);
+const view = q.get('view') || 'full';
+const views = { cam34: [[2.2, 1.5, 3.2], [0, 0.95, 0]], hem: [[0.5, 0.4, 1.4], [0, 0.3, 0]], wiz34: [[1.6, 1.6, 1.8], [0, 1.2, 0]], torso: [[0.9, 1.3, 1.6], [0, 1.1, 0]], full: [[0, 1.1, 4.6], [0, 0.95, 0]], face: [[0.0, 1.66, 0.75], [0, 1.64, 0]], eye: [[0.07, 1.67, 0.3], [0.033, 1.655, 0.06]], face34: [[0.45, 1.68, 0.62], [0, 1.64, 0]], hand: [[0.55, 0.85, 0.5], [0.28, 0.8, 0]], side34: [[3.2, 1.3, 3.2], [0, 0.95, 0]], left: [[-4.6, 1.1, 0], [0, 0.95, 0]], back: [[0, 1.2, -4.6], [0, 0.95, 0]], side: [[4.6, 1.1, 0], [0, 0.95, 0]], sideWide: [[5.2, 1.2, -1.2], [0, 0.85, 0.8]], weapon: [[-1.5, 1.15, 1.1], [-0.32, 0.85, 0.42]], shield: [[1.6, 1.0, 0.45], [0.3, 0.85, 0.08]], shieldIn: [[-0.2, 1.1, 1.6], [0.3, 0.85, 0.08]], weapons: [[0.2, 1.3, 3.0], [0, 0.9, 0.3]] };
+const [cp, ct] = views[view]; cam.position.set(...cp);
+const ctl = new OrbitControls(cam, r.domElement); ctl.target.set(...ct); ctl.update();
+const stage = createStage(r, scene, { preset: q.get('light') || 'studio' });
+const presets = (await (await fetch('./data/chibi3-presets.json')).json()).presets;
+const avatar = q.get('preset') ? presets.find(p => p.id === q.get('preset')).avatar : q.get('a') ? JSON.parse(q.get('a')) : { body: { race: q.get('race') || 'human', skin: q.get('skin') || '#e2b08a' }, hair: { id: 'bald' }, eyes: { color: '#4a7a9a' } };
+const t0 = performance.now();
+const hero = await createChibi3Character(avatar, { lod: q.has('lod') ? +q.get('lod') : 0 });
+window.buildMs = performance.now() - t0; window.stats = hero.stats();
+scene.add(hero.group);
+// animation test params: hold=right,left,twoHanded  anim  speed  expr  say  t (freeze at seconds)  grip=1 (debug sticks)
+if (q.get('hold')) { const [right, left, two] = q.get('hold').split(','); hero.animator.setHold({ right, left: left || 'none', twoHanded: two === '1' }); }
+if (q.get('grip')) for (const s of ['L', 'R']) { const stick = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.9, 0.05), new THREE.MeshStandardMaterial({ color: s === 'R' ? 0xd04040 : 0x4060d0 })); stick.position.y = 0.3; hero.parts['grip' + s].add(stick); }
+if (q.get('expr')) hero.setExpression(q.get('expr'));
+if (q.get('anim')) hero.setAnim(q.get('anim'), 0);
+if (q.get('speed')) hero.setSpeed(+q.get('speed'));
+if (q.get('say')) hero.say(q.get('say'));
+if (q.get('look')) hero.lookAt(new THREE.Vector3(...q.get('look').split(',').map(Number)));
+const freeze = q.has('t') ? +q.get('t') : null;
+if (freeze != null) { hero.animator.speed = hero.animator.speedTarget; for (let t = 0; t < freeze; t += 1 / 60) hero.update(Math.min(1 / 60, freeze - t)); }
+let last = performance.now();
+r.setAnimationLoop(() => { const now = performance.now(); if (freeze == null && !q.has('bind')) hero.update((now - last) / 1000); last = now; ctl.update(); r.render(scene, cam); });
+window.hero = hero; window.ready = true;
+</script></body></html>

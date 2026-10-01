@@ -15,6 +15,8 @@ the page opens on it; the other two are **deprecated** (kept, labelled, for comp
 
 Open: `http://<LAN-IP>:8400/avatar-3d/`. Presets, random generation and the slot catalog are shared with `../avatar-2d/`.
 
+**Chibi 3 prototype (2026-10-01):** `http://<LAN-IP>:8400/avatar-3d/chibi3.html` — heroic-proportion characters meshed from blended distance fields, clothes and armour fitted by offset, one physically based material, a 66-bone rig with a layered animator (32 clips, foot IK, springs, face morphs and lip shapes), three levels of detail, baked presets (Knight, Wizard, Orc Berserker), a full builder, a Chibi 2 vs 3 view and a benchmark. Read `CHIBI3.md`.
+
 **Chibi 2 comparison:** `http://<LAN-IP>:8400/avatar-3d/chibi2.html`. Character, side-by-side and eight-fighter views, original/batched spell sprites, equal-settings sequential benchmarks and JSON results. Emberveil now uses Chibi 2 by default; `/prototypes/emberveil/?renderer=chibi1` selects the original renderer.
 
 ## Creatures (non-humanoids) — `js/creatures.js`, demo `creatures.html`

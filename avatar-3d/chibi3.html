@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chibi 3 | Avatar 3D</title>
+  <link rel="stylesheet" href="../shared/tooltip.css">
+  <link rel="stylesheet" href="chibi3.css">
+  <script type="importmap">{ "imports": { "three": "../vendor/three/three.module.js", "three/addons/": "../vendor/three/addons/" } }</script>
+</head>
+<body>
+  <header class="lab-header">
+    <a href="./">Avatar 3D</a><span class="divider">/</span><h1>Chibi 3</h1><span class="milestone">PROTOTYPE <span>KNIGHT · WIZARD · ORC BERSERKER</span></span>
+    <span id="state" role="status">Loading</span>
+  </header>
+  <div class="workspace">
+    <main>
+      <div class="toolbar">
+        <div class="segments" aria-label="View">
+          <button data-view="character" aria-pressed="true" data-tip="One Chibi 3 character in the builder">Character</button>
+          <button data-view="compare" aria-pressed="false" data-tip="The same avatar JSON in Chibi 2 and Chibi 3, side by side, same light">Chibi 2 vs 3</button>
+          <button data-view="trio" aria-pressed="false" data-tip="The three prototype classes together">The three</button>
+          <button data-view="crowd" aria-pressed="false" data-tip="Many characters at once (levels of detail switch by distance)">Crowd</button>
+        </div>
+        <div class="tool-group">
+          <label class="inline">Light <select id="light"></select></label>
+          <label class="inline">Detail <select id="lod"><option value="auto">Auto</option><option value="0">Hero</option><option value="1">Mid</option><option value="2">Far</option></select></label>
+          <label class="inline" id="crowd-size-wrap" hidden>Count <select id="crowd-size"><option>10</option><option selected>30</option><option>60</option></select></label>
+          <label class="inline" id="crowd-engine-wrap" hidden>Model <select id="crowd-engine"><option value="chibi3">Chibi 3</option><option value="chibi2">Chibi 2</option></select></label>
+        </div>
+      </div>
+      <div id="stage" aria-label="Interactive 3D character stage">
+        <div class="stage-label"><span id="scene-label">CHARACTER</span><span id="actor-label"></span></div>
+        <div id="pair-labels" hidden><span>Chibi 2</span><span>Chibi 3</span></div>
+        <div id="building" hidden><div class="spinner"></div><span id="building-text">Building</span></div>
+        <div class="stage-actions"><button id="pause" aria-label="Pause" data-tip="Pause animation">II</button><button id="reset-camera" aria-label="Reset camera" data-tip="Reset camera">⟲</button><button id="capture" aria-label="Download image" data-tip="Download image">⤓</button></div>
+      </div>
+      <div class="readout" aria-live="off">
+        <div><span>FRAME RATE</span><strong id="fps">--</strong><small>fps</small></div>
+        <div><span>FRAME / P95</span><strong id="p95">--</strong><small>ms</small></div>
+        <div><span>ANIMATION CPU</span><strong id="cpu">--</strong><small>ms / char</small></div>
+        <div><span>DRAW CALLS</span><strong id="calls">--</strong></div>
+        <div><span>TRIANGLES</span><strong id="triangles">--</strong></div>
+        <div><span>LOOK READY IN</span><strong id="build">--</strong><small id="build-src"></small></div>
+      </div>
+      <section class="results-section" id="scorecard-section">
+        <div class="section-heading"><h2>Scorecard: Chibi 2 vs Chibi 3</h2><button id="benchmark" data-tip="Builds crowds of 1, 10 and 30 in both models and measures them. Takes about a minute; keep the tab visible.">Run benchmark</button></div>
+        <div class="table-scroll"><table><thead><tr><th>Case</th><th>Frame avg</th><th>Frame p95</th><th>Animation CPU / char</th><th>Draw calls</th><th>Triangles</th></tr></thead><tbody id="results"><tr><td colspan="6" class="empty">No measurements yet. Run the benchmark.</td></tr></tbody></table></div>
+        <div class="results-footer"><span id="bench-state" role="status"></span><button id="download-results" hidden>Export results</button></div>
+        <div class="table-scroll"><table class="scorecard"><thead><tr><th>What</th><th>Chibi 2</th><th>Chibi 3</th></tr></thead><tbody id="scorecard"></tbody></table></div>
+        <div id="verdict" class="verdict"></div>
+      </section>
+    </main>
+    <aside>
+      <div class="tabs" role="tablist"><button role="tab" data-tab="look" aria-selected="true">Look</button><button role="tab" data-tab="animate" aria-selected="false">Animate</button></div>
+      <div class="tab" id="tab-look">
+        <section>
+          <h2>Start from</h2>
+          <label class="field">Preset<select id="preset"></select></label>
+          <label class="field">Dress as class (Chibi 2 outfit data)<select id="outfit"><option value="">Own clothes</option></select></label>
+          <div class="row"><button id="random" data-tip="Roll a random look on the current race">Random</button><button id="export" data-tip="Copy the avatar JSON">Copy JSON</button><button id="import" data-tip="Paste an avatar JSON (any Chibi 2 look works)">Paste JSON</button></div>
+        </section>
+        <section id="body-controls"><h2>Body</h2></section>
+        <section id="face-controls"><h2>Face</h2></section>
+        <section id="color-controls"><h2>Colours</h2></section>
+        <section id="part-controls"><h2>Parts</h2></section>
+      </div>
+      <div class="tab" id="tab-animate" hidden>
+        <section id="clip-controls"><h2>Clips</h2></section>
+        <section>
+          <h2>Move</h2>
+          <label class="field">Speed <output id="speed-value">0.0 m/s</output><input id="speed" type="range" min="0" max="6" step="0.1" value="0" data-tip="Walk and run blend by speed, feet stay planted"></label>
+        </section>
+        <section>
+          <h2>Face</h2>
+          <label class="field">Expression<select id="expression"></select></label>
+          <label class="field">Strength <output id="expr-value">1</output><input id="expr-weight" type="range" min="0" max="1" step="0.05" value="1"></label>
+          <label class="field">Say<input id="say-text" type="text" value="Hold the line, friends!" maxlength="120"></label>
+          <button id="say">Say it</button>
+          <label class="check"><input id="look-camera" type="checkbox" checked>Look at the camera</label>
+        </section>
+        <section>
+          <h2>Stage</h2>
+          <label class="check"><input id="turntable" type="checkbox">Turntable</label>
+          <label class="check"><input id="hands-free" type="checkbox">Hands free</label>
+        </section>
+      </div>
+      <section class="aside-footer"><a href="chibi2.html">Chibi 2 study</a><a href="CHIBI3.md">CHIBI3.md (how it works)</a></section>
+    </aside>
+  </div>
+  <script type="module" src="js/chibi3-app.js"></script>
+</body>
+</html>

@@ -114,8 +114,9 @@ function resetCamera() {
 let last = performance.now(), readoutAt = 0;
 const lookTarget = new THREE.Vector3();
 renderer.setAnimationLoop(() => {
-  const now = performance.now(), dt = Math.min(0.05, (now - last) / 1000); last = now;
-  if (!building) frameTimes.push(dt * 1000); if (frameTimes.length > 240) frameTimes.shift();
+  const now = performance.now(), raw = now - last, dt = Math.min(0.05, raw / 1000); last = now;
+  // the measured frame is the raw one: the clamped dt only keeps the animation stable
+  if (!building) frameTimes.push(raw); if (frameTimes.length > 240) frameTimes.shift();
   if (!state.paused) {
     const c0 = performance.now();
     lookTarget.copy(camera.position);
@@ -128,7 +129,7 @@ renderer.setAnimationLoop(() => {
   }
   controls.update();
   renderer.render(scene, camera);
-  for (const s of sampleListeners) s(dt * 1000, renderer.info.render);
+  for (const s of sampleListeners) s(raw, renderer.info.render);
   if (now - readoutAt > 400 && frameTimes.length > 10) { readoutAt = now; readouts(); }
 });
 function stats() {
@@ -235,7 +236,7 @@ function syncUi() {
 const sampleListeners = new Set();
 function sampleFrames(count) {
   return new Promise((resolve, reject) => {
-    const values = [], timeout = setTimeout(() => { sampleListeners.delete(sample); reject(new Error('Benchmark timed out; keep this tab visible.')); }, 90000);
+    const values = [], timeout = setTimeout(() => { sampleListeners.delete(sample); reject(new Error('Benchmark timed out; keep this tab visible.')); }, Math.max(90000, count * 4000));
     function sample(ms, info) { values.push({ ms, calls: info.calls, triangles: info.triangles, cpu: cpuTimes[cpuTimes.length - 1] || 0 }); if (values.length >= count) { clearTimeout(timeout); sampleListeners.delete(sample); resolve(values); } }
     sampleListeners.add(sample);
   });

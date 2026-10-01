@@ -42,7 +42,7 @@ export function tunic(ctx, color, { trim = null, sleeve = 1.85, hem = null, thic
  * sleeves, trim at the hem, cuffs and down the front. The skirt is a cone joined to the body by a
  * smooth union, so it hangs from the hips instead of wrapping each leg.
  */
-export function robe(ctx, color, { trim = null, sleeve = 1.95, bell = 1.6, hemY = null } = {}) {
+export function robe(ctx, color, { trim = null, sleeve = 1.95, bell = 1.25, hemY = null } = {}) {
   const L = ctx.L, S = L.S, W = L.W, hem = hemY ?? L.ankle + 0.05 * S;
   const prims = [];
   // the skirt cone, from just above the hips (inside the body) to the hem
@@ -58,6 +58,7 @@ export function robe(ctx, color, { trim = null, sleeve = 1.95, bell = 1.6, hemY 
   const torso = torsoRegion(L, { hem, sleeve, neckline: 0.062, sleeveR: 0.11 });
   const skirtZone = (x, y, z) => Math.max(hem - y, y - L.pelvis, Math.hypot(x / (0.42 * S * W), z / (0.36 * S)) - 1);
   const region = minOf(torso, skirtZone);
+  region.partAt = (x, y, z) => skirtZone(x, y, z) < torso(x, y, z) ? 'torso' : torso.partAt(x, y, z);
   if (trim) {
     prims.push(bandPaint([0, hem, 0], [0, 1, 0], 0.025 * S, paint('silk', trim)));
     for (const s of ['L', 'R']) prims.push(bandPaint(sleeveEnd(s), L.arm[s].fore, 0.022 * S, paint('silk', trim), 0.16 * S));
@@ -87,6 +88,7 @@ export function surcoat(ctx, color, { trim = null, device = 'cross', over = 0.03
   const torso = torsoRegion(L, { hem: L.waist - 0.06 * S, sleeve: 0, neckline: 0.085 });
   const panels = (x, y, z) => Math.max(hem - y, y - L.waist, Math.abs(x) - (0.15 + 0.03 * (L.waist - y) / (L.waist - hem)) * S * W, 0.03 * S - Math.abs(z));
   const region = minOf(torso, panels);
+  region.partAt = () => 'torso';
   const dark = shadeHex(color, -0.12);
   if (device === 'cross' && trim) {
     // a heraldic cross on the chest and on the front panel

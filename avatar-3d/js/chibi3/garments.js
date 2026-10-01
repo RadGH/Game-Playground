@@ -77,8 +77,11 @@ export function torsoRegion(L, { hem, top = null, sleeve = 0, neckline = 0.075, 
     // the sleeve cut only applies past the shoulder: above it the torso slab decides
     parts.push((x, y, z) => Math.max(cap(x, y, z), cut(x, y, z), y - (L.shoulder + 0.13 * S)));
   }
-  let f = minOf(...parts);
-  if (open > 0) { const g = f; f = (x, y, z) => Math.max(g(x, y, z), -(Math.abs(x) - open * S) * (z > 0.02 * S ? 1 : -1e3)); }
+  const f = minOf(...parts);
+  // which part a point belongs to ('torso', 'L', 'R'): a sleeve takes its bones from its own arm,
+  // and the torso part never from an arm (see addGarment)
+  const names = ['torso', ...(sleeve > 0 ? ['L', 'R'] : [])];
+  f.partAt = (x, y, z) => { let best = 0, bd = 1e9; parts.forEach((p, i) => { const v = p(x, y, z); if (v < bd) { bd = v; best = i; } }); return names[best]; };
   return f;
 }
 
@@ -97,6 +100,7 @@ export function legsRegion(L, { top, cuff = 1, legR = 0.13, cuffOver = 0 }) {
 /** A garment shape: the body offset by `t` metres inside `region`, plus optional folds. */
 export function garmentShape(name, ctx, t, region, { folds = null, paintBase, prims = [] } = {}) {
   const sh = new Shape([], { name, base: ctx.body.shape, baseFast: ctx.bodyFast, offset: -t, basePaint: paintBase, displace: folds });
+  sh.region = region;
   for (const p of prims) sh.add(p);
   sh.add({ op: 'inter', k: 0, box: null, d: region });
   return sh;
@@ -137,18 +141,41 @@ export function skirtWeights(R, ctx, { from, to }) {
       sum += w;
     }
     const panel = panelList.map(([i, w]) => [i, w / (sum || 1)]);
-    // the pelvis keeps a share at the top so the waistband never tears away
-    return mixWeights(body, mixWeights([[idx('pelvis'), 1]], panel, Math.min(1, t * 1.6)), t);
+    // the pelvis keeps a share at the top so the waistband never tears away, and the legs keep a
+    // third all the way down so a stride carries the cloth with it instead of through it
+    return mixWeights(body, mixWeights([[idx('pelvis'), 1]], panel, Math.min(1, t * 1.6)), t * 0.68);
   };
 }
 
 // ------------------------------------------------------------------ the builders
 // Each takes ctx = { a, R, L, body, bodyFast, asm, lod } and adds layers to ctx.asm.
 
-/** Add a garment layer with the usual options. */
+/** The arm bone nearest a point (upper arm, forearm or hand), by distance to the bone segments. */
+export function armOwner(L, side, x, y, z) {
+  const A = L.arm[side], segs = [['upperArm', A.sh, A.el], ['foreArm', A.el, A.wr], ['hand', A.wr, addv(A.wr, A.fore, 0.1 * L.S)]];
+  let best = 'upperArm', bd = 1e9;
+  for (const [n, a, b] of segs) { const d = capsuleDist(a, b, 0)(x, y, z); if (d < bd) { bd = d; best = n; } }
+  return best + side;
+}
+const ARM = /^(clav|upperArm|foreArm|hand|thumb|index|middle|ring)/;
+
+/**
+ * Add a garment layer with the usual options. When the garment's region knows its parts (a torso and
+ * sleeves), a sleeve vertex is owned by the nearest bone of ITS arm, and a torso vertex never by an
+ * arm: a bell sleeve hanging beside the hip would otherwise borrow the hip's bones and tear, and a
+ * tabard's shoulder would lift with the arm.
+ */
 export function addGarment(ctx, name, shape, bounds, opts = {}) {
+  const R = ctx.R, base = opts.weights || ((x, y, z, owner, px, py, pz) => jointWeights(R, px, py, pz, owner || 'chest'));
+  const partAt = shape.region?.partAt;
+  const weights = partAt ? (x, y, z, owner, px = x, py = y, pz = z) => {
+    const part = partAt(x, y, z);
+    if (part === 'L' || part === 'R') { const o = armOwner(ctx.L, part, x, y, z); return base(x, y, z, o, x, y, z); }
+    if (owner && ARM.test(owner)) return base(x, y, z, owner.startsWith('clav') ? owner : 'chest', px, py, pz);
+    return base(x, y, z, owner, px, py, pz);
+  } : base;
   ctx.asm.addField({ name, shape, owner: ctx.body.shape, step: opts.step ?? 0.011, bounds, covers: opts.covers ?? true, hideable: opts.hideable ?? true, simplify: opts.simplify,
-    hideDepth: opts.hideDepth, weights: opts.weights, aoStrength: opts.ao ?? 1, minLod: opts.minLod, maxLod: opts.maxLod });
+    hideDepth: opts.hideDepth, weights, aoStrength: opts.ao ?? 1, minLod: opts.minLod, maxLod: opts.maxLod });
 }
 
 export function torsoBounds(L, hem, extra = 0.06) { const S = L.S; return [-(L.shX + 0.17 * S + extra), hem - 0.03 * S, -0.24 * S - extra, L.shX + 0.17 * S + extra, L.neck + 0.08 * S, 0.24 * S + extra]; }

@@ -1,0 +1,57 @@
+{
+  "_doc": "Chibi 3 presets. Each `avatar` is the SAME shared character JSON every game reads (see shared/character-schema.md); Chibi 3's own dials live in avatar.body.c3 (0..1, 0.5 = the race's value). Ids Chibi 2 does not know (harness, fur_kilt, fur_boots, spiked_pauldron, war_paint, long_beard) are Chibi 3 parts; Chibi 2 falls back to its defaults for them.",
+  "presets": [
+    {
+      "id": "knight", "name": "Knight",
+      "avatar": {
+        "body": { "race": "human", "skin": "#e2b08a", "height": 0.6, "width": 0.55, "c3": { "muscle": 0.6, "jaw": 0.6, "brow": 0.55 } },
+        "hair": { "id": "short", "color": "#4a3020" },
+        "eyes": { "id": "round", "color": "#4a6a8a" }, "brows": { "id": "straight" },
+        "facialHair": { "id": "stubble", "color": "#3a2618" },
+        "top": { "id": "surcoat", "color": "#2a4a9a", "color2": "#d8b040" },
+        "bottom": { "id": "greaves", "color": "#a8b0ba" },
+        "shoes": { "id": "heavy", "color": "#a0a8b2" },
+        "hat": { "id": "plate_helm", "color": "#b8c0cc", "color2": "#c02828" },
+        "cape": { "id": "cape", "color": "#8a1c1c", "color2": "#d8c8a0" },
+        "decor": { "id": "pauldrons", "color": "#b0b8c2" },
+        "held": { "id": "longsword", "color": "#c8ccd2" },
+        "offhand": { "id": "heater_shield", "color": "#2a4a9a", "color2": "#d8b040" }
+      }
+    },
+    {
+      "id": "wizard", "name": "Wizard",
+      "avatar": {
+        "body": { "race": "human", "skin": "#e8c0a0", "height": 0.55, "width": 0.4, "c3": { "muscle": 0.25, "fat": 0.35, "age": 0.85, "nose": 0.75, "brow": 0.6, "cheek": 0.6 } },
+        "hair": { "id": "long", "color": "#d8d4cc" },
+        "eyes": { "id": "round", "color": "#3a6aa0" }, "brows": { "id": "bushy", "color": "#e0dcd4" },
+        "facialHair": { "id": "long_beard", "color": "#e4e0d8" },
+        "top": { "id": "trim_robe", "color": "#2a3a8a", "color2": "#d8b040" },
+        "bottom": { "id": "pants", "color": "#1a2a5a" },
+        "shoes": { "id": "slippers", "color": "#2a2a4a" },
+        "hat": { "id": "wizard", "color": "#25336f", "color2": "#d8b040" },
+        "cape": { "id": "none" },
+        "decor": { "id": "none" },
+        "held": { "id": "staff_crystal", "color": "#6a4a30", "color2": "#7ad0ff" },
+        "offhand": { "id": "none" }
+      }
+    },
+    {
+      "id": "berserker", "name": "Orc Berserker",
+      "avatar": {
+        "body": { "race": "orc", "skin": "#6f8f4a", "height": 0.6, "width": 0.65, "c3": { "muscle": 0.9, "fat": 0.25, "jaw": 0.7, "brow": 0.75 } },
+        "hair": { "id": "mohawk", "color": "#1a1410" },
+        "eyes": { "id": "narrow", "color": "#c8a020" }, "brows": { "id": "angry", "color": "#1a1410" },
+        "facialHair": { "id": "none" },
+        "top": { "id": "harness", "color": "#3a2618" },
+        "bottom": { "id": "fur_kilt", "color": "#4a3424", "color2": "#8a7058" },
+        "shoes": { "id": "fur_boots", "color": "#3a2a1e", "color2": "#7a6450" },
+        "hat": { "id": "none" },
+        "cape": { "id": "none" },
+        "decor": { "id": "spiked_pauldron", "color": "#5a5a62", "color2": "#6a5440" },
+        "extras": { "id": "war_paint", "color": "#a01818" },
+        "held": { "id": "greataxe", "color": "#a8acb2", "color2": "#5a3a24" },
+        "offhand": { "id": "none" }
+      }
+    }
+  ]
+}

@@ -193,7 +193,7 @@ export function characterMaterial({ detail = true } = {}) {
         float c3ao = vSurf.w;
         reflectedLight.indirectDiffuse *= c3ao;
         reflectedLight.indirectSpecular *= c3ao * c3ao;
-        reflectedLight.directDiffuse *= mix(1.0, c3ao, 0.5);
+        reflectedLight.directDiffuse *= mix(1.0, c3ao, 0.3);
         reflectedLight.directSpecular *= mix(1.0, c3ao, 0.6);`)
       .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
         totalEmissiveRadiance += diffuseColor.rgb * vExtra.x * 2.5;`);

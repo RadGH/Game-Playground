@@ -192,6 +192,14 @@ const EMPTY = [];
 export class Shape {
   constructor(prims = [], opts = {}) {
     this.prims = prims; this.base = opts.base || null; this.offset = opts.offset || 0;
+    // baseFast: a cheap stand-in for `base` (a sampled grid) used to fill the mesher's grid; the exact
+    // base still places the vertices and gives the normals
+    this.baseFast = opts.baseFast || null;
+    // MARGIN: how far off the surface this shape must still answer correctly. Box culling skips a
+    // primitive whose bound is further away than this — fine at the surface, but a garment asks the
+    // body "how far am I" from up to 4 cm out, and a culled answer there is garbage.
+    this.margin = opts.margin ?? 0.002;
+    this.wideMargin = 0.06;
     this.displace = opts.displace || null; this.basePaint = opts.basePaint || null; this.name = opts.name || 'shape';
   }
   add(p) { this.prims.push(p); this.idx = null; return p; }
@@ -202,32 +210,51 @@ export class Shape {
    * carve only removes what was added before it.
    */
   buildIndex(brick = 0.03) {
-    const b = this.bounds(0.04), n = [0, 1, 2].map(i => Math.max(1, Math.ceil((b[i + 3] - b[i]) / brick)));
-    const lists = Array.from({ length: n[0] * n[1] * n[2] }, () => []);
+    const b = this.bounds(0.08), n = [0, 1, 2].map(i => Math.max(1, Math.ceil((b[i + 3] - b[i]) / brick)));
+    const listsFor = margin => {
+      const lists = Array.from({ length: n[0] * n[1] * n[2] }, () => []);
+      for (const p of this.prims) {
+        if (p.op === 'paint') continue;
+        const k = (p.k || 0) + margin;
+        const r = p.box ? [0, 1, 2].map(i => [Math.max(0, Math.floor((p.box[i] - k - b[i]) / brick)), Math.min(n[i] - 1, Math.floor((p.box[i + 3] + k - b[i]) / brick))]) : [[0, n[0] - 1], [0, n[1] - 1], [0, n[2] - 1]];
+        for (let z = r[2][0]; z <= r[2][1]; z++) for (let y = r[1][0]; y <= r[1][1]; y++) for (let x = r[0][0]; x <= r[0][1]; x++) lists[x + y * n[0] + z * n[0] * n[1]].push(p);
+      }
+      return lists;
+    };
+    const lists = listsFor(this.margin), wide = listsFor(this.wideMargin);
+    // a second set of lists for paintAt: every primitive that can be NEAREST to a point up to ~5 cm
+    // off the surface (garments sit that far out), plus paint and carve primitives
+    const plists = Array.from({ length: n[0] * n[1] * n[2] }, () => []);
     for (const p of this.prims) {
-      if (p.op === 'paint') continue;
-      const k = (p.k || 0) + 0.002;
+      if (!p.paint) continue;
+      const k = (p.op === 'paint' ? (p.band || 0.003) : 0.055) + (p.k || 0);
       const r = p.box ? [0, 1, 2].map(i => [Math.max(0, Math.floor((p.box[i] - k - b[i]) / brick)), Math.min(n[i] - 1, Math.floor((p.box[i + 3] + k - b[i]) / brick))]) : [[0, n[0] - 1], [0, n[1] - 1], [0, n[2] - 1]];
-      for (let z = r[2][0]; z <= r[2][1]; z++) for (let y = r[1][0]; y <= r[1][1]; y++) for (let x = r[0][0]; x <= r[0][1]; x++) lists[x + y * n[0] + z * n[0] * n[1]].push(p);
+      for (let z = r[2][0]; z <= r[2][1]; z++) for (let y = r[1][0]; y <= r[1][1]; y++) for (let x = r[0][0]; x <= r[0][1]; x++) plists[x + y * n[0] + z * n[0] * n[1]].push(p);
     }
-    this.idx = { b, n, brick, lists };
+    this.idx = { b, n, brick, lists, wide, plists };
     return this;
   }
-  eval(x, y, z) {
+  evalFast(x, y, z) { return this._eval(x, y, z, this.baseFast || this.base, false); }
+  eval(x, y, z) { return this._eval(x, y, z, this.base, false); }
+  /** Correct up to ~6 cm off the surface (what a garment built on this shape needs). */
+  evalWide(x, y, z) { return this._eval(x, y, z, this.base, true); }
+  _eval(x, y, z, base, wide) {
     let ps = this.prims;
-    const I = this.idx;
+    const I = this.idx, far = wide ? this.wideMargin : this.margin;
     if (I) {
       const i = Math.floor((x - I.b[0]) / I.brick), j = Math.floor((y - I.b[1]) / I.brick), k = Math.floor((z - I.b[2]) / I.brick);
       if (i < 0 || j < 0 || k < 0 || i >= I.n[0] || j >= I.n[1] || k >= I.n[2]) {
-        if (!this.base) return 0.05 + Math.max(I.b[0] - x, x - I.b[3], I.b[1] - y, y - I.b[4], I.b[2] - z, z - I.b[5], 0);
+        if (!this.base) return Math.max(far, I.b[0] - x, x - I.b[3], I.b[1] - y, y - I.b[4], I.b[2] - z, z - I.b[5]);
         ps = EMPTY;
-      } else ps = I.lists[i + j * I.n[0] + k * I.n[0] * I.n[1]];
-      if (!this.base && ps.length === 0) return 0.03;
+      } else ps = (wide ? I.wide : I.lists)[i + j * I.n[0] + k * I.n[0] * I.n[1]];
+      // nothing can reach this brick: all we know is that the surface is at least `far` away
+      if (!this.base && ps.length === 0) return far;
     }
-    let d = this.base ? this.base.eval(x, y, z) + this.offset : 1e9;
+    let d = base ? (base.evalWide ? base.evalWide(x, y, z) : base.eval(x, y, z)) + this.offset : 1e9;
+    const M = wide ? this.wideMargin : this.margin;
     for (let i = 0; i < ps.length; i++) {
-      const p = ps[i], b = p.box, k = p.k || 0;
-      if (b && (x < b[0] - k || y < b[1] - k || z < b[2] - k || x > b[3] + k || y > b[4] + k || z > b[5] + k)) {
+      const p = ps[i], b = p.box, k = p.k || 0, km = k + M;
+      if (b && (x < b[0] - km || y < b[1] - km || z < b[2] - km || x > b[3] + km || y > b[4] + km || z > b[5] + km)) {
         if (p.op === 'inter') d = 1e9;   // a bounded intersection outside its bound leaves nothing
         continue;
       }
@@ -237,6 +264,8 @@ export class Shape {
       else if (p.op === 'inter') d = sinter(d, v, k);
       else d = smin(d, v, k);
     }
+    // every primitive was out of reach: same honest lower bound as an empty brick
+    if (d > 1e8) return far;
     if (this.displace) d -= this.displace(x, y, z);
     return d;
   }
@@ -254,7 +283,13 @@ export class Shape {
    */
   paintAt(x, y, z) {
     let best = null, bestD = 1e9, second = null, secondD = 1e9, wall = null, splash = null, splashD = 1e9;
-    for (const p of this.prims) {
+    let list = this.prims;
+    const I = this.idx;
+    if (I) {
+      const i = Math.floor((x - I.b[0]) / I.brick), j = Math.floor((y - I.b[1]) / I.brick), k = Math.floor((z - I.b[2]) / I.brick);
+      if (i >= 0 && j >= 0 && k >= 0 && i < I.n[0] && j < I.n[1] && k < I.n[2]) { const l = I.plists[i + j * I.n[0] + k * I.n[0] * I.n[1]]; if (l.length) list = l; }
+    }
+    for (const p of list) {
       if (!p.paint) continue;
       const b = p.box;
       if (b && (p.op === 'sub' || p.op === 'paint') && (x < b[0] - 0.01 || y < b[1] - 0.01 || z < b[2] - 0.01 || x > b[3] + 0.01 || y > b[4] + 0.01 || z > b[5] + 0.01)) continue;

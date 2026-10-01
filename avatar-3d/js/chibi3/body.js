@@ -242,7 +242,7 @@ function detailRegions(R, eyes, headY, hz, hs, mouthY, mouthZ, F) {
   const box = (c, h) => [c[0] - h[0], c[1] - h[1], c[2] - h[2], c[0] + h[0], c[1] + h[1], c[2] + h[2]];
   const eyeMid = [0, eyes[0].center[1], eyes[0].center[2]];
   const out = [
-    { name: 'eyes', step: 0.0015, inflate: 0.0011, box: box([0, eyeMid[1] + 0.02 * hs, eyeMid[2] + 0.04 * hs], [Math.abs(eyes[0].center[0]) + 0.095 * hs, 0.085 * hs, 0.085 * hs]) },
+    { name: 'eyes', step: 0.0019, inflate: 0.0011, box: box([0, eyeMid[1] + 0.02 * hs, eyeMid[2] + 0.04 * hs], [Math.abs(eyes[0].center[0]) + 0.095 * hs, 0.085 * hs, 0.085 * hs]) },
     { name: 'mouth', step: 0.0015, inflate: 0.0010, box: box([0, headY + (mouthY + 0.0) * hs, hz + (mouthZ + 0.0) * hs], [0.13 * hs * F.mouthWidth, 0.075 * hs, 0.07 * hs]) },
     { name: 'nose', step: 0.0024, inflate: 0.0009, box: box([0, headY + 0.24 * hs, hz + 0.34 * hs], [0.085 * hs * F.noseWidth, 0.13 * hs, 0.09 * hs]) },
   ];

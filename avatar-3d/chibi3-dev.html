@@ -38,6 +38,6 @@ if (q.get('look')) hero.lookAt(new THREE.Vector3(...q.get('look').split(',').map
 const freeze = q.has('t') ? +q.get('t') : null;
 if (freeze != null) { hero.animator.speed = hero.animator.speedTarget; for (let t = 0; t < freeze; t += 1 / 60) hero.update(Math.min(1 / 60, freeze - t)); }
 let last = performance.now();
-r.setAnimationLoop(() => { const now = performance.now(); if (freeze == null) hero.update((now - last) / 1000); last = now; ctl.update(); r.render(scene, cam); });
+r.setAnimationLoop(() => { const now = performance.now(); if (freeze == null && !q.has('bind')) hero.update((now - last) / 1000); last = now; ctl.update(); r.render(scene, cam); });
 window.hero = hero; window.ready = true;
 </script></body></html>

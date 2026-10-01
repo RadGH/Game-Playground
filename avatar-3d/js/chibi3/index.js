@@ -16,6 +16,7 @@ import { Assembler } from './assemble.js';
 import { buildBody } from './body.js';
 import { skinPaints, paint, shadeHex, mixHex } from './paint.js';
 import { Shape, cone, sphere, smoothstep } from './sdf.js';
+import { Grid } from './mesher.js';
 import { jointWeights } from './skin.js';
 import { characterMaterial, eyeMaterial } from './material.js';
 import { buildOutfit } from './outfit.js';
@@ -23,6 +24,7 @@ import { Animator } from './animator.js';
 import { faceMorphs, MORPHS } from './face.js';
 
 export { MORPHS };
+export { Assembler };
 
 /** Merge the shared defaults WITHOUT dropping ids the 2D catalogue does not know (ours may be new). */
 export function normalizeForChibi3(avatar = {}) {
@@ -43,6 +45,13 @@ function buildTemplate(a, lod) {
   const t0 = performance.now();
   const body = buildBody(a, R, colors);
   const asm = new Assembler(R, { lod });
+  // the body sampled once on a grid: the skin is meshed from it, and every garment reads it as a
+  // cheap stand-in for the body while filling its own grid
+  body.shape.buildIndex();
+  // filled with the WIDE evaluation: garments read it from centimetres off the skin
+  const bodyGrid = new Grid(body.shape.bounds(0.04), 0.0125).fill({ eval: (x, y, z) => body.shape.evalWide(x, y, z) });
+  const bodyFast = { eval: (x, y, z) => bodyGrid.sample(x, y, z) };
+  asm.bodyField = bodyFast;
   const hs = R.hs, headY = R.headY, hz = R.byName.head.pos[2];
   // ---- the skin, in three regions: the body coarse, the face and the hands fine
   const wrists = ['L', 'R'].map(s => { const w = R.byName['hand' + s].pos, e = R.byName['foreArm' + s].pos, d = norm3(sub(w, e)); return { w, d }; });
@@ -55,24 +64,24 @@ function buildTemplate(a, lod) {
   });
   const neckCut = headY - 0.3 * hs;
   const skinWeights = faceWeights(R, body);
-  const bodyLayer = { name: 'skin', shape: body.shape, step: 0.0125, hideable: true, weights: skinWeights,
+  const bodyLayer = { name: 'skin', shape: body.shape, step: 0.0125, grid: bodyGrid, hideable: true, weights: skinWeights, simplify: 0.0007,
     keep: lod === 2 ? null : (x, y, z) => y < neckCut + 0.02 * hs && !pastWrist(x, y, z, 0.012 * R.P.S) };
   asm.addField(bodyLayer);
   if (lod < 2) {
     // the finest regions (eyes, mouth, nose, ears) at LOD 0 only; LOD 1 keeps the plain face grid
     const regions = lod === 0 ? body.regions : [];
     const inBox = (b, x, y, z, m) => x > b[0] + m && y > b[1] + m && z > b[2] + m && x < b[3] - m && y < b[4] - m && z < b[5] - m;
-    asm.addField({ name: 'face', shape: body.shape, step: 0.0048, inflate: 0.0004, hideable: true, weights: skinWeights,
+    asm.addField({ name: 'face', shape: body.shape, step: 0.0052, inflate: 0.0004, hideable: true, weights: skinWeights, simplify: 0.0003,
       bounds: [-0.62 * hs, neckCut - 0.08 * hs, hz - 0.62 * hs, 0.62 * hs, headY + 0.95 * hs, hz + 0.6 * hs],
       keep: (x, y, z) => y > neckCut && !regions.some(r => inBox(r.box, x, y, z, 0.003)) });
     for (const r of regions) {
       const b = r.box, pad = r.step * 3;
-      asm.addField({ name: r.name, shape: body.shape, step: r.step, inflate: r.inflate, hideable: true, weights: skinWeights,
+      asm.addField({ name: r.name, shape: body.shape, step: r.step, inflate: r.inflate, hideable: true, weights: skinWeights, simplify: 0.00018,
         bounds: [b[0] - pad, b[1] - pad, b[2] - pad, b[3] + pad, b[4] + pad, b[5] + pad], keep: (x, y, z) => inBox(b, x, y, z, -0.0005), stepFixed: true });
     }
     for (const { w, d } of wrists) {
       const reach = 0.24 * R.P.S * R.P.hand, c = [w[0] + d[0] * reach * 0.42, w[1] + d[1] * reach * 0.42, w[2] + d[2] * reach * 0.42];
-      asm.addField({ name: 'hand', shape: body.shape, step: 0.0042, inflate: 0.0006, hideable: true, weights: skinWeights,
+      asm.addField({ name: 'hand', shape: body.shape, step: 0.0046, inflate: 0.0006, hideable: true, weights: skinWeights, simplify: 0.00025,
         bounds: [c[0] - reach * 0.55, c[1] - reach * 0.62, c[2] - reach * 0.45, c[0] + reach * 0.55, c[1] + reach * 0.62, c[2] + reach * 0.45],
         keep: (x, y, z) => (x - w[0]) * d[0] + (y - w[1]) * d[1] + (z - w[2]) * d[2] > -0.006 * R.P.S });
     }
@@ -96,12 +105,12 @@ function buildTemplate(a, lod) {
     // a domed pelt: tallest along the stroke, meeting the skin at its edge (no slab walls)
     browShape.displace = (x, y, z) => { if (z < front) return 0; const d = strokeDist(x, y); return d > 0 ? 0 : browH * Math.min(1, -d / (0.008 * hs)); };
     browShape.add({ op: 'inter', k: 0, box: null, d(x, y, z) { return Math.max(strokeDist(x, y), front - z); } });
-    asm.addField({ name: 'brows', shape: browShape, owner: body.shape, step: 0.0035, minLod: 0, maxLod: 1, aoStrength: 0.3,
+    asm.addField({ name: 'brows', shape: browShape, owner: body.shape, step: 0.0035, simplify: 0.0002, minLod: 0, maxLod: 1, aoStrength: 0.3,
       bounds: [-0.3 * hs, headY + 0.36 * hs, hz + 0.12 * hs, 0.3 * hs, headY + 0.52 * hs, hz + 0.4 * hs],
       paint: paint('hair', browColor, { detail: 1.0, rough: 0.7 }), paintFn: () => paint('hair', browColor, { detail: 1.0, rough: 0.7 }), weights: (x, y, z) => [[R.byName.head.index, 1]] });
   }
   // ---- clothes, armour, hair, headwear, held things
-  const outfit = buildOutfit(a, R, body, asm, { lod });
+  const outfit = buildOutfit(a, R, body, asm, { lod, bodyFast });
   // ---- eyelids: a cap over each eyeball, on its own bone, so a blink is a rotation
   if (lod < 2) for (const e of body.eyes) {
     // the cap rests a little closed, so the upper lid covers the top of the iris as a real one does

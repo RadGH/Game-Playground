@@ -9,14 +9,17 @@
 // his breastplate), which is most of what keeps a dressed character inside its triangle budget.
 
 import * as THREE from 'three';
-import { meshField, filterTriangles, compact, fieldAO, fieldCurvature } from './mesher.js';
+import { meshField, filterTriangles, compact, fieldAO, fieldCurvature, Grid } from './mesher.js';
 import { noise3 } from './sdf.js';
+import { decimate } from './decimate.js';
 import { jointWeights, normalize } from './skin.js';
 
 const tmpColor = new THREE.Color();
 const linear = hex => { tmpColor.set(hex); return [tmpColor.r, tmpColor.g, tmpColor.b]; };
 
 export class Assembler {
+  /** Debug switches (the dev page sets them): noSimplify, noHide, skip: [layer names]. */
+  static debug = { noSimplify: false, noHide: false, skip: [] };
   /** `rig` from layoutRig(). `lod` 0 (hero), 1, 2 (crowd). */
   constructor(rig, { lod = 0 } = {}) {
     this.rig = rig; this.lod = lod; this.layers = []; this.meshes = []; this.timings = {};
@@ -43,35 +46,66 @@ export class Assembler {
 
   build() {
     const rig = this.rig, out = [];
-    const fields = this.layers.filter(l => l.kind === 'field' && this.inLod(l));
+    const fields = this.layers.filter(l => l.kind === 'field' && this.inLod(l) && !Assembler.debug.skip.includes(l.name));
     const t0 = performance.now();
     for (const L of fields) {
       const t = performance.now();
-      if (L.shape.buildIndex && !L.shape.idx) L.shape.buildIndex();
-      const field = L.inflate ? { eval: (x, y, z) => L.shape.eval(x, y, z) - L.inflate } : L.shape;
+      // (re)index the shape and every shape it is built on: adding a primitive drops an index
+      for (let sh = L.shape; sh; sh = sh.base) if (sh.buildIndex && !sh.idx) sh.buildIndex();
+      const inf = L.inflate || 0;
+      const field = inf ? { eval: (x, y, z) => L.shape.eval(x, y, z) - inf } : L.shape;
+      const fill = L.shape.baseFast ? { eval: (x, y, z) => L.shape.evalFast(x, y, z) - inf } : null;
       const step = L.stepFixed ? L.step : L.step * this.stepScale;
       const bounds = L.bounds || L.shape.bounds(step * 2);
-      L.mesh = meshField(field, bounds, step, { project: this.lod === 0 ? 2 : 1, clip: L.keep || null });
+      L.mesh = meshField(field, bounds, step, { project: this.lod === 0 ? 2 : 1, clip: L.keep || null, fill, grid: L.grid && this.lod === 0 ? L.grid : null });
       L.field = field;
+      // simplify: flat stretches lose triangles, curves keep them (decimate.js)
+      if (L.simplify !== 0 && !Assembler.debug.noSimplify) {
+        const grid = L.mesh.grid;
+        L.mesh = decimate(L.mesh, { maxError: (L.simplify ?? 0.0006) * [1, 2.6, 6][this.lod], field, pin: this.lod < 2 ? paintBorders(L) : null });
+        L.mesh.grid = grid;
+      }
       this.timings[L.name] = (this.timings[L.name] || 0) + Math.round(performance.now() - t);
       this.tris = this.tris || {}; this.tris[L.name] = (this.tris[L.name] || 0) + L.mesh.indices.length / 3;
     }
-    // hidden-surface removal: drop triangles of hideable layers buried inside a covering layer
+    // hidden-surface removal: drop triangles of hideable layers buried inside a covering layer.
+    // Each layer's own sampled grid answers "how deep inside am I" (cheap, and exact enough).
     const covers = fields.filter(l => l.covers);
+    const tHide = performance.now();
     for (const L of fields) {
-      if (!L.hideable || !covers.length) continue;
+      if (!L.hideable || !covers.length || Assembler.debug.noHide) continue;
       const m = L.mesh, p = m.positions;
-      const hidden = new Uint8Array(p.length / 3);
+      const hidden = new Uint8Array(p.length / 3), depth = -(L.hideDepth ?? 0.0025);
       for (let v = 0; v < hidden.length; v++) {
         const x = p[v * 3], y = p[v * 3 + 1], z = p[v * 3 + 2];
-        for (const C of covers) if (C !== L && C.field.eval(x, y, z) < -(L.hideDepth ?? 0.0025)) { hidden[v] = 1; break; }
+        for (const C of covers) if (C !== L && C.mesh.grid.sample(x, y, z) < depth) { hidden[v] = 1; break; }
       }
       m.indices = filterTriangles(m.indices, p, (a, b, c) => !(hidden[a] && hidden[b] && hidden[c]));
       L.mesh = compact(m);
     }
-    const all = { eval: (x, y, z) => { let d = 1e9; for (const L of fields) { const v = L.field.eval(x, y, z); if (v < d) d = v; } return d; } };
+    this.timings.hide = Math.round(performance.now() - tHide);
+    // one coarse grid holding the nearest surface of EVERY layer, for ambient occlusion; each vertex
+    // also asks its own layer's finer grid, so small creases still darken
+    const tOcc = performance.now();
+    let ob = null;
+    for (const L of fields) { const g = L.mesh.grid, hi = g.min.map((v, i) => v + (g.n[i] - 1) * g.step); const b = [...g.min, ...hi]; ob = ob ? [Math.min(ob[0], b[0]), Math.min(ob[1], b[1]), Math.min(ob[2], b[2]), Math.max(ob[3], b[3]), Math.max(ob[4], b[4]), Math.max(ob[5], b[5])] : b; }
+    const occ = new Grid(ob || [0, 0, 0, 1, 1, 1], this.lod === 0 ? 0.018 : 0.03);
+    {
+      const [nx, ny, nz] = occ.n, h = occ.step, d = occ.data; let i = 0;
+      const gridBounds = fields.map(L => { const g = L.mesh.grid; return [g.min, g.min.map((v, k) => v + (g.n[k] - 1) * g.step), g]; });
+      for (let k = 0; k < nz; k++) { const z = occ.min[2] + k * h; for (let j = 0; j < ny; j++) { const y = occ.min[1] + j * h; for (let ii = 0; ii < nx; ii++) {
+        const x = occ.min[0] + ii * h; let v = 0.2;
+        for (const [lo, hi, g] of gridBounds) if (x >= lo[0] && y >= lo[1] && z >= lo[2] && x <= hi[0] && y <= hi[1] && z <= hi[2]) { const s2 = g.sample(x, y, z); if (s2 < v) v = s2; }
+        d[i++] = v;
+      } } }
+    }
+    this.timings.occlusion = Math.round(performance.now() - tOcc);
+    for (const L of fields) { const g = L.mesh.grid; L.aoField = { eval: (x, y, z) => Math.min(occ.sample(x, y, z), g.sample(x, y, z)) }; }
+    const all = { eval: (x, y, z) => occ.sample(x, y, z) };
+    const tAttr = performance.now();
     for (const L of fields) out.push(this.attributesForField(L, all));
     for (const L of this.layers.filter(l => l.kind === 'geometry' && this.inLod(l))) out.push(this.attributesForGeometry(L, all));
+    this.timings.attributes = Math.round(performance.now() - tAttr);
     this.timings.total = Math.round(performance.now() - t0);
     return merge(out.filter(Boolean));
   }
@@ -87,19 +121,34 @@ export class Assembler {
       const x = m.positions[v * 3], y = m.positions[v * 3 + 1], z = m.positions[v * 3 + 2];
       const nx = m.normals[v * 3], ny = m.normals[v * 3 + 1], nz = m.normals[v * 3 + 2];
       const pa = painter.paintAt(x, y, z);
-      const ownerBone = owner === painter ? pa.bone : owner.paintAt(x, y, z).bone;
+      // A garment takes its bones from the SKIN DIRECTLY UNDER IT (the point found by stepping down
+      // the body's distance field), not from whatever muscle is nearest the cloth: otherwise a sleeve
+      // over the deltoid follows the chest while the skin follows the arm, and the shoulder pokes
+      // through the moment the arm moves.
+      let px = x, py = y, pz = z;
+      if (owner !== painter && this.bodyField) {
+        const bf = this.bodyField, e = 0.002;
+        for (let it = 0; it < 2; it++) {
+          const d0 = bf.eval(px, py, pz);
+          if (Math.abs(d0) < 0.0015 || d0 > 0.08) break;
+          const gx = bf.eval(px + e, py, pz) - bf.eval(px - e, py, pz), gy = bf.eval(px, py + e, pz) - bf.eval(px, py - e, pz), gz = bf.eval(px, py, pz + e) - bf.eval(px, py, pz - e);
+          const gl = Math.hypot(gx, gy, gz) || 1;
+          px -= gx / gl * d0; py -= gy / gl * d0; pz -= gz / gl * d0;
+        }
+      }
+      const ownerBone = owner === painter ? pa.bone : owner.paintAt(px, py, pz).bone;
       let P = pa.paint || L.paint;
       if (L.paintFn) P = L.paintFn(x, y, z, P) || P;
       let c = linear(P.color);
       if (pa.other && pa.t > 0.001 && !L.paintFn) { const o = linear(pa.other.color); c = c.map((cv, i) => cv + (o[i] - cv) * pa.t); }
       if (P.vary) { const k = 1 + noise3(x * 9 + 3.1, y * 9, z * 9) * P.vary + noise3(x * 31, y * 31, z * 31 + 7) * P.vary * 0.4; c = c.map(cv => cv * k); }
-      const ao = this.lod === 2 ? 1 : fieldAO(all, x, y, z, nx, ny, nz, L.aoStrength ?? 1);
+      const ao = this.lod === 2 ? 1 : fieldAO(L.aoField, x, y, z, nx, ny, nz, L.aoStrength ?? 1);
       let wear = 0;
-      if (P.wear && this.lod < 2) { const k = fieldCurvature(L.field, x, y, z, 0.005); wear = Math.max(0, Math.min(1, k * 2.2 - 0.25)) * P.wear * 0.55 * wearScale; if (k < -0.15) c = c.map(cv => cv * (1 + Math.max(-0.35, k * 0.25))); }
+      if (P.wear && this.lod < 2) { const k = fieldCurvature(L.mesh.grid.asField(), x, y, z, Math.max(0.005, L.mesh.grid.step)); wear = Math.max(0, Math.min(1, k * 2.2 - 0.25)) * P.wear * 0.55 * wearScale; if (k < -0.15) c = c.map(cv => cv * (1 + Math.max(-0.35, k * 0.25))); }
       color.set(c, v * 3);
       surf.set([P.tile ?? 0, P.rough ?? 0.7, P.metal ?? 0, ao], v * 4);
       extra.set([P.emissive || 0, P.sheen ?? 0, P.detail ?? 0.5, wear], v * 4);
-      const w = L.weights ? L.weights(x, y, z, ownerBone) : jointWeights(this.rig, x, y, z, ownerBone || L.bone || 'chest');
+      const w = L.weights ? L.weights(x, y, z, ownerBone, px, py, pz) : jointWeights(this.rig, px, py, pz, ownerBone || L.bone || 'chest');
       writeWeights(si, sw, v, w);
     }
     return { positions: m.positions, normals: m.normals, indices: m.indices, color, surf, extra, si, sw };
@@ -120,11 +169,54 @@ export class Assembler {
       const ao = L.ao === false || this.lod === 2 ? 1 : fieldAO(all, x, y, z, normals[v * 3], normals[v * 3 + 1], normals[v * 3 + 2], 0.5);
       surf.set([P.tile ?? 0, P.rough ?? 0.7, P.metal ?? 0, ao], v * 4);
       extra.set([P.emissive || 0, P.sheen ?? 0, P.detail ?? 0.5, L.wear ?? 0], v * 4);
-      const w = L.weights ? L.weights(x, y, z) : [[this.rig.byName[L.bone].index, 1]];
+      const w = L.weights ? L.weights(x, y, z, v) : [[this.rig.byName[L.bone].index, 1]];
       writeWeights(si, sw, v, w);
     }
     return { positions, normals, indices: new Uint32Array(g.index.array), color, surf, extra, si, sw };
   }
+}
+
+/**
+ * Vertices on a paint border (a trim, a cross, the edge of the lips) are pinned for the simplifier,
+ * because colour lives on the vertices: thin the triangles across a border and the border smears.
+ */
+function paintBorders(L) {
+  const m = L.mesh, n = m.positions.length / 3, painter = L.paintFrom || L.shape;
+  if (!painter.paintAt || L.paintFn) return null;
+  const ids = new Map(), key = new Int32Array(n);
+  const idOf = p => { if (!p) return 0; let i = ids.get(p); if (i == null) { i = ids.size + 1; ids.set(p, i); } return i; };
+  for (let v = 0; v < n; v++) {
+    const pa = painter.paintAt(m.positions[v * 3], m.positions[v * 3 + 1], m.positions[v * 3 + 2]);
+    key[v] = idOf(pa.paint) * 4096 + (pa.t > 0.25 ? idOf(pa.other) : 0);
+  }
+  if (ids.size < 2) return null;
+  const pin = new Uint8Array(n), I = m.indices, P = m.positions;
+  // each border vertex moves to where its nearest border-crossing edge actually crosses (found by
+  // bisection), then back onto the surface: the colour edge becomes a smooth line, not a staircase
+  const target = new Float32Array(n * 3), best = new Float32Array(n).fill(9);
+  const keyAt = (x, y, z) => { const pa = painter.paintAt(x, y, z); return idOf(pa.paint) * 4096 + (pa.t > 0.25 ? idOf(pa.other) : 0); };
+  const consider = (a, b) => {
+    if (key[a] === key[b]) return;
+    let lo = 0, hi = 1;
+    const ax = P[a * 3], ay = P[a * 3 + 1], az = P[a * 3 + 2], dx = P[b * 3] - ax, dy = P[b * 3 + 1] - ay, dz = P[b * 3 + 2] - az;
+    for (let i = 0; i < 5; i++) { const t = (lo + hi) / 2; if (keyAt(ax + dx * t, ay + dy * t, az + dz * t) === key[a]) lo = t; else hi = t; }
+    const t = (lo + hi) / 2, len = Math.hypot(dx, dy, dz);
+    // the vertex nearer the crossing takes it (staying a hair on its own side)
+    if (t < 0.5 && t * len < best[a]) { best[a] = t * len; const s = Math.max(0, t - 0.04); target.set([ax + dx * s, ay + dy * s, az + dz * s], a * 3); }
+    if (t >= 0.5 && (1 - t) * len < best[b]) { best[b] = (1 - t) * len; const s = Math.min(1, t + 0.04); target.set([ax + dx * s, ay + dy * s, az + dz * s], b * 3); }
+  };
+  for (let t = 0; t < I.length; t += 3) {
+    const a = I[t], b = I[t + 1], c = I[t + 2];
+    if (key[a] !== key[b] || key[b] !== key[c] || key[a] !== key[c]) { pin[a] = pin[b] = pin[c] = 1; consider(a, b); consider(b, c); consider(c, a); }
+  }
+  const f = L.field;
+  for (let v = 0; v < n; v++) {
+    if (best[v] > 8) continue;
+    let x = target[v * 3], y = target[v * 3 + 1], z = target[v * 3 + 2];
+    if (f) { const e = 0.0004, d0 = f.eval(x, y, z), gx = (f.eval(x + e, y, z) - f.eval(x - e, y, z)) / (2 * e), gy = (f.eval(x, y + e, z) - f.eval(x, y - e, z)) / (2 * e), gz = (f.eval(x, y, z + e) - f.eval(x, y, z - e)) / (2 * e), g2 = gx * gx + gy * gy + gz * gz; if (g2 > 1e-8 && Math.abs(d0) < 0.01) { x -= d0 * gx / g2; y -= d0 * gy / g2; z -= d0 * gz / g2; } }
+    P[v * 3] = x; P[v * 3 + 1] = y; P[v * 3 + 2] = z;
+  }
+  return pin;
 }
 
 function writeWeights(si, sw, v, w) {

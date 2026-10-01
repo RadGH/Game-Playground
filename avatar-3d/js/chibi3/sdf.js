@@ -68,21 +68,28 @@ function boxUnion(a, b) { return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Ma
 
 export function sphere(c, r, extra = {}) {
   const [cx, cy, cz] = c;
-  return { d: (x, y, z) => Math.hypot(x - cx, y - cy, z - cz) - r, box: boxAround(cx, cy, cz, r), ...extra };
+  return { d: (x, y, z) => { const dx = x - cx, dy = y - cy, dz = z - cz; return Math.sqrt(dx * dx + dy * dy + dz * dz) - r; }, box: boxAround(cx, cy, cz, r), ...extra };
 }
 
 /** Ellipsoid with radii [rx, ry, rz], optional Euler rotation `rot`. Approximate (good near the surface). */
 export function ellipsoid(c, radii, extra = {}) {
   const [cx, cy, cz] = c, [rx, ry, rz] = radii, m = extra.rot ? inverseRotation(...extra.rot) : null;
+  const ix = 1 / rx, iy = 1 / ry, iz = 1 / rz, ix2 = ix * ix, iy2 = iy * iy, iz2 = iz * iz, rmin = Math.min(rx, ry, rz);
   const big = Math.max(rx, ry, rz);
-  return {
-    d(x, y, z) {
-      const [px, py, pz] = local(m, x - cx, y - cy, z - cz);
-      const k0 = Math.hypot(px / rx, py / ry, pz / rz), k1 = Math.hypot(px / (rx * rx), py / (ry * ry), pz / (rz * rz));
-      return k1 < 1e-9 ? -Math.min(rx, ry, rz) : k0 * (k0 - 1) / k1;
-    },
-    box: boxAround(cx, cy, cz, big), ...extra,
+  // (no allocations here: this is the hottest function in the whole build)
+  const d = m ? (x, y, z) => {
+    const ox = x - cx, oy = y - cy, oz = z - cz;
+    const px = m[0] * ox + m[1] * oy + m[2] * oz, py = m[3] * ox + m[4] * oy + m[5] * oz, pz = m[6] * ox + m[7] * oy + m[8] * oz;
+    const ax = px * ix, ay = py * iy, az = pz * iz, bx = px * ix2, by = py * iy2, bz = pz * iz2;
+    const k0 = Math.sqrt(ax * ax + ay * ay + az * az), k1 = Math.sqrt(bx * bx + by * by + bz * bz);
+    return k1 < 1e-9 ? -rmin : k0 * (k0 - 1) / k1;
+  } : (x, y, z) => {
+    const px = x - cx, py = y - cy, pz = z - cz;
+    const ax = px * ix, ay = py * iy, az = pz * iz, bx = px * ix2, by = py * iy2, bz = pz * iz2;
+    const k0 = Math.sqrt(ax * ax + ay * ay + az * az), k1 = Math.sqrt(bx * bx + by * by + bz * bz);
+    return k1 < 1e-9 ? -rmin : k0 * (k0 - 1) / k1;
   };
+  return { d, box: boxAround(cx, cy, cz, big), ...extra };
 }
 
 /**
@@ -97,14 +104,15 @@ export function cone(a, b, ra, rb, extra = {}) {
   const L = Math.hypot(bx - ax, by - ay, bz - az);
   const bax = bx - ax, bay = by - ay, baz = bz - az;
   const l2 = bax * bax + bay * bay + baz * baz, rr = ra - rb, a2 = l2 - rr * rr, il2 = 1 / l2;
+  const srr = rr > 0 ? 1 : rr < 0 ? -1 : 0, krr = srr * rr * rr;
   const fn = (px, py, pz) => {
     // iq's round cone, in world space
     const yv = px * bax + py * bay + pz * baz, z = yv - l2;
     const xx = px * l2 - bax * yv, xy = py * l2 - bay * yv, xz = pz * l2 - baz * yv;
     const x2 = xx * xx + xy * xy + xz * xz, y2 = yv * yv * l2, z2 = z * z * l2;
-    const k = Math.sign(rr) * rr * rr * x2;
-    if (Math.sign(z) * a2 * z2 > k) return Math.sqrt(x2 + z2) * il2 - rb;
-    if (Math.sign(yv) * a2 * y2 < k) return Math.sqrt(x2 + y2) * il2 - ra;
+    const k = krr * x2;
+    if ((z > 0 ? 1 : z < 0 ? -1 : 0) * a2 * z2 > k) return Math.sqrt(x2 + z2) * il2 - rb;
+    if ((yv > 0 ? 1 : yv < 0 ? -1 : 0) * a2 * y2 < k) return Math.sqrt(x2 + y2) * il2 - ra;
     return (Math.sqrt(x2 * a2 * il2) + yv * rr) * il2 - ra;
   };
   const r = Math.max(ra, rb);
@@ -113,11 +121,11 @@ export function cone(a, b, ra, rb, extra = {}) {
     // squash the cross-section: scale the local x/z offsets about the axis, then correct the distance roughly
     const [sx, sz] = sq, kx = 1 / sx, kz = 1 / sz, corr = Math.min(sx, sz);
     d = (x, y, z) => {
-      const [lx, ly, lz] = local(m, x - ax, y - ay, z - az);
+      const ox = x - ax, oy = y - ay, oz = z - az;
+      const lx = m[0] * ox + m[1] * oy + m[2] * oz, ly = m[3] * ox + m[4] * oy + m[5] * oz, lz = m[6] * ox + m[7] * oy + m[8] * oz;
       // rebuild a world offset with the squashed local coordinates (local y stays on the axis)
       const qx = lx * kx, qz = lz * kz;
-      const wx = m[0] * qx + m[3] * ly + m[6] * qz, wy = m[1] * qx + m[4] * ly + m[7] * qz, wz = m[2] * qx + m[5] * ly + m[8] * qz;
-      return fn(wx, wy, wz) * corr;
+      return fn(m[0] * qx + m[3] * ly + m[6] * qz, m[1] * qx + m[4] * ly + m[7] * qz, m[2] * qx + m[5] * ly + m[8] * qz) * corr;
     };
   } else d = (x, y, z) => fn(x - ax, y - ay, z - az);
   const pad = r * (sq ? Math.max(1, ...sq) : 1);
@@ -131,9 +139,12 @@ export function roundBox(c, half, r = 0, extra = {}) {
   const big = Math.hypot(hx, hy, hz) + r;
   return {
     d(x, y, z) {
-      const [px, py, pz] = local(m, x - cx, y - cy, z - cz);
+      const ox = x - cx, oy = y - cy, oz = z - cz;
+      const px = m ? m[0] * ox + m[1] * oy + m[2] * oz : ox, py = m ? m[3] * ox + m[4] * oy + m[5] * oz : oy, pz = m ? m[6] * ox + m[7] * oy + m[8] * oz : oz;
       const qx = Math.abs(px) - hx + r, qy = Math.abs(py) - hy + r, qz = Math.abs(pz) - hz + r;
-      return Math.hypot(Math.max(qx, 0), Math.max(qy, 0), Math.max(qz, 0)) + Math.min(Math.max(qx, qy, qz), 0) - r;
+      const mx = qx > 0 ? qx : 0, my = qy > 0 ? qy : 0, mz = qz > 0 ? qz : 0;
+      const inner = Math.max(qx, qy, qz);
+      return Math.sqrt(mx * mx + my * my + mz * mz) + (inner < 0 ? inner : 0) - r;
     },
     box: boxAround(cx, cy, cz, big), ...extra,
   };
@@ -209,27 +220,30 @@ export class Shape {
    * that can reach it. eval() then looks at its brick's list only. Order is preserved, because a
    * carve only removes what was added before it.
    */
-  buildIndex(brick = 0.03) {
+  buildIndex(brick = 0.02) {
+    // only worth it for a shape with many primitives (the body); a garment has a handful, and a
+    // full-body index for each of thirty garments is gigabytes of tiny lists
+    if (this.prims.length < 16) { this.idx = null; this.unindexed = true; return this; }
     const b = this.bounds(0.08), n = [0, 1, 2].map(i => Math.max(1, Math.ceil((b[i + 3] - b[i]) / brick)));
     const listsFor = margin => {
-      const lists = Array.from({ length: n[0] * n[1] * n[2] }, () => []);
+      const lists = new Array(n[0] * n[1] * n[2]).fill(EMPTY);
       for (const p of this.prims) {
         if (p.op === 'paint') continue;
         const k = (p.k || 0) + margin;
         const r = p.box ? [0, 1, 2].map(i => [Math.max(0, Math.floor((p.box[i] - k - b[i]) / brick)), Math.min(n[i] - 1, Math.floor((p.box[i + 3] + k - b[i]) / brick))]) : [[0, n[0] - 1], [0, n[1] - 1], [0, n[2] - 1]];
-        for (let z = r[2][0]; z <= r[2][1]; z++) for (let y = r[1][0]; y <= r[1][1]; y++) for (let x = r[0][0]; x <= r[0][1]; x++) lists[x + y * n[0] + z * n[0] * n[1]].push(p);
+        for (let z = r[2][0]; z <= r[2][1]; z++) for (let y = r[1][0]; y <= r[1][1]; y++) for (let x = r[0][0]; x <= r[0][1]; x++) { const i = x + y * n[0] + z * n[0] * n[1]; if (lists[i] === EMPTY) lists[i] = []; lists[i].push(p); }
       }
       return lists;
     };
     const lists = listsFor(this.margin), wide = listsFor(this.wideMargin);
     // a second set of lists for paintAt: every primitive that can be NEAREST to a point up to ~5 cm
     // off the surface (garments sit that far out), plus paint and carve primitives
-    const plists = Array.from({ length: n[0] * n[1] * n[2] }, () => []);
+    const plists = new Array(n[0] * n[1] * n[2]).fill(EMPTY);
     for (const p of this.prims) {
       if (!p.paint) continue;
       const k = (p.op === 'paint' ? (p.band || 0.003) : 0.055) + (p.k || 0);
       const r = p.box ? [0, 1, 2].map(i => [Math.max(0, Math.floor((p.box[i] - k - b[i]) / brick)), Math.min(n[i] - 1, Math.floor((p.box[i + 3] + k - b[i]) / brick))]) : [[0, n[0] - 1], [0, n[1] - 1], [0, n[2] - 1]];
-      for (let z = r[2][0]; z <= r[2][1]; z++) for (let y = r[1][0]; y <= r[1][1]; y++) for (let x = r[0][0]; x <= r[0][1]; x++) plists[x + y * n[0] + z * n[0] * n[1]].push(p);
+      for (let z = r[2][0]; z <= r[2][1]; z++) for (let y = r[1][0]; y <= r[1][1]; y++) for (let x = r[0][0]; x <= r[0][1]; x++) { const i = x + y * n[0] + z * n[0] * n[1]; if (plists[i] === EMPTY) plists[i] = []; plists[i].push(p); }
     }
     this.idx = { b, n, brick, lists, wide, plists };
     return this;
@@ -251,10 +265,11 @@ export class Shape {
       if (!this.base && ps.length === 0) return far;
     }
     let d = base ? (base.evalWide ? base.evalWide(x, y, z) : base.eval(x, y, z)) + this.offset : 1e9;
-    const M = wide ? this.wideMargin : this.margin;
+    const M = wide ? this.wideMargin : this.margin, culled = !I;
     for (let i = 0; i < ps.length; i++) {
       const p = ps[i], b = p.box, k = p.k || 0, km = k + M;
-      if (b && (x < b[0] - km || y < b[1] - km || z < b[2] - km || x > b[3] + km || y > b[4] + km || z > b[5] + km)) {
+      // (an indexed brick already lists only primitives that can reach it, so no bound test there)
+      if (culled && b && (x < b[0] - km || y < b[1] - km || z < b[2] - km || x > b[3] + km || y > b[4] + km || z > b[5] + km)) {
         if (p.op === 'inter') d = 1e9;   // a bounded intersection outside its bound leaves nothing
         continue;
       }

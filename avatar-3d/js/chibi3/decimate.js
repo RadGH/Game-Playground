@@ -35,7 +35,7 @@ class Heap {
  *   field      { eval(x,y,z) } — re-project merged vertices onto it and take normals from it
  * Returns a new { positions, normals, indices }.
  */
-export function decimate(mesh, { maxError = 0.0004, minRatio = 0.12, field = null, pin = null } = {}) {
+export function decimate(mesh, { maxError = 0.0004, minRatio = 0.12, field = null, pin = null, endpointsOnly = false, freeBoundaries = false } = {}) {
   const P = Float64Array.from(mesh.positions), nV = P.length / 3, T = Int32Array.from(mesh.indices), nT = T.length / 3;
   if (nT < 64) return mesh;
   const Q = new Float64Array(nV * 10);
@@ -66,7 +66,7 @@ export function decimate(mesh, { maxError = 0.0004, minRatio = 0.12, field = nul
   const edgeCount = new Map();
   for (let t = 0; t < nT; t++) for (let k = 0; k < 3; k++) { const a = T[t * 3 + k], b = T[t * 3 + (k + 1) % 3], key = edgeKey(a, b); edgeCount.set(key, (edgeCount.get(key) || 0) + 1); }
   const pinned = pin ? Uint8Array.from(pin) : new Uint8Array(nV);
-  for (const [key, cnt] of edgeCount) if (cnt !== 2) { pinned[Math.floor(key / nV)] = 1; pinned[key % nV] = 1; }
+  if (!freeBoundaries) for (const [key, cnt] of edgeCount) if (cnt !== 2) { pinned[Math.floor(key / nV)] = 1; pinned[key % nV] = 1; }
   const errAt = (q, x, y, z) => {
     const o = q;
     return Q[o] * x * x + 2 * Q[o + 1] * x * y + 2 * Q[o + 2] * x * z + 2 * Q[o + 3] * x + Q[o + 4] * y * y + 2 * Q[o + 5] * y * z + 2 * Q[o + 6] * y + Q[o + 7] * z * z + 2 * Q[o + 8] * z + Q[o + 9];
@@ -76,7 +76,10 @@ export function decimate(mesh, { maxError = 0.0004, minRatio = 0.12, field = nul
     for (let i = 0; i < 10; i++) sumQ[i] = Q[a * 10 + i] + Q[b * 10 + i];
     const save = Q.subarray(0, 0); void save;
     let best = Infinity, bx = 0, by = 0, bz = 0;
+    // endpointsOnly: the merged vertex IS one of the two (so every other attribute it carries — colour,
+    // skin weights, morphs — stays exact; used to derive the far levels of detail)
     const cand = pinned[a] ? [[P[a * 3], P[a * 3 + 1], P[a * 3 + 2]]] : pinned[b] ? [[P[b * 3], P[b * 3 + 1], P[b * 3 + 2]]]
+      : endpointsOnly ? [[P[a * 3], P[a * 3 + 1], P[a * 3 + 2]], [P[b * 3], P[b * 3 + 1], P[b * 3 + 2]]]
       : [[P[a * 3], P[a * 3 + 1], P[a * 3 + 2]], [P[b * 3], P[b * 3 + 1], P[b * 3 + 2]], [(P[a * 3] + P[b * 3]) / 2, (P[a * 3 + 1] + P[b * 3 + 1]) / 2, (P[a * 3 + 2] + P[b * 3 + 2]) / 2]];
     for (const [x, y, z] of cand) {
       const e = sumQ[0] * x * x + 2 * sumQ[1] * x * y + 2 * sumQ[2] * x * z + 2 * sumQ[3] * x + sumQ[4] * y * y + 2 * sumQ[5] * y * z + 2 * sumQ[6] * y + sumQ[7] * z * z + 2 * sumQ[8] * z + sumQ[9];
@@ -103,6 +106,7 @@ export function decimate(mesh, { maxError = 0.0004, minRatio = 0.12, field = nul
   let alive = nT;
   const minTris = Math.ceil(nT * minRatio);
   const before = [0, 0, 0], after = [0, 0, 0];
+  const mark = new Uint32Array(nV), mark2 = new Uint32Array(nV); let stamp = 0, stamp2 = 0;
   while (heap.size && alive > minTris) {
     const [c, id] = heap.pop();
     if (c > limit) break;
@@ -112,6 +116,8 @@ export function decimate(mesh, { maxError = 0.0004, minRatio = 0.12, field = nul
     const fresh = cost(a, b, tmp) / (area[a] + area[b] + 1e-12);
     if (Math.abs(fresh - c) > 1e-12 * (1 + c)) { heap.push(fresh, id, 0); continue; }
     if (pinned[b] && !pinned[a]) { const s = a; a = b; b = s; }
+    // with endpoints only, keep whichever vertex the cost picked
+    if (endpointsOnly && !pinned[a] && tmp[0] === P[b * 3] && tmp[1] === P[b * 3 + 1] && tmp[2] === P[b * 3 + 2]) { const s = a; a = b; b = s; }
     let tx = tmp[0], ty = tmp[1], tz = tmp[2];
     if (field && !pinned[a] && !pinned[b]) {
       // back onto the true surface (one Newton step)
@@ -121,14 +127,15 @@ export function decimate(mesh, { maxError = 0.0004, minRatio = 0.12, field = nul
       if (g2 > 1e-8 && Math.abs(f) < maxError * 4) { tx -= f * gx / g2; ty -= f * gy / g2; tz -= f * gz / g2; }
     }
     // the link condition: a and b may share exactly two neighbours (else the surface pinches)
-    const nbA = new Set(), shared = [];
-    for (const t of vt[a]) if (!triDead[t]) for (let k = 0; k < 3; k++) nbA.add(T[t * 3 + k]);
-    let sharedCount = 0;
-    for (const t of vt[b]) if (!triDead[t]) for (let k = 0; k < 3; k++) { const w = T[t * 3 + k]; if (w !== a && w !== b && nbA.has(w) && !shared.includes(w)) { shared.push(w); sharedCount++; } }
+    stamp++;
+    for (const t of vt[a]) if (!triDead[t]) for (let k = 0; k < 3; k++) mark[T[t * 3 + k]] = stamp;
+    let sharedCount = 0; stamp2++;
+    for (const t of vt[b]) if (!triDead[t]) for (let k = 0; k < 3; k++) { const w = T[t * 3 + k]; if (w !== a && w !== b && mark[w] === stamp && mark2[w] !== stamp2) { mark2[w] = stamp2; sharedCount++; } }
     if (sharedCount !== 2) continue;
     // no triangle may flip
     let flips = false;
-    for (const v of [a, b]) {
+    for (let vi = 0; vi < 2; vi++) {
+      const v = vi ? b : a;
       for (const t of vt[v]) {
         if (triDead[t]) continue;
         const i0 = T[t * 3], i1 = T[t * 3 + 1], i2 = T[t * 3 + 2];
@@ -158,8 +165,9 @@ export function decimate(mesh, { maxError = 0.0004, minRatio = 0.12, field = nul
     vDead[b] = 1; vVer[a]++;
     vt[a] = vt[a].filter(t => !triDead[t]);
     // new costs for every edge around a
-    const nb = new Set();
-    for (const t of vt[a]) for (let k = 0; k < 3; k++) { const w = T[t * 3 + k]; if (w !== a) nb.add(w); }
+    stamp++;
+    const nb = [];
+    for (const t of vt[a]) for (let k = 0; k < 3; k++) { const w = T[t * 3 + k]; if (w !== a && mark[w] !== stamp) { mark[w] = stamp; nb.push(w); } }
     for (const w of nb) {
       if (pinned[a] && pinned[w]) continue;
       const nid = edgesA.length; edgesA.push(a); edgesB.push(w); ver.push(0);
@@ -188,5 +196,5 @@ export function decimate(mesh, { maxError = 0.0004, minRatio = 0.12, field = nul
       normals[r * 3] = mesh.normals[v * 3]; normals[r * 3 + 1] = mesh.normals[v * 3 + 1]; normals[r * 3 + 2] = mesh.normals[v * 3 + 2];
     }
   }
-  return { ...mesh, positions, normals, indices: new Uint32Array(outIdx) };
+  return { ...mesh, positions, normals, indices: new Uint32Array(outIdx), remap };
 }

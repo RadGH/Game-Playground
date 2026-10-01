@@ -62,7 +62,7 @@ export function faulds(ctx, color, { count = 3 } = {}) {
  * Pauldron: a domed shoulder cap and lames stepping down the upper arm, each tucked under the one
  * above. `spikes` adds a row of spikes (the orc's war pauldron); `haute` the raised neck guard.
  */
-export function pauldron(ctx, side, color, { lames = 3, size = 1, spikes = 0, haute = true } = {}) {
+export function pauldron(ctx, side, color, { lames = 2, size = 1, spikes = 0, haute = false } = {}) {
   const L = ctx.L, S = L.S, A = L.arm[side], s = A.sign;
   const top = addv(A.sh, [s * 0.01 * S, 0.055 * S, 0]);
   const dome = 0.135 * S * size, step = 0.045 * S * size;
@@ -73,7 +73,7 @@ export function pauldron(ctx, side, color, { lames = 3, size = 1, spikes = 0, ha
     for (let i = 0; i < spikes; i++) {
       const t = (i - (spikes - 1) / 2) * 0.9;
       const base = addv(top, [s * 0.02 * S, 0.012 * S, t * 0.05 * S]);
-      sp.add(Object.assign(cone(base, addv(base, [s * 0.045 * S, 0.085 * S, t * 0.02 * S]), 0.017 * S, 0.0015 * S), { k: 0, paint: paint('darkMetal', shadeHex(color, -0.25)) }));
+      sp.add(Object.assign(cone(base, addv(base, [s * 0.06 * S, 0.12 * S, t * 0.03 * S]), 0.022 * S, 0.0015 * S), { k: 0, paint: paint('metal', shadeHex(color, 0.15)) }));
     }
     ctx.asm.addField({ name: 'spikes', shape: sp, owner: ctx.body.shape, step: 0.0045, covers: false, hideable: false });
   }
@@ -83,7 +83,7 @@ export function pauldron(ctx, side, color, { lames = 3, size = 1, spikes = 0, ha
     const u0 = i === 0 ? -1 : (i - 1) * step + 0.02 * S, u1 = i === 0 ? 0.025 * S : u0 + step * 1.25;
     const along = (x, y, z) => (x - top[0]) * A.up[0] + (y - top[1]) * A.up[1] + (z - top[2]) * A.up[2];
     const region = (x, y, z) => Math.max(zone(x, y, z), u0 - along(x, y, z), along(x, y, z) - u1, (s * x < 0.07 * S) ? 1 : -1);
-    const off = (0.036 - i * 0.004) * S * size;
+    const off = (0.034 - i * 0.005) * S * size;
     let extra = null;
     if (i === 0 && haute) extra = (x, y, z) => 0.012 * S * Math.exp(-(((s * x - 0.12 * S) / (0.008 * S)) ** 2)) * smoothstep(L.shoulder - 0.01 * S, L.shoulder + 0.05 * S, y);
     const sh = garmentShape('pauldron' + i, ctx, off, region, { paintBase: paint('metal', color), folds: rimmed(region, 0.0035 * S, 0.006 * S, extra), prims: i === 0 ? prims : [] });

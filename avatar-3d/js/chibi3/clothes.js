@@ -154,7 +154,7 @@ export function furRing(ctx, name, at, dir, radius, color, { length = 0.06 } = {
   const clumps = (x, y, z) => 0.008 * S * (noise3(x * 55, y * 55, z * 55) * 0.6 + noise3(x * 140, y * 140, z * 140) * 0.4) + 0.004 * S;
   const sh = garmentShape(name, ctx, 0.016 * S, region, { paintBase: paint('fur', color), folds: clumps });
   const lo = [0, 1, 2].map(i => Math.min(at[i], at[i] + dir[i] * length) - radius - 0.05), hi = [0, 1, 2].map(i => Math.max(at[i], at[i] + dir[i] * length) + radius + 0.05);
-  addGarment(ctx, name, sh, [...lo, ...hi], { step: 0.006 });
+  addGarment(ctx, name, sh, [...lo, ...hi], { step: 0.007, simplify: 0.0014 });
 }
 
 /** A fur mantle over the shoulders and upper back (a pelt), optional on one shoulder only. */
@@ -163,9 +163,10 @@ export function furMantle(ctx, color, { sides = ['L', 'R'] } = {}) {
   const zones = sides.map(s => { const A = L.arm[s]; return capsuleDist(addv(A.sh, [-A.sign * 0.06 * S, 0.06 * S, -0.02 * S]), addv(A.sh, A.up, 0.06 * S), 0.12 * S); });
   const back = (x, y, z) => Math.max(L.chest + 0.04 * S - y, z + 0.02 * S, Math.abs(x) - 0.2 * S, y - (L.neck + 0.01 * S));
   const region = (x, y, z) => { let d = back(x, y, z); for (const zf of zones) d = Math.min(d, zf(x, y, z)); return Math.max(d, L.chest - 0.02 * S - y, y - (L.neck + 0.05 * S)); };
-  const clumps = (x, y, z) => 0.012 * S * (noise3(x * 30, y * 30, z * 30) * 0.65 + noise3(x * 90, y * 90, z * 90) * 0.35) + 0.006 * S;
+  // fur: locks hanging down (noise stretched along y), with a finer layer of strands on top
+  const clumps = (x, y, z) => 0.012 * S * (noise3(x * 34, y * 8, z * 34) * 0.6 + noise3(x * 110, y * 22, z * 110) * 0.4) + 0.008 * S;
   const sh = garmentShape('mantle', ctx, 0.03 * S, region, { paintBase: paint('fur', color), folds: clumps });
-  addGarment(ctx, 'mantle', sh, [-L.shX - 0.2 * S, L.chest - 0.06 * S, -0.28 * S, L.shX + 0.2 * S, L.neck + 0.16 * S, 0.24 * S], { step: 0.0075 });
+  addGarment(ctx, 'mantle', sh, [-L.shX - 0.2 * S, L.chest - 0.06 * S, -0.28 * S, L.shX + 0.2 * S, L.neck + 0.16 * S, 0.24 * S], { step: 0.009, simplify: 0.0016 });
 }
 
 /**
@@ -178,14 +179,15 @@ export function harness(ctx, color, { studs = '#9aa0a8' } = {}) {
   // over the left shoulder, across the chest to the right hip, and the same across the back
   const shL = addv(L.arm.L.sh, [-0.05 * S, 0.05 * S, 0]);
   for (const zs of [1, -1]) paths.push([shL, [0.02 * S, L.chest + 0.06 * S, zs * 0.16 * S], [-0.15 * S, L.waist - 0.02 * S, zs * 0.08 * S]]);
-  const caps = paths.flatMap(p => p.slice(1).map((b, i) => capsuleDist(p[i], b, 0.024 * S)));
+  // lay every path point ON the skin (a muscular orc's chest is centimetres further out than a
+  // human's), then sample the strap densely so it follows the curve between points too
+  const onSkin = q => { const f = ctx.bodyFast || ctx.body.shape; let p = q.slice(); for (let it = 0; it < 4; it++) { const e = 0.003, d0 = f.eval(...p), g = [f.eval(p[0] + e, p[1], p[2]) - f.eval(p[0] - e, p[1], p[2]), f.eval(p[0], p[1] + e, p[2]) - f.eval(p[0], p[1] - e, p[2]), f.eval(p[0], p[1], p[2] + e) - f.eval(p[0], p[1], p[2] - e)], l = Math.hypot(...g) || 1; p = p.map((v, i) => v - g[i] / l * d0); } return p; };
+  for (const p of paths) { const dense = []; for (let i = 0; i < p.length - 1; i++) for (let k = 0; k < 6; k++) dense.push(onSkin(p[i].map((v, j) => v + (p[i + 1][j] - v) * k / 6))); dense.push(onSkin(p[p.length - 1])); p.length = 0; p.push(...dense); }
+  const caps = paths.flatMap(p => p.slice(1).map((b, i) => capsuleDist(p[i], b, 0.022 * S)));
   const region = minOf(...caps);
   const studPaint = paint('metal', studs);
   const prims = [];
-  for (const p of paths) for (let i = 0; i < p.length - 1; i++) for (let k = 1; k < 4; k++) {
-    const q = p[i].map((v, j) => v + (p[i + 1][j] - v) * k / 4);
-    prims.push({ ...sphere(q, 0.02 * S), op: 'paint', band: 0.002, paint: studPaint });
-  }
+  for (const p of paths) for (let i = 2; i < p.length - 1; i += 3) prims.push({ ...sphere(p[i], 0.02 * S), op: 'paint', band: 0.002, paint: studPaint });
   const studBumps = (x, y, z) => { let d = 0; for (const pr of prims) { const v = pr.d(x, y, z); if (v < 0) d = Math.max(d, 0.004 * S * Math.min(1, -v / (0.006 * S))); } return d * 0.5; };
   const sh = garmentShape('harness', ctx, 0.0055 * S, region, { paintBase: paint('leather', color), prims: prims.map(p => ({ ...p, d: (x, y, z) => p.d(x, y, z) + 0.012 * S })), folds: studBumps });
   addGarment(ctx, 'harness', sh, [-0.32 * S, L.waist - 0.08 * S, -0.3 * S, 0.32 * S, L.neck + 0.12 * S, 0.3 * S], { step: 0.0075 });
@@ -230,7 +232,7 @@ export function kilt(ctx, color, { hemY = null, fur = null, kind = 'leather' } =
     fz.add({ op: 'sub', k: 0.01 * S, box: null, d: (x, y, z) => -(Math.hypot(x / (0.19 * S * W), z / (0.15 * S)) - 1) });
     fz.add({ op: 'sub', k: 0, box: null, d: (x, y, z) => (y < L.hip - 0.02 * S && Math.abs(z) < 0.035 * S) ? -1 : 1 });
     fz.displace = (x, y, z) => 0.012 * S * (noise3(x * 45, y * 45, z * 45) * 0.6 + noise3(x * 120, y * 120, z * 120) * 0.4);
-    ctx.asm.addField({ name: 'kiltfur', shape: fz, owner: ctx.body.shape, step: 0.007, covers: true, hideable: false,
+    ctx.asm.addField({ name: 'kiltfur', shape: fz, owner: ctx.body.shape, step: 0.008, simplify: 0.0014, covers: true, hideable: false,
       bounds: [-0.4 * S * W, hem - 0.06, -0.36 * S, 0.4 * S * W, hem + 0.08 * S, 0.36 * S], weights: skirtWeights(ctx.R, ctx, { from: L.pelvis, to: L.knee }) });
   }
 }

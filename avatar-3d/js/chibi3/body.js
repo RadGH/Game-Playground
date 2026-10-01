@@ -48,7 +48,8 @@ export function buildBody(avatar, R, colors) {
   add(ellipsoid([0, chestY + 0.06 * S, 0.004 * S], [0.148 * W * S * mus(0.98, 1.08), 0.175 * S, 0.112 * S]), 'chest', 0.05 * S);
   add(ellipsoid([0, chestY + 0.05 * S, -0.045 * S], [0.172 * W * S * mus(0.9, 1.1), 0.15 * S, 0.08 * S]), 'chest', 0.04 * S);
   // pectorals: flatter and higher on a lean body, full slabs on a muscular one
-  for (const s of [1, -1]) add(ellipsoid([s * 0.07 * W * S, chestY + 0.105 * S, 0.068 * S + m * 0.014 * S], [0.08 * S * mus(0.85, 1.1), 0.058 * S * mus(0.8, 1.1), 0.042 * S * mus(0.6, 1.15)], { rot: [0.15, 0, s * 0.22] }), 'chest', 0.03 * S);
+  // (wide and flat, high on the ribcage: rounder and lower reads as a bust, not a chest)
+  for (const s of [1, -1]) add(ellipsoid([s * 0.074 * W * S, chestY + 0.118 * S, 0.064 * S + m * 0.01 * S], [0.088 * S * mus(0.88, 1.08), 0.052 * S * mus(0.85, 1.05), 0.034 * S * mus(0.6, 1.0)], { rot: [0.3, 0, s * 0.18] }), 'chest', 0.026 * S);
   // abdominal wall with a soft six-pack on muscular bodies (a paint-free displacement below)
   for (const s of [1, -1]) {
     add(cone([s * 0.04 * S, neckY + 0.015 * S, -0.04 * S], [s * shX * 0.85, shY + 0.008 * S, -0.035 * S], 0.034 * S * mus(0.7, 1.25), 0.028 * S), 'chest', 0.035 * S);   // trapezius

@@ -27,12 +27,13 @@ export function capsuleDist(a, b, r) {
   const d = sub(b, a), l2 = dot(d, d);
   return (x, y, z) => {
     const px = x - a[0], py = y - a[1], pz = z - a[2];
-    const t = Math.max(0, Math.min(1, (px * d[0] + py * d[1] + pz * d[2]) / l2));
-    return Math.hypot(px - d[0] * t, py - d[1] * t, pz - d[2] * t) - r;
+    let t = (px * d[0] + py * d[1] + pz * d[2]) / l2; t = t < 0 ? 0 : t > 1 ? 1 : t;
+    const qx = px - d[0] * t, qy = py - d[1] * t, qz = pz - d[2] * t;
+    return Math.sqrt(qx * qx + qy * qy + qz * qz) - r;
   };
 }
 /** Signed distance past a plane through `p` facing `n` (positive on the side n points to). */
-export const planeDist = (p, n) => { const u = unit(n); return (x, y, z) => (x - p[0]) * u[0] + (y - p[1]) * u[1] + (z - p[2]) * u[2]; };
+export const planeDist = (p, n) => { const u = unit(n), px = p[0], py = p[1], pz = p[2], ux = u[0], uy = u[1], uz = u[2]; return (x, y, z) => (x - px) * ux + (y - py) * uy + (z - pz) * uz; };
 export const minOf = (...fs) => (x, y, z) => { let d = 1e9; for (const f of fs) { const v = f(x, y, z); if (v < d) d = v; } return d; };
 export const maxOf = (...fs) => (x, y, z) => { let d = -1e9; for (const f of fs) { const v = f(x, y, z); if (v > d) d = v; } return d; };
 
@@ -146,7 +147,7 @@ export function skirtWeights(R, ctx, { from, to }) {
 
 /** Add a garment layer with the usual options. */
 export function addGarment(ctx, name, shape, bounds, opts = {}) {
-  ctx.asm.addField({ name, shape, owner: ctx.body.shape, step: opts.step ?? 0.011, bounds, covers: opts.covers ?? true, hideable: opts.hideable ?? true,
+  ctx.asm.addField({ name, shape, owner: ctx.body.shape, step: opts.step ?? 0.011, bounds, covers: opts.covers ?? true, hideable: opts.hideable ?? true, simplify: opts.simplify,
     hideDepth: opts.hideDepth, weights: opts.weights, aoStrength: opts.ao ?? 1, minLod: opts.minLod, maxLod: opts.maxLod });
 }
 

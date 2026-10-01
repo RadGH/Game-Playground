@@ -53,14 +53,16 @@ export function buildHair(ctx, { covered = 0, brimY = null } = {}) {
     const stubble = paint('skin', mixHex(a.body?.skin || '#e8b994', color, 0.45), { detail: 0.6, tile: 4 });
     body.shape.add({ op: 'paint', k: 0, box: null, band: 0.003, paint: stubble, d: (x, y, z) => { const [hx, hy, hzz] = toHead(x, y, z); return (hairlineAt(Math.atan2(hx, hzz)) - hy) * hs; } });
   }
-  const sh = new Shape([], { name: 'hair', base: body.shape, offset: -0.0015 * S, basePaint: paint('hair', color) });
+  const sh = new Shape([], { name: 'hair', base: body.shape, offset: 0.0012 * S, basePaint: paint('hair', color) });
   // thickness grows from nothing at the hairline to `thick` (head units) a little above it
   const grooveN = style === 'slicked' ? 26 : 34;
   sh.displace = (x, y, z) => {
     const [hx, hy, hzz] = toHead(x, y, z), th = Math.atan2(hx, hzz);
     const above = hy - hairlineAt(th);
     if (above < -0.02) return 0;
-    let t = thick * smoothstep(-0.005, 0.07, above);
+    // (+0.0027 head units lifts it clear of the skin; at the hairline it is still under the skin, so
+    // the cut edge of the hair mask is hidden and the hairline is a smooth line, not a stair)
+    let t = (thick + 0.011) * smoothstep(-0.01, 0.07, above);
     // the crown sits higher: more volume on top than at the sides
     t *= 0.75 + 0.45 * smoothstep(0.35, 0.75, hy);
     if (style === 'side_part') t += 0.025 * smoothstep(0.45, 0.7, hy) * smoothstep(-0.2, 0.2, hx) * smoothstep(-0.2, 0.3, hzz);
@@ -95,11 +97,12 @@ export function buildHair(ctx, { covered = 0, brimY = null } = {}) {
   }
   if (style === 'mohawk') {
     // a crest from the brow to the nape, tallest over the crown
-    for (let i = 0; i < 6; i++) {
-      const t = i / 5, ang = 0.25 + t * 2.4;
-      const p = H(0, 0.43 + Math.cos(ang) * 0.42, -0.08 + Math.sin(ang) * 0.42);
-      const h = (0.16 + 0.1 * Math.sin(t * Math.PI)) * hs;
-      vol.push(Object.assign(ellipsoid(p, [0.035 * hs, h, 0.1 * hs], { rot: [-(ang - Math.PI / 2), 0, 0] }), { k: 0.03 * hs, paint: hairPaint }));
+    for (let i = 0; i < 7; i++) {
+      const t = i / 6, ang = -0.45 + t * 2.5;     // 0 = straight up; positive leans back
+      const h = (0.1 + 0.09 * Math.sin(t * Math.PI)) * (1 - t * 0.35);
+      const r = 0.4 + h * 0.6;
+      const p = H(0, 0.43 + Math.cos(ang) * r, -0.08 - Math.sin(ang) * r);
+      vol.push(Object.assign(ellipsoid(p, [0.04 * hs, h * hs, 0.085 * hs], { rot: [-ang, 0, 0] }), { k: 0.035 * hs, paint: hairPaint }));
     }
   }
   const crestMask = style === 'mohawk' ? (x, y, z) => Math.max(hairMask(x, y, z), Math.abs(x) - 0.05 * hs) : hairMask;
@@ -157,11 +160,11 @@ export function buildBeard(ctx) {
   }
   if (style === 'full') vol.push(Object.assign(ellipsoid(H(0, -0.16, 0.24), [0.15 * hs, 0.1 * hs, 0.1 * hs]), { k: 0.05 * hs, paint: hairPaint }));
   if (style === 'goatee') vol.push(Object.assign(cone(H(0, -0.12, 0.26), H(0, -0.3, 0.27), 0.05 * hs, 0.02 * hs), { k: 0.03 * hs, paint: hairPaint }));
-  const sh = new Shape([], { name: 'beard', base: body.shape, offset: -0.0015 * S, basePaint: hairPaint });
+  const sh = new Shape([], { name: 'beard', base: body.shape, offset: 0.0012 * S, basePaint: hairPaint });
   sh.displace = (x, y, z) => {
     const [hx, hy, hzz] = toHead(x, y, z), r = beardRegion(hx, hy, hzz, my, mz, style);
     if (r > 0.02) return 0;
-    const t = thick * smoothstep(0.01, -0.04, r);
+    const t = (thick + 0.011) * smoothstep(0.015, -0.04, r);
     // strands run down the beard
     const g = Math.abs(Math.sin(hx * 70 + noise3(hx * 5, hy * 5, hzz * 5) * 2));
     return (t - 0.005 * (1 - g)) * hs;

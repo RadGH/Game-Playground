@@ -17,6 +17,8 @@ import { buildBody } from './body.js';
 import { skinPaints, paint, shadeHex, mixHex } from './paint.js';
 import { Shape, cone, sphere, smoothstep } from './sdf.js';
 import { Grid } from './mesher.js';
+import { decimate } from './decimate.js';
+import { bakeTemplate, readBaked, cacheGet, cachePut, hashKey, BAKE_VERSION } from './bake.js';
 import { jointWeights } from './skin.js';
 import { characterMaterial, eyeMaterial } from './material.js';
 import { buildOutfit } from './outfit.js';
@@ -81,7 +83,7 @@ function buildTemplate(a, lod) {
     }
     for (const { w, d } of wrists) {
       const reach = 0.24 * R.P.S * R.P.hand, c = [w[0] + d[0] * reach * 0.42, w[1] + d[1] * reach * 0.42, w[2] + d[2] * reach * 0.42];
-      asm.addField({ name: 'hand', shape: body.shape, step: 0.0046, inflate: 0.0006, hideable: true, weights: skinWeights, simplify: 0.00025,
+      asm.addField({ name: 'hand', shape: body.shape, step: 0.0046, inflate: 0.0006, hideable: true, weights: skinWeights, simplify: 0.0004,
         bounds: [c[0] - reach * 0.55, c[1] - reach * 0.62, c[2] - reach * 0.45, c[0] + reach * 0.55, c[1] + reach * 0.62, c[2] + reach * 0.45],
         keep: (x, y, z) => (x - w[0]) * d[0] + (y - w[1]) * d[1] + (z - w[2]) * d[2] > -0.006 * R.P.S });
     }
@@ -127,7 +129,7 @@ function buildTemplate(a, lod) {
   // ---- eyeballs: their own small mesh and material (an iris needs a real texture)
   let eyes = null;
   if (lod < 2) eyes = buildEyes(R, body, a);
-  return { R, geometry, eyes, outfit, body: { mouth: body.mouth, eyes: body.eyes, F: body.F }, ms: Math.round(performance.now() - t0), timings: asm.timings, tris: asm.tris };
+  return { R, a, lod, geometry, eyes, outfit, body: { mouth: body.mouth, eyes: body.eyes, F: body.F }, ms: Math.round(performance.now() - t0), timings: asm.timings, tris: asm.tris };
 }
 
 /** Jaw weights: the lower lip, chin and jaw follow the jaw bone; the split is sharp at the lips. */
@@ -204,16 +206,105 @@ export function unionMask(prims, op = 'inter') {
 const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
 const norm3 = a => { const l = Math.hypot(...a) || 1; return a.map(v => v / l); };
 
+/**
+ * The far levels of detail are NOT built again: they are the hero mesh simplified further, keeping
+ * whole vertices (so colours, skin weights and morphs carry over exactly). A crowd LOD costs a
+ * fraction of a second instead of a second full build.
+ */
+function deriveLod(hero, lod) {
+  const g = hero.geometry, pos = g.attributes.position.array, nrm = g.attributes.normal.array;
+  const t0 = performance.now();
+  // colour borders stay pinned at LOD 1 so trims and heraldry keep their edges
+  let pin = null;
+  if (lod === 1) {
+    const col = g.attributes.color.array, I = g.index.array, n = pos.length / 3;
+    pin = new Uint8Array(n);
+    const diff = (a, b) => Math.abs(col[a * 3] - col[b * 3]) + Math.abs(col[a * 3 + 1] - col[b * 3 + 1]) + Math.abs(col[a * 3 + 2] - col[b * 3 + 2]) > 0.18;
+    for (let t = 0; t < I.length; t += 3) { const a = I[t], b = I[t + 1], c = I[t + 2]; if (diff(a, b) || diff(b, c) || diff(a, c)) pin[a] = pin[b] = pin[c] = 1; }
+  }
+  const d = decimate({ positions: pos, normals: nrm, indices: g.index.array }, { maxError: lod === 1 ? 0.0022 : 0.012, minRatio: lod === 1 ? 0.22 : 0.04, pin, endpointsOnly: true, freeBoundaries: lod === 2 });
+  const geometry = new THREE.BufferGeometry(), remap = d.remap, nOut = d.positions.length / 3;
+  const back = new Int32Array(nOut); for (let v = 0; v < remap.length; v++) if (remap[v] >= 0) back[remap[v]] = v;
+  for (const [name, attr] of Object.entries(g.attributes)) {
+    const k = attr.itemSize, src = attr.array, out = new src.constructor(nOut * k);
+    for (let i = 0; i < nOut; i++) for (let c = 0; c < k; c++) out[i * k + c] = src[back[i] * k + c];
+    geometry.setAttribute(name, new THREE.BufferAttribute(out, k, attr.normalized));
+  }
+  if (lod === 1 && g.morphAttributes.position) {
+    geometry.morphAttributes.position = g.morphAttributes.position.map(m => { const out = new Float32Array(nOut * 3); for (let i = 0; i < nOut; i++) for (let c = 0; c < 3; c++) out[i * 3 + c] = m.array[back[i] * 3 + c]; return new THREE.BufferAttribute(out, 3); });
+    geometry.morphTargetsRelative = true;
+  }
+  geometry.setIndex(new THREE.BufferAttribute(d.indices, 1));
+  geometry.computeBoundingSphere();
+  return { ...hero, geometry, eyes: lod === 1 ? hero.eyes : null, ms: Math.round(performance.now() - t0), derived: true };
+}
+
+const DIRECT_LOD = new Set(globalThis.CHIBI3_DIRECT_LOD || []);
+/** A template from a baked file (bake.js): the geometry is read, the light parts rebuilt. */
+function fromBaked(buf, a, lod) {
+  const { geometry, header } = readBaked(buf);
+  const R = layoutRig(a);
+  const eyes = lod < 2 && header.body?.eyes ? buildEyes(R, header.body, a) : null;
+  return { R, a, lod, geometry, eyes, outfit: { hold: header.hold, families: header.families }, body: header.body, ms: 0, baked: true, timings: header.timings, tris: header.tris };
+}
+const keyOf = (a, lod) => JSON.stringify(a) + '|' + lod;
+const cacheKey = (a, lod) => 'v' + BAKE_VERSION + ':' + hashKey(keyOf(a, lod));
+
+/**
+ * Register a baked look so creating that avatar is instant. `files` is [lod0, lod1, lod2] as
+ * ArrayBuffers or URLs (any may be missing; missing levels are derived).
+ */
+export async function registerBaked(avatar, files) {
+  const a = normalizeForChibi3(avatar);
+  for (let lod = 0; lod < files.length; lod++) {
+    let f = files[lod]; if (!f) continue;
+    if (typeof f === 'string') {
+      const r = await fetch(f); if (!r.ok) continue;
+      f = f.endsWith('.gz') ? await new Response(r.body.pipeThrough(new DecompressionStream('gzip'))).arrayBuffer() : await r.arrayBuffer();
+    }
+    const key = keyOf(a, lod);
+    if (!templates.has(key)) { const t = fromBaked(f, a, lod); t.refs = 0; t.key = key; templates.set(key, t); }
+  }
+}
+
+/** Bake a look (all three levels) to ArrayBuffers — the tool and the builder's "export" use it. */
+export function bakeLook(avatar) {
+  const a = normalizeForChibi3(avatar);
+  return [0, 1, 2].map(lod => { const t = acquire(a, lod); const buf = bakeTemplate(t); release(t); return buf; });
+}
+
+/**
+ * Make sure the templates for `levels` exist: memory, then the browser cache, then a live build
+ * (whose result is stored in the cache for next time). Live builds are what take seconds.
+ */
+async function ensure(a, levels, useCache) {
+  for (const lod of levels) {
+    const key = keyOf(a, lod);
+    if (templates.has(key)) continue;
+    if (useCache) {
+      const buf = await cacheGet(cacheKey(a, lod));
+      if (buf) { try { const t = fromBaked(buf, a, lod); t.refs = 0; t.key = key; t.cached = true; templates.set(key, t); continue; } catch { /* stale: rebuild */ } }
+    }
+    const t = acquire(a, lod); t.refs--;
+    if (useCache) cachePut(cacheKey(a, lod), bakeTemplate(t));
+  }
+}
+
 function acquire(a, lod) {
-  const key = JSON.stringify(a) + '|' + lod;
+  const key = keyOf(a, lod);
   let t = templates.get(key);
-  if (!t) { t = buildTemplate(a, lod); t.refs = 0; t.key = key; templates.set(key, t); }
+  if (!t) {
+    const direct = lod === 0 || DIRECT_LOD.has(lod);
+    t = direct ? buildTemplate(a, lod) : deriveLod(acquire(a, 0), lod);
+    t.refs = 0; t.key = key; templates.set(key, t);
+    if (!direct) templates.get(JSON.stringify(a) + '|0').refs--;   // the derived level does not hold the hero
+  }
   t.refs++;
   return t;
 }
 function release(t) {
   if (--t.refs > 0) return;
-  t.geometry.dispose(); t.eyes?.geometry.dispose();
+  t.geometry.dispose(); if (!t.derived) t.eyes?.geometry.dispose();
   templates.delete(t.key);
 }
 
@@ -247,8 +338,10 @@ export async function createChibi3Character(avatar, opts = {}) {
   const group = new THREE.Group(); group.userData.character = true; group.name = 'chibi3';
   let state = null, disposed = false;
   const levels = opts.lod === 'auto' || opts.lod == null ? [0, 1, 2] : [opts.lod];
-  function install(av) {
+  async function install(av) {
     const a = normalizeForChibi3(av);
+    await ensure(a, levels, opts.cache !== false && typeof indexedDB !== 'undefined');
+    if (disposed) return;
     const temps = levels.map(l => acquire(a, l));
     const R = temps[0].R, sk = makeSkeleton(R);
     const skeleton = new THREE.Skeleton(sk.bones);
@@ -271,7 +364,7 @@ export async function createChibi3Character(avatar, opts = {}) {
     group.userData.fxHeight = R.height;
     animator.play(opts.initial || 'idle', { fade: 0 });
   }
-  install(avatar);
+  await install(avatar);
   let rate = 1;
   return {
     group,
@@ -284,7 +377,7 @@ export async function createChibi3Character(avatar, opts = {}) {
     metrics() { return { totalHeight: state.R.height, height: state.R.height }; },
     stats() {
       const lod0 = state.temps[0];
-      return { meshes: state.meshes.length, bones: state.R.bones.length, triangles: lod0.geometry.index.count / 3 + (lod0.eyes ? lod0.eyes.geometry.index.count / 3 : 0),
+      return { baked: !!lod0.baked, cached: !!lod0.cached, meshes: state.meshes.length, bones: state.R.bones.length, triangles: lod0.geometry.index.count / 3 + (lod0.eyes ? lod0.eyes.geometry.index.count / 3 : 0),
         lodTriangles: state.temps.map(t => t.geometry.index.count / 3), buildMs: state.temps.map(t => t.ms), timings: lod0.timings, layerTris: lod0.tris, morphs: Object.keys(lod0.geometry.morphAttributes.position ? MORPHS : {}).length };
     },
     setAnim(name, fade = 0.18) { state.animator.play(name, { fade }); },
@@ -297,7 +390,7 @@ export async function createChibi3Character(avatar, opts = {}) {
     setRate(k) { rate = Math.max(0.15, Math.min(3.5, Number(k) || 1)); },
     get rate() { return rate; },
     setHandsFree(v) { state.animator.handsFree = !!v; },
-    async setAvatar(av) { if (!disposed) install(av); },
+    async setAvatar(av) { if (!disposed) await install(av); },
     forceLod(level) { if (level == null) { state.lodObj.autoUpdate = true; return; } state.lodObj.autoUpdate = false; state.lodObj.levels.forEach((l, i) => { l.object.visible = levels[i] === level; }); },
     update(dt) { if (disposed) return; state.animator.update(Math.min(0.1, Math.max(0, dt)) * rate, group); },
     dispose() { if (disposed) return; disposed = true; group.remove(state.root); state.temps.forEach(release); state.skeleton.dispose(); },

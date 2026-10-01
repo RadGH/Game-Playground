@@ -12,7 +12,7 @@
 import * as THREE from 'three';
 
 const PRESETS = {
-  studio: { sky: [0x9aa6b8, 0x2a2e36], key: 0xfff1e2, keyI: 3.2, rim: 0x9cc4ff, rimI: 2.4, fill: 0x8090a8, fillI: 0.5, env: 1.0, bg: 0x30343c, floor: 0x4a4e56, exposure: 1.0 },
+  studio: { sky: [0x9aa6b8, 0x2a2e36], key: 0xfff1e2, keyI: 3.0, rim: 0x9cc4ff, rimI: 2.4, fill: 0xa0b0c8, fillI: 1.1, env: 1.25, bg: 0x30343c, floor: 0x4a4e56, exposure: 1.0 },
   dusk: { sky: [0xd89a6a, 0x232a44], key: 0xffb27a, keyI: 3.0, rim: 0x6a8cff, rimI: 2.8, fill: 0x405078, fillI: 0.5, env: 0.9, bg: 0x2a2436, floor: 0x3a3440, exposure: 1.05 },
   torch: { sky: [0x4a3a30, 0x0e0c10], key: 0xff9a50, keyI: 3.6, rim: 0x5a78c8, rimI: 1.6, fill: 0x302830, fillI: 0.3, env: 0.55, bg: 0x141016, floor: 0x262022, exposure: 1.1 },
 };
@@ -44,7 +44,7 @@ export function createStage(renderer, scene, { preset = 'studio', floorRadius = 
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap;
-  const key = new THREE.DirectionalLight(0xffffff, 3); key.position.set(2.2, 4.2, 3.0); key.castShadow = true;
+  const key = new THREE.DirectionalLight(0xffffff, 3); key.position.set(2.4, 3.1, 3.8);   // low enough to reach under a brim key.castShadow = true;
   key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0002; key.shadow.normalBias = 0.015; key.shadow.radius = 4;
   Object.assign(key.shadow.camera, { left: -shadowSize, right: shadowSize, top: shadowSize, bottom: -shadowSize, near: 0.5, far: 14 }); key.shadow.camera.updateProjectionMatrix();
   const rim = new THREE.DirectionalLight(0xffffff, 2); rim.position.set(-2.5, 3, -3.5);

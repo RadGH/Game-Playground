@@ -4,8 +4,9 @@
 // to one draw call by carrying the surface type on every vertex:
 //
 //   color   base colour (linear)
-//   surf    [detail tile, roughness, metalness, ambient occlusion]
-//   extra   [emissive, sheen, detail strength, edge wear]
+//   surf    [detail tile / 255, roughness, metalness, ambient occlusion]
+//   extra   [emissive / 2, sheen, detail strength, edge wear]
+// (all 0..1, so a baked character can store them as bytes)
 //
 // and putting the fine detail — skin pores, the weave of a tunic, the grain of leather, brushed and
 // scratched steel, hair strands, chainmail rings, wood grain, fur — in a TEXTURE ARRAY of eight
@@ -162,7 +163,8 @@ export function characterMaterial({ detail = true } = {}) {
     shader.uniforms.detailOn = { value: detail ? 1 : 0 };
     shader.vertexShader = VERT_HEAD + shader.vertexShader
       .replace('#include <skinnormal_vertex>', `#include <skinnormal_vertex>
-        vTile = surf.x; vSurf = surf; vExtra = extra; vBindPos = position; vBindNormal = normal;
+        // surf.x is the detail tile / 255 and extra.x the glow / 2, so both pack into bytes (baked files)
+        vTile = floor(surf.x * 255.0 + 0.5); vSurf = surf; vExtra = vec4(extra.x * 2.0, extra.yzw); vBindPos = position; vBindNormal = normal;
         #ifdef USE_SKINNING
           vBindToView = normalMatrix * mat3(skinMatrix);
         #else

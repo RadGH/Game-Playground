@@ -51,13 +51,13 @@ export class Assembler {
     for (const L of fields) {
       const t = performance.now();
       // (re)index the shape and every shape it is built on: adding a primitive drops an index
-      for (let sh = L.shape; sh; sh = sh.base) if (sh.buildIndex && !sh.idx) sh.buildIndex();
+      for (let sh = L.shape; sh; sh = sh.base) if (sh.buildIndex && !sh.idx && !sh.unindexed) sh.buildIndex();
       const inf = L.inflate || 0;
       const field = inf ? { eval: (x, y, z) => L.shape.eval(x, y, z) - inf } : L.shape;
       const fill = L.shape.baseFast ? { eval: (x, y, z) => L.shape.evalFast(x, y, z) - inf } : null;
       const step = L.stepFixed ? L.step : L.step * this.stepScale;
       const bounds = L.bounds || L.shape.bounds(step * 2);
-      L.mesh = meshField(field, bounds, step, { project: this.lod === 0 ? 2 : 1, clip: L.keep || null, fill, grid: L.grid && this.lod === 0 ? L.grid : null });
+      L.mesh = meshField(field, bounds, step, { project: 1, clip: L.keep || null, fill, grid: L.grid && this.lod === 0 ? L.grid : null });
       L.field = field;
       // simplify: flat stretches lose triangles, curves keep them (decimate.js)
       if (L.simplify !== 0 && !Assembler.debug.noSimplify) {
@@ -146,8 +146,8 @@ export class Assembler {
       let wear = 0;
       if (P.wear && this.lod < 2) { const k = fieldCurvature(L.mesh.grid.asField(), x, y, z, Math.max(0.005, L.mesh.grid.step)); wear = Math.max(0, Math.min(1, k * 2.2 - 0.25)) * P.wear * 0.55 * wearScale; if (k < -0.15) c = c.map(cv => cv * (1 + Math.max(-0.35, k * 0.25))); }
       color.set(c, v * 3);
-      surf.set([P.tile ?? 0, P.rough ?? 0.7, P.metal ?? 0, ao], v * 4);
-      extra.set([P.emissive || 0, P.sheen ?? 0, P.detail ?? 0.5, wear], v * 4);
+      surf.set([(P.tile ?? 0) / 255, P.rough ?? 0.7, P.metal ?? 0, ao], v * 4);
+      extra.set([Math.min(1, (P.emissive || 0) / 2), Math.min(1, P.sheen ?? 0), Math.min(1, P.detail ?? 0.5), Math.min(1, wear)], v * 4);
       const w = L.weights ? L.weights(x, y, z, ownerBone, px, py, pz) : jointWeights(this.rig, px, py, pz, ownerBone || L.bone || 'chest');
       writeWeights(si, sw, v, w);
     }
@@ -167,8 +167,8 @@ export class Assembler {
       if (P.vary) { const k = 1 + noise3(x * 9, y * 9, z * 9) * P.vary; c = c.map(cv => cv * k); }
       color.set(c, v * 3);
       const ao = L.ao === false || this.lod === 2 ? 1 : fieldAO(all, x, y, z, normals[v * 3], normals[v * 3 + 1], normals[v * 3 + 2], 0.5);
-      surf.set([P.tile ?? 0, P.rough ?? 0.7, P.metal ?? 0, ao], v * 4);
-      extra.set([P.emissive || 0, P.sheen ?? 0, P.detail ?? 0.5, L.wear ?? 0], v * 4);
+      surf.set([(P.tile ?? 0) / 255, P.rough ?? 0.7, P.metal ?? 0, ao], v * 4);
+      extra.set([Math.min(1, (P.emissive || 0) / 2), Math.min(1, P.sheen ?? 0), Math.min(1, P.detail ?? 0.5), Math.min(1, L.wear ?? 0)], v * 4);
       const w = L.weights ? L.weights(x, y, z, v) : [[this.rig.byName[L.bone].index, 1]];
       writeWeights(si, sw, v, w);
     }

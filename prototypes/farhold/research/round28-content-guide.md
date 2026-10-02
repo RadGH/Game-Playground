@@ -36,11 +36,16 @@ lead — never invent a key (the audit fails on it anyway).
 8. 60-second cast-through in the browser on DEV (8401): `?class=<id>` then in the console
    `f=farhold; f.rpg.gainXp(f.player,400000); f.cast(i)` for each slot. `farhold.mech` shows
    placed objects, walls, corpses, the link and the active forms.
-9. Add a line per class to `CLASSES.md` "Round 28".
+9. Write your `CLASSES.md` "Round 28" lines to `research/r28-batches/<batch>-classes.md`; the lead folds them in (CLASSES.md is not edited by content agents).
 
-Merging: rows are keyed by id. Load the JSON, set your rows, write it back with
-`JSON.stringify(data, null, 1)` (one-space indent, trailing newline). Never reformat other rows.
-One agent merges at a time.
+Merging (five agents at once): **never write `data/skills.json` or `data/classes.json` yourself**, and never
+run `describe-skills.mjs` on its own — each is a whole-file rewrite and would silently erase another batch's
+work. Author your rows in `data/r28-batches/<batch>.json` (`{ "skills": {id: row}, "statuses": {id: row},
+"classes": {classId: [six ids]} }`, every key optional), then run
+`node prototypes/farhold/tools/merge-r28-batch.mjs <batch>`. It takes a lock, copies your rows in (whole-row
+replace), writes `classes.<id>` to BOTH files, and regenerates every `desc` inside the same lock. Safe to
+run as often as you like. Your staging file is the source of truth: if a merged row looks wrong, fix the
+staging file and merge again.
 
 ---
 

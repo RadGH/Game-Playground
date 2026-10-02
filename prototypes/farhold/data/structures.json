@@ -14,7 +14,10 @@
     "autoLevel": 1.5,
     "lineMax": 40,
     "mountReach": 2.4,
-    "_r28": "R28. autoLevel: a piece whose worst corner is within this many metres of the ground under its middle levels its own footprint as it lands, instead of refusing with 'level it first'. lineMax: the most pieces one Shift+click line may place. mountReach: how far a wall-mounted piece (snap: wall) looks for a wall, a gate or a house side to hang on. Per structure: upgradesTo (the Upgrade tool's next step, paid as the difference — run pieces only: walls, fences, hedges) and gateId (the gate a wall run puts where you click a corner twice).",
+    "salvage": 0.25,
+    "repairShare": 0.5,
+    "siegeDamage": 1,
+    "_r28": "R28. autoLevel: a piece whose worst corner is within this many metres of the ground under its middle levels its own footprint as it lands, instead of refusing with 'level it first'. lineMax: the most pieces one Shift+click line may place. mountReach: how far a wall-mounted piece (snap: wall) looks for a wall, a gate or a house side to hang on. Per structure: upgradesTo (the Upgrade tool's next step, paid as the difference — run pieces only: walls, fences, hedges) and gateId (the gate a wall run puts where you click a corner twice). Damage: a piece's hit points are its `hp`, or when it has none clamp(round((40 + 20 x cost units) x tier), 60, 2000) (js/buildplan.js structureHp). salvage: the share of the cost a piece broken by enemies leaves behind. repairShare: what the Repair tool charges for a whole bar of hit points, as a share of the build cost (pro rata, rounded up per material). siegeDamage: multiplier on an enemy's damage roll against a building.",
     "_doc": "grid: metres between snap points. snapDistance: how close a ghost has to be to an existing piece's edge before it jumps to it. refund: fraction of the cost the deconstruct tool gives back (§4.7 — 'building should not punish experimenting'). footingTolerance: how far a corner may sit off the ground before the piece counts as floating. claimRadius: metres from the claim stone."
   },
   "materials": {
@@ -2481,7 +2484,7 @@
         "kind": "barricade",
         "color": "#6b4f34"
       },
-      "desc": "Does not stop them; sends them the long way round. The primitive the whole defence rests on."
+      "desc": "Cheap and quick to put up. Whatever comes for you stops to break it, and that is the time your turrets need."
     },
     {
       "id": "repair_station",

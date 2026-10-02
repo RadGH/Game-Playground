@@ -200,8 +200,29 @@ export function createCivics({
     const moved = trade.tick(dt, { day, rng });
     out.arrived = moved.arrived;
     out.lost = moved.lost;
+    out.resent = [];
+    out.stopped = [];
     for (const r of moved.arrived) say(r.line);
     for (const r of moved.lost) say(r.line);
+    // R28 — standing runs: the cart that just got back re-loads and goes again (see `resend`)
+    // every arrived standing run, not only this tick's: a cart that got back during the away
+    // catch-up (`away` below) waits, arrived, for the first live tick to send it on again
+    let purse = gold;
+    for (const r of trade.list()) {
+      if (r.state !== 'arrived' || !r.repeat || r.resentOnce) continue;
+      r.resentOnce = true;
+      purse += r.revenue || 0;
+      const again = resend(r, { day, gold: purse, at, rng });
+      if (again.ok) {
+        purse -= again.spent || 0;
+        out.resent.push({ from: r.id, route: again.route, spent: again.spent || 0 });
+        say(`${again.route.carrierName} loads up again for ${again.route.toName}.`);
+      } else {
+        r.repeat = false;
+        out.stopped.push({ id: r.id, why: again.why });
+        say(again.why);
+      }
+    }
     // once a game day: does anybody want to move in?
     if (day !== lastVendorDay) {
       lastVendorDay = day;
@@ -377,7 +398,7 @@ export function createCivics({
       if (c.key === 'hauler_drone' && !keys.has('hauler_drone')) why = 'A drone needs a Hauler Post standing.';
       return {
         key: c.key, name: c.name, hold: c.hold, speed: c.speed, upkeep: c.upkeep || 0,
-        guardsMax: c.guardsMax || 0, blurb: c.blurb || '', ok: !why, why,
+        guardsMax: c.guardsMax || 0, blurb: c.blurb || '', feed: { ...(c.feed || {}) }, ok: !why, why,
       };
     });
   }
@@ -415,13 +436,39 @@ export function createCivics({
     });
   }
 
-  /** Send it: the goods leave, the upkeep is paid, and the gold comes back on arrival (`tick`). */
-  function sendCart(draft = {}, { day = 1, gold = 0, at = 0, rng = Math.random, roadShare = 0, danger = 0.35 } = {}) {
-    const p = cartPlan(draft, { day, roadShare, danger });
-    if (!p.ok) return p;
-    if (gold < p.upkeep) return { ok: false, why: `The trip costs ${p.upkeep} gold in upkeep and you have ${Math.floor(gold)}.` };
-    const post = tradePosts.find(x => x.id === draft.postId);
-    const pool = stores?.poolAt ? stores.poolAt(post.x, post.z) : null;
+  /**
+   * R28 — WHAT A CARRIER EATS. data/colony.json has given the pack mule `feed: { grain: 4 }` since
+   * the carriers were written ("faster than the cart and it eats") and nothing ever charged it, so
+   * the mule was simply the best carrier under the wagon. It is charged per trip, out of the stores
+   * beside the Trade Post (where the animal is kept), and a send with no grain there is refused.
+   */
+  function feedFor(carrierKey) {
+    return { ...((data?.carriers || []).find(c => c.key === carrierKey)?.feed || {}) };
+  }
+
+  function poolOfPost(postId) {
+    const post = tradePosts.find(x => x.id === postId);
+    return post && stores?.poolAt ? stores.poolAt(post.x, post.z) : null;
+  }
+
+  /** Is the feed there? `null` when it is, otherwise the sentence. */
+  function feedRefusal(carrierKey, postId) {
+    const feed = feedFor(carrierKey);
+    const pool = poolOfPost(postId);
+    for (const [res, n] of Object.entries(feed)) {
+      const have = pool ? Math.floor(stores.count(pool, res) || 0) : 0;
+      if (have < n) {
+        const name = (resources?.materials?.[res]?.name || res).toLowerCase();
+        const who = (data?.carriers || []).find(c => c.key === carrierKey)?.name?.toLowerCase() || 'carrier';
+        return `A ${who} eats ${n} ${name} a trip, and the stores at the Trade Post hold ${have ? `only ${have}` : 'none'}. The post itself takes trade goods only: put the ${name} in a box beside it.`;
+      }
+    }
+    return null;
+  }
+
+  /** A hand into the post's stores and then your hold, which remembers what it lifted. */
+  function lifter(postId) {
+    const pool = poolOfPost(postId);
     const lifted = [];
     const take = (id, n) => {
       const a = pool ? stores.take(pool, id, n) : 0;
@@ -429,12 +476,68 @@ export function createCivics({
       lifted.push({ id, a, b });
       return a + b;
     };
-    const out = trade.open(p, { take, gold, at, rng });
-    if (!out.ok) {
-      // js/trade.js refuses a half-filled cart; put back whatever it already lifted
-      for (const l of lifted) { if (l.a && pool) stores.put(pool, l.id, l.a); if (l.b) hold.put(l.id, l.b); }
-      return out;
-    }
+    const putBack = () => { for (const l of lifted) { if (l.a && pool) stores.put(pool, l.id, l.a); if (l.b) hold.put(l.id, l.b); } };
+    return { take, putBack, pool };
+  }
+
+  function eat(carrierKey, postId) {
+    const pool = poolOfPost(postId);
+    const feed = feedFor(carrierKey);
+    for (const [res, n] of Object.entries(feed)) if (pool) stores.take(pool, res, n);
+    return feed;
+  }
+
+  /**
+   * Send it: the goods leave, the upkeep is paid, the feed is eaten, and the gold comes back on
+   * arrival (`tick`). `draft.repeat` makes it a standing run that re-loads at the post when it gets
+   * back and goes again (see `tick`).
+   */
+  function sendCart(draft = {}, { day = 1, gold = 0, at = 0, rng = Math.random, roadShare = 0, danger = 0.35 } = {}) {
+    const p = cartPlan(draft, { day, roadShare, danger });
+    if (!p.ok) return p;
+    if (gold < p.upkeep) return { ok: false, why: `The trip costs ${p.upkeep} gold in upkeep and you have ${Math.floor(gold)}.` };
+    const hungry = feedRefusal(p.carrier, draft.postId);
+    if (hungry) return { ok: false, why: hungry };
+    const hand = lifter(draft.postId);
+    const out = trade.open({ ...p, repeat: !!draft.repeat }, { take: hand.take, gold, at, rng });
+    if (!out.ok) { hand.putBack(); return out; }          // js/trade.js refuses a half-filled cart
+    // what `restand` needs to send it again: where it leaves from and where it is going
+    out.route.postId = draft.postId;
+    out.route.toPlace = asPlace(draft.to);
+    out.route.fed = eat(p.carrier, draft.postId);
+    return out;
+  }
+
+  /** Turn a route's standing order on or off — the "Repeat" toggle on an On-the-road row. */
+  function setRepeat(id, on) {
+    const r = trade.get(id);
+    if (!r) return { ok: false, why: 'That cart is not on the road any more.' };
+    if (on && !r.postId) return { ok: false, why: 'Only a cart sent from your own Trade Post can run again.' };
+    r.repeat = !!on;
+    return { ok: true, route: r };
+  }
+
+  /**
+   * R28 — A STANDING RUN GOES AGAIN. `trade.restand` was written for exactly this and never had a
+   * caller. An arrived repeat cart re-loads the same manifest at its post and sets off; it stops,
+   * and SAYS WHY, when the goods, the feed or the upkeep are not there, or the load no longer clears
+   * its upkeep at the far end. `gold` is what you will have once this trip has paid.
+   */
+  function resend(r, { day = 1, gold = 0, at = 0, rng = Math.random } = {}) {
+    const post = tradePosts.find(x => x.id === r.postId);
+    if (!post || !r.toPlace) return { ok: false, stopped: true, why: `The ${r.carrierName.toLowerCase()} came home to no Trade Post. The run has stopped.` };
+    const hungry = feedRefusal(r.carrier, r.postId);
+    if (hungry) return { ok: false, stopped: true, why: `${hungry} The run has stopped.` };
+    const short = cartPlan({ postId: r.postId, to: r.toPlace, carrier: r.carrier, guards: r.guards, manifest: r.manifest }, { day });
+    if (!short.ok) return { ok: false, stopped: true, why: `${short.why} The run to ${r.toName} has stopped.` };
+    if (gold < short.upkeep) return { ok: false, stopped: true, why: `The run to ${r.toName} needs ${short.upkeep} gold upkeep and you have ${Math.floor(gold)}. It has stopped.` };
+    const hand = lifter(r.postId);
+    const from = { id: post.id, name: post.name || 'your Trade Post', x: post.x, z: post.z, market: false };
+    const out = trade.restand(r, { from, to: r.toPlace, day, take: hand.take, gold, rng, at, clears: 'revenue' });
+    if (!out.ok) { hand.putBack(); return { ...out, stopped: true }; }
+    out.route.postId = r.postId;
+    out.route.toPlace = r.toPlace;
+    out.route.fed = eat(r.carrier, r.postId);
     return out;
   }
 
@@ -461,7 +564,7 @@ export function createCivics({
     housing, vendors, hold, trade, muster,
     rebuild, tick, away, report, facts, stationAt, madeOf,
     // R28 — the cart route's way in (the Trade tab's "Send a cart")
-    cartCarriers, cartGoods, cartPlan, sendCart,
+    cartCarriers, cartGoods, cartPlan, sendCart, setRepeat, resend, feedRefusal,
     holdCapacity: opts => holdCapacity({ data, carriers: data?.carriers || [], ...opts }),
     get spent() { return spent; },
     addSpend(n) { spent += Math.max(0, n); return spent; },

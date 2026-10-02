@@ -74,5 +74,14 @@ test('a road on a side slope, close up and from 120 m: lying on the ground, with
   await shoot('side', 0, -t * (spot.half + 10), -0.42);
   await shoot('mid', 60, t * 20, -0.1);
   await shoot('far', 120, t * 40, -0.12);
+
+  // R28: the map strokes the roads that are on the ground (terrain.roadPaths), switchbacks and all
+  await page.evaluate(() => { window.farhold.map.toggle(true); });
+  for (const z of [1, 4.2, 11]) {
+    await page.evaluate(z => window.farhold.map.setZoom(z), z);
+    await page.waitForTimeout(600);
+    await page.screenshot({ path: `${SHOTS}${TAG}-map-z${z}.png` });
+  }
+  await page.evaluate(() => { window.farhold.map.toggle(false); });
   expect(errors).toEqual([]);
 });

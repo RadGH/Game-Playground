@@ -88,6 +88,9 @@ test('a furnace has a screen of its own, and E is what opens it', async ({ page 
       opened: !!opened,
       hidden: panel?.hidden,
       text: (panel?.innerText || '').slice(0, 600),
+      // R28 — the recipe rows themselves. The first 600 characters used to reach them; R28's
+      // keep-in-stock row and rated line sit above them now, so the rule is asked of the rows
+      recipes: [...(panel?.querySelectorAll('.build-row-name') || [])].map(n => n.textContent),
     };
   });
 
@@ -99,7 +102,9 @@ test('a furnace has a screen of its own, and E is what opens it', async ({ page 
   expect(out.opened).toBe(true);
   expect(out.hidden).toBe(false);
   // its OWN recipes, not the catalogue
-  expect(out.text.toLowerCase()).toContain('iron');
+  expect(out.recipes.join(' | ').toLowerCase()).toContain('iron');
+  // and nothing from another machine's list: a furnace does not offer a loom's cloth
+  expect(out.recipes.join(' | ').toLowerCase()).not.toMatch(/weave|cloth bolt/);
   expect(errors).toEqual([]);
 });
 

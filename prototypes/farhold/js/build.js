@@ -27,7 +27,7 @@
 // made.
 
 import * as THREE from 'three';
-import { createBuildPlan, makeBag, cornersOf } from './buildplan.js';
+import { createBuildPlan, makeBag, cornersOf, damageBand } from './buildplan.js';
 import { createRoadBook, laneRibbon, levelUnderSlab } from './roadplan.js';
 // R17 — the research gate. See `createBuild`'s `plan` line for why this is imported here rather
 // than handed in: js/main.js's `createBuild` call belongs to another pair of hands this round, and
@@ -157,7 +157,9 @@ export function buildMesh(def) {
   const base = def.look?.color || '#7a7268';
   const group = new THREE.Group();
   for (const [kind, tint, [px, py, pz], [sx, sy, sz], override] of make(def)) {
-    const mesh = new THREE.Mesh(GEO[kind] || GEO.box, matFor(override || shade(base, tint)));
+    const colour = override || shade(base, tint);
+    const mesh = new THREE.Mesh(GEO[kind] || GEO.box, matFor(colour));
+    mesh.userData.colour = colour;     // R28 — what a damaged piece darkens FROM (see paintDamage)
     mesh.position.set(px, py, pz);
     mesh.scale.set(sx, sy, sz);
     group.add(mesh);
@@ -217,7 +219,12 @@ function saveLocalBlueprints(list) {
  * R28 — THE TOOLS THAT POINT AT A PIECE, and the colour each one highlights it in.
  * Kept here beside the highlight so build-ui.js's tool table and this file cannot disagree.
  */
-export const POINT_TOOLS = { remove: '#e06050', move: '#7fd4ff', upgrade: '#e0c070', route: '#9ec8ff', pick: '#ffffff' };
+export const POINT_TOOLS = { remove: '#e06050', move: '#7fd4ff', upgrade: '#e0c070', repair: '#7fe08a', route: '#9ec8ff', pick: '#ffffff' };
+
+const BAR_BACK = new THREE.MeshBasicMaterial({ color: 0x1a1210, depthTest: false, transparent: true, opacity: 0.85 });
+// transparent like the back, so both are drawn in the same pass and `renderOrder` puts the fill on
+// top (an opaque fill is drawn first and the see-through back then covers it)
+const BAR_FILL = [0x7fe08a, 0xe0c050, 0xe08040, 0xe04838].map(c => new THREE.MeshBasicMaterial({ color: c, depthTest: false, transparent: true, opacity: 1 }));
 
 export function createBuild(scene, {
   terrain,
@@ -440,6 +447,8 @@ export function createBuild(scene, {
    * against the id ever sees it go away. Dropped by Esc, another tool, another piece or leaving.
    */
   let moving = null;
+  /** R28 — seconds since the Repair Stations last mended (see `update`). */
+  let mendClock = 0;
   function cancelMove() {
     if (!moving) return false;
     const g = meshes.get(moving.id);
@@ -567,6 +576,49 @@ export function createBuild(scene, {
     g.rotation.y = -entry.rot;      // scene yaw runs the other way from plan bearing
     root.add(g);
     meshes.set(entry.id, g);
+    paintDamage(entry);
+  }
+
+  /**
+   * R28 — A DAMAGED PIECE LOOKS IT: it darkens by band (the same cached Lambert materials, so no
+   * shader is compiled for a hit), and a bar stands over it — green, amber, orange, red — while it
+   * is anything less than whole. A whole piece has no bar.
+   */
+  function paintDamage(entry) {
+    const g = meshes.get(entry.id);
+    if (!g) return;
+    const h = book.health(entry);
+    const band = h ? damageBand(h.ratio) : 0;
+    if (g.userData.band !== band) {
+      g.userData.band = band;
+      for (const m of g.children) {
+        if (m.userData.colour) m.material = matFor(band ? shade(m.userData.colour, -0.16 * band) : m.userData.colour);
+      }
+    }
+    let bar = g.userData.bar;
+    if (!band) { if (bar) bar.visible = false; return; }
+    if (!bar) {
+      const def = book.byId(entry.key);
+      const w = Math.max(0.8, Math.min(2.4, Math.max(def?.w || 1, def?.d || 1)));
+      bar = new THREE.Group();
+      const back = new THREE.Mesh(GEO.box, BAR_BACK);
+      back.scale.set(w + 0.08, 0.2, 0.2);
+      const fill = new THREE.Mesh(GEO.box, BAR_FILL[0]);
+      fill.scale.set(w, 0.14, 0.24);
+      back.renderOrder = 998; fill.renderOrder = 999;
+      bar.add(back, fill);
+      bar.position.y = (def?.h || 1) + 0.6;
+      bar.userData = { fill, w };
+      g.add(bar);
+      g.userData.bar = bar;
+    }
+    bar.visible = true;
+    const { fill, w } = bar.userData;
+    fill.scale.x = Math.max(0.02, w * h.ratio);
+    // shrinks toward the middle: the bar is in the piece's own space, so a left-aligned fill would
+    // read as right-aligned from the other side of the wall
+    fill.position.x = 0;
+    fill.material = BAR_FILL[band];
   }
 
   /**
@@ -677,6 +729,7 @@ export function createBuild(scene, {
     if (a.kind === 'takedown') return `take down ${a.entry?.name || ''}`.trim();
     if (a.kind === 'move') return `move ${book.entries.find(e => e.id === a.id)?.name || ''}`.trim();
     if (a.kind === 'upgrade') return `upgrade to ${book.entries.find(e => e.id === a.id)?.name || ''}`.trim();
+    if (a.kind === 'repair') return `repair ${book.entries.find(e => e.id === a.id)?.name || ''}`.trim();
     return a.kind;
   }
 
@@ -743,6 +796,13 @@ export function createBuild(scene, {
       log(`${res.entry.name} is back where it was.`, 'good');
       return { ok: true, entry: res.entry, moved: true };
     }
+    if (a.kind === 'repair') {
+      const res = book.unrepair(a.id, a.hp, a.paid);
+      if (!res.ok) return null;
+      paintDamage(res.entry);
+      log(`Repair undone: ${book.costText(a.paid) || 'nothing'} back.`, 'good');
+      return { ok: true, entry: res.entry };
+    }
     if (a.kind === 'upgrade') {
       const res = book.downgrade(a.id, a.was, a.paid);
       if (!res.ok) return null;
@@ -786,6 +846,14 @@ export function createBuild(scene, {
       text = up.to ? (up.ok ? `Click: ${e.name} → ${up.to.name} for ${book.costText(up.cost) || 'nothing'}.` : `${e.name} → ${up.to.name}: ${up.why}`) : up.why;
     } else if (tool === 'pick') {
       text = `Click: build another ${e.name}.`;
+    } else if (tool === 'repair') {
+      // R28 — the price BEFORE the click, against what you hold
+      const q = book.repairOf(e);
+      ok = q.ok;
+      const hp = `${Math.round(q.hp)}/${q.maxHp} HP`;
+      text = !(q.missing > 0) ? `${e.name}: ${hp}, not damaged.`
+        : q.ok ? `Click: repair the ${e.name} (${hp}) for ${book.costText(q.cost)}.`
+          : `Repair the ${e.name} (${hp}) for ${book.costText(q.cost)}: ${q.why}`;
     }
     highlightEntry(e, ok ? POINT_TOOLS[tool] : '#e06050');
     lastPoint = { entry: e, ok, text };
@@ -1005,6 +1073,7 @@ export function createBuild(scene, {
       if (tool === 'remove') return api.removeAt(aimAt.x, aimAt.z);
       if (tool === 'move') return api.moveAt(aimAt.x, aimAt.z);
       if (tool === 'upgrade') return api.upgradeAt(aimAt.x, aimAt.z);
+      if (tool === 'repair') return api.repairAt(aimAt.x, aimAt.z);
       if (tool === 'pick') return api.pickAt(aimAt.x, aimAt.z);
       if (tool === 'copy') return api.copyAt(aimAt.x, aimAt.z);
       if (tool === 'stamp') return api.stampHere();
@@ -1460,6 +1529,41 @@ export function createBuild(scene, {
       return res;
     },
 
+    /** R28 — the Repair tool: put the piece under the cursor back to full, for the quoted price. */
+    repairAt(x, z) {
+      const e = book.pickEntry(x, z, 3);
+      if (!e) return { ok: false, why: 'Point at something you built to repair it.' };
+      const res = book.repair(e.id);
+      if (!res.ok) { log(res.why, 'warn'); return res; }
+      paintDamage(res.entry);
+      pushAction({ kind: 'repair', id: e.id, hp: res.was, paid: res.paid });
+      log(`${e.name} repaired (+${Math.round(res.healed)} HP) for ${book.costText(res.paid) || 'nothing'}.`, 'good');
+      return res;
+    },
+
+    /**
+     * R28 — SOMETHING HIT A PIECE. js/main.js calls this when an enemy's swing lands on a wall it
+     * could not get past. Broken at 0: the mesh goes, `onRemove` runs exactly as for a take-down
+     * (the collider is rebuilt, a crate's goods are handed on, the grid and the drills let go), and
+     * the salvage goes in your store. A broken piece is not an undo step.
+     */
+    damagePiece(entryId, amount, { by = null } = {}) {
+      const before = book.entries.find(e => e.id === entryId);
+      if (!before) return { ok: false, why: 'Nothing there.' };
+      const res = book.damage(entryId, amount);
+      if (!res.ok) return res;
+      if (!res.destroyed) { paintDamage(res.entry); return res; }
+      api.forget(entryId);
+      if (lastPlaced?.id === entryId) lastPlaced = null;
+      if (onRemove) onRemove(res.entry, book.byId(res.entry.key) || null);
+      log(`${by ? `${by} breaks` : 'Broken:'} the ${res.entry.name}. ${book.costText(res.refund) || 'Nothing'} salvaged.`, 'bad');
+      return res;
+    },
+    /** R28 — the built piece in an enemy's way, for js/actors.js. See js/buildplan.js `blockingPiece`. */
+    blockingPiece(ax, az, bx, bz, opts) { return book.blocking(ax, az, bx, bz, opts); },
+    /** R28 — every piece below full, for the HUD and tests. */
+    get damaged() { return book.entries.filter(e => (book.health(e)?.ratio ?? 1) < 1); },
+
     /**
      * R28 — C, or the Pick tool: build another of whatever you point at, turned the same way.
      * The quickest way to say "one more of those" on a base that already has one.
@@ -1616,6 +1720,27 @@ export function createBuild(scene, {
     /** Turn the ring and breathe the ghost, so build mode does not look frozen. */
     update(dt) {
       if (api.portalRing?.visible) api.portalRing.rotation.y += dt * 0.6;
+      /**
+       * R28 — A REPAIR STATION MENDS. `repairs: { radius, rate }` is read as `rate` per cent of each
+       * damaged piece's bar per minute, for every piece within `radius`, while the station has
+       * power. Free: it already costs 12 kW. Once a second, and only when something is damaged.
+       */
+      mendClock += dt;
+      if (mendClock >= 1) {
+        const step = mendClock;
+        mendClock = 0;
+        const hurt = book.entries.filter(e => (book.health(e)?.ratio ?? 1) < 1);
+        if (hurt.length) {
+          const stations = book.entries.filter(e => book.byId(e.key)?.repairs && e.powered !== false);
+          for (const st of stations) {
+            const r = book.byId(st.key).repairs;
+            for (const e of hurt) {
+              if (Math.hypot(e.x - st.x, e.z - st.z) > (r.radius ?? 30)) continue;
+              if (book.heal(e.id, (book.health(e).maxHp * (r.rate ?? 25) / 100) * step / 60) > 0) paintDamage(e);
+            }
+          }
+        }
+      }
       if (brush.visible) brush.rotation.z += dt * 0.4;
     },
 

@@ -31,7 +31,7 @@ export function keysForTool(tool, { moving = false } = {}) {
   if (tool === 'build') return moving ? BUILD_KEYS.moving : BUILD_KEYS.place;
   if (tool === 'road' || tool === 'wall') return BUILD_KEYS.run;
   if (tool === 'stamp') return BUILD_KEYS.stamp;
-  if (['remove', 'move', 'upgrade', 'route', 'pick'].includes(tool)) return BUILD_KEYS.point;
+  if (['remove', 'move', 'upgrade', 'repair', 'route', 'pick'].includes(tool)) return BUILD_KEYS.point;
   return BUILD_KEYS.brush;
 }
 
@@ -54,7 +54,7 @@ export function liveLine(build, tool = null) {
     if (!si) return { text: tool?.hint || '', tone: '' };
     return si.ok ? { text: `${si.name}: ${si.fits} of ${si.total} fit here · ${si.text || 'free'} · click to stamp`, tone: '' } : { text: si.why || '', tone: 'bad' };
   }
-  if (['remove', 'move', 'upgrade', 'pick', 'copy'].includes(t)) {
+  if (['remove', 'move', 'upgrade', 'repair', 'pick', 'copy'].includes(t)) {
     const pt = build.lastPoint;
     return pt?.text ? { text: pt.text, tone: pt.ok ? '' : 'bad' } : { text: tool?.hint || '', tone: '' };
   }

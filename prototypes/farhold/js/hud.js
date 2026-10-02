@@ -946,7 +946,9 @@ export class Hud {
           + `<span class="skill-name"></span>`
           + `<span class="skill-mp"></span>`
           + `<i class="skill-cd"></i>`
-          + `<span class="skill-left"></span>`;
+          + `<span class="skill-left"></span>`
+          // R28 — charges, the next roll, a form's name (skillbar.css)
+          + `<span class="skill-tag"></span>`;
         return slot;
       });
       box.replaceChildren(...this._skillSlots);
@@ -981,7 +983,53 @@ export class Hud {
       const left = slot.querySelector('.skill-left');
       if (left) left.textContent = cooling && s.ready > 1.4 ? s.ready.toFixed(0) : '';
       // the hover card is the tooltip now; `title` would show a second, worse one over the top
+      /**
+       * R28 — WHAT THE NEW RULES LOOK LIKE ON THE BAR (research/round28-skills-plan.md §2 H): a
+       * charge count, the next roll of a random or cycling skill, the form a slot is in, a draining
+       * ring inside a recast window, and a channel that is running.
+       */
+      const tag = slot.querySelector('.skill-tag');
+      if (tag) {
+        const text = s.charges ? `${s.charges.n}/${s.charges.max}` : s.next ? `next: ${s.next}` : (s.form?.mine && s.form.left != null) ? `${Math.ceil(s.form.left)}s` : '';
+        if (tag.textContent !== text) tag.textContent = text;
+      }
+      slot.classList.toggle('form-on', !!s.form?.mine);
+      slot.classList.toggle('formed', !!s.formId);
+      slot.classList.toggle('recast', s.recastLeft > 0);
+      if (s.recastLeft > 0) slot.style.setProperty('--recast', String(Math.min(1, s.recastLeft / 4)));
+      slot.classList.toggle('channel', !!s.channel);
     }
+    this.skillStrip(state);
+  }
+
+  /** R28 — resource pips (Flair, Poise, Grudge) and the forms you are in, over the bar. */
+  skillStrip(state) {
+    let strip = $('skill-strip');
+    if (!strip) {
+      const bar = $('skillbar');
+      if (!bar?.parentNode) return;
+      strip = el('div', 'hud');
+      strip.id = 'skill-strip';
+      bar.parentNode.insertBefore(strip, bar);
+    }
+    const res = new Map();
+    const forms = new Map();
+    for (const s of state || []) {
+      if (s.resource) res.set(s.resource.id, s.resource);
+      if (s.form?.mine) forms.set(s.form.group, s.form);
+    }
+    const key = [...res.values()].map(r => `${r.id}${r.n}/${r.max}`).join(',') + '|' + [...forms.values()].map(f => `${f.name}${f.left != null ? Math.ceil(f.left) : ''}`).join(',');
+    if (strip.dataset.key === key) return;
+    strip.dataset.key = key;
+    const kids = [];
+    for (const r of res.values()) {
+      const box = el('span', `res ${r.id}`);
+      box.append(el('b', '', r.id[0].toUpperCase() + r.id.slice(1)));
+      for (let k = 0; k < r.max; k++) box.append(el('i', 'pip' + (k < r.n ? ' on' : '')));
+      kids.push(box);
+    }
+    for (const f of forms.values()) kids.push(el('span', 'form', f.left != null ? `${f.name} · ${Math.ceil(f.left)}s` : f.name));
+    strip.replaceChildren(...kids);
   }
 
   /**
@@ -2403,6 +2451,14 @@ export class Hud {
             const card = el('div', 'talent-card' + (on ? ' on' : '')
               + (open ? '' : ' locked') + (open && spent ? ' spent' : ''));
             card.innerHTML = `<b>${node.name}</b><span class="muted small">${node.desc}</span>`;
+            /**
+             * R28 — a node that works with another skill (`requires`) says so, dimmed, when that
+             * skill is not on your bar: it can still be taken, and its own part still works.
+             */
+            if (node.requires && !this.skillState.some(x => x.id === node.requires)) {
+              card.classList.add('needs');
+              card.append(el('span', 'muted small', `Needs ${this.skillState.find(x => x.id === node.requires)?.name || node.requires.replace(/_/g, ' ')} on your bar for its full effect.`));
+            }
             /**
              * R20 — CLICKING ONE YOU ALREADY HAVE NO LONGER CLEARS IT.
              *

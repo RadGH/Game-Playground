@@ -316,3 +316,7 @@
 .civ-cart-plan > div + div { margin-top: 2px; }
 .civ-cart-send { margin-top: 8px; }
 .civ-go:disabled { opacity: .45; cursor: not-allowed; }
+.civ-cart-go { gap: 8px; align-items: center; margin-top: 8px; }
+.civ-cart-go .civ-cart-send { margin: 0; }
+.civ-cart-route { flex-wrap: wrap; }
+.civ-cart-route .civ-cart-repeat { margin-left: auto; }

@@ -1,0 +1,36 @@
+/* ---------------------------------------------------------------- R28: the skill bar's new marks
+   research/round28-skills-plan.md §2 H — without these, Flair, Grudge, the next roll, a charge
+   count, a recast window and the current shape are rules a player cannot see. All of it is drawn
+   from `skills.state()` (js/skills.js) by js/hud.js `skills()`. */
+
+/* a corner tag on a slot: charges "2/3", the next roll, or the form it is in */
+.skill-slot .skill-tag {
+  position: absolute; top: 2px; right: 3px; z-index: 3;
+  font-size: 9px; color: #ffd58a; font-variant-numeric: tabular-nums;
+}
+.skill-slot .skill-tag:empty { display: none; }
+/* the slot whose form is ON (a shape you are in, the stance you hold, the song you play) */
+.skill-slot.form-on { border-color: #7ad67a; box-shadow: 0 0 0 1px #7ad67a inset, 0 0 10px rgba(122, 214, 122, 0.35); }
+/* a slot overridden by a form shows that version's name in green */
+.skill-slot.formed .skill-name { color: #b8f0a0; }
+/* inside a recast window: a draining ring, so "press again" is visible without reading */
+.skill-slot.recast { border-color: #c9a0ff; box-shadow: 0 0 0 2px rgba(201, 160, 255, calc(var(--recast, 1) * 0.9)) inset; }
+.skill-slot.channel { border-color: #6fd4ff; box-shadow: 0 0 10px rgba(111, 212, 255, 0.55); }
+
+/* resource pips and the form badge, in one strip over the bar */
+#skill-strip {
+  position: absolute; left: 50%; bottom: 84px; transform: translateX(-50%);
+  display: flex; gap: 14px; align-items: center; pointer-events: none;
+  font-size: 11px; color: #e8eef6; text-shadow: 0 1px 2px #000;
+}
+#skill-strip:empty { display: none; }
+#skill-strip .res { display: flex; gap: 3px; align-items: center; }
+#skill-strip .res b { font-weight: 600; margin-right: 4px; }
+#skill-strip .pip { width: 9px; height: 9px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.4); background: rgba(0, 0, 0, 0.45); }
+#skill-strip .pip.on { background: #ffcf5a; border-color: #ffe3a0; }
+#skill-strip .res.poise .pip.on { background: #8fd8ff; border-color: #c8ecff; }
+#skill-strip .res.grudge .pip.on { background: #ff6a5a; border-color: #ffb0a6; }
+#skill-strip .form { padding: 1px 7px; border: 1px solid #7ad67a; border-radius: 9px; background: rgba(20, 40, 20, 0.6); color: #c8f5b8; }
+
+/* a talent node whose partner skill is not on your bar (`requires`) */
+.talent-card.needs { opacity: 0.72; border-style: dashed; }

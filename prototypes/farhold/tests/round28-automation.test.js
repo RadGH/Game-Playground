@@ -671,3 +671,88 @@ test('R28 production — a cold furnace with no ore says both: nobody works it, 
   assert.match(d.chain.join(' '), /no iron ore in reach/i);
   assert.match(d.chain.join(' '), /seam|drill/i, 'and where ore comes from');
 });
+
+/** A Trade Post with a Drover in residence, and the town it sells to. */
+function tradePostBase({ drover = false } = {}) {
+  const GOODS = read('../data/tradegoods.json');
+  const STRUCT = read('../data/structures.json');
+  const rows = Array.isArray(STRUCT) ? STRUCT : (STRUCT.structures || Object.values(STRUCT));
+  const defOf = key => rows.find(r => r && (r.key === key || r.id === key)) || null;
+  const resources = JSON.parse(JSON.stringify(RESOURCES));
+  const refining = JSON.parse(JSON.stringify(REFINING));
+  const stores = createStoreNetwork({ power: POWER, materials: resources });
+  const civics = createCivics({ data: COLONY, goods: GOODS, resources, refining, stores, seed: 5 });
+  const post = { id: 'tp1', key: 'trade_post', name: 'Trade Post', x: 0, z: 0 };
+  stores.add({ id: post.id, type: 'trade_post', x: 0, z: 0 });
+  // the post itself takes trade goods only; the grain lives in a chest beside it, in the same pool
+  stores.add({ id: 'chest', type: 'storage_chest', x: 3, z: 0 });
+  civics.rebuild([post], defOf);
+  if (drover) civics.vendors.loadJSON({ here: { drover: { citizenId: 'c1', day: 1 } } });
+  const pool = stores.poolAt(0, 0);
+  const town = { id: 't9', name: 'Ashby', x: 900, z: 0, size: 4, biome: 'desert', race: 'human', market: true };
+  return { civics, stores, pool, town };
+}
+
+test('R28 trade — a standing run re-loads and goes again, and stops with a reason when the goods run out', () => {
+  const { civics, stores, pool, town } = tradePostBase();
+  stores.put(pool, 'salt_block', 8);
+  const draft = { postId: 'tp1', to: town, carrier: 'hand_cart', guards: 0, manifest: { salt_block: 4 }, repeat: true };
+  const first = civics.sendCart(draft, { gold: 500, rng: () => 0.99 });
+  assert.ok(first.ok, first.why);
+  assert.equal(first.route.repeat, true);
+  const secs = first.route.seconds + 1;
+
+  // it gets there: paid, and the same load goes out again from the post
+  let t = civics.tick(secs, { gold: 500, rng: () => 0.99 });
+  assert.equal(t.arrived.length, 1);
+  assert.equal(t.resent.length, 1, 'the standing run did not go again');
+  assert.equal(stores.count(pool, 'salt_block'), 0, 'the second load did not come out of the post');
+  assert.ok(t.resent[0].spent > 0, 'the second trip paid no upkeep');
+  civics.trade.collect(t.arrived[0].id);
+  // survives a save
+  const saved = JSON.parse(JSON.stringify(civics.toJSON()));
+  const again = tradePostBase().civics;
+  again.loadJSON(saved);
+  const live = again.trade.list().find(r => r.state === 'travelling');
+  assert.equal(live.repeat, true);
+  assert.equal(live.postId, 'tp1');
+  assert.equal(live.toPlace.name, 'Ashby');
+
+  // back again, and the post is empty: it stops, and the log says why
+  t = civics.tick(secs, { gold: 500, rng: () => 0.99 });
+  assert.equal(t.resent.length, 0);
+  assert.equal(t.stopped.length, 1);
+  assert.match(t.stopped[0].why, /salt.*stopped/i);
+});
+
+test('R28 trade — a standing run stops when the upkeep cannot be paid; the toggle turns it off', () => {
+  const { civics, stores, pool, town } = tradePostBase();
+  stores.put(pool, 'salt_block', 8);
+  const out = civics.sendCart({ postId: 'tp1', to: town, carrier: 'hand_cart', manifest: { salt_block: 4 } }, { gold: 500, rng: () => 0.99 });
+  assert.equal(out.route.repeat, false);
+  assert.ok(civics.setRepeat(out.route.id, true).ok);
+  const t = civics.tick(out.route.seconds + 1, { gold: -1000, rng: () => 0.99 });
+  assert.equal(t.stopped.length, 1);
+  assert.match(t.stopped[0].why, /upkeep/);
+  assert.equal(stores.count(pool, 'salt_block'), 4, 'a refused re-send took the goods anyway');
+  assert.match(civics.setRepeat('nope', true).why, /not on the road/);
+});
+
+test('R28 trade — the pack mule eats its grain, and a send with no grain is refused', () => {
+  const { civics, stores, pool, town } = tradePostBase({ drover: true });
+  assert.equal(civics.cartCarriers().find(c => c.key === 'pack_mule').ok, true, 'a Drover in residence sells the mule');
+  stores.put(pool, 'salt_block', 4);
+  const draft = { postId: 'tp1', to: town, carrier: 'pack_mule', manifest: { salt_block: 4 } };
+  const hungry = civics.sendCart(draft, { gold: 500 });
+  assert.equal(hungry.ok, false);
+  assert.match(hungry.why, /eats 4 grain/);
+  assert.equal(stores.count(pool, 'salt_block'), 4, 'a hungry mule still left with the goods');
+  stores.put(pool, 'grain', 6);
+  const out = civics.sendCart(draft, { gold: 500, rng: () => 0.99 });
+  assert.ok(out.ok, out.why);
+  assert.equal(stores.count(pool, 'grain'), 2, 'the mule ate nothing');
+  // and a cart eats nothing
+  stores.put(pool, 'salt_block', 4);
+  civics.sendCart({ ...draft, carrier: 'hand_cart' }, { gold: 500, rng: () => 0.99 });
+  assert.equal(stores.count(pool, 'grain'), 2);
+});

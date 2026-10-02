@@ -28,7 +28,7 @@
 // mistaken for a purchase that quietly did nothing.
 
 import { canRefund, refundOne, refundAll, spentBy, takenOf } from './perks.js';
-import { clearTalent, TALENT_LIBRARY, treeFor } from './skilltalents.js';
+import { clearTalent, TALENT_LIBRARY, treeFor, nodeFor, skillRow } from './skilltalents.js';
 import { unlearnSpell, PICK_COUNT } from './classbuild.js';
 
 /**
@@ -246,7 +246,7 @@ export function forgetTalent({ player, skillId, tier, prices = null } = {}) {
   const short = purseRefusal(player, price);
   if (short) return { ok: false, why: short, spent: 0 };
   clearTalent(player, skillId, tier);
-  return { ok: true, why: null, spent: spend(player, price), name: TALENT_LIBRARY[has]?.name || has };
+  return { ok: true, why: null, spent: spend(player, price), name: nodeFor(skillRow(skillId), tier, has)?.name || TALENT_LIBRARY[has]?.name || has };
 }
 
 /** Clear every talent on every skill. */

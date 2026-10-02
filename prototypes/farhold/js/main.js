@@ -172,6 +172,9 @@ import { handsOf, strikeAt, withArea, profileOf, isStaff, isWand, staffSpell, wa
 import { pushFor, feel, tuneFeel } from './combat-feel.js';
 // R20 — `clearTalent` moved with it: js/retrain.js is what empties a tier now, for gold.
 import { talentPlan, pickTalent, talentsOn } from './skilltalents.js';
+// R28 — the skill vocabulary: pure rules (js/skillmech.js) and the runtime that acts on them
+import { setMechEnv, blocksRanged, controlFor } from './skillmech.js';
+import { createSkillRuntime } from './skillrun.js';
 // R20 — `refundAll` and `refundOne` are no longer imported here: giving a perk back is an Unbinder
 // in a town and a price, and js/retrain.js is the only caller of either.
 import { allocate as allocatePerk, pointsLeft as perkPointsLeft } from './perks.js';
@@ -1254,6 +1257,15 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
    */
   function landStatus(type, spec, enemy, power = 1) {
     if (!type || !spec) return;
+    /**
+     * R28 — a boss is never slept, feared or rooted (it is slowed instead), and a champion or a
+     * rare holds a hard control for half as long (js/skillmech.js `controlFor`, plan §9.4).
+     */
+    if (enemy && enemy !== player) {
+      const ctl = controlFor(enemy, type, spec.seconds ?? 3);
+      if (ctl.id !== type) { type = ctl.id; spec = { ...(skillData.statuses[ctl.id] || {}), seconds: ctl.seconds, ...(ctl.slow ? { slow: ctl.slow } : {}) }; }
+      else if (ctl.seconds !== (spec.seconds ?? 3)) spec = { ...spec, seconds: ctl.seconds };
+    }
     const first = !enemy.statuses?.[type];
     const longer = rpg.fx.sum(player, 'statusLonger', { type, spec });
     const strength = rpg.fx.product(player, 'statusPower', { type });
@@ -1319,6 +1331,28 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         .catch(() => { /* the scene went away */ });
     },
   };
+
+  /**
+   * R28 — THE SKILL VOCABULARY'S RUNTIME (js/skillrun.js): forms and their bodies, placed posts and
+   * traps, dashes, lines, afterimages, links, counters, summons that take no slot. Everything is
+   * read through getters because most of it (the field, the pets, the bar, the HUD) is built
+   * further down this function — a value captured here would be a TDZ crash at boot.
+   */
+  const mech = createSkillRuntime({
+    THREE, makeActor, setActorAnim,
+    get scene() { return scene; }, get spellfx() { return spellfx; }, get fx() { return fx; },
+    get sound() { return sound; }, get rpg() { return rpg; }, get skillData() { return skillData; },
+    hud: { log: (t, k) => hud.log(t, k) },
+    field: () => field, pets: () => pets, player: () => player, control: () => control,
+    skills: () => skills, terrain: () => terrain, actor: () => actor,
+    uniqueEnv, landStatus, statusHook,
+    reportHit: (e, r) => reportHit(e, r), ringPoints: (...a) => ringPoints(...a),
+    groundTarget: r => groundTarget(r), aim: () => aim(), castSkill: (p, o) => castSkill(p, o),
+    running: () => state.running, playerLook: () => look,
+    rpgApply: (u, id, spec) => applyStatus(u, id, spec, 1),
+    gathering: () => !!gathering?.active, building: () => !!build?.mode,
+  });
+  setMechEnv(mech.mechEnv);
 
   /**
    * Where the player is AIMING — which is not the same as where the player is standing.
@@ -1464,6 +1498,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         // R23 — the attack's powers, where the bolt burst: shards, the pull, a chain, a patch. Only the
         // first bolt of a chain carries them, so a hop is not a fresh attack with fresh procs.
         if (plan.mods && !hop) resolveAttack(uniqueEnv, plan.mods, hits, { x: control.x, z: control.z, at: { x: at.x, z: at.z }, element: plan.element });
+        // R28 — a skill bolt's own ricochet, split and return (js/skillrun.js `afterBolt`)
+        if (!hop && plan.skill) mech.afterBolt(plan, at, hits, strikeOpts, hop);
 
         /**
          * CHAIN: jump to the next body along.
@@ -1547,6 +1583,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   function castSkill(i, { echo = false } = {}) {
     const plan = echo ? i : skills.use(i);
     if (!plan.ok) { if (plan.why) hud.log(plan.why); return null; }
+    // R28 — a form, the end of a channel or the start of one is the runtime's whole job
+    if (mech.intercept(plan, echo ? null : i)) { hud.setPlayer(player); return plan; }
+    const castFrom = { x: control.x, z: control.z, yaw: control.yaw };
+    const hpBefore = player.hp;
     const a = aim();
     const from = new THREE.Vector3(a.x + a.dx * 0.6, a.y - 0.2, a.z + a.dz * 0.6);
     /**
@@ -1568,7 +1608,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       if (plan.status && plan.statusSpec) landStatus(plan.status, plan.statusSpec, enemy, Math.max(1, plan.damage * STATUS_POWER_SHARE * (plan.statusMult || 1)));
       reportHit(enemy, result);
     };
-    const strikeOpts = { power, element: plan.element, skill: plan.skill?.id, onHit, applyStatus: statusHook };
+    // R28 — every strike of this cast carries the plan's own rules, its knock and its pull
+    const strikeOpts = mech.decorate(plan, { power, element: plan.element, skill: plan.skill?.id, onHit, applyStatus: statusHook });
     // R25 — every cast has a voice: its element's launch now, and its impact if it caught anything
     // (a physical skill keeps the melee swing and hit). Only bows had a sound before.
     if (plan.element && plan.element !== 'physical' && !['self', 'summon'].includes(plan.kind)) sound.spell(plan.element, 'launch');
@@ -1607,7 +1648,13 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       }
     }
 
-    if (plan.kind === 'summon') {
+    if (plan.kind === 'summon' && plan.summon && typeof plan.summon === 'object') {
+      // R28 — a temporary summon, a decoy, a summon at corpses: js/skillrun.js `afterCast` puts it down
+      spellfx.cast({ at: new THREE.Vector3(control.x, control.y + 0.4, control.z), element: plan.element, ms: 520 });
+    } else if (plan.kind === 'summon' && plan.howl && pets.canAdmit?.(plan.pet)?.ok === false) {
+      // R28 — `howl`: with the pack already up, the call is a howl that hastens and lifts it instead
+      mech.howl(plan);
+    } else if (plan.kind === 'summon') {
       pets.summon(plan.pet, player, { count: plan.petCount, at: control }).then(made => {
         if (made.length) hud.log(`${made[0].name} answers.`, 'good');
         // R18 — and if it was refused, SAY so. `made.refused` carries the reason and was dropped on
@@ -1633,19 +1680,27 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         const along = ex * a.dx + ez * a.dz;
         if (along < 0 || along > plan.range) continue;
         if (Math.hypot(ex - a.dx * along, ez - a.dz * along) > plan.width + (e.reach || 2) * 0.3) continue;
-        const result = rpg.strike(player, e, field.rng, { multiplier: power, element: plan.element, applyStatus: statusHook });
+        const result = rpg.strike(player, e, field.rng, { multiplier: power, element: plan.element, applyStatus: statusHook, skill: plan.skill?.id, rules: plan.rules });
         e.hitFlash = 0.18;
         if (e.state !== 'chase') e.state = 'chase';
-        onHit(e, result);
+        // R28 — a beam lands its knock (Groundbreaker's stun) the way every other strike does
+        field.land(e, result, { strike: strikeOpts.knock, fromX: control.x, fromZ: control.z, element: plan.element });
+        strikeOpts.onHit(e, result);
         healed += Math.round(result.amount * (plan.healFrac || 0));
         spellfx.impact({ at: new THREE.Vector3(e.x, e.y + 0.9, e.z), element: plan.element, crit: result.crit });
         if (result.dead) field.kill(e);
       }
       if (healed) { player.hp = Math.min(player.maxHp, player.hp + healed); hud.log(`Drained ${healed} back.`, 'good'); }
       sound.combat('hit');
+    } else if (plan.kind === 'ground' && (plan.line || mech.takesRepeats(plan))) {
+      // R28 — a line of strikes, or pulses that scatter / grow / alternate (js/skillrun.js)
+      const spot = groundTarget(plan.range);
+      plan.at = spot;
+      if (!mech.line(plan, spot, strikeOpts)) mech.repeats(plan, spot, strikeOpts);
     } else if (plan.kind === 'ground') {
       // it lands where you are looking, not where you are
       const spot = groundTarget(plan.range);
+      plan.at = spot;
       const at = new THREE.Vector3(spot.x, spot.y, spot.z);
       /**
        * R25 — THE NEW GROUND SKILLS. Judgement lands `delay` seconds after the cast (a ring shows
@@ -1679,6 +1734,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
           seconds: plan.ground, element: plan.element, power: power * 0.35,
         });
       }
+    } else if (plan.kind === 'dash' && mech.dash(plan, a, strikeOpts)) {
+      // R28 — to the first body, behind it, backward, a swap, beside an ally, a hook, a leap
+      skillSound(plan, []);
     } else if (plan.kind === 'dash') {
       // you move: everything along the line takes the hit, and you end up at the far end of it
       const spot = groundTarget(plan.range);
@@ -1778,6 +1836,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       };
       cone(true);
       for (let k = 1; k < plan.repeats; k++) setTimeout(() => cone(false), k * (plan.repeatEvery || 0.32) * 1000);
+    } else if (plan.kind === 'around' && mech.takesRepeats(plan)) {
+      // R28 — rings that grow, pulses that alternate (js/skillrun.js `repeats`)
+      feel.swing.clip = 'whirl';
+      mech.repeats(plan, { x: control.x, z: control.z }, strikeOpts);
     } else if (plan.kind === 'around') {
       // a ring on the ground, drawn where the ground actually is so it does not float on a slope
       const points = [];
@@ -1844,6 +1906,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         fireBolt(plan, a, dx, dy, dz, strikeOpts, from, k === 0);
       }
     }
+    // R28 — the self-ish half of the vocabulary: taunts, orders, barriers, wards, counters, links,
+    // imbues, placed posts and pools, afterimages, a reset in a crowd (js/skillrun.js `afterCast`)
+    mech.afterCast(plan, { a, hpBefore, origin: castFrom });
     hud.setPlayer(player);
     return plan;
   }
@@ -2560,6 +2625,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   /** What happens when something dies. Named, because the enemy field is rebuilt on every world. */
   function onEnemyKilled(e) {
     player.kills++;
+    // R28 — a corpse for the necromancer, a jumping Gnawed, and the killing skill's `onKill`
+    mech.onKill(e);
     freePrisonersOf(e);
     // §7 — a raider going down is progress through the wave, and the last one ends the raid
     if (e.raider) {
@@ -2821,6 +2888,16 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   }
 
   let field = makeField();
+  /**
+   * R28 — the built piece in an enemy's way (js/build.js `blockingPiece`). Set on the field here and
+   * again wherever a new field is made; read lazily, so `build` (declared far below) is only touched
+   * once the game is running. Never underground: a dungeon floor has no player-built walls.
+   */
+  const structuresFor = () => (ax, az, bx, bz) => {
+    // `dungeon` and `build` are declared further down; a call before they exist is a TDZ throw
+    try { return dungeon ? null : build.blockingPiece(ax, az, bx, bz); } catch { return null; }
+  };
+  field.structures = structuresFor();
   // R27 M9 — a hostile patrol gets bodies when you are near its clock position (js/patrols.js)
   const patrolBodies = createPatrolBodies({ patrols, field: () => field, radius: balance.warbands?.patrolSpawnRadius ?? 150,
     onWiped: p => hud.log(p.warband ? `${p.name} is broken — ${holderLine(field.warbands?.of?.(zones.byId(p.zoneId)), p.credit?.grip ?? 1)}.` : `${p.name} is wiped out.`, 'level') });
@@ -3578,6 +3655,12 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
           const r = out.route;
           hud.log(`${r.carrierName} sets off for ${r.toName} with ${r.kg} kg. Back in about ${Math.max(1, Math.round(r.seconds / 60))} min with ${r.revenue} gold, if the road is kind.`, 'good');
         } else hud.log(out.why, 'warn');
+        return out;
+      },
+      repeat: (id, on) => {
+        const out = civics.setRepeat(id, on);
+        if (!out.ok) hud.log(out.why, 'warn');
+        else hud.log(on ? `The ${out.route.carrierName.toLowerCase()} will load up and go again when it gets back.` : `This is the ${out.route.carrierName.toLowerCase()}'s last run.`, '');
         return out;
       },
     },
@@ -6940,6 +7023,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     });
     field = makeField();
     field.solids = [props.solids, features.solids, buildSolids, gateSolids, siteSolids];
+    field.structures = structuresFor();
     encounters = createEncounters({
       field, zones, terrain, balance, data: encounterData,
       // R14: the same router as the first one, or landing on a second world would un-throttle the
@@ -8899,6 +8983,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       actor.setRate(moving ? (control.moving * cycle) / STRIDE : 1);
     }
     actor.update(dt);
+    // R28 — a druid shape draws its creature in the humanoid's place
+    mech.placeBody(dt);
 
     if (horse) horse.group.visible = control.mounted;
     if (horse && control.mounted) {
@@ -9000,6 +9086,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      * what you see is what hits.
      */
     const swingWith = (hand, stepIndex) => {
+      // R28 — in a druid shape the basic attack is the beast's (js/skillrun.js `basicAttack`)
+      if (mech.basicAttack(hand)) return;
       const hands = handsOf(player);
       const weapon = hand === 'off' ? hands.off : hands.main;
       /**
@@ -9436,6 +9524,17 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     }
 
     field.update(dt, control, player, {
+      /**
+       * R28 — A SWING AT A WALL. js/actors.js asks `field.structures` which built piece stands
+       * between an enemy and what it is after, walks it up to that piece, and calls this instead of
+       * `onEnemyStrike` when it swings. The hit is the enemy's own damage roll (times the
+       * catalogue's `siegeDamage`); js/build.js decides whether the piece breaks.
+       */
+      onEnemyStrikeStructure: (e, id) => {
+        const [lo, hi] = e.dmg || [4, 8];
+        const amount = Math.max(1, Math.round((lo + field.rng() * (hi - lo)) * (build.plan.rules.siegeDamage ?? 1)));
+        return build.damagePiece(id, amount, { by: e.name });
+      },
 
       onStatusDamage: (e, amount) => {
         if (amount > 0.6) hud.log(`${e.name} takes ${amount.toFixed(0)}.`, '', 'dealt');
@@ -9459,6 +9558,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         const pet = e.aimingAt || pets.nearest(e.x, e.z, (e.reach || 2.4) + 0.6);
         const victim = pet && (e.aimingAt || field.rng() < 0.55) ? pet : player;
         const result = rpg.strike(e, victim, field.rng, { multiplier: incomingFrom(victim) * outgoingFrom(e) });
+        // R28 — a counter answered, a ward spent, a shockwave released, a share moved across a link
+        mech.onHurt(result, e, victim);
         if (e.lifeSteal) e.hp = Math.min(e.maxHp, e.hp + Math.round(result.amount * e.lifeSteal));
         // R23 — a frost nova off the hit, a barrier that bursts, a body the thorns just killed
         if (victim === player) {
@@ -9498,6 +9599,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         if (result.defenderPost?.guard) applyStatus(player, 'guard', skillData.statuses.guard, 1);
         if (result.dead && player.hp <= 0) respawn(e);
       },
+      // R28 — a taunting post or banner takes the swing instead of you
+      onEnemyStrikeObject: (e, obj) => mech.onObjectStruck(e, obj),
       // archers and casters: a real bolt, drawn with the same spell effects the player uses
       onEnemyShoot: e => {
         const spec = e.ranged || { range: 24, element: 'physical' };
@@ -9515,7 +9618,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
             const missed = Math.hypot(aimAt.x - to.x, aimAt.z - to.z) > 2.6;
             if (missed) return;
             const victim = aimAt === control ? player : aimAt;
+            // R28 — a Null Circle or a Sanctuary stops enemy ranged hits on anyone standing in it
+            if (blocksRanged(aimAt)) { spellfx.impact({ at: to, element: 'holy' }); return; }
             const result = rpg.strike(e, victim, field.rng, { multiplier: incomingFrom(victim) * outgoingFrom(e), element: spec.element, ranged: true });
+            mech.onHurt(result, e, victim);
             if (e.onHit?.length) field.statusOnHit(e, victim, skillData.statuses);
             if (victim === player) {
               // R23 — the same answers a melee hit gets; Frost Skin alone asks `ranged` and stays out
@@ -9531,6 +9637,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
     // companions, treasure, and everything the round-4 systems need every frame
     pets.update(dt, control, player, {
+      // R28 — temporary summons that burst when they end, and a Guardian Light's heal clock
+      ...mech.petHooks,
       // R25 — every companion hit is logged, with its number, under the 'Pet damage dealt' filter
       onPetHit: (p, target, result) => {
         if (result.dodged) hud.log(`${target.name} dodges ${p.name}.`, '', 'petDealt');
@@ -9598,7 +9706,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     }
     fx.update(dt);
     spellfx.update(dt);
-    skills.update(dt);
+    skills.update(dt, { fighting });
+    // R28 — placed posts and traps, channels, links, timed forms, imbues (js/skillrun.js)
+    mech.tick(dt, { fighting });
     // R23 — the powers that pulse on a clock: Pyre, Searing Light, the Dread Lantern, Stormrider
     tickSkillLeftovers(dt, tickAuras(uniqueEnv, rpg, player, dt, { fighting }));
     // whatever is burning or blessing the player keeps working while they run
@@ -10043,7 +10153,15 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         hour: sky.dayFraction * 24,
         gold: player.gold, rng: rpg.rng, at: state.elapsed,
       });
-      for (const r of civ.arrived || []) player.gold += civics.trade.collect(r.id).gold || 0;
+      /**
+       * R28 — PAY EVERY CART THAT IS BACK, not only the ones that got back this tick: one that
+       * arrived during the away catch-up sat "arrived" for ever and its gold never reached you.
+       * A standing run has already been sent on again by `civics.tick`; its upkeep comes out here.
+       */
+      for (const r of civics.trade.list()) {
+        if (r.state === 'arrived' || r.state === 'lost') player.gold += civics.trade.collect(r.id).gold || 0;
+      }
+      for (const x of civ.resent || []) player.gold -= x.spent || 0;
       if (civ.vendor) hud.log(`${civ.vendor.name} is asking after a bed. Press K.`, 'level');
       holding.drawHold();
       if (holding.open) holding.draw();
@@ -10156,6 +10274,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       build.aim(spot.x, spot.z);
       buildUI.tick();
     }
+    // R28 — nothing called this: the portal ring never turned and the Repair Stations never mended
+    build.update(dt);
     hud.tick(player, {
       place: dungeon ? dungeon.name : town ? `${town.name} (${town.kind || 'settlement'})` : (terrain.regionAt(control.x, control.z) || terrain.biomeAt(control.x, control.z).name),
       zone: dungeon ? { minLevel: dungeon.level, maxLevel: dungeon.level + 2, midLevel: dungeon.level + 1, danger: 'Underground' } : here,
@@ -10473,6 +10593,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   }
 
   function respawn(killer = null) {
+    // R28 — posts, traps, links and a channel do not survive a death; a shape ends with it
+    mech.reset();
+    mech.breakShapes('death');
     /**
      * THE STONE THAT SAID YOU WOULD GET UP ONCE.
      *
@@ -10804,6 +10927,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     firstPerson: on => setFirstPerson(on),
     /** Fire a skill slot from a test or the debug menu. */
     cast: i => castSkill(i),
+    // R28 — the skill vocabulary's runtime, for the Playwright specs and the debug menu
+    get mech() { return mech.debug(); },
     get statuses() { return { player: player.statuses || {}, enemies: field.enemies.map(e => ({ name: e.name, statuses: e.statuses || {} })) }; },
     /** Skip the cinematics — go straight to space, or straight down onto a world. */
     toSpace: () => { ensureSpace().enter({ fromPlanet: planet, elapsed: state.elapsed }); camera.far = 600000; camera.updateProjectionMatrix(); mode = 'space'; },

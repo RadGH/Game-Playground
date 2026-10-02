@@ -23,12 +23,12 @@
    ],
    "shield": true,
    "skills": [
-    "power_strike",
     "cleave",
+    "breaching_shove",
     "warcry",
-    "shield_bash",
     "whirlwind",
-    "execute"
+    "iron_resolve",
+    "groundbreaker"
    ],
    "look": {
     "body": {
@@ -521,7 +521,7 @@
     "guard_stance",
     "consecrate",
     "renew",
-    "shadow_lance",
+    "judgement",
     "rally"
    ],
    "look": {
@@ -816,7 +816,7 @@
     "curse",
     "drain",
     "poison_dart",
-    "rally"
+    "toxic_cloud"
    ],
    "pet": {
     "id": "bone_thrall",
@@ -921,7 +921,7 @@
     "bind_imp",
     "curse",
     "drain",
-    "fire_wall",
+    "void_rift",
     "meteor"
    ],
    "pet": {
@@ -1326,7 +1326,7 @@
     "power_strike",
     "cleave",
     "firebolt",
-    "guard_stance",
+    "flamethrower",
     "fire_wall",
     "meteor"
    ],
@@ -1423,9 +1423,9 @@
    "skills": [
     "firebolt",
     "fire_wall",
-    "thunderclap",
+    "flamethrower",
     "arcane_burst",
-    "quicken",
+    "ember_stride",
     "meteor"
    ],
    "pet": {
@@ -1526,7 +1526,7 @@
     "chain_bolt",
     "frost_nova",
     "storm_beam",
-    "thunderclap",
+    "storm_orbs",
     "quicken",
     "meteor"
    ],
@@ -1626,12 +1626,12 @@
    ],
    "shield": false,
    "skills": [
-    "poison_dart",
-    "call_wolf",
+    "thornlash",
     "renew",
-    "frost_nova",
-    "stoneskin",
-    "rally"
+    "briarback_shape",
+    "call_wolf",
+    "fenrunner_shape",
+    "sporecap_shape"
    ],
    "pet": {
     "id": "grove_wolf",
@@ -1931,7 +1931,7 @@
     "quicken",
     "ice_lance",
     "frost_nova",
-    "smoke",
+    "blizzard",
     "meteor"
    ],
    "look": {
@@ -2425,7 +2425,7 @@
     "chain_bolt",
     "arcane_burst",
     "storm_beam",
-    "quicken",
+    "storm_orbs",
     "meteor"
    ],
    "pet": {
@@ -2825,7 +2825,7 @@
     "renew",
     "consecrate",
     "curse",
-    "guard_stance",
+    "judgement",
     "rally"
    ],
    "pet": {

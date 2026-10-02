@@ -73,7 +73,7 @@ async function buildBase(page) {
 
 test('a starved furnace raises the pill, and the Production tab says why', async ({ page }) => {
   // the alert's 12 s grace is GAME time, and a headless page runs at a few frames a second
-  test.setTimeout(360000);
+  test.setTimeout(480000);
   const errors = await land(page);
   const base = await buildBase(page);
   expect(base.none, 'nowhere flat to build').toBeFalsy();
@@ -103,13 +103,13 @@ test('a starved furnace raises the pill, and the Production tab says why', async
   expect(queued.out.ok, queued.out.why).toBe(true);
 
   // the alert waits out its grace (12 s) before it is an alert
-  const lit = await page.waitForFunction(() => !document.getElementById('prod-pill')?.hidden, null, { timeout: 150000 }).then(() => true, () => false);
+  const lit = await page.waitForFunction(() => !document.getElementById('prod-pill')?.hidden, null, { timeout: 280000 }).then(() => true, () => false);
   if (!lit) {
     console.log('pill never lit:', JSON.stringify(await page.evaluate(id => {
       const f = window.farhold; const m = f.works.get(id);
       let threw = null; try { f.production.sample(f.state.elapsed); } catch (e) { threw = String(e && e.stack || e); }
       return { state: m.state, starvedFor: m.starvedFor, sheet: f.hud.sheetOpen, paused: f.state.paused, elapsed: f.state.elapsed, samples: f.production.samples, threw, alerts: f.production.alerts(), sum: f.production.summary() };
-    }, base.furnace)));
+    }, base.furnace)), 'errors so far:', JSON.stringify(errors.slice(0, 3)));
   }
   expect(lit, 'the pill never appeared').toBe(true);
   const pill = await page.evaluate(() => document.getElementById('prod-pill').textContent);
@@ -195,6 +195,10 @@ test('the Trade tab sends a cart from a Trade Post, and it goes on the road', as
   expect(priced.disabled).toBe(false);
   await page.screenshot({ path: 'prototypes/farhold/research/round28-automation/trade.png' });
 
+  // a standing run: Repeat on, then send
+  await page.evaluate(() => document.querySelector('.civ-cart-go .civ-cart-repeat').click());
+  await page.waitForTimeout(200);
+  expect(await page.evaluate(() => document.querySelector('.civ-cart-go .civ-cart-repeat').textContent)).toBe('Repeat: on');
   await page.evaluate(() => document.querySelector('.civ-cart-send').click());
   await page.waitForTimeout(500);
   const after = await page.evaluate(id => {
@@ -214,5 +218,15 @@ test('the Trade tab sends a cart from a Trade Post, and it goes on the road', as
   expect(after.text).toMatch(/On the road/);
   expect(after.text).not.toMatch(/No carts out/);
   await page.screenshot({ path: 'prototypes/farhold/research/round28-automation/trade-sent.png' });
+  const standing = await page.evaluate(() => ({
+    repeat: window.farhold.goodsMarket.list()[0]?.repeat,
+    chip: document.querySelector('.civ-cart-route .civ-cart-repeat')?.textContent || '',
+  }));
+  expect(standing.repeat, 'the Repeat toggle did not reach the route').toBe(true);
+  expect(standing.chip).toBe('Repeat: on');
+  // and the row's own toggle makes it the last run
+  await page.evaluate(() => document.querySelector('.civ-cart-route .civ-cart-repeat').click());
+  await page.waitForTimeout(200);
+  expect(await page.evaluate(() => window.farhold.goodsMarket.list()[0]?.repeat)).toBe(false);
   expect(errors).toEqual([]);
 });

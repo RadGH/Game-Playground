@@ -16,6 +16,7 @@ import { dirname, join } from 'node:path';
 
 import {
   createBuildPlan, makeBag, runSpots, runPiecesClash, solidsFor, lineSpots, boxesOverlap, upgradeCost, realCost,
+  structureHp, repairCost, salvageOf, damageBand, blockingPiece,
 } from '../js/buildplan.js';
 import { createTerraform } from '../js/terraform.js';
 import { ObstacleField } from '../js/collide.js';
@@ -309,4 +310,116 @@ test('no catalogue flag is left for nobody to read: blocks / perch are gone, the
   assert.equal(bar[0].kind, 'seg');
   // "somewhere a hired archer can actually stand" — a post slot is what js/civics.js posts a guard to
   assert.ok(def('watchtower').post?.slots >= 1);
+});
+
+// ------------------------------------------------------------------ structure damage (R28, building)
+
+test('hit points: the catalogue hp where there is one, derived from cost and tier where there is not', () => {
+  assert.equal(structureHp(def('palisade')), def('palisade').hp);
+  for (const piece of catalogue.structures) assert.ok(structureHp(piece) >= 60, `${piece.id} has ${structureHp(piece)} hp`);
+  // move the knob: a dearer, later piece with no hp of its own is tougher
+  const crate = structuredClone(def('storage_crate'));
+  delete crate.hp;
+  const base = structureHp(crate);
+  crate.cost = { timber: 12 };
+  assert.ok(structureHp(crate) > base);
+  crate.tier = 2;
+  assert.equal(structureHp(crate), Math.round((40 + 20 * 12) * 2));
+  // every placed piece carries its bar
+  const plan = planOf();
+  const e = plan.place({ id: 'storage_crate', x: 0, z: 0, rot: 0 }).entry;
+  assert.equal(e.maxHp, structureHp(def('storage_crate')));
+  assert.equal(e.hp, e.maxHp);
+});
+
+test('a repair costs a share of the build cost per bar, pro rata, rounded up, in real materials', () => {
+  const pal = def('palisade');
+  const full = realCost(pal.cost);
+  const k = Object.keys(full)[0];
+  assert.equal(repairCost(pal, pal.hp, pal.hp, 0.5)[k], Math.ceil(full[k] * 0.5));
+  assert.equal(repairCost(pal, pal.hp / 2, pal.hp, 0.5)[k], Math.ceil(full[k] * 0.25));
+  assert.equal(repairCost(pal, 1, pal.hp, 0.5)[k], 1, 'a scratch still costs one');
+  assert.deepEqual(repairCost(pal, 0, pal.hp), {});
+  assert.equal(repairCost(pal, pal.hp, pal.hp, 1)[k], full[k], 'the share is the knob');
+  for (const key of Object.keys(repairCost(def('gate'), 10, 900))) assert.ok(!(key in { timber: 1, iron: 1, block: 1 }), key);
+});
+
+test('damage darkens, breaks at 0 for the salvage share, and a repair pays the quote and can be undone', () => {
+  const bag = rich();
+  const plan = createBuildPlan({ catalogue, terrain: flat, store: bag });
+  const e = plan.place({ id: 'palisade', x: 0, z: 0, rot: 0 }).entry;
+  const max = e.maxHp;
+  assert.equal(damageBand(1), 0);
+  let r = plan.damage(e.id, max * 0.5);
+  assert.equal(r.destroyed, false);
+  assert.equal(damageBand(plan.health(e).ratio), 2);
+  // the quote, then the repair, then the undo of it
+  const q = plan.repairOf(e);
+  assert.ok(q.ok, q.why);
+  assert.deepEqual(q.cost, repairCost(def('palisade'), max * 0.5, max, plan.rules.repairShare));
+  const k = Object.keys(q.cost)[0];
+  const before = bag.have(k);
+  const fixed = plan.repair(e.id);
+  assert.equal(plan.health(e).hp, max);
+  assert.equal(before - bag.have(k), q.cost[k]);
+  assert.equal(plan.repairOf(e).ok, false, 'a whole piece offered a repair');
+  plan.unrepair(e.id, fixed.was, fixed.paid);
+  assert.equal(plan.health(e).hp, max * 0.5);
+  assert.equal(bag.have(k), before);
+  // a poor player is told what they are short of
+  const poor = createBuildPlan({ catalogue, terrain: flat, store: makeBag({ log: 6 }) });
+  const p2 = poor.place({ id: 'palisade', x: 0, z: 0, rot: 0 }).entry;
+  poor.damage(p2.id, 100);
+  assert.match(poor.repairOf(p2).why, /short of/);
+  // broken: out of the ledger, and the salvage share comes back
+  const have = bag.have(k);
+  r = plan.damage(e.id, max * 10);
+  assert.equal(r.destroyed, true);
+  assert.equal(plan.entries.length, 0);
+  assert.deepEqual(r.refund, salvageOf(def('palisade'), plan.rules.salvage));
+  assert.equal(bag.have(k) - have, r.refund[k] || 0);
+  // move the knob
+  const cat2 = structuredClone(catalogue);
+  cat2.rules.salvage = 1;
+  const p3 = createBuildPlan({ catalogue: cat2, terrain: flat, store: rich() });
+  const e3 = p3.place({ id: 'palisade', x: 0, z: 0, rot: 0 }).entry;
+  assert.deepEqual(p3.damage(e3.id, 1e9).refund, realCost(def('palisade').cost));
+});
+
+test('damage survives a save; an old save (hp 0) loads whole; the ceiling is always the catalogue\'s', () => {
+  const plan = planOf();
+  const e = plan.place({ id: 'stone_wall', x: 0, z: 0, rot: 0 }).entry;
+  plan.damage(e.id, 300);
+  const saved = JSON.parse(JSON.stringify(plan.toJSON()));
+  const back = planOf({ saved });
+  assert.equal(back.health(back.entries[0]).hp, e.maxHp - 300);
+  saved.entries[0].hp = 0;
+  saved.entries[0].maxHp = 0;
+  const old = planOf({ saved });
+  assert.equal(old.health(old.entries[0]).hp, structureHp(def('stone_wall')));
+  // healing never goes past the bar
+  const p = planOf();
+  const w = p.place({ id: 'palisade', x: 0, z: 0, rot: 0 }).entry;
+  p.damage(w.id, 50);
+  assert.equal(p.heal(w.id, 500), 50);
+  assert.equal(p.health(w).ratio, 1);
+});
+
+test('the built piece in an enemy\'s way: a wall across the line, not one off to the side or far ahead', () => {
+  const plan = planOf();
+  plan.run({ id: 'palisade', points: [[-6, 0], [6, 0]] });
+  // walking from z = -5 to the player at z = +5: the wall is across the line
+  const hit = plan.blocking(0, -5, 0, 5);
+  assert.ok(hit, 'the wall was not in the way');
+  assert.ok(Math.abs(hit.z) < 1e-6 && hit.gap > 4 && hit.gap < 5, JSON.stringify(hit));
+  // off to one side, or a wall too far ahead to matter yet
+  assert.equal(plan.blocking(20, -5, 20, 5), null);
+  assert.equal(plan.blocking(0, -40, 0, 5, { ahead: 14 }), null);
+  // a gate counts (its leaf stops enemies), and so does a lone barricade or a crate in the way
+  const p2 = planOf();
+  p2.place({ id: 'gate', x: 0, z: 0, rot: 0 });
+  assert.equal(p2.blocking(0, -5, 0, 5)?.entry.key, 'gate');
+  const list = [{ id: 'c', key: 'storage_crate', x: 0, z: 0, w: 1.6, d: 1.6, h: 1.4, rot: 0 }];
+  assert.equal(blockingPiece(list, k => def(k), 0, -5, 0, 5)?.id, 'c');
+  assert.equal(blockingPiece(list, k => def(k), 5, -5, 5, 5), null);
 });

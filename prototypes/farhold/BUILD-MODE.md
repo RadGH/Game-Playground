@@ -1459,3 +1459,120 @@ nothing read.
   three corners with one clicked twice → the card shows *"N m · N sections, 1 gate"* and *"click to
   add N m more"* → Enter lays exactly what was billed, gate included → one Ctrl+Z removes the whole
   run. Screenshots go in `test-results/round28-building/`.
+
+## Round 28 — automation
+
+> *"Improve building system and automation. Use sub agents and brainstorm ideas, update interfaces."*
+
+The building half of this round is the section above. This is the other half: production chains,
+drills and routes, storage, power, workers, standing orders, and the screens that explain them.
+The audit, the 22-idea brainstorm, the roast and the plan are in `research/round28-automation.md`;
+screenshots in `research/round28-automation/`.
+
+### The audit — the same fault again
+
+Once a base had more than three machines there was no screen that said what it made, what it ate,
+what was stuck or why. Four reports had been written for exactly that screen and nothing called
+them: `stores.overview()` (its own comment says "for the base overview panel"), `stores.linkAdvice`,
+`grid.overview()` and `works.allJobs()`. Two data rules were read by nobody: a recipe's `power`
+("the extra draw while working", on 33 of 61 recipes) and its `waste` list ("only so the UI can grey
+them" — the UI never did). A supply route could carry `only` some materials and leave a `keep`
+floor behind, and its only caller passed neither.
+
+Bugs found and fixed:
+
+* **A reload turned every Small Drill into a full Drill.** `mining.toJSON` did not save `tool`,
+  and `drillRate` fell back to `'drill'` — tier 3 and 2.3 times faster. Saved now; an old save
+  works it out from the piece standing there.
+* **A digging drill never told the grid it was busy**, so an 18 kW Drill was billed the 25% idle
+  share and one generator ran four of them. `grid.setBusy` is called now. To keep saved bases
+  running, the Burner Generator goes 30 -> 40 kW and a recipe's own `power` is drawn at
+  `recipePowerShare` 0.5 (data/refining.json). A test plays the one-generator base.
+* **The away clock never ran the drills.** Leave for six hours and the furnaces ran on whatever ore
+  was already in the crates. The drills dig in both away loops now, in steps of a minute at most,
+  so one long step cannot dig ten thousand ore into a 200 pile.
+* **The next-step hint read two fields nothing writes** (`d.routed`, `d.deliveredPerMinute`), so
+  with a drill down it said "put a crate near the drill" forever.
+* **A hand-cranked Small Drill read "power"** in the overview while it was digging.
+* **The people side** (from the review): `housing.houses` is a function and two readers used it
+  as a list, so the population reading and migration threw "filter is not a function" as soon as a
+  real house stood (`housesOf()` in js/population.js). Guard posts had no way in at all
+  (`colony.postGuard` / `standDown`, the Command Rod's guard order, and People-tab buttons). The
+  Gambler's "spent 1000" was never counted (`civics.addSpend` now runs on shop buys and recruit
+  fees). "Collect the tax" paid out a fresh day's tax on every click; it now empties the purse the
+  daily tax fills. The work board's "assign" bound a citizen to an ORDER id as if it were a station.
+  Migrant offers printed "undefined, undefined". The Trade Post's 2,000 kg vault that nothing ever
+  filled is gone, and so are the functions nothing called (listed in the test).
+
+### What was built
+
+* **`js/production.js`** — pure, no DOM. A **flow meter** that counts at the source (what the
+  machines finished plus what the drills delivered, not what the crates happen to hold, so a cart in
+  transit or you emptying a crate does not read as production). **Rated numbers** per machine
+  ("makes 3.8 iron ingot a minute from 7.5 iron ore"). A **diagnosis traced upstream**: a starved
+  furnace asks whether something of yours makes the ore, whether that thing is itself stuck (two
+  machines deep), whether a drill digs it and why it is not delivering, whether some sits in a
+  store this one cannot reach — then says one thing to do. A cold furnace that also has nothing to
+  smelt says both (js/refine.js checks labour before inputs, so it only ever reported "unworked").
+  **Alerts** that wait out a blip (12 s for a machine), worst first.
+* **Full stores asked per material.** js/stores.js caps one material at a quarter of a store and
+  all raw materials at half, so a box can turn ore away at 40% full. The alert asks about the
+  things actually arriving (drill routes, machine outputs, routes in) and says which line it hit.
+* **Keep-in-stock orders** — `works.queue(id, recipe, 0, { keep: 50 })`. The machine stops at the
+  line (state `stocked`, added to data/power.json), starts again below it, stops asking for a
+  worker while stocked, takes turns with a second keep order, and leaves a work order already up
+  in place rather than throwing away a citizen's half-done units. A supply route out of the same
+  pool leaves the higher of its own floor and the keep line behind (`logistics.setFloors`).
+* **Station screen** (js/station-ui.js): the rated line, the "why" chain, Keep 20 / 50 / 100
+  beside the batch buttons, +/- on a keep line, and byproducts greyed in brackets.
+* **The Production tab** — first tab of the Holding (K): Needs you, What the base makes a minute
+  (in / out / on hand, measured made and used, "runs out in"), Machines (badge, recipe, keep line
+  +/-10, switch off, rated line, why), Drills (dug / carried / piled, Re-route), Power (per grid,
+  shed list), Storage (fill, top five piles, what it is turning away, one-relay join advice) and
+  Supply routes (both floors side by side, material chips for `only`, leave-behind +/-10). The rail
+  button carries the alert count.
+* **The pill** — "2 things at your base need you — K" on the HUD; a click opens the tab.
+* **Send a cart** (the Trade tab). js/trade.js could plan, send, move, rob and pay a cart route,
+  and main.js already collected the gold on arrival, but nothing ever called `plan` or `open`, so
+  "On the road" was empty in every game. `civics.cartCarriers / cartGoods / cartPlan / sendCart`
+  are the join: from which Trade Post, to which town (nearest 16; size 3+ or a port has a market),
+  on which carrier (a mule needs a Drover in residence, a drone a Hauler Post — each refusal says
+  so), with how many guards, carrying what (the post's stores first, your hold second). The run is
+  priced live before anything leaves; a refused send puts back whatever it lifted. "On the road"
+  shows the revenue rather than `profit`, which subtracts what your own goods would cost to buy.
+  The Holding no longer redraws under an open drop-down.
+* **Standing cart runs.** A "Repeat" toggle on the Send a cart form and on each On-the-road row.
+  `trade.restand` was written for this and had no caller: an arrived repeat cart now re-loads the
+  same goods at its post and goes again (`civics.resend`, run from `civics.tick`), and stops with
+  the reason in the log when the goods, the feed or the upkeep run out. It asks whether the load
+  still clears its UPKEEP (`restand(…, { clears: 'revenue' })`) rather than `profit`, which
+  subtracts the buying price of goods you made yourself and would have stopped nearly every run.
+  The route carries `postId` and `toPlace`, so it survives a save. A cart that got back during the
+  away catch-up used to sit "arrived" forever with its gold never paid; main.js now pays every
+  arrived cart, not only the ones that arrived this tick.
+* **The pack mule eats.** `feed: { grain: 4 }` had been in data/colony.json since the carriers were
+  written and was never charged, so the mule was simply the best carrier below the wagon. It is
+  eaten per trip from the stores beside the Trade Post (the post itself takes trade goods only, and
+  the refusal says to put the grain in a box beside it); a send or a re-send with no grain is refused.
+
+### Tests
+
+* `tests/round28-automation.test.js` — 35 node tests: each audit bug through the real modules,
+  keep-in-stock, the meter, the upstream diagnosis, store refusals, alerts, the people fixes, the
+  dead code, the cart send end to end, standing runs (re-send, stop on empty goods and on
+  unpaid upkeep, save/load, the toggle) and the mule's grain.
+* `tests/round28-automation.spec.js` — the browser: a real Bunkhouse first (the screen that used
+  to throw), a furnace on a keep order with no ore raises the pill, the pill opens Production, the
+  row says what it is short of, and +10 reaches the machine; then the Trade tab loads salt at a
+  Trade Post through the buttons, prices it, sends it with Repeat on, it goes on the road, and the
+  row's own toggle turns the repeat off.
+* `tests/holding.spec.js` now polls for the colony tick instead of sleeping 1.2 s (a headless page
+  can run at 7 frames a second, which is under one 15-frame tick). `tests/round17-build.spec.js`
+  asks the furnace's recipe rows for iron instead of the panel's first 600 characters, which R28's
+  keep row pushed the recipes past.
+
+### Parked
+
+Chain orders ("make 10 machine parts" queuing the ingots upstream — a keep order on the ingot
+furnace covers most of it), a production graph view, hauler vehicles you can see on the road,
+and a citizen shift schedule.

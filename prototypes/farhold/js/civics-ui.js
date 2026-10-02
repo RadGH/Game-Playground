@@ -357,14 +357,14 @@ export function createCivicsScreen({
       : empty('A Trade Post is the only place a cart route can start or end. Its goods are whatever the stores beside it hold.'));
 
     const routes = pane('On the road', (r.routes || []).length
-      ? (r.routes || []).map(x => row(
+      ? (r.routes || []).map(x => withRepeat(x, row(
         `${x.carrierName} to ${x.toName}`,
         x.state === 'travelling' ? (x.left < 60 ? 'under a minute' : `${Math.round(x.left / 60)} min`) : x.state,
         // R28 — the revenue, not `profit`: `profit` takes off what the goods would COST to buy at the
         // post, and these are your own goods, so a good run read "−51 gold if it gets there"
         `${x.kg} kg · ${x.guards} guard${x.guards === 1 ? '' : 's'} · ${pct(x.risk)} risk · ${x.revenue} gold if it gets there`,
         x.state === 'lost' ? 'civ-bad' : x.state === 'arrived' ? 'civ-good' : '',
-      ))
+      )))
       : empty('No carts out. A run pays roughly what a fight does and does it while you are somewhere else.'));
 
     return [holdPane, posts, drawSendCart(r), routes].filter(Boolean);
@@ -376,7 +376,23 @@ export function createCivicsScreen({
    * from which post, to which town, on what, with how many guards, carrying what — and the price
    * of the run worked out live, before anything leaves.
    */
-  const draft = { postId: null, toId: null, carrier: 'hand_cart', guards: 0, manifest: {} };
+  const draft = { postId: null, toId: null, carrier: 'hand_cart', guards: 0, manifest: {}, repeat: false };
+
+  /**
+   * R28 — A STANDING RUN. Each cart sent from your own post carries a Repeat toggle: on, it
+   * re-loads the same goods when it gets back and goes again (js/civics.js `resend`), and stops
+   * with the reason in the log when the goods, the feed or the upkeep run out.
+   */
+  function withRepeat(x, line) {
+    if (!x.postId || x.state !== 'travelling') return line;
+    line.classList.add('civ-cart-route');
+    line.append(el('button', {
+      class: `prod-chip civ-cart-repeat${x.repeat ? ' on' : ''}`, text: x.repeat ? 'Repeat: on' : 'Repeat: off',
+      title: x.repeat ? 'It will load up and go again when it gets back. Click to make this the last run.' : 'Click to send it again, with the same load, every time it gets back.',
+      onclick: () => { cartActions?.repeat?.(x.id, !x.repeat); draw(); },
+    }));
+    return line;
+  }
 
   function select(options, value, onpick, cls) {
     const s = el('select', { class: `civ-select ${cls || ''}`.trim(), onchange: e => { onpick(e.target.value); e.target.blur(); draw(); } });
@@ -418,7 +434,7 @@ export function createCivicsScreen({
     ]);
     const carry = el('div', { class: 'civ-row civ-cart-pick' }, [
       el('b', { text: 'On' }),
-      select(carriers.map(c => ({ value: c.key, text: `${c.name} · ${c.hold} kg · ${c.upkeep} gold${c.ok ? '' : ' (not yet)'}`, disabled: !c.ok })), draft.carrier, v => { draft.carrier = v; }, 'civ-cart-carrier'),
+      select(carriers.map(c => ({ value: c.key, text: `${c.name} · ${c.hold} kg · ${c.upkeep} gold${Object.keys(c.feed || {}).length ? ` + ${Object.entries(c.feed).map(([k, n]) => `${n} ${k.replace(/_/g, ' ')}`).join(', ')}` : ''}${c.ok ? '' : ' (not yet)'}`, disabled: !c.ok })), draft.carrier, v => { draft.carrier = v; }, 'civ-cart-carrier'),
       el('span', { class: 'civ-note', text: `${draft.guards} guard${draft.guards === 1 ? '' : 's'}` }),
       el('button', { class: 'prod-btn', text: '−', title: 'One guard fewer', onclick: () => { draft.guards = Math.max(0, draft.guards - 1); draw(); } }),
       el('button', { class: 'prod-btn', text: '+', title: `One more guard (this carrier takes ${carrier?.guardsMax || 0})`, onclick: () => { draft.guards = Math.min(carrier?.guardsMax || 0, draft.guards + 1); draw(); } }),
@@ -444,9 +460,12 @@ export function createCivicsScreen({
       })
       : [empty('Nothing to sell yet. Trade goods are made at a workshop, kiln or loom; put them in the stores beside the post or carry them in your hold.')];
 
-    const plan = Object.keys(draft.manifest).length
+    let plan = Object.keys(draft.manifest).length
       ? civics.cartPlan({ ...draft, to }, { day })
       : { ok: false, why: 'Load something first.' };
+    // the pack mule eats: say so before the button, not after it
+    const hungry = plan.ok ? civics.feedRefusal?.(draft.carrier, draft.postId) : null;
+    if (hungry) plan = { ok: false, why: hungry };
     const verdict = plan.ok
       ? el('div', { class: 'civ-sub civ-cart-plan' }, [
         el('div', { text: `${plan.kg} of ${plan.hold} kg · ${plan.metres} m · about ${Math.max(1, Math.round(plan.seconds / 60))} min on the road · ${pct(plan.risk)} chance of an ambush` }),
@@ -457,16 +476,22 @@ export function createCivicsScreen({
       class: 'civ-go civ-cart-send', text: plan.ok ? `Send it (${plan.upkeep} gold)` : 'Send it',
       onclick: () => {
         const out = cartActions?.send?.({ ...draft, to, manifest: { ...draft.manifest } });
-        if (out?.ok) draft.manifest = {};
+        if (out?.ok) { draft.manifest = {}; draft.repeat = false; }
         draw();
       },
     });
     if (!plan.ok) send.disabled = true;
+    const repeat = el('button', {
+      class: `prod-chip civ-cart-repeat${draft.repeat ? ' on' : ''}`, text: draft.repeat ? 'Repeat: on' : 'Repeat: off',
+      title: 'On: the cart loads the same goods and goes again every time it gets back, until something runs out.',
+      onclick: () => { draft.repeat = !draft.repeat; draw(); },
+    });
+    const go = el('div', { class: 'civ-row civ-cart-go' }, [send, repeat]);
 
     return pane('Send a cart', [
       pick, carry,
       ...(unavailable.length ? [el('div', { class: 'civ-sub', text: unavailable.join(' ') })] : []),
-      ...goodRows, verdict, send,
+      ...goodRows, verdict, go,
     ]);
   }
 

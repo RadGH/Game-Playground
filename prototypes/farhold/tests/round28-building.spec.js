@@ -12,7 +12,7 @@
 import { test, expect } from '@playwright/test';
 import { mkdirSync } from 'node:fs';
 
-const SHOTS = 'test-results/round28-building';
+const SHOTS = 'prototypes/farhold/research/round28-building';
 
 async function land(page) {
   const errors = [];
@@ -205,6 +205,121 @@ test('the Wall tool from the ring: corners, a corner clicked twice is a gate, th
   await page.keyboard.press('Control+KeyZ');
   await page.waitForTimeout(400);
   expect(await page.evaluate(() => window.farhold.build.entries.length)).toBe(before);
+
+  expect(errors).toEqual([]);
+});
+
+test('an enemy with a wall in its way breaks it; the Repair tool quotes and mends a damaged section', async ({ page }) => {
+  test.setTimeout(240_000);
+  mkdirSync(SHOTS, { recursive: true });
+  const errors = await land(page);
+  const spot = await flatSpot(page);
+  expect(spot).not.toBeNull();
+
+  // a three-section palisade across the view, where the cursor at (640, 470) meets the ground (the
+  // clicks that lay a wall are the test above; this one is about what happens to it)
+  await page.keyboard.press('KeyB');
+  await page.mouse.click(640, 470, { button: 'right' });       // right-click puts the ring away
+  await expect(page.locator('#build-radial')).toBeHidden();
+  await page.mouse.move(640, 470);
+  await page.waitForTimeout(400);
+  const layout = await page.evaluate(() => {
+    const f = window.farhold;
+    f.bag.add('log', 300);
+    const w = f.build.aimAt, px = f.control.x, pz = f.control.z;
+    const L = Math.hypot(w.x - px, w.z - pz) || 1;
+    const dx = (w.x - px) / L, dz = (w.z - pz) / L;
+    // the Wall tool's own calls, so the sections go through the same join (solid, on the base)
+    f.build.setTool('wall');
+    f.build.select('palisade');
+    f.build.addRunPoint(w.x - dz * 3, w.z + dx * 3);
+    f.build.addRunPoint(w.x + dz * 3, w.z - dx * 3);
+    const res = f.build.finishRun();
+    return { ids: (res.placed || []).map(e => e.id), enemy: { x: px + dx * (L + 7), z: pz + dz * (L + 7) } };
+  });
+  const ids = layout.ids;
+  await page.keyboard.press('KeyB');
+  expect(await page.evaluate(() => window.farhold.build.mode)).toBe(false);
+  expect(ids.length).toBe(3);
+
+  // an enemy on the far side, hitting hard enough that the test does not take minutes; companions
+  // are told to stand aside so the only thing between it and the player is the wall
+  const spawned = await page.evaluate(async ({ x, z }) => {
+    const f = window.farhold;
+    f.field.setCompanions(null);
+    const def = (f.field.defs || []).find(d => !d.ranged && !d.hover && !d.flies) || f.field.defs[0];
+    const e = await f.field.add(def, 1, x, z);
+    if (!e) return null;
+    e.hp = e.maxHp = 1e6;
+    e.dmg = [150, 150];
+    e.state = 'chase';
+    window.__siege = e;
+    return { name: e.name, ranged: !!e.ranged };
+  }, layout.enemy);
+  expect(spawned, 'no enemy could be spawned').not.toBeNull();
+  expect(spawned.ranged).toBe(false);
+
+  // it walks up to the wall and swings at it: one section is damaged, and darkens with a bar
+  await page.waitForFunction(() => window.farhold.build.damaged.length > 0, null, { timeout: 60000 });
+  const hurt = await page.evaluate(() => {
+    const f = window.farhold;
+    const e = f.build.damaged[0];
+    // take the enemy out of the fight now, so the section is still standing to repair
+    window.__siege.hp = 0; window.__siege.playerDamage = 0; f.field.kill(window.__siege);
+    return { id: e.id, ...f.build.plan.health(e), x: e.x, z: e.z };
+  });
+  expect(ids).toContain(hurt.id);
+  expect(hurt.hp).toBeLessThan(hurt.maxHp);
+  await page.screenshot({ path: `${SHOTS}/damaged-wall.png` });
+
+  // Repair, from the Tools ring: hover the section and the card quotes the price; click mends it
+  await page.keyboard.press('KeyB');
+  const ring = page.locator('#build-radial');
+  await expect(ring).toBeVisible();
+  await ring.locator('.br-item[data-id="_tools"]').click();
+  await ring.locator('.br-item[data-id="repair"]').click();
+  await expect(ring).toBeHidden();
+  expect(await page.evaluate(() => window.farhold.build.tool)).toBe('repair');
+  // find a screen point over the damaged section by sweeping the cursor until the tool picks it
+  const canvas = page.locator('#stage canvas');
+  let over = null;
+  for (let y = 380; y <= 640 && !over; y += 20) {
+    for (let x = 440; x <= 840; x += 40) {
+      await page.mouse.move(x, y);
+      await page.waitForTimeout(120);
+      if (await page.evaluate(id => window.farhold.build.lastPoint?.entry?.id === id, hurt.id)) { over = [x, y]; break; }
+    }
+  }
+  expect(over, 'the cursor never found the damaged section').not.toBeNull();
+  const card = page.locator('#build-card');
+  await expect(card).toContainText(/Click: repair the Palisade \(\d+\/\d+ HP\) for /);
+  await page.screenshot({ path: `${SHOTS}/repair-quote.png` });
+  const logs = await page.evaluate(() => window.farhold.bag.count('log'));
+  await canvas.click({ position: { x: over[0], y: over[1] } });
+  await page.waitForTimeout(400);
+  const after = await page.evaluate(id => {
+    const f = window.farhold;
+    const e = f.build.entries.find(x => x.id === id);
+    return { ...f.build.plan.health(e), logs: f.bag.count('log') };
+  }, hurt.id);
+  expect(after.hp, 'the repair did not mend it').toBe(after.maxHp);
+  expect(logs - after.logs, 'the repair was free').toBeGreaterThan(0);
+  await page.keyboard.press('KeyB');
+
+  // a second enemy, hard enough to break a section outright: the piece is gone, salvage logged
+  await page.evaluate(async ({ x, z }) => {
+    const f = window.farhold;
+    const def = (f.field.defs || []).find(d => !d.ranged && !d.hover && !d.flies) || f.field.defs[0];
+    const e = await f.field.add(def, 1, x, z);
+    e.hp = e.maxHp = 1e6;
+    e.dmg = [5000, 5000];
+    e.state = 'chase';
+    window.__siege = e;
+  }, layout.enemy);
+  await page.waitForFunction(n => window.farhold.build.entries.filter(e => e.key === 'palisade').length < n, 3, { timeout: 60000 });
+  const broke = await page.evaluate(() => window.farhold.hud.lines.slice(0, 8).map(l => l.text).join(' | '));
+  expect(broke).toMatch(/breaks the Palisade\. .* salvaged\./);
+  await page.screenshot({ path: `${SHOTS}/wall-broken.png` });
 
   expect(errors).toEqual([]);
 });

@@ -118,6 +118,88 @@
    "damage": 0.2,
    "resist": 0.15,
    "seconds": 8
+  },
+  "root": {
+   "name": "Rooted",
+   "kind": "control",
+   "element": "nature",
+   "seconds": 2
+  },
+  "disarm": {
+   "name": "Disarmed",
+   "kind": "control",
+   "element": "physical",
+   "seconds": 3
+  },
+  "sleep": {
+   "name": "Asleep",
+   "kind": "disable",
+   "element": "arcane",
+   "seconds": 6,
+   "breakOnDamage": true,
+   "hitsToWake": 1
+  },
+  "fear": {
+   "name": "Feared",
+   "kind": "control",
+   "element": "shadow",
+   "seconds": 3
+  },
+  "silence": {
+   "name": "Silenced",
+   "kind": "control",
+   "element": "arcane",
+   "seconds": 3
+  },
+  "strip": {
+   "name": "Stripped",
+   "kind": "debuff",
+   "element": "holy",
+   "seconds": 6
+  },
+  "frostbite": {
+   "name": "Frostbite",
+   "kind": "counter",
+   "element": "ice",
+   "seconds": 8,
+   "slowPerStack": 0.06,
+   "onMax": {
+    "stagger": 2
+   }
+  },
+  "rune": {
+   "name": "Rune",
+   "kind": "counter",
+   "element": "arcane",
+   "seconds": 10,
+   "onMax": {
+    "detonate": {
+     "mult": 1.5,
+     "knock": {
+      "push": 2
+     },
+     "radius": 2.5,
+     "element": "arcane"
+    }
+   }
+  },
+  "gnawed": {
+   "name": "Gnawed",
+   "kind": "damage",
+   "element": "shadow",
+   "perSecond": 0.25,
+   "seconds": 8,
+   "onDeath": {
+    "jump": 8
+   }
+  },
+  "off_balance": {
+   "name": "Off Balance",
+   "kind": "tag",
+   "owner": "warrior",
+   "element": "physical",
+   "seconds": 4,
+   "fromYou": 0.2
   }
  },
  "skills": {
@@ -140,7 +222,131 @@
    "radius": 4.5,
    "cooldown": 7,
    "mp": 6,
-   "desc": "Strikes everything within 4.5 m of you for 143% weapon damage. 6 mana, 7s cooldown."
+   "bonusIf": [
+    {
+     "when": "crowd:0.12:0.48"
+    }
+   ],
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "reaping_arc",
+       "name": "Reaping Arc",
+       "fx": "knock",
+       "mod": {
+        "set": {
+         "shape": "melee",
+         "arc": 3.84,
+         "reach": 5.5
+        },
+        "knock": {
+         "push": 1.5
+        }
+       }
+      },
+      {
+       "id": "hooked_edge",
+       "name": "Hooked Edge",
+       "fx": "pull",
+       "mod": {
+        "pullIn": {
+         "metres": 2,
+         "to": "self"
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "shatter",
+     "nodes": [
+      {
+       "id": "opened_veins",
+       "name": "Opened Veins",
+       "fx": "stack",
+       "mod": {
+        "statuses": [
+         {
+          "id": "bleed",
+          "minCrowd": 3
+         }
+        ]
+       }
+      },
+      {
+       "id": "grim_return",
+       "name": "Grim Return",
+       "fx": "drain",
+       "mod": {
+        "onHit": {
+         "heal": 0.02
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "battle_rhythm",
+       "name": "Battle Rhythm",
+       "fx": "charge",
+       "mod": {
+        "cutCooldown": {
+         "skill": "warcry",
+         "seconds": 1,
+         "per": "hit",
+         "orSelf": 0.5
+        }
+       },
+       "requires": "warcry"
+      },
+      {
+       "id": "backswing",
+       "name": "Backswing",
+       "fx": "afterimage",
+       "mod": {
+        "afterimage": {
+         "at": "end",
+         "delay": 0.4,
+         "mult": 0.5
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "crescendo",
+     "nodes": [
+      {
+       "id": "field_of_blades",
+       "name": "Field of Blades",
+       "fx": "charge",
+       "mod": {
+        "resetOn": {
+         "when": "crowd:5"
+        }
+       }
+      },
+      {
+       "id": "iron_tide",
+       "name": "Iron Tide",
+       "fx": "wide",
+       "mod": {
+        "repeats": {
+         "count": 2,
+         "every": 0.35,
+         "grow": 2.5
+        }
+       }
+      }
+     ]
+    }
+   },
+   "desc": "Strikes everything within 4.5 m of you for 143% weapon damage. Deals 12% more damage for each enemy hit past the first, up to 48%. 6 mana, 7s cooldown."
   },
   "sunder": {
    "name": "Sunder",
@@ -167,17 +373,168 @@
    "desc": "Strikes everything in a 126° arc 2.8 m in front of you, or as far and as wide as your weapon swings if that is more, for 172% weapon damage. Leaves the target Snared: the target moves 80% slower for 3s. 6 mana, 8s cooldown."
   },
   "whirlwind": {
-   "name": "Whirlwind",
+   "name": "Iron Gyre",
    "shape": "around",
    "element": "physical",
    "mult": 0.8,
    "radius": 5.5,
    "cooldown": 12,
    "mp": 14,
-   "desc": "Spins 5 times, striking everything within 5.5 m of you for 131% weapon damage on every spin. Leaves the target Bleeding: a further 72% weapon damage over 6s. 14 mana, 12s cooldown.",
    "repeats": 5,
    "repeatEvery": 0.32,
-   "status": "bleed"
+   "status": "bleed",
+   "pullIn": {
+    "metres": 0.5,
+    "to": "self"
+   },
+   "selfBuff": {
+    "name": "Spinning",
+    "seconds": 1.7,
+    "movePct": -0.3
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "widening_gyre",
+       "name": "Widening Gyre",
+       "fx": "wide",
+       "mod": {
+        "repeats": {
+         "grow": 0.6
+        }
+       }
+      },
+      {
+       "id": "tight_gyre",
+       "name": "Tight Gyre",
+       "fx": "knock",
+       "mod": {
+        "set": {
+         "repeats": 3
+        },
+        "mul": {
+         "mult": 1.7
+        },
+        "knock": {
+         "push": 1.5
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "drain",
+     "nodes": [
+      {
+       "id": "shrapnel",
+       "name": "Shrapnel",
+       "fx": "post",
+       "mod": {
+        "place": {
+         "kind": "pulse",
+         "follow": "self",
+         "seconds": 1.6,
+         "every": 0.32,
+         "radius": 12,
+         "strike": {
+          "mult": 0.4,
+          "nearest": false
+         }
+        }
+       }
+      },
+      {
+       "id": "grinding",
+       "name": "Grinding",
+       "fx": "stack",
+       "mod": {
+        "set": {
+         "status": null
+        },
+        "stack": {
+         "status": "bleed",
+         "max": 5
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "momentum",
+       "name": "Momentum",
+       "fx": "charge",
+       "mod": {
+        "cutCooldown": {
+         "skill": "self",
+         "seconds": 0.4,
+         "per": "hit"
+        }
+       }
+      },
+      {
+       "id": "eye_of_iron",
+       "name": "Eye of Iron",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "name": "Eye of Iron",
+         "seconds": 1.7,
+         "resist": 0.3,
+         "movePct": -0.3
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "crescendo",
+     "nodes": [
+      {
+       "id": "cyclone_wake",
+       "name": "Cyclone Wake",
+       "fx": "zone",
+       "mod": {
+        "place": {
+         "kind": "pulse",
+         "seconds": 3,
+         "radius": 4,
+         "every": 0.5,
+         "strike": {
+          "mult": 0.3,
+          "all": true
+         },
+         "pull": 0.4
+        }
+       }
+      },
+      {
+       "id": "endless_gyre",
+       "name": "Endless Gyre",
+       "fx": "charge",
+       "mod": {
+        "channel": {
+         "seconds": 4,
+         "every": 0.35,
+         "moveK": 0.7
+        },
+        "set": {
+         "repeats": 1
+        },
+        "mul": {
+         "mult": 0.6,
+         "cooldown": 1.3
+        }
+       }
+      }
+     ]
+    }
+   },
+   "desc": "Spins 5 times, striking everything within 5.5 m of you for 131% weapon damage on every spin. Leaves the target Bleeding: a further 72% weapon damage over 6s. Pulls targets 0.5 m toward you. For 1.7s: -30% move speed. 14 mana, 12s cooldown."
   },
   "charge": {
    "name": "Charge",
@@ -451,13 +808,53 @@
    "desc": "Heals you for 35% of your maximum health. 18 mana, 14s cooldown."
   },
   "renew": {
-   "name": "Renew",
+   "name": "Greensap",
    "shape": "self",
-   "element": "holy",
+   "element": "nature",
    "status": "regen",
    "cooldown": 16,
    "mp": 14,
-   "desc": "Gives you Mending: heals 25% of your maximum health over 10s. Everything following you is mended with you. 14 mana, 16s cooldown."
+   "forms": {
+    "briarback": {
+     "name": "Thornswell",
+     "status": null,
+     "barrier": {
+      "share": 0.2,
+      "seconds": 6
+     },
+     "selfBuff": {
+      "name": "Thornswell",
+      "seconds": 6,
+      "reflect": 0.2
+     }
+    },
+    "fenrunner": {
+     "name": "Shed Skin",
+     "status": "haste",
+     "statusSeconds": 4,
+     "heal": 0.15,
+     "cleanse": {
+      "count": 2,
+      "types": [
+       "poison",
+       "bleed"
+      ]
+     }
+    },
+    "sporecap": {
+     "name": "Mycel Web",
+     "status": null,
+     "place": {
+      "kind": "zone",
+      "follow": "self",
+      "seconds": 6,
+      "radius": 12,
+      "every": 1,
+      "heal": 0.033
+     }
+    }
+   },
+   "desc": "Gives you Mending: heals 25% of your maximum health over 10s. Everything following you is mended with you. Changes with your shape or stance: Thornswell (Briarback), Shed Skin (Fenrunner) and Mycel Web (Sporecap). 14 mana, 16s cooldown."
   },
   "warcry": {
    "name": "War Cry",
@@ -466,7 +863,142 @@
    "status": "might",
    "cooldown": 22,
    "mp": 10,
-   "desc": "Gives you Might: you deal 30% more damage for 12s. 10 mana, 22s cooldown."
+   "taunt": {
+    "radius": 10,
+    "seconds": 3,
+    "perTaunt": 0.05,
+    "perTauntCap": 0.25
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "deafening_cry",
+       "name": "Deafening Cry",
+       "fx": "wide",
+       "mod": {
+        "burst": {
+         "radius": 8,
+         "statuses": [
+          {
+           "id": "weaken",
+           "dealLess": 0.2,
+           "seconds": 6
+          }
+         ]
+        }
+       }
+      },
+      {
+       "id": "rousing_cry",
+       "name": "Rousing Cry",
+       "fx": "summon",
+       "mod": {
+        "set": {
+         "pets": true
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "challenger",
+       "name": "Challenger",
+       "fx": "tag",
+       "mod": {
+        "taunt": {
+         "seconds": 6
+        },
+        "burst": {
+         "radius": 10,
+         "statuses": [
+          {
+           "id": "weaken",
+           "dealLess": 0.2,
+           "seconds": 6
+          }
+         ]
+        },
+        "mul": {
+         "cooldown": 1.15
+        }
+       }
+      },
+      {
+       "id": "battle_trance",
+       "name": "Battle Trance",
+       "fx": "drain",
+       "mod": {
+        "selfBuff": {
+         "name": "Battle Trance",
+         "seconds": 12,
+         "manaOnHurt": 2
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "echo",
+     "nodes": [
+      {
+       "id": "second_roar",
+       "name": "Second Roar",
+       "fx": "echo",
+       "mod": {
+        "again": {
+         "delay": 4,
+         "mult": 1
+        }
+       }
+      },
+      {
+       "id": "roar_of_iron",
+       "name": "Roar of Iron",
+       "fx": "ward",
+       "mod": {
+        "taunt": {
+         "barrierPer": 0.03
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "crescendo",
+     "nodes": [
+      {
+       "id": "warlords_call",
+       "name": "Warlord's Call",
+       "fx": "charge",
+       "mod": {
+        "selfBuff": {
+         "name": "Warlord's Call",
+         "seconds": 12,
+         "cdRate": 1.25
+        }
+       }
+      },
+      {
+       "id": "unshaken",
+       "name": "Unshaken",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "name": "Unshaken",
+         "seconds": 12,
+         "ccImmune": true
+        }
+       }
+      }
+     ]
+    }
+   },
+   "desc": "Gives you Might: you deal 30% more damage for 12s. Enemies within 10 m attack you for 3s. Each enemy taunted adds 5% damage to the buff, up to 25%. 10 mana, 22s cooldown."
   },
   "guard_stance": {
    "name": "Guard",
@@ -534,7 +1066,65 @@
    "count": 1,
    "cooldown": 26,
    "mp": 18,
-   "desc": "Summons 1 Grove Wolf to fight beside you. 18 mana, 26s cooldown."
+   "howl": {
+    "status": "haste",
+    "seconds": 6,
+    "damage": 0.3
+   },
+   "forms": {
+    "briarback": {
+     "name": "Den Guard",
+     "shape": "self",
+     "pet": null,
+     "howl": null,
+     "selfBuff": {
+      "name": "Den Guard",
+      "seconds": 4,
+      "resist": 0.3,
+      "petsOnly": true
+     },
+     "taunt": {
+      "radius": 4,
+      "seconds": 4,
+      "by": "pet"
+     }
+    },
+    "fenrunner": {
+     "name": "Running Pack",
+     "shape": "self",
+     "pet": null,
+     "howl": null,
+     "command": {
+      "order": "pounce",
+      "seconds": 4,
+      "biteStatus": "poison"
+     }
+    },
+    "sporecap": {
+     "name": "Puffball Brood",
+     "shape": "summon",
+     "pet": null,
+     "howl": null,
+     "summon": {
+      "def": "puffball",
+      "name": "Puffball",
+      "count": 3,
+      "temporary": true,
+      "lifetime": 8,
+      "decoy": {
+       "hpShare": 0.1,
+       "taunt": 4
+      },
+      "burstOnExpire": {
+       "radius": 3,
+       "mult": 0.8,
+       "element": "poison",
+       "heal": 0.05
+      }
+     }
+    }
+   },
+   "desc": "Summons 1 Grove Wolf to fight beside you. Changes with your shape or stance: Den Guard (Briarback), Running Pack (Fenrunner) and Puffball Brood (Sporecap). With the pack already called, casting this is a howl instead: the pack gets Hastened for 6s and 30% more damage. 18 mana, 26s cooldown."
   },
   "call_spirit": {
    "name": "Call a Spirit",
@@ -670,16 +1260,1214 @@
    "cooldown": 16,
    "mp": 24,
    "desc": "Falls on a spot up to 26 m away and strikes everything within 5 m of it 4 times over 2s, for 88% weapon damage as shadow each time. Every pulse drags everything 2.5 m toward the middle. Leaves the target Cursed: the target takes 25% more damage and moves 15% slower for 8s. 24 mana, 16s cooldown."
+  },
+  "breaching_shove": {
+   "name": "Breaching Shove",
+   "shape": "melee",
+   "element": "physical",
+   "mult": 1.1,
+   "reach": 3,
+   "arc": 1.4,
+   "cooldown": 7,
+   "mp": 6,
+   "knock": {
+    "push": 4,
+    "stagger": 0.6
+   },
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "bowling_line",
+       "name": "Bowling Line",
+       "fx": "knock",
+       "mod": {
+        "knock": {
+         "carry": {
+          "mult": 0.6,
+          "stagger": 0.4
+         }
+        }
+       }
+      },
+      {
+       "id": "anchor_chain",
+       "name": "Anchor Chain",
+       "fx": "pull",
+       "mod": {
+        "knock": {
+         "push": 0
+        },
+        "pullIn": {
+         "metres": 3,
+         "to": "self"
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "shatter",
+     "nodes": [
+      {
+       "id": "rattled",
+       "name": "Rattled",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "weaken",
+          "dealLess": 0.25,
+          "seconds": 4
+         }
+        ]
+       }
+      },
+      {
+       "id": "off_balance",
+       "name": "Off Balance",
+       "fx": "tag",
+       "mod": {
+        "tag": {
+         "id": "off_balance",
+         "seconds": 4
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "bulwark",
+     "nodes": [
+      {
+       "id": "tremor_line",
+       "name": "Tremor Line",
+       "fx": "zone",
+       "mod": {
+        "pool": {
+         "seconds": 3,
+         "radius": 3,
+         "slow": 0.6,
+         "power": 0,
+         "at": "ahead"
+        }
+       }
+      },
+      {
+       "id": "brace",
+       "name": "Brace",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "name": "Braced",
+         "seconds": 3,
+         "frontalResist": 0.25
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "unmaking",
+     "nodes": [
+      {
+       "id": "avalanche",
+       "name": "Avalanche",
+       "fx": "knock",
+       "mod": {
+        "knock": {
+         "push": 8,
+         "stagger": 1.2
+        },
+        "mul": {
+         "cooldown": 1.4
+        }
+       }
+      },
+      {
+       "id": "challenge_shove",
+       "name": "Challenge Shove",
+       "fx": "tag",
+       "mod": {
+        "onHit": {
+         "taunt": 5
+        }
+       }
+      }
+     ]
+    }
+   },
+   "desc": "Strikes everything in an 80° arc 3 m in front of you, or as far and as wide as your weapon swings if that is more, for 136% weapon damage. Knocks targets back 4 m and stuns them for 0.6s. 6 mana, 7s cooldown."
+  },
+  "iron_resolve": {
+   "name": "Iron Resolve",
+   "shape": "self",
+   "element": "physical",
+   "cooldown": 30,
+   "mp": 10,
+   "selfBuff": {
+    "name": "Iron Resolve",
+    "seconds": 10,
+    "resistPerFoe": {
+     "per": 0.06,
+     "cap": 0.36,
+     "radius": 6
+    },
+    "every": {
+     "hits": 4,
+     "radius": 4,
+     "mult": 0.8
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "deep_roots",
+       "name": "Deep Roots",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "ccImmune": true,
+         "movePct": -0.2
+        }
+       }
+      },
+      {
+       "id": "bloodied",
+       "name": "Bloodied",
+       "fx": "ward",
+       "mod": {
+        "set": {
+         "selfBuff.resistPerFoe.lowHp": 0.35
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "retort",
+       "name": "Retort",
+       "fx": "tag",
+       "mod": {
+        "set": {
+         "selfBuff.every.taunt": 3
+        }
+       }
+      },
+      {
+       "id": "spiked_mail",
+       "name": "Spiked Mail",
+       "fx": "counter",
+       "mod": {
+        "selfBuff": {
+         "reflect": 0.2
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "bulwark",
+     "nodes": [
+      {
+       "id": "shared_burden",
+       "name": "Shared Burden",
+       "fx": "link",
+       "mod": {
+        "selfBuff": {
+         "petsShare": 0.5
+        }
+       }
+      },
+      {
+       "id": "pain_bank",
+       "name": "Pain Bank",
+       "fx": "detonate",
+       "mod": {
+        "selfBuff": {
+         "storeShare": 0.3,
+         "storeRadius": 6
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "aegis",
+     "nodes": [
+      {
+       "id": "unkillable",
+       "name": "Unkillable",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "deathPreventOnce": {
+          "burst": {
+           "radius": 6,
+           "mult": 3
+          }
+         }
+        }
+       }
+      },
+      {
+       "id": "iron_crowd",
+       "name": "Iron Crowd",
+       "fx": "tag",
+       "mod": {
+        "taunt": {
+         "radius": 6,
+         "seconds": 10
+        }
+       }
+      }
+     ]
+    }
+   },
+   "desc": "For 10s: take 6% less damage for each enemy within 6 m, up to 36%; every 4th hit you take releases a 4 m shockwave for 80% weapon damage. 10 mana, 30s cooldown."
+  },
+  "groundbreaker": {
+   "name": "Groundbreaker",
+   "shape": "beam",
+   "element": "physical",
+   "mult": 2.6,
+   "range": 18,
+   "width": 2.4,
+   "cooldown": 20,
+   "mp": 22,
+   "knock": {
+    "stagger": 1.2
+   },
+   "consumes": {
+    "status": "stagger",
+    "mult": 0.5
+   },
+   "pool": {
+    "seconds": 5,
+    "radius": 1.4,
+    "slow": 0.6,
+    "power": 0,
+    "along": "beam"
+   },
+   "talents": {
+    "1": {
+     "lib": "heavy",
+     "nodes": [
+      {
+       "id": "long_fault",
+       "name": "Long Fault",
+       "fx": "lance",
+       "mod": {
+        "set": {
+         "range": 28,
+         "width": 1.6
+        }
+       }
+      },
+      {
+       "id": "fault_pull",
+       "name": "Fault Pull",
+       "fx": "pull",
+       "mod": {
+        "set": {
+         "width": 4
+        },
+        "pullIn": {
+         "metres": 2,
+         "to": "line"
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "shatter",
+     "nodes": [
+      {
+       "id": "magma_seam",
+       "name": "Magma Seam",
+       "fx": "burst",
+       "mod": {
+        "pool": {
+         "slow": 0,
+         "element": "fire",
+         "power": 0.25,
+         "status": "burn"
+        }
+       }
+      },
+      {
+       "id": "aftershock",
+       "name": "Aftershock",
+       "fx": "echo",
+       "mod": {
+        "again": {
+         "delay": 2,
+         "mult": 0.6
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "brand",
+     "nodes": [
+      {
+       "id": "cratering",
+       "name": "Cratering",
+       "fx": "burst",
+       "mod": {
+        "onKill": {
+         "burst": {
+          "radius": 3,
+          "mult": 0.5
+         }
+        }
+       }
+      },
+      {
+       "id": "upheaval",
+       "name": "Upheaval",
+       "fx": "knock",
+       "mod": {
+        "knock": {
+         "push": 3
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "cascade",
+     "nodes": [
+      {
+       "id": "open_wound",
+       "name": "Open Wound",
+       "fx": "zone",
+       "mod": {
+        "pool": {
+         "seconds": 10,
+         "power": 0.22,
+         "slow": 0
+        }
+       }
+      },
+      {
+       "id": "tectonic",
+       "name": "Tectonic",
+       "fx": "charge",
+       "mod": {
+        "cutCooldown": {
+         "skill": "iron_resolve",
+         "seconds": 3,
+         "per": "hit",
+         "orSelf": 1
+        }
+       },
+       "requires": "iron_resolve"
+      }
+     ]
+    }
+   },
+   "desc": "Fires a 2.4 m wide beam 18 m straight ahead, striking everything in the line for 593% weapon damage. Stuns targets for 1.2s. Leaves a 1.4 m patch for 5s all along the line that slows anything standing in it 60%. Deals 50% more damage to stunned targets. 22 mana, 20s cooldown."
+  },
+  "thornlash": {
+   "name": "Thornlash",
+   "shape": "bolt",
+   "element": "nature",
+   "mult": 1.4,
+   "cooldown": 3,
+   "mp": 5,
+   "range": 30,
+   "statuses": [
+    {
+     "id": "root",
+     "seconds": 0.8
+    }
+   ],
+   "onHit": {
+    "healPet": 0.03
+   },
+   "forms": {
+    "briarback": {
+     "name": "Bramble Gore",
+     "shape": "melee",
+     "mult": 1.8,
+     "reach": 3,
+     "arc": 1.6,
+     "cooldown": 4,
+     "knock": {
+      "push": 2
+     },
+     "taunt": {
+      "target": true,
+      "seconds": 3
+     },
+     "statuses": null,
+     "onHit": null
+    },
+    "fenrunner": {
+     "name": "Venom Lunge",
+     "shape": "dash",
+     "range": 8,
+     "dash": {
+      "to": "target",
+      "range": 8
+     },
+     "mult": 1.6,
+     "cooldown": 4,
+     "stack": {
+      "status": "poison",
+      "max": 2
+     },
+     "statuses": null,
+     "onHit": null
+    },
+    "sporecap": {
+     "name": "Spore Lob",
+     "shape": "ground",
+     "range": 24,
+     "radius": 3,
+     "mult": 0.2,
+     "cooldown": 4,
+     "pool": {
+      "seconds": 4,
+      "radius": 3,
+      "status": "poison",
+      "power": 0.2,
+      "healAllies": 0.015
+     },
+     "statuses": null,
+     "onHit": null
+    }
+   },
+   "desc": "Looses one bolt out to 30 m for 140% weapon damage as nature. Each enemy hit heals your nearest follower 3% of maximum health. Also applies Rooted for 0.8s. Changes with your shape or stance: Bramble Gore (Briarback), Venom Lunge (Fenrunner) and Spore Lob (Sporecap). 5 mana, 3s cooldown."
+  },
+  "briarback_shape": {
+   "name": "Briarback Shape",
+   "shape": "self",
+   "element": "nature",
+   "cooldown": 1.5,
+   "mp": 8,
+   "form": {
+    "id": "briarback",
+    "name": "Briarback",
+    "group": "shape",
+    "toggle": true,
+    "body": {
+     "creature": "boar",
+     "scale": 1.3,
+     "colors": {
+      "body": "#6b4f2a",
+      "belly": "#8a6f48",
+      "accent": "#3a2a16",
+      "eyes": "#e0c060"
+     }
+    },
+    "stats": {
+     "armorPct": 0.6,
+     "maxHpPct": 0.3,
+     "thorns": 0.15
+    },
+    "basic": {
+     "shape": "melee",
+     "reach": 2.8,
+     "arc": 2.8,
+     "mult": 1,
+     "element": "nature"
+    },
+    "onEnter": {
+     "shape": "self",
+     "taunt": {
+      "radius": 6,
+      "seconds": 3
+     }
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "oakhide",
+       "name": "Oakhide",
+       "fx": "ward",
+       "mod": {
+        "set": {
+         "form.stats.armorPct": 1,
+         "form.stats.movePct": -0.1
+        }
+       }
+      },
+      {
+       "id": "charging_shift",
+       "name": "Charging Shift",
+       "fx": "leap",
+       "mod": {
+        "set": {
+         "form.onEnter.shape": "dash",
+         "form.onEnter.dash": {
+          "to": "aim",
+          "range": 8
+         },
+         "form.onEnter.mult": 0.6
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "splinter_hide",
+       "name": "Splinter Hide",
+       "fx": "counter",
+       "mod": {
+        "set": {
+         "form.stats.thorns": 0.3
+        }
+       }
+      },
+      {
+       "id": "tusks",
+       "name": "Tusks",
+       "fx": "knock",
+       "mod": {
+        "set": {
+         "form.basic.knock": {
+          "push": 1
+         }
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "den_mother",
+       "name": "Den Mother",
+       "fx": "summon",
+       "mod": {
+        "set": {
+         "form.petBuff": {
+          "name": "Den Mother",
+          "resist": 0.2
+         }
+        }
+       }
+      },
+      {
+       "id": "set_hooves",
+       "name": "Set Hooves",
+       "fx": "ward",
+       "mod": {
+        "set": {
+         "form.stats.stillResist": {
+          "after": 1,
+          "resist": 0.2
+         }
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "bramble_burst",
+       "name": "Bramble Burst",
+       "fx": "burst",
+       "mod": {
+        "set": {
+         "form.onExit": {
+          "shape": "self",
+          "burst": {
+           "radius": 6,
+           "mult": 2,
+           "element": "nature"
+          }
+         }
+        }
+       }
+      },
+      {
+       "id": "unyielding",
+       "name": "Unyielding",
+       "fx": "ward",
+       "mod": {
+        "set": {
+         "form.stats.ccImmune": true
+        }
+       }
+      }
+     ]
+    }
+   },
+   "desc": "Press again to return to your own body. While in Briarback shape: +60% armour, +30% maximum health, melee attackers take 15% of the hit back and your basic attack becomes a strike 2.8 m in front of you for 100% weapon damage. Entering it: enemies within 6 m attack you for 3s. 8 mana, 1.5s cooldown."
+  },
+  "fenrunner_shape": {
+   "name": "Fenrunner Shape",
+   "shape": "self",
+   "element": "nature",
+   "cooldown": 1.5,
+   "mp": 8,
+   "form": {
+    "id": "fenrunner",
+    "name": "Fenrunner",
+    "group": "shape",
+    "toggle": true,
+    "body": {
+     "creature": "crocodile",
+     "scale": 0.85,
+     "colors": {
+      "body": "#4f6b3a",
+      "belly": "#9fb36a",
+      "accent": "#2a3d1e",
+      "eyes": "#e8e04b"
+     }
+    },
+    "stats": {
+     "movePct": 0.35,
+     "hastePct": 0.25,
+     "armorPct": -0.3
+    },
+    "basic": {
+     "shape": "melee",
+     "reach": 2.2,
+     "arc": 1.6,
+     "mult": 0.55,
+     "hits": 2,
+     "element": "nature",
+     "behindStatus": "poison"
+    },
+    "threatDrop": {
+     "beyond": 10
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "long_stride",
+       "name": "Long Stride",
+       "fx": "leap",
+       "mod": {
+        "set": {
+         "form.stats.movePct": 0.5,
+         "form.stats.armorPct": -0.4
+        }
+       }
+      },
+      {
+       "id": "pounce_shift",
+       "name": "Pounce Shift",
+       "fx": "leap",
+       "mod": {
+        "set": {
+         "form.onEnter.shape": "dash",
+         "form.onEnter.dash": {
+          "to": "target",
+          "range": 10,
+          "leap": true,
+          "land": {
+           "radius": 2.5,
+           "mult": 1
+          }
+         },
+         "form.onEnter.mult": 0.5
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "venom_glands",
+       "name": "Venom Glands",
+       "fx": "stack",
+       "mod": {
+        "set": {
+         "form.basic.every": {
+          "n": 3,
+          "stack": {
+           "status": "poison",
+           "add": 2,
+           "max": 5
+          }
+         }
+        }
+       }
+      },
+      {
+       "id": "sap_fed",
+       "name": "Sap-Fed",
+       "fx": "drain",
+       "mod": {
+        "set": {
+         "form.basic.heal": 0.01
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "pack_runner",
+       "name": "Pack Runner",
+       "fx": "summon",
+       "mod": {
+        "set": {
+         "form.petBuff": {
+          "name": "Pack Runner",
+          "biteStatus": "poison"
+         }
+        }
+       }
+      },
+      {
+       "id": "marsh_murk",
+       "name": "Marsh Murk",
+       "fx": "zone",
+       "mod": {
+        "set": {
+         "form.onEnter.pool": {
+          "seconds": 3,
+          "radius": 6,
+          "slow": 0.5,
+          "power": 0
+         }
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "apex",
+       "name": "Apex",
+       "fx": "charge",
+       "mod": {
+        "set": {
+         "form.onKillHaste": 3
+        }
+       }
+      },
+      {
+       "id": "from_the_reeds",
+       "name": "From the Reeds",
+       "fx": "heavy",
+       "mod": {
+        "set": {
+         "form.firstCrit": true
+        }
+       }
+      }
+     ]
+    }
+   },
+   "desc": "Press again to return to your own body. While in Fenrunner shape: -30% armour, +35% move speed, +25% attack speed, your basic attack becomes 2 quick strikes 2.2 m in front of you for 55% weapon damage each, a strike from behind applies Poisoned and entering it, enemies further than 10 m lose track of you. 8 mana, 1.5s cooldown."
+  },
+  "sporecap_shape": {
+   "name": "Sporecap Shape",
+   "shape": "self",
+   "element": "nature",
+   "cooldown": 50,
+   "mp": 30,
+   "form": {
+    "id": "sporecap",
+    "name": "Sporecap",
+    "group": "shape",
+    "seconds": 15,
+    "body": {
+     "creature": "mushroom",
+     "scale": 1.6,
+     "colors": {
+      "body": "#d8c7a0",
+      "belly": "#f2e6c8",
+      "accent": "#9b8456",
+      "eyes": "#3a2a10"
+     }
+    },
+    "stats": {
+     "movePct": -0.4,
+     "healingPct": 0.4,
+     "immune": [
+      "poison"
+     ]
+    },
+    "basic": {
+     "shape": "bolt",
+     "range": 14,
+     "mult": 0.7,
+     "splash": 1.5,
+     "element": "poison",
+     "status": "poison",
+     "healAllies": 0.02
+    },
+    "onEnter": {
+     "shape": "self",
+     "burst": {
+      "radius": 6,
+      "statuses": [
+       "poison"
+      ],
+      "heal": 0.1
+     }
+    },
+    "onExit": {
+     "shape": "self",
+     "burst": {
+      "radius": 8,
+      "mult": 1.5,
+      "element": "poison",
+      "statuses": [
+       "poison"
+      ],
+      "heal": 0.15
+     }
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "creeping_cap",
+       "name": "Creeping Cap",
+       "fx": "leap",
+       "mod": {
+        "set": {
+         "form.stats.movePct": -0.2,
+         "form.seconds": 11
+        }
+       }
+      },
+      {
+       "id": "deep_mycelium",
+       "name": "Deep Mycelium",
+       "fx": "zone",
+       "mod": {
+        "set": {
+         "form.seconds": 22,
+         "form.stats.movePct": -0.6
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "thick_spores",
+       "name": "Thick Spores",
+       "fx": "wide",
+       "mod": {
+        "set": {
+         "form.basic.splash": 2.5
+        }
+       }
+      },
+      {
+       "id": "rot_bloom",
+       "name": "Rot Bloom",
+       "fx": "tag",
+       "mod": {
+        "set": {
+         "form.basic.statuses": [
+          {
+           "id": "marked",
+           "takeMore": 0.1,
+           "seconds": 4
+          }
+         ]
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "grove_wolves",
+       "name": "Grove Wolves",
+       "fx": "summon",
+       "mod": {
+        "set": {
+         "form.petBuff": {
+          "name": "Grove Wolves",
+          "damage": 0.3,
+          "healPerSecond": 0.02
+         }
+        }
+       }
+      },
+      {
+       "id": "spore_mana",
+       "name": "Spore Mana",
+       "fx": "drain",
+       "mod": {
+        "set": {
+         "form.stats.manaPerSecond": 3
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "final_bloom",
+       "name": "Final Bloom",
+       "fx": "burst",
+       "mod": {
+        "set": {
+         "form.onExit.burst.radius": 15,
+         "form.onExit.burst.mult": 3
+        }
+       }
+      },
+      {
+       "id": "fairy_ring",
+       "name": "Fairy Ring",
+       "fx": "zone",
+       "mod": {
+        "set": {
+         "form.onExit.place": {
+          "kind": "zone",
+          "seconds": 10,
+          "radius": 6,
+          "every": 1,
+          "heal": 0.02
+         }
+        }
+       }
+      }
+     ]
+    }
+   },
+   "desc": "Lasts 15s; casting it again ends it early. While in Sporecap shape: -40% move speed, +40% healing done, immune to poison, your basic attack becomes a lobbed strike out to 14 m that splashes 1.5 m for 70% weapon damage that applies Poisoned and an ally inside the splash heals 2% of maximum health. Entering it: applies Poisoned for 8s to everything within 6 m of you and heals you and your followers within it 10% of maximum health. Leaving it: strikes everything within 8 m of you for 150% weapon damage as poison, applies Poisoned for 8s and heals you and your followers within it 15% of maximum health. 30 mana, 50s cooldown."
+  },
+  "duelist_stance": {
+   "name": "Duelist's Stance",
+   "shape": "self",
+   "element": "physical",
+   "cooldown": 1.5,
+   "mp": 0,
+   "form": {
+    "group": "stance",
+    "cycle": true,
+    "options": [
+     {
+      "id": "open",
+      "name": "Open stance",
+      "stats": {
+       "damage": 0.2,
+       "hastePct": 0.15,
+       "armorPct": -0.15
+      }
+     },
+     {
+      "id": "closed",
+      "name": "Closed stance",
+      "stats": {
+       "armorPct": 0.5,
+       "damage": -0.1
+      }
+     }
+    ]
+   },
+   "desc": "Steps to the next of 2: Open stance and Closed stance. Open stance: -15% armour, +15% attack speed and +20% damage. Closed stance: +50% armour and -10% damage. No mana cost, 1.5s cooldown."
+  },
+  "wyrm_temper": {
+   "name": "Wyrm Temper",
+   "shape": "self",
+   "element": "fire",
+   "cooldown": 2,
+   "mp": 0,
+   "form": {
+    "group": "temper",
+    "cycle": true,
+    "options": [
+     {
+      "id": "fire",
+      "name": "Fire Temper",
+      "element": "fire",
+      "status": "burn",
+      "stats": {
+       "damage": 0.15
+      },
+      "onExit": {
+       "shape": "around",
+       "radius": 4,
+       "mult": 0.6,
+       "element": "fire",
+       "status": "burn"
+      }
+     },
+     {
+      "id": "frost",
+      "name": "Frost Temper",
+      "element": "ice",
+      "status": "chill",
+      "stats": {
+       "armorPct": 0.25
+      },
+      "onExit": {
+       "shape": "around",
+       "radius": 4,
+       "mult": 0.6,
+       "element": "ice",
+       "status": "chill"
+      }
+     },
+     {
+      "id": "storm",
+      "name": "Storm Temper",
+      "element": "lightning",
+      "status": "shock",
+      "stats": {
+       "hastePct": 0.15
+      },
+      "onExit": {
+       "shape": "around",
+       "radius": 4,
+       "mult": 0.6,
+       "element": "lightning",
+       "status": "shock"
+      }
+     }
+    ]
+   },
+   "desc": "Steps to the next of 3: Fire Temper, Frost Temper and Storm Temper. Fire Temper: +15% damage and skills that follow the temper deal fire and apply Burning. Leaving it: strikes everything within 4 m of you for 60% weapon damage as fire and applies Burning for 5s. Frost Temper: +25% armour and skills that follow the temper deal ice and apply Chilled. Leaving it: strikes everything within 4 m of you for 60% weapon damage as ice and applies Chilled (moves 45% slower) for 4s. Storm Temper: +15% attack speed and skills that follow the temper deal lightning and apply Shocked. Leaving it: strikes everything within 4 m of you for 60% weapon damage as lightning and applies Shocked (takes 30% more damage) for 5s. No mana cost, 2s cooldown."
+  },
+  "ballad_of_valour": {
+   "name": "Ballad of Valour",
+   "shape": "self",
+   "element": "holy",
+   "cooldown": 2,
+   "mp": 8,
+   "form": {
+    "id": "valour",
+    "name": "Ballad of Valour",
+    "group": "song",
+    "toggle": true,
+    "aura": {
+     "radius": 10,
+     "buff": {
+      "id": "valour",
+      "name": "Valour",
+      "kind": "buff",
+      "element": "holy",
+      "hastePct": 0.25,
+      "movePct": 0.1
+     }
+    },
+    "finale": {
+     "shape": "self",
+     "selfBuff": {
+      "name": "Valour Finale",
+      "seconds": 4,
+      "damage": 0.4,
+      "petsOnly": true
+     }
+    }
+   },
+   "desc": "Plays until you press it again or play another song. While in Ballad of Valour: within 10 m of you allies get Valour (attacks 25% faster and moves 10% faster). Switching away plays its Finale: for 4s, your followers: +40% damage. 8 mana, 2s cooldown."
+  },
+  "song_of_ruin": {
+   "name": "Song of Ruin",
+   "shape": "self",
+   "element": "shadow",
+   "cooldown": 2,
+   "mp": 8,
+   "form": {
+    "id": "ruin",
+    "name": "Song of Ruin",
+    "group": "song",
+    "toggle": true,
+    "aura": {
+     "radius": 10,
+     "debuff": {
+      "id": "curse",
+      "takeMore": 0.12,
+      "dealLess": 0.1,
+      "slow": 0,
+      "name": "Ruin"
+     }
+    },
+    "finale": {
+     "shape": "around",
+     "radius": 10,
+     "mult": 1.5,
+     "element": "shadow",
+     "statuses": [
+      {
+       "id": "weaken",
+       "seconds": 5
+      }
+     ]
+    }
+   },
+   "desc": "Plays until you press it again or play another song. While in Song of Ruin: within 10 m of you enemies get Cursed (takes 12% more damage and deals 10% less damage). Switching away plays its Finale: strikes everything within 10 m of you for 150% weapon damage as shadow; also applies Weakened (deals 35% less damage) for 5s. 8 mana, 2s cooldown."
+  },
+  "air_of_mending": {
+   "name": "Air of Mending",
+   "shape": "self",
+   "element": "holy",
+   "cooldown": 2,
+   "mp": 8,
+   "form": {
+    "id": "mending",
+    "name": "Air of Mending",
+    "group": "song",
+    "toggle": true,
+    "aura": {
+     "radius": 10,
+     "heal": 0.015
+    },
+    "finale": {
+     "shape": "self",
+     "burst": {
+      "radius": 10,
+      "heal": 0.15
+     },
+     "cleanse": {
+      "count": 1,
+      "pets": true
+     }
+    }
+   },
+   "desc": "Plays until you press it again or play another song. While in Air of Mending: within 10 m of you allies heal 2% of maximum health a second. Switching away plays its Finale: heals you and your followers within it 15% of maximum health; removes 1 harmful status from you and every follower. 8 mana, 2s cooldown."
   }
  },
  "classes": {
   "warrior": [
-   "power_strike",
    "cleave",
+   "breaching_shove",
    "warcry",
-   "shield_bash",
    "whirlwind",
-   "execute"
+   "iron_resolve",
+   "groundbreaker"
   ],
   "fighter": [
    "power_strike",
@@ -802,12 +2590,12 @@
    "meteor"
   ],
   "druid": [
-   "poison_dart",
-   "call_wolf",
+   "thornlash",
    "renew",
-   "toxic_cloud",
-   "stoneskin",
-   "rally"
+   "briarback_shape",
+   "call_wolf",
+   "fenrunner_shape",
+   "sporecap_shape"
   ],
   "oracle": [
    "arcane_burst",

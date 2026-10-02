@@ -78,6 +78,8 @@ export const TOOLS = [
    */
   { key: 'move', name: 'Move', kind: 'point', hint: 'Click a piece to pick it up with nothing lost, then click where it goes. Walls, lamps, decoration — not things that hold goods or run.' },
   { key: 'upgrade', name: 'Upgrade', kind: 'point', hint: 'Click a piece to turn it into the next one up where it stands — a palisade into a stone wall — paying only the difference.' },
+  // R28 — enemies break what is in their way now, so there is something to mend
+  { key: 'repair', name: 'Repair', kind: 'point', hint: 'Point at a damaged piece: the card shows its health and the price. Click to put it back to full — half its build cost for a whole bar, less for a scratch.' },
   { key: 'copy', name: 'Copy', kind: 'brush', hint: 'Click to copy everything you built inside the brush as a layout. [ ] size the brush. It switches to Stamp.' },
   { key: 'stamp', name: 'Stamp', kind: 'stamp', hint: 'Put a copied layout down somewhere else, whole, for one bill. Q turns it. Layouts are listed below.' },
   /**

@@ -134,3 +134,10 @@ three machines there is no screen that says what it makes, what it eats, what is
 
 Parked (documented in BUILD-MODE.md): chain orders (16), graph view (18), hauler vehicles (15),
 citizen shift schedule (19).
+
+## 6. Status (end of round)
+
+Everything in §5 is built, plus the review's people-side fixes and a "Send a cart" form for
+js/trade.js (which had no way in). The write-up is BUILD-MODE.md "Round 28 — automation".
+Standing cart runs (Repeat) and the pack mule's grain were built at the end of the round.
+Parked as planned: chain orders, graph view, hauler vehicles, shift schedule.

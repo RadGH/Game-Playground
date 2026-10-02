@@ -141,7 +141,8 @@ test('a melee skill keeps its own numbers when they are already bigger than the 
  * Wider talent — offered on the melee board — widens a swing instead of multiplying a radius of 0.
  */
 test('a melee skill grows with the attack-area stat, exactly as the basic swing does', () => {
-  const { r, player } = character('warrior', 'longsword');
+  // R28 — Power Strike moved to the Fighter alone (every skill on one class); the Warrior opens on Cleave
+  const { r, player } = character('fighter', 'longsword');
   const base = createSkillBar({ data: skillData, player, rpg: r }).use(0);
   player.derived.areaPct = 40;
   const grown = createSkillBar({ data: skillData, player, rpg: r }).use(0);
@@ -152,7 +153,7 @@ test('a melee skill grows with the attack-area stat, exactly as the basic swing 
 });
 
 test('the Wider talent widens a melee skill', () => {
-  const { r, player } = character('warrior', 'longsword');
+  const { r, player } = character('fighter', 'longsword');
   const plain = createSkillBar({ data: skillData, player, rpg: r }).use(0);
   player.skillTalents = { power_strike: { 1: 'wide' } };
   const wide = createSkillBar({ data: skillData, player, rpg: r }).use(0);

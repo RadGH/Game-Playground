@@ -439,6 +439,119 @@ export function upgradeCost(fromCost, toCost) {
   return out;
 }
 
+// ------------------------------------------------------------------------------------------------
+// R28 — STRUCTURE DAMAGE. Pure pieces first, so the hp table, the repair price and the salvage
+// have node tests; the plan's own methods (`damage`, `repairOf`, `repair`, `heal`, `blocking`)
+// are below in createBuildPlan.
+// ------------------------------------------------------------------------------------------------
+
+/**
+ * HOW MUCH A PIECE CAN TAKE.
+ *
+ * 39 catalogue rows carry an `hp` and it is used as written (a palisade 400, a stone wall 1200, a
+ * reinforced wall 3000). The other 86 never needed one, because until R28 nothing hit a building;
+ * they get one DERIVED from what they cost and their tier, so a dearer, later piece is tougher:
+ *
+ *   hp = clamp(round((40 + 20 × cost units) × tier), 60, 2000)
+ *
+ * A Storage Box (6 log, tier 1) is 160; a tier-2 furnace of 22 units is 960. Written down here and
+ * in data/structures.json's `_r28` note, and a test moves a cost and watches the number move.
+ */
+export function structureHp(def) {
+  if (!def) return 0;
+  if (def.hp > 0) return def.hp;
+  const units = Object.values(def.cost || {}).reduce((n, v) => n + (v || 0), 0);
+  return Math.max(60, Math.min(2000, Math.round((40 + 20 * units) * (def.tier || 1))));
+}
+
+/**
+ * THE PRICE OF PUTTING HIT POINTS BACK: `share` of the piece's build cost per WHOLE bar, pro rata,
+ * rounded UP per material — so a scratch still costs one of each thing the piece is made of, and
+ * a piece at half health costs a quarter of a new one at the default share of one half. In the
+ * materials' real ids, like every other bill.
+ */
+export function repairCost(def, missing, maxHp, share = 0.5) {
+  if (!def || !(missing > 0) || !(maxHp > 0)) return {};
+  const frac = Math.min(1, missing / maxHp) * share;
+  const out = {};
+  for (const [k, n] of Object.entries(realCost(def.cost || {}))) {
+    const v = Math.ceil(n * frac - 1e-9);
+    if (v > 0) out[k] = v;
+  }
+  return out;
+}
+
+/**
+ * How hurt a piece LOOKS: 0 whole, then 1/2/3 as it falls past two thirds and one third. Four
+ * bands, so js/build.js swaps a piece's materials only when it crosses one, not on every hit.
+ */
+export function damageBand(ratio) {
+  if (!(ratio < 1)) return 0;
+  return ratio > 0.66 ? 1 : ratio > 0.33 ? 2 : 3;
+}
+
+/** What a piece broken by enemies leaves behind: `fraction` of its cost, rounded down. */
+export function salvageOf(def, fraction = 0.25) {
+  return realCost(scaleCost(def?.cost || {}, fraction));
+}
+
+/** Distance from a point to a segment, and how far along the segment the nearest point is. */
+function pointSeg(px, pz, ax, az, bx, bz) {
+  const dx = bx - ax, dz = bz - az;
+  const L2 = dx * dx + dz * dz;
+  const t = L2 > 0 ? Math.max(0, Math.min(1, ((px - ax) * dx + (pz - az) * dz) / L2)) : 0;
+  const cx = ax + dx * t, cz = az + dz * t;
+  return { d: Math.hypot(px - cx, pz - cz), t, x: cx, z: cz };
+}
+
+/** Do two segments cross? (Proper or touching.) */
+function segsCross(ax, az, bx, bz, cx, cz, dx, dz) {
+  const o = (px, pz, qx, qz, rx, rz) => Math.sign((qx - px) * (rz - pz) - (qz - pz) * (rx - px));
+  return o(ax, az, bx, bz, cx, cz) !== o(ax, az, bx, bz, dx, dz) && o(cx, cz, dx, dz, ax, az) !== o(cx, cz, dx, dz, bx, bz);
+}
+
+/**
+ * THE BUILT PIECE IN THE WAY: the first solid (by `solidsFor`) that the straight line from an enemy
+ * at A to its target at B runs into, looked for only within `ahead` metres of A — a wall a hundred
+ * metres off is not "in the way" yet. `pad` is the walker's own half-width.
+ *
+ * Returns `{ id, entry, x, z, gap }` — the point on the piece's centre line nearest the walker (what
+ * it walks at), and `gap`, how far the walker is from the piece's SURFACE (what a swing must reach)
+ * — or null when the way is clear. Enemies have no pathfinding, so "in the way" is the straight
+ * line; js/actors.js asks this a couple of times a second, not every frame.
+ */
+export function blockingPiece(list, defOf, ax, az, bx, bz, { ahead = 14, pad = 0.5 } = {}) {
+  const len = Math.hypot(bx - ax, bz - az);
+  if (len < 1e-6) return null;
+  const k = Math.min(1, ahead / len);
+  const ex = ax + (bx - ax) * k, ez = az + (bz - az) * k;
+  let best = null;
+  for (const e of list || []) {
+    if (Math.hypot(e.x - ax, e.z - az) > ahead + Math.max(e.w || 1, e.d || 1)) continue;
+    const def = defOf(e.key);
+    if (!def || def.road) continue;
+    for (const sol of solidsFor(e, def)) {
+      let hit = false, near;
+      if (sol.kind === 'seg') {
+        near = pointSeg(ax, az, sol.ax, sol.az, sol.bx, sol.bz);
+        // the gap between the walk and the piece: zero if they cross, else the nearest of the four ends
+        const between = segsCross(ax, az, ex, ez, sol.ax, sol.az, sol.bx, sol.bz) ? 0 : Math.min(
+          pointSeg(sol.ax, sol.az, ax, az, ex, ez).d, pointSeg(sol.bx, sol.bz, ax, az, ex, ez).d,
+          near.d, pointSeg(ex, ez, sol.ax, sol.az, sol.bx, sol.bz).d);
+        hit = between <= sol.half + pad;
+        near.gap = Math.max(0, near.d - sol.half);
+      } else {
+        const p = pointSeg(sol.x, sol.z, ax, az, ex, ez);
+        hit = p.d <= sol.r + pad;
+        const d = Math.hypot(sol.x - ax, sol.z - az);
+        near = { x: sol.x, z: sol.z, d, gap: Math.max(0, d - sol.r) };
+      }
+      if (hit && (!best || near.gap < best.gap)) best = { id: e.id, entry: e, x: near.x, z: near.z, gap: near.gap };
+    }
+  }
+  return best;
+}
+
 export function createBuildPlan({
   catalogue,
   /** `{ heightAt(x,z), slopeAt(x,z,step), waterAt(x,z) }` — the wrapped terrain, edits and all. */
@@ -471,6 +584,9 @@ export function createBuildPlan({
   const autoLevel = rules.autoLevel ?? 1.5;
   const lineMax = rules.lineMax ?? 40;
   const mountReach = rules.mountReach ?? 2.4;
+  // R28 — structure damage: what a broken piece leaves, and what a repair costs per whole bar
+  const salvage = rules.salvage ?? 0.25;
+  const repairShare = rules.repairShare ?? 0.5;
 
   /**
    * R19 — `terraformBudget` AND `maxLift`, WHICH THE CATALOGUE STATED AND NOBODY READ.
@@ -620,7 +736,7 @@ export function createBuildPlan({
   }
 
   const api = {
-    get rules() { return { grid, snapDistance, rotateStep, refund, defaultSlope, footing, claimRadius, undoDepth, autoLevel, lineMax, mountReach }; },
+    get rules() { return { grid, snapDistance, rotateStep, refund, defaultSlope, footing, claimRadius, undoDepth, autoLevel, lineMax, mountReach, salvage, repairShare, siegeDamage: rules.siegeDamage ?? 1 }; },
     get entries() { return entries; },
     get claims() { return claims; },
     byId: id => byId.get(id) || null,
@@ -906,7 +1022,7 @@ export function createBuildPlan({
         x, z, rot, w: def.w, d: def.d, h: def.h,
         y: ground(x, z),
         claim: claim.id,
-        hp: def.hp || 0, maxHp: def.hp || 0,
+        hp: structureHp(def), maxHp: structureHp(def),
         waypoint: !!def.waypoint,
         run: !!def.run,
         gate: !!def.gate,
@@ -1069,7 +1185,7 @@ export function createBuildPlan({
       const was = { key: entry.key, name: entry.name, w: entry.w, d: entry.d, h: entry.h, hp: entry.hp, maxHp: entry.maxHp, run: entry.run, gate: entry.gate, powered: entry.powered };
       Object.assign(entry, {
         key: to.id, name: to.name, cat: to.cat, w: to.w, d: to.d, h: to.h,
-        hp: to.hp || 0, maxHp: to.hp || 0, run: !!to.run, gate: !!to.gate, powered: !to.power?.use,
+        hp: structureHp(to), maxHp: structureHp(to), run: !!to.run, gate: !!to.gate, powered: !to.power?.use,
       });
       return { ok: true, entry, from, to, paid: test.cost, was };
     },
@@ -1370,6 +1486,85 @@ export function createBuildPlan({
     },
 
     /** The whole base, small enough to sit in a save next to the terrain deltas. */
+
+    // ---- R28: structure damage -------------------------------------------------------------
+
+    /** How hurt a piece is: `{ hp, maxHp, ratio }`. */
+    health(entryOrId) {
+      const e = typeof entryOrId === 'string' ? entries.find(x => x.id === entryOrId) : entryOrId;
+      if (!e) return null;
+      const maxHp = e.maxHp || structureHp(byId.get(e.key));
+      const hp = Math.max(0, Math.min(maxHp, e.hp ?? maxHp));
+      return { hp, maxHp, ratio: maxHp > 0 ? hp / maxHp : 1 };
+    },
+
+    /**
+     * Something hit a piece. At 0 it is BROKEN: out of the ledger, and `rules.salvage` of its cost
+     * (0.25) comes back — less than a take-down's 0.75, because you did not take it apart
+     * carefully, somebody kicked it in. Not an undo step; a broken wall is not something you did.
+     */
+    damage(entryId, amount) {
+      const e = entries.find(x => x.id === entryId);
+      if (!e || !(amount > 0)) return { ok: false, why: 'Nothing there.' };
+      const h = api.health(e);
+      e.maxHp = h.maxHp;
+      e.hp = Math.max(0, h.hp - amount);
+      if (e.hp > 0) return { ok: true, entry: e, hp: e.hp, maxHp: e.maxHp, destroyed: false };
+      const res = api.remove(e.id, { fraction: salvage });
+      return { ok: true, entry: res.entry, hp: 0, maxHp: h.maxHp, destroyed: true, refund: res.refund };
+    },
+
+    /** The Repair tool's quote: what it costs to put this piece back to full, and whether you can. */
+    repairOf(entryOrId) {
+      const e = typeof entryOrId === 'string' ? entries.find(x => x.id === entryOrId) : entryOrId;
+      if (!e) return { ok: false, why: 'Nothing there.' };
+      const def = byId.get(e.key);
+      const h = api.health(e);
+      const missing = h.maxHp - h.hp;
+      const out = { ok: false, entry: e, hp: h.hp, maxHp: h.maxHp, missing, cost: {}, why: '' };
+      if (!(missing > 0)) { out.why = `The ${e.name} is not damaged.`; return out; }
+      out.cost = repairCost(def, missing, h.maxHp, repairShare);
+      const short = {};
+      for (const [k, n] of Object.entries(out.cost)) if (bank.have(k) < n) short[k] = n - bank.have(k);
+      if (Object.keys(short).length) { out.why = `You are short of ${costText(short)}.`; out.short = short; return out; }
+      out.ok = true;
+      return out;
+    },
+
+    /** Pay the quote and put the piece back to full. */
+    repair(entryId) {
+      const q = api.repairOf(entryId);
+      if (!q.ok) return q;
+      bank.take(q.cost);
+      const was = q.entry.hp;
+      q.entry.hp = q.maxHp;
+      return { ok: true, entry: q.entry, paid: q.cost, was, healed: q.missing };
+    },
+
+    /** Undo of a repair: the damage back, and what it cost. */
+    unrepair(entryId, hp, paid = {}) {
+      const e = entries.find(x => x.id === entryId);
+      if (!e) return { ok: false };
+      e.hp = hp;
+      bank.give(paid);
+      return { ok: true, entry: e };
+    },
+
+    /** Free hit points (a Repair Station's slow mend). Returns how many went back. */
+    heal(entryId, amount) {
+      const e = entries.find(x => x.id === entryId);
+      if (!e || !(amount > 0)) return 0;
+      const h = api.health(e);
+      const add = Math.min(amount, h.maxHp - h.hp);
+      if (add > 0) e.hp = h.hp + add;
+      return Math.max(0, add);
+    },
+
+    /** The built piece in the way of a walker from A to B — see `blockingPiece`. */
+    blocking(ax, az, bx, bz, opts = {}) {
+      return blockingPiece(entries, k => byId.get(k), ax, az, bx, bz, opts);
+    },
+
     toJSON() {
       return {
         v: 1,
@@ -1395,6 +1590,15 @@ export function createBuildPlan({
         const copy = { ...e };
         const def = byId.get(copy.key);
         if (def) copy.cat = def.cat;
+        /**
+         * R28 — hit points. The ceiling is always the catalogue's (a tuning change reaches old
+         * bases); the damage is the save's. A save from before R28 wrote `hp: 0` for every piece
+         * with no catalogue hp, and a broken piece is never saved standing, so 0 or missing is full.
+         */
+        if (def) {
+          copy.maxHp = structureHp(def);
+          copy.hp = copy.hp > 0 ? Math.min(copy.hp, copy.maxHp) : copy.maxHp;
+        }
         return copy;
       });
       claims = (data?.claims || []).map(c => ({ ...c }));

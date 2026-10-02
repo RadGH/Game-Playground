@@ -32,7 +32,7 @@ import {
 } from '../js/classbuild.js';
 import { createSkillBar } from '../js/skills.js';
 import { buildForest, allocate, spentBy } from '../js/perks.js';
-import { pickTalent } from '../js/skilltalents.js';
+import { pickTalent, treeFor } from '../js/skilltalents.js';
 import {
   priceOf, retrainMenu, spellRows, perkRows, talentRows, countTalents,
   forgetSpell, forgetAllSpells, forgetPerk, forgetAllPerks, forgetTalent, forgetAllTalents,
@@ -425,9 +425,13 @@ test('4.9 — a talent comes off one tier of one skill, and the tier takes a new
   assert.ok(rows[0].name && rows[0].name !== 'fan', 'the row shows the raw id rather than the name');
 
   // a spent tier refuses a new pick until it is emptied — that is what the Unbinder is FOR
-  assert.equal(pickTalent(player, 'firebolt', 1, 'pierce', { shape: 'bolt' }).ok, false);
+  // R28 — the second pick is read off the tree, not named: firebolt's tier 1 becomes its own
+  // bespoke board when batch 4 lands, and `pierce` is not on it (research/round28-skills-plan.md §11)
+  const other = treeFor('firebolt', 'bolt').tiers[0].nodes.map(n => n.id).find(id => id !== player.skillTalents.firebolt[1]);
+  assert.ok(other, 'firebolt has a second tier-1 node to pick');
+  assert.equal(pickTalent(player, 'firebolt', 1, other, { shape: 'bolt' }).ok, false);
   assert.equal(forgetTalent({ player, skillId: 'firebolt', tier: 1, prices: balance.retrain }).ok, true);
-  assert.equal(pickTalent(player, 'firebolt', 1, 'pierce', { shape: 'bolt' }).ok, true);
+  assert.equal(pickTalent(player, 'firebolt', 1, other, { shape: 'bolt' }).ok, true);
   // …and unbinding one that is not there charges nothing
   const none = forgetTalent({ player, skillId: 'firebolt', tier: 3, prices: balance.retrain });
   assert.equal(none.ok, false);

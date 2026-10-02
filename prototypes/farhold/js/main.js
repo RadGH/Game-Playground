@@ -171,7 +171,7 @@ import { handsOf, strikeAt, withArea, profileOf, isStaff, isWand, staffSpell, wa
 // R15: the dome's shove resists by rank through the same helper a hammer's knockback uses
 import { pushFor, feel, tuneFeel } from './combat-feel.js';
 // R20 — `clearTalent` moved with it: js/retrain.js is what empties a tier now, for gold.
-import { talentPlan, pickTalent, talentsOn } from './skilltalents.js';
+import { talentPlan, pickTalent, talentsOn, migrateTalents, TALENTS_VERSION } from './skilltalents.js';
 // R28 — the skill vocabulary: pure rules (js/skillmech.js) and the runtime that acts on them
 import { setMechEnv, blocksRanged, controlFor } from './skillmech.js';
 import { createSkillRuntime } from './skillrun.js';
@@ -7747,6 +7747,18 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   sky.holdEclipsesUntil?.(state.elapsed + (balance.sky?.eclipseGrace ?? 450));
   if (save) {
     state.elapsed = restore(save, { rpg, player, control, map }) || 0;
+    /**
+     * R28 — THE TALENT TREES BECAME PER-SKILL (research/round28-skills-plan.md §7). A save from
+     * before keeps every pick the new trees still offer and drops the rest; nothing is charged and
+     * nothing is owed, because picking into an empty tier has always been free. Said once.
+     */
+    if ((save.player?.talentsVersion ?? save.talentsVersion ?? 0) < TALENTS_VERSION) {
+      const mig = migrateTalents(player, skills.slots.map(sl => sl.id).filter(Boolean));
+      if (mig.dropped) {
+        const line = `Skill talents were reworked: ${mig.dropped} ${mig.dropped === 1 ? 'pick was' : 'picks were'} returned. Choose again on the Skills tab — it is free.`;
+        setTimeout(() => { hud.log(line, 'level'); hud.notice?.(line, 'good'); }, 1500);
+      }
+    }
     // written on every save since round 3 and never read back, so the save list's clock restarted
     state.playtime = Math.max(0, Math.round(save.playtime || 0));
     if (save.world && !saveCarriesWorld(save)) {

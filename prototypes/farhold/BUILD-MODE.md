@@ -1395,9 +1395,8 @@ nothing read.
   `[-Infinity, -Infinity]`. js/collide.js `inBand` applies a band with no lower limit to any body
   that does not report its feet height (every enemy). It never applies to the player, whose feet are
   always above −∞. Companions do not collide with built pieces at all, so they follow you through.
-  **Watch out:** nothing in the game damages a structure yet, so a fully walled base cannot be
-  reached by enemies that fight up close. Ranged enemies and turrets still matter. A wall that takes
-  damage, and a Repair tool, are parked together (§28.5).
+  On its own this would make a walled base unreachable for enemies that fight up close, so walls
+  now take damage and can be broken (§28.7).
 * **Dead flags.** `blocks` (barricade) and `perch` (watchtower, guard tower) were read by nothing.
   Every barricade is now a segment no enemy crosses, which is what `blocks` described, so the flag
   was removed. The watchtower's description promised *"somewhere a hired archer can actually stand"*,
@@ -1434,8 +1433,6 @@ nothing read.
 
 ### 28.5 Parked
 
-* **Structures take damage** (and so a Repair tool). Nothing hits a building yet. Now that gates
-  stop enemies, this is the next thing defence needs. See the warning in §28.3.
 * **Redo**: killed in the roast. A redo would have to re-run every placement rule against a world
   that has changed since.
 * **Drag to place a line**: left-drag turns the camera in build mode. Shift+click does the same
@@ -1444,7 +1441,7 @@ nothing read.
   (under one section's width) open at the end of the leg. That gap is too narrow for the player.
   Filling it needs a short wall piece, which the catalogue does not have.
 
-### 28.6 Tests
+### 28.6 Tests (see also §28.7)
 
 * `tests/round28-building.test.js` (node, 16 tests): corners for every run piece and shape, the
   corner rule, gates at every corner for all four walls, `gateAt`, posts + leaf, the enemy-only
@@ -1458,7 +1455,7 @@ nothing read.
   F turns free placement on and off. Then the Tools ring shows Move/Upgrade/Copy/Stamp, Wall →
   three corners with one clicked twice → the card shows *"N m · N sections, 1 gate"* and *"click to
   add N m more"* → Enter lays exactly what was billed, gate included → one Ctrl+Z removes the whole
-  run. Screenshots go in `test-results/round28-building/`.
+  run. Screenshots go in `research/round28-building/`.
 
 ## Round 28 — automation
 
@@ -1576,3 +1573,83 @@ Bugs found and fixed:
 Chain orders ("make 10 machine parts" queuing the ingots upstream — a keep order on the ingot
 furnace covers most of it), a production graph view, hauler vehicles you can see on the road,
 and a citizen shift schedule.
+
+### 28.7 Walls take damage, break, and get repaired
+
+Gates that stop enemies (§28.3) would have made a walled base untouchable by melee enemies, so this
+was built in the same round instead of being parked.
+
+**Who hits a wall.** Enemies have no pathfinding: they walk in a straight line at what they are after.
+Two or three times a second, every melee enemy asks `field.structures(ax, az, bx, bz)` (js/main.js
+→ js/build.js `blockingPiece` → js/buildplan.js `blockingPiece`) for the built piece across its line,
+looking no further than 14 m ahead. If there is one, it walks up to that piece and swings at it
+(js/actors.js `siegeOf` and the branch next to the swing at you).
+`hooks.onEnemyStrikeStructure` (js/main.js) rolls the enemy's own `dmg`, multiplies by
+`rules.siegeDamage` (1), and hands the result to `build.damagePiece`. This affects:
+* **Ranged enemies.** Not affected: they stand off and keep shooting at you over the wall.
+* **Fliers.** Not affected: they go over.
+* **An enemy busy with a companion.** Not affected: the companion is on its side of the wall.
+* **Underground.** Not affected: the query returns null in a dungeon.
+* **Raid waves.** They spawn through the same field, so a raid now hits the wall in its way.
+* **Turrets.** Unchanged: they shoot whatever is beating on the wall. A turret that is itself in
+  the way gets hit too.
+* **A single fence section.** Enemies walk through it rather than around it, because they cannot
+  plan a way round.
+
+**Hit points.** A piece's hit points are its catalogue `hp` where it has one (39 rows: palisade 400,
+stone wall 1200, reinforced wall 3000, gate 900…). Every other piece gets a derived value, so a
+dearer, later piece is tougher:
+
+    hp = clamp(round((40 + 20 × cost units) × tier), 60, 2000)        js/buildplan.js structureHp
+
+A Storage Box comes out at 160. The maximum always comes from the catalogue, so a tuning change
+reaches old bases. The damage itself is saved with the piece. A save from before this round loads
+every piece whole.
+
+**What damage looks like.** There are four bands: whole, then below two thirds, then below one
+third (`damageBand`). Each band darkens the piece one step. It uses the same cached materials, so
+no shader is compiled on a hit. A health bar (green, amber, orange, red) stands over any piece that
+is not whole.
+
+**Broken.** At 0 hit points the piece leaves the ledger and its mesh is removed. `onRemove` then
+runs exactly as it does for a take-down: the collider is rebuilt, so the gap is a real gap, a
+crate's goods are handed on, and the grid and drills let go. `rules.salvage` (0.25) of the piece's
+cost comes back to your store, and the log says *"Moor Hound breaks the Palisade. 1 timber
+salvaged."* A broken piece is not an undo step.
+
+**Repair tool** (Tools ring and panel, after Upgrade). Point at a piece and the card shows its hit
+points and the price: *"Click: repair the Palisade (250/400 HP) for 2 timber."* If you are short,
+it says what you are short of. A click puts the piece back to full. The price is
+`rules.repairShare` (0.5) of the build cost for a whole bar, paid in proportion to the damage and
+rounded up per material, so even a scratch costs one of each material (`repairCost`). Ctrl+Z
+undoes a repair and gives back what it cost. Repairing is a click, not a held E: the build mode
+cursor is already free, and E means "use" everywhere else.
+
+**Repair Station.** `repairs: { radius: 30, rate: 25 }` is now read as 25% of each damaged piece's
+bar per minute, for every piece within 30 m, while the station has power. It runs from
+`build.update`, which nothing in js/main.js had ever called. The portal ring's spin, which lives in
+the same function, was dead for the same reason. js/raid.js `loseRaid` still has its abstract loss
+model, but nothing in the game calls it (`defence.lost` has no caller). Real damage is now the loss
+model.
+
+**Tests.** tests/round28-building.test.js adds 5 node tests:
+* the hp table, catalogue value or derived, with a cost and a tier changed to check the formula
+  responds;
+* the repair price: pro rata, rounded up, `share` as the setting, real material ids;
+* damage → band → quote → repair → undo → the short-of message → broken with the salvage share,
+  plus salvage set to 1;
+* save/load of the damage, an old save loading whole, healing capped at the bar;
+* `blockingPiece`: a wall across the line, one off to the side, one too far ahead, a gate, a crate.
+
+tests/round28-building.spec.js adds a third Playwright test, which passed:
+* A three-section palisade is laid across the view.
+* A melee enemy is spawned on the far side. Its damage is raised so the test does not take minutes,
+  and companions are taken out of its targeting so only the wall is in the way.
+* It walks up and damages the middle section. That enemy is then removed.
+* Tools ring → Repair → the cursor finds the section → the card reads *"Click: repair the
+  Palisade (250/400 HP) for 2 timber"* → a click puts it back to full and costs logs.
+* A second enemy breaks a section outright: one fewer palisade, and the *"breaks the Palisade …
+  salvaged"* line appears.
+
+Screenshots are in `research/round28-building/` (damaged-wall, repair-quote, wall-broken). Earlier
+runs wrote to `test-results/`, which other test runs clear.

@@ -197,6 +197,8 @@ export function snapshot({
        * off — so a reload was about to refund something you paid an Unbinder to change.
        */
       skillTalents: player.skillTalents || {},
+      // R28 — the talent trees became per-skill; a save without this stamp is migrated once on load
+      talentsVersion: 2,
       // unlockables rather than loot, so they travel with the character — see js/gear.js
       vehicles: player.vehicles,
       // R15: which of them H brings — the horse, or the motorcycle you built. One slot, one choice.

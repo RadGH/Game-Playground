@@ -407,7 +407,7 @@ export const VOCAB = {
     describe: v => `Costs ${pct(num(v, 'share'))} of your maximum health, never taking you below 1 health.`,
   },
   resetOn: {
-    phase: 'bar', reader: 'js/skills.js',
+    phase: 'bar', reader: 'js/skillmech.js',
     describe(v) {
       const [kind, n] = String(v.when || v).split(':');
       return { kill: 'A kill with this skill resets its cooldown.', crit: 'A critical hit with this skill resets its cooldown.', consume: 'Consuming a mark resets its cooldown.', crowd: `Hitting ${fmt(+n || 5)} or more enemies resets its cooldown.` }[kind] || '';
@@ -706,6 +706,60 @@ function describeSelfBuff(v, ctx) {
   if (v.onEnd) bits.push(`when it ends ${describeSub(v.onEnd, ctx)}`);
   const who = v.petsOnly ? ', your followers' : v.pets ? ', you and every follower' : '';
   return `For ${secs(v.seconds ?? 8)}${who}: ${bits.join('; ') || 'empowered'}.`;
+}
+
+/**
+ * R28 — a talent's DOTTED `set` (`form.stats.armorPct`, `selfBuff.every.taunt`) in words. A shape
+ * talent changes one number deep inside the form block, and "No change" is not an answer.
+ */
+export function describeSetPath(path, v, ctx = {}) {
+  const parts = path.split('.');
+  const leaf = parts[parts.length - 1];
+  if (parts[0] === 'form') {
+    const where = parts[1];
+    if (where === 'stats') {
+      const b = statBits({ [leaf]: v });
+      return b.length ? `In the form: ${b.join(', ')}` : '';
+    }
+    if (where === 'seconds') return `The form lasts ${secs(v)}`;
+    if (where === 'basic') {
+      if (leaf === 'knock') return `The basic attack knocks targets ${m(num(v, 'push'))} back`;
+      if (leaf === 'heal') return `Each basic hit heals you ${pct(v)} of maximum health`;
+      if (leaf === 'splash') return `The basic attack splashes ${m(v)}`;
+      if (leaf === 'every') return `Every ${fmt(v.n ?? 3)}rd basic hit adds ${fmt(v.stack?.add ?? 2)} ${sname(v.stack?.status, ctx)} stacks, up to ${fmt(v.stack?.max ?? 5)}`;
+      if (leaf === 'statuses') return `The basic attack also applies ${list([].concat(v).map(r => statusPhrase(r, ctx)))}`;
+      return '';
+    }
+    if (where === 'petBuff') {
+      const pb = [];
+      if (v.resist) pb.push(`take ${pct(v.resist)} less damage`);
+      if (v.damage) pb.push(`deal ${pct(v.damage)} more damage`);
+      if (v.healPerSecond) pb.push(`heal ${pct(v.healPerSecond)} of maximum health a second`);
+      if (v.biteStatus) pb.push(`apply ${sname(v.biteStatus, ctx)} with every attack`);
+      return `While in the form, your followers ${list(pb)}`;
+    }
+    if (where === 'onKillHaste') return `A kill while in the form Hastens you for ${secs(v)}, up to ${secs(v * 3)} on a streak`;
+    if (where === 'firstCrit') return 'The first basic hit after entering the form is a certain critical hit';
+    if (where === 'onEnter' || where === 'onExit') {
+      const when = where === 'onEnter' ? 'Entering the form' : 'Leaving the form';
+      if (parts.length === 2) return `${when}: ${describeSub(v, ctx)}`;
+      const k = parts[2];
+      if (k === 'dash') return `${when} ${v.leap ? 'leaps' : 'charges'} up to ${m(v.range ?? 8)} ${v.to === 'target' ? 'onto the aimed enemy' : 'toward where you aim'}${v.land ? `, striking everything within ${m(v.land.radius ?? 2.5)} for ${wd(v.land.mult ?? 1)} on landing` : ''}`;
+      if (k === 'pool') return `${when} leaves a ${m(v.radius ?? 3)} patch for ${secs(v.seconds ?? 3)}${v.slow ? ` that slows anything in it ${pct(v.slow)}` : ''}`;
+      if (k === 'place') return `${when} plants a ${m(v.radius ?? 6)} ring for ${secs(v.seconds ?? 10)}${v.heal ? ` that heals allies inside ${pct(v.heal)} of maximum health every ${secs(v.every ?? 1)}` : ''}`;
+      if (k === 'burst') return `${when}: the burst ${leaf === 'radius' ? `reaches ${m(v)}` : leaf === 'mult' ? `deals ${wd(v)}` : 'changes'}`;
+      if (k === 'shape' || k === 'mult') return '';
+      return '';
+    }
+    return '';
+  }
+  if (parts[0] === 'selfBuff') {
+    if (path === 'selfBuff.resistPerFoe.lowHp') return `Below ${pct(v)} health, the per-enemy reduction doubles`;
+    if (path === 'selfBuff.every.taunt') return `The shockwave taunts what it hits for ${secs(v)}`;
+    const b = statBits({ [leaf]: v });
+    return b.length ? `While it lasts: ${b.join(', ')}` : '';
+  }
+  return '';
 }
 
 /**

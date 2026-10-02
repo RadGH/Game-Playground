@@ -2504,25 +2504,15 @@ let findFavOnly = false;
     }
 
     if (wantRoads) {
+      /**
+       * R28 — the roads on the ground, and ONLY those. This used to stroke World Forge's links and
+       * then each region's own detail `paths` (dashed tracks between the places inside it). Nothing
+       * in Farhold builds those tracks: they were drawn roads with no road under them, a dense
+       * dashed web at high zoom that led the player nowhere. `drawRoadNetwork` is what you can walk.
+       */
       ctx.restore();
       drawRoadNetwork(ctx, scale, ox, oy);
       ctx.save();
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-
-      // the region's own tracks between the places inside it, in the detail view's own palette
-      for (const d of details) {
-        const at = detailCell(d);
-        const step = scale / (d.factor || 1);
-        for (const p of d.paths || []) {
-          ctx.strokeStyle = p.class === 'highway' ? 'rgba(226,205,160,0.95)'
-            : p.class === 'road' ? 'rgba(206,186,146,0.85)' : 'rgba(196,180,150,0.6)';
-          ctx.lineWidth = Math.max(1.0, step * (p.class === 'highway' ? 0.8 : 0.55));
-          if (p.class === 'trail') ctx.setLineDash([step * 1.4, step * 1.2]);
-          run(p.cells, at);
-          ctx.setLineDash([]);
-        }
-      }
     }
 
     ctx.restore();

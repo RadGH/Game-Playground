@@ -294,8 +294,11 @@ test('drawMark draws something for every mark, through one canvas API', () => {
 
 test('the map screen draws the places itself and the key is built from the same table', () => {
   const map = read('../js/map.js');
-  assert.match(map, /layers: \{ \.\.\.state\.layers, nodes: false \}/,
-    'World Forge is drawing its own node dots underneath ours again');
+  // the rule, not the sentence (R28 added `roads: false` to the same object): every call to
+  // World Forge's renderer turns its node dots off
+  const calls = map.match(/renderWorld\(ctx,[^;]*?layers: \{[^}]*\}/g) || [];
+  assert.ok(calls.length >= 2, `found ${calls.length} renderWorld calls`);
+  for (const c of calls) assert.match(c, /nodes: false/, 'World Forge is drawing its own node dots underneath ours again');
   assert.match(map, /function drawPlaces\(/);
   assert.match(map, /drawMark\(ctx, name, 11, 11/, 'the key swatches are not drawn by drawMark');
   assert.match(css, /\.map-key-swatch/, 'the key has no style');

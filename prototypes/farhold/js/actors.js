@@ -1076,7 +1076,6 @@ export class EnemyField {
       if (e.statuses?.fear && e.state !== 'flee') { e.state = 'flee'; e.fleeFor = Math.max(e.fleeFor || 0, e.statuses.fear.remaining || 2); e.feared = true; }
       if (e.feared && !e.statuses?.fear) { e.feared = false; if (e.state === 'flee') { e.state = 'chase'; e.fleeFor = 0; } }
       const rooted = !!e.statuses?.root;
-      const silenced = !!e.statuses?.silence;
       if (asleep) {
         e.y = groundAt(this.terrain, e.x, e.z, e.y);
         let sy = e.y;

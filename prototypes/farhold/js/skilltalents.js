@@ -52,7 +52,7 @@
 // Round 11 also took the six nodes NOTHING carries out of the offer — see the note on OFFERS.
 
 import { fmt, pct, pctOf, secs } from '../../../shared/format.js';
-import { VOCAB, VOCAB_KEYS, PENDING, applyMod, describeVocab, keysOf, mechRules, formIds, MOD_STRUCT_KEYS } from './skillmech.js';
+import { VOCAB, VOCAB_KEYS, PENDING, applyMod, describeVocab, keysOf, mechRules, formIds, MOD_STRUCT_KEYS, describeSetPath } from './skillmech.js';
 
 /**
  * R28 — THE SKILL ROWS, so a tree can be built from the row's own bespoke talents.
@@ -240,30 +240,31 @@ const metres = n => `${fmt(n)} m`;
 
 /** One clause per `set` field. */
 function setClause(k, v, ctx) {
+  if (k.includes('.')) return describeSetPath(k, v, ctx);
   switch (k) {
     case 'shape': return {
       melee: 'Becomes a strike in front of you', around: 'Becomes a ring around you', bolt: 'Becomes a thrown bolt',
       beam: 'Becomes a beam in a straight line', ground: 'Lands where you aim instead', dash: 'Carries you forward instead',
       self: 'Becomes a spell on yourself', summon: 'Summons instead',
     }[v] || `Becomes a ${v} skill`;
-    case 'arc': return `Its arc is ${deg(v)}`;
-    case 'reach': return `It reaches ${metres(v)}`;
-    case 'radius': return `Its radius is ${metres(v)}`;
-    case 'range': return `Its range is ${metres(v)}`;
-    case 'width': return `It is ${metres(v)} wide`;
-    case 'splash': return `It splashes everything within ${metres(v)}`;
+    case 'arc': return `The arc becomes ${deg(v)}`;
+    case 'reach': return `The reach becomes ${metres(v)}`;
+    case 'radius': return `The radius becomes ${metres(v)}`;
+    case 'range': return `The range becomes ${metres(v)}`;
+    case 'width': return `The width becomes ${metres(v)}`;
+    case 'splash': return `The impact splashes everything within ${metres(v)}`;
     case 'element': return `Deals ${v} damage instead`;
     case 'status': return v ? `Applies ${ctx.statuses?.[v]?.name || v} instead` : 'Applies no status';
-    case 'cooldown': return `Its cooldown is ${secs(v)}`;
+    case 'cooldown': return `The cooldown becomes ${secs(v)}`;
     case 'mp': return v ? `Costs ${fmt(v)} mana` : 'Costs no mana';
     case 'repeats': return `Strikes ${fmt(typeof v === 'object' ? v.count : v)} times`;
     case 'delay': return `Lands ${secs(v)} after you cast`;
     case 'heal': return `Heals ${pct(v)} of maximum health`;
     case 'seconds': return `Lasts ${secs(v)}`;
     case 'projectiles': return `Looses ${fmt(v)} projectiles`;
-    case 'statusMult': return `Its status is worth ${pct(v)} of the usual`;
+    case 'statusMult': return `The status is worth ${pct(v)} of the usual`;
     case 'pets': return v ? 'Your followers get the same' : 'Only you get it';
-    case 'statusSeconds': return `Its status lasts ${secs(v)}`;
+    case 'statusSeconds': return `The status lasts ${secs(v)}`;
     default: return '';
   }
 }
@@ -295,7 +296,7 @@ function mulClause(k, v, { heals = false } = {}) {
     case 'radius': case 'reach': case 'range': case 'splash': case 'width': return `${pctOf(d)} ${up ? 'larger' : 'smaller'} ${k}`;
     case 'heal': return `${pctOf(d)} ${up ? 'more' : 'less'} healing`;
     case 'mp': return `Costs ${pctOf(d)} ${up ? 'more' : 'less'} mana`;
-    case 'statusMult': return `Its status deals ${pctOf(d)} ${up ? 'more' : 'less'}`;
+    case 'statusMult': return `The status deals ${pctOf(d)} ${up ? 'more' : 'less'}`;
     default: return `${pctOf(d)} ${up ? 'more' : 'less'} ${k.replace(/\./g, ' ')}`;
   }
 }

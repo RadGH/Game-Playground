@@ -178,3 +178,30 @@ test('a road rebuild stays affordable (logged; fails only past 3x the round-27 c
   console.log(`# road + town rebuild on 25392 @ Small: ${best.toFixed(0)} ms (round 27: ~65 ms)`);
   assert.ok(best < 400, `a rebuild took ${best.toFixed(0)} ms`);
 });
+
+test('plan: no junction is a sliver, measured against the arms that actually leave it', () => {
+  // R28 — the old measure compared a branch to its trunk SEGMENT with an absolute cosine, so a road
+  // carrying straight on from another road's end read as a 0-degree sliver (12-18% of junctions).
+  // A road continuing straight off a trunk's end is 180 degrees from the only arm there:
+  assert.equal(Math.round(M.junctionAngle([[0, 0], [100, 0]], [100, 0], [200, 0])), 180);
+  // a true Y at 20 degrees is still caught
+  const a = 20 * Math.PI / 180;
+  assert.equal(Math.round(M.junctionAngle([[0, 0], [100, 0]], [50, 0], [50 + 60 * Math.cos(a), 60 * Math.sin(a)])), 20);
+  for (const [seed, scale] of WORLDS) {
+    const s = M.roadPlanStats(world(seed, scale).terrain);
+    assert.ok(s.junctions > 5, `${seed}@${scale}: ${s.junctions} junctions`);
+    assert.equal(s.sharp, 0, `${seed}@${scale}: ${s.sharp} junctions under 30 degrees`);
+  }
+});
+
+test('the map strokes the roads that are on the ground, not World Forge\'s links', () => {
+  const src = readFileSync(new URL('../js/map.js', import.meta.url), 'utf8');
+  // the network comes from terrain.roadPaths, at the map's own x / M_PER_CELL + 0.5
+  assert.match(src, /const paths = terrain\.roadPaths/);
+  assert.match(src, /\/ M_PER_CELL \+ 0\.5/);
+  // and World Forge is never asked to draw its own road layer on top of ours
+  const calls = src.match(/renderWorld\(ctx,[^;]*?layers: \{[^}]*\}/g) || [];
+  assert.ok(calls.length >= 2);
+  for (const c of calls) assert.match(c, /roads: false/, `renderWorld still strokes world.roads: ${c}`);
+  assert.doesNotMatch(src, /for \(const road of \[\.\.\.\(world\.roads/, 'the map strokes world.roads again');
+});

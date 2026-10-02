@@ -6,7 +6,7 @@ import { test, expect } from '@playwright/test';
 async function land(page) {
   const errors = [];
   page.on('pageerror', e => errors.push('pageerror: ' + e.message));
-  await page.goto('/prototypes/farhold/?auto=1&quality=low&sound=off&seed=7&class=warrior');
+  await page.goto('/prototypes/farhold/?auto=1&quality=low&sound=off&seed=7&class=fighter');
   await page.waitForFunction(() => document.body.dataset.ready === '1' && !!window.farhold, null, { timeout: 120000 });
   return errors;
 }

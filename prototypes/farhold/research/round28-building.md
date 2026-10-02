@@ -85,6 +85,5 @@ All ten picks are built. A reviewer checked the first build (`~/claude/agent/r28
 and every finding is answered row by row in **BUILD-MODE.md §28.4**. Testing found three more
 bugs and they are fixed: clicks used the previous frame's aim, the run's bill priced the leg out to
 the cursor, and a gate was an open gap to enemies. The dead `blocks`/`perch` flags were removed,
-and the watchtower got the guard post its description promised. Parked: structure damage + Repair
-(more urgent now that a gate stops enemies), Redo, drag-to-line, and the short leftover gap after a
+and the watchtower got the guard post its description promised. Structure damage + the Repair tool were then built as well (BUILD-MODE.md §28.7). Parked: Redo, drag-to-line, and the short leftover gap after a
 gate on an awkward leg length.

@@ -21,11 +21,18 @@ const DATA = read('data/skills.json');
 
 /** What a skill deals on impact, and what its status deals afterwards, as shares of weapon damage. */
 function damageOf(skill) {
-  const spec = skill.status ? DATA.statuses[skill.status] : null;
   const impact = skill.mult || 0;
-  const dot = (spec && spec.perSecond)
-    ? impact * STATUS_POWER_SHARE * (skill.statusMult || 1) * spec.perSecond * spec.seconds
-    : 0;
+  /**
+   * R28 — every damage-over-time the skill applies counts: its `status`, the extra `statuses`, and a
+   * `stack` (counted at half its maximum — research/round28-skills-plan.md §9.2).
+   */
+  const dotOf = (id, stacks = 1) => {
+    const spec = id ? DATA.statuses[id] : null;
+    return (spec && spec.perSecond) ? impact * STATUS_POWER_SHARE * (skill.statusMult || 1) * spec.perSecond * spec.seconds * stacks : 0;
+  };
+  let dot = dotOf(skill.status);
+  for (const ref of [].concat(skill.statuses || [])) dot += dotOf(typeof ref === 'string' ? ref : ref?.id);
+  if (skill.stack?.status) dot += dotOf(skill.stack.status, (skill.stack.max || 1) * 0.5);
   return { impact, dot, total: impact + dot };
 }
 

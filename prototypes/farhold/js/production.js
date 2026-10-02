@@ -325,6 +325,54 @@ export function createProduction({
     return (grid.overview?.() || []).find(n => n.id === u.net) || null;
   }
 
+  /**
+   * R28 — WHAT A POOL IS REFUSING, NOT HOW HEAVY IT IS.
+   *
+   * "Store at 90%" was the plan's test and it was the wrong one: js/stores.js caps ONE material at a
+   * quarter of a store and all raw materials at half of it (`roomFor`), so a Storage Box can turn the
+   * drill's ore away while it reads 40% full, and a box full of planks nobody needs is no problem at
+   * all. So the question is asked per material, for the things actually ARRIVING here — what the
+   * drills routed to this pool dig, what the machines standing in it make, what the supply routes
+   * into it carry — and the answer says which of the two lines it hit.
+   */
+  function inboundTo(poolId) {
+    const out = new Set();
+    for (const d of mining?.overview?.() || []) if (d.route?.to === poolId && d.resource) out.add(d.resource);
+    for (const m of works?.all?.() || []) {
+      if (poolOf(m)?.id !== poolId) continue;
+      const r = works.recipes?.[m.queue?.[0]?.recipe];
+      for (const k of Object.keys(r?.outputs || {})) out.add(k);
+    }
+    for (const l of logistics?.links || []) {
+      if (l.to !== poolId) continue;
+      for (const k of l.only || Object.keys(stores?.pool?.(l.from)?.totals || {})) out.add(k);
+    }
+    return out;
+  }
+
+  function refusing(p) {
+    const pool = stores?.pool?.(p.id);
+    if (!pool) return [];
+    const out = [];
+    for (const res of inboundTo(p.id)) {
+      let room = 0, free = 0;
+      for (const s of pool.members || []) {
+        if (s.cap <= 0) continue;
+        room += stores.roomFor?.(s, res) || 0;
+        free += Math.max(0, (s.cap || 0) - Object.values(s.inv || {}).reduce((a, n) => a + n, 0));
+      }
+      if (room >= 1) continue;
+      const accepts = (pool.members || []).some(s => stores.accepts?.(s, res));
+      out.push({
+        res, name: nameOf(res),
+        why: !accepts ? 'nothing here can hold it'
+          : free >= 1 ? 'at the line one material may fill (a quarter of a store; raw materials half)'
+          : 'full',
+      });
+    }
+    return out;
+  }
+
   // ------------------------------------------------------------------ the lists the screen draws
 
   function machines() {
@@ -379,6 +427,7 @@ export function createProduction({
         fraction: p.cap > 0 ? p.load / p.cap : 0,
         top: Object.entries(p.totals || {}).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([k, n]) => ({ res: k, name: nameOf(k), n })),
         join: near ? { to: near.q.id, toName: near.q.name, text: near.advice.text } : null,
+        refusing: refusing(p),
       };
     });
   }
@@ -390,6 +439,16 @@ export function createProduction({
     return (logistics?.links || []).map(l => ({
       id: l.id, from: l.from, to: l.to, fromName: name(l.from), toName: name(l.to),
       only: l.only ? [...l.only] : null, keep: l.keep || 0, batch: l.batch,
+      /**
+       * R28 — THE OTHER FLOOR ON THE SAME PILE. A keep-in-stock order on a machine at the sending
+       * end holds its line there too, and the route leaves the higher of the two behind
+       * (js/logistics.js `runLinks`). Both numbers are shown side by side so nobody has to guess why
+       * a route is not carrying the ingots off.
+       */
+      held: Object.keys(pools.find(p => p.id === l.from)?.totals || {})
+        .map(res => ({ res, name: nameOf(res), line: works?.keepLine?.(l.from, res) || 0 }))
+        .filter(x => x.line > 0 && (!l.only || l.only.includes(x.res))),
+      materials: Object.keys(pools.find(p => p.id === l.from)?.totals || {}).map(res => ({ res, name: nameOf(res) })),
       onRoad: loads.filter(x => x.from === name(l.from) && x.to === name(l.to)),
     }));
   }
@@ -410,7 +469,12 @@ export function createProduction({
       out.push({ key: `d:${d.id}:${d.limit}`, kind: 'drill', id: d.id, level: 'warn', grace: MACHINE_GRACE });
     }
     for (const p of stores?.overview?.() || []) {
-      if (p.cap > 0 && p.load / p.cap >= FULL_AT) out.push({ key: `s:${p.id}`, kind: 'store', id: p.id, level: 'warn', grace: 0 });
+      if (!(p.cap > 0)) continue;
+      // a pool turning away something that is on its way in is the alert; a heavy one is only a
+      // warning when it is nearly full outright (no material line left to explain it)
+      const refused = refusing(p);
+      if (refused.length) out.push({ key: `s:${p.id}:${refused.map(r => r.res).join(',')}`, kind: 'store', id: p.id, level: 'warn', grace: 0, refused });
+      else if (p.load / p.cap >= FULL_AT) out.push({ key: `s:${p.id}`, kind: 'store', id: p.id, level: 'warn', grace: 0, refused: [] });
     }
     for (const n of grid?.overview?.() || []) {
       if ((n.use || 0) > 0 && (n.satisfaction ?? 1) < 0.85) out.push({ key: `p:${n.id}`, kind: 'power', id: n.id, level: 'bad', grace: 3 });
@@ -441,7 +505,11 @@ export function createProduction({
         text = `${d.name} (${d.resourceName}): ${d.limit}.`; fix = row?.fix || '';
       } else if (p.kind === 'store') {
         const s = srows.get(p.id);
-        text = `${s.name} is ${Math.round(100 * s.load / s.cap)}% full.`; fix = 'Another box beside it, or a supply route that carries the surplus away.';
+        const r = p.refused?.[0];
+        text = r
+          ? `${s.name} will take no more ${r.name.toLowerCase()} — ${r.why} (${Math.round(100 * s.load / s.cap)}% full).`
+          : `${s.name} is ${Math.round(100 * s.load / s.cap)}% full.`;
+        fix = 'Another box beside it raises every line; a supply route out carries the surplus away.';
         at = { x: s.x, z: s.z };
       } else if (p.kind === 'power') {
         const n = prows.get(p.id);

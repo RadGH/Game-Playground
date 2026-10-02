@@ -621,7 +621,7 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
          * far behind, so a face can slow a companion down but never strand it.
          */
         if (!p.hover) [cx, cz] = cliffStep(currentTerrain, p, cx, cz, dt, { feet: p.y }, cliffOut);
-        if (!p.hover && field) [cx, cz] = field.unstick(cx, cz, (p.reach || 2) * 0.28);
+        if (!p.hover && field) [cx, cz] = field.unstick(cx, cz, (p.reach || 2) * 0.28, p.x, p.z);
         if (!wetAt(currentTerrain, cx, cz, p.y)) { p.x = cx; p.z = cz; }
         else { p.x = at.x; p.z = at.z; }        // a companion will not drown chasing you across a river
       }

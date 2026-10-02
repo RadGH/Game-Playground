@@ -135,6 +135,18 @@ export function roadProfile(klass, half) {
  * `ROAD_SKIRT` is the sloped edge face (the kerb near you, an embankment far away).
  */
 export const ROAD_DRAPE = 3;
+/**
+ * R28 — how finely to drape at a distance `d` from where the roads were rebuilt. The player can walk
+ * `refreshEvery` (260 m) before the next rebuild, and the terrain's fine rings reach ~100-300 m past
+ * them, so everything inside `ROAD_DRAPE_NEAR` gets the full `ROAD_DRAPE`; past it the rows open
+ * up to `ROAD_DRAPE_FAR`, because a ring there is 18-160 m a quad and the shader's skirt is what
+ * meets it. Draping a 2.6 km radius at 3 m was 2.3x the cost of the whole rebuild for nothing.
+ */
+export const ROAD_DRAPE_NEAR = 480;
+export const ROAD_DRAPE_FAR = 16;
+export function drapeStepAt(d) {
+  return d <= ROAD_DRAPE_NEAR ? ROAD_DRAPE : Math.min(ROAD_DRAPE_FAR, ROAD_DRAPE + (d - ROAD_DRAPE_NEAR) / 50);
+}
 export const ROAD_LIFT = { highway: 0.09, road: 0.07, trail: 0.05 };
 export const STREET_LIFT = 0.06;
 export const ROAD_SKIRT = { drop: 0.45, out: 0.35 };
@@ -709,16 +721,22 @@ export function createFeatures(scene, terrain, opts = {}) {
   /** R27 M4 — the buildings with a `role` (js/town-plan.js BUILDING_INFO) as built, per settlement. */
   const postRecords = new Map();
 
+  /**
+   * R28 — copy one array onto the end of another. `into.push(...from)` passes every element as an
+   * argument, and a draped road ribbon is tens of thousands of numbers: past ~120k V8 throws
+   * "Maximum call stack size exceeded", and below that it is still slower than a loop.
+   */
+  const append = (into, from) => { for (let i = 0; i < from.length; i++) into.push(from[i]); };
   /** Append one ribbon's triangles to a growing buffer, offsetting its indices. */
   function pushRibbon(into, part) {
     const base = into.position.length / 3;
-    into.position.push(...part.position);
-    into.normal.push(...part.normal);
-    if (part.color) into.color.push(...part.color);
+    append(into.position, part.position);
+    append(into.normal, part.normal);
+    if (part.color) append(into.color, part.color);
     for (const i of part.index) into.index.push(i + base);
     // R28 — the skirt mask rides along, zero for anything that has none
     if (into.skirt) {
-      if (part.skirt) into.skirt.push(...part.skirt);
+      if (part.skirt) append(into.skirt, part.skirt);
       else for (let k = 0; k < part.position.length / 3; k++) into.skirt.push(0);
     }
   }
@@ -850,18 +868,18 @@ export function createFeatures(scene, terrain, opts = {}) {
     const road = { position: [], normal: [], index: [], color: [], skirt: [] };
     const push = (target, part, fill = null) => {
       const base = target.position.length / 3;
-      target.position.push(...part.position);
-      target.normal.push(...part.normal);
+      append(target.position, part.position);
+      append(target.normal, part.normal);
       for (const i of part.index) target.index.push(i + base);
       // R28 — which vertices are the bottom of a road's skirt (see `roadShader`)
       if (target.skirt) {
-        if (part.skirt) target.skirt.push(...part.skirt);
+        if (part.skirt) append(target.skirt, part.skirt);
         else for (let k = 0; k < part.position.length / 3; k++) target.skirt.push(0);
       }
       // R27 M8 — the road mesh is vertex-coloured, so a part that carries no colour (a deck) is
       // painted the class's main colour
       if (target.color) {
-        if (part.color) target.color.push(...part.color);
+        if (part.color) append(target.color, part.color);
         else for (let k = 0; k < part.position.length / 3; k++) target.color.push(fill[0], fill[1], fill[2]);
       }
     };
@@ -942,7 +960,7 @@ export function createFeatures(scene, terrain, opts = {}) {
               // outranks it (see `drapeRibbon` in js/roadplan.js and `roadKeep` here)
               else push(road, ribbon(pts, hs, r.half * 2, {
                 lift: roadLift(r), groundAt: roadGroundAt, profile: roadProfile(r.klass, r.half),
-                drape: ROAD_DRAPE, skirt: ROAD_SKIRT, keep: roadKeep(r),
+                drape: (x, z) => drapeStepAt(Math.hypot(x - px, z - pz)), skirt: ROAD_SKIRT, keep: roadKeep(r),
               }));
             }
             k = e;

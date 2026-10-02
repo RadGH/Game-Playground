@@ -315,19 +315,6 @@ export function renameOutpostMarker(book, marker, name) {
   return marker.name;
 }
 
-/** One line per outpost for a panel: "Mine 3 — 4 pieces, 940 m out". No drawing in it. */
-export function outpostLines(posts, from = null) {
-  return posts.map(p => ({
-    id: p.id,
-    name: p.name,
-    role: p.role,
-    count: p.count,
-    metres: from ? Math.round(Math.hypot(p.x - from.x, p.z - from.z)) : null,
-    text: `${p.name} — ${p.count} piece${p.count === 1 ? '' : 's'}`
-      + (from ? `, ${Math.round(Math.hypot(p.x - from.x, p.z - from.z))} m out` : ''),
-  }));
-}
-
 function segDist(x, z, x1, z1, x2, z2) {
   const dx = x2 - x1, dz = z2 - z1;
   const len2 = dx * dx + dz * dz;

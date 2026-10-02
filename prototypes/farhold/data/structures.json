@@ -14,7 +14,7 @@
     "autoLevel": 1.5,
     "lineMax": 40,
     "mountReach": 2.4,
-    "_r28": "R28. autoLevel: a piece whose worst corner is within this many metres of the ground under its middle levels its own footprint as it lands, instead of refusing with 'level it first'. lineMax: the most pieces one Shift+click line may place. mountReach: how far a wall-mounted piece (snap: wall) looks for a wall, a gate or a house side to hang on. Per structure: upgradesTo (the Upgrade tool's next step, paid as the difference) and gateId (the gate a wall run puts where you click a corner twice).",
+    "_r28": "R28. autoLevel: a piece whose worst corner is within this many metres of the ground under its middle levels its own footprint as it lands, instead of refusing with 'level it first'. lineMax: the most pieces one Shift+click line may place. mountReach: how far a wall-mounted piece (snap: wall) looks for a wall, a gate or a house side to hang on. Per structure: upgradesTo (the Upgrade tool's next step, paid as the difference — run pieces only: walls, fences, hedges) and gateId (the gate a wall run puts where you click a corner twice).",
     "_doc": "grid: metres between snap points. snapDistance: how close a ghost has to be to an existing piece's edge before it jumps to it. refund: fraction of the cost the deconstruct tool gives back (§4.7 — 'building should not punish experimenting'). footingTolerance: how far a corner may sit off the ground before the piece counts as floating. claimRadius: metres from the claim stone."
   },
   "materials": {
@@ -1935,7 +1935,7 @@
       "h": 2.2,
       "snap": "grid",
       "power": {
-        "make": 30,
+        "make": 40,
         "burns": "coal"
       },
       "cost": {
@@ -2208,7 +2208,6 @@
       "d": 1.4,
       "h": 2.2,
       "snap": "grid",
-      "upgradesTo": "ballista_turret",
       "hp": 300,
       "turret": {
         "range": 30,
@@ -3141,7 +3140,6 @@
       "d": 2,
       "h": 2.6,
       "snap": "grid",
-      "upgradesTo": "watchtower",
       "hp": 350,
       "post": {
         "slots": 2

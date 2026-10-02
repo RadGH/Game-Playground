@@ -287,6 +287,8 @@
     }
   },
   "_recipeDoc": "`time` is seconds at speed 1. `power` is the extra draw while working. `unlock` is { recipe, times } — you must have completed that recipe that many times for this one to appear. `byproduct` outputs are listed in `outputs` like anything else; they are marked in `waste` only so the UI can grey them.",
+  "_r28RecipePowerDoc": "R28 — a recipe's `power` was read by nothing until this round. It is drawn now, at `recipePowerShare` of its face value (js/refine.js `step`), because its numbers were written without ever being played against a generator and drawing them whole would brown out every saved base with an assembler on it. The machine's own `powerUse` is unchanged.",
+  "recipePowerShare": 0.5,
   "recipes": [
     {
       "id": "cook_meat",

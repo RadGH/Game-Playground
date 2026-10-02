@@ -226,7 +226,9 @@ export function createMining({ data = {}, ore: oreIn = null, stores = null, grid
          * like it is working, the stock climbs, and nothing arrives. Saying "hauling" is worth more
          * than any number beside it.
          */
-        limit: !d.entry.powered ? 'power'
+        // R28 — `lit`, not `d.entry.powered`: a hand-cranked Small Drill is never on a grid, so every
+        // one of them read "power" here while it was digging away (the same rule `tick` uses)
+        limit: !lit ? 'power'
           : !node || node.depleted ? 'seam'
           : !r ? 'no route'
           : d.stock >= STOCK_CAP ? 'hauling'

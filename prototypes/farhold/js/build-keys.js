@@ -19,19 +19,74 @@
 /** The key strip, as data, so the card and the panel print the same words. */
 export const BUILD_KEYS = {
   place: 'click place · Shift+click a line · Q or scroll turn · F free · C copy a piece · Ctrl+Z undo · right-click menu · B leave',
+  moving: 'click put it down · Q or scroll turn · F free · Esc put it back where it was',
   run: 'click each corner · click a corner twice for a gate · Enter lay it · Esc drop the run · Ctrl+Z undo',
   brush: 'click to use · [ ] or scroll size the brush · Ctrl+Z undo · right-click menu · B leave',
-  point: 'click the highlighted piece · C copy it · Ctrl+Z undo · right-click menu · B leave',
+  point: 'click the highlighted piece · C build another of it · Ctrl+Z undo · right-click menu · B leave',
   stamp: 'click to stamp the layout · Q or scroll turn it · Ctrl+Z undo · right-click menu · B leave',
 };
 
 /** Which strip a tool shows. Pure, so the test can check every tool has one. */
-export function keysForTool(tool) {
-  if (tool === 'build') return BUILD_KEYS.place;
+export function keysForTool(tool, { moving = false } = {}) {
+  if (tool === 'build') return moving ? BUILD_KEYS.moving : BUILD_KEYS.place;
   if (tool === 'road' || tool === 'wall') return BUILD_KEYS.run;
   if (tool === 'stamp') return BUILD_KEYS.stamp;
   if (['remove', 'move', 'upgrade', 'route', 'pick'].includes(tool)) return BUILD_KEYS.point;
   return BUILD_KEYS.brush;
+}
+
+/**
+ * R28 — THE CARD'S LIVE LINE for whatever tool is up: the green/amber/red verdict while placing,
+ * the run's bill while one is being clicked out, what the click will do to the piece under the
+ * cursor, a layout's fit and bill. `{ text, tone }` with tone '' | 'bad' | 'level'. Pure over the
+ * build controller's getters, so the panel and the ring's card cannot disagree.
+ */
+export function liveLine(build, tool = null) {
+  if (!build) return { text: '', tone: '' };
+  const t = build.tool;
+  if (t === 'road' || t === 'wall') {
+    const ri = build.runInfo;
+    if (!ri) return { text: t === 'wall' ? 'Click the first corner. Fences and hedges are runs too.' : 'Click the first corner of the road.', tone: '' };
+    return { text: runText(ri), tone: ri.ok ? '' : 'bad' };
+  }
+  if (t === 'stamp') {
+    const si = build.stampInfo;
+    if (!si) return { text: tool?.hint || '', tone: '' };
+    return si.ok ? { text: `${si.name}: ${si.fits} of ${si.total} fit here · ${si.text || 'free'} · click to stamp`, tone: '' } : { text: si.why || '', tone: 'bad' };
+  }
+  if (['remove', 'move', 'upgrade', 'pick', 'copy'].includes(t)) {
+    const pt = build.lastPoint;
+    return pt?.text ? { text: pt.text, tone: pt.ok ? '' : 'bad' } : { text: tool?.hint || '', tone: '' };
+  }
+  if (t !== 'build') return { text: tool?.hint || '', tone: '' };
+  const li = build.lineInfo;
+  if (li) {
+    return li.count
+      ? { text: `Shift+click: ${li.count} in a line for ${li.text}${li.blocked ? ` · ${li.blocked} will not fit` : ''}${li.ok ? '' : ` · ${li.why}`}`, tone: li.ok ? '' : 'bad' }
+      : { text: li.why || '', tone: 'bad' };
+  }
+  const why = build.lastCheck;
+  if (!build.selected) return { text: 'Pick something from the ring (right-click).', tone: '' };
+  if (!why || why.x == null) return { text: 'Aim at the ground.', tone: '' };
+  if (!why.ok) return { text: why.why || '', tone: 'bad' };
+  const carry = build.moving ? `Carrying the ${build.moving.name}. ` : '';
+  return { text: carry + verdictText(why) + (build.free ? ' (free placement — F to snap)' : ''), tone: why.levels ? 'level' : '' };
+}
+
+export function verdictText(check) {
+  if (!check?.ok) return check?.why || '';
+  if (check.levels) return 'Clear — it levels the ground under it first. Click to build.';
+  if (check.mount) return 'Clear — hung on the wall. Click to build.';
+  return 'Clear. Click to build.';
+}
+
+/** R28 — a run being clicked out: "24 m · 12 sections, 1 gate · 72 timber, 10 steel". */
+export function runText(ri) {
+  if (!ri) return '';
+  const parts = [`${Math.round(ri.metres)} m`];
+  if (ri.count) parts.push(`${ri.count} section${ri.count === 1 ? '' : 's'}${ri.gates ? `, ${ri.gates} gate${ri.gates === 1 ? '' : 's'}` : ''}`);
+  parts.push(ri.text || 'free');
+  return parts.join(' · ') + (ri.ok ? '' : ` — ${ri.why}`);
 }
 
 export function installBuildKeys({ build, onLog = null, onChange = null, isTyping = null } = {}) {
@@ -56,6 +111,10 @@ export function installBuildKeys({ build, onLog = null, onChange = null, isTypin
       const at = build.aimAt;
       const res = build.pickAt?.(at.x, at.z);
       if (res && !res.ok && res.why) onLog?.(res.why, 'warn');
+    } else if (e.code === 'Escape' && build.moving) {
+      // with a piece in hand, Esc puts it back before anything else gets the key
+      build.cancelMove?.();
+      onLog?.('Put back where it was.', '');
     } else used = false;
     if (used) { e.preventDefault(); e.stopImmediatePropagation(); onChange?.(); }
   }

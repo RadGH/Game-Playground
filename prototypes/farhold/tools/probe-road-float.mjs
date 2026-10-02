@@ -39,7 +39,9 @@ for (const seed of SEEDS) {
     console.log(`${label}: ${exact.length} samples  vs heightAt: float p50/p95/p99/max ${fmt(quantiles(over))}  sunk n=${under.length} max ${fmt(quantiles(under, [1]))}`);
     {
       const k = label === 'roads' ? ROAD_SHADER.road : ROAD_SHADER.street;
+      seenFrom.where = [];
       const s = seenFrom(geom, terrain, rings, k, town.wx, town.wz, { skip });
+      if (seenFrom.where.length) console.log('   covered at [distance m, depth m]:', JSON.stringify(seenFrom.where.slice(0, 12)));
       const h = s.hidden.filter(v => v > 0.05), gp = s.gap.filter(v => v > 0.05);
       console.log(`   seen from the town: ${s.samples} vertices, still covered by the drawn hill ${(100 * h.length / s.samples).toFixed(2)}% (p95/max ${fmt(quantiles(h, [0.95, 1]))}), hanging past the skirt ${(100 * gp.length / s.samples).toFixed(2)}% (p95/max ${fmt(quantiles(gp, [0.95, 1]))})`);
     }

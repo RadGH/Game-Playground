@@ -55,6 +55,16 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
    */
   bag = null, bagReach = null,
 } = {}) {
+  /**
+   * R28 — HOW MUCH OF A RECIPE'S `power` IS ACTUALLY DRAWN. data/refining.json's `recipePowerShare`.
+   *
+   * The recipe draw was dead data until this round, so its numbers were never played against a
+   * generator — an assembler's 60 on top of its own 35 would brown out every base saved before it.
+   * Half of it, with the Burner Generator raised 30 -> 40 (data/power.json) to cover the drills that
+   * are now billed honestly, keeps a one-generator base of a drill and a smelter running. See
+   * research/round28-automation.md "Power balance".
+   */
+  const RECIPE_POWER_SHARE = Number.isFinite(refining?.recipePowerShare) ? refining.recipePowerShare : 0.5;
   const MACHINES = refining.machines || {};
   const RECIPES = Object.fromEntries((refining.recipes || []).map(r => [r.id, r]));
   const BY_MACHINE = {};
@@ -294,6 +304,28 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
     if (p) return stores.count(p, res);
     return bag?.count?.(res) || 0;
   }
+  /**
+   * R28 — THE KEEP LINE A POOL IS HOLDING FOR, BY MATERIAL.
+   *
+   * A supply route out of a pool (js/logistics.js `runLinks`) and a keep-in-stock order on a machine
+   * in that pool both decide how much of a thing should stay there, and neither knew about the
+   * other: a route shipped the furnace's 50 ingots out from under it, the furnace made 50 more, and
+   * the "keep 50" order never once stood satisfied. The route asks this and leaves the line behind.
+   * The highest line wins when two machines keep the same thing — they are both counting one pile.
+   */
+  function keepLine(poolId, res) {
+    let line = 0;
+    for (const m of machines.values()) {
+      if (!m.enabled) continue;
+      const p = poolFor(m);
+      if (!p || p.id !== poolId) continue;
+      for (const j of m.queue) {
+        if (j.keep > 0 && mainOutput(RECIPES[j.recipe]) === res) line = Math.max(line, j.keep);
+      }
+    }
+    return line;
+  }
+
   /** Is this job a keep-in-stock order that already has its stock? */
   function satisfied(m, job) {
     if (!(job?.keep > 0)) return false;
@@ -575,7 +607,7 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
      * empty smelter did. The machine's draw is its own `powerUse` plus whatever the job at the head
      * of its queue adds; the grid's idle share still applies when it is not actually running.
      */
-    if ((m.def.powerUse || 0) > 0) grid?.setDraw?.(m.id, m.def.powerUse + ((job && RECIPES[job.recipe]?.power) || 0));
+    if ((m.def.powerUse || 0) > 0) grid?.setDraw?.(m.id, m.def.powerUse + ((job && RECIPES[job.recipe]?.power) || 0) * RECIPE_POWER_SHARE);
     if (!job) { m.state = 'idle'; m.crafting = false; grid?.setBusy(m.id, false); return; }
     const recipe = RECIPES[job.recipe];
     if (!recipe) { m.queue.shift(); return; }
@@ -1036,7 +1068,7 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
     // R26 — the − / + on a queued job, the checklist, and whether the pack is in reach
     // R28 — keep-in-stock orders, and what a recipe is for
     speedOf: id => { const m = get(id); return m ? speedOf(m) : { speed: 0, why: 'no such machine' }; },
-    setKeep, mainOutput, stockOf: (id, res) => { const m = get(id); return m ? stockOf(m, res) : 0; },
+    setKeep, mainOutput, keepLine, stockOf: (id, res) => { const m = get(id); return m ? stockOf(m, res) : 0; },
     adjust, needs, bagOpen: id => { const m = get(id); return m ? bagOpen(m) : false; },
     isUnlocked, unlockProgress, available, board, inputsOf, snapshot, stateText, allJobs,
     // the Civilization Expansion §3 — work runs the machines

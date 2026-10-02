@@ -262,7 +262,7 @@ function crownLane(points, heights, reach, heightAt, ramp) {
 export function laneRibbon(lane, { lift = 0.06, color = null, groundAt = null, profile = null, drape = 0, skirt = null, keep = null } = {}) {
   // R28 — the draped ribbon (see `drapeRibbon` below) is what the game draws now; the flat
   // cross-section path below is kept for callers that pass no `drape`
-  if (drape > 0) return drapeRibbon(lane, { lift, color, groundAt, profile, step: drape, skirt, keep });
+  if (typeof drape === 'function' || drape > 0) return drapeRibbon(lane, { lift, color, groundAt, profile, step: drape, skirt, keep });
   const position = [], normal = [], index = [];
   // a town draws every street of every culture out of ONE mesh, so the colour has to travel with the
   // vertices rather than with the material
@@ -380,7 +380,7 @@ export function laneRibbon(lane, { lift = 0.06, color = null, groundAt = null, p
  * `crownLane`: the highest ground across the street plus two metres either side, so on a side slope
  * the downhill kerb floated.
  *
- * So the ribbon drapes instead. It is cut every `step` metres along (the source points are kept as
+ * So the ribbon drapes instead. It is cut every `step` metres along (a number, or `(x, z) => metres`) (the source points are kept as
  * rows, so a bend is still a vertex), every vertex across it asks `groundAt` and sits `lift` above
  * that, and then each quad's middle and edge middles are checked against the ground and the quad is
  * raised if the hillside bulges between its corners. The ground under a world road IS the graded deck
@@ -434,7 +434,10 @@ function drapeRibbon(lane, { lift, color, groundAt, profile, step, skirt, keep }
     if (i + 1 >= points.length) break;
     const ax = points[i][0], az = points[i][1], bx = points[i + 1][0], bz = points[i + 1][1];
     const len = Math.hypot(bx - ax, bz - az);
-    const n = Math.max(1, Math.ceil(len / step));
+    // `step` may be a function of where the segment is (features.js drapes finely near the player,
+    // where the terrain's rings are a metre or two a quad, and coarsely far off, where they are not)
+    const st = typeof step === 'function' ? step((ax + bx) / 2, (az + bz) / 2) : step;
+    const n = Math.max(1, Math.ceil(len / Math.max(0.5, st)));
     if (len < 1e-6) continue;
     const sdx = (bx - ax) / len, sdz = (bz - az) / len;
     const h0 = halfAt(i), h1 = halfAt(i + 1), d0 = heights[i] ?? 0, d1 = heights[i + 1] ?? d0;
@@ -490,9 +493,18 @@ function drapeRibbon(lane, { lift, color, groundAt, profile, step, skirt, keep }
   }
 
   // ---- no quad may dip under a bulge in the ground between its corners
-  const Y = v => position[v * 3 + 1];
-  const raise = (vs, by) => { for (const v of vs) position[v * 3 + 1] += by; };
-  const midAt = (v, w) => [(position[v * 3] + position[w * 3]) / 2, (position[v * 3 + 2] + position[w * 3 + 2]) / 2, (Y(v) + Y(w)) / 2];
+  // How far the ground at the middle of edge v–w comes up past half the lift (0 if it does not).
+  // Every edge is asked once: a quad owns its top (A–B), left (A–C) and diagonal (B–C) edges, and
+  // only the last row / last column also ask the bottom (C–D) / right (B–D) edge, because anywhere
+  // else those are the next quad's top / left. Asking all five per quad was ~6 `heightAt` calls a
+  // vertex and tripled the cost of a rebuild.
+  const bulge = (v, w) => {
+    const x = (position[v * 3] + position[w * 3]) / 2, z = (position[v * 3 + 2] + position[w * 3 + 2]) / 2;
+    const g = groundAt(x, z);
+    if (!Number.isFinite(g)) return 0;
+    const over = g + lift * 0.5 - (position[v * 3 + 1] + position[w * 3 + 1]) / 2;
+    return over > 0 ? over : 0;
+  };
   if (groundAt) {
     for (const [first, n] of grid) {
       for (let r = 1; r < n; r++) {
@@ -500,13 +512,13 @@ function drapeRibbon(lane, { lift, color, groundAt, profile, step, skirt, keep }
           if (profile && cols[j][0] === cols[j + 1][0]) continue;
           const A = (first + r - 1) * nc + j, B = A + 1, C = (first + r) * nc + j, D = C + 1;
           // the quad is drawn as (A, C, B) and (B, C, D): its centre lies on the B–C diagonal
-          let worst = 0;
-          for (const [v, w] of [[A, B], [C, D], [A, C], [B, D], [B, C]]) {
-            const [x, z, y] = midAt(v, w);
-            const g = groundAt(x, z);
-            if (Number.isFinite(g) && g + lift * 0.5 > y) worst = Math.max(worst, g + lift * 0.5 - y);
+          let worst = Math.max(bulge(A, B), bulge(A, C), bulge(B, C));
+          if (r === n - 1) worst = Math.max(worst, bulge(C, D));
+          if (j + 2 === nc || (profile && cols[j + 1][0] === cols[j + 2]?.[0])) worst = Math.max(worst, bulge(B, D));
+          if (worst > 0) {
+            position[A * 3 + 1] += worst; position[B * 3 + 1] += worst;
+            position[C * 3 + 1] += worst; position[D * 3 + 1] += worst;
           }
-          if (worst > 0) raise([A, B, C, D], worst);
         }
       }
     }
@@ -537,8 +549,11 @@ function drapeRibbon(lane, { lift, color, groundAt, profile, step, skirt, keep }
           // outward = from the inner column to the edge, flattened
           let ox = position[v * 3] - position[w * 3], oz = position[v * 3 + 2] - position[w * 3 + 2];
           const ol = Math.hypot(ox, oz) || 1; ox /= ol; oz /= ol;
-          const nx = ox * 0.8, ny = 0.6, nz = oz * 0.8;
-          const c = sc || (colour ? [colour[v * 3] * 0.62, colour[v * 3 + 1] * 0.6, colour[v * 3 + 2] * 0.58] : null);
+          // R28 (screenshots): a dark face lit side-on read as the edge of a slab — a black serrated
+          // line along every hillside road. The bank is EARTH, half the road's colour and half a
+          // soil tone, and is lit nearly as the ground is, so it reads as a verge, not a kerb.
+          const nx = ox * 0.35, ny = 0.94, nz = oz * 0.35;
+          const c = sc || (colour ? [colour[v * 3] * 0.5 + 0.17, colour[v * 3 + 1] * 0.5 + 0.15, colour[v * 3 + 2] * 0.5 + 0.09] : null);
           // top (a copy of the edge, so the face shades as a face) and bottom
           position.push(position[v * 3], position[v * 3 + 1], position[v * 3 + 2]);
           position.push(position[v * 3] + ox * out, position[v * 3 + 1] - drop, position[v * 3 + 2] + oz * out);

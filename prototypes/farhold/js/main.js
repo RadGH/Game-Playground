@@ -100,7 +100,7 @@ import { createTerraform } from './terraform.js';
 import { createPortals } from './portal.js';
 import { createBuild } from './build.js';
 import { ObstacleField } from './collide.js';
-import { alignCatalogue } from './buildplan.js';
+import { alignCatalogue, solidsFor } from './buildplan.js';
 import { createBuildUI } from './build-ui.js';
 import { nextStep as chainNextStep } from './nextstep.js';
 // R17 — the five-step line that takes a new player from an empty field to an iron ingot.
@@ -112,6 +112,8 @@ import { createColony } from './colony.js';
 // the away half, so main.js constructs ONE thing and ticks ONE thing
 import { createCivics } from './civics.js';
 import { createCivicsScreen } from './civics-ui.js';
+import { createProduction } from './production.js';
+import { createProductionPill } from './production-ui.js';
 import { createFarm } from './farm.js';
 import {
   migrateSave as migrateShipyard, canLaunch as canLaunchShip, spendFlightFuel, grantShip,
@@ -1069,8 +1071,20 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       const def = build.defOf?.(e.key);
       if (!def || NO_COLLIDE.has(e.key)) continue;
       if ((def.h ?? 1) <= 0.35) continue;            // ankle-high is not a wall
-      const r = Math.max(0.35, Math.min(1.4, Math.max(def.w ?? 1, def.d ?? 1) / 2));
-      buildSolids.add(e.x, e.z, r, def.h ?? 2);
+      /**
+       * R28 — THE SHAPE THAT IS DRAWN (js/buildplan.js `solidsFor`). A wall section, fence or hedge
+       * is a segment end to end; a gate is its two posts with the opening clear between them (you
+       * could not walk through your own gate — it was one circle in the middle of the gap); the
+       * rest are the circles they always were. A segment is filed with a floorless height band so
+       * a fence you could hop before is still one you can hop, and stays solid to anything that
+       * does not jump.
+       */
+      for (const sol of solidsFor(e, def)) {
+        if (sol.kind === 'seg') {
+          const top = terrain.heightAt((sol.ax + sol.bx) / 2, (sol.az + sol.bz) / 2) + sol.h;
+          buildSolids.addSegment(sol.ax, sol.az, sol.bx, sol.bz, sol.half, sol.h, { band: [-Infinity, top - 0.35] });
+        } else buildSolids.add(sol.x, sol.z, sol.r, sol.h);
+      }
     }
     return buildSolids.count;
   }
@@ -3510,6 +3524,34 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   const holding = createCivicsScreen({
     civics, colony, works,
     /**
+     * R28 — THE PEOPLE TAB'S BUTTONS. Posting somebody on the watch is the way in to
+     * `colony.postGuard` (the Command Rod's guard order is the other), and the offers at the gate
+     * had buttons only on the B panel. Both are the colony's own calls; nothing is decided here.
+     */
+    people: {
+      posts: () => colony.posts || [],
+      post: id => {
+        const c = colony.byId(id);
+        const free = (colony.posts || []).find(p => (colony.citizens || []).filter(o => o.posted === p.id).length < (p.slots || 1));
+        if (!free) { hud.log('Every post is full. A Watch Post holds two, a Guard Tower three.', 'warn'); return; }
+        const out = colony.postGuard(id, free.id);
+        hud.log(out.ok ? `${c?.name || 'They'} stand${c ? 's' : ''} the watch at the ${free.name || 'post'}.` : out.why, out.ok ? 'good' : 'warn');
+      },
+      standDown: id => {
+        const out = colony.standDown(id);
+        if (out.ok) hud.log(`${out.citizen.name} comes off the watch and goes back to work as a ${out.citizen.jobName.toLowerCase()}.`, '');
+      },
+      offers: () => (colony.pending || []).map(o => ({
+        id: o.id, name: o.citizen?.name || 'Somebody',
+        job: (colonyData?.jobs || []).find(j => j.key === o.citizen?.job)?.name || String(o.citizen?.job || 'worker').replace(/_/g, ' '),
+      })),
+      accept: id => {
+        const out = colony.accept?.(id);
+        hud.log(out?.ok ? `${out.citizen.name} moves in.` : (out?.why || 'They did not stay.'), out?.ok ? 'level' : '');
+      },
+      turnAway: id => { colony.turnAway?.(id); hud.log('You send them on their way.', ''); },
+    },
+    /**
      * R17 — it mounts INSIDE the character sheet, on the tab index.html reserves for it.
      *
      * The screen is unchanged: same markup, same civics.css, same rail. `embedded` only drops the
@@ -4168,7 +4210,28 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       // R18 — you can walk where it stood again
       rebuildBuildSolids();
       grid.remove(entry.id);
+      /**
+       * R28 — A CRATE TAKEN DOWN USED TO TAKE ITS GOODS WITH IT.
+       *
+       * `stores.remove` deletes the store and everything on its shelves, and every way a crate
+       * leaves the ledger — Take down, Ctrl+Z, a razed outpost — came through here. So the shelves
+       * are emptied first: into whatever pool still reaches the spot (the crates beside it), and
+       * what does not fit or has nowhere to go into your bag. Nothing is destroyed.
+       */
+      const held = stores.get(entry.id);
+      const goods = held?.inv ? { ...held.inv } : null;
       stores.remove(entry.id);
+      if (goods && Object.values(goods).some(n => n > 0)) {
+        const pool = stores.poolAt(entry.x, entry.z);
+        let toPool = 0, toBag = 0;
+        for (const [id, n] of Object.entries(goods)) {
+          if (!(n > 0)) continue;
+          const kept = pool ? stores.put(pool, id, n) : 0;
+          toPool += kept;
+          if (n - kept > 0) { materials.add(id, n - kept); toBag += n - kept; }
+        }
+        hud.log(`${entry.name}'s goods ${toPool && toBag ? `went to ${pool.name} and your bag` : toPool ? `went to ${pool.name}` : 'went into your bag'}: ${matText(goods)}.`, 'good');
+      }
       works.remove(entry.id);
       // a house that was pulled down must not leave its citizen holding a bed that is not there
       civics.rebuild(build.entries, build.defOf);
@@ -4212,6 +4275,40 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     // R28 — `mining`: the drills keep digging while you are away too (js/logistics.js)
     works, mining, logistics, stores, grid,
     materials: resourceData?.materials || {},
+  });
+
+  /**
+   * R28 — THE BASE ECONOMY, READ OFF THE SYSTEMS THAT RUN IT (js/production.js).
+   *
+   * What the base makes a minute, what is stuck and WHY (traced upstream: a furnace short of ore
+   * whose drill has no power says so), and the alerts. It is drawn in three places: the Holding's
+   * Production tab, the station screen's rated line and "why", and the pill on the HUD. Sampled
+   * once a second in the frame loop. A supply route also asks `works.keepLine` so it leaves the
+   * stock a keep-in-stock machine is holding rather than shipping it out from under it.
+   */
+  logistics.setFloors((poolId, res) => works.keepLine(poolId, res));
+  let nextProductionSample = 0;
+  const production = createProduction({
+    works, stores, grid, mining, logistics,
+    materials: resourceData?.materials || {}, refining: refiningData || {}, nodeKinds: resourceData?.nodeKinds || {},
+  });
+  holding.setProduction?.(production, {
+    setKeep: (id, i, n) => { works.setKeep(id, i, n); },
+    toggle: id => { const m = works.get(id); if (m) works.setEnabled(id, m.enabled === false); },
+    reroute: id => {
+      const out = mining.autoRoute(id);
+      hud.log(out.ok ? 'The drill has a new route.' : out.why, out.ok ? 'good' : 'warn');
+    },
+    setLink: (id, patch) => { const out = logistics.setLink(id, patch); if (!out.ok) hud.log(out.why, 'warn'); },
+  });
+  const productionPill = createProductionPill({
+    mount: document.body,
+    onOpen: () => {
+      pauseMenu.toggle?.(false);
+      if (!hud.sheetOpen) hud.toggleSheet(true);
+      hud.setTab('holding');
+      holding.tab = 'production';
+    },
   });
 
   /**
@@ -4515,14 +4612,32 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         if (res.complete) { hud.log(`${res.order.name || 'The job'} is done.`, 'good'); sound.questDone(); }
         else if (res.applied <= 0) hud.log('Nothing left to do on that one.', '');
       },
+      /**
+       * R28 — the panel hands in the ORDER's id ("w12" / "lab_furnace3"), and this bound a citizen to
+       * a STATION with that id: one that does not exist, so they walked nowhere. An order at a
+       * machine binds a free person who can mind it; an order with no station (a harvest, a build)
+       * is pulled off the board by job tag, so it goes to a free person whose job does that work.
+       */
       assign: id => {
-        const who = (colony.citizens || []).find(c => !c.stationId && c.rung !== 'leaving');
-        if (!who) { hud.log('Nobody is free.', 'warn'); return; }
-        // R28 — the panel hands in the ORDER's id ("w12" / "lab_furnace3"); a citizen is bound to a
-        // STATION, so they were tied to a station that does not exist and walked nowhere
         const order = board.get?.(id);
-        colony.assign(who.id, { stationId: order?.stationId || order?.meta?.machine || id });
-        hud.log(`${who.name} goes to it.`, 'good');
+        if (!order) { hud.log('That job is gone.', 'warn'); return; }
+        const free = (colony.citizens || []).filter(c => c.stationId == null && !c.posted && c.rung !== 'leaving');
+        const jobOf = c => (colonyData?.jobs || []).find(j => j.key === c.job) || {};
+        const stationId = order.stationId ?? order.meta?.machine ?? null;
+        if (stationId != null) {
+          const who = free.find(c => (jobOf(c).tendMax ?? 1) > 0 && (jobOf(c).tags || []).includes(order.tag))
+            || free.find(c => (jobOf(c).tendMax ?? 1) > 0);
+          if (!who) { hud.log('Nobody free can mind a machine.', 'warn'); return; }
+          const out = colony.assign(who.id, { stationId });
+          if (out?.ok === false) { hud.log(out.why, 'warn'); return; }
+          hud.log(`${who.name} goes to the ${works.get?.(stationId)?.name || 'machine'}.`, 'good');
+          return;
+        }
+        const who = free.find(c => (jobOf(c).tags || []).includes(order.tag));
+        if (!who) { hud.log(`Nobody free does ${order.tag} work. A labourer or a carpenter would.`, 'warn'); return; }
+        // put it at the top of the board, so "send somebody" means THIS job, not the oldest one
+        order.priority = Math.max(order.priority ?? 1, 2);
+        hud.log(`${who.name} does ${order.tag} work and takes "${order.name || order.tag}" first, on their shift.`, 'good');
       },
     },
     holding: {
@@ -4657,6 +4772,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       .filter(r => r.away < 8)
       .sort((a, b) => a.away - b.away)[0]?.e || null,
   });
+  // R28 — the station screen's rated line and upstream "why" (js/station-ui.js `production`)
+  if (buildUI.station) buildUI.station.production = production;
   document.body.append(buildUI.root);
 
   /**
@@ -4696,12 +4813,24 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     pointerNdc[0] = ((e.clientX - r.left) / r.width) * 2 - 1;
     pointerNdc[1] = -((e.clientY - r.top) / r.height) * 2 + 1;
   });
+  /**
+   * R28 — ONE NOTCH, ONE STEP. A mouse wheel sends ~100 per notch; a touchpad sends dozens of tiny
+   * events per flick, and each one used to be a whole turn. The wheel's travel is added up and a
+   * step is taken per 60 of it, so a notch is still one step and a flick is a few.
+   */
+  let wheelPile = 0;
   renderer.domElement.addEventListener('wheel', e => {
     if (build.mode) {
       e.preventDefault();
-      // the terrain tools have no ghost to turn, so the wheel sizes the brush for them instead
-      if (build.tool === 'build') build.rotate(Math.sign(e.deltaY) * (Math.PI / 8));
-      else build.setRadius(build.radius - Math.sign(e.deltaY) * 2);
+      const unit = e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? 600 : 1;     // lines / pages → pixels
+      wheelPile += e.deltaY * unit;
+      if (Math.abs(wheelPile) < 60) return;
+      const dir = Math.sign(wheelPile);
+      wheelPile = 0;
+      // the terrain tools have no ghost to turn, so the wheel sizes the brush for them instead;
+      // a layout being stamped turns like a piece (build.rotate takes one catalogue step)
+      if (build.tool === 'build' || build.tool === 'stamp') build.rotate(dir * (Math.PI / 8));
+      else build.setRadius(build.radius - dir * 2);
       return;
     }
     /**
@@ -6254,6 +6383,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     const out = colony.recruit(offer, { gold: player.gold });
     if (!out.ok) { hud.log(out.why, 'bad'); sound.ui('error'); return { ok: false }; }
     player.gold -= offer.price;
+    civics.addSpend(offer.price || 0);
     hud.log(`${out.citizen.name} packs up and starts for your holding. ${populationText(population({ colony }))}.`, 'level');
     sound.questDone();
     const home = defence.spot?.();
@@ -6446,6 +6576,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     sellPrice: item => Math.max(1, Math.round(rpg.price(item) * (items.sellFactor ?? 0.35))),
     buy: item => {
       const r = folk.buy(talk.npc, item, player, shopMult());
+      // R28 — the Gambler's `spent: 1000` (data/colony.json) — `civics.addSpend` had no caller at all
+      if (r.ok) civics.addSpend(r.price || 0);
       hud.log(r.ok ? `Bought ${item.name} for ${r.price} gold.` : r.why, r.ok ? 'loot' : 'bad');
       if (r.ok) sound.coin(); else sound.ui('error');
       hud.setPlayer(player);
@@ -8195,7 +8327,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       if (e.code === 'Escape') {
         e.preventDefault();
         // a half-dragged road is thrown away first; a second Esc leaves the mode
-        if (build.cancelRun?.()) { hud.log('Run dropped.', ''); buildUI.refresh(); }
+        const carrying = !!build.moving;     // R28 — Esc with a piece in hand puts it back (build.js says so)
+        if (build.cancelRun?.()) { if (!carrying) hud.log('Run dropped.', ''); buildUI.refresh(); }
         else {
           build.setMode(false); buildUI.setOpen(false);
           document.body.classList.remove('building'); regrab();
@@ -9815,6 +9948,11 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     }
     // the grid's answer reaches the pad, the turret and the smelter — see syncPower
     if (state.frames % 20 === 0) syncPower();
+    // R28 — the base economy, once a game second: the meter's sample, the alerts' ages, the pill
+    if (state.elapsed >= nextProductionSample) {
+      nextProductionSample = state.elapsed + 1;
+      productionPill.update(production.sample(state.elapsed) && production.summary());
+    }
     if (state.frames % 15 === 0) {
       /**
        * THE COLONY HAS TO BE TOLD WHAT YOU BUILT.
@@ -9832,7 +9970,16 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         wealth: player.gold || 0,
       });
       colony.setClock?.(sky.dayFraction * 24, Math.floor(state.elapsed / (balance.sky?.dayLengthSeconds ?? 900)) + 1);
-      colony.tick?.(dt * 15);
+      /**
+       * R28 — THE DAY'S TAX AND A MIGRANT AT THE GATE WERE BOTH SILENT. `colony.tick` raises the tax
+       * once a day into the holding's purse (`colony.gold`) and rolls for a migrant; it returned
+       * both as events and this line dropped them, so the purse filled where nobody looked and an
+       * offer expired unseen. Said once each, with the key that opens the screen.
+       */
+      for (const ev of colony.tick?.(dt * 15) || []) {
+        if (ev.kind === 'tax' && (ev.gold || 0) > 0) hud.log(`The day's tax: ${Math.round(ev.gold)} gold into the holding's purse (${Math.floor(colony.gold)} in it). K to collect.`, 'good');
+        else if (ev.kind === 'migrant') hud.log(`${ev.offer?.citizen?.name || 'Somebody'} is at the gate asking to stay. K, People.`, 'level');
+      }
       farm.tick?.(dt * 15);
       /**
        * `works.machines()` RETURNS SOMETHING NOW.

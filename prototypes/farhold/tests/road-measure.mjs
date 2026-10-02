@@ -128,3 +128,99 @@ export function seenFrom(geom, terrain, rings, k, px, pz, { skirtDrop = 0.45, sk
   }
   return { samples, hidden, gap };
 }
+
+/**
+ * Round 28 — the road NETWORK, measured (tools/probe-road-plan.mjs, tests/round28-roads.test.js).
+ * Reads only `terrain.roadPaths` and `terrain.metresPerCell`.
+ */
+export function roadPlanStats(terrain, { twinCells = 0.6, twinDeg = 30, endCells = 1.5, sharpDeg = 30 } = {}) {
+  const cell = terrain.metresPerCell;
+  const paths = terrain.roadPaths || [];
+  const byClass = {};
+  let length = 0, twin = 0, steepLen = 0, worstGrade = 0;
+  const segs = [];
+  for (const p of paths) for (let i = 0; i + 1 < p.points.length; i++) segs.push({ p, i });
+  // a coarse grid of segments, so "the nearest other road" is not n^2
+  const G = Math.max(16, cell * twinCells * 2);
+  const grid = new Map();
+  const key = (gx, gz) => gx * 73856093 ^ gz * 19349663;
+  for (const s of segs) {
+    const [ax, az] = s.p.points[s.i], [bx, bz] = s.p.points[s.i + 1];
+    const x0 = Math.floor(Math.min(ax, bx) / G), x1 = Math.floor(Math.max(ax, bx) / G);
+    const z0 = Math.floor(Math.min(az, bz) / G), z1 = Math.floor(Math.max(az, bz) / G);
+    for (let gx = x0; gx <= x1; gx++) for (let gz = z0; gz <= z1; gz++) {
+      const k = key(gx, gz); let l = grid.get(k); if (!l) grid.set(k, l = []); l.push(s);
+    }
+  }
+  const nearestOther = (self, x, z) => {
+    let best = null, bd = Infinity;
+    const gx = Math.floor(x / G), gz = Math.floor(z / G);
+    for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) {
+      for (const s of grid.get(key(gx + dx, gz + dz)) || []) {
+        if (s.p === self) continue;
+        const [ax, az] = s.p.points[s.i], [bx, bz] = s.p.points[s.i + 1];
+        const vx = bx - ax, vz = bz - az, l2 = vx * vx + vz * vz;
+        const t = l2 > 0 ? Math.max(0, Math.min(1, ((x - ax) * vx + (z - az) * vz) / l2)) : 0;
+        const d = Math.hypot(ax + vx * t - x, az + vz * t - z);
+        if (d < bd) { bd = d; best = { d, dx: vx / Math.sqrt(l2 || 1), dz: vz / Math.sqrt(l2 || 1) }; }
+      }
+    }
+    return best;
+  };
+  const cosTwin = Math.cos(twinDeg * Math.PI / 180);
+  for (const p of paths) {
+    const pts = p.points, hs = p.surface || [];
+    // distance along, to skip a branch's approach to its trunk
+    const along = [0];
+    for (let i = 1; i < pts.length; i++) along.push(along[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+    const total = along[along.length - 1];
+    length += total;
+    byClass[p.klass] = (byClass[p.klass] || 0) + total;
+    for (let i = 0; i + 1 < pts.length; i++) {
+      const sl = along[i + 1] - along[i];
+      if (sl < 1e-6) continue;
+      const mx = (pts[i][0] + pts[i + 1][0]) / 2, mz = (pts[i][1] + pts[i + 1][1]) / 2;
+      const mid = (along[i] + along[i + 1]) / 2;
+      const endish = mid < endCells * cell || total - mid < endCells * cell;
+      if (!endish) {
+        const o = nearestOther(p, mx, mz);
+        if (o && o.d < twinCells * cell) {
+          const ux = (pts[i + 1][0] - pts[i][0]) / sl, uz = (pts[i + 1][1] - pts[i][1]) / sl;
+          if (Math.abs(ux * o.dx + uz * o.dz) > cosTwin) twin += sl;
+        }
+      }
+      if (Number.isFinite(hs[i]) && Number.isFinite(hs[i + 1])) {
+        const g = Math.abs(hs[i + 1] - hs[i]) / sl;
+        if (sl >= 2) worstGrade = Math.max(worstGrade, g);
+        if (g > 0.12) steepLen += sl;
+      }
+    }
+  }
+  // junction angles: the branch's heading over its first/last ~20 m against the trunk's at the join
+  const angles = [];
+  for (const p of paths) {
+    for (const j of p.joins || []) {
+      if (!j.trunk || !Number.isFinite(j.i)) continue;
+      const pts = p.points;
+      const atStart = j.at === 'start';
+      const a = atStart ? pts[0] : pts[pts.length - 1];
+      let b = null;
+      for (let k = 1; k < pts.length; k++) {
+        const q = atStart ? pts[k] : pts[pts.length - 1 - k];
+        if (Math.hypot(q[0] - a[0], q[1] - a[1]) >= 20) { b = q; break; }
+      }
+      if (!b) continue;
+      const tp = j.trunk.points, ti = Math.min(tp.length - 2, Math.max(0, j.i));
+      const tx = tp[ti + 1][0] - tp[ti][0], tz = tp[ti + 1][1] - tp[ti][1];
+      const bx = b[0] - a[0], bz = b[1] - a[1];
+      const c = Math.abs(tx * bx + tz * bz) / (Math.hypot(tx, tz) * Math.hypot(bx, bz) || 1);
+      angles.push(Math.acos(Math.min(1, c)) * 180 / Math.PI);
+    }
+  }
+  const sorted = angles.slice().sort((x, y) => x - y);
+  return {
+    pieces: paths.length, length, byClass, twin, worstGrade, steepShare: steepLen / (length || 1),
+    junctions: angles.length, sharp: angles.filter(a => a < sharpDeg).length,
+    angleMedian: sorted.length ? sorted[sorted.length >> 1] : 0, angles,
+  };
+}

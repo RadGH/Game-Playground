@@ -2070,6 +2070,10 @@ body:has(.chart:not(.hidden)) .hud { opacity: 0; pointer-events: none; }
 .build-cost li.short { color: #d98a7a; }
 .build-why { color: #d98a7a; font-size: 12px; }
 .build-ok { color: #8ad6a0; font-size: 12px; }
+.build-level { color: #e8c070; font-size: 12px; }
+.build-layout { gap: 6px; align-items: center; }
+.build-layout.on .build-layout-name { color: #f1d9a2; }
+.build-layout-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .build-keys { line-height: 1.4; }
 
 @media (max-width: 900px) {

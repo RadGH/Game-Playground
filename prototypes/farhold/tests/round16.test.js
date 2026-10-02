@@ -14,6 +14,7 @@ import {
   createGathering, createScanner,
 } from '../js/tools.js';
 import { population, recruitRefusal, populationText, HOUSE_MIN_BEDS } from '../js/population.js';
+import { createHousing } from '../js/housing.js';
 import { createCommand, ORDERS } from '../js/command.js';
 
 const read = n => JSON.parse(readFileSync(new URL(`../data/${n}.json`, import.meta.url)));
@@ -305,14 +306,23 @@ test('R16.10 — a quest-only instance is never scattered on the map', () => {
 // ---------------------------------------------------------------- 15. population
 
 test('R16.15 — no house, no population, and no migrants', () => {
-  const bedrollOnly = { report: () => ({ beds: 1, spare: 1, meanComfort: 0 }), houses: [{ beds: 1 }] };
+  // R28 — the REAL housing register, built from real catalogue rows. These used to be hand-made
+  // objects with `houses` as a list, while js/housing.js hands `houses` out as a FUNCTION — so the
+  // fake passed and the game threw "filter is not a function" the first time anything was built.
+  const STRUCT = read('structures');
+  const rows = Array.isArray(STRUCT) ? STRUCT : (STRUCT.structures || Object.values(STRUCT));
+  const defOf = key => rows.find(r => r && (r.key === key || r.id === key)) || null;
+  const real = list => { const h = createHousing({ data: read('colony') }); h.rebuild(list, defOf); return h; };
+
+  const bedrollOnly = real([{ id: 'b1', key: 'bedroll', x: 0, z: 0 }]);
+  assert.equal(typeof bedrollOnly.houses, 'function', 'js/housing.js changed shape; housesOf may need to follow');
   const none = population({ colony: { citizens: [], housing: bedrollOnly } });
-  assert.equal(none.started, false, 'two bedrolls count as a holding');
+  assert.equal(none.started, false, 'a bedroll counts as a holding');
   assert.equal(none.open, false);
   assert.match(recruitRefusal(none), /house/i, 'the refusal does not say to build a house');
   assert.equal(populationText(none), 'No houses');
 
-  const housing = { report: () => ({ beds: 4, spare: 2, meanComfort: 0.4 }), houses: [{ beds: 4 }] };
+  const housing = real([{ id: 'h1', key: 'bunkhouse', x: 0, z: 0 }]);
   const pop = population({ colony: { citizens: [{}, {}], housing } });
   assert.equal(pop.started, true);
   assert.equal(pop.cap, 4);
@@ -327,8 +337,8 @@ test('R16.15 — no house, no population, and no migrants', () => {
   assert.match(recruitRefusal(full), /bed is taken/);
   assert.ok(HOUSE_MIN_BEDS >= 2);
 
-  // and the colony itself refuses a migrant with no real house
-  assert.match(src('colony.js'), /const houses = \(housing\?\.houses \|\| \[\]\)/,
+  // and the colony itself refuses a migrant with no real house — through the same reader
+  assert.match(src('colony.js'), /housesOf\(housing\)\.filter/,
     'js/colony.js will still send migrants to a field of bedrolls');
 });
 

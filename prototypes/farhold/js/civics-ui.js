@@ -14,6 +14,8 @@
 // injected by this module rather than linked from index.html so that adding a whole screen to the
 // game touches neither the page nor style.css.
 
+import { productionPanes } from './production-ui.js';
+
 const CSS_HREF = 'civics.css';
 
 /** One element, with children. Small enough that a helper library would be the heavier option. */
@@ -56,6 +58,11 @@ const empty = text => el('div', { class: 'civ-empty', text });
 const pct = n => `${Math.round((n || 0) * 100)}%`;
 
 export const CIVICS_TABS = [
+  /**
+   * R28 — PRODUCTION. What the base makes, what is stuck and why, and the one thing to do about it:
+   * js/production.js thinks, js/production-ui.js draws. First, because it is the tab the pill opens.
+   */
+  { key: 'production', name: 'Production' },
   { key: 'people', name: 'People' },
   { key: 'houses', name: 'Houses' },
   { key: 'work', name: 'Work' },
@@ -101,13 +108,24 @@ export function createCivicsScreen({
    * so js/civics-ui.js stays a screen and nothing else.
    */
   musterAt = () => null, onMuster = null,
+  /**
+   * R28 — the base economy (js/production.js) and the callbacks its tab drives, and the People
+   * tab's own buttons: `people.post(id)` / `people.standDown(id)` / `people.accept(offerId)` /
+   * `people.turnAway(offerId)` / `people.offers()` / `people.posts()`. All optional — the screen
+   * draws without them, the way it always has.
+   */
+  production = null, productionActions = {}, people: peopleActions = null,
 } = {}) {
   // the stylesheet, once, and never a second copy if a save is reloaded in place
   if (!document.querySelector(`link[href="${CSS_HREF}"]`)) {
     document.head.appendChild(el('link', { rel: 'stylesheet', href: CSS_HREF }));
   }
 
-  let tab = 'people';
+  let tab = 'production';
+  // R28 — js/main.js builds the economy reader after this screen (it needs the supply routes,
+  // which come later in boot), so it is handed over with `setProduction` rather than at creation
+  let prod = production;
+  let prodActions = productionActions || {};
   let open = false;
 
   const body = el('div', { class: 'civics-body' });
@@ -154,13 +172,47 @@ export function createCivicsScreen({
         row('Rent a day', `+${c.rent || 0}`, 'a trader pays more than two citizens, and costs you a bed', 'civ-gold'),
         row('Wages a day', `−${c.wages || 0}`, null, c.wages ? 'civ-bad' : ''),
       ]),
-      pane('Everybody', people.map(p => row(
-        p.name,
-        `${p.unitsToday ?? 0} units today`,
-        p.line.replace(`${p.name} — `, ''),
-        p.housed ? '' : 'civ-bad',
-      ))),
+      pane('Everybody', people.map(p => {
+        const line = row(
+          p.name,
+          `${p.unitsToday ?? 0} units today`,
+          p.line.replace(`${p.name} — `, ''),
+          p.housed ? '' : 'civ-bad',
+        );
+        /**
+         * R28 — THE WATCH HAS A WAY IN. `colony.station` was finished and nothing called it, so
+         * "Standing a watch" above was 0 in every game ever played. With a post standing, each
+         * person gets a button: on the watch, or back to what they did before.
+         */
+        if (peopleActions) {
+          const posts = peopleActions.posts?.() || [];
+          if (p.posted) {
+            line.append(el('button', { class: 'prod-btn', text: 'Stand down', onclick: () => { peopleActions.standDown?.(p.id); draw(); } }));
+          } else if (posts.length) {
+            line.append(el('button', {
+              class: 'prod-btn', text: 'Post on the watch',
+              title: `Guards cost ${c.wages != null ? 'a wage' : 'gold'} a day out of the purse, and each one counts as a turret when a raid comes.`,
+              onclick: () => { peopleActions.post?.(p.id); draw(); },
+            }));
+          }
+        }
+        return line;
+      })),
     ];
+  }
+
+  /** R28 — somebody at the gate. The B panel had the only buttons; the People tab has them too. */
+  function drawOffers() {
+    const offers = peopleActions?.offers?.() || [];
+    if (!offers.length) return null;
+    return pane('At the gate', offers.map(o => {
+      const line = row(o.name, null, o.job);
+      line.append(
+        el('button', { class: 'prod-btn', text: 'Take them in', onclick: () => { peopleActions.accept?.(o.id); draw(); } }),
+        el('button', { class: 'prod-btn', text: 'Turn away', onclick: () => { peopleActions.turnAway?.(o.id); draw(); } }),
+      );
+      return line;
+    }));
   }
 
   function drawHouses(r) {
@@ -296,7 +348,7 @@ export function createCivicsScreen({
 
     const posts = pane('Trade Posts', (r.tradePosts || []).length
       ? (r.tradePosts || []).map(p => row(p.name, `${Math.round(p.x)}, ${Math.round(p.z)}`, 'a route may start or end here'))
-      : empty('A Trade Post holds two tonnes of finished goods and is the only place a route can start or end.'));
+      : empty('A Trade Post is the only place a cart route can start or end. Its goods are whatever the stores beside it hold.'));
 
     const routes = pane('On the road', (r.routes || []).length
       ? (r.routes || []).map(x => row(
@@ -319,7 +371,19 @@ export function createCivicsScreen({
     const c = r.colony || {};
     subtitle.textContent = `${c.citizens || 0} people · ${r.housing?.beds || 0} beds · ${(r.traders || []).filter(t => t.state === 'here').length} traders · ${c.gold || 0} gold`;
     body.textContent = '';
-    const panes = tab === 'people' ? drawPeople(r)
+    // R28 — the alert count rides on the Production tab's rail button, like the sheet's own badges
+    const prodBtn = railButtons.get('production');
+    if (prodBtn) {
+      const n = prod?.alerts?.().length || 0;
+      prodBtn.textContent = 'Production';
+      if (n) prodBtn.appendChild(el('span', { class: 'civ-badge', text: String(n) }));
+    }
+    const panes = tab === 'production' ? productionPanes({
+      production: prod,
+      h: { el, pane, row, empty, bar, setBar },
+      actions: Object.fromEntries(Object.entries(prodActions).map(([k, fn]) => [k, (...a) => { fn(...a); draw(); }])),
+    })
+      : tab === 'people' ? [drawOffers(), ...drawPeople(r)].filter(Boolean)
       : tab === 'houses' ? drawHouses(r)
       : tab === 'work' ? drawWork(r)
       : tab === 'traders' ? drawTraders(r)
@@ -385,6 +449,7 @@ export function createCivicsScreen({
 
   return {
     show, hide, toggle, draw, showAway, drawHold,
+    setProduction(p, actions = {}) { prod = p; prodActions = actions || {}; },
     get open() { return open; },
     get root() { return root; },
     set tab(t) { tab = t; draw(); },

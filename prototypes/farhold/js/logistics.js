@@ -230,6 +230,27 @@ export function createLogistics({
     return { ok: true, link: row, quote: q };
   }
 
+  /**
+   * R28 — CHANGE A ROUTE'S FILTER AFTER IT IS LAID.
+   *
+   * `only` and `keep` have been on `link` since it was written and the one caller (the map's Supply
+   * tab) never passed either, so a route out of a mining camp carried off the coal its own generator
+   * burns. The Production tab sets them here. `only: null` means everything; `keep` is a floor left
+   * behind for every material the route carries.
+   */
+  function setLink(id, { only = undefined, keep = undefined, batch = undefined } = {}) {
+    const l = links.find(x => x.id === id);
+    if (!l) return { ok: false, why: 'That route is gone.' };
+    if (only !== undefined) l.only = only && only.length ? [...only] : null;
+    if (keep !== undefined) l.keep = Math.max(0, Math.round(Number(keep) || 0));
+    if (batch !== undefined) l.batch = Math.max(1, Math.round(Number(batch) || T.batch));
+    return { ok: true, link: l };
+  }
+
+  /** R28 — `(poolId, res) -> n`: a floor other systems hold in a pool. js/main.js hands in `works.keepLine`. */
+  let floorFor = null;
+  function setFloors(fn) { floorFor = typeof fn === 'function' ? fn : null; }
+
   function unlink(id) {
     const before = links.length;
     links = links.filter(l => l.id !== id && !(l.from === id));
@@ -262,7 +283,9 @@ export function createLogistics({
       let best = null;
       for (const [res, have] of Object.entries(totals)) {
         if (l.only && !l.only.includes(res)) continue;
-        const spare = have - (l.keep || 0);
+        // R28 — the route's own floor, or the keep-in-stock line a machine here is holding, whichever
+        // is higher (js/refine.js `keepLine`); see `setFloors`
+        const spare = have - Math.max(l.keep || 0, floorFor ? (floorFor(a.id, res) || 0) : 0);
         if (spare < l.batch) continue;
         if (!best || spare > best.spare) best = { res, spare };
       }
@@ -341,7 +364,7 @@ export function createLogistics({
   }
 
   return {
-    quote, send, link, unlink, tick, catchUp, pending, secsText,
+    quote, send, link, setLink, setFloors, unlink, tick, catchUp, pending, secsText,
     get loads() { return loads; },
     get links() { return links; },
     get travel() { return { ...T }; },

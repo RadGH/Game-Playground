@@ -26,6 +26,8 @@
 
 import { el } from '../../../shared/ui.js';
 import { mat } from '../../../shared/format.js';
+// R28 — the live sentence and the key strip, shared with the long panel
+import { liveLine, keysForTool } from './build-keys.js';
 
 const CSS_HREF = 'buildradial.css';
 
@@ -209,12 +211,12 @@ export function createBuildRadial({
       build?.select(it.id);
       // the same rule the panel follows: a road or a wall piece picked while its run tool is up is
       // choosing WHICH road, so the tool stays; anything else means "place this"
-      const runnable = it.piece.cat === 'road' || it.piece.cat === 'defence';
+      const runnable = it.piece.cat === 'road' || !!it.piece.run;     // R28 — a fence is a run too
       const onRun = build?.tool === 'road' || build?.tool === 'wall';
       if (build?.tool !== 'build' && !(runnable && onRun)) build?.setTool('build');
       const { afford, lines } = priceOf(it.piece);
       onLog?.(afford
-        ? `${it.piece.name}: click the ground to place it. Scroll turns it · right-click for the menu.`
+        ? `${it.piece.name}: click the ground to place it. Q or scroll turns it · Shift+click lays a line · right-click for the menu.`
         : `${it.piece.name}: you are short of ${lines.filter(l => l.short).map(l => `${mat(l.n - l.got)} ${nameOf(l.id)}`).join(', ')}.`,
       afford ? '' : 'warn');
       api.close();
@@ -242,27 +244,33 @@ export function createBuildRadial({
     const tool = tools.find(t => t.key === build.tool);
     const placing = !tool || tool.kind === 'place';
     const p = placing ? pieces.find(x => x.id === build.selected) : null;
+    /**
+     * R28 — THE CARD SAYS WHAT EVERY TOOL WILL DO, not only Place. A run's metres, sections, gates
+     * and bill; what Take down / Move / Upgrade would do to the piece under the cursor; a layout's
+     * fit; a Shift+click line's count. One sentence from js/build-keys.js `liveLine`, which the
+     * panel prints too, and a key strip for the tool that is up.
+     */
+    const live = liveLine(build, tool);
+    const keyText = keysForTool(build.tool, { moving: !!build.moving });
+    const undo = build.undoLabel ? ` · Ctrl+Z: undo ${build.undoLabel}` : '';
     // it is called every frame; only rebuild when something on it would actually change
-    const sig = JSON.stringify([build.tool, p?.id, build.lastCheck?.ok, build.lastCheck?.why,
+    const sig = JSON.stringify([build.tool, p?.id, live.text, live.tone, keyText, undo,
       p ? Object.keys(p.cost || {}).map(have) : 0]);
     if (sig === cardSig) return;
     cardSig = sig;
     card.replaceChildren();
     const row = el('div', { class: 'br-card-row' });
     row.append(el('b', { text: p ? p.name : tool ? tool.name : 'Build' }));
-    if (p) {
+    if (p && !build.moving) {
       for (const l of priceOf(p).lines) {
         row.append(el('span', { class: `br-chip ${l.short ? 'short' : 'ok'}`, text: `${l.text} (${mat(l.got)})` }));
       }
     }
+    if (p && build.moving) row.append(el('span', { class: 'br-chip ok', text: 'moving — already paid for' }));
+    if (build.free && placing) row.append(el('span', { class: 'br-chip free', text: 'free placement' }));
     card.append(row);
-    const why = build?.lastCheck;
-    const line = !p && tool ? tool.hint
-      : why && !why.ok && why.why ? why.why
-      : why?.ok ? 'Clear. Click to build.'
-      : 'Aim at the ground.';
-    card.append(el('div', { class: `br-card-why ${why && !why.ok && p ? 'bad' : ''}`, text: line }));
-    card.append(el('div', { class: 'br-card-keys', text: 'right-click: menu · Tab: full list · scroll: turn · Ctrl+Z: undo · B: leave' }));
+    card.append(el('div', { class: `br-card-why ${live.tone}`, 'data-live': '1', text: live.text }));
+    card.append(el('div', { class: 'br-card-keys', text: `${keyText} · Tab: full list${undo}` }));
   }
 
   // ---------------------------------------------------------------- keys and the right button

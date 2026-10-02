@@ -29,6 +29,9 @@ import { createProduction } from '../js/production.js';
 import { createHousing } from '../js/housing.js';
 import { population } from '../js/population.js';
 import { WorkBoard } from '../js/work.js';
+import { createColony } from '../js/colony.js';
+import { createCivics } from '../js/civics.js';
+import { createCommand } from '../js/command.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const read = p => JSON.parse(readFileSync(join(here, p), 'utf8'));
@@ -149,7 +152,37 @@ test('R28 dead data — a recipe\'s own `power` is drawn while it is the job', (
   b.works.queue('s1', 'draw_wire', 5);
   b.works.tick(0.1);
   const recipe = REFINING.recipes.find(r => r.id === 'draw_wire');
-  assert.equal(b.grid.get('s1').draw, 14 + recipe.power, 'the recipe draw was read by nothing');
+  assert.equal(b.grid.get('s1').draw, 14 + recipe.power * REFINING.recipePowerShare, 'the recipe draw was read by nothing');
+  assert.ok(REFINING.recipePowerShare > 0 && REFINING.recipePowerShare <= 1);
+});
+
+/**
+ * THE BALANCE CHECK THE REVIEW ASKED FOR. Two of this round's fixes raise the load on every saved
+ * base at once — a digging Drill is billed its full 18 kW instead of the 25% idle share, and a
+ * recipe's own `power` is drawn. The base a player most plausibly saved — one Burner Generator, one
+ * Drill, one Smelter on a job — has to keep running after the update, not start shedding the smelter.
+ */
+test('R28 balance — a saved one-generator base of a drill and a smelter still runs', () => {
+  const b = base({ grid: true });
+  b.give('coal', 200);
+  b.grid.add({ id: 'g', type: 'burner_generator', x: 0, z: 0 });
+  b.grid.add({ id: 'd1', type: 'drill', x: 2, z: 1, draw: 18, priority: 'extraction' });
+  const { node, ore } = seam({ x: 2, z: 1 });
+  const mining = createMining({ data: RESOURCES, ore, stores: b.stores, grid: b.grid });
+  mining.bindDrill({ id: 'd1', key: 'drill', name: 'Drill', x: 2, z: 1, powered: true }, node);
+  b.works.place({ id: 's1', type: 'smelter', x: 1, z: -1 });
+  // the hungriest thing a smelter does
+  const recipe = REFINING.recipes.filter(r => r.machine === 'smelter').sort((a, c) => (c.power || 0) - (a.power || 0))[0];
+  for (const [k, n] of Object.entries(recipe.inputs || {})) b.give(k, n * 20);
+  b.works.completed[recipe.unlock?.recipe] = recipe.unlock?.times || 0;
+  assert.ok(b.works.queue('s1', recipe.id, 0).ok);
+  for (let i = 0; i < 20; i++) { b.grid.tick(0.5); mining.tick(0.5); b.works.tick(0.5); }
+  const net = b.grid.overview()[0];
+  const want = 18 + 14 + (recipe.power || 0) * REFINING.recipePowerShare;
+  assert.equal(net.gen, POWER.generators.burner_generator.gen);
+  assert.ok(Math.abs(net.use - want) < 0.5, `the grid is asked for ${net.use} kW, expected ${want}`);
+  assert.ok(net.satisfaction >= POWER.shedding.brownoutBelow, `a drill and a smelter on one generator now brown out (${net.satisfaction})`);
+  assert.ok(!net.shed.length, `shed: ${net.shed.join(', ')}`);
 });
 
 // ============================================================================ 2. keep in stock
@@ -207,6 +240,46 @@ test('R28 keep — a stocked machine posts no new work order', () => {
   b.works.tick(0.1);
   assert.notEqual(b.works.get('f1').state, 'stocked');
   assert.equal(b.works.postLabour(board, { at: 1 }), 1, 'below the line it asks again');
+});
+
+test('R28 keep — an order already up is LEFT up when the machine stands stocked', () => {
+  // the review's catch: stock wobbles round the line every batch, and cancelling the work order
+  // each time it touched the line would throw away the units a citizen had walked over to put in
+  const b = furnaceWithOre({ labour: COLONY.labour });
+  const board = new WorkBoard();
+  b.works.queue('f1', 'smelt_iron', 0, { keep: 2 });
+  b.works.tick(0.1);
+  assert.equal(b.works.postLabour(board, { at: 0 }), 1);
+  board.work(board.get('lab_f1'), { source: 'citizen', by: 'c1', units: 1 });
+  b.give('iron_ingot', 5);
+  b.works.tick(0.1);
+  assert.equal(b.works.get('f1').state, 'stocked');
+  b.works.postLabour(board, { at: 1 });
+  const o = board.get('lab_f1');
+  assert.ok(o && !o.cancelled, 'the half-done order was cancelled the moment the stock touched the line');
+});
+
+test('R28 keep — a supply route leaves the keep line behind', () => {
+  const b = furnaceWithOre();
+  b.stores.add({ id: 'far', type: 'storage_chest', x: 140, z: 0 });
+  const logistics = createLogistics({ stores: b.stores, power: POWER, materials: RESOURCES.materials });
+  logistics.setFloors((pool, res) => b.works.keepLine(pool, res));
+  const far = b.stores.poolAt(140, 0);
+  b.works.queue('f1', 'smelt_iron', 0, { keep: 30 });
+  assert.equal(b.works.keepLine(b.pool().id, 'iron_ingot'), 30);
+  assert.equal(b.works.keepLine(b.pool().id, 'copper_ingot'), 0);
+  b.give('iron_ingot', 35);
+  assert.ok(logistics.link(b.pool().id, far.id, { only: ['iron_ingot'], batch: 5 }).ok);
+  logistics.tick(0.1);
+  const sent = logistics.loads.reduce((n, l) => n + (l.res === 'iron_ingot' ? l.n : 0), 0);
+  assert.equal(sent, 5, `the route shipped ${sent}; only what is over the furnace's keep line may go`);
+  // and the screen shows both floors on the route's row
+  const row = prodFor(b, { logistics }).links()[0];
+  assert.deepEqual(row.held.map(x => [x.res, x.line]), [['iron_ingot', 30]]);
+  // the filter can be changed after the route is laid
+  assert.ok(logistics.setLink(row.id, { only: null, keep: 12 }).ok);
+  assert.equal(logistics.links[0].only, null);
+  assert.equal(logistics.links[0].keep, 12);
 });
 
 test('R28 keep — survives a save, and setKeep moves the line', () => {
@@ -380,4 +453,147 @@ test('R28 production — supply routes carry their filters, and power rows read 
   const pw = p.power()[0];
   assert.equal(pw.gen, 26);
   assert.match(pw.text, /kW wanted of 26 kW made/);
+});
+
+
+test('R28 production — a store turning away what is arriving is the alert, at whatever weight', () => {
+  // a chest of 400 holds at most 100 of one raw material; at 100 iron ore it is 25% full by weight
+  // and refusing the drill's ore — "store at 90%" would never have said a word
+  const b = base();
+  const { node, ore } = seam({ x: 1, z: 0 });
+  const mining = createMining({ data: RESOURCES, ore, stores: b.stores });
+  mining.bindDrill({ id: 'd1', key: 'small_drill', name: 'Small Drill', x: 1, z: 0, powered: true }, node);
+  mining.autoRoute('d1', { quiet: true });
+  b.give('iron_ore', 100);
+  const p = prodFor(b, { mining });
+  const a = p.sample(0);
+  const s = a.find(x => x.kind === 'store');
+  assert.ok(s, a.map(x => x.text).join(' | ') || 'no alert at all');
+  assert.match(s.text, /will take no more iron ore — at the line one material may fill/);
+  assert.match(s.text, /25% full/);
+  assert.equal(p.storage()[0].refusing[0].res, 'iron_ore');
+});
+
+test('R28 bug — a hand-cranked Small Drill does not read "power" while it digs', () => {
+  const b = base();
+  const { node, ore } = seam({ x: 1, z: 0 });
+  const mining = createMining({ data: RESOURCES, ore, stores: b.stores });
+  // no grid in the game ever sets `powered` on a Small Drill
+  mining.bindDrill({ id: 'd1', key: 'small_drill', name: 'Small Drill', x: 1, z: 0, powered: false }, node);
+  mining.autoRoute('d1', { quiet: true });
+  mining.tick(1);
+  assert.equal(mining.overview()[0].limit, 'digging');
+});
+
+test('R28 away — the drills dig in the logistics clock, BEFORE civics runs the people', () => {
+  // two catch-up loops cover the same window; the first digs, the second must come after it
+  for (const at of [...MAIN.matchAll(/const back = away\.resume\(\);/g)].map(m => m.index)) {
+    const next = MAIN.indexOf('civics.away(', at);
+    assert.ok(next > at && next - at < 3000, 'civics.away no longer follows away.resume()');
+  }
+  assert.ok(/works, mining, logistics, stores, grid/.test(MAIN), 'the away clock is not handed the drills');
+  const CIVICS = readFileSync(join(here, '../js/civics.js'), 'utf8');
+  assert.doesNotMatch(CIVICS, /mining\??\.tick/, 'civics.away digs the same hours a second time');
+});
+
+// ============================================================================ 4. the people side
+
+/** A colony on the REAL housing register, with real catalogue rows — never a fake `houses` list. */
+function holdingWith(list) {
+  const STRUCT = read('../data/structures.json');
+  const rows = Array.isArray(STRUCT) ? STRUCT : (STRUCT.structures || Object.values(STRUCT));
+  const defOf = key => rows.find(r => r && (r.key === key || r.id === key)) || null;
+  const board = new WorkBoard();
+  const colony = createColony({ data: COLONY, board, seed: 3 });
+  const civics = createCivics({ data: COLONY, colony, board, dayLengthSeconds: 900 });
+  civics.rebuild(list, defOf);
+  return { colony, civics, board, defOf };
+}
+
+test('R28 people — migration rolls on a real house without throwing', () => {
+  const { colony } = holdingWith([{ id: 'h1', key: 'bunkhouse', x: 0, z: 0 }]);
+  assert.equal(typeof colony.housing.houses, 'function');
+  let offer = null;
+  for (let i = 0; i < 200 && !offer; i++) offer = colony.rollMigration();
+  assert.ok(offer, 'a bunkhouse with four spare beds never drew a migrant');
+  // and with only a bedroll, nobody
+  const bare = holdingWith([{ id: 'b1', key: 'bedroll', x: 0, z: 0 }]).colony;
+  for (let i = 0; i < 50; i++) assert.equal(bare.rollMigration(), null);
+});
+
+test('R28 people — a guard can be posted and stood down, and it shows everywhere', () => {
+  const { colony, civics } = holdingWith([
+    { id: 'h1', key: 'bunkhouse', x: 0, z: 0 },
+    { id: 'p1', key: 'watch_post', x: 10, z: 0 },
+  ]);
+  const c = colony.welcome(colony.newCitizen({ job: 'smelter' }));
+  assert.equal(civics.posts.length, 1);
+  const out = colony.postGuard(c.id, 'p1');
+  assert.ok(out.ok, out.why);
+  assert.equal(c.job, 'guard');
+  assert.equal(c.posted, 'p1');
+  assert.equal(colony.stationed(), 1, '"Standing a watch" is still 0');
+  assert.ok(colony.wages() > 0, 'a posted guard costs nothing');
+  assert.equal(civics.facts({}).posted, 1, 'the Armiger cannot see the watch');
+  // back to the furnace: the old job comes back with them
+  colony.standDown(c.id);
+  assert.equal(c.posted, null);
+  assert.equal(c.job, 'smelter');
+  assert.equal(colony.wages(), 0);
+  // a turret is not a post, and the refusal names what is
+  assert.match(colony.postGuard(c.id, 'nope').why, /Watch Post/);
+});
+
+test('R28 people — the Command Rod posts a guard, and a work order stands them down', () => {
+  const { colony } = holdingWith([
+    { id: 'h1', key: 'bunkhouse', x: 0, z: 0 },
+    { id: 'p1', key: 'watch_post', x: 10, z: 0 },
+  ]);
+  const c = colony.welcome(colony.newCitizen({ job: 'labourer' }));
+  c.body = 'colony:0';
+  const body = { id: 'colony:0', name: c.name, x: 0, z: 0, citizenId: c.id };
+  const STRUCT = read('../data/structures.json');
+  const rows = Array.isArray(STRUCT) ? STRUCT : (STRUCT.structures || Object.values(STRUCT));
+  const build = {
+    entries: [{ id: 'p1', key: 'watch_post', x: 10, z: 0 }],
+    defOf: key => rows.find(r => r && (r.key === key || r.id === key)) || null,
+  };
+  const rod = createCommand({ colony, folk: { own: () => [body], sendTo: () => true }, build, works: null });
+  rod.select(body);
+  const out = rod.order(10, 0);
+  assert.equal(out.kind, 'guard');
+  assert.equal(c.posted, 'p1', 'the guard order walked them there and posted nobody');
+  rod.select(body);
+  rod.order(-30, 0);                               // bare ground: off the watch
+  assert.equal(c.posted, null);
+  assert.equal(c.job, 'labourer');
+});
+
+test('R28 people — the purse, the Gambler, and the work board are wired to something', () => {
+  // the tax button empties the purse the daily tax fills; it does not raise a fresh day's tax
+  const tax = MAIN.slice(MAIN.indexOf('      tax: () => {'), MAIN.indexOf('      tax: () => {') + 600);
+  assert.doesNotMatch(tax, /collectTax/, 'the button raises another day of tax on every click');
+  assert.match(tax, /colony\.gold -= purse/);
+  // civics.addSpend: the Gambler's `spent: 1000` had nothing counting towards it
+  assert.ok((MAIN.match(/civics\.addSpend\(/g) || []).length >= 2, 'shop purchases and recruiting do not count as spending');
+  // the work board hands in an ORDER id; nothing may bind a citizen to it as a station
+  const assign = MAIN.slice(MAIN.indexOf('      assign: id => {'), MAIN.indexOf('      assign: id => {') + 1600);
+  assert.match(assign, /board\.get\?\.\(id\)/);
+  assert.doesNotMatch(assign, /stationId: id\b/);
+  // migrant offers carry their person in `citizen`
+  assert.doesNotMatch(MAIN, /offers: \(colony\.pending \|\| \[\]\)\.map\(o => \(\{ id: o\.id, name: o\.name, job: o\.job \}\)\)/);
+});
+
+test('R28 dead code — the functions nothing called are gone, not just unused', () => {
+  const src = f => readFileSync(join(here, '../js/' + f), 'utf8');
+  assert.doesNotMatch(src('work.js'), /openTagged\(|static fromJSON/);
+  assert.doesNotMatch(src('colony.js'), /stationsOf\(/);
+  assert.doesNotMatch(src('command.js'), /lastOrder/);
+  assert.doesNotMatch(src('outposts.js'), /export function outpostLines/);
+  assert.doesNotMatch(src('civics.js'), /createHold\(\{[^}]*tradePost/, 'the Trade Post vault nothing ever filled is back');
+  // and the ones that were wired instead
+  assert.match(src('command.js'), /postGuard/);
+  assert.match(MAIN, /createProduction\(/);
+  assert.match(MAIN, /holding\.setProduction/);
+  assert.match(MAIN, /buildUI\.station\.production = production/);
 });

@@ -75,8 +75,12 @@ export function createCivics({
   let spent = 0;            // gold spent at this holding, ever — the Gambler's condition
   let lastVendorDay = 0;
 
-  /** The Trade Post's own hold, which is 2 000 kg and does not go anywhere. */
-  const vault = createHold({ goods: goods?.goods || [], capacity: data?.hold?.tradePost ?? 2000 });
+  /**
+   * R28 — THE TRADE POST'S "VAULT" IS GONE. It was a second 2 000 kg hold that nothing ever put a
+   * single good into (`civics.vault` had no caller), so the report showed an empty bar for ever.
+   * A Trade Post's goods are whatever its stores hold — the same pool every machine beside it uses.
+   * An old save's `vault` field is simply ignored.
+   */
 
   const defFor = key => (defOf ? defOf(key) : null);
 
@@ -268,6 +272,14 @@ export function createCivics({
       farm?.tick?.(dt * hoursPerSecond);
       if (board && works?.postLabour) { works.postLabour(board, { at: done }); works.collectLabour(board); }
       events.push(...(colony?.tick?.(dt * hoursPerSecond) || []));
+      /**
+       * R28 — NO DRILLS IN THIS LOOP, AND THAT IS ON PURPOSE. js/main.js runs `away.resume()`
+       * (js/logistics.js `createAwayClock`) over the whole window FIRST, and that clock digs: every
+       * drill has dug and delivered its window before this loop starts. Running them again here
+       * would dig the same hours twice. What this pass adds is the LABOUR the first one cannot see,
+       * so a bench a citizen kept lit gets to spend the ore the drills already brought in.
+       * tests/round28-automation.test.js pins the order in main.js.
+       */
       works?.catchUp?.(dt, { slice });
       trade.tick(dt, { day, rng });
       done += dt;
@@ -351,7 +363,6 @@ export function createCivics({
       traders: vendors.board(facts({ day, gold })),
       hold: hold.bar(),
       holdRows: hold.rows(),
-      vault: vault.bar(),
       routes: trade.list(),
       tradePosts: tradePosts.map(e => ({ id: e.id, name: e.name, x: e.x, z: e.z })),
       posts: postSlots,
@@ -360,7 +371,7 @@ export function createCivics({
   }
 
   return {
-    housing, vendors, hold, vault, trade, muster,
+    housing, vendors, hold, trade, muster,
     rebuild, tick, away, report, facts, stationAt, madeOf,
     holdCapacity: opts => holdCapacity({ data, carriers: data?.carriers || [], ...opts }),
     get spent() { return spent; },
@@ -371,7 +382,7 @@ export function createCivics({
       return {
         v: 1, spent, lastVendorDay,
         housing: housing.toJSON(), vendors: vendors.toJSON(),
-        hold: hold.toJSON(), vault: vault.toJSON(),
+        hold: hold.toJSON(),
         trade: trade.toJSON(), muster: muster.toJSON(),
       };
     },
@@ -382,7 +393,6 @@ export function createCivics({
       housing.load(json.housing);
       vendors.loadJSON(json.vendors);
       hold.loadJSON(json.hold);
-      vault.loadJSON(json.vault);
       trade.loadJSON(json.trade);
       muster.loadJSON(json.muster);
     },

@@ -146,6 +146,9 @@
 .br-chip.short { color: #f0a27a; }
 .br-card-why { color: #9fd49a; }
 .br-card-why.bad { color: #f0a27a; }
+/* R28 — amber: it will go, and it levels the ground under it first (the ghost is amber too) */
+.br-card-why.level { color: #e8c070; }
+.br-chip.free { color: #9ec8ff; }
 .br-card-keys { font-size: 11px; color: #7d8896; }
 
 /* ---------------------------------------------------------------- phone width */

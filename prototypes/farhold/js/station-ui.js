@@ -34,6 +34,12 @@ const CSS_HREF = 'station.css';
 
 /** How many of a recipe one click queues. 0 is the standing order js/refine.js has always had. */
 const BATCHES = [1, 5, 20, 0];
+/**
+ * R28 — KEEP IN STOCK. "Keep 50 iron ingots": the machine runs until the stores it fills hold that
+ * many, stands `stocked`, and starts again by itself below the line. A batch value of `k50` means
+ * that rather than a count (js/refine.js `queue(…, { keep })`).
+ */
+const KEEPS = [20, 50, 100];
 
 /**
  * THE BODY OF A STATION, DRAWN INTO WHATEVER BOX YOU HAND IT.
@@ -57,6 +63,8 @@ export function drawStationBody(box, {
   entry, def, works = null, store = null, build = null, tools = null, garage = null,
   shipyard = null, workboard = null, onLog = null, redraw = () => {}, batch = 1, setBatch = null,
   compact = false,
+  /** R28 — js/production.js, for the rated line and the upstream "why". Optional. */
+  production = null,
 } = {}) {
   if (!entry) return;
   const have = id => (store?.have ? store.have(id) : 0);
@@ -92,6 +100,23 @@ export function drawStationBody(box, {
         }));
       }
       box.append(ul);
+    }
+    /**
+     * R28 — THE NUMBER AND THE REASON. What it turns out a minute while it runs, and — when it is not
+     * running — the chain UPSTREAM: "waiting for iron ore" is true and useless when the reason is that
+     * the drill feeding it has no power. The checklist above is about THIS machine; this is about
+     * what feeds it.
+     */
+    if (production) {
+      const rated = production.ratedText?.(machine);
+      if (rated) box.append(el('p', { class: 'station-rated small muted', 'data-live': '1', text: rated }));
+      const d = production.diagnose?.(machine.id);
+      if (d && !d.ok && (d.chain?.length || d.fix)) {
+        const why = el('ul', { class: 'station-why', 'data-live': '1' });
+        for (const c of d.chain || []) why.append(el('li', { class: 'small', text: `↳ ${c}` }));
+        if (d.fix && !(d.chain || []).includes(d.fix)) why.append(el('li', { class: 'small station-fix', text: d.fix }));
+        box.append(why);
+      }
     }
   }
 
@@ -162,7 +187,14 @@ export function drawStationBody(box, {
       const r = works.recipes[job.recipe];
       const row = el('div', { class: 'build-job' },
         el('span', { text: r?.name || job.recipe }),
-        el('span', { class: 'muted small', text: job.left === Infinity ? `repeating · ${job.done} made` : `${job.done} of ${job.done + job.left} made` }));
+        el('span', { class: 'muted small', text: job.keep > 0
+          ? `keeping ${job.keep} in stock · ${Math.floor(works.stockOf?.(machine.id, works.mainOutput?.(r)) || 0)} on hand · ${job.done} made`
+          : job.left === Infinity ? `repeating · ${job.done} made` : `${job.done} of ${job.done + job.left} made` }));
+      // R28 — the keep line moves the same way a count does
+      if (job.keep > 0 && works.setKeep) {
+        row.append(el('button', { class: 'small', text: '−', title: 'Keep ten fewer', onclick: () => { works.setKeep(machine.id, i, Math.max(1, job.keep - 10)); redraw(); } }));
+        row.append(el('button', { class: 'small', text: '+', title: 'Keep ten more', onclick: () => { works.setKeep(machine.id, i, job.keep + 10); redraw(); } }));
+      }
       // R26 — "I cannot add or remove items": the count on a queued job moves both ways now
       if (job.left !== Infinity && works.adjust) {
         row.append(el('button', { class: 'small', text: '−', title: 'One fewer', onclick: () => { works.adjust(machine.id, i, -1); redraw(); } }));
@@ -185,6 +217,18 @@ export function drawStationBody(box, {
         onclick: () => { setBatch?.(n); redraw(); },
       }));
     }
+    if (works.setKeep) {
+      batchRow.append(el('span', { class: 'muted small station-keep-label', text: 'or keep' }));
+      for (const n of KEEPS) {
+        const key = `k${n}`;
+        batchRow.append(el('button', {
+          class: 'build-tool build-batch build-keep' + (batch === key ? ' on' : ''),
+          text: `${n}`,
+          title: `Keep ${n} in stock: it makes them until the stores here hold ${n}, stops, and starts again by itself when something takes them below that.`,
+          onclick: () => { setBatch?.(key); redraw(); },
+        }));
+      }
+    }
     box.append(batchRow);
 
     /**
@@ -205,9 +249,12 @@ export function drawStationBody(box, {
         title: r.desc || '',
         onclick: () => {
           if (!r.unlocked) { onLog?.(r.unlock?.text || 'Not learned yet.', 'warn'); return; }
-          const out = works.queue(machine.id, r.id, batch);
+          const keep = typeof batch === 'string' && batch[0] === 'k' ? parseInt(batch.slice(1), 10) || 0 : 0;
+          const out = keep > 0 ? works.queue(machine.id, r.id, 0, { keep }) : works.queue(machine.id, r.id, batch);
           if (!out.ok) onLog?.(out.why, 'warn');
-          else {
+          else if (keep > 0) {
+            onLog?.(`${machine.name}: keeping ${keep} ${(works.mainOutput?.(r) || r.name).replace(/_/g, ' ')} in stock.`, 'good');
+          } else {
             const job = out.job;
             onLog?.(batch === 0 || job?.left === Infinity
               ? `${machine.name}: ${r.name}, on a standing order — it will keep making them.`
@@ -217,10 +264,19 @@ export function drawStationBody(box, {
           redraw();
         },
       });
-      const out = Object.keys(r.outputs || {}).map(k => k.replace(/_/g, ' ')).join(', ');
+      /**
+       * R28 — BYPRODUCTS GREYED. data/refining.json marks slag, ash and tailings `waste` "only so the
+       * UI can grey them", and the UI never did: slag was listed beside the ingot as if it were the
+       * point. The real output first; the waste after it, in brackets and dimmer.
+       */
+      const waste = new Set(r.waste || []);
+      const outs = Object.keys(r.outputs || {});
+      const makes = el('span', { class: 'station-makes small muted', text: `→ ${outs.filter(k => !waste.has(k)).map(k => k.replace(/_/g, ' ')).join(', ')}` });
+      const wasted = outs.filter(k => waste.has(k));
+      if (wasted.length) makes.append(el('span', { class: 'station-waste', text: ` (+ ${wasted.map(k => k.replace(/_/g, ' ')).join(', ')})` }));
       row.append(
         el('span', { class: 'build-row-name', text: r.name }),
-        el('span', { class: 'station-makes small muted', text: `→ ${out}` }),
+        makes,
         el('span', {
           class: 'build-row-cost',
           text: !r.unlocked ? (r.unlock?.text || 'locked')
@@ -546,6 +602,7 @@ export function createStationScreen({
         entry, def, works, store, build, tools, garage, shipyard, workboard, onLog,
         batch, setBatch: n => { batch = n; },
         redraw: () => { lastSig = ''; draw(); },
+        production: api.production || null,
       });
     });
     body.scrollTop = scrolled;
@@ -578,6 +635,8 @@ export function createStationScreen({
 
   const api = {
     root,
+    /** R28 — js/main.js sets this once js/production.js exists (it is built after the station screen). */
+    production: null,
     get isOpen() { return open; },
     get at() { return entry; },
     /** True if this entry has a screen and it is now up. False means "not a station" — try E's other answers. */

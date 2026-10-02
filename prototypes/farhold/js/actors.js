@@ -382,11 +382,15 @@ export class EnemyField {
    * Push a body out of anything solid. Enemies used to walk straight through trees, walls and
    * houses that stopped the player dead, which reads as cheating even when it is only an oversight.
    */
-  unstick(x, z, radius = 0.6) {
+  unstick(x, z, radius = 0.6, fromX = null, fromZ = null) {
     let ox = x, oz = z;
+    // R28 — where the step started, so a thin wall (a built palisade is half a metre) cannot be
+    // stepped clean through in one slow frame; js/collide.js `resolve` puts it back on its side
+    const from = fromX != null ? (this._from || (this._from = [0, 0])) : null;
+    if (from) { from[0] = fromX; from[1] = fromZ; }
     for (const field of this.solids) {
       if (!field) continue;
-      field.resolve(ox, oz, radius, this._resolved);
+      field.resolve(ox, oz, radius, this._resolved, null, from);
       ox = this._resolved[0]; oz = this._resolved[1];
     }
     return [ox, oz];
@@ -870,7 +874,7 @@ export class EnemyField {
         if (step > 0) {
           const nx = e.x + p.dx * step, nz = e.z + p.dz * step;
           let [cx, cz] = this.terrain.clampToWorld(nx, nz);
-          if (!e.hover) [cx, cz] = this.unstick(cx, cz, (e.reach || 2) * 0.28);
+          if (!e.hover) [cx, cz] = this.unstick(cx, cz, (e.reach || 2) * 0.28, e.x, e.z);
           // R27 M7 — a cliff behind it is a wall too: knocked into a face, it takes the slam
           if (!wetAt(this.terrain, cx, cz, e.y) && (e.hover || climbable(this.terrain, cx, cz, e.x, e.z, 0, e.y))
             && Math.hypot(cx - e.x, cz - e.z) > step * 0.4) {
@@ -1072,7 +1076,7 @@ export class EnemyField {
          * kept (so a chase finds its way round), and after three seconds pinned it scrambles.
          */
         if (!e.hover) [cx, cz] = cliffStep(this.terrain, e, cx, cz, dt, { feet: e.y }, this._cliffOut || (this._cliffOut = [0, 0]));
-        if (!e.hover) [cx, cz] = this.unstick(cx, cz, (e.reach || 2) * 0.28);
+        if (!e.hover) [cx, cz] = this.unstick(cx, cz, (e.reach || 2) * 0.28, e.x, e.z);
         if (!wetAt(this.terrain, cx, cz, e.y)) {
           // if the push put it back where it started it is up against something: turn and try again
           if (Math.hypot(cx - e.x, cz - e.z) < speed * dt * 0.25) e.facing += (this.rng() - 0.5) * 1.6 + Math.PI * 0.5;
@@ -1175,7 +1179,7 @@ export class EnemyField {
   slide(e, dx, dz) {
     if (!dx && !dz) return;
     let [cx, cz] = this.terrain.clampToWorld(e.x + dx, e.z + dz);
-    [cx, cz] = this.unstick(cx, cz, (e.reach || 2) * 0.28);
+    [cx, cz] = this.unstick(cx, cz, (e.reach || 2) * 0.28, e.x, e.z);
     if (wetAt(this.terrain, cx, cz, e.y)) return;
     e.x = cx; e.z = cz;
     e.y = groundAt(this.terrain, cx, cz, e.y);

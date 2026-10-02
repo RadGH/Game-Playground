@@ -434,6 +434,19 @@ export function createBuild(scene, {
   let stampInfo = null;
   /** The first end of a route, while the second is being picked. See `routeClick`. */
   let routeFrom = null;
+  /**
+   * R28 — the piece the Move tool is carrying: `{ id, key, name }`. It stays in the ledger under its
+   * own id the whole time (its mesh is hidden and the ghost ignores it), so nothing that files
+   * against the id ever sees it go away. Dropped by Esc, another tool, another piece or leaving.
+   */
+  let moving = null;
+  function cancelMove() {
+    if (!moving) return false;
+    const g = meshes.get(moving.id);
+    if (g) g.visible = true;
+    moving = null;
+    return true;
+  }
   /** The polyline being dragged for a road or a wall (§4.14, §4.16). */
   let runPoints = [];
 
@@ -661,7 +674,8 @@ export function createBuild(scene, {
     }
     if (a.kind === 'lane') return roads.get(a.id)?.name || 'road';
     if (a.kind === 'brush') return { smooth: 'Level', raise: 'Raise', lower: 'Lower' }[a.tool] || 'ground';
-    if (a.kind === 'takedown') return `${a.moved ? 'pick up' : 'take down'} ${a.entry?.name || ''}`.trim();
+    if (a.kind === 'takedown') return `take down ${a.entry?.name || ''}`.trim();
+    if (a.kind === 'move') return `move ${book.entries.find(e => e.id === a.id)?.name || ''}`.trim();
     if (a.kind === 'upgrade') return `upgrade to ${book.entries.find(e => e.id === a.id)?.name || ''}`.trim();
     return a.kind;
   }
@@ -715,6 +729,20 @@ export function createBuild(scene, {
       log(`${res.entry.name} is back where it was.`, 'good');
       return { ok: true, entry: res.entry, restored: true };
     }
+    if (a.kind === 'move') {
+      const entry = book.entries.find(e => e.id === a.id);
+      if (!entry) return null;
+      const there = { x: entry.x, z: entry.z };
+      const res = book.relocate(a.id, a.from);
+      if (!res.ok) { log(`Cannot carry the ${entry.name} back: ${res.why}`, 'warn'); return { ok: false, why: res.why }; }
+      for (const id of a.tf || []) terraform?.remove?.(id);
+      api.forget(a.id);
+      addMesh(res.entry);
+      groundChanged((there.x + a.from.x) / 2, (there.z + a.from.z) / 2, Math.hypot(there.x - a.from.x, there.z - a.from.z) / 2 + 8);
+      if (onPlace) onPlace(res.entry, book.byId(res.entry.key) || null);
+      log(`${res.entry.name} is back where it was.`, 'good');
+      return { ok: true, entry: res.entry, moved: true };
+    }
     if (a.kind === 'upgrade') {
       const res = book.downgrade(a.id, a.was, a.paid);
       if (!res.ok) return null;
@@ -751,7 +779,7 @@ export function createBuild(scene, {
     } else if (tool === 'move') {
       const can = book.movable(e);
       ok = can.ok;
-      text = ok ? `Click: pick up the ${e.name} (nothing lost) and put it somewhere else.` : can.why;
+      text = ok ? `Click: pick up the ${e.name} and carry it — nothing is lost, Esc puts it back.` : can.why;
     } else if (tool === 'upgrade') {
       const up = book.upgradeOf(e);
       ok = up.ok;
@@ -819,13 +847,14 @@ export function createBuild(scene, {
       mode = !!on;
       ghost.visible = mode && tool === 'build' && !!selected;
       brush.visible = mode && usesBrush();
-      if (!mode) { runPoints = []; runGates = []; footprint.visible = false; hideGhosts(); highlight.visible = false; lastPoint = null; lineMode = false; }
+      if (!mode) { runPoints = []; runGates = []; footprint.visible = false; hideGhosts(); highlight.visible = false; lastPoint = null; lineMode = false; cancelMove(); }
       drawRun();
       return mode;
     },
 
     /** 'build' | 'smooth' | 'raise' | 'lower' | 'road' | 'wall' | 'remove' | 'clear' | 'route'. */
     setTool(name) {
+      if (name !== 'build') cancelMove();
       tool = name;
       runPoints = [];
       runGates = [];
@@ -863,6 +892,7 @@ export function createBuild(scene, {
     select(id) {
       const def = book.byId(id);
       if (!def) return null;
+      if (moving && moving.key !== id) cancelMove();
       selected = id;
       makeGhost(def);
       ghost.visible = mode && tool === 'build';
@@ -930,8 +960,10 @@ export function createBuild(scene, {
         return null;
       }
       if (!selected) { footprint.visible = false; return null; }
-      const snapped = book.snap({ id: selected, x, z, rot, free });
-      const res = book.check({ id: selected, x: snapped.x, z: snapped.z, rot: snapped.rot });
+      // R28 — a piece being moved ignores itself, and is already paid for
+      const carry = moving && moving.key === selected ? moving.id : null;
+      const snapped = book.snap({ id: selected, x, z, rot, free, ignore: carry });
+      const res = book.check({ id: selected, x: snapped.x, z: snapped.z, rot: snapped.rot, ignore: carry, free: !!carry });
       ghost.position.set(snapped.x, res.ghostY, snapped.z);
       ghost.rotation.y = -snapped.rot;
       tintGhost(res.ok, res.levels);
@@ -939,7 +971,7 @@ export function createBuild(scene, {
       if (def) drawFootprint({ x: snapped.x, z: snapped.z, w: def.w, d: def.d, rot: snapped.rot }, !res.ok ? '#e06050' : res.levels ? '#e0b050' : '#5fd08a');
       lastCheck = { ...res, x: snapped.x, z: snapped.z, rot: snapped.rot, mount: snapped.mount || null };
       // R28 — Shift held: the whole line, ghosted, with its bill
-      if (lineMode && lastPlaced && lastPlaced.key === selected) {
+      if (lineMode && !moving && lastPlaced && lastPlaced.key === selected) {
         const ln = book.lineFrom({ id: selected, from: lastPlaced, to: { x: snapped.x, z: snapped.z }, rot: lastPlaced.rot });
         const list = ln.spots.map(sp => {
           const c = book.check({ id: selected, x: sp.x, z: sp.z, rot: sp.rot });
@@ -960,7 +992,7 @@ export function createBuild(scene, {
     /** The click. What it does depends on the tool. */
     confirm() {
       if (!mode) return { ok: false, why: 'Build mode is off.' };
-      if (tool === 'build') return lineMode && lastPlaced ? api.placeLineHere() : api.placeHere();
+      if (tool === 'build') return lineMode && lastPlaced && !moving ? api.placeLineHere() : api.placeHere();
       if (tool === 'remove') return api.removeAt(aimAt.x, aimAt.z);
       if (tool === 'move') return api.moveAt(aimAt.x, aimAt.z);
       if (tool === 'upgrade') return api.upgradeAt(aimAt.x, aimAt.z);
@@ -1005,6 +1037,7 @@ export function createBuild(scene, {
 
     placeHere() {
       if (!selected) return { ok: false, why: 'Nothing selected.' };
+      if (moving && moving.key === selected) return api.dropMoved();
       const at = lastCheck.x != null ? lastCheck : book.snap({ id: selected, x: aimAt.x, z: aimAt.z, rot, free });
       const res = book.place({ id: selected, x: at.x, z: at.z, rot: at.rot ?? rot });
       if (!res.ok) { log(res.why, 'warn'); return res; }
@@ -1165,6 +1198,8 @@ export function createBuild(scene, {
 
     /** Throw away a half-dragged run. Esc does this before it leaves build mode. */
     cancelRun() {
+      // R28 — Esc with a piece in hand puts it back where it stood (and counts as "something dropped")
+      if (cancelMove()) { log('Put back where it was.', ''); return 1; }
       const had = runPoints.length;
       runPoints = [];
       runGates = [];
@@ -1292,7 +1327,7 @@ export function createBuild(scene, {
         }
       }
 
-      const res = book.run({ id: pieceId, points: runPoints, gateAt, gateCorners: gateAt.length ? null : runGates });
+      const res = book.run({ id: pieceId, points: runPoints, gateAt, gateCorners: runGates });
       for (const entry of res.placed || []) {
         addMesh(entry);
         // R28 — a gate or a wall section joins the world like any piece: solid, and on the base
@@ -1356,30 +1391,51 @@ export function createBuild(scene, {
     },
 
     /**
-     * R28 — THE MOVE TOOL: pick a piece up at no loss and carry it.
+     * R28 — THE MOVE TOOL: pick a piece up and carry it.
      *
-     * It comes down with a FULL refund and the same piece is selected with the Place tool, turned
-     * the way it stood — so the next click is "put it here". Undo puts it back where it was. Only a
-     * piece nothing else keeps a record of may be moved (`plan.movable`): a crate, a furnace or a
-     * waypoint pad is filed by id in a store, a work queue or the network, and says so.
+     * The first version took the piece down at a full refund and built a new one, which gave it a
+     * NEW id — and a watch post's guards, an outpost's register and anything else filed by id lost
+     * track of it. Now the piece never leaves the ledger: its mesh is hidden, the ghost is the
+     * piece (turned the way it stood, ignoring itself), and the click that puts it down is
+     * `plan.relocate`, which moves it under the same id for nothing. Only pieces that no system
+     * keeps a POSITION for may be moved (`plan.movable`); Esc puts it back where it was.
      */
     moveAt(x, z) {
       const e = book.pickEntry(x, z, 3);
       if (!e) return { ok: false, why: 'Point at something you built to pick it up.' };
       const can = book.movable(e);
       if (!can.ok) { log(can.why, 'warn'); return can; }
-      const snap = { ...e };
-      const res = book.remove(e.id, { fraction: 1 });
-      if (!res.ok) return res;
-      api.forget(e.id);
-      if (onRemove) onRemove(res.entry, can.def);
-      pushAction({ kind: 'takedown', entry: snap, charge: res.refund, moved: true });
+      cancelMove();
+      api.setTool('build');
       api.select(e.key);
       rot = e.rot || 0;
-      api.setTool('build');
-      log(`${e.name} picked up — click where it goes. Q turns it. Ctrl+Z puts it back where it was.`, 'good');
-      return { ok: true, entry: res.entry, moving: true };
+      moving = { id: e.id, key: e.key, name: e.name };
+      const g = meshes.get(e.id);
+      if (g) g.visible = false;
+      log(`${e.name} picked up — click where it goes. Q turns it. Esc puts it back.`, 'good');
+      return { ok: true, entry: e, moving: true };
     },
+
+    /** R28 — the click that puts a carried piece down. See `moveAt`. */
+    dropMoved() {
+      if (!moving) return { ok: false, why: 'Nothing picked up.' };
+      const at = lastCheck.x != null ? lastCheck : book.snap({ id: moving.key, x: aimAt.x, z: aimAt.z, rot, free, ignore: moving.id });
+      const res = book.relocate(moving.id, { x: at.x, z: at.z, rot: at.rot ?? rot });
+      if (!res.ok) { log(res.why, 'warn'); return res; }
+      const def = book.byId(res.entry.key);
+      api.forget(res.entry.id);
+      addMesh(res.entry);
+      const r = Math.max(res.entry.w, res.entry.d);
+      if (res.tf.length) groundChanged(res.entry.x, res.entry.z, r + 4);
+      pushAction({ kind: 'move', id: res.entry.id, from: res.from, tf: res.tf });
+      moving = null;
+      log(`${res.entry.name} moved. Ctrl+Z carries it back.`, 'good');
+      if (onPlace) onPlace(res.entry, def || null);
+      return { ok: true, entry: res.entry, moved: true };
+    },
+    /** R28 — the piece the Move tool is carrying, if any. */
+    get moving() { return moving; },
+    cancelMove,
 
     /** R28 — the Upgrade tool. See `plan.upgradeOf` for the rules and the price. */
     upgradeAt(x, z) {
@@ -1496,6 +1552,7 @@ export function createBuild(scene, {
      * The stack is not saved: after a reload there is nothing to undo, which is the honest answer.
      */
     undo() {
+      cancelMove();
       while (actions.length) {
         const a = actions.pop();
         const res = undoStep(a);

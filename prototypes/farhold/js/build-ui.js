@@ -28,7 +28,7 @@ import { sharedResearch } from './research.js';
 // R26 — the build ring. B opens it; this panel is what its Tab / "Full list" opens.
 import { createBuildRadial } from './build-radial.js';
 // R28 — Q / F / C / Shift while placing, and the key strip the card and this panel print
-import { installBuildKeys, keysForTool } from './build-keys.js';
+import { installBuildKeys, keysForTool, verdictText, runText } from './build-keys.js';
 
 /**
  * The tools, in the order a base is actually built.
@@ -170,26 +170,9 @@ const CAT_BLURB = {
   craft: 'Benches you use yourself. Walk up and press E.',
 };
 
-/**
- * R28 — THE GREEN LINE, said once for the panel and the card. A piece that will level its own
- * ground says so, because a click that also reshapes the hillside should not be a surprise; one
- * hung on a wall says what it is hung on.
- */
-export function verdictText(check) {
-  if (!check?.ok) return check?.why || '';
-  if (check.levels) return 'Clear — it levels the ground under it first. Click to build.';
-  if (check.mount) return 'Clear — hung on the wall. Click to build.';
-  return 'Clear. Click to build.';
-}
-
-/** R28 — a run being clicked out: "24 m · 12 sections, 1 gate · 72 timber, 10 steel". */
-export function runText(ri) {
-  if (!ri) return '';
-  const parts = [`${Math.round(ri.metres)} m`];
-  if (ri.count) parts.push(`${ri.count} section${ri.count === 1 ? '' : 's'}${ri.gates ? `, ${ri.gates} gate${ri.gates === 1 ? '' : 's'}` : ''}`);
-  parts.push(ri.text || 'free');
-  return parts.join(' · ') + (ri.ok ? '' : ` — ${ri.why}`);
-}
+// R28 — `verdictText` and `runText` live in js/build-keys.js (the ring's card prints them too, and
+// js/build-radial.js cannot import this file without a loop); re-exported for the tests.
+export { verdictText, runText } from './build-keys.js';
 
 /** "12 stone, 2 iron" — and the ones you are short of are the ones that matter. */
 function costLine(cost, have) {
@@ -343,6 +326,12 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
     panelOpen: () => open,
     onPanel: () => { api.setOpen(true); },
   });
+  /**
+   * R28 — Q / Shift+Q turn, F free placement, C build another of what is under the cursor, Shift
+   * held for a line, Esc puts a carried piece back. Installed here because this panel is made once
+   * for the game and already holds `build`; the listener does nothing outside build mode.
+   */
+  const buildKeys = installBuildKeys({ build, onLog, onChange: () => { radial.tick(); if (open) redraw(); } });
   const research = sharedResearch({ catalogue });
   const researchScreen = createResearchScreen({ research, log: onLog, standalone: true });
 
@@ -373,7 +362,7 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
      */
     el('button', { class: 'build-close', text: '×', title: 'Close (B)', onclick: () => { api.setOpen(false); onClose?.(); } }),
   );
-  keys.textContent = 'scroll turn · click place · Enter finish a run · Ctrl+Z undo · Esc or B leave · [ ] brush size';
+  keys.textContent = keysForTool(build?.tool);
 
   /**
    * R15 — THE GUIDANCE STOPPED EXACTLY WHEN IT STARTED BEING NEEDED.
@@ -961,7 +950,7 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
 
   function redraw() {
     if (!open) return;
-    keys.textContent = keysForTool(build?.tool);
+    keys.textContent = keysForTool(build?.tool, { moving: !!build?.moving });
     drawSteps(); drawTools(); drawCats(); drawList(); drawBrush(); drawScan(); drawMines();
     drawBench(); drawWork(); drawHolding(); drawYard(); drawDetail();
   }
@@ -1040,7 +1029,7 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
     get categories() { return catKeys; },
     /** R17 — which categories the tool that is up will actually draw. The panel-tidy rule, askable. */
     get toolCategories() { return toolCats(); },
-    dispose() { root.remove(); station.dispose(); researchScreen.dispose(); radial.dispose(); },
+    dispose() { root.remove(); station.dispose(); researchScreen.dispose(); radial.dispose(); buildKeys.dispose(); },
   };
   return api;
 }

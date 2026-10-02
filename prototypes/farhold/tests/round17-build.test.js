@@ -441,7 +441,13 @@ test('the tool rail only offers the placement catalogue to a tool that places so
 
   assert.deepEqual(catsForTool('build', cats), cats, 'Place lost the catalogue');
   assert.deepEqual(catsForTool('road', cats), ['road'], 'the Road tool offers more than roads');
-  assert.deepEqual(catsForTool('wall', cats), ['defence'], 'the Wall tool offers more than walls');
+  // R28 — the Wall tool lays any RUN piece, and a fence or a hedge is decor: every group it offers
+  // must hold at least one run, and the palisade's and the fence's groups must both be there
+  const wallCats = catsForTool('wall', cats);
+  assert.ok(wallCats.includes('defence') && wallCats.includes('decor'), 'the Wall tool lost fences or palisades');
+  for (const c of wallCats) {
+    assert.ok(STRUCTURES.structures.some(s => s.cat === c && s.run), `the Wall tool offers ${c}, which has no run piece`);
+  }
 
   for (const key of ['scan', 'smooth', 'raise', 'lower', 'clear', 'remove', 'route']) {
     assert.deepEqual(catsForTool(key, cats), [],
@@ -449,7 +455,7 @@ test('the tool rail only offers the placement catalogue to a tool that places so
   }
   // every tool in the rail has to declare which sort it is, or it silently falls through to Place
   for (const t of TOOLS) {
-    assert.ok(['place', 'brush', 'scan', 'point'].includes(t.kind), `${t.key} has no kind`);
+    assert.ok(['place', 'brush', 'scan', 'point', 'stamp'].includes(t.kind), `${t.key} has no kind`);
     assert.ok(t.hint && t.hint.length > 20, `${t.key} has no hint worth reading`);
   }
 });

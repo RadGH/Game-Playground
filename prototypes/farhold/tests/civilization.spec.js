@@ -41,7 +41,7 @@ test('every piece of the expansion is reachable from the running game', async ({
   expect(errors).toEqual([]);
 });
 
-test('K opens the Holding, and it has all six tabs', async ({ page }) => {
+test('K opens the Holding, and it has all seven tabs', async ({ page }) => {
   const errors = await land(page);
   await page.evaluate(() => window.farhold.holding.show());
   await page.waitForTimeout(300);
@@ -52,7 +52,8 @@ test('K opens the Holding, and it has all six tabs', async ({ page }) => {
   }));
   console.log('holding:', JSON.stringify(out));
   expect(out.open).toBe(true);
-  expect(out.tabs).toEqual(['People', 'Houses', 'Work', 'Traders', 'Trade', 'Muster']);
+  // R28 — Production is first: it is the tab the base pill opens (a badge may follow the name)
+  expect(out.tabs.map(t => t.replace(/\d+$/, ''))).toEqual(['Production', 'People', 'Houses', 'Work', 'Traders', 'Trade', 'Muster']);
   expect(errors).toEqual([]);
 });
 

@@ -196,7 +196,12 @@ function bench({ amplitude = 6 } = {}) {
 }
 
 test('you cannot build on Farhold until you have levelled it — and then you can', () => {
-  const { terrain, ground, plan } = bench();
+  // R28 — a piece now levels a small slope by itself (rules.autoLevel; see
+  // tests/round28-build.test.js). This test is about the Level tool, so the self-levelling is off.
+  const terrain = fakeTerrain({ amplitude: 6 });
+  const ground = createTerraform();
+  ground.wrap(terrain);
+  const plan = createBuildPlan({ catalogue: { ...catalogue, rules: { ...catalogue.rules, autoLevel: 0 } }, terrain, terraform: ground });
   const steep = steepSpot(terrain);
   const spot = { id: 'furnace', x: steep.x, z: steep.z, rot: 0 };
   const no = plan.check(spot);
@@ -347,7 +352,9 @@ test('a wall run follows a polyline, corners itself and never overlaps', () => {
   const walls = plan.entries.filter(e => e.key === 'palisade');
   for (let i = 0; i < walls.length; i++) {
     for (let j = i + 1; j < walls.length; j++) {
-      assert.equal(boxesOverlap(walls[i], walls[j], 0.02), false, 'two wall sections overlap');
+      // R28 — the two sections that meet at a corner share it, by up to the wall's own depth
+      // (0.5 m); before R28 one of them was refused and every corner was a gap
+      assert.equal(boxesOverlap(walls[i], walls[j], 0.5 * 0.75 + 0.02), false, 'two wall sections overlap');
     }
   }
   // the run turned the corner: two different bearings are present

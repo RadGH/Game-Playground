@@ -254,6 +254,139 @@ export function snapAngle(rot, step) {
   return Math.round(rot / step) * step;
 }
 
+/**
+ * R28 — A SHIFT+CLICK LINE: the spots for a row of one piece from `from` to `to`.
+ *
+ * `from` is the piece you placed last, so the row starts one footprint PAST it rather than on top
+ * of it. The step is how long the footprint is measured along the line, so a fence turned along the
+ * line is spaced by its 2 m width and a fence turned across it by its 0.2 m depth — which is exactly
+ * how far apart two of them can stand without touching. Capped at `max`, because a line dragged to
+ * the horizon is a misclick, not a plan.
+ */
+export function lineSpots({ w, d, from, to, rot = 0, max = 40 }) {
+  const dx = to.x - from.x, dz = to.z - from.z;
+  const len = Math.hypot(dx, dz);
+  if (len < 0.01) return [];
+  const dir = Math.atan2(dz, dx);
+  const along = Math.abs(w * Math.cos(rot - dir)) + Math.abs(d * Math.sin(rot - dir));
+  const step = Math.max(0.3, along);
+  const count = Math.min(max, Math.floor(len / step + 1e-6));
+  const out = [];
+  for (let k = 1; k <= count; k++) {
+    out.push({ x: from.x + (dx / len) * step * k, z: from.z + (dz / len) * step * k, rot });
+  }
+  return out;
+}
+
+/**
+ * R28 — WHERE THE PIECES OF A RUN GO, and where its gates go.
+ *
+ * Pulled out of `plan.run` so the panel can price a run BEFORE Enter is pressed and a test can
+ * check the gate rule without placing anything. `gateCorners` are indices into `points` — the
+ * corners the player clicked twice ("double back over a corner and the gate goes there", which the
+ * Wall tool's hint has promised since round 13 and nothing ever did).
+ *
+ * The gate goes on the first piece of the leg that leaves that corner (or the last piece of the run
+ * for the final corner). A gate twice the width of the wall section (a 4 m gate in a 2 m palisade)
+ * takes the place of TWO sections, centred between them, so it meets the wall on both sides instead
+ * of standing half inside it.
+ */
+export function runSpots(def, points, { gateCorners = [], gateDef = null } = {}) {
+  const legs = [];
+  for (let i = 0; i + 1 < points.length; i++) {
+    const [ax, az] = points[i], [bx, bz] = points[i + 1];
+    const len = Math.hypot(bx - ax, bz - az);
+    const count = Math.max(1, Math.round(len / def.w));
+    const rot = Math.atan2(bz - az, bx - ax);
+    const spots = [];
+    for (let k = 0; k < count; k++) {
+      const t = (k + 0.5) / count;
+      spots.push({ x: ax + (bx - ax) * t, z: az + (bz - az) * t, rot, id: def.id });
+    }
+    legs.push(spots);
+  }
+  if (gateDef && gateCorners.length && legs.length) {
+    const wide = gateDef.w >= def.w * 1.5;
+    for (const c of new Set(gateCorners)) {
+      const leg = Math.min(c, legs.length - 1);
+      const spots = legs[leg];
+      const k = c >= legs.length ? spots.length - 1 : 0;
+      if (wide && spots.length >= 2) {
+        const k2 = k === spots.length - 1 ? k - 1 : k + 1;
+        const a = spots[Math.min(k, k2)], b = spots[Math.max(k, k2)];
+        spots.splice(Math.min(k, k2), 2, { x: (a.x + b.x) / 2, z: (a.z + b.z) / 2, rot: a.rot, id: gateDef.id, gate: true });
+      } else {
+        spots[k] = { ...spots[k], id: gateDef.id, gate: true };
+      }
+    }
+  }
+  return legs.flat();
+}
+
+/**
+ * R28 — WHAT A PIECE IS SOLID AS, for js/collide.js. Pure, so the gate rule has a test.
+ *
+ * It used to be one circle per piece, `min(1.4, max(w, d) / 2)` across, whatever the piece was —
+ * so a 2 × 0.2 m fence was a 2 m disc, a diagonal fence was a row of bumps, and a **gate was a
+ * circle in the middle of the opening**: a 4 m gate between two palisades left 0.6 m either side of
+ * its 1.4 m circle, and a body is 0.8 m wide. `gate: true` has been on three catalogue rows since
+ * they were written and nothing read it. You could not walk through your own gate.
+ *
+ *   * flat things (≤ 0.35 m) are not solid at all — the old rule, kept;
+ *   * a gate is its two POSTS and nothing between them;
+ *   * anything long and thin (a wall section, a fence, a hedge, a barricade — a run piece or
+ *     anything at least twice as long as it is deep) is a segment end to end, `d / 2` either side,
+ *     which is the shape that is drawn;
+ *   * everything else is the circle it always was.
+ *
+ * `{ kind: 'seg', ax, az, bx, bz, half, h }` or `{ kind: 'circle', x, z, r, h }`.
+ */
+export function solidsFor(entry, def = entry) {
+  const w = def?.w ?? entry.w ?? 1, d = def?.d ?? entry.d ?? 1, h = def?.h ?? entry.h ?? 2;
+  if (h <= 0.35) return [];
+  const rot = entry.rot || 0;
+  const c = Math.cos(rot), s = Math.sin(rot);
+  const along = (t, off = 0) => [entry.x + t * c - off * s, entry.z + t * s + off * c];
+  if (def?.gate || entry.gate) {
+    const post = Math.max(0.15, Math.min(0.45, d / 2, w * 0.12));
+    const out = [];
+    for (const side of [-1, 1]) {
+      const [x, z] = along(side * (w / 2 - post));
+      out.push({ kind: 'circle', x, z, r: post, h, post: true });
+    }
+    return out;
+  }
+  if (def?.run || w >= d * 2) {
+    const [ax, az] = along(-w / 2), [bx, bz] = along(w / 2);
+    return [{ kind: 'seg', ax, az, bx, bz, half: Math.max(0.12, d / 2), h }];
+  }
+  return [{ kind: 'circle', x: entry.x, z: entry.z, r: Math.max(0.35, Math.min(1.4, Math.max(w, d) / 2)), h }];
+}
+
+/** Is (x, z) inside a rotated footprint, grown by `pad` metres? */
+export function insideFootprint(e, x, z, pad = 0) {
+  const c = Math.cos(-(e.rot || 0)), s = Math.sin(-(e.rot || 0));
+  const lx = (x - e.x) * c - (z - e.z) * s, lz = (x - e.x) * s + (z - e.z) * c;
+  return Math.abs(lx) <= e.w / 2 + pad && Math.abs(lz) <= e.d / 2 + pad;
+}
+
+/**
+ * R28 — THE PRICE OF AN UPGRADE: what the new piece costs that the old one did not.
+ *
+ * Paid material by material, never below zero — a stone wall that replaces a palisade does not
+ * charge the timber the palisade was already made of, and it does not give any back either. Both
+ * sides in the materials' own ids.
+ */
+export function upgradeCost(fromCost, toCost) {
+  const a = realCost(fromCost), b = realCost(toCost);
+  const out = {};
+  for (const [k, n] of Object.entries(b)) {
+    const more = n - (a[k] || 0);
+    if (more > 0) out[k] = more;
+  }
+  return out;
+}
+
 export function createBuildPlan({
   catalogue,
   /** `{ heightAt(x,z), slopeAt(x,z,step), waterAt(x,z) }` — the wrapped terrain, edits and all. */
@@ -282,6 +415,10 @@ export function createBuildPlan({
   const footing = rules.footingTolerance ?? 0.35;
   const claimRadius = rules.claimRadius ?? 64;
   const undoDepth = rules.undoDepth ?? 30;
+  // R28 — see the `_r28` note in data/structures.json's rules block
+  const autoLevel = rules.autoLevel ?? 1.5;
+  const lineMax = rules.lineMax ?? 40;
+  const mountReach = rules.mountReach ?? 2.4;
 
   /**
    * R19 — `terraformBudget` AND `maxLift`, WHICH THE CATALOGUE STATED AND NOBODY READ.
@@ -346,6 +483,13 @@ export function createBuildPlan({
    * more than `footingTolerance` is either half-buried in a bank or hanging over a drop, and both
    * read as broken — which is exactly why the smoothing tool had to be built first.
    */
+  /** R28 — the mean of the middle and the four corners: the height a self-levelling piece lands at. */
+  function slabMean({ x, z, w, d, rot = 0 }) {
+    let sum = ground(x, z);
+    for (const [cx, cz] of cornersOf({ x, z, w, d, rot })) sum += ground(cx, cz);
+    return sum / 5;
+  }
+
   function footingOf({ x, z, w, d, rot = 0 }) {
     const base = ground(x, z);
     let worst = 0;
@@ -392,7 +536,7 @@ export function createBuildPlan({
   }
 
   const api = {
-    get rules() { return { grid, snapDistance, rotateStep, refund, defaultSlope, footing, claimRadius }; },
+    get rules() { return { grid, snapDistance, rotateStep, refund, defaultSlope, footing, claimRadius, undoDepth, autoLevel, lineMax, mountReach }; },
     get entries() { return entries; },
     get claims() { return claims; },
     byId: id => byId.get(id) || null,
@@ -432,16 +576,43 @@ export function createBuildPlan({
       const def = byId.get(id);
       if (free || !def) return { x, z, rot };
       const step = rotateStep;
+      /**
+       * R28 — `snap: "wall"` HANGS THE PIECE ON A WALL.
+       *
+       * Every catalogue row has carried `snap: "wall" | "floor" | "grid"` since the catalogue was
+       * written, and nothing read it — so a Wall Sconce, Shutters or a Banner snapped to the 2 m
+       * grid like a crate and stood in the grass. Fourteen pieces are meant to go ON something.
+       * `mountOn` finds the nearest side of a wall section, a gate or a building and puts the piece
+       * flat against it, facing out; with nothing in reach it falls through to the grid as before.
+       */
+      if (def.snap === 'wall') {
+        const m = api.mountOn({ id, x, z });
+        if (m) return m;
+      }
       let best = null;
+      /**
+       * R28 — a piece that is not a run keeps the way YOU turned it. Snapping used to copy the
+       * neighbour's bearing for everything, so next to another crate the wheel did nothing at all.
+       * A run piece still takes its neighbour's bearing, because that is what makes it a wall.
+       * Floor pieces (`snap: "floor"`) also tile off the neighbour's two long sides, not only its
+       * ends, so foundations make a grid rather than a row.
+       */
+      const mine = ((snapAngle(rot, step) % TAU) + TAU) % TAU;
       for (const e of entries) {
         if (e.cat !== def.cat && !(e.run && def.run)) continue;
-        // the mid-point of each of the neighbour's two end faces, in world metres
-        const c = Math.cos(e.rot || 0), s = Math.sin(e.rot || 0);
-        for (const side of [-1, 1]) {
-          const off = (e.w / 2 + def.w / 2) * side;
-          const px = e.x + off * c, pz = e.z + off * s;
+        const er = e.rot || 0;
+        const c = Math.cos(er), s = Math.sin(er);
+        const turn = def.run ? er : mine;
+        // how far this piece reaches along the neighbour's length / across it, at the bearing it will have
+        const extW = (Math.abs(def.w * Math.cos(turn - er)) + Math.abs(def.d * Math.sin(turn - er))) / 2;
+        const extD = (Math.abs(def.w * Math.sin(turn - er)) + Math.abs(def.d * Math.cos(turn - er))) / 2;
+        const faces = [[1, 0, e.w / 2 + extW], [-1, 0, e.w / 2 + extW]];
+        if (def.snap === 'floor') faces.push([0, 1, e.d / 2 + extD], [0, -1, e.d / 2 + extD]);
+        for (const [ax, az, off] of faces) {
+          const lx = ax * off, lz = az * off;
+          const px = e.x + lx * c - lz * s, pz = e.z + lx * s + lz * c;
           const dist = Math.hypot(px - x, pz - z);
-          if (dist < snapDistance && (!best || dist < best.dist)) best = { x: px, z: pz, rot: e.rot || 0, dist };
+          if (dist < snapDistance && (!best || dist < best.dist)) best = { x: px, z: pz, rot: turn, dist };
         }
       }
       if (best) return { x: best.x, z: best.z, rot: best.rot };
@@ -512,8 +683,31 @@ export function createBuildPlan({
       const flattens = !!def.flatten || def.h <= 0.3;
       if (!flattens) {
         const maxSlope = def.slope ?? defaultSlope;
-        if (steepness(x, z) > maxSlope) { out.why = 'The ground is too steep here — level it first.'; return out; }
-        if (foot.gap > footing) { out.why = 'The ground under this is uneven — level it first.'; return out; }
+        const steep = steepness(x, z) > maxSlope;
+        const uneven = foot.gap > footing;
+        /**
+         * R28 — A SMALL SLOPE LEVELS ITSELF.
+         *
+         * "The ground is too steep — level it first" was the commonest red ghost in the game, and
+         * for a crate on a half-metre hummock the answer was always the same three trips: pick
+         * Level, click, pick the crate again. Every flat piece has levelled its own footprint since
+         * round 14 (`levelUnderSlab`); a piece whose worst corner is within `autoLevel` metres of
+         * the ground under its middle now does the same as it lands, and the card says so before
+         * the click. Past the cap the old sentence stands — with the number in it — so a real
+         * hillside still teaches the Level tool.
+         */
+        if ((steep || uneven) && terraform && autoLevel > 0 && foot.gap <= autoLevel) {
+          out.levels = true;
+          out.ghostY = slabMean({ x, z, w: def.w, d: def.d, rot });
+        } else if (steep || uneven) {
+          const fall = Math.round(foot.gap * 10) / 10;
+          out.why = steep && !uneven
+            ? 'The ground is too steep here — level it first.'
+            : terraform && autoLevel > 0 && foot.gap > autoLevel
+              ? `The ground under this is uneven — it falls ${fall} m, more than the ${autoLevel} m a piece levels by itself. Level it first.`
+              : 'The ground under this is uneven — level it first.';
+          return out;
+        }
       }
 
       for (const e of entries) {
@@ -522,7 +716,18 @@ export function createBuildPlan({
         // real height, though, has to keep clear of anything else with real height.
         if ((def.h <= 0.3) !== (e.h <= 0.3)) continue;
         if (def.h <= 0.3 && e.h <= 0.3) continue;
-        if (boxesOverlap(spot, spotOf(e))) { out.why = `That would stand inside the ${e.name}.`; return out; }
+        /**
+         * R28 — TWO LEGS OF A RUN SHARE THEIR CORNER.
+         *
+         * The last section of one leg ends exactly on the corner and the first section of the next
+         * starts there, so at any angle their inside edges cross by up to a wall's thickness — and
+         * `check` refused one of them as "would stand inside the Palisade". Every corner of every
+         * wall anybody laid lost a section and left a gap. Run pieces (walls, fences, gates) may
+         * overlap each other by their own depth; anything else still may not overlap at all.
+         */
+        const runPair = (def.run || def.gate) && (e.run || e.gate);
+        const slack = runPair ? Math.max(def.d, e.d ?? 0) * 0.75 : 0;
+        if (boxesOverlap(spot, spotOf(e), slack)) { out.why = `That would stand inside the ${e.name}.`; return out; }
       }
 
       if (def.needs && siteOk && !siteOk(def.needs, x, z)) {
@@ -581,6 +786,8 @@ export function createBuildPlan({
       // §4.10 — the very first thing you build stakes the ground it stands on, so nobody has to
       // learn about claims before they can learn about building.
       if (!claim) claim = newClaim(x, z, name);
+      // R28 — a placement refused below must not leave an empty outpost behind it
+      const refuse = why => { if (!test.claim) claims = claims.filter(c => c !== claim); return { ok: false, why }; };
 
       /**
        * A FLATTENING PIECE PAINTS ITS OWN GROUND, WHICH IS WHY IT CANNOT FLOAT.
@@ -601,12 +808,22 @@ export function createBuildPlan({
        * so half the slab is a shallow cut, half a shallow fill, and the edge eases out to the
        * hillside instead of ending in a step.
        */
+      // R28 — every terrain brush this placement paints, so undoing it can take them back off
+      const tfBefore = terraform?.edits?.length ?? 0;
+      if (terraform && !def.flatten && def.h > 0.3 && test.levels) {
+        const lv = levelUnderSlab({ x, z, w: def.w + 0.6, d: def.d + 0.6, rot },
+          { terrain: { heightAt: ground }, terraform, claim: claim.id });
+        if (!lv.ok) return refuse(lv.why || 'The ground here cannot be levelled any more.');
+      }
       if (terraform && (def.flatten || def.h <= 0.3)) {
         if (def.flatten === 'pit') {
           terraform.lower({ x, z, r: Math.max(def.w, def.d) / 2, amount: 2.4, claim: claim.id });
         } else {
-          levelUnderSlab({ x, z, w: def.w + (def.flatten === 'strip' ? 0 : 0.6), d: def.d + (def.flatten === 'strip' ? 0 : 0.6), rot },
+          const lv = levelUnderSlab({ x, z, w: def.w + (def.flatten === 'strip' ? 0 : 0.6), d: def.d + (def.flatten === 'strip' ? 0 : 0.6), rot },
             { terrain: { heightAt: ground }, terraform, claim: claim.id });
+          // R28 — a floor that cannot level its ground would float; it used to be placed anyway
+          // once the claim's reshaping allowance ran out
+          if (lv && lv.ok === false && lv.why && /reshaped/.test(lv.why)) return refuse(lv.why);
         }
       }
 
@@ -638,11 +855,12 @@ export function createBuildPlan({
         if (name) claim.name = name;
         entry.outpostName = claim.name;
       }
-      return { ok: true, entry, claim, cost: test.cost };
+      const tf = (terraform?.edits || []).slice(tfBefore).map(e => e.id).filter(Boolean);
+      return { ok: true, entry, claim, cost: test.cost, levelled: !!test.levels, tf };
     },
 
     /** §4.7 — the deconstruct tool. Most of it back, because experimenting should be cheap. */
-    remove(entryId) {
+    remove(entryId, { fraction = refund } = {}) {
       const i = entries.findIndex(e => e.id === entryId);
       if (i < 0) return { ok: false, why: 'Nothing there.' };
       const entry = entries[i];
@@ -650,9 +868,210 @@ export function createBuildPlan({
       entries.splice(i, 1);
       // in material ids, like the bill — a refund of "timber" would put a word nothing spends
       // back into the pool, and the player would watch their logs disappear into a phantom
-      const back = realCost(scaleCost(def?.cost || {}, refund));
+      // R28 — `fraction` 1 is the Move tool and Undo: a full refund, because nothing was wasted
+      const back = realCost(fraction >= 1 ? (def?.cost || {}) : scaleCost(def?.cost || {}, fraction));
       bank.give(back);
       return { ok: true, entry, refund: back };
+    },
+
+    /**
+     * R28 — CAN THE MOVE TOOL PICK THIS UP?
+     *
+     * Only a piece no other system keeps a record of. Moving is "take it down at no loss and put it
+     * down again", which gives the piece a new id — harmless for a wall, a lamp or a statue, and a
+     * disaster for anything a store, the grid, a refining queue, a drill's route, the waypoint
+     * network or a citizen's bed is filed against. Those say so instead.
+     */
+    movable(entryOrKey) {
+      const def = byId.get(typeof entryOrKey === 'string' ? entryOrKey : entryOrKey?.key);
+      if (!def) return { ok: false, why: 'Nothing there.' };
+      if (def.store || def.pool) return { ok: false, why: `The ${def.name} holds goods — empty it, take it down and build it again.` };
+      if (def.power || def.station || def.needs || def.waypoint || def.home || def.claims
+        || ['refine', 'extract', 'craft', 'store', 'power', 'waypoint', 'home', 'trade'].includes(def.cat)) {
+        return { ok: false, why: `The ${def.name} is part of the base's workings — take it down and build it again instead.` };
+      }
+      return { ok: true, def };
+    },
+
+    /** R28 — what taking this down would give back, for the hover card BEFORE the click. */
+    refundFor(entryOrKey, fraction = refund) {
+      const def = byId.get(typeof entryOrKey === 'string' ? entryOrKey : entryOrKey?.key);
+      return realCost(fraction >= 1 ? (def?.cost || {}) : scaleCost(def?.cost || {}, fraction));
+    },
+
+    /**
+     * R28 — PUT A TAKEN-DOWN PIECE BACK, exactly where it was and under the same id: Undo of Take
+     * down and of Move. It costs what came back out of it (`charge`), so undoing a take-down is
+     * never a way to turn 75% into 100%. Refused, with the sentence, if something now stands there
+     * or the purse no longer covers it.
+     */
+    restore(snapshot, charge = null) {
+      if (!snapshot || entries.some(e => e.id === snapshot.id)) return { ok: false, why: 'It is already standing.' };
+      const def = byId.get(snapshot.key);
+      if (!def) return { ok: false, why: 'No such structure.' };
+      const spot = { x: snapshot.x, z: snapshot.z, w: snapshot.w ?? def.w, d: snapshot.d ?? def.d, rot: snapshot.rot || 0 };
+      for (const e of entries) {
+        if ((def.h <= 0.3) || (e.h <= 0.3)) continue;
+        if (boxesOverlap(spot, spotOf(e), 1e-6)) return { ok: false, why: `The ${e.name} stands there now.` };
+      }
+      const cost = charge || realCost(def.cost || {});
+      for (const [k, n] of Object.entries(cost)) {
+        if (n > 0 && bank.have(k) < n) return { ok: false, why: `You are short of ${costText({ [k]: n - bank.have(k) })} to put it back.` };
+      }
+      bank.take(cost);
+      const entry = { ...snapshot, y: ground(snapshot.x, snapshot.z) };
+      entries.push(entry);
+      return { ok: true, entry, cost };
+    },
+
+    /**
+     * R28 — THE UPGRADE TOOL: a palisade becomes a stone wall where it stands.
+     *
+     * `upgradesTo` on a catalogue row names the next step. The new piece is paid as the DIFFERENCE
+     * (`upgradeCost`), keeps the entry's id — so whatever files against that id (the outpost, the
+     * terrain brushes, a raid's idea of the base) is undisturbed — and must pass the same tests a
+     * fresh placement would: researched, not standing inside a neighbour, affordable.
+     *
+     * Refused for any piece that holds a store or runs a station, on either side of the upgrade:
+     * those carry contents and queues in systems this ledger does not own, and swapping the key
+     * under them is how a crate would lose what was in it.
+     */
+    upgradeOf(entryOrId) {
+      const entry = typeof entryOrId === 'string' ? entries.find(e => e.id === entryOrId) : entryOrId;
+      if (!entry) return { ok: false, why: 'Nothing there.' };
+      const from = byId.get(entry.key);
+      const to = from?.upgradesTo ? byId.get(from.upgradesTo) : null;
+      if (!to) return { ok: false, entry, why: `The ${entry.name} is as good as it gets.` };
+      const out = { ok: false, entry, from, to, cost: upgradeCost(from.cost, to.cost), missing: {}, why: '' };
+      if (from.store || to.store || from.station || to.station) { out.why = 'Empty it and build the new one instead — this one holds things.'; return out; }
+      const gate = locked ? locked(to) : null;
+      if (gate) { out.why = gate.text || 'You have not researched that yet.'; out.locked = gate; return out; }
+      const spot = { x: entry.x, z: entry.z, w: to.w, d: to.d, rot: entry.rot || 0 };
+      for (const e of entries) {
+        if (e.id === entry.id || to.h <= 0.3 || e.h <= 0.3) continue;
+        if (boxesOverlap(spot, spotOf(e), 1e-6)) { out.why = `A ${to.name} is bigger — it would stand inside the ${e.name}.`; return out; }
+      }
+      for (const [k, n] of Object.entries(out.cost)) {
+        const short = n - bank.have(k);
+        if (short > 0) out.missing[k] = short;
+      }
+      if (Object.keys(out.missing).length) { out.why = `You are short of ${costText(out.missing)}.`; return out; }
+      out.ok = true;
+      return out;
+    },
+    upgrade(entryId) {
+      const test = api.upgradeOf(entryId);
+      if (!test.ok) return test;
+      if (!bank.take(test.cost)) return { ok: false, why: 'You could not pay for it.' };
+      const { entry, from, to } = test;
+      const was = { key: entry.key, name: entry.name, w: entry.w, d: entry.d, h: entry.h, hp: entry.hp, maxHp: entry.maxHp, run: entry.run, gate: entry.gate, powered: entry.powered };
+      Object.assign(entry, {
+        key: to.id, name: to.name, cat: to.cat, w: to.w, d: to.d, h: to.h,
+        hp: to.hp || 0, maxHp: to.hp || 0, run: !!to.run, gate: !!to.gate, powered: !to.power?.use,
+      });
+      return { ok: true, entry, from, to, paid: test.cost, was };
+    },
+    /** R28 — Undo of an upgrade: the old piece back, and what was paid for the new one. */
+    downgrade(entryId, was, paid = {}) {
+      const entry = entries.find(e => e.id === entryId);
+      if (!entry || !was) return { ok: false, why: 'Nothing there.' };
+      Object.assign(entry, was, { cat: byId.get(was.key)?.cat || entry.cat });
+      bank.give(paid);
+      return { ok: true, entry };
+    },
+
+    /**
+     * R28 — WHAT IS UNDER THE CURSOR, for every tool you point at a piece.
+     *
+     * Inside a footprint wins outright (a crate standing next to a long wall is the crate when you
+     * point at the crate); otherwise the nearest middle within `reach`. The old `nearestEntry` was
+     * middle-distance only, so pointing at the end of a 6 m house picked the lamp beside its door.
+     */
+    pickEntry(x, z, reach = 3) {
+      let inside = null;
+      for (const e of entries) {
+        if (insideFootprint(e, x, z, 0.3) && (!inside || e.w * e.d < inside.w * inside.d)) inside = e;
+      }
+      if (inside) return inside;
+      let best = null;
+      for (const e of entries) {
+        const dist = Math.hypot(e.x - x, e.z - z);
+        if (dist <= reach + Math.max(e.w, e.d) / 2 && (!best || dist < best.dist)) best = { e, dist };
+      }
+      return best ? best.e : null;
+    },
+
+    /**
+     * R28 — WHERE A WALL-MOUNTED PIECE HANGS: the nearest side of a wall, a gate or a building.
+     *
+     * A host is anything standing at least 1.5 m tall that is not itself wall-mounted. Each of its
+     * four sides is a segment; the cursor is projected onto the nearest one within `mountReach`, and
+     * the piece goes flat against it, its back to the wall (`d / 2` out, plus a hair so the overlap
+     * test reads "touching" and not "inside"), turned to face away from the host.
+     */
+    mountOn({ id, x, z }) {
+      const def = byId.get(id);
+      if (!def) return null;
+      let best = null;
+      for (const e of entries) {
+        const edef = byId.get(e.key);
+        if (!edef || edef.snap === 'wall' || (e.h ?? edef.h) < 1.5) continue;
+        if (Math.hypot(e.x - x, e.z - z) > Math.max(e.w, e.d) / 2 + mountReach + 1) continue;
+        const r = e.rot || 0, c = Math.cos(r), s = Math.sin(r);
+        // the four sides, as (outward normal angle, half-length along the side, offset to the side)
+        for (const [nx, nz, half, off, faceRot] of [
+          [-s, c, e.w / 2, e.d / 2, r], [s, -c, e.w / 2, e.d / 2, r + Math.PI],
+          [c, s, e.d / 2, e.w / 2, r - Math.PI / 2], [-c, -s, e.d / 2, e.w / 2, r + Math.PI / 2],
+        ]) {
+          const fx = e.x + nx * off, fz = e.z + nz * off;            // middle of this side
+          const tx = -nz, tz = nx;                                   // along the side
+          const along = Math.max(-half + def.w / 2, Math.min(half - def.w / 2, (x - fx) * tx + (z - fz) * tz));
+          const out = (x - fx) * nx + (z - fz) * nz;
+          if (out < -0.5) continue;                                   // the cursor is behind this side
+          const px = fx + tx * along, pz = fz + tz * along;
+          const dist = Math.hypot(x - px, z - pz);
+          if (dist > mountReach || (best && dist >= best.dist)) continue;
+          const lift = def.d / 2 + 0.02;
+          best = { x: px + nx * lift, z: pz + nz * lift, rot: ((faceRot % TAU) + TAU) % TAU, mount: e.id, dist };
+        }
+      }
+      return best ? { x: best.x, z: best.z, rot: best.rot, mount: best.mount } : null;
+    },
+
+    /** R28 — a Shift+click line, checked: the spots, and which of them would be refused. */
+    lineFrom({ id, from, to, rot = 0 }) {
+      const def = byId.get(id);
+      if (!def || !from || !to) return { spots: [], ok: 0, cost: {}, text: '' };
+      const spots = lineSpots({ w: def.w, d: def.d, from, to, rot, max: lineMax });
+      const total = {};
+      addCost(total, realCost(def.cost || {}), spots.length);
+      return { spots, count: spots.length, cost: total, text: costText(total) };
+    },
+    placeLine({ id, from, to, rot = 0 }) {
+      const { spots } = api.lineFrom({ id, from, to, rot });
+      const placed = [], skipped = [], tf = [];
+      for (const sp of spots) {
+        const res = api.place({ id, x: sp.x, z: sp.z, rot: sp.rot });
+        if (res.ok) { placed.push(res.entry); tf.push(...(res.tf || [])); } else skipped.push({ ...sp, why: res.why });
+      }
+      return { ok: placed.length > 0, placed, skipped, tf };
+    },
+
+    /** R28 — the price of a run before Enter: how many pieces, how many gates, and the bill. */
+    runBill({ id, points, gateCorners = [] }) {
+      const def = byId.get(id);
+      if (!def || (points || []).length < 2) return { count: 0, gates: 0, cost: {}, missing: {}, text: '', ok: false };
+      const gateDef = def.gateId ? byId.get(def.gateId) : null;
+      const spots = runSpots(def, points, { gateCorners, gateDef });
+      const total = {};
+      for (const sp of spots) addCost(total, realCost(byId.get(sp.id)?.cost || {}));
+      const missing = {};
+      for (const [k, n] of Object.entries(total)) if (n - bank.have(k) > 0) missing[k] = n - bank.have(k);
+      return {
+        count: spots.length, gates: spots.filter(sp => sp.gate).length, spots,
+        cost: total, missing, ok: !Object.keys(missing).length, text: costText(total),
+        why: Object.keys(missing).length ? `You are short of ${costText(missing)}.` : '',
+      };
     },
 
     /** §4.9 — take the last placement back, materials and all. */
@@ -675,10 +1094,23 @@ export function createBuildPlan({
      * aborting the whole drag, because a wall that stops at the water is a wall and a wall that
      * refuses to exist is a bug report.
      */
-    run({ id, points, gateAt = [] }) {
+    run({ id, points, gateAt = [], gateCorners = null }) {
       const def = byId.get(id);
       if (!def) return { ok: false, why: 'No such structure.' };
       const placed = [], skipped = [];
+      /**
+       * R28 — gates by CORNER, which is what the player clicks. `gateAt` (by piece index) is the
+       * old form and is kept for its callers; nothing in the game ever filled it.
+       */
+      if (gateCorners) {
+        const gateDef = def.gateId ? byId.get(def.gateId) : null;
+        const tf = [];
+        for (const sp of runSpots(def, points, { gateCorners, gateDef })) {
+          const res = api.place({ id: sp.id, x: sp.x, z: sp.z, rot: sp.rot });
+          if (res.ok) { placed.push(res.entry); tf.push(...(res.tf || [])); } else skipped.push({ x: sp.x, z: sp.z, why: res.why });
+        }
+        return { ok: placed.length > 0, placed, skipped, tf };
+      }
       let n = 0;
       for (let i = 0; i + 1 < points.length; i++) {
         const [ax, az] = points[i], [bx, bz] = points[i + 1];
@@ -715,15 +1147,54 @@ export function createBuildPlan({
       };
     },
 
+    /**
+     * R28 — THE COPY TOOL: every piece whose middle is inside the brush, as a blueprint.
+     *
+     * The blueprint functions have been here since §4.8 and nothing ever called them. This is the
+     * door. Waypoint pads are left out on purpose (one per outpost — a stamped camp would be
+     * refused its pad every time), and so is anything wall-mounted whose wall was not copied.
+     */
+    captureAround(x, z, r, name = null) {
+      const inside = entries.filter(e => Math.hypot(e.x - x, e.z - z) <= r && !e.waypoint);
+      if (!inside.length) return null;
+      const bp = api.blueprint(inside.map(e => e.id), name || `Layout of ${inside.length}`);
+      bp.w = Math.round(Math.max(...inside.map(e => Math.abs(e.x - x) + Math.max(e.w, e.d) / 2)) * 2);
+      return bp;
+    },
+
+    /** R28 — where each piece of a blueprint would land, whether it may, and the whole bill. */
+    stampCheck(blueprint, x, z, rot = 0) {
+      const c = Math.cos(rot), s = Math.sin(rot);
+      const rows = [];
+      const total = {};
+      for (const p of blueprint?.pieces || []) {
+        const px = x + p.dx * c - p.dz * s, pz = z + p.dx * s + p.dz * c;
+        const res = api.check({ id: p.key, x: px, z: pz, rot: p.rot + rot });
+        // the bill alone would say "short" on every row once the pile is spent by the rows above
+        // it, so a row is refused here only for the ground or a neighbour, and the bill is summed
+        const blocked = !res.ok && !Object.keys(res.missing || {}).length ? res.why : '';
+        rows.push({ key: p.key, x: px, z: pz, rot: p.rot + rot, ok: !blocked && !res.locked, why: res.locked ? res.why : blocked, y: res.ghostY ?? ground(px, pz) });
+        if (!blocked && !res.locked) addCost(total, realCost(byId.get(p.key)?.cost || {}));
+      }
+      const missing = {};
+      for (const [k, n] of Object.entries(total)) if (n - bank.have(k) > 0) missing[k] = n - bank.have(k);
+      const fits = rows.filter(r => r.ok).length;
+      return {
+        rows, fits, total: rows.length, cost: total, missing, text: costText(total),
+        ok: fits > 0 && !Object.keys(missing).length,
+        why: !fits ? (rows[0]?.why || 'None of it fits here.') : Object.keys(missing).length ? `You are short of ${costText(missing)}.` : '',
+      };
+    },
+
     stamp(blueprint, x, z, rot = 0) {
       const c = Math.cos(rot), s = Math.sin(rot);
-      const placed = [], skipped = [];
+      const placed = [], skipped = [], tf = [];
       for (const p of blueprint?.pieces || []) {
         const px = x + p.dx * c - p.dz * s, pz = z + p.dx * s + p.dz * c;
         const res = api.place({ id: p.key, x: px, z: pz, rot: p.rot + rot });
-        if (res.ok) placed.push(res.entry); else skipped.push({ key: p.key, why: res.why });
+        if (res.ok) { placed.push(res.entry); tf.push(...(res.tf || [])); } else skipped.push({ key: p.key, why: res.why });
       }
-      return { placed, skipped };
+      return { placed, skipped, tf };
     },
 
     /** Total bill for a blueprint, so the player can be told before they stamp it. */

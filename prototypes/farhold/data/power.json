@@ -246,7 +246,9 @@
     "unworked",
     "unpowered",
     "shed",
-    "blocked"
+    "blocked",
+    "stocked"
   ],
+  "_r28StateDoc": "R28 — `stocked`: a machine whose every job is a keep-in-stock order (\"keep 50 iron ingot\") and the stores already hold that many. It is not idle (it has work) and not starved (it lacks nothing); it is satisfied, it stops asking for a worker, and it starts again by itself when the stock drops below the line.",
   "_r18Build": "R18 — the `build` blocks that used to sit on these rows are GONE. Only data/structures.json's `cost` is ever charged (js/buildplan.js `alignCatalogue` -> js/build.js); these were a second, dead price on 25 of 35 buildings, and they disagreed with the live one on every single row — `fuel_synthesiser` differed in all four lines. A price stated twice is a price that will be tuned in the wrong file, which is exactly what had happened. Per the standing ruling: structures.json owns COST, this file owns the power/throughput numbers."
 }

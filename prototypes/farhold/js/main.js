@@ -4209,7 +4209,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
    * fuel at all.
    */
   const away = createAwayClock({
-    works, logistics, stores, grid,
+    // R28 — `mining`: the drills keep digging while you are away too (js/logistics.js)
+    works, mining, logistics, stores, grid,
     materials: resourceData?.materials || {},
   });
 
@@ -4517,7 +4518,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       assign: id => {
         const who = (colony.citizens || []).find(c => !c.stationId && c.rung !== 'leaving');
         if (!who) { hud.log('Nobody is free.', 'warn'); return; }
-        colony.assign(who.id, { stationId: id });
+        // R28 — the panel hands in the ORDER's id ("w12" / "lab_furnace3"); a citizen is bound to a
+        // STATION, so they were tied to a station that does not exist and walked nowhere
+        const order = board.get?.(id);
+        colony.assign(who.id, { stationId: order?.stationId || order?.meta?.machine || id });
         hud.log(`${who.name} goes to it.`, 'good');
       },
     },
@@ -4533,10 +4537,16 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
           show: true,
           summary: `${cit} of ${beds} beds · appeal ${Math.round(a.score * 100)}% · `
             + `${crop.plots} field${crop.plots === 1 ? '' : 's'}${crop.ripe ? `, ${crop.ripe} ripe` : ''} · ${crop.meals} meals`,
-          offers: (colony.pending || []).map(o => ({ id: o.id, name: o.name, job: o.job })),
-          taxOk: taxable > 0,
-          taxNote: taxable > 0
-            ? `${taxable} housed · prosperity ${colony.prosperity().toFixed(2)}`
+          // R28 — an offer carries its person in `citizen`; `o.name`/`o.job` printed "undefined, undefined"
+          offers: (colony.pending || []).map(o => ({
+            id: o.id, name: o.name ?? o.citizen?.name ?? 'Somebody',
+            job: (colonyData?.jobs || []).find(j => j.key === (o.job ?? o.citizen?.job))?.name || String(o.job ?? o.citizen?.job ?? 'worker').replace(/_/g, ' '),
+          })),
+          // R28 — the purse, not a fresh day's tax: see `tax` below
+          taxOk: Math.floor(colony.gold || 0) > 0,
+          taxNote: Math.floor(colony.gold || 0) > 0
+            ? `${Math.floor(colony.gold)} gold in the purse · ${taxable} housed · prosperity ${colony.prosperity().toFixed(2)}`
+            : taxable > 0 ? `The purse is empty. Tax comes in once a day from the ${taxable} housed.`
             : cit ? 'Nobody is housed. A citizen with no bed pays nothing.' : 'Nobody lives here yet.',
           fieldOk: true,
           fieldNote: `${crop.plots} broken · they will replant what you start, never start their own`,
@@ -4547,13 +4557,20 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         hud.log(out?.ok ? `${out.citizen.name} moves in.` : (out?.why || 'They did not stay.'), out?.ok ? 'level' : '');
       },
       turnAway: id => { colony.turnAway?.(id); hud.log('You send them on their way.', ''); },
+      /**
+       * R28 — EMPTY THE PURSE; DO NOT RAISE ANOTHER DAY'S TAX.
+       *
+       * This called `colony.collectTax()`, which raises a whole day's tax, adds it to the holding's
+       * purse AND returned it to be added to yours — with no once-a-day check. Every click was
+       * another day's tax, twice over. `colony.tick` already raises the tax once a day into
+       * `colony.gold`; the button now takes what is in that purse, which is what it always said.
+       */
       tax: () => {
-        const out = colony.collectTax?.();
-        if (!out) return;
-        player.gold += out.gold;
-        hud.log(out.gold > 0
-          ? `${out.gold} gold in tax from ${out.paid.length}.${out.skipped.length ? ` ${out.skipped.length} paid nothing.` : ''}`
-          : 'Nobody had anything to give.', out.gold > 0 ? 'good' : 'warn');
+        const purse = Math.max(0, Math.floor(colony.gold || 0));
+        if (purse <= 0) { hud.log('The purse is empty. Tax comes in once a day.', 'warn'); return; }
+        colony.gold -= purse;
+        player.gold += purse;
+        hud.log(`${purse} gold out of the holding's purse.`, 'good');
       },
       field: () => {
         const out = farm.layPlot?.({
@@ -4624,7 +4641,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         hasSmelter: smelters.some(m => Object.keys(m.def?.fuels || {}).length > 0),
         hasFuel: fuels.some(f => haveAnywhere(f) > 0),
         hasDrill: entries.some(e => defOf(e.key)?.needs === 'node'),
-        hasRoute: drills.some(d => d.routed || d.deliveredPerMinute > 0),
+        // R28 — `mining.overview()` rows carry `route`; `routed` and `deliveredPerMinute` were never
+        // written by anything, so this was false for ever and the hint said "Put a crate near the
+        // drill" with a crate standing right beside it, and never reached the steps behind it
+        hasRoute: drills.some(d => !!d.route),
         hasPower: entries.some(e => defOf(e.key)?.power?.make > 0),
         hasLink: (logistics.links || []).length > 0,
         smelting: smelters.some(m => (m.queue || []).length > 0),

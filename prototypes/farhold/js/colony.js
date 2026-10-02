@@ -787,7 +787,9 @@ export function createColony({
        * house is a structure that sleeps two or more; see HOUSE_MIN_BEDS in js/population.js, which
        * the Town Hall and the recruit refusal both read.
        */
-      const houses = (housing?.houses || []).filter(h => (h.beds || 0) >= 2).length;
+      // R28 — `housing.houses` is a function on the real register (js/housing.js); see js/population.js
+      const houseList = typeof housing?.houses === 'function' ? housing.houses() : (housing?.houses || []);
+      const houses = houseList.filter(h => (h.beds || 0) >= 2).length;
       if (housing && houses <= 0) return null;
       const a = colony.appeal();
       const chance = (migCfg.baseChance || 0) + ((migCfg.chanceAtFullAppeal || 0) - (migCfg.baseChance || 0)) * a.score;

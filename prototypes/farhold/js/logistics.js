@@ -377,6 +377,13 @@ export const AWAY_CAP_SECONDS = 6 * 3600;
  */
 export function createAwayClock({
   works = null,
+  /**
+   * R28 — THE DRILLS. This clock was handed the grid, the benches, the carts and the stores, and
+   * never the drills: leave the planet for six hours and every furnace ran on the ore already in
+   * the crates while the seams feeding them sat still. js/mining.js's `tick` caps a step at the
+   * drill's pile, so a fifteen-minute slice cannot dig ten thousand ore into a 200 pile.
+   */
+  mining = null,
   logistics = null,
   stores = null,
   grid = null,
@@ -440,6 +447,9 @@ export function createAwayClock({
         const dt = Math.min(slice, left);
         // the grid first: a machine's speed comes from what power reached it this slice
         if (grid?.tick) grid.tick(dt, { daylight, wind });
+        // dig first, in steps no longer than a minute: a route drains a pile at its own rate and a
+        // pile tops out at 200, so one fifteen-minute step would dig 200 and then haul for fourteen
+        if (mining?.tick) for (let m = 0; m < dt - 1e-6; m += 60) mining.tick(Math.min(60, dt - m));
         if (works?.catchUp) unlocked.push(...(works.catchUp(dt).unlocked || []));
         if (logistics?.catchUp) deliveries += logistics.catchUp(dt).deliveries || 0;
         left -= dt;

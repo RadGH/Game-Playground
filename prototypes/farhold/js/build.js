@@ -27,7 +27,7 @@
 // made.
 
 import * as THREE from 'three';
-import { createBuildPlan, makeBag } from './buildplan.js';
+import { createBuildPlan, makeBag, cornersOf } from './buildplan.js';
 import { createRoadBook, laneRibbon, levelUnderSlab } from './roadplan.js';
 // R17 — the research gate. See `createBuild`'s `plan` line for why this is imported here rather
 // than handed in: js/main.js's `createBuild` call belongs to another pair of hands this round, and
@@ -193,6 +193,32 @@ export function buildPortalRing(color = '#7fd0ff') {
   return group;
 }
 
+/**
+ * R28 — SAVED LAYOUTS OUTLIVE A GAME.
+ *
+ * A blueprint rides in the save's `build` blob (so a run keeps its own), and every change is also
+ * mirrored to this browser's storage so a camp you laid out once is there in the next world too.
+ * Storage can be missing or refuse (a private window, a test page), so every touch is guarded and
+ * the game behaves exactly the same without it.
+ */
+const BP_KEY = 'farhold.blueprints.v1';
+function loadLocalBlueprints() {
+  try {
+    const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(BP_KEY) : null;
+    const list = raw ? JSON.parse(raw) : [];
+    return Array.isArray(list) ? list.filter(b => b && Array.isArray(b.pieces)) : [];
+  } catch { return []; }
+}
+function saveLocalBlueprints(list) {
+  try { if (typeof localStorage !== 'undefined') localStorage.setItem(BP_KEY, JSON.stringify(list.slice(-24))); } catch { /* no storage: the save still has them */ }
+}
+
+/**
+ * R28 — THE TOOLS THAT POINT AT A PIECE, and the colour each one highlights it in.
+ * Kept here beside the highlight so build-ui.js's tool table and this file cannot disagree.
+ */
+export const POINT_TOOLS = { remove: '#e06050', move: '#7fd4ff', upgrade: '#e0c070', route: '#9ec8ff', pick: '#ffffff' };
+
 export function createBuild(scene, {
   terrain,
   terraform,
@@ -332,6 +358,7 @@ export function createBuild(scene, {
   const runPegMat = matFor('#7fd4ff', { transparent: true, opacity: 0.9 });
   const runBandMat = matFor('#7fd4ff', { transparent: true, opacity: 0.35 });
   const runGhostMat = matFor('#e0c070', { transparent: true, opacity: 0.28 });
+  const runGateMat = matFor('#ffd36a', { emissive: '#7a5a10' });
 
   /** Rebuild the preview from `runPoints` plus wherever the cursor is. Cheap: a dozen boxes. */
   function drawRun() {
@@ -362,7 +389,16 @@ export function createBuild(scene, {
       runGroup.add(m);
     };
 
-    for (const [x, z] of runPoints) peg(x, z);
+    runPoints.forEach(([x, z], i) => {
+      peg(x, z);
+      // R28 — a corner clicked twice carries a gate: a gold arch over its peg
+      if (runGates.includes(i)) {
+        const m = new THREE.Mesh(GEO.ring, runGateMat);
+        m.position.set(x, terrain.heightAt(x, z) + 1.6, z);
+        m.scale.set(2.2, 2.2, 2.2);
+        runGroup.add(m);
+      }
+    });
     for (let i = 0; i + 1 < runPoints.length; i++) {
       band(runPoints[i][0], runPoints[i][1], runPoints[i + 1][0], runPoints[i + 1][1], runBandMat);
     }
@@ -379,6 +415,23 @@ export function createBuild(scene, {
   let radius = 8;
   let aimAt = { x: 0, z: 0 };
   let lastCheck = { ok: false, why: '' };
+  /**
+   * R28 — what a pointing tool is aimed at, and the sentence the card prints for it:
+   * `{ entry, ok, text }`. Null when it is aimed at nothing.
+   */
+  let lastPoint = null;
+  /** R28 — Shift is held: a click lays a LINE from the last piece to the cursor. */
+  let lineMode = false;
+  /** R28 — the last single piece you put down, which a Shift+click line starts from. */
+  let lastPlaced = null;
+  /** R28 — what a Shift+click would lay, for the card: `{ count, text, ok, why }`. */
+  let lineInfo = null;
+  /** R28 — corners of the wall run clicked twice: a gate goes there. Indices into `runPoints`. */
+  let runGates = [];
+  /** R28 — layouts the Copy tool lifted, and the one the Stamp tool is putting down. */
+  let blueprints = loadLocalBlueprints();
+  let stampIndex = -1;
+  let stampInfo = null;
   /** The first end of a route, while the second is being picked. See `routeClick`. */
   let routeFrom = null;
   /** The polyline being dragged for a road or a wall (§4.14, §4.16). */
@@ -395,8 +448,102 @@ export function createBuild(scene, {
     ghost.add(g);
   }
 
-  function tintGhost(ok) {
-    ghost.traverse(m => { if (m.isMesh) m.material = ok ? ghostOk : ghostNo; });
+  function tintGhost(ok, levels = false) {
+    const m0 = !ok ? ghostNo : levels ? ghostLevel : ghostOk;
+    ghost.traverse(m => { if (m.isMesh) m.material = m0; });
+  }
+
+  // ---- R28: everything else build mode now draws on the ground ----------------------------------
+
+  /** Amber: it will go, and it will level the ground under it first (`rules.autoLevel`). */
+  const ghostLevel = matFor('#e0b050', { transparent: true, opacity: 0.45 });
+
+  /**
+   * THE FOOTPRINT, DRAWN ON THE GROUND.
+   *
+   * The ghost is a translucent tint standing on the height under its middle; on a slope you could
+   * not see where its corners met the hillside, which is the thing that decides whether it fits.
+   * A line round the footprint, sampled down onto the ground every half metre, in the verdict's
+   * colour. One LineLoop, its positions rewritten in place each frame.
+   */
+  const FOOT_N = 40;
+  const footGeo = new THREE.BufferGeometry();
+  footGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(FOOT_N * 3), 3));
+  const footMat = new THREE.LineBasicMaterial({ color: 0x5fd08a, transparent: true, opacity: 0.95, depthTest: false });
+  const footprint = new THREE.LineLoop(footGeo, footMat);
+  footprint.name = 'farhold-build-footprint';
+  footprint.frustumCulled = false;
+  footprint.renderOrder = 5;
+  footprint.visible = false;
+  scene.add(footprint);
+  function drawFootprint(spot, colour, lift = 0.08) {
+    const c = cornersOf(spot);
+    const pos = footGeo.attributes.position.array;
+    const per = FOOT_N / 4;
+    for (let side = 0; side < 4; side++) {
+      const [ax, az] = c[side], [bx, bz] = c[(side + 1) % 4];
+      for (let k = 0; k < per; k++) {
+        const t = k / per, x = ax + (bx - ax) * t, z = az + (bz - az) * t;
+        const i = (side * per + k) * 3;
+        pos[i] = x; pos[i + 1] = terrain.heightAt(x, z) + lift; pos[i + 2] = z;
+      }
+    }
+    footGeo.attributes.position.needsUpdate = true;
+    footMat.color.set(colour);
+    footprint.visible = true;
+  }
+
+  /**
+   * MORE THAN ONE GHOST: a Shift+click line, a blueprint being stamped.
+   *
+   * A pool of piece-shaped groups keyed by catalogue id, re-used frame to frame and only rebuilt
+   * when the LIST of ids changes — moving the cursor moves them, it does not remake them.
+   */
+  const ghostPool = new THREE.Group();
+  ghostPool.name = 'farhold-build-ghosts';
+  scene.add(ghostPool);
+  let poolSig = '';
+  function showGhosts(list) {
+    const sig = list.map(g => g.key).join(',');
+    if (sig !== poolSig) {
+      while (ghostPool.children.length) ghostPool.remove(ghostPool.children[0]);
+      for (const g of list) {
+        const def = book.byId(g.key);
+        ghostPool.add(def ? buildMesh(def) : new THREE.Group());
+      }
+      poolSig = sig;
+    }
+    list.forEach((g, i) => {
+      const m = ghostPool.children[i];
+      if (!m) return;
+      m.position.set(g.x, g.y ?? terrain.heightAt(g.x, g.z), g.z);
+      m.rotation.y = -(g.rot || 0);
+      const mat = !g.ok ? ghostNo : g.levels ? ghostLevel : ghostOk;
+      m.traverse(o => { if (o.isMesh) o.material = mat; });
+    });
+    ghostPool.visible = list.length > 0;
+  }
+  function hideGhosts() { ghostPool.visible = false; }
+
+  /**
+   * WHAT A POINTING TOOL IS POINTING AT: Take down, Move, Upgrade, Route, Copy-a-piece.
+   *
+   * It used to be learned after the click — "Palisade taken down" — which on a crowded base is how
+   * the lamp next to the thing you meant comes down. A box round the piece, in the tool's colour,
+   * and a line on the card saying what the click will do and what it costs or gives back.
+   */
+  const hiMat = new THREE.MeshBasicMaterial({ color: 0xe0c070, transparent: true, opacity: 0.22, depthWrite: false });
+  const highlight = new THREE.Mesh(GEO.box, hiMat);
+  highlight.name = 'farhold-build-highlight';
+  highlight.visible = false;
+  scene.add(highlight);
+  function highlightEntry(e, colour) {
+    if (!e) { highlight.visible = false; return; }
+    highlight.position.set(e.x, (e.y ?? terrain.heightAt(e.x, e.z)) + (e.h || 1) / 2, e.z);
+    highlight.scale.set((e.w || 1) + 0.3, (e.h || 1) + 0.3, (e.d || 1) + 0.3);
+    highlight.rotation.y = -(e.rot || 0);
+    hiMat.color.set(colour);
+    highlight.visible = true;
   }
 
   function addMesh(entry) {
@@ -496,6 +643,137 @@ export function createBuild(scene, {
     return best ? best.e : null;
   }
 
+  // ---- R28: the undo stack, and the two tools that aim at something other than a ghost ----------
+
+  function pushAction(a) {
+    actions.push(a);
+    const depth = book.rules.undoDepth ?? 30;
+    while (actions.length > depth) actions.shift();
+  }
+
+  /** What Ctrl+Z will do next, in words, for the card. */
+  function actionLabel(a) {
+    if (!a) return '';
+    if (a.kind === 'place') {
+      const first = book.entries.find(e => e.id === a.ids[0]);
+      const name = first?.name || 'piece';
+      return a.ids.length > 1 ? `${a.ids.length} pieces${a.stamp ? ' (layout)' : a.run ? ` of ${name}` : ` of ${name}`}` : name;
+    }
+    if (a.kind === 'lane') return roads.get(a.id)?.name || 'road';
+    if (a.kind === 'brush') return { smooth: 'Level', raise: 'Raise', lower: 'Lower' }[a.tool] || 'ground';
+    if (a.kind === 'takedown') return `${a.moved ? 'pick up' : 'take down'} ${a.entry?.name || ''}`.trim();
+    if (a.kind === 'upgrade') return `upgrade to ${book.entries.find(e => e.id === a.id)?.name || ''}`.trim();
+    return a.kind;
+  }
+
+  /** Take one step back. Null when the step no longer applies (its pieces are already gone). */
+  function undoStep(a) {
+    if (a.kind === 'place') {
+      const gone = [];
+      for (const id of [...a.ids].reverse()) {
+        if (!book.entries.some(e => e.id === id)) continue;
+        const res = book.remove(id, { fraction: 1 });       // undo is a full refund; take-down is not
+        if (!res.ok) continue;
+        api.forget(id);
+        if (onRemove) onRemove(res.entry, book.byId(res.entry.key) || null);
+        if (lastPlaced?.id === id) lastPlaced = null;
+        gone.push(res.entry);
+      }
+      for (const id of a.tf || []) terraform?.remove?.(id);
+      if (!gone.length && !(a.tf || []).length) return null;
+      if (gone.length) {
+        const xs = gone.map(e => e.x), zs = gone.map(e => e.z);
+        const cx = (Math.min(...xs) + Math.max(...xs)) / 2, cz = (Math.min(...zs) + Math.max(...zs)) / 2;
+        groundChanged(cx, cz, Math.hypot(Math.max(...xs) - Math.min(...xs), Math.max(...zs) - Math.min(...zs)) / 2 + 8);
+      }
+      log(gone.length > 1 ? `Undone: ${gone.length} pieces, everything refunded.` : `Undone: ${gone[0]?.name || 'that'}, refunded.`, 'good');
+      return { ok: true, entry: gone[0] || null, entries: gone };
+    }
+    if (a.kind === 'lane') {
+      const lane = roads.get(a.id);
+      if (!lane) return null;
+      const def = book.byId(lane.key);
+      const sections = Math.max(1, Math.round((lane.metres || 0) / Math.max(1, def?.w || 4)));
+      book.giveBack(book.quote(lane.key, sections).cost || {});   // undo is a full refund
+      roads.remove(lane.id);
+      forgetLane(lane.id);
+      log(`${Math.round(lane.metres)} m of ${lane.name || 'road'} undone.`, 'good');
+      return { ok: true, lane };
+    }
+    if (a.kind === 'brush') {
+      const n = (a.tf || []).filter(id => terraform?.remove?.(id)).length;
+      if (!n) return null;
+      groundChanged(a.x, a.z, (a.r || radius) * 1.6);
+      log('Undone: the ground is back how it was.', 'good');
+      return { ok: true, brush: true };
+    }
+    if (a.kind === 'takedown') {
+      const res = book.restore(a.entry, a.charge);
+      if (!res.ok) { log(`Cannot put the ${a.entry?.name || 'piece'} back: ${res.why}`, 'warn'); return { ok: false, why: res.why }; }
+      addMesh(res.entry);
+      if (onPlace) onPlace(res.entry, book.byId(res.entry.key) || null);
+      log(`${res.entry.name} is back where it was.`, 'good');
+      return { ok: true, entry: res.entry, restored: true };
+    }
+    if (a.kind === 'upgrade') {
+      const res = book.downgrade(a.id, a.was, a.paid);
+      if (!res.ok) return null;
+      api.forget(a.id);
+      addMesh(res.entry);
+      if (onPlace) onPlace(res.entry, book.byId(res.entry.key) || null);
+      log(`Back to a ${res.entry.name}; ${book.costText(a.paid) || 'nothing'} refunded.`, 'good');
+      return { ok: true, entry: res.entry };
+    }
+    return null;
+  }
+
+  /** Does the tool that is up paint a circle on the ground? */
+  const usesBrush = () => ['smooth', 'raise', 'lower', 'clear', 'scan', 'copy'].includes(tool);
+
+  /** A pointing tool: what is under the cursor, boxed, and what a click would do to it. */
+  function aimPoint(x, z) {
+    footprint.visible = false;
+    hideGhosts();
+    if (tool === 'route') { highlightEntry(book.pickEntry(x, z, 8), POINT_TOOLS.route); lastPoint = null; return; }
+    const e = book.pickEntry(x, z, 3);
+    if (!e) {
+      highlightEntry(null);
+      // a road is not in the ledger: Take down still finds it (see `removeAt`)
+      const lane = tool === 'remove' ? roads.nearest(x, z, 7) : null;
+      lastPoint = lane
+        ? { ok: true, text: `Click: take up ${Math.round(lane.lane.metres)} m of ${lane.lane.name || 'road'}.` }
+        : { ok: false, text: 'Point at something you built.' };
+      return;
+    }
+    let ok = true, text = '';
+    if (tool === 'remove') {
+      text = `Click: take down the ${e.name} — ${book.costText(book.refundFor(e)) || 'nothing'} back.`;
+    } else if (tool === 'move') {
+      const can = book.movable(e);
+      ok = can.ok;
+      text = ok ? `Click: pick up the ${e.name} (nothing lost) and put it somewhere else.` : can.why;
+    } else if (tool === 'upgrade') {
+      const up = book.upgradeOf(e);
+      ok = up.ok;
+      text = up.to ? (up.ok ? `Click: ${e.name} → ${up.to.name} for ${book.costText(up.cost) || 'nothing'}.` : `${e.name} → ${up.to.name}: ${up.why}`) : up.why;
+    } else if (tool === 'pick') {
+      text = `Click: build another ${e.name}.`;
+    }
+    highlightEntry(e, ok ? POINT_TOOLS[tool] : '#e06050');
+    lastPoint = { entry: e, ok, text };
+  }
+
+  /** The Stamp tool: the whole layout as ghosts, and its bill on the card. */
+  function aimStamp(x, z) {
+    footprint.visible = false;
+    highlight.visible = false;
+    const bp = blueprints[stampIndex];
+    if (!bp) { hideGhosts(); stampInfo = { ok: false, why: 'No layout yet: pick Copy and click on something you built.' }; return; }
+    const chk = book.stampCheck(bp, x, z, rot);
+    showGhosts(chk.rows.map(r => ({ key: r.key, x: r.x, z: r.z, rot: r.rot, y: r.y, ok: r.ok })));
+    stampInfo = { ...chk, name: bp.name };
+  }
+
   const api = {
     plan: book,
     get mode() { return mode; },
@@ -517,13 +795,31 @@ export function createBuild(scene, {
      */
     isExtractor(keyOrDef) { return book.isExtractor(keyOrDef); },
     get runPoints() { return runPoints; },
+    /**
+     * R28 — THE RUN, PRICED BEFORE ENTER: how long, how many sections and gates, the bill, and
+     * whether the purse covers it. The card shows this the whole time a run is being clicked out.
+     */
+    get runInfo() {
+      if (!isRunTool() || !runPoints.length) return null;
+      const pts = [...runPoints, [aimAt.x, aimAt.z]];
+      let metres = 0;
+      for (let i = 0; i + 1 < pts.length; i++) metres += Math.hypot(pts[i + 1][0] - pts[i][0], pts[i + 1][1] - pts[i][1]);
+      const pieceId = selected || (tool === 'road' ? 'road_dirt' : 'palisade');
+      const def = book.byId(pieceId);
+      if (def?.road) {
+        const q = book.quote(pieceId, Math.max(1, Math.round(metres / Math.max(1, def.w))));
+        return { metres, corners: runPoints.length, name: def.name, count: 0, gates: 0, text: q.text, ok: q.ok, why: q.why };
+      }
+      const b = book.runBill({ id: pieceId, points: pts, gateCorners: runGates });
+      return { metres, corners: runPoints.length, name: def?.name || pieceId, count: b.count, gates: b.gates, text: b.text, ok: b.ok, why: b.why };
+    },
 
     /** §4.1 — a build mode you toggle. Nothing below does anything while it is off. */
     setMode(on) {
       mode = !!on;
       ghost.visible = mode && tool === 'build' && !!selected;
-      brush.visible = mode && tool !== 'build' && !isRunTool();
-      if (!mode) runPoints = [];
+      brush.visible = mode && usesBrush();
+      if (!mode) { runPoints = []; runGates = []; footprint.visible = false; hideGhosts(); highlight.visible = false; lastPoint = null; lineMode = false; }
       drawRun();
       return mode;
     },
@@ -532,6 +828,12 @@ export function createBuild(scene, {
     setTool(name) {
       tool = name;
       runPoints = [];
+      runGates = [];
+      lastPoint = null;
+      highlight.visible = false;
+      footprint.visible = false;
+      hideGhosts();
+      if (name === 'stamp' && stampIndex < 0 && blueprints.length) stampIndex = blueprints.length - 1;
       /**
        * THE ROAD TOOL PICKS A ROAD FOR YOU.
        *
@@ -541,14 +843,17 @@ export function createBuild(scene, {
        * lay. Choosing the cheapest piece of the right sort when you pick the tool means the panel
        * is telling the truth from the first click, and picking a different road still overrides it.
        */
-      const wantCat = name === 'road' ? 'road' : name === 'wall' ? 'defence' : null;
-      if (wantCat && book.byId(selected)?.cat !== wantCat) {
+      // R28 — the Wall tool lays any RUN piece (fence, hedge, palisade…), not only the defence
+      // category: a fence is a run and has always been one, and the tool refused to lay it
+      const sel = book.byId(selected);
+      const wrong = name === 'road' ? sel?.cat !== 'road' : name === 'wall' ? !sel?.run : false;
+      if ((name === 'road' || name === 'wall') && wrong) {
         const fallback = name === 'road' ? 'road_dirt' : 'palisade';
         if (book.byId(fallback)) api.select(fallback);
       }
       ghost.visible = mode && tool === 'build' && !!selected;
       // a run tool draws its own line; the round brush would say it paints a circle, which it does not
-      brush.visible = mode && tool !== 'build' && !isRunTool();
+      brush.visible = mode && usesBrush();
       drawRun();
       return tool;
     },
@@ -564,9 +869,43 @@ export function createBuild(scene, {
       return def;
     },
 
-    /** §4.2 — hold a key for free placement; let go and it snaps again. */
-    setFree(on) { free = !!on; },
-    rotate(delta) { rot += delta; return rot; },
+    /**
+     * §4.2 — free placement: no grid, no snapping to a neighbour, any angle.
+     *
+     * R28 — this has existed since §4.2 and NOTHING called it. F toggles it now (js/build-keys.js);
+     * a toggle rather than a held key because a held Alt hands the browser's menu bar the focus on
+     * release, and the card says which way it is.
+     */
+    setFree(on) { free = !!on; return free; },
+    get free() { return free; },
+    /**
+     * R28 — ONE NOTCH IS ONE STEP.
+     *
+     * The wheel turned the ghost by π/8 and `snap` rounded to the catalogue's `rotateStep` (π/4),
+     * so every other notch did nothing at all, and the first notch anticlockwise rounded to −0 and
+     * did nothing either. Snapped, a turn is now exactly one `rotateStep` in the direction asked;
+     * free, it is the fine angle it was given.
+     */
+    rotate(delta) {
+      if (!delta) return rot;
+      const step = book.rules.rotateStep || Math.PI / 4;
+      if (free) rot += delta;
+      else rot = Math.round(rot / step) * step + Math.sign(delta) * step;
+      rot = ((rot % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+      return rot;
+    },
+    get rot() { return rot; },
+    /** R28 — Shift is down: the next click lays a line from the last piece to here. */
+    setLine(on) { lineMode = !!on; if (!lineMode) { lineInfo = null; if (tool === 'build') hideGhosts(); } return lineMode; },
+    get lineMode() { return lineMode; },
+    get lineInfo() { return lineInfo; },
+    get lastPoint() { return lastPoint; },
+    get lastPlaced() { return lastPlaced; },
+    get runGates() { return runGates; },
+    get stampInfo() { return stampInfo; },
+    /** R28 — undo steps waiting, so the card can say whether Ctrl+Z will do anything. */
+    get undoCount() { return actions.length; },
+    get undoLabel() { return actions.length ? actionLabel(actions[actions.length - 1]) : ''; },
 
     /**
      * Every frame the mode is on: where the player is pointing.
@@ -577,28 +916,57 @@ export function createBuild(scene, {
     aim(x, z) {
       aimAt = { x, z };
       if (!mode) return null;
+      if (POINT_TOOLS[tool]) { aimPoint(x, z); return null; }
+      if (tool === 'stamp') { aimStamp(x, z); return null; }
       if (tool !== 'build') {
         brush.position.set(x, terrain.heightAt(x, z) + 0.15, z);
         brush.scale.set(radius * 2, radius * 2, radius * 2);
         // a run has no brush — it has the line you are laying, which has to follow the cursor
         if (tool === 'road' || tool === 'wall') drawRun();
+        if (tool === 'copy') {
+          const n = book.entries.filter(e => Math.hypot(e.x - x, e.z - z) <= radius && !e.waypoint).length;
+          lastPoint = { ok: n > 0, text: n ? `Click to copy these ${n} piece${n === 1 ? '' : 's'} as a layout.` : 'Nothing you built inside the brush. [ ] sizes it.' };
+        }
         return null;
       }
-      if (!selected) return null;
+      if (!selected) { footprint.visible = false; return null; }
       const snapped = book.snap({ id: selected, x, z, rot, free });
       const res = book.check({ id: selected, x: snapped.x, z: snapped.z, rot: snapped.rot });
       ghost.position.set(snapped.x, res.ghostY, snapped.z);
       ghost.rotation.y = -snapped.rot;
-      tintGhost(res.ok);
-      lastCheck = { ...res, x: snapped.x, z: snapped.z, rot: snapped.rot };
+      tintGhost(res.ok, res.levels);
+      const def = book.byId(selected);
+      if (def) drawFootprint({ x: snapped.x, z: snapped.z, w: def.w, d: def.d, rot: snapped.rot }, !res.ok ? '#e06050' : res.levels ? '#e0b050' : '#5fd08a');
+      lastCheck = { ...res, x: snapped.x, z: snapped.z, rot: snapped.rot, mount: snapped.mount || null };
+      // R28 — Shift held: the whole line, ghosted, with its bill
+      if (lineMode && lastPlaced && lastPlaced.key === selected) {
+        const ln = book.lineFrom({ id: selected, from: lastPlaced, to: { x: snapped.x, z: snapped.z }, rot: lastPlaced.rot });
+        const list = ln.spots.map(sp => {
+          const c = book.check({ id: selected, x: sp.x, z: sp.z, rot: sp.rot });
+          // the bill is judged for the whole line below; a spot is red only for the ground or a neighbour
+          return { key: selected, x: sp.x, z: sp.z, rot: sp.rot, y: c.ghostY, ok: c.ok || /^You are short/.test(c.why || ''), levels: c.levels };
+        });
+        showGhosts(list);
+        const blocked = list.filter(g => !g.ok).length;
+        const q = book.quote(selected, Math.max(1, ln.count));
+        lineInfo = { count: ln.count, blocked, text: ln.text, ok: ln.count > 0 && q.ok, why: q.why };
+      } else if (lineMode) {
+        hideGhosts();
+        lineInfo = { count: 0, text: '', ok: false, why: lastPlaced ? `Shift+click lays a line of the ${lastPlaced.name} — pick that again to use it.` : 'Place one first; Shift+click then lays a line from it to the cursor.' };
+      } else { hideGhosts(); lineInfo = null; }
       return lastCheck;
     },
 
     /** The click. What it does depends on the tool. */
     confirm() {
       if (!mode) return { ok: false, why: 'Build mode is off.' };
-      if (tool === 'build') return api.placeHere();
+      if (tool === 'build') return lineMode && lastPlaced ? api.placeLineHere() : api.placeHere();
       if (tool === 'remove') return api.removeAt(aimAt.x, aimAt.z);
+      if (tool === 'move') return api.moveAt(aimAt.x, aimAt.z);
+      if (tool === 'upgrade') return api.upgradeAt(aimAt.x, aimAt.z);
+      if (tool === 'pick') return api.pickAt(aimAt.x, aimAt.z);
+      if (tool === 'copy') return api.copyAt(aimAt.x, aimAt.z);
+      if (tool === 'stamp') return api.stampHere();
       if (tool === 'road' || tool === 'wall') return api.addRunPoint(aimAt.x, aimAt.z);
       if (tool === 'clear') return api.clear();
       if (tool === 'scan') return api.scan();
@@ -656,11 +1024,42 @@ export function createBuild(scene, {
        */
       const levels = !!def?.flatten || (def?.h ?? 1) <= 0.3;
       if (levels) { groundChanged(at.x, at.z, Math.max(def.w, def.d)); clearProps(at.x, at.z, Math.max(def.w, def.d) * 0.6); }
+      if (res.levelled) { groundChanged(at.x, at.z, Math.max(def.w, def.d) + 4); clearProps(at.x, at.z, Math.max(def.w, def.d) * 0.6); }
       addMesh(res.entry);
-      actions.push({ kind: 'entry', id: res.entry.id });
-      log(`${res.entry.name} built.`, 'good');
+      pushAction({ kind: 'place', ids: [res.entry.id], tf: res.tf || [] });
+      lastPlaced = res.entry;
+      log(`${res.entry.name} built${res.levelled ? ' — the ground under it levelled first' : ''}.`, 'good');
       if (onPlace) onPlace(res.entry, def || null);
       return res;
+    },
+
+    /**
+     * R28 — SHIFT+CLICK: a row of the piece you placed last, from it to the cursor.
+     *
+     * The whole row is ONE undo step and its bill is checked before anything is spent, so a line
+     * you cannot afford is refused in one sentence rather than laid halfway.
+     */
+    placeLineHere() {
+      if (!selected || !lastPlaced || lastPlaced.key !== selected) return api.placeHere();
+      const to = lastCheck.x != null ? { x: lastCheck.x, z: lastCheck.z } : aimAt;
+      const ln = book.lineFrom({ id: selected, from: lastPlaced, to, rot: lastPlaced.rot });
+      if (!ln.count) return { ok: false, why: 'Too close to the last one for a line — click further away.' };
+      const q = book.quote(selected, ln.count);
+      if (!q.ok) { log(`${ln.count} × ${q.def?.name || selected} costs ${q.text}. ${q.why}`, 'warn'); return { ok: false, why: q.why }; }
+      const res = book.placeLine({ id: selected, from: lastPlaced, to, rot: lastPlaced.rot });
+      const def = book.byId(selected);
+      for (const e of res.placed) {
+        addMesh(e);
+        if (onPlace) onPlace(e, def || null);
+      }
+      if (res.tf.length) { const m = res.placed[Math.floor(res.placed.length / 2)] || lastPlaced; groundChanged(m.x, m.z, Math.hypot(to.x - lastPlaced.x, to.z - lastPlaced.z) + 6); }
+      if (res.placed.length) {
+        pushAction({ kind: 'place', ids: res.placed.map(e => e.id), tf: res.tf });
+        lastPlaced = res.placed[res.placed.length - 1];
+        log(`${res.placed.length} × ${def?.name || selected} in a line.${res.skipped.length ? ` ${res.skipped.length} would not fit: ${res.skipped[0].why}` : ''}`, 'good');
+      } else log(`None of the line would fit: ${res.skipped[0]?.why || 'nothing to lay'}`, 'warn');
+      hideGhosts();
+      return { ok: res.placed.length > 0, placed: res.placed, skipped: res.skipped };
     },
 
     /**
@@ -679,6 +1078,8 @@ export function createBuild(scene, {
       else if (tool === 'lower') res = terraform.lower({ x, z, r: radius, amount: 1.5, claim });
       else return { ok: false, why: 'That tool does not paint.' };
       if (!res.ok) { log(res.why, 'warn'); return res; }
+      // R28 — a brush is an undo step: Ctrl+Z takes the ground back (the trees it felled stay felled)
+      if (res.edit?.id) pushAction({ kind: 'brush', tf: [res.edit.id], x, z, r: radius, tool });
       groundChanged(x, z, radius * 1.6);
       clearProps(x, z, radius);
       return res;
@@ -730,6 +1131,26 @@ export function createBuild(scene, {
      * road that has to follow a contour are the normal cases, not the exception.
      */
     addRunPoint(x, z) {
+      /**
+       * R28 — CLICK A CORNER TWICE AND A GATE GOES THERE.
+       *
+       * The Wall tool's hint has said "a gate goes where you double back over a corner" since round
+       * 13, and `finishRun` was always called with no gates, so it never did. A click within
+       * 1.5 m of the corner you just put down is that gesture: it marks the corner (or unmarks it)
+       * instead of adding a zero-length leg.
+       */
+      const prev = runPoints[runPoints.length - 1];
+      if (tool === 'wall' && prev && Math.hypot(x - prev[0], z - prev[1]) < 1.5) {
+        const c = runPoints.length - 1;
+        const def = book.byId(selected);
+        const gate = def?.gateId ? book.byId(def.gateId) : null;
+        if (!gate) { log(`A ${def?.name || 'wall'} has no gate to put in it.`, 'warn'); return { ok: false, why: 'No gate for this wall.' }; }
+        if (runGates.includes(c)) runGates = runGates.filter(g => g !== c);
+        else runGates.push(c);
+        drawRun();
+        log(runGates.includes(c) ? `A ${gate.name} goes at this corner. Click it again to take the gate out.` : 'No gate here after all.', '');
+        return { ok: true, gate: runGates.includes(c), points: runPoints.length };
+      }
       runPoints.push([x, z]);
       drawRun();
       // say something on the FIRST click, because that is the one that looks like nothing happened
@@ -746,6 +1167,7 @@ export function createBuild(scene, {
     cancelRun() {
       const had = runPoints.length;
       runPoints = [];
+      runGates = [];
       drawRun();
       return had;
     },
@@ -799,12 +1221,13 @@ export function createBuild(scene, {
         if (!laid.ok) {
           log(laid.why, 'warn');
           runPoints = [];
+          runGates = [];
           drawRun();
           return laid;
         }
         book.pay(bill.cost);
         addLaneMesh(laid.lane);
-        actions.push({ kind: 'lane', id: laid.lane.id });
+        pushAction({ kind: 'lane', id: laid.lane.id });
         const mid = laid.lane.points[Math.floor(laid.lane.points.length / 2)];
         groundChanged(mid[0], mid[1], metres);
         // …and the trees come down ALONG the road, not in a circle the size of it
@@ -824,6 +1247,18 @@ export function createBuild(scene, {
        * footings in the air. So each leg gets its strip brush, the clipmap is told, and only then
        * does `plan.run` measure the ground it is standing on.
        */
+      /**
+       * R28 — the whole run is checked against the purse BEFORE the ground is graded, so a wall you
+       * cannot afford is one sentence instead of a graded strip with half a palisade on it.
+       */
+      const runQuote = def?.run ? book.runBill({ id: pieceId, points: runPoints, gateCorners: runGates }) : null;
+      if (runQuote && !runQuote.ok) {
+        log(`${runQuote.count} section${runQuote.count === 1 ? '' : 's'} of ${def.name} cost ${runQuote.text}. ${runQuote.why}`, 'warn');
+        runPoints = []; runGates = [];
+        drawRun();
+        return { ok: false, why: runQuote.why };
+      }
+      const tfBefore = terraform?.edits?.length ?? 0;
       if (def?.run) {
         for (let i = 0; i + 1 < runPoints.length; i++) {
           const [ax, az] = runPoints[i], [bx, bz] = runPoints[i + 1];
@@ -857,8 +1292,15 @@ export function createBuild(scene, {
         }
       }
 
-      const res = book.run({ id: pieceId, points: runPoints, gateAt });
-      for (const entry of res.placed || []) addMesh(entry);
+      const res = book.run({ id: pieceId, points: runPoints, gateAt, gateCorners: gateAt.length ? null : runGates });
+      for (const entry of res.placed || []) {
+        addMesh(entry);
+        // R28 — a gate or a wall section joins the world like any piece: solid, and on the base
+        if (onPlace) onPlace(entry, book.byId(entry.key) || null);
+      }
+      // R28 — the whole run, strips and all, is ONE undo step (it used to be one per section)
+      const runTf = (terraform?.edits || []).slice(tfBefore).map(e => e.id).filter(Boolean);
+      if ((res.placed || []).length) pushAction({ kind: 'place', ids: res.placed.map(e => e.id), tf: runTf, run: true });
       /**
        * SAY WHAT WENT DOWN.
        *
@@ -867,17 +1309,19 @@ export function createBuild(scene, {
        * sections are behind you. Every other tool in this file says what it did; so does this one.
        */
       const laid = (res.placed || []).length;
-      if (laid) log(`${laid} section${laid === 1 ? '' : 's'} of ${def?.name || pieceId} laid.`, 'good');
+      const gates = (res.placed || []).filter(e => e.gate).length;
+      if (laid) log(`${laid} section${laid === 1 ? '' : 's'} of ${def?.name || pieceId} laid${gates ? `, with ${gates} gate${gates === 1 ? '' : 's'}` : ''}.`, 'good');
       else if (!res.skipped?.length) log(`Nothing was laid. ${res.why || 'Check you can afford it.'}`, 'warn');
       if (res.skipped?.length) log(`${res.skipped.length} sections would not fit: ${res.skipped[0].why}`, 'warn');
       runPoints = [];
+      runGates = [];
       drawRun();
       return res;
     },
 
     /** §4.7 — the deconstruct tool. */
     removeAt(x, z, reach = 3) {
-      const e = nearestEntry(x, z, reach);
+      const e = book.pickEntry(x, z, reach);
       const best = e ? { e, dist: 0 } : null;
       /**
        * A ROAD IS TAKEN UP, NOT DECONSTRUCTED PIECE BY PIECE.
@@ -901,40 +1345,164 @@ export function createBuild(scene, {
         }
       }
       if (!best) return { ok: false, why: 'Nothing to take down there.' };
+      const snap = { ...best.e };
       const res = book.remove(best.e.id);
       if (res.ok) api.forget(best.e.id);
-      if (res.ok) log(`${res.entry.name} taken down. ${book.costText(res.refund) || 'Nothing'} recovered.`, 'good');
+      if (res.ok) log(`${res.entry.name} taken down. ${book.costText(res.refund) || 'Nothing'} recovered. Ctrl+Z puts it back.`, 'good');
       if (res.ok && onRemove) onRemove(res.entry, book.byId(res.entry.key) || null);
+      if (res.ok) pushAction({ kind: 'takedown', entry: snap, charge: res.refund });
+      if (res.ok && lastPlaced?.id === snap.id) lastPlaced = null;
       return res;
     },
 
-    /** §4.9 — undo the last placement, geometry and all. */
-    undo() {
-      // the newest thing wins, whichever book it is in — see `actions` above
-      while (actions.length) {
-        const last = actions[actions.length - 1];
-        if (last.kind === 'lane') {
-          actions.pop();
-          const lane = roads.get(last.id);
-          if (!lane) continue;
-          const def = book.byId(lane.key);
-          const sections = Math.max(1, Math.round((lane.metres || 0) / Math.max(1, def?.w || 4)));
-          book.giveBack(book.quote(lane.key, sections).cost || {});   // undo is a full refund
-          roads.remove(lane.id);
-          forgetLane(lane.id);
-          log(`${Math.round(lane.metres)} m of ${lane.name || 'road'} undone.`, 'good');
-          return { ok: true, lane };
-        }
-        if (!book.entries.some(e => e.id === last.id)) { actions.pop(); continue; }
-        break;
-      }
-      if (actions[actions.length - 1]?.kind === 'entry') actions.pop();
-      const res = book.undo();
-      if (res.ok) api.forget(res.entry.id);
-      // an undone waypoint pad has to leave the register too, or the map keeps offering a trip to
-      // somewhere there is no longer a pad
-      if (res.ok && onRemove) onRemove(res.entry, book.byId(res.entry.key) || null);
+    /**
+     * R28 — THE MOVE TOOL: pick a piece up at no loss and carry it.
+     *
+     * It comes down with a FULL refund and the same piece is selected with the Place tool, turned
+     * the way it stood — so the next click is "put it here". Undo puts it back where it was. Only a
+     * piece nothing else keeps a record of may be moved (`plan.movable`): a crate, a furnace or a
+     * waypoint pad is filed by id in a store, a work queue or the network, and says so.
+     */
+    moveAt(x, z) {
+      const e = book.pickEntry(x, z, 3);
+      if (!e) return { ok: false, why: 'Point at something you built to pick it up.' };
+      const can = book.movable(e);
+      if (!can.ok) { log(can.why, 'warn'); return can; }
+      const snap = { ...e };
+      const res = book.remove(e.id, { fraction: 1 });
+      if (!res.ok) return res;
+      api.forget(e.id);
+      if (onRemove) onRemove(res.entry, can.def);
+      pushAction({ kind: 'takedown', entry: snap, charge: res.refund, moved: true });
+      api.select(e.key);
+      rot = e.rot || 0;
+      api.setTool('build');
+      log(`${e.name} picked up — click where it goes. Q turns it. Ctrl+Z puts it back where it was.`, 'good');
+      return { ok: true, entry: res.entry, moving: true };
+    },
+
+    /** R28 — the Upgrade tool. See `plan.upgradeOf` for the rules and the price. */
+    upgradeAt(x, z) {
+      const e = book.pickEntry(x, z, 3);
+      if (!e) return { ok: false, why: 'Point at something you built to upgrade it.' };
+      const res = book.upgrade(e.id);
+      if (!res.ok) { log(res.why, 'warn'); return res; }
+      api.forget(e.id);
+      addMesh(res.entry);
+      pushAction({ kind: 'upgrade', id: e.id, was: res.was, paid: res.paid });
+      log(`${res.from.name} → ${res.to.name} for ${book.costText(res.paid) || 'nothing'}.`, 'good');
+      if (onPlace) onPlace(res.entry, res.to);
       return res;
+    },
+
+    /**
+     * R28 — C, or the Pick tool: build another of whatever you point at, turned the same way.
+     * The quickest way to say "one more of those" on a base that already has one.
+     */
+    pickAt(x, z) {
+      const e = book.pickEntry(x, z, 3);
+      if (!e) return { ok: false, why: 'Point at something you built to build another.' };
+      const lock = book.lockOf(e.key);
+      if (lock) { log(lock.text, 'warn'); return { ok: false, why: lock.text }; }
+      api.select(e.key);
+      rot = e.rot || 0;
+      api.setTool('build');
+      lastPlaced = e;
+      log(`Another ${e.name}: click to place · Shift+click lays a line from this one.`, '');
+      return { ok: true, key: e.key };
+    },
+
+    /** R28 — the Copy tool: everything inside the brush becomes a saved layout, ready to stamp. */
+    copyAt(x, z) {
+      const n = blueprints.length + 1;
+      const bp = book.captureAround(x, z, radius, null);
+      if (!bp) return { ok: false, why: 'Nothing you built inside the brush.' };
+      bp.name = `Layout ${n} (${bp.pieces.length} piece${bp.pieces.length === 1 ? '' : 's'})`;
+      bp.made = Date.now();
+      blueprints.push(bp);
+      saveLocalBlueprints(blueprints);
+      stampIndex = blueprints.length - 1;
+      api.setTool('stamp');
+      log(`${bp.name} copied. Click to stamp it somewhere else · Q turns it · Esc to stop.`, 'good');
+      return { ok: true, blueprint: bp };
+    },
+
+    /** R28 — the saved layouts, for the panel. */
+    get blueprints() { return blueprints; },
+    get stampIndex() { return stampIndex; },
+    selectBlueprint(i) {
+      if (!blueprints[i]) return null;
+      stampIndex = i;
+      poolSig = '';
+      api.setTool('stamp');
+      return blueprints[i];
+    },
+    deleteBlueprint(i) {
+      if (!blueprints[i]) return false;
+      blueprints.splice(i, 1);
+      if (stampIndex >= blueprints.length) stampIndex = blueprints.length - 1;
+      saveLocalBlueprints(blueprints);
+      return true;
+    },
+    renameBlueprint(i, name) {
+      if (!blueprints[i] || !name) return false;
+      blueprints[i].name = String(name).slice(0, 40);
+      saveLocalBlueprints(blueprints);
+      return true;
+    },
+
+    /**
+     * R28 — STAMP: the whole layout, priced first.
+     *
+     * `plan.stamp` places piece by piece and would happily spend half the bill on half a building,
+     * so the whole bill is checked here before anything goes down. Pieces the ground or a
+     * neighbour refuses are left out and named; the rest is one undo step.
+     */
+    stampHere() {
+      const bp = blueprints[stampIndex];
+      if (!bp) return { ok: false, why: 'Copy a layout first: the Copy tool, then click on something you built.' };
+      const chk = book.stampCheck(bp, aimAt.x, aimAt.z, rot);
+      if (!chk.ok) { log(chk.why, 'warn'); return { ok: false, why: chk.why }; }
+      const fits = { ...bp, pieces: bp.pieces.filter((p, i) => chk.rows[i].ok) };
+      const res = book.stamp(fits, aimAt.x, aimAt.z, rot);
+      for (const e of res.placed) {
+        addMesh(e);
+        if (onPlace) onPlace(e, book.byId(e.key) || null);
+      }
+      if (res.tf?.length) groundChanged(aimAt.x, aimAt.z, (bp.w || 20) + 6);
+      if (res.placed.length) pushAction({ kind: 'place', ids: res.placed.map(e => e.id), tf: res.tf || [], stamp: true });
+      const left = chk.total - res.placed.length;
+      log(`${bp.name}: ${res.placed.length} piece${res.placed.length === 1 ? '' : 's'} built for ${chk.text || 'nothing'}.${left ? ` ${left} would not fit here.` : ''}`, res.placed.length ? 'good' : 'warn');
+      return { ok: res.placed.length > 0, placed: res.placed, skipped: res.skipped };
+    },
+
+    /**
+     * §4.9 — undo the last STEP, whatever it was.
+     *
+     * R28 — this used to pop the build ledger, which made it right for one placed piece and wrong
+     * for everything else: a wall run of twenty sections took twenty presses, Level / Raise / Lower
+     * could not be undone at all (the terraform book has always had `remove(id)`; nothing called
+     * it), a take-down could not be put back, and after a reload Ctrl+Z quietly deleted the newest
+     * piece of an old base at a full refund. Now every tool pushes one step onto `actions` and this
+     * takes the top one back:
+     *
+     *   place    — the pieces (one, a Shift line, a wall run or a stamped layout) come down at a
+     *              full refund, and the ground they levelled goes back to how it was;
+     *   lane     — the road comes up, full refund;
+     *   brush    — the ground comes back (what the brush felled stays felled: that timber is yours);
+     *   takedown — the piece goes back where it stood, for what the take-down gave you;
+     *   upgrade  — the old piece back, and what the upgrade cost.
+     *
+     * The stack is not saved: after a reload there is nothing to undo, which is the honest answer.
+     */
+    undo() {
+      while (actions.length) {
+        const a = actions.pop();
+        const res = undoStep(a);
+        if (res) return res;
+      }
+      log('Nothing to undo.', '');
+      return { ok: false, why: 'Nothing to undo.' };
     },
 
     forget(entryId) {
@@ -993,6 +1561,9 @@ export function createBuild(scene, {
       scene.remove(ghost);
       scene.remove(brush);
       scene.remove(runGroup);
+      scene.remove(footprint);
+      scene.remove(ghostPool);
+      scene.remove(highlight);
       if (api.portalRing) scene.remove(api.portalRing);
     },
 
@@ -1019,10 +1590,19 @@ export function createBuild(scene, {
         terraform: terraform?.toJSON?.() || null,
         roads: roads.toJSON(),
         research: research.toJSON(),
+        // R28 — this run's saved layouts (they are mirrored to the browser too; see BP_KEY)
+        blueprints: blueprints.slice(-24),
       };
     },
     load(data) {
       book.load(data?.plan);
+      // R28 — nothing from before the load can be undone; see `undo`
+      actions = [];
+      lastPlaced = null;
+      if (Array.isArray(data?.blueprints)) {
+        const names = new Set(blueprints.map(b => b.name + '|' + b.pieces.length));
+        for (const b of data.blueprints) if (b?.pieces && !names.has(b.name + '|' + b.pieces.length)) blueprints.push(b);
+      }
       if (data?.terraform && terraform) terraform.load(data.terraform);
       // a save from before R17 has no `research` key, which is a brand-new tree with nothing bought
       // and every low-tech piece available — exactly what that save already had

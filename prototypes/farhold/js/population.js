@@ -43,8 +43,13 @@ export function population({ colony = null, housing = null } = {}) {
    * concept of a house down there, so insisting on one would refuse every one of them forever.
    * `HOUSE_MIN_BEDS` is the same bar either way: two beds is a building, one is a bedroll.
    */
+  // R28 — js/housing.js exposes `houses` as a FUNCTION (`houses: () => houses.slice()`), and this
+  // read it as a list: `(fn || []).filter` threw "filter is not a function" the first time a real
+  // register was handed over — which `civics.rebuild` does on every placement. The Town Hall, the
+  // recruit refusal and the migration roll all came through here. Tests passed a plain list.
+  const houseList = typeof reg?.houses === 'function' ? reg.houses() : (reg?.houses || []);
   const houses = reg
-    ? (reg.houses || []).filter(h => (h.beds || 0) >= HOUSE_MIN_BEDS).length
+    ? houseList.filter(h => (h.beds || 0) >= HOUSE_MIN_BEDS).length
     : (cap >= HOUSE_MIN_BEDS ? 1 : 0);
   const used = colony?.citizens?.length || 0;
   const spare = Math.max(0, cap - used);

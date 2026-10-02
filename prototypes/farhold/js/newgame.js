@@ -48,6 +48,7 @@ import { openAppearance } from './appearance.js';
 import { createFigureView } from './figure3d.js';
 import { createLookMaker } from './titlelook.js';
 import { skillFacts, skillBody } from './spellcard.js';
+import { formVersions, formTransforms } from './skillcard.js';
 import { installTooltips } from '../../../shared/tooltip.js';
 
 const $ = id => document.getElementById(id);
@@ -549,10 +550,35 @@ export async function runTitle({
         const top = node('div', 'cs-top');
         top.append(node('b', null, sk.name), node('span', 'cs-lv', `Level ${at}`));
         const facts = node('div', 'sc-facts');
-        for (const f of skillFacts(sk, skillData.statuses)) {
+        for (const f of skillFacts(sk, skillData.statuses, { skills: skillData.skills })) {
           facts.append(node('span', `sc-chip k-${f.kind}${f.el ? ' el-' + f.el : ''}`, f.text));
         }
         li.append(top, facts, node('p', 'sc-desc', skillBody(sk)));
+        /**
+         * R28 — A SHAPE SAYS WHAT IT DOES TO THE REST OF THE BAR. The druid's Briarback turns
+         * Thornlash into Bramble Gore; a player choosing the class should see that before playing,
+         * so the card lists each changed skill under the shape (and each shape under the changed
+         * skill). Shown with the full sentence when the card is opened.
+         */
+        const ctx = { statuses: skillData.statuses, skills: skillData.skills };
+        const unlockAts = Object.fromEntries((c.skills || []).map((x, k) => [x, unlock[k] ?? unlock[unlock.length - 1]]));
+        const lines = [];
+        if (sk.form) {
+          for (const g of formTransforms(sk, c.skills || [], { ...ctx, unlockAts })) {
+            for (const e of g.entries) lines.push([`${e.baseName} becomes ${e.name}`, e.desc]);
+          }
+        } else if (sk.forms) {
+          for (const v of formVersions(sk, { ...ctx, unlockAt: at }).slice(1)) lines.push([`In ${v.label}: ${v.name}`, v.desc]);
+        }
+        if (lines.length) {
+          const ul = node('ul', 'sc-forms');
+          for (const [head, body] of lines) {
+            const row = node('li', null);
+            row.append(node('b', null, head), node('span', 'sc-form-desc', ` — ${body}`));
+            ul.append(row);
+          }
+          li.append(ul);
+        }
         const toggle = () => {
           const open = li.classList.toggle('open');
           li.setAttribute('aria-expanded', open ? 'true' : 'false');

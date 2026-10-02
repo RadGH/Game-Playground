@@ -71,6 +71,8 @@ export function registerSkillRows(skills = {}, statuses = {}) {
 }
 export function skillRow(id) { return ROWS.skills[id] || null; }
 export function registeredRows() { return ROWS.skills; }
+/** R28 — the status rows registered with the skills, for screens that describe a skill (js/hud.js). */
+export function registeredStatuses() { return ROWS.statuses; }
 
 /**
  * Fields a bespoke node may name inside `set` / `add` / `mul` without being a vocabulary key —

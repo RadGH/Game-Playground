@@ -518,11 +518,11 @@
    "shield": true,
    "skills": [
     "mend",
-    "guard_stance",
-    "consecrate",
-    "renew",
-    "judgement",
-    "rally"
+    "sunlance",
+    "sanctuary",
+    "guardian_light",
+    "raise_the_fallen",
+    "judgement"
    ],
    "look": {
     "body": {
@@ -615,12 +615,12 @@
    ],
    "shield": false,
    "skills": [
-    "shadow_lance",
-    "warcry",
-    "curse",
-    "mend",
-    "quicken",
-    "rally"
+    "discord_note",
+    "ballad_of_valour",
+    "song_of_ruin",
+    "air_of_mending",
+    "quickstep_jig",
+    "grand_finale"
    ],
    "look": {
     "body": {
@@ -1728,12 +1728,12 @@
    ],
    "shield": false,
    "skills": [
-    "arcane_burst",
-    "guard_stance",
-    "renew",
-    "curse",
-    "quicken",
-    "meteor"
+    "omen_bolt",
+    "foresight",
+    "prophecy",
+    "fate_thread",
+    "turn_aside",
+    "last_prophecy"
    ],
    "pet": {
     "id": "ember_familiar",
@@ -2120,12 +2120,12 @@
    ],
    "shield": false,
    "skills": [
-    "chain_bolt",
+    "spirit_bolt",
+    "mending_post",
+    "storm_post",
     "call_spirit",
-    "renew",
-    "thunderclap",
-    "stoneskin",
-    "rally"
+    "warding_spirits",
+    "great_post"
    ],
    "pet": {
     "id": "spirit_bear",
@@ -2821,12 +2821,12 @@
    ],
    "shield": true,
    "skills": [
-    "mend",
-    "renew",
-    "consecrate",
-    "curse",
-    "judgement",
-    "rally"
+    "shadow_lance",
+    "dawn_prayer",
+    "mark_the_killer",
+    "vigil",
+    "dread_hymn",
+    "twinlight"
    ],
    "pet": {
     "id": "spirit_bear",

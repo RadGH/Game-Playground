@@ -7756,7 +7756,13 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       const mig = migrateTalents(player, skills.slots.map(sl => sl.id).filter(Boolean));
       if (mig.dropped) {
         const line = `Skill talents were reworked: ${mig.dropped} ${mig.dropped === 1 ? 'pick was' : 'picks were'} returned. Choose again on the Skills tab — it is free.`;
-        setTimeout(() => { hud.log(line, 'level'); hud.notice?.(line, 'good'); }, 1500);
+        /**
+         * R28 (UI) — said ONCE and where it will be seen: `notice` already writes the log line (it
+         * used to be logged twice), stays up 9s instead of 3.4s because it lands while the world
+         * is still streaming in, and the Skills tab keeps a banner until the player dismisses it.
+         */
+        hud.talentsReturned = mig.dropped;
+        setTimeout(() => { hud.notice?.(line, 'good', 9000); }, 1500);
       }
     }
     // written on every save since round 3 and never read back, so the save list's clock restarted

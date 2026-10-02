@@ -1335,3 +1335,127 @@ Eight older specs that pressed B and read the panel now press Tab after it.
 * `tests/round26-build.spec.js` (Playwright, 2) — B → ring → Storage → Storage Box → click the
   ground: built, six logs gone, right-click/Tab/Ring/1/Backspace/B all do what the table says; and a
   furnace with no box in the real page: one row "0 of 2 made", the checklist, two ingots in the pack.
+
+## Round 28 — building
+
+> *"Improve building system and automation. Use sub agents and brainstorm ideas, update interfaces."*
+
+The building half (placement, the panel, walls and gates, undo, layouts). Automation — works,
+stores, the grid, haul paths, station screens — was a separate owner this round. The audit,
+the 22 ideas, the roast and the picks are in `research/round28-building.md`. A reviewer then
+checked the first build of the picks, and every one of its findings is answered in §28.4.
+
+### 28.1 What the audit found
+
+The usual Farhold bug: features that were finished but had no way in, and rules in the data that
+nothing read.
+
+* `build.setFree()` (free placement) existed, and **no key called it**.
+* `plan.blueprint()` / `plan.stamp()` / `plan.billFor(bp)` had **no caller anywhere**.
+* The Wall tool's hint promised *"a gate goes where you double back over a corner"*. `finishRun()`
+  was always called with no gates.
+* **`snap: "wall" | "floor" | "grid"` is on every catalogue row, and nothing read it.** Fourteen
+  wall-mounted pieces snapped to the 2 m grid like crates.
+* **`gate: true` was read by nothing, and you could not walk through your own gate.** Every piece
+  was one circle as wide as its long side. A 4 m gate became a 1.4 m circle in the middle of the
+  opening, which left 0.6 m gaps either side, and a body is 0.8 m wide.
+* **The wheel did nothing on every other notch.** It turned by π/8 and the snap rounded to π/4. The
+  first notch anticlockwise rounded to −0, so it did nothing either.
+* **Ctrl+Z popped the build ledger.** A 20-section wall took 20 presses. Level, Raise and Lower could
+  not be undone. A take-down could not be put back. After a reload, Ctrl+Z deleted the newest piece
+  of an old base and refunded all of it.
+
+### 28.2 What was built
+
+| | What | Where |
+|---|---|---|
+| Undo is a step | One stack covers placing (one piece, a Shift line, a whole wall run, a stamped layout), a road, a terrain brush, a take-down, a move and an upgrade. Undo refunds everything and removes the ground levelling the piece did (it stores the terraform edit ids). After a load there is nothing to undo. Depth is `rules.undoDepth` (30). | js/build.js `pushAction` / `undoStep` / `undo` |
+| Small slopes level themselves | If a piece's worst corner is within `rules.autoLevel` (1.5 m) of the ground under its middle, the piece levels its own footprint as it goes down, using a slab only 0.2 m wider than the piece so the ground under its neighbours is left alone. The ghost and footprint turn amber and the card says *"it levels the ground under it first"*. Past 1.5 m you still get *"Level it first"*, so players still learn the Level tool. If the claim has no reshaping budget left, the placement is refused instead of leaving the piece floating. | js/buildplan.js `check` / `groundWork` |
+| Shift+click a line | Hold Shift and a line of the piece you placed last is shown as ghosts from that piece to the cursor, spaced by its footprint. The card shows the count and the bill. A click lays the whole line as one undo step, and nothing is spent unless the whole bill can be paid. At most `rules.lineMax` (40) pieces. | js/buildplan.js `lineSpots` / `lineFrom` / `placeLine`, js/build.js `placeLineHere` |
+| Free placement, turning | **F** turns free placement on and off: no grid, no snapping, any angle. It is a toggle, not a held Alt, because letting go of Alt gives the browser's menu bar focus. **Q / Shift+Q** turn the piece one catalogue step. Each scroll-wheel notch is one step. A touchpad's flick is added up in units of 60 instead of every small event being a whole turn. A piece that is not a run piece keeps the angle you gave it next to a neighbour (snapping used to copy the neighbour's angle). | js/build-keys.js, js/build.js `rotate`, js/main.js wheel |
+| Walls, gates, runs | Walls collide as **segments** along the shape that is drawn. A gate is **two posts plus a leaf that only stops enemies** (see §28.3). Clicking the same corner twice puts in a gate of the right width, and the run is re-spaced around it. Corners no longer lose a piece. Fences and hedges are runs too (`run: true`, `gateId`). The card shows metres, sections, gates and the bill *before* you press Enter. | js/buildplan.js `runSpots` / `run` / `runBill` / `solidsFor`, js/collide.js bands, js/main.js `rebuildBuildSolids` |
+| Wall-mounted pieces | A `snap: "wall"` piece hangs on the nearest wall, gate or building side within `rules.mountReach` (2.4 m) and faces outward. With no wall in reach it stands on open ground (bookshelves and drawers are freestanding too). | js/buildplan.js `mountOn` |
+| Move + eyedropper | **Move** picks a piece up for free and keeps its **id**. Esc puts it back where it was. Pieces that hold goods or belong to the base's systems (crates, machines, the grid, posts, homes) refuse, with the reason. **C** (or the Pick tool) builds another of whatever is under the cursor, at the same angle. | js/buildplan.js `movable` / `relocate`, js/build.js `moveAt` / `pickAt` |
+| Upgrade | Walls only: fence → palisade → stone wall → reinforced wall (`upgradesTo` in the data). You pay the difference. The piece keeps its id, hp and gate flag, and Ctrl+Z gives the old piece back along with what you paid. | js/buildplan.js `upgradeOf` / `upgrade` / `downgrade` |
+| Layouts | **Copy** turns everything inside the brush into a named layout. **Stamp** shows the whole layout as ghosts, with how many pieces fit and one bill, and Q turns it. The whole bill is checked before any piece goes down. Layouts are saved in the `build` save blob and also in the browser (`farhold.blueprints.v1`), and the long panel lists them with Stamp and Forget buttons. | js/buildplan.js `captureAround` / `stampCheck`, js/build.js `copyAt` / `stampHere` |
+| The interface | Each tool has a **key strip** on the card and the panel. A **live line** shows green, amber (levels the ground) or red with the reason, the run's bill, what a click on the highlighted piece will do (*"take down the Fence — 1 plank back"*), and a layout's fit. A **footprint outline** on the ground uses the same colours. Point tools put a **highlight box** on the piece they will act on. The card also says what Ctrl+Z will undo next. Move, Upgrade, Copy and Stamp are on the ring's Tools page too. | js/build-keys.js `keysForTool` / `liveLine`, js/build-ui.js, js/build-radial.js |
+
+### 28.3 Fixed while testing
+
+* **Clicks used the previous frame's aim.** `build.aim` runs late in the frame, so a click used the
+  aim from the frame before. If you moved and clicked within one frame (a quick flick, or any slow
+  frame), the piece went where the cursor had been. Clicking the same corner twice for a gate
+  added a new corner 4.5 m away. Now the pointer is re-read just before the clicks are handled
+  (js/main.js, `buildClicks`). The Playwright spec found this.
+* **The run's bill priced the leg out to the cursor**, which Enter does not lay. The card said five
+  sections and four went down. The bill now covers only the corners already clicked, and the card
+  adds *"click to add N m more, Enter to lay"*.
+* **A gate let enemies through.** The data says *"Opens for you, and not for them"*, but the
+  opening was a clear gap. The leaf between the posts is now a segment with the band
+  `[-Infinity, -Infinity]`. js/collide.js `inBand` applies a band with no lower limit to any body
+  that does not report its feet height (every enemy). It never applies to the player, whose feet are
+  always above −∞. Companions do not collide with built pieces at all, so they follow you through.
+  **Watch out:** nothing in the game damages a structure yet, so a fully walled base cannot be
+  reached by enemies that fight up close. Ranged enemies and turrets still matter. A wall that takes
+  damage, and a Repair tool, are parked together (§28.5).
+* **Dead flags.** `blocks` (barricade) and `perch` (watchtower, guard tower) were read by nothing.
+  Every barricade is now a segment no enemy crosses, which is what `blocks` described, so the flag
+  was removed. The watchtower's description promised *"somewhere a hired archer can actually stand"*,
+  so it now has a real `post` slot (1 guard, `reachBonus` 4), which is what js/civics.js and
+  js/defence.js post guards to. `perch` was removed from both towers. A test fails if either flag
+  comes back.
+* With the Wall tool up, the long panel opened on Decoration (fences) while the tool held a
+  palisade. It now opens on the group of the piece the tool is holding.
+
+### 28.4 The reviewer's findings, one by one
+
+| Finding | Answer |
+|---|---|
+| Upgrade "lamp → crystal lamp" joins the power grid | Upgrade is walls only. `upgradeOf` refuses anything with a store, pool, station, power, turret, post or home, and a test gives a turret `upgradesTo` to check the code refuses it. |
+| −π/8 notch did nothing; snapping copied the neighbour's angle; a touchpad step per event | `rotate` takes exactly one `rotateStep` in the direction asked. Snapping copies the neighbour's angle only for run pieces, because that is what makes them a wall. The wheel adds its travel up and takes a step per 60. |
+| Every wall corner lost a piece | `runPiecesClash` lets two run pieces' end pieces overlap at a corner, and still refuses one standing on top of or alongside another. Tested on an L, a square, a short leg and an acute corner for every run piece. |
+| `gateAt` made a gap | `runSpots` re-spaces the leg around the gate's real width, and the old `gateAt` form goes through the same code. Tested. |
+| Fence/hedge runs could not be built | The Wall tool takes any `run: true` piece, and every run piece names its `gateId` (`fence_gate` for fences and hedges). |
+| `terraform.undo()` has no caller | Left without a caller on purpose. It pops the newest edit whatever it was, and that is often a slab some piece levelled. Build undo removes the exact edit ids each step stored (`terraform.remove(id)`). `undo()` is still used by tests/building.test.js. |
+| `blocks`, `perch` read by nothing | §28.3. |
+| Undo crossed a reload | `load` clears the stack. |
+| `place()` ignored `levelUnderSlab`'s result | `groundWork` returns the refusal and `place`/`relocate` pass it on. Tested with the reshaping budget set to 1 m². |
+| A crate's goods were destroyed on take-down/undo | js/main.js `onRemove` moves the goods into whatever pool still covers that spot, and the rest into your bag, then logs where they went. Move refuses anything that holds goods. |
+| P1: edit ids not plumbed; undo of a store | Every step stores its terraform ids. Undoing a crate goes through `onRemove`, so the goods are moved first. |
+| P2: slab under neighbours; budget | The self-levelling slab is the piece plus 0.2 m, not 0.6 m. When the budget runs out, the placement is refused. |
+| P3: Shift is also Run | Left as it is: Shift with no WASD moves nothing, and running while you lay a line is harmless. |
+| P4: Alt | F is a toggle. A test fails if any key strip mentions Alt. |
+| P5: hop height; enemies stepping through; `coverAt`; wall on the player | Segments get a band with no lower limit, so the player can still hop a fence and nothing without feet passes through. js/actors.js passes `from`, so a slow frame cannot step through either (tested). `coverAt` still ignores segments: it is dungeon-only cover for round solids, and a wall has no middle to stand behind. A wall dropped on the player pushes them to the nearer side. A segment always pushes out along its normal, so it cannot trap anyone, and refusing a wall section because you stand on the line would break wall runs. |
+| P6: wall pieces that are furniture | The wall is preferred, not required (tested). |
+| P7: Move gives a new id; right/middle click | `relocate` keeps the id, and Move refuses anything a system keeps a position for. The eyedropper is C, not a mouse button. |
+| P8: hp, gate, overlap, solids | `upgrade` carries `hp`/`maxHp`/`gate`, re-checks with the piece's own id ignored, and goes through `onPlace`, which rebuilds the solids. |
+| P9: partial stamp spends money | `stampHere` checks the whole bill first (`stampCheck`, the plan's own `billFor(bp)`), then places only the pieces that fit. |
+| Cut Upgrade | Kept, but only for walls, which was the reviewer's other option. |
+
+### 28.5 Parked
+
+* **Structures take damage** (and so a Repair tool). Nothing hits a building yet. Now that gates
+  stop enemies, this is the next thing defence needs. See the warning in §28.3.
+* **Redo**: killed in the roast. A redo would have to re-run every placement rule against a world
+  that has changed since.
+* **Drag to place a line**: left-drag turns the camera in build mode. Shift+click does the same
+  job.
+* **A gate on a leg longer than the gate but shorter than gate + one section** leaves the leftover
+  (under one section's width) open at the end of the leg. That gap is too narrow for the player.
+  Filling it needs a short wall piece, which the catalogue does not have.
+
+### 28.6 Tests
+
+* `tests/round28-building.test.js` (node, 16 tests): corners for every run piece and shape, the
+  corner rule, gates at every corner for all four walls, `gateAt`, posts + leaf, the enemy-only
+  leaf, floorless bands, a floor refused when the budget is gone, self-levelling vs *"Level it
+  first"*, Move keeps the id and refuses systems, Upgrade for walls only, lines, wall mounts, key
+  strips + the live line (and the cursor leg not being billed), real material ids in bills, no dead
+  flags.
+* `tests/round28-building.spec.js` (Playwright, 2 tests, keys and clicks only): B → ring → Storage Box,
+  Q / Shift+Q turn it by one step, a click places it at that angle, Shift+click lays a priced line,
+  Ctrl+Z takes the line back in one press and the first crate in a second (with the logs refunded),
+  F turns free placement on and off. Then the Tools ring shows Move/Upgrade/Copy/Stamp, Wall →
+  three corners with one clicked twice → the card shows *"N m · N sections, 1 gate"* and *"click to
+  add N m more"* → Enter lays exactly what was billed, gate included → one Ctrl+Z removes the whole
+  run. Screenshots go in `test-results/round28-building/`.

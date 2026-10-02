@@ -351,6 +351,93 @@ export function createCivics({
     };
   }
 
+  // ------------------------------------------------------------------ sending a cart (R28)
+
+  /**
+   * R28 — A CART ROUTE HAS A WAY IN.
+   *
+   * js/trade.js could plan a run, open it, move it down the road, roll the ambush and pay out on
+   * arrival — and js/main.js already collected the gold — but nothing anywhere called `plan` or
+   * `open`, so the Trade tab's "On the road" pane was empty in every game ever played. These three
+   * are the join: which carriers you can send, what a draft run would pay, and the send itself.
+   * The goods come out of the stores beside the Trade Post first and your own hold second.
+   */
+
+  /**
+   * Which carriers you can send, each with the sentence that says why not. The data's `from`
+   * field decides it: a porter is hired at any post; a pack mule needs a Drover in residence; a
+   * drone needs a Hauler Post standing; a cart or a wagon is built at the post itself.
+   */
+  function cartCarriers({ day = 1, gold = 0 } = {}) {
+    const here = new Set(vendors.board(facts({ day, gold })).filter(v => v.state === 'here').map(v => v.id));
+    const keys = new Set(entries.map(e => e.key));
+    return (data?.carriers || []).map(c => {
+      let why = null;
+      if (c.key === 'pack_mule' && !here.has('drover')) why = 'A pack mule is bought from a Drover, and none lives here yet.';
+      if (c.key === 'hauler_drone' && !keys.has('hauler_drone')) why = 'A drone needs a Hauler Post standing.';
+      return {
+        key: c.key, name: c.name, hold: c.hold, speed: c.speed, upkeep: c.upkeep || 0,
+        guardsMax: c.guardsMax || 0, blurb: c.blurb || '', ok: !why, why,
+      };
+    });
+  }
+
+  /** The trade goods a post can send, and how many: the stores beside it plus your own hold. */
+  function cartGoods(postId) {
+    const post = tradePosts.find(p => p.id === postId) || null;
+    const pool = post && stores?.poolAt ? stores.poolAt(post.x, post.z) : null;
+    return (goods?.goods || []).map(g => {
+      const atPost = pool ? Math.floor(stores.count(pool, g.id) || 0) : 0;
+      const onBack = Math.floor(hold.count(g.id) || 0);
+      return { id: g.id, name: g.name, weight: g.weight, base: g.base, atPost, onBack, n: atPost + onBack };
+    }).filter(g => g.n > 0);
+  }
+
+  const asPlace = p => (p ? { ...p, x: p.x ?? p.wx ?? 0, z: p.z ?? p.wz ?? 0 } : null);
+
+  /**
+   * A draft run, priced. `draft = { postId, to, carrier, guards, manifest }` where `to` is a place
+   * (`{ id, name, x, z, size, biome, race, market }`). Nothing leaves.
+   */
+  function cartPlan(draft = {}, { day = 1, roadShare = 0, danger = 0.35 } = {}) {
+    const post = tradePosts.find(p => p.id === draft.postId) || null;
+    if (!post) return { ok: false, why: 'A cart leaves from a Trade Post. Build one first.' };
+    const from = { id: post.id, name: post.name || 'your Trade Post', x: post.x, z: post.z, market: false };
+    const c = cartCarriers({ day }).find(x => x.key === draft.carrier);
+    if (c && !c.ok) return { ok: false, why: c.why };
+    const have = new Map(cartGoods(post.id).map(g => [g.id, g.n]));
+    for (const [id, n] of Object.entries(draft.manifest || {})) {
+      if (n > (have.get(id) || 0)) return { ok: false, why: `There ${have.get(id) ? `are only ${have.get(id)}` : 'is no'} ${(trade.good(id)?.name || id).toLowerCase()} at ${from.name} or on your back.` };
+    }
+    return trade.plan({
+      from, to: asPlace(draft.to), carrier: draft.carrier || 'porter', guards: draft.guards || 0,
+      manifest: draft.manifest || {}, day, roadShare, danger,
+    });
+  }
+
+  /** Send it: the goods leave, the upkeep is paid, and the gold comes back on arrival (`tick`). */
+  function sendCart(draft = {}, { day = 1, gold = 0, at = 0, rng = Math.random, roadShare = 0, danger = 0.35 } = {}) {
+    const p = cartPlan(draft, { day, roadShare, danger });
+    if (!p.ok) return p;
+    if (gold < p.upkeep) return { ok: false, why: `The trip costs ${p.upkeep} gold in upkeep and you have ${Math.floor(gold)}.` };
+    const post = tradePosts.find(x => x.id === draft.postId);
+    const pool = stores?.poolAt ? stores.poolAt(post.x, post.z) : null;
+    const lifted = [];
+    const take = (id, n) => {
+      const a = pool ? stores.take(pool, id, n) : 0;
+      const b = a < n ? hold.take(id, n - a) : 0;
+      lifted.push({ id, a, b });
+      return a + b;
+    };
+    const out = trade.open(p, { take, gold, at, rng });
+    if (!out.ok) {
+      // js/trade.js refuses a half-filled cart; put back whatever it already lifted
+      for (const l of lifted) { if (l.a && pool) stores.put(pool, l.id, l.a); if (l.b) hold.put(l.id, l.b); }
+      return out;
+    }
+    return out;
+  }
+
   // ------------------------------------------------------------------ the panels
 
   function report({ day = 1, gold = 0 } = {}) {
@@ -373,6 +460,8 @@ export function createCivics({
   return {
     housing, vendors, hold, trade, muster,
     rebuild, tick, away, report, facts, stationAt, madeOf,
+    // R28 — the cart route's way in (the Trade tab's "Send a cart")
+    cartCarriers, cartGoods, cartPlan, sendCart,
     holdCapacity: opts => holdCapacity({ data, carriers: data?.carriers || [], ...opts }),
     get spent() { return spent; },
     addSpend(n) { spent += Math.max(0, n); return spent; },

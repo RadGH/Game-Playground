@@ -597,3 +597,77 @@ test('R28 dead code — the functions nothing called are gone, not just unused',
   assert.match(MAIN, /holding\.setProduction/);
   assert.match(MAIN, /buildUI\.station\.production = production/);
 });
+
+// ============================================================================ 4. the cart route's way in
+
+test('R28 trade — a cart can be planned, sent from a Trade Post, and pays on arrival', () => {
+  const GOODS = read('../data/tradegoods.json');
+  const STRUCT = read('../data/structures.json');
+  const rows = Array.isArray(STRUCT) ? STRUCT : (STRUCT.structures || Object.values(STRUCT));
+  const defOf = key => rows.find(r => r && (r.key === key || r.id === key)) || null;
+  const resources = JSON.parse(JSON.stringify(RESOURCES));
+  const refining = JSON.parse(JSON.stringify(REFINING));
+  const stores = createStoreNetwork({ power: POWER, materials: resources });
+  const civics = createCivics({ data: COLONY, goods: GOODS, resources, refining, stores, seed: 5 });
+  const post = { id: 'tp1', key: 'trade_post', name: 'Trade Post', x: 0, z: 0 };
+  stores.add({ id: post.id, type: 'trade_post', x: 0, z: 0 });
+  civics.rebuild([post], defOf);
+
+  const town = { id: 't9', name: 'Ashby', x: 900, z: 0, size: 4, biome: 'desert', race: 'human', market: true };
+  // nothing to send yet: the refusal names what is missing
+  assert.equal(civics.cartGoods('tp1').length, 0);
+  assert.match(civics.cartPlan({ postId: 'tp1', to: town, carrier: 'porter', manifest: { salt_block: 2 } }).why, /no block of salt/i);
+  // no post at all
+  assert.match(civics.cartPlan({ postId: 'nope', to: town, carrier: 'porter', manifest: { salt_block: 1 } }).why, /Trade Post/);
+
+  const pool = stores.poolAt(0, 0);
+  assert.equal(stores.put(pool, 'salt_block', 3), 3);
+  civics.hold.put('salt_block', 1);
+  assert.equal(civics.cartGoods('tp1')[0].n, 4, 'the post and your own hold both count');
+
+  // the mule needs a Drover, the drone a Hauler Post — each says so
+  const carriers = civics.cartCarriers();
+  assert.equal(carriers.find(c => c.key === 'porter').ok, true);
+  assert.match(carriers.find(c => c.key === 'pack_mule').why, /Drover/);
+  assert.match(carriers.find(c => c.key === 'hauler_drone').why, /Hauler Post/);
+
+  // too heavy for a porter (40 kg)
+  stores.put(pool, 'salt_block', 6);
+  assert.match(civics.cartPlan({ postId: 'tp1', to: town, carrier: 'porter', manifest: { salt_block: 6 } }).why, /carries 40/);
+
+  const draft = { postId: 'tp1', to: town, carrier: 'hand_cart', guards: 1, manifest: { salt_block: 4 } };
+  const plan = civics.cartPlan(draft);
+  assert.ok(plan.ok, plan.why);
+  assert.ok(plan.revenue > 0 && plan.seconds > 0);
+  // not enough gold for the upkeep
+  assert.match(civics.sendCart(draft, { gold: 1 }).why, /upkeep/);
+  assert.equal(stores.count(pool, 'salt_block'), 9, 'a refused send must not take anything');
+
+  const out = civics.sendCart(draft, { gold: 100, rng: () => 0.99 });
+  assert.ok(out.ok, out.why);
+  assert.equal(stores.count(pool, 'salt_block'), 5, 'the goods left the post');
+  assert.equal(civics.trade.list().length, 1);
+  // the road, then the gold — the same tick the frame loop runs
+  const moved = civics.tick(plan.seconds + 1, { rng: () => 0.99 });
+  assert.equal(moved.arrived.length, 1);
+  assert.equal(civics.trade.collect(moved.arrived[0].id).gold, plan.revenue);
+});
+
+test('R28 trade — main.js wires the Trade tab to sendCart', () => {
+  assert.match(MAIN, /civics\.sendCart\(/);
+  const ui = readFileSync(join(here, '../js/civics-ui.js'), 'utf8');
+  assert.match(ui, /Send a cart/);
+});
+
+test('R28 production — a cold furnace with no ore says both: nobody works it, and nothing to put in it', () => {
+  const b = base({ labour: COLONY.labour });
+  b.works.place({ id: 'f1', type: 'furnace', x: 2, z: 0 });
+  b.give('coal', 20);
+  assert.ok(b.works.queue('f1', 'smelt_iron', 0, { keep: 20 }).ok);
+  b.works.tick(0.1);
+  assert.equal(b.works.get('f1').state, 'unworked');
+  const prod = createProduction({ works: b.works, stores: b.stores, materials: RESOURCES.materials, refining: REFINING, nodeKinds: RESOURCES.nodeKinds });
+  const d = prod.diagnose('f1');
+  assert.match(d.chain.join(' '), /no iron ore in reach/i);
+  assert.match(d.chain.join(' '), /seam|drill/i, 'and where ore comes from');
+});

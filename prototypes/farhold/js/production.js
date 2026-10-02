@@ -302,12 +302,25 @@ export function createProduction({
         }
         return { ...base, chain, fix: chain[chain.length - 1] };
       }
-      case 'unworked':
+      case 'unworked': {
+        /**
+         * js/refine.js checks labour BEFORE inputs (so a machine never eats ore nobody was there to
+         * smelt), which means a cold furnace with no ore in reach reads only "unworked". Whoever
+         * comes to work it would find nothing to put in it, so say that too, traced the same way.
+         */
+        const recipe = works.recipes?.[m.queue?.[0]?.recipe];
+        const pool = poolOf(m);
+        const short = Object.entries(works.inputsOf?.(recipe) || recipe?.inputs || {})
+          .find(([k, n]) => (pool ? (stores.count?.(pool, k) || 0) : 0) < n)?.[0];
+        const also = short && depth > 0
+          ? [`It has no ${nameOf(short).toLowerCase()} in reach either.`, ...sourceOf(short, m, depth - 1, seen)]
+          : [];
         return {
           ...base,
-          chain: ['A tended machine runs only while somebody works it.'],
+          chain: ['A tended machine runs only while somebody works it.', ...also],
           fix: 'Hold E at it, or give somebody a bed and a job (K, People). Set it First so they come here before anything else.',
         };
+      }
       case 'unpowered':
         return { ...base, chain: ['No grid reaches it.'], fix: 'Build a generator, or a power pole that reaches from one.' };
       case 'shed': {

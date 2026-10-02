@@ -78,3 +78,13 @@ Each row is a build feature followed from the key press through `js/main.js` int
 | P8 Upgrade in place | 14 | M | Walls get better without a gap |
 | P9 Blueprints | 15 (+A2) | M | Finished module with no door |
 | P10 Interface | 17, 18, 19 | M | Every new key has to be on screen or it does not exist |
+
+## 5. Status (2026-10-02)
+
+All ten picks are built. A reviewer checked the first build (`~/claude/agent/r28/building-roast-findings.md`),
+and every finding is answered row by row in **BUILD-MODE.md §28.4**. Testing found three more
+bugs and they are fixed: clicks used the previous frame's aim, the run's bill priced the leg out to
+the cursor, and a gate was an open gap to enemies. The dead `blocks`/`perch` flags were removed,
+and the watchtower got the guard post its description promised. Parked: structure damage + Repair
+(more urgent now that a gate stops enemies), Redo, drag-to-line, and the short leftover gap after a
+gate on an awkward leg length.

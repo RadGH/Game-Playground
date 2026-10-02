@@ -110,11 +110,11 @@ test('a gate fits on a leg too short for its width, and the old gateAt form make
 // ------------------------------------------------------------------ what is solid
 
 test('a built gate is two posts with an opening a body fits through; a wall is a segment', () => {
-  const gate = solidsFor({ x: 0, z: 0, rot: 0 }, def('gate'));
+  const gate = solidsFor({ x: 0, z: 0, rot: 0 }, def('gate')).filter(s => s.post);
   assert.equal(gate.length, 2);
   const gap = Math.hypot(gate[1].x - gate[0].x, gate[1].z - gate[0].z) - gate[0].r - gate[1].r;
   assert.ok(gap > 1.6, `the opening is ${gap.toFixed(2)} m`);
-  const fgate = solidsFor({ x: 0, z: 0, rot: 0 }, def('fence_gate'));
+  const fgate = solidsFor({ x: 0, z: 0, rot: 0 }, def('fence_gate')).filter(s => s.post);
   const fgap = Math.hypot(fgate[1].x - fgate[0].x, fgate[1].z - fgate[0].z) - fgate[0].r - fgate[1].r;
   assert.ok(fgap > 0.9, `a fence gate's opening is ${fgap.toFixed(2)} m`);
   const wall = solidsFor({ x: 0, z: 0, rot: Math.PI / 2 }, def('palisade'));
@@ -259,6 +259,9 @@ test('every tool has a key strip, and the live line says what a run will cost be
   for (const s of Object.values(BUILD_KEYS)) assert.doesNotMatch(s, /Alt/);
   const fake = { tool: 'wall', runInfo: { metres: 12.4, count: 6, gates: 1, text: '30 log', ok: true } };
   assert.equal(liveLine(fake).text, '12 m · 6 sections, 1 gate · 30 log');
+  // the leg out to the cursor is not priced (Enter does not lay it), only pointed out
+  const more = { tool: 'wall', runInfo: { ...fake.runInfo, next: 7.6 } };
+  assert.equal(liveLine(more).text, '12 m · 6 sections, 1 gate · 30 log · click to add 8 m more, Enter to lay');
   const red = { tool: 'build', selected: 'x', lastCheck: { x: 0, ok: false, why: 'You cannot build on water.' } };
   assert.deepEqual(liveLine(red), { text: 'You cannot build on water.', tone: 'bad' });
   const amber = { tool: 'build', selected: 'x', lastCheck: { x: 0, ok: true, levels: true } };
@@ -271,4 +274,39 @@ test('the costs a run and an upgrade quote are in the materials the pools hold',
   for (const k of Object.keys(bill.cost)) assert.ok(!(k in { timber: 1, iron: 1, block: 1 }), `${k} is a catalogue short name`);
   assert.deepEqual(Object.keys(upgradeCost(def('fence').cost, def('palisade').cost)).sort(),
     Object.keys(realCost(def('palisade').cost)).filter(k => realCost(def('palisade').cost)[k] > (realCost(def('fence').cost)[k] || 0)).sort());
+});
+
+// ------------------------------------------------------------------ the gate opens for you, not for them
+
+test('a gate lets the player through and stops anything without feet (every enemy)', () => {
+  for (const id of ['gate', 'fence_gate']) {
+    const sols = solidsFor({ x: 0, z: 0, rot: 0 }, def(id));
+    const leaf = sols.find(s => s.leaf);
+    assert.ok(leaf, `${id} has no leaf`);
+    const f = new ObstacleField().setGround(() => 0);
+    // filed exactly as js/main.js files it: its own band when it has one
+    for (const sol of sols) {
+      if (sol.kind === 'seg') f.addSegment(sol.ax, sol.az, sol.bx, sol.bz, sol.half, sol.h, { band: sol.band || [-Infinity, sol.h - 0.35] });
+      else f.add(sol.x, sol.z, sol.r, sol.h);
+    }
+    const out = [0, 0];
+    // the player (feet on the ground) walks straight through the middle of the opening
+    f.resolve(0, 0.05, 0.4, out, 0, [0, -1]);
+    assert.ok(Math.abs(out[0]) < 1e-6 && Math.abs(out[1] - 0.05) < 1e-6, `${id}: the player was pushed (${out})`);
+    // an enemy (no feet) is held on its side, and cannot cross in one slow frame either
+    f.resolve(0, 0.6, 0.4, out, null, [0, -1.2]);
+    assert.ok(out[1] < 0, `${id}: an enemy stepped through the gate`);
+  }
+});
+
+test('no catalogue flag is left for nobody to read: blocks / perch are gone, the watchtower is a post', () => {
+  for (const s of catalogue.structures) {
+    assert.ok(!('blocks' in s), `${s.id}.blocks is read by nothing`);
+    assert.ok(!('perch' in s), `${s.id}.perch is read by nothing`);
+  }
+  // the barricade's job ("sends them the long way round") is done by being a segment no enemy crosses
+  const bar = solidsFor({ x: 0, z: 0, rot: 0 }, def('barricade'));
+  assert.equal(bar[0].kind, 'seg');
+  // "somewhere a hired archer can actually stand" — a post slot is what js/civics.js posts a guard to
+  assert.ok(def('watchtower').post?.slots >= 1);
 });

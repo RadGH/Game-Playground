@@ -48,8 +48,9 @@ test('beds make a holding, and the colony is told what you built', async ({ page
     f.build.setTool('build');
     f.build.select('claim_stone'); f.build.aim(spot.x + 6, spot.z + 6); f.build.placeHere();
     for (let i = 0; i < 3; i++) { f.build.select('bed'); f.build.aim(spot.x + i * 3, spot.z); f.build.placeHere(); }
-    // the colony is only told what you built on the 15-frame tick, so wait for it
-    await new Promise(r => setTimeout(r, 1200));
+    // the colony is only told what you built on the 15-frame tick, so wait for it — polled, not a
+    // flat sleep: a headless page can run at 7 frames a second, and 1.2 s is then under one tick
+    for (let i = 0; i < 100 && (f.colony.base?.beds || 0) < 3; i++) await new Promise(r => setTimeout(r, 100));
     const withBeds = document.querySelector('#build-ui .build-holding')?.textContent || '';
     const base = { ...f.colony.base };
 

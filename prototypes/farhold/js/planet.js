@@ -1458,6 +1458,7 @@ export function makeTerrain(world, planet = null, opts = {}) {
     return { count, dropped };
   }
   const crossroads = fileCrossroads(roadPaths);
+
   // A road is graded: the surface is the natural ground smoothed along the line, so the road itself
   // is flat across its width and gentle along its length instead of following every bump.
   const bridgeClearance = opts.bridgeClearance ?? 2.4;

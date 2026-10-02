@@ -196,25 +196,19 @@ export function roadPlanStats(terrain, { twinCells = 0.6, twinDeg = 30, endCells
       }
     }
   }
-  // junction angles: the branch's heading over its first/last ~20 m against the trunk's at the join
+  // junction angles: the branch's heading over its first ~20 m against each ARM of the trunk that
+  // leaves the junction (R28: the old measure compared against the trunk segment's line with an
+  // absolute cosine, so a road carrying straight on from another road's END read as 0 degrees —
+  // two thirds of the "slivers" it reported were straight continuations)
   const angles = [];
   for (const p of paths) {
     for (const j of p.joins || []) {
       if (!j.trunk || !Number.isFinite(j.i)) continue;
-      const pts = p.points;
-      const atStart = j.at === 'start';
-      const a = atStart ? pts[0] : pts[pts.length - 1];
-      let b = null;
-      for (let k = 1; k < pts.length; k++) {
-        const q = atStart ? pts[k] : pts[pts.length - 1 - k];
-        if (Math.hypot(q[0] - a[0], q[1] - a[1]) >= 20) { b = q; break; }
-      }
+      const a = j.at === 'start' ? p.points[0] : p.points[p.points.length - 1];
+      const b = pointAlong(p.points, j.at === 'start', 20);
       if (!b) continue;
-      const tp = j.trunk.points, ti = Math.min(tp.length - 2, Math.max(0, j.i));
-      const tx = tp[ti + 1][0] - tp[ti][0], tz = tp[ti + 1][1] - tp[ti][1];
-      const bx = b[0] - a[0], bz = b[1] - a[1];
-      const c = Math.abs(tx * bx + tz * bz) / (Math.hypot(tx, tz) * Math.hypot(bx, bz) || 1);
-      angles.push(Math.acos(Math.min(1, c)) * 180 / Math.PI);
+      const ang = junctionAngle(j.trunk.points, a, b);
+      if (ang != null) angles.push(ang);
     }
   }
   const sorted = angles.slice().sort((x, y) => x - y);
@@ -223,4 +217,44 @@ export function roadPlanStats(terrain, { twinCells = 0.6, twinDeg = 30, endCells
     junctions: angles.length, sharp: angles.filter(a => a < sharpDeg).length,
     angleMedian: sorted.length ? sorted[sorted.length >> 1] : 0, angles,
   };
+}
+
+/** The first point of a polyline at least `reach` metres from its start (or its end, `fromStart` false). */
+export function pointAlong(pts, fromStart, reach = 20) {
+  const a = fromStart ? pts[0] : pts[pts.length - 1];
+  for (let k = 1; k < pts.length; k++) {
+    const q = fromStart ? pts[k] : pts[pts.length - 1 - k];
+    if (Math.hypot(q[0] - a[0], q[1] - a[1]) >= reach) return q;
+  }
+  return null;
+}
+
+/**
+ * R28 — the smallest angle, in degrees, between a branch leaving junction `a` toward `b` and any
+ * arm of the trunk leaving the same junction (each arm's heading taken to its point `reach` metres
+ * on). A junction at the trunk's very end has one arm, so a road carrying straight on reads 180;
+ * null if the trunk has no arm at all.
+ */
+export function junctionAngle(trunkPts, a, b, reach = 20) {
+  let best = null, at = null;
+  for (let i = 0; i + 1 < trunkPts.length; i++) {
+    const [ax, az] = trunkPts[i], [bx, bz] = trunkPts[i + 1];
+    const vx = bx - ax, vz = bz - az, l2 = vx * vx + vz * vz;
+    const t = l2 > 0 ? Math.max(0, Math.min(1, ((a[0] - ax) * vx + (a[1] - az) * vz) / l2)) : 0;
+    const d = Math.hypot(ax + vx * t - a[0], az + vz * t - a[1]);
+    if (!at || d < at.d) at = { d, i, t, x: ax + vx * t, z: az + vz * t };
+  }
+  if (!at) return null;
+  const foot = [at.x, at.z];
+  const fwd = [foot, ...trunkPts.slice(at.i + 1)], bwd = [foot, ...trunkPts.slice(0, at.i + 1).reverse()];
+  const bx = b[0] - a[0], bz = b[1] - a[1], bl = Math.hypot(bx, bz) || 1;
+  for (const arm of [fwd, bwd]) {
+    const q = pointAlong(arm, true, reach) || (arm.length > 1 && Math.hypot(arm[arm.length - 1][0] - foot[0], arm[arm.length - 1][1] - foot[1]) > 1 ? arm[arm.length - 1] : null);
+    if (!q) continue;
+    const ux = q[0] - foot[0], uz = q[1] - foot[1];
+    const c = (ux * bx + uz * bz) / ((Math.hypot(ux, uz) || 1) * bl);
+    const ang = Math.acos(Math.max(-1, Math.min(1, c))) * 180 / Math.PI;
+    if (best == null || ang < best) best = ang;
+  }
+  return best;
 }

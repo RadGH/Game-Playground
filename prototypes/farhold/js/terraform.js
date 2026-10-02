@@ -373,7 +373,14 @@ export function createTerraform({
       return terrain;
     },
 
-    /** §4.9 — take the last brush back. Cheap and hugely forgiving, which is the whole point. */
+    /**
+     * §4.9 — take the last brush back. Cheap and hugely forgiving, which is the whole point.
+     *
+     * R28 — the GAME does not call this, on purpose: it pops whichever edit is newest, and that is
+     * as often the slab some piece levelled under itself as the brush you meant. js/build.js `undo`
+     * keeps the ids each step painted and calls `remove(id)` for exactly those. Kept for the node
+     * tests and for any caller that really does own every edit.
+     */
     undo() {
       const e = edits.pop() || null;
       if (e) reindex();

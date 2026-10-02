@@ -1082,7 +1082,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       for (const sol of solidsFor(e, def)) {
         if (sol.kind === 'seg') {
           const top = terrain.heightAt((sol.ax + sol.bx) / 2, (sol.az + sol.bz) / 2) + sol.h;
-          buildSolids.addSegment(sol.ax, sol.az, sol.bx, sol.bz, sol.half, sol.h, { band: [-Infinity, top - 0.35] });
+          // a gate's leaf brings its own band (enemies only — js/buildplan.js `solidsFor`)
+          buildSolids.addSegment(sol.ax, sol.az, sol.bx, sol.bz, sol.half, sol.h, { band: sol.band || [-Infinity, top - 0.35] });
         } else buildSolids.add(sol.x, sol.z, sol.r, sol.h);
       }
     }
@@ -3550,6 +3551,35 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         hud.log(out?.ok ? `${out.citizen.name} moves in.` : (out?.why || 'They did not stay.'), out?.ok ? 'level' : '');
       },
       turnAway: id => { colony.turnAway?.(id); hud.log('You send them on their way.', ''); },
+    },
+    /**
+     * R28 — SEND A CART (the Trade tab). js/trade.js could run a cart route end to end and the
+     * gold was already collected on arrival further down this file, but nothing ever STARTED one.
+     * The towns are the world's own settlements, nearest your first Trade Post first; a town of
+     * size 3 or more, or a port, keeps a market (a hamlet buys at the flat poor price).
+     */
+    cart: {
+      places: () => {
+        const post = civics.tradePosts?.[0] || { x: control.x, z: control.z };
+        return (features.settlements || []).map(s => ({
+          id: 't' + s.id, name: s.name, x: s.wx, z: s.wz, size: s.size ?? 2, biome: s.biome, race: s.race,
+          culture: s.race, market: (s.size ?? 2) >= 3 || s.type === 'port',
+          metres: Math.round(Math.hypot(s.wx - post.x, s.wz - post.z)),
+        })).sort((a, b) => a.metres - b.metres).slice(0, 16);
+      },
+      send: draft => {
+        const out = civics.sendCart(draft, {
+          day: Math.floor(state.elapsed / (balance.sky?.dayLengthSeconds ?? 900)) + 1,
+          gold: player.gold, at: state.elapsed, rng: rpg.rng,
+        });
+        if (out.ok) {
+          player.gold -= out.spent || 0;
+          civics.addSpend(out.spent || 0);
+          const r = out.route;
+          hud.log(`${r.carrierName} sets off for ${r.toName} with ${r.kg} kg. Back in about ${Math.max(1, Math.round(r.seconds / 60))} min with ${r.revenue} gold, if the road is kind.`, 'good');
+        } else hud.log(out.why, 'warn');
+        return out;
+      },
     },
     /**
      * R17 — it mounts INSIDE the character sheet, on the tab index.html reserves for it.
@@ -9368,6 +9398,15 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      * post down should not be.
      */
     if (buildClicks > 0) {
+      /**
+       * R28 — AIM AT WHERE THE CLICK WAS, NOT WHERE THE CURSOR WAS LAST FRAME.
+       *
+       * `build.aim` runs further down the frame, so a click used the PREVIOUS frame's aim: move and
+       * click inside one frame (a quick flick, or any slow frame) and the piece went where the
+       * cursor had been. Clicking the same corner twice for a gate laid a new corner a few metres
+       * away instead. The pointer is re-read here first; the late aim below is unchanged.
+       */
+      if (build.mode) { const at = aimSpot(); build.aim(at.x, at.z); }
       for (let i = 0; i < buildClicks; i++) {
         const res = build.confirm();
         if (res && res.ok === false && res.why) hud.log(res.why, 'warn');
@@ -10678,6 +10717,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      * exactly that once already — `board` was declared twice and js/work.js became unreachable.
      */
     get goodsMarket() { return civics.trade; },
+    // R28 — the base economy (js/production.js), for the specs and the console
+    get production() { return production; },
     get muster() { return civics.muster; },
     get map() { return map; },
     /** Is the world under your feet a settled, multi-biome one? (round 10, for the specs) */

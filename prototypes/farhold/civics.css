@@ -301,3 +301,18 @@
 .prod-pill[hidden] { display: none !important; }
 .prod-pill.prod-pill--bad { border-color: #a04a3a; color: #ff9a8a; }
 @media (max-width: 720px) { .prod-pill { left: 8px; bottom: 106px; } }
+
+/* R28 — Send a cart (the Trade tab). js/trade.js could run a cart route and nothing could start one. */
+.civ-cart-pick { gap: 8px; flex-wrap: wrap; align-items: center; }
+.civ-select {
+  min-width: 0; max-width: 100%; padding: 3px 6px; border-radius: 4px; font: inherit; font-size: 12px;
+  border: 1px solid var(--civ-line); background: rgba(8, 13, 23, 0.9); color: var(--civ-ink);
+}
+.civ-select:focus-visible { outline: 2px solid var(--civ-accent); outline-offset: 1px; }
+.civ-cart-to { flex: 1 1 200px; }
+.civ-cart-good { flex-wrap: wrap; }
+.civ-cart-n { min-width: 26px; text-align: center; font-variant-numeric: tabular-nums; color: var(--civ-faint); }
+.civ-cart-n.on { color: var(--civ-gold); font-weight: 600; }
+.civ-cart-plan > div + div { margin-top: 2px; }
+.civ-cart-send { margin-top: 8px; }
+.civ-go:disabled { opacity: .45; cursor: not-allowed; }

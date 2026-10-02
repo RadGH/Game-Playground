@@ -69,7 +69,9 @@ test('a road on a side slope, close up and from 120 m: lying on the ground, with
     return T.heightAt(s.x + s.nx * o, s.z + s.nz * o) < T.heightAt(s.x - s.nx * o, s.z - s.nz * o) ? 1 : -1;
   }, spot);
   await shoot('along', 14, t * (spot.half + 3), -0.18);
-  await shoot('side', 0, t * (spot.half + 9), -0.05);
+  // from the UPHILL side, looking down across the road at its downhill edge: from below, the road
+  // is behind the crest of its own embankment and the picture shows only grass
+  await shoot('side', 0, -t * (spot.half + 10), -0.42);
   await shoot('mid', 60, t * 20, -0.1);
   await shoot('far', 120, t * 40, -0.12);
   expect(errors).toEqual([]);

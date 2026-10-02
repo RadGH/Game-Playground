@@ -2175,7 +2175,10 @@
       "h": 8,
       "snap": "grid",
       "hp": 800,
-      "perch": true,
+      "post": {
+        "slots": 1,
+        "reachBonus": 4
+      },
       "cost": {
         "timber": 18,
         "plank": 10,
@@ -2471,7 +2474,6 @@
       "snap": "grid",
       "run": true,
       "hp": 250,
-      "blocks": true,
       "cost": {
         "timber": 5
       },
@@ -3164,7 +3166,6 @@
       "h": 8,
       "snap": "grid",
       "hp": 900,
-      "perch": true,
       "post": {
         "slots": 3,
         "reachBonus": 4

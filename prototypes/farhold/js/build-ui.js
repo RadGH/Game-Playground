@@ -428,7 +428,10 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
     if (!keys.length) return;
     // a tool that narrows the list must also move the selection into it, or the panel shows a
     // heading for a category whose rows are not drawn
-    if (!keys.includes(cat)) cat = keys[0];
+    // R28 — and to the group of the piece the tool is actually holding: the Wall tool picks a
+    // palisade, and the panel opened on Decoration (fences) with the palisade nowhere in sight
+    const selCat = build?.selected ? pieces.find(p => p.id === build.selected)?.cat : null;
+    if (!keys.includes(cat)) cat = selCat && keys.includes(selCat) ? selCat : keys[0];
     for (const key of keys) {
       catRow.append(el('button', {
         class: 'build-cat' + (key === cat ? ' on' : ''),

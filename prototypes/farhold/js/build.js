@@ -829,17 +829,26 @@ export function createBuild(scene, {
      */
     get runInfo() {
       if (!isRunTool() || !runPoints.length) return null;
-      const pts = [...runPoints, [aimAt.x, aimAt.z]];
+      /**
+       * The bill is for what ENTER lays — the corners clicked so far. It used to include the dashed
+       * leg out to the cursor, which Enter does not lay, so the card quoted five sections and four
+       * went down. With one corner there is nothing to lay yet, and the leg to the cursor is the
+       * preview; after that the cursor leg is reported separately as `next` metres.
+       */
+      const last = runPoints[runPoints.length - 1];
+      const next = Math.hypot(aimAt.x - last[0], aimAt.z - last[1]);
+      const pts = runPoints.length >= 2 ? runPoints : [...runPoints, [aimAt.x, aimAt.z]];
       let metres = 0;
       for (let i = 0; i + 1 < pts.length; i++) metres += Math.hypot(pts[i + 1][0] - pts[i][0], pts[i + 1][1] - pts[i][1]);
+      const preview = runPoints.length < 2;
       const pieceId = selected || (tool === 'road' ? 'road_dirt' : 'palisade');
       const def = book.byId(pieceId);
       if (def?.road) {
         const q = book.quote(pieceId, Math.max(1, Math.round(metres / Math.max(1, def.w))));
-        return { metres, corners: runPoints.length, name: def.name, count: 0, gates: 0, text: q.text, ok: q.ok, why: q.why };
+        return { metres, corners: runPoints.length, name: def.name, count: 0, gates: 0, text: q.text, ok: q.ok, why: q.why, preview, next: preview ? 0 : next };
       }
       const b = book.runBill({ id: pieceId, points: pts, gateCorners: runGates });
-      return { metres, corners: runPoints.length, name: def?.name || pieceId, count: b.count, gates: b.gates, text: b.text, ok: b.ok, why: b.why };
+      return { metres, corners: runPoints.length, name: def?.name || pieceId, count: b.count, gates: b.gates, text: b.text, ok: b.ok, why: b.why, preview, next: preview ? 0 : next };
     },
 
     /** §4.1 — a build mode you toggle. Nothing below does anything while it is off. */

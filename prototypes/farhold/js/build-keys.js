@@ -86,7 +86,9 @@ export function runText(ri) {
   const parts = [`${Math.round(ri.metres)} m`];
   if (ri.count) parts.push(`${ri.count} section${ri.count === 1 ? '' : 's'}${ri.gates ? `, ${ri.gates} gate${ri.gates === 1 ? '' : 's'}` : ''}`);
   parts.push(ri.text || 'free');
-  return parts.join(' · ') + (ri.ok ? '' : ` — ${ri.why}`);
+  // the leg out to the cursor is not in the bill until it is clicked (Enter lays the corners only)
+  const tail = !ri.preview && ri.next >= 1.5 ? ` · click to add ${Math.round(ri.next)} m more, Enter to lay` : ri.preview ? ' · click the next corner' : '';
+  return parts.join(' · ') + (ri.ok ? '' : ` — ${ri.why}`) + tail;
 }
 
 export function installBuildKeys({ build, onLog = null, onChange = null, isTyping = null } = {}) {

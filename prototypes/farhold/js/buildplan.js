@@ -376,13 +376,20 @@ export function runPiecesClash(a, b) {
  * they were written and nothing read it. You could not walk through your own gate.
  *
  *   * flat things (≤ 0.35 m) are not solid at all — the old rule, kept;
- *   * a gate is its two POSTS and nothing between them;
+ *   * a gate is its two POSTS, and between them a LEAF that only stops bodies which do not say
+ *     where their feet are — every enemy. The catalogue says "Opens for you, and not for them",
+ *     and an open gap let a raid walk straight in. The leaf carries its own `band`
+ *     `[-Infinity, -Infinity]`: js/collide.js `inBand` applies a floorless band to a body with no
+ *     feet and never to the player, whose feet are always above minus infinity. Companions do not
+ *     collide with built pieces at all, so they follow you through;
  *   * anything long and thin (a wall section, a fence, a hedge, a barricade — a run piece or
  *     anything at least twice as long as it is deep) is a segment end to end, `d / 2` either side,
  *     which is the shape that is drawn;
  *   * everything else is the circle it always was.
  *
- * `{ kind: 'seg', ax, az, bx, bz, half, h }` or `{ kind: 'circle', x, z, r, h }`.
+ * `{ kind: 'seg', ax, az, bx, bz, half, h, band? }` or `{ kind: 'circle', x, z, r, h }`. A
+ * segment without its own `band` is filed by the caller with the hop band (see js/main.js
+ * `rebuildBuildSolids`).
  */
 export function solidsFor(entry, def = entry) {
   const w = def?.w ?? entry.w ?? 1, d = def?.d ?? entry.d ?? 1, h = def?.h ?? entry.h ?? 2;
@@ -397,6 +404,8 @@ export function solidsFor(entry, def = entry) {
       const [x, z] = along(side * (w / 2 - post));
       out.push({ kind: 'circle', x, z, r: post, h, post: true });
     }
+    const [ax, az] = along(-(w / 2 - 2 * post)), [bx, bz] = along(w / 2 - 2 * post);
+    out.push({ kind: 'seg', ax, az, bx, bz, half: Math.max(0.12, Math.min(0.3, d / 2)), h, leaf: true, band: [-Infinity, -Infinity] });
     return out;
   }
   if (def?.run || w >= d * 2) {

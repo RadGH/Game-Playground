@@ -115,6 +115,12 @@ export function createCivicsScreen({
    * draws without them, the way it always has.
    */
   production = null, productionActions = {}, people: peopleActions = null,
+  /**
+   * R28 — the Trade tab's "Send a cart". `cart.places()` -> the settlements a cart can go to
+   * (`{ id, name, x, z, size, biome, race, market, metres }`, nearest first) and `cart.send(draft)`
+   * -> `{ ok, why }`. Pricing and the carrier list come from js/civics.js itself.
+   */
+  cart: cartActions = null,
 } = {}) {
   // the stylesheet, once, and never a second copy if a save is reloaded in place
   if (!document.querySelector(`link[href="${CSS_HREF}"]`)) {
@@ -353,19 +359,125 @@ export function createCivicsScreen({
     const routes = pane('On the road', (r.routes || []).length
       ? (r.routes || []).map(x => row(
         `${x.carrierName} to ${x.toName}`,
-        x.state === 'travelling' ? `${Math.max(0, Math.round(x.left / 60))} min` : x.state,
-        `${x.kg} kg · ${x.guards} guard${x.guards === 1 ? '' : 's'} · ${pct(x.risk)} risk · ${x.profit} gold if it gets there`,
+        x.state === 'travelling' ? (x.left < 60 ? 'under a minute' : `${Math.round(x.left / 60)} min`) : x.state,
+        // R28 — the revenue, not `profit`: `profit` takes off what the goods would COST to buy at the
+        // post, and these are your own goods, so a good run read "−51 gold if it gets there"
+        `${x.kg} kg · ${x.guards} guard${x.guards === 1 ? '' : 's'} · ${pct(x.risk)} risk · ${x.revenue} gold if it gets there`,
         x.state === 'lost' ? 'civ-bad' : x.state === 'arrived' ? 'civ-good' : '',
       ))
       : empty('No carts out. A run pays roughly what a fight does and does it while you are somewhere else.'));
 
-    return [holdPane, posts, routes];
+    return [holdPane, posts, drawSendCart(r), routes].filter(Boolean);
+  }
+
+  /**
+   * R28 — SEND A CART. js/trade.js could price, send, move, rob and pay a cart route, and nothing
+   * ever called `plan` or `open`, so "On the road" was empty in every game. This is the form:
+   * from which post, to which town, on what, with how many guards, carrying what — and the price
+   * of the run worked out live, before anything leaves.
+   */
+  const draft = { postId: null, toId: null, carrier: 'hand_cart', guards: 0, manifest: {} };
+
+  function select(options, value, onpick, cls) {
+    const s = el('select', { class: `civ-select ${cls || ''}`.trim(), onchange: e => { onpick(e.target.value); e.target.blur(); draw(); } });
+    for (const o of options) {
+      const opt = el('option', { value: o.value, text: o.text });
+      if (o.disabled) opt.disabled = true;
+      if (String(o.value) === String(value)) opt.selected = true;
+      s.appendChild(opt);
+    }
+    return s;
+  }
+
+  function drawSendCart(r) {
+    const posts = r.tradePosts || [];
+    if (!posts.length || !civics?.cartPlan) return null;
+    if (!posts.some(p => p.id === draft.postId)) draft.postId = posts[0].id;
+    const places = cartActions?.places?.() || [];
+    if (!places.length) return pane('Send a cart', empty('There is no town on this world to sell to.'));
+    if (!places.some(p => String(p.id) === String(draft.toId))) draft.toId = places[0].id;
+    const to = places.find(p => String(p.id) === String(draft.toId));
+    const day = getDay();
+    const carriers = civics.cartCarriers({ day, gold: getPlayer()?.gold || 0 });
+    if (!carriers.find(c => c.key === draft.carrier)?.ok) draft.carrier = carriers.find(c => c.ok)?.key || 'porter';
+    const carrier = carriers.find(c => c.key === draft.carrier);
+    draft.guards = Math.min(draft.guards, carrier?.guardsMax || 0);
+    const goods = civics.cartGoods(draft.postId);
+    for (const id of Object.keys(draft.manifest)) {
+      const g = goods.find(x => x.id === id);
+      if (!g) delete draft.manifest[id];
+      else draft.manifest[id] = Math.min(draft.manifest[id], g.n);
+      if (!draft.manifest[id]) delete draft.manifest[id];
+    }
+
+    const pick = el('div', { class: 'civ-row civ-cart-pick' }, [
+      el('b', { text: 'From' }),
+      select(posts.map(p => ({ value: p.id, text: p.name || 'Trade Post' })), draft.postId, v => { draft.postId = v; }, 'civ-cart-from'),
+      el('b', { text: 'to' }),
+      select(places.map(p => ({ value: p.id, text: `${p.name} · ${p.market ? 'market' : 'no market'} · ${p.metres < 1000 ? `${p.metres} m` : `${(p.metres / 1000).toFixed(1)} km`}` })), draft.toId, v => { draft.toId = v; }, 'civ-cart-to'),
+    ]);
+    const carry = el('div', { class: 'civ-row civ-cart-pick' }, [
+      el('b', { text: 'On' }),
+      select(carriers.map(c => ({ value: c.key, text: `${c.name} · ${c.hold} kg · ${c.upkeep} gold${c.ok ? '' : ' (not yet)'}`, disabled: !c.ok })), draft.carrier, v => { draft.carrier = v; }, 'civ-cart-carrier'),
+      el('span', { class: 'civ-note', text: `${draft.guards} guard${draft.guards === 1 ? '' : 's'}` }),
+      el('button', { class: 'prod-btn', text: '−', title: 'One guard fewer', onclick: () => { draft.guards = Math.max(0, draft.guards - 1); draw(); } }),
+      el('button', { class: 'prod-btn', text: '+', title: `One more guard (this carrier takes ${carrier?.guardsMax || 0})`, onclick: () => { draft.guards = Math.min(carrier?.guardsMax || 0, draft.guards + 1); draw(); } }),
+    ]);
+    const unavailable = carriers.filter(c => !c.ok).map(c => c.why);
+
+    const goodRows = goods.length
+      ? goods.map(g => {
+        const n = draft.manifest[g.id] || 0;
+        const set = v => { const k = Math.max(0, Math.min(g.n, v)); if (k) draft.manifest[g.id] = k; else delete draft.manifest[g.id]; draw(); };
+        const line = row(g.name, null, `${g.n} to hand (${g.atPost} at the post${g.onBack ? `, ${g.onBack} on your back` : ''}) · ${g.weight} kg each`);
+        line.classList.add('civ-cart-good');
+        line.dataset.good = g.id;
+        line.append(el('div', { class: 'prod-tools' }, [
+          el('button', { class: 'prod-btn', text: '−5', onclick: () => set(n - 5) }),
+          el('button', { class: 'prod-btn', text: '−1', onclick: () => set(n - 1) }),
+          el('span', { class: `civ-cart-n${n ? ' on' : ''}`, text: String(n) }),
+          el('button', { class: 'prod-btn', text: '+1', onclick: () => set(n + 1) }),
+          el('button', { class: 'prod-btn', text: '+5', onclick: () => set(n + 5) }),
+          el('button', { class: 'prod-btn', text: 'All', title: 'As many as there are', onclick: () => set(g.n) }),
+        ]));
+        return line;
+      })
+      : [empty('Nothing to sell yet. Trade goods are made at a workshop, kiln or loom; put them in the stores beside the post or carry them in your hold.')];
+
+    const plan = Object.keys(draft.manifest).length
+      ? civics.cartPlan({ ...draft, to }, { day })
+      : { ok: false, why: 'Load something first.' };
+    const verdict = plan.ok
+      ? el('div', { class: 'civ-sub civ-cart-plan' }, [
+        el('div', { text: `${plan.kg} of ${plan.hold} kg · ${plan.metres} m · about ${Math.max(1, Math.round(plan.seconds / 60))} min on the road · ${pct(plan.risk)} chance of an ambush` }),
+        el('div', { class: plan.revenue > plan.upkeep ? 'civ-good' : 'civ-bad', text: `Sells for ${plan.revenue} gold at ${plan.toName}, less ${plan.upkeep} upkeep paid now: ${plan.revenue - plan.upkeep} gold clear if it gets there.` }),
+      ])
+      : el('div', { class: 'civ-sub civ-bad civ-cart-plan', text: plan.why });
+    const send = el('button', {
+      class: 'civ-go civ-cart-send', text: plan.ok ? `Send it (${plan.upkeep} gold)` : 'Send it',
+      onclick: () => {
+        const out = cartActions?.send?.({ ...draft, to, manifest: { ...draft.manifest } });
+        if (out?.ok) draft.manifest = {};
+        draw();
+      },
+    });
+    if (!plan.ok) send.disabled = true;
+
+    return pane('Send a cart', [
+      pick, carry,
+      ...(unavailable.length ? [el('div', { class: 'civ-sub', text: unavailable.join(' ') })] : []),
+      ...goodRows, verdict, send,
+    ]);
   }
 
   // ------------------------------------------------------------------ drawing
 
   function draw() {
     if (!open) return;
+    // R28 — the frame loop redraws an open Holding four times a second; a <select> that is being
+    // picked from would be torn down under the pointer, so wait until it has its answer
+    const focus = document.activeElement;
+    if (focus && focus.tagName === 'SELECT' && root.contains(focus)) return;
     const r = civics?.report?.({ day: getDay(), gold: getPlayer()?.gold || 0 }) || {};
     for (const [key, btn] of railButtons) btn.classList.toggle('on', key === tab);
     const c = r.colony || {};

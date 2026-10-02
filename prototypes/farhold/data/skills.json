@@ -200,6 +200,24 @@
    "element": "physical",
    "seconds": 4,
    "fromYou": 0.2
+  },
+  "turned": {
+   "name": "Turned",
+   "kind": "control",
+   "element": "arcane",
+   "seconds": 6
+  },
+  "stasis": {
+   "name": "Held in Stasis",
+   "kind": "disable",
+   "element": "arcane",
+   "seconds": 4
+  },
+  "transmuted": {
+   "name": "Transformed",
+   "kind": "disable",
+   "element": "arcane",
+   "seconds": 5
   }
  },
  "skills": {
@@ -1727,7 +1745,8 @@
       "max": 2
      },
      "statuses": null,
-     "onHit": null
+     "onHit": null,
+     "statusMult": 0.35
     },
     "sporecap": {
      "name": "Spore Lob",

@@ -183,3 +183,49 @@ test('the druid takes Briarback shape, its Thornlash becomes Bramble Gore, and i
   expect(spore.why).toMatch(/Sporecap has/);
   expect(errors).toEqual([]);
 });
+
+test('the second-pass mechanics in the field: stasis holds and banks, a turned enemy fights its own side, a wall stands', async ({ page }) => {
+  test.setTimeout(150000);
+  const errors = await land(page, 'warrior');
+  await dummy(page, 6);
+  await dummy(page, 7, 1.5);
+  const out = await page.evaluate(async () => {
+    const f = window.farhold;
+    const S = f.skillData.skills;
+    S.zz_stasis = { name: 'Test Stasis', shape: 'bolt', element: 'arcane', mult: 1, range: 30, cooldown: 1, mp: 0, stasis: { seconds: 2, bank: 1.5 } };
+    S.zz_turn = { name: 'Test Turn', shape: 'bolt', element: 'arcane', mult: 0.2, range: 30, cooldown: 1, mp: 0, turned: { seconds: 4 } };
+    S.zz_wall = { name: 'Test Wall', shape: 'ground', element: 'physical', range: 20, radius: 2, cooldown: 1, mp: 0, wall: { length: 6, seconds: 5, blocksRanged: true } };
+    f.skills.relearn(['zz_stasis', 'zz_turn', 'zz_wall', null, null, null]);
+    const [a, b] = window.__dummies;
+    const aim = () => { a.x = f.control.x + Math.sin(f.control.yaw) * 6; a.z = f.control.z + Math.cos(f.control.yaw) * 6; };
+    aim();
+    f.cast(0);
+    await new Promise(r => setTimeout(r, 500));
+    const held = !!a.statuses?.stasis;
+    const hp = a.hp;
+    f.rpg.strike(f.player, a, f.field.rng, { multiplier: 5 });
+    const banked = a.statuses?.stasis?.bank || 0;
+    const untouched = a.hp === hp;
+    for (let k = 0; k < 30 && a.statuses?.stasis; k++) await new Promise(r => setTimeout(r, 200));
+    await new Promise(r => setTimeout(r, 200));
+    const paid = hp - a.hp;
+    aim();
+    b.x = a.x + 1.5; b.z = a.z;              // a town makes bodies wander off: put its foe beside it
+    f.cast(1);
+    await new Promise(r => setTimeout(r, 500));
+    const turned = !!a.statuses?.turned;
+    // the dummy turned on its own side: count the blows it landed on another enemy
+    for (let k = 0; k < 20 && !(a.turnedHits > 0); k++) await new Promise(r => setTimeout(r, 200));
+    f.cast(2);
+    await new Promise(r => setTimeout(r, 200));
+    return { held, banked, untouched, paid, turned, bHit: a.turnedHits || 0, walls: f.mech.walls };
+  });
+  expect(out.held, 'the bolt put no stasis on the target').toBe(true);
+  expect(out.untouched, 'a body in stasis took the hit').toBe(true);
+  expect(out.banked).toBeGreaterThan(0);
+  expect(out.paid, 'the bank did not land as it thawed').toBeGreaterThan(0);
+  expect(out.turned).toBe(true);
+  expect(out.bHit, 'the turned enemy did not strike its own side').toBeGreaterThan(0);
+  expect(out.walls).toBe(1);
+  expect(errors).toEqual([]);
+});

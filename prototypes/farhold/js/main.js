@@ -9631,7 +9631,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
             if (missed) return;
             const victim = aimAt === control ? player : aimAt;
             // R28 — a Null Circle or a Sanctuary stops enemy ranged hits on anyone standing in it
-            if (blocksRanged(aimAt)) { spellfx.impact({ at: to, element: 'holy' }); return; }
+            if (blocksRanged(aimAt, e)) { spellfx.impact({ at: to, element: 'holy' }); return; }
             const result = rpg.strike(e, victim, field.rng, { multiplier: incomingFrom(victim) * outgoingFrom(e), element: spec.element, ranged: true });
             mech.onHurt(result, e, victim);
             if (e.onHit?.length) field.statusOnHit(e, victim, skillData.statuses);

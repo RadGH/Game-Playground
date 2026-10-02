@@ -84,7 +84,7 @@ export const VOCAB = {
       if (push) bits.push(`Knocks targets back ${m(push)}`);
       if (stun) bits.push(push ? `and stuns them for ${secs(stun)}` : `Stuns targets for ${secs(stun)}`);
       if (v?.interrupt) bits.push('interrupting the attack they were winding up');
-      if (v?.carry) bits.push(`a knocked target strikes each enemy it passes through for ${wd(v.carry.mult ?? v.carry)}`);
+      if (v?.carry) bits.push(`${bits.length ? 'a' : 'A'} knocked target strikes each enemy it passes through for ${wd(v.carry.mult ?? v.carry)}`);
       return bits.length ? `${bits.join(bits.length > 2 ? ', ' : ' ')}.` : '';
     },
   },
@@ -187,13 +187,14 @@ export const VOCAB = {
     phase: 'plan', reader: 'js/skillrun.js',
     describe(v, ctx) {
       const kind = v.kind || 'pulse';
-      const where = v.follow === 'self' ? 'around you' : v.follow === 'target' ? 'on the aimed enemy, following it' : 'where you aim';
+      const where = v.follow === 'self' ? 'around you' : v.follow === 'target' ? 'on the aimed enemy, following it' : ctx.atSelf ? 'where you stand' : 'where you aim';
       const parts = [];
       if (kind === 'trap') {
         parts.push(`Sets a trap ${where === 'around you' ? 'at your feet' : where} that arms after ${secs(v.arm ?? 1)}, lasts ${secs(v.seconds ?? 20)} and fires on the first enemy within ${m(v.triggerRadius ?? 2)}`);
       } else {
-        const what = kind === 'zone' ? 'a zone' : 'a post';
-        parts.push(`Places ${what} ${m(v.radius ?? 5)} across ${where} for ${secs(v.seconds ?? 8)}`);
+        parts.push(kind === 'zone'
+          ? `Places a zone ${m((v.radius ?? 5) * 2)} across ${where} for ${secs(v.seconds ?? 8)}`
+          : `Places a post ${where} for ${secs(v.seconds ?? 8)}`);
       }
       const s = v.strike;
       if (s) {
@@ -410,7 +411,7 @@ export const VOCAB = {
     phase: 'bar', reader: 'js/skillmech.js',
     describe(v) {
       const [kind, n] = String(v.when || v).split(':');
-      return { kill: 'A kill with this skill resets its cooldown.', crit: 'A critical hit with this skill resets its cooldown.', consume: 'Consuming a mark resets its cooldown.', crowd: `Hitting ${fmt(+n || 5)} or more enemies resets its cooldown.` }[kind] || '';
+      return { kill: "A kill with this skill resets this skill's cooldown.", crit: "A critical hit with this skill resets this skill's cooldown.", consume: "Consuming a mark resets this skill's cooldown.", crowd: `Hitting ${fmt(+n || 5)} or more enemies with one cast resets this skill's cooldown.` }[kind] || '';
     },
   },
   cutCooldown: {
@@ -554,6 +555,39 @@ export const VOCAB = {
       return `Links the follower nearest your aim to you for ${secs(v.seconds ?? 8)}: you take ${pct(v.share ?? 0.4)} of the damage dealt to it${v.threshold ? ` above ${pct(v.threshold)} of its health` : ''} instead.`;
     },
   },
+  // ---------------------------------------------------------------- P2 (second pass)
+  turned: {
+    phase: 'hit', reader: 'js/actors.js',
+    describe(v) {
+      let s = `A non-boss target fights its own side for ${secs(v.seconds ?? 6)}${v.follow ? ', following you' : ''}`;
+      if (v.weakenAfter) s += `; when it ends the target is Weakened for ${secs(v.weakenAfter)}`;
+      return `${s}. Champions and rares turn for half as long; a boss is slowed 60% instead.`;
+    },
+  },
+  stasis: {
+    phase: 'hit', reader: 'js/actors.js',
+    describe: v => `A non-boss target is held still and cannot be hurt for ${secs(v.seconds ?? 4)}; the damage dealt to it meanwhile lands at once, ${pct(v.bank ?? 1.5)} of it, when it thaws. A boss is slowed 60% instead.`,
+  },
+  transform: {
+    // applied as the `transmuted` status here; js/actors.js draws it small and js/rpg.js disarms it
+    phase: 'hit', reader: 'js/skillmech.js',
+    describe: v => `A non-boss target becomes a small harmless creature for ${secs(v.seconds ?? 5)}: it deals no damage and moves 50% slower, and damage after the first 1s turns it back.`,
+  },
+  wall: {
+    phase: 'plan', reader: 'js/actors.js',
+    describe(v) {
+      const what = v.ring ? `a ring of wall ${m(v.radius ?? 6)} across` : `a ${m(v.length ?? 6)} wall across where you aim`;
+      const bits = [];
+      if (v.blocksMove !== false) bits.push('enemies cannot walk through it');
+      if (v.blocksRanged) bits.push('enemy ranged hits through it are stopped');
+      if (v.hp) bits.push(`it has ${pct(v.hp)} of your maximum health`);
+      return `Raises ${what} for ${secs(v.seconds ?? 8)}${bits.length ? `: ${list(bits)}` : ''}.`;
+    },
+  },
+  mimic: {
+    phase: 'pet', reader: 'js/skillrun.js',
+    describe: v => `Your summoned copies repeat every skill you cast from where they stand, for ${pct(num(v, 'mult') || 0.4)} of the damage.`,
+  },
   howl: {
     phase: 'pet', reader: 'js/skillrun.js',
     describe(v, ctx) {
@@ -588,11 +622,8 @@ export const FORM_LABEL = {
  * the same commit that gives it a reader.
  */
 export const PENDING = {
-  turned: 'js/actors.js aimOf + the swing branch (an enemy fights its own side)',
-  wall: 'js/actors.js movement step + ranged branch (a segment enemies cannot cross)',
-  stasis: 'js/actors.js update skip + js/rpg.js strike bank',
-  mimic: 'js/skillrun.js castSkill end hook (a summon re-casts your skills)',
-  transform: 'js/actors.js status visual (a disabled enemy drawn as a small creature)',
+  // empty: the P2 five (turned, wall, stasis, mimic, transform) landed in the engine's second pass.
+  // A future mechanic goes here, with its reader, until it is built.
 };
 
 /** The keys in registry order. */
@@ -1086,8 +1117,47 @@ export function tickResources(player, dt, { fighting = false } = {}) {
  * section sets (24 placed, 30 traps, 40 corpses; the oldest goes first).
  */
 export const CAPS = { placed: 24, traps: 30, corpses: 40, corpseSeconds: 20 };
-export const world = { placed: [], corpses: [], nextId: 1 };
-export function resetWorld() { world.placed.length = 0; world.corpses.length = 0; }
+export const world = { placed: [], corpses: [], walls: [], nextId: 1 };
+export function resetWorld() { world.placed.length = 0; world.corpses.length = 0; world.walls.length = 0; }
+
+/** Do segments ab and cd cross? */
+function segCross(ax, az, bx, bz, cx, cz, dx, dz) {
+  const d = (bx - ax) * (dz - cz) - (bz - az) * (dx - cx);
+  if (Math.abs(d) < 1e-9) return false;
+  const t = ((cx - ax) * (dz - cz) - (cz - az) * (dx - cx)) / d;
+  const u = ((cx - ax) * (bz - az) - (cz - az) * (bx - ax)) / d;
+  return t >= 0 && t <= 1 && u >= 0 && u <= 1;
+}
+/**
+ * P2 `wall`: a segment (or a ring) enemies cannot walk through and enemy shots cannot pass.
+ * `spec` = { x1, z1, x2, z2 } or { ring: { x, z, r } }, plus `left`, `hp`, `blocksMove`, `blocksRanged`.
+ */
+export function addWall(spec) {
+  const w = { id: world.nextId++, blocksMove: true, ...spec };
+  world.walls.push(w);
+  return w;
+}
+export function tickWalls(dt) {
+  const gone = [];
+  for (let i = world.walls.length - 1; i >= 0; i--) {
+    const w = world.walls[i];
+    w.left -= dt;
+    if (w.left <= 0 || (w.hp != null && w.hp <= 0)) gone.push(...world.walls.splice(i, 1));
+  }
+  return gone;
+}
+/** Does a step from (x0,z0) to (x1,z1) cross a standing wall? Read by js/actors.js movement. */
+export function crossesWall(x0, z0, x1, z1, { ranged = false } = {}) {
+  for (const w of world.walls) {
+    if (ranged ? !w.blocksRanged : w.blocksMove === false) continue;
+    if (w.ring) {
+      const a = Math.hypot(x0 - w.ring.x, z0 - w.ring.z) <= w.ring.r;
+      const b = Math.hypot(x1 - w.ring.x, z1 - w.ring.z) <= w.ring.r;
+      if (a !== b) return w;
+    } else if (segCross(x0, z0, x1, z1, w.x1, w.z1, w.x2, w.z2)) return w;
+  }
+  return null;
+}
 
 /** A body fell: leave a corpse marker (necromancers spend them). */
 export function addCorpse(x, z, worth = 1) {
@@ -1212,8 +1282,9 @@ export function tickPlaced(dt, env) {
 }
 
 /** Is this body inside a placed zone that negates enemy ranged hits on it? (Null Circle, Sanctuary.) */
-export function blocksRanged(target) {
+export function blocksRanged(target, from = null) {
   if (!target) return false;
+  if (from && crossesWall(from.x, from.z, target.x, target.z, { ranged: true })) return true;
   return world.placed.some(o => o.spec.blocksRanged && Math.hypot(target.x - o.x, target.z - o.z) <= o.r);
 }
 
@@ -1234,7 +1305,7 @@ export const isStripped = e => !!(e?.statuses?.strip);
 
 /** Bosses are never slept, feared or turned (a slow instead); champions and rares get half. */
 export function controlFor(e, statusId, seconds) {
-  const hard = ['sleep', 'fear', 'turned', 'stasis'];
+  const hard = ['sleep', 'fear', 'turned', 'stasis', 'transmuted'];
   if (e?.boss && hard.includes(statusId)) return { id: 'chill', seconds: Math.min(seconds, 3), slow: 0.6 };
   if (e?.boss && statusId === 'root') return { id: 'chill', seconds, slow: 0.6 };
   if (e?.rank && e.rank !== 'normal' && hard.includes(statusId)) return { id: statusId, seconds: seconds * 0.5 };
@@ -1405,6 +1476,16 @@ export function afterHit(rules, attacker, defender, result, ctx = {}) {
       const ctl = controlFor(defender, r.id, r.seconds ?? base.seconds ?? 3);
       apply(defender, ctl.id, { ...base, ...r, ...(ctl.id !== r.id ? spec(ctl.id) : {}), seconds: ctl.seconds, ...(ctl.slow ? { slow: ctl.slow } : {}) }, powerOf());
     }
+  }
+  // P2 — turned, stasis, transform (boss: a slow instead; a champion half as long)
+  for (const [key, id] of [['turned', 'turned'], ['stasis', 'stasis'], ['transform', 'transmuted']]) {
+    const v = rules[key];
+    if (!v || !apply) continue;
+    const secsFor = typeof v === 'number' ? v : v.seconds ?? 5;
+    const ctl = controlFor(defender, id, secsFor);
+    const extra = ctl.id === id ? { follow: !!v.follow, weakenAfter: v.weakenAfter || 0, bankMult: v.bank ?? 1.5, bank: 0, total: ctl.seconds, creature: v.creature || null } : { slow: ctl.slow };
+    apply(defender, ctl.id, { ...spec(ctl.id), seconds: ctl.seconds, ...extra }, 1);
+    if (ctl.id === 'transmuted') apply(defender, 'chill', { ...spec('chill'), slow: 0.5, seconds: ctl.seconds, name: 'Shrunk' }, 1);
   }
   if (rules.statusPick && apply) {
     const id = rules.statusPick;

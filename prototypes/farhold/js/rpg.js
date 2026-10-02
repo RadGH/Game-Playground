@@ -1605,7 +1605,7 @@ export class Rpg {
      * boss half), and a stripped one loses the damage its modifiers gave it (js/actors.js records
      * the product at spawn as `modDmg`). Nothing is removed, so nothing has to be put back.
      */
-    if (!attacker.equipment && attacker.statuses?.disarm) amount *= attacker.boss ? 0.5 : 0;
+    if (!attacker.equipment && (attacker.statuses?.disarm || attacker.statuses?.transmuted)) amount *= attacker.boss ? 0.5 : 0;
     if (!attacker.equipment && attacker.statuses?.strip && attacker.modDmg > 0) amount /= attacker.modDmg;
     /**
      * R25 — THE BREAKDOWN, so an outlier explains itself. "All my spells deal 6-30 but Consecrate
@@ -1703,6 +1703,13 @@ export class Rpg {
       const hurt = mechOnHurt(defender, attacker, amount, { ranged });
       amount = hurt.amount;
       if (hurt.events.length) mechEvents = hurt.events;
+    }
+    // R28 P2 — a body in stasis cannot be hurt: the damage is BANKED and lands when it thaws
+    // (js/actors.js pays it out). A transformed one turns back on damage after its first second.
+    if (amount > 0 && defender.statuses?.stasis) { defender.statuses.stasis.bank = (defender.statuses.stasis.bank || 0) + amount; amount = 0; }
+    if (amount > 0 && defender.statuses?.transmuted) {
+      const tm = defender.statuses.transmuted;
+      if ((tm.total ?? 5) - tm.remaining > 1) { delete defender.statuses.transmuted; if (defender.statuses.chill?.name === 'Shrunk') delete defender.statuses.chill; }
     }
     // R28 — a sleeping body wakes on the first damage (unless a skill says it takes more hits)
     if (amount > 0 && defender.statuses?.sleep) {

@@ -1329,3 +1329,58 @@ browser on the DEV server (8401) shows each skill doing what its card says.
   reflected projectiles, ground pickups, enemy "alert the pack" behaviour, Grand Shuffle, enemy
   rewind, follower webs — all §2.3. A fourth druid shape (a flying one) is parked: flight is a
   mount/vehicle system question, not a skill.
+
+---
+
+## 13. Engine status (engine pass, 2026-10-02) — what is built, what is not
+
+**Built.** Every P1 key in §2.1 and all eight P2 keys in §2.2 (`turned`, `wall`, `stasis`,
+`rewind`, `mimic`, `knock.carry`, `dashWith`, `transform`) have a reader; `skillmech.PENDING` is
+empty. Pure rules: `js/skillmech.js` (VOCAB registry, applyMod, forms, resources, placed objects,
+traps, walls, corpses, hit and hit-taken rules). Runtime: `js/skillrun.js` (dashes, lines, repeats
+riders, afterimages, placed posts/zones/traps, walls, links, counters, wards, summons that take no
+slot, forms and their creature bodies, basic-attack overrides, channels, rewind, TALENT_FX), wired
+into `js/main.js` at fixed call sites. Bar: `js/skills.js` (form overrides, charges, recast,
+resources, empowerNext, hpCost, pools/cycles/variance with `next`, cutCooldown/resetOn, cdRate,
+`planFor` sub-plans, per-form cards). Talents: `js/skilltalents.js` (per-row bespoke trees, generated
+node text, `migrateTalents`, the inert audit over bespoke nodes). Strike: `js/rpg.js` (`rules` per
+strike, hitFactor/afterHit/onHurt, imbue, disarm/strip/stasis/transform, form stats on the sheet).
+Field: `js/actors.js` (taunt to the player/a post/a turned enemy, untargetable, root, sleep, fear,
+silence, stasis payout, turned, walls, interrupt, crowd count, knock.carry). Followers: `js/pets.js`
+(temporary/decoy summons, orders, revive, barrier, cleanse, bringAlong), `js/followers.js` (temporary
+summons take no slot). HUD: resource pips, form badge, charges, next roll, recast ring, channel
+(`skillbar.css`). Save: `talentsVersion: 2` + one-time migration with a single log/toast line.
+Data: the Warrior (reference class, 6 rows + 48 nodes), the three druid shapes (with §4.3 talents)
+and the druid's three overridden skills (base + `forms`, talents left to batch 5), and form rows
+with no class yet for the Fighter stance, the Dragon Knight temper and the three Bard songs
+(batches 1 and 5 add their talents and put them on the class). Status rows: root, disarm, sleep,
+fear, silence, strip, frostbite, rune, gnawed, turned, stasis, transmuted, off_balance.
+`data/classes.json` `skills` now equals `skills.json` `classes` for all 30 (11 differed).
+Content agents: read `research/round28-content-guide.md`.
+
+**Keys the engine added beyond §2** (each in VOCAB with a reader and a generated sentence):
+`burst` (a ring on cast with statuses/heal), `again` (the cast repeats after a delay), `howl`
+(Call the Pack with the pack already up), `onHit.taunt`, `cutCooldown.orSelf` (the G5 fallback when
+the `requires` skill is absent), `counter.grow`, `selfBuff` fields `frontalResist manaOnHurt
+deathPreventOnce petsShare petsOnly resistPerFoe.lowHp`, form `petBuff threatDrop onKillHaste
+firstCrit stats.stillResist stats.manaPerSecond`, `pool.at/along`, `statuses[].minCrowd`.
+
+**Behaviour that changed outside the vocabulary (bugs the round surfaced):**
+* A player buff's `haste`/`move` (Quicken, Hastened) now reaches the sheet — js/rpg.js `derive`
+  read no status at all, so Quicken never sped anybody up.
+* A follower's own statuses (Rally, a howl, Den Mother) and its target's (Shocked, Marked) now count
+  on its bite — `rpg.strike` applied `outgoingFrom/incomingFrom` to the player's strikes only.
+* A status with infinite duration (a form) no longer prints "Infinitys" on the status chip.
+
+**Not built yet / simplified (and why):**
+1. `silence` stops a ranged enemy firing and sends it to melee; a warband leader's *buff action*
+   is a passive aura in js/actors.js, so there is no action for silence to cancel.
+2. Thornlash's "root once per target per 6 s" limit — no per-target cooldown exists; the data
+   roots for 0.8 s on every hit (batch 5 may shorten or drop it).
+3. HUD timer pips on placed objects — placed rings fade with their time instead.
+4. `afterimage.at: 'end'` takes your position when the skill is cast, not when the copy fires.
+5. `mimic` copies strike through `echoFrom` (melee from the copy, rings, ground, or a thrown blade
+   at the target) rather than a full re-cast of every rider.
+6. A druid shape whose creature fails to build keeps the humanoid visible (no tint fallback).
+7. Iron Gyre (`whirlwind`) is pinned outside the §9.1 band (0.8 × 5 is R25's, and the balance test
+   lists it in `PINNED`).

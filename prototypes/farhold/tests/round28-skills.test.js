@@ -16,7 +16,7 @@ import { dirname, join } from 'node:path';
 import {
   VOCAB, VOCAB_KEYS, PENDING, keysOf, applyMod, hitFactor, afterHit, onHurt, setMechEnv,
   toggleForm, formIds, resolveForm, addStacks, placeObject, tickPlaced, resetWorld, world,
-  gainResource, resourceOf, statusStats, controlFor,
+  gainResource, resourceOf, statusStats, controlFor, addWall, crossesWall, blocksRanged,
 } from '../js/skillmech.js';
 import {
   TALENT_LIBRARY, TIER_LEVELS, treeFor, talentsOn, pickTalent, migrateTalents, inertTalents,
@@ -207,7 +207,7 @@ test('every generated skill card and every node line reads cleanly and carries a
     }
     for (const [t, tier] of Object.entries(row.talents || {})) {
       for (const n of tier.nodes || []) {
-        const text = describeNode(n, { statuses: DATA.statuses, skills: DATA.skills });
+        const text = describeNode(n, { statuses: DATA.statuses, skills: DATA.skills, row });
         const f = wordingFaults(text);
         if (f.length) bad.push(`${id} T${t} ${n.id}: ${f.join(', ')} — "${text}"`);
         if (/^No change/.test(text)) bad.push(`${id} T${t} ${n.id}: describes as "No change"`);
@@ -481,4 +481,57 @@ test('the round-28 names are declared before they are read (a TDZ throws every f
   // every `mech.` before the declaration would be in a function body called later; the only one
   // allowed above it is none at all
   assert.ok(main.search(/\bmech\.[a-zA-Z]/) > decl, 'js/main.js names `mech.` above `const mech`');
+});
+
+// ─────────────────────────────────────────────────────────────── P2 (second pass)
+
+test('P2: stasis banks the damage instead of taking it; a wall stops a step and a shot', () => {
+  setMechEnv({ statusSpec: id => DATA.statuses[id], rng: () => 0.5 });
+  const rpg = new Rpg(items, balance);
+  const player = rpg.createPlayer({ classId: 'warrior', level: 20 });
+  const foe = { name: 'x', x: 0, z: 2, hp: 1000, maxHp: 1000, armor: 0, derived: {}, statuses: {} };
+  const apply = (t, id, spec, power) => applyStatus(t, id, spec, power);
+  afterHit({ skill: 's', stasis: { seconds: 4, bank: 1.5 } }, player, foe, { amount: 1 }, { applyStatus: apply });
+  assert.ok(foe.statuses.stasis, 'no stasis on the target');
+  const r = rpg.strike(player, foe, rpg.rng, { multiplier: 1 });
+  assert.equal(r.amount, 0, 'a body in stasis took damage');
+  assert.ok(foe.statuses.stasis.bank > 0, 'nothing was banked');
+  assert.equal(foe.hp, 1000);
+  // a boss is slowed instead
+  const boss = { boss: true, statuses: {} };
+  afterHit({ skill: 's', stasis: { seconds: 4 } }, player, boss, { amount: 1 }, { applyStatus: apply });
+  assert.ok(!boss.statuses.stasis && boss.statuses.chill, 'a boss was put in stasis');
+
+  resetWorld();
+  addWall({ x1: -3, z1: 5, x2: 3, z2: 5, left: 8, blocksRanged: true });
+  assert.ok(crossesWall(0, 4, 0, 6), 'a step through the wall was not refused');
+  assert.ok(!crossesWall(0, 4, 2, 4.5), 'a step beside the wall was refused');
+  assert.ok(blocksRanged({ x: 0, z: 2 }, { x: 0, z: 9 }), 'a shot through the wall was not stopped');
+  resetWorld();
+});
+
+test('P2: turned and transform follow the boss and champion rules', () => {
+  setMechEnv({ statusSpec: id => DATA.statuses[id], rng: () => 0.5 });
+  const apply = (t, id, spec, power) => applyStatus(t, id, spec, power);
+  const champ = { rank: 'champion', statuses: {} };
+  afterHit({ skill: 's', turned: { seconds: 6, follow: true } }, {}, champ, { amount: 1 }, { applyStatus: apply });
+  assert.equal(champ.statuses.turned.remaining, 3, 'a champion turned for the full time');
+  assert.equal(champ.statuses.turned.follow, true);
+  const frog = { statuses: {} };
+  afterHit({ skill: 's', transform: { seconds: 5 } }, {}, frog, { amount: 1 }, { applyStatus: apply });
+  assert.ok(frog.statuses.transmuted && frog.statuses.chill, 'transform is a disable plus a 50% slow');
+});
+
+test('the custom-class catalogue names the class each spell comes from (plan §8.1)', async () => {
+  const { spellCatalogue } = await import('../js/classbuild.js');
+  const cat = spellCatalogue({ classData: read('data/classes.json'), skillData: DATA, data: read('data/classbuild.json') });
+  // a Warrior-only skill says so (cleave, warcry and whirlwind are still shared until their old
+  // classes are converted — then the earliest-tier class IS the one owner)
+  for (const id of ['breaching_shove', 'iron_resolve', 'groundbreaker']) {
+    assert.equal(cat.spells.find(s => s.id === id)?.origin, 'warrior', `${id} does not say it is the Warrior's`);
+  }
+  for (const sp of cat.spells) {
+    if (!sp.classes.length) continue;
+    assert.ok(DATA.classes[sp.origin]?.includes(sp.id), `${sp.id} names ${sp.origin}, which does not carry it`);
+  }
 });

@@ -195,6 +195,27 @@ export function createClassBuilder({
     return panes;
   }
 
+  /**
+   * R28 — ONE SKILL PER CLASS MEANS THIRTY SPELLS A TIER (plan §8.1). Past a dozen, the choices are
+   * grouped by the class each spell comes from (`origin`, js/classbuild.js), each group folded open
+   * under its class's name, so the tab is a list of classes rather than a wall of cards.
+   */
+  function grouped(list, spellOption) {
+    if (list.length <= 12) return [el('div', { class: 'cb-choices cb-choices--spells' }, list.map(spellOption))];
+    const by = new Map();
+    for (const sp of list) {
+      const key = sp.origin || 'other';
+      if (!by.has(key)) by.set(key, []);
+      by.get(key).push(sp);
+    }
+    const label = id => (id === 'other' ? 'Other' : id.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()));
+    return [...by.entries()].sort((a, b) => label(a[0]).localeCompare(label(b[0]))).map(([id, spells]) =>
+      el('details', { class: 'cb-later cb-origin', open: '' }, [
+        el('summary', { text: `${label(id)} — ${spells.length} ${spells.length === 1 ? 'spell' : 'spells'}` }),
+        el('div', { class: 'cb-choices cb-choices--spells' }, spells.map(spellOption)),
+      ]));
+  }
+
   // ------------------------------------------------------------------ the spells tab
 
   /** Which slot the right-hand list is filling. */
@@ -324,7 +345,7 @@ export function createClassBuilder({
               ? `${ready.length} ${ready.length === 1 ? 'spell is' : 'spells are'} open to a level ${slot.level} slot.`
               : `No new spell unlocks at level ${slot.level}. This slot can take any spell from an earlier level.`,
           }),
-          el('div', { class: 'cb-choices cb-choices--spells' }, ready.map(spellOption)),
+          ...grouped(ready, spellOption),
           /**
            * R23 — the spells a higher slot will offer are still here (knowing Meteor is coming is
            * part of choosing) but folded away: they were twenty-nine greyed cards under the eleven

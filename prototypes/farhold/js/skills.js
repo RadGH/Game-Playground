@@ -907,6 +907,9 @@ export function createSkillBar({ data, player, rpg, unlocks = null, canSummon = 
     }
     (player.mech || (player.mech = { res: {} })).lastSkill = s.id;
 
+    // R28 — `counter.grow`: what an earlier guard window banked for this skill is spent now
+    const grown = player.mech?.grow?.[s.id];
+    if (grown) { out.mult *= 1 + grown; out.damage = Math.max(1, Math.round(out.damage * (1 + grown))); delete player.mech.grow[s.id]; }
     // R28 — empowerNext: the rider waiting from an earlier skill is spent on this one
     const em = player.mech?.empower;
     if (em && em.count > 0 && em.from !== s.id) {

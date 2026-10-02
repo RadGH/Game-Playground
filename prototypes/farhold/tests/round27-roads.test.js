@@ -209,7 +209,9 @@ test('a fold never touches a gentle road: seeds 7 and 4477 keep every point of e
     for (const [id, want] of Object.entries(before[seed])) {
       const pieces = byBase.get(String(id));
       assert.ok(pieces, `seed ${seed}: road ${id} is gone`);
-      if (pieces.some(r => r.folded || r.rejoined)) { excused++; continue; }
+      // R28: a thin Y junction squared by planet.js `squareJunctions` (seed 7: roads 33 and 53)
+      // drops its hugging points on purpose, and says so with `squared`
+      if (pieces.some(r => r.folded || r.rejoined || r.squared)) { excused++; continue; }
       const pts = [];
       // R27 M6: a ford lays its own vertices ON the line (flagged `ford`), like a landing
       for (const r of pieces) for (const p of r.points) if (!p.cross && !p.landing && !p.ford) pts.push(p);

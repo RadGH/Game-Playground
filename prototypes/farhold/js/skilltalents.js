@@ -257,7 +257,7 @@ function setClause(k, v, ctx) {
     case 'status': return v ? `Applies ${ctx.statuses?.[v]?.name || v} instead` : 'Applies no status';
     case 'cooldown': return `The cooldown becomes ${secs(v)}`;
     case 'mp': return v ? `Costs ${fmt(v)} mana` : 'Costs no mana';
-    case 'repeats': return `Strikes ${fmt(typeof v === 'object' ? v.count : v)} times`;
+    case 'repeats': { const n = typeof v === 'object' ? v.count : v; return n === 1 ? 'Strikes once' : `Strikes ${fmt(n)} times`; }
     case 'delay': return `Lands ${secs(v)} after you cast`;
     case 'heal': return `Heals ${pct(v)} of maximum health`;
     case 'seconds': return `Lasts ${secs(v)}`;
@@ -313,8 +313,44 @@ export function describeNode(node, ctx = {}) {
   for (const [k, v] of Object.entries(mod.add || {})) if (v) lead.push(addClause(k, v));
   for (const [k, v] of Object.entries(mod.mul || {})) { const c = mulClause(k, v, { heals }); if (c) lead.push(c); }
   const parts = [];
-  if (lead.length) parts.push(`${lead.map((c, i) => (i ? c.charAt(0).toLowerCase() + c.slice(1) : c)).join(', ')}.`);
-  parts.push(...describeVocab(mod, ctx));
+  // clauses that share a "Where: " prefix (two form stats, two burst numbers) are said once
+  const merged = [];
+  for (const c of lead) {
+    const at = c.indexOf(': ');
+    const head = at > 0 ? c.slice(0, at) : null;
+    const prev = merged[merged.length - 1];
+    if (head && prev?.head === head) prev.rest.push(c.slice(at + 2));
+    else merged.push(head ? { head, rest: [c.slice(at + 2)] } : { head: null, rest: [c] });
+  }
+  const leadText = merged.map(x => (x.head ? `${x.head}: ${x.rest.join(', ')}` : x.rest[0]));
+  if (leadText.length) parts.push(`${leadText.map((c, i) => (i ? c.charAt(0).toLowerCase() + c.slice(1) : c)).join(', ')}.`);
+  /**
+   * A vocabulary key the row ALREADY has is merged, not replaced (applyMod), so the node is
+   * described as the merged value MINUS what the row already said — "Roar of Iron" reads as its
+   * barrier, not as the whole taunt again with a made-up radius.
+   */
+  const row = ctx.row || null;
+  const subCtx = { ...ctx, atSelf: row && (row.shape === 'self' || row.shape === 'around') };
+  for (const key of VOCAB_KEYS) {
+    if (!(key in mod)) continue;
+    const v = mod[key], base = row?.[key];
+    let text;
+    if (base && typeof base === 'object' && !Array.isArray(base) && v && typeof v === 'object' && !Array.isArray(v)) {
+      const merged = describeVocab({ [key]: { ...base, ...v } }, subCtx).join(' ');
+      const had = describeVocab({ [key]: base }, subCtx).join(' ');
+      const clauses = t => t.split(/(?<=\.)\s+|;\s+/).map(c => c.replace(/\.$/, '').replace(/^For [\d.]+s(, [^:]+)?: /, '').trim()).filter(Boolean);
+      const old = new Set(clauses(had));
+      const fresh = clauses(merged).filter(c => !old.has(c));
+      if (!fresh.length) continue;
+      const lead2 = key === 'selfBuff' && !/^For /.test(fresh[0]) ? 'While it lasts: ' : '';
+      text = `${lead2}${fresh.join('; ')}.`;
+    } else if (key === 'repeats' && typeof base === 'number' && v && typeof v === 'object') {
+      text = describeVocab({ repeats: v }, subCtx).join(' ');
+    } else {
+      text = describeVocab({ [key]: v }, subCtx).join(' ');
+    }
+    if (text) parts.push(text.charAt(0).toUpperCase() + text.slice(1));
+  }
   for (const [id, sub] of Object.entries(mod.forms || {})) {
     const inner = describeNode({ mod: sub }, ctx).replace(/\.$/, '');
     if (inner && inner !== 'No change') parts.push(`In ${ctx.formLabel?.(id) || id}: ${inner.charAt(0).toLowerCase() + inner.slice(1)}.`);
@@ -334,7 +370,7 @@ export function isBespokeMod(mod = {}) {
 function describeRowTalents(row) {
   if (!row?.talents) return;
   const heals = row.shape === 'self' && !row.mult;
-  const ctx = { statuses: ROWS.statuses, skills: ROWS.skills, heals, formLabel: id => FORM_LABELS[id] || id };
+  const ctx = { statuses: ROWS.statuses, skills: ROWS.skills, heals, formLabel: id => FORM_LABELS[id] || id, row };
   for (const t of Object.values(row.talents)) {
     for (const n of t.nodes || []) n.desc = describeNode(n, ctx);
   }

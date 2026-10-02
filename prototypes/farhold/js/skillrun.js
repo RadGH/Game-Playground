@@ -10,7 +10,7 @@
 
 import {
   world, placeObject, tickPlaced, takeCorpses, addCorpse, resetWorld, leaveShapes, formOf, formIds,
-  applyMod, gainResource, controlFor, statusRef, ringsFor, queue, repeatsOf, statusStatsKey,
+  applyMod, gainResource, controlFor, statusRef, ringsFor, queue, repeatsOf, statusStatsKey, addWall, tickWalls,
 } from './skillmech.js';
 
 /**
@@ -545,8 +545,17 @@ export function createSkillRuntime(env) {
     const o = ai.at === 'end' ? { x: C().x, z: C().z, yaw: C().yaw } : origin;
     const count = ai.count ?? 1;
     for (let k = 0; k < count; k++) {
-      later((ai.delay ?? 0.5) * (k + 1), () => {
-        const mult = plan.mult * (ai.mult ?? 0.5);
+      later((ai.delay ?? 0.5) * (k + 1), () => echoFrom(plan, a, o, ai.mult ?? 0.5));
+    }
+  }
+  /**
+   * One copy of a strike from somewhere else at a share: an afterimage, or a shade that mimics you
+   * (P2 `mimic`). Melee and rings strike from `o`; a bolt, beam or dash throws at its target.
+   */
+  function echoFrom(plan, a, o, share) {
+    {
+      {
+        const mult = plan.mult * share;
         env.spellfx.cast({ at: v3(o.x, groundY(o.x, o.z) + 0.6, o.z), element: 'shadow', ms: 260 });
         const opts = { power: mult, element: plan.element, skill: plan.skill?.id, rules: plan.rules ? { ...plan.rules, penBehind: plan.rules.penBehind || (plan.rules.afterimagePen ? 1 : 0) } : null, applyStatus: env.statusHook };
         let hits = [];
@@ -562,8 +571,76 @@ export function createSkillRuntime(env) {
           }
         }
         for (const h of hits) env.reportHit(h.enemy, h.result);
-      });
+      }
     }
+  }
+
+  /**
+   * TALENT_FX (plan §2.4): every talent a cast carries names ONE visual, and this is the one table
+   * that turns the name into a spellfx call — so a talented spell LOOKS different without an effect
+   * per node. `plan.talentFx` has been filled since round 11 and nothing drew it until now.
+   */
+  const TALENT_FX = {
+    knock: (at, el) => env.spellfx.impact({ at, element: el, crit: true }),
+    pull: (at, el) => env.spellfx.vortex?.({ at, radius: 2.5, element: el, ms: 400 }),
+    leap: (at, el) => env.spellfx.footfall?.({ at, element: el }),
+    swap: (at, el) => env.spellfx.cast({ at, element: 'arcane', ms: 300 }),
+    trap: (at, el) => env.spellfx.footfall?.({ at, element: el }),
+    post: (at, el) => env.spellfx.pillar?.({ at, radius: 0.8, element: el, ms: 400 }),
+    zone: (at, el) => env.spellfx.aoe({ points: env.ringPoints(at.x, at.z, 3), element: el, stagger: 0.02 }),
+    wall: (at, el) => env.spellfx.pillar?.({ at, radius: 1.5, element: el, ms: 400 }),
+    link: (at) => env.spellfx.cast({ at, element: 'holy', ms: 300 }),
+    ward: (at) => env.spellfx.cast({ at, element: 'holy', ms: 320 }),
+    counter: (at) => env.spellfx.cast({ at, element: 'physical', ms: 260 }),
+    afterimage: (at) => env.spellfx.cast({ at, element: 'shadow', ms: 300 }),
+    stack: (at, el) => env.spellfx.impact({ at, element: el }),
+    detonate: (at, el) => env.spellfx.impact({ at, element: el, crit: true }),
+    tag: (at) => env.spellfx.cast({ at, element: 'arcane', ms: 260 }),
+    summon: (at, el) => env.spellfx.cast({ at, element: el, ms: 420 }),
+    form: (at, el) => env.spellfx.cast({ at, element: el, ms: 420 }),
+    charge: (at) => env.spellfx.cast({ at, element: 'lightning', ms: 240 }),
+  };
+  function talentFx(plan, spot) {
+    const list = plan.talentFx;
+    if (!list?.length) return;
+    const at = v3(spot.x, groundY(spot.x, spot.z) + 0.6, spot.z);
+    for (const id of new Set(list)) (TALENT_FX[id] || ((p, el) => env.spellfx.cast({ at: p, element: el, ms: 240 })))(at, plan.element);
+  }
+
+  // ─────────────────────────────────────────── walls (P2)
+
+  /** `wall`: a segment across the aim (or a ring), drawn as a low barrier, that js/actors.js obeys. */
+  function raiseWall(plan, spot, a) {
+    const w = plan.wall;
+    const c = C();
+    const at = plan.kind === 'ground' || plan.kind === 'bolt' ? spot : { x: c.x + a.dx * (w.distance ?? 4), z: c.z + a.dz * (w.distance ?? 4) };
+    const seconds = w.seconds ?? 8;
+    const hp = w.hp ? Math.round((P().maxHp || 100) * w.hp) : null;
+    let wall;
+    const group = new THREE.Group();
+    const mat = new THREE.MeshBasicMaterial({ color: POST_TINT[plan.element] ?? 0xd8dcea, transparent: true, opacity: 0.55 });
+    if (w.ring) {
+      const r = w.radius ?? 6;
+      wall = addWall({ ring: { x: at.x, z: at.z, r }, left: seconds, hp, blocksMove: w.blocksMove !== false, blocksRanged: !!w.blocksRanged, owner: plan.skill?.id });
+      const ring = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 1.4, 40, 1, true), mat);
+      ring.position.y = 0.7;
+      group.add(ring);
+      group.position.set(at.x, groundY(at.x, at.z), at.z);
+    } else {
+      const L = w.length ?? 6;
+      const px = -a.dz, pz = a.dx;
+      wall = addWall({ x1: at.x - px * L / 2, z1: at.z - pz * L / 2, x2: at.x + px * L / 2, z2: at.z + pz * L / 2, left: seconds, hp, blocksMove: w.blocksMove !== false, blocksRanged: !!w.blocksRanged, owner: plan.skill?.id });
+      const box = new THREE.Mesh(new THREE.BoxGeometry(L, 1.4, 0.4), mat);
+      box.position.set(0, 0.7, 0);
+      group.add(box);
+      group.position.set(at.x, groundY(at.x, at.z), at.z);
+      group.rotation.y = Math.atan2(px, pz) + Math.PI / 2;
+    }
+    env.scene.add(group);
+    wall.mesh = group;
+    // a wall that taunts what strikes it (Rampart) takes their attention
+    if (w.taunt) for (const e of F().near(at.x, at.z, (w.length ?? 6) + 2)) F().taunt(e, Object.assign(wall, { placed: true, x: at.x, z: at.z }), w.taunt);
+    log(`${plan.skill?.name}: a wall stands for ${seconds}s.`, 'good');
   }
 
   // ─────────────────────────────────────────── bolts: ricochet, split, returns
@@ -783,6 +860,15 @@ export function createSkillRuntime(env) {
       if (hitsN >= need) queue(p, { reset: plan.skill?.id });
     }
     afterimage(plan, a, ctx.origin || { x: c.x, z: c.z, yaw: c.yaw });
+    if (plan.wall) raiseWall(plan, spot, a);
+    if (!plan.sub) talentFx(plan, spot);
+    // P2 `mimic`: every summoned copy that mimics you repeats this cast from where it stands
+    if (!plan.sub && plan.kind !== 'form') {
+      for (const pet of pets?.pets || []) {
+        if (pet.dying != null || !pet.mimic) continue;
+        later(0.15, () => { if (pet.dying == null) echoFrom(plan, a, { x: pet.x, z: pet.z, yaw: pet.facing || c.yaw }, pet.mimic); });
+      }
+    }
   }
 
   /** `summon` (the object form): temporary, a decoy, at corpses, with a burst when it ends. */
@@ -806,6 +892,7 @@ export function createSkillRuntime(env) {
       for (const u of made) {
         if (s.hpMult) { u.maxHp = Math.round(u.maxHp * s.hpMult); u.hp = u.maxHp; }
         if (s.biteStatus) u.biteStatus = s.biteStatus;
+        if (s.mimic || plan.mimic) u.mimic = (s.mimic || plan.mimic).mult ?? 0.4;
         u.fromPlan = plan;
       }
       if (made.length) log(`${made[0].name}${made.length > 1 ? ` x${made.length}` : ''} ${s.decoy ? 'draws them in' : 'answers'}.`, 'good');
@@ -1201,6 +1288,7 @@ export function createSkillRuntime(env) {
     const key = statusStatsKey(p);
     if (p.mechDirty || key !== statsKey) { p.mechDirty = false; statsKey = key; env.rpg.refresh(p); }
     runPlaced(dt);
+    for (const w of tickWalls(dt)) if (w.mesh) { env.scene.remove(w.mesh); w.mesh.traverse(o => { o.geometry?.dispose?.(); o.material?.dispose?.(); }); }
     for (const corpse of world.corpses) corpse.left -= dt;
     world.corpses = world.corpses.filter(x => x.left > 0);
     tickChannel(dt);
@@ -1219,6 +1307,9 @@ export function createSkillRuntime(env) {
       if (t.dirty) p.mechDirty = true;
       if (t.counter) {
         const spent = t.last?.counter?.used;
+        // `counter.grow`: the hits it took make the skill's NEXT cast hit harder (Sweeping Guard)
+        const g = t.plan.counter?.grow;
+        if (g && t.last?.counter?.taken) (p.mech.grow || (p.mech.grow = {}))[t.plan.skill?.id] = Math.min(g.cap ?? 0.5, (g.per ?? 0.1) * t.last.counter.taken);
         if (!spent && t.plan.counter?.onUnused?.refund) queue(p, { cut: { skill: t.plan.skill?.id, seconds: (env.skills().cooldownFor(slotOf(t.plan.skill?.id) || { cooldown: 8 }) || 8) * t.plan.counter.onUnused.refund } });
         continue;
       }
@@ -1256,6 +1347,7 @@ export function createSkillRuntime(env) {
   /** Respawn, a load, a dungeon door: the world lists start empty again. */
   function reset() {
     for (const o of world.placed) undraw(o);
+    for (const w of world.walls) if (w.mesh) env.scene.remove(w.mesh);
     resetWorld();
     endLink();
     const p = P();
@@ -1322,7 +1414,7 @@ export function createSkillRuntime(env) {
     mechEnv, decorate, intercept, dash, line, repeats, afterBolt, afterCast, onHurt, onKill,
     onObjectStruck, basicAttack, placeBody, breakShapes, tick, reset, petHooks, place, knockShape,
     /** For the debug hook and the Playwright specs. */
-    debug: () => ({ placed: world.placed.length, corpses: world.corpses.length, link: link ? { to: link.to.name, left: link.left } : null, forms: formIds(P()), bodies: Object.keys(bodies) }),
+    debug: () => ({ placed: world.placed.length, walls: world.walls.length, corpses: world.corpses.length, link: link ? { to: link.to.name, left: link.left } : null, forms: formIds(P()), bodies: Object.keys(bodies) }),
     applyMod, repeatsOf,
   };
 }

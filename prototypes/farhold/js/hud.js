@@ -1180,7 +1180,7 @@ export class Hud {
     const chips = Object.values(player.statuses || {});
     const box = $('hud-statuses');
     if (box) box.replaceChildren(...chips.map(st => {
-      const c = el('span', 'status-chip', `${st.name || st.type} ${st.remaining.toFixed(0)}s`);
+      const c = el('span', 'status-chip', Number.isFinite(st.remaining) ? `${st.name || st.type} ${st.remaining.toFixed(0)}s` : (st.name || st.type));
       c.style.color = STATUS_COLOR[st.type] || '#cfd8e3';
       return c;
     }));

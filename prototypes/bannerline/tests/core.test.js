@@ -153,3 +153,15 @@ test('data/items-bl.json is up to date with tools/build-items-bl.mjs', async () 
   const { ROOT } = await import('./_sim.mjs');
   execFileSync(process.execPath, [join(ROOT, 'tools', 'build-items-bl.mjs'), '--check'], { stdio: 'pipe' });
 });
+
+test('every hero class curve is read: dpsK, hpK (and the Druid self-heal)', async () => {
+  const { heroStats } = await import('../js/sim/heroes.js');
+  for (const hid of Object.keys(data.heroes.heroes)) {
+    const p = { hero: hid, level: 5, inv: [], upg: {}, form: null, race: 'freeholds' };
+    const a = heroStats(data, p);
+    const d2 = dataWith(raw => { raw.econ.hero.classes[hid].dpsK *= 1.5; raw.econ.hero.classes[hid].hpK *= 1.5; if (raw.econ.hero.classes[hid].selfHeal) raw.econ.hero.classes[hid].selfHeal *= 2; });
+    const b = heroStats(d2, p);
+    assert.ok(b.dps > a.dps && b.hpMax > a.hpMax, hid);
+    if (data.econ.hero.classes[hid].selfHeal) assert.ok(b.selfHeal > a.selfHeal, hid);
+  }
+});

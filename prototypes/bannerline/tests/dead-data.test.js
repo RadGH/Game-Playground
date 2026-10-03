@@ -47,8 +47,8 @@ function skillScene(data, heroId, slot, kind) {
   const o = hero(s, 1); o.x = s.map.fields[1].x0 + 1; o.z = 2;
   const ctx = { state: s.state, data, map: s.map, emit: () => {} };
   const f = s.map.fields[0];
-  const spots = kind === 'sparse' ? [[1.5, 53], [0, 59.8], [4, 61], [-5, 66]]
-    : [[1.2, 51], [-2, 49], [0, 47.5], [3.5, 52], [-4.5, 50], [0, 54], [0.6, 57], [-0.8, 61], [0, 66], [4, 58], [-4, 58], [8, 58], [2, 60.8], [6, 64], [-6, 64], [0, 70]];
+  const spots = kind === 'sparse' ? [[1.5, 53], [0, 59.8], [3, 57], [-5, 66]]
+    : [[1.2, 51], [-2, 49], [0, 47.5], [3.5, 52], [-4.5, 50], [0, 52.6], [0, 54], [0.6, 57], [-0.8, 61], [0, 66], [4, 58], [-4, 58], [8, 58], [2, 60.8], [6, 64], [-6, 64], [0, 70]];
   for (const [dx, z] of spots) {
     // sparse uses warded (spectral) bodies so armour-pierce has a resistance to close
     const e = spawnUnit(ctx, 0, 1, kind === 'sparse' ? 'gravecreeper' : 'iron_golem', { x: f.cx + dx, z }); e.hp = e.hpMax = 1e6; e._spd = kind === 'sparse' ? 0.6 : 0; e._traits = e._traits.filter(t => t !== 'rise');
@@ -67,7 +67,8 @@ function skillScene(data, heroId, slot, kind) {
     const tsk = p.skills.find(sk => data.heroes.skills[sk.id].turret);
     if (tsk) {
       for (let i = 0; i < 3; i++) { tsk.readyAt = 0; s.step([{ p: 0, type: 'cast', slot: tsk.slot, x: f.cx + (i - 1) * 2, z: 54 }]); }
-      for (const e of s.state.ents) if (e.kind === 'turret') e.hp = e.hpMax * 0.4;
+      for (const e of s.state.ents) if (e.kind === 'turret') { e.hpMax = 1e6; e.hp = 4e5; }
+      h.hp = h.hpMax * 0.5;
       tsk.readyAt = 0;
     }
   }
@@ -113,6 +114,7 @@ const SKILL_EXEMPT = {
   'wolf_shape.form.body.scale': 'a look hint for the view; the sim never reads it',
   'call_wolf.forms.wolf.howl.radius': 'needs an allied hero in the field; ranger-druid.test.js "Running Howl reaches allies"',
   'bolt_turret.range': 'the scene aims inside every range', 'shrapnel_mine.range': 'the scene aims inside every range', 'grapnel.dash.range': 'the scene aims inside every range',
+  'field_repair.repair.radius': 'the scene\'s turrets stand close; engineer.test.js "repairs only within its radius"',
   'shrapnel_mine.place.max': 'needs a fourth mine inside one scene; engineer.test.js "three mines at most"',
   'briarback_shape.form.body.scale': 'a look hint for the view (the boar body\'s scale); the sim never reads it',
   'briarback_shape.form.body.colors.body': 'view hint', 'briarback_shape.form.body.colors.belly': 'view hint', 'briarback_shape.form.body.colors.accent': 'view hint', 'briarback_shape.form.body.colors.eyes': 'view hint',
@@ -183,8 +185,8 @@ const ECON_EXEMPT = {
   'field.length': 'econ-model field length; the real field length is data/maps.json',
   'field.engageSlow': 'econ-model only (the real sim slows by bodies, not a factor)',
   'field.engageDepth': 'econ-model only',
-  'hero.classes.ranger.dpsK': 'Ranger arrives in M6', 'hero.classes.ranger.hpK': 'Ranger arrives in M6', 'hero.classes.ranger.aoe': 'econ-model only',
-  'hero.classes.druid.dpsK': 'Druid arrives in M6', 'hero.classes.druid.hpK': 'Druid arrives in M6', 'hero.classes.druid.aoe': 'econ-model only', 'hero.classes.druid.selfHeal': 'Druid arrives in M6',
+  'hero.classes.ranger.aoe': 'econ-model only',
+  'hero.classes.druid.aoe': 'econ-model only',
   'items.slots': 'econ-model slot count; the sim\'s slots are data/items-bl.json `slots`',
   'clock.tickHz': 'the tick rate is fixed in code (TICK_HZ) for the view, input delay and lockstep; core.test.js asserts the two agree',
   'clock.hardCap': 'AI matches end first; gameplay.test.js "the hard cap ends it" moves it',
@@ -194,6 +196,9 @@ const ECON_EXEMPT = {
   'hero.respawnCap': 'never binds: 5 s + 1 s x level 20 = 25 s, the cap; kept as a guard if the level cap rises',
   'hero.xpTable.15': 'AI matches end before level 16 at the current balance (owner: balance later)', 'hero.xpTable.16': 'same', 'hero.xpTable.17': 'same', 'hero.xpTable.18': 'same', 'hero.xpTable.19': 'same',
   'hero.xpTable.0': 'level 1 starts at 0 XP by definition (only the UI reads it)',
+  'hero.classes.ranger.dpsK': 'core.test.js "every hero class curve is read"', 'hero.classes.ranger.hpK': 'same',
+  'hero.classes.druid.dpsK': 'same', 'hero.classes.druid.hpK': 'same', 'hero.classes.druid.selfHeal': 'same',
+  'hero.classes.engineer.dpsK': 'same', 'hero.classes.engineer.hpK': 'same', 'hero.classes.engineer.aoe': 'econ-model only',
   'hero.classes.warrior.aoe': 'econ-model only (the real AoE is the skills)', 'hero.classes.pyromancer.aoe': 'econ-model only (the real AoE is the skills)',
 };
 

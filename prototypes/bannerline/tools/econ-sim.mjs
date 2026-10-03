@@ -89,15 +89,17 @@ const ROSTER = Object.fromEntries(RACE_IDS.map(r => [r, RACES.races[r].units.map
 // sendShare: share of this Pay's gold the strategy will put into sends before items.
 // score(u, ctx): which unit to buy first. Leftover gold always goes to items (then waits).
 const STRATS = {
-  income:   { sendShare: 1.0, muster: false, score: (u) => u.income / u.cost, needIncome: true },
-  pressure: { sendShare: 1.0, muster: true,  score: (u, x) => x.press(u) },
-  balanced: { sendShare: 0.7, muster: true,  score: (u, x) => 0.5 * (u.income / u.cost) / 0.17 + 0.5 * x.press(u) / x.pressRef },
+  income:   { sendShare: 1.0, drill: false, score: (u) => u.income / u.cost, needIncome: true },
+  pressure: { sendShare: 1.0, drill: true,  score: (u, x) => x.press(u) },
+  balanced: { sendShare: 0.7, drill: true,  score: (u, x) => 0.5 * (u.income / u.cost) / 0.17 + 0.5 * x.press(u) / x.pressRef },
   // hero-items-heavy: shops FIRST (up to itemsFirst of this Pay's gold), then sends like balanced
-  items:    { sendShare: 1.0, itemsFirst: 0.3, itemsFrom: 180, muster: false, score: (u, x) => 0.5 * (u.income / u.cost) / 0.17 + 0.5 * x.press(u) / x.pressRef },
-  noitems:  { sendShare: 1.0, muster: true,  noItems: true, score: (u, x) => 0.5 * (u.income / u.cost) / 0.17 + 0.5 * x.press(u) / x.pressRef },
-  notop:    { sendShare: 0.7, muster: true,  score: (u, x) => 0.5 * (u.income / u.cost) / 0.17 + 0.5 * x.press(u) / x.pressRef, maxTier: 3 },
+  items:    { sendShare: 1.0, itemsFirst: 0.3, itemsFrom: 180, drill: false, score: (u, x) => 0.5 * (u.income / u.cost) / 0.17 + 0.5 * x.press(u) / x.pressRef },
+  noitems:  { sendShare: 1.0, drill: true,  noItems: true, score: (u, x) => 0.5 * (u.income / u.cost) / 0.17 + 0.5 * x.press(u) / x.pressRef },
+  notop:    { sendShare: 0.7, drill: true,  score: (u, x) => 0.5 * (u.income / u.cost) / 0.17 + 0.5 * x.press(u) / x.pressRef, maxTier: 3 },
 };
-const single = uid => ({ sendShare: 1.0, muster: true, only: uid, score: () => 1 });
+// the model's stand-in for the Drill Yard (data/upgrades.json is stream I's real one)
+const DRILL = [{ cost: 250, pct: 0.1 }, { cost: 600, pct: 0.1 }, { cost: 1200, pct: 0.1 }];
+const single = uid => ({ sendShare: 1.0, drill: true, only: uid, score: () => 1 });
 
 // ── one player ────────────────────────────────────────────────────────────────────────────────────
 function makePlayer(race, hero, strat, rng) {
@@ -105,14 +107,14 @@ function makePlayer(race, hero, strat, rng) {
   return {
     race, heroId: hero, strat, rng, roster,
     gold: ECON.start.gold, income: ECON.start.income,
-    queued: [], muster: 0, slots: new Array(IT.slots).fill(-1), oil: null, chest: null, belt: IT.potion.belt,
+    queued: [], drill: 0, slots: new Array(IT.slots).fill(-1), oil: null, chest: null, belt: IT.potion.belt,
     hero: { lvl: 1, xp: 0, hp: 0, dead: 0 }, cls: H.classes[hero],
     // player skill: how well this player's hero fights on the day (+-SKILL_SPREAD). Without it the
     // model is nearly deterministic and a 2% edge reads as a 100% win rate.
     skill: 1 + (rng() * 2 - 1) * SKILL_SPREAD,
     banners: 0,
     // stats
-    spent: { sends: 0, items: 0, muster: 0, potions: 0 }, sendGold: {}, tierGold: {}, incomeAt: [], itemsAt: [], bodiesPeak: 0, bodiesSum: 0, leakedBy5: [], leaks: 0, deaths: 0, levelAt: [],
+    spent: { sends: 0, items: 0, drill: 0, potions: 0 }, sendGold: {}, tierGold: {}, incomeAt: [], itemsAt: [], bodiesPeak: 0, bodiesSum: 0, leakedBy5: [], leaks: 0, deaths: 0, levelAt: [],
   };
 }
 function heroStats(p) {
@@ -243,11 +245,11 @@ function decide(p, foe, t) {
   const x = { press, pressRef };
   // potions first (refill the belt)
   while (p.belt < IT.potion.belt && p.gold >= IT.potion.cost) { p.belt++; p.gold -= IT.potion.cost; p.spent.potions += IT.potion.cost; }
-  // muster
-  if (S.muster && p.muster < ECON.muster.ranks.length && t >= 360) {
+  // unit upgrades (a three-step model of the Drill Yard: +10% HP and damage per step)
+  if (S.drill && p.drill < DRILL.length && t >= 360) {
     const rt = RACES.traits[RACES.races[p.race].trait];
-    const cost = ECON.muster.ranks[p.muster].cost * (rt.musterCost ?? 1);
-    if (p.gold >= cost * 1.5) { p.gold -= cost; p.spent.muster += cost; p.muster++; }
+    const cost = DRILL[p.drill].cost * (rt.upgradeCost ?? 1);
+    if (p.gold >= cost * 1.5) { p.gold -= cost; p.spent.drill += cost; p.drill++; }
   }
   if (S.itemsFirst && t >= (S.itemsFrom || 0)) buyItems(p, t, p.gold * (1 - S.itemsFirst));
   // sends
@@ -260,7 +262,7 @@ function decide(p, foe, t) {
       if (u.cost <= budget && u.cost <= p.gold) {
         p.gold -= u.cost; budget -= u.cost; p.income += u.income;
         p.spent.sends += u.cost; p.sendGold[u.id] = (p.sendGold[u.id] || 0) + u.cost; p.tierGold[u.tier] = (p.tierGold[u.tier] || 0) + u.cost;
-        const mk = 1 + ECON.muster.ranks.slice(0, p.muster).reduce((s2, r) => s2 + r.pct, 0);
+        const mk = 1 + DRILL.slice(0, p.drill).reduce((s2, r) => s2 + r.pct, 0);
         p.queued.push({ uid: u.id, bodies: u.bodies, hp: u.hp * u.bodies * u.ehp * mk, hpMax: 0, dps: u.dps * mk, armour: u.armour, dmg: u.dmg, leak: u.leak, speed: u.speed, prog: 0, cost: u.cost, bounty: u.bounty ?? ECON.bounty.share, refund: u.leakRefund });
         bought = true; break;
       }
@@ -428,7 +430,7 @@ const hpg = r => { const t1 = ROSTER[r].filter(u => u.tier === 1), t6 = ROSTER[r
 check('Pressure per gold rises with tier (T6 effective HP/gold >= 2x the T1 average, every race)', RACE_IDS.every(r => hpg(r) >= 2), RACE_IDS.map(r => hpg(r).toFixed(2)).join('/'));
 const itemsWr = report.strategies.items.overall, items20 = mean(Object.entries(report.curves).filter(([k]) => k.endsWith('/balanced')).map(([, c]) => c.items20));
 const noItemsWr = Object.values(report.noitems);
-const itemShare = mean(Object.values(shareRuns).flat().map(r => r.P[0].spent.items / (r.P[0].spent.items + r.P[0].spent.sends + r.P[0].spent.muster)));
+const itemShare = mean(Object.values(shareRuns).flat().map(r => r.P[0].spent.items / (r.P[0].spent.items + r.P[0].spent.sends + r.P[0].spent.drill)));
 report.itemShare = itemShare;
 check('Items compete with sends (balanced puts 30-65% of its spend into equipment; beats a no-equipment player >= 70% for every race; items-first strategy >= 25%, i.e. over-investing is punished, not fatal)', itemShare >= 0.3 && itemShare <= 0.65 && noItemsWr.every(v => v >= 0.7) && itemsWr >= 0.25, `equipment ${(itemShare * 100).toFixed(0)}% of spend, vs no-equipment ${noItemsWr.map(v => (v * 100).toFixed(0)).join('/')}%, items-first ${(itemsWr * 100).toFixed(0)}%, items by 20:00 ${Math.round(items20)} g`);
 const heroCells = Object.values(report.heroes).flatMap(h => Object.values(h));

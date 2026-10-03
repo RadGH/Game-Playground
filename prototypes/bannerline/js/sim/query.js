@@ -92,6 +92,7 @@ export function heroInfo(state, data, pid) {
     skills,
     form: p.form, passive: def.passive ? { name: def.passive.name, desc: def.passive.desc } : null,
     pets: state.ents.filter(e => e.kind === 'pet' && e.owner === pid && e.alive && !e._gone).map(e => ({ id: e.id, type: e.type, name: data.heroes.pets[e.type].name, hpPct: e.hp / e.hpMax })),
+    turrets: state.ents.filter(e => e.kind === 'turret' && e.owner === pid && e.alive && !e._gone).map(e => ({ id: e.id, hpPct: e.hp / e.hpMax, expiresIn: Math.max(0, e._until - state.tick) })),
     talent: { open: p.talent < 0 && p.level >= R.talentLevel, level: R.talentLevel, skill: t.skill, choices: t.choices.map(c => ({ id: c.id, name: c.name, desc: c.desc })), picked: p.talent },
   };
 }

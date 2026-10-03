@@ -79,45 +79,6 @@ test('a field at its body cap holds extra sends in the gate queue (never refused
   assert.equal(Q.teamInfo(s.state, data, 1).waiting, 12);
 });
 
-test('auto-send buys whenever gold allows', () => {
-  const s = twoHumans();
-  s.state.players[0].gold = 120;
-  s.step([{ p: 0, type: 'auto', index: 0, on: true }]);
-  assert.equal(s.state.players[0].queued.length, 10);
-  assert.ok(s.state.players[0].gold < data.derived.units.levy.cost);
-});
-
-test('Muster ranks raise sent units, Drilled Muster makes them cheaper', () => {
-  const s = twoHumans();
-  const p = s.state.players[0];
-  p.gold = 5000;
-  s.step([{ p: 0, type: 'muster' }]);
-  assert.equal(p.muster, 1);
-  assert.equal(5000 - p.gold, Math.round(data.econ.muster.ranks[0].cost * data.races.traits.drilled_muster.musterCost));
-  s.step([{ p: 0, type: 'send', unit: 'levy' }]);
-  run(s, 200);
-  const u = s.state.ents.find(e => e.type === 'levy');
-  assert.ok(Math.abs(u.hpMax - data.derived.units.levy.hp * 1.1) < 1e-9);
-});
-
-test('upgrade: the cheapest shop step first, locked by time, raises hero HP and damage', () => {
-  const s = twoHumans();
-  const p = s.state.players[0], h = hero(s, 0);
-  const hp0 = h.hpMax;
-  p.gold = 100000;
-  h.x = s.map.fields[0].armory.x; h.z = s.map.fields[0].armory.z;   // at the Armory: no Requisition wait
-  run(s, 1);
-  s.step([{ p: 0, type: 'upgrade' }]);
-  assert.equal(Object.values(p.equip).filter(Boolean).length, 1);
-  assert.equal(p.equip.weapon.step, 0, 'lowest slot wins ties');
-  assert.equal(h.hpMax, hp0 + data.econ.items.tiers[0].hp);
-  s.drainEvents();
-  s.step([{ p: 0, type: 'upgrade', slot: 0 }]);
-  assert.deepEqual(events(s, 'reject').map(e => e.reason), ['locked'], 'step 2 unlocks at 2:00');
-  assert.equal(Q.gearInfo(s.state, data, 0).cheapest.cost, data.econ.items.tiers[0].cost);
-  assert.equal(Q.gearInfo(s.state, data, 0).slots[0].step, 0);
-});
-
 test('bounty for a kill goes to the defending team, XP to its hero within 20 m', () => {
   const s = twoHumans();
   const h0 = hero(s, 0);
@@ -278,19 +239,6 @@ test('moveDir walks in the 16-direction convention (dir 8 = up the screen = -z)'
   assert.equal(h.z, z1, 'speed 0 stops');
 });
 
-test('potions: buy, drink heals 40%, belt limits', () => {
-  const s = twoHumans();
-  const p = s.state.players[0], h = hero(s, 0);
-  h.hp = h.hpMax * 0.2;
-  s.step([{ p: 0, type: 'drink' }]);
-  assert.ok(h.hp >= h.hpMax * 0.6 - 1e-9 && h.hp < h.hpMax * 0.602, 'heals 40% (plus one tick of regen)');
-  assert.equal(p.belt, 1);
-  s.drainEvents();
-  s.step([{ p: 0, type: 'potion' }, { p: 0, type: 'potion' }]);
-  assert.equal(p.belt, 2);
-  assert.equal(events(s, 'reject')[0].reason, 'belt');
-});
-
 test('illegal and malformed commands are refused without throwing', () => {
   const s = twoHumans();
   const bad = [null, {}, { p: 9, type: 'send' }, { p: 0, type: 'warp' }, { p: 0, type: 'move', x: NaN, z: 1 }, { p: 0, type: 'cast', slot: 'Z' },
@@ -346,12 +294,30 @@ test('Cleave hits everything in its radius, scales with crowd, costs mana and go
 
 test('Breaching Shove: arc only, knocks back and stuns', () => {
   const { s, h } = skillLab();
-  const front = put(s, 'levy', 1, 0, 0, 62, { hp: 1e5, hpMax: 1e5 });
+  const front = put(s, 'levy', 1, 0, 0, 62, { hp: 1e5, hpMax: 1e5, _spd: 0 });
   const behind = put(s, 'levy', 1, 0, 0, 58, { hp: 1e5, hpMax: 1e5 });
   s.step([{ p: 0, type: 'cast', slot: 'W', x: h.x, z: h.z + 5 }]);
-  assert.ok(front.z > 62 + 3, `knocked to ${front.z}`);
   assert.ok(front.statuses.some(st => st.id === 'stun'));
+  assert.ok(front.z < 62 + 2, 'a push, not a teleport: one tick of slide on the cast tick');
+  run(s, 25);
+  assert.ok(front.z > 62 + 3, `slid to ${front.z}`);
+  assert.equal(front._kvx, 0); assert.equal(front._kvz, 0);
   assert.ok(Math.abs(behind.z - 58) < 0.7, 'behind the arc is untouched');
+});
+
+test('a pushed body shoves the body it runs into; a wall stops it', () => {
+  const { s, h } = skillLab();
+  const front = put(s, 'levy', 1, 0, 0, 62, { hp: 1e5, hpMax: 1e5 }), next = put(s, 'levy', 1, 0, 0, 63.3, { hp: 1e5, hpMax: 1e5 });
+  front._spd = next._spd = 0;
+  s.step([{ p: 0, type: 'cast', slot: 'W', x: h.x, z: h.z + 5 }]);
+  run(s, 30);
+  assert.ok(next.z > 64.5, `the second body was shoved to ${next.z}`);
+  // the field edge stops a push
+  const t = skillLab(); const e = put(t.s, 'levy', 1, 0, 0, 62, { hp: 1e5, hpMax: 1e5 });
+  t.h.x = t.s.map.fields[0].x1 - 3; t.h.z = 62; e.x = t.s.map.fields[0].x1 - 1.2; e._spd = 0;
+  t.s.step([{ p: 0, type: 'cast', slot: 'W', x: t.s.map.fields[0].x1, z: 62 }]);
+  run(t.s, 30);
+  assert.ok(e.x <= t.s.map.fields[0].x1 - e.r + 1e-9, 'stopped at the edge');
 });
 
 test('War Cry taunts nearby units onto the hero (past the engage cap) and grants scaled Might', () => {
@@ -512,9 +478,6 @@ test('query helpers describe the state for the UI', () => {
   const s = twoHumans();
   const c = Q.clock(s.state, data);
   assert.equal(c.payIn, 200);
-  const deck = Q.deckInfo(s.state, data, 0);
-  assert.equal(deck.length, 4);
-  assert.equal(deck[0].canBuy, true);
   const ros = Q.roster(s.state, data, 0);
   assert.equal(ros.length, 12);
   const sb = ros.find(r => r.unit === 'shieldbearer');
@@ -529,14 +492,17 @@ test('query helpers describe the state for the UI', () => {
   assert.deepEqual(Q.gatePreview(s.state, data, 0), [{ player: 1, unit: 'levy', count: 2 }], 'sends in the grouping window');
   assert.equal(Q.teamInfo(s.state, data, 0).shown, data.econ.banners['1v1']);
   assert.equal(Q.rivalInfo(s.state, data, 0).player, 1);
-  assert.equal(Q.musterInfo(s.state, data, 0).rank, 0);
   assert.equal(Q.entName(s.state, data, s.state.ents.find(e => e.kind === 'hero')), `${s.state.players[0].name} (Warrior)`);
 });
 
 test('config validation gives readable errors', () => {
   assert.throws(() => sim(config({ players: [{ team: 0, kind: 'human', race: 'elves', hero: 'warrior' }, { team: 1, kind: 'human', race: 'freeholds', hero: 'warrior' }] })), /Unknown race/);
   assert.throws(() => sim(config({ players: [{ team: 0, kind: 'human', race: 'freeholds', hero: 'bard' }, { team: 1, kind: 'human', race: 'freeholds', hero: 'warrior' }] })), /Unknown hero/);
-  assert.throws(() => sim(config({ players: [{ team: 0, kind: 'human', race: 'freeholds', hero: 'warrior', deck: ['levy', 'brute', 'levy', 'levy'] }, { team: 1, kind: 'human', race: 'freeholds', hero: 'warrior' }] })), /not in The Freeholds/);
+  assert.throws(() => sim(config({ mode: 'tag' })), /Unknown game mode/);
+  assert.throws(() => sim(config({ mode: 'linewar', format: '5v5' })), /no format/);
+  assert.throws(() => sim(config({ mode: 'linewar', format: '1v1', players: [
+    { team: 0, kind: 'human', race: 'freeholds', hero: 'warrior' }, { team: 0, kind: 'human', race: 'freeholds', hero: 'warrior' },
+    { team: 1, kind: 'human', race: 'freeholds', hero: 'warrior' }] })), /allows 1 player/);
 });
 
 // imports used by the trait tests

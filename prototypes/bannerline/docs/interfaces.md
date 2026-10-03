@@ -59,13 +59,14 @@ the fetcher does; `loadDataSync(readText)` is the node twin.
 ```js
 {
   seed: 12345,                  // uint32; every rng stream is derived from it
-  mode: '1v1',                  // '1v1' | '2v2' | '3v3'  (M1 builds 1v1; the shape is the same)
+  mode: 'linewar',              // the GAME MODE (R2.10, js/sim/modes/): 'linewar' today; 'hvf' etc. later
+  format: '1v1',                // the mode's format: line war '1v1' | '2v2' | '3v3'. Old configs with mode: '1v1' still work
   map: 'vale',
   players: [                    // player id = index in this array
     { team: 0, name: 'Radley', kind: 'human', race: 'freeholds', hero: 'warrior',
-      deck: ['levy', 'hill_slinger', 'shieldbearer', 'hedge_priest'] },
+    },
     { team: 1, name: 'Recruit', kind: 'ai', ai: { difficulty: 'recruit' },
-      race: 'freeholds', hero: 'warrior' }          // deck optional; defaults to the race's first 4 units
+      race: 'freeholds', hero: 'warrior' }
   ],
   rules: {                      // all optional; tests and debug only
     endless: false,             // no banner loss / no end (econ curves)
@@ -75,7 +76,7 @@ the fetcher does; `loadDataSync(readText)` is the node twin.
 }
 ```
 
-The config is validated: unknown race/hero/unit or a bad deck throws an `Error` whose message the
+The config is validated: an unknown mode/format, race or hero, or too many players for the format, throws an `Error` whose message the
 lobby can show.
 
 ### 2.2 Driving the clock (view side, M1)
@@ -89,6 +90,14 @@ const alpha = acc / TICK_MS;                 // 0..1 for interpolation (§5.3)
 ```
 
 Offline input delay is 1 tick: commands built during a frame go into the next `step()`.
+
+### 2.3 Game modes (R2.10)
+
+`js/sim/modes/index.js` holds the registry: `MODES` (`linewar`), `PLANNED` (hvf, td, moba, empires),
+`resolveMode(config)` and `modeList(data)`. A mode supplies its formats, allowed heroes/races, map,
+tick phase order, end rule, extra commands and AI (the contract is in that file's header). Line war
+is `js/sim/modes/linewar.js`; moving it there changed no outcome (identical match hashes before/after).
+`sim.mode` is the mode object; commands a mode adds arrive through `cmd.type` like any other.
 
 ## 3. Commands
 
@@ -108,9 +117,6 @@ per tick are fine; they apply in array order.
 | `learn` | `slot` | spend one skill point on that slot (rank + 1) |
 | `talent` | `choice` 0 or 1 | the level-6 talent pick (once) |
 | `send` | `unit` (unit id) | buy one send. **Gold is the only limit** (owner, 2026-10-03): no stock, no cooldown, no time lock; any number per tick works (mash or hold the key). It leaves through the rival's gate within 0.5 s (`GROUP_TICKS` = 10). Refused only for `'gold'`, `'roster'` (not your race) or `'over'`. A full field never refuses: extra bodies wait in the gate queue |
-| `deck` | `units` [4 unit ids] | set the 4 deck sends (any time) |
-| `auto` | `index` 0..3, `on` bool | auto-send toggle for a deck slot: buys that send whenever your gold allows (it spends everything) |
-| `muster` | — | buy the next Muster rank (I–III) |
 | `buy` | `id` (data/items-bl.json item id) | buy one Outfitter item into the first free inventory slot. The hero must be alive and inside the Outfitter's radius (`data/buildings.json`). Refusals: `notAtShop`, `dead`, `full`, `uniqueEquipped`, `gold`, `bad` (stream I, §11) |
 | `sell` | `slot` 0..5 | sell a carried item at the Outfitter for `items-bl.rules.sellFactor` of its price (a consumable: of its remaining charges' share). Refusals: `notAtShop`, `dead`, `bad` |
 | `swap` | `a`, `b` slots 0..5 | move / swap two inventory slots (anywhere) |
@@ -122,7 +128,7 @@ per tick are fine; they apply in array order.
 
 `reject.reason` values: `'gold'` (not enough gold), `'stunned'`, items/town (§11): `'notAtShop'`, `'full'` (no free inventory slot), `'uniqueEquipped'`, `'notUsable'`, `'max'` (upgrade at max level), `'ownFieldOnly'`, `'enemyFieldOnly'`, `'notInField'`,
 `'roster'` (unit not in your race), `'dead'` (hero is dead), `'cooldown'`, `'mana'`, `'rank'` (skill
-not learned), `'points'` (no skill point), `'maxRank'`, `'level'` (R before 6), `'maxMuster'`, `'over'` (match over), `'bad'` (malformed).
+not learned), `'points'` (no skill point), `'maxRank'`, `'level'` (R before 6), `'over'` (match over), `'bad'` (malformed).
 
 ## 4. Events
 
@@ -143,7 +149,7 @@ hashed, not snapshotted): they are hints for drawing and sound. Never derive gam
 | `zone` | `zone, x, z, radius, length, face, ticks, skill, dmgType` | a burning patch appears (`length` > 0: a capsule of that length along `face`, half-width `radius`); lasts `ticks` |
 | `zoneEnd` | `zone` | a zone went out |
 | `pulse` | `id, skill, x, z, radius` | a repeat of a multi-hit skill (Iron Gyre spin, shockwave) |
-| `knock` | `id, fromX, fromZ, toX, toZ` | an entity was shoved/pulled (view may tween) |
+| `knock` | `id, vx, vz, metres` | a push started (R2.5): the body now SLIDES over the next ticks (velocity + friction, it shoves bodies it runs into, walls stop it). Positions are real every tick, so plain interpolation draws it; `metres` = how far it will slide. Pounce / dash / Throat Leap / Grapnel are leaps (`dash` event), not pushes |
 | `status` | `id, status, on` | a status started (`on: true`) or ended |
 | `taunt` | `id, by, ticks` | a unit was taunted onto `by` |
 | `levelUp` | `player, level` | hero levelled (a skill point is now available) |
@@ -157,7 +163,6 @@ hashed, not snapshotted): they are hints for drawing and sound. Never derive gam
 | `leak` | `team, banners, src, unit` | `banners` (may be fractional) torn from `team` by entity `src` |
 | `refund` | `player, amount` | Grave Tithe refund *(M6, Unburied)* |
 | `rising` | `step` | Rising Tide step began (alert) |
-| `muster` | `player, rank` | Muster rank bought |
 | `item` | `player, uid, id, slot, how, name` | an item reached an inventory slot (`how`: `'buy'`, `'drop'`, `'champion'`) |
 | `drop` | `player, uid, id, x, z` | a kill in this player's field handed them an item (already in a slot): show a beacon at (x, z) flying to the hero |
 | `swap` / `use` / `recall` | `player, a, b` / `player, uid, id, slot, left` / `player, id, x, z` | inventory slots swapped / a consumable used (`left` charges) / Scroll of Return teleported the hero home |
@@ -167,7 +172,8 @@ hashed, not snapshotted): they are hints for drawing and sound. Never derive gam
 | `toll` | `team, player, stunned` | Toll of Iron rang |
 | `dash` | `id, fromX, fromZ, toX, toZ, skill` | a hero leapt (Tracker's Leap); `px/pz` already equal the new spot, tween it yourself |
 | `trap` | `zone, x, z, radius` | a snare sprang (zone kind `'trap'`) |
-| `form` | `player, form, id` | a hero took (`form: 'briarback'`) or left (`null`) a shape: swap the body to `heroes.json skills.briarback_shape.form.body` |
+| `form` | `player, form, id` | a hero took (`form: 'briarback'` or `'wolf'`) or left (`null`) a shape: swap the body to the `form.body` of the skill that grants it (`briarback_shape`, `wolf_shape` in heroes.json). In a shape the other skills are replaced (heroInfo skills show the new names) |
+| `spawn` (kind `turret`) / `remove` (why `expired`) | — | an Engineer's Bolt Turret was built / ran out (or was taken down by a new one past the 1/2/3 limit) |
 | `champion` | `player, unit, field` | a champion send is leaving through a gate ("Champion at the gate!") |
 | `revive` | `id` | a `rise` unit came back at half HP |
 | `talentReady` | `player` | level 6 reached, talent pick open |
@@ -181,7 +187,7 @@ Every field below is stable for M1; new fields may be added, none renamed withou
 
 ```js
 state = {
-  v: 1, tick, seed, mode, map,
+  v: 1, tick, seed, game ('linewar'), format ('1v1'...), mode (DEPRECATED: = format, kept for older readers), map,
   rng: { combat: [a,b,c,d], loot: [...], ai: [...], shop: [...] },   // sfc32 streams (do not touch)
   nextId,                        // next entity id
   rising: 0,                     // Rising Tide step (0 = not yet)
@@ -207,9 +213,7 @@ Player = {
   heroEnt,                       // entity id of this player's hero
   rival,                         // player id of the direct rival (whose field you send into)
   gold, income,
-  deck: [4 unit ids], auto: [4 bools],
   queued: [unit ids],            // bought in the current 0.5 s grouping window
-  muster,                        // 0..3
   inv: [6 x { uid, id, charges } | null],   // stream I: id = items-bl.json item; charges for consumables
   useAt,                         // tick the next consumable may be used
   upg: { damage, attackSpeed, ... }, upV,   // Drill Yard levels; upV bumps on every purchase
@@ -221,7 +225,7 @@ Player = {
   talent: -1 | 0 | 1,
   form: null | 'briarback',      // Druid shape (changes stats, basic attack, and the other skills)
   surrendered,
-  stats: { sendGold, sends, itemGold, potionGold, musterGold, kills, deaths, leaked, dealt, bounty,
+  stats: { sendGold, sends, itemGold, upgradeGold, powerGold, kills, deaths, leaked, dealt, bounty,
            incomeAt: [income at each whole minute], goldAt: [...] }
 }
 WaitingSend = { owner, unit, group, body, bodies }   // held at the gate because the field is at its cap
@@ -231,7 +235,7 @@ WaitingSend = { owner, unit, group, body, bodies }   // held at the gate because
 
 ```js
 Ent = {
-  id, kind: 'hero'|'unit'|'tide'|'pet',   // pet = a hero's summon (Druid Grove Wolf; `type` = pet id in heroes.json `pets`)
+  id, kind: 'hero'|'unit'|'tide'|'pet'|'turret',   // turret = an Engineer's Bolt Turret (`type` = skill id; never moves; expires)   // pet = a hero's summon (Druid Grove Wolf; `type` = pet id in heroes.json `pets`)
   type,                    // hero id ('warrior'), unit id ('levy') or 'tide'
   team,                    // the team it fights FOR (sends: the sender's team; tides: -1)
   owner,                   // player id (hero's player / sender), -1 for tides
@@ -262,8 +266,8 @@ const ix = e.px + (e.x - e.px) * alpha, iz = e.pz + (e.z - e.pz) * alpha;
 const f  = lerpAngle(e.pface, e.face, alpha);      // shortest arc
 ```
 
-A freshly spawned entity has `px = x`. A teleport (respawn, knock longer than 3 m) also sets
-`px = x` — the view should not tween it (watch `knock` events if you want a tween).
+A freshly spawned entity has `px = x`. A teleport (respawn, a leap: `dash`) also sets `px = x` — the
+view should not tween it (watch `dash` events if you want an arc). Pushes are not teleports: they slide.
 
 Entity lifetime: keep an `id -> mesh` map; each frame create meshes for ids you have not seen and
 drop meshes whose id is no longer in `state.ents` (or listen for `spawn`/`remove`).
@@ -298,24 +302,23 @@ All pure, `(state, data, ...) -> value`; safe to call every frame.
 | function | returns |
 |---|---|
 | `clock(state, data)` | `{ seconds, payIn, payEvery, payProgress, tideIn, tideLevel, rising, risingIn, capIn }` (all `...In` in ticks) |
-| `sendInfo(state, data, pid, unitId)` | one row of the **Muster Hall**: `{ unit, name, tier, role, roleText, cost, income, paybackSeconds (null = adds no income), bodies, armour, dmg, hp, dps, speed, range, leak (banners per purchase), bounty (gold the defender earns), traits, traitsText: [sentences], counters: {strongVs: [armour], weakVs: [dmg], resists: [dmg], lines: ["Hits light armour hard", "Weak to nature", ...]}, vsRival: {dealt, taken} (percent vs the rival hero's current armour class / damage type: the green/amber/red pip), canBuy, reason }` — race traits already applied |
-| `roster(state, data, pid)` | `sendInfo` for all 12 units of the player's race, tier order — the Muster Hall list |
+| `sendInfo(state, data, pid, unitId)` | one row of the **hiring hall** (stream I's Barracks): `{ unit, name, tier, role, roleText, cost, income, paybackSeconds (null = adds no income), bodies, armour, dmg, hp, dps, speed, range, leak (banners per purchase), bounty (gold the defender earns), traits, traitsText: [sentences], counters: {strongVs: [armour], weakVs: [dmg], resists: [dmg], lines: ["Hits light armour hard", "Weak to nature", ...]}, vsRival: {dealt, taken} (percent vs the rival hero's current armour class / damage type: the green/amber/red pip), canBuy, reason }` — race traits already applied |
+| `roster(state, data, pid)` | `sendInfo` for all 12 units of the player's race, tier order — the hiring hall list |
 | `gateQueue(state, fieldId)` | bodies waiting at that field's gate (the HUD's "+N waiting") |
-| `deckInfo(state, data, pid)` | `sendInfo` for each of the 4 deck slots + `auto` flag |
-| `heroInfo(state, data, pid)` | `{ ent, level, xp, xpNext, xpPrev, skillPts, dps, armor, armourClass, dmgType, oil, form, passive: {name, desc} | null, pets: [{id, type, name, hpPct}], respawnIn, skills: [{slot, id, name, rank, maxRank, readyIn, cooldown, mp, canCast, canLearn, desc}] , talent: {open, choices:[{id,name,desc}], picked} }` |
+| `heroInfo(state, data, pid)` | `{ ent, level, xp, xpNext, xpPrev, skillPts, dps, armor, armourClass, dmgType, form ('briarback' | 'wolf' | null), passive: {name, desc} | null, pets: [{id, type, name, hpPct}], turrets: [{id, hpPct, expiresIn (ticks)}], respawnIn, skills: [{slot, id, name, rank, maxRank, readyIn, cooldown, mp, canCast, canLearn, desc}] , talent: {open, choices:[{id,name,desc}], picked} }` |
 | `teamInfo(state, data, teamId)` | `{ banners, bannersMax, shown, rally, dealt, waiting (gate queue of the team's field), bodies, cap, toll: {charges, readyIn} }` |
-| `rivalInfo(state, data, pid)` | rival's `{ player, hero, level, hpPct, dmgType, armourClass, deck: deckInfo }` |
+| `rivalInfo(state, data, pid)` | rival's `{ player, hero, level, hpPct, dmgType, armourClass }` |
 | `gatePreview(state, data, fieldId)` | queued sends of every enemy player heading into that field: `[{ player, unit, count }]` |
 | `shopInfo`, `itemCard`, `inventoryInfo`, `itemView`, `upgradesInfo`, `powersInfo`, `powerTargetCheck`, `buildingsInfo`, `statLine` | items, Outfitter, Drill Yard, Sanctum and buildings — see §11 (stream I) |
 | `affixLine(data, affix)` | `"+4.5% critical chance"` |
-| `musterInfo(state, data, pid)` | `{ rank, next: {cost, canBuy, reason} | null }` |
+| `modeList(data)` (from `js/sim/modes/index.js`) | the lobby's mode picker: `[{ id, name, desc, formats, defaultFormat, heroes, races, playable }]` (planned modes listed with `playable: false`) |
 | `entName(state, data, ent)` | display name |
 
 ## 8. Data files (schemas)
 
 All files carry a `_doc` string. The sim reads them only through `sim.data` (frozen).
 
-- `data/econ.json` — clock, start, banners, bounty, rally, field (cap, length), tide stats, muster,
+- `data/econ.json` — clock, start, banners, bounty, rally, field (cap, length), tide stats,
   item steps, hero curve + `xpTable` + class multipliers. See the file's `_doc`.
 - `data/units.json` — `traits{id:{desc, ehp}}`, `units{id:{race, name, tier, cost, income, hp, dps,
   bodies, armour, dmg, range, speed, leak, bounty, traits[], splitInto?, role, model}}` (GENERATED by `tools/build-roster.mjs`: 12 units per race, tiers 1-6; also `tiers` templates, `roles` words, `traits` with `desc`).

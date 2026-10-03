@@ -131,17 +131,3 @@ test('Cinder Stride: faster, burning trail behind, a pool where it started', () 
   assert.ok(z0 - h.z > 2 * 5 * 1.15, 'moves faster than walking');
   assert.ok(s.state.zones.length >= 4, `trail zones ${s.state.zones.length}`);
 });
-
-test('Oil turns half of the hero damage into the chosen type and costs gold', () => {
-  const { s, h } = lab('warrior');
-  const heavy = put(s, 'shieldbearer', 0, 61.5);
-  const p = s.state.players[0];
-  const hitOnce = () => { s.drainEvents(); h._atkAt = 0; s.step([{ p: 0, type: 'attack', target: heavy.id }]); run(s, 2); return s.drainEvents().find(e => e.type === 'hit' && e.src === h.id).amount; };
-  const plain = hitOnce();
-  p.gold = 500;
-  s.step([{ p: 0, type: 'oil', dmgType: 'nature' }]);
-  assert.equal(p.gold, 500 - data.econ.items.oil.cost);
-  const oiled = hitOnce();
-  const pct = data.damage.pct;
-  assert.ok(Math.abs(oiled / plain - (0.5 * pct.blade.heavy + 0.5 * pct.nature.heavy) / pct.blade.heavy) < 0.02, `${oiled} vs ${plain}`);
-});

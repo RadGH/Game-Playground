@@ -170,3 +170,22 @@ the spam. **Removed** = done in the sim already; **Flag** = a judgement call for
   `js/input/commands.js` (`drink` on belt1/belt2 -> `use {slot}`; the `upgrade` binding; `oil`), `js/main.js`
   (`oil` event + case). Inventory hotkeys 1-6 -> `use {slot}` is the natural mapping.
 - [ ] (I -> C) Building models: Outfitter, Barracks, Drill Yard, Sanctum (data/buildings.json `size`, `door`).
+
+## Stream A round-2 notes (2026-10-03)
+
+- [ ] (A -> B) Removed from the core: commands `deck`, `auto`, `muster`; queries `deckInfo`, `musterInfo`;
+  player fields `deck`, `auto`, `muster`; events `muster`. Z X C V and the Muster button need removing
+  (owner R2.1/R2.9). `rivalInfo` lost `deck`.
+- [ ] (A -> B) Mode framework (R2.10): `createSim({ mode: 'linewar', format: '1v1', ... })`; the old
+  `mode: '1v1'` still works. Lobby first screen: `modeList(data)` from js/sim/modes/index.js (R2.11).
+  `state.game` / `state.format` are the new names; `state.mode` stays as the format for now.
+- [ ] (A -> B) Knockback is a slide now (R2.5): the `knock` event carries `vx, vz, metres` (no from/to);
+  positions move every tick, so normal interpolation draws it.
+- [ ] (A -> B/C) New hero `engineer` (R2.8) and the Druid's Wolf form (R2.7, skill `wolf_shape` on E;
+  form body `{ creature: 'wolf' }`): hero look, skill icons, turret look (`kind: 'turret'`, type
+  `bolt_turret`, radius 0.7). heroInfo has `turrets` and `form`.
+- [x] (A -> I) Drilled Muster is now **Drilled Ranks** (`races.json traits.drilled_ranks.upgradeCost`
+  0.7); A added a 3-line hook in upgrades.js `upgradeCost` that applies it (commented "stream A").
+  economy.js `buyPotion`, the `oil` read in combat.js, `econ.muster`, `econ.items.oil` are removed.
+- [ ] (A -> B) R2.9 leftovers in B's files: `data/bindings.json` actions `muster` / `musterHall` (+ its _doc).
+- [ ] (A -> C) R2.9 leftover in C's `data/identity.json` _doc ("Muster Halls").

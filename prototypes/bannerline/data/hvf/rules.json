@@ -113,10 +113,6 @@
   "towerWeight": 0.6,
   "hunterBase": 900,
   "hunterPerLevel": 220,
-  "itemWeight": 1.0,
-  "ghostPenalty": 0
- },
- "noise": {
-  "period": 20
+  "itemWeight": 1.0
  }
 }

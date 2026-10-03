@@ -6,6 +6,7 @@ import { loadLooks } from '../view/unit-looks.js';
 import { createIconStudio, createIconLibrary, ICON_TINTS } from '../view/icons.js';
 import { loadIdentity } from '../view/identity.js';
 import { makeKeep, MAKERS } from '../view/structures.js';
+import { makeTurret, makeMine } from '../view/engineer.js';
 
 const $ = id => document.getElementById(id);
 const here = p => new URL(p, import.meta.url).href;
@@ -39,11 +40,14 @@ function jobs() {
     out.push({ kind: 'building', id: `${race}.keep`, label: `${identity.race(race).name} Keep`, make: () => { const k = makeKeep(identity, race, color); return studio.object(k.group, { tint, update: dt => k.update(dt) }); } });
     for (const [kind, make] of Object.entries(MAKERS)) out.push({ kind: 'building', id: `${race}.${kind}`, label: `${identity.race(race).name} ${BUILDING_NAMES[kind]}`, make: () => { const b = make(identity, race, color); return studio.object(b.group, { tint, update: dt => b.update(dt) }); } });
   }
+  for (const L of [1, 2, 3]) out.push({ kind: 'gadget', id: 'turret_' + L, label: `Bolt Turret ${'I'.repeat(L)}`, make: () => { const t = makeTurret({ level: L, color: identity.slotColor(0) }); t.aim(0.6); t.update(1); return studio.object(t.group, { tint: ICON_TINTS.item, yaw: 0.9, pitch: 0.35, pad: 0.75 }); } });
+  out.push({ kind: 'gadget', id: 'mine', label: 'Shrapnel Mine', make: () => { const m = makeMine({}); m.setArmed(true); m.update(0.3); return studio.object(m.group, { tint: ICON_TINTS.item, yaw: 0.5, pitch: 0.7, pad: 0.7 }); } });
+  for (const [hero, form] of [['druid', 'wolf'], ['druid', 'briarback']]) out.push({ kind: 'hero', id: `${hero}.${form}`, label: `${hero} (${form})`, make: () => studio.lookIcon(looks.forForm(hero, form)) });
   return out;
 }
 const BUILDING_NAMES = { shop: 'Outfitter', barracks: 'Barracks', drillyard: 'Drill Yard', sanctum: 'Sanctum' };
 
-const KIND_NAMES = { unit: 'Units', hero: 'Heroes', item: 'Item bases', skill: 'Skills', power: 'Powers', building: 'Buildings' };
+const KIND_NAMES = { unit: 'Units', hero: 'Heroes', item: 'Item bases', skill: 'Skills', power: 'Powers', building: 'Buildings', gadget: 'Engineer gadgets' };
 function gallery(list, images) {
   const byKind = new Map(); for (const j of list) { if (!byKind.has(j.kind)) byKind.set(j.kind, []); byKind.get(j.kind).push(j); }
   $('gallery').replaceChildren(...[...byKind].map(([kind, js]) => {

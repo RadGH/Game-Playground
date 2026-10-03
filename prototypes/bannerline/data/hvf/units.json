@@ -12,7 +12,6 @@
   "reviveSeconds": 4,
   "reviveRange": 2.5,
   "buildRange": 3,
-  "canAttack": false,
   "abilities": {
    "Q": {
     "id": "scamper",
@@ -59,7 +58,6 @@
   "goldPerSecond": 1,
   "perLevel": 0.08,
   "maxLevel": 10,
-  "canAttack": true,
   "xpTable": [
    0,
    60,

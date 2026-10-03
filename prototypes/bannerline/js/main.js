@@ -38,7 +38,11 @@ import { createModeScreen } from './ui/modes.js';
 import { createOnboarding, shouldOnboard } from './ui/onboarding.js';
 import { createIconLibrary } from './view/icons.js';
 import { installTooltips } from '../../../shared/tooltip.js';
-import { createSim, TICK_MS } from './sim/sim.js';
+import { createSim, restoreSim, TICK_MS } from './sim/sim.js';
+import { createTransport, cleanRoomCode } from './net/transport.js';
+import { createRoom, joinRoom, beginMatch } from './net/lobbysync.js';
+import { createNetClock } from './net/netclock.js';
+import { createJoinScreen, createNetLobby } from './ui/netlobby.js';
 import { loadData } from './sim/data.js';
 import { buildMap } from './sim/map.js';
 import * as Q from './sim/query.js';
@@ -78,14 +82,21 @@ async function boot() {
   ensureWorld(buildMap(data, 'vale', '1v1'));
 
   app.session = defaultSession(data);
-  app.title = createTitle({ screen: $('screen-title'), onPlay: () => showModes() });
+  app.title = createTitle({
+    screen: $('screen-title'),
+    onPlay: () => { app.pendingOnline = false; showModes(); },
+    onHost: () => { app.pendingOnline = true; showModes(); },
+    onJoin: () => showJoin(),
+  });
+  app.join = createJoinScreen({ screen: $('screen-netjoin'), onJoin: (code) => joinOnline(code), onBack: () => showTitle() });
+  app.netroom = createNetLobby({ screen: $('screen-netroom'), data, devices: app.devices, onLeave: () => showTitle() });
   app.modes = createModeScreen({
     screen: $('screen-modes'), modes: modeList(data),
     onPick: (mode) => {
       const s = app.session;
       Object.assign(s, { game: mode.id, gameName: mode.name, heroes: mode.heroes, races: mode.races });
       if (!mode.formats.includes(s.mode)) s.mode = mode.defaultFormat || mode.formats[0];
-      showLobby();
+      if (app.pendingOnline) hostOnline(mode); else showLobby();
     },
     onBack: () => showTitle(),
   });
@@ -133,11 +144,64 @@ function setScreen(name) {
   $('screen-title').hidden = name !== 'title';
   $('screen-lobby').hidden = name !== 'lobby';
   $('screen-modes').hidden = name !== 'modes';
+  $('screen-netjoin').hidden = name !== 'netjoin';
+  $('screen-netroom').hidden = name !== 'netroom';
   $('screen-match').hidden = name !== 'match' && name !== 'results';
   $('screen-results').hidden = name !== 'results';
 }
-function showTitle() { endMatch(); app.lobby.hide(); setScreen('title'); app.title.show(); useFlyCam(); }
+function showTitle() {
+  if (app.room) { const r = app.room; app.room = null; try { r.leave(); } catch { /* already closed */ } app.netroom.detach(); }
+  endMatch(); app.lobby.hide(); setScreen('title'); app.title.show(); useFlyCam(); }
 function showModes() { endMatch(); app.title.hide(); app.lobby.hide(); setScreen('modes'); app.modes.show(); useFlyCam(); }
+function showJoin() { endMatch(); app.title.hide(); setScreen('netjoin'); app.join.show(); useFlyCam(); }
+function showNetRoom() { endMatch(); app.title.hide(); setScreen('netroom'); app.netroom.show(); useFlyCam(); }
+
+// ---------------------------------------------------------------- online (stream D's js/net)
+
+async function netTransport() { return createTransport(params.get('net') || 'peerjs'); }
+async function hostOnline(mode) {
+  try {
+    const room = await createRoom({ transport: await netTransport(), name: 'Host', dataHash: app.data.hash, mode: mode.id, format: app.session.mode });
+    attachRoom(room);
+  } catch (err) { showTitle(); alertBoot(err.message || String(err), 'Could not host a room'); }
+}
+async function joinOnline(code) {
+  const room = await joinRoom({ transport: await netTransport(), code: cleanRoomCode(code), name: 'Guest', dataHash: app.data.hash });
+  attachRoom(room);
+}
+function attachRoom(room) {
+  app.room = room;
+  app.netroom.attach(room);
+  showNetRoom();
+  room.on('start', (packet) => netStart(room, packet));
+  room.on('lobby', () => { if (app.screen === 'results' || app.screen === 'match') showNetRoom(); });
+  room.on('closed', () => {
+    if (app.room !== room) return;
+    app.room = null;
+    if (app.match?.net) { for (const v of app.match.views) v.hud.alert('Host left — match ended', 'bad', 4000); setTimeout(() => showTitle(), 2500); }
+    else if (app.screen === 'netroom') { showTitle(); alertBoot('The room closed.', 'Online'); }
+  });
+}
+function netStart(room, packet) {
+  let match;
+  try {
+    match = beginMatch(room, packet, { data: app.data, createSim, restoreSim, now: () => performance.now(), onEvent: (type, e) => netEvent(type, e) });
+  } catch (err) { alertBoot(err.message, 'Could not start'); return; }
+  const clock = createNetClock({ lockstep: match.lockstep, tickMs: packet.tickMs });
+  clock.attachVisibility(document);
+  const session = { ...app.session, game: packet.config.mode, mode: packet.config.format || app.session.mode, speed: 1 };
+  startMatch(session, { match, clock, room });
+}
+function netEvent(type, e = {}) {
+  const views = app.match?.views || [];
+  const say = (text, kind = 'info', ms = 3600) => { for (const v of views) v.hud.alert(text, kind, ms); };
+  if (type === 'takeover') say(`${e.name || 'A player'} left — an AI takes their seat`, 'warn');
+  else if (type === 'rejoin') say(`${e.name || 'A player'} is back`, 'good');
+  else if (type === 'hostLeft') { say('Host left — match ended', 'bad', 4000); setTimeout(() => showTitle(), 2500); }
+}
+/** Debug speed for online tests: the host's start packet runs faster ticks (everyone follows). */
+app.startOpts = () => ({ tickMs: 50 / (Number(params.get('speed')) || 1) });
+
 function showLobby() { endMatch(); app.title.hide(); setScreen('lobby'); app.lobby.show(); useFlyCam(); }
 function useFlyCam() {
   if (!app.gfx.viewports.includes(app.flyViewport)) app.gfx.addViewport(app.flyViewport);
@@ -146,26 +210,35 @@ function useFlyCam() {
 
 // ---------------------------------------------------------------- match
 
-function startMatch(session) {
+function startMatch(session, net = null) {
   endMatch();
   const data = app.data;
   const seed = params.get('seed') ? Number(params.get('seed')) >>> 0 : ((Math.random() * 0xffffffff) >>> 0);
-  const { players, local } = sessionToPlayers(session, data);
-  let sim;
-  try { sim = createSim({ seed, mode: session.game || 'linewar', format: session.mode, map: session.map || 'vale', players }, data); } catch (err) {
+  let players, local;
+  if (net) {
+    // Online: this machine's seats are the match's localPlayers; their devices claimed them in the room.
+    local = net.match.localPlayers.map((lp) => {
+      const dev = app.devices.get(lp.device) || app.devices.kbm;
+      return { player: lp.pid, slot: { key: 'net' + lp.pid, player: (lp.local | 0) + 1, device: dev.id, deviceType: dev.type, team: null } };
+    });
+  } else ({ players, local } = sessionToPlayers(session, data));
+  let base;
+  try { base = net ? net.clock.sim : createSim({ seed, mode: session.game || 'linewar', format: session.mode, map: session.map || 'vale', players }, data); } catch (err) {
     console.error(err);
     alertBoot(err.message);
     showLobby();
     return;
   }
+  // Every reader goes through this proxy: online, a resync replaces the sim object under the clock.
+  const sim = simProxy(() => (net ? net.clock.sim || base : base));
   ensureWorld(sim.map, sim.state.mode);
   app.gfx.removeViewport(app.flyViewport);
 
   const firstTeam = local.length ? sim.state.players[local[0].player].team : 0;
   const actors = createActors({ scene: app.gfx.scene, data, localTeam: firstTeam });
   const fx = createFx({ scene: app.gfx.scene, actors, tickHz: data.econ?.clock?.tickHz || 20, data });
-  const clock = createLocalClock({ sim, tickMs: TICK_MS, speed: Number(params.get('speed')) || session.speed || 1 });
-  const m = { sim, clock, actors, fx, views: [], session, deathPos: new Map(), overDelay: 1.6, pausedBy: null, shown: false, aim: createAimOverlay(app.gfx.scene) };
+  const clock = net ? net.clock : createLocalClock({ sim: base, tickMs: TICK_MS, speed: Number(params.get('speed')) || session.speed || 1 });
+  const m = { sim, net, clock, actors, fx, views: [], session, deathPos: new Map(), overDelay: 1.6, pausedBy: null, shown: false, aim: createAimOverlay(app.gfx.scene) };
   app.match = m;
 
   const seats = local.slice(0, MAX_LOCAL);
@@ -175,7 +248,19 @@ function startMatch(session) {
 
   setScreen('match');
   app.title.hide(); app.lobby.hide();
+  for (const v of m.views) {
+    const w = document.createElement('div'); w.className = 'net-wait'; w.hidden = true; v.hudRoot.append(w); v.netWait = w;
+  }
   for (const v of m.views) v.hud.alert(v.isPad ? 'Hold your field. D-pad down opens the Barracks.' : 'Hold your field. B opens the Barracks to hire units.', 'info', 3600);
+}
+
+/** A read-only stand-in for the sim that always points at the current sim object. */
+function simProxy(get) {
+  return {
+    get state() { return get().state; }, get data() { return get().data; }, get map() { return get().map; },
+    get over() { return get().over; }, get tick() { return get().tick; },
+    step(c) { return get().step(c); }, drainEvents() { return get().drainEvents(); }, hash() { return get().hash(); },
+  };
 }
 
 function makeView(m, i, n, l, host) {
@@ -223,7 +308,8 @@ function makeView(m, i, n, l, host) {
   });
   view.hud = createHud({
     root: hudRoot, overlay, sim, Q, player, seat: view.seat, project, isPad,
-    onPause: (v) => { m.clock.setPaused(v); m.pausedBy = v ? view : null; for (const o of m.views) o.root.classList.toggle('paused-other', v && o !== view); },
+    onPause: (v) => { m.clock.setPaused(v); m.pausedBy = v ? view : null;   // online the clock ignores it: the menu opens, the match runs on
+      for (const o of m.views) o.root.classList.toggle('paused-other', v && o !== view); },
     onSurrender: () => view.seat.issue({ type: 'surrender' }),
     onQuit: () => showLobby(),
     onHowTo: () => view.onboarding.start(),
@@ -598,7 +684,10 @@ function matchFrame(dt, frames) {
   document.body.classList.toggle('over-pad', overPad);
   if (overPad && kbmFrame) { const c = dimCursor(); c.style.transform = `translate(${kbmFrame.pointer.x}px, ${kbmFrame.pointer.y}px)`; }
 
-  const paused = !!m.pausedBy;
+  const paused = !!m.pausedBy && !m.net;
+  const waiting = m.clock.waitingFor || [];
+  const waitText = waiting.length ? `Waiting for ${waiting.map((w) => w.name + (w.hidden ? ' (tab hidden)' : '')).join(', ')}` : '';
+  for (const v of m.views) if (v.netWait && v.netWait._t !== waitText) { v.netWait._t = waitText; v.netWait.textContent = waitText; v.netWait.hidden = !waitText; }
   const events = m.clock.frame(dt * 1000, () => m.views.flatMap((v) => v.seat.take()));
   if (events.length) handleEvents(events);
   m.actors.sync(s, m.clock.alpha, paused ? 0 : dt);
@@ -632,10 +721,10 @@ function matchFrame(dt, frames) {
         : localTeams.length > 1 ? { cls: 'win', text: `Last battle: the ${['Blue', 'Red'][r.winner]} banner won` }
         : { cls: r.winner === localTeams[0] ? 'win' : 'lose', text: r.winner === localTeams[0] ? 'Last battle: Victory' : 'Last battle: Defeat' };
       app.results = showResults({
-        card: $('results-card'), sim: m.sim, players: m.views.map((v) => v.player),
-        onLobby: () => showLobby(),
+        card: $('results-card'), sim: m.sim, players: m.views.map((v) => v.player), online: !!m.net,
+        onLobby: () => { if (m.net) { if (m.net.room.isHost) m.net.room.backToLobby(); showNetRoom(); } else showLobby(); },
         onRematch: () => startMatch(app.session),
-        onTitle: () => showTitle(),
+        onTitle: () => { if (m.net) { try { m.net.room.leave(); } catch { /* closed */ } app.room = null; } showTitle(); },
       });
     }
   }
@@ -653,6 +742,8 @@ function frame(dt) {
   if (app.screen === 'title') app.title.frame && frames.forEach((f) => app.title.frame(f));
   else if (app.screen === 'modes') frames.forEach((f) => app.modes.frame(f));
   else if (app.screen === 'lobby') app.lobby.frame(frames, dt);
+  else if (app.screen === 'netjoin') frames.forEach((f) => app.join.frame(f));
+  else if (app.screen === 'netroom') app.netroom.frame(frames);
   if (app.match) matchFrame(dt, frames);
   if (app.screen === 'results' && app.results) frames.forEach((f) => app.results.frame(f));
   if (!app.match) {
@@ -666,9 +757,9 @@ function frame(dt) {
   app.gfx.render();
 }
 
-function alertBoot(msg) {
+function alertBoot(msg, title = 'Could not start the match') {
   const el = document.createElement('div');
-  el.className = 'boot error'; el.textContent = 'Could not start the match:\n' + msg;
+  el.className = 'boot error'; el.textContent = title + ':\n' + msg + '\n\n(click to close)';
   el.addEventListener('click', () => el.remove());
   $('app').append(el);
 }

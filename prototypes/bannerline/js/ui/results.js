@@ -10,7 +10,7 @@ const TEAM_WORDS = ['Blue banner', 'Red banner'];
 
 const REASONS = { banners: 'All banners torn down', cap: 'Time ran out — more banners wins', surrender: 'Surrendered' };
 
-export function showResults({ card, sim, players, onLobby, onRematch, onTitle }) {
+export function showResults({ card, sim, players, onLobby, onRematch, onTitle, online = false }) {
   const s = sim.state, data = sim.data;
   const r = s.result || { winner: -1, reason: 'cap', tick: s.tick };
   const localTeams = [...new Set(players.map((p) => s.players[p].team))];
@@ -47,7 +47,7 @@ export function showResults({ card, sim, players, onLobby, onRematch, onTitle })
     ${incomeChart(s, myTeam)}
     <div class="result-actions">
       <button class="menu-btn primary" data-act="lobby">Back to the lobby</button>
-      <button class="menu-btn" data-act="rematch">Rematch</button>
+      ${online ? '' : '<button class="menu-btn" data-act="rematch">Rematch</button>'}
       <button class="menu-btn" data-act="title">Title</button>
     </div>
     <p class="hint">Arrows or d-pad to choose · <kbd>Enter</kbd> / <kbd class="pad">A</kbd> to confirm</p>`;

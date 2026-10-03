@@ -13,6 +13,8 @@ export function createLocalClock({ sim, tickMs, speed = 1, maxTicksPerFrame = 40
   let paused = false;
   let alpha = 0;
   return {
+    get sim() { return sim; },
+    get waitingFor() { return []; },
     get alpha() { return alpha; },
     get speed() { return speed; },
     get paused() { return paused; },

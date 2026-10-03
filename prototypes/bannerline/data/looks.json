@@ -1,0 +1,53 @@
+{
+ "_doc": "Bannerline art data (stream C, PLAN §14/§16). How each unit's `model` ref in units.json becomes a 3D body. `chibi2` refs: start from a Chibi 2 preset (`bases`, avatar-3d/data/chibi2-presets.json by name) or a Farhold warband member (`warband` = a def id in prototypes/farhold/data/warbands.json, read-only), dress it as a class (`outfit`, avatar-3d/data/class-outfits.json), then apply `units.<id>.parts` slot overrides and the race `paint` (top/cape/hat colour swaps). `creature` refs: the race's `creatures` table names a designed look in avatar-3d/data/creature-variants.json (falling back to the bare type). `scale` is a suggested world scale so a T4 reads bigger than a T1 from the RTS camera; the view may ignore it. `heroes` are the four hero bodies. Read by js/view/unit-looks.js only; the sim never reads this file.",
+ "bases": {
+  "human": "Human wayfarer",
+  "dwarf": "Dwarf smith (round)",
+  "halfling": "Halfling traveller (round)",
+  "elf": "Elf archer",
+  "orc": "Orc berserker (two two-handers)",
+  "undead": "Barrow wight",
+  "beast": "Beastkin hunter"
+ },
+ "races": {
+  "freeholds": {
+   "paint": { "from": ["#8a2a2a", "#2a4a9a", "#3a5a8a", "#6a2a3a", "#7a2a2a"], "to": "#2f5d9e", "trim": "#c9d1d9" },
+   "creatures": { "golem": "bl_iron_golem" }
+  },
+  "ashtusk": { "creatures": { "tuskback": "bl_tuskback" } },
+  "unburied": { "creatures": { "ghoul": "bl_ghoul", "bone_colossus": "bl_bone_colossus", "crow": "bl_crow" } },
+  "thornmane": { "creatures": { "wolf": "bl_thornmane_wolf", "saber_cat": "bl_saber_cat", "thornback": "bl_thornback" } }
+ },
+ "units": {
+  "levy": { "parts": { "hat": { "id": "leather_cap", "color": "#6a5038" }, "top": { "id": "gambeson", "color": "#2f5d9e", "color2": "#c9d1d9" }, "held": { "id": "fh_spear", "color": "#a8b0b8" }, "offhand": { "id": "round_shield", "color": "#2f5d9e" }, "cape": { "id": "none" } }, "scale": 1.0 },
+  "hill_slinger": { "parts": { "hat": { "id": "feather_cap", "color": "#2f5d9e" }, "top": { "id": "travel_shirt", "color": "#2f5d9e" }, "held": { "id": "fh_javelin", "color": "#a08060" } }, "scale": 1.0 },
+  "shieldbearer": { "parts": { "held": { "id": "fh_hammer", "color": "#b0b8c2" }, "offhand": { "id": "fh_tower_shield", "color": "#2f5d9e" } }, "scale": 1.15 },
+  "hedge_priest": { "parts": { "top": { "id": "trim_robe", "color": "#e8e0c8", "color2": "#2f5d9e" }, "held": { "id": "staff_crook", "color": "#8a6a40" } }, "scale": 1.05 },
+  "iron_golem": { "scale": 1.0 },
+  "banner_marshal": { "parts": { "decor": { "id": "tabard", "color": "#2f5d9e" }, "held": { "id": "fh_longsword", "color": "#d8dee6" }, "offhand": { "id": "fh_kite_shield", "color": "#2f5d9e" } }, "scale": 1.5 },
+  "raider_pair": { "scale": 1.0 },
+  "spearthrower": { "scale": 1.0 },
+  "brute": { "scale": 1.15 },
+  "bonecaller": { "scale": 1.05 },
+  "tuskback": { "scale": 1.0 },
+  "tuskchief": { "scale": 1.5 },
+  "shambler": { "scale": 1.0 },
+  "crow_murder": { "scale": 1.0 },
+  "gravecreeper": { "scale": 1.05 },
+  "ghoul": { "scale": 1.0 },
+  "bone_colossus": { "scale": 1.0 },
+  "deathmarshal": { "scale": 1.5 },
+  "wolf_pair": { "scale": 1.0 },
+  "tracker": { "scale": 1.0 },
+  "mauler": { "scale": 1.15 },
+  "saber_cat": { "scale": 1.0 },
+  "thornback": { "scale": 1.0 },
+  "packlord": { "scale": 1.5 }
+ },
+ "heroes": {
+  "warrior": { "chibi2": "human", "outfit": "warrior", "parts": { "cape": { "id": "cape", "color": "#8a2a2a" } }, "scale": 1.35 },
+  "ranger": { "chibi2": "elf", "outfit": "ranger", "scale": 1.35 },
+  "pyromancer": { "chibi2": "human", "outfit": "pyromancer", "parts": { "held": { "id": "staff_orb", "color": "#e8642a" }, "offhand": { "id": "none" } }, "scale": 1.35 },
+  "druid": { "chibi2": "elf", "outfit": "druid", "scale": 1.35 }
+ }
+}

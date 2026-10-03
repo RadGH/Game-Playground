@@ -1,0 +1,8 @@
+{
+ "_doc": "AI difficulty knobs (PLAN §8). Stream A ships a minimal AI for M1 (js/sim/ai/index.js reads reaction, greed, noise, micro, potions, musterFrom); stream E extends this file and the AI in M6. reaction = ticks between decisions; greed = [min,max] share of gold put into sends at each decision after a Pay; noise = random jitter on send scores (0 = always the best-scored unit); micro 0/1/2 = hero play tier; retreatAt = HP share at which the hero walks home; musterFrom = second from which it buys Muster ranks.",
+ "difficulties": {
+  "recruit":   { "reaction": 32, "greed": [0.3, 1.0], "noise": 0.6, "micro": 0, "retreatAt": 0.0,  "potions": true, "musterFrom": 600, "skillChance": 0.35 },
+  "veteran":   { "reaction": 16, "greed": [0.7, 0.7], "noise": 0.2, "micro": 1, "retreatAt": 0.3,  "potions": true, "musterFrom": 360, "skillChance": 0.8 },
+  "commander": { "reaction": 7,  "greed": [0.6, 0.85], "noise": 0.05, "micro": 2, "retreatAt": 0.25, "potions": true, "musterFrom": 360, "skillChance": 1.0 }
+ }
+}

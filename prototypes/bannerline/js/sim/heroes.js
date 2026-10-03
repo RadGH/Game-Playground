@@ -1,0 +1,111 @@
+// Hero stats, XP, death and respawn. Curves: econ.json `hero` (base + per level) x class multipliers
+// (`hero.classes`); mechanics (range, speed, mana, slots): heroes.json.
+
+import { secToTicks } from './state.js';
+import { damageFactor } from './statuses.js';
+
+const OUT_OF_COMBAT = 80;   // ticks without damage before regen kicks in
+
+export function heroStats(data, p) {
+  const H = data.econ.hero, cls = H.classes[p.hero] || { dpsK: 1, hpK: 1 }, def = data.heroes.heroes[p.hero];
+  const L = p.level;
+  // gear steps (PLAN §7.2; econ.json items.tiers): a step replaces the last, so each row is the gain
+  let dpsK = 1, hpG = 0, armor = H.armor;
+  const T = data.econ.items.tiers;
+  for (const g of p.gear || []) for (let i = 0; i <= g; i++) { dpsK += T[i].dps; hpG += T[i].hp; armor += T[i].armor; }
+  return {
+    dps: (H.dps + H.dpsPerLevel * (L - 1)) * cls.dpsK * dpsK,
+    hpMax: (H.hp + H.hpPerLevel * (L - 1)) * cls.hpK + hpG,
+    armor,
+    mpMax: def.mp + def.mpPerLevel * (L - 1),
+    mpRegen: def.mpRegen + def.mpRegenPerLevel * (L - 1),
+  };
+}
+
+/** Re-read max HP/MP after gear or level changes (keeps the missing amount). */
+export function refreshHero(ctx, p) {
+  const h = ctx.state.ents.find(e => e.id === p.heroEnt);
+  if (!h) return;
+  const hs = heroStats(ctx.data, p);
+  if (h.alive) { h.hp += hs.hpMax - h.hpMax; h.mp += hs.mpMax - h.mpMax; }
+  h.hpMax = hs.hpMax; h.mpMax = hs.mpMax;
+}
+
+export function heroPlayer(ctx, hero) { return ctx.state.players[hero.owner]; }
+
+/** One basic attack's damage before statuses. */
+export function weaponHit(ctx, hero) {
+  const p = heroPlayer(ctx, hero);
+  return heroStats(ctx.data, p).dps * ctx.data.heroes.heroes[p.hero].attackEvery;
+}
+
+export function heroDamageFactor(ctx, hero) { return damageFactor(hero); }
+export function heroArmor(ctx, hero) { return heroStats(ctx.data, heroPlayer(ctx, hero)).armor; }
+
+export function xpForLevel(data, level) {
+  const t = data.econ.hero.xpTable;
+  return level - 1 < t.length ? t[level - 1] : t[t.length - 1];
+}
+export const maxLevel = data => data.econ.hero.xpTable.length;
+
+export function gainXp(ctx, p, amount) {
+  const { data, state } = ctx;
+  p.xp += amount;
+  const max = maxLevel(data);
+  while (p.level < max && p.xp >= data.econ.hero.xpTable[p.level]) {
+    const before = heroStats(data, p);
+    p.level++;
+    p.skillPts++;
+    const after = heroStats(data, p);
+    const h = state.ents.find(e => e.id === p.heroEnt);
+    if (h) {
+      h.level = p.level;
+      h.hpMax = after.hpMax; h.mpMax = after.mpMax;
+      if (h.alive) { h.hp += after.hpMax - before.hpMax; h.mp += after.mpMax - before.mpMax; }
+    }
+    ctx.emit('levelUp', { player: p.id, level: p.level });
+    if (p.level === data.heroes.ranks.talentLevel && p.talent < 0) ctx.emit('talentReady', { player: p.id });
+  }
+}
+
+export function respawnTicks(data, level) {
+  const H = data.econ.hero;
+  return secToTicks(Math.min(H.respawnCap, H.respawnBase + H.respawnPerLevel * level));
+}
+
+export function heroDied(ctx, hero, src) {
+  const { state, data } = ctx;
+  const p = heroPlayer(ctx, hero);
+  hero.hp = 0; hero.alive = false; hero.target = -1;
+  hero.act = 'dead'; hero.actTick = state.tick;
+  for (const s of hero.statuses) ctx.emit('status', { id: hero.id, status: s.id, on: false });
+  hero.statuses.length = 0;
+  hero.respawnAt = state.tick + respawnTicks(data, p.level);
+  hero._ord = { k: 'idle', x: 0, z: 0, target: -1, dir: 0, speed: 0 };
+  p.stats.deaths++;
+  ctx.emit('death', { id: hero.id, killer: src ? src.id : -1, x: hero.x, z: hero.z });
+  ctx.emit('heroDown', { player: p.id, respawnTick: hero.respawnAt });
+}
+
+/** Respawn, regen. */
+export function heroTick(ctx) {
+  const { state, data, map } = ctx;
+  for (const p of state.players) {
+    const h = state.ents.find(e => e.id === p.heroEnt);
+    if (!h) continue;
+    const hs = heroStats(data, p);
+    if (!h.alive) {
+      if (state.tick >= h.respawnAt) {
+        const f = map.fields[h.field];
+        h.alive = true; h.respawnAt = -1;
+        h.hpMax = hs.hpMax; h.hp = hs.hpMax; h.mpMax = hs.mpMax; h.mp = hs.mpMax;
+        h.x = h.px = f.spawn.x; h.z = h.pz = f.spawn.z; h.face = h.pface = Math.PI;
+        h.act = 'idle'; h.actTick = state.tick;
+        ctx.emit('respawn', { player: p.id, id: h.id });
+      }
+      continue;
+    }
+    h.mp = Math.min(h.mpMax, h.mp + hs.mpRegen / 20);
+    if (state.tick - h._lastHurt >= OUT_OF_COMBAT) h.hp = Math.min(h.hpMax, h.hp + h.hpMax * data.econ.hero.regen / 20);
+  }
+}

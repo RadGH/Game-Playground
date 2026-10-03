@@ -208,7 +208,7 @@ test('the title screen: a class card shows the mechanics, and the builder groups
   await page.waitForTimeout(600);
   const groups = await page.$$eval('.cb-origin > summary', ss => ss.map(s => s.textContent));
   expect(groups.length, 'spells are grouped by the class they come from').toBeGreaterThan(5);
-  expect(groups.some(g => /^Warrior — Frontline Tank · \d+ spells?/.test(g)), groups.join(' | ')).toBe(true);
+  expect(groups.some(g => /^Warrior — Frontline Tank( · [^·]+)? · \d+ spells?/.test(g)), groups.join(' | ')).toBe(true);
   // the element filter narrows the list
   const before = await page.locator('.cb-origin .cb-opt').count();
   await page.locator('.cb-filter', { hasText: 'Fire' }).click();

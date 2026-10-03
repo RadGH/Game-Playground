@@ -161,8 +161,15 @@ function shapeSentence(skill) {
         ? `Falls on a spot up to ${metres(skill.range ?? 30)} away${lands} and strikes everything within ${metres(skill.radius ?? 5)} of it ${fmt(skill.repeats)} times over ${secs(skill.repeats * (skill.repeatEvery ?? 0.32))}, ${forDmg} each time.${pull}`
         : `Falls on a spot up to ${metres(skill.range ?? 30)} away${lands} striking everything within ${metres(skill.radius ?? 5)} of that spot ${forDmg}.${pull}`;
     }
-    case 'dash':
-      return `Carries you ${metres(skill.range ?? 10)} forward, striking everything within ${metres(skill.splash ?? 2)} of your path ${forDmg}.`;
+    case 'dash': {
+      // R28 — a `dash` block says where you go (js/skillmech.js); this only says what it strikes
+      const d = skill.dash && typeof skill.dash === 'object' ? skill.dash : null;
+      if (!d) return `Carries you ${metres(skill.range ?? 10)} forward, striking everything within ${metres(skill.splash ?? 2)} of your path ${forDmg}.`;
+      if (d.leap || d.noPath) return ['target', 'behind', 'hit'].includes(d.to) ? `Strikes the enemy you reach ${forDmg}.` : '';
+      return ['target', 'behind', 'hit'].includes(d.to)
+        ? `Strikes everything within ${metres(skill.splash ?? 2)} of your path, and the enemy you reach, ${forDmg}.`
+        : `Strikes everything within ${metres(skill.splash ?? 2)} of your path ${forDmg}.`;
+    }
     case 'summon': {
       const count = Math.max(1, skill.count || 1);
       const who = petName(skill.pet) + (count > 1 ? 's' : '');
@@ -263,8 +270,10 @@ export function describeSkill(skill, statuses = {}, { cost = true, unlockAt = 1,
    * so a knockback, a trap, a counter window or a charge says what it does in numbers. The
    * `repeats` object's riders read off `repeatSpec`.
    */
-  const ctx = { statuses, skills };
+  const ctx = { statuses, skills, atSelf: skill.shape === 'self' || skill.shape === 'around' };
   const vocab = describeVocab({ ...skill, repeats: skill.repeatSpec || null }, ctx);
+  // R28 — a jumping bolt says how it jumps (Forked Bolt, Spirit Bolt)
+  if (skill.chains > 0) vocab.unshift(`Jumps to ${fmt(skill.chains)} more ${skill.chains === 1 ? 'enemy' : 'enemies'}, preferring Shocked ones (12 m between Shocked enemies, 8 m otherwise), each jump dealing ${pct(skill.chainFalloff ?? 0.7)} of the last.`);
   const parts = [base, statusSentence(skill, spec), healSentence(skill), ...vocab].filter(Boolean);
   if (cost) {
     const price = skill.mp ? `${fmt(skill.mp)} mana` : 'No mana cost';

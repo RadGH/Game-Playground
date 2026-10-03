@@ -282,3 +282,6 @@
   .ap-actions button { flex: 1 1 auto; padding: 8px 12px; font-size: 14px; }
   .ap-label { flex-basis: 84px; }
 }
+
+/* R28: the class signature under the name on the class card */
+.cc-head .cc-signature { margin: 2px 0 0; color: var(--b-faint); font-size: 12px; font-style: italic; }

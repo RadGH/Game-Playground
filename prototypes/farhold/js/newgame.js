@@ -229,7 +229,7 @@ export async function runTitle({
       tag.textContent = !custom && (c?.pet || CLASS_PETS[o.value]) ? 'companion' : '';
       const role = document.createElement('span');
       role.className = 'cl-role';
-      role.textContent = custom ? 'Build your own class' : (c?.role || '');
+      role.textContent = custom ? 'Build your own class' : [c?.role, c?.signature].filter(Boolean).join(' · ');
       b.append(name, tag, role);
       b.onclick = () => {
         if (select.value === o.value) return;
@@ -517,6 +517,8 @@ export async function runTitle({
       const h4 = node('h4', null, c.name + ' ');
       h4.append(node('span', null, c.role || ''));
       head.append(h4);
+      // R28: the class's one-line signature (data/classes.json `signature`), what its six skills share.
+      if (c.signature) head.append(node('p', 'cc-signature', c.signature[0].toUpperCase() + c.signature.slice(1)));
 
       const chips = node('ul', 'cc-chips');
       const starter = items.weaponBases?.[c.starter];

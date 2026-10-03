@@ -225,7 +225,8 @@ export function createClassBuilder({
       const key = keyPrefix + id;
       const holds = spells.some(sp => sp.id === chosen);
       const open = few || holds || openGroups.has(key);
-      const role = classById.get(id)?.role;
+      const cls = classById.get(id);
+      const role = [cls?.role, cls?.signature].filter(Boolean).join(' · ');
       const details = el('details', { class: 'cb-later cb-origin', open: open || null, 'data-origin': id }, [
         el('summary', {}, [
           el('b', { text: label(id) }),

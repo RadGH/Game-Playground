@@ -194,7 +194,7 @@ test('the warband grip survives a save through the territory deltas, and an old 
   const factions = JSON.parse(readFileSync(new URL('../data/factions.json', import.meta.url), 'utf8'));
   const zone = { id: 3, name: 'Probe Vale', minLevel: 8, maxLevel: 12, midLevel: 10, danger: 'wild', cells: [] };
   const zones = { byId: id => (id === 3 ? zone : null) };
-  const band = { id: 'ashtusk', name: 'The Ashtusk Horde' };
+  const band = { id: 'ashtusk', name: 'The Ashtusk Warhost' };
   const make = saved => createTerritory({ zones, seed: 9, factions, saved, warbandOf: () => band, warbandCfg: { gripRegen: 0.1, patrolGrip: 0.1 } });
   const land = make(null);
   land.warbandLoss(3, 'patrol');

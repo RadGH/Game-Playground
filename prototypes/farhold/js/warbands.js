@@ -7,7 +7,7 @@
 // other five are these:
 //
 //   sootwick   goblin    The Sootwick Gang       levels 1-16
-//   ashtusk    orc       The Ashtusk Horde       levels 5-24
+//   ashtusk    orc       The Ashtusk Warhost       levels 5-24
 //   thornmane  beastkin  The Thornmane Packs     levels 9-28
 //   unburied   undead    The Unburied Legion     levels 14-36
 //   stonehide  giant     The Stonehide Clans     levels 20-50
@@ -168,7 +168,7 @@ export function gripWord(grip) {
   return 'broken';
 }
 
-/** "held by the Ashtusk Horde — shaken", or "the Ashtusk Horde driven out". */
+/** "held by the Ashtusk Warhost — shaken", or "the Ashtusk Warhost driven out". */
 export function holderLine(band, grip = 1) {
   if (!band) return '';
   const name = String(band.name || band.id).replace(/^The /, 'the ');

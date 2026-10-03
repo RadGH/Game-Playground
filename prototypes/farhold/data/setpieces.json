@@ -2938,7 +2938,7 @@
     "warcamp_ashtusk": {
       "tall": 12,
       "hostile": true,
-      "_r27": "R27 M10 — the Ashtusk Horde's palisade (M3's orc wall) with bone totems.",
+      "_r27": "R27 M10 — the Ashtusk Warhost's palisade (M3's orc wall) with bone totems.",
       "centre": [
         {
           "piece": "pyre",

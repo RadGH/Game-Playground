@@ -417,7 +417,7 @@ export class EnemyField {
     if (!pool.length) return null;
     /**
      * R26 — IN A HELD ZONE, THE WARBAND IS MOST OF WHAT YOU MEET. Its five members against the
-     * zone's thirty-odd beasts would otherwise be one spawn in seven, and "the Ashtusk Horde hold
+     * zone's thirty-odd beasts would otherwise be one spawn in seven, and "the Ashtusk Warhost hold
      * this valley" would be a claim the valley never backs up. The rng is only drawn when there is
      * a warband here, so every unheld zone rolls exactly the sequence it always did.
      */

@@ -1,4 +1,4 @@
-// Bannerline keyboard smoke + lobby loop (PLAN §19 #14): title -> lobby -> join + ready by keyboard
+// Bannerline keyboard smoke + lobby loop (PLAN §19 #14): title -> modes -> lobby -> join + ready by keyboard
 // -> countdown -> match at debug speed; sends, a skill rank, auto-send and a right-click move go
 // through the real bindings; surrender from the pause menu -> results -> Back to the lobby (slot and
 // device kept) -> ready again -> match -> fast-forward to a banners/cap result -> lobby -> title.
@@ -18,6 +18,10 @@ test('keyboard: title -> lobby -> match -> surrender -> results -> lobby (kept) 
 
   // Title -> lobby -> join (Enter) -> ready (Enter) -> 3-2-1 -> match.
   await page.keyboard.press('Enter');
+  await expect(page.locator('#screen-modes')).toBeVisible();
+  await expect(page.locator('.md-card.ready')).toHaveCount(1);                 // Line War
+  await expect(page.locator('.md-card.locked, .md-card.next')).not.toHaveCount(0);
+  await page.keyboard.press('Enter');
   await expect(page.locator('#screen-lobby')).toBeVisible();
   await page.keyboard.press('Enter');
   await expect(page.locator('.lb-slot.local')).toHaveCount(1);
@@ -36,17 +40,20 @@ test('keyboard: title -> lobby -> match -> surrender -> results -> lobby (kept) 
     const s = window.bannerline.state();
     const p = s.players[0];
     return { tick: s.tick, income: p.income, sends: p.stats.sends, q: p.skills.find((k) => k.slot === 'Q').rank,
-      pts: p.skillPts, auto: p.auto.slice(), over: !!s.result };
+      pts: p.skillPts, over: !!s.result };
   });
   const before = await st();
   expect(before.pts).toBeGreaterThan(0);
   await page.keyboard.down('Control'); await page.keyboard.press('KeyQ'); await page.keyboard.up('Control');
   await expect.poll(async () => (await st()).q).toBe(1);
-  for (const k of ['KeyZ', 'KeyX', 'KeyZ']) await page.keyboard.press(k);
+  // B opens the Barracks; its grid keys hire (Q = first unit); B closes it again.
+  await page.keyboard.press('KeyB');
+  await expect(page.locator('.tp-barracks')).toBeVisible();
+  for (const k of ['KeyQ', 'KeyW', 'KeyQ']) await page.keyboard.press(k);
   await expect.poll(async () => (await st()).sends, { timeout: 10_000 }).toBeGreaterThanOrEqual(3);
   expect((await st()).income).toBeGreaterThan(before.income);
-  await page.keyboard.down('Shift'); await page.keyboard.press('KeyZ'); await page.keyboard.up('Shift');
-  await expect.poll(async () => (await st()).auto[0]).toBe(true);
+  await page.keyboard.press('KeyB');
+  await expect(page.locator('.tp-barracks')).toBeHidden();
   const vp = page.viewportSize();
   await page.mouse.click(vp.width / 2, vp.height * 0.35, { button: 'right' });
   await expect.poll(async () => (await st()).tick, { timeout: 30_000 }).toBeGreaterThan(450);
@@ -54,7 +61,9 @@ test('keyboard: title -> lobby -> match -> surrender -> results -> lobby (kept) 
   // Esc -> pause -> Down to Surrender -> Enter -> results.
   await page.keyboard.press('Escape');
   await expect(page.locator('.pause-menu')).toBeVisible();
-  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('ArrowDown');                // How to play
+  await expect(page.locator('.pause-menu [data-act="howto"]')).toHaveClass(/nav-focus/);
+  await page.keyboard.press('ArrowDown');                // Surrender
   await expect(page.locator('.pause-menu [data-act="surrender"]')).toHaveClass(/nav-focus/);
   await page.keyboard.press('Enter');
   await expect(page.locator('#screen-results')).toBeVisible({ timeout: 15_000 });
@@ -79,7 +88,10 @@ test('keyboard: title -> lobby -> match -> surrender -> results -> lobby (kept) 
   await expect(page.locator('#screen-lobby')).toBeVisible();
   await page.keyboard.press('Escape');                 // leave the seat
   await expect(page.locator('.lb-slot.local')).toHaveCount(0);
-  await page.keyboard.press('Escape');                 // nobody seated: back to the title
+  await page.keyboard.press('Escape');                 // nobody seated: back to the modes
+  await expect(page.locator('#screen-modes')).toBeVisible();
+  await page.waitForTimeout(350);                      // menus ignore input for a quarter second after opening
+  await page.keyboard.press('Escape');                 // and the title
   await expect(page.locator('#screen-title')).toBeVisible();
   expect(errors).toEqual([]);
 });

@@ -9,23 +9,26 @@
 //
 // A MODE is a plain object:
 //   { id, name, desc, formats: [..], defaultFormat, heroes: [ids] | null (all), races: [ids] | null,
+//     playable (false = registered but greyed in the lobby), roles: [..] | null, dataFiles: ['hvf/rules.json', ..],
 //     validate(config, data) -> throws on a bad config,
-//     buildMap(data, format) -> sim.map,
+//     buildMap(data, format, { seed, rules }) -> sim.map  (rebuilt on restore from state.seed / state.rules),
+//     createState?(config, data, map) -> state   (optional: the core createState otherwise),
 //     initState(state, data, map, config),          // mode-specific state after the core creates players + heroes
 //     phases: [fn(ctx), ...],                       // per-tick order, after commands
 //     checkResult(ctx),                             // sets state.result when the match ends
 //     commands: { type: fn(ctx, player, cmd) -> reason | null },   // extra command types
 //     ai: fn(ctx, player) -> [commands] }
 //
-// PLANNED (documented, not built — R2.20): 'hvf' Hunters vs Farmers (designed by another agent),
+// REGISTERED but not playable yet: 'hvf' Hunters vs Farmers (stream H). PLANNED (R2.20, not built):
 // 'td' tower defense, 'moba', 'empires' (heroes and empires). Nothing here assumes lanes, banners or
 // sends outside linewar.js, so those can bring their own map, economy and win rule.
 
 import linewar from './linewar.js';
+import hvf from './hvf/index.js';
 
-export const MODES = { linewar };
+// a mode with `playable: false` is registered (its pieces load and test) but the lobby shows it greyed
+export const MODES = { linewar, hvf };
 export const PLANNED = [
-  { id: 'hvf', name: 'Hunters vs Farmers', status: 'designing (round 2, R2.12-R2.19)' },
   { id: 'td', name: 'Tower defense', status: 'parked (R2.20)' },
   { id: 'moba', name: 'Lanes and towers', status: 'parked (R2.20)' },
   { id: 'empires', name: 'Heroes and Empires', status: 'parked (R2.20)' },
@@ -48,6 +51,14 @@ export function resolveMode(config) {
 export function modeList(data) {
   return Object.values(MODES).map(m => ({
     id: m.id, name: m.name, desc: m.desc, formats: m.formats, defaultFormat: m.defaultFormat,
-    heroes: m.heroes || Object.keys(data.heroes.heroes), races: m.races || Object.keys(data.races.races), playable: true,
-  })).concat(PLANNED.map(p => ({ ...p, playable: false })));
+    heroes: m.heroes || Object.keys(data.heroes.heroes), races: m.races || Object.keys(data.races.races), roles: m.roles || null,
+    playable: m.playable !== false, status: m.playable === false ? 'next' : 'ready',
+  })).concat(PLANNED.map(p => ({ ...p, formats: [], playable: false, status: 'planned' })));
+}
+
+/** Every per-mode data file the registered modes ask for (data.js MODE_DATA_FILES must match). */
+export function modeDataFiles() {
+  const out = [];
+  for (const m of Object.values(MODES)) for (const f of m.dataFiles || []) if (!out.includes(f)) out.push(f);
+  return out;
 }

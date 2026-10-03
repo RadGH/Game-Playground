@@ -98,6 +98,11 @@ Offline input delay is 1 tick: commands built during a frame go into the next `s
 tick phase order, end rule, extra commands and AI (the contract is in that file's header). Line war
 is `js/sim/modes/linewar.js`; moving it there changed no outcome (identical match hashes before/after).
 `sim.mode` is the mode object; commands a mode adds arrive through `cmd.type` like any other.
+Hooks for other modes (stream H): `mode.buildMap(data, format, { seed, rules })` (rebuilt on restore from
+`state.seed` / `state.rules`), an optional `mode.createState(config, data, map)` (HvF seats carry `role`), and
+per-mode data files (`mode.dataFiles`, listed in data.js `MODE_DATA_FILES`) loaded as `data.<folder>.<file>`
+(`data.hvf.rules`) and included in `data.hash`. `modeList(data)` gives the lobby `status: 'ready'|'next'|'planned'`;
+Hunters vs Farmers is registered with `playable: false` until stream H finishes the match.
 
 ## 3. Commands
 
@@ -176,6 +181,8 @@ hashed, not snapshotted): they are hints for drawing and sound. Never derive gam
 | `spawn` (kind `turret`) / `remove` (why `expired`) | — | an Engineer's Bolt Turret was built / ran out (or was taken down by a new one past the 1/2/3 limit) |
 | `champion` | `player, unit, field` | a champion send is leaving through a gate ("Champion at the gate!") |
 | `revive` | `id` | a `rise` unit came back at half HP |
+| `counter` | `player, target, unit, name, count, reason, key` | a wave from `player` counters `target`'s defence (stream E): toast to the TARGET, "**{sender}** sends **{name}** x{count} — {reason}" (`reason` is written to the defender, `key` is the machine word: resists / strong / ward / swarm / stealth / unstoppable / shred / bulk). AI senders: throttled by `ai.json`; human senders: at most one every 10 s |
+| `takeover` / `release` | `player` (+ `difficulty`) | online: a seat changed hands at this tick (its machine left / came back) |
 | `talentReady` | `player` | level 6 reached, talent pick open |
 | `reject` | `player, cmd, reason` | a command was refused (§3) |
 | `result` | `winner, reason` | match over. `winner` = team id, or −1 for a draw. `reason`: `'banners'|'cap'|'surrender'` |

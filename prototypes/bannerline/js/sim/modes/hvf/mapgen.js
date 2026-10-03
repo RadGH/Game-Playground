@@ -66,11 +66,14 @@ function bfs(G, sources, pass, stopAt = null, buf = null) {
   while (h < t) {
     const i = q[h++];
     if (stopAt && stopAt(i)) return { dist, prev, hit: i };
-    const x = i % G.cols, z = (i / G.cols) | 0;
-    for (const [dx, dz] of N4) {
-      const nx = x + dx, nz = z + dz;
-      if (!G.inb(nx, nz)) continue;
-      const j = nz * G.cols + nx;
+    const x = i % G.cols, cols = G.cols;
+    // neighbours in N4 order (+x, -x, +z, -z), unrolled: this is the generator's hottest loop
+    for (let k = 0; k < 4; k++) {
+      let j;
+      if (k === 0) { if (x + 1 >= cols) continue; j = i + 1; }
+      else if (k === 1) { if (x === 0) continue; j = i - 1; }
+      else if (k === 2) { j = i + cols; if (j >= G.n) continue; }
+      else { j = i - cols; if (j < 0) continue; }
       if (dist[j] >= 0 || !pass(j)) continue;
       dist[j] = dist[i] + 1; prev[j] = i; q[t++] = j;
     }
@@ -261,9 +264,8 @@ export function buildWorld(gen, { seed, size, farmers = 5, hunters = 2 }) {
     const nm = new Uint8Array(G.n);
     for (let i = 0; i < G.n; i++) {
       if (reserved[i]) continue;
-      const x = i % cols, z = (i / cols) | 0;
-      let s = 0;
-      for (const [dx, dz] of N8) { const nx = x + dx, nz = z + dz; if (G.inb(nx, nz) && mask[nz * cols + nx]) s++; }
+      // (reserved covers a 2-cell border, so all eight neighbours exist)
+      const s = mask[i - 1] + mask[i + 1] + mask[i - cols] + mask[i + cols] + mask[i - cols - 1] + mask[i - cols + 1] + mask[i + cols - 1] + mask[i + cols + 1];
       nm[i] = s >= 5 || (mask[i] && s >= 4) ? 1 : 0;
     }
     mask = nm;
@@ -483,8 +485,8 @@ export function buildWorld(gen, { seed, size, farmers = 5, hunters = 2 }) {
       if (snap[i] !== K.tree || level[i] && false) continue;
       const x = i % cols, z = (i / cols) | 0;
       if (x < 2 || z < 2 || x >= cols - 2 || z >= rows - 2) continue;
-      let open = 0;
-      for (const [dx, dz] of N4) { const j = (z + dz) * cols + x + dx; if (OPEN[snap[j]] && level[j] === level[i]) open++; }
+      const L = level[i];
+      const open = (OPEN[snap[i - 1]] && level[i - 1] === L) || (OPEN[snap[i + 1]] && level[i + 1] === L) || (OPEN[snap[i - cols]] && level[i - cols] === L) || (OPEN[snap[i + cols]] && level[i + cols] === L);
       if (open && hash3(x, z, nseed + 5) < F.roughen) cells[i] = K.grass;
       else if (!open && hash3(x, z, nseed + 6) < F.specks) cells[i] = K.grass;
       else if (!open && hash3(x, z, nseed + 7) < gen.rocks.share) cells[i] = K.rock;
@@ -578,6 +580,8 @@ export function buildWorld(gen, { seed, size, farmers = 5, hunters = 2 }) {
   const needHollows = Math.max(H.minPerFarmer * farmers, Math.round(H.perFarmer * farmers));
   const dTrail = bfs(G, (() => { const s = []; for (let i = 0; i < G.n; i++) if (cells[i] === K.trail) s.push(i); return s; })(), i => level[i] === 0 && cells[i] !== K.water && cells[i] !== K.cliff).dist;
   const reachNow = bfsMove(G, cells, level, Math.floor(commons.z) * cols + Math.floor(commons.x), c => WALK_FARMER[cells[c]] === 1);
+  const hunterNow = bfsMove(G, cells, level, Math.floor(commons.z) * cols + Math.floor(commons.x), c => WALK_HUNTER[cells[c]] === 1);
+  const isDoor = new Uint8Array(G.n), inOther = new Uint8Array(G.n);   // corridors never cut a door or cross a hollow
   const farFromHollows = (x, z, m) => hollows.every(h => (h.cx - x) * (h.cx - x) + (h.cz - z) * (h.cz - z) >= m * m);
   const addHollow = (hcells, cx, cz, r, entry, mouthCell, door, lvl, name) => {
     const h = { id: hollows.length, cx, cz, x: (cx + 0.5) * cell, z: (cz + 0.5) * cell, r, cells: hcells, entry, level: lvl, door, name: name || null,
@@ -644,29 +648,33 @@ export function buildWorld(gen, { seed, size, farmers = 5, hunters = 2 }) {
     if (!farFromHollows(cx, cz, M(H.spacing))) { no('hollow:spacing'); continue; }
     const ring = discCells(G, cx, cz, r + 2);
     if (ring.some(c => level[c] || (cells[c] !== K.tree && cells[c] !== K.rock))) { no('hollow:notForest'); continue; }
-    const hc = [];
+    const hc = [], hcBefore = [];
     for (const c of discCells(G, cx, cz, r * 1.15)) {
       const x = c % cols, z = (c / cols) | 0, dx = x - cx, dz = z - cz, d = Math.sqrt(dx * dx + dz * dz);
-      if (d <= r * (0.82 + 0.33 * valueNoise(x, z, 2.5, nseed + t))) { cells[c] = K.grass; hc.push(c); }
+      if (d <= r * (0.82 + 0.33 * valueNoise(x, z, 2.5, nseed + t))) { hcBefore.push(cells[c]); cells[c] = K.grass; hc.push(c); }
     }
     // corridor to the nearest open ground (through forest only)
     const inH = new Uint8Array(G.n); for (const c of hc) inH[c] = 1;
     // (only through forest: never through another hollow, which would join the two)
-    const res = bfs(G, hc, j => level[j] === 0 && (cells[j] === K.tree || cells[j] === K.rock || cells[j] === K.briar || (OPEN[cells[j]] && reachNow[j] >= 0)), j => !inH[j] && OPEN[cells[j]] && reachNow[j] >= 0, S1);
-    if (res.hit < 0) { for (const c of hc) cells[c] = K.tree; continue; }
+    const res = bfs(G, hc, j => level[j] === 0 && !isDoor[j] && !inOther[j] && (cells[j] === K.tree || cells[j] === K.rock || cells[j] === K.briar || (OPEN[cells[j]] && reachNow[j] >= 0)), j => !inH[j] && OPEN[cells[j]] && reachNow[j] >= 0, S1);
+    if (res.hit < 0) { hc.forEach((c, k) => { cells[c] = hcBefore[k]; }); continue; }
     const path = [];
     for (let c = res.prev[res.hit]; c >= 0 && !inH[c]; c = res.prev[c]) path.push(c);   // corridor cells, mouth end first
+    const before = path.map(c => cells[c]);
     for (const c of path) if (cells[c] !== K.briar) cells[c] = K.grass;
     let entry, door = -1;
     if (next(rng) < H.entry.briar || !path.length) { entry = 'briar'; for (const c of path.slice(0, 2)) cells[c] = K.briar; }
-    else { entry = 'tree'; door = path[0]; cells[door] = K.tree; look[door] = 0; doors.push(door); }
+    else { entry = 'tree'; door = path[0]; cells[door] = K.tree; look[door] = 0; }
+    // the entry must really keep hunters out (a corridor can graze open ground on its way): else undo
+    // (a small flood out of the hollow on hunter footing, stopping at ground hunters already reach)
+    const leak = bfs(G, hc, j => WALK_HUNTER[cells[j]] === 1 && level[j] === 0, j => hunterNow[j] >= 0, S1).hit >= 0;
+    if (leak) { path.forEach((c, k) => { cells[c] = before[k]; }); hc.forEach((c, k) => { cells[c] = hcBefore[k]; }); no('hollow:leaky'); continue; }
+    if (door >= 0) { doors.push(door); isDoor[door] = 1; }
+    for (const c of hc) inOther[c] = 1;
+    for (const c of path) inOther[c] = 1;
     addHollow(hc, cx, cz, r, entry, path.length ? path[0] : res.hit, door, 0, null);
-  { const hr = bfsMove(G, cells, level, Math.floor(commons.z) * cols + Math.floor(commons.x), c => WALK_HUNTER[cells[c]] === 1); const bad = hollows.filter(h => h.entry === 'tree' && h.cells.some(c => hr[c] >= 0)).map(h => h.id); if (bad.length) console.log('PROBE', 'hollow ' + hollows.length + '', bad); }
-
   }
 
-
-  { const hr = bfsMove(G, cells, level, Math.floor(commons.z) * cols + Math.floor(commons.x), c => WALK_HUNTER[cells[c]] === 1); const bad = hollows.filter(h => h.entry === 'tree' && h.cells.some(c => hr[c] >= 0)).map(h => h.id); if (bad.length) console.log('PROBE', 'after-hollows', bad); }
   // 12. deadfall wall: a long tree line across the map, crossings closed except 1-2 gaps
   const reach = (passFarmer) => {
     const start = Math.floor(commons.z) * cols + Math.floor(commons.x);
@@ -705,8 +713,6 @@ export function buildWorld(gen, { seed, size, farmers = 5, hunters = 2 }) {
     }
   }
 
-
-  { const hr = bfsMove(G, cells, level, Math.floor(commons.z) * cols + Math.floor(commons.x), c => WALK_HUNTER[cells[c]] === 1); const bad = hollows.filter(h => h.entry === 'tree' && h.cells.some(c => hr[c] >= 0)).map(h => h.id); if (bad.length) console.log('PROBE', 'after-deadfall', bad); }
   // 13. border, tree looks
   for (let x = 0; x < cols; x++) for (const z of [0, rows - 1]) { cells[z * cols + x] = K.tree; level[z * cols + x] = 0; }
   for (let z = 0; z < rows; z++) for (const x of [0, cols - 1]) { cells[z * cols + x] = K.tree; level[z * cols + x] = 0; }
@@ -776,11 +782,13 @@ export function bfsMove(G, cells, level, start, pass) {
   let h = 0, t = 0;
   dist[start] = 0; q[t++] = start;
   while (h < t) {
-    const i = q[h++], x = i % G.cols, z = (i / G.cols) | 0;
-    for (const [dx, dz] of N4) {
-      const nx = x + dx, nz = z + dz;
-      if (!G.inb(nx, nz)) continue;
-      const j = nz * G.cols + nx;
+    const i = q[h++], x = i % G.cols, cols = G.cols;
+    for (let k = 0; k < 4; k++) {
+      let j;
+      if (k === 0) { if (x + 1 >= cols) continue; j = i + 1; }
+      else if (k === 1) { if (x === 0) continue; j = i - 1; }
+      else if (k === 2) { j = i + cols; if (j >= G.n) continue; }
+      else { j = i - cols; if (j < 0) continue; }
       if (dist[j] >= 0 || !pass(j)) continue;
       if (level[i] !== level[j] && cells[i] !== K.ramp && cells[j] !== K.ramp) continue;
       dist[j] = dist[i] + 1; q[t++] = j;

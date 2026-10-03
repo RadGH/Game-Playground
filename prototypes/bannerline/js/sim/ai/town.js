@@ -99,14 +99,20 @@ export function sanctum(ctx, p, K, S, fund, cmd) {
   const { state, map } = ctx;
   const style = K.town.powers;
   if (style === 'none') return 0;
-  let gold = Math.min(p.gold, Math.max(fund, 0) + (S.threat.danger > 6 ? p.gold : 0));
+  // two purses: a power that saves banners in my own field may spend any gold (a banner is worth more
+  // than the units the gold would buy); anything else comes out of the item fund
+  let all = p.gold, spare = Math.max(0, Math.min(fund, p.gold));
   let spent = 0;
   // powers are a pinch tool: total power spending stays under a share of what goes into sends
-  const cap = (K.town.powerShare ?? 0.12) * (p.stats.sendGold + p.stats.itemGold) + 150 - (p.stats.powerGold || 0);
+  let cap = (K.town.powerShare ?? 0.12) * (p.stats.sendGold + p.stats.itemGold) + 150 - (p.stats.powerGold || 0);
   if (cap <= 0) return 0;
-  gold = Math.min(gold, cap);
   const cast = {};   // one cast per power per think (the cooldown starts when the command lands)
-  const use = (id, x, z) => { if (cast[id]) return false; const c = tryPower(ctx, p, id, x, z, gold, cmd); gold -= c; spent += c; if (c > 0) cast[id] = true; return c > 0; };
+  const use = (id, x, z, home = true) => {
+    if (cast[id]) return false;
+    const c = tryPower(ctx, p, id, x, z, Math.min(cap, home ? all : spare), cmd);
+    if (c > 0) { cast[id] = true; all -= c; spare = Math.max(0, Math.min(spare - c, all)); cap -= c; spent += c; }
+    return c > 0;
+  };
   const f = map.fields[state.teams[p.team].field];
   const foesHere = [];
   for (const e of state.ents) if (live(e) && e.field === f.id && e.team !== p.team && e.kind !== 'hero') foesHere.push(e);
@@ -115,7 +121,7 @@ export function sanctum(ctx, p, K, S, fund, cmd) {
   if (style === 'basic') {
     if (near.length >= 8) { const c = bestCluster(near, 7); use('frost_field', c.x, c.z); }
     const rival = state.players[p.rival], rh = rival && state.ents.find(e => e.id === rival.heroEnt);
-    if (rh && live(rh) && rh.hp < rh.hpMax * 0.4) use('skyfall', rh.x, rh.z);
+    if (rh && live(rh) && rh.hp < rh.hpMax * 0.4) use('skyfall', rh.x, rh.z, false);
     return spent;
   }
 
@@ -135,7 +141,7 @@ export function sanctum(ctx, p, K, S, fund, cmd) {
     if (hp < 0.4 && on >= 3 && hero.z > f.leakZ - 45) { if (!use('stone_ward', hero.x, hero.z)) use('mending_light', hero.x, hero.z); }
     // Blessing when my hero takes on a big wave at full strength
     const around = foesHere.filter(e => dist2(e.x, e.z, hero.x, hero.z) <= 100).length;
-    if (around >= 8 && hp > 0.6 && S.threat.ehp > 4000) use('blessing_of_valour', hero.x, hero.z);
+    if (around >= 8 && hp > 0.6 && S.threat.ehp > 4000) use('blessing_of_valour', hero.x, hero.z, false);
     // Far Sight only when stealthed units are near my hero or the Keep
     const hidden = foesHere.filter(e => e._traits.indexOf('stealth') >= 0 && !e.statuses.some(s => s.id === 'revealed'));
     // ... and they carry enough banners to matter (a single stalker is the hero's job)
@@ -153,14 +159,14 @@ export function sanctum(ctx, p, K, S, fund, cmd) {
   const down = D.heroes.every(h => !h.alive || h.atShop);
   if (mine.length >= 4) {
     const c = bestCluster(mine, 10);
-    if (down && c.n >= 4) { use('war_banner', c.x, c.z); if (c.z > ef.z0 + 30) use('loose_the_pack', c.x, Math.max(ef.z0 + 5, c.z - 4)); }
+    if (down && c.n >= 4) { use('war_banner', c.x, c.z, false); if (c.z > ef.z0 + 30) use('loose_the_pack', c.x, Math.max(ef.z0 + 5, c.z - 4), false); }
     for (const h of D.heroes) {
       if (!h.alive) continue;
       const buried = mine.filter(e => dist2(e.x, e.z, h.x, h.z) <= 64).length;
       if (h.busy >= 4 || buried >= 5) {
-        if (h.hpPct < 0.55) use('skyfall', h.x, h.z);
-        else if (buried >= 6) use('withering_hex', h.x, h.z);
-        if (c.n >= 6 && dist2(c.x, c.z, h.x, h.z) <= 144) use('war_banner', c.x, c.z);
+        if (h.hpPct < 0.55) use('skyfall', h.x, h.z, false);
+        else if (buried >= 6) use('withering_hex', h.x, h.z, false);
+        if (c.n >= 6 && dist2(c.x, c.z, h.x, h.z) <= 144) use('war_banner', c.x, c.z, false);
       }
     }
   }

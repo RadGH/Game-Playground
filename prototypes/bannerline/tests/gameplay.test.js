@@ -473,6 +473,22 @@ test('new traits: ward, unstoppable, volatile, regrow, shred, split, stealth eac
     assert.notEqual(h.target, st.id, 'hidden at 6 m'); st.z = 58.2; run(s, 3); assert.equal(h.target, st.id, 'seen at 2 m'); }
 });
 
+test('a human wave that counters the defence sends the defender a counter notice (throttled)', () => {
+  const s = twoHumans();
+  s.state.players[0].gold = 1e5;
+  const wave = () => { const c = []; for (let i = 0; i < 3; i++) c.push({ p: 0, type: 'send', unit: 'halberdier' }); return c; };
+  s.drainEvents(); s.step(wave()); run(s, 12);
+  const ev = s.drainEvents().filter(e => e.type === 'counter');
+  assert.equal(ev.length, 1);
+  assert.equal(ev[0].player, 0); assert.equal(ev[0].target, 1); assert.equal(ev[0].unit, 'halberdier'); assert.equal(ev[0].count, 3);
+  assert.ok(ev[0].reason.length > 5 && ev[0].key);
+  s.step(wave()); run(s, 12);
+  assert.equal(s.drainEvents().filter(e => e.type === 'counter').length, 0, 'throttled');
+  const t = twoHumans(); t.state.players[0].gold = 1e5;
+  t.drainEvents(); t.step([{ p: 0, type: 'send', unit: 'levy' }, { p: 0, type: 'send', unit: 'levy' }]); run(t, 12);
+  assert.equal(t.drainEvents().filter(e => e.type === 'counter').length, 0, 'no notice for a wave that does not counter');
+});
+
 // ── query helpers ───────────────────────────────────────────────────────────────────────────
 test('query helpers describe the state for the UI', () => {
   const s = twoHumans();

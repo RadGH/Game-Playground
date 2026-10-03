@@ -2,7 +2,7 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { loadDataSync, prepareData, DATA_FILES } from '../js/sim/data.js';
+import { loadDataSync, prepareData, ALL_DATA_FILES, rawSet } from '../js/sim/data.js';
 import { createSim } from '../js/sim/sim.js';
 
 export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -12,7 +12,7 @@ export const data = loadDataSync(readData);
 /** Raw (unfrozen) data, optionally modified, as a new bundle. */
 export function dataWith(mutate) {
   const raw = {};
-  for (const f of DATA_FILES) raw[f.replace('.json', '')] = JSON.parse(readData(f));
+  for (const f of ALL_DATA_FILES) rawSet(raw, f, JSON.parse(readData(f)));
   mutate(raw);
   return prepareData(raw);
 }

@@ -10,8 +10,10 @@
 //   1. read the situation   read.js     defence of the field my sends go into, threat in my field, my army
 //   2. skills + talent      skills.js   learn order, the level-6 pick
 //   3. sends                sends.js    how much, which units (counter.js), when to push; counter notices
+//   3a. Sanctum             town.js     before sends: a power that saves banners outranks units
+//   3b. Drill Yard          town.js     (Commander) before sends when a level beats its price in units
 //   4. shopping             shop.js     walk to the Outfitter when it is safe and worth it; what to buy
-//   5. town                 town.js     Drill Yard levels, Sanctum powers
+//   5. Drill Yard           town.js     (Veteran) out of the item fund
 //   6. hero                 hero.js     post, target, retreat, kiting, helping a teammate; draughts; skills
 //   7. Toll of Iron
 //
@@ -81,6 +83,9 @@ function track(ctx, p) {
     m.deathRate = m.leakRate < 0.3 ? 0.6 : 0.2;
   }
   m.foeBanners = foe.banners;
+  const mine = state.teams[p.team].banners;
+  if (m.myBanners >= 0 && m.myBanners !== undefined) m.lossRate = (m.lossRate || 0) * 0.7 + Math.max(0, m.myBanners - mine) * 0.3;
+  m.myBanners = mine;
   for (const r of Object.keys(m.recentRoles)) m.recentRoles[r] *= 0.75;
 }
 
@@ -99,24 +104,29 @@ export function aiCommands(ctx, p) {
 
   learnCommands(ctx, p, K, rng, cmd);
 
+  // ── Sanctum first: a power that saves banners is worth more than the sends its gold would buy ──
+  const pw = sanctum(ctx, p, K, S, m.fund, cmd);
+  m.fund = Math.max(0, m.fund - pw);
+  const pvPow = pw ? { ...p, gold: p.gold - pw } : p;
+
   // ── Drill Yard first for the Commander: a level that is worth more than the units its price would buy
   //    comes out of the send gold before any send ──
   const planned = K.town.upgrades === 'planned';
   let upFirst = 0;
   if (planned) {
-    upFirst = drillYard(ctx, p, K, S, Math.max(0, p.gold - m.fund), cmd);
+    upFirst = drillYard(ctx, pvPow, K, S, Math.max(0, pvPow.gold - m.fund), cmd);
     if (upFirst) m.pool = Math.max(0, (m.pool || 0) - upFirst);
   }
 
   // ── sends ──
-  const res = planSends(ctx, upFirst ? { ...p, gold: p.gold - upFirst } : p, K, rng, S);
+  const res = planSends(ctx, upFirst || pw ? { ...p, gold: p.gold - upFirst - pw } : p, K, rng, S);
   for (const uid of res.buys) {
     cmd('send', { unit: uid });
     const r = data.derived.units[uid].role;
     m.recentRoles[r] = (m.recentRoles[r] || 0) + data.derived.units[uid].cost;
   }
   noticeCounter(ctx, p, K, res);
-  let gold = p.gold - res.spent - upFirst;
+  let gold = p.gold - res.spent - upFirst - pw;
   m.fund = Math.max(0, Math.min(m.fund, gold));
 
   // ── the Outfitter ──
@@ -146,8 +156,6 @@ export function aiCommands(ctx, p) {
     const up = drillYard(ctx, pv, K, S, m.fund - (S.wantItem && !m.shopTrip ? Math.min(m.fund, S.wantItem.price * 0.5) : 0), cmd);
     gold -= up; m.fund = Math.max(0, m.fund - up);
   }
-  const pw = sanctum(ctx, { ...p, gold }, K, S, m.fund, cmd);
-  gold -= pw; m.fund = Math.max(0, m.fund - pw);
 
   // ── Toll of Iron ──
   const team = state.teams[p.team];

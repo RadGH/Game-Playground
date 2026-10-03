@@ -9,7 +9,11 @@ test('two local players: two views, two bars, per-half panels, mouse stays in it
   await page.addInitScript({ content: PADMOCK });
   await page.goto('prototypes/bannerline/?seed=7&speed=2');
   await expect(page.locator('#boot')).toHaveCount(0, { timeout: 30_000 });
-  await page.keyboard.press('Enter');                        // lobby
+  await page.keyboard.press('Enter');                        // modes
+  await expect(page.locator('#screen-modes')).toBeVisible();
+  await page.waitForTimeout(300);
+  await page.keyboard.press('Enter');                        // lobby (Line War)
+  await expect(page.locator('#screen-lobby')).toBeVisible();
   await page.keyboard.press('Enter');                        // keyboard joins (blue)
   await page.evaluate(() => window.__pad.connect(0));
   await tap(page, 0, STD.A);                                 // pad joins: takes the red AI seat (couch 1v1)
@@ -27,13 +31,13 @@ test('two local players: two views, two bars, per-half panels, mouse stays in it
   expect(probe[0].rect.x).toBe(0);
   expect(probe[1].rect.x).toBe(probe[0].rect.w);
 
-  // Pad View opens the Armory in the RIGHT half only.
+  // Pad View opens the Outfitter in the RIGHT half only; keyboard B opens the Barracks on the left.
   await tap(page, 0, STD.View);
-  await expect(page.locator('.view-root[data-view="1"] .shop-panel')).toBeVisible();
-  await expect(page.locator('.view-root[data-view="0"] .shop-panel')).toBeHidden();
-  // Keyboard B opens the left one.
+  await expect(page.locator('.view-root[data-view="1"] .tp-shop')).toBeVisible();
+  await expect(page.locator('.view-root[data-view="0"] .tp-shop')).toBeHidden();
   await page.keyboard.press('KeyB');
-  await expect(page.locator('.view-root[data-view="0"] .shop-panel')).toBeVisible();
+  await expect(page.locator('.view-root[data-view="0"] .tp-barracks')).toBeVisible();
+  await expect(page.locator('.view-root[data-view="1"] .tp-barracks')).toBeHidden();
 
   // A right-click over the pad's half does nothing for the keyboard hero.
   const vp = page.viewportSize();

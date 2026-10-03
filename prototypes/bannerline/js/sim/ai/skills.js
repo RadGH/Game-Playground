@@ -75,9 +75,10 @@ export function castCommands(ctx, p, K, rng, hero, foes, target, S, cmd) {
   const hp = hero.hp / hero.hpMax;
   const meleeOn = foes.filter(e => e._range <= 3 && dist2(hero.x, hero.z, e.x, e.z) <= 9).length;
   const crowd = r => enemiesNear(foes, hero.x, hero.z, r);
+  // shape changes are decided first (they change what every other key does), then the slots in order
   const order = p.skills.slice();
-  // Commander: the ultimate first, then by slot order; others as listed
-  for (const sk of order) {
+  const shapes = order.filter(sk => data.heroes.skills[sk.id].form), rest = order.filter(sk => !data.heroes.skills[sk.id].form);
+  for (const sk of tier >= 1 ? shapes.concat(rest) : order) {
     if (castRefusal(ctx, p, sk.slot)) continue;
     if (next(rng) > K.hero.skillChance) continue;
     const plan = planFor(data, p, sk.id);
@@ -163,7 +164,8 @@ export function castCommands(ctx, p, K, rng, hero, foes, target, S, cmd) {
         at = bestCluster(inRange, r);
       } else at.n = enemiesNear(foes, target.x, target.z, r);
       if (dist2(hero.x, hero.z, at.x, at.z) > range * range) continue;
-      let need = plan.cooldown >= 18 ? 4 : 2;
+      const CN = K.hero.castNeed;   // [short cooldown, long cooldown] bodies an area skill must catch
+      let need = CN ? (plan.cooldown >= 18 ? CN[1] : CN[0]) : plan.cooldown >= 18 ? 4 : 2;
       if (plan.detonate) {
         // Flashover: only worth it on Burning targets
         const burning = foes.filter(e => dist2(at.x, at.z, e.x, e.z) <= r * r && e.statuses.some(s => s.id === 'burn')).length;
@@ -173,8 +175,8 @@ export function castCommands(ctx, p, K, rng, hero, foes, target, S, cmd) {
         const marked = foes.filter(e => dist2(at.x, at.z, e.x, e.z) <= r * r && e.statuses.some(s => s.id === 'quarry')).length;
         if (marked === 0 && at.n < need + 2) continue;
       }
-      if (tier === 0) need = 1;
-      if (tier === 1 && plan.cooldown >= 18) need = 3;
+      if (!CN && tier === 0) need = 1;
+      if (!CN && tier === 1 && plan.cooldown >= 18) need = 3;
       // a big single target is worth a big skill too (Commander)
       if (tier >= 2 && at.n < need && target.hp > 3000 && dist2(hero.x, hero.z, target.x, target.z) <= range * range) return cast(target.x, target.z);
       if (at.n >= need) return cast(at.x, at.z);
@@ -202,7 +204,8 @@ export function castCommands(ctx, p, K, rng, hero, foes, target, S, cmd) {
     }
     if (plan.shape === 'around') {
       const n = crowd(plan.radius || 4);
-      const need = tier === 0 ? 1 : tier >= 2 ? (plan.cooldown >= 12 ? 4 : 2) : (plan.cooldown >= 12 ? 3 : 2);
+      const CN = K.hero.castNeed;
+      const need = CN ? (plan.cooldown >= 12 ? CN[1] : CN[0]) : tier === 0 ? 1 : tier >= 2 ? (plan.cooldown >= 12 ? 4 : 2) : (plan.cooldown >= 12 ? 3 : 2);
       if (n >= need || (tier >= 2 && n >= 1 && target.hp > 2500)) return cast(hero.x, hero.z);
       continue;
     }

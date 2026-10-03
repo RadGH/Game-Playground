@@ -49,7 +49,7 @@ writes where it landed.
   from `js/view/structures.js` (about 7 m wide x 5 m deep,  a
   banner/war-drum look, team colour as an accent only). B swaps it in with one import. Also welcome:
   the Armory and Keep from the same file.
-- [ ] (B -> A) The send panel reads `query.roster()` and groups by `tier`, so 12 units per race appear
+- [x] (B -> A) **Done (A):** `sendInfo` keeps those fields (+ role, paybackSeconds, traitsText, counters, vsRival); stock/unlocked are gone (absent); the gate queue IS `state.fields[i].waiting` (also `teamInfo().waiting`). Original: The send panel reads `query.roster()` and groups by `tier`, so 12 units per race appear
   with no UI change. After the no-stock change, please keep `sendInfo` returning `{unit, name, tier,
   cost, income, hp, dps, bodies, armour, dmg, traits, canBuy, reason}`; B reads `stock`/`unlocked`
   defensively (absent = no stock, unlocked). For the HUD queue element B reads `state.fields[i].waiting`
@@ -113,7 +113,7 @@ the spam. **Removed** = done in the sim already; **Flag** = a judgement call for
   - `powersInfo(state, data, pid)` -> `[{ id, name, desc, cost, kind: 'defensive'|'offensive'|'neutral',
     radius, canBuy, reason }]`; command `power {id, x, z}`; B needs the valid area per kind: own field /
     enemy fields / anywhere — B will use sim.map fields (`team`) unless you expose `validAt(x,z)`.
-- [ ] (B -> A) R2.10/R2.11: the lobby's first screen lists modes. B reads `data/modes.json` (or a `MODES`
+- [x] (B -> A) **Done (A):** `modeList(data)` from js/sim/modes/index.js returns `[{ id, name, desc, formats, defaultFormat, heroes, races, roles, playable, status: 'ready'|'next'|'planned' }]` (Line War ready, Hunters vs Farmers next, TD/MOBA/Empires planned). The wolf form's skills already come from `heroInfo().skills` (+ `form`). Original: R2.10/R2.11: the lobby's first screen lists modes. B reads `data/modes.json` (or a `MODES`
   export) as `[{ id, name, desc, status: 'ready'|'next'|'planned', formats: ['1v1','2v2','3v3'], heroes?: [ids],
   races?: [ids] }]`; until it exists B shows Line War (ready), Hunters vs Farmers (next), Tower Defense, MOBA,
   Heroes and Empires (planned) from a local list, and passes `config.mode = 'linewar'`, `config.format`.
@@ -205,3 +205,54 @@ the spam. **Removed** = done in the sim already; **Flag** = a judgement call for
   results; after results the HOST calls `room.backToLobby()` and every machine returns to the room.
 - [ ] (D -> B) Banners for lockstep events: takeover ("X left — an AI takes their seat"), rejoin
   ("X is back"), hostLeft, waiting ("Waiting for X (tab hidden)").
+
+## Stream E (AI, round 2) — 2026-10-03
+
+- [x] (E -> A) **Done (A):** added to interfaces.md §4. Original: **New event `counter`** (please add to interfaces.md §4): `{ player, target, unit, name, count, reason, key }`.
+  An AI sent `count` x `unit` (display `name`) that counters `target`'s defence; `reason` is a short
+  player-facing clause ("heavy armour turns your blades", "warded against your spells", "slips past ranged
+  defenders unseen", "too many bodies for single shots", "shrugs off your stuns and shoves", "Nature magic
+  hits your heavy armour hard", "tears through your armour", "too tough for your area spells"); `key` is the
+  machine id (`resists|strong|ward|swarm|stealth|unstoppable|shred|bulk`). Throttled per AI
+  (`ai.json sends.toast` s; Recruit never). Emitted by js/sim/ai/sends.js `noticeCounter`.
+- [x] (E -> A, optional) **Done (A):** economy.js `humanCounterNotice` on each human wave (one notice per 10 s per sender; test in gameplay.test.js). Original: The same notice for HUMAN senders: `unitCounter(data, u, defenceOf(ctx, fieldId, team))`
+  in js/sim/ai/counter.js is pure and takes no AI state, so `releaseTick` could call
+  `counterEvent(ctx, p, p.rival, uid, n, reason)` for a human's wave too. One import + ~6 lines in economy.js;
+  E did not touch A's file.
+- [ ] (E -> B) Toast for `counter` events whose `target` is a local player: "**{sender name}** sends
+  **{name}** x{count} — {reason}". The reason is written to be read by the DEFENDER ("your").
+- [ ] (E -> I) `js/sim/shop.js` `aiShopping` / `aiHealSlot` are no longer called (the AI's Outfitter,
+  Drill Yard and Sanctum decisions moved into js/sim/ai/shop.js + town.js). Safe to delete.
+- [ ] (E -> lead) **Balance finding, not tuned (owner: balance later).** In the current numbers raw send
+  volume decides almost everything: a scripted "new player" (spends 70% of its gold on tier 1-2 units every
+  Pay, stands mid-field, presses Q) beats the Veteran ~62% and the Recruit 99%; AI mirrors end in 5-8 min.
+  Tier 1 has the best income per gold AND the best banners per gold (leak 1 per 12 g vs 18 per 2400 g at
+  tier 6), so items, Drill Yard levels and powers barely move win rates (the Commander's measured best
+  greed is ~1.0). Retreating and kiting LOSE games (respawn is short and next to the Keep). When the
+  economy is tuned, re-run `node tools/ai-duel.mjs commander veteran 40` and the sweeps in
+  tests/ai.test.js; the knobs are all in data/ai.json.
+
+## Stream H (Hunters vs Farmers sim) — 2026-10-03
+
+- [x] H1 done: the forest generator `js/sim/modes/hvf/mapgen.js` (pure; covered by the sim-purity scan),
+  data `data/hvf/{rules,mapgen}.json`, viewer `hvf-map.html` (+ `js/tools/hvf-map-page.js`, `css/hvf-map.css`),
+  tests `tests/hvf-mapgen.test.js` (node) and `tests/hvf-mapgen.spec.js` (node vs Chromium vs Firefox hashes + viewer).
+- [x] (H -> A) **Done (A, 2026-10-03):** hvf registered in `MODES` (playable false: lobby shows it greyed via `modeList().status === 'next'`); hooks 1-3 in sim.js / data.js (buildMap(data, format, { seed, rules }) on create and restore from state.seed / state.rules; `mode.createState` used when present; `data/hvf/*.json` load as data.hvf.* via `MODE_DATA_FILES` and join the data hash; tests/modes.test.js checks the list matches every mode's `dataFiles`). Line war identical (6 matches incl. snapshot+restore: same hashes before/after). Original request: The mode entry is `js/sim/modes/hvf/index.js` (default export in linewar.js's shape, `playable: false`
+  until H2). Please register it — `import hvf from './hvf/index.js'` and add it to `MODES` while keeping it off the
+  lobby (`modeList` can read `m.playable === false` and show it greyed), or leave it in PLANNED until H2; your call.
+  To run it, the framework needs three hooks (none touch line war's behaviour):
+  1. **buildMap gets the config**: `mode.buildMap(data, format, config)` in createSim, and on restore
+     `mode.buildMap(data, format, { seed: state.seed, rules: state.rules })` — the forest is rebuilt from the seed
+     (keep `state.rules` or the map size override in state).
+  2. **The mode may build its own state**: in createSim, `mode.createState ? mode.createState(config, data, map)
+     : createState(...)`. HvF seats carry `role: 'farmer'|'hunter'`, no race/hero, unequal teams (5v2).
+  3. **Per-mode data files**: `mode.dataFiles` (`['hvf/rules.json', 'hvf/mapgen.json']`, more in H2/H3) loaded as
+     `data.hvf.rules`, `data.hvf.mapgen` and joined to the data hash (online peers must agree on them).
+  4. **Mode commands first**: in `applyCommand`, when `ctx.mode.commands[cmd.type]` exists, dispatch to it BEFORE the
+     line-war switch (HvF has its own `move`/`stop`/`attack`/`surrender` for characters that are not heroes).
+  5. **Core step assumptions**: `Sim.step` copies `px/pz/face` for `state.ents`, filters `_gone`, and `minuteStats`
+     reads `p.stats.incomeAt/goldAt`, `p.income`, `p.gold` — HvF state keeps all of these, so no change needed; just
+     don't add line-war-only reads to the shared step.
+- [ ] (H -> B) FYI: `hvf-map.html` is a standalone tool page (like structures.html); link it from wherever tool
+  pages are listed. `tests/hvf-mapgen.spec.js` is mine (cross-engine check for H1 per hvf-PLAN §17) although §18 gives
+  `tests/hvf-*.spec.js` to B; keep it or move it, it only opens hvf-map.html.

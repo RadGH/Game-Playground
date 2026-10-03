@@ -11,6 +11,8 @@
 import { secToTicks, baseEnt } from './state.js';
 import { gainXp } from './heroes.js';
 import { gearStats } from './items.js';
+import { unitCounter, counterEvent } from './ai/counter.js';
+import { defenceOf } from './ai/read.js';
 import { dist2 } from './mathx.js';
 
 export const payTicks = data => secToTicks(data.econ.clock.pay);
@@ -77,6 +79,7 @@ export function releaseTick(ctx) {
         if (u.traits.includes('champion')) ctx.emit('champion', { player: p.id, unit: uid, field: field.id });
       }
       ctx.emit('wave', { player: p.id, field: field.id, units });
+      if (p.kind === 'human') humanCounterNotice(ctx, p, field.id, units);
       p.queued.length = 0;
     }
   }
@@ -178,4 +181,24 @@ export function payKill(ctx, dst, src) {
   }
   if (heroes.length) for (const pid of heroes) gainXp(ctx, state.players[pid], dst._xp * r / heroes.length);
   if (src && src.kind === 'hero') state.players[src.owner].stats.kills++;
+}
+
+const HUMAN_COUNTER_EVERY = 200;   // ticks: at most one counter notice per human sender every 10 s
+/** The `counter` notice (stream E) for a HUMAN's wave too: the defender learns why it hurts. */
+function humanCounterNotice(ctx, p, fieldId, units) {
+  const { state, data } = ctx;
+  if (state.tick < (p.counterAt || 0)) return;
+  const counts = [];
+  for (const uid of units) { const c = counts.find(x => x.uid === uid); if (c) c.n++; else counts.push({ uid, n: 1 }); }
+  let best = null;
+  const D = defenceOf(ctx, fieldId, p.team);
+  for (const c of counts) {
+    const u = data.derived.units[c.uid];
+    if (c.n * u.cost < 90) continue;
+    const k = unitCounter(data, u, D);
+    if (k.mult >= 1.1 && k.reasons.length && (!best || c.n * u.cost > best.gold)) best = { uid: c.uid, n: c.n, gold: c.n * u.cost, reason: k.reasons[0] };
+  }
+  if (!best) return;
+  p.counterAt = state.tick + HUMAN_COUNTER_EVERY;
+  counterEvent(ctx, p, p.rival, best.uid, best.n, best.reason);
 }

@@ -124,7 +124,7 @@ function spam(ctx, p, K, rng, fresh) {
     for (let i = 0; i < avail.length; i++) { r -= w[i]; if (r <= 0) return avail[i]; }
     return avail[avail.length - 1];
   }, K.sends.maxPerPay || 80);
-  return { ...res, push: false, counter: null };
+  return { ...res, push: false, cmap: null };
 }
 
 // Veteran: fixed share, half income half pressure, a coin-flip read of the rival hero
@@ -142,17 +142,7 @@ function balanced(ctx, p, K, rng, S, fresh) {
     for (const u of roster) if (u.cost <= b) { const s = score(u); if (s > bs || (s === bs && u.id < best.id)) { bs = s; best = u; } }
     return best;
   });
-  return { ...res, push: false, counter: readIt ? topCounter(res.buys, c) : null };
-}
-
-function topCounter(buys, c, min = 1.08) {
-  let best = null;
-  for (const uid of buys) {
-    const k = c[uid];
-    if (!k || k.mult < min || !k.reasons.length) continue;
-    if (!best || k.mult > best.mult) best = { uid, mult: k.mult, reason: k.reasons[0] };
-  }
-  return best;
+  return { ...res, push: false, cmap: readIt ? c : null };
 }
 
 /** Is the defence of my lane down right now? Returns a short reason or null. */
@@ -180,7 +170,9 @@ export function pushWindow(ctx, p, S) {
 //   income share   spent at once on the best income per gold (counters weighted in) — income only pays
 //                  if it comes early, so this share shrinks with the clock and the banner count
 //   pressure pool  saved (p.ai.pool) until it buys the cheapest wave that should leak against the
-//                  defence as it stands, then sent in one go; any push window empties it at once
+//                  defence as it stands, then sent in one go; any push window empties it at once.
+//                  Its share starts at sends.pressure[0] and grows by sends.pressure[1] a minute (and
+//                  when banners run low on either side)
 function adaptive(ctx, p, K, rng, S, fresh) {
   const { state, data } = ctx;
   const T = state.tick / 20;
@@ -208,11 +200,13 @@ function adaptive(ctx, p, K, rng, S, fresh) {
   const push = !!why || behind;
   if (why && why !== 'team') p.ai.pushUntil = state.tick + 100;
 
-  // the purse: item fund (hero + town) vs sends; greed slides from greed[1] early to greed[0] by minute 10
-  // greed: enough into the item fund to afford the next build step within `itemPays` Pays, never
-  // below greed[0] or above greed[1] (a sharp player keeps sending while it saves)
+  // the purse: item fund (hero + town) vs sends. When an item is wanted, enough goes into the fund to
+  // afford the next build step within `itemPays` Pays (never below greed[0]). Items are bought when they are cheap next to my income, or when my own lane is going badly (banners
+  // lost lately); otherwise every coin goes to sends (measured: in a send race an item fund taken
+  // early is income never made)
   let greed = K.sends.greed[1];
-  if (S.wantItem) {
+  const struggling = (p.ai.lossRate || 0) >= 0.5;
+  if (S.wantItem && (struggling || S.wantItem.price <= p.income * (K.sends.itemAt || 1.5))) {
     const short = Math.max(0, S.wantItem.price - (p.ai.fund || 0));
     const share = short / Math.max(1, p.income * (K.sends.itemPays || 9));
     greed = Math.max(K.sends.greed[0], Math.min(K.sends.greed[1], 1 - share));
@@ -230,13 +224,13 @@ function adaptive(ctx, p, K, rng, S, fresh) {
     p.ai.fund = Math.min(p.ai.fund || 0, Math.max(keep, (p.ai.fund || 0) * (allIn ? 0 : 0.3)));
   }
   p.ai.fund = Math.min(p.ai.fund, p.gold);
-  let fresh$ = Math.max(0, p.gold - p.ai.fund - pool0);   // new send gold this think
+  const sendGold = Math.max(0, p.gold - p.ai.fund - pool0);   // new send gold this think
 
   // pressure share of new send gold: a quarter at the start, most of it by minute 15
   const PS = K.sends.pressure || [0.25, 0.05];   // [share at 0:00, added per minute]
   const pShare = push ? 1 : Math.min(0.9, PS[0] + PS[1] * T / 60 + Math.max(0, 0.6 - Math.min(me.banners / me.bannersMax, foe.banners / foe.bannersMax)));
-  let pool = pool0 + fresh$ * pShare;
-  let incomeGold = fresh$ * (1 - pShare);
+  let pool = pool0 + sendGold * pShare;
+  const incomeGold = sendGold * (1 - pShare);
 
   const out = [];
   let spent = 0, gold = p.gold;
@@ -291,20 +285,33 @@ function adaptive(ctx, p, K, rng, S, fresh) {
 
   // remember my armour mix for teammates (decays)
   if (!p.ai.recent) p.ai.recent = {};
-  for (const a of Object.keys(p.ai.recent)) p.ai.recent[a] *= 0.8;
+  if (fresh) for (const a of Object.keys(p.ai.recent)) p.ai.recent[a] *= 0.8;
   for (const uid of out) { const a = data.derived.units[uid].armour; p.ai.recent[a] = (p.ai.recent[a] || 0) + data.derived.units[uid].cost; }
-  if (push && out.length) p.ai.pushUntil = Math.max(p.ai.pushUntil || 0, state.tick + 60);
-  return { buys: out, spent, push, why, plan, counter: topCounter(out, c, 1.1) };
+  if (push && why !== 'team' && out.length) p.ai.pushUntil = Math.max(p.ai.pushUntil || 0, state.tick + 60);   // (a push that only follows a teammate's does not re-arm it)
+  return { buys: out, spent, push, why, plan, cmap: c };
 }
 
-/** Emit a counter-send notice at most once per K.toastEvery seconds per AI. */
+/**
+ * Counter-send notices. Every send that counters the defence (mult >= 1.1 with a reason) adds its gold to
+ * a per-unit tally; when the throttle allows (`sends.toast` s) and one unit has piled up a real wave
+ * (>= 90 gold since the last notice), the biggest is announced and the tally clears.
+ */
 export function noticeCounter(ctx, p, K, res) {
-  const { state } = ctx;
-  if (!res.counter || !K.sends.toast) return;
+  const { state, data } = ctx;
+  if (!K.sends.toast || !res.cmap) return;
+  const acc = p.ai.counterAcc || (p.ai.counterAcc = {});
+  for (const uid of res.buys) {
+    const k = res.cmap[uid];
+    if (k && k.mult >= 1.1 && k.reasons.length) acc[uid] = (acc[uid] || 0) + data.derived.units[uid].cost;
+  }
   if (state.tick < (p.ai.toastAt || 0)) return;
+  let best = null;
+  for (const uid of Object.keys(acc)) if (acc[uid] >= 90 && (!best || acc[uid] > acc[best] || (acc[uid] === acc[best] && uid < best))) best = uid;
+  if (!best) return;
+  const n = Math.round(acc[best] / data.derived.units[best].cost);
   p.ai.toastAt = state.tick + K.sends.toast * 20;
-  const n = res.buys.filter(u => u === res.counter.uid).length;
-  counterEvent(ctx, p, p.rival, res.counter.uid, n, res.counter.reason);
+  p.ai.counterAcc = {};
+  counterEvent(ctx, p, p.rival, best, n, res.cmap[best].reasons[0]);
 }
 
 export { live };

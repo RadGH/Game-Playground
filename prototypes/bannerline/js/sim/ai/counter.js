@@ -15,7 +15,7 @@
 // Reasons are short, player-facing, and say what the defender can do about it implicitly.
 
 const DMG_WORD = { blade: 'blades', pierce: 'arrows', fire: 'fire', nature: 'nature magic' };
-const DMG_ADJ = { blade: 'Blades', pierce: 'Arrows', fire: 'Fire', nature: 'Nature magic' };
+const DMG_ADJ = { blade: 'Blades hit', pierce: 'Arrows hit', fire: 'Fire hits', nature: 'Nature magic hits' };
 const ARMOUR_WORD = { light: 'light', heavy: 'heavy', spectral: 'spectral', hide: 'hide', fortified: 'fortified' };
 
 const pct = (data, d, a) => {
@@ -63,7 +63,7 @@ export function unitCounter(data, u, D, opts = {}) {
   const top = D.heroes.reduce((b, h, i) => (W[i] > (b ? b.w : -1) ? { h, w: W[i] } : b), null);
   if (top && pct(data, u.dmg, top.h.armourClass) > 1) {
     const mr = (u.dmg === 'fire' || u.dmg === 'nature') ? top.h.mr : 0;
-    if (mr < 15) reasons.push({ key: 'strong', w: (pct(data, u.dmg, top.h.armourClass) - 1) * 2, text: `${DMG_ADJ[u.dmg]} hits your ${ARMOUR_WORD[top.h.armourClass]} armour hard` });
+    if (mr < 15) reasons.push({ key: 'strong', w: (pct(data, u.dmg, top.h.armourClass) - 1) * 2, text: `${DMG_ADJ[u.dmg]} your ${ARMOUR_WORD[top.h.armourClass]} armour hard` });
   }
   if (opts.only === 'table') return finish(taken, dealt, reasons);
 
@@ -83,7 +83,8 @@ export function unitCounter(data, u, D, opts = {}) {
     taken *= 0.92;
     reasons.push({ key: 'bulk', w: 0.08, text: 'too tough for your area spells' });
   }
-  if (has('stealth') && ranged + ts > 0.5) { taken *= 0.78; reasons.push({ key: 'stealth', w: 0.22, text: 'slips past ranged defenders unseen' }); }
+  // hidden bodies dodge aimed shots and turrets, not area spells (an area still hits what it cannot see)
+  if (has('stealth') && ranged + ts > 0.5) { const k = 0.22 * (1 - skill * 0.6); taken *= 1 - k; if (k > 0.12) reasons.push({ key: 'stealth', w: k, text: 'slips past ranged defenders unseen' }); }
   if (has('unstoppable') && cc >= 0.5) { taken *= 1 - 0.12 * cc; reasons.push({ key: 'unstoppable', w: 0.12 * cc, text: 'shrugs off your stuns and shoves' }); }
   if (has('flying') && ts > 0.25) { taken *= 0.92; }
   if (has('heal') && aoe < 0.9) taken *= 0.94;

@@ -63,9 +63,11 @@ class Sim {
 export function createSim(config, data, opts = {}) {
   const { mode, format } = resolveMode(config);
   mode.validate({ ...config, format }, data);
-  const map = mode.buildMap(data, format);
+  // hooks (R2.10, for modes beyond line war): buildMap gets the seed + rules; a mode may build its own
+  // state (Hunters vs Farmers seats carry a role, not a race and hero)
+  const map = mode.buildMap(data, format, { seed: (config.seed ?? 1) >>> 0, rules: config.rules || {} });
   // state.mode keeps the FORMAT ('1v1') for older readers; state.game names the mode (R2.10)
-  const state = createState({ ...config, mode: format }, data, map);
+  const state = mode.createState ? mode.createState({ ...config, format }, data, map) : createState({ ...config, mode: format }, data, map);
   state.game = mode.id; state.format = format;
   mode.initState(state, data, map, config);
   const sim = new Sim(state, data, map, opts, mode);
@@ -78,6 +80,6 @@ export function restoreSim(snap, data, opts = {}) {
   if (snap.dataHash !== data.hash) throw new Error('Version mismatch: update and rejoin');
   const state = JSON.parse(JSON.stringify(snap.state));
   const { mode, format } = resolveMode({ mode: state.game || 'linewar', format: state.format || state.mode });
-  const map = mode.buildMap(data, format);
+  const map = mode.buildMap(data, format, { seed: state.seed, rules: state.rules || {} });   // a mode keeps state.rules if its map needs them
   return new Sim(state, data, map, opts, mode);
 }

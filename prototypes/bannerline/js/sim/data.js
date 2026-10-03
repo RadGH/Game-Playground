@@ -5,12 +5,26 @@
 //   const data = await loadData(name => fetch('data/' + name).then(r => r.text()));   // browser
 //   const data = loadDataSync(name => readFileSync(join(dir, 'data', name), 'utf8'));  // node
 //
-// The bundle is { econ, units, races, damage, maps, heroes, ai, derived, hash }.
+// The bundle is { econ, units, races, damage, maps, heroes, ai, ..., derived, hash }, plus per-mode files
+// in sub-folders (MODE_DATA_FILES: 'hvf/rules.json' -> data.hvf.rules). Every file joins the hash, so
+// online peers must agree on mode data too.
 
 import { hashCanonical } from './hash.js';
 
 export const DATA_FILES = ['econ.json', 'units.json', 'races.json', 'damage.json', 'maps.json', 'heroes.json', 'ai.json', 'items-bl.json', 'shop.json', 'upgrades.json', 'powers.json', 'buildings.json'];
+// Per-mode data (R2.10 hook for stream H). Kept as a plain list here so data.js imports no mode code;
+// tests/modes.test.js checks it equals the union of every registered mode's `dataFiles`.
+export const MODE_DATA_FILES = ['hvf/rules.json', 'hvf/mapgen.json'];
+export const ALL_DATA_FILES = DATA_FILES.concat(MODE_DATA_FILES);
 const keyOf = f => f.replace(/\.json$/, '');
+/** Read / write a file's slot in a raw bundle ('hvf/rules.json' -> raw.hvf.rules). */
+export function rawGet(raw, f) { return keyOf(f).split('/').reduce((o, k) => (o ? o[k] : undefined), raw); }
+export function rawSet(raw, f, v) {
+  const parts = keyOf(f).split('/');
+  let o = raw;
+  for (let i = 0; i < parts.length - 1; i++) o = o[parts[i]] = o[parts[i]] || {};
+  o[parts[parts.length - 1]] = v;
+}
 
 export function deepFreeze(o) {
   if (o && typeof o === 'object' && !Object.isFrozen(o)) {
@@ -47,22 +61,22 @@ function derive(raw) {
 }
 
 export function prepareData(raw) {
-  for (const f of DATA_FILES) if (!raw[keyOf(f)]) throw new Error(`Missing data file ${f}`);
-  const hash = hashCanonical(DATA_FILES.map(f => raw[keyOf(f)]));
+  for (const f of ALL_DATA_FILES) if (!rawGet(raw, f)) throw new Error(`Missing data file ${f}`);
+  const hash = hashCanonical(ALL_DATA_FILES.map(f => rawGet(raw, f)));
   const bundle = { ...raw, derived: derive(raw), hash };
   return deepFreeze(bundle);
 }
 
 function parseAll(texts) {
   const raw = {};
-  DATA_FILES.forEach((f, i) => { raw[keyOf(f)] = typeof texts[i] === 'string' ? JSON.parse(texts[i]) : texts[i]; });
+  ALL_DATA_FILES.forEach((f, i) => rawSet(raw, f, typeof texts[i] === 'string' ? JSON.parse(texts[i]) : texts[i]));
   return prepareData(raw);
 }
 
 /** fetchText(name) -> string | Promise<string> (or already-parsed object). */
 export function loadData(fetchText) {
-  return Promise.all(DATA_FILES.map(f => fetchText(f))).then(parseAll);
+  return Promise.all(ALL_DATA_FILES.map(f => fetchText(f))).then(parseAll);
 }
 
 /** Synchronous twin for node: readText(name) -> string. */
-export function loadDataSync(readText) { return parseAll(DATA_FILES.map(f => readText(f))); }
+export function loadDataSync(readText) { return parseAll(ALL_DATA_FILES.map(f => readText(f))); }

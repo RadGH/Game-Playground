@@ -77,26 +77,43 @@ function chooseTarget(ctx, p, K, hero, foes, f) {
     for (const e of foes) if (!best || e.z > best.z || (e.z === best.z && e.id < best.id)) best = e;
     return best;
   }
-  // tier 2: score every visible body
-  const reach = ranged ? data.heroes.heroes[p.hero].range + 4 : 6;
+  // tier 2: score every body in REACH (chasing what you cannot catch is the classic waste); what is
+  // out of reach is handled by moving to intercept it (interceptPoint)
+  const def = data.heroes.heroes[p.hero];
+  const reach = (ranged ? def.range + 1 : Math.max(def.range, hero._range || 0) + 2.5) + hero.r;
   let best = null, bs = -Infinity;
   for (const e of foes) {
     const d = Math.sqrt(dist2(hero.x, hero.z, e.x, e.z));
+    if (d > reach + e.r) continue;
     const u = data.derived.units[e.type];
     let s = 0;
-    // leakers first: anything past me and close to the Keep
     const toKeep = f.leakZ - e.z;
-    if (e.z > hero.z + 3) s += 6 + Math.max(0, 30 - toKeep) / 3;
-    if (toKeep < 15) s += 8;
+    if (e.z > hero.z + 2) s += 3;          // already past me
+    if (toKeep < 15) s += 6;
     if (u) s += PRIORITY_ROLE[u.role] || 0;
     if (e._traits.indexOf('heal') >= 0) s += 2;
-    // finish what is low, prefer what is in reach
-    s += 3 * (1 - Math.min(1, e.hp / Math.max(1, e.hpMax)));
-    s -= Math.max(0, d - reach) * 0.35;
+    s += 3 * (1 - Math.min(1, e.hp / Math.max(1, e.hpMax)));   // finish what is low
     if (e.id === hero.target) s += 1.5;   // stickiness: do not twitch between targets
     if (s > bs || (s === bs && e.id < best.id)) { bs = s; best = e; }
   }
   return best;
+}
+
+/** Tier 2: where to stand to meet the most dangerous enemy group in my lane (keep-side of it). */
+function interceptPoint(ctx, p, hero, foes, f, laneX) {
+  const { data } = ctx;
+  const def = data.heroes.heroes[p.hero];
+  const ranged = !def.melee && p.form !== 'wolf' && p.form !== 'briarback';
+  let best = null, bs = -Infinity;
+  for (const e of foes) {
+    const prox = (e.z - f.z0) / (f.leakZ - f.z0);
+    const s = (e.kind === 'tide' ? 1 : e._leak) * (0.3 + prox * prox) - Math.abs(e.x - laneX) * 0.01;
+    if (s > bs || (s === bs && e.id < best.id)) { bs = s; best = e; }
+  }
+  if (!best) return null;
+  // meet it a little ahead (it walks +z); a ranged hero keeps most of its range between them
+  const lead = ranged ? Math.min(def.range * 0.7, f.leakZ - 2 - best.z) : 2.5;
+  return { x: Math.max(f.x0 + 1.5, Math.min(f.x1 - 1.5, best.x)), z: Math.max(f.z0 + 2, Math.min(f.leakZ - 2, best.z + Math.max(0, lead))) };
 }
 
 /**
@@ -120,8 +137,13 @@ export function heroCommands(ctx, p, K, rng, hero, S, cmd) {
   const noHeal = S.healSlot < 0;
   if (tier >= 1 && hp < K.hero.retreatAt && (noHeal || state.tick < (p.useAt || 0) + 10)) {
     // Commander stands and fights if the Keep is about to fall and the fight is small
-    const keepBurning = tier >= 2 && S.threat.near > 0 && S.threat.near <= 3 && hp > 0.15;
-    if (!keepBurning) {
+    if (tier >= 2) {
+      // Commander falls back toward the Keep FIGHTING (attack-move): the bodies come to it there, it
+      // respawns next door if it dies, and walking home with a wave behind it only hands that wave the
+      // lane (measured: walking home cost ~15% of games against a plain spammer)
+      const fz = f.leakZ - 8;
+      if (hero.z < fz - 3) { moveCmd(cmd, f, hero, S.laneX, fz, 'amove'); return { target: null, foes }; }
+    } else {
       p.ai.retreat = true;
       moveCmd(cmd, f, hero, f.spawn.x, f.spawn.z);
       return { target: null, foes };
@@ -141,15 +163,22 @@ export function heroCommands(ctx, p, K, rng, hero, S, cmd) {
   // ── where to stand ──
   const post = S.post;
   const target = chooseTarget(ctx, p, K, hero, foes, f);
-  // leash: tier 2 does not chase deep up the field when the Keep side is threatened
+  if (tier >= 2 && !target) {
+    // nothing in reach: go and meet the most dangerous group (attack-move, so the first body in aggro
+    // range gets hit on the way)
+    const at = interceptPoint(ctx, p, hero, foes, f, S.laneX);
+    if (at) { moveCmd(cmd, f, hero, at.x, at.z, 'amove'); return { target: null, foes }; }
+  }
   if (target) {
     const d2 = dist2(hero.x, hero.z, target.x, target.z);
     const aggro = data.heroes.heroes[p.hero].aggro || 8;
-    const engage = tier === 0 ? aggro + 2 : tier === 1 ? aggro + 8 : aggro + 14;
-    const chase = d2 <= engage * engage || (tier >= 1 && target.z > hero.z && f.leakZ - target.z < 35);
+    const engage = tier === 0 ? aggro + 2 : tier === 1 ? aggro + 8 : Infinity;   // tier 2 only targets what is in reach
+    const chase = d2 <= engage * engage || (tier === 1 && target.z > hero.z && f.leakZ - target.z < 35);
     if (chase) {
       // ranged kiting (tier >= 1): step away from melee that is on me, then keep shooting
-      if (!melee && tier >= 1 && meleeOn >= (tier >= 2 ? 1 : 2) && hp < (tier >= 2 ? 0.95 : 0.85)) {
+      // (only when it is losing that fight: every step away is a shot not taken — measured, kiting at
+      // the first touch cost a third of the games against a plain spammer)
+      if (!melee && tier >= 1 && K.hero.kite !== false && meleeOn >= (tier >= 2 ? 3 : 2) && hp < (tier >= 2 ? 0.45 : 0.5)) {
         let mx = 0, mz = 0, n = 0;
         for (const e of foes) if (e._range <= 3 && e.target === hero.id) { mx += e.x; mz += e.z; n++; }
         let dx = hero.x - mx / n, dz = hero.z - mz / n;

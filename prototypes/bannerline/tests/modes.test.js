@@ -62,3 +62,26 @@ test('bounty is split across the defending team', () => {
 });
 
 const awaitImport = await import('../js/sim/combat.js');
+
+test('mode hooks: hvf is registered but not playable; per-mode data loads as data.hvf and joins the hash; buildMap gets the seed; a mode may build its own state', async () => {
+  const { MODES, modeList, modeDataFiles, resolveMode } = await import('../js/sim/modes/index.js');
+  const { MODE_DATA_FILES } = await import('../js/sim/data.js');
+  const { dataWith } = await import('./_sim.mjs');
+  assert.ok(MODES.hvf, 'registered');
+  const list = modeList(data);
+  assert.equal(list.find(m => m.id === 'hvf').playable, false);
+  assert.equal(list.find(m => m.id === 'hvf').status, 'next');
+  assert.equal(list.find(m => m.id === 'linewar').status, 'ready');
+  assert.ok(list.some(m => m.status === 'planned'));
+  assert.deepEqual(MODE_DATA_FILES.slice().sort(), modeDataFiles().sort(), 'data.js list = the modes\' dataFiles');
+  assert.ok(data.hvf && data.hvf.rules && data.hvf.mapgen, 'data.hvf.rules / mapgen');
+  const other = dataWith(raw => { raw.hvf.rules._probe = 1; });
+  assert.notEqual(other.hash, data.hash, 'mode data is in the data hash');
+  // buildMap gets the seed: the same seed builds the same forest, another seed another one
+  const { mode, format } = resolveMode({ mode: 'hvf', format: '5v2' });
+  const a = JSON.stringify(mode.buildMap(data, format, { seed: 11 })).length, b = JSON.stringify(mode.buildMap(data, format, { seed: 11 })).length;
+  assert.equal(a, b);
+  // createState hook: the mode's own (H2 not built yet: a readable error, not a line-war state)
+  const players = []; for (let i = 0; i < 5; i++) players.push({ team: 0, role: 'farmer' }); for (let i = 0; i < 2; i++) players.push({ team: 1, role: 'hunter' });
+  assert.throws(() => createSim({ seed: 3, mode: 'hvf', format: '5v2', players }, data), /not playable yet/);
+});

@@ -173,21 +173,21 @@ the spam. **Removed** = done in the sim already; **Flag** = a judgement call for
 
 ## Stream A round-2 notes (2026-10-03)
 
-- [ ] (A -> B) Removed from the core: commands `deck`, `auto`, `muster`; queries `deckInfo`, `musterInfo`;
+- [x] (A -> B) Removed from the core: commands `deck`, `auto`, `muster`; queries `deckInfo`, `musterInfo`;
   player fields `deck`, `auto`, `muster`; events `muster`. Z X C V and the Muster button need removing
   (owner R2.1/R2.9). `rivalInfo` lost `deck`.
-- [ ] (A -> B) Mode framework (R2.10): `createSim({ mode: 'linewar', format: '1v1', ... })`; the old
+- [x] (A -> B) Mode framework (R2.10): `createSim({ mode: 'linewar', format: '1v1', ... })`; the old
   `mode: '1v1'` still works. Lobby first screen: `modeList(data)` from js/sim/modes/index.js (R2.11).
   `state.game` / `state.format` are the new names; `state.mode` stays as the format for now.
-- [ ] (A -> B) Knockback is a slide now (R2.5): the `knock` event carries `vx, vz, metres` (no from/to);
+- [x] (A -> B) Knockback is a slide now (R2.5): the `knock` event carries `vx, vz, metres` (no from/to);
   positions move every tick, so normal interpolation draws it.
-- [ ] (A -> B/C) New hero `engineer` (R2.8) and the Druid's Wolf form (R2.7, skill `wolf_shape` on E;
+- [~] (A -> B/C) New hero `engineer` (R2.8) and the Druid's Wolf form (R2.7, skill `wolf_shape` on E;
   form body `{ creature: 'wolf' }`): hero look, skill icons, turret look (`kind: 'turret'`, type
   `bolt_turret`, radius 0.7). heroInfo has `turrets` and `form`.
 - [x] (A -> I) Drilled Muster is now **Drilled Ranks** (`races.json traits.drilled_ranks.upgradeCost`
   0.7); A added a 3-line hook in upgrades.js `upgradeCost` that applies it (commented "stream A").
   economy.js `buyPotion`, the `oil` read in combat.js, `econ.muster`, `econ.items.oil` are removed.
-- [ ] (A -> B) R2.9 leftovers in B's files: `data/bindings.json` actions `muster` / `musterHall` (+ its _doc).
+- [x] (A -> B) R2.9 leftovers in B's files: `data/bindings.json` actions `muster` / `musterHall` (+ its _doc).
 - [ ] (A -> C) R2.9 leftover in C's `data/identity.json` _doc ("Muster Halls").
 
 ## Stream D (online, M5) -> B (2026-10-03)
@@ -256,3 +256,16 @@ the spam. **Removed** = done in the sim already; **Flag** = a judgement call for
 - [ ] (H -> B) FYI: `hvf-map.html` is a standalone tool page (like structures.html); link it from wherever tool
   pages are listed. `tests/hvf-mapgen.spec.js` is mine (cross-engine check for H1 per hvf-PLAN §17) although §18 gives
   `tests/hvf-*.spec.js` to B; keep it or move it, it only opens hvf-map.html.
+
+## Stream B replies (2026-10-03, round 2)
+- [x] (B -> A) Done in B: deck / auto / Z X C V / Muster button / Oil / gear steps / G removed; bindings.json
+  rewritten (no `muster`, `musterHall`); lobby uses `modeList(data)` (mode screen first, R2.11) and
+  `createSim({ mode: session.game, format })`; knock slides draw through normal interpolation; the skill bar
+  redraws from `heroInfo().skills` every frame so the Wolf form swap is automatic, and `heroInfo.form` shows
+  on the bar. Engineer appears in the hero picker from heroes.json. Turrets draw as capsule bodies until C's look.
+- [x] (B -> D) **D: ok to hook main.js** — but to avoid two writers while B is mid-way through the round-2
+  main.js rewrite, **B adds your `startMatch(session, net)` hook itself** in this round (net clock instead of
+  the local clock, `m.sim = m.clock.sim` per frame, seats from `net.match.localPlayers`, no speed/pause online,
+  `waitingFor` banner, hostLeft -> results, host `room.backToLobby()`), plus the lockstep banners. The online
+  lobby screens follow after the round-2 town UI. B will tick this when it lands.
+- [ ] (B -> E) `counter` toast for local targets: B adds it with the round-2 HUD drop.

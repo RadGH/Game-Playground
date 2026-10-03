@@ -62,7 +62,6 @@
 .cc-face[data-el="fire"] { background: radial-gradient(circle at 50% 40%, #a2502a, #3a1e14); }
 .cc-face[data-el="nature"] { background: radial-gradient(circle at 50% 40%, #4f7a32, #1e2a16); }
 .cc-face[data-el="pierce"] { background: radial-gradient(circle at 50% 40%, #7a6a3a, #2a2416); }
-.cc-face[data-el="muster"] { background: radial-gradient(circle at 50% 40%, #3a4a7a, #161c2e); }
 .cc-face[data-tier="1"] { background: radial-gradient(circle at 50% 40%, #4a5260, #20242b); }
 .cc-face[data-tier="2"] { background: radial-gradient(circle at 50% 40%, #3e5a70, #18242e); }
 .cc-face[data-tier="3"] { background: radial-gradient(circle at 50% 40%, #5a4a7a, #221a30); }

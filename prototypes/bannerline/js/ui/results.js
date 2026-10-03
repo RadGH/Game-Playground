@@ -30,7 +30,7 @@ export function showResults({ card, sim, players, onLobby, onRematch, onTitle })
         <dt>Income at the end</dt><dd>+${Math.round(p.income)}</dd>
         <dt>Sends bought</dt><dd>${p.stats.sends}</dd>
         <dt>Gold on sends</dt><dd>${fmt(p.stats.sendGold, { decimals: 0 })}</dd>
-        <dt>Gold on gear / Muster / potions</dt><dd>${fmt(p.stats.itemGold || 0, { decimals: 0 })} / ${fmt(p.stats.musterGold, { decimals: 0 })} / ${fmt(p.stats.potionGold, { decimals: 0 })}</dd>
+        <dt>Gold on items / training / powers</dt><dd>${fmt(p.stats.itemGold || 0, { decimals: 0 })} / ${fmt(p.stats.upgradeGold || 0, { decimals: 0 })} / ${fmt(p.stats.powerGold || 0, { decimals: 0 })}</dd>
         <dt>Kills · hero deaths</dt><dd>${p.stats.kills} · ${p.stats.deaths}</dd>
         <dt>Banners torn from the enemy</dt><dd>${fmt(p.stats.dealt, { decimals: 1 })}</dd>
         <dt>Bounty earned</dt><dd>${fmt(p.stats.bounty, { decimals: 0 })}</dd>

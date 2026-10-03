@@ -3,7 +3,9 @@
 // draws; each card has a download link. window.iconForge.renderAll() is what tools/bake-icons.mjs calls.
 import * as THREE from 'three';
 import { loadLooks } from '../view/unit-looks.js';
-import { createIconStudio, createIconLibrary } from '../view/icons.js';
+import { createIconStudio, createIconLibrary, ICON_TINTS } from '../view/icons.js';
+import { loadIdentity } from '../view/identity.js';
+import { makeKeep, MAKERS } from '../view/structures.js';
 
 const $ = id => document.getElementById(id);
 const here = p => new URL(p, import.meta.url).href;
@@ -11,9 +13,10 @@ const renderer = new THREE.WebGLRenderer({ canvas: $('gl'), antialias: true, alp
 renderer.setPixelRatio(1); renderer.setSize(512, 512, false);
 renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
 
-const [looks, catalog, heroesData, library] = await Promise.all([
+const [looks, catalog, heroesData, library, identity, powersData] = await Promise.all([
   loadLooks(), fetch(here('../../assets/icons/catalog.json')).then(r => r.json()),
-  fetch(here('../../data/heroes.json')).then(r => r.json()).catch(() => ({ heroes: {}, skills: {} })), createIconLibrary()]);
+  fetch(here('../../data/heroes.json')).then(r => r.json()).catch(() => ({ heroes: {}, skills: {} })), createIconLibrary(), loadIdentity(),
+  fetch(here('../../data/powers.json')).then(r => r.json()).catch(() => ({ powers: {} }))]);
 const studio = createIconStudio(renderer, { looks, size: catalog.size || 128 });
 
 /** Every icon the game needs, as { kind, id, label, make() }. */
@@ -27,10 +30,20 @@ function jobs() {
     const element = s.element || 'physical';
     out.push({ kind: 'skill', id, label: s.name || id, make: () => studio.skill(id, { hero: owner[id] || null, element, sprite: catalog.skillSprites?.[id] || catalog.elementSprites?.[element] || 'spark' }) });
   }
+  for (const [id, pw] of Object.entries(powersData.powers || {})) {
+    const [sprite, element] = catalog.powerSprites?.[id] || ['spark', 'arcane'];
+    out.push({ kind: 'power', id, label: pw.name || id, make: () => studio.power(id, { sprite, element, frame: catalog.powerFrames?.[pw.kind] || '#ffd24a' }) });
+  }
+  for (const race of identity.raceIds()) {
+    const color = identity.slotColor(0), tint = ICON_TINTS[race] || ICON_TINTS.building;
+    out.push({ kind: 'building', id: `${race}.keep`, label: `${identity.race(race).name} Keep`, make: () => { const k = makeKeep(identity, race, color); return studio.object(k.group, { tint, update: dt => k.update(dt) }); } });
+    for (const [kind, make] of Object.entries(MAKERS)) out.push({ kind: 'building', id: `${race}.${kind}`, label: `${identity.race(race).name} ${BUILDING_NAMES[kind]}`, make: () => { const b = make(identity, race, color); return studio.object(b.group, { tint, update: dt => b.update(dt) }); } });
+  }
   return out;
 }
+const BUILDING_NAMES = { shop: 'Outfitter', barracks: 'Barracks', drillyard: 'Drill Yard', sanctum: 'Sanctum' };
 
-const KIND_NAMES = { unit: 'Units', hero: 'Heroes', item: 'Item bases', skill: 'Skills' };
+const KIND_NAMES = { unit: 'Units', hero: 'Heroes', item: 'Item bases', skill: 'Skills', power: 'Powers', building: 'Buildings' };
 function gallery(list, images) {
   const byKind = new Map(); for (const j of list) { if (!byKind.has(j.kind)) byKind.set(j.kind, []); byKind.get(j.kind).push(j); }
   $('gallery').replaceChildren(...[...byKind].map(([kind, js]) => {

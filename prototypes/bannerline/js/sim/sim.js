@@ -9,6 +9,7 @@ import { buildMap } from './map.js';
 import { hashValue } from './hash.js';
 import { applyCommand } from './commands.js';
 import { resolveMode, MODES } from './modes/index.js';
+import { initCampaign, campaignTick, campaignAfterResult } from './campaign.js';
 
 export { TICK_HZ };
 export const TICK_MS = 1000 / TICK_HZ;
@@ -51,7 +52,9 @@ class Sim {
     for (const phase of mode.phases) phase(ctx);   // the mode's tick order (modes/linewar.js)
     if (state.ents.some(e => e._gone)) state.ents = state.ents.filter(e => !e._gone);
     minuteStats(state);
+    if (state.campaign) campaignTick(ctx);   // a campaign mission's script and objectives (campaign.js)
     mode.checkResult(ctx);
+    if (state.campaign) campaignAfterResult(ctx);
   }
 
   drainEvents() { const q = this._queue; this._queue = []; return q; }
@@ -70,6 +73,7 @@ export function createSim(config, data, opts = {}) {
   const state = mode.createState ? mode.createState({ ...config, format }, data, map) : createState({ ...config, mode: format }, data, map);
   state.game = mode.id; state.format = format;
   mode.initState(state, data, map, config);
+  if (config.campaign) { state.campaignMission = JSON.parse(JSON.stringify(config.campaign)); state.campaign = initCampaign(state, config.campaign); }
   const sim = new Sim(state, data, map, opts, mode);
   for (const e of state.ents) sim._events && sim._queue.push({ type: 'spawn', tick: 0, id: e.id, kind: e.kind, unit: e.type, team: e.team, field: e.field });
   return sim;

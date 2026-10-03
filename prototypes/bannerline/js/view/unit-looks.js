@@ -106,7 +106,8 @@ export function createLooks({ looks, units, races = null, presets, outfits = nul
       const u = unitTable[id];
       if (!u || !u.model) throw new Error(`unit-looks: no unit "${id}"`);
       const extra = looks.units?.[id] || {};
-      const look = u.model.creature ? creatureLook(u.model, extra, u.race) : chibiLook(u.model, extra, u.race);
+      const tierScale = looks.tierScale?.[u.tier] ?? 1;
+      const look = u.model.creature ? creatureLook(u.model, { ...extra, scale: extra.scale ?? tierScale }, u.race) : chibiLook(u.model, { ...extra, scale: extra.scale ?? tierScale }, u.race);
       look.id = id; look.name = u.name; look.race = u.race; look.tier = u.tier;
       cache.set(key, look); return look;
     },

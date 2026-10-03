@@ -188,7 +188,6 @@ body.over-pad .dim-cursor { opacity: 1; }
   .ci-name b { font-size: 16px; }
   .cb-card { gap: 4px; }
   .minimap { width: 128px; height: 84px; }
-  .cb-oil span { display: none; }
   .shop-panel { right: 6px; bottom: 160px; width: calc(100% - 12px); max-width: 520px; }
   .pad-legend { bottom: 166px; }
   .reject { bottom: 160px; }
@@ -219,7 +218,7 @@ body.over-pad .dim-cursor { opacity: 1; }
 @keyframes incFloat { from { opacity: 1; transform: translate(-50%, 0); } to { opacity: 0; transform: translate(-50%, 34px); } }
 @container (max-width: 1000px) { .army-chip { bottom: 168px; left: 6px; font-size: 12px; } }
 
-/* Muster Hall label over the building */
+/* building labels over the town buildings */
 .hall-label { position: absolute; left: 0; top: 0; padding: 3px 10px; border-radius: 6px; white-space: nowrap; pointer-events: none;
   background: rgba(20,16,8,.85); border: 1px solid var(--gold-dim); color: var(--gold); font: 700 13px var(--ui); box-shadow: var(--shadow); will-change: transform; }
 .hall-label kbd { margin-left: 4px; }
@@ -238,3 +237,6 @@ body.over-pad .dim-cursor { opacity: 1; }
 .ob-actions .ob-next { background: linear-gradient(180deg, #d9a842, #a87a24); color: #1a1206; border-color: #f2c45a; }
 @container (max-width: 1000px) { .onboard { top: 62px; } }
 body.hall-hover #view { cursor: pointer; }
+.hall-label.k-shop { color: #8fd0ff; border-color: #4f86b0; }
+.hall-label.k-drillyard { color: #ffb08a; border-color: #b0704f; }
+.hall-label.k-sanctum { color: #d6b8ff; border-color: #8a6ad0; }

@@ -62,7 +62,7 @@ export function createControlBar({ root, sim, Q, player, seat, actors, minimapLa
     return el;
   });
   const hireBtn = h('button', 'cc-hire', null, { type: 'button', 'data-bld': 'barracks' });
-  hireBtn.innerHTML = `<span class="hire-ic">${icon('coin')}${icon('income')}</span><span class="hire-t"><b>Hire units</b><small>Barracks · raises your income</small></span><kbd class="hire-key${isPad ? ' pad' : ''}">${isPad ? '↓' : 'B'}</kbd>`;
+  hireBtn.innerHTML = `<span class="hire-ic">${icon('coin')}${icon('income')}</span><span class="hire-t"><b>Hire units</b><small>Barracks</small></span><kbd class="hire-key${isPad ? ' pad' : ''}">${isPad ? '↓' : 'B'}</kbd>`;
   setTipHtml(hireBtn, `<b>Barracks</b><br>Hire units and send them down your rival's lane. Every unit you hire raises your income. ${isPad ? 'D-pad down' : 'B'} opens it from anywhere; walking up to the Barracks opens it too.`);
   card.append(...skillCells, dCell, ...bldCells, hireBtn);
   let onBuilding = null;

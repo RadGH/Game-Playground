@@ -1,0 +1,7 @@
+{
+ "_doc": "Hunters vs Farmers characters and army (docs/hvf-PLAN.md §6, §7). Read by js/sim/modes/hvf/. Speeds m/s, radius m, sight m, damage per hit. `chop` = seconds to cut one tree cell (briar: `chopBriar`). Hunter HP and damage are multiplied by the format's `hunterMult` (rules.json) and grow `perLevel` per level (levels from kills only, H3). The farmer cannot attack.",
+ "farmer": { "name": "Farmer", "hp": 260, "speed": 5.6, "radius": 0.35, "sight": 16, "chop": 4, "chopBriar": 1, "chopGold": 2, "reviveSeconds": 4, "reviveRange": 2.5, "buildRange": 3, "canAttack": false },
+ "hunter": { "name": "Hunter", "hp": 1200, "speed": 5.2, "radius": 0.9, "sight": 14, "damage": 60, "attackEvery": 1.0, "range": 1.8, "chop": 2, "chopBriar": 1, "chopGold": 2, "respawn": 15, "respawnPerDeath": 3, "startGold": 150, "goldPerSecond": 1, "perLevel": 0.08, "maxLevel": 10, "canAttack": true },
+ "bounty": { "hen": 4, "sheep": 10, "pig": 18, "cow": 40, "farmer": 120, "buildingShare": 0.3 },
+ "farmerStartGold": 60
+}

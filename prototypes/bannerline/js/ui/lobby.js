@@ -28,7 +28,7 @@ const ARM = { light: 'Light', heavy: 'Heavy', spectral: 'Spectral', hide: 'Hide'
 const COUNTDOWN = 3;
 
 export function defaultSession(data) {
-  const s = { mode: '1v1', speed: 1, map: 'vale', slots: [], last: null };
+  const s = { game: 'linewar', gameName: 'Line War', mode: '1v1', speed: 1, map: 'vale', slots: [], last: null };
   resizeSlots(s, data);
   return s;
 }
@@ -74,8 +74,17 @@ export function sessionToPlayers(session, data) {
 }
 
 export function createLobby({ screen, data, devices, session, onStart, onBack }) {
-  const heroes = Object.keys(data.heroes.heroes);
-  const races = Object.keys(data.races.races);
+  // The chosen game mode decides which heroes and races may be picked (modes.js modeList).
+  let heroes = Object.keys(data.heroes.heroes);
+  let races = Object.keys(data.races.races);
+  function applyMode() {
+    heroes = (session.heroes && session.heroes.length ? session.heroes : Object.keys(data.heroes.heroes)).filter((h) => data.heroes.heroes[h]);
+    races = (session.races && session.races.length ? session.races : Object.keys(data.races.races)).filter((r) => data.races.races[r]);
+    for (const s of session.slots) {
+      if (!heroes.includes(s.hero)) s.hero = heroes[0];
+      if (!races.includes(s.race)) s.race = races[0];
+    }
+  }
   const aiLevels = AI_LEVELS.filter((a) => data.ai?.difficulties?.[a]);
   const cursors = new Map();          // slot key -> field index into fieldsFor(slot)
   let countdown = -1;
@@ -302,7 +311,7 @@ export function createLobby({ screen, data, devices, session, onStart, onBack })
       ${head}
       ${arrowRow('Hero', hd?.name || s.hero, 'hero', s, 'hero', mouseEdit || editable, heroSub)}
       ${isLocal ? `<div class="lb-desc">${hd?.desc || ''}</div>` : ''}
-      ${arrowRow('Muster', rd?.name || s.race, 'race', s, 'race', mouseEdit || editable, trait ? trait.name : '')}
+      ${arrowRow('Army', rd?.name || s.race, 'race', s, 'race', mouseEdit || editable, trait ? trait.name : '')}
       ${isLocal ? `<div class="lb-desc">${trait?.desc || ''}</div><div class="lb-deck">${deck}</div>` : ''}
       ${isLocal ? `<div class="lb-actions">
         <button class="lb-btn${focusClass('team', s.key)}" data-act="team" data-slot="${s.key}">${icon('people')} Switch side</button>
@@ -336,8 +345,8 @@ export function createLobby({ screen, data, devices, session, onStart, onBack })
       : `${readyCount} of ${ls.length} ready — press your join key again when ready`;
     root.innerHTML = `
       <header class="lb-top">
-        <button class="lb-back" data-act="back">‹ Title</button>
-        <div class="lb-title"><h1>War Council</h1><span>Vale · ${session.mode}</span></div>
+        <button class="lb-back" data-act="back">‹ Modes</button>
+        <div class="lb-title"><h1>${session.gameName || 'Line War'}</h1><span>War council · Vale · ${session.mode}</span></div>
         <div class="lb-modes${focusClass('mode')}">${MODES.map((m) => `<button class="lb-mode${session.mode === m ? ' on' : ''}" data-act="mode" data-v="${m}">${m}</button>`).join('')}</div>
         <div class="lb-speed${focusClass('speed')}"><span>Speed</span>${SPEEDS.map((sp) => `<button class="chip${session.speed === sp.v ? ' on' : ''}" data-act="speed" data-v="${sp.v}">${sp.label}</button>`).join('')}</div>
       </header>
@@ -358,7 +367,7 @@ export function createLobby({ screen, data, devices, session, onStart, onBack })
   }
 
   return {
-    show() { active = true; screen.hidden = false; countdown = -1; for (const s of session.slots) s.ready = false; justJoined = new Set(); render(); },
+    show() { applyMode(); active = true; screen.hidden = false; countdown = -1; for (const s of session.slots) s.ready = false; justJoined = new Set(); render(); },
     hide() { active = false; screen.hidden = true; },
     get active() { return active; },
     frame,

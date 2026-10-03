@@ -24,9 +24,17 @@ import { createTitle } from './ui/title.js';
 import { createLobby, defaultSession, sessionToPlayers } from './ui/lobby.js';
 import { createHud } from './ui/hud.js';
 import { createControlBar } from './ui/controlbar.js';
-import { createShop } from './ui/shop.js';
 import { showResults } from './ui/results.js';
-import { createSendPanel } from './ui/sendpanel.js';
+import { createBarracks } from './ui/barracks.js';
+import { createOutfitter } from './ui/outfitter.js';
+import { createDrillYard } from './ui/drillyard.js';
+import { createSanctum } from './ui/sanctum.js';
+import { BUILDING_NAMES, BUILDING_KEYS, BUILDING_PAD } from './ui/townpanel.js';
+import { installGameTips } from './ui/tips.js';
+import { createAimOverlay } from './view/aim.js';
+import { buildingsFor } from './sim/buildings.js';
+import { modeList } from './sim/modes/index.js';
+import { createModeScreen } from './ui/modes.js';
 import { createOnboarding, shouldOnboard } from './ui/onboarding.js';
 import { createIconLibrary } from './view/icons.js';
 import { installTooltips } from '../../../shared/tooltip.js';
@@ -57,6 +65,7 @@ async function boot() {
   ]);
   app.data = data;
   installTooltips();
+  installGameTips(() => (app.match ? { sim: app.match.sim, Q } : null));
   try { app.icons = await createIconLibrary(); } catch (err) { console.warn('icons unavailable', err); app.icons = null; }
 
   app.gfx = createRenderer($('view'));
@@ -69,11 +78,21 @@ async function boot() {
   ensureWorld(buildMap(data, 'vale', '1v1'));
 
   app.session = defaultSession(data);
-  app.title = createTitle({ screen: $('screen-title'), onPlay: () => showLobby() });
+  app.title = createTitle({ screen: $('screen-title'), onPlay: () => showModes() });
+  app.modes = createModeScreen({
+    screen: $('screen-modes'), modes: modeList(data),
+    onPick: (mode) => {
+      const s = app.session;
+      Object.assign(s, { game: mode.id, gameName: mode.name, heroes: mode.heroes, races: mode.races });
+      if (!mode.formats.includes(s.mode)) s.mode = mode.defaultFormat || mode.formats[0];
+      showLobby();
+    },
+    onBack: () => showTitle(),
+  });
   app.lobby = createLobby({
     screen: $('screen-lobby'), data, devices: app.devices, session: app.session,
     onStart: (session) => startMatch(session),
-    onBack: () => showTitle(),
+    onBack: () => showModes(),
   });
   // A controller that dropped out mid-match can take its seat back with A / Start.
   app.devices.onJoin((dev) => {
@@ -98,11 +117,13 @@ async function boot() {
   else showTitle();
 }
 
-function ensureWorld(map) {
-  const key = map.id + ':' + map.fields.length + ':' + map.width;
+function ensureWorld(map, format = '1v1') {
+  const key = map.id + ':' + map.fields.length + ':' + map.width + ':' + format;
   if (app.world && app.worldKey === key) return;
   app.world?.dispose();
-  app.layout = layoutFromMap(map);
+  let buildings = [];
+  try { buildings = buildingsFor(app.data, map, format); } catch (err) { console.warn('no buildings', err); }
+  app.layout = layoutFromMap(map, buildings);
   app.world = buildWorld(app.gfx.scene, app.layout);
   app.worldKey = key;
 }
@@ -111,10 +132,12 @@ function setScreen(name) {
   app.screen = name;
   $('screen-title').hidden = name !== 'title';
   $('screen-lobby').hidden = name !== 'lobby';
+  $('screen-modes').hidden = name !== 'modes';
   $('screen-match').hidden = name !== 'match' && name !== 'results';
   $('screen-results').hidden = name !== 'results';
 }
 function showTitle() { endMatch(); app.lobby.hide(); setScreen('title'); app.title.show(); useFlyCam(); }
+function showModes() { endMatch(); app.title.hide(); app.lobby.hide(); setScreen('modes'); app.modes.show(); useFlyCam(); }
 function showLobby() { endMatch(); app.title.hide(); setScreen('lobby'); app.lobby.show(); useFlyCam(); }
 function useFlyCam() {
   if (!app.gfx.viewports.includes(app.flyViewport)) app.gfx.addViewport(app.flyViewport);
@@ -129,20 +152,20 @@ function startMatch(session) {
   const seed = params.get('seed') ? Number(params.get('seed')) >>> 0 : ((Math.random() * 0xffffffff) >>> 0);
   const { players, local } = sessionToPlayers(session, data);
   let sim;
-  try { sim = createSim({ seed, mode: session.mode, map: session.map || 'vale', players }, data); } catch (err) {
+  try { sim = createSim({ seed, mode: session.game || 'linewar', format: session.mode, map: session.map || 'vale', players }, data); } catch (err) {
     console.error(err);
     alertBoot(err.message);
     showLobby();
     return;
   }
-  ensureWorld(sim.map);
+  ensureWorld(sim.map, sim.state.mode);
   app.gfx.removeViewport(app.flyViewport);
 
   const firstTeam = local.length ? sim.state.players[local[0].player].team : 0;
   const actors = createActors({ scene: app.gfx.scene, data, localTeam: firstTeam });
   const fx = createFx({ scene: app.gfx.scene, actors, tickHz: data.econ?.clock?.tickHz || 20, data });
   const clock = createLocalClock({ sim, tickMs: TICK_MS, speed: Number(params.get('speed')) || session.speed || 1 });
-  const m = { sim, clock, actors, fx, views: [], session, deathPos: new Map(), overDelay: 1.6, pausedBy: null, shown: false };
+  const m = { sim, clock, actors, fx, views: [], session, deathPos: new Map(), overDelay: 1.6, pausedBy: null, shown: false, aim: createAimOverlay(app.gfx.scene) };
   app.match = m;
 
   const seats = local.slice(0, MAX_LOCAL);
@@ -152,7 +175,7 @@ function startMatch(session) {
 
   setScreen('match');
   app.title.hide(); app.lobby.hide();
-  for (const v of m.views) v.hud.alert(v.isPad ? 'Hold your field. LB + d-pad sends units.' : 'Hold your field. Send units with Z X C V.', 'info', 3600);
+  for (const v of m.views) v.hud.alert(v.isPad ? 'Hold your field. D-pad down opens the Barracks.' : 'Hold your field. B opens the Barracks to hire units.', 'info', 3600);
 }
 
 function makeView(m, i, n, l, host) {
@@ -189,7 +212,7 @@ function makeView(m, i, n, l, host) {
 
   const view = { i, player, slotKey: slot.key, slotPlayer: slot.player, device: slot.device, deviceType: slot.deviceType, isPad, lost: false,
     camera, vp, root, overlay, hudRoot, myTeam, myField, talentMode: false,
-    hall: app.layout.fields.find((f) => f.team === myTeam)?.musterHall || null, nearHall: false, hallBy: null, lookIdx: 0 };
+    buildings: (app.layout.buildings || []).filter((b) => b.team === myTeam), near: null, openedBy: null, lookIdx: 0, aim: null };
   const project = (x, y, z) => { const p = camera.project(x, y, z, vp.rect); p.x -= vp.rect.x; p.y -= vp.rect.y; return p; };
   view.project = project;
   view.numbers = createNumbers(overlay);
@@ -205,26 +228,35 @@ function makeView(m, i, n, l, host) {
     onQuit: () => showLobby(),
     onHowTo: () => view.onboarding.start(),
   });
-  view.bar = createControlBar({ root: hudRoot, sim, Q, player, seat: view.seat, actors: m.actors, minimapLayout: app.layout });
-  view.shop = createShop({ root: hudRoot, sim, Q, player, seat: view.seat, isPad });
-  view.sendPanel = createSendPanel({
-    root: hudRoot, sim, Q, player, seat: view.seat, isPad,
-    iconUrl: (u) => app.icons?.url('unit', u) || null,
-    onSend: ({ ok }) => sfx(ok ? 'send' : 'refuse'),
-    onToast: (t) => view.hud.alert(t, 'info', 1600),
-  });
-  view.bar.onHall(() => toggleHall(view, 'button'), () => view.sendPanel.open);
-  view.bar.onFavSend(() => sfx('send'));
+  const unitIcon = (u) => app.icons?.url('unit', u) || null;
+  const itemIcon = (ic) => app.icons?.url('item', ic) || null;
+  view.bar = createControlBar({ root: hudRoot, sim, Q, player, seat: view.seat, actors: m.actors, minimapLayout: app.layout, isPad, itemIconUrl: itemIcon });
+  // The four town buildings' panels (owner round 2). One open at a time per view.
+  view.panels = {
+    barracks: createBarracks({ root: hudRoot, sim, Q, player, seat: view.seat, isPad, iconUrl: unitIcon, onSend: ({ ok }) => sfx(ok ? 'send' : 'refuse') }),
+    shop: createOutfitter({ root: hudRoot, sim, Q, player, seat: view.seat, isPad, iconUrl: itemIcon, onWalk: () => walkTo(view, 'shop') }),
+    drillyard: createDrillYard({ root: hudRoot, sim, Q, player, seat: view.seat, isPad, iconUrl: itemIcon }),
+    sanctum: createSanctum({ root: hudRoot, sim, Q, player, isPad, iconUrl: itemIcon, onPick: (row) => beginAim(view, row) }),
+  };
+  view.panels.barracks.heldKey = (code) => app.devices.kbm.isDown(code);
+  view.openPanel = () => Object.values(view.panels).find((p) => p.open) || null;
+  view.bar.onBuilding((kind) => togglePanel(view, kind, 'button'), () => view.openPanel()?.kind || null);
   view.hud.onArmy(() => lookAtField(view, 1));
-  const hallLabel = document.createElement('div');
-  hallLabel.className = 'hall-label';
-  hallLabel.innerHTML = `Muster Hall · send units ${isPad ? '<kbd class="pad">↓</kbd>' : '<kbd>B</kbd>'}`;
-  overlay.append(hallLabel);
-  view.hallLabel = hallLabel;
+  // A floating name over each of your town buildings, with its key.
+  view.labels = view.buildings.map((b) => {
+    const el = document.createElement('div');
+    el.className = 'hall-label k-' + b.kind;
+    el.innerHTML = `${BUILDING_NAMES[b.kind] || b.name} ${isPad ? `<kbd class="pad">${BUILDING_PAD[b.kind]}</kbd>` : `<kbd>${BUILDING_KEYS[b.kind]}</kbd>`}`;
+    el.dataset.tip = b.desc || '';
+    overlay.append(el);
+    return { b, el };
+  });
+  const aimHint = document.createElement('div');
+  aimHint.className = 'aim-hint'; aimHint.hidden = true;
+  hudRoot.append(aimHint);
+  view.aimHint = aimHint;
   view.onboarding = createOnboarding({ root: hudRoot, isPad });
   if (shouldOnboard()) view.onboarding.start();
-  view.bar.onGear(() => { view.sendPanel.setOpen(false); view.shop.toggle(); });
-  view.bar.onOil(() => view.shop.openOil());
   view.bar.setCameraBox(() => cameraBox(view));
   view.bar.onMinimap(({ x, z, button }) => {
     if (button === 2) view.seat.issue({ type: 'move', x, z });
@@ -237,7 +269,7 @@ function makeView(m, i, n, l, host) {
   if (isPad) {
     const pad = document.createElement('div');
     pad.className = 'pad-legend';
-    pad.innerHTML = '<kbd class="pad">LB</kbd>+d-pad send · <kbd class="pad">View</kbd> armory · <kbd class="pad">LT</kbd>+skill learn · <kbd class="pad">Menu</kbd> pause';
+    pad.innerHTML = '<kbd class="pad">↓</kbd> Barracks · <kbd class="pad">View</kbd> Outfitter · <kbd class="pad">↑</kbd> Drill Yard · <kbd class="pad">LB</kbd> Sanctum · <kbd class="pad">LT</kbd>+skill learn · <kbd class="pad">Menu</kbd> pause';
     hudRoot.append(pad);
   }
   return view;
@@ -260,47 +292,105 @@ function onSeatUi(view, u) {
     setTimeout(() => el.remove(), 520);
   } else if (u.type === 'select') {
     view.bar.select(u.id);
-  } else if (u.type === 'cycleSelect') {
-    const s = m.sim.state;
-    const foes = s.ents.filter((e) => e.alive !== false && e.field === view.myField.id && e.team !== view.myTeam);
-    const cur = foes.findIndex((e) => e.id === view.bar.selected);
-    const next = foes[(cur + 1) % Math.max(1, foes.length)];
-    view.bar.select(next ? next.id : -1);
   } else if (u.type === 'pause') {
+    if (view.aim) { endAim(view); return; }
     if (!m.sim.over && !m.pausedBy) view.hud.setPaused(true);
   } else if (u.type === 'scoreboard') {
     view.hud.showBoard(!view.hud.boardOpen);
-  } else if (u.type === 'shop') {
-    if (view.isPad && view.hud.talentOpen && !view.talentMode && !view.shop.open) view.talentMode = true;
-    else { view.talentMode = false; view.sendPanel.setOpen(false); view.shop.toggle(); }
-  } else if (u.type === 'oil') {
-    if (view.shop.open) view.shop.setOpen(false); else view.shop.openOil();
-  } else if (u.type === 'musterHall') {
-    toggleHall(view, 'key');
+  } else if (u.type === 'building') {
+    if (view.aim) endAim(view);
+    if (u.kind === 'shop' && view.isPad && view.hud.talentOpen && !view.talentMode && !view.panels.shop.open) { view.talentMode = true; return; }
+    view.talentMode = false;
+    togglePanel(view, u.kind, 'key');
   } else if (u.type === 'interact') {
-    if (view.nearHall && !view.sendPanel.open) toggleHall(view, 'key');
+    if (view.near && !view.openPanel()) togglePanel(view, view.near.kind, 'key', true);
   } else if (u.type === 'clickGround') {
-    // Clicking the Muster Hall (anywhere on the building or its ring) opens the send panel.
-    const hl = view.hall;
-    if (hl && Math.hypot(u.x - hl.x, u.z - (hl.z + 1.5)) < 5.5) { toggleHall(view, 'click', true); return true; }
+    if (view.aim) { castAim(view, u.x, u.z); return true; }
+    // Clicking one of your buildings (its footprint or the ring by its door) opens its panel.
+    const b = buildingAt(view, u.x, u.z);
+    if (b) { togglePanel(view, b.kind, 'click', true); return true; }
+    return false;
+  } else if (u.type === 'rightClick') {
+    if (view.aim) { endAim(view); return true; }
     return false;
   } else if (u.type === 'nextField') {
     lookAtField(view, (view.lookIdx + 1) % fieldOrder(view).length);
-  } else if (u.type === 'sent') {
-    sfx('send');
-  } else if (u.type === 'autoToggled') {
-    const me = m.sim.state.players[view.player];
-    const unit = m.sim.data.units.units[me.deck[u.index]]?.name || 'send';
-    view.hud.alert(`Auto-send ${me.auto[u.index] ? 'off' : 'on'}: ${unit}`, 'info', 1400);
+  } else if (u.type === 'useNth') {
+    // Pad d-pad left / right: use the first / second usable item carried.
+    const inv = Q.inventoryInfo(m.sim.state, m.sim.data, view.player);
+    const usable = inv.slots.filter((x) => x && x.consumable);
+    const it = usable[u.n];
+    if (it) view.seat.issue({ type: 'use', slot: it.slot });
+    else view.hud.alert(u.n ? 'No second item to use' : 'No item to use — buy draughts at the Outfitter', 'info', 1400);
   }
 }
 
-/** Open / close the Muster Hall send panel. `by` = 'walk' | 'key' | 'click' | 'button'. */
-function toggleHall(view, by, forceOpen = false) {
-  const open = forceOpen || !view.sendPanel.open;
-  if (open) { view.shop.setOpen(false); view.hallBy = by; }
-  view.sendPanel.setOpen(open);
-  if (open) view.onboarding.did('openHall');
+/** Your building at a ground point (footprint or door ring), or null. */
+function buildingAt(view, x, z) {
+  for (const b of view.buildings) {
+    const [w, d] = b.size || [6, 6];
+    const r = ringPoint(b);
+    if (Math.abs(x - b.x) < w / 2 + 1 && Math.abs(z - b.z) < d / 2 + 1) return b;
+    if (Math.hypot(x - r.x, z - r.z) < 2.8) return b;
+  }
+  return null;
+}
+/** The interaction ring in front of a building's door (matches terrain.js buildingModel). */
+function ringPoint(b) {
+  const yaw = { '+z': 0, '+x': Math.PI / 2, '-z': Math.PI, '-x': -Math.PI / 2 }[b.door] ?? 0;
+  const dist = (b.size?.[1] || 6) / 2 + 2.6;
+  return { x: b.x + Math.sin(yaw) * dist, z: b.z + Math.cos(yaw) * dist };
+}
+/** Open / close a building panel. `by` = 'walk' | 'key' | 'click' | 'button'. */
+function togglePanel(view, kind, by, forceOpen = false) {
+  const p = view.panels[kind]; if (!p) return;
+  const open = forceOpen || !p.open;
+  for (const o of Object.values(view.panels)) if (o !== p) o.setOpen(false);
+  if (open) view.openedBy = by;
+  p.setOpen(open);
+  if (open && kind === 'barracks') view.onboarding.did('openHall');
+}
+/** Right-click-walk the hero to a building (the Outfitter's "Walk there"). */
+function walkTo(view, kind) {
+  const b = view.buildings.find((x) => x.kind === kind); if (!b) return;
+  const r = ringPoint(b);
+  view.seat.issue({ type: 'move', x: r.x, z: r.z });
+  view.hud.alert(`Walking to the ${BUILDING_NAMES[kind]}`, 'info', 1400);
+}
+
+// ---------- Sanctum power targeting ----------
+function beginAim(view, row) {
+  const m = app.match;
+  const map = m.sim.map;
+  const ok = (f) => (row.kind === 'neutral' ? true : row.kind === 'defensive' ? f.team === view.myTeam : f.team !== view.myTeam);
+  m.aim.show({ fields: map.fields.map((f) => ({ x0: f.x0, x1: f.x1, z0: f.z0, z1: f.z1, ok: ok(f) })), radius: row.radius || 4 });
+  // Start the reticle somewhere sensible: your field for defensive, the rival's for offensive.
+  const order = fieldOrder(view);
+  const f = row.kind === 'offensive' ? order[1] || order[0] : order[0];
+  const s = m.sim.state;
+  const hero = s.ents.find((e) => e.id === s.players[view.player].heroEnt);
+  view.aim = { row, x: row.kind === 'offensive' ? (f.x0 + f.x1) / 2 : hero?.x ?? (f.x0 + f.x1) / 2, z: row.kind === 'offensive' ? (f.z0 + f.z1) / 2 : (hero?.z ?? (f.z0 + f.z1) / 2) - 10 };
+  if (view.isPad) { view.seat.stickFrozen = true; view.camera.lookAt(view.aim.x, view.aim.z); }
+  else if (row.kind === 'offensive') lookAtField(view, 1);
+  document.body.classList.add('aiming');
+  view.aimHint.hidden = false;
+}
+function castAim(view, x, z) {
+  const m = app.match; const a = view.aim; if (!a) return;
+  const why = Q.powerTargetCheck(m.sim.state, m.sim.data, view.player, a.row.id, x, z);
+  if (why) { view.hud.alert(view.hud.reasonText?.(why) || why, 'bad', 1400); return; }
+  view.seat.issue({ type: 'power', id: a.row.id, x, z });
+  sfx('power', { id: a.row.id });
+  m.fx.flare(x, z, 0xc69cff, a.row.radius || 4);
+  endAim(view);
+}
+function endAim(view) {
+  if (!view.aim) return;
+  view.aim = null;
+  view.seat.stickFrozen = false;
+  app.match?.aim.hide();
+  view.aimHint.hidden = true;
+  if (!app.match?.views.some((v) => v.aim)) document.body.classList.remove('aiming');
 }
 
 /** Fields in look order: yours first, then your rival's, then the rest. */
@@ -393,11 +483,6 @@ function handleEvents(events, quiet = false) {
         v.onboarding.did('send');
         break;
       }
-      case 'oil': {
-        const v = m.views.find((x) => x.player === ev.player);
-        if (v) v.hud.alert(`Weapon oiled: half your damage is now ${ev.dmgType}`, 'good', 2200);
-        break;
-      }
       default: break;
     }
   }
@@ -407,14 +492,14 @@ function handleEvents(events, quiet = false) {
 function endMatch() {
   const m = app.match; if (!m) return;
   for (const v of m.views) {
-    v.hud.destroy(); v.bar.destroy(); v.shop.destroy(); v.sendPanel.destroy(); v.onboarding.destroy(); v.numbers.clear();
+    v.hud.destroy(); v.bar.destroy(); for (const p of Object.values(v.panels)) p.destroy(); v.onboarding.destroy(); v.numbers.clear();
     app.gfx.removeViewport(v.vp);
     v.root.remove();
   }
-  m.actors.dispose(); m.fx.dispose();
+  m.actors.dispose(); m.fx.dispose(); m.aim.dispose();
   app.match = null; app.results = null;
   $('screen-match').replaceChildren();
-  document.body.classList.remove('targeting', 'over-pad');
+  document.body.classList.remove('targeting', 'over-pad', 'aiming', 'hall-hover');
 }
 
 function matchFrame(dt, frames) {
@@ -437,14 +522,29 @@ function matchFrame(dt, frames) {
       continue;
     }
     let capture = false;
-    if (v.isPad && f) {
+    const panel = v.openPanel();
+    if (v.aim && f) {
+      capture = true;
+      if (v.isPad) {
+        // Aim with the left stick; A casts, B cancels. The camera follows the reticle.
+        v.aim.x += f.stickL.x * 26 * dt; v.aim.z += f.stickL.y * 26 * dt;
+        const b = app.layout.bounds;
+        v.aim.x = Math.max(b.x0, Math.min(b.x1, v.aim.x)); v.aim.z = Math.max(b.z0, Math.min(b.z1, v.aim.z));
+        v.camera.lookAt(v.aim.x, v.aim.z);
+        if (f.pressed.has('confirm')) castAim(v, v.aim.x, v.aim.z);
+        else if (f.pressed.has('back')) endAim(v);
+      } else {
+        if (v.seat.ground) { v.aim.x = v.seat.ground.x; v.aim.z = v.seat.ground.z; }
+        if (f.pressed.has('back')) endAim(v);
+        capture = false;          // the mouse click casts through clickGround; keep the camera keys
+      }
+    } else if (v.isPad && f) {
       if (v.talentMode) { if (v.hud.talentFrame(f)) capture = true; else v.talentMode = false; }
-      else if (v.sendPanel.open) { v.sendPanel.frame(f, dt); capture = true; }
-      else if (v.shop.open) { v.shop.frame(f); capture = true; }
-    } else if (f && (v.sendPanel.open || v.shop.open)) {
-      // Keyboard: Esc closes the open panel; arrows / Enter drive the send panel.
-      if (f.pressed.has('back')) { v.sendPanel.setOpen(false); v.shop.setOpen(false); }
-      else if (v.sendPanel.open) v.sendPanel.frame(f, dt);
+      else if (panel) { panel.frame(f, dt); capture = true; }
+    } else if (f && panel) {
+      // Keyboard: Esc closes the open panel; arrows / Enter (and the Barracks' letter grid) drive it.
+      if (f.pressed.has('back')) panel.setOpen(false);
+      else panel.frame(f, dt);
       capture = true;
     }
     const intents = v.seat.update(f, dt, { capture, connected });
@@ -457,20 +557,37 @@ function matchFrame(dt, frames) {
     const heroA = m.actors.get(s.players[v.player].heroEnt);
     const heroAlive = heroA && heroA.ent.alive !== false;
     if (intents.centre) v.lookIdx = 0;
-    // Walking up to the Muster Hall opens it; walking away closes it again (if walking opened it).
-    if (v.hall) {
-      const near = !!heroAlive && Math.hypot(heroA.x - v.hall.x, heroA.z - (v.hall.z + 3.6)) < 4.2;
-      if (near && !v.nearHall && !v.sendPanel.open) toggleHall(v, 'walk', true);
-      if (!near && v.nearHall && v.sendPanel.open && v.hallBy === 'walk') v.sendPanel.setOpen(false);
-      v.nearHall = near;
-      const p = v.project(v.hall.x, 8.6, v.hall.z);
-      const show = p.visible && !v.sendPanel.open;
-      v.hallLabel.hidden = !show;
-      if (show) v.hallLabel.style.transform = `translate(${p.x.toFixed(0)}px, ${p.y.toFixed(0)}px) translate(-50%, -100%)`;
-      v.hallLabel.classList.toggle('near', near);
-      const hover = !v.isPad && v.seat.ground && Math.hypot(v.seat.ground.x - v.hall.x, v.seat.ground.z - (v.hall.z + 1.5)) < 5.5;
-      app.world.hallHighlight(v.myTeam, !!hover || near);
-      if (hover) document.body.classList.add('hall-hover'); else if (!v.isPad) document.body.classList.remove('hall-hover');
+    // Walking up to a building opens its panel; walking away closes it again (if walking opened it).
+    // A teleport (respawn inside the Outfitter) does not count as walking up.
+    let near = null;
+    if (heroAlive) for (const b of v.buildings) {
+      const r = ringPoint(b);
+      const inRange = b.radius != null ? Math.hypot(heroA.x - b.x, heroA.z - b.z) <= b.radius - 0.5 : Math.hypot(heroA.x - r.x, heroA.z - r.z) < 3;
+      if (inRange) { near = b; break; }
+    }
+    const jumped = v.lastHero && heroAlive && Math.hypot(heroA.x - v.lastHero.x, heroA.z - v.lastHero.z) > 3;
+    if (near && near !== v.near && !jumped && !v.openPanel() && v.lastHero) togglePanel(v, near.kind, 'walk', true);
+    if (!near && v.near && v.openedBy === 'walk' && v.panels[v.near.kind]?.open) v.panels[v.near.kind].setOpen(false);
+    v.near = near;
+    v.lastHero = heroAlive ? { x: heroA.x, z: heroA.z } : null;
+    const openKind = v.openPanel()?.kind;
+    const hoverB = !v.isPad && v.seat.ground ? buildingAt(v, v.seat.ground.x, v.seat.ground.z) : null;
+    for (const { b, el } of v.labels) {
+      const p = v.project(b.x, 7.5, b.z);
+      const show = p.visible && openKind !== b.kind;
+      el.hidden = !show;
+      if (show) el.style.transform = `translate(${p.x.toFixed(0)}px, ${p.y.toFixed(0)}px) translate(-50%, -100%)`;
+      el.classList.toggle('near', near === b || hoverB === b);
+      app.world.highlight(b.id, near === b || hoverB === b);
+    }
+    if (!v.isPad) document.body.classList.toggle('hall-hover', !!hoverB);
+    if (v.aim) {
+      const ok = !Q.powerTargetCheck(s, m.sim.data, v.player, v.aim.row.id, v.aim.x, v.aim.z);
+      m.aim.move(v.aim.x, v.aim.z, ok);
+      const where = { defensive: 'in your own field', offensive: 'in an enemy field', neutral: 'in any field' }[v.aim.row.kind];
+      const key = v.isPad ? '<kbd class="pad">A</kbd> cast · <kbd class="pad">B</kbd> cancel' : 'click to cast · right-click / <kbd>Esc</kbd> cancel';
+      const html = `${v.aim.row.name}: choose where it lands ${where} — ${key}${ok ? '' : ' · <span class="bad">not here</span>'}`;
+      if (v.aimHint._h !== html) { v.aimHint._h = html; v.aimHint.innerHTML = html; }
     }
     v.camera.update(dt, {
       follow: heroAlive ? { x: heroA.x, z: heroA.z } : { x: v.myField.spawn.x, z: v.myField.spawn.z - 8 },
@@ -488,14 +605,14 @@ function matchFrame(dt, frames) {
   m.fx.syncZones(s.zones, paused ? 0 : dt);
   for (const t of s.teams) app.world.setBanners(t.id, t.bannersMax ? t.banners / t.bannersMax : 0);
   m.fx.update(paused ? 0 : dt);
+  m.aim.update(dt);
   for (const v of m.views) {
     const r = v.vp.rect;
     const key = `${r.x},${r.y},${r.w},${r.h}`;
     if (v.root._r !== key) { v.root._r = key; Object.assign(v.root.style, { left: r.x + 'px', top: r.y + 'px', width: r.w + 'px', height: r.h + 'px' }); }
     v.hud.update(dt);
     v.bar.update(dt);
-    v.shop.update(dt);
-    v.sendPanel.update(paused ? 0 : dt);
+    for (const p of Object.values(v.panels)) p.update(paused ? 0 : dt);
     // Hint cards after the first step move on by themselves so they never block play (pads have no
     // spare button for "Next"); the first one waits for an actual send.
     const step = v.onboarding.step;
@@ -507,7 +624,7 @@ function matchFrame(dt, frames) {
     m.overDelay -= dt;
     if (m.overDelay <= 0) {
       m.shown = true;
-      for (const v of m.views) { v.hud.setPaused?.(false); v.shop.setOpen(false); v.sendPanel.setOpen(false); v.onboarding.close(); }
+      for (const v of m.views) { v.hud.setPaused?.(false); for (const p of Object.values(v.panels)) p.setOpen(false); endAim(v); v.onboarding.close(); }
       setScreen('results');
       const r = s.result;
       const localTeams = [...new Set(m.views.map((v) => v.myTeam))];
@@ -534,6 +651,7 @@ function frame(dt) {
   const frames = app.devices.poll();
   if (app.world) app.world.update(dt);
   if (app.screen === 'title') app.title.frame && frames.forEach((f) => app.title.frame(f));
+  else if (app.screen === 'modes') frames.forEach((f) => app.modes.frame(f));
   else if (app.screen === 'lobby') app.lobby.frame(frames, dt);
   if (app.match) matchFrame(dt, frames);
   if (app.screen === 'results' && app.results) frames.forEach((f) => app.results.frame(f));
@@ -561,6 +679,7 @@ function alertBoot(msg) {
 app.start = (choice = {}) => {
   const data = app.data;
   const s = app.session;
+  s.game = 'linewar'; s.gameName = 'Line War'; s.heroes = null; s.races = null;
   s.mode = choice.mode || params.get('mode') || '1v1';
   s.speed = Number(choice.speed || params.get('speed')) || 1;
   s.slots = [];

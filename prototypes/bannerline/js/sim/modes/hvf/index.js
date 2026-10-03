@@ -4,19 +4,44 @@
 // registry (js/sim/modes/index.js, stream A) can list it.
 //
 // STATUS (stream H): H1 done — the world generator (./mapgen.js) and its viewer (hvf-map.html).
-// The match itself (H2: state, phases, commands, rules) is not built yet, so `playable` is false and
-// createState throws a readable error. What the framework needs from stream A to run this mode is in
+// H2 sim: state (./state.js), farm + breeding + income (./farm.js), animals (./animals.js),
+// characters (./units.js), fog (./vision.js), commands (./commands.js), queries (./query.js).
+// `playable` stays false until the view (stream B) and the framework hooks exist. What the framework needs from stream A to run this mode is in
 // docs/requests.md ("Stream H"): buildMap gets the seed, the mode builds its own state (seats carry a
 // `role`, not a race or hero), and data/hvf/*.json join the data bundle as `data.hvf`.
 
 import { worldForFormat } from './mapgen.js';
+import { createHvfState, FARMERS, HUNTERS, entById } from './state.js';
+import { breedTick, incomeTick } from './farm.js';
+import { animalTick } from './animals.js';
+import { unitTick } from './units.js';
+import { visionTick, updateVision } from './vision.js';
+import { HVF_COMMANDS } from './commands.js';
+import * as queries from './query.js';
 
 // mirrors data/hvf/rules.json `formats` (tests/hvf-mapgen.test.js checks the two agree)
 export const FORMATS = ['2v1', '3v1', '4v1', '4v2', '5v2', '6v2', '7v2', '8v2', '6v3', '7v3', '8v3', '9v3'];
-export const DATA_FILES = ['hvf/rules.json', 'hvf/mapgen.json'];
+export const DATA_FILES = ['hvf/rules.json', 'hvf/mapgen.json', 'hvf/units.json', 'hvf/animals.json', 'hvf/buildings.json'];
 
 /** The mode's data (data.hvf once A loads per-mode files; a bundle with { rules, mapgen } works too). */
 const hvfData = data => (data && data.hvf) || data;
+
+/** Hunters leave their kennels when the head start runs out. */
+function releaseTick(ctx) {
+  if (ctx.state.tick === ctx.state.hvf.releaseTick) ctx.emit('released', { tick: ctx.state.tick });
+}
+
+/** Hunters win the moment every farmer is a ghost; farmers win when every hunter is out, or on the clock. */
+export function checkResult(ctx) {
+  const { state } = ctx;
+  if (state.result) return;
+  const farmers = state.players.filter(p => p.role === 'farmer'), hunters = state.players.filter(p => p.role === 'hunter');
+  let winner = null, reason = null;
+  if (farmers.length && farmers.every(p => p.ghost)) { winner = HUNTERS; reason = 'caught'; }
+  else if (hunters.length && hunters.every(p => p.out)) { winner = FARMERS; reason = 'hunted'; }
+  else if (state.tick >= state.hvf.endTick) { winner = FARMERS; reason = 'clock'; }
+  if (reason) { state.result = { winner, reason, tick: state.tick }; ctx.emit('result', { winner, reason }); }
+}
 
 export default {
   id: 'hvf',
@@ -45,10 +70,18 @@ export default {
     return worldForFormat(hvfData(data), (config.seed ?? 1) >>> 0, format, config.rules && config.rules.size);
   },
 
-  createState() { throw new Error('Hunters vs Farmers is not playable yet: the forest generator is ready (hvf-map.html), the match arrives in H2.'); },
+  /** The mode builds its own state (seats carry roles; no races, heroes, lanes or banners). */
+  createState(config, data, map) {
+    const state = createHvfState({ ...config, format: config.format }, data, map);
+    const ctx = { state, data, map, emit: () => {} };
+    updateVision(ctx, FARMERS); updateVision(ctx, HUNTERS);
+    return state;
+  },
   initState() {},
-  phases: [],
-  checkResult() {},
-  commands: {},
-  ai: () => [],
+  // §2.2 order (H2 subset; timers, noise, tracks, the Turn arrive with H3)
+  phases: [releaseTick, breedTick, incomeTick, animalTick, unitTick, visionTick],
+  checkResult,
+  commands: HVF_COMMANDS,
+  queries,
+  ai: () => [],   // stream E builds the AI (js/sim/modes/hvf/ai/, H4)
 };

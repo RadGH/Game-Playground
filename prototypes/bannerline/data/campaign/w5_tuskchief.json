@@ -1,0 +1,146 @@
+{
+ "id": "w5_tuskchief",
+ "chapter": "warrior",
+ "name": "The Tuskchief Comes",
+ "place": "Thornfold Keep",
+ "briefing": [
+  "The Ashtusk have crowned a Tuskchief, and he is coming down our road himself with his guard.",
+  "Captain Merrow: \"Everything you have learned, now. Grow your income, arm yourself, and when the Tuskchief walks through our gate, he does not walk out.\""
+ ],
+ "config": {
+  "format": "1v1",
+  "map": "vale",
+  "players": [
+   {
+    "team": 0,
+    "kind": "human",
+    "race": "freeholds",
+    "hero": "warrior",
+    "name": "You"
+   },
+   {
+    "team": 1,
+    "kind": "ai",
+    "race": "ashtusk",
+    "hero": "warrior",
+    "name": "The Tuskchief's Host",
+    "ai": {
+     "difficulty": "veteran"
+    }
+   }
+  ],
+  "rules": {
+   "banners": 70
+  }
+ },
+ "player": 0,
+ "winWhen": "objectives",
+ "timeLimit": 1500,
+ "objectives": [
+  {
+   "id": "ready",
+   "text": "Reach hero level 6",
+   "kind": "level",
+   "args": {
+    "n": 6
+   }
+  },
+  {
+   "id": "chief",
+   "text": "Slay the Tuskchief and his guard",
+   "kind": "slay",
+   "args": {
+    "tag": "chief"
+   }
+  },
+  {
+   "id": "banners",
+   "text": "Keep at least 30 banners",
+   "kind": "bannersAtLeast",
+   "args": {
+    "n": 30
+   },
+   "optional": true
+  },
+  {
+   "id": "unbowed",
+   "text": "Never fall",
+   "kind": "noHeroDeaths",
+   "args": {},
+   "optional": true
+  }
+ ],
+ "stars": [
+  "banners",
+  "unbowed"
+ ],
+ "script": [
+  {
+   "id": "hello",
+   "when": {
+    "tick": 20
+   },
+   "do": [
+    {
+     "do": "say",
+     "who": "Captain Merrow",
+     "text": "Scouts say the Tuskchief marches in five minutes. Make every one of them count."
+    }
+   ]
+  },
+  {
+   "id": "warn",
+   "when": {
+    "at": 270
+   },
+   "do": [
+    {
+     "do": "say",
+     "who": "Captain Merrow",
+     "text": "Drums on the road. He is coming."
+    }
+   ]
+  },
+  {
+   "id": "chief",
+   "when": {
+    "at": 300
+   },
+   "do": [
+    {
+     "do": "wave",
+     "player": 1,
+     "units": [
+      [
+       "tuskchief",
+       1
+      ],
+      [
+       "brute",
+       2
+      ]
+     ],
+     "tag": "chief"
+    },
+    {
+     "do": "say",
+     "who": "The Tuskchief",
+     "text": "Your banners will make fine cloaks."
+    }
+   ]
+  },
+  {
+   "id": "fallen",
+   "when": {
+    "done": "chief"
+   },
+   "do": [
+    {
+     "do": "say",
+     "who": "Captain Merrow",
+     "text": "The Tuskchief is down! The Vale is free."
+    }
+   ]
+  }
+ ]
+}

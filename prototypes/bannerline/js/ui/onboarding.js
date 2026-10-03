@@ -10,16 +10,16 @@ const KEY = 'bannerline.onboarded.v1';
 function steps(isPad) {
   return [
     { id: 'send', title: 'Send units to raise your income',
-      text: isPad ? 'Press <kbd class="pad">↓</kbd> on the d-pad (or walk to the Muster Hall) and buy units with <kbd class="pad">A</kbd>. They march on your rival, and every send adds income for the rest of the match.'
-        : 'Open the <b>Muster Hall</b> with <kbd>B</kbd> (or walk your hero to it) and buy units. They march on your rival, and every send adds income for the rest of the match. Hold to keep buying.' },
+      text: isPad ? 'Press <kbd class="pad">↓</kbd> on the d-pad (or walk to the Barracks) and hire units with <kbd class="pad">A</kbd> — hold it to keep hiring. They march on your rival, and every unit adds income for the rest of the match.'
+        : 'Open the <b>Barracks</b> with <kbd>B</kbd> (or walk your hero to it) and hire units — hold to keep hiring. They march on your rival, and every unit adds income for the rest of the match.' },
     { id: 'defend', title: 'Defend your field with your hero',
       text: isPad ? 'Enemy units come through your gate. Move with the left stick, <kbd class="pad">A</kbd> attacks, <kbd class="pad">X</kbd> <kbd class="pad">Y</kbd> <kbd class="pad">B</kbd> <kbd class="pad">RB</kbd> cast. <kbd class="pad">LT</kbd> + a skill button learns it.'
         : 'Enemy units come through your gate. Right-click to move and attack; <kbd>Q</kbd> <kbd>W</kbd> <kbd>E</kbd> <kbd>R</kbd> cast at the cursor. <kbd>Ctrl</kbd> + a skill key learns it.' },
     { id: 'banners', title: 'Guard your banners',
       text: 'Units that reach your Keep tear down banners. Lose them all and the match is lost — tear down theirs first.' },
-    { id: 'gear', title: 'Spend the rest on gear',
-      text: isPad ? 'Gold arrives every payout. <kbd class="pad">View</kbd> opens the Armory — the best upgrade is one more press.'
-        : 'Gold arrives every payout. <kbd>I</kbd> opens the Armory for gear; <kbd>G</kbd> buys the best upgrade straight away. <kbd>F</kbd> looks at the rival\'s field.' },
+    { id: 'gear', title: 'Your town',
+      text: isPad ? 'Gold arrives every payout. <kbd class="pad">View</kbd> Outfitter (items — stand next to it), <kbd class="pad">↑</kbd> Drill Yard (train every unit you send), <kbd class="pad">LB</kbd> Sanctum (powers you aim at a field). <kbd class="pad">R3</kbd> watches the rival\'s field.'
+        : 'Gold arrives every payout. <kbd>O</kbd> Outfitter (items — stand next to it), <kbd>U</kbd> Drill Yard (train every unit you send), <kbd>P</kbd> Sanctum (powers you aim at a field). <kbd>F</kbd> watches the rival\'s field.' },
   ];
 }
 

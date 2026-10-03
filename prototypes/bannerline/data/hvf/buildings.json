@@ -1,0 +1,18 @@
+{
+ "_doc": "Farmer buildings (docs/hvf-PLAN.md §6). Read by js/sim/modes/hvf/farm.js. size = footprint in 2 m cells [w, d]; cost in gold, each further copy of the same building by the same farmer x copyMult; makes = animal kind and capacity (cap) for producers; flat = gold/s without animals; incomePct = added to all the farmer's income; tell 0-3 (how loud: shown in the build menu); hp. Gold is the only gate: no build timers, no tech locks. A building is placed when its farmer reaches it (buildRange in units.json) and still has the gold. `blocks`: who cannot walk through its cells (all = everyone and animals; hunters = hunters and army only).",
+ "copyMult": 1.15,
+ "order": ["coop", "pen", "sty", "barn", "hive", "granary", "windmill", "farmhouse", "fence", "wall", "hedge"],
+ "kinds": {
+  "coop": { "name": "Hen Coop", "size": [2, 2], "cost": 30, "makes": "hen", "cap": 3, "tell": 1, "hp": 200, "blocks": "all", "desc": "Three hens. Small and quiet." },
+  "pen": { "name": "Sheep Pen", "size": [3, 3], "cost": 90, "makes": "sheep", "cap": 4, "tell": 2, "hp": 300, "blocks": "all", "desc": "Four sheep. They bleat." },
+  "sty": { "name": "Pigsty", "size": [3, 2], "cost": 220, "makes": "pig", "cap": 3, "tell": 3, "hp": 350, "blocks": "all", "desc": "Three pigs. Loud." },
+  "barn": { "name": "Cow Barn", "size": [3, 3], "cost": 600, "makes": "cow", "cap": 2, "tell": 3, "hp": 500, "blocks": "all", "desc": "Two cows. Big, slow and easy to spot." },
+  "hive": { "name": "Beehive", "size": [1, 1], "cost": 160, "flat": 0.40, "tell": 0, "hp": 80, "blocks": "all", "desc": "Silent gold." },
+  "granary": { "name": "Granary", "size": [2, 2], "cost": 400, "incomePct": 0.10, "tell": 0, "hp": 300, "blocks": "all", "desc": "+10% to all your income." },
+  "windmill": { "name": "Windmill", "size": [2, 2], "cost": 1500, "incomePct": 0.35, "tell": 2, "hp": 400, "blocks": "all", "tall": 40, "desc": "+35% to all your income. Tall: seen over the trees." },
+  "farmhouse": { "name": "Farmhouse", "size": [2, 2], "cost": 200, "tell": 1, "hp": 700, "blocks": "all", "onePer": true, "respawn": 40, "desc": "Your respawn point. One per farmer." },
+  "fence": { "name": "Fence", "size": [1, 1], "cost": 8, "tell": 0, "hp": 120, "blocks": "all", "opaque": true, "desc": "Stops everyone and the animals; blocks sight." },
+  "wall": { "name": "Stone Wall", "size": [1, 1], "cost": 25, "tell": 0, "hp": 600, "blocks": "all", "opaque": true, "desc": "A tougher fence." },
+  "hedge": { "name": "Briar Hedge", "size": [1, 1], "cost": 15, "tell": 0, "hp": 200, "blocks": "hunters", "desc": "Farmers and animals squeeze through; hunters cannot." }
+ }
+}

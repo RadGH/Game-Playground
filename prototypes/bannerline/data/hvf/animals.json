@@ -1,0 +1,10 @@
+{
+ "_doc": "Farm animals (docs/hvf-PLAN.md §5) — the farmers' income and the hunters' main tell. Read by js/sim/modes/hvf/animals.js. income = gold per second each; wander = metres from home; speed m/s; breed = seconds per new animal (one at a time per building); sight m (they are team vision); noise radius m and period s (H3); hp. `rules`: wander every [min,max] s; crowding: comfort = open cells within the wander radius / comfortCells, over it the radius x crowdMult; flee from a hunter or army unit within fleeRange for fleeSeconds at fleeSpeed x; a stray is outside wander x strayMult; a ghost farmer's animals go wild (wander x wildMult, no income); caps per farmer and per match.",
+ "kinds": {
+  "hen": { "name": "Hen", "income": 0.10, "wander": 6, "speed": 1.6, "breed": 15, "hp": 30, "sight": 6, "radius": 0.25, "noise": 10, "noiseEvery": 9 },
+  "sheep": { "name": "Sheep", "income": 0.22, "wander": 10, "speed": 1.4, "breed": 25, "hp": 60, "sight": 6, "radius": 0.4, "noise": 18, "noiseEvery": 7 },
+  "pig": { "name": "Pig", "income": 0.45, "wander": 7, "speed": 1.5, "breed": 30, "hp": 90, "sight": 6, "radius": 0.45, "noise": 25, "noiseEvery": 6 },
+  "cow": { "name": "Cow", "income": 1.40, "wander": 12, "speed": 1.2, "breed": 45, "hp": 180, "sight": 6, "radius": 0.6, "noise": 22, "noiseEvery": 10 }
+ },
+ "rules": { "wanderEvery": [3, 6], "comfortCells": 6, "crowdMult": 1.5, "fleeRange": 6, "fleeSeconds": 4, "fleeSpeed": 2.2, "strayMult": 1.2, "wildMult": 3, "capPerFarmer": 60, "capMatch": 420 }
+}

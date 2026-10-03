@@ -39,11 +39,11 @@ const CREATURE_FRAMES = {
 /** The background each kind of icon sits on: [inner, outer] radial colours. */
 export const ICON_TINTS = {
   freeholds: ['#4f6f9e', '#141b2a'], ashtusk: ['#9a4a3a', '#1f1110'], unburied: ['#4f8a8e', '#0f1a1c'], thornmane: ['#6a7a3e', '#151a0e'],
-  hero: ['#b08a48', '#20180c'], item: ['#5a5650', '#121214'], skill: ['#3a3a44', '#101014'],
+  hero: ['#b08a48', '#20180c'], item: ['#5a5650', '#121214'], skill: ['#3a3a44', '#101014'], building: ['#6a7a8a', '#151a20'],
 };
 export const ELEMENT_TINTS = {
   physical: ['#a9b6c8', '#1c2028'], blade: ['#a9b6c8', '#1c2028'], pierce: ['#b4c9a0', '#2a3424'],
-  fire: ['#ff9a3a', '#3a1206'], nature: ['#8fdc6a', '#11280c'], ice: ['#9ad8ff', '#0c2030'], arcane: ['#c49aff', '#1e1030'], holy: ['#ffe08a', '#30280c'],
+  fire: ['#ff9a3a', '#3a1206'], nature: ['#8fdc6a', '#11280c'], ice: ['#9ad8ff', '#0c2030'], arcane: ['#c49aff', '#1e1030'], holy: ['#ffe08a', '#30280c'], shadow: ['#b48aff', '#160c22'], lightning: ['#fff07a', '#20202e'],
 };
 
 // ---------------------------------------------------------------- framing
@@ -265,6 +265,23 @@ export function createIconStudio(renderer, { looks = null, size = ICON_SIZE, sup
       const sp = await tintedSprite(new URL(`../../assets/data/fx/${sprite}.svg`, base).href, tint[0], px);
       g.save(); g.shadowColor = tint[0]; g.shadowBlur = px * 0.08; g.drawImage(sp, px * 0.18, px * 0.08, px * 0.78, px * 0.78); g.restore();
       return finishIcon(c, { tint: ['rgba(0,0,0,0)', 'rgba(0,0,0,0)'], size });
+    },
+    /** A Sanctum power: the skill composite without a hero, inside a frame in the power kind's colour. */
+    async power(id, { sprite = 'spark', element = 'arcane', frame = '#ffd24a' } = {}) {
+      const base = await api.skill(id, { hero: null, sprite, element });
+      const g = base.getContext('2d'), w = base.width, lw = Math.max(3, w / 22);
+      g.strokeStyle = frame; g.lineWidth = lw; g.globalAlpha = 0.95; g.strokeRect(lw / 2 + 1, lw / 2 + 1, w - lw - 2, w - lw - 2);
+      g.globalAlpha = 0.35; g.lineWidth = lw * 2.4; g.strokeRect(lw * 1.6, lw * 1.6, w - lw * 3.2, w - lw * 3.2); g.globalAlpha = 1;
+      return base;
+    },
+    /** Any static model (a building): its whole bounding box from a raised three-quarter view. */
+    async object(group, { tint = ICON_TINTS.building, yaw = 0.6, pitch = 0.5, pad = 0.82, update = null } = {}) {
+      return queue(async () => {
+        scene.add(group); update?.(0.016); update?.(0.5);
+        frameCamera({ group, kind: 'object' }, camera, { mode: 'full', yaw, pitch, pad });
+        const shot = shoot(); scene.remove(group);
+        return finishIcon(shot, { tint, size });
+      });
     },
     dispose() { scene.traverse(o => o.dispose?.()); },
   };

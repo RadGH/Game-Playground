@@ -11,10 +11,10 @@ const DMG_NAMES = { blade: 'Blade', pierce: 'Pierce', fire: 'Fire', nature: 'Nat
 const ARMOUR_NAMES = { light: 'Light', heavy: 'Heavy', spectral: 'Spectral', hide: 'Hide', fortified: 'Fortified' };
 const REJECT_TEXT = {
   gold: 'Not enough gold', stock: 'Out of stock — wait for a restock', locked: 'That tier is not open yet',
-  roster: 'Not in your muster', dead: 'Your hero is down', cooldown: 'Not ready yet', mana: 'Not enough mana',
+  roster: 'Not in your army', dead: 'Your hero is down', cooldown: 'Not ready yet', mana: 'Not enough mana',
   rank: 'Learn that skill first (Ctrl + key)', points: 'No skill points', maxRank: 'Already at full rank',
-  level: 'Needs hero level 6', belt: 'Belt is empty — buy a potion', maxMuster: 'Muster is at full rank',
-  over: 'The match is over', bad: 'Cannot do that', maxGear: 'That slot is fully upgraded', stunned: 'Stunned',
+  level: 'Needs hero level 6', notAtShop: 'Walk to the Outfitter to buy or sell', full: 'Your six item slots are full', uniqueEquipped: 'Unique: you can carry only one', notUsable: 'That item works while carried', ownFieldOnly: 'Defensive powers land in your own field', enemyFieldOnly: 'Offensive powers land in an enemy field', notInField: 'Powers land inside a field', max: 'Fully trained', maxLevel: 'Fully trained',
+  over: 'The match is over', bad: 'Cannot do that', stunned: 'Stunned',
 };
 export { DMG_NAMES, ARMOUR_NAMES };
 
@@ -32,7 +32,7 @@ export function createHud({ root, overlay, sim, Q, player, seat, project, onPaus
   const banR = bannerBlock(enemyTeam, 'Rival');
   const econ = h('div', 'tb-econ');
   econ.innerHTML = `
-    <div class="tb-stat gold" data-tip="Gold. Spend it on sends (Z X C V), Muster (M) and potions.">${icon('coin')}<b class="v"></b></div>
+    <div class="tb-stat gold" data-tip="Gold. Hire units at the Barracks (B), buy items at the Outfitter (O), train your army at the Drill Yard (U) and buy powers at the Sanctum (P).">${icon('coin')}<b class="v"></b></div>
     <div class="tb-stat income" data-tip="Income: paid every Pay. Every send you buy raises it.">${icon('income')}<b class="v"></b></div>
     <div class="pay-ring" data-tip="Pay: gold arrives and your queued sends march when the ring fills.">
       <svg viewBox="0 0 40 40"><circle class="track" cx="20" cy="20" r="16"/><circle class="fill" cx="20" cy="20" r="16"/></svg>
@@ -110,7 +110,7 @@ export function createHud({ root, overlay, sim, Q, player, seat, project, onPaus
     <button class="menu-btn" data-act="surrender">Surrender</button>
     <button class="menu-btn" data-act="quit">Leave to the lobby</button>
     <p class="keys"><kbd>↑</kbd><kbd>↓</kbd> choose · <kbd>Enter</kbd> confirm · controller: d-pad, <kbd class="pad">A</kbd>, <kbd class="pad">B</kbd><br>Right-click move / attack · <kbd>A</kbd> attack-move · <kbd>S</kbd> stop · <kbd>Q</kbd><kbd>W</kbd><kbd>E</kbd><kbd>D</kbd><kbd>R</kbd> skills at the cursor · <kbd>Ctrl</kbd>+key learn ·
-    <kbd>B</kbd> Muster Hall (send units) · <kbd>Z</kbd><kbd>X</kbd><kbd>C</kbd><kbd>V</kbd> favourite sends (hold = keep buying) · <kbd>F</kbd> look at the next field · <kbd>I</kbd> Armory · <kbd>M</kbd> Muster · <kbd>1</kbd> potion · <kbd>Space</kbd> centre · wheel zoom</p></div>`;
+    <kbd>B</kbd> Barracks (hire units, hold to keep hiring) · <kbd>O</kbd> Outfitter · <kbd>U</kbd> Drill Yard · <kbd>P</kbd> Sanctum · <kbd>1</kbd>–<kbd>6</kbd> use items · <kbd>F</kbd> look at the next field · <kbd>Space</kbd> back to your hero · wheel zoom</p></div>`;
   root.append(pause);
   pause.addEventListener('click', (e) => {
     const act = e.target.closest('[data-act]')?.dataset.act;
@@ -285,7 +285,7 @@ export function createHud({ root, overlay, sim, Q, player, seat, project, onPaus
         else alert(`Your ${name} leaves the gate`, 'good', 2600);
         break;
       }
-      case 'muster': if (ev.player === player) alert(`Muster rank ${['I', 'II', 'III'][ev.rank - 1] || ev.rank}: your sends hit harder`, 'good'); break;
+      case 'upgradeUnit': case 'unitUpgrade': if (ev.player === player) alert('Your army is better trained', 'good', 1600); break;
       default: break;
     }
   }
@@ -295,6 +295,7 @@ export function createHud({ root, overlay, sim, Q, player, seat, project, onPaus
     get paused() { return paused; },
     togglePause() { setPaused(!paused); },
     onArmy(fn) { onArmyClick = fn; },
+    reasonText(r) { return REJECT_TEXT[r] || r; },
     /** A send was bought: "+1.8 income" floats up from the income counter. */
     sendFeedback(income) {
       const inc = econ.querySelector('.income');

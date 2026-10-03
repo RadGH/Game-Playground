@@ -111,15 +111,19 @@ per tick are fine; they apply in array order.
 | `deck` | `units` [4 unit ids] | set the 4 deck sends (any time) |
 | `auto` | `index` 0..3, `on` bool | auto-send toggle for a deck slot: buys that send whenever its stock and your gold allow |
 | `muster` | — | buy the next Muster rank (I–III) |
-| `upgrade` | `slot?` 0..7 | buy the next **gear step** for that equipment slot (PLAN §7.2 steps, `econ.json items.tiers`); omit `slot` for the cheapest unlocked step. M1's gold sink; M4's shop replaces the abstract steps with real items but keeps the step prices |
+| `upgrade` | `slot?` (name like `'chest'` or index 0..7), `kind?` (chest only: `'cloth'|'light'|'medium'|'heavy'`) | "Buy recommended": buy the next shop step item for that slot (omit `slot` = the cheapest unlocked step anywhere) and wear it when it arrives. The worn item is traded in if it is a plain shop step; anything special (unique, set piece, rolled or dropped item) goes back to the bag |
+| `buy` | `slot`, `step` 0..6, `kind?`, `equip?` | buy one specific shop item into the bag (or worn with `equip: true`). Steps 0-4 are plain (Plain/Fine/Superior/Masterwork/Exquisite), 5 is a **rare roll** (3 affixes), 6 a **legendary roll** (5); each step unlocks by time (`econ.items.tiers[step].unlock`). Away from the Armory every purchase is a **Requisition** (arrives after `items-bl.shop.requisition` s; lost and refunded if the hero dies first) |
+| `equip` | `uid` | wear a bag item; what it replaces goes into its bag slot. A two-handed weapon also moves the off-hand to the bag |
+| `unequip` | `slot` | worn item to the bag |
+| `sell` | `uid` | sell a bag item for `items-bl.shop.sellFactor` of its price |
+| `pick` | `index` 0..2 | choose a card from the oldest waiting champion pick (`player.picks[0]`) into the bag |
 | `oil` | `dmgType` `'blade'|'pierce'|'fire'|'nature'` | buy weapon Oil (`econ.items.oil.cost`): half of the hero's damage becomes that type (replaces any earlier oil) |
 | `potion` | — | buy one belt potion (25 g) if the belt has room |
 | `drink` | — | drink a belt potion (heals 40% max HP) |
 | `surrender` | — | your team loses at once |
-| `toll` | — | *(M6)* Toll of Iron |
-| `buy`, `equip`, `unequip`, `sell`, `oil`, `requisition` | — | *(M4)* items; shapes defined in M4 |
+| `toll` | — | Toll of Iron: every enemy unit in your team's field is stunned (`items-bl.toll.stun` s). Team charges (`team.toll`), one back every `toll.cooldown` s |
 
-`reject.reason` values: `'gold'` (not enough gold), `'stock'`, `'maxGear'`, `'stunned'`, `'locked'` (tier not unlocked yet),
+`reject.reason` values: `'gold'` (not enough gold), `'stock'`, `'maxGear'`, `'stunned'`, `'bag'` (bag full), `'twoHanded'` (off-hand beside a two-hander), `'hero'` (another hero's unique), `'locked'` (tier not unlocked yet),
 `'roster'` (unit not in your race), `'dead'` (hero is dead), `'cooldown'`, `'mana'`, `'rank'` (skill
 not learned), `'points'` (no skill point), `'maxRank'`, `'level'` (R before 6), `'belt'` (belt full /
 empty), `'maxMuster'`, `'over'` (match over), `'bad'` (malformed).
@@ -159,7 +163,15 @@ hashed, not snapshotted): they are hints for drawing and sound. Never derive gam
 | `unlock` | `tier` | a send tier unlocked for everyone |
 | `rising` | `step` | Rising Tide step began (alert) |
 | `muster` | `player, rank` | Muster rank bought |
-| `gear` | `player, slot, step` | a gear step was bought |
+| `item` | `player, uid, how, name, rarity` | an item reached the player (`how`: `'buy'` at the Armory, `'requisition'` delivered, `'pick'`) |
+| `requisition` | `player, uid, atTick, name` | a purchase away from the Armory is on its way |
+| `requisitionLost` | `player, uid, refund` | the hero died before it arrived |
+| `drop` | `player, uid, x, z, rarity, name, better` | a kill dropped an item for this player at (x, z): show a rarity beacon, then fly it to the hero (it is already in the bag). `better` = score versus the worn item in that slot (> 0: "Equip (better by +X)") |
+| `equip` / `unequip` | `player, uid, slot` / `player, slot` | worn gear changed |
+| `sell` | `player, uid, gold, name` | an item was sold (also when a full bag auto-sells a drop) |
+| `pickOffer` | `player, cards` | a champion died in this player's field: a 3-card pick waits (`player.picks`) |
+| `power` | `player, unique` | a unique's power fired (Long Scythe sweep, Sootcrown overload...) |
+| `toll` | `team, player, stunned` | Toll of Iron rang |
 | `oil` | `player, dmgType` | Oil applied |
 | `champion` | `player, unit, field` | a champion send is leaving through a gate ("Champion at the gate!") |
 | `revive` | `id` | a `rise` unit came back at half HP |
@@ -193,7 +205,7 @@ state = {
 ### 5.1 Team, Player, Field
 
 ```js
-Team   = { id, banners, bannersMax, field, players: [ids], dealt }   // dealt = banners torn from enemies (hard-cap tie-break)
+Team   = { id, banners, bannersMax, field, players: [ids], dealt, toll: { charges, readyAt } }   // dealt = banners torn from enemies (hard-cap tie-break)
 Field  = { id, team, waiting: [WaitingSend], bodies }               // live bodies now (cap: econ.field.cap)
 Player = {
   id, team, name, kind: 'human'|'ai', ai: null | { difficulty },
@@ -205,7 +217,12 @@ Player = {
   stock: [{ unit, n, max, t, every }],    // race roster order; t = ticks toward the next charge, every = restock ticks
   queued: [unit ids],            // bought this Pay interval, released on the next Pay
   muster,                        // 0..3
-  gear: [8 step indices],        // -1 = nothing, 0..6 = econ.items.tiers index (M1 abstract gear; M4 adds items)
+  equip: { weapon, offhand, head, chest, hands, feet, neck, ring },   // Item | null
+  bag: [12 x Item | null],
+  picks: [[Item, Item, Item], ...],  // champion picks waiting, oldest first
+  requisitions: [{ item, atTick, equip, replace, cost }],
+  atArmory,                      // hero is at the Armory now (purchases are instant)
+  procs, gearV,                  // internal: unique power counters, gear cache version
   level, xp, skillPts,
   skills: [{ slot, id, rank, readyAt }],  // slots Q W E D R; readyAt = tick the cooldown ends
   talent: -1 | 0 | 1,
@@ -295,7 +312,11 @@ All pure, `(state, data, ...) -> value`; safe to call every frame.
 | `teamInfo(state, data, teamId)` | `{ banners, bannersMax, rally }` |
 | `rivalInfo(state, data, pid)` | rival's `{ player, hero, level, hpPct, dmgType, armourClass, deck: deckInfo }` |
 | `gatePreview(state, data, fieldId)` | queued sends of every enemy player heading into that field: `[{ player, unit, count }]` |
-| `gearInfo(state, data, pid)` | `{ slots: [{ slot, step, next: {cost, unlocked, unlockIn} | null }], cheapest: {slot, cost} | null, spent }` |
+| `gearInfo(state, data, pid)` | Armory summary, one row per slot in `SLOTS` order: `{ slots: [{ slot (index), key ('weapon'...), name, usable, step, stepName, item: ItemView|null, next: {step, stepName, cost, unlocked, unlockIn, canBuy} | null }], cheapest: {slot, key, cost, canBuy} | null, spent }` (kept from M1) |
+| `inventoryInfo(state, data, pid)` | the character panel: `{ equip: {slot: ItemView|null}, bag: [ItemView|null], belt, beltMax, armourClass, oil, totals: {stat: value}, totalLines: [text], set: {pieces, active: [text]}, picks: [[ItemView x3]], requisitions: [{uid, name, inTicks}] }` |
+| `shopInfo(state, data, pid)` | `{ atArmory, requisitionSeconds, topStep, topStepName, recommended: {slot, cost, canBuy} | null, slots: [{ slot, slotName, kind, kinds (chest: [{kind, armourClass, name}]), next: {step, stepName, cost, unlocked, unlockIn, reason} | null }], potion: {cost, belt, max}, oil: {cost, current, types} }` |
+| `itemView(state, data, pid, item)` | ItemView = `{ uid, name, slot, slotName, rarity ('normal'|'magic'|'rare'|'legendary'|'unique'|'set'), step, stepName, ilvl, tier, kind, armourClass (chest), twoHanded, lines: [text], power (unique text), set: {name, pieces, bonuses}, lore, score, better, worn, sell, forHero }` |
+| `affixLine(data, affix)` | `"+4.5% critical chance"` |
 | `musterInfo(state, data, pid)` | `{ rank, next: {cost, canBuy, reason} | null }` |
 | `entName(state, data, ent)` | display name |
 
@@ -319,12 +340,82 @@ All files carry a `_doc` string. The sim reads them only through `sim.data` (fro
   mpRegen, armor, slots{Q,W,E,D,R: skill id}, talents[{skill, choices:[{id,name,desc,mod}]}]}}`,
   `skills{id:{name, desc, shape, element, mult, radius|reach|arc, cooldown, mp, ...effects}}`,
   `statuses{id:{...}}`, `ranks{max, ult, multPerRank, cdPerRank}`.
+- `data/items-bl.json` — built by `tools/build-items-bl.mjs`: `slots`, `stepNames`, `stepIlvl`, `stepRarity`,
+  `rarityAffixes`, `bases{slot:{kind:{id,name,twoHanded}}}`, `affixes[16]` `{id, name, kind (prefix/suffix), stat, min, max, unit, label, slots?}`,
+  `caps`, `score`, `uniques{id:{name, lore, hero, slot, base, twoHanded, power, powerText}}`, `set`, `heroKind`, `shop`, `drops`, `toll`.
 
 ## 9. What the view may and may not do
 
 - May: read `sim.state`, `sim.map`, `sim.data`, call `query.js`, drain events, build commands.
 - May not: write into state, call internal sim modules, use `Math.random` to change game outcomes.
+- Item = `{ uid, slot, base, baseName, name, rarity, step, ilvl, kind, twoHanded, affixes: [{id, stat, value}], unique, set, price }` (plain data; use `itemView` for display).
 - Player-facing names for gear slots: `GEAR_SLOTS` exported by `query.js` (weapon, off-hand, head,
   chest, hands, feet, neck, ring) and step names `GEAR_STEPS` (Plain … Legendary roll).
 - Display rounding: `shared/format.js` (`hp`, `fmt`). Banners are fractional internally — show
   `Math.ceil(banners)`.
+
+## 10. Portrait + icons (stream C)
+
+Art modules the view and UI use. All take the game's own renderer — none opens a second WebGL context.
+
+### 10.1 Models: `js/view/unit-looks.js` + `data/looks.json`
+
+```js
+import { loadLooks, createBodyFactory } from './view/unit-looks.js';
+const looks = await loadLooks();                  // data/looks.json + units.json + avatar-3d data + Farhold warbands (read-only)
+looks.forUnit('tuskback')  // { kind: 'creature', spec, variant, scale, race, tier, name }
+looks.forHero('druid')     // { kind: 'chibi2', avatar, scale, hero: true }
+looks.forRef('unit:levy' | 'hero:warrior')
+const actor = await looks.build(look)  // { group, height, setAnim(clip, fade?, restart?), update(dt,t), metrics(), dispose(), kind, parts? }
+
+// stream B's actors.js:
+const bodies = createBodyFactory(looks, { scale: 1.3, fallback: capsuleBody });
+await bodies.preload();                           // one of each body: warms Chibi 2 templates, learns heights
+createActors({ scene, data, makeBody: bodies.makeBody, localTeam });
+```
+
+- `makeBody(ent, look, data)` returns `{ object, height, play(act, t), dispose() }` synchronously; the
+  model drops into `object` when its async build lands. Heroes are `ent.kind === 'hero'` (ent.type = hero
+  id), units `kind === 'unit'`; anything else (tides) goes to `fallback`.
+- `play(act, t)` maps the sim's `act` → clip: idle → ready, walk, attack, cast, stun → hit, dead.
+- Models face +z. Creatures are folded by `avatar-3d/js/mesh-merge.js` (1–3 draw calls); a Chibi 2
+  body is 2 draw calls (templates shared per identical look). Team identity stays a ground ring.
+- `scale` (default 1.3) × each look's `scale` (T6 champions 1.5, heroes 1.35) gives world size; Chibi 2
+  bodies are ~1.0–1.3 m before scale.
+
+### 10.2 Live portrait: `js/view/portrait.js`
+
+```js
+import { createPortrait } from './view/portrait.js';
+const portrait = createPortrait({ gfx: app.gfx, slot: bar.portraitSlot, looks });   // adds .live to the slot
+bar.onSelect(id => portrait.showEnt(state.ents.find(e => e.id === id)));            // { kind, type } or null
+portrait.react('hit');        // on damage to the shown entity; 'talk' | 'attack' | 'cast' too
+portrait.dispose();           // on match end (removes its pass and canvas)
+```
+
+- Registers one `gfx.addPass` pass; renders ≤ 30 fps into the canvas square under the slot and copies it
+  into a 2D canvas inside the slot (the bar is opaque, so a bare scissored viewport would be hidden).
+- Split screen: one `createPortrait` per control bar. Each has its own little scene and actor.
+- `showEnt` of the same `kind:type` again is free (no rebuild).
+
+### 10.3 Icons: `js/view/icons.js`, `assets/icons/`
+
+```js
+import { createIconLibrary, createIconStudio } from './view/icons.js';
+const icons = await createIconLibrary();          // reads assets/icons/index.json
+icons.url('unit', 'levy')    // 'assets/icons/unit/levy.png' or null (synchronous; use in <img>)
+icons.url('hero', 'druid'); icons.url('skill', 'firebolt'); icons.url('item', 'greatsword')
+// optional runtime generation for anything not baked (previews only):
+icons.attach(createIconStudio(app.gfx.renderer, { looks })); await icons.get('unit', 'newthing')
+```
+
+- Kinds and ids: `unit/<unit id>` (24), `hero/<hero id>` (4), `skill/<skill id>` (every skill in
+  data/heroes.json), `item/<base>` (generic bases: sword, longsword, greatsword, axe, greataxe, mace,
+  warhammer, spear, bow, staff, druid_staff, quarterstaff, wand, heater/kite/tower_shield, tome, quiver,
+  plate_helm, leather_cap, hood, wizard_hat, plate_armour, chainmail, leather_armour, robe, boots,
+  bracers, potion, oil, amulet, ring, scroll — `assets/icons/catalog.json`).
+- 128×128 PNG, background and frame baked in (race tint for units, gold for heroes, element tint for
+  skills). Scale down freely in CSS.
+- Rebake after changing a look, a creature or the catalog: `flock /tmp/claude-1000/farhold-pw.lock node
+  prototypes/bannerline/tools/bake-icons.mjs` (writes the PNGs + index.json). `icons.html` is the gallery
+  and re-render tool for people.

@@ -162,7 +162,7 @@ function playMatch({ a, b, seed, endless = false }) {
     }
     if (t % C.tide === 0) {
       const L = Math.floor(t / C.tide) + risingLevel(t) * ECON.clock.risingTideLevels;
-      for (let i = 0; i < 2; i++) waiting[i].push({ tide: true, uid: 'tide', bodies: ECON.tide.bodies, hp: (ECON.tide.hpBase + ECON.tide.hpPerLevel * L) * ECON.tide.bodies, hpMax: 0, dps: ECON.tide.dpsBase + ECON.tide.dpsPerLevel * L, armour: DMG.armours[L % 4], dmg: 'blade', leak: ECON.tide.leak, speed: 3, prog: 0, cost: 0, gold: ECON.tide.gold + ECON.tide.goldPerLevel * L, xp: ECON.tide.xp + ECON.tide.xpPerLevel * L, owner: -1 });
+      for (let i = 0; i < 2; i++) waiting[i].push({ tide: true, uid: 'tide', bodies: ECON.tide.bodies, hp: (ECON.tide.hpBase + ECON.tide.hpPerLevel * L) * ECON.tide.bodies, hpMax: 0, dps: (ECON.tide.dpsBase + ECON.tide.dpsPerLevel * L), armour: DMG.armours[L % 4], dmg: 'blade', leak: ECON.tide.leak, speed: 3, prog: 0, cost: 0, gold: ECON.tide.gold + ECON.tide.goldPerLevel * L, xp: ECON.tide.xp + ECON.tide.xpPerLevel * L, owner: -1 });
     }
     // gate: admit waiting groups under the cap
     for (let i = 0; i < 2; i++) {
@@ -263,7 +263,7 @@ function decide(p, foe, t) {
     for (const u of order) {
       const s = p.stock[u.id];
       if (s.n > 0 && u.cost <= budget && u.cost <= p.gold) {
-        s.n--; p.gold -= u.cost; budget -= u.cost; p.income += u.income;
+        s.n--; p.gold -= u.cost; budget -= u.cost; p.income += u.income / (u.tier >= 4 && t >= C.risingTide ? 1 + (C.risingRestock || 0) * (1 + Math.floor((t - C.risingTide) / C.risingEvery)) : 1);   // Rising: pressure only
         p.spent.sends += u.cost; p.sendGold[u.id] = (p.sendGold[u.id] || 0) + u.cost; p.tierGold[u.tier] = (p.tierGold[u.tier] || 0) + u.cost;
         const mk = 1 + ECON.muster.ranks.slice(0, p.muster).reduce((s2, r) => s2 + r.pct, 0);
         p.queued.push({ uid: u.id, bodies: u.bodies, hp: u.hp * u.bodies * u.ehp * mk, hpMax: 0, dps: u.dps * mk, armour: u.armour, dmg: u.dmg, leak: u.leak, speed: u.speed, prog: 0, cost: u.cost, bounty: u.bounty ?? ECON.bounty.share, refund: u.leakRefund });

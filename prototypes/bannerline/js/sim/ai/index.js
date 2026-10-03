@@ -13,7 +13,8 @@
 import { next, int, range } from '../rng.js';
 import { liveEnt } from '../state.js';
 import { dist2 } from '../mathx.js';
-import { payTicks, sendRefusal, musterCost, gearNext } from '../economy.js';
+import { payTicks, sendRefusal, musterCost } from '../economy.js';
+import { SLOTS, nextStepFor, itemScore, slotUsable } from '../items.js';
 import { learnRefusal, castRefusal } from '../skills.js';
 import { planFor } from '../talents.js';
 import { sortBy } from '../order.js';
@@ -43,8 +44,21 @@ export function aiCommands(ctx, p) {
   if (p.talent < 0 && p.level >= data.heroes.ranks.talentLevel) cmd('talent', { choice: int(rng, 2) });
 
   economy(ctx, p, K, rng, cmd);
+  inventory(ctx, p, K, cmd);
+  toll(ctx, p, K, cmd);
   heroPlay(ctx, p, K, rng, cmd);
   return out;
+}
+
+/** Ring Toll of Iron when the Keep is about to be swarmed (micro >= 1). */
+function toll(ctx, p, K, cmd) {
+  const { state, map } = ctx;
+  const team = state.teams[p.team];
+  if (K.micro < 1 || team.toll.charges <= 0) return;
+  const f = map.fields[team.field];
+  let near = 0;
+  for (const e of state.ents) if (e.alive && !e._gone && e.field === f.id && e.team !== p.team && e.z > f.leakZ - 30) near++;
+  if (near >= 8) cmd('toll');
 }
 
 function pressure(u) { return u.hp * u.bodies * (1 + u.leak / 4) / u.cost; }
@@ -77,17 +91,44 @@ function economy(ctx, p, K, rng, cmd) {
     cmd('send', { unit: u.id });
     gold -= u.cost; budget -= u.cost; stock[u.id]--;
   }
-  // gear: cheapest unlocked step first while gold stays above a potion (the econ sim's buyItems)
-  const gear = p.gear.slice();
+  // gear: cheapest unlocked shop step first while gold stays above a potion (the econ sim's buyItems);
+  // `upgrade` trades in the old step, so the local copy just tracks steps
+  const steps = {};
+  for (const sl of SLOTS) steps[sl] = p.equip[sl] ? p.equip[sl].step : -1;
+  for (const r of p.requisitions) if (r.equip) steps[r.item.slot] = Math.max(steps[r.item.slot], r.item.step);
+  const T = data.econ.items.tiers;
   for (let guard = 0; guard < 16; guard++) {
     let best = null;
-    for (let s = 0; s < gear.length; s++) {
-      const n = gearNext(state, data, { gear }, s);
-      if (n && n.unlocked && (!best || n.cost < best.cost)) best = n;
+    for (const sl of SLOTS) {
+      if (!slotUsable(data, p, sl)) continue;
+      const st = steps[sl] + 1;
+      if (st >= T.length || state.tick < T[st].unlock * 20) continue;
+      if (!best || T[st].cost < best.cost) best = { slot: sl, step: st, cost: T[st].cost };
     }
     if (!best || gold - best.cost < P.cost) break;
     cmd('upgrade', { slot: best.slot });
-    gold -= best.cost; gear[best.slot] = best.step;
+    gold -= best.cost; steps[best.slot] = best.step;
+  }
+}
+
+/** Bag housekeeping: wear anything better, take the best champion card, sell the worst when full. */
+function inventory(ctx, p, K, cmd) {
+  const { data } = ctx;
+  if (p.picks.length) {
+    let bi = 0;
+    p.picks[0].forEach((c, i) => { if (itemScore(data, c) > itemScore(data, p.picks[0][bi])) bi = i; });
+    cmd('pick', { index: bi });
+  }
+  for (const it of p.bag) {
+    if (!it) continue;
+    if (it.unique && data['items-bl'].uniques[it.unique].hero !== p.hero) continue;
+    if (itemScore(data, it) > itemScore(data, p.equip[it.slot]) + 1) { cmd('equip', { uid: it.uid }); return; }
+  }
+  const items = p.bag.filter(Boolean);
+  if (items.length >= p.bag.length - 2) {
+    let worst = items[0];
+    for (const it of items) if (itemScore(data, it) < itemScore(data, worst)) worst = it;
+    cmd('sell', { uid: worst.uid });
   }
 }
 

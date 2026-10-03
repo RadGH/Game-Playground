@@ -6,7 +6,8 @@
 //   Bounty: a kill in your field pays your team pool (split evenly), x (1 + Rally).
 
 import { secToTicks, baseEnt } from './state.js';
-import { gainXp, refreshHero } from './heroes.js';
+import { gainXp } from './heroes.js';
+import { gearStats } from './items.js';
 import { dist2 } from './mathx.js';
 
 export const payTicks = data => secToTicks(data.econ.clock.pay);
@@ -24,7 +25,7 @@ export function rally(state, data, teamId) {
 }
 
 /** Tier-4+ restock speed during the Rising Tide. */
-function restockRate(state, data, tier) {
+export function restockRate(state, data, tier) {
   if (tier < 4 || !state.rising) return 1;
   return 1 + (data.econ.clock.risingRestock || 0) * state.rising;
 }
@@ -76,7 +77,9 @@ export function buySend(ctx, p, uid, silent = false) {
   const u = data.derived.units[uid];
   stockOf(p, uid).n--;
   p.gold -= u.cost;
-  p.income += u.income;
+  // during the Rising Tide tier 4+ restocks faster (pressure); the income a send adds is divided by the
+  // same factor so income per second stays linear (PLAN §3.1: "pressure only")
+  p.income += u.income / restockRate(state, data, u.tier);
   p.queued.push(uid);
   p.stats.sendGold += u.cost; p.stats.sends++;
   ctx.emit('queued', { player: p.id, unit: uid, auto: silent });
@@ -203,8 +206,9 @@ export function payKill(ctx, dst, src) {
     const share = gold / team.players.length;
     for (const pid of team.players) {
       const p = state.players[pid];
-      p.gold += share; p.stats.bounty += share;
-      ctx.emit('bounty', { player: pid, amount: Math.round(share * 10) / 10, src: dst.id });
+      const mine = share * (1 + gearStats(data, p).bountyPct / 100);
+      p.gold += mine; p.stats.bounty += mine;
+      ctx.emit('bounty', { player: pid, amount: Math.round(mine * 10) / 10, src: dst.id });
     }
   }
   // XP to the defending heroes within range, split
@@ -239,42 +243,5 @@ export function buyPotion(ctx, p) {
   if (p.belt >= P.belt) return 'belt';
   if (p.gold < P.cost) return 'gold';
   p.gold -= P.cost; p.belt++; p.stats.potionGold += P.cost;
-  return null;
-}
-
-/** Gear step model (PLAN §7.2): the next step for a slot, or null. */
-export function gearNext(state, data, p, slot) {
-  const T = data.econ.items.tiers;
-  const nt = p.gear[slot] + 1;
-  if (nt >= T.length) return null;
-  return { slot, step: nt, cost: T[nt].cost, unlockTick: secToTicks(T[nt].unlock), unlocked: state.tick >= secToTicks(T[nt].unlock) };
-}
-
-/** Cheapest unlocked next step over all slots (lowest slot wins ties), or null. */
-export function cheapestGear(state, data, p) {
-  let best = null;
-  for (let s = 0; s < p.gear.length; s++) {
-    const n = gearNext(state, data, p, s);
-    if (n && n.unlocked && (!best || n.cost < best.cost)) best = n;
-  }
-  return best;
-}
-
-/** Buy one gear step (slot omitted = cheapest). Returns refusal or null. */
-export function buyGear(ctx, p, slot) {
-  const { state, data } = ctx;
-  if (state.result) return 'over';
-  let n;
-  if (slot == null) { n = cheapestGear(state, data, p); if (!n) return 'maxGear'; }
-  else {
-    if (!(slot >= 0 && slot < p.gear.length)) return 'bad';
-    n = gearNext(state, data, p, slot);
-    if (!n) return 'maxGear';
-    if (!n.unlocked) return 'locked';
-  }
-  if (p.gold < n.cost) return 'gold';
-  p.gold -= n.cost; p.gear[n.slot] = n.step; p.stats.itemGold += n.cost;
-  refreshHero(ctx, p);
-  ctx.emit('gear', { player: p.id, slot: n.slot, step: n.step });
   return null;
 }

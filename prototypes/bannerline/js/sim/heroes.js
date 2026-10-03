@@ -3,22 +3,24 @@
 
 import { secToTicks } from './state.js';
 import { damageFactor } from './statuses.js';
+import { gearStats, nearKeepFactor, cancelRequisitions, atArmory } from './items.js';
 
 const OUT_OF_COMBAT = 80;   // ticks without damage before regen kicks in
 
 export function heroStats(data, p) {
   const H = data.econ.hero, cls = H.classes[p.hero] || { dpsK: 1, hpK: 1 }, def = data.heroes.heroes[p.hero];
   const L = p.level;
-  // gear steps (PLAN §7.2; econ.json items.tiers): a step replaces the last, so each row is the gain
-  let dpsK = 1, hpG = 0, armor = H.armor;
-  const T = data.econ.items.tiers;
-  for (const g of p.gear || []) for (let i = 0; i <= g; i++) { dpsK += T[i].dps; hpG += T[i].hp; armor += T[i].armor; }
+  // equipment (items.js): shop steps add to the dps multiplier, HP and armour exactly as the econ
+  // model's step ladder; affixes add their own stats on top
+  const g = gearStats(data, p);
   return {
-    dps: (H.dps + H.dpsPerLevel * (L - 1)) * cls.dpsK * dpsK,
-    hpMax: (H.hp + H.hpPerLevel * (L - 1)) * cls.hpK + hpG,
-    armor,
-    mpMax: def.mp + def.mpPerLevel * (L - 1),
-    mpRegen: def.mpRegen + def.mpRegenPerLevel * (L - 1),
+    dps: (H.dps + H.dpsPerLevel * (L - 1)) * cls.dpsK * (1 + g.stepDps),
+    hpMax: (H.hp + H.hpPerLevel * (L - 1)) * cls.hpK + g.stepHp + g.maxHp,
+    armor: H.armor + g.stepArmor + g.armor,
+    mpMax: def.mp + def.mpPerLevel * (L - 1) + g.mana,
+    mpRegen: def.mpRegen + def.mpRegenPerLevel * (L - 1) + g.manaRegen,
+    hpRegen: g.hpRegen,
+    g,
   };
 }
 
@@ -39,7 +41,10 @@ export function weaponHit(ctx, hero) {
   return heroStats(ctx.data, p).dps * ctx.data.heroes.heroes[p.hero].attackEvery;
 }
 
-export function heroDamageFactor(ctx, hero) { return damageFactor(hero); }
+export function heroDamageFactor(ctx, hero) {
+  const g = gearStats(ctx.data, heroPlayer(ctx, hero));
+  return damageFactor(hero) * (1 + g.dmgPct / 100) * nearKeepFactor(ctx, hero);
+}
 export function heroArmor(ctx, hero) { return heroStats(ctx.data, heroPlayer(ctx, hero)).armor; }
 
 export function xpForLevel(data, level) {
@@ -83,6 +88,7 @@ export function heroDied(ctx, hero, src) {
   hero.respawnAt = state.tick + respawnTicks(data, p.level);
   hero._ord = { k: 'idle', x: 0, z: 0, target: -1, dir: 0, speed: 0 };
   p.stats.deaths++;
+  cancelRequisitions(ctx, p);
   ctx.emit('death', { id: hero.id, killer: src ? src.id : -1, x: hero.x, z: hero.z });
   ctx.emit('heroDown', { player: p.id, respawnTick: hero.respawnAt });
 }
@@ -94,6 +100,7 @@ export function heroTick(ctx) {
     const h = state.ents.find(e => e.id === p.heroEnt);
     if (!h) continue;
     const hs = heroStats(data, p);
+    p.atArmory = atArmory(ctx, p);
     if (!h.alive) {
       if (state.tick >= h.respawnAt) {
         const f = map.fields[h.field];
@@ -107,5 +114,6 @@ export function heroTick(ctx) {
     }
     h.mp = Math.min(h.mpMax, h.mp + hs.mpRegen / 20);
     if (state.tick - h._lastHurt >= OUT_OF_COMBAT) h.hp = Math.min(h.hpMax, h.hp + h.hpMax * data.econ.hero.regen / 20);
+    if (hs.hpRegen > 0) h.hp = Math.min(h.hpMax, h.hp + hs.hpRegen / 20);
   }
 }

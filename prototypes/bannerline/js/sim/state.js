@@ -3,6 +3,7 @@
 
 import { seedStream } from './rng.js';
 import { heroStats } from './heroes.js';
+import { emptyEquip, armourClassFor } from './items.js';
 
 export const TICK_HZ = 20;
 export const secToTicks = s => Math.round(s * TICK_HZ);
@@ -26,9 +27,9 @@ export function createState(config, data, map) {
     v: 1, tick: 0, seed: seed >>> 0, mode, map: mapId,
     rng, nextId: 1, unlocked: 1, rising: 0, tideLevel: 0, tides: 0, result: null,
     endless: !!rules.endless,
-    teams: [0, 1].map(t => ({ id: t, banners: bannersMax, bannersMax, field: t, players: [], dealt: 0 })),
+    teams: [0, 1].map(t => ({ id: t, banners: bannersMax, bannersMax, field: t, players: [], dealt: 0, toll: { charges: data['items-bl'].toll.charges, readyAt: 0 } })),
     players: [], fields: map.fields.map(f => ({ id: f.id, team: f.team, waiting: [], bodies: 0 })),
-    ents: [], timers: [], nextTimer: 1, nextGroup: 1, zones: [], nextZone: 1,
+    ents: [], timers: [], nextTimer: 1, nextGroup: 1, zones: [], nextZone: 1, nextItem: 1,
   };
 
   players.forEach((pc, id) => {
@@ -46,7 +47,8 @@ export function createState(config, data, map) {
       gold: rules.startGold ?? data.econ.start.gold, income: data.econ.start.income,
       deck, auto: [false, false, false, false],
       stock: race.units.map(uid => { const u = data.derived.units[uid]; return { unit: uid, n: u.stock, max: u.stock, t: 0, every: secToTicks(u.restock) }; }),
-      queued: [], muster: 0, gear: new Array(data.econ.items.slots).fill(-1),
+      queued: [], muster: 0,
+      equip: emptyEquip(), bag: new Array(data['items-bl'].shop.bag).fill(null), picks: [], requisitions: [], procs: {}, atArmory: false, gearV: 0,
       level: 1, xp: 0, skillPts: 1,
       skills: ['Q', 'W', 'E', 'D', 'R'].filter(s => heroDef.slots[s]).map(s => ({ slot: s, id: heroDef.slots[s], rank: 0, readyAt: 0 })),
       talent: -1, oil: null, belt: data.econ.items.potion.belt, drinkAt: 0, surrendered: false,
@@ -91,7 +93,7 @@ export function spawnHero(state, data, map, p) {
     kind: 'hero', type: p.hero, team: p.team, owner: p.id, field: f.id,
     x: f.spawn.x + idx * 2, z: f.spawn.z, face: Math.PI, r: def.radius,
     hp: hs.hpMax, hpMax: hs.hpMax, mp: hs.mpMax, mpMax: hs.mpMax, level: p.level,
-    armour: def.armourClass, dmgType: def.dmgType, _spd: def.moveSpeed, _range: def.range,
+    armour: armourClassFor(data, p), dmgType: def.dmgType, _spd: def.moveSpeed, _range: def.range,
     _atkEvery: secToTicks(def.attackEvery), _ord: { k: 'idle', x: 0, z: 0, target: -1, dir: 0, speed: 0 },
   });
   p.heroEnt = e.id;

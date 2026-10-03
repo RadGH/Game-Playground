@@ -9,7 +9,7 @@
 
 import { hashCanonical } from './hash.js';
 
-export const DATA_FILES = ['econ.json', 'units.json', 'races.json', 'damage.json', 'maps.json', 'heroes.json', 'ai.json'];
+export const DATA_FILES = ['econ.json', 'units.json', 'races.json', 'damage.json', 'maps.json', 'heroes.json', 'ai.json', 'items-bl.json'];
 const keyOf = f => f.replace(/\.json$/, '');
 
 export function deepFreeze(o) {

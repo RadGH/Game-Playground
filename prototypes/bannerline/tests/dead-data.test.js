@@ -137,6 +137,7 @@ const ECON_EXEMPT = {
   'field.engageDepth': 'econ-model only',
   'hero.classes.ranger.dpsK': 'Ranger arrives in M6', 'hero.classes.ranger.hpK': 'Ranger arrives in M6', 'hero.classes.ranger.aoe': 'econ-model only',
   'hero.classes.druid.dpsK': 'Druid arrives in M6', 'hero.classes.druid.hpK': 'Druid arrives in M6', 'hero.classes.druid.aoe': 'econ-model only', 'hero.classes.druid.selfHeal': 'Druid arrives in M6',
+  'items.slots': 'econ-model slot count; the sim\'s slots are data/items-bl.json `slots`',
   'clock.tickHz': 'the tick rate is fixed in code (TICK_HZ) for the view, input delay and lockstep; core.test.js asserts the two agree',
   'clock.hardCap': 'AI matches end first; gameplay.test.js "the hard cap ends it" moves it',
   'rally.cap': 'not reached in one AI match; gameplay.test.js "Rally" moves it',

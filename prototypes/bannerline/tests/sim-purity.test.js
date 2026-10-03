@@ -25,11 +25,12 @@ function strip(src) {
   const n = src.length;
   while (i < n) {
     const c = src[i], d = src[i + 1];
+    // comments and strings are blanked but their newlines kept, so line numbers stay true
     if (c === '/' && d === '/') { while (i < n && src[i] !== '\n') i++; continue; }
-    if (c === '/' && d === '*') { i += 2; while (i < n && !(src[i] === '*' && src[i + 1] === '/')) i++; i += 2; continue; }
+    if (c === '/' && d === '*') { i += 2; while (i < n && !(src[i] === '*' && src[i + 1] === '/')) { if (src[i] === '\n') out += '\n'; i++; } i += 2; continue; }
     if (c === '"' || c === "'" || c === '`') {
       const q = c; out += q; i++;
-      while (i < n && src[i] !== q) { if (src[i] === '\\') i++; i++; }
+      while (i < n && src[i] !== q) { if (src[i] === '\\') i++; else if (src[i] === '\n') out += '\n'; i++; }
       out += q; i++; continue;
     }
     out += c; i++;
@@ -55,6 +56,13 @@ const BANNED = [
 const ALLOW = {
   'hash.js': ['for...in over an object (object-as-map iteration order)'],   // walks plain data in insertion order, which IS the canonical order
 };
+// narrower exceptions: [file suffix, rule, the line must match this] — the rule still applies to
+// every other line of that file
+const ALLOW_LINES = [
+  // Farhold's roller defaults rng to Math.random; js/sim/adapters/affixes.js always passes the sim's
+  // stream and throws without one, so the default never fires inside the sim
+  ['farhold/js/affixes.js', 'Math.random (use js/sim/rng.js)', /\brng\s*=\s*Math\.random\b/],
+];
 
 function importsOf(file, src) {
   const out = [];
@@ -76,7 +84,11 @@ test('js/sim and everything it imports avoid non-deterministic APIs', () => {
     for (const [re, why] of BANNED) {
       if ((ALLOW[base] || []).includes(why)) continue;
       const lines = src.split('\n');
-      lines.forEach((ln, i) => { if (re.test(ln)) problems.push(`${relative(ROOT, f)}:${i + 1}  ${why}\n      ${raw.split('\n')[i].trim()}`); });
+      lines.forEach((ln, i) => {
+        if (!re.test(ln)) return;
+        if (ALLOW_LINES.some(([suf, rule, ok]) => f.endsWith(suf) && rule === why && ok.test(ln))) return;
+        problems.push(`${relative(ROOT, f)}:${i + 1}  ${why}\n      ${raw.split('\n')[i].trim()}`);
+      });
     }
     for (const imp of importsOf(f, raw)) {
       if (!imp.startsWith('/')) { problems.push(`${relative(ROOT, f)} imports bare module "${imp}"`); continue; }

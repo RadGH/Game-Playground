@@ -17,13 +17,15 @@ import { runAttacks, projectileLands } from './combat.js';
 import { traitTick } from './traits.js';
 import { skillPulse, boltLands, groundLands, trailTick } from './skills.js';
 import { zoneTick } from './zones.js';
+import { requisitionArrives } from './items.js';
+import { tollTick } from './commands.js';
 import { aiCommands } from './ai/index.js';
 
 export { TICK_HZ };
 export const TICK_MS = 1000 / TICK_HZ;
 export const SNAPSHOT_VERSION = 1;
 
-const TIMERS = { proj: projectileLands, pulse: skillPulse, bolt: boltLands, ground: groundLands };
+const TIMERS = { proj: projectileLands, pulse: skillPulse, bolt: boltLands, ground: groundLands, requisition: requisitionArrives };
 
 function makeCtx(sim) {
   const ctx = {
@@ -89,6 +91,7 @@ class Sim {
     }
     for (const p of state.players) if (p.kind === 'ai') for (const c of aiCommands(ctx, p)) applyCommand(ctx, c);
     unlockTick(ctx);
+    tollTick(ctx);
     restockTick(ctx);
     payTick(ctx);
     autoSends(ctx);

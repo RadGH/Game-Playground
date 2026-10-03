@@ -96,18 +96,22 @@ test('Muster ranks raise sent units, Drilled Muster makes them cheaper', () => {
   assert.ok(Math.abs(u.hpMax - data.derived.units.levy.hp * 1.1) < 1e-9);
 });
 
-test('gear steps: cheapest first, locked by time, raise hero HP and damage', () => {
+test('upgrade: the cheapest shop step first, locked by time, raises hero HP and damage', () => {
   const s = twoHumans();
-  const p = s.state.players[0], h = hero(s);
+  const p = s.state.players[0], h = hero(s, 0);
   const hp0 = h.hpMax;
   p.gold = 100000;
+  h.x = s.map.fields[0].armory.x; h.z = s.map.fields[0].armory.z;   // at the Armory: no Requisition wait
+  run(s, 1);
   s.step([{ p: 0, type: 'upgrade' }]);
-  assert.equal(p.gear.filter(g => g === 0).length, 1);
+  assert.equal(Object.values(p.equip).filter(Boolean).length, 1);
+  assert.equal(p.equip.weapon.step, 0, 'lowest slot wins ties');
   assert.equal(h.hpMax, hp0 + data.econ.items.tiers[0].hp);
   s.drainEvents();
   s.step([{ p: 0, type: 'upgrade', slot: 0 }]);
   assert.deepEqual(events(s, 'reject').map(e => e.reason), ['locked'], 'step 2 unlocks at 2:00');
   assert.equal(Q.gearInfo(s.state, data, 0).cheapest.cost, data.econ.items.tiers[0].cost);
+  assert.equal(Q.gearInfo(s.state, data, 0).slots[0].step, 0);
 });
 
 test('bounty for a kill goes to the defending team, XP to its hero within 20 m', () => {

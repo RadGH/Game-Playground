@@ -10,8 +10,11 @@ import { liveEnt, addTimer } from './state.js';
 import { takenFactor, damageFactor, attackSpeedFactor, isStunned } from './statuses.js';
 import { onUnitHurt, onUnitKilled, unitDamageFactor, incomingTraitFactor, beforeUnitDeath, onHitHero } from './traits.js';
 import { payKill } from './economy.js';
-import { heroDied, heroArmor, weaponHit, heroDamageFactor } from './heroes.js';
-import { pulseAround } from './skills.js';
+import { heroDied, heroArmor, weaponHit, heroDamageFactor, heroPlayer } from './heroes.js';
+import { pulseAround, applyStatus } from './skills.js';
+import { gearStats, onBasicHit, lootForKill } from './items.js';
+import { addStatus } from './statuses.js';
+import { next } from './rng.js';
 
 const PROJ_SPEED = 20;   // m/s for ranged unit shots
 
@@ -39,13 +42,19 @@ export function dealDamage(ctx, src, dst, amount, dmgType, opts = {}) {
   if (dst.kind === 'hero') {
     if (!opts.raw) { const a = heroArmor(ctx, dst); dmg *= 1 - a / (a + 40); }
     dmg *= heroResist(ctx, dst);
+    const ra = gearStats(data, heroPlayer(ctx, dst)).resistAll;
+    if (ra) dmg *= 1 - ra / 100;
   } else {
+    if (src && src.kind === 'hero' && dst._traits.indexOf('champion') >= 0) {
+      const vc = gearStats(data, heroPlayer(ctx, src)).vsChampion;
+      if (vc) dmg *= 1 + vc / 100;
+    }
     dmg *= incomingTraitFactor(ctx, dst, src, dmgType);
   }
   if (!(dmg > 0)) return 0;
   dst.hp -= dmg;
   dst._lastHurt = state.tick;
-  ctx.emit('hit', { src: src ? src.id : -1, dst: dst.id, amount: q1(dmg), dmgType, crit: false, skill: opts.skill || null });
+  ctx.emit('hit', { src: src ? src.id : -1, dst: dst.id, amount: q1(dmg), dmgType, crit: !!opts.crit, skill: opts.skill || null });
   if (dst.kind === 'hero') { if (src && !opts.dot) onHitHero(ctx, src, dst); heroHurtBuffs(ctx, dst, src); }
   else {
     onUnitHurt(ctx, dst);
@@ -94,6 +103,7 @@ export function kill(ctx, dst, src) {
   ctx.emit('death', { id: dst.id, killer: src ? src.id : -1, x: dst.x, z: dst.z });
   ctx.emit('remove', { id: dst.id, why: 'killed' });
   payKill(ctx, dst, src);
+  lootForKill(ctx, dst);
   if (src) onUnitKilled(ctx, src, dst);
 }
 
@@ -113,11 +123,16 @@ export function runAttacks(ctx) {
     if (!t) { a.target = -1; continue; }
     if (!inReach(a, t, a._range)) continue;
     if (state.tick < a._atkAt) continue;
-    const every = Math.max(4, Math.round(a._atkEvery / attackSpeedFactor(a, data)));
+    const asp = a.kind === 'hero' ? 1 + gearStats(data, heroPlayer(ctx, a)).attackSpeed / 100 : 1;
+    const every = Math.max(4, Math.round(a._atkEvery / (attackSpeedFactor(a, data) * asp)));
     a._atkAt = state.tick + every;
     a.act = 'attack'; a.actTick = state.tick;
-    let amount, type = a.dmgType;
-    if (a.kind === 'hero') amount = weaponHit(ctx, a) * heroDamageFactor(ctx, a);
+    let amount, type = a.dmgType, crit = false;
+    if (a.kind === 'hero') {
+      amount = weaponHit(ctx, a) * heroDamageFactor(ctx, a);
+      const g = gearStats(data, heroPlayer(ctx, a));
+      if (g.critChance > 0 && next(state.rng.combat) * 100 < g.critChance) { crit = true; amount *= 1.5 + g.critDamage / 100; }
+    }
     else amount = a._dps * (a._atkEvery / 20) * a._mk * damageFactor(a) * unitDamageFactor(ctx, a);
     const ranged = a._range > 3;
     ctx.emit('attack', { src: a.id, dst: t.id, ranged });
@@ -125,21 +140,31 @@ export function runAttacks(ctx) {
       const d = Math.sqrt(dist2(a.x, a.z, t.x, t.z));
       const ticks = Math.max(1, Math.round(d / PROJ_SPEED * 20));
       ctx.emit('shot', { src: a.id, dst: t.id, dmgType: type, ticks });
-      addTimer(state, state.tick + ticks, 'proj', { src: a.id, dst: t.id, amount, type });
+      addTimer(state, state.tick + ticks, 'proj', { src: a.id, dst: t.id, amount, type, crit, basic: a.kind === 'hero' });
     } else {
-      dealDamage(ctx, a, t, amount, type);
-      if (a.kind === 'hero') heroBasicHit(ctx, a, t);
+      const dealt = dealDamage(ctx, a, t, amount, type, { crit });
+      if (a.kind === 'hero') heroBasicHit(ctx, a, t, dealt, type);
     }
   }
 }
 
-function heroBasicHit(ctx, hero, target) { /* M3+: on-hit effects (Quarry, uniques) */ }
+// a hero's basic attack landed: life steal (blade / pierce only), unique powers
+function heroBasicHit(ctx, hero, target, dealt, type) {
+  if (!hero.alive) return;
+  const g = gearStats(ctx.data, heroPlayer(ctx, hero));
+  if (g.lifeSteal > 0 && dealt > 0 && (type === 'blade' || type === 'pierce')) {
+    const h = Math.min(hero.hpMax - hero.hp, dealt * g.lifeSteal / 100);
+    if (h > 0) { hero.hp += h; ctx.emit('heal', { src: hero.id, dst: hero.id, amount: Math.round(h * 10) / 10 }); }
+  }
+  onBasicHit(ctx, hero, target, { applyStatus, addStatus, pulseAround, weaponHit });
+}
 
 /** Timer handler for projectiles. */
 export function projectileLands(ctx, args) {
   const t = liveEnt(ctx.state, args.dst);
   if (!t) return;
   const src = liveEnt(ctx.state, args.src);
-  dealDamage(ctx, src, t, args.amount, args.type);
+  const dealt = dealDamage(ctx, src, t, args.amount, args.type, { crit: !!args.crit });
+  if (args.basic && src && src.kind === 'hero') heroBasicHit(ctx, src, t, dealt, args.type);
 }
 

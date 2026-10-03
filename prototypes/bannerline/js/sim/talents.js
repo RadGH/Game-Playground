@@ -5,6 +5,8 @@
 // pool (replace), statuses (append), forms (merge). Unknown keys throw: build-hero-skills.mjs stops
 // them before they reach data, and this is the runtime backstop.
 
+import { gearStats } from './items.js';
+
 export const MOD_KEYS = ['set', 'add', 'mul', 'knock', 'pullIn', 'pool', 'statuses', 'forms'];
 
 const clone = o => JSON.parse(JSON.stringify(o));
@@ -47,5 +49,14 @@ export function planFor(data, p, skillId) {
   plan.cooldown *= 1 - R.cdPerRank * (rank - 1);
   const t = data.heroes.heroes[p.hero].talent;
   if (t && p.talent >= 0 && t.skill === skillId) applyMod(plan, t.choices[p.talent].mod);
+  // equipment: skill area and cooldowns (items.js affixes)
+  const g = gearStats(data, p);
+  if (g.areaPct) {
+    const k = 1 + g.areaPct / 100;
+    for (const key of ['radius', 'reach', 'splash']) if (plan[key] != null) plan[key] *= k;
+    if (plan.line) plan.line.length *= k;
+    if (plan.pool && plan.pool.radius != null) plan.pool.radius *= k;
+  }
+  if (g.cdr) plan.cooldown *= 1 - g.cdr / 100;
   return plan;
 }

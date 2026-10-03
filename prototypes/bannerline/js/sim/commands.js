@@ -3,11 +3,14 @@
 
 import { q2 } from './mathx.js';
 import { liveEnt } from './state.js';
-import { buySend, buyMuster, buyPotion, buyGear } from './economy.js';
+import { buySend, buyMuster, buyPotion } from './economy.js';
+import { SLOTS, buyItem, nextStepFor, cheapestNext, equipItem, unequipItem, sellItem, choosePick, tollMax } from './items.js';
+import { addStatus } from './statuses.js';
+import { secToTicks } from './state.js';
 import { castRefusal, castSkill, learnRefusal } from './skills.js';
 
 const isNum = v => typeof v === 'number' && v === v && v !== Infinity && v !== -Infinity;
-const SLOTS = ['Q', 'W', 'E', 'D', 'R'];
+const SKILL_SLOTS = ['Q', 'W', 'E', 'D', 'R'];
 
 export function applyCommand(ctx, cmd) {
   const { state, data } = ctx;
@@ -44,7 +47,7 @@ export function applyCommand(ctx, cmd) {
       return null;
     }
     case 'cast': {
-      if (!SLOTS.includes(cmd.slot)) return reject('bad');
+      if (!SKILL_SLOTS.includes(cmd.slot)) return reject('bad');
       const why = castRefusal(ctx, p, cmd.slot);
       if (why) return reject(why);
       const x = isNum(cmd.x) ? q2(cmd.x) : null, z = isNum(cmd.z) ? q2(cmd.z) : null;
@@ -52,7 +55,7 @@ export function applyCommand(ctx, cmd) {
       return null;
     }
     case 'learn': {
-      if (!SLOTS.includes(cmd.slot)) return reject('bad');
+      if (!SKILL_SLOTS.includes(cmd.slot)) return reject('bad');
       const why = learnRefusal(data, p, cmd.slot);
       if (why) return reject(why);
       p.skills.find(s => s.slot === cmd.slot).rank++;
@@ -85,9 +88,38 @@ export function applyCommand(ctx, cmd) {
     }
     case 'muster': { const why = buyMuster(ctx, p); return why ? reject(why) : null; }
     case 'upgrade': {
-      if (cmd.slot != null && typeof cmd.slot !== 'number') return reject('bad');
-      const why = buyGear(ctx, p, cmd.slot == null ? null : cmd.slot);
+      // the next shop step for a slot (omit = the cheapest unlocked one), equipped on arrival; the item
+      // it replaces is traded in (the step ladder of PLAN §7.2). `slot` may be a name or an index.
+      let slot = cmd.slot;
+      if (typeof slot === 'number') slot = SLOTS[slot];
+      if (slot != null && !SLOTS.includes(slot)) return reject('bad');
+      const n = slot == null ? cheapestNext(state, data, p) : nextStepFor(state, data, p, slot);
+      if (!n) return reject(slot == null ? 'gold' : 'maxGear');
+      if (!n.unlocked) return reject('locked');
+      const why = buyItem(ctx, p, { slot: n.slot, step: n.step, kind: cmd.kind, equip: true, replace: true });
       return why ? reject(why) : null;
+    }
+    case 'buy': {
+      // a specific shop item into the bag (or worn with equip: true): slot, step, kind (armour tier)
+      if (!SLOTS.includes(cmd.slot) || typeof cmd.step !== 'number') return reject('bad');
+      if (cmd.kind != null && !['cloth', 'light', 'medium', 'heavy'].includes(cmd.kind)) return reject('bad');
+      const why = buyItem(ctx, p, { slot: cmd.slot, step: cmd.step, kind: cmd.kind, equip: !!cmd.equip, replace: false });
+      return why ? reject(why) : null;
+    }
+    case 'equip': { const why = equipItem(ctx, p, cmd.uid); return why ? reject(why) : null; }
+    case 'unequip': { const why = unequipItem(ctx, p, cmd.slot); return why ? reject(why) : null; }
+    case 'sell': { const why = sellItem(ctx, p, cmd.uid); return why ? reject(why) : null; }
+    case 'pick': { const why = choosePick(ctx, p, cmd.index); return why ? reject(why) : null; }
+    case 'toll': {
+      const team = state.teams[p.team];
+      if (team.toll.charges <= 0) return reject('cooldown');
+      team.toll.charges--;
+      if (team.toll.readyAt <= state.tick) team.toll.readyAt = state.tick + secToTicks(data['items-bl'].toll.cooldown);
+      const field = state.teams[p.team].field, ticks = secToTicks(data['items-bl'].toll.stun);
+      let n = 0;
+      for (const e of state.ents) if (e.alive && !e._gone && e.field === field && e.team !== p.team) { addStatus(ctx, e, 'stun', { ticks, src: -1 }); n++; }
+      ctx.emit('toll', { team: p.team, player: p.id, stunned: n });
+      return null;
     }
     case 'oil': {
       if (!data.damage.types.includes(cmd.dmgType)) return reject('bad');
@@ -116,5 +148,18 @@ export function applyCommand(ctx, cmd) {
       return null;
     }
     default: return reject('bad');
+  }
+}
+
+/** Toll of Iron charges refill one at a time (cooldown each), up to the team's maximum. */
+export function tollTick(ctx) {
+  const { state, data } = ctx;
+  for (const team of state.teams) {
+    const max = tollMax(ctx, team);
+    if (team.toll.charges > max) team.toll.charges = max;
+    if (team.toll.charges < max && state.tick >= team.toll.readyAt) {
+      team.toll.charges++;
+      team.toll.readyAt = team.toll.charges < max ? state.tick + secToTicks(data['items-bl'].toll.cooldown) : state.tick;
+    }
   }
 }

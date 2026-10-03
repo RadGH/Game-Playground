@@ -120,3 +120,10 @@ test('econ.json clock.tickHz documents the code tick rate', async () => {
   const { TICK_HZ } = await import('../js/sim/sim.js');
   assert.equal(data.econ.clock.tickHz, TICK_HZ);
 });
+
+test('data/items-bl.json is up to date with tools/build-items-bl.mjs', async () => {
+  const { execFileSync } = await import('node:child_process');
+  const { join } = await import('node:path');
+  const { ROOT } = await import('./_sim.mjs');
+  execFileSync(process.execPath, [join(ROOT, 'tools', 'build-items-bl.mjs'), '--check'], { stdio: 'pipe' });
+});

@@ -17,6 +17,7 @@ import { addStatus, statusDef, isStunned, findStatus } from './statuses.js';
 import { dealDamage } from './combat.js';
 import { weaponHit, heroDamageFactor } from './heroes.js';
 import { addZone } from './zones.js';
+import { castPowerMult } from './items.js';
 
 export const SHAPES = ['melee', 'around', 'self', 'bolt', 'ground'];
 const BOLT_SPEED = 24;   // m/s
@@ -215,6 +216,8 @@ export function castSkill(ctx, p, slot, aimX, aimZ) {
   const hero = liveEnt(state, p.heroEnt);
   const plan = planFor(data, p, sk.id);
   if (!SHAPES.includes(plan.shape)) throw new Error(`Skill shape "${plan.shape}" has no runtime yet`);
+  const pm = castPowerMult(ctx, hero);   // unique powers that empower every Nth cast
+  if (pm !== 1 && plan.mult) plan.mult *= pm;
   hero.mp -= plan.mp;
   sk.readyAt = state.tick + secToTicks(plan.cooldown);
   if (aimX != null && aimZ != null && (aimX !== hero.x || aimZ !== hero.z)) hero.face = faceOf(aimX - hero.x, aimZ - hero.z);
@@ -223,14 +226,14 @@ export function castSkill(ctx, p, slot, aimX, aimZ) {
   if (plan.shape === 'ground') ({ x: px, z: pz } = groundPoint(ctx, hero, plan, aimX, aimZ));
   ctx.emit('cast', { id: hero.id, slot, skill: sk.id, shape: plan.shape, x: px, z: pz, face: hero.face, radius: plan.radius || 0, arc: plan.arc || 0, reach: plan.reach || 0, range: plan.range || 0, delay: plan.delay ? secToTicks(plan.delay) : 0, line: plan.line ? plan.line.length : 0 });
   selfEffects(ctx, hero, p, plan);
-  if (plan.shape === 'bolt') fireBolts(ctx, hero, p, plan, aimX, aimZ);
+  if (plan.shape === 'bolt') fireBolts(ctx, hero, p, plan, aimX, aimZ, pm);
   else if (plan.shape === 'ground') {
-    if (plan.delay) addTimer(state, state.tick + secToTicks(plan.delay), 'ground', { hero: hero.id, player: p.id, skill: sk.id, x: px, z: pz, hx: hero.x, hz: hero.z });
+    if (plan.delay) addTimer(state, state.tick + secToTicks(plan.delay), 'ground', { hero: hero.id, player: p.id, skill: sk.id, x: px, z: pz, hx: hero.x, hz: hero.z, pm });
     else groundStrike(ctx, hero, p, plan, px, pz, hero);
   } else if (plan.shape !== 'self') hitTargets(ctx, hero, plan, targetsFor(ctx, hero, plan, hero.face));
   if (plan.repeats && plan.repeats.count > 1) {
     const every = Math.max(1, secToTicks(plan.repeats.every));
-    for (let n = 1; n < plan.repeats.count; n++) addTimer(state, state.tick + every * n, 'pulse', { hero: hero.id, player: p.id, skill: sk.id, n, x: px, z: pz });
+    for (let n = 1; n < plan.repeats.count; n++) addTimer(state, state.tick + every * n, 'pulse', { hero: hero.id, player: p.id, skill: sk.id, n, x: px, z: pz, pm });
   }
 }
 
@@ -259,17 +262,19 @@ function groundStrike(ctx, hero, p, plan, x, z, from) {
   poolAt(ctx, hero, plan, x, z, line);
 }
 
+const withPm = (plan, pm) => { if (pm && pm !== 1 && plan.mult) plan.mult *= pm; return plan; };
+
 /** Timer: a delayed ground strike (Fallstone). */
 export function groundLands(ctx, args) {
   const hero = liveEnt(ctx.state, args.hero) || ctx.state.ents.find(e => e.id === args.hero);
   if (!hero) return;
   const p = ctx.state.players[args.player];
-  const plan = planFor(ctx.data, p, args.skill);
+  const plan = withPm(planFor(ctx.data, p, args.skill), args.pm);
   ctx.emit('pulse', { id: hero.id, skill: args.skill, x: args.x, z: args.z, radius: plan.radius || 0 });
   groundStrike(ctx, hero, p, plan, args.x, args.z, { x: args.hx, z: args.hz });
 }
 
-function fireBolts(ctx, hero, p, plan, aimX, aimZ) {
+function fireBolts(ctx, hero, p, plan, aimX, aimZ, pm = 1) {
   const { state } = ctx;
   const n = Math.max(1, Math.round(plan.projectiles ? 1 + plan.projectiles : 1));
   const spread = plan.spread || 0;
@@ -291,7 +296,7 @@ function fireBolts(ctx, hero, p, plan, aimX, aimZ) {
     const tx = best ? best.x : hero.x + dx * range, tz = best ? best.z : hero.z + dz * range;
     const ticks = Math.max(1, Math.round(Math.max(bt, 0.5) / BOLT_SPEED * 20));
     ctx.emit('bolt', { id: hero.id, skill: plan.id, fromX: hero.x, fromZ: hero.z, toX: tx, toZ: tz, ticks, dst: best ? best.id : -1 });
-    addTimer(state, state.tick + ticks, 'bolt', { hero: hero.id, player: p.id, skill: plan.id, x: tx, z: tz, target: best ? best.id : -1 });
+    addTimer(state, state.tick + ticks, 'bolt', { hero: hero.id, player: p.id, skill: plan.id, x: tx, z: tz, target: best ? best.id : -1, pm });
   }
 }
 
@@ -301,7 +306,7 @@ export function boltLands(ctx, args) {
   const hero = state.ents.find(e => e.id === args.hero);
   if (!hero) return;
   const p = state.players[args.player];
-  const plan = planFor(data, p, args.skill);
+  const plan = withPm(planFor(data, p, args.skill), args.pm);
   const t = liveEnt(state, args.target);
   const x = t ? t.x : args.x, z = t ? t.z : args.z;
   let targets;
@@ -336,7 +341,7 @@ export function skillPulse(ctx, args) {
   const hero = liveEnt(ctx.state, args.hero);
   if (!hero) return;
   const p = ctx.state.players[args.player];
-  const plan = planFor(ctx.data, p, args.skill);
+  const plan = withPm(planFor(ctx.data, p, args.skill), args.pm);
   if (plan.shape === 'ground') { ctx.emit('pulse', { id: hero.id, skill: args.skill, x: args.x, z: args.z, radius: plan.radius || 0 }); groundStrike(ctx, hero, p, { ...plan, pool: null }, args.x, args.z, hero); return; }
   ctx.emit('pulse', { id: hero.id, skill: args.skill, x: hero.x, z: hero.z, radius: plan.radius || plan.reach || 0 });
   hitTargets(ctx, hero, plan, targetsFor(ctx, hero, plan, hero.face));

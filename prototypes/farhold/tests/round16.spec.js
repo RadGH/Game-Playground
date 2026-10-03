@@ -85,13 +85,20 @@ test('R16.8 — a bow-carrying character can work a seam, which is the whole com
 });
 
 test('R16.8 — the scanner finds what is under the ground and keeps it', async ({ page }) => {
+  test.setTimeout(150_000);   // landing + streaming + polled sweeps run ~50 s at headless frame rates
   const errors = await land(page);
   const out = await page.evaluate(async () => {
     const f = window.farhold;
     f.player.devices = { ...(f.player.devices || {}), scanner: true };
     const before = f.markers.here().filter(m => m.kind === 'seam').length;
     f.scanner.setOn(true);
-    await new Promise(r => setTimeout(r, 2500));
+    /**
+     * Poll for the sweep on the GAME clock (triage 2026-10-02). Right after landing the world is
+     * still streaming and headless WebGL ran 0.3 s of game time in this 2.5 s wall wait — fewer
+     * than one 0.45 s sweep, on both the pre-round-28 build and HEAD. That was a frame-rate test.
+     */
+    const c0 = f.field.clock, t0 = Date.now();
+    while (!f.scanner.size && f.field.clock - c0 < 6 && Date.now() - t0 < 40000) await new Promise(r => setTimeout(r, 200));
     const found = f.scanner.size;
     const marks = f.markers.here().filter(m => m.kind === 'seam');
     const named = marks.filter(m => m.name && m.name.length > 2).length;
@@ -123,7 +130,13 @@ test('R16.8 — the scanner finds what is under the ground and keeps it', async 
       }
       return n;
     };
-    const withNames = ink();
+    // the same rule the other way round: the minimap redraws every sixth frame, so poll for the
+    // label rather than reading whatever canvas the last redraw left (triage 2026-10-02)
+    let withNames = ink();
+    for (let i = 0; i < 80 && withNames === 0; i++) {
+      await new Promise(r => setTimeout(r, 100));
+      withNames = ink();
+    }
     f.scanner.setOn(false);
     /**
      * R18 — WAIT FOR THE CANVAS, NOT FOR A NUMBER OF MILLISECONDS.
@@ -276,6 +289,25 @@ test('R16.15 — the Town Hall opens, and the rod points at your own people', as
        * stretches by itself when it is not, which is the property a fixed sleep can never have.
        */
       const frame = () => new Promise(res => requestAnimationFrame(() => requestAnimationFrame(res)));
+      /**
+       * Triage 2026-10-02 — WALK TO WHERE THE HALL IS, THEN SPIRAL ONLY IF THAT MISSES. The blind
+       * spiral is up to 108 teleports of two frames each, and at headless WebGL's ~6 fps inside a
+       * streaming town that alone outran the 60 s timeout (on the pre-round-28 build too). The
+       * spot comes from the same `hallSpotFor` main.js asks, with the same ground test; E still
+       * has to say "hall" there, so the door is still checked for real.
+       */
+      const { hallSpotFor } = await import('/prototypes/farhold/js/waypoints.js');
+      const ok = (x, z) => !f.terrain.waterAt(x, z) && !f.terrain.underwater(x, z)
+        && f.terrain.riverAt(x, z) <= 0.3 && f.terrain.slopeAt(x, z, 4) <= 0.5;
+      const spot = hallSpotFor(t, ok);
+      if (spot) {
+        f.control.teleport(spot.x, spot.z);
+        for (let i = 0; i < 4 && !hall; i++) {
+          await frame();
+          const it = f.interactTarget?.();
+          if (it?.kind === 'hall') hall = { town: t.name, size: t.size };
+        }
+      }
       for (let r = 0; r <= 24 && !hall; r += 3) {
         for (let k = 0; k < 12 && !hall; k++) {
           const a = (k / 12) * Math.PI * 2;

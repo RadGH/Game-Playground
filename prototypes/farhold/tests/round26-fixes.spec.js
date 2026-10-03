@@ -14,6 +14,7 @@
 //    plane of your facing, from over the head down to the ground in front, revealed top first.
 
 import { test, expect } from '@playwright/test';
+import { pickOpenSpell } from './builder-pick.mjs';
 
 const BASE = '/prototypes/farhold/';
 
@@ -28,13 +29,13 @@ function watch(page) {
 
 async function startFromTitle(page, classId, seed) {
   await page.goto(BASE + '?quality=low&sound=off');
-  await page.waitForSelector('#boot-menu:not(.hidden)', { timeout: 30000 });
+  await page.waitForSelector('#boot[data-wired] #boot-menu:not(.hidden)', { timeout: 30000 });
   await page.click('#boot-new');
   await page.selectOption('#boot-class', classId);
   if (classId === 'custom') {
     await page.click('.cb-open');
     await page.locator('.cb:not([hidden]) .cb-rail button', { hasText: 'Spells' }).click();
-    await page.locator('.cb:not([hidden]) .cb-opt:not([disabled])').first().click();
+    await pickOpenSpell(page, '.cb:not([hidden])');
     await page.locator('.cb-done').click();
   }
   await page.click('#boot-to-world');

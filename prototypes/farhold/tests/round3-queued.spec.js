@@ -139,7 +139,26 @@ test('ground between you and the star puts the rays out, and lights the horizon 
   const out = await page.evaluate(() => {
     const f = window.farhold;
     f.pause(true);
-    f.setTime(((0.28 - 0.34 + 1) % 1) * 900);          // sun low, so a ridge can cut it
+    /**
+     * Triage 2026-10-02 — FIND THE TIME BY THE SUN, NOT BY A CONSTANT. `((0.28 - 0.34 + 1) % 1) * 900`
+     * was "sun low" for whatever the clock's phase was when this was written; on today's build it
+     * puts the sun 25° up (sunDirection.y 0.43), where no ridge within the 2.6 km occlusion reach
+     * can cover it, so the 30 km sweep never found ground in the way (pre-round-28 build too).
+     * Step the clock and take the first morning time the star is ~5° up, and one ~0.6° up for the
+     * horizon wash.
+     */
+    const timeAt = (lo, hi) => {
+      for (let t = 0; t < 900; t += 0.5) {
+        f.setTime(t);
+        const y = f.sky.sunDirection.y;
+        f.setTime((t + 1) % 900);
+        const rising = f.sky.sunDirection.y > y;
+        if (rising && y > lo && y < hi) return t;
+      }
+      return null;
+    };
+    const tLow = timeAt(0.07, 0.11), tSet = timeAt(0.004, 0.02);
+    f.setTime(tLow);                                   // sun low, so a ridge can cut it
     const sd = f.sky.sunDirection;
     const sample = () => {
       f.control.yaw = Math.atan2(sd.x, sd.z);
@@ -180,16 +199,19 @@ test('ground between you and the star puts the rays out, and lights the horizon 
       }
     }
     // and the horizon wash when the star is right on the skyline
-    f.setTime(((0.25 - 0.34 + 1) % 1) * 900);
+    // back to where the clock was read: the star's height depends on WHERE you stand on the
+    // planet, so the far corner of a 30 km sweep is a different local time of day
+    f.teleport(sx, sz);
+    f.setTime(tSet);
     const setting = sample();
-    return { clear, partly, setting };
+    return { clear, partly, setting, tLow, tSet, setY: f.sky.sunDirection.y };
   });
   expect(out.partly).not.toBeNull();
   expect(out.clear).not.toBeNull();
   // a ridge across the star takes the shafts down with it
   expect(out.partly.strength).toBeLessThan(out.clear.strength);
   // and the sun on the skyline lights the sky even when the shafts are gone
-  expect(out.setting.rim).toBeGreaterThan(0.05);
+  expect(out.setting.rim, JSON.stringify({ tLow: out.tLow, tSet: out.tSet, setY: out.setY, setting: out.setting })).toBeGreaterThan(0.05);
   expect(errors).toEqual([]);
 });
 

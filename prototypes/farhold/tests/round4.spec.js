@@ -6,6 +6,7 @@
 // coming back, and the galaxy sitting behind the planets rather than in front of them.
 
 import { test, expect } from '@playwright/test';
+import { goWild } from './wild-spot.mjs';
 
 async function land(page, { seed = 3, cls = 'warrior', extra = '' } = {}) {
   const errors = [];
@@ -98,17 +99,21 @@ test('the map draws the level-band overlay, with a legend and a toggle', async (
 });
 
 test('the world is busy: packs, ranks and set-piece encounters, not one straggler', async ({ page }) => {
+  test.setTimeout(150_000);
   const errors = await land(page, { seed: 5 });
+  const spot = await page.evaluate(goWild);
+  expect(spot.share, 'found no dry wild ground near the start').toBeGreaterThan(0.5);
   const out = await page.evaluate(async () => {
     const f = window.farhold;
     // Round 8 gave every settlement a quiet ring nothing hostile spawns in, and a new run starts
     // beside a town. Walk out of it first: this test is about the spawn ring being busy, not about
     // whether towns are safe (which tests/round8.test.js covers).
-    const town = f.folk.safeZones()[0];
-    if (town) f.teleport(town.x + town.r * 2.2, town.z + town.r * 2.2);
-    await new Promise(r => setTimeout(r, 300));
-    // one spawn about every 1.1s: six seconds put this on exactly the threshold and it flaked
-    await new Promise(r => setTimeout(r, 9000));
+    // (A fixed hop past the first town could land on water or in another town's ring — see
+    // tests/wild-spot.mjs; `goWild` runs before this evaluate.)
+    // one spawn about every 1.1 s of GAME time; headless runs ~6 fps with dt capped, so a wall-clock
+    // wait was a frame-rate test. Wait on the field's own clock instead.
+    const c0 = f.field.clock, t0 = Date.now();
+    while (f.field.clock - c0 < 12 && Date.now() - t0 < 60000) await new Promise(r => setTimeout(r, 200));
     const ranks = {};
     for (const e of f.field.enemies) ranks[e.rank] = (ranks[e.rank] || 0) + 1;
     const before = f.field.enemies.length;

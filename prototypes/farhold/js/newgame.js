@@ -813,5 +813,15 @@ export async function runTitle({
       $('boot-start').disabled = true;
       finish(result());
     };
+
+    /**
+     * Every button on every title screen has a handler from here on. `#boot-menu` is visible in
+     * the static HTML from the first paint — long before main.js has loaded its data and called
+     * this — so "the menu is showing" never meant "the menu works", and a click that landed in
+     * that gap (a fast player, or a spec on a busy machine) did nothing at all. Specs wait for
+     * this attribute instead of for the menu (tests/round16-title.spec.js and friends).
+     */
+    const bootEl = $('boot');
+    if (bootEl) bootEl.dataset.wired = '1';
   });
 }

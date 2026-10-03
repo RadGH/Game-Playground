@@ -5,6 +5,7 @@
 // REACHABLE — which is this project's signature fault and the reason this file exists.
 
 import { test, expect } from '@playwright/test';
+import { pickOpenSpell } from './builder-pick.mjs';
 
 const BASE = '/prototypes/farhold/';
 
@@ -18,7 +19,7 @@ function watch(page) {
 test('the title screen offers a custom class, and the builder opens', async ({ page }) => {
   const errors = watch(page);
   await page.goto(BASE);
-  await page.waitForSelector('#boot-menu:not(.hidden)', { timeout: 30000 });
+  await page.waitForSelector('#boot[data-wired] #boot-menu:not(.hidden)', { timeout: 30000 });
   await page.locator('#boot-new').click();
   await page.waitForSelector('#boot-class', { timeout: 15000 });
 
@@ -185,7 +186,7 @@ test('R20 — the creator offers the opening slot only, and one pick finishes it
   expect(levels.every(t => t === 'Level 1'),
     `the opening slot offers spells it cannot take: ${levels.join(', ')}`).toBe(true);
 
-  await page.locator('.cb-opt:not([disabled])').first().click();
+  await pickOpenSpell(page);
   await page.waitForTimeout(600);
   const after = await page.evaluate(() => ({
     filled: document.querySelectorAll('.cb-pick.filled').length,

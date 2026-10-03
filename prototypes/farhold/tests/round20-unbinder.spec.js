@@ -10,6 +10,7 @@
 // slot on the character sheet open the chooser.
 
 import { test, expect } from '@playwright/test';
+import { pickOpenSpell } from './builder-pick.mjs';
 
 async function land(page, { seed = 7, cls = 'ranger' } = {}) {
   const errors = [];
@@ -174,7 +175,7 @@ test('a levelled custom character is offered the next spell on the Skills screen
   await page.waitForTimeout(1200);
   await page.locator('.cb-rail > *', { hasText: 'Spells' }).click();
   await page.waitForTimeout(600);
-  await page.locator('.cb-opt:not([disabled])').first().click();
+  await pickOpenSpell(page);
   await page.waitForTimeout(500);
   await page.locator('.cb-done').click();
   await page.waitForTimeout(500);

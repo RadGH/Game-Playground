@@ -34,7 +34,7 @@ test('the four body presets change the figure and the race walks into the game',
   test.setTimeout(240000);
   const errors = watch(page);
   await page.goto(BASE + '?quality=low&sound=off');
-  await page.waitForSelector('#boot-menu:not(.hidden)', { timeout: 30000 });
+  await page.waitForSelector('#boot[data-wired] #boot-menu:not(.hidden)', { timeout: 30000 });
   await page.click('#boot-new');
   await page.selectOption('#boot-class', 'knight');
   await page.waitForFunction(() => document.querySelector('#boot-figure canvas')?.dataset.look, null, { timeout: 30000 });

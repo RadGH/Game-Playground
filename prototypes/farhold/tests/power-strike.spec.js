@@ -41,8 +41,14 @@ test('a Power Strike that catches nobody says where the nearest enemy was', asyn
     e.x = f.control.x - Math.sin(f.control.yaw) * 5; e.z = f.control.z - Math.cos(f.control.yaw) * 5;
     f.skills.slots[0].ready = 0;
     f.cast(0);
-    return [...document.querySelectorAll('#log > *')].map(n => n.textContent).find(t => /catches nobody/.test(t)) || '';
+    // R28 renamed the fighter's opener (Precise Strike) and widened its arc; the RULE is that the
+    // line names the skill in the slot, its reach and arc, and where the missed enemy stood
+    const name = f.skills.slots[0].name || f.skills.slots[0].skill?.name || '';
+    const text = [...document.querySelectorAll('#log > *')].map(n => n.textContent).find(t => /catches nobody/.test(t)) || '';
+    return { name, text };
   });
-  expect(line).toMatch(/Power Strike reaches [\d.]+ m across \d+° and catches nobody\. .+ is 5\.0 m away, 180° to your (left|right)\./);
+  expect(line.name, 'slot 1 holds no named skill').not.toBe('');
+  expect(line.text.startsWith(`${line.name} reaches `), `the line does not name the skill: ${line.text}`).toBe(true);
+  expect(line.text).toMatch(/ reaches [\d.]+ m across \d+° and catches nobody\. .+ is 5\.0 m away, 180° to your (left|right)\./);
   expect(errors).toEqual([]);
 });

@@ -26,7 +26,7 @@ async function land(page, query = '?auto=1&seed=4477&scale=0.35') {
 
 test('the title tagline is centred, not left-aligned inside a centred block', async ({ page }) => {
   await page.goto(BASE);
-  await page.waitForSelector('#boot-menu:not(.hidden)', { timeout: 30000 });
+  await page.waitForSelector('#boot[data-wired] #boot-menu:not(.hidden)', { timeout: 30000 });
   const off = await page.evaluate(() => {
     const p = document.querySelector('#boot .tagline');
     const box = p.closest('.boot-inner').getBoundingClientRect();

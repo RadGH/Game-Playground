@@ -44,7 +44,7 @@ async function firstLook(page, sel = '#boot-figure canvas') {
 
 async function openTitle(page, query = '') {
   await page.goto(BASE + query);
-  await page.waitForSelector('#boot-menu:not(.hidden)', { timeout: 30000 });
+  await page.waitForSelector('#boot[data-wired] #boot-menu:not(.hidden)', { timeout: 30000 });
 }
 
 test('the menu is a menu: Continue, New game, Load game, Settings, Back to playground', async ({ page }) => {
@@ -62,7 +62,7 @@ test('the menu is a menu: Continue, New game, Load game, Settings, Back to playg
   // round-10 specs wait for `#boot-continue:not([hidden])` after saving
   await page.evaluate(() => localStorage.removeItem('farhold.lastSave'));
   await page.reload();
-  await page.waitForSelector('#boot-menu:not(.hidden)');
+  await page.waitForSelector('#boot[data-wired] #boot-menu:not(.hidden)');
   expect(await page.locator('#boot-continue').isHidden()).toBe(true);
 
   /**

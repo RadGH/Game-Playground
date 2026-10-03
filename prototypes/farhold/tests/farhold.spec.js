@@ -5,6 +5,7 @@
 // system is the real one.
 
 import { test, expect } from '@playwright/test';
+import { goWild } from './wild-spot.mjs';
 
 /** Open the page, land on the planet, and collect any error the page throws. */
 async function land(page, query = '') {
@@ -260,13 +261,16 @@ test('a level requirement is refused out loud, not silently ignored', async ({ p
 });
 
 test('enemies appear around the player, chase, and are cleared away when you leave', async ({ page }) => {
+  test.setTimeout(150_000);
   await land(page);
+  // a run starts inside a town's watch, where nothing spawns: walk out to dry wild ground first
+  const spot = await page.evaluate(goWild);
+  expect(spot.share, 'found no dry wild ground near the start').toBeGreaterThan(0.5);
   const life = await page.evaluate(async () => {
     const f = window.farhold;
-    f.field.clear();
-    // let the spawner work
-    const start = Date.now();
-    while (f.field.enemies.length < 3 && Date.now() - start < 30000) await new Promise(r => setTimeout(r, 200));
+    // let the spawner work — timed on the GAME clock (headless runs ~6 fps, dt capped)
+    const c0 = f.field.clock, start = Date.now();
+    while (f.field.enemies.length < 3 && f.field.clock - c0 < 20 && Date.now() - start < 60000) await new Promise(r => setTimeout(r, 200));
     const spawned = f.field.enemies.length;
     const distances = f.field.enemies.map(e => Math.hypot(e.x - f.control.x, e.z - f.control.z));
     const onGround = f.field.enemies.every(e => Math.abs(e.y - f.terrain.heightAt(e.x, e.z)) < 0.01);

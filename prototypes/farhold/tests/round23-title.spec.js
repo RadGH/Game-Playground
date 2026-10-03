@@ -17,6 +17,7 @@
 //      game is running, and the game's own renderer draws.
 
 import { test, expect } from '@playwright/test';
+import { pickOpenSpell } from './builder-pick.mjs';
 
 const BASE = '/prototypes/farhold/';
 
@@ -29,7 +30,7 @@ function watch(page) {
 
 async function openTitle(page, query = '') {
   await page.goto(BASE + query);
-  await page.waitForSelector('#boot-menu:not(.hidden)', { timeout: 30000 });
+  await page.waitForSelector('#boot[data-wired] #boot-menu:not(.hidden)', { timeout: 30000 });
 }
 
 /** How far the title spills past the window, sideways and downwards. */
@@ -197,7 +198,7 @@ test('Start from a custom class, built the way a player builds one, reaches the 
   await page.selectOption('#boot-class', 'custom');
   await page.click('.cb-open');
   await page.locator('.cb:not([hidden]) .cb-rail button', { hasText: 'Spells' }).click();
-  await page.locator('.cb:not([hidden]) .cb-opt:not([disabled])').first().click();
+  await pickOpenSpell(page, '.cb:not([hidden])');
   await page.locator('.cb-done').click();
   await expect(page.locator('.cb:not([hidden])')).toHaveCount(0);
   await expect(page.locator('#boot-class-card .cb-good')).toContainText('Ready');

@@ -68,6 +68,7 @@ test('a war camp: walls and banners, a pure garrison under its warlord, and a ro
     const awake = camp.roster.filter(u => u.state === 'chase').length;
     wl.playerDamage = 1;
     f.field.kill(wl);
+    window.__routClock = f.field.clock;   // the GAME clock the rout is timed on
     const t0 = performance.now();
     let fled = new Set(), firstFlee = null;
     while (performance.now() - t0 < 2000) {
@@ -88,12 +89,19 @@ test('a war camp: walls and banners, a pure garrison under its warlord, and a ro
     const f = window.farhold;
     const camp = f.sites.warCamps.find(c => c.warlordSlain);
     const t0 = performance.now();
-    await new Promise(r => setTimeout(r, 6500));
+    /**
+     * Wait on the GAME clock, not the wall clock. `routSeconds` is game time and headless WebGL
+     * runs this scene at ~6 fps with dt capped, so game time is ~0.6x wall time: a fixed 6.5 s
+     * wall wait landed within a few tenths of the runners' last step and failed by luck
+     * (identical rout timings on the pre-round-28 build; triage 2026-10-02).
+     */
+    const secs = (f.field.warbandCfg?.routSeconds ?? 6) + 1.5;
+    while (f.field.clock - window.__routClock < secs && performance.now() - t0 < 30000) await new Promise(r => setTimeout(r, 200));
     const running = camp.roster.filter(u => u.dying == null && !u.removed && u.state === 'flee' && u.routed).length;
     const alive = camp.roster.filter(u => u.dying == null && !u.removed).length;
     return { running, alive, secs: (performance.now() - t0) / 1000 };
   });
-  expect(back.running, 'a routed guard was still running after 8 s').toBe(0);
+  expect(back.running, 'a routed guard was still running after routSeconds + 1.5 s of game time').toBe(0);
   expect(back.alive, 'the runners were thrown away — they keep their drop and still count for the camp').toBeGreaterThan(0);
   expect(errors, errors.join('\n')).toEqual([]);
 });

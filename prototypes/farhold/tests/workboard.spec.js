@@ -53,7 +53,15 @@ test('the work board is on the build panel, and all three sources put units in',
     // 2. an assigned citizen
     btn('Send somebody')?.click();
     await new Promise(r => setTimeout(r, 250));
-    const assigned = f.colony.byId(ilsa.id)?.stationId;
+    /**
+     * R28 — an order with no machine behind it (a build, a harvest) is not a station, so "Send
+     * somebody" no longer binds the citizen's `stationId` to the ORDER's id (which sent them to a
+     * station that did not exist). It moves the order to the top of the board for a free person
+     * whose job does that kind of work, and says who.
+     */
+    const order1 = f.workBoard.get('o1');
+    const logText = [...document.querySelectorAll('#log > *')].map(n => n.textContent).join('\n');
+    const assigned = { priority: order1.priority, named: /Ilsa does build work/.test(logText) };
     f.workBoard.work('o1', { units: 3, source: 'citizen', by: ilsa.id, byName: 'Ilsa' });
 
     // 3. a machine
@@ -84,7 +92,8 @@ test('the work board is on the build panel, and all three sources put units in',
    * and pinning it to an exact number would be a test of the frame rate.
    */
   expect(out.afterSwing.player, 'swinging at it credited nobody').toBe(1);
-  expect(out.assigned, 'Send somebody did not put the citizen on the order').toBe('o1');
+  expect(out.assigned.priority, 'Send somebody did not move the order up the board').toBeGreaterThan(1);
+  expect(out.assigned.named, 'Send somebody did not say who takes the order').toBe(true);
   expect(out.ledger.citizen, 'the citizen put nothing in').toBeGreaterThanOrEqual(3);
   expect(out.ledger.machine, 'the machine put nothing in').toBe(2);
   expect(out.done, 'the three sources do not add up').toBeGreaterThanOrEqual(6);

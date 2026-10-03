@@ -2,7 +2,7 @@
 // call every frame; nothing here changes state.
 
 import { TICK_HZ, secToTicks } from './state.js';
-import { stockOf, sendRefusal, rally, musterCost, payTicks } from './economy.js';
+import { sendRefusal, rally, musterCost, payTicks, GROUP_TICKS } from './economy.js';
 import { SLOTS, nextStepFor, cheapestNext, itemScore, gearStats, setBonuses, armourClassFor, slotUsable, maxStep, buyRefusal, kindFor, STAT_IDS } from './items.js';
 import { affixTier } from './adapters/affixes.js';
 import { heroStats, xpForLevel, maxLevel } from './heroes.js';
@@ -17,27 +17,48 @@ export function clock(state, data) {
   const pay = payTicks(data), tide = secToTicks(C.tide);
   const rStart = secToTicks(C.risingTide), rEvery = secToTicks(C.risingEvery);
   let risingIn = t < rStart ? rStart - t : rEvery - ((t - rStart) % rEvery);
-  let nextUnlock = null;
-  for (const u of data.derived.tiers) if (u.tier > state.unlocked) { nextUnlock = { tier: u.tier, inTicks: Math.max(0, secToTicks(u.unlock) - t) }; break; }
   return {
     seconds: t / TICK_HZ,
     payIn: pay - (t % pay), payEvery: pay, payProgress: (t % pay) / pay,
     tideIn: tide - (t % tide), tideLevel: state.tideLevel,
     rising: state.rising, risingIn, risingNext: risingStep(data, t) + 1,
     capIn: Math.max(0, secToTicks(C.hardCap) - t),
-    unlocked: state.unlocked, nextUnlock,
   };
 }
 
+const DMG_WORD = { blade: 'blade', pierce: 'pierce', fire: 'fire', nature: 'nature' };
+const ARMOUR_WORD = { light: 'light', heavy: 'heavy', spectral: 'warded', hide: 'hide', fortified: 'fortified' };
+
+/** Counter words for one unit: which hero armour its damage beats, which hero damage beats it. */
+export function counters(data, u) {
+  const strongVs = [], weakVs = [], resists = [];
+  for (const a of data.damage.armours) if (data.damage.pct[u.dmg][a] > 100) strongVs.push(a);
+  for (const d of data.damage.types) {
+    const v = data.damage.pct[d][u.armour];
+    if (v > 100) weakVs.push(d); else if (v < 100) resists.push(d);
+  }
+  const lines = [];
+  if (strongVs.length) lines.push(`Hits ${strongVs.map(a => ARMOUR_WORD[a]).join('/')} armour hard`);
+  if (weakVs.length) lines.push(`Weak to ${weakVs.map(d => DMG_WORD[d]).join('/')}`);
+  if (resists.length) lines.push(`Resists ${resists.map(d => DMG_WORD[d]).join('/')}`);
+  return { strongVs, weakVs, resists, lines };
+}
+
+/** One send for the Muster Hall / deck. All numbers already include race traits. */
 export function sendInfo(state, data, pid, uid) {
-  const p = state.players[pid], u = data.derived.units[uid], s = stockOf(p, uid);
-  const unlockT = secToTicks(u.unlock);
+  const p = state.players[pid], u = data.derived.units[uid];
+  const rival = state.players[p.rival];
+  const rivalEnt = rival ? state.ents.find(e => e.id === rival.heroEnt) : null;
+  const rivalArmour = rivalEnt ? rivalEnt.armour : null, rivalDmg = rival ? data.heroes.heroes[rival.hero].dmgType : null;
+  const pays = u.income > 0 ? u.cost / u.income : null;
   return {
-    unit: uid, name: u.name, tier: u.tier, cost: u.cost, income: u.income, bodies: u.bodies, armour: u.armour, dmg: u.dmg,
-    hp: u.hp, dps: u.dps, leak: u.leak, traits: u.traits,
-    stock: s ? s.n : 0, max: s ? s.max : 0,
-    restockIn: s && s.n < s.max ? Math.ceil(s.every - s.t) : 0, restockEvery: s ? s.every : 0,
-    unlocked: u.tier <= state.unlocked, unlockIn: Math.max(0, unlockT - state.tick),
+    unit: uid, name: u.name, tier: u.tier, role: u.role, roleText: data.units.roles[u.role] || '', cost: u.cost, income: u.income,
+    paybackSeconds: pays == null ? null : Math.round(pays * data.econ.clock.pay),
+    bodies: u.bodies, armour: u.armour, dmg: u.dmg, hp: u.hp, dps: u.dps, speed: u.speed, range: u.range, leak: u.leak, bounty: Math.round(u.cost * u.bounty),
+    traits: u.traits, traitsText: u.traits.map(t => data.units.traits[t].desc),
+    counters: counters(data, u),
+    // the green / amber / red pip against the rival hero right now (PLAN §5.2)
+    vsRival: rival ? { dealt: rivalArmour ? data.damage.pct[u.dmg][rivalArmour] : 100, taken: rivalDmg ? data.damage.pct[rivalDmg][u.armour] : 100 } : null,
     reason: sendRefusal(state, data, p, uid), get canBuy() { return this.reason === null; },
   };
 }
@@ -78,7 +99,7 @@ export function heroInfo(state, data, pid) {
 
 export function teamInfo(state, data, teamId) {
   const t = state.teams[teamId];
-  return { banners: t.banners, bannersMax: t.bannersMax, shown: Math.max(0, Math.ceil(t.banners)), rally: rally(state, data, teamId), dealt: t.dealt };
+  return { banners: t.banners, bannersMax: t.bannersMax, shown: Math.max(0, Math.ceil(t.banners)), rally: rally(state, data, teamId), dealt: t.dealt, waiting: state.fields[t.field].waiting.length, bodies: state.fields[t.field].bodies, cap: data.econ.field.cap, toll: { charges: t.toll.charges, readyIn: Math.max(0, t.toll.readyAt - state.tick) } };
 }
 
 export function rivalInfo(state, data, pid) {
@@ -86,6 +107,9 @@ export function rivalInfo(state, data, pid) {
   const h = entOf(state, r.heroEnt), def = data.heroes.heroes[r.hero];
   return { player: r.id, name: r.name, hero: r.hero, heroName: def.name, level: r.level, hpPct: h ? h.hp / h.hpMax : 0, alive: !!h && h.alive, dmgType: def.dmgType, oil: r.oil, armourClass: armourClassFor(data, r), target: h ? h.target : -1, deck: deckInfo(state, data, r.id) };
 }
+
+/** Bodies held at a field's gate because the field is at its body cap ("+N waiting"). */
+export function gateQueue(state, fieldId) { return state.fields[fieldId].waiting.length; }
 
 export function gatePreview(state, data, fieldId) {
   const out = [];

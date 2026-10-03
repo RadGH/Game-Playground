@@ -32,55 +32,59 @@ test('start gold and income come from econ.json; Pay adds income every 10 s', ()
   run(s, 1); assert.equal(p.gold, data.econ.start.gold + data.econ.start.income);
 });
 
-test('a send costs gold and a stock charge, adds income at once, and leaves on the next Pay into the rival field', () => {
+test('a send costs gold, adds income at once, and leaves within the 0.5 s grouping window into the rival field', () => {
   const s = twoHumans();
   const p = s.state.players[0], levy = data.derived.units.levy;
   s.step([{ p: 0, type: 'send', unit: 'levy' }]);
   assert.equal(p.gold, data.econ.start.gold - levy.cost);
   assert.equal(p.income, data.econ.start.income + levy.income);
-  assert.equal(p.stock.find(x => x.unit === 'levy').n, levy.stock - 1);
   assert.deepEqual(p.queued, ['levy']);
-  assert.ok(!s.state.ents.some(e => e.type === 'levy'));
-  run(s, 199);
+  run(s, 9);
   const u = s.state.ents.find(e => e.type === 'levy');
-  assert.ok(u, 'spawned on the Pay');
+  assert.ok(u, 'out within 10 ticks, no wait for the Pay');
   assert.equal(u.field, 1, 'into the rival field');
   assert.equal(u.team, 0);
   assert.equal(p.queued.length, 0);
 });
 
-test('send refusals: locked tier, empty stock, not enough gold, wrong race', () => {
+test('buying is limited only by gold: no stock, no time locks, any tier at once', () => {
   const s = twoHumans();
+  const p = s.state.players[0];
+  p.gold = 100000;
+  const cmds = [];
+  for (let i = 0; i < 25; i++) cmds.push({ p: 0, type: 'send', unit: 'levy' });
+  cmds.push({ p: 0, type: 'send', unit: 'banner_marshal' }, { p: 0, type: 'send', unit: 'banner_marshal' });
+  s.drainEvents();
+  s.step(cmds);
+  assert.equal(events(s, 'reject').length, 0, 'nothing refused at tick 1');
+  assert.equal(p.queued.length, 27);
   const rej = cmd => { s.drainEvents(); s.step([cmd]); return events(s, 'reject').map(e => e.reason)[0] || null; };
-  assert.equal(rej({ p: 0, type: 'send', unit: 'shieldbearer' }), 'locked');
   assert.equal(rej({ p: 0, type: 'send', unit: 'brute' }), 'roster');
-  for (let i = 0; i < 3; i++) assert.equal(rej({ p: 0, type: 'send', unit: 'levy' }), null);
-  assert.equal(rej({ p: 0, type: 'send', unit: 'levy' }), 'stock');
-  s.state.players[0].gold = 5;
+  p.gold = 5;
   assert.equal(rej({ p: 0, type: 'send', unit: 'hill_slinger' }), 'gold');
 });
 
-test('stock refills one charge per restock period', () => {
+test('a field at its body cap holds extra sends in the gate queue (never refused), oldest first', () => {
   const s = twoHumans();
-  s.step([{ p: 0, type: 'send', unit: 'levy' }]);
-  const st = s.state.players[0].stock.find(x => x.unit === 'levy');
-  run(s, st.every - 2); assert.equal(st.n, st.max - 1);
-  run(s, 2); assert.equal(st.n, st.max);
+  const p = s.state.players[0];
+  p.gold = 1e6;
+  const cmds = [];
+  for (let i = 0; i < data.econ.field.cap + 12; i++) cmds.push({ p: 0, type: 'send', unit: 'levy' });
+  s.drainEvents();
+  s.step(cmds);
+  assert.equal(events(s, 'reject').length, 0);
+  run(s, 10);
+  assert.equal(s.state.fields[1].bodies, data.econ.field.cap);
+  assert.equal(Q.gateQueue(s.state, 1), 12);
+  assert.equal(Q.teamInfo(s.state, data, 1).waiting, 12);
 });
 
-test('tiers unlock on the clock and emit unlock events', () => {
+test('auto-send buys whenever gold allows', () => {
   const s = twoHumans();
-  run(s, 90 * 20 - 1); assert.equal(s.state.unlocked, 1);
-  s.drainEvents(); run(s, 1);
-  assert.equal(s.state.unlocked, 2);
-  assert.deepEqual(events(s, 'unlock').map(e => e.tier), [2]);
-});
-
-test('auto-send buys whenever stock and gold allow', () => {
-  const s = twoHumans();
+  s.state.players[0].gold = 120;
   s.step([{ p: 0, type: 'auto', index: 0, on: true }]);
-  assert.equal(s.state.players[0].stock.find(x => x.unit === 'levy').n, 0);
-  assert.equal(s.state.players[0].queued.length, 3);
+  assert.equal(s.state.players[0].queued.length, 10);
+  assert.ok(s.state.players[0].gold < data.derived.units.levy.cost);
 });
 
 test('Muster ranks raise sent units, Drilled Muster makes them cheaper', () => {
@@ -473,20 +477,56 @@ test('trait heal / hardened / enrage / rise / feast / bleed / pounce / raise / c
   assert.ok(data.units.units.raider_pair.bodies > 1 && data.units.units.raider_pair.traits.includes('pack'));
 });
 
+test('new traits: ward, unstoppable, volatile, regrow, shred, split, stealth each change the sim', () => {
+  const { dealDamage } = awaitImport.combat;
+  // ward: hero skills hit it 30% softer, basic attacks do not
+  { const s = twoHumans(); const c = ctxOf(s); const w = put(s, 'lantern_warden', 1, 0, 0, 20);
+    const sk = dealDamage(c, null, w, 100, 'blade', { skill: 'cleave' }); const ba = dealDamage(c, null, w, 100, 'blade');
+    assert.ok(Math.abs(sk / ba - 0.7) < 1e-9, 'ward'); }
+  // unstoppable: no stun / root / slow / taunt / knockback
+  { const { s, h } = skillLab(); const u = put(s, 'halberdier', 1, 0, 0, 62, { hp: 1e5, hpMax: 1e5 });
+    s.step([{ p: 0, type: 'cast', slot: 'W', x: h.x, z: h.z + 5 }]);
+    assert.ok(!u.statuses.some(x => x.id === 'stun'), 'no stun'); assert.ok(u.z < 63, 'no knockback'); }
+  // volatile: bursts on the hero when it dies
+  { const s = twoHumans(); const h = hero(s, 0); h.x = s.map.fields[0].cx; h.z = 60; h._ord.k = 'stop';
+    const v = put(s, 'pyre_runner', 1, 0, 0, 58.5); v.hp = 1; s.drainEvents(); run(s, 25);
+    assert.ok(s.drainEvents().some(e => e.type === 'hit' && e.dst === h.id && e.src === -1), 'volatile burst'); }
+  // regrow
+  { const s = twoHumans(); parkHeroes(s); const b = put(s, 'bear_warden', 1, 0, 0, 20); b.hp = b.hpMax / 2; b._spd = 0; run(s, 40);
+    assert.ok(b.hp > b.hpMax / 2, 'regrow'); }
+  // shred: strips hero armour
+  { const s = twoHumans(); const h = hero(s, 0); h.x = s.map.fields[0].cx; h.z = 60; h.hp = h.hpMax = 1e6; h._ord.k = 'stop';
+    const a0 = awaitImport.heroes.heroArmor(ctxOf(s), h); put(s, 'skullsplitter', 1, 0, 0, 58.5, { hp: 1e6, hpMax: 1e6 }); run(s, 40);
+    assert.ok(awaitImport.heroes.heroArmor(ctxOf(s), h) < a0, 'shred'); }
+  // split: two shamblers when it dies
+  { const s = twoHumans(); parkHeroes(s); const c = ctxOf(s); const hk = put(s, 'carrion_hulk', 1, 0, 0, 20);
+    dealDamage(c, null, hk, 1e7, 'blade'); assert.equal(s.state.ents.filter(e => e.type === 'shambler' && e.alive && !e._gone).length, 2, 'split'); }
+  // stealth: the hero does not notice it from 6 m, does at 2 m
+  { const s = twoHumans(); const h = hero(s, 0); h.x = s.map.fields[0].cx; h.z = 60; h._ord.k = 'idle';
+    const st = put(s, 'briar_stalker', 1, 0, 0, 54, { hp: 1e5, hpMax: 1e5 }); st._spd = 0; run(s, 3);
+    assert.notEqual(h.target, st.id, 'hidden at 6 m'); st.z = 58.2; run(s, 3); assert.equal(h.target, st.id, 'seen at 2 m'); }
+});
+
 // ── query helpers ───────────────────────────────────────────────────────────────────────────
 test('query helpers describe the state for the UI', () => {
   const s = twoHumans();
   const c = Q.clock(s.state, data);
-  assert.equal(c.payIn, 200); assert.equal(c.nextUnlock.tier, 2);
+  assert.equal(c.payIn, 200);
   const deck = Q.deckInfo(s.state, data, 0);
   assert.equal(deck.length, 4);
   assert.equal(deck[0].canBuy, true);
-  assert.equal(deck[2].reason, 'locked');
+  const ros = Q.roster(s.state, data, 0);
+  assert.equal(ros.length, 12);
+  const sb = ros.find(r => r.unit === 'shieldbearer');
+  assert.equal(ros.find(r => r.unit === 'gate_warden').reason, 'gold');
+  assert.ok(sb.paybackSeconds > 0 && sb.traitsText.length === 1 && sb.counters.lines.length > 0 && sb.roleText);
+  assert.equal(ros.find(r => r.unit === 'banner_marshal').paybackSeconds, null, 'champions add no income');
+  assert.equal(typeof sb.vsRival.taken, 'number');
   const hi = Q.heroInfo(s.state, data, 0);
   assert.equal(hi.skills.length, 5); assert.equal(hi.skills[0].canLearn, true);
   assert.equal(hi.talent.choices.length, 2);
   s.step([{ p: 1, type: 'send', unit: 'levy' }, { p: 1, type: 'send', unit: 'levy' }]);
-  assert.deepEqual(Q.gatePreview(s.state, data, 0), [{ player: 1, unit: 'levy', count: 2 }]);
+  assert.deepEqual(Q.gatePreview(s.state, data, 0), [{ player: 1, unit: 'levy', count: 2 }], 'sends in the grouping window');
   assert.equal(Q.teamInfo(s.state, data, 0).shown, data.econ.banners['1v1']);
   assert.equal(Q.rivalInfo(s.state, data, 0).player, 1);
   assert.equal(Q.musterInfo(s.state, data, 0).rank, 0);
@@ -500,4 +540,4 @@ test('config validation gives readable errors', () => {
 });
 
 // imports used by the trait tests
-const awaitImport = { combat: await import('../js/sim/combat.js'), traits: await import('../js/sim/traits.js'), economy: await import('../js/sim/economy.js') };
+const awaitImport = { combat: await import('../js/sim/combat.js'), traits: await import('../js/sim/traits.js'), economy: await import('../js/sim/economy.js'), heroes: await import('../js/sim/heroes.js') };

@@ -25,7 +25,7 @@ export function createState(config, data, map) {
 
   const state = {
     v: 1, tick: 0, seed: seed >>> 0, mode, map: mapId,
-    rng, nextId: 1, unlocked: 1, rising: 0, tideLevel: 0, tides: 0, result: null,
+    rng, nextId: 1, rising: 0, tideLevel: 0, tides: 0, result: null,
     endless: !!rules.endless,
     teams: [0, 1].map(t => ({ id: t, banners: bannersMax, bannersMax, field: t, players: [], dealt: 0, toll: { charges: data['items-bl'].toll.charges, readyAt: 0 } })),
     players: [], fields: map.fields.map(f => ({ id: f.id, team: f.team, waiting: [], bodies: 0 })),
@@ -42,11 +42,10 @@ export function createState(config, data, map) {
     for (const u of deck) if (!race.units.includes(u)) throw new Error(`Deck unit "${u}" is not in ${race.name}`);
     const p = {
       id, team: pc.team, name: pc.name || `Player ${id + 1}`, kind: pc.kind === 'ai' ? 'ai' : 'human',
-      ai: pc.kind === 'ai' ? { difficulty: (pc.ai && pc.ai.difficulty) || 'recruit', sendDone: -1, nextAt: 0, rng: seedStream(seed >>> 0, 'ai' + id) } : null,
+      ai: pc.kind === 'ai' ? { difficulty: (pc.ai && pc.ai.difficulty) || 'recruit', sendDone: -1, nextAt: 0, fund: 0, rng: seedStream(seed >>> 0, 'ai' + id) } : null,
       race: pc.race, hero: pc.hero, heroEnt: -1, rival: -1,
       gold: rules.startGold ?? data.econ.start.gold, income: data.econ.start.income,
       deck, auto: [false, false, false, false],
-      stock: race.units.map(uid => { const u = data.derived.units[uid]; return { unit: uid, n: u.stock, max: u.stock, t: 0, every: secToTicks(u.restock) }; }),
       queued: [], muster: 0,
       equip: emptyEquip(), bag: new Array(data['items-bl'].shop.bag).fill(null), picks: [], requisitions: [], procs: {}, atArmory: false, gearV: 0,
       level: 1, xp: 0, skillPts: 1,

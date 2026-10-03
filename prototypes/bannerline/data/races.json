@@ -8,11 +8,10 @@
   },
   "cheap_steel": {
    "name": "Cheap Steel",
-   "desc": "Tier 1-4 units cost 15% less, add 10% less income, and hold one more in stock.",
+   "desc": "Tier 1-3 units cost 15% less but add 15% less income.",
    "cost": 0.85,
-   "income": 0.9,
-   "extraStock": 1,
-   "maxTier": 4
+   "income": 0.85,
+   "maxTier": 3
   },
   "grave_tithe": {
    "name": "Grave Tithe",
@@ -21,8 +20,8 @@
   },
   "running_packs": {
    "name": "Running Packs",
-   "desc": "Pack units restock 15% faster.",
-   "packRestock": 0.85
+   "desc": "Pack units run 20% faster.",
+   "packSpeed": 1.2
   }
  },
  "races": {
@@ -37,9 +36,15 @@
    "units": [
     "levy",
     "hill_slinger",
+    "fleetfoot",
     "shieldbearer",
+    "crossbowman",
+    "lantern_warden",
     "hedge_priest",
+    "halberdier",
     "iron_golem",
+    "ballista_crew",
+    "gate_warden",
     "banner_marshal"
    ]
   },
@@ -54,9 +59,15 @@
    "units": [
     "raider_pair",
     "spearthrower",
+    "pyre_runner",
     "brute",
+    "skullsplitter",
+    "sling_gang",
     "bonecaller",
+    "ironhide_charger",
     "tuskback",
+    "blood_shaman",
+    "ash_ogre",
     "tuskchief"
    ],
    "econModelHpMult": 0.996
@@ -72,9 +83,15 @@
    "units": [
     "shambler",
     "crow_murder",
+    "plague_rats",
     "gravecreeper",
+    "bone_archer",
+    "wailing_shade",
     "ghoul",
+    "carrion_hulk",
     "bone_colossus",
+    "grave_hexer",
+    "barrow_wight",
     "deathmarshal"
    ]
   },
@@ -89,9 +106,15 @@
    "units": [
     "wolf_pair",
     "tracker",
+    "briar_stalker",
     "mauler",
+    "hyena_pack",
+    "moon_seer",
     "saber_cat",
+    "bear_warden",
     "thornback",
+    "elk_charger",
+    "elder_bear",
     "packlord"
    ]
   }

@@ -29,15 +29,13 @@ export function unitStats(raw, uid) {
   const low = u.tier <= (rt.maxTier ?? 99);
   const pack = u.traits.includes('pack');
   return {
-    id: uid, race: u.race, name: u.name, tier: u.tier, bodies: u.bodies, armour: u.armour, dmg: u.dmg,
-    range: u.range, speed: u.speed, leak: u.leak, unlock: u.unlock, traits: u.traits.slice(),
+    id: uid, race: u.race, name: u.name, tier: u.tier, role: u.role, bodies: u.bodies, armour: u.armour, dmg: u.dmg,
+    range: u.range, speed: u.speed * (pack ? (rt.packSpeed ?? 1) : 1), leak: u.leak, traits: u.traits.slice(), splitInto: u.splitInto || null,
     bounty: u.bounty ?? raw.econ.bounty.share,
     hp: u.hp * (race.hpMult ?? 1), dps: u.dps,
     baseCost: u.cost,
     cost: Math.round(u.cost * (low ? (rt.cost ?? 1) : 1)),
     income: u.income * (low ? (rt.income ?? 1) : 1),
-    stock: u.stock + (low ? (rt.extraStock ?? 0) : 0),
-    restock: u.restock * (pack ? (rt.packRestock ?? 1) : 1),
     leakRefund: rt.leakRefund ?? 0,
   };
 }
@@ -45,11 +43,7 @@ export function unitStats(raw, uid) {
 function derive(raw) {
   const units = {};
   for (const uid of Object.keys(raw.units.units)) units[uid] = unitStats(raw, uid);
-  const tiers = [];
-  for (const u of Object.values(units)) if (!tiers.some(t => t.tier === u.tier)) tiers.push({ tier: u.tier, unlock: u.unlock });
-  // ascending by unlock time (small list; insertion sort keeps it free of Array.sort)
-  for (let i = 1; i < tiers.length; i++) for (let j = i; j > 0 && (tiers[j].unlock < tiers[j - 1].unlock || (tiers[j].unlock === tiers[j - 1].unlock && tiers[j].tier < tiers[j - 1].tier)); j--) { const t = tiers[j]; tiers[j] = tiers[j - 1]; tiers[j - 1] = t; }
-  return { units, tiers };
+  return { units };
 }
 
 export function prepareData(raw) {

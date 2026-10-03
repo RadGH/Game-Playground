@@ -19,6 +19,8 @@ export function findStatus(e, id) {
 /** Add or refresh a status. opts: { ticks, stacks (add), maxStacks, power, src, buff } */
 export function addStatus(ctx, e, id, opts) {
   if (!e.alive || e._gone) return null;
+  // unstoppable units shrug off crowd control (traits.js)
+  if (e._traits && e._traits.indexOf('unstoppable') >= 0 && (id === 'stun' || id === 'root' || id === 'slow' || id === 'taunt')) return null;
   const until = ctx.state.tick + Math.max(1, opts.ticks | 0);
   let s = findStatus(e, id);
   if (s) {

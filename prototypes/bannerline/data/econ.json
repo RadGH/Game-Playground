@@ -9,12 +9,11 @@
   "risingLeakMult": 1.5,
   "risingTideLevels": 5,
   "hardCap": 1920,
-  "risingRestock": 1.0,
-  "_doc": "risingTide: from this second the match escalates every risingEvery s (step n = 1, 2, 3...): Tides jump risingTideLevels levels per step, leaks count x (risingLeakMult + risingLeakStep*(n-1)), and tier 4+ send stocks refill (1 + risingRestock*n) times faster (pressure only, so income stays linear). This is the end clock: it guarantees a stronger defence eventually breaks. risingRestock 1.0 (was 0.5): tuned on the real sim in M4, where geared heroes held the field to the cap with 0.5.",
+  "_doc": "risingTide: from this second the match escalates every risingEvery s (step n = 1, 2, 3...): Tides jump risingTideLevels levels per step, leaks count x (risingLeakMult + risingLeakStep*(n-1)). This is the end clock: it guarantees a stronger defence eventually breaks.",
   "risingLeakStep": 0.5
  },
  "start": {
-  "gold": 120,
+  "gold": 60,
   "income": 20
  },
  "banners": {

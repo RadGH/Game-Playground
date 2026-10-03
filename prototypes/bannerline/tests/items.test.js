@@ -40,6 +40,7 @@ test('away from the Armory a purchase is a Requisition: it arrives later, and is
   run(s, data['items-bl'].shop.requisition * 20);
   assert.ok(p.equip.weapon, 'arrived and equipped');
   // lost on death
+  p.gold += 500;
   s.step([{ p: 0, type: 'upgrade' }]);
   const g1 = p.gold;
   h.hp = 1;

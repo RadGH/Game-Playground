@@ -27,19 +27,32 @@ const SKILL_KEYS = new Set(['name', 'shape', 'element', 'mult', 'radius', 'reach
   'projectiles', 'spread', 'splash', 'pierce', 'repeats', 'line', 'pet', 'count', 'form', 'place',
   // effects
   'status', 'statuses', 'knock', 'pullIn', 'taunt', 'selfBuff', 'pool', 'detonate', 'empowerNext', 'bonusIf', 'pen',
-  'trail', 'heal', 'stack', 'statusMult', 'delay']);
+  'trail', 'heal', 'stack', 'statusMult', 'delay',
+  // M6 (Ranger, Druid)
+  'split', 'dash', 'consumes', 'onHit', 'forms', 'howl', 'barrier']);
 const SUB_KEYS = {
   line: ['length', 'width', 'every', 'across'],
   pool: ['seconds', 'radius', 'power', 'element', 'slow'],
   detonate: ['types', 'share', 'keep'],
   trail: ['seconds', 'every', 'radius', 'burns', 'step'],
   stack: ['status', 'add', 'max'],
+  place: ['kind', 'arm', 'seconds', 'radius', 'triggerRadius', 'max', 'strike', 'tag'],
+  split: ['shards', 'range', 'keep', 'when'],
+  dash: ['to', 'range'],
+  empowerNext: ['count', 'mult', 'seconds'],
+  consumes: ['tag', 'mult'],
+  onHit: ['healPet'],
+  howl: ['status', 'seconds', 'damage'],
+  barrier: ['share', 'seconds'],
+  form: ['id', 'name', 'group', 'toggle', 'body', 'stats', 'basic', 'onEnter'],
 };
-const SELFBUFF_KEYS = new Set(['name', 'seconds', 'movePct', 'resistPerFoe', 'every', 'resist', 'damage', 'haste', 'regen']);
-const TAUNT_KEYS = new Set(['radius', 'seconds', 'perTaunt', 'perTauntCap']);
+// shape-changing forms the runtime knows (PLAN §6.2: Briarback in v1; Fenrunner and Sporecap after v1)
+const FORMS = ['briarback'];
+const SELFBUFF_KEYS = new Set(['name', 'seconds', 'movePct', 'resistPerFoe', 'every', 'resist', 'damage', 'haste', 'regen', 'reflect', 'petsOnly']);
+const TAUNT_KEYS = new Set(['radius', 'seconds', 'perTaunt', 'perTauntCap', 'target', 'by']);
 const KNOCK_KEYS = new Set(['push', 'stagger']);
 const MOD_KEYS = new Set(['set', 'add', 'mul', 'knock', 'pullIn', 'pool', 'statuses', 'forms']);
-const BONUS_WHEN = /^(crowd|distance):[0-9.]+(:[0-9.]+)?$/;
+const BONUS_WHEN = /^(crowd|distance):[0-9.]+(:[0-9.]+){0,2}$/;
 // Farhold keys dropped on purpose (presentation or Farhold-only systems)
 const DROP = new Set(['desc', 'talents', 'icon', 'fx', 'sound', 'anim', 'unlock']);
 
@@ -68,6 +81,25 @@ const HEROES = {
     skillScale: 0.43,
     desc: 'Ranged caster. Stacks Burning on crowds and sets them off.',
   },
+  ranger: {
+    name: 'Ranger', dmgType: 'pierce', armourClass: 'light', melee: false,
+    range: 9, attackEvery: 0.9, moveSpeed: 5.4, radius: 0.5, aggro: 10,
+    mp: 60, mpPerLevel: 5, mpRegen: 1.3, mpRegenPerLevel: 0.1,
+    slots: { Q: 'aimed_shot', W: 'hunters_snare', E: 'multi_shot', D: 'trackers_leap', R: 'rain_of_arrows' },
+    passive: { name: 'Quarry', everyNth: 4, status: 'quarry', desc: 'Every 4th basic attack marks the target as Quarry: it takes 20% more damage for 6 s.' },
+    talentSkill: 'multi_shot', talentTier: '1',
+    skillScale: 0.4,
+    desc: 'Ranged marksman. Marks Quarry, snares the road and rains arrows on it.',
+  },
+  druid: {
+    name: 'Druid', dmgType: 'nature', armourClass: 'hide', melee: false,
+    range: 7, attackEvery: 1.0, moveSpeed: 5.0, radius: 0.6, aggro: 8,
+    mp: 70, mpPerLevel: 6, mpRegen: 1.5, mpRegenPerLevel: 0.12,
+    slots: { Q: 'thornlash', W: 'renew', D: 'briarback_shape', R: 'call_wolf' },
+    talentSkill: 'thornlash', talentTier: '1',
+    skillScale: 0.4,
+    desc: 'Shapeshifter. Roots and heals at range; becomes a thorned boar that holds the line; calls wolves.',
+  },
 };
 
 // Bannerline descriptions (numbers here must match the copied rows; tests/skills.test.js checks the
@@ -83,6 +115,15 @@ const DESC = {
   fire_wall: 'Raise a 10 m line of flame up to {range} m away across your aim: {mult} weapon damage and 2 Burning stacks to everything in it, then it burns for 5 s ({pool} weapon damage a second).',
   flashover: 'Ignite a 6 m area up to {range} m away for {mult} weapon damage and set off Burning: 60% of each target\'s remaining burn damage at once (one stack stays).',
   ember_stride: 'For 8 s move 20% faster and leave burning ground behind you ({mult} weapon damage a second); the spot you start from burns for 4 s ({pool} a second).',
+  aimed_shot: 'Loose a heavy arrow up to {range} m for {mult} weapon damage that ignores half of the target\'s resistance; more damage the further it flies (up to +60%).',
+  hunters_snare: 'Set a snare up to {range} m away (two at most). It arms after 1 s; the first enemy to step on it roots everything within 2.5 m, deals {strike} weapon damage and marks them as Quarry.',
+  multi_shot: 'Fire 5 arrows in a fan for {mult} weapon damage each. An arrow that hits Quarry splits into 2 shards.',
+  trackers_leap: 'Leap {dash} m back from where you aim, striking everything within 2.5 m of where you stood for {mult} weapon damage. Your next basic attack within 3 s deals 50% more.',
+  rain_of_arrows: 'Rain 8 volleys over 4 s on a 6.5 m area up to {range} m away, {mult} weapon damage each; Quarry takes 50% more and loses the mark.',
+  thornlash: 'Lash a target up to {range} m away for {mult} weapon damage and root it for 0.6 s (not again on the same target for 6 s); your wolves heal 3%. In Briarback: Bramble Gore, a wide gore for more damage that knocks back and taunts what it hits.',
+  renew: 'Mending for 10 s (2.5% of your health a second). In Briarback: Thornswell, a barrier of 20% of your health for 6 s that returns 20% of the damage it takes.',
+  briarback_shape: 'Take the Briarback shape (or leave it): +60% armour, +30% health, attackers take 15% of their blow back, and your attacks gore everything in front of you. Taking it taunts enemies within 6 m.',
+  call_wolf: 'Call two Grove Wolves to fight beside you (at most two) and howl: you and your wolves are Hastened and deal 30% more for 6 s. In Briarback: Den Guard, your wolves take 30% less damage and taunt everything near them for 4 s.',
   meteor: 'Call a stone down on an 8 m area up to {range} m away after a short delay: {mult} weapon damage and 3 Burning stacks.',
 };
 const TALENT_DESC = {
@@ -90,6 +131,10 @@ const TALENT_DESC = {
   hooked_edge: 'Cleave drags everything it hits 2 m toward you.',
   cinder_spray: 'Firebolt throws three bolts in a fan, each for 65% of the damage.',
   slow_burner: 'Firebolt leaves a 2 m patch of fire for 3 s where it lands.',
+  wide_fan: 'Broadhead Fan looses 7 arrows in a wider fan, each for 80% of the damage.',
+  tight_fan: 'Broadhead Fan looses 3 arrows straight ahead, each for 130% of the damage.',
+  thorn_fan: 'Thornlash throws three lashes in a fan; Bramble Gore sweeps a wider arc.',
+  barbed: 'Thornlash also leaves the target Bleeding.',
 };
 
 // Statuses the runtime knows (PLAN §6.3: 9). Numbers are Bannerline's.
@@ -113,22 +158,56 @@ const RANKS = {
 // Bannerline-only additions merged onto a Farhold row before it is normalised.
 const OVERRIDES = {
   meteor: { delay: 0.8 },
+  call_wolf: { count: 2 },            // PLAN §6.2: two Grove Wolves
 };
+
+// Farhold keys a kept skill carries that Bannerline does not run, each with the reason. Anything not
+// listed here and not in the vocabulary FAILS the build.
+const REMOVE = {
+  hunters_snare: { mult: 'the trap\'s strike carries its own multiplier (place.strike.mult)', radius: 'place.radius is the trap radius' },
+};
+// Bannerline numbers for pets (Farhold's pets read Farhold's level curve). Per body, at hero level 1;
+// grows per hero level.
+const PETS = {
+  grove_wolf: { name: 'Grove Wolf', hp: 260, hpPerLevel: 40, dps: 9, dpsPerLevel: 2.2, speed: 5.4, range: 1.6, radius: 0.5, armour: 'hide', dmgType: 'nature', leash: 9, max: 2 },
+};
+function normaliseForm(id, f, scale) {
+  // a form override: same vocabulary, `null` removes the key while in the form
+  const nulls = Object.keys(f).filter(k => f[k] === null);
+  const rest = {};
+  for (const [k, v] of Object.entries(f)) if (v !== null) rest[k] = v;
+  const out = normaliseSkill(id, { shape: f.shape || 'self', ...rest }, scale, true);
+  if (!f.shape) delete out.shape;
+  for (const k of nulls) out[k] = null;
+  return out;
+}
 
 // ── normalise + validate ───────────────────────────────────────────────────────────────────────
 function fail(msg) { console.error('build-hero-skills: ' + msg); process.exit(1); }
 
-function normaliseSkill(id, src, scale = 1) {
+function normaliseSkill(id, src, scale = 1, inForm = false) {
   const out = {};
   for (const [k, v] of Object.entries(src)) {
     if (DROP.has(k)) continue;
+    if (REMOVE[id] && REMOVE[id][k]) continue;
+    if (k === 'forms') {
+      const forms = {};
+      for (const [fid, f] of Object.entries(v)) if (FORMS.includes(fid)) forms[fid] = normaliseForm(`${id}.forms.${fid}`, f, scale);
+      out.forms = forms;
+      continue;
+    }
     if (k === 'repeatEvery') continue;               // folded into repeats below
     if (k === 'repeats') { out.repeats = typeof v === 'number' ? { count: v, every: src.repeatEvery ?? 0.3 } : v; continue; }
     if (!SKILL_KEYS.has(k)) fail(`skill ${id}: key "${k}" is not in the Bannerline vocabulary (PLAN §6.3). Add a handler in js/sim/skills.js and to SKILL_KEYS, or drop the skill.`);
     out[k] = v;
   }
-  if (!SHAPES.has(out.shape)) fail(`skill ${id}: shape "${out.shape}" unknown`);
+  if (out.shape != null && !SHAPES.has(out.shape)) fail(`skill ${id}: shape "${out.shape}" unknown`);
   if (out.range != null) out.range = out.range / 2;   // top-down camera: ranges halved
+  if (out.dash && out.dash.range != null) out.dash = { ...out.dash, range: out.dash.range / 2 };
+  // a distance bonus starts at half the distance (ranges are halved) and grows twice as fast per metre
+  if (out.bonusIf) out.bonusIf = out.bonusIf.map(b => { const m = /^distance:([0-9.]+):([0-9.]+):([0-9.]+)$/.exec(b.when); return m ? { when: `distance:${+m[1] / 2}:${+m[2] * 2}:${m[3]}` } : b; });
+  if (out.statuses) for (const st of out.statuses) for (const k of Object.keys(st)) if (!['id', 'seconds', 'lockout', 'minCrowd', 'slow', 'add', 'max'].includes(k)) fail(`skill ${id}: statuses[].${k} unknown`);
+  if (out.pet && !PETS[out.pet]) fail(`skill ${id}: pet "${out.pet}" has no Bannerline stats in PETS`);
   if (out.selfBuff) for (const k of Object.keys(out.selfBuff)) if (!SELFBUFF_KEYS.has(k)) fail(`skill ${id}: selfBuff.${k} unknown`);
   if (out.taunt) for (const k of Object.keys(out.taunt)) if (!TAUNT_KEYS.has(k)) fail(`skill ${id}: taunt.${k} unknown`);
   if (out.knock) for (const k of Object.keys(out.knock)) if (!KNOCK_KEYS.has(k)) fail(`skill ${id}: knock.${k} unknown`);
@@ -141,10 +220,14 @@ function normaliseSkill(id, src, scale = 1) {
   if (out.selfBuff && out.selfBuff.every && out.selfBuff.every.mult != null) out.selfBuff.every.mult = r2(out.selfBuff.every.mult * scale);
   if (out.statusMult != null) out.statusMult = r2(out.statusMult * scale);
   if (out.pool && out.pool.power != null) out.pool = { ...out.pool, power: r2(out.pool.power * scale) };
+  if (out.place && out.place.strike && out.place.strike.mult != null) out.place = { ...out.place, strike: { ...out.place.strike, mult: r2(out.place.strike.mult * scale) } };
+  if (out.form && out.form.basic && out.form.basic.mult != null) out.form = { ...out.form, basic: { ...out.form.basic } };
+  if (inForm) return out;
   if (!DESC[id]) fail(`skill ${id}: no Bannerline description in DESC`);
   const pc = v => `${Math.round(v * 100)}%`;
   out.desc = DESC[id].replace('{mult}', out.mult != null ? pc(out.mult) : '').replace('{every}', out.selfBuff?.every ? pc(out.selfBuff.every.mult) : '')
-    .replace('{status}', out.statusMult != null ? pc(out.statusMult) : '').replace('{pool}', out.pool ? pc(out.pool.power) : '').replace('{range}', out.range != null ? String(out.range) : '');
+    .replace('{status}', out.statusMult != null ? pc(out.statusMult) : '').replace('{pool}', out.pool ? pc(out.pool.power) : '').replace('{range}', out.range != null ? String(out.range) : '')
+    .replace('{strike}', out.place && out.place.strike ? pc(out.place.strike.mult) : '').replace('{dash}', out.dash ? String(out.dash.range) : '');
   if (out.desc.includes('{')) fail(`skill ${id}: unfilled placeholder in description`);
   return out;
 }
@@ -153,7 +236,9 @@ function normaliseTalent(skillId, node) {
   for (const k of Object.keys(node.mod)) if (!MOD_KEYS.has(k)) fail(`talent ${node.id} (${skillId}): mod key "${k}" is not one of ${[...MOD_KEYS].join(', ')}`);
   if (node.mod.knock) for (const k of Object.keys(node.mod.knock)) if (!KNOCK_KEYS.has(k)) fail(`talent ${node.id}: knock.${k} unknown`);
   if (!TALENT_DESC[node.id]) fail(`talent ${node.id}: no Bannerline description`);
-  return { id: node.id, name: node.name, desc: TALENT_DESC[node.id], mod: node.mod };
+  const mod = JSON.parse(JSON.stringify(node.mod));
+  if (mod.forms) { for (const f of Object.keys(mod.forms)) if (!FORMS.includes(f)) delete mod.forms[f]; }
+  return { id: node.id, name: node.name, desc: TALENT_DESC[node.id], mod };
 }
 
 const farhold = JSON.parse(readFileSync(FARHOLD, 'utf8'));
@@ -163,6 +248,7 @@ const out = {
   statuses: STATUSES,
   heroes: {},
   skills: {},
+  pets: {},
 };
 for (const [hid, h] of Object.entries(HEROES)) {
   const hero = { ...h };
@@ -175,6 +261,7 @@ for (const [hid, h] of Object.entries(HEROES)) {
   const tier = farhold.skills[h.talentSkill]?.talents?.[h.talentTier];
   if (!tier) fail(`hero ${hid}: talent tier ${h.talentTier} of ${h.talentSkill} missing`);
   hero.talent = { skill: h.talentSkill, choices: tier.nodes.slice(0, 2).map(n => normaliseTalent(h.talentSkill, n)) };
+  for (const sid of Object.values(h.slots)) if (out.skills[sid].pet) out.pets[out.skills[sid].pet] = PETS[out.skills[sid].pet];
   out.heroes[hid] = hero;
 }
 

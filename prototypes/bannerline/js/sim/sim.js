@@ -8,7 +8,7 @@ import { createState, TICK_HZ, secToTicks } from './state.js';
 import { buildMap } from './map.js';
 import { hashValue } from './hash.js';
 import { applyCommand } from './commands.js';
-import { unlockTick, restockTick, payTick, autoSends, admitWaiting } from './economy.js';
+import { releaseTick, payTick, autoSends, admitWaiting } from './economy.js';
 import { tideTick } from './tides.js';
 import { tickStatuses } from './statuses.js';
 import { heroTick } from './heroes.js';
@@ -90,11 +90,10 @@ class Sim {
       applyCommand(ctx, c);
     }
     for (const p of state.players) if (p.kind === 'ai') for (const c of aiCommands(ctx, p)) applyCommand(ctx, c);
-    unlockTick(ctx);
     tollTick(ctx);
-    restockTick(ctx);
     payTick(ctx);
     autoSends(ctx);
+    releaseTick(ctx);
     tideTick(ctx);
     admitWaiting(ctx);
     runTimers(ctx);

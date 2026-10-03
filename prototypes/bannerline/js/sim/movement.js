@@ -7,8 +7,9 @@ import { liveEnt } from './state.js';
 import { flowDir } from './flow.js';
 import { moveFactor, isStunned, isRooted, findStatus } from './statuses.js';
 import { inReach } from './combat.js';
-import { tryPounce, hasTrait } from './traits.js';
+import { tryPounce, hasTrait, isHidden } from './traits.js';
 import { leakMult } from './tides.js';
+import { petThink } from './pets.js';
 
 export const UNIT_AGGRO = 7;
 export const UNIT_LEASH = 12;
@@ -21,7 +22,7 @@ function setAct(e, a, tick) {
 }
 
 function enemyOfHero(hero, e) {
-  return e.alive && !e._gone && e.field === hero.field && e.team !== hero.team && e.kind !== 'hero';
+  return e.alive && !e._gone && e.field === hero.field && e.team !== hero.team && e.kind !== 'hero' && !isHidden(e, hero.x, hero.z);
 }
 
 function nearestEnemy(state, hero, radius) {
@@ -92,7 +93,7 @@ function heroThink(ctx, hero, def) {
 
 function defendersIn(state, field, team) {
   const out = [];
-  for (const e of state.ents) if (e.kind === 'hero' && e.alive && e.field === field && e.team !== team) out.push(e);
+  for (const e of state.ents) if ((e.kind === 'hero' || e.kind === 'pet') && e.alive && !e._gone && e.field === field && e.team !== team) out.push(e);
   return out;
 }
 
@@ -117,7 +118,7 @@ function unitThink(ctx, e) {
     // walk on past it, so one hero cannot hold a whole road. Taunts ignore the cap while they last;
     // when one ends, units over the cap let go (counting this unit, which still targets the hero).
     const cap = ctx.data.econ.field.engagedBodies;
-    if (cur && cur.field === e.field && dist2(e.x, e.z, cur.x, cur.z) <= leash * leash && (cur.kind !== 'hero' || engagedOn(state, cur.id) <= cap)) t = cur;
+    if (cur && cur.field === e.field && dist2(e.x, e.z, cur.x, cur.z) <= leash * leash && ((cur.kind !== 'hero' && cur.kind !== 'pet') || engagedOn(state, cur.id) <= cap)) t = cur;
     else {
       let bd = aggro * aggro;
       for (const h of defendersIn(state, e.field, e.team)) {
@@ -150,6 +151,7 @@ export function moveTick(ctx) {
   for (const e of state.ents) {
     if (e._gone) continue;
     if (e.kind === 'hero') heroThink(ctx, e, data.heroes.heroes[e.type]);
+    else if (e.kind === 'pet') { if (e.alive) { const t = petThink(ctx, e, inReach); if (t && e._wantAttack) e.face = faceOf(t.x - e.x, t.z - e.z); } }
     else if (e.alive) unitThink(ctx, e);
   }
   for (const e of state.ents) {
@@ -175,7 +177,7 @@ export function moveTick(ctx) {
     if (e._gone || !e.alive) continue;
     const f = map.fields[e.field];
     e.x = clamp(e.x, f.x0 + e.r, f.x1 - e.r);
-    e.z = e.kind === 'hero' ? clamp(e.z, f.z0 + 0.5, f.leakZ - 0.5) : clamp(e.z, f.z0, f.z1);
+    e.z = e.kind === 'hero' || e.kind === 'pet' ? clamp(e.z, f.z0 + 0.5, f.leakZ - 0.5) : clamp(e.z, f.z0, f.z1);
   }
   leaks(ctx);
 }
@@ -211,7 +213,7 @@ function separate(ctx) {
 function leaks(ctx) {
   const { state, data, map } = ctx;
   for (const e of state.ents) {
-    if (e._gone || !e.alive || e.kind === 'hero') continue;
+    if (e._gone || !e.alive || e.kind === 'hero' || e.kind === 'pet') continue;
     const f = map.fields[e.field];
     if (e.z < f.leakZ) continue;
     const team = state.teams[f.team];

@@ -135,6 +135,7 @@ function crowdBonus(plan, hits) {
 }
 
 function shove(ctx, from, e, metres, away, field) {
+  if (e._traits && e._traits.indexOf('unstoppable') >= 0) return;   // traits.js: no knockback or pull
   const dx = e.x - from.x, dz = e.z - from.z;
   const d = Math.sqrt(dx * dx + dz * dz) || 1;
   const move = away ? metres : -Math.min(metres, Math.max(0, d - (from.r || 0) - e.r - 0.3));
@@ -276,7 +277,7 @@ export function groundLands(ctx, args) {
 
 function fireBolts(ctx, hero, p, plan, aimX, aimZ, pm = 1) {
   const { state } = ctx;
-  const n = Math.max(1, Math.round(plan.projectiles ? 1 + plan.projectiles : 1));
+  const n = Math.max(1, Math.round(plan.projectiles ?? 1));   // total bolts (talent `add` counts from 1)
   const spread = plan.spread || 0;
   const range = plan.range || 12;
   let base = hero.face;
@@ -330,7 +331,7 @@ function doTaunt(ctx, hero, t) {
   const ticks = secToTicks(t.seconds);
   for (const e of enemiesOf(ctx, hero)) {
     if (e.kind === 'hero' || dist2(e.x, e.z, hero.x, hero.z) > r2) continue;
-    addStatus(ctx, e, 'taunt', { ticks, src: hero.id });
+    if (!addStatus(ctx, e, 'taunt', { ticks, src: hero.id })) continue;
     e.target = hero.id;
     ctx.emit('taunt', { id: e.id, by: hero.id, ticks });
   }

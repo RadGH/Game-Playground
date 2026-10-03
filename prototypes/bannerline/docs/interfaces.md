@@ -107,9 +107,9 @@ per tick are fine; they apply in array order.
 | `cast` | `slot` `'Q'|'W'|'E'|'D'|'R'`, `x, z` (aim point), `target?` | cast the skill in that slot. `x,z` aims shaped skills (arc direction / ground point). Omit `x,z` to cast toward the current facing |
 | `learn` | `slot` | spend one skill point on that slot (rank + 1) |
 | `talent` | `choice` 0 or 1 | the level-6 talent pick (once) |
-| `send` | `unit` (unit id) | buy one send: queues it for the next Pay (must be in your race roster, unlocked, in stock, affordable) |
+| `send` | `unit` (unit id) | buy one send. **Gold is the only limit** (owner, 2026-10-03): no stock, no cooldown, no time lock; any number per tick works (mash or hold the key). It leaves through the rival's gate within 0.5 s (`GROUP_TICKS` = 10). Refused only for `'gold'`, `'roster'` (not your race) or `'over'`. A full field never refuses: extra bodies wait in the gate queue |
 | `deck` | `units` [4 unit ids] | set the 4 deck sends (any time) |
-| `auto` | `index` 0..3, `on` bool | auto-send toggle for a deck slot: buys that send whenever its stock and your gold allow |
+| `auto` | `index` 0..3, `on` bool | auto-send toggle for a deck slot: buys that send whenever your gold allows (it spends everything) |
 | `muster` | — | buy the next Muster rank (I–III) |
 | `upgrade` | `slot?` (name like `'chest'` or index 0..7), `kind?` (chest only: `'cloth'|'light'|'medium'|'heavy'`) | "Buy recommended": buy the next shop step item for that slot (omit `slot` = the cheapest unlocked step anywhere) and wear it when it arrives. The worn item is traded in if it is a plain shop step; anything special (unique, set piece, rolled or dropped item) goes back to the bag |
 | `buy` | `slot`, `step` 0..6, `kind?`, `equip?` | buy one specific shop item into the bag (or worn with `equip: true`). Steps 0-4 are plain (Plain/Fine/Superior/Masterwork/Exquisite), 5 is a **rare roll** (3 affixes), 6 a **legendary roll** (5); each step unlocks by time (`econ.items.tiers[step].unlock`). Away from the Armory every purchase is a **Requisition** (arrives after `items-bl.shop.requisition` s; lost and refunded if the hero dies first) |
@@ -123,7 +123,7 @@ per tick are fine; they apply in array order.
 | `surrender` | — | your team loses at once |
 | `toll` | — | Toll of Iron: every enemy unit in your team's field is stunned (`items-bl.toll.stun` s). Team charges (`team.toll`), one back every `toll.cooldown` s |
 
-`reject.reason` values: `'gold'` (not enough gold), `'stock'`, `'maxGear'`, `'stunned'`, `'bag'` (bag full), `'twoHanded'` (off-hand beside a two-hander), `'hero'` (another hero's unique), `'locked'` (tier not unlocked yet),
+`reject.reason` values: `'gold'` (not enough gold), `'maxGear'`, `'stunned'`, `'bag'` (bag full), `'twoHanded'` (off-hand beside a two-hander), `'hero'` (another hero's unique), `'locked'` (an item step not unlocked yet — sends have no locks),
 `'roster'` (unit not in your race), `'dead'` (hero is dead), `'cooldown'`, `'mana'`, `'rank'` (skill
 not learned), `'points'` (no skill point), `'maxRank'`, `'level'` (R before 6), `'belt'` (belt full /
 empty), `'maxMuster'`, `'over'` (match over), `'bad'` (malformed).
@@ -153,14 +153,13 @@ hashed, not snapshotted): they are hints for drawing and sound. Never derive gam
 | `levelUp` | `player, level` | hero levelled (a skill point is now available) |
 | `heroDown` | `player, respawnTick` | hero died; respawns at `respawnTick` |
 | `respawn` | `player, id` | hero is back at the Armory |
-| `queued` | `player, unit` | a send was bought (goes out on the next Pay) |
-| `wave` | `player, field, units` | a Pay released that player's queued sends into `field` |
+| `queued` | `player, unit, auto` | a send was bought (it leaves within 0.5 s) |
+| `wave` | `player, field, units` | sends bought in the last 0.5 s left through the gate into `field` |
 | `pay` | `player, amount, income` | gold paid on the Pay |
 | `bounty` | `player, amount, src` | bounty share paid to a player for a kill |
 | `tide` | `level, field` | a Tide wave entered a field |
 | `leak` | `team, banners, src, unit` | `banners` (may be fractional) torn from `team` by entity `src` |
 | `refund` | `player, amount` | Grave Tithe refund *(M6, Unburied)* |
-| `unlock` | `tier` | a send tier unlocked for everyone |
 | `rising` | `step` | Rising Tide step began (alert) |
 | `muster` | `player, rank` | Muster rank bought |
 | `item` | `player, uid, how, name, rarity` | an item reached the player (`how`: `'buy'` at the Armory, `'requisition'` delivered, `'pick'`) |
@@ -189,7 +188,6 @@ state = {
   v: 1, tick, seed, mode, map,
   rng: { combat: [a,b,c,d], loot: [...], ai: [...], shop: [...] },   // sfc32 streams (do not touch)
   nextId,                        // next entity id
-  unlocked: 1,                   // highest send tier unlocked (1, 2, 3, 4, 6)
   rising: 0,                     // Rising Tide step (0 = not yet)
   tideLevel: 0,                  // level of the last Tide wave
   result: null,                  // { winner, reason, tick } once the match ends
@@ -206,7 +204,7 @@ state = {
 
 ```js
 Team   = { id, banners, bannersMax, field, players: [ids], dealt, toll: { charges, readyAt } }   // dealt = banners torn from enemies (hard-cap tie-break)
-Field  = { id, team, waiting: [WaitingSend], bodies }               // live bodies now (cap: econ.field.cap)
+Field  = { id, team, waiting: [WaitingSend], bodies }               // bodies = live bodies now (cap: econ.field.cap); waiting = the GATE QUEUE ("+N waiting" on the HUD), entering oldest first as space frees
 Player = {
   id, team, name, kind: 'human'|'ai', ai: null | { difficulty },
   race, hero,                    // ids
@@ -214,8 +212,7 @@ Player = {
   rival,                         // player id of the direct rival (whose field you send into)
   gold, income,
   deck: [4 unit ids], auto: [4 bools],
-  stock: [{ unit, n, max, t, every }],    // race roster order; t = ticks toward the next charge, every = restock ticks
-  queued: [unit ids],            // bought this Pay interval, released on the next Pay
+  queued: [unit ids],            // bought in the current 0.5 s grouping window
   muster,                        // 0..3
   equip: { weapon, offhand, head, chest, hands, feet, neck, ring },   // Item | null
   bag: [12 x Item | null],
@@ -304,12 +301,13 @@ All pure, `(state, data, ...) -> value`; safe to call every frame.
 
 | function | returns |
 |---|---|
-| `clock(state, data)` | `{ seconds, payIn, payEvery, payProgress, tideIn, tideLevel, rising, risingIn, capIn, unlocked, nextUnlock: {tier, inTicks} | null }` (all `...In` in ticks) |
-| `sendInfo(state, data, pid, unitId)` | `{ unit, cost, income, stock, max, restockIn, restockEvery, tier, unlocked, unlockIn, canBuy, reason }` — reason as in §3 or null; race traits already applied |
+| `clock(state, data)` | `{ seconds, payIn, payEvery, payProgress, tideIn, tideLevel, rising, risingIn, capIn }` (all `...In` in ticks) |
+| `sendInfo(state, data, pid, unitId)` | one row of the **Muster Hall**: `{ unit, name, tier, role, roleText, cost, income, paybackSeconds (null = adds no income), bodies, armour, dmg, hp, dps, speed, range, leak (banners per purchase), bounty (gold the defender earns), traits, traitsText: [sentences], counters: {strongVs: [armour], weakVs: [dmg], resists: [dmg], lines: ["Hits light armour hard", "Weak to nature", ...]}, vsRival: {dealt, taken} (percent vs the rival hero's current armour class / damage type: the green/amber/red pip), canBuy, reason }` — race traits already applied |
+| `roster(state, data, pid)` | `sendInfo` for all 12 units of the player's race, tier order — the Muster Hall list |
+| `gateQueue(state, fieldId)` | bodies waiting at that field's gate (the HUD's "+N waiting") |
 | `deckInfo(state, data, pid)` | `sendInfo` for each of the 4 deck slots + `auto` flag |
-| `roster(state, data, pid)` | `sendInfo` for every unit of the player's race |
 | `heroInfo(state, data, pid)` | `{ ent, level, xp, xpNext, xpPrev, skillPts, dps, armor, armourClass, dmgType, respawnIn, skills: [{slot, id, name, rank, maxRank, readyIn, cooldown, mp, canCast, canLearn, desc}] , talent: {open, choices:[{id,name,desc}], picked} }` |
-| `teamInfo(state, data, teamId)` | `{ banners, bannersMax, rally }` |
+| `teamInfo(state, data, teamId)` | `{ banners, bannersMax, shown, rally, dealt, waiting (gate queue of the team's field), bodies, cap, toll: {charges, readyIn} }` |
 | `rivalInfo(state, data, pid)` | rival's `{ player, hero, level, hpPct, dmgType, armourClass, deck: deckInfo }` |
 | `gatePreview(state, data, fieldId)` | queued sends of every enemy player heading into that field: `[{ player, unit, count }]` |
 | `gearInfo(state, data, pid)` | Armory summary, one row per slot in `SLOTS` order: `{ slots: [{ slot (index), key ('weapon'...), name, usable, step, stepName, item: ItemView|null, next: {step, stepName, cost, unlocked, unlockIn, canBuy} | null }], cheapest: {slot, key, cost, canBuy} | null, spent }` (kept from M1) |
@@ -327,7 +325,7 @@ All files carry a `_doc` string. The sim reads them only through `sim.data` (fro
 - `data/econ.json` — clock, start, banners, bounty, rally, field (cap, length), tide stats, muster,
   item steps, hero curve + `xpTable` + class multipliers. See the file's `_doc`.
 - `data/units.json` — `traits{id:{desc, ehp}}`, `units{id:{race, name, tier, cost, income, hp, dps,
-  bodies, armour, dmg, range, speed, leak, stock, restock, unlock, bounty, traits[], model}}`.
+  bodies, armour, dmg, range, speed, leak, bounty, traits[], splitInto?, role, model}}` (GENERATED by `tools/build-roster.mjs`: 12 units per race, tiers 1-6; also `tiers` templates, `roles` words, `traits` with `desc`).
   `hp`/`dps` per body; `leak` per purchase (split over bodies). `model` is a look hint for the view.
 - `data/races.json` — `traits{id:{name, desc, ...knobs}}`, `races{id:{name, armour[], trait, hpMult,
   units[]}}`.

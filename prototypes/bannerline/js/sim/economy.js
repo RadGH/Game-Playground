@@ -1,8 +1,11 @@
-// Gold, income, stocks, sends, waves, bounty, Rally, Muster, potions (PLAN §3.1).
+// Gold, income, sends, waves, bounty, Rally, Muster, potions.
 //
-//   Pay every econ.clock.pay s: queued sends leave through the rival's gate, then gold += income.
-//   Stocks: each unit has `max` charges and regains one every `every` ticks (tier 4+ faster during the
-//   Rising Tide). A send costs gold AND a charge, and adds its income at once.
+//   THE SPAM RULES (owner, 2026-10-03): a send is limited ONLY by gold — no stock, no restock, no tier
+//   time locks. It leaves through the rival's gate within GROUP_TICKS (0.5 s grouping, so a mashed key
+//   reads as one wave) and adds its income at once. A field over its body cap holds the extra bodies
+//   in a visible gate queue (fields[].waiting) and lets them in oldest first; a send is never refused
+//   for the cap.
+//   Pay every econ.clock.pay s: gold += income.
 //   Bounty: a kill in your field pays your team pool (split evenly), x (1 + Rally).
 
 import { secToTicks, baseEnt } from './state.js';
@@ -24,47 +27,11 @@ export function rally(state, data, teamId) {
   return Math.min(R.cap, Math.floor(behind / R.behindStep + 1e-9) * R.perStep);
 }
 
-/** Tier-4+ restock speed during the Rising Tide. */
-export function restockRate(state, data, tier) {
-  if (tier < 4 || !state.rising) return 1;
-  return 1 + (data.econ.clock.risingRestock || 0) * state.rising;
-}
-
-export function restockTick(ctx) {
-  const { state, data } = ctx;
-  for (const p of state.players) {
-    for (const s of p.stock) {
-      if (s.n >= s.max) { s.t = 0; continue; }
-      s.t += restockRate(state, data, data.derived.units[s.unit].tier);
-      if (s.t >= s.every) { s.t -= s.every; s.n++; }
-    }
-  }
-}
-
-/** Highest unlocked tier at this tick + emit unlock events. */
-export function unlockTick(ctx) {
-  const { state, data } = ctx;
-  for (const t of data.derived.tiers) {
-    if (t.tier > state.unlocked && state.tick >= secToTicks(t.unlock)) {
-      state.unlocked = t.tier;
-      ctx.emit('unlock', { tier: t.tier });
-    }
-  }
-}
-
-export function stockOf(p, uid) {
-  for (const s of p.stock) if (s.unit === uid) return s;
-  return null;
-}
-
 /** Why `p` cannot buy `uid` right now, or null. */
 export function sendRefusal(state, data, p, uid) {
   if (state.result) return 'over';
   const u = data.derived.units[uid];
   if (!u || u.race !== p.race) return 'roster';
-  if (u.tier > state.unlocked) return 'locked';
-  const s = stockOf(p, uid);
-  if (!s || s.n <= 0) return 'stock';
   if (p.gold < u.cost) return 'gold';
   return null;
 }
@@ -75,23 +42,20 @@ export function buySend(ctx, p, uid, silent = false) {
   const why = sendRefusal(state, data, p, uid);
   if (why) return why;
   const u = data.derived.units[uid];
-  stockOf(p, uid).n--;
   p.gold -= u.cost;
-  // during the Rising Tide tier 4+ restocks faster (pressure); the income a send adds is divided by the
-  // same factor so income per second stays linear (PLAN §3.1: "pressure only")
-  p.income += u.income / restockRate(state, data, u.tier);
+  p.income += u.income;
   p.queued.push(uid);
   p.stats.sendGold += u.cost; p.stats.sends++;
   ctx.emit('queued', { player: p.id, unit: uid, auto: silent });
   return null;
 }
 
-/** Auto-send toggles: buy deck sends whenever stock and gold allow. */
+/** Auto-send toggles: buy deck sends whenever gold allows. */
 export function autoSends(ctx) {
   for (const p of ctx.state.players) {
     for (let i = 0; i < 4; i++) {
       if (!p.auto[i]) continue;
-      let guard = 8;
+      let guard = 40;   // spend what there is (a bound only so one tick cannot loop forever)
       while (guard-- > 0 && buySend(ctx, p, p.deck[i], true) === null) { /* keep buying */ }
     }
   }
@@ -111,10 +75,12 @@ export function sendTarget(state, map, p) {
   return { field, gate: field.gates[gi] };
 }
 
-/** Pay: release waves, then pay income. */
-export function payTick(ctx) {
+/** Sends bought in the last GROUP_TICKS leave together (a 0.5 s grouping window so a mashed key
+ *  reads as one wave, never a wait for the Pay). */
+export const GROUP_TICKS = 10;
+export function releaseTick(ctx) {
   const { state, data, map } = ctx;
-  if (state.tick === 0 || state.tick % payTicks(data) !== 0) return;
+  if (state.tick % GROUP_TICKS !== 0) return;
   for (const p of state.players) {
     if (p.queued.length) {
       const { field, gate } = sendTarget(state, map, p);
@@ -131,6 +97,12 @@ export function payTick(ctx) {
       p.queued.length = 0;
     }
   }
+}
+
+/** Pay: gold += income every econ.clock.pay s. */
+export function payTick(ctx) {
+  const { state, data } = ctx;
+  if (state.tick === 0 || state.tick % payTicks(data) !== 0) return;
   for (const p of state.players) {
     p.gold += p.income;
     ctx.emit('pay', { player: p.id, amount: p.income, income: p.income });
@@ -149,7 +121,7 @@ export function admitWaiting(ctx) {
   const cap = data.econ.field.cap;
   for (const fs of state.fields) {
     let bodies = 0;
-    for (const e of state.ents) if (e.alive && !e._gone && e.field === fs.id && e.kind !== 'hero') bodies++;
+    for (const e of state.ents) if (e.alive && !e._gone && e.field === fs.id && e.kind !== 'hero' && e.kind !== 'pet') bodies++;
     while (fs.waiting.length && bodies < cap) {
       const w = fs.waiting.shift();
       const col = w.slot % 6, row = (w.slot / 6) | 0;

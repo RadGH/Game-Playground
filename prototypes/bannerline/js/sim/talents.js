@@ -23,13 +23,14 @@ export function applyMod(plan, mod) {
     const v = mod[k];
     switch (k) {
       case 'set': for (const p of Object.keys(v)) setPath(plan, p, clone(v[p])); break;
-      case 'add': for (const p of Object.keys(v)) plan[p] = (plan[p] || 0) + v[p]; break;
+      // `projectiles` counts bolts, so a skill without the key already fires one
+      case 'add': for (const p of Object.keys(v)) plan[p] = (plan[p] ?? (p === 'projectiles' ? 1 : 0)) + v[p]; break;
       case 'mul': for (const p of Object.keys(v)) plan[p] = (plan[p] ?? 1) * v[p]; break;
       case 'knock': plan.knock = Object.assign({}, plan.knock || {}, clone(v)); break;
       case 'pullIn': plan.pullIn = clone(v); break;
       case 'pool': plan.pool = clone(v); break;
       case 'statuses': plan.statuses = (plan.statuses || []).concat(clone(v)); break;
-      case 'forms': plan.forms = Object.assign({}, plan.forms || {}, clone(v)); break;
+      case 'forms': break;   // per-form talent mods are applied by planFor while the hero is in that form
       default: throw new Error(`Unknown talent mod key "${k}"`);
     }
   }
@@ -48,7 +49,18 @@ export function planFor(data, p, skillId) {
   if (plan.mult != null) plan.mult *= 1 + R.multPerRank * (rank - 1);
   plan.cooldown *= 1 - R.cdPerRank * (rank - 1);
   const t = data.heroes.heroes[p.hero].talent;
-  if (t && p.talent >= 0 && t.skill === skillId) applyMod(plan, t.choices[p.talent].mod);
+  const tmod = t && p.talent >= 0 && t.skill === skillId ? t.choices[p.talent].mod : null;
+  if (tmod) applyMod(plan, tmod);
+  // a shape-changing form (Druid Briarback) overrides the skill while it lasts: keys in the form's
+  // block replace the base, `null` removes one; the talent's per-form mod applies on top
+  const forms = plan.forms;
+  delete plan.forms;
+  if (p.form && forms && forms[p.form]) {
+    const f = forms[p.form];
+    for (const k of Object.keys(f)) { if (f[k] === null) delete plan[k]; else plan[k] = clone(f[k]); }
+    if (tmod && tmod.forms && tmod.forms[p.form]) applyMod(plan, tmod.forms[p.form]);
+    plan.formOf = p.form;
+  }
   // equipment: skill area and cooldowns (items.js affixes)
   const g = gearStats(data, p);
   if (g.areaPct) {

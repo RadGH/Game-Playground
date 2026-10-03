@@ -45,7 +45,11 @@ export function heroDamageFactor(ctx, hero) {
   const g = gearStats(ctx.data, heroPlayer(ctx, hero));
   return damageFactor(hero) * (1 + g.dmgPct / 100) * nearKeepFactor(ctx, hero);
 }
-export function heroArmor(ctx, hero) { return heroStats(ctx.data, heroPlayer(ctx, hero)).armor; }
+export function heroArmor(ctx, hero) {
+  let a = heroStats(ctx.data, heroPlayer(ctx, hero)).armor;
+  for (const s of hero.statuses) if (s.id === 'shred') a -= 3 * s.stacks;   // traits.js K.shredArmor
+  return a > 0 ? a : 0;
+}
 
 export function xpForLevel(data, level) {
   const t = data.econ.hero.xpTable;

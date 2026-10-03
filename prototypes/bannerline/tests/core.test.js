@@ -71,12 +71,38 @@ test('derived unit stats apply race traits (Cheap Steel, Running Packs)', () => 
   const brute = data.derived.units.brute, raw = data.units.units.brute;
   const cs = data.races.traits.cheap_steel;
   assert.equal(brute.cost, Math.round(raw.cost * cs.cost));
-  assert.equal(brute.stock, raw.stock + cs.extraStock);
-  const chief = data.derived.units.tuskchief;
-  assert.equal(chief.cost, data.units.units.tuskchief.cost, 'tier 6 is above Cheap Steel maxTier');
+  assert.ok(Math.abs(brute.income - raw.income * cs.income) < 1e-9);
+  const ogre = data.derived.units.ash_ogre;
+  assert.equal(ogre.cost, data.units.units.ash_ogre.cost, 'above Cheap Steel maxTier');
   const wolves = data.derived.units.wolf_pair;
-  assert.equal(wolves.restock, data.units.units.wolf_pair.restock * data.races.traits.running_packs.packRestock);
+  assert.ok(Math.abs(wolves.speed - data.units.units.wolf_pair.speed * data.races.traits.running_packs.packSpeed) < 1e-9);
+  assert.equal(data.derived.units.tracker.speed, data.units.units.tracker.speed, 'only packs run faster');
   assert.equal(data.derived.units.levy.hp, data.units.units.levy.hp * data.races.races.freeholds.hpMult);
+});
+
+test('every race fields 12 units, each tier 1-6 offers a choice where it has two or more, top tiers add no income', () => {
+  for (const [rid, race] of Object.entries(data.races.races)) {
+    assert.equal(race.units.length, 12, rid);
+    const us = race.units.map(u => data.units.units[u]);
+    for (const t of [1, 2, 3, 4]) {
+      const tier = us.filter(u => u.tier === t);
+      assert.ok(tier.length >= 2, `${rid} tier ${t} has ${tier.length}`);
+      assert.equal(new Set(tier.map(u => u.role + '/' + u.traits.join('+') + '/' + u.dmg)).size, tier.length, `${rid} tier ${t}: two choices are the same unit`);
+    }
+    assert.equal(us.filter(u => u.tier === 6).length, 1, `${rid} champion`);
+    for (const u of us) if (u.tier >= 5) assert.equal(u.income, 0, `${u.name} adds income`);
+    // income per gold falls with tier
+    const ipg = t => { const x = us.filter(u => u.tier === t); return x.reduce((s, u) => s + u.income / u.cost, 0) / x.length; };
+    for (let t = 2; t <= 5; t++) if (us.some(u => u.tier === t)) assert.ok(ipg(t) < ipg(t - 1), `${rid}: income per gold at tier ${t}`);
+    for (const u of us) assert.ok(u.model && (u.model.chibi2 || u.model.creature), `${u.name} has a look`);
+  }
+});
+
+test('data/units.json + races.json rosters are up to date with tools/build-roster.mjs', async () => {
+  const { execFileSync } = await import('node:child_process');
+  const { join } = await import('node:path');
+  const { ROOT } = await import('./_sim.mjs');
+  execFileSync(process.execPath, [join(ROOT, 'tools', 'build-roster.mjs'), '--check'], { stdio: 'pipe' });
 });
 
 test('map: two fields side by side, gate at the top, flow leads every cell to the Keep', () => {

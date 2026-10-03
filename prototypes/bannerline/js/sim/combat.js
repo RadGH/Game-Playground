@@ -8,7 +8,7 @@
 import { q1, dist2 } from './mathx.js';
 import { liveEnt, addTimer } from './state.js';
 import { takenFactor, damageFactor, attackSpeedFactor, isStunned } from './statuses.js';
-import { onUnitHurt, onUnitKilled, unitDamageFactor, incomingTraitFactor, beforeUnitDeath, onHitHero } from './traits.js';
+import { onUnitHurt, onUnitKilled, unitDamageFactor, incomingTraitFactor, beforeUnitDeath, onHitHero, onUnitDeath } from './traits.js';
 import { payKill } from './economy.js';
 import { heroDied, heroArmor, weaponHit, heroDamageFactor, heroPlayer } from './heroes.js';
 import { pulseAround, applyStatus } from './skills.js';
@@ -49,7 +49,7 @@ export function dealDamage(ctx, src, dst, amount, dmgType, opts = {}) {
       const vc = gearStats(data, heroPlayer(ctx, src)).vsChampion;
       if (vc) dmg *= 1 + vc / 100;
     }
-    dmg *= incomingTraitFactor(ctx, dst, src, dmgType);
+    dmg *= incomingTraitFactor(ctx, dst, src, dmgType, opts);
   }
   if (!(dmg > 0)) return 0;
   dst.hp -= dmg;
@@ -95,15 +95,14 @@ function heroHurtBuffs(ctx, hero, src) {
 export function kill(ctx, dst, src) {
   const { state } = ctx;
   if (dst.kind === 'hero') { heroDied(ctx, dst, src); if (src) onUnitKilled(ctx, src, dst); return; }
-  if (beforeUnitDeath(ctx, dst)) return;   // e.g. `rise` brought it back
+  if (dst.kind !== 'pet' && beforeUnitDeath(ctx, dst)) return;   // e.g. `rise` brought it back
   dst.hp = 0;
   dst.alive = false;
   dst._gone = true;
   dst.act = 'dead'; dst.actTick = state.tick;
   ctx.emit('death', { id: dst.id, killer: src ? src.id : -1, x: dst.x, z: dst.z });
   ctx.emit('remove', { id: dst.id, why: 'killed' });
-  payKill(ctx, dst, src);
-  lootForKill(ctx, dst);
+  if (dst.kind !== 'pet') { payKill(ctx, dst, src); lootForKill(ctx, dst); onUnitDeath({ ...ctx, dealDamage }, dst); }
   if (src) onUnitKilled(ctx, src, dst);
 }
 

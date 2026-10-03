@@ -17,6 +17,7 @@ import { payTicks, sendRefusal, musterCost } from '../economy.js';
 import { SLOTS, nextStepFor, itemScore, slotUsable } from '../items.js';
 import { learnRefusal, castRefusal } from '../skills.js';
 import { planFor } from '../talents.js';
+import { isHidden } from '../traits.js';
 import { sortBy } from '../order.js';
 
 const LEARN_ORDER = ['R', 'Q', 'W', 'E', 'D'];
@@ -79,17 +80,20 @@ function economy(ctx, p, K, rng, cmd) {
   // sends
   const roster = data.races.races[p.race].units.map(uid => data.derived.units[uid]);
   const pressRef = Math.max(...roster.map(pressure));
-  let budget = gold * range(rng, K.greed[0], K.greed[1]);
-  const stock = {};
-  for (const s of p.stock) stock[s.unit] = s.n;
-  for (let guard = 0; guard < 40; guard++) {
-    const avail = roster.filter(u => u.cost <= budget && u.cost <= gold && stock[u.id] > 0 && u.tier <= state.unlocked);
+  // each Pay splits the purse: `greed` to sends now, the rest into an item fund that accrues until it
+  // buys a gear step (without it the remainder never grows past a potion)
+  const greed = range(rng, K.greed[0], K.greed[1]);
+  const fresh = Math.max(0, gold - (p.ai.fund || 0));
+  p.ai.fund = Math.min(gold, (p.ai.fund || 0) + fresh * (1 - greed));
+  let budget = Math.max(0, gold - p.ai.fund);
+  for (let guard = 0; guard < 60; guard++) {
+    const avail = roster.filter(u => u.cost <= budget && u.cost <= gold);
     if (!avail.length) break;
     const scored = sortBy(avail.map(u => ({ id: u.id, u, s: -(0.5 * (u.income / u.cost) / 0.17 + 0.5 * pressure(u) / pressRef + K.noise * next(rng)) })), x => x.s);
     const u = scored[0].u;
-    if (sendRefusal(state, data, { ...p, gold }, u.id) && sendRefusal(state, data, { ...p, gold }, u.id) !== 'stock') break;
+    if (sendRefusal(state, data, { ...p, gold }, u.id)) break;
     cmd('send', { unit: u.id });
-    gold -= u.cost; budget -= u.cost; stock[u.id]--;
+    gold -= u.cost; budget -= u.cost;
   }
   // gear: cheapest unlocked shop step first while gold stays above a potion (the econ sim's buyItems);
   // `upgrade` trades in the old step, so the local copy just tracks steps
@@ -105,9 +109,9 @@ function economy(ctx, p, K, rng, cmd) {
       if (st >= T.length || state.tick < T[st].unlock * 20) continue;
       if (!best || T[st].cost < best.cost) best = { slot: sl, step: st, cost: T[st].cost };
     }
-    if (!best || gold - best.cost < P.cost) break;
+    if (!best || best.cost > p.ai.fund || gold < best.cost) break;
     cmd('upgrade', { slot: best.slot });
-    gold -= best.cost; steps[best.slot] = best.step;
+    gold -= best.cost; p.ai.fund -= best.cost; steps[best.slot] = best.step;
   }
 }
 
@@ -143,7 +147,7 @@ function heroPlay(ctx, p, K, rng, cmd) {
   const hero = liveEnt(state, p.heroEnt);
   if (!hero) return;
   const f = map.fields[hero.field];
-  const foes = state.ents.filter(e => e.alive && !e._gone && e.field === hero.field && e.team !== hero.team && e.kind !== 'hero');
+  const foes = state.ents.filter(e => e.alive && !e._gone && e.field === hero.field && e.team !== hero.team && e.kind !== 'hero' && !isHidden(e, hero.x, hero.z));
   const hpPct = hero.hp / hero.hpMax;
   if (hpPct < 0.35 && p.belt > 0 && state.tick >= p.drinkAt) cmd('drink');
   if (K.retreatAt > 0 && hpPct < K.retreatAt && p.belt === 0) {

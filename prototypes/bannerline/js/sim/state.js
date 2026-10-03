@@ -28,7 +28,7 @@ export function createState(config, data, map) {
     endless: !!rules.endless,
     teams: [0, 1].map(t => ({ id: t, banners: bannersMax, bannersMax, field: t, players: [], dealt: 0 })),
     players: [], fields: map.fields.map(f => ({ id: f.id, team: f.team, waiting: [], bodies: 0 })),
-    ents: [], timers: [], nextTimer: 1, nextGroup: 1,
+    ents: [], timers: [], nextTimer: 1, nextGroup: 1, zones: [], nextZone: 1,
   };
 
   players.forEach((pc, id) => {
@@ -49,7 +49,7 @@ export function createState(config, data, map) {
       queued: [], muster: 0, gear: new Array(data.econ.items.slots).fill(-1),
       level: 1, xp: 0, skillPts: 1,
       skills: ['Q', 'W', 'E', 'D', 'R'].filter(s => heroDef.slots[s]).map(s => ({ slot: s, id: heroDef.slots[s], rank: 0, readyAt: 0 })),
-      talent: -1, belt: data.econ.items.potion.belt, drinkAt: 0, surrendered: false,
+      talent: -1, oil: null, belt: data.econ.items.potion.belt, drinkAt: 0, surrendered: false,
       stats: { sendGold: 0, sends: 0, itemGold: 0, potionGold: 0, musterGold: 0, kills: 0, deaths: 0, leaked: 0, dealt: 0, bounty: 0, incomeAt: [], goldAt: [] },
     };
     state.players.push(p);

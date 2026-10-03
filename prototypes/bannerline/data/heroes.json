@@ -130,6 +130,63 @@
      }
     ]
    }
+  },
+  "pyromancer": {
+   "name": "Pyromancer",
+   "dmgType": "fire",
+   "armourClass": "spectral",
+   "melee": false,
+   "range": 8,
+   "attackEvery": 1.1,
+   "moveSpeed": 5,
+   "radius": 0.55,
+   "aggro": 9,
+   "mp": 80,
+   "mpPerLevel": 8,
+   "mpRegen": 1.6,
+   "mpRegenPerLevel": 0.15,
+   "slots": {
+    "Q": "firebolt",
+    "W": "fire_wall",
+    "E": "flashover",
+    "D": "ember_stride",
+    "R": "meteor"
+   },
+   "desc": "Ranged caster. Stacks Burning on crowds and sets them off.",
+   "talent": {
+    "skill": "firebolt",
+    "choices": [
+     {
+      "id": "cinder_spray",
+      "name": "Cinder Spray",
+      "desc": "Firebolt throws three bolts in a fan, each for 65% of the damage.",
+      "mod": {
+       "add": {
+        "projectiles": 2
+       },
+       "set": {
+        "spread": 0.35
+       },
+       "mul": {
+        "mult": 0.65
+       }
+      }
+     },
+     {
+      "id": "slow_burner",
+      "name": "Slow Burner",
+      "desc": "Firebolt leaves a 2 m patch of fire for 3 s where it lands.",
+      "mod": {
+       "pool": {
+        "seconds": 3,
+        "radius": 2,
+        "power": 0.15,
+        "element": "fire"
+       }
+      }
+     }
+    ]
+   }
   }
  },
  "skills": {
@@ -223,6 +280,115 @@
     "movePct": -0.3
    },
    "desc": "Spin 5 times over 1.6 s, striking everything within 5.5 m for 20% weapon damage each spin, pulling it in and leaving it Bleeding. You move 30% slower while spinning."
+  },
+  "firebolt": {
+   "name": "Firebolt",
+   "shape": "bolt",
+   "element": "fire",
+   "mult": 0.38,
+   "range": 18,
+   "splash": 2.6,
+   "cooldown": 4,
+   "mp": 8,
+   "stack": {
+    "status": "burn",
+    "add": 1,
+    "max": 5
+   },
+   "statusMult": 0.05,
+   "desc": "Hurl a bolt up to 18 m for 38% weapon damage that splashes 2.6 m and adds a stack of Burning (5% weapon damage a second per stack, up to 5)."
+  },
+  "fire_wall": {
+   "name": "Burning Line",
+   "shape": "ground",
+   "element": "fire",
+   "mult": 0.25,
+   "range": 15,
+   "radius": 1.4,
+   "cooldown": 13,
+   "mp": 18,
+   "line": {
+    "length": 10,
+    "width": 2,
+    "every": 2,
+    "across": true
+   },
+   "pool": {
+    "seconds": 5,
+    "radius": 1.6,
+    "power": 0.04,
+    "element": "fire"
+   },
+   "stack": {
+    "status": "burn",
+    "add": 2,
+    "max": 5
+   },
+   "statusMult": 0.05,
+   "desc": "Raise a 10 m line of flame up to 15 m away across your aim: 25% weapon damage and 2 Burning stacks to everything in it, then it burns for 5 s (4% weapon damage a second)."
+  },
+  "flashover": {
+   "name": "Flashover",
+   "shape": "ground",
+   "element": "fire",
+   "mult": 0.28,
+   "range": 15,
+   "radius": 6,
+   "cooldown": 12,
+   "mp": 16,
+   "detonate": {
+    "types": [
+     "burn"
+    ],
+    "share": 0.6,
+    "keep": 1
+   },
+   "desc": "Ignite a 6 m area up to 15 m away for 28% weapon damage and set off Burning: 60% of each target's remaining burn damage at once (one stack stays)."
+  },
+  "ember_stride": {
+   "name": "Cinder Stride",
+   "shape": "self",
+   "element": "fire",
+   "mult": 0.06,
+   "cooldown": 20,
+   "mp": 16,
+   "trail": {
+    "seconds": 8,
+    "every": 0.3,
+    "radius": 1.8,
+    "burns": 2.5,
+    "step": 1.4
+   },
+   "selfBuff": {
+    "name": "Cinder Stride",
+    "seconds": 8,
+    "movePct": 0.2
+   },
+   "pool": {
+    "seconds": 4,
+    "radius": 3,
+    "power": 0.09,
+    "element": "fire"
+   },
+   "desc": "For 8 s move 20% faster and leave burning ground behind you (6% weapon damage a second); the spot you start from burns for 4 s (9% a second)."
+  },
+  "meteor": {
+   "name": "Fallstone",
+   "shape": "ground",
+   "element": "fire",
+   "mult": 0.73,
+   "range": 18,
+   "radius": 8,
+   "cooldown": 22,
+   "mp": 30,
+   "stack": {
+    "status": "burn",
+    "add": 3,
+    "max": 5
+   },
+   "statusMult": 0.03,
+   "delay": 0.8,
+   "desc": "Call a stone down on an 8 m area up to 18 m away after a short delay: 73% weapon damage and 3 Burning stacks."
   }
  }
 }

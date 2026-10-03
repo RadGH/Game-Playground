@@ -27,7 +27,14 @@ const SKILL_KEYS = new Set(['name', 'shape', 'element', 'mult', 'radius', 'reach
   'projectiles', 'spread', 'splash', 'pierce', 'repeats', 'line', 'pet', 'count', 'form', 'place',
   // effects
   'status', 'statuses', 'knock', 'pullIn', 'taunt', 'selfBuff', 'pool', 'detonate', 'empowerNext', 'bonusIf', 'pen',
-  'trail', 'heal']);
+  'trail', 'heal', 'stack', 'statusMult', 'delay']);
+const SUB_KEYS = {
+  line: ['length', 'width', 'every', 'across'],
+  pool: ['seconds', 'radius', 'power', 'element', 'slow'],
+  detonate: ['types', 'share', 'keep'],
+  trail: ['seconds', 'every', 'radius', 'burns', 'step'],
+  stack: ['status', 'add', 'max'],
+};
 const SELFBUFF_KEYS = new Set(['name', 'seconds', 'movePct', 'resistPerFoe', 'every', 'resist', 'damage', 'haste', 'regen']);
 const TAUNT_KEYS = new Set(['radius', 'seconds', 'perTaunt', 'perTauntCap']);
 const KNOCK_KEYS = new Set(['push', 'stagger']);
@@ -52,6 +59,15 @@ const HEROES = {
     skillScale: 0.25,
     desc: 'Melee bruiser. Holds a crowd in place and cuts it down.',
   },
+  pyromancer: {
+    name: 'Pyromancer', dmgType: 'fire', armourClass: 'spectral', melee: false,
+    range: 8, attackEvery: 1.1, moveSpeed: 5.0, radius: 0.55, aggro: 9,
+    mp: 80, mpPerLevel: 8, mpRegen: 1.6, mpRegenPerLevel: 0.15,
+    slots: { Q: 'firebolt', W: 'fire_wall', E: 'flashover', D: 'ember_stride', R: 'meteor' },
+    talentSkill: 'firebolt', talentTier: '1',
+    skillScale: 0.25,
+    desc: 'Ranged caster. Stacks Burning on crowds and sets them off.',
+  },
 };
 
 // Bannerline descriptions (numbers here must match the copied rows; tests/skills.test.js checks the
@@ -63,10 +79,17 @@ const DESC = {
   warcry: 'Gain Might (+30% damage for 12 s). Enemies within 10 m attack you for 3 s; each one adds 5% to Might (up to +25%).',
   iron_resolve: 'For 10 s take 6% less damage per enemy within 6 m (up to 36%); every 4th hit you take releases a 4 m shockwave for {every} weapon damage.',
   whirlwind: 'Spin 5 times over 1.6 s, striking everything within 5.5 m for {mult} weapon damage each spin, pulling it in and leaving it Bleeding. You move 30% slower while spinning.',
+  firebolt: 'Hurl a bolt up to {range} m for {mult} weapon damage that splashes 2.6 m and adds a stack of Burning ({status} weapon damage a second per stack, up to 5).',
+  fire_wall: 'Raise a 10 m line of flame up to {range} m away across your aim: {mult} weapon damage and 2 Burning stacks to everything in it, then it burns for 5 s ({pool} weapon damage a second).',
+  flashover: 'Ignite a 6 m area up to {range} m away for {mult} weapon damage and set off Burning: 60% of each target\'s remaining burn damage at once (one stack stays).',
+  ember_stride: 'For 8 s move 20% faster and leave burning ground behind you ({mult} weapon damage a second); the spot you start from burns for 4 s ({pool} a second).',
+  meteor: 'Call a stone down on an 8 m area up to {range} m away after a short delay: {mult} weapon damage and 3 Burning stacks.',
 };
 const TALENT_DESC = {
   reaping_arc: 'Cleave becomes a wide 220° sweep reaching 5.5 m that knocks enemies back 1.5 m.',
   hooked_edge: 'Cleave drags everything it hits 2 m toward you.',
+  cinder_spray: 'Firebolt throws three bolts in a fan, each for 65% of the damage.',
+  slow_burner: 'Firebolt leaves a 2 m patch of fire for 3 s where it lands.',
 };
 
 // Statuses the runtime knows (PLAN §6.3: 9). Numbers are Bannerline's.
@@ -87,6 +110,11 @@ const RANKS = {
   max: 3, basicLevels: [1, 3, 5], ultLevels: [6, 11, 16], multPerRank: 0.2, cdPerRank: 0.1, talentLevel: 6,
 };
 
+// Bannerline-only additions merged onto a Farhold row before it is normalised.
+const OVERRIDES = {
+  meteor: { delay: 0.8 },
+};
+
 // ── normalise + validate ───────────────────────────────────────────────────────────────────────
 function fail(msg) { console.error('build-hero-skills: ' + msg); process.exit(1); }
 
@@ -104,14 +132,19 @@ function normaliseSkill(id, src, scale = 1) {
   if (out.selfBuff) for (const k of Object.keys(out.selfBuff)) if (!SELFBUFF_KEYS.has(k)) fail(`skill ${id}: selfBuff.${k} unknown`);
   if (out.taunt) for (const k of Object.keys(out.taunt)) if (!TAUNT_KEYS.has(k)) fail(`skill ${id}: taunt.${k} unknown`);
   if (out.knock) for (const k of Object.keys(out.knock)) if (!KNOCK_KEYS.has(k)) fail(`skill ${id}: knock.${k} unknown`);
+  for (const [k, keys] of Object.entries(SUB_KEYS)) if (out[k]) for (const sk of Object.keys(out[k])) if (!keys.includes(sk)) fail(`skill ${id}: ${k}.${sk} unknown`);
+  if (out.stack && !STATUSES[out.stack.status]) fail(`skill ${id}: stack status "${out.stack.status}" unknown`);
   if (out.status && !STATUSES[out.status]) fail(`skill ${id}: status "${out.status}" unknown`);
   if (out.bonusIf) for (const b of out.bonusIf) if (!BONUS_WHEN.test(b.when)) fail(`skill ${id}: bonusIf "${b.when}" unknown`);
   const r2 = v => Math.round(v * 100) / 100;
   if (out.mult != null) out.mult = r2(out.mult * scale);
   if (out.selfBuff && out.selfBuff.every && out.selfBuff.every.mult != null) out.selfBuff.every.mult = r2(out.selfBuff.every.mult * scale);
+  if (out.statusMult != null) out.statusMult = r2(out.statusMult * scale);
+  if (out.pool && out.pool.power != null) out.pool = { ...out.pool, power: r2(out.pool.power * scale) };
   if (!DESC[id]) fail(`skill ${id}: no Bannerline description in DESC`);
   const pc = v => `${Math.round(v * 100)}%`;
-  out.desc = DESC[id].replace('{mult}', out.mult != null ? pc(out.mult) : '').replace('{every}', out.selfBuff?.every ? pc(out.selfBuff.every.mult) : '');
+  out.desc = DESC[id].replace('{mult}', out.mult != null ? pc(out.mult) : '').replace('{every}', out.selfBuff?.every ? pc(out.selfBuff.every.mult) : '')
+    .replace('{status}', out.statusMult != null ? pc(out.statusMult) : '').replace('{pool}', out.pool ? pc(out.pool.power) : '').replace('{range}', out.range != null ? String(out.range) : '');
   if (out.desc.includes('{')) fail(`skill ${id}: unfilled placeholder in description`);
   return out;
 }
@@ -137,7 +170,7 @@ for (const [hid, h] of Object.entries(HEROES)) {
   for (const sid of Object.values(h.slots)) {
     const row = farhold.skills[sid];
     if (!row) fail(`hero ${hid}: Farhold skill "${sid}" missing`);
-    out.skills[sid] = normaliseSkill(sid, row, h.skillScale ?? 1);
+    out.skills[sid] = normaliseSkill(sid, { ...row, ...(OVERRIDES[sid] || {}) }, h.skillScale ?? 1);
   }
   const tier = farhold.skills[h.talentSkill]?.talents?.[h.talentTier];
   if (!tier) fail(`hero ${hid}: talent tier ${h.talentTier} of ${h.talentSkill} missing`);

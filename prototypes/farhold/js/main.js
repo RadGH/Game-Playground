@@ -1592,7 +1592,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     if (mech.intercept(plan, echo ? null : i)) { hud.setPlayer(player); return plan; }
     const castFrom = { x: control.x, z: control.z, yaw: control.yaw };
     const hpBefore = player.hp;
-    const a = aim();
+    // R28 — a delayed copy (a beam's wind-up) lands where it was AIMED, not where you look later
+    const a = plan.frozenAim || aim();
     const from = new THREE.Vector3(a.x + a.dx * 0.6, a.y - 0.2, a.z + a.dz * 0.6);
     /**
      * R22 — THE SECOND DOUBLE-COUNT ON THE SAME CAST.
@@ -1675,7 +1676,13 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       const pts = [];
       for (let t = 2; t <= plan.range; t += 3) pts.push(new THREE.Vector3(a.x + a.dx * t, terrain.heightAt(a.x + a.dx * t, a.z + a.dz * t) + 0.1, a.z + a.dz * t));
       if (pts.length) spellfx.aoe({ points: pts, element: plan.element, stagger: 0.01 });
-      const strikeOnly = { ...plan, beamFired: true, sub: true, place: null, pool: null, selfBuff: null, summon: null, taunt: null, command: null, barrier: null, ward: null, counter: null, imbue: null, link: null, burst: null, again: null, afterimage: null, empowerNext: null };
+      // the strike only: every self-ish key already ran on this cast and must not run again
+      const strikeOnly = {
+        ...plan, beamFired: true, sub: true, frozenAim: { ...a }, place: null, pool: null, selfBuff: null, summon: null, taunt: null,
+        command: null, barrier: null, ward: null, counter: null, imbue: null, link: null, burst: null, again: null, afterimage: null,
+        empowerNext: null, empowerRepeat: null, wall: null, rewind: null, cleanse: null, revive: null, healPets: null,
+        overflowBarrier: null, allyStatus: null, corpseBurst: null, clusters: null, dashWith: null, resetOn: null,
+      };
       setTimeout(() => { if (state.running) castSkill(strikeOnly, { echo: true }); }, plan.delay * 1000);
     } else if (plan.kind === 'beam') {
       // a line out from you: everything within `width` of the ray, out to `range`

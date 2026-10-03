@@ -64,10 +64,15 @@ import { VOCAB, VOCAB_KEYS, PENDING, applyMod, describeVocab, keysOf, mechRules,
  * lookup falls back to the registry. A caller that passes a row explicitly wins.
  */
 const ROWS = { skills: {}, statuses: {} };
+const DESCRIBED = new WeakMap();
 export function registerSkillRows(skills = {}, statuses = {}) {
   ROWS.skills = skills || {};
   ROWS.statuses = statuses || {};
+  // ~1,400 node lines: written once per table (and again only if rows were added to it)
+  const n = Object.keys(ROWS.skills).length;
+  if (DESCRIBED.get(ROWS.skills) === n) return;
   for (const row of Object.values(ROWS.skills)) describeRowTalents(row);
+  DESCRIBED.set(ROWS.skills, n);
 }
 export function skillRow(id) { return ROWS.skills[id] || null; }
 export function registeredRows() { return ROWS.skills; }

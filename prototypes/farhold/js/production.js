@@ -506,6 +506,7 @@ export function createProduction({
     const srows = new Map((stores?.overview?.() || []).map(p => [p.id, p]));
     const prows = new Map((grid?.overview?.() || []).map(n => [n.id, n]));
     const lrows = new Map((logistics?.pending?.() || []).map(l => [l.id, l]));
+    let drillRows = null;
     for (const p of rawProblems()) {
       const age = lastAt - (since.get(p.key) ?? lastAt);
       if (age < p.grace) continue;
@@ -514,7 +515,8 @@ export function createProduction({
         const m = mrows.get(p.id); const d = diagnose(p.id);
         text = `${m.name}: ${d.text}.`; fix = d.fix; at = { x: m.x, z: m.z };
       } else if (p.kind === 'drill') {
-        const d = drows.get(p.id); const row = drills().find(x => x.id === p.id);
+        // R28 review — the drill table once per call, not once per drill alert
+        const d = drows.get(p.id); const row = (drillRows || (drillRows = drills())).find(x => x.id === p.id);
         text = `${d.name} (${d.resourceName}): ${d.limit}.`; fix = row?.fix || '';
       } else if (p.kind === 'store') {
         const s = srows.get(p.id);

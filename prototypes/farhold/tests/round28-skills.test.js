@@ -597,3 +597,36 @@ test('a status with a lockout lands on the same body at most once per lockout (T
   assert.equal(applied.length, 3, 'the lockout never ran out');
   assert.match(DATA.skills.thornlash.desc, /once per target every 6s/);
 });
+
+// ─────────────────────────────────────────────────────────────── review fixes (R28 code review)
+
+test('review: a charge slot keeps a cooldown cut (refresh, a cut, a refund all reach the recharge clock)', () => {
+  const { player, rpg } = bar('warrior');
+  const data = { ...DATA, skills: { ...DATA.skills, zz_charged: { name: 'Charged', shape: 'around', element: 'physical', mult: 1, radius: 3, cooldown: 10, mp: 0, charges: { max: 2 } } },
+    classes: { ...DATA.classes, zz: ['zz_charged', null, null, null, null, null] } };
+  player.classId = 'zz';
+  const skills = createSkillBar({ data, player, rpg });
+  skills.use(0); skills.use(0);
+  assert.equal(skills.slots[0].charges, 0);
+  const before = skills.slots[0].chargeT;
+  skills.refresh(4);
+  skills.update(0.01);
+  assert.ok(skills.slots[0].chargeT < before - 3.9, `refresh(4) was thrown away: ${before} -> ${skills.slots[0].chargeT}`);
+  assert.ok(skills.slots[0].ready < before - 3.9, 'the slot still shows the old wait');
+  registerSkillRows(DATA.skills, DATA.statuses);
+});
+
+test('review: the talented row is cached per slot until the form or the picks change', () => {
+  const { player, skills } = bar('druid');
+  const a = skills.rowFor(0), b = skills.rowFor(0);
+  assert.equal(a, b, 'state() folds the talents again every call');
+  skills.use(2);                                  // Briarback: the form changed
+  assert.notEqual(skills.rowFor(0), a);
+  assert.equal(skills.rowFor(0).name, 'Bramble Gore');
+});
+
+test('review: a temporary summon never comes back, and a refused revive keeps its place', () => {
+  const pets = src('js/pets.js');
+  assert.match(pets, /if \(p\.owner && !p\.temporary\) \{\s*fallen\.push/, 'a fallen temporary summon is queued to revive as a permanent follower');
+  assert.match(pets, /\} else \{[\s\S]{0,200}fallen\.push\(f\);/, 'reviveAll drops a follower whose summon was refused');
+});

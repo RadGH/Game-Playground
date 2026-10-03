@@ -299,8 +299,13 @@ export function describeSkill(skill, statuses = {}, { cost = true, unlockAt = 1,
  *
  * Safe to run more than once: nothing here reads the old `desc`.
  */
+const DESCRIBED_SKILLS = new WeakMap();
 export function describeSkills(data) {
   if (!data?.skills) return data;
+  // once per table (and again if rows were added): every bar built over the same data shares it
+  const n = Object.keys(data.skills).length;
+  if (DESCRIBED_SKILLS.get(data.skills) === n) return data;
+  DESCRIBED_SKILLS.set(data.skills, n);
   for (const skill of Object.values(data.skills)) {
     skill.desc = describeSkill(skill, data.statuses || {}, { skills: data.skills });
     /**
@@ -598,10 +603,18 @@ export function createSkillBar({ data, player, rpg, unlocks = null, canSummon = 
     return base ? resolveForm(base, player) : null;
   }
   /** …and with this character's talents folded in (for charges, cooldown, cost and the card). */
+  /**
+   * Cached per slot on (the forms you are in, this skill's picks): `state()` runs every frame and
+   * asks for charges, cost and cooldown on six slots, which was ~18 talent folds a frame.
+   */
   function talentedRow(s) {
+    const picks = player.skillTalents?.[s.id];
+    const key = `${formIds(player).join(',')}|${picks ? JSON.stringify(picks) : ''}|${data.skills[s.id] ? 1 : 0}`;
+    if (s._tr && s._tr.key === key && s._tr.base === data.skills[s.id]) return s._tr.row;
     const row = formRow(s);
-    if (!row) return null;
-    return talentPlan(player, s.id, { ...row, kind: row.shape }, data.skills[s.id]);
+    const out = row ? talentPlan(player, s.id, { ...row, kind: row.shape }, data.skills[s.id]) : null;
+    s._tr = { key, base: data.skills[s.id], row: out };
+    return out;
   }
   /** Max charges for a slot, if it has any (a T3/T4 talent can add them). */
   function maxCharges(s) {
@@ -623,6 +636,19 @@ export function createSkillBar({ data, player, rpg, unlocks = null, canSummon = 
       if (req.cut) cutCooldowns(req.cut, req.from || req.cut.from);
     }
   }
+  /**
+   * Take seconds off a slot's cooldown. A CHARGE slot's visible `ready` is rebuilt from `chargeT`
+   * every frame, so a cut written to `ready` alone was thrown away — the recharge clock is cut instead.
+   */
+  function cutSlot(s, secsOff, { half = false } = {}) {
+    if (s.charges != null && s.chargeT > 0) {
+      s.chargeT = half ? s.chargeT * 0.5 : Math.max(0, s.chargeT - secsOff);
+      if (s.charges <= 0) s.ready = s.chargeT;
+      return;
+    }
+    s.ready = half ? s.ready * 0.5 : Math.max(0, s.ready - secsOff);
+  }
+
   /** `cutCooldown`: one named skill, 'self', every 'others', or every follower ability. */
   function cutCooldowns(c, from = null) {
     const secsOff = c.seconds ?? 1;
@@ -633,10 +659,10 @@ export function createSkillBar({ data, player, rpg, unlocks = null, canSummon = 
       const hit = c.skill === 'others' ? s.id !== (from || c.from) : c.skill === 'self' ? s.id === (from || c.from) : s.id === c.skill;
       if (!hit) continue;
       any = true;
-      s.ready = c.half ? s.ready * 0.5 : Math.max(0, s.ready - secsOff);
+      cutSlot(s, secsOff, { half: !!c.half });
     }
     // the named skill is not on this bar: `orSelf` cuts the skill that asked instead (plan G5)
-    if (!any && c.orSelf && from) { const me = slots.find(s => s.id === from); if (me) me.ready = Math.max(0, me.ready - c.orSelf); }
+    if (!any && c.orSelf && from) { const me = slots.find(s => s.id === from); if (me) cutSlot(me, c.orSelf); }
   }
 
   function update(dt, { fighting = false } = {}) {
@@ -663,7 +689,7 @@ export function createSkillBar({ data, player, rpg, unlocks = null, canSummon = 
     const owed = player.cooldownRefund;
     if (owed && owed.seconds > 0) {
       const s = slots.find(x => x.id === owed.skill);
-      if (s) s.ready = Math.max(0, s.ready - owed.seconds);
+      if (s) cutSlot(s, owed.seconds);
       player.cooldownRefund = null;
     }
     drainQueue();
@@ -1013,7 +1039,7 @@ export function createSkillBar({ data, player, rpg, unlocks = null, canSummon = 
   }
 
   /** Cut every cooldown by `n` seconds — the `skill_refresh` legendary does this on a kill. */
-  function refresh(n) { for (const s of slots) s.ready = Math.max(0, s.ready - n); }
+  function refresh(n) { for (const s of slots) cutSlot(s, n); }
 
   /** R28 — the card for a slot in its CURRENT form, cached per form. */
   function view(s) {

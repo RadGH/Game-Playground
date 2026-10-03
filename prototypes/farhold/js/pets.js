@@ -502,7 +502,9 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
            * companion became dismissible for the same reason, which is the exact thing the "they
            * came with you" rule exists to prevent.
            */
-          if (p.owner) {
+          // R28 — a temporary summon (a decoy, a wisp, a shade) is simply gone: it never comes back,
+          // and above all never as a permanent follower holding a slot
+          if (p.owner && !p.temporary) {
             fallen.push({
               defId: p.defId, owner: p.owner, left: cfg.reviveSeconds ?? 14,
               origin: p.origin || 'summon', uid: p.id, name: p.name || null,
@@ -872,6 +874,10 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
         if (f.uid) made[0].id = f.uid;
         made[0].hp = Math.max(1, Math.round(made[0].maxHp * share));
         out.push(made[0]);
+      } else {
+        // refused (the follower gate, the body cap): put it back on its revive clock, uid and all,
+        // so a mercenary's contract still finds it when it returns
+        fallen.push(f);
       }
     }
     return out;

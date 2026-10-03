@@ -392,7 +392,6 @@ export function createSkillRuntime(env) {
         const res = env.rpg.strike(P(), e, field.rng, { multiplier: plan.mult, element: plan.element, skill: plan.skill?.id, applyStatus: env.statusHook, rules: plan.rules, noDamage: !!plan.noDamage });
         field.land(e, res, { strike: knockShape(plan.knock), fromX: C().x, fromZ: C().z, element: plan.element });
         opts.onHit?.(e, res);
-        env.reportHit(e, res);
         if (res.dead) field.kill(e);
         if (plan.afterimage && k > 0) echoFrom(plan, env.aim(), { x: ox, z: oz, yaw: ang + Math.PI }, plan.afterimage.mult ?? 0.5);
       }));
@@ -464,8 +463,8 @@ export function createSkillRuntime(env) {
     }
     // every body near the path, once (the one you stop at takes its own hit below)
     if (!d.leap && !d.noPath && len > 0.5) {
-      const hits = field.strikeSegment(from.x, from.z, to.x, to.z, plan.splash || 2, P(), { ...opts, falloff: 0.8 }).filter(h => h.enemy !== struck);
-      for (const h of hits) env.reportHit(h.enemy, h.result);
+      // `opts.onHit` already reports each hit; the body you stop at is struck below, once
+      field.strikeSegment(from.x, from.z, to.x, to.z, plan.splash || 2, P(), { ...opts, falloff: 0.8, except: struck && (d.to === 'target' || d.to === 'behind' || d.to === 'hit') ? struck : null });
     }
     if (points.length) env.spellfx.aoe({ points, element: plan.element, stagger: 0.02 });
     if (d.leap) env.spellfx.footfall?.({ at: v3(from.x, groundY(from.x, from.z), from.z), element: plan.element });
@@ -516,16 +515,8 @@ export function createSkillRuntime(env) {
     };
     const segs = [];
     for (let t = 0; t <= length; t += every) segs.push({ x: sx + dx * t, z: sz + dz * t });
-    const strike = () => {
-      const seen = new Set();
-      for (const s of segs) {
-        for (const h of F().strikeArea(s.x, s.z, (l.width ?? 2) / 2 + 0.4, P(), { falloff: 0.9, ...opts })) {
-          if (seen.has(h.enemy)) continue;
-          seen.add(h.enemy);
-          env.reportHit(h.enemy, h.result);
-        }
-      }
-    };
+    // each body near the line is struck ONCE (`opts.onHit` reports it)
+    const strike = () => F().strikeSegment(sx, sz, sx + dx * length, sz + dz * length, (l.width ?? 2) / 2 + 0.4, P(), { falloff: 0.9, ...opts });
     env.spellfx.aoe({ points: segs.map(s => v3(s.x, groundY(s.x, s.z) + 0.15, s.z)), element: plan.element, stagger: 0.02 });
     if (plan.delay) later(plan.delay, strike); else strike();
     if (plan.pool) for (const s of segs) place(plan, { kind: 'zone', ...poolSpec(plan.pool), radius: (l.width ?? 2) / 2 + 0.6 }, s.x, s.z);
@@ -564,7 +555,7 @@ export function createSkillRuntime(env) {
           sp.at = at;
           // the sub-strike scales with whatever scaled the cast (a spender's points, an empower)
           const hits = field.strikeArea(x, z, sub.radius ?? radius, P(), { falloff: 0.6, power: subPower(plan, sub.mult ?? plan.baseMult ?? 1), element: sp.element, rules: sp.rules, onHit: opts.onHit, skill: plan.skill?.id, applyStatus: env.statusHook, noDamage: !sub.mult && !plan.mult });
-          for (const h of hits) env.reportHit(h.enemy, h.result);
+          if (!opts.onHit) for (const h of hits) env.reportHit(h.enemy, h.result);
           if (sub.healAllies) healAllies(sub.healAllies);
           if (sub.healShare) healAllies(0, {}); // the share-of-damage heal rides onHit.healShare
           env.spellfx.aoe({ points: env.ringPoints(x, z, sub.radius ?? radius), element: sp.element, stagger: 0.02 });
@@ -587,14 +578,13 @@ export function createSkillRuntime(env) {
         env.spellfx.aoe({ points: env.ringPoints(x, z, radius), element: plan.element, stagger: 0.015 });
         env.spellfx.impact({ at: v3(x, groundY(x, z) + 0.6, z), element: plan.element });
         const hits = field.strikeArea(x, z, radius, P(), { falloff: 0.6, ...opts });
-        for (const h of hits) env.reportHit(h.enemy, h.result);
         // a tagged target inside is struck by EVERY pulse (Arrow Storm's Quarry)
         if (r.alwaysTag) {
           for (const e of field.near(at.x, at.z, plan.radius || 6)) {
             if (!e.statuses?.[r.alwaysTag] || hits.some(h => h.enemy === e)) continue;
             const res = env.rpg.strike(P(), e, field.rng, { multiplier: plan.mult, element: plan.element, skill: plan.skill?.id, applyStatus: env.statusHook, rules: plan.rules });
             field.land(e, res, { fromX: x, fromZ: z, element: plan.element });
-            env.reportHit(e, res);
+            if (opts.onHit) opts.onHit(e, res); else env.reportHit(e, res);
             if (res.dead) field.kill(e);
           }
         }
@@ -732,8 +722,7 @@ export function createSkillRuntime(env) {
     const hit = (from, e, keep) => {
       used.add(e);
       env.uniqueEnv.arc?.({ x: from.x, z: from.z, y: (from.y ?? groundY(from.x, from.z)) + 1 }, e, plan.element);
-      const h = field.strikeArea(e.x, e.z, 1.1, P(), { ...opts, falloff: 1, power: (opts.power ?? plan.mult) * keep });
-      for (const x of h) env.reportHit(x.enemy, x.result);
+      field.strikeArea(e.x, e.z, 1.1, P(), { ...opts, falloff: 1, power: (opts.power ?? plan.mult) * keep });
       return e;
     };
     if (plan.ricochet && struck) jump(struck, plan.ricochet.keep ?? 0.6, plan.ricochet.bounces ?? 1, plan.ricochet.range ?? 8);
@@ -755,16 +744,8 @@ export function createSkillRuntime(env) {
       const to = v3(C().x, C().y + 1.1, C().z);
       const ms = Math.max(120, from.distanceTo(to) / 40 * 1000);
       env.spellfx.projectile({ from, to, element: plan.element, ms }).then(() => {
-        const seen = new Set();
-        const len = Math.hypot(to.x - from.x, to.z - from.z);
-        for (let t = 0; t <= len; t += 2) {
-          const x = from.x + (to.x - from.x) * (t / Math.max(1, len)), z = from.z + (to.z - from.z) * (t / Math.max(1, len));
-          for (const h of field.strikeArea(x, z, 1.4, P(), { ...opts, falloff: 1, power: (opts.power ?? plan.mult) * keep })) {
-            if (seen.has(h.enemy)) continue;
-            seen.add(h.enemy);
-            env.reportHit(h.enemy, h.result);
-          }
-        }
+        // each body on the way back is struck once (`opts.onHit` reports it)
+        field.strikeSegment(from.x, from.z, to.x, to.z, 1.4, P(), { ...opts, falloff: 1, power: (opts.power ?? plan.mult) * keep });
       }).catch(() => {});
     }
   }
@@ -1249,7 +1230,7 @@ export function createSkillRuntime(env) {
       const mats = o.material ? [].concat(o.material) : [];
       for (const mt of mats) {
         if (!mt.color) continue;
-        if (!mt.userData.r28base) mt.userData.r28base = mt.color.getHex();
+        if (mt.userData.r28base === undefined) mt.userData.r28base = mt.color.getHex();
         if (color) mt.color.set(mt.userData.r28base).lerp(new THREE.Color(color), 0.55);
         else mt.color.setHex(mt.userData.r28base);
       }
@@ -1480,10 +1461,11 @@ export function createSkillRuntime(env) {
         continue;
       }
       if (t.store && t.last?.stored > 0) {
-        const hits = F().strikeArea(c.x, c.z, t.radius, p, { power: 1, element: 'physical', falloff: 0.6, proc: true });
+        // who is in reach, without striking them: the bank is the whole of the damage
+        const hits = F().near(c.x, c.z, t.radius).map(e => ({ enemy: e, result: { amount: 0 } }));
         // the bank is raw damage: pay it to each body directly, split
         const each = Math.round(t.last.stored / Math.max(1, hits.length));
-        for (const h of hits) { h.enemy.hp = Math.max(0, h.enemy.hp - each); if (h.enemy.hp <= 0) F().kill(h.enemy); env.reportHit(h.enemy, h.result); }
+        for (const h of hits) { h.enemy.hp = Math.max(0, h.enemy.hp - each); F().credit?.(h.enemy, each); if (h.enemy.hp <= 0) F().kill(h.enemy); env.reportHit(h.enemy, { amount: each, crit: false }); }
         env.spellfx.aoe({ points: env.ringPoints(c.x, c.z, t.radius), element: 'physical', stagger: 0.02 });
       }
       if (t.onEnd) castSub(t.onEnd, t.plan, { shape: t.onEnd.shape || 'around' });

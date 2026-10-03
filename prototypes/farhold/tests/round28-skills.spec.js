@@ -255,3 +255,28 @@ test('a shape whose creature cannot be built tints the humanoid instead of vanis
   expect(out.after).toBe(null);
   expect(errors.filter(e => !/no_such_creature/.test(e))).toEqual([]);
 });
+
+test('review: a dash to the first body hits it once, and every hit is reported once', async ({ page }) => {
+  test.setTimeout(120000);
+  const errors = await land(page, 'warrior');
+  await dummy(page, 5);
+  const out = await page.evaluate(async () => {
+    const f = window.farhold;
+    const e = window.__dummies[0];
+    e.name = 'Lunge Dummy';
+    f.skillData.skills.zz_lunge = { name: 'Test Lunge', shape: 'dash', element: 'physical', mult: 1.5, range: 10, splash: 2, cooldown: 1, mp: 0, dash: { to: 'target', range: 10 } };
+    f.skills.relearn(['zz_lunge', null, null, null, null, null]);
+    const log = () => [...document.querySelectorAll('#log > *')].map(n => n.textContent).filter(t => /Lunge Dummy for/.test(t)).length;
+    const n0 = log();
+    let hits = 0;
+    const strike = f.rpg.strike.bind(f.rpg);
+    f.rpg.strike = (a, d, ...rest) => { if (d === e) hits++; return strike(a, d, ...rest); };
+    f.cast(0);
+    await new Promise(r => setTimeout(r, 400));
+    f.rpg.strike = strike;
+    return { hits, logged: log() - n0 };
+  });
+  expect(out.hits, 'the body the dash stops at was struck more than once').toBe(1);
+  expect(out.logged, 'one hit, reported more than once').toBe(1);
+  expect(errors).toEqual([]);
+});

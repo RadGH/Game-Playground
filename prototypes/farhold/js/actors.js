@@ -1702,14 +1702,25 @@ export class EnemyField {
   strikeSegment(x0, z0, x1, z1, width, attacker, opts = {}) {
     const dx = x1 - x0, dz = z1 - z0, len2 = dx * dx + dz * dz || 1;
     const hits = [];
-    for (const e of [...this.enemies]) {
+    // the same reach test and the same falloff the per-step `strikeArea` had: full damage on the
+    // line, `falloff` of it at the edge of `width`; `except` is struck by the caller on its own
+    const reachOf = e => width + (e.reach || 2) * 0.25;
+    const near = this.enemies.filter(e => {
+      if (e.dying != null || e === opts.except) return false;
+      const t = Math.max(0, Math.min(1, ((e.x - x0) * dx + (e.z - z0) * dz) / len2));
+      return Math.hypot(e.x - (x0 + dx * t), e.z - (z0 + dz * t)) <= reachOf(e);
+    });
+    const crowd = near.length;
+    const falloff = opts.falloff ?? 0.8;
+    for (const e of near) {
       if (e.dying != null) continue;
       const t = Math.max(0, Math.min(1, ((e.x - x0) * dx + (e.z - z0) * dz) / len2));
       const px = x0 + dx * t, pz = z0 + dz * t;
-      if (Math.hypot(e.x - px, e.z - pz) > width + (e.reach || 2) * 0.25) continue;
+      const d = Math.hypot(e.x - px, e.z - pz);
+      const share = 1 - (1 - falloff) * Math.min(1, d / Math.max(0.001, width));
       const result = this.rpg.strike(attacker, e, this.rng, {
-        multiplier: (opts.power ?? 1) * (opts.falloff ?? 1), element: opts.element || 'physical', skill: opts.skill || null,
-        applyStatus: opts.applyStatus || null, rules: opts.rules || null, noDamage: !!opts.noDamage,
+        multiplier: (opts.power ?? 1) * share, element: opts.element || 'physical', skill: opts.skill || null,
+        applyStatus: opts.applyStatus || null, rules: opts.rules || null, noDamage: !!opts.noDamage, proc: !!opts.proc, crowd,
       });
       this.land(e, result, { strike: opts.knock || null, fromX: px, fromZ: pz, element: opts.element || 'physical' });
       opts.onHit?.(e, result);

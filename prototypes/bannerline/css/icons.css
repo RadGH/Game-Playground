@@ -1,0 +1,16 @@
+/* Icon Forge (icons.html) gallery. */
+#gl { position: fixed; left: -9999px; top: 0; width: 512px; height: 512px; }
+.gallery { padding: 16px; display: grid; gap: 22px; }
+.gallery h2 { margin: 0 0 8px; font: 700 18px var(--head); color: var(--gold); letter-spacing: .05em; }
+.gallery h2 small { font: 500 13px var(--ui); color: var(--ink3); margin-left: 8px; letter-spacing: 0; }
+.icon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 12px; }
+.icon-card {
+  display: grid; justify-items: center; gap: 6px; padding: 8px 6px 8px; border-radius: 8px;
+  background: rgba(255,255,255,.03); border: 1px solid rgba(214,188,128,.14);
+}
+.icon-card img, .icon-card canvas { width: 96px; height: 96px; border-radius: 6px; image-rendering: auto; box-shadow: 0 2px 8px rgba(0,0,0,.5); }
+.icon-card .missing { width: 96px; height: 96px; border-radius: 6px; display: grid; place-items: center; color: var(--ink3); font-size: 12px; background: #0f1114; border: 1px dashed var(--line); }
+.icon-card span { font-size: 13px; color: var(--ink2); text-align: center; line-height: 1.2; }
+.icon-card a { font-size: 12px; color: var(--ink3); }
+.icon-card a:hover { color: var(--gold); }
+@media (max-width: 600px) { .icon-grid { grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); } .icon-card img, .icon-card canvas { width: 72px; height: 72px; } }

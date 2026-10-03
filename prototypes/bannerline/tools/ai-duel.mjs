@@ -1,4 +1,6 @@
-// AI duel harness (stream E): plays difficulty A vs B over N seeds, mirrored races/heroes, sides swapped.
+// AI duel harness (stream E): plays difficulty A vs B over N seeds, mirrored races/heroes (the same
+// race and hero on both sides, varying with the seed), seats swapped on odd seeds. tests/ai.test.js
+// uses duel(); run it by hand after changing data/ai.json or js/sim/ai/**:
 //   node tools/ai-duel.mjs commander veteran 20 [format] [hero] [race]
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -11,7 +13,7 @@ const data = loadDataSync(n => readFileSync(join(ROOT, 'data', n), 'utf8'));
 const RACES = ['freeholds', 'ashtusk', 'unburied', 'thornmane'];
 const HEROES = ['warrior', 'ranger', 'pyromancer', 'druid', 'engineer'];
 
-export function duel(a, b, seed, { format = '1v1', hero, race, maxTicks = 20 * 60 * 40 } = {}) {
+export function duel(a, b, seed, { format = '1v1', hero, race, maxTicks = 20 * 60 * 40, data: d = data } = {}) {
   const n = +format[0];
   const swap = seed % 2 === 1;
   const players = [];
@@ -20,7 +22,7 @@ export function duel(a, b, seed, { format = '1v1', hero, race, maxTicks = 20 * 6
     players.push({ team: t, kind: 'ai', ai: { difficulty: (t === 0) !== swap ? a : b },
       race: race || RACES[k % 4], hero: hero || HEROES[(k >> 2) % 5], name: `P${t}${i}` });
   }
-  const s = createSim({ seed, mode: format, map: 'vale', players }, data, { events: false });
+  const s = createSim({ seed, mode: format, map: 'vale', players }, d, { events: false });
   while (!s.over && s.tick < maxTicks) s.step([]);
   const r = s.state.result;
   const aTeam = swap ? 1 : 0;

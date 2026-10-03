@@ -16,8 +16,8 @@
    "name": "Veteran",
    "desc": "Balances income and pressure, sometimes counters your hero's armour, buys Drill Yard levels and shops between waves.",
    "reaction": 16,
-   "sends": { "style": "balanced", "greed": [0.7, 0.7], "noise": 0.2, "counter": 0.5, "toast": 30 },
-   "hero": { "tier": 1, "retreatAt": 0.3, "potionAt": 0.35, "skillChance": 0.8 },
+   "sends": { "style": "balanced", "greed": [0.9, 0.9], "noise": 0.2, "counter": 0.5, "toast": 30 },
+   "hero": { "tier": 1, "retreatAt": 0.2, "potionAt": 0.35, "skillChance": 0.8 },
    "shop": { "style": "value", "trips": true },
    "town": { "upgrades": "cheapest", "powers": "basic" },
    "team": 1
@@ -26,8 +26,8 @@
    "name": "Commander",
    "desc": "Reads your whole defence and sends what beats it, saves for waves that break through, strikes while your hero is away, and plays as a team.",
    "reaction": 7,
-   "sends": { "style": "adaptive", "greed": [0.65, 0.9], "itemPays": 8, "pressure": [0.25, 0.05], "noise": 0.03, "counter": 1, "toast": 25 },
-   "hero": { "tier": 2, "retreatAt": 0.28, "potionAt": 0.35, "skillChance": 1.0 },
+   "sends": { "style": "adaptive", "greed": [0.85, 1.0], "itemPays": 12, "itemAt": 3, "pressure": [0, 0.06], "noise": 0.03, "counter": 1, "toast": 25 },
+   "hero": { "tier": 2, "retreatAt": 0.3, "potionAt": 0.35, "skillChance": 1.0, "kite": false },
    "shop": { "style": "build", "trips": true },
    "town": { "upgrades": "planned", "upgradeMin": 2, "powers": "full", "powerShare": 0.12 },
    "team": 2

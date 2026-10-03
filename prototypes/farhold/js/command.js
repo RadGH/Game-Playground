@@ -49,7 +49,6 @@ export function createCommand({
 } = {}) {
   /** Body ids, not citizen ids — the rod points at bodies and the citizen comes along behind. */
   let picked = [];
-  let lastOrder = null;
 
   const theColony = () => deref(colony);
   const theFolk = () => deref(folk);
@@ -87,12 +86,17 @@ export function createCommand({
 
   /** Somewhere to stand watch: a post with slots, or anything the defence category owns. */
   function postAt(x, z, r = 7) {
+    // R28 — a real watch post first (a Watch Post, Guard Tower or Gate House has slots a guard can
+    // stand in); any other defence piece only if there is none, and the colony then says why not
+    let other = null;
     for (const e of theBuild()?.entries || []) {
       const def = theBuild()?.defOf?.(e.key);
       if (!def?.post?.slots && def?.cat !== 'defence') continue;
-      if (Math.hypot(e.x - x, e.z - z) <= r) return e;
+      if (Math.hypot(e.x - x, e.z - z) > r) continue;
+      if (def?.post?.slots) return e;
+      other ||= e;
     }
-    return null;
+    return other;
   }
 
   function stationAt(x, z, r = 6) {
@@ -158,17 +162,29 @@ export function createCommand({
       const tx = x + Math.cos(a) * spread, tz = z + Math.sin(a) * spread;
       theFolk()?.sendTo?.(npc, tx, tz, { run: kind === 'guard', name: where });
       const cit = citizenOf(npc);
-      if (cit && station) {
-        const out = theColony()?.assign?.(cit.id, { stationId: station.id });
+      const col = theColony();
+      /**
+       * R28 — A GUARD ORDER POSTS THEM. It walked the body to the post and then cleared their
+       * station, and nothing ever set `posted` — the watch was always empty. `postGuard` changes
+       * their job to guard (remembering the old one) and stands them in the post; any other order
+       * stands them down first, which gives them their old job back.
+       */
+      if (cit && kind === 'guard') {
+        const out = col?.postGuard?.(cit.id, post.id);
         if (out && out.ok === false) onLog(`${npc.name}: ${out.why}`, 'warn');
-      } else if (cit && !station) {
-        // told to go and stand somewhere: let go of whatever station they were tied to, or they
-        // will be counted as tending a bench they are nowhere near
-        theColony()?.assign?.(cit.id, { stationId: null });
+      } else if (cit) {
+        if (cit.posted) col?.standDown?.(cit.id);
+        if (station) {
+          const out = col?.assign?.(cit.id, { stationId: station.id });
+          if (out && out.ok === false) onLog(`${npc.name}: ${out.why}`, 'warn');
+        } else {
+          // told to go and stand somewhere: let go of whatever station they were tied to, or they
+          // will be counted as tending a bench they are nowhere near
+          col?.assign?.(cit.id, { stationId: null });
+        }
       }
       done++;
     }
-    lastOrder = { kind, where, n: done, at: { x, z } };
     onLog(done === 1
       ? `${people[0].name} ${ORDERS[kind].verb} ${where}.`
       : `${done} of your people ${ORDERS[kind].verb.replace(/s$/, '')} ${where}.`, 'good');
@@ -227,6 +243,5 @@ export function createCommand({
         ? `${people[0].name} selected. Click where they should be.`
         : `${people.length} selected. Click where they should be.`;
     },
-    get lastOrder() { return lastOrder; },
   };
 }

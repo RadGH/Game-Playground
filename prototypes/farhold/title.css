@@ -190,6 +190,22 @@
 }
 .open > .sc-desc { -webkit-line-clamp: unset; line-clamp: unset; display: block; }
 
+/* R28 — the round-28 mechanics as chips (js/skillcard.js mechFacts): a shape, stance, temper or
+   song is green like the bar's form badge, a rule about pressing the key (charges, recast,
+   channel) is violet like the recast ring, a class resource is the gold of its pips. */
+.sc-chip.k-form { color: #b8f0a0; border-color: #2f5a2a; }
+.sc-chip.k-mech { color: #d4b8ff; border-color: #44345e; }
+.sc-chip.k-res { color: #ffd58a; border-color: #5a4a26; }
+
+/* R28 — what a shape does to the other skills, and what a skill becomes in each shape. The
+   names always show; the sentences only on an opened card. */
+.sc-forms { list-style: none; margin: 4px 0 0; padding: 4px 0 0 8px; border-left: 2px solid #2f5a2a; font-size: 11.5px; color: #8b9ab0; }
+/* the class card's own `.cc-skills li` is a three-column grid; these rows are plain lines */
+.class-card .cc-skills .sc-forms li { display: block; margin: 1px 0; font-size: 11.5px; }
+.class-card .cc-skills .sc-forms b, .sc-forms b { display: inline; color: #b8f0a0; font-size: 11.5px; font-weight: 600; }
+.sc-forms .sc-form-desc { display: none; }
+.open > .sc-forms .sc-form-desc { display: inline; }
+
 /* ---------------------------------------------------------------- the step footer
    Back on the left, the next step on the right, and what you have picked between the two. */
 #boot .boot-step .boot-actions { margin-top: 12px; padding-top: 10px; }
@@ -266,3 +282,6 @@
   .ap-actions button { flex: 1 1 auto; padding: 8px 12px; font-size: 14px; }
   .ap-label { flex-basis: 84px; }
 }
+
+/* R28: the class signature under the name on the class card */
+.cc-head .cc-signature { margin: 2px 0 0; color: var(--b-faint); font-size: 12px; font-style: italic; }

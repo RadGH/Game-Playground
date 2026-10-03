@@ -79,7 +79,7 @@ export function createVendors({ data = null, saved = null } = {}) {
       return { ok: false, why: `${v.name} follows the money. Turn over ${need.turnover} gold of trade first — you are at ${Math.floor(facts.turnover || 0)}.` };
     }
     if (need.spent && (facts.spent || 0) < need.spent) {
-      return { ok: false, why: `${v.name} arrives once there is enough money here to be worth losing. Spend ${need.spent} gold at this holding.` };
+      return { ok: false, why: `${v.name} arrives once there is enough money here to be worth losing. Spend ${need.spent} gold — at any shop, or taking people on — you are at ${Math.floor(facts.spent || 0)}.` };
     }
     return { ok: true, why: null };
   }

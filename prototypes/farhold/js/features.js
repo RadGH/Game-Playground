@@ -126,6 +126,79 @@ export function roadProfile(klass, half) {
   if (klass === 'road') return [[1, L.edge], [0.7, L.main], [-0.7, L.main], [-1, L.edge]];
   return [[1, L.main], [0.45, L.main], [0.14, L.crown], [-0.14, L.crown], [-0.45, L.main], [-1, L.main]];
 }
+/**
+ * ROUND 28 — HOW A ROAD MEETS THE GROUND (see `drapeRibbon` in js/roadplan.js for the measurements).
+ *
+ * `ROAD_DRAPE` is the longest gap between two rows of a draped ribbon, in metres. `ROAD_LIFT` is how
+ * far the paving sits over the ground it is draped on, by class: a road that outranks another is
+ * drawn a couple of centimetres above it where the two share ground, so the trunk is the one you see.
+ * `ROAD_SKIRT` is the sloped edge face (the kerb near you, an embankment far away).
+ */
+export const ROAD_DRAPE = 3;
+/**
+ * R28 — how finely to drape at a distance `d` from where the roads were rebuilt. The player can walk
+ * `refreshEvery` (260 m) before the next rebuild, and the terrain's fine rings reach ~100-300 m past
+ * them, so everything inside `ROAD_DRAPE_NEAR` gets the full `ROAD_DRAPE`; past it the rows open
+ * up to `ROAD_DRAPE_FAR`, because a ring there is 18-160 m a quad and the shader's skirt is what
+ * meets it. Draping a 2.6 km radius at 3 m was 2.3x the cost of the whole rebuild for nothing.
+ */
+export const ROAD_DRAPE_NEAR = 480;
+export const ROAD_DRAPE_FAR = 16;
+export function drapeStepAt(d) {
+  return d <= ROAD_DRAPE_NEAR ? ROAD_DRAPE : Math.min(ROAD_DRAPE_FAR, ROAD_DRAPE + (d - ROAD_DRAPE_NEAR) / 50);
+}
+export const ROAD_LIFT = { highway: 0.09, road: 0.07, trail: 0.05 };
+export const STREET_LIFT = 0.06;
+export const ROAD_SKIRT = { drop: 0.45, out: 0.35 };
+/**
+ * R28 — WHAT THE CLIPMAP CANNOT DRAW, THE ROAD'S SHADER COVERS.
+ *
+ * Near the player the terrain rings are 1-4 m a quad and draw `heightAt` faithfully: a draped road
+ * is 5-9 cm over them. Further out a ring's quad is 10-100 m across and is a plane through three
+ * `heightAt` samples, so a 7 m road's carved bed is not in it at all — measured on Small, the drawn
+ * ground is 1-5 m off the road at the 95th percentile on the 32 m ring and up to 21 m on the 96 m
+ * ring, sometimes over it (the road vanishes into the hill) and sometimes under it (the road hangs in
+ * the air). No CPU drape can fix that, because which ring covers a road changes every time the
+ * player moves a cell and the roads are rebuilt every 260 m.
+ *
+ * So the vertex shader does two things that grow with distance from the camera, both starting
+ * past the fine rings:
+ *   * PULL — the vertex slides toward the camera along its own view ray. On screen it does not move
+ *     at all; in the depth buffer it is now in front of the coarse hillside that would have covered
+ *     it. (`polygonOffset` would be the usual tool, and does nothing here: the renderer uses a
+ *     logarithmic depth buffer, which writes `gl_FragDepth` and ignores the offset.)
+ *   * SKIRT — the bottom of the edge face drops, so a road over a coarse ring's sag reads as an
+ *     embankment standing on the ground rather than a sheet hanging over it.
+ * Constants are `defines`, so each material compiles its own program (js/atmosphere.js keys the
+ * program cache on the hook's source text, which is the same for both).
+ */
+export const ROAD_SHADER = {
+  road: { pullStart: 60, pull: 0.008, pullMax: 16, skirtStart: 40, skirt: 0.012, skirtMax: 12 },
+  street: { pullStart: 60, pull: 0.004, pullMax: 2, skirtStart: 40, skirt: 0.006, skirtMax: 5 },
+};
+export function roadShader(material, k = ROAD_SHADER.road) {
+  const f = v => Number(v).toFixed(4);
+  material.defines = {
+    ...(material.defines || {}),
+    FH_PULL_START: f(k.pullStart), FH_PULL_K: f(k.pull), FH_PULL_MAX: f(k.pullMax),
+    FH_SKIRT_START: f(k.skirtStart), FH_SKIRT_K: f(k.skirt), FH_SKIRT_MAX: f(k.skirtMax),
+  };
+  material.onBeforeCompile = shader => {
+    shader.vertexShader = shader.vertexShader
+      .replace('#include <common>', '#include <common>\nattribute float skirt;')
+      .replace('#include <begin_vertex>', `#include <begin_vertex>
+  float fhRoadD = distance( ( modelMatrix * vec4( transformed, 1.0 ) ).xyz, cameraPosition );
+  transformed.y -= skirt * clamp( ( fhRoadD - FH_SKIRT_START ) * FH_SKIRT_K, 0.0, FH_SKIRT_MAX );`)
+      .replace('#include <project_vertex>', `#include <project_vertex>
+  {
+    float fhPull = clamp( ( fhRoadD - FH_PULL_START ) * FH_PULL_K, 0.0, FH_PULL_MAX );
+    mvPosition.xyz *= max( 0.05, 1.0 - fhPull / max( length( mvPosition.xyz ), 1.0 ) );
+    gl_Position = projectionMatrix * mvPosition;
+  }`);
+  };
+  material.userData = { ...(material.userData || {}), roadShader: k };
+  return material;
+}
 const CONE4 = new THREE.ConeGeometry(1, 1, 4);
 // what is left of the fixed palette: the four things still modelled here (wall, gatehouse,
 // well, bridge) rather than assembled by the kit
@@ -602,7 +675,7 @@ export function createFeatures(scene, terrain, opts = {}) {
    * rides on the vertices (`ROAD_LOOKS` + `roadProfile`), a highway pale paving with a darker kerb
    * strip on its outer 0.4 m, a road gravel, a trail dark dirt with a lighter grass crown.
    */
-  const roadMat = new THREE.MeshLambertMaterial({ vertexColors: true });
+  const roadMat = roadShader(new THREE.MeshLambertMaterial({ vertexColors: true }), ROAD_SHADER.road);
   const riverMesh = new THREE.Mesh(new THREE.BufferGeometry(), waterMat);
   const roadMesh = new THREE.Mesh(new THREE.BufferGeometry(), roadMat);
   /**
@@ -612,7 +685,7 @@ export function createFeatures(scene, terrain, opts = {}) {
    * and a ribbon is geometry rather than a transform — so the colour cannot ride on the instance and
    * has to ride on the vertices instead. One mesh for the lot, rebuilt with the settlements.
    */
-  const streetMat = new THREE.MeshLambertMaterial({ vertexColors: true });
+  const streetMat = roadShader(new THREE.MeshLambertMaterial({ vertexColors: true }), ROAD_SHADER.street);
   const streetMesh = new THREE.Mesh(new THREE.BufferGeometry(), streetMat);
   /**
    * ROUND 23 — every bridge near the player in one mesh, built from its plan (js/bridge-plan.js).
@@ -648,13 +721,24 @@ export function createFeatures(scene, terrain, opts = {}) {
   /** R27 M4 — the buildings with a `role` (js/town-plan.js BUILDING_INFO) as built, per settlement. */
   const postRecords = new Map();
 
+  /**
+   * R28 — copy one array onto the end of another. `into.push(...from)` passes every element as an
+   * argument, and a draped road ribbon is tens of thousands of numbers: past ~120k V8 throws
+   * "Maximum call stack size exceeded", and below that it is still slower than a loop.
+   */
+  const append = (into, from) => { for (let i = 0; i < from.length; i++) into.push(from[i]); };
   /** Append one ribbon's triangles to a growing buffer, offsetting its indices. */
   function pushRibbon(into, part) {
     const base = into.position.length / 3;
-    into.position.push(...part.position);
-    into.normal.push(...part.normal);
-    if (part.color) into.color.push(...part.color);
+    append(into.position, part.position);
+    append(into.normal, part.normal);
+    if (part.color) append(into.color, part.color);
     for (const i of part.index) into.index.push(i + base);
+    // R28 — the skirt mask rides along, zero for anything that has none
+    if (into.skirt) {
+      if (part.skirt) append(into.skirt, part.skirt);
+      else for (let k = 0; k < part.position.length / 3; k++) into.skirt.push(0);
+    }
   }
 
   const instanced = {};
@@ -744,6 +828,28 @@ export function createFeatures(scene, terrain, opts = {}) {
    * ground (the channel is left open on purpose), so the deck keeps its own height there.
    */
   const roadGroundAt = (x, z) => (terrain.bridgedAt?.(x, z) ? -Infinity : terrain.heightAt(x, z));
+  /**
+   * R28 — WHO IS ON TOP WHERE TWO ROADS SHARE GROUND. Both ribbons lie on the same `heightAt` now,
+   * so wherever a branch runs into its trunk the two would be drawn at one height and flicker
+   * against each other (and a trail's grass crown would show through a highway). The road that
+   * outranks — class first, then the longer, the order planet.js's merge and `conformOverlaps` use —
+   * keeps its paving; the other stops at its kerb (`roadKeep`, one row tucked under) and sits a
+   * couple of centimetres lower (`roadLift`).
+   */
+  const roadById = new Map(roads.map(p => [p.id, p]));
+  const roadRank = p => (p.klass === 'highway' ? 3 : p.klass === 'road' ? 2 : 1) * 1e6 + p.points.length;
+  const outranks = (b, a) => roadRank(b) !== roadRank(a) ? roadRank(b) > roadRank(a) : String(b.id) < String(a.id);
+  const roadLift = r => ROAD_LIFT[r.klass] ?? ROAD_LIFT.trail;
+  const roadKeep = r => (x, z) => {
+    const pair = terrain.roadPairAt?.(x, z);
+    if (!pair) return true;
+    for (const h of pair) {
+      if (!h || h.id === r.id) continue;
+      const other = roadById.get(h.id);
+      if (other && h.dist < other.half - 0.4 && outranks(other, r)) return false;
+    }
+    return true;
+  };
 
   function buildRibbons(px, pz) {
     const near = (points) => {
@@ -759,16 +865,21 @@ export function createFeatures(scene, terrain, opts = {}) {
     };
 
     const water = { position: [], normal: [], index: [] };
-    const road = { position: [], normal: [], index: [], color: [] };
+    const road = { position: [], normal: [], index: [], color: [], skirt: [] };
     const push = (target, part, fill = null) => {
       const base = target.position.length / 3;
-      target.position.push(...part.position);
-      target.normal.push(...part.normal);
+      append(target.position, part.position);
+      append(target.normal, part.normal);
       for (const i of part.index) target.index.push(i + base);
+      // R28 — which vertices are the bottom of a road's skirt (see `roadShader`)
+      if (target.skirt) {
+        if (part.skirt) append(target.skirt, part.skirt);
+        else for (let k = 0; k < part.position.length / 3; k++) target.skirt.push(0);
+      }
       // R27 M8 — the road mesh is vertex-coloured, so a part that carries no colour (a deck) is
       // painted the class's main colour
       if (target.color) {
-        if (part.color) target.color.push(...part.color);
+        if (part.color) append(target.color, part.color);
         else for (let k = 0; k < part.position.length / 3; k++) target.color.push(fill[0], fill[1], fill[2]);
       }
     };
@@ -845,7 +956,12 @@ export function createFeatures(scene, terrain, opts = {}) {
               const look = roadLook(r.klass);
               if (up) push(road, roadDeck(pts, hs, r.half * 2, { thick: 0.5, lift: 0.06 }), look.main);
               // R22: the ribbon clears the ground it is drawn on — see the note on `ribbon`
-              else push(road, ribbon(pts, hs, r.half * 2, { lift: 0.06, groundAt: roadGroundAt, profile: roadProfile(r.klass, r.half) }));
+              // R28: draped vertex by vertex, with a skirt, and stopping inside a road that
+              // outranks it (see `drapeRibbon` in js/roadplan.js and `roadKeep` here)
+              else push(road, ribbon(pts, hs, r.half * 2, {
+                lift: roadLift(r), groundAt: roadGroundAt, profile: roadProfile(r.klass, r.half),
+                drape: (x, z) => drapeStepAt(Math.hypot(x - px, z - pz)), skirt: ROAD_SKIRT, keep: roadKeep(r),
+              }));
             }
             k = e;
           }
@@ -868,6 +984,7 @@ export function createFeatures(scene, terrain, opts = {}) {
         geom.setAttribute('position', new THREE.BufferAttribute(new Float32Array(data.position), 3));
         geom.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(data.normal), 3));
         if (data.color) geom.setAttribute('color', new THREE.BufferAttribute(new Float32Array(data.color), 3));
+        if (data.skirt) geom.setAttribute('skirt', new THREE.BufferAttribute(new Float32Array(data.skirt), 1));
         geom.setIndex(data.index);
       }
       mesh.geometry = geom;
@@ -1218,7 +1335,12 @@ export function createFeatures(scene, terrain, opts = {}) {
         skip: (x, z) => terrain.underwater(x, z) || terrain.riverAt(x, z) > 0.3
           || !!terrain.bridgedAt?.(x, z) || terrain.roadAt(x, z) > 0.45,
       })) {
-        pushRibbon(streets, laneRibbon(lane, { lift: 0.12, color: [tint.r, tint.g, tint.b] }));
+        // R28: draped on the hillside it is laid on, not a shelf lifted to the highest ground
+        // across it (see `drapeRibbon` in js/roadplan.js)
+        pushRibbon(streets, laneRibbon(lane, {
+          lift: STREET_LIFT, color: [tint.r, tint.g, tint.b], groundAt: roadGroundAt,
+          drape: ROAD_DRAPE, skirt: ROAD_SKIRT,
+        }));
         const lp = lane.points;
         if (lp.length >= 2) {
           drawnStreetEnds.push({ x: lp[0][0], z: lp[0][1], half: lane.half, px: lp[1][0], pz: lp[1][1] });
@@ -1939,7 +2061,7 @@ export function createFeatures(scene, terrain, opts = {}) {
     doorsBuilt = [];                                   // R27 M4 (doorState is kept: a shut gate is rebuilt shut)
     postRecords.clear();
     // ROUND 14: every town's streets go into one ribbon buffer — see buildSettlement
-    const streets = { position: [], normal: [], color: [], index: [] };
+    const streets = { position: [], normal: [], color: [], index: [], skirt: [] };
 
     for (const node of settlements) {
       if (Math.hypot(node.wx - px, node.wz - pz) > radius) continue;
@@ -2009,6 +2131,7 @@ export function createFeatures(scene, terrain, opts = {}) {
       sg.setAttribute('position', new THREE.BufferAttribute(new Float32Array(streets.position), 3));
       sg.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(streets.normal), 3));
       sg.setAttribute('color', new THREE.BufferAttribute(new Float32Array(streets.color), 3));
+      sg.setAttribute('skirt', new THREE.BufferAttribute(new Float32Array(streets.skirt), 1));
       sg.setIndex(streets.index);
     }
     streetMesh.geometry = sg;

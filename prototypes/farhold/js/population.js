@@ -25,6 +25,21 @@
 export const HOUSE_MIN_BEDS = 2;
 
 /**
+ * R28 — THE HOUSES ON A REGISTER, WHICHEVER SHAPE IT HANDS THEM IN.
+ *
+ * js/housing.js exposes `houses` as a FUNCTION (`houses: () => houses.slice()`), and this file and
+ * js/colony.js both read it as a list: `(fn || []).filter` threw "filter is not a function" the
+ * first time a real register was handed over — which `civics.rebuild` does on every placement. The
+ * Town Hall, the recruit refusal and the migration roll all came through here, and the tests passed
+ * a plain list, so nothing noticed. One reader, used by both files.
+ */
+export function housesOf(reg) {
+  if (!reg) return [];
+  const h = typeof reg.houses === 'function' ? reg.houses() : reg.houses;
+  return Array.isArray(h) ? h : [];
+}
+
+/**
  * The population reading.
  *
  * `houses` counts real houses — a bunkhouse, a cottage, a longhouse — rather than every bed, so
@@ -44,7 +59,7 @@ export function population({ colony = null, housing = null } = {}) {
    * `HOUSE_MIN_BEDS` is the same bar either way: two beds is a building, one is a bedroll.
    */
   const houses = reg
-    ? (reg.houses || []).filter(h => (h.beds || 0) >= HOUSE_MIN_BEDS).length
+    ? housesOf(reg).filter(h => (h.beds || 0) >= HOUSE_MIN_BEDS).length
     : (cap >= HOUSE_MIN_BEDS ? 1 : 0);
   const used = colony?.citizens?.length || 0;
   const spare = Math.max(0, cap - used);

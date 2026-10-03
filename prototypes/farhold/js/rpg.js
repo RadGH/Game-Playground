@@ -16,6 +16,8 @@
 // rather than swallowed (`derived.inert`), which is the guard that found the dead ones.
 
 import { Loot } from '../../emberveil/js/loot.js';
+// R28 — the skill vocabulary's per-hit rules, the hit-taken rules, and a form's sheet stats
+import { hitFactor, afterHit as mechAfterHit, onHurt as mechOnHurt, statusStats, tagFactor } from './skillmech.js';
 import { focusLook } from './foci.js';
 import { makeRng } from '../../emberveil/js/rng.js';
 import { tuneAffixData, affixAllowed, rollAffixValue, itemLevelFor, requirementFor, tierFor, capValue, roundFor, scrubRetired, FARHOLD_AFFIXES } from './affixes.js';
@@ -1037,6 +1039,20 @@ export class Rpg {
       d.offDamage = null;
     }
     d.levelScale = skill;
+    /**
+     * R28 — A FORM'S STATS (a druid shape, a stance): armour, health, speed, attack speed and thorns
+     * as shares, read off the `form:<id>` status js/skillmech.js `toggleForm` puts on the character.
+     * Applied once, here, where the sheet is built, so the bar, the sheet and the strike agree.
+     */
+    {
+      const fs = statusStats(unit);
+      if (fs.armorPct) d.armor = Math.max(0, d.armor * (1 + fs.armorPct));
+      if (fs.maxHpPct) d.maxHp = d.maxHp * (1 + fs.maxHpPct);
+      if (fs.movePct) d.movePct = (d.movePct || 0) + fs.movePct * 100;
+      if (fs.hastePct) d.haste = (d.haste || 0) + fs.hastePct * 100;
+      if (fs.thorns) d.thorns = (d.thorns || 0) + fs.thorns;
+      d.healingPct = fs.healingPct || 0;
+    }
     d.moveSpeed = (b.moveSpeed ?? 5.2) * (1 - Math.min(0.2, (d.armor / 400))) * (1 + d.movePct / 100);
     /**
      * How often you can swing. `d.haste` is PERCENTAGE POINTS and every writer speaks that.
@@ -1478,6 +1494,8 @@ export class Rpg {
       defId: def.id, name: name || (prefix ? `${prefix} ${def.name}` : def.name), baseName: def.name,
       kind: def.kind || 'beast', family: def.family || 'beast', role: def.role || 'skirmisher',
       level: lvl, rank, modifiers: modifiers.map(m => m.id),
+      // R28 — what the modifiers multiplied, so a `strip` (js/skillmech.js) can take it back off
+      modDmg: modifiers.reduce((k, m) => k * (m.dmg ?? 1), 1), modArmor: modifiers.reduce((k, m) => k * (m.armor ?? 1), 1),
       auras: modifiers.map(m => m.aura).filter(Boolean),
       hp, maxHp: hp, dmg,
       armor: Math.round((def.armor ?? 0) * scale * armorMult),
@@ -1507,7 +1525,7 @@ export class Rpg {
    * One swing. Returns what happened so the caller can show numbers, play an animation and write
    * a line in the log. Attacker and defender are any `{ derived }` character or plain enemy.
    */
-  strike(attacker, defender, rng = this.rng, { multiplier = 1, element = 'physical', skill = null, applyStatus = null, hand = 'main', pen = 0, proc = false, ranged = false } = {}) {
+  strike(attacker, defender, rng = this.rng, { multiplier = 1, element = 'physical', skill = null, applyStatus = null, hand = 'main', pen = 0, proc = false, ranged = false, rules: rulesIn = null, crowd = 1, noDamage = false } = {}) {
     const a = attacker.derived, d = defender.derived;
     // Read every field with a fallback, NEVER `a ? a.x : fallback`. Round 4 gave enemies and pets a
     // small `derived` bag (resistAll / thorns / dodge) so modifiers could hang off them, which made
@@ -1552,7 +1570,7 @@ export class Rpg {
     // a riposte spends itself on the next swing, whatever the dice say
     const riposte = !!(attacker.perkFlags?.riposte && attacker.riposteReady);
     if (riposte) attacker.riposteReady = false;
-    const crit = riposte || rng() * 100 < (a?.critChance ?? attacker.critChance ?? 3) + critBonus;
+    let crit = riposte || rng() * 100 < (a?.critChance ?? attacker.critChance ?? 3) + critBonus;
     ctx.crit = crit;
 
     /**
@@ -1561,9 +1579,36 @@ export class Rpg {
      * the strikes happen in here — so Shattering, Draining, Cauterise and Branding had nowhere to
      * run and were being thrown away with the plan.
      */
-    const rules = (attacker.castRules && skill && attacker.castRules.skill === skill) ? attacker.castRules : null;
+    /**
+     * R28 — a strike may carry its OWN rules (`opts.rules`, put on the plan by js/skills.js), so a
+     * delayed repeat, an afterimage or a Finale cannot pick up whatever skill was cast last.
+     */
+    const rules = rulesIn || ((attacker.castRules && skill && attacker.castRules.skill === skill) ? attacker.castRules : null);
+    /**
+     * R28 — THE SKILL'S OWN RULES BEFORE THE DICE: bonuses against a tag, a status, a family, from
+     * behind, in a crowd, at a distance; armour it ignores; a forced critical (js/skillmech.js).
+     */
+    const mechHit = rules ? hitFactor(rules, attacker, defender, { crowd }) : null;
+    if (mechHit) { multiplier *= mechHit.mult; if (mechHit.pen > pen) pen = mechHit.pen; }
+    // R28 — a class tag's own numbers (Quarry, Flanked, Off Balance) count on every strike
+    if (defender.statuses) multiplier *= tagFactor(attacker, defender);
+    if (mechHit?.crit && !crit) { crit = true; ctx.crit = true; }
 
     let amount = rng.range(dmgRange[0], dmgRange[1]) * multiplier;
+    /**
+     * R28 — IMBUE: for a while your BASIC attacks change (Forge Flame, Wyrm Ascendant). Read here
+     * because a swing, a shot and a staff bolt all arrive without a skill and all pass through.
+     */
+    const imb = !skill && !proc && attacker.imbue && attacker.imbue.left > 0 ? attacker.imbue : null;
+    if (imb?.mult) amount *= 1 + imb.mult;
+    if (imb?.element && element === 'physical') element = imb.element;
+    /**
+     * R28 — what the ATTACKER is carrying from the new statuses: a disarmed enemy deals nothing (a
+     * boss half), and a stripped one loses the damage its modifiers gave it (js/actors.js records
+     * the product at spawn as `modDmg`). Nothing is removed, so nothing has to be put back.
+     */
+    if (!attacker.equipment && (attacker.statuses?.disarm || attacker.statuses?.transmuted)) amount *= attacker.boss ? 0.5 : 0;
+    if (!attacker.equipment && attacker.statuses?.strip && attacker.modDmg > 0) amount /= attacker.modDmg;
     /**
      * R25 — THE BREAKDOWN, so an outlier explains itself. "All my spells deal 6-30 but Consecrate
      * hits for like 600" could not be reproduced from the formula (400 random level-15 paladins
@@ -1597,7 +1642,9 @@ export class Rpg {
      * through. The enemy path keeps its own `incomingFrom(victim) * outgoingFrom(e)` in main.js and
      * is excluded by the same test as before, so nothing is counted twice.
      */
-    if (attacker.equipment && !defender.equipment) amount *= outgoingFrom(attacker) * incomingFrom(defender);
+    // R28 — and a FOLLOWER's own buffs (a Rally, a Den Mother, a howl) reach its bite the same way;
+    // before this a status on a pet changed nothing about how hard it hit
+    if ((attacker.equipment || attacker.owner) && !defender.equipment) amount *= outgoingFrom(attacker) * incomingFrom(defender);
     if (why && !defender.equipment) why.buffs = +(outgoingFrom(attacker) * incomingFrom(defender)).toFixed(2);
 
     /**
@@ -1625,6 +1672,8 @@ export class Rpg {
      * and it is a shape property rather than an affix so every rapier in the game has it.
      */
     if (pen > 0) armor *= 1 - Math.min(0.85, pen);
+    // R28 — a stripped enemy's armour goes back to what it was before its modifiers
+    if (defender.statuses?.strip && defender.modArmor > 0) armor /= defender.modArmor;
     amount *= 100 / (100 + Math.max(0, armor));
     const mres = d?.magicResist ?? defender.magicResist ?? 0;
     if (isMagic(element) && mres > 0) amount *= 100 / (100 + mres);
@@ -1641,11 +1690,41 @@ export class Rpg {
       if (defender.perkFlags?.riposte) defender.riposteReady = true;   // block arms it too
     }
     amount = Math.max(blocked ? 0 : 1, Math.round(amount));
+    // R28 — a skill with no `mult` lands its statuses and its knock and nothing else
+    if (noDamage) amount = 0;
 
     // a mana shield takes its share before health does
     // NOTHING in this game takes the player's mana when they are hit. The old mana shield did, and
     // it read as every enemy draining you; `cond_manaShieldOnHit` is a damage reduction now.
     const fromMana = 0;
+    /**
+     * R28 — A HIT ON SOMEBODY CARRYING A WARD, A COUNTER WINDOW, A PER-FOE GUARD OR A LINK.
+     * js/skillmech.js `onHurt` decides; js/skillrun.js acts on the events (the answering strike, the
+     * shockwave, the taunt). Only a skill status can carry these, so a plain body pays nothing.
+     */
+    let mechEvents = null;
+    if (defender.statuses && amount > 0) {
+      const hurt = mechOnHurt(defender, attacker, amount, { ranged });
+      amount = hurt.amount;
+      if (hurt.events.length) mechEvents = hurt.events;
+    }
+    // R28 P2 — a body in stasis cannot be hurt: the damage is BANKED and lands when it thaws
+    // (js/actors.js pays it out). A transformed one turns back on damage after its first second.
+    if (amount > 0 && defender.statuses?.stasis) {
+      // an enemy banks it; a follower or the player held in stasis simply takes nothing
+      if (!defender.owner && !defender.equipment) defender.statuses.stasis.bank = (defender.statuses.stasis.bank || 0) + amount;
+      amount = 0;
+    }
+    if (amount > 0 && defender.statuses?.transmuted) {
+      const tm = defender.statuses.transmuted;
+      if ((tm.total ?? 5) - tm.remaining > 1) { delete defender.statuses.transmuted; if (defender.statuses.chill?.name === 'Shrunk') delete defender.statuses.chill; }
+    }
+    // R28 — a sleeping body wakes on the first damage (unless a skill says it takes more hits)
+    if (amount > 0 && defender.statuses?.sleep) {
+      const sl = defender.statuses.sleep;
+      sl.hitsToWake = (sl.hitsToWake ?? 1) - 1;
+      if (sl.hitsToWake <= 0) { delete defender.statuses.sleep; defender.wokeAt = 1; }
+    }
     // then barrier, then health
     let absorbed = 0;
     if (defender.barrier > 0) {
@@ -1697,7 +1776,7 @@ export class Rpg {
       if (reflected > 0) attacker.hp = Math.max(0, attacker.hp - reflected);
     }
 
-    const result = { dodged: false, amount, crit, healed, manaBack, reflected, blocked, absorbed, fromMana, saved, element, dead: defender.hp <= 0, why };
+    const result = { dodged: false, amount, crit, healed, manaBack, reflected, blocked, absorbed, fromMana, saved, element, dead: defender.hp <= 0, why, mechEvents, noDamage };
     // A belt-and-braces guard. A NaN anywhere upstream used to walk straight into a health bar and
     // leave it reading "NaN / 94" with no way to tell where it came from; now it is caught here.
     if (!Number.isFinite(result.amount)) {
@@ -1739,6 +1818,18 @@ export class Rpg {
       if (rules.killRefund && defender.hp <= 0) {
         attacker.cooldownRefund = { skill: rules.skill, seconds: rules.killRefund };
       }
+    }
+    /**
+     * R28 — THE SKILL VOCABULARY THAT PAYS OUT ON A HIT: tags, stacks, detonations, spreads, the
+     * per-hit heals and mana, a critical's rider, and the kill book `onKill` reads. One call, so a
+     * rule added to js/skillmech.js reaches every skill without this function learning its name.
+     */
+    if (rules && (amount > 0 || noDamage)) result.mech = mechAfterHit(rules, attacker, defender, result, { applyStatus, consumed: mechHit?.consumed, damage: amount, crowd });
+    if (imb && amount > 0) {
+      if (imb.status && applyStatus) applyStatus(defender, imb.status, imb.statusSpec || null, Math.max(1, amount * 0.35));
+      imb.count = (imb.count || 0) + 1;
+      if (imb.every && imb.count % (imb.every.n || 4) === 0) (attacker.mechEvents || (attacker.mechEvents = [])).push({ kind: 'imbueBurst', at: { x: defender.x, z: defender.z }, spec: imb.every.burst || {}, element: imb.element || element });
+      if (imb.splash) (attacker.mechEvents || (attacker.mechEvents = [])).push({ kind: 'imbueSplash', at: { x: defender.x, z: defender.z }, radius: imb.splash, amount, element: imb.element || element, except: defender });
     }
 
     /**

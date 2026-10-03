@@ -1,0 +1,5075 @@
+{
+ "skills": {
+  "mend": {
+   "name": "Mend",
+   "shape": "self",
+   "element": "holy",
+   "heal": 0.35,
+   "cooldown": 14,
+   "mp": 18,
+   "healPets": 0.2,
+   "overflowBarrier": 0.1,
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "quick_mend",
+       "name": "Quick Mend",
+       "fx": "charge",
+       "mod": {
+        "mul": {
+         "heal": 0.6,
+         "cooldown": 0.5
+        }
+       }
+      },
+      {
+       "id": "purifying_mend",
+       "name": "Purifying Mend",
+       "fx": "ward",
+       "mod": {
+        "cleanse": {
+         "count": 2,
+         "types": [
+          "poison",
+          "bleed",
+          "burn",
+          "curse"
+         ]
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "lingering_mend",
+       "name": "Lingering Mend",
+       "fx": "zone",
+       "mod": {
+        "set": {
+         "status": "regen"
+        },
+        "mul": {
+         "heal": 0.6
+        }
+       }
+      },
+      {
+       "id": "mend_burst",
+       "name": "Mend Burst",
+       "fx": "burst",
+       "mod": {
+        "burst": {
+         "radius": 6,
+         "mult": 0.8,
+         "element": "holy"
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "echo",
+     "nodes": [
+      {
+       "id": "steadying_hand",
+       "name": "Steadying Hand",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "name": "Steadied",
+         "seconds": 6,
+         "resist": 0.15,
+         "pets": true
+        }
+       }
+      },
+      {
+       "id": "answered_call",
+       "name": "Answered Call",
+       "fx": "charge",
+       "requires": "raise_the_fallen",
+       "mod": {
+        "cutCooldown": {
+         "skill": "raise_the_fallen",
+         "seconds": 4,
+         "per": "cast",
+         "orSelf": 2
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "wellspring",
+     "nodes": [
+      {
+       "id": "second_mend",
+       "name": "Second Mend",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      },
+      {
+       "id": "emboldened",
+       "name": "Emboldened",
+       "fx": "charge",
+       "mod": {
+        "empowerNext": {
+         "count": 1,
+         "mult": 0.5,
+         "seconds": 6
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "sunlance": {
+   "name": "Sunlance",
+   "shape": "beam",
+   "element": "holy",
+   "mult": 1.5,
+   "range": 24,
+   "width": 1.4,
+   "cooldown": 6,
+   "mp": 10,
+   "onHit": {
+    "healAllies": 0.02
+   },
+   "tag": {
+    "id": "lit",
+    "seconds": 3
+   },
+   "talents": {
+    "1": {
+     "lib": "pierce",
+     "nodes": [
+      {
+       "id": "wide_lance",
+       "name": "Wide Lance",
+       "fx": "wide",
+       "mod": {
+        "set": {
+         "width": 3
+        },
+        "mul": {
+         "mult": 0.85
+        }
+       }
+      },
+      {
+       "id": "dawn_edge",
+       "name": "Dawn Edge",
+       "fx": "brand",
+       "mod": {
+        "bonusIf": [
+         {
+          "when": "family:undead,fiend",
+          "mult": 0.5
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "drain",
+     "nodes": [
+      {
+       "id": "blinding_lance",
+       "name": "Blinding Lance",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "weaken",
+          "dealLess": 0.25,
+          "seconds": 3
+         }
+        ]
+       }
+      },
+      {
+       "id": "searing_line",
+       "name": "Searing Line",
+       "fx": "zone",
+       "mod": {
+        "pool": {
+         "seconds": 3,
+         "radius": 1.2,
+         "power": 0.15,
+         "element": "holy",
+         "along": "beam"
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "brand",
+     "nodes": [
+      {
+       "id": "mending_light",
+       "name": "Mending Light",
+       "fx": "drain",
+       "mod": {
+        "onHit": {
+         "healShare": 0.25
+        }
+       }
+      },
+      {
+       "id": "lit_fuse",
+       "name": "Lit Fuse",
+       "fx": "charge",
+       "requires": "judgement",
+       "mod": {
+        "cutCooldown": {
+         "skill": "judgement",
+         "seconds": 1,
+         "per": "hit",
+         "orSelf": 0.5
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "crescendo",
+     "nodes": [
+      {
+       "id": "holy_echo",
+       "name": "Holy Echo",
+       "fx": "echo",
+       "mod": {
+        "again": {
+         "delay": 0.5,
+         "mult": 0.6
+        }
+       }
+      },
+      {
+       "id": "daystar",
+       "name": "Daystar",
+       "fx": "detonate",
+       "mod": {
+        "consumes": {
+         "tag": "lit",
+         "mult": 0.6,
+         "remove": true
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "sanctuary": {
+   "name": "Sanctuary",
+   "shape": "ground",
+   "element": "holy",
+   "range": 20,
+   "radius": 5,
+   "cooldown": 24,
+   "mp": 26,
+   "place": {
+    "kind": "zone",
+    "seconds": 6,
+    "radius": 5,
+    "every": 1,
+    "knockOut": 2,
+    "heal": 0.03
+   },
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "moving_sanctuary",
+       "name": "Moving Sanctuary",
+       "fx": "zone",
+       "mod": {
+        "place": {
+         "follow": "self",
+         "seconds": 4
+        }
+       }
+      },
+      {
+       "id": "small_mercy",
+       "name": "Small Mercy",
+       "fx": "charge",
+       "mod": {
+        "place": {
+         "radius": 3
+        },
+        "mul": {
+         "cooldown": 0.6
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "searing_ground",
+       "name": "Searing Ground",
+       "fx": "zone",
+       "mod": {
+        "place": {
+         "strike": {
+          "mult": 0.25,
+          "targets": 3
+         }
+        }
+       }
+      },
+      {
+       "id": "hushed_ground",
+       "name": "Hushed Ground",
+       "fx": "tag",
+       "mod": {
+        "place": {
+         "debuff": {
+          "id": "weaken",
+          "dealLess": 0.3
+         }
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "bulwark",
+     "nodes": [
+      {
+       "id": "shelter",
+       "name": "Shelter",
+       "fx": "ward",
+       "mod": {
+        "place": {
+         "blocksRanged": true
+        }
+       }
+      },
+      {
+       "id": "sanctified_rest",
+       "name": "Sanctified Rest",
+       "fx": "summon",
+       "mod": {
+        "revive": {
+         "share": 0.25
+        },
+        "mul": {
+         "cooldown": 1.25
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "aegis",
+     "nodes": [
+      {
+       "id": "warding_light",
+       "name": "Warding Light",
+       "fx": "ward",
+       "mod": {
+        "barrier": {
+         "share": 0.15,
+         "seconds": 6,
+         "pets": true
+        }
+       }
+      },
+      {
+       "id": "twin_sanctuary",
+       "name": "Twin Sanctuary",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "guardian_light": {
+   "name": "Guardian Light",
+   "shape": "self",
+   "element": "holy",
+   "cooldown": 30,
+   "mp": 24,
+   "summon": {
+    "def": "holy_wisp",
+    "name": "Guardian Light",
+    "count": 1,
+    "temporary": true,
+    "lifetime": 20,
+    "heal": {
+     "share": 0.06,
+     "every": 2,
+     "strike": 0.4
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "twin_lights",
+       "name": "Twin Lights",
+       "fx": "summon",
+       "mod": {
+        "summon": {
+         "count": 2,
+         "lifetime": 12
+        }
+       }
+      },
+      {
+       "id": "clearing_light",
+       "name": "Clearing Light",
+       "fx": "ward",
+       "mod": {
+        "cleanse": {
+         "count": 1,
+         "pets": true
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "lantern_death",
+       "name": "Lantern Death",
+       "fx": "burst",
+       "mod": {
+        "summon": {
+         "burstOnExpire": {
+          "radius": 8,
+          "mult": 0.8
+         }
+        }
+       }
+      },
+      {
+       "id": "searing_lamp",
+       "name": "Searing Lamp",
+       "fx": "tag",
+       "mod": {
+        "burst": {
+         "radius": 6,
+         "statuses": [
+          {
+           "id": "weaken",
+           "dealLess": 0.2,
+           "seconds": 4
+          }
+         ]
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "lamp_bearer",
+       "name": "Lamp Bearer",
+       "fx": "zone",
+       "mod": {
+        "place": {
+         "kind": "zone",
+         "seconds": 10,
+         "radius": 4,
+         "follow": "target",
+         "every": 1,
+         "debuff": {
+          "id": "marked",
+          "takeMore": 0.15
+         }
+        }
+       }
+      },
+      {
+       "id": "lamplighter",
+       "name": "Lamplighter",
+       "fx": "charge",
+       "requires": "mend",
+       "mod": {
+        "cutCooldown": {
+         "skill": "mend",
+         "seconds": 4,
+         "per": "cast",
+         "orSelf": 6
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "aegis",
+     "nodes": [
+      {
+       "id": "choir",
+       "name": "Choir",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      },
+      {
+       "id": "last_light",
+       "name": "Last Light",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "name": "Last Light",
+         "seconds": 12,
+         "deathPreventOnce": {}
+        },
+        "mul": {
+         "cooldown": 1.5
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "raise_the_fallen": {
+   "name": "Raise the Fallen",
+   "shape": "self",
+   "element": "holy",
+   "status": "rally",
+   "pets": true,
+   "cooldown": 40,
+   "mp": 30,
+   "revive": {
+    "share": 0.5
+   },
+   "healPets": 0.3,
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "swift_return",
+       "name": "Swift Return",
+       "fx": "charge",
+       "mod": {
+        "revive": {
+         "share": 0.3
+        },
+        "mul": {
+         "cooldown": 0.65
+        }
+       }
+      },
+      {
+       "id": "rising_ward",
+       "name": "Rising Ward",
+       "fx": "ward",
+       "mod": {
+        "barrier": {
+         "share": 0.15,
+         "seconds": 8,
+         "pets": true
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "raised_in_wrath",
+       "name": "Raised in Wrath",
+       "fx": "summon",
+       "mod": {
+        "selfBuff": {
+         "name": "Wrath of the Raised",
+         "seconds": 10,
+         "damage": 0.3,
+         "petsOnly": true
+        }
+       }
+      },
+      {
+       "id": "shared_breath",
+       "name": "Shared Breath",
+       "fx": "burst",
+       "mod": {
+        "burst": {
+         "radius": 10,
+         "heal": 0.2
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "cleansing_rise",
+       "name": "Cleansing Rise",
+       "fx": "ward",
+       "mod": {
+        "cleanse": {
+         "count": 2,
+         "pets": true
+        }
+       }
+      },
+      {
+       "id": "pulse_of_return",
+       "name": "Pulse of Return",
+       "fx": "burst",
+       "mod": {
+        "burst": {
+         "radius": 6,
+         "mult": 1.5,
+         "element": "holy"
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "wellspring",
+     "nodes": [
+      {
+       "id": "undying_company",
+       "name": "Undying Company",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "name": "Undying Company",
+         "seconds": 8,
+         "deathPrevent": true,
+         "petsOnly": true
+        },
+        "mul": {
+         "cooldown": 1.15
+        }
+       }
+      },
+      {
+       "id": "grace_given",
+       "name": "Grace Given",
+       "fx": "charge",
+       "mod": {
+        "empowerNext": {
+         "count": 2,
+         "free": true,
+         "seconds": 10
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "judgement": {
+   "name": "Falling Light",
+   "shape": "ground",
+   "element": "holy",
+   "mult": 2.4,
+   "range": 28,
+   "radius": 3.5,
+   "delay": 0.7,
+   "cooldown": 14,
+   "mp": 22,
+   "consumes": {
+    "tag": "lit",
+    "mult": 0.5
+   },
+   "place": {
+    "kind": "zone",
+    "seconds": 1,
+    "radius": 3.5,
+    "every": 1,
+    "heal": 0.1
+   },
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "wide_light",
+       "name": "Wide Light",
+       "fx": "wide",
+       "mod": {
+        "set": {
+         "radius": 6,
+         "delay": 1.2
+        }
+       }
+      },
+      {
+       "id": "shackling_light",
+       "name": "Shackling Light",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "root",
+          "seconds": 1.5
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "weighed",
+       "name": "Weighed",
+       "fx": "heavy",
+       "mod": {
+        "bonusIf": [
+         {
+          "when": "execute:0.3",
+          "mult": 1
+         }
+        ]
+       }
+      },
+      {
+       "id": "lingering_dawn",
+       "name": "Lingering Dawn",
+       "fx": "tag",
+       "mod": {
+        "tag": {
+         "id": "lit",
+         "seconds": 3
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "three_columns",
+       "name": "Three Columns",
+       "fx": "zone",
+       "mod": {
+        "line": {
+         "length": 12,
+         "width": 3.5
+        },
+        "mul": {
+         "mult": 0.6
+        }
+       }
+      },
+      {
+       "id": "sentence_passed",
+       "name": "Sentence Passed",
+       "fx": "charge",
+       "mod": {
+        "onKill": {
+         "refund": 0.5
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "conflagration",
+     "nodes": [
+      {
+       "id": "last_sentence",
+       "name": "Last Sentence",
+       "fx": "brand",
+       "mod": {
+        "bonusIf": [
+         {
+          "when": "family:undead,fiend",
+          "mult": 0.8
+         }
+        ]
+       }
+      },
+      {
+       "id": "standing_light",
+       "name": "Standing Light",
+       "fx": "zone",
+       "mod": {
+        "pool": {
+         "seconds": 4,
+         "radius": 3.5,
+         "power": 0.3,
+         "element": "holy"
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "shadow_lance": {
+   "name": "Shadow Lance",
+   "shape": "bolt",
+   "element": "shadow",
+   "mult": 1.9,
+   "range": 38,
+   "splash": 2,
+   "cooldown": 5,
+   "mp": 10,
+   "onHit": {
+    "healShare": 0.25
+   },
+   "talents": {
+    "1": {
+     "lib": "seeking",
+     "nodes": [
+      {
+       "id": "withering_lance",
+       "name": "Withering Lance",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "weaken",
+          "dealLess": 0.2,
+          "seconds": 4
+         }
+        ]
+       }
+      },
+      {
+       "id": "long_lance",
+       "name": "Long Lance",
+       "fx": "lance",
+       "mod": {
+        "add": {
+         "pierce": 2
+        },
+        "mul": {
+         "mult": 0.85
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "chain",
+     "nodes": [
+      {
+       "id": "grief",
+       "name": "Grief",
+       "fx": "brand",
+       "mod": {
+        "consumes": {
+         "tag": "killer",
+         "mult": 0.6
+        }
+       }
+      },
+      {
+       "id": "spirit_feed",
+       "name": "Spirit Feed",
+       "fx": "drain",
+       "mod": {
+        "onHit": {
+         "healPet": 0.03
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "brand",
+     "nodes": [
+      {
+       "id": "dark_mend",
+       "name": "Dark Mend",
+       "fx": "drain",
+       "mod": {
+        "onHit": {
+         "healShare": 0.5
+        },
+        "mul": {
+         "mult": 0.8
+        }
+       }
+      },
+      {
+       "id": "split_shadows",
+       "name": "Split Shadows",
+       "fx": "fan",
+       "mod": {
+        "split": {
+         "shards": 3,
+         "range": 6,
+         "keep": 0.35,
+         "when": "hit"
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "cascade",
+     "nodes": [
+      {
+       "id": "endless_night",
+       "name": "Endless Night",
+       "fx": "charge",
+       "mod": {
+        "onKill": {
+         "reset": true,
+         "heal": 0.03
+        }
+       }
+      },
+      {
+       "id": "shared_guilt",
+       "name": "Shared Guilt",
+       "fx": "tag",
+       "mod": {
+        "spreadStatus": {
+         "types": [
+          "killer"
+         ],
+         "radius": 6,
+         "max": 2
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "dawn_prayer": {
+   "name": "Prayer of Dawn",
+   "shape": "around",
+   "element": "holy",
+   "mult": 1.1,
+   "radius": 10,
+   "heal": 0.2,
+   "cooldown": 12,
+   "mp": 16,
+   "healPets": 0.2,
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "wide_prayer",
+       "name": "Wide Prayer",
+       "fx": "wide",
+       "mod": {
+        "set": {
+         "radius": 16
+        },
+        "mul": {
+         "mult": 0.7
+        }
+       }
+      },
+      {
+       "id": "morning_hush",
+       "name": "Morning Hush",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "weaken",
+          "dealLess": 0.2,
+          "seconds": 4
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "lingering_prayer",
+       "name": "Lingering Prayer",
+       "fx": "zone",
+       "mod": {
+        "place": {
+         "kind": "zone",
+         "follow": "self",
+         "seconds": 6,
+         "radius": 10,
+         "every": 1,
+         "heal": 0.02
+        }
+       }
+      },
+      {
+       "id": "searing_prayer",
+       "name": "Searing Prayer",
+       "fx": "burst",
+       "mod": {
+        "set": {
+         "status": "burn",
+         "statusMult": 0.5
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "echo",
+     "nodes": [
+      {
+       "id": "blessed_company",
+       "name": "Blessed Company",
+       "fx": "summon",
+       "mod": {
+        "selfBuff": {
+         "name": "Blessed",
+         "seconds": 8,
+         "damage": 0.3,
+         "petsOnly": true
+        }
+       }
+      },
+      {
+       "id": "answered",
+       "name": "Answered",
+       "fx": "ward",
+       "mod": {
+        "overflowBarrier": 0.15
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "wellspring",
+     "nodes": [
+      {
+       "id": "twice_said",
+       "name": "Twice Said",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      },
+      {
+       "id": "undead_dawn",
+       "name": "Undead Dawn",
+       "fx": "brand",
+       "mod": {
+        "bonusIf": [
+         {
+          "when": "family:undead,fiend",
+          "mult": 1
+         }
+        ]
+       }
+      }
+     ]
+    }
+   }
+  },
+  "mark_the_killer": {
+   "name": "Mark the Killer",
+   "shape": "bolt",
+   "element": "shadow",
+   "mult": 1.2,
+   "range": 34,
+   "cooldown": 8,
+   "mp": 9,
+   "tag": {
+    "id": "killer",
+    "seconds": 8
+   },
+   "talents": {
+    "1": {
+     "lib": "seeking",
+     "nodes": [
+      {
+       "id": "two_marks",
+       "name": "Two Marks",
+       "fx": "fan",
+       "mod": {
+        "set": {
+         "projectiles": 2,
+         "spread": 0.2
+        },
+        "mul": {
+         "mult": 0.6
+        }
+       }
+      },
+      {
+       "id": "haunted",
+       "name": "Haunted",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "chill",
+          "slow": 0.3,
+          "seconds": 6
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "hunted",
+       "name": "Hunted",
+       "fx": "summon",
+       "mod": {
+        "command": {
+         "order": "focus",
+         "seconds": 8
+        }
+       }
+      },
+      {
+       "id": "debt_owed",
+       "name": "Debt Owed",
+       "fx": "detonate",
+       "mod": {
+        "tag": {
+         "store": 0.25
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "repayment",
+       "name": "Repayment",
+       "fx": "burst",
+       "mod": {
+        "onKill": {
+         "burst": {
+          "radius": 6,
+          "mult": 1.5
+         }
+        }
+       }
+      },
+      {
+       "id": "shadow_debt",
+       "name": "Shadow Debt",
+       "fx": "drain",
+       "mod": {
+        "onHit": {
+         "heal": 0.04
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "unmaking",
+     "nodes": [
+      {
+       "id": "last_word",
+       "name": "Last Word",
+       "fx": "heavy",
+       "mod": {
+        "bonusIf": [
+         {
+          "when": "execute:0.3",
+          "mult": 0.8
+         }
+        ]
+       }
+      },
+      {
+       "id": "dread",
+       "name": "Dread",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "fear",
+          "seconds": 2
+         }
+        ]
+       }
+      }
+     ]
+    }
+   }
+  },
+  "vigil": {
+   "name": "Vigil",
+   "shape": "self",
+   "element": "holy",
+   "cooldown": 45,
+   "mp": 24,
+   "selfBuff": {
+    "name": "Vigil",
+    "seconds": 12,
+    "deathPreventOnce": {
+     "burst": {
+      "radius": 6,
+      "mult": 1.5
+     }
+    },
+    "pets": true
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "night_watch",
+       "name": "Night Watch",
+       "fx": "drain",
+       "mod": {
+        "selfBuff": {
+         "manaOnHurt": 3
+        }
+       }
+      },
+      {
+       "id": "vigil_light",
+       "name": "Vigil Light",
+       "fx": "drain",
+       "mod": {
+        "healPets": 0.2
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "steeled_watch",
+       "name": "Steeled Watch",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "resist": 0.15
+        }
+       }
+      },
+      {
+       "id": "answering_dark",
+       "name": "Answering Dark",
+       "fx": "counter",
+       "mod": {
+        "selfBuff": {
+         "reflect": 0.2
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "killers_debt",
+       "name": "Killer's Debt",
+       "fx": "tag",
+       "mod": {
+        "burst": {
+         "radius": 8,
+         "statuses": [
+          {
+           "id": "killer",
+           "seconds": 8
+          }
+         ]
+        }
+       }
+      },
+      {
+       "id": "calm_before",
+       "name": "Calm Before",
+       "fx": "ward",
+       "mod": {
+        "cleanse": {
+         "count": 2,
+         "pets": true
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "aegis",
+     "nodes": [
+      {
+       "id": "dawn_rising",
+       "name": "Dawn Rising",
+       "fx": "burst",
+       "mod": {
+        "selfBuff": {
+         "deathPreventOnce": {
+          "burst": {
+           "radius": 10,
+           "mult": 3
+          }
+         }
+        }
+       }
+      },
+      {
+       "id": "debt_of_light",
+       "name": "Debt of Light",
+       "fx": "ward",
+       "mod": {
+        "barrier": {
+         "share": 0.2,
+         "seconds": 12,
+         "pets": true
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "dread_hymn": {
+   "name": "Dread Hymn",
+   "shape": "around",
+   "element": "shadow",
+   "mult": 1.1,
+   "radius": 8,
+   "cooldown": 18,
+   "mp": 14,
+   "statuses": [
+    {
+     "id": "fear",
+     "seconds": 3
+    }
+   ],
+   "selfBuff": {
+    "name": "Dread Hymn",
+    "seconds": 4,
+    "damage": 0.2,
+    "petsOnly": true
+   },
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "wide_hymn",
+       "name": "Wide Hymn",
+       "fx": "wide",
+       "mod": {
+        "set": {
+         "radius": 12
+        },
+        "mul": {
+         "cooldown": 1.2
+        }
+       }
+      },
+      {
+       "id": "cold_dread",
+       "name": "Cold Dread",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "chill",
+          "slow": 0.3,
+          "seconds": 5
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "haunting",
+       "name": "Haunting",
+       "fx": "zone",
+       "mod": {
+        "pool": {
+         "seconds": 4,
+         "radius": 6,
+         "power": 0.2,
+         "element": "shadow"
+        }
+       }
+      },
+      {
+       "id": "steadying_verse",
+       "name": "Steadying Verse",
+       "fx": "drain",
+       "mod": {
+        "healPets": 0.12
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "bulwark",
+     "nodes": [
+      {
+       "id": "despair",
+       "name": "Despair",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "weaken",
+          "dealLess": 0.25,
+          "seconds": 6
+         }
+        ]
+       }
+      },
+      {
+       "id": "dark_refrain",
+       "name": "Dark Refrain",
+       "fx": "charge",
+       "requires": "mark_the_killer",
+       "mod": {
+        "cutCooldown": {
+         "skill": "mark_the_killer",
+         "seconds": 4,
+         "per": "cast",
+         "orSelf": 3
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "aegis",
+     "nodes": [
+      {
+       "id": "two_verses",
+       "name": "Two Verses",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      },
+      {
+       "id": "unhinged",
+       "name": "Unhinged",
+       "fx": "tag",
+       "mod": {
+        "set": {
+         "statuses": null
+        },
+        "turned": {
+         "seconds": 3
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "twinlight": {
+   "name": "Twinlight",
+   "shape": "around",
+   "element": "shadow",
+   "mult": 0.8,
+   "radius": 14,
+   "repeats": 6,
+   "repeatEvery": 1,
+   "cooldown": 40,
+   "mp": 36,
+   "onHit": {
+    "healShare": 0.25
+   },
+   "place": {
+    "kind": "zone",
+    "follow": "self",
+    "seconds": 6,
+    "radius": 14,
+    "every": 1,
+    "heal": 0.03
+   },
+   "talents": {
+    "1": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "cleansing_dawn",
+       "name": "Cleansing Dawn",
+       "fx": "ward",
+       "mod": {
+        "cleanse": {
+         "count": 1,
+         "pets": true
+        }
+       }
+      },
+      {
+       "id": "dusk_ward",
+       "name": "Dusk Ward",
+       "fx": "ward",
+       "mod": {
+        "barrier": {
+         "share": 0.12,
+         "seconds": 6,
+         "pets": true
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "shared_light",
+       "name": "Shared Light",
+       "fx": "summon",
+       "mod": {
+        "selfBuff": {
+         "name": "Twinlit",
+         "seconds": 6,
+         "damage": 0.25,
+         "petsOnly": true
+        }
+       }
+      },
+      {
+       "id": "raising_light",
+       "name": "Raising Light",
+       "fx": "summon",
+       "mod": {
+        "revive": {
+         "share": 0.3
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "sunward",
+       "name": "Sunward",
+       "fx": "brand",
+       "mod": {
+        "set": {
+         "element": "holy"
+        },
+        "bonusIf": [
+         {
+          "when": "family:undead,fiend",
+          "mult": 0.6
+         }
+        ]
+       }
+      },
+      {
+       "id": "lingering_dusk",
+       "name": "Lingering Dusk",
+       "fx": "zone",
+       "mod": {
+        "statuses": [
+         {
+          "id": "weaken",
+          "dealLess": 0.2,
+          "seconds": 3
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "crescendo",
+     "nodes": [
+      {
+       "id": "final_light",
+       "name": "Final Light",
+       "fx": "burst",
+       "mod": {
+        "selfBuff": {
+         "name": "Twinlight",
+         "seconds": 6,
+         "onEnd": {
+          "shape": "around",
+          "radius": 14,
+          "mult": 3,
+          "element": "holy"
+         }
+        }
+       }
+      },
+      {
+       "id": "long_dusk",
+       "name": "Long Dusk",
+       "fx": "charge",
+       "mod": {
+        "add": {
+         "repeats.count": 4,
+         "place.seconds": 4
+        },
+        "mul": {
+         "cooldown": 1.25
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "omen_bolt": {
+   "name": "Omen Bolt",
+   "shape": "bolt",
+   "element": "arcane",
+   "mult": 1.2,
+   "range": 32,
+   "cooldown": 3,
+   "mp": 5,
+   "tag": {
+    "id": "omen",
+    "seconds": 6
+   },
+   "statuses": [
+    {
+     "id": "weaken",
+     "dealLess": 0.25,
+     "seconds": 3
+    }
+   ],
+   "talents": {
+    "1": {
+     "lib": "seeking",
+     "nodes": [
+      {
+       "id": "twin_omens",
+       "name": "Twin Omens",
+       "fx": "fan",
+       "mod": {
+        "set": {
+         "projectiles": 2,
+         "spread": 0.2
+        },
+        "mul": {
+         "mult": 0.6
+        }
+       }
+      },
+      {
+       "id": "seers_tithe",
+       "name": "Seer's Tithe",
+       "fx": "drain",
+       "mod": {
+        "onHit": {
+         "mana": 2
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "chain",
+     "nodes": [
+      {
+       "id": "ill_omen",
+       "name": "Ill Omen",
+       "fx": "tag",
+       "mod": {
+        "tag": {
+         "takeMore": 0.12
+        }
+       }
+      },
+      {
+       "id": "familiar_sight",
+       "name": "Familiar Sight",
+       "fx": "summon",
+       "mod": {
+        "command": {
+         "order": "focus",
+         "seconds": 4
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "brand",
+     "nodes": [
+      {
+       "id": "every_path",
+       "name": "Every Path",
+       "fx": "chain",
+       "mod": {
+        "spreadStatus": {
+         "types": [
+          "omen"
+         ],
+         "radius": 6,
+         "max": 2
+        }
+       }
+      },
+      {
+       "id": "twisting_path",
+       "name": "Twisting Path",
+       "fx": "chain",
+       "mod": {
+        "ricochet": {
+         "bounces": 1,
+         "range": 8,
+         "keep": 0.6
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "cascade",
+     "nodes": [
+      {
+       "id": "doom_foretold",
+       "name": "Doom Foretold",
+       "fx": "charge",
+       "mod": {
+        "cutCooldown": {
+         "skill": "others",
+         "seconds": 1,
+         "per": "kill"
+        }
+       }
+      },
+      {
+       "id": "sealed_omen",
+       "name": "Sealed Omen",
+       "fx": "detonate",
+       "mod": {
+        "consumes": {
+         "tag": "omen",
+         "mult": 0.5,
+         "remove": true
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "foresight": {
+   "name": "Foresight",
+   "shape": "self",
+   "element": "arcane",
+   "cooldown": 16,
+   "mp": 14,
+   "ward": {
+    "charges": 1,
+    "threshold": 0.1,
+    "seconds": 15,
+    "pets": true
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "twofold_sight",
+       "name": "Twofold Sight",
+       "fx": "ward",
+       "mod": {
+        "ward": {
+         "charges": 2
+        },
+        "mul": {
+         "cooldown": 1.25
+        }
+       }
+      },
+      {
+       "id": "clear_eyes",
+       "name": "Clear Eyes",
+       "fx": "ward",
+       "mod": {
+        "cleanse": {
+         "count": 1,
+         "pets": true
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "warning_pulse",
+       "name": "Warning Pulse",
+       "fx": "tag",
+       "mod": {
+        "burst": {
+         "radius": 6,
+         "statuses": [
+          {
+           "id": "weaken",
+           "dealLess": 0.2,
+           "seconds": 4
+          }
+         ]
+        }
+       }
+      },
+      {
+       "id": "seers_barrier",
+       "name": "Seer's Barrier",
+       "fx": "ward",
+       "mod": {
+        "barrier": {
+         "share": 0.1,
+         "seconds": 8,
+         "pets": true
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "echo",
+     "nodes": [
+      {
+       "id": "calm_mind",
+       "name": "Calm Mind",
+       "fx": "drain",
+       "mod": {
+        "selfBuff": {
+         "name": "Calm Mind",
+         "seconds": 15,
+         "manaOnHurt": 3
+        }
+       }
+      },
+      {
+       "id": "fated_strike",
+       "name": "Fated Strike",
+       "fx": "charge",
+       "mod": {
+        "empowerNext": {
+         "count": 1,
+         "mult": 0.5,
+         "seconds": 8
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "aegis",
+     "nodes": [
+      {
+       "id": "perfect_foresight",
+       "name": "Perfect Foresight",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "name": "Perfect Foresight",
+         "seconds": 12,
+         "deathPreventOnce": {},
+         "pets": true
+        },
+        "mul": {
+         "cooldown": 2.8
+        }
+       }
+      },
+      {
+       "id": "prophets_ward",
+       "name": "Prophet's Ward",
+       "fx": "counter",
+       "mod": {
+        "selfBuff": {
+         "name": "Prophet's Ward",
+         "seconds": 15,
+         "reflect": 0.3
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "prophecy": {
+   "name": "Prophecy",
+   "shape": "ground",
+   "element": "arcane",
+   "mult": 1.5,
+   "range": 30,
+   "radius": 6,
+   "delay": 2.5,
+   "cooldown": 14,
+   "mp": 16,
+   "place": {
+    "kind": "zone",
+    "follow": "target",
+    "seconds": 2.5,
+    "radius": 6,
+    "every": 1,
+    "debuff": {
+     "id": "chill",
+     "slow": 0.3
+    }
+   },
+   "consumes": {
+    "tag": "omen",
+    "mult": 1
+   },
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "swift_fate",
+       "name": "Swift Fate",
+       "fx": "quick",
+       "mod": {
+        "set": {
+         "delay": 1
+        },
+        "mul": {
+         "mult": 0.8
+        }
+       }
+      },
+      {
+       "id": "grand_fate",
+       "name": "Grand Fate",
+       "fx": "wide",
+       "mod": {
+        "set": {
+         "radius": 9,
+         "delay": 4
+        },
+        "mul": {
+         "mult": 1.6,
+         "cooldown": 1.3
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "binding_fate",
+       "name": "Binding Fate",
+       "fx": "trap",
+       "mod": {
+        "place": {
+         "debuff": {
+          "id": "root"
+         }
+        }
+       }
+      },
+      {
+       "id": "fated_wounds",
+       "name": "Fated Wounds",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "curse"
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "twice_foretold",
+       "name": "Twice Foretold",
+       "fx": "echo",
+       "mod": {
+        "again": {
+         "delay": 1.5,
+         "mult": 0.6
+        }
+       }
+      },
+      {
+       "id": "foreseen_opening",
+       "name": "Foreseen Opening",
+       "fx": "detonate",
+       "mod": {
+        "consumes": {
+         "remove": true
+        },
+        "knock": {
+         "stagger": 1
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "conflagration",
+     "nodes": [
+      {
+       "id": "inevitable",
+       "name": "Inevitable",
+       "fx": "charge",
+       "mod": {
+        "resetOn": {
+         "when": "crowd:3"
+        }
+       }
+      },
+      {
+       "id": "fates_pull",
+       "name": "Fate's Pull",
+       "fx": "pull",
+       "mod": {
+        "pullIn": {
+         "metres": 4,
+         "to": "impact"
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "fate_thread": {
+   "name": "Thread of Fate",
+   "shape": "self",
+   "element": "arcane",
+   "cooldown": 18,
+   "mp": 12,
+   "link": {
+    "to": "follower",
+    "share": 0.5,
+    "seconds": 8,
+    "range": 24
+   },
+   "status": "regen",
+   "pets": true,
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "turned_thread",
+       "name": "Turned Thread",
+       "fx": "link",
+       "mod": {
+        "link": {
+         "to": "enemy",
+         "share": 0.3
+        }
+       }
+      },
+      {
+       "id": "kindred_pace",
+       "name": "Kindred Pace",
+       "fx": "leap",
+       "mod": {
+        "selfBuff": {
+         "name": "Kindred Pace",
+         "seconds": 8,
+         "movePct": 0.15,
+         "pets": true
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "thin_thread",
+       "name": "Thin Thread",
+       "fx": "link",
+       "mod": {
+        "link": {
+         "threshold": 0.1
+        }
+       }
+      },
+      {
+       "id": "woven_mend",
+       "name": "Woven Mend",
+       "fx": "ward",
+       "mod": {
+        "barrier": {
+         "share": 0.15,
+         "seconds": 8,
+         "pets": true
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "cut_the_thread",
+       "name": "Cut the Thread",
+       "fx": "detonate",
+       "mod": {
+        "recast": {
+         "window": 8,
+         "then": {
+          "shape": "around",
+          "radius": 6,
+          "mult": 2,
+          "element": "arcane"
+         }
+        }
+       }
+      },
+      {
+       "id": "mirrored_pain",
+       "name": "Mirrored Pain",
+       "fx": "counter",
+       "mod": {
+        "selfBuff": {
+         "name": "Mirrored Pain",
+         "seconds": 8,
+         "reflect": 0.2
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "aegis",
+     "nodes": [
+      {
+       "id": "long_weave",
+       "name": "Long Weave",
+       "fx": "link",
+       "mod": {
+        "link": {
+         "range": 36,
+         "seconds": 12
+        }
+       }
+      },
+      {
+       "id": "lifeline",
+       "name": "Lifeline",
+       "fx": "summon",
+       "mod": {
+        "revive": {
+         "share": 0.3
+        },
+        "mul": {
+         "cooldown": 1.3
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "turn_aside": {
+   "name": "Turn Aside",
+   "shape": "around",
+   "element": "arcane",
+   "mult": 1.1,
+   "radius": 6,
+   "cooldown": 12,
+   "mp": 12,
+   "knock": {
+    "push": 3,
+    "interrupt": true
+   },
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "wide_turning",
+       "name": "Wide Turning",
+       "fx": "wide",
+       "mod": {
+        "set": {
+         "radius": 9
+        },
+        "mul": {
+         "mult": 0.75
+        }
+       }
+      },
+      {
+       "id": "turn_inward",
+       "name": "Turn Inward",
+       "fx": "pull",
+       "mod": {
+        "knock": {
+         "push": 0,
+         "stagger": 0.3
+        },
+        "pullIn": {
+         "metres": 3,
+         "to": "self"
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "shatter",
+     "nodes": [
+      {
+       "id": "dazing_turn",
+       "name": "Dazing Turn",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "weaken",
+          "dealLess": 0.25,
+          "seconds": 3
+         }
+        ]
+       }
+      },
+      {
+       "id": "stillness",
+       "name": "Stillness",
+       "fx": "knock",
+       "mod": {
+        "knock": {
+         "push": 0,
+         "stagger": 1
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "bulwark",
+     "nodes": [
+      {
+       "id": "warded_burst",
+       "name": "Warded Burst",
+       "fx": "ward",
+       "mod": {
+        "ward": {
+         "charges": 1,
+         "threshold": 0.1,
+         "seconds": 6,
+         "pets": true
+        }
+       }
+      },
+      {
+       "id": "omen_sweep",
+       "name": "Omen Sweep",
+       "fx": "tag",
+       "mod": {
+        "tag": {
+         "id": "omen",
+         "seconds": 6
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "aegis",
+     "nodes": [
+      {
+       "id": "twice_turned",
+       "name": "Twice Turned",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      },
+      {
+       "id": "ward_line",
+       "name": "Ward Line",
+       "fx": "wall",
+       "mod": {
+        "wall": {
+         "length": 6,
+         "seconds": 4,
+         "blocksMove": false,
+         "blocksRanged": true
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "last_prophecy": {
+   "name": "The Last Prophecy",
+   "shape": "self",
+   "element": "arcane",
+   "cooldown": 60,
+   "mp": 36,
+   "place": {
+    "kind": "zone",
+    "follow": "self",
+    "seconds": 8,
+    "radius": 20,
+    "every": 1,
+    "debuff": {
+     "id": "weaken",
+     "dealLess": 0.25
+    }
+   },
+   "selfBuff": {
+    "name": "The Last Prophecy",
+    "seconds": 8,
+    "damage": 0.4,
+    "petsOnly": true,
+    "onEnd": {
+     "shape": "around",
+     "radius": 12,
+     "mult": 3,
+     "element": "arcane"
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "swift_end",
+       "name": "Swift End",
+       "fx": "quick",
+       "mod": {
+        "selfBuff": {
+         "seconds": 5
+        },
+        "add": {
+         "place.seconds": -3
+        },
+        "mul": {
+         "cooldown": 0.7
+        }
+       }
+      },
+      {
+       "id": "seers_calm",
+       "name": "Seer's Calm",
+       "fx": "drain",
+       "mod": {
+        "selfBuff": {
+         "noMana": true
+        },
+        "mul": {
+         "cooldown": 1.15
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "stunning_vision",
+       "name": "Stunning Vision",
+       "fx": "tag",
+       "mod": {
+        "burst": {
+         "radius": 12,
+         "statuses": [
+          {
+           "id": "root",
+           "seconds": 2
+          }
+         ]
+        }
+       }
+      },
+      {
+       "id": "all_paths",
+       "name": "All Paths",
+       "fx": "ward",
+       "mod": {
+        "ward": {
+         "charges": 1,
+         "threshold": 0.1,
+         "seconds": 8,
+         "pets": true
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "fated_fall",
+       "name": "Fated Fall",
+       "fx": "charge",
+       "requires": "prophecy",
+       "mod": {
+        "cutCooldown": {
+         "skill": "prophecy",
+         "seconds": 6,
+         "per": "cast",
+         "orSelf": 10
+        }
+       }
+      },
+      {
+       "id": "spoken_doom",
+       "name": "Spoken Doom",
+       "fx": "post",
+       "mod": {
+        "place": {
+         "strike": {
+          "mult": 0.4,
+          "targets": 2
+         }
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "crescendo",
+     "nodes": [
+      {
+       "id": "ending_written",
+       "name": "Ending Written",
+       "fx": "heavy",
+       "mod": {
+        "selfBuff": {
+         "onEnd": {
+          "shape": "around",
+          "radius": 8,
+          "mult": 4.5,
+          "element": "arcane"
+         }
+        }
+       }
+      },
+      {
+       "id": "retold",
+       "name": "Retold",
+       "fx": "charge",
+       "mod": {
+        "selfBuff": {
+         "cdRate": 1.5
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "spirit_bolt": {
+   "name": "Spirit Bolt",
+   "shape": "bolt",
+   "element": "lightning",
+   "mult": 1.2,
+   "range": 32,
+   "cooldown": 3,
+   "mp": 5,
+   "ricochet": {
+    "bounces": 2,
+    "range": 8,
+    "keep": 0.7
+   },
+   "onHit": {
+    "healAllies": 0.02
+   },
+   "talents": {
+    "1": {
+     "lib": "seeking",
+     "nodes": [
+      {
+       "id": "forked_spirit",
+       "name": "Forked Spirit",
+       "fx": "fan",
+       "mod": {
+        "split": {
+         "shards": 2,
+         "range": 8,
+         "keep": 0.4,
+         "when": "kill"
+        }
+       }
+      },
+      {
+       "id": "static_touch",
+       "name": "Static Touch",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "shock",
+          "seconds": 3,
+          "chance": 0.25
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "post_charge",
+       "name": "Post Charge",
+       "fx": "charge",
+       "requires": "storm_post",
+       "mod": {
+        "cutCooldown": {
+         "skill": "storm_post",
+         "seconds": 0.5,
+         "per": "hit",
+         "orSelf": 0.3
+        }
+       }
+      },
+      {
+       "id": "spirit_mark",
+       "name": "Spirit Mark",
+       "fx": "summon",
+       "mod": {
+        "command": {
+         "order": "pounce",
+         "seconds": 4
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "echo",
+     "nodes": [
+      {
+       "id": "elders_share",
+       "name": "Elders' Share",
+       "fx": "drain",
+       "mod": {
+        "onHit": {
+         "healAllies": 0.04
+        },
+        "mul": {
+         "mult": 0.8
+        }
+       }
+      },
+      {
+       "id": "spirit_rebound",
+       "name": "Spirit Rebound",
+       "fx": "drain",
+       "mod": {
+        "onHit": {
+         "mana": 1
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "cascade",
+     "nodes": [
+      {
+       "id": "spirit_storm",
+       "name": "Spirit Storm",
+       "fx": "chain",
+       "mod": {
+        "ricochet": {
+         "bounces": 5
+        },
+        "mul": {
+         "mult": 0.8
+        }
+       }
+      },
+      {
+       "id": "bears_answer",
+       "name": "Bear's Answer",
+       "fx": "summon",
+       "mod": {
+        "cutCooldown": {
+         "skill": "followers",
+         "seconds": 1,
+         "per": "hit"
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "mending_post": {
+   "name": "Mending Post",
+   "shape": "ground",
+   "element": "nature",
+   "range": 12,
+   "cooldown": 18,
+   "mp": 16,
+   "place": {
+    "kind": "pulse",
+    "seconds": 12,
+    "radius": 8,
+    "every": 1,
+    "heal": 0.02,
+    "hp": 0.3,
+    "max": 2
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "carried_post",
+       "name": "Carried Post",
+       "fx": "zone",
+       "mod": {
+        "place": {
+         "follow": "self",
+         "radius": 5
+        }
+       }
+      },
+      {
+       "id": "clinging_roots",
+       "name": "Clinging Roots",
+       "fx": "tag",
+       "mod": {
+        "place": {
+         "debuff": {
+          "id": "chill",
+          "slow": 0.3
+         }
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "cleansing_post",
+       "name": "Cleansing Post",
+       "fx": "ward",
+       "mod": {
+        "cleanse": {
+         "count": 2,
+         "pets": true
+        }
+       }
+      },
+      {
+       "id": "stone_bark",
+       "name": "Stone Bark",
+       "fx": "ward",
+       "mod": {
+        "barrier": {
+         "share": 0.12,
+         "seconds": 8,
+         "pets": true
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "spirit_lure",
+       "name": "Spirit Lure",
+       "fx": "post",
+       "mod": {
+        "place": {
+         "taunt": true
+        }
+       }
+      },
+      {
+       "id": "spirit_spark",
+       "name": "Spirit Spark",
+       "fx": "post",
+       "mod": {
+        "place": {
+         "strike": {
+          "mult": 0.3,
+          "targets": 1,
+          "element": "lightning"
+         }
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "wellspring",
+     "nodes": [
+      {
+       "id": "long_post",
+       "name": "Long Post",
+       "fx": "charge",
+       "mod": {
+        "add": {
+         "place.seconds": 12
+        },
+        "mul": {
+         "cooldown": 1.3
+        }
+       }
+      },
+      {
+       "id": "quickening_post",
+       "name": "Quickening Post",
+       "fx": "zone",
+       "mod": {
+        "place": {
+         "buff": {
+          "id": "haste",
+          "haste": 0.2,
+          "move": 0.15
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "storm_post": {
+   "name": "Storm Post",
+   "shape": "ground",
+   "element": "lightning",
+   "range": 16,
+   "cooldown": 16,
+   "mp": 18,
+   "place": {
+    "kind": "pulse",
+    "seconds": 10,
+    "radius": 10,
+    "every": 1,
+    "strike": {
+     "mult": 0.25,
+     "targets": 2
+    },
+    "hp": 0.3
+   },
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "great_strike",
+       "name": "Great Strike",
+       "fx": "heavy",
+       "mod": {
+        "place": {
+         "every": 2.5,
+         "strike": {
+          "mult": 0.75,
+          "targets": 2
+         }
+        }
+       }
+      },
+      {
+       "id": "shocking_post",
+       "name": "Shocking Post",
+       "fx": "tag",
+       "mod": {
+        "place": {
+         "strike": {
+          "mult": 0.25,
+          "targets": 2,
+          "status": "shock"
+         }
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "lightning_rod",
+       "name": "Lightning Rod",
+       "fx": "post",
+       "requires": "spirit_bolt",
+       "mod": {
+        "place": {
+         "hp": 0.6,
+         "ringOn": {
+          "skill": "spirit_bolt",
+          "radius": 8,
+          "mult": 0.8
+         }
+        }
+       }
+      },
+      {
+       "id": "thunder_lure",
+       "name": "Thunder Lure",
+       "fx": "post",
+       "mod": {
+        "place": {
+         "taunt": true
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "discharge",
+       "name": "Discharge",
+       "fx": "detonate",
+       "mod": {
+        "recast": {
+         "window": 10,
+         "then": {
+          "shape": "around",
+          "radius": 6,
+          "mult": 1.5,
+          "element": "lightning"
+         }
+        }
+       }
+      },
+      {
+       "id": "storm_bond",
+       "name": "Storm Bond",
+       "fx": "summon",
+       "mod": {
+        "selfBuff": {
+         "name": "Storm Bond",
+         "seconds": 10,
+         "damage": 0.25,
+         "petsOnly": true
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "conflagration",
+     "nodes": [
+      {
+       "id": "tempest_post",
+       "name": "Tempest Post",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      },
+      {
+       "id": "grounding_post",
+       "name": "Grounding Post",
+       "fx": "pull",
+       "mod": {
+        "place": {
+         "pull": 1
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "call_spirit": {
+   "name": "Call a Spirit",
+   "shape": "summon",
+   "element": "holy",
+   "pet": "spirit_bear",
+   "count": 1,
+   "cooldown": 40,
+   "mp": 26,
+   "howl": {
+    "status": "haste",
+    "seconds": 4,
+    "taunt": {
+     "radius": 4,
+     "seconds": 4
+    }
+   },
+   "command": {
+    "order": "pounce",
+    "seconds": 4,
+    "petOnly": true
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "quick_waking",
+       "name": "Quick Waking",
+       "fx": "charge",
+       "mod": {
+        "mul": {
+         "cooldown": 0.5,
+         "mp": 1.5
+        }
+       }
+      },
+      {
+       "id": "thundering_howl",
+       "name": "Thundering Howl",
+       "fx": "summon",
+       "mod": {
+        "howl": {
+         "damage": 0.25
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "spirit_hide",
+       "name": "Spirit Hide",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "name": "Spirit Hide",
+         "seconds": 10,
+         "resist": 0.3,
+         "petsOnly": true
+        }
+       }
+      },
+      {
+       "id": "guardian_call",
+       "name": "Guardian Call",
+       "fx": "tag",
+       "mod": {
+        "taunt": {
+         "radius": 6,
+         "seconds": 3,
+         "by": "pet"
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "bonded_spirits",
+       "name": "Bonded Spirits",
+       "fx": "link",
+       "mod": {
+        "link": {
+         "to": "follower",
+         "share": 0.3,
+         "seconds": 10
+        }
+       }
+      },
+      {
+       "id": "rewaking",
+       "name": "Rewaking",
+       "fx": "summon",
+       "mod": {
+        "revive": {
+         "share": 0.5
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "aegis",
+     "nodes": [
+      {
+       "id": "twin_spirits",
+       "name": "Twin Spirits",
+       "fx": "summon",
+       "mod": {
+        "summon": {
+         "def": "spirit_bear",
+         "name": "Spirit Bear",
+         "count": 1,
+         "temporary": true,
+         "lifetime": 15
+        }
+       }
+      },
+      {
+       "id": "post_walker",
+       "name": "Post Walker",
+       "fx": "charge",
+       "requires": "mending_post",
+       "mod": {
+        "cutCooldown": {
+         "skill": "mending_post",
+         "seconds": 6,
+         "per": "cast",
+         "orSelf": 8
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "warding_spirits": {
+   "name": "Warding Spirits",
+   "shape": "self",
+   "element": "holy",
+   "cooldown": 24,
+   "mp": 18,
+   "ward": {
+    "charges": 3,
+    "cap": 0.08,
+    "seconds": 12,
+    "pets": true
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "five_charges",
+       "name": "Five Wards",
+       "fx": "ward",
+       "mod": {
+        "ward": {
+         "charges": 5,
+         "seconds": 8
+        }
+       }
+      },
+      {
+       "id": "thorned_wards",
+       "name": "Thorned Wards",
+       "fx": "counter",
+       "mod": {
+        "selfBuff": {
+         "name": "Thorned Wards",
+         "seconds": 12,
+         "reflect": 0.2
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "calming_spirits",
+       "name": "Calming Spirits",
+       "fx": "ward",
+       "mod": {
+        "cleanse": {
+         "count": 1,
+         "pets": true
+        }
+       }
+      },
+      {
+       "id": "spirit_bloom",
+       "name": "Spirit Bloom",
+       "fx": "drain",
+       "mod": {
+        "set": {
+         "status": "regen",
+         "pets": true
+        },
+        "mul": {
+         "cooldown": 1.15
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "echo",
+     "nodes": [
+      {
+       "id": "recall",
+       "name": "Recall",
+       "fx": "echo",
+       "mod": {
+        "again": {
+         "delay": 10,
+         "mult": 1
+        },
+        "mul": {
+         "cooldown": 1.3
+        }
+       }
+      },
+      {
+       "id": "spirit_shield",
+       "name": "Spirit Shield",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "name": "Spirit Shield",
+         "seconds": 6,
+         "ccImmune": true
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "aegis",
+     "nodes": [
+      {
+       "id": "ward_burst",
+       "name": "Ward Burst",
+       "fx": "burst",
+       "mod": {
+        "burst": {
+         "radius": 8,
+         "mult": 1.2,
+         "element": "holy"
+        }
+       }
+      },
+      {
+       "id": "ancestors_hold",
+       "name": "Ancestors' Hold",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "name": "Ancestors' Hold",
+         "seconds": 12,
+         "deathPreventOnce": {},
+         "pets": true
+        },
+        "mul": {
+         "cooldown": 1.9
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "great_post": {
+   "name": "The Great Post",
+   "shape": "ground",
+   "element": "holy",
+   "range": 16,
+   "cooldown": 50,
+   "mp": 36,
+   "place": {
+    "kind": "pulse",
+    "seconds": 15,
+    "radius": 12,
+    "every": 1.5,
+    "strike": {
+     "mult": 0.4,
+     "targets": 3,
+     "element": "lightning"
+    },
+    "heal": 0.02,
+    "hp": 0.5,
+    "ringOn": {
+     "skill": "spirit_bolt",
+     "radius": 12,
+     "mult": 0.6
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "short_rite",
+       "name": "Short Rite",
+       "fx": "quick",
+       "mod": {
+        "add": {
+         "place.seconds": -7
+        },
+        "mul": {
+         "cooldown": 0.7
+        }
+       }
+      },
+      {
+       "id": "elders_blessing",
+       "name": "Elder's Blessing",
+       "fx": "zone",
+       "mod": {
+        "place": {
+         "buff": {
+          "id": "rally"
+         }
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "thunder_totem",
+       "name": "Thunder Totem",
+       "fx": "tag",
+       "mod": {
+        "place": {
+         "strike": {
+          "mult": 0.4,
+          "targets": 3,
+          "element": "lightning",
+          "status": "shock"
+         }
+        }
+       }
+      },
+      {
+       "id": "warding_ground",
+       "name": "Warding Ground",
+       "fx": "ward",
+       "mod": {
+        "place": {
+         "blocksRanged": true
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "bears_totem",
+       "name": "Bear's Totem",
+       "fx": "summon",
+       "mod": {
+        "selfBuff": {
+         "name": "Bear's Totem",
+         "seconds": 15,
+         "damage": 0.3,
+         "petsOnly": true
+        }
+       }
+      },
+      {
+       "id": "pulling_post",
+       "name": "Pulling Post",
+       "fx": "pull",
+       "mod": {
+        "place": {
+         "pull": 1
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "conflagration",
+     "nodes": [
+      {
+       "id": "old_ones_rise",
+       "name": "Old Ones Rise",
+       "fx": "summon",
+       "mod": {
+        "summon": {
+         "def": "spirit_warrior",
+         "name": "Spirit Warrior",
+         "count": 3,
+         "temporary": true,
+         "lifetime": 15
+        }
+       }
+      },
+      {
+       "id": "final_thunder",
+       "name": "Final Thunder",
+       "fx": "burst",
+       "mod": {
+        "selfBuff": {
+         "name": "Final Thunder",
+         "seconds": 15,
+         "onEnd": {
+          "shape": "around",
+          "radius": 15,
+          "mult": 4,
+          "element": "lightning"
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "discord_note": {
+   "name": "Discord Note",
+   "shape": "bolt",
+   "element": "arcane",
+   "mult": 1.3,
+   "range": 30,
+   "splash": 1.6,
+   "cooldown": 3,
+   "mp": 5,
+   "ricochet": {
+    "bounces": 1,
+    "range": 8,
+    "keep": 0.6
+   },
+   "forms": {
+    "valour": {
+     "name": "Marching Note",
+     "selfBuff": {
+      "name": "Quick Tempo",
+      "seconds": 2,
+      "hastePct": 0.25
+     }
+    },
+    "ruin": {
+     "name": "Ruinous Note",
+     "statuses": [
+      {
+       "id": "marked",
+       "seconds": 3
+      }
+     ]
+    },
+    "mending": {
+     "name": "Mending Note",
+     "onHit": {
+      "healAllies": 0.02
+     }
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": "seeking",
+     "nodes": [
+      {
+       "id": "scattered_chord",
+       "name": "Scattered Chord",
+       "fx": "fan",
+       "mod": {
+        "split": {
+         "shards": 2,
+         "range": 6,
+         "keep": 0.4,
+         "when": "hit"
+        }
+       }
+      },
+      {
+       "id": "off_key",
+       "name": "Off Key",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "weaken",
+          "dealLess": 0.15,
+          "seconds": 2
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "chain",
+     "nodes": [
+      {
+       "id": "echoing_note",
+       "name": "Echoing Note",
+       "fx": "afterimage",
+       "mod": {
+        "afterimage": {
+         "at": "start",
+         "delay": 0.6,
+         "mult": 0.4
+        }
+       }
+      },
+      {
+       "id": "duet",
+       "name": "Duet",
+       "fx": "summon",
+       "mod": {
+        "command": {
+         "order": "focus",
+         "seconds": 3
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "echo",
+     "nodes": [
+      {
+       "id": "tempo",
+       "name": "Tempo",
+       "fx": "charge",
+       "mod": {
+        "onHit": {
+         "mana": 1
+        },
+        "forms": {
+         "valour": {
+          "selfBuff": {
+           "seconds": 4,
+           "hastePct": 0.4
+          }
+         },
+         "ruin": {
+          "statuses": [
+           {
+            "id": "marked",
+            "seconds": 5,
+            "takeMore": 0.2
+           }
+          ]
+         },
+         "mending": {
+          "onHit": {
+           "mana": 1,
+           "healAllies": 0.04
+          }
+         }
+        }
+       }
+      },
+      {
+       "id": "sharp_note",
+       "name": "Sharp Note",
+       "fx": "heavy",
+       "mod": {
+        "bonusIf": [
+         {
+          "when": "caster",
+          "mult": 0.4
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "cascade",
+     "nodes": [
+      {
+       "id": "cacophony",
+       "name": "Cacophony",
+       "fx": "chain",
+       "mod": {
+        "ricochet": {
+         "bounces": 4,
+         "keep": 0.5
+        },
+        "mul": {
+         "cooldown": 1.3
+        }
+       }
+      },
+      {
+       "id": "discordant_end",
+       "name": "Discordant End",
+       "fx": "burst",
+       "mod": {
+        "onKill": {
+         "burst": {
+          "radius": 4,
+          "mult": 1
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "ballad_of_valour": {
+   "name": "Ballad of Valour",
+   "shape": "self",
+   "element": "holy",
+   "cooldown": 2,
+   "mp": 8,
+   "form": {
+    "id": "valour",
+    "name": "Ballad of Valour",
+    "group": "song",
+    "toggle": true,
+    "aura": {
+     "radius": 10,
+     "buff": {
+      "id": "valour",
+      "name": "Valour",
+      "kind": "buff",
+      "element": "holy",
+      "hastePct": 0.25,
+      "movePct": 0.1
+     }
+    },
+    "finale": {
+     "shape": "self",
+     "selfBuff": {
+      "name": "Valour Finale",
+      "seconds": 4,
+      "damage": 0.4,
+      "petsOnly": true
+     }
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "marching_verse",
+       "name": "Marching Verse",
+       "fx": "leap",
+       "mod": {
+        "set": {
+         "form.stats.movePct": 0.15
+        }
+       }
+      },
+      {
+       "id": "rousing_verse",
+       "name": "Rousing Verse",
+       "fx": "summon",
+       "mod": {
+        "set": {
+         "form.petBuff": {
+          "name": "Rousing Verse",
+          "damage": 0.15
+         }
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "steel_chorus",
+       "name": "Steel Chorus",
+       "fx": "ward",
+       "mod": {
+        "set": {
+         "form.stats.armorPct": 0.25
+        }
+       }
+      },
+      {
+       "id": "steady_breath",
+       "name": "Steady Breath",
+       "fx": "drain",
+       "mod": {
+        "set": {
+         "form.stats.manaPerSecond": 2
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "encore",
+       "name": "Encore",
+       "fx": "charge",
+       "mod": {
+        "set": {
+         "form.onEnter": {
+          "shape": "self",
+          "cutCooldown": {
+           "skill": "followers",
+           "seconds": 3,
+           "per": "cast"
+          }
+         }
+        }
+       }
+      },
+      {
+       "id": "champions_verse",
+       "name": "Champion's Verse",
+       "fx": "form",
+       "mod": {
+        "set": {
+         "form.stats.hastePct": 0.2
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "unbroken_march",
+       "name": "Unbroken March",
+       "fx": "ward",
+       "mod": {
+        "set": {
+         "form.stats.ccImmune": true
+        }
+       }
+      },
+      {
+       "id": "double_time",
+       "name": "Double Time",
+       "fx": "charge",
+       "mod": {
+        "set": {
+         "form.onExit": {
+          "shape": "self",
+          "selfBuff": {
+           "name": "Double Time",
+           "seconds": 5,
+           "hastePct": 0.6,
+           "petsOnly": true
+          }
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "song_of_ruin": {
+   "name": "Song of Ruin",
+   "shape": "self",
+   "element": "shadow",
+   "cooldown": 2,
+   "mp": 8,
+   "form": {
+    "id": "ruin",
+    "name": "Song of Ruin",
+    "group": "song",
+    "toggle": true,
+    "aura": {
+     "radius": 10,
+     "debuff": {
+      "id": "curse",
+      "takeMore": 0.12,
+      "dealLess": 0.1,
+      "slow": 0,
+      "name": "Ruin"
+     }
+    },
+    "finale": {
+     "shape": "around",
+     "radius": 10,
+     "mult": 1.5,
+     "element": "shadow",
+     "statuses": [
+      {
+       "id": "weaken",
+       "seconds": 5
+      }
+     ]
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "bitter_verse",
+       "name": "Bitter Verse",
+       "fx": "counter",
+       "mod": {
+        "set": {
+         "form.stats.thorns": 0.2
+        }
+       }
+      },
+      {
+       "id": "unmoved_dirge",
+       "name": "Unmoved Dirge",
+       "fx": "ward",
+       "mod": {
+        "set": {
+         "form.stats.stillResist": {
+          "after": 1,
+          "resist": 0.15
+         }
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "rot_in_tune",
+       "name": "Rot in Tune",
+       "fx": "stack",
+       "mod": {
+        "set": {
+         "form.petBuff": {
+          "name": "Rot in Tune",
+          "biteStatus": "poison"
+         }
+        }
+       }
+      },
+      {
+       "id": "dark_shelter",
+       "name": "Dark Shelter",
+       "fx": "ward",
+       "mod": {
+        "set": {
+         "form.stats.resist": 0.12
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "dirge_step",
+       "name": "Dirge Step",
+       "fx": "charge",
+       "mod": {
+        "set": {
+         "form.onKillHaste": 3
+        }
+       }
+      },
+      {
+       "id": "sour_finale",
+       "name": "Sour Finale",
+       "fx": "tag",
+       "mod": {
+        "set": {
+         "form.onExit": {
+          "shape": "self",
+          "burst": {
+           "radius": 10,
+           "statuses": [
+            {
+             "id": "curse",
+             "seconds": 6
+            }
+           ]
+          }
+         }
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "requiem",
+       "name": "Requiem",
+       "fx": "heavy",
+       "mod": {
+        "set": {
+         "form.stats.damage": 0.15
+        }
+       }
+      },
+      {
+       "id": "silencing_hymn",
+       "name": "Silencing Hymn",
+       "fx": "tag",
+       "mod": {
+        "set": {
+         "form.onEnter": {
+          "shape": "self",
+          "burst": {
+           "radius": 10,
+           "statuses": [
+            {
+             "id": "strip",
+             "seconds": 6
+            }
+           ]
+          }
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "air_of_mending": {
+   "name": "Air of Mending",
+   "shape": "self",
+   "element": "holy",
+   "cooldown": 2,
+   "mp": 8,
+   "form": {
+    "id": "mending",
+    "name": "Air of Mending",
+    "group": "song",
+    "toggle": true,
+    "aura": {
+     "radius": 10,
+     "heal": 0.015
+    },
+    "finale": {
+     "shape": "self",
+     "burst": {
+      "radius": 10,
+      "heal": 0.15
+     },
+     "cleanse": {
+      "count": 1,
+      "pets": true
+     }
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "close_harmony",
+       "name": "Close Harmony",
+       "fx": "drain",
+       "mod": {
+        "set": {
+         "form.stats.healingPct": 0.2
+        }
+       }
+      },
+      {
+       "id": "carrying_tune",
+       "name": "Carrying Tune",
+       "fx": "summon",
+       "mod": {
+        "set": {
+         "form.petBuff": {
+          "name": "Carrying Tune",
+          "healPerSecond": 0.01
+         }
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "soothing_finale",
+       "name": "Soothing Finale",
+       "fx": "ward",
+       "mod": {
+        "set": {
+         "form.onExit": {
+          "shape": "self",
+          "barrier": {
+           "share": 0.1,
+           "seconds": 6,
+           "pets": true
+          }
+         }
+        }
+       }
+      },
+      {
+       "id": "steady_voice",
+       "name": "Steady Voice",
+       "fx": "ward",
+       "mod": {
+        "set": {
+         "form.stats.ccImmune": true
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "restful_verse",
+       "name": "Restful Verse",
+       "fx": "ward",
+       "mod": {
+        "set": {
+         "form.stats.stillResist": {
+          "after": 1.5,
+          "resist": 0.15
+         }
+        }
+       }
+      },
+      {
+       "id": "calm_breath",
+       "name": "Calm Breath",
+       "fx": "drain",
+       "mod": {
+        "set": {
+         "form.stats.manaPerSecond": 1.5
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "tending_hands",
+       "name": "Tending Hands",
+       "fx": "ward",
+       "mod": {
+        "set": {
+         "form.onEnter": {
+          "shape": "self",
+          "cleanse": {
+           "count": 1,
+           "pets": true
+          }
+         }
+        }
+       }
+      },
+      {
+       "id": "warm_air",
+       "name": "Warm Air",
+       "fx": "ward",
+       "mod": {
+        "set": {
+         "form.stats.maxHpPct": 0.1
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "quickstep_jig": {
+   "name": "Quickstep Jig",
+   "shape": "dash",
+   "element": "physical",
+   "mult": 1.6,
+   "range": 10,
+   "splash": 2,
+   "cooldown": 10,
+   "mp": 8,
+   "statuses": [
+    {
+     "id": "weaken",
+     "dealLess": 0.2,
+     "seconds": 3
+    }
+   ],
+   "forms": {
+    "valour": {
+     "name": "Valiant Step",
+     "statuses": null,
+     "place": {
+      "kind": "zone",
+      "seconds": 3,
+      "radius": 5,
+      "every": 1,
+      "buff": {
+       "id": "haste",
+       "haste": 0.25,
+       "move": 0.1
+      }
+     }
+    },
+    "ruin": {
+     "name": "Ruinous Step",
+     "statuses": null,
+     "place": {
+      "kind": "zone",
+      "seconds": 3,
+      "radius": 5,
+      "every": 1,
+      "debuff": {
+       "id": "curse",
+       "takeMore": 0.12,
+       "dealLess": 0.1
+      }
+     }
+    },
+    "mending": {
+     "name": "Mending Step",
+     "statuses": null,
+     "place": {
+      "kind": "zone",
+      "seconds": 3,
+      "radius": 5,
+      "every": 1,
+      "heal": 0.02
+     }
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "reverse_jig",
+       "name": "Reverse Jig",
+       "fx": "leap",
+       "mod": {
+        "dash": {
+         "to": "back",
+         "range": 10
+        }
+       }
+      },
+      {
+       "id": "light_feet",
+       "name": "Light Feet",
+       "fx": "leap",
+       "mod": {
+        "selfBuff": {
+         "name": "Light Feet",
+         "seconds": 3,
+         "movePct": 0.3
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "burst",
+     "nodes": [
+      {
+       "id": "stomp",
+       "name": "Stomp",
+       "fx": "knock",
+       "mod": {
+        "burst": {
+         "radius": 3,
+         "mult": 0.6,
+         "knock": {
+          "push": 3
+         }
+        }
+       }
+      },
+      {
+       "id": "swap_partner",
+       "name": "Swap Partner",
+       "fx": "swap",
+       "mod": {
+        "dash": {
+         "to": "swap",
+         "range": 12
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "encore_step",
+       "name": "Encore Step",
+       "fx": "charge",
+       "mod": {
+        "cutCooldown": {
+         "skill": "self",
+         "seconds": 3,
+         "per": "hit"
+        }
+       }
+      },
+      {
+       "id": "leading_step",
+       "name": "Leading Step",
+       "fx": "summon",
+       "mod": {
+        "dashWith": {
+         "followers": true
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "crescendo",
+     "nodes": [
+      {
+       "id": "echo_stage",
+       "name": "Echo Stage",
+       "fx": "zone",
+       "mod": {
+        "mul": {
+         "cooldown": 1.2
+        },
+        "forms": {
+         "valour": {
+          "add": {
+           "place.seconds": 5
+          }
+         },
+         "ruin": {
+          "add": {
+           "place.seconds": 5
+          }
+         },
+         "mending": {
+          "add": {
+           "place.seconds": 5
+          }
+         }
+        }
+       }
+      },
+      {
+       "id": "whirling_jig",
+       "name": "Whirling Jig",
+       "fx": "afterimage",
+       "mod": {
+        "afterimage": {
+         "at": "end",
+         "delay": 0.3,
+         "mult": 0.6,
+         "count": 3
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "grand_finale": {
+   "name": "Grand Finale",
+   "shape": "around",
+   "element": "arcane",
+   "mult": 3.2,
+   "radius": 12,
+   "cooldown": 30,
+   "mp": 30,
+   "bonusIf": [
+    {
+     "when": "followers:0.25:0.5"
+    }
+   ],
+   "talents": {
+    "1": {
+     "lib": "heavy",
+     "nodes": [
+      {
+       "id": "focused_finale",
+       "name": "Focused Finale",
+       "fx": "heavy",
+       "mod": {
+        "set": {
+         "radius": 6
+        },
+        "mul": {
+         "mult": 1.3
+        }
+       }
+      },
+      {
+       "id": "standing_ovation",
+       "name": "Standing Ovation",
+       "fx": "drain",
+       "mod": {
+        "healPets": 0.3
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "shatter",
+     "nodes": [
+      {
+       "id": "shattering_chord",
+       "name": "Shattering Chord",
+       "fx": "knock",
+       "mod": {
+        "knock": {
+         "push": 6
+        }
+       }
+      },
+      {
+       "id": "hush",
+       "name": "Hush",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "silence",
+          "seconds": 4
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "echo",
+     "nodes": [
+      {
+       "id": "curtain_call",
+       "name": "Curtain Call",
+       "fx": "charge",
+       "mod": {
+        "onKill": {
+         "refund": 0.5
+        }
+       }
+      },
+      {
+       "id": "echoing_hall",
+       "name": "Echoing Hall",
+       "fx": "echo",
+       "mod": {
+        "again": {
+         "delay": 1,
+         "mult": 0.4
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "crescendo",
+     "nodes": [
+      {
+       "id": "opus",
+       "name": "Opus",
+       "fx": "form",
+       "mod": {
+        "burst": {
+         "radius": 12,
+         "heal": 0.1
+        },
+        "forms": {
+         "valour": {
+          "selfBuff": {
+           "name": "Opus",
+           "seconds": 10,
+           "hastePct": 0.25,
+           "movePct": 0.1,
+           "pets": true
+          }
+         },
+         "ruin": {
+          "statuses": [
+           {
+            "id": "curse",
+            "seconds": 10
+           }
+          ]
+         },
+         "mending": {
+          "place": {
+           "kind": "zone",
+           "follow": "self",
+           "seconds": 10,
+           "radius": 10,
+           "every": 1,
+           "heal": 0.015
+          }
+         }
+        }
+       }
+      },
+      {
+       "id": "standing_ring",
+       "name": "Standing Ring",
+       "fx": "zone",
+       "mod": {
+        "place": {
+         "kind": "pulse",
+         "seconds": 6,
+         "radius": 12,
+         "every": 1,
+         "strike": {
+          "mult": 0.25,
+          "targets": 4
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "thornlash": {
+   "name": "Thornlash",
+   "shape": "bolt",
+   "element": "nature",
+   "mult": 1.4,
+   "range": 30,
+   "cooldown": 3,
+   "mp": 5,
+   "statuses": [
+    {
+     "id": "root",
+     "seconds": 0.6,
+     "lockout": 6
+    }
+   ],
+   "onHit": {
+    "healPet": 0.03
+   },
+   "forms": {
+    "briarback": {
+     "name": "Bramble Gore",
+     "shape": "melee",
+     "mult": 1.8,
+     "reach": 3,
+     "arc": 1.6,
+     "cooldown": 4,
+     "knock": {
+      "push": 2
+     },
+     "taunt": {
+      "target": true,
+      "seconds": 3
+     },
+     "statuses": null,
+     "onHit": null
+    },
+    "fenrunner": {
+     "name": "Venom Lunge",
+     "shape": "dash",
+     "range": 8,
+     "dash": {
+      "to": "target",
+      "range": 8
+     },
+     "mult": 1.6,
+     "cooldown": 4,
+     "stack": {
+      "status": "poison",
+      "max": 2
+     },
+     "statuses": null,
+     "onHit": null,
+     "statusMult": 0.35
+    },
+    "sporecap": {
+     "name": "Spore Lob",
+     "shape": "ground",
+     "range": 24,
+     "radius": 3,
+     "mult": 0.2,
+     "cooldown": 4,
+     "pool": {
+      "seconds": 4,
+      "radius": 3,
+      "status": "poison",
+      "power": 0.2,
+      "healAllies": 0.015
+     },
+     "statuses": null,
+     "onHit": null
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": "seeking",
+     "nodes": [
+      {
+       "id": "thorn_fan",
+       "name": "Thorn Fan",
+       "fx": "fan",
+       "mod": {
+        "set": {
+         "projectiles": 3,
+         "spread": 0.5
+        },
+        "forms": {
+         "briarback": {
+          "set": {
+           "arc": 2.8
+          }
+         },
+         "fenrunner": {
+          "add": {
+           "dash.range": 4
+          }
+         },
+         "sporecap": {
+          "add": {
+           "pool.radius": 1.5
+          }
+         }
+        }
+       }
+      },
+      {
+       "id": "barbed",
+       "name": "Barbed",
+       "fx": "stack",
+       "mod": {
+        "statuses": [
+         {
+          "id": "bleed"
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "sap_thief",
+       "name": "Sap Thief",
+       "fx": "drain",
+       "mod": {
+        "onHit": {
+         "heal": 0.02
+        }
+       }
+      },
+      {
+       "id": "pack_signal",
+       "name": "Pack Signal",
+       "fx": "summon",
+       "mod": {
+        "command": {
+         "order": "pounce",
+         "seconds": 3
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "brand",
+     "nodes": [
+      {
+       "id": "seedling",
+       "name": "Seedling",
+       "fx": "zone",
+       "mod": {
+        "place": {
+         "kind": "zone",
+         "seconds": 4,
+         "radius": 3,
+         "every": 1,
+         "heal": 0.02
+        }
+       }
+      },
+      {
+       "id": "thorned_bond",
+       "name": "Thorned Bond",
+       "fx": "charge",
+       "requires": "renew",
+       "mod": {
+        "cutCooldown": {
+         "skill": "renew",
+         "seconds": 1,
+         "per": "hit",
+         "orSelf": 0.5
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "cascade",
+     "nodes": [
+      {
+       "id": "wild_lash",
+       "name": "Wild Lash",
+       "fx": "form",
+       "mod": {
+        "ricochet": {
+         "bounces": 1,
+         "range": 8,
+         "keep": 0.6
+        },
+        "forms": {
+         "briarback": {
+          "knock": {
+           "push": 4,
+           "stagger": 0.5
+          }
+         },
+         "fenrunner": {
+          "onKill": {
+           "reset": true
+          }
+         },
+         "sporecap": {
+          "statuses": [
+           {
+            "id": "weaken",
+            "dealLess": 0.2,
+            "seconds": 4
+           }
+          ]
+         }
+        }
+       }
+      },
+      {
+       "id": "thicket",
+       "name": "Thicket",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "renew": {
+   "name": "Greensap",
+   "shape": "self",
+   "element": "nature",
+   "status": "regen",
+   "cooldown": 16,
+   "mp": 14,
+   "forms": {
+    "briarback": {
+     "name": "Thornswell",
+     "status": null,
+     "barrier": {
+      "share": 0.2,
+      "seconds": 6
+     },
+     "selfBuff": {
+      "name": "Thornswell",
+      "seconds": 6,
+      "reflect": 0.2
+     }
+    },
+    "fenrunner": {
+     "name": "Shed Skin",
+     "status": "haste",
+     "statusSeconds": 4,
+     "heal": 0.15,
+     "cleanse": {
+      "count": 2,
+      "types": [
+       "poison",
+       "bleed"
+      ]
+     }
+    },
+    "sporecap": {
+     "name": "Mycel Web",
+     "status": null,
+     "place": {
+      "kind": "zone",
+      "follow": "self",
+      "seconds": 6,
+      "radius": 12,
+      "every": 1,
+      "heal": 0.033
+     }
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "blooming",
+       "name": "Blooming",
+       "fx": "burst",
+       "mod": {
+        "burst": {
+         "radius": 6,
+         "heal": 0.06
+        }
+       }
+      },
+      {
+       "id": "cleansing_sap",
+       "name": "Cleansing Sap",
+       "fx": "ward",
+       "mod": {
+        "cleanse": {
+         "count": 2,
+         "types": [
+          "poison",
+          "bleed",
+          "burn",
+          "curse"
+         ]
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "overgrowth",
+       "name": "Overgrowth",
+       "fx": "ward",
+       "mod": {
+        "barrier": {
+         "share": 0.1,
+         "seconds": 8
+        },
+        "forms": {
+         "briarback": {
+          "barrier": {
+           "share": 0.3,
+           "seconds": 6
+          }
+         }
+        }
+       }
+      },
+      {
+       "id": "grafting",
+       "name": "Grafting",
+       "fx": "drain",
+       "mod": {
+        "healPets": 0.08
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "echo",
+     "nodes": [
+      {
+       "id": "heartwood",
+       "name": "Heartwood",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "name": "Heartwood",
+         "seconds": 8,
+         "resist": 0.12
+        }
+       }
+      },
+      {
+       "id": "lifeblood",
+       "name": "Lifeblood",
+       "fx": "charge",
+       "requires": "sporecap_shape",
+       "mod": {
+        "cutCooldown": {
+         "skill": "sporecap_shape",
+         "seconds": 8,
+         "per": "cast",
+         "orSelf": 4
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "wellspring",
+     "nodes": [
+      {
+       "id": "second_flush",
+       "name": "Second Flush",
+       "fx": "echo",
+       "mod": {
+        "again": {
+         "delay": 5,
+         "mult": 1
+        },
+        "mul": {
+         "cooldown": 1.3
+        }
+       }
+      },
+      {
+       "id": "wild_sap",
+       "name": "Wild Sap",
+       "fx": "form",
+       "mod": {
+        "ward": {
+         "charges": 1,
+         "cap": 0.1,
+         "seconds": 8
+        },
+        "forms": {
+         "briarback": {
+          "taunt": {
+           "radius": 6,
+           "seconds": 3
+          }
+         },
+         "fenrunner": {
+          "selfBuff": {
+           "name": "Wild Sap",
+           "seconds": 4,
+           "movePct": 0.3
+          }
+         },
+         "sporecap": {
+          "add": {
+           "place.radius": 4
+          }
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "call_wolf": {
+   "name": "Call the Pack",
+   "shape": "summon",
+   "element": "nature",
+   "pet": "grove_wolf",
+   "count": 1,
+   "cooldown": 26,
+   "mp": 18,
+   "howl": {
+    "status": "haste",
+    "seconds": 6,
+    "damage": 0.3
+   },
+   "forms": {
+    "briarback": {
+     "name": "Den Guard",
+     "shape": "self",
+     "pet": null,
+     "howl": null,
+     "selfBuff": {
+      "name": "Den Guard",
+      "seconds": 4,
+      "resist": 0.3,
+      "petsOnly": true
+     },
+     "taunt": {
+      "radius": 4,
+      "seconds": 4,
+      "by": "pet"
+     }
+    },
+    "fenrunner": {
+     "name": "Running Pack",
+     "shape": "self",
+     "pet": null,
+     "howl": null,
+     "command": {
+      "order": "pounce",
+      "seconds": 4,
+      "biteStatus": "poison"
+     }
+    },
+    "sporecap": {
+     "name": "Puffball Brood",
+     "shape": "self",
+     "pet": null,
+     "howl": null,
+     "summon": {
+      "def": "puffball",
+      "name": "Puffball",
+      "count": 3,
+      "temporary": true,
+      "lifetime": 8,
+      "decoy": {
+       "hpShare": 0.1,
+       "taunt": 4
+      },
+      "burstOnExpire": {
+       "radius": 3,
+       "mult": 0.8,
+       "element": "poison",
+       "heal": 0.05
+      }
+     }
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "fast_call",
+       "name": "Fast Call",
+       "fx": "charge",
+       "mod": {
+        "mul": {
+         "cooldown": 0.6,
+         "mp": 1.5
+        }
+       }
+      },
+      {
+       "id": "thorny_pelts",
+       "name": "Thorny Pelts",
+       "fx": "counter",
+       "mod": {
+        "selfBuff": {
+         "name": "Thorny Pelts",
+         "seconds": 10,
+         "reflect": 0.15,
+         "petsOnly": true
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "pack_mend",
+       "name": "Pack Mend",
+       "fx": "drain",
+       "mod": {
+        "healPets": 0.2
+       }
+      },
+      {
+       "id": "den_scent",
+       "name": "Den Scent",
+       "fx": "leap",
+       "mod": {
+        "selfBuff": {
+         "name": "Den Scent",
+         "seconds": 8,
+         "movePct": 0.2,
+         "pets": true
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "pack_bond",
+       "name": "Pack Bond",
+       "fx": "link",
+       "mod": {
+        "link": {
+         "to": "follower",
+         "share": 0.2,
+         "seconds": 10
+        }
+       }
+      },
+      {
+       "id": "howl_of_dread",
+       "name": "Howl of Dread",
+       "fx": "tag",
+       "mod": {
+        "burst": {
+         "radius": 6,
+         "statuses": [
+          {
+           "id": "fear",
+           "seconds": 2
+          }
+         ]
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "aegis",
+     "nodes": [
+      {
+       "id": "alphas_call",
+       "name": "Alpha's Call",
+       "fx": "summon",
+       "mod": {
+        "revive": {
+         "share": 0.5
+        }
+       }
+      },
+      {
+       "id": "wild_pack",
+       "name": "Wild Pack",
+       "fx": "form",
+       "mod": {
+        "selfBuff": {
+         "name": "Wild Pack",
+         "seconds": 8,
+         "damage": 0.2,
+         "petsOnly": true
+        },
+        "forms": {
+         "briarback": {
+          "selfBuff": {
+           "name": "Den Guard",
+           "seconds": 4,
+           "reflect": 0.2,
+           "petsOnly": true
+          }
+         },
+         "fenrunner": {
+          "selfBuff": {
+           "name": "Running Pack",
+           "seconds": 6,
+           "hastePct": 0.3,
+           "petsOnly": true
+          }
+         },
+         "sporecap": {
+          "burst": {
+           "radius": 6,
+           "statuses": [
+            "poison"
+           ]
+          }
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
+  }
+ },
+ "statuses": {
+  "lit": {
+   "name": "Lit",
+   "kind": "tag",
+   "owner": "cleric",
+   "element": "holy",
+   "seconds": 3,
+   "fromYou": 0.1
+  },
+  "killer": {
+   "name": "Killer",
+   "kind": "tag",
+   "owner": "priest",
+   "element": "shadow",
+   "seconds": 8,
+   "fromYou": 0.2
+  },
+  "omen": {
+   "name": "Omen",
+   "kind": "tag",
+   "owner": "oracle",
+   "element": "arcane",
+   "seconds": 6
+  }
+ },
+ "classes": {
+  "cleric": [
+   "mend",
+   "sunlance",
+   "sanctuary",
+   "guardian_light",
+   "raise_the_fallen",
+   "judgement"
+  ],
+  "priest": [
+   "shadow_lance",
+   "dawn_prayer",
+   "mark_the_killer",
+   "vigil",
+   "dread_hymn",
+   "twinlight"
+  ],
+  "oracle": [
+   "omen_bolt",
+   "foresight",
+   "prophecy",
+   "fate_thread",
+   "turn_aside",
+   "last_prophecy"
+  ],
+  "shaman": [
+   "spirit_bolt",
+   "mending_post",
+   "storm_post",
+   "call_spirit",
+   "warding_spirits",
+   "great_post"
+  ],
+  "bard": [
+   "discord_note",
+   "ballad_of_valour",
+   "song_of_ruin",
+   "air_of_mending",
+   "quickstep_jig",
+   "grand_finale"
+  ],
+  "druid": [
+   "thornlash",
+   "renew",
+   "briarback_shape",
+   "call_wolf",
+   "fenrunner_shape",
+   "sporecap_shape"
+  ]
+ }
+}

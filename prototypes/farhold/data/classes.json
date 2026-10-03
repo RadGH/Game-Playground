@@ -23,12 +23,12 @@
    ],
    "shield": true,
    "skills": [
-    "power_strike",
     "cleave",
+    "breaching_shove",
     "warcry",
-    "shield_bash",
     "whirlwind",
-    "execute"
+    "iron_resolve",
+    "groundbreaker"
    ],
    "look": {
     "body": {
@@ -100,7 +100,8 @@
      "color": "#6a6a72"
     }
    },
-   "sample": "Brannoc Redmane"
+   "sample": "Brannoc Redmane",
+   "signature": "stronger in a crowd"
   },
   {
    "id": "fighter",
@@ -123,11 +124,11 @@
    "shield": true,
    "skills": [
     "power_strike",
-    "sunder",
-    "guard_stance",
-    "charge",
-    "cleave",
-    "execute"
+    "riposte",
+    "duelist_stance",
+    "lunge",
+    "sweeping_guard",
+    "masters_flurry"
    ],
    "look": {
     "body": {
@@ -199,7 +200,8 @@
      "color": "#9aa0aa"
     }
    },
-   "sample": "Corvin Hale"
+   "sample": "Corvin Hale",
+   "signature": "stances and counters"
   },
   {
    "id": "paladin",
@@ -220,12 +222,12 @@
    ],
    "shield": true,
    "skills": [
-    "power_strike",
-    "guard_stance",
+    "sanctified_blade",
     "consecrate",
-    "shield_bash",
-    "renew",
-    "rally"
+    "oath_hammer",
+    "martyrs_vow",
+    "shining_rebuke",
+    "daybreak_descent"
    ],
    "look": {
     "body": {
@@ -296,7 +298,8 @@
      "color": "#f4f0e0"
     }
    },
-   "sample": "Aurel Dawnward"
+   "sample": "Aurel Dawnward",
+   "signature": "heal by hitting, protect with your own health"
   },
   {
    "id": "ranger",
@@ -318,10 +321,10 @@
    "shield": false,
    "skills": [
     "aimed_shot",
-    "poison_dart",
+    "hunters_snare",
     "multi_shot",
-    "mend",
-    "pinning_shot",
+    "quarry_call",
+    "trackers_leap",
     "rain_of_arrows"
    ],
    "pet": {
@@ -399,7 +402,8 @@
      "color": "#5a3a1a"
     }
    },
-   "sample": "Wren Ashvale"
+   "sample": "Wren Ashvale",
+   "signature": "the hunt"
   },
   {
    "id": "rogue",
@@ -420,10 +424,10 @@
    "skills": [
     "eviscerate",
     "poison_dart",
-    "shadowstep",
-    "smoke",
-    "power_strike",
-    "execute"
+    "sucker_punch",
+    "grave_mark",
+    "slip_away",
+    "knife_storm"
    ],
    "look": {
     "body": {
@@ -496,7 +500,8 @@
     }
    },
    "sample": "Sable Quick",
-   "offStarter": "dagger"
+   "offStarter": "dagger",
+   "signature": "set up, then cash in"
   },
   {
    "id": "cleric",
@@ -518,11 +523,11 @@
    "shield": true,
    "skills": [
     "mend",
-    "guard_stance",
-    "consecrate",
-    "renew",
-    "shadow_lance",
-    "rally"
+    "sunlance",
+    "sanctuary",
+    "guardian_light",
+    "raise_the_fallen",
+    "judgement"
    ],
    "look": {
     "body": {
@@ -596,7 +601,8 @@
      "color": "#e8d8a0"
     }
    },
-   "sample": "Mirelle Sanct"
+   "sample": "Mirelle Sanct",
+   "signature": "heals that overflow into protection; raising the fallen"
   },
   {
    "id": "bard",
@@ -615,12 +621,12 @@
    ],
    "shield": false,
    "skills": [
-    "shadow_lance",
-    "warcry",
-    "curse",
-    "mend",
-    "quicken",
-    "rally"
+    "discord_note",
+    "ballad_of_valour",
+    "song_of_ruin",
+    "air_of_mending",
+    "quickstep_jig",
+    "grand_finale"
    ],
    "look": {
     "body": {
@@ -693,7 +699,8 @@
      "color": "#6a3a8a"
     }
    },
-   "sample": "Tamsin Lark"
+   "sample": "Tamsin Lark",
+   "signature": "songs"
   },
   {
    "id": "mage",
@@ -713,12 +720,12 @@
    ],
    "shield": false,
    "skills": [
-    "firebolt",
+    "frost_shard",
     "frost_nova",
-    "arcane_burst",
     "ice_lance",
-    "fire_wall",
-    "meteor"
+    "spellrush",
+    "blizzard",
+    "stillfrost"
    ],
    "look": {
     "body": {
@@ -790,7 +797,8 @@
      "color": "#8a6a3a"
     }
    },
-   "sample": "Edric Vane"
+   "sample": "Edric Vane",
+   "signature": "frost then shatter"
   },
   {
    "id": "necromancer",
@@ -811,12 +819,12 @@
    ],
    "shield": false,
    "skills": [
-    "shadow_lance",
+    "marrow_lance",
     "raise_thrall",
-    "curse",
+    "corpse_pyre",
     "drain",
-    "poison_dart",
-    "rally"
+    "toxic_cloud",
+    "buried_march"
    ],
    "pet": {
     "id": "bone_thrall",
@@ -897,7 +905,8 @@
      "color": "#3a3a3a"
     }
    },
-   "sample": "Osric Mourne"
+   "sample": "Osric Mourne",
+   "signature": "corpses"
   },
   {
    "id": "warlock",
@@ -917,12 +926,12 @@
    ],
    "shield": false,
    "skills": [
-    "shadow_lance",
+    "gnawing_dark",
     "bind_imp",
     "curse",
-    "drain",
-    "fire_wall",
-    "meteor"
+    "soul_pact",
+    "void_rift",
+    "abyss_gate"
    ],
    "pet": {
     "id": "bound_imp",
@@ -1004,7 +1013,8 @@
      "color": "#3a1a4a"
     }
    },
-   "sample": "Vesna Duskwell"
+   "sample": "Vesna Duskwell",
+   "signature": "health as fuel, corruption that spreads"
   },
   {
    "id": "demon_hunter",
@@ -1024,12 +1034,12 @@
    ],
    "shield": false,
    "skills": [
-    "aimed_shot",
-    "shadowstep",
-    "multi_shot",
-    "curse",
-    "pinning_shot",
-    "execute"
+    "hex_bolt",
+    "tumbling_shot",
+    "chain_hook",
+    "unleash_hound",
+    "grudge_bolt",
+    "night_hunt"
    ],
    "pet": {
     "id": "dire_companion",
@@ -1108,7 +1118,8 @@
      "color": "#2a1a1a"
     }
    },
-   "sample": "Kael Sorrowend"
+   "sample": "Kael Sorrowend",
+   "signature": "grudge"
   },
   {
    "id": "scavenger",
@@ -1130,12 +1141,12 @@
    ],
    "shield": false,
    "skills": [
-    "aimed_shot",
-    "poison_dart",
-    "guard_stance",
-    "mend",
-    "smoke",
-    "rain_of_arrows"
+    "lucky_strike",
+    "junk_toss",
+    "scrounge",
+    "caltrop_scatter",
+    "pitch_bomb",
+    "big_score"
    ],
    "look": {
     "body": {
@@ -1206,7 +1217,8 @@
      "color": "#6a5a3a"
     }
    },
-   "sample": "Grit Pennyworth"
+   "sample": "Grit Pennyworth",
+   "signature": "luck"
   },
   {
    "id": "swashbuckler",
@@ -1226,12 +1238,12 @@
    ],
    "shield": false,
    "skills": [
-    "eviscerate",
-    "charge",
-    "smoke",
-    "power_strike",
-    "whirlwind",
-    "execute"
+    "flourish",
+    "daring_leap",
+    "mocking_parry",
+    "pinning_thrust",
+    "matadors_turn",
+    "grandeur"
    ],
    "look": {
     "body": {
@@ -1302,7 +1314,8 @@
      "color": "#5a3a1a"
     }
    },
-   "sample": "Lucan Farrow"
+   "sample": "Lucan Farrow",
+   "signature": "flair, which rewards variety"
   },
   {
    "id": "dragon_knight",
@@ -1323,12 +1336,12 @@
    ],
    "shield": true,
    "skills": [
-    "power_strike",
-    "cleave",
-    "firebolt",
-    "guard_stance",
-    "fire_wall",
-    "meteor"
+    "scale_rend",
+    "flamethrower",
+    "wyrmfall",
+    "wyrm_temper",
+    "dragonscale",
+    "wyrm_ascendant"
    ],
    "look": {
     "body": {
@@ -1400,7 +1413,8 @@
      "color": "#8a2a1a"
     }
    },
-   "sample": "Sera Emberscale"
+   "sample": "Sera Emberscale",
+   "signature": "wyrm tempers"
   },
   {
    "id": "pyromancer",
@@ -1423,9 +1437,9 @@
    "skills": [
     "firebolt",
     "fire_wall",
-    "thunderclap",
-    "arcane_burst",
-    "quicken",
+    "ember_stride",
+    "stoke_familiar",
+    "flashover",
     "meteor"
    ],
    "pet": {
@@ -1503,7 +1517,8 @@
      "color": "#8a6a3a"
     }
    },
-   "sample": "Ilsa Cinder"
+   "sample": "Ilsa Cinder",
+   "signature": "burn stacks"
   },
   {
    "id": "stormcaller",
@@ -1524,11 +1539,11 @@
    "shield": false,
    "skills": [
     "chain_bolt",
-    "frost_nova",
-    "storm_beam",
     "thunderclap",
-    "quicken",
-    "meteor"
+    "storm_beam",
+    "storm_orbs",
+    "bolt_step",
+    "tempest_eye"
    ],
    "pet": {
     "id": "storm_familiar",
@@ -1606,7 +1621,8 @@
      "color": "#9aa0aa"
     }
    },
-   "sample": "Torvald Gale"
+   "sample": "Torvald Gale",
+   "signature": "conductors"
   },
   {
    "id": "druid",
@@ -1626,12 +1642,12 @@
    ],
    "shield": false,
    "skills": [
-    "poison_dart",
-    "call_wolf",
+    "thornlash",
     "renew",
-    "frost_nova",
-    "stoneskin",
-    "rally"
+    "briarback_shape",
+    "call_wolf",
+    "fenrunner_shape",
+    "sporecap_shape"
    ],
    "pet": {
     "id": "grove_wolf",
@@ -1709,7 +1725,8 @@
      "color": "#6a4a2a"
     }
    },
-   "sample": "Aveline Thorne"
+   "sample": "Aveline Thorne",
+   "signature": "shapes"
   },
   {
    "id": "oracle",
@@ -1728,12 +1745,12 @@
    ],
    "shield": false,
    "skills": [
-    "arcane_burst",
-    "guard_stance",
-    "renew",
-    "curse",
-    "quicken",
-    "meteor"
+    "omen_bolt",
+    "foresight",
+    "prophecy",
+    "fate_thread",
+    "turn_aside",
+    "last_prophecy"
    ],
    "pet": {
     "id": "ember_familiar",
@@ -1810,7 +1827,8 @@
      "color": "#40e0ff"
     }
    },
-   "sample": "Nysa Farsight"
+   "sample": "Nysa Farsight",
+   "signature": "foresight"
   },
   {
    "id": "tactician",
@@ -1830,12 +1848,12 @@
    ],
    "shield": true,
    "skills": [
-    "sunder",
-    "shield_bash",
+    "exploit_gap",
     "rally",
-    "warcry",
     "charge",
-    "execute"
+    "reposition",
+    "seize_initiative",
+    "battle_plan"
    ],
    "look": {
     "body": {
@@ -1907,7 +1925,8 @@
      "color": "#5a3a1a"
     }
    },
-   "sample": "Marcus Ostwald"
+   "sample": "Marcus Ostwald",
+   "signature": "orders"
   },
   {
    "id": "chronomancer",
@@ -1927,12 +1946,12 @@
    ],
    "shield": false,
    "skills": [
-    "arcane_burst",
+    "second_hand",
     "quicken",
-    "ice_lance",
-    "frost_nova",
-    "smoke",
-    "meteor"
+    "entropy_field",
+    "rewind",
+    "stasis_lock",
+    "stop_the_clock"
    ],
    "look": {
     "body": {
@@ -2004,7 +2023,8 @@
      "color": "#d8b040"
     }
    },
-   "sample": "Benedict Hourne"
+   "sample": "Benedict Hourne",
+   "signature": "time"
   },
   {
    "id": "monk",
@@ -2023,12 +2043,12 @@
    ],
    "shield": false,
    "skills": [
-    "power_strike",
-    "charge",
-    "quicken",
-    "whirlwind",
-    "stoneskin",
-    "execute"
+    "open_palm",
+    "wind_step",
+    "sweeping_heel",
+    "inner_stillness",
+    "mountain_fist",
+    "ninefold_staff"
    ],
    "look": {
     "body": {
@@ -2100,7 +2120,8 @@
      "color": "#6a4a2a"
     }
    },
-   "sample": "Jiro Stillwater"
+   "sample": "Jiro Stillwater",
+   "signature": "poise"
   },
   {
    "id": "shaman",
@@ -2120,12 +2141,12 @@
    ],
    "shield": false,
    "skills": [
-    "chain_bolt",
+    "spirit_bolt",
+    "mending_post",
+    "storm_post",
     "call_spirit",
-    "renew",
-    "thunderclap",
-    "stoneskin",
-    "rally"
+    "warding_spirits",
+    "great_post"
    ],
    "pet": {
     "id": "spirit_bear",
@@ -2204,7 +2225,8 @@
      "color": "#6a4a2a"
     }
    },
-   "sample": "Zuri Bonechant"
+   "sample": "Zuri Bonechant",
+   "signature": "posts"
   },
   {
    "id": "witch_hunter",
@@ -2225,12 +2247,12 @@
    ],
    "shield": false,
    "skills": [
-    "aimed_shot",
-    "sunder",
-    "curse",
     "pinning_shot",
-    "smoke",
-    "execute"
+    "silver_edge",
+    "null_circle",
+    "writ_of_guilt",
+    "iron_net",
+    "purging_rite"
    ],
    "look": {
     "body": {
@@ -2302,7 +2324,8 @@
      "color": "#3a3a3a"
     }
    },
-   "sample": "Solomon Kreel"
+   "sample": "Solomon Kreel",
+   "signature": "silver: silence, strip, cleanse"
   },
   {
    "id": "knight",
@@ -2325,10 +2348,10 @@
    "skills": [
     "shield_bash",
     "guard_stance",
-    "power_strike",
-    "sunder",
-    "stoneskin",
-    "execute"
+    "sworn_ward",
+    "challenge",
+    "rampart",
+    "unbroken_banner"
    ],
    "look": {
     "body": {
@@ -2401,7 +2424,8 @@
      "color": "#b8bcc8"
     }
    },
-   "sample": "Isolde Vaunt"
+   "sample": "Isolde Vaunt",
+   "signature": "takes hits for others"
   },
   {
    "id": "sorcerer",
@@ -2421,12 +2445,12 @@
    ],
    "shield": false,
    "skills": [
-    "firebolt",
-    "chain_bolt",
+    "wild_bolt",
     "arcane_burst",
-    "storm_beam",
-    "quicken",
-    "meteor"
+    "mana_rend",
+    "overchannel",
+    "transmute",
+    "sixfold_ruin"
    ],
    "pet": {
     "id": "storm_familiar",
@@ -2503,7 +2527,8 @@
      "color": "#a040e0"
     }
    },
-   "sample": "Cassius Vell"
+   "sample": "Cassius Vell",
+   "signature": "wild magic"
   },
   {
    "id": "runesmith",
@@ -2523,12 +2548,12 @@
    ],
    "shield": true,
    "skills": [
-    "power_strike",
-    "stoneskin",
+    "rune_hammer",
     "sunder",
-    "thunderclap",
-    "guard_stance",
-    "whirlwind"
+    "stoneskin",
+    "forge_flame",
+    "warding_glyph",
+    "great_anvil"
    ],
    "look": {
     "body": {
@@ -2600,7 +2625,8 @@
      "color": "#6a5a4a"
     }
    },
-   "sample": "Dagan Forgehand"
+   "sample": "Dagan Forgehand",
+   "signature": "runes"
   },
   {
    "id": "shadow_dancer",
@@ -2619,12 +2645,12 @@
    ],
    "shield": false,
    "skills": [
-    "eviscerate",
+    "shade_cut",
     "shadowstep",
     "smoke",
-    "poison_dart",
-    "whirlwind",
-    "execute"
+    "cutting_waltz",
+    "execute",
+    "host_of_shades"
    ],
    "look": {
     "body": {
@@ -2696,7 +2722,8 @@
      "color": "#3a2a4a"
     }
    },
-   "sample": "Nyx Veilstep"
+   "sample": "Nyx Veilstep",
+   "signature": "afterimages"
   },
   {
    "id": "tinker",
@@ -2716,12 +2743,12 @@
    ],
    "shield": false,
    "skills": [
-    "aimed_shot",
+    "clockwork_bolt",
+    "flask_grenade",
     "deploy_sentry",
-    "pinning_shot",
-    "fire_wall",
-    "quicken",
-    "rain_of_arrows"
+    "pocket_watch",
+    "grapple_line",
+    "spring_battery"
    ],
    "pet": {
     "id": "clockwork_sentry",
@@ -2800,7 +2827,8 @@
      "color": "#b08a3a"
     }
    },
-   "sample": "Fenwick Cogsby"
+   "sample": "Fenwick Cogsby",
+   "signature": "gadgets"
   },
   {
    "id": "priest",
@@ -2821,12 +2849,12 @@
    ],
    "shield": true,
    "skills": [
-    "mend",
-    "renew",
-    "consecrate",
-    "curse",
-    "guard_stance",
-    "rally"
+    "shadow_lance",
+    "dawn_prayer",
+    "mark_the_killer",
+    "vigil",
+    "dread_hymn",
+    "twinlight"
    ],
    "pet": {
     "id": "spirit_bear",
@@ -2904,7 +2932,8 @@
      "color": "#3b2e6b"
     }
    },
-   "sample": "Selene Duskmoon"
+   "sample": "Selene Duskmoon",
+   "signature": "pre-paid revives and revenge"
   },
   {
    "id": "enchanter",
@@ -2924,12 +2953,12 @@
    ],
    "shield": false,
    "skills": [
-    "arcane_burst",
-    "bind_imp",
-    "curse",
-    "ice_lance",
-    "quicken",
-    "meteor"
+    "arcane_jolt",
+    "drowse",
+    "beguile",
+    "lethargy",
+    "phantasm",
+    "enthrall"
    ],
    "pet": {
     "id": "bound_imp",
@@ -3006,7 +3035,8 @@
      "color": "#5b3aaa"
     }
    },
-   "sample": "Auren Whisperlight"
+   "sample": "Auren Whisperlight",
+   "signature": "sleep and charm"
   }
  ]
 }

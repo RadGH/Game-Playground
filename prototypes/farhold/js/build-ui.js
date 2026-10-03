@@ -27,6 +27,8 @@ import { createResearchScreen } from './research-ui.js';
 import { sharedResearch } from './research.js';
 // R26 — the build ring. B opens it; this panel is what its Tab / "Full list" opens.
 import { createBuildRadial } from './build-radial.js';
+// R28 — Q / F / C / Shift while placing, and the key strip the card and this panel print
+import { installBuildKeys, keysForTool, verdictText, runText } from './build-keys.js';
 
 /**
  * The tools, in the order a base is actually built.
@@ -56,7 +58,9 @@ export const TOOLS = [
   { key: 'smooth', name: 'Level', kind: 'brush', hint: 'Flatten a circle of ground to the height under the cursor. Do this first.' },
   { key: 'build', name: 'Place', kind: 'place', hint: 'Put the selected piece down. Scroll to turn it.' },
   { key: 'road', name: 'Road', kind: 'place', cats: ['road'], hint: 'Click a corner, then another, then press Enter. It lays one smooth road, not a row of tiles — the ground comes up to meet it and the corners round themselves. Goods travel far quicker over one.' },
-  { key: 'wall', name: 'Wall', kind: 'place', cats: ['defence'], hint: 'Same as Road, but a wall — and a gate goes where you double back over a corner.' },
+  // R28 — any RUN piece (fence, hedge, palisade, stone wall…), whatever its category, and the gate
+  // gesture finally does something
+  { key: 'wall', name: 'Wall', kind: 'place', cats: ['defence', 'decor'], runOnly: true, hint: 'Click each corner, then Enter. Click a corner twice and a gate goes there. Fences and hedges are runs too.' },
   { key: 'raise', name: 'Raise', kind: 'brush', hint: 'Pull the ground up under the brush.' },
   { key: 'lower', name: 'Lower', kind: 'brush', hint: 'Push it down. A moat is a lowered ring.' },
   { key: 'clear', name: 'Clear', kind: 'brush', hint: 'Fell every tree, bush and boulder in the brush, and keep what they drop. [ and ] size the brush.' },
@@ -65,7 +69,19 @@ export const TOOLS = [
    * deconstructing is a late one.
    */
   { key: 'scan', name: 'Scan', kind: 'scan', hint: 'Sweep for ore, stone, clay and timber. [ and ] widen the sweep. What it finds is listed below and pinned to the map.' },
-  { key: 'remove', name: 'Take down', kind: 'point', hint: 'Deconstruct what you point at. Most of the cost comes back.' },
+  { key: 'remove', name: 'Take down', kind: 'point', hint: 'Deconstruct what you point at. Most of the cost comes back, and Ctrl+Z puts it back up.' },
+  /**
+   * R28 — three tools that point at a piece you already built, and two for layouts. Each one is
+   * the door to something js/buildplan.js could already do or that nothing could do at all:
+   * moving cost a quarter of the piece every time, nothing upgraded in place, and `blueprint` /
+   * `stamp` had no caller anywhere.
+   */
+  { key: 'move', name: 'Move', kind: 'point', hint: 'Click a piece to pick it up with nothing lost, then click where it goes. Walls, lamps, decoration — not things that hold goods or run.' },
+  { key: 'upgrade', name: 'Upgrade', kind: 'point', hint: 'Click a piece to turn it into the next one up where it stands — a palisade into a stone wall — paying only the difference.' },
+  // R28 — enemies break what is in their way now, so there is something to mend
+  { key: 'repair', name: 'Repair', kind: 'point', hint: 'Point at a damaged piece: the card shows its health and the price. Click to put it back to full — half its build cost for a whole bar, less for a scratch.' },
+  { key: 'copy', name: 'Copy', kind: 'brush', hint: 'Click to copy everything you built inside the brush as a layout. [ ] size the brush. It switches to Stamp.' },
+  { key: 'stamp', name: 'Stamp', kind: 'stamp', hint: 'Put a copied layout down somewhere else, whole, for one bill. Q turns it. Layouts are listed below.' },
   /**
    * The route tool: click a drill, then click a store.
    *
@@ -89,6 +105,7 @@ export const toolInfo = key => TOOLS.find(t => t.key === key) || TOOLS.find(t =>
  */
 export function catsForTool(toolKey, catKeys = []) {
   const info = toolInfo(toolKey);
+  if (toolKey && !TOOLS.some(t => t.key === toolKey)) return [];
   if (info.kind !== 'place') return [];
   if (!info.cats) return [...catKeys];
   return catKeys.filter(k => info.cats.includes(k));
@@ -154,6 +171,10 @@ const CAT_BLURB = {
   refine: 'These need somebody at them. Stand at one and hold E to work it, send one of your people, or — for the benches that take power — wire it to the grid and it pays its own way.',
   craft: 'Benches you use yourself. Walk up and press E.',
 };
+
+// R28 — `verdictText` and `runText` live in js/build-keys.js (the ring's card prints them too, and
+// js/build-radial.js cannot import this file without a loop); re-exported for the tests.
+export { verdictText, runText } from './build-keys.js';
 
 /** "12 stone, 2 iron" — and the ones you are short of are the ones that matter. */
 function costLine(cost, have) {
@@ -307,6 +328,12 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
     panelOpen: () => open,
     onPanel: () => { api.setOpen(true); },
   });
+  /**
+   * R28 — Q / Shift+Q turn, F free placement, C build another of what is under the cursor, Shift
+   * held for a line, Esc puts a carried piece back. Installed here because this panel is made once
+   * for the game and already holds `build`; the listener does nothing outside build mode.
+   */
+  const buildKeys = installBuildKeys({ build, onLog, onChange: () => { radial.tick(); if (open) redraw(); } });
   const research = sharedResearch({ catalogue });
   const researchScreen = createResearchScreen({ research, log: onLog, standalone: true });
 
@@ -337,7 +364,7 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
      */
     el('button', { class: 'build-close', text: '×', title: 'Close (B)', onclick: () => { api.setOpen(false); onClose?.(); } }),
   );
-  keys.textContent = 'scroll turn · click place · Enter finish a run · Ctrl+Z undo · Esc or B leave · [ ] brush size';
+  keys.textContent = keysForTool(build?.tool);
 
   /**
    * R15 — THE GUIDANCE STOPPED EXACTLY WHEN IT STARTED BEING NEEDED.
@@ -403,7 +430,10 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
     if (!keys.length) return;
     // a tool that narrows the list must also move the selection into it, or the panel shows a
     // heading for a category whose rows are not drawn
-    if (!keys.includes(cat)) cat = keys[0];
+    // R28 — and to the group of the piece the tool is actually holding: the Wall tool picks a
+    // palisade, and the panel opened on Decoration (fences) with the palisade nowhere in sight
+    const selCat = build?.selected ? pieces.find(p => p.id === build.selected)?.cat : null;
+    if (!keys.includes(cat)) cat = selCat && keys.includes(selCat) ? selCat : keys[0];
     for (const key of keys) {
       catRow.append(el('button', {
         class: 'build-cat' + (key === cat ? ' on' : ''),
@@ -419,7 +449,10 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
     listBox.hidden = keys.length === 0;
     if (!keys.length) return;
     if (CAT_BLURB[cat]) listBox.append(el('p', { class: 'build-cat-blurb small muted', text: CAT_BLURB[cat] }));
-    const rows = pieces.filter(p => p.cat === cat).sort((a, b) => (a.tier || 1) - (b.tier || 1) || a.name.localeCompare(b.name));
+    // R28 — the Wall tool lays runs: only the pieces that ARE runs (or the gates that go in them)
+    const runOnly = !!toolInfo(build?.tool).runOnly;
+    const rows = pieces.filter(p => p.cat === cat && (!runOnly || p.run))
+      .sort((a, b) => (a.tier || 1) - (b.tier || 1) || a.name.localeCompare(b.name));
     for (const p of rows) {
       const parts = costLine(p.cost, have);
       const afford = parts.every(c => !c.short);
@@ -445,7 +478,7 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
            * EXCEPT for the pieces that are laid as a run. A road or a palisade picked while the
            * Road or Wall tool is up is you choosing which road, not you asking to place one slab.
            */
-          const runnable = p.cat === 'road' || p.cat === 'defence';
+          const runnable = p.cat === 'road' || !!p.run;
           const onRunTool = build?.tool === 'road' || build?.tool === 'wall';
           if (build?.tool !== 'build' && !(runnable && onRunTool)) build.setTool('build');
           redraw();
@@ -475,6 +508,12 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
     brushBox.hidden = false;
     brushBox.append(el('h3', { text: info.name }));
     brushBox.append(el('p', { class: 'small muted', text: info.hint }));
+    // R28 — what the click will do to the thing under the cursor, live (Take down, Move, Upgrade, Copy)
+    const pt = build?.lastPoint;
+    if (pt?.text && (info.kind === 'point' || build?.tool === 'copy')) {
+      brushBox.append(el('p', { class: `${pt.ok ? 'build-ok' : 'build-why'}`, 'data-live': '1', text: pt.text }));
+    }
+    if (info.kind === 'stamp') drawLayouts(brushBox);
     if (info.kind === 'brush' && build?.setRadius) {
       const r = Math.round(build.radius || 0);
       const bar = el('div', { class: 'build-yard-row build-brush-size' });
@@ -488,6 +527,35 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
       }
       brushBox.append(bar);
     }
+  }
+
+  /**
+   * R28 — THE SAVED LAYOUTS, under the Stamp tool (and the Copy tool, which makes them).
+   * One row each: its name and size, Stamp, and Forget. The one being stamped is lit.
+   */
+  function drawLayouts(box) {
+    const list = build?.blueprints || [];
+    box.append(el('h3', { text: `Layouts (${list.length})` }));
+    if (!list.length) {
+      box.append(el('p', { class: 'small muted', text: 'None yet. Pick Copy, size the brush over something you built, and click.' }));
+      return;
+    }
+    const si = build?.stampInfo;
+    if (si && build?.tool === 'stamp') {
+      box.append(el('p', { class: si.ok ? 'build-ok' : 'build-why', 'data-live': '1',
+        text: si.ok ? `${si.fits} of ${si.total} fit here · ${si.text || 'free'} · click to stamp` : (si.why || '') }));
+    }
+    list.forEach((bp, i) => {
+      const row = el('div', { class: 'build-yard-row build-layout' + (i === build.stampIndex ? ' on' : '') });
+      const bill = build.plan?.billFor?.(bp) || {};
+      row.append(
+        el('span', { class: 'build-layout-name', text: bp.name }),
+        el('span', { class: 'muted small', text: build.plan?.costText?.(bill) || '' }),
+        el('button', { class: 'small', text: i === build.stampIndex && build.tool === 'stamp' ? 'stamping' : 'Stamp', onclick: () => { build.selectBlueprint(i); redraw(); } }),
+        el('button', { class: 'small', text: 'Forget', title: 'Delete this layout', onclick: () => { build.deleteBlueprint(i); redraw(); } }),
+      );
+      box.append(row);
+    });
   }
 
   function drawDetail() {
@@ -589,11 +657,21 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
           : n === 1 ? 'One corner down. Click the next one.'
           : `${n} corners · press Enter to lay the ${word} · Esc to drop the run.`,
       }));
-      if (build.tool === 'wall' && n >= 2) {
-        detail.append(el('p', { class: 'small muted', text: 'Double back over a corner and the gate goes there.' }));
+      // R28 — the run priced as you click it out, cursor leg included
+      const ri = build.runInfo;
+      if (ri) detail.append(el('p', { class: ri.ok ? 'small' : 'build-why', 'data-live': '1', text: runText(ri) }));
+      if (build.tool === 'wall') {
+        detail.append(el('p', { class: 'small muted', text: 'Click a corner twice and a gate goes there (a gold ring marks it).' }));
       }
       return;
     }
+    // R28 — Shift held: the line; F: free placement
+    if (build?.lineInfo) {
+      const li = build.lineInfo;
+      detail.append(el('p', { class: li.ok ? 'build-ok' : 'build-why', 'data-live': '1',
+        text: li.count ? `Shift+click: ${li.count} in a line for ${li.text}${li.blocked ? ` · ${li.blocked} will not fit` : ''}${li.ok ? '' : ` · ${li.why}`}` : li.why }));
+    }
+    if (build?.free) detail.append(el('p', { class: 'small muted', text: 'Free placement is on (F): no grid, no snapping.' }));
 
     /**
      * WHY THE GHOST IS RED.
@@ -604,7 +682,7 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
      */
     const why = build?.lastCheck;
     if (why && !why.ok && why.why) detail.append(el('p', { class: 'build-why', text: why.why }));
-    else if (why?.ok) detail.append(el('p', { class: 'build-ok', text: 'Clear. Click to build.' }));
+    else if (why?.ok) detail.append(el('p', { class: why.levels ? 'build-level' : 'build-ok', text: verdictText(why) }));
   }
 
   /**
@@ -877,6 +955,7 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
 
   function redraw() {
     if (!open) return;
+    keys.textContent = keysForTool(build?.tool, { moving: !!build?.moving });
     drawSteps(); drawTools(); drawCats(); drawList(); drawBrush(); drawScan(); drawMines();
     drawBench(); drawWork(); drawHolding(); drawYard(); drawDetail();
   }
@@ -911,6 +990,7 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
        * recipes, the work board or the shipyard. `steadyRedraw` keeps the nodes that did not change.
        */
       steadyRedraw(detail, drawDetail);
+      steadyRedraw(brushBox, drawBrush);
       steadyRedraw(scanBox, drawScan);
       steadyRedraw(minesBox, drawMines);
       steadyRedraw(benchBox, drawBench);
@@ -954,7 +1034,7 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
     get categories() { return catKeys; },
     /** R17 — which categories the tool that is up will actually draw. The panel-tidy rule, askable. */
     get toolCategories() { return toolCats(); },
-    dispose() { root.remove(); station.dispose(); researchScreen.dispose(); radial.dispose(); },
+    dispose() { root.remove(); station.dispose(); researchScreen.dispose(); radial.dispose(); buildKeys.dispose(); },
   };
   return api;
 }

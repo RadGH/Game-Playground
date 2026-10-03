@@ -100,7 +100,7 @@ import { createTerraform } from './terraform.js';
 import { createPortals } from './portal.js';
 import { createBuild } from './build.js';
 import { ObstacleField } from './collide.js';
-import { alignCatalogue } from './buildplan.js';
+import { alignCatalogue, solidsFor } from './buildplan.js';
 import { createBuildUI } from './build-ui.js';
 import { nextStep as chainNextStep } from './nextstep.js';
 // R17 — the five-step line that takes a new player from an empty field to an iron ingot.
@@ -112,6 +112,8 @@ import { createColony } from './colony.js';
 // the away half, so main.js constructs ONE thing and ticks ONE thing
 import { createCivics } from './civics.js';
 import { createCivicsScreen } from './civics-ui.js';
+import { createProduction } from './production.js';
+import { createProductionPill } from './production-ui.js';
 import { createFarm } from './farm.js';
 import {
   migrateSave as migrateShipyard, canLaunch as canLaunchShip, spendFlightFuel, grantShip,
@@ -169,7 +171,10 @@ import { handsOf, strikeAt, withArea, profileOf, isStaff, isWand, staffSpell, wa
 // R15: the dome's shove resists by rank through the same helper a hammer's knockback uses
 import { pushFor, feel, tuneFeel } from './combat-feel.js';
 // R20 — `clearTalent` moved with it: js/retrain.js is what empties a tier now, for gold.
-import { talentPlan, pickTalent, talentsOn } from './skilltalents.js';
+import { talentPlan, pickTalent, talentsOn, migrateTalents, TALENTS_VERSION } from './skilltalents.js';
+// R28 — the skill vocabulary: pure rules (js/skillmech.js) and the runtime that acts on them
+import { setMechEnv, blocksRanged, controlFor, dotRateOf } from './skillmech.js';
+import { createSkillRuntime } from './skillrun.js';
 // R20 — `refundAll` and `refundOne` are no longer imported here: giving a perk back is an Unbinder
 // in a town and a price, and js/retrain.js is the only caller of either.
 import { allocate as allocatePerk, pointsLeft as perkPointsLeft } from './perks.js';
@@ -1069,8 +1074,21 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       const def = build.defOf?.(e.key);
       if (!def || NO_COLLIDE.has(e.key)) continue;
       if ((def.h ?? 1) <= 0.35) continue;            // ankle-high is not a wall
-      const r = Math.max(0.35, Math.min(1.4, Math.max(def.w ?? 1, def.d ?? 1) / 2));
-      buildSolids.add(e.x, e.z, r, def.h ?? 2);
+      /**
+       * R28 — THE SHAPE THAT IS DRAWN (js/buildplan.js `solidsFor`). A wall section, fence or hedge
+       * is a segment end to end; a gate is its two posts with the opening clear between them (you
+       * could not walk through your own gate — it was one circle in the middle of the gap); the
+       * rest are the circles they always were. A segment is filed with a floorless height band so
+       * a fence you could hop before is still one you can hop, and stays solid to anything that
+       * does not jump.
+       */
+      for (const sol of solidsFor(e, def)) {
+        if (sol.kind === 'seg') {
+          const top = terrain.heightAt((sol.ax + sol.bx) / 2, (sol.az + sol.bz) / 2) + sol.h;
+          // a gate's leaf brings its own band (enemies only — js/buildplan.js `solidsFor`)
+          buildSolids.addSegment(sol.ax, sol.az, sol.bx, sol.bz, sol.half, sol.h, { band: sol.band || [-Infinity, top - 0.35] });
+        } else buildSolids.add(sol.x, sol.z, sol.r, sol.h);
+      }
     }
     return buildSolids.count;
   }
@@ -1239,10 +1257,22 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
    */
   function landStatus(type, spec, enemy, power = 1) {
     if (!type || !spec) return;
+    /**
+     * R28 — a boss is never slept, feared or rooted (it is slowed instead), and a champion or a
+     * rare holds a hard control for half as long (js/skillmech.js `controlFor`, plan §9.4).
+     */
+    if (enemy && enemy !== player) {
+      const ctl = controlFor(enemy, type, spec.seconds ?? 3);
+      if (ctl.id !== type) { type = ctl.id; spec = { ...(skillData.statuses[ctl.id] || {}), seconds: ctl.seconds, ...(ctl.slow ? { slow: ctl.slow } : {}) }; }
+      else if (ctl.seconds !== (spec.seconds ?? 3)) spec = { ...spec, seconds: ctl.seconds };
+    }
     const first = !enemy.statuses?.[type];
     const longer = rpg.fx.sum(player, 'statusLonger', { type, spec });
+    // R28 — Soul Pact (`dotRate` on a player buff): what you apply now ticks that much faster
+    const rate = enemy !== player ? dotRateOf(player) : 1;
     const strength = rpg.fx.product(player, 'statusPower', { type });
-    applyStatus(enemy, type, spec, power, { longer, strength });
+    const entry = applyStatus(enemy, type, spec, power, { longer, strength });
+    if (entry && rate !== 1) entry.rate = rate;
     if (first) hud.log(`${enemy.name} is ${(spec.name || type).toLowerCase()}.`, 'good');
   }
   /** The callback every strike hands to the effect registry, so a crit can open a bleed. */
@@ -1304,6 +1334,28 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         .catch(() => { /* the scene went away */ });
     },
   };
+
+  /**
+   * R28 — THE SKILL VOCABULARY'S RUNTIME (js/skillrun.js): forms and their bodies, placed posts and
+   * traps, dashes, lines, afterimages, links, counters, summons that take no slot. Everything is
+   * read through getters because most of it (the field, the pets, the bar, the HUD) is built
+   * further down this function — a value captured here would be a TDZ crash at boot.
+   */
+  const mech = createSkillRuntime({
+    THREE, makeActor, setActorAnim,
+    get scene() { return scene; }, get spellfx() { return spellfx; }, get fx() { return fx; },
+    get sound() { return sound; }, get rpg() { return rpg; }, get skillData() { return skillData; },
+    hud: { log: (t, k) => hud.log(t, k) },
+    field: () => field, pets: () => pets, player: () => player, control: () => control,
+    skills: () => skills, terrain: () => terrain, actor: () => actor,
+    uniqueEnv, landStatus, statusHook,
+    reportHit: (e, r) => reportHit(e, r), ringPoints: (...a) => ringPoints(...a),
+    groundTarget: r => groundTarget(r), aim: () => aim(), castSkill: (p, o) => castSkill(p, o),
+    running: () => state.running, playerLook: () => look,
+    rpgApply: (u, id, spec) => applyStatus(u, id, spec, 1),
+    gathering: () => !!gathering?.active, building: () => !!build?.mode,
+  });
+  setMechEnv(mech.mechEnv);
 
   /**
    * Where the player is AIMING — which is not the same as where the player is standing.
@@ -1449,6 +1501,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         // R23 — the attack's powers, where the bolt burst: shards, the pull, a chain, a patch. Only the
         // first bolt of a chain carries them, so a hop is not a fresh attack with fresh procs.
         if (plan.mods && !hop) resolveAttack(uniqueEnv, plan.mods, hits, { x: control.x, z: control.z, at: { x: at.x, z: at.z }, element: plan.element });
+        // R28 — a skill bolt's own ricochet, split and return (js/skillrun.js `afterBolt`)
+        if (!hop && plan.skill) mech.afterBolt(plan, at, hits, strikeOpts, hop);
 
         /**
          * CHAIN: jump to the next body along.
@@ -1460,7 +1514,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
          */
         const left = (plan.chains || 0) - hop;
         if (left > 0) {
-          const next = field.nearestTo(at.x, at.z, 12, chase) || null;
+          // R28 — a Shocked body is a conductor: a jump prefers one within 12 m, else the nearest within 8 m
+          const conductors = field.near(at.x, at.z, 12, chase).filter(e => e.statuses?.shock);
+          const next = (conductors.sort((p, q) => Math.hypot(p.x - at.x, p.z - at.z) - Math.hypot(q.x - at.x, q.z - at.z))[0]) || field.nearestTo(at.x, at.z, 8, chase) || null;
           if (next) {
             const ndx = next.x - at.x, ndz = next.z - at.z;
             const nlen = Math.hypot(ndx, ndz) || 1;
@@ -1532,7 +1588,12 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   function castSkill(i, { echo = false } = {}) {
     const plan = echo ? i : skills.use(i);
     if (!plan.ok) { if (plan.why) hud.log(plan.why); return null; }
-    const a = aim();
+    // R28 — a form, the end of a channel or the start of one is the runtime's whole job
+    if (mech.intercept(plan, echo ? null : i)) { hud.setPlayer(player); return plan; }
+    const castFrom = { x: control.x, z: control.z, yaw: control.yaw };
+    const hpBefore = player.hp;
+    // R28 — a delayed copy (a beam's wind-up) lands where it was AIMED, not where you look later
+    const a = plan.frozenAim || aim();
     const from = new THREE.Vector3(a.x + a.dx * 0.6, a.y - 0.2, a.z + a.dz * 0.6);
     /**
      * R22 — THE SECOND DOUBLE-COUNT ON THE SAME CAST.
@@ -1553,7 +1614,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       if (plan.status && plan.statusSpec) landStatus(plan.status, plan.statusSpec, enemy, Math.max(1, plan.damage * STATUS_POWER_SHARE * (plan.statusMult || 1)));
       reportHit(enemy, result);
     };
-    const strikeOpts = { power, element: plan.element, skill: plan.skill?.id, onHit, applyStatus: statusHook };
+    // R28 — every strike of this cast carries the plan's own rules, its knock and its pull
+    const strikeOpts = mech.decorate(plan, { power, element: plan.element, skill: plan.skill?.id, onHit, applyStatus: statusHook });
     // R25 — every cast has a voice: its element's launch now, and its impact if it caught anything
     // (a physical skill keeps the melee swing and hit). Only bows had a sound before.
     if (plan.element && plan.element !== 'physical' && !['self', 'summon'].includes(plan.kind)) sound.spell(plan.element, 'launch');
@@ -1592,7 +1654,13 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       }
     }
 
-    if (plan.kind === 'summon') {
+    if (plan.kind === 'summon' && plan.summon && typeof plan.summon === 'object') {
+      // R28 — a temporary summon, a decoy, a summon at corpses: js/skillrun.js `afterCast` puts it down
+      spellfx.cast({ at: new THREE.Vector3(control.x, control.y + 0.4, control.z), element: plan.element, ms: 520 });
+    } else if (plan.kind === 'summon' && plan.howl && pets.canAdmit?.(plan.pet)?.ok === false) {
+      // R28 — `howl`: with the pack already up, the call is a howl that hastens and lifts it instead
+      mech.howl(plan);
+    } else if (plan.kind === 'summon') {
       pets.summon(plan.pet, player, { count: plan.petCount, at: control }).then(made => {
         if (made.length) hud.log(`${made[0].name} answers.`, 'good');
         // R18 — and if it was refused, SAY so. `made.refused` carries the reason and was dropped on
@@ -1602,6 +1670,20 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       });
       spellfx.cast({ at: new THREE.Vector3(control.x, control.y + 0.4, control.z), element: plan.element, ms: 520 });
       sound.ui('click');
+    } else if (plan.kind === 'beam' && plan.delay > 0 && !plan.beamFired) {
+      // R28 — a beam with a wind-up (Mountain Fist): the line is shown now and lands `delay` later,
+      // as a strike-only copy (its buffs, posts and summons were already handled by this cast)
+      const pts = [];
+      for (let t = 2; t <= plan.range; t += 3) pts.push(new THREE.Vector3(a.x + a.dx * t, terrain.heightAt(a.x + a.dx * t, a.z + a.dz * t) + 0.1, a.z + a.dz * t));
+      if (pts.length) spellfx.aoe({ points: pts, element: plan.element, stagger: 0.01 });
+      // the strike only: every self-ish key already ran on this cast and must not run again
+      const strikeOnly = {
+        ...plan, beamFired: true, sub: true, frozenAim: { ...a }, place: null, pool: null, selfBuff: null, summon: null, taunt: null,
+        command: null, barrier: null, ward: null, counter: null, imbue: null, link: null, burst: null, again: null, afterimage: null,
+        empowerNext: null, empowerRepeat: null, wall: null, rewind: null, cleanse: null, revive: null, healPets: null,
+        overflowBarrier: null, allyStatus: null, corpseBurst: null, clusters: null, dashWith: null, resetOn: null,
+      };
+      setTimeout(() => { if (state.running) castSkill(strikeOnly, { echo: true }); }, plan.delay * 1000);
     } else if (plan.kind === 'beam') {
       // a line out from you: everything within `width` of the ray, out to `range`
       const points = [];
@@ -1618,19 +1700,27 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         const along = ex * a.dx + ez * a.dz;
         if (along < 0 || along > plan.range) continue;
         if (Math.hypot(ex - a.dx * along, ez - a.dz * along) > plan.width + (e.reach || 2) * 0.3) continue;
-        const result = rpg.strike(player, e, field.rng, { multiplier: power, element: plan.element, applyStatus: statusHook });
+        const result = rpg.strike(player, e, field.rng, { multiplier: power, element: plan.element, applyStatus: statusHook, skill: plan.skill?.id, rules: plan.rules, noDamage: !!plan.noDamage });
         e.hitFlash = 0.18;
         if (e.state !== 'chase') e.state = 'chase';
-        onHit(e, result);
+        // R28 — a beam lands its knock (Groundbreaker's stun) the way every other strike does
+        field.land(e, result, { strike: strikeOpts.knock, fromX: control.x, fromZ: control.z, element: plan.element });
+        strikeOpts.onHit(e, result);
         healed += Math.round(result.amount * (plan.healFrac || 0));
         spellfx.impact({ at: new THREE.Vector3(e.x, e.y + 0.9, e.z), element: plan.element, crit: result.crit });
         if (result.dead) field.kill(e);
       }
       if (healed) { player.hp = Math.min(player.maxHp, player.hp + healed); hud.log(`Drained ${healed} back.`, 'good'); }
       sound.combat('hit');
+    } else if (plan.kind === 'ground' && (plan.line || mech.takesRepeats(plan))) {
+      // R28 — a line of strikes, or pulses that scatter / grow / alternate (js/skillrun.js)
+      const spot = groundTarget(plan.range);
+      plan.at = spot;
+      if (!mech.line(plan, spot, strikeOpts)) mech.repeats(plan, spot, strikeOpts);
     } else if (plan.kind === 'ground') {
       // it lands where you are looking, not where you are
       const spot = groundTarget(plan.range);
+      plan.at = spot;
       const at = new THREE.Vector3(spot.x, spot.y, spot.z);
       /**
        * R25 — THE NEW GROUND SKILLS. Judgement lands `delay` seconds after the cast (a ring shows
@@ -1664,6 +1754,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
           seconds: plan.ground, element: plan.element, power: power * 0.35,
         });
       }
+    } else if (plan.kind === 'dash' && mech.dash(plan, a, strikeOpts)) {
+      // R28 — to the first body, behind it, backward, a swap, beside an ally, a hook, a leap
+      skillSound(plan, []);
     } else if (plan.kind === 'dash') {
       // you move: everything along the line takes the hit, and you end up at the far end of it
       const spot = groundTarget(plan.range);
@@ -1674,10 +1767,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         points.push(new THREE.Vector3(bx, terrain.heightAt(bx, bz) + 0.3, bz));
       }
       spellfx.aoe({ points, element: plan.element, stagger: 0.02 });
-      const hits = [];
-      for (let t = 1; t <= dist; t += 2) {
-        hits.push(...field.strikeArea(control.x + a.dx * t, control.z + a.dz * t, plan.splash, player, { falloff: 0.8, ...strikeOpts }));
-      }
+      // R28 — each body near the path is struck ONCE, not once per 2 m step
+      const hits = field.strikeSegment(control.x + a.dx, control.z + a.dz, control.x + a.dx * dist, control.z + a.dz * dist, plan.splash, player, { ...strikeOpts, falloff: 0.8 });
       control.teleport(control.x + a.dx * dist, control.z + a.dz * dist);
       control.swing = Math.max(control.swing, 0.35);
       skillSound(plan, hits);
@@ -1763,6 +1854,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       };
       cone(true);
       for (let k = 1; k < plan.repeats; k++) setTimeout(() => cone(false), k * (plan.repeatEvery || 0.32) * 1000);
+    } else if (plan.kind === 'around' && mech.takesRepeats(plan)) {
+      // R28 — rings that grow, pulses that alternate (js/skillrun.js `repeats`)
+      feel.swing.clip = 'whirl';
+      mech.repeats(plan, { x: control.x, z: control.z }, strikeOpts);
     } else if (plan.kind === 'around') {
       // a ring on the ground, drawn where the ground actually is so it does not float on a slope
       const points = [];
@@ -1829,6 +1924,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         fireBolt(plan, a, dx, dy, dz, strikeOpts, from, k === 0);
       }
     }
+    // R28 — the self-ish half of the vocabulary: taunts, orders, barriers, wards, counters, links,
+    // imbues, placed posts and pools, afterimages, a reset in a crowd (js/skillrun.js `afterCast`)
+    mech.afterCast(plan, { a, hpBefore, origin: castFrom });
     hud.setPlayer(player);
     return plan;
   }
@@ -2227,6 +2325,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       hud.hit(at, 'miss', 'miss', camera);
       return;
     }
+    // R28 — a skill that deals no damage (a sleep, a sanctuary) is not "you hit it for 0"
+    if (result.noDamage) return;
     hud.log(`You hit ${enemy.name} for ${result.amount}${result.crit ? ' (critical)' : ''}.`, result.crit ? 'good' : '', 'dealt');
     // R25 — a hit far above your weapon's own damage says where it came from (see rpg.strike `why`)
     const top = player.derived?.damage?.[1] || 10;
@@ -2545,6 +2645,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   /** What happens when something dies. Named, because the enemy field is rebuilt on every world. */
   function onEnemyKilled(e) {
     player.kills++;
+    // R28 — a corpse for the necromancer, a jumping Gnawed, and the killing skill's `onKill`
+    mech.onKill(e);
     freePrisonersOf(e);
     // §7 — a raider going down is progress through the wave, and the last one ends the raid
     if (e.raider) {
@@ -2806,6 +2908,16 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   }
 
   let field = makeField();
+  /**
+   * R28 — the built piece in an enemy's way (js/build.js `blockingPiece`). Set on the field here and
+   * again wherever a new field is made; read lazily, so `build` (declared far below) is only touched
+   * once the game is running. Never underground: a dungeon floor has no player-built walls.
+   */
+  const structuresFor = () => (ax, az, bx, bz) => {
+    // `dungeon` and `build` are declared further down; a call before they exist is a TDZ throw
+    try { return dungeon ? null : build.blockingPiece(ax, az, bx, bz); } catch { return null; }
+  };
+  field.structures = structuresFor();
   // R27 M9 — a hostile patrol gets bodies when you are near its clock position (js/patrols.js)
   const patrolBodies = createPatrolBodies({ patrols, field: () => field, radius: balance.warbands?.patrolSpawnRadius ?? 150,
     onWiped: p => hud.log(p.warband ? `${p.name} is broken — ${holderLine(field.warbands?.of?.(zones.byId(p.zoneId)), p.credit?.grip ?? 1)}.` : `${p.name} is wiped out.`, 'level') });
@@ -3510,6 +3622,69 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   const holding = createCivicsScreen({
     civics, colony, works,
     /**
+     * R28 — THE PEOPLE TAB'S BUTTONS. Posting somebody on the watch is the way in to
+     * `colony.postGuard` (the Command Rod's guard order is the other), and the offers at the gate
+     * had buttons only on the B panel. Both are the colony's own calls; nothing is decided here.
+     */
+    people: {
+      posts: () => colony.posts || [],
+      post: id => {
+        const c = colony.byId(id);
+        const free = (colony.posts || []).find(p => (colony.citizens || []).filter(o => o.posted === p.id).length < (p.slots || 1));
+        if (!free) { hud.log('Every post is full. A Watch Post holds two, a Guard Tower three.', 'warn'); return; }
+        const out = colony.postGuard(id, free.id);
+        hud.log(out.ok ? `${c?.name || 'They'} stand${c ? 's' : ''} the watch at the ${free.name || 'post'}.` : out.why, out.ok ? 'good' : 'warn');
+      },
+      standDown: id => {
+        const out = colony.standDown(id);
+        if (out.ok) hud.log(`${out.citizen.name} comes off the watch and goes back to work as a ${out.citizen.jobName.toLowerCase()}.`, '');
+      },
+      offers: () => (colony.pending || []).map(o => ({
+        id: o.id, name: o.citizen?.name || 'Somebody',
+        job: (colonyData?.jobs || []).find(j => j.key === o.citizen?.job)?.name || String(o.citizen?.job || 'worker').replace(/_/g, ' '),
+      })),
+      accept: id => {
+        const out = colony.accept?.(id);
+        hud.log(out?.ok ? `${out.citizen.name} moves in.` : (out?.why || 'They did not stay.'), out?.ok ? 'level' : '');
+      },
+      turnAway: id => { colony.turnAway?.(id); hud.log('You send them on their way.', ''); },
+    },
+    /**
+     * R28 — SEND A CART (the Trade tab). js/trade.js could run a cart route end to end and the
+     * gold was already collected on arrival further down this file, but nothing ever STARTED one.
+     * The towns are the world's own settlements, nearest your first Trade Post first; a town of
+     * size 3 or more, or a port, keeps a market (a hamlet buys at the flat poor price).
+     */
+    cart: {
+      places: () => {
+        const post = civics.tradePosts?.[0] || { x: control.x, z: control.z };
+        return (features.settlements || []).map(s => ({
+          id: 't' + s.id, name: s.name, x: s.wx, z: s.wz, size: s.size ?? 2, biome: s.biome, race: s.race,
+          culture: s.race, market: (s.size ?? 2) >= 3 || s.type === 'port',
+          metres: Math.round(Math.hypot(s.wx - post.x, s.wz - post.z)),
+        })).sort((a, b) => a.metres - b.metres).slice(0, 16);
+      },
+      send: draft => {
+        const out = civics.sendCart(draft, {
+          day: Math.floor(state.elapsed / (balance.sky?.dayLengthSeconds ?? 900)) + 1,
+          gold: player.gold, at: state.elapsed, rng: rpg.rng,
+        });
+        if (out.ok) {
+          player.gold -= out.spent || 0;
+          civics.addSpend(out.spent || 0);
+          const r = out.route;
+          hud.log(`${r.carrierName} sets off for ${r.toName} with ${r.kg} kg. Back in about ${Math.max(1, Math.round(r.seconds / 60))} min with ${r.revenue} gold, if the road is kind.`, 'good');
+        } else hud.log(out.why, 'warn');
+        return out;
+      },
+      repeat: (id, on) => {
+        const out = civics.setRepeat(id, on);
+        if (!out.ok) hud.log(out.why, 'warn');
+        else hud.log(on ? `The ${out.route.carrierName.toLowerCase()} will load up and go again when it gets back.` : `This is the ${out.route.carrierName.toLowerCase()}'s last run.`, '');
+        return out;
+      },
+    },
+    /**
      * R17 — it mounts INSIDE the character sheet, on the tab index.html reserves for it.
      *
      * The screen is unchanged: same markup, same civics.css, same rail. `embedded` only drops the
@@ -4168,7 +4343,28 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       // R18 — you can walk where it stood again
       rebuildBuildSolids();
       grid.remove(entry.id);
+      /**
+       * R28 — A CRATE TAKEN DOWN USED TO TAKE ITS GOODS WITH IT.
+       *
+       * `stores.remove` deletes the store and everything on its shelves, and every way a crate
+       * leaves the ledger — Take down, Ctrl+Z, a razed outpost — came through here. So the shelves
+       * are emptied first: into whatever pool still reaches the spot (the crates beside it), and
+       * what does not fit or has nowhere to go into your bag. Nothing is destroyed.
+       */
+      const held = stores.get(entry.id);
+      const goods = held?.inv ? { ...held.inv } : null;
       stores.remove(entry.id);
+      if (goods && Object.values(goods).some(n => n > 0)) {
+        const pool = stores.poolAt(entry.x, entry.z);
+        let toPool = 0, toBag = 0;
+        for (const [id, n] of Object.entries(goods)) {
+          if (!(n > 0)) continue;
+          const kept = pool ? stores.put(pool, id, n) : 0;
+          toPool += kept;
+          if (n - kept > 0) { materials.add(id, n - kept); toBag += n - kept; }
+        }
+        hud.log(`${entry.name}'s goods ${toPool && toBag ? `went to ${pool.name} and your bag` : toPool ? `went to ${pool.name}` : 'went into your bag'}: ${matText(goods)}.`, 'good');
+      }
       works.remove(entry.id);
       // a house that was pulled down must not leave its citizen holding a bed that is not there
       civics.rebuild(build.entries, build.defOf);
@@ -4209,8 +4405,43 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
    * fuel at all.
    */
   const away = createAwayClock({
-    works, logistics, stores, grid,
+    // R28 — `mining`: the drills keep digging while you are away too (js/logistics.js)
+    works, mining, logistics, stores, grid,
     materials: resourceData?.materials || {},
+  });
+
+  /**
+   * R28 — THE BASE ECONOMY, READ OFF THE SYSTEMS THAT RUN IT (js/production.js).
+   *
+   * What the base makes a minute, what is stuck and WHY (traced upstream: a furnace short of ore
+   * whose drill has no power says so), and the alerts. It is drawn in three places: the Holding's
+   * Production tab, the station screen's rated line and "why", and the pill on the HUD. Sampled
+   * once a second in the frame loop. A supply route also asks `works.keepLine` so it leaves the
+   * stock a keep-in-stock machine is holding rather than shipping it out from under it.
+   */
+  logistics.setFloors((poolId, res) => works.keepLine(poolId, res));
+  let nextProductionSample = 0;
+  const production = createProduction({
+    works, stores, grid, mining, logistics,
+    materials: resourceData?.materials || {}, refining: refiningData || {}, nodeKinds: resourceData?.nodeKinds || {},
+  });
+  holding.setProduction?.(production, {
+    setKeep: (id, i, n) => { works.setKeep(id, i, n); },
+    toggle: id => { const m = works.get(id); if (m) works.setEnabled(id, m.enabled === false); },
+    reroute: id => {
+      const out = mining.autoRoute(id);
+      hud.log(out.ok ? 'The drill has a new route.' : out.why, out.ok ? 'good' : 'warn');
+    },
+    setLink: (id, patch) => { const out = logistics.setLink(id, patch); if (!out.ok) hud.log(out.why, 'warn'); },
+  });
+  const productionPill = createProductionPill({
+    mount: document.body,
+    onOpen: () => {
+      pauseMenu.toggle?.(false);
+      if (!hud.sheetOpen) hud.toggleSheet(true);
+      hud.setTab('holding');
+      holding.tab = 'production';
+    },
   });
 
   /**
@@ -4514,11 +4745,32 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         if (res.complete) { hud.log(`${res.order.name || 'The job'} is done.`, 'good'); sound.questDone(); }
         else if (res.applied <= 0) hud.log('Nothing left to do on that one.', '');
       },
+      /**
+       * R28 — the panel hands in the ORDER's id ("w12" / "lab_furnace3"), and this bound a citizen to
+       * a STATION with that id: one that does not exist, so they walked nowhere. An order at a
+       * machine binds a free person who can mind it; an order with no station (a harvest, a build)
+       * is pulled off the board by job tag, so it goes to a free person whose job does that work.
+       */
       assign: id => {
-        const who = (colony.citizens || []).find(c => !c.stationId && c.rung !== 'leaving');
-        if (!who) { hud.log('Nobody is free.', 'warn'); return; }
-        colony.assign(who.id, { stationId: id });
-        hud.log(`${who.name} goes to it.`, 'good');
+        const order = board.get?.(id);
+        if (!order) { hud.log('That job is gone.', 'warn'); return; }
+        const free = (colony.citizens || []).filter(c => c.stationId == null && !c.posted && c.rung !== 'leaving');
+        const jobOf = c => (colonyData?.jobs || []).find(j => j.key === c.job) || {};
+        const stationId = order.stationId ?? order.meta?.machine ?? null;
+        if (stationId != null) {
+          const who = free.find(c => (jobOf(c).tendMax ?? 1) > 0 && (jobOf(c).tags || []).includes(order.tag))
+            || free.find(c => (jobOf(c).tendMax ?? 1) > 0);
+          if (!who) { hud.log('Nobody free can mind a machine.', 'warn'); return; }
+          const out = colony.assign(who.id, { stationId });
+          if (out?.ok === false) { hud.log(out.why, 'warn'); return; }
+          hud.log(`${who.name} goes to the ${works.get?.(stationId)?.name || 'machine'}.`, 'good');
+          return;
+        }
+        const who = free.find(c => (jobOf(c).tags || []).includes(order.tag));
+        if (!who) { hud.log(`Nobody free does ${order.tag} work. A labourer or a carpenter would.`, 'warn'); return; }
+        // put it at the top of the board, so "send somebody" means THIS job, not the oldest one
+        order.priority = Math.max(order.priority ?? 1, 2);
+        hud.log(`${who.name} does ${order.tag} work and takes "${order.name || order.tag}" first, on their shift.`, 'good');
       },
     },
     holding: {
@@ -4533,10 +4785,16 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
           show: true,
           summary: `${cit} of ${beds} beds · appeal ${Math.round(a.score * 100)}% · `
             + `${crop.plots} field${crop.plots === 1 ? '' : 's'}${crop.ripe ? `, ${crop.ripe} ripe` : ''} · ${crop.meals} meals`,
-          offers: (colony.pending || []).map(o => ({ id: o.id, name: o.name, job: o.job })),
-          taxOk: taxable > 0,
-          taxNote: taxable > 0
-            ? `${taxable} housed · prosperity ${colony.prosperity().toFixed(2)}`
+          // R28 — an offer carries its person in `citizen`; `o.name`/`o.job` printed "undefined, undefined"
+          offers: (colony.pending || []).map(o => ({
+            id: o.id, name: o.name ?? o.citizen?.name ?? 'Somebody',
+            job: (colonyData?.jobs || []).find(j => j.key === (o.job ?? o.citizen?.job))?.name || String(o.job ?? o.citizen?.job ?? 'worker').replace(/_/g, ' '),
+          })),
+          // R28 — the purse, not a fresh day's tax: see `tax` below
+          taxOk: Math.floor(colony.gold || 0) > 0,
+          taxNote: Math.floor(colony.gold || 0) > 0
+            ? `${Math.floor(colony.gold)} gold in the purse · ${taxable} housed · prosperity ${colony.prosperity().toFixed(2)}`
+            : taxable > 0 ? `The purse is empty. Tax comes in once a day from the ${taxable} housed.`
             : cit ? 'Nobody is housed. A citizen with no bed pays nothing.' : 'Nobody lives here yet.',
           fieldOk: true,
           fieldNote: `${crop.plots} broken · they will replant what you start, never start their own`,
@@ -4547,13 +4805,20 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         hud.log(out?.ok ? `${out.citizen.name} moves in.` : (out?.why || 'They did not stay.'), out?.ok ? 'level' : '');
       },
       turnAway: id => { colony.turnAway?.(id); hud.log('You send them on their way.', ''); },
+      /**
+       * R28 — EMPTY THE PURSE; DO NOT RAISE ANOTHER DAY'S TAX.
+       *
+       * This called `colony.collectTax()`, which raises a whole day's tax, adds it to the holding's
+       * purse AND returned it to be added to yours — with no once-a-day check. Every click was
+       * another day's tax, twice over. `colony.tick` already raises the tax once a day into
+       * `colony.gold`; the button now takes what is in that purse, which is what it always said.
+       */
       tax: () => {
-        const out = colony.collectTax?.();
-        if (!out) return;
-        player.gold += out.gold;
-        hud.log(out.gold > 0
-          ? `${out.gold} gold in tax from ${out.paid.length}.${out.skipped.length ? ` ${out.skipped.length} paid nothing.` : ''}`
-          : 'Nobody had anything to give.', out.gold > 0 ? 'good' : 'warn');
+        const purse = Math.max(0, Math.floor(colony.gold || 0));
+        if (purse <= 0) { hud.log('The purse is empty. Tax comes in once a day.', 'warn'); return; }
+        colony.gold -= purse;
+        player.gold += purse;
+        hud.log(`${purse} gold out of the holding's purse.`, 'good');
       },
       field: () => {
         const out = farm.layPlot?.({
@@ -4624,7 +4889,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         hasSmelter: smelters.some(m => Object.keys(m.def?.fuels || {}).length > 0),
         hasFuel: fuels.some(f => haveAnywhere(f) > 0),
         hasDrill: entries.some(e => defOf(e.key)?.needs === 'node'),
-        hasRoute: drills.some(d => d.routed || d.deliveredPerMinute > 0),
+        // R28 — `mining.overview()` rows carry `route`; `routed` and `deliveredPerMinute` were never
+        // written by anything, so this was false for ever and the hint said "Put a crate near the
+        // drill" with a crate standing right beside it, and never reached the steps behind it
+        hasRoute: drills.some(d => !!d.route),
         hasPower: entries.some(e => defOf(e.key)?.power?.make > 0),
         hasLink: (logistics.links || []).length > 0,
         smelting: smelters.some(m => (m.queue || []).length > 0),
@@ -4637,6 +4905,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       .filter(r => r.away < 8)
       .sort((a, b) => a.away - b.away)[0]?.e || null,
   });
+  // R28 — the station screen's rated line and upstream "why" (js/station-ui.js `production`)
+  if (buildUI.station) buildUI.station.production = production;
   document.body.append(buildUI.root);
 
   /**
@@ -4676,12 +4946,24 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     pointerNdc[0] = ((e.clientX - r.left) / r.width) * 2 - 1;
     pointerNdc[1] = -((e.clientY - r.top) / r.height) * 2 + 1;
   });
+  /**
+   * R28 — ONE NOTCH, ONE STEP. A mouse wheel sends ~100 per notch; a touchpad sends dozens of tiny
+   * events per flick, and each one used to be a whole turn. The wheel's travel is added up and a
+   * step is taken per 60 of it, so a notch is still one step and a flick is a few.
+   */
+  let wheelPile = 0;
   renderer.domElement.addEventListener('wheel', e => {
     if (build.mode) {
       e.preventDefault();
-      // the terrain tools have no ghost to turn, so the wheel sizes the brush for them instead
-      if (build.tool === 'build') build.rotate(Math.sign(e.deltaY) * (Math.PI / 8));
-      else build.setRadius(build.radius - Math.sign(e.deltaY) * 2);
+      const unit = e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? 600 : 1;     // lines / pages → pixels
+      wheelPile += e.deltaY * unit;
+      if (Math.abs(wheelPile) < 60) return;
+      const dir = Math.sign(wheelPile);
+      wheelPile = 0;
+      // the terrain tools have no ghost to turn, so the wheel sizes the brush for them instead;
+      // a layout being stamped turns like a piece (build.rotate takes one catalogue step)
+      if (build.tool === 'build' || build.tool === 'stamp') build.rotate(dir * (Math.PI / 8));
+      else build.setRadius(build.radius - dir * 2);
       return;
     }
     /**
@@ -6234,6 +6516,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     const out = colony.recruit(offer, { gold: player.gold });
     if (!out.ok) { hud.log(out.why, 'bad'); sound.ui('error'); return { ok: false }; }
     player.gold -= offer.price;
+    civics.addSpend(offer.price || 0);
     hud.log(`${out.citizen.name} packs up and starts for your holding. ${populationText(population({ colony }))}.`, 'level');
     sound.questDone();
     const home = defence.spot?.();
@@ -6426,6 +6709,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     sellPrice: item => Math.max(1, Math.round(rpg.price(item) * (items.sellFactor ?? 0.35))),
     buy: item => {
       const r = folk.buy(talk.npc, item, player, shopMult());
+      // R28 — the Gambler's `spent: 1000` (data/colony.json) — `civics.addSpend` had no caller at all
+      if (r.ok) civics.addSpend(r.price || 0);
       hud.log(r.ok ? `Bought ${item.name} for ${r.price} gold.` : r.why, r.ok ? 'loot' : 'bad');
       if (r.ok) sound.coin(); else sound.ui('error');
       hud.setPlayer(player);
@@ -6758,6 +7043,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     });
     field = makeField();
     field.solids = [props.solids, features.solids, buildSolids, gateSolids, siteSolids];
+    field.structures = structuresFor();
     encounters = createEncounters({
       field, zones, terrain, balance, data: encounterData,
       // R14: the same router as the first one, or landing on a second world would un-throttle the
@@ -7481,6 +7767,24 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   sky.holdEclipsesUntil?.(state.elapsed + (balance.sky?.eclipseGrace ?? 450));
   if (save) {
     state.elapsed = restore(save, { rpg, player, control, map }) || 0;
+    /**
+     * R28 — THE TALENT TREES BECAME PER-SKILL (research/round28-skills-plan.md §7). A save from
+     * before keeps every pick the new trees still offer and drops the rest; nothing is charged and
+     * nothing is owed, because picking into an empty tier has always been free. Said once.
+     */
+    if ((save.player?.talentsVersion ?? save.talentsVersion ?? 0) < TALENTS_VERSION) {
+      const mig = migrateTalents(player, skills.slots.map(sl => sl.id).filter(Boolean));
+      if (mig.dropped) {
+        const line = `Skill talents were reworked: ${mig.dropped} ${mig.dropped === 1 ? 'pick was' : 'picks were'} returned. Choose again on the Skills tab — it is free.`;
+        /**
+         * R28 (UI) — said ONCE and where it will be seen: `notice` already writes the log line (it
+         * used to be logged twice), stays up 9s instead of 3.4s because it lands while the world
+         * is still streaming in, and the Skills tab keeps a banner until the player dismisses it.
+         */
+        hud.talentsReturned = mig.dropped;
+        setTimeout(() => { hud.notice?.(line, 'good', 9000); }, 1500);
+      }
+    }
     // written on every save since round 3 and never read back, so the save list's clock restarted
     state.playtime = Math.max(0, Math.round(save.playtime || 0));
     if (save.world && !saveCarriesWorld(save)) {
@@ -8175,7 +8479,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       if (e.code === 'Escape') {
         e.preventDefault();
         // a half-dragged road is thrown away first; a second Esc leaves the mode
-        if (build.cancelRun?.()) { hud.log('Run dropped.', ''); buildUI.refresh(); }
+        const carrying = !!build.moving;     // R28 — Esc with a piece in hand puts it back (build.js says so)
+        if (build.cancelRun?.()) { if (!carrying) hud.log('Run dropped.', ''); buildUI.refresh(); }
         else {
           build.setMode(false); buildUI.setOpen(false);
           document.body.classList.remove('building'); regrab();
@@ -8716,6 +9021,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       actor.setRate(moving ? (control.moving * cycle) / STRIDE : 1);
     }
     actor.update(dt);
+    // R28 — a druid shape draws its creature in the humanoid's place
+    mech.placeBody(dt);
 
     if (horse) horse.group.visible = control.mounted;
     if (horse && control.mounted) {
@@ -8817,6 +9124,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      * what you see is what hits.
      */
     const swingWith = (hand, stepIndex) => {
+      // R28 — in a druid shape the basic attack is the beast's (js/skillrun.js `basicAttack`)
+      if (mech.basicAttack(hand)) return;
       const hands = handsOf(player);
       const weapon = hand === 'off' ? hands.off : hands.main;
       /**
@@ -9215,6 +9524,15 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      * post down should not be.
      */
     if (buildClicks > 0) {
+      /**
+       * R28 — AIM AT WHERE THE CLICK WAS, NOT WHERE THE CURSOR WAS LAST FRAME.
+       *
+       * `build.aim` runs further down the frame, so a click used the PREVIOUS frame's aim: move and
+       * click inside one frame (a quick flick, or any slow frame) and the piece went where the
+       * cursor had been. Clicking the same corner twice for a gate laid a new corner a few metres
+       * away instead. The pointer is re-read here first; the late aim below is unchanged.
+       */
+      if (build.mode) { const at = aimSpot(); build.aim(at.x, at.z); }
       for (let i = 0; i < buildClicks; i++) {
         const res = build.confirm();
         if (res && res.ok === false && res.why) hud.log(res.why, 'warn');
@@ -9244,6 +9562,17 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     }
 
     field.update(dt, control, player, {
+      /**
+       * R28 — A SWING AT A WALL. js/actors.js asks `field.structures` which built piece stands
+       * between an enemy and what it is after, walks it up to that piece, and calls this instead of
+       * `onEnemyStrike` when it swings. The hit is the enemy's own damage roll (times the
+       * catalogue's `siegeDamage`); js/build.js decides whether the piece breaks.
+       */
+      onEnemyStrikeStructure: (e, id) => {
+        const [lo, hi] = e.dmg || [4, 8];
+        const amount = Math.max(1, Math.round((lo + field.rng() * (hi - lo)) * (build.plan.rules.siegeDamage ?? 1)));
+        return build.damagePiece(id, amount, { by: e.name });
+      },
 
       onStatusDamage: (e, amount) => {
         if (amount > 0.6) hud.log(`${e.name} takes ${amount.toFixed(0)}.`, '', 'dealt');
@@ -9267,6 +9596,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         const pet = e.aimingAt || pets.nearest(e.x, e.z, (e.reach || 2.4) + 0.6);
         const victim = pet && (e.aimingAt || field.rng() < 0.55) ? pet : player;
         const result = rpg.strike(e, victim, field.rng, { multiplier: incomingFrom(victim) * outgoingFrom(e) });
+        // R28 — a counter answered, a ward spent, a shockwave released, a share moved across a link
+        mech.onHurt(result, e, victim);
         if (e.lifeSteal) e.hp = Math.min(e.maxHp, e.hp + Math.round(result.amount * e.lifeSteal));
         // R23 — a frost nova off the hit, a barrier that bursts, a body the thorns just killed
         if (victim === player) {
@@ -9306,6 +9637,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         if (result.defenderPost?.guard) applyStatus(player, 'guard', skillData.statuses.guard, 1);
         if (result.dead && player.hp <= 0) respawn(e);
       },
+      // R28 — a taunting post or banner takes the swing instead of you
+      onEnemyStrikeObject: (e, obj) => mech.onObjectStruck(e, obj),
       // archers and casters: a real bolt, drawn with the same spell effects the player uses
       onEnemyShoot: e => {
         const spec = e.ranged || { range: 24, element: 'physical' };
@@ -9323,7 +9656,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
             const missed = Math.hypot(aimAt.x - to.x, aimAt.z - to.z) > 2.6;
             if (missed) return;
             const victim = aimAt === control ? player : aimAt;
+            // R28 — a Null Circle or a Sanctuary stops enemy ranged hits on anyone standing in it
+            if (blocksRanged(aimAt, e)) { spellfx.impact({ at: to, element: 'holy' }); return; }
             const result = rpg.strike(e, victim, field.rng, { multiplier: incomingFrom(victim) * outgoingFrom(e), element: spec.element, ranged: true });
+            mech.onHurt(result, e, victim);
             if (e.onHit?.length) field.statusOnHit(e, victim, skillData.statuses);
             if (victim === player) {
               // R23 — the same answers a melee hit gets; Frost Skin alone asks `ranged` and stays out
@@ -9339,6 +9675,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
     // companions, treasure, and everything the round-4 systems need every frame
     pets.update(dt, control, player, {
+      // R28 — temporary summons that burst when they end, and a Guardian Light's heal clock
+      ...mech.petHooks,
       // R25 — every companion hit is logged, with its number, under the 'Pet damage dealt' filter
       onPetHit: (p, target, result) => {
         if (result.dodged) hud.log(`${target.name} dodges ${p.name}.`, '', 'petDealt');
@@ -9406,7 +9744,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     }
     fx.update(dt);
     spellfx.update(dt);
-    skills.update(dt);
+    skills.update(dt, { fighting });
+    // R28 — placed posts and traps, channels, links, timed forms, imbues (js/skillrun.js)
+    mech.tick(dt, { fighting });
     // R23 — the powers that pulse on a clock: Pyre, Searing Light, the Dread Lantern, Stormrider
     tickSkillLeftovers(dt, tickAuras(uniqueEnv, rpg, player, dt, { fighting }));
     // whatever is burning or blessing the player keeps working while they run
@@ -9432,7 +9772,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
        */
       const mending = fighting ? 0 : player.maxHp * (balance.player?.outOfCombatRegen ?? 0.015);
       player.hp = Math.min(player.maxHp, player.hp + (player.derived.hpRegen || 0) + mending);
-      player.mp = Math.min(player.maxMp, player.mp + (player.derived.mpRegen || 0) + (fighting ? 0 : player.maxMp * 0.02));
+      // R28 — Spellrush's price: a self status `noManaRegen` stops mana coming back while it lasts
+      if (!Object.values(player.statuses || {}).some(st => st.noManaRegen)) player.mp = Math.min(player.maxMp, player.mp + (player.derived.mpRegen || 0) + (fighting ? 0 : player.maxMp * 0.02));
       // barrier refills out of a fight, and faster with `barrierRegen`
       /**
        * A barrier a SKILL put up is not the gear's barrier.
@@ -9795,6 +10136,11 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     }
     // the grid's answer reaches the pad, the turret and the smelter — see syncPower
     if (state.frames % 20 === 0) syncPower();
+    // R28 — the base economy, once a game second: the meter's sample, the alerts' ages, the pill
+    if (state.elapsed >= nextProductionSample) {
+      nextProductionSample = state.elapsed + 1;
+      productionPill.update(production.sample(state.elapsed) && production.summary());
+    }
     if (state.frames % 15 === 0) {
       /**
        * THE COLONY HAS TO BE TOLD WHAT YOU BUILT.
@@ -9812,7 +10158,16 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         wealth: player.gold || 0,
       });
       colony.setClock?.(sky.dayFraction * 24, Math.floor(state.elapsed / (balance.sky?.dayLengthSeconds ?? 900)) + 1);
-      colony.tick?.(dt * 15);
+      /**
+       * R28 — THE DAY'S TAX AND A MIGRANT AT THE GATE WERE BOTH SILENT. `colony.tick` raises the tax
+       * once a day into the holding's purse (`colony.gold`) and rolls for a migrant; it returned
+       * both as events and this line dropped them, so the purse filled where nobody looked and an
+       * offer expired unseen. Said once each, with the key that opens the screen.
+       */
+      for (const ev of colony.tick?.(dt * 15) || []) {
+        if (ev.kind === 'tax' && (ev.gold || 0) > 0) hud.log(`The day's tax: ${Math.round(ev.gold)} gold into the holding's purse (${Math.floor(colony.gold)} in it). K to collect.`, 'good');
+        else if (ev.kind === 'migrant') hud.log(`${ev.offer?.citizen?.name || 'Somebody'} is at the gate asking to stay. K, People.`, 'level');
+      }
       farm.tick?.(dt * 15);
       /**
        * `works.machines()` RETURNS SOMETHING NOW.
@@ -9837,7 +10192,15 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         hour: sky.dayFraction * 24,
         gold: player.gold, rng: rpg.rng, at: state.elapsed,
       });
-      for (const r of civ.arrived || []) player.gold += civics.trade.collect(r.id).gold || 0;
+      /**
+       * R28 — PAY EVERY CART THAT IS BACK, not only the ones that got back this tick: one that
+       * arrived during the away catch-up sat "arrived" for ever and its gold never reached you.
+       * A standing run has already been sent on again by `civics.tick`; its upkeep comes out here.
+       */
+      for (const r of civics.trade.list()) {
+        if (r.state === 'arrived' || r.state === 'lost') player.gold += civics.trade.collect(r.id).gold || 0;
+      }
+      for (const x of civ.resent || []) player.gold -= x.spent || 0;
       if (civ.vendor) hud.log(`${civ.vendor.name} is asking after a bed. Press K.`, 'level');
       holding.drawHold();
       if (holding.open) holding.draw();
@@ -9950,6 +10313,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       build.aim(spot.x, spot.z);
       buildUI.tick();
     }
+    // R28 — nothing called this: the portal ring never turned and the Repair Stations never mended
+    build.update(dt);
     hud.tick(player, {
       place: dungeon ? dungeon.name : town ? `${town.name} (${town.kind || 'settlement'})` : (terrain.regionAt(control.x, control.z) || terrain.biomeAt(control.x, control.z).name),
       zone: dungeon ? { minLevel: dungeon.level, maxLevel: dungeon.level + 2, midLevel: dungeon.level + 1, danger: 'Underground' } : here,
@@ -10267,6 +10632,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   }
 
   function respawn(killer = null) {
+    // R28 — posts, traps, links and a channel do not survive a death; a shape ends with it
+    mech.reset();
+    mech.breakShapes('death');
     /**
      * THE STONE THAT SAID YOU WOULD GET UP ONCE.
      *
@@ -10511,6 +10879,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      * exactly that once already — `board` was declared twice and js/work.js became unreachable.
      */
     get goodsMarket() { return civics.trade; },
+    // R28 — the base economy (js/production.js), for the specs and the console
+    get production() { return production; },
     get muster() { return civics.muster; },
     get map() { return map; },
     /** Is the world under your feet a settled, multi-biome one? (round 10, for the specs) */
@@ -10596,6 +10966,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     firstPerson: on => setFirstPerson(on),
     /** Fire a skill slot from a test or the debug menu. */
     cast: i => castSkill(i),
+    // R28 — the skill vocabulary's runtime, for the Playwright specs and the debug menu
+    get mech() { return mech.debug(); },
     get statuses() { return { player: player.statuses || {}, enemies: field.enemies.map(e => ({ name: e.name, statuses: e.statuses || {} })) }; },
     /** Skip the cinematics — go straight to space, or straight down onto a world. */
     toSpace: () => { ensureSpace().enter({ fromPlanet: planet, elapsed: state.elapsed }); camera.far = 600000; camera.updateProjectionMatrix(); mode = 'space'; },

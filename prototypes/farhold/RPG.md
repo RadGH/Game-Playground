@@ -4999,3 +4999,88 @@ All three are restated in Farhold's own tables (`js/affixes.js` `ENGINE_UNIT`, `
 
 Not done: nothing. The fix for the bar was reproduced and checked in node against the real
 `EnemyField`; it was not play-tested in a browser.
+
+## Round 28 — roads (2026-10-02)
+
+*"Improve road plans and fix floating paper thin roads."* The full write-up with every number is
+`research/round28-roads.md`. Screenshots are in `research/round28-roads/`.
+
+**Floating roads.** We measured the drawn road mesh against the ground you stand on. World roads sat
+**0.84 m** above it at the median on Small (1.74 m at the 95th percentile, 3.1 m at worst) and up to
+13.3 m on a full-size planet. Town streets sat 0.35 m up at the median and 2.9 m at worst. Nothing had
+caught it, because since round 22 the tests only asked whether the ground poked *through* a road.
+
+The cause was round 22's own fix for that: each flat cross-section was raised to the highest ground
+across its width *and half a step toward each neighbour*, with road points 45–128 m apart. On any slope
+that put the road at half the climb to the next point, a flat sheet hanging over the verge. Town
+streets (`crownLane`) did the same with "highest ground plus 2 m either side".
+
+Now the ribbon **drapes**: `drapeRibbon` in js/roadplan.js cuts a row every 3 m, sets every vertex 5–9 cm
+over `heightAt` (which under a world road *is* the carved road bed), and raises any quad whose edge
+midpoint the ground bulges past. A road also has a **sloped earth edge** (`ROAD_SKIRT`), so it is no longer
+paper-thin edge-on. Past about 50 m, the terrain's coarse rings cannot draw a 7 m road bed at all
+(1–21 m off), so the road's vertex shader (`roadShader` in js/features.js) moves each vertex toward the
+camera in depth only, and drops the edge further with distance. `polygonOffset` does nothing here,
+because the renderer uses a logarithmic depth buffer. A branch running into a higher road now stops at
+its kerb (`roadKeep`), instead of drawing a second sheet that flickers against the first.
+
+After: 0.09 m median, 0.33 m worst. The median is the lift itself. Streets: 0.06 m median, 0.24 m worst.
+Seen from a town, nothing hangs past the edge, and 0.49% of vertices (all 1.6 km away) are behind the
+drawn hill. Before this round it was 13–25% buried and 23–71% hanging.
+
+**Road plans.**
+
+* **The map now draws the roads that are on the ground.** `drawRoadNetwork` in js/map.js strokes
+  `terrain.roadPaths` by class (merged, switchbacked, spurred). Before, it drew World Forge's raw links.
+  On the user's world (seed 25392, Small), 18% of the walkable roads were more than half a cell from any
+  map line, and 20% of the map's lines were roads that don't exist (the straight climb a switchback
+  replaced). The region detail view's dashed "tracks", which nothing ever built, are no longer drawn.
+  Compare `before-map-z11.png` (player standing on a road the map draws a cell away) with `after-map-z11.png`.
+* **The 12–18% "sliver junctions" were a measurement bug.** The measure compared the branch to the trunk
+  segment with an absolute cosine, so a road carrying straight on from another road's end read as
+  0°. `junctionAngle` (tests/road-measure.mjs) measures against the arms of the trunk that actually
+  leave the junction. Real count: 0 of 337 on Small, and 2 on seed 7 at Super tiny. Those two (23° Ys)
+  are fixed by `squareJunctions` in js/planet.js. It runs before grading, drops the branch points that
+  hug the trunk, and slides the junction to the last spot where the branch still leaves at 55°. That spot
+  is searched for rather than solved, because the trunk bends at both. Flags: `path.squared`,
+  `terrain.roadJunctionsSquared`, and `opts.squareJunctions: false` to turn it off.
+* **Grade** was measured and left alone. Most length over 12% is on switchback legs (the fold targets
+  about 10% over 40 m), and the worst cases are climbs the fold pass already marked `steep` because water,
+  a cliff or a town was in the way. Retuning the fold would move every folded road and the fold cache.
+  It's parked as a candidate in the research note.
+
+Tests: `tests/round28-roads.test.js` (9 tests, four worlds). They check drape against `heightAt` at vertices
+and edge midpoints, that the edge tucks into the verge, the view from the town against the drawn rings,
+the compiled shader, drape over a bump and a valley, paving drawn twice, rebuild cost, no junction under
+30°, and that the map reads `roadPaths`. `tests/round28-roads.spec.js` takes the road and map screenshots.
+`tests/round27-roads.test.js` excuses `squared` roads by name, the same way it already excuses
+folded/rejoined ones. `tests/round11-ui.test.js` now checks the rule (every `renderWorld` call passes
+`nodes: false`) instead of the exact line of source.
+
+Not done: ruts and edge wear in the road colours, and a gentler switchback grade. Both are in
+`research/round28-roads.md`.
+
+## Round 28 — skills, talents and the druid's shapes (2026-10-02)
+
+The request: give every class its own abilities instead of sharing them, make talents change how a skill plays rather than add a percentage, and give the druid shapes that change its other skills. Pipeline: a brainstorm (`research/round28-skills-brainstorm.md`), a harsh roast of it, a final spec (`research/round28-skills-plan.md`), an engine agent, five content agents in parallel, then an interface agent.
+
+**What changed for the player**
+- **180 skills, each owned by one class.** Before this round `execute` sat on 10 classes, `power_strike` on 9 and `meteor` on 9. All 47 old ids were kept and given to the one class they fit best, so saves stay valid; the rest are new. Full list per class: `CLASSES.md` "Round 28".
+- **Talents are written per skill.** Four tiers (levels 3/8/18/28), two bespoke nodes each plus an optional shared node. The roast's rule: at most one size/duration/count talent per skill, and it must cost something. A bespoke node changes the skill's rules — its shape, what happens on impact, how it combines with another of the class's skills, a resource, a form, or what the followers do.
+- **Forms.** One toggle system covers the druid's three shapes — **Briarback** (a thorn boar that tanks), **Fenrunner** (a venomous marsh lizard for close fighting) and **Sporecap** (a walking fungus that heals for a short while), each a real creature body — the Fighter's stances, the Dragon Knight's tempers and the Bard's songs. In a shape, the druid's basic attack and other skills become new ones (Thornlash becomes Bramble Gore in Briarback).
+- **Class resources and marks.** Flair (Swashbuckler, rewards switching skills), Poise (Monk, builds from taking hits), Grudge (Demon Hunter), Frostbite stacks (Mage), corpses (Necromancer), runes (Runesmith), and per-class marks such as Quarry, Grave Marked and Guilty.
+- **Class signatures** (`signature` in `data/classes.json`) on the title screen, the class card and the builder.
+- **Interfaces:** the Skills tab shows all four tiers side by side, each pick lists the numbers it changes ("Damage 143% → 162%"); skill cards show charges, recast windows, resources and form badges, and a form lists what every other skill becomes; old saves whose picks were dropped get a banner until dismissed.
+
+**Engine.** `js/skillmech.js` is the mechanics vocabulary (~60 keys); each key names the file that reads it and writes its own card sentence. `js/skillrun.js` runs placed objects, walls, links, corpses, shades and forms; `main.js` only gained hook calls. `js/skillcard.js` is the shared card logic for every screen. The audit test cuts the description table out of skillmech.js before looking for a reader, because `dotRate` passed the first version of it while nothing outside that file read it — this project's usual fault, "a rule in data nobody reads", caught by a better test rather than by a player.
+
+**Bugs found along the way**
+- A ring or ground skill with no damage number still struck for 100% weapon damage. Now a skill with no `mult` deals none and its card says so.
+- A dash hit a body once per 2 m step of its path, so an enemy near the line was hit several times. Now once.
+- A self-buff that followed a Dragon Knight temper also set the player on fire.
+- `data/classes.json` and `data/skills.json` disagreed on 11 classes' skill lists, so the title screen previewed the wrong skills. A test now keeps them identical.
+- Training-dummy damage looked broken in the browser (1–9 per hit); it was a level-50 dummy with 8,775 armour, not a bug.
+
+**How the content was written.** Five agents wrote six classes each at the same time. Each kept its rows in its own staging file (`data/r28-batches/<batch>.json`), and `tools/merge-r28-batch.mjs` is the only thing that writes `skills.json`/`classes.json`: it takes a lock, copies the rows in and regenerates every card inside the same lock, so no batch could overwrite another's.
+
+**Not built** (plan §13 has the reasons): silence cancelling a warband leader's passive aura; shade copies repeating every rider of a cast; Iron Gyre is deliberately above its balance band.

@@ -175,6 +175,22 @@
 .cb-later > summary:hover { color: var(--cb-ink); }
 .cb-later[open] > summary { margin-bottom: 6px; }
 
+/* R28 — spells grouped by the class they come from: the class name leads, its role is quieter */
+.cb-origin > summary b { color: var(--cb-ink); font-weight: 600; }
+.cb-origin > summary .cb-role { color: var(--cb-dim); }
+.cb-origin > summary .cb-count { color: var(--cb-faint); font-variant-numeric: tabular-nums; }
+.cb-origin { margin-top: 4px; border-bottom: 1px solid var(--cb-line); }
+.cb-origin[open] { padding-bottom: 8px; }
+
+/* R28 — the element filter over the spell list */
+.cb-filters { display: flex; flex-wrap: wrap; gap: 5px; margin: 6px 0 4px; }
+.cb-filter {
+  font: inherit; font-size: 11.5px; line-height: 20px; padding: 0 9px; cursor: pointer;
+  border: 1px solid var(--cb-line); border-radius: 999px; background: transparent; color: var(--cb-dim);
+}
+.cb-filter:hover { border-color: var(--cb-accent); color: var(--cb-ink); }
+.cb-filter.on { border-color: var(--cb-accent); background: #14243a; color: var(--cb-ink); }
+
 /* the Spells tab: the six slots on the left stay put while the list on the right scrolls past */
 .cb-grid--spells { grid-template-columns: minmax(260px, 340px) minmax(0, 1fr); }
 .cb-grid--spells > .cb-pane:first-child { position: sticky; top: 0; }

@@ -1,0 +1,5294 @@
+{
+ "_doc": "Round 28 content batch b2 (Skirmish): rogue, shadow_dancer, swashbuckler, monk, scavenger, witch_hunter. Merged by tools/merge-r28-batch.mjs b2. This file is the source of truth for these rows.",
+ "statuses": {
+  "grave": {
+   "name": "Grave Marked",
+   "kind": "tag",
+   "owner": "rogue",
+   "element": "shadow",
+   "seconds": 10,
+   "fromYou": 0.25,
+   "store": 0.3
+  },
+  "turned_about": {
+   "name": "Turned About",
+   "kind": "tag",
+   "owner": "swashbuckler",
+   "element": "physical",
+   "seconds": 3,
+   "fromBehind": true
+  },
+  "downed": {
+   "name": "Downed",
+   "kind": "tag",
+   "owner": "monk",
+   "element": "physical",
+   "seconds": 3,
+   "fromYou": 0.2
+  },
+  "guilty": {
+   "name": "Guilty",
+   "kind": "tag",
+   "owner": "witch_hunter",
+   "element": "holy",
+   "seconds": 10,
+   "takeMore": 0.25
+  },
+  "shrouded": {
+   "name": "Shrouded",
+   "kind": "buff",
+   "element": "shadow",
+   "resist": 0.35,
+   "seconds": 2
+  }
+ },
+ "classes": {
+  "rogue": [
+   "eviscerate",
+   "poison_dart",
+   "sucker_punch",
+   "grave_mark",
+   "slip_away",
+   "knife_storm"
+  ],
+  "shadow_dancer": [
+   "shade_cut",
+   "shadowstep",
+   "smoke",
+   "cutting_waltz",
+   "execute",
+   "host_of_shades"
+  ],
+  "swashbuckler": [
+   "flourish",
+   "daring_leap",
+   "mocking_parry",
+   "pinning_thrust",
+   "matadors_turn",
+   "grandeur"
+  ],
+  "monk": [
+   "open_palm",
+   "wind_step",
+   "sweeping_heel",
+   "inner_stillness",
+   "mountain_fist",
+   "ninefold_staff"
+  ],
+  "scavenger": [
+   "lucky_strike",
+   "junk_toss",
+   "scrounge",
+   "caltrop_scatter",
+   "pitch_bomb",
+   "big_score"
+  ],
+  "witch_hunter": [
+   "pinning_shot",
+   "silver_edge",
+   "null_circle",
+   "writ_of_guilt",
+   "iron_net",
+   "purging_rite"
+  ]
+ },
+ "skills": {
+  "eviscerate": {
+   "name": "Gutting Strike",
+   "shape": "melee",
+   "element": "physical",
+   "mult": 1.1,
+   "reach": 2.8,
+   "arc": 1.1,
+   "cooldown": 7,
+   "mp": 8,
+   "status": "bleed",
+   "statusMult": 0.7,
+   "consumes": {
+    "status": "stagger",
+    "mult": 0.8
+   },
+   "bonusIf": [
+    {
+     "when": "behind",
+     "mult": 0.3
+    }
+   ],
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "double_gut",
+       "name": "Double Gut",
+       "fx": "stack",
+       "mod": {
+        "set": {
+         "repeats": 2,
+         "repeatEvery": 0.2
+        },
+        "mul": {
+         "mult": 0.6
+        }
+       }
+      },
+      {
+       "id": "reaching_gut",
+       "name": "Reaching Gut",
+       "fx": "leap",
+       "mod": {
+        "set": {
+         "shape": "dash"
+        },
+        "dash": {
+         "to": "target",
+         "range": 6,
+         "noPath": true
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "open_artery",
+       "name": "Open Artery",
+       "fx": "stack",
+       "mod": {
+        "set": {
+         "status": null
+        },
+        "stack": {
+         "status": "bleed",
+         "max": 3
+        }
+       }
+      },
+      {
+       "id": "laid_open",
+       "name": "Laid Open",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "marked",
+          "takeMore": 0.2,
+          "seconds": 5
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "cauterise",
+     "nodes": [
+      {
+       "id": "cool_nerve",
+       "name": "Cool Nerve",
+       "fx": "charge",
+       "mod": {
+        "onCrit": {
+         "reset": true
+        }
+       }
+      },
+      {
+       "id": "knife_throw",
+       "name": "Knife Throw",
+       "fx": "lance",
+       "mod": {
+        "set": {
+         "shape": "bolt",
+         "range": 15
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "unmaking",
+     "nodes": [
+      {
+       "id": "bloodletter",
+       "name": "Bloodletter",
+       "fx": "detonate",
+       "mod": {
+        "detonate": {
+         "types": [
+          "bleed"
+         ],
+         "share": 1
+        }
+       }
+      },
+      {
+       "id": "red_harvest",
+       "name": "Red Harvest",
+       "fx": "burst",
+       "mod": {
+        "onKill": {
+         "spread": {
+          "types": [
+           "bleed"
+          ],
+          "radius": 5
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "poison_dart": {
+   "name": "Poison Dart",
+   "shape": "bolt",
+   "element": "poison",
+   "mult": 1.1,
+   "range": 34,
+   "splash": 1.5,
+   "cooldown": 5,
+   "mp": 6,
+   "statusMult": 1.2,
+   "stack": {
+    "status": "poison",
+    "max": 3
+   },
+   "talents": {
+    "1": {
+     "lib": "seeking",
+     "nodes": [
+      {
+       "id": "dart_spray",
+       "name": "Dart Spray",
+       "fx": "fan",
+       "mod": {
+        "set": {
+         "projectiles": 3,
+         "spread": 0.35
+        },
+        "mul": {
+         "mult": 0.55
+        }
+       }
+      },
+      {
+       "id": "blowpipe",
+       "name": "Blowpipe",
+       "fx": "lance",
+       "mod": {
+        "bonusIf": [
+         {
+          "when": "distance:15:0.02:0.3"
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "chain",
+     "nodes": [
+      {
+       "id": "numbing",
+       "name": "Numbing",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "chill",
+          "slow": 0.3,
+          "seconds": 4,
+          "name": "Numbed"
+         }
+        ]
+       }
+      },
+      {
+       "id": "toxic_bloom",
+       "name": "Toxic Bloom",
+       "fx": "zone",
+       "mod": {
+        "pool": {
+         "seconds": 3,
+         "radius": 2.5,
+         "power": 0.15,
+         "element": "poison"
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "brand",
+     "nodes": [
+      {
+       "id": "paralytic",
+       "name": "Paralytic",
+       "fx": "tag",
+       "mod": {
+        "onHit": {
+         "status": {
+          "id": "root",
+          "seconds": 1.5
+         },
+         "statusChance": 0.25
+        }
+       }
+      },
+      {
+       "id": "venom_lash",
+       "name": "Venom Lash",
+       "fx": "charge",
+       "requires": "eviscerate",
+       "mod": {
+        "cutCooldown": {
+         "skill": "eviscerate",
+         "seconds": 1,
+         "per": "hit",
+         "orSelf": 0.5
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "cascade",
+     "nodes": [
+      {
+       "id": "spreading_dart",
+       "name": "Spreading Dart",
+       "fx": "burst",
+       "mod": {
+        "onKill": {
+         "spread": {
+          "types": [
+           "poison"
+          ],
+          "radius": 5
+         }
+        }
+       }
+      },
+      {
+       "id": "deep_venom",
+       "name": "Deep Venom",
+       "fx": "stack",
+       "mod": {
+        "add": {
+         "stack.max": 3
+        },
+        "mul": {
+         "statusMult": 0.7
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "sucker_punch": {
+   "name": "Sucker Punch",
+   "shape": "melee",
+   "element": "physical",
+   "mult": 1.2,
+   "reach": 2.6,
+   "arc": 1,
+   "cooldown": 10,
+   "mp": 6,
+   "knock": {
+    "stagger": 1.6
+   },
+   "bonusIf": [
+    {
+     "when": "behind",
+     "mult": 0.5
+    }
+   ],
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "ear_clap",
+       "name": "Ear Clap",
+       "fx": "wide",
+       "mod": {
+        "burst": {
+         "radius": 3,
+         "statuses": [
+          {
+           "id": "weaken",
+           "dealLess": 0.2,
+           "seconds": 3
+          }
+         ]
+        }
+       }
+      },
+      {
+       "id": "hook_punch",
+       "name": "Hook Punch",
+       "fx": "pull",
+       "mod": {
+        "pullIn": {
+         "metres": 2,
+         "to": "self"
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "shatter",
+     "nodes": [
+      {
+       "id": "loose_grip",
+       "name": "Loose Grip",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "disarm",
+          "seconds": 1.5
+         }
+        ]
+       }
+      },
+      {
+       "id": "opened_guard",
+       "name": "Opened Guard",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "marked",
+          "takeMore": 0.3,
+          "seconds": 1.6
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "elbow_spin",
+       "name": "Elbow Spin",
+       "fx": "knock",
+       "mod": {
+        "burst": {
+         "radius": 3,
+         "mult": 0.4,
+         "knock": {
+          "push": 1.5,
+          "stagger": 1
+         }
+        }
+       }
+      },
+      {
+       "id": "look_away",
+       "name": "Look Away",
+       "fx": "summon",
+       "mod": {
+        "summon": {
+         "def": "phantom_decoy",
+         "decoy": {
+          "hpShare": 0.15,
+          "taunt": 3
+         },
+         "lifetime": 3,
+         "temporary": true
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "crescendo",
+     "nodes": [
+      {
+       "id": "knockout",
+       "name": "Knockout",
+       "fx": "knock",
+       "mod": {
+        "add": {
+         "knock.stagger": 1.4
+        },
+        "mul": {
+         "cooldown": 1.3
+        }
+       }
+      },
+      {
+       "id": "twin_punch",
+       "name": "Twin Punch",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "grave_mark": {
+   "name": "Grave Mark",
+   "shape": "bolt",
+   "element": "shadow",
+   "mult": 1.6,
+   "range": 30,
+   "cooldown": 20,
+   "mp": 12,
+   "tag": {
+    "id": "grave",
+    "seconds": 10
+   },
+   "talents": {
+    "1": {
+     "lib": "seeking",
+     "nodes": [
+      {
+       "id": "shared_grave",
+       "name": "Shared Grave",
+       "fx": "tag",
+       "mod": {
+        "split": {
+         "shards": 2,
+         "range": 10,
+         "keep": 0.4
+        }
+       }
+      },
+      {
+       "id": "close_mark",
+       "name": "Close Mark",
+       "fx": "quick",
+       "mod": {
+        "set": {
+         "shape": "melee",
+         "reach": 3,
+         "arc": 1.2
+        },
+        "mul": {
+         "cooldown": 0.75
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "quick_pursuit",
+       "name": "Quick Pursuit",
+       "fx": "charge",
+       "mod": {
+        "selfBuff": {
+         "name": "Pursuit",
+         "seconds": 4,
+         "movePct": 0.3
+        }
+       }
+      },
+      {
+       "id": "bleeding_grave",
+       "name": "Bleeding Grave",
+       "fx": "stack",
+       "mod": {
+        "statuses": [
+         "bleed"
+        ]
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "settled_account",
+       "name": "Settled Account",
+       "fx": "charge",
+       "mod": {
+        "cutCooldown": {
+         "skill": "others",
+         "seconds": 2,
+         "per": "hit"
+        }
+       }
+      },
+      {
+       "id": "shadows_reach",
+       "name": "Shadow's Reach",
+       "fx": "charge",
+       "requires": "eviscerate",
+       "mod": {
+        "cutCooldown": {
+         "skill": "eviscerate",
+         "seconds": 7,
+         "per": "hit",
+         "orSelf": 4
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "unmaking",
+     "nodes": [
+      {
+       "id": "last_appointment",
+       "name": "Last Appointment",
+       "fx": "detonate",
+       "mod": {
+        "tag": {
+         "store": 0.5
+        }
+       }
+      },
+      {
+       "id": "second_notice",
+       "name": "Second Notice",
+       "fx": "echo",
+       "mod": {
+        "again": {
+         "delay": 5,
+         "mult": 0.5
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "slip_away": {
+   "name": "Slip Away",
+   "shape": "self",
+   "element": "shadow",
+   "cooldown": 22,
+   "mp": 10,
+   "summon": {
+    "def": "phantom_decoy",
+    "decoy": {
+     "hpShare": 0.36,
+     "taunt": 4
+    },
+    "lifetime": 4,
+    "temporary": true
+   },
+   "empowerNext": {
+    "behind": true,
+    "seconds": 6
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "running_slip",
+       "name": "Running Slip",
+       "fx": "charge",
+       "mod": {
+        "selfBuff": {
+         "name": "Slipping",
+         "seconds": 4,
+         "movePct": 0.5
+        }
+       }
+      },
+      {
+       "id": "sleight",
+       "name": "Sleight",
+       "fx": "charge",
+       "mod": {
+        "empowerNext": {
+         "crit": true
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "rigged_decoy",
+       "name": "Rigged Decoy",
+       "fx": "burst",
+       "mod": {
+        "summon": {
+         "burstOnExpire": {
+          "radius": 4,
+          "mult": 1.2
+         }
+        }
+       }
+      },
+      {
+       "id": "smoke_decoy",
+       "name": "Smoke Decoy",
+       "fx": "wide",
+       "mod": {
+        "burst": {
+         "radius": 5,
+         "statuses": [
+          {
+           "id": "weaken",
+           "dealLess": 0.25,
+           "seconds": 4
+          }
+         ]
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "second_slip",
+       "name": "Second Slip",
+       "fx": "leap",
+       "mod": {
+        "recast": {
+         "window": 4,
+         "say": "dash 8 m back the way you are facing",
+         "then": {
+          "shape": "dash",
+          "dash": {
+           "to": "back",
+           "range": 8,
+           "noPath": true
+          }
+         }
+        }
+       }
+      },
+      {
+       "id": "clean_break",
+       "name": "Clean Break",
+       "fx": "ward",
+       "mod": {
+        "cleanse": {
+         "count": 2
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "aegis",
+     "nodes": [
+      {
+       "id": "ghost_step",
+       "name": "Ghost Step",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "name": "Unseen",
+         "seconds": 1.5,
+         "untargetable": true
+        }
+       }
+      },
+      {
+       "id": "long_con",
+       "name": "Long Con",
+       "fx": "summon",
+       "mod": {
+        "summon": {
+         "lifetime": 8
+        },
+        "mul": {
+         "cooldown": 1.25
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "knife_storm": {
+   "name": "Knife Storm",
+   "shape": "around",
+   "element": "physical",
+   "mult": 0.38,
+   "radius": 7,
+   "cooldown": 22,
+   "mp": 22,
+   "repeats": {
+    "count": 8,
+    "every": 0.35,
+    "scatter": true
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "knife_ring",
+       "name": "Knife Ring",
+       "fx": "wide",
+       "mod": {
+        "set": {
+         "radius": 4
+        },
+        "repeats": {
+         "scatter": false
+        }
+       }
+      },
+      {
+       "id": "pinning_knives",
+       "name": "Pinning Knives",
+       "fx": "knock",
+       "mod": {
+        "knock": {
+         "stagger": 0.3
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "poisoned_edges",
+       "name": "Poisoned Edges",
+       "fx": "stack",
+       "mod": {
+        "stack": {
+         "status": "poison",
+         "max": 3
+        }
+       }
+      },
+      {
+       "id": "bleeding_edges",
+       "name": "Bleeding Edges",
+       "fx": "stack",
+       "mod": {
+        "statuses": [
+         "bleed"
+        ]
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "culling_knives",
+       "name": "Culling Knives",
+       "fx": "seek",
+       "mod": {
+        "repeats": {
+         "scatter": false,
+         "target": "lowest"
+        },
+        "bonusIf": [
+         {
+          "when": "execute:0.3",
+          "mult": 0.3
+         }
+        ]
+       }
+      },
+      {
+       "id": "knife_ward",
+       "name": "Knife Ward",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "name": "Knife Ward",
+         "seconds": 3,
+         "evade": 0.3
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "cascade",
+     "nodes": [
+      {
+       "id": "endless_knives",
+       "name": "Endless Knives",
+       "fx": "charge",
+       "mod": {
+        "onKill": {
+         "refund": 0.15
+        }
+       }
+      },
+      {
+       "id": "grave_storm",
+       "name": "Grave Storm",
+       "fx": "tag",
+       "requires": "grave_mark",
+       "mod": {
+        "bonusIf": [
+         {
+          "when": "status:grave",
+          "mult": 0.5
+         }
+        ],
+        "cutCooldown": {
+         "skill": "grave_mark",
+         "seconds": 1,
+         "per": "hit",
+         "orSelf": 0.5
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "shade_cut": {
+   "name": "Shade Cut",
+   "shape": "melee",
+   "element": "shadow",
+   "mult": 1,
+   "reach": 2.8,
+   "arc": 1.6,
+   "cooldown": 3,
+   "mp": 3,
+   "afterimage": {
+    "at": "start",
+    "delay": 0.5,
+    "mult": 0.5
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "two_shades",
+       "name": "Two Shades",
+       "fx": "afterimage",
+       "mod": {
+        "afterimage": {
+         "count": 2,
+         "mult": 0.35
+        }
+       }
+      },
+      {
+       "id": "reaching_shade",
+       "name": "Reaching Shade",
+       "fx": "lance",
+       "mod": {
+        "set": {
+         "reach": 5,
+         "arc": 0.8
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "shatter",
+     "nodes": [
+      {
+       "id": "shade_bleed",
+       "name": "Shade Bleed",
+       "fx": "stack",
+       "mod": {
+        "statuses": [
+         "bleed"
+        ]
+       }
+      },
+      {
+       "id": "backhand_shade",
+       "name": "Backhand Shade",
+       "fx": "afterimage",
+       "mod": {
+        "bonusIf": [
+         {
+          "when": "behind",
+          "mult": 0.4
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "cauterise",
+     "nodes": [
+      {
+       "id": "lingering_shade",
+       "name": "Lingering Shade",
+       "fx": "afterimage",
+       "mod": {
+        "afterimage": {
+         "delay": 1.2,
+         "mult": 0.8
+        }
+       }
+      },
+      {
+       "id": "shade_swap",
+       "name": "Shade Swap",
+       "fx": "swap",
+       "mod": {
+        "recast": {
+         "window": 3,
+         "say": "step 5 m back to where your afterimage stood",
+         "then": {
+          "shape": "dash",
+          "dash": {
+           "to": "back",
+           "range": 5,
+           "noPath": true
+          }
+         }
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "crescendo",
+     "nodes": [
+      {
+       "id": "dance_partner",
+       "name": "Dance Partner",
+       "fx": "afterimage",
+       "mod": {
+        "empowerNext": {
+         "count": 1,
+         "repeat": 2,
+         "repeatMult": 0.5,
+         "seconds": 4
+        }
+       }
+      },
+      {
+       "id": "light_feet",
+       "name": "Light Feet",
+       "fx": "charge",
+       "mod": {
+        "onKill": {
+         "haste": 3
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "shadowstep": {
+   "name": "Umbral Step",
+   "shape": "dash",
+   "element": "shadow",
+   "mult": 2.1,
+   "range": 14,
+   "splash": 2,
+   "cooldown": 9,
+   "mp": 10,
+   "dash": {
+    "to": "behind",
+    "range": 14,
+    "noPath": true
+   },
+   "afterimage": {
+    "at": "start",
+    "delay": 0.4,
+    "mult": 0.4
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "long_step",
+       "name": "Long Step",
+       "fx": "leap",
+       "mod": {
+        "set": {
+         "range": 22
+        },
+        "dash": {
+         "range": 22
+        },
+        "mul": {
+         "mult": 0.8
+        }
+       }
+      },
+      {
+       "id": "unseen_edge",
+       "name": "Unseen Edge",
+       "fx": "afterimage",
+       "mod": {
+        "bonusIf": [
+         {
+          "when": "behind",
+          "mult": 0.4
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "burst",
+     "nodes": [
+      {
+       "id": "shadow_pin",
+       "name": "Shadow Pin",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "root",
+          "seconds": 1.5
+         }
+        ]
+       }
+      },
+      {
+       "id": "dazing_arrival",
+       "name": "Dazing Arrival",
+       "fx": "wide",
+       "mod": {
+        "burst": {
+         "radius": 3,
+         "statuses": [
+          {
+           "id": "weaken",
+           "dealLess": 0.2,
+           "seconds": 3
+          }
+         ]
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "bulwark",
+     "nodes": [
+      {
+       "id": "step_back",
+       "name": "Step Back",
+       "fx": "swap",
+       "mod": {
+        "recast": {
+         "window": 3,
+         "say": "dash 10 m back the way you came",
+         "then": {
+          "shape": "dash",
+          "dash": {
+           "to": "back",
+           "range": 10,
+           "noPath": true
+          }
+         }
+        }
+       }
+      },
+      {
+       "id": "unseen",
+       "name": "Unseen",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "name": "Unseen",
+         "seconds": 1,
+         "untargetable": true
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "crescendo",
+     "nodes": [
+      {
+       "id": "next_shadow",
+       "name": "Next Shadow",
+       "fx": "charge",
+       "mod": {
+        "onKill": {
+         "reset": true,
+         "haste": 2
+        }
+       }
+      },
+      {
+       "id": "twin_steps",
+       "name": "Twin Steps",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "smoke": {
+   "name": "Shroud",
+   "shape": "self",
+   "element": "shadow",
+   "cooldown": 20,
+   "mp": 12,
+   "place": {
+    "kind": "zone",
+    "seconds": 6,
+    "radius": 4,
+    "buff": {
+     "id": "shrouded"
+    },
+    "debuff": {
+     "id": "weaken",
+     "dealLess": 0.2,
+     "seconds": 1.5
+    },
+    "follow": "self"
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "thrown_shroud",
+       "name": "Thrown Shroud",
+       "fx": "zone",
+       "mod": {
+        "set": {
+         "shape": "ground",
+         "range": 20
+        },
+        "place": {
+         "follow": null
+        }
+       }
+      },
+      {
+       "id": "thick_shroud",
+       "name": "Thick Shroud",
+       "fx": "zone",
+       "mod": {
+        "place": {
+         "radius": 2.5,
+         "buff": {
+          "id": "shrouded",
+          "resist": 0.5
+         }
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "choking_smoke",
+       "name": "Choking Smoke",
+       "fx": "zone",
+       "mod": {
+        "place": {
+         "strike": {
+          "mult": 0.2,
+          "targets": 3,
+          "status": "poison"
+         }
+        }
+       }
+      },
+      {
+       "id": "from_the_dark",
+       "name": "From the Dark",
+       "fx": "charge",
+       "mod": {
+        "empowerNext": {
+         "behind": true,
+         "count": 2,
+         "seconds": 6
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "echo",
+     "nodes": [
+      {
+       "id": "lost_track",
+       "name": "Lost Track",
+       "fx": "summon",
+       "mod": {
+        "summon": {
+         "def": "phantom_decoy",
+         "decoy": {
+          "hpShare": 0.2,
+          "taunt": 3
+         },
+         "lifetime": 3,
+         "temporary": true
+        }
+       }
+      },
+      {
+       "id": "cloud_step",
+       "name": "Cloud Step",
+       "fx": "charge",
+       "mod": {
+        "selfBuff": {
+         "name": "Cloud Step",
+         "seconds": 6,
+         "movePct": 0.25
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "wellspring",
+     "nodes": [
+      {
+       "id": "twin_clouds",
+       "name": "Twin Clouds",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      },
+      {
+       "id": "soothing_dark",
+       "name": "Soothing Dark",
+       "fx": "zone",
+       "mod": {
+        "place": {
+         "heal": 0.03
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "cutting_waltz": {
+   "name": "Cutting Waltz",
+   "shape": "around",
+   "element": "shadow",
+   "mult": 0.45,
+   "radius": 8,
+   "cooldown": 14,
+   "mp": 14,
+   "repeats": {
+    "count": 5,
+    "every": 0.25,
+    "scatter": true
+   },
+   "afterimage": {
+    "at": "end",
+    "delay": 0.6,
+    "mult": 0.4
+   },
+   "talents": {
+    "1": {
+     "lib": "heavy",
+     "nodes": [
+      {
+       "id": "seven_steps",
+       "name": "Seven Steps",
+       "fx": "afterimage",
+       "mod": {
+        "add": {
+         "repeats.count": 2
+        },
+        "mul": {
+         "mult": 0.75
+        }
+       }
+      },
+      {
+       "id": "close_waltz",
+       "name": "Close Waltz",
+       "fx": "seek",
+       "mod": {
+        "repeats": {
+         "scatter": false,
+         "target": "lowest"
+        },
+        "add": {
+         "repeats.count": -1
+        },
+        "mul": {
+         "mult": 1.25
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "shatter",
+     "nodes": [
+      {
+       "id": "bleeding_steps",
+       "name": "Bleeding Steps",
+       "fx": "stack",
+       "mod": {
+        "statuses": [
+         "bleed"
+        ]
+       }
+      },
+      {
+       "id": "blinding_steps",
+       "name": "Blinding Steps",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "weaken",
+          "dealLess": 0.2,
+          "seconds": 2
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "untouched",
+       "name": "Untouched",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "name": "Waltzing",
+         "seconds": 1.5,
+         "evade": 0.6
+        }
+       }
+      },
+      {
+       "id": "smoke_dance",
+       "name": "Smoke Dance",
+       "fx": "charge",
+       "requires": "smoke",
+       "mod": {
+        "cutCooldown": {
+         "skill": "smoke",
+         "seconds": 1,
+         "per": "hit",
+         "orSelf": 0.5
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "crescendo",
+     "nodes": [
+      {
+       "id": "endless_dance",
+       "name": "Endless Dance",
+       "fx": "charge",
+       "mod": {
+        "onKill": {
+         "refund": 0.3
+        }
+       }
+      },
+      {
+       "id": "curtain_of_night",
+       "name": "Curtain of Night",
+       "fx": "burst",
+       "mod": {
+        "selfBuff": {
+         "name": "Curtain",
+         "seconds": 1.4,
+         "onEnd": {
+          "shape": "around",
+          "radius": 6,
+          "mult": 0.8,
+          "element": "shadow"
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "execute": {
+   "name": "Assassinate",
+   "shape": "melee",
+   "element": "shadow",
+   "mult": 2.2,
+   "reach": 3,
+   "arc": 1.2,
+   "cooldown": 14,
+   "mp": 12,
+   "bonusIf": [
+    {
+     "when": "execute:0.3",
+     "mult": 1
+    }
+   ],
+   "onKill": {
+    "reset": true
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "leaping_kill",
+       "name": "Leaping Kill",
+       "fx": "leap",
+       "mod": {
+        "set": {
+         "shape": "dash"
+        },
+        "dash": {
+         "to": "target",
+         "range": 8,
+         "noPath": true
+        }
+       }
+      },
+      {
+       "id": "thrown_blade",
+       "name": "Thrown Blade",
+       "fx": "lance",
+       "mod": {
+        "set": {
+         "shape": "bolt",
+         "range": 20
+        },
+        "mul": {
+         "mult": 0.8
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "shatter",
+     "nodes": [
+      {
+       "id": "wider_grave",
+       "name": "Wider Grave",
+       "fx": "tag",
+       "mod": {
+        "bonusIf": [
+         {
+          "when": "execute:0.45",
+          "mult": 0.3
+         }
+        ]
+       }
+      },
+      {
+       "id": "shadow_venom",
+       "name": "Shadow Venom",
+       "fx": "stack",
+       "mod": {
+        "statuses": [
+         "poison"
+        ]
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "fade",
+       "name": "Fade",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "name": "Fading",
+         "seconds": 2,
+         "evade": 0.4
+        }
+       }
+      },
+      {
+       "id": "shade_finish",
+       "name": "Shade Finish",
+       "fx": "afterimage",
+       "mod": {
+        "afterimage": {
+         "at": "start",
+         "delay": 0.5,
+         "mult": 0.6
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "unmaking",
+     "nodes": [
+      {
+       "id": "next_name",
+       "name": "Next Name",
+       "fx": "tag",
+       "mod": {
+        "onKill": {
+         "tag": {
+          "id": "marked",
+          "seconds": 6
+         }
+        }
+       }
+      },
+      {
+       "id": "no_witnesses",
+       "name": "No Witnesses",
+       "fx": "wide",
+       "mod": {
+        "burst": {
+         "radius": 6,
+         "statuses": [
+          {
+           "id": "fear",
+           "seconds": 2
+          }
+         ]
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "host_of_shades": {
+   "name": "Host of Shades",
+   "shape": "self",
+   "element": "shadow",
+   "cooldown": 50,
+   "mp": 34,
+   "summon": {
+    "def": "shade",
+    "name": "shade",
+    "count": 3,
+    "lifetime": 10,
+    "temporary": true
+   },
+   "mimic": {
+    "mult": 0.4
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "five_shades",
+       "name": "Five Shades",
+       "fx": "summon",
+       "mod": {
+        "summon": {
+         "count": 5
+        },
+        "mimic": {
+         "mult": 0.25
+        }
+       }
+      },
+      {
+       "id": "gathered_shades",
+       "name": "Gathered Shades",
+       "fx": "summon",
+       "mod": {
+        "summon": {
+         "at": "aim"
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "bursting_shades",
+       "name": "Bursting Shades",
+       "fx": "burst",
+       "mod": {
+        "summon": {
+         "burstOnExpire": {
+          "radius": 3,
+          "mult": 1
+         }
+        }
+       }
+      },
+      {
+       "id": "shade_guard",
+       "name": "Shade Guard",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "name": "Shade Guard",
+         "seconds": 10,
+         "resist": 0.15
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "trade_places",
+       "name": "Trade Places",
+       "fx": "swap",
+       "mod": {
+        "recast": {
+         "window": 10,
+         "say": "swap places with the shade or enemy you aim at",
+         "then": {
+          "shape": "dash",
+          "dash": {
+           "to": "swap",
+           "range": 20
+          }
+         }
+        }
+       }
+      },
+      {
+       "id": "shadow_ward",
+       "name": "Shadow Ward",
+       "fx": "ward",
+       "mod": {
+        "ward": {
+         "charges": 2,
+         "cap": 0.12,
+         "seconds": 10
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "crescendo",
+     "nodes": [
+      {
+       "id": "lasting_host",
+       "name": "Lasting Host",
+       "fx": "summon",
+       "mod": {
+        "summon": {
+         "lifetime": 16
+        },
+        "mul": {
+         "cooldown": 1.3
+        }
+       }
+      },
+      {
+       "id": "darkest_hour",
+       "name": "Darkest Hour",
+       "fx": "charge",
+       "mod": {
+        "empowerNext": {
+         "count": 2,
+         "mult": 0.3,
+         "seconds": 10
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "flourish": {
+   "name": "Flourish",
+   "shape": "melee",
+   "element": "physical",
+   "mult": 1.35,
+   "reach": 3,
+   "arc": 1.6,
+   "cooldown": 3,
+   "mp": 3,
+   "resource": {
+    "id": "flair",
+    "gain": 1,
+    "gainIfNew": 1
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "twirl",
+       "name": "Twirl",
+       "fx": "wide",
+       "mod": {
+        "set": {
+         "shape": "around",
+         "radius": 3.2
+        },
+        "mul": {
+         "mult": 0.8
+        }
+       }
+      },
+      {
+       "id": "flashing_steel",
+       "name": "Flashing Steel",
+       "fx": "charge",
+       "mod": {
+        "onHit": {
+         "resource": {
+          "id": "flair",
+          "n": 1
+         }
+        },
+        "mul": {
+         "mult": 0.85
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "shatter",
+     "nodes": [
+      {
+       "id": "showboat",
+       "name": "Showboat",
+       "fx": "knock",
+       "mod": {
+        "when": {
+         "resourceAtLeast": [
+          "flair",
+          3
+         ]
+        },
+        "knock": {
+         "push": 2,
+         "stagger": 0.3
+        }
+       }
+      },
+      {
+       "id": "ribbon_cuts",
+       "name": "Ribbon Cuts",
+       "fx": "stack",
+       "mod": {
+        "stack": {
+         "status": "bleed",
+         "max": 3
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "cauterise",
+     "nodes": [
+      {
+       "id": "encore",
+       "name": "Encore",
+       "fx": "echo",
+       "mod": {
+        "onCrit": {
+         "repeat": 0.6
+        }
+       }
+      },
+      {
+       "id": "disarming_flick",
+       "name": "Disarming Flick",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "weaken",
+          "dealLess": 0.25,
+          "seconds": 3
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "crescendo",
+     "nodes": [
+      {
+       "id": "perfect_rhythm",
+       "name": "Perfect Rhythm",
+       "fx": "charge",
+       "mod": {
+        "resource": {
+         "gainIfNew": 2
+        },
+        "mul": {
+         "cooldown": 1.2
+        }
+       }
+      },
+      {
+       "id": "taunting_flourish",
+       "name": "Taunting Flourish",
+       "fx": "tag",
+       "mod": {
+        "onHit": {
+         "taunt": 3
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "daring_leap": {
+   "name": "Daring Leap",
+   "shape": "dash",
+   "element": "physical",
+   "mult": 1.4,
+   "range": 10,
+   "cooldown": 9,
+   "mp": 6,
+   "dash": {
+    "to": "behind",
+    "leap": true,
+    "range": 10,
+    "land": {
+     "radius": 2.5,
+     "mult": 0.4
+    }
+   },
+   "empowerNext": {
+    "behind": true,
+    "seconds": 3
+   },
+   "resource": {
+    "id": "flair",
+    "gain": 1
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "rope_swing",
+       "name": "Rope Swing",
+       "fx": "leap",
+       "mod": {
+        "set": {
+         "range": 16
+        },
+        "dash": {
+         "range": 16
+        },
+        "mul": {
+         "cooldown": 1.25
+        }
+       }
+      },
+      {
+       "id": "vault_back",
+       "name": "Vault Back",
+       "fx": "leap",
+       "mod": {
+        "recast": {
+         "window": 2,
+         "say": "spring 5 m back off the target",
+         "then": {
+          "shape": "dash",
+          "dash": {
+           "to": "back",
+           "range": 5,
+           "leap": true
+          }
+         }
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "burst",
+     "nodes": [
+      {
+       "id": "boot_to_the_face",
+       "name": "Boot to Face",
+       "fx": "knock",
+       "mod": {
+        "knock": {
+         "stagger": 1
+        }
+       }
+      },
+      {
+       "id": "showstopper",
+       "name": "Showstopper",
+       "fx": "wide",
+       "mod": {
+        "dash": {
+         "land": {
+          "radius": 3.5,
+          "mult": 0.6,
+          "knock": {
+           "push": 2
+          }
+         }
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "bulwark",
+     "nodes": [
+      {
+       "id": "twin_leap",
+       "name": "Twin Leap",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      },
+      {
+       "id": "cape_toss",
+       "name": "Cape Toss",
+       "fx": "zone",
+       "mod": {
+        "pool": {
+         "seconds": 3,
+         "radius": 2.5,
+         "power": 0.1,
+         "status": {
+          "id": "weaken",
+          "dealLess": 0.3,
+          "seconds": 2
+         }
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "crescendo",
+     "nodes": [
+      {
+       "id": "untouchable",
+       "name": "Untouchable",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "name": "Untouchable",
+         "seconds": 1.5,
+         "evade": 0.75
+        }
+       }
+      },
+      {
+       "id": "chandelier_drop",
+       "name": "Chandelier Drop",
+       "fx": "burst",
+       "mod": {
+        "selfBuff": {
+         "name": "Falling Debris",
+         "seconds": 1,
+         "onEnd": {
+          "shape": "around",
+          "radius": 6,
+          "mult": 1.5
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "mocking_parry": {
+   "name": "Mocking Parry",
+   "shape": "self",
+   "element": "physical",
+   "cooldown": 10,
+   "mp": 4,
+   "counter": {
+    "window": 1.5,
+    "hits": 1,
+    "negate": 1,
+    "tauntAttacker": 3,
+    "gain": {
+     "resource": "flair",
+     "n": 2
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "long_laugh",
+       "name": "Long Laugh",
+       "fx": "counter",
+       "mod": {
+        "counter": {
+         "window": 2.5,
+         "hits": 3
+        },
+        "mul": {
+         "cooldown": 1.4
+        }
+       }
+      },
+      {
+       "id": "jeer",
+       "name": "Jeer",
+       "fx": "wide",
+       "mod": {
+        "burst": {
+         "radius": 6,
+         "statuses": [
+          {
+           "id": "weaken",
+           "dealLess": 0.15,
+           "seconds": 4
+          }
+         ]
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "opening_line",
+       "name": "Opening Line",
+       "fx": "charge",
+       "mod": {
+        "empowerNext": {
+         "mult": 0.3,
+         "seconds": 4
+        }
+       }
+      },
+      {
+       "id": "crowd_pleaser",
+       "name": "Crowd Pleaser",
+       "fx": "summon",
+       "mod": {
+        "selfBuff": {
+         "name": "Crowd Pleaser",
+         "seconds": 4,
+         "damage": 0.2,
+         "petsOnly": true
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "bulwark",
+     "nodes": [
+      {
+       "id": "showing_off",
+       "name": "Showing Off",
+       "fx": "charge",
+       "requires": "daring_leap",
+       "mod": {
+        "cutCooldown": {
+         "skill": "daring_leap",
+         "seconds": 4,
+         "per": "cast",
+         "orSelf": 2
+        }
+       }
+      },
+      {
+       "id": "arrow_dance",
+       "name": "Arrow Dance",
+       "fx": "counter",
+       "mod": {
+        "counter": {
+         "ranged": true
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "aegis",
+     "nodes": [
+      {
+       "id": "centre_stage",
+       "name": "Centre Stage",
+       "fx": "tag",
+       "mod": {
+        "taunt": {
+         "radius": 8,
+         "seconds": 3
+        },
+        "counter": {
+         "hits": 3
+        }
+       }
+      },
+      {
+       "id": "never_touched",
+       "name": "Never Touched",
+       "fx": "counter",
+       "mod": {
+        "counter": {
+         "onUnused": {
+          "refund": 0.5
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "pinning_thrust": {
+   "name": "Pinning Thrust",
+   "shape": "beam",
+   "element": "physical",
+   "mult": 1,
+   "range": 6,
+   "width": 1,
+   "cooldown": 8,
+   "mp": 6,
+   "statuses": [
+    {
+     "id": "root",
+     "seconds": 2
+    }
+   ],
+   "resource": {
+    "id": "flair",
+    "spend": 1,
+    "optional": true,
+    "perPoint": {
+     "mult": 0.5
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": "pierce",
+     "nodes": [
+      {
+       "id": "long_thrust",
+       "name": "Long Thrust",
+       "fx": "lance",
+       "mod": {
+        "set": {
+         "range": 10,
+         "width": 0.7
+        }
+       }
+      },
+      {
+       "id": "twin_thrust",
+       "name": "Twin Thrust",
+       "fx": "echo",
+       "mod": {
+        "again": {
+         "delay": 0.25,
+         "mult": 0.5
+        },
+        "consumes": {
+         "status": "root",
+         "mult": 0.4
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "shatter",
+     "nodes": [
+      {
+       "id": "hilt_catch",
+       "name": "Hilt Catch",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "disarm",
+          "seconds": 2
+         }
+        ]
+       }
+      },
+      {
+       "id": "purse_cut",
+       "name": "Purse Cut",
+       "fx": "hunger",
+       "mod": {
+        "onKill": {
+         "gold": 15
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "brand",
+     "nodes": [
+      {
+       "id": "vault_over",
+       "name": "Vault Over",
+       "fx": "leap",
+       "mod": {
+        "recast": {
+         "window": 2,
+         "say": "vault 6 m over the pinned body to its back",
+         "then": {
+          "shape": "dash",
+          "dash": {
+           "to": "behind",
+           "range": 6,
+           "leap": true
+          }
+         }
+        }
+       }
+      },
+      {
+       "id": "pinwheel",
+       "name": "Pinwheel",
+       "fx": "charge",
+       "requires": "flourish",
+       "mod": {
+        "cutCooldown": {
+         "skill": "flourish",
+         "seconds": 1.5,
+         "per": "hit",
+         "orSelf": 1
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "crescendo",
+     "nodes": [
+      {
+       "id": "run_through",
+       "name": "Run Through",
+       "fx": "lance",
+       "mod": {
+        "bonusIf": [
+         {
+          "when": "status:root",
+          "mult": 0.4
+         }
+        ]
+       }
+      },
+      {
+       "id": "grand_thrust",
+       "name": "Grand Thrust",
+       "fx": "overload",
+       "mod": {
+        "resource": {
+         "spend": "all",
+         "perPoint": {
+          "mult": 0.3
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "matadors_turn": {
+   "name": "Matador's Turn",
+   "shape": "around",
+   "element": "physical",
+   "mult": 1.3,
+   "radius": 4,
+   "cooldown": 12,
+   "mp": 10,
+   "tag": {
+    "id": "turned_about",
+    "seconds": 3
+   },
+   "statuses": [
+    {
+     "id": "weaken",
+     "dealLess": 0.2,
+     "seconds": 3
+    }
+   ],
+   "resource": {
+    "id": "flair",
+    "gain": 1,
+    "gainPer": "hit"
+   },
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "bull_run",
+       "name": "Bull Run",
+       "fx": "knock",
+       "mod": {
+        "knock": {
+         "push": 4
+        }
+       }
+      },
+      {
+       "id": "tangled_cape",
+       "name": "Tangled Cape",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         "web"
+        ]
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "shatter",
+     "nodes": [
+      {
+       "id": "red_rag",
+       "name": "Red Rag",
+       "fx": "tag",
+       "mod": {
+        "turned": {
+         "seconds": 2
+        }
+       }
+      },
+      {
+       "id": "swirling_cape",
+       "name": "Swirling Cape",
+       "fx": "pull",
+       "mod": {
+        "pullIn": {
+         "metres": 2,
+         "to": "self"
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "exit_stage",
+       "name": "Exit Stage",
+       "fx": "charge",
+       "mod": {
+        "selfBuff": {
+         "name": "Exit Stage",
+         "seconds": 3,
+         "movePct": 0.4
+        }
+       }
+      },
+      {
+       "id": "costly_turn",
+       "name": "Costly Turn",
+       "fx": "knock",
+       "mod": {
+        "when": {
+         "resourceAtLeast": [
+          "flair",
+          2
+         ]
+        },
+        "resource": {
+         "spend": 2
+        },
+        "knock": {
+         "stagger": 1.2
+        },
+        "mul": {
+         "cooldown": 1.2
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "aegis",
+     "nodes": [
+      {
+       "id": "second_pass",
+       "name": "Second Pass",
+       "fx": "echo",
+       "mod": {
+        "again": {
+         "delay": 1,
+         "mult": 0.6
+        }
+       }
+      },
+      {
+       "id": "crowd_favourite",
+       "name": "Crowd Favourite",
+       "fx": "charge",
+       "mod": {
+        "onKill": {
+         "refund": 0.5
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "grandeur": {
+   "name": "Grandeur",
+   "shape": "melee",
+   "element": "physical",
+   "mult": 0.8,
+   "reach": 4,
+   "arc": 2,
+   "cooldown": 20,
+   "mp": 12,
+   "resource": {
+    "id": "flair",
+    "spend": "all",
+    "perPoint": {
+     "mult": 0.75
+    },
+    "atMax": {
+     "set": {
+      "shape": "around",
+      "radius": 6,
+      "crit": true
+     }
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": "heavy",
+     "nodes": [
+      {
+       "id": "measured",
+       "name": "Measured",
+       "fx": "charge",
+       "mod": {
+        "resource": {
+         "spend": 3
+        }
+       }
+      },
+      {
+       "id": "grand_lunge",
+       "name": "Grand Lunge",
+       "fx": "lance",
+       "mod": {
+        "set": {
+         "reach": 6,
+         "arc": 1
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "shatter",
+     "nodes": [
+      {
+       "id": "applause",
+       "name": "Applause",
+       "fx": "drain",
+       "mod": {
+        "onHit": {
+         "heal": 0.03
+        }
+       }
+      },
+      {
+       "id": "bleeding_bow",
+       "name": "Bleeding Bow",
+       "fx": "stack",
+       "mod": {
+        "stack": {
+         "status": "bleed",
+         "max": 5,
+         "add": 2
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "bow_out",
+       "name": "Bow Out",
+       "fx": "charge",
+       "mod": {
+        "resource": {
+         "gain": 2,
+         "gainPer": "kill"
+        }
+       }
+      },
+      {
+       "id": "spotlight",
+       "name": "Spotlight",
+       "fx": "summon",
+       "mod": {
+        "selfBuff": {
+         "name": "Spotlight",
+         "seconds": 8,
+         "damage": 0.25,
+         "petsOnly": true
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "crescendo",
+     "nodes": [
+      {
+       "id": "legend",
+       "name": "Legend",
+       "fx": "charge",
+       "mod": {
+        "resource": {
+         "max": 7
+        }
+       }
+      },
+      {
+       "id": "final_bow",
+       "name": "Final Bow",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "name": "Final Bow",
+         "seconds": 1,
+         "untargetable": true
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "open_palm": {
+   "name": "Open Palm",
+   "shape": "melee",
+   "element": "physical",
+   "mult": 1.2,
+   "reach": 2.8,
+   "arc": 1.4,
+   "cooldown": 3,
+   "mp": 2,
+   "knock": {
+    "push": 2
+   },
+   "resource": {
+    "id": "poise",
+    "gain": 1
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "double_palm",
+       "name": "Double Palm",
+       "fx": "stack",
+       "mod": {
+        "set": {
+         "repeats": 2,
+         "repeatEvery": 0.2
+        },
+        "mul": {
+         "mult": 0.6
+        }
+       }
+      },
+      {
+       "id": "far_palm",
+       "name": "Far Palm",
+       "fx": "lance",
+       "mod": {
+        "set": {
+         "shape": "beam",
+         "range": 8,
+         "width": 1.2
+        },
+        "mul": {
+         "mult": 0.8
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "shatter",
+     "nodes": [
+      {
+       "id": "pressure_point",
+       "name": "Pressure Point",
+       "fx": "tag",
+       "mod": {
+        "consumes": {
+         "tag": "downed",
+         "mult": 0.4,
+         "remove": true
+        }
+       }
+      },
+      {
+       "id": "ripple",
+       "name": "Ripple",
+       "fx": "knock",
+       "mod": {
+        "knock": {
+         "carry": {
+          "mult": 0.6,
+          "stagger": 0.4
+         }
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "cauterise",
+     "nodes": [
+      {
+       "id": "breath_return",
+       "name": "Breath Return",
+       "fx": "drain",
+       "mod": {
+        "onHit": {
+         "heal": 0.02
+        }
+       }
+      },
+      {
+       "id": "flowing_poise",
+       "name": "Flowing Poise",
+       "fx": "charge",
+       "mod": {
+        "onHit": {
+         "resource": {
+          "id": "poise",
+          "n": 1
+         }
+        },
+        "mul": {
+         "mult": 0.85
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "crescendo",
+     "nodes": [
+      {
+       "id": "hundred_palms",
+       "name": "Hundred Palms",
+       "fx": "echo",
+       "mod": {
+        "when": {
+         "resourceAtLeast": [
+          "poise",
+          5
+         ]
+        },
+        "set": {
+         "repeats": 3,
+         "repeatEvery": 0.15
+        }
+       }
+      },
+      {
+       "id": "push_the_mountain",
+       "name": "Push the Mountain",
+       "fx": "knock",
+       "mod": {
+        "knock": {
+         "push": 6,
+         "stagger": 0.4
+        },
+        "mul": {
+         "cooldown": 1.5
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "wind_step": {
+   "name": "Wind Step",
+   "shape": "dash",
+   "element": "physical",
+   "mult": 1.3,
+   "range": 10,
+   "cooldown": 7,
+   "mp": 5,
+   "dash": {
+    "to": "target",
+    "range": 10,
+    "noPath": true
+   },
+   "empowerNext": {
+    "crit": true,
+    "seconds": 3
+   },
+   "resource": {
+    "id": "poise",
+    "gain": 1
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "pass_through",
+       "name": "Pass Through",
+       "fx": "leap",
+       "mod": {
+        "dash": {
+         "to": "behind"
+        }
+       }
+      },
+      {
+       "id": "feather_step",
+       "name": "Feather Step",
+       "fx": "charge",
+       "mod": {
+        "selfBuff": {
+         "name": "Feather Step",
+         "seconds": 3,
+         "movePct": 0.3
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "burst",
+     "nodes": [
+      {
+       "id": "return_step",
+       "name": "Return Step",
+       "fx": "leap",
+       "mod": {
+        "recast": {
+         "window": 2,
+         "say": "spring 5 m back",
+         "then": {
+          "shape": "dash",
+          "dash": {
+           "to": "back",
+           "range": 5,
+           "noPath": true
+          }
+         }
+        }
+       }
+      },
+      {
+       "id": "rising_knee",
+       "name": "Rising Knee",
+       "fx": "knock",
+       "mod": {
+        "knock": {
+         "stagger": 0.8
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "bulwark",
+     "nodes": [
+      {
+       "id": "weightless",
+       "name": "Weightless",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "name": "Weightless",
+         "seconds": 1,
+         "untargetable": true
+        }
+       }
+      },
+      {
+       "id": "poise_step",
+       "name": "Poise Step",
+       "fx": "charge",
+       "mod": {
+        "resource": {
+         "spend": 1,
+         "optional": true,
+         "perPoint": {
+          "mult": 0.6
+         }
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "crescendo",
+     "nodes": [
+      {
+       "id": "gale_path",
+       "name": "Gale Path",
+       "fx": "summon",
+       "mod": {
+        "empowerNext": {
+         "pets": true,
+         "mult": 0.3
+        }
+       }
+      },
+      {
+       "id": "endless_steps",
+       "name": "Endless Steps",
+       "fx": "charge",
+       "mod": {
+        "onKill": {
+         "reset": true,
+         "heal": 0.03
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "sweeping_heel": {
+   "name": "Sweeping Heel",
+   "shape": "around",
+   "element": "physical",
+   "mult": 1.2,
+   "radius": 3.5,
+   "cooldown": 10,
+   "mp": 6,
+   "knock": {
+    "stagger": 1.2
+   },
+   "tag": {
+    "id": "downed",
+    "seconds": 3
+   },
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "low_spin",
+       "name": "Low Spin",
+       "fx": "wide",
+       "mod": {
+        "set": {
+         "repeats": 2,
+         "repeatEvery": 0.35
+        },
+        "mul": {
+         "mult": 0.6
+        },
+        "knock": {
+         "stagger": 0.6
+        }
+       }
+      },
+      {
+       "id": "cracked_knee",
+       "name": "Cracked Knee",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "chill",
+          "slow": 0.4,
+          "seconds": 3,
+          "name": "Limping"
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "shatter",
+     "nodes": [
+      {
+       "id": "up_you_go",
+       "name": "Up You Go",
+       "fx": "charge",
+       "requires": "wind_step",
+       "mod": {
+        "cutCooldown": {
+         "skill": "wind_step",
+         "seconds": 3,
+         "per": "cast",
+         "orSelf": 2
+        }
+       }
+      },
+      {
+       "id": "rolling_heel",
+       "name": "Rolling Heel",
+       "fx": "pull",
+       "mod": {
+        "pullIn": {
+         "metres": 1.5,
+         "to": "self"
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "poise_sweep",
+       "name": "Poise Sweep",
+       "fx": "charge",
+       "mod": {
+        "onHit": {
+         "resource": {
+          "id": "poise",
+          "n": 1
+         }
+        },
+        "mul": {
+         "cooldown": 1.2
+        }
+       }
+      },
+      {
+       "id": "staff_ring",
+       "name": "Staff Ring",
+       "fx": "wide",
+       "mod": {
+        "set": {
+         "radius": 6
+        },
+        "knock": {
+         "stagger": 0.6
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "aegis",
+     "nodes": [
+      {
+       "id": "earthsplit",
+       "name": "Earthsplit",
+       "fx": "zone",
+       "mod": {
+        "pool": {
+         "seconds": 4,
+         "radius": 4,
+         "slow": 0.5,
+         "power": 0
+        }
+       }
+      },
+      {
+       "id": "spinning_tail",
+       "name": "Spinning Tail",
+       "fx": "charge",
+       "mod": {
+        "resetOn": {
+         "when": "crowd:4"
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "inner_stillness": {
+   "name": "Inner Stillness",
+   "shape": "self",
+   "element": "physical",
+   "cooldown": 22,
+   "mp": 0,
+   "heal": 0.06,
+   "channel": {
+    "seconds": 3,
+    "every": 1
+   },
+   "counter": {
+    "window": 1.2,
+    "hits": 2,
+    "negate": 0.5,
+    "gain": {
+     "resource": "poise",
+     "n": 1
+    }
+   },
+   "resource": {
+    "id": "poise",
+    "gain": 1
+   },
+   "talents": {
+    "1": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "quick_stillness",
+       "name": "Quick Stillness",
+       "fx": "quick",
+       "mod": {
+        "channel": {
+         "seconds": 1.5,
+         "every": 0.5
+        },
+        "mul": {
+         "heal": 0.6
+        }
+       }
+      },
+      {
+       "id": "moving_meditation",
+       "name": "Moving Meditation",
+       "fx": "charge",
+       "mod": {
+        "channel": {
+         "moveK": 0.5
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "clear_mind",
+       "name": "Clear Mind",
+       "fx": "ward",
+       "mod": {
+        "cleanse": {
+         "count": 3
+        }
+       }
+      },
+      {
+       "id": "iron_body",
+       "name": "Iron Body",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "name": "Iron Body",
+         "seconds": 3,
+         "resist": 0.3
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "echo",
+     "nodes": [
+      {
+       "id": "calm_aura",
+       "name": "Calm Aura",
+       "fx": "drain",
+       "mod": {
+        "healPets": {
+         "share": 0.03
+        }
+       }
+      },
+      {
+       "id": "stored_breath",
+       "name": "Stored Breath",
+       "fx": "charge",
+       "mod": {
+        "empowerNext": {
+         "mult": 0.4,
+         "seconds": 6
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "wellspring",
+     "nodes": [
+      {
+       "id": "empty_hand",
+       "name": "Empty Hand",
+       "fx": "charge",
+       "mod": {
+        "resource": {
+         "gain": 3
+        }
+       }
+      },
+      {
+       "id": "perfect_balance",
+       "name": "Perfect Balance",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "name": "Perfect Balance",
+         "seconds": 3,
+         "ccImmune": true
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "mountain_fist": {
+   "name": "Mountain Fist",
+   "shape": "beam",
+   "element": "physical",
+   "mult": 2.6,
+   "range": 10,
+   "width": 1.6,
+   "cooldown": 12,
+   "mp": 10,
+   "knock": {
+    "stagger": 1.5
+   },
+   "resource": {
+    "id": "poise",
+    "gain": 2
+   },
+   "talents": {
+    "1": {
+     "lib": "pierce",
+     "nodes": [
+      {
+       "id": "earth_fist",
+       "name": "Earth Fist",
+       "fx": "zone",
+       "mod": {
+        "pool": {
+         "seconds": 3,
+         "radius": 1.2,
+         "slow": 0.6,
+         "power": 0,
+         "along": "beam"
+        }
+       }
+      },
+      {
+       "id": "long_fist",
+       "name": "Long Fist",
+       "fx": "lance",
+       "mod": {
+        "set": {
+         "range": 16,
+         "width": 1
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "shatter",
+     "nodes": [
+      {
+       "id": "shockwave_fist",
+       "name": "Shockwave Fist",
+       "fx": "knock",
+       "mod": {
+        "knock": {
+         "push": 4
+        }
+       }
+      },
+      {
+       "id": "hollow_fist",
+       "name": "Hollow Fist",
+       "fx": "shatter",
+       "mod": {
+        "pen": 0.5
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "echo",
+     "nodes": [
+      {
+       "id": "spent_breath",
+       "name": "Spent Breath",
+       "fx": "overload",
+       "mod": {
+        "resource": {
+         "spend": "all",
+         "perPoint": {
+          "mult": 0.2
+         }
+        }
+       }
+      },
+      {
+       "id": "mountain_falls",
+       "name": "Mountain Falls",
+       "fx": "leap",
+       "mod": {
+        "recast": {
+         "window": 2,
+         "say": "leap 10 m down the line and land in a 3 m ring for 60% weapon damage",
+         "then": {
+          "shape": "dash",
+          "dash": {
+           "to": "aim",
+           "range": 10,
+           "leap": true,
+           "land": {
+            "radius": 3,
+            "mult": 0.6
+           }
+          }
+         }
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "crescendo",
+     "nodes": [
+      {
+       "id": "twin_fists",
+       "name": "Twin Fists",
+       "fx": "echo",
+       "mod": {
+        "again": {
+         "delay": 0.6,
+         "mult": 0.5
+        }
+       }
+      },
+      {
+       "id": "crushing_fist",
+       "name": "Crushing Fist",
+       "fx": "tag",
+       "mod": {
+        "consumes": {
+         "tag": "downed",
+         "mult": 0.5
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "ninefold_staff": {
+   "name": "Ninefold Staff",
+   "shape": "around",
+   "element": "physical",
+   "mult": 0.5,
+   "radius": 3.5,
+   "cooldown": 22,
+   "mp": 16,
+   "repeats": {
+    "count": 3,
+    "every": 0.3,
+    "grow": 1.2
+   },
+   "resource": {
+    "id": "poise",
+    "spend": "all",
+    "perPoint": {
+     "mult": 0.33
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": "heavy",
+     "nodes": [
+      {
+       "id": "wide_form",
+       "name": "Wide Form",
+       "fx": "wide",
+       "mod": {
+        "repeats": {
+         "grow": 2
+        },
+        "mul": {
+         "mult": 0.85
+        }
+       }
+      },
+      {
+       "id": "pressure_form",
+       "name": "Pressure Form",
+       "fx": "knock",
+       "mod": {
+        "knock": {
+         "stagger": 0.3
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "shatter",
+     "nodes": [
+      {
+       "id": "breath_form",
+       "name": "Breath Form",
+       "fx": "drain",
+       "mod": {
+        "onHit": {
+         "heal": 0.01
+        }
+       }
+      },
+      {
+       "id": "pinning_form",
+       "name": "Pinning Form",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "root",
+          "seconds": 1
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "afterflow",
+       "name": "Afterflow",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "name": "Afterflow",
+         "seconds": 3,
+         "resist": 0.3
+        }
+       }
+      },
+      {
+       "id": "echo_form",
+       "name": "Echo Form",
+       "fx": "afterimage",
+       "mod": {
+        "afterimage": {
+         "at": "start",
+         "delay": 1.2,
+         "mult": 0.5
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "crescendo",
+     "nodes": [
+      {
+       "id": "endless_form",
+       "name": "Endless Form",
+       "fx": "charge",
+       "mod": {
+        "onKill": {
+         "refund": 0.2
+        }
+       }
+      },
+      {
+       "id": "final_bell",
+       "name": "Final Bell",
+       "fx": "burst",
+       "mod": {
+        "selfBuff": {
+         "name": "Final Bell",
+         "seconds": 1.2,
+         "onEnd": {
+          "shape": "around",
+          "radius": 8,
+          "mult": 1.5
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "lucky_strike": {
+   "name": "Lucky Strike",
+   "shape": "melee",
+   "element": "physical",
+   "mult": 1.5,
+   "reach": 3,
+   "arc": 1.4,
+   "cooldown": 4,
+   "mp": 3,
+   "statusPool": [
+    "burn",
+    "poison",
+    "bleed",
+    "chill",
+    "shock",
+    "weaken",
+    "web"
+   ],
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "lucky_throw",
+       "name": "Lucky Throw",
+       "fx": "lance",
+       "mod": {
+        "set": {
+         "shape": "bolt",
+         "range": 20
+        }
+       }
+      },
+      {
+       "id": "hot_hand",
+       "name": "Hot Hand",
+       "fx": "charge",
+       "mod": {
+        "onCrit": {
+         "reset": true
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "second_roll",
+       "name": "Second Roll",
+       "fx": "tag",
+       "mod": {
+        "onHit": {
+         "status": {
+          "id": "shock",
+          "seconds": 3
+         },
+         "statusChance": 0.35
+        }
+       }
+      },
+      {
+       "id": "pocket_it",
+       "name": "Pocket It",
+       "fx": "hunger",
+       "mod": {
+        "onKill": {
+         "gold": 12
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "streak",
+       "name": "Streak",
+       "fx": "stack",
+       "mod": {
+        "bonusIf": [
+         {
+          "when": "variety:0.1:0.5"
+         }
+        ]
+       }
+      },
+      {
+       "id": "scrap_mail",
+       "name": "Scrap Mail",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "name": "Scrap Mail",
+         "seconds": 4,
+         "armorPct": 0.2
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "crescendo",
+     "nodes": [
+      {
+       "id": "all_in",
+       "name": "All In",
+       "fx": "stack",
+       "mod": {
+        "statuses": [
+         "burn",
+         "poison",
+         "bleed"
+        ],
+        "mul": {
+         "cooldown": 2.5
+        }
+       }
+      },
+      {
+       "id": "dirty_trick",
+       "name": "Dirty Trick",
+       "fx": "tag",
+       "mod": {
+        "onCrit": {
+         "status": {
+          "id": "disarm",
+          "seconds": 2
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "junk_toss": {
+   "name": "Junk Toss",
+   "shape": "bolt",
+   "element": "physical",
+   "mult": 1.4,
+   "range": 26,
+   "cooldown": 6,
+   "mp": 6,
+   "elementPool": [
+    {
+     "name": "Rock",
+     "element": "physical",
+     "status": null,
+     "mod": {
+      "knock": {
+       "stagger": 0.6
+      }
+     }
+    },
+    {
+     "name": "Bottle",
+     "element": "fire",
+     "status": null,
+     "mod": {
+      "pool": {
+       "seconds": 3,
+       "radius": 2.5,
+       "power": 0.2,
+       "element": "fire"
+      }
+     }
+    },
+    {
+     "name": "Pot",
+     "element": "poison",
+     "status": null,
+     "mod": {
+      "pool": {
+       "seconds": 3,
+       "radius": 2.5,
+       "power": 0.2,
+       "element": "poison"
+      }
+     }
+    }
+   ],
+   "talents": {
+    "1": {
+     "lib": "seeking",
+     "nodes": [
+      {
+       "id": "nail_bag",
+       "name": "Nail Bag",
+       "fx": "fan",
+       "mod": {
+        "split": {
+         "shards": 3,
+         "range": 6,
+         "keep": 0.35
+        }
+       }
+      },
+      {
+       "id": "skipping_stone",
+       "name": "Skipping Stone",
+       "fx": "chain",
+       "mod": {
+        "ricochet": {
+         "bounces": 1,
+         "range": 8,
+         "keep": 0.6
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "burst",
+     "nodes": [
+      {
+       "id": "bigger_bag",
+       "name": "Bigger Bag",
+       "fx": "fan",
+       "mod": {
+        "set": {
+         "projectiles": 2,
+         "spread": 0.25
+        },
+        "mul": {
+         "mult": 0.65
+        }
+       }
+      },
+      {
+       "id": "sticky_junk",
+       "name": "Sticky Junk",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "web",
+          "seconds": 2
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "brand",
+     "nodes": [
+      {
+       "id": "salvage",
+       "name": "Salvage",
+       "fx": "drain",
+       "mod": {
+        "onHit": {
+         "mana": 2
+        }
+       }
+      },
+      {
+       "id": "booby_trap",
+       "name": "Booby Trap",
+       "fx": "trap",
+       "mod": {
+        "place": {
+         "kind": "trap",
+         "seconds": 15,
+         "radius": 2.5,
+         "arm": 0.5,
+         "triggerRadius": 2,
+         "max": 2,
+         "strike": {
+          "mult": 0.8
+         }
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "cascade",
+     "nodes": [
+      {
+       "id": "bottomless_sack",
+       "name": "Bottomless Sack",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      },
+      {
+       "id": "lucky_find",
+       "name": "Lucky Find",
+       "fx": "hunger",
+       "mod": {
+        "onHit": {
+         "gold": 3
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "scrounge": {
+   "name": "Scrounge",
+   "shape": "self",
+   "element": "physical",
+   "cooldown": 20,
+   "mp": 6,
+   "heal": 0.08,
+   "selfBuff": {
+    "name": "Scrounging",
+    "seconds": 15,
+    "movePct": 0.15,
+    "manaOnHurt": 2
+   },
+   "talents": {
+    "1": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "keen_eye",
+       "name": "Keen Eye",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "evade": 0.15
+        }
+       }
+      },
+      {
+       "id": "light_pockets",
+       "name": "Light Pockets",
+       "fx": "charge",
+       "mod": {
+        "selfBuff": {
+         "movePct": 0.3
+        },
+        "mul": {
+         "heal": 0.5
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "sharing",
+       "name": "Sharing",
+       "fx": "drain",
+       "mod": {
+        "healPets": {
+         "share": 0.1
+        }
+       }
+      },
+      {
+       "id": "spare_bandage",
+       "name": "Spare Bandage",
+       "fx": "ward",
+       "mod": {
+        "cleanse": {
+         "count": 2
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "stocked",
+       "name": "Stocked",
+       "fx": "ward",
+       "mod": {
+        "barrier": {
+         "share": 0.12,
+         "seconds": 6
+        }
+       }
+      },
+      {
+       "id": "pack_rat",
+       "name": "Pack Rat",
+       "fx": "charge",
+       "requires": "junk_toss",
+       "mod": {
+        "cutCooldown": {
+         "skill": "junk_toss",
+         "seconds": 6,
+         "per": "cast",
+         "orSelf": 4
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "wellspring",
+     "nodes": [
+      {
+       "id": "second_wind",
+       "name": "Second Wind",
+       "fx": "charge",
+       "mod": {
+        "selfBuff": {
+         "hastePct": 0.2
+        }
+       }
+      },
+      {
+       "id": "never_wasted",
+       "name": "Never Wasted",
+       "fx": "ward",
+       "mod": {
+        "overflowBarrier": 0.15
+       }
+      }
+     ]
+    }
+   }
+  },
+  "caltrop_scatter": {
+   "name": "Caltrop Scatter",
+   "shape": "ground",
+   "element": "physical",
+   "mult": 1,
+   "range": 16,
+   "radius": 4,
+   "cooldown": 12,
+   "mp": 8,
+   "statuses": [
+    {
+     "id": "chill",
+     "slow": 0.5,
+     "seconds": 3,
+     "name": "Hobbled"
+    }
+   ],
+   "place": {
+    "kind": "trap",
+    "seconds": 20,
+    "radius": 4,
+    "arm": 0.5,
+    "triggerRadius": 2,
+    "max": 4,
+    "strike": {
+     "mult": 0.8,
+     "status": "bleed"
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "wide_scatter",
+       "name": "Wide Scatter",
+       "fx": "wide",
+       "mod": {
+        "set": {
+         "radius": 6
+        },
+        "place": {
+         "radius": 6
+        },
+        "mul": {
+         "mult": 0.7
+        }
+       }
+      },
+      {
+       "id": "rusty_caltrops",
+       "name": "Rusty Caltrops",
+       "fx": "trap",
+       "mod": {
+        "place": {
+         "strike": {
+          "mult": 0.8,
+          "status": "poison"
+         }
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "sticky_caltrops",
+       "name": "Sticky Caltrops",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "root",
+          "seconds": 1.5
+         }
+        ]
+       }
+      },
+      {
+       "id": "bait",
+       "name": "Bait",
+       "fx": "trap",
+       "mod": {
+        "place": {
+         "taunt": true
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "behind_me",
+       "name": "Behind Me",
+       "fx": "leap",
+       "mod": {
+        "recast": {
+         "window": 3,
+         "say": "dash 6 m back from where you stand",
+         "then": {
+          "shape": "dash",
+          "dash": {
+           "to": "back",
+           "range": 6,
+           "noPath": true
+          }
+         }
+        }
+       }
+      },
+      {
+       "id": "second_scatter",
+       "name": "Second Scatter",
+       "fx": "echo",
+       "mod": {
+        "again": {
+         "delay": 3,
+         "mult": 0.5
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "wellspring",
+     "nodes": [
+      {
+       "id": "chain_reaction",
+       "name": "Chain Reaction",
+       "fx": "burst",
+       "mod": {
+        "onKill": {
+         "burst": {
+          "radius": 4,
+          "mult": 0.6
+         }
+        }
+       }
+      },
+      {
+       "id": "crippling_spikes",
+       "name": "Crippling Spikes",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "weaken",
+          "dealLess": 0.2,
+          "seconds": 4
+         }
+        ]
+       }
+      }
+     ]
+    }
+   }
+  },
+  "pitch_bomb": {
+   "name": "Rag-and-Pitch Bomb",
+   "shape": "ground",
+   "element": "fire",
+   "mult": 1.6,
+   "range": 22,
+   "radius": 4,
+   "delay": 1,
+   "cooldown": 14,
+   "mp": 12,
+   "elementPool": [
+    "fire",
+    "poison",
+    "lightning",
+    "ice"
+   ],
+   "pool": {
+    "seconds": 4,
+    "radius": 3,
+    "power": 0.15
+   },
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "cluster_bomb",
+       "name": "Cluster Bomb",
+       "fx": "burst",
+       "mod": {
+        "set": {
+         "repeats": 3
+        },
+        "repeats": {
+         "every": 0.3,
+         "scatter": true
+        },
+        "mul": {
+         "mult": 0.5
+        }
+       }
+      },
+      {
+       "id": "concussive",
+       "name": "Concussive",
+       "fx": "knock",
+       "mod": {
+        "knock": {
+         "push": 3
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "linger",
+     "nodes": [
+      {
+       "id": "smoky",
+       "name": "Smoky",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "weaken",
+          "dealLess": 0.25,
+          "seconds": 3
+         }
+        ]
+       }
+      },
+      {
+       "id": "sticky_pitch",
+       "name": "Sticky Pitch",
+       "fx": "zone",
+       "mod": {
+        "pool": {
+         "slow": 0.6
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "short_fuse",
+       "name": "Short Fuse",
+       "fx": "quick",
+       "mod": {
+        "set": {
+         "delay": 0.3
+        },
+        "mul": {
+         "mult": 0.8
+        }
+       }
+      },
+      {
+       "id": "scrap_shrapnel",
+       "name": "Scrap Shrapnel",
+       "fx": "burst",
+       "mod": {
+        "onKill": {
+         "burst": {
+          "radius": 3,
+          "mult": 0.5
+         }
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "conflagration",
+     "nodes": [
+      {
+       "id": "second_bomb",
+       "name": "Second Bomb",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      },
+      {
+       "id": "lucky_blast",
+       "name": "Lucky Blast",
+       "fx": "burst",
+       "mod": {
+        "statuses": [
+         "burn",
+         "chill",
+         "shock"
+        ],
+        "mul": {
+         "mult": 0.8
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "big_score": {
+   "name": "Big Score",
+   "shape": "melee",
+   "element": "physical",
+   "mult": 1,
+   "reach": 3,
+   "arc": 1.4,
+   "cooldown": 22,
+   "mp": 16,
+   "variance": [
+    0.2,
+    5
+   ],
+   "onKill": {
+    "gold": 25
+   },
+   "talents": {
+    "1": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "loaded_swing",
+       "name": "Loaded Swing",
+       "fx": "shatter",
+       "mod": {
+        "pen": 0.4
+       }
+      },
+      {
+       "id": "hustle",
+       "name": "Hustle",
+       "fx": "leap",
+       "mod": {
+        "set": {
+         "shape": "dash"
+        },
+        "dash": {
+         "to": "target",
+         "range": 7,
+         "noPath": true
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "shatter",
+     "nodes": [
+      {
+       "id": "weighted",
+       "name": "Weighted",
+       "fx": "stack",
+       "mod": {
+        "bonusIf": [
+         {
+          "when": "variety:0.15:0.6"
+         }
+        ]
+       }
+      },
+      {
+       "id": "double_or_nothing",
+       "name": "Double or Nothing",
+       "fx": "charge",
+       "mod": {
+        "onCrit": {
+         "reset": true
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "payout",
+       "name": "Payout",
+       "fx": "hunger",
+       "mod": {
+        "onKill": {
+         "gold": 60
+        }
+       }
+      },
+      {
+       "id": "insurance",
+       "name": "Insurance",
+       "fx": "drain",
+       "mod": {
+        "onHit": {
+         "heal": 0.06
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "crescendo",
+     "nodes": [
+      {
+       "id": "double_down",
+       "name": "Double Down",
+       "fx": "echo",
+       "mod": {
+        "again": {
+         "delay": 0.6,
+         "mult": 0.5
+        }
+       }
+      },
+      {
+       "id": "jackpot",
+       "name": "Jackpot",
+       "fx": "burst",
+       "mod": {
+        "burst": {
+         "radius": 6,
+         "mult": 1
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "pinning_shot": {
+   "name": "Silvered Pin",
+   "shape": "bolt",
+   "element": "physical",
+   "mult": 0.7,
+   "projectiles": 2,
+   "spread": 0.09,
+   "range": 38,
+   "splash": 1.4,
+   "cooldown": 6,
+   "mp": 8,
+   "statuses": [
+    {
+     "id": "root",
+     "seconds": 2
+    },
+    {
+     "id": "strip",
+     "seconds": 6
+    }
+   ],
+   "bonusIf": [
+    {
+     "when": "family:undead",
+     "mult": 0.5
+    }
+   ],
+   "talents": {
+    "1": {
+     "lib": "seeking",
+     "nodes": [
+      {
+       "id": "triple_pin",
+       "name": "Triple Pin",
+       "fx": "fan",
+       "mod": {
+        "set": {
+         "projectiles": 3,
+         "spread": 0.2
+        },
+        "mul": {
+         "mult": 0.7
+        }
+       }
+      },
+      {
+       "id": "heavy_pin",
+       "name": "Heavy Pin",
+       "fx": "lance",
+       "mod": {
+        "add": {
+         "projectiles": -1,
+         "pierce": 2
+        },
+        "mul": {
+         "mult": 1.6
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "burst",
+     "nodes": [
+      {
+       "id": "hushing_pin",
+       "name": "Hushing Pin",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "silence",
+          "seconds": 3
+         }
+        ]
+       }
+      },
+      {
+       "id": "nailed",
+       "name": "Nailed",
+       "fx": "knock",
+       "mod": {
+        "knock": {
+         "push": 3
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "brand",
+     "nodes": [
+      {
+       "id": "called_out",
+       "name": "Called Out",
+       "fx": "tag",
+       "mod": {
+        "tag": {
+         "id": "guilty",
+         "seconds": 4
+        }
+       }
+      },
+      {
+       "id": "reload",
+       "name": "Reload",
+       "fx": "charge",
+       "mod": {
+        "cutCooldown": {
+         "skill": "self",
+         "seconds": 1,
+         "per": "hit"
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "cascade",
+     "nodes": [
+      {
+       "id": "crossfire",
+       "name": "Crossfire",
+       "fx": "lance",
+       "mod": {
+        "bonusIf": [
+         {
+          "when": "status:root",
+          "mult": 0.5
+         }
+        ]
+       }
+      },
+      {
+       "id": "next_on_the_list",
+       "name": "Next in Line",
+       "fx": "charge",
+       "mod": {
+        "onKill": {
+         "reset": true,
+         "haste": 2
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "silver_edge": {
+   "name": "Silver Edge",
+   "shape": "melee",
+   "element": "physical",
+   "mult": 1.1,
+   "reach": 3,
+   "arc": 1.4,
+   "cooldown": 4,
+   "mp": 3,
+   "bonusIf": [
+    {
+     "when": "caster",
+     "mult": 0.6
+    },
+    {
+     "when": "family:undead",
+     "mult": 0.5
+    }
+   ],
+   "cleanse": {
+    "count": 1
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "circle_of_silver",
+       "name": "Circle of Silver",
+       "fx": "wide",
+       "mod": {
+        "set": {
+         "shape": "around",
+         "radius": 3.5
+        },
+        "mul": {
+         "mult": 0.75
+        }
+       }
+      },
+      {
+       "id": "silver_lunge",
+       "name": "Silver Lunge",
+       "fx": "lance",
+       "mod": {
+        "set": {
+         "shape": "beam",
+         "range": 5,
+         "width": 1
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "shatter",
+     "nodes": [
+      {
+       "id": "hallowed_silver",
+       "name": "Blessed Silver",
+       "fx": "deepen",
+       "mod": {
+        "set": {
+         "element": "holy"
+        },
+        "bonusIf": [
+         {
+          "when": "family:undead",
+          "mult": 0.25
+         }
+        ]
+       }
+      },
+      {
+       "id": "ward_breaker",
+       "name": "Ward Breaker",
+       "fx": "shatter",
+       "mod": {
+        "statuses": [
+         {
+          "id": "strip",
+          "seconds": 4
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "interrupting_cut",
+       "name": "Interrupting Cut",
+       "fx": "knock",
+       "mod": {
+        "knock": {
+         "stagger": 0.3,
+         "interrupt": true
+        }
+       }
+      },
+      {
+       "id": "blessed_steel",
+       "name": "Mending Steel",
+       "fx": "drain",
+       "mod": {
+        "onHit": {
+         "heal": 0.02
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "crescendo",
+     "nodes": [
+      {
+       "id": "witchbane",
+       "name": "Witchbane",
+       "fx": "charge",
+       "mod": {
+        "onKill": {
+         "reset": true,
+         "mana": 0.05
+        }
+       }
+      },
+      {
+       "id": "silver_storm",
+       "name": "Silver Storm",
+       "fx": "echo",
+       "mod": {
+        "set": {
+         "repeats": 3,
+         "repeatEvery": 0.18
+        },
+        "mul": {
+         "mult": 0.45
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "null_circle": {
+   "name": "Null Circle",
+   "shape": "ground",
+   "element": "holy",
+   "mult": 1,
+   "range": 16,
+   "radius": 6,
+   "cooldown": 18,
+   "mp": 14,
+   "place": {
+    "kind": "zone",
+    "seconds": 8,
+    "radius": 6,
+    "debuff": {
+     "id": "silence",
+     "seconds": 1.5
+    },
+    "blocksRanged": true
+   },
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "carried_circle",
+       "name": "Carried Circle",
+       "fx": "zone",
+       "mod": {
+        "set": {
+         "shape": "self"
+        },
+        "place": {
+         "follow": "self",
+         "radius": 4
+        }
+       }
+      },
+      {
+       "id": "burning_salt",
+       "name": "Burning Salt",
+       "fx": "zone",
+       "mod": {
+        "place": {
+         "strike": {
+          "mult": 0.2,
+          "targets": 3
+         }
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "binding_circle",
+       "name": "Binding Circle",
+       "fx": "wall",
+       "mod": {
+        "wall": {
+         "ring": true,
+         "radius": 6,
+         "seconds": 8,
+         "blocksMove": true
+        }
+       }
+      },
+      {
+       "id": "purifying_ground",
+       "name": "Purifying Ground",
+       "fx": "zone",
+       "mod": {
+        "place": {
+         "heal": 0.02
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "bulwark",
+     "nodes": [
+      {
+       "id": "silver_dust",
+       "name": "Silver Dust",
+       "fx": "shatter",
+       "mod": {
+        "statuses": [
+         {
+          "id": "strip",
+          "seconds": 6
+         }
+        ]
+       }
+      },
+      {
+       "id": "iron_circle",
+       "name": "Iron Circle",
+       "fx": "knock",
+       "mod": {
+        "knock": {
+         "stagger": 1
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "aegis",
+     "nodes": [
+      {
+       "id": "twin_circles",
+       "name": "Twin Circles",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      },
+      {
+       "id": "warding_salt",
+       "name": "Warding Salt",
+       "fx": "ward",
+       "mod": {
+        "ward": {
+         "charges": 2,
+         "cap": 0.15,
+         "seconds": 8,
+         "pets": true
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "writ_of_guilt": {
+   "name": "Writ of Guilt",
+   "shape": "bolt",
+   "element": "holy",
+   "mult": 1.4,
+   "range": 40,
+   "cooldown": 14,
+   "mp": 10,
+   "tag": {
+    "id": "guilty",
+    "seconds": 10
+   },
+   "command": {
+    "order": "focus",
+    "seconds": 10
+   },
+   "talents": {
+    "1": {
+     "lib": "seeking",
+     "nodes": [
+      {
+       "id": "two_writs",
+       "name": "Two Writs",
+       "fx": "tag",
+       "mod": {
+        "split": {
+         "shards": 2,
+         "range": 10,
+         "keep": 0.3
+        }
+       }
+      },
+      {
+       "id": "long_sentence",
+       "name": "Long Sentence",
+       "fx": "tag",
+       "mod": {
+        "tag": {
+         "seconds": 16
+        },
+        "mul": {
+         "cooldown": 1.3
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "public_trial",
+       "name": "Public Trial",
+       "fx": "summon",
+       "mod": {
+        "command": {
+         "order": "pounce"
+        }
+       }
+      },
+      {
+       "id": "passed_on",
+       "name": "Passed On",
+       "fx": "tag",
+       "mod": {
+        "onKill": {
+         "tag": {
+          "id": "guilty",
+          "seconds": 8
+         }
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "stripped_of_rank",
+       "name": "Stripped of Rank",
+       "fx": "shatter",
+       "mod": {
+        "statuses": [
+         {
+          "id": "strip",
+          "seconds": 6
+         }
+        ]
+       }
+      },
+      {
+       "id": "burning_writ",
+       "name": "Burning Writ",
+       "fx": "stack",
+       "mod": {
+        "statuses": [
+         "burn"
+        ]
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "unmaking",
+     "nodes": [
+      {
+       "id": "last_sentence",
+       "name": "Last Sentence",
+       "fx": "overload",
+       "mod": {
+        "bonusIf": [
+         {
+          "when": "execute:0.2",
+          "mult": 1.5
+         }
+        ]
+       }
+      },
+      {
+       "id": "gallows",
+       "name": "Gallows",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "root",
+          "seconds": 3
+         }
+        ]
+       }
+      }
+     ]
+    }
+   }
+  },
+  "iron_net": {
+   "name": "Iron Net",
+   "shape": "bolt",
+   "element": "physical",
+   "mult": 1,
+   "range": 20,
+   "splash": 4,
+   "cooldown": 12,
+   "mp": 8,
+   "statuses": [
+    {
+     "id": "root",
+     "seconds": 3
+    },
+    {
+     "id": "silence",
+     "seconds": 3
+    }
+   ],
+   "talents": {
+    "1": {
+     "lib": "seeking",
+     "nodes": [
+      {
+       "id": "weighted_net",
+       "name": "Weighted Net",
+       "fx": "wide",
+       "mod": {
+        "set": {
+         "splash": 6
+        },
+        "mul": {
+         "cooldown": 1.3
+        }
+       }
+      },
+      {
+       "id": "barbed_net",
+       "name": "Barbed Net",
+       "fx": "stack",
+       "mod": {
+        "statuses": [
+         "bleed"
+        ]
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "silver_mesh",
+       "name": "Silver Mesh",
+       "fx": "deepen",
+       "mod": {
+        "bonusIf": [
+         {
+          "when": "family:undead",
+          "mult": 0.8
+         }
+        ]
+       }
+      },
+      {
+       "id": "drag_net",
+       "name": "Drag Net",
+       "fx": "pull",
+       "mod": {
+        "pullIn": {
+         "metres": 3,
+         "to": "self"
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "cast_and_run",
+       "name": "Cast and Run",
+       "fx": "leap",
+       "mod": {
+        "recast": {
+         "window": 2,
+         "say": "dash 6 m back",
+         "then": {
+          "shape": "dash",
+          "dash": {
+           "to": "back",
+           "range": 6,
+           "noPath": true
+          }
+         }
+        }
+       }
+      },
+      {
+       "id": "reel_in",
+       "name": "Reel In",
+       "fx": "pull",
+       "mod": {
+        "recast": {
+         "window": 4,
+         "say": "pull everything within 8 m of you 5 m closer",
+         "then": {
+          "shape": "around",
+          "radius": 8,
+          "mult": 0.2,
+          "pullIn": {
+           "metres": 5,
+           "to": "self"
+          }
+         }
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "cascade",
+     "nodes": [
+      {
+       "id": "twin_nets",
+       "name": "Twin Nets",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      },
+      {
+       "id": "iron_maiden",
+       "name": "Iron Maiden",
+       "fx": "burst",
+       "mod": {
+        "onKill": {
+         "burst": {
+          "radius": 4,
+          "mult": 0.8
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "purging_rite": {
+   "name": "Rite of Purging",
+   "shape": "around",
+   "element": "holy",
+   "mult": 2.6,
+   "radius": 12,
+   "cooldown": 30,
+   "mp": 26,
+   "statuses": [
+    {
+     "id": "strip",
+     "seconds": 8
+    }
+   ],
+   "bonusIf": [
+    {
+     "when": "rank:champion",
+     "mult": 0.5
+    }
+   ],
+   "cleanse": {
+    "count": 2,
+    "pets": true
+   },
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "narrow_rite",
+       "name": "Narrow Rite",
+       "fx": "heavy",
+       "mod": {
+        "set": {
+         "radius": 6
+        },
+        "mul": {
+         "mult": 1.6
+        }
+       }
+      },
+      {
+       "id": "sweeping_rite",
+       "name": "Sweeping Rite",
+       "fx": "pull",
+       "mod": {
+        "pullIn": {
+         "metres": 3,
+         "to": "self"
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "shatter",
+     "nodes": [
+      {
+       "id": "silver_fire",
+       "name": "Silver Fire",
+       "fx": "zone",
+       "mod": {
+        "pool": {
+         "seconds": 6,
+         "radius": 5,
+         "power": 0.15,
+         "element": "holy"
+        }
+       }
+      },
+      {
+       "id": "quiet_rite",
+       "name": "Quiet Rite",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "silence",
+          "seconds": 4
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "punish_magic",
+       "name": "Punish Magic",
+       "fx": "overload",
+       "mod": {
+        "bonusIf": [
+         {
+          "when": "caster",
+          "mult": 0.6
+         }
+        ]
+       }
+      },
+      {
+       "id": "stolen_power",
+       "name": "Stolen Power",
+       "fx": "charge",
+       "mod": {
+        "selfBuff": {
+         "name": "Stolen Power",
+         "seconds": 10,
+         "damage": 0.15
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "aegis",
+     "nodes": [
+      {
+       "id": "hunters_due",
+       "name": "Hunter's Due",
+       "fx": "overload",
+       "mod": {
+        "bonusIf": [
+         {
+          "when": "execute:0.25",
+          "mult": 1
+         }
+        ]
+       }
+      },
+      {
+       "id": "second_rite",
+       "name": "Second Rite",
+       "fx": "echo",
+       "mod": {
+        "again": {
+         "delay": 1.5,
+         "mult": 0.5
+        }
+       }
+      }
+     ]
+    }
+   }
+  }
+ }
+}

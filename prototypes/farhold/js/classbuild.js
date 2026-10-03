@@ -120,6 +120,12 @@ export function spellCatalogue({ classData = null, skillData = null, data = null
       tier,
       tierIndex: Math.max(0, unlockAt.indexOf(tier)),
       classes: (carriedBy.get(id) || []).map(nameOf),
+      /**
+       * R28 — the class this spell comes from (plan §8.1), for the builder to group 30 spells a
+       * tier by class of origin. Once every skill is on one class this is that class; until then
+       * it is the first class that grants it at its earliest tier.
+       */
+      origin: (carriedBy.get(id) || []).find(c => (classSkills[c] || []).indexOf(id) === unlockAt.indexOf(tier)) || (carriedBy.get(id) || [])[0] || null,
       /** Rough tags, so the builder can filter without a second hand-written table. */
       tags: tagsFor(s),
     };

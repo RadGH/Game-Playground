@@ -12,6 +12,11 @@
 //   skillBody(skill)             // → the description without its "12 mana, 4s cooldown." tail
 //
 // Pure: no DOM, so a node test can read it.
+//
+// R28 — the round-28 mechanics (a shape, a stance, charges, a recast window, Flair…) are chips
+// too, from js/skillcard.js `mechFacts`, so the class card and the builder show them at a glance.
+
+import { mechFacts } from './skillcard.js';
 
 const SHAPE_LABEL = {
   melee: 'Melee', around: 'Around you', dash: 'Dash', bolt: 'Projectile', ground: 'Ground target',
@@ -30,7 +35,7 @@ const secs = v => `${Math.round((v ?? 0) * 10) / 10}s`;
  * @param {object} [statuses] data/skills.json's `statuses`, for the status's own name
  * @returns {{text: string, kind: string, el?: string}[]}
  */
-export function skillFacts(skill, statuses = {}) {
+export function skillFacts(skill, statuses = {}, { skills = {} } = {}) {
   if (!skill) return [];
   const out = [];
   out.push({ text: SHAPE_LABEL[skill.shape] || cap(skill.shape || 'Skill'), kind: 'shape' });
@@ -43,6 +48,7 @@ export function skillFacts(skill, statuses = {}) {
   if (skill.heal) out.push({ text: `Heals ${pct(skill.heal)}`, kind: 'heal' });
   if (skill.shape === 'summon') out.push({ text: skill.count > 1 ? `Summons ${skill.count}` : 'Summons 1', kind: 'hit' });
   if (skill.status) out.push({ text: statuses?.[skill.status]?.name || cap(skill.status), kind: 'status' });
+  for (const f of mechFacts(skill, { skills })) out.push(f);
   out.push({ text: skill.mp ? `${skill.mp} mana` : 'No mana cost', kind: 'cost' });
   out.push({ text: `${secs(skill.cooldown ?? 6)} cooldown`, kind: 'cost' });
   return out;

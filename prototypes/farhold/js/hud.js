@@ -12,7 +12,9 @@ import { EFFECTS } from './effects.js';
 
 /** What each talent tier is for. Tier 1 is how it is thrown, 2 what happens when it lands, 3 what it
  *  does to the fight — it was written down in a comment and never shown to the player. */
-const TIER_THEMES = { 1: 'how it flies', 2: 'when it lands', 3: 'what it does to the fight' };
+const TIER_THEMES = { 1: 'how it flies', 2: 'when it lands', 3: 'what it does to the fight', 4: 'the capstone' };
+/** R28 — text from data goes into innerHTML on the skill cards, so it is escaped on the way in. */
+const esc = t => String(t ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 /** The seven screens, in rail order — also what the `1`–`7` keys pick. */
 /**
@@ -37,7 +39,8 @@ const SHEET_TITLES = {
 import { worldPixels } from '../../../worldgen/js/render.js';
 import { M_PER_CELL } from './planet.js';
 import { zoneTone } from './zones.js';
-import { treeFor, picksFor, talentSummary, tiersOpen, TIER_LEVELS } from './skilltalents.js';
+import { treeFor, picksFor, talentSummary, tiersOpen, TIER_LEVELS, registeredRows, registeredStatuses, talentsOn } from './skilltalents.js';
+import { mechFacts, formVersions, formTransforms, formLabelOf, talentChanges } from './skillcard.js';
 import { ARMS, NODE_KINDS, RINGS, pointsFor, pointsLeft, spentBy, takenOf, canTake, canRefund, linksOf, armProgress } from './perks.js';
 
 /** R25 — what a log line can be, in the order the filter toggles show them. */
@@ -432,10 +435,7 @@ export class Hud {
             + '<div class="tip-line">Open the character sheet, Skills, and pick the spell that goes in this slot.</div>'
           : `<b>Not learned yet</b><div class="tip-bad">This slot opens at level ${s.unlockAt}.</div>`;
       }
-      return `<b>${s.name}</b>`
-        + (s.locked ? `<div class="tip-bad">Unlocks at level ${s.unlockAt}.</div>`
-          : `<div class="tip-dim">${s.mp} mana · ${s.cooldown.toFixed(1)}s cooldown${s.ready > 0 ? ` · ${s.ready.toFixed(1)}s left` : ''}</div>`)
-        + `<div class="tip-line">${s.descShort || s.desc || ''}</div>`;
+      return this.skillCardHtml(+node.dataset.tipSkill);
     });
     registerTip('stat', node => `<b>${node.dataset.tipStat}</b><div class="tip-line">${STAT_HELP[node.dataset.tipStat] || ''}</div>`);
     /** Items shown in a tooltip are held by id, because a dataset can only carry a string. */
@@ -946,7 +946,9 @@ export class Hud {
           + `<span class="skill-name"></span>`
           + `<span class="skill-mp"></span>`
           + `<i class="skill-cd"></i>`
-          + `<span class="skill-left"></span>`;
+          + `<span class="skill-left"></span>`
+          // R28 — charges, the next roll, a form's name (skillbar.css)
+          + `<span class="skill-tag"></span>`;
         return slot;
       });
       box.replaceChildren(...this._skillSlots);
@@ -981,7 +983,53 @@ export class Hud {
       const left = slot.querySelector('.skill-left');
       if (left) left.textContent = cooling && s.ready > 1.4 ? s.ready.toFixed(0) : '';
       // the hover card is the tooltip now; `title` would show a second, worse one over the top
+      /**
+       * R28 — WHAT THE NEW RULES LOOK LIKE ON THE BAR (research/round28-skills-plan.md §2 H): a
+       * charge count, the next roll of a random or cycling skill, the form a slot is in, a draining
+       * ring inside a recast window, and a channel that is running.
+       */
+      const tag = slot.querySelector('.skill-tag');
+      if (tag) {
+        const text = s.charges ? `${s.charges.n}/${s.charges.max}` : s.next ? `next: ${s.next}` : (s.form?.mine && s.form.left != null) ? `${Math.ceil(s.form.left)}s` : '';
+        if (tag.textContent !== text) tag.textContent = text;
+      }
+      slot.classList.toggle('form-on', !!s.form?.mine);
+      slot.classList.toggle('formed', !!s.formId);
+      slot.classList.toggle('recast', s.recastLeft > 0);
+      if (s.recastLeft > 0) slot.style.setProperty('--recast', String(Math.min(1, s.recastLeft / 4)));
+      slot.classList.toggle('channel', !!s.channel);
     }
+    this.skillStrip(state);
+  }
+
+  /** R28 — resource pips (Flair, Poise, Grudge) and the forms you are in, over the bar. */
+  skillStrip(state) {
+    let strip = $('skill-strip');
+    if (!strip) {
+      const bar = $('skillbar');
+      if (!bar?.parentNode) return;
+      strip = el('div', 'hud');
+      strip.id = 'skill-strip';
+      bar.parentNode.insertBefore(strip, bar);
+    }
+    const res = new Map();
+    const forms = new Map();
+    for (const s of state || []) {
+      if (s.resource) res.set(s.resource.id, s.resource);
+      if (s.form?.mine) forms.set(s.form.group, s.form);
+    }
+    const key = [...res.values()].map(r => `${r.id}${r.n}/${r.max}`).join(',') + '|' + [...forms.values()].map(f => `${f.name}${f.left != null ? Math.ceil(f.left) : ''}`).join(',');
+    if (strip.dataset.key === key) return;
+    strip.dataset.key = key;
+    const kids = [];
+    for (const r of res.values()) {
+      const box = el('span', `res ${r.id}`);
+      box.append(el('b', '', r.id[0].toUpperCase() + r.id.slice(1)));
+      for (let k = 0; k < r.max; k++) box.append(el('i', 'pip' + (k < r.n ? ' on' : '')));
+      kids.push(box);
+    }
+    for (const f of forms.values()) kids.push(el('span', 'form', f.left != null ? `${f.name} · ${Math.ceil(f.left)}s` : f.name));
+    strip.replaceChildren(...kids);
   }
 
   /**
@@ -1132,7 +1180,7 @@ export class Hud {
     const chips = Object.values(player.statuses || {});
     const box = $('hud-statuses');
     if (box) box.replaceChildren(...chips.map(st => {
-      const c = el('span', 'status-chip', `${st.name || st.type} ${st.remaining.toFixed(0)}s`);
+      const c = el('span', 'status-chip', Number.isFinite(st.remaining) ? `${st.name || st.type} ${st.remaining.toFixed(0)}s` : (st.name || st.type));
       c.style.color = STATUS_COLOR[st.type] || '#cfd8e3';
       return c;
     }));
@@ -2297,6 +2345,81 @@ export class Hud {
     return row;
   }
 
+  /**
+   * R28 — ONE CARD FOR A SKILL, for the bar's hover and the head of the Skills tab.
+   *
+   * Round 28's rules are invisible unless a card says them: a shape that turns Thornlash into
+   * Bramble Gore, a stance, charges, a recast window, Flair. So the card is, in order: the name
+   * (and, while a form has changed it, which skill it really is), the cost, chips for the
+   * mechanics (js/skillcard.js `mechFacts`), what is live right now (charges left, the form you are
+   * in, resource points), the sentence for the version you would cast, and then —
+   *
+   *   * for a skill that changes with forms: every OTHER version, by form, with its own sentence;
+   *   * for a shape / stance / temper / song: what each other skill on your bar becomes in it;
+   *   * the talents taken on it.
+   *
+   * `full` is the Skills tab: the same card with a little more room. All text is generated.
+   */
+  /** R28 — the one-line mark on a Skills-tab card: its form group, charges or a recast. */
+  skCardMarks(s) {
+    const base = registeredRows()?.[s.id];
+    if (!base) return '';
+    const bits = [];
+    if (s.formId) bits.push(`<span class="sk-mark k-form">${esc(formLabelOf(s.formId, registeredRows()))}</span>`);
+    for (const f of mechFacts(base, { skills: registeredRows() }).slice(0, 2)) bits.push(`<span class="sk-mark k-${f.kind}">${esc(f.text)}</span>`);
+    return bits.length ? `<span class="sk-marks">${bits.join('')}</span>` : '';
+  }
+
+  skillCardHtml(i, { full = false } = {}) {
+    const s = this.skillState[i];
+    if (!s || s.empty) return null;
+    const rows = registeredRows() || {};
+    const statuses = registeredStatuses() || {};
+    const base = rows[s.id] || null;
+    const ctx = { statuses, skills: rows };
+    const live = this.skillState.filter(x => !x.empty && !x.locked);
+    const unlockAts = Object.fromEntries(this.skillState.filter(x => !x.empty).map(x => [x.id, x.unlockAt]));
+    let h = `<div class="skc${full ? ' skc-full' : ''}"><b class="skc-name">${esc(s.name)}</b>`;
+    if (s.formId && base && base.name !== s.name) h += ` <span class="tip-dim">— ${esc(base.name)} in ${esc(formLabelOf(s.formId, rows))}</span>`;
+    h += s.locked ? `<div class="tip-bad">Unlocks at level ${s.unlockAt}.</div>`
+      : `<div class="tip-dim">${s.mp ? `${s.mp} mana` : 'No mana cost'} · ${s.cooldown.toFixed(1)}s cooldown${s.ready > 0 ? ` · ${s.ready.toFixed(1)}s left` : ''}</div>`;
+    const facts = base ? mechFacts(base, ctx) : [];
+    if (facts.length) h += `<div class="skc-chips">${facts.map(f => `<span class="skc-chip k-${f.kind}"${f.tip ? ` title="${esc(f.tip)}"` : ''}>${esc(f.text)}</span>`).join('')}</div>`;
+    // what is true right now, not what the skill is in general
+    const now = [];
+    if (s.charges) now.push(`${s.charges.n} of ${s.charges.max} charges ready`);
+    if (s.recastLeft > 0) now.push(`press again within ${s.recastLeft.toFixed(1)}s`);
+    if (s.form?.mine) now.push(`you are in ${esc(s.form.name || formLabelOf(s.form.active, rows))}${s.form.left != null ? ` · ${Math.ceil(s.form.left)}s left` : ''} — press to leave`);
+    if (s.resource) now.push(`${esc(s.resource.id[0].toUpperCase() + s.resource.id.slice(1))} ${s.resource.n} of ${s.resource.max}`);
+    if (s.next) now.push(`next roll: ${esc(s.next)}`);
+    if (now.length) h += `<div class="tip-good skc-now">${now.join(' · ')}</div>`;
+    h += `<div class="tip-line">${esc(s.descShort || s.desc || '')}</div>`;
+
+    if (base?.forms) {
+      const versions = formVersions(base, { ...ctx, unlockAt: s.unlockAt }).filter(v => v.formId !== (s.formId || null));
+      if (versions.length) {
+        h += `<div class="skc-sec"><div class="skc-h">${s.formId ? 'In your other forms' : 'In other forms'}</div>`
+          + versions.map(v => `<div class="skc-form"><b>${esc(v.label)}: ${esc(v.name)}</b><span>${esc(v.desc)}</span></div>`).join('')
+          + '</div>';
+      }
+    }
+    if (base?.form) {
+      const groups = formTransforms(base, live.map(x => x.id).filter(id => id !== s.id), { ...ctx, unlockAts });
+      for (const g of groups) {
+        h += `<div class="skc-sec"><div class="skc-h">While in ${esc(g.label)}</div>`;
+        h += g.entries.length
+          ? g.entries.map(e => `<div class="skc-form"><b>${esc(e.baseName)} becomes ${esc(e.name)}</b><span>${esc(e.desc)}</span></div>`).join('')
+          : '<div class="tip-dim">No other skill on your bar changes in it.</div>';
+        h += '</div>';
+      }
+    }
+    if (!full && !s.locked) {
+      const taken = talentsOn(this.player, s.id);
+      if (taken.length) h += `<div class="skc-sec"><div class="skc-h">Talents</div><div class="tip-line">${taken.map(n => esc(n.name)).join(' · ')}</div></div>`;
+    }
+    return h + '</div>';
+  }
+
   renderSkills() {
     const player = this.player;
 
@@ -2348,7 +2471,11 @@ export class Hud {
           + `<span class="sk-name">${name}</span>`
           + `<span class="sk-cost">${cost}</span>`
           + `<span class="sk-desc">${desc}</span>`
-          + '<span class="sk-pips">' + [1, 2, 3].map(t =>
+          // R28 — a mark for the round-28 rules on the card itself: the form this slot belongs to
+          // (or is in), charges, a recast — the chips the hover card explains
+          + (dead || s.empty ? '' : this.skCardMarks(s))
+          // R22 added a fourth tier and this still drew three dots, so the capstone never showed
+          + '<span class="sk-pips">' + TIER_LEVELS.map((_, k) => k + 1).map(t =>
             `<i class="${picks[t] ? 'on' : (t <= open && !s.empty) ? 'open' : ''}"></i>`).join('') + '</span>';
         if (s.pending) card.onclick = () => { hideTip(); this.onChooseSpell?.(i); };
         else if (!dead) card.onclick = () => { this.talentSkill = s.id; this.renderSheet(); };
@@ -2375,43 +2502,77 @@ export class Hud {
       } else {
         if (!list.some(s => s.id === this.talentSkill)) this.talentSkill = list[0]?.id || null;
         const chosen = list.find(s => s.id === this.talentSkill) || list[0];
-        // the picker is the bar strip above now, so `#sheet-skilltree` holds exactly six children —
-        // h4, row, h4, row, h4, row — which `grid-auto-flow: column` lays out as three tier columns
+        const index = this.skillState.indexOf(chosen);
         const kids = [];
+        /**
+         * R28 — THE SKILL ITSELF HEADS ITS TREE. A talent changes a skill, so the skill is read
+         * first: its chips, its sentence, every version of it in the druid's shapes (or, for a
+         * shape, what the rest of the bar becomes) — the same card the bar shows on hover.
+         */
+        const head = el('div', 'st-skill');
+        head.innerHTML = this.skillCardHtml(index, { full: true }) || '';
+        kids.push(head);
+        if (this.talentsReturned) {
+          const note = el('div', 'st-returned');
+          note.setAttribute('role', 'status');
+          note.append(el('span', null, `Skill talents were reworked in this version: ${this.talentsReturned} ${this.talentsReturned === 1 ? 'pick was' : 'picks were'} returned to you. The tiers marked "take" below are free to choose again.`));
+          const ok = el('button', 'small', 'Got it');
+          ok.onclick = () => { this.talentsReturned = 0; this.onTalentsNoticeSeen?.(); this.renderSheet(); };
+          note.append(ok);
+          kids.push(note);
+        }
         const tree = treeFor(chosen.id, chosen.shape || 'bolt');
+        const row = registeredRows()?.[chosen.id] || null;
         const picks = picksFor(player, chosen.id);
+        const tiersBox = el('div', 'st-tiers');
         for (const tier of tree.tiers) {
           const open = (player.level ?? 1) >= tier.level;
-          // what each tier is FOR, which was only ever written down in a comment in this file
-          const theme = TIER_THEMES[tier.tier] || '';
-          kids.push(el('h4', 'tier-head' + (open ? '' : ' locked'),
-            `Tier ${tier.tier}${theme ? ` — ${theme}` : ''}${open ? '' : ` · level ${tier.level}`}`));
-          const row = el('div', 'tier-row');
+          const col = el('div', 'st-tier' + (open ? '' : ' locked'));
+          /**
+           * R28 — a bespoke tree's tiers are not "how it flies / when it lands" any more (each skill
+           * writes its own), so the theme is shown only on the shared fallback board.
+           */
+          const theme = tree.offer === 'bespoke' ? '' : (TIER_THEMES[tier.tier] || '');
+          const state = !open ? `opens at level ${tier.level}` : picks[tier.tier] ? 'taken' : 'free pick';
+          col.append(el('h4', 'tier-head' + (open ? '' : ' locked'),
+            `Tier ${tier.tier}${theme ? ` — ${theme}` : ''} · ${state}`));
+          const rowBox = el('div', 'tier-row');
           for (const node of tier.nodes) {
             const on = picks[tier.tier] === node.id;
             /**
-             * R20 — a card in a tier that is already spent is DIMMED, not merely inert.
-             *
-             * With the tier spent and this not being the one taken, the card had no click handler
-             * and no class, so it sat at full opacity with a hover border and did nothing — the
-             * explanation was in a tooltip, which needs a hover delay and never arrives at all on
-             * a touch screen. That is exactly the failure the Unbinder's own rows were fixed for
-             * ("a greyed row with no reason is the one answer a player cannot act on"), so the two
-             * screens now agree.
+             * R20 — a card in a tier that is already spent is DIMMED, not merely inert (a
+             * tooltip-only reason never arrives on a touch screen).
              */
             const spent = !!picks[tier.tier] && picks[tier.tier] !== node.id;
             const card = el('div', 'talent-card' + (on ? ' on' : '')
-              + (open ? '' : ' locked') + (open && spent ? ' spent' : ''));
-            card.innerHTML = `<b>${node.name}</b><span class="muted small">${node.desc}</span>`;
+              + (open ? '' : ' locked') + (open && spent ? ' spent' : '')
+              + (node.bespoke ? ' bespoke' : ' shared'));
+            card.dataset.node = node.id;
+            card.innerHTML = `<b>${esc(node.name)}</b>`
+              // R28 — the third card in a tier is a SHARED talent (the old library); say so, quietly
+              + (node.bespoke ? '' : '<span class="tc-kind">shared talent</span>')
+              + `<span class="muted small">${esc(node.desc)}</span>`;
             /**
-             * R20 — CLICKING ONE YOU ALREADY HAVE NO LONGER CLEARS IT.
-             *
-             *   "…remove the ability to do it directly from the inventory."
-             *
-             * It used to be a toggle: click the taken node and the tier emptied, free, mid-fight.
-             * An Unbinder in town takes a talent off for gold (js/retrain.js). Picking an EMPTY
-             * tier is still free and instant — that is the choice, not the undo — and a taken card
-             * says where to go rather than doing nothing without explanation.
+             * R28 — WHAT THE PICK DOES TO THE SKILL'S NUMBERS, before → after (js/skillcard.js
+             * `talentChanges`). A node that only adds a behaviour moves no number and shows none.
+             */
+            const delta = row ? talentChanges(row, node, { skillId: chosen.id, tier: tier.tier, unlockAt: chosen.unlockAt }) : [];
+            if (delta.length) {
+              const d = el('span', 'tc-delta');
+              for (const c of delta) d.append(el('span', null, c.from == null ? `${c.label} ${c.to}` : `${c.label} ${c.from} → ${c.to}`));
+              card.append(d);
+            }
+            /**
+             * R28 — a node that works with another skill (`requires`) says so, dimmed, when that
+             * skill is not on your bar: it can still be taken, and its own part still works.
+             */
+            if (node.requires && !this.skillState.some(x => x.id === node.requires)) {
+              card.classList.add('needs');
+              card.append(el('span', 'muted small', `Needs ${registeredRows()?.[node.requires]?.name || node.requires.replace(/_/g, ' ')} on your bar for its full effect.`));
+            }
+            /**
+             * R20 — CLICKING ONE YOU ALREADY HAVE NO LONGER CLEARS IT. Picking an EMPTY tier is
+             * free and instant; undoing one is an Unbinder in town, for gold (js/retrain.js).
              */
             const tierSpent = !!picks[tier.tier];
             if (open && !tierSpent) {
@@ -2424,19 +2585,22 @@ export class Hud {
             } else if (open && tierSpent) {
               card.dataset.tip = 'This tier is already spent. An Unbinder in town takes the talent you picked back off first.';
             }
-            row.append(card);
+            rowBox.append(card);
           }
-          kids.push(row);
+          col.append(rowBox);
+          tiersBox.append(col);
         }
+        kids.push(tiersBox);
         treeBox.replaceChildren(...kids);
         const title = $('sheet-tree-title');
         if (title) title.textContent = `${chosen.name} — talents`;
         const sum = $('sheet-talent-summary');
         if (sum) {
           const summary = talentSummary(player, chosen.id);
-          sum.textContent = summary
+          sum.textContent = (summary
             ? `${chosen.name}: ${summary}. The spell is drawn bigger and busier for every talent on it.`
-            : `${chosen.name} has no talents yet. Pick one from each tier.`;
+            : `${chosen.name} has no talents yet. Pick one from each tier as it opens.`)
+            + ' To change a taken talent, visit an Unbinder in a town.';
         }
       }
     }

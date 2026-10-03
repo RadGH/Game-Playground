@@ -16,6 +16,7 @@
 // chase, swing, die, and are cleared away once you have walked far enough off. Nothing is
 // simulated beyond the ring — this is a prototype, not a persistent ecology.
 
+import { untargetable, crossesWall } from './skillmech.js';
 import * as THREE from 'three';
 import { createChibi2Character } from '../../../avatar-3d/js/chibi2.js';
 import { createCreature } from '../../../avatar-3d/js/creatures.js';
@@ -382,11 +383,15 @@ export class EnemyField {
    * Push a body out of anything solid. Enemies used to walk straight through trees, walls and
    * houses that stopped the player dead, which reads as cheating even when it is only an oversight.
    */
-  unstick(x, z, radius = 0.6) {
+  unstick(x, z, radius = 0.6, fromX = null, fromZ = null) {
     let ox = x, oz = z;
+    // R28 — where the step started, so a thin wall (a built palisade is half a metre) cannot be
+    // stepped clean through in one slow frame; js/collide.js `resolve` puts it back on its side
+    const from = fromX != null ? (this._from || (this._from = [0, 0])) : null;
+    if (from) { from[0] = fromX; from[1] = fromZ; }
     for (const field of this.solids) {
       if (!field) continue;
-      field.resolve(ox, oz, radius, this._resolved);
+      field.resolve(ox, oz, radius, this._resolved, null, from);
       ox = this._resolved[0]; oz = this._resolved[1];
     }
     return [ox, oz];
@@ -713,7 +718,37 @@ export class EnemyField {
     e.threatFor = Math.max(0, (e.threatFor || 0) - dt);
     e.aimingAt = null;
     const onPlayer = { x: player.x, z: player.z, pet: null };
+    /**
+     * R28 P2 — TURNED: it fights its own side. The nearest other enemy is its target; with nobody
+     * to fight it follows you (`follow`) or stands. The swing branch strikes the foe for real.
+     */
+    if (e.statuses?.turned) {
+      e.state = 'chase';
+      let foe = null, bd = 16;
+      for (const o of this.enemies) {
+        if (o === e || o.dying != null || o.removed || o.statuses?.turned) continue;
+        const d = Math.hypot(o.x - e.x, o.z - e.z);
+        if (d < bd) { bd = d; foe = o; }
+      }
+      if (foe) return { x: foe.x, z: foe.z, pet: null, foe };
+      return e.statuses.turned.follow ? { x: player.x, z: player.z, pet: null, follow: true } : { x: e.x, z: e.z, pet: null, none: true };
+    }
     if (e.state !== 'chase') { e.threatOn = null; e.threatFor = 0; return onPlayer; }
+    /**
+     * R28 — A TAUNT CAN POINT AT THE PLAYER, OR AT A PLACED THING. Until now threat was "seconds on
+     * a pet id" and a warrior's War Cry could only clear it. `tauntBy` is 'player', a placed object
+     * (a Knight's banner, a Shaman's post) or a pet, and it beats everything below until it runs out.
+     */
+    if (e.tauntFor > 0) {
+      e.tauntFor -= dt;
+      const by = e.tauntBy;
+      if (by === 'player') return onPlayer;
+      if (by && typeof by === 'object' && !by.removed && (by.hp == null || by.hp > 0) && (by.left == null || by.left > 0)) {
+        e.aimingAt = by.pet ? by : null;
+        return { x: by.x, z: by.z, pet: by.pet ? by : null, object: by.pet ? null : by };
+      }
+      e.tauntFor = 0; e.tauntBy = null;
+    }
     const pets = this.companions?.();
     if (!pets || !pets.length) return onPlayer;
     const usable = p => p && p.dying == null && !p.removed && (p.hp ?? 1) > 0;
@@ -738,7 +773,27 @@ export class EnemyField {
       if (d < bestD) { bestD = d; best = p; }
     }
     if (best) { e.aimingAt = best; return { x: best.x, z: best.z, pet: best }; }
+    // R28 — an untargetable player (Bolt Step, ≤1.5 s) is not swung at: the body holds where it is
+    if (this.playerUnit && untargetable(this.playerUnit)) return { x: e.x, z: e.z, pet: null, none: true };
     return onPlayer;
+  }
+
+  /**
+   * R28 (building) — the built piece standing between this enemy and what it is after, or null.
+   *
+   * `this.structures` is `(ax, az, bx, bz) => { id, x, z, gap } | null`, handed in by js/main.js
+   * (js/buildplan.js `blockingPiece`); a field without it (a dungeon, a test) never besieges. Asked
+   * every 0.4 s per enemy rather than every frame, and never for something airborne (it flies over)
+   * or something busy with a companion (the companion is on this side of the wall).
+   */
+  siegeOf(e, aim, dt) {
+    if (!this.structures || e.hover || aim?.pet) { e.siege = null; return null; }
+    e.siegeCheck = (e.siegeCheck || 0) - dt;
+    if (e.siegeCheck <= 0) {
+      e.siegeCheck = 0.4;
+      e.siege = this.structures(e.x, e.z, aim.x, aim.z) || null;
+    }
+    return e.siege;
   }
 
   /**
@@ -751,6 +806,16 @@ export class EnemyField {
    */
   taunt(enemy, pet, seconds = THREAT_SECONDS) {
     if (!enemy || !pet || enemy.dying != null || enemy.removed) return;
+    /**
+     * R28 — `pet` may be the string 'player' or a placed object (`{ x, z, hp?, left? }`), not only a
+     * companion: a hard taunt that beats the threat clock for `seconds`.
+     */
+    if (pet === 'player' || pet.placed || pet.hard) {
+      enemy.tauntBy = pet === 'player' ? 'player' : pet;
+      enemy.tauntFor = Math.max(enemy.tauntFor || 0, seconds);
+      if (enemy.state !== 'chase') enemy.state = 'chase';
+      return;
+    }
     enemy.threatOn = pet.id;
     enemy.threatFor = Math.max(enemy.threatFor || 0, seconds);
     if (enemy.state !== 'chase' && enemy.state !== 'flee') enemy.state = 'chase';
@@ -759,6 +824,7 @@ export class EnemyField {
   /** One tick of the whole field: spawn, think, move, swing, die, clean up. */
   update(dt, player, playerUnit, hooks = {}) {
     const cfg = this.cfg;
+    this.playerUnit = playerUnit;
     // one running clock, so the stagger book knows what "inside six seconds" means
     this.clock = (this.clock || 0) + dt;
     if (!this.paused) {
@@ -841,7 +907,10 @@ export class EnemyField {
         e.stagger -= dt;
         if (e.stagger <= 0) { e.stagger = 0; this.spellfx?.status?.(e.actor.group, 'stun', false); }
       } else if (e.swingTimer > 0) {
-        e.swingTimer -= dt;
+        // R28 — Lethargy's `attackSlow`: its attacks come round that much slower
+        let as = 0;
+        for (const st of Object.values(e.statuses || {})) as = Math.max(as, st.attackSlow || 0);
+        e.swingTimer -= dt * (1 - Math.min(0.9, as));
       }
       // a hammer's armour break wears off
       if (e.sunderLeft > 0) {
@@ -867,10 +936,22 @@ export class EnemyField {
         const k = Math.max(0, Math.min(1, 1 - p.t / p.span));
         p.done = p.metres * (1 - (1 - k) ** 3);
         const step = p.done - was;
+        if (step > 0 && p.carry) {
+          // R28 — `knock.carry`: whatever the thrown body passes through is struck and staggered
+          for (const other of this.enemies) {
+            if (other === e || other.dying != null || p.carry.hit.has(other)) continue;
+            if (Math.hypot(other.x - e.x, other.z - e.z) > (other.reach || 2) * 0.4 + 0.9) continue;
+            p.carry.hit.add(other);
+            const res = this.rpg.strike(p.carry.by, other, this.rng, { multiplier: p.carry.mult });
+            this.land(other, res, { strike: { push: 1.2, stagger: p.carry.stagger }, fromX: e.x, fromZ: e.z });
+            e.stagger = Math.max(e.stagger || 0, p.carry.stagger);
+            if (res.dead) this.kill(other);
+          }
+        }
         if (step > 0) {
           const nx = e.x + p.dx * step, nz = e.z + p.dz * step;
           let [cx, cz] = this.terrain.clampToWorld(nx, nz);
-          if (!e.hover) [cx, cz] = this.unstick(cx, cz, (e.reach || 2) * 0.28);
+          if (!e.hover) [cx, cz] = this.unstick(cx, cz, (e.reach || 2) * 0.28, e.x, e.z);
           // R27 M7 — a cliff behind it is a wall too: knocked into a face, it takes the slam
           if (!wetAt(this.terrain, cx, cz, e.y) && (e.hover || climbable(this.terrain, cx, cz, e.x, e.z, 0, e.y))
             && Math.hypot(cx - e.x, cz - e.z) > step * 0.4) {
@@ -885,6 +966,30 @@ export class EnemyField {
         if (p.t <= 0) e.push = null;
       }
 
+      /**
+       * R28 P2 — STASIS PAYS OUT AS IT THAWS: everything banked while it was held lands at once,
+       * times the bank. TURNED runs out into a weaken. TRANSFORMED is drawn small.
+       */
+      const sx = e.statuses?.stasis;
+      if (sx && sx.remaining - dt <= 0 && sx.bank > 0) {
+        const pay = Math.round(sx.bank * (sx.bankMult ?? 1.5));
+        sx.bank = 0;
+        e.hp = Math.max(0, e.hp - pay);
+        this.credit(e, pay);
+        this.spellfx?.impact?.({ at: (this._vec || (this._vec = new THREE.Vector3())).set(e.x, e.y + 1, e.z), element: 'arcane', crit: true });
+        if (e.hp <= 0) { this.kill(e); continue; }
+      }
+      if (e.statuses?.turned) e.wasTurned = e.statuses.turned.weakenAfter || 0.001;
+      else if (e.wasTurned) {
+        if (e.wasTurned > 0.01) applyStatus(e, 'weaken', { ...(this.statusData?.weaken || { name: 'Weakened', kind: 'debuff', element: 'shadow', dealLess: 0.35 }), seconds: e.wasTurned }, 1);
+        e.wasTurned = 0; e.hard = false;
+      }
+      const tm = !!e.statuses?.transmuted;
+      if (tm !== !!e.shrunk) {
+        if (e.preScale == null) e.preScale = e.actor.group.scale.x;
+        e.shrunk = tm;
+        e.actor.group.scale.setScalar(tm ? e.preScale * 0.4 : e.preScale);
+      }
       // burns and poisons keep working between swings; a chill takes the legs out of the chase
       if (e.statuses) {
         const burned = tickStatuses(e, dt);
@@ -1000,9 +1105,29 @@ export class EnemyField {
       const adist = Math.hypot(adx, adz);
 
       // how close this one wants to be: an archer or a caster holds off, everything else closes
-      const standOff = e.ranged ? Math.min(e.ranged.range * 0.65, e.ranged.range - 6) : 0;
+      const standOff = e.ranged && !e.statuses?.silence && !e.statuses?.turned ? Math.min(e.ranged.range * 0.65, e.ranged.range - 6) : 0;
 
       let speed = 0;
+      let siege = null;                      // R28 (building) — the wall in its way, see `siegeOf`
+      /**
+       * R28 — THE NEW STATUSES (data/skills.json): asleep acts like a long stagger (nothing at all);
+       * feared runs from you through the existing flee state; rooted stands but still swings in
+       * reach; silenced cannot shoot and closes to melee.
+       */
+      // P2 — a body in stasis is held exactly as a sleeper is (and cannot be hurt: js/rpg.js banks it)
+      const asleep = !!e.statuses?.sleep || !!e.statuses?.stasis;
+      if (e.statuses?.fear && e.state !== 'flee') { e.state = 'flee'; e.fleeFor = Math.max(e.fleeFor || 0, e.statuses.fear.remaining || 2); e.feared = true; }
+      if (e.feared && !e.statuses?.fear) { e.feared = false; if (e.state === 'flee') { e.state = 'chase'; e.fleeFor = 0; } }
+      const rooted = !!e.statuses?.root;
+      if (asleep) {
+        e.y = groundAt(this.terrain, e.x, e.z, e.y);
+        let sy = e.y;
+        if (e.hover) { e.bob += dt * 1.6; sy += e.hover + Math.sin(e.bob) * 0.22; }
+        this.placeBody(e, sy);
+        anim(e.actor, 'idle');
+        e.actor.update(dt);
+        continue;
+      }
       if (e.stagger > 0) {
         // reeling: no walk, no swing, no shot. The body still gets its frame so the clip plays.
         e.y = groundAt(this.terrain, e.x, e.z, e.y);
@@ -1024,7 +1149,7 @@ export class EnemyField {
          * a minute, whichever way you come at it. Without this you sidestep once and it runs
          * cheerfully back into your swing, and "catch it before it gets away" is not a chase.
          */
-        if (e.quarry || e.routed) e.facing = Math.atan2(-dx, -dz);   // R27 M10 — a rout runs from you too
+        if (e.quarry || e.routed || e.feared) e.facing = Math.atan2(-dx, -dz);   // R27 M10 — a rout runs from you too; R28 — so does fear
       } else if (e.state === 'chase') {
         // R22 — everything from here down is about the thing it is FIGHTING, which is usually you
         // and is sometimes the companion that just bit it.
@@ -1038,8 +1163,48 @@ export class EnemyField {
             anim(e.actor, 'attack');
             hooks.onEnemyShoot?.(e);
           }
+        } else if (aim.none) {
+          speed = 0;                         // R28 — nothing it can see to swing at
+        } else if (aim.follow) {
+          speed = adist > 3.5 ? e.speed : 0; // R28 P2 — turned and following you, with nobody to fight
+        } else if (aim.foe && adist > e.reach) {
+          speed = e.speed;
+        } else if (aim.foe && e.swingTimer <= 0) {
+          // R28 P2 — a turned enemy strikes its own side, and that side answers it
+          e.swingTimer = e.attackEvery;
+          anim(e.actor, 'attack');
+          const res = this.rpg.strike(e, aim.foe, this.rng, {});
+          e.turnedHits = (e.turnedHits || 0) + 1;
+          this.land(aim.foe, res, { fromX: e.x, fromZ: e.z });
+          this.taunt(aim.foe, Object.assign(e, { hard: true }), 3);
+          if (res.dead) this.kill(aim.foe);
+        } else if (!aim.object && (siege = this.siegeOf(e, aim, dt))) {
+          /**
+           * R28 (building) — A WALL IN THE WAY IS A WALL TO BREAK. Enemies have no pathfinding, so a
+           * built wall, gate or barricade across the straight line to what they are after left them
+           * shoving at it for ever. Now a melee enemy walks up to the piece and swings at it
+           * (`hooks.onEnemyStrikeStructure`, routed by js/main.js to js/build.js). Ranged enemies
+           * are in the branch above and keep shooting over it.
+           */
+          e.facing = Math.atan2(siege.x - e.x, siege.z - e.z);
+          if (siege.gap > e.reach * 0.8) speed = e.speed;
+          else if (e.swingTimer <= 0) {
+            e.swingTimer = e.attackEvery;
+            anim(e.actor, 'attack');
+            const hit = hooks.onEnemyStrikeStructure?.(e, siege.id);
+            if (!hit || hit.destroyed || hit.ok === false) { e.siege = null; e.siegeCheck = 0; }
+          }
         } else if (adist > e.reach) {
           speed = e.speed;
+        } else if (e.swingTimer <= 0 && aim.object) {
+          // R28 — a taunting post or banner takes the swing (js/skillrun.js gives it health); a
+          // turned enemy that taunted this one takes a real blow
+          e.swingTimer = e.attackEvery;
+          anim(e.actor, 'attack');
+          if (aim.object.actor && Array.isArray(aim.object.dmg)) {
+            const res = this.rpg.strike(e, aim.object, this.rng, {});
+            if (res.dead) this.kill(aim.object);
+          } else hooks.onEnemyStrikeObject?.(e, aim.object);
         } else if (e.swingTimer <= 0) {
           e.swingTimer = e.attackEvery;
           anim(e.actor, 'attack');
@@ -1058,6 +1223,7 @@ export class EnemyField {
       // thrown away two lines ago. Its bones are gone; do not go on animating them.
       if (e.removed) continue;
 
+      if (rooted) speed = e.boss ? speed * 0.4 : 0;
       if (speed > 0) {
         speed *= 1 - slowOf(e);
         const nx = e.x + Math.sin(e.facing) * speed * dt;
@@ -1072,7 +1238,9 @@ export class EnemyField {
          * kept (so a chase finds its way round), and after three seconds pinned it scrambles.
          */
         if (!e.hover) [cx, cz] = cliffStep(this.terrain, e, cx, cz, dt, { feet: e.y }, this._cliffOut || (this._cliffOut = [0, 0]));
-        if (!e.hover) [cx, cz] = this.unstick(cx, cz, (e.reach || 2) * 0.28);
+        if (!e.hover) [cx, cz] = this.unstick(cx, cz, (e.reach || 2) * 0.28, e.x, e.z);
+        // R28 P2 — a Rampart (`wall`) stops a step that would cross it
+        if (crossesWall(e.x, e.z, cx, cz)) { cx = e.x; cz = e.z; }
         if (!wetAt(this.terrain, cx, cz, e.y)) {
           // if the push put it back where it started it is up against something: turn and try again
           if (Math.hypot(cx - e.x, cz - e.z) < speed * dt * 0.25) e.facing += (this.rng() - 0.5) * 1.6 + Math.PI * 0.5;
@@ -1175,7 +1343,7 @@ export class EnemyField {
   slide(e, dx, dz) {
     if (!dx && !dz) return;
     let [cx, cz] = this.terrain.clampToWorld(e.x + dx, e.z + dz);
-    [cx, cz] = this.unstick(cx, cz, (e.reach || 2) * 0.28);
+    [cx, cz] = this.unstick(cx, cz, (e.reach || 2) * 0.28, e.x, e.z);
     if (wetAt(this.terrain, cx, cz, e.y)) return;
     e.x = cx; e.z = cz;
     e.y = groundAt(this.terrain, cx, cz, e.y);
@@ -1194,6 +1362,8 @@ export class EnemyField {
     if (!m) return;
     e.dmg = e.dmg.map(v => (m.exact ? v * (m.dmg ?? 1) : Math.round(v * (m.dmg ?? 1))));
     e.armor = Math.round(e.armor * (m.armor ?? 1));
+    // R28 — the running product a `strip` divides back out (js/rpg.js strike)
+    e.modDmg = (e.modDmg || 1) * (m.dmg ?? 1); e.modArmor = (e.modArmor || 1) * (m.armor ?? 1);
     e.speed *= m.speed ?? 1;
     e.attackEvery *= m.attackEvery ?? 1;
     if (m.onHit) e.onHit = [...(e.onHit || []), m.onHit];
@@ -1224,6 +1394,7 @@ export class EnemyField {
     const held = e?.heldMods?.[id];
     if (!held) return false;
     e.dmg = e.dmg.map(v => v / (held.dmg ?? 1));
+    e.modDmg = (e.modDmg || 1) / (held.dmg ?? 1);
     delete e.heldMods[id];
     e.modifiers = (e.modifiers || []).filter(x => x !== id);
     return true;
@@ -1326,7 +1497,7 @@ export class EnemyField {
     e.struckAt = this.clock || 0;
     e.hitFlash = 0.18;
     if (e.state !== 'chase') e.state = 'chase';
-    if (!(result.amount > 0) && !result.blocked) return;
+    if (!(result.amount > 0) && !result.blocked && !result.noDamage) return;
 
     const at = this._vec || (this._vec = new THREE.Vector3());
     const bodyY = (e.y || 0) + 0.9 * (e.scale || 1) + (e.hover || 0);
@@ -1362,8 +1533,12 @@ export class EnemyField {
     if (push > 0.01) {
       const span = COMBAT_FEEL.knockbackSeconds;
       e.push = { dx: dx / len, dz: dz / len, metres: push, t: span, span, done: 0 };
+      // R28 — `knock.carry`: a body thrown through another strikes it on the way (Bowling Line)
+      if (strike.carry && this.playerUnit) e.push.carry = { mult: strike.carry.mult ?? 0.6, stagger: strike.carry.stagger ?? 0.4, by: this.playerUnit, hit: new Set([e]) };
     }
 
+    // R28 — `knock.interrupt`: the attack it was winding up is lost (its swing clock starts over)
+    if (strike.interrupt && result.amount > 0) e.swingTimer = Math.max(e.swingTimer || 0, e.attackEvery || 1);
     /** (e) STAGGER, with the diminishing returns that stop a maul locking a boss for ever. */
     const stagger = staggerFor(e, (strike.stagger || 0) * share, this.clock || 0);
     if (stagger > 0.01) {
@@ -1404,7 +1579,7 @@ export class EnemyField {
    * (js/combat-feel.js), because `main.js` hands this function a reach and an arc and never says
    * which shape they came from.
    */
-  strike(player, playerUnit, { reach = 2.9, arc = 1.5, power = 1, element = 'physical', skill = null, onHit = null, applyStatus: applyFn = null, hand = null, strike: shapeIn = null } = {}) {
+  strike(player, playerUnit, { reach = 2.9, arc = 1.5, power = 1, element = 'physical', skill = null, onHit = null, applyStatus: applyFn = null, hand = null, strike: shapeIn = null, rules = null, knock = null, noDamage = false } = {}) {
     const hits = [];
     const shape = shapeIn || feel.swing.strike || null;
     const weapon = shape?.item || null;
@@ -1414,8 +1589,10 @@ export class EnemyField {
     const line = shape?.key === 'thrust' && traits.pierceLine ? traits.pierceLine : 0;
     const fx = Math.sin(player.yaw), fz = Math.cos(player.yaw);
     let pierced = 0;
+    // R28 — a skill's crowd bonus needs the head count BEFORE the first body is struck
+    const crowd = rules ? this.enemies.filter(e => e.dying == null && Math.hypot(e.x - player.x, e.z - player.z) <= reach + (e.reach || 2) * 0.4).length : 1;
 
-    for (const e of this.enemies) {
+    for (const e of [...this.enemies]) {
       if (e.dying != null) continue;
       const dx = e.x - player.x, dz = e.z - player.z;
       const dist = Math.hypot(dx, dz);
@@ -1460,9 +1637,10 @@ export class EnemyField {
 
       const result = this.rpg.strike(playerUnit, e, this.rng, {
         multiplier: mult, element, skill, applyStatus: applyFn,
-        hand: which, pen: shape?.pen || 0,
+        hand: which, pen: shape?.pen || 0, rules, crowd, noDamage,
       });
-      this.land(e, result, { strike: shape, fromX: player.x, fromZ: player.z, element, share: power });
+      // R28 — a skill's `knock` is the strike shape this hit lands with (push + stun + interrupt)
+      this.land(e, result, { strike: knock || shape, fromX: player.x, fromZ: player.z, element, share: power });
 
       // a hammer strips armour, an axe opens a vein, a knife in the back does both
       if (traits.armourBreak && result.amount > 0) this.sunder(e, traits.armourBreak);
@@ -1483,7 +1661,7 @@ export class EnemyField {
    * Damage everything within `radius` of a point — an arrow landing, or a heavy weapon's shockwave.
    * Every attack in the game goes through this or `strike`, so nothing is ever single-target.
    */
-  strikeArea(x, z, radius, attacker, { falloff = 0.45, power = null, element = 'physical', skill = null, onHit = null, applyStatus: applyFn = null, proc = false } = {}) {
+  strikeArea(x, z, radius, attacker, { falloff = 0.45, power = null, element = 'physical', skill = null, onHit = null, applyStatus: applyFn = null, proc = false, rules = null, knock = null, from = null, noDamage = false } = {}) {
     const hits = [];
     /**
      * AN ARROW CARRIES THE DRAW IT WAS LOOSED AT.
@@ -1496,18 +1674,56 @@ export class EnemyField {
      */
     const shot = power == null ? feel.swing.shot : null;
     const mult = power != null ? power : (shot?.power ?? 1);
-    const shape = shot?.strike || null;
-    for (const e of this.enemies) {
+    const shape = knock || shot?.strike || null;
+    // R28 — the head count first (a skill's crowd bonus), and a copy so a kill mid-loop is safe
+    const inside = this.enemies.filter(e => e.dying == null && Math.hypot(e.x - x, e.z - z) <= radius + (e.reach || 2) * 0.25);
+    const crowd = inside.length;
+    for (const e of inside) {
       if (e.dying != null) continue;
       const d = Math.hypot(e.x - x, e.z - z);
-      if (d > radius + (e.reach || 2) * 0.25) continue;
       // full damage at the centre, `falloff` of it at the rim
       const near = 1 - (1 - falloff) * Math.min(1, d / Math.max(0.001, radius));
       // R23 — `proc` marks a strike a unique's power made (a pool, an aura, a slam), so the powers
       // that start more strikes do not start them off this one
-      const result = this.rpg.strike(attacker, e, this.rng, { multiplier: near * mult, element, skill, applyStatus: applyFn, proc });
-      this.land(e, result, { strike: shape, fromX: x, fromZ: z, element, share: near });
+      const result = this.rpg.strike(attacker, e, this.rng, { multiplier: near * mult, element, skill, applyStatus: applyFn, proc, rules, crowd, noDamage });
+      // a knock thrown `away` from the caster pushes from where the caster stands, not the centre
+      this.land(e, result, { strike: shape, fromX: from ? from.x : x, fromZ: from ? from.z : z, element, share: near });
       onHit?.(e, result);
+      hits.push({ enemy: e, result });
+      if (result.dead) this.kill(e);
+    }
+    return hits;
+  }
+
+  /**
+   * R28 — EVERY BODY WITHIN `width` OF A SEGMENT, STRUCK ONCE. A dash used to call `strikeArea` at
+   * every 2 m step of its path, so a body near the line was hit two or three times by one dash.
+   */
+  strikeSegment(x0, z0, x1, z1, width, attacker, opts = {}) {
+    const dx = x1 - x0, dz = z1 - z0, len2 = dx * dx + dz * dz || 1;
+    const hits = [];
+    // the same reach test and the same falloff the per-step `strikeArea` had: full damage on the
+    // line, `falloff` of it at the edge of `width`; `except` is struck by the caller on its own
+    const reachOf = e => width + (e.reach || 2) * 0.25;
+    const near = this.enemies.filter(e => {
+      if (e.dying != null || e === opts.except) return false;
+      const t = Math.max(0, Math.min(1, ((e.x - x0) * dx + (e.z - z0) * dz) / len2));
+      return Math.hypot(e.x - (x0 + dx * t), e.z - (z0 + dz * t)) <= reachOf(e);
+    });
+    const crowd = near.length;
+    const falloff = opts.falloff ?? 0.8;
+    for (const e of near) {
+      if (e.dying != null) continue;
+      const t = Math.max(0, Math.min(1, ((e.x - x0) * dx + (e.z - z0) * dz) / len2));
+      const px = x0 + dx * t, pz = z0 + dz * t;
+      const d = Math.hypot(e.x - px, e.z - pz);
+      const share = 1 - (1 - falloff) * Math.min(1, d / Math.max(0.001, width));
+      const result = this.rpg.strike(attacker, e, this.rng, {
+        multiplier: (opts.power ?? 1) * share, element: opts.element || 'physical', skill: opts.skill || null,
+        applyStatus: opts.applyStatus || null, rules: opts.rules || null, noDamage: !!opts.noDamage, proc: !!opts.proc, crowd,
+      });
+      this.land(e, result, { strike: opts.knock || null, fromX: px, fromZ: pz, element: opts.element || 'physical' });
+      opts.onHit?.(e, result);
       hits.push({ enemy: e, result });
       if (result.dead) this.kill(e);
     }

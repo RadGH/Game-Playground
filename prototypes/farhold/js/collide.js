@@ -222,7 +222,14 @@ export class ObstacleField {
   /** Does a height-banded segment (a rail) apply to feet at this height? */
   inBand(o, feet) {
     if (!o.band) return true;
-    return Number.isFinite(feet) && feet >= o.band[0] && feet <= o.band[1];
+    /**
+     * R28 — A BAND WITH NO FLOOR (`[-Infinity, top]`) is a wall you can JUMP: solid for anything
+     * whose feet are below its top, and for anything that does not say where its feet are (every
+     * enemy and companion). That is how a built fence or wall stays hoppable for the player — as
+     * the old one-circle-per-piece was — without letting a wolf walk through it.
+     */
+    if (!Number.isFinite(feet)) return o.band[0] === -Infinity;
+    return feet >= o.band[0] && feet <= o.band[1];
   }
 
   /** Is this point over a deck's footprint? */
@@ -272,7 +279,7 @@ export class ObstacleField {
     for (const o of list) {
       if (o.deck) continue;                      // you walk ON a deck, never into it
       if (o.seg) {
-        if (o.band || !o.enabled) continue;      // a rail needs feet to know if it applies; R27 M4: an open door is not there
+        if ((o.band && o.band[0] !== -Infinity) || !o.enabled) continue;      // a rail needs feet to know if it applies; R27 M4: an open door is not there
         if (this.segPush(o, x, z, radius)) return true;
         continue;
       }

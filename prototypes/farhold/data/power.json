@@ -6,7 +6,7 @@
     "burner_generator": {
       "name": "Burner Generator",
       "tier": 1,
-      "gen": 30,
+      "gen": 40,
       "supplyRadius": 10,
       "fuel": {
         "coal": 0.06,
@@ -14,7 +14,8 @@
         "log": 0.2,
         "lift_fuel": 0.02
       },
-      "desc": "Burns whatever you have. Loud, dirty, dependable, and the reason you go looking for coal before you go looking for wind."
+      "desc": "Burns whatever you have. Loud, dirty, dependable, and the reason you go looking for coal before you go looking for wind.",
+      "_r28": "R28: 30 -> 40. A digging Drill is billed its full 18 kW now (it was billed the 25% idle share — a bug, js/mining.js), and a smelter draws half its recipe's `power` on top of its own. At 30 a saved base of one generator, one drill and one smelter would have gone from fine to shedding the smelter on load; at 40 it carries both at about 95%. tests/round28-automation.test.js plays that base."
     },
     "wind_turbine": {
       "name": "Wind Turbine",
@@ -246,7 +247,9 @@
     "unworked",
     "unpowered",
     "shed",
-    "blocked"
+    "blocked",
+    "stocked"
   ],
+  "_r28StateDoc": "R28 — `stocked`: a machine whose every job is a keep-in-stock order (\"keep 50 iron ingot\") and the stores already hold that many. It is not idle (it has work) and not starved (it lacks nothing); it is satisfied, it stops asking for a worker, and it starts again by itself when the stock drops below the line.",
   "_r18Build": "R18 — the `build` blocks that used to sit on these rows are GONE. Only data/structures.json's `cost` is ever charged (js/buildplan.js `alignCatalogue` -> js/build.js); these were a second, dead price on 25 of 35 buildings, and they disagreed with the live one on every single row — `fuel_synthesiser` differed in all four lines. A price stated twice is a price that will be tuned in the wrong file, which is exactly what had happened. Per the standing ruling: structures.json owns COST, this file owns the power/throughput numbers."
 }

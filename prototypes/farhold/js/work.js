@@ -207,7 +207,7 @@ export class WorkBoard {
    *
    * `toJSON` has always written the open orders out and the constructor has always thrown them
    * away: `new WorkBoard(save.work)` read `now` and nothing else, and `WorkBoard.fromJSON` — which
-   * does read them — is called by nobody in the game. So every load emptied the board. For a
+   * does read them — was called by nobody in the game (R28: deleted; the constructor is the one way in). So every load emptied the board. For a
    * machine's `lab_*` order that was invisible (js/refine.js re-posts within the second), but a
    * harvest or a build order posted by something that only posts once was simply lost, and the
    * half a shift a citizen had already put into one went with it.
@@ -248,7 +248,6 @@ export class WorkBoard {
   open() { return this.orders.filter(o => !o.complete && !o.cancelled); }
 
   openAt(stationId) { return this.open().filter(o => o.stationId === stationId); }
-  openTagged(tag) { return this.open().filter(o => o.tag === tag); }
 
   cancel(id) {
     const o = this.get(id);
@@ -351,10 +350,4 @@ export class WorkBoard {
   }
 
   toJSON() { return { now: this.now, orders: this.orders, finished: this.finished.map(o => o.id) }; }
-
-  static fromJSON(data) {
-    const board = new WorkBoard({ now: data?.now || 0 });
-    if (Array.isArray(data?.orders)) board.orders = data.orders;
-    return board;
-  }
 }

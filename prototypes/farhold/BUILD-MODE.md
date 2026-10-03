@@ -1335,3 +1335,321 @@ Eight older specs that pressed B and read the panel now press Tab after it.
 * `tests/round26-build.spec.js` (Playwright, 2) — B → ring → Storage → Storage Box → click the
   ground: built, six logs gone, right-click/Tab/Ring/1/Backspace/B all do what the table says; and a
   furnace with no box in the real page: one row "0 of 2 made", the checklist, two ingots in the pack.
+
+## Round 28 — building
+
+> *"Improve building system and automation. Use sub agents and brainstorm ideas, update interfaces."*
+
+The building half (placement, the panel, walls and gates, undo, layouts). Automation — works,
+stores, the grid, haul paths, station screens — was a separate owner this round. The audit,
+the 22 ideas, the roast and the picks are in `research/round28-building.md`. A reviewer then
+checked the first build of the picks, and every one of its findings is answered in §28.4.
+
+### 28.1 What the audit found
+
+The usual Farhold bug: features that were finished but had no way in, and rules in the data that
+nothing read.
+
+* `build.setFree()` (free placement) existed, and **no key called it**.
+* `plan.blueprint()` / `plan.stamp()` / `plan.billFor(bp)` had **no caller anywhere**.
+* The Wall tool's hint promised *"a gate goes where you double back over a corner"*. `finishRun()`
+  was always called with no gates.
+* **`snap: "wall" | "floor" | "grid"` is on every catalogue row, and nothing read it.** Fourteen
+  wall-mounted pieces snapped to the 2 m grid like crates.
+* **`gate: true` was read by nothing, and you could not walk through your own gate.** Every piece
+  was one circle as wide as its long side. A 4 m gate became a 1.4 m circle in the middle of the
+  opening, which left 0.6 m gaps either side, and a body is 0.8 m wide.
+* **The wheel did nothing on every other notch.** It turned by π/8 and the snap rounded to π/4. The
+  first notch anticlockwise rounded to −0, so it did nothing either.
+* **Ctrl+Z popped the build ledger.** A 20-section wall took 20 presses. Level, Raise and Lower could
+  not be undone. A take-down could not be put back. After a reload, Ctrl+Z deleted the newest piece
+  of an old base and refunded all of it.
+
+### 28.2 What was built
+
+| | What | Where |
+|---|---|---|
+| Undo is a step | One stack covers placing (one piece, a Shift line, a whole wall run, a stamped layout), a road, a terrain brush, a take-down, a move and an upgrade. Undo refunds everything and removes the ground levelling the piece did (it stores the terraform edit ids). After a load there is nothing to undo. Depth is `rules.undoDepth` (30). | js/build.js `pushAction` / `undoStep` / `undo` |
+| Small slopes level themselves | If a piece's worst corner is within `rules.autoLevel` (1.5 m) of the ground under its middle, the piece levels its own footprint as it goes down, using a slab only 0.2 m wider than the piece so the ground under its neighbours is left alone. The ghost and footprint turn amber and the card says *"it levels the ground under it first"*. Past 1.5 m you still get *"Level it first"*, so players still learn the Level tool. If the claim has no reshaping budget left, the placement is refused instead of leaving the piece floating. | js/buildplan.js `check` / `groundWork` |
+| Shift+click a line | Hold Shift and a line of the piece you placed last is shown as ghosts from that piece to the cursor, spaced by its footprint. The card shows the count and the bill. A click lays the whole line as one undo step, and nothing is spent unless the whole bill can be paid. At most `rules.lineMax` (40) pieces. | js/buildplan.js `lineSpots` / `lineFrom` / `placeLine`, js/build.js `placeLineHere` |
+| Free placement, turning | **F** turns free placement on and off: no grid, no snapping, any angle. It is a toggle, not a held Alt, because letting go of Alt gives the browser's menu bar focus. **Q / Shift+Q** turn the piece one catalogue step. Each scroll-wheel notch is one step. A touchpad's flick is added up in units of 60 instead of every small event being a whole turn. A piece that is not a run piece keeps the angle you gave it next to a neighbour (snapping used to copy the neighbour's angle). | js/build-keys.js, js/build.js `rotate`, js/main.js wheel |
+| Walls, gates, runs | Walls collide as **segments** along the shape that is drawn. A gate is **two posts plus a leaf that only stops enemies** (see §28.3). Clicking the same corner twice puts in a gate of the right width, and the run is re-spaced around it. Corners no longer lose a piece. Fences and hedges are runs too (`run: true`, `gateId`). The card shows metres, sections, gates and the bill *before* you press Enter. | js/buildplan.js `runSpots` / `run` / `runBill` / `solidsFor`, js/collide.js bands, js/main.js `rebuildBuildSolids` |
+| Wall-mounted pieces | A `snap: "wall"` piece hangs on the nearest wall, gate or building side within `rules.mountReach` (2.4 m) and faces outward. With no wall in reach it stands on open ground (bookshelves and drawers are freestanding too). | js/buildplan.js `mountOn` |
+| Move + eyedropper | **Move** picks a piece up for free and keeps its **id**. Esc puts it back where it was. Pieces that hold goods or belong to the base's systems (crates, machines, the grid, posts, homes) refuse, with the reason. **C** (or the Pick tool) builds another of whatever is under the cursor, at the same angle. | js/buildplan.js `movable` / `relocate`, js/build.js `moveAt` / `pickAt` |
+| Upgrade | Walls only: fence → palisade → stone wall → reinforced wall (`upgradesTo` in the data). You pay the difference. The piece keeps its id, hp and gate flag, and Ctrl+Z gives the old piece back along with what you paid. | js/buildplan.js `upgradeOf` / `upgrade` / `downgrade` |
+| Layouts | **Copy** turns everything inside the brush into a named layout. **Stamp** shows the whole layout as ghosts, with how many pieces fit and one bill, and Q turns it. The whole bill is checked before any piece goes down. Layouts are saved in the `build` save blob and also in the browser (`farhold.blueprints.v1`), and the long panel lists them with Stamp and Forget buttons. | js/buildplan.js `captureAround` / `stampCheck`, js/build.js `copyAt` / `stampHere` |
+| The interface | Each tool has a **key strip** on the card and the panel. A **live line** shows green, amber (levels the ground) or red with the reason, the run's bill, what a click on the highlighted piece will do (*"take down the Fence — 1 plank back"*), and a layout's fit. A **footprint outline** on the ground uses the same colours. Point tools put a **highlight box** on the piece they will act on. The card also says what Ctrl+Z will undo next. Move, Upgrade, Copy and Stamp are on the ring's Tools page too. | js/build-keys.js `keysForTool` / `liveLine`, js/build-ui.js, js/build-radial.js |
+
+### 28.3 Fixed while testing
+
+* **Clicks used the previous frame's aim.** `build.aim` runs late in the frame, so a click used the
+  aim from the frame before. If you moved and clicked within one frame (a quick flick, or any slow
+  frame), the piece went where the cursor had been. Clicking the same corner twice for a gate
+  added a new corner 4.5 m away. Now the pointer is re-read just before the clicks are handled
+  (js/main.js, `buildClicks`). The Playwright spec found this.
+* **The run's bill priced the leg out to the cursor**, which Enter does not lay. The card said five
+  sections and four went down. The bill now covers only the corners already clicked, and the card
+  adds *"click to add N m more, Enter to lay"*.
+* **A gate let enemies through.** The data says *"Opens for you, and not for them"*, but the
+  opening was a clear gap. The leaf between the posts is now a segment with the band
+  `[-Infinity, -Infinity]`. js/collide.js `inBand` applies a band with no lower limit to any body
+  that does not report its feet height (every enemy). It never applies to the player, whose feet are
+  always above −∞. Companions do not collide with built pieces at all, so they follow you through.
+  On its own this would make a walled base unreachable for enemies that fight up close, so walls
+  now take damage and can be broken (§28.7).
+* **Dead flags.** `blocks` (barricade) and `perch` (watchtower, guard tower) were read by nothing.
+  Every barricade is now a segment no enemy crosses, which is what `blocks` described, so the flag
+  was removed. The watchtower's description promised *"somewhere a hired archer can actually stand"*,
+  so it now has a real `post` slot (1 guard, `reachBonus` 4), which is what js/civics.js and
+  js/defence.js post guards to. `perch` was removed from both towers. A test fails if either flag
+  comes back.
+* With the Wall tool up, the long panel opened on Decoration (fences) while the tool held a
+  palisade. It now opens on the group of the piece the tool is holding.
+
+### 28.4 The reviewer's findings, one by one
+
+| Finding | Answer |
+|---|---|
+| Upgrade "lamp → crystal lamp" joins the power grid | Upgrade is walls only. `upgradeOf` refuses anything with a store, pool, station, power, turret, post or home, and a test gives a turret `upgradesTo` to check the code refuses it. |
+| −π/8 notch did nothing; snapping copied the neighbour's angle; a touchpad step per event | `rotate` takes exactly one `rotateStep` in the direction asked. Snapping copies the neighbour's angle only for run pieces, because that is what makes them a wall. The wheel adds its travel up and takes a step per 60. |
+| Every wall corner lost a piece | `runPiecesClash` lets two run pieces' end pieces overlap at a corner, and still refuses one standing on top of or alongside another. Tested on an L, a square, a short leg and an acute corner for every run piece. |
+| `gateAt` made a gap | `runSpots` re-spaces the leg around the gate's real width, and the old `gateAt` form goes through the same code. Tested. |
+| Fence/hedge runs could not be built | The Wall tool takes any `run: true` piece, and every run piece names its `gateId` (`fence_gate` for fences and hedges). |
+| `terraform.undo()` has no caller | Left without a caller on purpose. It pops the newest edit whatever it was, and that is often a slab some piece levelled. Build undo removes the exact edit ids each step stored (`terraform.remove(id)`). `undo()` is still used by tests/building.test.js. |
+| `blocks`, `perch` read by nothing | §28.3. |
+| Undo crossed a reload | `load` clears the stack. |
+| `place()` ignored `levelUnderSlab`'s result | `groundWork` returns the refusal and `place`/`relocate` pass it on. Tested with the reshaping budget set to 1 m². |
+| A crate's goods were destroyed on take-down/undo | js/main.js `onRemove` moves the goods into whatever pool still covers that spot, and the rest into your bag, then logs where they went. Move refuses anything that holds goods. |
+| P1: edit ids not plumbed; undo of a store | Every step stores its terraform ids. Undoing a crate goes through `onRemove`, so the goods are moved first. |
+| P2: slab under neighbours; budget | The self-levelling slab is the piece plus 0.2 m, not 0.6 m. When the budget runs out, the placement is refused. |
+| P3: Shift is also Run | Left as it is: Shift with no WASD moves nothing, and running while you lay a line is harmless. |
+| P4: Alt | F is a toggle. A test fails if any key strip mentions Alt. |
+| P5: hop height; enemies stepping through; `coverAt`; wall on the player | Segments get a band with no lower limit, so the player can still hop a fence and nothing without feet passes through. js/actors.js passes `from`, so a slow frame cannot step through either (tested). `coverAt` still ignores segments: it is dungeon-only cover for round solids, and a wall has no middle to stand behind. A wall dropped on the player pushes them to the nearer side. A segment always pushes out along its normal, so it cannot trap anyone, and refusing a wall section because you stand on the line would break wall runs. |
+| P6: wall pieces that are furniture | The wall is preferred, not required (tested). |
+| P7: Move gives a new id; right/middle click | `relocate` keeps the id, and Move refuses anything a system keeps a position for. The eyedropper is C, not a mouse button. |
+| P8: hp, gate, overlap, solids | `upgrade` carries `hp`/`maxHp`/`gate`, re-checks with the piece's own id ignored, and goes through `onPlace`, which rebuilds the solids. |
+| P9: partial stamp spends money | `stampHere` checks the whole bill first (`stampCheck`, the plan's own `billFor(bp)`), then places only the pieces that fit. |
+| Cut Upgrade | Kept, but only for walls, which was the reviewer's other option. |
+
+### 28.5 Parked
+
+* **Redo**: killed in the roast. A redo would have to re-run every placement rule against a world
+  that has changed since.
+* **Drag to place a line**: left-drag turns the camera in build mode. Shift+click does the same
+  job.
+* **A gate on a leg longer than the gate but shorter than gate + one section** leaves the leftover
+  (under one section's width) open at the end of the leg. That gap is too narrow for the player.
+  Filling it needs a short wall piece, which the catalogue does not have.
+
+### 28.6 Tests (see also §28.7)
+
+* `tests/round28-building.test.js` (node, 16 tests): corners for every run piece and shape, the
+  corner rule, gates at every corner for all four walls, `gateAt`, posts + leaf, the enemy-only
+  leaf, floorless bands, a floor refused when the budget is gone, self-levelling vs *"Level it
+  first"*, Move keeps the id and refuses systems, Upgrade for walls only, lines, wall mounts, key
+  strips + the live line (and the cursor leg not being billed), real material ids in bills, no dead
+  flags.
+* `tests/round28-building.spec.js` (Playwright, 2 tests, keys and clicks only): B → ring → Storage Box,
+  Q / Shift+Q turn it by one step, a click places it at that angle, Shift+click lays a priced line,
+  Ctrl+Z takes the line back in one press and the first crate in a second (with the logs refunded),
+  F turns free placement on and off. Then the Tools ring shows Move/Upgrade/Copy/Stamp, Wall →
+  three corners with one clicked twice → the card shows *"N m · N sections, 1 gate"* and *"click to
+  add N m more"* → Enter lays exactly what was billed, gate included → one Ctrl+Z removes the whole
+  run. Screenshots go in `research/round28-building/`.
+
+## Round 28 — automation
+
+> *"Improve building system and automation. Use sub agents and brainstorm ideas, update interfaces."*
+
+The building half of this round is the section above. This is the other half: production chains,
+drills and routes, storage, power, workers, standing orders, and the screens that explain them.
+The audit, the 22-idea brainstorm, the roast and the plan are in `research/round28-automation.md`;
+screenshots in `research/round28-automation/`.
+
+### The audit — the same fault again
+
+Once a base had more than three machines there was no screen that said what it made, what it ate,
+what was stuck or why. Four reports had been written for exactly that screen and nothing called
+them: `stores.overview()` (its own comment says "for the base overview panel"), `stores.linkAdvice`,
+`grid.overview()` and `works.allJobs()`. Two data rules were read by nobody: a recipe's `power`
+("the extra draw while working", on 33 of 61 recipes) and its `waste` list ("only so the UI can grey
+them" — the UI never did). A supply route could carry `only` some materials and leave a `keep`
+floor behind, and its only caller passed neither.
+
+Bugs found and fixed:
+
+* **A reload turned every Small Drill into a full Drill.** `mining.toJSON` did not save `tool`,
+  and `drillRate` fell back to `'drill'` — tier 3 and 2.3 times faster. Saved now; an old save
+  works it out from the piece standing there.
+* **A digging drill never told the grid it was busy**, so an 18 kW Drill was billed the 25% idle
+  share and one generator ran four of them. `grid.setBusy` is called now. To keep saved bases
+  running, the Burner Generator goes 30 -> 40 kW and a recipe's own `power` is drawn at
+  `recipePowerShare` 0.5 (data/refining.json). A test plays the one-generator base.
+* **The away clock never ran the drills.** Leave for six hours and the furnaces ran on whatever ore
+  was already in the crates. The drills dig in both away loops now, in steps of a minute at most,
+  so one long step cannot dig ten thousand ore into a 200 pile.
+* **The next-step hint read two fields nothing writes** (`d.routed`, `d.deliveredPerMinute`), so
+  with a drill down it said "put a crate near the drill" forever.
+* **A hand-cranked Small Drill read "power"** in the overview while it was digging.
+* **The people side** (from the review): `housing.houses` is a function and two readers used it
+  as a list, so the population reading and migration threw "filter is not a function" as soon as a
+  real house stood (`housesOf()` in js/population.js). Guard posts had no way in at all
+  (`colony.postGuard` / `standDown`, the Command Rod's guard order, and People-tab buttons). The
+  Gambler's "spent 1000" was never counted (`civics.addSpend` now runs on shop buys and recruit
+  fees). "Collect the tax" paid out a fresh day's tax on every click; it now empties the purse the
+  daily tax fills. The work board's "assign" bound a citizen to an ORDER id as if it were a station.
+  Migrant offers printed "undefined, undefined". The Trade Post's 2,000 kg vault that nothing ever
+  filled is gone, and so are the functions nothing called (listed in the test).
+
+### What was built
+
+* **`js/production.js`** — pure, no DOM. A **flow meter** that counts at the source (what the
+  machines finished plus what the drills delivered, not what the crates happen to hold, so a cart in
+  transit or you emptying a crate does not read as production). **Rated numbers** per machine
+  ("makes 3.8 iron ingot a minute from 7.5 iron ore"). A **diagnosis traced upstream**: a starved
+  furnace asks whether something of yours makes the ore, whether that thing is itself stuck (two
+  machines deep), whether a drill digs it and why it is not delivering, whether some sits in a
+  store this one cannot reach — then says one thing to do. A cold furnace that also has nothing to
+  smelt says both (js/refine.js checks labour before inputs, so it only ever reported "unworked").
+  **Alerts** that wait out a blip (12 s for a machine), worst first.
+* **Full stores asked per material.** js/stores.js caps one material at a quarter of a store and
+  all raw materials at half, so a box can turn ore away at 40% full. The alert asks about the
+  things actually arriving (drill routes, machine outputs, routes in) and says which line it hit.
+* **Keep-in-stock orders** — `works.queue(id, recipe, 0, { keep: 50 })`. The machine stops at the
+  line (state `stocked`, added to data/power.json), starts again below it, stops asking for a
+  worker while stocked, takes turns with a second keep order, and leaves a work order already up
+  in place rather than throwing away a citizen's half-done units. A supply route out of the same
+  pool leaves the higher of its own floor and the keep line behind (`logistics.setFloors`).
+* **Station screen** (js/station-ui.js): the rated line, the "why" chain, Keep 20 / 50 / 100
+  beside the batch buttons, +/- on a keep line, and byproducts greyed in brackets.
+* **The Production tab** — first tab of the Holding (K): Needs you, What the base makes a minute
+  (in / out / on hand, measured made and used, "runs out in"), Machines (badge, recipe, keep line
+  +/-10, switch off, rated line, why), Drills (dug / carried / piled, Re-route), Power (per grid,
+  shed list), Storage (fill, top five piles, what it is turning away, one-relay join advice) and
+  Supply routes (both floors side by side, material chips for `only`, leave-behind +/-10). The rail
+  button carries the alert count.
+* **The pill** — "2 things at your base need you — K" on the HUD; a click opens the tab.
+* **Send a cart** (the Trade tab). js/trade.js could plan, send, move, rob and pay a cart route,
+  and main.js already collected the gold on arrival, but nothing ever called `plan` or `open`, so
+  "On the road" was empty in every game. `civics.cartCarriers / cartGoods / cartPlan / sendCart`
+  are the join: from which Trade Post, to which town (nearest 16; size 3+ or a port has a market),
+  on which carrier (a mule needs a Drover in residence, a drone a Hauler Post — each refusal says
+  so), with how many guards, carrying what (the post's stores first, your hold second). The run is
+  priced live before anything leaves; a refused send puts back whatever it lifted. "On the road"
+  shows the revenue rather than `profit`, which subtracts what your own goods would cost to buy.
+  The Holding no longer redraws under an open drop-down.
+* **Standing cart runs.** A "Repeat" toggle on the Send a cart form and on each On-the-road row.
+  `trade.restand` was written for this and had no caller: an arrived repeat cart now re-loads the
+  same goods at its post and goes again (`civics.resend`, run from `civics.tick`), and stops with
+  the reason in the log when the goods, the feed or the upkeep run out. It asks whether the load
+  still clears its UPKEEP (`restand(…, { clears: 'revenue' })`) rather than `profit`, which
+  subtracts the buying price of goods you made yourself and would have stopped nearly every run.
+  The route carries `postId` and `toPlace`, so it survives a save. A cart that got back during the
+  away catch-up used to sit "arrived" forever with its gold never paid; main.js now pays every
+  arrived cart, not only the ones that arrived this tick.
+* **The pack mule eats.** `feed: { grain: 4 }` had been in data/colony.json since the carriers were
+  written and was never charged, so the mule was simply the best carrier below the wagon. It is
+  eaten per trip from the stores beside the Trade Post (the post itself takes trade goods only, and
+  the refusal says to put the grain in a box beside it); a send or a re-send with no grain is refused.
+
+### Tests
+
+* `tests/round28-automation.test.js` — 35 node tests: each audit bug through the real modules,
+  keep-in-stock, the meter, the upstream diagnosis, store refusals, alerts, the people fixes, the
+  dead code, the cart send end to end, standing runs (re-send, stop on empty goods and on
+  unpaid upkeep, save/load, the toggle) and the mule's grain.
+* `tests/round28-automation.spec.js` — the browser: a real Bunkhouse first (the screen that used
+  to throw), a furnace on a keep order with no ore raises the pill, the pill opens Production, the
+  row says what it is short of, and +10 reaches the machine; then the Trade tab loads salt at a
+  Trade Post through the buttons, prices it, sends it with Repeat on, it goes on the road, and the
+  row's own toggle turns the repeat off.
+* `tests/holding.spec.js` now polls for the colony tick instead of sleeping 1.2 s (a headless page
+  can run at 7 frames a second, which is under one 15-frame tick). `tests/round17-build.spec.js`
+  asks the furnace's recipe rows for iron instead of the panel's first 600 characters, which R28's
+  keep row pushed the recipes past.
+
+### Parked
+
+Chain orders ("make 10 machine parts" queuing the ingots upstream — a keep order on the ingot
+furnace covers most of it), a production graph view, hauler vehicles you can see on the road,
+and a citizen shift schedule.
+
+### 28.7 Walls take damage, break, and get repaired
+
+Gates that stop enemies (§28.3) would have made a walled base untouchable by melee enemies, so this
+was built in the same round instead of being parked.
+
+**Who hits a wall.** Enemies have no pathfinding: they walk in a straight line at what they are after.
+Two or three times a second, every melee enemy asks `field.structures(ax, az, bx, bz)` (js/main.js
+→ js/build.js `blockingPiece` → js/buildplan.js `blockingPiece`) for the built piece across its line,
+looking no further than 14 m ahead. If there is one, it walks up to that piece and swings at it
+(js/actors.js `siegeOf` and the branch next to the swing at you).
+`hooks.onEnemyStrikeStructure` (js/main.js) rolls the enemy's own `dmg`, multiplies by
+`rules.siegeDamage` (1), and hands the result to `build.damagePiece`. This affects:
+* **Ranged enemies.** Not affected: they stand off and keep shooting at you over the wall.
+* **Fliers.** Not affected: they go over.
+* **An enemy busy with a companion.** Not affected: the companion is on its side of the wall.
+* **Underground.** Not affected: the query returns null in a dungeon.
+* **Raid waves.** They spawn through the same field, so a raid now hits the wall in its way.
+* **Turrets.** Unchanged: they shoot whatever is beating on the wall. A turret that is itself in
+  the way gets hit too.
+* **A single fence section.** Enemies walk through it rather than around it, because they cannot
+  plan a way round.
+
+**Hit points.** A piece's hit points are its catalogue `hp` where it has one (39 rows: palisade 400,
+stone wall 1200, reinforced wall 3000, gate 900…). Every other piece gets a derived value, so a
+dearer, later piece is tougher:
+
+    hp = clamp(round((40 + 20 × cost units) × tier), 60, 2000)        js/buildplan.js structureHp
+
+A Storage Box comes out at 160. The maximum always comes from the catalogue, so a tuning change
+reaches old bases. The damage itself is saved with the piece. A save from before this round loads
+every piece whole.
+
+**What damage looks like.** There are four bands: whole, then below two thirds, then below one
+third (`damageBand`). Each band darkens the piece one step. It uses the same cached materials, so
+no shader is compiled on a hit. A health bar (green, amber, orange, red) stands over any piece that
+is not whole.
+
+**Broken.** At 0 hit points the piece leaves the ledger and its mesh is removed. `onRemove` then
+runs exactly as it does for a take-down: the collider is rebuilt, so the gap is a real gap, a
+crate's goods are handed on, and the grid and drills let go. `rules.salvage` (0.25) of the piece's
+cost comes back to your store, and the log says *"Moor Hound breaks the Palisade. 1 timber
+salvaged."* A broken piece is not an undo step.
+
+**Repair tool** (Tools ring and panel, after Upgrade). Point at a piece and the card shows its hit
+points and the price: *"Click: repair the Palisade (250/400 HP) for 2 timber."* If you are short,
+it says what you are short of. A click puts the piece back to full. The price is
+`rules.repairShare` (0.5) of the build cost for a whole bar, paid in proportion to the damage and
+rounded up per material, so even a scratch costs one of each material (`repairCost`). Ctrl+Z
+undoes a repair and gives back what it cost. Repairing is a click, not a held E: the build mode
+cursor is already free, and E means "use" everywhere else.
+
+**Repair Station.** `repairs: { radius: 30, rate: 25 }` is now read as 25% of each damaged piece's
+bar per minute, for every piece within 30 m, while the station has power. It runs from
+`build.update`, which nothing in js/main.js had ever called. The portal ring's spin, which lives in
+the same function, was dead for the same reason. js/raid.js `loseRaid` still has its abstract loss
+model, but nothing in the game calls it (`defence.lost` has no caller). Real damage is now the loss
+model.
+
+**Tests.** tests/round28-building.test.js adds 5 node tests:
+* the hp table, catalogue value or derived, with a cost and a tier changed to check the formula
+  responds;
+* the repair price: pro rata, rounded up, `share` as the setting, real material ids;
+* damage → band → quote → repair → undo → the short-of message → broken with the salvage share,
+  plus salvage set to 1;
+* save/load of the damage, an old save loading whole, healing capped at the bar;
+* `blockingPiece`: a wall across the line, one off to the side, one too far ahead, a gate, a crate.
+
+tests/round28-building.spec.js adds a third Playwright test, which passed:
+* A three-section palisade is laid across the view.
+* A melee enemy is spawned on the far side. Its damage is raised so the test does not take minutes,
+  and companions are taken out of its targeting so only the wall is in the way.
+* It walks up and damages the middle section. That enemy is then removed.
+* Tools ring → Repair → the cursor finds the section → the card reads *"Click: repair the
+  Palisade (250/400 HP) for 2 timber"* → a click puts it back to full and costs logs.
+* A second enemy breaks a section outright: one fewer palisade, and the *"breaks the Palisade …
+  salvaged"* line appears.
+
+Screenshots are in `research/round28-building/` (damaged-wall, repair-quote, wall-broken). Earlier
+runs wrote to `test-results/`, which other test runs clear.

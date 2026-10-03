@@ -511,14 +511,22 @@ export function createTrade({ goods = [], data = null, seed = 1, caravans = null
    * origin plus upkeep, the origin is empty and nothing is making more, the carrier was robbed, or
    * the grid at the origin cannot carry a drone.
    */
-  function restand(r, { from, to, day = 1, standing = 0, take = null, gold = Infinity, rng = Math.random, at = 0 } = {}) {
+  function restand(r, { from, to, day = 1, standing = 0, take = null, gold = Infinity, rng = Math.random, at = 0, clears = 'profit' } = {}) {
     if (!r?.repeat) return { ok: false, why: 'That route was a one-off.' };
     const next = plan({
       from, to, carrier: r.carrier, manifest: r.manifest, guards: r.guards,
       metres: r.metres, roadShare: r.roadShare, day, standing, repeat: true,
     });
     if (!next.ok) return { ok: false, why: next.why, stopped: true };
-    if (next.profit <= 0) {
+    /**
+     * R28 — `clears: 'revenue'` is for goods you MADE rather than bought: `profit` takes off what
+     * the load would cost to buy at the origin, so a run of your own salt that clears its upkeep
+     * comfortably still read as a loss and stopped. Your own Trade Post's carts ask this instead.
+     */
+    if (clears === 'revenue' && next.revenue - next.upkeep <= 0) {
+      return { ok: false, stopped: true, why: `The load no longer covers its ${next.upkeep} gold upkeep at ${to.name}. The run has stopped.` };
+    }
+    if (clears !== 'revenue' && next.profit <= 0) {
       const worst = next.rows.slice().sort((a, b) => a.gross - b.gross)[0];
       return { ok: false, stopped: true, why: `${worst?.name || 'The load'} no longer covers the trip at ${to.name}. The run has stopped.` };
     }

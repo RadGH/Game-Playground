@@ -259,7 +259,10 @@ function crownLane(points, heights, reach, heightAt, ramp) {
  * the ground insists. Fifteen terrain samples per point, and none at all when no `groundAt` is
  * passed, so the tests that drive this as a pure transform still can.
  */
-export function laneRibbon(lane, { lift = 0.06, color = null, groundAt = null, profile = null } = {}) {
+export function laneRibbon(lane, { lift = 0.06, color = null, groundAt = null, profile = null, drape = 0, skirt = null, keep = null } = {}) {
+  // R28 — the draped ribbon (see `drapeRibbon` below) is what the game draws now; the flat
+  // cross-section path below is kept for callers that pass no `drape`
+  if (typeof drape === 'function' || drape > 0) return drapeRibbon(lane, { lift, color, groundAt, profile, step: drape, skirt, keep });
   const position = [], normal = [], index = [];
   // a town draws every street of every culture out of ONE mesh, so the colour has to travel with the
   // vertices rather than with the material
@@ -357,6 +360,220 @@ export function laneRibbon(lane, { lift = 0.06, color = null, groundAt = null, p
     }
   }
   return colour ? { position, normal, index, color: colour } : { position, normal, index };
+}
+
+/**
+ * ROUND 28 — A ROAD LIES ON THE GROUND, VERTEX BY VERTEX, AND HAS AN EDGE THAT TUCKS INTO IT.
+ *
+ * *"Improve road plans and fix floating paper thin roads."*
+ *
+ * Measured (tools/probe-road-float.mjs, the drawn road mesh's own vertex buffer against `heightAt`):
+ * on the default Small planet (seed 25392) the world roads stood **0.84 m above the ground at the
+ * median, 1.74 m at the 95th percentile and 3.1 m at worst**; on a full-size planet 1.6 m median and
+ * 13.3 m worst. Town streets stood 0.35 m median and 2.9 m worst. Nothing measured it, because every
+ * test since round 22 asked only whether the ground came up THROUGH the road — and the way round 22
+ * guaranteed it never did was to lift each flat cross-section to the highest ground across its width
+ * AND half a step toward each neighbour. World road points are a fifth of a map cell apart (12.8 m on
+ * Super tiny, 45 m on Small, 128 m at full size), so on any grade "half a step uphill" is half the
+ * climb to the next point: a 4% road on Small floats 0.9 m everywhere, and the flat quad between two
+ * such cross-sections is a sheet of paper hanging over the verge. Town streets were the same idea in
+ * `crownLane`: the highest ground across the street plus two metres either side, so on a side slope
+ * the downhill kerb floated.
+ *
+ * So the ribbon drapes instead. It is cut every `step` metres along (a number, or `(x, z) => metres`) (the source points are kept as
+ * rows, so a bend is still a vertex), every vertex across it asks `groundAt` and sits `lift` above
+ * that, and then each quad's middle and edge middles are checked against the ground and the quad is
+ * raised if the hillside bulges between its corners. The ground under a world road IS the graded deck
+ * (planet.js carves it, flat across the carriageway and linear along each segment), so the ribbon is
+ * the deck to the millimetre; under a street the ground is the hillside, so the street follows it.
+ * Either way the thing you see is the thing you stand on (js/player.js stands on `heightAt`), which is
+ * this project's rule: drawn geometry and measured geometry must agree. Where `groundAt` gives no
+ * answer (−Infinity inside a bridge's footprint) the vertex takes the lane's own graded `surface`.
+ *
+ * `skirt` ({ drop, out, color }) adds a sloped face along both edges, falling `drop` metres over `out`
+ * metres: near the player it is under the verge and what shows is a few centimetres of kerb, and the
+ * road's shader (js/features.js `roadShader`) pulls it further down with distance, where the clipmap's
+ * coarse rings cannot follow a 7 m road and would otherwise leave it hanging. Its vertices carry
+ * `skirt = 1` (the `skirt` array) so the shader knows which they are.
+ *
+ * `keep(x, z)` drops rows (a branch inside a trunk's carriageway, see features.js); one row either
+ * side of a dropped stretch is kept so the end tucks under whatever covers it.
+ *
+ * The result also carries `rows`, `columns` and `stations` (the source-point index, fractional, of
+ * every row), so a test can find the cross-section at a road point without assuming two vertices
+ * per point. The grid is `rows × columns` vertices first; skirt vertices come after it.
+ */
+function drapeRibbon(lane, { lift, color, groundAt, profile, step, skirt, keep }) {
+  const points = lane?.points || [];
+  const heights = lane?.surface || [];
+  const halfAt = i => (typeof lane.half === 'function' ? lane.half(i) : lane.half) || 1;
+  const cols = profile && profile.length >= 2 ? profile
+    : [[1, color], [0, color], [-1, color]];
+  const nc = cols.length;
+  const coloured = !!(profile || color);
+  const empty = { position: [], normal: [], index: [], rows: 0, columns: nc, stations: [], skirt: [] };
+  if (points.length < 2) return empty;
+
+  // ---- rows: every source point, plus enough between each pair that no gap is longer than `step`
+  let lastDx = 1, lastDz = 0;
+  for (let i = 0; i + 1 < points.length; i++) {
+    const ex = points[i + 1][0] - points[i][0], ez = points[i + 1][1] - points[i][1], el = Math.hypot(ex, ez);
+    if (el > 1e-6) { lastDx = ex / el; lastDz = ez / el; break; }
+  }
+  const tangentAt = i => {
+    const prev = points[Math.max(0, i - 1)], next = points[Math.min(points.length - 1, i + 1)];
+    let dx = next[0] - prev[0], dz = next[1] - prev[1];
+    const len = Math.hypot(dx, dz);
+    if (len > 1e-6) { dx /= len; dz /= len; lastDx = dx; lastDz = dz; } else { dx = lastDx; dz = lastDz; }
+    return [dx, dz];
+  };
+  const rows = [];   // { x, z, dx, dz, half, deck, station }
+  for (let i = 0; i < points.length; i++) {
+    const [dx, dz] = tangentAt(i);
+    rows.push({ x: points[i][0], z: points[i][1], dx, dz, half: halfAt(i), deck: heights[i] ?? 0, station: i });
+    if (i + 1 >= points.length) break;
+    const ax = points[i][0], az = points[i][1], bx = points[i + 1][0], bz = points[i + 1][1];
+    const len = Math.hypot(bx - ax, bz - az);
+    // `step` may be a function of where the segment is (features.js drapes finely near the player,
+    // where the terrain's rings are a metre or two a quad, and coarsely far off, where they are not)
+    const st = typeof step === 'function' ? step((ax + bx) / 2, (az + bz) / 2) : step;
+    const n = Math.max(1, Math.ceil(len / Math.max(0.5, st)));
+    if (len < 1e-6) continue;
+    const sdx = (bx - ax) / len, sdz = (bz - az) / len;
+    const h0 = halfAt(i), h1 = halfAt(i + 1), d0 = heights[i] ?? 0, d1 = heights[i + 1] ?? d0;
+    for (let k = 1; k < n; k++) {
+      const u = k / n;
+      rows.push({ x: ax + (bx - ax) * u, z: az + (bz - az) * u, dx: sdx, dz: sdz,
+        half: h0 + (h1 - h0) * u, deck: d0 + (d1 - d0) * u, station: i + u });
+    }
+  }
+
+  // ---- runs: rows `keep` refuses are dropped, keeping one either side so an end tucks under
+  let runs = [[0, rows.length - 1]];
+  if (keep) {
+    const ok = rows.map(r => !!keep(r.x, r.z));
+    runs = [];
+    let start = -1;
+    for (let r = 0; r < rows.length; r++) {
+      const want = ok[r] || (r > 0 && ok[r - 1]) || (r + 1 < rows.length && ok[r + 1]);
+      if (want && start < 0) start = r;
+      if (!want && start >= 0) { runs.push([start, r - 1]); start = -1; }
+    }
+    if (start >= 0) runs.push([start, rows.length - 1]);
+    runs = runs.filter(([a, b]) => b > a);
+  }
+
+  const position = [], normal = [], index = [], colour = coloured ? [] : null, stations = [], skirtMask = [];
+  const ground = (x, z, fallback) => {
+    if (!groundAt) return fallback;
+    const g = groundAt(x, z);
+    return Number.isFinite(g) ? g : fallback;
+  };
+  let rowCount = 0;
+  const grid = [];   // per run: [firstRowIndexInOutput, rowsInRun]
+  for (const [a, b] of runs) {
+    const first = rowCount;
+    for (let r = a; r <= b; r++) {
+      const row = rows[r];
+      // the left edge is side 0 (u = 1), exactly as the flat ribbon's `sides[i][0]`
+      const lx = row.x - row.dz * row.half, lz = row.z + row.dx * row.half;
+      const rx = row.x + row.dz * row.half, rz = row.z - row.dx * row.half;
+      for (const [u, c] of cols) {
+        const k = (1 - u) / 2;
+        const x = lx + (rx - lx) * k, z = lz + (rz - lz) * k;
+        position.push(x, ground(x, z, row.deck) + lift, z);
+        normal.push(0, 1, 0);
+        if (colour) { const cc = c || color || [1, 1, 1]; colour.push(cc[0], cc[1], cc[2]); }
+        skirtMask.push(0);
+      }
+      stations.push(row.station);
+      rowCount++;
+    }
+    grid.push([first, b - a + 1]);
+  }
+
+  // ---- no quad may dip under a bulge in the ground between its corners
+  // How far the ground at the middle of edge v–w comes up past half the lift (0 if it does not).
+  // Every edge is asked once: a quad owns its top (A–B), left (A–C) and diagonal (B–C) edges, and
+  // only the last row / last column also ask the bottom (C–D) / right (B–D) edge, because anywhere
+  // else those are the next quad's top / left. Asking all five per quad was ~6 `heightAt` calls a
+  // vertex and tripled the cost of a rebuild.
+  const bulge = (v, w) => {
+    const x = (position[v * 3] + position[w * 3]) / 2, z = (position[v * 3 + 2] + position[w * 3 + 2]) / 2;
+    const g = groundAt(x, z);
+    if (!Number.isFinite(g)) return 0;
+    const over = g + lift * 0.5 - (position[v * 3 + 1] + position[w * 3 + 1]) / 2;
+    return over > 0 ? over : 0;
+  };
+  if (groundAt) {
+    for (const [first, n] of grid) {
+      for (let r = 1; r < n; r++) {
+        for (let j = 0; j + 1 < nc; j++) {
+          if (profile && cols[j][0] === cols[j + 1][0]) continue;
+          const A = (first + r - 1) * nc + j, B = A + 1, C = (first + r) * nc + j, D = C + 1;
+          // the quad is drawn as (A, C, B) and (B, C, D): its centre lies on the B–C diagonal
+          let worst = Math.max(bulge(A, B), bulge(A, C), bulge(B, C));
+          if (r === n - 1) worst = Math.max(worst, bulge(C, D));
+          if (j + 2 === nc || (profile && cols[j + 1][0] === cols[j + 2]?.[0])) worst = Math.max(worst, bulge(B, D));
+          if (worst > 0) {
+            position[A * 3 + 1] += worst; position[B * 3 + 1] += worst;
+            position[C * 3 + 1] += worst; position[D * 3 + 1] += worst;
+          }
+        }
+      }
+    }
+  }
+
+  // ---- the strip's own triangles
+  for (const [first, n] of grid) {
+    for (let r = 1; r < n; r++) {
+      for (let j = 0; j + 1 < nc; j++) {
+        if (profile && cols[j][0] === cols[j + 1][0]) continue;
+        const A = (first + r - 1) * nc + j, B = A + 1, C = (first + r) * nc + j, D = C + 1;
+        index.push(A, C, B, B, C, D);
+      }
+    }
+  }
+
+  // ---- the skirt: a sloped face down from each edge, with its own (outward) normals
+  if (skirt) {
+    const drop = skirt.drop ?? 0.4, out = skirt.out ?? 0.3;
+    const sc = skirt.color || null;
+    for (const [first, n] of grid) {
+      for (const side of [0, 1]) {
+        const col = side === 0 ? 0 : nc - 1;
+        const base = position.length / 3;
+        for (let r = 0; r < n; r++) {
+          const v = (first + r) * nc + col;
+          const w = (first + r) * nc + (side === 0 ? 1 : nc - 2);
+          // outward = from the inner column to the edge, flattened
+          let ox = position[v * 3] - position[w * 3], oz = position[v * 3 + 2] - position[w * 3 + 2];
+          const ol = Math.hypot(ox, oz) || 1; ox /= ol; oz /= ol;
+          // R28 (screenshots): a dark face lit side-on read as the edge of a slab — a black serrated
+          // line along every hillside road. The bank is EARTH, half the road's colour and half a
+          // soil tone, and is lit nearly as the ground is, so it reads as a verge, not a kerb.
+          const nx = ox * 0.35, ny = 0.94, nz = oz * 0.35;
+          const c = sc || (colour ? [colour[v * 3] * 0.5 + 0.17, colour[v * 3 + 1] * 0.5 + 0.15, colour[v * 3 + 2] * 0.5 + 0.09] : null);
+          // top (a copy of the edge, so the face shades as a face) and bottom
+          position.push(position[v * 3], position[v * 3 + 1], position[v * 3 + 2]);
+          position.push(position[v * 3] + ox * out, position[v * 3 + 1] - drop, position[v * 3 + 2] + oz * out);
+          normal.push(nx, ny, nz, nx, ny, nz);
+          skirtMask.push(0, 1);
+          if (colour) colour.push(c[0], c[1], c[2], c[0], c[1], c[2]);
+          if (r > 0) {
+            const t0 = base + (r - 1) * 2, b0 = t0 + 1, t1 = base + r * 2, b1 = t1 + 1;
+            // facing outward on either side
+            if (side === 0) index.push(t0, b0, t1, t1, b0, b1);
+            else index.push(t0, t1, b0, t1, b1, b0);
+          }
+        }
+      }
+    }
+  }
+
+  const outGeom = { position, normal, index, rows: rowCount, columns: nc, stations, skirt: skirtMask };
+  if (colour) outGeom.color = colour;
+  return outGeom;
 }
 
 /**

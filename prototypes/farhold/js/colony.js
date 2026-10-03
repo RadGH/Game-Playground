@@ -37,6 +37,7 @@
 //             not budget for.
 
 import { workLeft } from './work.js';
+import { housesOf, HOUSE_MIN_BEDS } from './population.js';
 
 /** A safety net if the JSON did not load. `data/colony.json` is the real file. */
 const FALLBACK = {
@@ -295,13 +296,6 @@ export function createColony({
 
     // ---------------------------------------------------------------- bound to a machine
 
-    /** Every station somebody is minding, so the caller can ask "who has this furnace?". */
-    stationsOf(citizenId) {
-      const c = colony.byId(citizenId);
-      if (!c) return [];
-      return c.stationId == null ? [] : (Array.isArray(c.stations) ? c.stations : [c.stationId]);
-    },
-
     /**
      * Tie somebody to a machine. §3.5 — how many one person may mind is a number in the data.
      *
@@ -421,6 +415,41 @@ export function createColony({
       if (!c) return { ok: false, why: 'Nobody by that name lives here.' };
       c.posted = null; c.postName = null;
       return { ok: true, citizen: c };
+    },
+
+    /**
+     * R28 — PUT SOMEBODY ON THE WATCH, AND TAKE THEM OFF IT. THE WAY IN TO `station`.
+     *
+     * `station` and `unstation` were finished and nothing outside this file called either one.
+     * Nothing ever gave a citizen the guard job either (migration excludes it and `assign({ job })`
+     * had no caller), so the Command Rod's guard order walked a body to the post and posted nobody:
+     * wages were always 0, "Standing a watch" was always 0, js/defence.js never counted a guard as
+     * a turret and the Armiger (`needs.posted: 1`) could never move in.
+     *
+     * A guard minds no machine (`tendMax: 0`), so the job has to change — and changing it back is the
+     * other half: `formerJob` is what they did before, and standing them down restores it, so the
+     * same Rod that posted them can put them back on the furnace.
+     */
+    postGuard(citizenId, postId) {
+      const c = colony.byId(citizenId);
+      if (!c) return { ok: false, why: 'Nobody by that name lives here.' };
+      if (!colony.posts.find(p => p.id === postId)) return { ok: false, why: 'That is not a post. A guard stands in a Watch Post, a Guard Tower or a Gate House.' };
+      if (c.job !== 'guard') {
+        const was = c.job;
+        colony.assign(c.id, { job: 'guard' });
+        c.formerJob = was;
+      } else if (c.stationId != null) colony.assign(c.id, { stationId: null });
+      const out = colony.station(c.id, postId);
+      if (!out.ok && c.formerJob) { colony.assign(c.id, { job: c.formerJob }); c.formerJob = null; }
+      return out;
+    },
+    standDown(citizenId) {
+      const c = colony.byId(citizenId);
+      if (!c) return { ok: false, why: 'Nobody by that name lives here.' };
+      const was = c.posted;
+      colony.unstation(c.id);
+      if (c.job === 'guard' && c.formerJob) { colony.assign(c.id, { job: c.formerJob }); c.formerJob = null; }
+      return { ok: true, citizen: c, was };
     },
 
     /** What the guards cost you a day. Paid in `collectTax`, out of the same purse. */
@@ -787,7 +816,8 @@ export function createColony({
        * house is a structure that sleeps two or more; see HOUSE_MIN_BEDS in js/population.js, which
        * the Town Hall and the recruit refusal both read.
        */
-      const houses = (housing?.houses || []).filter(h => (h.beds || 0) >= 2).length;
+      // R28 — `housing.houses` is a FUNCTION on the real register; js/population.js `housesOf` reads both
+      const houses = housesOf(housing).filter(h => (h.beds || 0) >= HOUSE_MIN_BEDS).length;
       if (housing && houses <= 0) return null;
       const a = colony.appeal();
       const chance = (migCfg.baseChance || 0) + ((migCfg.chanceAtFullAppeal || 0) - (migCfg.baseChance || 0)) * a.score;

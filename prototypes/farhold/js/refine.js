@@ -55,6 +55,16 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
    */
   bag = null, bagReach = null,
 } = {}) {
+  /**
+   * R28 — HOW MUCH OF A RECIPE'S `power` IS ACTUALLY DRAWN. data/refining.json's `recipePowerShare`.
+   *
+   * The recipe draw was dead data until this round, so its numbers were never played against a
+   * generator — an assembler's 60 on top of its own 35 would brown out every base saved before it.
+   * Half of it, with the Burner Generator raised 30 -> 40 (data/power.json) to cover the drills that
+   * are now billed honestly, keeps a one-generator base of a drill and a smelter running. See
+   * research/round28-automation.md "Power balance".
+   */
+  const RECIPE_POWER_SHARE = Number.isFinite(refining?.recipePowerShare) ? refining.recipePowerShare : 0.5;
   const MACHINES = refining.machines || {};
   const RECIPES = Object.fromEntries((refining.recipes || []).map(r => [r.id, r]));
   const BY_MACHINE = {};
@@ -214,8 +224,16 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
 
   // ---------------------------------------------------------------- the queue
 
-  /** Put a job on a machine. `count` 0 or less means "keep going until told otherwise". */
-  function queue(machineId, recipeId, count = 1) {
+  /**
+   * Put a job on a machine. `count` 0 or less means "keep going until told otherwise".
+   *
+   * R28 — `{ keep: N }` is the third kind of job: a KEEP-IN-STOCK order. "Keep 50 iron ingots in
+   * stock" runs like a standing order until the stores this machine fills hold N of the recipe's
+   * main output, then the machine stands `stocked` — satisfied, not idle, not asking for a worker —
+   * and starts again by itself the moment something takes the stock below the line. Two keep
+   * orders on one furnace (iron AND copper) take turns: whichever is short runs.
+   */
+  function queue(machineId, recipeId, count = 1, { keep = 0 } = {}) {
     const m = get(machineId);
     if (!m) return { ok: false, why: 'no such machine' };
     const r = RECIPES[recipeId];
@@ -230,8 +248,16 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
      * which read as two separate orders that were each stuck. If the LAST job on the queue is the
      * same recipe, the new count goes onto it — "0/2" — and a standing order swallows any count.
      */
+    keep = Math.max(0, Math.round(Number(keep) || 0));
+    if (keep > 0) {
+      // one keep order per recipe per machine: asking again moves the line rather than adding a row
+      const had = m.queue.find(j => j.recipe === recipeId);
+      if (had) { had.left = Infinity; had.keep = keep; return { ok: true, job: had, merged: true }; }
+      m.queue.push({ recipe: recipeId, left: Infinity, done: 0, keep });
+      return { ok: true, job: m.queue[m.queue.length - 1] };
+    }
     const last = m.queue[m.queue.length - 1];
-    if (last && last.recipe === recipeId) {
+    if (last && last.recipe === recipeId && !last.keep) {
       if (count <= 0) last.left = Infinity;
       else if (last.left !== Infinity) last.left += count;
       return { ok: true, job: last, merged: true };
@@ -252,6 +278,60 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
     if (job.left <= 0) cancel(machineId, index);
     return true;
   }
+  /** R28 — move the line on a keep-in-stock job. 0 turns it back into a plain standing order. */
+  function setKeep(machineId, index = 0, keep = 0) {
+    const job = get(machineId)?.queue[index];
+    if (!job) return false;
+    job.keep = Math.max(0, Math.round(Number(keep) || 0));
+    job.left = Infinity;
+    return true;
+  }
+
+  /**
+   * R28 — WHAT A RECIPE IS FOR. The first output that is not in its `waste` list — data/refining.json
+   * marks slag, ash and tailings as `waste` "so the UI can grey them", and a keep-in-stock order on
+   * a smelter is counting ingots, not slag.
+   */
+  function mainOutput(recipe) {
+    const outs = Object.keys(recipe?.outputs || {});
+    const waste = new Set(recipe?.waste || []);
+    return outs.find(k => !waste.has(k)) || outs[0] || null;
+  }
+  /** How many of `res` the place this machine delivers to holds: its pool, or your pack with none. */
+  function stockOf(m, res) {
+    if (!res) return 0;
+    const p = poolFor(m);
+    if (p) return stores.count(p, res);
+    return bag?.count?.(res) || 0;
+  }
+  /**
+   * R28 — THE KEEP LINE A POOL IS HOLDING FOR, BY MATERIAL.
+   *
+   * A supply route out of a pool (js/logistics.js `runLinks`) and a keep-in-stock order on a machine
+   * in that pool both decide how much of a thing should stay there, and neither knew about the
+   * other: a route shipped the furnace's 50 ingots out from under it, the furnace made 50 more, and
+   * the "keep 50" order never once stood satisfied. The route asks this and leaves the line behind.
+   * The highest line wins when two machines keep the same thing — they are both counting one pile.
+   */
+  function keepLine(poolId, res) {
+    let line = 0;
+    for (const m of machines.values()) {
+      if (!m.enabled) continue;
+      const p = poolFor(m);
+      if (!p || p.id !== poolId) continue;
+      for (const j of m.queue) {
+        if (j.keep > 0 && mainOutput(RECIPES[j.recipe]) === res) line = Math.max(line, j.keep);
+      }
+    }
+    return line;
+  }
+
+  /** Is this job a keep-in-stock order that already has its stock? */
+  function satisfied(m, job) {
+    if (!(job?.keep > 0)) return false;
+    return stockOf(m, mainOutput(RECIPES[job.recipe])) >= job.keep;
+  }
+
   function cancel(machineId, index = 0) {
     const m = get(machineId);
     if (!m || !m.queue[index]) return false;
@@ -394,6 +474,10 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
         if (open && !open.complete) board.cancel(id);
         continue;
       }
+      // R28 — a stocked machine posts nothing new, but an order already up is LEFT up: the stock
+      // wobbles round the line every batch, and cancelling would throw away a citizen's walk there.
+      // Whatever they put in is banked (capped as always) and spent the moment the stock dips.
+      if (m.state === 'stocked' && !live) continue;
       if (m.workBank >= bankCap(m) - 1e-6) continue;
       // R16 — an order already up follows the machine's switch: changing the priority on a bench
       // that somebody is already walking towards has to mean something NOW, not in four units' time
@@ -501,7 +585,29 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
 
   function step(m, dt) {
     if (!m.enabled) { m.state = 'idle'; grid?.setBusy(m.id, false); return; }
+    /**
+     * R28 — KEEP-IN-STOCK. Between batches (never half way through one, and never while a finished
+     * batch is still waiting for room) the first job that is short goes to the front. If every job
+     * on the machine is a keep order that already has its stock, the machine is `stocked`.
+     */
+    if (!m.crafting && !m.pending && m.queue.length && m.queue.some(j => j.keep > 0)) {
+      const i = m.queue.findIndex(j => !satisfied(m, j));
+      if (i < 0) {
+        m.state = 'stocked'; m.starvedFor = null; m.progress = 0;
+        grid?.setBusy(m.id, false);
+        if ((m.def.powerUse || 0) > 0) grid?.setDraw?.(m.id, m.def.powerUse);
+        return;
+      }
+      if (i > 0) m.queue.unshift(m.queue.splice(i, 1)[0]);
+    }
     const job = m.queue[0];
+    /**
+     * R28 — A RECIPE'S OWN DRAW. data/refining.json gives 32 recipes a `power` — "the extra draw while
+     * working" — and nothing ever read it: a smelter drawing wire billed the grid exactly what an
+     * empty smelter did. The machine's draw is its own `powerUse` plus whatever the job at the head
+     * of its queue adds; the grid's idle share still applies when it is not actually running.
+     */
+    if ((m.def.powerUse || 0) > 0) grid?.setDraw?.(m.id, m.def.powerUse + ((job && RECIPES[job.recipe]?.power) || 0) * RECIPE_POWER_SHARE);
     if (!job) { m.state = 'idle'; m.crafting = false; grid?.setBusy(m.id, false); return; }
     const recipe = RECIPES[job.recipe];
     if (!recipe) { m.queue.shift(); return; }
@@ -532,6 +638,8 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
     let guard = 0;
     while (budget > 1e-9 && guard++ < 10000) {
       if (!m.crafting) {
+        // R28 — a keep order that has just made its last one stops HERE; the next tick re-picks
+        if (job.keep > 0 && satisfied(m, job)) break;
         const ins = inputsOf(recipe);
         if (!ins) { m.state = 'starved'; m.starvedFor = 'a rare element this world does not hold'; break; }
         let short = null;
@@ -722,7 +830,7 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
       recipe: recipe?.id || null,
       recipeName: recipe?.name || '',
       progress: recipe ? Math.min(1, m.progress / recipe.time) : 0,
-      queued: m.queue.map(j => ({ recipe: j.recipe, name: RECIPES[j.recipe]?.name || j.recipe, left: j.left, done: j.done })),
+      queued: m.queue.map(j => ({ recipe: j.recipe, name: RECIPES[j.recipe]?.name || j.recipe, left: j.left, done: j.done, keep: j.keep || 0 })),
       fuel: m.fuelRes ? { resource: m.fuelRes, name: nameOf(m.fuelRes), seconds: +m.fuelSeconds.toFixed(1) } : null,
       made: m.made,
       pooled: !!poolFor(m),
@@ -752,6 +860,11 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
         ? `Out of fuel — nothing to burn ${poolFor(m) ? 'in the stores here' : 'in your pack'}`
         : `Waiting for ${nameOf(m.starvedFor)} — none ${poolFor(m) ? (bagOpen(m) ? 'here or in your pack' : 'in the stores here') : 'in your pack'}`;
       case 'blocked': return 'Finished, and nowhere to put it';
+      case 'stocked': {
+        const j = m.queue[0];
+        const res = mainOutput(RECIPES[j?.recipe]);
+        return j ? `Stocked — ${fmtN(stockOf(m, res))} ${nameOf(res)} on hand, keeping ${j.keep}. Starts again below that` : 'Stocked';
+      }
       case 'unworked': return 'Standing cold — nobody is working this. Stand beside it, or hold E at it';
       case 'unpowered': return 'No power reaches this';
       case 'shed': return 'Grid is short — this was switched off to keep the important things on';
@@ -797,7 +910,9 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
     if (!recipe) {
       out.push({ key: 'job', ok: false, text: 'Nothing queued — pick something to make below.' });
     } else {
-      const left = job.left === Infinity ? 'on a standing order' : `${job.left} to go`;
+      const left = job.keep > 0
+        ? `keeping ${job.keep} in stock, ${fmtN(stockOf(m, mainOutput(recipe)))} on hand`
+        : job.left === Infinity ? 'on a standing order' : `${job.left} to go`;
       out.push({ key: 'job', ok: true, text: `Making ${recipe.name} — ${left}.` });
       const ins = inputsOf(recipe);
       if (!ins) out.push({ key: 'input', ok: false, text: 'Needs a rare element this world does not hold.' });
@@ -867,7 +982,7 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
         out.push({
           machine: m.id, machineName: m.name, index: i,
           recipe: j.recipe, name: RECIPES[j.recipe]?.name || j.recipe,
-          left: j.left, done: j.done,
+          left: j.left, done: j.done, keep: j.keep || 0,
           progress: i === 0 && RECIPES[j.recipe] ? Math.min(1, m.progress / RECIPES[j.recipe].time) : 0,
           state: i === 0 ? m.state : 'queued',
         });
@@ -881,7 +996,7 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
       completed: { ...completed },
       machines: [...machines.values()].map(m => ({
         id: m.id, type: m.type, x: m.x, z: m.z, enabled: m.enabled,
-        queue: m.queue.map(j => ({ recipe: j.recipe, left: j.left === Infinity ? -1 : j.left, done: j.done })),
+        queue: m.queue.map(j => ({ recipe: j.recipe, left: j.left === Infinity ? -1 : j.left, done: j.done, ...(j.keep > 0 ? { keep: j.keep } : {}) })),
         progress: m.progress, crafting: m.crafting, pending: m.pending, fuelSeconds: m.fuelSeconds, fuelRes: m.fuelRes, made: m.made,
         workBank: m.workBank, workedSeconds: m.workedSeconds,
         priority: m.priority ?? 1, lastCredit: m.lastCredit || '',
@@ -908,7 +1023,7 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
       // A save made before R16 has neither of these, and the defaults are what it has always done.
       machine.priority = spec.priority == null ? 1 : Math.max(0, Math.min(2, spec.priority | 0));
       machine.lastCredit = spec.lastCredit || '';
-      machine.queue = (spec.queue || []).map(j => ({ recipe: j.recipe, left: j.left < 0 ? Infinity : j.left, done: j.done || 0 }));
+      machine.queue = (spec.queue || []).map(j => ({ recipe: j.recipe, left: j.left < 0 ? Infinity : j.left, done: j.done || 0, ...(j.keep > 0 ? { keep: j.keep } : {}) }));
     }
     return machines.size;
   }
@@ -951,6 +1066,9 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
   return {
     place, remove: removeMachine, get, queue, cancel, clear, tick, catchUp,
     // R26 — the − / + on a queued job, the checklist, and whether the pack is in reach
+    // R28 — keep-in-stock orders, and what a recipe is for
+    speedOf: id => { const m = get(id); return m ? speedOf(m) : { speed: 0, why: 'no such machine' }; },
+    setKeep, mainOutput, keepLine, stockOf: (id, res) => { const m = get(id); return m ? stockOf(m, res) : 0; },
     adjust, needs, bagOpen: id => { const m = get(id); return m ? bagOpen(m) : false; },
     isUnlocked, unlockProgress, available, board, inputsOf, snapshot, stateText, allJobs,
     // the Civilization Expansion §3 — work runs the machines
@@ -1056,6 +1174,10 @@ export function createHandWork({
       // Not a refusal — this is the automated half of the split, and saying so is the whole of
       // "make that VISIBLE". A tier-2 machine on the grid genuinely does not want your help.
       if (holding) say(m.id, `The ${m.name} runs itself. It wants power, not hands.`, '');
+      return null;
+    }
+    if (m.state === 'stocked') {
+      if (holding) say(m.id, `The ${m.name} has all it was asked to keep in stock. It starts again by itself when the stock drops.`, '');
       return null;
     }
     if (!m.queue.length) {

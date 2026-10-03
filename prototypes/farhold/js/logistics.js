@@ -230,6 +230,27 @@ export function createLogistics({
     return { ok: true, link: row, quote: q };
   }
 
+  /**
+   * R28 — CHANGE A ROUTE'S FILTER AFTER IT IS LAID.
+   *
+   * `only` and `keep` have been on `link` since it was written and the one caller (the map's Supply
+   * tab) never passed either, so a route out of a mining camp carried off the coal its own generator
+   * burns. The Production tab sets them here. `only: null` means everything; `keep` is a floor left
+   * behind for every material the route carries.
+   */
+  function setLink(id, { only = undefined, keep = undefined, batch = undefined } = {}) {
+    const l = links.find(x => x.id === id);
+    if (!l) return { ok: false, why: 'That route is gone.' };
+    if (only !== undefined) l.only = only && only.length ? [...only] : null;
+    if (keep !== undefined) l.keep = Math.max(0, Math.round(Number(keep) || 0));
+    if (batch !== undefined) l.batch = Math.max(1, Math.round(Number(batch) || T.batch));
+    return { ok: true, link: l };
+  }
+
+  /** R28 — `(poolId, res) -> n`: a floor other systems hold in a pool. js/main.js hands in `works.keepLine`. */
+  let floorFor = null;
+  function setFloors(fn) { floorFor = typeof fn === 'function' ? fn : null; }
+
   function unlink(id) {
     const before = links.length;
     links = links.filter(l => l.id !== id && !(l.from === id));
@@ -262,7 +283,9 @@ export function createLogistics({
       let best = null;
       for (const [res, have] of Object.entries(totals)) {
         if (l.only && !l.only.includes(res)) continue;
-        const spare = have - (l.keep || 0);
+        // R28 — the route's own floor, or the keep-in-stock line a machine here is holding, whichever
+        // is higher (js/refine.js `keepLine`); see `setFloors`
+        const spare = have - Math.max(l.keep || 0, floorFor ? (floorFor(a.id, res) || 0) : 0);
         if (spare < l.batch) continue;
         if (!best || spare > best.spare) best = { res, spare };
       }
@@ -341,7 +364,7 @@ export function createLogistics({
   }
 
   return {
-    quote, send, link, unlink, tick, catchUp, pending, secsText,
+    quote, send, link, setLink, setFloors, unlink, tick, catchUp, pending, secsText,
     get loads() { return loads; },
     get links() { return links; },
     get travel() { return { ...T }; },
@@ -377,6 +400,13 @@ export const AWAY_CAP_SECONDS = 6 * 3600;
  */
 export function createAwayClock({
   works = null,
+  /**
+   * R28 — THE DRILLS. This clock was handed the grid, the benches, the carts and the stores, and
+   * never the drills: leave the planet for six hours and every furnace ran on the ore already in
+   * the crates while the seams feeding them sat still. js/mining.js's `tick` caps a step at the
+   * drill's pile, so a fifteen-minute slice cannot dig ten thousand ore into a 200 pile.
+   */
+  mining = null,
   logistics = null,
   stores = null,
   grid = null,
@@ -440,6 +470,9 @@ export function createAwayClock({
         const dt = Math.min(slice, left);
         // the grid first: a machine's speed comes from what power reached it this slice
         if (grid?.tick) grid.tick(dt, { daylight, wind });
+        // dig first, in steps no longer than a minute: a route drains a pile at its own rate and a
+        // pile tops out at 200, so one fifteen-minute step would dig 200 and then haul for fourteen
+        if (mining?.tick) for (let m = 0; m < dt - 1e-6; m += 60) mining.tick(Math.min(60, dt - m));
         if (works?.catchUp) unlocked.push(...(works.catchUp(dt).unlocked || []));
         if (logistics?.catchUp) deliveries += logistics.catchUp(dt).deliveries || 0;
         left -= dt;

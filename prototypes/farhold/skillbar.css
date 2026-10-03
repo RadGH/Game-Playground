@@ -1,0 +1,86 @@
+/* ---------------------------------------------------------------- R28: the skill bar's new marks
+   research/round28-skills-plan.md §2 H — without these, Flair, Grudge, the next roll, a charge
+   count, a recast window and the current shape are rules a player cannot see. All of it is drawn
+   from `skills.state()` (js/skills.js) by js/hud.js `skills()`. */
+
+/* a corner tag on a slot: charges "2/3", the next roll, or the form it is in */
+.skill-slot .skill-tag {
+  position: absolute; top: 2px; right: 3px; z-index: 3;
+  font-size: 9px; color: #ffd58a; font-variant-numeric: tabular-nums;
+}
+.skill-slot .skill-tag:empty { display: none; }
+/* the slot whose form is ON (a shape you are in, the stance you hold, the song you play) */
+.skill-slot.form-on { border-color: #7ad67a; box-shadow: 0 0 0 1px #7ad67a inset, 0 0 10px rgba(122, 214, 122, 0.35); }
+/* a slot overridden by a form shows that version's name in green */
+.skill-slot.formed .skill-name { color: #b8f0a0; }
+/* inside a recast window: a draining ring, so "press again" is visible without reading */
+.skill-slot.recast { border-color: #c9a0ff; box-shadow: 0 0 0 2px rgba(201, 160, 255, calc(var(--recast, 1) * 0.9)) inset; }
+.skill-slot.channel { border-color: #6fd4ff; box-shadow: 0 0 10px rgba(111, 212, 255, 0.55); }
+
+/* resource pips and the form badge, in one strip over the bar */
+#skill-strip {
+  position: absolute; left: 50%; bottom: 84px; transform: translateX(-50%);
+  display: flex; gap: 14px; align-items: center; pointer-events: none;
+  font-size: 11px; color: #e8eef6; text-shadow: 0 1px 2px #000;
+}
+#skill-strip:empty { display: none; }
+#skill-strip .res { display: flex; gap: 3px; align-items: center; }
+#skill-strip .res b { font-weight: 600; margin-right: 4px; }
+#skill-strip .pip { width: 9px; height: 9px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.4); background: rgba(0, 0, 0, 0.45); }
+#skill-strip .pip.on { background: #ffcf5a; border-color: #ffe3a0; }
+#skill-strip .res.poise .pip.on { background: #8fd8ff; border-color: #c8ecff; }
+#skill-strip .res.grudge .pip.on { background: #ff6a5a; border-color: #ffb0a6; }
+#skill-strip .form { padding: 1px 7px; border: 1px solid #7ad67a; border-radius: 9px; background: rgba(20, 40, 20, 0.6); color: #c8f5b8; }
+
+/* a talent node whose partner skill is not on your bar (`requires`) */
+.talent-card.needs { opacity: 0.72; border-style: dashed; }
+
+/* ---------------------------------------------------------------- R28 (UI): the skill card
+   js/hud.js `skillCardHtml` — the bar's hover card and the head of the Skills tab. Chips for the
+   mechanics (js/skillcard.js `mechFacts`), what is live now, and one block per form: what this
+   skill becomes in each shape, or what a shape does to the rest of the bar. */
+.skc { max-width: 380px; }
+.skc.skc-full { max-width: none; }
+.skc .skc-name { font-size: 14px; }
+.skc-chips { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0 2px; }
+.skc-chip, .sk-mark {
+  display: inline-block; padding: 0 7px; border: 1px solid #2c3a52; border-radius: 999px;
+  background: #121a29; color: #9fb0c8; font-size: 11px; line-height: 17px; white-space: nowrap;
+}
+.skc-chip.k-form, .sk-mark.k-form { color: #b8f0a0; border-color: #2f5a2a; }
+.skc-chip.k-mech, .sk-mark.k-mech { color: #d4b8ff; border-color: #44345e; }
+.skc-chip.k-res, .sk-mark.k-res { color: #ffd58a; border-color: #5a4a26; }
+.skc-now { margin: 2px 0; font-size: 12px; }
+.skc-sec { margin-top: 7px; padding-top: 5px; border-top: 1px solid rgba(255, 255, 255, 0.08); }
+.skc-h { font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: #8fa0b8; margin-bottom: 3px; }
+.skc-form { margin: 3px 0 5px; padding-left: 8px; border-left: 2px solid #2f5a2a; font-size: 12px; line-height: 1.4; }
+.skc-form b { display: block; color: #b8f0a0; font-weight: 600; }
+.skc-form span { color: #a9b6c8; }
+
+/* the head of the Skills tab: the same card, laid out wider — the form versions side by side */
+.st-skill {
+  padding: 9px 12px; background: var(--pane-bg2, rgba(16, 24, 36, .8));
+  border: 1px solid #2a3446; border-radius: 7px;
+}
+.st-skill .skc-full .tip-line { color: var(--ink, #e8eef6); font-size: 13px; line-height: 1.45; }
+.st-skill .skc-full .tip-dim { color: var(--ink-faint, #7f8ea4); font-size: 12px; }
+.st-skill .skc-full .tip-good { color: var(--good, #8fe0a0); }
+.st-skill .skc-full .skc-sec { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 4px 12px; }
+.st-skill .skc-full .skc-sec > .skc-h, .st-skill .skc-full .skc-sec > .tip-dim, .st-skill .skc-full .skc-sec > .tip-line { grid-column: 1 / -1; }
+
+/* the one-time "your talents were returned" banner (an old save, plan §7) */
+.st-returned {
+  display: flex; gap: 10px; align-items: center; justify-content: space-between;
+  padding: 7px 10px; border: 1px solid #6aa84f; border-radius: 7px;
+  background: rgba(30, 60, 30, .55); color: #dff5d4; font-size: 12.5px;
+}
+.st-returned button { flex: 0 0 auto; }
+
+/* a talent card: shared (library) vs the skill's own, and what it moves on the skill */
+.talent-card .tc-kind { font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: #8fa0b8; }
+.talent-card.shared { border-style: dotted; }
+.talent-card .tc-delta { display: flex; flex-wrap: wrap; gap: 3px 8px; margin-top: 2px; font-size: 11px; color: #ffd58a; font-variant-numeric: tabular-nums; }
+
+/* the bar strip on the Skills tab: a form/charges mark above the talent dots */
+.sk-card .sk-marks { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 2px; }
+.sk-card .sk-mark { font-size: 10px; line-height: 15px; padding: 0 5px; }

@@ -154,6 +154,8 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
    * legitimately hold, so it never fights the gate, and it still stops an unbounded summon loop.
    */
   const DEFAULT_BODY_CAP = 6;
+  /** R28 — temporary summons have their own budget, outside the follower slots and the body cap. */
+  const TEMP_CAP = 12;
   const bodyCap = () => Math.max(1, Math.round(cfg.maxAlive ?? DEFAULT_BODY_CAP));
   /** Bodies in the scene or on their way into it — an actor mid-await is a body that is coming. */
   const bodies = () => pets.length + pending;
@@ -356,14 +358,23 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
    * honest answer rather than refusing the whole cast. `refused` is left on the returned array so a
    * caller can say WHY only one turned up.
    */
-  async function summon(defId, owner, { count = 1, at = null, origin = 'summon', name = null } = {}) {
+  async function summon(defId, owner, { count = 1, at = null, origin = 'summon', name = null, temporary = false, lifetime = 0, decoy = null, burstOnExpire = null, hpShare = null, look = null, heal = null, taunt = 0 } = {}) {
     const def = byId[defId];
     if (!def) return [];
     const made = [];
     made.refused = null;
     for (let i = 0; i < count; i++) {
-      const allow = admitted(defId, { origin, name: name || def.name });
-      if (!allow.ok) { made.refused = allow.why; break; }
+      /**
+       * R28 — A TEMPORARY SUMMON TAKES NO FOLLOWER SLOT (plan §8.2): a Guardian Light, a decoy, a
+       * March of the Buried. It skips the follower gate entirely and is held to a separate body
+       * budget so a burst of them cannot grow the scene without limit.
+       */
+      if (temporary) {
+        if (pets.filter(p => p.temporary).length + pending >= TEMP_CAP) { made.refused = 'Too many summoned things at once.'; break; }
+      } else {
+        const allow = admitted(defId, { origin, name: name || def.name });
+        if (!allow.ok) { made.refused = allow.why; break; }
+      }
       /**
        * R19 — THE SECOND CAP, WHICH IS GONE.
        *
@@ -373,9 +384,22 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
        * door now, it counts the bodies on their way in as well as the ones standing, and when
        * there is no follower book it IS this test.
        */
-      const unit = make(def, owner);
-      unit.origin = origin;
+      const unit = make(look ? { ...def, look } : def, owner);
+      unit.origin = temporary ? 'temporary' : origin;
       if (name) unit.name = name;
+      if (temporary) {
+        unit.temporary = true;
+        unit.left = lifetime || 10;
+        unit.burstOnExpire = burstOnExpire || null;
+        unit.healPulse = heal ? { ...heal, next: heal.every ?? 2 } : null;
+        unit.tauntOnSpawn = taunt || 0;
+      }
+      if (decoy) {
+        // a decoy stands still, never swings, and has a share of its OWNER's health
+        unit.decoy = true;
+        unit.hp = unit.maxHp = Math.max(1, Math.round((owner.maxHp || 100) * (decoy.hpShare ?? hpShare ?? 0.3)));
+        unit.onStruck = decoy.onStruck || null;
+      }
       const home = at || { x: owner.x ?? 0, z: owner.z ?? 0 };
       const a = rng() * Math.PI * 2;
       unit.x = home.x + Math.cos(a) * 2.4;
@@ -478,7 +502,9 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
            * companion became dismissible for the same reason, which is the exact thing the "they
            * came with you" rule exists to prevent.
            */
-          if (p.owner) {
+          // R28 — a temporary summon (a decoy, a wisp, a shade) is simply gone: it never comes back,
+          // and above all never as a permanent follower holding a slot
+          if (p.owner && !p.temporary) {
             fallen.push({
               defId: p.defId, owner: p.owner, left: cfg.reviveSeconds ?? 14,
               origin: p.origin || 'summon', uid: p.id, name: p.name || null,
@@ -492,6 +518,33 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
       retune(p);
       if (p.hitFlash > 0) p.hitFlash -= dt;
       if (p.swingTimer > 0) p.swingTimer -= dt;
+      // R28 — a barrier a skill put on this follower runs out on its own clock
+      if (p.barrierFor > 0) { p.barrierFor -= dt; if (p.barrierFor <= 0) { p.barrierFor = 0; p.barrier = 0; } }
+      /**
+       * R28 — A TEMPORARY SUMMON RUNS OUT. It does not fall and come back like a follower: it is
+       * simply gone, and one that was meant to burst on expiry says so through the hook.
+       */
+      if (p.temporary) {
+        p.left -= dt;
+        if (p.left <= 0) {
+          hooks.onExpire?.(p);
+          scene.remove(p.actor.group);
+          p.actor.dispose?.();
+          p.removed = true;
+          pets.splice(i, 1);
+          continue;
+        }
+        if (p.healPulse) {
+          p.healPulse.next -= dt;
+          if (p.healPulse.next <= 0) { p.healPulse.next = p.healPulse.every ?? 2; hooks.onHealPulse?.(p, p.healPulse); }
+        }
+      }
+      if (p.tauntOnSpawn > 0 && field) {
+        for (const e of field.enemies) if (e.dying == null && Math.hypot(e.x - p.x, e.z - p.z) <= 8) field.taunt?.(e, p, p.tauntOnSpawn);
+        p.tauntOnSpawn = 0;
+      }
+      // R28 — orders from a `command` skill run out
+      if (p.order) { p.order.left -= dt; if (p.order.left <= 0 || p.order.target?.dying != null || p.order.target?.removed) p.order = null; }
       if (p.statuses) {
         const hurt = tickStatuses(p, dt);
         if (hurt > 0 && p.hp <= 0) { fall(p); continue; }
@@ -528,6 +581,15 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
       const selfHurt = p._hpSeen != null && p.hp < p._hpSeen;
       p._hpSeen = p.hp;
 
+      // R28 — a decoy does not move and does not swing: it stands there and is hit (and a follower
+      // held in stasis by its own side's Chronomancer stands the same way, untouchable)
+      if (p.decoy || p.statuses?.stasis) {
+        p.y = groundAt(currentTerrain, p.x, p.z, p.y);
+        p.actor.group.position.set(p.x, p.y + (p.hover || 0), p.z);
+        setActorAnim(p.actor, 'idle');
+        p.actor.update(dt);
+        continue;
+      }
       let target = p.target;
       if (target && (target.removed || target.dying != null || Math.hypot(target.x - at.x, target.z - at.z) > leash * 1.4)) target = null;
       if (field && (selfHurt || ownerHurt || !target)) {
@@ -540,6 +602,12 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
           if (d < bestD) { bestD = d; best = e; }
         }
         if (best || !target) target = best;
+      }
+      // R28 — an order beats the pet's own choice: focus/pounce the named target, guard, return
+      if (p.order) {
+        if ((p.order.kind === 'focus' || p.order.kind === 'pounce') && p.order.target) target = p.order.target;
+        else if (p.order.kind === 'return') target = null;
+        else if (p.order.kind === 'guard' && target && Math.hypot(target.x - at.x, target.z - at.z) > 4 + (target.reach || 2)) target = null;
       }
       p.target = target;
 
@@ -588,7 +656,12 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
         p.facing = Math.atan2(target.x - p.x, target.z - p.z);
         p.swingTimer = p.attackEvery;
         setActorAnim(p.actor, 'attack');
-        const result = rpg.strike(p, target, rng, { element: p.ranged?.element || 'physical' });
+        // R28 — a pounce order's next attack is +50%; an empowered follower's (Lead the Charge) too
+        const boost = (p.empowered || 0);
+        p.empowered = 0;
+        const result = rpg.strike(p, target, rng, { element: p.ranged?.element || 'physical', multiplier: 1 + boost });
+        if (p.biteStatus && statuses?.[p.biteStatus]) applyStatus(target, p.biteStatus, statuses[p.biteStatus], Math.max(1, result.amount * 0.5));
+        hooks.onPetStrike?.(p, target, result);
         // your minions' damage is your damage: this is what stops a guard walking off with the kill
         field?.credit?.(target, result.amount);
         target.hitFlash = 0.18;
@@ -621,7 +694,7 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
          * far behind, so a face can slow a companion down but never strand it.
          */
         if (!p.hover) [cx, cz] = cliffStep(currentTerrain, p, cx, cz, dt, { feet: p.y }, cliffOut);
-        if (!p.hover && field) [cx, cz] = field.unstick(cx, cz, (p.reach || 2) * 0.28);
+        if (!p.hover && field) [cx, cz] = field.unstick(cx, cz, (p.reach || 2) * 0.28, p.x, p.z);
         if (!wetAt(currentTerrain, cx, cz, p.y)) { p.x = cx; p.z = cz; }
         else { p.x = at.x; p.z = at.z; }        // a companion will not drown chasing you across a river
       }
@@ -762,6 +835,90 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
     }
   }
 
+  /**
+   * R28 — ORDERS (the `command` vocabulary key). Every follower within 30 m takes it — pets,
+   * temporary summons and mercenaries alike — unless `petOnly` keeps it to the class companions.
+   *   focus   attack `target` for `seconds`
+   *   pounce  leap to `target`; the next attack deals 50% more
+   *   guard   stay within 4 m of the owner and only take what is near
+   *   return  come back
+   * Returns how many obeyed.
+   */
+  function order(kind, target = null, { seconds = 6, petOnly = false, from = null } = {}) {
+    let n = 0;
+    for (const p of pets) {
+      if (p.dying != null || p.decoy) continue;
+      if (petOnly && p.origin !== 'companion') continue;
+      if (from && Math.hypot(p.x - from.x, p.z - from.z) > 30) continue;
+      p.order = { kind, target, left: seconds };
+      if (kind === 'pounce' && target) {
+        const a = Math.atan2(p.x - target.x, p.z - target.z);
+        p.x = target.x + Math.sin(a) * 1.6; p.z = target.z + Math.cos(a) * 1.6;
+        p.y = groundAt(currentTerrain, p.x, p.z, p.y);
+        p.empowered = Math.max(p.empowered || 0, 0.5);
+        p.swingTimer = 0;
+      }
+      if (kind === 'return') p.target = null;
+      n++;
+    }
+    return n;
+  }
+
+  /** R28 — `revive`: every fallen follower comes back NOW, at `share` of its health. */
+  async function reviveAll(share = 0.5, owner = null) {
+    const back = fallen.splice(0, fallen.length);
+    const out = [];
+    for (const f of back) {
+      const made = await summon(f.defId, f.owner || owner, { count: 1, at: owner ? { x: owner.x, z: owner.z } : null, origin: f.origin, name: f.name });
+      if (made[0]) {
+        if (f.uid) made[0].id = f.uid;
+        made[0].hp = Math.max(1, Math.round(made[0].maxHp * share));
+        out.push(made[0]);
+      } else {
+        // refused (the follower gate, the body cap): put it back on its revive clock, uid and all,
+        // so a mercenary's contract still finds it when it returns
+        fallen.push(f);
+      }
+    }
+    return out;
+  }
+
+  /** R28 — every follower ability's clock cut by `seconds` (or reset, with `Infinity`). */
+  function cutAbilities(seconds = Infinity) {
+    for (const p of pets) for (const ab of p.abilities || []) ab.ready = Math.max(0, (ab.ready || 0) - seconds);
+  }
+
+  /** R28 — a barrier on every follower, worth `amount`, for `seconds`. */
+  function barrierAll(amount, seconds = 6) {
+    for (const p of pets) {
+      if (p.dying != null) continue;
+      p.barrier = Math.max(p.barrier || 0, Math.round(amount));
+      p.barrierFor = seconds;
+    }
+  }
+
+  /** R28 — take `count` harmful statuses off every follower. */
+  function cleanseAll(count = 1) {
+    for (const p of pets) {
+      if (!p.statuses) continue;
+      const bad = Object.entries(p.statuses).filter(([, st]) => st.kind !== 'buff' && st.kind !== 'form');
+      for (const [id] of bad.slice(0, count)) delete p.statuses[id];
+    }
+  }
+
+  /** R28 — `dashWith`: every follower within 15 m of `from` moves to a ring around `to`. */
+  function bringAlong(from, to, radius = 15) {
+    let k = 0;
+    for (const p of pets) {
+      if (p.dying != null || p.decoy) continue;
+      if (Math.hypot(p.x - from.x, p.z - from.z) > radius) continue;
+      const a = (k++ / 4) * Math.PI * 2;
+      p.x = to.x + Math.cos(a) * 2.2; p.z = to.z + Math.sin(a) * 2.2;
+      p.y = groundAt(currentTerrain, p.x, p.z, p.y);
+    }
+    return k;
+  }
+
   function clear() {
     for (const p of pets) { scene.remove(p.actor.group); p.actor.dispose?.(); }
     pets.length = 0;
@@ -770,6 +927,8 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
 
   return {
     pets, summon, summonForClass, update, splash, nearest, heal, fall, clear,
+    // R28 — the follower half of the skill vocabulary: command, revive, barrier, cleanse, dashWith
+    order, reviveAll, cutAbilities, barrierAll, cleanseAll, bringAlong,
     // R17 — the three the follower book needs: add a type at runtime, install the limit, let one go
     register, remove,
     setGate: fn => { gate = typeof fn === 'function' ? fn : null; },
@@ -789,7 +948,7 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
     /** Companions waiting out their revive cooldown. */
     waiting: () => fallen.map(f => ({ defId: f.defId, left: Math.max(0, f.left) })),
     /** For the character sheet and the Followers screen: who they are and what they are doing. */
-    roster: () => pets.filter(p => p.dying == null).map(p => ({
+    roster: () => pets.filter(p => p.dying == null && !p.temporary).map(p => ({
       uid: p.id, defId: p.defId, origin: p.origin || 'summon',
       name: p.name, hp: Math.ceil(p.hp), maxHp: p.maxHp, state: p.state, level: p.level,
       abilities: (p.abilities || []).map(a => a.name), carrying: p.carrying || null,

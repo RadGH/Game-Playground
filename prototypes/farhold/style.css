@@ -260,6 +260,12 @@ body {
     grid-template-rows: none !important; grid-template-areas: none !important;
     grid-auto-rows: minmax(200px, auto); grid-auto-flow: row; overflow-y: auto;
   }
+  /* R28 (UI) — the panes keep their named `grid-area`s (bar, tree, pick…), and with the areas
+     switched off above, a named area that no longer exists is an IMPLICIT line: the Skills tab's
+     bar landed on top of its talent tree. One column means every pane simply takes the next row. */
+  .sheet > .tab-body:not(.hidden) > .pane { grid-area: auto; }
+  #sheet-skillbar { flex-wrap: wrap; height: auto; }
+  #sheet-skillbar .sk-card { flex: 1 1 30%; min-width: 120px; min-height: 96px; }
   .pane-body { overflow: visible; }
 }
 
@@ -1591,7 +1597,12 @@ body {
 .col-bar { grid-area: bar; }
 .col-tree { grid-area: tree; }
 @media (max-width: 1440px) {
-  .tab-body[data-tab="skills"]:not(.hidden) { grid-template-rows: 168px minmax(0, 1fr); }
+  .tab-body[data-tab="skills"]:not(.hidden) { grid-template-rows: 180px minmax(0, 1fr); }
+  /* R28 — at this height a three-line sentence pushed the card's own name out of the top of the
+     button (a button centres content that overflows it); two lines fit, one beside the round-28
+     marks, and the hover card has the rest */
+  .sk-card .sk-desc { -webkit-line-clamp: 2; }
+  .sk-card:has(.sk-marks) .sk-desc { -webkit-line-clamp: 1; }
 }
 /* The in-game bar and this screen used to share nothing — the screen was a text list and the bar
  * six boxes, and neither showed which talents were on a skill. This strip is both, and it is the
@@ -1605,6 +1616,7 @@ body {
   padding: 7px 9px 6px 26px;
   background: var(--pane-bg2); border: 1px solid #2a3446; border-radius: 7px;
   cursor: pointer; text-align: left; font: inherit; color: var(--ink);
+  justify-content: flex-start; overflow: hidden;
 }
 .sk-card .sk-key {
   position: absolute; left: 6px; top: 6px;
@@ -1638,19 +1650,24 @@ body {
 .skill-slot.pending { border-color: var(--good); box-shadow: 0 0 0 1px var(--good) inset; }
 .skill-slot.pending .skill-name, .skill-slot.pending .skill-mp { color: var(--good); }
 
-/* three tiers side by side instead of three stacked rows that read as one list */
-.pane .skilltree {
-  display: grid; grid-auto-flow: column;
-  grid-template-columns: repeat(3, minmax(220px, 1fr));
-  grid-template-rows: auto minmax(0, 1fr);
-  gap: 8px 12px; align-content: start; min-height: 0;
+/* R28 — the skill's own card on top, then the FOUR tiers side by side (R22 added the fourth and the
+   grid still had three columns, so the capstone wrapped into an implicit column of its own). Each
+   tier is one box (head + cards), so the grid can drop to two columns and then one on a narrow
+   screen without the heads and the cards coming apart. */
+.pane .skilltree { display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+.pane .skilltree .st-tiers {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px 12px; align-items: start;
 }
-.pane .skilltree > .tier-head { margin: 0; padding-bottom: 5px; border-bottom: 1px solid var(--pane-line); }
-.pane .skilltree > .tier-row {
+@media (max-width: 1100px) { .pane .skilltree .st-tiers { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .pane .skilltree .st-tiers { grid-template-columns: minmax(0, 1fr); } }
+.pane .skilltree .st-tier { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.pane .skilltree .tier-head { margin: 0; padding-bottom: 5px; border-bottom: 1px solid var(--pane-line); }
+.pane .skilltree .tier-row {
   flex-direction: column; flex-wrap: nowrap; gap: 7px; min-height: 0;
   align-content: start; justify-content: flex-start;
 }
-.pane .skilltree > .tier-row > .talent-card { flex: 0 0 auto; align-self: stretch; }
+.pane .skilltree .tier-row > .talent-card { flex: 0 0 auto; align-self: stretch; }
 .pane .talent-card {
   width: auto; min-height: 62px; padding: 8px 10px; position: relative;
   display: flex; flex-direction: column; gap: 3px;
@@ -1661,7 +1678,7 @@ body {
 /* D10: a tier that does not open for ten more levels rendered at the same contrast as the one you
    can take right now, under a footer that said "pick one from each tier" as though you could. */
 .pane .talent-card.locked { opacity: .38; }
-.pane .skilltree > .tier-head.locked { opacity: .5; }
+.pane .skilltree .tier-head.locked { opacity: .5; }
 .pane .talent-card:not(.locked):not(.on)::after {
   content: "take"; position: absolute; right: 8px; top: 6px;
   font-size: var(--fs-sm); color: var(--ink-faint);
@@ -2070,6 +2087,10 @@ body:has(.chart:not(.hidden)) .hud { opacity: 0; pointer-events: none; }
 .build-cost li.short { color: #d98a7a; }
 .build-why { color: #d98a7a; font-size: 12px; }
 .build-ok { color: #8ad6a0; font-size: 12px; }
+.build-level { color: #e8c070; font-size: 12px; }
+.build-layout { gap: 6px; align-items: center; }
+.build-layout.on .build-layout-name { color: #f1d9a2; }
+.build-layout-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .build-keys { line-height: 1.4; }
 
 @media (max-width: 900px) {

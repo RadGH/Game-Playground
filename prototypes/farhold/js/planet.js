@@ -1458,6 +1458,114 @@ export function makeTerrain(world, planet = null, opts = {}) {
     return { count, dropped };
   }
   const crossroads = fileCrossroads(roadPaths);
+
+  /**
+   * ROUND 28 — A BRANCH LEAVES ITS TRUNK, IT DOES NOT PEEL OFF IT.
+   *
+   * A merge can leave a branch meeting its trunk as a thin Y: on seed 7 at Super tiny, roads 53 and
+   * 33 leave their trunks at 23 degrees, so the two carriageways lie across each other for tens of
+   * metres — paving drawn twice, a road bed graded twice, and a fork on the map you cannot tell
+   * from one road. (The probe once reported 12-18% of junctions like this; that was its own bug —
+   * see `junctionAngle` in tests/road-measure.mjs — and the real count is these two.)
+   *
+   * The angle is taken against each ARM of the trunk that leaves the junction, so a road carrying
+   * straight on from another road's end (180 degrees from the only arm) is never touched. Under
+   * `SQUARE_BELOW`, the branch points still inside `clear` metres of the trunk are dropped and the
+   * junction slides along the trunk to where the branch, heading for the first point that is out
+   * of the way, meets it at `SQUARE_ANGLE`. That point and everything past it keep their places.
+   * Before the grading on purpose, like the connect and crossroads passes. Crossroads are already
+   * square; a branch that another road joins inside the stretch to be dropped is left alone.
+   */
+  const SQUARE_ANGLE = (opts.junctionAngle ?? 55) * Math.PI / 180;
+  const SQUARE_BELOW = (opts.junctionSliver ?? 30) * Math.PI / 180;
+  function squareJunctions(paths) {
+    let squared = 0;
+    // nearest point on a polyline: segment, parameter, distance, and arc length from its start
+    const project = (pts, x, z) => {
+      let best = null, s = 0;
+      for (let i = 0; i + 1 < pts.length; i++) {
+        const [ax, az] = pts[i], [bx, bz] = pts[i + 1];
+        const vx = bx - ax, vz = bz - az, l2 = vx * vx + vz * vz, len = Math.sqrt(l2);
+        const t = l2 > 0 ? clamp(((x - ax) * vx + (z - az) * vz) / l2, 0, 1) : 0;
+        const d = Math.hypot(ax + vx * t - x, az + vz * t - z);
+        if (!best || d < best.d) best = { d, i, t, s: s + len * t };
+        s += len;
+      }
+      return best;
+    };
+    const arcAt = (pts, s) => {
+      let acc = 0;
+      for (let i = 0; i + 1 < pts.length; i++) {
+        const len = Math.hypot(pts[i + 1][0] - pts[i][0], pts[i + 1][1] - pts[i][1]);
+        if (acc + len >= s || i + 2 === pts.length) {
+          const t = len > 0 ? clamp((s - acc) / len, 0, 1) : 0;
+          return { i, t, point: [pts[i][0] + (pts[i + 1][0] - pts[i][0]) * t, pts[i][1] + (pts[i + 1][1] - pts[i][1]) * t] };
+        }
+        acc += len;
+      }
+      return null;
+    };
+    const lengthOf = pts => { let m = 0; for (let k = 0; k + 1 < pts.length; k++) m += Math.hypot(pts[k + 1][0] - pts[k][0], pts[k + 1][1] - pts[k][1]); return m; };
+    // the smallest angle between heading a→b and either arm of the trunk leaving its point nearest a
+    const armAngle = (tp, a, b, reach = 20) => {
+      const from = project(tp, a[0], a[1]);
+      const total = lengthOf(tp);
+      const bx = b[0] - a[0], bz = b[1] - a[1], bl = Math.hypot(bx, bz) || 1;
+      let best = Math.PI;
+      for (const dir of [1, -1]) {
+        const room = dir > 0 ? total - from.s : from.s;
+        if (room < 1) continue;
+        const q = arcAt(tp, from.s + dir * Math.min(reach, room)).point;
+        const p0 = arcAt(tp, from.s).point;
+        const ux = q[0] - p0[0], uz = q[1] - p0[1];
+        best = Math.min(best, Math.acos(clamp((ux * bx + uz * bz) / ((Math.hypot(ux, uz) || 1) * bl), -1, 1)));
+      }
+      return best;
+    };
+    for (const path of paths) {
+      for (const join of path.joins || []) {
+        if (join.cross || !join.trunk) continue;
+        const trunk = join.trunk, tp = trunk.points;
+        const pts = path.points, n = pts.length;
+        if (tp.length < 2 || n < 3) continue;
+        const idx = k => (join.at === 'start' ? k : n - 1 - k);
+        let ahead = null;
+        for (let k = 1; k < n; k++) if (Math.hypot(pts[idx(k)][0] - join.point[0], pts[idx(k)][1] - join.point[1]) >= 20) { ahead = pts[idx(k)]; break; }
+        if (!ahead || armAngle(tp, join.point, ahead) >= SQUARE_BELOW) continue;
+        const clear = Math.max(12, 2.5 * ((trunk.half || 3) + (path.half || 3)));
+        let k = 1;
+        while (k < n - 1 && project(tp, pts[idx(k)][0], pts[idx(k)][1]).d < clear) k++;
+        if (k >= n - 1) continue;                          // the whole road hugs the trunk: leave it
+        const lo = join.at === 'start' ? 0 : n - 1 - k, hi = join.at === 'start' ? k : n - 1;
+        if (paths.some(p => (p.joins || []).some(j => j.trunk === path && j.i >= lo - 1 && j.i < hi))) continue;
+        const far = pts[idx(k)];
+        const foot = project(tp, far[0], far[1]);
+        const from = project(tp, join.point[0], join.point[1]);
+        // walk from the foot of that point back toward the old junction, and stop at the last
+        // place the branch would still leave at SQUARE_ANGLE (searched, not solved: the trunk may
+        // bend between the two, which is exactly where the two Ys above were)
+        const dir = Math.sign(from.s - foot.s) || 1;
+        const span = Math.abs(from.s - foot.s);
+        let J = arcAt(tp, foot.s);
+        for (let d = 2; d <= span; d += 2) {
+          const c = arcAt(tp, foot.s + dir * d);
+          if (!c || armAngle(tp, c.point, far) < SQUARE_ANGLE) break;
+          J = c;
+        }
+        if (!J) continue;
+        path.points = join.at === 'start' ? [J.point, ...pts.slice(k)] : [...pts.slice(0, n - k), J.point];
+        if (join.at === 'start') {
+          for (const p of paths) for (const j of p.joins || []) if (j.trunk === path) j.i = Math.max(0, j.i - (k - 1));
+        }
+        join.point = J.point; join.i = J.i; join.t = J.t;
+        path.squared = (path.squared || 0) + 1;
+        squared++;
+      }
+    }
+    return squared;
+  }
+  const junctionsSquared = opts.squareJunctions === false ? 0 : squareJunctions(roadPaths);
+
   // A road is graded: the surface is the natural ground smoothed along the line, so the road itself
   // is flat across its width and gentle along its length instead of following every bump.
   const bridgeClearance = opts.bridgeClearance ?? 2.4;
@@ -3663,6 +3771,8 @@ export function makeTerrain(world, planet = null, opts = {}) {
     junctions: roadJunctionList,
     /** R27 M5: how many crossroads were filed, and how many overshoot stubs they cut off. */
     roadCrossroads: crossroads.count,
+    /** R28: thin Y junctions squared to `SQUARE_ANGLE`. */
+    roadJunctionsSquared: junctionsSquared,
     /** R27 M8: overlapping carriageways made one surface (`conformOverlaps`), and trunks lifted to a branch's floor. */
     roadMeets,
     roadCrossStubs: crossroads.dropped,

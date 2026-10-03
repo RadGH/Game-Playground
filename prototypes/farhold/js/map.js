@@ -1864,9 +1864,11 @@ let findFavOnly = false;
       state.view = renderWorld(ctx, drawnWorld(), {
         // 4.11: the place marks are ours now — `drawPlaces` puts every one of them down from the
         // one table the key is drawn from. Labels stay World Forge's.
-        layers: { ...state.layers, nodes: false }, layer: state.layer,
+        // R28: and so are the roads — see `drawRoadNetwork`
+        layers: { ...state.layers, nodes: false, roads: false }, layer: state.layer,
         scale, offsetX: ox, offsetY: oy,
       });
+      if (state.layers.roads !== false) drawRoadNetwork(ctx, scale, ox, oy);
     }
 
     drawWaypoints(ctx, scale, ox, oy);
@@ -2351,7 +2353,7 @@ let findFavOnly = false;
     ctx.fillStyle = '#05070d';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     // the plain world underneath, so anything without detail yet is still there rather than a hole
-    renderWorld(ctx, drawnWorld(), { layers: { ...state.layers, nodes: false }, layer: state.layer, scale, offsetX: ox, offsetY: oy });
+    renderWorld(ctx, drawnWorld(), { layers: { ...state.layers, nodes: false, roads: false }, layer: state.layer, scale, offsetX: ox, offsetY: oy });
     ctx.imageSmoothingEnabled = false;
     // `origin` is the top-left WORLD cell each detail was generated from and `worldCells` how many
     // of them it covers, so each one lands exactly over the ground it came from and they tile
@@ -2364,6 +2366,69 @@ let findFavOnly = false;
     }
     ctx.imageSmoothingEnabled = true;
     drawWays(ctx, details, scale, ox, oy);
+  }
+
+  /**
+   * ROUND 28 — THE MAP DRAWS THE ROADS THAT ARE ON THE GROUND.
+   *
+   * The map stroked World Forge's `world.roads`: one line per map link, cell centre to cell centre.
+   * That is what js/planet.js STARTS from, and not what it builds — two links sharing a corridor are
+   * merged into one road, a climb is folded into switchbacks, an orphan end is walked to the nearest
+   * road or dropped, a crossing is cut into a crossroads. Measured (tools/probe-road-plan.mjs's
+   * sibling in research/round28-roads.md): on the user's world, seed 25392 at Small, 18% of the
+   * roads you can walk were more than half a cell from any line on the map, and 20% of the lines
+   * on the map were roads that do not exist (the straight climb a fold replaced). So the map strokes
+   * `terrain.roadPaths` — the same lines the road meshes and `roadAt` are built from — by class,
+   * in World Forge's own colours and widths so nothing changes appearance but the line.
+   *
+   * The paths are in metres; the map puts a world position at `x / M_PER_CELL + 0.5` cells (the
+   * player marker's own rule), so the lines are cached once per network in cell units as Path2D and
+   * stroked under a transform, with the width divided back out.
+   */
+  let roadNetCache = null;
+  function roadNetworkPaths() {
+    const paths = terrain.roadPaths || [];
+    if (roadNetCache?.of === paths && roadNetCache.m === M_PER_CELL) return roadNetCache.byClass;
+    const byClass = { trail: new Path2D(), road: new Path2D(), highway: new Path2D() };
+    for (const p of paths) {
+      const pts = p.points || [];
+      if (pts.length < 2) continue;
+      const path = byClass[p.klass] || byClass.trail;
+      path.moveTo(pts[0][0] / M_PER_CELL + 0.5, pts[0][1] / M_PER_CELL + 0.5);
+      for (let i = 1; i < pts.length; i++) path.lineTo(pts[i][0] / M_PER_CELL + 0.5, pts[i][1] / M_PER_CELL + 0.5);
+    }
+    roadNetCache = { of: paths, m: M_PER_CELL, byClass };
+    return byClass;
+  }
+  function drawRoadNetwork(ctx, scale, ox, oy) {
+    ctx.save();
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    // sea lanes are not built on the ground; they stay World Forge's
+    const worldCell = c => ({ x: (c % world.width) + 0.5, y: ((c / world.width) | 0) + 0.5 });
+    ctx.setLineDash([scale * 1.2, scale * 1.2]);
+    ctx.strokeStyle = 'rgba(190,220,255,0.45)';
+    ctx.lineWidth = Math.max(0.6, scale * 0.14);
+    for (const l of world.seaLanes || []) {
+      ctx.beginPath();
+      l.cells.forEach((c, i) => { const p = worldCell(c); i ? ctx.lineTo(ox + p.x * scale, oy + p.y * scale) : ctx.moveTo(ox + p.x * scale, oy + p.y * scale); });
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
+    const byClass = roadNetworkPaths();
+    ctx.setTransform(ctx.getTransform().translate(ox, oy).scale(scale, scale));
+    const looks = [
+      ['trail', 'rgba(70,60,48,0.5)', Math.max(0.6, scale * 0.14), true],
+      ['road', 'rgba(62,48,34,0.7)', Math.max(0.8, scale * 0.22), false],
+      ['highway', 'rgba(50,36,24,0.85)', Math.max(1.1, scale * 0.34), false],
+    ];
+    for (const [klass, colour, width, dashed] of looks) {
+      ctx.strokeStyle = colour;
+      ctx.lineWidth = width / scale;
+      ctx.setLineDash(dashed ? [0.7, 0.7] : []);
+      ctx.stroke(byClass[klass]);
+    }
+    ctx.restore();
   }
 
   /**
@@ -2439,34 +2504,15 @@ let findFavOnly = false;
     }
 
     if (wantRoads) {
-      ctx.setLineDash([scale * 1.2, scale * 1.2]);
-      ctx.strokeStyle = 'rgba(190,220,255,0.45)';
-      ctx.lineWidth = Math.max(0.6, scale * 0.14);
-      for (const l of world.seaLanes || []) run(l.cells, worldCell);
-      ctx.setLineDash([]);
-
-      const order = { trail: 0, road: 1, highway: 2 };
-      for (const road of [...(world.roads || [])].sort((a, b) => (order[a.class] ?? 0) - (order[b.class] ?? 0))) {
-        if (road.class === 'highway') { ctx.strokeStyle = 'rgba(50,36,24,0.85)'; ctx.lineWidth = Math.max(1.1, scale * 0.34); }
-        else if (road.class === 'road') { ctx.strokeStyle = 'rgba(62,48,34,0.7)'; ctx.lineWidth = Math.max(0.8, scale * 0.22); }
-        else { ctx.strokeStyle = 'rgba(70,60,48,0.5)'; ctx.lineWidth = Math.max(0.6, scale * 0.14); ctx.setLineDash([scale * 0.7, scale * 0.7]); }
-        run(road.cells, worldCell);
-        ctx.setLineDash([]);
-      }
-
-      // the region's own tracks between the places inside it, in the detail view's own palette
-      for (const d of details) {
-        const at = detailCell(d);
-        const step = scale / (d.factor || 1);
-        for (const p of d.paths || []) {
-          ctx.strokeStyle = p.class === 'highway' ? 'rgba(226,205,160,0.95)'
-            : p.class === 'road' ? 'rgba(206,186,146,0.85)' : 'rgba(196,180,150,0.6)';
-          ctx.lineWidth = Math.max(1.0, step * (p.class === 'highway' ? 0.8 : 0.55));
-          if (p.class === 'trail') ctx.setLineDash([step * 1.4, step * 1.2]);
-          run(p.cells, at);
-          ctx.setLineDash([]);
-        }
-      }
+      /**
+       * R28 — the roads on the ground, and ONLY those. This used to stroke World Forge's links and
+       * then each region's own detail `paths` (dashed tracks between the places inside it). Nothing
+       * in Farhold builds those tracks: they were drawn roads with no road under them, a dense
+       * dashed web at high zoom that led the player nowhere. `drawRoadNetwork` is what you can walk.
+       */
+      ctx.restore();
+      drawRoadNetwork(ctx, scale, ox, oy);
+      ctx.save();
     }
 
     ctx.restore();

@@ -275,7 +275,8 @@ export function createFollowers({
    */
   const spellCountFor = new Map();
   for (const s of Object.values(skillData?.skills || {})) {
-    if (s.shape === 'summon' && s.pet) spellCountFor.set(s.pet, Math.max(1, s.count || 1));
+    // R28 — a temporary summon (`summon.temporary`) never counts toward a per-type cap
+    if (s.shape === 'summon' && s.pet && !s.summon?.temporary) spellCountFor.set(s.pet, Math.max(1, s.count || 1));
   }
 
   /**
@@ -316,7 +317,8 @@ export function createFollowers({
   /** What js/pets.js is holding right now, in the shape `admit` wants. */
   function alive() {
     return (pets?.pets || [])
-      .filter(p => p.dying == null)
+      // R28 — a temporary summon (a decoy, a wisp, the buried) takes no slot and blocks no hire
+      .filter(p => p.dying == null && !p.temporary)
       .map(p => ({ defId: p.defId, origin: p.origin || 'summon', name: p.name, uid: p.id }));
   }
 
@@ -498,7 +500,7 @@ export function createFollowers({
     const player = getPlayer();
     const level = player?.level || 1;
     const cap = limit();
-    const list = (pets?.pets || []).filter(p => p.dying == null).map(p => ({
+    const list = (pets?.pets || []).filter(p => p.dying == null && !p.temporary).map(p => ({
       uid: p.id,
       name: p.name,
       kind: FOLLOWER_KINDS[p.origin || 'summon'] || FOLLOWER_KINDS.summon,

@@ -257,7 +257,6 @@ export function createHousing({ data = null, linkSlack = 0 } = {}) {
     rebuild, beds, assign, release, report, comfortOf, servedBy,
     houses: () => houses.slice(),
     utilities: () => utils.slice(),
-    bedCount,
     /** For the save: only who is in which bed. Everything else is worked out from what is standing. */
     toJSON() { return { v: 1, taken: [...taken] }; },
     load(json) {

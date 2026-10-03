@@ -195,6 +195,66 @@ export function createClassBuilder({
     return panes;
   }
 
+  /**
+   * R28 — ONE SKILL PER CLASS MEANS THIRTY SPELLS A TIER (plan §8.1). Past a dozen, the choices are
+   * grouped by the class each spell comes from (`origin`, js/classbuild.js), each group headed by
+   * the class's real name and role ("Druid — Shapeshifting Healer"), so the tab is a list of
+   * classes rather than a wall of cards.
+   *
+   * Thirty open groups is still a wall, so a group starts FOLDED unless it holds the spell already
+   * in the slot (or the filter has narrowed the list to a handful), and the groups you open stay
+   * open while you click around. The element filter above the list cuts it further.
+   */
+  const classList = Array.isArray(classData) ? classData : (classData?.classes || []);
+  const classById = new Map(classList.map(c => [c.id, c]));
+  const openGroups = new Set();
+  /** Which element the spell list is narrowed to (`null` = all). */
+  let elementFilter = null;
+
+  function grouped(list, spellOption, { chosen = null, keyPrefix = '' } = {}) {
+    if (list.length <= 12) return [el('div', { class: 'cb-choices cb-choices--spells' }, list.map(spellOption))];
+    const by = new Map();
+    for (const sp of list) {
+      const key = sp.origin || 'other';
+      if (!by.has(key)) by.set(key, []);
+      by.get(key).push(sp);
+    }
+    const label = id => (id === 'other' ? 'Other' : classById.get(id)?.name || id.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()));
+    const few = by.size <= 4;
+    return [...by.entries()].sort((a, b) => label(a[0]).localeCompare(label(b[0]))).map(([id, spells]) => {
+      const key = keyPrefix + id;
+      const holds = spells.some(sp => sp.id === chosen);
+      const open = few || holds || openGroups.has(key);
+      const cls = classById.get(id);
+      const role = [cls?.role, cls?.signature].filter(Boolean).join(' · ');
+      const details = el('details', { class: 'cb-later cb-origin', open: open || null, 'data-origin': id }, [
+        el('summary', {}, [
+          el('b', { text: label(id) }),
+          role ? el('span', { class: 'cb-role', text: ` — ${role}` }) : null,
+          el('span', { class: 'cb-count', text: ` · ${spells.length} ${spells.length === 1 ? 'spell' : 'spells'}${holds ? ' · in this slot' : ''}` }),
+        ]),
+        el('div', { class: 'cb-choices cb-choices--spells' }, spells.sort((a, b) => a.tier - b.tier || a.name.localeCompare(b.name)).map(spellOption)),
+      ]);
+      details.addEventListener('toggle', () => { if (details.open) openGroups.add(key); else openGroups.delete(key); });
+      return details;
+    });
+  }
+
+  /** The element chips over the spell list. Only elements that some spell in `list` has. */
+  function elementBar(list) {
+    const els = [...new Set(list.map(sp => skillData?.skills?.[sp.id]?.element || sp.element || 'physical'))].sort();
+    if (els.length < 2) return null;
+    const chip = (key, text) => el('button', {
+      type: 'button', class: `cb-filter${elementFilter === key ? ' on' : ''}${key ? ' el-' + key : ''}`, text,
+      onclick: () => { elementFilter = elementFilter === key ? null : key; draw(); },
+    });
+    return el('div', { class: 'cb-filters', role: 'group', 'aria-label': 'Filter by element' }, [
+      chip(null, 'All elements'),
+      ...els.map(e => chip(e, e[0].toUpperCase() + e.slice(1))),
+    ]);
+  }
+  const byElement = list => (elementFilter ? list.filter(sp => (skillData?.skills?.[sp.id]?.element || sp.element || 'physical') === elementFilter) : list);
+
   // ------------------------------------------------------------------ the spells tab
 
   /** Which slot the right-hand list is filling. */
@@ -275,7 +335,7 @@ export function createClassBuilder({
         // label. tests/round17-class.spec.js moved with it.
         right: `Level ${sp.tier}`,
         // R23: the facts first as chips, then the sentence without the cost the chips already show
-        facts: skillFacts(skill, skillData?.statuses),
+        facts: skillFacts(skill, skillData?.statuses, { skills: skillData?.skills }),
         sub: `${skillBody(skill)}${users}`,
         clamp: true,
         tip: `${sp.desc}${users}`,
@@ -299,8 +359,9 @@ export function createClassBuilder({
      * under a heading that says so. The later ones are still shown — knowing Meteor is coming is
      * part of choosing — but they are no longer mixed in with what you can actually click.
      */
-    const ready = cat.spells.filter(sp => sp.tier <= slot.level);
-    const later = cat.spells.filter(sp => sp.tier > slot.level);
+    const allReady = cat.spells.filter(sp => sp.tier <= slot.level);
+    const ready = byElement(allReady);
+    const later = byElement(cat.spells.filter(sp => sp.tier > slot.level));
     const owed = pendingPicks(state, cat, level);
     const rungs = cat.unlockAt.slice(1).join(', ');
 
@@ -320,11 +381,12 @@ export function createClassBuilder({
           el('div', { class: 'cb-note', text: slot.blurb }),
           el('div', {
             class: 'cb-note',
-            text: ready.length
-              ? `${ready.length} ${ready.length === 1 ? 'spell is' : 'spells are'} open to a level ${slot.level} slot.`
+            text: allReady.length
+              ? `${allReady.length} ${allReady.length === 1 ? 'spell is' : 'spells are'} open to a level ${slot.level} slot${elementFilter ? `; ${ready.length} of them ${elementFilter}` : ''}.`
               : `No new spell unlocks at level ${slot.level}. This slot can take any spell from an earlier level.`,
           }),
-          el('div', { class: 'cb-choices cb-choices--spells' }, ready.map(spellOption)),
+          elementBar(allReady),
+          ...(ready.length ? grouped(ready, spellOption, { chosen: slot.spellId }) : [el('div', { class: 'cb-note', text: 'No spell of that element is open to this slot.' })]),
           /**
            * R23 — the spells a higher slot will offer are still here (knowing Meteor is coming is
            * part of choosing) but folded away: they were twenty-nine greyed cards under the eleven
@@ -333,7 +395,7 @@ export function createClassBuilder({
           ...(later.length ? [
             el('details', { class: 'cb-later' }, [
               el('summary', { text: `Spells for later slots — ${later.length} more open above level ${slot.level}` }),
-              el('div', { class: 'cb-choices cb-choices--spells' }, later.map(spellOption)),
+              ...grouped(later, spellOption, { keyPrefix: 'later:' }),
             ]),
           ] : []),
         ])

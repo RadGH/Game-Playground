@@ -48,6 +48,7 @@ import { openAppearance } from './appearance.js';
 import { createFigureView } from './figure3d.js';
 import { createLookMaker } from './titlelook.js';
 import { skillFacts, skillBody } from './spellcard.js';
+import { formVersions, formTransforms } from './skillcard.js';
 import { installTooltips } from '../../../shared/tooltip.js';
 
 const $ = id => document.getElementById(id);
@@ -228,7 +229,7 @@ export async function runTitle({
       tag.textContent = !custom && (c?.pet || CLASS_PETS[o.value]) ? 'companion' : '';
       const role = document.createElement('span');
       role.className = 'cl-role';
-      role.textContent = custom ? 'Build your own class' : (c?.role || '');
+      role.textContent = custom ? 'Build your own class' : [c?.role, c?.signature].filter(Boolean).join(' · ');
       b.append(name, tag, role);
       b.onclick = () => {
         if (select.value === o.value) return;
@@ -516,6 +517,8 @@ export async function runTitle({
       const h4 = node('h4', null, c.name + ' ');
       h4.append(node('span', null, c.role || ''));
       head.append(h4);
+      // R28: the class's one-line signature (data/classes.json `signature`), what its six skills share.
+      if (c.signature) head.append(node('p', 'cc-signature', c.signature[0].toUpperCase() + c.signature.slice(1)));
 
       const chips = node('ul', 'cc-chips');
       const starter = items.weaponBases?.[c.starter];
@@ -549,10 +552,35 @@ export async function runTitle({
         const top = node('div', 'cs-top');
         top.append(node('b', null, sk.name), node('span', 'cs-lv', `Level ${at}`));
         const facts = node('div', 'sc-facts');
-        for (const f of skillFacts(sk, skillData.statuses)) {
+        for (const f of skillFacts(sk, skillData.statuses, { skills: skillData.skills })) {
           facts.append(node('span', `sc-chip k-${f.kind}${f.el ? ' el-' + f.el : ''}`, f.text));
         }
         li.append(top, facts, node('p', 'sc-desc', skillBody(sk)));
+        /**
+         * R28 — A SHAPE SAYS WHAT IT DOES TO THE REST OF THE BAR. The druid's Briarback turns
+         * Thornlash into Bramble Gore; a player choosing the class should see that before playing,
+         * so the card lists each changed skill under the shape (and each shape under the changed
+         * skill). Shown with the full sentence when the card is opened.
+         */
+        const ctx = { statuses: skillData.statuses, skills: skillData.skills };
+        const unlockAts = Object.fromEntries((c.skills || []).map((x, k) => [x, unlock[k] ?? unlock[unlock.length - 1]]));
+        const lines = [];
+        if (sk.form) {
+          for (const g of formTransforms(sk, c.skills || [], { ...ctx, unlockAts })) {
+            for (const e of g.entries) lines.push([`${e.baseName} becomes ${e.name}`, e.desc]);
+          }
+        } else if (sk.forms) {
+          for (const v of formVersions(sk, { ...ctx, unlockAt: at }).slice(1)) lines.push([`In ${v.label}: ${v.name}`, v.desc]);
+        }
+        if (lines.length) {
+          const ul = node('ul', 'sc-forms');
+          for (const [head, body] of lines) {
+            const row = node('li', null);
+            row.append(node('b', null, head), node('span', 'sc-form-desc', ` — ${body}`));
+            ul.append(row);
+          }
+          li.append(ul);
+        }
         const toggle = () => {
           const open = li.classList.toggle('open');
           li.setAttribute('aria-expanded', open ? 'true' : 'false');
@@ -785,5 +813,15 @@ export async function runTitle({
       $('boot-start').disabled = true;
       finish(result());
     };
+
+    /**
+     * Every button on every title screen has a handler from here on. `#boot-menu` is visible in
+     * the static HTML from the first paint — long before main.js has loaded its data and called
+     * this — so "the menu is showing" never meant "the menu works", and a click that landed in
+     * that gap (a fast player, or a spec on a busy machine) did nothing at all. Specs wait for
+     * this attribute instead of for the menu (tests/round16-title.spec.js and friends).
+     */
+    const bootEl = $('boot');
+    if (bootEl) bootEl.dataset.wired = '1';
   });
 }

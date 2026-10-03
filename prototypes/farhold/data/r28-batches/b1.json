@@ -1,0 +1,4502 @@
+{
+ "skills": {
+  "scale_rend": {
+   "name": "Scale Rend",
+   "shape": "melee",
+   "element": "fire",
+   "mult": 1.6,
+   "reach": 3.4,
+   "arc": 1.8,
+   "cooldown": 5,
+   "mp": 5,
+   "elementFrom": "temper",
+   "status": "burn",
+   "statusMult": 0.5,
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "tail_sweep",
+       "name": "Tail Sweep",
+       "fx": "wide",
+       "mod": {
+        "set": {
+         "shape": "around",
+         "radius": 4
+        },
+        "knock": {
+         "push": 1.5
+        }
+       }
+      },
+      {
+       "id": "rending_overhead",
+       "name": "Rending Overhead",
+       "fx": "shatter",
+       "mod": {
+        "set": {
+         "arc": 0.9
+        },
+        "pen": 0.4
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "shatter",
+     "nodes": [
+      {
+       "id": "temper_riders",
+       "name": "Temper Riders",
+       "fx": "form",
+       "mod": {
+        "forms": {
+         "fire": {
+          "onKill": {
+           "spread": {
+            "types": [
+             "burn"
+            ],
+            "radius": 3
+           }
+          }
+         },
+         "frost": {
+          "knock": {
+           "stagger": 0.4
+          }
+         },
+         "storm": {
+          "spreadStatus": {
+           "types": [
+            "shock"
+           ],
+           "radius": 5,
+           "max": 2
+          }
+         }
+        }
+       }
+      },
+      {
+       "id": "scale_break",
+       "name": "Scale Break",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "marked",
+          "seconds": 6
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "cauterise",
+     "nodes": [
+      {
+       "id": "dragonblood",
+       "name": "Dragonblood",
+       "fx": "drain",
+       "mod": {
+        "onHit": {
+         "heal": 0.02
+        }
+       }
+      },
+      {
+       "id": "wingbeat",
+       "name": "Wingbeat",
+       "fx": "knock",
+       "mod": {
+        "onCrit": {
+         "knock": {
+          "push": 3
+         }
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "crescendo",
+     "nodes": [
+      {
+       "id": "temper_weave",
+       "name": "Temper Weave",
+       "fx": "form",
+       "mod": {
+        "set": {
+         "elementFrom": null
+        },
+        "elementCycle": [
+         "fire",
+         "ice",
+         "lightning"
+        ],
+        "bonusIf": [
+         {
+          "when": "variety:0.15:0.45"
+         }
+        ]
+       }
+      },
+      {
+       "id": "molten_edge",
+       "name": "Molten Edge",
+       "fx": "burst",
+       "mod": {
+        "consumes": {
+         "status": "burn",
+         "mult": 0.5
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "flamethrower": {
+   "name": "Wyrm's Breath",
+   "shape": "melee",
+   "element": "fire",
+   "mult": 0.3,
+   "reach": 7,
+   "arc": 0.9,
+   "repeats": 10,
+   "repeatEvery": 0.22,
+   "breath": true,
+   "status": "burn",
+   "cooldown": 10,
+   "mp": 18,
+   "elementFrom": "temper",
+   "forms": {
+    "frost": {
+     "name": "Frost Breath",
+     "knock": {
+      "stagger": 0.3
+     }
+    },
+    "storm": {
+     "name": "Storm Breath",
+     "spreadStatus": {
+      "types": [
+       "shock"
+      ],
+      "radius": 4,
+      "max": 2
+     }
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "far_breath",
+       "name": "Far Breath",
+       "fx": "lance",
+       "mod": {
+        "set": {
+         "reach": 11,
+         "arc": 0.6
+        }
+       }
+      },
+      {
+       "id": "gale_breath",
+       "name": "Gale Breath",
+       "fx": "knock",
+       "mod": {
+        "knock": {
+         "push": 0.3
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "linger",
+     "nodes": [
+      {
+       "id": "scorched_earth",
+       "name": "Scorched Earth",
+       "fx": "zone",
+       "mod": {
+        "pool": {
+         "seconds": 4,
+         "radius": 2.5,
+         "power": 0.15,
+         "at": "ahead"
+        }
+       }
+      },
+      {
+       "id": "inhale",
+       "name": "Inhale",
+       "fx": "pull",
+       "mod": {
+        "pullIn": {
+         "metres": 0.3,
+         "to": "self"
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "overload",
+     "nodes": [
+      {
+       "id": "closing_roar",
+       "name": "Closing Roar",
+       "fx": "burst",
+       "mod": {
+        "selfBuff": {
+         "name": "Wyrm's Breath",
+         "seconds": 2.2,
+         "onEnd": {
+          "shape": "around",
+          "radius": 6,
+          "mult": 0.3,
+          "knock": {
+           "stagger": 1
+          }
+         }
+        }
+       }
+      },
+      {
+       "id": "ash_cloud",
+       "name": "Ash Cloud",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "weaken",
+          "dealLess": 0.2,
+          "seconds": 3
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "conflagration",
+     "nodes": [
+      {
+       "id": "breath_of_ages",
+       "name": "Breath of Ages",
+       "fx": "echo",
+       "mod": {
+        "again": {
+         "delay": 3,
+         "mult": 0.5
+        }
+       }
+      },
+      {
+       "id": "deep_lungs",
+       "name": "Deep Lungs",
+       "fx": "charge",
+       "mod": {
+        "channel": {
+         "seconds": 4,
+         "every": 0.22,
+         "moveK": 0.3
+        },
+        "set": {
+         "repeats": 1
+        },
+        "mul": {
+         "mult": 0.75,
+         "cooldown": 1.3
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "wyrmfall": {
+   "name": "Wyrmfall",
+   "shape": "dash",
+   "element": "fire",
+   "mult": 2,
+   "range": 14,
+   "cooldown": 14,
+   "mp": 14,
+   "elementFrom": "temper",
+   "dash": {
+    "to": "aim",
+    "range": 14,
+    "leap": true,
+    "land": {
+     "radius": 5,
+     "mult": 2
+    }
+   },
+   "knock": {
+    "push": 3
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "long_wings",
+       "name": "Long Wings",
+       "fx": "leap",
+       "mod": {
+        "dash": {
+         "range": 22
+        },
+        "mul": {
+         "cooldown": 1.3
+        }
+       }
+      },
+      {
+       "id": "low_glide",
+       "name": "Low Glide",
+       "fx": "leap",
+       "mod": {
+        "dash": {
+         "leap": false
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "burst",
+     "nodes": [
+      {
+       "id": "crater",
+       "name": "Crater",
+       "fx": "zone",
+       "mod": {
+        "pool": {
+         "seconds": 4,
+         "radius": 4,
+         "power": 0.2
+        }
+       }
+      },
+      {
+       "id": "pinning_landing",
+       "name": "Pinning Landing",
+       "fx": "knock",
+       "mod": {
+        "knock": {
+         "stagger": 1.2
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "bulwark",
+     "nodes": [
+      {
+       "id": "return_flight",
+       "name": "Return Flight",
+       "fx": "leap",
+       "mod": {
+        "recast": {
+         "window": 3,
+         "then": {
+          "shape": "dash",
+          "dash": {
+           "to": "back",
+           "range": 14,
+           "leap": true
+          }
+         },
+         "say": "leap 14 m back the way you came"
+        }
+       }
+      },
+      {
+       "id": "hard_landing",
+       "name": "Hard Landing",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "name": "Hard Landing",
+         "seconds": 3,
+         "resist": 0.3
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "crescendo",
+     "nodes": [
+      {
+       "id": "dragon_dive",
+       "name": "Dragon Dive",
+       "fx": "leap",
+       "mod": {
+        "dash": {
+         "land": {
+          "radius": 5,
+          "mult": 4
+         }
+        },
+        "mul": {
+         "cooldown": 1.5
+        }
+       }
+      },
+      {
+       "id": "twin_wings",
+       "name": "Twin Wings",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "wyrm_temper": {
+   "name": "Wyrm Temper",
+   "shape": "self",
+   "element": "fire",
+   "cooldown": 2,
+   "mp": 0,
+   "form": {
+    "group": "temper",
+    "cycle": true,
+    "options": [
+     {
+      "id": "fire",
+      "name": "Fire Temper",
+      "element": "fire",
+      "status": "burn",
+      "stats": {
+       "damage": 0.15
+      },
+      "onExit": {
+       "shape": "around",
+       "radius": 4,
+       "mult": 0.6,
+       "element": "fire",
+       "status": "burn"
+      }
+     },
+     {
+      "id": "frost",
+      "name": "Frost Temper",
+      "element": "ice",
+      "status": "chill",
+      "stats": {
+       "armorPct": 0.25
+      },
+      "onExit": {
+       "shape": "around",
+       "radius": 4,
+       "mult": 0.6,
+       "element": "ice",
+       "status": "chill"
+      }
+     },
+     {
+      "id": "storm",
+      "name": "Storm Temper",
+      "element": "lightning",
+      "status": "shock",
+      "stats": {
+       "hastePct": 0.15
+      },
+      "onExit": {
+       "shape": "around",
+       "radius": 4,
+       "mult": 0.6,
+       "element": "lightning",
+       "status": "shock"
+      }
+     }
+    ]
+   },
+   "talents": {
+    "1": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "scaled_hide",
+       "name": "Scaled Hide",
+       "fx": "ward",
+       "mod": {
+        "set": {
+         "form.onEnter": {
+          "shape": "self",
+          "barrier": {
+           "share": 0.08,
+           "seconds": 4
+          }
+         },
+         "cooldown": 5
+        }
+       }
+      },
+      {
+       "id": "biting_scales",
+       "name": "Biting Scales",
+       "fx": "counter",
+       "mod": {
+        "set": {
+         "form.onEnter": {
+          "shape": "self",
+          "selfBuff": {
+           "name": "Biting Scales",
+           "seconds": 4,
+           "reflect": 0.3
+          }
+         }
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "wing_guard",
+       "name": "Wing Guard",
+       "fx": "summon",
+       "mod": {
+        "set": {
+         "form.petBuff": {
+          "name": "Wing Guard",
+          "healPerSecond": 0.01
+         }
+        }
+       }
+      },
+      {
+       "id": "brood_fire",
+       "name": "Brood Fire",
+       "fx": "summon",
+       "mod": {
+        "set": {
+         "form.petBuff": {
+          "name": "Brood Fire",
+          "biteStatus": "burn"
+         }
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "quick_temper",
+       "name": "Quick Temper",
+       "fx": "charge",
+       "mod": {
+        "set": {
+         "cooldown": 0.6,
+         "mp": 6
+        }
+       }
+      },
+      {
+       "id": "hearth_scales",
+       "name": "Hearth Scales",
+       "fx": "zone",
+       "mod": {
+        "set": {
+         "form.onEnter.shape": "self",
+         "form.onEnter.place": {
+          "kind": "zone",
+          "seconds": 4,
+          "radius": 5,
+          "every": 1,
+          "heal": 0.01,
+          "max": 1
+         }
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "clawed_earth",
+       "name": "Clawed Earth",
+       "fx": "zone",
+       "mod": {
+        "set": {
+         "form.onEnter.shape": "self",
+         "form.onEnter.pool": {
+          "seconds": 4,
+          "radius": 3,
+          "slow": 0.5,
+          "power": 0
+         }
+        }
+       }
+      },
+      {
+       "id": "lingering_heat",
+       "name": "Lingering Heat",
+       "fx": "zone",
+       "mod": {
+        "set": {
+         "form.onEnter.shape": "self",
+         "form.onEnter.pool": {
+          "seconds": 8,
+          "radius": 5,
+          "slow": 0.2,
+          "power": 0
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "dragonscale": {
+   "name": "Dragonscale",
+   "shape": "self",
+   "element": "fire",
+   "cooldown": 22,
+   "mp": 12,
+   "barrier": {
+    "share": 0.25,
+    "seconds": 8
+   },
+   "selfBuff": {
+    "name": "Dragonscale",
+    "seconds": 8,
+    "reflect": 0.4
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "thick_scales",
+       "name": "Thick Scales",
+       "fx": "ward",
+       "mod": {
+        "barrier": {
+         "share": 0.35,
+         "seconds": 5
+        }
+       }
+      },
+      {
+       "id": "wing_buffet",
+       "name": "Wing Buffet",
+       "fx": "knock",
+       "mod": {
+        "burst": {
+         "radius": 4,
+         "mult": 0.4,
+         "knock": {
+          "push": 3
+         }
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "hoard_heat",
+       "name": "Hoard Heat",
+       "fx": "charge",
+       "requires": "wyrm_ascendant",
+       "mod": {
+        "cutCooldown": {
+         "skill": "wyrm_ascendant",
+         "seconds": 6,
+         "per": "cast",
+         "orSelf": 4
+        }
+       }
+      },
+      {
+       "id": "scale_shards",
+       "name": "Scale Shards",
+       "fx": "counter",
+       "mod": {
+        "selfBuff": {
+         "every": {
+          "hits": 3,
+          "radius": 4,
+          "mult": 0.5
+         }
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "bulwark",
+     "nodes": [
+      {
+       "id": "dragon_hide",
+       "name": "Dragon Hide",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "armorPct": 0.3
+        }
+       }
+      },
+      {
+       "id": "covering_wing",
+       "name": "Covering Wing",
+       "fx": "ward",
+       "mod": {
+        "barrier": {
+         "pets": true
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "aegis",
+     "nodes": [
+      {
+       "id": "impervious",
+       "name": "Impervious",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "ccImmune": true
+        }
+       }
+      },
+      {
+       "id": "scales_wrath",
+       "name": "Scale's Wrath",
+       "fx": "leap",
+       "mod": {
+        "selfBuff": {
+         "onEnd": {
+          "shape": "dash",
+          "dash": {
+           "to": "target",
+           "range": 12,
+           "leap": true,
+           "land": {
+            "radius": 4,
+            "mult": 1.5
+           }
+          }
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "wyrm_ascendant": {
+   "name": "Wyrm Ascendant",
+   "shape": "self",
+   "element": "fire",
+   "cooldown": 40,
+   "mp": 30,
+   "imbue": {
+    "seconds": 10,
+    "element": "fire",
+    "mult": 0.15,
+    "status": "burn",
+    "splash": 3
+   },
+   "forms": {
+    "frost": {
+     "name": "Frost Ascendant",
+     "imbue": {
+      "seconds": 10,
+      "element": "ice",
+      "mult": 0.15,
+      "status": "chill",
+      "splash": 3
+     }
+    },
+    "storm": {
+     "name": "Storm Ascendant",
+     "imbue": {
+      "seconds": 10,
+      "element": "lightning",
+      "mult": 0.15,
+      "status": "shock",
+      "splash": 3
+     }
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "brief_ascent",
+       "name": "Brief Ascent",
+       "fx": "charge",
+       "mod": {
+        "imbue": {
+         "seconds": 6,
+         "mult": 0.4
+        }
+       }
+      },
+      {
+       "id": "rising_wyrm",
+       "name": "Rising Wyrm",
+       "fx": "burst",
+       "mod": {
+        "imbue": {
+         "every": {
+          "n": 4,
+          "burst": {
+           "radius": 4,
+           "mult": 0.8
+          }
+         }
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "wings_out",
+       "name": "Wings Out",
+       "fx": "leap",
+       "mod": {
+        "selfBuff": {
+         "name": "Wings Out",
+         "seconds": 10,
+         "movePct": 0.4
+        }
+       }
+      },
+      {
+       "id": "scale_mantle",
+       "name": "Scale Mantle",
+       "fx": "ward",
+       "mod": {
+        "barrier": {
+         "share": 0.15,
+         "seconds": 10
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "roaring_start",
+       "name": "Roaring Start",
+       "fx": "wide",
+       "mod": {
+        "burst": {
+         "radius": 10,
+         "statuses": [
+          {
+           "id": "fear",
+           "seconds": 1.5
+          }
+         ]
+        }
+       }
+      },
+      {
+       "id": "wyrm_blood",
+       "name": "Wyrm Blood",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "name": "Wyrm Blood",
+         "seconds": 10,
+         "resist": 0.2
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "crescendo",
+     "nodes": [
+      {
+       "id": "wyrms_end",
+       "name": "Wyrm's End",
+       "fx": "burst",
+       "mod": {
+        "selfBuff": {
+         "name": "Wyrm Ascendant",
+         "seconds": 10,
+         "onEnd": {
+          "shape": "around",
+          "radius": 10,
+          "mult": 3
+         }
+        }
+       }
+      },
+      {
+       "id": "ascendant_dive",
+       "name": "Ascendant Dive",
+       "fx": "charge",
+       "requires": "wyrmfall",
+       "mod": {
+        "cutCooldown": {
+         "skill": "wyrmfall",
+         "seconds": 14,
+         "per": "cast",
+         "orSelf": 8
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "power_strike": {
+   "name": "Precise Strike",
+   "shape": "melee",
+   "element": "physical",
+   "mult": 1.9,
+   "reach": 3.4,
+   "arc": 1.6,
+   "cooldown": 4,
+   "mp": 0,
+   "pen": 0.4,
+   "onCrit": {
+    "status": {
+     "id": "marked",
+     "seconds": 4
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "thrust_line",
+       "name": "Thrust Line",
+       "fx": "lance",
+       "mod": {
+        "set": {
+         "shape": "beam",
+         "range": 5,
+         "width": 1.2
+        }
+       }
+      },
+      {
+       "id": "measured_cut",
+       "name": "Measured Cut",
+       "fx": "echo",
+       "mod": {
+        "onCrit": {
+         "repeat": 0.5
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "shatter",
+     "nodes": [
+      {
+       "id": "exploit_opening",
+       "name": "Exploit Opening",
+       "fx": "detonate",
+       "mod": {
+        "consumes": {
+         "status": "stagger",
+         "mult": 0.6
+        }
+       }
+      },
+      {
+       "id": "wrist_cut",
+       "name": "Wrist Cut",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "weaken",
+          "dealLess": 0.3,
+          "seconds": 3
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "cauterise",
+     "nodes": [
+      {
+       "id": "patient_blade",
+       "name": "Patient Blade",
+       "fx": "charge",
+       "mod": {
+        "bonusIf": [
+         {
+          "when": "stationary:1.5",
+          "mult": 0.6
+         }
+        ]
+       }
+      },
+      {
+       "id": "flowing_form",
+       "name": "Flowing Form",
+       "fx": "charge",
+       "mod": {
+        "onKill": {
+         "refund": 1
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "unmaking",
+     "nodes": [
+      {
+       "id": "perfect_form",
+       "name": "Perfect Form",
+       "fx": "form",
+       "mod": {
+        "forms": {
+         "open": {
+          "onCrit": {
+           "reset": true
+          }
+         },
+         "closed": {
+          "barrier": {
+           "share": 0.1,
+           "seconds": 4
+          }
+         }
+        }
+       }
+      },
+      {
+       "id": "through_the_guard",
+       "name": "Through the Guard",
+       "fx": "shatter",
+       "mod": {
+        "pen": 1
+       }
+      }
+     ]
+    }
+   }
+  },
+  "riposte": {
+   "name": "Riposte",
+   "shape": "self",
+   "element": "physical",
+   "cooldown": 8,
+   "mp": 4,
+   "counter": {
+    "window": 1.2,
+    "hits": 1,
+    "negate": 1,
+    "answer": {
+     "mult": 2.5,
+     "knock": {
+      "stagger": 0.8
+     }
+    },
+    "onUnused": {
+     "refund": 0.5
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "long_guard",
+       "name": "Long Guard",
+       "fx": "counter",
+       "mod": {
+        "counter": {
+         "window": 2.2,
+         "hits": 2,
+         "answer": {
+          "mult": 1.6,
+          "knock": {
+           "stagger": 0.8
+          }
+         }
+        }
+       }
+      },
+      {
+       "id": "feint",
+       "name": "Feint",
+       "fx": "charge",
+       "mod": {
+        "empowerNext": {
+         "count": 1,
+         "crit": true,
+         "seconds": 4
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "open_guard",
+       "name": "Open Guard",
+       "fx": "counter",
+       "mod": {
+        "counter": {
+         "negate": 0.6,
+         "hits": 3
+        }
+       }
+      },
+      {
+       "id": "warning_edge",
+       "name": "Warning Edge",
+       "fx": "wide",
+       "mod": {
+        "burst": {
+         "radius": 3,
+         "statuses": [
+          {
+           "id": "weaken",
+           "dealLess": 0.3,
+           "seconds": 3
+          }
+         ]
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "bulwark",
+     "nodes": [
+      {
+       "id": "arrow_catcher",
+       "name": "Arrow Catcher",
+       "fx": "ward",
+       "mod": {
+        "counter": {
+         "ranged": true
+        }
+       }
+      },
+      {
+       "id": "duelists_rhythm",
+       "name": "Duelist's Rhythm",
+       "fx": "charge",
+       "mod": {
+        "cutCooldown": {
+         "skill": "others",
+         "seconds": 1.5,
+         "per": "cast"
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "aegis",
+     "nodes": [
+      {
+       "id": "second_guard",
+       "name": "Second Guard",
+       "fx": "echo",
+       "mod": {
+        "again": {
+         "delay": 1.4
+        }
+       }
+      },
+      {
+       "id": "last_parry",
+       "name": "Last Parry",
+       "fx": "ward",
+       "mod": {
+        "ward": {
+         "charges": 1,
+         "seconds": 6,
+         "threshold": 0.15
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "duelist_stance": {
+   "name": "Duelist's Stance",
+   "shape": "self",
+   "element": "physical",
+   "cooldown": 1.5,
+   "mp": 0,
+   "form": {
+    "group": "stance",
+    "cycle": true,
+    "options": [
+     {
+      "id": "open",
+      "name": "Open stance",
+      "stats": {
+       "damage": 0.2,
+       "hastePct": 0.15,
+       "armorPct": -0.15
+      }
+     },
+     {
+      "id": "closed",
+      "name": "Closed stance",
+      "stats": {
+       "armorPct": 0.5,
+       "damage": -0.1
+      }
+     }
+    ]
+   },
+   "talents": {
+    "1": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "quick_switch",
+       "name": "Quick Switch",
+       "fx": "form",
+       "mod": {
+        "set": {
+         "form.onEnter": {
+          "shape": "self",
+          "selfBuff": {
+           "name": "Quick Switch",
+           "seconds": 2,
+           "hastePct": 0.3
+          }
+         }
+        }
+       }
+      },
+      {
+       "id": "guarded_turn",
+       "name": "Guarded Turn",
+       "fx": "ward",
+       "mod": {
+        "set": {
+         "form.onEnter": {
+          "shape": "self",
+          "ward": {
+           "charges": 1,
+           "seconds": 3,
+           "threshold": 0.1
+          }
+         }
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "drilled",
+       "name": "Drilled",
+       "fx": "summon",
+       "mod": {
+        "set": {
+         "form.petBuff": {
+          "name": "Drilled",
+          "resist": 0.15
+         }
+        }
+       }
+      },
+      {
+       "id": "shared_opening",
+       "name": "Shared Opening",
+       "fx": "summon",
+       "mod": {
+        "set": {
+         "form.petBuff": {
+          "name": "Shared Opening",
+          "damage": 0.12
+         }
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "dancers_switch",
+       "name": "Dancer's Switch",
+       "fx": "wide",
+       "mod": {
+        "set": {
+         "form.onExit": {
+          "shape": "around",
+          "radius": 3,
+          "mult": 0.8
+         },
+         "cooldown": 6
+        }
+       }
+      },
+      {
+       "id": "shoulder_turn",
+       "name": "Shoulder Turn",
+       "fx": "knock",
+       "mod": {
+        "set": {
+         "form.onExit": {
+          "shape": "around",
+          "radius": 3.5,
+          "mult": 0.3,
+          "knock": {
+           "push": 3
+          }
+         },
+         "cooldown": 5
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "fluid_footwork",
+       "name": "Fluid Footwork",
+       "fx": "charge",
+       "mod": {
+        "set": {
+         "cooldown": 0.6,
+         "mp": 5
+        }
+       }
+      },
+      {
+       "id": "tangling_feet",
+       "name": "Tangling Feet",
+       "fx": "zone",
+       "mod": {
+        "set": {
+         "form.onEnter.shape": "self",
+         "form.onEnter.pool": {
+          "seconds": 3,
+          "radius": 3,
+          "slow": 0.5,
+          "power": 0
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "lunge": {
+   "name": "Lunge",
+   "shape": "dash",
+   "element": "physical",
+   "mult": 1.8,
+   "range": 8,
+   "splash": 1.6,
+   "cooldown": 9,
+   "mp": 8,
+   "dash": {
+    "to": "target",
+    "range": 8,
+    "hitMult": 0.5
+   },
+   "forms": {
+    "open": {
+     "name": "Long Lunge",
+     "range": 11,
+     "dash": {
+      "to": "target",
+      "range": 11,
+      "hitMult": 0.5
+     }
+    },
+    "closed": {
+     "name": "Shield Lunge",
+     "knock": {
+      "stagger": 0.6
+     }
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "pass_through",
+       "name": "Pass Through",
+       "fx": "leap",
+       "mod": {
+        "dash": {
+         "to": "aim"
+        }
+       }
+      },
+      {
+       "id": "pinned",
+       "name": "Pinned",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "root",
+          "seconds": 1.5
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "shatter",
+     "nodes": [
+      {
+       "id": "skewer",
+       "name": "Skewer",
+       "fx": "knock",
+       "mod": {
+        "knock": {
+         "push": 3,
+         "carry": {
+          "mult": 0.6,
+          "stagger": 0.4
+         }
+        }
+       }
+      },
+      {
+       "id": "bleeding_point",
+       "name": "Bleeding Point",
+       "fx": "stack",
+       "mod": {
+        "stack": {
+         "status": "bleed",
+         "max": 3
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "double_lunge",
+       "name": "Double Lunge",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      },
+      {
+       "id": "called_out",
+       "name": "Called Out",
+       "fx": "tag",
+       "mod": {
+        "tag": {
+         "id": "duel",
+         "seconds": 6
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "crescendo",
+     "nodes": [
+      {
+       "id": "flicker",
+       "name": "Flicker",
+       "fx": "charge",
+       "mod": {
+        "onKill": {
+         "refund": 1
+        }
+       }
+      },
+      {
+       "id": "twin_thrust",
+       "name": "Twin Thrust",
+       "fx": "echo",
+       "mod": {
+        "again": {
+         "delay": 0.8,
+         "mult": 0.6
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "sweeping_guard": {
+   "name": "Sweeping Guard",
+   "shape": "melee",
+   "element": "physical",
+   "mult": 1.3,
+   "reach": 3.6,
+   "arc": 3.1,
+   "cooldown": 12,
+   "mp": 10,
+   "tag": {
+    "id": "riposted",
+    "seconds": 5
+   },
+   "counter": {
+    "window": 1.5,
+    "hits": 5,
+    "negate": 0.6,
+    "frontal": true,
+    "grow": {
+     "per": 0.1,
+     "cap": 0.5
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "full_circle",
+       "name": "Full Circle",
+       "fx": "wide",
+       "mod": {
+        "set": {
+         "shape": "around",
+         "radius": 4
+        }
+       }
+      },
+      {
+       "id": "shoulder_check",
+       "name": "Shoulder Check",
+       "fx": "knock",
+       "mod": {
+        "knock": {
+         "push": 2
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "shatter",
+     "nodes": [
+      {
+       "id": "stored_force",
+       "name": "Stored Force",
+       "fx": "stack",
+       "mod": {
+        "counter": {
+         "negate": 0.4,
+         "grow": {
+          "per": 0.2,
+          "cap": 1
+         }
+        }
+       }
+      },
+      {
+       "id": "hamstring_sweep",
+       "name": "Hamstring Sweep",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         "web"
+        ]
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "bulwark",
+     "nodes": [
+      {
+       "id": "covering_sweep",
+       "name": "Covering Sweep",
+       "fx": "ward",
+       "mod": {
+        "barrier": {
+         "share": 0.1,
+         "seconds": 4,
+         "pets": true
+        }
+       }
+      },
+      {
+       "id": "braced",
+       "name": "Braced",
+       "fx": "ward",
+       "mod": {
+        "counter": {
+         "ccImmune": true
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "aegis",
+     "nodes": [
+      {
+       "id": "counterstorm",
+       "name": "Counterstorm",
+       "fx": "counter",
+       "mod": {
+        "counter": {
+         "answer": {
+          "mult": 0.8,
+          "knock": {
+           "stagger": 0.3
+          }
+         }
+        }
+       }
+      },
+      {
+       "id": "unmoving",
+       "name": "Unmoving",
+       "fx": "charge",
+       "mod": {
+        "channel": {
+         "seconds": 3,
+         "every": 0.6,
+         "moveK": 0.3
+        },
+        "mul": {
+         "mult": 0.4,
+         "cooldown": 1.25
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "masters_flurry": {
+   "name": "Master's Flurry",
+   "shape": "around",
+   "element": "physical",
+   "mult": 0.4,
+   "radius": 3.4,
+   "cooldown": 22,
+   "mp": 20,
+   "repeats": {
+    "count": 6,
+    "every": 0.25,
+    "target": "lowest"
+   },
+   "selfBuff": {
+    "name": "Flurry",
+    "seconds": 1.5,
+    "movePct": -0.5,
+    "onEnd": {
+     "shape": "melee",
+     "reach": 3.4,
+     "arc": 1.2,
+     "mult": 1.6,
+     "knock": {
+      "push": 4
+     }
+    }
+   },
+   "forms": {
+    "open": {
+     "name": "Open Flurry",
+     "repeats": {
+      "count": 8,
+      "every": 0.18,
+      "target": "lowest"
+     }
+    },
+    "closed": {
+     "name": "Closed Flurry",
+     "selfBuff": {
+      "name": "Flurry",
+      "seconds": 1.5,
+      "movePct": -0.5,
+      "resist": 0.3,
+      "onEnd": {
+       "shape": "melee",
+       "reach": 3.4,
+       "arc": 1.2,
+       "mult": 1.6,
+       "knock": {
+        "push": 4
+       }
+      }
+     }
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "measured_flurry",
+       "name": "Measured Flurry",
+       "fx": "heavy",
+       "mod": {
+        "set": {
+         "repeats": {
+          "count": 4,
+          "every": 0.3,
+          "target": "lowest"
+         }
+        },
+        "mul": {
+         "mult": 1.4
+        }
+       }
+      },
+      {
+       "id": "moving_flurry",
+       "name": "Moving Flurry",
+       "fx": "leap",
+       "mod": {
+        "selfBuff": {
+         "movePct": -0.2
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "drain",
+     "nodes": [
+      {
+       "id": "bleeding_edge",
+       "name": "Bleeding Edge",
+       "fx": "stack",
+       "mod": {
+        "stack": {
+         "status": "bleed",
+         "max": 6
+        }
+       }
+      },
+      {
+       "id": "disarming_flurry",
+       "name": "Disarming Flurry",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "disarm",
+          "seconds": 1.5
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "overload",
+     "nodes": [
+      {
+       "id": "closing_line",
+       "name": "Closing Line",
+       "fx": "lance",
+       "mod": {
+        "selfBuff": {
+         "onEnd": {
+          "shape": "beam",
+          "range": 6,
+          "width": 1.6,
+          "mult": 1.6,
+          "knock": {
+           "push": 4,
+           "stagger": 0.6
+          }
+         }
+        }
+       }
+      },
+      {
+       "id": "whirling_finish",
+       "name": "Whirling Finish",
+       "fx": "wide",
+       "mod": {
+        "selfBuff": {
+         "onEnd": {
+          "shape": "around",
+          "radius": 4,
+          "mult": 1.2,
+          "knock": {
+           "push": 3
+          }
+         }
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "crescendo",
+     "nodes": [
+      {
+       "id": "endless_discipline",
+       "name": "Endless Discipline",
+       "fx": "charge",
+       "requires": "lunge",
+       "mod": {
+        "cutCooldown": {
+         "skill": "lunge",
+         "seconds": 1.5,
+         "per": "hit",
+         "orSelf": 1
+        }
+       }
+      },
+      {
+       "id": "second_flurry",
+       "name": "Second Flurry",
+       "fx": "echo",
+       "mod": {
+        "again": {
+         "delay": 2,
+         "mult": 0.5
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "shield_bash": {
+   "name": "Rim Strike",
+   "shape": "melee",
+   "element": "physical",
+   "mult": 1.3,
+   "reach": 2.8,
+   "arc": 2.2,
+   "cooldown": 6,
+   "mp": 6,
+   "knock": {
+    "stagger": 1
+   },
+   "onHit": {
+    "taunt": 3
+   },
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "charging_bash",
+       "name": "Charging Bash",
+       "fx": "leap",
+       "mod": {
+        "set": {
+         "shape": "dash",
+         "range": 6
+        },
+        "dash": {
+         "to": "target",
+         "range": 6,
+         "hitMult": 0.3
+        }
+       }
+      },
+      {
+       "id": "ringing_blow",
+       "name": "Ringing Blow",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "weaken",
+          "dealLess": 0.3,
+          "seconds": 4
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "shatter",
+     "nodes": [
+      {
+       "id": "splinter",
+       "name": "Splinter",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "marked",
+          "seconds": 6
+         }
+        ]
+       }
+      },
+      {
+       "id": "hook_rim",
+       "name": "Hook Rim",
+       "fx": "pull",
+       "mod": {
+        "pullIn": {
+         "metres": 2,
+         "to": "self"
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "cauterise",
+     "nodes": [
+      {
+       "id": "oath_rhythm",
+       "name": "Oath Rhythm",
+       "fx": "charge",
+       "requires": "sworn_ward",
+       "mod": {
+        "cutCooldown": {
+         "skill": "sworn_ward",
+         "seconds": 2,
+         "per": "hit",
+         "orSelf": 1
+        }
+       }
+      },
+      {
+       "id": "warded_bash",
+       "name": "Warded Bash",
+       "fx": "ward",
+       "mod": {
+        "barrier": {
+         "share": 0.08,
+         "seconds": 5
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "crescendo",
+     "nodes": [
+      {
+       "id": "double_bash",
+       "name": "Double Bash",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      },
+      {
+       "id": "bell_ringer",
+       "name": "Bell Ringer",
+       "fx": "knock",
+       "mod": {
+        "knock": {
+         "stagger": 2
+        },
+        "mul": {
+         "cooldown": 1.4
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "guard_stance": {
+   "name": "Sworn Guard",
+   "shape": "self",
+   "element": "holy",
+   "cooldown": 18,
+   "mp": 8,
+   "selfBuff": {
+    "name": "Sworn Guard",
+    "seconds": 8,
+    "frontalResist": 0.5,
+    "movePct": -0.2
+   },
+   "link": {
+    "to": "follower",
+    "share": 0.4,
+    "seconds": 8,
+    "range": 8
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "moving_guard",
+       "name": "Moving Guard",
+       "fx": "leap",
+       "mod": {
+        "selfBuff": {
+         "frontalResist": 0.3,
+         "movePct": 0.1
+        }
+       }
+      },
+      {
+       "id": "close_guard",
+       "name": "Close Guard",
+       "fx": "link",
+       "mod": {
+        "link": {
+         "share": 0.6,
+         "range": 5
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "edged_shield",
+       "name": "Edged Shield",
+       "fx": "counter",
+       "mod": {
+        "selfBuff": {
+         "reflect": 0.3
+        }
+       }
+      },
+      {
+       "id": "shield_bearer",
+       "name": "Shield Bearer",
+       "fx": "ward",
+       "mod": {
+        "barrier": {
+         "share": 0.12,
+         "seconds": 8,
+         "pets": true
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "echo",
+     "nodes": [
+      {
+       "id": "iron_will",
+       "name": "Iron Will",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "ccImmune": true
+        }
+       }
+      },
+      {
+       "id": "steadfast",
+       "name": "Steadfast",
+       "fx": "drain",
+       "mod": {
+        "selfBuff": {
+         "manaOnHurt": 2
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "wellspring",
+     "nodes": [
+      {
+       "id": "draw_fire",
+       "name": "Draw Fire",
+       "fx": "tag",
+       "mod": {
+        "taunt": {
+         "radius": 8,
+         "seconds": 3
+        }
+       }
+      },
+      {
+       "id": "guard_toss",
+       "name": "Guard Toss",
+       "fx": "chain",
+       "mod": {
+        "selfBuff": {
+         "onEnd": {
+          "shape": "bolt",
+          "range": 15,
+          "mult": 1.2,
+          "ricochet": {
+           "bounces": 3,
+           "range": 8,
+           "keep": 0.7
+          }
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "sworn_ward": {
+   "name": "Sworn Ward",
+   "shape": "self",
+   "element": "holy",
+   "cooldown": 18,
+   "mp": 8,
+   "link": {
+    "to": "follower",
+    "share": 1,
+    "threshold": 0.2,
+    "seconds": 12,
+    "range": 24
+   },
+   "talents": {
+    "1": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "oath_of_mending",
+       "name": "Oath of Mending",
+       "fx": "drain",
+       "mod": {
+        "healPets": 0.2
+       }
+      },
+      {
+       "id": "long_oath",
+       "name": "Long Oath",
+       "fx": "link",
+       "mod": {
+        "link": {
+         "seconds": 20
+        },
+        "mul": {
+         "cooldown": 1.4
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "answering_steel",
+       "name": "Answering Steel",
+       "fx": "charge",
+       "mod": {
+        "empowerNext": {
+         "count": 1,
+         "mult": 0.4,
+         "seconds": 10
+        }
+       }
+      },
+      {
+       "id": "oath_armour",
+       "name": "Oath Armour",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "name": "Oath Armour",
+         "seconds": 12,
+         "armorPct": 0.3
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "to_your_side",
+       "name": "To Your Side",
+       "fx": "leap",
+       "mod": {
+        "recast": {
+         "window": 4,
+         "then": {
+          "shape": "dash",
+          "dash": {
+           "to": "ally",
+           "range": 15,
+           "leap": true
+          },
+          "taunt": {
+           "radius": 6,
+           "seconds": 4
+          }
+         },
+         "say": "leap up to 15 m to the follower nearest your aim and make everything within 6 m of you attack you for 4s"
+        }
+       }
+      },
+      {
+       "id": "oath_ward",
+       "name": "Oath Ward",
+       "fx": "ward",
+       "mod": {
+        "ward": {
+         "charges": 1,
+         "seconds": 12,
+         "threshold": 0.2,
+         "pets": true
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "aegis",
+     "nodes": [
+      {
+       "id": "not_today",
+       "name": "Not Today",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "name": "Not Today",
+         "seconds": 4,
+         "petsOnly": true,
+         "deathPrevent": true
+        },
+        "mul": {
+         "cooldown": 2.5
+        }
+       }
+      },
+      {
+       "id": "oath_retort",
+       "name": "Oath Retort",
+       "fx": "counter",
+       "mod": {
+        "selfBuff": {
+         "name": "Oath Retort",
+         "seconds": 12,
+         "every": {
+          "hits": 3,
+          "radius": 4,
+          "mult": 0.7
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "challenge": {
+   "name": "Challenge",
+   "shape": "around",
+   "element": "physical",
+   "mult": 1.05,
+   "radius": 10,
+   "cooldown": 12,
+   "mp": 6,
+   "taunt": {
+    "radius": 10,
+    "seconds": 4
+   },
+   "pullIn": {
+    "metres": 4,
+    "to": "self",
+    "only": "ranged"
+   },
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "single_combat",
+       "name": "Single Combat",
+       "fx": "tag",
+       "mod": {
+        "taunt": {
+         "target": true,
+         "seconds": 8
+        },
+        "statuses": [
+         {
+          "id": "marked",
+          "seconds": 8
+         }
+        ]
+       }
+      },
+      {
+       "id": "long_challenge",
+       "name": "Long Challenge",
+       "fx": "tag",
+       "mod": {
+        "taunt": {
+         "seconds": 7
+        },
+        "mul": {
+         "cooldown": 1.35
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "haul",
+       "name": "Haul",
+       "fx": "pull",
+       "mod": {
+        "pullIn": {
+         "only": null
+        }
+       }
+      },
+      {
+       "id": "shame",
+       "name": "Shame",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "weaken",
+          "dealLess": 0.2,
+          "seconds": 6
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "bulwark",
+     "nodes": [
+      {
+       "id": "bulwark_shout",
+       "name": "Bulwark Shout",
+       "fx": "ward",
+       "mod": {
+        "taunt": {
+         "barrierPer": 0.03
+        }
+       }
+      },
+      {
+       "id": "braced_answer",
+       "name": "Braced Answer",
+       "fx": "counter",
+       "mod": {
+        "counter": {
+         "window": 4,
+         "hits": 3,
+         "negate": 0.6
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "aegis",
+     "nodes": [
+      {
+       "id": "second_challenge",
+       "name": "Second Challenge",
+       "fx": "echo",
+       "mod": {
+        "again": {
+         "delay": 3,
+         "mult": 0.6
+        }
+       }
+      },
+      {
+       "id": "iron_gaze",
+       "name": "Iron Gaze",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "disarm",
+          "seconds": 1.5
+         }
+        ],
+        "mul": {
+         "cooldown": 1.2
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "rampart": {
+   "name": "Rampart",
+   "shape": "ground",
+   "element": "physical",
+   "cooldown": 20,
+   "mp": 12,
+   "wall": {
+    "length": 6,
+    "seconds": 8,
+    "blocksRanged": true,
+    "taunt": 3
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "long_rampart",
+       "name": "Long Rampart",
+       "fx": "wall",
+       "mod": {
+        "wall": {
+         "length": 12,
+         "hp": 0.6
+        }
+       }
+      },
+      {
+       "id": "ring_rampart",
+       "name": "Ring Rampart",
+       "fx": "wall",
+       "mod": {
+        "wall": {
+         "ring": true,
+         "radius": 5,
+         "distance": 0,
+         "seconds": 6
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "shield_shove",
+       "name": "Shield Shove",
+       "fx": "knock",
+       "mod": {
+        "burst": {
+         "radius": 6,
+         "mult": 0.5,
+         "knock": {
+          "push": 3
+         }
+        }
+       }
+      },
+      {
+       "id": "holy_rampart",
+       "name": "Holy Rampart",
+       "fx": "zone",
+       "mod": {
+        "place": {
+         "kind": "zone",
+         "seconds": 8,
+         "radius": 5,
+         "every": 1,
+         "heal": 0.015
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "bulwark",
+     "nodes": [
+      {
+       "id": "topple",
+       "name": "Topple",
+       "fx": "knock",
+       "mod": {
+        "recast": {
+         "window": 8,
+         "then": {
+          "shape": "beam",
+          "range": 6,
+          "width": 6,
+          "mult": 2,
+          "knock": {
+           "stagger": 1
+          }
+         },
+         "say": "topple the wall forward: everything in a 6 m wide strip 6 m ahead takes 200% weapon damage and is stunned for 1s"
+        }
+       }
+      },
+      {
+       "id": "sally_port",
+       "name": "Sally Port",
+       "fx": "charge",
+       "requires": "challenge",
+       "mod": {
+        "cutCooldown": {
+         "skill": "challenge",
+         "seconds": 6,
+         "per": "cast",
+         "orSelf": 4
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "aegis",
+     "nodes": [
+      {
+       "id": "second_rampart",
+       "name": "Second Rampart",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      },
+      {
+       "id": "bastion",
+       "name": "Bastion",
+       "fx": "ward",
+       "mod": {
+        "ward": {
+         "charges": 1,
+         "seconds": 8,
+         "threshold": 0.12,
+         "pets": true
+        }
+       }
+      }
+     ]
+    }
+   },
+   "range": 8
+  },
+  "unbroken_banner": {
+   "name": "Unbroken Banner",
+   "shape": "self",
+   "element": "holy",
+   "cooldown": 60,
+   "mp": 30,
+   "selfBuff": {
+    "name": "Unbroken Banner",
+    "seconds": 12,
+    "pets": true,
+    "deathPrevent": true,
+    "onEnd": {
+     "shape": "self",
+     "burst": {
+      "radius": 10,
+      "heal": 0.2
+     }
+    }
+   },
+   "place": {
+    "kind": "zone",
+    "seconds": 12,
+    "radius": 10,
+    "every": 1,
+    "buff": {
+     "id": "guard",
+     "resist": 0.2,
+     "seconds": 1.3
+    }
+   },
+   "taunt": {
+    "radius": 10,
+    "seconds": 12
+   },
+   "talents": {
+    "1": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "short_stand",
+       "name": "Short Stand",
+       "fx": "charge",
+       "mod": {
+        "selfBuff": {
+         "seconds": 6
+        },
+        "place": {
+         "seconds": 6
+        },
+        "set": {
+         "cooldown": 40
+        }
+       }
+      },
+      {
+       "id": "colour_guard",
+       "name": "Colour Guard",
+       "fx": "ward",
+       "mod": {
+        "cleanse": {
+         "count": 2,
+         "pets": true
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "war_colours",
+       "name": "War Colours",
+       "fx": "zone",
+       "mod": {
+        "place": {
+         "buff": {
+          "id": "might",
+          "damage": 0.2,
+          "seconds": 1.3
+         }
+        }
+       }
+      },
+      {
+       "id": "gilded",
+       "name": "Gilded",
+       "fx": "zone",
+       "mod": {
+        "place": {
+         "heal": 0.02
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "carried_banner",
+       "name": "Carried Banner",
+       "fx": "zone",
+       "mod": {
+        "place": {
+         "follow": "self"
+        }
+       }
+      },
+      {
+       "id": "stand_firm",
+       "name": "Stand Firm",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "ccImmune": true
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "aegis",
+     "nodes": [
+      {
+       "id": "victory",
+       "name": "Victory",
+       "fx": "burst",
+       "mod": {
+        "selfBuff": {
+         "onEnd": {
+          "shape": "around",
+          "radius": 10,
+          "mult": 2.5,
+          "burst": {
+           "radius": 10,
+           "heal": 0.2
+          }
+         }
+        }
+       }
+      },
+      {
+       "id": "two_banners",
+       "name": "Two Banners",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "sanctified_blade": {
+   "name": "Sanctified Blade",
+   "shape": "melee",
+   "element": "holy",
+   "mult": 1.6,
+   "reach": 3.2,
+   "arc": 1.4,
+   "cooldown": 5,
+   "mp": 4,
+   "bonusIf": [
+    {
+     "when": "family:undead,fiend",
+     "mult": 0.5
+    }
+   ],
+   "onHit": {
+    "heal": 0.015
+   },
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "wide_blessing",
+       "name": "Wide Blessing",
+       "fx": "drain",
+       "mod": {
+        "onHit": {
+         "heal": 0,
+         "healAllies": 0.015
+        }
+       }
+      },
+      {
+       "id": "radiant_edge",
+       "name": "Radiant Edge",
+       "fx": "lance",
+       "mod": {
+        "set": {
+         "shape": "beam",
+         "range": 6,
+         "width": 2
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "shatter",
+     "nodes": [
+      {
+       "id": "searing_mark",
+       "name": "Searing Mark",
+       "fx": "tag",
+       "mod": {
+        "tag": {
+         "id": "seared",
+         "seconds": 6
+        }
+       }
+      },
+      {
+       "id": "judging_blow",
+       "name": "Judging Blow",
+       "fx": "knock",
+       "mod": {
+        "knock": {
+         "stagger": 0.5
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "echo",
+     "nodes": [
+      {
+       "id": "blessed_steel",
+       "name": "Blessed Steel",
+       "fx": "drain",
+       "mod": {
+        "onKill": {
+         "heal": 0.05
+        }
+       }
+      },
+      {
+       "id": "searing_return",
+       "name": "Searing Return",
+       "fx": "detonate",
+       "mod": {
+        "consumes": {
+         "tag": "seared",
+         "mult": 0.5,
+         "remove": true
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "crescendo",
+     "nodes": [
+      {
+       "id": "martyrs_edge",
+       "name": "Martyr's Edge",
+       "fx": "drain",
+       "mod": {
+        "hpCost": 0.04,
+        "mul": {
+         "mult": 1.8
+        }
+       }
+      },
+      {
+       "id": "bright_rhythm",
+       "name": "Bright Rhythm",
+       "fx": "charge",
+       "mod": {
+        "resetOn": {
+         "when": "crit"
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "consecrate": {
+   "name": "Blessed Earth",
+   "shape": "around",
+   "element": "holy",
+   "mult": 1.4,
+   "radius": 6.5,
+   "cooldown": 16,
+   "mp": 20,
+   "place": {
+    "kind": "zone",
+    "seconds": 6,
+    "radius": 6.5,
+    "every": 1,
+    "strike": {
+     "mult": 0.2,
+     "targets": 6
+    },
+    "heal": 0.02
+   },
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "moving_light",
+       "name": "Moving Light",
+       "fx": "zone",
+       "mod": {
+        "place": {
+         "follow": "self"
+        }
+       }
+      },
+      {
+       "id": "holy_bounds",
+       "name": "Holy Bounds",
+       "fx": "trap",
+       "mod": {
+        "statuses": [
+         {
+          "id": "root",
+          "seconds": 1.5
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "scorching_earth",
+       "name": "Scorching Earth",
+       "fx": "zone",
+       "mod": {
+        "statuses": [
+         "burn"
+        ]
+       }
+      },
+      {
+       "id": "blessed_stone",
+       "name": "Blessed Stone",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "name": "Blessed Stone",
+         "seconds": 6,
+         "resist": 0.2
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "bulwark",
+     "nodes": [
+      {
+       "id": "unwelcome",
+       "name": "Unwelcome",
+       "fx": "knock",
+       "mod": {
+        "knock": {
+         "push": 3
+        }
+       }
+      },
+      {
+       "id": "second_blessing",
+       "name": "Second Blessing",
+       "fx": "echo",
+       "mod": {
+        "again": {
+         "delay": 3,
+         "mult": 0.6
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "aegis",
+     "nodes": [
+      {
+       "id": "cathedral",
+       "name": "Cathedral",
+       "fx": "zone",
+       "mod": {
+        "place": {
+         "radius": 10,
+         "seconds": 10
+        },
+        "mul": {
+         "cooldown": 1.5
+        }
+       }
+      },
+      {
+       "id": "twin_ground",
+       "name": "Twin Ground",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "oath_hammer": {
+   "name": "Oath Hammer",
+   "shape": "bolt",
+   "element": "holy",
+   "mult": 1.2,
+   "range": 26,
+   "splash": 1.8,
+   "cooldown": 8,
+   "mp": 10,
+   "returns": {
+    "keep": 0.8
+   },
+   "tag": {
+    "id": "seared",
+    "seconds": 6
+   },
+   "onHit": {
+    "heal": 0.01
+   },
+   "talents": {
+    "1": {
+     "lib": "seeking",
+     "nodes": [
+      {
+       "id": "ricochet_oath",
+       "name": "Ricochet Oath",
+       "fx": "chain",
+       "mod": {
+        "set": {
+         "returns": null
+        },
+        "ricochet": {
+         "bounces": 3,
+         "range": 8,
+         "keep": 0.7
+        }
+       }
+      },
+      {
+       "id": "heavy_oath",
+       "name": "Heavy Oath",
+       "fx": "knock",
+       "mod": {
+        "knock": {
+         "stagger": 1
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "burst",
+     "nodes": [
+      {
+       "id": "warding_throw",
+       "name": "Warding Throw",
+       "fx": "ward",
+       "mod": {
+        "barrier": {
+         "share": 0.08,
+         "seconds": 5
+        }
+       }
+      },
+      {
+       "id": "binding_oath",
+       "name": "Binding Oath",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "root",
+          "seconds": 1.2
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "brand",
+     "nodes": [
+      {
+       "id": "pull_of_faith",
+       "name": "Pull of Faith",
+       "fx": "pull",
+       "mod": {
+        "pullIn": {
+         "metres": 3,
+         "to": "self"
+        }
+       }
+      },
+      {
+       "id": "hammer_storm",
+       "name": "Hammer Storm",
+       "fx": "fan",
+       "mod": {
+        "set": {
+         "projectiles": 3,
+         "spread": 0.5
+        },
+        "mul": {
+         "mult": 0.6
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "cascade",
+     "nodes": [
+      {
+       "id": "unending_oath",
+       "name": "Unending Oath",
+       "fx": "charge",
+       "mod": {
+        "resetOn": {
+         "when": "crowd:3"
+        }
+       }
+      },
+      {
+       "id": "oath_kept",
+       "name": "Oath Kept",
+       "fx": "detonate",
+       "mod": {
+        "consumes": {
+         "tag": "seared",
+         "mult": 0.6,
+         "remove": true
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "martyrs_vow": {
+   "name": "Martyr's Vow",
+   "shape": "self",
+   "element": "holy",
+   "cooldown": 20,
+   "mp": 0,
+   "hpCost": 0.15,
+   "barrier": {
+    "share": 0.25,
+    "seconds": 8,
+    "pets": true
+   },
+   "talents": {
+    "1": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "lesser_vow",
+       "name": "Lesser Vow",
+       "fx": "ward",
+       "mod": {
+        "hpCost": 0.08,
+        "barrier": {
+         "share": 0.15
+        }
+       }
+      },
+      {
+       "id": "vow_of_thorns",
+       "name": "Vow of Thorns",
+       "fx": "counter",
+       "mod": {
+        "selfBuff": {
+         "name": "Vow of Thorns",
+         "seconds": 8,
+         "reflect": 0.25
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "answering_oath",
+       "name": "Answering Oath",
+       "fx": "charge",
+       "mod": {
+        "empowerNext": {
+         "count": 1,
+         "mult": 0.5,
+         "seconds": 8
+        }
+       }
+      },
+      {
+       "id": "cleansing_vow",
+       "name": "Cleansing Vow",
+       "fx": "ward",
+       "mod": {
+        "cleanse": {
+         "count": 2,
+         "pets": true
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "taunting_vow",
+       "name": "Taunting Vow",
+       "fx": "tag",
+       "mod": {
+        "taunt": {
+         "radius": 8,
+         "seconds": 4
+        }
+       }
+      },
+      {
+       "id": "shared_strength",
+       "name": "Shared Strength",
+       "fx": "drain",
+       "mod": {
+        "healPets": 0.15
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "aegis",
+     "nodes": [
+      {
+       "id": "undying_vow",
+       "name": "Undying Vow",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "name": "Undying Vow",
+         "seconds": 8,
+         "deathPreventOnce": {}
+        },
+        "mul": {
+         "cooldown": 2.25
+        }
+       }
+      },
+      {
+       "id": "martyrs_ward",
+       "name": "Martyr's Ward",
+       "fx": "ward",
+       "mod": {
+        "ward": {
+         "charges": 1,
+         "seconds": 8,
+         "threshold": 0.15,
+         "pets": true
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "shining_rebuke": {
+   "name": "Shining Repulse",
+   "shape": "around",
+   "element": "holy",
+   "mult": 1.5,
+   "radius": 5,
+   "cooldown": 14,
+   "mp": 16,
+   "knock": {
+    "push": 5,
+    "stagger": 1
+   },
+   "bonusIf": [
+    {
+     "when": "family:undead,fiend",
+     "mult": 0.5
+    }
+   ],
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "focused_repulse",
+       "name": "Focused Repulse",
+       "fx": "wide",
+       "mod": {
+        "set": {
+         "shape": "melee",
+         "reach": 9,
+         "arc": 1.75
+        }
+       }
+      },
+      {
+       "id": "blinding_flash",
+       "name": "Blinding Flash",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "weaken",
+          "dealLess": 0.35,
+          "seconds": 4
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "seared_flash",
+       "name": "Seared Flash",
+       "fx": "tag",
+       "mod": {
+        "tag": {
+         "id": "seared",
+         "seconds": 6
+        }
+       }
+      },
+      {
+       "id": "turn_away",
+       "name": "Turn Away",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "fear",
+          "seconds": 2
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "brand",
+     "nodes": [
+      {
+       "id": "return_to_me",
+       "name": "Return to Me",
+       "fx": "pull",
+       "mod": {
+        "knock": {
+         "push": 0
+        },
+        "pullIn": {
+         "metres": 4,
+         "to": "self"
+        }
+       }
+      },
+      {
+       "id": "shining_answer",
+       "name": "Shining Answer",
+       "fx": "counter",
+       "mod": {
+        "selfBuff": {
+         "name": "Shining Answer",
+         "seconds": 5,
+         "reflect": 0.3
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "aegis",
+     "nodes": [
+      {
+       "id": "banishment",
+       "name": "Banishment",
+       "fx": "detonate",
+       "mod": {
+        "bonusIf": [
+         {
+          "when": "execute:0.25",
+          "mult": 1
+         }
+        ]
+       }
+      },
+      {
+       "id": "double_repulse",
+       "name": "Double Repulse",
+       "fx": "echo",
+       "mod": {
+        "again": {
+         "delay": 1,
+         "mult": 0.6
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "daybreak_descent": {
+   "name": "Daybreak Descent",
+   "shape": "dash",
+   "element": "holy",
+   "mult": 2.2,
+   "range": 16,
+   "cooldown": 24,
+   "mp": 28,
+   "dash": {
+    "to": "ally",
+    "range": 16,
+    "leap": true,
+    "land": {
+     "radius": 6,
+     "mult": 2.2,
+     "place": {
+      "kind": "zone",
+      "seconds": 4,
+      "radius": 4,
+      "every": 1,
+      "strike": {
+       "mult": 0.2,
+       "targets": 4
+      },
+      "heal": 0.02
+     }
+    }
+   },
+   "knock": {
+    "push": 3
+   },
+   "healPets": 0.15,
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "long_fall",
+       "name": "Long Fall",
+       "fx": "leap",
+       "mod": {
+        "dash": {
+         "range": 24
+        },
+        "mul": {
+         "cooldown": 1.25
+        }
+       }
+      },
+      {
+       "id": "guarded_fall",
+       "name": "Guarded Fall",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "name": "Guarded Fall",
+         "seconds": 2,
+         "resist": 0.5
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "burst",
+     "nodes": [
+      {
+       "id": "muster",
+       "name": "Muster",
+       "fx": "summon",
+       "mod": {
+        "dashWith": true
+       }
+      },
+      {
+       "id": "morning_shield",
+       "name": "Morning Shield",
+       "fx": "ward",
+       "mod": {
+        "barrier": {
+         "share": 0.15,
+         "seconds": 6,
+         "pets": true
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "lift",
+       "name": "Lift",
+       "fx": "knock",
+       "mod": {
+        "knock": {
+         "stagger": 1.8
+        }
+       }
+      },
+      {
+       "id": "cleansing_dawn",
+       "name": "Cleansing Dawn",
+       "fx": "ward",
+       "mod": {
+        "cleanse": {
+         "count": 2,
+         "pets": true
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "aegis",
+     "nodes": [
+      {
+       "id": "twin_descent",
+       "name": "Twin Descent",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      },
+      {
+       "id": "morning_ring",
+       "name": "Morning Ring",
+       "fx": "drain",
+       "mod": {
+        "set": {
+         "heal": 0.25
+        },
+        "healPets": 0.25
+       }
+      }
+     ]
+    }
+   }
+  },
+  "rune_hammer": {
+   "name": "Rune Hammer",
+   "shape": "melee",
+   "element": "arcane",
+   "mult": 1.6,
+   "reach": 3.2,
+   "arc": 1.4,
+   "cooldown": 5,
+   "mp": 5,
+   "stack": {
+    "status": "rune",
+    "max": 3
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "double_rune",
+       "name": "Double Rune",
+       "fx": "stack",
+       "mod": {
+        "stack": {
+         "add": 2
+        }
+       }
+      },
+      {
+       "id": "rune_toss",
+       "name": "Rune Toss",
+       "fx": "lance",
+       "mod": {
+        "set": {
+         "shape": "bolt",
+         "range": 18,
+         "splash": 1.5
+        },
+        "stack": {
+         "add": 2
+        },
+        "mul": {
+         "mult": 0.7
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "shatter",
+     "nodes": [
+      {
+       "id": "binding_rune",
+       "name": "Binding Rune",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "root",
+          "seconds": 1
+         }
+        ]
+       }
+      },
+      {
+       "id": "fire_rune",
+       "name": "Fire Rune",
+       "fx": "burst",
+       "mod": {
+        "set": {
+         "status": "burn",
+         "statusMult": 0.5
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "cauterise",
+     "nodes": [
+      {
+       "id": "runic_echo",
+       "name": "Runic Echo",
+       "fx": "charge",
+       "requires": "forge_flame",
+       "mod": {
+        "cutCooldown": {
+         "skill": "forge_flame",
+         "seconds": 1,
+         "per": "hit",
+         "orSelf": 0.5
+        }
+       }
+      },
+      {
+       "id": "rune_chain",
+       "name": "Rune Chain",
+       "fx": "stack",
+       "mod": {
+        "spreadStatus": {
+         "types": [
+          "rune"
+         ],
+         "radius": 4,
+         "max": 3
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "crescendo",
+     "nodes": [
+      {
+       "id": "master_rune",
+       "name": "Master Rune",
+       "fx": "detonate",
+       "mod": {
+        "stack": {
+         "max": 2
+        }
+       }
+      },
+      {
+       "id": "rune_weight",
+       "name": "Rune Weight",
+       "fx": "stack",
+       "mod": {
+        "consumes": {
+         "status": "rune",
+         "perStack": true,
+         "mult": 0.25,
+         "cap": 0.75
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "sunder": {
+   "name": "Rend Plate",
+   "shape": "melee",
+   "element": "physical",
+   "mult": 1.6,
+   "reach": 3.2,
+   "arc": 1.4,
+   "cooldown": 9,
+   "mp": 8,
+   "tag": {
+    "id": "rent",
+    "seconds": 8
+   },
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "two_blows",
+       "name": "Two Blows",
+       "fx": "echo",
+       "mod": {
+        "set": {
+         "repeats": {
+          "count": 2,
+          "every": 0.3
+         }
+        },
+        "mul": {
+         "mult": 0.6
+        }
+       }
+      },
+      {
+       "id": "splitting_swing",
+       "name": "Splitting Swing",
+       "fx": "wide",
+       "mod": {
+        "set": {
+         "arc": 3.14
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "shatter",
+     "nodes": [
+      {
+       "id": "opened_plate",
+       "name": "Opened Plate",
+       "fx": "stack",
+       "mod": {
+        "statuses": [
+         "bleed"
+        ]
+       }
+      },
+      {
+       "id": "cold_iron",
+       "name": "Cold Iron",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         "chill"
+        ]
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "exposed_steel",
+       "name": "Exposed Steel",
+       "fx": "tag",
+       "mod": {
+        "tag": {
+         "fromParty": 0.2
+        }
+       }
+      },
+      {
+       "id": "salvage",
+       "name": "Salvage",
+       "fx": "ward",
+       "mod": {
+        "barrier": {
+         "share": 0.06,
+         "seconds": 5
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "unmaking",
+     "nodes": [
+      {
+       "id": "shatterbreak",
+       "name": "Shatterbreak",
+       "fx": "detonate",
+       "mod": {
+        "bonusIf": [
+         {
+          "when": "execute:0.3",
+          "mult": 0.8
+         }
+        ]
+       }
+      },
+      {
+       "id": "runed_edge",
+       "name": "Runed Edge",
+       "fx": "stack",
+       "mod": {
+        "stack": {
+         "status": "rune",
+         "max": 3
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "stoneskin": {
+   "name": "Runeskin",
+   "shape": "self",
+   "element": "physical",
+   "cooldown": 24,
+   "mp": 14,
+   "selfBuff": {
+    "name": "Runeskin",
+    "seconds": 6,
+    "resist": 0.4,
+    "reflect": 0.15,
+    "stacksOnAttacker": {
+     "status": "rune",
+     "add": 1,
+     "max": 3
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "bedrock",
+       "name": "Bedrock",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "ccImmune": true
+        }
+       }
+      },
+      {
+       "id": "runed_ward",
+       "name": "Runed Ward",
+       "fx": "ward",
+       "mod": {
+        "ward": {
+         "charges": 1,
+         "seconds": 6,
+         "threshold": 0.15
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "thorn_runes",
+       "name": "Thorn Runes",
+       "fx": "counter",
+       "mod": {
+        "selfBuff": {
+         "reflect": 0.35
+        }
+       }
+      },
+      {
+       "id": "rune_drinker",
+       "name": "Rune Drinker",
+       "fx": "drain",
+       "mod": {
+        "selfBuff": {
+         "manaOnHurt": 3
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "echo",
+     "nodes": [
+      {
+       "id": "stone_pulse",
+       "name": "Stone Pulse",
+       "fx": "knock",
+       "mod": {
+        "selfBuff": {
+         "onEnd": {
+          "shape": "around",
+          "radius": 4,
+          "mult": 0.6,
+          "knock": {
+           "push": 3
+          }
+         }
+        }
+       }
+      },
+      {
+       "id": "shared_stone",
+       "name": "Shared Stone",
+       "fx": "link",
+       "mod": {
+        "selfBuff": {
+         "petsShare": 0.5
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "wellspring",
+     "nodes": [
+      {
+       "id": "second_skin",
+       "name": "Second Skin",
+       "fx": "echo",
+       "mod": {
+        "again": {
+         "delay": 6
+        }
+       }
+      },
+      {
+       "id": "stone_oath",
+       "name": "Stone Oath",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "deathPreventOnce": {
+          "burst": {
+           "radius": 5,
+           "mult": 2
+          }
+         }
+        },
+        "mul": {
+         "cooldown": 1.9
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "forge_flame": {
+   "name": "Forge Flame",
+   "shape": "self",
+   "element": "fire",
+   "cooldown": 24,
+   "mp": 12,
+   "imbue": {
+    "seconds": 12,
+    "element": "fire",
+    "mult": 0.4,
+    "status": "burn",
+    "every": {
+     "n": 4,
+     "burst": {
+      "radius": 3,
+      "mult": 1
+     }
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "frost_forge",
+       "name": "Frost Forge",
+       "fx": "form",
+       "mod": {
+        "imbue": {
+         "element": "ice",
+         "status": "chill"
+        }
+       }
+      },
+      {
+       "id": "storm_forge",
+       "name": "Storm Forge",
+       "fx": "form",
+       "mod": {
+        "imbue": {
+         "element": "lightning",
+         "status": "shock"
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "shared_forge",
+       "name": "Shared Forge",
+       "fx": "summon",
+       "mod": {
+        "selfBuff": {
+         "name": "Shared Forge",
+         "seconds": 12,
+         "petsOnly": true,
+         "damage": 0.2
+        }
+       }
+      },
+      {
+       "id": "spark_shower",
+       "name": "Spark Shower",
+       "fx": "burst",
+       "mod": {
+        "imbue": {
+         "splash": 2
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "echo",
+     "nodes": [
+      {
+       "id": "quench",
+       "name": "Quench",
+       "fx": "drain",
+       "mod": {
+        "recast": {
+         "window": 12,
+         "then": {
+          "shape": "self",
+          "heal": 0.15
+         },
+         "say": "quench the metal and heal 15% of your maximum health"
+        }
+       }
+      },
+      {
+       "id": "anvil_rhythm",
+       "name": "Anvil Rhythm",
+       "fx": "burst",
+       "mod": {
+        "imbue": {
+         "every": {
+          "n": 3,
+          "burst": {
+           "radius": 3,
+           "mult": 1
+          }
+         }
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "crescendo",
+     "nodes": [
+      {
+       "id": "eternal_forge",
+       "name": "Eternal Forge",
+       "fx": "charge",
+       "mod": {
+        "imbue": {
+         "seconds": 24
+        },
+        "mul": {
+         "cooldown": 1.5
+        }
+       }
+      },
+      {
+       "id": "rune_forging",
+       "name": "Rune Forging",
+       "fx": "charge",
+       "requires": "rune_hammer",
+       "mod": {
+        "cutCooldown": {
+         "skill": "rune_hammer",
+         "seconds": 5,
+         "per": "cast",
+         "orSelf": 4
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "warding_glyph": {
+   "name": "Warding Glyph",
+   "shape": "ground",
+   "element": "holy",
+   "cooldown": 20,
+   "mp": 16,
+   "place": {
+    "kind": "zone",
+    "seconds": 12,
+    "radius": 6,
+    "every": 1,
+    "buff": {
+     "id": "guard",
+     "resist": 0.25,
+     "seconds": 1.3
+    },
+    "barrierTick": 0.02,
+    "barrierCap": 0.15
+   },
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "moving_glyph",
+       "name": "Moving Glyph",
+       "fx": "zone",
+       "mod": {
+        "place": {
+         "follow": "self"
+        }
+       }
+      },
+      {
+       "id": "wide_glyph",
+       "name": "Wide Glyph",
+       "fx": "zone",
+       "mod": {
+        "place": {
+         "radius": 9,
+         "seconds": 8
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "repelling_glyph",
+       "name": "Repelling Glyph",
+       "fx": "knock",
+       "mod": {
+        "place": {
+         "edge": true,
+         "edgeMult": 0.3,
+         "edgeKnock": {
+          "push": 3
+         }
+        }
+       }
+      },
+      {
+       "id": "healing_glyph",
+       "name": "Healing Glyph",
+       "fx": "drain",
+       "mod": {
+        "place": {
+         "heal": 0.015
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "bulwark",
+     "nodes": [
+      {
+       "id": "marking_glyph",
+       "name": "Marking Glyph",
+       "fx": "tag",
+       "mod": {
+        "place": {
+         "debuff": {
+          "id": "marked",
+          "seconds": 1.3
+         }
+        }
+       }
+      },
+      {
+       "id": "shelter_glyph",
+       "name": "Shelter Glyph",
+       "fx": "ward",
+       "mod": {
+        "place": {
+         "blocksRanged": true
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "aegis",
+     "nodes": [
+      {
+       "id": "glyph_strike",
+       "name": "Glyph Strike",
+       "fx": "post",
+       "mod": {
+        "place": {
+         "strike": {
+          "mult": 0.3,
+          "targets": 3
+         }
+        }
+       }
+      },
+      {
+       "id": "twin_glyph",
+       "name": "Twin Glyph",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      }
+     ]
+    }
+   },
+   "range": 14
+  },
+  "great_anvil": {
+   "name": "The Great Anvil",
+   "shape": "ground",
+   "element": "arcane",
+   "mult": 3.5,
+   "range": 20,
+   "radius": 8,
+   "delay": 1,
+   "cooldown": 45,
+   "mp": 30,
+   "knock": {
+    "stagger": 2
+   },
+   "place": {
+    "kind": "pulse",
+    "seconds": 10,
+    "radius": 8,
+    "ringOn": {
+     "skill": "rune_hammer",
+     "radius": 8,
+     "mult": 1.2,
+     "rune": true
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "fast_fall",
+       "name": "Fast Fall",
+       "fx": "charge",
+       "mod": {
+        "set": {
+         "delay": 0
+        },
+        "mul": {
+         "mult": 0.8
+        }
+       }
+      },
+      {
+       "id": "lodestone",
+       "name": "Lodestone",
+       "fx": "pull",
+       "mod": {
+        "place": {
+         "pull": 1
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "slag_pool",
+       "name": "Slag Pool",
+       "fx": "zone",
+       "mod": {
+        "pool": {
+         "seconds": 6,
+         "radius": 4,
+         "element": "fire",
+         "power": 0.2
+        }
+       }
+      },
+      {
+       "id": "anvil_ward",
+       "name": "Anvil Ward",
+       "fx": "ward",
+       "mod": {
+        "place": {
+         "buff": {
+          "id": "guard",
+          "resist": 0.2,
+          "seconds": 1.3
+         }
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "clangour",
+       "name": "Clangour",
+       "fx": "tag",
+       "mod": {
+        "place": {
+         "taunt": true,
+         "hp": 0.5
+        }
+       }
+      },
+      {
+       "id": "anvil_song",
+       "name": "Anvil Song",
+       "fx": "post",
+       "mod": {
+        "place": {
+         "strike": {
+          "mult": 0.4,
+          "targets": 6
+         },
+         "every": 2
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "conflagration",
+     "nodes": [
+      {
+       "id": "second_anvil",
+       "name": "Second Anvil",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      },
+      {
+       "id": "shatter_anvil",
+       "name": "Shatter Anvil",
+       "fx": "detonate",
+       "mod": {
+        "recast": {
+         "window": 10,
+         "then": {
+          "shape": "around",
+          "radius": 8,
+          "mult": 2.5,
+          "knock": {
+           "push": 4
+          }
+         },
+         "say": "shatter the anvil: everything within 8 m of you takes 250% weapon damage and is knocked 4 m back"
+        }
+       }
+      }
+     ]
+    }
+   }
+  }
+ },
+ "statuses": {
+  "riposted": {
+   "name": "Riposted",
+   "kind": "tag",
+   "owner": "fighter",
+   "element": "physical",
+   "seconds": 5,
+   "fromYou": 0.1
+  },
+  "duel": {
+   "name": "Called Out",
+   "kind": "tag",
+   "owner": "fighter",
+   "element": "physical",
+   "seconds": 6,
+   "fromYou": 0.25
+  },
+  "seared": {
+   "name": "Seared",
+   "kind": "tag",
+   "owner": "paladin",
+   "element": "holy",
+   "seconds": 6,
+   "fromYou": 0.15
+  },
+  "rent": {
+   "name": "Rent",
+   "kind": "tag",
+   "owner": "runesmith",
+   "element": "physical",
+   "seconds": 8,
+   "takeMore": 0.15,
+   "detonateMult": 2
+  }
+ },
+ "classes": {
+  "dragon_knight": [
+   "scale_rend",
+   "flamethrower",
+   "wyrmfall",
+   "wyrm_temper",
+   "dragonscale",
+   "wyrm_ascendant"
+  ],
+  "fighter": [
+   "power_strike",
+   "riposte",
+   "duelist_stance",
+   "lunge",
+   "sweeping_guard",
+   "masters_flurry"
+  ],
+  "knight": [
+   "shield_bash",
+   "guard_stance",
+   "sworn_ward",
+   "challenge",
+   "rampart",
+   "unbroken_banner"
+  ],
+  "paladin": [
+   "sanctified_blade",
+   "consecrate",
+   "oath_hammer",
+   "martyrs_vow",
+   "shining_rebuke",
+   "daybreak_descent"
+  ],
+  "runesmith": [
+   "rune_hammer",
+   "sunder",
+   "stoneskin",
+   "forge_flame",
+   "warding_glyph",
+   "great_anvil"
+  ]
+ }
+}

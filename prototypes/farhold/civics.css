@@ -257,3 +257,66 @@
    only ever styled inside a `.civ-row`, so a bare one in a pane inherited nothing and came out
    the same colour as the background it was explaining. */
 .civ-pane > .civ-note { color: var(--civ-faint); font-size: 13px; line-height: 1.5; margin: 6px 0 0; }
+
+/* ---------------------------------------------------------------- R28: the Production tab
+   js/production-ui.js. Rows wrap so the "why" chain and the fix sit under the machine they explain;
+   the badge colours are the same good / gold / bad the rest of this screen uses. */
+.civics .civ-grid .prod-machine, .civics .civ-grid .prod-drill, .civics .civ-grid .prod-route,
+.civics .civ-grid .prod-alert, .civics .civ-grid .civ-row:has(> .prod-btn) { flex-wrap: wrap; }
+.prod-head b, .prod-head .civ-right { font-size: 11px; color: var(--civ-faint); font-weight: 600; }
+.prod-badge {
+  font-size: 10.5px; letter-spacing: .5px; text-transform: uppercase; padding: 0 6px;
+  border-radius: 8px; border: 1px solid currentColor; white-space: nowrap;
+}
+.prod-badge--ok { color: var(--civ-good); }
+.prod-badge--warn { color: var(--civ-gold); }
+.prod-badge--bad { color: var(--civ-bad); }
+.prod-tools { display: flex; gap: 6px; align-items: center; margin-left: auto; flex-wrap: wrap; }
+.prod-btn {
+  padding: 2px 9px; border-radius: 5px; cursor: pointer; font: inherit; font-size: 12px;
+  border: 1px solid var(--civ-line); background: var(--civ-soft); color: var(--civ-ink);
+}
+.prod-btn:hover { border-color: var(--civ-accent); }
+.prod-btn:focus-visible { outline: 2px solid var(--civ-accent); outline-offset: 1px; }
+.civ-row > .prod-btn:first-of-type { margin-left: auto; }
+.prod-why { color: var(--civ-ink); }
+.prod-chain { padding-left: 10px; }
+.prod-fix { color: var(--civ-accent); }
+.prod-alert--bad > b { color: var(--civ-bad); }
+.prod-alert--warn > b { color: var(--civ-gold); }
+.prod-chips { display: flex; flex-wrap: wrap; gap: 4px; flex-basis: 100%; }
+.prod-chip {
+  padding: 1px 8px; border-radius: 10px; cursor: pointer; font: inherit; font-size: 11.5px;
+  border: 1px solid var(--civ-line); background: transparent; color: var(--civ-faint);
+}
+.prod-chip.on { color: #061018; background: var(--civ-accent); border-color: var(--civ-accent); }
+
+/* the pill: one line on the HUD, above the hold readout, only when something needs you */
+.prod-pill {
+  position: fixed; left: 14px; bottom: 128px; z-index: 8;
+  padding: 4px 12px; border-radius: 12px; cursor: pointer;
+  background: rgba(8, 13, 23, 0.8); border: 1px solid #8a6a10; color: #ffd24a;
+  font: 12px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.prod-pill[hidden] { display: none !important; }
+.prod-pill.prod-pill--bad { border-color: #a04a3a; color: #ff9a8a; }
+@media (max-width: 720px) { .prod-pill { left: 8px; bottom: 106px; } }
+
+/* R28 — Send a cart (the Trade tab). js/trade.js could run a cart route and nothing could start one. */
+.civ-cart-pick { gap: 8px; flex-wrap: wrap; align-items: center; }
+.civ-select {
+  min-width: 0; max-width: 100%; padding: 3px 6px; border-radius: 4px; font: inherit; font-size: 12px;
+  border: 1px solid var(--civ-line); background: rgba(8, 13, 23, 0.9); color: var(--civ-ink);
+}
+.civ-select:focus-visible { outline: 2px solid var(--civ-accent); outline-offset: 1px; }
+.civ-cart-to { flex: 1 1 200px; }
+.civ-cart-good { flex-wrap: wrap; }
+.civ-cart-n { min-width: 26px; text-align: center; font-variant-numeric: tabular-nums; color: var(--civ-faint); }
+.civ-cart-n.on { color: var(--civ-gold); font-weight: 600; }
+.civ-cart-plan > div + div { margin-top: 2px; }
+.civ-cart-send { margin-top: 8px; }
+.civ-go:disabled { opacity: .45; cursor: not-allowed; }
+.civ-cart-go { gap: 8px; align-items: center; margin-top: 8px; }
+.civ-cart-go .civ-cart-send { margin: 0; }
+.civ-cart-route { flex-wrap: wrap; }
+.civ-cart-route .civ-cart-repeat { margin-left: auto; }

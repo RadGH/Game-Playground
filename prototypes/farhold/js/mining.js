@@ -226,7 +226,9 @@ export function createMining({ data = {}, ore: oreIn = null, stores = null, grid
          * like it is working, the stock climbs, and nothing arrives. Saying "hauling" is worth more
          * than any number beside it.
          */
-        limit: !d.entry.powered ? 'power'
+        // R28 — `lit`, not `d.entry.powered`: a hand-cranked Small Drill is never on a grid, so every
+        // one of them read "power" here while it was digging away (the same rule `tick` uses)
+        limit: !lit ? 'power'
           : !node || node.depleted ? 'seam'
           : !r ? 'no route'
           : d.stock >= STOCK_CAP ? 'hauling'
@@ -313,9 +315,26 @@ export function createMining({ data = {}, ore: oreIn = null, stores = null, grid
          * data/resources.json (`handCranked: true`), not a name this file has to recognise: add a
          * third kind of drill tomorrow and nothing here changes.
          */
-        if (!data?.tools?.[d.tool]?.handCranked && !d.entry.powered) continue;
+        const lit = data?.tools?.[d.tool]?.handCranked || d.entry.powered;
+        /**
+         * R28 — A DIGGING DRILL TELLS THE GRID IT IS BUSY.
+         *
+         * js/refine.js has always called `grid.setBusy` for a bench; this file never did, so an
+         * 18 kW Drill digging flat out was billed the grid's `idleShare` (25%) — 4.5 kW — and one
+         * generator could carry four of them. The power panel now has an honest number to show.
+         */
+        grid?.setBusy?.(d.entry.id, !!lit && d.stock < STOCK_CAP && !!node && !node.depleted);
+        if (!lit) continue;
         if (d.stock >= STOCK_CAP) continue;
-        const out = mine(node, dt, { data, drill: true, rate: drillRate(node, { data, drill: d.tool, powered: 1 }) });
+        const rate = drillRate(node, { data, drill: d.tool, powered: 1 });
+        /**
+         * R28 — NEVER DIG PAST THE PILE'S CAP IN ONE STEP.
+         *
+         * Harmless at a sixtieth of a second; the away clock (js/logistics.js) runs this in slices of
+         * up to fifteen minutes, and one of those would have dug ten thousand ore into a 200 pile.
+         */
+        const secs = rate > 0 ? Math.min(dt, (STOCK_CAP - d.stock) / rate) : dt;
+        const out = mine(node, secs, { data, drill: true, rate });
         if (out.got > 0) { d.stock += out.got; ore?.noteWorked?.(node); }
       }
       for (const r of routes) {
@@ -334,7 +353,7 @@ export function createMining({ data = {}, ore: oreIn = null, stores = null, grid
 
     toJSON() {
       return {
-        drills: [...drills.values()].map(d => ({ id: d.entry.id, nodeId: d.nodeId, stock: d.stock, resource: d.resource })),
+        drills: [...drills.values()].map(d => ({ id: d.entry.id, nodeId: d.nodeId, stock: d.stock, resource: d.resource, tool: d.tool })),
         routes: routes.map(({ id, fromId, toPoolId, hauler, carried }) => ({ id, fromId, toPoolId, hauler, carried })),
         seq,
       };
@@ -344,7 +363,17 @@ export function createMining({ data = {}, ore: oreIn = null, stores = null, grid
       drills.clear();
       for (const d of json?.drills || []) {
         const entry = entryOf ? entryOf(d.id) : null;
-        if (entry) drills.set(d.id, { entry, nodeId: d.nodeId, stock: d.stock || 0, resource: d.resource });
+        /**
+         * R28 — THE KIND OF DRILL SURVIVES A RELOAD.
+         *
+         * `tool` was never written, so a loaded drill had `tool: undefined` — and `drillRate`'s
+         * default parameter turned that into `'drill'`: every Small Drill (tier 1, ×1.4, hand-cranked)
+         * came back from a save as a full powered Drill (tier 3, ×3.2), digging hardness-2 seams it
+         * had been refused the hour before. An old save has no `tool`, so it is worked out the same
+         * way `bindDrill` does it — from the piece that is standing there.
+         */
+        const tool = d.tool && data?.tools?.[d.tool] ? d.tool : (entry && data?.tools?.[entry.key] ? entry.key : 'drill');
+        if (entry) drills.set(d.id, { entry, nodeId: d.nodeId, stock: d.stock || 0, resource: d.resource, tool });
       }
       routes = (json?.routes || []).filter(r => drills.has(r.fromId)).map(r => ({ ...r, path: null, pathKey: '' }));
       seq = json?.seq || routes.length;

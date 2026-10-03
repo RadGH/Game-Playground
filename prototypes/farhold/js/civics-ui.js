@@ -14,6 +14,8 @@
 // injected by this module rather than linked from index.html so that adding a whole screen to the
 // game touches neither the page nor style.css.
 
+import { productionPanes } from './production-ui.js';
+
 const CSS_HREF = 'civics.css';
 
 /** One element, with children. Small enough that a helper library would be the heavier option. */
@@ -56,6 +58,11 @@ const empty = text => el('div', { class: 'civ-empty', text });
 const pct = n => `${Math.round((n || 0) * 100)}%`;
 
 export const CIVICS_TABS = [
+  /**
+   * R28 — PRODUCTION. What the base makes, what is stuck and why, and the one thing to do about it:
+   * js/production.js thinks, js/production-ui.js draws. First, because it is the tab the pill opens.
+   */
+  { key: 'production', name: 'Production' },
   { key: 'people', name: 'People' },
   { key: 'houses', name: 'Houses' },
   { key: 'work', name: 'Work' },
@@ -101,13 +108,30 @@ export function createCivicsScreen({
    * so js/civics-ui.js stays a screen and nothing else.
    */
   musterAt = () => null, onMuster = null,
+  /**
+   * R28 — the base economy (js/production.js) and the callbacks its tab drives, and the People
+   * tab's own buttons: `people.post(id)` / `people.standDown(id)` / `people.accept(offerId)` /
+   * `people.turnAway(offerId)` / `people.offers()` / `people.posts()`. All optional — the screen
+   * draws without them, the way it always has.
+   */
+  production = null, productionActions = {}, people: peopleActions = null,
+  /**
+   * R28 — the Trade tab's "Send a cart". `cart.places()` -> the settlements a cart can go to
+   * (`{ id, name, x, z, size, biome, race, market, metres }`, nearest first) and `cart.send(draft)`
+   * -> `{ ok, why }`. Pricing and the carrier list come from js/civics.js itself.
+   */
+  cart: cartActions = null,
 } = {}) {
   // the stylesheet, once, and never a second copy if a save is reloaded in place
   if (!document.querySelector(`link[href="${CSS_HREF}"]`)) {
     document.head.appendChild(el('link', { rel: 'stylesheet', href: CSS_HREF }));
   }
 
-  let tab = 'people';
+  let tab = 'production';
+  // R28 — js/main.js builds the economy reader after this screen (it needs the supply routes,
+  // which come later in boot), so it is handed over with `setProduction` rather than at creation
+  let prod = production;
+  let prodActions = productionActions || {};
   let open = false;
 
   const body = el('div', { class: 'civics-body' });
@@ -154,13 +178,47 @@ export function createCivicsScreen({
         row('Rent a day', `+${c.rent || 0}`, 'a trader pays more than two citizens, and costs you a bed', 'civ-gold'),
         row('Wages a day', `−${c.wages || 0}`, null, c.wages ? 'civ-bad' : ''),
       ]),
-      pane('Everybody', people.map(p => row(
-        p.name,
-        `${p.unitsToday ?? 0} units today`,
-        p.line.replace(`${p.name} — `, ''),
-        p.housed ? '' : 'civ-bad',
-      ))),
+      pane('Everybody', people.map(p => {
+        const line = row(
+          p.name,
+          `${p.unitsToday ?? 0} units today`,
+          p.line.replace(`${p.name} — `, ''),
+          p.housed ? '' : 'civ-bad',
+        );
+        /**
+         * R28 — THE WATCH HAS A WAY IN. `colony.station` was finished and nothing called it, so
+         * "Standing a watch" above was 0 in every game ever played. With a post standing, each
+         * person gets a button: on the watch, or back to what they did before.
+         */
+        if (peopleActions) {
+          const posts = peopleActions.posts?.() || [];
+          if (p.posted) {
+            line.append(el('button', { class: 'prod-btn', text: 'Stand down', onclick: () => { peopleActions.standDown?.(p.id); draw(); } }));
+          } else if (posts.length) {
+            line.append(el('button', {
+              class: 'prod-btn', text: 'Post on the watch',
+              title: `Guards cost ${c.wages != null ? 'a wage' : 'gold'} a day out of the purse, and each one counts as a turret when a raid comes.`,
+              onclick: () => { peopleActions.post?.(p.id); draw(); },
+            }));
+          }
+        }
+        return line;
+      })),
     ];
+  }
+
+  /** R28 — somebody at the gate. The B panel had the only buttons; the People tab has them too. */
+  function drawOffers() {
+    const offers = peopleActions?.offers?.() || [];
+    if (!offers.length) return null;
+    return pane('At the gate', offers.map(o => {
+      const line = row(o.name, null, o.job);
+      line.append(
+        el('button', { class: 'prod-btn', text: 'Take them in', onclick: () => { peopleActions.accept?.(o.id); draw(); } }),
+        el('button', { class: 'prod-btn', text: 'Turn away', onclick: () => { peopleActions.turnAway?.(o.id); draw(); } }),
+      );
+      return line;
+    }));
   }
 
   function drawHouses(r) {
@@ -296,30 +354,173 @@ export function createCivicsScreen({
 
     const posts = pane('Trade Posts', (r.tradePosts || []).length
       ? (r.tradePosts || []).map(p => row(p.name, `${Math.round(p.x)}, ${Math.round(p.z)}`, 'a route may start or end here'))
-      : empty('A Trade Post holds two tonnes of finished goods and is the only place a route can start or end.'));
+      : empty('A Trade Post is the only place a cart route can start or end. Its goods are whatever the stores beside it hold.'));
 
     const routes = pane('On the road', (r.routes || []).length
-      ? (r.routes || []).map(x => row(
+      ? (r.routes || []).map(x => withRepeat(x, row(
         `${x.carrierName} to ${x.toName}`,
-        x.state === 'travelling' ? `${Math.max(0, Math.round(x.left / 60))} min` : x.state,
-        `${x.kg} kg · ${x.guards} guard${x.guards === 1 ? '' : 's'} · ${pct(x.risk)} risk · ${x.profit} gold if it gets there`,
+        x.state === 'travelling' ? (x.left < 60 ? 'under a minute' : `${Math.round(x.left / 60)} min`) : x.state,
+        // R28 — the revenue, not `profit`: `profit` takes off what the goods would COST to buy at the
+        // post, and these are your own goods, so a good run read "−51 gold if it gets there"
+        `${x.kg} kg · ${x.guards} guard${x.guards === 1 ? '' : 's'} · ${pct(x.risk)} risk · ${x.revenue} gold if it gets there`,
         x.state === 'lost' ? 'civ-bad' : x.state === 'arrived' ? 'civ-good' : '',
-      ))
+      )))
       : empty('No carts out. A run pays roughly what a fight does and does it while you are somewhere else.'));
 
-    return [holdPane, posts, routes];
+    return [holdPane, posts, drawSendCart(r), routes].filter(Boolean);
+  }
+
+  /**
+   * R28 — SEND A CART. js/trade.js could price, send, move, rob and pay a cart route, and nothing
+   * ever called `plan` or `open`, so "On the road" was empty in every game. This is the form:
+   * from which post, to which town, on what, with how many guards, carrying what — and the price
+   * of the run worked out live, before anything leaves.
+   */
+  const draft = { postId: null, toId: null, carrier: 'hand_cart', guards: 0, manifest: {}, repeat: false };
+
+  /**
+   * R28 — A STANDING RUN. Each cart sent from your own post carries a Repeat toggle: on, it
+   * re-loads the same goods when it gets back and goes again (js/civics.js `resend`), and stops
+   * with the reason in the log when the goods, the feed or the upkeep run out.
+   */
+  function withRepeat(x, line) {
+    if (!x.postId || x.state !== 'travelling') return line;
+    line.classList.add('civ-cart-route');
+    line.append(el('button', {
+      class: `prod-chip civ-cart-repeat${x.repeat ? ' on' : ''}`, text: x.repeat ? 'Repeat: on' : 'Repeat: off',
+      title: x.repeat ? 'It will load up and go again when it gets back. Click to make this the last run.' : 'Click to send it again, with the same load, every time it gets back.',
+      onclick: () => { cartActions?.repeat?.(x.id, !x.repeat); draw(); },
+    }));
+    return line;
+  }
+
+  function select(options, value, onpick, cls) {
+    const s = el('select', { class: `civ-select ${cls || ''}`.trim(), onchange: e => { onpick(e.target.value); e.target.blur(); draw(); } });
+    for (const o of options) {
+      const opt = el('option', { value: o.value, text: o.text });
+      if (o.disabled) opt.disabled = true;
+      if (String(o.value) === String(value)) opt.selected = true;
+      s.appendChild(opt);
+    }
+    return s;
+  }
+
+  function drawSendCart(r) {
+    const posts = r.tradePosts || [];
+    if (!posts.length || !civics?.cartPlan) return null;
+    if (!posts.some(p => p.id === draft.postId)) draft.postId = posts[0].id;
+    const places = cartActions?.places?.() || [];
+    if (!places.length) return pane('Send a cart', empty('There is no town on this world to sell to.'));
+    if (!places.some(p => String(p.id) === String(draft.toId))) draft.toId = places[0].id;
+    const to = places.find(p => String(p.id) === String(draft.toId));
+    const day = getDay();
+    const carriers = civics.cartCarriers({ day, gold: getPlayer()?.gold || 0 });
+    if (!carriers.find(c => c.key === draft.carrier)?.ok) draft.carrier = carriers.find(c => c.ok)?.key || 'porter';
+    const carrier = carriers.find(c => c.key === draft.carrier);
+    draft.guards = Math.min(draft.guards, carrier?.guardsMax || 0);
+    const goods = civics.cartGoods(draft.postId);
+    for (const id of Object.keys(draft.manifest)) {
+      const g = goods.find(x => x.id === id);
+      if (!g) delete draft.manifest[id];
+      else draft.manifest[id] = Math.min(draft.manifest[id], g.n);
+      if (!draft.manifest[id]) delete draft.manifest[id];
+    }
+
+    const pick = el('div', { class: 'civ-row civ-cart-pick' }, [
+      el('b', { text: 'From' }),
+      select(posts.map(p => ({ value: p.id, text: p.name || 'Trade Post' })), draft.postId, v => { draft.postId = v; }, 'civ-cart-from'),
+      el('b', { text: 'to' }),
+      select(places.map(p => ({ value: p.id, text: `${p.name} · ${p.market ? 'market' : 'no market'} · ${p.metres < 1000 ? `${p.metres} m` : `${(p.metres / 1000).toFixed(1)} km`}` })), draft.toId, v => { draft.toId = v; }, 'civ-cart-to'),
+    ]);
+    const carry = el('div', { class: 'civ-row civ-cart-pick' }, [
+      el('b', { text: 'On' }),
+      select(carriers.map(c => ({ value: c.key, text: `${c.name} · ${c.hold} kg · ${c.upkeep} gold${Object.keys(c.feed || {}).length ? ` + ${Object.entries(c.feed).map(([k, n]) => `${n} ${k.replace(/_/g, ' ')}`).join(', ')}` : ''}${c.ok ? '' : ' (not yet)'}`, disabled: !c.ok })), draft.carrier, v => { draft.carrier = v; }, 'civ-cart-carrier'),
+      el('span', { class: 'civ-note', text: `${draft.guards} guard${draft.guards === 1 ? '' : 's'}` }),
+      el('button', { class: 'prod-btn', text: '−', title: 'One guard fewer', onclick: () => { draft.guards = Math.max(0, draft.guards - 1); draw(); } }),
+      el('button', { class: 'prod-btn', text: '+', title: `One more guard (this carrier takes ${carrier?.guardsMax || 0})`, onclick: () => { draft.guards = Math.min(carrier?.guardsMax || 0, draft.guards + 1); draw(); } }),
+    ]);
+    const unavailable = carriers.filter(c => !c.ok).map(c => c.why);
+
+    const goodRows = goods.length
+      ? goods.map(g => {
+        const n = draft.manifest[g.id] || 0;
+        const set = v => { const k = Math.max(0, Math.min(g.n, v)); if (k) draft.manifest[g.id] = k; else delete draft.manifest[g.id]; draw(); };
+        const line = row(g.name, null, `${g.n} to hand (${g.atPost} at the post${g.onBack ? `, ${g.onBack} on your back` : ''}) · ${g.weight} kg each`);
+        line.classList.add('civ-cart-good');
+        line.dataset.good = g.id;
+        line.append(el('div', { class: 'prod-tools' }, [
+          el('button', { class: 'prod-btn', text: '−5', onclick: () => set(n - 5) }),
+          el('button', { class: 'prod-btn', text: '−1', onclick: () => set(n - 1) }),
+          el('span', { class: `civ-cart-n${n ? ' on' : ''}`, text: String(n) }),
+          el('button', { class: 'prod-btn', text: '+1', onclick: () => set(n + 1) }),
+          el('button', { class: 'prod-btn', text: '+5', onclick: () => set(n + 5) }),
+          el('button', { class: 'prod-btn', text: 'All', title: 'As many as there are', onclick: () => set(g.n) }),
+        ]));
+        return line;
+      })
+      : [empty('Nothing to sell yet. Trade goods are made at a workshop, kiln or loom; put them in the stores beside the post or carry them in your hold.')];
+
+    let plan = Object.keys(draft.manifest).length
+      ? civics.cartPlan({ ...draft, to }, { day })
+      : { ok: false, why: 'Load something first.' };
+    // the pack mule eats: say so before the button, not after it
+    const hungry = plan.ok ? civics.feedRefusal?.(draft.carrier, draft.postId) : null;
+    if (hungry) plan = { ok: false, why: hungry };
+    const verdict = plan.ok
+      ? el('div', { class: 'civ-sub civ-cart-plan' }, [
+        el('div', { text: `${plan.kg} of ${plan.hold} kg · ${plan.metres} m · about ${Math.max(1, Math.round(plan.seconds / 60))} min on the road · ${pct(plan.risk)} chance of an ambush` }),
+        el('div', { class: plan.revenue > plan.upkeep ? 'civ-good' : 'civ-bad', text: `Sells for ${plan.revenue} gold at ${plan.toName}, less ${plan.upkeep} upkeep paid now: ${plan.revenue - plan.upkeep} gold clear if it gets there.` }),
+      ])
+      : el('div', { class: 'civ-sub civ-bad civ-cart-plan', text: plan.why });
+    const send = el('button', {
+      class: 'civ-go civ-cart-send', text: plan.ok ? `Send it (${plan.upkeep} gold)` : 'Send it',
+      onclick: () => {
+        const out = cartActions?.send?.({ ...draft, to, manifest: { ...draft.manifest } });
+        if (out?.ok) { draft.manifest = {}; draft.repeat = false; }
+        draw();
+      },
+    });
+    if (!plan.ok) send.disabled = true;
+    const repeat = el('button', {
+      class: `prod-chip civ-cart-repeat${draft.repeat ? ' on' : ''}`, text: draft.repeat ? 'Repeat: on' : 'Repeat: off',
+      title: 'On: the cart loads the same goods and goes again every time it gets back, until something runs out.',
+      onclick: () => { draft.repeat = !draft.repeat; draw(); },
+    });
+    const go = el('div', { class: 'civ-row civ-cart-go' }, [send, repeat]);
+
+    return pane('Send a cart', [
+      pick, carry,
+      ...(unavailable.length ? [el('div', { class: 'civ-sub', text: unavailable.join(' ') })] : []),
+      ...goodRows, verdict, go,
+    ]);
   }
 
   // ------------------------------------------------------------------ drawing
 
   function draw() {
     if (!open) return;
+    // R28 — the frame loop redraws an open Holding four times a second; a <select> that is being
+    // picked from would be torn down under the pointer, so wait until it has its answer
+    const focus = document.activeElement;
+    if (focus && focus.tagName === 'SELECT' && root.contains(focus)) return;
     const r = civics?.report?.({ day: getDay(), gold: getPlayer()?.gold || 0 }) || {};
     for (const [key, btn] of railButtons) btn.classList.toggle('on', key === tab);
     const c = r.colony || {};
     subtitle.textContent = `${c.citizens || 0} people · ${r.housing?.beds || 0} beds · ${(r.traders || []).filter(t => t.state === 'here').length} traders · ${c.gold || 0} gold`;
     body.textContent = '';
-    const panes = tab === 'people' ? drawPeople(r)
+    // R28 — the alert count rides on the Production tab's rail button, like the sheet's own badges
+    const prodBtn = railButtons.get('production');
+    if (prodBtn) {
+      const n = prod?.alerts?.().length || 0;
+      prodBtn.textContent = 'Production';
+      if (n) prodBtn.appendChild(el('span', { class: 'civ-badge', text: String(n) }));
+    }
+    const panes = tab === 'production' ? productionPanes({
+      production: prod,
+      h: { el, pane, row, empty, bar, setBar },
+      actions: Object.fromEntries(Object.entries(prodActions).map(([k, fn]) => [k, (...a) => { fn(...a); draw(); }])),
+    })
+      : tab === 'people' ? [drawOffers(), ...drawPeople(r)].filter(Boolean)
       : tab === 'houses' ? drawHouses(r)
       : tab === 'work' ? drawWork(r)
       : tab === 'traders' ? drawTraders(r)
@@ -385,6 +586,7 @@ export function createCivicsScreen({
 
   return {
     show, hide, toggle, draw, showAway, drawHold,
+    setProduction(p, actions = {}) { prod = p; prodActions = actions || {}; },
     get open() { return open; },
     get root() { return root; },
     set tab(t) { tab = t; draw(); },

@@ -5059,3 +5059,28 @@ folded/rejoined ones. `tests/round11-ui.test.js` now checks the rule (every `ren
 
 Not done: ruts and edge wear in the road colours, and a gentler switchback grade. Both are in
 `research/round28-roads.md`.
+
+## Round 28 — skills, talents and the druid's shapes (2026-10-02)
+
+The request: give every class its own abilities instead of sharing them, make talents change how a skill plays rather than add a percentage, and give the druid shapes that change its other skills. Pipeline: a brainstorm (`research/round28-skills-brainstorm.md`), a harsh roast of it, a final spec (`research/round28-skills-plan.md`), an engine agent, five content agents in parallel, then an interface agent.
+
+**What changed for the player**
+- **180 skills, each owned by one class.** Before this round `execute` sat on 10 classes, `power_strike` on 9 and `meteor` on 9. All 47 old ids were kept and given to the one class they fit best, so saves stay valid; the rest are new. Full list per class: `CLASSES.md` "Round 28".
+- **Talents are written per skill.** Four tiers (levels 3/8/18/28), two bespoke nodes each plus an optional shared node. The roast's rule: at most one size/duration/count talent per skill, and it must cost something. A bespoke node changes the skill's rules — its shape, what happens on impact, how it combines with another of the class's skills, a resource, a form, or what the followers do.
+- **Forms.** One toggle system covers the druid's three shapes — **Briarback** (a thorn boar that tanks), **Fenrunner** (a venomous marsh lizard for close fighting) and **Sporecap** (a walking fungus that heals for a short while), each a real creature body — the Fighter's stances, the Dragon Knight's tempers and the Bard's songs. In a shape, the druid's basic attack and other skills become new ones (Thornlash becomes Bramble Gore in Briarback).
+- **Class resources and marks.** Flair (Swashbuckler, rewards switching skills), Poise (Monk, builds from taking hits), Grudge (Demon Hunter), Frostbite stacks (Mage), corpses (Necromancer), runes (Runesmith), and per-class marks such as Quarry, Grave Marked and Guilty.
+- **Class signatures** (`signature` in `data/classes.json`) on the title screen, the class card and the builder.
+- **Interfaces:** the Skills tab shows all four tiers side by side, each pick lists the numbers it changes ("Damage 143% → 162%"); skill cards show charges, recast windows, resources and form badges, and a form lists what every other skill becomes; old saves whose picks were dropped get a banner until dismissed.
+
+**Engine.** `js/skillmech.js` is the mechanics vocabulary (~60 keys); each key names the file that reads it and writes its own card sentence. `js/skillrun.js` runs placed objects, walls, links, corpses, shades and forms; `main.js` only gained hook calls. `js/skillcard.js` is the shared card logic for every screen. The audit test cuts the description table out of skillmech.js before looking for a reader, because `dotRate` passed the first version of it while nothing outside that file read it — this project's usual fault, "a rule in data nobody reads", caught by a better test rather than by a player.
+
+**Bugs found along the way**
+- A ring or ground skill with no damage number still struck for 100% weapon damage. Now a skill with no `mult` deals none and its card says so.
+- A dash hit a body once per 2 m step of its path, so an enemy near the line was hit several times. Now once.
+- A self-buff that followed a Dragon Knight temper also set the player on fire.
+- `data/classes.json` and `data/skills.json` disagreed on 11 classes' skill lists, so the title screen previewed the wrong skills. A test now keeps them identical.
+- Training-dummy damage looked broken in the browser (1–9 per hit); it was a level-50 dummy with 8,775 armour, not a bug.
+
+**How the content was written.** Five agents wrote six classes each at the same time. Each kept its rows in its own staging file (`data/r28-batches/<batch>.json`), and `tools/merge-r28-batch.mjs` is the only thing that writes `skills.json`/`classes.json`: it takes a lock, copies the rows in and regenerates every card inside the same lock, so no batch could overwrite another's.
+
+**Not built** (plan §13 has the reasons): silence cancelling a warband leader's passive aura; shade copies repeating every rider of a cast; Iron Gyre is deliberately above its balance band.

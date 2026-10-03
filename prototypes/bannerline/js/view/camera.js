@@ -53,6 +53,8 @@ export function createRtsCamera({ fov = 38, pitchDeg = 56 } = {}) {
     /** Snap immediately (match start). */
     snapTo(x, z) { goal.set(x, 0, z); clampGoal(); target.copy(goal); place(); },
     centre() { mode = 'follow'; },
+    /** Look at a point and stop following (minimap click). */
+    lookAt(x, z) { mode = 'free'; goal.set(x, 0, z); clampGoal(); },
     zoomBy(step) {
       zoomIndex = Math.max(0, Math.min(ZOOMS.length - 1, zoomIndex + step));
     },

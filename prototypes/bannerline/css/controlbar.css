@@ -1,4 +1,4 @@
-/* Bannerline bottom control bar: portrait | info | 4x3 command card | belt + minimap. */
+/* Bannerline bottom control bar: portrait | info | command card | items + minimap. */
 .controlbar {
   position: absolute; left: 50%; bottom: 0; transform: translateX(-50%);
   display: grid; grid-template-columns: 150px 260px auto 210px; align-items: stretch; gap: 10px;
@@ -93,26 +93,6 @@
 .cc.locked .cc-lock { display: grid; }
 .cc-util .cc-key { font-size: 9px; }
 
-/* side: belt + minimap */
-.cb-side { display: grid; grid-template-rows: auto 1fr; gap: 6px; }
-.belt { display: flex; gap: 6px; justify-content: flex-end; }
-.flask { position: relative; width: 30px; height: 26px; border-radius: 5px; display: grid; place-items: center; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.12); color: var(--ink3); }
-.flask.full { color: #ff7a8a; border-color: rgba(255,122,138,.45); }
-.flask kbd { position: absolute; left: -4px; bottom: -4px; font-size: 9px; line-height: 11px; padding: 0 2px; min-width: 0; }
-.minimap { width: 210px; height: 122px; border-radius: 6px; border: 1px solid var(--line-strong); background: #1c2318; cursor: pointer; display: block; }
-
-/* roster picker (right-click a send) */
-.roster-picker { position: fixed; z-index: 40; width: 230px; padding: 6px; border-radius: 8px; background: var(--panel2); border: 1px solid var(--line-strong); box-shadow: var(--shadow); display: grid; gap: 3px; pointer-events: auto; }
-.roster-picker[hidden] { display: none; }
-.rp-head { font-size: 12px; color: var(--ink3); text-transform: uppercase; letter-spacing: .08em; padding: 2px 6px 4px; }
-.rp-row { display: grid; grid-template-columns: 34px 1fr auto; align-items: center; gap: 6px; padding: 5px 6px; border-radius: 5px; border: 1px solid transparent; background: transparent; cursor: pointer; text-align: left; }
-.rp-row:hover { background: rgba(242,196,90,.08); border-color: var(--line); }
-.rp-row.in { opacity: .6; }
-.rp-t { font: 700 10px var(--ui); color: var(--ink2); text-align: center; border: 1px solid rgba(255,255,255,.15); border-radius: 3px; padding: 1px 0; }
-.rp-c { display: inline-flex; align-items: center; gap: 3px; color: var(--gold); font-weight: 700; font-variant-numeric: tabular-nums; }
-.rp-c .ic { width: 13px; height: 13px; }
-.muted { color: var(--ink3); }
-
 @media (max-width: 1100px) {
   .controlbar { grid-template-columns: 110px 200px auto 150px; gap: 8px; }
   .portrait-slot { height: 120px; }
@@ -123,37 +103,45 @@
   .cb-portrait, .cb-side, .cb-info { display: none; }
 }
 
-/* belt flasks are buttons */
-button.flask { padding: 0; cursor: pointer; font: inherit; }
-button.flask.full:hover { border-color: #ff9aa8; }
 
-/* Armory panel (M1 gear steps) */
-.shop-panel {
-  position: absolute; right: 12px; bottom: 186px; width: min(560px, calc(100vw - 16px));
-  padding: 10px 12px 10px; border-radius: 10px; background: var(--panel2); border: 1px solid var(--line-strong); box-shadow: var(--shadow);
-  pointer-events: auto; animation: alertIn .2s;
+.muted { color: var(--ink3); }
+
+/* card: Q W E R / D + three buildings / the Barracks hire button */
+.cb-card { grid-template-rows: 46px 46px 46px; }
+.cc-bld .cc-face { color: var(--ink2); background: radial-gradient(circle at 50% 40%, #3a3f4a, #1b1d22); }
+.cc-bld .cc-face .ic { width: 20px; height: 20px; }
+.bld-shop .cc-face { color: #8fd0ff; } .bld-drillyard .cc-face { color: #ffb08a; } .bld-sanctum .cc-face { color: #d6b8ff; }
+.cc-bld .cc-sub { left: 0; right: 0; text-align: center; font-size: 9.5px; color: var(--ink3); text-transform: uppercase; letter-spacing: .05em; }
+.cc-bld.open, .cc-hire.open { box-shadow: inset 0 0 0 2px var(--gold), 0 0 12px rgba(242,196,90,.35); }
+.cc-hire {
+  grid-column: 1 / -1; position: relative; display: flex; align-items: center; gap: 10px; padding: 0 10px; border-radius: 7px; cursor: pointer;
+  background: linear-gradient(180deg, #d9a842, #9c7020); color: #1a1206; border: 1px solid #f2c45a;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 2px 8px rgba(0,0,0,.4), 0 0 14px rgba(242,196,90,.2);
 }
-.shop-panel[hidden] { display: none; }
-.sp-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
-.sp-head b { font: 700 19px var(--head); color: var(--gold); }
-.sp-spent { color: var(--ink3); font-size: 13px; }
-.sp-close { margin-left: auto; background: none; border: 0; color: var(--ink2); font-size: 22px; line-height: 1; cursor: pointer; }
-.sp-best { width: 100%; display: flex; align-items: center; gap: 10px; padding: 7px 10px; margin-bottom: 8px; border-radius: 6px; cursor: pointer;
-  background: linear-gradient(180deg, rgba(242,196,90,.18), rgba(242,196,90,.06)); border: 1px solid var(--gold-dim); font-weight: 700; }
-.sp-best span { display: inline-flex; align-items: center; gap: 6px; }
-.sp-best b { margin-left: auto; color: var(--gold); }
-.sp-best.off { opacity: .5; }
-.sp-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-.sp-slot { display: grid; gap: 2px; text-align: left; padding: 6px 8px; border-radius: 6px; cursor: pointer; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.1); }
-.sp-slot:hover { border-color: var(--line-strong); }
-.sp-slot.can { border-color: rgba(242,196,90,.55); }
-.sp-slot.locked, .sp-slot.done { cursor: default; }
-.sp-slot.locked .sp-next { color: var(--ink3); }
-.sp-slot.done .sp-next { color: var(--green); }
-.sp-name { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink3); }
-.sp-step { font-weight: 700; font-size: 14px; }
-.sp-pips { display: flex; gap: 2px; }
-.sp-pips i { flex: 1; height: 4px; border-radius: 2px; background: rgba(255,255,255,.1); }
-.sp-pips i.on { background: var(--gold); } .sp-pips i.on.r { background: #b98af0; }
-.sp-next { font-size: 12px; color: var(--ink2); }
-.sp-foot { margin-top: 8px; font-size: 12px; color: var(--ink3); }
+.cc-hire:hover { filter: brightness(1.08); }
+.hire-ic { display: flex; gap: 1px; } .hire-ic .ic { width: 18px; height: 18px; }
+.hire-t { display: grid; line-height: 1.05; text-align: left; }
+.hire-t b { font: 800 16px var(--head); letter-spacing: .02em; }
+.hire-t small { font-size: 10.5px; font-weight: 700; opacity: .75; text-transform: uppercase; letter-spacing: .06em; }
+.hire-key { margin-left: auto; background: rgba(0,0,0,.2); color: #2a1d08; border-color: rgba(0,0,0,.35); }
+.controlbar.form .cc-skill .cc-face { box-shadow: inset 0 0 0 2px rgba(150,220,120,.6); }
+
+/* side: six item slots + minimap */
+.cb-side { display: grid; grid-template-rows: auto 1fr; gap: 6px; }
+.cb-inv { display: grid; grid-template-columns: repeat(6, 1fr); gap: 3px; }
+.inv-slot { position: relative; aspect-ratio: 1; padding: 0; border-radius: 5px; cursor: pointer; overflow: hidden; background: rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.16); }
+.inv-slot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.inv-slot b { font: 800 12px var(--head); }
+.inv-slot.empty { border-style: dashed; cursor: default; }
+.inv-slot.usable { border-color: rgba(166,240,180,.5); }
+.inv-slot kbd { position: absolute; left: 0; top: 0; font-size: 8.5px; line-height: 10px; padding: 0 2px; min-width: 0; border-width: 1px; }
+.inv-slot i { position: absolute; right: 2px; bottom: 0; font: 800 10px var(--ui); color: #fff; text-shadow: 0 1px 2px #000; font-style: normal; }
+.inv-slot .uq { position: absolute; right: 2px; top: 0; color: var(--gold); font-size: 10px; }
+.inv-slot.press { animation: ccPress .14s; }
+.minimap { width: 210px; height: 112px; border-radius: 6px; border: 1px solid var(--line-strong); background: #1c2318; cursor: pointer; display: block; }
+
+@container (max-width: 1000px) {
+  .cb-card { grid-template-rows: 40px 40px 40px; grid-template-columns: repeat(4, 48px); }
+  .hire-t small { display: none; }
+  .minimap { width: 128px; height: 74px; }
+}

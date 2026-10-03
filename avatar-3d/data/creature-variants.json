@@ -1143,6 +1143,699 @@
     }
    },
    "game": "bannerline"
+  },
+  "bl_druid_wolf": {
+   "id": "bl_druid_wolf",
+   "name": "Druid Wolf Shape",
+   "desc": "The druid as a great grey-green wolf with a mane of leaves and a glow of sap in its eyes.",
+   "level": 10,
+   "attrs": {
+    "CON": 14,
+    "DEX": 17,
+    "INT": 10,
+    "STR": 14
+   },
+   "voiceRole": "brute",
+   "traits": [
+    "loyal"
+   ],
+   "voice": {
+    "engine": "formant",
+    "variant": "custom",
+    "gender": "n",
+    "pitch": 0.3,
+    "depth": 0.7,
+    "tone": 0.3,
+    "breath": 0.3,
+    "rough": 0.5,
+    "speed": 0.35,
+    "flutter": 0.12,
+    "intonation": 0.4,
+    "wordgap": 0.37,
+    "role": "brute",
+    "seed": 492212589
+   },
+   "speech": {
+    "traits": [
+     "loyal"
+    ],
+    "formality": 0.3,
+    "verbosity": 0.3,
+    "cheer": 0.2,
+    "aggression": 0.85,
+    "confidence": 0.75,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "creature": {
+    "seed": 1,
+    "type": "dire_wolf",
+    "size": 1.1,
+    "colors": {
+     "body": "#5e6a4e",
+     "belly": "#a8ac86",
+     "accent": "#33402a",
+     "eyes": "#b8ff6a"
+    },
+    "features": {
+     "fangs": true,
+     "spikes": false,
+     "mane": true,
+     "claws": true
+    }
+   },
+   "game": "bannerline"
+  },
+  "bl_grove_wolf": {
+   "id": "bl_grove_wolf",
+   "name": "Grove Wolf",
+   "desc": "A wolf called out of the trees by a druid; moss along the spine, bark-brown legs.",
+   "level": 4,
+   "attrs": {
+    "CON": 10,
+    "DEX": 15,
+    "INT": 5,
+    "STR": 11
+   },
+   "voiceRole": "brute",
+   "traits": [
+    "loyal"
+   ],
+   "voice": {
+    "engine": "formant",
+    "variant": "custom",
+    "gender": "n",
+    "pitch": 0.32,
+    "depth": 0.65,
+    "tone": 0.3,
+    "breath": 0.3,
+    "rough": 0.5,
+    "speed": 0.35,
+    "flutter": 0.12,
+    "intonation": 0.4,
+    "wordgap": 0.37,
+    "role": "brute",
+    "seed": 1982296858
+   },
+   "speech": {
+    "traits": [
+     "loyal"
+    ],
+    "formality": 0.3,
+    "verbosity": 0.3,
+    "cheer": 0.2,
+    "aggression": 0.85,
+    "confidence": 0.75,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "creature": {
+    "seed": 1,
+    "type": "wolf",
+    "size": 1,
+    "colors": {
+     "body": "#6a6448",
+     "belly": "#a89c76",
+     "accent": "#3e4a2a",
+     "eyes": "#b8ff6a"
+    },
+    "features": {
+     "fangs": true,
+     "spikes": true
+    }
+   },
+   "game": "bannerline"
+  },
+  "bl_briarback": {
+   "id": "bl_briarback",
+   "name": "Briarback",
+   "desc": "The druid as a bramble-armoured boar that drags every eye in the lane onto itself.",
+   "level": 10,
+   "attrs": {
+    "CON": 18,
+    "DEX": 8,
+    "INT": 8,
+    "STR": 16
+   },
+   "voiceRole": "brute",
+   "traits": [
+    "loyal"
+   ],
+   "voice": {
+    "engine": "formant",
+    "variant": "custom",
+    "gender": "n",
+    "pitch": 0.15,
+    "depth": 0.9,
+    "tone": 0.3,
+    "breath": 0.3,
+    "rough": 0.6,
+    "speed": 0.35,
+    "flutter": 0.12,
+    "intonation": 0.4,
+    "wordgap": 0.37,
+    "role": "brute",
+    "seed": 2022773139
+   },
+   "speech": {
+    "traits": [
+     "loyal"
+    ],
+    "formality": 0.3,
+    "verbosity": 0.3,
+    "cheer": 0.2,
+    "aggression": 0.85,
+    "confidence": 0.75,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "creature": {
+    "seed": 1,
+    "type": "thornback",
+    "size": 0.95,
+    "colors": {
+     "body": "#6b4f2a",
+     "belly": "#8a6f48",
+     "accent": "#cfe08a",
+     "eyes": "#e0c060",
+     "nose": "#2a1e10"
+    },
+    "features": {
+     "horns": true,
+     "plates": true,
+     "spikes": true,
+     "tusks": true
+    }
+   },
+   "game": "bannerline"
+  },
+  "bl_plague_rat": {
+   "id": "bl_plague_rat",
+   "name": "Plague Rat",
+   "desc": "Grave rats swollen with sickness; they come in threes and nobody wants to stamp on them.",
+   "level": 1,
+   "attrs": {
+    "CON": 5,
+    "DEX": 15,
+    "INT": 3,
+    "STR": 4
+   },
+   "voiceRole": "brute",
+   "traits": [
+    "hungry"
+   ],
+   "voice": {
+    "engine": "formant",
+    "variant": "custom",
+    "gender": "n",
+    "pitch": 0.9,
+    "depth": 0.1,
+    "tone": 0.3,
+    "breath": 0.3,
+    "rough": 0.8,
+    "speed": 0.35,
+    "flutter": 0.12,
+    "intonation": 0.4,
+    "wordgap": 0.37,
+    "role": "brute",
+    "seed": 1643214520
+   },
+   "speech": {
+    "traits": [
+     "hungry"
+    ],
+    "formality": 0.3,
+    "verbosity": 0.3,
+    "cheer": 0.2,
+    "aggression": 0.85,
+    "confidence": 0.75,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "creature": {
+    "seed": 1,
+    "type": "rat",
+    "size": 1.45,
+    "colors": {
+     "body": "#6a6458",
+     "belly": "#9a9a7a",
+     "accent": "#c890a0",
+     "eyes": "#9aff6a"
+    },
+    "features": {
+     "whiskers": true,
+     "spikes": true
+    }
+   },
+   "game": "bannerline"
+  },
+  "bl_wailing_shade": {
+   "id": "bl_wailing_shade",
+   "name": "Wailing Shade",
+   "desc": "A drowned ghost in rags that drifts over walls and shields the dead around it.",
+   "level": 5,
+   "attrs": {
+    "CON": 8,
+    "DEX": 14,
+    "INT": 12,
+    "STR": 6
+   },
+   "voiceRole": "brute",
+   "traits": [
+    "grieving"
+   ],
+   "voice": {
+    "engine": "formant",
+    "variant": "custom",
+    "gender": "n",
+    "pitch": 0.7,
+    "depth": 0.4,
+    "tone": 0.3,
+    "breath": 0.3,
+    "rough": 0.9,
+    "speed": 0.35,
+    "flutter": 0.12,
+    "intonation": 0.4,
+    "wordgap": 0.37,
+    "role": "brute",
+    "seed": 152109328
+   },
+   "speech": {
+    "traits": [
+     "grieving"
+    ],
+    "formality": 0.3,
+    "verbosity": 0.3,
+    "cheer": 0.2,
+    "aggression": 0.85,
+    "confidence": 0.75,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "creature": {
+    "seed": 1,
+    "type": "wraith",
+    "size": 1.05,
+    "colors": {
+     "body": "#3e5a5e",
+     "belly": "#7ab0b4",
+     "accent": "#122024",
+     "eyes": "#8affe8"
+    },
+    "features": {
+     "glow": true,
+     "claws": true
+    }
+   },
+   "game": "bannerline"
+  },
+  "bl_carrion_hulk": {
+   "id": "bl_carrion_hulk",
+   "name": "Carrion Hulk",
+   "desc": "A heap of the fallen stitched into one shape; cut it down and smaller pieces crawl on.",
+   "level": 8,
+   "attrs": {
+    "CON": 18,
+    "DEX": 5,
+    "INT": 3,
+    "STR": 15
+   },
+   "voiceRole": "brute",
+   "traits": [
+    "hungry"
+   ],
+   "voice": {
+    "engine": "formant",
+    "variant": "custom",
+    "gender": "n",
+    "pitch": 0.08,
+    "depth": 1,
+    "tone": 0.3,
+    "breath": 0.3,
+    "rough": 0.9,
+    "speed": 0.35,
+    "flutter": 0.12,
+    "intonation": 0.4,
+    "wordgap": 0.37,
+    "role": "brute",
+    "seed": 222782795
+   },
+   "speech": {
+    "traits": [
+     "hungry"
+    ],
+    "formality": 0.3,
+    "verbosity": 0.3,
+    "cheer": 0.2,
+    "aggression": 0.85,
+    "confidence": 0.75,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "creature": {
+    "seed": 1,
+    "type": "horror",
+    "size": 1.35,
+    "colors": {
+     "body": "#5a5048",
+     "belly": "#8a6a5a",
+     "accent": "#2a1e1a",
+     "eyes": "#8affe8"
+    },
+    "features": {
+     "glow": true,
+     "fangs": true
+    }
+   },
+   "game": "bannerline"
+  },
+  "bl_ash_ogre": {
+   "id": "bl_ash_ogre",
+   "name": "Ash Ogre",
+   "desc": "A soot-black giant that carries embers in its chest and bursts when it falls.",
+   "level": 14,
+   "attrs": {
+    "CON": 19,
+    "DEX": 6,
+    "INT": 4,
+    "STR": 19
+   },
+   "voiceRole": "brute",
+   "traits": [
+    "bloodlust"
+   ],
+   "voice": {
+    "engine": "formant",
+    "variant": "custom",
+    "gender": "n",
+    "pitch": 0.05,
+    "depth": 1,
+    "tone": 0.3,
+    "breath": 0.3,
+    "rough": 0.8,
+    "speed": 0.35,
+    "flutter": 0.12,
+    "intonation": 0.4,
+    "wordgap": 0.37,
+    "role": "brute",
+    "seed": 1497676916
+   },
+   "speech": {
+    "traits": [
+     "bloodlust"
+    ],
+    "formality": 0.3,
+    "verbosity": 0.3,
+    "cheer": 0.2,
+    "aggression": 0.85,
+    "confidence": 0.75,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "creature": {
+    "seed": 1,
+    "type": "titan",
+    "size": 1.05,
+    "colors": {
+     "body": "#4a3a32",
+     "belly": "#7a5a46",
+     "accent": "#1e1612",
+     "eyes": "#ff7a2a"
+    },
+    "features": {
+     "core": true,
+     "horns": true,
+     "spikes": true,
+     "claws": true
+    }
+   },
+   "game": "bannerline"
+  },
+  "bl_hyena": {
+   "id": "bl_hyena",
+   "name": "Thornmane Hyena",
+   "desc": "Lean, spotted and laughing; packs of three strip a wounded hero in seconds.",
+   "level": 4,
+   "attrs": {
+    "CON": 9,
+    "DEX": 16,
+    "INT": 6,
+    "STR": 10
+   },
+   "voiceRole": "brute",
+   "traits": [
+    "cruel"
+   ],
+   "voice": {
+    "engine": "formant",
+    "variant": "custom",
+    "gender": "n",
+    "pitch": 0.6,
+    "depth": 0.4,
+    "tone": 0.3,
+    "breath": 0.3,
+    "rough": 0.6,
+    "speed": 0.35,
+    "flutter": 0.12,
+    "intonation": 0.4,
+    "wordgap": 0.37,
+    "role": "brute",
+    "seed": 1472919628
+   },
+   "speech": {
+    "traits": [
+     "cruel"
+    ],
+    "formality": 0.3,
+    "verbosity": 0.3,
+    "cheer": 0.2,
+    "aggression": 0.85,
+    "confidence": 0.75,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "creature": {
+    "seed": 1,
+    "type": "hyena",
+    "size": 1,
+    "colors": {
+     "body": "#8a7a50",
+     "belly": "#c8b98f",
+     "accent": "#3a2e1a",
+     "eyes": "#f0c040"
+    },
+    "features": {
+     "fangs": true,
+     "mane": true,
+     "claws": true
+    }
+   },
+   "game": "bannerline"
+  },
+  "bl_bear_warden": {
+   "id": "bl_bear_warden",
+   "name": "Bear Warden",
+   "desc": "A moss-backed bear that the Thornmane send in front to soak the blows; its wounds close by themselves.",
+   "level": 8,
+   "attrs": {
+    "CON": 18,
+    "DEX": 8,
+    "INT": 6,
+    "STR": 16
+   },
+   "voiceRole": "brute",
+   "traits": [
+    "gruff"
+   ],
+   "voice": {
+    "engine": "formant",
+    "variant": "custom",
+    "gender": "n",
+    "pitch": 0.12,
+    "depth": 0.9,
+    "tone": 0.3,
+    "breath": 0.3,
+    "rough": 0.6,
+    "speed": 0.35,
+    "flutter": 0.12,
+    "intonation": 0.4,
+    "wordgap": 0.37,
+    "role": "brute",
+    "seed": 414778312
+   },
+   "speech": {
+    "traits": [
+     "gruff"
+    ],
+    "formality": 0.3,
+    "verbosity": 0.3,
+    "cheer": 0.2,
+    "aggression": 0.85,
+    "confidence": 0.75,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "creature": {
+    "seed": 1,
+    "type": "bear",
+    "size": 1,
+    "colors": {
+     "body": "#4e4430",
+     "belly": "#7a6a48",
+     "accent": "#2c3a1e",
+     "eyes": "#d8ff8a"
+    },
+    "features": {
+     "claws": true,
+     "spikes": true
+    }
+   },
+   "game": "bannerline"
+  },
+  "bl_elk_charger": {
+   "id": "bl_elk_charger",
+   "name": "Elk Charger",
+   "desc": "A war elk with antlers like a hedge of spears; nothing slows it once it runs.",
+   "level": 10,
+   "attrs": {
+    "CON": 15,
+    "DEX": 14,
+    "INT": 6,
+    "STR": 16
+   },
+   "voiceRole": "brute",
+   "traits": [
+    "brave"
+   ],
+   "voice": {
+    "engine": "formant",
+    "variant": "custom",
+    "gender": "n",
+    "pitch": 0.2,
+    "depth": 0.8,
+    "tone": 0.3,
+    "breath": 0.3,
+    "rough": 0.5,
+    "speed": 0.35,
+    "flutter": 0.12,
+    "intonation": 0.4,
+    "wordgap": 0.37,
+    "role": "brute",
+    "seed": 773857571
+   },
+   "speech": {
+    "traits": [
+     "brave"
+    ],
+    "formality": 0.3,
+    "verbosity": 0.3,
+    "cheer": 0.2,
+    "aggression": 0.85,
+    "confidence": 0.75,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "creature": {
+    "seed": 1,
+    "type": "elk",
+    "size": 1.15,
+    "colors": {
+     "body": "#6a5638",
+     "belly": "#c8b48a",
+     "accent": "#d8cca0",
+     "eyes": "#2a1a08"
+    },
+    "features": {
+     "antlers": true,
+     "hooves": true,
+     "mane": true
+    }
+   },
+   "game": "bannerline"
+  },
+  "bl_elder_bear": {
+   "id": "bl_elder_bear",
+   "name": "Elder Bear",
+   "desc": "The oldest bear of the Thornmane: grey-muzzled, thorn-crowned and twice the Warden's size.",
+   "level": 14,
+   "attrs": {
+    "CON": 20,
+    "DEX": 7,
+    "INT": 8,
+    "STR": 19
+   },
+   "voiceRole": "brute",
+   "traits": [
+    "gruff"
+   ],
+   "voice": {
+    "engine": "formant",
+    "variant": "custom",
+    "gender": "n",
+    "pitch": 0.04,
+    "depth": 1,
+    "tone": 0.3,
+    "breath": 0.3,
+    "rough": 0.7,
+    "speed": 0.35,
+    "flutter": 0.12,
+    "intonation": 0.4,
+    "wordgap": 0.37,
+    "role": "brute",
+    "seed": 1548253823
+   },
+   "speech": {
+    "traits": [
+     "gruff"
+    ],
+    "formality": 0.3,
+    "verbosity": 0.3,
+    "cheer": 0.2,
+    "aggression": 0.85,
+    "confidence": 0.75,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "creature": {
+    "seed": 1,
+    "type": "bear",
+    "size": 1.55,
+    "colors": {
+     "body": "#5a5448",
+     "belly": "#9a907a",
+     "accent": "#d6cca6",
+     "eyes": "#d8ff8a"
+    },
+    "features": {
+     "claws": true,
+     "spikes": true,
+     "horns": true,
+     "plates": true
+    }
+   },
+   "game": "bannerline"
   }
  }
 }

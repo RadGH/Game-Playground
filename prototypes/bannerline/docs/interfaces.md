@@ -461,3 +461,42 @@ Damage from powers has no hero source. Per-power cooldown (`player.powerCd`), go
 Removed with the old gear: `GEAR_SLOTS`, `GEAR_STEPS`, `SLOTS`, `gearInfo`, `affixLine`, the `upgrade` "buy cheapest" path,
 Requisition, champion picks, Oil, the potion belt (`potion`/`drink`; draughts are Outfitter consumables now).
 
+
+## 12. Online play (stream D, M5) — `js/net/`, full write-up in `docs/online.md`
+
+```js
+import { createTransport, cleanRoomCode, NET_MESSAGES } from './net/transport.js';
+import { createRoom, joinRoom, beginMatch } from './net/lobbysync.js';
+import { createNetClock } from './net/netclock.js';
+
+const t = await createTransport('peerjs');                     // 'channel' between tabs (tests), 'loopback' (node)
+const room = await createRoom({ transport: t, name, dataHash: data.hash, format: '2v2' });   // host; room.code
+const room = await joinRoom({ transport: t, code: cleanRoomCode(typed), name, dataHash: data.hash });
+// errors: e.code 'version' | 'full' | 'no-room' | 'timeout' | 'taken'; show e.message (plain language)
+room.on('change', state => render(state));                     // state: interfaces below
+room.claim('1-0', { local: 0, name, race, hero, device });     // one call per local (couch) player
+room.update(key, { race, hero }); room.ready(key, true); room.release(key);
+room.setSlot('1-1', { kind: 'ai', difficulty: 'veteran' });    // host
+room.configure({ mode: 'linewar', format: '3v3' });            // host
+room.on('start', packet => {                                    // host: room.start() fires it too
+  const match = beginMatch(room, packet, { data, createSim, restoreSim, now: () => performance.now(),
+                                          onEvent: (type, e) => banner(type, e) });
+  const clock = createNetClock({ lockstep: match.lockstep, tickMs: packet.tickMs });
+  clock.attachVisibility(document);
+  // match.localPlayers: [{ pid, local, device, name }] — which sim players this machine's seats are
+});
+room.backToLobby();   // host, after results; seats kept, ready cleared
+```
+
+`room.state = { code, hostId, phase: 'lobby'|'match', mode, format, map, slots: [{ key, team, index, kind:
+'open'|'human'|'ai'|'closed', owner (machine id), local, name, race, hero, device, ready, difficulty }], machines:
+[{ id, name, ping, hidden, host }] }`. A `human` slot with `owner === room.me` is one of this machine's seats.
+
+In the match: `clock.frame(dt, takeCommands)` exactly like the local clock; **`clock.sim` is the sim to draw
+and read every frame** (a resync / rejoin replaces it). `clock.waitingFor` = `[{ name, hidden }]` → "Waiting
+for Radley (tab hidden)". Lockstep events through `onEvent`: `takeover` / `rejoin` (`{ name, players, atTick }`
+→ "Radley left — an AI takes over at 1:42"), `hostLeft` ("Host left — match ended"), `desync` / `resync`
+(debug), `status`. Speed and pause are fixed online. Sim events `takeover` / `release` (`{ player }`) mark a
+seat changing hands. Rejoin: `joinRoom({ ..., rejoinToken })` then `beginMatch(room, room.rejoin.packet,
+{ ..., rejoin: room.rejoin })`; keep `{ code, token }` (`packet.machines[].token` of this machine) in
+sessionStorage so a reload can rejoin.

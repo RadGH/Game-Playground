@@ -110,16 +110,31 @@ export function createLooks({ looks, units, races = null, presets, outfits = nul
       look.id = id; look.name = u.name; look.race = u.race; look.tier = u.tier;
       cache.set(key, look); return look;
     },
-    forHero(id) {
-      const key = 'h:' + id;
+    /** A hero's Chibi 2 look; `color` paints the slots in heroes.<id>.team (the player's colour). */
+    forHero(id, { color = null } = {}) {
+      const key = 'h:' + id + ':' + (color || '');
       if (cache.has(key)) return cache.get(key);
       const h = looks.heroes?.[id];
       if (!h) throw new Error(`unit-looks: no hero "${id}"`);
       const look = chibiLook(h, h, null); look.id = id; look.hero = true;
+      if (color) for (const [slot, field] of Object.entries(h.team || {})) if (look.avatar[slot] && look.avatar[slot].id !== 'none') look.avatar[slot][field] = color;
       cache.set(key, look); return look;
     },
+    /** A hero's summon (heroes.json `pets`, e.g. the Druid's Grove Wolf): looks.json `pets.<id>` names a creature look. */
+    forPet(id) {
+      const vid = looks.pets?.[id], v = vid && variantTable[vid];
+      if (!v) throw new Error(`unit-looks: no pet "${id}"`);
+      return { kind: 'creature', spec: normalizeCreature(v.creature), variant: vid, scale: 1, id, pet: true };
+    },
+    /** The creature a hero becomes in a shape ('druid', 'wolf'); null when there is no such form. */
+    forForm(heroId, formId) {
+      const vid = looks.forms?.[heroId]?.[formId], v = vid && variantTable[vid];
+      if (!v) return null;
+      return { kind: 'creature', spec: normalizeCreature(v.creature), variant: vid, scale: looks.heroes?.[heroId]?.scale ?? 1, id: heroId + ':' + formId, hero: true, form: formId };
+    },
     /** Any ref: 'unit:levy', 'hero:druid', or a plain unit id. */
-    forRef(ref) { const [k, id] = ref.includes(':') ? ref.split(':') : ['unit', ref]; return k === 'hero' ? api.forHero(id) : api.forUnit(id); },
+    /** 'unit:levy', 'hero:druid', 'form:druid:wolf', or a plain unit id. */
+    forRef(ref) { const [k, id, f] = ref.includes(':') ? ref.split(':') : ['unit', ref]; return k === 'hero' ? api.forHero(id) : k === 'form' ? api.forForm(id, f) : k === 'pet' ? api.forPet(id) : api.forUnit(id); },
     build: buildActor,
   };
   return api;
@@ -166,22 +181,30 @@ export async function buildActor(look, { merge = true, anims } = {}) {
 /**
  * The body factory stream B's actors take: `createActors({ makeBody: bodies.makeBody })`.
  *
- *   const bodies = createBodyFactory(looks, { scale: 1.3 });
- *   await bodies.preload(data);                 // builds one of every unit + hero: warms templates, learns heights
- *   makeBody(ent, look, data) -> { object, height, play(act, t, phase), dispose() }
+ *   const bodies = createBodyFactory(looks, { scale: 1.3, colorOf: ent => identity.slotColor(slotOfPlayer(ent.owner)), turretLevelOf: ent => rank });
+ *   await bodies.preload();                     // builds one of every unit + hero: warms templates, learns heights
+ *   makeBody(ent, look, data) -> { object, height, play(act, t), dispose(), setForm(formId|null), setGhost(bool), turret? }
  *
- * `makeBody` is synchronous (actors.js needs an object now), so it returns an empty group at once and
- * drops the real model into it when the async build lands (a frame or two; instant for preloaded
- * Chibi 2 templates). `height` comes from the preload, so HP bars sit right from the first frame.
- * `play(act, t)` maps the sim's act (idle/walk/attack/cast/dead…) to a clip and advances it.
- * Ent kinds: `hero` (ent.type = hero id), `unit` (ent.type = unit id), anything else (tides) uses
- * `fallback(ent, look, data)` if given, else nothing is drawn.
+ * Kinds: `hero` (Chibi 2, painted in `colorOf(ent)`), `unit`, `pet` (data/looks.json `pets`),
+ * `turret` (js/view/engineer.js at `turretLevelOf(ent)` 1-3). Tides go to `fallback`.
+ * `makeBody` is synchronous: it returns an empty group at once and drops the model in when the async
+ * build lands. `height` comes from the preload, so HP bars sit right from the first frame.
+ * `play(act, t)` maps the sim's act (idle/walk/attack/cast/stun/dead) to a clip and advances it.
+ * `setForm('wolf')` swaps a hero into its shape body (on the `form` event), `setForm(null)` back.
+ * `setGhost(true)` draws the body half-transparent (stealth units nobody can see); per-body
+ * materials are cloned only while ghosted, so shared Chibi 2 templates are never touched.
  */
-export function createBodyFactory(looks, { scale = 1.3, fallback = null } = {}) {
+export function createBodyFactory(looks, { scale = 1.3, fallback = null, colorOf = () => null, turretLevelOf = () => 1, makeTurret = null } = {}) {
   const heights = new Map();
-  const refOf = ent => ent.kind === 'hero' ? 'hero:' + ent.type : 'unit:' + ent.type;
-  function lookOf(ent) { try { return looks.forRef(refOf(ent)); } catch { return null; } }
-  async function preload(data = null) {
+  const refOf = ent => ent.kind === 'hero' ? 'hero:' + ent.type : ent.kind === 'pet' ? 'pet:' + ent.type : 'unit:' + ent.type;
+  function lookOf(ent) {
+    try {
+      if (ent.kind === 'hero') return looks.forHero(ent.type, { color: colorOf(ent) });
+      if (ent.kind === 'pet') return looks.forPet(ent.type);
+      return looks.forUnit(ent.type);
+    } catch { return null; }
+  }
+  async function preload() {
     const refs = [...looks.unitIds().map(id => 'unit:' + id), ...looks.heroIds().map(id => 'hero:' + id)];
     for (const ref of refs) {
       if (heights.has(ref)) continue;
@@ -190,27 +213,63 @@ export function createBodyFactory(looks, { scale = 1.3, fallback = null } = {}) 
     }
     return heights;
   }
+  const CLIP = act => act === 'dead' || act === 'die' ? 'dead' : act === 'walk' || act === 'move' ? 'walk' : act === 'attack' ? 'attack' : act === 'cast' ? 'cast' : act === 'hit' || act === 'stun' ? 'hit' : 'ready';
+
+  function turretBody(ent) {
+    const T = makeTurret?.({ level: turretLevelOf(ent), color: colorOf(ent) || '#888888' });
+    if (!T) return null;
+    let lastT = null;
+    return { object: T.group, height: T.height, turret: T,
+      play(act, t) { const dt = lastT == null ? 0 : Math.max(0, Math.min(0.1, t - lastT)); lastT = t; if (act === 'attack' && T._act !== 'attack') T.fire(); T._act = act; T.aim(ent.face ?? 0); T.update(dt); },
+      setForm() {}, setGhost() {}, dispose() { T.dispose(); } };
+  }
+
   function makeBody(ent, lookRef, data) {
-    const look = (ent.kind === 'hero' || ent.kind === 'unit' || ent.kind === undefined) ? lookOf(ent) : null;
-    if (!look) return fallback ? fallback(ent, lookRef, data) : { object: new THREE_GROUP(), height: 1, play() {}, dispose() {} };
-    const s = scale * (look.scale || 1);
-    const holder = new THREE_GROUP(); holder.scale.setScalar(s);
-    const body = { object: holder, height: (heights.get(refOf(ent)) ?? 1.1) * s, actor: null, look, disposed: false, anim: null, lastT: null,
+    if (ent.kind === 'turret') { const b = turretBody(ent); if (b) return b; }
+    const look = (ent.kind === 'hero' || ent.kind === 'unit' || ent.kind === 'pet' || ent.kind === undefined) ? lookOf(ent) : null;
+    if (!look) return fallback ? fallback(ent, lookRef, data) : { object: new THREE_GROUP(), height: 1, play() {}, dispose() {}, setForm() {}, setGhost() {} };
+    const holder = new THREE_GROUP();
+    const body = { object: holder, height: 1.1, actor: null, look, disposed: false, anim: null, lastT: null, form: null, ghost: false, ghostMats: null, token: 0,
       play(act, t) {
         const a = body.actor; if (!a) return;
-        const clip = act === 'dead' || act === 'die' ? 'dead' : act === 'walk' || act === 'move' ? 'walk' : act === 'attack' ? 'attack' : act === 'cast' ? 'cast' : act === 'hit' || act === 'stun' ? 'hit' : 'ready';
+        const clip = CLIP(act);
         if (clip !== body.anim) { a.setAnim(clip, 0.12, clip === 'attack' || clip === 'cast'); body.anim = clip; }
         const dt = body.lastT == null ? 0 : Math.max(0, Math.min(0.1, t - body.lastT)); body.lastT = t;
         a.update(dt, t);
       },
-      dispose() { body.disposed = true; body.actor?.dispose(); },
+      setForm(formId) {
+        if ((formId || null) === body.form) return;
+        body.form = formId || null;
+        const L = body.form && ent.kind === 'hero' ? looks.forForm(ent.type, body.form) : null;
+        load(L || look, body.form ? 'form:' + ent.type + ':' + body.form : refOf(ent));
+      },
+      setGhost(v) {
+        v = !!v; if (v === body.ghost) return; body.ghost = v; applyGhost();
+      },
+      dispose() { body.disposed = true; restoreMats(); body.actor?.dispose(); },
     };
-    buildActor(look).then(a => {
-      if (body.disposed) { a.dispose(); return; }
-      body.actor = a; holder.add(a.group);
-      if (!heights.has(refOf(ent))) { heights.set(refOf(ent), a.height); }
-      body.height = a.height * s;
-    }).catch(e => console.warn('unit-looks: build failed', refOf(ent), e));
+    function restoreMats() { if (body.ghostMats) { for (const [m, orig] of body.ghostMats) { m.material.dispose(); m.material = orig; } body.ghostMats = null; } }
+    function applyGhost() {
+      restoreMats();
+      if (!body.ghost || !body.actor) return;
+      body.ghostMats = [];
+      body.actor.group.traverse(o => { if (o.isMesh && !Array.isArray(o.material)) { const c = o.material.clone(); c.transparent = true; c.opacity = 0.42; c.depthWrite = false; body.ghostMats.push([o, o.material]); o.material = c; } });
+    }
+    function load(L, ref) {
+      const my = ++body.token, s = scale * (L.scale || 1);
+      holder.scale.setScalar(s);
+      body.height = (heights.get(ref) ?? 1.1) * s;
+      buildActor(L).then(a => {
+        if (body.disposed || my !== body.token) { a.dispose(); return; }
+        restoreMats();
+        if (body.actor) { holder.remove(body.actor.group); body.actor.dispose(); }
+        body.actor = a; body.anim = null; holder.add(a.group);
+        if (!heights.has(ref)) heights.set(ref, a.height);
+        body.height = a.height * s;
+        applyGhost();
+      }).catch(e => console.warn('unit-looks: build failed', ref, e));
+    }
+    load(look, refOf(ent));
     return body;
   }
   return { makeBody, preload, heights, lookOf };

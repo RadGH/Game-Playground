@@ -55,11 +55,14 @@ const N4 = [[1, 0], [-1, 0], [0, 1], [0, -1]];
 const N8 = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]];
 
 /** 4-neighbour BFS. sources: cell indices; pass(i) -> bool. Returns { dist: Int32Array (-1 = never), prev }. */
-function bfs(G, sources, pass, stopAt = null) {
-  const dist = new Int32Array(G.n).fill(-1), prev = new Int32Array(G.n).fill(-1);
-  const q = new Int32Array(G.n);
+function bfs(G, sources, pass, stopAt = null, buf = null) {
+  // buf: reusable { dist, prev, q } scratch (the many short path searches would otherwise allocate
+  // three grid-sized arrays each)
+  const dist = buf ? buf.dist.fill(-1) : new Int32Array(G.n).fill(-1);
+  const prev = buf ? buf.prev : new Int32Array(G.n).fill(-1);
+  const q = buf ? buf.q : new Int32Array(G.n);
   let h = 0, t = 0;
-  for (const s of sources) if (dist[s] < 0) { dist[s] = 0; q[t++] = s; }
+  for (const s of sources) if (dist[s] < 0) { dist[s] = 0; prev[s] = -1; q[t++] = s; }
   while (h < t) {
     const i = q[h++];
     if (stopAt && stopAt(i)) return { dist, prev, hit: i };
@@ -122,16 +125,23 @@ function noisyLine(rng, a, b, depth, wobble) {
   return pts;
 }
 
-/** Cells under a polyline of half-width r (cells). */
+/** Cells whose centre lies within r (cells) of a polyline. r >= 0.71 keeps the band 4-connected. */
 function lineCells(G, pts, r) {
-  const set = new Uint8Array(G.n), out = [];
+  const set = new Uint8Array(G.n), out = [], r2 = r * r;
   for (let i = 1; i < pts.length; i++) {
     const p = pts[i - 1], q = pts[i];
-    const dx = q.x - p.x, dz = q.z - p.z, len = Math.sqrt(dx * dx + dz * dz);
-    const steps = Math.max(1, Math.ceil(len / 0.4));
-    for (let s = 0; s <= steps; s++) {
-      const x = p.x + dx * s / steps, z = p.z + dz * s / steps;
-      for (const c of discCells(G, Math.floor(x), Math.floor(z), r)) if (!set[c]) { set[c] = 1; out.push(c); }
+    const vx = q.x - p.x, vz = q.z - p.z, L2 = vx * vx + vz * vz;
+    const x0 = Math.floor(Math.min(p.x, q.x) - r - 1), x1 = Math.ceil(Math.max(p.x, q.x) + r + 1);
+    const z0 = Math.floor(Math.min(p.z, q.z) - r - 1), z1 = Math.ceil(Math.max(p.z, q.z) + r + 1);
+    for (let z = z0; z <= z1; z++) for (let x = x0; x <= x1; x++) {
+      if (!G.inb(x, z)) continue;
+      const cx = x + 0.5, cz = z + 0.5;
+      let t = L2 > 0 ? ((cx - p.x) * vx + (cz - p.z) * vz) / L2 : 0;
+      if (t < 0) t = 0; else if (t > 1) t = 1;
+      const dx = p.x + vx * t - cx, dz = p.z + vz * t - cz;
+      if (dx * dx + dz * dz > r2) continue;
+      const c = z * G.cols + x;
+      if (!set[c]) { set[c] = 1; out.push(c); }
     }
   }
   return out;
@@ -165,7 +175,11 @@ export function buildWorld(gen, { seed, size, farmers = 5, hunters = 2 }) {
   const doors = [];
   const features = [];
   const problems = [];
+  const why = {};   // rejection counts per step (the viewer shows them)
+  const no = k => { why[k] = (why[k] || 0) + 1; };
   const names = makeNamer(gen.names, rng);
+  const scratch = () => ({ dist: new Int32Array(G.n), prev: new Int32Array(G.n), q: new Int32Array(G.n) });
+  const S1 = scratch(), S2 = scratch();
   const centre = { x: cols / 2, z: rows / 2 };
 
   // 1. fixed nodes: the Commons (centre) and the kennels (rim, spread by angle)
@@ -272,7 +286,7 @@ export function buildWorld(gen, { seed, size, farmers = 5, hunters = 2 }) {
   };
   for (const n of nodes) carveGlade(n);
   for (const e of kept) {
-    e.cells = lineCells(G, e.pts, e.width / 2 + 0.3);   // >= 1 cell: a plus shape keeps the trail 4-connected
+    e.cells = lineCells(G, e.pts, Math.max(0.75, e.width / 2));
     for (const c of e.cells) if (level[c] === 0) cells[c] = K.trail;
   }
 
@@ -349,7 +363,7 @@ export function buildWorld(gen, { seed, size, farmers = 5, hunters = 2 }) {
     for (let g = 1; g < info.glades.length; g++) {
       const first = new Set(discCells(G, Math.floor(info.glades[0].x), Math.floor(info.glades[0].z), 1));
       const a = info.glades[g], from = Math.floor(a.z) * cols + Math.floor(a.x);
-      const r = bfs(G, [from], j => level[j] === 1 && cells[j] !== K.cliff, j => first.has(j));
+      const r = bfs(G, [from], j => level[j] === 1 && cells[j] !== K.cliff, j => first.has(j), S1);
       if (r.hit >= 0) for (let c = r.hit; c >= 0; c = r.prev[c]) if (cells[c] === K.tree) cells[c] = K.grass;
     }
     if (info.glades.length) plateauInfo.push(info);
@@ -359,7 +373,7 @@ export function buildWorld(gen, { seed, size, farmers = 5, hunters = 2 }) {
   const groundOpen = i => level[i] === 0 && OPEN[cells[i]];
   const dGround = bfs(G, (() => { const s = []; for (let i = 0; i < G.n; i++) if (groundOpen(i)) s.push(i); return s; })(), i => level[i] === 0 && cells[i] !== K.water).dist;
   const carvePath = (from, isGoal, passKind) => {
-    const r = bfs(G, [from], passKind, isGoal);
+    const r = bfs(G, [from], passKind, isGoal, S1);
     if (r.hit < 0) return null;
     const path = [];
     for (let c = r.hit; c >= 0; c = r.prev[c]) path.push(c);
@@ -368,7 +382,7 @@ export function buildWorld(gen, { seed, size, farmers = 5, hunters = 2 }) {
   for (const info of plateauInfo) {
     const glSet = new Set();
     for (const g of info.glades) for (const c of discCells(G, Math.floor(g.x), Math.floor(g.z), g.r * 0.6)) if (level[c] === 1 && cells[c] !== K.cliff) glSet.add(c);
-    const dPlat = bfs(G, [...glSet], i => level[i] === 1 && cells[i] !== K.cliff).dist;
+    const dPlat = bfs(G, [...glSet], i => level[i] === 1 && cells[i] !== K.cliff, null, S2).dist;
     const cands = [];
     for (const i of info.cells) {
       if (cells[i] !== K.cliff) continue;
@@ -410,7 +424,10 @@ export function buildWorld(gen, { seed, size, farmers = 5, hunters = 2 }) {
       const pp = carvePath(c.p, j => glSet.has(j), j => level[j] === 1 && cells[j] !== K.cliff);
       if (pp) for (const j of pp) if (cells[j] === K.tree) cells[j] = K.grass;
       if (cells[c.p] === K.tree) cells[c.p] = K.grass;
-      info.ramps.push({ cells: [c.i, c.o], foot: c.g });
+      // which glade this ramp leads to
+      let gl = 0;
+      if (pp) { const hx = pp[0] % cols, hz = (pp[0] / cols) | 0; let bd = 1e9; info.glades.forEach((g, k) => { const d = (g.x - hx) * (g.x - hx) + (g.z - hz) * (g.z - hz); if (d < bd) { bd = d; gl = k; } }); }
+      info.ramps.push({ cells: [c.i, c.o], foot: c.g, glade: gl });
     }
   }
 
@@ -436,17 +453,22 @@ export function buildWorld(gen, { seed, size, farmers = 5, hunters = 2 }) {
   const nodeDisc = new Uint8Array(G.n);
   for (const n of [commons, ...kennels]) for (const c of discCells(G, Math.floor(n.x), Math.floor(n.z), n.r + 2)) nodeDisc[c] = 1;
   for (let k = 0; k < S.candidates && !streamDone; k++) {
-    const side = int(rng, 4), u = range(rng, 0.2, 0.8) * cols, v = range(rng, 0.2, 0.8) * cols;
-    const ends = [[{ x: u, z: 0 }, { x: v, z: rows - 1 }], [{ x: 0, z: u }, { x: cols - 1, z: v }]][side % 2];
+    // a spring part-way in, running out to one edge of the map
+    const side = int(rng, 4), u = range(rng, 0.2, 0.8) * cols, v = range(rng, 0.15, 0.4) * cols, depth = range(rng, 0.3, 0.5) * cols;
+    const edgeP = [{ x: u, z: 0 }, { x: cols - 1, z: u }, { x: u, z: rows - 1 }, { x: 0, z: u }][side];
+    const inP = [{ x: v + u * 0.3, z: depth }, { x: cols - 1 - depth, z: v + u * 0.3 }, { x: v + u * 0.3, z: rows - 1 - depth }, { x: depth, z: v + u * 0.3 }][side];
+    const ends = [inP, edgeP];
     const pts = noisyLine(rng, ends[0], ends[1], 4, S.wobble);
-    const sc = lineCells(G, pts, M(S.width) / 2 + 0.3);
-    if (sc.some(c => level[c] || nodeDisc[c] || cells[c] === K.ramp)) continue;
+    const sc = lineCells(G, pts, Math.max(0.75, M(S.width) / 2));
+    if (sc.some(c => nodeDisc[c])) { no('stream:blocked'); continue; }
+    // the stream runs on the ground: it rises at a cliff foot and passes round the plateaus
+    for (let q = sc.length - 1; q >= 0; q--) if (level[sc[q]] || cells[sc[q]] === K.ramp) sc.splice(q, 1);
     const tm = new Uint8Array(G.n);
     for (const c of sc) if (cells[c] === K.trail) tm[c] = 1;
     const crossings = components(G, tm).comps.length;
-    if (crossings < S.fords[0] || crossings > S.fords[1]) continue;
+    if (crossings < S.fords[0] || crossings > S.fords[1]) { no('stream:crossings' + crossings); continue; }
     const nearTrail = c => { const x = c % cols, z = (c / cols) | 0; for (let dz = -1; dz <= 1; dz++) for (let dx = -1; dx <= 1; dx++) if (G.inb(x + dx, z + dz) && cells[(z + dz) * cols + x + dx] === K.trail) return true; return false; };
-    const fords = sc.filter(c => OPEN[cells[c]] && nearTrail(c));
+    const fords = sc.filter(c => OPEN[cells[c]]);   // where it crosses open ground it runs shallow (a ford)
     for (const c of sc) cells[c] = K.water;
     for (const c of fords) cells[c] = K.ford;
     fordCount = crossings; streamDone = true;
@@ -566,7 +588,7 @@ export function buildWorld(gen, { seed, size, farmers = 5, hunters = 2 }) {
   // pocket valleys
   for (const info of plateauInfo) {
     if (!pocketIds.has(info.id) || info.ramps.length !== 1) continue;
-    const g = info.glades[0];
+    const g = info.glades[info.ramps[0].glade];
     const hc = discCells(G, Math.floor(g.x), Math.floor(g.z), g.r).filter(c => level[c] === 1 && (cells[c] === K.grass || cells[c] === K.tallgrass));
     const name = names.feature('pocketValley');
     addHollow(hc, Math.floor(g.x), Math.floor(g.z), g.r, 'ramp', info.ramps[0].foot, -1, 1, name);
@@ -578,14 +600,15 @@ export function buildWorld(gen, { seed, size, farmers = 5, hunters = 2 }) {
     for (let t = 0; t < 300; t++) {
       const cx = int(rng, cols), cz = int(rng, rows), c0 = cz * cols + cx;
       if (cx < pr + 4 || cz < pr + 4 || cx >= cols - pr - 4 || cz >= rows - pr - 4) continue;
-      if (dTrail[c0] < pr + 3 || dTrail[c0] > pr + 12 || !farFromHollows(cx, cz, M(H.spacing) + pr)) continue;
+      if (dTrail[c0] < pr + 2 || dTrail[c0] > pr + 14 || !farFromHollows(cx, cz, M(H.spacing) + pr)) { no('pond:place'); continue; }
       const disc = discCells(G, cx, cz, pr + 1.5);
-      if (disc.some(c => level[c] || (cells[c] !== K.tree && cells[c] !== K.rock && cells[c] !== K.briar))) continue;
+      if (disc.some(c => level[c] || (cells[c] !== K.tree && cells[c] !== K.rock && cells[c] !== K.briar))) { no('pond:notForest'); continue; }
       for (const c of discCells(G, cx, cz, pr)) cells[c] = K.water;
       const island = discCells(G, cx, cz, ir);
+      const isl = new Set(island);
       for (const c of island) cells[c] = K.grass;
       // the ford: from the island rim toward the nearest trail, then a path to it
-      const r = bfs(G, [c0], j => level[j] === 0 && cells[j] !== K.cliff && cells[j] !== K.rock, j => cells[j] === K.trail && reachNow[j] >= 0);
+      const r = bfs(G, [c0], j => level[j] === 0 && (cells[j] === K.tree || cells[j] === K.water || isl.has(j) || cells[j] === K.briar || (OPEN[cells[j]] && reachNow[j] >= 0)), j => cells[j] === K.trail && reachNow[j] >= 0, S1);
       if (r.hit < 0) { for (const c of discCells(G, cx, cz, pr)) cells[c] = K.tree; continue; }
       let mouth = -1;
       for (let c = r.hit; c >= 0; c = r.prev[c]) {
@@ -599,18 +622,28 @@ export function buildWorld(gen, { seed, size, farmers = 5, hunters = 2 }) {
       break;
     }
   }
-  // forest hollows
-  for (let t = 0; t < 900 && hollows.length < needHollows; t++) {
-    const r = M(range(rng, H.radius[0], H.radius[1]));
-    const cx = int(rng, cols), cz = int(rng, rows), c0 = cz * cols + cx;
+  // forest hollows: candidates are deep-forest cells (Chebyshev distance to anything not forest)
+  // at the right distance from a trail; pick among them at random, keeping hollows apart
+  const dNF = chebyshev(G, i => level[i] !== 0 || (cells[i] !== K.tree && cells[i] !== K.rock));
+  const rMin = M(H.radius[0]);
+  let pool = [];
+  for (let i = 0; i < G.n; i++) {
+    if (dNF[i] < rMin + 2 || dTrail[i] < 0) continue;
+    const off = dTrail[i] - rMin;
+    if (off >= M(H.offTrail[0]) && off <= M(H.offTrail[1]) + 2) pool.push(i);
+  }
+  why.hollowPool = pool.length;
+  for (let t = 0; t < 400 && hollows.length < needHollows && pool.length; t++) {
+    const c0 = pool[int(rng, pool.length)], cx = c0 % cols, cz = (c0 / cols) | 0;
+    const r = Math.min(M(range(rng, H.radius[0], H.radius[1])), dNF[c0] - 2);
     const R = Math.ceil(r + 2);
     if (cx < R + 2 || cz < R + 2 || cx >= cols - R - 2 || cz >= rows - R - 2) continue;
-    if (level[c0] || dTrail[c0] < 0) continue;
+    if (level[c0] || dTrail[c0] < 0) { no('hollow:level'); continue; }
     const off = dTrail[c0] - r;
-    if (off < M(H.offTrail[0]) || off > M(H.offTrail[1])) continue;
-    if (!farFromHollows(cx, cz, M(H.spacing))) continue;
+    if (off < M(H.offTrail[0]) || off > M(H.offTrail[1])) { no('hollow:offTrail'); continue; }
+    if (!farFromHollows(cx, cz, M(H.spacing))) { no('hollow:spacing'); continue; }
     const ring = discCells(G, cx, cz, r + 2);
-    if (ring.some(c => level[c] || (cells[c] !== K.tree && cells[c] !== K.rock))) continue;
+    if (ring.some(c => level[c] || (cells[c] !== K.tree && cells[c] !== K.rock))) { no('hollow:notForest'); continue; }
     const hc = [];
     for (const c of discCells(G, cx, cz, r * 1.15)) {
       const x = c % cols, z = (c / cols) | 0, dx = x - cx, dz = z - cz, d = Math.sqrt(dx * dx + dz * dz);
@@ -618,7 +651,8 @@ export function buildWorld(gen, { seed, size, farmers = 5, hunters = 2 }) {
     }
     // corridor to the nearest open ground (through forest only)
     const inH = new Uint8Array(G.n); for (const c of hc) inH[c] = 1;
-    const res = bfs(G, hc, j => level[j] === 0 && (cells[j] === K.tree || cells[j] === K.rock || OPEN[cells[j]] || cells[j] === K.briar), j => !inH[j] && OPEN[cells[j]] && reachNow[j] >= 0);
+    // (only through forest: never through another hollow, which would join the two)
+    const res = bfs(G, hc, j => level[j] === 0 && (cells[j] === K.tree || cells[j] === K.rock || cells[j] === K.briar || (OPEN[cells[j]] && reachNow[j] >= 0)), j => !inH[j] && OPEN[cells[j]] && reachNow[j] >= 0, S1);
     if (res.hit < 0) { for (const c of hc) cells[c] = K.tree; continue; }
     const path = [];
     for (let c = res.prev[res.hit]; c >= 0 && !inH[c]; c = res.prev[c]) path.push(c);   // corridor cells, mouth end first
@@ -627,8 +661,12 @@ export function buildWorld(gen, { seed, size, farmers = 5, hunters = 2 }) {
     if (next(rng) < H.entry.briar || !path.length) { entry = 'briar'; for (const c of path.slice(0, 2)) cells[c] = K.briar; }
     else { entry = 'tree'; door = path[0]; cells[door] = K.tree; look[door] = 0; doors.push(door); }
     addHollow(hc, cx, cz, r, entry, path.length ? path[0] : res.hit, door, 0, null);
+  { const hr = bfsMove(G, cells, level, Math.floor(commons.z) * cols + Math.floor(commons.x), c => WALK_HUNTER[cells[c]] === 1); const bad = hollows.filter(h => h.entry === 'tree' && h.cells.some(c => hr[c] >= 0)).map(h => h.id); if (bad.length) console.log('PROBE', 'hollow ' + hollows.length + '', bad); }
+
   }
 
+
+  { const hr = bfsMove(G, cells, level, Math.floor(commons.z) * cols + Math.floor(commons.x), c => WALK_HUNTER[cells[c]] === 1); const bad = hollows.filter(h => h.entry === 'tree' && h.cells.some(c => hr[c] >= 0)).map(h => h.id); if (bad.length) console.log('PROBE', 'after-hollows', bad); }
   // 12. deadfall wall: a long tree line across the map, crossings closed except 1-2 gaps
   const reach = (passFarmer) => {
     const start = Math.floor(commons.z) * cols + Math.floor(commons.x);
@@ -640,11 +678,11 @@ export function buildWorld(gen, { seed, size, farmers = 5, hunters = 2 }) {
     for (let t = 0; t < 6; t++) {
       const th = range(rng, 0, PI), nx = cos(th), nz = sin(th);
       const d = (next(rng) < 0.5 ? -1 : 1) * range(rng, commons.r + M(12), cols * 0.3);
-      const band = [];
+      const band = [], wood = [];
       for (let i = 0; i < G.n; i++) {
         const x = i % cols + 0.5 - centre.x, z = ((i / cols) | 0) + 0.5 - centre.z;
         const s = x * nx + z * nz - d;
-        if (s >= -D.thickness / 2 && s < D.thickness / 2 && level[i] === 0 && OPEN[cells[i]] && !nodeDisc[i]) band.push(i);
+        if (s >= -D.thickness / 2 && s < D.thickness / 2 && level[i] === 0 && !nodeDisc[i]) { if (OPEN[cells[i]]) band.push(i); else if (cells[i] === K.tree) wood.push(i); }
       }
       if (band.length < 6) continue;
       const tm = new Uint8Array(G.n);
@@ -658,13 +696,17 @@ export function buildWorld(gen, { seed, size, farmers = 5, hunters = 2 }) {
       crossings.forEach((comp, k) => { if (gapIdx.has(k)) for (const c of comp) keep[c] = 1; });
       const before = band.map(c => cells[c]);
       for (const c of band) if (!keep[c]) { cells[c] = K.tree; look[c] = 4; }
-      if (worldProblems().length) { band.forEach((c, k) => { cells[c] = before[k]; look[c] = 0; }); continue; }
+      const intact = kept.filter(e => e.cells.every(c => cells[c] !== K.tree || look[c] !== 4));
+      if (worldProblems().length || cyclomatic(nodes.length, intact) < gen.validate.loops) { band.forEach((c, k) => { cells[c] = before[k]; look[c] = 0; }); continue; }
+      for (const c of wood) look[c] = 4;   // the fallen timber shows along its whole length
       const mid = band[band.length >> 1];
       features.push({ kind: 'deadfallWall', x: ((mid % cols) + 0.5) * cell, z: (((mid / cols) | 0) + 0.5) * cell, name: names.feature('deadfallWall'), gaps: nGaps, angle: th });
       break;
     }
   }
 
+
+  { const hr = bfsMove(G, cells, level, Math.floor(commons.z) * cols + Math.floor(commons.x), c => WALK_HUNTER[cells[c]] === 1); const bad = hollows.filter(h => h.entry === 'tree' && h.cells.some(c => hr[c] >= 0)).map(h => h.id); if (bad.length) console.log('PROBE', 'after-deadfall', bad); }
   // 13. border, tree looks
   for (let x = 0; x < cols; x++) for (const z of [0, rows - 1]) { cells[z * cols + x] = K.tree; level[z * cols + x] = 0; }
   for (let z = 0; z < rows; z++) for (const x of [0, cols - 1]) { cells[z * cols + x] = K.tree; level[z * cols + x] = 0; }
@@ -720,7 +762,7 @@ export function buildWorld(gen, { seed, size, farmers = 5, hunters = 2 }) {
     commons: { x: commons.x * cell, z: commons.z * cell, r: commons.r * cell, name: commons.name },
     kennels: kennels.map((k, i) => ({ id: i, x: k.x * cell, z: k.z * cell, r: k.r * cell, name: k.name })),
     plateaus: plateauInfo.map(p => ({ id: p.id, cells: p.cells.length, ramps: p.ramps.length, pocket: pocketIds.has(p.id) })),
-    problems,
+    problems, why,
   };
   world.metrics = metrics(G, world, { forest, plateau: plateau / G.n, water: water / G.n, loops: loopsNow, kennelDistance: hunters ? kd : null, fords: fordCount, dTrail });
   return world;
@@ -741,6 +783,24 @@ export function bfsMove(G, cells, level, start, pass) {
       const j = nz * G.cols + nx;
       if (dist[j] >= 0 || !pass(j)) continue;
       if (level[i] !== level[j] && cells[i] !== K.ramp && cells[j] !== K.ramp) continue;
+      dist[j] = dist[i] + 1; q[t++] = j;
+    }
+  }
+  return dist;
+}
+
+/** Chebyshev (8-neighbour) distance to the nearest cell where src(i) is true. */
+function chebyshev(G, src) {
+  const dist = new Int32Array(G.n).fill(-1), q = new Int32Array(G.n);
+  let h = 0, t = 0;
+  for (let i = 0; i < G.n; i++) if (src(i)) { dist[i] = 0; q[t++] = i; }
+  while (h < t) {
+    const i = q[h++], x = i % G.cols, z = (i / G.cols) | 0;
+    for (const [dx, dz] of N8) {
+      const nx = x + dx, nz = z + dz;
+      if (!G.inb(nx, nz)) continue;
+      const j = nz * G.cols + nx;
+      if (dist[j] >= 0) continue;
       dist[j] = dist[i] + 1; q[t++] = j;
     }
   }
@@ -873,9 +933,10 @@ function makeNamer(N, rng) {
     },
     feature(kind) {
       const list = N[kind];
-      usedF[kind] = usedF[kind] || 0;
-      const i = (int(rng, list.length) + usedF[kind]++) % list.length;
-      const s = list[i];
+      usedF[kind] = usedF[kind] || [];
+      const free = list.filter(x => !usedF[kind].includes(x));
+      const s = free.length ? free[int(rng, free.length)] : `${list[0]} ${usedF[kind].length + 1}`;
+      usedF[kind].push(s);
       return s.charAt(0).toUpperCase() + s.slice(1);
     },
   };

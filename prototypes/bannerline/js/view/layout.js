@@ -1,7 +1,7 @@
 // sim.map (docs/interfaces.md §6) -> the drawing layout js/view/terrain.js takes.
 // Kept separate so terrain.js does not care how the sim names things.
 
-export function layoutFromMap(map) {
+export function layoutFromMap(map, buildings = []) {
   const fields = map.fields.map((f) => {
     const lanes = f.gates.map((g) => [
       { x: g.x, z: f.z0 - 4 },
@@ -22,5 +22,5 @@ export function layoutFromMap(map) {
     x0: Math.min(...fields.map((f) => f.x0)), x1: Math.max(...fields.map((f) => f.x1)),
     z0: Math.min(...fields.map((f) => f.zGate)), z1: Math.max(...fields.map((f) => f.zEnd)),
   };
-  return { fields, bounds };
+  return { fields, bounds, buildings };
 }

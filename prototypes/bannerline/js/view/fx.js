@@ -14,6 +14,40 @@ export function createFx({ scene, actors, tickHz = TICK_HZ_FALLBACK, data = null
   const ringGeo = new THREE.RingGeometry(0.9, 1, 48);
   const discGeo = new THREE.CircleGeometry(1, 40);
 
+  const boltGeo = new THREE.SphereGeometry(0.2, 10, 8);
+  const zoneMeshes = new Map();
+  let zoneT = 0;
+  function makeZone(zn) {
+    const el = zn.dmgType || data?.heroes?.skills?.[zn.skill]?.element;
+    const color = ELEMENT_COLORS[el] ?? 0xff7a2a;
+    const r = zn.radius || 2, len = zn.length || 0;
+    // A disc, or a capsule (stadium) of `length` along `face` with half-width `radius`.
+    const shape = new THREE.Shape();
+    if (len > 0) {
+      shape.absarc(0, len / 2, r, 0, Math.PI, false);
+      shape.absarc(0, -len / 2, r, Math.PI, Math.PI * 2, false);
+    } else shape.absarc(0, 0, r, 0, Math.PI * 2, false);
+    const geo = new THREE.ShapeGeometry(shape, 24);
+    const fill = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.3, depthWrite: false, blending: THREE.AdditiveBlending }));
+    const edgeGeo = new THREE.EdgesGeometry(geo);
+    const edge = new THREE.LineSegments(edgeGeo, new THREE.MeshBasicMaterial({ color: 0xffd08a, transparent: true, opacity: 0.7 }));
+    const g = new THREE.Group();
+    const flat = new THREE.Group(); flat.rotation.x = -Math.PI / 2; flat.add(fill, edge);
+    g.add(flat);
+    // Shape +y is local length; after laying flat it points along -z, so turn by face + PI.
+    g.rotation.y = (zn.face || 0) + Math.PI;
+    g.position.set(zn.x, 0.08, zn.z);
+    // Embers rising from the patch.
+    const n = Math.min(24, Math.round((len + r * 2) * 2.5));
+    const pts = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) { pts[i * 3] = (Math.random() - 0.5) * r * 1.6; pts[i * 3 + 1] = Math.random() * 1.5; pts[i * 3 + 2] = (Math.random() - 0.5) * (len + r); }
+    const pg = new THREE.BufferGeometry(); pg.setAttribute('position', new THREE.BufferAttribute(pts, 3));
+    const sparks = new THREE.Points(pg, new THREE.PointsMaterial({ color: 0xffc070, size: 0.18, transparent: true, opacity: 0.8, depthWrite: false }));
+    sparks.onBeforeRender = () => { const a = pg.attributes.position; for (let i = 0; i < n; i++) { a.array[i * 3 + 1] += 0.02; if (a.array[i * 3 + 1] > 1.6) a.array[i * 3 + 1] = 0; } a.needsUpdate = true; };
+    g.add(sparks);
+    return { group: g, fill, edge, dispose() { geo.dispose(); edgeGeo.dispose(); pg.dispose(); fill.material.dispose(); edge.material.dispose(); sparks.material.dispose(); } };
+  }
+
   function add(obj, life, update) { root.add(obj); live.push({ obj, life, t: 0, update }); }
 
   function arcGeo(radius, arc) {
@@ -44,6 +78,28 @@ export function createFx({ scene, actors, tickHz = TICK_HZ_FALLBACK, data = null
   return {
     onEvent(ev, state) {
       switch (ev.type) {
+        case 'bolt': {
+          // A skill bolt (Firebolt): a bright head with a glowing tail, homing on `dst` if it lives.
+          const el = data?.heroes?.skills?.[ev.skill]?.element;
+          const color = ELEMENT_COLORS[el] ?? 0xff7a2a;
+          const head = new THREE.Mesh(boltGeo, new THREE.MeshBasicMaterial({ color: 0xfff2c0 }));
+          const glow = new THREE.Mesh(boltGeo, new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.55, depthWrite: false }));
+          glow.scale.setScalar(2.1);
+          const tail = new THREE.Mesh(new THREE.ConeGeometry(0.22, 1.6, 8, 1, true), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.45, depthWrite: false }));
+          tail.rotation.x = -Math.PI / 2; tail.position.z = -0.8;
+          const g = new THREE.Group(); g.add(head, glow, tail);
+          const life = Math.max(0.05, (ev.ticks || 1) / tickHz);
+          const fx0 = ev.fromX, fz0 = ev.fromZ;
+          add(g, life, (k) => {
+            const dst = ev.dst >= 0 ? actors.get(ev.dst) : null;
+            const tx = dst ? dst.x : ev.toX, tz = dst ? dst.z : ev.toZ;
+            g.position.set(fx0 + (tx - fx0) * k, 1.2, fz0 + (tz - fz0) * k);
+            g.lookAt(tx, 1.2, tz);
+            glow.scale.setScalar(2.1 + Math.sin(k * 40) * 0.25);
+            if (k >= 0.999) groundShape(tx, tz, 1.6, color, { life: 0.4, fill: 0.35 });
+          });
+          break;
+        }
         case 'shot': {
           const src = actors.get(ev.src), dst = actors.get(ev.dst);
           if (!src || !dst) break;
@@ -86,6 +142,20 @@ export function createFx({ scene, actors, tickHz = TICK_HZ_FALLBACK, data = null
     },
     /** Flash at a gate when a wave/tide enters. */
     flare(x, z, color = 0xffd66b, radius = 4) { groundShape(x, z, radius, color, { life: 1.0, fill: 0.22 }); },
+    /** Lingering ground zones (state.zones): drawn from state each frame so a reload never loses one. */
+    syncZones(zones, dt) {
+      const seen = new Set();
+      zoneT += dt;
+      for (const zn of zones || []) {
+        seen.add(zn.id);
+        let m = zoneMeshes.get(zn.id);
+        if (!m) { m = makeZone(zn); zoneMeshes.set(zn.id, m); root.add(m.group); }
+        const flick = 0.75 + Math.sin(zoneT * 9 + zn.id) * 0.12 + Math.sin(zoneT * 23 + zn.id * 2) * 0.08;
+        m.fill.material.opacity = 0.32 * flick;
+        m.edge.material.opacity = 0.75 * flick;
+      }
+      for (const [id, m] of zoneMeshes) if (!seen.has(id)) { root.remove(m.group); m.dispose(); zoneMeshes.delete(id); }
+    },
     update(dt) {
       for (let i = live.length - 1; i >= 0; i--) {
         const f = live[i];
@@ -94,12 +164,12 @@ export function createFx({ scene, actors, tickHz = TICK_HZ_FALLBACK, data = null
         f.update(k);
         if (k >= 1) {
           root.remove(f.obj);
-          f.obj.traverse((o) => { if (o.material) o.material.dispose(); if (o.geometry && o.geometry !== projGeo && o.geometry !== ringGeo && o.geometry !== discGeo) o.geometry.dispose(); });
+          f.obj.traverse((o) => { if (o.material) o.material.dispose(); if (o.geometry && o.geometry !== projGeo && o.geometry !== boltGeo && o.geometry !== ringGeo && o.geometry !== discGeo) o.geometry.dispose(); });
           live.splice(i, 1);
         }
       }
     },
     count() { return live.length; },
-    dispose() { scene.remove(root); },
+    dispose() { for (const m of zoneMeshes.values()) m.dispose(); zoneMeshes.clear(); scene.remove(root); },
   };
 }

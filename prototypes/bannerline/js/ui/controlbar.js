@@ -1,30 +1,29 @@
-// Bottom control bar (PLAN §16), one per viewport:
+// Bottom control bar (PLAN §16, owner round 2), one per viewport:
 //
-// | portrait SLOT | name, level, HP/MP, damage/armour/speed, statuses, XP | 4x3 command card | belt + minimap |
+// | portrait SLOT | name, level, HP/MP, damage/armour, statuses, XP | command card | items + minimap |
 //
-// The portrait slot is an empty element (`bar.portraitSlot`) that stream C's js/view/portrait.js
-// fills with a scissored 3D viewport (M7). Until then it shows a drawn crest. `bar.onSelect(fn)`
-// tells the portrait which entity is selected.
-//
-// Command card (4 x 3):
-//   Q  W  E  R          skills (cooldown sweep, rank pips, Ctrl+key or the + badge to learn)
-//   D  Muster  Buy potion  Armory (G buys the cheapest gear step; click opens the Armory panel)
-// Potions are drunk from the belt (1/2 or click a flask).
-//   Z  X  C  V          the deck: 4 sends with stock pips, restock sweep, Shift+key or right badge = auto
+// Command card (4 columns):
+//   Q  W  E  R                       hero skills (cooldown sweep, rank pips, + badge / Ctrl+key learns)
+//   D  Outfitter  Drill Yard  Sanctum   the hero's D skill, then three town buildings (O U P)
+//   [ Hire units — Barracks  (B) ]   THE way to send units (opens the Barracks panel)
+// Items: the hero's six inventory slots (WC3-style grid). Click / 1-6 uses a consumable; every slot
+// has a tooltip. The portrait slot is filled by stream C's js/view/portrait.js (`portraitSlot`).
 
 import { h, setText, setStyle, toggle, setTipHtml, shortSecs } from './dom.js';
 import { icon } from './icons.js';
 import { DMG_NAMES, ARMOUR_NAMES } from './hud.js';
 import { TEAM_CSS } from '../view/terrain.js';
+import { BUILDING_NAMES, BUILDING_KEYS, BUILDING_PAD, BUILDING_ICONS } from './townpanel.js';
 import { hp as fmtHp, fmt } from '../../../../shared/format.js';
 
-const STATUS_NAMES = { burn: 'Burning', bleed: 'Bleeding', root: 'Rooted', stun: 'Stunned', slow: 'Slowed', quarry: 'Marked', might: 'Might', regen: 'Regenerating', haste: 'Haste' };
-const BAD = new Set(['burn', 'bleed', 'root', 'stun', 'slow', 'quarry']);
+const STATUS_NAMES = { burn: 'Burning', bleed: 'Bleeding', root: 'Rooted', stun: 'Stunned', slow: 'Slowed', quarry: 'Marked', might: 'Might', regen: 'Regenerating', haste: 'Haste', taunt: 'Taunted', shred: 'Shredded', barrier: 'Shielded', empower: 'Empowered', revealed: 'Revealed' };
+const STATUS_TEXT = { burn: 'Taking fire damage over time.', bleed: 'Taking damage over time.', root: 'Cannot move.', stun: 'Cannot act.', slow: 'Moving slower.', quarry: 'Takes extra damage.', might: 'Deals extra damage.', regen: 'Healing over time.', haste: 'Moving faster.', taunt: 'Forced to attack one target.', shred: 'Armour stripped.', barrier: 'A shield absorbs damage.', empower: 'The next hit lands harder.', revealed: 'Hidden units here can be seen.' };
+const BAD = new Set(['burn', 'bleed', 'root', 'stun', 'slow', 'quarry', 'taunt', 'shred']);
 const SKILL_KEYS = ['Q', 'W', 'E', 'R'];
-const SEND_KEYS = ['Z', 'X', 'C', 'V'];
-const TIER_NAMES = { 1: 'I', 2: 'II', 3: 'III', 4: 'IV', 6: 'Champion' };
+const TIER_NAMES = { 1: 'I', 2: 'II', 3: 'III', 4: 'IV', 5: 'V', 6: 'Champion' };
+const PAD_SKILL = { Q: 'X', W: 'Y', E: 'B', D: 'RB', R: 'RT' };
 
-export function createControlBar({ root, sim, Q, player, seat, actors, minimapLayout }) {
+export function createControlBar({ root, sim, Q, player, seat, actors, minimapLayout, isPad = false, itemIconUrl = () => null }) {
   const data = sim.data;
   const tickHz = data.econ?.clock?.tickHz || 20;
   const bar = h('div', 'controlbar', null, { 'data-ui': true });
@@ -32,16 +31,16 @@ export function createControlBar({ root, sim, Q, player, seat, actors, minimapLa
     <div class="cb-portrait"><div class="portrait-slot" data-slot="portrait"><div class="crest-fallback"><span></span></div></div></div>
     <div class="cb-info">
       <div class="ci-name"><b></b><span class="ci-lv"></span></div>
-      <div class="ci-bar hp"><div class="fill"></div><span></span></div>
-      <div class="ci-bar mp"><div class="fill"></div><span></span></div>
+      <div class="ci-bar hp" data-tip="Health. At zero your hero falls and comes back at the Outfitter after a short wait."><div class="fill"></div><span></span></div>
+      <div class="ci-bar mp" data-tip="Mana. Skills cost mana; it refills over time."><div class="fill"></div><span></span></div>
       <div class="ci-tags"></div>
       <div class="ci-status"></div>
-      <div class="ci-xp" data-tip="Experience"><div class="fill"></div></div>
+      <div class="ci-xp" data-tip="Experience. Kills in your field level your hero up; every level gives a skill point."><div class="fill"></div></div>
     </div>
     <div class="cb-card"></div>
     <div class="cb-side">
-      <div class="belt" data-tip="Belt potions: 1 or 2 drinks one (heals 40%)."></div>
-      <canvas class="minimap" width="200" height="150"></canvas>
+      <div class="cb-inv"></div>
+      <canvas class="minimap" width="200" height="150" data-tip="Map of every field. Click to look there, right-click to walk there."></canvas>
     </div>`;
   root.append(bar);
   const $ = (sel) => bar.querySelector(sel);
@@ -49,78 +48,64 @@ export function createControlBar({ root, sim, Q, player, seat, actors, minimapLa
   const card = $('.cb-card');
   const tags = $('.ci-tags');
   const statusEl = $('.ci-status');
-  const belt = $('.belt');
+  const invEl = $('.cb-inv');
   const mini = $('.minimap');
   const selectListeners = new Set();
   let selected = -1;
 
-  // ---------- command card cells ----------
-  const skillCells = SKILL_KEYS.map((k) => cell('skill', k));
-  const dCell = cell('skill', 'D');
-  const musterCell = cell('util', 'M');
-  const potionCell = cell('util', '');
-  const gearCell = cell('util', 'G');
-  const sendCells = SEND_KEYS.map((k, i) => cell('send', k, i));
-  card.append(...skillCells, dCell, musterCell, potionCell, gearCell, ...sendCells);
+  // ---------- command card ----------
+  const skillCells = SKILL_KEYS.map((k) => skillCell(k));
+  const dCell = skillCell('D');
+  const bldCells = ['shop', 'drillyard', 'sanctum'].map((kind) => {
+    const el = h('button', 'cc cc-bld bld-' + kind, null, { type: 'button', 'data-bld': kind });
+    el.innerHTML = `<span class="cc-face">${icon(BUILDING_ICONS[kind])}</span><kbd class="cc-key${isPad ? ' pad' : ''}">${isPad ? BUILDING_PAD[kind] : BUILDING_KEYS[kind]}</kbd><span class="cc-sub"></span>`;
+    return el;
+  });
+  const hireBtn = h('button', 'cc-hire', null, { type: 'button', 'data-bld': 'barracks' });
+  hireBtn.innerHTML = `<span class="hire-ic">${icon('coin')}${icon('income')}</span><span class="hire-t"><b>Hire units</b><small>Barracks · raises your income</small></span><kbd class="hire-key${isPad ? ' pad' : ''}">${isPad ? '↓' : 'B'}</kbd>`;
+  setTipHtml(hireBtn, `<b>Barracks</b><br>Hire units and send them down your rival's lane. Every unit you hire raises your income. ${isPad ? 'D-pad down' : 'B'} opens it from anywhere; walking up to the Barracks opens it too.`);
+  card.append(...skillCells, dCell, ...bldCells, hireBtn);
+  let onBuilding = null;
+  let openPanel = () => null;
 
-  function cell(kind, key, index = -1) {
-    const el = h('button', 'cc cc-' + kind, null, { type: 'button' });
-    el.innerHTML = `<span class="cc-face"></span><span class="cc-cd"></span><kbd class="cc-key">${key}</kbd><span class="cc-sub"></span><span class="cc-pips"></span>`;
-    if (kind === 'skill') el.insertAdjacentHTML('beforeend', '<span class="cc-learn" data-tip="Learn a rank (Ctrl + key)">+</span>');
-    if (kind === 'send') el.insertAdjacentHTML('beforeend', `<span class="cc-auto" data-tip="Auto-send: buys this whenever stock and gold allow (Shift + ${key})">${icon('auto')}</span><span class="cc-lock"></span>`);
-    el.dataset.key = key; el.dataset.index = String(index);
+  function skillCell(key) {
+    const el = h('button', 'cc cc-skill', null, { type: 'button', 'data-tip-render': 'bl-skill', 'data-tip-skill': key, 'data-tip-player': String(player) });
+    el.innerHTML = `<span class="cc-face"></span><span class="cc-cd"></span><kbd class="cc-key${isPad ? ' pad' : ''}">${isPad ? PAD_SKILL[key] : key}</kbd><span class="cc-sub"></span><span class="cc-pips"></span><span class="cc-learn">+</span>`;
+    el.dataset.key = key;
     return el;
   }
 
   card.addEventListener('click', (e) => {
-    const el = e.target.closest('.cc'); if (!el) return;
-    const me = sim.state.players[player];
-    if (el.classList.contains('cc-skill')) {
-      const slot = el.dataset.key;
-      if (e.target.closest('.cc-learn') || e.ctrlKey) seat.issue({ type: 'learn', slot });
-      else {
-        const g = seat.ground;
-        seat.issue(g ? { type: 'cast', slot, x: g.x, z: g.z } : { type: 'cast', slot });
-      }
-    } else if (el.classList.contains('cc-send')) {
-      const i = Number(el.dataset.index);
-      if (e.target.closest('.cc-auto') || e.shiftKey) seat.issue({ type: 'auto', index: i, on: !me.auto[i] });
-      else seat.issue({ type: 'send', unit: me.deck[i] });
-    } else if (el === musterCell) seat.issue({ type: 'muster' });
-    else if (el === potionCell) seat.issue({ type: 'potion' });
-    else if (el === gearCell) { if (e.shiftKey || !onGearClick) seat.issue({ type: 'upgrade' }); else onGearClick(); }
+    const b = e.target.closest('[data-bld]');
+    if (b) { onBuilding?.(b.dataset.bld); return; }
+    const el = e.target.closest('.cc-skill'); if (!el) return;
+    const slot = el.dataset.key;
+    if (e.target.closest('.cc-learn') || e.ctrlKey) seat.issue({ type: 'learn', slot });
+    else { const g = seat.ground; seat.issue(g ? { type: 'cast', slot, x: g.x, z: g.z } : { type: 'cast', slot }); }
     el.classList.remove('press'); void el.offsetWidth; el.classList.add('press');
   });
-  // Right-click a send to swap it from the roster.
-  const picker = h('div', 'roster-picker', null, { hidden: true, 'data-ui': true, 'data-ui-menu': true });
-  root.append(picker);
-  let pickIndex = -1;
-  card.addEventListener('contextmenu', (e) => {
-    const el = e.target.closest('.cc-send'); if (!el) return;
-    e.preventDefault();
-    pickIndex = Number(el.dataset.index);
-    const ro = Q.roster(sim.state, data, player);
-    const me = sim.state.players[player];
-    picker.innerHTML = `<div class="rp-head">Swap ${SEND_KEYS[pickIndex]} for…</div>` + ro.map((r) =>
-      `<button class="rp-row${me.deck.includes(r.unit) ? ' in' : ''}" data-unit="${r.unit}"><span class="rp-t t${r.tier}">${TIER_NAMES[r.tier] || r.tier}</span><b>${data.units.units[r.unit].name}</b><span class="rp-c">${icon('coin')}${r.cost}</span></button>`).join('');
-    const r = el.getBoundingClientRect();
-    picker.hidden = false;
-    picker.style.left = Math.min(window.innerWidth - 240, r.left) + 'px';
-    picker.style.bottom = (window.innerHeight - r.top + 8) + 'px';
+
+  // ---------- inventory (six slots, no slot types) ----------
+  const invCells = Array.from({ length: data['items-bl']?.rules?.slots || 6 }, (_, i) => {
+    const b = h('button', 'inv-slot', null, { type: 'button', 'data-slot': String(i), 'data-tip-render': 'bl-slot', 'data-tip-slot': String(i), 'data-tip-player': String(player) });
+    invEl.append(b);
+    return b;
   });
-  picker.addEventListener('click', (e) => {
-    const b = e.target.closest('[data-unit]'); if (!b) return;
-    const me = sim.state.players[player];
-    const deck = me.deck.slice();
-    const unit = b.dataset.unit;
-    const j = deck.indexOf(unit);
-    if (j >= 0) deck[j] = deck[pickIndex];     // already in the deck: swap places
-    deck[pickIndex] = unit;
-    seat.issue({ type: 'deck', units: deck });
-    picker.hidden = true;
+  invEl.addEventListener('click', (e) => {
+    const b = e.target.closest('.inv-slot'); if (!b) return;
+    const v = Q.itemView(sim.state, data, player, Number(b.dataset.slot));
+    if (v?.consumable) { seat.issue({ type: 'use', slot: Number(b.dataset.slot) }); b.classList.remove('press'); void b.offsetWidth; b.classList.add('press'); }
+    else onBuilding?.('shop');
   });
-  const closePicker = (e) => { if (!picker.hidden && !e.target.closest('.roster-picker')) picker.hidden = true; };
-  window.addEventListener('mousedown', closePicker);
+  // Drag one slot onto another to swap them (the `swap` command works anywhere).
+  let dragFrom = -1;
+  invEl.addEventListener('pointerdown', (e) => { const b = e.target.closest('.inv-slot'); dragFrom = b ? Number(b.dataset.slot) : -1; });
+  invEl.addEventListener('pointerup', (e) => {
+    const b = e.target.closest('.inv-slot');
+    const to = b ? Number(b.dataset.slot) : -1;
+    if (dragFrom >= 0 && to >= 0 && to !== dragFrom) seat.issue({ type: 'swap', a: dragFrom, b: to });
+    dragFrom = -1;
+  });
 
   // ---------- update ----------
   function updateSkill(el, sk, hero) {
@@ -139,7 +124,6 @@ export function createControlBar({ root, sim, Q, player, seat, actors, minimapLa
     const pips = el.querySelector('.cc-pips');
     const pk = sk.rank + '/' + sk.maxRank;
     if (pips._k !== pk) { pips._k = pk; pips.innerHTML = Array.from({ length: sk.maxRank }, (_, i) => `<i class="${i < sk.rank ? 'on' : ''}"></i>`).join(''); }
-    setTipHtml(el, `<b>${sk.name}</b> · rank ${sk.rank}/${sk.maxRank}${sk.mp ? ` · ${sk.mp} mana` : ''}${sk.cooldown ? ` · ${fmt(sk.cooldown / tickHz, { decimals: 1 })}s cooldown` : ''}<br>${sk.desc || ''}`);
   }
 
   function update(dt) {
@@ -153,11 +137,11 @@ export function createControlBar({ root, sim, Q, player, seat, actors, minimapLa
     if (ent) {
       const isMine = ent.id === me.heroEnt;
       setText($('.ci-name b'), Q.entName(s, data, ent));
-      setText($('.ci-lv'), ent.kind === 'hero' ? `Level ${ent.level}` : ent.kind === 'tide' ? `Tide ${ent.level}` : `Tier ${TIER_NAMES[data.units.units[ent.type]?.tier] || ''}`);
+      setText($('.ci-lv'), ent.kind === 'hero' ? `Level ${ent.level}${hi?.form && isMine ? ` · ${hi.form} form` : ''}` : ent.kind === 'tide' ? `Tide ${ent.level}` : ent.kind === 'unit' ? `Tier ${TIER_NAMES[data.units.units[ent.type]?.tier] || ''}` : '');
       bar.style.setProperty('--team', ent.team >= 0 ? TEAM_CSS[ent.team] : '#9a8f80');
       const hpF = ent.hpMax ? Math.max(0, ent.hp / ent.hpMax) : 0;
       setStyle($('.ci-bar.hp .fill'), 'width', (hpF * 100).toFixed(1) + '%');
-      setText($('.ci-bar.hp span'), ent.alive === false ? `Respawn in ${Math.ceil((hi?.respawnIn || 0) / tickHz)}s` : `${fmtHp(ent.hp)} / ${fmtHp(ent.hpMax)}`);
+      setText($('.ci-bar.hp span'), ent.alive === false ? `Back in ${Math.ceil((hi?.respawnIn || 0) / tickHz)}s` : `${fmtHp(ent.hp)} / ${fmtHp(ent.hpMax)}`);
       const showMp = ent.mpMax > 0;
       $('.ci-bar.mp').hidden = !showMp;
       if (showMp) {
@@ -169,14 +153,13 @@ export function createControlBar({ root, sim, Q, player, seat, actors, minimapLa
       if (tags._k !== tk) {
         tags._k = tk;
         const dps = isMine ? hi?.dps : u?.dps;
-        tags.innerHTML = `<span class="tag dmg" data-type="${ent.dmgType}" data-tip="Damage type">${icon('sword')}${DMG_NAMES[ent.dmgType] || ent.dmgType || '—'}${dps ? ` · ${fmt(dps, { decimals: 0 })} dps` : ''}</span>
-          <span class="tag arm" data-tip="Armour class">${icon('shield')}${ARMOUR_NAMES[ent.armour] || ent.armour || '—'}${isMine && hi?.armor ? ` · ${fmt(hi.armor, { decimals: 0 })}` : ''}</span>`;
+        tags.innerHTML = `<span class="tag dmg" data-type="${ent.dmgType}" data-tip="Damage type: each type hits one armour hard (+15%) and one armour poorly (−10%).">${icon('sword')}${DMG_NAMES[ent.dmgType] || ent.dmgType || '—'}${dps ? ` · ${fmt(dps, { decimals: 0 })} dps` : ''}</span>
+          <span class="tag arm" data-tip="Armour class: decides which damage types hurt it most.${isMine ? ' The number is your armour value.' : ''}">${icon('shield')}${ARMOUR_NAMES[ent.armour] || ent.armour || '—'}${isMine && hi?.armor ? ` · ${fmt(hi.armor, { decimals: 0 })}` : ''}</span>`;
       }
-      const st = (ent.statuses || []).map((x) => x.id);
-      const sk = st.join(',');
+      const sk = (ent.statuses || []).map((x) => x.id + (x.stacks || '')).join(',');
       if (statusEl._k !== sk) {
         statusEl._k = sk;
-        statusEl.innerHTML = (ent.statuses || []).map((x) => `<span class="st ${BAD.has(x.id) ? 'bad' : 'good'}" data-tip="${STATUS_NAMES[x.id] || x.id}">${(STATUS_NAMES[x.id] || x.id).slice(0, 3)}${x.stacks > 1 ? `<b>${x.stacks}</b>` : ''}</span>`).join('');
+        statusEl.innerHTML = (ent.statuses || []).filter((x) => !x.id.startsWith('lock_')).map((x) => `<span class="st ${BAD.has(x.id) ? 'bad' : 'good'}" data-tip="${STATUS_NAMES[x.id] || x.id}: ${STATUS_TEXT[x.id] || 'an effect from a skill.'}">${(STATUS_NAMES[x.id] || x.id).slice(0, 3)}${x.stacks > 1 ? `<b>${x.stacks}</b>` : ''}</span>`).join('');
       }
       const xpF = hi && isMine ? (hi.xpNext > hi.xpPrev ? (hi.xp - hi.xpPrev) / (hi.xpNext - hi.xpPrev) : 1) : 0;
       $('.ci-xp').hidden = !isMine;
@@ -184,63 +167,42 @@ export function createControlBar({ root, sim, Q, player, seat, actors, minimapLa
       setText($('.crest-fallback span'), (Q.entName(s, data, ent) || '?')[0]);
     }
 
-    // Skills.
+    // Skills (the Druid's wolf form swaps these: heroInfo returns the form's skills).
     const byslot = {};
     for (const sk of hi?.skills || []) byslot[sk.slot] = sk;
     const heroDef = data.heroes?.heroes?.[me.hero];
     SKILL_KEYS.forEach((k, i) => updateSkill(skillCells[i], byslot[k], heroDef));
     updateSkill(dCell, byslot.D, heroDef);
     toggle(bar, 'has-points', (hi?.skillPts || 0) > 0);
+    toggle(bar, 'form', !!hi?.form);
 
-    // Muster.
-    const mi = Q.musterInfo(s, data, player);
-    setText(musterCell.querySelector('.cc-face'), ['—', 'I', 'II', 'III'][mi.rank] ?? mi.rank);
-    musterCell.querySelector('.cc-face').dataset.el = 'muster';
-    setText(musterCell.querySelector('.cc-sub'), mi.next ? String(mi.next.cost) : 'max');
-    toggle(musterCell, 'ready', !!mi.next?.canBuy);
-    toggle(musterCell, 'dim', !mi.next?.canBuy);
-    setTipHtml(musterCell, mi.next ? `<b>Muster ${['I', 'II', 'III'][mi.rank]}</b> · ${mi.next.cost} gold<br>+10% health and damage on every unit you send.` : '<b>Muster</b> is at full rank.');
-    // Potions.
-    const pf = potionCell.querySelector('.cc-face');
-    if (!pf._i) { pf._i = 1; pf.innerHTML = icon('potion'); }
-    setText(potionCell.querySelector('.cc-sub'), '25');
-    setText(potionCell.querySelector('.cc-key'), 'Buy');
-    toggle(potionCell, 'dim', me.belt >= 2 || me.gold < 25);
-    setTipHtml(potionCell, '<b>Buy a potion</b> · 25 gold<br>The belt holds two.');
-    const gi = Q.gearInfo(s, data, player);
-    const gf = gearCell.querySelector('.cc-face');
-    if (!gf._i) { gf._i = 1; gf.innerHTML = icon('hammer'); }
-    setText(gearCell.querySelector('.cc-sub'), gi.cheapest ? String(gi.cheapest.cost) : '—');
-    toggle(gearCell, 'ready', !!gi.cheapest && me.gold >= gi.cheapest.cost);
-    toggle(gearCell, 'dim', !gi.cheapest || me.gold < gi.cheapest.cost);
-    setTipHtml(gearCell, `<b>Armory</b>${gi.cheapest ? ` · next upgrade ${gi.cheapest.cost} gold` : ''}<br>G buys the cheapest gear step from anywhere. Click (or B) opens the Armory.`);
-    const bk = String(me.belt);
-    if (belt._k !== bk) { belt._k = bk; belt.innerHTML = [0, 1].map((i) => `<button type="button" class="flask${i < me.belt ? ' full' : ''}" data-drink="1">${icon('potion')}<kbd>${i + 1}</kbd></button>`).join(''); }
+    // Building buttons.
+    const open = openPanel();
+    for (const el of [...bldCells, hireBtn]) toggle(el, 'open', open === el.dataset.bld);
+    const bk = bldCells.map((el) => el.dataset.bld).join();
+    if (bar._bk !== bk) {
+      bar._bk = bk;
+      for (const el of bldCells) {
+        const kind = el.dataset.bld;
+        const d = data.buildings?.kinds?.[kind];
+        setTipHtml(el, `<b>${BUILDING_NAMES[kind]}</b> <span class="muted">${isPad ? BUILDING_PAD[kind] : BUILDING_KEYS[kind]}</span><br>${d?.desc || ''}`);
+      }
+    }
+    for (const el of bldCells) setText(el.querySelector('.cc-sub'), el.dataset.bld === 'shop' ? 'items' : el.dataset.bld === 'drillyard' ? 'train' : 'powers');
 
-    // Deck sends.
-    const deck = Q.deckInfo(s, data, player);
-    deck.forEach((d, i) => {
-      const el = sendCells[i];
-      const u = data.units.units[d.unit];
-      const face = el.querySelector('.cc-face');
-      setText(face, (u?.name || d.unit).split(/\s+/).map((w) => w[0]).join('').slice(0, 2));
-      face.dataset.tier = String(d.tier);
-      setText(el.querySelector('.cc-sub'), String(d.cost));
-      const pk = `${d.stock}/${d.max}`;
-      const pips = el.querySelector('.cc-pips');
-      if (pips._k !== pk) { pips._k = pk; pips.innerHTML = Array.from({ length: d.max }, (_, j) => `<i class="${j < d.stock ? 'on' : ''}"></i>`).join(''); }
-      const rf = d.stock < d.max && d.restockEvery ? 1 - d.restockIn / d.restockEvery : 0;
-      setStyle(el.querySelector('.cc-cd'), '--cd', String(d.stock === 0 ? 1 - rf : 0));
-      toggle(el, 'auto-on', !!d.auto);
-      toggle(el, 'locked', !d.unlocked);
-      toggle(el, 'ready', !!d.canBuy);
-      toggle(el, 'poor', d.unlocked && d.stock > 0 && !d.canBuy && d.reason === 'gold');
-      toggle(el, 'empty-stock', d.unlocked && d.stock === 0);
-      setText(el.querySelector('.cc-lock'), d.unlocked ? '' : shortSecs((d.unlockIn || 0) / tickHz));
-      setTipHtml(el, `<b>${u?.name || d.unit}</b> · tier ${TIER_NAMES[d.tier] || d.tier}<br>${d.cost} gold · +${fmt(d.income, { decimals: 1 })} income · ${d.stock}/${d.max} in stock` +
-        `${u ? `<br>${fmtHp(u.hp)} health${u.bodies > 1 ? ` ×${u.bodies}` : ''} · ${ARMOUR_NAMES[u.armour]} armour · ${DMG_NAMES[u.dmg]} damage` : ''}` +
-        `${u?.traits?.length ? `<br><i>${u.traits.map((t) => data.units.traits[t]?.desc).filter(Boolean).join(' ')}</i>` : ''}` +
-        `<br><span class="muted">Click or ${SEND_KEYS[i]} to send · Shift = auto · right-click to swap</span>`);
+    // Inventory.
+    const inv = Q.inventoryInfo(s, data, player);
+    inv.slots.forEach((v, i) => {
+      const b = invCells[i]; if (!b) return;
+      const k = v ? `${v.uid}|${v.chargesLeft}` : 'e';
+      if (b._k !== k) {
+        b._k = k;
+        const url = v?.icon ? itemIconUrl(v.icon) : null;
+        b.innerHTML = v ? `${url ? `<img src="${url}" alt="" draggable="false">` : `<b>${v.name.slice(0, 2)}</b>`}${v.consumable && v.chargesLeft > 1 ? `<i>${v.chargesLeft}</i>` : ''}${v.uniqueEquipped ? '<span class="uq">★</span>' : ''}<kbd>${i + 1}</kbd>` : `<kbd>${i + 1}</kbd>`;
+      }
+      toggle(b, 'empty', !v);
+      toggle(b, 'usable', !!v?.consumable);
+      toggle(b, 'ready', !!v?.canUse);
     });
 
     drawMinimap(dt);
@@ -265,10 +227,11 @@ export function createControlBar({ root, sim, Q, player, seat, actors, minimapLa
       ctx.fillStyle = '#3c5230'; ctx.fillRect(X(f.x0), Z(f.zGate), (f.x1 - f.x0) * k, (f.zEnd - f.zGate) * k);
       if (f.ford) { ctx.fillStyle = '#3d6f86'; ctx.fillRect(X(f.x0), Z(f.ford.z0), (f.x1 - f.x0) * k, (f.ford.z1 - f.ford.z0) * k); }
       ctx.fillStyle = '#7a6a50';
-      for (const lane of f.lanes) { ctx.fillRect(X(lane[0].x) - 1.5, Z(f.zGate), 3, (f.zKeep - f.zGate) * k); }
+      for (const lane of f.lanes) ctx.fillRect(X(lane[0].x) - 1.5, Z(f.zGate), 3, (f.zKeep - f.zGate) * k);
       ctx.fillStyle = TEAM_CSS[f.team]; ctx.fillRect(X(f.keep.x) - 5, Z(f.keep.z) - 3, 10, 6);
       ctx.strokeStyle = 'rgba(214,188,128,.5)'; ctx.lineWidth = 1; ctx.strokeRect(X(f.x0) + .5, Z(f.zGate) + .5, (f.x1 - f.x0) * k, (f.zEnd - f.zGate) * k);
     }
+    for (const bd of L.buildings || []) { ctx.fillStyle = 'rgba(242,196,90,.75)'; ctx.fillRect(X(bd.x) - 2, Z(bd.z) - 2, 4, 4); }
     const me = sim.state.players[player];
     for (const e of sim.state.ents) {
       if (e.alive === false) continue;
@@ -276,10 +239,10 @@ export function createControlBar({ root, sim, Q, player, seat, actors, minimapLa
       ctx.fillStyle = e.team < 0 ? '#c8b48a' : TEAM_CSS[e.team];
       const r = hero ? 3.2 : 1.6;
       ctx.beginPath(); ctx.arc(X(e.x), Z(e.z), r, 0, Math.PI * 2); ctx.fill();
-      if (hero && e.id === me.heroEnt) { ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.2; ctx.stroke(); }
+      // Your own units (in the enemy field) get a white rim so you can follow them.
+      if ((hero && e.id === me.heroEnt) || (e.kind === 'unit' && e.owner === player)) { ctx.strokeStyle = '#fff'; ctx.lineWidth = hero ? 1.2 : 0.7; ctx.stroke(); }
     }
-    // Camera view box.
-    if (seat.viewport && cameraBox) {
+    if (cameraBox) {
       const pts = cameraBox();
       if (pts) {
         ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 1;
@@ -289,33 +252,28 @@ export function createControlBar({ root, sim, Q, player, seat, actors, minimapLa
     mini._map = { X, Z, k, ox, oz, b };
   }
   let cameraBox = null;
-  let onGearClick = null;
-  belt.addEventListener('click', (e) => { if (e.target.closest('[data-drink]')) seat.issue({ type: 'drink' }); });
   let onMiniClick = null;
   mini.addEventListener('mousedown', (e) => {
     const m = mini._map; if (!m || !onMiniClick) return;
     const r = mini.getBoundingClientRect();
     const px = (e.clientX - r.left) * (mini.width / r.width), pz = (e.clientY - r.top) * (mini.height / r.height);
-    const x = m.b.x0 + (px - m.ox) / m.k, z = m.b.z0 + (pz - m.oz) / m.k;
-    onMiniClick({ x, z, button: e.button });
+    onMiniClick({ x: m.b.x0 + (px - m.ox) / m.k, z: m.b.z0 + (pz - m.oz) / m.k, button: e.button });
     e.preventDefault();
   });
   mini.addEventListener('contextmenu', (e) => e.preventDefault());
 
-  function setSelected(id) {
-    selected = id;
-    for (const fn of selectListeners) fn(id);
-  }
+  function setSelected(id) { selected = id; for (const fn of selectListeners) fn(id); }
 
   return {
-    el: bar, portraitSlot,
+    el: bar, portraitSlot, hireButton: hireBtn,
     update,
     select(id) { setSelected(id); },
     get selected() { return selected; },
     onSelect(fn) { selectListeners.add(fn); return () => selectListeners.delete(fn); },
     setCameraBox(fn) { cameraBox = fn; },
     onMinimap(fn) { onMiniClick = fn; },
-    onGear(fn) { onGearClick = fn; },
-    destroy() { window.removeEventListener('mousedown', closePicker); bar.remove(); picker.remove(); },
+    /** fn(kind) opens a building panel; isOpen() returns the open panel's kind (for the lit button). */
+    onBuilding(fn, isOpen) { onBuilding = fn; openPanel = isOpen || (() => null); },
+    destroy() { bar.remove(); },
   };
 }

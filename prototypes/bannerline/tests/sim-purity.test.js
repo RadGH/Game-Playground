@@ -55,6 +55,9 @@ const BANNED = [
 // files allowed specific exceptions, with the reason
 const ALLOW = {
   'hash.js': ['for...in over an object (object-as-map iteration order)'],   // walks plain data in insertion order, which IS the canonical order
+  // the match CLOCK worker (stream D): it pulses the main thread with setInterval; nothing in the sim
+  // imports it (the scan below would follow it if anything did)
+  'worker.js': ['browser / timer API in the sim'],
 };
 // narrower exceptions: [file suffix, rule, the line must match this] — the rule still applies to
 // every other line of that file

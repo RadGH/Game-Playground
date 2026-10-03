@@ -4,6 +4,7 @@
 import { q2 } from './mathx.js';
 import { liveEnt } from './state.js';
 import { buySend } from './economy.js';
+import { seedStream } from './rng.js';
 import { buyItem, sellItem, swapSlots, useItem, tollMax } from './items.js';
 import { buyUpgrade } from './upgrades.js';
 import { castPower } from './powers.js';
@@ -17,6 +18,7 @@ const SKILL_SLOTS = ['Q', 'W', 'E', 'D', 'R'];
 export function applyCommand(ctx, cmd) {
   const { state, data } = ctx;
   const reject = (reason, p = cmd && cmd.p) => { ctx.emit('reject', { player: typeof p === 'number' ? p : -1, cmd: cmd && cmd.type, reason }); return reason; };
+  if (cmd && cmd.sys === true) return applySystem(ctx, cmd, reject);
   if (!cmd || typeof cmd !== 'object' || typeof cmd.p !== 'number' || !state.players[cmd.p]) return reject('bad', -1);
   const p = state.players[cmd.p];
   if (state.result) return reject('over');
@@ -131,4 +133,30 @@ export function tollTick(ctx) {
       team.toll.readyAt = team.toll.charges < max ? state.tick + secToTicks(data['items-bl'].toll.cooldown) : state.tick;
     }
   }
+}
+
+/**
+ * System commands (online play, js/net/lockstep.js): issued by the HOST inside a turn, so every peer
+ * applies them at the same tick. Never sent by a player.
+ *   { sys: true, type: 'takeover', player, difficulty }  a human seat becomes an AI (its machine left)
+ *   { sys: true, type: 'release', player }              the AI hands the seat back (the human rejoined)
+ */
+function applySystem(ctx, cmd, reject) {
+  const { state } = ctx;
+  const p = state.players[cmd.player];
+  if (!p) return reject('bad', -1);
+  if (cmd.type === 'takeover') {
+    if (p.kind === 'ai') return null;
+    p.kind = 'ai';
+    p.ai = { difficulty: cmd.difficulty || 'veteran', sendDone: -1, nextAt: state.tick, fund: 0, rng: seedStream((state.seed ^ (state.tick * 2654435761)) >>> 0, 'takeover' + p.id), takenOver: true };
+    ctx.emit('takeover', { player: p.id, difficulty: p.ai.difficulty });
+    return null;
+  }
+  if (cmd.type === 'release') {
+    if (p.kind !== 'ai' || !p.ai || !p.ai.takenOver) return reject('bad', p.id);
+    p.kind = 'human'; p.ai = null;
+    ctx.emit('release', { player: p.id });
+    return null;
+  }
+  return reject('bad', p.id);
 }

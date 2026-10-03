@@ -1,5 +1,5 @@
 {
- "_doc": "World generator knobs for Hunters vs Farmers (docs/hvf-PLAN.md \u00a73). Read by js/sim/modes/hvf/mapgen.js. Distances in METRES unless a key ends in Cells. Cell kinds are fixed in code (KIND in mapgen.js). `features` = how many of each stamped feature to TRY per map, scaled by map area / (256 m)^2 and rounded (min 0); each has its own validator and is skipped where it does not fit. `validate` = the acceptance rules; a failing world retries with seed + k up to `retries` times, then the generator throws. `names` = plain-word pieces for landmark names (minimap and pings: \"A sheep was taken near the Stone Ring\").",
+ "_doc": "World generator knobs for Hunters vs Farmers (docs/hvf-PLAN.md \u00a73). Read by js/sim/modes/hvf/mapgen.js. Distances in METRES unless a key ends in Cells. Cell kinds are fixed in code (KIND in mapgen.js). `features` = how many of each stamped feature to TRY per map, scaled by map area / (256 m)^2 and rounded (min 0); each has its own validator and is skipped where it does not fit. `validate` = the acceptance rules; a failing world retries with seed + k up to `retries` times, then the generator throws. `names` = plain-word pieces for landmark names (minimap and pings: \"A sheep was taken near the Stone Ring\"). Tuning notes: validate.forest was the plan's 35-55%; after the first look (H1) it is 45-68%, because with 2 m cells and 3-5 m trails a half-open map read as a park, not a forest, and the plateaus' wooded tops count as forest.",
  "cell": 2,
  "plateau": {
   "share": 0.18,
@@ -19,9 +19,9 @@
   ]
  },
  "glades": {
-  "spacing": 34,
+  "spacing": 44,
   "radius": [
-   5,
+   6,
    14
   ],
   "edgeMargin": 12
@@ -44,7 +44,7 @@
   "depth": 3
  },
  "forest": {
-  "roughen": 0.28,
+  "roughen": 0.32,
   "specks": 0.012,
   "looks": 3
  },
@@ -77,21 +77,21 @@
   ]
  },
  "hollows": {
-  "perFarmer": 2.5,
+  "perFarmer": 2.2,
   "minPerFarmer": 2,
   "radius": [
    3.5,
    5
   ],
   "offTrail": [
-   8,
-   20
+   6,
+   18
   ],
   "entry": {
    "briar": 0.45,
    "tree": 0.55
   },
-  "spacing": 22,
+  "spacing": 18,
   "layouts": 3
  },
  "features": {
@@ -141,8 +141,8 @@
   "farmerReach": 1.0,
   "hunterGlades": 0.85,
   "forest": [
-   0.35,
-   0.55
+   0.45,
+   0.68
   ],
   "loops": 3,
   "kennelDistance": 60,
@@ -229,7 +229,7 @@
    "the Timber Line",
    "the Long Tangle"
   ],
-  "commons": "the Commons",
+  "commons": "The Commons",
   "kennel": "Kennel"
  }
 }

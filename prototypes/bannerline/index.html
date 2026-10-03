@@ -11,6 +11,8 @@
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/hud.css">
 <link rel="stylesheet" href="css/controlbar.css">
+<link rel="stylesheet" href="css/lobby.css">
+<link rel="stylesheet" href="css/town.css">
 <script type="importmap">{ "imports": { "three": "../../vendor/three/three.module.js", "three/addons/": "../../vendor/three/addons/" } }</script>
 </head>
 <body>
@@ -25,29 +27,19 @@
       <h1 class="logo">Bannerline</h1>
       <p class="tagline">Hold your field. Muster against theirs. Keep your banners flying.</p>
       <nav class="menu" id="title-menu">
-        <button class="menu-btn primary" data-act="play-ai">Play vs AI</button>
-        <button class="menu-btn" data-act="local" disabled>Play Local <small>two on one screen · soon</small></button>
+        <button class="menu-btn primary" data-act="play">Play <small>vs AI · two on one screen</small></button>
         <button class="menu-btn" data-act="host" disabled>Host Online <small>soon</small></button>
         <button class="menu-btn" data-act="join" disabled>Join by Code <small>soon</small></button>
         <button class="menu-btn" data-act="campaign" disabled>Campaign <small>soon</small></button>
       </nav>
-      <div class="setup" id="title-setup" hidden>
-        <div class="setup-row"><span class="setup-label">Hero</span><div class="chips" id="pick-hero"></div></div>
-        <div class="setup-row"><span class="setup-label">Muster</span><div class="chips" id="pick-race"></div></div>
-        <div class="setup-row"><span class="setup-label">Opponent</span><div class="chips" id="pick-ai"></div></div>
-        <div class="setup-row"><span class="setup-label">Speed</span><div class="chips" id="pick-speed"></div></div>
-        <div class="setup-actions">
-          <button class="menu-btn" data-act="back">Back</button>
-          <button class="menu-btn primary" data-act="start" id="btn-start">March <kbd>Enter</kbd></button>
-        </div>
-      </div>
-      <p class="hint" id="title-hint">Keyboard + mouse. Press <kbd>Enter</kbd> to begin.</p>
+      <p class="hint" id="title-hint">Keyboard, mouse or controller · <kbd>Enter</kbd> / <kbd class="pad">A</kbd> to begin</p>
     </div>
     <div class="title-foot">A playground prototype by Radley Sustaire</div>
   </section>
 
+  <section id="screen-lobby" class="screen lobby-screen" hidden data-ui></section>
+
   <section id="screen-match" class="screen match-screen" hidden>
-    <div id="hud" class="hud"></div>
   </section>
 
   <section id="screen-results" class="screen results-screen" hidden data-ui>

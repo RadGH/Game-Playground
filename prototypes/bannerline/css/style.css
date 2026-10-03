@@ -128,3 +128,14 @@ kbd {
   .result-grid { grid-template-columns: 1fr; }
   .logo { font-size: 38px; }
 }
+
+/* ---------- shared: menu focus (keyboard + gamepad) ---------- */
+.nav-focus { outline: 2px solid var(--gold) !important; outline-offset: 2px; box-shadow: 0 0 0 4px rgba(242,196,90,.18), 0 0 18px rgba(242,196,90,.25) !important; }
+.nav-press { animation: navPress .16s; }
+@keyframes navPress { 50% { transform: scale(.95); } }
+kbd.pad { border-radius: 999px; min-width: 1.6em; color: #bfe6a8; border-color: rgba(150,220,120,.55); }
+.result-actions { flex-wrap: wrap; }
+.results-card .hint { text-align: center; }
+.stat-list dt.who, .stat-list dd.who { color: var(--ink); font-weight: 700; padding-top: 4px; }
+.stat-list dt.who:not(:first-child) { border-top: 1px solid rgba(255,255,255,.08); margin-top: 6px; padding-top: 8px; }
+.stat-list dd.who:not(:nth-child(2)) { border-top: 1px solid rgba(255,255,255,.08); margin-top: 6px; padding-top: 8px; }

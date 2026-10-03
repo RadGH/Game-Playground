@@ -664,6 +664,43 @@ switch to a **cheap stand-in** (the unit's baked icon on a billboard + a capsule
 `InstancedMesh` per type). If N < 25, add the stand-in *and* lower the per-field cap to 2N. The full
 8-direction impostor atlas from v1 stays cut (~290 MB).
 
+#### 15.2 results (stream C, 2026-10-03)
+
+Built: `bench.html` + `js/bench/bench.js` (the real unit looks through `js/view/unit-looks.js`, the
+game's `js/view/renderer.js` and `camera.js` at the middle zoom, BatchedSpellFx casts at N/12 a
+second per field, contact-shadow quads, the live portrait drawing too) and
+`tools/bench-bannerline.mjs` (headless run → table + JSON). Run in this VM (SwiftShader, i.e. a CPU
+rasteriser — frame times are meaningless here, draw calls / triangles / CPU are not):
+`docs/bench/headless-swiftshader.json`.
+
+| Case | Bodies | Draw calls | Triangles | Anim CPU ms | Render CPU ms |
+|---|---|---|---|---|---|
+| 20 × 1 | 21 | 66 | 154k | 2.7 | 3.8 |
+| 40 × 1 | 41 | 112 | 303k | 3.1 | 3.4 |
+| 60 × 1 | 61 | 198 | 445k | 3.5 | 5.2 |
+| 80 × 1 | 81 | 240 | 600k | 3.8 | 4.8 |
+| 20 × 2 | 42 | 178 | 342k | 3.0 | 5.5 |
+| 40 × 2 | 82 | 295 | 692k | 3.9 | 7.1 |
+| 60 × 2 | 122 | 407 | 1.00M | 4.6 | 8.6 |
+| 80 × 2 | 162 | 539 | 1.37M | 5.4 | 10.6 |
+| 80 × 2, stand-ins past 25 | 162 | 380 | 520k | 4.2 | 8.8 |
+
+- A body costs about **3 draw calls and 7.4k triangles** (Chibi 2: 2 skinned meshes ~8k tris;
+  creatures after the mesh merge: 1–3 calls, 3–9k tris). Animation CPU is small (5 ms for 162 bodies on
+  this VM's CPU); **triangles are the first budget to break**: 80 per viewport hits the 600k line.
+- The stand-in (one InstancedMesh per unit type, capsule + head) cuts 80 × 2 to 380 calls and 520k
+  triangles (−30% calls, −62% triangles) and halved the software frame time.
+
+**Decision (provisional until the owner's numbers): no impostors and no stand-ins in v1.** The econ
+sim's peak is 31 live bodies per field and the field cap is 60; 60 × 2 sits inside both budgets
+(407 ≤ 600 calls, 1.00M ≤ 1.2M triangles). The stand-in path is built and measured in the bench, so if
+the owner's run gives N < 40 it is a small port into `js/view/standins.js` (stream B) and the rule
+above applies unchanged. If only triangles are tight, the cheaper lever is a Chibi 2 low-detail body
+past ~45 m, not stand-ins.
+
+**Owner action:** open `bench.html` on the desktop (dev server 8401), press **Run all cases**, then
+**Copy results** and paste into `docs/bench/owner.json`; the page prints N and the rule it implies.
+
 ---
 
 ## 16. Icons and the 3D portrait

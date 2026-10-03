@@ -1,218 +1,167 @@
-// Minimal AI for M1 (stream E grows it into the full parametric AI of PLAN §8 in M6).
+// Bannerline AI (stream E, PLAN §8): one AI, three settings that differ in DECISIONS, not stats.
 //
-// Runs inside the sim on every peer, reads only sim state, draws only from its own stream (player.ai.rng), and acts
-// only through commands (the same ones a human sends). Knobs: data/ai.json `difficulties`.
+// Runs inside the sim on every peer (lockstep), reads only sim state, draws only from its own rng stream
+// (player.ai.rng, one per slot, so one AI's draws never shift another's) and acts only through the same
+// commands a human sends (send, buy, sell, use, upgradeUnit, power, learn, talent, cast, move, amove,
+// attack, toll). Every command is checked against the sim's own refusal functions first, so an AI never
+// sends an illegal one (tests/ai.test.js counts rejects).
 //
-//   economy: once per Pay interval spend a `greed` share of gold on sends, scored half income /
-//            half pressure (the econ sim's "balanced" player) plus random noise; unit upgrades and items
-//            through shop.js aiShopping (stream I).
-//   hero:    learn skills (ult first), pick the talent at random, fight the nearest / most advanced
-//            enemy, cast a skill when enough enemies are inside its shape, drink below 35% HP,
-//            walk home below `retreatAt`.
+// One think every `reaction` ticks:
+//   1. read the situation   read.js     defence of the field my sends go into, threat in my field, my army
+//   2. skills + talent      skills.js   learn order, the level-6 pick
+//   3. sends                sends.js    how much, which units (counter.js), when to push; counter notices
+//   4. shopping             shop.js     walk to the Outfitter when it is safe and worth it; what to buy
+//   5. town                 town.js     Drill Yard levels, Sanctum powers
+//   6. hero                 hero.js     post, target, retreat, kiting, helping a teammate; draughts; skills
+//   7. Toll of Iron
+//
+// Knobs: data/ai.json `difficulties` (Recruit / Veteran / Commander). Memory lives in player.ai (plain
+// data, part of the state, so snapshots and hashes include it).
 
-import { next, int, range } from '../rng.js';
 import { liveEnt } from '../state.js';
+import { heroStats } from '../heroes.js';
+import { atShop } from '../items.js';
+import { defenceOf, threatIn, myArmy, myLane } from './read.js';
+import { planSends, noticeCounter, horizon } from './sends.js';
+import { learnCommands, castCommands } from './skills.js';
+import { shopAtOutfitter, nextBuildItem, healSlot, drinkCommand, slotOf } from './shop.js';
+import { drillYard, sanctum } from './town.js';
+import { heroCommands, postFor } from './hero.js';
 import { dist2 } from '../mathx.js';
-import { payTicks, sendRefusal } from '../economy.js';
-import { aiShopping, aiHealSlot } from '../shop.js';
-import { learnRefusal, castRefusal } from '../skills.js';
-import { planFor } from '../talents.js';
-import { isHidden } from '../traits.js';
-import { sortBy } from '../order.js';
 
-const LEARN_ORDER = ['R', 'Q', 'W', 'E', 'D'];
+export function knobs(data, p) {
+  const D = data.ai.difficulties;
+  return D[p.ai.difficulty] || D.recruit;
+}
 
-export function knobs(data, p) { return data.ai.difficulties[p.ai.difficulty] || data.ai.difficulties.recruit; }
+function memory(p) {
+  const m = p.ai;
+  if (m.v === 2) return m;
+  Object.assign(m, { v: 2, fund: m.fund || 0, pushUntil: 0, saveUntil: 0, saveFor: null, recent: {}, recentRoles: {}, toastAt: 0,
+    shopTrip: false, retreat: false, helping: -1, foeBanners: -1, leakRate: 0, deathRate: 0.4 });
+  return m;
+}
+
+/** The situation for one think (see read.js). */
+function situation(ctx, p, K) {
+  const { state, data, map } = ctx;
+  const hero = liveEnt(state, p.heroEnt);
+  const f = map.fields[state.teams[p.team].field];
+  const lane = myLane(ctx, p);
+  const ef = map.fields[state.teams[1 - p.team].field];
+  const sendLane = state.teams[p.team].players.indexOf(p.id) % ef.gates.length;
+  const S = {
+    hero, heroAlive: !!hero, myLane: lane, laneX: f.gates[lane].x, sendLane,
+    enemyDef: defenceOf(ctx, ef.id, p.team), threat: threatIn(ctx, p.team), army: myArmy(ctx, p),
+    healSlot: healSlot(p), myDps: heroStats(data, p).dps,
+    wantItem: K.shop.style === 'build' ? nextBuildItem(ctx, p) : null,
+    horizon: horizon(ctx, p),
+  };
+  let lead = null;
+  for (const e of state.ents) if (e.alive && !e._gone && e.field === f.id && e.team !== p.team && e.kind !== 'hero' && (!lead || e.z > lead.z)) lead = e;
+  S.leadFoe = lead;
+  S.post = postFor(ctx, p, K, S);
+  S.farFromPost = hero ? dist2(hero.x, hero.z, S.post.x, S.post.z) > 400 : false;
+  return S;
+}
+
+/** Bookkeeping once a Pay: how fast my units tear banners (Drill Yard reads it). */
+function track(ctx, p) {
+  const { state } = ctx;
+  const m = p.ai;
+  if (m.foeBanners >= 0 && state.tick - (m.trackAt || 0) < 200) return;
+  m.trackAt = state.tick;
+  const foe = state.teams[1 - p.team];
+  const secs = Math.max(1, (state.tick - (m.trackPrev || 0)) / 20);
+  m.sendRate = (m.sendRate || 0) * 0.7 + Math.max(0, p.stats.sendGold - (m.sendGold0 || 0)) / secs * 0.3;   // gold per second
+  m.sendGold0 = p.stats.sendGold; m.trackPrev = state.tick;
+  if (m.foeBanners >= 0) {
+    const torn = Math.max(0, m.foeBanners - foe.banners);
+    m.leakRate = m.leakRate * 0.7 + torn * 0.3;
+    m.deathRate = m.leakRate < 0.3 ? 0.6 : 0.2;
+  }
+  m.foeBanners = foe.banners;
+  for (const r of Object.keys(m.recentRoles)) m.recentRoles[r] *= 0.75;
+}
 
 export function aiCommands(ctx, p) {
   const { state, data } = ctx;
   if (state.result || state.tick < p.ai.nextAt) return [];
   const K = knobs(data, p);
   p.ai.nextAt = state.tick + K.reaction;
-  const rng = p.ai.rng;   // own stream per AI slot, so one AI's draws never shift another's
+  const m = memory(p);
+  const rng = p.ai.rng;
   const out = [];
   const cmd = (type, args = {}) => out.push(Object.assign({ p: p.id, type }, args));
+  track(ctx, p);
+  const S = situation(ctx, p, K);
+  const hero = S.hero;
 
-  // skills + talent
-  let pts = p.skillPts;
-  const ranks = {};
-  for (const s of p.skills) ranks[s.slot] = s.rank;
-  while (pts > 0) {
-    const slot = LEARN_ORDER.find(sl => learnRefusal(data, { ...p, skillPts: pts, skills: p.skills.map(s => ({ ...s, rank: ranks[s.slot] })) }, sl) === null);
-    if (!slot) break;
-    cmd('learn', { slot }); ranks[slot]++; pts--;
+  learnCommands(ctx, p, K, rng, cmd);
+
+  // ── Drill Yard first for the Commander: a level that is worth more than the units its price would buy
+  //    comes out of the send gold before any send ──
+  const planned = K.town.upgrades === 'planned';
+  let upFirst = 0;
+  if (planned) {
+    upFirst = drillYard(ctx, p, K, S, Math.max(0, p.gold - m.fund), cmd);
+    if (upFirst) m.pool = Math.max(0, (m.pool || 0) - upFirst);
   }
-  if (p.talent < 0 && p.level >= data.heroes.ranks.talentLevel) cmd('talent', { choice: int(rng, 2) });
 
-  economy(ctx, p, K, rng, cmd);
-  shopping(ctx, p, K, cmd);
-  toll(ctx, p, K, cmd);
-  heroPlay(ctx, p, K, rng, cmd);
+  // ── sends ──
+  const res = planSends(ctx, upFirst ? { ...p, gold: p.gold - upFirst } : p, K, rng, S);
+  for (const uid of res.buys) {
+    cmd('send', { unit: uid });
+    const r = data.derived.units[uid].role;
+    m.recentRoles[r] = (m.recentRoles[r] || 0) + data.derived.units[uid].cost;
+  }
+  noticeCounter(ctx, p, K, res);
+  let gold = p.gold - res.spent - upFirst;
+  m.fund = Math.max(0, Math.min(m.fund, gold));
+
+  // ── the Outfitter ──
+  if (hero && K.shop.trips && !m.retreat) {
+    const calm = S.threat.near === 0 && S.threat.danger < (K.hero.tier >= 2 ? 1.5 : 3);
+    const price = S.wantItem ? S.wantItem.price : K.shop.style === 'value' ? 300 : Infinity;
+    const needHeal = S.healSlot < 0 && m.fund >= 80 && hero.hp < hero.hpMax * 0.5;
+    if (!m.shopTrip && calm && (m.fund >= price || needHeal) && !atShop(ctx, p)) m.shopTrip = true;
+    if (m.shopTrip && S.threat.near >= 3) m.shopTrip = false;   // the Keep needs me more
+  }
+  if (hero && atShop(ctx, p)) {
+    const pv = { ...p, gold };
+    const r = shopAtOutfitter(ctx, pv, K, rng, m.fund);
+    for (const c of r.cmds) cmd(c.type, c);
+    gold -= r.spent; m.fund = Math.max(0, m.fund - r.spent);
+    if (m.shopTrip && !r.cmds.length) m.shopTrip = false;
+  }
+  // Veteran: read a Scroll of Return to go shopping from far up the field
+  if (hero && m.shopTrip && K.shop.style === 'value' && hero.z < 70) {
+    const s = slotOf(p, 'scroll_of_return');
+    if (s >= 0 && state.tick >= (p.useAt || 0)) { cmd('use', { slot: s }); m.usedAt = state.tick; }
+  }
+
+  // ── Drill Yard and Sanctum ──
+  const pv = { ...p, gold };
+  if (!planned) {
+    const up = drillYard(ctx, pv, K, S, m.fund - (S.wantItem && !m.shopTrip ? Math.min(m.fund, S.wantItem.price * 0.5) : 0), cmd);
+    gold -= up; m.fund = Math.max(0, m.fund - up);
+  }
+  const pw = sanctum(ctx, { ...p, gold }, K, S, m.fund, cmd);
+  gold -= pw; m.fund = Math.max(0, m.fund - pw);
+
+  // ── Toll of Iron ──
+  const team = state.teams[p.team];
+  if (K.hero.tier >= 1 && team.toll.charges > 0) {
+    const need = K.hero.tier >= 2 ? 6 : 8;
+    if (S.threat.near >= need && (K.hero.tier < 2 || S.threat.danger >= 4)) cmd('toll');
+  }
+
+  // ── hero ──
+  if (hero) {
+    const drink = m.usedAt === state.tick ? null : drinkCommand(ctx, p, K, hero);
+    if (drink) cmd(drink.type, drink);
+    const h = heroCommands(ctx, p, K, rng, hero, { ...S, wantShop: m.shopTrip }, cmd);
+    if (!h.shopping) castCommands(ctx, p, K, rng, hero, h.foes, h.target, S, cmd);
+  }
   return out;
 }
-
-/** Ring Toll of Iron when the Keep is about to be swarmed (micro >= 1). */
-function toll(ctx, p, K, cmd) {
-  const { state, map } = ctx;
-  const team = state.teams[p.team];
-  if (K.micro < 1 || team.toll.charges <= 0) return;
-  const f = map.fields[team.field];
-  let near = 0;
-  for (const e of state.ents) if (e.alive && !e._gone && e.field === f.id && e.team !== p.team && e.z > f.leakZ - 30) near++;
-  if (near >= 8) cmd('toll');
-}
-
-function pressure(u) { return u.hp * u.bodies * (1 + u.leak / 4) / u.cost; }
-
-function economy(ctx, p, K, rng, cmd) {
-  const { state, data } = ctx;
-  const payIdx = Math.floor(state.tick / payTicks(data));
-  if (p.ai.sendDone === payIdx) return;
-  p.ai.sendDone = payIdx;
-  let gold = p.gold;
-  // sends
-  const roster = data.races.races[p.race].units.map(uid => data.derived.units[uid]);
-  const pressRef = Math.max(...roster.map(pressure));
-  // each Pay splits the purse: `greed` to sends now, the rest into an item fund that accrues until it
-  // buys a gear step (without it the remainder never grows past a potion)
-  const greed = range(rng, K.greed[0], K.greed[1]);
-  const fresh = Math.max(0, gold - (p.ai.fund || 0));
-  p.ai.fund = Math.min(gold, (p.ai.fund || 0) + fresh * (1 - greed));
-  let budget = Math.max(0, gold - p.ai.fund);
-  for (let guard = 0; guard < 60; guard++) {
-    const avail = roster.filter(u => u.cost <= budget && u.cost <= gold);
-    if (!avail.length) break;
-    const scored = sortBy(avail.map(u => ({ id: u.id, u, s: -(0.5 * (u.income / u.cost) / 0.17 + 0.5 * pressure(u) / pressRef + K.noise * next(rng)) })), x => x.s);
-    const u = scored[0].u;
-    if (sendRefusal(state, data, { ...p, gold }, u.id)) break;
-    cmd('send', { unit: u.id });
-    gold -= u.cost; budget -= u.cost;
-  }
-  // items, Drill Yard and Sanctum come out of p.ai.fund in shopping() (js/sim/shop.js, stream I)
-}
-
-/** Outfitter / Drill Yard / Sanctum through js/sim/shop.js (stream I); spends from the item fund. */
-function shopping(ctx, p, K, cmd) {
-  const { cmds, spent } = aiShopping(ctx, p, K, p.ai.fund || 0);
-  for (const c of cmds) cmd(c.type, c);
-  p.ai.fund = Math.max(0, (p.ai.fund || 0) - spent);
-}
-
-function enemiesNear(state, hero, x, z, r) {
-  let n = 0;
-  for (const e of state.ents) if (e.alive && !e._gone && e.field === hero.field && e.team !== hero.team && dist2(x, z, e.x, e.z) <= (r + e.r) * (r + e.r)) n++;
-  return n;
-}
-
-function heroPlay(ctx, p, K, rng, cmd) {
-  const { state, data, map } = ctx;
-  const hero = liveEnt(state, p.heroEnt);
-  if (!hero) return;
-  const f = map.fields[hero.field];
-  const foes = state.ents.filter(e => e.alive && !e._gone && e.field === hero.field && e.team !== hero.team && e.kind !== 'hero' && !isHidden(e, hero.x, hero.z));
-  const hpPct = hero.hp / hero.hpMax;
-  const heal = aiHealSlot(p);
-  if (hpPct < 0.35 && heal >= 0 && state.tick >= (p.useAt || 0)) cmd('use', { slot: heal });
-  if (K.retreatAt > 0 && hpPct < K.retreatAt && heal < 0) {
-    if (dist2(hero.x, hero.z, f.spawn.x, f.spawn.z) > 4) cmd('move', { x: f.spawn.x, z: f.spawn.z });
-    return;
-  }
-  if (!foes.length) {
-    const gx = f.cx, gz = 92;
-    if (hero._ord.k !== 'move' && dist2(hero.x, hero.z, gx, gz) > 25) cmd('move', { x: gx, z: gz });
-    return;
-  }
-  // target choice
-  let target;
-  if (K.micro === 0) target = sortBy(foes, e => dist2(hero.x, hero.z, e.x, e.z))[0];
-  else if (!data.heroes.heroes[p.hero].melee) {
-    // ranged: shoot what is closest to the Keep (it cannot body-block, so leaks are the danger)
-    target = sortBy(foes, e => -e.z)[0];
-  } else {
-    const close = foes.filter(e => dist2(hero.x, hero.z, e.x, e.z) <= 100);
-    target = close.length ? sortBy(close, e => e.hp)[0] : sortBy(foes, e => -e.z)[0];
-  }
-  // ranged heroes step away from melee that is on them (micro >= 1), then go back to shooting
-  if (K.micro >= 1 && !data.heroes.heroes[p.hero].melee) {
-    let mx = 0, mz = 0, n = 0;
-    for (const e of foes) if (e._range <= 3 && e.target === hero.id && dist2(hero.x, hero.z, e.x, e.z) <= 9) { mx += e.x; mz += e.z; n++; }
-    if (n > 0 && hpPct < 0.85) {
-      let dx = hero.x - mx / n, dz = hero.z - mz / n;
-      const d = Math.sqrt(dx * dx + dz * dz) || 1;
-      dx /= d; dz /= d;
-      // prefer backing toward the Keep side, but never into the leak line
-      const tx = Math.max(f.x0 + 2, Math.min(f.x1 - 2, hero.x + dx * 5)), tz = Math.max(f.z0 + 2, Math.min(f.leakZ - 4, hero.z + dz * 5 + 1));
-      cmd('move', { x: tx, z: tz });
-      castOpportunist(ctx, p, K, rng, cmd, hero, target);
-      return;
-    }
-  }
-  if (hero._ord.k !== 'attack' || hero._ord.target !== target.id) cmd('attack', { target: target.id });
-  castOpportunist(ctx, p, K, rng, cmd, hero, target);
-}
-
-function castOpportunist(ctx, p, K, rng, cmd, hero, target) {
-  const { state, data } = ctx;
-  // skills
-  const foes = state.ents.filter(e => e.alive && !e._gone && e.field === hero.field && e.team !== hero.team && e.kind !== 'hero');
-  for (const sk of p.skills) {
-    if (castRefusal(ctx, p, sk.slot)) continue;
-    if (next(rng) > K.skillChance) continue;
-    const plan = planFor(data, p, sk.id);
-    let n = 0, need = 2;
-    const tr = plan.range || 0, td2 = dist2(hero.x, hero.z, target.x, target.z);
-    if (plan.form) {
-      // shapeshift in when a crowd is on you, back out when the field is quiet
-      const crowd = enemiesNear(state, hero, hero.x, hero.z, 6);
-      if ((!p.form && crowd >= 3) || (p.form === plan.form.id && crowd === 0)) { cmd('cast', { slot: sk.slot }); break; }
-      continue;
-    }
-    if (plan.shape === 'turret') {
-      // build toward the enemies, within reach; rebuild when below the limit for this rank
-      const T = plan.turret, have = state.ents.filter(e => e.kind === 'turret' && e.owner === p.id && e.alive && !e._gone).length;
-      if (have < T.max[Math.max(0, Math.min(T.max.length, sk.rank) - 1)]) {
-        const bx = hero.x + (target.x - hero.x) * 0.4, bz = hero.z + (target.z - hero.z) * 0.4;
-        cmd('cast', { slot: sk.slot, x: bx, z: bz }); break;
-      }
-      continue;
-    }
-    if (plan.repair) {
-      const hurt = state.ents.some(e => e.kind === 'turret' && e.owner === p.id && e.alive && !e._gone && e.hp < e.hpMax * 0.6 && dist2(e.x, e.z, hero.x, hero.z) <= plan.repair.radius * plan.repair.radius);
-      if (hurt || hero.hp < hero.hpMax * 0.5) { cmd('cast', { slot: sk.slot }); break; }
-      continue;
-    }
-    if (plan.turretBuff) {
-      const guns = state.ents.filter(e => e.kind === 'turret' && e.owner === p.id && e.alive && !e._gone);
-      if (guns.length && guns.some(g => enemiesNear(state, hero, g.x, g.z, g._range) >= 3)) { cmd('cast', { slot: sk.slot }); break; }
-      continue;
-    }
-    if (plan.shape === 'summon') {
-      const d = plan.pet ? data.heroes.pets[plan.pet] : null;
-      const have = state.ents.filter(e => e.kind === 'pet' && e.owner === p.id && e.alive && !e._gone).length;
-      if (!d || have < d.max) { cmd('cast', { slot: sk.slot, x: target.x, z: target.z }); break; }
-      continue;
-    }
-    if (plan.shape === 'dash') {
-      // a leap back is an escape: use it when melee is on you
-      let on = 0;
-      for (const e of foes) if (e._range <= 3 && dist2(hero.x, hero.z, e.x, e.z) <= 9) on++;
-      if (on >= 2) { cmd('cast', { slot: sk.slot, x: target.x, z: target.z }); break; }
-      continue;
-    }
-    if (plan.shape === 'ground' && plan.place) {
-      if (td2 <= tr * tr) { cmd('cast', { slot: sk.slot, x: target.x, z: target.z + 2 }); break; }   // just ahead of it
-      continue;
-    }
-    if (plan.shape === 'around') n = enemiesNear(state, hero, hero.x, hero.z, plan.radius);
-    else if (plan.shape === 'bolt') { n = td2 <= tr * tr ? 1 + enemiesNear(state, hero, target.x, target.z, plan.splash || 0) - 1 : 0; need = 1; }
-    else if (plan.shape === 'ground') { n = td2 <= tr * tr ? enemiesNear(state, hero, target.x, target.z, plan.line ? plan.line.length / 2 : plan.radius) : 0; need = plan.cooldown >= 18 ? 3 : 2; }
-    else if (plan.shape === 'melee') { n = dist2(hero.x, hero.z, target.x, target.z) <= (plan.reach + target.r + hero.r) * (plan.reach + target.r + hero.r) ? enemiesNear(state, hero, target.x, target.z, 2) : 0; need = 1; }
-    else if (plan.shape === 'self') {
-      const r = plan.taunt ? plan.taunt.radius : plan.selfBuff && plan.selfBuff.resistPerFoe ? plan.selfBuff.resistPerFoe.radius : 6;
-      n = enemiesNear(state, hero, hero.x, hero.z, r); need = 3;
-    }
-    if (K.micro === 0) need = Math.max(1, need - 1);
-    if (n >= need) { cmd('cast', { slot: sk.slot, x: target.x, z: target.z }); break; }
-  }
-}
-

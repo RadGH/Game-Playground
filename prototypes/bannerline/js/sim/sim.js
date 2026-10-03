@@ -43,7 +43,7 @@ class Sim {
     state.tick++;
     const ctx = makeCtx(this);
     for (const c of commands) {
-      if (c && state.players[c.p] && state.players[c.p].kind === 'ai') { ctx.emit('reject', { player: c.p, cmd: c.type, reason: 'bad' }); continue; }
+      if (c && !c.sys && state.players[c.p] && state.players[c.p].kind === 'ai') { ctx.emit('reject', { player: c.p, cmd: c.type, reason: 'bad' }); continue; }
       applyCommand(ctx, c);
     }
     const mode = this.mode;

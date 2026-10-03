@@ -38,7 +38,11 @@ export function createKeyboardDevice({ root = document.body, type = 'keyboard' }
   const onKeyDown = (e) => {
     if (!enabled || typingTarget(e.target)) return;    // join keys ignored while typing (PLAN §9.3)
     if (SWALLOW.has(e.code)) e.preventDefault();
-    if (e.repeat) return;
+    if (e.repeat) {
+      // Menus want held arrows to repeat; nothing else does.
+      if (e.code.startsWith('Arrow')) { edgeDown.push(e.code); lastActivity = performance.now(); }
+      return;
+    }
     press(e.code);
   };
   const onKeyUp = (e) => { release(e.code); };
@@ -94,7 +98,7 @@ export function createKeyboardDevice({ root = document.body, type = 'keyboard' }
     type,
     label: 'Keyboard + mouse',
     icon: 'keyboard',
-    get connected() { return true; },
+    connected: true,
     get lastActivity() { return lastActivity; },
     set enabled(v) { enabled = !!v; if (!v) onBlur(); },
     get enabled() { return enabled; },

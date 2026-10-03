@@ -235,15 +235,15 @@ export function buildWorld(scene, layout) {
     g.add(keep);
     const banners = bannerRing(g, f.keep.x, f.keep.z, f.team, 14, 11);
 
-    // The Armory: a small timber hall with an anvil sign.
-    if (f.armory) {
-      const arm = new THREE.Group(); arm.position.set(f.armory.x, 0, f.armory.z);
-      const hall = new THREE.Mesh(new THREE.BoxGeometry(5, 3, 4), new THREE.MeshStandardMaterial({ color: 0x8b6a45, roughness: 0.9 }));
-      hall.position.y = 1.5; arm.add(hall);
-      const roof = new THREE.Mesh(new THREE.ConeGeometry(4, 2.2, 4), new THREE.MeshStandardMaterial({ color: 0x6b3b2a, roughness: 0.8 }));
-      roof.position.y = 4.1; roof.rotation.y = Math.PI / 4; roof.scale.set(1, 1, 0.8); arm.add(roof);
-      const glow = new THREE.PointLight(0xffa040, 6, 9, 2); glow.position.set(0, 1.6, 2.6); arm.add(glow);
-      g.add(arm);
+    // Town buildings (Outfitter, Barracks, Drill Yard, Sanctum): placeholders until stream C's
+    // js/view/structures.js models land. Positions come from the sim (buildingsInfo).
+    const town = [];
+    for (const bd of (layout.buildings || []).filter((x) => x.team === f.team)) {
+      const m = buildingModel(bd);
+      m.position.set(bd.x, 0, bd.z);
+      m.rotation.y = DOOR_YAW[bd.door] ?? 0;
+      g.add(m);
+      town.push({ def: bd, model: m });
     }
 
     // Torches along the walls for some warmth.
@@ -258,7 +258,7 @@ export function buildWorld(scene, layout) {
       }
     }
     root.add(g);
-    fields.push({ team: f.team, group: g, banners, layout: f });
+    fields.push({ team: f.team, group: g, banners, layout: f, town });
   }
 
   // Decoration outside the fields: trees and rocks, seeded.
@@ -269,9 +269,84 @@ export function buildWorld(scene, layout) {
   return {
     root, fields,
     setBanners(team, fraction) { for (const f of fields) if (f.team === team) f.banners.setFraction(fraction); },
-    update(dt) { t += dt; for (const f of fields) f.banners.update(t, dt); },
+    update(dt) {
+      t += dt;
+      for (const f of fields) {
+        f.banners.update(t, dt);
+        for (const b of f.town) {
+          const u = b.model.userData;
+          u.ring.material.opacity = (u.hot ? 0.75 : 0.32) + Math.sin(t * 3) * 0.12;
+          if (u.spin) u.spin.rotation.y += dt * 0.8;
+          if (u.flag) u.flag.rotation.y = Math.sin(t * 1.3) * 0.15;
+        }
+      }
+    },
+    /** Highlight a field's Muster Hall (hovered / near). */
+    /** Highlight one building's ring (hovered / hero standing in range). */
+    highlight(id, on) {
+      for (const f of fields) for (const b of f.town) if (b.def.id === id) { b.model.userData.hot = on; b.model.userData.ring.material.color.set(on ? 0xfff1c0 : b.model.userData.ringColor); }
+    },
     dispose() { scene.remove(root); root.traverse((o) => { o.geometry?.dispose?.(); }); },
   };
+}
+
+// Door direction (data/buildings.json `door`) -> yaw. Models are built with the door on local +z.
+const DOOR_YAW = { '+z': 0, '+x': Math.PI / 2, '-z': Math.PI, '-x': -Math.PI / 2 };
+const RING_COLORS = { shop: 0x7fd0ff, barracks: 0xf2c45a, drillyard: 0xff9a6a, sanctum: 0xc69cff };
+
+/** Placeholder building per kind: shop (Outfitter), barracks, drillyard, sanctum. Door on +z. */
+function buildingModel(bd) {
+  const g = new THREE.Group(); g.name = 'building:' + bd.id;
+  const [w, d] = bd.size || [7, 5];
+  const team = TEAM_COLORS[bd.team] ?? 0x888888;
+  const M = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.85, ...o });
+  const wood = M(0x7a5a3a), dark = M(0x4a3524), stone = M(0x9a968c), roofM = M(0x5a2f22), teamM = M(team, { side: THREE.DoubleSide });
+  const gold = M(0xd9a842, { metalness: 0.6, roughness: 0.35 });
+  const box = (bw, bh, bd2, mat, x, y, z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(bw, bh, bd2), mat); m.position.set(x, y, z); g.add(m); return m; };
+  const u = { ringColor: RING_COLORS[bd.kind] ?? 0xf2c45a };
+  if (bd.kind === 'shop') {
+    box(w, 3, d, wood, 0, 1.5, 0);
+    const roof = new THREE.Mesh(new THREE.ConeGeometry(Math.max(w, d) * 0.72, 2.2, 4), roofM); roof.rotation.y = Math.PI / 4; roof.scale.set(w / Math.max(w, d), 1, d / Math.max(w, d)); roof.position.y = 4.1; g.add(roof);
+    // A striped awning over the counter and goods out front.
+    const aw = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.9, 2), M(0x3f86ec, { side: THREE.DoubleSide })); aw.rotation.x = -Math.PI / 3; aw.position.set(0, 2.9, d / 2 + 0.7); g.add(aw);
+    box(w * 0.7, 1, 0.8, dark, 0, 0.5, d / 2 + 0.6);
+    for (const [x, z] of [[-w / 2 - 0.7, d / 2], [w / 2 + 0.6, d / 2 - 0.5]]) box(1, 1, 1, wood, x, 0.5, z);
+    const sign = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.1, 16), gold); sign.rotation.x = Math.PI / 2; sign.position.set(0, 3.4, d / 2 + 0.06); g.add(sign);
+  } else if (bd.kind === 'barracks') {
+    box(w, 3.2, d, wood, 0, 1.6, 0);
+    const roof = new THREE.Mesh(new THREE.CylinderGeometry(0.01, Math.max(w, d) * 0.5, 2.4, 4, 1), roofM); roof.rotation.y = Math.PI / 4; roof.scale.set(w / Math.max(w, d) * 1.4, 1, d / Math.max(w, d) * 1.4); roof.position.y = 4.4; g.add(roof);
+    box(1.8, 2.2, 0.2, dark, 0, 1.1, d / 2 + 0.05);
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 7, 6), dark); pole.position.set(-w / 2 - 0.4, 3.5, d / 2 + 0.4); g.add(pole);
+    const flagGeo = new THREE.PlaneGeometry(1.5, 2.4); flagGeo.translate(0.75, -1.2, 0);
+    const flag = new THREE.Mesh(flagGeo, teamM); flag.position.set(-w / 2 - 0.4, 6.8, d / 2 + 0.4); g.add(flag); u.flag = flag;
+    const drum = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.7, 0.9, 16), M(0xa8562e)); drum.position.set(w / 2 - 1.2, 0.45, d / 2 + 1); g.add(drum);
+    const sign = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 0.12, 18), gold); sign.rotation.x = Math.PI / 2; sign.position.set(0, 2.85, d / 2 + 0.08); g.add(sign);
+  } else if (bd.kind === 'drillyard') {
+    // A fenced yard with a small shed and training dummies.
+    const ground = new THREE.Mesh(new THREE.PlaneGeometry(w, d), M(0x8a7556)); ground.rotation.x = -Math.PI / 2; ground.position.y = 0.02; g.add(ground);
+    for (const [x0, z0, x1, z1] of [[-w / 2, -d / 2, w / 2, -d / 2], [-w / 2, -d / 2, -w / 2, d / 2], [w / 2, -d / 2, w / 2, d / 2], [-w / 2, d / 2, -1.2, d / 2], [1.2, d / 2, w / 2, d / 2]]) {
+      const len = Math.hypot(x1 - x0, z1 - z0);
+      const rail = new THREE.Mesh(new THREE.BoxGeometry(len, 0.15, 0.15), wood); rail.position.set((x0 + x1) / 2, 0.9, (z0 + z1) / 2); rail.rotation.y = -Math.atan2(z1 - z0, x1 - x0); g.add(rail);
+      for (let k = 0; k <= Math.floor(len / 1.6); k++) { const t = k / Math.max(1, Math.floor(len / 1.6)); box(0.18, 1.2, 0.18, dark, x0 + (x1 - x0) * t, 0.6, z0 + (z1 - z0) * t); }
+    }
+    box(w * 0.4, 2.4, d * 0.35, wood, -w * 0.25, 1.2, -d * 0.28);
+    for (const x of [0.8, 2.4]) { box(0.15, 1.6, 0.15, dark, x, 0.8, 0.6); const dm = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.36, 0.9, 8), M(0xd8c08a)); dm.position.set(x, 1.4, 0.6); g.add(dm); }
+    const rack = box(1.6, 1.2, 0.2, dark, w / 2 - 1.2, 0.6, -d / 2 + 0.5); rack.material = dark;
+  } else {
+    // Sanctum: a round stone shrine with a floating crystal.
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(w * 0.5, w * 0.55, 0.6, 20), stone); base.position.y = 0.3; g.add(base);
+    for (let k = 0; k < 6; k++) { const a = (k / 6) * Math.PI * 2; const c = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.3, 3.2, 8), stone); c.position.set(Math.cos(a) * w * 0.4, 2.2, Math.sin(a) * w * 0.4); g.add(c); }
+    const cap = new THREE.Mesh(new THREE.TorusGeometry(w * 0.4, 0.25, 6, 24), stone); cap.rotation.x = Math.PI / 2; cap.position.y = 3.8; g.add(cap);
+    const crystal = new THREE.Mesh(new THREE.OctahedronGeometry(0.8, 0), new THREE.MeshStandardMaterial({ color: 0xc69cff, emissive: 0x6a3ad0, emissiveIntensity: 1.2, roughness: 0.2 }));
+    crystal.position.y = 2.2; crystal.scale.set(1, 1.6, 1); g.add(crystal); u.spin = crystal;
+    const glow = new THREE.PointLight(0xb08aff, 5, 10, 2); glow.position.y = 2.2; g.add(glow);
+  }
+  // Interaction ring on the ground in front of the door.
+  const ring = new THREE.Mesh(new THREE.RingGeometry(2.4, 2.8, 40), new THREE.MeshBasicMaterial({ color: u.ringColor, transparent: true, opacity: 0.4, depthWrite: false }));
+  ring.rotation.x = -Math.PI / 2; ring.position.set(0, 0.05, d / 2 + 2.6); g.add(ring);
+  u.ring = ring;
+  g.userData = u;
+  return g;
 }
 
 function decorate(root, layout) {

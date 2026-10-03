@@ -189,3 +189,19 @@ the spam. **Removed** = done in the sim already; **Flag** = a judgement call for
   economy.js `buyPotion`, the `oil` read in combat.js, `econ.muster`, `econ.items.oil` are removed.
 - [ ] (A -> B) R2.9 leftovers in B's files: `data/bindings.json` actions `muster` / `musterHall` (+ its _doc).
 - [ ] (A -> C) R2.9 leftover in C's `data/identity.json` _doc ("Muster Halls").
+
+## Stream D (online, M5) -> B (2026-10-03)
+
+- [ ] (D -> B) Online lobby UI over `js/net/lobbysync.js` (interfaces.md §12): Title "Host Online" /
+  "Join (code)" (R2.11: after the mode screen), room code shown big with a copy button, seats from
+  `room.state.slots` (kind + owner name + ping + "(tab hidden)"), local devices claim seats with
+  `room.claim(key, { local, device })` (couch players work online), host-only controls (format, AI seats,
+  kick, Start), plain errors from `NET_MESSAGES`, `!isSecureContext` note as today.
+- [ ] (D -> B) Minimal main.js hook (D will NOT edit main.js without your OK — say "D: ok to hook main.js"
+  here and D adds it): `startMatch(session, net)` where `net = { match, clock }` from `beginMatch` +
+  `createNetClock`; use that clock instead of `createLocalClock`; at the top of every frame
+  `m.sim = m.clock.sim` (a resync swaps the sim object); seats = `net.match.localPlayers`; disable the
+  speed chip and pause in online matches; show `clock.waitingFor` as a banner; on `hostLeft` go to
+  results; after results the HOST calls `room.backToLobby()` and every machine returns to the room.
+- [ ] (D -> B) Banners for lockstep events: takeover ("X left — an AI takes their seat"), rejoin
+  ("X is back"), hostLeft, waiting ("Waiting for X (tab hidden)").

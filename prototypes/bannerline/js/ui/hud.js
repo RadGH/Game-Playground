@@ -5,6 +5,7 @@
 import { h, setText, setStyle, toggle, setTip, clockText, shortSecs } from './dom.js';
 import { icon } from './icons.js';
 import { TEAM_CSS } from '../view/terrain.js';
+import { createMenuNav } from './menunav.js';
 
 const DMG_NAMES = { blade: 'Blade', pierce: 'Pierce', fire: 'Fire', nature: 'Nature' };
 const ARMOUR_NAMES = { light: 'Light', heavy: 'Heavy', spectral: 'Spectral', hide: 'Hide', fortified: 'Fortified' };
@@ -17,7 +18,7 @@ const REJECT_TEXT = {
 };
 export { DMG_NAMES, ARMOUR_NAMES };
 
-export function createHud({ root, overlay, sim, Q, player, seat, project, onPause, onSurrender, onQuit }) {
+export function createHud({ root, overlay, sim, Q, player, seat, project, onPause, onSurrender, onQuit, onHowTo = null, isPad = false }) {
   const data = sim.data;
   const tickHz = data.econ?.clock?.tickHz || 20;
   const me = () => sim.state.players[player];
@@ -72,6 +73,13 @@ export function createHud({ root, overlay, sim, Q, player, seat, project, onPaus
   root.append(rival);
   const rvDeck = rival.querySelector('.rv-deck');
 
+  // ---------- army chip: your sends in the enemy field + the gate queue (click = look there) ----------
+  const army = h('button', 'army-chip', null, { type: 'button', 'data-ui': true });
+  army.innerHTML = `${icon('sword')}<span class="ar-main"><b class="ar-n">0</b> fighting</span><span class="ar-wait"></span><span class="ar-dealt"></span>`;
+  root.append(army);
+  let onArmyClick = null;
+  army.addEventListener('click', () => onArmyClick?.());
+
   // ---------- alerts + reject line ----------
   const alerts = h('div', 'alerts');
   const reject = h('div', 'reject');
@@ -98,32 +106,25 @@ export function createHud({ root, overlay, sim, Q, player, seat, project, onPaus
   const pause = h('div', 'pause-menu', null, { 'data-ui': true, hidden: true });
   pause.innerHTML = `<div class="pause-card"><h2>Paused</h2>
     <button class="menu-btn primary" data-act="resume">Resume <kbd>Esc</kbd></button>
+    <button class="menu-btn" data-act="howto">How to play</button>
     <button class="menu-btn" data-act="surrender">Surrender</button>
-    <button class="menu-btn" data-act="quit">Quit to title</button>
-    <p class="keys"><kbd>↑</kbd><kbd>↓</kbd> choose · <kbd>Enter</kbd> confirm<br>Right-click move / attack · <kbd>A</kbd> attack-move · <kbd>S</kbd> stop · <kbd>Q</kbd><kbd>W</kbd><kbd>E</kbd><kbd>D</kbd><kbd>R</kbd> skills at the cursor · <kbd>Ctrl</kbd>+key learn ·
-    <kbd>Z</kbd><kbd>X</kbd><kbd>C</kbd><kbd>V</kbd> send · <kbd>Shift</kbd>+send auto · <kbd>M</kbd> Muster · <kbd>1</kbd> potion · <kbd>Space</kbd> centre · wheel zoom</p></div>`;
+    <button class="menu-btn" data-act="quit">Leave to the lobby</button>
+    <p class="keys"><kbd>↑</kbd><kbd>↓</kbd> choose · <kbd>Enter</kbd> confirm · controller: d-pad, <kbd class="pad">A</kbd>, <kbd class="pad">B</kbd><br>Right-click move / attack · <kbd>A</kbd> attack-move · <kbd>S</kbd> stop · <kbd>Q</kbd><kbd>W</kbd><kbd>E</kbd><kbd>D</kbd><kbd>R</kbd> skills at the cursor · <kbd>Ctrl</kbd>+key learn ·
+    <kbd>B</kbd> Muster Hall (send units) · <kbd>Z</kbd><kbd>X</kbd><kbd>C</kbd><kbd>V</kbd> favourite sends (hold = keep buying) · <kbd>F</kbd> look at the next field · <kbd>I</kbd> Armory · <kbd>M</kbd> Muster · <kbd>1</kbd> potion · <kbd>Space</kbd> centre · wheel zoom</p></div>`;
   root.append(pause);
   pause.addEventListener('click', (e) => {
     const act = e.target.closest('[data-act]')?.dataset.act;
     if (act === 'resume') setPaused(false);
     if (act === 'surrender') { setPaused(false); onSurrender(); }
+    if (act === 'howto') { setPaused(false); onHowTo?.(); }
     if (act === 'quit') { setPaused(false); onQuit(); }
   });
   let paused = false;
-  // Arrow keys (and later the d-pad) walk the pause menu; Enter presses the focused button.
-  const onPauseKey = (e) => {
-    if (!paused) return;
-    if (e.code !== 'ArrowDown' && e.code !== 'ArrowUp') return;
-    const btns = [...pause.querySelectorAll('button')];
-    const i = btns.indexOf(document.activeElement);
-    const j = e.code === 'ArrowDown' ? (i + 1) % btns.length : (i - 1 + btns.length) % btns.length;
-    btns[j].focus({ preventScroll: true });
-  };
-  window.addEventListener('keydown', onPauseKey);
+  const pauseNav = createMenuNav(pause, { onBack: () => setPaused(false) });
+  const talentNav = createMenuNav(talent, { selector: '.tp-card' });
   function setPaused(v) {
     paused = v; pause.hidden = !v; onPause(v);
-    if (v) pause.querySelector('[data-act="resume"]').focus({ preventScroll: true });
-    else if (pause.contains(document.activeElement)) document.activeElement.blur();
+    if (v) pauseNav.focus('[data-act="resume"]');
   }
 
   const board = h('div', 'scoreboard', null, { hidden: true });
@@ -218,8 +219,22 @@ export function createHud({ root, overlay, sim, Q, player, seat, project, onPaus
       talentShown = true;
       talent.hidden = false;
       talent.innerHTML = `<div class="tp-head">Choose a talent</div><div class="tp-row">${hi.talent.choices.map((ch, i) => `
-        <button class="tp-card" data-choice="${i}"><b>${ch.name}</b><span>${ch.desc || ''}</span><kbd>${i === 0 ? 'F1' : 'F2'}</kbd></button>`).join('')}</div>`;
+        <button class="tp-card" data-choice="${i}"><b>${ch.name}</b><span>${ch.desc || ''}</span>${isPad ? '' : `<kbd>${i === 0 ? 'F1' : 'F2'}</kbd>`}</button>`).join('')}</div>${isPad ? '<div class="tp-pad">Press <kbd class="pad">View</kbd> to choose</div>' : ''}`;
     } else if (!open && talentShown) { talentShown = false; talent.hidden = true; }
+
+    // Army chip.
+    {
+      let fighting = 0, waiting = 0;
+      for (const e of s.ents) if (e.kind === 'unit' && e.owner === player && e.alive !== false) fighting++;
+      for (const f of s.fields || []) for (const w of f.waiting || []) if (w.owner === player) waiting += w.bodies || 1;
+      if (Array.isArray(s.gateQueue)) for (const w of s.gateQueue) if (w.owner === player) waiting += w.bodies || 1;
+      setText(army.querySelector('.ar-n'), fighting);
+      setText(army.querySelector('.ar-wait'), waiting ? `+${waiting} waiting at the gate` : '');
+      const dealt = p.stats?.dealt || 0;
+      setText(army.querySelector('.ar-dealt'), dealt ? `${Math.round(dealt * 10) / 10} banners torn` : '');
+      toggle(army, 'idle', fighting === 0 && waiting === 0);
+      setTip(army, 'Your units in the rival\'s field. Click (or F) to watch them.');
+    }
 
     if (rejectT > 0) { rejectT -= dt; if (rejectT <= 0) reject.classList.remove('show'); }
     if (!board.hidden) drawBoard();
@@ -230,7 +245,7 @@ export function createHud({ root, overlay, sim, Q, player, seat, project, onPaus
     seat.issue({ type: 'talent', choice: Number(b.dataset.choice) });
   });
   const onKey = (e) => {
-    if (!talentShown) return;
+    if (!talentShown || isPad) return;
     if (e.code === 'F1' || e.code === 'F2') { e.preventDefault(); seat.issue({ type: 'talent', choice: e.code === 'F1' ? 0 : 1 }); }
   };
   window.addEventListener('keydown', onKey);
@@ -279,9 +294,23 @@ export function createHud({ root, overlay, sim, Q, player, seat, project, onPaus
     update, onEvent, alert,
     get paused() { return paused; },
     togglePause() { setPaused(!paused); },
+    onArmy(fn) { onArmyClick = fn; },
+    /** A send was bought: "+1.8 income" floats up from the income counter. */
+    sendFeedback(income) {
+      const inc = econ.querySelector('.income');
+      const f = h('span', 'inc-float', `+${Math.round(income * 10) / 10}`);
+      inc.append(f);
+      setTimeout(() => f.remove(), 900);
+      inc.classList.remove('bump'); void inc.offsetWidth; inc.classList.add('bump');
+    },
+    /** Menu input for this view's device while paused. */
+    pauseFrame(frame) { if (paused) pauseNav.handle(frame); },
+    get talentOpen() { return talentShown; },
+    /** Pad: drive the talent cards (d-pad + A). Returns true while it owns the pad. */
+    talentFrame(frame) { if (!talentShown) return false; talentNav.handle(frame); return true; },
     setPaused,
     showBoard(v) { board.hidden = !v; if (v) drawBoard(); },
     get boardOpen() { return !board.hidden; },
-    destroy() { window.removeEventListener('keydown', onKey); window.removeEventListener('keydown', onPauseKey); root.replaceChildren(); gate.remove(); },
+    destroy() { window.removeEventListener('keydown', onKey); pauseNav.destroy(); talentNav.destroy(); root.replaceChildren(); gate.remove(); },
   };
 }

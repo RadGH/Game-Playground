@@ -155,3 +155,86 @@ body.targeting #view { cursor: crosshair; }
   .tb-tide, .tb-clock .clock-sub { display: none; }
   .rival { display: none; }
 }
+
+/* ---------- views (one per local player; split screen = two halves) ---------- */
+.match-screen { pointer-events: none; }
+.view-root { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: hidden; container-type: size; pointer-events: none; }
+.view-root .hud, .view-root .overlay { position: absolute; inset: 0; }
+.view-root.split + .view-root.split { box-shadow: inset 2px 0 0 rgba(0,0,0,.85), inset 3px 0 0 rgba(214,188,128,.35); }
+.seat-tag { position: absolute; left: 10px; top: 8px; padding: 2px 9px; border-radius: 5px; font: 800 12px/18px var(--ui); letter-spacing: .06em; text-transform: uppercase; color: #140f04; background: var(--seat); z-index: 3; }
+/* The mouse belongs to the keyboard player's half only: the pad half ignores it and shows a dim cursor. */
+.view-root.pad-view, .view-root.pad-view * { pointer-events: none !important; }
+body.over-pad #view { cursor: none; }
+.dim-cursor { position: absolute; left: 0; top: 0; width: 14px; height: 20px; margin: -1px 0 0 -1px; pointer-events: none; z-index: 60; opacity: 0; background: rgba(255,255,255,.35); clip-path: polygon(0 0, 100% 72%, 55% 70%, 75% 100%, 60% 100%, 42% 74%, 0 95%); }
+body.over-pad .dim-cursor { opacity: 1; }
+.view-root.paused-other::after { content: 'Paused'; position: absolute; inset: 0; display: grid; place-items: center; background: rgba(6,7,9,.5); font: 800 34px var(--head); color: var(--ink2); }
+.pad-legend { position: absolute; left: 50%; bottom: 190px; transform: translateX(-50%); padding: 3px 10px; border-radius: 6px; background: rgba(14,15,18,.7); color: var(--ink3); font-size: 12px; white-space: nowrap; }
+.tp-pad { text-align: center; color: var(--ink2); font-size: 12px; margin-top: 6px; }
+.tp-card.nav-focus { border-color: var(--gold); }
+
+/* compact HUD for a half screen (or any narrow window) */
+@container (max-width: 1000px) {
+  .topbar { grid-template-columns: minmax(90px, 1fr) auto auto auto minmax(90px, 1fr); gap: 8px; min-width: 0; width: calc(100% - 8px); padding: 5px 8px 6px; }
+  .ban-label { display: none; }
+  .tb-clock { min-width: 0; }
+  .clock-v { font-size: 21px; }
+  .clock-sub { font-size: 11px; }
+  .tide-txt { display: none; }
+  .tb-econ { gap: 8px; }
+  .tb-stat { font-size: 16px; }
+  .rival { top: 66px; right: 6px; width: 200px; transform-origin: top right; transform: scale(.9); }
+  .controlbar { grid-template-columns: 96px 170px auto 128px; gap: 6px; padding: 8px 8px; }
+  .portrait-slot { height: 116px; }
+  .ci-name b { font-size: 16px; }
+  .cb-card { gap: 4px; }
+  .minimap { width: 128px; height: 84px; }
+  .cb-oil span { display: none; }
+  .shop-panel { right: 6px; bottom: 160px; width: calc(100% - 12px); max-width: 520px; }
+  .pad-legend { bottom: 166px; }
+  .reject { bottom: 160px; }
+  .talent-pick { bottom: 170px; }
+  .tp-card { width: 180px; }
+}
+@container (max-width: 700px) {
+  .controlbar { grid-template-columns: auto auto; }
+  .cb-portrait, .cb-info { display: none; }
+  .tb-econ .income { display: none; }
+}
+
+/* army chip: your sends in the enemy field, gate queue, banners torn */
+.army-chip { position: absolute; left: 12px; bottom: 196px; display: flex; align-items: center; gap: 8px; padding: 5px 12px; border-radius: 999px; cursor: pointer;
+  background: rgba(14,15,18,.86); border: 1px solid rgba(224,80,62,.5); color: var(--ink); font-size: 13px; box-shadow: var(--shadow); pointer-events: auto; }
+.army-chip:hover { border-color: #ff8a6a; }
+.army-chip .ic { width: 15px; height: 15px; color: #ff9a7a; }
+.army-chip .ar-n { font-size: 15px; font-variant-numeric: tabular-nums; }
+.army-chip .ar-wait { color: #ffd38a; font-weight: 700; }
+.army-chip .ar-wait:empty, .army-chip .ar-dealt:empty { display: none; }
+.army-chip .ar-dealt { color: var(--ink2); }
+.army-chip.idle { opacity: .6; }
+/* income feedback */
+.tb-stat.income { position: relative; }
+.tb-stat.income.bump { animation: incBump .25s ease-out; }
+@keyframes incBump { 40% { transform: scale(1.18); color: #c8ffd0; } }
+.inc-float { position: absolute; left: 50%; top: -2px; transform: translateX(-50%); font: 800 14px var(--ui); color: #a6f0b4; text-shadow: 0 1px 3px #000; pointer-events: none; white-space: nowrap; animation: incFloat .9s ease-out forwards; z-index: 5; }
+@keyframes incFloat { from { opacity: 1; transform: translate(-50%, 0); } to { opacity: 0; transform: translate(-50%, 34px); } }
+@container (max-width: 1000px) { .army-chip { bottom: 168px; left: 6px; font-size: 12px; } }
+
+/* Muster Hall label over the building */
+.hall-label { position: absolute; left: 0; top: 0; padding: 3px 10px; border-radius: 6px; white-space: nowrap; pointer-events: none;
+  background: rgba(20,16,8,.85); border: 1px solid var(--gold-dim); color: var(--gold); font: 700 13px var(--ui); box-shadow: var(--shadow); will-change: transform; }
+.hall-label kbd { margin-left: 4px; }
+.hall-label[hidden] { display: none; }
+.hall-label.near { border-color: var(--gold); color: #fff1c8; }
+
+/* onboarding hint card */
+.onboard { position: absolute; left: 14px; top: 76px; width: min(340px, calc(100% - 28px)); padding: 12px 14px 10px; border-radius: 10px; pointer-events: auto; z-index: 14;
+  background: linear-gradient(180deg, rgba(28,26,20,.96), rgba(16,16,18,.96)); border: 1px solid var(--gold-dim); box-shadow: var(--shadow); animation: alertIn .25s; }
+.onboard[hidden] { display: none; }
+.ob-step { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--ink3); }
+.ob-title { font: 800 18px/1.15 var(--head); color: var(--gold); margin: 2px 0 6px; }
+.ob-text { font-size: 14px; color: var(--ink); line-height: 1.4; margin: 0 0 10px; }
+.ob-actions { display: flex; gap: 6px; justify-content: flex-end; }
+.ob-actions button { padding: 5px 12px; border-radius: 6px; cursor: pointer; font-weight: 700; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.15); color: var(--ink2); }
+.ob-actions .ob-next { background: linear-gradient(180deg, #d9a842, #a87a24); color: #1a1206; border-color: #f2c45a; }
+@container (max-width: 1000px) { .onboard { top: 62px; } }
+body.hall-hover #view { cursor: pointer; }

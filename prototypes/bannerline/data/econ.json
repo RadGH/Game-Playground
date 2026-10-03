@@ -50,25 +50,8 @@
   "xpPerLevel": 6,
   "leak": 1
  },
- "muster": {
-  "_doc": "per player, all sent units: +hp and +dps",
-  "ranks": [
-   {
-    "cost": 250,
-    "pct": 0.1
-   },
-   {
-    "cost": 600,
-    "pct": 0.1
-   },
-   {
-    "cost": 1200,
-    "pct": 0.1
-   }
-  ]
- },
  "items": {
-  "_doc": "Shop model the econ sim uses: 8 equipment slots, each upgraded through 7 steps (5 base tiers, then rare and legendary rolls of the top base). A step REPLACES the last, so dps/hp/armor are the gain over the previous step. Steps unlock by match time. The real shop (data/shop.json) prices bases + rarity from these.",
+  "_doc": "Shop model the econ sim uses: 8 equipment slots, each upgraded through 7 steps (5 base tiers, then rare and legendary rolls of the top base). A step REPLACES the last, so dps/hp/armor are the gain over the previous step. Steps unlock by match time. The real shop (data/shop.json) prices bases + rarity from these. `unlock` no longer gates the shop (lead decision 2026-10-03: gold is the gate); it is the second from which drops and champion picks may roll that step.",
   "slots": 8,
   "tiers": [
    {
@@ -125,10 +108,6 @@
    "cost": 25,
    "heal": 0.4,
    "belt": 2
-  },
-  "oil": {
-   "cost": 80,
-   "_doc": "Weapon oil (PLAN §5.2): half of the hero's damage becomes the chosen type. Buying another type replaces it."
   }
  },
  "hero": {
@@ -189,6 +168,12 @@
     "aoe": 0.8,
     "type": "nature",
     "selfHeal": 0.01
+   },
+   "engineer": {
+    "dpsK": 0.95,
+    "hpK": 0.95,
+    "aoe": 0.7,
+    "type": "pierce"
    }
   }
  }

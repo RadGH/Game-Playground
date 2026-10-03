@@ -111,22 +111,18 @@ per tick are fine; they apply in array order.
 | `deck` | `units` [4 unit ids] | set the 4 deck sends (any time) |
 | `auto` | `index` 0..3, `on` bool | auto-send toggle for a deck slot: buys that send whenever your gold allows (it spends everything) |
 | `muster` | — | buy the next Muster rank (I–III) |
-| `upgrade` | `slot?` (name like `'chest'` or index 0..7), `kind?` (chest only: `'cloth'|'light'|'medium'|'heavy'`) | "Buy recommended": buy the next shop step item for that slot (omit `slot` = the cheapest unlocked step anywhere) and wear it when it arrives. The worn item is traded in if it is a plain shop step; anything special (unique, set piece, rolled or dropped item) goes back to the bag |
-| `buy` | `slot`, `step` 0..6, `kind?`, `equip?` | buy one specific shop item into the bag (or worn with `equip: true`). Steps 0-4 are plain (Plain/Fine/Superior/Masterwork/Exquisite), 5 is a **rare roll** (3 affixes), 6 a **legendary roll** (5); each step unlocks by time (`econ.items.tiers[step].unlock`). Away from the Armory every purchase is a **Requisition** (arrives after `items-bl.shop.requisition` s; lost and refunded if the hero dies first) |
-| `equip` | `uid` | wear a bag item; what it replaces goes into its bag slot. A two-handed weapon also moves the off-hand to the bag |
-| `unequip` | `slot` | worn item to the bag |
-| `sell` | `uid` | sell a bag item for `items-bl.shop.sellFactor` of its price |
-| `pick` | `index` 0..2 | choose a card from the oldest waiting champion pick (`player.picks[0]`) into the bag |
-| `oil` | `dmgType` `'blade'|'pierce'|'fire'|'nature'` | buy weapon Oil (`econ.items.oil.cost`): half of the hero's damage becomes that type (replaces any earlier oil) |
-| `potion` | — | buy one belt potion (25 g) if the belt has room |
-| `drink` | — | drink a belt potion (heals 40% max HP) |
+| `buy` | `id` (data/items-bl.json item id) | buy one Outfitter item into the first free inventory slot. The hero must be alive and inside the Outfitter's radius (`data/buildings.json`). Refusals: `notAtShop`, `dead`, `full`, `uniqueEquipped`, `gold`, `bad` (stream I, §11) |
+| `sell` | `slot` 0..5 | sell a carried item at the Outfitter for `items-bl.rules.sellFactor` of its price (a consumable: of its remaining charges' share). Refusals: `notAtShop`, `dead`, `bad` |
+| `swap` | `a`, `b` slots 0..5 | move / swap two inventory slots (anywhere) |
+| `use` | `slot` 0..5 | use a consumable (spends one charge; `items-bl.rules.useCooldown` s between uses). Refusals: `notUsable`, `dead`, `cooldown`, `bad` |
+| `upgradeUnit` | `id` (data/upgrades.json) | buy the next Drill Yard level (from anywhere). Refusals: `max`, `gold`, `bad` |
+| `power` | `id` (data/powers.json), `x`, `z` | buy + cast a Sanctum power at a world point (from anywhere, hero may be dead). Refusals: `ownFieldOnly` (defensive outside your field), `enemyFieldOnly` (offensive in a field of your team), `notInField`, `cooldown`, `gold`, `bad` |
 | `surrender` | — | your team loses at once |
 | `toll` | — | Toll of Iron: every enemy unit in your team's field is stunned (`items-bl.toll.stun` s). Team charges (`team.toll`), one back every `toll.cooldown` s |
 
-`reject.reason` values: `'gold'` (not enough gold), `'maxGear'`, `'stunned'`, `'bag'` (bag full), `'twoHanded'` (off-hand beside a two-hander), `'hero'` (another hero's unique), `'locked'` (an item step not unlocked yet — sends have no locks),
+`reject.reason` values: `'gold'` (not enough gold), `'stunned'`, items/town (§11): `'notAtShop'`, `'full'` (no free inventory slot), `'uniqueEquipped'`, `'notUsable'`, `'max'` (upgrade at max level), `'ownFieldOnly'`, `'enemyFieldOnly'`, `'notInField'`,
 `'roster'` (unit not in your race), `'dead'` (hero is dead), `'cooldown'`, `'mana'`, `'rank'` (skill
-not learned), `'points'` (no skill point), `'maxRank'`, `'level'` (R before 6), `'belt'` (belt full /
-empty), `'maxMuster'`, `'over'` (match over), `'bad'` (malformed).
+not learned), `'points'` (no skill point), `'maxRank'`, `'level'` (R before 6), `'maxMuster'`, `'over'` (match over), `'bad'` (malformed).
 
 ## 4. Events
 
@@ -162,16 +158,16 @@ hashed, not snapshotted): they are hints for drawing and sound. Never derive gam
 | `refund` | `player, amount` | Grave Tithe refund *(M6, Unburied)* |
 | `rising` | `step` | Rising Tide step began (alert) |
 | `muster` | `player, rank` | Muster rank bought |
-| `item` | `player, uid, how, name, rarity` | an item reached the player (`how`: `'buy'` at the Armory, `'requisition'` delivered, `'pick'`) |
-| `requisition` | `player, uid, atTick, name` | a purchase away from the Armory is on its way |
-| `requisitionLost` | `player, uid, refund` | the hero died before it arrived |
-| `drop` | `player, uid, x, z, rarity, name, better` | a kill dropped an item for this player at (x, z): show a rarity beacon, then fly it to the hero (it is already in the bag). `better` = score versus the worn item in that slot (> 0: "Equip (better by +X)") |
-| `equip` / `unequip` | `player, uid, slot` / `player, slot` | worn gear changed |
-| `sell` | `player, uid, gold, name` | an item was sold (also when a full bag auto-sells a drop) |
-| `pickOffer` | `player, cards` | a champion died in this player's field: a 3-card pick waits (`player.picks`) |
-| `power` | `player, unique` | a unique's power fired (Long Scythe sweep, Sootcrown overload...) |
+| `item` | `player, uid, id, slot, how, name` | an item reached an inventory slot (`how`: `'buy'`, `'drop'`, `'champion'`) |
+| `drop` | `player, uid, id, x, z` | a kill in this player's field handed them an item (already in a slot): show a beacon at (x, z) flying to the hero |
+| `swap` / `use` / `recall` | `player, a, b` / `player, uid, id, slot, left` / `player, id, x, z` | inventory slots swapped / a consumable used (`left` charges) / Scroll of Return teleported the hero home |
+| `sell` | `player, uid, id, slot, gold, name` | an item was sold (`slot` -1: a drop that found no free slot was sold for you) |
+| `upgrade` | `player, id, level, cost` | a Drill Yard level was bought |
+| `power` / `powerHit` | `player, power, kind, field, x, z` / `player, power, x, z, radius` | a Sanctum power was cast (draw its marker; zones also emit `zone`) / a delayed blast (Skyfall) landed |
 | `toll` | `team, player, stunned` | Toll of Iron rang |
-| `oil` | `player, dmgType` | Oil applied |
+| `dash` | `id, fromX, fromZ, toX, toZ, skill` | a hero leapt (Tracker's Leap); `px/pz` already equal the new spot, tween it yourself |
+| `trap` | `zone, x, z, radius` | a snare sprang (zone kind `'trap'`) |
+| `form` | `player, form, id` | a hero took (`form: 'briarback'`) or left (`null`) a shape: swap the body to `heroes.json skills.briarback_shape.form.body` |
 | `champion` | `player, unit, field` | a champion send is leaving through a gate ("Champion at the gate!") |
 | `revive` | `id` | a `rise` unit came back at half HP |
 | `talentReady` | `player` | level 6 reached, talent pick open |
@@ -214,17 +210,16 @@ Player = {
   deck: [4 unit ids], auto: [4 bools],
   queued: [unit ids],            // bought in the current 0.5 s grouping window
   muster,                        // 0..3
-  equip: { weapon, offhand, head, chest, hands, feet, neck, ring },   // Item | null
-  bag: [12 x Item | null],
-  picks: [[Item, Item, Item], ...],  // champion picks waiting, oldest first
-  requisitions: [{ item, atTick, equip, replace, cost }],
-  atArmory,                      // hero is at the Armory now (purchases are instant)
+  inv: [6 x { uid, id, charges } | null],   // stream I: id = items-bl.json item; charges for consumables
+  useAt,                         // tick the next consumable may be used
+  upg: { damage, attackSpeed, ... }, upV,   // Drill Yard levels; upV bumps on every purchase
+  powerCd: { [powerId]: readyAtTick },
+  atArmory,                      // hero is inside the Outfitter's radius now (name kept)
   procs, gearV,                  // internal: unique power counters, gear cache version
   level, xp, skillPts,
   skills: [{ slot, id, rank, readyAt }],  // slots Q W E D R; readyAt = tick the cooldown ends
   talent: -1 | 0 | 1,
-  belt,                          // potions carried (0..2)
-  oil,                           // null or a damage type (half the hero's damage becomes it)
+  form: null | 'briarback',      // Druid shape (changes stats, basic attack, and the other skills)
   surrendered,
   stats: { sendGold, sends, itemGold, potionGold, musterGold, kills, deaths, leaked, dealt, bounty,
            incomeAt: [income at each whole minute], goldAt: [...] }
@@ -236,7 +231,7 @@ WaitingSend = { owner, unit, group, body, bodies }   // held at the gate because
 
 ```js
 Ent = {
-  id, kind: 'hero'|'unit'|'tide',
+  id, kind: 'hero'|'unit'|'tide'|'pet',   // pet = a hero's summon (Druid Grove Wolf; `type` = pet id in heroes.json `pets`)
   type,                    // hero id ('warrior'), unit id ('levy') or 'tide'
   team,                    // the team it fights FOR (sends: the sender's team; tides: -1)
   owner,                   // player id (hero's player / sender), -1 for tides
@@ -251,7 +246,7 @@ Ent = {
   target,                  // entity id it is fighting / chasing, -1 if none
   level,                   // heroes: hero level; tides: tide level; units: 0
   armour, dmgType,         // 'light'|'heavy'|'spectral'|'hide'|'fortified', 'blade'|'pierce'|'fire'|'nature'
-  statuses: [{ id, until, stacks, power, src, buff? }],   // 'burn','bleed','root','stun','slow','quarry','might','regen','haste','taunt', plus hero self-buffs by skill id (buff = the skill's selfBuff block)
+  statuses: [{ id, until, stacks, power, src, buff? }],   // 'burn','bleed','root','stun','slow','quarry','might','regen','haste','taunt','shred' (stacks: armour stripped), 'empower' (next basic hits harder), 'barrier' (power = absorb left), 'howl', 'lock_<status>' (lockout), plus self-buffs by skill id (buff = the skill's selfBuff block)
   group,                   // purchase id (bodies bought together share it), -1 for heroes
   // internal fields (prefixed _) may exist; the view must not depend on them
 }
@@ -289,7 +284,8 @@ sim.map = {
     armory: { x, z, r },           // shop + respawn
     spawn: { x, z },               // hero (re)spawn point
     ford:  { x0, x1, z0, z1, slow },
-    walls: [{ x0, z0, x1, z1 }]    // axis-aligned blockers (none on M1 vale)
+    walls: [{ x0, z0, x1, z1 }],   // axis-aligned blockers (none on vale)
+    laneWalls: [{ x0, x1, z0, z1, gaps: [{ z0, z1 }] }]   // 2v2/3v3: unit-proof lane walls between gates; heroes and pets cross at the gaps, flyers over them
   }],
   grid: { cell: 1 }                // flow-field resolution (internal)
 }
@@ -306,14 +302,11 @@ All pure, `(state, data, ...) -> value`; safe to call every frame.
 | `roster(state, data, pid)` | `sendInfo` for all 12 units of the player's race, tier order — the Muster Hall list |
 | `gateQueue(state, fieldId)` | bodies waiting at that field's gate (the HUD's "+N waiting") |
 | `deckInfo(state, data, pid)` | `sendInfo` for each of the 4 deck slots + `auto` flag |
-| `heroInfo(state, data, pid)` | `{ ent, level, xp, xpNext, xpPrev, skillPts, dps, armor, armourClass, dmgType, respawnIn, skills: [{slot, id, name, rank, maxRank, readyIn, cooldown, mp, canCast, canLearn, desc}] , talent: {open, choices:[{id,name,desc}], picked} }` |
+| `heroInfo(state, data, pid)` | `{ ent, level, xp, xpNext, xpPrev, skillPts, dps, armor, armourClass, dmgType, oil, form, passive: {name, desc} | null, pets: [{id, type, name, hpPct}], respawnIn, skills: [{slot, id, name, rank, maxRank, readyIn, cooldown, mp, canCast, canLearn, desc}] , talent: {open, choices:[{id,name,desc}], picked} }` |
 | `teamInfo(state, data, teamId)` | `{ banners, bannersMax, shown, rally, dealt, waiting (gate queue of the team's field), bodies, cap, toll: {charges, readyIn} }` |
 | `rivalInfo(state, data, pid)` | rival's `{ player, hero, level, hpPct, dmgType, armourClass, deck: deckInfo }` |
 | `gatePreview(state, data, fieldId)` | queued sends of every enemy player heading into that field: `[{ player, unit, count }]` |
-| `gearInfo(state, data, pid)` | Armory summary, one row per slot in `SLOTS` order: `{ slots: [{ slot (index), key ('weapon'...), name, usable, step, stepName, item: ItemView|null, next: {step, stepName, cost, unlocked, unlockIn, canBuy} | null }], cheapest: {slot, key, cost, canBuy} | null, spent }` (kept from M1) |
-| `inventoryInfo(state, data, pid)` | the character panel: `{ equip: {slot: ItemView|null}, bag: [ItemView|null], belt, beltMax, armourClass, oil, totals: {stat: value}, totalLines: [text], set: {pieces, active: [text]}, picks: [[ItemView x3]], requisitions: [{uid, name, inTicks}] }` |
-| `shopInfo(state, data, pid)` | `{ atArmory, requisitionSeconds, topStep, topStepName, recommended: {slot, cost, canBuy} | null, slots: [{ slot, slotName, kind, kinds (chest: [{kind, armourClass, name}]), next: {step, stepName, cost, unlocked, unlockIn, reason} | null }], potion: {cost, belt, max}, oil: {cost, current, types} }` |
-| `itemView(state, data, pid, item)` | ItemView = `{ uid, name, slot, slotName, rarity ('normal'|'magic'|'rare'|'legendary'|'unique'|'set'), step, stepName, ilvl, tier, kind, armourClass (chest), twoHanded, lines: [text], power (unique text), set: {name, pieces, bonuses}, lore, score, better, worn, sell, forHero }` |
+| `shopInfo`, `itemCard`, `inventoryInfo`, `itemView`, `upgradesInfo`, `powersInfo`, `powerTargetCheck`, `buildingsInfo`, `statLine` | items, Outfitter, Drill Yard, Sanctum and buildings — see §11 (stream I) |
 | `affixLine(data, affix)` | `"+4.5% critical chance"` |
 | `musterInfo(state, data, pid)` | `{ rank, next: {cost, canBuy, reason} | null }` |
 | `entName(state, data, ent)` | display name |
@@ -338,15 +331,7 @@ All files carry a `_doc` string. The sim reads them only through `sim.data` (fro
   mpRegen, armor, slots{Q,W,E,D,R: skill id}, talents[{skill, choices:[{id,name,desc,mod}]}]}}`,
   `skills{id:{name, desc, shape, element, mult, radius|reach|arc, cooldown, mp, ...effects}}`,
   `statuses{id:{...}}`, `ranks{max, ult, multPerRank, cdPerRank}`.
-- `data/items-bl.json` — built by `tools/build-items-bl.mjs`: `slots`, `stepNames`, `stepIlvl`, `stepRarity`,
-  `rarityAffixes`, `bases{slot:{kind:{id,name,twoHanded}}}`, `affixes[16]` `{id, name, kind (prefix/suffix), stat, min, max, unit, label, slots?}`,
-  `caps`, `score`, `uniques{id:{name, lore, hero, slot, base, twoHanded, power, powerText}}`, `set`, `heroKind`, `shop`, `drops`, `toll`.
-
-## 9. What the view may and may not do
-
-- May: read `sim.state`, `sim.map`, `sim.data`, call `query.js`, drain events, build commands.
-- May not: write into state, call internal sim modules, use `Math.random` to change game outcomes.
-- Item = `{ uid, slot, base, baseName, name, rarity, step, ilvl, kind, twoHanded, affixes: [{id, stat, value}], unique, set, price }` (plain data; use `itemView` for display).
+- `data/items-bl.json` + `data/shop.json` — built by `tools/build-items-bl.mjs`; `data/upgrades.json`, `data/powers.json`, `data/buildings.json` hand-written. Schemas in each file's `_doc` and §11.
 - Player-facing names for gear slots: `GEAR_SLOTS` exported by `query.js` (weapon, off-hand, head,
   chest, hands, feet, neck, ring) and step names `GEAR_STEPS` (Plain … Legendary roll).
 - Display rounding: `shared/format.js` (`hp`, `fmt`). Banners are fractional internally — show
@@ -417,3 +402,59 @@ icons.attach(createIconStudio(app.gfx.renderer, { looks })); await icons.get('un
 - Rebake after changing a look, a creature or the catalog: `flock /tmp/claude-1000/farhold-pw.lock node
   prototypes/bannerline/tools/bake-icons.mjs` (writes the PNGs + index.json). `icons.html` is the gallery
   and re-render tool for people.
+
+## 11. Items, town buildings, unit upgrades, powers (stream I, owner round 2)
+
+Owner rulings: six inventory slots with **no slot types**; simple stat items in the classic hero-arena
+style; **duplicates never merge** — every copy takes a slot and every copy counts; a few items carry
+`uniqueEquipped` and refuse a second copy; tiers by price only; no affixes, rolls, procs, uniques or
+sets (kept data-driven so effects can return). Sends stay unlimited (the Barracks is the send building).
+
+### 11.1 Buildings (`js/sim/buildings.js`, `data/buildings.json`)
+Static geometry, not state (rebuilt from data + map + mode). One set per **team field**:
+`{ id: 't<team>.<kind>', kind: 'shop'|'barracks'|'drillyard'|'sanctum', role, name, desc, team, field, x, z (world), radius, size: [w, d], door }`.
+Names: **Outfitter** (shop, radius 7 — the hero must stand inside it to buy or sell; the hero spawns inside it),
+**Barracks** (sends; `radius: null` = usable from anywhere), **Drill Yard** (unit upgrades, anywhere),
+**Sanctum** (powers, anywhere). Positions are field-local per map in `layouts.<map>.default` (optionally
+`modes.<mode>`), else `fallback` (relative to the Keep) — A's mode framework can add a layout per mode/map.
+`buildingsFor(data, map, mode)`, `buildingOf(ctx, team, kind)`, `inBuildingRange(ctx, team, kind, x, z)`, `fieldAt(map, x, z)`.
+
+### 11.2 Items (`js/sim/items.js`, `data/items-bl.json`, `data/shop.json`)
+- `player.inv = [6 x { uid, id, charges } | null]`. Item rows: `{ id, name, category, tier (1-4 by price), price, icon (assets/icons item base), desc, stats: {stat: n}, statLines: [text], uniqueEquipped?, consumable?, charges?, use?: [{effect, ...}] }`.
+- Stats (each with a handler, `STAT_HANDLERS`): `damage` (flat per basic attack), `attackSpeed` %, `critChance` %, `critDamage` %, `lifeSteal` % (any damage type), `spellPower` % (hero skill damage), `maxHp`, `armor`, `magicResist` % (fire + nature damage taken), `hpRegen` /s, `mana`, `manaRegen` /s, `moveSpeed` %, `cdr` %, `bountyPct` %. `caps` clamp sums.
+- Use effects (`USE_EFFECTS`): `heal {pct}`, `mana {pct}`, `status {status, seconds, power?}`, `barrier {pct, seconds}`, `recall` (home to the field spawn).
+- **Core contract** (what the rest of the sim reads): `gearStats(data, p)` -> the stat totals above + legacy zeros (`stepDps, stepHp, stepArmor, dmgPct, areaPct, vsChampion, resistAll, setPieces`) + `powers: []`; `refreshFromGear(ctx, p)`; `itemDamageFactor(ctx, src, dst, dmgType, opts)` (dealDamage); `atShop(ctx, p)` (alias `atArmory`); `armourClassFor` (hero default — items no longer change it); `lootForKill`; `tollMax`; no-op hooks `onBasicHit`, `castPowerMult` (1), `nearKeepFactor` (1).
+- Drops (`items-bl.drops`): a kill of tier >= `minTier` in your field may hand the nearest defending hero a consumable from `pool`; a champion kill hands every defender a random item up to `champion.maxPrice` (sold for gold if there is no free slot).
+
+### 11.3 Unit upgrades (`js/sim/upgrades.js`, `data/upgrades.json`)
+Eight upgrades (Sharpened Steel damage, Battle Drills attack speed, Field Rations health, Riveted Plates armour,
+Blood Oath life steal, Forced March move speed, Field Medics regeneration, Banner Breakers leak damage), each
+`perLevel`, `max`, cost `base * grow^(level-1)`. They apply to **every unit the player sends, including the ones
+already on the field**: `upgradeTick` (after `admitWaiting`) re-stamps `_spd`, `_dps`, `_atkEvery`, `hpMax`
+(current health keeps its share) and `_leak` from the spawn values in `_up0` when `ent._upV !== player.upV`;
+armour (`unitTakenFactor`) and life steal (`onUnitHit`) are read live in combat.js. No auto-buy.
+
+### 11.4 Powers (`js/sim/powers.js`, `data/powers.json`)
+12 powers, 4 per kind. `defensive` (Frost Field, Binding Roots, Mending Light, Stone Ward) only inside your team's
+field; `offensive` (Skyfall, Withering Hex, Loose the Pack, War Banner) only inside an enemy field; `neutral`
+(Far Sight, Thunderstorm, Earthshaker, Blessing of Valour) inside any field. Effects (`POWER_EFFECTS`): `zone`,
+`status` (who: enemies | enemyHeroes | allyHeroes | ownUnits), `heal`, `barrier`, `blast` (with `delay` -> timer
+`power`), `summon` (caster's units, no bounty, no income), `reveal` (status `revealed`; traits.js isHidden honours it).
+Damage from powers has no hero source. Per-power cooldown (`player.powerCd`), gold is the main limit.
+
+### 11.5 Query helpers (`js/sim/query.js`) for the UI
+| Helper | Returns |
+|---|---|
+| `buildingsInfo(state, data)` | every building (11.1) for drawing + the minimap |
+| `shopInfo(state, data, pid)` | `{ atShop, gold, columns, sellFactor, tabs: [{ id, name, desc, items: [ItemCard + {canBuy, reason}] }] }` |
+| `itemCard(data, id)` | `{ id, name, desc, stats: [lines], price, tier, category, icon, uniqueEquipped, consumable, charges, sell }` — the tooltip |
+| `inventoryInfo(state, data, pid)` | `{ slots: [ItemView | null] x6, size, free, totals: {stat: n}, totalLines, armourClass, atShop }` |
+| `itemView(state, data, pid, slot)` | ItemCard + `{ uid, slot, chargesLeft, sellNow, canSell, sellReason, canUse, useReason }` |
+| `upgradesInfo(state, data, pid)` | `{ rows: [{ id, name, desc, icon, stat, level, max, cost (null at max), canBuy, reason, stats: [per level, current], total }], spent }` |
+| `powersInfo(state, data, pid)` | `{ kinds, rows: [{ id, name, desc, stats, kind, kindName, icon, cost, cooldown (ticks), readyIn, canBuy, reason, radius }] }` |
+| `powerTargetCheck(state, data, pid, id, x, z)` | null or the refusal for a cast cursor (`ownFieldOnly` …) |
+| `statLine(data, stat, value)` | "+20 damage" / "+12% attack speed" |
+
+Removed with the old gear: `GEAR_SLOTS`, `GEAR_STEPS`, `SLOTS`, `gearInfo`, `affixLine`, the `upgrade` "buy cheapest" path,
+Requisition, champion picks, Oil, the potion belt (`potion`/`drink`; draughts are Outfitter consumables now).
+

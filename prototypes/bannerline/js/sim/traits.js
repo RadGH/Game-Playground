@@ -104,7 +104,7 @@ export function onUnitKilled(ctx, killer, victim) {
 
 /** Is `e` hidden from a hero standing at (x, z)? (stealth) */
 export function isHidden(e, x, z) {
-  return e._traits.indexOf('stealth') >= 0 && dist2(e.x, e.z, x, z) > K.stealthRange * K.stealthRange;
+  return e._traits.indexOf('stealth') >= 0 && dist2(e.x, e.z, x, z) > K.stealthRange * K.stealthRange && !e.statuses.some(s => s.id === 'revealed');   // Far Sight (powers.js)
 }
 
 /** Immune to crowd control (unstoppable)? */
@@ -117,7 +117,7 @@ export function onUnitDeath(ctx, e) {
     const r2 = K.burstRange * K.burstRange, amount = e.hpMax * K.burstShare;
     ctx.emit('pulse', { id: e.id, skill: 'volatile', x: e.x, z: e.z, radius: K.burstRange });
     for (const o of state.ents) {
-      if (!o.alive || o._gone || o.field !== e.field || o.team === e.team || (o.kind !== 'hero' && o.kind !== 'pet')) continue;
+      if (!o.alive || o._gone || o.field !== e.field || o.team === e.team || (o.kind !== 'hero' && o.kind !== 'pet' && o.kind !== 'turret')) continue;
       if (dist2(o.x, o.z, e.x, e.z) <= r2) ctx.dealDamage(ctx, null, o, amount, e.dmgType, { trait: 'volatile' });
     }
   }

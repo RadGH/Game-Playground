@@ -96,7 +96,10 @@ export function damageFactor(e) {
 /** Attack-speed factor (higher = faster). */
 export function attackSpeedFactor(e, data) {
   let f = 1;
-  for (const s of e.statuses) if (s.id === 'haste') f += data ? data.heroes.statuses.haste.attackSpeed : 0.3;
+  for (const s of e.statuses) {
+    if (s.id === 'haste') f += data ? data.heroes.statuses.haste.attackSpeed : 0.3;
+    else if (s.buff && s.buff.attackSpeed) f += s.buff.attackSpeed;   // Overcharge
+  }
   return f;
 }
 

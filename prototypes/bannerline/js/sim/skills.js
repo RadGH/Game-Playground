@@ -2,10 +2,12 @@
 // sim state; anything that happens later (repeats, bolts in flight, delayed ground strikes) is a
 // timer { atTick, kind, args } and anything that lingers is a zone (zones.js) or a status.
 //
-// Shapes implemented: melee (arc + reach), around (radius), self, bolt (range, projectiles, spread,
-//   splash), ground (point + radius; line {length, width, across}; delay; repeats). Still to come
-//   with their heroes: dash, summon, form, place (M6). castSkill throws for an unknown shape, so data
-//   can never silently do nothing.
+// Shapes implemented: melee (arc + reach), around (radius), self (incl. a `form` toggle), bolt (range,
+//   projectiles, spread, splash, split), ground (point + radius; line; delay; repeats incl. scatter;
+//   place = a trap), dash (to 'back' / 'target'), summon (pets + howl). castSkill throws for an
+//   unknown shape, so data can never silently do nothing.
+// M6 effects: pen, bonusIf distance, place (trap), split, dash, empowerNext, consumes, onHit.healPet,
+//   howl, barrier, selfBuff reflect / petsOnly, taunt.target / taunt.by 'pet', statuses lockout.
 // Effects: damage (mult x weapon hit), status / statuses, stack {status, add, max} + statusMult,
 //   knock {push, stagger}, pullIn, taunt, selfBuff (movePct, resist, resistPerFoe, every-nth-hit
 //   shockwave, damage), bonusIf crowd, repeats {count, every}, pool (zone), detonate, trail.
@@ -18,8 +20,12 @@ import { dealDamage } from './combat.js';
 import { weaponHit, heroDamageFactor } from './heroes.js';
 import { addZone } from './zones.js';
 import { castPowerMult } from './items.js';
+import { summonPets, petsOf } from './pets.js';
+import { buildTurret, repair, buffTurrets } from './turrets.js';
+import { next } from './rng.js';
+import { refreshHero } from './heroes.js';
 
-export const SHAPES = ['melee', 'around', 'self', 'bolt', 'ground'];
+export const SHAPES = ['melee', 'around', 'self', 'bolt', 'ground', 'dash', 'summon', 'turret'];
 const BOLT_SPEED = 24;   // m/s
 
 export function skillDmgType(data, hero, plan) {
@@ -125,6 +131,18 @@ function targetsFor(ctx, hero, plan, aimFace) {
   return out;
 }
 
+/** bonusIf distance:start:per:cap — more damage the further the target is from the hero. */
+function distanceBonus(plan, hero, e) {
+  let m = 1;
+  for (const b of plan.bonusIf || []) {
+    const parts = b.when.split(':');
+    if (parts[0] !== 'distance') continue;
+    const d = Math.sqrt(dist2(hero.x, hero.z, e.x, e.z));
+    m *= 1 + Math.min(+parts[3], +parts[2] * Math.max(0, d - +parts[1]));
+  }
+  return m;
+}
+
 function crowdBonus(plan, hits) {
   let m = 1;
   for (const b of plan.bonusIf || []) {
@@ -134,18 +152,21 @@ function crowdBonus(plan, hits) {
   return m;
 }
 
-function shove(ctx, from, e, metres, away, field) {
+/** Knockback / pull as a real push (owner R2.5): a velocity that friction bleeds off over the next
+ *  ticks (movement.js knockTick), so the body slides `metres` in total, shoves what it runs into and
+ *  stops at walls. No teleport. */
+export function shove(ctx, from, e, metres, away, field) {
   if (e._traits && e._traits.indexOf('unstoppable') >= 0) return;   // traits.js: no knockback or pull
-  const dx = e.x - from.x, dz = e.z - from.z;
-  const d = Math.sqrt(dx * dx + dz * dz) || 1;
+  let dx = e.x - from.x, dz = e.z - from.z;
+  let d = Math.sqrt(dx * dx + dz * dz);
+  if (d < 1e-6) { dx = sin(from.face || 0); dz = cos(from.face || 0); d = 1; }
   const move = away ? metres : -Math.min(metres, Math.max(0, d - (from.r || 0) - e.r - 0.3));
-  if (!away && move === 0) return;
-  const fx = e.x, fz = e.z;
-  e.x = clamp(e.x + dx / d * move, field.x0 + e.r, field.x1 - e.r);
-  e.z = clamp(e.z + dz / d * move, field.z0 + 0.5, field.z1 - 0.5);
-  if (Math.abs(move) > 3) { e.px = e.x; e.pz = e.z; }
-  ctx.emit('knock', { id: e.id, fromX: fx, fromZ: fz, toX: e.x, toZ: e.z });
+  if (move === 0) return;
+  const v0 = move * (1 - KNOCK_FRICTION);       // sum of v0 * f^n over the slide = move
+  e._kvx += dx / d * v0; e._kvz += dz / d * v0;
+  ctx.emit('knock', { id: e.id, vx: e._kvx, vz: e._kvz, metres: Math.abs(move) });
 }
+export const KNOCK_FRICTION = 0.6;   // share of the push left after each tick (a 4 m shove slides for ~0.5 s)
 
 /** Burn-style stacking statuses and plain statuses from a plan, on one target. */
 function applyPlanStatuses(ctx, hero, plan, e, wh, hits) {
@@ -157,6 +178,11 @@ function applyPlanStatuses(ctx, hero, plan, e, wh, hits) {
 function applyStatusTo(ctx, hero, e, id, wh, extra = {}) {
   const def = statusDef(ctx.data, id);
   if (!def) return;
+  // lockout: once applied, the same status cannot land on this target again for `lockout` s
+  if (extra.lockout) {
+    if (findStatus(e, 'lock_' + id)) return;
+    addStatus(ctx, e, 'lock_' + id, { ticks: secToTicks(extra.lockout), src: hero.id });
+  }
   const ticks = secToTicks(extra.seconds ?? def.seconds);
   if (def.kind === 'dot') addStatus(ctx, e, id, { ticks, stacks: extra.add || 1, maxStacks: extra.max || def.maxStacks || 1, power: (extra.perSecond ?? def.perSecond) * wh, src: hero.id });
   else if (def.kind === 'slow') addStatus(ctx, e, id, { ticks, power: extra.slow ?? def.slow, src: hero.id });
@@ -187,7 +213,19 @@ function hitTargets(ctx, hero, plan, targets, from = hero) {
   if (plan.detonate) for (const e of targets) detonate(ctx, hero, plan, e);
   if (plan.mult) {
     const amount = wh * plan.mult * heroDamageFactor(ctx, hero) * crowdBonus(plan, targets.length);
-    for (const e of targets) dealDamage(ctx, hero, e, amount, type, { skill: plan.id });
+    for (const e of targets) {
+      let a = amount * distanceBonus(plan, hero, e);
+      if (plan.consumes) { const tag = findStatus(e, plan.consumes.tag); if (tag) { a *= 1 + plan.consumes.mult; tag.until = ctx.state.tick; } }
+      dealDamage(ctx, hero, e, a, type, { skill: plan.id, pen: plan.pen || 0 });
+    }
+  }
+  if (plan.onHit && plan.onHit.healPet && targets.length) {
+    for (const pet of petsOf(ctx.state, hero.owner)) { const h = Math.min(pet.hpMax - pet.hp, pet.hpMax * plan.onHit.healPet); if (h > 0) { pet.hp += h; ctx.emit('heal', { src: hero.id, dst: pet.id, amount: Math.round(h * 10) / 10 }); } }
+  }
+  if (plan.taunt && plan.taunt.target) for (const e of targets) {
+    if (e.kind === 'hero' || !e.alive || e._gone) continue;
+    const ticks = secToTicks(plan.taunt.seconds);
+    if (addStatus(ctx, e, 'taunt', { ticks, src: hero.id })) { e.target = hero.id; ctx.emit('taunt', { id: e.id, by: hero.id, ticks }); }
   }
   for (const e of targets) {
     if (!e.alive || e._gone) continue;
@@ -224,14 +262,20 @@ export function castSkill(ctx, p, slot, aimX, aimZ) {
   if (aimX != null && aimZ != null && (aimX !== hero.x || aimZ !== hero.z)) hero.face = faceOf(aimX - hero.x, aimZ - hero.z);
   hero.act = 'cast'; hero.actTick = state.tick;
   let px = hero.x, pz = hero.z;
-  if (plan.shape === 'ground') ({ x: px, z: pz } = groundPoint(ctx, hero, plan, aimX, aimZ));
+  if (plan.shape === 'ground' || plan.shape === 'turret') ({ x: px, z: pz } = groundPoint(ctx, hero, plan, aimX, aimZ));
   ctx.emit('cast', { id: hero.id, slot, skill: sk.id, shape: plan.shape, x: px, z: pz, face: hero.face, radius: plan.radius || 0, arc: plan.arc || 0, reach: plan.reach || 0, range: plan.range || 0, delay: plan.delay ? secToTicks(plan.delay) : 0, line: plan.line ? plan.line.length : 0 });
   selfEffects(ctx, hero, p, plan);
   if (plan.shape === 'bolt') fireBolts(ctx, hero, p, plan, aimX, aimZ, pm);
   else if (plan.shape === 'ground') {
     if (plan.delay) addTimer(state, state.tick + secToTicks(plan.delay), 'ground', { hero: hero.id, player: p.id, skill: sk.id, x: px, z: pz, hx: hero.x, hz: hero.z, pm });
+    else if (plan.place) placeTrap(ctx, hero, plan, px, pz);
     else groundStrike(ctx, hero, p, plan, px, pz, hero);
-  } else if (plan.shape !== 'self') hitTargets(ctx, hero, plan, targetsFor(ctx, hero, plan, hero.face));
+  } else if (plan.shape === 'dash') dashTo(ctx, hero, plan, aimX, aimZ);
+  else if (plan.shape === 'summon') summonWith(ctx, hero, plan);
+  else if (plan.shape === 'turret') buildTurret(ctx, hero, plan, px, pz, sk.rank, weaponHit(ctx, hero));
+  else if (plan.shape !== 'self') hitTargets(ctx, hero, plan, targetsFor(ctx, hero, plan, hero.face));
+  if (plan.form) toggleForm(ctx, hero, p, plan);
+  if (plan.empowerNext) addStatus(ctx, hero, 'empower', { ticks: secToTicks(plan.empowerNext.seconds), stacks: plan.empowerNext.count, maxStacks: plan.empowerNext.count, power: plan.empowerNext.mult, src: hero.id });
   if (plan.repeats && plan.repeats.count > 1) {
     const every = Math.max(1, secToTicks(plan.repeats.every));
     for (let n = 1; n < plan.repeats.count; n++) addTimer(state, state.tick + every * n, 'pulse', { hero: hero.id, player: p.id, skill: sk.id, n, x: px, z: pz, pm });
@@ -243,11 +287,19 @@ function selfEffects(ctx, hero, p, plan) {
   if (plan.shape === 'self' && plan.status) {
     const def = statusDef(data, plan.status);
     let power = def.damage || 0;
-    if (plan.taunt) power += Math.min(plan.taunt.perTauntCap || 0, (plan.taunt.perTaunt || 0) * tauntCount(ctx, hero, plan.taunt));
+    if (plan.taunt && !plan.taunt.target) power += Math.min(plan.taunt.perTauntCap || 0, (plan.taunt.perTaunt || 0) * tauntCount(ctx, hero, plan.taunt));
     addStatus(ctx, hero, plan.status, { ticks: secToTicks(def.seconds), power, src: hero.id });
   }
-  if (plan.taunt) doTaunt(ctx, hero, plan.taunt);
-  if (plan.selfBuff || plan.trail) {
+  if (plan.taunt && !plan.taunt.target) {
+    if (plan.taunt.by === 'pet') for (const pet of petsOf(ctx.state, hero.owner)) doTaunt(ctx, pet, plan.taunt);
+    else doTaunt(ctx, hero, plan.taunt);
+  }
+  if (plan.repair) repair(ctx, hero, plan.repair);
+  if (plan.turretBuff) buffTurrets(ctx, hero, plan);
+  if (plan.barrier) addStatus(ctx, hero, 'barrier', { ticks: secToTicks(plan.barrier.seconds), power: hero.hpMax * plan.barrier.share, src: hero.id });
+  if (plan.selfBuff && plan.selfBuff.petsOnly) {
+    for (const pet of petsOf(ctx.state, hero.owner)) addStatus(ctx, pet, plan.id, { ticks: secToTicks(plan.selfBuff.seconds), src: hero.id, buff: JSON.parse(JSON.stringify(plan.selfBuff)) });
+  } else if (plan.selfBuff || plan.trail) {
     const buff = JSON.parse(JSON.stringify(plan.selfBuff || {}));
     if (plan.trail) { buff.trail = JSON.parse(JSON.stringify(plan.trail)); buff.trailPower = plan.mult || 0; buff.trailType = skillDmgType(data, hero, plan); }
     const s = addStatus(ctx, hero, plan.id, { ticks: secToTicks(Math.max((plan.selfBuff && plan.selfBuff.seconds) || 0, (plan.trail && plan.trail.seconds) || 0, 0.05)), src: hero.id, buff });
@@ -314,9 +366,11 @@ export function boltLands(ctx, args) {
   if (plan.splash) targets = inCircle(ctx, hero, x, z, plan.splash);
   else targets = t ? [t] : [];
   if (!hero.alive && !targets.length) return;
+  const tagged = plan.split && t && splitReady(plan, t);
   hitTargets(ctx, hero, plan, targets, { x, z, r: 0 });
   poolAt(ctx, hero, plan, x, z, null);
   ctx.emit('pulse', { id: hero.id, skill: args.skill, x, z, radius: plan.splash || 0.5 });
+  if (tagged) splitShards(ctx, hero, plan, t, x, z);
 }
 
 function tauntCount(ctx, hero, t) {
@@ -326,15 +380,134 @@ function tauntCount(ctx, hero, t) {
   return n;
 }
 
-function doTaunt(ctx, hero, t) {
+function doTaunt(ctx, by, t) {
   const r2 = t.radius * t.radius;
   const ticks = secToTicks(t.seconds);
-  for (const e of enemiesOf(ctx, hero)) {
-    if (e.kind === 'hero' || dist2(e.x, e.z, hero.x, hero.z) > r2) continue;
-    if (!addStatus(ctx, e, 'taunt', { ticks, src: hero.id })) continue;
-    e.target = hero.id;
-    ctx.emit('taunt', { id: e.id, by: hero.id, ticks });
+  for (const e of enemiesOf(ctx, by)) {
+    if (e.kind === 'hero' || e.kind === 'pet' || dist2(e.x, e.z, by.x, by.z) > r2) continue;
+    if (!addStatus(ctx, e, 'taunt', { ticks, src: by.id })) continue;
+    e.target = by.id;
+    ctx.emit('taunt', { id: e.id, by: by.id, ticks });
   }
+}
+
+// ── M6 shapes and effects ────────────────────────────────────────────────────────────────────
+
+/** dash: leap `dash.range` back from the aim ('back') or toward it ('target'); splash where you stood. */
+function dashTo(ctx, hero, plan, aimX, aimZ) {
+  const f = ctx.map.fields[hero.field];
+  const range = (plan.dash && plan.dash.range) || plan.range || 4;
+  let dx = sin(hero.face), dz = cos(hero.face);
+  if (aimX != null && aimZ != null && (aimX !== hero.x || aimZ !== hero.z)) { const d = Math.sqrt(dist2(hero.x, hero.z, aimX, aimZ)); dx = (aimX - hero.x) / d; dz = (aimZ - hero.z) / d; }
+  const back = !plan.dash || plan.dash.to === 'back';
+  let go = range;
+  if (!back && aimX != null) go = Math.min(range, Math.sqrt(dist2(hero.x, hero.z, aimX, aimZ)));
+  const sx = hero.x, sz = hero.z;
+  if (plan.splash) hitTargets(ctx, hero, plan, inCircle(ctx, hero, sx, sz, plan.splash), { x: sx, z: sz, r: 0 });
+  hero.x = clamp(hero.x + (back ? -dx : dx) * go, f.x0 + hero.r, f.x1 - hero.r);
+  hero.z = clamp(hero.z + (back ? -dz : dz) * go, f.z0 + 0.5, f.leakZ - 0.5);
+  hero.px = hero.x; hero.pz = hero.z;
+  if (!back && !plan.splash) hitTargets(ctx, hero, plan, inCircle(ctx, hero, hero.x, hero.z, 2.5));
+  ctx.emit('dash', { id: hero.id, fromX: sx, fromZ: sz, toX: hero.x, toZ: hero.z, skill: plan.id });
+}
+
+/** summon: pets next to the hero, then the howl (haste + damage for the hero and every pet). */
+function summonWith(ctx, hero, plan) {
+  if (plan.pet) summonPets(ctx, hero, plan.pet, plan.count || 1);
+  if (plan.howl) {
+    const ticks = secToTicks(plan.howl.seconds);
+    const allies = [hero, ...petsOf(ctx.state, hero.owner)];
+    if (plan.howl.radius) {   // Running Howl also reaches allied heroes nearby
+      const r2 = plan.howl.radius * plan.howl.radius;
+      for (const e of ctx.state.ents) if (e.kind === 'hero' && e !== hero && e.alive && e.team === hero.team && e.field === hero.field && dist2(e.x, e.z, hero.x, hero.z) <= r2) allies.push(e);
+    }
+    for (const e of allies) {
+      if (plan.howl.status) addStatus(ctx, e, plan.howl.status, { ticks, src: hero.id });
+      if (plan.howl.damage) addStatus(ctx, e, 'howl', { ticks, src: hero.id, buff: { damage: plan.howl.damage } });
+    }
+  }
+}
+
+/** place: a trap that arms, waits, and springs on the first enemy inside its trigger radius. */
+function placeTrap(ctx, hero, plan, x, z) {
+  const { state } = ctx;
+  const P = plan.place;
+  const mine = state.zones.filter(zz => zz.kind === 'trap' && zz.owner === hero.id && zz.skill === plan.id);
+  if (mine.length >= (P.max || 1)) { const old = mine[0]; old.until = state.tick; }
+  const zone = addZone(ctx, { owner: hero, x, z, radius: P.radius || 2, seconds: P.seconds || 30, perSecond: 0, dmgType: skillDmgType(ctx.data, hero, plan), skill: plan.id });
+  zone.kind = 'trap';
+  zone.armAt = state.tick + secToTicks(P.arm || 0);
+  zone.trigger = P.triggerRadius || zone.radius;
+  zone.strike = JSON.parse(JSON.stringify(P.strike || {}));
+  zone.tag = P.tag ? JSON.parse(JSON.stringify(P.tag)) : null;
+  zone.player = hero.owner;
+}
+
+/** zones.js calls this for a trap each tick: spring when an enemy steps in. Returns true if sprung. */
+export function trapTick(ctx, zone) {
+  const { state, data } = ctx;
+  if (state.tick < zone.armAt) return false;
+  const r2 = zone.trigger * zone.trigger;
+  let hit = false;
+  for (const e of state.ents) if (e.alive && !e._gone && e.field === zone.field && e.team !== zone.team && e.kind !== 'hero' && e.kind !== 'pet' && e._traits.indexOf('flying') < 0 && dist2(e.x, e.z, zone.x, zone.z) <= r2) { hit = true; break; }
+  if (!hit) return false;
+  const hero = state.ents.find(e => e.id === zone.owner);
+  if (!hero) return false;
+  const p = state.players[zone.player];
+  const wh = weaponHit(ctx, hero);
+  ctx.emit('trap', { zone: zone.id, x: zone.x, z: zone.z, radius: zone.radius });
+  const targets = inCircle(ctx, hero, zone.x, zone.z, zone.radius).filter(e => e.kind !== 'hero');
+  const amount = wh * (zone.strike.mult || 0) * heroDamageFactor(ctx, hero);
+  for (const e of targets) {
+    if (amount > 0) dealDamage(ctx, hero, e, amount, zone.dmgType, { skill: zone.skill });
+    if (!e.alive || e._gone) continue;
+    if (zone.strike.status) applyStatusTo(ctx, hero, e, zone.strike.status, wh);
+    if (zone.tag) addStatus(ctx, e, zone.tag.id, { ticks: secToTicks(zone.tag.seconds), power: (statusDef(data, zone.tag.id) || {}).takeMore || 0, src: hero.id });
+  }
+  zone.until = state.tick;
+  return true;
+}
+
+function splitReady(plan, t) {
+  const w = plan.split.when || '';
+  if (w.startsWith('tag:')) return !!findStatus(t, w.slice(4));
+  return true;
+}
+
+/** split: an arrow that hits a tagged target throws shards at the nearest other enemies. */
+function splitShards(ctx, hero, plan, t, x, z) {
+  const S = plan.split;
+  const r2 = S.range * S.range;
+  const near = enemiesOf(ctx, hero).filter(e => e !== t && dist2(e.x, e.z, x, z) <= r2);
+  const order = near.map(e => ({ e, d: dist2(e.x, e.z, x, z) }));
+  for (let i = 1; i < order.length; i++) for (let j = i; j > 0 && (order[j].d < order[j - 1].d || (order[j].d === order[j - 1].d && order[j].e.id < order[j - 1].e.id)); j--) { const tmp = order[j]; order[j] = order[j - 1]; order[j - 1] = tmp; }
+  const amount = weaponHit(ctx, hero) * (plan.mult || 0) * (S.keep || 0.5) * heroDamageFactor(ctx, hero);
+  for (let i = 0; i < Math.min(S.shards, order.length); i++) {
+    const e = order[i].e;
+    ctx.emit('bolt', { id: hero.id, skill: plan.id, fromX: x, fromZ: z, toX: e.x, toZ: e.z, ticks: 2, dst: e.id, shard: true });
+    dealDamage(ctx, hero, e, amount, skillDmgType(ctx.data, hero, plan), { skill: plan.id });
+  }
+}
+
+/** form: toggle a shape (Briarback). The stats, the basic attack and the per-skill overrides read
+ *  player.form; entering runs onEnter (a taunt). */
+function toggleForm(ctx, hero, p, plan) {
+  const F = plan.form;
+  if (p.form === F.id) { if (F.toggle === false) return; p.form = null; ctx.emit('form', { player: p.id, form: null, id: hero.id }); }   // toggle false: casting again keeps the form
+  else {
+    p.form = F.id;
+    ctx.emit('form', { player: p.id, form: F.id, id: hero.id });
+    if (F.onEnter && F.onEnter.taunt) doTaunt(ctx, hero, F.onEnter.taunt);
+  }
+  refreshHero(ctx, p);
+}
+
+/** The form block a player is in (from the skill that grants it), or null. */
+export function activeForm(data, p) {
+  if (!p.form) return null;
+  const hero = data.heroes.heroes[p.hero];
+  for (const sid of Object.values(hero.slots)) { const f = data.heroes.skills[sid].form; if (f && f.id === p.form) return f; }
+  return null;
 }
 
 /** Timer: a repeat of a multi-hit skill (around: centred on the hero now; ground: same point). */
@@ -343,7 +516,16 @@ export function skillPulse(ctx, args) {
   if (!hero) return;
   const p = ctx.state.players[args.player];
   const plan = withPm(planFor(ctx.data, p, args.skill), args.pm);
-  if (plan.shape === 'ground') { ctx.emit('pulse', { id: hero.id, skill: args.skill, x: args.x, z: args.z, radius: plan.radius || 0 }); groundStrike(ctx, hero, p, { ...plan, pool: null }, args.x, args.z, hero); return; }
+  if (plan.shape === 'ground') {
+    let x = args.x, z = args.z;
+    if (plan.repeats && plan.repeats.scatter) {   // scatter: each volley lands somewhere inside the area
+      const st = ctx.state.rng.combat, a = next(st) * 6.283185307179586, r = Math.sqrt(next(st)) * (plan.radius || 2) * 0.6;
+      x += sin(a) * r; z += cos(a) * r;
+    }
+    ctx.emit('pulse', { id: hero.id, skill: args.skill, x, z, radius: plan.radius || 0 });
+    groundStrike(ctx, hero, p, { ...plan, pool: null }, x, z, hero);
+    return;
+  }
   ctx.emit('pulse', { id: hero.id, skill: args.skill, x: hero.x, z: hero.z, radius: plan.radius || plan.reach || 0 });
   hitTargets(ctx, hero, plan, targetsFor(ctx, hero, plan, hero.face));
 }
@@ -365,8 +547,9 @@ export function trailTick(ctx) {
 }
 
 /** A plain damaging ring around an entity (Iron Resolve shockwave). */
-export function pulseAround(ctx, hero, { radius, mult, skill }) {
-  ctx.emit('pulse', { id: hero.id, skill, x: hero.x, z: hero.z, radius });
+export function pulseAround(ctx, at, { radius, mult, skill, by }) {
+  const hero = by || at;   // `at` may be a point-like copy (a unique striking around the target)
+  ctx.emit('pulse', { id: hero.id, skill, x: at.x, z: at.z, radius });
   const amount = weaponHit(ctx, hero) * mult * heroDamageFactor(ctx, hero);
-  for (const e of inCircle(ctx, hero, hero.x, hero.z, radius)) dealDamage(ctx, hero, e, amount, hero.dmgType, { skill });
+  for (const e of inCircle(ctx, hero, at.x, at.z, radius)) dealDamage(ctx, hero, e, amount, hero.dmgType, { skill });
 }

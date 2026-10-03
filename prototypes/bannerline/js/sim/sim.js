@@ -8,61 +8,18 @@ import { createState, TICK_HZ, secToTicks } from './state.js';
 import { buildMap } from './map.js';
 import { hashValue } from './hash.js';
 import { applyCommand } from './commands.js';
-import { releaseTick, payTick, autoSends, admitWaiting } from './economy.js';
-import { tideTick } from './tides.js';
-import { tickStatuses } from './statuses.js';
-import { heroTick } from './heroes.js';
-import { moveTick } from './movement.js';
-import { runAttacks, projectileLands } from './combat.js';
-import { traitTick } from './traits.js';
-import { skillPulse, boltLands, groundLands, trailTick } from './skills.js';
-import { zoneTick } from './zones.js';
-import { requisitionArrives } from './items.js';
-import { tollTick } from './commands.js';
-import { aiCommands } from './ai/index.js';
+import { resolveMode, MODES } from './modes/index.js';
 
 export { TICK_HZ };
 export const TICK_MS = 1000 / TICK_HZ;
 export const SNAPSHOT_VERSION = 1;
 
-const TIMERS = { proj: projectileLands, pulse: skillPulse, bolt: boltLands, ground: groundLands, requisition: requisitionArrives };
-
 function makeCtx(sim) {
   const ctx = {
-    state: sim.state, data: sim.data, map: sim.map,
+    state: sim.state, data: sim.data, map: sim.map, mode: sim.mode,
     emit: sim._events ? (type, fields) => { fields.type = type; fields.tick = sim.state.tick; sim._queue.push(fields); } : () => {},
   };
   return ctx;
-}
-
-function runTimers(ctx) {
-  const { state } = ctx;
-  while (state.timers.length && state.timers[0].atTick <= state.tick) {
-    const t = state.timers.shift();
-    const fn = TIMERS[t.kind];
-    if (!fn) throw new Error(`Unknown timer kind "${t.kind}"`);
-    fn(ctx, t.args);
-  }
-}
-
-function checkResult(ctx) {
-  const { state, data } = ctx;
-  if (state.result || state.endless) return;
-  const [a, b] = state.teams;
-  let winner = null, reason = null;
-  if (a.banners <= 0 || b.banners <= 0) {
-    reason = 'banners';
-    winner = a.banners <= 0 && b.banners <= 0 ? (a.banners === b.banners ? -1 : (a.banners > b.banners ? 0 : 1)) : (a.banners <= 0 ? 1 : 0);
-  } else if (state.tick >= secToTicks(data.econ.clock.hardCap)) {
-    reason = 'cap';
-    if (a.banners !== b.banners) winner = a.banners > b.banners ? 0 : 1;
-    else if (a.dealt !== b.dealt) winner = a.dealt > b.dealt ? 0 : 1;
-    else winner = -1;
-  }
-  if (reason) {
-    state.result = { winner, reason, tick: state.tick };
-    ctx.emit('result', { winner, reason });
-  }
 }
 
 function minuteStats(state) {
@@ -71,8 +28,8 @@ function minuteStats(state) {
 }
 
 class Sim {
-  constructor(state, data, map, opts) {
-    this.state = state; this.data = data; this.map = map;
+  constructor(state, data, map, opts, mode) {
+    this.state = state; this.data = data; this.map = map; this.mode = mode;
     this._events = opts.events !== false;
     this._queue = [];
   }
@@ -89,24 +46,12 @@ class Sim {
       if (c && state.players[c.p] && state.players[c.p].kind === 'ai') { ctx.emit('reject', { player: c.p, cmd: c.type, reason: 'bad' }); continue; }
       applyCommand(ctx, c);
     }
-    for (const p of state.players) if (p.kind === 'ai') for (const c of aiCommands(ctx, p)) applyCommand(ctx, c);
-    tollTick(ctx);
-    payTick(ctx);
-    autoSends(ctx);
-    releaseTick(ctx);
-    tideTick(ctx);
-    admitWaiting(ctx);
-    runTimers(ctx);
-    tickStatuses(ctx);
-    zoneTick(ctx);
-    trailTick(ctx);
-    heroTick(ctx);
-    moveTick(ctx);
-    runAttacks(ctx);
-    traitTick(ctx);
+    const mode = this.mode;
+    for (const p of state.players) if (p.kind === 'ai') for (const c of mode.ai(ctx, p)) applyCommand(ctx, c);
+    for (const phase of mode.phases) phase(ctx);   // the mode's tick order (modes/linewar.js)
     if (state.ents.some(e => e._gone)) state.ents = state.ents.filter(e => !e._gone);
     minuteStats(state);
-    checkResult(ctx);
+    mode.checkResult(ctx);
   }
 
   drainEvents() { const q = this._queue; this._queue = []; return q; }
@@ -116,9 +61,14 @@ class Sim {
 
 /** opts: { events: true } (false = no event objects; headless sims and tests) */
 export function createSim(config, data, opts = {}) {
-  const map = buildMap(data, config.map || 'vale', config.mode || '1v1', 2);
-  const state = createState(config, data, map);
-  const sim = new Sim(state, data, map, opts);
+  const { mode, format } = resolveMode(config);
+  mode.validate({ ...config, format }, data);
+  const map = mode.buildMap(data, format);
+  // state.mode keeps the FORMAT ('1v1') for older readers; state.game names the mode (R2.10)
+  const state = createState({ ...config, mode: format }, data, map);
+  state.game = mode.id; state.format = format;
+  mode.initState(state, data, map, config);
+  const sim = new Sim(state, data, map, opts, mode);
   for (const e of state.ents) sim._events && sim._queue.push({ type: 'spawn', tick: 0, id: e.id, kind: e.kind, unit: e.type, team: e.team, field: e.field });
   return sim;
 }
@@ -127,6 +77,7 @@ export function restoreSim(snap, data, opts = {}) {
   if (!snap || snap.v !== SNAPSHOT_VERSION) throw new Error('Unknown snapshot version');
   if (snap.dataHash !== data.hash) throw new Error('Version mismatch: update and rejoin');
   const state = JSON.parse(JSON.stringify(snap.state));
-  const map = buildMap(data, state.map, state.mode, 2);
-  return new Sim(state, data, map, opts);
+  const { mode, format } = resolveMode({ mode: state.game || 'linewar', format: state.format || state.mode });
+  const map = mode.buildMap(data, format);
+  return new Sim(state, data, map, opts, mode);
 }

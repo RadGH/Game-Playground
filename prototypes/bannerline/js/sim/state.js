@@ -3,9 +3,13 @@
 
 import { seedStream } from './rng.js';
 import { heroStats } from './heroes.js';
-import { emptyEquip, armourClassFor } from './items.js';
+import { newInventory, armourClassFor } from './items.js';
+import { newUpgrades } from './upgrades.js';
 
 export const TICK_HZ = 20;
+
+/** Bodies that defend a field for its team: heroes, their pets and turrets (enemy units fight them). */
+export const isDefender = e => e.kind === 'hero' || e.kind === 'pet' || e.kind === 'turret';
 export const secToTicks = s => Math.round(s * TICK_HZ);
 
 const STREAMS = ['combat', 'loot', 'ai', 'shop'];
@@ -37,21 +41,18 @@ export function createState(config, data, map) {
     if (!race) throw new Error(`Unknown race "${pc.race}"`);
     const heroDef = data.heroes.heroes[pc.hero];
     if (!heroDef) throw new Error(`Unknown hero "${pc.hero}" (available: ${Object.keys(data.heroes.heroes).join(', ')})`);
-    const deck = pc.deck ? pc.deck.slice(0, 4) : race.units.slice(0, 4);
-    if (deck.length !== 4) throw new Error('A deck needs 4 units');
-    for (const u of deck) if (!race.units.includes(u)) throw new Error(`Deck unit "${u}" is not in ${race.name}`);
     const p = {
       id, team: pc.team, name: pc.name || `Player ${id + 1}`, kind: pc.kind === 'ai' ? 'ai' : 'human',
       ai: pc.kind === 'ai' ? { difficulty: (pc.ai && pc.ai.difficulty) || 'recruit', sendDone: -1, nextAt: 0, fund: 0, rng: seedStream(seed >>> 0, 'ai' + id) } : null,
       race: pc.race, hero: pc.hero, heroEnt: -1, rival: -1,
       gold: rules.startGold ?? data.econ.start.gold, income: data.econ.start.income,
-      deck, auto: [false, false, false, false],
-      queued: [], muster: 0,
-      equip: emptyEquip(), bag: new Array(data['items-bl'].shop.bag).fill(null), picks: [], requisitions: [], procs: {}, atArmory: false, gearV: 0,
+      queued: [],
+      inv: newInventory(data), useAt: 0, procs: {}, atArmory: false, gearV: 0,   // items.js (stream I)
+      upg: newUpgrades(data), upV: 0, powerCd: {},                               // upgrades.js, powers.js (stream I)
       level: 1, xp: 0, skillPts: 1,
       skills: ['Q', 'W', 'E', 'D', 'R'].filter(s => heroDef.slots[s]).map(s => ({ slot: s, id: heroDef.slots[s], rank: 0, readyAt: 0 })),
-      talent: -1, oil: null, belt: data.econ.items.potion.belt, drinkAt: 0, surrendered: false,
-      stats: { sendGold: 0, sends: 0, itemGold: 0, potionGold: 0, musterGold: 0, kills: 0, deaths: 0, leaked: 0, dealt: 0, bounty: 0, incomeAt: [], goldAt: [] },
+      talent: -1, form: null, surrendered: false,
+      stats: { sendGold: 0, sends: 0, itemGold: 0, upgradeGold: 0, powerGold: 0, kills: 0, deaths: 0, leaked: 0, dealt: 0, bounty: 0, incomeAt: [], goldAt: [] },
     };
     state.players.push(p);
     state.teams[pc.team].players.push(id);
@@ -75,7 +76,7 @@ export function baseEnt(state, props) {
     armour: 'light', dmgType: 'blade', statuses: [], group: -1,
     _spd: 3, _dps: 0, _range: 1.5, _atkEvery: 20, _atkAt: 0, _traits: [], _leak: 0, _cost: 0, _bounty: 0, _xp: 0,
     _gone: false, _lastHurt: -1000, _hardAt: -1000, _rose: false, _pounced: false, _timerA: 0, _timerB: 0,
-    _ord: null, _mk: 1, _refund: 0, _wantAttack: false, _vx: 0, _vz: 0, _sp: 1, _aggroBy: -1,
+    _ord: null, _mk: 1, _refund: 0, _wantAttack: false, _vx: 0, _vz: 0, _sp: 1, _aggroBy: -1, _kvx: 0, _kvz: 0,
   };
   Object.assign(e, props);
   e.px = e.x; e.pz = e.z; e.pface = e.face;

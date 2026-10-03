@@ -1,276 +1,200 @@
-// Inventory and equipment (PLAN §7): slots, bag, shop steps + rolls, Requisition, drops, the
-// champion pick, uniques, the set, Toll of Iron, chest armour class, and every affix stat.
+// Hero items (owner round 2, R2.2): six slots with no slot types, simple stat items, every copy of a
+// duplicate counts, rare `uniqueEquipped`, buy / sell only inside the Outfitter's radius, consumables
+// with charges, drops, and every stat / use effect proven to reach the sim.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { sim, config, data, hero, run, dataWith } from './_sim.mjs';
+import { execFileSync } from 'node:child_process';
+import { join } from 'node:path';
+import { config, data, hero, run, dataWith, ROOT } from './_sim.mjs';
 import { createSim } from '../js/sim/sim.js';
 import { spawnUnit } from '../js/sim/economy.js';
-import { makeItem, gearStats, STAT_IDS, itemScore, SLOTS } from '../js/sim/items.js';
+import { gearStats, STAT_HANDLERS, USE_EFFECTS, sellValue, refreshFromGear } from '../js/sim/items.js';
 import { heroStats } from '../js/sim/heroes.js';
+import { buildingOf } from '../js/sim/buildings.js';
 import * as Q from '../js/sim/query.js';
 
+const IB = data['items-bl'];
 const two = (heroA = 'warrior', d = data) => createSim(config({ players: [
   { team: 0, kind: 'human', race: 'freeholds', hero: heroA },
   { team: 1, kind: 'human', race: 'freeholds', hero: 'warrior' }] }), d);
 const ctxOf = s => ({ state: s.state, data: s.data, map: s.map, emit: (type, f) => s._queue.push({ ...f, type, tick: s.state.tick }) });
 const evs = (s, type) => s.drainEvents().filter(e => e.type === type);
-const atArmory = s => { const h = hero(s, 0), a = s.map.fields[0].armory; h.x = a.x; h.z = a.z; s.step([]); };
-const give = (s, it) => { const p = s.state.players[0]; const i = p.bag.indexOf(null); p.bag[i] = it; return it; };
-const mk = (s, o) => makeItem(ctxOf(s), s.state.players[0], { stream: s.state.rng.loot, ...o });
+const rejects = s => evs(s, 'reject').map(e => e.reason);
+const toShop = (s, pid = 0) => { const h = hero(s, pid), b = buildingOf(ctxOf(s), s.state.players[pid].team, 'shop'); h.x = h.px = b.x + 1; h.z = h.pz = b.z; h._ord.k = 'stop'; };
+const away = (s, pid = 0) => { const h = hero(s, pid); h.x = h.px = s.map.fields[h.field].cx; h.z = h.pz = 40; h._ord.k = 'stop'; };
+const buy = (s, id, pid = 0) => s.step([{ p: pid, type: 'buy', id }]);
 
-test('8 equipment slots, a 12-slot bag and a 2-potion belt', () => {
-  const s = two();
-  const p = s.state.players[0];
-  assert.deepEqual(Object.keys(p.equip), SLOTS);
-  assert.equal(SLOTS.length, 8);
-  assert.equal(p.bag.length, 12);
-  assert.equal(p.belt, 2);
-});
-
-test('away from the Armory a purchase is a Requisition: it arrives later, and is lost (refunded) if the hero dies', () => {
-  const s = two();
-  const p = s.state.players[0], h = hero(s, 0);
-  h.x = s.map.fields[0].cx; h.z = 40;
-  s.step([]);
-  const g0 = p.gold;
-  s.step([{ p: 0, type: 'upgrade' }]);
-  assert.equal(p.equip.weapon, null);
-  assert.equal(p.requisitions.length, 1);
-  assert.equal(p.gold, g0 - data.econ.items.tiers[0].cost);
-  run(s, data['items-bl'].shop.requisition * 20);
-  assert.ok(p.equip.weapon, 'arrived and equipped');
-  // lost on death
-  p.gold += 500;
-  s.step([{ p: 0, type: 'upgrade' }]);
-  const g1 = p.gold;
-  h.hp = 1;
-  const u = spawnUnit(ctxOf(s), 0, 1, 'iron_golem', { x: h.x, z: h.z - 2 });
-  s.drainEvents();
-  run(s, 30);
-  assert.equal(h.alive, false);
-  assert.equal(p.requisitions.length, 0);
-  const lost = s.drainEvents().find(e => e.type === 'requisitionLost');
-  assert.ok(lost);
-  assert.equal(p.gold, g1 + lost.refund + (p.gold - g1 - lost.refund));
-  assert.ok(u);
-});
-
-test('upgrade trades in a plain step; a special item goes back to the bag instead', () => {
-  const s = two(); const p = s.state.players[0];
-  p.gold = 1e6; atArmory(s);
-  s.step([{ p: 0, type: 'upgrade', slot: 'head' }]);
-  s.state.tick = 200 * 20;
-  s.step([{ p: 0, type: 'upgrade', slot: 'head' }]);
-  assert.equal(p.equip.head.step, 1);
-  assert.equal(p.bag.filter(Boolean).length, 0, 'plain step traded in');
-  const set = give(s, mk(s, { slot: 'head', step: 0, set: true }));
-  s.step([{ p: 0, type: 'equip', uid: set.uid }]);
-  s.step([{ p: 0, type: 'upgrade', slot: 'head' }]);
-  assert.equal(p.equip.head.step, 1);
-  assert.ok(p.bag.some(x => x && x.uid === set.uid), 'the set piece is kept');
-});
-
-test('rolled shop steps carry affixes: rare 3, legendary 5', () => {
-  const s = two();
-  const r = mk(s, { slot: 'ring', step: 5 }), l = mk(s, { slot: 'ring', step: 6 });
-  assert.equal(r.rarity, 'rare'); assert.equal(r.affixes.length, data['items-bl'].rarityAffixes.rare);
-  assert.equal(l.rarity, 'legendary'); assert.equal(l.affixes.length, data['items-bl'].rarityAffixes.legendary);
-  assert.equal(new Set(l.affixes.map(a => a.id)).size, l.affixes.length, 'distinct affixes');
-  assert.ok(mk(s, { slot: 'ring', step: 6 }).affixes.every(a => a.value > 0));
-  // affixes respect slot rules
-  for (let i = 0; i < 30; i++) for (const a of mk(s, { slot: 'head', step: 6 }).affixes) {
-    const def = data['items-bl'].affixes.find(d => d.id === a.id);
-    assert.ok(!def.slots || def.slots.includes('head'), `${a.id} on head`);
+test('catalogue: 40-60 simple stat items over five tabs, every one with name, desc and stat lines', () => {
+  const items = Object.values(IB.items);
+  assert.ok(items.length >= 40 && items.length <= 60, `${items.length} items`);
+  const cats = new Set(items.map(i => i.category));
+  for (const c of ['weapons', 'armour', 'trinkets', 'charms', 'consumables']) assert.ok(cats.has(c), c);
+  for (const it of items) {
+    assert.ok(it.name && it.desc && it.statLines.length, it.id);
+    assert.ok(it.price > 0 && it.tier >= 1 && it.tier <= 4, it.id);
+    for (const k of Object.keys(it.stats)) assert.ok(STAT_HANDLERS[k] && IB.statDefs[k], `${it.id}: stat ${k} has a handler`);
+    if (it.consumable) { assert.ok(it.charges >= 1 && it.use.length, it.id); for (const u of it.use) assert.ok(USE_EFFECTS[u.effect], `${it.id}: use ${u.effect}`); }
+    else assert.ok(Object.keys(it.stats).length, `${it.id} gives something`);
+    // no affixes / rolls / procs in the simple set
+    for (const k of ['affixes', 'power', 'onHit', 'set', 'rarity']) assert.equal(it[k], undefined, `${it.id}.${k}`);
   }
+  const ue = items.filter(i => i.uniqueEquipped);
+  assert.ok(ue.length >= 1 && ue.length <= 6, `uniqueEquipped used sparingly (${ue.length})`);
+  // every item on exactly one shop tab
+  const listed = data.shop.tabs.flatMap(t => t.items);
+  assert.deepEqual(listed.slice().sort(), Object.keys(IB.items).sort());
+  // prices spread over a range
+  assert.ok(Math.min(...items.map(i => i.price)) <= 60 && Math.max(...items.map(i => i.price)) >= 2000);
 });
 
-test('higher item levels roll bigger affixes (tier ladder from the adapter)', () => {
-  const s = two();
-  const avg = step => { let t = 0, n = 0; for (let i = 0; i < 60; i++) for (const a of mk(s, { slot: 'ring', step, rarity: 'magic' }).affixes) if (a.stat === 'maxHp') { t += a.value; n++; } return t / Math.max(1, n); };
-  assert.ok(avg(6) > avg(0) * 1.5);
+test('the generated data files are up to date with tools/build-items-bl.mjs', () => {
+  execFileSync(process.execPath, [join(ROOT, 'tools', 'build-items-bl.mjs'), '--check'], { stdio: 'pipe' });
 });
 
-test('the chest sets the armour class (and units hit it through the table)', () => {
-  const s = two(); const p = s.state.players[0], h = hero(s, 0);
-  p.gold = 1e6; atArmory(s);
-  assert.equal(h.armour, 'heavy', 'warrior default');
-  s.step([{ p: 0, type: 'buy', slot: 'chest', step: 0, kind: 'cloth' }]);
-  const robe = p.bag.find(Boolean);
-  s.step([{ p: 0, type: 'equip', uid: robe.uid }]);
-  assert.equal(h.armour, data.damage.chestArmour.cloth);
-  assert.equal(Q.inventoryInfo(s.state, data, 0).armourClass, 'spectral');
-  assert.equal(Q.heroInfo(s.state, data, 0).armourClass, 'spectral');
-});
-
-test('two-handed weapons take the off-hand; an off-hand cannot go on beside one', () => {
-  const s = two('pyromancer'); const p = s.state.players[0];
-  const orb = give(s, mk(s, { slot: 'offhand', step: 0 }));
-  s.step([{ p: 0, type: 'equip', uid: orb.uid }]);
-  assert.ok(p.equip.offhand);
-  const staff = give(s, mk(s, { slot: 'weapon', step: 2, unique: 'bl_sootcrown' }));
-  s.step([{ p: 0, type: 'equip', uid: staff.uid }]);
-  assert.equal(p.equip.weapon.uid, staff.uid);
-  assert.equal(p.equip.offhand, null);
-  assert.ok(p.bag.some(x => x && x.uid === orb.uid));
-  s.drainEvents();
-  s.step([{ p: 0, type: 'equip', uid: orb.uid }]);
-  assert.equal(evs(s, 'reject')[0].reason, 'twoHanded');
-});
-
-test('uniques belong to their hero', () => {
-  const s = two('warrior');
-  const staff = give(s, mk(s, { slot: 'weapon', step: 2, unique: 'bl_sootcrown' }));
-  s.drainEvents();
-  s.step([{ p: 0, type: 'equip', uid: staff.uid }]);
-  assert.equal(evs(s, 'reject')[0].reason, 'hero');
-});
-
-test('sell returns half the price; unequip needs bag room', () => {
+test('six slots, no slot types; buying fills the first free slot', () => {
   const s = two(); const p = s.state.players[0];
-  const it = give(s, mk(s, { slot: 'ring', step: 3 }));
+  assert.equal(p.inv.length, 6);
+  p.gold = 1e5; toShop(s);
+  buy(s, 'leather_cap'); buy(s, 'training_sword'); buy(s, 'copper_ring');
+  assert.deepEqual(p.inv.map(x => x && x.id), ['leather_cap', 'training_sword', 'copper_ring', null, null, null]);
+  assert.equal(p.gold, 1e5 - IB.items.leather_cap.price - IB.items.training_sword.price - IB.items.copper_ring.price);
+});
+
+test('the Outfitter only sells to a hero standing in its radius', () => {
+  const s = two(); const p = s.state.players[0];
+  p.gold = 1e4; away(s); s.drainEvents();
+  buy(s, 'training_sword');
+  assert.deepEqual(rejects(s), ['notAtShop']);
+  assert.ok(p.inv.every(x => !x));
+  assert.equal(Q.shopInfo(s.state, data, 0).tabs[0].items[0].reason, 'notAtShop');
+  // the hero spawns inside it
+  const s2 = two(); s2.state.players[0].gold = 1e4; buy(s2, 'training_sword');
+  assert.equal(s2.state.players[0].inv[0].id, 'training_sword');
+  // dead heroes cannot shop
+  const s3 = two(); const h = hero(s3, 0); h.alive = false; s3.state.players[0].gold = 1e4; s3.drainEvents(); buy(s3, 'training_sword');
+  assert.deepEqual(rejects(s3), ['dead']);
+});
+
+test('duplicates each take a slot and every copy counts; a full inventory refuses', () => {
+  const s = two(); const p = s.state.players[0];
+  p.gold = 1e5; toShop(s);
+  const dps0 = heroStats(data, p).dps;
+  for (let i = 0; i < 6; i++) buy(s, 'training_sword');
+  assert.equal(p.inv.filter(x => x && x.id === 'training_sword').length, 6);
+  assert.equal(gearStats(data, p).damage, 6 * IB.items.training_sword.stats.damage);
+  const per = IB.items.training_sword.stats.damage / data.heroes.heroes.warrior.attackEvery;
+  assert.ok(Math.abs(heroStats(data, p).dps - (dps0 + 6 * per)) < 1e-9);
+  s.drainEvents(); buy(s, 'training_sword');
+  assert.deepEqual(rejects(s), ['full']);
+  // consumables too: two draughts are two slots
+  const s2 = two(); const p2 = s2.state.players[0]; p2.gold = 1e4;
+  buy(s2, 'healing_draught'); buy(s2, 'healing_draught');
+  assert.equal(p2.inv.filter(Boolean).length, 2);
+});
+
+test('uniqueEquipped refuses a second copy; ordinary items never do', () => {
+  const s = two(); const p = s.state.players[0];
+  p.gold = 1e5; toShop(s);
+  buy(s, 'kingsbane'); s.drainEvents(); buy(s, 'kingsbane');
+  assert.deepEqual(rejects(s), ['uniqueEquipped']);
+  assert.equal(p.inv.filter(x => x && x.id === 'kingsbane').length, 1);
+  assert.ok(IB.items.kingsbane.statLines.some(l => /only one/.test(l)));
+});
+
+test('stat caps clamp the sum', () => {
+  const s = two(); const p = s.state.players[0];
+  p.gold = 1e5; toShop(s);
+  for (let i = 0; i < 6; i++) buy(s, 'windstring_bow');
+  assert.equal(gearStats(data, p).attackSpeed, IB.caps.attackSpeed);
+});
+
+test('selling pays back a fraction, only at the Outfitter; a used consumable pays its share', () => {
+  const s = two(); const p = s.state.players[0];
+  p.gold = 1000; toShop(s);
+  buy(s, 'iron_mace');
   const g = p.gold;
-  s.step([{ p: 0, type: 'sell', uid: it.uid }]);
-  assert.equal(p.gold, g + Math.round(it.price * data['items-bl'].shop.sellFactor) + 0);
-  const w = give(s, mk(s, { slot: 'ring', step: 0 }));
-  s.step([{ p: 0, type: 'equip', uid: w.uid }]);
-  for (let i = 0; i < 12; i++) give(s, mk(s, { slot: 'neck', step: 0 }));
-  s.drainEvents();
-  s.step([{ p: 0, type: 'unequip', slot: 'ring' }]);
-  assert.equal(evs(s, 'reject')[0].reason, 'bag');
+  away(s); s.drainEvents(); s.step([{ p: 0, type: 'sell', slot: 0 }]);
+  assert.deepEqual(rejects(s), ['notAtShop']);
+  toShop(s); s.step([{ p: 0, type: 'sell', slot: 0 }]);
+  assert.equal(p.gold, g + Math.round(IB.items.iron_mace.price * IB.rules.sellFactor));
+  assert.equal(p.inv[0], null);
+  assert.equal(sellValue(data, { id: 'field_salve', charges: 1 }), Math.round(IB.items.field_salve.price * IB.rules.sellFactor / 3));
 });
 
-test('kills in your field drop items into the defender bag (auto-loot) with a better-by score', () => {
-  const d = dataWith(raw => { raw['items-bl'].drops.byTier['1'] = 1; });
-  const s = two('warrior', d); const p = s.state.players[0], h = hero(s, 0);
-  const u = spawnUnit(ctxOf(s), 0, 1, 'levy', { x: h.x, z: h.z - 2 }); u.hp = 1;
-  s.drainEvents();
-  run(s, 30);
-  const drop = s.drainEvents().find(e => e.type === 'drop');
-  assert.ok(drop);
-  assert.equal(drop.player, 0);
-  assert.equal(typeof drop.better, 'number');
-  assert.ok(p.bag.some(x => x && x.uid === drop.uid));
+test('swap moves items between slots anywhere', () => {
+  const s = two(); const p = s.state.players[0];
+  p.gold = 1000; buy(s, 'training_sword'); away(s);
+  s.step([{ p: 0, type: 'swap', a: 0, b: 5 }]);
+  assert.equal(p.inv[0], null); assert.equal(p.inv[5].id, 'training_sword');
 });
 
-test('killing a champion opens a 3-card pick for every defender; pick puts one in the bag', () => {
+test('consumables: heal, charges, cooldown, removal; recall goes home; status and barrier scrolls', () => {
   const s = two(); const p = s.state.players[0], h = hero(s, 0);
-  s.state.tick = 18 * 60 * 20;
-  const c = spawnUnit(ctxOf(s), 0, 1, 'banner_marshal', { x: h.x, z: h.z - 2 }); c.hp = 1;
-  run(s, 30);
-  assert.equal(p.picks.length, 1);
-  assert.equal(p.picks[0].length, data['items-bl'].drops.pick.cards);
-  assert.ok(p.picks[0].some(x => x.rarity === 'unique'));
-  const card = p.picks[0][1];
-  s.step([{ p: 0, type: 'pick', index: 1 }]);
-  assert.equal(p.picks.length, 0);
-  assert.ok(p.bag.some(x => x && x.uid === card.uid));
-  assert.equal(Q.inventoryInfo(s.state, data, 0).picks.length, 0);
+  p.gold = 1e4;
+  buy(s, 'healing_draught'); buy(s, 'field_salve'); buy(s, 'scroll_of_return'); buy(s, 'stoneskin_tonic'); buy(s, 'mana_tonic'); buy(s, 'scroll_of_haste');
+  h.hp = 100; s.step([{ p: 0, type: 'use', slot: 0 }]);
+  assert.ok(Math.abs(h.hp - (100 + h.hpMax * 0.4)) < 1);
+  assert.equal(p.inv[0], null, 'one charge, gone');
+  s.drainEvents(); s.step([{ p: 0, type: 'use', slot: 1 }]);
+  assert.deepEqual(rejects(s), ['cooldown']);
+  run(s, 20); s.step([{ p: 0, type: 'use', slot: 1 }]);
+  assert.equal(p.inv[1].charges, 2); assert.ok(h.statuses.some(x => x.id === 'regen'));
+  run(s, 20); s.step([{ p: 0, type: 'use', slot: 3 }]);
+  assert.ok(h.statuses.find(x => x.id === 'barrier').power > 0);
+  run(s, 20); h.mp = 0; s.step([{ p: 0, type: 'use', slot: 4 }]); assert.ok(h.mp >= h.mpMax * 0.5 - 1);
+  run(s, 20); s.step([{ p: 0, type: 'use', slot: 5 }]); assert.ok(h.statuses.some(x => x.id === 'haste'));
+  away(s); run(s, 20); s.step([{ p: 0, type: 'use', slot: 2 }]);
+  const f = s.map.fields[0];
+  assert.ok(Math.abs(h.x - f.spawn.x) < 0.5 && Math.abs(h.z - f.spawn.z) < 0.5, 'recalled');
+  s.drainEvents(); s.step([{ p: 0, type: 'use', slot: 2 }]);
+  assert.deepEqual(rejects(s), ['bad']);
+  // a stat item is not usable
+  p.inv[0] = { uid: 999, id: 'training_sword', charges: 0 }; run(s, 20); s.drainEvents();
+  s.step([{ p: 0, type: 'use', slot: 0 }]);
+  assert.deepEqual(rejects(s), ['notUsable']);
 });
 
-test('unique powers: every 3rd hit cleaves (Long Scythe); every 4th cast is empowered (Sootcrown); basics burn (Cinderquill)', () => {
-  const s = two(); const p = s.state.players[0], h = hero(s, 0);
-  const w = give(s, mk(s, { slot: 'weapon', step: 0, unique: 'bl_the_long_scythe' }));
-  s.step([{ p: 0, type: 'equip', uid: w.uid }]);
-  h._ord.k = 'stop';
-  const t = spawnUnit(ctxOf(s), 0, 1, 'iron_golem', { x: h.x, z: h.z - 2 }); t.hp = t.hpMax = 1e6; t._spd = 0;
-  s.drainEvents(); run(s, 70);
-  assert.ok(s.drainEvents().some(e => e.type === 'power' && e.unique === 'bl_the_long_scythe'));
-  const ps = two('pyromancer'); const pp = ps.state.players[0], ph = hero(ps, 0);
-  const st = give(ps, mk(ps, { slot: 'weapon', step: 0, unique: 'bl_sootcrown' }));
-  ps.step([{ p: 0, type: 'equip', uid: st.uid }]);
-  pp.skills[0].rank = 1; ph.mp = ph.mpMax = 1e4;
-  ps.drainEvents();
-  for (let i = 0; i < 4; i++) { pp.skills[0].readyAt = 0; ps.step([{ p: 0, type: 'cast', slot: 'Q', x: ph.x, z: ph.z - 5 }]); }
-  assert.equal(ps.drainEvents().filter(e => e.type === 'power').length, 1);
-  const cs = two('pyromancer'); const ch = hero(cs, 0);
-  const q = give(cs, mk(cs, { slot: 'weapon', step: 0, unique: 'bl_cinderquill' }));
-  cs.step([{ p: 0, type: 'equip', uid: q.uid }]);
-  const tg = spawnUnit(ctxOf(cs), 0, 1, 'iron_golem', { x: ch.x, z: ch.z - 6 }); tg.hp = tg.hpMax = 1e6; tg._spd = 0;
-  cs.step([{ p: 0, type: 'attack', target: tg.id }]);
-  run(cs, 40);
-  assert.ok(tg.statuses.some(x => x.id === 'burn'));
+test('a champion kill hands every defender an item (sold for gold when full)', () => {
+  const s = two(); const p = s.state.players[0];
+  const ctx = ctxOf(s);
+  const f = s.map.fields[0];
+  const champ = spawnUnit(ctx, 0, 1, 'banner_marshal', { x: f.cx, z: 60 });
+  const { dealDamage } = awaitCombat;
+  dealDamage(ctx, null, champ, 1e9, 'blade');
+  assert.ok(p.inv.some(Boolean));
+  const it = p.inv.find(Boolean);
+  assert.ok(!IB.items[it.id].consumable && IB.items[it.id].price <= IB.drops.champion.maxPrice);
 });
+const awaitCombat = await import('../js/sim/combat.js');
 
-test('Keepwarden set: 2 pieces add a Toll charge, 3 add damage near your Keep', () => {
-  const s = two(); const p = s.state.players[0], h = hero(s, 0);
-  for (const slot of ['head', 'hands']) { const it = give(s, mk(s, { slot, step: 0, set: true })); s.step([{ p: 0, type: 'equip', uid: it.uid }]); }
-  run(s, 2);
-  assert.equal(s.state.teams[0].toll.charges, data['items-bl'].toll.charges + 1);
-  const f3 = give(s, mk(s, { slot: 'feet', step: 0, set: true }));
-  s.step([{ p: 0, type: 'equip', uid: f3.uid }]);
-  assert.equal(Q.inventoryInfo(s.state, data, 0).set.active.length, 2);
-  const c = ctxOf(s);
-  h.x = s.map.fields[0].keep.x; h.z = s.map.fields[0].keep.z - 5;
-  const near = awaitImport.heroes.heroDamageFactor(c, h);
-  h.z = 40;
-  const far = awaitImport.heroes.heroDamageFactor(c, h);
-  assert.ok(Math.abs(near / far - 1.15) < 1e-9);
-});
-
-test('Toll of Iron stuns every enemy unit in your field, then recharges', () => {
-  const s = two(); const h = hero(s, 0);
-  const us = [0, 1, 2].map(i => spawnUnit(ctxOf(s), 0, 1, 'levy', { x: h.x + i * 3, z: 30 }));
-  const other = spawnUnit(ctxOf(s), 1, 0, 'levy', { x: s.map.fields[1].cx, z: 30 });
-  s.step([{ p: 0, type: 'toll' }]);
-  for (const u of us) assert.ok(u.statuses.some(x => x.id === 'stun'));
-  assert.ok(!other.statuses.some(x => x.id === 'stun'), 'only your field');
-  assert.equal(s.state.teams[0].toll.charges, 0);
-  s.drainEvents(); s.step([{ p: 1, type: 'toll' }]); s.step([{ p: 0, type: 'toll' }]);
-  assert.equal(evs(s, 'reject')[0].reason, 'cooldown');
-  run(s, data['items-bl'].toll.cooldown * 20);
-  assert.equal(s.state.teams[0].toll.charges, 1);
-});
-
-// every affix stat changes the sim: a hero wearing one big affix of that stat vs none, same scene
-test('every one of the 16 affix stats changes a fight', () => {
-  const dead = [];
-  const scene = stat => {
-    const s = two('warrior');
+// Every stat reaches the sim: a test item carrying ONLY that stat must change the outcome of a busy
+// scene (hero fighting fire + blade units, casting, taking damage, killing for bounty, walking).
+test('every item stat changes the sim (dead-data guard)', () => {
+  const scene = d => {
+    const s = createSim(config({ seed: 4, players: [
+      { team: 0, kind: 'human', race: 'freeholds', hero: 'pyromancer' },
+      { team: 1, kind: 'human', race: 'freeholds', hero: 'warrior' }] }), d, { events: false });
     const p = s.state.players[0], h = hero(s, 0);
-    p.level = 6; for (const sk of p.skills) sk.rank = 1;
-    if (stat) {
-      const it = mk(s, { slot: 'ring', step: 0 });
-      it.affixes = [{ id: 'x', stat, value: stat === 'maxHp' ? 300 : stat === 'mana' ? 80 : stat === 'manaRegen' || stat === 'hpRegen' ? 10 : 20 }];
-      give(s, it); s.step([{ p: 0, type: 'equip', uid: it.uid }]);
+    p.level = 8; for (const sk of p.skills) sk.rank = 1; p.skillPts = 0;
+    const ctx = ctxOf(s);
+    ctx.emit = () => {};
+    s.step([]);
+    h.hp = h.hpMax * 0.5; h.mp = 5;
+    p.inv[0] = { uid: 1, id: '__probe', charges: 0 }; p.gearV++; refreshFromGear(ctx, p);
+    const f = s.map.fields[0];
+    for (let i = 0; i < 8; i++) { const u = spawnUnit(ctx, 0, 1, i % 2 ? 'pyre_runner' : 'levy', { x: f.cx + (i - 4) * 1.5, z: 70 + i }); u.hp = u.hpMax = i < 6 ? 2500 : 60; u._spd = 0.4; u._traits = []; }
+    for (let t = 1; t <= 600; t++) {
+      const c = [];
+      if (t === 1) c.push({ p: 0, type: 'amove', x: f.cx, z: 72 });
+      if (t % 40 === 5) c.push({ p: 0, type: 'cast', slot: 'Q', x: f.cx, z: 72 });
+      s.step(c);
     }
-    h.x = s.map.fields[0].cx; h.z = 60; h.hp = h.hpMax * 0.6; h.mp = 20;
-    const c = ctxOf(s);
-    const champ = spawnUnit(c, 0, 1, 'banner_marshal', { x: h.x, z: 57 }); champ.hp = champ.hpMax = 2e4;
-    for (let i = 0; i < 4; i++) { const u = spawnUnit(c, 0, 1, 'levy', { x: h.x - 3 + i * 2, z: 55 }); u.hp = 40; }
-    for (let t = 1; t <= 300; t++) {
-      const cmds = [];
-      if (t === 1) cmds.push({ p: 0, type: 'stop' });
-      if (t === 200) cmds.push({ p: 0, type: 'move', x: h.x, z: 40 });
-      cmds.push({ p: 0, type: 'cast', slot: t % 2 ? 'Q' : 'W', x: h.x, z: 55 });
-      s.step(cmds);
-    }
-    return s.hash();
+    return s.hash() + ':' + p.gold.toFixed(3);
   };
-  const ref = scene(null);
-  for (const stat of STAT_IDS) if (scene(stat) === ref) dead.push(stat);
-  assert.deepEqual(dead, [], 'affix stats with no effect: ' + dead.join(', '));
+  const dead = [];
+  for (const k of Object.keys(STAT_HANDLERS)) {
+    const withStat = v => dataWith(raw => { raw['items-bl'].items.__probe = { id: '__probe', name: 'Probe', category: 'charms', tier: 1, price: 1, icon: 'ring', desc: '', stats: k === 'critDamage' ? { critChance: 50, critDamage: v } : { [k]: v }, statLines: ['x'] }; });
+    if (scene(withStat(0)) === scene(withStat(k === 'critDamage' ? 80 : 15))) dead.push(k);
+  }
+  assert.deepEqual(dead, [], 'stats the sim never reads: ' + dead.join(', '));
 });
-
-test('caps hold on the worn total', () => {
-  const s = two(); const p = s.state.players[0];
-  for (const slot of ['ring', 'neck']) { const it = mk(s, { slot, step: 0 }); it.affixes = [{ id: 'x', stat: 'critChance', value: 90 }]; give(s, it); s.step([{ p: 0, type: 'equip', uid: it.uid }]); }
-  assert.equal(gearStats(data, p).critChance, data['items-bl'].caps.critChance);
-});
-
-test('query helpers: inventory, item cards with better-by, shop with chest kinds', () => {
-  const s = two(); const p = s.state.players[0];
-  const it = give(s, mk(s, { slot: 'ring', step: 6 }));
-  const v = Q.inventoryInfo(s.state, data, 0);
-  assert.equal(v.bag.filter(Boolean).length, 1);
-  const card = v.bag.find(Boolean);
-  assert.equal(card.uid, it.uid);
-  assert.ok(card.lines.length >= 3 + it.affixes.length);
-  assert.equal(card.better, itemScore(data, it));
-  const shop = Q.shopInfo(s.state, data, 0);
-  assert.equal(shop.slots.find(x => x.slot === 'chest').kinds.length, 4);
-  assert.equal(shop.recommended.cost, data.econ.items.tiers[0].cost);
-  assert.equal(typeof shop.atArmory, 'boolean');
-  assert.equal(heroStats(data, p).hpMax > 0, true);
-});
-
-const awaitImport = { heroes: await import('../js/sim/heroes.js') };

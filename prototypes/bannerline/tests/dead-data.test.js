@@ -13,6 +13,8 @@ import { createSim } from '../js/sim/sim.js';
 import { spawnUnit } from '../js/sim/economy.js';
 import { addStatus } from '../js/sim/statuses.js';
 import { applyStatus } from '../js/sim/skills.js';
+import { summonPets } from '../js/sim/pets.js';
+import { refreshHero } from '../js/sim/heroes.js';
 
 function leaves(obj, path = []) {
   const out = [];
@@ -48,8 +50,26 @@ function skillScene(data, heroId, slot, kind) {
   const spots = kind === 'sparse' ? [[1.5, 53], [0, 59.8], [4, 61], [-5, 66]]
     : [[1.2, 51], [-2, 49], [0, 47.5], [3.5, 52], [-4.5, 50], [0, 54], [0.6, 57], [-0.8, 61], [0, 66], [4, 58], [-4, 58], [8, 58], [2, 60.8], [6, 64], [-6, 64], [0, 70]];
   for (const [dx, z] of spots) {
-    const e = spawnUnit(ctx, 0, 1, 'iron_golem', { x: f.cx + dx, z }); e.hp = e.hpMax = 1e6; e._spd = kind === 'sparse' ? 0.6 : 0;
-    if (kind === 'burned') { applyStatus(ctx, h, e, 'burn', 40, { add: 4, max: 5 }); applyStatus(ctx, h, e, 'bleed', 40, { add: 2, max: 5 }); }
+    // sparse uses warded (spectral) bodies so armour-pierce has a resistance to close
+    const e = spawnUnit(ctx, 0, 1, kind === 'sparse' ? 'gravecreeper' : 'iron_golem', { x: f.cx + dx, z }); e.hp = e.hpMax = 1e6; e._spd = kind === 'sparse' ? 0.6 : 0; e._traits = e._traits.filter(t => t !== 'rise');
+    if (kind === 'burned') { applyStatus(ctx, h, e, 'burn', 40, { add: 4, max: 5 }); applyStatus(ctx, h, e, 'bleed', 40, { add: 2, max: 5 }); addStatus(ctx, e, 'quarry', { ticks: 2000, power: 0.2, src: h.id }); }
+  }
+  if (kind.startsWith('form')) {
+    // in a shape (form:<id>, from whichever skill grants it), with two wolves out
+    p.form = kind.split(':')[1];
+    const psk = Object.values(data.heroes.heroes[heroId].slots).find(sid => data.heroes.skills[sid].pet);
+    if (psk) summonPets(ctx, h, data.heroes.skills[psk].pet, 2);
+    refreshHero(ctx, p); h.hp = h.hpMax = 1e6; h.mpMax = 1e9; h.mp = 1e5;
+  }
+  if (kind.startsWith('rank')) for (const sk of p.skills) sk.rank = +kind.slice(4);
+  if (kind === 'rig' || kind.startsWith('rank')) {
+    // a builder hero: turrets already standing and hurt (repair / overcharge have something to work on)
+    const tsk = p.skills.find(sk => data.heroes.skills[sk.id].turret);
+    if (tsk) {
+      for (let i = 0; i < 3; i++) { tsk.readyAt = 0; s.step([{ p: 0, type: 'cast', slot: tsk.slot, x: f.cx + (i - 1) * 2, z: 54 }]); }
+      for (const e of s.state.ents) if (e.kind === 'turret') e.hp = e.hpMax * 0.4;
+      tsk.readyAt = 0;
+    }
   }
   for (let t = 1; t <= 260; t++) {
     const c = [];
@@ -60,7 +80,15 @@ function skillScene(data, heroId, slot, kind) {
   }
   return s.hash();
 }
-const SCENES = ['crowd', 'sparse', 'burned'];
+const BASE_SCENES = ['crowd', 'sparse', 'burned'];
+/** Scenes for one hero: the base three, one per shape it can take, and builder scenes if it builds. */
+function scenesFor(data, heroId) {
+  const out = BASE_SCENES.slice();
+  const sids = Object.values(data.heroes.heroes[heroId].slots);
+  for (const sid of sids) if (data.heroes.skills[sid].form) out.push('form:' + data.heroes.skills[sid].form.id);
+  if (sids.some(sid => data.heroes.skills[sid].turret)) out.push('rig', 'rank2', 'rank3');
+  return out;
+}
 
 // skill fields whose effect the scene cannot show, with the reason (keep this list short)
 const SKILL_EXEMPT = {
@@ -69,6 +97,25 @@ const SKILL_EXEMPT = {
   'fire_wall.range': 'the scene aims inside every range',
   'firebolt.range': 'the first golem on the line is always inside the range',
   'fire_wall.line.every': 'Farhold draws flames every N m; Bannerline hits the whole line (view hint only)',
+  'aimed_shot.range': 'the scene aims inside every range', 'hunters_snare.range': 'the scene aims inside every range',
+  'multi_shot.range': 'the first body on each line is inside the range', 'rain_of_arrows.range': 'the scene aims inside every range',
+  'thornlash.range': 'the first body on the line is inside the range',
+  'hunters_snare.place.max': 'needs a third snare inside one scene; tests/ranger-druid.test.js "snares: two at most"',
+  'multi_shot.split.range': 'the scene\'s bodies are all inside both ranges; ranger-druid.test.js "split"',
+  'thornlash.onHit.healPet': 'needs hurt wolves; ranger-druid.test.js "wolves heal"',
+  'thornlash.forms.briarback.arc': 'arc width vs a ring of targets; ranger-druid.test.js "Briarback"',
+  'briarback_shape.form.basic.arc': 'arc width vs a ring of targets; ranger-druid.test.js "gore arc"',
+  'renew.forms.briarback.barrier.share': 'the barrier outlives nothing in the scene; ranger-druid.test.js "Thornswell"',
+  'renew.forms.briarback.barrier.seconds': 'the scene breaks the barrier before it expires; ranger-druid.test.js "lasts barrier.seconds"',
+  'renew.forms.briarback.selfBuff.reflect': 'needs units hitting a still hero; ranger-druid.test.js "Thornswell"',
+  'briarback_shape.form.onEnter.taunt.seconds': 'units hold the hero anyway in the scene; ranger-druid.test.js "taunts on entering"',
+  'call_wolf.forms.briarback.taunt.seconds': 'units hold the wolves anyway; ranger-druid.test.js "Den Guard"',
+  'wolf_shape.form.body.scale': 'a look hint for the view; the sim never reads it',
+  'call_wolf.forms.wolf.howl.radius': 'needs an allied hero in the field; ranger-druid.test.js "Running Howl reaches allies"',
+  'bolt_turret.range': 'the scene aims inside every range', 'shrapnel_mine.range': 'the scene aims inside every range', 'grapnel.dash.range': 'the scene aims inside every range',
+  'shrapnel_mine.place.max': 'needs a fourth mine inside one scene; engineer.test.js "three mines at most"',
+  'briarback_shape.form.body.scale': 'a look hint for the view (the boar body\'s scale); the sim never reads it',
+  'briarback_shape.form.body.colors.body': 'view hint', 'briarback_shape.form.body.colors.belly': 'view hint', 'briarback_shape.form.body.colors.accent': 'view hint', 'briarback_shape.form.body.colors.eyes': 'view hint',
   'fire_wall.line.width': 'Farhold\'s drawn band; the hit band is the skill radius (fallback when a line skill has none)',
 };
 
@@ -77,6 +124,7 @@ test('every skill number changes what a cast does', async () => {
   const dead = [];
   for (const [hid, h] of Object.entries(base.heroes.heroes)) {
     for (const [slot, sid] of Object.entries(h.slots)) {
+      const SCENES = scenesFor(base, hid);
       const refs = SCENES.map(k => skillScene(base, hid, slot, k));
       for (const path of leaves(base.heroes.skills[sid])) {
         const key = [sid, ...path].join('.');
@@ -144,6 +192,7 @@ const ECON_EXEMPT = {
   'field.cap': 'not reached in one AI match; gameplay.test.js "field cap" moves it',
   'items.oil.cost': 'the M1 AI does not buy Oil; pyromancer.test.js "Oil" checks the price',
   'hero.respawnCap': 'never binds: 5 s + 1 s x level 20 = 25 s, the cap; kept as a guard if the level cap rises',
+  'hero.xpTable.15': 'AI matches end before level 16 at the current balance (owner: balance later)', 'hero.xpTable.16': 'same', 'hero.xpTable.17': 'same', 'hero.xpTable.18': 'same', 'hero.xpTable.19': 'same',
   'hero.xpTable.0': 'level 1 starts at 0 XP by definition (only the UI reads it)',
   'hero.classes.warrior.aoe': 'econ-model only (the real AoE is the skills)', 'hero.classes.pyromancer.aoe': 'econ-model only (the real AoE is the skills)',
 };
@@ -163,6 +212,7 @@ test('every econ.json number changes an AI-vs-AI match (or is listed with a reas
   for (const path of leaves(base.econ)) {
     const key = path.join('.');
     if (ECON_EXEMPT[key]) continue;
+    if (key.startsWith('items.')) continue;   // the hero shop moved to items-bl.json (stream I, round 2); econ.json `items` is the econ model's only (tests/items.test.js covers the real items)
     const d = dataWith(raw => setAt(raw.econ, path, oddly(getAt(raw.econ, path))));
     if (match(d, false) === refs[0] && match(d, true) === refs[1]) dead.push(key);
   }

@@ -3,8 +3,10 @@
 
 import { q2 } from './mathx.js';
 import { liveEnt } from './state.js';
-import { buySend, buyMuster, buyPotion } from './economy.js';
-import { SLOTS, buyItem, nextStepFor, cheapestNext, equipItem, unequipItem, sellItem, choosePick, tollMax } from './items.js';
+import { buySend } from './economy.js';
+import { buyItem, sellItem, swapSlots, useItem, tollMax } from './items.js';
+import { buyUpgrade } from './upgrades.js';
+import { castPower } from './powers.js';
 import { addStatus } from './statuses.js';
 import { secToTicks } from './state.js';
 import { castRefusal, castSkill, learnRefusal } from './skills.js';
@@ -74,42 +76,25 @@ export function applyCommand(ctx, cmd) {
       const why = buySend(ctx, p, cmd.unit);
       return why ? reject(why) : null;
     }
-    case 'deck': {
-      const u = cmd.units;
-      const roster = data.races.races[p.race].units;
-      if (!Array.isArray(u) || u.length !== 4 || u.some(x => !roster.includes(x))) return reject('roster');
-      p.deck = u.slice();
-      return null;
-    }
-    case 'auto': {
-      if (!(cmd.index >= 0 && cmd.index < 4) || (cmd.index | 0) !== cmd.index) return reject('bad');
-      p.auto[cmd.index] = !!cmd.on;
-      return null;
-    }
-    case 'muster': { const why = buyMuster(ctx, p); return why ? reject(why) : null; }
-    case 'upgrade': {
-      // the next shop step for a slot (omit = the cheapest unlocked one), equipped on arrival; the item
-      // it replaces is traded in (the step ladder of PLAN §7.2). `slot` may be a name or an index.
-      let slot = cmd.slot;
-      if (typeof slot === 'number') slot = SLOTS[slot];
-      if (slot != null && !SLOTS.includes(slot)) return reject('bad');
-      const n = slot == null ? cheapestNext(state, data, p) : nextStepFor(state, data, p, slot);
-      if (!n) return reject(slot == null ? 'gold' : 'maxGear');
-      if (!n.unlocked) return reject('locked');
-      const why = buyItem(ctx, p, { slot: n.slot, step: n.step, kind: cmd.kind, equip: true, replace: true });
+    // ── items, Drill Yard, Sanctum (stream I: items.js, upgrades.js, powers.js) ──
+    case 'buy': {   // { id }: one Outfitter item into the first free slot (hero within the Outfitter's radius)
+      if (typeof cmd.id !== 'string') return reject('bad');
+      const why = buyItem(ctx, p, cmd.id);
       return why ? reject(why) : null;
     }
-    case 'buy': {
-      // a specific shop item into the bag (or worn with equip: true): slot, step, kind (armour tier)
-      if (!SLOTS.includes(cmd.slot) || typeof cmd.step !== 'number') return reject('bad');
-      if (cmd.kind != null && !['cloth', 'light', 'medium', 'heavy'].includes(cmd.kind)) return reject('bad');
-      const why = buyItem(ctx, p, { slot: cmd.slot, step: cmd.step, kind: cmd.kind, equip: !!cmd.equip, replace: false });
+    case 'sell': { const why = sellItem(ctx, p, cmd.slot); return why ? reject(why) : null; }        // { slot } at the Outfitter
+    case 'swap': { const why = swapSlots(ctx, p, cmd.a, cmd.b); return why ? reject(why) : null; }   // { a, b } slots, anywhere
+    case 'use': { const why = useItem(ctx, p, cmd.slot); return why ? reject(why) : null; }          // { slot } a consumable
+    case 'upgradeUnit': {   // { id }: next Drill Yard level
+      if (typeof cmd.id !== 'string') return reject('bad');
+      const why = buyUpgrade(ctx, p, cmd.id);
       return why ? reject(why) : null;
     }
-    case 'equip': { const why = equipItem(ctx, p, cmd.uid); return why ? reject(why) : null; }
-    case 'unequip': { const why = unequipItem(ctx, p, cmd.slot); return why ? reject(why) : null; }
-    case 'sell': { const why = sellItem(ctx, p, cmd.uid); return why ? reject(why) : null; }
-    case 'pick': { const why = choosePick(ctx, p, cmd.index); return why ? reject(why) : null; }
+    case 'power': {   // { id, x, z }: buy + cast a Sanctum power at a point
+      if (typeof cmd.id !== 'string' || !isNum(cmd.x) || !isNum(cmd.z)) return reject('bad');
+      const why = castPower(ctx, p, cmd.id, cmd.x, cmd.z);
+      return why ? reject(why) : null;
+    }
     case 'toll': {
       const team = state.teams[p.team];
       if (team.toll.charges <= 0) return reject('cooldown');
@@ -121,33 +106,17 @@ export function applyCommand(ctx, cmd) {
       ctx.emit('toll', { team: p.team, player: p.id, stunned: n });
       return null;
     }
-    case 'oil': {
-      if (!data.damage.types.includes(cmd.dmgType)) return reject('bad');
-      const cost = data.econ.items.oil.cost;
-      if (p.oil === cmd.dmgType) return reject('bad');
-      if (p.gold < cost) return reject('gold');
-      p.gold -= cost; p.oil = cmd.dmgType; p.stats.itemGold += cost;
-      ctx.emit('oil', { player: p.id, dmgType: cmd.dmgType });
-      return null;
-    }
-    case 'potion': { const why = buyPotion(ctx, p); return why ? reject(why) : null; }
-    case 'drink': {
-      if (!hero || !hero.alive) return reject('dead');
-      if (p.belt <= 0) return reject('belt');
-      if (state.tick < p.drinkAt) return reject('cooldown');
-      p.belt--; p.drinkAt = state.tick + 20;
-      const h = Math.min(hero.hpMax - hero.hp, hero.hpMax * data.econ.items.potion.heal);
-      hero.hp += h;
-      ctx.emit('heal', { src: hero.id, dst: hero.id, amount: Math.round(h * 10) / 10 });
-      return null;
-    }
     case 'surrender': {
       p.surrendered = true;
       state.result = { winner: 1 - p.team, reason: 'surrender', tick: state.tick };
       ctx.emit('result', { winner: state.result.winner, reason: 'surrender' });
       return null;
     }
-    default: return reject('bad');
+    default: {
+      const own = ctx.mode && ctx.mode.commands && ctx.mode.commands[cmd.type];   // a mode's extra commands (R2.10)
+      if (own) { const why = own(ctx, p, cmd); return why ? reject(why) : null; }
+      return reject('bad');
+    }
   }
 }
 

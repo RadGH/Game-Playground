@@ -7,6 +7,7 @@ import { dist2, sin, cos } from './mathx.js';
 import { liveEnt, secToTicks } from './state.js';
 import { addStatus } from './statuses.js';
 import { dealDamage } from './combat.js';
+import { trapTick } from './skills.js';
 
 const ZONE_EVERY = 10;
 
@@ -41,7 +42,9 @@ export function zoneTick(ctx) {
   const { state } = ctx;
   if (!state.zones.length) return;
   for (const z of state.zones) {
-    if (state.tick < z.nextAt || state.tick >= z.until) continue;
+    if (state.tick >= z.until) continue;
+    if (z.kind === 'trap') { trapTick(ctx, z); continue; }
+    if (state.tick < z.nextAt) continue;
     z.nextAt += z.every;
     const src = liveEnt(state, z.owner);
     for (const e of state.ents) {

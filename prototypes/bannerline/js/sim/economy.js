@@ -1,4 +1,4 @@
-// Gold, income, sends, waves, bounty, Rally, Muster, potions.
+// Gold, income, sends, waves, bounty, Rally.
 //
 //   THE SPAM RULES (owner, 2026-10-03): a send is limited ONLY by gold — no stock, no restock, no tier
 //   time locks. It leaves through the rival's gate within GROUP_TICKS (0.5 s grouping, so a mashed key
@@ -50,23 +50,6 @@ export function buySend(ctx, p, uid, silent = false) {
   return null;
 }
 
-/** Auto-send toggles: buy deck sends whenever gold allows. */
-export function autoSends(ctx) {
-  for (const p of ctx.state.players) {
-    for (let i = 0; i < 4; i++) {
-      if (!p.auto[i]) continue;
-      let guard = 40;   // spend what there is (a bound only so one tick cannot loop forever)
-      while (guard-- > 0 && buySend(ctx, p, p.deck[i], true) === null) { /* keep buying */ }
-    }
-  }
-}
-
-function musterMult(data, p) {
-  let m = 1;
-  for (let i = 0; i < p.muster; i++) m += data.econ.muster.ranks[i].pct;
-  return m;
-}
-
 /** The field a player's sends go into, and which gate. */
 export function sendTarget(state, map, p) {
   const rival = state.players[p.rival];
@@ -90,7 +73,7 @@ export function releaseTick(ctx) {
       for (const uid of units) {
         const u = data.derived.units[uid];
         const group = state.nextGroup++;
-        for (let b = 0; b < u.bodies; b++) fs.waiting.push({ owner: p.id, unit: uid, group, body: b, bodies: u.bodies, slot: k++, gx: gate.x, gz: gate.z, mk: musterMult(data, p) });
+        for (let b = 0; b < u.bodies; b++) fs.waiting.push({ owner: p.id, unit: uid, group, body: b, bodies: u.bodies, slot: k++, gx: gate.x, gz: gate.z, mk: 1 });   // unit upgrades are stamped by upgrades.js (Drill Yard)
         if (u.traits.includes('champion')) ctx.emit('champion', { player: p.id, unit: uid, field: field.id });
       }
       ctx.emit('wave', { player: p.id, field: field.id, units });
@@ -121,7 +104,7 @@ export function admitWaiting(ctx) {
   const cap = data.econ.field.cap;
   for (const fs of state.fields) {
     let bodies = 0;
-    for (const e of state.ents) if (e.alive && !e._gone && e.field === fs.id && e.kind !== 'hero' && e.kind !== 'pet') bodies++;
+    for (const e of state.ents) if (e.alive && !e._gone && e.field === fs.id && e.kind !== 'hero' && e.kind !== 'pet' && e.kind !== 'turret') bodies++;
     while (fs.waiting.length && bodies < cap) {
       const w = fs.waiting.shift();
       const col = w.slot % 6, row = (w.slot / 6) | 0;
@@ -191,29 +174,4 @@ export function payKill(ctx, dst, src) {
   }
   if (heroes.length) for (const pid of heroes) gainXp(ctx, state.players[pid], dst._xp * r / heroes.length);
   if (src && src.kind === 'hero') state.players[src.owner].stats.kills++;
-}
-
-/** Muster rank purchase. */
-export function musterCost(data, p) {
-  const ranks = data.econ.muster.ranks;
-  if (p.muster >= ranks.length) return null;
-  const rt = data.races.traits[data.races.races[p.race].trait] || {};
-  return Math.round(ranks[p.muster].cost * (rt.musterCost ?? 1));
-}
-
-export function buyMuster(ctx, p) {
-  const cost = musterCost(ctx.data, p);
-  if (cost == null) return 'maxMuster';
-  if (p.gold < cost) return 'gold';
-  p.gold -= cost; p.muster++; p.stats.musterGold += cost;
-  ctx.emit('muster', { player: p.id, rank: p.muster });
-  return null;
-}
-
-export function buyPotion(ctx, p) {
-  const P = ctx.data.econ.items.potion;
-  if (p.belt >= P.belt) return 'belt';
-  if (p.gold < P.cost) return 'gold';
-  p.gold -= P.cost; p.belt++; p.stats.potionGold += P.cost;
-  return null;
 }

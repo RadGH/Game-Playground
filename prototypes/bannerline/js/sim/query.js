@@ -2,9 +2,11 @@
 // call every frame; nothing here changes state.
 
 import { TICK_HZ, secToTicks } from './state.js';
-import { sendRefusal, rally, musterCost, payTicks, GROUP_TICKS } from './economy.js';
-import { SLOTS, nextStepFor, cheapestNext, itemScore, gearStats, setBonuses, armourClassFor, slotUsable, maxStep, buyRefusal, kindFor, STAT_IDS } from './items.js';
-import { affixTier } from './adapters/affixes.js';
+import { sendRefusal, rally, payTicks, GROUP_TICKS } from './economy.js';
+import { gearStats, armourClassFor, itemDef, buyRefusal, sellRefusal, useRefusal, sellValue, atShop, STAT_IDS } from './items.js';
+import { upgradeCost, upgradeRefusal, unitBonus } from './upgrades.js';
+import { powerRefusal } from './powers.js';
+import { buildingsFor, mapFor } from './buildings.js';
 import { heroStats, xpForLevel, maxLevel } from './heroes.js';
 import { planFor } from './talents.js';
 import { learnRefusal } from './skills.js';
@@ -44,7 +46,7 @@ export function counters(data, u) {
   return { strongVs, weakVs, resists, lines };
 }
 
-/** One send for the Muster Hall / deck. All numbers already include race traits. */
+/** One send for the hiring hall (Barracks). All numbers already include race traits. */
 export function sendInfo(state, data, pid, uid) {
   const p = state.players[pid], u = data.derived.units[uid];
   const rival = state.players[p.rival];
@@ -61,11 +63,6 @@ export function sendInfo(state, data, pid, uid) {
     vsRival: rival ? { dealt: rivalArmour ? data.damage.pct[u.dmg][rivalArmour] : 100, taken: rivalDmg ? data.damage.pct[rivalDmg][u.armour] : 100 } : null,
     reason: sendRefusal(state, data, p, uid), get canBuy() { return this.reason === null; },
   };
-}
-
-export function deckInfo(state, data, pid) {
-  const p = state.players[pid];
-  return p.deck.map((uid, i) => Object.assign(sendInfo(state, data, pid, uid), { auto: p.auto[i], index: i }));
 }
 
 export function roster(state, data, pid) {
@@ -90,9 +87,11 @@ export function heroInfo(state, data, pid) {
   return {
     ent, name: def.name, level: p.level, xp: p.xp,
     xpPrev: xpForLevel(data, p.level), xpNext: p.level >= maxLevel(data) ? null : xpForLevel(data, p.level + 1),
-    skillPts: p.skillPts, dps: hs.dps, armor: hs.armor, armourClass: armourClassFor(data, p), dmgType: def.dmgType, oil: p.oil,
+    skillPts: p.skillPts, dps: hs.dps, armor: hs.armor, armourClass: armourClassFor(data, p), dmgType: def.dmgType,
     respawnIn: ent && !ent.alive ? Math.max(0, ent.respawnAt - state.tick) : 0,
-    belt: p.belt, skills,
+    skills,
+    form: p.form, passive: def.passive ? { name: def.passive.name, desc: def.passive.desc } : null,
+    pets: state.ents.filter(e => e.kind === 'pet' && e.owner === pid && e.alive && !e._gone).map(e => ({ id: e.id, type: e.type, name: data.heroes.pets[e.type].name, hpPct: e.hp / e.hpMax })),
     talent: { open: p.talent < 0 && p.level >= R.talentLevel, level: R.talentLevel, skill: t.skill, choices: t.choices.map(c => ({ id: c.id, name: c.name, desc: c.desc })), picked: p.talent },
   };
 }
@@ -105,7 +104,7 @@ export function teamInfo(state, data, teamId) {
 export function rivalInfo(state, data, pid) {
   const r = state.players[state.players[pid].rival];
   const h = entOf(state, r.heroEnt), def = data.heroes.heroes[r.hero];
-  return { player: r.id, name: r.name, hero: r.hero, heroName: def.name, level: r.level, hpPct: h ? h.hp / h.hpMax : 0, alive: !!h && h.alive, dmgType: def.dmgType, oil: r.oil, armourClass: armourClassFor(data, r), target: h ? h.target : -1, deck: deckInfo(state, data, r.id) };
+  return { player: r.id, name: r.name, hero: r.hero, heroName: def.name, level: r.level, hpPct: h ? h.hp / h.hpMax : 0, alive: !!h && h.alive, dmgType: def.dmgType, armourClass: armourClassFor(data, r), target: h ? h.target : -1 };
 }
 
 /** Bodies held at a field's gate because the field is at its body cap ("+N waiting"). */
@@ -123,100 +122,110 @@ export function gatePreview(state, data, fieldId) {
   return out;
 }
 
-export function musterInfo(state, data, pid) {
-  const p = state.players[pid], cost = musterCost(data, p);
-  return { rank: p.muster, max: data.econ.muster.ranks.length, next: cost == null ? null : { cost, canBuy: p.gold >= cost, reason: p.gold >= cost ? null : 'gold' } };
-}
 
 export function entName(state, data, ent) {
   if (!ent) return '';
   if (ent.kind === 'hero') return `${state.players[ent.owner].name} (${data.heroes.heroes[ent.type].name})`;
   if (ent.kind === 'tide') return `Tide ${ent.level}`;
+  if (ent.kind === 'pet') return data.heroes.pets[ent.type].name;
   return data.units.units[ent.type].name;
 }
 
-export const GEAR_SLOTS = ['Weapon', 'Off-hand', 'Head', 'Chest', 'Hands', 'Feet', 'Neck', 'Ring'];
-export const GEAR_STEPS = ['Plain', 'Fine', 'Superior', 'Masterwork', 'Exquisite', 'Rare roll', 'Legendary roll'];
-export { SLOTS };
+// ── items, Outfitter, Drill Yard, Sanctum, buildings (stream I) ───────────────────────────────────
 
-/** Armory summary per slot (index order = SLOTS). Kept from M1: `upgrade {slot}` buys row.next. */
-export function gearInfo(state, data, pid) {
-  const p = state.players[pid];
-  const slots = SLOTS.map((key, slot) => {
-    const it = p.equip[key];
-    const n = nextStepFor(state, data, p, key);
-    return { slot, key, name: GEAR_SLOTS[slot], usable: slotUsable(data, p, key), step: it ? it.step : -1, stepName: it ? GEAR_STEPS[it.step] : null, item: it ? itemView(state, data, pid, it) : null,
-      next: n ? { step: n.step, stepName: GEAR_STEPS[n.step], cost: n.cost, unlocked: n.unlocked, unlockIn: Math.max(0, n.unlockTick - state.tick), canBuy: n.unlocked && p.gold >= n.cost } : null };
-  });
-  const c = cheapestNext(state, data, p);
-  return { slots, cheapest: c ? { slot: SLOTS.indexOf(c.slot), key: c.slot, cost: c.cost, canBuy: p.gold >= c.cost } : null, spent: p.stats.itemGold };
+const qctx = (state, data) => ({ state, data, map: mapFor(data, state), emit: () => {} });
+const PCT = new Set(['attackSpeed', 'critChance', 'critDamage', 'lifeSteal', 'spellPower', 'magicResist', 'moveSpeed', 'cdr', 'bountyPct']);
+
+/** "+20 damage" / "+12% attack speed" / "+2 health regen per second" for a stat total. */
+export function statLine(data, stat, value) {
+  const d = data['items-bl'].statDefs[stat];
+  const v = Math.round(value * 10) / 10;
+  if (!d) return `+${v} ${stat}`;
+  if (d.unit === 'pct') return `+${v}% ${d.label}`;
+  if (d.unit === 'perSec') return `+${v} ${d.label} per second`;
+  return `+${v} ${d.label}`;
 }
 
-const pctStats = new Set(['dmgPct', 'attackSpeed', 'critChance', 'critDamage', 'lifeSteal', 'areaPct', 'vsChampion', 'cdr', 'moveSpeed', 'bountyPct', 'resistAll']);
-
-/** One affix as a line of text ("+4.5% critical chance"). */
-export function affixLine(data, a) {
-  const def = data['items-bl'].affixes.find(d => d.id === a.id);
-  const v = Math.round(a.value * 10) / 10;
-  return `+${v}${pctStats.has(a.stat) ? '%' : ''} ${def ? def.label : a.stat}`;
+/** A catalogue entry for tooltips / shop cells: { id, name, desc, stats: [lines], price, tier,
+ *  category, icon, uniqueEquipped, consumable, charges, sell (full-charge sale price) } */
+export function itemCard(data, id) {
+  const d = itemDef(data, id);
+  if (!d) return null;
+  return { id, name: d.name, desc: d.desc, stats: d.statLines.slice(), price: d.price, tier: d.tier, category: d.category, icon: d.icon,
+    uniqueEquipped: !!d.uniqueEquipped, consumable: !!d.consumable, charges: d.charges || 0, sell: Math.round(d.price * data['items-bl'].rules.sellFactor) };
 }
 
-/** Everything a card / tooltip needs about one item, plus how it compares to what is worn. */
-export function itemView(state, data, pid, it) {
+/** One carried item (slot view) or null. Adds uid, slot, charges left, sell value now, use refusal. */
+export function itemView(state, data, pid, slot) {
+  const p = state.players[pid], it = p.inv[slot];
   if (!it) return null;
-  const p = state.players[pid];
-  const T = data.econ.items.tiers, ib = data['items-bl'];
-  let dps = 0, hp = 0, armor = 0;
-  for (let i = 0; i <= it.step; i++) { dps += T[i].dps; hp += T[i].hp; armor += T[i].armor; }
-  const lines = [`+${Math.round(dps * 100)}% weapon power`, `+${hp} health`, `+${armor} armour`];
-  for (const a of it.affixes) lines.push(affixLine(data, a));
-  let power = null, set = null;
-  if (it.unique) power = ib.uniques[it.unique].powerText;
-  if (it.set) set = { name: ib.set.name, pieces: gearStats(data, p).setPieces, bonuses: ib.set.bonuses.map(b => ({ pieces: b.pieces, text: b.text })) };
-  const worn = p.equip[it.slot];
-  const score = itemScore(data, it);
-  return {
-    uid: it.uid, name: it.name, slot: it.slot, slotName: GEAR_SLOTS[SLOTS.indexOf(it.slot)], rarity: it.rarity, step: it.step, stepName: GEAR_STEPS[it.step],
-    ilvl: it.ilvl, tier: affixTier(it.ilvl).name, kind: it.kind, armourClass: it.slot === 'chest' ? data.damage.chestArmour[it.kind] || null : null,
-    twoHanded: it.twoHanded, lines, power, set, lore: it.unique ? ib.uniques[it.unique].lore : null,
-    score, better: worn && worn.uid === it.uid ? 0 : Math.round((score - itemScore(data, worn)) * 10) / 10, worn: !!worn && worn.uid === it.uid,
-    sell: Math.round(it.price * ib.shop.sellFactor), forHero: it.unique ? ib.uniques[it.unique].hero : null,
-  };
+  const c = itemCard(data, it.id);
+  const ctx = qctx(state, data);
+  return Object.assign(c, { uid: it.uid, slot, chargesLeft: it.charges, sellNow: sellValue(data, it),
+    canSell: sellRefusal(ctx, p, slot) === null, sellReason: sellRefusal(ctx, p, slot),
+    canUse: c.consumable && useRefusal(ctx, p, slot) === null, useReason: c.consumable ? useRefusal(ctx, p, slot) : 'notUsable' });
 }
 
-/** The character panel: worn items, bag, totals, champion picks waiting, requisitions in flight. */
+/** The inventory panel: 6 slots + totals. */
 export function inventoryInfo(state, data, pid) {
-  const p = state.players[pid];
-  const g = gearStats(data, p);
-  const equip = {};
-  for (const s of SLOTS) equip[s] = itemView(state, data, pid, p.equip[s]);
+  const p = state.players[pid], g = gearStats(data, p);
   const totals = {};
   for (const k of STAT_IDS) if (g[k]) totals[k] = Math.round(g[k] * 10) / 10;
   return {
-    equip, bag: p.bag.map(it => itemView(state, data, pid, it)), belt: p.belt, beltMax: data.econ.items.potion.belt,
-    armourClass: armourClassFor(data, p), oil: p.oil, totals, totalLines: Object.keys(totals).map(k => affixLine(data, { id: (data['items-bl'].affixes.find(a => a.stat === k) || {}).id, stat: k, value: totals[k] })),
-    set: { pieces: g.setPieces, active: setBonuses(data, p).map(b => b.text) },
-    picks: p.picks.map(cards => cards.map(c => itemView(state, data, pid, c))),
-    requisitions: p.requisitions.map(r => ({ uid: r.item.uid, name: r.item.name, inTicks: Math.max(0, r.atTick - state.tick) })),
+    slots: p.inv.map((_, i) => itemView(state, data, pid, i)), size: p.inv.length, free: p.inv.filter(x => !x).length,
+    totals, totalLines: Object.keys(totals).map(k => statLine(data, k, totals[k])),
+    armourClass: armourClassFor(data, p), atShop: atShop(qctx(state, data), p),
   };
 }
 
-/** The shop: per slot the next step (with chest kinds), Buy recommended, Armory / Requisition. */
+/** The Outfitter: tabs of item cards, each with canBuy / reason ('notAtShop', 'gold', 'full', 'uniqueEquipped', 'dead'). */
 export function shopInfo(state, data, pid) {
-  const p = state.players[pid], ib = data['items-bl'], T = data.econ.items.tiers;
-  const top = maxStep(state, data);
-  const slots = SLOTS.filter(s => slotUsable(data, p, s)).map(s => {
-    const n = nextStepFor(state, data, p, s);
-    const kinds = s === 'chest' ? ['cloth', 'light', 'medium', 'heavy'].map(k => ({ kind: k, armourClass: data.damage.chestArmour[k], name: ib.bases.chest[k].name })) : null;
-    return { slot: s, slotName: GEAR_SLOTS[SLOTS.indexOf(s)], kind: kindFor(data, p, s), kinds,
-      next: n ? { step: n.step, stepName: GEAR_STEPS[n.step], cost: n.cost, unlocked: n.unlocked, unlockIn: Math.max(0, n.unlockTick - state.tick), reason: buyRefusal({ state, data }, p, s, n.step) } : null };
-  });
-  const c = cheapestNext(state, data, p);
+  const p = state.players[pid], ctx = qctx(state, data);
+  const here = atShop(ctx, p);
   return {
-    atArmory: p.atArmory,
-    requisitionSeconds: ib.shop.requisition, topStep: top, topStepName: top >= 0 ? GEAR_STEPS[top] : null,
-    recommended: c ? { slot: c.slot, cost: c.cost, canBuy: p.gold >= c.cost } : null, slots,
-    potion: { cost: data.econ.items.potion.cost, belt: p.belt, max: data.econ.items.potion.belt },
-    oil: { cost: data.econ.items.oil.cost, current: p.oil, types: data.damage.types },
+    atShop: here, gold: p.gold, columns: data.shop.columns, sellFactor: data['items-bl'].rules.sellFactor,
+    tabs: data.shop.tabs.map(t => ({ id: t.id, name: t.name, desc: t.desc, items: t.items.map(id => {
+      const c = itemCard(data, id), why = buyRefusal(ctx, p, id);
+      return Object.assign(c, { canBuy: why === null, reason: why });
+    }) })),
   };
+}
+
+/** The Drill Yard: one row per upgrade with level, next cost, refusal and text. */
+export function upgradesInfo(state, data, pid) {
+  const p = state.players[pid], ctx = qctx(state, data), U = data.upgrades;
+  const bonus = unitBonus(data, p);
+  return {
+    rows: U.order.map(id => {
+      const d = U.upgrades[id], lvl = p.upg[id] || 0, cost = upgradeCost(data, p, id), why = upgradeRefusal(ctx, p, id);
+      const per = Math.round(d.perLevel * 1000) / 10;
+      return { id, name: d.name, desc: d.desc, icon: d.icon, stat: d.stat, level: lvl, max: d.max, cost, canBuy: why === null, reason: why,
+        stats: [d.statText.replace('{v}', per), `Level ${lvl} / ${d.max}` + (lvl ? `: ${d.statText.replace('{v}', Math.round(per * lvl * 10) / 10).replace(' per level', '')}` : '')],
+        total: Math.round((bonus[d.stat] || 0) * 1000) / 1000 };
+    }),
+    spent: p.stats.upgradeGold || 0,
+  };
+}
+
+/** The Sanctum: one row per power. `at(x, z)` refusal is powerRefusal(...) — use powerTargetCheck. */
+export function powersInfo(state, data, pid) {
+  const p = state.players[pid], P = data.powers;
+  return {
+    kinds: P.kinds,
+    rows: P.order.map(id => {
+      const d = P.powers[id], readyIn = Math.max(0, (p.powerCd[id] || 0) - state.tick);
+      const reason = state.result ? 'over' : readyIn > 0 ? 'cooldown' : p.gold < d.cost ? 'gold' : null;
+      return { id, name: d.name, desc: d.desc, stats: d.statLines.slice(), kind: d.kind, kindName: P.kinds[d.kind].name, icon: d.icon,
+        cost: d.cost, cooldown: secToTicks(d.cooldown), readyIn, canBuy: reason === null, reason,
+        radius: Math.max(...d.effects.map(e => e.radius || 0)) || null };
+    }),
+  };
+}
+
+/** Would `power {id, x, z}` be accepted right now? null or the refusal ('ownFieldOnly', 'enemyFieldOnly', 'notInField', ...). */
+export function powerTargetCheck(state, data, pid, id, x, z) { return powerRefusal(qctx(state, data), state.players[pid], id, x, z); }
+
+/** Every town building (world coordinates), for the view and the minimap. */
+export function buildingsInfo(state, data) {
+  return buildingsFor(data, mapFor(data, state), state.mode).map(b => Object.assign({}, b, { size: b.size.slice() }));
 }

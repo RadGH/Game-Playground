@@ -1,0 +1,54 @@
+{
+ "_doc": "Town buildings in every player's field (owner round 2, R2.3). Read by js/sim/buildings.js. `kinds`: what each building does; `radius` = how close (m, from the building centre to the hero centre) a hero must stand to use it, or null = usable from anywhere (select the building like any other). `size` [w, d] in metres for the view; `door` = which way the entrance faces (+z = toward the Keep and the camera). `layouts`: field-local positions per map (x = 0 the field centre, z grows toward the Keep), optionally per mode (`modes.<mode>` overrides `default`); a map without a row uses `fallback`. One set of buildings per TEAM field; in team modes every teammate uses the same buildings. Ids are `t<team>.<kind>`.",
+ "kinds": {
+  "shop": {
+   "name": "Outfitter",
+   "role": "shop",
+   "desc": "Sells weapons, armour, trinkets, charms and consumables. Your hero must stand next to it to buy or sell.",
+   "radius": 7,
+   "size": [8, 6],
+   "door": "+x"
+  },
+  "barracks": {
+   "name": "Barracks",
+   "role": "send",
+   "desc": "Hire units and send them down your rival's lane. Every unit you hire raises your income. Usable from anywhere.",
+   "radius": null,
+   "size": [7, 5],
+   "door": "+z"
+  },
+  "drillyard": {
+   "name": "Drill Yard",
+   "role": "upgrades",
+   "desc": "Train your army: upgrades apply to every unit you send, including the ones already on the field. Usable from anywhere.",
+   "radius": null,
+   "size": [8, 6],
+   "door": "-x"
+  },
+  "sanctum": {
+   "name": "Sanctum",
+   "role": "powers",
+   "desc": "Buy one-shot powers and cast them where you choose: defensive in your own field, offensive in an enemy field, neutral anywhere. Usable from anywhere.",
+   "radius": null,
+   "size": [6, 6],
+   "door": "-x"
+  }
+ },
+ "layouts": {
+  "vale": {
+   "default": {
+    "shop": { "x": -15, "z": 126 },
+    "barracks": { "x": -14, "z": 112 },
+    "drillyard": { "x": 16, "z": 126 },
+    "sanctum": { "x": 16, "z": 112 }
+   },
+   "modes": {}
+  }
+ },
+ "fallback": {
+  "shop": { "x": -15, "z": -14, "fromKeep": true },
+  "barracks": { "x": -14, "z": -28, "fromKeep": true },
+  "drillyard": { "x": 16, "z": -14, "fromKeep": true },
+  "sanctum": { "x": 16, "z": -28, "fromKeep": true }
+ }
+}

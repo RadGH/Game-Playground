@@ -3,7 +3,8 @@
 
 import { secToTicks } from './state.js';
 import { damageFactor } from './statuses.js';
-import { gearStats, nearKeepFactor, cancelRequisitions, atArmory } from './items.js';
+import { gearStats, nearKeepFactor, atArmory } from './items.js';
+import { activeForm } from './skills.js';
 
 const OUT_OF_COMBAT = 80;   // ticks without damage before regen kicks in
 
@@ -13,10 +14,16 @@ export function heroStats(data, p) {
   // equipment (items.js): shop steps add to the dps multiplier, HP and armour exactly as the econ
   // model's step ladder; affixes add their own stats on top
   const g = gearStats(data, p);
+  const form = activeForm(data, p);
+  const fs = (form && form.stats) || {};
   return {
-    dps: (H.dps + H.dpsPerLevel * (L - 1)) * cls.dpsK * (1 + g.stepDps),
-    hpMax: (H.hp + H.hpPerLevel * (L - 1)) * cls.hpK + g.stepHp + g.maxHp,
-    armor: H.armor + g.stepArmor + g.armor,
+    dps: (H.dps + H.dpsPerLevel * (L - 1)) * cls.dpsK + g.damage / def.attackEvery,   // items: flat damage per basic attack
+    hpMax: ((H.hp + H.hpPerLevel * (L - 1)) * cls.hpK + g.maxHp) * (1 + (fs.maxHpPct || 0)),
+    armor: (H.armor + g.armor) * (1 + (fs.armorPct || 0)),
+    thorns: fs.thorns || 0,
+    movePct: (fs.movePct || 0) + g.moveSpeed / 100,   /* + items (stream I) */ attackSpeedPct: fs.attackSpeedPct || 0,   // a form's speed (Druid Wolf)
+    form,
+    selfHeal: cls.selfHeal || 0,
     mpMax: def.mp + def.mpPerLevel * (L - 1) + g.mana,
     mpRegen: def.mpRegen + def.mpRegenPerLevel * (L - 1) + g.manaRegen,
     hpRegen: g.hpRegen,
@@ -31,6 +38,9 @@ export function refreshHero(ctx, p) {
   const hs = heroStats(ctx.data, p);
   if (h.alive) { h.hp += hs.hpMax - h.hpMax; h.mp += hs.mpMax - h.mpMax; }
   h.hpMax = hs.hpMax; h.mpMax = hs.mpMax;
+  // a form's basic attack (Briarback gores in an arc at its own reach) changes the hero's reach
+  const def = ctx.data.heroes.heroes[p.hero];
+  h._range = hs.form && hs.form.basic && hs.form.basic.reach ? hs.form.basic.reach : def.range;
 }
 
 export function heroPlayer(ctx, hero) { return ctx.state.players[hero.owner]; }
@@ -92,7 +102,6 @@ export function heroDied(ctx, hero, src) {
   hero.respawnAt = state.tick + respawnTicks(data, p.level);
   hero._ord = { k: 'idle', x: 0, z: 0, target: -1, dir: 0, speed: 0 };
   p.stats.deaths++;
-  cancelRequisitions(ctx, p);
   ctx.emit('death', { id: hero.id, killer: src ? src.id : -1, x: hero.x, z: hero.z });
   ctx.emit('heroDown', { player: p.id, respawnTick: hero.respawnAt });
 }
@@ -119,5 +128,6 @@ export function heroTick(ctx) {
     h.mp = Math.min(h.mpMax, h.mp + hs.mpRegen / 20);
     if (state.tick - h._lastHurt >= OUT_OF_COMBAT) h.hp = Math.min(h.hpMax, h.hp + h.hpMax * data.econ.hero.regen / 20);
     if (hs.hpRegen > 0) h.hp = Math.min(h.hpMax, h.hp + hs.hpRegen / 20);
+    if (hs.selfHeal > 0) h.hp = Math.min(h.hpMax, h.hp + h.hpMax * hs.selfHeal / 20);   // Druid: econ classes.druid.selfHeal per second
   }
 }

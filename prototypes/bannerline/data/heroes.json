@@ -285,7 +285,7 @@
    "name": "Firebolt",
    "shape": "bolt",
    "element": "fire",
-   "mult": 0.38,
+   "mult": 0.65,
    "range": 18,
    "splash": 2.6,
    "cooldown": 4,
@@ -295,14 +295,14 @@
     "add": 1,
     "max": 5
    },
-   "statusMult": 0.05,
-   "desc": "Hurl a bolt up to 18 m for 38% weapon damage that splashes 2.6 m and adds a stack of Burning (5% weapon damage a second per stack, up to 5)."
+   "statusMult": 0.09,
+   "desc": "Hurl a bolt up to 18 m for 65% weapon damage that splashes 2.6 m and adds a stack of Burning (9% weapon damage a second per stack, up to 5)."
   },
   "fire_wall": {
    "name": "Burning Line",
    "shape": "ground",
    "element": "fire",
-   "mult": 0.25,
+   "mult": 0.43,
    "range": 15,
    "radius": 1.4,
    "cooldown": 13,
@@ -316,7 +316,7 @@
    "pool": {
     "seconds": 5,
     "radius": 1.6,
-    "power": 0.04,
+    "power": 0.06,
     "element": "fire"
    },
    "stack": {
@@ -324,14 +324,14 @@
     "add": 2,
     "max": 5
    },
-   "statusMult": 0.05,
-   "desc": "Raise a 10 m line of flame up to 15 m away across your aim: 25% weapon damage and 2 Burning stacks to everything in it, then it burns for 5 s (4% weapon damage a second)."
+   "statusMult": 0.09,
+   "desc": "Raise a 10 m line of flame up to 15 m away across your aim: 43% weapon damage and 2 Burning stacks to everything in it, then it burns for 5 s (6% weapon damage a second)."
   },
   "flashover": {
    "name": "Flashover",
    "shape": "ground",
    "element": "fire",
-   "mult": 0.28,
+   "mult": 0.47,
    "range": 15,
    "radius": 6,
    "cooldown": 12,
@@ -343,13 +343,13 @@
     "share": 0.6,
     "keep": 1
    },
-   "desc": "Ignite a 6 m area up to 15 m away for 28% weapon damage and set off Burning: 60% of each target's remaining burn damage at once (one stack stays)."
+   "desc": "Ignite a 6 m area up to 15 m away for 47% weapon damage and set off Burning: 60% of each target's remaining burn damage at once (one stack stays)."
   },
   "ember_stride": {
    "name": "Cinder Stride",
    "shape": "self",
    "element": "fire",
-   "mult": 0.06,
+   "mult": 0.11,
    "cooldown": 20,
    "mp": 16,
    "trail": {
@@ -367,16 +367,16 @@
    "pool": {
     "seconds": 4,
     "radius": 3,
-    "power": 0.09,
+    "power": 0.15,
     "element": "fire"
    },
-   "desc": "For 8 s move 20% faster and leave burning ground behind you (6% weapon damage a second); the spot you start from burns for 4 s (9% a second)."
+   "desc": "For 8 s move 20% faster and leave burning ground behind you (11% weapon damage a second); the spot you start from burns for 4 s (15% a second)."
   },
   "meteor": {
    "name": "Fallstone",
    "shape": "ground",
    "element": "fire",
-   "mult": 0.73,
+   "mult": 1.25,
    "range": 18,
    "radius": 8,
    "cooldown": 22,
@@ -386,9 +386,9 @@
     "add": 3,
     "max": 5
    },
-   "statusMult": 0.03,
+   "statusMult": 0.04,
    "delay": 0.8,
-   "desc": "Call a stone down on an 8 m area up to 18 m away after a short delay: 73% weapon damage and 3 Burning stacks."
+   "desc": "Call a stone down on an 8 m area up to 18 m away after a short delay: 125% weapon damage and 3 Burning stacks."
   }
  }
 }

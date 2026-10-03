@@ -15,14 +15,15 @@ import { heroTick } from './heroes.js';
 import { moveTick } from './movement.js';
 import { runAttacks, projectileLands } from './combat.js';
 import { traitTick } from './traits.js';
-import { skillPulse } from './skills.js';
+import { skillPulse, boltLands, groundLands, trailTick } from './skills.js';
+import { zoneTick } from './zones.js';
 import { aiCommands } from './ai/index.js';
 
 export { TICK_HZ };
 export const TICK_MS = 1000 / TICK_HZ;
 export const SNAPSHOT_VERSION = 1;
 
-const TIMERS = { proj: projectileLands, pulse: skillPulse };
+const TIMERS = { proj: projectileLands, pulse: skillPulse, bolt: boltLands, ground: groundLands };
 
 function makeCtx(sim) {
   const ctx = {
@@ -95,6 +96,8 @@ class Sim {
     admitWaiting(ctx);
     runTimers(ctx);
     tickStatuses(ctx);
+    zoneTick(ctx);
+    trailTick(ctx);
     heroTick(ctx);
     moveTick(ctx);
     runAttacks(ctx);

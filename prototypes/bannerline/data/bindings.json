@@ -32,11 +32,18 @@
   "panUp":       ["ArrowUp"],
   "panDown":     ["ArrowDown"],
   "panLeft":     ["ArrowLeft"],
-  "panRight":    ["ArrowRight"]
+  "panRight":    ["ArrowRight"],
+  "navUp":       ["ArrowUp"],
+  "navDown":     ["ArrowDown"],
+  "navLeft":     ["ArrowLeft"],
+  "navRight":    ["ArrowRight"],
+  "confirm":     ["Enter", "Space"],
+  "back":        ["Escape", "Backspace"],
+  "learnMod":    ["ControlLeft", "ControlRight"]
  },
  "gamepad": {
-  "_doc": "M2. Left stick moves (moveDir), right stick aims (centred = auto-target). LB + d-pad = deck sends; LB held + d-pad held = toggle auto-send.",
-  "join":        ["A", "Start"],
+  "_doc": "Left stick moves (moveDir), right stick aims (centred = auto-target). A attacks the nearest enemy. LB + d-pad = deck sends; LB + d-pad HELD half a second = toggle that send's auto. D-pad alone: left/right drink (belt), up = Muster, down = buy a potion. LT + a skill button learns a rank. View opens the Armory panel with the best upgrade focused (two presses: View, A). Menu = pause. Menus: d-pad or left stick moves, A confirms, B goes back. navUp/navDown/navLeft/navRight are synthesised from the d-pad and the stick by js/input/gamepad.js.",
+  "join":        ["A", "Menu"],
   "leave":       ["B"],
   "attack":      ["A"],
   "skillQ":      ["X"],
@@ -51,8 +58,15 @@
   "send4":       ["DLeft"],
   "belt1":       ["DLeft"],
   "belt2":       ["DRight"],
+  "muster":      ["DUp"],
+  "potion":      ["DDown"],
+  "learnMod":    ["LT"],
   "character":   ["View"],
   "pause":       ["Menu"],
-  "cycleSelect": ["R3"]
+  "cycleSelect": ["R3"],
+  "zoomCycle":   ["L3"],
+  "confirm":     ["A"],
+  "back":        ["B"],
+  "ready":       ["A", "Menu"]
  }
 }

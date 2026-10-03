@@ -89,6 +89,15 @@ export function applyCommand(ctx, cmd) {
       const why = buyGear(ctx, p, cmd.slot == null ? null : cmd.slot);
       return why ? reject(why) : null;
     }
+    case 'oil': {
+      if (!data.damage.types.includes(cmd.dmgType)) return reject('bad');
+      const cost = data.econ.items.oil.cost;
+      if (p.oil === cmd.dmgType) return reject('bad');
+      if (p.gold < cost) return reject('gold');
+      p.gold -= cost; p.oil = cmd.dmgType; p.stats.itemGold += cost;
+      ctx.emit('oil', { player: p.id, dmgType: cmd.dmgType });
+      return null;
+    }
     case 'potion': { const why = buyPotion(ctx, p); return why ? reject(why) : null; }
     case 'drink': {
       if (!hero || !hero.alive) return reject('dead');

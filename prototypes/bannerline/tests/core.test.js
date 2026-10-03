@@ -115,3 +115,8 @@ test('data/heroes.json is up to date with tools/build-hero-skills.mjs', async ()
   const { ROOT } = await import('./_sim.mjs');
   execFileSync(process.execPath, [join(ROOT, 'tools', 'build-hero-skills.mjs'), '--check'], { stdio: 'pipe' });
 });
+
+test('econ.json clock.tickHz documents the code tick rate', async () => {
+  const { TICK_HZ } = await import('../js/sim/sim.js');
+  assert.equal(data.econ.clock.tickHz, TICK_HZ);
+});

@@ -167,6 +167,27 @@ test('banners at zero ends the match; surrender ends it; the hard cap ends it', 
   const before = d.hash(); d.step([{ p: 0, type: 'send', unit: 'levy' }]); assert.equal(d.hash(), before, 'nothing moves after the end');
 });
 
+test('Rally: +bounty per 20% of banners behind, up to the cap', () => {
+  const { rally } = awaitImport.economy;
+  const s = twoHumans();
+  const R = data.econ.rally;
+  s.state.teams[0].banners = 70 * (1 - 0.41);
+  assert.ok(Math.abs(rally(s.state, data, 0) - 2 * R.perStep) < 1e-9);
+  assert.equal(rally(s.state, data, 1), 0);
+  s.state.teams[0].banners = 1;
+  assert.equal(rally(s.state, data, 0), R.cap);
+});
+
+test('field cap: sends past the body cap wait at the gate', () => {
+  const s = twoHumans();
+  parkHeroes(s);
+  const fs = s.state.fields[1];
+  for (let i = 0; i < data.econ.field.cap + 5; i++) fs.waiting.push({ owner: 0, unit: 'levy', group: 900 + i, body: 0, bodies: 1, slot: i, gx: s.map.fields[1].gates[0].x, gz: 3, mk: 1 });
+  s.step([]);
+  assert.equal(fs.bodies, data.econ.field.cap);
+  assert.equal(fs.waiting.length, 5);
+});
+
 // ── combat + heroes ─────────────────────────────────────────────────────────────────────────
 test('damage uses the type table and hero armour', () => {
   const s = twoHumans();
@@ -475,4 +496,4 @@ test('config validation gives readable errors', () => {
 });
 
 // imports used by the trait tests
-const awaitImport = { combat: await import('../js/sim/combat.js'), traits: await import('../js/sim/traits.js') };
+const awaitImport = { combat: await import('../js/sim/combat.js'), traits: await import('../js/sim/traits.js'), economy: await import('../js/sim/economy.js') };

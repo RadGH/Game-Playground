@@ -73,7 +73,7 @@ const traitEhp = u => u.traits.reduce((m, t) => m * (UNITS.traits[t]?.ehp ?? 1),
 function unitFor(uid) {
   const u = UNITS.units[uid], rt = RACES.traits[RACES.races[u.race].trait];
   const pack = u.traits.includes('pack'), low = u.tier <= (rt.maxTier ?? 99);
-  const rk = RACES.races[u.race].hpMult ?? 1;
+  const rk = RACES.races[u.race].econModelHpMult ?? RACES.races[u.race].hpMult ?? 1;   // see races.json _doc
   return {
     id: uid, ...u, hp: u.hp * rk,
     cost: Math.round(u.cost * (low ? (rt.cost ?? 1) : 1)),

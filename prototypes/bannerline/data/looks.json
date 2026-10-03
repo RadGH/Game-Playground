@@ -22,7 +22,7 @@
   "levy": { "parts": { "hat": { "id": "leather_cap", "color": "#6a5038" }, "top": { "id": "gambeson", "color": "#2f5d9e", "color2": "#c9d1d9" }, "held": { "id": "fh_spear", "color": "#a8b0b8" }, "offhand": { "id": "round_shield", "color": "#2f5d9e" }, "cape": { "id": "none" } }, "scale": 1.0 },
   "hill_slinger": { "parts": { "hat": { "id": "feather_cap", "color": "#2f5d9e" }, "top": { "id": "travel_shirt", "color": "#2f5d9e" }, "held": { "id": "fh_javelin", "color": "#a08060" } }, "scale": 1.0 },
   "shieldbearer": { "parts": { "held": { "id": "fh_hammer", "color": "#b0b8c2" }, "offhand": { "id": "fh_tower_shield", "color": "#2f5d9e" } }, "scale": 1.15 },
-  "hedge_priest": { "parts": { "top": { "id": "trim_robe", "color": "#e8e0c8", "color2": "#2f5d9e" }, "held": { "id": "staff_crook", "color": "#8a6a40" } }, "scale": 1.05 },
+  "hedge_priest": { "parts": { "hat": { "id": "hood", "color": "#2f5d9e" }, "top": { "id": "trim_robe", "color": "#e8e0c8", "color2": "#2f5d9e" }, "held": { "id": "staff_crook", "color": "#8a6a40" } }, "scale": 1.05 },
   "iron_golem": { "scale": 1.0 },
   "banner_marshal": { "parts": { "decor": { "id": "tabard", "color": "#2f5d9e" }, "held": { "id": "fh_longsword", "color": "#d8dee6" }, "offhand": { "id": "fh_kite_shield", "color": "#2f5d9e" } }, "scale": 1.5 },
   "raider_pair": { "scale": 1.0 },

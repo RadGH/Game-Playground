@@ -49,6 +49,11 @@ export function tickStatuses(ctx) {
     for (let i = 0; i < e.statuses.length; i++) {
       const s = e.statuses[i];
       const def = statusDef(ctx.data, s.id);
+      if (def && def.healPerSecond && (state.tick - s.until) % DOT_EVERY === 0 && s.until > state.tick && e.hp < e.hpMax) {
+        const h = Math.min(e.hpMax - e.hp, e.hpMax * def.healPerSecond * DOT_EVERY / 20);
+        e.hp += h;
+        ctx.emit('heal', { src: s.src, dst: e.id, amount: Math.round(h * 10) / 10 });
+      }
       if (def && def.kind === 'dot' && (state.tick - s.until) % DOT_EVERY === 0 && s.until > state.tick) {
         const src = liveEnt(state, s.src) || null;
         dealDamage(ctx, src, e, s.power * s.stacks * DOT_EVERY / 20, def.dmgType, { dot: true, raw: true, status: s.id });
@@ -66,11 +71,11 @@ export const isStunned = e => !!findStatus(e, 'stun');
 export const isRooted = e => !!findStatus(e, 'root') || !!findStatus(e, 'stun');
 
 /** Move-speed factor from statuses (slows, haste, self-buff movePct). */
-export function moveFactor(e) {
+export function moveFactor(e, data) {
   let f = 1;
   for (const s of e.statuses) {
     if (s.id === 'slow') f *= 1 - s.power;
-    else if (s.id === 'haste') f *= 1 + s.power;
+    else if (s.id === 'haste') f *= 1 + (data ? data.heroes.statuses.haste.move : 0.2);
     else if (s.buff && s.buff.movePct) f *= 1 + s.buff.movePct;
   }
   return f < 0.1 ? 0.1 : f;
@@ -87,9 +92,9 @@ export function damageFactor(e) {
 }
 
 /** Attack-speed factor (higher = faster). */
-export function attackSpeedFactor(e) {
+export function attackSpeedFactor(e, data) {
   let f = 1;
-  for (const s of e.statuses) if (s.id === 'haste') f += 0.3;
+  for (const s of e.statuses) if (s.id === 'haste') f += data ? data.heroes.statuses.haste.attackSpeed : 0.3;
   return f;
 }
 

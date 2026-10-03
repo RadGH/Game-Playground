@@ -113,19 +113,25 @@ function unitThink(ctx, e) {
     const cur = liveEnt(state, e.target);
     const aggro = e._range > 3 ? Math.max(UNIT_AGGRO, e._range + 2) : UNIT_AGGRO;
     const leash = aggro + UNIT_LEASH - UNIT_AGGRO;
-    if (cur && cur.field === e.field && dist2(e.x, e.z, cur.x, cur.z) <= leash * leash) t = cur;
+    // a hero can only be fought by `econ.field.engagedBodies` units at once (econ model): the rest
+    // walk on past it, so one hero cannot hold a whole road. Taunts ignore the cap while they last;
+    // when one ends, units over the cap let go (counting this unit, which still targets the hero).
+    const cap = ctx.data.econ.field.engagedBodies;
+    if (cur && cur.field === e.field && dist2(e.x, e.z, cur.x, cur.z) <= leash * leash && (cur.kind !== 'hero' || engagedOn(state, cur.id) <= cap)) t = cur;
     else {
-      // a hero can only be fought by `econ.field.engagedBodies` units at once (econ model): the rest
-      // walk on past it, so one hero cannot hold a whole road. Taunts ignore the cap.
-      const cap = ctx.data.econ.field.engagedBodies;
       let bd = aggro * aggro;
       for (const h of defendersIn(state, e.field, e.team)) {
         const d = dist2(e.x, e.z, h.x, h.z);
         if (d < bd && engagedOn(state, h.id) < cap) { bd = d; t = h; }
       }
+      if (!t && e._aggroBy >= 0) {
+        const h = liveEnt(state, e._aggroBy);
+        if (h && h.field === e.field && engagedOn(state, h.id) < cap) t = h;
+      }
       if (t) tryPounce(ctx, e, t);
     }
   }
+  e._aggroBy = -1;
   e.target = t ? t.id : -1;
   if (t) {
     if (inReach(e, t, e._range)) { e._wantAttack = true; e.face = faceOf(t.x - e.x, t.z - e.z); return; }
@@ -155,7 +161,7 @@ export function moveTick(ctx) {
       continue;
     }
     const f = map.fields[e.field];
-    let sp = e._spd * e._sp * moveFactor(e);
+    let sp = e._spd * e._sp * moveFactor(e, data);
     if (inFord(f, e) && !hasTrait(e, 'flying')) sp *= 1 - f.ford.slow;
     let step = sp / 20;
     if (e.kind === 'hero' && (e._ord.k === 'move' || e._ord.k === 'amove') && e.target < 0) step = Math.min(step, len);

@@ -117,18 +117,44 @@ function heroPlay(ctx, p, K, rng, cmd) {
   // target choice
   let target;
   if (K.micro === 0) target = sortBy(foes, e => dist2(hero.x, hero.z, e.x, e.z))[0];
-  else {
+  else if (!data.heroes.heroes[p.hero].melee) {
+    // ranged: shoot what is closest to the Keep (it cannot body-block, so leaks are the danger)
+    target = sortBy(foes, e => -e.z)[0];
+  } else {
     const close = foes.filter(e => dist2(hero.x, hero.z, e.x, e.z) <= 100);
     target = close.length ? sortBy(close, e => e.hp)[0] : sortBy(foes, e => -e.z)[0];
   }
+  // ranged heroes step away from melee that is on them (micro >= 1), then go back to shooting
+  if (K.micro >= 1 && !data.heroes.heroes[p.hero].melee) {
+    let mx = 0, mz = 0, n = 0;
+    for (const e of foes) if (e._range <= 3 && e.target === hero.id && dist2(hero.x, hero.z, e.x, e.z) <= 9) { mx += e.x; mz += e.z; n++; }
+    if (n > 0 && hpPct < 0.85) {
+      let dx = hero.x - mx / n, dz = hero.z - mz / n;
+      const d = Math.sqrt(dx * dx + dz * dz) || 1;
+      dx /= d; dz /= d;
+      // prefer backing toward the Keep side, but never into the leak line
+      const tx = Math.max(f.x0 + 2, Math.min(f.x1 - 2, hero.x + dx * 5)), tz = Math.max(f.z0 + 2, Math.min(f.leakZ - 4, hero.z + dz * 5 + 1));
+      cmd('move', { x: tx, z: tz });
+      castOpportunist(ctx, p, K, rng, cmd, hero, target);
+      return;
+    }
+  }
   if (hero._ord.k !== 'attack' || hero._ord.target !== target.id) cmd('attack', { target: target.id });
+  castOpportunist(ctx, p, K, rng, cmd, hero, target);
+}
+
+function castOpportunist(ctx, p, K, rng, cmd, hero, target) {
+  const { state, data } = ctx;
   // skills
   for (const sk of p.skills) {
     if (castRefusal(ctx, p, sk.slot)) continue;
     if (next(rng) > K.skillChance) continue;
     const plan = planFor(data, p, sk.id);
     let n = 0, need = 2;
+    const tr = plan.range || 0, td2 = dist2(hero.x, hero.z, target.x, target.z);
     if (plan.shape === 'around') n = enemiesNear(state, hero, hero.x, hero.z, plan.radius);
+    else if (plan.shape === 'bolt') { n = td2 <= tr * tr ? 1 + enemiesNear(state, hero, target.x, target.z, plan.splash || 0) - 1 : 0; need = 1; }
+    else if (plan.shape === 'ground') { n = td2 <= tr * tr ? enemiesNear(state, hero, target.x, target.z, plan.line ? plan.line.length / 2 : plan.radius) : 0; need = plan.cooldown >= 18 ? 3 : 2; }
     else if (plan.shape === 'melee') { n = dist2(hero.x, hero.z, target.x, target.z) <= (plan.reach + target.r + hero.r) * (plan.reach + target.r + hero.r) ? enemiesNear(state, hero, target.x, target.z, 2) : 0; need = 1; }
     else if (plan.shape === 'self') {
       const r = plan.taunt ? plan.taunt.radius : plan.selfBuff && plan.selfBuff.resistPerFoe ? plan.selfBuff.resistPerFoe.radius : 6;

@@ -37,7 +37,7 @@
   "engageSlow": 0.3,
   "engagedBodies": 6,
   "engageDepth": 8,
-  "_doc": "cap = live bodies per field; sends beyond it wait at the gate. econ-sim peak is ~31, so 60 is headroom, and the render budget (PLAN \u00a715) is sized to it."
+  "_doc": "cap = live bodies per field; sends beyond it wait at the gate. econ-sim peak is ~31, so 60 is headroom, and the render budget (PLAN §15) is sized to it."
  },
  "tide": {
   "bodies": 4,
@@ -126,6 +126,10 @@
    "cost": 25,
    "heal": 0.4,
    "belt": 2
+  },
+  "oil": {
+   "cost": 80,
+   "_doc": "Weapon oil (PLAN §5.2): half of the hero's damage becomes the chosen type. Buying another type replaces it."
   }
  },
  "hero": {

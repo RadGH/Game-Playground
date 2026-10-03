@@ -65,7 +65,7 @@ const HEROES = {
     mp: 80, mpPerLevel: 8, mpRegen: 1.6, mpRegenPerLevel: 0.15,
     slots: { Q: 'firebolt', W: 'fire_wall', E: 'flashover', D: 'ember_stride', R: 'meteor' },
     talentSkill: 'firebolt', talentTier: '1',
-    skillScale: 0.25,
+    skillScale: 0.43,
     desc: 'Ranged caster. Stacks Burning on crowds and sets them off.',
   },
 };

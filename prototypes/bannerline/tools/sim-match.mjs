@@ -5,6 +5,7 @@
 //   node tools/sim-match.mjs --seeds 30 --a recruit --b veteran
 //   node tools/sim-match.mjs --trace --seed 3      per-minute line for one match
 //   node tools/sim-match.mjs --json
+//   node tools/sim-match.mjs --ra ashtusk --hb pyromancer   races / heroes per side (--ra --rb --ha --hb)
 
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -38,10 +39,11 @@ export function runMatch({ seed, a = 'veteran', b = 'veteran', raceA = 'freehold
 
 if (process.argv[1] && process.argv[1].endsWith('sim-match.mjs')) {
   const seeds = +arg('--seeds', 10), A = arg('--a', 'veteran'), B = arg('--b', 'veteran');
-  if (argv.includes('--trace')) { const r = runMatch({ seed: +arg('--seed', 1), a: A, b: B, trace: true }); console.log(r.winner, r.reason, r.minutes.toFixed(1), 'min'); process.exit(0); }
+  const combo = { raceA: arg('--ra', 'freeholds'), raceB: arg('--rb', 'freeholds'), heroA: arg('--ha', 'warrior'), heroB: arg('--hb', 'warrior') };
+  if (argv.includes('--trace')) { const r = runMatch({ seed: +arg('--seed', 1), a: A, b: B, trace: true, ...combo }); console.log(r.winner, r.reason, r.minutes.toFixed(1), 'min'); process.exit(0); }
   const res = [];
   const t0 = Date.now();
-  for (let i = 0; i < seeds; i++) res.push(runMatch({ seed: 1 + i * 7919, a: A, b: B }));
+  for (let i = 0; i < seeds; i++) res.push(runMatch({ seed: 1 + i * 7919, a: A, b: B, ...combo }));
   const mins = res.map(r => r.minutes).slice(); mins.sort((x, y) => x - y);
   const wA = res.filter(r => r.winner === 0).length, wB = res.filter(r => r.winner === 1).length;
   const out = { seeds, a: A, b: B, winsA: wA, winsB: wB, draws: seeds - wA - wB, median: mins[mins.length >> 1], p10: mins[Math.floor(mins.length * 0.1)], p90: mins[Math.min(mins.length - 1, Math.floor(mins.length * 0.9))], caps: res.filter(r => r.reason === 'cap').length, peak: Math.max(...res.map(r => r.peak)), inc10: res.map(r => r.players[0].incomeAt[9]).filter(v => v != null), ms: Date.now() - t0 };

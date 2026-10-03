@@ -30,7 +30,11 @@ export function dealDamage(ctx, src, dst, amount, dmgType, opts = {}) {
   const { state, data } = ctx;
   if (!dst || !dst.alive || dst._gone || !(amount > 0)) return 0;
   let dmg = amount;
-  if (!opts.raw) dmg *= typePct(data, dmgType, dst.armour);
+  if (!opts.raw) {
+    // Oil (PLAN §5.2): half of a hero's damage becomes the oil's type
+    const oil = src && src.kind === 'hero' ? state.players[src.owner].oil : null;
+    dmg *= oil ? 0.5 * typePct(data, dmgType, dst.armour) + 0.5 * typePct(data, oil, dst.armour) : typePct(data, dmgType, dst.armour);
+  }
   dmg *= takenFactor(dst);
   if (dst.kind === 'hero') {
     if (!opts.raw) { const a = heroArmor(ctx, dst); dmg *= 1 - a / (a + 40); }
@@ -43,7 +47,12 @@ export function dealDamage(ctx, src, dst, amount, dmgType, opts = {}) {
   dst._lastHurt = state.tick;
   ctx.emit('hit', { src: src ? src.id : -1, dst: dst.id, amount: q1(dmg), dmgType, crit: false, skill: opts.skill || null });
   if (dst.kind === 'hero') { if (src && !opts.dot) onHitHero(ctx, src, dst); heroHurtBuffs(ctx, dst, src); }
-  else onUnitHurt(ctx, dst);
+  else {
+    onUnitHurt(ctx, dst);
+    // a unit hit by a hero turns on it (if the hero's engage slots allow): ranged heroes outrange unit
+    // aggro, and without this the whole wave would walk past them
+    if (src && src.kind === 'hero' && dst.target < 0 && !opts.dot) dst._aggroBy = src.id;
+  }
   if (dst.hp <= 0) kill(ctx, dst, src);
   return dmg;
 }
@@ -104,7 +113,7 @@ export function runAttacks(ctx) {
     if (!t) { a.target = -1; continue; }
     if (!inReach(a, t, a._range)) continue;
     if (state.tick < a._atkAt) continue;
-    const every = Math.max(4, Math.round(a._atkEvery / attackSpeedFactor(a)));
+    const every = Math.max(4, Math.round(a._atkEvery / attackSpeedFactor(a, data)));
     a._atkAt = state.tick + every;
     a.act = 'attack'; a.actTick = state.tick;
     let amount, type = a.dmgType;

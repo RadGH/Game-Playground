@@ -1,5 +1,5 @@
 {
- "_doc": "Bannerline races: armour mix, the one visible economy trait, and the unit roster (6 per race in v1). Player-facing names only; never show Farhold warband `name` fields (one contains a banned word). `hpMult` is a per-race HP scale set by tools/econ-sim.mjs balancing (race-vs-race win rates 45-55%); it applies at runtime on top of units.json hp.",
+ "_doc": "Bannerline races: armour mix, the one visible economy trait, and the unit roster (6 per race in v1). Player-facing names only; never show Farhold warband `name` fields (one contains a banned word). `hpMult` is a per-race HP scale set by tools/econ-sim.mjs balancing (race-vs-race win rates 45-55%); it applies at runtime on top of units.json hp. `econModelHpMult` (optional) is the HP scale tools/econ-sim.mjs uses instead of hpMult for a race whose real-sim strength the model cannot see (the model has no positions, so pack bodies swarming a hero's engage limit are invisible to it). hpMult is tuned on the REAL sim with tools/matchups.mjs.",
  "traits": {
   "drilled_muster": {
    "name": "Drilled Muster",
@@ -50,7 +50,7 @@
     "hide"
    ],
    "trait": "cheap_steel",
-   "hpMult": 0.996,
+   "hpMult": 0.96,
    "units": [
     "raider_pair",
     "spearthrower",
@@ -58,7 +58,8 @@
     "bonecaller",
     "tuskback",
     "tuskchief"
-   ]
+   ],
+   "econModelHpMult": 0.996
   },
   "unburied": {
    "name": "The Unburied",

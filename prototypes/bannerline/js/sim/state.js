@@ -74,7 +74,7 @@ export function baseEnt(state, props) {
     armour: 'light', dmgType: 'blade', statuses: [], group: -1,
     _spd: 3, _dps: 0, _range: 1.5, _atkEvery: 20, _atkAt: 0, _traits: [], _leak: 0, _cost: 0, _bounty: 0, _xp: 0,
     _gone: false, _lastHurt: -1000, _hardAt: -1000, _rose: false, _pounced: false, _timerA: 0, _timerB: 0,
-    _ord: null, _mk: 1, _refund: 0, _wantAttack: false, _vx: 0, _vz: 0, _sp: 1,
+    _ord: null, _mk: 1, _refund: 0, _wantAttack: false, _vx: 0, _vz: 0, _sp: 1, _aggroBy: -1,
   };
   Object.assign(e, props);
   e.px = e.x; e.pz = e.z; e.pface = e.face;

@@ -112,6 +112,7 @@ per tick are fine; they apply in array order.
 | `auto` | `index` 0..3, `on` bool | auto-send toggle for a deck slot: buys that send whenever its stock and your gold allow |
 | `muster` | — | buy the next Muster rank (I–III) |
 | `upgrade` | `slot?` 0..7 | buy the next **gear step** for that equipment slot (PLAN §7.2 steps, `econ.json items.tiers`); omit `slot` for the cheapest unlocked step. M1's gold sink; M4's shop replaces the abstract steps with real items but keeps the step prices |
+| `oil` | `dmgType` `'blade'|'pierce'|'fire'|'nature'` | buy weapon Oil (`econ.items.oil.cost`): half of the hero's damage becomes that type (replaces any earlier oil) |
 | `potion` | — | buy one belt potion (25 g) if the belt has room |
 | `drink` | — | drink a belt potion (heals 40% max HP) |
 | `surrender` | — | your team loses at once |
@@ -137,7 +138,10 @@ hashed, not snapshotted): they are hints for drawing and sound. Never derive gam
 | `hit` | `src, dst, amount, dmgType, crit, skill?` | damage applied (floating number; `amount` already rounded to 0.1) |
 | `heal` | `src, dst, amount` | healing applied |
 | `death` | `id, killer, x, z` | something died (heroes too) |
-| `cast` | `id, slot, skill, shape, x, z, face, radius, arc, reach` | a hero cast a skill (draw the ring/arc). `shape` per PLAN §6.3 |
+| `cast` | `id, slot, skill, shape, x, z, face, radius, arc, reach, range, delay, line` | a hero cast a skill. `shape` per PLAN §6.3. For `ground`, `x,z` is the landing point (already clamped to range); `delay` > 0 = it lands that many ticks later (draw a warning marker); `line` > 0 = a line that long across the aim (`face` + 90°), half-width `radius` |
+| `bolt` | `id, skill, fromX, fromZ, toX, toZ, ticks, dst` | a skill bolt (Firebolt) flies for `ticks`; `dst` is the entity it will hit or −1 |
+| `zone` | `zone, x, z, radius, length, face, ticks, skill, dmgType` | a burning patch appears (`length` > 0: a capsule of that length along `face`, half-width `radius`); lasts `ticks` |
+| `zoneEnd` | `zone` | a zone went out |
 | `pulse` | `id, skill, x, z, radius` | a repeat of a multi-hit skill (Iron Gyre spin, shockwave) |
 | `knock` | `id, fromX, fromZ, toX, toZ` | an entity was shoved/pulled (view may tween) |
 | `status` | `id, status, on` | a status started (`on: true`) or ended |
@@ -156,6 +160,7 @@ hashed, not snapshotted): they are hints for drawing and sound. Never derive gam
 | `rising` | `step` | Rising Tide step began (alert) |
 | `muster` | `player, rank` | Muster rank bought |
 | `gear` | `player, slot, step` | a gear step was bought |
+| `oil` | `player, dmgType` | Oil applied |
 | `champion` | `player, unit, field` | a champion send is leaving through a gate ("Champion at the gate!") |
 | `revive` | `id` | a `rise` unit came back at half HP |
 | `talentReady` | `player` | level 6 reached, talent pick open |
@@ -180,7 +185,8 @@ state = {
   players: [Player],
   fields:  [Field],
   ents:    [Ent],                // ascending id
-  timers:  [{ id, atTick, kind, args }]   // delayed effects (projectile hits, skill repeats, respawns)
+  timers:  [{ id, atTick, kind, args }]   // delayed effects: 'proj' (unit/hero shots), 'pulse' (skill repeats), 'bolt' (skill bolts), 'ground' (delayed ground strikes)
+  zones:   [{ id, owner, team, field, x, z, radius, length, face, until, dmgType, skill, ... }]   // lingering ground effects (draw them; `until` is the end tick)
 }
 ```
 
@@ -204,6 +210,7 @@ Player = {
   skills: [{ slot, id, rank, readyAt }],  // slots Q W E D R; readyAt = tick the cooldown ends
   talent: -1 | 0 | 1,
   belt,                          // potions carried (0..2)
+  oil,                           // null or a damage type (half the hero's damage becomes it)
   surrendered,
   stats: { sendGold, sends, itemGold, potionGold, musterGold, kills, deaths, leaked, dealt, bounty,
            incomeAt: [income at each whole minute], goldAt: [...] }

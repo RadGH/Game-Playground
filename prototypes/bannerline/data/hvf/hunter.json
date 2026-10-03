@@ -1,0 +1,77 @@
+{
+ "_doc": "The hunter's kit (docs/hvf-PLAN.md \u00a77). Read by js/sim/modes/hvf/hunter.js. Skills by `cast` slot; `level` = the hunter level that unlocks it. spear: thrown automatically at a target out of melee reach within `range` (cooldown). lodge: command `lodge {x, z}`, cost, build seconds, at most `max` standing including the kennel; a lodge is a respawn point, a shop and `sight` m of vision. watchstone/snare: placed things farmers can pull up. tracking: from `level` the hunter sees stray tracks.",
+ "skills": {
+  "Q": {
+   "id": "pounce",
+   "name": "Pounce",
+   "range": 8,
+   "cooldown": 10,
+   "level": 1
+  },
+  "W": {
+   "id": "snare",
+   "name": "Snare",
+   "max": 3,
+   "root": 3,
+   "armySlow": 0.5,
+   "armySlowSeconds": 4,
+   "cooldown": 4,
+   "range": 3,
+   "seenWithin": 6,
+   "level": 1
+  },
+  "E": {
+   "id": "hawk",
+   "name": "Hawk",
+   "seconds": 12,
+   "sight": 12,
+   "speed": 14,
+   "cooldown": 30,
+   "range": 60,
+   "level": 1
+  },
+  "R": {
+   "id": "horn",
+   "name": "Hunting Horn",
+   "radius": 40,
+   "reveal": 5,
+   "cooldown": 60,
+   "level": 6
+  }
+ },
+ "spear": {
+  "range": 8,
+  "cooldown": 6,
+  "damageMult": 1.0
+ },
+ "tracking": {
+  "level": 3,
+  "every": 2,
+  "keep": 20
+ },
+ "lodge": {
+  "cost": 300,
+  "seconds": 12,
+  "max": 3,
+  "sight": 10,
+  "hp": 800,
+  "range": 4
+ },
+ "watchstone": {
+  "sight": 12,
+  "seconds": 300,
+  "hp": 60,
+  "seenWithin": 6,
+  "range": 4
+ },
+ "flare": {
+  "radius": 20,
+  "seconds": 6
+ },
+ "hound": {
+  "speed": 7,
+  "range": 20,
+  "sight": 10,
+  "hp": 200
+ }
+}

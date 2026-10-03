@@ -65,11 +65,12 @@ for (const m of allMissions) {
 }
 
 test('the script: lines are said, tagged waves are tracked, slaying them completes the objective', () => {
-  const m = allMissions.find(x => x.id === 'w5_tuskchief');
+  const m0 = allMissions.find(x => x.id === 'w5_tuskchief');
+  const m = { ...m0, config: { ...m0.config, rules: { ...m0.config.rules, banners: 100000 } } };   // an idle player must not lose first
   const s = start(m, 2);
   const said = [];
   let t = 0;
-  while (s.tick < 300 * 20 + 2) { s.step([]); for (const e of s.drainEvents()) if (e.type === 'say') said.push(e.who); }
+  while (s.tick < 300 * 20 + 2 && !s.over) { s.step([]); for (const e of s.drainEvents()) if (e.type === 'say') said.push(e.who); }
   assert.ok(said.includes('Captain Merrow') && said.includes('The Tuskchief'));
   const tagged = s.state.campaign.tags.filter(x => x.tag === 'chief');
   assert.equal(tagged.length, 3, 'the Tuskchief and two Brutes');

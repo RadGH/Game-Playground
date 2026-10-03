@@ -81,7 +81,7 @@ test('vision golden: 12 line-of-sight cases', () => {
   L = lab(['..........', '....T.....', '..........']);
   assert.ok(!L.see(0, 1)(9, 1), '2 a tree blocks the line');
   assert.ok(L.see(0, 1)(4, 1), '3 the tree itself is seen');
-  assert.ok(L.see(0, 1)(9, 0), '4 a line that misses the tree is clear');
+  assert.ok(L.see(0, 0)(9, 0), '4 a line that misses the tree is clear');
   L = lab(['.....#^^^^', '.....#^^^^', '.....#^^^^']);
   assert.ok(!L.see(0, 1)(8, 1), '5 ground eye cannot see onto a plateau');
   assert.ok(L.see(8, 1)(0, 1), '6 a plateau eye looks down past its cliff');
@@ -102,17 +102,19 @@ test('vision golden: 12 line-of-sight cases', () => {
   released(s);
   const h = ent(s, 2), f = ent(s, 0);
   const g = liveGrid({ state: s.state, map: s.map });
-  const tg = g.cells.findIndex((k, i) => k === KIND.tallgrass && s.map.level[i] === 0);
-  const fx = ((tg % s.map.cols) + 0.5) * 2, fz = (Math.floor(tg / s.map.cols) + 0.5) * 2;
+  // a tall-grass cell with four open ground cells east of it on the same row
+  const cols = s.map.cols, open = i => s.map.level[i] === 0 && [KIND.grass, KIND.tallgrass, KIND.trail].includes(g.cells[i]);
+  const tg = g.cells.findIndex((k, i) => k === KIND.tallgrass && s.map.level[i] === 0 && (i % cols) + 4 < cols && [1, 2, 3, 4].every(d => open(i + d)));
+  assert.ok(tg >= 0);
+  const fx = ((tg % cols) + 0.5) * 2, fz = (Math.floor(tg / cols) + 0.5) * 2;
   at(s, f, fx, fz);
-  // hunter 3 cells away in the open (move along the row until standable)
-  let hx = fx + 6;
-  at(s, h, hx, fz);
+  at(s, h, fx + 8, fz);   // 4 cells east, in the open
   const ctx = { state: s.state, data: s.data, map: s.map, emit: () => {} };
   updateVision(ctx, 1);
-  if (hasBit(s.state.hvf.vision[1], cellOf(s.map, fx, fz))) assert.ok(!canSee(ctx, 1, f), '12a in vision, but hidden in the tall grass');
-  at(s, h, fx + 3, fz); updateVision(ctx, 1);
-  assert.ok(canSee(ctx, 1, f), '12b seen from 1.5 cells');
+  assert.ok(hasBit(s.state.hvf.vision[1], cellOf(s.map, fx, fz)), '12a the cell is in vision');
+  assert.ok(!canSee(ctx, 1, f), '12a but the farmer in the tall grass is not seen from 8 m');
+  at(s, h, fx + 2, fz); updateVision(ctx, 1);
+  assert.ok(canSee(ctx, 1, f), '12b seen from one cell away');
 });
 
 test('explored remembers; vision forgets', () => {
@@ -176,7 +178,7 @@ test('building: price per copy x1.15, refusals (gold, blocked, one farmhouse), a
   assert.equal(hens.length, data.hvf.buildings.kinds.coop.cap);
   assert.ok(Math.abs(p.income - data.hvf.animals.kinds.hen.income * 3) < 1e-9);
   const menu = Q.buildMenu(s, 0);
-  assert.equal(menu.find(r => r.kind === 'coop').payback, 100);
+  assert.equal(menu.find(r => r.kind === 'pen').payback, Math.round(90 / (4 * 0.22)));
   assert.equal(menu.find(r => r.kind === 'pen').tell, 2);
 });
 

@@ -8,6 +8,8 @@ import { join } from 'node:path';
 import { ROOT } from './_sim.mjs';
 import { generateWorld, buildWorld, worldForFormat, KIND, WALK_FARMER, WALK_HUNTER, bfsMove, lineOfSight } from '../js/sim/modes/hvf/mapgen.js';
 import { hashValue } from '../js/sim/hash.js';
+import { data as hvfFull } from './hvf-helpers.mjs';
+const hvfExtra = hvfFull.hvf;
 
 const read = n => JSON.parse(readFileSync(join(ROOT, 'data', 'hvf', n), 'utf8'));
 const gen = read('mapgen.json'), rules = read('rules.json');
@@ -160,5 +162,7 @@ test('the mode entry (js/sim/modes/hvf/index.js): formats match rules.json, seat
   const a = hvf.buildMap(data, '3v1', { seed: 44 }), b = hvf.buildMap(data, '3v1', { seed: 44 });
   assert.equal(a.size, rules.formats['3v1'].size);
   assert.equal(worldHash(a), worldHash(b));
-  assert.throws(() => hvf.createState(), /not playable yet/);
+  const st = hvf.createState({ format: '3v1', seed: 44, players: seats(3, 1) }, { hvf: { ...data.hvf, ...JSON.parse(JSON.stringify(hvfExtra)) } }, a);
+  assert.equal(st.players.length, 4);
+  assert.equal(st.players.filter(p => p.role === 'hunter').length, 1);
 });

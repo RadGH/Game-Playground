@@ -1,0 +1,113 @@
+{
+ "_doc": "Hunters' Outfitter catalogue for Hunters vs Farmers (docs/hvf-PLAN.md \u00a77), sold at any of the hunter's lodges (within lodge.range + 2 m). Same rules as line war's items (stream I): 6 slots, no slot types, every copy counts, `uniqueEquipped` refuses a second copy, `group` = only one item of that group carried (horses), consumables have charges. Effects: speed (fraction), chopMult, sightPct, damage (flat per hit), armorPct (damage taken cut), regen (hp/s), snares (+ standing), and use effects: ward (plant a watchstone: command `ward`), flare, hound (summon a hound pet), torch (x2 damage to buildings for seconds).",
+ "slots": 6,
+ "sellFactor": 0.5,
+ "items": {
+  "horse1": {
+   "name": "Pony",
+   "price": 150,
+   "group": "horse",
+   "stats": {
+    "speed": 0.15
+   },
+   "desc": "+15% speed. One mount at a time."
+  },
+  "horse2": {
+   "name": "Hunting Horse",
+   "price": 350,
+   "group": "horse",
+   "stats": {
+    "speed": 0.3
+   },
+   "desc": "+30% speed. One mount at a time."
+  },
+  "horse3": {
+   "name": "Warhorse",
+   "price": 700,
+   "group": "horse",
+   "stats": {
+    "speed": 0.45
+   },
+   "desc": "+45% speed. One mount at a time."
+  },
+  "axe": {
+   "name": "Woodsman's Axe",
+   "price": 120,
+   "uniqueEquipped": true,
+   "stats": {
+    "chopMult": 3
+   },
+   "desc": "Chops three times as fast."
+  },
+  "spyglass": {
+   "name": "Spyglass",
+   "price": 200,
+   "uniqueEquipped": true,
+   "stats": {
+    "sightPct": 0.3
+   },
+   "desc": "+30% sight."
+  },
+  "watchstone": {
+   "name": "Watchstone",
+   "price": 40,
+   "charges": 3,
+   "use": "ward",
+   "desc": "Plant up to three watchstones: 12 m of sight for 5 minutes. Farmers can pull them up."
+  },
+  "flare": {
+   "name": "Flare",
+   "price": 60,
+   "charges": 1,
+   "use": "flare",
+   "desc": "Light up 20 m around a point for 6 s."
+  },
+  "hound": {
+   "name": "Hound",
+   "price": 250,
+   "charges": 1,
+   "use": "hound",
+   "desc": "A hound that runs to the nearest animal within 20 m and bays."
+  },
+  "torch": {
+   "name": "Torch Oil",
+   "price": 100,
+   "charges": 1,
+   "use": "torch",
+   "seconds": 60,
+   "desc": "Double damage to buildings for 60 s."
+  },
+  "snarekit": {
+   "name": "Snare Kit",
+   "price": 150,
+   "stats": {
+    "snares": 2
+   },
+   "desc": "+2 snares standing."
+  },
+  "blade": {
+   "name": "Skinning Blade",
+   "price": 180,
+   "stats": {
+    "damage": 12
+   },
+   "desc": "+12 damage."
+  },
+  "leathers": {
+   "name": "Hunter's Leathers",
+   "price": 200,
+   "stats": {
+    "armorPct": 0.08
+   },
+   "desc": "-8% damage taken."
+  },
+  "salve": {
+   "name": "Trail Salve",
+   "price": 160,
+   "stats": {
+    "regen": 3
+   },
+   "desc": "+3 health per second."
+  }
+ }
+}

@@ -12,7 +12,7 @@ scene.add(new THREE.HemisphereLight(0xcfe3ff, 0x4a3f2c, 1.2)); const sun = new T
 const ground = new THREE.Mesh(new THREE.PlaneGeometry(80, 80), new THREE.MeshStandardMaterial({ color: 0x4f6b34, roughness: 1 })); ground.rotation.x = -Math.PI / 2; scene.add(ground);
 const camera = new THREE.PerspectiveCamera(38, 1, 0.5, 300);
 // the game's middle zoom: pitch 56, 50 m out, looking from +z
-const P = THREE.MathUtils.degToRad(56), D = 34; camera.position.set(0, Math.sin(P) * D, 2 + Math.cos(P) * D); camera.lookAt(0, 0, 2);
+const P = THREE.MathUtils.degToRad(56), D = 26; camera.position.set(0, Math.sin(P) * D, 2 + Math.cos(P) * D); camera.lookAt(0, 0, 2);
 function resize() { const r = canvas.getBoundingClientRect(); renderer.setSize(r.width, r.height, false); camera.aspect = r.width / r.height; camera.updateProjectionMatrix(); }
 addEventListener('resize', resize); resize();
 

@@ -20,7 +20,7 @@ import { Assets } from '../../../../assets/js/assets.js';
 const here = p => new URL(p, import.meta.url).href;
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
 
-export async function createSkillFx({ scene, camera, actors = null, tickHz = 20, scale = 1.5, table = null, heroes = null, textures = null, maxParticles = 700, maxLive = 90 } = {}) {
+export async function createSkillFx({ scene, camera, actors = null, tickHz = 20, scale = 2.2, table = null, heroes = null, textures = null, maxParticles = 700, maxLive = 90 } = {}) {
   const T = table || await (await fetch(here('../../data/skill-fx.json'))).json();
   const H = heroes || await (await fetch(here('../../data/heroes.json'))).json().catch(() => ({ skills: {} }));
   const tex = textures || await (await Assets.open(here('../../../../assets/'))).fxTextures(THREE, { size: 128 });

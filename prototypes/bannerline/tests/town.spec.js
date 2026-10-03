@@ -92,7 +92,9 @@ test('Outfitter needs the hero beside it; a Sanctum power is cast into the enemy
   await expect(page.locator('.ot-away')).toBeVisible();
   await page.keyboard.press('Escape');
 
-  // Sanctum: pick Skyfall, click inside the enemy field.
+  // Sanctum: earn enough for Skyfall, pick it, click inside the enemy field.
+  await page.evaluate(() => window.bannerline.fastForward(20 * 120));
+  expect((await me(page)).gold).toBeGreaterThan(250);
   await page.keyboard.press('KeyP');
   await expect(page.locator('.tp-sanctum')).toBeVisible();
   await page.locator('.sc-pow[data-pow="skyfall"]').click();

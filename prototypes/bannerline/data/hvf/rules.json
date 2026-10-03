@@ -106,5 +106,17 @@
   "name": "Kennel",
   "radius": 6,
   "hp": 1500
+ },
+ "turn": {
+  "_doc": "The Turn (docs/hvf-PLAN.md \u00a78.2): farmers' army + tower value vs hunters' combat value, both in gold; turn = (F - H) / (F + H), -1..+1, every second.",
+  "armyWeight": 1.0,
+  "towerWeight": 0.6,
+  "hunterBase": 900,
+  "hunterPerLevel": 220,
+  "itemWeight": 1.0,
+  "ghostPenalty": 0
+ },
+ "noise": {
+  "period": 20
  }
 }

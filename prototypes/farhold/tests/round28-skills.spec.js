@@ -92,11 +92,14 @@ test('the Warrior casts all six of its round-28 skills, and each one does what i
     const hp0 = e.hp;
     for (const i of [3, 4, 5]) { f.skills.slots[i].ready = 0; f.player.mp = f.player.maxMp; f.cast(i); await new Promise(r => setTimeout(r, 250)); }
     await new Promise(r => setTimeout(r, 1700));
-    return { dealt: hp0 - e.hp, resolve: Object.keys(f.player.statuses || {}).some(k => k === 'buff:iron_resolve'), placed: f.mech.placed };
+    return { dealt: hp0 - e.hp, resolve: Object.keys(f.player.statuses || {}).some(k => k === 'buff:iron_resolve'), placed: f.mech.placed, timers: f.mech.timers };
   });
   expect(rest.dealt).toBeGreaterThan(0);
   expect(rest.resolve).toBe(true);
   expect(rest.placed, 'Groundbreaker left no fissure').toBeGreaterThan(0);
+  // every placed thing shows the time it has left as a shrinking arc
+  expect(rest.timers.length).toBeGreaterThan(0);
+  expect(rest.timers.every(t => t.drawn < t.full), 'a timer arc did not shrink').toBe(true);
 
   // a bespoke talent changes the cast: Reaping Arc turns Cleave into a frontal arc that knocks
   const talent = await page.evaluate(() => {
@@ -228,4 +231,27 @@ test('the second-pass mechanics in the field: stasis holds and banks, a turned e
   expect(out.bHit, 'the turned enemy did not strike its own side').toBeGreaterThan(0);
   expect(out.walls).toBe(1);
   expect(errors).toEqual([]);
+});
+
+test('a shape whose creature cannot be built tints the humanoid instead of vanishing', async ({ page }) => {
+  test.setTimeout(120000);
+  const errors = await land(page, 'druid');
+  const out = await page.evaluate(async () => {
+    const f = window.farhold;
+    // a creature type that does not exist: the build fails, and the body must still be visible
+    f.skillData.skills.fenrunner_shape.form.body.creature = 'no_such_creature_r28';
+    f.skills.slots[4].ready = 0; f.player.mp = f.player.maxMp;
+    f.cast(4);
+    await new Promise(r => setTimeout(r, 1200));
+    const shaped = { tinted: f.mech.tinted, visible: f.actor.group.visible, forms: f.mech.forms };
+    f.skills.slots[4].ready = 0;
+    f.cast(4);
+    await new Promise(r => setTimeout(r, 300));
+    return { shaped, after: f.mech.tinted };
+  });
+  expect(out.shaped.forms).toContain('fenrunner');
+  expect(out.shaped.visible).toBe(true);
+  expect(out.shaped.tinted).toBeTruthy();
+  expect(out.after).toBe(null);
+  expect(errors.filter(e => !/no_such_creature/.test(e))).toEqual([]);
 });

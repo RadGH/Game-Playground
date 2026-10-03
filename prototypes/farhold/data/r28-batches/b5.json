@@ -4372,7 +4372,8 @@
    "statuses": [
     {
      "id": "root",
-     "seconds": 0.6
+     "seconds": 0.6,
+     "lockout": 6
     }
    ],
    "onHit": {

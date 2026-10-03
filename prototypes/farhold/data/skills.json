@@ -7592,7 +7592,8 @@
    "statuses": [
     {
      "id": "root",
-     "seconds": 0.6
+     "seconds": 0.6,
+     "lockout": 6
     }
    ],
    "onHit": {
@@ -7807,7 +7808,7 @@
      ]
     }
    },
-   "desc": "Looses one bolt out to 30 m for 140% weapon damage as nature. Each enemy hit heals your nearest follower 3% of maximum health. Also applies Rooted for 0.6s. Changes with your shape or stance: Bramble Gore (Briarback), Venom Lunge (Fenrunner) and Spore Lob (Sporecap). 5 mana, 3s cooldown."
+   "desc": "Looses one bolt out to 30 m for 140% weapon damage as nature. Each enemy hit heals your nearest follower 3% of maximum health. Also applies Rooted for 0.6s, at most once per target every 6s. Changes with your shape or stance: Bramble Gore (Briarback), Venom Lunge (Fenrunner) and Spore Lob (Sporecap). 5 mana, 3s cooldown."
   },
   "briarback_shape": {
    "name": "Briarback Shape",

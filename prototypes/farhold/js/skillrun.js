@@ -13,6 +13,8 @@ import {
   applyMod, gainResource, controlFor, statusRef, ringsFor, queue, repeatsOf, statusStatsKey, addWall, tickWalls,
 } from './skillmech.js';
 import { setStatusExpire } from './skills.js';
+// the creature catalogue has no Three.js in it, so a shape can be checked before it is built
+import { CREATURE_TYPES } from '../../../avatar-3d/js/creature-types.js';
 
 /**
  * env (all lazily read — main.js builds this before the field, the pets and the bar exist):
@@ -210,9 +212,31 @@ export function createSkillRuntime(env) {
       post.position.y = 0.8;
       group.add(post);
     }
+    /**
+     * THE TIME LEFT, as a bright arc just outside the ring that shrinks as the object runs down —
+     * a fade alone did not say "two seconds left". The arc is a full ring drawn partly (drawRange),
+     * so it costs nothing per frame beyond one number.
+     */
+    if (Number.isFinite(obj.life)) {
+      const SEG = 48;
+      const arcGeo = new THREE.RingGeometry(obj.r + 0.05, obj.r + 0.32, SEG, 1, Math.PI / 2, Math.PI * 2);
+      const arc = new THREE.Mesh(arcGeo, new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.75, depthWrite: false, side: THREE.DoubleSide }));
+      arc.rotation.x = -Math.PI / 2;
+      arc.position.y = 0.02;
+      group.add(arc);
+      obj.timer = { mesh: arc, seg: SEG };
+    }
     group.position.set(obj.x, groundY(obj.x, obj.z) + 0.08, obj.z);
     env.scene.add(group);
     obj.mesh = group;
+  }
+  /** Shrink a placed object's timer arc to the share of its life it has left. */
+  function drawTimer(o) {
+    if (!o.timer) return;
+    const frac = Math.max(0, Math.min(1, o.left / o.life));
+    const idx = o.timer.mesh.geometry.index;
+    o.timer.mesh.geometry.setDrawRange(0, Math.ceil(frac * o.timer.seg) * 6);
+    if (!idx) o.timer.mesh.visible = frac > 0;
   }
   function undraw(obj) {
     if (!obj?.mesh) return;
@@ -245,6 +269,7 @@ export function createSkillRuntime(env) {
       o.mesh.position.set(o.x, groundY(o.x, o.z) + 0.08, o.z);
       const fade = Number.isFinite(o.life) ? Math.max(0.2, o.left / o.life) : 1;
       o.mesh.children[0].material.opacity = (o.kind === 'trap' ? (o.armed > 0 ? 0.2 : 0.55) : 0.42) * fade;
+      drawTimer(o);
     }
     for (const act of acts) {
       const o = act.obj, s = o.spec;
@@ -583,10 +608,10 @@ export function createSkillRuntime(env) {
   function afterimage(plan, a, origin) {
     const ai = plan.afterimage;
     if (!ai || plan.sub) return;
-    const o = ai.at === 'end' ? { x: C().x, z: C().z, yaw: C().yaw } : origin;
     const count = ai.count ?? 1;
     for (let k = 0; k < count; k++) {
-      later((ai.delay ?? 0.5) * (k + 1), () => echoFrom(plan, a, o, ai.mult ?? 0.5));
+      // 'end' is where you stand when the copy FIRES (after a dash, a leap or a walk), 'start' where you cast
+      later((ai.delay ?? 0.5) * (k + 1), () => echoFrom(plan, a, ai.at === 'end' ? { x: C().x, z: C().z, yaw: C().yaw } : origin, ai.mult ?? 0.5));
     }
   }
   /**
@@ -1180,12 +1205,15 @@ export function createSkillRuntime(env) {
     if (!b?.creature) return null;
     if (bodies[form.id] !== undefined) return bodies[form.id];
     bodies[form.id] = null;
+    // an unknown creature would be quietly drawn as some default beast — call it a failed build
+    if (!CREATURE_TYPES[b.creature]) { bodyFailed[form.id] = true; return null; }
     try {
       const actor = await env.makeActor({ creature: { type: b.creature, size: (b.scale ?? 1) * (b.size ?? 1.3), colors: b.colors || (b.tint ? { body: b.tint } : undefined) } });
       actor.group.visible = false;
       env.scene.add(actor.group);
       bodies[form.id] = actor;
     } catch { bodies[form.id] = null; }
+    if (!bodies[form.id]) bodyFailed[form.id] = true;
     return bodies[form.id];
   }
 
@@ -1208,8 +1236,25 @@ export function createSkillRuntime(env) {
     } else {
       if (shownBody) { shownBody.group.visible = false; shownBody = null; }
       if (hidActor && actor) { actor.group.visible = true; hidActor = false; }
-      // no creature to draw (the build failed or is on its way): tint the humanoid instead
     }
+    // no creature to draw (its build FAILED): the humanoid is tinted the shape's colour instead
+    tintActor(actor, f && body === null && bodyFailed[f.id] ? (f.spec?.body?.tint || f.spec?.body?.colors?.body || '#6b8f4a') : null);
+  }
+  const bodyFailed = {};
+  let tinted = null;
+  /** Tint (or un-tint) every material on the humanoid, remembering the colours to put back. */
+  function tintActor(actor, color) {
+    if (!actor?.group || tinted === color) return;
+    actor.group.traverse(o => {
+      const mats = o.material ? [].concat(o.material) : [];
+      for (const mt of mats) {
+        if (!mt.color) continue;
+        if (!mt.userData.r28base) mt.userData.r28base = mt.color.getHex();
+        if (color) mt.color.set(mt.userData.r28base).lerp(new THREE.Color(color), 0.55);
+        else mt.color.setHex(mt.userData.r28base);
+      }
+    });
+    tinted = color;
   }
 
   /** The form's basic attack instead of the weapon's pattern. Returns true when it took the swing. */
@@ -1538,7 +1583,7 @@ export function createSkillRuntime(env) {
     mechEnv, decorate, intercept, dash, line, repeats, afterBolt, afterCast, onHurt, onKill,
     onObjectStruck, basicAttack, placeBody, breakShapes, tick, reset, petHooks, place, knockShape,
     /** For the debug hook and the Playwright specs. */
-    debug: () => ({ placed: world.placed.length, walls: world.walls.length, corpses: world.corpses.length, link: link ? { to: link.to.name, left: link.left } : null, forms: formIds(P()), bodies: Object.keys(bodies) }),
+    debug: () => ({ timers: world.placed.filter(o => o.timer).map(o => ({ drawn: o.timer.mesh.geometry.drawRange.count, full: o.timer.seg * 6 })), tinted, placed: world.placed.length, walls: world.walls.length, corpses: world.corpses.length, link: link ? { to: link.to.name, left: link.left } : null, forms: formIds(P()), bodies: Object.keys(bodies) }),
     applyMod, repeatsOf,
   };
 }

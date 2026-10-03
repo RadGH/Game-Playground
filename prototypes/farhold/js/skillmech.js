@@ -68,7 +68,8 @@ function statusPhrase(ref, ctx, { lasting = true } = {}) {
   if (spec.resist) bits.push(`takes ${pct(spec.resist)} less damage`);
   if (spec.takeMoreDot) bits.push(`takes ${pct(spec.takeMoreDot)} more damage from damage over time`);
   const what = bits.length ? ` (${list(bits)})` : '';
-  return `${sname(r.id, ctx)}${what}${lasting ? ` for ${secs(spec.seconds ?? 4)}` : ''}`;
+  const lock = r.lockout ? `, at most once per target every ${secs(r.lockout)}` : '';
+  return `${sname(r.id, ctx)}${what}${lasting ? ` for ${secs(spec.seconds ?? 4)}` : ''}${lock}`;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────── the vocabulary
@@ -1631,6 +1632,7 @@ export function afterHit(rules, attacker, defender, result, ctx = {}) {
       const r = statusRef(ref);
       if (r.chance != null && (ENV.rng?.() ?? Math.random()) >= r.chance) continue;
       if (r.minCrowd && (ctx.crowd ?? 1) < r.minCrowd) continue;
+      if (lockedOut(defender, r)) continue;
       const base = spec(r.id);
       const ctl = controlFor(defender, r.id, r.seconds ?? base.seconds ?? 3);
       apply(defender, ctl.id, { ...base, ...r, ...(ctl.id !== r.id ? spec(ctl.id) : {}), seconds: ctl.seconds, ...(ctl.slow ? { slow: ctl.slow } : {}) }, powerOf());
@@ -1702,7 +1704,7 @@ export function afterHit(rules, attacker, defender, result, ctx = {}) {
     if (oh.status && apply && ((oh.statusChance ?? 1) >= 1 || (ENV.rng?.() ?? Math.random()) < oh.statusChance)) {
       const r = statusRef(oh.status);
       const fam = r.family ? String(r.family).split(',') : null;
-      if (!fam || fam.includes(defender.family)) {
+      if ((!fam || fam.includes(defender.family)) && !lockedOut(defender, r)) {
         const ctl = controlFor(defender, r.id, r.seconds ?? spec(r.id).seconds ?? 3);
         apply(defender, ctl.id, { ...spec(r.id), ...r, ...(ctl.id !== r.id ? spec(ctl.id) : {}), seconds: ctl.seconds }, powerOf());
       }
@@ -1727,6 +1729,19 @@ export function afterHit(rules, attacker, defender, result, ctx = {}) {
     if (rules.resource?.gainPer === 'kill') gainResource(attacker, rules.resource.id, rules.resource.gain ?? 1);
   }
   return did;
+}
+
+/**
+ * `lockout` on a status reference: the same body takes this status from this source at most once
+ * every N seconds (Thornlash roots once per target every 6 s). Records the lockout as it applies.
+ */
+export function lockedOut(target, ref, now = (ENV.now?.() ?? Date.now() / 1000)) {
+  if (!ref?.lockout || !target) return false;
+  const book = target.lockouts || (target.lockouts = {});
+  const key = ref.lockKey || ref.id;
+  if ((book[key] ?? -Infinity) > now) return true;
+  book[key] = now + ref.lockout;
+  return false;
 }
 
 /** A request to the skill bar from a hit (`rpg.strike` cannot reach the bar). Drained in `update`. */

@@ -212,7 +212,7 @@ test('no vocabulary key and no self/status field is read only by the sentence th
     'untargetable', 'frontalResist', 'manaOnHurt', 'perCastHp', 'noMana', 'noManaRegen', 'storeShare', 'petsShare', 'petsOnly',
     'takeMoreDot', 'attackSlow', 'sleeperHits', 'hitsToWake', 'stillResist', 'manaPerSecond', 'healingPct', 'immune',
     'fromYou', 'fromParty', 'gainOnHurt', 'burstOnExpire', 'barrierTick', 'onExpire', 'edgeMult', 'blocksRanged', 'ringOn',
-    'onKillHaste', 'firstCrit', 'petBuff', 'threatDrop', 'behindStatus', 'manaPause', 'biteStatus', 'hpMult', 'perCorpse', 'stacksOnAttacker'];
+    'onKillHaste', 'firstCrit', 'petBuff', 'threatDrop', 'behindStatus', 'manaPause', 'biteStatus', 'hpMult', 'perCorpse', 'stacksOnAttacker', 'lockout'];
   for (const f of FIELDS) {
     if (!files.some(file => new RegExp(`\\.${f}\\b`).test(code[file]))) dead.push(`field ${f}`);
   }
@@ -579,4 +579,21 @@ test('the custom-class catalogue names the class each spell comes from (plan §8
     if (!sp.classes.length) continue;
     assert.ok(DATA.classes[sp.origin]?.includes(sp.id), `${sp.id} names ${sp.origin}, which does not carry it`);
   }
+});
+
+test('a status with a lockout lands on the same body at most once per lockout (Thornlash: 6 s)', () => {
+  let now = 100;
+  setMechEnv({ statusSpec: id => DATA.statuses[id], rng: () => 0.5, now: () => now });
+  const applied = [];
+  const apply = (t, id) => applied.push(id);
+  const foe = { statuses: {} }, other = { statuses: {} };
+  const rules = { skill: 'thornlash', statuses: [{ id: 'root', seconds: 0.6, lockout: 6 }] };
+  afterHit(rules, {}, foe, { amount: 5 }, { applyStatus: apply });
+  afterHit(rules, {}, foe, { amount: 5 }, { applyStatus: apply });
+  afterHit(rules, {}, other, { amount: 5 }, { applyStatus: apply });
+  assert.equal(applied.length, 2, 'the same body was rooted twice inside 6s, or another body was locked out');
+  now = 106.5;
+  afterHit(rules, {}, foe, { amount: 5 }, { applyStatus: apply });
+  assert.equal(applied.length, 3, 'the lockout never ran out');
+  assert.match(DATA.skills.thornlash.desc, /once per target every 6s/);
 });

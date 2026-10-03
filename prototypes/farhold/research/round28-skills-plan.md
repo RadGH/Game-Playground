@@ -1393,16 +1393,17 @@ Dummy damage (batch 3): not a strike bug. `stone_sentinel` at level 50 has 8,775
 hit is floored to 1–9; and a 40 s slot-6 skill's placed pulses inherit its ×7.8 `effectiveMult`, so
 13 pulses add up to a lot — inside the §9.1 band once the balance test counts placed pulses (it now does).
 
-**Not built yet / simplified (and why):**
-1. `silence` stops a ranged enemy firing and sends it to melee (see 8).
-2. Thornlash's "root once per target per 6 s" limit — no per-target cooldown exists; the data
-   roots for 0.8 s on every hit (batch 5 may shorten or drop it).
-3. HUD timer pips on placed objects — placed rings fade with their time instead.
-4. `afterimage.at: 'end'` takes your position when the skill is cast, not when the copy fires.
-5. `mimic` copies strike through `echoFrom` (melee from the copy, rings, ground, or a thrown blade
-   at the target) rather than a full re-cast of every rider.
-6. A druid shape whose creature fails to build keeps the humanoid visible (no tint fallback).
-7. Iron Gyre (`whirlwind`) is pinned outside the §9.1 band (0.8 × 5 is R25's, and the balance test
-   lists it in `PINNED`).
-8. A warband leader's buff action is a passive aura, so `silence` cannot cancel it.
-9. `runeMult` is retired in favour of the tag field `detonateMult` (Rent carries `detonateMult: 2`).
+**Built in the last pass:** a status reference's `lockout` (Thornlash roots once per target every
+6 s, said on the card), a shrinking time-left arc on every placed post, zone and trap, `afterimage`
+`at: 'end'` firing from where you stand when it fires, and a tinted humanoid when a shape's creature
+cannot be built (an unknown creature type counts as a failed build).
+
+**Staying as they are, and why:**
+1. Silence cannot cancel a warband leader's buff: that buff is a passive aura (js/actors.js
+   `linkEscort`), not an action a leader takes, so there is nothing to interrupt — silence still stops
+   every ranged enemy and caster from firing.
+2. Shade copies (`mimic`) repeat the strike, not every rider: re-running posts, summons and buffs
+   from three shades would triple a cast's whole budget and its object counts (§12 frame cost).
+3. Iron Gyre stays above the §9.1 band: 0.8 × 5 spins is R25's tuning, which the player already
+   plays with and an existing test pins; the balance test lists it in `PINNED` rather than skipping it.
+4. `runeMult` is retired in favour of the tag field `detonateMult` (Rent carries `detonateMult: 2`).

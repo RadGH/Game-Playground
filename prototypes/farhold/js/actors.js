@@ -30,7 +30,7 @@ import { CHIBI2_COMBAT_RIDE } from '../../../avatar-3d/js/chibi2-motion.js';
 // R23: a body stands on a bridge deck, not on the river bed under it — see js/ground.js
 import { groundAt, wetAt, cliffStep, climbable } from './ground.js';
 import { leaderModifier, fitsRoom } from './warbands.js';   // R27 M10
-import { compactCreature } from './mesh-merge.js';            // R27 M8
+import { compactCreature } from '../../../avatar-3d/js/mesh-merge.js';   // R27 M8 (moved to avatar-3d)
 import { lookedAt, lastStruck } from './targetpick.js';        // R28
 
 /** `bleed` out of data/skills.json — the field applies it without owning the skill data. */

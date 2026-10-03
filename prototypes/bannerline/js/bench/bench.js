@@ -22,6 +22,7 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { createRenderer } from '../view/renderer.js';
 import { createRtsCamera } from '../view/camera.js';
 import { loadLooks } from '../view/unit-looks.js';
+import { createPortrait } from '../view/portrait.js';
 import { BatchedSpellFx } from '../../../../avatar-3d/js/spellfx-batched.js';
 import { Assets } from '../../../../assets/js/assets.js';
 
@@ -347,9 +348,17 @@ $('pr').onchange = () => { R.renderer.setPixelRatio(pixelRatio()); R.resize(); }
 function gpuName() { const gl = R.renderer.getContext(), ext = gl.getExtension('WEBGL_debug_renderer_info'); return ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER); }
 
 await rebuildAll();
+// the live portrait draws in the bench too (it is part of a real frame's cost): click it to cycle
+const portrait = createPortrait({ gfx: R, slot: $('portrait'), looks });
+const portraitRefs = [...looks.heroIds().map(id => 'hero:' + id), ...looks.unitIds().map(id => 'unit:' + id)];
+let portraitAt = 0;
+const showPortrait = async i => { portraitAt = (i + portraitRefs.length) % portraitRefs.length; const ref = portraitRefs[portraitAt]; await portrait.show(ref); $('portrait').dataset.name = looks.forRef(ref).name || ref.split(':')[1].replace(/^./, c => c.toUpperCase()); };
+$('portrait').onclick = () => showPortrait(portraitAt + 1);
+await showPortrait(0);
+setInterval(() => portrait.react(Math.random() < 0.7 ? 'hit' : 'talk'), 2500);
 const pre = (params.get('case') || '40x2').match(/^(\d+)x(\d)(?:s(\d+))?$/);
 applyCase(pre ? { n: Math.min(POOL, +pre[1]), v: Math.min(2, +pre[2]), standins: +(pre[3] || 0) } : { n: 40, v: 2 });
 $('state').textContent = `Ready · ${gpuName()}`;
 requestAnimationFrame(frame);
-window.bench = { run, results: () => results, verdict, applyCase, get ready() { return ready; }, gpu: gpuName, cases: DEFAULT_CASES, scene, renderer: R };
+window.bench = { portrait, showPortrait, run, results: () => results, verdict, applyCase, get ready() { return ready; }, gpu: gpuName, cases: DEFAULT_CASES, scene, renderer: R };
 if (params.get('auto') === '1') run();

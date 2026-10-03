@@ -35,6 +35,11 @@ select {
 }
 #vp0 { left: 12px; }
 #vp1 { left: calc(50% + 12px); }
+.bench-portrait {
+  position: absolute; left: 12px; bottom: 12px; width: 132px; height: 150px; border-radius: 8px; overflow: hidden; cursor: pointer;
+  background: #15181d; border: 1px solid var(--line-strong); box-shadow: 0 4px 18px rgba(0,0,0,.55);
+}
+.bench-portrait::after { content: attr(data-name); position: absolute; left: 0; right: 0; bottom: 0; padding: 3px 6px; font: 600 12px var(--ui); color: var(--ink); background: linear-gradient(transparent, rgba(0,0,0,.7)); }
 .bench-results { padding: 14px 16px 28px; }
 .manual { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; color: var(--ink2); }
 #table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }

@@ -21,6 +21,7 @@ import { createChibi2Character } from '../../../../avatar-3d/js/chibi2.js';
 import { createCreature, normalizeCreature, CREATURE_TYPES } from '../../../../avatar-3d/js/creatures.js';
 import { compactCreature } from '../../../../avatar-3d/js/mesh-merge.js';
 import { dressAs } from '../../../../avatar-3d/js/class-outfits.js';
+import { Group as THREE_GROUP } from 'three';
 
 const here = p => new URL(p, import.meta.url).href;
 const clone = v => JSON.parse(JSON.stringify(v));
@@ -160,4 +161,57 @@ export async function buildActor(look, { merge = true, anims } = {}) {
     dispose: () => ch.dispose(),
     stats: () => ch.stats(),
   };
+}
+
+/**
+ * The body factory stream B's actors take: `createActors({ makeBody: bodies.makeBody })`.
+ *
+ *   const bodies = createBodyFactory(looks, { scale: 1.3 });
+ *   await bodies.preload(data);                 // builds one of every unit + hero: warms templates, learns heights
+ *   makeBody(ent, look, data) -> { object, height, play(act, t, phase), dispose() }
+ *
+ * `makeBody` is synchronous (actors.js needs an object now), so it returns an empty group at once and
+ * drops the real model into it when the async build lands (a frame or two; instant for preloaded
+ * Chibi 2 templates). `height` comes from the preload, so HP bars sit right from the first frame.
+ * `play(act, t)` maps the sim's act (idle/walk/attack/cast/dead…) to a clip and advances it.
+ * Ent kinds: `hero` (ent.type = hero id), `unit` (ent.type = unit id), anything else (tides) uses
+ * `fallback(ent, look, data)` if given, else nothing is drawn.
+ */
+export function createBodyFactory(looks, { scale = 1.3, fallback = null } = {}) {
+  const heights = new Map();
+  const refOf = ent => ent.kind === 'hero' ? 'hero:' + ent.type : 'unit:' + ent.type;
+  function lookOf(ent) { try { return looks.forRef(refOf(ent)); } catch { return null; } }
+  async function preload(data = null) {
+    const refs = [...looks.unitIds().map(id => 'unit:' + id), ...looks.heroIds().map(id => 'hero:' + id)];
+    for (const ref of refs) {
+      if (heights.has(ref)) continue;
+      const a = await buildActor(looks.forRef(ref));
+      heights.set(ref, a.height); a.dispose?.();
+    }
+    return heights;
+  }
+  function makeBody(ent, lookRef, data) {
+    const look = (ent.kind === 'hero' || ent.kind === 'unit' || ent.kind === undefined) ? lookOf(ent) : null;
+    if (!look) return fallback ? fallback(ent, lookRef, data) : { object: new THREE_GROUP(), height: 1, play() {}, dispose() {} };
+    const s = scale * (look.scale || 1);
+    const holder = new THREE_GROUP(); holder.scale.setScalar(s);
+    const body = { object: holder, height: (heights.get(refOf(ent)) ?? 1.1) * s, actor: null, look, disposed: false, anim: null, lastT: null,
+      play(act, t) {
+        const a = body.actor; if (!a) return;
+        const clip = act === 'dead' || act === 'die' ? 'dead' : act === 'walk' || act === 'move' ? 'walk' : act === 'attack' ? 'attack' : act === 'cast' ? 'cast' : act === 'hit' || act === 'stun' ? 'hit' : 'ready';
+        if (clip !== body.anim) { a.setAnim(clip, 0.12, clip === 'attack' || clip === 'cast'); body.anim = clip; }
+        const dt = body.lastT == null ? 0 : Math.max(0, Math.min(0.1, t - body.lastT)); body.lastT = t;
+        a.update(dt, t);
+      },
+      dispose() { body.disposed = true; body.actor?.dispose(); },
+    };
+    buildActor(look).then(a => {
+      if (body.disposed) { a.dispose(); return; }
+      body.actor = a; holder.add(a.group);
+      if (!heights.has(refOf(ent))) { heights.set(refOf(ent), a.height); }
+      body.height = a.height * s;
+    }).catch(e => console.warn('unit-looks: build failed', refOf(ent), e));
+    return body;
+  }
+  return { makeBody, preload, heights, lookOf };
 }

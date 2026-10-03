@@ -6,7 +6,8 @@
 //   { type: 'wolf' | 'dire_wolf' | 'boar' | 'bear' | 'rat' | 'horse' | 'deer' | 'bat' | 'spider' | 'snake' | 'drake' | 'dragon'
 //           | 'hound' | 'cat' | 'frog' | 'owl' | 'moth' | 'worm' | 'golem' | 'titan' | 'imp' | 'elemental' | 'wisp' | 'shard' | 'wraith' | 'horror',
 //     size: 1 (scale multiplier), colors: { body, belly, accent, eyes }, seed,
-//     features: { horns, wings, tail, mane, tusks, spikes, claws, fangs, core, glow, bulgeEyes, beak, antennae, maw, plates } (overrides) }
+//     features: { horns, wings, tail, mane, tusks, spikes, claws, fangs, core, glow, bulgeEyes, beak, antennae, maw, plates,
+//                 trunk, howdah (quad), feathers (bat), spine, ribs (biped) } (overrides) }
 // Animations: idle · walk · run · attack (lunge/bite) · dead · talk (mouth open, for growls) · fly (bat/dragon)
 import * as THREE from 'three';
 import { shade } from '../../avatar-2d/js/render.js';
@@ -81,7 +82,23 @@ function buildQuad(root, T, s) {
   const belly = capsule(B.r * 0.8, B.len - B.r * 2.2, C.belly); belly.rotation.x = Math.PI / 2; belly.position.y = -B.r * 0.35; hip.add(belly);
   if (isFrog) { const throat = sphere(B.r * 0.62, C.belly, 12); throat.position.set(0, -B.r * 0.54, B.len * 0.22); throat.scale.set(1.35, 0.45, 0.65); hip.add(throat); }
   if (F.mane) { const mane = capsule(B.r * 1.05, B.len * 0.35, C.accent); mane.rotation.x = Math.PI / 2; mane.position.set(0, B.r * 0.25, B.len * 0.22); hip.add(mane); }
-  if (F.spikes) for (let i = 0; i < 5; i++) { const sp = cone(B.r * 0.18, B.r * 0.5, C.accent, 6); sp.position.set(0, B.r * 0.95, B.len * 0.4 - i * B.len * 0.2); hip.add(sp); }
+  // PLATES (2026-10-03). The feature existed in the type table (turtle, crocodile) and nothing drew it
+  // on a four-legged body. A `body.shell` type gets one domed shell; everything else gets a row of
+  // overlapping armour plates down the spine, and any thorns grow out of the plates.
+  if (F.plates && B.shell) {
+    const dome = sphere(B.r * 1.22, shade(C.accent, 0.3), 18); dome.scale.set(1.0, 0.62, (B.len / 2 + B.r * 0.25) / (B.r * 1.22)); dome.position.y = B.r * 0.12; hip.add(dome);
+    const rim = mesh(new THREE.TorusGeometry(B.r * 1.16, B.r * 0.09, 6, 22), C.belly); rim.rotation.x = Math.PI / 2; rim.scale.set(1, (B.len / 2 + B.r * 0.2) / (B.r * 1.16), 1); rim.position.y = -B.r * 0.12; hip.add(rim);
+    // scutes: a spine row of three and two flank rows, each a low lens laid on the dome
+    const domeTop = B.r * 0.12 + B.r * 1.22 * 0.62, half = B.len / 2 + B.r * 0.25;
+    for (const [u, v] of [[0, -0.42], [0, 0], [0, 0.42], [-0.55, -0.25], [-0.55, 0.25], [0.55, -0.25], [0.55, 0.25]]) {
+      const x = u * B.r * 1.22, z = v * half, k = Math.sqrt(Math.max(0.05, 1 - u * u - v * v)), sc = sphere(B.r * 0.36, shade(C.body, 0.1), 8);
+      sc.scale.set(1, 0.2, 1.1); sc.position.set(x, B.r * 0.12 + (domeTop - B.r * 0.12) * k - B.r * 0.03, z); sc.rotation.set(v * 0.95, 0, -u * 0.95); hip.add(sc);
+    }
+  } else if (F.plates) {
+    for (let i = 0; i < 5; i++) { const pl = sphere(B.r * (0.62 - Math.abs(i - 1.5) * 0.05), shade(C.body, -0.28), 10); pl.scale.set(1.25, 0.38, 0.85); pl.rotation.x = -0.28; pl.position.set(0, B.r * 0.86, B.len * (0.32 - i * 0.16)); hip.add(pl); }
+  }
+  if (F.spikes) for (let i = 0; i < 5; i++) { const sp = cone(B.r * 0.18, B.r * 0.5, C.accent, 6); sp.position.set(0, B.r * (F.plates && !B.shell ? 1.2 : 0.95), B.len * 0.4 - i * B.len * 0.2); if (F.plates && !B.shell) sp.rotation.x = -0.3; hip.add(sp); }
+  if (F.howdah) buildHowdah(hip, B, C, P);
   // legs: pivots at the shoulder/hip, hanging down
   P.legs = [];
   const legX = B.r * 0.6, frontZ = B.len * 0.36, backZ = -B.len * 0.36;
@@ -102,16 +119,33 @@ function buildQuad(root, T, s) {
   const head = new THREE.Group(); head.position.set(0, Math.sin(neckUp) * neckLen + B.headR * 0.3, Math.cos(neckUp) * neckLen + B.headR * 0.4); neck.add(head); P.head = head;
   const skull = sphere(B.headR, C.body); skull.scale.set(isFrog ? 1.22 : isDragon ? 1.12 : 1, isFrog ? 0.82 : isDragon ? 1.08 : 1, isFrog ? 0.92 : isDragon ? 1.12 : 1); head.add(skull);
   const [sr, sl] = B.snout; const snout = capsule(sr, sl - sr, C.body); snout.rotation.x = Math.PI / 2; snout.position.set(0, -B.headR * 0.25, B.headR * 0.6 + sl / 2 - sr / 2); head.add(snout);
-  const nose = sphere(sr * 0.45, C.accent, 8); nose.position.set(0, -B.headR * 0.12, B.headR * 0.6 + sl - sr * 0.2); head.add(nose);
+  const nose = sphere(sr * 0.45, C.nose || C.accent, 8); nose.position.set(0, -B.headR * 0.12, B.headR * 0.6 + sl - sr * 0.2); head.add(nose);
+  if (F.howdah) { const plate = sphere(B.headR * 0.62, C.accent, 10); plate.scale.set(1.15, 0.9, 0.35); plate.position.set(0, B.headR * 0.42, B.headR * 0.62); head.add(plate); const stud = cone(B.headR * 0.12, B.headR * 0.4, '#d8b060', 6); stud.rotation.x = 1.2; stud.position.set(0, B.headR * 0.5, B.headR * 0.86); head.add(stud); }
   if (isFrog) { const mouth = new THREE.Mesh(new THREE.TorusGeometry(B.headR * 0.48, B.headR * 0.035, 5, 16, Math.PI), mat(C.accent)); mouth.rotation.x = Math.PI / 2; mouth.position.set(0, -B.headR * 0.28, B.headR * 0.78); head.add(mouth); }
   if (isDragon) { for (const x of [-1, 1]) { const nostril = glowSphere(B.headR * 0.035, C.eyes, 0.3, 6); nostril.position.set(x * sr * 0.42, -B.headR * 0.12, B.headR * 0.6 + sl * 0.8); head.add(nostril); } }
   const jaw = new THREE.Group(); jaw.position.set(0, -B.headR * 0.45, B.headR * 0.5); head.add(jaw); P.jaw = jaw;
   const jawM = capsule(sr * 0.8, sl * 0.7, shade(C.body, -0.12)); jawM.rotation.x = Math.PI / 2; jawM.position.set(0, -sr * 0.2, sl * 0.4); jaw.add(jawM);
   if (F.fangs) for (const x of [-1, 1]) { const f = cone(sr * 0.14, sr * 0.5, '#f4f0e0', 6); f.rotation.x = Math.PI; f.position.set(x * sr * 0.45, -B.headR * 0.5, B.headR * 0.6 + sl * 0.75); head.add(f); }
-  if (F.tusks) for (const x of [-1, 1]) { const tk = cone(sr * 0.2, sr * 1.2, '#f0e8d0', 6); tk.position.set(x * sr * 0.7, -B.headR * 0.35, B.headR * 0.6 + sl * 0.6); tk.rotation.set(-0.6, 0, x * -0.4); head.add(tk); }
+  if (F.tusks && B.tuskLen) for (const x of [-1, 1]) {
+    // long war tusks: out of the lip, forward and down, then curving up at the tip
+    const L = sr * 1.2 * B.tuskLen, root2 = new THREE.Group(); root2.position.set(x * sr * 0.95, -B.headR * 0.42, B.headR * 0.62 + sl * 0.3); root2.rotation.set(1.9, 0, x * 0.22); head.add(root2);
+    const base = cyl(sr * 0.2, sr * 0.3, L * 0.55, '#efe6cf', 8); base.position.y = L * 0.27; root2.add(base);
+    const bend = new THREE.Group(); bend.position.y = L * 0.55; bend.rotation.x = -0.75; root2.add(bend);
+    const tip = cone(sr * 0.2, L * 0.5, '#f6f0de', 8); tip.position.y = L * 0.25; bend.add(tip);
+  } else if (F.tusks) for (const x of [-1, 1]) { const tk = cone(sr * 0.2, sr * 1.2, '#f0e8d0', 6); tk.position.set(x * sr * 0.7, -B.headR * 0.35, B.headR * 0.6 + sl * 0.6); tk.rotation.set(-0.6, 0, x * -0.4); head.add(tk); }
+  if (F.trunk && B.trunk) {
+    // a hanging trunk: a chain of groups from the snout, so it sways and curls like a tail does
+    const TR = B.trunk, segL = TR.len / TR.segs; let parent = new THREE.Group(); parent.position.set(0, -B.headR * 0.18, B.headR * 0.6 + sl * 0.55); parent.rotation.x = -0.3; head.add(parent); P.trunk = [];
+    for (let i = 0; i < TR.segs; i++) { const seg = new THREE.Group(); seg.position.y = i === 0 ? 0 : -segL; const r = TR.r * (1 - i * 0.11); const m = capsule(r, segL * 0.9, i % 2 ? C.body : shade(C.body, -0.06)); m.position.y = -segL / 2; seg.add(m); if (i === TR.segs - 1) { const lip = sphere(r * 1.15, shade(C.body, -0.18), 8); lip.position.y = -segL; lip.scale.set(1, 0.6, 1); seg.add(lip); } parent.add(seg); parent = seg; P.trunk.push(seg); }
+  }
   const eyeR = B.headR * (F.bulgeEyes ? 0.36 : isDragon ? 0.19 : 0.16), eyeY = B.headR * (F.bulgeEyes ? 0.7 : isDragon ? 0.42 : 0.2), eyeX = B.headR * (F.bulgeEyes ? 0.55 : 0.45), eyeZ = B.headR * (F.bulgeEyes ? 0.35 : 0.75);
   for (const x of [-1, 1]) { const eye = sphere(eyeR, C.eyes, 10); eye.position.set(x * eyeX, eyeY, eyeZ); head.add(eye); const pupil = isDragon ? new THREE.Mesh(new THREE.CapsuleGeometry(eyeR * 0.18, eyeR * 0.75, 3, 6), mat('#16100b')) : sphere(eyeR * 0.42, '#111', 8); pupil.position.set(x * eyeX, eyeY + eyeR * 0.25, eyeZ + eyeR * 0.8); head.add(pupil); }
   if (T.ears === 'pointed') for (const x of [-1, 1]) { const e = cone(B.headR * 0.28, B.headR * 0.6, C.body, 8); e.position.set(x * B.headR * 0.55, B.headR * 0.9, -B.headR * 0.1); e.rotation.z = x * -0.3; head.add(e); const inner = cone(B.headR * 0.16, B.headR * 0.4, C.belly, 8); inner.position.set(x * B.headR * 0.55, B.headR * 0.85, -B.headR * 0.02); inner.rotation.z = x * -0.3; head.add(inner); }
+  else if (T.ears === 'fan') for (const x of [-1, 1]) {
+    // big flat ears that stand off the side of the skull (the tuskback)
+    const e = cyl(B.headR * 0.78, B.headR * 0.62, B.headR * 0.07, shade(C.body, -0.04), 14); e.rotation.set(0.15, 0, Math.PI / 2 + x * 0.25); e.scale.set(1, 1, 1.25); e.position.set(x * B.headR * 1.0, B.headR * 0.12, -B.headR * 0.32); head.add(e);
+    const inner = cyl(B.headR * 0.6, B.headR * 0.46, B.headR * 0.03, C.belly, 12); inner.rotation.copy(e.rotation); inner.scale.copy(e.scale); inner.position.set(x * B.headR * 1.04, B.headR * 0.12, -B.headR * 0.28); head.add(inner);
+  }
   else if (T.ears === 'round') for (const x of [-1, 1]) { const e = sphere(B.headR * 0.28, C.body, 10); e.position.set(x * B.headR * 0.7, B.headR * 0.7, -B.headR * 0.1); head.add(e); const inner = sphere(B.headR * 0.16, C.belly, 8); inner.position.set(x * B.headR * 0.72, B.headR * 0.72, B.headR * 0.02); head.add(inner); }
   if (F.horns) for (const x of [-1, 1]) { const h = cone(B.headR * 0.18, B.headR * 1.1, C.accent, 7); h.position.set(x * B.headR * 0.5, B.headR * 0.9, -B.headR * 0.3); h.rotation.set(-0.7, 0, x * -0.35); head.add(h); }
   if (isDragon) for (let i = 0; i < 5; i++) { const crest = cone(B.headR * (0.10 - i * 0.01), B.headR * (0.45 - i * 0.04), C.accent, 6); crest.position.set(0, B.headR * (0.7 - i * 0.08), -B.headR * (0.34 - i * 0.18)); crest.rotation.x = -0.45; head.add(crest); }
@@ -129,6 +163,26 @@ function buildQuad(root, T, s) {
 }
 /** Bat-style membrane: leading edge along the bone, scalloped trailing edge between three finger tips. */
 function wingShape(span, x) { const sh = new THREE.Shape(); sh.moveTo(0, 0); sh.lineTo(x * span, -span * 0.02); sh.quadraticCurveTo(x * span * 0.85, -span * 0.2, x * span * 0.78, -span * 0.5); sh.quadraticCurveTo(x * span * 0.62, -span * 0.32, x * span * 0.48, -span * 0.58); sh.quadraticCurveTo(x * span * 0.32, -span * 0.36, x * span * 0.16, -span * 0.5); sh.quadraticCurveTo(x * span * 0.06, -span * 0.3, 0, -span * 0.2); sh.closePath(); return sh; }
+/**
+ * A wooden fighting platform strapped on a big quad's back (the tuskback): a cloth saddle blanket,
+ * a plank deck, four posts with rails, a peaked canopy and a banner pole. All static, so the mesh
+ * merge folds it into the hip's single draw call. `colors.cloth` is the blanket, canopy and banner.
+ */
+function buildHowdah(hip, B, C, P) {
+  const cloth = C.cloth || C.accent, wood = C.accent, top = B.r * 0.92, w = B.r * 1.25, d = B.len * 0.42;
+  const blanket = box(B.r * 2.12, B.r * 0.16, d * 1.15, cloth); blanket.position.set(0, top - B.r * 0.08, -B.len * 0.02); hip.add(blanket);
+  const trim = box(B.r * 2.18, B.r * 0.06, d * 1.2, shade(cloth, 0.35)); trim.position.set(0, top - B.r * 0.2, -B.len * 0.02); hip.add(trim);
+  const deck = box(w, B.r * 0.1, d, shade(wood, 0.15)); deck.position.set(0, top + B.r * 0.06, -B.len * 0.02); hip.add(deck);
+  const postH = B.r * 0.62;
+  for (const x of [-1, 1]) for (const z of [-1, 1]) { const post = cyl(B.r * 0.035, B.r * 0.04, postH, wood, 6); post.position.set(x * w * 0.44, top + B.r * 0.1 + postH / 2, -B.len * 0.02 + z * d * 0.44); hip.add(post); }
+  for (const x of [-1, 1]) { const rail = box(B.r * 0.04, B.r * 0.05, d * 0.9, wood); rail.position.set(x * w * 0.44, top + B.r * 0.36, -B.len * 0.02); hip.add(rail); }
+  for (const z of [-1, 1]) { const rail = box(w * 0.9, B.r * 0.05, B.r * 0.04, wood); rail.position.set(0, top + B.r * 0.36, -B.len * 0.02 + z * d * 0.44); hip.add(rail); }
+  const roof = cone(w * 0.78, B.r * 0.5, cloth, 4); roof.rotation.y = Math.PI / 4; roof.scale.set(1, 1, d / w); roof.position.set(0, top + B.r * 0.1 + postH + B.r * 0.22, -B.len * 0.02); hip.add(roof);
+  const pole = cyl(B.r * 0.025, B.r * 0.025, B.r * 1.5, wood, 5); pole.position.set(w * 0.4, top + B.r * 0.85, -B.len * 0.02 - d * 0.44); hip.add(pole);
+  const flag = box(B.r * 0.02, B.r * 0.42, B.r * 0.55, cloth); flag.position.set(w * 0.4, top + B.r * 1.38, -B.len * 0.02 - d * 0.44 - B.r * 0.28); hip.add(flag);
+  const tip = sphere(B.r * 0.05, '#d8b060', 6); tip.position.set(w * 0.4, top + B.r * 1.62, -B.len * 0.02 - d * 0.44); hip.add(tip);
+  P.howdah = true;
+}
 function animQuad(st, dt) {
   const P = st.parts, t = st.t, an = st.anim; const S = st.root;
   if (an === 'dead') { S.rotation.z = Math.PI / 2; S.position.y = P.bodyY * 0.35 * st.spec.size; for (const l of P.legs) { l.pivot.rotation.x = 0.4; l.knee.rotation.x = 0.6; } P.jaw.rotation.x = 0.35; return; }
@@ -142,6 +196,8 @@ function animQuad(st, dt) {
   if (an === 'attack') { const k = (t % 0.9) / 0.9; const lunge = k < 0.35 ? k / 0.35 : Math.max(0, 1 - (k - 0.35) / 0.5); P.neck.rotation.x = -0.35 * lunge; P.hip.position.z = lunge * 0.25; P.hip.rotation.x = -0.15 * lunge; for (const l of P.legs) if (l.front) l.pivot.rotation.x = -0.9 * lunge; } else P.hip.position.z = 0;
   for (let i = 0; i < P.tailSegs.length; i++) P.tailSegs[i].rotation.y = Math.sin(t * (moving ? 5 : 2) + i * 0.7) * (0.25 + i * 0.1) * (an === 'idle' ? 1 : 1.4);
   if (P.wings) for (const w of P.wings) w.group.rotation.z = w.side * (an === 'fly' ? Math.sin(t * 7) * 0.7 : an === 'attack' ? 0.9 : 0.55 + Math.sin(t * 1.2) * 0.05);
+  // the trunk swings with the walk, and curls up and forward to strike
+  if (P.trunk) { const atk = an === 'attack' ? Math.max(0, Math.sin(((t % 0.9) / 0.9) * Math.PI)) : 0; for (let i = 0; i < P.trunk.length; i++) { P.trunk[i].rotation.x = -atk * (0.35 + i * 0.12) + Math.sin(t * (moving ? 4 : 1.3) + i * 0.6) * (moving ? 0.1 : 0.05); P.trunk[i].rotation.z = Math.sin(t * (moving ? speed * 0.5 : 0.9) + i * 0.5) * (moving ? 0.12 : 0.06); } }
 }
 
 // ------------------------------------------------------------------ spider
@@ -195,12 +251,34 @@ function buildBat(root, T, s) {
   const head = new THREE.Group(); head.position.set(0, B.r * 1.1, B.r * 0.5); body.add(head); P.head = head; P.neck = head; head.add(sphere(B.headR, C.body));
   const jaw = new THREE.Group(); jaw.position.set(0, -B.headR * 0.4, B.headR * 0.5); head.add(jaw); P.jaw = jaw; const jm = sphere(B.headR * 0.5, shade(C.body, -0.15), 8); jm.scale.set(1, 0.5, 1.2); jaw.add(jm);
   if (F.fangs) for (const x of [-1, 1]) { const f = cone(B.headR * 0.12, B.headR * 0.4, '#f4f0e0', 5); f.rotation.x = Math.PI; f.position.set(x * B.headR * 0.3, -B.headR * 0.45, B.headR * 0.7); head.add(f); }
-  if (F.beak) { const bk = cone(B.headR * 0.3, B.headR * 0.75, C.accent, 8); bk.rotation.x = Math.PI / 2; bk.position.set(0, -B.headR * 0.1, B.headR * 0.95); head.add(bk); }
+  if (F.beak) { const long = F.feathers ? 1.5 : 1; const bk = cone(B.headR * 0.3, B.headR * 0.75 * long, C.accent, 8); bk.rotation.x = Math.PI / 2; bk.position.set(0, -B.headR * 0.1, B.headR * (0.95 + (long - 1) * 0.35)); head.add(bk); }
   if (F.antennae) for (const x of [-1, 1]) { const a = cyl(0.004, 0.008, B.headR * 1.6, C.accent, 5); a.position.set(x * B.headR * 0.35, B.headR * 1.1, B.headR * 0.3); a.rotation.set(-0.5, 0, x * -0.5); head.add(a); const tip = sphere(B.headR * 0.12, C.belly, 8); tip.position.set(x * B.headR * 0.95, B.headR * 1.75, B.headR * 0.75); head.add(tip); }
-  for (const x of [-1, 1]) { const e = sphere(B.headR * 0.2, C.eyes, 8); e.position.set(x * B.headR * 0.4, B.headR * 0.15, B.headR * 0.8); head.add(e); const ear = cone(B.headR * 0.35, B.headR * 1.1, C.body, 6); ear.position.set(x * B.headR * 0.5, B.headR * 1.1, -B.headR * 0.1); ear.rotation.z = x * -0.25; head.add(ear); const inner = cone(B.headR * 0.2, B.headR * 0.8, C.accent, 6); inner.position.set(x * B.headR * 0.5, B.headR * 1.0, B.headR * 0.02); inner.rotation.z = x * -0.25; head.add(inner); }
-  for (const x of [-1, 1]) { const w = new THREE.Group(); w.position.set(x * B.r * 0.6, B.r * 0.3, 0); body.add(w); const half = B.span / 2; const arm = cyl(0.015, 0.015, half, C.accent, 5); arm.rotation.z = Math.PI / 2; arm.position.x = x * half / 2; w.add(arm); for (let f = 1; f <= 3; f++) { const fin = cyl(0.008, 0.008, half * 0.75, C.accent, 4); fin.position.set(x * half * (0.55 + f * 0.13), -half * 0.28, 0); fin.rotation.z = x * (0.5 + f * 0.35); w.add(fin); } const mem = mesh(new THREE.ShapeGeometry(wingShape(half, x)), C.accent); mem.material.side = THREE.DoubleSide; w.add(mem); P.wings.push({ group: w, side: x }); }
+  for (const x of [-1, 1]) { const e = sphere(B.headR * 0.2, C.eyes, 8); e.position.set(x * B.headR * 0.4, B.headR * 0.15, B.headR * 0.8); head.add(e); if (T.ears === 'none') continue; const ear = cone(B.headR * 0.35, B.headR * 1.1, C.body, 6); ear.position.set(x * B.headR * 0.5, B.headR * 1.1, -B.headR * 0.1); ear.rotation.z = x * -0.25; head.add(ear); const inner = cone(B.headR * 0.2, B.headR * 0.8, C.accent, 6); inner.position.set(x * B.headR * 0.5, B.headR * 1.0, B.headR * 0.02); inner.rotation.z = x * -0.25; head.add(inner); }
+  if (F.feathers) buildFeatheredWings(body, B, C, P);
+  else for (const x of [-1, 1]) { const w = new THREE.Group(); w.position.set(x * B.r * 0.6, B.r * 0.3, 0); body.add(w); const half = B.span / 2; const arm = cyl(0.015, 0.015, half, C.accent, 5); arm.rotation.z = Math.PI / 2; arm.position.x = x * half / 2; w.add(arm); for (let f = 1; f <= 3; f++) { const fin = cyl(0.008, 0.008, half * 0.75, C.accent, 4); fin.position.set(x * half * (0.55 + f * 0.13), -half * 0.28, 0); fin.rotation.z = x * (0.5 + f * 0.35); w.add(fin); } const mem = mesh(new THREE.ShapeGeometry(wingShape(half, x)), C.accent); mem.material.side = THREE.DoubleSide; w.add(mem); P.wings.push({ group: w, side: x }); }
   for (const x of [-1, 1]) { const foot = capsule(0.012, 0.06, C.accent); foot.position.set(x * B.r * 0.3, -B.r * 0.9, -B.r * 0.2); body.add(foot); }
   return P;
+}
+/**
+ * FEATHERED WINGS (2026-10-03, the crow). A bird's wing is a fan of blades, not a membrane between
+ * fingers: a covert pad along the arm, six primaries that lengthen toward the tip and sweep back,
+ * and a fan of tail feathers. Same `P.wings` groups as the bat, so the flap animation is shared.
+ */
+function buildFeatheredWings(body, B, C, P) {
+  const half = B.span / 2;
+  for (const x of [-1, 1]) {
+    const w = new THREE.Group(); w.position.set(x * B.r * 0.6, B.r * 0.35, -B.r * 0.1); body.add(w);
+    const covert = sphere(half * 0.3, C.body, 10); covert.scale.set(1.7, 0.16, 0.9); covert.position.set(x * half * 0.32, 0, -half * 0.06); w.add(covert);
+    for (let f = 0; f < 6; f++) {
+      const len = half * (0.42 + f * 0.07), along = half * (0.22 + f * 0.13);
+      const blade = sphere(1, f % 2 ? C.belly : C.body, 6); blade.scale.set(half * 0.075, half * 0.018, len * 0.5);
+      blade.position.set(x * along, -half * 0.005 * f, -len * 0.42); blade.rotation.y = x * (0.12 + f * 0.13); w.add(blade);
+    }
+    const edge = capsule(half * 0.035, half * 0.8, C.accent); edge.rotation.z = Math.PI / 2; edge.position.set(x * half * 0.45, half * 0.02, half * 0.02); w.add(edge);
+    P.wings.push({ group: w, side: x });
+  }
+  const tail = new THREE.Group(); tail.position.set(0, -B.r * 0.55, -B.r * 0.65); tail.rotation.x = -0.5; body.add(tail);
+  for (let i = -2; i <= 2; i++) { const f = sphere(1, i % 2 ? C.belly : C.body, 6); f.scale.set(B.r * 0.2, B.r * 0.05, B.r * 1.05); f.position.set(i * B.r * 0.12, 0, -B.r * 0.95); f.rotation.y = i * 0.16; tail.add(f); }
 }
 function animBat(st) {
   const P = st.parts, t = st.t, an = st.anim; const S = st.root;
@@ -243,41 +321,54 @@ function animSnake(st) {
 // Features: core (glowing chest heart), spikes (shoulder/back), horns, claws, fangs, tail, wings.
 function buildBiped(root, T, s) {
   const B = T.body, C = s.colors, F = s.features; const P = { legs: [], arms: [] }; const blocky = !!B.blocky;
-  P.bodyY = B.legLen; const hip = new THREE.Group(); hip.position.y = B.legLen; root.add(hip); P.hip = hip;
+  const crouch = B.crouch || 0; P.bodyY = B.legLen * Math.cos(crouch); const hip = new THREE.Group(); hip.position.y = P.bodyY; root.add(hip); P.hip = hip;
+  // THE CHEST (2026-10-03). Everything above the pelvis hangs off one group, so `body.hunch` can tip
+  // the upper body forward (the ghoul) while the legs stay planted. At hunch 0 it is the old body.
+  const chest = new THREE.Group(); chest.rotation.x = B.hunch || 0; hip.add(chest); P.chest = chest;
+  const ribs = !!F.ribs, bony = !!B.bony;
   const torso = blocky ? box(B.torsoR * 2, B.torsoH, B.torsoR * 1.35, C.body) : capsule(B.torsoR, Math.max(0.02, B.torsoH - B.torsoR * 2), C.body);
-  torso.position.y = B.torsoH * 0.5; hip.add(torso);
+  torso.position.y = B.torsoH * 0.5; if (!ribs) chest.add(torso);
   const belly = blocky ? box(B.torsoR * 1.4, B.torsoH * 0.42, B.torsoR * 0.3, C.belly) : capsule(B.torsoR * 0.68, B.torsoH * 0.3, C.belly);
-  belly.position.set(0, B.torsoH * 0.4, B.torsoR * (blocky ? 0.7 : 0.45)); hip.add(belly);
-  const pelvis = blocky ? box(B.torsoR * 1.7, B.torsoR * 0.7, B.torsoR * 1.2, shade(C.body, -0.12)) : sphere(B.torsoR * 0.8, shade(C.body, -0.12), 12); hip.add(pelvis);
-  if (F.core) { const core = glowSphere(B.torsoR * 0.34, C.eyes, 1.1, 12); core.position.set(0, B.torsoH * 0.62, B.torsoR * (blocky ? 0.72 : 0.5)); hip.add(core); P.core = core; }
-  if (F.spikes) for (let i = 0; i < 3; i++) { const sp = cone(B.torsoR * 0.16, B.torsoR * 0.7, C.accent, 6); sp.position.set(0, B.torsoH * (0.35 + i * 0.25), -B.torsoR * (blocky ? 0.7 : 0.55)); sp.rotation.x = 0.5; hip.add(sp); }
+  belly.position.set(0, B.torsoH * 0.4, B.torsoR * (blocky ? 0.7 : 0.45)); if (!ribs) chest.add(belly);
+  const pelvis = bony ? sphere(B.torsoR * 0.42, shade(C.body, -0.08), 10) : blocky ? box(B.torsoR * 1.7, B.torsoR * 0.7, B.torsoR * 1.2, shade(C.body, -0.12)) : sphere(B.torsoR * 0.8, shade(C.body, -0.12), 12); hip.add(pelvis);
+  if (bony) { pelvis.scale.set(1.7, 0.55, 0.9); pelvis.position.y = B.torsoR * 0.05; for (const x of [-1, 1]) { const wing = sphere(B.torsoR * 0.3, C.body, 10); wing.scale.set(1.1, 0.8, 0.45); wing.position.set(x * B.torsoR * 0.5, B.torsoR * 0.22, -B.torsoR * 0.05); wing.rotation.z = x * 0.5; hip.add(wing); } }
+  if (ribs) buildRibcage(chest, B, C);
+  if (F.core) { const core = glowSphere(B.torsoR * 0.34, C.eyes, 1.1, 12); core.position.set(0, B.torsoH * 0.62, ribs ? 0 : B.torsoR * (blocky ? 0.72 : 0.5)); chest.add(core);
+    if (ribs) { const halo = glowSphere(B.torsoR * 0.5, C.eyes, 0.5, 12); halo.material.transparent = true; halo.material.opacity = 0.35; halo.material.depthWrite = false; core.add(halo); core.scale.setScalar(0.85); } P.core = core; }
+  if (F.spikes) for (let i = 0; i < 3; i++) { const sp = cone(B.torsoR * 0.16, B.torsoR * 0.7, C.accent, 6); sp.position.set(0, B.torsoH * (0.35 + i * 0.25), -B.torsoR * (ribs ? 0.62 : blocky ? 0.7 : 0.55)); sp.rotation.x = ribs ? -0.5 : 0.5; chest.add(sp); }
+  if (F.spine) for (let i = 0; i < 5; i++) { const v = sphere(B.torsoR * 0.17, shade(C.body, -0.1), 8); v.scale.set(1, 0.7, 1); v.position.set(0, B.torsoH * (0.2 + i * 0.17), -B.torsoR * 0.92); chest.add(v); }
   // legs
   for (const x of [-1, 1]) {
     const pivot = new THREE.Group(); pivot.position.set(x * B.torsoR * 0.52, 0, 0); hip.add(pivot);
-    const upper = blocky ? box(B.legR * 2, B.legLen * 0.52, B.legR * 2, C.body) : capsule(B.legR, B.legLen * 0.4, C.body); upper.position.y = -B.legLen * 0.26; pivot.add(upper);
+    const upper = blocky ? box(B.legR * 2, B.legLen * 0.52, B.legR * 2, C.body) : capsule(B.legR * (bony ? 0.55 : 1), B.legLen * 0.4, C.body); upper.position.y = -B.legLen * 0.26; pivot.add(upper);
+    if (bony) { const kn = sphere(B.legR * 0.95, shade(C.body, -0.06), 10); kn.position.y = -B.legLen * 0.5; pivot.add(kn); }
     const knee = new THREE.Group(); knee.position.y = -B.legLen * 0.5; pivot.add(knee);
-    const lower = blocky ? box(B.legR * 1.8, B.legLen * 0.46, B.legR * 1.8, shade(C.body, -0.1)) : capsule(B.legR * 0.85, B.legLen * 0.36, shade(C.body, -0.1)); lower.position.y = -B.legLen * 0.24; knee.add(lower);
+    const lower = blocky ? box(B.legR * 1.8, B.legLen * 0.46, B.legR * 1.8, shade(C.body, -0.1)) : capsule(B.legR * (bony ? 0.5 : 0.85), B.legLen * 0.36, shade(C.body, -0.1)); lower.position.y = -B.legLen * 0.24; knee.add(lower);
     const foot = box(B.legR * 2.2, B.legR * 0.9, B.legR * 3.2, C.accent); foot.position.set(0, -B.legLen * 0.5 + B.legR * 0.45, B.legR * 0.7); knee.add(foot);
-    P.legs.push({ pivot, knee, side: x });
+    P.legs.push({ pivot, knee, side: x, base: -crouch, kbase: crouch * 2 });
   }
   // arms
   for (const x of [-1, 1]) {
-    const shoulder = new THREE.Group(); shoulder.position.set(x * (B.torsoR + B.armR * 0.5), B.torsoH * 0.84, 0); hip.add(shoulder);
+    const shoulder = new THREE.Group(); shoulder.position.set(x * (B.torsoR + B.armR * 0.5), B.torsoH * 0.84, 0); chest.add(shoulder);
     const pad = blocky ? box(B.armR * 2.6, B.armR * 2.2, B.armR * 2.6, shade(C.body, 0.1)) : sphere(B.armR * 1.45, shade(C.body, 0.1), 12); shoulder.add(pad);
     if (F.spikes) { const sp = cone(B.armR * 0.7, B.armR * 2, C.accent, 6); sp.position.y = B.armR * 1.6; sp.rotation.z = x * 0.35; shoulder.add(sp); }
-    const upper = blocky ? box(B.armR * 1.8, B.armLen * 0.5, B.armR * 1.8, C.body) : capsule(B.armR, B.armLen * 0.38, C.body); upper.position.y = -B.armLen * 0.25; shoulder.add(upper);
+    const upper = blocky ? box(B.armR * 1.8, B.armLen * 0.5, B.armR * 1.8, C.body) : capsule(B.armR * (bony ? 0.55 : 1), B.armLen * 0.38, C.body); upper.position.y = -B.armLen * 0.25; shoulder.add(upper);
+    if (bony) { const el2 = sphere(B.armR * 0.9, shade(C.body, -0.06), 10); el2.position.y = -B.armLen * 0.5; shoulder.add(el2); }
     const elbow = new THREE.Group(); elbow.position.y = -B.armLen * 0.5; shoulder.add(elbow);
-    const lower = blocky ? box(B.armR * 1.6, B.armLen * 0.46, B.armR * 1.6, shade(C.body, -0.08)) : capsule(B.armR * 0.85, B.armLen * 0.36, shade(C.body, -0.08)); lower.position.y = -B.armLen * 0.24; elbow.add(lower);
+    const lower = blocky ? box(B.armR * 1.6, B.armLen * 0.46, B.armR * 1.6, shade(C.body, -0.08)) : capsule(B.armR * (bony ? 0.5 : 0.85), B.armLen * 0.36, shade(C.body, -0.08)); lower.position.y = -B.armLen * 0.24; elbow.add(lower);
     const hand = blocky ? box(B.armR * 2.3, B.armR * 2.3, B.armR * 2.3, shade(C.body, -0.16)) : sphere(B.armR * 1.3, shade(C.body, -0.16), 12); hand.position.y = -B.armLen * 0.48; elbow.add(hand);
     if (F.claws) for (let i = -1; i <= 1; i++) { const cl = cone(B.armR * 0.3, B.armR * 1.5, C.accent, 5); cl.rotation.x = Math.PI * 0.5 + 0.6; cl.position.set(i * B.armR * 0.8, -B.armLen * 0.52, B.armR * 1.1); elbow.add(cl); }
-    P.arms.push({ shoulder, elbow, side: x });
+    P.arms.push({ shoulder, elbow, side: x, base: -(B.hunch || 0) * 0.85 });
   }
   // neck + head
-  const neck = new THREE.Group(); neck.position.y = B.torsoH + (B.neck || 0); hip.add(neck); P.neck = neck;
-  const head = new THREE.Group(); head.position.y = B.headR * 0.85; neck.add(head); P.head = head;
+  const neck = new THREE.Group(); neck.position.y = B.torsoH + (B.neck || 0); chest.add(neck); P.neck = neck;
+  const head = new THREE.Group(); head.position.set(0, B.headR * 0.85, B.hunch ? B.headR * 0.35 : 0); head.rotation.x = -(B.hunch || 0) * 0.95; neck.add(head); P.head = head;
   const skull = blocky ? box(B.headR * 1.7, B.headR * 1.8, B.headR * 1.6, C.body) : sphere(B.headR, C.body); head.add(skull);
-  const brow = blocky ? box(B.headR * 1.8, B.headR * 0.35, B.headR * 0.4, C.accent) : capsule(B.headR * 0.16, B.headR * 1.3, C.accent); if (!blocky) brow.rotation.z = Math.PI / 2; brow.position.set(0, B.headR * 0.42, B.headR * 0.72); head.add(brow);
-  for (const x of [-1, 1]) { const eye = glowSphere(B.headR * 0.2, C.eyes, 1.1, 10); eye.position.set(x * B.headR * 0.42, B.headR * 0.12, B.headR * 0.76); head.add(eye); }
+  const brow = blocky ? box(B.headR * 1.8, B.headR * 0.35, B.headR * 0.4, C.accent) : capsule(B.headR * 0.16, B.headR * 1.3, bony ? C.body : C.accent); if (!blocky) brow.rotation.z = Math.PI / 2; brow.position.set(0, B.headR * 0.42, B.headR * 0.72); head.add(brow);
+  for (const x of [-1, 1]) { const eye = glowSphere(B.headR * (bony ? 0.13 : 0.2), C.eyes, bony ? 1.6 : 1.1, 10); eye.position.set(x * B.headR * 0.42, B.headR * 0.12, B.headR * (bony ? 0.8 : 0.76)); head.add(eye);
+    if (bony) { const socket = sphere(B.headR * 0.27, '#14161a', 10); socket.scale.z = 0.5; socket.position.set(x * B.headR * 0.42, B.headR * 0.12, B.headR * 0.78); head.add(socket); } }
+  if (bony) { for (let i = -2; i <= 2; i++) { const tooth = box(B.headR * 0.13, B.headR * 0.2, B.headR * 0.08, '#efe8d4'); tooth.position.set(i * B.headR * 0.16, -B.headR * 0.5, B.headR * 0.78); head.add(tooth); }
+    const nose = cone(B.headR * 0.1, B.headR * 0.2, '#14161a', 3); nose.rotation.x = Math.PI; nose.position.set(0, -B.headR * 0.12, B.headR * 0.9); head.add(nose); }
   const jaw = new THREE.Group(); jaw.position.set(0, -B.headR * 0.5, B.headR * 0.12); head.add(jaw); P.jaw = jaw;
   const jawM = blocky ? box(B.headR * 1.4, B.headR * 0.55, B.headR * 1.3, shade(C.body, -0.14)) : capsule(B.headR * 0.5, B.headR * 0.35, shade(C.body, -0.14)); jawM.position.set(0, -B.headR * 0.1, B.headR * 0.2); jaw.add(jawM);
   if (F.fangs) for (const x of [-1, 1]) { const f = cone(B.headR * 0.12, B.headR * 0.42, '#f4f0e0', 5); f.rotation.x = Math.PI; f.position.set(x * B.headR * 0.35, -B.headR * 0.42, B.headR * 0.55); head.add(f); }
@@ -288,18 +379,33 @@ function buildBiped(root, T, s) {
     for (let i = 0; i < 4; i++) { const seg = new THREE.Group(); const l = B.torsoH * 0.36, r = B.armR * (0.9 - i * 0.15); const m = capsule(r, l, C.body); m.rotation.x = Math.PI / 2; m.position.z = -l / 2; seg.add(m); seg.rotation.x = i === 0 ? -0.5 : 0.25; seg.position.z = i === 0 ? 0 : -l; parent.add(seg); parent = seg; P.tailSegs.push(seg); }
     const spade = cone(B.armR * 1.1, B.armR * 2.6, C.accent, 4); spade.rotation.x = -Math.PI / 2; spade.position.z = -B.torsoH * 0.5; parent.add(spade); }
   // wings
-  if (F.wings) { P.wings = []; for (const x of [-1, 1]) { const w = new THREE.Group(); w.position.set(x * B.torsoR * 0.7, B.torsoH * 0.78, -B.torsoR * 0.5); hip.add(w); const span = B.torsoH * 1.5; const bone = cyl(B.armR * 0.35, B.armR * 0.35, span, C.accent, 6); bone.rotation.z = x * -Math.PI / 2; bone.position.x = x * span / 2; w.add(bone); const mem = mesh(new THREE.ShapeGeometry(wingShape(span, x)), C.belly); mem.material.side = THREE.DoubleSide; mem.material.transparent = true; mem.material.opacity = 0.92; w.add(mem); P.wings.push({ group: w, side: x }); } }
+  if (F.wings) { P.wings = []; for (const x of [-1, 1]) { const w = new THREE.Group(); w.position.set(x * B.torsoR * 0.7, B.torsoH * 0.78, -B.torsoR * 0.5); chest.add(w); const span = B.torsoH * 1.5; const bone = cyl(B.armR * 0.35, B.armR * 0.35, span, C.accent, 6); bone.rotation.z = x * -Math.PI / 2; bone.position.x = x * span / 2; w.add(bone); const mem = mesh(new THREE.ShapeGeometry(wingShape(span, x)), C.belly); mem.material.side = THREE.DoubleSide; mem.material.transparent = true; mem.material.opacity = 0.92; w.add(mem); P.wings.push({ group: w, side: x }); } }
   P.type = s.type; return P;
+}
+/**
+ * A RIB CAGE in place of a solid torso (the bone colossus): a spine of vertebrae, six ribs that open
+ * at the front so the glowing core shows through, collar bones and a sternum-less front. Rings are
+ * flattened front-to-back like a real chest.
+ */
+function buildRibcage(chest, B, C) {
+  const H = B.torsoH, R = B.torsoR;
+  for (let i = 0; i < 7; i++) { const v = cyl(R * 0.13, R * 0.15, H * 0.1, shade(C.body, -0.05), 8); v.position.set(0, H * (0.06 + i * 0.14), -R * 0.55); chest.add(v); }
+  for (let i = 0; i < 6; i++) {
+    const k = i / 5, rr = R * (0.72 + Math.sin(k * Math.PI) * 0.3), hold = new THREE.Group();
+    hold.position.set(0, H * (0.28 + k * 0.6), -R * 0.12); hold.rotation.x = -Math.PI / 2; hold.scale.set(1, 0.78, 1); chest.add(hold);
+    const rib = mesh(new THREE.TorusGeometry(rr, B.armR * 0.32, 6, 18, Math.PI * 1.45), C.body); rib.rotation.z = -Math.PI * 0.225; hold.add(rib);
+  }
+  for (const x of [-1, 1]) { const collar = capsule(B.armR * 0.3, R * 0.8, C.body); collar.rotation.z = Math.PI / 2 + x * 0.15; collar.position.set(x * R * 0.48, H * 0.9, R * 0.05); chest.add(collar); }
 }
 function animBiped(st) {
   const P = st.parts, t = st.t, an = st.anim, S = st.root;
   if (an === 'dead') { S.rotation.x = -Math.PI / 2; S.position.y = P.bodyY * 0.28 * st.spec.size; for (const l of P.legs) { l.pivot.rotation.x = 0.25; l.knee.rotation.x = 0.3; } for (const a of P.arms) { a.shoulder.rotation.z = a.side * 1.1; a.elbow.rotation.x = 0; } P.jaw.rotation.x = 0.3; return; }
   S.rotation.x = 0; S.position.y = 0;
   const moving = an === 'walk' || an === 'run'; const speed = an === 'run' ? 11 : 6; const amp = an === 'run' ? 0.75 : moving ? 0.45 : 0;
-  for (const l of P.legs) { const ph = l.side < 0 ? 0 : Math.PI; const sw = Math.sin(t * speed + ph) * amp; l.pivot.rotation.x = sw; l.knee.rotation.x = Math.max(0, -sw) * 1.1 + (moving ? 0.12 : 0.05); }
+  for (const l of P.legs) { const ph = l.side < 0 ? 0 : Math.PI; const sw = Math.sin(t * speed + ph) * amp; l.pivot.rotation.x = (l.base || 0) + sw; l.knee.rotation.x = (l.kbase || 0) + Math.max(0, -sw) * 1.1 + (moving ? 0.12 : 0.05); }
   const atk = an === 'attack' ? (k => k < 0.3 ? k / 0.3 : Math.max(0, 1 - (k - 0.3) / 0.55))((t % 1.1) / 1.1) : 0;
-  for (const a of P.arms) { const ph = a.side < 0 ? Math.PI : 0; a.shoulder.rotation.x = moving ? Math.sin(t * speed + ph) * amp * 0.7 : Math.sin(t * 1.2 + ph) * 0.05; a.shoulder.rotation.z = a.side * (0.12 + (moving ? 0.05 : 0.03) * Math.sin(t * 1.4)); a.elbow.rotation.x = -0.2 - (moving ? 0.2 : 0.05); }
-  if (atk > 0) { const a = P.arms[1]; a.shoulder.rotation.x = -2.4 * atk + 0.9 * atk * atk; a.shoulder.rotation.z = 0; a.elbow.rotation.x = -1.2 * atk; }
+  for (const a of P.arms) { const ph = a.side < 0 ? Math.PI : 0; a.shoulder.rotation.x = (a.base || 0) + (moving ? Math.sin(t * speed + ph) * amp * 0.7 : Math.sin(t * 1.2 + ph) * 0.05); a.shoulder.rotation.z = a.side * (0.12 + (moving ? 0.05 : 0.03) * Math.sin(t * 1.4)); a.elbow.rotation.x = -0.2 - (moving ? 0.2 : 0.05); }
+  if (atk > 0) { const a = P.arms[1]; a.shoulder.rotation.x = (a.base || 0) - 2.4 * atk + 0.9 * atk * atk; a.shoulder.rotation.z = 0; a.elbow.rotation.x = -1.2 * atk; }
   P.hip.position.y = P.bodyY + (moving ? Math.abs(Math.sin(t * speed)) * 0.04 * st.spec.size : Math.sin(t * 1.4) * 0.012) + (an === 'fly' ? 0.55 + Math.sin(t * 2.2) * 0.06 : 0);
   P.hip.position.z = atk * 0.18; P.hip.rotation.x = an === 'run' ? -0.14 : atk * -0.2;
   P.neck.rotation.y = an === 'idle' ? Math.sin(t * 0.5) * 0.3 : 0; P.neck.rotation.x = an === 'run' ? 0.12 : 0;

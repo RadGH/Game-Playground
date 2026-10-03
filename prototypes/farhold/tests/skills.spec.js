@@ -159,7 +159,8 @@ test('War Cry and Guard change what the numbers do, not just the log', async ({ 
   expect(cry.statuses).toContain('might');
   expect(errors).toEqual([]);
 
-  const e2 = await land(page, 'fighter');
+  // R28 — Sworn Guard is the Knight's now, and is a frontal self buff (`buff:guard_stance`), not Guarded
+  const e2 = await land(page, 'knight');
   const guard = await page.evaluate(async () => {
     const f = window.farhold;
     f.pause(false);
@@ -169,7 +170,7 @@ test('War Cry and Guard change what the numbers do, not just the log', async ({ 
     await new Promise(r => setTimeout(r, 120));
     return { statuses: Object.keys(f.statuses.player) };
   });
-  expect(guard.statuses).toContain('guard');
+  expect(guard.statuses).toContain('buff:guard_stance');
   expect(e2).toEqual([]);
 });
 

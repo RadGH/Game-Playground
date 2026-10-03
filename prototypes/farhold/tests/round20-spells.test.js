@@ -234,7 +234,7 @@ test('3.4 — the card says a slot is chosen later, not that nothing was picked'
   const d = describeBuild(starter(cat), cat, cbData, { level: 1 });
   assert.equal(d.picked, 1);
   assert.equal(d.pending, 0, 'a level-1 character is owed nothing beyond the opening spell');
-  assert.equal(d.spells[0].name, 'Power Strike');
+  assert.equal(d.spells[0].name, 'Precise Strike'); // R28 renamed (plan §3.2)
   assert.equal(d.spells[1].name, null);
   assert.equal(d.spells[1].pending, false);
   // …and at level 6 two of them have come due

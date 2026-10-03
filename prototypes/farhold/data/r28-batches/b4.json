@@ -1,0 +1,5187 @@
+{
+ "skills": {
+  "frost_shard": {
+   "name": "Frost Shard",
+   "shape": "bolt",
+   "element": "ice",
+   "mult": 1.1,
+   "range": 34,
+   "splash": 1.4,
+   "cooldown": 2.5,
+   "mp": 5,
+   "stack": {
+    "status": "frostbite",
+    "add": 1,
+    "max": 5
+   },
+   "talents": {
+    "1": {
+     "lib": "seeking",
+     "nodes": [
+      {
+       "id": "shard_fan",
+       "name": "Shard Fan",
+       "fx": "fan",
+       "mod": {
+        "add": {
+         "projectiles": 2
+        },
+        "set": {
+         "spread": 0.3
+        },
+        "mul": {
+         "mult": 0.6
+        }
+       }
+      },
+      {
+       "id": "brittle_edge",
+       "name": "Brittle Edge",
+       "fx": "shatter",
+       "mod": {
+        "consumes": {
+         "status": "stagger",
+         "mult": 0.6
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "chain",
+     "nodes": [
+      {
+       "id": "splinter",
+       "name": "Splinter",
+       "fx": "fan",
+       "mod": {
+        "split": {
+         "shards": 3,
+         "range": 6,
+         "keep": 0.4,
+         "when": "tag:frostbite"
+        }
+       }
+      },
+      {
+       "id": "numbing_cold",
+       "name": "Numbing Cold",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "weaken",
+          "dealLess": 0.15,
+          "seconds": 3
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "cauterise",
+     "nodes": [
+      {
+       "id": "icy_recoil",
+       "name": "Icy Recoil",
+       "fx": "drain",
+       "mod": {
+        "onKill": {
+         "mana": 0.04
+        }
+       }
+      },
+      {
+       "id": "heavy_hail",
+       "name": "Heavy Hail",
+       "fx": "stack",
+       "mod": {
+        "add": {
+         "stack.add": 1
+        },
+        "mul": {
+         "cooldown": 1.4
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "cascade",
+     "nodes": [
+      {
+       "id": "shard_hail",
+       "name": "Shard Hail",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      },
+      {
+       "id": "winter_spreads",
+       "name": "Winter Spreads",
+       "fx": "stack",
+       "mod": {
+        "onKill": {
+         "spread": {
+          "types": [
+           "frostbite"
+          ],
+          "radius": 5
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "frost_nova": {
+   "name": "Rime Burst",
+   "shape": "around",
+   "element": "ice",
+   "mult": 1.2,
+   "radius": 6,
+   "cooldown": 9,
+   "mp": 14,
+   "stack": {
+    "status": "frostbite",
+    "add": 3,
+    "max": 5
+   },
+   "knock": {
+    "push": 2
+   },
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "frozen_ring",
+       "name": "Frozen Ring",
+       "fx": "stack",
+       "mod": {
+        "knock": {
+         "push": 0
+        },
+        "statuses": [
+         {
+          "id": "root",
+          "seconds": 2
+         }
+        ]
+       }
+      },
+      {
+       "id": "fleet_frost",
+       "name": "Fleet Frost",
+       "fx": "quick",
+       "mod": {
+        "selfBuff": {
+         "name": "Fleet Frost",
+         "seconds": 3,
+         "movePct": 0.4
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "linger",
+     "nodes": [
+      {
+       "id": "ice_rink",
+       "name": "Ice Rink",
+       "fx": "zone",
+       "mod": {
+        "pool": {
+         "seconds": 6,
+         "radius": 6,
+         "slow": 0.6,
+         "power": 0
+        }
+       }
+      },
+      {
+       "id": "shatter_ring",
+       "name": "Shatter Ring",
+       "fx": "shatter",
+       "mod": {
+        "consumes": {
+         "status": "stagger",
+         "mult": 1
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "bulwark",
+     "nodes": [
+      {
+       "id": "distant_rime",
+       "name": "Distant Rime",
+       "fx": "zone",
+       "mod": {
+        "set": {
+         "shape": "ground",
+         "range": 20
+        }
+       }
+      },
+      {
+       "id": "rime_coat",
+       "name": "Rime Coat",
+       "fx": "ward",
+       "mod": {
+        "barrier": {
+         "share": 0.2,
+         "seconds": 6
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "conflagration",
+     "nodes": [
+      {
+       "id": "second_ring",
+       "name": "Second Ring",
+       "fx": "wide",
+       "mod": {
+        "repeats": {
+         "count": 2,
+         "every": 1,
+         "grow": 4
+        },
+        "mul": {
+         "mult": 0.7
+        }
+       }
+      },
+      {
+       "id": "hardfrost",
+       "name": "Hardfrost",
+       "fx": "zone",
+       "mod": {
+        "pool": {
+         "seconds": 12,
+         "radius": 6,
+         "slow": 0.4,
+         "power": 0.1
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "ice_lance": {
+   "name": "Rime Spear",
+   "shape": "beam",
+   "element": "ice",
+   "mult": 1.5,
+   "range": 26,
+   "width": 1.8,
+   "cooldown": 7,
+   "mp": 12,
+   "consumes": {
+    "status": "frostbite",
+    "perStack": true,
+    "mult": 0.2,
+    "cap": 1,
+    "remove": true
+   },
+   "talents": {
+    "1": {
+     "lib": "pierce",
+     "nodes": [
+      {
+       "id": "long_spear",
+       "name": "Long Spear",
+       "fx": "lance",
+       "mod": {
+        "set": {
+         "range": 40,
+         "width": 1.2
+        }
+       }
+      },
+      {
+       "id": "twin_spears",
+       "name": "Twin Spears",
+       "fx": "echo",
+       "mod": {
+        "again": {
+         "delay": 0.4,
+         "mult": 0.5
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "shatter",
+     "nodes": [
+      {
+       "id": "shatter_spear",
+       "name": "Shatter Spear",
+       "fx": "shatter",
+       "mod": {
+        "consumes": {
+         "status": "stagger",
+         "perStack": false,
+         "mult": 1,
+         "cap": null,
+         "remove": false
+        }
+       }
+      },
+      {
+       "id": "frost_trail",
+       "name": "Frost Trail",
+       "fx": "zone",
+       "mod": {
+        "pool": {
+         "along": "beam",
+         "seconds": 4,
+         "radius": 1.5,
+         "slow": 0.4,
+         "power": 0
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "brand",
+     "nodes": [
+      {
+       "id": "spear_volley",
+       "name": "Spear Volley",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        },
+        "mul": {
+         "cooldown": 1.3
+        }
+       }
+      },
+      {
+       "id": "pinning_spear",
+       "name": "Pinning Spear",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "root",
+          "seconds": 2
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "cascade",
+     "nodes": [
+      {
+       "id": "glacier_line",
+       "name": "Glacier Line",
+       "fx": "wall",
+       "mod": {
+        "wall": {
+         "length": 8,
+         "seconds": 6,
+         "distance": 12
+        }
+       }
+      },
+      {
+       "id": "endless_edge",
+       "name": "Endless Edge",
+       "fx": "charge",
+       "mod": {
+        "onKill": {
+         "refund": 1
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "spellrush": {
+   "name": "Spellrush",
+   "shape": "self",
+   "element": "arcane",
+   "cooldown": 30,
+   "mp": 20,
+   "empowerNext": {
+    "count": 3,
+    "mult": 0.6,
+    "free": true,
+    "seconds": 10
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "long_rush",
+       "name": "Long Rush",
+       "fx": "charge",
+       "mod": {
+        "empowerNext": {
+         "count": 5,
+         "mult": 0.35
+        }
+       }
+      },
+      {
+       "id": "twin_rush",
+       "name": "Twin Rush",
+       "fx": "overload",
+       "mod": {
+        "empowerNext": {
+         "count": 2,
+         "mult": 1
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "arcane_mantle",
+       "name": "Arcane Mantle",
+       "fx": "ward",
+       "mod": {
+        "barrier": {
+         "share": 0.15,
+         "seconds": 8
+        }
+       }
+      },
+      {
+       "id": "clear_sight",
+       "name": "Clear Sight",
+       "fx": "charge",
+       "mod": {
+        "empowerNext": {
+         "count": 2,
+         "crit": true
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "rush_nova",
+       "name": "Rush Nova",
+       "fx": "wide",
+       "mod": {
+        "burst": {
+         "radius": 6,
+         "mult": 1.5,
+         "element": "arcane"
+        }
+       }
+      },
+      {
+       "id": "spell_ward",
+       "name": "Spell Ward",
+       "fx": "ward",
+       "mod": {
+        "ward": {
+         "charges": 2,
+         "cap": 0.15,
+         "seconds": 10
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "unbound_hour",
+       "name": "Unbound Hour",
+       "fx": "charge",
+       "mod": {
+        "selfBuff": {
+         "name": "Unbound Hour",
+         "seconds": 8,
+         "cdRate": 1.5
+        }
+       }
+      },
+      {
+       "id": "twinned_spells",
+       "name": "Twinned Spells",
+       "fx": "echo",
+       "mod": {
+        "empowerNext": {
+         "count": 2,
+         "mult": 0,
+         "repeat": 2,
+         "repeatMult": 0.6
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "blizzard": {
+   "name": "Whiteout",
+   "shape": "ground",
+   "element": "ice",
+   "mult": 0.35,
+   "range": 30,
+   "radius": 5.5,
+   "repeats": 6,
+   "repeatEvery": 0.5,
+   "weather": true,
+   "cooldown": 14,
+   "mp": 24,
+   "stack": {
+    "status": "frostbite",
+    "add": 1,
+    "max": 5
+   },
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "wide_whiteout",
+       "name": "Wide Whiteout",
+       "fx": "wide",
+       "mod": {
+        "set": {
+         "radius": 8
+        },
+        "mul": {
+         "mult": 0.8
+        }
+       }
+      },
+      {
+       "id": "frozen_ground",
+       "name": "Frozen Ground",
+       "fx": "zone",
+       "mod": {
+        "pool": {
+         "seconds": 4,
+         "radius": 5.5,
+         "slow": 0.5,
+         "power": 0
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "hailstones",
+       "name": "Hailstones",
+       "fx": "seek",
+       "mod": {
+        "repeats": {
+         "scatter": true
+        },
+        "mul": {
+         "mult": 1.3
+        }
+       }
+      },
+      {
+       "id": "drifts",
+       "name": "Drifts",
+       "fx": "pull",
+       "mod": {
+        "pullIn": {
+         "metres": 1,
+         "to": "impact"
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "snowmelt",
+       "name": "Snowmelt",
+       "fx": "drain",
+       "mod": {
+        "onHit": {
+         "mana": 1
+        }
+       }
+      },
+      {
+       "id": "lost_in_snow",
+       "name": "Lost in Snow",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "name": "Lost in Snow",
+         "seconds": 4,
+         "evade": 0.25
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "conflagration",
+     "nodes": [
+      {
+       "id": "glacial_age",
+       "name": "Glacial Age",
+       "fx": "shatter",
+       "mod": {
+        "consumes": {
+         "status": "stagger",
+         "mult": 0.8
+        }
+       }
+      },
+      {
+       "id": "twin_storms",
+       "name": "Twin Storms",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "stillfrost": {
+   "name": "Stillfrost",
+   "shape": "ground",
+   "element": "ice",
+   "mult": 3,
+   "range": 30,
+   "radius": 7,
+   "delay": 1.5,
+   "cooldown": 30,
+   "mp": 34,
+   "consumes": {
+    "status": "frostbite",
+    "perStack": true,
+    "mult": 0.2,
+    "cap": 1,
+    "remove": true
+   },
+   "stack": {
+    "status": "frostbite",
+    "add": 5,
+    "max": 5
+   },
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "wide_stillness",
+       "name": "Wide Stillness",
+       "fx": "wide",
+       "mod": {
+        "set": {
+         "radius": 10
+        },
+        "mul": {
+         "mult": 0.8
+        }
+       }
+      },
+      {
+       "id": "heart_of_winter",
+       "name": "Heart of Winter",
+       "fx": "wide",
+       "mod": {
+        "set": {
+         "shape": "around"
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "shatter",
+     "nodes": [
+      {
+       "id": "shrapnel_ice",
+       "name": "Shrapnel Ice",
+       "fx": "shatter",
+       "mod": {
+        "onKill": {
+         "burst": {
+          "radius": 4,
+          "mult": 0.8
+         }
+        }
+       }
+      },
+      {
+       "id": "lingering_cold",
+       "name": "Lingering Cold",
+       "fx": "zone",
+       "mod": {
+        "pool": {
+         "seconds": 5,
+         "radius": 7,
+         "slow": 0.5,
+         "power": 0
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "cold_fusion",
+       "name": "Cold Fusion",
+       "fx": "charge",
+       "mod": {
+        "cutCooldown": {
+         "skill": "spellrush",
+         "seconds": 10,
+         "per": "cast",
+         "orSelf": 6
+        }
+       },
+       "requires": "spellrush"
+      },
+      {
+       "id": "brittle_ice",
+       "name": "Brittle Ice",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "marked",
+          "takeMore": 0.25,
+          "seconds": 6
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "cascade",
+     "nodes": [
+      {
+       "id": "second_stillness",
+       "name": "Second Stillness",
+       "fx": "charge",
+       "mod": {
+        "onKill": {
+         "refund": 0.5
+        }
+       }
+      },
+      {
+       "id": "ice_age",
+       "name": "Ice Age",
+       "fx": "post",
+       "mod": {
+        "place": {
+         "kind": "pulse",
+         "seconds": 10,
+         "radius": 7,
+         "every": 1,
+         "strike": {
+          "mult": 0.25,
+          "targets": 3,
+          "nearest": false
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "firebolt": {
+   "name": "Firebolt",
+   "shape": "bolt",
+   "element": "fire",
+   "mult": 1.5,
+   "range": 36,
+   "splash": 2.6,
+   "cooldown": 4,
+   "mp": 8,
+   "stack": {
+    "status": "burn",
+    "add": 1,
+    "max": 5
+   },
+   "statusMult": 0.2,
+   "talents": {
+    "1": {
+     "lib": "fan",
+     "nodes": [
+      {
+       "id": "cinder_spray",
+       "name": "Cinder Spray",
+       "fx": "fan",
+       "mod": {
+        "add": {
+         "projectiles": 2
+        },
+        "set": {
+         "spread": 0.35
+        },
+        "mul": {
+         "mult": 0.65
+        }
+       }
+      },
+      {
+       "id": "slow_burner",
+       "name": "Slow Burner",
+       "fx": "zone",
+       "mod": {
+        "pool": {
+         "seconds": 3,
+         "radius": 2,
+         "power": 0.15,
+         "element": "fire"
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "chain",
+     "nodes": [
+      {
+       "id": "flashpoint",
+       "name": "Flashpoint",
+       "fx": "detonate",
+       "mod": {
+        "detonate": {
+         "types": [
+          "burn"
+         ],
+         "share": 0.3,
+         "keep": 2
+        }
+       }
+      },
+      {
+       "id": "wildfire",
+       "name": "Wildfire",
+       "fx": "stack",
+       "mod": {
+        "onKill": {
+         "spread": {
+          "types": [
+           "burn"
+          ],
+          "radius": 4
+         }
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "cauterise",
+     "nodes": [
+      {
+       "id": "familiars_spark",
+       "name": "Familiar's Spark",
+       "fx": "summon",
+       "mod": {
+        "command": {
+         "order": "focus",
+         "petOnly": true,
+         "seconds": 3,
+         "biteStatus": "burn"
+        }
+       }
+      },
+      {
+       "id": "kindling",
+       "name": "Kindling",
+       "fx": "stack",
+       "mod": {
+        "consumes": {
+         "status": "burn",
+         "perStack": true,
+         "mult": 0.08,
+         "cap": 0.4
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "cascade",
+     "nodes": [
+      {
+       "id": "white_heat",
+       "name": "White Heat",
+       "fx": "overload",
+       "mod": {
+        "onCrit": {
+         "repeat": 0.8
+        }
+       }
+      },
+      {
+       "id": "phoenix_bolt",
+       "name": "Phoenix Bolt",
+       "fx": "chain",
+       "mod": {
+        "ricochet": {
+         "bounces": 2,
+         "range": 10,
+         "keep": 0.6
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "fire_wall": {
+   "name": "Burning Line",
+   "shape": "ground",
+   "element": "fire",
+   "mult": 1,
+   "range": 30,
+   "radius": 1.4,
+   "cooldown": 13,
+   "mp": 18,
+   "line": {
+    "length": 10,
+    "width": 2,
+    "every": 2,
+    "across": true
+   },
+   "pool": {
+    "seconds": 5,
+    "radius": 1.6,
+    "power": 0.15,
+    "element": "fire"
+   },
+   "stack": {
+    "status": "burn",
+    "add": 2,
+    "max": 5
+   },
+   "statusMult": 0.2,
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "ring_of_fire",
+       "name": "Ring of Fire",
+       "fx": "zone",
+       "mod": {
+        "line": null,
+        "set": {
+         "radius": 6
+        },
+        "pool": {
+         "radius": 6
+        }
+       }
+      },
+      {
+       "id": "long_wall",
+       "name": "Long Wall",
+       "fx": "wide",
+       "mod": {
+        "line": {
+         "length": 18
+        },
+        "mul": {
+         "cooldown": 1.25
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "linger",
+     "nodes": [
+      {
+       "id": "firebreak",
+       "name": "Firebreak",
+       "fx": "wall",
+       "mod": {
+        "wall": {
+         "length": 10,
+         "seconds": 3
+        }
+       }
+      },
+      {
+       "id": "choking_smoke",
+       "name": "Choking Smoke",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "weaken",
+          "dealLess": 0.2,
+          "seconds": 3
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "second_line",
+       "name": "Second Line",
+       "fx": "echo",
+       "mod": {
+        "again": {
+         "delay": 1.5,
+         "mult": 0.6
+        }
+       }
+      },
+      {
+       "id": "fed_flames",
+       "name": "Fed Flames",
+       "fx": "charge",
+       "mod": {
+        "onKill": {
+         "refund": 0.15
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "conflagration",
+     "nodes": [
+      {
+       "id": "fire_lane",
+       "name": "Fire Lane",
+       "fx": "zone",
+       "mod": {
+        "line": {
+         "across": false
+        }
+       }
+      },
+      {
+       "id": "kindled_post",
+       "name": "Kindled Post",
+       "fx": "post",
+       "mod": {
+        "place": {
+         "kind": "pulse",
+         "seconds": 5,
+         "radius": 6,
+         "every": 1,
+         "strike": {
+          "mult": 0.3
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "ember_stride": {
+   "name": "Cinder Stride",
+   "shape": "self",
+   "element": "fire",
+   "mult": 0.25,
+   "cooldown": 20,
+   "mp": 16,
+   "trail": {
+    "seconds": 8,
+    "every": 0.3,
+    "radius": 1.8,
+    "burns": 2.5,
+    "step": 1.4
+   },
+   "selfBuff": {
+    "name": "Cinder Stride",
+    "seconds": 8,
+    "movePct": 0.2
+   },
+   "pool": {
+    "seconds": 4,
+    "radius": 3,
+    "power": 0.35,
+    "element": "fire"
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "sprint_of_flame",
+       "name": "Sprint of Flame",
+       "fx": "quick",
+       "mod": {
+        "selfBuff": {
+         "movePct": 0.4
+        },
+        "mul": {
+         "cooldown": 1.25
+        }
+       }
+      },
+      {
+       "id": "heat_shield",
+       "name": "Heat Shield",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "resist": 0.15
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "ash_cloud",
+       "name": "Ash Cloud",
+       "fx": "wide",
+       "mod": {
+        "burst": {
+         "radius": 5,
+         "statuses": [
+          {
+           "id": "weaken",
+           "dealLess": 0.2,
+           "seconds": 4
+          }
+         ]
+        }
+       }
+      },
+      {
+       "id": "kindled_pace",
+       "name": "Kindled Pace",
+       "fx": "quick",
+       "mod": {
+        "selfBuff": {
+         "hastePct": 0.25
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "kindled_path",
+       "name": "Kindled Path",
+       "fx": "drain",
+       "mod": {
+        "selfBuff": {
+         "manaPerSecond": 2
+        }
+       }
+      },
+      {
+       "id": "fire_ward",
+       "name": "Fire Ward",
+       "fx": "ward",
+       "mod": {
+        "ward": {
+         "charges": 2,
+         "cap": 0.12,
+         "seconds": 8
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "conflagrant_path",
+       "name": "Conflagrant Path",
+       "fx": "detonate",
+       "mod": {
+        "selfBuff": {
+         "onEnd": {
+          "shape": "around",
+          "radius": 6,
+          "mult": 1.5,
+          "element": "fire"
+         }
+        }
+       }
+      },
+      {
+       "id": "hands_of_cinder",
+       "name": "Hands of Cinder",
+       "fx": "charge",
+       "mod": {
+        "imbue": {
+         "seconds": 8,
+         "element": "fire",
+         "status": "burn",
+         "mult": 0.2
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "stoke_familiar": {
+   "name": "Stoke the Familiar",
+   "shape": "self",
+   "element": "fire",
+   "cooldown": 20,
+   "mp": 14,
+   "selfBuff": {
+    "name": "Stoked",
+    "seconds": 10,
+    "petsOnly": true,
+    "damage": 0.5,
+    "resist": 0.25
+   },
+   "command": {
+    "order": "focus",
+    "petOnly": true,
+    "seconds": 10,
+    "biteStatus": "burn"
+   },
+   "revive": {
+    "share": 0.6
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "bonfire",
+       "name": "Bonfire",
+       "fx": "post",
+       "mod": {
+        "place": {
+         "kind": "pulse",
+         "seconds": 10,
+         "radius": 5,
+         "every": 1,
+         "strike": {
+          "mult": 0.3,
+          "targets": 6
+         }
+        }
+       }
+      },
+      {
+       "id": "clean_flame",
+       "name": "Clean Flame",
+       "fx": "ward",
+       "mod": {
+        "cleanse": {
+         "count": 2,
+         "pets": true
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "feeding_flame",
+       "name": "Feeding Flame",
+       "fx": "drain",
+       "mod": {
+        "healPets": {
+         "share": 0.3
+        }
+       }
+      },
+      {
+       "id": "quick_kindling",
+       "name": "Quick Kindling",
+       "fx": "quick",
+       "mod": {
+        "selfBuff": {
+         "hastePct": 0.3
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "overheat",
+       "name": "Overheat",
+       "fx": "detonate",
+       "mod": {
+        "selfBuff": {
+         "onEnd": {
+          "shape": "around",
+          "radius": 5,
+          "mult": 2,
+          "element": "fire"
+         }
+        }
+       }
+      },
+      {
+       "id": "fireguard",
+       "name": "Fireguard",
+       "fx": "ward",
+       "mod": {
+        "ward": {
+         "charges": 2,
+         "cap": 0.15,
+         "seconds": 10,
+         "pets": true
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "great_flame",
+       "name": "Great Flame",
+       "fx": "overload",
+       "mod": {
+        "selfBuff": {
+         "damage": 1,
+         "resist": 0.4
+        },
+        "mul": {
+         "cooldown": 1.5
+        }
+       }
+      },
+      {
+       "id": "shared_blaze",
+       "name": "Shared Blaze",
+       "fx": "charge",
+       "mod": {
+        "imbue": {
+         "seconds": 10,
+         "element": "fire",
+         "status": "burn",
+         "mult": 0.15
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "flashover": {
+   "name": "Flashover",
+   "shape": "ground",
+   "element": "fire",
+   "mult": 1.1,
+   "range": 30,
+   "radius": 6,
+   "cooldown": 12,
+   "mp": 16,
+   "detonate": {
+    "types": [
+     "burn"
+    ],
+    "share": 0.6,
+    "keep": 1
+   },
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "wildfire_reach",
+       "name": "Wildfire Reach",
+       "fx": "wide",
+       "mod": {
+        "set": {
+         "shape": "around",
+         "radius": 12
+        },
+        "mul": {
+         "mult": 0.7
+        }
+       }
+      },
+      {
+       "id": "pinpoint",
+       "name": "Pinpoint",
+       "fx": "lance",
+       "mod": {
+        "set": {
+         "shape": "bolt",
+         "range": 30
+        },
+        "detonate": {
+         "share": 1
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "leaping_sparks",
+       "name": "Leaping Sparks",
+       "fx": "chain",
+       "mod": {
+        "spreadStatus": {
+         "types": [
+          "burn"
+         ],
+         "radius": 4,
+         "max": 2
+        }
+       }
+      },
+      {
+       "id": "banked_coals",
+       "name": "Banked Coals",
+       "fx": "stack",
+       "mod": {
+        "detonate": {
+         "share": 0.35,
+         "keep": 3
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "mana_flame",
+       "name": "Mana Flame",
+       "fx": "drain",
+       "mod": {
+        "onHit": {
+         "mana": 2
+        }
+       }
+      },
+      {
+       "id": "blast_wave",
+       "name": "Blast Wave",
+       "fx": "knock",
+       "mod": {
+        "knock": {
+         "push": 2
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "conflagration",
+     "nodes": [
+      {
+       "id": "supernova",
+       "name": "Supernova",
+       "fx": "charge",
+       "mod": {
+        "cutCooldown": {
+         "skill": "meteor",
+         "seconds": 1.5,
+         "per": "hit",
+         "orSelf": 1
+        }
+       },
+       "requires": "meteor"
+      },
+      {
+       "id": "ashes",
+       "name": "Ashes",
+       "fx": "zone",
+       "mod": {
+        "onKill": {
+         "pool": {
+          "seconds": 4,
+          "radius": 3,
+          "element": "fire"
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "meteor": {
+   "name": "Fallstone",
+   "shape": "ground",
+   "element": "fire",
+   "mult": 2.9,
+   "range": 36,
+   "radius": 8,
+   "cooldown": 22,
+   "mp": 30,
+   "stack": {
+    "status": "burn",
+    "add": 3,
+    "max": 5
+   },
+   "statusMult": 0.1,
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "narrow_fall",
+       "name": "Narrow Fall",
+       "fx": "heavy",
+       "mod": {
+        "set": {
+         "radius": 4
+        },
+        "bonusIf": [
+         {
+          "when": "status:burn",
+          "mult": 0.5
+         }
+        ]
+       }
+      },
+      {
+       "id": "stone_rain",
+       "name": "Stone Rain",
+       "fx": "wide",
+       "mod": {
+        "repeats": {
+         "count": 5,
+         "every": 0.3,
+         "scatter": true
+        },
+        "mul": {
+         "mult": 0.3
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "linger",
+     "nodes": [
+      {
+       "id": "molten_crater",
+       "name": "Molten Crater",
+       "fx": "zone",
+       "mod": {
+        "pool": {
+         "seconds": 6,
+         "radius": 5,
+         "power": 0.25,
+         "element": "fire"
+        }
+       }
+      },
+      {
+       "id": "impact",
+       "name": "Impact",
+       "fx": "knock",
+       "mod": {
+        "knock": {
+         "stagger": 1.5
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "second_fall",
+       "name": "Second Fall",
+       "fx": "echo",
+       "mod": {
+        "again": {
+         "delay": 2,
+         "mult": 0.5
+        }
+       }
+      },
+      {
+       "id": "kindled_sky",
+       "name": "Kindled Sky",
+       "fx": "stack",
+       "mod": {
+        "add": {
+         "stack.add": 2
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "conflagration",
+     "nodes": [
+      {
+       "id": "skyfall",
+       "name": "Skyfall",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 3
+        },
+        "mul": {
+         "cooldown": 1.5
+        }
+       }
+      },
+      {
+       "id": "bring_it_down",
+       "name": "Bring It Down",
+       "fx": "wide",
+       "mod": {
+        "set": {
+         "shape": "around"
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "chain_bolt": {
+   "name": "Forked Bolt",
+   "shape": "bolt",
+   "element": "lightning",
+   "mult": 1.1,
+   "range": 40,
+   "splash": 1.2,
+   "ricochet": {
+    "bounces": 4,
+    "range": 8,
+    "keep": 0.8
+   },
+   "status": "shock",
+   "cooldown": 4,
+   "mp": 8,
+   "talents": {
+    "1": {
+     "lib": "seeking",
+     "nodes": [
+      {
+       "id": "three_forks",
+       "name": "Three Forks",
+       "fx": "fan",
+       "mod": {
+        "add": {
+         "projectiles": 2
+        },
+        "set": {
+         "spread": 0.35
+        },
+        "ricochet": {
+         "bounces": 2
+        }
+       }
+      },
+      {
+       "id": "grounding",
+       "name": "Grounding",
+       "fx": "zone",
+       "mod": {
+        "pool": {
+         "seconds": 2,
+         "radius": 2,
+         "power": 0.15,
+         "status": "shock"
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "return_arc",
+       "name": "Return Arc",
+       "fx": "chain",
+       "mod": {
+        "returns": {
+         "keep": 0.5
+        }
+       }
+      },
+      {
+       "id": "charged_flesh",
+       "name": "Charged Flesh",
+       "fx": "tag",
+       "mod": {
+        "consumes": {
+         "status": "shock",
+         "mult": 0.3
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "echo",
+     "nodes": [
+      {
+       "id": "overcharge",
+       "name": "Overcharge",
+       "fx": "overload",
+       "mod": {
+        "onCrit": {
+         "repeat": 0.6
+        }
+       }
+      },
+      {
+       "id": "familiar_relay",
+       "name": "Familiar Relay",
+       "fx": "summon",
+       "mod": {
+        "command": {
+         "order": "focus",
+         "petOnly": true,
+         "seconds": 4,
+         "biteStatus": "shock"
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "cascade",
+     "nodes": [
+      {
+       "id": "storm_web",
+       "name": "Storm Web",
+       "fx": "chain",
+       "mod": {
+        "spreadStatus": {
+         "types": [
+          "shock"
+         ],
+         "radius": 8,
+         "max": 4
+        }
+       }
+      },
+      {
+       "id": "endless_arc",
+       "name": "Endless Arc",
+       "fx": "charge",
+       "mod": {
+        "onKill": {
+         "refund": 1
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "thunderclap": {
+   "name": "Thunder Ring",
+   "shape": "around",
+   "element": "lightning",
+   "mult": 1,
+   "radius": 7,
+   "status": "shock",
+   "cooldown": 12,
+   "mp": 18,
+   "place": {
+    "kind": "zone",
+    "seconds": 6,
+    "radius": 7,
+    "follow": "self",
+    "edge": true,
+    "edgeMult": 1,
+    "edgeStatus": "shock",
+    "edgeKnock": {
+     "stagger": 0.6
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "clap",
+       "name": "Clap",
+       "fx": "knock",
+       "mod": {
+        "place": null,
+        "knock": {
+         "push": 3
+        }
+       }
+      },
+      {
+       "id": "tight_ring",
+       "name": "Tight Ring",
+       "fx": "zone",
+       "mod": {
+        "place": {
+         "radius": 4,
+         "every": 1,
+         "strike": {
+          "mult": 0.3,
+          "targets": 6
+         }
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "linger",
+     "nodes": [
+      {
+       "id": "static_field",
+       "name": "Static Field",
+       "fx": "zone",
+       "mod": {
+        "place": {
+         "debuff": {
+          "id": "static",
+          "slow": 0.3
+         }
+        }
+       }
+      },
+      {
+       "id": "caged",
+       "name": "Caged",
+       "fx": "wall",
+       "mod": {
+        "wall": {
+         "ring": true,
+         "radius": 7,
+         "seconds": 4,
+         "distance": 0
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "bulwark",
+     "nodes": [
+      {
+       "id": "lightning_rods",
+       "name": "Lightning Rods",
+       "fx": "post",
+       "mod": {
+        "place": {
+         "every": 1.5,
+         "strike": {
+          "mult": 0.4,
+          "targets": 2
+         }
+        }
+       }
+      },
+      {
+       "id": "charged_ground",
+       "name": "Charged Ground",
+       "fx": "zone",
+       "mod": {
+        "pool": {
+         "seconds": 6,
+         "radius": 7,
+         "power": 0.15,
+         "status": "shock"
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "conflagration",
+     "nodes": [
+      {
+       "id": "double_ring",
+       "name": "Double Ring",
+       "fx": "wide",
+       "mod": {
+        "repeats": {
+         "count": 2,
+         "every": 0.5,
+         "grow": 3
+        },
+        "mul": {
+         "mult": 0.8
+        }
+       }
+      },
+      {
+       "id": "collapse",
+       "name": "Collapse",
+       "fx": "pull",
+       "mod": {
+        "place": {
+         "pull": 1.5
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "storm_beam": {
+   "name": "Storm Beam",
+   "shape": "beam",
+   "element": "lightning",
+   "mult": 2.2,
+   "range": 30,
+   "width": 2.4,
+   "status": "shock",
+   "cooldown": 11,
+   "mp": 20,
+   "talents": {
+    "1": {
+     "lib": "pierce",
+     "nodes": [
+      {
+       "id": "held_storm",
+       "name": "Held Storm",
+       "fx": "charge",
+       "mod": {
+        "channel": {
+         "seconds": 2,
+         "every": 0.5,
+         "grow": 0.25
+        },
+        "mul": {
+         "mult": 0.28
+        }
+       }
+      },
+      {
+       "id": "wide_beam",
+       "name": "Wide Beam",
+       "fx": "wide",
+       "mod": {
+        "set": {
+         "width": 4
+        },
+        "mul": {
+         "mult": 0.8
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "chain",
+     "nodes": [
+      {
+       "id": "ionise",
+       "name": "Ionise",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "marked",
+          "takeMore": 0.15,
+          "seconds": 6
+         }
+        ]
+       }
+      },
+      {
+       "id": "storm_push",
+       "name": "Storm Push",
+       "fx": "knock",
+       "mod": {
+        "knock": {
+         "push": 2
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "echo",
+     "nodes": [
+      {
+       "id": "full_discharge",
+       "name": "Full Discharge",
+       "fx": "detonate",
+       "mod": {
+        "consumes": {
+         "status": "shock",
+         "mult": 0.5,
+         "remove": true
+        }
+       }
+      },
+      {
+       "id": "static_path",
+       "name": "Static Path",
+       "fx": "zone",
+       "mod": {
+        "pool": {
+         "along": "beam",
+         "seconds": 3,
+         "power": 0.12,
+         "radius": 1.5
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "cascade",
+     "nodes": [
+      {
+       "id": "afterstrike",
+       "name": "Afterstrike",
+       "fx": "echo",
+       "mod": {
+        "again": {
+         "delay": 1,
+         "mult": 0.6
+        }
+       }
+      },
+      {
+       "id": "feedback",
+       "name": "Feedback",
+       "fx": "drain",
+       "mod": {
+        "onHit": {
+         "mana": 2
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "storm_orbs": {
+   "name": "Storm Orbs",
+   "shape": "self",
+   "element": "lightning",
+   "mult": 0.15,
+   "cooldown": 24,
+   "mp": 22,
+   "orbs": {
+    "count": 3,
+    "seconds": 12,
+    "every": 1.2,
+    "radius": 8,
+    "status": "shock"
+   },
+   "pool": {
+    "seconds": 4,
+    "radius": 3,
+    "power": 0.35,
+    "status": "shock",
+    "element": "lightning"
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "shield_orbs",
+       "name": "Shield Orbs",
+       "fx": "ward",
+       "mod": {
+        "ward": {
+         "charges": 2,
+         "cap": 0.15,
+         "seconds": 12
+        }
+       }
+      },
+      {
+       "id": "orb_burst",
+       "name": "Orb Burst",
+       "fx": "wide",
+       "mod": {
+        "burst": {
+         "radius": 5,
+         "mult": 0.8,
+         "element": "lightning"
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "static_skin",
+       "name": "Static Skin",
+       "fx": "counter",
+       "mod": {
+        "selfBuff": {
+         "name": "Static Skin",
+         "seconds": 12,
+         "reflect": 0.2
+        }
+       }
+      },
+      {
+       "id": "grounded_orbs",
+       "name": "Grounded Orbs",
+       "fx": "zone",
+       "mod": {
+        "pool": {
+         "radius": 5,
+         "slow": 0.3
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "familiars_orbit",
+       "name": "Familiar's Orbit",
+       "fx": "summon",
+       "mod": {
+        "command": {
+         "order": "focus",
+         "petOnly": true,
+         "seconds": 6,
+         "biteStatus": "shock"
+        }
+       }
+      },
+      {
+       "id": "charged_casting",
+       "name": "Charged Casting",
+       "fx": "charge",
+       "mod": {
+        "empowerNext": {
+         "count": 2,
+         "mult": 0.4,
+         "seconds": 12
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "discharge",
+       "name": "Discharge",
+       "fx": "detonate",
+       "mod": {
+        "recast": {
+         "window": 12,
+         "then": {
+          "shape": "around",
+          "radius": 8,
+          "mult": 1.2,
+          "element": "lightning",
+          "status": "shock"
+         },
+         "say": "release the orbs as an 8 m ring of lightning for 120% weapon damage"
+        }
+       }
+      },
+      {
+       "id": "storm_crown",
+       "name": "Storm Crown",
+       "fx": "charge",
+       "mod": {
+        "selfBuff": {
+         "name": "Storm Crown",
+         "seconds": 12,
+         "cdRate": 1.2
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "bolt_step": {
+   "name": "Bolt Step",
+   "shape": "dash",
+   "element": "lightning",
+   "mult": 1.5,
+   "range": 12,
+   "splash": 2,
+   "status": "shock",
+   "cooldown": 10,
+   "mp": 10,
+   "selfBuff": {
+    "name": "Bolt Step",
+    "seconds": 0.8,
+    "untargetable": true
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "return_bolt",
+       "name": "Return Bolt",
+       "fx": "swap",
+       "mod": {
+        "recast": {
+         "window": 3,
+         "then": {
+          "shape": "dash",
+          "mult": 0.5,
+          "dash": {
+           "to": "back",
+           "range": 12
+          }
+         },
+         "say": "dash 12 m back the way you came, striking for 50% weapon damage"
+        }
+       }
+      },
+      {
+       "id": "long_step",
+       "name": "Long Step",
+       "fx": "leap",
+       "mod": {
+        "set": {
+         "range": 18
+        },
+        "mul": {
+         "cooldown": 1.3
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "burst",
+     "nodes": [
+      {
+       "id": "static_landing",
+       "name": "Static Landing",
+       "fx": "zone",
+       "mod": {
+        "pool": {
+         "seconds": 3,
+         "radius": 3,
+         "power": 0.2,
+         "status": "shock"
+        }
+       }
+      },
+      {
+       "id": "thunder_arrival",
+       "name": "Thunder Arrival",
+       "fx": "knock",
+       "mod": {
+        "burst": {
+         "radius": 3,
+         "mult": 0.6,
+         "element": "lightning",
+         "knock": {
+          "push": 1,
+          "stagger": 1
+         }
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "bulwark",
+     "nodes": [
+      {
+       "id": "charged_up",
+       "name": "Charged Up",
+       "fx": "charge",
+       "mod": {
+        "empowerNext": {
+         "count": 2,
+         "mult": 0.3,
+         "seconds": 6
+        }
+       }
+      },
+      {
+       "id": "twin_steps",
+       "name": "Twin Steps",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "crescendo",
+     "nodes": [
+      {
+       "id": "familiar_swap",
+       "name": "Familiar Swap",
+       "fx": "swap",
+       "mod": {
+        "dash": {
+         "to": "swap",
+         "range": 20
+        }
+       }
+      },
+      {
+       "id": "lightning_column",
+       "name": "Lightning Column",
+       "fx": "post",
+       "mod": {
+        "place": {
+         "kind": "pulse",
+         "seconds": 4,
+         "radius": 6,
+         "every": 1,
+         "strike": {
+          "mult": 0.5,
+          "targets": 2
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "tempest_eye": {
+   "name": "Eye of the Tempest",
+   "shape": "ground",
+   "element": "lightning",
+   "mult": 0.34,
+   "range": 30,
+   "radius": 9,
+   "status": "shock",
+   "repeats": {
+    "count": 12,
+    "every": 0.5,
+    "scatter": true
+   },
+   "cooldown": 30,
+   "mp": 34,
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "follow_me",
+       "name": "Follow Me",
+       "fx": "zone",
+       "mod": {
+        "set": {
+         "shape": "around"
+        }
+       }
+      },
+      {
+       "id": "narrow_eye",
+       "name": "Narrow Eye",
+       "fx": "pull",
+       "mod": {
+        "set": {
+         "radius": 4
+        },
+        "repeats": {
+         "scatter": false
+        },
+        "pullIn": {
+         "metres": 1,
+         "to": "impact"
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "downpour",
+       "name": "Downpour",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "chill",
+          "slow": 0.3,
+          "seconds": 2
+         }
+        ]
+       }
+      },
+      {
+       "id": "static_charge",
+       "name": "Static Charge",
+       "fx": "tag",
+       "mod": {
+        "consumes": {
+         "status": "shock",
+         "mult": 0.4
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "conductors_baton",
+       "name": "Conductor's Baton",
+       "fx": "charge",
+       "mod": {
+        "cutCooldown": {
+         "skill": "chain_bolt",
+         "seconds": 0.5,
+         "per": "hit",
+         "orSelf": 0.3
+        }
+       },
+       "requires": "chain_bolt"
+      },
+      {
+       "id": "calm_centre",
+       "name": "Calm Centre",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "name": "Calm Centre",
+         "seconds": 6,
+         "resist": 0.2
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "conflagration",
+     "nodes": [
+      {
+       "id": "storms_wake",
+       "name": "Storm's Wake",
+       "fx": "wide",
+       "mod": {
+        "onKill": {
+         "burst": {
+          "radius": 4,
+          "mult": 0.8
+         }
+        }
+       }
+      },
+      {
+       "id": "hunting_storm",
+       "name": "Hunting Storm",
+       "fx": "seek",
+       "mod": {
+        "repeats": {
+         "target": "lowest"
+        },
+        "mul": {
+         "mult": 0.85
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "wild_bolt": {
+   "name": "Wild Bolt",
+   "shape": "bolt",
+   "element": "arcane",
+   "mult": 1.3,
+   "range": 34,
+   "splash": 1.2,
+   "cooldown": 3,
+   "mp": 5,
+   "elementPool": [
+    "fire",
+    "ice",
+    "lightning",
+    "shadow",
+    "poison",
+    "arcane"
+   ],
+   "statusMult": 0.4,
+   "talents": {
+    "1": {
+     "lib": "seeking",
+     "nodes": [
+      {
+       "id": "wild_fan",
+       "name": "Wild Fan",
+       "fx": "fan",
+       "mod": {
+        "add": {
+         "projectiles": 2
+        },
+        "set": {
+         "spread": 0.35
+        },
+        "mul": {
+         "mult": 0.6
+        }
+       }
+      },
+      {
+       "id": "stable_weave",
+       "name": "Stable Weave",
+       "fx": "charge",
+       "mod": {
+        "elementCycle": [
+         "fire",
+         "ice",
+         "lightning",
+         "shadow",
+         "poison",
+         "arcane"
+        ],
+        "mul": {
+         "mult": 0.9
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "chain",
+     "nodes": [
+      {
+       "id": "spilled_element",
+       "name": "Spilled Element",
+       "fx": "zone",
+       "mod": {
+        "pool": {
+         "seconds": 3,
+         "radius": 2.5,
+         "power": 0.15
+        }
+       }
+      },
+      {
+       "id": "unstable_mix",
+       "name": "Unstable Mix",
+       "fx": "stack",
+       "mod": {
+        "bonusIf": [
+         {
+          "when": "variety:0.1:0.4"
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "cauterise",
+     "nodes": [
+      {
+       "id": "familiar_sparks",
+       "name": "Familiar Sparks",
+       "fx": "summon",
+       "mod": {
+        "command": {
+         "order": "focus",
+         "petOnly": true,
+         "seconds": 3
+        }
+       }
+      },
+      {
+       "id": "mana_feedback",
+       "name": "Mana Feedback",
+       "fx": "drain",
+       "mod": {
+        "onHit": {
+         "mana": 2
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "cascade",
+     "nodes": [
+      {
+       "id": "prism",
+       "name": "Prism",
+       "fx": "charge",
+       "mod": {
+        "statusPool": [
+         "burn",
+         "chill",
+         "shock",
+         "curse",
+         "poison"
+        ]
+       }
+      },
+      {
+       "id": "chaos_split",
+       "name": "Chaos Split",
+       "fx": "fan",
+       "mod": {
+        "split": {
+         "shards": 3,
+         "range": 8,
+         "keep": 0.4
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "arcane_burst": {
+   "name": "Arcane Burst",
+   "shape": "ground",
+   "element": "arcane",
+   "mult": 1.8,
+   "range": 34,
+   "radius": 5,
+   "status": "curse",
+   "cooldown": 10,
+   "mp": 18,
+   "bonusIf": [
+    {
+     "when": "variety:0.2:1"
+    }
+   ],
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "unstable",
+       "name": "Unstable",
+       "fx": "overload",
+       "mod": {
+        "variance": [
+         0.5,
+         1.6
+        ]
+       }
+      },
+      {
+       "id": "tight_knot",
+       "name": "Tight Knot",
+       "fx": "heavy",
+       "mod": {
+        "set": {
+         "radius": 3
+        },
+        "pen": 0.3
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "unravel",
+       "name": "Unravel",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "strip",
+          "seconds": 4
+         }
+        ]
+       }
+      },
+      {
+       "id": "leaking_rift",
+       "name": "Leaking Rift",
+       "fx": "zone",
+       "mod": {
+        "pool": {
+         "seconds": 4,
+         "radius": 4,
+         "power": 0.2,
+         "element": "arcane"
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "feedback_loop",
+       "name": "Feedback Loop",
+       "fx": "drain",
+       "mod": {
+        "onHit": {
+         "mana": 3
+        }
+       }
+      },
+      {
+       "id": "rift_pull",
+       "name": "Rift Pull",
+       "fx": "pull",
+       "mod": {
+        "pullIn": {
+         "metres": 3,
+         "to": "impact"
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "conflagration",
+     "nodes": [
+      {
+       "id": "afterburst",
+       "name": "Afterburst",
+       "fx": "wide",
+       "mod": {
+        "onKill": {
+         "burst": {
+          "radius": 4,
+          "mult": 0.6
+         }
+        }
+       }
+      },
+      {
+       "id": "second_rupture",
+       "name": "Second Rupture",
+       "fx": "echo",
+       "mod": {
+        "again": {
+         "delay": 1.5,
+         "mult": 0.5
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "mana_rend": {
+   "name": "Mana Rend",
+   "shape": "beam",
+   "element": "arcane",
+   "mult": 1.6,
+   "range": 22,
+   "width": 1.8,
+   "cooldown": 10,
+   "mp": 0,
+   "onHit": {
+    "mana": 8
+   },
+   "bonusIf": [
+    {
+     "when": "caster",
+     "mult": 0.6
+    },
+    {
+     "when": "rank:champion",
+     "mult": 0.6
+    }
+   ],
+   "statuses": [
+    {
+     "id": "silence",
+     "seconds": 2
+    }
+   ],
+   "talents": {
+    "1": {
+     "lib": "pierce",
+     "nodes": [
+      {
+       "id": "wide_rend",
+       "name": "Wide Rend",
+       "fx": "wide",
+       "mod": {
+        "set": {
+         "width": 3
+        },
+        "mul": {
+         "mult": 0.8
+        }
+       }
+      },
+      {
+       "id": "tether",
+       "name": "Tether",
+       "fx": "link",
+       "mod": {
+        "channel": {
+         "seconds": 2,
+         "every": 0.5
+        },
+        "mul": {
+         "mult": 0.35
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "drain",
+     "nodes": [
+      {
+       "id": "spilled_power",
+       "name": "Spilled Power",
+       "fx": "ward",
+       "mod": {
+        "barrier": {
+         "share": 0.1,
+         "seconds": 5
+        }
+       }
+      },
+      {
+       "id": "drain_will",
+       "name": "Drain Will",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "weaken",
+          "dealLess": 0.2,
+          "seconds": 4
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "echo",
+     "nodes": [
+      {
+       "id": "backlash",
+       "name": "Backlash",
+       "fx": "knock",
+       "mod": {
+        "knock": {
+         "push": 2,
+         "interrupt": true
+        }
+       }
+      },
+      {
+       "id": "unspent",
+       "name": "Unspent",
+       "fx": "charge",
+       "mod": {
+        "cutCooldown": {
+         "skill": "self",
+         "seconds": 1,
+         "per": "hit"
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "cascade",
+     "nodes": [
+      {
+       "id": "drink_deep",
+       "name": "Drink Deep",
+       "fx": "drain",
+       "mod": {
+        "onKill": {
+         "mana": 0.2
+        }
+       }
+      },
+      {
+       "id": "bottomless",
+       "name": "Bottomless",
+       "fx": "charge",
+       "mod": {
+        "onKill": {
+         "refund": 1
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "overchannel": {
+   "name": "Overchannel",
+   "shape": "self",
+   "element": "arcane",
+   "cooldown": 30,
+   "mp": 0,
+   "selfBuff": {
+    "name": "Overchannel",
+    "seconds": 8,
+    "damage": 0.6,
+    "perCastHp": 0.03
+   },
+   "talents": {
+    "1": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "short_burn",
+       "name": "Short Burn",
+       "fx": "overload",
+       "mod": {
+        "selfBuff": {
+         "damage": 1,
+         "perCastHp": 0.06
+        }
+       }
+      },
+      {
+       "id": "mana_flood",
+       "name": "Mana Flood",
+       "fx": "drain",
+       "mod": {
+        "selfBuff": {
+         "noMana": true,
+         "perCastHp": 0.05
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "blood_ward",
+       "name": "Blood Ward",
+       "fx": "ward",
+       "mod": {
+        "barrier": {
+         "share": 0.2,
+         "seconds": 8
+        }
+       }
+      },
+      {
+       "id": "blood_haste",
+       "name": "Blood Haste",
+       "fx": "quick",
+       "mod": {
+        "selfBuff": {
+         "hastePct": 0.25
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "blood_mirror",
+       "name": "Blood Mirror",
+       "fx": "counter",
+       "mod": {
+        "selfBuff": {
+         "reflect": 0.25
+        }
+       }
+      },
+      {
+       "id": "deep_reserves",
+       "name": "Deep Reserves",
+       "fx": "drain",
+       "mod": {
+        "selfBuff": {
+         "manaOnHurt": 4
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "chaos_crown",
+       "name": "Chaos Crown",
+       "fx": "echo",
+       "mod": {
+        "empowerNext": {
+         "count": 3,
+         "repeat": 2,
+         "repeatMult": 0.5,
+         "seconds": 8
+        }
+       }
+      },
+      {
+       "id": "final_burn",
+       "name": "Final Burn",
+       "fx": "detonate",
+       "mod": {
+        "selfBuff": {
+         "onEnd": {
+          "shape": "around",
+          "radius": 8,
+          "mult": 2,
+          "element": "arcane"
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "transmute": {
+   "name": "Transmute",
+   "shape": "bolt",
+   "element": "arcane",
+   "range": 26,
+   "cooldown": 18,
+   "mp": 14,
+   "transform": {
+    "seconds": 5
+   },
+   "talents": {
+    "1": {
+     "lib": "seeking",
+     "nodes": [
+      {
+       "id": "toad_pond",
+       "name": "Toad Pond",
+       "fx": "wide",
+       "mod": {
+        "set": {
+         "splash": 3
+        },
+        "mul": {
+         "cooldown": 1.3
+        }
+       }
+      },
+      {
+       "id": "brittle_shape",
+       "name": "Brittle Shape",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "marked",
+          "takeMore": 0.2,
+          "seconds": 5
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "burst",
+     "nodes": [
+      {
+       "id": "volatile_toad",
+       "name": "Volatile Toad",
+       "fx": "detonate",
+       "mod": {
+        "onKill": {
+         "burst": {
+          "radius": 3,
+          "mult": 1
+         }
+        }
+       }
+      },
+      {
+       "id": "wrong_shape",
+       "name": "Wrong Shape",
+       "fx": "swap",
+       "mod": {
+        "transform": null,
+        "turned": {
+         "seconds": 5
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "brand",
+     "nodes": [
+      {
+       "id": "unmade_shape",
+       "name": "Unmade Shape",
+       "fx": "shatter",
+       "mod": {
+        "statuses": [
+         {
+          "id": "strip",
+          "seconds": 5
+         }
+        ]
+       }
+      },
+      {
+       "id": "fed_toad",
+       "name": "Fed Toad",
+       "fx": "drain",
+       "mod": {
+        "onKill": {
+         "mana": 0.15
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "unmaking",
+     "nodes": [
+      {
+       "id": "mass_transmute",
+       "name": "Mass Transmute",
+       "fx": "wide",
+       "mod": {
+        "set": {
+         "shape": "ground",
+         "radius": 6
+        },
+        "mul": {
+         "cooldown": 1.5
+        }
+       }
+      },
+      {
+       "id": "small_again",
+       "name": "Small Again",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "weaken",
+          "dealLess": 0.4,
+          "seconds": 5
+         }
+        ]
+       }
+      }
+     ]
+    }
+   }
+  },
+  "sixfold_ruin": {
+   "name": "Sixfold Ruin",
+   "shape": "ground",
+   "element": "arcane",
+   "mult": 0.7,
+   "range": 30,
+   "radius": 9,
+   "cooldown": 34,
+   "mp": 38,
+   "repeats": {
+    "count": 6,
+    "every": 0.35,
+    "alternate": [
+     {
+      "element": "fire",
+      "mult": 0.7,
+      "cooldown": 34,
+      "radius": 4,
+      "statuses": [
+       "burn"
+      ]
+     },
+     {
+      "element": "ice",
+      "mult": 0.7,
+      "cooldown": 34,
+      "radius": 4,
+      "statuses": [
+       "chill"
+      ]
+     },
+     {
+      "element": "lightning",
+      "mult": 0.7,
+      "cooldown": 34,
+      "radius": 4,
+      "statuses": [
+       "shock"
+      ]
+     },
+     {
+      "element": "shadow",
+      "mult": 0.7,
+      "cooldown": 34,
+      "radius": 4,
+      "statuses": [
+       "curse"
+      ]
+     },
+     {
+      "element": "poison",
+      "mult": 0.7,
+      "cooldown": 34,
+      "radius": 4,
+      "statuses": [
+       "poison"
+      ]
+     },
+     {
+      "element": "arcane",
+      "mult": 0.7,
+      "cooldown": 34,
+      "radius": 4,
+      "statuses": [
+       "marked"
+      ]
+     }
+    ]
+   },
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "ruin_ward",
+       "name": "Ruin Ward",
+       "fx": "ward",
+       "mod": {
+        "barrier": {
+         "share": 0.15,
+         "seconds": 6
+        }
+       }
+      },
+      {
+       "id": "rift_draw",
+       "name": "Rift Draw",
+       "fx": "pull",
+       "mod": {
+        "pullIn": {
+         "metres": 2,
+         "to": "impact"
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "lingering_ruin",
+       "name": "Lingering Ruin",
+       "fx": "zone",
+       "mod": {
+        "pool": {
+         "seconds": 5,
+         "radius": 6,
+         "power": 0.2,
+         "element": "arcane"
+        }
+       }
+      },
+      {
+       "id": "ruin_echo",
+       "name": "Ruin Echo",
+       "fx": "echo",
+       "mod": {
+        "again": {
+         "delay": 3,
+         "mult": 0.4
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "overchannelled",
+       "name": "Overchannelled",
+       "fx": "charge",
+       "mod": {
+        "cutCooldown": {
+         "skill": "overchannel",
+         "seconds": 8,
+         "per": "cast",
+         "orSelf": 5
+        }
+       },
+       "requires": "overchannel"
+      },
+      {
+       "id": "familiar_rain",
+       "name": "Familiar Rain",
+       "fx": "summon",
+       "mod": {
+        "command": {
+         "order": "focus",
+         "petOnly": true,
+         "seconds": 6,
+         "biteStatus": "shock"
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "conflagration",
+     "nodes": [
+      {
+       "id": "ruin_ring",
+       "name": "Ruin Ring",
+       "fx": "wide",
+       "mod": {
+        "burst": {
+         "radius": 6,
+         "mult": 1,
+         "element": "arcane"
+        }
+       }
+      },
+      {
+       "id": "rift_gate",
+       "name": "Rift Gate",
+       "fx": "post",
+       "mod": {
+        "place": {
+         "kind": "pulse",
+         "seconds": 8,
+         "radius": 6,
+         "every": 1,
+         "strike": {
+          "mult": 0.3,
+          "targets": 2,
+          "nearest": false
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "second_hand": {
+   "name": "Second Hand",
+   "shape": "bolt",
+   "element": "arcane",
+   "mult": 1.1,
+   "range": 32,
+   "splash": 1,
+   "cooldown": 2.5,
+   "mp": 4,
+   "stack": {
+    "status": "lagging",
+    "add": 1,
+    "max": 4
+   },
+   "cutCooldown": {
+    "skill": "others",
+    "seconds": 0.2,
+    "per": "hit"
+   },
+   "talents": {
+    "1": {
+     "lib": "seeking",
+     "nodes": [
+      {
+       "id": "tick_tock",
+       "name": "Tick-Tock",
+       "fx": "echo",
+       "mod": {
+        "again": {
+         "delay": 0.3,
+         "mult": 0.5
+        }
+       }
+      },
+      {
+       "id": "hour_hand",
+       "name": "Hour Hand",
+       "fx": "stack",
+       "mod": {
+        "consumes": {
+         "status": "lagging",
+         "perStack": true,
+         "mult": 0.1,
+         "cap": 0.4
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "chain",
+     "nodes": [
+      {
+       "id": "stopped_hand",
+       "name": "Stopped Hand",
+       "fx": "charge",
+       "mod": {
+        "onHit": {
+         "status": {
+          "id": "stasis",
+          "seconds": 1
+         },
+         "statusChance": 0.15
+        }
+       }
+      },
+      {
+       "id": "aftershock",
+       "name": "Aftershock",
+       "fx": "afterimage",
+       "mod": {
+        "afterimage": {
+         "at": "start",
+         "delay": 2,
+         "mult": 0.4
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "echo",
+     "nodes": [
+      {
+       "id": "borrowed_seconds",
+       "name": "Borrowed Seconds",
+       "fx": "charge",
+       "mod": {
+        "cutCooldown": {
+         "seconds": 0.5
+        },
+        "mul": {
+         "mult": 0.7
+        }
+       }
+      },
+      {
+       "id": "wound_back",
+       "name": "Wound Back",
+       "fx": "drain",
+       "mod": {
+        "onKill": {
+         "mana": 0.05
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "cascade",
+     "nodes": [
+      {
+       "id": "clockwork_split",
+       "name": "Clockwork Split",
+       "fx": "fan",
+       "mod": {
+        "split": {
+         "shards": 2,
+         "range": 8,
+         "keep": 0.5,
+         "when": "tag:lagging"
+        }
+       }
+      },
+      {
+       "id": "paradox",
+       "name": "Paradox",
+       "fx": "stack",
+       "mod": {
+        "spreadStatus": {
+         "types": [
+          "lagging"
+         ],
+         "radius": 5,
+         "max": 3
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "quicken": {
+   "name": "Quicken",
+   "shape": "self",
+   "element": "lightning",
+   "status": "haste",
+   "pets": true,
+   "cooldown": 26,
+   "mp": 16,
+   "cutCooldown": {
+    "skill": "others",
+    "seconds": 2,
+    "per": "cast"
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "brief_hour",
+       "name": "Brief Hour",
+       "fx": "quick",
+       "mod": {
+        "set": {
+         "statusSeconds": 5
+        },
+        "mul": {
+         "cooldown": 0.6
+        }
+       }
+      },
+      {
+       "id": "slipstream",
+       "name": "Slipstream",
+       "fx": "wide",
+       "mod": {
+        "burst": {
+         "radius": 5,
+         "statuses": [
+          {
+           "id": "chill",
+           "slow": 0.45,
+           "seconds": 4
+          }
+         ]
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "temporal_ward",
+       "name": "Temporal Ward",
+       "fx": "ward",
+       "mod": {
+        "barrier": {
+         "share": 0.12,
+         "seconds": 8,
+         "pets": true
+        }
+       }
+      },
+      {
+       "id": "hour_of_need",
+       "name": "Hour of Need",
+       "fx": "ward",
+       "mod": {
+        "cleanse": {
+         "count": 1,
+         "pets": true
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "echo",
+     "nodes": [
+      {
+       "id": "echo_of_you",
+       "name": "Echo of You",
+       "fx": "afterimage",
+       "mod": {
+        "summon": {
+         "def": "shade",
+         "name": "Echo",
+         "temporary": true,
+         "lifetime": 6
+        },
+        "mimic": {
+         "mult": 0.3
+        }
+       }
+      },
+      {
+       "id": "overclock",
+       "name": "Overclock",
+       "fx": "charge",
+       "mod": {
+        "selfBuff": {
+         "name": "Overclock",
+         "seconds": 10,
+         "cdRate": 1.2
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "crescendo",
+     "nodes": [
+      {
+       "id": "accelerando",
+       "name": "Accelerando",
+       "fx": "charge",
+       "mod": {
+        "empowerNext": {
+         "count": 3,
+         "free": true,
+         "seconds": 10
+        }
+       }
+      },
+      {
+       "id": "stolen_moments",
+       "name": "Stolen Moments",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "name": "Stolen Moments",
+         "seconds": 6,
+         "evade": 0.2
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "entropy_field": {
+   "name": "Entropy Field",
+   "shape": "ground",
+   "element": "arcane",
+   "mult": 0.22,
+   "range": 30,
+   "radius": 5.5,
+   "repeats": 8,
+   "repeatEvery": 0.75,
+   "cooldown": 14,
+   "mp": 18,
+   "stack": {
+    "status": "lagging",
+    "add": 1,
+    "max": 4
+   },
+   "bonusIf": [
+    {
+     "when": "variety:0.15:0.6"
+    }
+   ],
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "wide_entropy",
+       "name": "Wide Entropy",
+       "fx": "wide",
+       "mod": {
+        "set": {
+         "radius": 8
+        },
+        "mul": {
+         "mult": 0.75
+        }
+       }
+      },
+      {
+       "id": "pull_of_ages",
+       "name": "Pull of Ages",
+       "fx": "pull",
+       "mod": {
+        "pullIn": {
+         "metres": 0.8,
+         "to": "impact"
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "rust",
+       "name": "Rust",
+       "fx": "shatter",
+       "mod": {
+        "pen": 0.3
+       }
+      },
+      {
+       "id": "wither",
+       "name": "Wither",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "weaken",
+          "dealLess": 0.15,
+          "seconds": 2
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "hourglass",
+       "name": "Hourglass",
+       "fx": "stack",
+       "mod": {
+        "consumes": {
+         "status": "lagging",
+         "perStack": true,
+         "mult": 0.15,
+         "cap": 0.6
+        }
+       }
+      },
+      {
+       "id": "ages_pass",
+       "name": "Ages Pass",
+       "fx": "overload",
+       "mod": {
+        "bonusIf": [
+         {
+          "when": "execute:0.15",
+          "mult": 1
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "conflagration",
+     "nodes": [
+      {
+       "id": "time_trap",
+       "name": "Time Trap",
+       "fx": "trap",
+       "mod": {
+        "place": {
+         "kind": "trap",
+         "arm": 1,
+         "seconds": 20,
+         "radius": 4,
+         "triggerRadius": 2,
+         "strike": {
+          "mult": 1.5,
+          "status": {
+           "id": "stasis",
+           "seconds": 2
+          }
+         }
+        }
+       }
+      },
+      {
+       "id": "decay",
+       "name": "Decay",
+       "fx": "stack",
+       "mod": {
+        "onKill": {
+         "spread": {
+          "types": [
+           "lagging"
+          ],
+          "radius": 6
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "rewind": {
+   "name": "Rewind",
+   "shape": "self",
+   "element": "arcane",
+   "cooldown": 30,
+   "mp": 16,
+   "rewind": {
+    "seconds": 4
+   },
+   "cutCooldown": {
+    "skill": "others",
+    "seconds": 3,
+    "per": "cast"
+   },
+   "talents": {
+    "1": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "short_rewind",
+       "name": "Short Rewind",
+       "fx": "quick",
+       "mod": {
+        "rewind": {
+         "seconds": 2
+        },
+        "mul": {
+         "cooldown": 0.6
+        }
+       }
+      },
+      {
+       "id": "left_behind",
+       "name": "Left Behind",
+       "fx": "summon",
+       "mod": {
+        "summon": {
+         "def": "phantom_decoy",
+         "temporary": true,
+         "lifetime": 3,
+         "decoy": {
+          "hpShare": 0.25,
+          "taunt": 3
+         }
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "undone",
+       "name": "Undone",
+       "fx": "ward",
+       "mod": {
+        "cleanse": {
+         "count": 2
+        }
+       }
+      },
+      {
+       "id": "stitched_time",
+       "name": "Stitched Time",
+       "fx": "ward",
+       "mod": {
+        "barrier": {
+         "share": 0.15,
+         "seconds": 5
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "shared_rewind",
+       "name": "Shared Rewind",
+       "fx": "summon",
+       "mod": {
+        "healPets": {
+         "share": 0.25
+        }
+       }
+      },
+      {
+       "id": "quick_return",
+       "name": "Quick Return",
+       "fx": "quick",
+       "mod": {
+        "selfBuff": {
+         "name": "Quick Return",
+         "seconds": 4,
+         "movePct": 0.3,
+         "hastePct": 0.2
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "second_chance",
+       "name": "Second Chance",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      },
+      {
+       "id": "frozen_instant",
+       "name": "Frozen Instant",
+       "fx": "zone",
+       "mod": {
+        "burst": {
+         "radius": 6,
+         "statuses": [
+          {
+           "id": "stasis",
+           "seconds": 1.5
+          }
+         ]
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "stasis_lock": {
+   "name": "Stasis Lock",
+   "shape": "bolt",
+   "element": "arcane",
+   "range": 28,
+   "cooldown": 16,
+   "mp": 14,
+   "stasis": {
+    "seconds": 4,
+    "bank": 1.5
+   },
+   "talents": {
+    "1": {
+     "lib": "seeking",
+     "nodes": [
+      {
+       "id": "area_lock",
+       "name": "Area Lock",
+       "fx": "wide",
+       "mod": {
+        "set": {
+         "splash": 3
+        },
+        "mul": {
+         "cooldown": 1.25
+        }
+       }
+      },
+      {
+       "id": "marked_moment",
+       "name": "Marked Moment",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "marked",
+          "takeMore": 0.15,
+          "seconds": 8
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "burst",
+     "nodes": [
+      {
+       "id": "fragile_moment",
+       "name": "Fragile Moment",
+       "fx": "overload",
+       "mod": {
+        "stasis": {
+         "bank": 2
+        },
+        "mul": {
+         "cooldown": 1.3
+        }
+       }
+      },
+      {
+       "id": "time_lag",
+       "name": "Time Lag",
+       "fx": "stack",
+       "mod": {
+        "stack": {
+         "status": "lagging",
+         "add": 4,
+         "max": 4
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "brand",
+     "nodes": [
+      {
+       "id": "locked_clock",
+       "name": "Locked Clock",
+       "fx": "charge",
+       "mod": {
+        "selfBuff": {
+         "name": "Locked Clock",
+         "seconds": 4,
+         "cdRate": 1.3
+        }
+       }
+      },
+      {
+       "id": "timeshard",
+       "name": "Timeshard",
+       "fx": "fan",
+       "mod": {
+        "split": {
+         "shards": 2,
+         "range": 8,
+         "keep": 0.5
+        },
+        "mul": {
+         "cooldown": 1.4
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "unmaking",
+     "nodes": [
+      {
+       "id": "two_locks",
+       "name": "Two Locks",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      },
+      {
+       "id": "hourly_toll",
+       "name": "Hourly Toll",
+       "fx": "charge",
+       "mod": {
+        "onKill": {
+         "refund": 0.5
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "stop_the_clock": {
+   "name": "Stop the Clock",
+   "shape": "around",
+   "element": "arcane",
+   "radius": 25,
+   "cooldown": 60,
+   "mp": 40,
+   "stasis": {
+    "seconds": 4,
+    "bank": 1.25
+   },
+   "selfBuff": {
+    "name": "Stopped Clock",
+    "seconds": 4,
+    "cdRate": 4
+   },
+   "talents": {
+    "1": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "long_stop",
+       "name": "Long Stop",
+       "fx": "zone",
+       "mod": {
+        "stasis": {
+         "seconds": 6
+        },
+        "mul": {
+         "cooldown": 1.3
+        }
+       }
+      },
+      {
+       "id": "time_thief",
+       "name": "Time Thief",
+       "fx": "quick",
+       "mod": {
+        "selfBuff": {
+         "movePct": 0.5
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "company_moves",
+       "name": "Company Moves",
+       "fx": "summon",
+       "mod": {
+        "cutCooldown": {
+         "skill": "followers",
+         "seconds": 8,
+         "per": "cast"
+        }
+       }
+      },
+      {
+       "id": "heavy_bank",
+       "name": "Heavy Bank",
+       "fx": "overload",
+       "mod": {
+        "stasis": {
+         "bank": 1.6
+        },
+        "mul": {
+         "cooldown": 1.2
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "free_rewind",
+       "name": "Free Rewind",
+       "fx": "charge",
+       "mod": {
+        "cutCooldown": {
+         "skill": "rewind",
+         "seconds": 30,
+         "per": "cast",
+         "orSelf": 10
+        }
+       },
+       "requires": "rewind"
+      },
+      {
+       "id": "stillness_ward",
+       "name": "Stillness Ward",
+       "fx": "ward",
+       "mod": {
+        "barrier": {
+         "share": 0.25,
+         "seconds": 6
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "final_second",
+       "name": "Final Second",
+       "fx": "detonate",
+       "mod": {
+        "selfBuff": {
+         "onEnd": {
+          "shape": "around",
+          "radius": 12,
+          "mult": 1.5,
+          "element": "arcane"
+         }
+        }
+       }
+      },
+      {
+       "id": "borrowed_time",
+       "name": "Borrowed Time",
+       "fx": "charge",
+       "mod": {
+        "empowerNext": {
+         "count": 3,
+         "mult": 0.4,
+         "seconds": 8
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "arcane_jolt": {
+   "name": "Arcane Jolt",
+   "shape": "bolt",
+   "element": "arcane",
+   "mult": 0.7,
+   "range": 34,
+   "cooldown": 2.5,
+   "mp": 4,
+   "consumes": {
+    "status": "sleep",
+    "mult": 1.5,
+    "remove": true
+   },
+   "talents": {
+    "1": {
+     "lib": "seeking",
+     "nodes": [
+      {
+       "id": "twin_jolt",
+       "name": "Twin Jolt",
+       "fx": "fan",
+       "mod": {
+        "add": {
+         "projectiles": 1
+        },
+        "set": {
+         "spread": 0.2
+        },
+        "mul": {
+         "mult": 0.65
+        }
+       }
+      },
+      {
+       "id": "lucid_jolt",
+       "name": "Lucid Jolt",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "weaken",
+          "dealLess": 0.25,
+          "seconds": 3
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "chain",
+     "nodes": [
+      {
+       "id": "mind_spike",
+       "name": "Mind Spike",
+       "fx": "shatter",
+       "mod": {
+        "bonusIf": [
+         {
+          "when": "status:weaken",
+          "mult": 0.3
+         }
+        ]
+       }
+      },
+      {
+       "id": "drowsing_bolt",
+       "name": "Drowsing Bolt",
+       "fx": "tag",
+       "mod": {
+        "onHit": {
+         "status": {
+          "id": "sleep",
+          "seconds": 2
+         },
+         "statusChance": 0.2
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "brand",
+     "nodes": [
+      {
+       "id": "dream_harvest",
+       "name": "Dream Harvest",
+       "fx": "drain",
+       "mod": {
+        "onKill": {
+         "mana": 0.08
+        }
+       }
+      },
+      {
+       "id": "imp_prod",
+       "name": "Imp Prod",
+       "fx": "summon",
+       "mod": {
+        "command": {
+         "order": "focus",
+         "petOnly": true,
+         "seconds": 4
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "cascade",
+     "nodes": [
+      {
+       "id": "wandering_thought",
+       "name": "Wandering Thought",
+       "fx": "chain",
+       "mod": {
+        "ricochet": {
+         "bounces": 2,
+         "range": 8,
+         "keep": 0.5
+        }
+       }
+      },
+      {
+       "id": "recurring",
+       "name": "Recurring",
+       "fx": "charge",
+       "mod": {
+        "onKill": {
+         "refund": 1
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "drowse": {
+   "name": "Drowse",
+   "shape": "ground",
+   "element": "arcane",
+   "range": 30,
+   "radius": 5,
+   "statuses": [
+    {
+     "id": "sleep",
+     "seconds": 6
+    }
+   ],
+   "cooldown": 14,
+   "mp": 14,
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "wide_drowse",
+       "name": "Wide Drowse",
+       "fx": "wide",
+       "mod": {
+        "set": {
+         "radius": 8
+        },
+        "mul": {
+         "cooldown": 1.3
+        }
+       }
+      },
+      {
+       "id": "dream_leash",
+       "name": "Dream Leash",
+       "fx": "pull",
+       "mod": {
+        "pullIn": {
+         "metres": 2,
+         "to": "impact"
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "dream_leech",
+       "name": "Dream Leech",
+       "fx": "drain",
+       "mod": {
+        "onHit": {
+         "mana": 2
+        }
+       }
+      },
+      {
+       "id": "restful_dreams",
+       "name": "Restful Dreams",
+       "fx": "drain",
+       "mod": {
+        "onHit": {
+         "heal": 0.01
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "nightmare",
+       "name": "Nightmare",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "weaken",
+          "dealLess": 0.3,
+          "seconds": 9
+         }
+        ]
+       }
+      },
+      {
+       "id": "soft_landing",
+       "name": "Soft Landing",
+       "fx": "zone",
+       "mod": {
+        "pool": {
+         "seconds": 6,
+         "radius": 5,
+         "slow": 0.5,
+         "power": 0
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "aegis",
+     "nodes": [
+      {
+       "id": "twin_drowse",
+       "name": "Twin Drowse",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      },
+      {
+       "id": "dreamers_mark",
+       "name": "Dreamer's Mark",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "marked",
+          "takeMore": 0.25,
+          "seconds": 8
+         }
+        ]
+       }
+      }
+     ]
+    }
+   }
+  },
+  "beguile": {
+   "name": "Beguile",
+   "shape": "bolt",
+   "element": "arcane",
+   "range": 26,
+   "cooldown": 24,
+   "mp": 18,
+   "turned": {
+    "seconds": 10,
+    "follow": true,
+    "weakenAfter": 3
+   },
+   "talents": {
+    "1": {
+     "lib": "seeking",
+     "nodes": [
+      {
+       "id": "long_charm",
+       "name": "Long Charm",
+       "fx": "charge",
+       "mod": {
+        "turned": {
+         "seconds": 16
+        },
+        "mul": {
+         "cooldown": 1.4
+        }
+       }
+      },
+      {
+       "id": "eager_thrall",
+       "name": "Eager Thrall",
+       "fx": "quick",
+       "mod": {
+        "statuses": [
+         {
+          "id": "haste",
+          "seconds": 10
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "devoted",
+       "name": "Devoted",
+       "fx": "overload",
+       "mod": {
+        "statuses": [
+         {
+          "id": "might",
+          "seconds": 10
+         }
+        ]
+       }
+      },
+      {
+       "id": "bitter_end",
+       "name": "Bitter End",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "marked",
+          "takeMore": 0.3,
+          "seconds": 14
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "charmed_pair",
+       "name": "Charmed Pair",
+       "fx": "fan",
+       "mod": {
+        "ricochet": {
+         "bounces": 1,
+         "range": 8,
+         "keep": 0.5
+        }
+       }
+      },
+      {
+       "id": "shared_leash",
+       "name": "Shared Leash",
+       "fx": "link",
+       "mod": {
+        "link": {
+         "to": "enemy",
+         "share": 0.25,
+         "seconds": 10
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "aegis",
+     "nodes": [
+      {
+       "id": "sacrifice",
+       "name": "Sacrifice",
+       "fx": "detonate",
+       "mod": {
+        "recast": {
+         "window": 10,
+         "then": {
+          "shape": "ground",
+          "radius": 3,
+          "range": 26,
+          "mult": 2,
+          "element": "arcane"
+         },
+         "say": "blast the spot you aim at for 200% weapon damage within 3 m"
+        }
+       }
+      },
+      {
+       "id": "mind_ward",
+       "name": "Mind Ward",
+       "fx": "ward",
+       "mod": {
+        "ward": {
+         "charges": 2,
+         "cap": 0.15,
+         "seconds": 10
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "lethargy": {
+   "name": "Lethargy",
+   "shape": "ground",
+   "element": "arcane",
+   "range": 26,
+   "radius": 6,
+   "cooldown": 16,
+   "mp": 14,
+   "place": {
+    "kind": "zone",
+    "seconds": 8,
+    "radius": 6,
+    "every": 1,
+    "debuff": {
+     "id": "lethargic",
+     "slow": 0.5
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "heavy_air",
+       "name": "Heavy Air",
+       "fx": "zone",
+       "mod": {
+        "place": {
+         "radius": 4,
+         "debuff": {
+          "id": "lethargic",
+          "slow": 0.7
+         }
+        }
+       }
+      },
+      {
+       "id": "drifting_lethargy",
+       "name": "Drifting Lethargy",
+       "fx": "zone",
+       "mod": {
+        "place": {
+         "follow": "target"
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "dull_edges",
+       "name": "Dull Edges",
+       "fx": "tag",
+       "mod": {
+        "place": {
+         "debuff": {
+          "id": "lethargic",
+          "slow": 0.5,
+          "dealLess": 0.2
+         }
+        }
+       }
+      },
+      {
+       "id": "dream_tax",
+       "name": "Dream Tax",
+       "fx": "drain",
+       "mod": {
+        "onHit": {
+         "mana": 4
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "lull",
+       "name": "Lull",
+       "fx": "zone",
+       "mod": {
+        "place": {
+         "every": 2,
+         "strike": {
+          "mult": 0.1,
+          "targets": 1,
+          "nearest": false,
+          "status": {
+           "id": "sleep",
+           "seconds": 3
+          }
+         }
+        }
+       }
+      },
+      {
+       "id": "imps_fog",
+       "name": "Imp's Fog",
+       "fx": "summon",
+       "mod": {
+        "command": {
+         "order": "focus",
+         "petOnly": true,
+         "seconds": 8,
+         "biteStatus": "lethargic"
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "aegis",
+     "nodes": [
+      {
+       "id": "drag_of_dreams",
+       "name": "Drag of Dreams",
+       "fx": "pull",
+       "mod": {
+        "place": {
+         "pull": 1
+        }
+       }
+      },
+      {
+       "id": "sharp_waking",
+       "name": "Sharp Waking",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "marked",
+          "takeMore": 0.2,
+          "seconds": 8
+         }
+        ]
+       }
+      }
+     ]
+    }
+   }
+  },
+  "phantasm": {
+   "name": "Phantasm",
+   "shape": "self",
+   "element": "arcane",
+   "cooldown": 22,
+   "mp": 14,
+   "summon": {
+    "def": "phantom_decoy",
+    "temporary": true,
+    "lifetime": 8,
+    "decoy": {
+     "hpShare": 0.3,
+     "taunt": 8,
+     "onStruck": {
+      "id": "sleep",
+      "seconds": 2
+     }
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "shattering",
+       "name": "Shattering",
+       "fx": "detonate",
+       "mod": {
+        "summon": {
+         "burstOnExpire": {
+          "radius": 3,
+          "mult": 1.2
+         }
+        }
+       }
+      },
+      {
+       "id": "mirror_ward",
+       "name": "Mirror Ward",
+       "fx": "ward",
+       "mod": {
+        "barrier": {
+         "share": 0.15,
+         "seconds": 6
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "hypnotic",
+       "name": "Hypnotic",
+       "fx": "tag",
+       "mod": {
+        "summon": {
+         "decoy": {
+          "hpShare": 0.2,
+          "taunt": 8,
+          "onStruck": {
+           "id": "sleep",
+           "seconds": 4
+          }
+         }
+        }
+       }
+      },
+      {
+       "id": "slip_away",
+       "name": "Slip Away",
+       "fx": "quick",
+       "mod": {
+        "selfBuff": {
+         "name": "Slip Away",
+         "seconds": 4,
+         "movePct": 0.4
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "trade_places",
+       "name": "Trade Places",
+       "fx": "swap",
+       "mod": {
+        "recast": {
+         "window": 8,
+         "then": {
+          "shape": "dash",
+          "dash": {
+           "to": "swap",
+           "range": 30
+          }
+         },
+         "say": "swap places with the aimed enemy (not a boss) up to 30 m away"
+        }
+       }
+      },
+      {
+       "id": "echoing_mind",
+       "name": "Echoing Mind",
+       "fx": "afterimage",
+       "mod": {
+        "mimic": {
+         "mult": 0.3
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "aegis",
+     "nodes": [
+      {
+       "id": "twin_phantasm",
+       "name": "Twin Phantasm",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      },
+      {
+       "id": "vanishing_act",
+       "name": "Vanishing Act",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "name": "Vanishing Act",
+         "seconds": 1.5,
+         "untargetable": true
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "enthrall": {
+   "name": "Grand Enthrallment",
+   "shape": "around",
+   "element": "arcane",
+   "radius": 12,
+   "cooldown": 60,
+   "mp": 40,
+   "turned": {
+    "seconds": 6,
+    "weakenAfter": 4
+   },
+   "talents": {
+    "1": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "brief_hold",
+       "name": "Brief Hold",
+       "fx": "quick",
+       "mod": {
+        "turned": {
+         "seconds": 3
+        },
+        "mul": {
+         "cooldown": 0.67
+        }
+       }
+      },
+      {
+       "id": "marked_minds",
+       "name": "Marked Minds",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "marked",
+          "takeMore": 0.2,
+          "seconds": 8
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "puppet_strings",
+       "name": "Puppet Strings",
+       "fx": "overload",
+       "mod": {
+        "statuses": [
+         {
+          "id": "might",
+          "seconds": 6
+         }
+        ]
+       }
+      },
+      {
+       "id": "thought_shield",
+       "name": "Thought Shield",
+       "fx": "ward",
+       "mod": {
+        "barrier": {
+         "share": 0.2,
+         "seconds": 6
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "tide_of_thought",
+       "name": "Tide of Thought",
+       "fx": "drain",
+       "mod": {
+        "onHit": {
+         "mana": 3
+        }
+       }
+      },
+      {
+       "id": "frenzied_thralls",
+       "name": "Frenzied Thralls",
+       "fx": "quick",
+       "mod": {
+        "burst": {
+         "radius": 12,
+         "statuses": [
+          {
+           "id": "haste",
+           "seconds": 6
+          }
+         ]
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "final_command",
+       "name": "Final Command",
+       "fx": "detonate",
+       "mod": {
+        "selfBuff": {
+         "name": "Enthralling",
+         "seconds": 6,
+         "onEnd": {
+          "shape": "around",
+          "radius": 12,
+          "mult": 1.5,
+          "element": "arcane"
+         }
+        }
+       }
+      },
+      {
+       "id": "echo_of_command",
+       "name": "Echo of Command",
+       "fx": "echo",
+       "mod": {
+        "again": {
+         "delay": 6,
+         "mult": 1
+        },
+        "mul": {
+         "cooldown": 1.3
+        }
+       }
+      }
+     ]
+    }
+   }
+  }
+ },
+ "statuses": {
+  "lagging": {
+   "name": "Lagging",
+   "kind": "counter",
+   "element": "arcane",
+   "seconds": 5,
+   "slowPerStack": 0.1
+  },
+  "static": {
+   "name": "Static",
+   "kind": "debuff",
+   "element": "lightning",
+   "slow": 0.3,
+   "seconds": 2
+  },
+  "lethargic": {
+   "name": "Lethargic",
+   "kind": "debuff",
+   "element": "arcane",
+   "slow": 0.5,
+   "seconds": 2
+  }
+ },
+ "classes": {
+  "mage": [
+   "frost_shard",
+   "frost_nova",
+   "ice_lance",
+   "spellrush",
+   "blizzard",
+   "stillfrost"
+  ],
+  "pyromancer": [
+   "firebolt",
+   "fire_wall",
+   "ember_stride",
+   "stoke_familiar",
+   "flashover",
+   "meteor"
+  ],
+  "stormcaller": [
+   "chain_bolt",
+   "thunderclap",
+   "storm_beam",
+   "storm_orbs",
+   "bolt_step",
+   "tempest_eye"
+  ],
+  "sorcerer": [
+   "wild_bolt",
+   "arcane_burst",
+   "mana_rend",
+   "overchannel",
+   "transmute",
+   "sixfold_ruin"
+  ],
+  "chronomancer": [
+   "second_hand",
+   "quicken",
+   "entropy_field",
+   "rewind",
+   "stasis_lock",
+   "stop_the_clock"
+  ],
+  "enchanter": [
+   "arcane_jolt",
+   "drowse",
+   "beguile",
+   "lethargy",
+   "phantasm",
+   "enthrall"
+  ]
+ }
+}

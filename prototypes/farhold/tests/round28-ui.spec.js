@@ -76,6 +76,7 @@ test('the Skills tab: a skill heads its own four-tier tree, with what each pick 
   // Reaping Arc turns Cleave from a ring into a strike in front — and the card says so in numbers
   const reaping = tree.tiers[0].cards.find(c => c.name === 'Reaping Arc');
   expect(reaping.delta).toMatch(/Shape around you → strike in front/);
+  expect(reaping.delta).toMatch(/Reach 5.5 m/);
   expect(tree.foot).toMatch(/Unbinder/);
 
   await page.screenshot({ path: `${SHOTS}/skills-tab-warrior.png` });
@@ -153,18 +154,28 @@ test('the druid: a shape card says what the rest of the bar becomes, and Thornla
     return { t, shapeSlot: i, name: document.querySelectorAll('#skillbar .skill-slot')[t]?.querySelector('.skill-name')?.textContent };
   });
   expect(slot.name).toBe('Bramble Gore');
-  await page.locator('#skillbar .skill-slot').nth(slot.t).hover();
-  await page.waitForSelector('#tipbox:not([hidden])', { timeout: 3000 });
-  const tip = await page.locator('#tipbox').textContent();
+  /**
+   * The hover card, asked for the way the tooltip engine asks for it. While playing, the 3D canvas
+   * owns the pointer, so a real hover is checked with the sheet open below.
+   */
+  const card = idx => page.evaluate(i => {
+    const d = document.createElement('div');
+    d.innerHTML = window.farhold.hud.skillCardHtml(i);
+    return d.textContent;
+  }, idx);
+  const tip = await card(slot.t);
   expect(tip).toContain('Bramble Gore');
   expect(tip).toContain('Thornlash in Briarback shape');
   expect(tip).toContain('In your other forms');
   expect(tip).toContain('Own body: Thornlash');
-  await page.screenshot({ path: `${SHOTS}/bar-tooltip-bramble-gore.png` });
-  await page.locator('#skillbar .skill-slot').nth(slot.shapeSlot).hover();
-  await page.waitForTimeout(400);
-  const tip2 = await page.locator('#tipbox').textContent();
+  const tip2 = await card(slot.shapeSlot);
   expect(tip2).toMatch(/you are in Briarback/);
+  // a real hover on the sheet's bar strip shows the same card in the tooltip box
+  await openSkills(page, 'thornlash');
+  await page.locator('#sheet-skillbar .sk-card').nth(slot.t).hover();
+  await page.waitForSelector('#tipbox:not([hidden])', { timeout: 3000 });
+  expect(await page.locator('#tipbox').textContent()).toContain('Thornlash in Briarback shape');
+  await page.screenshot({ path: `${SHOTS}/sheet-tooltip-bramble-gore.png` });
   expect(errors).toEqual([]);
 });
 
@@ -218,7 +229,9 @@ test('an old save whose talent picks were dropped says so once, and the Skills t
   test.setTimeout(240000);
   await land(page, 'warrior', { level: 30 });
   // write a save the way round 27 would have: no talentsVersion stamp, picks from the old shared board
-  await page.evaluate(async () => {
+  // written under a NEW id: leaving the page autosaves the live run over its own slot, which
+  // would put the stamp straight back on an edited copy of it
+  const oldId = await page.evaluate(async () => {
     const f = window.farhold;
     f.saveNow();
     await new Promise(r => setTimeout(r, 300));
@@ -230,11 +243,14 @@ test('an old save whose talent picks were dropped says so once, and the Skills t
     // cleave's tier 1 shares `wide` (kept); `fan` was never Cleave's, `burst` is not its tier 2
     // shared pick, and Execute is not on a warrior's bar any more — three dropped
     s.player.skillTalents = { cleave: { 1: 'wide', 2: 'burst' }, firebolt: { 1: 'fan' }, execute: { 1: 'wide' } };
+    const copy = { ...s, id: 'r28-old-save' };
+    all['r28-old-save'] = copy;
     localStorage.setItem('farhold.saves.v1', JSON.stringify(all));
+    return 'r28-old-save';
   });
   const errors = [];
   page.on('pageerror', e => errors.push('pageerror: ' + e.message));
-  await page.goto('/prototypes/farhold/?load=last&quality=low&sound=off');
+  await page.goto(`/prototypes/farhold/?load=${oldId}&quality=low&sound=off`);
   await page.waitForFunction(() => document.body.dataset.ready === '1' && !!window.farhold, null, { timeout: 120000 });
   await page.waitForFunction(() => document.getElementById('hud-notice')?.classList.contains('show'), null, { timeout: 15000 });
   const notice = await page.locator('#hud-notice').textContent();

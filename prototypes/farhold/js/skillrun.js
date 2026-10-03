@@ -12,6 +12,7 @@ import {
   world, placeObject, tickPlaced, takeCorpses, addCorpse, resetWorld, leaveShapes, formOf, formIds,
   applyMod, gainResource, controlFor, statusRef, ringsFor, queue, repeatsOf, statusStatsKey, addWall, tickWalls,
 } from './skillmech.js';
+import { setStatusExpire } from './skills.js';
 
 /**
  * env (all lazily read — main.js builds this before the field, the pets and the bar exist):
@@ -33,6 +34,17 @@ export function createSkillRuntime(env) {
   const groundY = (x, z) => env.terrain().heightAt(x, z);
   const log = (t, k = '') => env.hud?.log?.(t, k);
   const later = (s, fn) => setTimeout(() => { if (env.running()) fn(); }, Math.max(0, s * 1000));
+
+  // a tag that bursts as it ends (Clockwork Bolt's Stuck): js/skills.js tickStatuses calls this
+  setStatusExpire((unit, type, st) => {
+    const b = st.burstOnExpire;
+    if (!b || unit.removed || !F()) return;
+    const pool = ['fire', 'ice', 'lightning', 'shadow', 'poison', 'arcane'];
+    const el = b.element === 'random' ? pool[Math.floor(Math.random() * pool.length)] : (b.element || 'physical');
+    env.spellfx?.aoe?.({ points: env.ringPoints(unit.x, unit.z, b.radius ?? 2.5), element: el, stagger: 0.02 });
+    const hits = F().strikeArea(unit.x, unit.z, b.radius ?? 2.5, P(), { power: b.power ?? 0.5, element: el, falloff: 0.7, proc: true });
+    for (const h of hits) env.reportHit(h.enemy, h.result);
+  });
 
   // ─────────────────────────────────────────── temporary pet defs (plan §8.2)
 
@@ -90,7 +102,7 @@ export function createSkillRuntime(env) {
 
   /** Decorate the strike options castSkill built: carry the rules, the knock, the pull. */
   function decorate(plan, opts) {
-    const out = { ...opts, rules: plan.rules || null, knock: knockShape(plan.knock) };
+    const out = { ...opts, rules: plan.rules || null, knock: knockShape(plan.knock), noDamage: !!plan.noDamage };
     out.onHit = wrapOnHit(plan, opts, plan.at || null);
     return out;
   }
@@ -260,6 +272,8 @@ export function createSkillRuntime(env) {
         case 'debuff':
           for (const e of act.targets) {
             const r = statusRef(s.debuff);
+            // Lethargy: a sleeper inside needs more hits to wake
+            if (r.sleeperHits && e.statuses?.sleep) e.statuses.sleep.hitsToWake = Math.max(e.statuses.sleep.hitsToWake || 1, r.sleeperHits);
             const ctl = controlFor(e, r.id, Math.max(1.2, o.every + 0.3));
             env.landStatus(ctl.id, { ...statusSpec(ctl.id), ...(ctl.id === r.id ? r : {}), seconds: ctl.seconds, ...(ctl.slow ? { slow: ctl.slow } : {}) }, e, 1);
           }
@@ -411,7 +425,7 @@ export function createSkillRuntime(env) {
     c.swing = Math.max(c.swing, 0.35);
     // the body you stop at takes the hit (Lunge's +50%, Wind Step, Chain Hook)
     if (struck && struck.dying == null && (d.to === 'target' || d.to === 'behind' || d.to === 'hit')) {
-      const res = env.rpg.strike(P(), struck, field.rng, { multiplier: plan.mult * (1 + (d.hitMult || 0)), element: plan.element, skill: plan.skill?.id, applyStatus: env.statusHook, rules: plan.rules });
+      const res = env.rpg.strike(P(), struck, field.rng, { multiplier: plan.mult * (1 + (d.hitMult || 0)), element: plan.element, skill: plan.skill?.id, applyStatus: env.statusHook, rules: plan.rules, noDamage: !!plan.noDamage });
       field.land(struck, res, { strike: knockShape(plan.knock), fromX: from.x, fromZ: from.z, element: plan.element });
       opts.onHit?.(struck, res);
       if (res.dead) field.kill(struck);
@@ -745,6 +759,8 @@ export function createSkillRuntime(env) {
       const n = pets.order(cm.order || 'focus', target, { seconds: cm.seconds ?? 6, petOnly: !!cm.petOnly, from: { x: c.x, z: c.z } });
       if (!n) log('No follower to give the order to.', '');
       if (cm.biteStatus) for (const pet of pets.pets) if (pet.order) { pet.biteStatus = cm.biteStatus; later(cm.seconds ?? 6, () => { if (pet.biteStatus === cm.biteStatus) pet.biteStatus = null; }); }
+      // `command.gain`: while the order lasts, each of their hits gives you a class resource
+      if (cm.gain) for (const pet of pets.pets) if (pet.order) { pet.resourceOnHit = cm.gain; later(cm.seconds ?? 6, () => { if (pet.resourceOnHit === cm.gain) pet.resourceOnHit = null; }); }
     }
     if (plan.summon && typeof plan.summon === 'object' && pets) summonFrom(plan, spot, a);
     if (plan.barrier && typeof plan.barrier === 'object') {
@@ -855,6 +871,18 @@ export function createSkillRuntime(env) {
       for (let k = 1; k < er.count; k++) later(0.3 * k, () => env.castSkill({ ...plan, empowerRepeat: null, mult: plan.mult * er.mult, damage: Math.round(plan.damage * er.mult), sub: true }, { echo: true }));
     }
     if (plan.rewind) doRewind(plan.rewind);
+    // `dashWith` on a skill that does not move you: followers within 15 m form up around you
+    if (plan.dashWith && plan.kind !== 'dash') PETS()?.bringAlong?.({ x: c.x, z: c.z }, { x: c.x, z: c.z }, 15);
+    if (plan.corpseBurst) corpseBurst(plan, spot);
+    if (plan.clusters && plan.kind === 'ground') clusterStrikes(plan, spot);
+    // `allyStatus`: a status on your followers (the nearest to your aim, or all of them)
+    if (plan.allyStatus) {
+      const as = plan.allyStatus;
+      const list = as.target === 'all' ? (pets?.pets || []).filter(x => x.dying == null) : [aimedFollower(a, plan.range || 30)].filter(Boolean);
+      const r = statusRef(as.status);
+      for (const u of list) env.rpgApply(u, r.id, { ...statusSpec(r.id), ...r, seconds: as.seconds ?? r.seconds ?? statusSpec(r.id)?.seconds ?? 4 });
+      if (as.self) env.rpgApply(p, r.id, { ...statusSpec(r.id), ...r, seconds: as.seconds ?? 4 });
+    }
     if (plan.resetOn && String(plan.resetOn.when || plan.resetOn).startsWith('crowd')) {
       const need = +String(plan.resetOn.when || plan.resetOn).split(':')[1] || 5;
       if (hitsN >= need) queue(p, { reset: plan.skill?.id });
@@ -878,9 +906,11 @@ export function createSkillRuntime(env) {
     const def = s.def || plan.pet || 'shade';
     let count = s.count ?? 1;
     let at = s.at === 'aim' ? spot : { x: c.x, z: c.z };
+    let corpses = null;
     if (s.at === 'corpses') {
       const found = takeCorpses(spot.x ?? c.x, spot.z ?? c.z, s.radius ?? 12, s.maxCorpses ?? count);
       if (found.length) at = found[0];
+      corpses = found;
       count = s.perCorpse ? Math.min(s.max ?? 8, found.reduce((n, x) => n + x.worth, 0) + (s.plus || 0)) : count;
       if (!found.length && s.needsCorpse) { log('There is no corpse near enough.', ''); return; }
     }
@@ -889,7 +919,10 @@ export function createSkillRuntime(env) {
       count, at, temporary: s.temporary !== false && !!(s.temporary || s.lifetime || s.decoy), lifetime: s.lifetime || 10,
       decoy: s.decoy || null, burstOnExpire: s.burstOnExpire || null, look, heal: s.heal || null, taunt: s.decoy ? (s.decoy.taunt ?? 4) : (s.taunt || 0),
     }).then(made => {
-      for (const u of made) {
+      for (const [i, u] of made.entries()) {
+        // each one rises from its own corpse, not all of them from the first
+        const cp = corpses?.[i];
+        if (cp) { u.x = cp.x + (i % 2 ? 0.4 : -0.4); u.z = cp.z; u.y = groundY(u.x, u.z); u.actor?.group?.position.set(u.x, u.y, u.z); }
         if (s.hpMult) { u.maxHp = Math.round(u.maxHp * s.hpMult); u.hp = u.maxHp; }
         if (s.biteStatus) u.biteStatus = s.biteStatus;
         if (s.mimic || plan.mimic) u.mimic = (s.mimic || plan.mimic).mult ?? 0.4;
@@ -898,6 +931,51 @@ export function createSkillRuntime(env) {
       if (made.length) log(`${made[0].name}${made.length > 1 ? ` x${made.length}` : ''} ${s.decoy ? 'draws them in' : 'answers'}.`, 'good');
       else if (made.refused) log(made.refused, 'bad');
     });
+  }
+
+  /**
+   * `clusters` (Fallstone): besides the main strike, one smaller strike for `mult` on each OTHER
+   * group of at least `min` enemies within `range` of you — grouped greedily, `radius` across.
+   */
+  function clusterStrikes(plan, spot) {
+    const c = plan.clusters;
+    const r = c.radius ?? plan.radius ?? 5;
+    const left = F().near(C().x, C().z, c.range ?? 30).filter(e => Math.hypot(e.x - spot.x, e.z - spot.z) > (plan.radius || 5));
+    const used = new Set();
+    let n = 0;
+    for (const e of left) {
+      if (used.has(e) || n >= (c.max ?? 4)) continue;
+      const group = left.filter(o => !used.has(o) && Math.hypot(o.x - e.x, o.z - e.z) <= r);
+      if (group.length < (c.min ?? 2)) continue;
+      for (const g of group) used.add(g);
+      const x = group.reduce((t, g) => t + g.x, 0) / group.length, z = group.reduce((t, g) => t + g.z, 0) / group.length;
+      later(0.25 + n * 0.15, () => {
+        env.spellfx.pillar?.({ at: v3(x, groundY(x, z), z), radius: r, element: plan.element, ms: 600 });
+        const hits = F().strikeArea(x, z, r, P(), { power: plan.mult * (c.mult ?? 0.4), element: plan.element, falloff: 0.6, rules: plan.rules, skill: plan.skill?.id, applyStatus: env.statusHook });
+        for (const h of hits) env.reportHit(h.enemy, h.result);
+      });
+      n++;
+    }
+    return n;
+  }
+
+  /**
+   * `corpseBurst`: every corpse within `radius` of where you aim (up to `max`) explodes where IT
+   * lies, for `mult` each within `burst` m. With none, a follower may give `fallback` of its health
+   * to explode instead (Corpse Pyre's thrall).
+   */
+  function corpseBurst(plan, spot) {
+    const cb = plan.corpseBurst;
+    const found = takeCorpses(spot.x, spot.z, cb.radius ?? 10, cb.max ?? 5);
+    for (const [i, cp] of found.entries()) later(i * 0.12, () => burst(plan, cp.x, cp.z, cb.burst ?? 4, (cb.mult ?? 1) * (cp.worth || 1), { element: cb.element || null, status: cb.status || null }));
+    if (!found.length && cb.fallback) {
+      const pet = (PETS()?.pets || []).filter(x => x.dying == null && !x.decoy && Math.hypot(x.x - spot.x, x.z - spot.z) <= (cb.radius ?? 10))[0];
+      if (pet) {
+        pet.hp = Math.max(1, pet.hp - Math.round(pet.maxHp * cb.fallback));
+        burst(plan, pet.x, pet.z, cb.burst ?? 4, cb.mult ?? 1, { element: cb.element || null });
+      } else log('There is no corpse near enough.', '');
+    } else if (!found.length) log('There is no corpse near enough.', '');
+    return found.length;
   }
 
   // ─────────────────────────────────────────── links (Sworn Guard, Sworn Ward, Thread of Fate)
@@ -969,6 +1047,10 @@ export function createSkillRuntime(env) {
         case 'deathPrevented': if (victim === p) log('Something holds you up at 1 health.', 'level'); break;
         default: break;
       }
+    }
+    // a tag that pays you when the tagged body hits you or a follower (the Demon Hunter's Brand)
+    if (result.amount > 0 && attacker?.statuses) {
+      for (const st of Object.values(attacker.statuses)) if (st.kind === 'tag' && st.gainOnHurt) gainResource(p, st.gainOnHurt.id, st.gainOnHurt.n ?? 1);
     }
     // a resource that fills when you are hit (`resource.gainPer: 'hurt'`)
     if (victim === p && result.amount > 0) {
@@ -1370,6 +1452,9 @@ export function createSkillRuntime(env) {
 
   /** The pet hooks the frame loop hands js/pets.js update. */
   const petHooks = {
+    onPetStrike(p, target, result) {
+      if (p.resourceOnHit && result?.amount > 0) gainResource(P(), p.resourceOnHit.resource || p.resourceOnHit.id, p.resourceOnHit.n ?? 1);
+    },
     onExpire(p) {
       const b = p.burstOnExpire;
       if (!b) return;

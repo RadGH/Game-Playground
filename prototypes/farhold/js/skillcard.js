@@ -197,7 +197,8 @@ export function talentChanges(row, node, { skillId = null, tier = null, unlockAt
     // a library node's `mult` on a skill that deals no damage (War Cry) is not "damage"
     if (k === 'dmg' && x == null) continue;
     if (y == null || y === '' || (typeof y === 'object' && count(y) == null && k !== 'heal')) continue;
-    const sx = x == null ? '—' : show(x), sy = show(y);
+    // a skill with no `repeats` strikes once; any other field it lacks is simply new
+    const sx = x == null ? (k === 'repeats' ? '1' : null) : show(x), sy = show(y);
     if (sx === sy) continue;
     out.push({ label, from: sx, to: sy });
   }

@@ -409,7 +409,7 @@
   },
   "guardian_light": {
    "name": "Guardian Light",
-   "shape": "summon",
+   "shape": "self",
    "element": "holy",
    "cooldown": 30,
    "mp": 24,
@@ -604,8 +604,8 @@
      "lib": "deepen",
      "nodes": [
       {
-       "id": "wrath_of_the_raised",
-       "name": "Wrath Raised",
+       "id": "raised_in_wrath",
+       "name": "Raised in Wrath",
        "fx": "summon",
        "mod": {
         "selfBuff": {
@@ -945,7 +945,8 @@
        "fx": "charge",
        "mod": {
         "onKill": {
-         "reset": true
+         "reset": true,
+         "heal": 0.03
         }
        }
       },
@@ -1034,7 +1035,8 @@
        "fx": "burst",
        "mod": {
         "set": {
-         "status": "burn"
+         "status": "burn",
+         "statusMult": 0.5
         }
        }
       }
@@ -1080,8 +1082,8 @@
        }
       },
       {
-       "id": "dawn_on_the_dead",
-       "name": "Dawn on the Dead",
+       "id": "undead_dawn",
+       "name": "Undead Dawn",
        "fx": "brand",
        "mod": {
         "bonusIf": [
@@ -1251,15 +1253,12 @@
      "lib": "quick",
      "nodes": [
       {
-       "id": "kept_vigil",
-       "name": "Kept Vigil",
-       "fx": "charge",
+       "id": "night_watch",
+       "name": "Night Watch",
+       "fx": "drain",
        "mod": {
         "selfBuff": {
-         "seconds": 8
-        },
-        "mul": {
-         "cooldown": 0.8
+         "manaOnHurt": 3
         }
        }
       },
@@ -1509,30 +1508,23 @@
   "twinlight": {
    "name": "Twinlight",
    "shape": "around",
-   "element": "holy",
+   "element": "shadow",
    "mult": 0.8,
    "radius": 14,
+   "repeats": 6,
+   "repeatEvery": 1,
    "cooldown": 40,
    "mp": 36,
-   "repeats": {
-    "count": 6,
+   "onHit": {
+    "healShare": 0.25
+   },
+   "place": {
+    "kind": "zone",
+    "follow": "self",
+    "seconds": 6,
+    "radius": 14,
     "every": 1,
-    "alternate": [
-     {
-      "name": "Dawn Pulse",
-      "element": "holy",
-      "mult": 0.2,
-      "healAllies": 0.06
-     },
-     {
-      "name": "Dusk Pulse",
-      "element": "shadow",
-      "mult": 0.8,
-      "onHit": {
-       "healShare": 0.25
-      }
-     }
-    ]
+    "heal": 0.03
    },
    "talents": {
     "1": {
@@ -1595,27 +1587,19 @@
      "lib": "hunger",
      "nodes": [
       {
-       "id": "dusk_only",
-       "name": "Dusk Only",
-       "fx": "heavy",
+       "id": "sunward",
+       "name": "Sunward",
+       "fx": "brand",
        "mod": {
         "set": {
-         "element": "shadow",
-         "repeats": {
-          "count": 4,
-          "every": 1,
-          "alternate": [
-           {
-            "name": "Dusk Pulse",
-            "element": "shadow",
-            "mult": 1.3,
-            "onHit": {
-             "healShare": 0.25
-            }
-           }
-          ]
+         "element": "holy"
+        },
+        "bonusIf": [
+         {
+          "when": "family:undead,fiend",
+          "mult": 0.6
          }
-        }
+        ]
        }
       },
       {
@@ -1623,17 +1607,13 @@
        "name": "Lingering Dusk",
        "fx": "zone",
        "mod": {
-        "place": {
-         "kind": "zone",
-         "follow": "self",
-         "seconds": 6,
-         "radius": 8,
-         "every": 1,
-         "debuff": {
+        "statuses": [
+         {
           "id": "weaken",
-          "dealLess": 0.2
+          "dealLess": 0.2,
+          "seconds": 3
          }
-        }
+        ]
        }
       }
      ]
@@ -1664,7 +1644,8 @@
        "fx": "charge",
        "mod": {
         "add": {
-         "repeats.count": 4
+         "repeats.count": 4,
+         "place.seconds": 4
         },
         "mul": {
          "cooldown": 1.25
@@ -2267,7 +2248,8 @@
        "fx": "pull",
        "mod": {
         "knock": {
-         "push": 0
+         "push": 0,
+         "stagger": 0.3
         },
         "pullIn": {
          "metres": 3,
@@ -2422,6 +2404,9 @@
        "mod": {
         "selfBuff": {
          "noMana": true
+        },
+        "mul": {
+         "cooldown": 1.15
         }
        }
       }
@@ -2504,15 +2489,9 @@
         "selfBuff": {
          "onEnd": {
           "shape": "around",
-          "radius": 12,
-          "mult": 3,
-          "element": "arcane",
-          "bonusIf": [
-           {
-            "when": "execute:0.15",
-            "mult": 2
-           }
-          ]
+          "radius": 8,
+          "mult": 4.5,
+          "element": "arcane"
          }
         }
        }
@@ -2537,9 +2516,13 @@
    "element": "lightning",
    "mult": 1.2,
    "range": 32,
-   "chains": 2,
    "cooldown": 3,
    "mp": 5,
+   "ricochet": {
+    "bounces": 2,
+    "range": 8,
+    "keep": 0.7
+   },
    "onHit": {
     "healAllies": 0.02
    },
@@ -2642,8 +2625,8 @@
        "name": "Spirit Storm",
        "fx": "chain",
        "mod": {
-        "add": {
-         "chains": 3
+        "ricochet": {
+         "bounces": 5
         },
         "mul": {
          "mult": 0.8
@@ -3150,6 +3133,9 @@
         "set": {
          "status": "regen",
          "pets": true
+        },
+        "mul": {
+         "cooldown": 1.15
         }
        }
       }
@@ -3760,15 +3746,15 @@
        }
       },
       {
-       "id": "deaf_ear",
-       "name": "Deaf Ear",
+       "id": "unmoved_dirge",
+       "name": "Unmoved Dirge",
        "fx": "ward",
        "mod": {
         "set": {
-         "form.stats.immune": [
-          "curse",
-          "weaken"
-         ]
+         "form.stats.stillResist": {
+          "after": 1,
+          "resist": 0.15
+         }
         }
        }
       }
@@ -3953,15 +3939,12 @@
        }
       },
       {
-       "id": "clear_voice",
-       "name": "Clear Voice",
+       "id": "steady_voice",
+       "name": "Steady Voice",
        "fx": "ward",
        "mod": {
         "set": {
-         "form.stats.immune": [
-          "poison",
-          "bleed"
-         ]
+         "form.stats.ccImmune": true
         }
        }
       }
@@ -4580,9 +4563,13 @@
           }
          },
          "sporecap": {
-          "add": {
-           "pool.seconds": 3
-          }
+          "statuses": [
+           {
+            "id": "weaken",
+            "dealLess": 0.2,
+            "seconds": 4
+           }
+          ]
          }
         }
        }
@@ -4841,7 +4828,7 @@
     },
     "sporecap": {
      "name": "Puffball Brood",
-     "shape": "summon",
+     "shape": "self",
      "pet": null,
      "howl": null,
      "summon": {
@@ -4905,14 +4892,15 @@
        }
       },
       {
-       "id": "wild_bite",
-       "name": "Wild Bite",
-       "fx": "summon",
+       "id": "den_scent",
+       "name": "Den Scent",
+       "fx": "leap",
        "mod": {
-        "command": {
-         "order": "pounce",
-         "seconds": 4,
-         "biteStatus": "bleed"
+        "selfBuff": {
+         "name": "Den Scent",
+         "seconds": 8,
+         "movePct": 0.2,
+         "pets": true
         }
        }
       }
@@ -4978,7 +4966,10 @@
         "forms": {
          "briarback": {
           "selfBuff": {
-           "reflect": 0.2
+           "name": "Den Guard",
+           "seconds": 4,
+           "reflect": 0.2,
+           "petsOnly": true
           }
          },
          "fenrunner": {
@@ -4990,13 +4981,11 @@
           }
          },
          "sporecap": {
-          "summon": {
-           "burstOnExpire": {
-            "radius": 5,
-            "mult": 1,
-            "element": "poison",
-            "heal": 0.05
-           }
+          "burst": {
+           "radius": 6,
+           "statuses": [
+            "poison"
+           ]
           }
          }
         }

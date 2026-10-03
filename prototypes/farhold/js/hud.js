@@ -2559,7 +2559,7 @@ export class Hud {
             const delta = row ? talentChanges(row, node, { skillId: chosen.id, tier: tier.tier, unlockAt: chosen.unlockAt }) : [];
             if (delta.length) {
               const d = el('span', 'tc-delta');
-              for (const c of delta) d.append(el('span', null, `${c.label} ${c.from} → ${c.to}`));
+              for (const c of delta) d.append(el('span', null, c.from == null ? `${c.label} ${c.to}` : `${c.label} ${c.from} → ${c.to}`));
               card.append(d);
             }
             /**

@@ -123,11 +123,11 @@
    "shield": true,
    "skills": [
     "power_strike",
-    "sunder",
-    "guard_stance",
-    "charge",
-    "cleave",
-    "execute"
+    "riposte",
+    "duelist_stance",
+    "lunge",
+    "sweeping_guard",
+    "masters_flurry"
    ],
    "look": {
     "body": {
@@ -220,12 +220,12 @@
    ],
    "shield": true,
    "skills": [
-    "power_strike",
-    "guard_stance",
+    "sanctified_blade",
     "consecrate",
-    "shield_bash",
-    "renew",
-    "rally"
+    "oath_hammer",
+    "martyrs_vow",
+    "shining_rebuke",
+    "daybreak_descent"
    ],
    "look": {
     "body": {
@@ -318,10 +318,10 @@
    "shield": false,
    "skills": [
     "aimed_shot",
-    "poison_dart",
+    "hunters_snare",
     "multi_shot",
-    "mend",
-    "pinning_shot",
+    "quarry_call",
+    "trackers_leap",
     "rain_of_arrows"
    ],
    "pet": {
@@ -420,10 +420,10 @@
    "skills": [
     "eviscerate",
     "poison_dart",
-    "shadowstep",
-    "smoke",
-    "power_strike",
-    "execute"
+    "sucker_punch",
+    "grave_mark",
+    "slip_away",
+    "knife_storm"
    ],
    "look": {
     "body": {
@@ -713,12 +713,12 @@
    ],
    "shield": false,
    "skills": [
-    "firebolt",
+    "frost_shard",
     "frost_nova",
-    "arcane_burst",
     "ice_lance",
-    "fire_wall",
-    "meteor"
+    "spellrush",
+    "blizzard",
+    "stillfrost"
    ],
    "look": {
     "body": {
@@ -811,12 +811,12 @@
    ],
    "shield": false,
    "skills": [
-    "shadow_lance",
+    "marrow_lance",
     "raise_thrall",
-    "curse",
+    "corpse_pyre",
     "drain",
-    "poison_dart",
-    "toxic_cloud"
+    "toxic_cloud",
+    "buried_march"
    ],
    "pet": {
     "id": "bone_thrall",
@@ -917,12 +917,12 @@
    ],
    "shield": false,
    "skills": [
-    "shadow_lance",
+    "gnawing_dark",
     "bind_imp",
     "curse",
-    "drain",
+    "soul_pact",
     "void_rift",
-    "meteor"
+    "abyss_gate"
    ],
    "pet": {
     "id": "bound_imp",
@@ -1024,12 +1024,12 @@
    ],
    "shield": false,
    "skills": [
-    "aimed_shot",
-    "shadowstep",
-    "multi_shot",
-    "curse",
-    "pinning_shot",
-    "execute"
+    "hex_bolt",
+    "tumbling_shot",
+    "chain_hook",
+    "unleash_hound",
+    "grudge_bolt",
+    "night_hunt"
    ],
    "pet": {
     "id": "dire_companion",
@@ -1130,12 +1130,12 @@
    ],
    "shield": false,
    "skills": [
-    "aimed_shot",
-    "poison_dart",
-    "guard_stance",
-    "mend",
-    "smoke",
-    "rain_of_arrows"
+    "lucky_strike",
+    "junk_toss",
+    "scrounge",
+    "caltrop_scatter",
+    "pitch_bomb",
+    "big_score"
    ],
    "look": {
     "body": {
@@ -1226,12 +1226,12 @@
    ],
    "shield": false,
    "skills": [
-    "eviscerate",
-    "charge",
-    "smoke",
-    "power_strike",
-    "whirlwind",
-    "execute"
+    "flourish",
+    "daring_leap",
+    "mocking_parry",
+    "pinning_thrust",
+    "matadors_turn",
+    "grandeur"
    ],
    "look": {
     "body": {
@@ -1323,12 +1323,12 @@
    ],
    "shield": true,
    "skills": [
-    "power_strike",
-    "cleave",
-    "firebolt",
+    "scale_rend",
     "flamethrower",
-    "fire_wall",
-    "meteor"
+    "wyrmfall",
+    "wyrm_temper",
+    "dragonscale",
+    "wyrm_ascendant"
    ],
    "look": {
     "body": {
@@ -1423,9 +1423,9 @@
    "skills": [
     "firebolt",
     "fire_wall",
-    "flamethrower",
-    "arcane_burst",
     "ember_stride",
+    "stoke_familiar",
+    "flashover",
     "meteor"
    ],
    "pet": {
@@ -1524,11 +1524,11 @@
    "shield": false,
    "skills": [
     "chain_bolt",
-    "frost_nova",
+    "thunderclap",
     "storm_beam",
     "storm_orbs",
-    "quicken",
-    "meteor"
+    "bolt_step",
+    "tempest_eye"
    ],
    "pet": {
     "id": "storm_familiar",
@@ -1830,12 +1830,12 @@
    ],
    "shield": true,
    "skills": [
-    "sunder",
-    "shield_bash",
+    "exploit_gap",
     "rally",
-    "warcry",
     "charge",
-    "execute"
+    "reposition",
+    "seize_initiative",
+    "battle_plan"
    ],
    "look": {
     "body": {
@@ -1927,12 +1927,12 @@
    ],
    "shield": false,
    "skills": [
-    "arcane_burst",
+    "second_hand",
     "quicken",
-    "ice_lance",
-    "frost_nova",
-    "blizzard",
-    "meteor"
+    "entropy_field",
+    "rewind",
+    "stasis_lock",
+    "stop_the_clock"
    ],
    "look": {
     "body": {
@@ -2023,12 +2023,12 @@
    ],
    "shield": false,
    "skills": [
-    "power_strike",
-    "charge",
-    "quicken",
-    "whirlwind",
-    "stoneskin",
-    "execute"
+    "open_palm",
+    "wind_step",
+    "sweeping_heel",
+    "inner_stillness",
+    "mountain_fist",
+    "ninefold_staff"
    ],
    "look": {
     "body": {
@@ -2225,12 +2225,12 @@
    ],
    "shield": false,
    "skills": [
-    "aimed_shot",
-    "sunder",
-    "curse",
     "pinning_shot",
-    "smoke",
-    "execute"
+    "silver_edge",
+    "null_circle",
+    "writ_of_guilt",
+    "iron_net",
+    "purging_rite"
    ],
    "look": {
     "body": {
@@ -2325,10 +2325,10 @@
    "skills": [
     "shield_bash",
     "guard_stance",
-    "power_strike",
-    "sunder",
-    "stoneskin",
-    "execute"
+    "sworn_ward",
+    "challenge",
+    "rampart",
+    "unbroken_banner"
    ],
    "look": {
     "body": {
@@ -2421,12 +2421,12 @@
    ],
    "shield": false,
    "skills": [
-    "firebolt",
-    "chain_bolt",
+    "wild_bolt",
     "arcane_burst",
-    "storm_beam",
-    "storm_orbs",
-    "meteor"
+    "mana_rend",
+    "overchannel",
+    "transmute",
+    "sixfold_ruin"
    ],
    "pet": {
     "id": "storm_familiar",
@@ -2523,12 +2523,12 @@
    ],
    "shield": true,
    "skills": [
-    "power_strike",
-    "stoneskin",
+    "rune_hammer",
     "sunder",
-    "thunderclap",
-    "guard_stance",
-    "whirlwind"
+    "stoneskin",
+    "forge_flame",
+    "warding_glyph",
+    "great_anvil"
    ],
    "look": {
     "body": {
@@ -2619,12 +2619,12 @@
    ],
    "shield": false,
    "skills": [
-    "eviscerate",
+    "shade_cut",
     "shadowstep",
     "smoke",
-    "poison_dart",
-    "whirlwind",
-    "execute"
+    "cutting_waltz",
+    "execute",
+    "host_of_shades"
    ],
    "look": {
     "body": {
@@ -2716,12 +2716,12 @@
    ],
    "shield": false,
    "skills": [
-    "aimed_shot",
+    "clockwork_bolt",
+    "flask_grenade",
     "deploy_sentry",
-    "pinning_shot",
-    "fire_wall",
-    "quicken",
-    "rain_of_arrows"
+    "pocket_watch",
+    "grapple_line",
+    "spring_battery"
    ],
    "pet": {
     "id": "clockwork_sentry",
@@ -2924,12 +2924,12 @@
    ],
    "shield": false,
    "skills": [
-    "arcane_burst",
-    "bind_imp",
-    "curse",
-    "ice_lance",
-    "quicken",
-    "meteor"
+    "arcane_jolt",
+    "drowse",
+    "beguile",
+    "lethargy",
+    "phantasm",
+    "enthrall"
    ],
    "pet": {
     "id": "bound_imp",

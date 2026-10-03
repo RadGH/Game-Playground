@@ -51,6 +51,7 @@ test('talentChanges states the numbers a pick moves, and nothing for a pure beha
   const reaping = tree.tiers[0].nodes.find(n => n.id === 'reaping_arc');
   const c = talentChanges(data.skills.cleave, reaping, { skillId: 'cleave', tier: 1 });
   assert.ok(c.some(x => x.label === 'Shape' && x.to === 'strike in front'));
+  assert.ok(c.some(x => x.label === 'Reach' && x.from == null), 'a field the skill never had is new, not "— →"');
   const hooked = tree.tiers[0].nodes.find(n => n.id === 'hooked_edge');
   assert.deepEqual(talentChanges(data.skills.cleave, hooked, { skillId: 'cleave', tier: 1 }), []);
   // a cooldown-only library node on a skill that deals no damage does not invent a damage number
@@ -66,6 +67,7 @@ test('every converted row: chips, versions and deltas render without a stray tok
     for (const tier of treeFor(id, row.shape).tiers) {
       for (const n of tier.nodes) {
         for (const d of talentChanges(row, n, { skillId: id, tier: tier.tier })) {
+          if (d.from == null) { assert.doesNotMatch(d.to, BAD); continue; }
           assert.doesNotMatch(`${d.from} ${d.to}`, BAD, `${id} ${n.id}`);
         }
       }

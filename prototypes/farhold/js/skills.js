@@ -131,6 +131,8 @@ function shapeSentence(skill) {
   const n = Math.max(1, skill.projectiles || 1);
   const dmg = `${pctOf(Math.round((skill.mult || 1) * 100))} weapon damage`
     + (skill.element && skill.element !== 'physical' ? ` as ${skill.element}` : '');
+  // R28 — a row with no `mult` deals no damage (Sanctuary, Drowse, a post): the card says so
+  const forDmg = skill.mult ? `for ${dmg}` : 'without dealing damage';
   const shot = skill.element === 'physical' ? 'shot' : 'bolt';
   const splash = skill.splash
     ? `, splashing everything within ${metres(skill.splash)} of where ${n > 1 ? 'a' : 'the'} ${shot} lands`
@@ -142,25 +144,25 @@ function shapeSentence(skill) {
     case 'melee':
       // R25 — Flamethrower: the same cone again and again while you hold it
       return skill.repeats > 1
-        ? `${skill.breath ? 'Breathes a stream that strikes' : 'Strikes'} everything in ${article(arc)} ${arc} cone ${metres(skill.reach ?? 3)} in front of you ${fmt(skill.repeats)} times over ${secs(skill.repeats * (skill.repeatEvery ?? 0.32))}, for ${dmg} each time.`
-        : `Strikes everything in ${article(arc)} ${arc} arc ${metres(skill.reach ?? 3)} in front of you, or as far and as wide as your weapon swings if that is more, for ${dmg}.`;
+        ? `${skill.breath ? 'Breathes a stream that strikes' : 'Strikes'} everything in ${article(arc)} ${arc} cone ${metres(skill.reach ?? 3)} in front of you ${fmt(skill.repeats)} times over ${secs(skill.repeats * (skill.repeatEvery ?? 0.32))}, ${forDmg} each time.`
+        : `Strikes everything in ${article(arc)} ${arc} arc ${metres(skill.reach ?? 3)} in front of you, or as far and as wide as your weapon swings if that is more, ${forDmg}.`;
     case 'around':
       // R25 — Whirlwind spins five times: say so, and say it is per spin
       return skill.repeats > 1
-        ? `Spins ${skill.repeats} times, striking everything within ${metres(skill.radius ?? 4)} of you for ${dmg} on every spin.`
-        : `Strikes everything within ${metres(skill.radius ?? 4)} of you for ${dmg}.`;
+        ? `Spins ${skill.repeats} times, striking everything within ${metres(skill.radius ?? 4)} of you ${forDmg} on every spin.`
+        : `Strikes everything within ${metres(skill.radius ?? 4)} of you ${forDmg}.`;
     case 'beam':
-      return `Fires ${article(width)} ${width} wide beam ${metres(skill.range ?? 20)} straight ahead, striking everything in the line for ${dmg}.`;
+      return `Fires ${article(width)} ${width} wide beam ${metres(skill.range ?? 20)} straight ahead, striking everything in the line ${forDmg}.`;
     case 'ground': {
       // R25 — Blizzard, Toxic Cloud and Void Rift pulse; Judgement lands a beat after the cast
       const lands = skill.delay ? `, ${secs(skill.delay)} after you cast,` : '';
       const pull = skill.pull ? ` Every pulse drags everything ${metres(skill.pull)} toward the middle.` : '';
       return skill.repeats > 1
-        ? `Falls on a spot up to ${metres(skill.range ?? 30)} away${lands} and strikes everything within ${metres(skill.radius ?? 5)} of it ${fmt(skill.repeats)} times over ${secs(skill.repeats * (skill.repeatEvery ?? 0.32))}, for ${dmg} each time.${pull}`
-        : `Falls on a spot up to ${metres(skill.range ?? 30)} away${lands} striking everything within ${metres(skill.radius ?? 5)} of that spot for ${dmg}.${pull}`;
+        ? `Falls on a spot up to ${metres(skill.range ?? 30)} away${lands} and strikes everything within ${metres(skill.radius ?? 5)} of it ${fmt(skill.repeats)} times over ${secs(skill.repeats * (skill.repeatEvery ?? 0.32))}, ${forDmg} each time.${pull}`
+        : `Falls on a spot up to ${metres(skill.range ?? 30)} away${lands} striking everything within ${metres(skill.radius ?? 5)} of that spot ${forDmg}.${pull}`;
     }
     case 'dash':
-      return `Carries you ${metres(skill.range ?? 10)} forward, striking everything within ${metres(skill.splash ?? 2)} of your path for ${dmg}.`;
+      return `Carries you ${metres(skill.range ?? 10)} forward, striking everything within ${metres(skill.splash ?? 2)} of your path ${forDmg}.`;
     case 'summon': {
       const count = Math.max(1, skill.count || 1);
       const who = petName(skill.pet) + (count > 1 ? 's' : '');
@@ -169,18 +171,18 @@ function shapeSentence(skill) {
     case 'self': {
       // R25 — the two self skills that fight for you: Ember Stride's trail and Storm Orbs
       const t = skill.trail, o = skill.orbs;
-      if (t) return `For ${secs(t.seconds)}, every step leaves burning ground behind you, ${metres(t.radius * 2)} across, that lasts ${secs(t.burns)} and strikes whatever stands in it for ${dmg} every 0.75s.`;
+      if (t) return `For ${secs(t.seconds)}, every step leaves burning ground behind you, ${metres(t.radius * 2)} across, that lasts ${secs(t.burns)} and strikes whatever stands in it ${forDmg} every 0.75s.`;
       if (o) {
         const st = o.status && STATUS_NAMES[o.status] ? ` and leaves it ${STATUS_NAMES[o.status]}` : '';
-        return `For ${secs(o.seconds)}, ${fmt(o.count)} orbs circle you in a fight; each one strikes the nearest enemy within ${metres(o.radius)} every ${secs(o.every)} for ${dmg}${st}.`;
+        return `For ${secs(o.seconds)}, ${fmt(o.count)} orbs circle you in a fight; each one strikes the nearest enemy within ${metres(o.radius)} every ${secs(o.every)} ${forDmg}${st}.`;
       }
       return '';
     }
     default:
       // a bolt, or a fan of them
       return n > 1
-        ? `Looses ${fmt(n)} ${shot}s in ${article(fan)} ${fan} fan out to ${metres(skill.range ?? 30)}, each for ${dmg}${splash}.`
-        : `Looses one ${shot} out to ${metres(skill.range ?? 30)} for ${dmg}${splash}.`;
+        ? `Looses ${fmt(n)} ${shot}s in ${article(fan)} ${fan} fan out to ${metres(skill.range ?? 30)}, each ${forDmg}${splash}.`
+        : `Looses one ${shot} out to ${metres(skill.range ?? 30)} ${forDmg}${splash}.`;
   }
 }
 
@@ -340,6 +342,9 @@ let statusFx = null;
 let statusPulse = null;
 export function setStatusFx(fn) { statusFx = typeof fn === 'function' ? fn : null; }
 export function setStatusPulse(fn) { statusPulse = typeof fn === 'function' ? fn : null; }
+/** R28 — called when a status with an exit behaviour (a tag's `burstOnExpire`) runs out. */
+let statusExpire = null;
+export function setStatusExpire(fn) { statusExpire = typeof fn === 'function' ? fn : null; }
 
 /** Statuses live on the target as `{ type, remaining, power, … }`. */
 export function applyStatus(target, type, spec, power = 1, { longer = 0, strength = 1 } = {}) {
@@ -423,15 +428,23 @@ export const TICK_EVERY = 1;
 export function tickStatuses(unit, dt, { resist = 1 } = {}) {
   if (!unit.statuses) return 0;
   let damage = 0, healed = 0;
+  // R28 — Hex of Ruin's `takeMoreDot`: the body takes more from every damage-over-time on it
+  let dotK = 1;
+  // …and `dotRate` on a debuff (Entropy Field) makes every status on the body run faster
+  let bodyRate = 1;
+  for (const st of Object.values(unit.statuses)) { dotK += st.takeMoreDot || 0; if (st.kind !== 'buff' && st.kind !== 'form' && st.dotRate) bodyRate *= st.dotRate; }
   for (const [type, st] of Object.entries(unit.statuses)) {
-    st.remaining -= dt;
+    // R28 — a status ticks faster on a body in an Entropy Field, or when its caster had Soul Pact
+    // (`st.rate`, stamped where the player applies it); the total is the same, it simply lands sooner
+    const sdt = st.perSecond ? dt * bodyRate * (st.rate || 1) : dt;
+    st.remaining -= sdt;
     // R23 — Hemorrhage: every metre walked while it bleeds is worth more damage on the next tick
     if (st.growOnMove && unit.x != null) {
       if (st.lastX != null) st.moved = (st.moved || 0) + Math.hypot(unit.x - st.lastX, unit.z - st.lastZ);
       st.lastX = unit.x; st.lastZ = unit.z;
     }
     if (st.perSecond) {
-      st.since = (st.since || 0) + dt;
+      st.since = (st.since || 0) + sdt;
       const expiring = st.remaining <= 0;
       // pay out on the tick, and pay out whatever is left over when the status runs out, so a
       // three-and-a-half-second burn does not silently drop its last half second
@@ -441,7 +454,7 @@ export function tickStatuses(unit, dt, { resist = 1 } = {}) {
         const ramp = st.ramp ? Math.min(st.rampCap || 3, 1 + st.ramp * (st.ticks || 0)) : 1;
         const grow = st.growOnMove ? 1 + Math.min(st.growCap || 1, (st.moved || 0) * st.growOnMove) : 1;
         st.ticks = (st.ticks || 0) + 1;
-        damage += st.perSecond * st.power * span * resist * ramp * grow;
+        damage += st.perSecond * st.power * span * resist * ramp * grow * dotK;
         st.since = expiring ? 0 : st.since - TICK_EVERY;
         // a burn that ticks should LOOK like it ticked: a 1.7x pop on the aura, once a second
         if (!expiring) statusPulse?.(unit, type);
@@ -450,7 +463,13 @@ export function tickStatuses(unit, dt, { resist = 1 } = {}) {
     if (st.healPerSecond) healed += st.healPerSecond * (unit.maxHp || 0) * dt;
     // R23 — Doom: whatever was stored on it lands, once, as it runs out
     if (st.detonate && st.remaining <= 0 && st.stored > 0) damage += st.stored * st.detonate * resist;
-    if (st.remaining <= 0) { delete unit.statuses[type]; statusFx?.(unit, type, false); }
+    if (st.remaining <= 0) {
+      // R28 — a tag that banked damage pays it as it ends (Grave Mark's `store`), and one that
+      // bursts or does something else on its way out hands that to the runtime (`setStatusExpire`)
+      if (st.kind === 'tag' && st.store > 0 && st.bank > 0) damage += st.bank * st.store;
+      delete unit.statuses[type]; statusFx?.(unit, type, false);
+      if (st.burstOnExpire) statusExpire?.(unit, type, st);
+    }
   }
   if (healed > 0) unit.hp = Math.min(unit.maxHp ?? unit.hp, (unit.hp ?? 0) + healed);
   if (damage > 0) unit.hp = Math.max(0, (unit.hp ?? 0) - damage);
@@ -703,8 +722,9 @@ export function createSkillBar({ data, player, rpg, unlocks = null, canSummon = 
     /**
      * R18 — A SUMMON YOU CANNOT HAVE IS NOT CASTABLE, so pressing the key costs nothing.
      */
-    if (canSummon && s.shape === 'summon' && s.pet && !row?.summon?.temporary && !row?.howl) {
-      const allowed = canSummon(s.pet, s);
+    // R28 — ask of the row cast NOW: a shaped Call the Pack (Den Guard, Running Pack) is not a summon
+    if (canSummon && row?.shape === 'summon' && row.pet && !row.summon?.temporary && !row.howl) {
+      const allowed = canSummon(row.pet, s);
       if (allowed && allowed.ok === false) return { ok: false, why: allowed.why || `You cannot keep another ${s.name}.` };
     }
     return { ok: true, skill: s };
@@ -729,6 +749,16 @@ export function createSkillBar({ data, player, rpg, unlocks = null, canSummon = 
       s.next = pick();
     }
     if (row.statusPool?.length) row = { ...row, statusPick: row.statusPool[Math.floor(rng() * row.statusPool.length)] };
+    /**
+     * R28 — `sequence`: after `n` casts in a row with DIFFERENT elements, the next cast takes `mod`
+     * (Wild Bolt: three different rolls make the fourth carry every status).
+     */
+    if (row.sequence) {
+      const sq = row.sequence;
+      const seen = (s.seq || []).slice(-(sq.n ?? 3));
+      if (seen.length >= (sq.n ?? 3) && new Set(seen).size === seen.length) { row = applyMod(row, sq.mod || {}, {}); s.seq = []; }
+      else s.seq = [...(s.seq || []), row.element].slice(-6);
+    }
     if (Array.isArray(row.variance)) {
       const [lo, hi] = row.variance;
       const roll = lo + rng() * (hi - lo);
@@ -785,6 +815,10 @@ export function createSkillBar({ data, player, rpg, unlocks = null, canSummon = 
       spent: cost,
       paidWith: bloodPrice() ? 'health' : 'mana',
       formId: row.formId || null,
+      // R28 — the row's own base share, and whether it deals damage at all (no `mult` = none:
+      // Sanctuary, Drowse, a post land their effects and nothing else)
+      baseMult: row.mult || 1,
+      noDamage: !row.mult && !['self', 'summon'].includes(row.shape),
       pickName: row.pickName || null,
       statusPick: row.statusPick || null,
     };
@@ -919,7 +953,11 @@ export function createSkillBar({ data, player, rpg, unlocks = null, canSummon = 
       if (em.behind) out.behind = true;
       if (em.repeat) out.empowerRepeat = { count: em.repeat, mult: em.repeatMult ?? 0.6 };
       if (em.free && cost) { if (bloodPrice()) player.hp = Math.min(player.maxHp, player.hp + cost); else player.mp = Math.min(player.maxMp, player.mp + cost); }
-      if (em.count <= 0) player.mech.empower = null;
+      if (em.count <= 0) {
+        player.mech.empower = null;
+        // Spellrush: once the empowered casts are spent, mana stops coming back for a while
+        if (em.manaPause) applyStatus(player, 'mana_pause', { name: 'Spent', kind: 'debuff', element: 'arcane', seconds: em.manaPause, noManaRegen: true });
+      }
     }
     if (out.empowerNext) {
       player.mech.empower = { ...out.empowerNext, count: out.empowerNext.count ?? 1, left: out.empowerNext.seconds ?? 8, from: s.id };

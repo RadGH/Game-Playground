@@ -17,7 +17,7 @@
 
 import { Loot } from '../../emberveil/js/loot.js';
 // R28 — the skill vocabulary's per-hit rules, the hit-taken rules, and a form's sheet stats
-import { hitFactor, afterHit as mechAfterHit, onHurt as mechOnHurt, statusStats } from './skillmech.js';
+import { hitFactor, afterHit as mechAfterHit, onHurt as mechOnHurt, statusStats, tagFactor } from './skillmech.js';
 import { focusLook } from './foci.js';
 import { makeRng } from '../../emberveil/js/rng.js';
 import { tuneAffixData, affixAllowed, rollAffixValue, itemLevelFor, requirementFor, tierFor, capValue, roundFor, scrubRetired, FARHOLD_AFFIXES } from './affixes.js';
@@ -1525,7 +1525,7 @@ export class Rpg {
    * One swing. Returns what happened so the caller can show numbers, play an animation and write
    * a line in the log. Attacker and defender are any `{ derived }` character or plain enemy.
    */
-  strike(attacker, defender, rng = this.rng, { multiplier = 1, element = 'physical', skill = null, applyStatus = null, hand = 'main', pen = 0, proc = false, ranged = false, rules: rulesIn = null, crowd = 1 } = {}) {
+  strike(attacker, defender, rng = this.rng, { multiplier = 1, element = 'physical', skill = null, applyStatus = null, hand = 'main', pen = 0, proc = false, ranged = false, rules: rulesIn = null, crowd = 1, noDamage = false } = {}) {
     const a = attacker.derived, d = defender.derived;
     // Read every field with a fallback, NEVER `a ? a.x : fallback`. Round 4 gave enemies and pets a
     // small `derived` bag (resistAll / thorns / dodge) so modifiers could hang off them, which made
@@ -1590,6 +1590,8 @@ export class Rpg {
      */
     const mechHit = rules ? hitFactor(rules, attacker, defender, { crowd }) : null;
     if (mechHit) { multiplier *= mechHit.mult; if (mechHit.pen > pen) pen = mechHit.pen; }
+    // R28 — a class tag's own numbers (Quarry, Flanked, Off Balance) count on every strike
+    if (defender.statuses) multiplier *= tagFactor(attacker, defender);
     if (mechHit?.crit && !crit) { crit = true; ctx.crit = true; }
 
     let amount = rng.range(dmgRange[0], dmgRange[1]) * multiplier;
@@ -1688,6 +1690,8 @@ export class Rpg {
       if (defender.perkFlags?.riposte) defender.riposteReady = true;   // block arms it too
     }
     amount = Math.max(blocked ? 0 : 1, Math.round(amount));
+    // R28 — a skill with no `mult` lands its statuses and its knock and nothing else
+    if (noDamage) amount = 0;
 
     // a mana shield takes its share before health does
     // NOTHING in this game takes the player's mana when they are hit. The old mana shield did, and
@@ -1706,7 +1710,11 @@ export class Rpg {
     }
     // R28 P2 — a body in stasis cannot be hurt: the damage is BANKED and lands when it thaws
     // (js/actors.js pays it out). A transformed one turns back on damage after its first second.
-    if (amount > 0 && defender.statuses?.stasis) { defender.statuses.stasis.bank = (defender.statuses.stasis.bank || 0) + amount; amount = 0; }
+    if (amount > 0 && defender.statuses?.stasis) {
+      // an enemy banks it; a follower or the player held in stasis simply takes nothing
+      if (!defender.owner && !defender.equipment) defender.statuses.stasis.bank = (defender.statuses.stasis.bank || 0) + amount;
+      amount = 0;
+    }
     if (amount > 0 && defender.statuses?.transmuted) {
       const tm = defender.statuses.transmuted;
       if ((tm.total ?? 5) - tm.remaining > 1) { delete defender.statuses.transmuted; if (defender.statuses.chill?.name === 'Shrunk') delete defender.statuses.chill; }
@@ -1768,7 +1776,7 @@ export class Rpg {
       if (reflected > 0) attacker.hp = Math.max(0, attacker.hp - reflected);
     }
 
-    const result = { dodged: false, amount, crit, healed, manaBack, reflected, blocked, absorbed, fromMana, saved, element, dead: defender.hp <= 0, why, mechEvents };
+    const result = { dodged: false, amount, crit, healed, manaBack, reflected, blocked, absorbed, fromMana, saved, element, dead: defender.hp <= 0, why, mechEvents, noDamage };
     // A belt-and-braces guard. A NaN anywhere upstream used to walk straight into a health bar and
     // leave it reading "NaN / 94" with no way to tell where it came from; now it is caught here.
     if (!Number.isFinite(result.amount)) {
@@ -1816,7 +1824,7 @@ export class Rpg {
      * per-hit heals and mana, a critical's rider, and the kill book `onKill` reads. One call, so a
      * rule added to js/skillmech.js reaches every skill without this function learning its name.
      */
-    if (rules && amount > 0) result.mech = mechAfterHit(rules, attacker, defender, result, { applyStatus, consumed: mechHit?.consumed, damage: amount, crowd });
+    if (rules && (amount > 0 || noDamage)) result.mech = mechAfterHit(rules, attacker, defender, result, { applyStatus, consumed: mechHit?.consumed, damage: amount, crowd });
     if (imb && amount > 0) {
       if (imb.status && applyStatus) applyStatus(defender, imb.status, imb.statusSpec || null, Math.max(1, amount * 0.35));
       imb.count = (imb.count || 0) + 1;

@@ -200,8 +200,9 @@
 /* R28 — what a shape does to the other skills, and what a skill becomes in each shape. The
    names always show; the sentences only on an opened card. */
 .sc-forms { list-style: none; margin: 4px 0 0; padding: 4px 0 0 8px; border-left: 2px solid #2f5a2a; font-size: 11.5px; color: #8b9ab0; }
-.sc-forms li { margin: 1px 0; }
-.sc-forms b { color: #b8f0a0; font-weight: 600; }
+/* the class card's own `.cc-skills li` is a three-column grid; these rows are plain lines */
+.class-card .cc-skills .sc-forms li { display: block; margin: 1px 0; font-size: 11.5px; }
+.class-card .cc-skills .sc-forms b, .sc-forms b { display: inline; color: #b8f0a0; font-size: 11.5px; font-weight: 600; }
 .sc-forms .sc-form-desc { display: none; }
 .open > .sc-forms .sc-form-desc { display: inline; }
 

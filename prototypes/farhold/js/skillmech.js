@@ -60,6 +60,7 @@ function statusPhrase(ref, ctx, { lasting = true } = {}) {
   if (spec.movePct || spec.move) bits.push(`moves ${pct(spec.movePct || spec.move)} faster`);
   if (spec.damage) bits.push(`deals ${pct(spec.damage)} more damage`);
   if (spec.resist) bits.push(`takes ${pct(spec.resist)} less damage`);
+  if (spec.takeMoreDot) bits.push(`takes ${pct(spec.takeMoreDot)} more damage from damage over time`);
   const what = bits.length ? ` (${list(bits)})` : '';
   return `${sname(r.id, ctx)}${what}${lasting ? ` for ${secs(spec.seconds ?? 4)}` : ''}`;
 }
@@ -208,7 +209,13 @@ export const VOCAB = {
       if (v.debuff) parts.push(`applying ${statusPhrase(v.debuff, ctx)} to enemies inside`);
       if (v.knockOut) parts.push(`pushing enemies inside ${m(v.knockOut)} outward every second`);
       if (v.pull) parts.push(`pulling enemies inside ${m(v.pull)} inward every second`);
-      if (v.edge) parts.push('affecting an enemy only as it crosses the edge');
+      if (v.edge) {
+        const eb = [`${wd(v.edgeMult ?? 1)}`];
+        const st = v.edgeKnock?.stagger ?? 0.6;
+        if (st) eb.push(`a ${secs(st)} stun`);
+        if (v.edgeStatus) eb.push(statusPhrase(v.edgeStatus, ctx));
+        parts.push(`an enemy that crosses its edge, in or out, takes ${list(eb)}`);
+      }
       if (v.blocksRanged) parts.push('stopping enemy ranged hits on anyone inside');
       if (v.hp) parts.push(`it has ${pct(v.hp)} of your maximum health and can be broken`);
       if (v.max) parts.push(`at most ${fmt(v.max)} stand at once`);
@@ -242,7 +249,12 @@ export const VOCAB = {
       if (v.grow) bits.push(`each strike reaches ${m(v.grow)} further than the last`);
       if (v.scatter) bits.push('each strike lands at a random point inside the area, preferring enemies');
       if (v.target === 'lowest') bits.push('each strike picks the enemy with the lowest health');
-      if (v.alternate) bits.push('the strikes alternate between its two forms');
+      if (v.alternate) {
+        const forms = v.alternate.length;
+        bits.push(forms === 2 ? 'the strikes alternate between its two forms' : `the strikes take each of ${fmt(forms)} forms in turn`);
+        const els = v.alternate.map(a => a.element).filter(Boolean);
+        if (els.length === forms && new Set(els).size === forms) bits.push(`one strike each of ${list(els)}`);
+      }
       return bits.length ? `${cap(list(bits))}.` : '';
     },
   },
@@ -278,6 +290,11 @@ export const VOCAB = {
       if (row.takeMore) bits.push(`take ${pct(row.takeMore)} more damage from every source`);
       if (row.fromParty) bits.push(`take ${pct(row.fromParty)} more damage from your followers`);
       if (row.store) bits.push(`take ${pct(row.store)} of the damage dealt to them during the mark again when it ends`);
+      if (row.dealLess) bits.push(`deal ${pct(row.dealLess)} less damage`);
+      if (row.takeMoreDot) bits.push(`take ${pct(row.takeMoreDot)} more damage from damage over time`);
+      if (row.slow) bits.push(`move ${pct(row.slow)} slower`);
+      if (row.burstOnExpire) bits.push(`burst for ${wd(row.burstOnExpire.mult ?? 0.5)} within ${m(row.burstOnExpire.radius ?? 2.5)} when the mark ends`);
+      if (row.gainOnHurt) bits.push(`give you ${fmt(row.gainOnHurt.n ?? 1)} ${cap(row.gainOnHurt.id)} each time they hit you or a follower`);
       return `Marks targets with ${sname(t.id, ctx)} for ${secs(row.seconds ?? 6)}${bits.length ? `: they ${list(bits)}` : ''}.`;
     },
   },
@@ -353,11 +370,15 @@ export const VOCAB = {
   },
   recast: {
     phase: 'bar', reader: 'js/skills.js',
-    describe: (v, ctx) => `Press again within ${secs(v.window ?? 4)} to ${v.say || describeSub(v.then, ctx) || 'use the second part'}.`,
+    describe(v, ctx) {
+      if (v.say) return `Press again within ${secs(v.window ?? 4)} to ${v.say}.`;
+      const sub = describeSub(v.then, ctx);
+      return `Press again within ${secs(v.window ?? 4)} for a second part that ${sub || 'goes off where you aim'}.`;
+    },
   },
   resource: {
     phase: 'bar', reader: 'js/skills.js',
-    describe(v) {
+    describe(v, ctx) {
       const name = cap(v.id);
       const bits = [];
       if (v.gain) {
@@ -368,6 +389,11 @@ export const VOCAB = {
         const what = v.spend === 'all' ? `all your ${name}` : `${fmt(v.spend)} ${name}`;
         bits.push(`Spends ${what}${v.perPoint?.mult ? `: ${pct(v.perPoint.mult)} more damage for each point spent` : ''}${v.optional ? ' if you have it' : ''}.`);
       }
+      if (v.atMax) {
+        const sub = describeSub(v.atMax, ctx);
+        if (sub) bits.push(`Spending ${fmt(v.max || RESOURCE_MAX)} or more: ${sub}.`);
+      }
+      if (v.ifSpent) { const sub = describeSub(v.ifSpent, ctx); if (sub) bits.push(`Spending any: ${sub}.`); }
       if (v.max) bits.push(`${name} holds up to ${fmt(v.max)}.`);
       return bits.join(' ');
     },
@@ -379,7 +405,7 @@ export const VOCAB = {
   forms: {
     phase: 'bar', reader: 'js/skills.js',
     describe(v) {
-      const names = Object.entries(v || {}).map(([id, o]) => `${o.name || id} (${FORM_LABEL[id] || cap(id)})`);
+      const names = Object.entries(v || {}).map(([id, o]) => (o?.name ? `${o.name} (${FORM_LABEL[id] || cap(id)})` : `a ${FORM_LABEL[id] || cap(id)} version`));
       return names.length ? `Changes with your shape or stance: ${list(names)}.` : '';
     },
   },
@@ -429,14 +455,15 @@ export const VOCAB = {
     describe(v) {
       const n = v.count ?? 1;
       const bits = [];
-      if (v.mult) bits.push(`deal ${pct(v.mult)} more damage`);
-      if (v.free) bits.push('cost no mana');
-      if (v.crit) bits.push('are certain critical hits');
-      if (v.behind) bits.push('count as from behind');
-      if (v.repeat) bits.push(`fire ${fmt(v.repeat)} times at ${pct(v.repeatMult ?? 0.6)} each`);
-      if (v.pets) bits.push('also empower your followers\' next attack');
+      const one = n === 1;
+      if (v.mult) bits.push(`${one ? 'deals' : 'deal'} ${pct(v.mult)} more damage`);
+      if (v.free) bits.push(one ? 'costs no mana' : 'cost no mana');
+      if (v.crit) bits.push(one ? 'is a certain critical hit' : 'are certain critical hits');
+      if (v.behind) bits.push(one ? 'counts as from behind' : 'count as from behind');
+      if (v.repeat) bits.push(`${one ? 'fires' : 'fire'} ${fmt(v.repeat)} times at ${pct(v.repeatMult ?? 0.6)} each`);
+      if (v.pets) bits.push(`also ${one ? 'empowers' : 'empower'} your followers' next attack`);
       const who = v.basic ? (n === 1 ? 'Your next attack' : `Your next ${fmt(n)} attacks`) : (n === 1 ? 'Your next skill' : `Your next ${fmt(n)} skills`);
-      return `${who} within ${secs(v.seconds ?? 8)} ${list(bits) || 'is empowered'}.`;
+      return `${who} within ${secs(v.seconds ?? 8)} ${list(bits) || (n === 1 ? 'is empowered' : 'are empowered')}.`;
     },
   },
   imbue: {
@@ -482,8 +509,8 @@ export const VOCAB = {
     describe(v) {
       const who = v.pets ? 'You and every follower get' : 'You get';
       const n = v.charges ?? 1;
-      const which = v.threshold ? `a hit worth more than ${pct(v.threshold)} of maximum health` : v.cap ? `a hit of up to ${pct(v.cap)} of maximum health` : 'a hit';
-      return `${who} a ward for ${secs(v.seconds ?? 10)} that negates ${n === 1 ? `the first ${which}` : `${fmt(n)} hits, each ${which.replace(/^a hit/, 'one')}`} completely.`;
+      const which = v.threshold ? ` worth more than ${pct(v.threshold)} of maximum health` : v.cap ? ` of up to ${pct(v.cap)} of maximum health` : '';
+      return `${who} a ward for ${secs(v.seconds ?? 10)} that completely negates ${n === 1 ? `the first hit${which}` : `${fmt(n)} hits${which ? `, each one${which}` : ''}`}.`;
     },
   },
 
@@ -501,19 +528,29 @@ export const VOCAB = {
   },
   command: {
     phase: 'plan', reader: 'js/pets.js',
-    describe(v) {
+    describe(v, ctx) {
       const who = v.petOnly ? 'your class companion' : 'your followers';
-      const what = { focus: `${who} attack the target`, pounce: `${who} leap onto the target and their next attack deals 50% more damage`, guard: `${who} stay within 4 m of you and attack whatever hits you`, return: `${who} return to you` }[v.order || 'focus'];
-      return `Orders ${what}${v.seconds ? ` for ${secs(v.seconds)}` : ''}.`.replace('Orders your followers attack', 'Orders your followers to attack').replace('Orders your class companion attack', 'Orders your class companion to attack');
+      const verb = { focus: 'to attack the target', pounce: 'to leap onto the target, the next attack dealing 50% more damage', guard: 'to stay within 4 m of you and attack whatever hits you', return: 'to return to you' }[v.order || 'focus'];
+      let s = `Orders ${who} ${verb}${v.seconds ? ` for ${secs(v.seconds)}` : ''}`;
+      if (v.biteStatus) s += `; meanwhile their attacks apply ${sname(v.biteStatus, ctx)}`;
+      if (v.gain) s += `; each of their hits gives you ${fmt(v.gain.n ?? 1)} ${cap(v.gain.resource || v.gain.id)}`;
+      return `${s}.`;
     },
   },
   summon: {
     phase: 'pet', reader: 'js/pets.js',
-    describe(v) {
+    describe(v, ctx) {
       const n = v.count ?? 1;
-      const at = v.at === 'corpses' ? ' at corpses nearby' : v.at === 'aim' ? ' where you aim' : '';
-      const what = v.decoy ? `a decoy with ${pct(v.decoy.hpShare ?? 0.3)} of your maximum health that does not move or attack and draws every enemy near it` : `${fmt(n)} ${v.name || 'helper'}${n === 1 ? '' : 's'}`;
+      const at = v.at === 'corpses' ? (v.perCorpse ? '' : ` from a corpse within ${m(v.radius ?? 12)}`) : v.at === 'aim' ? ' where you aim' : '';
+      const what = v.decoy
+        ? `${n === 1 ? `a ${v.name || 'decoy'}` : `${fmt(n)} ${v.name ? `${v.name}s` : 'decoys'}`}, each with ${pct(v.decoy.hpShare ?? 0.3)} of your maximum health, that ${n === 1 ? 'does' : 'do'} not move or attack and ${n === 1 ? 'draws' : 'draw'} every enemy near ${n === 1 ? 'it' : 'them'}`
+        : `${fmt(n)} ${v.name || 'helper'}${n === 1 ? '' : 's'}`;
       let s = `Summons ${what}${at}${v.lifetime ? ` for ${secs(v.lifetime)}` : ''}`;
+      if (v.perCorpse) s += `, one for each corpse within ${m(v.radius ?? 12)} of where you aim${v.plus ? ` plus ${fmt(v.plus)}` : ''}${v.max ? `, up to ${fmt(v.max)}` : ''}; each rises where its corpse lies`;
+      if (v.hpMult && v.hpMult !== 1) s += `; it has ${pct(Math.abs(v.hpMult - 1))} ${v.hpMult > 1 ? 'more' : 'less'} health`;
+      if (v.biteStatus) s += `; its attacks apply ${sname(v.biteStatus, ctx)}`;
+      if (v.decoy?.onStruck) s += `; whatever strikes it gets ${statusPhrase(v.decoy.onStruck, ctx)}`;
+      if (v.mimic) s += `; it repeats every skill you cast for ${pct(v.mimic.mult ?? 0.4)} of the damage`;
       if (v.temporary) s += '; it takes no follower slot';
       if (v.burstOnExpire) s += `; when it ends it bursts for ${wd(v.burstOnExpire.mult ?? 0.8)} within ${m(v.burstOnExpire.radius ?? 3)}`;
       if (v.heal) s += `; it heals the most-hurt of you and your followers ${pct(v.heal.share ?? 0.06)} every ${secs(v.heal.every ?? 2)}`;
@@ -555,6 +592,23 @@ export const VOCAB = {
       return `Links the follower nearest your aim to you for ${secs(v.seconds ?? 8)}: you take ${pct(v.share ?? 0.4)} of the damage dealt to it${v.threshold ? ` above ${pct(v.threshold)} of its health` : ''} instead.`;
     },
   },
+  corpseBurst: {
+    phase: 'plan', reader: 'js/skillrun.js',
+    describe: v => `Every corpse within ${m(v.radius ?? 10)} of where you aim (up to ${fmt(v.max ?? 5)}) explodes where it lies, striking everything within ${m(v.burst ?? 4)} of it for ${wd(v.mult ?? 1)}${v.fallback ? `; with no corpse, your nearest follower gives ${pct(v.fallback)} of its health to explode instead` : ''}.`,
+  },
+  clusters: {
+    phase: 'plan', reader: 'js/skillrun.js',
+    describe: v => `Each other group of ${fmt(v.min ?? 2)} or more enemies within ${m(v.range ?? 30)} of you is struck too, for ${pct(v.mult ?? 0.4)} of the damage (up to ${fmt(v.max ?? 4)} groups).`,
+  },
+  allyStatus: {
+    phase: 'plan', reader: 'js/skillrun.js',
+    describe: (v, ctx) => `${v.target === 'all' ? 'Every follower gets' : 'The follower nearest your aim gets'} ${statusPhrase({ ...statusRef(v.status), seconds: v.seconds ?? statusRef(v.status)?.seconds }, ctx)}${v.self ? ', and so do you' : ''}.`,
+  },
+  sequence: {
+    phase: 'bar', reader: 'js/skills.js',
+    describe: (v, ctx) => `After ${fmt(v.n ?? 3)} casts in a row with different elements, the next cast ${describeSub(v.mod, ctx) || 'is empowered'}.`,
+  },
+
   // ---------------------------------------------------------------- P2 (second pass)
   turned: {
     phase: 'hit', reader: 'js/actors.js',
@@ -633,9 +687,19 @@ export const MOD_STRUCT_KEYS = ['set', 'add', 'mul', 'forms', 'when'];
 
 // ─────────────────────────────────────────────────────────────────────────────── describing
 
+/** The plain `set`/`add`/`mul` of a sub-mod in words (Settle the Grudge's `atMax`). */
+function modClauses(sub) {
+  const out = [];
+  const add = { pierce: n => `passes through ${fmt(n)} more targets`, chains: n => `jumps ${fmt(n)} more times`, projectiles: n => `looses ${fmt(n)} more projectiles`, radius: n => `reaches ${m(n)} further`, splash: n => `splashes ${m(n)} further` };
+  for (const [k, n] of Object.entries(sub.add || {})) out.push(add[k] ? add[k](n) : `+${fmt(n)} ${k.replace(/\./g, ' ')}`);
+  for (const [k, n] of Object.entries(sub.mul || {})) if (k === 'mult') out.push(`deals ${pct(Math.abs(n - 1))} ${n > 1 ? 'more' : 'less'} damage`);
+  if (sub.set?.crit || sub.crit) out.push('is a certain critical hit');
+  return out;
+}
+
 function describeSub(sub, ctx) {
   if (!sub) return '';
-  const bits = describeVocab(sub, ctx).map(s => s.replace(/\.$/, ''));
+  const bits = [...modClauses(sub), ...describeVocab(sub, ctx).map(s => s.replace(/\.$/, ''))];
   if (sub.mult) {
     const el = sub.element && sub.element !== 'physical' ? ` as ${sub.element}` : '';
     const st = sub.status ? ` and applies ${statusPhrase(sub.status, ctx)}` : '';
@@ -1414,12 +1478,22 @@ export function hitFactor(rules, attacker, defender, ctx = {}) {
       out.consumed = what;
     }
   }
-  // a tag that makes the target take more from YOU (`fromYou`), or from your followers
-  for (const st of Object.values(defender.statuses || {})) {
-    if (st.kind !== 'tag') continue;
-    if (st.fromYou && attacker?.equipment) out.mult *= 1 + st.fromYou;
-  }
   return out;
+}
+
+/**
+ * A TAG'S OWN NUMBERS, for every strike whoever makes it (not only a skill's): `fromYou` counts on
+ * the player's hits, `fromParty` on a follower's (an attacker with an `owner`). Read by js/rpg.js
+ * `strike` on every hit, so a hound's bite on a Quarry target is worth more.
+ */
+export function tagFactor(attacker, defender) {
+  let k = 1;
+  for (const st of Object.values(defender?.statuses || {})) {
+    if (st.kind !== 'tag') continue;
+    if (st.fromYou && attacker?.equipment) k *= 1 + st.fromYou;
+    if (st.fromParty && attacker?.owner) k *= 1 + st.fromParty;
+  }
+  return k;
 }
 
 /**
@@ -1451,7 +1525,12 @@ export function afterHit(rules, attacker, defender, result, ctx = {}) {
       ...(was || {}), type: t.id, name: row.name || t.id, kind: 'tag', element: row.element || 'arcane',
       remaining: row.seconds ?? 6, power: 1, perSecond: 0, slow: row.slow || 0,
       takeMore: row.takeMore || 0, fromYou: row.fromYou || 0, fromParty: row.fromParty || 0,
+      dealLess: row.dealLess || 0, takeMoreDot: row.takeMoreDot || 0,
       store: row.store || rules.store?.share || 0, bank: was?.bank || 0, owner: rules.skill,
+      // a tag that bursts as it ends (Clockwork Bolt's Stuck), at the cast's own scale, and one
+      // that pays the caster a resource when the tagged body hits you or a follower (Brand)
+      burstOnExpire: row.burstOnExpire ? { ...row.burstOnExpire, power: (row.burstOnExpire.mult ?? 0.5) * (rules.scale || 1), element: row.burstOnExpire.element || row.element } : null,
+      gainOnHurt: row.gainOnHurt || null,
     };
     did.tagged = t.id;
     if (!was) ENV.statusFx?.(defender, 'marked', true);
@@ -1483,7 +1562,11 @@ export function afterHit(rules, attacker, defender, result, ctx = {}) {
     if (!v || !apply) continue;
     const secsFor = typeof v === 'number' ? v : v.seconds ?? 5;
     const ctl = controlFor(defender, id, secsFor);
-    const extra = ctl.id === id ? { follow: !!v.follow, weakenAfter: v.weakenAfter || 0, bankMult: v.bank ?? 1.5, bank: 0, total: ctl.seconds, creature: v.creature || null } : { slow: ctl.slow };
+    const extra = ctl.id === id ? {
+      follow: !!v.follow, weakenAfter: v.weakenAfter || 0, bankMult: v.bank ?? 1.5, bank: 0, total: ctl.seconds, creature: v.creature || null,
+      // Transmute's blast as it wears off (a random element when `element: 'random'`)
+      burstOnExpire: v.burstOnExpire ? { ...v.burstOnExpire, power: (v.burstOnExpire.mult ?? 1) * (rules.scale || 1) } : null,
+    } : { slow: ctl.slow };
     apply(defender, ctl.id, { ...spec(ctl.id), seconds: ctl.seconds, ...extra }, 1);
     if (ctl.id === 'transmuted') apply(defender, 'chill', { ...spec('chill'), slow: 0.5, seconds: ctl.seconds, name: 'Shrunk' }, 1);
   }
@@ -1695,6 +1778,7 @@ export function mechRules(plan) {
   const out = {};
   let any = false;
   for (const k of HIT_KEYS) if (plan[k] != null && plan[k] !== false) { out[k] = plan[k]; any = true; }
+  if (plan.mult && plan.baseMult) { out.scale = plan.mult / plan.baseMult; }
   for (const k of ['crit', 'behind', 'statusPick', 'statusMult', 'resetOn', 'cutCooldown', 'resource', 'runeMult', 'penBehind']) {
     if (plan[k] != null && plan[k] !== false) { out[k] = plan[k]; any = true; }
   }

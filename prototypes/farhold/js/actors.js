@@ -907,7 +907,10 @@ export class EnemyField {
         e.stagger -= dt;
         if (e.stagger <= 0) { e.stagger = 0; this.spellfx?.status?.(e.actor.group, 'stun', false); }
       } else if (e.swingTimer > 0) {
-        e.swingTimer -= dt;
+        // R28 — Lethargy's `attackSlow`: its attacks come round that much slower
+        let as = 0;
+        for (const st of Object.values(e.statuses || {})) as = Math.max(as, st.attackSlow || 0);
+        e.swingTimer -= dt * (1 - Math.min(0.9, as));
       }
       // a hammer's armour break wears off
       if (e.sunderLeft > 0) {
@@ -1494,7 +1497,7 @@ export class EnemyField {
     e.struckAt = this.clock || 0;
     e.hitFlash = 0.18;
     if (e.state !== 'chase') e.state = 'chase';
-    if (!(result.amount > 0) && !result.blocked) return;
+    if (!(result.amount > 0) && !result.blocked && !result.noDamage) return;
 
     const at = this._vec || (this._vec = new THREE.Vector3());
     const bodyY = (e.y || 0) + 0.9 * (e.scale || 1) + (e.hover || 0);
@@ -1576,7 +1579,7 @@ export class EnemyField {
    * (js/combat-feel.js), because `main.js` hands this function a reach and an arc and never says
    * which shape they came from.
    */
-  strike(player, playerUnit, { reach = 2.9, arc = 1.5, power = 1, element = 'physical', skill = null, onHit = null, applyStatus: applyFn = null, hand = null, strike: shapeIn = null, rules = null, knock = null } = {}) {
+  strike(player, playerUnit, { reach = 2.9, arc = 1.5, power = 1, element = 'physical', skill = null, onHit = null, applyStatus: applyFn = null, hand = null, strike: shapeIn = null, rules = null, knock = null, noDamage = false } = {}) {
     const hits = [];
     const shape = shapeIn || feel.swing.strike || null;
     const weapon = shape?.item || null;
@@ -1634,7 +1637,7 @@ export class EnemyField {
 
       const result = this.rpg.strike(playerUnit, e, this.rng, {
         multiplier: mult, element, skill, applyStatus: applyFn,
-        hand: which, pen: shape?.pen || 0, rules, crowd,
+        hand: which, pen: shape?.pen || 0, rules, crowd, noDamage,
       });
       // R28 — a skill's `knock` is the strike shape this hit lands with (push + stun + interrupt)
       this.land(e, result, { strike: knock || shape, fromX: player.x, fromZ: player.z, element, share: power });
@@ -1658,7 +1661,7 @@ export class EnemyField {
    * Damage everything within `radius` of a point — an arrow landing, or a heavy weapon's shockwave.
    * Every attack in the game goes through this or `strike`, so nothing is ever single-target.
    */
-  strikeArea(x, z, radius, attacker, { falloff = 0.45, power = null, element = 'physical', skill = null, onHit = null, applyStatus: applyFn = null, proc = false, rules = null, knock = null, from = null } = {}) {
+  strikeArea(x, z, radius, attacker, { falloff = 0.45, power = null, element = 'physical', skill = null, onHit = null, applyStatus: applyFn = null, proc = false, rules = null, knock = null, from = null, noDamage = false } = {}) {
     const hits = [];
     /**
      * AN ARROW CARRIES THE DRAW IT WAS LOOSED AT.
@@ -1682,7 +1685,7 @@ export class EnemyField {
       const near = 1 - (1 - falloff) * Math.min(1, d / Math.max(0.001, radius));
       // R23 — `proc` marks a strike a unique's power made (a pool, an aura, a slam), so the powers
       // that start more strikes do not start them off this one
-      const result = this.rpg.strike(attacker, e, this.rng, { multiplier: near * mult, element, skill, applyStatus: applyFn, proc, rules, crowd });
+      const result = this.rpg.strike(attacker, e, this.rng, { multiplier: near * mult, element, skill, applyStatus: applyFn, proc, rules, crowd, noDamage });
       // a knock thrown `away` from the caster pushes from where the caster stands, not the centre
       this.land(e, result, { strike: shape, fromX: from ? from.x : x, fromZ: from ? from.z : z, element, share: near });
       onHit?.(e, result);

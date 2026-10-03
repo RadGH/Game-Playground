@@ -260,6 +260,12 @@ body {
     grid-template-rows: none !important; grid-template-areas: none !important;
     grid-auto-rows: minmax(200px, auto); grid-auto-flow: row; overflow-y: auto;
   }
+  /* R28 (UI) — the panes keep their named `grid-area`s (bar, tree, pick…), and with the areas
+     switched off above, a named area that no longer exists is an IMPLICIT line: the Skills tab's
+     bar landed on top of its talent tree. One column means every pane simply takes the next row. */
+  .sheet > .tab-body:not(.hidden) > .pane { grid-area: auto; }
+  #sheet-skillbar { flex-wrap: wrap; height: auto; }
+  #sheet-skillbar .sk-card { flex: 1 1 30%; min-width: 120px; min-height: 96px; }
   .pane-body { overflow: visible; }
 }
 
@@ -1591,7 +1597,12 @@ body {
 .col-bar { grid-area: bar; }
 .col-tree { grid-area: tree; }
 @media (max-width: 1440px) {
-  .tab-body[data-tab="skills"]:not(.hidden) { grid-template-rows: 168px minmax(0, 1fr); }
+  .tab-body[data-tab="skills"]:not(.hidden) { grid-template-rows: 180px minmax(0, 1fr); }
+  /* R28 — at this height a three-line sentence pushed the card's own name out of the top of the
+     button (a button centres content that overflows it); two lines fit, one beside the round-28
+     marks, and the hover card has the rest */
+  .sk-card .sk-desc { -webkit-line-clamp: 2; }
+  .sk-card:has(.sk-marks) .sk-desc { -webkit-line-clamp: 1; }
 }
 /* The in-game bar and this screen used to share nothing — the screen was a text list and the bar
  * six boxes, and neither showed which talents were on a skill. This strip is both, and it is the
@@ -1605,6 +1616,7 @@ body {
   padding: 7px 9px 6px 26px;
   background: var(--pane-bg2); border: 1px solid #2a3446; border-radius: 7px;
   cursor: pointer; text-align: left; font: inherit; color: var(--ink);
+  justify-content: flex-start; overflow: hidden;
 }
 .sk-card .sk-key {
   position: absolute; left: 6px; top: 6px;

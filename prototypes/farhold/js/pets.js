@@ -579,8 +579,9 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
       const selfHurt = p._hpSeen != null && p.hp < p._hpSeen;
       p._hpSeen = p.hp;
 
-      // R28 — a decoy does not move and does not swing: it stands there and is hit
-      if (p.decoy) {
+      // R28 — a decoy does not move and does not swing: it stands there and is hit (and a follower
+      // held in stasis by its own side's Chronomancer stands the same way, untouchable)
+      if (p.decoy || p.statuses?.stasis) {
         p.y = groundAt(currentTerrain, p.x, p.z, p.y);
         p.actor.group.position.set(p.x, p.y + (p.hover || 0), p.z);
         setActorAnim(p.actor, 'idle');

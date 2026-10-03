@@ -278,9 +278,15 @@ const ADD_NOUN = {
   'ricochet.bounces': ['bounce', 'bounces'], 'split.shards': ['shard', 'shards'], 'place.seconds': 's on the placed object',
   'place.radius': 'm on the placed object', 'resource.gain': 'resource point gained', 'channel.seconds': 's of channel',
   'stack.max': ['maximum stack', 'maximum stacks'], 'stack.add': ['stack added', 'stacks added'],
+  'orbs.count': ['orb', 'orbs'], 'orbs.seconds': 's on the orbs', 'orbs.radius': 'm orb reach', 'orbs.every': 's between orb strikes',
+  'trail.seconds': 's of trail', 'trail.radius': 'm of trail width', 'trail.burns': 's of burning ground',
+  'selfBuff.seconds': 's on the buff', 'place.every': 's between pulses', 'place.max': ['post at once', 'posts at once'],
+  'channel.every': 's between ticks', 'summon.count': ['summon', 'summons'], 'summon.lifetime': 's of summon life',
 };
 function addClause(k, v) {
-  const noun = ADD_NOUN[k] || (k.endsWith('seconds') ? 's' : k.replace(/\./g, ' '));
+  // R28 (UI) — a nested distance ("dash.range", "pool.radius") is metres too: it read "+4 dash range"
+  const dist = /\.(radius|range|reach|length|metres|width)$/.test(k) ? `m ${k.split('.').join(' ').replace('metres', 'pull')}` : null;
+  const noun = ADD_NOUN[k] || dist || (k.endsWith('seconds') ? 's' : k.replace(/\./g, ' '));
   const sign = v > 0 ? '+' : '−';
   const abs = Math.abs(v);
   if (Array.isArray(noun)) return `${sign}${fmt(abs)} ${abs === 1 ? noun[0] : noun[1]}`;
@@ -335,14 +341,22 @@ export function describeNode(node, ctx = {}) {
   const subCtx = { ...ctx, atSelf: row && (row.shape === 'self' || row.shape === 'around') };
   for (const key of VOCAB_KEYS) {
     if (!(key in mod)) continue;
+    /**
+     * R28 (UI) — a node's `forms` is a set of per-form RIDERS (said by the loop below, "In
+     * Briarback shape: …"), not a skill row's list of named overrides. Run through the row's
+     * `forms` sentence it printed "Changes with your shape or stance: briarback (Briarback)".
+     */
+    if (key === 'forms') continue;
     const v = mod[key], base = row?.[key];
     let text;
     if (base && typeof base === 'object' && !Array.isArray(base) && v && typeof v === 'object' && !Array.isArray(v)) {
       const merged = describeVocab({ [key]: { ...base, ...v } }, subCtx).join(' ');
       const had = describeVocab({ [key]: base }, subCtx).join(' ');
-      const clauses = t => t.split(/(?<=\.)\s+|;\s+/).map(c => c.replace(/\.$/, '').replace(/^For [\d.]+s(, [^:]+)?: /, '').trim()).filter(Boolean);
+      const clauses = t => t.split(/(?<=\.)\s+|;\s+|,\s+/).map(c => c.replace(/\.$/, '').replace(/^For [\d.]+s(, [^:]+)?: /, '').trim()).filter(Boolean);
       const old = new Set(clauses(had));
       const fresh = clauses(merged).filter(c => !old.has(c));
+      // a duration the node changes is said, even when nothing else did
+      if (v.seconds != null && v.seconds !== base.seconds) fresh.unshift(`lasts ${secs(v.seconds)} instead of ${secs(base.seconds ?? 0)}`);
       if (!fresh.length) continue;
       const lead2 = key === 'selfBuff' && !/^For /.test(fresh[0]) ? 'While it lasts: ' : '';
       text = `${lead2}${fresh.join('; ')}.`;

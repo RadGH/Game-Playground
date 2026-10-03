@@ -173,7 +173,7 @@ import { pushFor, feel, tuneFeel } from './combat-feel.js';
 // R20 — `clearTalent` moved with it: js/retrain.js is what empties a tier now, for gold.
 import { talentPlan, pickTalent, talentsOn, migrateTalents, TALENTS_VERSION } from './skilltalents.js';
 // R28 — the skill vocabulary: pure rules (js/skillmech.js) and the runtime that acts on them
-import { setMechEnv, blocksRanged, controlFor } from './skillmech.js';
+import { setMechEnv, blocksRanged, controlFor, dotRateOf } from './skillmech.js';
 import { createSkillRuntime } from './skillrun.js';
 // R20 — `refundAll` and `refundOne` are no longer imported here: giving a perk back is an Unbinder
 // in a town and a price, and js/retrain.js is the only caller of either.
@@ -1268,8 +1268,11 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     }
     const first = !enemy.statuses?.[type];
     const longer = rpg.fx.sum(player, 'statusLonger', { type, spec });
+    // R28 — Soul Pact (`dotRate` on a player buff): what you apply now ticks that much faster
+    const rate = enemy !== player ? dotRateOf(player) : 1;
     const strength = rpg.fx.product(player, 'statusPower', { type });
-    applyStatus(enemy, type, spec, power, { longer, strength });
+    const entry = applyStatus(enemy, type, spec, power, { longer, strength });
+    if (entry && rate !== 1) entry.rate = rate;
     if (first) hud.log(`${enemy.name} is ${(spec.name || type).toLowerCase()}.`, 'good');
   }
   /** The callback every strike hands to the effect registry, so a crit can open a bleed. */
@@ -1511,7 +1514,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
          */
         const left = (plan.chains || 0) - hop;
         if (left > 0) {
-          const next = field.nearestTo(at.x, at.z, 12, chase) || null;
+          // R28 — a Shocked body is a conductor: a jump prefers one within 12 m, else the nearest within 8 m
+          const conductors = field.near(at.x, at.z, 12, chase).filter(e => e.statuses?.shock);
+          const next = (conductors.sort((p, q) => Math.hypot(p.x - at.x, p.z - at.z) - Math.hypot(q.x - at.x, q.z - at.z))[0]) || field.nearestTo(at.x, at.z, 8, chase) || null;
           if (next) {
             const ndx = next.x - at.x, ndz = next.z - at.z;
             const nlen = Math.hypot(ndx, ndz) || 1;
@@ -1680,7 +1685,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         const along = ex * a.dx + ez * a.dz;
         if (along < 0 || along > plan.range) continue;
         if (Math.hypot(ex - a.dx * along, ez - a.dz * along) > plan.width + (e.reach || 2) * 0.3) continue;
-        const result = rpg.strike(player, e, field.rng, { multiplier: power, element: plan.element, applyStatus: statusHook, skill: plan.skill?.id, rules: plan.rules });
+        const result = rpg.strike(player, e, field.rng, { multiplier: power, element: plan.element, applyStatus: statusHook, skill: plan.skill?.id, rules: plan.rules, noDamage: !!plan.noDamage });
         e.hitFlash = 0.18;
         if (e.state !== 'chase') e.state = 'chase';
         // R28 — a beam lands its knock (Groundbreaker's stun) the way every other strike does
@@ -2307,6 +2312,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       hud.hit(at, 'miss', 'miss', camera);
       return;
     }
+    // R28 — a skill that deals no damage (a sleep, a sanctuary) is not "you hit it for 0"
+    if (result.noDamage) return;
     hud.log(`You hit ${enemy.name} for ${result.amount}${result.crit ? ' (critical)' : ''}.`, result.crit ? 'good' : '', 'dealt');
     // R25 — a hit far above your weapon's own damage says where it came from (see rpg.strike `why`)
     const top = player.derived?.damage?.[1] || 10;
@@ -9752,7 +9759,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
        */
       const mending = fighting ? 0 : player.maxHp * (balance.player?.outOfCombatRegen ?? 0.015);
       player.hp = Math.min(player.maxHp, player.hp + (player.derived.hpRegen || 0) + mending);
-      player.mp = Math.min(player.maxMp, player.mp + (player.derived.mpRegen || 0) + (fighting ? 0 : player.maxMp * 0.02));
+      // R28 — Spellrush's price: a self status `noManaRegen` stops mana coming back while it lasts
+      if (!Object.values(player.statuses || {}).some(st => st.noManaRegen)) player.mp = Math.min(player.maxMp, player.mp + (player.derived.mpRegen || 0) + (fighting ? 0 : player.maxMp * 0.02));
       // barrier refills out of a fight, and faster with `barrierRegen`
       /**
        * A barrier a SKILL put up is not the gear's barrier.

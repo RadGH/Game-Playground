@@ -148,10 +148,13 @@ test('Mend heals a share of your health and War Cry buffs instead of hitting', (
   assert.equal(plan.kind, 'self');
   assert.ok(plan.heal > 0 && plan.heal <= player.maxHp);
 
-  const guard = skills.slots.findIndex(s => s.id === 'guard_stance');
-  const guardPlan = skills.use(guard);
-  assert.equal(guardPlan.heal, 0);
-  assert.equal(guardPlan.status, 'guard');
+  // R28 — Guarded left the cleric (her six are all heals and holy light now). The rule this test
+  // pins is "a buff skill buffs instead of hitting", and War Cry keeps `status: might` on purpose.
+  const w = bar('warrior');
+  const cry = w.skills.slots.findIndex(s => s.id === 'warcry');
+  const cryPlan = w.skills.use(cry);
+  assert.equal(cryPlan.heal, 0);
+  assert.equal(cryPlan.status, 'might');
 });
 
 test('a skill locked by level cannot be used, and unlocks when you reach it', () => {

@@ -32,7 +32,10 @@ export function tideTick(ctx) {
   for (const f of map.fields) {
     const gate = f.gates[(state.tides - 1) % f.gates.length];
     const group = state.nextGroup++;
-    for (let b = 0; b < T.bodies; b++) {
+    // a field already at its body cap gets only the Tide bodies that fit (it is full of pressure already)
+    let room = data.econ.field.cap;
+    for (const e of state.ents) if (e.alive && !e._gone && e.field === f.id && (e.kind === 'unit' || e.kind === 'tide')) room--;
+    for (let b = 0; b < T.bodies && b < room; b++) {
       const hp = T.hpBase + T.hpPerLevel * L;
       const e = baseEnt(state, {
         kind: 'tide', type: 'tide', team: -1, owner: -1, field: f.id,

@@ -206,7 +206,7 @@ state = {
 
 ```js
 Team   = { id, banners, bannersMax, field, players: [ids], dealt, toll: { charges, readyAt } }   // dealt = banners torn from enemies (hard-cap tie-break)
-Field  = { id, team, waiting: [WaitingSend], bodies }               // bodies = live bodies now (cap: econ.field.cap); waiting = the GATE QUEUE ("+N waiting" on the HUD), entering oldest first as space frees
+Field  = { id, team, waiting: [WaitingSend], bodies }               // bodies = live bodies now (cap: econ.field.cap); waiting = the GATE QUEUE ("+N waiting" on the HUD), entering oldest first as space frees. Only player SENDS queue; trait summons (raise, pack call, split) and Tide bodies that would exceed the cap are simply not created
 Player = {
   id, team, name, kind: 'human'|'ai', ai: null | { difficulty },
   race, hero,                    // ids

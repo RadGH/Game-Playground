@@ -141,9 +141,13 @@ export function spawnUnit(ctx, fieldId, owner, uid, opts) {
 
 /** A trait summons a unit next to `src` (raise, pack_call). */
 export function spawnSummon(ctx, src, uid) {
-  const { data } = ctx;
+  const { data, state } = ctx;
   if (!data.derived.units[uid]) return null;
   const u = data.derived.units[uid];
+  // trait summons (raise, pack_call, split) are not sends: a full field simply gets none
+  let bodies = 0;
+  for (const e of state.ents) if (e.alive && !e._gone && e.field === src.field && (e.kind === 'unit' || e.kind === 'tide')) bodies++;
+  if (bodies + u.bodies > data.econ.field.cap) return null;
   const group = ctx.state.nextGroup++;
   let last = null;
   for (let b = 0; b < u.bodies; b++) last = spawnUnit(ctx, src.field, src.owner, uid, { group, bodies: u.bodies, x: src.x + (b - (u.bodies - 1) / 2) * 0.9, z: src.z - 1.2, mk: src._mk, summon: true });

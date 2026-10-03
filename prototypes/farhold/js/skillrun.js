@@ -349,6 +349,31 @@ export function createSkillRuntime(env) {
     const c = C(), field = F();
     const range = d.range ?? plan.range ?? 10;
     const from = { x: c.x, z: c.z };
+    /**
+     * `dash.targets`: step between up to N enemies within `range`, nearest first, one strike each
+     * (Cutting Waltz). Each step is a short teleport beside the next body.
+     */
+    if (d.targets) {
+      const list = field.near(c.x, c.z, range).filter(e => e.dying == null)
+        .sort((p, q) => Math.hypot(p.x - c.x, p.z - c.z) - Math.hypot(q.x - c.x, q.z - c.z)).slice(0, d.targets);
+      list.forEach((e, k) => later(k * 0.18, () => {
+        if (e.dying != null) return;
+        const ox = C().x, oz = C().z;
+        const ang = Math.atan2(ox - e.x, oz - e.z);
+        C().teleport(e.x + Math.sin(ang) * 1.3, e.z + Math.cos(ang) * 1.3);
+        C().yaw = Math.atan2(e.x - C().x, e.z - C().z);
+        C().swing = Math.max(C().swing, 0.2);
+        env.spellfx.footfall?.({ at: v3(ox, groundY(ox, oz), oz), element: plan.element });
+        const res = env.rpg.strike(P(), e, field.rng, { multiplier: plan.mult, element: plan.element, skill: plan.skill?.id, applyStatus: env.statusHook, rules: plan.rules, noDamage: !!plan.noDamage });
+        field.land(e, res, { strike: knockShape(plan.knock), fromX: C().x, fromZ: C().z, element: plan.element });
+        opts.onHit?.(e, res);
+        env.reportHit(e, res);
+        if (res.dead) field.kill(e);
+        if (plan.afterimage && k > 0) echoFrom(plan, env.aim(), { x: ox, z: oz, yaw: ang + Math.PI }, plan.afterimage.mult ?? 0.5);
+      }));
+      plan._start = from;
+      return true;
+    }
     let to = null, face = null, struck = null;
     const toward = (x, z, keep) => { const dx = x - from.x, dz = z - from.z, len = Math.hypot(dx, dz) || 1; return { x: x - dx / len * keep, z: z - dz / len * keep }; };
     switch (d.to || 'aim') {
@@ -411,10 +436,11 @@ export function createSkillRuntime(env) {
     for (let t = 1; t <= len; t += 2) {
       const bx = from.x + (to.x - from.x) * (t / Math.max(1, len)), bz = from.z + (to.z - from.z) * (t / Math.max(1, len));
       points.push(v3(bx, groundY(bx, bz) + (d.leap ? 1.4 : 0.3), bz));
-      if (!d.leap && !d.noPath) {
-        const hits = field.strikeArea(bx, bz, plan.splash || 2, P(), { falloff: 0.8, ...opts });
-        for (const h of hits) env.reportHit(h.enemy, h.result);
-      }
+    }
+    // every body near the path, once (the one you stop at takes its own hit below)
+    if (!d.leap && !d.noPath && len > 0.5) {
+      const hits = field.strikeSegment(from.x, from.z, to.x, to.z, plan.splash || 2, P(), { ...opts, falloff: 0.8 }).filter(h => h.enemy !== struck);
+      for (const h of hits) env.reportHit(h.enemy, h.result);
     }
     if (points.length) env.spellfx.aoe({ points, element: plan.element, stagger: 0.02 });
     if (d.leap) env.spellfx.footfall?.({ at: v3(from.x, groundY(from.x, from.z), from.z), element: plan.element });
@@ -511,7 +537,8 @@ export function createSkillRuntime(env) {
           const sub = r.alternate[k % r.alternate.length];
           const sp = env.skills().planFor(sub, plan.skill, { shape: plan.kind, element: sub.element || plan.element });
           sp.at = at;
-          const hits = field.strikeArea(x, z, sub.radius ?? radius, P(), { falloff: 0.6, power: sp.mult, element: sp.element, rules: sp.rules, onHit: opts.onHit, skill: plan.skill?.id, applyStatus: env.statusHook });
+          // the sub-strike scales with whatever scaled the cast (a spender's points, an empower)
+          const hits = field.strikeArea(x, z, sub.radius ?? radius, P(), { falloff: 0.6, power: subPower(plan, sub.mult ?? plan.baseMult ?? 1), element: sp.element, rules: sp.rules, onHit: opts.onHit, skill: plan.skill?.id, applyStatus: env.statusHook, noDamage: !sub.mult && !plan.mult });
           for (const h of hits) env.reportHit(h.enemy, h.result);
           if (sub.healAllies) healAllies(sub.healAllies);
           if (sub.healShare) healAllies(0, {}); // the share-of-damage heal rides onHit.healShare
@@ -1100,6 +1127,18 @@ export function createSkillRuntime(env) {
     if (sh?.spec?.onKillHaste && (e.playerDamage || 0) > 0) {
       sh.apex = Math.min(3, (sh.apex || 0) + 1);
       env.rpgApply(p, 'haste', { ...statusSpec('haste'), seconds: sh.spec.onKillHaste * sh.apex });
+    }
+    // a self buff with its own on-kill rider (`selfBuff.onKill`), whatever made the kill
+    if ((e.playerDamage || 0) > 0) {
+      for (const st of Object.values(p.statuses || {})) {
+        const k = st.onKill;
+        if (!k || typeof k !== 'object') continue;
+        if (k.heal) p.hp = Math.min(p.maxHp, p.hp + Math.round(p.maxHp * k.heal));
+        if (k.mana) p.mp = Math.min(p.maxMp, p.mp + Math.round(p.maxMp * k.mana));
+        if (k.resource) gainResource(p, k.resource.id, k.resource.n ?? 1);
+        if (k.haste) env.rpgApply(p, 'haste', { ...statusSpec('haste'), seconds: k.haste });
+        if (k.reset) queue(p, { reset: k.reset });
+      }
     }
     const rules = e.killedBy;
     if (!rules) return;

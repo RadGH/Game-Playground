@@ -38,7 +38,8 @@ test('the bar shows six skills and a cast puts one on cooldown', async ({ page }
 });
 
 test('a firebolt reaches an enemy, hurts it, and leaves it burning', async ({ page }) => {
-  const errors = await land(page);
+  // R28 — Firebolt is the Pyromancer's alone now (every skill on one class)
+  const errors = await land(page, 'pyromancer');
   const out = await page.evaluate(async () => {
     const f = window.farhold;
     f.pause(false);
@@ -105,9 +106,10 @@ test('Frost Nova catches everything around you and slows it', async ({ page }) =
     const before = around.map(e => e.hp);
     f.cast(f.skills.slots.findIndex(s => s.id === 'frost_nova'));
     await new Promise(r => setTimeout(r, 200));
+    // R28 — Rime Burst (the old Frost Nova) slows through Frostbite stacks, not a plain chill
     return {
       hurt: around.filter((e, i) => e.hp < before[i]).length,
-      chilled: around.filter(e => e.statuses?.chill).length,
+      chilled: around.filter(e => e.statuses?.chill || (e.statuses?.frostbite?.slow > 0) || e.stagger > 0).length,
     };
   });
   expect(out.hurt).toBe(3);

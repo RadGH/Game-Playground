@@ -358,7 +358,9 @@ export function describeNode(node, ctx = {}) {
       // a duration the node changes is said, even when nothing else did
       if (v.seconds != null && v.seconds !== base.seconds) fresh.unshift(`lasts ${secs(v.seconds)} instead of ${secs(base.seconds ?? 0)}`);
       if (!fresh.length) continue;
-      const lead2 = key === 'selfBuff' && !/^For /.test(fresh[0]) ? 'While it lasts: ' : '';
+      // a clause cut out of a longer sentence names what it is about
+      const LEAD = { selfBuff: 'While it lasts: ', place: `The ${base.kind === 'trap' ? 'trap' : base.kind === 'zone' ? 'zone' : 'post'}: `, counter: 'The guard window: ', ward: 'The ward: ', pool: 'The pool: ', summon: 'The summon: ', dash: 'The dash: ', link: 'The link: ' };
+      const lead2 = key === 'selfBuff' && /^For /.test(fresh[0]) ? '' : (LEAD[key] || '');
       text = `${lead2}${fresh.join('; ')}.`;
     } else if (key === 'repeats' && typeof base === 'number' && v && typeof v === 'object') {
       text = describeVocab({ repeats: v }, subCtx).join(' ');

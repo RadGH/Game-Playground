@@ -15,7 +15,8 @@
    "kind": "tag",
    "owner": "swashbuckler",
    "element": "physical",
-   "seconds": 3
+   "seconds": 3,
+   "fromBehind": true
   },
   "downed": {
    "name": "Downed",
@@ -395,7 +396,7 @@
    "element": "physical",
    "mult": 1.2,
    "reach": 2.6,
-   "arc": 1.0,
+   "arc": 1,
    "cooldown": 10,
    "mp": 6,
    "knock": {
@@ -961,7 +962,7 @@
    "name": "Shade Cut",
    "shape": "melee",
    "element": "shadow",
-   "mult": 1.0,
+   "mult": 1,
    "reach": 2.8,
    "arc": 1.6,
    "cooldown": 3,
@@ -1550,7 +1551,7 @@
    "bonusIf": [
     {
      "when": "execute:0.3",
-     "mult": 1.0
+     "mult": 1
     }
    ],
    "onKill": {
@@ -2280,7 +2281,7 @@
    "name": "Pinning Thrust",
    "shape": "beam",
    "element": "physical",
-   "mult": 1.0,
+   "mult": 1,
    "range": 6,
    "width": 1,
    "cooldown": 8,
@@ -3995,7 +3996,7 @@
    "name": "Caltrop Scatter",
    "shape": "ground",
    "element": "physical",
-   "mult": 1.0,
+   "mult": 1,
    "range": 16,
    "radius": 4,
    "cooldown": 12,
@@ -4302,14 +4303,14 @@
    "name": "Big Score",
    "shape": "melee",
    "element": "physical",
-   "mult": 1.0,
+   "mult": 1,
    "reach": 3,
    "arc": 1.4,
    "cooldown": 22,
    "mp": 16,
    "variance": [
     0.2,
-    5.0
+    5
    ],
    "onKill": {
     "gold": 25
@@ -4722,7 +4723,7 @@
    "name": "Null Circle",
    "shape": "ground",
    "element": "holy",
-   "mult": 1.0,
+   "mult": 1,
    "range": 16,
    "radius": 6,
    "cooldown": 18,
@@ -4996,7 +4997,7 @@
    "name": "Iron Net",
    "shape": "bolt",
    "element": "physical",
-   "mult": 1.0,
+   "mult": 1,
    "range": 20,
    "splash": 4,
    "cooldown": 12,

@@ -256,7 +256,8 @@
    "kind": "tag",
    "owner": "swashbuckler",
    "element": "physical",
-   "seconds": 3
+   "seconds": 3,
+   "fromBehind": true
   },
   "downed": {
    "name": "Downed",
@@ -364,7 +365,8 @@
    "owner": "runesmith",
    "element": "physical",
    "seconds": 8,
-   "takeMore": 0.15
+   "takeMore": 0.15,
+   "detonateMult": 2
   }
  },
  "skills": {
@@ -766,7 +768,7 @@
      ]
     }
    },
-   "desc": "Strikes everything in an 80° arc 3.2 m in front of you, or as far and as wide as your weapon swings if that is more, for 224% weapon damage. Marks targets with Rent for 8s: they take 15% more damage from every source. 8 mana, 9s cooldown."
+   "desc": "Strikes everything in an 80° arc 3.2 m in front of you, or as far and as wide as your weapon swings if that is more, for 224% weapon damage. Marks targets with Rent for 8s: they take 15% more damage from every source and take 2 times the damage when a rune detonates on them. 8 mana, 9s cooldown."
   },
   "shield_bash": {
    "name": "Rim Strike",
@@ -1215,7 +1217,7 @@
      ]
     }
    },
-   "desc": "Carries you 12 m forward, striking everything within 2.4 m of your path for 252% weapon damage. Leaves the target Weakened: the target deals 35% less damage for 7s. Dashes up to 12 m toward where you aim. Your next skill within 6s deals 30% more damage and also empowers your followers' next attack. Every follower within 15 m moves with you to where you land. 10 mana, 10s cooldown."
+   "desc": "Strikes everything within 2.4 m of your path for 252% weapon damage. Leaves the target Weakened: the target deals 35% less damage for 7s. Dashes up to 12 m toward where you aim. Your next skill within 6s deals 30% more damage and also empowers your followers' next attack. Every follower within 15 m moves with you to where you land. 10 mana, 10s cooldown."
   },
   "execute": {
    "name": "Assassinate",
@@ -2235,7 +2237,7 @@
      ]
     }
    },
-   "desc": "Carries you 14 m forward, striking everything within 2 m of your path for 294% weapon damage as shadow. Dashes up to 14 m to land behind the target. An afterimage where you stood repeats the strike 0.4s later for 40% of the damage. 10 mana, 9s cooldown."
+   "desc": "Strikes the enemy you reach for 294% weapon damage as shadow. Dashes up to 14 m to land behind the target. An afterimage where you stood repeats the strike 0.4s later for 40% of the damage. 10 mana, 9s cooldown."
   },
   "eviscerate": {
    "name": "Gutting Strike",
@@ -2532,7 +2534,7 @@
      ]
     }
    },
-   "desc": "Places a zone 8 m across around you for 6s, giving allies inside Shrouded (takes 35% less damage) for 2s, applying Weakened (deals 20% less damage) for 1.5s to enemies inside. 12 mana, 20s cooldown."
+   "desc": "Places a zone 8 m across around you for 6s, giving allies inside Shrouded (takes 35% less damage) while they stay in it, applying Weakened (deals 20% less damage) to enemies inside while they stay in it. 12 mana, 20s cooldown."
   },
   "firebolt": {
    "name": "Firebolt",
@@ -3392,7 +3394,7 @@
      ]
     }
    },
-   "desc": "Strikes everything within 7 m of you for 164% weapon damage as lightning. Leaves the target Shocked: the target takes 30% more damage for 5s. Places a zone 14 m across around you for 6s, affecting an enemy only as it crosses the edge. 18 mana, 12s cooldown."
+   "desc": "Strikes everything within 7 m of you for 164% weapon damage as lightning. Leaves the target Shocked: the target takes 30% more damage for 5s. Places a zone 14 m across around you for 6s, an enemy that crosses its edge, in or out, takes 100% weapon damage, a 0.6s stun and Shocked (takes 30% more damage) for 5s. 18 mana, 12s cooldown."
   },
   "storm_beam": {
    "name": "Storm Beam",
@@ -4828,7 +4830,12 @@
     "name": "Runeskin",
     "seconds": 6,
     "resist": 0.4,
-    "reflect": 0.15
+    "reflect": 0.15,
+    "stacksOnAttacker": {
+     "status": "rune",
+     "add": 1,
+     "max": 3
+    }
    },
    "talents": {
     "1": {
@@ -4949,7 +4956,7 @@
      ]
     }
    },
-   "desc": "For 6s: take 40% less damage; melee attackers take 15% of the hit back. 14 mana, 24s cooldown."
+   "desc": "For 6s: take 40% less damage; melee attackers take 15% of the hit back; every melee attacker that hits you takes 1 Rune stack. 14 mana, 24s cooldown."
   },
   "quicken": {
    "name": "Quicken",
@@ -5227,7 +5234,7 @@
      ]
     }
    },
-   "desc": "Gives you Rallied: you deal 20% more damage and take 15% less damage for 8s. Everything following you gets the same. Orders your followers return to you for 3s. 18 mana, 30s cooldown."
+   "desc": "Gives you Rallied: you deal 20% more damage and take 15% less damage for 8s. Everything following you gets the same. Orders your followers to return to you for 3s. 18 mana, 30s cooldown."
   },
   "consecrate": {
    "name": "Blessed Earth",
@@ -5360,7 +5367,7 @@
      ]
     }
    },
-   "desc": "Strikes everything within 6.5 m of you for 274% weapon damage as holy. Places a zone 13 m across where you aim for 6s, striking 6 enemies within 6.5 m every 1s for 20% weapon damage, healing you and your followers inside 2% of maximum health every 1s. 20 mana, 16s cooldown."
+   "desc": "Strikes everything within 6.5 m of you for 274% weapon damage as holy. Places a zone 13 m across where you stand for 6s, striking 6 enemies within 6.5 m every 1s for 20% weapon damage, healing you and your followers inside 2% of maximum health every 1s. 20 mana, 16s cooldown."
   },
   "raise_thrall": {
    "name": "Raise Thrall",
@@ -5498,7 +5505,7 @@
      ]
     }
    },
-   "desc": "Summons 1 Bone Thrall to fight beside you. Summons 1 thrall with 50% more health at corpses nearby. 20 mana, 26s cooldown."
+   "desc": "Summons 1 Bone Thrall to fight beside you. Summons 1 thrall with 50% more health from a corpse within 12 m; it has 50% more health. 20 mana, 26s cooldown."
   },
   "call_wolf": {
    "name": "Call the Pack",
@@ -5851,7 +5858,7 @@
      ]
     }
    },
-   "desc": "Summons 1 Spirit Bear to fight beside you. Orders your class companion leap onto the target and their next attack deals 50% more damage for 4s. With the pack already called, casting this is a howl instead: the pack gets Hastened for 4s and they draw every enemy within 4 m of you for 4s. 26 mana, 40s cooldown."
+   "desc": "Summons 1 Spirit Bear to fight beside you. Orders your class companion to leap onto the target, the next attack dealing 50% more damage for 4s. With the pack already called, casting this is a howl instead: the pack gets Hastened for 4s and they draw every enemy within 4 m of you for 4s. 26 mana, 40s cooldown."
   },
   "bind_imp": {
    "name": "Bind a Fiend",
@@ -5992,7 +5999,7 @@
      ]
     }
    },
-   "desc": "Summons 1 Bound Imp to fight beside you. Costs 10% of your maximum health, never taking you below 1 health. Summons 1 Bound Imp whose bolts leave Gnawed. 16 mana, 32s cooldown."
+   "desc": "Summons 1 Bound Imp to fight beside you. Costs 10% of your maximum health, never taking you below 1 health. Summons 1 Bound Imp whose bolts leave Gnawed; its attacks apply Gnawed. 16 mana, 32s cooldown."
   },
   "deploy_sentry": {
    "name": "Deploy Sentry",
@@ -9442,7 +9449,7 @@
      ]
     }
    },
-   "desc": "Falls on a spot up to 20 m away striking everything within 5 m of that spot without dealing damage. Places a zone 10 m across where you aim for 6s, healing you and your followers inside 3% of maximum health every 1s, pushing enemies inside 2 m outward every second. 26 mana, 24s cooldown."
+   "desc": "Lands on a spot up to 20 m away. Places a zone 10 m across where you aim for 6s, healing you and your followers inside 3% of maximum health every 1s, pushing enemies inside 2 m outward every second. 26 mana, 24s cooldown."
   },
   "guardian_light": {
    "name": "Guardian Light",
@@ -10847,7 +10854,7 @@
      ]
     }
    },
-   "desc": "Falls on a spot up to 30 m away, 2.5s after you cast, striking everything within 6 m of that spot for 270% weapon damage as arcane. Places a zone 12 m across on the aimed enemy, following it for 2.5s, applying Chilled (moves 30% slower) for 4s to enemies inside. Deals 100% more damage to Omen targets. 16 mana, 14s cooldown."
+   "desc": "Falls on a spot up to 30 m away, 2.5s after you cast, striking everything within 6 m of that spot for 270% weapon damage as arcane. Places a zone 12 m across on the aimed enemy, following it for 2.5s, applying Chilled (moves 30% slower) to enemies inside while they stay in it. Deals 100% more damage to Omen targets. 16 mana, 14s cooldown."
   },
   "fate_thread": {
    "name": "Thread of Fate",
@@ -11282,7 +11289,7 @@
      ]
     }
    },
-   "desc": "Places a zone 40 m across around you for 8s, applying Weakened (deals 25% less damage) for 7s to enemies inside. For 8s, your followers: +40% damage; when it ends strikes everything within 12 m of you for 300% weapon damage as arcane. 36 mana, 60s cooldown."
+   "desc": "Places a zone 40 m across around you for 8s, applying Weakened (deals 25% less damage) to enemies inside while they stay in it. For 8s, your followers: +40% damage; when it ends strikes everything within 12 m of you for 300% weapon damage as arcane. 36 mana, 60s cooldown."
   },
   "spirit_bolt": {
    "name": "Spirit Bolt",
@@ -11560,7 +11567,7 @@
      ]
     }
    },
-   "desc": "Falls on a spot up to 12 m away striking everything within 5 m of that spot without dealing damage. Places a post where you aim for 12s, healing you and your followers inside 2% of maximum health every 1s, it has 30% of your maximum health and can be broken, at most 2 stand at once. 16 mana, 18s cooldown."
+   "desc": "Lands on a spot up to 12 m away. Places a post where you aim for 12s, healing you and your followers within 8 m of it 2% of maximum health every 1s, the post has 30% of your maximum health and can be broken, at most 2 stand at once. 16 mana, 18s cooldown."
   },
   "storm_post": {
    "name": "Storm Post",
@@ -11705,7 +11712,7 @@
      ]
     }
    },
-   "desc": "Falls on a spot up to 16 m away striking everything within 5 m of that spot without dealing damage. Places a post where you aim for 10s, striking 2 enemies within 10 m every 1s for 25% weapon damage, it has 30% of your maximum health and can be broken. 18 mana, 16s cooldown."
+   "desc": "Lands on a spot up to 16 m away. Places a post where you aim for 10s, striking 2 enemies within 10 m every 1s for 25% weapon damage, the post has 30% of your maximum health and can be broken. 18 mana, 16s cooldown."
   },
   "warding_spirits": {
    "name": "Warding Spirits",
@@ -11996,7 +12003,7 @@
      ]
     }
    },
-   "desc": "Falls on a spot up to 16 m away striking everything within 5 m of that spot without dealing damage. Places a post where you aim for 15s, striking 3 enemies within 12 m every 1.5s for 40% weapon damage, healing you and your followers inside 2% of maximum health every 1.5s, it has 50% of your maximum health and can be broken, each Spirit Bolt hit within 12 m of it rings it for 60% weapon damage. 36 mana, 50s cooldown."
+   "desc": "Lands on a spot up to 16 m away. Places a post where you aim for 15s, striking 3 enemies within 12 m every 1.5s for 40% weapon damage, healing you and your followers within 12 m of it 2% of maximum health every 1.5s, the post has 50% of your maximum health and can be broken, each Spirit Bolt hit within 12 m of the post rings the post for 60% weapon damage. 36 mana, 50s cooldown."
   },
   "discord_note": {
    "name": "Discord Note",
@@ -13106,7 +13113,7 @@
      ]
     }
    },
-   "desc": "Spins 8 times, striking everything within 7 m of you for 93% weapon damage on every spin. Each strike lands at a random point inside the area, preferring enemies. 22 mana, 22s cooldown."
+   "desc": "Strikes 8 times over 2.8s, each strike at one spot within 7 m of you, 2.4 m across, for 93% weapon damage each. Each strike lands at a random point inside the area, preferring enemies. 22 mana, 22s cooldown."
   },
   "shade_cut": {
    "name": "Shade Cut",
@@ -13391,7 +13398,7 @@
      ]
     }
    },
-   "desc": "Spins 5 times, striking everything within 8 m of you for 81% weapon damage as shadow on every spin. Each strike lands at a random point inside the area, preferring enemies. An afterimage where you end up repeats the strike 0.6s later for 40% of the damage. 14 mana, 14s cooldown."
+   "desc": "Strikes 5 times over 1.3s, each strike at one spot within 8 m of you, 2.4 m across, for 81% weapon damage as shadow each. Each strike lands at a random point inside the area, preferring enemies. An afterimage where you end up repeats the strike 0.6s later for 40% of the damage. 14 mana, 14s cooldown."
   },
   "host_of_shades": {
    "name": "Host of Shades",
@@ -13842,7 +13849,7 @@
      ]
     }
    },
-   "desc": "Carries you 10 m forward, striking everything within 2 m of your path for 196% weapon damage. Leaps up to 10 m to land behind the target, striking nothing on the way. On landing, strikes everything within 2.5 m for 40% weapon damage. Gains 1 Flair when you cast it. Your next skill within 3s counts as from behind. 6 mana, 9s cooldown."
+   "desc": "Strikes the enemy you reach for 196% weapon damage. Leaps up to 10 m to land behind the target, striking nothing on the way. On landing, strikes everything within 2.5 m for 40% weapon damage. Gains 1 Flair when you cast it. Your next skill within 3s counts as from behind. 6 mana, 9s cooldown."
   },
   "mocking_parry": {
    "name": "Mocking Parry",
@@ -14286,7 +14293,7 @@
      ]
     }
    },
-   "desc": "Strikes everything within 4 m of you for 213% weapon damage. Marks targets with Turned About for 3s. Also applies Weakened (deals 20% less damage) for 3s. Gains 1 Flair for each enemy hit. 10 mana, 12s cooldown."
+   "desc": "Strikes everything within 4 m of you for 213% weapon damage. Marks targets with Turned About for 3s: they take every hit as if it came from behind. Also applies Weakened (deals 20% less damage) for 3s. Gains 1 Flair for each enemy hit. 10 mana, 12s cooldown."
   },
   "grandeur": {
    "name": "Grandeur",
@@ -14422,7 +14429,7 @@
      ]
     }
    },
-   "desc": "Strikes everything in an 115° arc 4 m in front of you, or as far and as wide as your weapon swings if that is more, for 182% weapon damage. Spends all your Flair: 75% more damage for each point spent. 12 mana, 20s cooldown."
+   "desc": "Strikes everything in an 115° arc 4 m in front of you, or as far and as wide as your weapon swings if that is more, for 182% weapon damage. Spends all your Flair: 75% more damage for each point spent. Spending 5 or more: becomes a ring 6 m around you; is a certain critical hit. 12 mana, 20s cooldown."
   },
   "open_palm": {
    "name": "Open Palm",
@@ -14717,7 +14724,7 @@
      ]
     }
    },
-   "desc": "Carries you 10 m forward, striking everything within 2 m of your path for 161% weapon damage. Dashes up to 10 m to the first enemy in the line. Gains 1 Poise when you cast it. Your next skill within 3s is a certain critical hit. 5 mana, 7s cooldown."
+   "desc": "Strikes the enemy you reach for 161% weapon damage. Dashes up to 10 m to the first enemy in the line. Gains 1 Poise when you cast it. Your next skill within 3s is a certain critical hit. 5 mana, 7s cooldown."
   },
   "sweeping_heel": {
    "name": "Sweeping Heel",
@@ -16436,7 +16443,7 @@
      ]
     }
    },
-   "desc": "Falls on a spot up to 16 m away striking everything within 6 m of that spot for 212% weapon damage as holy. Places a zone 12 m across where you aim for 8s, applying Silenced for 1.5s to enemies inside, stopping enemy ranged hits on anyone inside. 14 mana, 18s cooldown."
+   "desc": "Falls on a spot up to 16 m away striking everything within 6 m of that spot for 212% weapon damage as holy. Places a zone 12 m across where you aim for 8s, applying Silenced to enemies inside while they stay in it, enemy ranged hits on anyone within 6 m of its middle are stopped. 14 mana, 18s cooldown."
   },
   "writ_of_guilt": {
    "name": "Writ of Guilt",
@@ -17441,7 +17448,7 @@
      ]
     }
    },
-   "desc": "For 10s, your followers: +50% damage; take 25% less damage. Orders your class companion to attack the target for 10s. Revives every fallen follower at once at 60% health. 14 mana, 20s cooldown."
+   "desc": "For 10s, your followers: +50% damage; take 25% less damage. Orders your class companion to attack the target for 10s; meanwhile their attacks apply Burning. Revives every fallen follower at once at 60% health. 14 mana, 20s cooldown."
   },
   "flashover": {
    "name": "Flashover",
@@ -18629,7 +18636,7 @@
      ]
     }
    },
-   "desc": "Falls on a spot up to 30 m away and strikes everything within 9 m of it 6 times over 2.1s, for 238% weapon damage as arcane each time. The strikes alternate between its two forms. 38 mana, 34s cooldown."
+   "desc": "Falls on a spot up to 30 m away and strikes everything within 9 m of it 6 times over 2.1s, for 238% weapon damage as arcane each time. The strikes take each of 6 forms in turn and one strike each of fire, ice, lightning, shadow, poison and arcane. 38 mana, 34s cooldown."
   },
   "second_hand": {
    "name": "Second Hand",
@@ -19607,7 +19614,7 @@
      ]
     }
    },
-   "desc": "Falls on a spot up to 30 m away striking everything within 5 m of that spot without dealing damage. Also applies Asleep for 6s. 14 mana, 14s cooldown."
+   "desc": "Lands on a spot up to 30 m away, affecting everything within 5 m of it. Also applies Asleep for 6s. 14 mana, 14s cooldown."
   },
   "beguile": {
    "name": "Beguile",
@@ -19896,7 +19903,7 @@
      ]
     }
    },
-   "desc": "Falls on a spot up to 26 m away striking everything within 6 m of that spot without dealing damage. Places a zone 12 m across where you aim for 8s, applying Lethargic (moves 50% slower) for 2s to enemies inside. 14 mana, 16s cooldown."
+   "desc": "Lands on a spot up to 26 m away. Places a zone 12 m across where you aim for 8s, applying Lethargic (moves 50% slower) to enemies inside while they stay in it. 14 mana, 16s cooldown."
   },
   "phantasm": {
    "name": "Phantasm",
@@ -20042,7 +20049,7 @@
      ]
     }
    },
-   "desc": "Summons a decoy, each with 30% of your maximum health, that does not move or attack and draws every enemy near it for 8s; it takes no follower slot. 14 mana, 22s cooldown."
+   "desc": "Summons a decoy, each with 30% of your maximum health, that does not move or attack and draws every enemy near it for 8s; whatever strikes it gets Asleep for 2s; it takes no follower slot. 14 mana, 22s cooldown."
   },
   "enthrall": {
    "name": "Grand Enthrallment",
@@ -20471,7 +20478,7 @@
      ]
     }
    },
-   "desc": "Looses one shot out to 40 m for 252% weapon damage. Marks targets with Quarry for 12s: they take 20% more damage from every source. Orders your followers leap onto the target and their next attack deals 50% more damage for 6s. 10 mana, 14s cooldown."
+   "desc": "Looses one shot out to 40 m for 252% weapon damage. Marks targets with Quarry for 12s: they take 20% more damage from every source. Orders your followers to leap onto the target, the next attack dealing 50% more damage for 6s. 10 mana, 14s cooldown."
   },
   "trackers_leap": {
    "name": "Tracker's Leap",
@@ -20605,7 +20612,7 @@
      ]
     }
    },
-   "desc": "Carries you 9 m forward, striking everything within 2.5 m of your path for 213% weapon damage. Dashes up to 9 m backward, away from where you aim. Your next skill within 3s deals 50% more damage. 8 mana, 12s cooldown."
+   "desc": "Strikes everything within 2.5 m of your path for 213% weapon damage. Dashes up to 9 m backward, away from where you aim. Your next skill within 3s deals 50% more damage. 8 mana, 12s cooldown."
   },
   "hex_bolt": {
    "name": "Brand Bolt",
@@ -20892,7 +20899,7 @@
      ]
     }
    },
-   "desc": "Carries you 7 m forward, striking everything within 2 m of your path for 158% weapon damage. Knocks targets back 2 m. Dashes up to 7 m backward, away from where you aim. Gains 1 Grudge when you cast it. 6 mana, 8s cooldown."
+   "desc": "Strikes everything within 2 m of your path for 158% weapon damage. Knocks targets back 2 m. Dashes up to 7 m backward, away from where you aim. Gains 1 Grudge when you cast it. 6 mana, 8s cooldown."
   },
   "chain_hook": {
    "name": "Chain Hook",
@@ -21177,7 +21184,7 @@
      ]
     }
    },
-   "desc": "Gains 2 Grudge when you cast it. Orders your followers leap onto the target and their next attack deals 50% more damage for 8s. Revives every fallen follower at once at 50% health. 10 mana, 18s cooldown."
+   "desc": "Gains 2 Grudge when you cast it. Orders your followers to leap onto the target, the next attack dealing 50% more damage for 8s. Revives every fallen follower at once at 50% health. 10 mana, 18s cooldown."
   },
   "grudge_bolt": {
    "name": "Settle the Grudge",
@@ -21318,7 +21325,7 @@
      ]
     }
    },
-   "desc": "Looses one bolt out to 40 m for 70% weapon damage as shadow. Spends all your Grudge: 35% more damage for each point spent. 8 mana, 6s cooldown."
+   "desc": "Looses one bolt out to 40 m for 70% weapon damage as shadow. Spends all your Grudge: 35% more damage for each point spent. Spending 5 or more: passes through 9 more targets; stuns targets for 1s. 8 mana, 6s cooldown."
   },
   "night_hunt": {
    "name": "Night Hunt",
@@ -22042,7 +22049,7 @@
      ]
     }
    },
-   "desc": "Carries you 18 m forward, striking everything within 1.5 m of your path for 207% weapon damage. Stuns targets for 0.5s. Dashes up to 18 m out on a line and pulls you to whatever the line hits first. 6 mana, 10s cooldown."
+   "desc": "Strikes everything within 1.5 m of your path, and the enemy you reach, for 207% weapon damage. Stuns targets for 0.5s. Dashes up to 18 m out on a line and pulls you to whatever the line hits first. 6 mana, 10s cooldown."
   },
   "spring_battery": {
    "name": "Spring Battery",
@@ -22467,7 +22474,7 @@
      ]
     }
    },
-   "desc": "Carries you 20 m forward, striking everything within 1.5 m of your path for 207% weapon damage as arcane. Dashes up to 20 m and swaps places with the aimed follower or enemy (not a boss). 6 mana, 10s cooldown."
+   "desc": "Strikes everything within 1.5 m of your path for 207% weapon damage as arcane. Dashes up to 20 m and swaps places with the aimed follower or enemy (not a boss). A follower swapped with gets a barrier of 20% of maximum health. An enemy swapped with gets Weakened (deals 25% less damage) for 2s. 6 mana, 10s cooldown."
   },
   "seize_initiative": {
    "name": "Seize the Initiative",
@@ -22762,7 +22769,7 @@
      ]
     }
    },
-   "desc": "Places a zone 16 m across around you for 10s, striking the nearest enemy within 8 m every 2s for 80% weapon damage, giving allies inside Hastened (attacks 30% faster and moves 15% faster) for 2.3s, applying Marked (takes 25% more damage and moves 30% slower) for 2.3s to enemies inside. Orders your followers to attack the target for 10s. 30 mana, 40s cooldown."
+   "desc": "Places a zone 16 m across around you for 10s, striking the nearest enemy within 8 m every 2s for 80% weapon damage, giving allies inside Hastened (attacks 30% faster and moves 15% faster) while they stay in it, applying Marked (takes 25% more damage and moves 30% slower) to enemies inside while they stay in it. Orders your followers to attack the target for 10s. 30 mana, 40s cooldown."
   },
   "marrow_lance": {
    "name": "Marrow Lance",
@@ -23048,7 +23055,7 @@
      ]
     }
    },
-   "desc": "Falls on a spot up to 26 m away striking everything within 4 m of that spot for 178% weapon damage as shadow. Summons 5 burning corpses at corpses nearby for 0.8s; it takes no follower slot; when it ends it bursts for 100% weapon damage within 4 m. 14 mana, 10s cooldown."
+   "desc": "Falls on a spot up to 26 m away striking everything within 4 m of that spot for 178% weapon damage as shadow. Summons 5 burning corpses for 0.8s, one for each corpse within 10 m of where you aim, up to 5; each rises where its corpse lies; it takes no follower slot; when it ends it bursts for 100% weapon damage within 4 m. 14 mana, 10s cooldown."
   },
   "buried_march": {
    "name": "March of the Buried",
@@ -23190,7 +23197,7 @@
      ]
     }
    },
-   "desc": "Summons 1 Buried Thrall, plus 1 for each corpse within 20 m (up to 8 in all), at corpses nearby for 18s; it takes no follower slot. 40 mana, 60s cooldown."
+   "desc": "Summons 1 Buried Thrall, plus 1 for each corpse within 20 m (up to 8 in all), for 18s, one for each corpse within 20 m of where you aim plus 1, up to 8; each rises where its corpse lies; it takes no follower slot. 40 mana, 60s cooldown."
   },
   "gnawing_dark": {
    "name": "Gnawing Dark",
@@ -23904,7 +23911,7 @@
      ]
     }
    },
-   "desc": "Carries you 8 m forward, striking everything within 1.6 m of your path for 252% weapon damage. Dashes up to 8 m to the first enemy in the line. Changes with your shape or stance: Long Lunge (Open stance) and Shield Lunge (Closed stance). 8 mana, 9s cooldown."
+   "desc": "Strikes everything within 1.6 m of your path, and the enemy you reach, for 252% weapon damage. Dashes up to 8 m to the first enemy in the line. Changes with your shape or stance: Long Lunge (Open stance) and Shield Lunge (Closed stance). 8 mana, 9s cooldown."
   },
   "sweeping_guard": {
    "name": "Sweeping Guard",
@@ -24240,7 +24247,7 @@
      ]
     }
    },
-   "desc": "Spins 6 times, striking everything within 3.4 m of you for 98% weapon damage on every spin. Each strike picks the enemy with the lowest health. Changes with your shape or stance: Open Flurry (Open stance) and Closed Flurry (Closed stance). For 1.5s: -50% move speed; when it ends strikes for 160% weapon damage; knocks targets back 4 m. 20 mana, 22s cooldown."
+   "desc": "Strikes 6 times over 1.5s, each strike at one spot within 3.4 m of you, 2.4 m across, for 98% weapon damage each. Each strike picks the enemy with the lowest health. Changes with your shape or stance: Open Flurry (Open stance) and Closed Flurry (Closed stance). For 1.5s: -50% move speed; when it ends strikes everything in a 69° arc 3.4 m in front of you for 160% weapon damage; knocks targets back 4 m. 20 mana, 22s cooldown."
   },
   "sanctified_blade": {
    "name": "Sanctified Blade",
@@ -24922,7 +24929,7 @@
      ]
     }
    },
-   "desc": "Carries you 16 m forward, striking everything within 2 m of your path for 572% weapon damage as holy. Knocks targets back 3 m. Leaps up to 16 m to land beside the follower nearest your aim, striking nothing on the way. On landing, strikes everything within 6 m for 220% weapon damage. Every follower heals 15% of its maximum health. 28 mana, 24s cooldown."
+   "desc": "Knocks targets back 3 m. Leaps up to 16 m to land beside the follower nearest your aim, striking nothing on the way. On landing, strikes everything within 6 m for 220% weapon damage and leaves a 8 m zone for 4s. Every follower heals 15% of its maximum health. 28 mana, 24s cooldown."
   },
   "scale_rend": {
    "name": "Scale Rend",
@@ -25229,7 +25236,7 @@
      ]
     }
    },
-   "desc": "Carries you 14 m forward, striking everything within 2 m of your path for 360% weapon damage as fire. Knocks targets back 3 m. Leaps up to 14 m toward where you aim, striking nothing on the way. On landing, strikes everything within 5 m for 200% weapon damage. Its element and status follow your Wyrm Temper. 14 mana, 14s cooldown."
+   "desc": "Knocks targets back 3 m. Leaps up to 14 m toward where you aim, striking nothing on the way. On landing, strikes everything within 5 m for 200% weapon damage. Its element and status follow your Wyrm Temper. 14 mana, 14s cooldown."
   },
   "dragonscale": {
    "name": "Dragonscale",
@@ -25837,7 +25844,7 @@
   },
   "rampart": {
    "name": "Rampart",
-   "shape": "self",
+   "shape": "ground",
    "element": "physical",
    "cooldown": 20,
    "mp": 12,
@@ -25845,8 +25852,7 @@
     "length": 6,
     "seconds": 8,
     "blocksRanged": true,
-    "taunt": 3,
-    "distance": 5
+    "taunt": 3
    },
    "talents": {
     "1": {
@@ -25979,7 +25985,8 @@
      ]
     }
    },
-   "desc": "Raises a 6 m wall across where you aim for 8s: enemies cannot walk through it and enemy ranged hits through it are stopped. 12 mana, 20s cooldown."
+   "range": 8,
+   "desc": "Lands on a spot up to 8 m away. Raises a 6 m wall across where you aim for 8s: enemies cannot walk through it and enemy ranged hits through it are stopped. 12 mana, 20s cooldown."
   },
   "unbroken_banner": {
    "name": "Unbroken Banner",
@@ -26136,7 +26143,7 @@
      ]
     }
    },
-   "desc": "Places a zone 20 m across where you aim for 12s, giving allies inside Guarded (takes 20% less damage) for 1.3s. For 12s, you and every follower: cannot drop below 1 health; when it ends heals you and your followers within it 20% of maximum health. Enemies within 10 m attack you for 12s. 30 mana, 60s cooldown."
+   "desc": "Places a zone 20 m across where you stand for 12s, giving allies inside Guarded (takes 20% less damage) while they stay in it. For 12s, you and every follower: cannot drop below 1 health; when it ends heals you and your followers within it 20% of maximum health. Enemies within 10 m attack you for 12s. 30 mana, 60s cooldown."
   },
   "rune_hammer": {
    "name": "Rune Hammer",
@@ -26426,7 +26433,7 @@
   },
   "warding_glyph": {
    "name": "Warding Glyph",
-   "shape": "self",
+   "shape": "ground",
    "element": "holy",
    "cooldown": 20,
    "mp": 16,
@@ -26556,7 +26563,8 @@
      ]
     }
    },
-   "desc": "Places a zone 12 m across where you aim for 12s, giving allies inside Guarded (takes 25% less damage) for 1.3s. 16 mana, 20s cooldown."
+   "range": 14,
+   "desc": "Lands on a spot up to 14 m away. Places a zone 12 m across where you aim for 12s, giving allies inside Guarded (takes 25% less damage) while they stay in it, allies inside gain a barrier of 2% of maximum health every 1s, up to 15%. 16 mana, 20s cooldown."
   },
   "great_anvil": {
    "name": "The Great Anvil",
@@ -26708,7 +26716,7 @@
      ]
     }
    },
-   "desc": "Falls on a spot up to 20 m away, 1s after you cast, striking everything within 8 m of that spot for 1,498% weapon damage as arcane. Stuns targets for 2s. Places a post where you aim for 10s, each Rune Hammer hit within 8 m of it rings it for 120% weapon damage. 30 mana, 45s cooldown."
+   "desc": "Falls on a spot up to 20 m away, 1s after you cast, striking everything within 8 m of that spot for 1,498% weapon damage as arcane. Stuns targets for 2s. Places a post where you aim for 10s, each Rune Hammer hit within 8 m of the post rings the post for 120% weapon damage. 30 mana, 45s cooldown."
   }
  },
  "classes": {

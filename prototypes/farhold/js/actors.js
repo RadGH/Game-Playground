@@ -1696,6 +1696,30 @@ export class EnemyField {
   }
 
   /**
+   * R28 — EVERY BODY WITHIN `width` OF A SEGMENT, STRUCK ONCE. A dash used to call `strikeArea` at
+   * every 2 m step of its path, so a body near the line was hit two or three times by one dash.
+   */
+  strikeSegment(x0, z0, x1, z1, width, attacker, opts = {}) {
+    const dx = x1 - x0, dz = z1 - z0, len2 = dx * dx + dz * dz || 1;
+    const hits = [];
+    for (const e of [...this.enemies]) {
+      if (e.dying != null) continue;
+      const t = Math.max(0, Math.min(1, ((e.x - x0) * dx + (e.z - z0) * dz) / len2));
+      const px = x0 + dx * t, pz = z0 + dz * t;
+      if (Math.hypot(e.x - px, e.z - pz) > width + (e.reach || 2) * 0.25) continue;
+      const result = this.rpg.strike(attacker, e, this.rng, {
+        multiplier: (opts.power ?? 1) * (opts.falloff ?? 1), element: opts.element || 'physical', skill: opts.skill || null,
+        applyStatus: opts.applyStatus || null, rules: opts.rules || null, noDamage: !!opts.noDamage,
+      });
+      this.land(e, result, { strike: opts.knock || null, fromX: px, fromZ: pz, element: opts.element || 'physical' });
+      opts.onHit?.(e, result);
+      hits.push({ enemy: e, result });
+      if (result.dead) this.kill(e);
+    }
+    return hits;
+  }
+
+  /**
    * A cut that keeps working. An axe is the melee damage-over-time weapon: less up front, more in
    * total, and it goes on paying while you back off. `bleed` is already a status with an aura.
    */

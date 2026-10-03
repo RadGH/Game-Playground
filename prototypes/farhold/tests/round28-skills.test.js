@@ -16,7 +16,7 @@ import { dirname, join } from 'node:path';
 import {
   VOCAB, VOCAB_KEYS, PENDING, keysOf, applyMod, hitFactor, afterHit, onHurt, setMechEnv,
   toggleForm, formIds, resolveForm, addStacks, placeObject, tickPlaced, resetWorld, world,
-  gainResource, resourceOf, statusStats, controlFor, addWall, crossesWall, blocksRanged,
+  gainResource, resourceOf, statusStats, controlFor, addWall, crossesWall, blocksRanged, tagFactor,
 } from '../js/skillmech.js';
 import {
   TALENT_LIBRARY, TIER_LEVELS, treeFor, talentsOn, pickTalent, migrateTalents, inertTalents,
@@ -174,6 +174,49 @@ test('every vocabulary key has a describe() and its named reader file really men
     if (!new RegExp(`\\b${key}\\b`).test(file)) missing.push(`${key} (${v.reader})`);
   }
   assert.deepEqual(missing, [], `vocabulary keys whose reader never names them:\n  ${missing.join('\n  ')}`);
+});
+
+/**
+ * THE AUDIT THE ROUND'S OWN SIGNATURE FAULT NEEDS: a key whose only "reader" is the sentence that
+ * describes it. js/skillmech.js is both the registry and a reader (the hit rules), so its VOCAB
+ * table and its describe helpers are cut out before the search — `dotRate` passed the old version
+ * of this test while nothing outside the describe text read it.
+ */
+function codeOf(file) {
+  let text = src(file).split('\n').filter(l => !/^\s*(\/\/|\*|\/\*)/.test(l)).join('\n');
+  if (file === 'js/skillmech.js') {
+    const a = text.indexOf('export const VOCAB = {');
+    const b = text.indexOf('\n};', a);
+    text = text.slice(0, a) + text.slice(b);
+    // the describe helpers below the table
+    for (const fn of ['function describeForm', 'function describeSelfBuff', 'function statBits', 'function statusPhrase', 'function describeSub', 'function modClauses', 'export function describeSetPath']) {
+      const at = text.indexOf(fn);
+      if (at < 0) continue;
+      const end = text.indexOf('\n}\n', at);
+      text = text.slice(0, at) + text.slice(end + 3);
+    }
+  }
+  return text;
+}
+
+test('no vocabulary key and no self/status field is read only by the sentence that describes it', () => {
+  const files = ['js/skillmech.js', 'js/skillrun.js', 'js/skills.js', 'js/rpg.js', 'js/actors.js', 'js/pets.js', 'js/main.js', 'js/followers.js'];
+  const code = Object.fromEntries(files.map(f => [f, codeOf(f)]));
+  const dead = [];
+  for (const key of VOCAB_KEYS) {
+    const reader = VOCAB[key].reader;
+    if (!new RegExp(`\\b${key}\\b`).test(code[reader] || codeOf(reader))) dead.push(`${key} (reader ${reader})`);
+  }
+  // the fields a selfBuff, a status, a form or a placed object may carry: each needs a reader
+  const FIELDS = ['resistPerFoe', 'reflect', 'ccImmune', 'deathPrevent', 'deathPreventOnce', 'cdRate', 'dotRate', 'evade',
+    'untargetable', 'frontalResist', 'manaOnHurt', 'perCastHp', 'noMana', 'noManaRegen', 'storeShare', 'petsShare', 'petsOnly',
+    'takeMoreDot', 'attackSlow', 'sleeperHits', 'hitsToWake', 'stillResist', 'manaPerSecond', 'healingPct', 'immune',
+    'fromYou', 'fromParty', 'gainOnHurt', 'burstOnExpire', 'barrierTick', 'onExpire', 'edgeMult', 'blocksRanged', 'ringOn',
+    'onKillHaste', 'firstCrit', 'petBuff', 'threatDrop', 'behindStatus', 'manaPause', 'biteStatus', 'hpMult', 'perCorpse', 'stacksOnAttacker'];
+  for (const f of FIELDS) {
+    if (!files.some(file => new RegExp(`\\.${f}\\b`).test(code[file]))) dead.push(`field ${f}`);
+  }
+  assert.deepEqual(dead, [], `read by nothing but its own description:\n  ${dead.join('\n  ')}`);
 });
 
 test('no talent anywhere is inert: bespoke nodes included, P2 keys only while they are on PENDING', () => {
@@ -368,7 +411,9 @@ test('hit rules: a crowd bonus, a stun consumed, a tag, a stack that freezes at 
   assert.equal(hitFactor({ consumes: { status: 'stagger', mult: 0.5 } }, me, foe).mult, 1.5);
   afterHit({ skill: 'x', tag: { id: 'off_balance' } }, me, foe, { amount: 10 });
   assert.equal(foe.statuses.off_balance.kind, 'tag');
-  assert.ok(Math.abs(hitFactor({ skill: 'y' }, me, foe).mult - 1.2) < 1e-9, 'Off Balance did not make the target take more from you');
+  // a tag's own numbers count on every strike, skill or not (js/skillmech.js tagFactor)
+  assert.ok(Math.abs(tagFactor(me, foe) - 1.2) < 1e-9, 'Off Balance did not make the target take more from you');
+  assert.equal(tagFactor({ owner: me }, foe), 1, 'Off Balance is from YOU, not your followers');
   for (let i = 0; i < 4; i++) addStacks(foe, 'frostbite', DATA.statuses.frostbite, { max: 5 });
   assert.equal(foe.statuses.frostbite.stacks, 4);
   foe.stagger = 0;

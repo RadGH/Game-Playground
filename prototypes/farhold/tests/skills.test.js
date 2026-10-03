@@ -86,14 +86,16 @@ test('a skill on cooldown cannot be used again until it comes back', () => {
 });
 
 test('mana is spent and runs out', () => {
+  // R28 — read off the mage's own bar rather than naming skills: the six change with the rework
   const { player, skills } = bar('mage');
-  player.mp = 10;
-  const firebolt = skills.slots.findIndex(s => s.id === 'firebolt');
+  const cheap = skills.slots.findIndex(s => s.mp > 0 && s.mp <= 6);
+  const dear = skills.slots.findIndex(s => s.mp > 10 && s.unlockAt <= 12);
+  assert.ok(cheap >= 0 && dear >= 0, 'the mage needs a cheap and a dear skill for this test');
+  player.mp = skills.slots[cheap].mp + 4;
   const before = player.mp;
-  assert.equal(skills.use(firebolt).ok, true);
-  assert.equal(player.mp, before - data.skills.firebolt.mp);
-  const nova = skills.slots.findIndex(s => s.id === 'frost_nova');
-  const blocked = skills.use(nova);
+  assert.equal(skills.use(cheap).ok, true);
+  assert.equal(player.mp, before - data.skills[skills.slots[cheap].id].mp);
+  const blocked = skills.use(dear);
   assert.equal(blocked.ok, false);
   assert.match(blocked.why, /mana/i);
 });

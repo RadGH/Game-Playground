@@ -2480,7 +2480,7 @@
   },
   "rampart": {
    "name": "Rampart",
-   "shape": "self",
+   "shape": "ground",
    "element": "physical",
    "cooldown": 20,
    "mp": 12,
@@ -2488,8 +2488,7 @@
     "length": 6,
     "seconds": 8,
     "blocksRanged": true,
-    "taunt": 3,
-    "distance": 5
+    "taunt": 3
    },
    "talents": {
     "1": {
@@ -2621,7 +2620,8 @@
       }
      ]
     }
-   }
+   },
+   "range": 8
   },
   "unbroken_banner": {
    "name": "Unbroken Banner",
@@ -3864,7 +3864,12 @@
     "name": "Runeskin",
     "seconds": 6,
     "resist": 0.4,
-    "reflect": 0.15
+    "reflect": 0.15,
+    "stacksOnAttacker": {
+     "status": "rune",
+     "add": 1,
+     "max": 3
+    }
    },
    "talents": {
     "1": {
@@ -4133,7 +4138,7 @@
   },
   "warding_glyph": {
    "name": "Warding Glyph",
-   "shape": "self",
+   "shape": "ground",
    "element": "holy",
    "cooldown": 20,
    "mp": 16,
@@ -4262,7 +4267,8 @@
       }
      ]
     }
-   }
+   },
+   "range": 14
   },
   "great_anvil": {
    "name": "The Great Anvil",
@@ -4447,7 +4453,8 @@
    "owner": "runesmith",
    "element": "physical",
    "seconds": 8,
-   "takeMore": 0.15
+   "takeMore": 0.15,
+   "detonateMult": 2
   }
  },
  "classes": {

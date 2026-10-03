@@ -1669,6 +1669,14 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       });
       spellfx.cast({ at: new THREE.Vector3(control.x, control.y + 0.4, control.z), element: plan.element, ms: 520 });
       sound.ui('click');
+    } else if (plan.kind === 'beam' && plan.delay > 0 && !plan.beamFired) {
+      // R28 — a beam with a wind-up (Mountain Fist): the line is shown now and lands `delay` later,
+      // as a strike-only copy (its buffs, posts and summons were already handled by this cast)
+      const pts = [];
+      for (let t = 2; t <= plan.range; t += 3) pts.push(new THREE.Vector3(a.x + a.dx * t, terrain.heightAt(a.x + a.dx * t, a.z + a.dz * t) + 0.1, a.z + a.dz * t));
+      if (pts.length) spellfx.aoe({ points: pts, element: plan.element, stagger: 0.01 });
+      const strikeOnly = { ...plan, beamFired: true, sub: true, place: null, pool: null, selfBuff: null, summon: null, taunt: null, command: null, barrier: null, ward: null, counter: null, imbue: null, link: null, burst: null, again: null, afterimage: null, empowerNext: null };
+      setTimeout(() => { if (state.running) castSkill(strikeOnly, { echo: true }); }, plan.delay * 1000);
     } else if (plan.kind === 'beam') {
       // a line out from you: everything within `width` of the ray, out to `range`
       const points = [];
@@ -1752,10 +1760,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         points.push(new THREE.Vector3(bx, terrain.heightAt(bx, bz) + 0.3, bz));
       }
       spellfx.aoe({ points, element: plan.element, stagger: 0.02 });
-      const hits = [];
-      for (let t = 1; t <= dist; t += 2) {
-        hits.push(...field.strikeArea(control.x + a.dx * t, control.z + a.dz * t, plan.splash, player, { falloff: 0.8, ...strikeOpts }));
-      }
+      // R28 — each body near the path is struck ONCE, not once per 2 m step
+      const hits = field.strikeSegment(control.x + a.dx, control.z + a.dz, control.x + a.dx * dist, control.z + a.dz * dist, plan.splash, player, { ...strikeOpts, falloff: 0.8 });
       control.teleport(control.x + a.dx * dist, control.z + a.dz * dist);
       control.swing = Math.max(control.swing, 0.35);
       skillSound(plan, hits);

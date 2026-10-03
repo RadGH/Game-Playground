@@ -148,12 +148,21 @@ function shapeSentence(skill) {
         : `Strikes everything in ${article(arc)} ${arc} arc ${metres(skill.reach ?? 3)} in front of you, or as far and as wide as your weapon swings if that is more, ${forDmg}.`;
     case 'around':
       // R25 — Whirlwind spins five times: say so, and say it is per spin
+      // R28 — strikes that each pick a point or a body inside the ring are not spins
+      if (skill.repeats > 1 && (skill.repeatSpec?.scatter || skill.repeatSpec?.target)) {
+        return `Strikes ${skill.repeats} times over ${secs(skill.repeats * (skill.repeatEvery ?? 0.32))}, each strike at one spot within ${metres(skill.radius ?? 4)} of you, ${metres(Math.min(2.4, skill.radius ?? 2.4))} across, ${forDmg} each.`;
+      }
       return skill.repeats > 1
         ? `Spins ${skill.repeats} times, striking everything within ${metres(skill.radius ?? 4)} of you ${forDmg} on every spin.`
         : `Strikes everything within ${metres(skill.radius ?? 4)} of you ${forDmg}.`;
     case 'beam':
       return `Fires ${article(width)} ${width} wide beam ${metres(skill.range ?? 20)} straight ahead, striking everything in the line ${forDmg}.`;
     case 'ground': {
+      // R28 — a ground skill that deals no damage: where it lands, and (if it applies a status) how wide
+      if (!skill.mult) {
+        const what = skill.status || skill.statuses ? `, affecting everything within ${metres(skill.radius ?? 5)} of it` : '';
+        return `Lands on a spot up to ${metres(skill.range ?? 30)} away${skill.delay ? `, ${secs(skill.delay)} after you cast` : ''}${what}.`;
+      }
       // R25 — Blizzard, Toxic Cloud and Void Rift pulse; Judgement lands a beat after the cast
       const lands = skill.delay ? `, ${secs(skill.delay)} after you cast,` : '';
       const pull = skill.pull ? ` Every pulse drags everything ${metres(skill.pull)} toward the middle.` : '';
@@ -171,6 +180,8 @@ function shapeSentence(skill) {
         : `Strikes everything within ${metres(skill.splash ?? 2)} of your path ${forDmg}.`;
     }
     case 'summon': {
+      // a summon with no pet of its own (a decoy, a brood) is described by its `summon` block
+      if (!skill.pet) return '';
       const count = Math.max(1, skill.count || 1);
       const who = petName(skill.pet) + (count > 1 ? 's' : '');
       return `Summons ${fmt(count)} ${who} to fight beside you.`;
@@ -850,12 +861,18 @@ export function createSkillBar({ data, player, rpg, unlocks = null, canSummon = 
         plan.splash = Math.max(plan.splash || 0, span.splash);
       }
     }
+    /**
+     * R28 — A SELF SKILL NEVER PUTS A HARMFUL STATUS ON ITS CASTER. A self buff that follows a
+     * temper's element picked up the temper's Burning and set the Dragon Knight alight.
+     */
+    if (plan.kind === 'self' && plan.statusSpec && !['buff', 'form'].includes(plan.statusSpec.kind)) { plan.status = null; plan.statusSpec = null; }
     if (!talents) return plan;
     /** AND NOW THE TALENTS — library and bespoke, folded once, here, for every cast. */
     const out = talentPlan(player, s.id, plan, data.skills[s.id]);
     // a bespoke `set`/`mul` on `repeats` or `status` has to re-derive what the plan read off them
     if (out.repeats && typeof out.repeats === 'object') { out.repeatSpec = out.repeats; out.repeatEvery = out.repeats.every ?? out.repeatEvery; out.repeats = Math.max(1, out.repeats.count || 1); }
     if (out.status && (!out.statusSpec || out.statusSpec.name !== data.statuses[out.status]?.name)) out.statusSpec = data.statuses[out.status] || null;
+    if (out.kind === 'self' && out.statusSpec && !['buff', 'form'].includes(out.statusSpec.kind)) { out.status = null; out.statusSpec = null; }
     if (out.mult !== plan.mult && out.damage === plan.damage) out.damage = Math.max(1, Math.round(plan.damage * (out.mult / plan.mult)));
     /** Deepening lengthens what the skill leaves on the target — on a CLONE of the shared row. */
     if (out.statusLonger && out.statusSpec) {

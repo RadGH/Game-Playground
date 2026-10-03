@@ -27,6 +27,12 @@ const m = n => `${fmt(n)} m`;
 /** A share (0..n) as a percentage of weapon damage. */
 const wd = n => `${pct(n)} weapon damage`;
 const cap = s => (s ? s[0].toUpperCase() + s.slice(1) : s);
+/** 1st 2nd 3rd 4th … 11th 12th 13th 21st. */
+export function ordinal(n) {
+  const v = Math.round(n), t = v % 100;
+  if (t >= 11 && t <= 13) return `${v}th`;
+  return `${v}${{ 1: 'st', 2: 'nd', 3: 'rd' }[v % 10] || 'th'}`;
+}
 function list(bits) {
   bits = bits.filter(Boolean);
   if (bits.length <= 1) return bits[0] || '';
@@ -99,7 +105,7 @@ export const VOCAB = {
   },
   dash: {
     phase: 'plan', reader: 'js/skillrun.js',
-    describe(v) {
+    describe(v, ctx) {
       if (!v || typeof v !== 'object') return '';
       const verb = v.leap ? 'Leaps' : 'Dashes';
       const where = {
@@ -110,7 +116,17 @@ export const VOCAB = {
       let s = `${verb} up to ${m(v.range ?? 10)} ${where}`;
       if (v.leap) s += ', striking nothing on the way';
       s += '.';
-      if (v.land) s += ` On landing, strikes everything within ${m(v.land.radius ?? 3)} for ${wd(v.land.mult ?? 1)}.`;
+      if (v.land) {
+        const lb = [`strikes everything within ${m(v.land.radius ?? 3)} for ${wd(v.land.mult ?? 1)}`];
+        if (v.land.status) lb.push(`applies ${statusPhrase(v.land.status, ctx)}`);
+        if (v.land.knock) lb.push(`knocks them ${m(num(v.land.knock, 'push'))} back`);
+        if (v.land.heal) lb.push(`heals you and your followers within ${m(v.land.radius ?? 3)} ${pct(v.land.heal)} of maximum health`);
+        if (v.land.place) lb.push(`leaves a ${m((v.land.place.radius ?? 5) * 2)} zone for ${secs(v.land.place.seconds ?? 4)}`);
+        s += ` On landing, ${list(lb)}.`;
+      }
+      if (v.targets) s += ` Steps between up to ${fmt(v.targets)} enemies within ${m(v.range ?? 8)}, striking each.`;
+      if (v.allyBarrier) s += ` A follower swapped with gets a barrier of ${pct(v.allyBarrier)} of maximum health.`;
+      if (v.enemyStatus) s += ` An enemy swapped with gets ${statusPhrase(v.enemyStatus, ctx)}.`;
       return s;
     },
   },
@@ -123,18 +139,18 @@ export const VOCAB = {
 
   // ---------------------------------------------------------------- B. projectiles
   ricochet: {
-    phase: 'plan', reader: 'js/main.js',
+    phase: 'plan', reader: 'js/skillrun.js',
     describe: v => `Bounces to ${fmt(v.bounces ?? 1)} more target${(v.bounces ?? 1) === 1 ? '' : 's'} within ${m(v.range ?? 8)}, each bounce dealing ${pct(v.keep ?? 0.6)} of the damage.`,
   },
   split: {
-    phase: 'plan', reader: 'js/main.js',
+    phase: 'plan', reader: 'js/skillrun.js',
     describe(v, ctx) {
       const when = v.when === 'kill' ? 'when it kills' : String(v.when || '').startsWith('tag:') ? `on a ${sname(v.when.slice(4), ctx)} target` : 'on impact';
       return `Splits into ${fmt(v.shards ?? 2)} shards ${when}, each striking an enemy within ${m(v.range ?? 8)} for ${pct(v.keep ?? 0.5)} of the damage.`;
     },
   },
   returns: {
-    phase: 'plan', reader: 'js/main.js',
+    phase: 'plan', reader: 'js/skillrun.js',
     describe: v => `Flies back to you, striking everything on the way back for ${pct(num(v, 'keep') || 0.8)} of the damage.`,
   },
 
@@ -204,9 +220,9 @@ export const VOCAB = {
           ? `dealing ${wd(s.mult ?? 1)}${s.status ? ` and applying ${statusPhrase(s.status, ctx)}` : ''}`
           : `striking ${who} within ${m(v.radius ?? 5)} every ${secs(v.every ?? 1)} for ${wd(s.mult ?? 0.3)}${s.status ? ` and applying ${statusPhrase(s.status, ctx)}` : ''}`);
       }
-      if (v.heal) parts.push(`healing you and your followers inside ${pct(v.heal)} of maximum health every ${secs(v.every ?? 1)}`);
-      if (v.buff) parts.push(`giving allies inside ${statusPhrase(v.buff, ctx)}`);
-      if (v.debuff) parts.push(`applying ${statusPhrase(v.debuff, ctx)} to enemies inside`);
+      if (v.heal) parts.push(`healing you and your followers ${kind === 'zone' ? 'inside' : `within ${m(v.radius ?? 5)} of it`} ${pct(v.heal)} of maximum health every ${secs(v.every ?? 1)}`);
+      if (v.buff) parts.push(`giving allies inside ${statusPhrase(v.buff, ctx, { lasting: false })} while they stay in it`);
+      if (v.debuff) parts.push(`applying ${statusPhrase(v.debuff, ctx, { lasting: false })} to enemies inside while they stay in it`);
       if (v.knockOut) parts.push(`pushing enemies inside ${m(v.knockOut)} outward every second`);
       if (v.pull) parts.push(`pulling enemies inside ${m(v.pull)} inward every second`);
       if (v.edge) {
@@ -216,11 +232,15 @@ export const VOCAB = {
         if (v.edgeStatus) eb.push(statusPhrase(v.edgeStatus, ctx));
         parts.push(`an enemy that crosses its edge, in or out, takes ${list(eb)}`);
       }
-      if (v.blocksRanged) parts.push('stopping enemy ranged hits on anyone inside');
-      if (v.hp) parts.push(`it has ${pct(v.hp)} of your maximum health and can be broken`);
+      if (v.blocksRanged) parts.push(`enemy ranged hits on anyone within ${m(v.radius ?? 5)} of its middle are stopped`);
+      const thing = kind === 'trap' ? 'the trap' : kind === 'zone' ? 'the zone' : 'the post';
+      if (v.hp) parts.push(`${thing} has ${pct(v.hp)} of your maximum health and can be broken`);
       if (v.max) parts.push(`at most ${fmt(v.max)} stand at once`);
-      if (v.ringOn) parts.push(`each ${skillName(v.ringOn.skill, ctx)} hit within ${m(v.ringOn.radius ?? 8)} of it rings it for ${wd(v.ringOn.mult ?? 1.2)}`);
-      if (v.taunt) parts.push(`enemies within ${m(v.radius ?? 5)} attack it`);
+      if (v.ringOn) parts.push(`each ${skillName(v.ringOn.skill, ctx)} hit within ${m(v.ringOn.radius ?? 8)} of ${thing} rings ${thing} for ${wd(v.ringOn.mult ?? 1.2)}`);
+      if (v.taunt) parts.push(`enemies within ${m(v.radius ?? 5)} attack ${thing}`);
+      if (v.barrierTick) parts.push(`allies inside gain a barrier of ${pct(v.barrierTick)} of maximum health every ${secs(v.every ?? 1)}, up to ${pct(v.barrierCap ?? 0.15)}`);
+      if (v.deathPrevent) parts.push('allies inside cannot drop below 1 health');
+      if (v.onExpire) parts.push(`when ${thing} ends it ${v.onExpire.mult ? `bursts for ${wd(v.onExpire.mult)} within ${m(v.onExpire.radius ?? 4)}` : ''}${v.onExpire.mult && v.onExpire.heal ? ' and ' : ''}${v.onExpire.heal ? `heals allies within ${m(v.onExpire.radius ?? 4)} ${pct(v.onExpire.heal)} of maximum health` : ''}`.replace(' it bursts', ' and bursts').replace('it heals', 'and heals'));
       return `${parts.join(', ')}.`;
     },
   },
@@ -291,6 +311,8 @@ export const VOCAB = {
       if (row.fromParty) bits.push(`take ${pct(row.fromParty)} more damage from your followers`);
       if (row.store) bits.push(`take ${pct(row.store)} of the damage dealt to them during the mark again when it ends`);
       if (row.dealLess) bits.push(`deal ${pct(row.dealLess)} less damage`);
+      if (row.fromBehind) bits.push('take every hit as if it came from behind');
+      if (row.detonateMult) bits.push(`take ${fmt(row.detonateMult)} times the damage when a rune detonates on them`);
       if (row.takeMoreDot) bits.push(`take ${pct(row.takeMoreDot)} more damage from damage over time`);
       if (row.slow) bits.push(`move ${pct(row.slow)} slower`);
       if (row.burstOnExpire) bits.push(`burst for ${wd(row.burstOnExpire.mult ?? 0.5)} within ${m(row.burstOnExpire.radius ?? 2.5)} when the mark ends`);
@@ -333,7 +355,7 @@ export const VOCAB = {
   },
   bonusIf: {
     phase: 'hit', reader: 'js/skillmech.js',
-    describe(v) {
+    describe(v, ctx) {
       const out = [];
       for (const b of [].concat(v || [])) {
         const [kind, a, b2, c] = String(b.when || '').split(':');
@@ -346,7 +368,7 @@ export const VOCAB = {
         else if (kind === 'stationary') out.push(`Deals ${more} more damage after you have stood still for ${secs(+a)}.`);
         else if (kind === 'caster') out.push(`Deals ${more} more damage to casters and archers.`);
         else if (kind === 'rank') out.push(`Deals ${more} more damage to champions, rares and bosses.`);
-        else if (kind === 'status') out.push(`Deals ${more} more damage to a target with ${a}.`);
+        else if (kind === 'status') out.push(`Deals ${more} more damage to a target with ${sname(a, ctx)}.`);
         else if (kind === 'variety') out.push(`Deals ${pct(+a || 0.2)} more damage for each different status on the target, up to ${pct(+b2 || 1)}.`);
         else if (kind === 'aimNotYou') out.push(`Deals ${more} more damage to an enemy that is attacking someone other than you.`);
         else if (kind === 'followers') out.push(`Deals ${pct(+a || 0.25)} more damage for each follower alive, up to ${pct(+b2 || 0.5)}.`);
@@ -474,7 +496,7 @@ export const VOCAB = {
       if (v.status) bits.push(`apply ${sname(v.status, ctx)}`);
       if (v.splash) bits.push(`splash everything within ${m(v.splash)}`);
       let s = `For ${secs(v.seconds ?? 10)} your attacks ${list(bits) || 'are empowered'}`;
-      if (v.every) s += `; every ${fmt(v.every.n ?? 4)}th attack bursts for ${wd(v.every.burst?.mult ?? 1)} within ${m(v.every.burst?.radius ?? 3)}`;
+      if (v.every) s += `; every ${ordinal(v.every.n ?? 4)} attack bursts for ${wd(v.every.burst?.mult ?? 1)} within ${m(v.every.burst?.radius ?? 3)}`;
       return `${s}.`;
     },
   },
@@ -493,9 +515,10 @@ export const VOCAB = {
       const bits = [];
       const what = v.negate >= 1 ? 'negated' : `reduced by ${pct(v.negate ?? 1)}`;
       let s = `For ${secs(v.window ?? 1.5)}, the next ${n === 1 ? 'melee hit' : `${fmt(n)} melee hits`} on you ${n === 1 ? 'is' : 'are'} ${what}${v.frontal ? ' (from the front)' : ''}`;
-      if (v.ranged) s += `, and one ranged hit is negated too`;
+      if (v.ranged) s += `; 1 ranged hit is also negated`;
       if (v.answer) bits.push(`each is answered with a strike for ${wd(v.answer.mult ?? 1)}${v.answer.knock?.stagger ? ` that stuns for ${secs(v.answer.knock.stagger)}` : ''}`);
       if (v.tauntAttacker) bits.push(`the attacker is taunted for ${secs(v.tauntAttacker)}`);
+      if (v.heal) bits.push(`you heal ${pct(v.heal)} of maximum health`);
       if (v.gain) bits.push(`you gain ${fmt(v.gain.n ?? 1)} ${cap(v.gain.resource)}`);
       if (v.grow) bits.push(`the next cast of this skill deals ${pct(v.grow.per)} more for each hit, up to ${pct(v.grow.cap)}`);
       if (v.ccImmune) bits.push('nothing can knock you back or stun you meanwhile');
@@ -527,7 +550,7 @@ export const VOCAB = {
     },
   },
   command: {
-    phase: 'plan', reader: 'js/pets.js',
+    phase: 'plan', reader: 'js/skillrun.js',
     describe(v, ctx) {
       const who = v.petOnly ? 'your class companion' : 'your followers';
       const verb = { focus: 'to attack the target', pounce: 'to leap onto the target, the next attack dealing 50% more damage', guard: 'to stay within 4 m of you and attack whatever hits you', return: 'to return to you' }[v.order || 'focus'];
@@ -575,7 +598,7 @@ export const VOCAB = {
     describe: v => `Healing past your maximum becomes a barrier, up to ${pct(v)} of maximum health.`,
   },
   revive: {
-    phase: 'pet', reader: 'js/pets.js',
+    phase: 'pet', reader: 'js/skillrun.js',
     describe: v => `Revives every fallen follower at once at ${pct(num(v, 'share') || 0.5)} health.`,
   },
   cleanse: {
@@ -586,10 +609,13 @@ export const VOCAB = {
     },
   },
   link: {
-    phase: 'self', reader: 'js/skillmech.js',
-    describe(v) {
+    phase: 'self', reader: 'js/skillrun.js',
+    describe(v, ctx) {
       if (v.to === 'enemy') return `Links the target to you for ${secs(v.seconds ?? 8)}: ${pct(v.share ?? 0.3)} of the damage you take is dealt to it too.`;
-      return `Links the follower nearest your aim to you for ${secs(v.seconds ?? 8)}: you take ${pct(v.share ?? 0.4)} of the damage dealt to it${v.threshold ? ` above ${pct(v.threshold)} of its health` : ''} instead.`;
+      let s = `Links the follower nearest your aim to you for ${secs(v.seconds ?? 8)}: you take ${pct(v.share ?? 0.4)} of the damage dealt to it${v.threshold ? ` above ${pct(v.threshold)} of its health` : ''} instead`;
+      if (v.gainPer) s += `; each hit you take for it adds ${pct(v.gainPer.per ?? 0.05)} damage to your ${sname(v.gainPer.status, ctx)}, up to ${pct(v.gainPer.cap ?? 0.25)}`;
+      if (v.healEach) s += `; you both heal ${pct(v.healEach)} of maximum health a second`;
+      return `${s}.`;
     },
   },
   corpseBurst: {
@@ -652,7 +678,7 @@ export const VOCAB = {
     },
   },
   dashWith: {
-    phase: 'pet', reader: 'js/pets.js',
+    phase: 'pet', reader: 'js/skillrun.js',
     describe: () => 'Every follower within 15 m moves with you to where you land.',
   },
   rewind: {
@@ -693,6 +719,9 @@ function modClauses(sub) {
   const add = { pierce: n => `passes through ${fmt(n)} more targets`, chains: n => `jumps ${fmt(n)} more times`, projectiles: n => `looses ${fmt(n)} more projectiles`, radius: n => `reaches ${m(n)} further`, splash: n => `splashes ${m(n)} further` };
   for (const [k, n] of Object.entries(sub.add || {})) out.push(add[k] ? add[k](n) : `+${fmt(n)} ${k.replace(/\./g, ' ')}`);
   for (const [k, n] of Object.entries(sub.mul || {})) if (k === 'mult') out.push(`deals ${pct(Math.abs(n - 1))} ${n > 1 ? 'more' : 'less'} damage`);
+  if (sub.set?.shape === 'around') out.push(`becomes a ring ${m(sub.set.radius ?? 6)} around you`);
+  else if (sub.set?.shape === 'melee') out.push(`becomes a ${fmt((sub.set.arc ?? 1.5) * 180 / Math.PI, { decimals: 0 })}° strike in front of you`);
+  else if (sub.set?.radius) out.push(`reaches ${m(sub.set.radius)}`);
   if (sub.set?.crit || sub.crit) out.push('is a certain critical hit');
   return out;
 }
@@ -703,9 +732,11 @@ function describeSub(sub, ctx) {
   if (sub.mult) {
     const el = sub.element && sub.element !== 'physical' ? ` as ${sub.element}` : '';
     const st = sub.status ? ` and applies ${statusPhrase(sub.status, ctx)}` : '';
-    bits.unshift(sub.radius
-      ? `strikes everything within ${m(sub.radius)} of you for ${wd(sub.mult)}${el}${st}`
-      : `strikes for ${wd(sub.mult)}${el}${st}`);
+    bits.unshift(sub.shape === 'melee'
+      ? `strikes everything in a ${fmt((sub.arc ?? 1.5) * 180 / Math.PI, { decimals: 0 })}° arc ${m(sub.reach ?? 3)} in front of you for ${wd(sub.mult)}${el}${st}`
+      : sub.radius
+        ? `strikes everything within ${m(sub.radius)} of you for ${wd(sub.mult)}${el}${st}`
+        : `strikes for ${wd(sub.mult)}${el}${st}`);
   }
   return bits.length ? bits.map(b => b.replace(/^On cast, /, '')).map(b => b.charAt(0).toLowerCase() + b.slice(1)).join('; ') : '';
 }
@@ -751,7 +782,7 @@ function describeForm(f, ctx) {
     if (o.basic?.knock) bits.push(`your basic attack knocks targets ${m(num(o.basic.knock, 'push'))} back`);
     if (o.basic?.heal) bits.push(`each basic hit heals you ${pct(o.basic.heal)} of maximum health`);
     if (o.basic?.healAllies) bits.push(`an ally inside the splash heals ${pct(o.basic.healAllies)} of maximum health`);
-    if (o.basic?.every) bits.push(`every ${fmt(o.basic.every.n ?? 3)}rd basic hit adds ${fmt(o.basic.every.stack?.add ?? 2)} ${sname(o.basic.every.stack?.status, ctx)} stacks`);
+    if (o.basic?.every) bits.push(`every ${ordinal(o.basic.every.n ?? 3)} basic hit adds ${fmt(o.basic.every.stack?.add ?? 2)} ${sname(o.basic.every.stack?.status, ctx)} stacks`);
     if (o.basic?.statuses) bits.push(`your basic attack also applies ${list([].concat(o.basic.statuses).map(r => statusPhrase(r, ctx)))}`);
     if (o.petBuff) {
       const pb = [];
@@ -785,6 +816,7 @@ function describeSelfBuff(v, ctx) {
   if (v.reflect) bits.push(`melee attackers take ${pct(v.reflect)} of the hit back`);
   if (v.frontalResist) bits.push(`take ${pct(v.frontalResist)} less damage from the front`);
   if (v.manaOnHurt) bits.push(`each hit you take restores ${fmt(v.manaOnHurt)} mana`);
+  if (v.stacksOnAttacker) bits.push(`every melee attacker that hits you takes ${fmt(v.stacksOnAttacker.add ?? 1)} ${sname(v.stacksOnAttacker.status, ctx)} stack${(v.stacksOnAttacker.add ?? 1) === 1 ? '' : 's'}`);
   if (v.deathPreventOnce) bits.push(`the first killing blow leaves you at 1 health and ends it${v.deathPreventOnce.burst ? ` with a ${m(v.deathPreventOnce.burst.radius ?? 6)} blast for ${wd(v.deathPreventOnce.burst.mult ?? 3)}` : ''}`);
   if (v.resistPerFoe?.lowHp) bits.push(`below ${pct(v.resistPerFoe.lowHp)} health the per-enemy reduction doubles`);
   if (v.petsShare) bits.push(`followers within 8 m get ${pct(v.petsShare)} of it`);
@@ -796,9 +828,18 @@ function describeSelfBuff(v, ctx) {
   if (v.frontal) bits.push('only against hits from the front');
   if (v.perCastHp) bits.push(`every skill cast costs ${pct(v.perCastHp)} of your maximum health`);
   if (v.noMana) bits.push('skills cost no mana');
-  if (v.every) bits.push(`every ${fmt(v.every.hits ?? 4)}th hit you take releases a ${m(v.every.radius ?? 4)} shockwave for ${wd(v.every.mult ?? 0.8)}${v.every.taunt ? ` that taunts what it hits for ${secs(v.every.taunt)}` : ''}`);
+  if (v.every) bits.push(`every ${ordinal(v.every.hits ?? 4)} hit you take releases a ${m(v.every.radius ?? 4)} shockwave for ${wd(v.every.mult ?? 0.8)}${v.every.taunt ? ` that taunts what it hits for ${secs(v.every.taunt)}` : ''}`);
   if (v.storeShare) bits.push(`${pct(v.storeShare)} of the damage you take is stored and released within ${m(v.storeRadius ?? 6)} when it ends`);
   if (v.onEnd) bits.push(`when it ends ${describeSub(v.onEnd, ctx)}`);
+  if (v.onKill) {
+    const k = v.onKill, kb = [];
+    if (k.heal) kb.push(`heals you ${pct(k.heal)} of maximum health`);
+    if (k.mana) kb.push(`restores ${pct(k.mana)} of maximum mana`);
+    if (k.resource) kb.push(`gives ${fmt(k.resource.n ?? 1)} ${cap(k.resource.id)}`);
+    if (k.haste) kb.push(`Hastens you for ${secs(k.haste)}`);
+    if (k.reset) kb.push(`resets ${skillName(k.reset, ctx)}`);
+    if (kb.length) bits.push(`each kill ${list(kb)}`);
+  }
   const who = v.petsOnly ? ', your followers' : v.pets ? ', you and every follower' : '';
   return `For ${secs(v.seconds ?? 8)}${who}: ${bits.join('; ') || 'empowered'}.`;
 }
@@ -821,7 +862,7 @@ export function describeSetPath(path, v, ctx = {}) {
       if (leaf === 'knock') return `The basic attack knocks targets ${m(num(v, 'push'))} back`;
       if (leaf === 'heal') return `Each basic hit heals you ${pct(v)} of maximum health`;
       if (leaf === 'splash') return `The basic attack splashes ${m(v)}`;
-      if (leaf === 'every') return `Every ${fmt(v.n ?? 3)}rd basic hit adds ${fmt(v.stack?.add ?? 2)} ${sname(v.stack?.status, ctx)} stacks, up to ${fmt(v.stack?.max ?? 5)}`;
+      if (leaf === 'every') return `Every ${ordinal(v.n ?? 3)} basic hit adds ${fmt(v.stack?.add ?? 2)} ${sname(v.stack?.status, ctx)} stacks, up to ${fmt(v.stack?.max ?? 5)}`;
       if (leaf === 'statuses') return `The basic attack also applies ${list([].concat(v).map(r => statusPhrase(r, ctx)))}`;
       return '';
     }
@@ -832,6 +873,18 @@ export function describeSetPath(path, v, ctx = {}) {
       if (v.healPerSecond) pb.push(`heal ${pct(v.healPerSecond)} of maximum health a second`);
       if (v.biteStatus) pb.push(`apply ${sname(v.biteStatus, ctx)} with every attack`);
       return `While in the form, your followers ${list(pb)}`;
+    }
+    if (where === 'aura') {
+      if (leaf === 'radius') return `The aura reaches ${m(v)}`;
+      if (leaf === 'heal') return `Allies in the aura heal ${pct(v)} of maximum health a second`;
+      if (leaf === 'buff') return `Allies in the aura get ${statusPhrase(v, ctx, { lasting: false })}`;
+      if (leaf === 'debuff') return `Enemies in the aura get ${statusPhrase(v, ctx, { lasting: false })}`;
+      return '';
+    }
+    if (where === 'finale') return `The Finale: ${describeSub(v, ctx) || 'changes'}`;
+    if (parts.length >= 3 && where !== 'stats' && FORM_LABEL[where] && parts[2] === 'stats') {
+      const b = statBits({ [leaf]: v });
+      return b.length ? `In ${FORM_LABEL[where]}: ${b.join(', ')}` : '';
     }
     if (where === 'onKillHaste') return `A kill while in the form Hastens you for ${secs(v)}, up to ${secs(v * 3)} on a streak`;
     if (where === 'firstCrit') return 'The first basic hit after entering the form is a certain critical hit';
@@ -1037,7 +1090,19 @@ export function toggleForm(player, skillId, formSpec) {
     const left = leaveForm(player, group, 'toggle');
     return { entered: null, left };
   }
-  const opt = nextOption(formSpec, player);
+  let opt = nextOption(formSpec, player);
+  /**
+   * A talent on a CYCLING form (a stance, a temper) writes either to one option by id —
+   * `form.open.stats.damage` — or to `form.stats`, which every option adds to its own.
+   */
+  if (formSpec.options) {
+    if (formSpec[opt.id] && typeof formSpec[opt.id] === 'object') opt = deepMerge(opt, formSpec[opt.id]);
+    if (formSpec.stats) {
+      const st = { ...(opt.stats || {}) };
+      for (const [k, v] of Object.entries(formSpec.stats)) st[k] = typeof v === 'number' ? (st[k] || 0) + v : v;
+      opt = { ...opt, stats: st };
+    }
+  }
   const left = now ? leaveForm(player, group, 'swap') : null;
   const form = {
     id: opt.id, group, skill: skillId, name: opt.name || FORM_LABEL[opt.id] || cap(opt.id),
@@ -1057,6 +1122,14 @@ export function toggleForm(player, skillId, formSpec) {
   form.firstCritPending = !!opt.firstCrit;
   player.mechDirty = true;
   return { entered: form, left };
+}
+
+function deepMerge(a, b) {
+  const out = { ...a };
+  for (const [k, v] of Object.entries(b || {})) {
+    out[k] = v && typeof v === 'object' && !Array.isArray(v) && a?.[k] && typeof a[k] === 'object' && !Array.isArray(a[k]) ? deepMerge(a[k], v) : v;
+  }
+  return out;
 }
 
 /** Leave whatever form is in `group`. Returns the form left (its spec carries `onExit`/`finale`). */
@@ -1444,7 +1517,7 @@ export function hitFactor(rules, attacker, defender, ctx = {}) {
   const out = { mult: 1, pen: 0, crit: false };
   if (!rules) return out;
   if (rules.pen) out.pen = Math.max(out.pen, rules.pen);
-  const isBehind = rules.behind || behind(attacker, defender) || !!defender?.statuses?.turned_about;
+  const isBehind = rules.behind || behind(attacker, defender) || Object.values(defender?.statuses || {}).some(st => st.kind === 'tag' && st.fromBehind);
   if (rules.penBehind && isBehind) out.pen = Math.max(out.pen, rules.penBehind);
   if (rules.crit) out.crit = true;
   for (const b of [].concat(rules.bonusIf || [])) {
@@ -1486,6 +1559,13 @@ export function hitFactor(rules, attacker, defender, ctx = {}) {
  * the player's hits, `fromParty` on a follower's (an attacker with an `owner`). Read by js/rpg.js
  * `strike` on every hit, so a hound's bite on a Quarry target is worth more.
  */
+/** A tag's `detonateMult` (Rent): a counter detonating on this body is worth that much more. */
+export function detonateMultOf(unit) {
+  let k = 1;
+  for (const st of Object.values(unit?.statuses || {})) if (st.kind === 'tag' && st.detonateMult) k *= st.detonateMult;
+  return k;
+}
+
 export function tagFactor(attacker, defender) {
   let k = 1;
   for (const st of Object.values(defender?.statuses || {})) {
@@ -1525,7 +1605,7 @@ export function afterHit(rules, attacker, defender, result, ctx = {}) {
       ...(was || {}), type: t.id, name: row.name || t.id, kind: 'tag', element: row.element || 'arcane',
       remaining: row.seconds ?? 6, power: 1, perSecond: 0, slow: row.slow || 0,
       takeMore: row.takeMore || 0, fromYou: row.fromYou || 0, fromParty: row.fromParty || 0,
-      dealLess: row.dealLess || 0, takeMoreDot: row.takeMoreDot || 0,
+      dealLess: row.dealLess || 0, takeMoreDot: row.takeMoreDot || 0, detonateMult: row.detonateMult || 0, fromBehind: !!row.fromBehind,
       store: row.store || rules.store?.share || 0, bank: was?.bank || 0, owner: rules.skill,
       // a tag that bursts as it ends (Clockwork Bolt's Stuck), at the cast's own scale, and one
       // that pays the caster a resource when the tagged body hits you or a follower (Brand)
@@ -1542,7 +1622,7 @@ export function afterHit(rules, attacker, defender, result, ctx = {}) {
     if (r.fresh) ENV.statusFx?.(defender, s.status === 'frostbite' ? 'freeze' : s.status, true);
     if (r.maxed && r.onMax?.detonate) {
       const d = r.onMax.detonate;
-      ENV.strikeArea?.(defender.x, defender.z, d.radius ?? 2.5, { power: (d.mult ?? 1.5) * (rules.runeMult && defender.statuses?.rent ? 2 : 1), element: d.element || 'arcane', knock: d.knock });
+      ENV.strikeArea?.(defender.x, defender.z, d.radius ?? 2.5, { power: (d.mult ?? 1.5) * detonateMultOf(defender), element: d.element || 'arcane', knock: d.knock });
     }
     if (r.maxed && r.onMax?.stagger) ENV.statusFx?.(defender, 'freeze', true);
   }
@@ -1718,6 +1798,18 @@ export function onHurt(defender, attacker, amount, ctx = {}) {
       k *= 1 - Math.min((r.cap ?? 0.36) * low, (r.per ?? 0.06) * n * low, 0.75);
     }
     if (st.manaOnHurt && defender.mp != null) defender.mp = Math.min(defender.maxMp ?? defender.mp, defender.mp + st.manaOnHurt);
+    // Runeskin: whatever hits you is inscribed (`stacksOnAttacker`), a detonation at the maximum
+    if (st.stacksOnAttacker && attacker && attacker.dying == null && !ranged) {
+      const so = st.stacksOnAttacker;
+      const spec = ENV.statusSpec?.(so.status);
+      if (spec) {
+        const r = addStacks(attacker, so.status, spec, { add: so.add ?? 1, max: so.max ?? 3 });
+        if (r.maxed && r.onMax?.detonate) {
+          const d = r.onMax.detonate;
+          ENV.strikeArea?.(attacker.x, attacker.z, d.radius ?? 2.5, { power: d.mult ?? 1.5, element: d.element || 'arcane', knock: d.knock });
+        }
+      }
+    }
     if (st.stillResist && (defender.stillFor || 0) >= (st.stillResist.after ?? 1)) k *= 1 - (st.stillResist.resist ?? 0.2);
     if (st.frontalResist && fromFront()) k *= 1 - st.frontalResist;
     if (st.every) {
@@ -1779,7 +1871,7 @@ export function mechRules(plan) {
   let any = false;
   for (const k of HIT_KEYS) if (plan[k] != null && plan[k] !== false) { out[k] = plan[k]; any = true; }
   if (plan.mult && plan.baseMult) { out.scale = plan.mult / plan.baseMult; }
-  for (const k of ['crit', 'behind', 'statusPick', 'statusMult', 'resetOn', 'cutCooldown', 'resource', 'runeMult', 'penBehind']) {
+  for (const k of ['crit', 'behind', 'statusPick', 'statusMult', 'resetOn', 'cutCooldown', 'resource', 'penBehind']) {
     if (plan[k] != null && plan[k] !== false) { out[k] = plan[k]; any = true; }
   }
   return any ? out : null;

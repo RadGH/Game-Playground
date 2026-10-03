@@ -61,7 +61,18 @@ export function expectedOf(row) {
   if (row.stack?.status) dot += dotOf(row.stack.status, (row.stack.max || 1) * 0.5);
   // a damaging pool pays `power` every 0.75 s for its life (js/skillrun.js poolSpec)
   const pool = row.pool && (row.pool.power ?? 0.3) > 0 ? (row.pool.power ?? 0.3) * Math.max(1, Math.round((row.pool.seconds ?? 4) / 0.75)) : 0;
-  return (m * reps * proj * (1 + bonus) + dot + pool) / Math.max(0.5, row.cooldown || 1);
+  /**
+   * …and a placed post or zone that strikes on a clock (js/skillrun.js scales its pulses by the same
+   * effectiveMult as the cast, so a 40 s post's pulses are big): every pulse that could land on one
+   * target, at half weight when it picks a random target. A trap fires once.
+   */
+  let placed = 0;
+  const pl = row.place;
+  if (pl?.strike?.mult) {
+    const pulses = pl.kind === 'trap' ? 1 : Math.max(1, Math.floor((pl.seconds ?? 8) / (pl.every ?? 1)));
+    placed = pl.strike.mult * pulses * (pl.strike.nearest === false ? 0.5 : 1) * (pl.kind === 'trap' && row.place.max ? 1 : 1);
+  }
+  return (m * reps * proj * (1 + bonus) + dot + pool + placed) / Math.max(0.5, row.cooldown || 1);
 }
 
 const converted = Object.entries(DATA.classes)

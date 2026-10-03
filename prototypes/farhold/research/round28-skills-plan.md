@@ -1372,9 +1372,29 @@ firstCrit stats.stillResist stats.manaPerSecond`, `pool.at/along`, `statuses[].m
   on its bite — `rpg.strike` applied `outgoingFrom/incomingFrom` to the player's strikes only.
 * A status with infinite duration (a form) no longer prints "Infinitys" on the status chip.
 
+**Fix round after the five content batches (engine, 2026-10-02):** shaped summons ask the shaped
+row; a row with no `mult` deals NO damage (`noDamage`, through every strike path, and the card says
+"Lands on a spot…") so Rampart and Warding Glyph are `ground` again; each dash strikes a body once
+(`field.strikeSegment`); tags carry `fromYou`/`fromParty` (read on EVERY strike by `tagFactor`),
+`dealLess`, `takeMoreDot`, `fromBehind`, `detonateMult` (Rent), `burstOnExpire`, `gainOnHurt`, and a
+`store` that actually pays out; `command.gain`, `corpseBurst`, `clusters`, `allyStatus`, `sequence`,
+`dash.targets`, `selfBuff.onKill`, `selfBuff.stacksOnAttacker`, `empowerNext.manaPause`,
+`transform.burstOnExpire`, `attackSlow`, `sleeperHits`, `dotRate` (body and caster), chains prefer
+Shocked targets, beams with a `delay`, follower stasis, `dashWith` on non-dash skills, summons rise
+at their own corpses, cycling-form talents (`form.<optionId>.stats…`, shared `form.stats`), and a
+self skill never puts a harmful status on its caster. Card generator: ordinals, wards, recast,
+empower agreement, decoy counts and `onStruck`, summon fields, `atMax`, dash/land/swap riders,
+placed-object riders, edge crossings, alternates, sub-strike shapes, a talent's duration change,
+orb/trail numbers, "Strikes N times at one spot" for scatter/lowest repeats. The audit now cuts the
+VOCAB table and describe helpers out of js/skillmech.js before looking for a reader, and checks a
+list of selfBuff/status/form fields the same way — `dotRate` was the case it missed.
+
+Dummy damage (batch 3): not a strike bug. `stone_sentinel` at level 50 has 8,775 armour, so every
+hit is floored to 1–9; and a 40 s slot-6 skill's placed pulses inherit its ×7.8 `effectiveMult`, so
+13 pulses add up to a lot — inside the §9.1 band once the balance test counts placed pulses (it now does).
+
 **Not built yet / simplified (and why):**
-1. `silence` stops a ranged enemy firing and sends it to melee; a warband leader's *buff action*
-   is a passive aura in js/actors.js, so there is no action for silence to cancel.
+1. `silence` stops a ranged enemy firing and sends it to melee (see 8).
 2. Thornlash's "root once per target per 6 s" limit — no per-target cooldown exists; the data
    roots for 0.8 s on every hit (batch 5 may shorten or drop it).
 3. HUD timer pips on placed objects — placed rings fade with their time instead.
@@ -1384,3 +1404,5 @@ firstCrit stats.stillResist stats.manaPerSecond`, `pool.at/along`, `statuses[].m
 6. A druid shape whose creature fails to build keeps the humanoid visible (no tint fallback).
 7. Iron Gyre (`whirlwind`) is pinned outside the §9.1 band (0.8 × 5 is R25's, and the balance test
    lists it in `PINNED`).
+8. A warband leader's buff action is a passive aura, so `silence` cannot cancel it.
+9. `runeMult` is retired in favour of the tag field `detonateMult` (Rent carries `detonateMult: 2`).

@@ -345,7 +345,7 @@
       },
       "wants": 0.25,
       "stand": "post",
-      "blurb": "Runs the muster, and will sell you somebody to walk beside a cart."
+      "blurb": "Calls up the levy, and will sell you somebody to walk beside a cart."
     },
     {
       "id": "wright",
@@ -440,7 +440,7 @@
     "sliceSeconds": 20,
     "minCardSeconds": 900
   },
-  "_musterDoc": "§9. A drill is an ordinary raid with a flag on it, run through js/raid.js so every rule the raid already keeps — nothing spawns before the bell, night is harder and pays more, the rare crate is a floor — keeps itself for free. Cooldown is per RANK and per PLACE, so clearing rank 4 does not lock out rank 1. Losing costs nothing at all beyond whatever dying already costs you: no broken structures, no materials taken, no citizen leaves, no standing lost. The user's words: 'No need to penalize for a minigame.'",
+  "_levyDoc": "§9. A drill is an ordinary raid with a flag on it, run through js/raid.js so every rule the raid already keeps — nothing spawns before the bell, night is harder and pays more, the rare crate is a floor — keeps itself for free. Cooldown is per RANK and per PLACE, so clearing rank 4 does not lock out rank 1. Losing costs nothing at all beyond whatever dying already costs you: no broken structures, no materials taken, no citizen leaves, no standing lost. The user's words: 'No need to penalize for a minigame.'",
   "_tradeDoc": "§7. What a thing is worth somewhere is its base price moved by whether that place NEEDS the tag and whether it MAKES it, plus a slow wobble on a six-day step. Clamped hard, so the whole spread a player can ever see on one good is about three and a half times — enough to be worth a cart, never enough to be a slot machine. A place never both needs and makes the same tag; `makes` wins.",
   "trade": {
     "needWeight": 0.45,
@@ -604,5 +604,5 @@
       "Yarrow"
     ]
   },
-  "_r18Dead": "R18 — a number stated in two files is a number that will be tuned in the wrong one, which this round has now fixed four times (structures/power prices, the generator kW, the logistics pole's radius, and these). `food.cookedMealMultiplier` removed: the live one is data/crops.json's `cook.multiplier`, read by js/farm.js. Same value, 1.6, in two files — and only one of them was ever read. the `muster` block removed: js/muster.js reads `D.muster || civics?.muster` where `D` is data/raids.json, so raids.json's block always won and this one never applied."
+  "_r18Dead": "R18 — a number stated in two files is a number that will be tuned in the wrong one, which this round has now fixed four times (structures/power prices, the generator kW, the logistics pole's radius, and these). `food.cookedMealMultiplier` removed: the live one is data/crops.json's `cook.multiplier`, read by js/farm.js. Same value, 1.6, in two files — and only one of them was ever read. the `levy` block removed: js/levy.js reads `D.levy || civics?.levy` where `D` is data/raids.json, so raids.json's block always won and this one never applied."
 }

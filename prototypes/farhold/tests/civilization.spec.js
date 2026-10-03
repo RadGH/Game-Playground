@@ -25,14 +25,14 @@ test('every piece of the expansion is reachable from the running game', async ({
     const fh = window.farhold;
     return {
       civics: !!fh.civics, holding: !!fh.holding,
-      housing: !!fh.housing, hold: !!fh.hold, trade: !!fh.goodsMarket, muster: !!fh.muster,
+      housing: !!fh.housing, hold: !!fh.hold, trade: !!fh.goodsMarket, levy: !!fh.levy,
       // the switch: `labour` handed to createWorks is what makes a machine need a worker
       labourOn: !!fh.works?.labour || !!fh.works?.needsLabour || typeof fh.works?.machines === 'function',
       machines: typeof fh.works?.machines === 'function' ? (fh.works.machines() || []).length : -1,
     };
   });
   console.log('civics wiring:', JSON.stringify(out));
-  for (const k of ['civics', 'holding', 'housing', 'hold', 'trade', 'muster']) {
+  for (const k of ['civics', 'holding', 'housing', 'hold', 'trade', 'levy']) {
     expect(out[k], `${k} is not on window.farhold — the module exists and nothing calls it`).toBe(true);
   }
   // `works.machines()` has been called by main.js since the building expansion and did not exist,
@@ -53,16 +53,16 @@ test('K opens the Holding, and it has all seven tabs', async ({ page }) => {
   console.log('holding:', JSON.stringify(out));
   expect(out.open).toBe(true);
   // R28 — Production is first: it is the tab the base pill opens (a badge may follow the name)
-  expect(out.tabs.map(t => t.replace(/\d+$/, ''))).toEqual(['Production', 'People', 'Houses', 'Work', 'Traders', 'Trade', 'Muster']);
+  expect(out.tabs.map(t => t.replace(/\d+$/, ''))).toEqual(['Production', 'People', 'Houses', 'Work', 'Traders', 'Trade', 'Levy']);
   expect(errors).toEqual([]);
 });
 
-test('the muster tab says what a muster is, and never offers one with nothing at stake hidden', async ({ page }) => {
+test('the levy tab says what a levy is, and never offers one with nothing at stake hidden', async ({ page }) => {
   const errors = await land(page);
-  await page.evaluate(() => { window.farhold.holding.show('muster'); });
+  await page.evaluate(() => { window.farhold.holding.show('levy'); });
   await page.waitForTimeout(300);
   const text = await page.evaluate(() => document.querySelector('.civics-body')?.textContent || '');
-  console.log('muster tab:', text.slice(0, 220));
+  console.log('levy tab:', text.slice(0, 220));
   // the user's own condition has to be on the screen, not only in the code
   expect(text).toMatch(/nothing happens at all|no wall comes down|Stand at your own holding/i);
   expect(errors).toEqual([]);

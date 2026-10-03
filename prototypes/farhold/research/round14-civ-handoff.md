@@ -6,7 +6,7 @@ Everything below is a copy-pasteable patch against the code as it stood when I f
 in this file has been applied.**
 
 Everything else — `js/civics.js`, `js/housing.js`, `js/vendors.js`, `js/hold.js`, `js/trade.js`,
-`js/muster.js`, `js/civics-ui.js`, `civics.css`, the changes to `js/colony.js`, `js/refine.js`,
+`js/levy.js`, `js/civics-ui.js`, `civics.css`, the changes to `js/colony.js`, `js/refine.js`,
 `js/defence.js`, `js/raid.js`, `js/caravans.js`, `js/hire.js`, `js/save.js`, and the data — is in
 the working tree and `npm run test:unit` is green on it.
 
@@ -72,7 +72,7 @@ becomes
 
 ```js
 import { createColony } from './colony.js';
-// the Civilization Expansion: one module owns housing, vendors, the hold, trade, the muster and
+// the Civilization Expansion: one module owns housing, vendors, the hold, trade, the levy and
 // the away half, so main.js constructs ONE thing and ticks ONE thing
 import { createCivics } from './civics.js';
 import { createCivicsScreen } from './civics-ui.js';
@@ -157,7 +157,7 @@ Replace with:
    * ================= THE CIVILIZATION EXPANSION =================
    *
    * One module, one tick, one save field. js/civics.js owns js/housing.js, js/vendors.js,
-   * js/hold.js, js/trade.js and js/muster.js, and it injects the twenty-two trade goods into the
+   * js/hold.js, js/trade.js and js/levy.js, and it injects the twenty-two trade goods into the
    * live resources and refining data before anything reads either — never into the files, which is
    * the rule data/items.json taught when it turned out to be shared with Emberveil.
    */
@@ -341,7 +341,7 @@ Replace with:
       farm: farm.toJSON?.() || null,
       work: board.toJSON?.() || null,
       // who sleeps where, which traders moved in, what is in the hold and the Trade Post, the carts
-      // on the long roads, and the muster cooldowns. js/save.js's parameter list already has it.
+      // on the long roads, and the levy cooldowns. js/save.js's parameter list already has it.
       civics: civics.toJSON?.() || null,
 ```
 
@@ -365,12 +365,12 @@ Insert after it:
     get housing() { return civics.housing; },
     get hold() { return civics.hold; },
     get trade() { return civics.trade; },
-    get muster() { return civics.muster; },
+    get levy() { return civics.levy; },
 ```
 
 ---
 
-## B — `js/main.js`: the defence getters and the muster (§8.5, §9)
+## B — `js/main.js`: the defence getters and the levy (§8.5, §9)
 
 ### B1 — the three lines that close `colony.guards()` → `defence.baseOf()`
 
@@ -414,7 +414,7 @@ Replace with:
 If `outposts` or `folk` is not in scope at that point, pass `() => null` / `null` — both are
 optional and `baseOf` falls back to the behaviour it has today.
 
-### B2 — the muster: `E` on a notice board or a Muster Stone
+### B2 — the levy: `E` on a notice board or a Levy Stone
 
 Find the interact router at about line 3126, which already returns `{ kind: 'board', town: inTown }`
 for a town's notice board, and add beside it:
@@ -422,15 +422,15 @@ for a town's notice board, and add beside it:
 ```js
       // the Civilization Expansion §9.2 — a stone you strike to call a drill
       const stone = (build.entries || []).find(e =>
-        build.defOf?.(e.key)?.muster && Math.hypot(control.x - e.x, control.z - e.z) < 4);
-      if (stone) return { kind: 'muster', at: stone };
+        build.defOf?.(e.key)?.levy && Math.hypot(control.x - e.x, control.z - e.z) < 4);
+      if (stone) return { kind: 'levy', at: stone };
 ```
 
-…and where a `board` or `muster` interaction is handled:
+…and where a `board` or `levy` interaction is handled:
 
 ```js
     /**
-     * THE MUSTER BOARD. Four ranks, always all four, each greyed with its reason.
+     * THE LEVY BOARD. Four ranks, always all four, each greyed with its reason.
      *
      * The existing Alarm Bell stays exactly what it is — that is the REAL raid, the one that pays
      * standing and can cost you a wall. The stone and the notice board are the DRILL. Two objects,
@@ -442,10 +442,10 @@ for a town's notice board, and add beside it:
      * which matters, because a call site that re-derived the loss from raids.json would bypass the
      * flag and a minigame would quietly start eating walls.
      */
-    function openMuster({ placeId, placeName, base }) {
-      const rows = civics.muster.board({ placeId, base, level: player.level, at: state.elapsed });
+    function openLevy({ placeId, placeName, base }) {
+      const rows = civics.levy.board({ placeId, base, level: player.level, at: state.elapsed });
       // draw `rows` however the notice board already draws a job list; taking one is:
-      //   const out = civics.muster.start({ placeId, placeName, tier: row.key, base,
+      //   const out = civics.levy.start({ placeId, placeName, tier: row.key, base,
       //                                     level: player.level, biome: terrain.biomeAt(control.x, control.z).key,
       //                                     at: state.elapsed, hour: sky.dayFraction * 24 });
       //   if (out.ok) { defence.rally({ level: player.level }); spawnFor(out.quest); }
@@ -461,9 +461,9 @@ from `raidData.loss`. If any of it is computed at the call site, the drill flag 
 ### B3 — the leash, in the tick
 
 ```js
-    if (civics.muster.quest) {
-      const out = civics.muster.tickLeash(dt, { x: control.x, z: control.z, spot: defence.spot() });
-      if (out?.warn) hud.log(`You are ${out.metres} m from the muster. ${out.seconds}s and it is over.`, 'warn');
+    if (civics.levy.quest) {
+      const out = civics.levy.tickLeash(dt, { x: control.x, z: control.z, spot: defence.spot() });
+      if (out?.warn) hud.log(`You are ${out.metres} m from the levy. ${out.seconds}s and it is over.`, 'warn');
       if (out?.over) hud.log(out.line, '');
     }
 ```
@@ -478,7 +478,7 @@ The two new catalogue categories (`home` — Housing, and `trade` — Trade) are
 
 ## D — `js/buildplan.js`: nothing at all, and deliberately
 
-The design (§10.4) wanted `place()` to copy `home`, `utility`, `post`, `tender` and `muster` blocks
+The design (§10.4) wanted `place()` to copy `home`, `utility`, `post`, `tender` and `levy` blocks
 on to the entry beside `waypoint`/`run`/`gate`. It is not necessary: every module in this round
 reads the blocks through `build.defOf(entry.key)` instead, which is the same information from the
 same file and needs no edit to a file two other agents are in. If a later round wants them on the

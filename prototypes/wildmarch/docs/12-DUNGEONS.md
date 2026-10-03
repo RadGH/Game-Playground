@@ -3457,7 +3457,7 @@ guarded by the Lord Castellan himself. Open it, and the Fire Court is next.
                                      |
                               (S3) Chain Room
                                      |
-   [s2] Pyre Chapel ====== [B3] THE MUSTER HALL (Commander)
+   [s2] Pyre Chapel ====== [B3] THE MARSHALLING HALL (Commander)
                                      |
                            [B2] THE SLAG WORKS (Colossus)
                                      |
@@ -3480,7 +3480,7 @@ guarded by the Lord Castellan himself. Open it, and the Fire Court is next.
 | The Inner Gate | 30×24, a portcullis in the middle | B1 Varrow |
 | Ballista Walk | 8×50, wall-top, 3 siege ballistas | s1 Torven (optional) |
 | The Slag Works | 34×30, lava channels in a grid | B2 the Slag Colossus; S2 before it |
-| The Muster Hall | 32×32 | B3 Commander Kaelis |
+| The Marshalling Hall | 32×32 | B3 Commander Kaelis |
 | Pyre Chapel | 18×20 | s2 Ilsabet (optional) |
 | Chain Room | 14×14, the gate chains | S3, pack 5 |
 | The Gate Mechanism | 40×36, great wheel and chains, open to the sky and the red glow of Kingsfire | END Lord Castellan Vorhane |
@@ -3592,7 +3592,7 @@ Body: chibi2 human (woman) ×1.7, ash-white robes, a burning censer on a chain. 
 |---|---|
 | Body | chibi2 elf ×2.0 (a turncoat Moonwell elf in legion plate), twin flame-sabres, a red cloak |
 | Health | 170 H |
-| Phases | 100–65% · 65–30% (musters the legion) · 30–0% ("The Legion Holds") |
+| Phases | 100–65% · 65–30% (calls up the legion) · 30–0% ("The Legion Holds") |
 | Teaches | **overlapping patterns** |
 | Enrage | 7:30 |
 
@@ -3600,13 +3600,13 @@ Body: chibi2 human (woman) ×1.7, ash-white robes, a burning censer on a chain. 
 |---|---|---|---|---|---|
 | Sabre Dance | all | melee, 4 hits + **Scorched** (−3% armour, max 10) | — | 4 × 6 %HP | tank handoff at 6 (Challenge) |
 | **Crossfire** | all | 2 Arbalests on the balcony fire red lines 1 m × 35 m in an **X** across the hall; at the same time Kaelis's **Blade Wave** (moving wave, 5 m/s from her, a gap) | 2.5 s + 2.0 s | 30 %HP each | find the gap that is not on the X |
-| **Muster** | P2 | a line of 6 Legionnaires in shield wall marches across the hall (a **moving wall**, 2 m/s): touching it = 20 %HP + pushed | 2.0 s | — | go round the ends or kill a hole in it (the wall has 2 H per legionnaire) |
+| **Advance** | P2 | a line of 6 Legionnaires in shield wall marches across the hall (a **moving wall**, 2 m/s): touching it = 20 %HP + pushed | 2.0 s | — | go round the ends or kill a hole in it (the wall has 2 H per legionnaire) |
 | Fire Order | P2+ | 3 **targeted** yellow circles 5 m + 1 soak (3 pips) | 3.0 s | 30 %HP / 90 %HP if short | spread and soak at once |
 | **Hold the Line** | P3 | room-wide (u) 4 s; **safe zone**: behind the Legionnaires' shields (blue arcs 3 m behind each surviving legionnaire) — keep 2 alive on purpose | 4.0 s | 110 %HP | a real choice: leave shields standing |
 
 **Dialog opportunity — "The turncoat"** (at pull, only if a player is an **Elf**): "Sister of the Moonwell. Come over — the Fire King keeps his promises." · "The moon keeps better ones." → she hesitates: −10% health. · "What did he promise you?" → "That I'd never be cold." Fight normally; her death line changes. · (no elf) no dialog.
-**Dialog:** Crossfire ⚠ — "Archers, cross!" · Muster ⚠ (banner) — "LEGION, ADVANCE!" · Hold the Line ⚠ (banner) — "Shields up! Hold them!" · death — "Cold... he said... never cold..."
-**Challenge:** Muster walls from both ends. **Deep tuning:** Fire Order and Crossfire in the same 3 s.
+**Dialog:** Crossfire ⚠ — "Archers, cross!" · Advance ⚠ (banner) — "LEGION, ADVANCE!" · Hold the Line ⚠ (banner) — "Shields up! Hold them!" · death — "Cold... he said... never cold..."
+**Challenge:** Advance walls from both ends. **Deep tuning:** Fire Order and Crossfire in the same 3 s.
 **Depth list** (page 11 §22.2): ① `mech_arrow_pin` Arbalest Pin: 30 m, root 1 s · ② `mech_trail_fire` a burning trail behind her dash · ③ `mech_mark_of_prey` Commander's Mark.
 **Loot:** `it_flame_sabre` (one-handed sword, pair), `it_turncoats_cloak` (back), `set_firebreaker_plate` piece (hands), `uq_never_cold` **[D-EXCL]** — heavy hands (was wrists): immune to Chill and freeze; +15% fire damage taken (a real trade, marked in red on the tooltip).
 
@@ -3629,7 +3629,7 @@ Body: chibi2 human (woman) ×1.7, ash-white robes, a burning censer on a chain. 
 | **The Gate Falls** | P4 | every ability at once on a 20 s loop, the room-wide **Flood of Fire** (u) 5 s every 40 s — **safe zone** = the 2 blue rings of the gate's quench cisterns, which **move** with the wheel | 5.0 s | 120 %HP | the finale |
 
 **Dialog:** pull (banner) — "Last Light sends its last. How fitting." · Furnace ⚠ — "Feel the fire that keeps this gate." · Garrison ⚠ — "Hold the line! Both ends!" · Chain Snap ⚠ (banner) — "Cut them loose!" · Gate Falls (banner) — "If the gate falls, it falls on YOU." · death — "The King... will... burn you... at his court..."
-**After the kill:** the gate opens; Last Light's army horns sound (story state for your character: the Fire Court's gate road opens and Last Light's army camps before it — page 14; a character who has killed the Castellan gets **Last Light's Muster** in d15, §d15).
+**After the kill:** the gate opens; Last Light's army horns sound (story state for your character: the Fire Court's gate road opens and Last Light's army camps before it — page 14; a character who has killed the Castellan gets **Last Light's Vanguard** in d15, §d15).
 **Challenge:** Garrison Soak needs 3/3; the tank handoff at 3. **Deep tuning:** Chain Snap sweeps both ways.
 **Depth list** (page 11 §22.2): ① `mech_void_line_wall` a firewall 16 m × 2 m on the wheel · ② `mech_arrow_pin` Gate Bolt: 30 m, root 1 s · ③ `mech_add_wave` 2 Legionnaires.
 **Loot:** `it_flaming_tower_shield` (shield), `it_castellan_war_pick` (one-handed axe/pick), `it_furnace_grille_plate` (heavy chest), `set_firebreaker_plate` pieces (helm, chest), `soul_gate_key` **[D-EXCL]** — soul (armour socket: shield or chest; was the trinket `uq_gate_key_of_the_ember`): when a single hit takes more than 30% of your health, you and the 4 nearest allies take −20% damage for 6 s (120 s cooldown). `leg_the_cindergate` **[D-EXCL]** — shield legendary: every block builds **Heat** (max 10); at 10 your next hit releases the Furnace Heart: a 60° cone 12 m for 300% weapon damage.
@@ -3972,7 +3972,7 @@ to Ash. Favour is per run.
 
 | Carry-in | From | Help in the King fight |
 |---|---|---|
-| **Last Light's Muster** | having killed d13's Lord Castellan Vorhane | Last Light's archers line the throne-hall rim: once per phase they shoot down every Legion add of **Legion Muster** the moment it arrives |
+| **Last Light's Vanguard** | having killed d13's Lord Castellan Vorhane | Last Light's archers line the throne-hall rim: once per phase they shoot down every Legion add of **Legion Levy** the moment it arrives |
 | **The Oldest Coal** (`it_the_oldest_coal`) | d14's secret boss, Ashmother Veyra | in P4 *Last Light*, the room-wide grows +10% per cast instead of +15% |
 
 ### Story hook
@@ -4273,7 +4273,7 @@ fire makes the cinder tiles harmless for 20 s once per phase.
 | Ability | Shape / colour | Warn | Damage | Counterplay |
 |---|---|---|---|---|
 | **Cinder Tiles** | half the hex tiles (a honeycomb **checkerboard**) glow red; flips every 10 s | 1.8 s | 45 %HP | stand on unlit tiles |
-| Legion Muster | 1 Pyrecaller + 2 Legionnaires | 3.0 s | as trash | interrupt the Pyrecaller |
+| Legion Levy | 1 Pyrecaller + 2 Legionnaires | 3.0 s | as trash | interrupt the Pyrecaller |
 | **Tax of Ash** | 2 orange **soaks** 6 m, **2 pips** each | 3.0 s | 90 %HP split each; short: 40 %HP room-wide and he heals 3% | two pairs soak (the tank does not) |
 | **Firebrand** | a white line between him and the farthest player: 8 %HP a second to them for 10 s; if they come **within 10 m** of another player it jumps to that player | 1.8 s | 8 %HP / s | the target stays alone; the healer keeps them up |
 
@@ -4760,7 +4760,7 @@ every place it dreamed."*
 | Phase (health) | Region wedge | Borrowed from (page 13's world boss) | Five-player version |
 |---|---|---|---|
 | 100–90% | Hearthvale / Mossfen | the Harvest Effigy (`b_harvest_effigy`, seasonal — these regions have no regional world boss) | **Harvest Ring**: a red **donut** 4–14 m, then a **soak** 2 pips |
-| 90–80% | Greyridge | Grief-in-Iron (`b_grief_in_iron`) | **Ironmuster**: a red **cross** + iron-plate stacks on the tank (handoff at 3; a quarry pool is the Cleansing Pool) |
+| 90–80% | Greyridge | Grief-in-Iron (`b_grief_in_iron`) | **Ironcross**: a red **cross** + iron-plate stacks on the tank (handoff at 3; a quarry pool is the Cleansing Pool) |
 | 80–70% | Sunscar | the Glass Wyrm (`b_glass_wyrm`) | **Glass Storm**: burrow lines + glass **void zones** |
 | 70–60% | Whisperwood | the Hungering Brood (`b_hungering_brood`) | **Brood Web**: a white tether pair + 2 egg adds |
 | 60–50% | Cinder Steppe | the Carrion Crown (`b_carrion_crown`) | **Carrion Circles**: dive lines + circling shadows (yellow targeted) |

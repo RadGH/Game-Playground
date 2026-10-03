@@ -86,7 +86,7 @@
       "greeting": "The road is watched. Keep to it and we have no argument.",
       "sites": [
         "waypost",
-        "muster_yard"
+        "drill_yard"
       ],
       "plural": true
     },
@@ -448,8 +448,8 @@
       "size": 1,
       "respawnHours": 0
     },
-    "muster_yard": {
-      "name": "Muster Yard",
+    "drill_yard": {
+      "name": "Drill Yard",
       "hostile": false,
       "size": 2,
       "respawnHours": 0

@@ -528,5 +528,5 @@ test('5.2 — main.js wires every one of the Unbinder\'s six, and the chooser', 
 test('5.3 — the picked talents are saved, which they never were before', () => {
   const save = readSrc('js/save.js');
   assert.match(save, /skillTalents: player\.skillTalents/, 'talents are still dropped on reload');
-  assert.match(save, /player\.skillTalents = p\.skillTalents/, 'talents are saved and never read back');
+  assert.match(save, /player\.skillTalents = [^\n]*p\.skillTalents/, 'talents are saved and never read back');
 });

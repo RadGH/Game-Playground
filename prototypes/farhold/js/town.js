@@ -1103,8 +1103,8 @@ export function createTownFolk(scene, terrain, opts = {}) {
     },
     /**
      * R27 M2 — the guard BODIES standing in one settlement right now (its watch and its gate
-     * guards). The muster's defence count reads this; it used to count YOUR colony's guards, so a
-     * city with a dozen men on the walls mustered as if it had none.
+     * guards). The levy's defence count reads this; it used to count YOUR colony's guards, so a
+     * city with a dozen men on the walls fought as if it had none.
      */
     guardsOf: id => (live.get(id) || []).filter(n => n.guards).length,
 

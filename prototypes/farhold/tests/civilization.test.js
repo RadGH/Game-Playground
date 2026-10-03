@@ -1,6 +1,6 @@
 // node --test prototypes/farhold/tests/civilization.test.js
 //
-// THE CIVILIZATION EXPANSION — houses, workers, vendors, trade goods, guards and the muster.
+// THE CIVILIZATION EXPANSION — houses, workers, vendors, trade goods, guards and the levy.
 //
 // The one test in here that matters more than the rest is the first one:
 //
@@ -31,7 +31,7 @@ import { createHousing } from '../js/housing.js';
 import { createHold } from '../js/hold.js';
 import { createVendors } from '../js/vendors.js';
 import { createTrade, installTradeGoods, TRADE_TAGS } from '../js/trade.js';
-import { createMuster } from '../js/muster.js';
+import { createLevy } from '../js/levy.js';
 import { createFarm } from '../js/farm.js';
 import { WorkBoard } from '../js/work.js';
 import { raidOffer, acceptRaid, beginRaid, loseRaid, raidRewards, clearWave } from '../js/raid.js';
@@ -609,7 +609,7 @@ test('the world is no longer a road with a wreck on it — trouble is a roll', (
   assert.ok(ambushChanceFor({ danger: 0 }) >= 0.03, 'the floor must hold — nowhere is perfectly safe');
 });
 
-// ==================================================================== §9 the muster
+// ==================================================================== §9 the levy
 
 const BESTIARY = {
   enemies: [{ id: 'e1', name: 'Scav', hp: 40, minLevel: 1, maxLevel: 40, biomes: ['any'] }],
@@ -664,33 +664,33 @@ test('the gate that makes raids not a burden survives the round', () => {
     'a drill started without ever being accepted');
   const nope = raidOffer({ base: BASE, level: 5, ...BESTIARY, rng: () => 0.5, data: RAIDS, forceTier: 'nonsense', drill: true });
   assert.equal(nope.tier, null);
-  assert.match(nope.why, /No such muster/);
+  assert.match(nope.why, /No such levy/);
 });
 
 test('the cooldown is per rank and per place', () => {
-  const m = createMuster({ data: RAIDS, civics: { ...COLONY, dayLengthSeconds: 900 }, bestiary: BESTIARY, rng: () => 0.5 });
+  const m = createLevy({ data: RAIDS, civics: { ...COLONY, dayLengthSeconds: 900 }, bestiary: BESTIARY, rng: () => 0.5 });
   assert.equal(m.start({ placeId: 'ironmoor', tier: 'prowlers', base: BASE, level: 5, at: 0 }).ok, true);
   m.lost({ at: 0 });
   assert.ok(m.cooldownLeft('ironmoor', 'prowlers', 0) > 0);
   assert.equal(m.cooldownLeft('ironmoor', 'warband', 0), 0, 'clearing rank 1 locked out rank 2');
-  assert.equal(m.cooldownLeft('yours', 'prowlers', 0), 0, 'a muster at Ironmoor locked out one at your own holding');
+  assert.equal(m.cooldownLeft('yours', 'prowlers', 0), 0, 'a levy at Ironmoor locked out one at your own holding');
   assert.equal(m.start({ placeId: 'ironmoor', tier: 'prowlers', base: BASE, level: 5, at: 10 }).ok, false);
 });
 
-test('a walled city musters a harder fight than a hamlet, with arithmetic that was already written', async () => {
+test('a walled city calls up a harder fight than a hamlet, with arithmetic that was already written', async () => {
   // R27 M2: through the real path — the planner plans both towns, the plans are filed the way
-  // js/features.js files them, and `musterFacts` is the very call main.js makes. This used to pass
+  // js/features.js files them, and `levyFacts` is the very call main.js makes. This used to pass
   // `walled: true` by hand, which is why nobody noticed the game itself always passed false.
   const { planTown } = await import('../../../proctown/js/townplan.js');
-  const { rememberPlan, musterFacts } = await import('../js/town-plan.js');
+  const { rememberPlan, levyFacts } = await import('../js/town-plan.js');
   const cityNode = { id: 9001, size: 5 }, hamletNode = { id: 9002, size: 1 };
   rememberPlan(cityNode, planTown({ seed: 11, size: 5, culture: 'human' }));
   rememberPlan(hamletNode, planTown({ seed: 12, size: 1, culture: 'human' }));
-  const cityFacts = musterFacts(cityNode, 12), hamletFacts = musterFacts(hamletNode, 1);
-  assert.equal(cityFacts.walled, true, 'a size-5 city does not muster as walled');
+  const cityFacts = levyFacts(cityNode, 12), hamletFacts = levyFacts(hamletNode, 1);
+  assert.equal(cityFacts.walled, true, 'a size-5 city does not count as walled for the levy');
   assert.equal(hamletFacts.walled, false);
   assert.ok(cityFacts.plots > hamletFacts.plots && hamletFacts.plots > 0, 'plots are not the plan\'s own count');
-  const m = createMuster({ data: RAIDS, civics: COLONY, bestiary: BESTIARY });
+  const m = createLevy({ data: RAIDS, civics: COLONY, bestiary: BESTIARY });
   const city = m.baseForTown(cityNode, cityFacts);
   const hamlet = m.baseForTown(hamletNode, hamletFacts);
   assert.ok(city.defences > m.baseForTown(cityNode, { ...cityFacts, walled: false }).defences, 'the walled bonus did not apply');
@@ -700,7 +700,7 @@ test('a walled city musters a harder fight than a hamlet, with arithmetic that w
 });
 
 test('the leash ends a drill without taking anything', () => {
-  const m = createMuster({ data: RAIDS, civics: { ...COLONY, dayLengthSeconds: 900 }, bestiary: BESTIARY, rng: () => 0.5 });
+  const m = createLevy({ data: RAIDS, civics: { ...COLONY, dayLengthSeconds: 900 }, bestiary: BESTIARY, rng: () => 0.5 });
   m.start({ placeId: 'yours', tier: 'prowlers', base: BASE, level: 5, at: 0 });
   const spot = { x: 0, z: 0 };
   assert.equal(m.tickLeash(1, { x: 10, z: 0, spot }), null, 'standing at the stone ended the drill');

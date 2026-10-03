@@ -4039,8 +4039,8 @@ you are 50 m inside a grown city.
 which Farhold had been carrying a copy of) is the only copy; `'low'` is reserved for M3's fences.
 The walled set is unchanged, and a test fails if any of the five modules grows its own copy back.
 
-**The muster** was reading `town.walled` (set by nothing, so the walled bonus never applied),
-YOUR colony's guards, and the town's size as its plot count. `musterFacts(town, guards)` gives the
+**The levy** was reading `town.walled` (set by nothing, so the walled bonus never applied),
+YOUR colony's guards, and the town's size as its plot count. `levyFacts(town, guards)` gives the
 plan's plot count, the town's own guard bodies (`folk.guardsOf`) and the real wall; main.js and
 `tests/civilization.test.js` both go through it (the test used to pass `walled: true` by hand).
 
@@ -4075,7 +4075,7 @@ every settlement's safe circle >= wall + 10, "in town" at wall - 1 m on 16 beari
 boundary >= wall; 0 spawns inside a wall; every main-street end on the wall passes within 4 m of
 an opening, every walled town has 2-6 gates, both no-road walled towns (Leltudhold, Datitcrown)
 have every gate at a street end; a flood fill over the live colliders reaches every dry gate from
-the square; the muster is walled for exactly the size-4+ towns. Screenshots:
+the square; the levy is walled for exactly the size-4+ towns. Screenshots:
 `research/round27-towns/`.
 
 ### Round 27 — Strongholds pay once, and keep their promises (M1)
@@ -4122,7 +4122,7 @@ level 30 so every caller fell back to `bosses[0]` — the level 4-12 Warden in e
 - A warband encounter's leader comes from the whole `defsFor` pool (same warband, then same family),
   not from the skirmisher/archer pool that by construction held none.
 - `raidersFor({ heldBy })`: a warband member raids only a base inside a zone its warband holds;
-  `defence.offer` passes the holder. (The muster's town drill passes nothing, so no warband member
+  `defence.offer` passes the holder. (The levy's town drill passes nothing, so no warband member
   joins a drill — its call site is M2's region and was left alone.)
 - Two side fixes found on the way: the cold data path in `createSites` never set `instanceData`
   (the first world built before the files arrived had no instances), and a const read above its
@@ -4294,7 +4294,7 @@ and a clock with no body — `near`, `killed`, `reaction` and `loseOne` had no c
   has no friendly bodies.
 - **Job** `thin_their_patrols` binds only to a live war party of the zone's own warband with its
   leader up; the goal is that leader.
-- **Leftover from M1**: a town drill (`muster.start`) now takes `heldBy`, so a drill on warband ground
+- **Leftover from M1**: a town drill (`levy.start`) now takes `heldBy`, so a drill on warband ground
   draws that warband.
 
 **Measured** (tests/round27-warbands.test.js, 12 tests, six standard seeds): one hostile holder in

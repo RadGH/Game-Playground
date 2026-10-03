@@ -88,7 +88,7 @@ damage reduction — never the only way to live. Soaks, Targeted circles and min
   Drowned Coast :15, Riftmarch :30, Kingsfire :45. Somewhere on the continent a world boss is always 15 minutes or
   less away. The clock is the server's; the tracker shows it on your local clock.
 - **Announcement:** 15 minutes before a spawn, a pin with a countdown appears on that region's map and on the
-  continent map; a line goes to the region's chat channel (*"The ground at the Ironmuster is shaking. (15:00)"*)
+  continent map; a line goes to the region's chat channel (*"The ground at the Ironfield is shaking. (15:00)"*)
   and — per the *World boss warnings* setting (§11) — a toast to everyone in the region, or everywhere. Page 14's
   `ev_world_boss_call` adds a continent-wide banner 5 minutes before. At 1 minute: a horn sound for everyone within
   400 m.
@@ -221,7 +221,7 @@ the boss's level** (its health is in the table header). Sites are page 01's (`wb
 | Field | Value |
 |---|---|
 | id | `b_grief_in_iron` (reuse: Farhold `grief_in_iron`, tier 2) |
-| Site | `wb_site_ironmuster` — the Ironmuster field on the Bellows Heights, above Anvilgate · level **21** · Farhold `over` +3, `scale` 2.4 |
+| Site | `wb_site_ironfield` — the Ironfield on the Bellows Heights, above Anvilgate · level **21** · Farhold `over` +3, `scale` 2.4 |
 | Body | `creature:golem ×2.9` at scale 2.4 (≈7 m), body `#5e5a54`, belly `#7e7a72`, accent `#2e2b28`, eyes `#ff8a20`; `barrier` and `sunder` auras (reuse) |
 | Base health | **180,000** · leaves after 30 min |
 | Phases | 60% *Ironclad* ("Grief-in-Iron shuts its plates and stops caring what you are holding.") — takes 30% less damage from the front; 30% *Vicious* — +25% attack speed (reuse: Farhold `phases`) |
@@ -229,11 +229,11 @@ the boss's level** (its health is in the table header). Sites are page 01's (`wb
 
 | Ability | Kind | Shape / colour | Warning | Damage (vs level-21 non-tank ≈ 900 health) | Counterplay |
 |---|---|---|---|---|---|
-| **Ironmuster** `b_grief_in_iron_muster` | Danger zone | cross, 2 lines 50 m × 5 m, RED | 2.0 s | 700 | stand on the diagonals |
+| **Ironcross** `b_grief_in_iron_cross` | Danger zone | cross, 2 lines 50 m × 5 m, RED | 2.0 s | 700 | stand on the diagonals |
 | **Plate Shed** `b_grief_in_iron_plates` | Void zone | 4 iron plates fall (circles 4 m, PURPLE-black, 45 s) | 2.0 s | 60 / tick | step out; the plates become cover |
 | **Grinding Grip** `b_grief_in_iron_grip` | Tank | melee, stacking Sunder (−5% armour per stack, decays 1 stack / 6 s) | — | 400 + Sunder | a second tank may take over; not required |
 | **Pass Holder** `b_grief_in_iron_hold` | Soak | ORANGE 6 m, `ceil(N/5)` pips | 3.0 s | 2,000 × N/5, split between soakers | enough people stand in it |
-| *Ascendant:* **Second Muster** `b_grief_in_iron_second_muster` | Danger zone | Ironmuster fires twice: the cross, then an X rotated 45°, 1.5 s apart | 2.0 s each | 70% of health each | move from the diagonal to the old cross lines |
+| *Ascendant:* **Second Cross** `b_grief_in_iron_second_cross` | Danger zone | Ironcross fires twice: the cross, then an X rotated 45°, 1.5 s apart | 2.0 s each | 70% of health each | move from the diagonal to the old cross lines |
 
 Loot: `uq_griefplate_gauntlets` (heavy hands: blocking gives a 5% armour stack, max 5), `it_mount_mine_crawler`
 (`creature:beetle ×1.6`, iron plates), Deepforge Clans reputation.
@@ -486,7 +486,7 @@ can see show faintly for you), and the §5 chest.
   different world bosses. While you are on that step, every credited kill of a world boss you have not yet
   taken a feather from drops `it_storm_feather` (quest item) — whether or not you already opened its chest this
   week.
-- **Page 14's `ev_world_boss_call`** is the muster event wrapped around every spawn (banner, gathering, the
+- **Page 14's `ev_world_boss_call`** is the gathering event wrapped around every spawn (banner, gathering, the
   fight is this page's).
 - **Achievement:** defeating every regional world boss is page 07's `ach_world_bosses_all` (page 07 owns the
   title).
@@ -541,7 +541,7 @@ Ability ids follow `<bossid>_<snake>` and are listed in each table. Boss lines f
 
 ### 10.3 Everything else
 
-- **Sites:** `wb_site_ironmuster`, `wb_site_shattered_pan`, `wb_site_brood_hollow`, `wb_site_carrion_mound`,
+- **Sites:** `wb_site_ironfield`, `wb_site_shattered_pan`, `wb_site_brood_hollow`, `wb_site_carrion_mound`,
   `wb_site_ruin_field`, `wb_site_brine_pool`, `wb_site_half_made_plain`, `wb_site_slagpit` (page 01).
 - **Feats:** §8. **Screen:** `scr_world_boss_tracker`. **Event:** `ev_world_boss_call` (page 14).
 
@@ -592,7 +592,7 @@ For pages 03 and 04 to list (both already carry them; names as they stand):
   the open group no longer uses raid frames (§3.2); world-boss weekly quests removed (§8).
 - **Budget:** matched page 11 §22.4 — Crust Break is no longer lethal, Grasping Dead's warning is 2.0 s, the
   Ruinous Roar and the glares only reduce damage behind cover.
-- **Sites** now use page 01's `wb_site_*` ids and names (the Bellows Scar → the Ironmuster, the Silkfall → Brood
+- **Sites** now use page 01's `wb_site_*` ids and names (the Bellows Scar → the Ironfield, the Silkfall → Brood
   Hollow, the Bone Mesa → the Carrion Mound, the Broken Circle → the Ruin Field, the Drowned Barrow → the Brine
   Pool, the Anchorless Field → the Half-Made Plain, the Slag Sea → the Slagpit).
 

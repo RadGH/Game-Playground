@@ -176,7 +176,7 @@ boss at any level) actually happens. This goes first because the war camps (M10)
 2. **One wall tier function.** Collapse the six `size >= 4` wall checks into
    `wallTier(size) → 'none' | 'low' | 'wall'` in `town-plan.js`. M3 fills in `'low'`; here it maps
    size ≥ 4 to `'wall'` and everything else to `'none'`, so behaviour is unchanged.
-3. **The muster reads the town** (`main.js` ~3502-3506).
+3. **The levy reads the town** (`main.js` ~3502-3506).
    - `walled` comes from `townExtent(...).walled`.
    - `guards` counts the *town's* guard bodies (`folk`), not `colony.guards()`.
    - `plots` is the plan's plot count.
@@ -200,7 +200,7 @@ boss at any level) actually happens. This goes first because the war camps (M10)
 - "You are in town" agrees with the wall.
 - No main street runs into solid masonry.
 - The town hall's "walled" is true for walled towns.
-- The muster's walled bonus finally applies.
+- The levy's walled bonus finally applies.
 
 **Acceptance (measured)**
 - **Safe zones.** For every settlement on 6 seeds (scale 0.1 and 1): `safeZones` r ≥
@@ -215,7 +215,7 @@ boss at any level) actually happens. This goes first because the war camps (M10)
     street end
 - **Reachability.** A flood fill over the collider field from each gate reaches the town square
   (round 23's wall walk extended).
-- **Muster.** `muster` reports `walled: true` for every size ≥ 4 town, and `false` below.
+- **Levy.** `levy` reports `walled: true` for every size ≥ 4 town, and `false` below.
 - **Unchanged.** `wallTier` gives exactly today's walled set: the round-8 `footprintOf(5).walled`
   test and the round-16 walled-town counts are unchanged.
 
@@ -238,7 +238,7 @@ boss at any level) actually happens. This goes first because the war camps (M10)
 **Files:**
 - `js/town-plan.js`, `js/town.js`, `js/features.js` (wall/gate block ~1122-1340 and `settlementAt`
   only), `js/waypoints.js`, `js/townhall.js`, `js/sites.js` (`townGap` only)
-- `js/main.js` (muster lines only)
+- `js/main.js` (levy lines only)
 - `proctown/js/townplan.js` (`buildWall` typo, exports)
 - `tests/civilization.test.js`, new test
 
@@ -1048,7 +1048,7 @@ with their name on it.
 
 | File | M1 | M2 | M3 | M4 | M5 | M6 | M7 | M8 | M9 | M10 |
 |---|---|---|---|---|---|---|---|---|---|---|
-| js/main.js | ● stronghold / boss sites | (r) muster | (r) arrival | (r) gate tick, E, nightSpawn | | | | (r) signpost E | (r) patrols, banner | (r) grip drops |
+| js/main.js | ● stronghold / boss sites | (r) levy | (r) arrival | (r) gate tick, E, nightSpawn | | | | (r) signpost E | (r) patrols, banner | (r) grip drops |
 | js/planet.js | | | | | (r) roads, lakes | (r) crossings, clamp | (r) colorAt, normalAt | (r) roadAt | | |
 | js/features.js | | (r) gates, settlementAt | (r) wall kinds, towers | (r) gate doors | | (r) bridge filing | | (r) road ribbon | | |
 | js/actors.js | (r) bossFor, placeBoss | | | (r) spawn family | | | (r) movement | | (r) spawnNear share | (r) leads, wake, rout |
@@ -1078,7 +1078,7 @@ its own files by name.
 
 | Wave | Milestones | Why they don't collide |
 |---|---|---|
-| 1 | **M1**, **M2**, **M5** | M1 = strongholds, factions, boss (main.js stronghold functions, sites, actors `bossFor`). M2 = towns (town.js, features wall/gate, main.js muster). M5 = planet.js road pipeline + lakes only. |
+| 1 | **M1**, **M2**, **M5** | M1 = strongholds, factions, boss (main.js stronghold functions, sites, actors `bossFor`). M2 = towns (town.js, features wall/gate, main.js levy). M5 = planet.js road pipeline + lakes only. |
 | 2 | **M3**, **M6**, **M9** | M3 = features wall/tower + proctown kit + hud arrival. M6 = bridge-plan + planet `findCrossings` / clamp + features bridge filing + player wade. M9 = warbands / territory / patrols / map + actors `spawnNear` + hud zone line. The hud.js edits are different functions (a new arrival function vs `announceZone`); M3 adds a function and M9 edits one line inside `announceZone`. |
 | 3 | **M4**, **M7**, **M10** | M4 = collide + features gate doors + town guards. M7 = player slope / road + actors movement + props + terrain + planet `colorAt`. M10 = sites camps + actors `leads` / wake / kill + warbands. The actors.js regions are disjoint (movement step vs spawn/wake/kill). The player.js wade branch from M6 is already committed. |
 | 4 | **M8** | Needs M5 (classes, junctions) and M7 (road speed). Touches features road ribbon, planet `roadAt` and a new `roadside.js`. |

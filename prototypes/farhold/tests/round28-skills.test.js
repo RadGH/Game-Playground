@@ -272,7 +272,8 @@ const BANNED = ['heroic', 'mythic', 'keystone', 'war mode', 'horde', 'alliance',
   'condemn', 'arcane surge', 'hallowed ground', 'final verdict', 'rebuke', 'purge the wicked', 'cold blood',
   'rallying cry', 'retribution', 'ironbark', 'rebirth', 'flare', 'frost armour', 'frost armor', 'ambush', 'shiv',
   'vengeance', 'vengeful', 'sigil', 'infernal', 'halo', 'beacon', 'overload', 'kill order', 'feral', 'death coil',
-  'bear form', 'cat form', 'moonkin', 'travel form', 'tree of life', 'swipe', 'heartseeker', 'pack tactics'];
+  'bear form', 'cat form', 'moonkin', 'travel form', 'tree of life', 'swipe', 'heartseeker', 'pack tactics',
+  'muster'];
 const BANNED_NEW = ['ember', 'veil'];
 
 test('no banned or borrowed name on a converted skill, a form, a node or a new status', () => {

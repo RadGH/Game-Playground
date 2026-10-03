@@ -135,7 +135,7 @@ export function raidOffer({
   base = {}, level = 1, biome = 'any', enemies = [], bosses = [], modifiers = [],
   rng = Math.random, data = null, enabled = true, at = 0, placeName = 'your base', place = null,
   /**
-   * THE MUSTER (the Civilization Expansion §9), AND IT IS TWO ARGUMENTS.
+   * THE LEVY (the Civilization Expansion §9), AND IT IS TWO ARGUMENTS.
    *
    *   "Allow the town center to initiate wave defense minigames that reward loot or resources for
    *    victory, or just nothing if defeated besides death penalty if the player dies. No need to
@@ -162,7 +162,7 @@ export function raidOffer({
   if (forceTier) {
     tier = (D.tiers || FALLBACK.tiers).find(t => t.key === forceTier) || null;
     notoriety = notorietyOf(base, D);
-    why = tier ? null : 'No such muster.';
+    why = tier ? null : 'No such levy.';
   } else ({ tier, notoriety, why } = tierFor({ base, data: D }));
   if (!tier) return { ok: false, tier: null, notoriety, why };
 
@@ -188,7 +188,7 @@ export function raidOffer({
   return {
     ok: true,
     id: `raid_${Math.floor(rng() * 1e9).toString(36)}`,
-    kind: drill ? 'muster' : 'raid',
+    kind: drill ? 'levy' : 'raid',
     drill: !!drill,
     state: 'offered',
     tierKey: tier.key,
@@ -423,7 +423,7 @@ export function raidRewards(quest, { rng = Math.random, data = null } = {}) {
    * materials into the nearest store pool. You get both: the crate is the loot and the spoils are
    * the resources.
    */
-  const M = D.muster || { goldMultiplier: 0.6, standing: 0 };
+  const M = D.levy || { goldMultiplier: 0.6, standing: 0 };
   const goldScale = quest.drill ? (M.goldMultiplier ?? 0.6) : 1;
   return {
     gold: Math.round((quest.reward?.gold || 0) * nightGold * earlyGold * goldScale),
@@ -440,11 +440,11 @@ export function raidRewards(quest, { rng = Math.random, data = null } = {}) {
 }
 
 /**
- * What a held muster pays in materials.
+ * What a held levy pays in materials.
  *
  * The range per material is the tier's own `spoils` block in data/raids.json, so tuning it never
  * touches this file. Delivered into the nearest store pool, or into the materials bag if there is
- * none within `muster.spoilsRadius` — which is the caller's job, because js/raid.js has never known
+ * none within `levy.spoilsRadius` — which is the caller's job, because js/raid.js has never known
  * where a crate is and should not start now.
  */
 export function rollSpoils(quest, rng = Math.random, data = null) {

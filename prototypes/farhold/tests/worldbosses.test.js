@@ -241,7 +241,7 @@ test('5.1 — every arena is a real set piece and is built out of real pieces', 
 });
 
 test('5.1 — the middle of an arena is empty, because the boss stands in it', () => {
-  // Found in a screenshot: boss_bonefield put a den at the centre and boss_ironmuster a keep, and
+  // Found in a screenshot: boss_bonefield put a den at the centre and boss_ironpass a keep, and
   // js/sites.js spawns the boss at the site's own coordinate — so a nine-metre body stood inside a
   // solid model and you could not see the thing you had walked two kilometres to look at.
   const CLEAR = 9;   // metres of ground the body itself needs

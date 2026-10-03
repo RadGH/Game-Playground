@@ -209,7 +209,7 @@
   .civ-hold { left: 8px; bottom: 76px; }
 }
 
-/* ---------------------------------------------------------------- R14: the Muster tab
+/* ---------------------------------------------------------------- R14: the Levy tab
    Four ranks, always all four, each greyed with the SENTENCE saying why — a greyed row with no
    reason is the one answer a player cannot act on. */
 .civ-row.civ-dim { opacity: .55; }
@@ -229,7 +229,7 @@
    Its own structural names, sharing this file's look. The Holding screen's tests reach for
    `.civics-head` / `.civics-rail` / `.civics-body` with `document.querySelector`, and a second
    element wearing those means whichever comes first in the document wins — which is exactly how a
-   hidden Town Hall became the thing a muster test was reading its text out of. Everything INSIDE
+   hidden Town Hall became the thing a levy test was reading its text out of. Everything INSIDE
    a pane (`.civ-pane`, `.civ-row`, `.civ-grid`) is deliberately still shared: those are
    components, and the two screens should look identical. */
 .hall-head {

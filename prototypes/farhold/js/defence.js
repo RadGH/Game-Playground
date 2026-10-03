@@ -250,10 +250,10 @@ export function createDefence({
     /**
      * R14 — TAKE OVER A FIGHT SOMEBODY ELSE STARTED.
      *
-     * `js/muster.js` builds its own raid quest — same `raidOffer`, same `beginRaid`, same shape —
+     * `js/levy.js` builds its own raid quest — same `raidOffer`, same `beginRaid`, same shape —
      * because a drill is not an offer the world made you and must not occupy the slot a real raid
      * needs. But `spawnWave`, `killed` and `lost` all read the quest held HERE, so without this the
-     * muster could be started and nothing would ever walk out of the treeline.
+     * levy could be started and nothing would ever walk out of the treeline.
      *
      * Adopting rather than duplicating is the whole point: there is still exactly one wave system,
      * one `canFire` gate and one kill counter, and `loseRaid` still decides what a loss costs — so
@@ -313,7 +313,7 @@ export function createDefence({
     /**
      * How many bodies the watch can put on the wall, without spawning any of them.
      *
-     * Used by the Holding screen and by the muster board's difficulty line, which both want the
+     * Used by the Holding screen and by the levy board's difficulty line, which both want the
      * number long before anybody rings anything.
      */
     watch() {
@@ -509,6 +509,10 @@ export function createDefence({
     lost({ materials = 0 } = {}) { return loseRaid(quest, { base: baseOf(), materials, data }); },
 
     toJSON() { return { quest }; },
-    load(json) { quest = json?.quest || null; },
+    load(json) {
+      quest = json?.quest || null;
+      // a drill saved before 2026-10-03 carries the old kind name
+      if (quest?.kind === 'muster') quest = { ...quest, kind: 'levy' };
+    },
   };
 }

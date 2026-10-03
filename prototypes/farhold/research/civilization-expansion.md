@@ -1,4 +1,4 @@
-# Farhold — the Civilization Expansion: houses, workers, vendors, trade goods and the muster
+# Farhold — the Civilization Expansion: houses, workers, vendors, trade goods and the levy
 
 **Design spec. Implementable as written. No game code was changed to produce this document.**
 
@@ -164,7 +164,7 @@ and cheaply, or buy it instantly and dearly.**
                                                      GOLD ──▶ wages (§8.3), rent (§5.6),
                                                               recruiting (colony.js:540)
 
-  AND, SIDEWAYS:   the MUSTER STONE / the town's notice board ──▶ js/raid.js, with drill: true (§9)
+  AND, SIDEWAYS:   the LEVY STONE / the town's notice board ──▶ js/raid.js, with drill: true (§9)
                    waves ──▶ crates + spoils on a win, nothing at all on a loss
 ```
 
@@ -740,7 +740,7 @@ same reason: a mouth you did not agree to is a mouth you did not budget for.
 | `victualler` | Victualler | grain, cooked rations, seed, salt | crops, game meat, hide | **2 field plots** and a larder | comfort ≥ 0.25 | by the larder or the granary |
 | `carter` | Carter | hand carts, pack mules, wagons, route upkeep | — | a **Trade Post** | comfort ≥ 0.20 | at the Trade Post door |
 | `chandler` | Chandler | lamps, lanterns, lamp oil, candles, the five street lights | resin, tallow, wax | **4 citizens** and a lamp post lit | comfort ≥ 0.30 | on a lit street |
-| `armiger` | Armiger | guard contracts (§8), turret parts, ammunition | broken gear | a **Watch Post** with a guard in it | comfort ≥ 0.25 | at the Watch Post; **this is who runs the muster (§9)** |
+| `armiger` | Armiger | guard contracts (§8), turret parts, ammunition | broken gear | a **Watch Post** with a guard in it | comfort ≥ 0.25 | at the Watch Post; **this is who runs the levy (§9)** |
 | `wright` | Wright | machine parts, wire, control boards, the Tender Arm | salvage, scrap plate | an **assembler** | comfort ≥ 0.40 | by the assembler |
 | `factor` | Factor | **trade goods, at this place's price (§7.2)** | **trade goods** | a Trade Post **and** 400 gold of trade turned over | comfort ≥ 0.35 | at the Trade Post; keeps the price board |
 | `drover` | Drover | mounts, pack mules, feed | — | a **stable** | comfort ≥ 0.20 | at the stable, outside the ring |
@@ -1394,7 +1394,7 @@ the next day.
 
 ---
 
-## 9. The muster — the wave defence you ask for
+## 9. The levy — the wave defence you ask for
 
 > "Allow the town center to initiate wave defense minigames that reward loot or resources for
 > victory, or just nothing if defeated besides death penalty if the player dies. No need to penalize
@@ -1405,7 +1405,7 @@ scaling, a guaranteed rare crate, a journal, and a single gate (`canFire`, line 
 can spawn through. `BUILD-MODE.md` §16 wired it to an alarm bell at your own base. A second wave
 system would be the fifteenth join nobody made and it would immediately drift.
 
-So the muster is **four small edits to `js/raid.js`** and a board.
+So the levy is **four small edits to `js/raid.js`** and a board.
 
 ### 9.1 The four edits, in full
 
@@ -1417,7 +1417,7 @@ export function raidOffer({ …, forceTier = null, drill = false } = {}) {
   if (forceTier) {
     tier = tiers.find(t => t.key === forceTier) || null;
     notoriety = notorietyOf(base, D);
-    why = tier ? null : 'No such muster.';
+    why = tier ? null : 'No such levy.';
   } else ({ tier, notoriety, why } = tierFor({ base, data: D }));
   …
   return { …, drill: !!drill };            // 2. carried on the quest
@@ -1456,14 +1456,14 @@ Two places, and both are things that already exist on the ground.
 
 - **A town's notice board.** `BUILDING_INFO.noticeboard` is already in `js/town-plan.js:56` — *"the
   town's notice board, a real object you walk up to"* — and every settlement of size 1 and up has
-  one. `E` on it opens the muster board. Flavour: the town is paying you to help them run a drill,
+  one. `E` on it opens the levy board. Flavour: the town is paying you to help them run a drill,
   which is why the spoils are materials out of their stores rather than standing.
-- **A Muster Stone** at your own outpost:
+- **A Levy Stone** at your own outpost:
 
 ```json
-{ "id": "muster_stone", "name": "Muster Stone", "cat": "defence", "tier": 1,
+{ "id": "levy_stone", "name": "Levy Stone", "cat": "defence", "tier": 1,
   "w": 1.6, "d": 1.6, "h": 2.0, "snap": "grid", "hp": 600,
-  "muster": true,
+  "levy": true,
   "cost": { "block": 14, "iron": 4 },
   "desc": "A stone you strike to call a drill. Nothing comes until you strike it." }
 ```
@@ -1490,8 +1490,8 @@ there is none within 60 m. Crates keep the tier's existing `crates` list and the
 (`raid.js:338`), which is the whole "reward loot **or** resources" of the request: you get both, and
 the crate is the loot.
 
-**Cooldown is per rank, per place**, in `data/civics.json muster.cooldownHours`. It exists so the
-muster is a thing you do when you want a fight, not a gold tap you farm; and it is per-rank so
+**Cooldown is per rank, per place**, in `data/civics.json levy.cooldownHours`. It exists so the
+levy is a thing you do when you want a fight, not a gold tap you farm; and it is per-rank so
 clearing rank 4 does not lock out rank 1.
 
 ### 9.4 Scaling, which needs no new code
@@ -1503,8 +1503,8 @@ hp  = (1 + (level − 1) × 0.06) × clamp(1 + defences × 0.02, 1, 1.6) × (nig
 dmg = (1 + (level − 1) × 0.05) × (night ? 1.15 : 1)
 ```
 
-For a muster **at your outpost**, `base` is `defence.baseOf()` — including the guards §8.5 just
-added. For a muster **at a town**, the board builds the same shape out of the town:
+For a levy **at your outpost**, `base` is `defence.baseOf()` — including the guards §8.5 just
+added. For a levy **at a town**, the board builds the same shape out of the town:
 
 ```js
 base = { structures: plan.plots.length,
@@ -1512,10 +1512,10 @@ base = { structures: plan.plots.length,
          citizens: HEADCOUNT[node.size], waypoint: true, gold: 0 };
 ```
 
-So a walled city of size 5 musters a harder rank 3 than a hamlet does, using arithmetic that is
+So a walled city of size 5 calls up a harder rank 3 than a hamlet does, using arithmetic that is
 already written and already tested. And the town's **own guards fight** — `js/town.js` spawns them
 with the `GUARD` block and `js/actors.js` already knows how to make them swing at something — which
-is what makes a city muster feel different rather than just bigger.
+is what makes a city levy feel different rather than just bigger.
 
 ### 9.5 Losing, and the exact shape of "no penalty"
 
@@ -1523,7 +1523,7 @@ A drill ends in defeat when **either**:
 
 - the player dies — the ordinary death penalty applies, whatever `js/rpg.js` does, and **nothing is
   added on top**; or
-- the player is more than `muster.leashMetres` (300 m) from the muster point for 45 continuous
+- the player is more than `levy.leashMetres` (300 m) from the levy point for 45 continuous
   seconds — you walked away, so it ends.
 
 Then: raiders on the field despawn over 6 seconds, `loseRaid` returns its zeros, the `RaidBook`
@@ -1540,7 +1540,7 @@ the user asked for and which is also the only version of this that people will a
 
 ### 9.6 Tests
 
-`tests/muster.test.js`, node:
+`tests/levy.test.js`, node:
 
 - a lost drill returns `structuresBroken: 0, materialsTaken: 0, citizensLeave: 0` at every one of the
   four tiers, and a lost **raid** at the same tier returns the ordinary non-zero loss;
@@ -1572,7 +1572,7 @@ the materials bag and `farhold.build.entries.length` is unchanged.
 | `js/vendors.js` | the twelve, their move-in conditions, their rent, their stock cycle (§5) |
 | `js/hold.js` | the one weight-capped container in the game (§6.5) |
 | `js/trade.js` | town prices, `installTradeGoods`, the route planner, and the bridge into `js/caravans.js` (§6.3, §7) |
-| `js/muster.js` | the drill board — a thin wrapper over `js/raid.js`, not a second wave system (§9) |
+| `js/levy.js` | the drill board — a thin wrapper over `js/raid.js`, not a second wave system (§9) |
 
 ### 10.2 New interface — deliberately its own file
 
@@ -1585,7 +1585,7 @@ the materials bag and `farhold.build.entries.length` is unchanged.
 
 | File | Why |
 |---|---|
-| `data/civics.json` | one knob file: housing comfort, utility radii, the `away` block, vendors, guard wages and stats, muster cooldowns and leash. The `guard` stat block moves here out of `js/town.js:133` so towns and your outpost read one table. |
+| `data/civics.json` | one knob file: housing comfort, utility radii, the `away` block, vendors, guard wages and stats, levy cooldowns and leash. The `guard` stat block moves here out of `js/town.js:133` so towns and your outpost read one table. |
 | `data/tradegoods.json` | the 22 goods — weight, base price, tags, and the recipe that makes each (§6.2) |
 | `data/routes.json` | carriers (hold, speed, upkeep, guard slots), the road bonus, the ambush table, the Factor's cut (§7.5) |
 
@@ -1597,20 +1597,20 @@ the materials bag and `farhold.build.entries.length` is unchanged.
 | `data/colony.json` | `wagePerDay`, `tendMax` and `rentPerDay` on the jobs; the `vendor` job; the rebalanced appeal weights |
 | `js/refine.js` | the labour gate in `step` (194), `m.workBank`, `credit()`, `postLabour()`, the `unworked` state and its sentence, `slice` from `civics.away` (§3.2) |
 | `data/refining.json` | a `labour` block on every machine; the `workshop` and `manufactory` machines; 22 trade-good recipes appended (§6.3) |
-| `data/structures.json` | six houses, eight utilities, three posts, the Trade Post, the Tender Arm, the Muster Stone, the workshop and the manufactory — **every cost in words the game already produces** |
+| `data/structures.json` | six houses, eight utilities, three posts, the Trade Post, the Tender Arm, the Levy Stone, the workshop and the manufactory — **every cost in words the game already produces** |
 | `data/power.json` | the `trade_vault` storage row, so `stores.js defFor` finds the Trade Post's cap |
-| `data/raids.json` | a `spoils` block per tier, and a `muster` block (§9.3) |
-| `js/buildplan.js` | `home`, `utility`, `post`, `tender`, `muster` and `store` blocks copied on to the entry in `place()` (412), beside `waypoint`/`run`/`gate`; the claim refusal at 358 is the other round's |
+| `data/raids.json` | a `spoils` block per tier, and a `levy` block (§9.3) |
+| `js/buildplan.js` | `home`, `utility`, `post`, `tender`, `levy` and `store` blocks copied on to the entry in `place()` (412), beside `waypoint`/`run`/`gate`; the claim refusal at 358 is the other round's |
 | `js/build-ui.js` | a **Housing** and a **Trade** category in the catalogue; the Holding section (`main.js:2462`) becomes a button that opens the new screen |
 | `js/stores.js` | `kind: 'trade'` passes `accepts`; the union-find at 99 lifted into a shared helper `js/outposts.js` can reuse |
-| `js/defence.js` | `baseOf()` reads `colony.stationed()` and `colony.citizens.length` through getters (§8.5); `rally()`; `muster()` |
+| `js/defence.js` | `baseOf()` reads `colony.stationed()` and `colony.citizens.length` through getters (§8.5); `rally()`; `levy()` |
 | `js/raid.js` | `forceTier`, `drill`, the zeroed loss, the spoils roll — **four edits, quoted in full in §9.1, and nothing else** |
 | `js/caravans.js` | `dispatch({ owner, manifest, carrier, guards })`; the unconditional ambush at 119 becomes a roll (§7.6); `arrive` pays a player manifest out |
 | `js/town.js` | the eleven new vendor roles and their stock; the materials shelf at 2.2×/0.45× value; the `GUARD` block moves to `data/civics.json`; `rosterFor` places a vendor in their building |
 | `js/town-plan.js` | `BUILDING_INFO` gains `tradepost` and `countinghouse` and the new `role` names, with the old ones kept as aliases |
 | **`proctown/js/townplan.js`** | **SHARED** — `WANT_ORDER` and `WANT_FROM` gain `tradepost` and `countinghouse`. `proctown/tests/townplan.test.js` runs 7 cultures × 11 seeds × 6 sizes and `overlaps()` must still read zero. Two data lines, no logic. |
 | `js/save.js` | `outposts`, `hold`, `vendors`, `routes`, `housing` added to `snapshot()`'s parameter list **and** its returned object, in the same edit — the file's own comment at line 96 explains why |
-| **`js/main.js`** | **6 308 lines, shared.** Wiring only: construct the six modules beside the existing block at 1666–1840; `outposts.rebuild` on every build change; `works.postLabour(board)` and the credit sweep in the tick; the catch-up and away card on landing and load; `K` opens the Holding screen; `E` on a notice board or muster stone; five new getters on `window.farhold` for the specs |
+| **`js/main.js`** | **6 308 lines, shared.** Wiring only: construct the six modules beside the existing block at 1666–1840; `outposts.rebuild` on every build change; `works.postLabour(board)` and the credit sweep in the tick; the catch-up and away card on landing and load; `K` opens the Holding screen; `E` on a notice board or levy stone; five new getters on `window.farhold` for the specs |
 | **`js/hud.js`** | **3 026 lines, shared.** One change: the hold weight readout (§6.6), four lines, shown only when the hold is not empty |
 | `js/actors.js` | a citizen's body stands at their station while `working` and at their house while `asleep` — `COLONY.md`'s wiring table has asked for this since the colony landed, and §2.4 finally gives both coordinates |
 
@@ -1688,12 +1688,12 @@ The three posts, `colony.station`, wages, the `watch`/`repair` posters, the ward
 Tests: `tests/guards.test.js` (§8.7).
 **Depends on:** Phase 1 (a guard is a housed citizen) and Phase 6 for the route half.
 
-### Phase 8 — The muster
-The four `js/raid.js` edits, `js/muster.js`, the spoils tables, the Muster Stone, the notice-board
+### Phase 8 — The levy
+The four `js/raid.js` edits, `js/levy.js`, the spoils tables, the Levy Stone, the notice-board
 entry point, the leash, the cooldowns.
-**[shared]** `js/main.js`: `E` on a notice board or a muster stone; **and the loss call site must be
+**[shared]** `js/main.js`: `E` on a notice board or a levy stone; **and the loss call site must be
 audited per the warning in §9.5.**
-Tests: `tests/muster.test.js` (§9.6) and `tests/civilization.spec.js` end to end.
+Tests: `tests/levy.test.js` (§9.6) and `tests/civilization.spec.js` end to end.
 **Depends on:** Phase 7, so a town's guards and yours fight with one stat block.
 
 ### 11.1 What must still pass at the end of every phase
@@ -1727,7 +1727,7 @@ rather than an oversight.
   inside a fixed clamp. A price board you can break by selling into it is a different game.
 - **No citizens who can die.** §8.5. A knocked-down guard is back the next morning.
 - **No raid that fires on its own.** `raid.js:209 canFire` survives this round unchanged, and §9's
-  muster is an additional thing you choose, never a thing that happens to you.
+  levy is an additional thing you choose, never a thing that happens to you.
 - **No new vehicle physics.** The carriers in §7.5 are rows in a table; a caravan is a position and
   a clock (`caravans.js:16`) until you are near it, and it stays that way.
 - **Not wired to Emberveil.** `data/items.json` and `prototypes/emberveil/js/loot.js` are shared and

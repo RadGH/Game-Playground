@@ -834,10 +834,10 @@ tables (they are not deleted from this page until the owner decides), and the gr
 | Kind | id | Name | Slot | Power | Source |
 |---|---|---|---|---|---|
 | Legendary | `leg_the_last_command` | The Last Command | crossbow | **Leads From the Front** — every Order also applies to you at 50% | `b_grief_in_iron` (world boss of `greyridge`) |
-| Legendary | `leg_ever_unfolding_map` | The Ever-Unfolding Map | off hand (field map) | **Two Camps, One Road** — Muster Point 2 charges; allies may jump between them | `b_oddrin_the_unmaker` (`d12_unmade_workshop` end boss) |
+| Legendary | `leg_ever_unfolding_map` | The Ever-Unfolding Map | off hand (field map) | **Two Camps, One Road** — Rally Point 2 charges; allies may jump between them | `b_oddrin_the_unmaker` (`d12_unmade_workshop` end boss) |
 | Legendary | `leg_forced_march_sabatons` | Sabatons of the Forced March | feet | **Forced March** — Outflank leaves a +30% move trail; Forward! 12 s | `b_carrion_crown` (world boss of `cinder_steppe`) |
 | Legendary | `leg_signet_of_seven_armies` | Signet of Seven Armies | ring | **Seven Banners** — +1 follower slot; followers take 25% less area damage; On My Mark makes their next hit crit | `b_castellan_vorhane` (`d13_cindergate` end boss; Normal and Challenge) |
-| Unique | `uq_quartermasters_coat` | The Quartermaster's Coat | chest | **Stores Opened** — +10 Tempo a second inside your Muster Point or Field Standard | `b_razorback_rider_krunn` (`d09_warmasters_pit`) |
+| Unique | `uq_quartermasters_coat` | The Quartermaster's Coat | chest | **Stores Opened** — +10 Tempo a second inside your Rally Point or Field Standard | `b_razorback_rider_krunn` (`d09_warmasters_pit`) |
 | Unique | `uq_drillmasters_whistle` | Drillmaster's Whistle | necklace | **Sharp Blast** — Initiative fills every 5 s | `b_oruvel_moon_drinker` (`d08_moonwell_ruins` end boss) |
 | Unique | `uq_turncoat_spur` | The Turncoat's Spur | feet | **Wrong Side of the Line** — Redeploy can swap with a non-boss enemy (45 s) | `d06_sandsworn_vault`, a rare elite in the side hall |
 

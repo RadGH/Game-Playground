@@ -1,11 +1,11 @@
-// Farhold — the muster: a wave defence you ask for, and nothing happens if you lose it.
+// Farhold — the levy: a wave defence you ask for, and nothing happens if you lose it.
 //
 // PURE JavaScript: no DOM, no Three.js. A thin board over js/raid.js and NOT a second wave system.
 //
-//   import { createMuster } from './muster.js';
-//   const muster = createMuster({ data: raidsJson, civics: colonyJson, bestiary });
-//   muster.board({ placeId: 'ironmoor', base, level, at: state.elapsed });
-//   const quest = muster.start({ placeId: 'ironmoor', tier: 'prowlers', base, level, biome, at, hour });
+//   import { createLevy } from './levy.js';
+//   const levy = createLevy({ data: raidsJson, civics: colonyJson, bestiary });
+//   levy.board({ placeId: 'ironmoor', base, level, at: state.elapsed });
+//   const quest = levy.start({ placeId: 'ironmoor', tier: 'prowlers', base, level, biome, at, hour });
 //
 // THE REQUEST, IN FULL:
 //
@@ -15,18 +15,18 @@
 //
 // js/raid.js is already this. It is pure, it has four tiers, night and early scaling, a guaranteed
 // rare crate, a journal, and a single gate (`canFire`) that nothing can spawn through. So the
-// muster is four small edits over there and this board here, and nothing else.
+// levy is four small edits over there and this board here, and nothing else.
 //
 // TWO PLACES YOU START ONE, and both are things that already stand on the ground:
 //
 //   * a town's NOTICE BOARD — every settlement of size 1 and up already has one, and it is a real
 //     object you walk up to. The town is paying you to help them run a drill, which is why the
 //     spoils are materials out of their own stores rather than reputation.
-//   * a MUSTER STONE at your own outpost. The existing Alarm Bell stays what it is — that is the
+//   * a LEVY STONE at your own outpost. The existing Alarm Bell stays what it is — that is the
 //     REAL raid, the one that pays standing and can cost you a wall. The stone is the drill. Two
 //     objects, two meanings, and the panel says which is which every time.
 //
-// COOLDOWN IS PER RANK AND PER PLACE. It exists so the muster is a thing you do when you want a
+// COOLDOWN IS PER RANK AND PER PLACE. It exists so the levy is a thing you do when you want a
 // fight rather than a gold tap you farm, and it is per-rank so clearing rank 4 does not lock out
 // rank 1.
 
@@ -37,9 +37,9 @@ const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
 /** HEADCOUNT by settlement size, so a town-shaped base is not invented out of nothing. */
 export const TOWN_HEADCOUNT = [4, 9, 18, 34, 60, 96];
 
-export function createMuster({ data = null, civics = null, bestiary = null, rng = Math.random, saved = null } = {}) {
+export function createLevy({ data = null, civics = null, bestiary = null, rng = Math.random, saved = null } = {}) {
   const D = data || {};
-  const M = D.muster || civics?.muster || { cooldownHours: {}, leashMetres: 300, leashSeconds: 45, goldMultiplier: 0.6, spoilsRadius: 60 };
+  const M = D.levy || civics?.levy || { cooldownHours: {}, leashMetres: 300, leashSeconds: 45, goldMultiplier: 0.6, spoilsRadius: 60 };
   const TIERS = D.tiers || [];
 
   /** `${placeId}:${tierKey}` -> the elapsed second the last one at that rank ended. */
@@ -95,11 +95,11 @@ export function createMuster({ data = null, civics = null, bestiary = null, rng 
   }
 
   /**
-   * A TOWN-SHAPED BASE, so a walled city musters a harder rank 3 than a hamlet does.
+   * A TOWN-SHAPED BASE, so a walled city calls up a harder rank 3 than a hamlet does.
    *
    * `waveSpawns` already scales off `base.defences` and the player's level, so this needs no new
    * arithmetic at all: it only has to describe a settlement in the same four numbers a base is
-   * described in. And the town's OWN guards fight, which is what makes a city muster feel different
+   * described in. And the town's OWN guards fight, which is what makes a city levy feel different
    * rather than just bigger.
    */
   function baseForTown(node = {}, { plots = 0, guards = 0, walled = false } = {}) {
@@ -121,7 +121,7 @@ export function createMuster({ data = null, civics = null, bestiary = null, rng 
   function start({ placeId = 'here', placeName = 'here', tier = null, base = {}, level = 1, biome = 'any', at = 0, hour = 12, heldBy = null } = {}) {
     if (quest && quest.state === 'running') return { ok: false, why: 'One is already on the field.' };
     const row = TIERS.find(t => t.key === tier);
-    if (!row) return { ok: false, why: 'No such muster.' };
+    if (!row) return { ok: false, why: 'No such levy.' };
     const wait = cooldownLeft(placeId, tier, at);
     if (wait > 0) return { ok: false, why: `You ran that one recently. Again ${waitText(wait)}.` };
     const offer = raidOffer({
@@ -191,6 +191,8 @@ export function createMuster({ data = null, civics = null, bestiary = null, rng 
       cooled.clear();
       for (const [k, v] of Object.entries(json?.cooled || {})) cooled.set(k, v);
       quest = json?.quest || null;
+      // a drill saved before 2026-10-03 carries the old kind name
+      if (quest?.kind === 'muster') quest = { ...quest, kind: 'levy' };
       return cooled.size;
     },
   };

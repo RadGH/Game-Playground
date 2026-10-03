@@ -272,9 +272,9 @@ people. They do not use a bigger party; instead everyone near the boss is loosel
 | Where | A marked area of the region, the **world boss grounds**. When a boss is up, the grounds become their own layer-set with the caps in §4.2. |
 | Warning | Everyone in the region gets a banner and a map pin when the boss is about to wake (page 13 owns the timers). |
 | Joining | Walk into the grounds. You are moved to the grounds layer with the most room, **with your party** (a party is never split). No invite, no queue, no size limit beyond the layer cap. |
-| Muster channel | While inside the grounds you are in the **Muster** chat channel (`/mu`, **new → page 02**) with everyone else there. Leaving the grounds leaves it. |
+| Warcall channel | While inside the grounds you are in the **Warcall** chat channel (`/wc`, **new → page 02**) with everyone else there. Leaving the grounds leaves it. |
 | Parties stay 5 | Your party frames still show only your party. The boss's frame is shared by everyone. Healing and buffs land on anyone (Needs-target heals can target any player you can click). |
-| Markers | Only one person marks: the first player to type `/muster lead` inside the grounds becomes the **Muster lead** for that fight (a small banner icon on their nameplate) and may place the 8 world markers for everyone in the grounds. Anyone can take it over when the lead leaves. |
+| Markers | Only one person marks: the first player to type `/warcall lead` inside the grounds becomes the **Warcall lead** for that fight (a small banner icon on their nameplate) and may place the 8 world markers for everyone in the grounds. Anyone can take it over when the lead leaves. |
 | Credit | Personal. A player qualifies for loot after dealing or healing **1%** of the boss's health, or holding its attention for 5 s (page 08 owns the rule). Followers' damage does not count toward their owner's share. |
 | Loot limit | **Once per boss per week** per character, reset Monday 06:00 (W5). After that you may keep helping for gold and reputation (page 13). |
 | Followers | Up to 4 per player, but see "Credit". |
@@ -461,7 +461,7 @@ every 7 days. (There is no weekly deed cap: the weekly reset is only for loot li
 | **Swift Standard** | At a discovered waystone, pull one party member to you (5 min cooldown). Arriving this way discovers the waystone for them (§4.5) |
 | **Quartermaster** | A guild vendor in Highcourt that sells potions and food at −10% |
 | **Deep Vault** | Bank tabs cost 25% less |
-| **Mustering Horn** | A guild-wide 1 h buff, 24 h cooldown: +3% movement speed out of combat |
+| **Gathering Horn** | A guild-wide 1 h buff, 24 h cooldown: +3% movement speed out of combat |
 | **Kin of the Road** | Resurrection costs no durability for members |
 | **Banner Call** | Place a guild banner in the world for 10 min: members within 20 m regain 1% health every 5 s out of combat |
 | **Reserved Seats** | Members riding a bus-style Travel Method together always get the same carriage (§22.3) |
@@ -501,7 +501,7 @@ opens the input line and **/** opens it with a slash (page 02). Messages are at 
 | **Party** | Your party | `/p`, `/party` | blue | |
 | **Party warning** | Your party, as a centre-screen banner (page 11 banner slot, white, with the sender's name) and a sound (`ui.partywarning`, [page 17](17-ART-AUDIO.md)) | `/pw`, `/warn` **(renamed → page 02)** | white on red | Leader and assistants only |
 | **Instance** | Everyone in your dungeon instance (includes cross-realm finder members) | `/i`, `/instance` | blue-grey | |
-| **Muster** | Everyone in the same world boss grounds (§6) | `/mu` **(new → page 02)** | amber | Auto-joined inside the grounds, left on leaving |
+| **Warcall** | Everyone in the same world boss grounds (§6) | `/wc` **(new → page 02)** | amber | Auto-joined inside the grounds, left on leaving |
 | **Carriage** | Everyone riding the same Travel Method vehicle (§22) | `/car` **(new → page 02)** | light tan | Auto-joined on boarding, left on stepping off |
 | **Guild** | Guild members with the listen permission | `/g`, `/guild` | green | |
 | **Officer** | Ranks with officer chat | `/o`, `/officer` | dark green | |
@@ -549,7 +549,7 @@ brackets (`[Electrified]`). A reader can turn icons off with the link switch bel
 
 Every command and its spelling is in **page 02 §6** (talking, groups, targeting, social and status,
 information, emotes, developer). Commands this page adds, for page 02 to copy: `/recruit`, `/new`,
-`/chkick`, `/chban`, `/chpass`, `/chowner`, `/pw` (party warning, §9.1), `/mu` and `/muster lead` (§6),
+`/chkick`, `/chban`, `/chpass`, `/chowner`, `/pw` (party warning, §9.1), `/wc` and `/warcall lead` (§6),
 `/car` (§22), `/board` and `/stepoff` (§22), `/yield` (§16), `/ticket` (same as `/help` → Report a problem,
 §18.3), `/order <attack|hold|follow>` and `/stance <aggressive|defensive|passive>` (§21.7). **Removed**
 in round 2: `/ra`, `/rw`, `/pvp`, `/feud`.
@@ -1176,7 +1176,7 @@ Page 04 §11 (`set.social.*`), §12 (`set.online.*`), §6.9 (chat window), §6.2
 | `set.social.joinNewcomers` | Join the Newcomers channel | toggle | | On (under level 20) | C |
 | `set.social.autoLayer` | Move me to my guild's world copy when I can | toggle | | On | A |
 | `set.social.boardWithParty` | Board a Travel Method with my party automatically (fares under 10 g) | toggle | | On | C |
-| `set.social.joinMuster` | Join the Muster channel at world bosses | toggle | | On | A |
+| `set.social.joinWarcall` | Join the Warcall channel at world bosses | toggle | | On | A |
 
 ## 24. Keys (page 02 owns them)
 
@@ -1196,5 +1196,5 @@ commands listed in §9.4.
 6. Mail delay of 1 hour for strangers — acceptable, or too annoying?
 7. Followers in Depth: allowed while the run's level is under 60, none from 60 on (§21.2) — right line?
 8. Stepping off a land Travel Method between stations (§22.6) — allowed, or stations only?
-9. World bosses: is the loose "Muster" (shared channel, one marker lead, no big group) enough, or should
+9. World bosses: is the loose "Warcall" (shared channel, one marker lead, no big group) enough, or should
    there be a temporary open group with frames for everyone present?

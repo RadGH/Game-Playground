@@ -382,7 +382,7 @@ section. Where it conflicts with anything older, this section wins.
 | **W36** | Rename Last Stand, Mirror Image, Leap of Faith, Hellfire, Starfall. Plain English (Execute, Whirlwind, Shield Bash, Hex, Fear, Charge) stays | classes |
 | **W37** | Pets stay, under the new bind/tame/control rules (§6) | classes |
 | **W38** | Cap 60, 5-player dungeons stay | — |
-| **W39b** | Chat channels added for the two open-group places: **Muster** (inside a world-boss area) and **Carriage** (riders of one Travel Method vehicle) — page 15 | 15, 02 |
+| **W39b** | Chat channels added for the two open-group places: **Warcall** (inside a world-boss area) and **Carriage** (riders of one Travel Method vehicle) — page 15 | 15, 02 |
 | **W39** | **An online action RPG with an MMO-style world and a tight small-group focus.** Everything is designed for 5 players except world bosses, towns/hubs and trading | all |
 | **W40** | One rename pass across every page, then a check that no banned name remains (§12.5). The list goes into the playground's IP rule too | all |
 

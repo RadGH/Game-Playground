@@ -437,10 +437,10 @@ lead to P.4 on the south road, where the two openings meet.
 
 | # | id | Title | Giver | Where | Objective | Reward | Lvl |
 |---|---|---|---|---|---|---|---|
-| P.1 | `q_ms_the_muster` | The Muster | `npc_odile_marsh` | Brightwater drill yard | Sign the muster roll at the First Waystone [use] and speak to the Captain [talk]. | 10 g · the starter weapon is already in hand | 1 |
+| P.1 | `q_ms_the_roll_call` | The Roll Call | `npc_odile_marsh` | Brightwater drill yard | Sign the Warden roll at the First Waystone [use] and speak to the Captain [talk]. | 10 g · the starter weapon is already in hand | 1 |
 | P.2 | `q_ms_first_blood` | Rats in the Granary | `npc_odile_marsh` | Brightwater Fields | Kill 6 field rats in the granary yard [hunt]. Teaches the basic attack, spell 1 and **Tab targeting** (a hard target that stays until you change it). | 10 g · Common gloves | 1 |
 | P.3 | `q_ms_scarecrow_watch` | Scarecrow Watch | `npc_bram_fenwick` | Brightwater Fields | Light 3 scarecrow braziers with a brand from the drill-yard fire [use] and kill the 4 crows that come for the flames [hunt] | 11 g · Uncommon belt | 2 |
-| P.1b | `q_ms_the_burrow_gate` | The Burrow Gate | `npc_pip_underbough` | Oakhollow | Sign the Hearth Speaker's muster book at the burrow gate [use] and speak to Pip [talk]. | 10 g · the starter weapon is already in hand | 1 |
+| P.1b | `q_ms_the_burrow_gate` | The Burrow Gate | `npc_pip_underbough` | Oakhollow | Sign the Hearth Speaker's roll book at the burrow gate [use] and speak to Pip [talk]. | 10 g · the starter weapon is already in hand | 1 |
 | P.2b | `q_ms_wasps_in_the_pears` | Wasps in the Pears | `npc_pip_underbough` | `sz_old_orchards` | Kill 6 orchard wasps in the pear rows [hunt]. Teaches the basic attack, spell 1 and Tab targeting. | 10 g · Common gloves | 1 |
 | P.3b | `q_ms_the_fruit_carts` | The Fruit Carts | `npc_pip_underbough` | `sz_old_orchards` | Chase off the 4 Sootwick scavengers robbing the fruit carts [hunt] and set the 3 carts upright [use] | 11 g · Uncommon belt | 2 |
 | P.4 | `q_ms_the_lantern_scholar` | The Lantern Scholar | `npc_bram_fenwick` (Brightwater) or `npc_pip_underbough` (Oakhollow) | south road | Meet Iris Vael's cart on the south road, halfway between the two towns, and escort it to Brightwater's gate [escort] (2 Hedge Knives ambush at 60%) | 11 g · `class_pick` Uncommon | 2 |
@@ -1055,7 +1055,7 @@ own; a party shares the party leader's).
 ## 12. No daily or weekly quests
 
 Removed in round 2 (canon W20): there are **no daily or weekly quests** — no region dailies, no
-quartermaster dailies, no Spire Isle dailies, no weekly muster board. The ideas are parked in
+quartermaster dailies, no Spire Isle dailies, no weekly call-up board. The ideas are parked in
 `WISHLIST.md`. Repeatable work is board jobs, bounties (§11) and dynamic events (§13), none of which
 has a daily reset; world bosses (page 13) keep their once-a-week loot limit (Monday 06:00, canon 00 §4).
 
@@ -1168,7 +1168,7 @@ No trigger is a time of day or a moon phase (there is none).
 | 22 | `ev_star_falls` (was `ev_starfall`) | A Star Falls | any region from Mossfen north, open ground | band of the sub-zone | timer (reuse: Farhold `js/meteors.js`) | 90 min per region, jitter 30 | 30 s warning + 12 min | 150 |
 | 23 | `ev_refugee_column` | The Refugee Column | the Kingsroad, Kettle Pass → Highcourt or Fort Ashfall → Kettle Pass | 12–16 or 30–34 | world: `raid_coming` incident on the road's region | incident | 10 min (moving) | 80 round the column |
 | 24 | `ev_fair_day` | Fair Day | any hub (not Last Light or Spire Landing) | any | world: holder grip > 0.7 (reuse incident `fair`) | 1 per region per real day | 60 min | the town |
-| 25 | `ev_world_boss_call` | *(wrapper)* World boss muster | the 8 world boss sites (page 01 §8) | boss level | timer (page 13 owns spawn times) | per page 13 | pre-phase 5 min + the fight | 300 — world bosses are the one open-world content **not** capped at 5 (canon W6) |
+| 25 | `ev_world_boss_call` | *(wrapper)* World boss gathering | the 8 world boss sites (page 01 §8) | boss level | timer (page 13 owns spawn times) | per page 13 | pre-phase 5 min + the fight | 300 — world bosses are the one open-world content **not** capped at 5 (canon W6) |
 
 ### 13.5 Event details
 
@@ -1366,7 +1366,7 @@ player; §13.3 scales them.
   toy or a cosmetic (page 08) — or gold if you already own it. No tiers; everyone who plays one game
   gets Bronze.
 
-**25 · `ev_world_boss_call` — World boss muster** *(wrapper; the fight is page 13's)*
+**25 · `ev_world_boss_call` — World boss gathering** *(wrapper; the fight is page 13's)*
 - 5 min before a world boss spawns: banner to the whole **continent** (not only the region), a map
   marker at the site, and a **pre-phase** local to each boss (e.g. Greyridge: protect 3 dwarf
   engineers trying to shut Grief-in-Iron down — if all 3 live, the boss starts at 90% health).

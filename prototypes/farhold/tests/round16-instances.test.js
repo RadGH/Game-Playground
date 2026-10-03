@@ -459,7 +459,7 @@ test('the twenty new layouts did not disturb the twenty-six that were there', ()
     'ferry_landing', 'toll_bridge', 'hunting_blind', 'cairn_field', 'beacon', 'sunken_wreck',
     'forge_fire', 'broken_road', 'bandit_camp', 'raider_stockade', 'watchtower_hold',
     'border_fort', 'castle', 'cult_circle', 'beast_lair', 'siege_camp',
-    'boss_bonefield', 'boss_barrow', 'boss_slagpit', 'boss_ironmuster',
+    'boss_bonefield', 'boss_barrow', 'boss_slagpit', 'boss_ironpass',
   ]) assert.ok(LAYOUTS[key], `the "${key}" layout has gone`);
   assert.equal(Object.keys(LAYOUTS).filter(k => k.startsWith('inst_')).length, 20, 'there are not twenty mouths');
 });

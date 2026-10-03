@@ -254,7 +254,7 @@ it.
 
 ## The Civilization Expansion
 
-Housing, comfort, NPC-run machines, vendors, trade goods, routes, guards and the muster all extend
+Housing, comfort, NPC-run machines, vendors, trade goods, routes, guards and the levy all extend
 this module rather than replacing it. See **`CIVILIZATION.md`** — and in particular §2 (a bed is a
 building now, and the walk to work is real metres), §4 (a vendor is a citizen with the `vendor` job,
 who pays rent and does no work at all), §7 (`colony.station` and wages), and §10, which lists the

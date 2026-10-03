@@ -598,7 +598,7 @@ a tie goes to the leader), so `dialog_vote` is gone too.
 | `loot_popup` | Show others' personal loot in a popup | toggle | | Off | the combat log always shows it (`set.interface.logLootOthers`) | A |
 | `ready_check_sound` | Ready check sound | toggle | | On | the bell when a ready check starts | A |
 
-(The world-boss **Muster** channel is `set.social.joinMuster`, §11.)
+(The world-boss **Warcall** channel is `set.social.joinWarcall`, §11.)
 
 ---
 
@@ -922,7 +922,7 @@ unless noted.
 | `joinNewcomers` | Join the Newcomers channel | toggle | | On (under level 20) | Character scope; leaves itself at level 20 (page 15) |
 | `autoLayer` | Move me to my guild's world copy when I can | toggle | | On | (page 15) |
 | `boardWithParty` | Ask my party to board with me | toggle | | On | when you board a Travel Method, party members at the station get "Board with {name}?" (page 02 §5.18, page 03 §5.10); Character scope |
-| `joinMuster` | Join the Muster channel near world bosses | toggle | | On | `/mu` for everyone in a world-boss area (page 13, page 15) |
+| `joinWarcall` | Join the Warcall channel near world bosses | toggle | | On | `/wc` for everyone in a world-boss area (page 13, page 15) |
 | `joinCarriage` | Join the Carriage channel while riding | toggle | | On | `/car` for everyone on the same Travel Method (page 20) |
 
 ---
@@ -1015,7 +1015,7 @@ should be updated to it. Keys this pass **renamed** to another page's name are l
 | `set.appearance.hide_head` / `_shoulders` / `_back` | 08 §21 | `set.gameplay.showHelm` / `showShoulders` / `showCloak` | the same switch, the other way up (`_light` / `showLight` removed: no light slot) |
 | `set.social.chatStickyChannel` | 15, old 02 | `set.interface.chatStickyChannel` | |
 | `set.interface.raidLayout` … `rangeFade`, all of `set.raid.*` | old 04, 13 | **removed** (raid frames → `WISHLIST.md`); `pull_timer_length`, `marker_labels`, `boss_banner`, `world_boss_alerts`, `loot_popup` moved to `set.group.*` (§7b); `set.interface.rangeFade` is back as a party option | round 2 |
-| `set.raid.join_open_groups` | old 04, 13 | `set.social.joinMuster` | world bosses use the Muster channel (page 13, page 15) |
+| `set.raid.join_open_groups` | old 04, 13 | `set.social.joinWarcall` | world bosses use the Warcall channel (page 13, page 15) |
 | `set.raid.dialog_vote` | old 04, 13 | **removed** — canon 00 §10 fixes the vote (party votes, tie to the leader) | round 2 |
 | `set.gameplay.aimMode`, `softLockCone`, `tabCone`, `keepTargetRange`, `selfCast`, `mouseoverCast`, `tabRange`, `tabOrder`, `targetOnAttack` | old 04, old 02 | `set.controls.pointerStyle` + the Targeting group §3.1 (`self_cast_fallback`, `mouseover_cast`, `tab_range`, `tab_order`, `target_on_attack`…) | round 2 (W8) |
 | `set.gameplay.autotarget_sets_target`, `ground_at_target`, `self_cast_fallback` | `classes/ranger.md`, `classes/cleric.md` | §3.1 | **`self_cast_fallback` defaults Off everywhere** (W8: no silent self-cast; decided in the round-2 sweep, the cleric file follows) |

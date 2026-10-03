@@ -131,7 +131,7 @@
       "name": "Grief-in-Iron",
       "tier": 2,
       "weight": 8,
-      "plan": "boss_ironmuster",
+      "plan": "boss_ironpass",
       "on": ["pass", "landmark", "dungeon"],
       "minBand": 2,
       "biomes": ["mountain", "highland", "any"],
@@ -152,7 +152,7 @@
         "prefer": { "families": ["construct", "humanoid"] },
         "first": [5, 7], "add": [2, 4], "every": 14, "max": 11,
         "radius": 28, "weaken": 0.8, "rankBonus": 1.4,
-        "announce": "The muster wakes up behind it."
+        "announce": "The garrison wakes up behind it."
       },
       "chest": { "kind": "gilded" },
       "dropBases": ["warhammer", "heavy_chest", "heavy_gauntlets", "kite_shield"],
@@ -264,7 +264,7 @@
       "name": "The Standing Ruin",
       "tier": 4,
       "weight": 5,
-      "plan": "boss_ironmuster",
+      "plan": "boss_ironpass",
       "on": ["pass", "landmark"],
       "minBand": 5,
       "biomes": ["any"],

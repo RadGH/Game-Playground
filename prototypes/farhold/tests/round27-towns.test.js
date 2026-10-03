@@ -7,7 +7,7 @@
 //   1. SIX answers to "how big is this town". The planner grows a crowded site's ring 1.3x or
 //      1.65x and reports the wall it really built as `plan.wallRadius`; js/features.js read it (since
 //      R22) and nothing else did. js/town.js's no-spawn circle, js/waypoints.js's boundary, "you are
-//      in town", the town hall's walled/open label and the muster all worked it out again from
+//      in town", the town hall's walled/open label and the levy all worked it out again from
 //      `16 + size * 13` — so a pack could spawn forty metres inside a grown city's wall.
 //   2. The planner cut a gate at the end of every main street and Farhold threw them all away. The
 //      only openings were where a world road crossed; every other high street ran into masonry,
@@ -26,7 +26,7 @@ import { readFileSync } from 'node:fs';
 register('./three-loader.mjs', import.meta.url);
 const P = await import('../js/planet.js');
 const { createFeatures } = await import('../js/features.js');
-const { townExtent, planOf, wallTier, footprintOf, musterFacts, sentryPosts } = await import('../js/town-plan.js');
+const { townExtent, planOf, wallTier, footprintOf, levyFacts, sentryPosts } = await import('../js/town-plan.js');
 const { boundaryOf } = await import('../js/waypoints.js');
 const { createTownFolk } = await import('../js/town.js');
 const { EnemyField } = await import('../js/actors.js');
@@ -286,7 +286,7 @@ test('the gate books describe what is built NOW — a rebuild elsewhere empties 
   assert.ok(w.features.gatesOf(b.id).length >= 2);
 });
 
-// ------------------------------------------------------------------------------ one tier, the muster
+// ------------------------------------------------------------------------------ one tier, the levy
 
 test('one wall tier: exactly the towns of size 4 and up are walled, everywhere', () => {
   for (let size = 0; size <= 8; size++) {
@@ -308,17 +308,17 @@ test('one wall tier: exactly the towns of size 4 and up are walled, everywhere',
   }
 });
 
-test('the muster reads the TOWN: walled for every size-4+ town and not below, plots from the plan', () => {
+test('the levy reads the TOWN: walled for every size-4+ town and not below, plots from the plan', () => {
   eachWorld(({ towns }) => {
     for (const { t, plan } of towns) {
-      const facts = musterFacts(t, 3);
-      assert.equal(facts.walled, (t.size || 1) >= 4, `${t.name}: size ${t.size} mustered walled=${facts.walled}`);
+      const facts = levyFacts(t, 3);
+      assert.equal(facts.walled, (t.size || 1) >= 4, `${t.name}: size ${t.size} levy walled=${facts.walled}`);
       assert.equal(facts.plots, plan.plots.length);
       assert.equal(facts.guards, 3);
     }
   });
   const src = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
-  assert.match(src, /baseForTown\(town, musterFacts\(town, folk\.guardsOf/, 'main.js does not muster through musterFacts + the town\'s own guards');
+  assert.match(src, /baseForTown\(town, levyFacts\(town, folk\.guardsOf/, 'main.js does not call the levy through levyFacts + the town\'s own guards');
 });
 
 // ------------------------------------------------------------------------------ the gate guards

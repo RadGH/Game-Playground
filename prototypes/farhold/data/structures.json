@@ -3112,7 +3112,7 @@
         "plank": 30,
         "glass": 6
       },
-      "desc": "One big room with benches round the walls. Traders post their offers here, and so does whoever is running the muster."
+      "desc": "One big room with benches round the walls. Traders post their offers here, and so does whoever is calling up the levy."
     },
     {
       "id": "stable",
@@ -3210,8 +3210,8 @@
       "desc": "A gate with somebody in it. Raiders stop at a manned gate instead of walking through the gap beside it."
     },
     {
-      "id": "muster_stone",
-      "name": "Muster Stone",
+      "id": "levy_stone",
+      "name": "Levy Stone",
       "cat": "defence",
       "tier": 1,
       "w": 1.6,
@@ -3219,7 +3219,7 @@
       "h": 2,
       "snap": "grid",
       "hp": 600,
-      "muster": true,
+      "levy": true,
       "look": {
         "kind": "statue",
         "color": "#7f7a72"

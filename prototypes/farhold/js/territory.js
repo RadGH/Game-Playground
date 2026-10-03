@@ -176,7 +176,7 @@ export function createTerritory({
      * WHOEVER IS PUSHING IN IS ON THE GROUND TOO.
      *
      * Without this, a settled zone held by the road wardens had nothing in it you could knock over —
-     * their sites are wayposts and muster yards, and neither is hostile — so the one repeatable action
+     * their sites are wayposts and drill yards, and neither is hostile — so the one repeatable action
      * the whole territory layer is built around had nowhere to happen in the first zone of the game.
      * One or two of the rival's camps go in as well, which is also what makes "burn it out before it
      * takes root" a job the generator can actually offer.

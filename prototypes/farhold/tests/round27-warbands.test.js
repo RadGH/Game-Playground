@@ -449,7 +449,7 @@ test('jobs: over 500 jobs on 6 seeds "Thin their patrols" is offered, and always
 // ------------------------------------------------------------------------------------ the drill
 
 test('a town drill on warband ground draws that warband, and one elsewhere draws none (M1 leftover)', async () => {
-  const { createMuster } = await import('../js/muster.js');
+  const { createLevy } = await import('../js/levy.js');
   const raids = read('../data/raids.json');
   const colony = read('../data/colony.json');
   const defs = bestiary.enemies.slice();
@@ -458,7 +458,7 @@ test('a town drill on warband ground draws that warband, and one elsewhere draws
   const run = heldBy => {
     const seen = new Set();
     for (let i = 0; i < 40; i++) {
-      const m = createMuster({ data: raids, civics: colony, bestiary: { ...bestiary, enemies: defs } });
+      const m = createLevy({ data: raids, civics: colony, bestiary: { ...bestiary, enemies: defs } });
       const out = m.start({ placeId: 'p' + i, tier: 'prowlers', base, level: 10, biome: 'any', at: 0, heldBy });
       assert.ok(out.ok, out.why);
       for (const w of out.quest.waves) for (const g of w.groups) {

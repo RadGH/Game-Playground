@@ -106,7 +106,7 @@ These are weaknesses in the current code, found while reading it. Several ideas 
   - `safeZones`
   - `settlementAt` (`30 + 15*size`, `features.js:1478`)
   - `sites.js` (`190 + 120*size`)
-- **The muster reads the wrong things** (`main.js:3502-3506`):
+- **The levy reads the wrong things** (`main.js:3502-3506`):
   - `walled: !!town.walled` is always false, because nothing sets `walled`, so the +6 defence for a
     walled town never applies
   - `guards` counts *your colony's* guards, not the town's
@@ -581,7 +581,7 @@ Shared files to be careful with:
 ### D1. One town size, read by everybody
 - **Pitch:**
   - Every consumer reads `plan.ring` / `plan.wallRadius` through one function: `safeZones`,
-    `settlementAt`, `sites.js` keep-clear, the muster and the town hall.
+    `settlementAt`, `sites.js` keep-clear, the levy and the town hall.
   - Delete the five local formulas.
 - **Extends:** `town.js:707-708`, `features.js:1478`, `sites.js:454`, `town-plan.js:85`, proctown
   `footprintOf` (duplicated at `townplan.js:162`).
@@ -998,7 +998,7 @@ So nearly every idea here is a **join**: point one of those at a warband.
   - It also fixes today's leak, where *any* warband's members can raid a base in a zone they don't
     hold.
 - **Extends:** `js/raid.js` `raidersFor` (`:111-119`, uses the full bestiary), `js/defence.js:214`,
-  `js/muster.js:129`, `data/raids.json` (the "warband" tier named for nothing).
+  `js/levy.js:129`, `data/raids.json` (the "warband" tier named for nothing).
 - **Player notices:** Actions have a response. The base's defences have an enemy with a name.
 - **Size:** M
 - **Risks:**

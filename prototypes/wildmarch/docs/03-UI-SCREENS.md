@@ -1142,7 +1142,7 @@ hover (fades back after 6 s). Farhold's `#log` becomes the **System** tab's cont
 
 | Element | Shows | Interactions |
 |---|---|---|
-| Tabs | **General** (Say, Yell, Zone, Trade, LookingForGroup, Muster, Carriage, System), **Party** (Party, Party warning, Instance), **Guild** (Guild, Officer), **Whispers**, **Combat** (§11.2), **Loot** (loot, gold, XP, reputation, profession skill-ups) | click switches; unread count badge; right-click a tab: Rename, Channels…, Colours…, Font size, Close; **+** adds a tab |
+| Tabs | **General** (Say, Yell, Zone, Trade, LookingForGroup, Warcall, Carriage, System), **Party** (Party, Party warning, Instance), **Guild** (Guild, Officer), **Whispers**, **Combat** (§11.2), **Loot** (loot, gold, XP, reputation, profession skill-ups) | click switches; unread count badge; right-click a tab: Rename, Channels…, Colours…, Font size, Close; **+** adds a tab |
 | Lines | "[12:40] [Zone] Borin: lfg barrow" — timestamp optional (page 04), channel tag, name in class colour (click = whisper, right-click = menu), text; item links shown in rarity colour with [brackets], hovering opens the item card (§7.2.1); a **special-rarity** item's link starts with its **bespoke SVG icon** (§14.3.1) before the name, e.g. "[⟨bolt⟩ Electrified Longsword]" — an inline 12 px SVG, never an emoji (canon 00 §12.3), hidden by `set.interface.specialRarityIcons` = off; quest/spell/achievement links likewise | Shift+click an item in your bag pastes a link |
 | Input | "Say:" prefix with the current channel; `Enter` opens it, `/` opens it with a slash | `Tab` completes a slash command, channel or player name (page 02 §5.11); ↑ recalls sent lines |
 | Scroll | wheel scrolls; a "↓ new messages" button when scrolled up | — |
@@ -1158,7 +1158,7 @@ Channels and colours:
 | Party | `/p` | #8ab4ff | party |
 | Party warning | `/pw` (party leader) | #ff4800, also shown centre-screen with `hud_warning_banner` | party |
 | Instance | `/i` | #ff9f40 | your dungeon, or everyone at a world boss |
-| Muster | `/mu` | #ffb070 | everyone in a world-boss area (page 13); `/muster lead` offers to call the fight |
+| Warcall | `/wc` | #ffb070 | everyone in a world-boss area (page 13); `/warcall lead` offers to call the fight |
 | Carriage | `/car` | #d0c0a0 | everyone riding the same Travel Method (page 20) |
 | Guild | `/g` | #40ff40 | guild |
 | Officer | `/o` | #40c040 | guild officers |
@@ -3076,7 +3076,7 @@ What a phone/tablet gets:
   timers; the banner sound ids; the eight marker symbols' art and colours.
 - **Page 12:** the Depth ladder numbers the Dungeon Finder and journal print; how a Depth unlocks.
 - **Page 15:** realm types, name rules list, trade and Trading Post fees, mail postage, meter privacy,
-  report pipeline, the Muster and Carriage channels.
+  report pipeline, the Warcall and Carriage channels.
 - **Page 16:** `tests/ui-index.test.js` (every `scr_` id exists), the "target frame never changes by
   itself" test (§4.4), the UI profile saved per character.
 - **Page 17:** the item portrait models and budget, the five special-rarity card effects and icons

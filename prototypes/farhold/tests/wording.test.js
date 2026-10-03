@@ -139,3 +139,65 @@ test('nothing tells the player their weapon is their tool — there has been a T
       `${key}'s "from" still tells the player to carry a weapon: ${from}`);
   }
 });
+
+// ───────────────────────────────────── 2026-10-03: the owner banned the word "muster" outright
+//
+// Not a list check over one data file: the word was in a tab name, a structure, a faction site, a
+// talent, a stronghold epithet, a world boss arena and a worldgen place-name pool, so the scan is
+// over every file the game ships. The only lines allowed to say it are the ones that read an OLD
+// save (a renamed id has to keep loading), and those all name it inside a rename map or a load.
+
+test('the word "muster" appears nowhere a player could read it', async () => {
+  const { readdirSync } = await import('node:fs');
+  const root = join(here, '..');
+  const walk = dir => readdirSync(dir, { withFileTypes: true }).flatMap(d =>
+    d.isDirectory() ? walk(join(dir, d.name)) : [join(dir, d.name)]);
+  const files = [
+    ...walk(join(root, 'data')).filter(f => f.endsWith('.json')),
+    ...walk(join(root, 'js')).filter(f => f.endsWith('.js')),
+    ...readdirSync(root).filter(f => /\.(html|css)$/.test(f)).map(f => join(root, f)),
+    ...walk(join(root, '..', '..', 'worldgen', 'js')).filter(f => f.endsWith('.js')),
+  ];
+  const saveReader = /RENAMED_|json\.muster|kind === 'muster'|^\s*(\/\/|\*)/;
+  const bad = [];
+  for (const f of files) {
+    readFileSync(f, 'utf8').split('\n').forEach((line, i) => {
+      if (!/muster/i.test(line)) return;
+      if (f.endsWith('.js') && f.includes('/farhold/js/') && saveReader.test(line)) return;
+      bad.push(`${f.slice(root.length + 1)}:${i + 1}: ${line.trim().slice(0, 120)}`);
+    });
+  }
+  assert.deepEqual(bad, [], `\n  ${bad.join('\n  ')}`);
+});
+
+test('a save from before the "muster" rename still loads its stone, its talent and its drill', async () => {
+  const { createBuildPlan } = await import('../js/buildplan.js');
+  const { renameTalentPicks } = await import('../js/save.js');
+  const catalogue = read('data/structures.json');
+  const plan = createBuildPlan({ catalogue, terrain: null });
+  plan.load({ entries: [{ id: 'e1', key: 'muster_stone', name: 'Muster Stone', x: 0, z: 0, rot: 0 }] });
+  const [stone] = plan.entries;
+  assert.equal(plan.byId(stone.key)?.levy, true, `an old stone came back as "${stone.key}", which is no catalogue row`);
+  assert.doesNotMatch(stone.name, /muster/i);
+
+  const picks = renameTalentPicks({ daybreak_descent: { 2: 'muster', 1: 'something_else' } });
+  assert.equal(picks.daybreak_descent[2], 'close_ranks');
+  assert.equal(picks.daybreak_descent[1], 'something_else', 'the rename touched a pick it does not own');
+  const skills = read('data/skills.json');
+  const row = skills.skills.daybreak_descent?.talents?.[2]?.nodes || [];
+  assert.ok(row.some(n => n.id === picks.daybreak_descent[2]), 'the renamed talent id is not on the skill');
+
+  // the civics block was saved under `muster`, with a drill quest of kind 'muster' in it
+  const { createCivics } = await import('../js/civics.js');
+  const { createColony } = await import('../js/colony.js');
+  const { WorkBoard } = await import('../js/work.js');
+  const board = new WorkBoard();
+  const COLONY = read('data/colony.json');
+  const colony = createColony({ data: COLONY, board, seed: 3 });
+  const civics = createCivics({ data: COLONY, raids: read('data/raids.json'), colony, board, dayLengthSeconds: 900 });
+  civics.loadJSON({ v: 1, muster: { v: 1, cooled: { 'yours|prowlers': 12345 }, quest: { kind: 'muster', id: 'raid_x' } } });
+  assert.equal(civics.levy.quest?.id, 'raid_x', 'an old save lost its drill in progress');
+  assert.equal(civics.levy.quest.kind, 'levy');
+  assert.deepEqual(civics.levy.toJSON().cooled, { 'yours|prowlers': 12345 }, 'an old save lost its cooldowns');
+  assert.ok(!('muster' in civics.toJSON()), 'a new save still writes the old key');
+});

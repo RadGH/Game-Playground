@@ -667,7 +667,7 @@ heirs and his whole war-band so that none of them would ever serve another crown
 of the barrow on purpose — the first Crown Assembly wanted the old king to hear every coronation. The dead
 king has heard nine of them. The tenth is this year, and the catacomb sextons say the bones under the Chapel of
 Ash have started to line up in ranks. The Unburied Legion (the undead warband, page 10) has been marching out of
-the Greyridge for a decade; this is where they are mustered from.
+the Greyridge for a decade; this is where they are levied from.
 
 The **Ninth Heir** is the child the king had struck from the list of his heirs. Her name was chiselled off
 every stone. She was buried below the others, alone and unnamed, and she is the reason the Unburied do not stay
@@ -769,7 +769,7 @@ aberration.
 | `m_aberration_grave_grub` | Grave Grub | `creature:worm ×0.5`, pale | Rot Pit approach | 5,000 | **Burst** on death — 3 m Void zone for 10 s, 60 / tick; kill them away from the group |
 | `m_aberration_rot_lurker` | Rot Lurker | `creature:horror ×1.1`, sickly green-brown | Rot Pit approach (Elite) | 55,000 | **Rot Breath** — 50° cone 10 m, 2.0 s, 600 + poison 60/s; **Pull** — tethers the farthest player and drags them 8 m in |
 | `m_undead_barrow_knight` | Barrow Knight | `chibi2:undead/knight`, `plate_helm`, sword + shield | Barrow Road (pairs, Elite) | 70,000 | **Pinning Strike** — tank 700 + Sunder (–20% armour 12 s); **Oath of Pairs** — if the other knight of its pair is within 8 m it is immune to crowd control; split them |
-| `m_undead_barrow_herald` | The Barrow Herald | `chibi2:undead/tactician`, horn, banner (`warbanner`) | Barrow Road end (mini-boss, optional for hard mode) | 120,000 | **Muster Horn** (gold, 3.0 s) — calls 4 spearmen; **Banner of Nine** — a 12 m Beneficial-for-*enemies* aura (+20% damage). Killing him disarms the Barrowking hard mode (§3.10) |
+| `m_undead_barrow_herald` | The Barrow Herald | `chibi2:undead/tactician`, horn, banner (`warbanner`) | Barrow Road end (mini-boss, optional for hard mode) | 120,000 | **Summoning Horn** (gold, 3.0 s) — calls 4 spearmen; **Banner of Nine** — a 12 m Beneficial-for-*enemies* aura (+20% damage). Killing him disarms the Barrowking hard mode (§3.10) |
 | `m_undead_catacomb_sexton` | Hollow Sexton | `creature:wraith ×1.3`, lantern-yellow eyes | patrols the Hall of Mourners and the Barrow Road | 45,000 | **Lantern Sweep** — 12 m cone that Marks players (marked aura) for 10 s; marked players take 25% more from the next trash pull |
 | `m_undead_barrow_hound` | Barrow Hound | `creature:hound ×1.3`, bone-and-hide | Barrow Road, with knights | 14,000 | **Harry** — leaps at a healer, 400 + slow 30% 4 s |
 
@@ -975,9 +975,9 @@ patrol's body, `it_sextons_bell`) into the pit before the pull.
 | id | `b_barrowking_hrodric` |
 | Body | `chibi2:undead/knight`, hat `crown` (iron, `#8a8070`, gold rim), held `fh_greatsword` `#9ab0c8`, cape `#3a2a4a`, `rune_halo` decor in pale gold; `scale 2.2` |
 | Health | **685,000** |
-| Enrage | 10:00 — *The Last Muster*: every heir-tomb opens; Room-wide 3,500 every 8 s |
+| Enrage | 10:00 — *The Last Roll Call*: every heir-tomb opens; Room-wide 3,500 every 8 s |
 | Arena | Throne of Nine, 56 × 40 m; the throne on a dais at the north end; 8 named heir-tombs along the sides (4 each side) and a ninth, unnamed, behind the throne |
-| Phases | P1 100–70% *Court of Bones*; P2 70–40% *The Ninefold Muster*; P3 40–0% *The Weight of the Crown* |
+| Phases | P1 100–70% *Court of Bones*; P2 70–40% *The Ninefold Call*; P3 40–0% *The Weight of the Crown* |
 
 **Phase 1 — Court of Bones (100–70%)**
 
@@ -988,7 +988,7 @@ patrol's body, `it_sextons_bell`) into the pit before the pull.
 | **Grave Decree** `b_barrowking_hrodric_decree` | Targeted | circle 6 m YELLOW on 3 players | 2.0 s | 800 to target, 800 more for each other decree circle overlapping | spread; world markers `wm_star`, `wm_flame`, `wm_leaf` are the usual spread spots |
 | **Barrow Frost** `b_barrowking_hrodric_frost` | Void zone | circle 5 m PURPLE-black on the spot of one Grave Decree target, 30 s | when the decree lands | 120 / tick | decree targets spread to the edges so the frost does not take the middle |
 
-**Phase 2 — The Ninefold Muster (70–40%).** He returns to the throne and becomes **untargetable**. His eight
+**Phase 2 — The Ninefold Call (70–40%).** He returns to the throne and becomes **untargetable**. His eight
 named heirs rise from their tombs in **three waves** (3, 3, 2) as `m_undead_barrow_heir` adds (below). Each heir
 that dies **removes 3.75%** of the king's health (8 heirs = 30%, which is exactly the phase). If all eight die
 within 3:00 he comes down early. At 3:00 any heir still standing is absorbed and he comes down with its share
@@ -1035,9 +1035,9 @@ living? Name yourselves — or name my heirs."*
 
 **Hard mode — `hm_b_barrowking_hrodric` "The Herald's Horn."** Armed by **not killing** the Barrow Herald on the
 Barrow Road (he stands aside and follows the raid into the hall). He joins at 70%:
-- The Muster is **three waves of 4** (12 heirs; the 4 extras are unnamed Barrow Knights, and each heir's share
+- The Ninefold Call is **three waves of 4** (12 heirs; the 4 extras are unnamed Barrow Knights, and each heir's share
   of the phase becomes 2.5%).
-- The Herald keeps blowing **Muster Horn** (gold, 3.0 s) — an uninterrupted horn brings 2 more knights.
+- The Herald keeps blowing **Summoning Horn** (gold, 3.0 s) — an uninterrupted horn brings 2 more knights.
 - P3 Take Up the Crown needs **6 pips**.
 - Drop: `it_mount_barrow_charger` (an undead horse: `creature:courser`, bone barding, pale-gold eyes) at 4% per
   player. Feat `ft_r01_heralds_horn`.
@@ -2302,7 +2302,7 @@ Flame — Oruk's fire makes Cinder Tiles harmless for 20 s once per phase.
 | Ability | Kind | Shape / colour | Warning | Damage | Counterplay |
 |---|---|---|---|---|---|
 | **Cinder Tiles** `b_ember_king_tiles` | Checkerboard | half the hex tiles (a honeycomb checkerboard) glow RED | 1.8 s | 3,800 | stand on unlit tiles; flips every 10 s |
-| **Legion Muster** `b_ember_king_muster` | Adds | 2 `m_ember_pyrecaller` + 4 `m_ember_legionnaire` | 3 s | as trash | interrupt the pyrecallers |
+| **Legion Levy** `b_ember_king_levy` | Adds | 2 `m_ember_pyrecaller` + 4 `m_ember_legionnaire` | 3 s | as trash | interrupt the pyrecallers |
 | **Tax of Ash** `b_ember_king_tax` | Soak | 2 ORANGE circles 6 m, **4 pips** each (Mythic 8) | 3.0 s | 10,000 split each; missed = Room-wide 4,000 + he heals 3% | two teams soak |
 | **Firebrand** `b_ember_king_firebrand` | Tether | WHITE line between him and the farthest player: 800/s to them while it lasts; if they are **within 10 m** of another player it jumps to that player at full damage | 1.8 s | 800/s, 10 s | the target stays alone; healers keep them up |
 
@@ -2897,7 +2897,7 @@ The Veil lights up; a door made of every region's colours opens onto the **Dream
 | Phase (health) | Region wedge | Borrowed mechanic (see §8) | Plus |
 |---|---|---|---|
 | 100–90% | Hearthvale / Mossfen | **Harvest Ring** (Harvest Effigy): a donut + a soak | **Waking Stir** (Room-wide 3,000 every 20 s) |
-| 90–80% | Greyridge | **Ironmuster** (Grief-in-Iron): cross lines + armour-plate stacks | Tank swap **Mountain's Weight** (6,500 + stacks, swap at 2) |
+| 90–80% | Greyridge | **Ironcross** (Grief-in-Iron): cross lines + armour-plate stacks | Tank swap **Mountain's Weight** (6,500 + stacks, swap at 2) |
 | 80–70% | Sunscar | **Glass Storm** (the Glass Wyrm): burrow lines + glass Void zones | |
 | 70–60% | Whisperwood | **Brood Web** (the Hungering Brood): tether webs + egg adds | |
 | 60–50% | Cinder Steppe | **Carrion Circles** (the Carrion Crown): dive lines + circling shadows | |

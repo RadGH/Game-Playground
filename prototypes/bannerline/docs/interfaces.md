@@ -507,3 +507,16 @@ for Radley (tab hidden)". Lockstep events through `onEvent`: `takeover` / `rejoi
 seat changing hands. Rejoin: `joinRoom({ ..., rejoinToken })` then `beginMatch(room, room.rejoin.packet,
 { ..., rejoin: room.rejoin })`; keep `{ code, token }` (`packet.machines[].token` of this machine) in
 sessionStorage so a reload can rejoin.
+
+## 13. Campaign (stream F, PLAN §13) — "Banners of the Vale"
+
+Missions are data (`data/campaign/index.json` + one file per mission; format in the header of
+`js/sim/campaign.js`). The script runs INSIDE the sim: `createSim({ ...mission.config, seed, campaign: mission })`
+(use `campaignSession(mission).config` from `js/ui/campaign.js`, players included — a `scripted` seat has no AI
+and no player). State: `state.campaign` (progress, plain data) + `state.campaignMission`. Results: the normal
+`state.result` (`reason: 'objectives'` or `'time'` for mission endings). Events: `objective { id, text, optional }`,
+`say { who, text }`, `mission { outcome: 'won'|'lost', stars }`. Query: `campaignInfo(state, data)` →
+`{ name, objectives: [{ id, text, optional, star, done, have, need, counted }], log, outcome, stars, maxStars, timeLimit }`.
+UI (`js/ui/campaign.js`, stream F): `loadCampaign()`, `campaignProgress()` (localStorage), `createCampaignScreen`,
+`createCampaignOverlay` (call `update(sim)` each frame), `showDebrief`. `campaign.html` is a 2D preview that
+plays any mission with the real sim (`?mission=w1_first_banner&speed=8`).

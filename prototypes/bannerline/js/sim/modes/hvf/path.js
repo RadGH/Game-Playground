@@ -16,7 +16,8 @@ function buffers(n) {
 
 /**
  * opts: { who, maxNodes (default 30000), near: true = stop at the first cell within 1 step of the goal
- *         when the goal itself cannot be stood on (a tree to chop, a building to reach) }
+ *         when the goal itself cannot be stood on (a tree to chop, a building to reach),
+ *         closest: true = when the goal cannot be reached, go to the reached cell nearest to it }
  */
 export function findPath(ctx, g, from, goal, opts) {
   const { map } = ctx, cols = map.cols, rows = map.rows;
@@ -25,7 +26,7 @@ export function findPath(ctx, g, from, goal, opts) {
   if (from === goal) return [];
   const gx = goal % cols, gz = (goal / cols) | 0;
   const isGoal = c => c === goal || (!goalOk && opts.near && Math.abs((c % cols) - gx) <= 1 && Math.abs(((c / cols) | 0) - gz) <= 1);
-  if (!goalOk && !opts.near) return null;
+  if (!goalOk && !opts.near && !opts.closest) return null;
   const B = buffers(cols * rows), gen = B.gen;
   const heapF = [], heapC = [];
   const h = c => { const dx = Math.abs((c % cols) - gx), dz = Math.abs(((c / cols) | 0) - gz); return dx < dz ? 14 * dx + 10 * (dz - dx) : 14 * dz + 10 * (dx - dz); };
@@ -41,12 +42,14 @@ export function findPath(ctx, g, from, goal, opts) {
   };
   B.stamp[from] = gen; B.g[from] = 0; B.from[from] = -1;
   push(h(from), from);
-  let expanded = 0, found = -1;
+  let expanded = 0, found = -1, best = from, bestH = h(from);
   while (heapF.length) {
     const c = pop();
     if (B.closed[c] === gen) continue;
     B.closed[c] = gen;
     if (isGoal(c)) { found = c; break; }
+    const hc = h(c);
+    if (hc < bestH || (hc === bestH && c < best)) { bestH = hc; best = c; }
     if (++expanded > maxNodes) break;
     const x = c % cols, z = (c / cols) | 0;
     for (const [dx, dz, cost] of DIRS) {
@@ -63,7 +66,7 @@ export function findPath(ctx, g, from, goal, opts) {
       push(ng + h(n), n);
     }
   }
-  if (found < 0) return null;
+  if (found < 0) { if (!opts.closest || best === from) return null; found = best; }
   const path = [];
   for (let c = found; c !== from; c = B.from[c]) path.push(c);
   path.reverse();

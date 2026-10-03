@@ -192,7 +192,7 @@
    ],
    "cost": 20,
    "tell": 0,
-   "hp": 0,
+   "hp": 50,
    "blocks": "none",
    "mud": {
     "speedMult": 0.6,

@@ -3,12 +3,14 @@
 
 import { createMenuNav } from './menunav.js';
 
-export function createTitle({ screen, onPlay }) {
+export function createTitle({ screen, onPlay, onHost = () => {}, onJoin = () => {} }) {
   const menu = screen.querySelector('#title-menu');
   const nav = createMenuNav(menu, { initial: '.primary' });
   menu.addEventListener('click', (e) => {
     const act = e.target.closest('[data-act]')?.dataset.act;
     if (act === 'play') onPlay();
+    if (act === 'host') onHost();
+    if (act === 'join') onJoin();
   });
   let shownAt = 0;
   return {

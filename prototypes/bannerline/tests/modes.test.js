@@ -81,7 +81,13 @@ test('mode hooks: hvf is registered but not playable; per-mode data loads as dat
   const { mode, format } = resolveMode({ mode: 'hvf', format: '5v2' });
   const a = JSON.stringify(mode.buildMap(data, format, { seed: 11 })).length, b = JSON.stringify(mode.buildMap(data, format, { seed: 11 })).length;
   assert.equal(a, b);
-  // createState hook: the mode's own (H2 not built yet: a readable error, not a line-war state)
-  const players = []; for (let i = 0; i < 5; i++) players.push({ team: 0, role: 'farmer' }); for (let i = 0; i < 2; i++) players.push({ team: 1, role: 'hunter' });
-  assert.throws(() => createSim({ seed: 3, mode: 'hvf', format: '5v2', players }, data), /not playable yet/);
+  // createState hook, tested with a throwaway mode (so it does not pin stream H's progress)
+  const probe = { ...MODES.linewar, id: 'probe', formats: ['x'], defaultFormat: 'x', validate() {}, buildMap: (d, f, o) => ({ ...MODES.linewar.buildMap(d, '1v1'), seenSeed: o.seed }),
+    createState: (config, d, map) => ({ v: 1, tick: 0, seed: config.seed, players: [], teams: [], fields: [], ents: [], timers: [], probe: map.seenSeed, result: null }), phases: [], checkResult() {}, ai: () => [] };
+  MODES.probe = probe;
+  try {
+    const sim = createSim({ seed: 77, mode: 'probe', players: [] }, data);
+    assert.equal(sim.state.probe, 77, 'buildMap got the seed and createState got the map');
+    assert.equal(sim.state.game, 'probe');
+  } finally { delete MODES.probe; }
 });

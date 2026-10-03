@@ -11,6 +11,7 @@
 import { liveGrid, blocksSight, cellOf } from './grid.js';
 import { KIND } from './mapgen.js';
 import { FARMERS, HUNTERS } from './state.js';
+import { gear } from './hunter.js';
 
 const RAYS = new Map();   // radius (cells) -> { off: Int32Array [dx, dz, start, count], path: Int16Array [dx, dz ...] }
 function raysFor(R) {
@@ -75,16 +76,23 @@ export function stamp(map, bits, c, R) {
 /** Everything that gives a team vision: [{ c (cell), R (cells), los }]. */
 export function viewers(ctx, team) {
   const { state, data, map } = ctx;
-  const U = data.hvf.units, out = [];
+  const U = data.hvf.units, H = data.hvf.hunter, B = data.hvf.buildings.kinds, out = [];
   const cells = m => Math.max(1, Math.round(m / map.cell));
   for (const e of state.ents) {
     if (e.team !== team || !e.alive || e._gone) continue;
-    if (e.kind === 'farmer') out.push({ c: cellOf(map, e.x, e.z), R: cells(U.farmer.sight), los: true, id: e.id });
-    else if (e.kind === 'hunter') out.push({ c: cellOf(map, e.x, e.z), R: cells(U.hunter.sight), los: true, id: e.id });
-    else if (e.kind === 'animal') out.push({ c: cellOf(map, e.x, e.z), R: cells(data.hvf.animals.kinds[e.type].sight), los: false, id: e.id });
-    else if (e.kind === 'building' && e.type === 'kennel') out.push({ c: cellOf(map, e.x, e.z), R: cells(10), los: false, id: e.id });
-    else if (e.kind === 'building') out.push({ c: cellOf(map, e.x, e.z), R: cells(e.r + 2), los: false, id: e.id });
+    const c = cellOf(map, e.x, e.z);
+    if (e.kind === 'farmer') out.push({ c, R: cells(U.farmer.sight), los: true });
+    else if (e.kind === 'hunter') out.push({ c, R: cells(U.hunter.sight * (1 + gear(data, state.players[e.owner]).sightPct)), los: true });
+    else if (e.kind === 'animal') out.push({ c, R: cells(data.hvf.animals.kinds[e.type].sight), los: false });
+    else if (e.kind === 'army') out.push({ c, R: cells(U.army[e.type].sight), los: !e.flying });
+    else if (e.kind === 'ward') out.push({ c, R: cells(H.watchstone.sight), los: true });
+    else if (e.kind === 'hawk') out.push({ c, R: cells(H.skills.E.sight), los: false });
+    else if (e.kind === 'hound') out.push({ c, R: cells(H.hound.sight), los: false });
+    else if (e.kind === 'building' && e.lodge) { if (e.done !== false) out.push({ c, R: cells(e.type === 'kennel' ? 10 : H.lodge.sight), los: false }); }
+    else if (e.kind === 'building' && B[e.type] && B[e.type].sight) out.push({ c, R: cells(B[e.type].sight), los: true });
+    else if (e.kind === 'building') out.push({ c, R: cells(e.r + 2), los: false });
   }
+  for (const f of state.hvf.flares) if (f.team === team) out.push({ c: cellOf(map, f.x, f.z), R: cells(H.flare.radius), los: false });
   return out;
 }
 
@@ -104,6 +112,26 @@ export function updateVision(ctx, team) {
   for (const v of viewers(ctx, team)) { if (v.los) seeFrom(map, g, bits, v.c, v.R); else stamp(map, bits, v.c, v.R); }
   const ex = state.hvf.explored[team];
   for (let i = 0; i < bits.length; i++) ex[i] |= bits[i];
+  rememberBuildings(ctx, team);
+}
+
+/** Last-seen enemy buildings (the view draws them as grey ghosts where they were last seen). */
+function rememberBuildings(ctx, team) {
+  const { state, map } = ctx;
+  const mem = state.hvf.seen[team];
+  for (const b of state.ents) {
+    if (b.kind !== 'building' || b.team === team || !b.alive || b._gone || !canSee(ctx, team, b)) continue;
+    const m = mem.find(q => q.id === b.id);
+    if (m) { m.tick = state.tick; m.x = b.x; m.z = b.z; }
+    else mem.push({ id: b.id, kind: b.type, x: b.x, z: b.z, tick: state.tick });
+  }
+  // a remembered building whose spot is in sight again and is not there any more is forgotten
+  for (let i = mem.length - 1; i >= 0; i--) {
+    const m = mem[i];
+    if (!hasBit(state.hvf.vision[team], cellOf(map, m.x, m.z))) continue;
+    const b = state.ents.find(e => e.id === m.id);
+    if (!b || !b.alive || b._gone) mem.splice(i, 1);
+  }
 }
 
 /**
@@ -113,6 +141,18 @@ export function updateVision(ctx, team) {
 export function canSee(ctx, team, e) {
   const { state, map } = ctx;
   if (e.team === team) return true;
+  const { data } = ctx;
+  // hidden kit: farmers notice watchstones and snares only up close
+  if (e.kind === 'ward' || e.kind === 'snare') {
+    const R = e.kind === 'ward' ? data.hvf.hunter.watchstone.seenWithin : data.hvf.hunter.skills.W.seenWithin;
+    for (const o of state.ents) if (o.team === team && o.alive && !o._gone && (o.kind === 'farmer' || o.kind === 'army') && (o.x - e.x) * (o.x - e.x) + (o.z - e.z) * (o.z - e.z) <= R * R) return true;
+    return false;
+  }
+  // the Horn and the hound show animals through the fog for a moment
+  if (e.revealUntil > state.tick) return true;
+  // a windmill stands over the trees
+  const tall = e.kind === 'building' && data.hvf.buildings.kinds[e.type] && data.hvf.buildings.kinds[e.type].tall;
+  if (tall) for (const o of state.ents) if (o.team === team && o.alive && !o._gone && (o.kind === 'hunter' || o.kind === 'hawk') && (o.x - e.x) * (o.x - e.x) + (o.z - e.z) * (o.z - e.z) <= tall * tall) return true;
   const c = cellOf(map, e.x, e.z);
   if (!hasBit(state.hvf.vision[team], c)) return false;
   const g = liveGrid(ctx);

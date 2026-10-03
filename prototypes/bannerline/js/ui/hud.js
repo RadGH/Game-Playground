@@ -285,6 +285,12 @@ export function createHud({ root, overlay, sim, Q, player, seat, project, onPaus
         else alert(`Your ${name} leaves the gate`, 'good', 2600);
         break;
       }
+      case 'counter': {
+        if (ev.target !== player) break;
+        const who = s.players[ev.player]?.name || 'Your rival';
+        alert(`${who} sends ${ev.name}${ev.count > 1 ? ` ×${ev.count}` : ''} — ${ev.reason}`, 'warn', 3600);
+        break;
+      }
       case 'upgradeUnit': case 'unitUpgrade': if (ev.player === player) alert('Your army is better trained', 'good', 1600); break;
       default: break;
     }

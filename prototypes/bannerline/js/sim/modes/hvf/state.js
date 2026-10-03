@@ -43,12 +43,12 @@ export function createHvfState(config, data, map) {
   const state = {
     v: 1, game: 'hvf', mode: config.format, format: config.format, map: 'wild', seed, tick: 0, rng,
     nextId: 1, players: [], teams: [{ id: FARMERS, role: 'farmer', players: [] }, { id: HUNTERS, role: 'hunter', players: [] }],
-    ents: [], timers: [], nextTimer: 1, result: null, rules: { size: rules.size || null },
+    ents: [], timers: [], nextTimer: 1, nextItem: 1, result: null, rules: { size: rules.size || null },
     hvf: {
       chopped: [], chopV: 0, buildV: 0,
       vision: [new Array(words).fill(0), new Array(words).fill(0)],
       explored: [new Array(words).fill(0), new Array(words).fill(0)],
-      seen: [[], []], tracks: [], graves: [], turn: 0,
+      seen: [[], []], tracks: [], graves: [], flares: [], turn: -1, turnWhy: 'The farmers have no army yet',
       releaseTick: secToTicks(rules.headStart ?? f.headStart),
       endTick: secToTicks(rules.timer ?? f.clock),
       hunterMult: f.hunterMult,
@@ -62,7 +62,7 @@ export function createHvfState(config, data, map) {
       kind: pc.kind === 'ai' ? 'ai' : 'human', ai: pc.kind === 'ai' ? { difficulty: (pc.ai && pc.ai.difficulty) || 'recruit', rng: seedStream(seed, 'hvf-ai' + id) } : null,
       colour: pc.colour ?? id, ent: -1,
       gold: pc.role === 'hunter' ? U.hunter.startGold : U.farmerStartGold, income: 0,
-      ghost: false, out: false, copies: {}, level: 1, xp: 0, deaths: 0,
+      ghost: false, out: false, copies: {}, upgrades: {}, cd: {}, inv: pc.role === 'hunter' ? new Array(data.hvf['hunter-items'].slots).fill(null) : null, level: 1, xp: 0, deaths: 0,
       stats: { incomeAt: [], goldAt: [], earned: 0, animalsLost: 0, kills: 0, chopped: 0 },
     };
     state.players.push(p);

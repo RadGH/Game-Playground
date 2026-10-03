@@ -360,5 +360,5 @@ const pre = (params.get('case') || '40x2').match(/^(\d+)x(\d)(?:s(\d+))?$/);
 applyCase(pre ? { n: Math.min(POOL, +pre[1]), v: Math.min(2, +pre[2]), standins: +(pre[3] || 0) } : { n: 40, v: 2 });
 $('state').textContent = `Ready · ${gpuName()}`;
 requestAnimationFrame(frame);
-window.bench = { portrait, showPortrait, run, results: () => results, verdict, applyCase, get ready() { return ready; }, gpu: gpuName, cases: DEFAULT_CASES, scene, renderer: R };
+window.bench = { cams, portrait, showPortrait, run, results: () => results, verdict, applyCase, get ready() { return ready; }, gpu: gpuName, cases: DEFAULT_CASES, scene, renderer: R };
 if (params.get('auto') === '1') run();

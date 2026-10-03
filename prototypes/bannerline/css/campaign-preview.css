@@ -1,0 +1,22 @@
+/* campaign.html: the 2D preview of a campaign mission (no 3D). */
+#screen-play { background: #0d0f12; }
+#field { position: absolute; inset: 0 0 96px 0; width: 100%; height: calc(100% - 96px); display: block; cursor: crosshair; }
+.pv-bar {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 96px; display: flex; gap: 8px; align-items: center; padding: 8px 14px;
+  background: var(--panel-solid); border-top: 1px solid var(--line); overflow-x: auto;
+}
+.pv-stat { display: grid; min-width: 96px; font-size: 13px; color: var(--ink2); }
+.pv-stat b { color: var(--gold); font: 600 18px var(--head); }
+.pv-bar button {
+  display: grid; justify-items: center; gap: 1px; min-width: 74px; padding: 6px 8px; border-radius: var(--r); cursor: pointer;
+  background: var(--panel2); border: 1px solid var(--line); color: var(--ink); font-size: 12px;
+}
+.pv-bar button b { font: 600 13px var(--head); }
+.pv-bar button.off { opacity: .45; }
+.pv-sep { width: 1px; align-self: stretch; background: var(--line); margin: 0 4px; }
+.pv-card {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(460px, calc(100vw - 32px));
+  padding: 22px; background: var(--panel-solid); border: 1px solid var(--line-strong); border-radius: 10px; box-shadow: var(--shadow); z-index: 9;
+}
+.pv-card[hidden] { display: none; }
+@media (max-width: 760px) { .pv-bar { height: 110px; } #field { inset: 0 0 110px 0; height: calc(100% - 110px); } }

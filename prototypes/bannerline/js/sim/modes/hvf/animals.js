@@ -20,6 +20,8 @@ export function animalTick(ctx) {
   const hunters = [];
   for (const e of state.ents) if (e.team === HUNTERS && (e.kind === 'hunter' || e.kind === 'army') && e.alive && !e._gone && state.tick >= state.hvf.releaseTick) hunters.push(e);
   const rng = state.rng.animals;
+  const dogDef = data.hvf.buildings.kinds.sheepdog, dogR2 = dogDef.herd.radius * dogDef.herd.radius;
+  const dogs = state.ents.filter(b => b.kind === 'building' && b.type === 'sheepdog' && b.alive && !b._gone);
   for (const a of state.ents) {
     if (a.kind !== 'animal' || !a.alive || a._gone) continue;
     const K = A.kinds[a.type];
@@ -30,6 +32,8 @@ export function animalTick(ctx) {
     let radius = K.wander;
     if (home && (perHome[home.id] || 0) > home.comfort) radius *= R.crowdMult;
     if (a.wild) radius *= R.wildMult;
+    // a Sheepdog nearby keeps the flock close
+    for (const d of dogs) if ((d.x - a.x) * (d.x - a.x) + (d.z - a.z) * (d.z - a.z) <= dogR2) { radius *= dogDef.herd.wanderMult; break; }
     // flee
     let threat = null, td = R.fleeRange * R.fleeRange;
     for (const h of hunters) { const d = (h.x - a.x) * (h.x - a.x) + (h.z - a.z) * (h.z - a.z); if (d < td) { td = d; threat = h; } }
@@ -75,4 +79,31 @@ export function ringBell(ctx, p, x, z, r) {
     a.tx = a.hx; a.tz = a.hz; a.fleeUntil = ctx.state.tick + 40; a.nextAt = ctx.state.tick + 120; n++;
   }
   return n;
+}
+
+/**
+ * Noise and tracks (docs/hvf-PLAN.md §4): an animal calls every `noiseEvery` s on its own beat
+ * ((tick + id * 7) % period === 0); a hunter inside its noise radius hears it through the fog (event
+ * `noise`, the AI uses the same rule). Strays and fleeing animals leave a track every 2 s, kept 20 s.
+ */
+export function noiseTick(ctx) {
+  const { state, data } = ctx;
+  const A = data.hvf.animals.kinds, T = data.hvf.hunter.tracking;
+  const hunters = state.ents.filter(h => h.kind === 'hunter' && h.alive && !h._gone);
+  const every = Math.round(T.every * 20), keep = Math.round(T.keep * 20);
+  for (const a of state.ents) {
+    if (a.kind !== 'animal' || !a.alive || a._gone) continue;
+    const K = A[a.type], period = Math.round(K.noiseEvery * 20);
+    if ((state.tick + a.id * 7) % period === 0) {
+      const heard = [];
+      for (const h of hunters) if ((h.x - a.x) * (h.x - a.x) + (h.z - a.z) * (h.z - a.z) <= K.noise * K.noise) heard.push(h.owner);
+      ctx.emit('noise', { x: Math.round(a.x), z: Math.round(a.z), kind: a.type, src: a.id, heard });
+    }
+    if ((a.stray || state.tick < a.fleeUntil) && (state.tick + a.id * 3) % every === 0) {
+      const dx = a.x - a.px, dz = a.z - a.pz;
+      state.hvf.tracks.push({ x: Math.round(a.x * 10) / 10, z: Math.round(a.z * 10) / 10, dir: dx * dx + dz * dz > 1e-8 ? Math.round(faceOf(dx, dz) * 100) / 100 : 0, tick: state.tick, owner: a.owner });
+    }
+  }
+  if (state.hvf.tracks.length && state.hvf.tracks[0].tick < state.tick - keep) state.hvf.tracks = state.hvf.tracks.filter(t => t.tick >= state.tick - keep);
+  if (state.hvf.tracks.length > 600) state.hvf.tracks = state.hvf.tracks.slice(-600);
 }

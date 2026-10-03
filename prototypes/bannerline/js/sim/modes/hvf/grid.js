@@ -22,7 +22,7 @@ export function liveGrid(ctx) {
   }
   const occ = new Uint8Array(map.cells.length), opaque = new Uint8Array(map.cells.length);
   for (const e of state.ents) {
-    if (e.kind !== 'building' || !e.alive || e._gone || !e.cells) continue;
+    if (e.kind !== 'building' || !e.alive || e._gone || !e.cells || e.blocks === 'none') continue;
     for (const i of e.cells) { occ[i] = e.blocks === 'hunters' ? OCC_HUNTERS : OCC_ALL; if (e.opaque) opaque[i] = 1; }
   }
   c.occ = occ; c.opaque = opaque; c.buildV = H.buildV;

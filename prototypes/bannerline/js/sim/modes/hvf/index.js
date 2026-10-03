@@ -13,7 +13,10 @@
 import { worldForFormat } from './mapgen.js';
 import { createHvfState, FARMERS, HUNTERS, entById } from './state.js';
 import { breedTick, incomeTick } from './farm.js';
-import { animalTick } from './animals.js';
+import { animalTick, noiseTick } from './animals.js';
+import { hunterKitTick } from './hunter.js';
+import { armyTick, towerTick } from './army.js';
+import { turnTick } from './turn.js';
 import { unitTick } from './units.js';
 import { visionTick, updateVision } from './vision.js';
 import { HVF_COMMANDS } from './commands.js';
@@ -21,7 +24,7 @@ import * as queries from './query.js';
 
 // mirrors data/hvf/rules.json `formats` (tests/hvf-mapgen.test.js checks the two agree)
 export const FORMATS = ['2v1', '3v1', '4v1', '4v2', '5v2', '6v2', '7v2', '8v2', '6v3', '7v3', '8v3', '9v3'];
-export const DATA_FILES = ['hvf/rules.json', 'hvf/mapgen.json', 'hvf/units.json', 'hvf/animals.json', 'hvf/buildings.json'];
+export const DATA_FILES = ['hvf/rules.json', 'hvf/mapgen.json', 'hvf/units.json', 'hvf/animals.json', 'hvf/buildings.json', 'hvf/hunter.json', 'hvf/hunter-items.json'];
 
 /** The mode's data (data.hvf once A loads per-mode files; a bundle with { rules, mapgen } works too). */
 const hvfData = data => (data && data.hvf) || data;
@@ -78,8 +81,9 @@ export default {
     return state;
   },
   initState() {},
-  // §2.2 order (H2 subset; timers, noise, tracks, the Turn arrive with H3)
-  phases: [releaseTick, breedTick, incomeTick, animalTick, unitTick, visionTick],
+  // §2.2 order: release -> build/breed -> income -> noise + tracks -> animals -> characters -> the
+  // hunter's kit (hawk, hound, wards, snares, lodges) -> army -> towers -> vision -> the Turn
+  phases: [releaseTick, breedTick, incomeTick, noiseTick, animalTick, unitTick, hunterKitTick, armyTick, towerTick, visionTick, turnTick],
   checkResult,
   commands: HVF_COMMANDS,
   queries,

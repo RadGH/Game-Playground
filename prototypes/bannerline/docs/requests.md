@@ -219,7 +219,7 @@ the spam. **Removed** = done in the sim already; **Flag** = a judgement call for
   in js/sim/ai/counter.js is pure and takes no AI state, so `releaseTick` could call
   `counterEvent(ctx, p, p.rival, uid, n, reason)` for a human's wave too. One import + ~6 lines in economy.js;
   E did not touch A's file.
-- [ ] (E -> B) Toast for `counter` events whose `target` is a local player: "**{sender name}** sends
+- [x] (E -> B) Toast for `counter` events whose `target` is a local player: "**{sender name}** sends
   **{name}** x{count} — {reason}". The reason is written to be read by the DEFENDER ("your").
 - [ ] (E -> I) `js/sim/shop.js` `aiShopping` / `aiHealSlot` are no longer called (the AI's Outfitter,
   Drill Yard and Sanctum decisions moved into js/sim/ai/shop.js + town.js). Safe to delete.
@@ -268,4 +268,22 @@ the spam. **Removed** = done in the sim already; **Flag** = a judgement call for
   the local clock, `m.sim = m.clock.sim` per frame, seats from `net.match.localPlayers`, no speed/pause online,
   `waitingFor` banner, hostLeft -> results, host `room.backToLobby()`), plus the lockstep banners. The online
   lobby screens follow after the round-2 town UI. B will tick this when it lands.
-- [ ] (B -> E) `counter` toast for local targets: B adds it with the round-2 HUD drop.
+- [x] (B -> E) `counter` toast for local targets: done (js/ui/hud.js onEvent `counter`).
+
+## Stream F (campaign, M8) -> B (2026-10-03)
+
+- [ ] (F -> B) Reach the campaign from the title / mode screen (R2.11): a "Campaign" entry that shows
+  `createCampaignScreen({ screen, campaign: await loadCampaign(), progress: campaignProgress(), onPlay, onBack })`
+  from `js/ui/campaign.js` (+ `<link rel="stylesheet" href="css/campaign.css">` in index.html). Pads: map
+  d-pad/stick to `screen.nav(dx, dy)`, A to `screen.confirm()`, B to `screen.back()`.
+- [ ] (F -> B) `onPlay(mission)` -> `const { config, session } = campaignSession(mission, { device, deviceType })`;
+  in `startMatch`, when `session.campaign` is set, build the sim from `createSim({ ...config, seed }, data)` AS IS
+  (the mission's players; `session.slots` has the one `local` seat to bind to the device); create
+  `createCampaignOverlay({ root: <the match view root> })` and call `overlay.update(m.sim)` every frame;
+  when the match ends show `showDebrief({ card, sim, mission, progress, next, onNext, onRetry, onMap })`
+  instead of the normal results (Next / Play again / Campaign map). The mission's opening lines arrive as
+  `say` events and in the overlay; nothing else is needed. Until then `campaign.html` plays every mission
+  in 2D (tests/campaign.spec.js).
+- [ ] (F -> lead) PLAN §13's old campaign title used a word the owner dislikes; the campaign is now
+  "Banners of the Vale", Warrior chapter "The Iron Oath" (5 missions); Ranger / Pyromancer / Druid / Engineer
+  chapters are stubs (status 'planned').

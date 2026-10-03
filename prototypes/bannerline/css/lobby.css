@@ -145,3 +145,26 @@
 .md-card.ready .md-status { color: #1a1206; background: linear-gradient(180deg, #d9a842, #a87a24); padding: 3px 12px; border-radius: 6px; }
 .md-card.next .md-status { color: #8fd0ff; }
 .modes .hint { text-align: center; }
+
+/* ---------- online: join by code + room ---------- */
+.netjoin { max-width: 720px; margin: 0 auto; padding: 14px 20px; display: grid; gap: 18px; }
+.nj-card { display: grid; gap: 14px; justify-items: center; padding: 26px; border-radius: 12px; background: linear-gradient(180deg, rgba(30,32,38,.95), rgba(16,17,21,.96)); border: 1px solid var(--line); }
+.nj-input { width: 280px; text-align: center; font: 800 30px var(--head); letter-spacing: .4em; text-transform: uppercase; padding: 8px; border-radius: 8px; background: rgba(0,0,0,.4); border: 1px solid var(--line-strong); color: var(--gold); }
+.nj-boxes { display: flex; gap: 8px; }
+.nj-box { width: 48px; height: 58px; border-radius: 8px; font: 800 28px var(--head); color: var(--ink); background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.15); cursor: pointer; }
+.nj-box.on { border-color: var(--gold); color: var(--gold); box-shadow: 0 0 0 2px rgba(242,196,90,.25); }
+.nj-help { margin: 0; color: var(--ink3); font-size: 13px; text-align: center; }
+.nj-go { min-width: 220px; }
+.nj-err { margin: 0; color: #ffb0a2; font-weight: 700; text-align: center; }
+.netroom .lb-top { grid-template-columns: auto 1fr auto auto; }
+.nr-code { display: flex; align-items: center; gap: 10px; padding: 6px 12px; border-radius: 8px; background: rgba(0,0,0,.4); border: 1px solid var(--gold-dim); }
+.nr-code span { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink3); }
+.nr-code b { font: 800 28px var(--head); letter-spacing: .25em; color: var(--gold); }
+.nr-machines { display: flex; flex-wrap: wrap; gap: 8px; }
+.nr-m { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 13px; color: var(--ink2); background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.12); }
+.nr-m .ic { width: 14px; height: 14px; }
+.nr-m.hidden { opacity: .6; }
+.netroom .lb-slot.mine { box-shadow: 0 0 0 1px var(--gold-dim); }
+.nr-start { min-width: 240px; }
+.net-wait { position: absolute; top: 120px; left: 50%; transform: translateX(-50%); padding: 8px 18px; border-radius: 8px; font-weight: 700; background: rgba(14,15,18,.92); border: 1px solid #ffd38a; color: #ffd38a; z-index: 25; }
+.net-wait[hidden] { display: none; }

@@ -14,7 +14,7 @@ import { hashCanonical } from './hash.js';
 export const DATA_FILES = ['econ.json', 'units.json', 'races.json', 'damage.json', 'maps.json', 'heroes.json', 'ai.json', 'items-bl.json', 'shop.json', 'upgrades.json', 'powers.json', 'buildings.json'];
 // Per-mode data (R2.10 hook for stream H). Kept as a plain list here so data.js imports no mode code;
 // tests/modes.test.js checks it equals the union of every registered mode's `dataFiles`.
-export const MODE_DATA_FILES = ['hvf/rules.json', 'hvf/mapgen.json'];
+export const MODE_DATA_FILES = ['hvf/rules.json', 'hvf/mapgen.json', 'hvf/units.json', 'hvf/animals.json', 'hvf/buildings.json', 'hvf/hunter.json', 'hvf/hunter-items.json'];
 export const ALL_DATA_FILES = DATA_FILES.concat(MODE_DATA_FILES);
 const keyOf = f => f.replace(/\.json$/, '');
 /** Read / write a file's slot in a raw bundle ('hvf/rules.json' -> raw.hvf.rules). */

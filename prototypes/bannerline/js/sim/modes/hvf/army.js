@@ -87,7 +87,7 @@ function followPath(ctx, u, gx, gz, speed) {
   if (u.flying) return stepToward(ctx, u, gx, gz, speed);
   const o = u.ord;
   if (!o.path) {
-    o.path = findPath(ctx, liveGrid(ctx), cellOf(map, u.x, u.z), cellOf(map, gx, gz), { who: 'army', near: true, maxNodes: 12000 }) || [];
+    o.path = findPath(ctx, liveGrid(ctx), cellOf(map, u.x, u.z), cellOf(map, gx, gz), { who: 'army', near: true, closest: true, maxNodes: 12000 }) || [];
     o.i = 0;
   }
   if (o.i >= o.path.length) return true;

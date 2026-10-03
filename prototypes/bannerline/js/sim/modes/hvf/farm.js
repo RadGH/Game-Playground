@@ -41,6 +41,11 @@ export function buildRefusal(ctx, p, kind, x, z) {
   for (const c of fp.cells) if (!BUILDABLE[g.cells[c]] || g.occ[c] !== OCC_NONE || map.level[c] !== lv) return 'blocked';
   // never on a kennel
   for (const e of state.ents) if (e.kind === 'building' && e.type === 'kennel' && !e._gone && (e.x - fp.x) * (e.x - fp.x) + (e.z - fp.z) * (e.z - fp.z) < (e.r + 2) * (e.r + 2)) return 'blocked';
+  if (def.needsProducers) {
+    let n = 0;
+    for (const e of state.ents) if (e.kind === 'building' && e.owner === p.id && e.alive && !e._gone && BK(data).kinds[e.type] && BK(data).kinds[e.type].makes) n++;
+    if (n < def.needsProducers) return 'needs';
+  }
   if (p.gold < priceOf(data, p, kind)) return 'gold';
   return null;
 }
@@ -99,7 +104,7 @@ export function breedTick(ctx) {
     if (!def.makes) continue;
     const p = state.players[b.owner];
     if (p.ghost || (perHome[b.id] || 0) >= def.cap || (perFarmer[p.id] || 0) >= A.rules.capPerFarmer || total >= A.rules.capMatch) { b.breedAt = -1; continue; }
-    if (b.breedAt < 0) { b.breedAt = state.tick + secToTicks(A.kinds[def.makes].breed); continue; }
+    if (b.breedAt < 0) { b.breedAt = state.tick + secToTicks(A.kinds[def.makes].breed * (p.upgrades.breeding ? B.upgrades.breeding.breedMult : 1)); continue; }
     if (state.tick < b.breedAt) continue;
     const a = spawnAnimal(ctx, b, def.makes);
     if (a) { total++; perFarmer[p.id] = (perFarmer[p.id] || 0) + 1; perHome[b.id] = (perHome[b.id] || 0) + 1; }
@@ -131,9 +136,10 @@ export function incomeOf(ctx, p) {
   if (p.ghost) return { total: 0, animals: 0, flat: 0, pct: 0 };
   for (const e of state.ents) {
     if (e.owner !== p.id || !e.alive || e._gone) continue;
-    if (e.kind === 'animal' && !e.wild) animals += A[e.type].income;
+    if (e.kind === 'animal' && !e.wild) animals += A[e.type].income * (e.type === 'sheep' && p.upgrades.shears ? 1 + BK(data).upgrades.shears.sheepPct : 1);
     else if (e.kind === 'building' && B[e.type]) { flat += B[e.type].flat || 0; pct += B[e.type].incomePct || 0; }
   }
+  animals *= 1 + (p.upgrades.feed || 0) * BK(data).upgrades.feed.animalIncomePct;
   return { total: (animals + flat) * (1 + pct), animals, flat, pct };
 }
 
@@ -153,6 +159,32 @@ export function incomeTick(ctx) {
       p.gold += inc; p.stats.earned += inc;
     }
   }
+}
+
+/** Farm upgrades (command `upgrade {id}`): the next rank's price, or null at max. */
+export function upgradeCost(data, p, id) {
+  const U = BK(data).upgrades[id];
+  if (!U || id === 'order') return null;
+  const r = p.upgrades[id] || 0;
+  return r < U.costs.length ? U.costs[r] : null;
+}
+
+export function buyUpgrade(ctx, p, id) {
+  if (p.role !== 'farmer') return 'role';
+  if (p.ghost) return 'dead';
+  if (typeof id !== 'string' || !BK(ctx.data).upgrades[id] || id === 'order') return 'bad';
+  const c = upgradeCost(ctx.data, p, id);
+  if (c == null) return 'max';
+  if (p.gold < c) return 'gold';
+  p.gold -= c;
+  p.upgrades[id] = (p.upgrades[id] || 0) + 1;
+  ctx.emit('upgrade', { player: p.id, id, rank: p.upgrades[id], cost: c });
+  // Stuffing reaches the scarecrows already standing
+  if (id === 'stuffing') for (const u of ctx.state.ents) if (u.kind === 'army' && u.type === 'scarecrow' && u.owner === p.id && u.alive) {
+    const m = 1 + p.upgrades.stuffing * BK(ctx.data).upgrades.stuffing.armyPct, base = ctx.data.hvf.units.army.scarecrow.hp;
+    u.hp = u.hp / u.hpMax * base * m; u.hpMax = base * m;
+  }
+  return null;
 }
 
 export { entById, liveEnt };

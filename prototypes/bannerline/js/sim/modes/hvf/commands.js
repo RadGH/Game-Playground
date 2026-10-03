@@ -11,6 +11,10 @@ import { liveEnt, entById, FARMERS, HUNTERS } from './state.js';
 import { routeTo, released } from './units.js';
 import { buildRefusal, footprint } from './farm.js';
 import { canSee } from './vision.js';
+import { castFarmer } from './units.js';
+import { buyUpgrade } from './farm.js';
+import { train, armyOrder } from './army.js';
+import { castHunter, buyItem, sellItem, useItem, buildLodge } from './hunter.js';
 
 const isNum = v => typeof v === 'number' && v === v && v !== Infinity && v !== -Infinity;
 const inMap = (map, x, z) => isNum(x) && isNum(z) && x >= 0 && z >= 0 && x < map.size && z < map.size;
@@ -29,7 +33,8 @@ export const HVF_COMMANDS = {
     e.ord = { k: 'move' };
     const g = liveGrid(ctx), who = p.role === 'hunter' ? 'hunter' : 'farmer';
     const goal = cellOf(ctx.map, cmd.x, cmd.z);
-    if (!routeTo(ctx, e, goal, !canStand(g, who, goal))) { e.ord = { k: 'idle' }; return 'reach'; }
+    // a goal in the trees or across water: walk as close as the ground allows (closest: true)
+    if (!routeTo(ctx, e, goal, false, true)) { e.ord = { k: 'idle' }; return 'reach'; }
     return null;
   },
   stop(ctx, p) {
@@ -47,7 +52,12 @@ export const HVF_COMMANDS = {
     const fp = footprint(ctx.map, def, cmd.x, cmd.z);
     e.ord = { k: 'build', kind: cmd.kind, x: cmd.x, z: cmd.z, near: true };
     // walk next to the footprint (its centre cell, stopping one step short)
-    if (!routeTo(ctx, e, cellOf(ctx.map, fp.x - 0.01, fp.z - 0.01), true)) { e.ord = { k: 'idle' }; return 'reach'; }
+    // walk to the reachable cell nearest the footprint; placing checks the distance on arrival
+    if (!routeTo(ctx, e, cellOf(ctx.map, fp.x - 0.01, fp.z - 0.01), true, true)) {
+      const here = Math.sqrt((fp.x - e.x) * (fp.x - e.x) + (fp.z - e.z) * (fp.z - e.z));
+      if (here > buildReach(ctx, def)) { e.ord = { k: 'idle' }; return 'reach'; }
+      e.ord.path = []; e.ord.i = 0;
+    }
     return null;
   },
   chop(ctx, p, cmd) {
@@ -87,6 +97,51 @@ export const HVF_COMMANDS = {
     b.rally = { x: cmd.x, z: cmd.z };
     return null;
   },
+  cast(ctx, p, cmd) {
+    if (typeof cmd.slot !== 'string') return 'bad';
+    if (p.role === 'farmer') return castFarmer(ctx, p, cmd);
+    if (!released(ctx.state)) return 'kennel';
+    if (cmd.x != null && !inMap(ctx.map, cmd.x, cmd.z)) return 'bad';
+    return castHunter(ctx, p, cmd);
+  },
+  pullup(ctx, p, cmd) {   // farmer: 3 s at a watchstone or snare he can see — removing it is not an attack
+    if (p.role !== 'farmer') return 'role';
+    const { e, why } = actor(ctx, p); if (why) return why;
+    const t = typeof cmd.target === 'number' ? liveEnt(ctx.state, cmd.target) : null;
+    if (!t || (t.kind !== 'ward' && t.kind !== 'snare')) return 'bad';
+    if (!canSee(ctx, FARMERS, t)) return 'unseen';
+    e.ord = { k: 'pullup', target: t.id, until: -1, near: true };
+    if (!routeTo(ctx, e, cellOf(ctx.map, t.x, t.z), true)) { e.ord = { k: 'idle' }; return 'reach'; }
+    return null;
+  },
+  upgrade(ctx, p, cmd) { return buyUpgrade(ctx, p, cmd.id); },
+  train(ctx, p, cmd) {
+    if (typeof cmd.unit !== 'string' || typeof cmd.building !== 'number') return 'bad';
+    return train(ctx, p, cmd.unit, cmd.building);
+  },
+  order(ctx, p, cmd) {
+    if (p.role !== 'farmer') return 'role';
+    return armyOrder(ctx, p, cmd.ids, { kind: cmd.kind, x: cmd.x, z: cmd.z, target: cmd.target });
+  },
+  buy(ctx, p, cmd) { if (typeof cmd.id !== 'string') return 'bad'; return buyItem(ctx, p, cmd.id); },
+  sell(ctx, p, cmd) { if (p.role !== 'hunter') return 'role'; return sellItem(ctx, p, cmd.slot); },
+  use(ctx, p, cmd) {
+    if (p.role !== 'hunter') return 'role';
+    if (cmd.x != null && !inMap(ctx.map, cmd.x, cmd.z)) return 'bad';
+    return useItem(ctx, p, cmd);
+  },
+  ward(ctx, p, cmd) {   // plant a watchstone from the inventory
+    if (p.role !== 'hunter') return 'role';
+    if (!inMap(ctx.map, cmd.x, cmd.z)) return 'bad';
+    const slot = p.inv.findIndex(it => it && ctx.data.hvf['hunter-items'].items[it.id].use === 'ward');
+    if (slot < 0) return 'none';
+    return useItem(ctx, p, { slot, x: cmd.x, z: cmd.z });
+  },
+  lodge(ctx, p, cmd) {
+    if (p.role !== 'hunter') return 'role';
+    if (!released(ctx.state)) return 'kennel';
+    return buildLodge(ctx, p, cmd.x, cmd.z);
+  },
   surrender(ctx, p) {
     const { state } = ctx;
     if (state.result) return 'over';
@@ -107,5 +162,8 @@ export function applyHvfCommand(ctx, cmd) {
   const why = fn(ctx, state.players[cmd.p], cmd);
   return why ? reject(why) : null;
 }
+
+/** How far from a footprint's centre a farmer may stand and still place it. */
+export function buildReach(ctx, def) { return Math.max(def.size[0], def.size[1]) * ctx.map.cell * 0.75 + ctx.data.hvf.units.farmer.buildRange; }
 
 export { cellX, cellZ };

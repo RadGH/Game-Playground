@@ -20,13 +20,11 @@
    },
    {
     "team": 1,
-    "kind": "ai",
+    "kind": "human",
     "race": "ashtusk",
     "hero": "warrior",
     "name": "Ashtusk Scouts",
-    "ai": {
-     "difficulty": "recruit"
-    }
+    "scripted": true
    }
   ],
   "rules": {
@@ -175,6 +173,50 @@
    ]
   },
   {
+   "id": "third_wave",
+   "when": {
+    "at": 200
+   },
+   "do": [
+    {
+     "do": "wave",
+     "player": 1,
+     "units": [
+      [
+       "raider_pair",
+       3
+      ],
+      [
+       "spearthrower",
+       2
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "fourth_wave",
+   "when": {
+    "at": 290
+   },
+   "do": [
+    {
+     "do": "wave",
+     "player": 1,
+     "units": [
+      [
+       "raider_pair",
+       4
+      ],
+      [
+       "brute",
+       1
+      ]
+     ]
+    }
+   ]
+  },
+  {
    "id": "won",
    "when": {
     "done": "defend"
@@ -187,5 +229,6 @@
     }
    ]
   }
- ]
+ ],
+ "_doc": "The Ashtusk seat is `scripted`: no AI and no player; only this mission's script sends its waves (a first mission must be gentle)."
 }

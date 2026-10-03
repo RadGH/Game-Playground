@@ -2,7 +2,10 @@
 // plain values; nothing here changes state. `q` = { state, data, map } (a sim is fine: it has all three).
 
 import { hasBit, canSee } from './vision.js';
-import { priceOf, buildRefusal, incomeOf } from './farm.js';
+import { priceOf, buildRefusal, incomeOf, upgradeCost } from './farm.js';
+import { gear, castRefusal, buyRefusal as hunterBuyRefusal } from './hunter.js';
+import { turnValues } from './turn.js';
+import { armyCount } from './army.js';
 import { entById, FARMERS, HUNTERS, TICK_HZ } from './state.js';
 import { cellOf } from './grid.js';
 
@@ -43,10 +46,50 @@ export function buildMenu(q, pid) {
 export function buildCheck(q, pid, kind, x, z) { return buildRefusal(ctxOf(q), q.state.players[pid], kind, x, z); }
 
 export function hunterInfo(q, pid) {
-  const { state } = q, p = state.players[pid], e = entById(state, p.ent);
-  return { gold: p.gold, level: p.level, xp: p.xp, out: p.out, deaths: p.deaths, alive: !!e && e.alive, respawnIn: e && !e.alive && e.respawnAt >= 0 ? (e.respawnAt - state.tick) / TICK_HZ : 0, ent: e,
-    lodges: state.ents.filter(b => b.kind === 'building' && b.lodge && b.owner === pid && b.alive && !b._gone).map(b => ({ id: b.id, x: b.x, z: b.z, type: b.type })) };
+  const { state, data } = q, p = state.players[pid], e = entById(state, p.ent), H = data.hvf.hunter, U = data.hvf.units.hunter, ctx = ctxOf(q);
+  const g = gear(data, p);
+  return {
+    gold: p.gold, level: p.level, xp: p.xp, xpNext: p.level < U.maxLevel ? U.xpTable[p.level] : null, out: p.out, deaths: p.deaths,
+    alive: !!e && e.alive, respawnIn: e && !e.alive && e.respawnAt >= 0 ? (e.respawnAt - state.tick) / TICK_HZ : 0, ent: e,
+    lodges: state.ents.filter(b => b.kind === 'building' && b.lodge && b.owner === pid && b.alive && !b._gone).map(b => ({ id: b.id, x: b.x, z: b.z, type: b.type, done: b.done !== false })),
+    skills: Object.keys(H.skills).map(slot => ({ slot, id: H.skills[slot].id, name: H.skills[slot].name, level: H.skills[slot].level, readyIn: Math.max(0, (p.cd[slot] || 0) - state.tick) / TICK_HZ, canCast: castRefusal(ctx, p, slot) === null, reason: castRefusal(ctx, p, slot) })),
+    snares: { standing: state.ents.filter(x => x.kind === 'snare' && x.owner === pid && !x._gone).length, max: H.skills.W.max + g.snares },
+    wards: state.ents.filter(x => x.kind === 'ward' && x.owner === pid && !x._gone).map(w => ({ id: w.id, x: w.x, z: w.z, left: (w.until - state.tick) / TICK_HZ })),
+    tracking: p.level >= H.tracking.level, gear: g,
+    inv: p.inv.map((it, slot) => it ? { slot, id: it.id, charges: it.charges, name: data.hvf['hunter-items'].items[it.id].name } : null),
+  };
 }
+
+/** The hunters' Outfitter at a lodge: every item with its price, text and refusal. */
+export function hunterShop(q, pid) {
+  const { state, data } = q, p = state.players[pid], ctx = ctxOf(q), I = data.hvf['hunter-items'].items;
+  return Object.keys(I).map(id => { const why = hunterBuyRefusal(ctx, p, id); return { id, name: I[id].name, desc: I[id].desc, price: I[id].price, canBuy: why === null, reason: why }; });
+}
+
+/** Farm upgrades: rank, next price, refusal. */
+export function farmUpgrades(q, pid) {
+  const { state, data } = q, p = state.players[pid], U = data.hvf.buildings.upgrades;
+  return U.order.map(id => { const c = upgradeCost(data, p, id); const reason = c == null ? 'max' : p.gold < c ? 'gold' : null; return { id, name: U[id].name, desc: U[id].desc, rank: p.upgrades[id] || 0, ranks: U[id].costs.length, cost: c, canBuy: reason === null, reason }; });
+}
+
+/** The farmer's army bar. */
+export function armyInfo(q, pid) {
+  const { state, data } = q;
+  return { count: armyCount(state, pid), cap: data.hvf.units.army.cap, units: state.ents.filter(u => u.kind === 'army' && u.owner === pid && u.alive && !u._gone).map(u => ({ id: u.id, type: u.type, hpPct: u.hp / u.hpMax, order: u.ord.k })) };
+}
+
+/** The Turn moon: value -1..+1, the two sides' values, one line of why. */
+export function turnInfo(q) { const v = turnValues(ctxOf(q)); return { value: q.state.hvf.turn, farm: Math.round(v.farm), hunt: Math.round(v.hunt), reason: q.state.hvf.turnWhy }; }
+
+/** Tracks a hunter can see now (needs the Tracking level; only inside his team's vision). */
+export function visibleTracks(q, pid) {
+  const { state, data } = q, p = state.players[pid];
+  if (p.role !== 'hunter' || p.level < data.hvf.hunter.tracking.level) return [];
+  return state.hvf.tracks.filter(t => hasBit(state.hvf.vision[HUNTERS], cellOf(q.map, t.x, t.z)));
+}
+
+/** Enemy buildings a team remembers (grey ghosts where they were last seen). */
+export function seenBuildings(q, team) { return q.state.hvf.seen[team].slice(); }
 
 /** Alive / ghost / out counts per side (the sides strip). */
 export function sideInfo(q) {

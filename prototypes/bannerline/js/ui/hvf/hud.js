@@ -55,6 +55,7 @@ export function createHvfHud({ root, sim, player, onCmd, onPlace, onAim, onMinim
       <div class="hv-clock"><b data-k="clock">0:00</b><small data-k="clocksub"></small></div>
       <div class="hv-turn" data-tip-render="hvf-turn"><span class="moon"><i data-k="moon"></i></span><small data-k="turn">Hunters' night</small></div>
       <div class="hv-sides" data-k="sides"></div>
+      <div class="hv-sound" data-k="soundw" hidden><button class="hv-mute" data-act="mute" data-k="mute" data-tip="Sound on / off (M)">🔊</button><input type="range" min="0" max="100" data-k="vol" data-tip="Volume"></div>
     </header>
     <div class="hv-alerts" data-k="alerts"></div>
     <div class="hv-ghost" data-k="ghost" hidden></div>
@@ -127,8 +128,12 @@ export function createHvfHud({ root, sim, player, onCmd, onPlace, onAim, onMinim
   });
 
   // ── clicks ──
+  let sound = null;
+  K.vol.addEventListener('input', () => { sound?.setVolume(K.vol.value / 100); });
   el.addEventListener('click', (e) => {
     const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.act === 'mute') { if (sound) { sound.setMuted(!sound.settings.muted); paintSound(); } return; }
+    sound?.ui('click');
     if (b.dataset.build) onPlace(b.dataset.build);
     else if (b.dataset.up) onCmd({ type: 'upgrade', id: b.dataset.up });
     else if (b.dataset.skill) onAim({ skill: b.dataset.skill });
@@ -334,6 +339,13 @@ export function createHvfHud({ root, sim, player, onCmd, onPlace, onAim, onMinim
     }
   }
 
+  function paintSound() {
+    if (!sound) return;
+    const st = sound.settings;
+    K.mute.textContent = st.muted ? '🔇' : '🔊';
+    K.vol.value = Math.round(st.volume * 100);
+  }
+
   function showResult(result, { onAgain, onBack }) {
     const won = (result.winner === me().team);
     const why = { caught: 'Every farmer was caught.', hunted: 'Every hunter was put out.', clock: 'The farmers held out until the clock ran down.', surrender: 'A side surrendered.' }[result.reason] || '';
@@ -348,6 +360,8 @@ export function createHvfHud({ root, sim, player, onCmd, onPlace, onAim, onMinim
   return {
     el, update, onEvent, alert, showResult, useSlot, toggleShop,
     get shopOpen() { return shopOpen; },
+    /** The sound bridge arrived: show mute + volume (saved per browser by the bridge). */
+    setSound(snd) { sound = snd; K.soundw.hidden = !snd; paintSound(); },
     setWaiting(text) { K.wait.hidden = !text; setT(K.wait, text || ''); },
     setPlaceHint(html) { K.placehint.hidden = !html; if (html) setH(K.placehint, html); },
     destroy() { el.remove(); },

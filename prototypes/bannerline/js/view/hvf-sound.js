@@ -37,7 +37,7 @@ export const HVF_SOUNDS = {
   snareSet: ['trap.snap', 'mine'], snared: ['trap.snap', 'pos'], snarePulled: ['ward.pull', 'pos'],
   wardPlanted: ['build.place', 'mine'], wardPulled: ['ward.pull', 'pos'], flare: ['spell.fire.launch', 'pos'],
   gold: ['coin', 'mine'], upgrade: ['equip', 'mine'], item: ['equip', 'mine'], sell: ['coin', 'mine'], use: ['heal', 'mine'],
-  levelUp: ['levelup', 'mine'], lyingLow: ['ui.close', 'mine'], reject: ['ui.error', 'mine'], turn: ['hvf.turn', 'global'],
+  hawkArrived: ['hvf.hawk', 'pos'], levelUp: ['levelup', 'mine'], lyingLow: ['ui.close', 'mine'], reject: ['ui.error', 'mine'], turn: ['hvf.turn', 'global'],
 };
 export const HVF_UI = { click: 'ui.click', hover: 'ui.hover', open: 'ui.open', close: 'ui.close', error: 'ui.error', tab: 'ui.tab', build: 'build.place', buy: 'coin' };
 
@@ -92,6 +92,8 @@ export async function createHvfSound({ localPlayers = [0], roleOf = () => 'farme
       }
       const row = HVF_SOUNDS[ev.type]; if (!row) return false;
       const [id, how] = row;
+      // the hawk's owner always hears it land, however far it flew (a cue, like a sting); anyone else only nearby and in sight
+      if (ev.type === 'hawkArrived' && mine(ev.player)) return play(id, { gain: 0.85 });
       if (how === 'global') return play(id);
       if (how === 'mine') return mine(ev.player) ? play(id) : false;
       const p = ev.x != null ? { x: ev.x, z: ev.z } : ev.grave ? ev.grave : at(ev.dst ?? ev.src ?? ev.id);

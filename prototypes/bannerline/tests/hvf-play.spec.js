@@ -89,3 +89,32 @@ test('hunter: waits in the kennel, then walks under the fog; the farmers stay hi
   await page.screenshot({ path: 'test-results/hvf-hunter.png' });
   expect(errors).toEqual([]);
 });
+
+test('sound: the bridge loads, the hawk cries for its owner, fogged fights are silent, M and the slider are saved', async ({ page }) => {
+  test.setTimeout(90_000);
+  const errors = errorsOf(page);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto(`${PAGE}?seed=5`);
+  await page.waitForFunction(() => window.hvfGame, null, { timeout: 30_000 });
+  await page.evaluate(() => { try { localStorage.removeItem('bannerline.hvf-sound.v1'); } catch {} window.hvfGame.start({ seats: [{ role: 'hunter', device: 'kbm' }], format: '3v1', seed: 5, headStart: 2, ai: 'recruit' }); });
+  await page.waitForFunction(() => window.hvf?.match?.sound, null, { timeout: 30_000 });
+  await page.mouse.click(720, 300);                       // a click unlocks audio
+  const r = await page.evaluate(async () => {
+    const m = window.hvf.match, snd = m.sound, s = window.hvf.state(), me = m.me;
+    const e = s.ents.find((x) => x.id === s.players[me].ent);
+    await new Promise((res) => setTimeout(res, 150));
+    const hawk = snd.onEvent({ type: 'hawkArrived', player: me, id: 1, x: e.x + 300, z: e.z });   // far and fogged: the owner still hears it
+    await new Promise((res) => setTimeout(res, 150));
+    const turn = snd.onEvent({ type: 'turn' });
+    const far = snd.onEvent({ type: 'hit', x: e.x + 200, z: e.z + 200 });     // in the fog / out of earshot
+    return { hawk, turn, far, shown: !document.querySelector('[data-k=soundw]').hidden };
+  });
+  expect(r).toEqual({ hawk: true, turn: true, far: false, shown: true });
+  await page.keyboard.press('KeyM');
+  expect(await page.evaluate(() => window.hvf.match.sound.settings.muted)).toBe(true);
+  expect(await page.locator('[data-k=mute]').first().textContent()).toBe('🔇');
+  await page.locator('[data-k=vol]').first().fill('40');
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('bannerline.hvf-sound.v1')))).toMatchObject({ muted: true, volume: 0.4 });
+  await page.keyboard.press('KeyM');
+  expect(errors).toEqual([]);
+});

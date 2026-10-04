@@ -544,7 +544,9 @@ sound.ui('click' | 'build' | 'error' | ...); sound.result(won); sound.setVolume(
 ```
 A hunter hears an animal only if `noise.heard` includes him (through fog, panned toward it); a farmer hears his flock near
 him; other events are positional (full within 12 m of the nearest ear, silent past 60 m, dropped in fog); the Turn, a farmer
-down/revived, release and a hunter out are global; gold/items/upgrades/rejects only for the local player.
+down/revived, release and a hunter out are global; gold/items/upgrades/rejects only for the local player. `hawkArrived` is heard by the hawk's owner wherever it lands.
+Wired in `js/ui/hvf/game.js`: one bridge per match, `localPlayers` = every seat at this screen, `ears` = each seat's character
+(its camera target while down), `visible` = either seat's team sees the spot; mute/volume in the HUD top bar and on M.
 
 **Icons**: `hvf-unit/<farmer|hunter|ghost|sheep|hen|pig|cow|scarecrow|crow|hound|hawk>`, `hvf-building/<kind>` (22),
 `hvf-item/<data/hvf/hunter-items.json id>` (13) — `icons.url(kind, id)` as in §10.3.
@@ -683,7 +685,7 @@ mode exactly like `js/sim/sim.js` does.
 - **Events**: `built, buildStart, lost, animalBorn, animalKilled, flee, noise {x,z,kind,heard:[pid]}, chopped,
   hit, attack, spear, shot, farmerDown {grave}, reviveStart, farmerRevived, respawn, hunterDown, hunterOut,
   released, gold, upgrade, item, sell, use, cast, bell, lyingLow, pounce, snareSet, snared, snarePulled,
-  wardPlanted, wardPulled, flare, horn, levelUp, spawn, despawn, turn {value, reason}, reject, result`.
+  wardPlanted, wardPulled, flare, horn, hawkArrived {player, id, x, z} (the hawk reached its spot — the view plays its cry), levelUp, spawn, despawn, turn {value, reason}, reject, result`.
 - **Queries** (`js/sim/modes/hvf/query.js`, `q` = a sim or `{state, data, map}`): `clock`, `farmerInfo`,
   `buildMenu` (cost, income, payback s, tell 0-3), `buildCheck` (placement ghost), `farmUpgrades`, `armyInfo`,
   `hunterInfo` (skills + cooldowns, snares, wards, items, tracking), `hunterShop`, `sideInfo`, `turnInfo`,

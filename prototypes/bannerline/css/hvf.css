@@ -165,3 +165,11 @@
 .hv-slot .ic { position: absolute; right: 4px; bottom: 4px; opacity: .9; }
 .hv-bt.has-ic kbd { top: auto; bottom: 3px; }
 .hv-bt.has-ic .tell { right: 24px; }
+/* sound: mute + volume in the top bar */
+.hv-top { grid-template-columns: minmax(220px, auto) auto auto auto auto; }
+.hv-sound { display: flex; align-items: center; gap: 6px; }
+.hv-mute { background: none; border: 1px solid var(--line); border-radius: 6px; padding: 0 6px; cursor: pointer; font-size: 15px; color: var(--ink); }
+.hv-sound input[type=range] { width: 70px; accent-color: var(--gold); }
+.hvf-root.split .hv-sound input { display: none; }
+.hv-clock small { white-space: nowrap; }
+.hvf-root.split .hv-top { grid-template-columns: auto auto auto auto; }

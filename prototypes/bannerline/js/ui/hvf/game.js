@@ -34,6 +34,7 @@ import { createHvfWorld, groundY } from '../../view/hvf/world.js';
 import { createHvfActors } from '../../view/hvf/actors.js';
 import { loadHvfModels } from '../../view/hvf/models.js';
 import { createIconLibrary } from '../../view/icons.js';
+import { createHvfSound } from '../../view/hvf-sound.js';
 import { createHvfHud, REASONS } from './hud.js';
 import { createMenuNav } from '../menunav.js';
 import * as Q from '../../sim/modes/hvf/query.js';
@@ -228,6 +229,18 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
       v.hud.alert(v.role === 'farmer' ? `Find a hidden spot before the hunters are loose (${f.headStart} s). Hollows are off the trails behind briar or a single tree.` : `You wait in your kennel for ${f.headStart} s while the farmers hide. Listen for their animals.`, 'info', 7000);
     }
     bindKbm();
+    // sound (stream C's bridge, js/view/hvf-sound.js): one listener per screen — the nearest local character
+    // (or camera) is the ear, and a spot counts as seen if either half's team sees it
+    const mm = m;
+    createHvfSound({
+      localPlayers: m.views.map((v) => v.player),
+      roleOf: (pid) => mm.sim.state.players[pid].role,
+      ears: () => mm.views.map((v) => { const e = charOf(v); return e && e.alive ? { x: e.x, z: e.z } : { x: v.camera.target.x, z: v.camera.target.z }; }),
+      visible: (x, z) => mm.views.some((v) => Q.visibleAt(mm.sim, v.team, x, z)),
+      entOf: (id) => mm.sim.state.ents.find((e) => e.id === id) || null,
+    }).then((snd) => { if (m === mm) { mm.sound = snd; for (const v of mm.views) v.hud.setSound?.(snd); } else snd.dispose(); }).catch((err) => console.warn('hvf sound unavailable', err));
+    m.unlock = () => { mm.sound?.unlock(); };
+    host.addEventListener('pointerdown', m.unlock); window.addEventListener('keydown', m.unlock);
     window.hvf = api;
     return m;
   }
@@ -322,7 +335,7 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
     issue(v, { type: 'move', x, z }); marker(v, x, z, 'move');
   }
   function placeOrFire(v, x, z, keep = false) {
-    if (v.placing) { issue(v, { type: 'build', kind: v.placing, x, z }); if (!keep) setPlacing(v, null); return true; }
+    if (v.placing) { issue(v, { type: 'build', kind: v.placing, x, z }); m.sound?.ui('build'); if (!keep) setPlacing(v, null); return true; }
     if (v.aim) { fireAim(v, x, z); return true; }
     return false;
   }
@@ -373,6 +386,7 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
       if (!down || e.repeat || !m || m.over || !v) return;
       if (e.code === 'Escape') { if (v.placing || v.aim) cancel(v); else if (v.hud.shopOpen) v.hud.toggleShop(false); else togglePause(v); return; }
       if (e.code === 'Space') { e.preventDefault(); v.camera.centre(); return; }
+      if (e.code === 'KeyM') { if (m.sound) { m.sound.setMuted(!m.sound.settings.muted); for (const w of m.views) w.hud.setSound?.(m.sound); } return; }
       if (['KeyQ', 'KeyW', 'KeyE', 'KeyR'].includes(e.code)) { e.preventDefault(); setAim(v, { skill: e.code.slice(3) }); return; }
       const i = BUILD_KEYS.indexOf(e.code);
       if (v.role === 'farmer') {
@@ -417,6 +431,7 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
   // ── gamepad (B's device frames) ────────────────────────────────────────────────────────────────
   function padFrame(v, f, dt) {
     const p = f.pressed;
+    if (p.size) m.sound?.unlock();
     if (p.has('pause')) { togglePause(v); return; }
     if (m.paused) return;
     // right stick moves the aim ring around your character (screen right = +x, screen down = +z)
@@ -491,7 +506,11 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
 
     // sim
     const events = m.clock.frame(dt * 1000, () => { const q = m.queue; m.queue = []; return q; });
-    for (const ev of events) { m.actors.onEvent(ev); for (const v of m.views) v.hud.onEvent(ev); }
+    for (const ev of events) {
+      m.actors.onEvent(ev);
+      for (const v of m.views) v.hud.onEvent(ev);
+      m.sound?.onEvent(ev);
+    }
     if (m.net) for (const v of m.views) { const w = m.clock.waitingFor || []; v.hud.setWaiting?.(w.length ? `Waiting for ${w.map((x) => x.name + (x.hidden ? ' (tab hidden)' : '')).join(', ')}` : ''); }
 
     if (s.tick !== m.lastFogTick) {
@@ -541,6 +560,7 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
       m.overT -= dt;
       if (m.overT <= 0) {
         m.over = true;
+        m.sound?.result(m.views.some((v) => v.team === s.result.winner));
         for (const v of m.views) {
           cancel(v); closeMenu(v);
           v.hud.showResult(s.result, { onAgain: () => (m.net ? (end(), openSetup()) : start({ ...m.opts, seed: null })), onBack: () => { end(); openSetup(); } });
@@ -586,6 +606,8 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
   function end() {
     if (!m) return;
     unbindKbm();
+    if (m.unlock) { host.removeEventListener('pointerdown', m.unlock); window.removeEventListener('keydown', m.unlock); }
+    m.sound?.dispose();
     m.net?.match.lockstep.close?.();
     m.net?.detach?.();
     try { m.net?.room.leave(); } catch { /* closed */ }

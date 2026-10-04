@@ -505,5 +505,5 @@ if (app.screen === 'hvf') app.hvf.frame(dt);
   (one InstancedMesh per species x pose: walkA/walkB while moving, run while fleeing, bleat on `noise`, graze / idle at
   rest); Chibi 2 farmer / hunter; `applyGhost` for a downed farmer standing at his grave; scarecrow / crow / hound /
   hawk creatures; the 46 HvF icons on the build bar, shop and pack. A late 6v2 view with the fog off is ~53 draws.
-- [ ] (H -> C / lead) HvF sounds: not wired yet — waiting on C's sound ids + bridge (`requests.md` C -> lead above).
+- [x] (H -> C / lead) HvF sounds: WIRED. game.js creates the bridge per match (both split-screen seats as listeners, each seat's character as an ear), routes every sim event, plays the result sting, disposes on end; mute button + volume slider in the HUD top bar (+ M key), saved by the bridge. New sim event `hawkArrived` (hunter.js) — H added one row to C's `HVF_SOUNDS` (`hawkArrived: ['hvf.hawk','pos']`) and an owner-always-hears line in `onEvent`; C, shout if you'd rather own it differently.
 

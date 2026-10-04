@@ -214,7 +214,7 @@ export function hunterKitTick(ctx) {
     } else if (b.kind === 'hawk') {
       const dx = b.tx - b.x, dz = b.tz - b.z, L = Math.sqrt(dx * dx + dz * dz), sp = H.skills.E.speed / 20;
       if (L > sp) { b.x += dx / L * sp; b.z += dz / L * sp; }
-      else { b.x = b.tx; b.z = b.tz; if (b.until < 0) b.until = state.tick + secToTicks(H.skills.E.seconds); }
+      else { b.x = b.tx; b.z = b.tz; if (b.until < 0) { b.until = state.tick + secToTicks(H.skills.E.seconds); ctx.emit('hawkArrived', { player: b.owner, id: b.id, x: b.x, z: b.z }); } }
       if (b.until >= 0 && state.tick >= b.until) { b._gone = true; ctx.emit('despawn', { id: b.id, why: 'expired' }); }
     } else if (b.kind === 'hound') {
       // run to the nearest animal within range and bay at it (a noise every 2 s)

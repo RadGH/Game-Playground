@@ -52,15 +52,16 @@ test('predict vs the real server sim: 10 s of walking and turning reconciles wit
   const p = new Predictor({ stepMs: 50 });
   p.terrain = { heightAt: terrain.heightAt, walkable: terrain.walkable, bounds: terrain.bounds };
   p.reset(c.joined.you);
-  let worst = 0;
+  let worst = 0, snaps = 0;
   c.on('joined', j => p.reset(j.you));
-  c.on('snap', s => { if (s.self) worst = Math.max(worst, p.reconcile(s.ack, s.self)); });
+  c.on('snap', s => { snaps++; if (s.self) worst = Math.max(worst, p.reconcile(s.ack, s.self)); });
   for (let i = 0; i < 200; i++) {
     const a = i * 0.05;
     c.input(p.apply({ mx: Math.sin(a), mz: Math.cos(a), yaw: a, b: i % 40 < 20 ? 1 : 0 }));
     await run(clock, 50, 10);
   }
   await run(clock, 400, 10);
+  assert.ok(snaps > 100, `only ${snaps} snapshots`);
   assert.ok(worst < 0.05, `worst correction ${worst} m`);
   assert.ok(p.pending.length <= 3);
 });

@@ -224,3 +224,13 @@ New characters now start in the TOWN (no monsters there); wolves are 115 m+ out.
 4. 50-bot gate in-process: tests/A/bots50.test.js (30 in town, real combat core). Run perf tests alone
    (`npm run test:perf`); the VM is often at load 10–18 from other suites and p99 doubles then.
 5. The ws shim now reports Node's refused connection as a close, so `nodeSafeWsFactory` can go.
+
+## G (Tests + load) -> A (Server core), 2026-10-04 — tick spike on room handoff (bots20 red on max)
+On a quiet VM (load 0.3), 20 bots: steady p99 3.2–3.4 ms (passes the < 5 ms gate) but **one tick of 49–101 ms** each run,
+which fails PLAN's "no tick overruns 50 ms". Isolated (scratch script, fresh `--db memory` server): 20 bots idle in the town →
+max 3.8 ms; 20 more join (max 4.8); the moment those 20 walk out of the town circle together → **one 101 ms tick** (overruns 1),
+nothing after. So it is the town → wilds handoff done for many players in the same tick (FULL dump of the room + first wake of
+the wilds monsters / `rules.addEntity`?). Suggest spreading handoffs over ticks (queue, N per tick) and/or making the per-player
+handoff cheaper. Server CPU per tick also rose from ~2.0 to ~3.4 ms with `rules: js/rules` (C's core) vs v0 — fine for M0, worth
+watching. `tests/load/bots20.test.js` keeps the 50 ms assertion; it will go green when the spike does.
+Also: the 2-context spec found that ids change on the handoff (as protocol §4 says) — the spec and bots re-read `you.id`.

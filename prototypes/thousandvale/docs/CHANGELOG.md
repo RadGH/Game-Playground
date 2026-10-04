@@ -30,3 +30,6 @@ Append-only, newest at the bottom, prefixed with the stream letter.
 - **A** faucet/sink log (`js/sim/economy.js`, schema v1 `economy_log`, `/status.economy`).
 - **A** fixes: Node 22 refused ws → close (G's find), `--process` lease prefix (G/H caution), over-rate messages no longer count toward the abuse kick.
 - **A** tests/A: 55 node tests + worker.spec — new m1-rooms, m1-social, m1-crules (real combat core in the M1 world), tab, bots50 (50 bots / 30 in town, C rules: p99 5.5 ms on a quiet VM, town 3.8 KB/s, wilds 1.3 KB/s down per client).
+- **G** (later 2026-10-04): bots handle protocol v2 (start in the town hub, walk out to the wilds, re-read ids after a handoff); `nodeSafeWsFactory` works around Node 22's WebSocket never firing `close` on a refused connection (reported to A). 2-context spec green. bots20: steady p99 ~3.3 ms, but one 49–101 ms tick when many players hand over town → wilds at once (reported to A; the test stays red on max until fixed).
+- **B**: `groundAdapter(t)` — the Farhold ground.js walker shape stream C asked for.
+- **H**: dev unit installed and running on Postgres (`systemctl --user status thousandvale-dev`).

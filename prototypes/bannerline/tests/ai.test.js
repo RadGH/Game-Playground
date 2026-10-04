@@ -492,3 +492,26 @@ test('a new player beats the Recruit: a scripted beginner (spends most of its go
   }
   assert.ok(wins >= 10, `beginner won ${wins}/12`);
 });
+
+test('one bell per wave: two AI teammates facing the same swarm ring Toll of Iron once, not twice', () => {
+  const s = createSim({ seed: 21, mode: '2v2', map: 'vale', players: [
+    { team: 0, kind: 'ai', ai: { difficulty: 'commander' }, race: 'freeholds', hero: 'warrior' },
+    { team: 0, kind: 'ai', ai: { difficulty: 'commander' }, race: 'freeholds', hero: 'ranger' },
+    { team: 1, kind: 'human', race: 'ashtusk', hero: 'warrior' },
+    { team: 1, kind: 'human', race: 'ashtusk', hero: 'druid' }] }, data);
+  s.state.teams[0].toll.charges = 3;
+  for (const pid of [0, 1]) { const p = s.state.players[pid]; p.gold = 0; p.ai.nextAt = 0; }
+  const f = s.map.fields[0];
+  for (let i = 0; i < 16; i++) put(s, 'brute', 2, 0, (i % 8) * 1.5 - 6, f.leakZ - 6 - (i >> 3) * 1.5).hp = 1e5;
+  // both seats think on the same tick
+  s.step([]);
+  let rang = 0;
+  for (const e of s.drainEvents()) if (e.type === 'toll') rang++;
+  assert.equal(rang, 1, 'one toll for one wave (before the fix both seats rang on this tick)');
+  // and nobody rings again while the wave is still stunned
+  const stun = Math.round(data['items-bl'].toll.stun * 20);
+  s.state.teams[0].toll.charges = 3;
+  let again = 0;
+  for (let t = 0; t < stun - 2; t++) { s.step([]); for (const e of s.drainEvents()) if (e.type === 'toll') again++; }
+  assert.equal(again, 0, 'no second bell while the wave is stunned');
+});

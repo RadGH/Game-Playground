@@ -6,7 +6,7 @@
 // small proxy whose `rng` is whatever room the character is standing in (`ch.roomRng`), never the
 // engine's shared generator — a fight replays from its room's seed alone.
 
-import { attuneWeapon, createSkillBar } from './farhold.js';
+import { attuneWeapon, createSkillBar, describeSkill } from './farhold.js';
 
 /**
  * `engine` from js/rules/engine.js. `rng` rolls the starter kit (a seeded stream; the server passes
@@ -43,8 +43,66 @@ export function createCharacter(engine, { id, classId = 'warrior', level = 1, na
     get rng() { return ch.roomRng || rpg.rng; },
     get fx() { return rpg.fx; },
   };
-  ch.skills = createSkillBar({ data: engine.skillData, player: ch, rpg: rpgView });
+  ch.skills = buildSkillBar(engine, ch, rpgView);
   return ch;
+}
+
+/**
+ * Farhold's skill bar, without writing the same descriptions again for every character.
+ *
+ * `createSkillBar` fills its slots with two generated sentences per skill (`describeSkill`, which
+ * formats every number through `toLocaleString`): ~5 ms a character, and the whole cost of a login
+ * or a room handoff. The sentence depends only on the skill row and the slot's unlock level, so it
+ * is cached per process here. The bar is built over a view of the data with no class table, which
+ * makes its own first fill empty, then filled with `fillSlots` — a copy of skills.js `fill` that
+ * takes the sentence from the cache (drift-guarded: tests/C/drift.test.mjs "skills.js fill").
+ */
+const DESC = new Map();
+function describedSlot(engine, id, unlockAt) {
+  const key = `${id}|${unlockAt}`;
+  let d = DESC.get(key);
+  if (!d) {
+    const data = engine.skillData;
+    d = {
+      desc: describeSkill(data.skills[id], data.statuses || {}, { unlockAt, skills: data.skills }),
+      descShort: describeSkill(data.skills[id], data.statuses || {}, { cost: false, unlockAt, skills: data.skills }),
+    };
+    DESC.set(key, d);
+  }
+  return d;
+}
+const VIEWS = new WeakMap();
+function barData(engine) {
+  let v = VIEWS.get(engine.skillData);
+  if (!v) { v = { ...engine.skillData, classes: {} }; VIEWS.set(engine.skillData, v); }
+  return v;
+}
+export function buildSkillBar(engine, ch, rpgView) {
+  const bar = createSkillBar({ data: barData(engine), player: ch, rpg: rpgView });
+  fillSlots(engine, bar, engine.skillData.classes?.[ch.classId] || engine.skillData.classes?.ranger || []);
+  bar.relearn = (ids = null) => { fillSlots(engine, bar, ids || engine.skillData.classes?.[ch.classId] || []); return bar.slots.map(sl => sl.id); };
+  return bar;
+}
+/** skills.js `fill(ids)`, with the descriptions from the cache. */
+export function fillSlots(engine, bar, ids) {
+  const data = engine.skillData;
+  const unlockAt = data.unlockAt || [1, 3, 6, 12, 18, 24];
+  const slots = bar.slots;
+  const next = (ids || []).map((id, i) => ({
+    id: id || null,
+    empty: !id,
+    ...(data.skills[id] || {}),
+    name: data.skills[id]?.name || 'Not learned',
+    cooldown: data.skills[id]?.cooldown ?? 6,
+    ready: slots[i]?.ready ?? 0,
+    unlockAt: unlockAt[i] ?? 1,
+    charges: slots[i]?.id === id ? slots[i]?.charges : null,
+    chargeT: slots[i]?.id === id ? slots[i]?.chargeT || 0 : 0,
+    recastLeft: 0, recastThen: null, cycleAt: 0, next: null,
+  }));
+  for (const sl of next) if (!sl.empty && data.skills[sl.id]) Object.assign(sl, describedSlot(engine, sl.id, sl.unlockAt));
+  slots.length = 0;
+  slots.push(...next);
 }
 
 /** A character's current skill ids, slot by slot (empty slots are null). */

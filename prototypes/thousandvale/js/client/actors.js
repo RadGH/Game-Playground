@@ -98,9 +98,9 @@ export function createActors(scene, { plateLayer, camera }) {
     if (!plateLayer) return null;
     const root = document.createElement('div');
     root.className = `plate ${a.kind} ${a.hostile ? 'hostile' : 'friendly'}${a.self ? ' self' : ''}`;
-    root.innerHTML = `<div class="plate-name"><span class="plate-lvl"></span><span class="plate-n"></span></div><div class="plate-bar"><i></i><b></b></div>`;
+    root.innerHTML = `<div class="plate-bubble"></div><div class="plate-name"><span class="plate-lvl"></span><span class="plate-n"></span></div><div class="plate-bar"><i></i><b></b></div>`;
     plateLayer.appendChild(root);
-    const p = { root, name: root.querySelector('.plate-n'), lvl: root.querySelector('.plate-lvl'), bar: root.querySelector('.plate-bar i'), lag: root.querySelector('.plate-bar b'), lagW: 1 };
+    const p = { root, bubble: root.querySelector('.plate-bubble'), bubbleUntil: 0, name: root.querySelector('.plate-n'), lvl: root.querySelector('.plate-lvl'), bar: root.querySelector('.plate-bar i'), lag: root.querySelector('.plate-bar b'), lagW: 1 };
     a.plate = p; refreshPlate(a);
     return p;
   }
@@ -113,7 +113,7 @@ export function createActors(scene, { plateLayer, camera }) {
     p.root.classList.toggle('dead', a.hp <= 0);
   }
 
-  const _v = new THREE.Vector3();
+  const _v = new THREE.Vector3(), _w = new THREE.Vector3();
   function updatePlates(targetId, hoverId) {
     if (!plateLayer) return;
     const w = plateLayer.clientWidth, h = plateLayer.clientHeight;
@@ -121,8 +121,12 @@ export function createActors(scene, { plateLayer, camera }) {
       const p = a.plate; if (!p) continue;
       _v.set(a.group.position.x, a.group.position.y + a.height + 0.35, a.group.position.z);
       const dist = camera.position.distanceTo(_v);
+      // Behind the camera a projected point can still land inside the screen (mirrored): test camera space first.
+      const front = _w.copy(_v).applyMatrix4(camera.matrixWorldInverse).z < -0.1;
       _v.project(camera);
-      const show = !a.noPlate && _v.z < 1 && dist < (a.self ? 0 : 70) && a.fade > 0.05;
+      const bubbling = p.bubbleUntil > performance.now();
+      if (p.bubble && !bubbling && p.bubble.style.display !== 'none') p.bubble.style.display = 'none';
+      const show = front && _v.z < 1 && a.fade > 0.05 && (bubbling ? dist < 60 : !a.noPlate && dist < (a.self ? 0 : 70));
       if (!show) { if (p.shown !== false) { p.root.style.display = 'none'; p.shown = false; } continue; }
       if (p.shown !== true) { p.root.style.display = ''; p.shown = true; }
       const x = (_v.x * 0.5 + 0.5) * w, y = (-_v.y * 0.5 + 0.5) * h;
@@ -250,5 +254,14 @@ export function createActors(scene, { plateLayer, camera }) {
     return a;
   }
 
-  return { actors, add, remove, rekey, update, playAttack, playHit, setDead, setHp, pickAt, get: id => actors.get(id), refreshPlate };
+  /** A speech bubble over someone's head (say chat), for a few seconds scaled to the line's length. */
+  function say(id, text) {
+    const a = actors.get(id); if (!a?.plate) return;
+    const p = a.plate;
+    p.bubble.textContent = text; p.bubble.style.display = '';
+    p.bubbleUntil = performance.now() + Math.min(9000, 3500 + text.length * 60);
+    p.root.classList.toggle('self-plate', !!a.self);
+  }
+
+  return { actors, add, remove, rekey, say, update, playAttack, playHit, setDead, setHp, pickAt, get: id => actors.get(id), refreshPlate };
 }

@@ -234,3 +234,10 @@ the wilds monsters / `rules.addEntity`?). Suggest spreading handoffs over ticks 
 handoff cheaper. Server CPU per tick also rose from ~2.0 to ~3.4 ms with `rules: js/rules` (C's core) vs v0 — fine for M0, worth
 watching. `tests/load/bots20.test.js` keeps the 50 ms assertion; it will go green when the spike does.
 Also: the 2-context spec found that ids change on the handoff (as protocol §4 says) — the spec and bots re-read `you.id`.
+
+## C (Combat core) -> A (Server core), 2026-10-04 — your 4 M1 asks are done
+1. Handoff reuses `e.r.unit` (0.025 ms median vs 4.5 ms before; tests/C/room-rules "HANDOFF"). Fresh builds ~0.5 ms. bots50 p99 2.6 ms.
+2. Loot: `host.award(e, {xp, gold, items, from, reason:'kill'})`; no more `loot` events from me.
+3. `equip(e,item,slot)->{ok,text?,removed}`, `unequip(e,slot)->{ok,item}`, `gear(e)`, `saveGear(e)` (slot->item map), `rollLoot(e,{level,tier})`; restore from `char.equipment` (non-Farhold stand-in items are ignored -> class kit). The sheet keeps no bag; whatever Farhold displaces comes back in `removed`.
+4. `e.rank` passed (elite/boss), `onParty(e,id)` implemented, objects/npcs ignored.
+Ask: expose the zone's terrain reader on the host (`host.terrain = { reader }` or `host.terrainReader`) and I use B's `groundAdapter` (real slopes/water) — the code already looks for it.

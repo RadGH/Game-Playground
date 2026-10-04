@@ -239,7 +239,10 @@ function wireNet(net) {
     hud.setSelf(S.self);
     if (levelled) levelFlash(S.selfId);
   });
-  net.on('chat', m => hud.chat(m.text, m.ch === 'say' ? 'say' : 'system', m.ch === 'say' ? m.name : null));
+  net.on('chat', m => {
+    hud.chat(m.text, m.ch === 'say' ? 'say' : 'system', m.ch === 'say' ? m.name : null);
+    if (m.ch === 'say' && m.from != null) actors.say(m.from, m.text);
+  });
   net.on('castR', r => {
     if (r.why === 'cooldown') { S.swing.ms = Math.min(2500, S.swing.ms + 60); return; }
     if (r.why === 'range') { const t = actors.get(S.target); if (t) S.reach = Math.max(1.6, Math.min(S.reach, Math.hypot(t.pos.x - S.predictor.pos.x, t.pos.z - S.predictor.pos.z)) * 0.8); }

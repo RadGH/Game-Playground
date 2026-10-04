@@ -267,6 +267,15 @@ function runtimeOf(combat) {
     }
   }
 
+  /** A unit left this room (handed to another, or gone): nothing here acts for it any more. */
+  rt.forget = (u) => {
+    rt.links.delete(u.id);
+    for (const [id, l] of rt.links) if (l.to === u) rt.links.delete(id);
+    rt.tracked = rt.tracked.filter(t => t.unit !== u);
+    rt.pools = rt.pools.filter(p => p.caster !== u.id);
+    for (const o of mechWorld.placed) if (o.caster === u.id) o.caster = null;
+  };
+
   // ---- per-tick: placed objects, walls, corpses, links, tracked buffs, imbue
   rt.tick = (dt) => {
     // skillrun.js tick order: refresh a sheet whose statuses changed, placed objects, walls, corpses, imbue

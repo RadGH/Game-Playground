@@ -51,6 +51,7 @@ export const DRIFT = [
   { name: 'actors.js EnemyField.update', file: 'actors.js', start: /^  update\(dt, player, playerUnit, hooks = \{\}\) \{/, end: /^  spread\(dt\) \{/, mirror: 'js/rules/monster-ai.js tickMonsters' },
   { name: 'actors.js strike/strikeArea/strikeSegment/land', file: 'actors.js', start: /^  land\(e, result,/, end: /^  bleed\(e, amount = 1\) \{/, mirror: 'js/rules/field.js' },
   { name: 'actors.js add', file: 'actors.js', start: /^  async add\(def, level, x, z,/, end: /this\.pending\+\+;/, mirror: 'js/rules/monster-ai.js spawnMonster' },
+  { name: 'skills.js fill', file: 'skills.js', start: /^  function fill\(ids\) \{/, end: /^  fill\(data\.classes/, mirror: 'js/rules/character.js fillSlots' },
   { name: 'main.js fireBolt', file: 'main.js', start: /^  function fireBolt\(plan, a, dx, dy, dz/, end: /^  function regrab\(\)/, mirror: 'js/rules/cast-skills.js fireBolt' },
   { name: 'main.js dropPool/tickPools', file: 'main.js', start: /^  function dropPool\(\{ x, z, r, seconds/, end: /if \(p\.left <= 0\) \{/, mirror: 'js/rules/cast-skills.js dropPool/tickPools' },
   { name: 'main.js onArrowLand', file: 'main.js', start: /onArrowLand: arrow => \{/, end: /^  \}\);/, mirror: 'js/rules/cast.js resolveArrow' },

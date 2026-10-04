@@ -98,18 +98,99 @@ test('levelFor / xpFor are Farhold\'s curve at the realm cap', () => {
   for (let l = 2; l <= 50; l++) assert.equal(rules.levelFor(rules.xpFor(l)), l, `level ${l}`);
 });
 
-test('gear survives a save: serializeGear -> char.gear -> a fresh room puts the same items back on', async () => {
-  const { serializeGear } = await import('../../js/rules/index.js');
+test('gear survives a save: saveGear -> char.equipment -> a fresh room puts the same items back on', () => {
   const a = setup({ cls: 'rogue', level: 5 });
-  const blob = serializeGear(a.me.r.unit);
-  assert.ok(blob.equipment.weapon, 'the dagger is in the blob');
-  blob.equipment.weapon.uid = 'test:1';
+  const blob = a.room.rules.saveGear(a.me);
+  assert.ok(blob.weapon, 'the dagger is in the blob');
+  blob.weapon.uid = 'test:1';
   const b = setup({ cls: 'rogue', level: 5 });
   b.room.remove(b.me);
-  const char = { id: 78, name: 'Loaded', cls: 'rogue', level: 5, xp: 0, gold: 0, room: 'c-test', x: 1000, z: 1000, gear: blob };
+  const char = { id: 78, name: 'Loaded', cls: 'rogue', level: 5, xp: 0, gold: 0, room: 'c-test', x: 1000, z: 1000, equipment: JSON.parse(JSON.stringify(blob)) };
   const me = b.room.addPlayer(char, null);
   assert.equal(me.r.unit.equipment.weapon.uid, 'test:1');
   assert.deepEqual(me.r.unit.derived.damage, a.me.r.unit.derived.damage);
+  // the stand-in rules' old plain items are ignored: a character with them gets the class kit
+  const c = setup({ cls: 'rogue', level: 5 });
+  const old = c.room.addPlayer({ id: 79, name: 'Old', cls: 'rogue', level: 5, room: 'c-test', x: 900, z: 900, equipment: { weapon: { name: 'Stick', slot: 'weapon' } } }, null);
+  assert.ok(old.r.unit.equipment.weapon && old.r.unit.equipment.weapon.type === 'weapon');
+});
+
+test('equip / unequip / gear / rollLoot', () => {
+  const { room, me } = setup({ cls: 'warrior', level: 10 });
+  const rules = room.rules;
+  const sword = rules.gear(me).weapon;
+  const off = rules.unequip(me, 'weapon');
+  assert.ok(off.ok && off.item === sword);
+  assert.ok(!rules.gear(me).weapon);
+  assert.ok(!me.r.unit.bag.includes(sword), 'the sheet keeps no bag of its own');
+  const on = rules.equip(me, sword, 'weapon');
+  assert.ok(on.ok, on.text);
+  assert.equal(rules.gear(me).weapon, sword);
+  const loot = rules.rollLoot(me, { level: 10, tier: 'reward' });
+  assert.ok(loot.length === 1 && loot[0].name, 'a reward chest always gives an item');
+  const ring = loot[0];
+  const r = rules.equip(me, { ...ring, levelReq: 99, requiredLevel: 99, ilvl: 400 });
+  assert.equal(typeof r.ok, 'boolean');
+});
+
+test('monster ranks: elite is a champion with a modifier, boss is a boss', () => {
+  const { room } = setup({ wolves: 0 });
+  const elite = room.spawn({ kind: 'monster', type: 'wolf', level: 5, x: 1100, z: 1100, rank: 'elite' });
+  const boss = room.spawn({ kind: 'monster', type: 'wolf', level: 5, x: 1110, z: 1100, rank: 'boss' });
+  const plain = room.spawn({ kind: 'monster', type: 'wolf', level: 5, x: 1120, z: 1100 });
+  assert.equal(elite.r.unit.rank, 'champion');
+  assert.equal(elite.r.unit.modifiers.length, 1);
+  assert.equal(boss.r.unit.rank, 'rare');
+  assert.ok(boss.r.unit.boss, 'a boss never leashes');
+  assert.equal(boss.r.unit.modifiers.length, 2);
+  assert.ok(boss.hpMax > plain.hpMax && elite.hpMax > plain.hpMax);
+});
+
+test('HANDOFF: a player moving to another room keeps the same sheet (statuses, cooldowns, mana) and costs ~nothing', () => {
+  const A = setup({ cls: 'knight', level: 20 });
+  const terrain = A.room.terrain;
+  const B = createRoom({ id: 'c-other', terrain, seed: 9, camps: [], createRules, hooks: { log: () => {} } });
+  const unit = A.me.r.unit;
+  A.room.intent(A.me, { t: 'cast', slot: 2 });                   // Sworn Guard: a buff + a cooldown
+  unit.mp = 7;
+  const cd = unit.skills.slots[1].ready;
+  assert.ok(cd > 0);
+  // the world's handoff: the old entity goes, a new one arrives carrying the old `r`
+  const carry = A.me.r;
+  const t0 = performance.now();
+  A.room.remove(A.me);
+  const me2 = B.addPlayer({ ...A.char, room: 'c-other' }, null, { carry });
+  const ms = performance.now() - t0;
+  assert.equal(me2.r.unit, unit, 'the same sheet object');
+  assert.equal(unit.id, me2.id);
+  assert.equal(unit.skills.slots[1].ready, cd, 'the cooldown came along');
+  assert.equal(unit.mp, 7);
+  assert.ok(B.rules.field.players.includes(unit) && !A.room.rules.field.players.includes(unit));
+  assert.equal(B.rules.stats().handoffs, 1);
+  assert.equal(B.rules.stats().builds, 0);
+  // measure: a fresh build vs a handoff, warm
+  const fresh = [], hand = [];
+  for (let i = 0; i < 40; i++) {
+    let t = performance.now();
+    const e = B.addPlayer({ id: 500 + i, name: 'N' + i, cls: ['knight', 'cleric', 'mage', 'rogue'][i % 4], level: 20, room: 'c-other', x: 1000, z: 1000 }, null);
+    fresh.push(performance.now() - t);
+    const r = e.r;
+    B.remove(e);
+    t = performance.now();
+    const e2 = A.room.addPlayer({ id: 500 + i, name: 'N' + i, cls: 'knight', level: 20, room: 'c-test', x: 1000, z: 1000 }, null, { carry: r });
+    hand.push(performance.now() - t);
+    A.room.remove(e2);
+  }
+  const med = a => a.sort((x, y) => x - y)[a.length >> 1];
+  console.log(`# addEntity: fresh build median ${med(fresh).toFixed(2)} ms (max ${Math.max(...fresh).toFixed(2)}), handoff median ${med(hand).toFixed(3)} ms (max ${Math.max(...hand).toFixed(3)}); first handoff ${ms.toFixed(3)} ms incl. remove`);
+  assert.ok(med(hand) < 0.5, `handoff median ${med(hand)} ms`);
+  assert.equal(A.room.stats.rulesErrors + B.stats.rulesErrors, 0);
+});
+
+test('onParty keeps the sheet\'s party current', () => {
+  const { room, me } = setup();
+  room.rules.onParty(me, 'P9');
+  assert.equal(me.r.unit.partyId, 'P9');
 });
 
 test('a target message names a living body in reach, or is refused', () => {

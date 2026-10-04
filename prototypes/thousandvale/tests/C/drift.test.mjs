@@ -20,6 +20,7 @@ const PORTED = {
   'actors.js strike/strikeArea/strikeSegment/land': '890a4d0b5becbd35',
   'actors.js add': '083a91f79fbc1f5a',
   'actors.js spread/shove/slide': 'da77860a7597e155',
+  'skills.js fill': '9329afb65dc3e5b5',
   'main.js fireBolt': '40eac2d1011ac7cf',
   'main.js dropPool/tickPools': '713c1028b7c65d42',
   'main.js onArrowLand': 'a9e3b67cc5dd188c',

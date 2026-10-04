@@ -173,7 +173,8 @@ button.icon { font-size: 20px; line-height: 1; }
 @media (max-width: 760px) {
   .title { grid-template-columns: 1fr; padding: 16px; background: rgba(10, 8, 6, 0.75); align-content: center; }
   .brand { align-self: auto; }
-  .unitframe { min-width: 0; transform: scale(0.82); transform-origin: top left; }
+  .unitframe { min-width: 220px; transform: scale(0.82); transform-origin: top left; }
+  .conn { max-width: 46vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .unitframe.target { left: 14px; top: 78px; }
   .chat { width: calc(100vw - 28px); bottom: 84px; }
   .chat-log { max-height: 110px; }
@@ -188,3 +189,9 @@ button.icon { font-size: 20px; line-height: 1; }
 .chat-log .rarity-legendary, .toast.rarity-legendary, .chat-log .rarity-unique, .toast.rarity-unique { color: #ff9a3d; }
 .chat-log .rarity-set, .toast.rarity-set { color: #63e07a; }
 .toast.loot { font-family: var(--serif); font-size: 18px; }
+
+/* speech bubbles over heads (say chat) */
+.plate-bubble { display: none; max-width: 240px; white-space: normal; text-align: center; margin-bottom: 4px; padding: 6px 10px; border-radius: 10px;
+  background: rgba(250, 244, 228, 0.94); color: #2a2016; font-size: 14px; line-height: 1.25; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4); position: relative; }
+.plate-bubble::after { content: ''; position: absolute; left: 50%; bottom: -6px; margin-left: -6px; border: 6px solid transparent; border-bottom: 0; border-top-color: rgba(250, 244, 228, 0.94); }
+.plate.self .plate-name, .plate.self .plate-bar { display: none; }

@@ -60,6 +60,7 @@ export function attachField(room, { terrain = null, safeZones = [] } = {}) {
     ent.side = kind === 'monster' ? 'foe' : 'friend';
     list.push(ent);
     field.byId.set(ent.id, ent);
+    ent.homeField = field;
     return ent;
   };
   field.remove = (ent) => {
@@ -72,6 +73,20 @@ export function attachField(room, { terrain = null, safeZones = [] } = {}) {
     field.byId.delete(ent.id);
     // nobody keeps threat on a body that left
     for (const m of field.monsters) if (m.threat?.has(ent.id)) { m.threat.delete(ent.id); if (m.targetId === ent.id) m.targetId = null; }
+  };
+  /**
+   * Take a body out of this field WITHOUT ending it: a player handed to another room keeps its
+   * sheet, statuses and cooldowns (js/rules/index.js reuses the unit). Monsters forget it.
+   */
+  field.detach = (ent) => {
+    if (!ent) return;
+    for (const list of [field.monsters, field.players, field.allies]) {
+      const i = list.indexOf(ent);
+      if (i >= 0) list.splice(i, 1);
+    }
+    if (field.byId.get(ent.id) === ent) field.byId.delete(ent.id);
+    for (const m of field.monsters) if (m.threat?.has(ent.id)) { m.threat.delete(ent.id); if (m.targetId === ent.id) m.targetId = null; }
+    if (ent.homeField === field) ent.homeField = null;
   };
   field.get = id => field.byId.get(id) || null;
   field.emit = ev => { field.out.push(ev); return ev; };

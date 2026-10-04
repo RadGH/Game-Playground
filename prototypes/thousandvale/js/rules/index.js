@@ -25,6 +25,8 @@ import { spawnMonster, tickMonsters } from './monster-ai.js';
 import { clearThreat } from './threat.js';
 import { makeRng } from './rng.js';
 import { validTarget, TAB } from './targeting.js';
+import { groundAdapter } from './terrain-read.js';
+import { serializeGear } from './character.js';
 export { serializeGear, restoreGear } from './character.js';
 export { nextTarget, tabOrder, validTarget } from './targeting.js';
 import { xpForLevel, levelFromXp, hashStr } from './farhold.js';
@@ -53,6 +55,9 @@ function whyCode(text = '') {
 
 /** The room's heightmap in the shape js/rules/ (and Farhold's ground.js) reads. */
 function terrainFrom(host) {
+  // stream B's reader when the room hands it over (docs/world.md `groundAdapter`): real slopes and depths
+  const reader = host.terrain?.reader || host.terrainReader || null;
+  if (reader) return groundAdapter(reader);
   const h = (x, z) => host.groundAt(x, z);
   const S = 0.75;
   return {
@@ -77,18 +82,18 @@ const ONE_SHOT_ANIMS = new Set(['attack', 'hit', 'bite', 'cast']);
 export function createRules(host, opts = {}) {
   const engine = shared;
   const room = createRoomContext({ id: String(opts.roomId ?? host.roomId ?? 'room'), seed: opts.seed ?? 1, engine });
-  const field = attachField(room, { terrain: terrainFrom(host) });
+  const field = attachField(room, { terrain: terrainFrom(host), safeZones: host.safeZones || [] });
   const combat = createCombat(room);
   room.combat = combat;
   combat.tickMonsters = dt => tickMonsters(field, dt);
   const entOf = unit => (unit?.id != null ? host.entities.get(unit.id) : null);
   let regenClock = 0;
+  let builds = 0, handoffs = 0;
 
-  combat.award = (unit, { xp, gold, items }) => {
+  combat.award = (unit, { xp, gold, items, from }) => {
     const e = entOf(unit);
     if (!e) return;
-    host.award(e, { xp, gold });
-    if (items?.length) host.event({ type: 'loot', to: e.id, d: e.id, items, gold });
+    host.award(e, { xp, gold, items: items?.length ? items : undefined, from: entOf(from) || undefined, reason: 'kill' });
   };
 
   // ------------------------------------------------------------------ sync
@@ -174,25 +179,65 @@ export function createRules(host, opts = {}) {
 
   // ------------------------------------------------------------------ the interface
 
+  /** A saved gear blob: A's `char.equipment` is `slot -> item`; an older blob is `{ v, equipment }`. */
+  const savedGear = ch => {
+    const raw = ch?.equipment?.equipment ? ch.equipment.equipment : ch?.equipment;
+    if (!raw || typeof raw !== 'object') return null;
+    // only Farhold items (the stand-in rules saved plain `{ name, slot }` objects)
+    const items = Object.entries(raw).filter(([, it]) => it && typeof it === 'object' && (it.type === 'weapon' || it.type === 'armor' || it.base || it.baseKey));
+    return items.length ? { equipment: Object.fromEntries(items) } : null;
+  };
+
+  /** e.rank (room) -> Farhold rank + modifiers: elite = a champion with one modifier, boss = boss. */
+  // Farhold's own boss rank is x1 (its bosses are boss DEFINITIONS); a dungeon boss built on an
+  // ordinary type is therefore a rare (two modifiers, x4.5 health) that never leashes.
+  function rankFor(e, def) {
+    const table = engine.bestiary.modifiers || [];
+    const pick = n => (table.length ? engine.rpg.pickModifiers(table, n, room.streams.get('spawn')) : []);
+    const isBossDef = (engine.bestiary.bosses || []).includes(def);
+    if (e.rank === 'boss') return isBossDef ? { rank: 'boss', boss: true, modifiers: [] } : { rank: 'rare', boss: true, modifiers: pick(2) };
+    if (e.rank === 'elite') return { rank: 'champion', modifiers: pick(1) };
+    return { rank: 'normal', modifiers: [] };
+  }
+
   function addEntity(e) {
+    if (e.kind === 'object' || e.kind === 'npc') return;
     run(() => {
       if (e.kind === 'player') {
         const ch = e.char || {};
-        const unit = createCharacter(engine, {
-          id: e.id, classId: ch.cls || e.cls || 'warrior', level: ch.level || e.level || 1, name: e.name,
-          rng: makeRng(hashStr(`${ch.id ?? ch.name ?? e.name}:kit`)), x: e.x, z: e.z, y: e.y, yaw: e.yaw,
-          gear: ch.gear || null,          // a saved gear blob (serializeGear) wins over the class kit
-        });
+        let unit = e.r.unit;
+        if (unit && unit.skills) {
+          // A HANDOFF (protocol.md §7 M1 notes): the entity arrives with the old room's `r`. Keep the
+          // sheet — statuses, cooldowns, mana, barrier — and move it into this room's field.
+          unit.homeField?.detach(unit);
+          unit.homeField?.room?.combat?.skillRt?.forget(unit);
+          unit.id = e.id;
+          unit.removed = false;
+          unit.x = e.x; unit.y = e.y; unit.z = e.z; unit.yaw = e.yaw;
+          unit.dead = !!e.dead;
+          // swing clocks are in the old room's seconds: ready now, the pattern starts over
+          unit.swing = { mainStep: 0, offStep: 0, mainReady: 0, offReady: 0, readySince: room.clock.now() };
+          handoffs++;
+        } else {
+          unit = createCharacter(engine, {
+            id: e.id, classId: ch.cls || e.cls || 'warrior', level: ch.level || e.level || 1, name: e.name,
+            rng: makeRng(hashStr(`${ch.id ?? ch.name ?? e.name}:kit`)), x: e.x, z: e.z, y: e.y, yaw: e.yaw,
+            gear: savedGear(ch),               // the saved equipment wins over the class kit
+          });
+          if (ch.hp > 0) unit.hp = Math.min(ch.hp, unit.maxHp);
+          builds++;
+        }
         unit.roomRng = room.streams.get('bars');
-        unit.partyId = ch.partyId ?? e.data?.partyId ?? null;
-        if (ch.hp > 0) unit.hp = Math.min(ch.hp, unit.maxHp);
+        unit.partyId = e.data?.partyId ?? ch.partyId ?? null;
         field.add(unit, 'player');
         e.r.unit = unit;
         e.setMax(unit.maxHp, unit.maxMp ?? 0);
         e.setHp(unit.hp); e.setMp(unit.mp ?? unit.maxMp);
       } else if (e.kind === 'monster') {
         const def = engine.enemyDef(TYPE_ALIASES[e.type] || e.type) || engine.enemyDef('moor_hound');
-        const unit = spawnMonster(field, def, e.level || 1, e.x, e.z, { id: e.id });
+        const rk = rankFor(e, def);
+        const unit = spawnMonster(field, def, e.level || 1, e.x, e.z, { id: e.id, ...rk });
+        if (rk.boss) unit.boss = true;
         e.r.unit = unit;
         e.setMax(unit.maxHp, 0);
         e.setHp(unit.hp);
@@ -203,8 +248,11 @@ export function createRules(host, opts = {}) {
   function removeEntity(e) {
     room.run(() => {
       const u = e.r.unit;
-      if (u) field.remove(u);
       for (const p of room.combat.pending) if (p.who === e.id) p.fn = () => {};
+      if (!u) return;
+      combat.skillRt?.forget(u);
+      if (e.kind === 'player') field.detach(u);       // the sheet may live on in the next room
+      else field.remove(u);
     });
   }
 
@@ -278,7 +326,50 @@ export function createRules(host, opts = {}) {
     });
   }
 
+  // ------------------------------------------------------------------ gear (protocol.md §7 M1, A's ask 3)
+
+  function equip(e, item, slot = null) {
+    const u = e.r.unit;
+    if (!u || !item || typeof item !== 'object') return { ok: false, text: 'Nothing to equip.' };
+    return run(() => {
+      // the bag is the room's (char.bag), never the sheet's: whatever Farhold moves into `u.bag` is
+      // handed back as `removed` and taken off the sheet again
+      const bagBefore = u.bag.length;
+      const out = engine.rpg.equip(u, item, { into: slot || null });
+      if (out && out.refused) return { ok: false, text: out.refused };
+      const removed = u.bag.splice(bagBefore).filter(it => it !== item);
+      u.bag = u.bag.filter(it => it !== item);
+      if (!Object.values(u.equipment).includes(item)) return { ok: false, text: `${item.name || 'That'} will not go in that slot.`, removed };
+      engine.rpg.refresh(u);
+      return { ok: true, removed };
+    });
+  }
+  function unequip(e, slot) {
+    const u = e.r.unit;
+    if (!u || !u.equipment?.[slot]) return { ok: false, text: 'Nothing is worn there.' };
+    return run(() => {
+      const item = engine.rpg.unequip(u, slot);
+      u.bag = u.bag.filter(it => it !== item);      // the room puts it in char.bag
+      return { ok: !!item, item };
+    });
+  }
+  const gear = e => ({ ...(e.r.unit?.equipment || {}) });
+  const saveGear = e => (e.r.unit ? serializeGear(e.r.unit).equipment : {});
+  /** A chest's roll for `e` (tier 'reward' = a guaranteed item one rarity up). */
+  function rollLoot(e, { level = null, tier = 'normal' } = {}) {
+    const u = e.r.unit;
+    const lvl = level || u?.level || e.level || 1;
+    const items = [];
+    const rng = room.streams.get('loot');
+    const one = engine.rpg.rollDrop({ level: lvl, rng, magicFind: u?.derived?.magicFind || 0, chance: tier === 'reward' ? 1 : null, rarityBoost: tier === 'reward' ? 2 : 1 });
+    if (one) items.push(one);
+    return items;
+  }
+  function onParty(e, id) { const u = e.r.unit; if (u) u.partyId = id ?? null; }
+
   return {
+    equip, unequip, gear, saveGear, rollLoot, onParty,
+    stats: () => ({ builds, handoffs }),
     addEntity, removeEntity, intent, step, respawn, onLevel,
     levelFor: xp => levelFromXp(xp, engine.levelCap),
     xpFor: level => xpForLevel(level, engine.levelCap),

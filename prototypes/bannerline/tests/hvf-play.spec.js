@@ -66,8 +66,9 @@ test('hunter: waits in the kennel, then walks under the fog; the farmers stay hi
   // right-click toward the Commons
   const before = await page.evaluate(() => { const g = window.hvf, s = g.state(), e = s.ents.find((x) => x.id === s.players[g.match.me].ent); return { x: e.x, z: e.z }; });
   await page.evaluate(() => window.hvf.fastForward(60));
-  const target = await page.evaluate(() => { const m = window.hvf.match, c = m.sim.map.commons, s = window.hvf.state(), e = s.ents.find((x) => x.id === s.players[m.me].ent);
-    const x = e.x + (c.x - e.x) * 0.15, z = e.z + (c.z - e.z) * 0.15; m.camera.snapTo(e.x, e.z); m.camera.update(0.016, {}); const p = m.camera.project(x, 0, z, m.vp.rect); return p; });
+  // a point on open screen above the character (the bottom of the screen is the control bar)
+  await page.evaluate(() => { const m = window.hvf.match, s = window.hvf.state(), e = s.ents.find((x) => x.id === s.players[m.me].ent); m.camera.snapTo(e.x, e.z); });
+  const target = { x: 720, y: 300 };
   await page.mouse.click(target.x, target.y, { button: 'right' });
   await page.evaluate(() => window.hvf.fastForward(20 * 8));
   const after = await page.evaluate(() => { const g = window.hvf, s = g.state(), e = s.ents.find((x) => x.id === s.players[g.match.me].ent); return { x: e.x, z: e.z }; });

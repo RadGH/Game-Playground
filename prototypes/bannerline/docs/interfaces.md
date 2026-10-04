@@ -149,7 +149,7 @@ hashed, not snapshotted): they are hints for drawing and sound. Never derive gam
 | `hit` | `src, dst, amount, dmgType, crit, skill?` | damage applied (floating number; `amount` already rounded to 0.1) |
 | `heal` | `src, dst, amount` | healing applied |
 | `death` | `id, killer, x, z` | something died (heroes too) |
-| `cast` | `id, slot, skill, shape, x, z, face, radius, arc, reach, range, delay, line` | a hero cast a skill. `shape` per PLAN §6.3. For `ground`, `x,z` is the landing point (already clamped to range); `delay` > 0 = it lands that many ticks later (draw a warning marker); `line` > 0 = a line that long across the aim (`face` + 90°), half-width `radius` |
+| `cast` | `id, slot, skill, fx, shape, x, z, face, radius, arc, reach, range, delay, line` | a hero cast a skill. `fx` = the fx/sound key: the form variant's own id while a form changes the skill (Druid wolf: `throat_leap`, `rending_bite`, `pack_run`, `running_howl`), else the skill id. `shape` per PLAN §6.3. For `ground`, `x,z` is the landing point (already clamped to range); `delay` > 0 = it lands that many ticks later (draw a warning marker); `line` > 0 = a line that long across the aim (`face` + 90°), half-width `radius` |
 | `bolt` | `id, skill, fromX, fromZ, toX, toZ, ticks, dst` | a skill bolt (Firebolt) flies for `ticks`; `dst` is the entity it will hit or −1 |
 | `zone` | `zone, x, z, radius, length, face, ticks, skill, dmgType` | a burning patch appears (`length` > 0: a capsule of that length along `face`, half-width `radius`); lasts `ticks` |
 | `zoneEnd` | `zone` | a zone went out |
@@ -175,7 +175,7 @@ hashed, not snapshotted): they are hints for drawing and sound. Never derive gam
 | `upgrade` | `player, id, level, cost` | a Drill Yard level was bought |
 | `power` / `powerHit` | `player, power, kind, field, x, z` / `player, power, x, z, radius` | a Sanctum power was cast (draw its marker; zones also emit `zone`) / a delayed blast (Skyfall) landed |
 | `toll` | `team, player, stunned` | Toll of Iron rang |
-| `dash` | `id, fromX, fromZ, toX, toZ, skill` | a hero leapt (Tracker's Leap); `px/pz` already equal the new spot, tween it yourself |
+| `dash` | `id, fromX, fromZ, toX, toZ, skill, fx` | a hero leapt (Tracker's Leap); `px/pz` already equal the new spot, tween it yourself |
 | `trap` | `zone, x, z, radius` | a snare sprang (zone kind `'trap'`) |
 | `form` | `player, form, id` | a hero took (`form: 'briarback'` or `'wolf'`) or left (`null`) a shape: swap the body to the `form.body` of the skill that grants it (`briarback_shape`, `wolf_shape` in heroes.json). In a shape the other skills are replaced (heroInfo skills show the new names) |
 | `spawn` (kind `turret`) / `remove` (why `expired`) | — | an Engineer's Bolt Turret was built / ran out (or was taken down by a new one past the 1/2/3 limit) |

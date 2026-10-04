@@ -383,7 +383,7 @@ function makeView(m, i, n, l, host) {
   });
   const unitIcon = (u) => app.icons?.url('unit', u) || null;
   const itemIcon = (ic) => app.icons?.url('item', ic) || null;
-  view.bar = createControlBar({ root: hudRoot, sim, Q, player, seat: view.seat, actors: m.actors, minimapLayout: app.layout, isPad, itemIconUrl: itemIcon });
+  view.bar = createControlBar({ root: hudRoot, sim, Q, player, seat: view.seat, actors: m.actors, minimapLayout: app.layout, isPad, itemIconUrl: itemIcon, skillIconUrl: (id) => app.icons?.url('skill', id) || null });
   // The four town buildings' panels (owner round 2). One open at a time per view.
   view.panels = {
     barracks: createBarracks({ root: hudRoot, sim, Q, player, seat: view.seat, isPad, iconUrl: unitIcon, onSend: ({ ok }) => sfx(ok ? 'send' : 'refuse') }),

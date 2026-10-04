@@ -81,7 +81,7 @@ export function createHvfState(config, data, map) {
     const kn = map.kennels[k % map.kennels.length];
     const hp = U.hunter.hp * f.hunterMult;
     baseEnt(state, { kind: 'building', type: 'kennel', owner: pid, team: HUNTERS, x: kn.x, z: kn.z, r: H.rules.kennel.radius, hp: H.rules.kennel.hp, hpMax: H.rules.kennel.hp, cells: null, lodge: true });
-    const c = nearestStandable({ state, map }, g, 'hunter', cellOf(map, kn.x, kn.z));
+    const c = nearestStandable({ state, map }, g, 'hunter', cellOf(map, kn.x, kn.z + 4))   // out in front of the kennel door;
     const e = baseEnt(state, { kind: 'hunter', type: 'hunter', owner: pid, team: HUNTERS, x: cellX(map, c), z: cellZ(map, c), r: U.hunter.radius, hp, hpMax: hp, _atkAt: 0, respawnAt: -1 });
     state.players[pid].ent = e.id;
   });

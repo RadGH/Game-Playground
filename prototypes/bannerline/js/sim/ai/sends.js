@@ -69,6 +69,8 @@ export function wavesToLeak(ctx, u, D, c, head = 0) {
       cap += h.dps * aoeK * time;
     }
     cap += D.turretDps * Math.min(walk, 20) + D.petDps * walk * 0.5;
+    // the Keep's splash on the last stretch (it hits a few bodies of a crowd at once)
+    if (D.keep) cap += D.keep.shot / D.keep.every * (D.keep.range / Math.max(0.5, u.speed)) * Math.min(bodies, 3);
     return cap;
   };
   let n = Math.max(1, Math.ceil((capFor(u.bodies) - head) / per));
@@ -253,7 +255,8 @@ function adaptive(ctx, p, K, rng, S, fresh) {
       if (payback > R * 0.8) continue;                            // will not pay back before the end
       // income that pays back, plus how long the body lives against this defence (a body the hero
       // sweeps away in one swing feeds it gold and XP; a tougher one keeps pressing)
-      const sc = ((u.income / u.cost) * (R - payback) / R + (K.sends.survive ?? 0.03) * hpPerGold(data, u) / hpRef * c[u.id].mult) * mix(u) + K.sends.noise * next(rng) * 0.01;
+      // (a body that melts on the Keep still pays its income, but sends nothing to the banners)
+      const sc = ((u.income / u.cost) * (R - payback) / R * (K.sends.incomeCounter ? c[u.id].mult : 1) + (K.sends.survive ?? 0.03) * hpPerGold(data, u) / hpRef * c[u.id].mult) * mix(u) + K.sends.noise * next(rng) * 0.01;
       if (sc > bs || (sc === bs && u.id < best.id)) { bs = sc; best = u; }
     }
     if (!best || !buy(best, 1, inc)) break;
@@ -299,19 +302,24 @@ function adaptive(ctx, p, K, rng, S, fresh) {
 export function noticeCounter(ctx, p, K, res) {
   const { state, data } = ctx;
   if (!K.sends.toast || !res.cmap) return;
+  // tally per unit: { gold, reason } — the reason is kept from when the unit was bought (the defence,
+  // and so this think's counter map, may have changed since)
   const acc = p.ai.counterAcc || (p.ai.counterAcc = {});
   for (const uid of res.buys) {
     const k = res.cmap[uid];
-    if (k && k.mult >= 1.1 && k.reasons.length) acc[uid] = (acc[uid] || 0) + data.derived.units[uid].cost;
+    if (!k || k.mult < 1.1 || !k.reasons.length) continue;
+    const a = acc[uid] || (acc[uid] = { gold: 0, text: k.reasons[0].text, key: k.reasons[0].key });
+    a.gold += data.derived.units[uid].cost;
   }
   if (state.tick < (p.ai.toastAt || 0)) return;
   let best = null;
-  for (const uid of Object.keys(acc)) if (acc[uid] >= 90 && (!best || acc[uid] > acc[best] || (acc[uid] === acc[best] && uid < best))) best = uid;
+  for (const uid of Object.keys(acc)) if (acc[uid].gold >= 90 && (!best || acc[uid].gold > acc[best].gold || (acc[uid].gold === acc[best].gold && uid < best))) best = uid;
   if (!best) return;
-  const n = Math.round(acc[best] / data.derived.units[best].cost);
+  const n = Math.round(acc[best].gold / data.derived.units[best].cost);
+  const why = acc[best];
   p.ai.toastAt = state.tick + K.sends.toast * 20;
   p.ai.counterAcc = {};
-  counterEvent(ctx, p, p.rival, best, n, res.cmap[best].reasons[0]);
+  counterEvent(ctx, p, p.rival, best, n, why);
 }
 
 export { live };

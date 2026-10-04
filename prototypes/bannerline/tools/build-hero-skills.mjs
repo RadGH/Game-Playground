@@ -23,7 +23,7 @@ const OUT = join(ROOT, 'data', 'heroes.json');
 // ── vocabulary (PLAN §6.3) ──────────────────────────────────────────────────────────────────────
 const SHAPES = new Set(['melee', 'around', 'bolt', 'ground', 'dash', 'self', 'summon', 'form', 'place', 'turret']);
 // keys a skill row may carry after normalisation (effects + shape parameters)
-const SKILL_KEYS = new Set(['name', 'shape', 'element', 'mult', 'radius', 'reach', 'arc', 'range', 'cooldown', 'mp',
+const SKILL_KEYS = new Set(['fxId', 'name', 'shape', 'element', 'mult', 'radius', 'reach', 'arc', 'range', 'cooldown', 'mp',
   'projectiles', 'spread', 'splash', 'pierce', 'repeats', 'line', 'pet', 'count', 'form', 'place',
   // effects
   'status', 'statuses', 'knock', 'pullIn', 'taunt', 'selfBuff', 'pool', 'detonate', 'empowerNext', 'bonusIf', 'pen',
@@ -192,10 +192,10 @@ const BL_SKILLS = {
 };
 // per-form overrides added to Farhold rows (data-driven: the runtime swaps the skill while in the form)
 const FORM_ADD = {
-  thornlash: { wolf: { name: 'Throat Leap', shape: 'dash', dash: { to: 'target', range: 7 }, mult: 0.6, cooldown: 6, mp: 6, statuses: [{ id: 'bleed' }], onHit: null } },
-  renew: { wolf: { name: 'Rending Bite', shape: 'melee', reach: 2.4, arc: 1.2, mult: 0.8, cooldown: 5, mp: 6, status: null, stack: { status: 'bleed', add: 2, max: 5 }, statusMult: 0.12 } },
-  briarback_shape: { wolf: { name: 'Pack Run', shape: 'self', form: null, cooldown: 14, mp: 10, selfBuff: { name: 'Pack Run', seconds: 5, movePct: 0.35 } } },
-  call_wolf: { wolf: { name: 'Running Howl', pet: null, count: null, cooldown: 20, mp: 12, howl: { status: 'haste', seconds: 6, damage: 0.2, radius: 12 } } },
+  thornlash: { wolf: { fxId: 'throat_leap', name: 'Throat Leap', shape: 'dash', dash: { to: 'target', range: 7 }, mult: 0.6, cooldown: 6, mp: 6, statuses: [{ id: 'bleed' }], onHit: null } },
+  renew: { wolf: { fxId: 'rending_bite', name: 'Rending Bite', shape: 'melee', reach: 2.4, arc: 1.2, mult: 0.8, cooldown: 5, mp: 6, status: null, stack: { status: 'bleed', add: 2, max: 5 }, statusMult: 0.12 } },
+  briarback_shape: { wolf: { fxId: 'pack_run', name: 'Pack Run', shape: 'self', form: null, cooldown: 14, mp: 10, selfBuff: { name: 'Pack Run', seconds: 5, movePct: 0.35 } } },
+  call_wolf: { wolf: { fxId: 'running_howl', name: 'Running Howl', pet: null, count: null, cooldown: 20, mp: 12, howl: { status: 'haste', seconds: 6, damage: 0.2, radius: 12 } } },
 };
 
 // talents for Bannerline-original heroes (same mod vocabulary)

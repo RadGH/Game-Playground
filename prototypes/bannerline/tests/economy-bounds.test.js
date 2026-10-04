@@ -15,12 +15,21 @@ function playAll() {
   if (results.length) return results;
   for (let i = 0; i < SEEDS; i++) {
     const s = sim(aiVsAi(1 + i * 7919), { events: false });
-    let peak = 0;
+    // gate queue: how long the send at the FRONT of a field's queue sits there (FIFO, so this is "is it
+    // moving"), and the gaps between moments the queue is empty
+    const head = [null, null], since = [0, 0], emptyAt = [0, 0], gaps = [];
+    let stall = 0;
     while (!s.over && s.tick < 32 * 1200) {
       s.step([]);
-      if (s.tick % 20 === 0) for (const f of s.state.fields) peak = Math.max(peak, f.bodies + f.waiting.length);
+      s.state.fields.forEach((f, k) => {
+        const h = f.waiting[0] || null;
+        if (h !== head[k]) { head[k] = h; since[k] = s.tick; } else if (h) stall = Math.max(stall, s.tick - since[k]);
+        if (!f.waiting.length) { gaps.push([emptyAt[k], s.tick]); emptyAt[k] = s.tick; }
+      });
     }
-    results.push({ minutes: s.tick / 1200, result: s.state.result, peak, players: s.state.players.map(p => ({ ...p.stats, income: p.income })) });
+    const end = s.tick;
+    const midGap = Math.max(0, ...gaps.filter(g => g[1] < end - 3 * 1200).map(g => g[1] - g[0]));
+    results.push({ minutes: s.tick / 1200, result: s.state.result, stall: stall / 20, midGap: midGap / 20, players: s.state.players.map(p => ({ ...p.stats, income: p.income })) });
   }
   return results;
 }
@@ -42,8 +51,14 @@ test.skip('no runaway income: gain m20-30 / gain m5-15 <= 2.0 (endless mode)', (
   }
 });
 
-test('the gate queue stays bounded in normal play (bodies + waiting under twice the cap)', () => {
-  for (const r of playAll()) assert.ok(r.peak < data.econ.field.cap * 2, `peak ${r.peak}`);
+// The gate queue has no fixed size limit on purpose (gold is the only limit on sending). What must hold
+// is that it MOVES: a long queue in the final push before a Keep falls is the avalanche the mode is about,
+// but no send may sit stuck at the front, and before the last 3 minutes the queue keeps emptying.
+test('the gate queue drains: the front send never waits > 30 s; before the final 3 min it empties at least every 90 s', () => {
+  for (const r of playAll()) {
+    assert.ok(r.stall < 30, `front of the queue stuck ${r.stall} s`);
+    assert.ok(r.midGap < 90, `queue did not empty for ${r.midGap} s before the final push`);
+  }
 });
 
 test('pressure per gold rises with tier (T6 HP/gold >= 2x the T1 average) for every race', () => {

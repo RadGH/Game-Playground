@@ -698,6 +698,7 @@
     },
     "wolf": {
      "shape": "dash",
+     "fxId": "throat_leap",
      "name": "Throat Leap",
      "dash": {
       "to": "target",
@@ -739,6 +740,7 @@
     },
     "wolf": {
      "shape": "melee",
+     "fxId": "rending_bite",
      "name": "Rending Bite",
      "reach": 2.4,
      "arc": 1.2,
@@ -830,6 +832,7 @@
    "forms": {
     "wolf": {
      "shape": "self",
+     "fxId": "pack_run",
      "name": "Pack Run",
      "cooldown": 14,
      "mp": 10,
@@ -875,6 +878,7 @@
      "howl": null
     },
     "wolf": {
+     "fxId": "running_howl",
      "name": "Running Howl",
      "cooldown": 20,
      "mp": 12,

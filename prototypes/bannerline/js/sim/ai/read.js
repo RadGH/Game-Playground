@@ -96,7 +96,11 @@ export function defenceOf(ctx, fieldId, forTeam) {
     if (e.kind === 'turret') { turrets++; turretDps += e._dps; turretType = e.dmgType; }
     else if (e.kind === 'pet') { pets++; petDps += e._dps; }
   }
-  return { fieldId, team, heroes, turrets, turretDps, turretType, pets, petDps };
+  // the Keep guard (js/sim/keep.js): a splash shot every few seconds on whatever is nearest the leak
+  // line, growing with the clock — it melts swarms of small bodies on the last stretch
+  const G = field.keep && field.keep.guard;
+  const keep = G ? { shot: G.damage + G.damagePerMinute * (state.tick / 1200), every: G.every, range: G.range, splash: G.splash, dmgType: G.dmgType || 'pierce' } : null;
+  return { fieldId, team, heroes, turrets, turretDps, turretType, pets, petDps, keep };
 }
 
 /**

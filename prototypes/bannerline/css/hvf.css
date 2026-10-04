@@ -117,3 +117,6 @@
 
 @media (max-width: 1100px) { .hv-build { grid-template-columns: repeat(6, 76px); } .hv-top { gap: 12px; } }
 .hvf-hud [hidden], .hvf-root [hidden] { display: none !important; }
+.hv-bt, .hv-sk { padding-right: 20px; }
+.hv-row .hv-bt { min-width: 78px; }
+.hv-sk { width: 96px; }

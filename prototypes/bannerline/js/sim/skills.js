@@ -263,7 +263,7 @@ export function castSkill(ctx, p, slot, aimX, aimZ) {
   hero.act = 'cast'; hero.actTick = state.tick;
   let px = hero.x, pz = hero.z;
   if (plan.shape === 'ground' || plan.shape === 'turret') ({ x: px, z: pz } = groundPoint(ctx, hero, plan, aimX, aimZ));
-  ctx.emit('cast', { id: hero.id, slot, skill: sk.id, shape: plan.shape, x: px, z: pz, face: hero.face, radius: plan.radius || 0, arc: plan.arc || 0, reach: plan.reach || 0, range: plan.range || 0, delay: plan.delay ? secToTicks(plan.delay) : 0, line: plan.line ? plan.line.length : 0 });
+  ctx.emit('cast', { id: hero.id, slot, skill: sk.id, fx: plan.fxId || sk.id, shape: plan.shape, x: px, z: pz, face: hero.face, radius: plan.radius || 0, arc: plan.arc || 0, reach: plan.reach || 0, range: plan.range || 0, delay: plan.delay ? secToTicks(plan.delay) : 0, line: plan.line ? plan.line.length : 0 });
   selfEffects(ctx, hero, p, plan);
   if (plan.shape === 'bolt') fireBolts(ctx, hero, p, plan, aimX, aimZ, pm);
   else if (plan.shape === 'ground') {
@@ -408,7 +408,7 @@ function dashTo(ctx, hero, plan, aimX, aimZ) {
   hero.z = clamp(hero.z + (back ? -dz : dz) * go, f.z0 + 0.5, f.leakZ - 0.5);
   hero.px = hero.x; hero.pz = hero.z;
   if (!back && !plan.splash) hitTargets(ctx, hero, plan, inCircle(ctx, hero, hero.x, hero.z, 2.5));
-  ctx.emit('dash', { id: hero.id, fromX: sx, fromZ: sz, toX: hero.x, toZ: hero.z, skill: plan.id });
+  ctx.emit('dash', { id: hero.id, fromX: sx, fromZ: sz, toX: hero.x, toZ: hero.z, skill: plan.id, fx: plan.fxId || plan.id });
 }
 
 /** summon: pets next to the hero, then the howl (haste + damage for the hero and every pet). */

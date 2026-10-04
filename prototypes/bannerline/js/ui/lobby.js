@@ -328,7 +328,6 @@ export function createLobby({ screen, data, devices, session, onStart, onBack })
       <button class="lb-arrow" data-act="kind" data-slot="${s.key}" data-d="-1" aria-label="Previous seat type">‹</button>
       <span>${label}</span>
       <button class="lb-arrow" data-act="kind" data-slot="${s.key}" data-d="1" aria-label="Next seat type">›</button>
-      <span class="lb-online" data-tip="Online seats arrive with online play">Online — soon</span>
     </div>`;
   }
 

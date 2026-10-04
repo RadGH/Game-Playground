@@ -189,7 +189,7 @@ body.over-pad .dim-cursor { opacity: 1; }
   .cb-card { gap: 4px; }
   .minimap { width: 128px; height: 84px; }
   .shop-panel { right: 6px; bottom: 160px; width: calc(100% - 12px); max-width: 520px; }
-  .pad-legend { bottom: 166px; }
+  .pad-legend { bottom: 192px; }
   .reject { bottom: 160px; }
   .talent-pick { bottom: 170px; }
   .tp-card { width: 180px; }
@@ -216,7 +216,7 @@ body.over-pad .dim-cursor { opacity: 1; }
 @keyframes incBump { 40% { transform: scale(1.18); color: #c8ffd0; } }
 .inc-float { position: absolute; left: 50%; top: -2px; transform: translateX(-50%); font: 800 14px var(--ui); color: #a6f0b4; text-shadow: 0 1px 3px #000; pointer-events: none; white-space: nowrap; animation: incFloat .9s ease-out forwards; z-index: 5; }
 @keyframes incFloat { from { opacity: 1; transform: translate(-50%, 0); } to { opacity: 0; transform: translate(-50%, 34px); } }
-@container (max-width: 1000px) { .army-chip { bottom: 168px; left: 6px; font-size: 12px; } }
+@container (max-width: 1000px) { .army-chip { bottom: 192px; left: 6px; font-size: 12px; } }
 
 /* building labels over the town buildings */
 .hall-label { position: absolute; left: 0; top: 0; padding: 3px 10px; border-radius: 6px; white-space: nowrap; pointer-events: none;

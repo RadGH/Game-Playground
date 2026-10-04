@@ -65,6 +65,13 @@ export function unitCounter(data, u, D, opts = {}) {
     const mr = (u.dmg === 'fire' || u.dmg === 'nature') ? top.h.mr : 0;
     if (mr < 15) reasons.push({ key: 'strong', w: (pct(data, u.dmg, top.h.armourClass) - 1) * 2, text: `${DMG_ADJ[u.dmg]} your ${ARMOUR_WORD[top.h.armourClass]} armour hard` });
   }
+  // the Keep: a body that dies to one or two of its splash shots never reaches the banners (everyone
+  // who has played a match knows this, so the Veteran's table read includes it)
+  if (D.keep) {
+    const shot = D.keep.shot * pct(data, D.keep.dmgType, u.armour);
+    const survive = Math.min(1, u.hp / (shot * 3));
+    taken /= 0.55 + 0.45 * survive;
+  }
   if (opts.only === 'table') return finish(taken, dealt, reasons);
 
   // what the hero kits do to a crowd

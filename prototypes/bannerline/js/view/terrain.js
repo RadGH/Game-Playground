@@ -281,7 +281,6 @@ export function buildWorld(scene, layout) {
         }
       }
     },
-    /** Highlight a field's Muster Hall (hovered / near). */
     /** Highlight one building's ring (hovered / hero standing in range). */
     highlight(id, on) {
       for (const f of fields) for (const b of f.town) if (b.def.id === id) { b.model.userData.hot = on; b.model.userData.ring.material.color.set(on ? 0xfff1c0 : b.model.userData.ringColor); }

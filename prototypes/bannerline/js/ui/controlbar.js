@@ -23,7 +23,7 @@ const SKILL_KEYS = ['Q', 'W', 'E', 'R'];
 const TIER_NAMES = { 1: 'I', 2: 'II', 3: 'III', 4: 'IV', 5: 'V', 6: 'Champion' };
 const PAD_SKILL = { Q: 'X', W: 'Y', E: 'B', D: 'RB', R: 'RT' };
 
-export function createControlBar({ root, sim, Q, player, seat, actors, minimapLayout, isPad = false, itemIconUrl = () => null }) {
+export function createControlBar({ root, sim, Q, player, seat, actors, minimapLayout, isPad = false, itemIconUrl = () => null, skillIconUrl = () => null }) {
   const data = sim.data;
   const tickHz = data.econ?.clock?.tickHz || 20;
   const bar = h('div', 'controlbar', null, { 'data-ui': true });
@@ -112,7 +112,12 @@ export function createControlBar({ root, sim, Q, player, seat, actors, minimapLa
     if (!sk) { el.classList.add('empty'); return; }
     el.classList.remove('empty');
     const face = el.querySelector('.cc-face');
-    setText(face, sk.name.split(/\s+/).map((w) => w[0]).join('').slice(0, 2));
+    if (face._id !== sk.id) {
+      face._id = sk.id;
+      const url = skillIconUrl(sk.id);
+      if (url) face.innerHTML = `<img src="${url}" alt="" draggable="false">`;
+      else face.textContent = sk.name.split(/\s+/).map((w) => w[0]).join('').slice(0, 2);
+    }
     face.dataset.el = data.heroes?.skills?.[sk.id]?.element || hero?.dmgType || '';
     const cdFrac = sk.cooldown > 0 && sk.readyIn > 0 ? sk.readyIn / sk.cooldown : 0;   // both in ticks
     setStyle(el.querySelector('.cc-cd'), '--cd', String(Math.max(0, Math.min(1, cdFrac))));

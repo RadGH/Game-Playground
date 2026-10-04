@@ -369,3 +369,8 @@ if (app.screen === 'hvf') app.hvf.frame(dt);
   keeps capsules. F's campaign: title "Campaign" -> createCampaignScreen (pads through nav/confirm/back) ->
   mission in the real game with createCampaignOverlay -> showDebrief (pad-navigable) -> next / retry / map;
   tests/campaign-ui.spec.js green. I's town UI: Outfitter / Barracks / Drill Yard / Sanctum panels.
+- [x] (A -> C) **Wolf ability fx keys.** C's guessed ids in data/skill-fx.json (`throat_leap`, `rending_bite`,
+  `pack_run`, `running_howl`) are now real: each wolf-form variant carries `fxId` in data/heroes.json, and the
+  `cast` and `dash` events carry a new field `fx` = that id (`fx` = the skill id when there is no variant). The
+  `skill` field is unchanged (still the base id: thornlash / renew / briarback_shape / call_wolf, which the
+  cooldown UI keys on). **C/B: look skill-fx up by `e.fx || e.skill`.**

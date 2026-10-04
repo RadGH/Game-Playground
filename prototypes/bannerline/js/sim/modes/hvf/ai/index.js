@@ -20,7 +20,9 @@ export function hvfKnobs(data, p) {
 function memory(p) {
   const m = p.ai;
   if (m.v === 1) return m;
-  Object.assign(m, { v: 1, nextAt: m.nextAt || 0, hollow: null, hollow2: null, cleared: [], arrived: false, found: null, flee: null, seenHunter: null,
+  // first thinks are staggered by seat (3 ticks apart): nine farmers each picking a hollow and routing
+  // to it on the same tick was a 40-90 ms tick
+  Object.assign(m, { v: 1, nextAt: m.nextAt === undefined ? p.id * 3 : m.nextAt, hollow: null, hollow2: null, cleared: [], arrived: false, found: null, flee: null, seenHunter: null,
     sus: null, checked: null, target: -1, goal: null, lastSeen: null, progress: null, breach: -1, lastThink: null, retry: false });
   return m;
 }

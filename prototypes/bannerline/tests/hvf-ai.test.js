@@ -237,13 +237,15 @@ test('the same hunter finds a careless (Recruit) farm sooner than a careful (Com
   assert.ok(rec < com, `recruit farms found after ${(rec / 8 / 1200).toFixed(1)} min, commander farms after ${(com / 8 / 1200).toFixed(1)} min`);
 });
 
-test('strength (hunters): Commander hunters down more farmers and cost them more gold than Recruit hunters (16 seeds, 15 min)', () => {
-  let dr = 0, dc = 0, er = 0, ec = 0;
-  for (let i = 0; i < 16; i++) {
+test('strength (hunters): Commander hunters win more matches and cost the farmers more gold than Recruit hunters (32 seeds, 15 min)', () => {
+  // (farmers DOWNED is not the measure: a Recruit hunter downs the same farmers again and again while
+  // their friends keep reviving them; catching them all, and starving the farms, is what wins)
+  let wr = 0, wc = 0, er = 0, ec = 0;
+  for (let i = 0; i < 32; i++) {
     const r = play('veteran', 'recruit', 820 + i, '3v1', 15), c = play('veteran', 'commander', 820 + i, '3v1', 15);
-    dr += r.downs; dc += c.downs; er += r.earned; ec += c.earned;
+    wr += r.hunters ? 1 : 0; wc += c.hunters ? 1 : 0; er += r.earned; ec += c.earned;
   }
-  assert.ok(dc > dr, `farmers downed: commander hunters ${dc} vs recruit ${dr}`);
+  assert.ok(wc > wr, `hunter wins: commander ${wc} vs recruit ${wr}`);
   assert.ok(ec < er, `farmers earned: under commander hunters ${Math.round(ec)} vs recruit ${Math.round(er)}`);
 });
 

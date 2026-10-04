@@ -391,7 +391,8 @@ export function farmerThink(ctx, p, K, rng, cmd) {
       if (me.ord.k === 'move' && me.ord.path && me.ord.i < me.ord.path.length) return;
       if (me.ord.k === 'chop') return;
       // a door tree: walk to it and cut it
-      if (h.door >= 0 && g.cells[h.door] === KIND.tree && !canRoute(ctx, me, homeCell, false, false)) { route('chop', { cell: h.door }, h.door, true, false); return; }
+      // (a tree-door hollow's door IS its only way in — mapgen — so no whole-map search to find that out)
+      if (h.entry === 'tree' && h.door >= 0 && g.cells[h.door] === KIND.tree) { route('chop', { cell: h.door }, h.door, true, false); return; }
       if (!route('move', { x: cellX(map, homeCell), z: cellZ(map, homeCell) }, homeCell, false, false) && !m.retry) { m.hollow = pickHollow(ctx, p, K, rng); }
       return;
     }

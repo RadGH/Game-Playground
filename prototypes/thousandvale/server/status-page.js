@@ -11,7 +11,7 @@ pre{background:var(--card);padding:10px;border-radius:6px;overflow:auto;font-siz
 </style></head><body><h1>Thousandvale server</h1><div class="grid" id="g"></div><pre id="raw"></pre>
 <script>
 const cell=(k,v,cls='')=>'<div class="c"><div class="k">'+k+'</div><div class="v '+cls+'">'+v+'</div></div>';
-async function poll(){try{const s=await (await fetch('/status',{cache:'no-store'})).json();
+async function poll(){try{const s=await (await fetch('status',{cache:'no-store'})).json();
 const t=s.tick;const tone=v=>v>50?'style="color:var(--bad)"':v>20?'style="color:var(--warn)"':'style="color:var(--ok)"';
 document.getElementById('g').innerHTML=cell('Players online',s.ccu)+cell('Tick p50 ms',t.p50)+cell('Tick p99 ms','<span '+tone(t.p99)+'>'+t.p99+'</span>')+cell('Worst tick (10 min)','<span '+tone(t.worst10m)+'>'+t.worst10m+'</span>')+cell('Messages in /s',s.msgsInPerSec)+cell('Bytes out /s',s.bytesOutPerSec)+cell('Saves ok / failed',s.saves.done+' / '+s.saves.failed)+cell('Uptime s',s.uptime)+cell('Heap MB',s.heapMB)+cell('Rules',s.rules)+cell('DB',s.db)+cell('Build',s.build);
 document.getElementById('raw').textContent=JSON.stringify(s,null,2);}catch(e){document.getElementById('raw').textContent='offline: '+e.message}}

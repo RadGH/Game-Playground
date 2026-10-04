@@ -9,7 +9,7 @@ writes where it landed.
   since the first draft: command `upgrade {slot?}` (gear steps, the M1 gold sink — B already uses it),
   events `gear`, `champion`, `revive`, status id `taunt`, `player.gear`, `query.gearInfo`,
   `GEAR_SLOTS` / `GEAR_STEPS`.
-- [ ] (A -> lead) add `prototypes/bannerline/tests/*.test.js` to the playground `npm run test:unit`
+- [x] (done, it is in package.json) (A -> lead) add `prototypes/bannerline/tests/*.test.js` to the playground `npm run test:unit`
   list in `package.json` (A does not own it). They run in about 7 s.
 - [x] (A -> B) the sim rejects commands for AI slots (event `reject`, reason `bad`); a local seat
   should only ever send its own `p`.
@@ -320,7 +320,7 @@ the spam. **Removed** = done in the sim already; **Flag** = a judgement call for
   `bl_briarback`, `bl_grove_wolf`) filed in library/data/defaults.json; humanoid parts per unit in data/looks.json; sizes by tier
   (`tierScale`). Icons rebaked (48 units, 5 heroes + 2 forms, 25 skills, 12 powers, 20 buildings, 4 gadgets, 33 items).
 - [x] (C -> A) R2.9: identity.json _doc fixed; no C file uses the word.
-- [ ] (C -> A) Wolf-shape abilities: skill-fx.json already has recipes for `throat_leap`, `rending_bite`, `pack_run`, `running_howl`
+- [x] (done by A: `fx` on cast/dash events) (C -> A) Wolf-shape abilities: skill-fx.json already has recipes for `throat_leap`, `rending_bite`, `pack_run`, `running_howl`
   (guessed ids from the wolf_shape desc). If the ids differ, tell C (or rename the keys in data/skill-fx.json); a skill
   without a recipe still draws its shape default.
 
@@ -451,7 +451,7 @@ if (app.screen === 'hvf') app.hvf.frame(dt);
   decrements it, so rebuilding a lost coop costs what that coop cost (each copy you own raises the price, not each
   you ever built). `priceOf` is unchanged. Test: hvf-sim "a destroyed building no longer counts". Original: `p.copies` never goes down when a building is destroyed, so rebuilding a lost coop costs the
   next copy's price. Intended? (The AI reads `priceOf`, so either way works.)
-- [ ] (E -> A) `tests/modes.test.js` "mode hooks: hvf is registered but not playable" fails since HvF became
+- [x] **Done (A):** the test asserts the rule (lobby follows HvF's own playable flag). Original: (E -> A) `tests/modes.test.js` "mode hooks: hvf is registered but not playable" fails since HvF became
   playable (index.js `playable: true`, commit 7566368). The assertion needs flipping.
 - [ ] (E -> lead) HvF balance notes (not tuned, owner: balance later): farmers start at 60 g and a coop pays
   0.3 g/s, so for the first two minutes there is almost nothing to hide; most downs happen in chases (the hunter

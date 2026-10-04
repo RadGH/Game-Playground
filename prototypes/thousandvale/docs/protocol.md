@@ -1,6 +1,6 @@
 # Thousandvale — network protocol and room interface (stream A)
 
-**Status:** v2 for M1 (rooms, parties, loot, encounter events), 2026-10-04 (v1 = M0). Owner: stream A (`js/net/**` ★, `js/sim/**`, `server/**`).
+**Status:** v2 for M1.5 (rooms, parties, loot, encounter events, journal, trade, human check), 2026-10-04 (v1 = M0). Owner: stream A (`js/net/**` ★, `js/sim/**`, `server/**`).
 The machine-readable copy of every table on this page is `js/net/protocol.js`; if this page and that file
 disagree, the file wins and this page is a bug. Changes go through stream A (`docs/requests.md`).
 
@@ -373,7 +373,11 @@ Teams: players `team = 1`, hostile monsters `team = 2`, friendly NPCs `team = 1`
 
 ### 8.1 Processes and ports
 `node server/main.mjs` (dev, port **8491**, LAN): static client (allow-listed directories only, §8.5), `/gw`,
-`/p/0`, `/status`. Options: `--port`, `--db` (`pg` | `json` | `memory`), `--host`. Stage 1 = one process.
+`/p/0`, `/status`, `/status.html`, `/healthz`. Options (header of main.mjs): `--port`, `--host`, `--db pg|json|memory`,
+`--db-file`, `--env dev|stable` (a pg database must end in `_<env>`: dev and stable never share one), `--public <dir>`
+(serve only a published copy, stream H), `--process <name>` (lease owner prefix), `--save-every`, `--journal-ms`,
+`--linger`, `--terrain <zone>`, `--rules auto|v0`, `--build`. Environment (an env file outside the repo,
+`server/env.example`): `PG*`/`DATABASE_URL`, `TV_TURNSTILE_SECRET`, `TV_TURNSTILE_SITEKEY`, `TV_ENV`. Stage 1 = one process.
 
 ### 8.2 Tick
 Fixed 20 Hz loop with drift correction (each tick is scheduled for `start + k*50 ms`; late ticks run
@@ -385,13 +389,22 @@ spawns/despawns → AOI refresh → snapshots and events → flush sockets.
 `tick:{p50, p95, p99, max, worst10m, overruns, skipped}` (ms, last minute), `msgsIn/s`, `bytesOut/s`,
 `bad`, `rulesErrors`, `saves:{queue, lastMs, failed}`, `heap`, `uptime`, `build`, `db`. Read-only numbers.
 
-### 8.4 Saves and crashes (M0)
-Characters live in Postgres (`thousandvale_dev`, schema `server/db/schema.sql`), or a JSON file / memory in
-tests and the Worker. A character is saved every 10 s while it changed, on level-up and on logout. Position,
-level, XP, gold and HP are columns + a JSON blob (`SAVE_FIELDS`, `js/sim/save-fields.js`). Each save is
-`UPDATE … WHERE version=$v AND lease_fence=$f`. At boot the process clears leases held by its own name
-(`p0:*`), so after a `kill -9` + restart clients reconnect straight away and resume from the last save
-(≤ 10 s of walking lost; the journal of M1.5 cuts this to ≤ 2 s).
+### 8.4 Saves, the journal and crashes (M1.5, PLAN §9.2)
+- Every change that matters becomes a **journal row** (`js/sim/journal.js`: `gold {d}`, `xp {d, level}`, `bagAdd {item}`,
+  `bagDel {uid}`, `equip {equipment}`, `opened`, `pos`, `set`) — deltas and add/removes, so they stay right on top of
+  any later blob. Rows are **group-committed every 2 s** (`--journal-ms`) in one statement that keeps only rows whose
+  character still holds the writer's lease fence (`char_journal`, schema v2).
+- The full **blob** is saved every 60 s if anything changed (`--save-every`), on logout, on a rare-or-better drop and
+  on a level-up; it records the last journal seq it contains (`journal_seq`) and the rows up to it are pruned in the
+  same statement. Every write sends a snapshot copy (the live character keeps changing while the write is in flight).
+- **Load** = blob + the journal rows after its seq, in order. **Worst-case loss on a crash: ≤ 2 s.**
+- **One writer**: lease + fence (`lease_fence` bumps on every take); blob saves are `… WHERE version=$v AND
+  lease_fence=$f`; a frozen old process that wakes cannot write a blob or a journal row. At boot a process clears
+  leases under its own name (`--process`, default `p0`), so after a `kill -9` + restart clients come straight back.
+- **Trades** write both blobs in ONE transaction (`store.tradeChars`, versions + fences checked): everything moves or
+  nothing does. Proven by tests/A/chaos.test.js: 500 crashes at random moments (writes landing 5–60 ms late, so crashes
+  cut through saves, journal commits and trades) with four players trading/equipping/walking — every item held exactly
+  once and the gold total unchanged after every restart.
 
 ### 8.5 Static files (dev)
 Served from the playground root so the client's relative imports into Farhold/avatar-3d/shared resolve:
@@ -503,3 +516,19 @@ tiles: <run lengths: 0s, 1s, 0s, …>, rooms, gate?: {i, j, w, h, open} }] }` (g
 - **Faucet/sink log** (PLAN §13): every gold/item gain or loss is logged with a reason (`kill`, `chest`,
   `overflow`; sinks `destroy`) and the level band (`floor((level-1)/5)`); hourly rows are upserted into
   `economy_log` (schema v1) every minute; `/status.economy` shows the last hour.
+
+## 13. Trades (M1.5)
+`trade {op}` on the province socket (§3.1): ask (within 10 m, both alive, not ignoring) → accept → offers (≤ 12 uids
+from the bag + gold; any change unlocks both) → both lock → both confirm → one all-or-nothing store write. While a trade
+is open its offered items cannot be equipped/destroyed or offered elsewhere; a character is in one trade at a time;
+walking apart, dying, leaving or logging out cancels. While the write is in flight both characters' new loot waits
+(a couple of ticks). `tradeState` keeps both windows current; `trade:null` closes them (`done` or `why`).
+Options: `tradeMinLevel` (PLAN §5.5 wants claimed accounts at level 5+ for trades from M3; default 1 until claims exist).
+
+## 14. Human check on new guests (M1.5, PLAN §9.4)
+When `TV_TURNSTILE_SECRET` is set, `welcome.human = {provider:'turnstile', siteKey}` and `guest` must carry
+`human: <Turnstile token>`; the server checks it with Cloudflare (`server/turnstile.js`) and answers `err {code:'human'}`
+if it fails. New accounts are limited to 20 per network per hour (`err {code:'tooMany'}`; loopback/worker exempt).
+`js/net/client.js` takes `connect({ human })` = a token or `async ({siteKey}) => token` (the client renders the widget).
+Cloudflare's public test keys are in `server/env.example` (site key `1x00000000000000000000AA` passes, token
+`XXXX.DUMMY.TOKEN.XXXX`); the real pair lives only in the env file outside the repo.

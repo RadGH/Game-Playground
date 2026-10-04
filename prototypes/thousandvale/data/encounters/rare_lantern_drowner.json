@@ -7,7 +7,7 @@
   "place": "a light that bobs over the deepest pool of Brackwater Fen at dusk, pretending to be a lost traveller's lamp",
   "_doc": "Stream E (M2). A wisp that lures. Its Lantern Light puts a gold SAFE circle under it and darkens everything else — come close to be spared. It sends sparks after everyone (spread), and at half health splits off three little lights.",
   "party": {
-    "solo": "Solo is fine if you remember to walk INTO the light.",
+    "solo": "Solo is fine as long as you walk INTO the light.",
     "small": "Easy.",
     "full": "Easy; spread for the sparks.",
     "m5": "M5 adds health per extra player and one more copy of the spread/scatter shapes for parties of 4-5; mechanics stay the same."

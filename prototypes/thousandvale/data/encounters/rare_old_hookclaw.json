@@ -25,8 +25,8 @@
     "reset": "Old Hookclaw climbs back into the thermals."
   },
   "abilities": {
-    "rake": {
-      "id": "rake",
+    "raking_claws": {
+      "id": "raking_claws",
       "name": "Hooked Talon",
       "every": [
         6,
@@ -118,7 +118,7 @@
     {
       "name": "Hunting",
       "abilities": [
-        "rake",
+        "raking_claws",
         "dive",
         "gust"
       ]
@@ -128,7 +128,7 @@
       "at": 0.5,
       "say": "Old Hookclaw takes to the sky!",
       "abilities": [
-        "rake",
+        "raking_claws",
         "triple_dive",
         "gust"
       ]

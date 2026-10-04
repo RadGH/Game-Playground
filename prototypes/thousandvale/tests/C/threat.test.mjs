@@ -63,7 +63,8 @@ test('a taunt forces the target for its seconds and lifts the taunter above the 
   assert.equal(pickTarget(m, lookup, usable, 1).id, 'tank');
   addThreat(m, dps, 400);                                        // dps now 900 vs tank 550
   assert.equal(pickTarget(m, lookup, usable, 1).id, 'tank', 'the taunt still holds');
-  assert.equal(pickTarget(m, lookup, usable, 1.5).id, 'dps', 'and runs out');
+  assert.equal(pickTarget(m, lookup, usable, 1.5).id, 'tank', 'the last second holds (Farhold order)');
+  assert.equal(pickTarget(m, lookup, usable, 1).id, 'dps', 'and then it has run out');
 });
 
 test('dead or departed bodies drop off; clear wipes the table', () => {

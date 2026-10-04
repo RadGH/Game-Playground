@@ -122,8 +122,8 @@
         }
       ]
     },
-    "blink_flash": {
-      "id": "blink_flash",
+    "flare_flash": {
+      "id": "flare_flash",
       "name": "Blinding Flash",
       "every": [
         20,
@@ -171,7 +171,7 @@
         "flare",
         "sparks",
         "beam",
-        "blink_flash"
+        "flare_flash"
       ]
     },
     {

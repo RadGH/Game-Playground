@@ -530,7 +530,7 @@ export function tickMonsters(field, dt, hooks = {}) {
         e.turnedHits = (e.turnedHits || 0) + 1;
         field.land(foe, res, { fromX: e.x, fromZ: e.z, by: null });
         field.report(e, foe, res, 'bite');
-        threatTaunt(foe, e, 3);              // actors.js: the side it hit answers it (a hard taunt, 3 s)
+        threatTaunt(foe, e, 3, { lift: false });   // actors.js: the side it hit answers it (a hard taunt, 3 s)
         if (res.dead) field.kill(foe);
       } else if (adist > e.reach) {
         speed = e.speed;

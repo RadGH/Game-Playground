@@ -34,7 +34,13 @@ export async function pair({ classId, level = 30, seed = 4, pack = PACK, followe
   return { F, fp, ff, fmobs, fs, control, room, tp, tmobs };
 }
 
+/** Farhold's Rewind keeps its history on `performance.now()`: the fixtures run it on the fake clock. */
+let fakeMs = 0;
+const realPerfNow = performance.now.bind(performance);
+export function fakePerformance(on) { fakeMs = 0; performance.now = on ? () => fakeMs : realPerfNow; }
+
 export function frame(s) {
+  fakeMs += DT * 1000;
   mock.timers.tick(DT * 1000);
   s.ff.update(DT, s.control, s.fp, { onEnemyStrike: e => O.farholdEnemyStrike(s.F, s.ff, s.fp, e, s.fs.mech) });
   s.fs.tick(DT);
@@ -86,6 +92,7 @@ export function basic(s, step) {
  */
 export async function runBar({ classId, seed = 4, level = 30, frames = 50, skip = () => false, followers = false }) {
   mock.timers.enable({ apis: ['setTimeout'], now: 0 });
+  fakePerformance(true);
   const problems = [];
   let casts = 0, dealt = 0;
   try {
@@ -118,6 +125,7 @@ export async function runBar({ classId, seed = 4, level = 30, frames = 50, skip 
     if (!problems.length && s.tp.roomRng() !== s.F.rpg.rng()) problems.push(`${classId}: skill-bar rngs out of step`);
   } finally {
     mock.timers.reset();
+    fakePerformance(false);
   }
   return { problems, casts, dealt };
 }

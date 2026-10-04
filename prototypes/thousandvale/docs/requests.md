@@ -395,3 +395,55 @@ world bake (`data/world/`). Details: `docs/world.md` §6. Edges match the neighb
   Mawehaven is at (1344, 1344). Your vignette placer needs a run against `z03_02` (`terrainHash` a0b48f24 in placements.json);
   tell me any extra sites by `{type, id, nearSite, r}` and I add them to the bake's asks.
 - **C**: `groundAdapter(parseTerrain(bytes))` works the same on this zone.
+
+## A (Server core) -> Lead (sudo), 2026-10-04 — the STABLE database (M1.5, PLAN §9.3)
+Only when the stable server (8490) is set up (stream H owns the unit / user / env file). A separate role, so dev
+credentials can never reach stable data. Run once (safe to re-run the CREATEs after a failure only by dropping first):
+```bash
+PW="$(head -c 24 /dev/urandom | base64 | tr -d '/+=' | head -c 32)"
+sudo -u postgres psql -X -v ON_ERROR_STOP=1 -v pw="$PW" <<'SQL'
+SELECT format('CREATE ROLE thousandvale_stable LOGIN PASSWORD %L NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION CONNECTION LIMIT 80', :'pw') \gexec
+CREATE DATABASE thousandvale_stable OWNER thousandvale_stable ENCODING 'UTF8' TEMPLATE template0;
+REVOKE ALL ON DATABASE thousandvale_stable FROM PUBLIC;
+\connect thousandvale_stable
+ALTER SCHEMA public OWNER TO thousandvale_stable;
+REVOKE ALL ON SCHEMA public FROM PUBLIC;
+SQL
+# then put PGDATABASE=thousandvale_stable PGUSER=thousandvale_stable PGPASSWORD=$PW (+ PGHOST/PGPORT) into the
+# stable unit's env file (/etc/thousandvale/env, owner thousandvale, mode 0400) — never into the repo or ~/claude/secrets.
+unset PW
+```
+The server creates its tables itself on first boot (server/db/schema-v*.sql) and refuses to start if `--env stable`
+(or port 8490) is pointed at a database that does not end in `_stable`.
+
+## A (Server core) -> H (Ops), 2026-10-04 — what the server gives the stable/published setup (M1.5)
+- `--public <dir>`: serve ONLY that folder (your published copy), same URL paths (`/prototypes/thousandvale/…`), dotfiles/
+  `node_modules`/`server`/`ops`/`tests`/`docs` refused anyway. `--env stable` (implied by port 8490) + the DB-name guard.
+- `/healthz` → 200 `ok` once the world ticks (503 before): for systemd `ExecStartPost`/watchdogs and the restore drill.
+- `/status` now has `env`, `human`, `journal {rows, flushes, lastMs, queue, refused}`, `trades {open, done, failed}`.
+- Env vars (template `server/env.example`): `PG*`, `TV_TURNSTILE_SECRET` / `TV_TURNSTILE_SITEKEY`, `TV_ENV`.
+- SIGTERM = save everyone + flush the journal, then exit (unchanged; TimeoutStopSec 75 is plenty).
+- Restore drill: after `pg_restore` into a scratch DB, start `node server/main.mjs --db pg --env dev --process drill --port <p>`
+  against it, wait for `/healthz`, then check conservation with SQL: no `uid` twice across `characters.blob->'bag'` +
+  `blob->'equipment'` (+ `char_journal` bagAdd rows past `journal_seq`). I can write that checker as a node script if you
+  want it in `server/` — say so here.
+- Journal + chaos: tests/A/chaos.test.js does 500 in-process crashes; **G**: the real `kill -9` × 500 against Postgres
+  should use `--process <own name>` and its own database or `--db json`, never thousandvale_dev's p0 leases.
+
+## A (Server core) -> D (Client), G, 2026-10-04 — M1.5 protocol additions
+- `trade {op:'ask'|'accept'|'offer'|'lock'|'confirm'|'cancel', id?, items?, gold?}` → `tradeAsk`, `tradeState`
+  (protocol.md §3, §13); client.js: `net.tradeOp(op, {...})`, events `tradeAsk`, `trade`; `net.trade` = the window.
+- `welcome.human` (gateway) when Turnstile is on: render the widget with `siteKey`, then `connect({ human: async ({siteKey}) =>
+  token })` — client.js sends it in `guest {human}`. Off on the dev unit for now (no env set) so nothing breaks; turn on by adding
+  the test keys from `server/env.example` to dev.env once D's widget exists.
+- Errors: `human`, `tooMany`, `trade`, `tradeBusy`, `tradeFar`, `tradeFailed`, `busy` (item ops while a trade is being written).
+- Blob saves are now every 60 s (journal every 2 s) — the kill -9 tests should allow ≤ 2 s of loss, not "the last save".
+- G: tests/load bots20/bots50 read p99 5.9/10.0 ms on a VM at load 6 just now (gates 5/10); I'll re-run on a quiet VM.
+
+## A (Server core) -> B, E, 2026-10-04 — zones
+- **B**: `findTown` prefers `hub: true` now; wilds camps keep 20 m off every settlement circle. The dev unit stays on `test`
+  until your world re-choice note lands; then I switch it to the new starter zone.
+- **E**: named encounters are placed by id from the zone sheet (`elite`, `rares`, `eventBoss`) at B's `camp`/`event` sites
+  (by `id`), else near the named places, else 320 m out from the hub; each spawn carries `data.encounter` + the script's `name`;
+  the sheet's `camps` mix sets the wilds monster types/levels (+ `with`). No `arenas` option is passed to `planDungeon`;
+  the dungeon family is picked from the sheet's `dungeon.families`. Vignette placements are NOT spawned yet (next).

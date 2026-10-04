@@ -438,6 +438,7 @@ function chainFloor(rng, L) {
   const gi = rooms.findIndex(r => r.kind === 'boss') >= 0 ? rooms.findIndex(r => r.kind === 'boss') : rooms.findIndex(r => r.kind === 'miniboss');
   const carvePath = path => { for (const [i, j] of path) for (let dj = -half; dj <= half; dj++) for (let di = -half; di <= half; di++) g.carve(i + di, j + dj); };
   const corridorTiles = new Uint8Array(W * H);
+  const postTiles = new Uint8Array(W * H);          // corridors from the gate on: nothing else may touch them
   const markPath = path => { for (const [i, j] of path) for (let dj = -half; dj <= half; dj++) for (let di = -half; di <= half; di++) { const ii = i + di, jj = j + dj; if (ii >= 0 && jj >= 0 && ii < W && jj < H && owner[jj * W + ii] < 0) corridorTiles[jj * W + ii] = 1; } };
   /** may a corridor between rooms a and b (b may be -1 = open rock) run with its centre on (i, j)? */
   const okFor = (a, b, post) => (i, j) => {
@@ -447,6 +448,7 @@ function chainFloor(rng, L) {
       const k = jj * W + ii, o = owner[k];
       if (o >= 0) { if (o !== a && o !== b) return false; continue; }
       if (post && corridorTiles[k]) return false;
+      if (postTiles[k]) return false;
     }
     return true;
   };
@@ -458,6 +460,7 @@ function chainFloor(rng, L) {
     if (!path) return fail(post ? 'post corridor' : 'pre corridor');
     if (k === gi) gatePath = path;
     carvePath(path); markPath(path);
+    if (post) for (const [i, j] of path) for (let dj = -half; dj <= half; dj++) for (let di = -half; di <= half; di++) { const ii = i + di, jj = j + dj; if (ii >= 0 && jj >= 0 && ii < W && jj < H && owner[jj * W + ii] < 0) postTiles[jj * W + ii] = 1; }
   }
   // loops: extra links between rooms before the gate (pre rules)
   for (let n = 0; n < (L.loops || 0); n++) {

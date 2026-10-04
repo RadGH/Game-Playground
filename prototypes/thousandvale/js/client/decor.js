@@ -41,7 +41,7 @@ export async function createDecor(hf, { placements = [], paths = [], seed = 7, a
   const LOD_FAR = lodFar;   // metres: lod0 inside [0], lod1 inside [1], billboard beyond
   const group = new THREE.Group(); group.name = 'decor';
   const rng = makeRng(seed * 101 + 9);
-  const nForest = makeNoise2D(seed * 13 + 5);   // same field the terrain shader paints forest floor from
+  const nForest = makeNoise2D(seed * 13 + 5);   // breaks woods into groves
 
   // --- materials --------------------------------------------------------------------------------
   const atlas = await loadFoliageAtlas();
@@ -69,23 +69,29 @@ export async function createDecor(hf, { placements = [], paths = [], seed = 7, a
   const trees = [];   // { x, y, z, yaw, s, sp, v }
   const rocks = [];
   const bushes = [];
-  const lim = hf.half - 8;
-  const tries = Math.round(16000 * density);
+  // Where things grow is the zone's biome: woods are dense, open grass has the odd tree and bush,
+  // rock and sand have none; a noise field breaks woods into groves and glades.
+  const FOREST_DENSITY = { temperateForest: 0.75, rainforest: 0.85, borealForest: 0.8, blighted: 0.5, hallowed: 0.55, marsh: 0.25, hills: 0.22, shrubland: 0.12, grassland: 0.07, savanna: 0.04, tundra: 0.03 };
+  const b = hf.bounds, W = b.maxX - b.minX, D = b.maxZ - b.minZ;
+  const tries = Math.round(W * D / 65 * density);
+  const ylo = hf.heightAt(hf.spawn.x, hf.spawn.z);
   for (let i = 0; i < tries; i++) {
-    const x = (rng() * 2 - 1) * lim, z = (rng() * 2 - 1) * lim;
-    const y = hf.heightAt(x, z);
-    if (y < hf.waterLevel + 0.8) continue;
-    const slope = hf.slopeAt(x, z);
-    const f = fbm(nForest, x * 0.006, z * 0.006, { octaves: 3 });
+    const x = b.minX + 6 + rng() * (W - 12), z = b.minZ + 6 + rng() * (D - 12);
     if (blocked(x, z)) continue;
+    if (hf.waterAt(x, z).depth > 0 || hf.waterAt(x + 3, z).depth > 0 || hf.waterAt(x, z + 3).depth > 0) continue;
+    const y = hf.heightAt(x, z);
+    const deg = hf.slopeDeg(x, z), slope = 1 - Math.cos(deg * Math.PI / 180);
+    const biome = hf.biomeKey(x, z);
+    const f = fbm(nForest, x * 0.006, z * 0.006, { octaves: 3 });
+    const dens = (FOREST_DENSITY[biome] || 0) * (0.35 + f * 1.1);
     const r = rng();
-    if (slope < 0.18 && r < (f - 0.42) * 1.3) {
-      const high = y > 30;
-      const sp = high ? (rng() < 0.6 ? 'fir' : 'pine') : f > 0.62 ? SPECIES[Math.floor(rng() * 2)] : SPECIES[2 + Math.floor(rng() * 2)];
+    if (deg < 28 && r < dens * 0.32) {
+      const high = biome === 'borealForest' || y > ylo + 110;
+      const sp = high ? (rng() < 0.6 ? 'fir' : 'pine') : biome === 'rainforest' ? 'oak' : f > 0.6 ? SPECIES[Math.floor(rng() * 2)] : SPECIES[2 + Math.floor(rng() * 2)];
       trees.push({ x, y, z, yaw: rng() * 6.283, s: 0.75 + rng() * 0.5, sp, v: Math.floor(rng() * VARIANTS) });
-    } else if (slope > 0.12 && rng() < 0.05 + slope * 0.4) {
+    } else if (deg > 20 && rng() < 0.02 + slope * 0.25) {
       rocks.push({ x, y, z, yaw: rng() * 6.283, s: 0.6 + rng() * 1.4, k: Math.floor(rng() * 3) });
-    } else if (r < 0.03 + f * 0.05 && slope < 0.25) {
+    } else if (r < 0.006 + dens * 0.04 && deg < 25) {
       bushes.push({ x, y, z, yaw: rng() * 6.283, s: 0.8 + rng() * 0.6, k: Math.floor(rng() * 2) });
     }
   }

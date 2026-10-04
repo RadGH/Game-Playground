@@ -11,7 +11,7 @@
 //   takeChar(account, id, owner, leaseMs) -> { char, fence } | { err: 'missing' | 'lease' }
 //   saveChar(char, fence) -> true | false             refused when version or fence moved on
 //   releaseChar(id, owner) ; heartbeat(owner, ids, leaseMs) ; clearLeases(ownerPrefix) -> count
-//   info() -> { kind, accounts, characters }
+//   logEconomy(rows) ; info() -> { kind, accounts, characters }
 
 import { sha256Hex, randomHex } from './sha256.js';
 import { packChar, unpackChar } from './save-fields.js';
@@ -84,6 +84,15 @@ export function createMemoryStore({ now = () => Date.now(), data = null, onChang
       for (const r of Object.values(d.chars)) if (r.lease_owner && r.lease_owner.startsWith(prefix)) { r.lease_owner = null; r.lease_until = 0; n++; }
       if (n) changed();
       return n;
+    },
+    async logEconomy(rows) {
+      const log = d.economy ||= {};
+      for (const r of rows) {
+        const k = r.hour + '|' + r.band + '|' + r.kind + '|' + r.reason;
+        const o = log[k] ||= { hour: r.hour, band: r.band, kind: r.kind, reason: r.reason, gold: 0, items: 0, count: 0 };
+        o.gold += r.gold; o.items += r.items; o.count += r.count;
+      }
+      if (rows.length) changed();
     },
     async info() { return { kind: 'memory', accounts: Object.keys(d.accounts).length, characters: Object.keys(d.chars).length }; },
   };

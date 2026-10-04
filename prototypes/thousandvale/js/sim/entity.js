@@ -31,7 +31,8 @@ export class Entity {
     this.data = spec.data || null;
     this.cls = spec.cls || (spec.char && spec.char.cls) || null;
     this.look = spec.look || (spec.char && spec.char.look) || null;
-    this.r = {};
+    this.r = spec.r || {};          // a handoff carries the rules' state over (cooldowns, statuses)
+    this.rank = spec.rank || 'normal';
     this.cell = -1;
     this.dirty = new Array(BANDS).fill(F.FULL);
     this.infoVer = 1;
@@ -111,6 +112,8 @@ export class Entity {
     const o = { id: this.id, kind: this.kind, name: this.name, level: this.level, hpMax: this.hpMax, team: this.team };
     if (this.kind === 'player') { o.cls = this.cls; if (this.look) o.look = this.look; }
     else if (this.type) o.type = this.type;
+    if (this.rank !== 'normal') o.rank = this.rank;
+    if (this.kind === 'object' && this.data && this.data.chest) o.key = this.data.chest.key;
     return o;
   }
 }

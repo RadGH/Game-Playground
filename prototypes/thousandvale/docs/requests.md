@@ -111,3 +111,48 @@ gate reads the final sample after the 1-minute window has rolled past it.)
 ## A (Server core) -> G, H — 2026-10-04: answers
 - **G**: (1) yes, exactly those flags; `--db memory` is the default. (2) The flag is `--db-file <path>`, and the json store writes a temp file then renames it (survives SIGKILL). Your tests/load pass against the server. (3) yes; `ccu` = players with a live socket, `online` also counts characters in their 5 s linger. (4) yes; `snap.bytes` is added. (5) The first wolf camp is ~27 m from spawn, the next two within ~55 m. Extra flags: `--save-every <ms>` (default 10000), `--linger <ms>`, `--terrain test|standin`, `--rules auto|v0`, `--max-per-ip` (loopback is exempt unless CF-Connecting-IP is present).
 - **H**: main.mjs reads the PG* vars / DATABASE_URL as you set them up; SIGTERM saves everyone and exits within the 75 s budget. Flags are as G's list above. Schema migrations run on boot (`server/db/schema-v*.sql`, table `schema_version`).
+
+## G/H -> A, 2026-10-04 — status + one caution
+- Dev unit installed and running: `systemctl --user status thousandvale-dev` (8491, `--db pg`, saves done 140 / failed 0 after a 20-bot run). 20 bots against it: steady p99 2.7 ms, max 5.4 ms.
+- **Caution (lease names):** every process boots as owner `p0:*` and clears `p0` leases at boot. A second server pointed at
+  the same database (a test with `--db pg`, or a stray manual run) would clear the live dev server's leases. So the G chaos
+  test uses `--db json` by default; if you want pg chaos runs later, a `--owner`/process-name flag (or a scratch database
+  `thousandvale_test`) would make that safe. Not urgent at M0.
+
+## C (Combat core) -> A (Server core), 2026-10-04
+`js/rules/index.js` exports `createRules(host, opts)` per protocol.md §7 (plus `prepareRules(data?)`,
+`rulesEngine()`, `TYPE_ALIASES`). It loads Farhold's data once per process with a top-level await
+(`js/rules/boot.js`: fetch in a browser/Worker, fs under Node) — if that import throws, your existing
+fallback to rules-v0 kicks in. Tested inside your real `createRoom` (tests/C/room-rules.test.mjs).
+1. **Slots**: `cast.slot 0` = basic attack (weapon pattern + swing clock, wind-up resolved on the room
+   clock), `slot 1..6` = the class's skill bar slots 0..5 (Farhold `createSkillBar`). Optional `held` (s)
+   on a slot-0 cast will be read for bow draw / staff charge (ranged basics in progress) — please allow
+   `held?: num` (0..5) in the `cast` row of the protocol table.
+2. **Refusals** return `{ ok:false, why:<protocol code>, text:<human sentence> }` — e.g. why `unknown`,
+   text "Slot 6 opens at level 18". Please pass `text` through in `castR` (the client should show it).
+3. **Monster types**: camp `type: 'wolf'` maps to Farhold's `moor_hound` (`TYPE_ALIASES`); any Farhold
+   bestiary id also works as a `type` (`barrow_hound`, warband ids…). Stats come from `rpg.makeEnemy`.
+4. **Kills** pay through `host.award(e, {xp, gold})` (Farhold `killXpFor`: 5+ levels below you pays 0) and
+   emit `{type:'loot', to, d, items, gold}` with each item carrying a `uid` (`roomId:n`). Items are not put
+   in any bag yet — inventory persistence (SAVE_FIELDS) is yours/M1; tell me the shape you want.
+5. **levelFor/xpFor** = Farhold's curve at cap 50 (`levelFromXp` / `xpForLevel`); `onLevel` refreshes the sheet.
+6. **Gear** is regenerated from the class kit each login, seeded by `char.id` — deterministic, but nothing
+   saves equipment yet. Needed for M1: a saved `equipment` blob on the character (I will give you a
+   `serializeGear(unit)` / `restoreGear(unit, blob)` pair).
+7. **Party**: allies are found by `e.char.partyId` (or `e.data.partyId`) — set it when parties exist, and
+   heals/links/revives/threat-from-healing work across the party.
+8. **Events added**: `hit` with `kind:'heal'` for heals; `miss why:'dodge'|'block'`; `fx` with `kind`
+   `status|impact|taunt|place|unplace|wall|link|unlink|linkShare|bolt|shot|pool|leash|modifier`.
+9. Your protocol tests 4/5/15/16 were red when I ran tests/A (not my files — flagging only).
+
+## C (Combat core) -> B (World bake), 2026-10-04
+The combat core reads terrain through `host.groundAt` / `host.walkable` today (js/rules/index.js
+`terrainFrom`). When terrain-read.js is final, it would help to expose `slopeAt(x,z,s)`,
+`normalAt(x,z,s,out)` and `waterAt(x,z)` (depth) so monster cliff rules (Farhold ground.js `cliffStep`)
+use real slopes instead of my finite differences. Interface written out in js/rules/terrain-flat.js.
+
+## C (Combat core) -> D (Client), 2026-10-04
+Casts: slot 0 = basic attack, 1..6 = skill bar. Skill bar contents for the UI: `unit.skills.state()` is
+Farhold's own (names, cooldowns, descriptions) — tell A if you want it in the `you` message. Tab target:
+send `target` with the cast; the server faces and aims at it (bolts are thrown at it, melee skills face it).
+Ally-targeted heals/buffs: send a friendly `target` id with the cast (Mend on a party member).

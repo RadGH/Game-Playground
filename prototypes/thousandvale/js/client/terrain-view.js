@@ -1,57 +1,56 @@
-// The ground mesh, drawn from a heightfield (heightfield.js) — the exact grid and triangles
-// `heightAt` reads, so feet sit on the drawn surface to the millimetre.
+// The ground mesh, built from the terrain's own height grid (terrain.js) with the reader's diagonal,
+// so `heightAt` is exactly the drawn surface and feet sit on it to the millimetre.
 //
-// Cut into 64-cell chunks so the camera culls what is behind it. Four ground surfaces (grass, forest
-// floor, rock, sand) from the high-def kit are blended per pixel; the WEIGHTS are worked out per vertex
-// here (slope -> rock, near the water -> sand, a noise field + `paths` -> worn earth). A large-scale
-// blotch and a fine close-up grain hide the texture repeat. Water is one plane at the water level.
+// A 2 km zone is a million samples, so the grid is cut into 64-cell chunks, each built lazily at the
+// detail its distance deserves (every sample near you; every 4th, 16th further out). A short skirt
+// hangs off every chunk rim so the seam between a fine chunk and a coarse one never shows sky.
+// Four kit surfaces (grass, forest floor, rock, sand) are blended per pixel; the weights come from the
+// zone's biome and slope per vertex, and the biome colour tints the ground so a marsh reads as a marsh.
+// Water is drawn from the reader's own water layer: a triangle is wet only when all three corners are.
 
 import * as THREE from 'three';
 import { makeSurface, makeWaterNormals } from '../../../../highdef-3d/js/kit/textures.js';
-import { makeNoise2D, fbm } from '../../../../worldgen/js/noise.js';
 
 const CHUNK = 64;
+const SKIRT = 3;
+const FOREST = new Set(['temperateForest', 'rainforest', 'borealForest', 'blighted', 'marsh', 'hallowed']);
+const SAND = new Set(['beach', 'desert', 'savanna', 'coast']);
+const ROCK = new Set(['mountains', 'snowyPeaks', 'badlands', 'volcanic', 'ashPlain', 'glimmerwaste', 'tundra']);
 
-export function createTerrainView(hf, { paths = [], seed = 7, textureSize = 512, clearings = [] } = {}) {
+export function createTerrainView(T, { textureSize = 512, quality = 'high', clearings = [], biomeColors = null } = {}) {
   const group = new THREE.Group(); group.name = 'terrain';
-  const { res, step, half, data } = hf;
+  const grid = T.heightGrid();
+  const { res, step, origin } = T;
   const cells = res - 1;
-  const nForest = makeNoise2D(seed * 13 + 5), nTint = makeNoise2D(seed * 17 + 3);
+  const per = Math.ceil(cells / CHUNK);
+  const strides = quality === 'low' ? [2, 8, 16] : [1, 4, 16];
+  const dist = quality === 'low' ? [90, 320] : [180, 520];
 
-  // --- surface weights per vertex: x forest floor, y rock, z sand, w worn path ---------------------
-  const distToPaths = (x, z) => {
-    let best = 1e9;
-    for (const p of paths) for (let i = 0; i < p.pts.length - 1; i++) {
-      const [ax, az] = p.pts[i], [bx, bz] = p.pts[i + 1];
-      const vx = bx - ax, vz = bz - az, l2 = vx * vx + vz * vz;
-      const t = Math.max(0, Math.min(1, ((x - ax) * vx + (z - az) * vz) / l2));
-      const d = Math.hypot(x - ax - vx * t, z - az - vz * t) - (p.width || 2.5) / 2;
-      if (d < best) best = d;
-    }
-    return best;
-  };
   const smooth = (a, b, v) => { const t = Math.max(0, Math.min(1, (v - a) / (b - a))); return t * t * (3 - 2 * t); };
-
-  function weights(x, z, y, ny) {
-    const slope = 1 - ny;
-    const rock = smooth(0.16, 0.32, slope) + smooth(55, 90, y) * 0.6;
-    const sand = (1 - smooth(hf.waterLevel + 0.6, hf.waterLevel + 2.2, y));
-    let forest = smooth(0.5, 0.68, fbm(nForest, x * 0.006, z * 0.006, { octaves: 3 }));
-    // Clearings (camps, towns) are open grass with a trodden-earth middle, never forest floor.
-    let trodden = 0;
-    for (const c of clearings) { const d = Math.hypot(x - c.x, z - c.z) / c.r; forest *= smooth(0.8, 1.3, d); trodden = Math.max(trodden, (1 - smooth(0.15, 0.55, d)) * 0.75); }
-    const path = Math.max(trodden, paths.length ? 1 - smooth(0, 2.2, distToPaths(x, z)) : 0);
-    let w = [forest * 0.85, Math.min(1, rock), sand, path * 0.95];
-    // Rock and sand win over the softer layers; normalise so the total never exceeds 1.
-    w[0] *= 1 - w[1]; w[3] *= 1 - w[1];
-    const sum = w[0] + w[1] + w[2] + w[3];
-    if (sum > 1) w = w.map(v => v / sum);
-    return w;
+  const col = new THREE.Color(), bcol = new THREE.Color();
+  function surface(x, z, out, o) {
+    const slope = T.slopeDeg(x, z), b = T.biomeKey(x, z);
+    let forest = FOREST.has(b) ? 0.75 : b === 'hills' || b === 'shrubland' ? 0.25 : 0;
+    let rock = Math.max(smooth(26, 38, slope), ROCK.has(b) ? 0.55 : 0);
+    let sand = SAND.has(b) ? 0.8 : 0;
+    const w = T.waterAt(x, z);
+    if (w.depth > 0) sand = Math.max(sand, 0.7);
+    let path = 0;
+    for (const c of clearings) { const d = Math.hypot(x - c.x, z - c.z) / c.r; forest *= smooth(0.7, 1.2, d); path = Math.max(path, (1 - smooth(0.12, 0.6, d)) * 0.7); }
+    forest *= 1 - rock; path *= 1 - rock;
+    let s = forest + rock + sand + path;
+    if (s > 1) { forest /= s; rock /= s; sand /= s; path /= s; }
+    out[o] = forest; out[o + 1] = rock; out[o + 2] = sand; out[o + 3] = path;
+    // A faint pull toward the biome's own colour, so neighbouring biomes read differently.
+    const hex = biomeColors?.[b];
+    col.setRGB(1, 1, 1);
+    if (hex) { bcol.set(hex); const l = (bcol.r + bcol.g + bcol.b) / 3 || 1; col.setRGB(0.82 + 0.18 * bcol.r / l, 0.82 + 0.18 * bcol.g / l, 0.82 + 0.18 * bcol.b / l); }
+    return col;
   }
 
-  // --- material ---------------------------------------------------------------------------------
+  // --- material --------------------------------------------------------------------------------
   const surf = k => { const s = makeSurface(k, { size: textureSize, seed: 7 }); s.map.anisotropy = 8; s.map.wrapS = s.map.wrapT = THREE.RepeatWrapping; return s.map; };
-  const tex = { grass: surf('grass'), floor: surf('forest_floor'), rock: surf('rock'), sand: surf('sand'), path: (() => { try { return surf('dirt'); } catch { return surf('forest_floor'); } })() };
+  const tex = { grass: surf('grass'), floor: surf('forest_floor'), rock: surf('rock'), sand: surf('sand'), path: surf('dirt') };
   const material = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, metalness: 0 });
   material.onBeforeCompile = shader => {
     Object.assign(shader.uniforms, { tGrass: { value: tex.grass }, tFloor: { value: tex.floor }, tRock: { value: tex.rock }, tSand: { value: tex.sand }, tPath: { value: tex.path } });
@@ -74,7 +73,7 @@ export function createTerrainView(hf, { paths = [], seed = 7, textureSize = 512,
             c += (texture2D(tRock, vW.zy * 0.06).rgb * b.x + texture2D(tRock, vW.xz * 0.06).rgb * b.y + texture2D(tRock, vW.xy * 0.06).rgb * b.z) * wR;
           }
           float macro = tvNoise(p * 0.012) * 0.5 + tvNoise(p * 0.041) * 0.5;
-          c *= mix(0.82, 1.15, macro);
+          c *= mix(0.84, 1.14, macro);
           float camD = length(vW - cameraPosition);
           float near = 1.0 - smoothstep(18.0, 60.0, camD);
           vec3 det = texture2D(tGrass, p * 0.9).rgb;
@@ -83,55 +82,107 @@ export function createTerrainView(hf, { paths = [], seed = 7, textureSize = 512,
         }`);
   };
 
-  // --- chunks -----------------------------------------------------------------------------------
-  const per = Math.ceil(cells / CHUNK);
-  const tint = new THREE.Color();
-  for (let cj = 0; cj < per; cj++) for (let ci = 0; ci < per; ci++) {
+  // --- chunks ------------------------------------------------------------------------------------
+  function buildChunk(ci, cj, stride) {
     const i0 = ci * CHUNK, j0 = cj * CHUNK, i1 = Math.min(cells, i0 + CHUNK), j1 = Math.min(cells, j0 + CHUNK);
-    const nx = i1 - i0 + 1, nz = j1 - j0 + 1, count = nx * nz;
-    const pos = new Float32Array(count * 3), nor = new Float32Array(count * 3), col = new Float32Array(count * 3), spl = new Float32Array(count * 4);
+    const nx = Math.floor((i1 - i0) / stride) + 1, nz = Math.floor((j1 - j0) / stride) + 1;
+    const count = nx * nz, rim = 2 * (nx + nz) - 4, total = count + rim;
+    const pos = new Float32Array(total * 3), nor = new Float32Array(total * 3), cols = new Float32Array(total * 3), spl = new Float32Array(total * 4);
+    const H = (i, j) => grid[Math.min(cells, Math.max(0, j)) * res + Math.min(cells, Math.max(0, i))];
     let v = 0;
-    for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++, v++) {
-      const x = -half + i * step, z = -half + j * step, y = data[j * res + i];
+    for (let b = 0; b < nz; b++) for (let a = 0; a < nx; a++, v++) {
+      const i = i0 + a * stride, j = j0 + b * stride;
+      const x = origin.x + i * step, z = origin.z + j * step, y = H(i, j);
       pos[v * 3] = x; pos[v * 3 + 1] = y; pos[v * 3 + 2] = z;
-      // Vertex normal from the grid's central differences (smooth shading; heights stay exact).
-      const hl = data[j * res + Math.max(0, i - 1)], hr = data[j * res + Math.min(cells, i + 1)];
-      const hd = data[Math.max(0, j - 1) * res + i], hu = data[Math.min(cells, j + 1) * res + i];
-      const ddx = (hr - hl) / (2 * step), ddz = (hu - hd) / (2 * step), l = Math.hypot(ddx, 1, ddz);
+      const ddx = (H(i + 1, j) - H(i - 1, j)) / (2 * step), ddz = (H(i, j + 1) - H(i, j - 1)) / (2 * step), l = Math.hypot(ddx, 1, ddz);
       nor[v * 3] = -ddx / l; nor[v * 3 + 1] = 1 / l; nor[v * 3 + 2] = -ddz / l;
-      const w = weights(x, z, y, 1 / l);
-      spl.set(w, v * 4);
-      // A gentle colour wander so wide meadows are not one flat green.
-      const t = fbm(nTint, x * 0.004, z * 0.004, { octaves: 2 });
-      tint.setRGB(0.92 + t * 0.16, 0.95 + t * 0.1, 0.9 + (1 - t) * 0.08);
-      col[v * 3] = tint.r; col[v * 3 + 1] = tint.g; col[v * 3 + 2] = tint.b;
+      const c = surface(x, z, spl, v * 4);
+      cols[v * 3] = c.r; cols[v * 3 + 1] = c.g; cols[v * 3 + 2] = c.b;
     }
-    // Same diagonal as heightfield.js: cell (i,j) splits along (i, j+1) — (i+1, j).
     const idx = [];
-    for (let j = 0; j < nz - 1; j++) for (let i = 0; i < nx - 1; i++) {
-      const a = j * nx + i, b = a + 1, c = a + nx, d = c + 1;   // a=(i,j) b=(i+1,j) c=(i,j+1) d=(i+1,j+1)
-      idx.push(a, c, b, c, d, b);
+    for (let b = 0; b < nz - 1; b++) for (let a = 0; a < nx - 1; a++) {
+      const p = b * nx + a, q = p + 1, r = p + nx, s = r + 1;   // p=(i,j) q=(i+1,j) r=(i,j+1) s=(i+1,j+1)
+      idx.push(p, r, q, q, r, s);                                // same split as the reader: q–r diagonal
+    }
+    // Skirt: a copy of the rim dropped SKIRT metres, stitched to the rim.
+    const ring = [];
+    for (let a = 0; a < nx; a++) ring.push(a);
+    for (let b = 1; b < nz; b++) ring.push(b * nx + nx - 1);
+    for (let a = nx - 2; a >= 0; a--) ring.push((nz - 1) * nx + a);
+    for (let b = nz - 2; b >= 1; b--) ring.push(b * nx);
+    const base = v;
+    for (const src of ring) {
+      pos[v * 3] = pos[src * 3]; pos[v * 3 + 1] = pos[src * 3 + 1] - SKIRT; pos[v * 3 + 2] = pos[src * 3 + 2];
+      for (let k = 0; k < 3; k++) { nor[v * 3 + k] = nor[src * 3 + k]; cols[v * 3 + k] = cols[src * 3 + k]; }
+      for (let k = 0; k < 4; k++) spl[v * 4 + k] = spl[src * 4 + k];
+      v++;
+    }
+    for (let k = 0; k < ring.length; k++) {
+      const a = ring[k], b = ring[(k + 1) % ring.length], A = base + k, B = base + (k + 1) % ring.length;
+      idx.push(a, b, A, b, B, A, a, A, b, b, A, B);   // both windings: the skirt is seen from either side
     }
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     g.setAttribute('normal', new THREE.BufferAttribute(nor, 3));
-    g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    g.setAttribute('color', new THREE.BufferAttribute(cols, 3));
     g.setAttribute('aSplat', new THREE.BufferAttribute(spl, 4));
-    g.setIndex(count > 65535 ? new THREE.Uint32BufferAttribute(idx, 1) : new THREE.Uint16BufferAttribute(idx, 1));
+    g.setIndex(total > 65535 ? new THREE.Uint32BufferAttribute(idx, 1) : new THREE.Uint16BufferAttribute(idx, 1));
     g.computeBoundingSphere();
-    const mesh = new THREE.Mesh(g, material);
-    mesh.receiveShadow = true; mesh.name = `chunk-${ci}-${cj}`;
-    group.add(mesh);
+    return g;
   }
 
-  // --- water ------------------------------------------------------------------------------------
-  const normals = makeWaterNormals(256, 7);
-  normals.wrapS = normals.wrapT = THREE.RepeatWrapping; normals.repeat.set(60, 60);
-  const water = new THREE.Mesh(new THREE.PlaneGeometry(hf.size, hf.size, 1, 1), new THREE.MeshStandardMaterial({
-    color: '#2f5f73', roughness: 0.12, metalness: 0.1, transparent: true, opacity: 0.82, normalMap: normals, normalScale: new THREE.Vector2(0.35, 0.35),
-  }));
-  water.rotation.x = -Math.PI / 2; water.position.y = hf.waterLevel - 0.15; water.name = 'water';
-  group.add(water);
+  const chunks = [];
+  for (let cj = 0; cj < per; cj++) for (let ci = 0; ci < per; ci++) {
+    const cx = origin.x + (ci + 0.5) * CHUNK * step, cz = origin.z + (cj + 0.5) * CHUNK * step;
+    const mesh = new THREE.Mesh(buildChunk(ci, cj, strides[2]), material);
+    mesh.receiveShadow = true; mesh.name = `chunk-${ci}-${cj}`;
+    group.add(mesh);
+    chunks.push({ ci, cj, cx, cz, mesh, level: 2, geos: [null, null, mesh.geometry] });
+  }
 
-  return { group, material, water, update(t) { normals.offset.set(t * 0.004, t * 0.0025); } };
+  // --- water --------------------------------------------------------------------------------------
+  let water = null, normals = null;
+  const wg = T.waterGrid();
+  if (wg) {
+    const ws = quality === 'low' ? 2 : 1;
+    const map = new Int32Array(res * res).fill(-1);
+    const wpos = [], widx = [];
+    const vert = (i, j) => { const k = j * res + i; if (map[k] < 0) { map[k] = wpos.length / 3; wpos.push(origin.x + i * step, wg[k], origin.z + j * step); } return map[k]; };
+    for (let j = 0; j + ws <= cells; j += ws) for (let i = 0; i + ws <= cells; i += ws) {
+      const a = wg[j * res + i], b = wg[j * res + i + ws], c = wg[(j + ws) * res + i], d = wg[(j + ws) * res + i + ws];
+      if (!Number.isNaN(a) && !Number.isNaN(b) && !Number.isNaN(c)) widx.push(vert(i, j), vert(i, j + ws), vert(i + ws, j));
+      if (!Number.isNaN(b) && !Number.isNaN(c) && !Number.isNaN(d)) widx.push(vert(i + ws, j), vert(i, j + ws), vert(i + ws, j + ws));
+    }
+    if (widx.length) {
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.Float32BufferAttribute(wpos, 3));
+      g.setIndex(widx); g.computeVertexNormals();
+      const uv = new Float32Array(wpos.length / 3 * 2);
+      for (let k = 0; k < uv.length / 2; k++) { uv[k * 2] = wpos[k * 3] / 24; uv[k * 2 + 1] = wpos[k * 3 + 2] / 24; }
+      g.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+      normals = makeWaterNormals(256, 7); normals.wrapS = normals.wrapT = THREE.RepeatWrapping;
+      water = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: '#2c5b6e', roughness: 0.1, metalness: 0.15, transparent: true, opacity: 0.84, normalMap: normals, normalScale: new THREE.Vector2(0.4, 0.4), depthWrite: false }));
+      water.position.y = 0.02; water.renderOrder = 1; water.name = 'water';
+      group.add(water);
+    }
+  }
+
+  // --- per frame: re-level the chunks near the camera (two rebuilds a frame at most) --------------
+  let lodAt = 0, t = 0;
+  function update(dt, cam) {
+    t += dt;
+    if (normals) normals.offset.set(t * 0.012, t * 0.007);
+    if (!cam || t < lodAt) return;
+    lodAt = t + 0.25;
+    let built = 0;
+    const order = chunks.map(c => ({ c, d: Math.max(0, Math.hypot(c.cx - cam.x, c.cz - cam.z) - CHUNK * step * 0.7) })).sort((a, b) => a.d - b.d);
+    for (const { c, d } of order) {
+      const want = d < dist[0] ? 0 : d < dist[1] ? 1 : 2;
+      if (want === c.level) continue;
+      if (!c.geos[want]) { if (built >= 2) continue; c.geos[want] = buildChunk(c.ci, c.cj, strides[want]); built++; }
+      c.mesh.geometry = c.geos[want]; c.level = want;
+    }
+  }
+
+  return { group, material, water, update, ready: () => chunks.every(c => c.level !== 2 || true) };
 }

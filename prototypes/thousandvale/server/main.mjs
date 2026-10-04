@@ -4,7 +4,7 @@
 //
 //   node server/main.mjs [--port 8491] [--host 0.0.0.0] [--db pg|json|memory] [--db-file data.json]
 //                        [--build dev] [--rules auto|v0] [--terrain test|standin] [--linger 5000]
-//                        [--max-per-ip 4] [--save-every 10000]
+//                        [--max-per-ip 4] [--save-every 10000] [--process p0]
 //
 // pg settings come from PGHOST/PGPORT/PGDATABASE/PGUSER/PGPASSWORD or DATABASE_URL (ops/start-dev.sh).
 // SIGTERM / SIGINT: tell everyone, save everyone, exit (protocol.md §8.4).
@@ -29,7 +29,7 @@ const GAME = resolve(HERE, '..');
 const PLAYGROUND = resolve(GAME, '../..');
 
 function args(argv) {
-  const o = { port: 8491, host: '0.0.0.0', db: 'memory', dbFile: join(GAME, '.data/dev-store.json'), build: 'dev', rules: 'auto', terrain: 'test', linger: 5000, maxPerIp: 4, saveEvery: 10000 };
+  const o = { port: 8491, host: '0.0.0.0', db: 'memory', dbFile: join(GAME, '.data/dev-store.json'), build: 'dev', rules: 'auto', terrain: 'test', linger: 5000, maxPerIp: 4, saveEvery: 10000, process: 'p0' };
   for (let i = 2; i < argv.length; i++) {
     const k = argv[i], v = argv[i + 1];
     const take = () => { i++; return v; };
@@ -43,6 +43,7 @@ function args(argv) {
     else if (k === '--linger') o.linger = +take();
     else if (k === '--max-per-ip') o.maxPerIp = +take();
     else if (k === '--save-every') o.saveEvery = +take();
+    else if (k === '--process') o.process = take();   // lease owner prefix: give a second server on the same DB its own name
     else if (k === '--help') { console.log(readFileSync(fileURLToPath(import.meta.url), 'utf8').split('\n').slice(1, 12).join('\n')); process.exit(0); }
     else throw new Error('unknown flag ' + k);
   }
@@ -97,7 +98,7 @@ export async function startServer(o) {
   const store = await makeStore(o);
   const terrain = loadTerrain(o.terrain);
   const { createRules, rules } = await loadRules(o.rules);
-  const world = createWorld({ store, terrain, build: o.build, createRules, classes: loadClasses(), now, log, lingerMs: o.linger, saveEveryMs: o.saveEvery });
+  const world = createWorld({ store, terrain, build: o.build, createRules, classes: loadClasses(), now, log, lingerMs: o.linger, saveEveryMs: o.saveEvery, processName: o.process });
   await world.init();
 
   const serveStatic = createStaticHandler(PLAYGROUND);

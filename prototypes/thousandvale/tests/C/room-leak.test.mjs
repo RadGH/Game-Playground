@@ -122,7 +122,9 @@ test('a full fight in each of two rooms, interleaved tick by tick, matches each 
   for (let k = 0; k < 200; k++) step(alone, k);
   const a = await setup('A', 4), b = await setup('B', 9);
   for (let k = 0; k < 200; k++) { step(a, k); step(b, k); }
-  assert.ok(alone.p.hp < alone.p.maxHp && alone.room.field.monsters.some(m => m.hp < m.maxHp || m.dying != null), 'a real fight happened');
+  assert.ok(alone.p.hp < alone.p.maxHp && alone.p.kills > 0, 'a real fight happened');
+  assert.equal(a.p.kills, alone.p.kills);
+  assert.equal(a.p.xp, alone.p.xp);
   assert.equal(a.p.hp, alone.p.hp);
   assert.deepEqual(a.room.field.monsters.map(m => m.hp), alone.room.field.monsters.map(m => m.hp));
   assert.equal(a.room.mech.corpses.length, alone.room.mech.corpses.length);

@@ -16,6 +16,12 @@ export const SAVE_FIELDS = Object.freeze([
   { k: 'hp', def: 0 },
   { k: 'mp', def: 0 },
   { k: 'look', def: null },
+  { k: 'bag', def: [] },           // items, each with a server uid (PLAN §6.2)
+  { k: 'equip', def: {} },         // slot -> item
+  { k: 'opened', def: {} },        // per-character chests: key -> reopen time (wall ms)
+  { k: 'ignore', def: [] },        // [{ id, name }] whose chat this character does not see
+  { k: 'exit', def: null },        // { x, z } in the wilds: where leaving an instance (or losing it) puts you
+  { k: 'mutedUntil', def: 0 },     // wall ms; chat refused until then (admin hook)
 ]);
 
 /** Runtime-only keys on a live character (never saved). */

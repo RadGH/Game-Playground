@@ -13,6 +13,29 @@ export const MONSTER_TYPES = {
   wolf: { name: 'Grey wolf', hp: l => 40 + 14 * l, dmg: l => [3 + 2 * l, 5 + 2 * l], xp: l => 20 + 6 * l },
 };
 
+const RANK_HP = { normal: 1, elite: 3, boss: 6 };
+const RANK_XP = { normal: 1, elite: 3, boss: 8 };
+
+/** STAND-IN loot (C's rules roll Farhold drops). Items get their uid from the server. */
+const JUNK = [['wolf_pelt', 'Wolf pelt', 3], ['wolf_fang', 'Wolf fang', 2], ['torn_cloth', 'Torn cloth', 1]];
+const GEAR = [['rusty_sword', 'Rusty sword', 'mainhand', 8], ['hide_cap', 'Hide cap', 'head', 6], ['iron_ring', 'Iron ring', 'ring', 12], ['wool_boots', 'Wool boots', 'feet', 5]];
+const RARITIES = ['common', 'magic', 'rare', 'unique'];
+export function rollLoot(rng, level, { rank = 'normal', chest = false } = {}) {
+  const items = [];
+  if (next(rng) < (chest ? 1 : rank === 'normal' ? 0.35 : 1)) {
+    const [base, name, value] = JUNK[Math.floor(next(rng) * JUNK.length)];
+    items.push({ base, name, rarity: 'common', level, value, kind: 'junk' });
+  }
+  const gearChance = chest ? 1 : rank === 'boss' ? 1 : rank === 'elite' ? 0.6 : 0.06;
+  if (next(rng) < gearChance) {
+    const [base, name, slot, value] = GEAR[Math.floor(next(rng) * GEAR.length)];
+    const roll = next(rng) + (chest ? 0.35 : rank === 'boss' ? 0.5 : 0);
+    const rarity = RARITIES[roll > 1.25 ? 3 : roll > 0.95 ? 2 : roll > 0.6 ? 1 : 0];
+    items.push({ base, name, rarity, level, value: value * (1 + RARITIES.indexOf(rarity)), slot, kind: 'gear' });
+  }
+  return items;
+}
+
 export function xpFor(level) { return Math.round(100 * Math.pow(Math.max(0, level - 1), 1.6)); }
 export function levelFor(xp) { let l = 1; while (l < 50 && xp >= xpFor(l + 1)) l++; return l; }
 
@@ -21,6 +44,7 @@ const angDiff = (a, b) => { let d = (a - b) % (Math.PI * 2); if (d > Math.PI) d 
 export function createRules(host) {
   const rng = host.rng('combat');
   const ai = host.rng('ai');
+  const loot = host.rng('loot');
 
   function stats(e) {
     if (e.kind === 'player') {
@@ -30,7 +54,7 @@ export function createRules(host) {
       e.setMp(e.mpMax);
     } else if (e.kind === 'monster') {
       const t = MONSTER_TYPES[e.type] || MONSTER_TYPES.wolf;
-      e.setMax(t.hp(e.level), 0);
+      e.setMax(t.hp(e.level) * (RANK_HP[e.rank] || 1), 0);
       e.setHp(e.hpMax);
       e.r.home = { x: e.x, z: e.z };
       e.r.threat = new Map();
@@ -65,7 +89,7 @@ export function createRules(host) {
         const t = MONSTER_TYPES[dst.type] || MONSTER_TYPES.wolf;
         for (const id of dst.r.credit || []) {
           const p = host.entities.get(id);
-          if (p && p.kind === 'player' && !p.dead) host.award(p, { xp: t.xp(dst.level), gold: 1 + (dst.level >> 1) });
+          if (p && p.kind === 'player' && !p.dead) host.award(p, { xp: t.xp(dst.level) * (RANK_XP[dst.rank] || 1), gold: (1 + (dst.level >> 1)) * (RANK_XP[dst.rank] || 1), items: rollLoot(loot, dst.level, { rank: dst.rank }), from: dst, reason: 'kill' });
         }
         host.despawn(dst, WOLF.corpseMs);
       }
@@ -111,7 +135,7 @@ export function createRules(host) {
         if (v > best) { best = v; top = p; }
       }
       const fromHome = Math.hypot(m.x - r.home.x, m.z - r.home.z);
-      if (!top || fromHome > WOLF.leashM || now - r.lastHurt > WOLF.leashMs) { reset(m); return; }
+      if (!top || fromHome > WOLF.leashM || now - r.lastHurt > WOLF.leashMs || (host.inSafeZone && host.inSafeZone(top.x, top.z))) { reset(m); return; }
       m.setTarget(top.id);
       const dx = top.x - m.x, dz = top.z - m.z, d = Math.hypot(dx, dz);
       m.face(Math.atan2(dx, dz));
@@ -139,7 +163,7 @@ export function createRules(host) {
     }
     // idle / wander: look for a player
     for (const p of host.near(m.x, m.z, WOLF.aggro)) {
-      if (p.kind === 'player' && !p.dead) { addThreat(m, p, 1); return; }
+      if (p.kind === 'player' && !p.dead && !(host.inSafeZone && host.inSafeZone(p.x, p.z))) { addThreat(m, p, 1); return; }
     }
     if (now >= r.next) {
       r.next = now + range(ai, 2500, 6000);
@@ -194,6 +218,8 @@ export function createRules(host) {
     },
     respawn(e) { e.r.combatUntil = 0; },
     levelFor, xpFor,
+    /** Loot for a chest opened by `e` (personal). */
+    rollLoot(e, { level = e.level, tier = 'chest' } = {}) { return rollLoot(loot, level, { chest: true, rank: tier }); },
     onLevel(e) { stats(e); e.setHp(e.hpMax); },
     dispose() {},
   };

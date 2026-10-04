@@ -35,10 +35,14 @@ function wsFactory({ url } = {}) {
       send(d) { if (ws.readyState === 1) ws.send(d); },
       close() { try { ws.close(); } catch { /* ignore */ } },
     };
+    let closedOnce = false;
+    const fireClose = (code, reason) => { if (closedOnce) return; closedOnce = true; s.onclose && s.onclose({ code, reason }); };
     ws.onopen = () => s.onopen && s.onopen();
     ws.onmessage = ev => s.onmessage && s.onmessage({ data: ev.data });
-    ws.onclose = ev => s.onclose && s.onclose({ code: ev.code, reason: ev.reason });
-    ws.onerror = () => {};
+    ws.onclose = ev => fireClose(ev.code, ev.reason);
+    // Node 22's WebSocket fires only 'error' (never 'close') when the connection is refused and sits at
+    // readyState 0 — report it as a close so client.js retries (found by stream G's kill -9 test).
+    ws.onerror = () => { if (ws.readyState !== 1) fireClose(1006, 'error'); };
     return s;
   };
 }

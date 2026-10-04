@@ -6,12 +6,21 @@
 //   parseFrame(str)    -> { msg } | { bad: reason }   (JSON text frame -> validated message)
 //   createBuckets()    -> per-socket rate limiter: take(t) -> true if allowed
 
-export const PROTOCOL_VERSION = 1;
+export const PROTOCOL_VERSION = 2;
 export const SNAP_VERSION = 1;
 export const TICK_MS = 50;
 export const MAX_FRAME = 16 * 1024;
 
 export const KIND = Object.freeze({ player: 1, monster: 2, npc: 3, object: 4 });
+/** Join codes reuse Bannerline's alphabet (no I/O, no digits). */
+export const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+export const CODE_LENGTH = 5;
+export function cleanCode(s) {
+  const c = String(s || '').toUpperCase().replace(/[^A-Z]/g, '');
+  if (c.length !== CODE_LENGTH || [...c].some(ch => !CODE_ALPHABET.includes(ch))) return null;
+  return c;
+}
+
 export const KIND_NAMES = Object.freeze(['', 'player', 'monster', 'npc', 'object']);
 
 /** Animation names; index = wire id. APPEND ONLY. */
@@ -42,6 +51,14 @@ export const CODES = Object.freeze({
   abuse: 'Too many bad messages.',
   restart: 'The server is restarting. Back in a moment.',
   idle: 'Disconnected for being idle.',
+  party: 'Party action not possible.',
+  partyFull: 'That party is full.',
+  noCode: 'No party with that code.',
+  notFound: 'Nobody by that name is online.',
+  muted: 'You are muted.',
+  item: 'You do not have that item.',
+  far: 'Too far away.',
+  bagFull: 'Your bag is full.',
 });
 
 // ---- field types -------------------------------------------------------------------------------
@@ -68,7 +85,10 @@ export const CLIENT_MSGS = Object.freeze({
   auth:    { on: 'gw', fields: { token: 'str:64' }, rate: 1, burst: 3 },
   chars:   { on: 'gw', fields: {}, rate: 2, burst: 4 },
   create:  { on: 'gw', fields: { name: 'str:24', cls: 'str:32', look: '?obj' }, rate: 1, burst: 3 },
-  play:    { on: 'gw', fields: { char: 'int' }, rate: 1, burst: 3 },
+  play:    { on: 'gw', fields: { char: 'int', join: '?str:8' }, rate: 1, burst: 3 },
+  party:   { on: 'gw', fields: { op: 'str:8', name: '?str:24', code: '?str:8', char: '?int' }, rate: 2, burst: 6 },
+  chat:    { on: 'gw', fields: { ch: 'str:8', text: 'str:200' }, rate: 1, burst: 5 },
+  ignore:  { on: 'gw', fields: { name: 'str:24', on: 'bool' }, rate: 1, burst: 5 },
   ping:    { on: 'both', fields: { c: 'num' }, rate: 2, burst: 4 },
   enter:   { on: 'p', fields: { ticket: 'str:256' }, rate: 1, burst: 3 },
   in:      { on: 'p', fields: { s: 'int', dt: 'num', mx: 'num', mz: 'num', yaw: 'num', b: 'int' }, rate: 40, burst: 60 },
@@ -76,6 +96,8 @@ export const CLIENT_MSGS = Object.freeze({
   target:  { on: 'p', fields: { id: '?id' }, rate: 10, burst: 20 },
   say:     { on: 'p', fields: { text: 'str:200' }, rate: 1, burst: 5 },
   respawn: { on: 'p', fields: {}, rate: 1, burst: 2 },
+  use:     { on: 'p', fields: { id: 'id' }, rate: 4, burst: 8 },
+  item:    { on: 'p', fields: { op: 'str:8', uid: 'str:40', slot: '?str:16' }, rate: 5, burst: 10 },
   leave:   { on: 'both', fields: {}, rate: 1, burst: 2 },
 });
 
@@ -96,9 +118,26 @@ export const SERVER_MSGS = Object.freeze({
   castR: ['slot', 'ok', 'why'],
   err: ['code', 'msg'],
   kick: ['code', 'msg'],
+  used: ['id', 'ok', 'why'],
+  bag: ['add', 'remove', 'gold'],
+  equip: ['slot', 'item'],
+  partyState: ['party'],
+  partyInvite: ['from', 'name', 'party'],
+  partyFrames: ['m'],
+  targetR: ['id', 'ok', 'why'],
 });
 
-export const EVENT_TYPES = Object.freeze(['cast', 'hit', 'miss', 'die', 'xp', 'level', 'loot', 'aggro', 'fx']);
+/** Party ops (`party {op}`); docs/protocol.md §3.3. */
+export const PARTY_OPS = Object.freeze(['invite', 'accept', 'decline', 'leave', 'kick', 'lead', 'join', 'code']);
+export const PARTY_MAX = 5;
+/** Item ops (`item {op}`). */
+export const ITEM_OPS = Object.freeze(['equip', 'unequip', 'destroy']);
+/** Chat channels a client may send on the gateway (`say` is local, on the province socket). */
+export const CHAT_CHANNELS = Object.freeze(['party']);
+/** Room kinds (`joined.room.kind`). */
+export const ROOM_KINDS = Object.freeze(['wilds', 'town', 'instance']);
+
+export const EVENT_TYPES = Object.freeze(['cast', 'hit', 'miss', 'die', 'xp', 'level', 'loot', 'aggro', 'fx', 'open']);
 
 /** Validate a decoded client message. Returns null when fine, else a reason. */
 export function validate(msg, socketKind = null) {

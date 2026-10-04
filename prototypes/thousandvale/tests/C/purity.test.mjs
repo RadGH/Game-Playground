@@ -26,9 +26,13 @@ const BANNED = [
   [/performance\.now\(/, 'performance.now'], [/from ['"]node:/, 'node: built-ins'], [/\bsetTimeout\(|\bsetInterval\(/, 'timers (use the room clock)'],
 ];
 
+/** boot.js reads the data files once at module load (fetch in a browser, fs under Node) — never during a fight. */
+const LOADERS = new Set(['boot.js']);
+const LOADER_OK = new Set(['fetch', 'node: built-ins']);
+
 test('no js/rules file touches Three.js, the DOM, storage, fetch, wall clocks or unseeded random', () => {
   const bad = [];
-  for (const f of files) for (const [re, what] of BANNED) if (re.test(code(f))) bad.push(`${f}: ${what}`);
+  for (const f of files) for (const [re, what] of BANNED) if (re.test(code(f)) && !(LOADERS.has(f) && LOADER_OK.has(what))) bad.push(`${f}: ${what}`);
   assert.deepEqual(bad, []);
 });
 
@@ -39,6 +43,7 @@ test('only js/rules/farhold.js imports Farhold or Emberveil; everything else sta
     for (const m of code(f).matchAll(/(?:from|import\()\s*['"]([^'"]+)['"]/g)) {
       const spec = m[1];
       if (f === 'farhold.js') { if (!/^\.\.\/\.\.\/\.\.\/(farhold|emberveil)\/js\//.test(spec)) bad.push(`${f}: ${spec}`); continue; }
+      if (LOADERS.has(f) && spec === 'node:fs/promises') continue;
       if (!/^\.\/[\w-]+\.js$/.test(spec)) bad.push(`${f}: ${spec}`);
     }
   }

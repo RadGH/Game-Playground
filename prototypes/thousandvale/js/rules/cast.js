@@ -86,12 +86,15 @@ export function createCombat(room) {
       if (post.cooldownCut) p.skills.refresh(post.cooldownCut);
       if (post.rally) applyStatus(p, 'rally', statuses.rally, 1);
       const award = rpg.killXpFor(p, e, xpCfg);
-      const levels = rpg.gainXp(p, award);
       const coin = foundGold(p, e.gold);
-      p.gold += coin;
       const drops = rpg.rollDrops(e, { rng: lootRng, magicFind: p.derived.magicFind }) || [];
       for (const it of drops) it.uid = `${room.id}:${++uidN}`;
-      field.emit({ t: 'reward', to: p.id, from: e.id, xp: award, levels: levels || 0, level: p.level, gold: coin, restore: back, items: drops });
+      // the room owns experience, gold and the bag when it says so (js/rules/index.js sets `award`);
+      // otherwise (tests, the parity fixtures) the sheet keeps them itself, as Farhold does
+      let levels = 0;
+      if (combat.award) combat.award(p, { xp: award, gold: coin, items: drops, from: e });
+      else { levels = rpg.gainXp(p, award) || 0; p.gold += coin; }
+      field.emit({ t: 'reward', to: p.id, from: e.id, xp: award, levels, level: p.level, gold: coin, restore: back, items: drops });
     }
   };
   const foundGold = (p, amount) => Math.max(0, Math.round(amount * (1 + (p.derived?.goldFind || 0) / 100)));

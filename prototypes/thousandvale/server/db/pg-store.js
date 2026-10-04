@@ -92,6 +92,14 @@ export function createPgStore({ connectionString = process.env.DATABASE_URL, rea
       const r = await q("UPDATE characters SET lease_owner = NULL, lease_until = NULL WHERE lease_owner LIKE $1 || '%'", [prefix]);
       return r.rowCount;
     },
+    async logEconomy(rows) {
+      for (const r of rows) {
+        await q(`INSERT INTO economy_log (hour, band, kind, reason, gold, items, count) VALUES ($1, $2, $3, $4, $5, $6, $7)
+                 ON CONFLICT (hour, band, kind, reason) DO UPDATE SET gold = economy_log.gold + EXCLUDED.gold,
+                   items = economy_log.items + EXCLUDED.items, count = economy_log.count + EXCLUDED.count`,
+          [r.hour, r.band, r.kind, r.reason, r.gold, r.items, r.count]);
+      }
+    },
     async info() {
       const r = await q('SELECT (SELECT count(*) FROM accounts)::int AS a, (SELECT count(*) FROM characters)::int AS c');
       return { kind: 'pg', accounts: r.rows[0].a, characters: r.rows[0].c };

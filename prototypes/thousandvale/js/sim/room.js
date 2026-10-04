@@ -27,7 +27,7 @@ export const VIEW = Object.freeze({
 const MAX_QUEUED_INPUTS = 30, MOVE_BUDGET_CAP = 500;
 
 export function createRoom(opts) {
-  const { id, name = id, terrain, seed = 1, createRules, hooks = {}, tickMs = TICK_MS, camps = [] } = opts;
+  const { id, name = id, terrain, seed = 1, createRules, hooks = {}, tickMs = TICK_MS, camps = [], objects = [], kind = 'wilds', area = null, safeZones = [], meta = null } = opts;
   const bounds = terrain.bounds;
   const size = Math.max(bounds.maxX - bounds.minX, bounds.maxZ - bounds.minZ);
   const q = Math.max(VIEW.q, size / 65535);
@@ -36,23 +36,26 @@ export function createRoom(opts) {
   const clients = new Map();       // entity id -> client
   const streams = new Map();
   const despawns = [];             // { at, e }
-  let tick = 0, nextId = 1, events = [];
+  let tick = 0, nextId = 1, events = [], uidN = 0;
   const awake = new Uint32Array(grid.cells.length);   // == awakeGen when awake this tick
   let awakeGen = 0;
   const stats = { rulesErrors: 0, lastRulesError: '', spawned: 0 };
   const writer = new ByteWriter(4096), snapWriter = new ByteWriter(2048);
   const campState = camps.map(c => ({ ...c, live: new Set(), nextAt: 0 }));
-  const spawnPoint = { ...terrain.spawn };
+  const spawnPoint = opts.spawn ? { ...opts.spawn } : { ...terrain.spawn };
 
   const room = {
-    id, name, terrain, bounds, grid, entities, clients, q, size, stats, tickMs,
+    id, name, kind, area, meta, terrain, bounds, grid, entities, clients, q, size, stats, tickMs,
     get tick() { return tick; },
     now: () => tick * tickMs,
     groundAt: (x, z) => terrain.heightAt(x, z),
     walkable: (x, z) => (terrain.walkable ? terrain.walkable(x, z) : true),
     spawnPoint,
     describe() {
-      return { id, name, size, q, origin: { x: bounds.minX, z: bounds.minZ }, terrain: terrain.key ?? null, spawn: { ...spawnPoint } };
+      const d = { id, name, kind, size, q, origin: { x: bounds.minX, z: bounds.minZ }, terrain: terrain.key ?? null, spawn: { ...spawnPoint } };
+      if (area) d.area = { ...area };
+      if (opts.describeExtra) Object.assign(d, opts.describeExtra);
+      return d;
     },
     event(ev) {
       if (ev.x === undefined) {
@@ -80,6 +83,10 @@ export function createRoom(opts) {
     spawn: spec => room.spawn(spec),
     despawn(e, delayMs = 0) { if (delayMs > 0) despawns.push({ at: room.now() + delayMs, e }); else room.remove(e); },
     award: (e, a) => room.award(e, a),
+    newUid: () => (hooks.newUid ? hooks.newUid() : id + ':' + (++uidN)),
+    safeZones,
+    inSafeZone(x, z) { for (const c of safeZones) if ((x - c.x) ** 2 + (z - c.z) ** 2 <= c.r * c.r) return true; return false; },
+    kind,
     log: (...a) => hooks.log && hooks.log('[rules ' + id + ']', ...a),
   };
   room.host = host;
@@ -117,10 +124,10 @@ export function createRoom(opts) {
     clients.delete(e.id);
   };
 
-  room.addPlayer = function (char, client) {
-    const x = Number.isFinite(char.x) && char.room === id ? char.x : spawnPoint.x;
-    const z = Number.isFinite(char.z) && char.room === id ? char.z : spawnPoint.z;
-    const e = room.spawn({ kind: 'player', name: char.name, level: char.level || 1, x, z, yaw: char.yaw || 0, char, team: 1 });
+  room.addPlayer = function (char, client, at = null) {
+    const x = at ? at.x : Number.isFinite(char.x) && char.room === id ? char.x : spawnPoint.x;
+    const z = at ? at.z : Number.isFinite(char.z) && char.room === id ? char.z : spawnPoint.z;
+    const e = room.spawn({ kind: 'player', name: char.name, level: char.level || 1, x, z, yaw: char.yaw || 0, char, team: 1, r: at && at.carry });
     if (char.hp > 0) e.setHp(Math.min(char.hp, e.hpMax));
     char.room = id;
     if (client) room.attach(e, client);
@@ -163,7 +170,7 @@ export function createRoom(opts) {
     const c = clients.get(e.id); if (c) c.selfDirty = true;
     return true;
   };
-  room.award = function (e, { xp = 0, gold = 0 } = {}) {
+  room.award = function (e, { xp = 0, gold = 0, items = null, from = null, reason = 'kill' } = {}) {
     const ch = e.char;
     if (!ch) return;
     xp = Math.max(0, Math.round(xp)); gold = Math.max(0, Math.round(gold));
@@ -180,6 +187,7 @@ export function createRoom(opts) {
     }
     if (c && c.you) c.you({ xp: ch.xp, level: ch.level, gold: ch.gold, xpNext: rules.xpFor ? safe('xpFor', (ch.level || 1) + 1) : undefined, hpMax: e.hpMax, mpMax: e.mpMax });
     hooks.dirty && hooks.dirty(ch, urgent);
+    if (hooks.award) hooks.award(e, { gold, items: items || [], reason, from });
   };
 
   // ---- camps (monster spawners) ----
@@ -190,7 +198,7 @@ export function createRoom(opts) {
       const tx = c.x + Math.cos(a) * r, tz = c.z + Math.sin(a) * r;
       if (room.walkable(tx, tz)) { x = tx; z = tz; break; }
     }
-    const m = room.spawn({ kind: 'monster', type: c.type, level: c.level || 1, x, z, yaw: host.random('spawn') * 6.283 });
+    const m = room.spawn({ kind: 'monster', type: c.type, level: c.level || 1, x, z, yaw: host.random('spawn') * 6.283, rank: c.rank || 'normal', state: c.rank && c.rank !== 'normal' ? STATE.elite : 0 });
     c.live.add(m.id);
   }
   function fillCamps(now, initial = false) {
@@ -392,6 +400,20 @@ export function createRoom(opts) {
     // bands nobody looked at keep accumulating; a FULL record goes out when someone starts looking
   }
   function stripTo(ev) { const o = { ...ev }; delete o.to; return o; }
+
+  // objects: portals, stairs, exits, chests (team 0: nobody fights them)
+  room.objects = new Map();
+  for (const o of objects) {
+    const e = room.spawn({ kind: 'object', type: o.type, name: o.name || o.type, x: o.x, z: o.z, yaw: o.yaw || 0, team: 0, data: { portal: o.portal || null, chest: o.chest || null } });
+    room.objects.set(e.id, e);
+  }
+  /** The object `objId` if `e` stands within reach of it. */
+  room.objectNear = function (e, objId, reach = 4) {
+    const o = room.objects.get(objId);
+    if (!o || o.removed) return { why: 'unknown' };
+    if (Math.hypot(o.x - e.x, o.z - e.z) > reach + 0.5) return { why: 'far', o };
+    return { o };
+  };
 
   // first fill
   fillCamps(0, true);

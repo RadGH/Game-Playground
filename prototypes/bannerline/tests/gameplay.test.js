@@ -144,7 +144,10 @@ test('Rally: +bounty per 20% of banners behind, up to the cap', () => {
   assert.ok(Math.abs(rally(s.state, data, 0) - 2 * R.perStep) < 1e-9);
   assert.equal(rally(s.state, data, 1), 0);
   s.state.teams[0].banners = 1;
-  assert.equal(rally(s.state, data, 0), R.cap);
+  assert.equal(rally(s.state, data, 0), R.cap);  // the knobs are really read: odd values change the answer
+  const odd = dataWith(raw => { raw.econ.rally.behindStep = 0.13; raw.econ.rally.perStep = 0.07; raw.econ.rally.cap = 0.9; });
+  s.state.teams[0].banners = 70 * (1 - 0.41);
+  assert.ok(Math.abs(rally(s.state, odd, 0) - 3 * 0.07) < 1e-9);
 });
 
 test('field cap: sends past the body cap wait at the gate', () => {

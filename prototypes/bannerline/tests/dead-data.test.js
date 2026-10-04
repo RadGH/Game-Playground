@@ -191,6 +191,9 @@ const ECON_EXEMPT = {
   'clock.tickHz': 'the tick rate is fixed in code (TICK_HZ) for the view, input delay and lockstep; core.test.js asserts the two agree',
   'clock.hardCap': 'AI matches end first; gameplay.test.js "the hard cap ends it" moves it',
   'rally.cap': 'not reached in one AI match; gameplay.test.js "Rally" moves it',
+  // wired (economy.js rally -> kill bounties while a team is behind); since the feel pass the seed-5 probe
+  // stays within 20% of banners until the final collapse, so it never pays. gameplay.test.js "Rally" moves both.
+  'rally.behindStep': 'not reached in the probe match; gameplay.test.js "Rally" moves it', 'rally.perStep': 'same',
   'field.cap': 'not reached in one AI match; gameplay.test.js "field cap" moves it',
   'items.oil.cost': 'the M1 AI does not buy Oil; pyromancer.test.js "Oil" checks the price',
   'hero.respawnCap': 'never binds: 5 s + 1 s x level 20 = 25 s, the cap; kept as a guard if the level cap rises',

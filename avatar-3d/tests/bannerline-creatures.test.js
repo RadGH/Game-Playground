@@ -92,3 +92,43 @@ test('the designed bl_ looks resolve, and the library files each one', () => {
     assert.ok(e.data.voice && e.data.speech);
   }
 });
+
+// ── Hunters vs Farmers (2026-10-03): the farm animals, the scarecrow, the new clips and baked poses
+const FARM = ['sheep', 'hen', 'pig', 'cow', 'scarecrow'];
+
+test('the farm types build, animate the new clips, and keep their features', async () => {
+  assert.equal(CREATURE_TYPES.hen.plan, 'fowl');
+  for (const t of FARM) {
+    const c = await createCreature({ type: t });
+    for (const a of ['idle', 'walk', 'graze', 'bleat', 'panic', 'talk', 'attack', 'dead', 'idle']) { c.setAnim(a); c.update(0.17, 0.17); }
+    assert.ok(c.metrics().height > 0.3, t);
+  }
+  for (const [type, f] of [['sheep', 'wool'], ['cow', 'spots'], ['cow', 'udder'], ['pig', 'snoutDisc'], ['hen', 'comb'], ['scarecrow', 'sack'], ['scarecrow', 'straw']]) {
+    const on = meshes(await createCreature({ type })), off = meshes(await createCreature({ type, features: { [f]: false } }));
+    assert.notEqual(on, off, `${type}.${f} makes no difference`);
+  }
+});
+
+test('graze puts the head down and panic tosses it', async () => {
+  const neckOf = async (anim) => { const c = await createCreature({ type: 'sheep' }); c.setAnim(anim); c.update(2.0, 2.0); let y = -Infinity; const v = new (await import('three')).Vector3(); c.group.updateMatrixWorld(true); c.group.traverse(o => { if (o.isMesh && o.material.color && o.material.color.getHexString() === 'd8b040') { o.getWorldPosition(v); y = Math.max(y, v.y); } }); return y; };
+  assert.ok(await neckOf('graze') < await neckOf('idle') - 0.15, 'the eyes go down when grazing');
+});
+
+test('detail lowers the triangle count, and baked poses differ by clip', async () => {
+  const tris = c => { let n = 0; c.group.traverse(o => { if (o.isMesh) n += o.geometry.attributes.position.count / 3; }); return n; };
+  const hi = tris(await createCreature({ type: 'sheep' })), lo = tris(await createCreature({ type: 'sheep' }, { detail: 0.35 }));
+  assert.ok(lo < hi / 3, `${lo} vs ${hi}`);
+  const { creaturePoses } = await import('../js/creature-poses.js');
+  const p = await creaturePoses({ type: 'sheep' });
+  assert.ok(p.idle.attributes.color && p.idle.attributes.position.count / 3 < 2500);
+  const sum = g => { let s = 0; const a = g.attributes.position.array; for (let i = 1; i < a.length; i += 3) s += a[i]; return s; };
+  assert.notEqual(sum(p.graze), sum(p.idle)); assert.notEqual(sum(p.walkA), sum(p.walkB));
+  for (const g of Object.values(p)) if (g.attributes) for (const v of g.attributes.position.array) assert.ok(Number.isFinite(v));
+});
+
+test('the farm looks are designed and filed in the library', () => {
+  const variants = J('../data/creature-variants.json').variants, lib = J('../../library/data/defaults.json').entries;
+  for (const id of ['bl_sheep', 'bl_hen', 'bl_pig', 'bl_cow', 'bl_scarecrow', 'bl_hunt_hound', 'bl_hawk']) {
+    assert.ok(variants[id], id); assert.ok(lib.find(e => e.id === id), `library ${id}`);
+  }
+});

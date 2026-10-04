@@ -72,9 +72,22 @@ export const CREATURE_TYPES = {
   bone_colossus: { plan: 'biped', label: 'Bone colossus', body: { bony: true, legLen: 0.95, legR: 0.12, torsoH: 1.15, torsoR: 0.5, armLen: 1.32, armR: 0.11, headR: 0.3, neck: 0.12 }, colors: { body: '#ddd4bc', belly: '#a89c80', accent: '#5e584c', eyes: '#7ff2ff' }, features: { ribs: true, core: true, horns: true, spikes: true, claws: true } },
   crow:      { plan: 'bat', label: 'Crow', body: { r: 0.1, span: 0.78, headR: 0.085 }, ears: 'none', colors: { body: '#34344c', belly: '#4c4c68', accent: '#9090a6', eyes: '#8affe8' }, features: { wings: true, beak: true, feathers: true } },
   thornback: { plan: 'quad', label: 'Thornback', body: { len: 1.35, r: 0.42, legLen: 0.4, legR: 0.1, headR: 0.29, snout: [0.15, 0.2], neck: 0.03, tuskLen: 1.5, tail: { len: 0.35, r: 0.06, up: -0.2, spiky: true } }, ears: 'round', colors: { body: '#5e5a3a', belly: '#8c7c56', accent: '#d6cca6', eyes: '#ffb040', nose: '#2c261a' }, features: { horns: true, plates: true, spikes: true, tusks: true } },
+  // ── Bannerline Hunters vs Farmers (2026-10-03, prototypes/bannerline/docs/hvf-PLAN.md §14): the farm.
+  // sheep:     a quad under a lumpy fleece (`wool`) with a dark face and legs — the main tell of the mode.
+  // hen:       the new `fowl` plan (two legs, folded wings, comb + wattle). Pecks when it grazes.
+  // pig:       round, short-legged, a flat snout disc (`snoutDisc`) and a curly little tail.
+  // cow:       the horse frame made heavier, short horns, patches (`spots`) and an udder.
+  // scarecrow: a biped of sticks and old clothes with a sack head (`sack`), a floppy hat and straw at
+  //            the cuffs (`straw`) — the farmers' army from the Harvest Hall.
+  // Quads also gained the `graze`, `bleat` and `panic` clips for a flock that eats, calls and bolts.
+  sheep:     { plan: 'quad', label: 'Sheep', body: { len: 0.82, r: 0.27, legLen: 0.34, legR: 0.04, headR: 0.15, snout: [0.08, 0.13], neck: 0.12, neckUp: 0.5, tail: { len: 0.1, r: 0.05, up: -0.4 } }, ears: 'round', colors: { body: '#3a3430', belly: '#efe9dc', accent: '#2a2420', eyes: '#d8b040' }, features: { wool: true, hooves: true } },
+  hen:       { plan: 'fowl', label: 'Hen', body: { r: 0.17, legLen: 0.13, legR: 0.013, headR: 0.072, neck: 0.06 }, colors: { body: '#c8783a', belly: '#e8b070', accent: '#d8302a', eyes: '#1a1410', nose: '#e8a030' }, features: { comb: true } },
+  pig:       { plan: 'quad', label: 'Pig', body: { len: 0.82, r: 0.27, legLen: 0.22, legR: 0.055, headR: 0.18, snout: [0.1, 0.1], neck: 0.02, tail: { len: 0.14, r: 0.025, up: 0.9 } }, ears: 'pointed', colors: { body: '#eba3a0', belly: '#f2b8b2', accent: '#c87a78', eyes: '#2a1a14', nose: '#d4807d' }, features: { hooves: true, snoutDisc: true } },
+  cow:       { plan: 'quad', label: 'Cow', body: { len: 1.45, r: 0.36, legLen: 0.62, legR: 0.07, headR: 0.2, snout: [0.13, 0.2], neck: 0.25, neckUp: 0.35, tail: { len: 0.7, r: 0.035, up: -1.2, hair: true } }, ears: 'round', colors: { body: '#f0ece4', belly: '#e8e0d4', accent: '#2a2622', eyes: '#1a1008', nose: '#e8b4a8' }, features: { horns: true, hooves: true, spots: true, udder: true } },
+  scarecrow: { plan: 'biped', label: 'Scarecrow', body: { legLen: 0.62, legR: 0.045, torsoH: 0.6, torsoR: 0.2, armLen: 0.7, armR: 0.045, headR: 0.2, neck: 0.04 }, colors: { body: '#6a7a4a', belly: '#c8a87a', accent: '#5a4632', eyes: '#ff9a2a' }, features: { sack: true, straw: true, claws: false } },
   mimic:     { plan: 'float', label: 'Mimic', body: { shape: 'mass', coreR: 0.38, y: 0.8, tentacles: 5, eyes: 4 }, colors: { body: '#78553b', belly: '#b67a45', accent: '#302019', eyes: '#ffcf50' }, features: { fangs: true, glow: false } },
 };
-export const CREATURE_ANIMS = ['idle', 'walk', 'run', 'attack', 'talk', 'dead', 'fly'];
+export const CREATURE_ANIMS = ['idle', 'walk', 'run', 'attack', 'talk', 'dead', 'fly', 'graze', 'bleat', 'panic'];
 
 export function normalizeCreature(spec = {}) {
   const type = CREATURE_TYPES[spec.type] ? spec.type : 'wolf'; const T = CREATURE_TYPES[type];

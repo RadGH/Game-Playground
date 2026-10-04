@@ -21,15 +21,16 @@ Open: `http://<LAN-IP>:8400/avatar-3d/`. Presets, random generation and the slot
 
 ## Creatures (non-humanoids) — `js/creatures.js`, demo `creatures.html`
 
-Mii-style procedural bodies for things that are not people — **37 types over six body plans**, parameterised in `CREATURE_TYPES` (lengths/radii in metres, ear style, default colours, feature flags). The newest set adds hyena, saber cat, crocodile, turtle, griffin, phoenix, beetle, centipede, slime, mushroom and mimic silhouettes. Ten ready-made designs built on those new types (colours, size, voice and traits) live in `data/creature-variants.json`; they are not wired into any game, so a game copies the ones it wants into its own looks table. The table itself lives in `js/creature-types.js`, which is free of Three.js so data tools and node tests can read it; `js/creatures.js` re-exports it and does the building. Round 11 added three **mounts** — `pony` (short legs, deep barrel), `courser` (long legs, lean, streaming tail) and `elk` (a deer's frame scaled up, antlers on by default) — because Farhold's three mount bases were all being drawn as the same horse, and `normalizeCreature` carries only type/size/colours/features: the proportions that make one mount look different from another have to be a type.
+Mii-style procedural bodies for things that are not people — **47 types over seven body plans**, parameterised in `CREATURE_TYPES` (lengths/radii in metres, ear style, default colours, feature flags). The newest set adds hyena, saber cat, crocodile, turtle, griffin, phoenix, beetle, centipede, slime, mushroom and mimic silhouettes. Ten ready-made designs built on those new types (colours, size, voice and traits) live in `data/creature-variants.json`; they are not wired into any game, so a game copies the ones it wants into its own looks table. The table itself lives in `js/creature-types.js`, which is free of Three.js so data tools and node tests can read it; `js/creatures.js` re-exports it and does the building. Round 11 added three **mounts** — `pony` (short legs, deep barrel), `courser` (long legs, lean, streaming tail) and `elk` (a deer's frame scaled up, antlers on by default) — because Farhold's three mount bases were all being drawn as the same horse, and `normalizeCreature` carries only type/size/colours/features: the proportions that make one mount look different from another have to be a type.
 
 | Plan | Types |
 |---|---|
-| `quad` | wolf, dire wolf, boar, bear, rat, horse, deer, hound, cat, frog, mire drake, dragon, hyena, saber cat, crocodile, turtle, griffin |
+| `quad` | wolf, dire wolf, boar, bear, rat, horse, pony, courser, elk, deer, hound, cat, frog, mire drake, dragon, hyena, saber cat, crocodile, turtle, griffin, **tuskback, thornback, sheep, pig, cow** |
 | `spider` | giant spider, beetle |
-| `bat` (fliers) | bat, owl, moth, phoenix |
+| `bat` (fliers) | bat, owl, moth, phoenix, **crow** (feathered) |
+| `fowl` (ground birds) | **hen** |
 | `snake` (serpents) | snake, worm, centipede (thick, segmented, head reared off the ground) |
-| `biped` | golem, titan, imp (`body.blocky` swaps capsules for boxes; `features.core` adds a glowing chest heart) |
+| `biped` | golem, titan, imp, **ghoul, bone colossus, scarecrow** (`body.blocky` swaps capsules for boxes; `features.core` adds a glowing chest heart) |
 | `float` (no legs, hovers) | elemental, wisp, shard, wraith, horror, slime, mushroom, mimic — `body.shape` picks `sphere` (glowing ball + flame licks), `crystal` (octahedron cluster), `hood` (robe with an empty face and trailing rags) or `mass` (lumpy body covered in eyes, with tentacles) |
 
 Same interface as the humanoid builder:
@@ -41,11 +42,32 @@ scene.add(wolf.group); wolf.setAnim('walk');            // idle · walk · run �
 const spec = randomCreature('dragon', seed);             // colour variation inside the type's family; a creature JSON you can store under character.creature
 ```
 
-Features can be toggled on any plan (`features: { wings: true }` on a wolf works): fangs, tusks, horns, antlers, wings, spikes, mane, whiskers, claws, hooves, tail, core, glow, bulgeEyes, beak, antennae, maw, plates. Bodies face +z like the humanoids, so the same side/facing code places them. Heights before the size multiplier: wisp/moth ≈ 0.5 m, wolf ≈ 0.9 m, golem ≈ 1.4 m, horror ≈ 1.6 m, dragon ≈ 1.9 m, titan ≈ 2.6 m. Party Quest uses them for beast enemies (`prototypes/party-quest/js/main.js` `BEAST_BODY`); Emberveil uses them for its whole bestiary (`prototypes/emberveil/data/enemy-looks.json`).
+Features can be toggled on any plan (`features: { wings: true }` on a wolf works): fangs, tusks, horns, antlers, wings, spikes, mane, whiskers, claws, hooves, tail, core, glow, bulgeEyes, beak, antennae, maw, plates.
+
+**Added for Bannerline (2026-10-03, `prototypes/bannerline/docs/PLAN.md` §14 and `hvf-PLAN.md` §14).** Every one is a normal type, so any game can use it; the designed looks are `bl_*` entries in `data/creature-variants.json` and in `library/data/defaults.json` (kind `enemy`, tag `bannerline`).
+
+| Type | Plan | New body parts / features | Designed look |
+|---|---|---|---|
+| `tuskback` | quad | `trunk` (a swaying chain), `howdah` (a fighting platform with canopy and banner, `colors.cloth`), fan ears (`ears: 'fan'`), long curved tusks (`body.tuskLen`), a forehead plate | `bl_tuskback` |
+| `ghoul` | biped | `body.hunch` tips the upper body forward (legs stay planted), `body.crouch` bends the knees, `spine` knobs | `bl_ghoul` |
+| `bone_colossus` | biped | `ribs` (an open rib cage round a glowing core), `body.bony` (thin bones with knuckle joints, skull face) | `bl_bone_colossus` |
+| `crow` | bat | `feathers` (fanned blades instead of a membrane, a fan tail), `ears: 'none'` | `bl_crow` |
+| `thornback` | quad | `plates` on a quad (overlapping armour down the spine; thorns grow out of them) | `bl_thornback`, `bl_briarback` |
+| `sheep` | quad | `wool` (a lumpy fleece in the belly colour over a dark face and legs) | `bl_sheep` |
+| `hen` | **fowl** (new plan) | two legs, folded wings that flap when running, fan tail, `comb` + wattle; pecks when grazing | `bl_hen` |
+| `pig` | quad | `snoutDisc` (a flat snout with nostrils), `colors.nose` | `bl_pig` |
+| `cow` | quad | `spots` (patches), `udder` | `bl_cow` |
+| `scarecrow` | biped | `sack` (a burlap head with a stitched face and a floppy hat), `straw` (tufts at the cuffs and collar) | `bl_scarecrow` |
+
+Also new: the turtle finally has a shell (`body.shell` + `plates`), `colors.nose` overrides the nose on any quad, quads play **`graze`** (head down, chewing, looking up now and then), **`bleat`** (head up, mouth open) and **`panic`** (a flat-out gallop with the head tossing) — the clips a wandering, calling, bolting flock needs — and more designed looks on old types: `bl_iron_golem`, `bl_thornmane_wolf`, `bl_saber_cat`, `bl_plague_rat`, `bl_wailing_shade`, `bl_carrion_hulk`, `bl_ash_ogre`, `bl_hyena`, `bl_bear_warden`, `bl_elk_charger`, `bl_elder_bear`, `bl_druid_wolf`, `bl_grove_wolf`, `bl_hunt_hound`, `bl_hawk`.
+
+**Crowds.** `createCreature(spec, { detail: 0.35 })` lowers every segment count (a sheep drops from ~8k to ~1.7k triangles). `js/creature-poses.js` bakes a creature into plain vertex-coloured geometry at a clip and moment — `await creaturePoses({ type: 'sheep' })` gives `{ idle, walkA, walkB, run, graze, bleat, attack, dead }` — so a game draws hundreds of animals as one InstancedMesh per (species, pose). `js/mesh-merge.js` (`compactCreature`, moved here from Farhold) folds a live creature into 1-3 draw calls without changing how it animates. Bodies face +z like the humanoids, so the same side/facing code places them. Heights before the size multiplier: wisp/moth ≈ 0.5 m, wolf ≈ 0.9 m, golem ≈ 1.4 m, horror ≈ 1.6 m, dragon ≈ 1.9 m, titan ≈ 2.6 m. Party Quest uses them for beast enemies (`prototypes/party-quest/js/main.js` `BEAST_BODY`); Emberveil uses them for its whole bestiary (`prototypes/emberveil/data/enemy-looks.json`).
 
 The current creature visual pass gives frogs a squat, long-legged silhouette with throat, mouth and toe detail, and gives drakes/dragons a broader chest, crest, nostrils, slit pupils and back scales. These remain lightweight primitives behind the same `createCreature` JSON contract, so existing enemy definitions and animation calls continue to work.
 
 Bespoke Chibi 2 accessories are tracked in `data/chibi2-assets.json`; Emberveil's 30 class-facing records are listed in `data/emberveil-class-assets.json`. The Bard cap (`hat.id: "feather_cap"`) is a modeled red cap with brim, band and green feather, and headwear now suppresses the covered crown/fringe hair layer so it does not clip. The hood (`hat.id: "hood"`) is a modeled cowl that wraps the head, frames the face with a piped rim and settles onto a small mantle; `hood_down` is a rolled collar with the hood lying on the back (see `CHIBI2.md`, Head space and hoods). Clothing ids now change silhouette as well as color: coats and robes have tails, doublets have panels, wraps have bands, skirts/baggy/ragged bottoms are distinct, and sandals/heavy/slipper/barefoot footwear read differently.
+
+The gallery (`creatures.html`) now animates (nothing used to tick the creature, so every clip chip showed a statue) and has a **Designed looks** panel listing `creature-variants.json`.
 
 ## Vehicles — `js/vehicles.js`, demo `vehicles.html`
 

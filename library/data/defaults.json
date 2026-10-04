@@ -13804,6 +13804,495 @@
     "kind": "enemy",
     "source": "bannerline"
    }
+  },
+  {
+   "id": "bl_sheep",
+   "kind": "enemy",
+   "name": "Sheep",
+   "tags": [
+    "bannerline",
+    "enemy",
+    "sheep"
+   ],
+   "notes": "A black-faced sheep in a thick fleece; it wanders, it bleats, and it gives the farm away.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "bl_sheep",
+    "name": "Sheep",
+    "short": "Sheep",
+    "race": "beast",
+    "gender": "n",
+    "pronouns": "they",
+    "templateId": "sheep",
+    "creature": {
+     "seed": 1,
+     "type": "sheep",
+     "size": 1,
+     "colors": {
+      "body": "#3a3430",
+      "belly": "#efe9dc",
+      "accent": "#2a2420",
+      "eyes": "#d8b040"
+     },
+     "features": {
+      "wool": true,
+      "hooves": true
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "variant": "custom",
+     "gender": "n",
+     "pitch": 0.6,
+     "depth": 0.3,
+     "tone": 0.4,
+     "breath": 0.3,
+     "rough": 0.4,
+     "speed": 0.4,
+     "flutter": 0.15,
+     "intonation": 0.5,
+     "wordgap": 0.37,
+     "role": "villager",
+     "seed": 356381394
+    },
+    "speech": {
+     "traits": [
+      "nervous"
+     ],
+     "formality": 0.3,
+     "verbosity": 0.3,
+     "cheer": 0.5,
+     "aggression": 0.2,
+     "confidence": 0.5,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "enemy",
+    "source": "bannerline"
+   }
+  },
+  {
+   "id": "bl_hen",
+   "kind": "enemy",
+   "name": "Hen",
+   "tags": [
+    "bannerline",
+    "enemy",
+    "hen"
+   ],
+   "notes": "A russet hen that pecks round the coop and clucks quietly.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "bl_hen",
+    "name": "Hen",
+    "short": "Hen",
+    "race": "beast",
+    "gender": "n",
+    "pronouns": "they",
+    "templateId": "hen",
+    "creature": {
+     "seed": 1,
+     "type": "hen",
+     "size": 1,
+     "colors": {
+      "body": "#c8783a",
+      "belly": "#e8b070",
+      "accent": "#d8302a",
+      "eyes": "#1a1410",
+      "nose": "#e8a030"
+     },
+     "features": {
+      "comb": true
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "variant": "custom",
+     "gender": "n",
+     "pitch": 0.9,
+     "depth": 0.1,
+     "tone": 0.4,
+     "breath": 0.3,
+     "rough": 0.3,
+     "speed": 0.4,
+     "flutter": 0.15,
+     "intonation": 0.5,
+     "wordgap": 0.37,
+     "role": "villager",
+     "seed": 1542257304
+    },
+    "speech": {
+     "traits": [
+      "nervous"
+     ],
+     "formality": 0.3,
+     "verbosity": 0.3,
+     "cheer": 0.5,
+     "aggression": 0.2,
+     "confidence": 0.5,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "enemy",
+    "source": "bannerline"
+   }
+  },
+  {
+   "id": "bl_pig",
+   "kind": "enemy",
+   "name": "Pig",
+   "tags": [
+    "bannerline",
+    "enemy",
+    "pig"
+   ],
+   "notes": "A pink pig that never stops snuffling; loud enough to hear through the trees.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "bl_pig",
+    "name": "Pig",
+    "short": "Pig",
+    "race": "beast",
+    "gender": "n",
+    "pronouns": "they",
+    "templateId": "pig",
+    "creature": {
+     "seed": 1,
+     "type": "pig",
+     "size": 1,
+     "colors": {
+      "body": "#eba3a0",
+      "belly": "#f2b8b2",
+      "accent": "#c87a78",
+      "eyes": "#2a1a14",
+      "nose": "#d4807d"
+     },
+     "features": {
+      "hooves": true,
+      "snoutDisc": true
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "variant": "custom",
+     "gender": "n",
+     "pitch": 0.4,
+     "depth": 0.6,
+     "tone": 0.4,
+     "breath": 0.3,
+     "rough": 0.7,
+     "speed": 0.4,
+     "flutter": 0.15,
+     "intonation": 0.5,
+     "wordgap": 0.37,
+     "role": "villager",
+     "seed": 1634214482
+    },
+    "speech": {
+     "traits": [
+      "hungry"
+     ],
+     "formality": 0.3,
+     "verbosity": 0.3,
+     "cheer": 0.5,
+     "aggression": 0.2,
+     "confidence": 0.5,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "enemy",
+    "source": "bannerline"
+   }
+  },
+  {
+   "id": "bl_cow",
+   "kind": "enemy",
+   "name": "Cow",
+   "tags": [
+    "bannerline",
+    "enemy",
+    "cow"
+   ],
+   "notes": "A patched dairy cow, slow and huge and worth a fortune.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "bl_cow",
+    "name": "Cow",
+    "short": "Cow",
+    "race": "beast",
+    "gender": "n",
+    "pronouns": "they",
+    "templateId": "cow",
+    "creature": {
+     "seed": 1,
+     "type": "cow",
+     "size": 1,
+     "colors": {
+      "body": "#f0ece4",
+      "belly": "#e8e0d4",
+      "accent": "#2a2622",
+      "eyes": "#1a1008",
+      "nose": "#e8b4a8"
+     },
+     "features": {
+      "horns": true,
+      "hooves": true,
+      "spots": true,
+      "udder": true
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "variant": "custom",
+     "gender": "n",
+     "pitch": 0.2,
+     "depth": 0.9,
+     "tone": 0.4,
+     "breath": 0.3,
+     "rough": 0.4,
+     "speed": 0.4,
+     "flutter": 0.15,
+     "intonation": 0.5,
+     "wordgap": 0.37,
+     "role": "villager",
+     "seed": 1650455371
+    },
+    "speech": {
+     "traits": [
+      "gruff"
+     ],
+     "formality": 0.3,
+     "verbosity": 0.3,
+     "cheer": 0.5,
+     "aggression": 0.2,
+     "confidence": 0.5,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "enemy",
+    "source": "bannerline"
+   }
+  },
+  {
+   "id": "bl_scarecrow",
+   "kind": "enemy",
+   "name": "Scarecrow",
+   "tags": [
+    "bannerline",
+    "enemy",
+    "scarecrow"
+   ],
+   "notes": "Sticks, straw and an old shirt, walked out of the Harvest Hall to hunt the hunters.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "bl_scarecrow",
+    "name": "Scarecrow",
+    "short": "Scarecrow",
+    "race": "beast",
+    "gender": "n",
+    "pronouns": "they",
+    "templateId": "scarecrow",
+    "creature": {
+     "seed": 1,
+     "type": "scarecrow",
+     "size": 1,
+     "colors": {
+      "body": "#6a7a4a",
+      "belly": "#c8a87a",
+      "accent": "#5a4632",
+      "eyes": "#ff9a2a"
+     },
+     "features": {
+      "sack": true,
+      "straw": true,
+      "claws": false
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "variant": "custom",
+     "gender": "n",
+     "pitch": 0.3,
+     "depth": 0.6,
+     "tone": 0.4,
+     "breath": 0.3,
+     "rough": 0.9,
+     "speed": 0.4,
+     "flutter": 0.15,
+     "intonation": 0.5,
+     "wordgap": 0.37,
+     "role": "brute",
+     "seed": 1782877135
+    },
+    "speech": {
+     "traits": [
+      "cruel"
+     ],
+     "formality": 0.3,
+     "verbosity": 0.3,
+     "cheer": 0.5,
+     "aggression": 0.2,
+     "confidence": 0.5,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "enemy",
+    "source": "bannerline"
+   }
+  },
+  {
+   "id": "bl_hunt_hound",
+   "kind": "enemy",
+   "name": "Hunting Hound",
+   "tags": [
+    "bannerline",
+    "enemy",
+    "hound"
+   ],
+   "notes": "A lean brown hound bred to run down strays and bay at them.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "bl_hunt_hound",
+    "name": "Hunting Hound",
+    "short": "Hunting",
+    "race": "beast",
+    "gender": "n",
+    "pronouns": "they",
+    "templateId": "hunt_hound",
+    "creature": {
+     "seed": 1,
+     "type": "hound",
+     "size": 0.95,
+     "colors": {
+      "body": "#6a4a2e",
+      "belly": "#a8845a",
+      "accent": "#3a2a1a",
+      "eyes": "#2a1a08"
+     },
+     "features": {
+      "fangs": true,
+      "spikes": false,
+      "claws": false
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "variant": "custom",
+     "gender": "n",
+     "pitch": 0.4,
+     "depth": 0.6,
+     "tone": 0.4,
+     "breath": 0.3,
+     "rough": 0.5,
+     "speed": 0.4,
+     "flutter": 0.15,
+     "intonation": 0.5,
+     "wordgap": 0.37,
+     "role": "brute",
+     "seed": 855030060
+    },
+    "speech": {
+     "traits": [
+      "loyal"
+     ],
+     "formality": 0.3,
+     "verbosity": 0.3,
+     "cheer": 0.5,
+     "aggression": 0.2,
+     "confidence": 0.5,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "enemy",
+    "source": "bannerline"
+   }
+  },
+  {
+   "id": "bl_hawk",
+   "kind": "enemy",
+   "name": "Hunter's Hawk",
+   "tags": [
+    "bannerline",
+    "enemy",
+    "owl"
+   ],
+   "notes": "A red-brown hawk that circles over the forest and sees what hides in it.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "bl_hawk",
+    "name": "Hunter's Hawk",
+    "short": "Hunter's",
+    "race": "beast",
+    "gender": "n",
+    "pronouns": "they",
+    "templateId": "hawk",
+    "creature": {
+     "seed": 1,
+     "type": "owl",
+     "size": 0.9,
+     "colors": {
+      "body": "#8a5a2a",
+      "belly": "#e8dcc0",
+      "accent": "#4a3018",
+      "eyes": "#f0c040"
+     },
+     "features": {
+      "wings": true,
+      "beak": true
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "variant": "custom",
+     "gender": "n",
+     "pitch": 0.8,
+     "depth": 0.2,
+     "tone": 0.4,
+     "breath": 0.3,
+     "rough": 0.6,
+     "speed": 0.4,
+     "flutter": 0.15,
+     "intonation": 0.5,
+     "wordgap": 0.37,
+     "role": "brute",
+     "seed": 667814567
+    },
+    "speech": {
+     "traits": [
+      "brave"
+     ],
+     "formality": 0.3,
+     "verbosity": 0.3,
+     "cheer": 0.5,
+     "aggression": 0.2,
+     "confidence": 0.5,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "enemy",
+    "source": "bannerline"
+   }
   }
  ]
 }

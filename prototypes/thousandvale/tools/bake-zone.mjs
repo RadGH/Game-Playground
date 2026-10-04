@@ -484,12 +484,38 @@ export function placementsFor(meta, plans, roads = [], bridges = []) {
     });
     if (plan.wall) out.push({ kind: 'town_wall', id: `${town}_wall`, x: r2(tx), z: r2(tz), yaw: 0, data: { town, radius: plan.wallRadius, gates: plan.wall.gates } });
   }
+  // a road stops at a town's edge: inside, the town's own high streets (proctown `links`) carry it on
+  const circles = plans.map(p => ({ x: p.origin.x, z: p.origin.z, r: p.town.radius }));
   for (const r of roads) {
-    const pts = r.pts.map(([x, z, h]) => [r2(x), r2(z), r2(h)]);
-    out.push({ kind: 'road', id: r.id, x: pts[0][0], z: pts[0][1], yaw: 0, data: { cls: r.cls, width: r.width, spur: !!r.spur, pts } });
+    clipOutside(r.pts, circles).forEach((piece, n, all) => {
+      const pts = piece.map(([x, z, h]) => [r2(x), r2(z), r2(h)]);
+      if (pts.length < 2) return;
+      out.push({ kind: 'road', id: all.length > 1 ? `${r.id}_${n}` : r.id, x: pts[0][0], z: pts[0][1], yaw: 0, data: { cls: r.cls, width: r.width, spur: !!r.spur, pts } });
+    });
   }
   for (const b of bridges) out.push({ kind: 'bridge', id: b.id, x: r2(b.x), z: r2(b.z), yaw: b.yaw, data: { span: b.span, deck: b.deck, road: `road_${b.road}` } });
   return out;
+}
+
+/** Split a polyline [[x, z, h]…] into the pieces outside every circle, cutting exactly at the rims. */
+function clipOutside(pts, circles) {
+  const inside = p => circles.some(c => Math.hypot(p[0] - c.x, p[1] - c.z) < c.r);
+  const pieces = []; let cur = [];
+  const cut = (a, b) => {   // the rim point between an outside a and an inside b (or vice versa), by bisection
+    let lo = 0, hi = 1; const ain = inside(a);
+    for (let k = 0; k < 24; k++) { const mid = (lo + hi) / 2, p = [a[0] + (b[0] - a[0]) * mid, a[1] + (b[1] - a[1]) * mid]; if (inside(p) === ain) lo = mid; else hi = mid; }
+    const t = (lo + hi) / 2; return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+  };
+  for (let k = 0; k < pts.length; k++) {
+    const p = pts[k], pin = inside(p);
+    if (k > 0) {
+      const q = pts[k - 1], qin = inside(q);
+      if (qin !== pin) { const c = cut(q, p); if (pin) { cur.push(c); pieces.push(cur); cur = []; } else cur.push(c); }
+    }
+    if (!pin) cur.push(p);
+  }
+  if (cur.length) pieces.push(cur);
+  return pieces;
 }
 
 /** Summary for zone.json and the console. */

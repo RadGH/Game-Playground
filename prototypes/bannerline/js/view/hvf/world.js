@@ -147,7 +147,7 @@ export function createHvfWorld(scene, map) {
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), s3 = new THREE.Vector3(), p3 = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0);
   const colorGeo = (geo, c) => { const n = geo.attributes.position.count, a = new Float32Array(n * 3); for (let k = 0; k < n; k++) { a[3 * k] = c[0]; a[3 * k + 1] = c[1]; a[3 * k + 2] = c[2]; } geo.setAttribute('color', new THREE.BufferAttribute(a, 3)); return geo; };
   const merge = (parts) => {
-    const geos = parts.map((g) => g.toNonIndexed());
+    const geos = parts.map((g) => (g.index ? g.toNonIndexed() : g));
     let n = 0; for (const g of geos) n += g.attributes.position.count;
     const P = new Float32Array(n * 3), C = new Float32Array(n * 3);
     let o = 0;

@@ -9,13 +9,21 @@
 //    seat is DENIED that system (items refunded the moment they are bought; Drill Yard levels refunded
 //    and cleared; powers blocked by a cooldown) and plays the same AI otherwise. Reported: the win rate
 //    of the side that KEEPS the system (50% = it does not matter; the goal is clearly above 50%).
+// 3. Is gear worth its gold? ("buy" test) From each scheduled minute one seat's gold is skimmed into
+//    savings until the item's price is reached, then the item lands in a free slot - i.e. that gold went
+//    to gear instead of sends - against the same AI. Reported: the buying side's win rate (50% = gear
+//    is worth exactly what sends are). This separates the ITEMS from how the AI shops (the deny test
+//    above measures the AI's own shopping, trips and consumables included).
 // It drives E's AI unchanged and reads only sim state + events.
+//   node tools/feel-report.mjs 32           (all three)      FEEL_DENY=items,hero  (pick deny tests)
+//   node tools/feel-report.mjs --buy 64     (only the buy test)
 
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadDataSync } from '../js/sim/data.js';
 import { createSim } from '../js/sim/sim.js';
+import { refreshHero } from '../js/sim/heroes.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const argv = process.argv.slice(2);
@@ -60,6 +68,29 @@ export function play(data, seed, { deny = null, deniedSeat = 0, maxMin = 40 } = 
     banners: s.state.teams.map(t => Math.ceil(t.banners)), stats: s.state.players.map(p => ({ items: p.stats.itemGold, upg: p.stats.upgradeGold || 0, pow: p.stats.powerGold || 0, sends: p.stats.sendGold })) };
 }
 
+export const BUY_SCHEDULE = [[3, 'longsword'], [6, 'chainmail'], [9, 'plate_helm'], [12, 'warhammer']];
+/** Buy test: share of games the gear-buying seat wins (mirror Veterans, mixed races/heroes). */
+export function buyTest(data, n = N, schedule = BUY_SCHEDULE) {
+  let won = 0;
+  for (let i = 0; i < n; i++) {
+    const seed = 700 + i, seat = i % 2;
+    const players = [0, 1].map(t => ({ team: t, kind: 'ai', ai: { difficulty: DIFF }, race: RACES[seed % 4], hero: HEROES[(seed >> 2) % 5] }));
+    const s = createSim({ seed, mode: 'linewar', format: '1v1', players }, data, { events: false });
+    let k = 0, saved = 0;
+    while (!s.over && s.tick < 40 * 1200) {
+      s.step([]);
+      if (k >= schedule.length || s.tick < schedule[k][0] * 1200) continue;
+      const p = s.state.players[seat], id = schedule[k][1], price = data['items-bl'].items[id].price;
+      const take = Math.min(Math.max(0, p.gold), price - saved); p.gold -= take; saved += take;
+      const slot = p.inv.findIndex(x => !x);
+      if (saved >= price && slot >= 0) { p.inv[slot] = { uid: 90000 + k, id, charges: 0 }; p.gearV = (p.gearV || 0) + 1; refreshHero({ state: s.state, data }, p); k++; saved = 0; }
+    }
+    const w = s.state.result ? s.state.result.winner : -1;
+    won += w === -1 ? 0.5 : w === seat ? 1 : 0;
+  }
+  return Math.round(won / n * 100);
+}
+
 export function report(data, n = N) {
   const mins = [], tg = {}, spend = { items: 0, upg: 0, pow: 0, sends: 0 };
   for (let i = 0; i < n; i++) {
@@ -93,7 +124,7 @@ export function report(data, n = N) {
 
 if (process.argv[1] && process.argv[1].endsWith('feel-report.mjs')) {
   const t0 = Date.now();
-  const r = report(loadData());
-  console.log(JSON.stringify(r, null, 1));
+  if (argv.includes('--buy')) console.log('buy test: the gear-buying seat wins', buyTest(loadData()) + '%');
+  else { const r = report(loadData()); r.buyWins = buyTest(loadData()); console.log(JSON.stringify(r, null, 1)); }
   console.log(`${N} seeds, ${((Date.now() - t0) / 1000).toFixed(0)} s`);
 }

@@ -140,7 +140,7 @@
    "name": "Training Sword",
    "category": "weapons",
    "tier": 1,
-   "price": 70,
+   "price": 30,
    "icon": "sword",
    "desc": "A blunt practice blade. Better than bare hands.",
    "stats": {
@@ -155,7 +155,7 @@
    "name": "Hand Axe",
    "category": "weapons",
    "tier": 1,
-   "price": 110,
+   "price": 50,
    "icon": "axe",
    "desc": "Light, cheap and mean.",
    "stats": {
@@ -172,7 +172,7 @@
    "name": "Light Spear",
    "category": "weapons",
    "tier": 1,
-   "price": 120,
+   "price": 55,
    "icon": "spear",
    "desc": "Quick thrusts, quick recovery.",
    "stats": {
@@ -187,7 +187,7 @@
    "name": "Hunting Bow",
    "category": "weapons",
    "tier": 1,
-   "price": 160,
+   "price": 70,
    "icon": "bow",
    "desc": "Strung for game, works on raiders too.",
    "stats": {
@@ -204,7 +204,7 @@
    "name": "Iron Mace",
    "category": "weapons",
    "tier": 1,
-   "price": 255,
+   "price": 110,
    "icon": "mace",
    "desc": "A solid head on a solid haft.",
    "stats": {
@@ -218,8 +218,8 @@
    "id": "longsword",
    "name": "Longsword",
    "category": "weapons",
-   "tier": 2,
-   "price": 360,
+   "tier": 1,
+   "price": 160,
    "icon": "longsword",
    "desc": "A soldier's blade with reach.",
    "stats": {
@@ -235,8 +235,8 @@
    "id": "war_spear",
    "name": "War Spear",
    "category": "weapons",
-   "tier": 2,
-   "price": 415,
+   "tier": 1,
+   "price": 180,
    "icon": "spear",
    "desc": "Balanced for a fast, steady rhythm.",
    "stats": {
@@ -253,7 +253,7 @@
    "name": "Warhammer",
    "category": "weapons",
    "tier": 2,
-   "price": 680,
+   "price": 300,
    "icon": "warhammer",
    "desc": "Each blow lands like a falling gate.",
    "stats": {
@@ -268,7 +268,7 @@
    "name": "Bloodletter",
    "category": "weapons",
    "tier": 2,
-   "price": 760,
+   "price": 335,
    "icon": "sword",
    "desc": "Every cut feeds the hand that holds it.",
    "stats": {
@@ -284,8 +284,8 @@
    "id": "windstring_bow",
    "name": "Windstring Bow",
    "category": "weapons",
-   "tier": 3,
-   "price": 880,
+   "tier": 2,
+   "price": 385,
    "icon": "bow",
    "desc": "Looses before the last arrow lands.",
    "stats": {
@@ -301,8 +301,8 @@
    "id": "reavers_greataxe",
    "name": "Reaver's Greataxe",
    "category": "weapons",
-   "tier": 3,
-   "price": 1000,
+   "tier": 2,
+   "price": 440,
    "icon": "greataxe",
    "desc": "Built to end fights in one swing.",
    "stats": {
@@ -320,8 +320,8 @@
    "id": "kingsbane",
    "name": "Kingsbane",
    "category": "weapons",
-   "tier": 4,
-   "price": 2080,
+   "tier": 3,
+   "price": 910,
    "icon": "greatsword",
    "desc": "Only one blade like it was ever forged.",
    "stats": {
@@ -344,7 +344,7 @@
    "name": "Leather Cap",
    "category": "armour",
    "tier": 1,
-   "price": 65,
+   "price": 30,
    "icon": "leather_cap",
    "desc": "Keeps the worst knocks off.",
    "stats": {
@@ -361,7 +361,7 @@
    "name": "Traveller's Boots",
    "category": "armour",
    "tier": 1,
-   "price": 95,
+   "price": 40,
    "icon": "boots",
    "desc": "Worn soft by many roads.",
    "stats": {
@@ -376,7 +376,7 @@
    "name": "Leather Armour",
    "category": "armour",
    "tier": 1,
-   "price": 130,
+   "price": 55,
    "icon": "leather_armour",
    "desc": "Boiled hide, stitched tight.",
    "stats": {
@@ -391,7 +391,7 @@
    "name": "Iron Bracers",
    "category": "armour",
    "tier": 1,
-   "price": 145,
+   "price": 65,
    "icon": "bracers",
    "desc": "Guards the wrists, frees the swing.",
    "stats": {
@@ -407,8 +407,8 @@
    "id": "plate_helm",
    "name": "Plate Helm",
    "category": "armour",
-   "tier": 2,
-   "price": 305,
+   "tier": 1,
+   "price": 135,
    "icon": "plate_helm",
    "desc": "Heavy, hot and worth it.",
    "stats": {
@@ -424,8 +424,8 @@
    "id": "chainmail",
    "name": "Chainmail",
    "category": "armour",
-   "tier": 2,
-   "price": 335,
+   "tier": 1,
+   "price": 145,
    "icon": "chainmail",
    "desc": "Rings of iron that turn a blade.",
    "stats": {
@@ -441,8 +441,8 @@
    "id": "heater_shield",
    "name": "Heater Shield",
    "category": "armour",
-   "tier": 2,
-   "price": 400,
+   "tier": 1,
+   "price": 175,
    "icon": "heater_shield",
    "desc": "A plain shield, painted and proven.",
    "stats": {
@@ -458,8 +458,8 @@
    "id": "fleetfoot_boots",
    "name": "Fleetfoot Boots",
    "category": "armour",
-   "tier": 2,
-   "price": 440,
+   "tier": 1,
+   "price": 195,
    "icon": "boots",
    "desc": "Light enough to run all day.",
    "stats": {
@@ -475,8 +475,8 @@
    "id": "warded_robe",
    "name": "Warded Robe",
    "category": "armour",
-   "tier": 2,
-   "price": 560,
+   "tier": 1,
+   "price": 245,
    "icon": "robe",
    "desc": "Stitched with signs that drink flame.",
    "stats": {
@@ -492,8 +492,8 @@
    "id": "plate_harness",
    "name": "Plate Harness",
    "category": "armour",
-   "tier": 3,
-   "price": 800,
+   "tier": 2,
+   "price": 350,
    "icon": "plate_armour",
    "desc": "A wall you can wear.",
    "stats": {
@@ -509,8 +509,8 @@
    "id": "tower_shield",
    "name": "Tower Shield",
    "category": "armour",
-   "tier": 3,
-   "price": 1120,
+   "tier": 2,
+   "price": 490,
    "icon": "tower_shield",
    "desc": "Hide behind it and let them tire.",
    "stats": {
@@ -528,8 +528,8 @@
    "id": "bannerguard_aegis",
    "name": "Bannerguard Aegis",
    "category": "armour",
-   "tier": 4,
-   "price": 2240,
+   "tier": 3,
+   "price": 980,
    "icon": "kite_shield",
    "desc": "Carried by the last guard of the last banner.",
    "stats": {
@@ -552,7 +552,7 @@
    "name": "Copper Ring",
    "category": "trinkets",
    "tier": 1,
-   "price": 80,
+   "price": 35,
    "icon": "ring",
    "desc": "A plain band that steadies the heart.",
    "stats": {
@@ -567,7 +567,7 @@
    "name": "Sapphire Ring",
    "category": "trinkets",
    "tier": 1,
-   "price": 175,
+   "price": 75,
    "icon": "ring",
    "desc": "Cool to the touch, always.",
    "stats": {
@@ -584,7 +584,7 @@
    "name": "Apprentice Wand",
    "category": "trinkets",
    "tier": 1,
-   "price": 190,
+   "price": 85,
    "icon": "wand",
    "desc": "Every caster starts somewhere.",
    "stats": {
@@ -601,7 +601,7 @@
    "name": "Ring of Vigour",
    "category": "trinkets",
    "tier": 1,
-   "price": 210,
+   "price": 90,
    "icon": "ring",
    "desc": "Warm as a hearth stone.",
    "stats": {
@@ -617,8 +617,8 @@
    "id": "sages_amulet",
    "name": "Sage's Amulet",
    "category": "trinkets",
-   "tier": 2,
-   "price": 360,
+   "tier": 1,
+   "price": 160,
    "icon": "amulet",
    "desc": "Quickens thought between spells.",
    "stats": {
@@ -634,8 +634,8 @@
    "id": "tome_of_kindling",
    "name": "Tome of Kindling",
    "category": "trinkets",
-   "tier": 2,
-   "price": 480,
+   "tier": 1,
+   "price": 210,
    "icon": "tome",
    "desc": "Its pages are always slightly warm.",
    "stats": {
@@ -649,8 +649,8 @@
    "id": "shadow_hood",
    "name": "Shadow Hood",
    "category": "trinkets",
-   "tier": 2,
-   "price": 520,
+   "tier": 1,
+   "price": 225,
    "icon": "hood",
    "desc": "Strike from where they are not looking.",
    "stats": {
@@ -667,7 +667,7 @@
    "name": "Starweave Hat",
    "category": "trinkets",
    "tier": 2,
-   "price": 720,
+   "price": 315,
    "icon": "wizard_hat",
    "desc": "Spun from thread that remembers the night sky.",
    "stats": {
@@ -685,8 +685,8 @@
    "id": "grove_staff",
    "name": "Grove Staff",
    "category": "trinkets",
-   "tier": 3,
-   "price": 880,
+   "tier": 2,
+   "price": 385,
    "icon": "druid_staff",
    "desc": "Still grows a leaf each spring.",
    "stats": {
@@ -704,8 +704,8 @@
    "id": "archmage_staff",
    "name": "Archmage Staff",
    "category": "trinkets",
-   "tier": 3,
-   "price": 1200,
+   "tier": 2,
+   "price": 525,
    "icon": "staff",
    "desc": "Heavy with old, patient power.",
    "stats": {
@@ -721,8 +721,8 @@
    "id": "sigil_of_the_long_night",
    "name": "Sigil of the Long Night",
    "category": "trinkets",
-   "tier": 4,
-   "price": 2400,
+   "tier": 3,
+   "price": 1050,
    "icon": "amulet",
    "desc": "Spells come back before the echo fades.",
    "stats": {
@@ -743,7 +743,7 @@
    "name": "Spring Charm",
    "category": "charms",
    "tier": 1,
-   "price": 160,
+   "price": 70,
    "icon": "amulet",
    "desc": "A drop of clear water in glass.",
    "stats": {
@@ -758,7 +758,7 @@
    "name": "Moonstone",
    "category": "charms",
    "tier": 1,
-   "price": 175,
+   "price": 75,
    "icon": "ring",
    "desc": "Glows faintly when you are tired.",
    "stats": {
@@ -773,7 +773,7 @@
    "name": "Hawk Feather",
    "category": "charms",
    "tier": 1,
-   "price": 200,
+   "price": 90,
    "icon": "amulet",
    "desc": "Find the gap and strike it.",
    "stats": {
@@ -788,7 +788,7 @@
    "name": "Gold Tooth",
    "category": "charms",
    "tier": 1,
-   "price": 240,
+   "price": 105,
    "icon": "ring",
    "desc": "Somebody's lucky tooth. Now yours.",
    "stats": {
@@ -802,8 +802,8 @@
    "id": "blood_charm",
    "name": "Blood Charm",
    "category": "charms",
-   "tier": 2,
-   "price": 305,
+   "tier": 1,
+   "price": 135,
    "icon": "amulet",
    "desc": "A red bead that beats like a heart.",
    "stats": {
@@ -817,8 +817,8 @@
    "id": "quicksilver_charm",
    "name": "Quicksilver Charm",
    "category": "charms",
-   "tier": 2,
-   "price": 320,
+   "tier": 1,
+   "price": 140,
    "icon": "ring",
    "desc": "Never sits still.",
    "stats": {
@@ -834,8 +834,8 @@
    "id": "banner_charm",
    "name": "Banner Charm",
    "category": "charms",
-   "tier": 2,
-   "price": 560,
+   "tier": 1,
+   "price": 245,
    "icon": "amulet",
    "desc": "A scrap of an old standard, sewn into a token.",
    "stats": {
@@ -854,7 +854,7 @@
    "name": "Heart of the Mountain",
    "category": "charms",
    "tier": 3,
-   "price": 1920,
+   "price": 840,
    "icon": "amulet",
    "desc": "A stone that refuses to break, and so do you.",
    "stats": {

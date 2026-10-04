@@ -1,5 +1,5 @@
 {
- "_doc": "Bannerline art data (stream C, PLAN \u00a714/\u00a716). How each unit's `model` ref in units.json becomes a 3D body. `chibi2` refs: start from a Chibi 2 preset (`bases`, avatar-3d/data/chibi2-presets.json by name) or a Farhold warband member (`warband` = a def id in prototypes/farhold/data/warbands.json, read-only), dress it as a class (`outfit`, avatar-3d/data/class-outfits.json), then apply `units.<id>.parts` slot overrides and the race `paint` (top/cape/hat colour swaps). `creature` refs: the race's `creatures` table names a designed look in avatar-3d/data/creature-variants.json (falling back to the bare type). `scale` is a suggested world scale so a T4 reads bigger than a T1 from the RTS camera; the view may ignore it. `heroes` are the four hero bodies. Read by js/view/unit-looks.js only; the sim never reads this file. `heroes.<id>.team` names the slots painted in the player's colour (`{slot: 'color'|'color2'}`) by `forHero(id, { color })` \u2014 heroes are the one exception to never-recolour, because the owner wants a hero to read as his at a glance (5 heroes x 6 slot colours at most 30 Chibi 2 templates). `forms.<hero>.<form id>` is the creature look (creature-variants.json) a hero turns into while shaped (heroes.json skills `form.id`). `pets.<pet id>` is the creature look for a hero's summon (heroes.json `pets`). `tierScale` sizes a unit by tier (T1 1.0 .. T6 1.5) unless `units.<id>.scale` says otherwise; creature looks multiply it by their own designed size, so the eye reads a tier from across the field.",
+ "_doc": "Bannerline art data (stream C, PLAN \u00a714/\u00a716). How each unit's `model` ref in units.json becomes a 3D body. `chibi2` refs: start from a Chibi 2 preset (`bases`, avatar-3d/data/chibi2-presets.json by name) or a Farhold warband member (`warband` = a def id in prototypes/farhold/data/warbands.json, read-only), dress it as a class (`outfit`, avatar-3d/data/class-outfits.json), then apply `units.<id>.parts` slot overrides and the race `paint` (top/cape/hat colour swaps). `creature` refs: the race's `creatures` table names a designed look in avatar-3d/data/creature-variants.json (falling back to the bare type). `scale` is a suggested world scale so a T4 reads bigger than a T1 from the RTS camera; the view may ignore it. `heroes` are the four hero bodies. Read by js/view/unit-looks.js only; the sim never reads this file. `heroes.<id>.team` names the slots painted in the player's colour (`{slot: 'color'|'color2'}`) by `forHero(id, { color })` \u2014 heroes are the one exception to never-recolour, because the owner wants a hero to read as his at a glance (5 heroes x 6 slot colours at most 30 Chibi 2 templates). `forms.<hero>.<form id>` is the creature look (creature-variants.json) a hero turns into while shaped (heroes.json skills `form.id`). `pets.<pet id>` is the creature look for a hero's summon (heroes.json `pets`). `tierScale` sizes a unit by tier (T1 1.0 .. T6 1.5) unless `units.<id>.scale` says otherwise; creature looks multiply it by their own designed size, so the eye reads a tier from across the field. `hvf` (Hunters vs Farmers): `farmer` / `hunter` Chibi 2 looks (`team` slots painted in the player's colour), `ghost` (how a downed farmer is drawn: tint, opacity, glow), and the creature looks for `animals`, `army` and `pets` (creature-variants.json ids).",
  "bases": {
   "human": "Human wayfarer",
   "dwarf": "Dwarf smith (round)",
@@ -567,5 +567,112 @@
   "4": 1.2,
   "5": 1.32,
   "6": 1.5
+ },
+ "hvf": {
+  "farmer": {
+   "chibi2": "human",
+   "parts": {
+    "hat": {
+     "id": "straw",
+     "color": "#d8b55a",
+     "color2": "#c8302a"
+    },
+    "top": {
+     "id": "apron",
+     "color": "#6e8a4a",
+     "color2": "#e8dcc0"
+    },
+    "bottom": {
+     "id": "breeches",
+     "color": "#5a4a32"
+    },
+    "shoes": {
+     "id": "boots",
+     "color": "#4a3424"
+    },
+    "cape": {
+     "id": "none"
+    },
+    "decor": {
+     "id": "belt_pouches",
+     "color": "#6a4a2a"
+    },
+    "held": {
+     "id": "staff_crook",
+     "color": "#8a6a40"
+    },
+    "offhand": {
+     "id": "none"
+    }
+   },
+   "team": {
+    "hat": "color2",
+    "top": "color"
+   },
+   "scale": 1.35
+  },
+  "hunter": {
+   "chibi2": "human",
+   "parts": {
+    "hat": {
+     "id": "hood",
+     "color": "#3a3a32",
+     "color2": "#5a4a3a"
+    },
+    "top": {
+     "id": "strapped_leather",
+     "color": "#4a3a2a",
+     "color2": "#b23a2a"
+    },
+    "bottom": {
+     "id": "leggings",
+     "color": "#2e2a24"
+    },
+    "shoes": {
+     "id": "boots",
+     "color": "#2a1e14"
+    },
+    "cape": {
+     "id": "travel_cloak",
+     "color": "#2e3428"
+    },
+    "decor": {
+     "id": "trophy_belt",
+     "color": "#e6dcc4"
+    },
+    "held": {
+     "id": "fh_spear",
+     "color": "#9aa0a8"
+    },
+    "offhand": {
+     "id": "none"
+    }
+   },
+   "team": {
+    "top": "color2"
+   },
+   "scale": 1.6
+  },
+  "ghost": {
+   "color": "#9fd8ff",
+   "opacity": 0.45,
+   "emissive": 0.6,
+   "anim": "idle",
+   "bob": 0.25
+  },
+  "animals": {
+   "hen": "bl_hen",
+   "sheep": "bl_sheep",
+   "pig": "bl_pig",
+   "cow": "bl_cow"
+  },
+  "army": {
+   "scarecrow": "bl_scarecrow",
+   "crow": "bl_crow"
+  },
+  "pets": {
+   "hound": "bl_hunt_hound",
+   "hawk": "bl_hawk"
+  }
  }
 }

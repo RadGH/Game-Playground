@@ -58,6 +58,17 @@ test('host + guest by room code -> match on both -> results -> back to the room'
   expect(hi.player).not.toBe(gi.player);
   expect(hi.team).not.toBe(gi.team);
 
+  // The guest reloads mid-match: the title offers "Rejoin your match", which puts it back in.
+  await guest.reload();
+  await expect(guest.locator('#boot')).toHaveCount(0, { timeout: 30_000 });
+  await expect(guest.locator('[data-act="rejoin"]')).toBeVisible({ timeout: 10_000 });
+  await guest.click('[data-act="rejoin"]');
+  await expect(guest.locator('#screen-match')).toBeVisible({ timeout: 30_000 });
+  const t0 = (await info(guest)).tick;
+  await expect.poll(async () => (await info(guest)).tick, { timeout: 30_000 }).toBeGreaterThan(t0 + 20);
+  expect((await info(guest)).player).toBe(gi.player);
+  guest.on('pageerror', (e) => errors.push(e.message));
+
   // The guest surrenders through the pause menu (online the match keeps running behind it).
   await guest.locator('body').press('Escape');
   await expect(guest.locator('.pause-menu')).toBeVisible();

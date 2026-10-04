@@ -21,7 +21,7 @@ import { createChibi2Character } from '../../../../avatar-3d/js/chibi2.js';
 import { createCreature, normalizeCreature, CREATURE_TYPES } from '../../../../avatar-3d/js/creatures.js';
 import { compactCreature } from '../../../../avatar-3d/js/mesh-merge.js';
 import { dressAs } from '../../../../avatar-3d/js/class-outfits.js';
-import { Group as THREE_GROUP } from 'three';
+import { Group as THREE_GROUP, Color as THREE_COLOR } from 'three';
 
 const here = p => new URL(p, import.meta.url).href;
 const clone = v => JSON.parse(JSON.stringify(v));
@@ -121,6 +121,23 @@ export function createLooks({ looks, units, races = null, presets, outfits = nul
       if (color) for (const [slot, field] of Object.entries(h.team || {})) if (look.avatar[slot] && look.avatar[slot].id !== 'none') look.avatar[slot][field] = color;
       cache.set(key, look); return look;
     },
+    /** Hunters vs Farmers: 'farmer' | 'hunter' (Chibi 2, `color` paints the hat band / jerkin). */
+    forRole(role, { color = null } = {}) {
+      const key = 'r:' + role + ':' + (color || '');
+      if (cache.has(key)) return cache.get(key);
+      const h = looks.hvf?.[role]; if (!h) throw new Error(`unit-looks: no hvf role "${role}"`);
+      const look = chibiLook(h, h, null); look.id = role; look.role = role;
+      if (color) for (const [slot, field] of Object.entries(h.team || {})) if (look.avatar[slot] && look.avatar[slot].id !== 'none') look.avatar[slot][field] = color;
+      cache.set(key, look); return look;
+    },
+    /** Hunters vs Farmers creatures: kind 'animals' | 'army' | 'pets', id 'sheep' / 'scarecrow' / 'hound'... */
+    forHvf(kind, id) {
+      const vid = looks.hvf?.[kind]?.[id], v = vid && variantTable[vid];
+      if (!v) throw new Error(`unit-looks: no hvf ${kind} "${id}"`);
+      return { kind: 'creature', spec: normalizeCreature(v.creature), variant: vid, scale: 1, id };
+    },
+    /** How a downed farmer is drawn (looks.json hvf.ghost). */
+    ghostStyle() { return looks.hvf?.ghost || { color: '#9fd8ff', opacity: 0.45, emissive: 0.6 }; },
     /** A hero's summon (heroes.json `pets`, e.g. the Druid's Grove Wolf): looks.json `pets.<id>` names a creature look. */
     forPet(id) {
       const vid = looks.pets?.[id], v = vid && variantTable[vid];
@@ -135,7 +152,7 @@ export function createLooks({ looks, units, races = null, presets, outfits = nul
     },
     /** Any ref: 'unit:levy', 'hero:druid', or a plain unit id. */
     /** 'unit:levy', 'hero:druid', 'form:druid:wolf', or a plain unit id. */
-    forRef(ref) { const [k, id, f] = ref.includes(':') ? ref.split(':') : ['unit', ref]; return k === 'hero' ? api.forHero(id) : k === 'form' ? api.forForm(id, f) : k === 'pet' ? api.forPet(id) : api.forUnit(id); },
+    forRef(ref) { const [k, id, f] = ref.includes(':') ? ref.split(':') : ['unit', ref]; return k === 'hero' ? api.forHero(id) : k === 'form' ? api.forForm(id, f) : k === 'pet' ? api.forPet(id) : k === 'role' ? api.forRole(id) : k === 'hvf' ? api.forHvf(id, f) : api.forUnit(id); },
     build: buildActor,
   };
   return api;
@@ -274,4 +291,22 @@ export function createBodyFactory(looks, { scale = 1.3, fallback = null, colorOf
     return body;
   }
   return { makeBody, preload, heights, lookOf };
+}
+
+/**
+ * Make an actor (or any group) look like a GHOST: every mesh gets a translucent, glowing copy of its
+ * material in `style.color` (Hunters vs Farmers' downed farmer, looks.json hvf.ghost). Returns
+ * restore() which puts the original materials back. Shared Chibi 2 template materials are never edited.
+ */
+export function applyGhost(group, style = { color: '#9fd8ff', opacity: 0.45, emissive: 0.6 }) {
+  const swaps = [];
+  group.traverse(o => {
+    if (!o.isMesh || Array.isArray(o.material)) return;
+    const m = o.material.clone();
+    m.transparent = true; m.opacity = style.opacity ?? 0.45; m.depthWrite = false;
+    if (m.color) m.color.lerp(new THREE_COLOR(style.color), 0.7);
+    if ('emissive' in m && m.emissive) { m.emissive = new THREE_COLOR(style.color); m.emissiveIntensity = style.emissive ?? 0.6; }
+    swaps.push([o, o.material]); o.material = m;
+  });
+  return () => { for (const [o, orig] of swaps) { o.material.dispose(); o.material = orig; } };
 }

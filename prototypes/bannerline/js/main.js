@@ -148,7 +148,11 @@ async function boot() {
   requestAnimationFrame(loop);
 
   if (params.get('autostart')) app.start({});
-  else showTitle();
+  else {
+    showTitle();
+    const rj = loadRejoin();
+    if (rj) app.title.offerRejoin?.(rj.code, () => rejoinOnline(rj));
+  }
 }
 
 function ensureWorld(map, format = '1v1', teams = null) {
@@ -185,6 +189,7 @@ function setScreen(name) {
   $('screen-results').hidden = name !== 'results';
 }
 function showTitle() {
+  saveRejoin(app.match?.net ? null : loadRejoin());   // leaving a running online match on purpose forgets it
   if (app.room) { const r = app.room; app.room = null; try { r.leave(); } catch { /* already closed */ } app.netroom.detach(); }
   app.hvf?.end(); endMatch(); app.lobby.hide(); setScreen('title'); app.title.show(); useFlyCam(); }
 function showModes() { app.hvf?.end(); endMatch(); app.title.hide(); app.lobby.hide(); setScreen('modes'); app.modes.show(); useFlyCam(); }
@@ -241,15 +246,20 @@ function attachRoom(room) {
     else if (app.screen === 'netroom') { showTitle(); alertBoot('The room closed.', 'Online'); }
   });
 }
-function netStart(room, packet) {
+function netStart(room, packet, rejoin = null) {
   let match;
   try {
-    match = beginMatch(room, packet, { data: app.data, createSim, restoreSim, now: () => performance.now(), onEvent: (type, e) => netEvent(type, e) });
+    match = beginMatch(room, packet, { data: app.data, createSim, restoreSim, now: () => performance.now(), onEvent: (type, e) => netEvent(type, e), rejoin });
   } catch (err) { alertBoot(err.message, 'Could not start'); return; }
   const clock = createNetClock({ lockstep: match.lockstep, tickMs: packet.tickMs });
   clock.attachVisibility(document);
   const session = { ...app.session, game: packet.config.mode, mode: packet.config.format || app.session.mode, speed: 1 };
-  startMatch(session, { match, clock, room });
+  const mine = packet.machines.find((x) => x.id === room.me) || rejoin?.machine;
+  if (mine?.token && !room.isHost) saveRejoin({ code: room.code || room.state?.code, token: mine.token, name: mine.name });
+  const net = { match, clock, room };
+  // A rejoin has no sim until the host's snapshot lands: wait for it ("Rejoining…").
+  if (!clock.sim) { app.pendingNet = { session, net, since: performance.now() }; alertBoot('Catching up with the match…', 'Rejoining'); return; }
+  startMatch(session, net);
 }
 function netEvent(type, e = {}) {
   const views = app.match?.views || [];
@@ -257,6 +267,22 @@ function netEvent(type, e = {}) {
   if (type === 'takeover') say(`${e.name || 'A player'} left — an AI takes their seat`, 'warn');
   else if (type === 'rejoin') say(`${e.name || 'A player'} is back`, 'good');
   else if (type === 'hostLeft') { say('Host left — match ended', 'bad', 4000); setTimeout(() => showTitle(), 2500); }
+}
+
+// Rejoin after a reload: the room code + this machine's token live in sessionStorage during a match.
+const REJOIN_KEY = 'bannerline.rejoin';
+function saveRejoin(v) { try { if (v) sessionStorage.setItem(REJOIN_KEY, JSON.stringify(v)); else sessionStorage.removeItem(REJOIN_KEY); } catch { /* private window */ } }
+function loadRejoin() { try { return JSON.parse(sessionStorage.getItem(REJOIN_KEY) || 'null'); } catch { return null; } }
+async function rejoinOnline(info) {
+  try {
+    const room = await joinRoom({ transport: await netTransport(), code: info.code, name: info.name || 'Guest', dataHash: app.data.hash, rejoinToken: info.token });
+    if (!room.rejoin) { saveRejoin(null); alertBoot('That match has ended.', 'Rejoin'); attachRoom(room); return; }
+    app.room = room;
+    app.netroom.attach(room);
+    room.on('start', (packet) => netStart(room, packet));
+    room.on('closed', () => { if (app.room === room) { app.room = null; saveRejoin(null); } });
+    netStart(room, room.rejoin.packet, room.rejoin);
+  } catch (err) { saveRejoin(null); alertBoot(err.message || String(err), 'Could not rejoin'); showTitle(); }
 }
 /** Debug speed for online tests: the host's start packet runs faster ticks (everyone follows). */
 app.startOpts = () => ({ tickMs: 50 / (Number(params.get('speed')) || 1) });
@@ -776,7 +802,15 @@ function matchFrame(dt, frames) {
   const paused = !!m.pausedBy && !m.net;
   const waiting = m.clock.waitingFor || [];
   const waitText = waiting.length ? `Waiting for ${waiting.map((w) => w.name + (w.hidden ? ' (tab hidden)' : '')).join(', ')}` : '';
-  for (const v of m.views) if (v.netWait && v.netWait._t !== waitText) { v.netWait._t = waitText; v.netWait.textContent = waitText; v.netWait.hidden = !waitText; }
+  if (waiting.length) m.waitSince = m.waitSince || performance.now(); else m.waitSince = 0;
+  // After 10 s the host may hand a stalled seat to an AI (stream D: lockstep.replaceWithAI).
+  const offer = m.net?.room?.isHost && waiting.length && performance.now() - m.waitSince > 10000;
+  const waitKey = waitText + (offer ? '|offer' : '');
+  for (const v of m.views) if (v.netWait && v.netWait._t !== waitKey) {
+    v.netWait._t = waitKey; v.netWait.hidden = !waitText;
+    v.netWait.innerHTML = waitText ? `${waitText}${offer ? ' <button class="lb-btn" data-act="ai-takeover">Replace with AI</button>' : ''}` : '';
+    v.netWait.onclick = (e) => { if (e.target.closest('[data-act="ai-takeover"]')) for (const w of m.clock.waitingFor || []) m.net.match.lockstep.replaceWithAI(w.id); };
+  }
   const events = m.clock.frame(dt * 1000, () => m.views.flatMap((v) => v.seat.take()));
   if (events.length) handleEvents(events);
   m.actors.sync(s, m.clock.alpha, paused ? 0 : dt);
@@ -812,6 +846,7 @@ function matchFrame(dt, frames) {
       app.session.last = r.winner === -1 ? { cls: 'draw', text: 'Last battle: a draw' }
         : localTeams.length > 1 ? { cls: 'win', text: `Last battle: the ${['Blue', 'Red'][r.winner]} banner won` }
         : { cls: r.winner === localTeams[0] ? 'win' : 'lose', text: r.winner === localTeams[0] ? 'Last battle: Victory' : 'Last battle: Defeat' };
+      if (m.net) saveRejoin(null);
       if (m.session.campaign) {
         const mission = m.session.campaign, next = nextMissionOf(mission);
         const card = $('results-card');
@@ -858,6 +893,12 @@ function frame(dt) {
   else if (app.screen === 'lobby') app.lobby.frame(frames, dt);
   else if (app.screen === 'netjoin') frames.forEach((f) => app.join.frame(f));
   else if (app.screen === 'netroom') app.netroom.frame(frames);
+  if (app.pendingNet) {
+    const p = app.pendingNet;
+    p.net.clock.pump();
+    if (p.net.clock.sim) { app.pendingNet = null; document.querySelectorAll('.boot.error').forEach((e) => e.remove()); startMatch(p.session, p.net); }
+    else if (performance.now() - p.since > 20000) { app.pendingNet = null; saveRejoin(null); alertBoot('The host did not send the match.', 'Could not rejoin'); showTitle(); }
+  }
   if (app.match) matchFrame(dt, frames);
   if (app.screen === 'results' && app.results) frames.forEach((f) => app.results.frame(f));
   if (app.screen === 'hvf') app.hvf.frame(dt, frames);   // frames polled once above (a second poll would lose presses)

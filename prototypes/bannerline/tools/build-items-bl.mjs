@@ -149,13 +149,18 @@ function tierOf(price) { return price < 300 ? 1 : price < 800 ? 2 : price < 2000
 // FEEL PASS (stream A, 2026-10-03): items have to swing fights. Measured (tools/feel-report.mjs + a paid
 // purchase test): at the hand-written numbers ~1,700 g of gear bought on a schedule won 50% of Veteran
 // mirrors — a coin flip, because a level-12 hero already hits for ~120/s and +20 damage is a rounding
-// error. The hero's power stats are scaled up and every equipment price cut by a fifth, which took the
-// same paid schedule to ~67-77%. Percent stats grow less (they hit caps), and economy / movement /
+// error. The hero's power stats are scaled up and equipment prices cut to 0.35. The fair test ("skim"): from a
+// scheduled minute, the seat's gold goes into savings until the price is reached, then the item lands —
+// i.e. that gold went to gear instead of sends. Same weapon/armour schedule (longsword, chainmail, plate
+// helm, warhammer), 48 Veteran mirrors: hand-written numbers 25% (the gear returned ~40% of what the
+// same gold did as sends); stats x2.5 + price x0.4 50%, x0.35 (shipped) see the feel report; the same gear for free 81%; the same gold
+// thrown away 10%. Spell power only scales skills, so spell items pay for the Pyromancer (~50%) and
+// barely for the Engineer / Druid, whose power is in turrets and pets: they should buy weapons/armour. Percent stats grow less (they hit caps), and economy / movement /
 // cooldown stats not at all. The rows below stay at their original hand-written values; the scale is
 // applied here so a later tuning pass changes three numbers, not ninety.
 const STAT_SCALE = { damage: 2.5, maxHp: 2.5, armor: 2.5, hpRegen: 2.5, spellPower: 2.5, mana: 2.5, manaRegen: 2.5,
   attackSpeed: 1.5, critChance: 1.5, critDamage: 1.5, lifeSteal: 1.5, magicResist: 1.5 };
-const PRICE_SCALE = 0.8;   // equipment only; consumables keep their price
+const PRICE_SCALE = 0.35;  // equipment only; consumables keep their price
 const scaleStat = (k, v) => { const m = STAT_SCALE[k] || 1; return m === 1 ? v : (Math.abs(v) < 5 ? Math.round(v * m * 10) / 10 : Math.round(v * m)); };
 
 const items = {};

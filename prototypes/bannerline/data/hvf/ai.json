@@ -11,7 +11,7 @@
    "reaction": 30,
    "farm": {
     "hiding": "random",
-    "fleeAt": 7,
+    "fleeAt": 5,
     "lieLow": false,
     "bellAt": 4,
     "sheepdog": false,

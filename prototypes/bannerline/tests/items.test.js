@@ -43,8 +43,9 @@ test('catalogue: 40-60 simple stat items over five tabs, every one with name, de
   // every item on exactly one shop tab
   const listed = data.shop.tabs.flatMap(t => t.items);
   assert.deepEqual(listed.slice().sort(), Object.keys(IB.items).sort());
-  // prices spread over a range
-  assert.ok(Math.min(...items.map(i => i.price)) <= 60 && Math.max(...items.map(i => i.price)) >= 2000);
+  // prices spread over a range: the dearest piece costs at least 20x the cheapest (absolute prices are a
+  // tuning knob: tools/build-items-bl.mjs PRICE_SCALE, feel pass 2026-10-03)
+  assert.ok(Math.max(...items.map(i => i.price)) >= 20 * Math.min(...items.map(i => i.price)));
 });
 
 test('the generated data files are up to date with tools/build-items-bl.mjs', () => {

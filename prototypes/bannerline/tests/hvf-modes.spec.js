@@ -98,7 +98,7 @@ test('online: two pages over BroadcastChannel, co-op farmers vs AI hunter, same 
   test.setTimeout(180_000);
   const host = await context.newPage(), guest = await context.newPage();
   const errors = [...errorsOf(host), ...errorsOf(guest)];
-  for (const p of [host, guest]) { await p.setViewportSize({ width: 960, height: 600 }); await p.goto(`${PAGE}?seed=3&net=channel`); }
+  for (const p of [host, guest]) { await p.setViewportSize({ width: 960, height: 600 }); await p.goto(`${PAGE}?seed=3&net=channel&render=0`); }
   for (const p of [host, guest]) await p.waitForFunction(() => window.hvfGame && document.querySelector('.hvf-setup'), null, { timeout: 30_000 });
   await host.evaluate(() => window.hvfGame.online.host('HVFAB', { format: '3v1' }));
   await guest.evaluate(() => window.hvfGame.online.join('HVFAB'));

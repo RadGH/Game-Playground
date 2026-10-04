@@ -240,7 +240,8 @@ export function hunterThink(ctx, p, K, rng, cmd) {
       const moving = me.ord.k === 'move' && me.ord.path && me.ord.i < me.ord.path.length;
       if (moving && m.goal === 'hot') return;
       const dd = dist(me.x, me.z, hb.x, hb.z);
-      hb.tries++;
+      // a try counts once per two seconds, whatever the think rate
+      if (state.tick - (hb.at || -1000) >= 40) { hb.tries++; hb.at = state.tick; }
       if (dd > 5 && hb.tries <= 2 && route('move', { x: hb.x, z: hb.z }, cellOf(map, hb.x, hb.z), false, true)) { m.goal = 'hot'; return; }
       if (dd < 24) {
         const b = breachToward(ctx, me, hb.x, hb.z);
@@ -266,7 +267,7 @@ export function hunterThink(ctx, p, K, rng, cmd) {
   if (best === m.target && moving) return;
   // arrived as close as the ground allows, again and again: give the place up for a while
   if (best === m.target && !moving) {
-    m.tries = (m.tries || 0) + 1;
+    if (state.tick - (m.triedAt || -1000) >= 40) { m.tries = (m.tries || 0) + 1; m.triedAt = state.tick; }
     if (m.tries > 3 && poi.kind !== 'pocket') { ban(m, best, state.tick); m.target = -1; m.tries = 0; return; }
   } else m.tries = 0;
   // a pocket I cannot walk into: cut my way in from the nearest point

@@ -142,6 +142,7 @@ export function createNetLobby({ screen, data, devices, onLeave, heroes: heroLis
     const s = key ? state.slots.find((x) => x.key === key) : null;
     const d = Number(b.dataset.d || 1);
     if (act === 'leave') leave();
+    if (act === 'kick' && room.isHost) room.kick(b.dataset.id);
     if (act === 'copy') { navigator.clipboard?.writeText(state.code).then(() => { toast = 'Room code copied'; render(); }, () => {}); }
     if (act === 'format' && room.isHost) room.configure({ format: b.dataset.v });
     if (act === 'kind' && room.isHost && s && s.kind !== 'human') {
@@ -201,7 +202,7 @@ export function createNetLobby({ screen, data, devices, onLeave, heroes: heroLis
         <div class="nr-code"><span>Room code</span><b>${state.code}</b><button class="lb-btn" data-act="copy" data-tip="Copy the code to send to a friend">Copy</button></div>
         <div class="lb-modes">${FORMATS.map((f) => `<button class="lb-mode${state.format === f ? ' on' : ''}" data-act="format" data-v="${f}" ${host ? '' : 'disabled'}>${f}</button>`).join('')}</div>
       </header>
-      <div class="nr-machines">${state.machines.map((m) => `<span class="nr-m${m.hidden ? ' hidden' : ''}">${m.host ? icon('crown') : icon('people')}${m.name}${m.host ? '' : ` · ${m.ping} ms`}${m.hidden ? ' · tab hidden' : ''}</span>`).join('')}</div>
+      <div class="nr-machines">${state.machines.map((m) => `<span class="nr-m${m.hidden ? ' hidden' : ''}">${m.host ? icon('crown') : icon('people')}${m.name}${m.host ? '' : ` · ${m.ping} ms`}${m.hidden ? ' · tab hidden' : ''}${host && !m.host ? ` <button class="nr-kick" data-act="kick" data-id="${m.id}" data-tip="Remove this machine from the room">×</button>` : ''}</span>`).join('')}</div>
       <div class="lb-teams n${state.slots.length / 2}">
         ${[0, 1].map((t) => `<section class="lb-team t${t}" style="--team:${TEAM_CSS[t]}"><h2>${icon('flag')}${TEAM_NAMES[t]}</h2><div class="lb-slots">${state.slots.filter((s) => s.team === t).map(card).join('')}</div></section>`).join('<div class="lb-vs">vs</div>')}
       </div>

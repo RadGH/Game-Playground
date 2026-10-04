@@ -8,7 +8,7 @@ import assert from 'node:assert/strict';
 import { data } from './_sim.mjs';
 import { matchups } from '../tools/matchups.mjs';
 
-test.skip('no race x hero combo dominates (owner: balance later — 48-unit roster not tuned yet) (2x2, 6 seeds per pairing per seat)', () => {
+test.skip('no race x hero combo dominates (owner: balance later — 48-unit roster not tuned yet; after the feel pass freeholds/pyromancer wins 89%) (2x2, 6 seeds per pairing per seat)', () => {
   const r = matchups({ data, races: ['freeholds', 'ashtusk'], heroes: ['warrior', 'pyromancer'], seeds: 6, base: 1 });
   for (const [k, v] of Object.entries(r.combos)) assert.ok(v >= 0.25 && v <= 0.75, `${k} ${(v * 100).toFixed(0)}%`);
   for (const [k, v] of Object.entries(r.races)) assert.ok(v >= 0.35 && v <= 0.65, `race ${k} ${(v * 100).toFixed(0)}%`);

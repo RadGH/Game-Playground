@@ -25,7 +25,7 @@ async function boot() {
   const loop = (now) => {
     const dt = Math.min(0.1, (now - last) / 1000); last = now;
     try { game.frame(dt); } catch (err) { console.error(err); }
-    gfx.render();
+    if (params.get('render') !== '0') gfx.render();   // render=0: headless net tests (the sim, HUD and lockstep still run)
     requestAnimationFrame(loop);
   };
   requestAnimationFrame(loop);

@@ -87,20 +87,25 @@ test('leak is per purchase: a pack splits it across its bodies', () => {
   assert.equal(new Set(bodies.map(e => e.group)).size, 1, 'one purchase = one group');
 });
 
-test.skip('matches end: median length 15-30 min (owner: balance later — ~12.8 min since the round-2 item rework), at most 30% reach the hard cap', () => {
+// FEEL PASS 2026-10-03 (stream A): back on. The Keep guard (js/sim/keep.js) made the mirror last; target ~15-25 min.
+test('matches end: median length 15-25 min, at most 30% reach the hard cap', () => {
   const r = playAll();
   const med = median(r.map(x => x.minutes));
   const caps = r.filter(x => x.result && x.result.reason === 'cap').length;
-  assert.ok(med >= 15 && med <= 30, `median ${med.toFixed(1)} min`);
+  assert.ok(med >= 15 && med <= 25, `median ${med.toFixed(1)} min`);
   assert.ok(caps <= SEEDS * 0.3, `${caps}/${SEEDS} hit the cap`);
 });
 
-test.skip('gold is spent: equipment takes 30-75% of spend, sends the rest (no hoarding)', () => {
+// FEEL PASS 2026-10-03: the old "equipment takes 30-75%" was written for the M1 step-ladder gear. What
+// should hold now: the town (Outfitter + Drill Yard + Sanctum) gets a real share of the gold, sends most.
+test('gold is spent: the town (items + Drill Yard + Sanctum) takes 10-50% of spend over the mirror, sends the rest', () => {
+  let town = 0, all = 0;
   for (const r of playAll()) for (const p of r.players) {
-    const spend = p.itemGold + p.sendGold + (p.upgradeGold || 0) + (p.powerGold || 0);
-    const share = p.itemGold / spend;
-    assert.ok(share >= 0.3 && share <= 0.75, `equipment share ${(share * 100).toFixed(0)}%`);
+    const t = p.itemGold + (p.upgradeGold || 0) + (p.powerGold || 0);
+    town += t; all += t + p.sendGold;
   }
+  const share = town / all;
+  assert.ok(share >= 0.1 && share <= 0.5, `town share ${(share * 100).toFixed(0)}%`);
 });
 
 test('seat does not decide the mirror (each seat wins 20-80%)', () => {

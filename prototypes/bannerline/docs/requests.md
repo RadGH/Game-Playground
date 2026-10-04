@@ -378,3 +378,34 @@ if (app.screen === 'hvf') app.hvf.frame(dt);
   `app.hvf.frame(dt, frames)` with the frames main.js already polled (polling twice a frame loses presses).
   `playable: true` flipped in js/sim/modes/hvf/index.js (agreed), "Coming next." dropped from modes.js.
   tests/hvf-ui.spec.js: mode card -> setup -> Start -> running match -> end() -> line war renders again.
+- [x] (A, FYI E/I/lead) **Feel pass done (2026-10-03).** No rationing anywhere: gold is still the only limit on sends.
+  Tool: `node tools/feel-report.mjs 32` (Veteran mirrors, mixed races and heroes, seats swapped).
+  Before -> after:
+  - **Match length:** median 6.1 min (p10 5.5, p90 8.3) -> **17.4** (14.7 / 19.5).
+  - **Send gold by tier:** T1 81 / T2 18 / T3 1 -> **T1 47 / T2 21 / T3 7 / T4 24 / T5 2**.
+  - **Win rate when the side keeps the system** (the other side gets the same gold refunded into sends):
+    - Drill Yard upgrades: 56% -> **66%**
+    - Sanctum powers: 38% -> **63%**
+    - gear bought on a schedule (buy test): about 6-25% -> **58%**; the same gear free wins 80%, the same gold thrown away 10-28%.
+  Changes:
+  - (1) **The Keep shoots**: js/sim/keep.js, `maps.json keep.guard`. 30 + 6 per minute every second, 3.5 m splash, 22 m range.
+    It melts tier-1 swarms at the Keep; big units walk through.
+  - (2) **Frost Field also deals damage**: 80 nature damage per second, 8 m, 60% slow, cost 110. It was the only power E's
+    Veteran casts, and it did nothing but slow.
+  - (3) **Items** (tools/build-items-bl.mjs `STAT_SCALE` / `PRICE_SCALE`, I's tool, three constants at the top):
+    - hero power stats x2.5;
+    - percent stats x1.5 (the caps still apply);
+    - equipment prices x0.35;
+    - consumables untouched.
+  - (4) **Drill Yard**: every `perLevel` x1.5 (data/upgrades.json).
+  - (5) **ai.json**: Veteran greed 0.9 -> 0.8, so it funds the town (town share of spend 15% -> 21%).
+  **For E:** the Veteran's OWN item shopping is still a net loss (denying it its items wins 72%). The gear
+  is not the cause (buy test 58%); the cause is consumables first plus trips off the field. Worth a look in
+  shop.js / index.js; no AI logic was changed here.
+  **For I:** I edited your generator's scale constants and upgrades.json `perLevel`. The hand-written rows are unchanged.
+  Tests:
+  - economy-bounds "matches end 15-25 min" is back on.
+  - The old "equipment takes 30-75%" test is now "the town takes 10-50%" (on).
+  - The gate-queue test asserts that the queue moves: the front send waits less than 30 s, and before the final 3 min
+    the queue empties at least every 90 s. It no longer asserts a fixed peak (that peak was 139 in the final push).
+  - Matchups stays skipped (freeholds/pyromancer 89%, a balance issue).

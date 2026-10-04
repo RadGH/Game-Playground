@@ -63,14 +63,15 @@ test('bounty is split across the defending team', () => {
 
 const awaitImport = await import('../js/sim/combat.js');
 
-test('mode hooks: hvf is registered but not playable; per-mode data loads as data.hvf and joins the hash; buildMap gets the seed; a mode may build its own state', async () => {
+test('mode hooks: hvf is registered (its own playable flag decides the lobby); per-mode data loads as data.hvf and joins the hash; buildMap gets the seed; a mode may build its own state', async () => {
   const { MODES, modeList, modeDataFiles, resolveMode } = await import('../js/sim/modes/index.js');
   const { MODE_DATA_FILES } = await import('../js/sim/data.js');
   const { dataWith } = await import('./_sim.mjs');
   assert.ok(MODES.hvf, 'registered');
   const list = modeList(data);
-  assert.equal(list.find(m => m.id === 'hvf').playable, false);
-  assert.equal(list.find(m => m.id === 'hvf').status, 'next');
+  const hv = list.find(m => m.id === 'hvf');
+  assert.equal(hv.playable, MODES.hvf.playable !== false);   // stream H owns the flag; the list must follow it
+  assert.equal(hv.status, hv.playable ? 'ready' : 'next');
   assert.equal(list.find(m => m.id === 'linewar').status, 'ready');
   assert.ok(list.some(m => m.status === 'planned'));
   assert.deepEqual(MODE_DATA_FILES.slice().sort(), modeDataFiles().sort(), 'data.js list = the modes\' dataFiles');

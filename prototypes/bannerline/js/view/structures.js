@@ -34,7 +34,8 @@ function rng(seed) { let a = seed >>> 0; return () => { a += 0x6D2B79F5; let t =
 
 // ================================================================ the Kit (static mesh baker)
 const MATS = {};
-function kitMaterial(kind) {
+/** The shared Kit materials (vertex colours), one per kind. */
+export function kitMaterial(kind) {
   if (MATS[kind]) return MATS[kind];
   MATS[kind] = kind === 'metal' ? new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.42, metalness: 0.65 })
     : kind === 'glow' ? new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false })
@@ -44,7 +45,8 @@ function kitMaterial(kind) {
 }
 
 export class Kit {
-  constructor() { this.parts = { std: [], metal: [], glow: [], cloth: [] }; this.stack = [new THREE.Matrix4()]; }
+  /** `material(kind)` picks the material for 'std' | 'metal' | 'glow' | 'cloth' (default: the shared set here). */
+  constructor({ material = kitMaterial } = {}) { this.material = material; this.parts = { std: [], metal: [], glow: [], cloth: [] }; this.stack = [new THREE.Matrix4()]; }
   /** Run `fn` with every add() placed relative to { p, r, s }. */
   at({ p = [0, 0, 0], r = [0, 0, 0], s = [1, 1, 1] } = {}, fn) {
     const m = new THREE.Matrix4().compose(new THREE.Vector3(...p), new THREE.Quaternion().setFromEuler(new THREE.Euler(...r)), typeof s === 'number' ? new THREE.Vector3(s, s, s) : new THREE.Vector3(...s));
@@ -74,7 +76,7 @@ export class Kit {
     const g = new THREE.Group(); g.name = name;
     for (const [kind, list] of Object.entries(this.parts)) {
       if (!list.length) continue;
-      const mesh = new THREE.Mesh(mergeGeometries(list), kitMaterial(kind));
+      const mesh = new THREE.Mesh(mergeGeometries(list), this.material(kind));
       mesh.name = name + ':' + kind; mesh.matrixAutoUpdate = false; mesh.updateMatrix();
       g.add(mesh); for (const p of list) p.dispose();
     }

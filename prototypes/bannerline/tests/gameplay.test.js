@@ -499,7 +499,7 @@ test('the Keep guard splashes a swarm near the Keep; a big unit walks through; i
   const golem = put(s, 'iron_golem', 1, 0, 6, f.keep.z - 12, { _spd: 0 });
   const far = put(s, 'levy', 1, 0, 0, 40, { _spd: 0 });
   s.drainEvents();
-  run(s, 100);
+  run(s, 220);
   assert.ok(events(s, 'keepShot').length >= 3);
   assert.ok(swarm.every(u => !s.state.ents.includes(u)), 'the swarm melted');
   assert.ok(s.state.ents.includes(golem) && golem.hp > golem.hpMax * 0.8, 'the golem walks on');

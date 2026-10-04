@@ -16,7 +16,7 @@ const HUNTER_COLOUR = '#b23a2a';
 // ── geometry helpers ───────────────────────────────────────────────────────────────────────────────
 const C = (hex) => { const c = new THREE.Color(hex); return [c.r, c.g, c.b]; };
 function part(geo, col) {
-  const g = geo.toNonIndexed(), n = g.attributes.position.count, a = new Float32Array(n * 3);
+  const g = geo.index ? geo.toNonIndexed() : geo, n = g.attributes.position.count, a = new Float32Array(n * 3);
   for (let i = 0; i < n; i++) { a[3 * i] = col[0]; a[3 * i + 1] = col[1]; a[3 * i + 2] = col[2]; }
   g.setAttribute('color', new THREE.BufferAttribute(a, 3));
   g.deleteAttribute('normal'); g.deleteAttribute('uv');

@@ -13,8 +13,17 @@ export function createTitle({ screen, onPlay, onHost = () => {}, onJoin = () => 
     if (act === 'join') onJoin();
     if (act === 'campaign') onCampaign();
   });
+  // "Rejoin your match" after a reload during an online match.
+  function offerRejoin(code, go) {
+    let b = menu.querySelector('[data-act="rejoin"]');
+    if (!b) { b = document.createElement('button'); b.className = 'menu-btn primary'; b.dataset.act = 'rejoin'; menu.prepend(b); }
+    b.innerHTML = `Rejoin your match <small>room ${code}</small>`;
+    b.onclick = () => { b.remove(); go(); };
+    nav.focus(b);
+  }
   let shownAt = 0;
   return {
+    offerRejoin,
     show() { screen.hidden = false; shownAt = performance.now(); nav.focus('.primary'); },
     hide() { screen.hidden = true; },
     get visible() { return !screen.hidden; },

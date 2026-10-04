@@ -190,8 +190,10 @@ export function hunterThink(ctx, p, K, rng, cmd) {
   }
   if (!target && F.animals.length) target = nearest(F.animals, me.x, me.z);
   if (!target && F.buildings.length) {
+    // Commander: the Farmhouse first (a farmer with one comes back on his own), then what earns
+    const house = HK.priority ? F.buildings.filter(b => b.type === 'farmhouse') : [];
     const prod = HK.priority ? F.buildings.filter(b => data.hvf.buildings.kinds[b.type] && (data.hvf.buildings.kinds[b.type].makes || data.hvf.buildings.kinds[b.type].incomePct || data.hvf.buildings.kinds[b.type].flat)) : [];
-    target = nearest(prod.length ? prod : F.buildings, me.x, me.z);
+    target = nearest(house.length ? house : prod.length ? prod : F.buildings, me.x, me.z);
   }
   if (target) {
     m.lastSeen = { x: target.x, z: target.z, tick: state.tick, kind: target.kind };
@@ -233,6 +235,20 @@ export function hunterThink(ctx, p, K, rng, cmd) {
     return;
   }
   if (me.ord.k === 'chop') return;
+
+  // Commander: camp a fresh grave for a while — his friends come to revive him (graves are public)
+  if (HK.camp > 0) {
+    let gr = null;
+    for (const g of state.hvf.graves) if (state.tick - g.since < HK.camp * 20 && (!gr || g.since > gr.since)) gr = g;
+    if (gr) {
+      const dd = dist(me.x, me.z, gr.x, gr.z);
+      if (dd > 9) { if (!(me.ord.k === 'move' && m.goal === 'grave') && route('move', { x: gr.x, z: gr.z }, cellOf(map, gr.x, gr.z), false, true)) m.goal = 'grave'; return; }
+      if (dd > 4) return;   // close enough: wait out of the way
+      // standing on the grave: step aside a little (from the right distance a reviver walks into reach)
+      if (route('move', { x: gr.x + 6, z: gr.z }, cellOf(map, gr.x + 6, gr.z), false, true)) { m.goal = 'grave'; return; }
+      return;
+    }
+  }
 
   // the last farmer I saw went somewhere: look there first
   if (m.lastSeen && m.lastSeen.kind === 'farmer' && state.tick - m.lastSeen.tick < HK.memory) {

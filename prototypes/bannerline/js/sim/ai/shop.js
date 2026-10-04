@@ -2,9 +2,9 @@
 // walks there too); hero.js decides WHEN to walk over, this file decides WHAT to buy once there.
 //
 //   style 'impulse' (Recruit)   a draught, then whatever random item the fund covers; never sells
-//   style 'value'   (Veteran)   two draughts + a Scroll of Return, then the priciest item its fund
-//                               affords, weighted by a rough fit (casters like trinkets, fighters
-//                               weapons); sells the cheapest item for one 1.5x better
+//   style 'value'   (Veteran)   a generic list of core stat items per kind of hero (VALUE_BUILDS),
+//                               a draught once two pieces are carried; sells the cheapest piece for one
+//                               1.5x dearer
 //   style 'build'   (Commander) a planned build per hero (BUILDS), with one defensive piece chosen
 //                               against the damage the enemy race actually sends (magic resist vs fire /
 //                               nature senders, armour vs blades and arrows); draughts shrink as the
@@ -23,6 +23,12 @@ export const BUILDS = {
   pyromancer: ['copper_ring', 'apprentice_wand', 'tome_of_kindling', '@def', 'sages_amulet', 'archmage_staff', 'starweave_hat', 'archmage_staff', 'sigil_of_the_long_night'],
   druid:      ['copper_ring', 'apprentice_wand', 'ring_of_vigour', 'tome_of_kindling', '@def', 'grove_staff', 'archmage_staff', 'heart_of_the_mountain', 'sigil_of_the_long_night'],
   engineer:   ['training_sword', 'leather_cap', 'longsword', '@def', 'iron_mace', 'warhammer', 'reavers_greataxe', 'kingsbane', 'warhammer'],
+};
+// Veteran: one generic list per kind of hero (no reading of the enemy race, no per-hero plan) — the
+// core stat items a decent player buys first, in order
+export const VALUE_BUILDS = {
+  fighter: ['training_sword', 'leather_cap', 'longsword', 'chainmail', 'warhammer', 'plate_harness', 'reavers_greataxe', 'warhammer'],
+  caster: ['apprentice_wand', 'copper_ring', 'tome_of_kindling', 'ring_of_vigour', 'archmage_staff', 'plate_harness', 'archmage_staff'],
 };
 const CASTERS = { pyromancer: true, druid: true };
 const HEALS = ['greater_draught', 'healing_draught'];
@@ -67,6 +73,21 @@ export function nextBuildItem(ctx, p) {
   return null;
 }
 
+/** The next item on a list the player does not carry yet (with multiplicity), or null. */
+function nextOnList(ctx, p, list) {
+  const { data } = ctx;
+  const have = {};
+  for (const it of p.inv) if (isGear(data, it)) have[it.id] = (have[it.id] || 0) + 1;
+  for (const id of list) {
+    if (have[id] > 0) { have[id]--; continue; }
+    const def = itemDef(data, id);
+    if (def && !(def.uniqueEquipped && carries(p, id))) return def;
+  }
+  return null;
+}
+/** The Veteran's next core item. */
+export function nextValueItem(ctx, p) { return nextOnList(ctx, p, VALUE_BUILDS[CASTERS[p.hero] ? 'caster' : 'fighter']); }
+
 /** What the AI should buy / sell while at the Outfitter. Returns { cmds, spent }. */
 export function shopAtOutfitter(ctx, p, K, rng, fund) {
   const { data } = ctx;
@@ -98,29 +119,20 @@ export function shopAtOutfitter(ctx, p, K, rng, fund) {
   }
 
   if (style === 'value') {
-    for (const [id, n] of [['healing_draught', 2], ['scroll_of_return', 1]]) {
-      const def = itemDef(data, id);
-      while (count(id) < n && free() >= 0 && gold >= def.price * 2 && (id !== 'scroll_of_return' || gold >= 160)) if (!buy(id)) break;
-    }
-    const carried = inv.filter(it => isGear(data, it)).map(it => itemDef(data, it.id).price);
-    const floor = Math.max(150, carried.length >= 4 ? 1.5 * Math.min(...carried) : 0);
-    const fit = d => {
-      const caster = !!CASTERS[p.hero];
-      if (d.category === 'trinkets') return caster ? 1.3 : 0.6;
-      if (d.category === 'weapons') return caster ? 0.7 : 1.3;
-      return 1;
-    };
-    const items = Object.values(data['items-bl'].items).filter(d => !d.consumable && d.price >= floor && d.price <= Math.min(fund, gold) && !(d.uniqueEquipped && carries(sim, d.id)));
-    if (items.length) {
-      let best = items[0];
-      for (const d of items) if (d.price * fit(d) > best.price * fit(best) || (d.price * fit(d) === best.price * fit(best) && d.id < best.id)) best = d;
+    // core stat items first (measured: draughts and a Scroll of Return first left no gold for gear,
+    // and the gear is what holds the gate); a draught only once two pieces are carried
+    for (let guard = 0; guard < 3; guard++) {
+      const want = nextValueItem(ctx, { ...p, inv });
+      if (!want || want.price > Math.min(gold, fund + 40)) break;
       if (free() < 0) {
         let worst = -1;
-        inv.forEach((it, i) => { if (isGear(data, it) && (worst < 0 || itemDef(data, it.id).price < itemDef(data, inv[worst].id).price)) worst = i; });
-        if (worst >= 0 && best.price > 1.5 * itemDef(data, inv[worst].id).price) sell(worst);
+        inv.forEach((it, i) => { if (it && (worst < 0 || itemDef(data, it.id).price < itemDef(data, inv[worst].id).price)) worst = i; });
+        if (worst < 0 || itemDef(data, inv[worst].id).price * 1.5 > want.price) break;
+        sell(worst);
       }
-      if (free() >= 0) buy(best.id);
+      if (!buy(want.id)) break;
     }
+    if (gearCount() >= 2 && count('healing_draught') < 1 && free() >= 0 && fund >= 40 && gold >= 40) buy('healing_draught');
     return { cmds, spent: spent.v };
   }
 

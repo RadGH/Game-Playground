@@ -26,7 +26,7 @@ import { atShop } from '../items.js';
 import { defenceOf, threatIn, myArmy, myLane } from './read.js';
 import { planSends, noticeCounter, horizon } from './sends.js';
 import { learnCommands, castCommands } from './skills.js';
-import { shopAtOutfitter, nextBuildItem, healSlot, drinkCommand, slotOf } from './shop.js';
+import { shopAtOutfitter, nextBuildItem, nextValueItem, healSlot, drinkCommand, slotOf } from './shop.js';
 import { drillYard, sanctum } from './town.js';
 import { heroCommands, postFor } from './hero.js';
 import { dist2 } from '../mathx.js';
@@ -56,7 +56,7 @@ function situation(ctx, p, K) {
     hero, heroAlive: !!hero, myLane: lane, laneX: f.gates[lane].x, sendLane,
     enemyDef: defenceOf(ctx, ef.id, p.team), threat: threatIn(ctx, p.team), army: myArmy(ctx, p),
     healSlot: healSlot(p), myDps: heroStats(data, p).dps,
-    wantItem: K.shop.style === 'build' ? nextBuildItem(ctx, p) : null,
+    wantItem: K.shop.style === 'build' ? nextBuildItem(ctx, p) : K.shop.style === 'value' ? nextValueItem(ctx, p) : null,
     horizon: horizon(ctx, p),
   };
   let lead = null;
@@ -131,11 +131,13 @@ export function aiCommands(ctx, p) {
 
   // ── the Outfitter ──
   if (hero && K.shop.trips && !m.retreat) {
-    const calm = S.threat.near === 0 && S.threat.danger < (K.hero.tier >= 2 ? 1.5 : 3);
-    const price = S.wantItem ? S.wantItem.price : K.shop.style === 'value' ? 300 : Infinity;
+    // between waves only: nothing near the Keep and at most a couple of bodies anywhere in the field;
+    // a trip is called off the moment a wave comes in (never leave the gate mid-wave)
+    const calm = S.threat.near === 0 && S.threat.danger < (K.hero.tier >= 2 ? 1.5 : 2) && S.threat.n <= 2;
+    const price = S.wantItem ? S.wantItem.price : Infinity;
     const needHeal = S.healSlot < 0 && m.fund >= 80 && hero.hp < hero.hpMax * 0.5;
     if (!m.shopTrip && calm && (m.fund >= price || needHeal) && !atShop(ctx, p)) m.shopTrip = true;
-    if (m.shopTrip && S.threat.near >= 3) m.shopTrip = false;   // the Keep needs me more
+    if (m.shopTrip && (S.threat.near >= 1 || S.threat.n >= 4)) m.shopTrip = false;   // the gate needs me more
   }
   if (hero && atShop(ctx, p)) {
     const pv = { ...p, gold };
@@ -143,11 +145,6 @@ export function aiCommands(ctx, p) {
     for (const c of r.cmds) cmd(c.type, c);
     gold -= r.spent; m.fund = Math.max(0, m.fund - r.spent);
     if (m.shopTrip && !r.cmds.length) m.shopTrip = false;
-  }
-  // Veteran: read a Scroll of Return to go shopping from far up the field
-  if (hero && m.shopTrip && K.shop.style === 'value' && hero.z < 70) {
-    const s = slotOf(p, 'scroll_of_return');
-    if (s >= 0 && state.tick >= (p.useAt || 0)) { cmd('use', { slot: s }); m.usedAt = state.tick; }
   }
 
   // ── Drill Yard and Sanctum ──

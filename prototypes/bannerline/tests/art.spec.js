@@ -101,3 +101,29 @@ test('Hunters vs Farmers art: forest, farm and cast render without errors in bud
   for (const v of ['lineup', 'cast']) { await page.evaluate(v => window.hvfArt.setView(v), v); await page.waitForTimeout(500); }
   expect(errors).toEqual([]);
 });
+
+test('HvF sound bridge: hunters hear only what the sim says, fog silences, distance fades', async ({ page }) => {
+  test.setTimeout(60_000);
+  const errors = []; page.on('pageerror', e => errors.push(e.message));
+  await page.goto('sfx/index.html');
+  const r = await page.evaluate(async () => {
+    const { createHvfSound } = await import('/prototypes/bannerline/js/view/hvf-sound.js');
+    const s = await createHvfSound({ localPlayers: [7], roleOf: () => 'hunter', ears: () => [{ x: 0, z: 0 }], visible: (x) => x < 50 });
+    s.setMuted(true);
+    const out = {};
+    out.heard = s.onEvent({ type: 'noise', kind: 'sheep', x: 10, z: 0, heard: [7] });
+    await new Promise(r => setTimeout(r, 120));
+    out.notHeard = s.onEvent({ type: 'noise', kind: 'sheep', x: 10, z: 0, heard: [3] });
+    out.fogged = s.onEvent({ type: 'chopped', x: 60, z: 0, player: 1 });
+    out.near = s.onEvent({ type: 'chopped', x: 5, z: 0, player: 1 });
+    out.tooFar = s.onEvent({ type: 'shot', x: -200, z: 0 });
+    out.turn = s.onEvent({ type: 'turn', value: 1 });
+    out.othersGold = s.onEvent({ type: 'gold', player: 2 });
+    out.fade = [s.place(5, 0).gain, s.place(40, 0).gain];
+    return out;
+  });
+  expect(r.heard).toBe(true); expect(r.notHeard).toBe(false); expect(r.fogged).toBe(false); expect(r.near).toBe(true);
+  expect(r.tooFar).toBe(false); expect(r.turn).toBe(true); expect(r.othersGold).toBe(false);
+  expect(r.fade[0]).toBeGreaterThan(r.fade[1]);
+  expect(errors).toEqual([]);
+});

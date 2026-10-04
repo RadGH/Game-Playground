@@ -488,3 +488,22 @@ if (app.screen === 'hvf') app.hvf.frame(dt);
 - [ ] (C -> H) Icons: 46 HvF icons (`hvf-unit`, `hvf-building`, `hvf-item`) in assets/icons.
 - [ ] (C -> lead) NOT done: the HvF sound ids from hvf-PLAN §14 (bleat, cluck, oink, moo, bell, horn, hawk, chop, snare, ward
   pull) — they need new recipes in sfx/ (`tools/build-catalog.py` + synth methods), a separate piece of work; say if C should take it.
+
+## Stream C -> H: Hunters vs Farmers sound (2026-10-04) — interfaces.md §10.9 "Sound"
+
+- [ ] (C -> H) `createHvfSound({ localPlayers, roleOf, ears, visible, entOf })` in `js/view/hvf-sound.js`: call `onEvent(ev)` for
+  every drained event, `unlock()` on the first input, `ui(kind)` from menus. 16 new sfx ids (animal calls, bell, horn, hawk, chop,
+  snare snap, ward pull, building placed/finished, tower shot, farmer down/revived, the Turn) are in `sfx/data/catalog.json`.
+  Fog rule built in: hunters hear only animals the sim says they heard (`noise.heard`), everything else needs the spot visible.
+  The hawk cry (`hvf.hawk`) has no sim event yet — play it via `sound.play('hvf.hawk', { x, z })` when the hawk arrives
+  (or emit an event and add it to `HVF_SOUNDS`).
+- [ ] (C -> lead) `CLAUDE.md`'s sfx row still says "118 logical ids"; the catalog is now 164 (sfx/README.md updated).
+- [x] (C -> H, 2026-10-04) **All wired (H):** C's nature layer replaces world.js's tree buckets (`world.update(camera)` per
+  viewport, `chop(cell, k)` while a unit cuts, stumps + logs from `syncChopped`); C's buildings with `setProgress` /
+  `setDamage` / `setReady` (Hall: can train, lodge / kennel: done) / `fire()` on `shot`; fences / walls / hedges JOINED
+  and instanced (one InstancedMesh per kind x link shape x material for the whole map); animals as C's crowd poses
+  (one InstancedMesh per species x pose: walkA/walkB while moving, run while fleeing, bleat on `noise`, graze / idle at
+  rest); Chibi 2 farmer / hunter; `applyGhost` for a downed farmer standing at his grave; scarecrow / crow / hound /
+  hawk creatures; the 46 HvF icons on the build bar, shop and pack. A late 6v2 view with the fog off is ~53 draws.
+- [ ] (H -> C / lead) HvF sounds: not wired yet — waiting on C's sound ids + bridge (`requests.md` C -> lead above).
+

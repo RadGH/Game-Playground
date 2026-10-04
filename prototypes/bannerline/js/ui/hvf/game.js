@@ -33,6 +33,7 @@ import { createSim, restoreSim, TICK_MS } from '../../sim/sim.js';
 import { createHvfWorld, groundY } from '../../view/hvf/world.js';
 import { createHvfActors } from '../../view/hvf/actors.js';
 import { loadHvfModels } from '../../view/hvf/models.js';
+import { createIconLibrary } from '../../view/icons.js';
 import { createHvfHud, REASONS } from './hud.js';
 import { createMenuNav } from '../menunav.js';
 import * as Q from '../../sim/modes/hvf/query.js';
@@ -51,7 +52,11 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
   let m = null;                  // the running match
   let setup = null;              // the setup card { el, nav, seats }
   let models = null;             // stream C's art (js/view/hvf/models.js), loaded in the background; stand-ins until then
-  const ready = params.get('models') !== '0' ? loadHvfModels().then((x) => { models = x; }) : Promise.resolve();
+  let icons = null;   // stream C's baked icons (assets/icons/hvf-*), shown on the build bar, shop and pack
+  const ready = Promise.all([
+    params.get('models') !== '0' ? loadHvfModels().then((x) => { models = x; }) : null,
+    createIconLibrary().then((x) => { icons = x; }).catch(() => {}),
+  ]);
   const choice = { format: rules.defaultFormat, ai: 'veteran', speed: 1, seed: null, seats: [{ role: 'farmer', device: null }] };
   const devLabel = (id) => (!id ? 'press A / Enter to join' : id === 'kbm' ? 'Keyboard + mouse' : (devices?.get(id)?.label || 'Controller'));
 
@@ -249,6 +254,7 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
     v.hud = createHvfHud({
       root: v.root, sim, player,
       keyLabel: (k) => (isPad ? PAD_KEYS[k] || k : k),
+      iconUrl: (kind, id) => icons?.url(kind, id) || null,
       onCmd: (c) => issue(v, c),
       onPlace: (kind) => { setPlacing(v, kind); closeMenu(v); },
       onAim: (spec) => { setAim(v, spec); if (spec.skill || spec.lodge || spec.army || spec.use) closeMenu(v); },
@@ -485,7 +491,7 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
 
     // sim
     const events = m.clock.frame(dt * 1000, () => { const q = m.queue; m.queue = []; return q; });
-    for (const ev of events) for (const v of m.views) v.hud.onEvent(ev);
+    for (const ev of events) { m.actors.onEvent(ev); for (const v of m.views) v.hud.onEvent(ev); }
     if (m.net) for (const v of m.views) { const w = m.clock.waitingFor || []; v.hud.setWaiting?.(w.length ? `Waiting for ${w.map((x) => x.name + (x.hidden ? ' (tab hidden)' : '')).join(', ')}` : ''); }
 
     if (s.tick !== m.lastFogTick) {
@@ -493,6 +499,18 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
       for (const team of new Set(m.views.map((v) => v.team))) m.world.setFog(s.hvf.vision[team], s.hvf.explored[team], team);
     }
     m.world.syncChopped(s.hvf.chopped);
+    // trees being cut shake and lean as the chop goes on
+    // (the start tick lives in a view-side map: the view never writes to the sim's state, which is hashed)
+    if (m.world.nature) {
+      const chopping = m.chopping || (m.chopping = new Map());
+      for (const e of s.ents) {
+        const o = e.ord;
+        if (!o || o.k !== 'chop' || !(o.until > 0)) { chopping.delete(e.id); continue; }
+        let c = chopping.get(e.id);
+        if (!c || c.cell !== o.cell) { c = { cell: o.cell, from: s.tick }; chopping.set(e.id, c); }
+        m.world.chop(o.cell, Math.min(0.95, (s.tick - c.from) / Math.max(1, o.until - c.from)));
+      }
+    }
     m.frameDt = m.paused ? 0 : dt;
 
     for (const v of m.views) {
@@ -538,7 +556,8 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
     if (!m) return;
     const sim = m.sim;
     m.world.useTeam(v.team);
-    m.actors.setTeam?.(v.team);
+    m.world.update(v.camera.camera, m.frameDt);
+    m.actors.setTeam(v.team);
     m.actors.sync(sim.state, m.clock.alpha, m.frameDt, (e) => Q.visibleEnt(sim, v.team, e), v.team === 1 ? Q.seenBuildings(sim, 1) : []);
     m.frameDt = 0;   // animate once per frame, not once per viewport
     for (const w of m.views) if (w.ghost) w.ghost.visible = w === v && !!w.ground;

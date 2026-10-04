@@ -63,10 +63,10 @@ adding a fifth is a new file in `js/methods/` plus a line in `METHODS`.
 
 | id | What it is | Licence | Coverage |
 |---|---|---|---|
-| `synth` | Our own procedural Web Audio synthesis, driven by the layer recipes in the catalog | ours | all 118 ids |
+| `synth` | Our own procedural Web Audio synthesis, driven by the layer recipes in the catalog | ours | all 164 ids |
 | `library` | Recorded samples from three Kenney CC0 packs | **CC0 1.0** | 39 ids |
-| `hybrid` | Samples where the pack has them, synth everywhere else — **the default** | CC0 + ours | all 118 ids |
-| `retro` | Chiptune: square, triangle and noise channels, stepped envelopes, semitone notes | ours | all 118 ids |
+| `hybrid` | Samples where the pack has them, synth everywhere else — **the default** | CC0 + ours | all 164 ids |
+| `retro` | Chiptune: square, triangle and noise channels, stepped envelopes, semitone notes | ours | all 164 ids |
 
 **synth** builds each sound from a stack of layers: filtered noise bursts, oscillator sweeps,
 2-operator FM, Karplus-Strong plucks, grain scatters, stacked chords, and LFO-modulated drones for
@@ -82,7 +82,7 @@ tunes it with a hash of the id, which is a useful proof that the catalog really 
 
 ## The catalog
 
-`data/catalog.json` — 118 ids in 10 categories. **It is generated**: edit
+`data/catalog.json` — 164 ids in 10 categories. **It is generated**: edit
 `tools/build-catalog.py` and run `python3 sfx/tools/build-catalog.py`.
 
 ```json
@@ -126,7 +126,7 @@ Every clip goes through `js/loudness.js` once, when it is first built:
 1. **Measure.** A K-weighted loudness estimate: the two real BS.1770 pre-filters (a +4 dB shelf at
    1682 Hz and a 38 Hz high-pass), then mean square over 400 ms blocks with the absolute (−70) and
    relative (−10 LU) gates. A 200 ms sound effect is shorter than one block, so short clips get a
-   single ungated block instead. It is an estimate, not a certified meter — but it lines 118 sounds
+   single ungated block instead. It is an estimate, not a certified meter — but it lines 164 sounds
    up by ear far better than plain RMS does, because it weights the frequencies people actually hear.
 2. **Aim.** The target is the sound's category target plus its `trim`. `js/loudness.js`
    (`CATEGORY_TARGETS`) owns this table; `data/catalog.json` carries the same numbers so the data
@@ -242,6 +242,15 @@ npx playwright test sfx
 
 The browser tests assert that each method produces finite, non-silent audio and lands every clip
 within 3 dB of what it aims for — which is the property the whole library exists to provide.
+
+### Hunters vs Farmers set (Bannerline, 2026-10-04)
+
+Sixteen ids for the farm-and-forest mode (`prototypes/bannerline/js/view/hvf-sound.js` maps the sim's events onto them):
+`animal.sheep.bleat`, `animal.hen.cluck`, `animal.pig.oink`, `animal.cow.moo` (world; triangle/sine voices with vibrato and a
+formant band — no sawtooth), `hvf.bell` (the farmer's handbell), `hvf.horn` (hunting horn), `hvf.hawk` (two falling cries),
+`wood.chop`, `trap.snap`, `ward.pull`, `build.place`, `build.done`, `tower.shot` (bow twang), `hvf.down`, `hvf.revive` and
+`hvf.turn` (the mode's turning-point sting). `wood.chop`, `build.place` and `trap.snap` use Kenney wood / plank / metal hits in
+`library` and `hybrid`. All measured on target in synth, hybrid and retro, peaks under −1 dBFS.
 
 ## Adding a sound
 

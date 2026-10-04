@@ -35,7 +35,7 @@ test('setup card -> farmer match: build with the mouse, the animals wander', asy
   await page.mouse.move(spot.x, spot.y);
   await page.mouse.click(spot.x, spot.y);
   await page.evaluate(() => window.hvf.fastForward(300));
-  let st = await page.evaluate(() => { const s = window.hvf.state(); return { coops: s.ents.filter((e) => e.type === 'coop').length, hens: s.ents.filter((e) => e.kind === 'animal').length }; });
+  let st = await page.evaluate(() => { const s = window.hvf.state(); return { coops: s.ents.filter((e) => e.type === 'coop' && e.owner === window.hvf.match.me).length, hens: s.ents.filter((e) => e.kind === 'animal').length }; });
   expect(st.coops, 'the coop was placed by a mouse click').toBe(1);
   // a pen by key (2) + click a little further out
   await page.keyboard.press('Digit2');

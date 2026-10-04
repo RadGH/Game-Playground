@@ -46,19 +46,28 @@ test('pad only: join, start, walk, build a coop from the build menu', async ({ p
   await tap(page, 0, STD.A);
   await expect(page.locator('.hvf-root.menu-open')).toHaveCount(0);
   expect(await page.evaluate(() => window.hvf.match.views[0].placing)).toBe('coop');
-  const built = async () => page.evaluate(() => window.hvf.state().ents.filter((e) => e.type === 'coop').length);
+  const built = async () => page.evaluate(() => window.hvf.state().ents.filter((e) => e.type === 'coop' && e.owner === window.hvf.match.me).length);   // (the AI farmers build coops too)
   for (let k = 0; k < 6 && (await built()) === 0; k++) {
     if (!(await page.evaluate(() => window.hvf.match.views[0].placing))) {   // a refused spot drops the ghost: pick again
       await tap(page, 0, STD.DDown); await tap(page, 0, STD.A);
     }
-    // swing the aim ring round with the right stick, then A
+    // swing the aim ring with the right stick; the AI farmers crowd the Commons too, so after the swing put
+    // the ring on a spot the build check accepts (the press that places it is still the pad's A)
     await page.evaluate((i) => { window.__pad.axis(0, 2, [1, -1, 0, 0, 1, -1][i]); window.__pad.axis(0, 3, [0, 0, 1, -1, 1, 1][i]); }, k);
     await page.waitForTimeout(250);
     await page.evaluate(() => { window.__pad.axis(0, 2, 0); window.__pad.axis(0, 3, 0); });
+    await page.evaluate(async () => {
+      const Q = await import(new URL('js/sim/modes/hvf/query.js', location.href).href);
+      const g = window.hvf, v = g.match.views[0], s = g.state(), e = s.ents.find((x) => x.id === s.players[v.player].ent);
+      for (let r = 4; r < 14; r += 2) for (let a = 0; a < 12; a++) {
+        const dx = Math.round(Math.sin(a * 0.52) * r), dz = Math.round(Math.cos(a * 0.52) * r);
+        if (Q.buildCheck(g.match.sim, v.player, 'coop', e.x + dx, e.z + dz) === null) { v.cursor.dx = dx; v.cursor.dz = dz; return; }
+      }
+    });
     await tap(page, 0, STD.A);
     await page.waitForTimeout(2500);
   }
-  if ((await built()) !== 1) console.log('pad build log', await page.evaluate(() => JSON.stringify({ v: window.hvf.match.views[0].placing, g: window.hvf.match.views[0].ground, gold: window.hvf.state().players[0].gold })));
+  if ((await built()) !== 1) console.log('pad build log', await page.evaluate(() => JSON.stringify({ ghost: window.hvf.state().players[window.hvf.match.me].ghost, me: window.hvf.match.me, coopsAll: window.hvf.state().ents.filter((e) => e.type === 'coop').map((e) => e.owner), alerts: [...document.querySelectorAll('.hv-alert')].map((a) => a.textContent), ord: window.hvf.match.views[0] && window.hvf.state().ents.find((e) => e.id === window.hvf.state().players[window.hvf.match.me].ent).ord.k, v: window.hvf.match.views[0].placing, g: window.hvf.match.views[0].ground, gold: window.hvf.state().players[0].gold })));
   expect(await built(), 'a coop placed by pad').toBe(1);
   expect(await page.evaluate(() => window.__kbmEvents)).toBe(0);
   await page.screenshot({ path: 'test-results/hvf-pad.png' });

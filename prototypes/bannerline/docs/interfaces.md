@@ -534,6 +534,18 @@ layer.update(camera, dt)        // 64 m chunks: frustum culled, near/far swap at
 layer.chop(cell, 0.5)           // being cut: shakes and leans;  layer.chop(cell, 1) -> stump + fallen log
 layer.syncChopped(state.hvf.chopped)
 ```
+**Sound** (`js/view/hvf-sound.js`, ids in `sfx/data/catalog.json`):
+```js
+const sound = await createHvfSound({ localPlayers, roleOf: pid => state.players[pid].role, ears: () => localHeroes.map(e => ({ x: e.x, z: e.z })),
+  visible: (x, z) => Q.visibleAt(q, localTeam, x, z), entOf: id => entById(id) });
+sound.unlock();                         // first click / key / pad press
+for (const ev of events) sound.onEvent(ev);
+sound.ui('click' | 'build' | 'error' | ...); sound.result(won); sound.setVolume(v); sound.setMuted(b)
+```
+A hunter hears an animal only if `noise.heard` includes him (through fog, panned toward it); a farmer hears his flock near
+him; other events are positional (full within 12 m of the nearest ear, silent past 60 m, dropped in fog); the Turn, a farmer
+down/revived, release and a hunter out are global; gold/items/upgrades/rejects only for the local player.
+
 **Icons**: `hvf-unit/<farmer|hunter|ghost|sheep|hen|pig|cow|scarecrow|crow|hound|hawk>`, `hvf-building/<kind>` (22),
 `hvf-item/<data/hvf/hunter-items.json id>` (13) — `icons.url(kind, id)` as in §10.3.
 

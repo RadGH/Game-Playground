@@ -291,6 +291,8 @@ export function createHvfActors({ scene, map, data, fogify, localTeam, models = 
       if (it.obj) {
         if (e.done === false) it.obj.setProgress(e.hp / e.hpMax); else it.obj.setProgress(1);
         it.obj.setDamage(e.hpMax > 0 ? 1 - e.hp / e.hpMax : 0);
+        if (e.type === 'hall') it.obj.setReady(state.players[e.owner].gold >= data.hvf.units.army.crow.cost);
+        else if (e.lodge) it.obj.setReady(e.done !== false);
         if (dt > 0) it.obj.update(dt);
       } else if (e.kind === 'building' && e.done === false) it.mesh.scale.setScalar(0.55 + 0.45 * (e.hp / e.hpMax));
       else if (e.kind === 'building') it.mesh.scale.setScalar(1);
@@ -367,7 +369,13 @@ export function createHvfActors({ scene, map, data, fogify, localTeam, models = 
   return {
     group, sync, pick, items,
     /** Sim events the crowd reacts to: an animal calling bleats for a moment. */
-    onEvent(ev) { if (ev.type === 'noise' && ev.src != null) bleatUntil.set(ev.src, t + 0.9); if (bleatUntil.size > 2000) bleatUntil.clear(); },
+    onEvent(ev) {
+      if (ev.type === 'noise' && ev.src != null) bleatUntil.set(ev.src, t + 0.9);
+      if (bleatUntil.size > 2000) bleatUntil.clear();
+      if (ev.type === 'shot') { const it = items.get(ev.src); it?.obj?.fire?.(); }
+    },
+    /** Whose eyes the next sync draws with (split screen: each half sets its own team). */
+    setTeam(team) { localTeam = team; },
     stats() { let calls = 0, tris = 0; group.traverse((o) => { if (o.isMesh && o.visible && (o.count == null || o.count > 0)) { calls++; tris += ((o.geometry.index?.count || o.geometry.attributes.position.count) / 3) * (o.isInstancedMesh ? o.count : 1); } }); return { calls, tris }; },
     /** A free-standing model for the placement ghost. */
     ghostFor(kind) { const def = BK[kind]; return new THREE.Mesh(buildingModel(kind, def.size[0] * map.cell, def.size[1] * map.cell), ghostMat); },

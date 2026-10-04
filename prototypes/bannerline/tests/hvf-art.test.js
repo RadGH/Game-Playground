@@ -82,3 +82,17 @@ test('icons cover every HvF building, unit and hunter item', () => {
     assert.ok(existsSync(new URL(`../assets/icons/${kind}/${id}.png`, import.meta.url)));
   }
 });
+
+test('HvF sound bridge: every id exists in the sfx catalog and every sim event is mapped or deliberately silent', async () => {
+  const cat = J('../../../sfx/data/catalog.json'), ids = new Set(cat.sounds.map(s => s.id));
+  const B = await import('../js/view/hvf-sound.js');
+  for (const id of [...Object.values(B.ANIMAL_CALLS), ...Object.values(B.HVF_SOUNDS).map(r => r[0]), ...Object.values(B.HVF_UI)]) assert.ok(ids.has(id), `sound ${id} not in sfx/data/catalog.json`);
+  for (const k of Object.keys(J('../data/hvf/animals.json').kinds)) assert.ok(B.ANIMAL_CALLS[k], `no call for ${k}`);
+  const SILENT = new Set(['noise', 'animalBorn', 'cast', 'spawn', 'despawn', 'result']);   // noise has its own rule; the rest are covered by other events
+  const fs = await import('node:fs');
+  const dir = new URL('../js/sim/modes/hvf/', import.meta.url);
+  const all = fs.readdirSync(dir).filter(f => f.endsWith('.js')).map(f => fs.readFileSync(new URL(f, dir), 'utf8')).join('\n');
+  const emitted = new Set([...all.matchAll(/emit\(\s*'([a-zA-Z]+)'/g)].map(m => m[1]));
+  for (const e of emitted) assert.ok(B.HVF_SOUNDS[e] || SILENT.has(e) || e === 'wardPulled' || e === 'snarePulled', `sim event ${e} has no sound`);
+  for (const id of ['animal.sheep.bleat', 'animal.hen.cluck', 'animal.pig.oink', 'animal.cow.moo', 'hvf.bell', 'hvf.horn', 'hvf.hawk', 'wood.chop', 'trap.snap', 'ward.pull', 'build.place', 'build.done', 'tower.shot', 'hvf.down', 'hvf.revive', 'hvf.turn']) assert.ok(ids.has(id), id);
+});

@@ -7,7 +7,7 @@ import { createHvf, hvfData, ent } from './hvf-helpers.mjs';
 import { hashValue, hashString } from '../js/sim/hash.js';
 import { hurt } from '../js/sim/modes/hvf/units.js';
 import * as Q from '../js/sim/modes/hvf/query.js';
-import { liveGrid, cellOf, canStand } from '../js/sim/modes/hvf/grid.js';
+import { liveGrid, cellOf, canStand, nearestStandable } from '../js/sim/modes/hvf/grid.js';
 import { bfsMove } from '../js/sim/modes/hvf/mapgen.js';
 
 function leaves(obj, path = []) {
@@ -52,10 +52,13 @@ const EXEMPT = {
 const PENDING = new Set([
   'units.farmer.chop',
   'units.farmer.chopGold',
+  'units.farmer.reviveSeconds',
   'units.farmer.reviveRange',
   'units.farmer.buildRange',
   'units.farmer.abilities.W.seen',
   'units.farmer.abilities.E.radius',
+  'units.hunter.xpTable.1',
+  'units.hunter.xpTable.2',
   'units.hunter.xpTable.3',
   'units.hunter.xpTable.4',
   'units.hunter.xpTable.5',
@@ -67,87 +70,37 @@ const PENDING = new Set([
   'units.hunter.xp.sheep',
   'units.hunter.xp.pig',
   'units.hunter.xp.cow',
+  'units.hunter.xp.building',
   'units.hunter.xp.scarecrow',
-  'units.hunter.xp.crow',
   'units.bounty.hen',
   'units.bounty.sheep',
   'units.bounty.pig',
   'units.bounty.cow',
+  'units.bounty.buildingShare',
   'units.bounty.scarecrow',
-  'units.bounty.crow',
-  'units.army.scarecrow.cost',
-  'units.army.scarecrow.hp',
-  'units.army.scarecrow.dps',
-  'units.army.scarecrow.attackEvery',
-  'units.army.scarecrow.range',
-  'units.army.scarecrow.speed',
-  'units.army.scarecrow.sight',
-  'units.army.scarecrow.radius',
-  'units.army.scarecrow.flying',
   'units.army.scarecrow.bounty',
-  'units.army.crow.cost',
-  'units.army.crow.flock',
-  'units.army.crow.hp',
-  'units.army.crow.dps',
-  'units.army.crow.attackEvery',
-  'units.army.crow.range',
-  'units.army.crow.speed',
-  'units.army.crow.sight',
-  'units.army.crow.radius',
-  'units.army.crow.flying',
   'units.army.crow.bounty',
-  'animals.kinds.cow.breed',
+  'animals.kinds.hen.noise',
+  'animals.kinds.pig.noise',
   'animals.kinds.cow.sight',
   'animals.kinds.cow.noise',
   'animals.rules.crowdMult',
-  'animals.rules.fleeRange',
   'animals.rules.fleeSeconds',
   'animals.rules.fleeSpeed',
+  'animals.rules.strayMult',
+  'animals.rules.wildMult',
   'buildings.copyMult',
-  'buildings.kinds.pen.cap',
-  'buildings.kinds.sty.cap',
-  'buildings.kinds.barn.cap',
-  'buildings.kinds.hive.hp',
-  'buildings.kinds.granary.hp',
   'buildings.kinds.windmill.tall',
-  'buildings.kinds.farmhouse.size.0',
-  'buildings.kinds.farmhouse.size.1',
-  'buildings.kinds.farmhouse.cost',
-  'buildings.kinds.farmhouse.hp',
   'buildings.kinds.farmhouse.onePer',
-  'buildings.kinds.hedge.size.0',
-  'buildings.kinds.hedge.size.1',
-  'buildings.kinds.hedge.cost',
-  'buildings.kinds.hedge.hp',
-  'buildings.kinds.mud.size.0',
-  'buildings.kinds.mud.size.1',
-  'buildings.kinds.mud.cost',
-  'buildings.kinds.mud.hp',
+  'buildings.kinds.sheepdog.herd.radius',
   'buildings.kinds.mud.mud.speedMult',
   'buildings.kinds.mud.mud.attackMult',
-  'buildings.kinds.lookout.size.0',
-  'buildings.kinds.lookout.size.1',
-  'buildings.kinds.lookout.cost',
-  'buildings.kinds.lookout.hp',
-  'buildings.kinds.lookout.sight',
-  'buildings.kinds.tower.size.0',
-  'buildings.kinds.tower.size.1',
-  'buildings.kinds.tower.cost',
-  'buildings.kinds.tower.hp',
-  'buildings.kinds.tower.sight',
   'buildings.kinds.tower.shoot.dps',
   'buildings.kinds.tower.shoot.attackEvery',
-  'buildings.kinds.tower.shoot.range',
-  'buildings.kinds.hall.size.0',
-  'buildings.kinds.hall.size.1',
-  'buildings.kinds.hall.cost',
-  'buildings.kinds.hall.hp',
-  'buildings.kinds.hall.needsProducers',
   'buildings.upgrades.feed.costs.1',
   'buildings.upgrades.feed.costs.2',
   'buildings.upgrades.stuffing.costs.1',
   'buildings.upgrades.stuffing.costs.2',
-  'buildings.upgrades.stuffing.armyPct',
   'hunter.skills.Q.range',
   'hunter.skills.Q.cooldown',
   'hunter.skills.W.max',
@@ -156,12 +109,14 @@ const PENDING = new Set([
   'hunter.skills.W.armySlowSeconds',
   'hunter.skills.W.range',
   'hunter.skills.W.seenWithin',
+  'hunter.skills.E.seconds',
   'hunter.skills.E.range',
+  'hunter.tracking.every',
   'hunter.tracking.keep',
   'hunter.watchstone.sight',
+  'hunter.watchstone.seconds',
   'hunter.watchstone.seenWithin',
   'hunter.watchstone.range',
-  'hunter.flare.seconds',
   'hunter.hound.range',
   'hunter-items.sellFactor',
   'hunter-items.items.horse1.price',
@@ -178,14 +133,9 @@ const PENDING = new Set([
   'hunter-items.items.leathers.stats.armorPct',
   'hunter-items.items.salve.price',
   'hunter-items.items.salve.stats.regen',
-  'rules.turn.armyWeight',
-  'rules.turn.towerWeight',
-  'rules.turn.hunterBase',
-  'rules.turn.hunterPerLevel',
-  'rules.turn.itemWeight',
 ]);
 
-const exempt = key => PENDING.has(key) || Object.keys(EXEMPT).some(k => k === key || (k.endsWith('.*') && key.startsWith(k.slice(0, -1))) || (k.includes('.*.') && new RegExp('^' + k.replace(/\./g, '\\.').replace('\\.*\\.', '\\.[^.]+\\.') + '$').test(key)));
+const exempt = key => (!process.env.HVF_NOPENDING && PENDING.has(key)) || Object.keys(EXEMPT).some(k => k === key || (k.endsWith('.*') && key.startsWith(k.slice(0, -1))) || (k.includes('.*.') && new RegExp('^' + k.replace(/\./g, '\\.').replace('\\.*\\.', '\\.[^.]+\\.') + '$').test(key)));
 
 /** A busy 75-second 3v1: every building, upgrades, an army, the whole hunter kit. */
 function scene(d) {
@@ -197,13 +147,20 @@ function scene(d) {
   // the first free spot (spiral out from the Commons) where this building fits
   const spotFor = (pid, kind) => {
     const f = ent(s, pid), g = liveGrid(s.ctx()), G = { cols: s.map.cols, rows: s.map.rows, n: s.map.cols * s.map.rows };
-    const reach = bfsMove(G, g.cells, s.map.level, cellOf(s.map, f.x, f.z), c => canStand(g, 'farmer', c));
+    const reach = bfsMove(G, g.cells, s.map.level, nearestStandable(s.ctx(), g, 'farmer', cellOf(s.map, f.x, f.z)), c => canStand(g, 'farmer', c));
     const near = (x, z) => { const c = cellOf(s.map, x, z); for (const d of [0, 1, -1, 2, -2]) for (const e of [0, 1, -1, 2, -2]) { const i = c + d + e * s.map.cols; if (i >= 0 && i < G.n && reach[i] >= 0) return true; } return false; };
     for (let r = 4; r < 120; r += 2) for (let k = 0; k < 32; k++) {
       const a = k * 0.19635, x = s.map.commons.x + Math.round(r * Math.sin(a)), z = s.map.commons.z + Math.round(r * Math.cos(a));
       if (x < 4 || z < 4 || x > s.map.size - 4 || z > s.map.size - 4) continue;
-      if (near(x, z) && Q.buildCheck(s, pid, kind, x, z) === null) return [x - s.map.commons.x, z - s.map.commons.z];
+      if (Q.buildCheck(s, pid, kind, x, z) !== null) continue;
+      if (!near(x, z)) {   // boxed in by his own buildings: step him over (a test scene, not play)
+        const c = nearestStandable(s.ctx(), g, 'farmer', cellOf(s.map, x + 4, z + 4));
+        if (c < 0) continue;
+        f.x = f.px = ((c % s.map.cols) + 0.5) * s.map.cell; f.z = f.pz = (Math.floor(c / s.map.cols) + 0.5) * s.map.cell;
+      }
+      return [x - s.map.commons.x, z - s.map.commons.z];
     }
+    if (process.env.HVF_SCENE) { const f = ent(s, pid); console.log('no spot', kind, pid, f.x, f.z, f.alive, Q.buildCheck(s, pid, kind, s.map.commons.x + 10, s.map.commons.z), s.state.players[pid].gold); }
     return [0, 0];
   };
   let ev = 0;

@@ -20,6 +20,7 @@ import { powerLands } from '../powers.js';
 import { tollTick } from '../commands.js';
 import { aiCommands } from '../ai/index.js';
 import { turretTick } from '../turrets.js';
+import { keepGuardTick } from '../keep.js';
 
 const TIMERS = { proj: projectileLands, pulse: skillPulse, bolt: boltLands, ground: groundLands, power: powerLands };
 
@@ -65,7 +66,7 @@ export default {
   phases: [
     tollTick, payTick, releaseTick, tideTick, admitWaiting,
     upgradeTick,   // Drill Yard upgrades stamped on new / upgraded units (stream I)
-    makeRunTimers(TIMERS), tickStatuses, zoneTick, trailTick, heroTick, moveTick, runAttacks, traitTick, turretTick,
+    makeRunTimers(TIMERS), tickStatuses, zoneTick, trailTick, heroTick, moveTick, runAttacks, keepGuardTick, traitTick, turretTick,
   ],
   checkResult,
   commands: {},

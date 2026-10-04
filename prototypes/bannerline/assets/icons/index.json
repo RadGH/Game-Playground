@@ -1,6 +1,6 @@
 {
  "_doc": "Written by tools/bake-icons.mjs. Every file is assets/icons/<kind>/<id>.png.",
- "date": "2026-10-03",
+ "date": "2026-10-04",
  "size": 128,
  "kinds": {
   "unit": [
@@ -58,7 +58,9 @@
    "ranger",
    "pyromancer",
    "druid",
-   "engineer"
+   "engineer",
+   "druid.wolf",
+   "druid.briarback"
   ],
   "item": [
    "sword",
@@ -157,6 +159,12 @@
    "thornmane.barracks",
    "thornmane.drillyard",
    "thornmane.sanctum"
+  ],
+  "gadget": [
+   "turret_1",
+   "turret_2",
+   "turret_3",
+   "mine"
   ]
  }
 }

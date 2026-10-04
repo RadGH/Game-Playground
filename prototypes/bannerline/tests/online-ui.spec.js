@@ -44,6 +44,7 @@ test('host + guest by room code -> match on both -> results -> back to the room'
   await expect(host.locator('.lb-slot.local')).toHaveCount(2);     // the host sees the guest's seat
   await host.locator('body').press('Enter');
   await guest.locator('body').press('Enter');
+  await expect(host.locator('.lb-slot.local.ready')).toHaveCount(2, { timeout: 10_000 });
   await expect(host.locator('#screen-match')).toBeVisible({ timeout: 20_000 });
   await expect(guest.locator('#screen-match')).toBeVisible({ timeout: 20_000 });
 

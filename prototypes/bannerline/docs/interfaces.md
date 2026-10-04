@@ -181,6 +181,7 @@ hashed, not snapshotted): they are hints for drawing and sound. Never derive gam
 | `spawn` (kind `turret`) / `remove` (why `expired`) | — | an Engineer's Bolt Turret was built / ran out (or was taken down by a new one past the 1/2/3 limit) |
 | `champion` | `player, unit, field` | a champion send is leaving through a gate ("Champion at the gate!") |
 | `revive` | `id` | a `rise` unit came back at half HP |
+| `keepShot` | `field, x, z, radius` | the Keep guard fired (js/sim/keep.js): draw a bolt from the Keep to (x, z) and a blast of `radius`; its `hit` events carry `skill: 'keep'`, `src: -1` |
 | `counter` | `player, target, unit, name, count, reason, key` | a wave from `player` counters `target`'s defence (stream E): toast to the TARGET, "**{sender}** sends **{name}** x{count} — {reason}" (`reason` is written to the defender, `key` is the machine word: resists / strong / ward / swarm / stealth / unstoppable / shred / bulk). AI senders: throttled by `ai.json`; human senders: at most one every 10 s |
 | `takeover` / `release` | `player` (+ `difficulty`) | online: a seat changed hands at this tick (its machine left / came back) |
 | `talentReady` | `player` | level 6 reached, talent pick open |
@@ -290,7 +291,7 @@ sim.map = {
     id, team, cx,                  // field centre x
     x0, x1, z0, z1,                // bounds (z0 = gate end, z1 = Keep end)
     gates: [{ x, z }],             // spawn points (1 in 1v1)
-    keep:  { x, z, w, d },         // Keep footprint centre + size
+    keep:  { x, z, w, d, guard },  // Keep footprint centre + size; guard = { range, every, damage, damagePerMinute, splash, dmgType } (the Keep shoots)
     leakZ,                         // a unit that reaches z >= leakZ is a leak
     armory: { x, z, r },           // shop + respawn
     spawn: { x, z },               // hero (re)spawn point
@@ -361,15 +362,25 @@ looks.forHero('druid')     // { kind: 'chibi2', avatar, scale, hero: true }
 looks.forRef('unit:levy' | 'hero:warrior')
 const actor = await looks.build(look)  // { group, height, setAnim(clip, fade?, restart?), update(dt,t), metrics(), dispose(), kind, parts? }
 
+looks.forHero('druid', { color: '#3f86ec' })   // heroes are Chibi 2, a few clothing slots in the player's colour (looks.json heroes.<id>.team)
+looks.forForm('druid', 'wolf')                    // the creature a hero becomes in a shape (looks.json forms)
+looks.forPet('grove_wolf')                        // a hero's summon (looks.json pets)
+
 // stream B's actors.js:
-const bodies = createBodyFactory(looks, { scale: 1.3, fallback: capsuleBody });
+import { makeTurret } from './view/engineer.js';
+const bodies = createBodyFactory(looks, { scale: 1.3, fallback: capsuleBody, makeTurret,
+  colorOf: ent => identity.slotColor(slotOf(ent.owner)), turretLevelOf: ent => rankOf(ent.owner, 'bolt_turret') });
 await bodies.preload();                           // one of each body: warms Chibi 2 templates, learns heights
 createActors({ scene, data, makeBody: bodies.makeBody, localTeam });
+// on a `form` event:  actors.get(heroEntId).body.setForm(ev.form)      ('wolf' | 'briarback' | null)
+// stealth (trait `stealth`, Briar Stalker): body.setGhost(!seenByAnyHeroOfThatField)
 ```
 
-- `makeBody(ent, look, data)` returns `{ object, height, play(act, t), dispose() }` synchronously; the
-  model drops into `object` when its async build lands. Heroes are `ent.kind === 'hero'` (ent.type = hero
-  id), units `kind === 'unit'`; anything else (tides) goes to `fallback`.
+- `makeBody(ent, look, data)` returns `{ object, height, play(act, t), dispose(), setForm(id|null), setGhost(bool) }`
+  synchronously; the model drops into `object` when its async build lands. Kinds: `hero` (ent.type = hero id),
+  `unit`, `pet` (Grove Wolf), `turret` (Engineer's Bolt Turret: js/view/engineer.js at `turretLevelOf(ent)`,
+  aims along `ent.face`, recoils on `act === 'attack'`; also `body.turret.setOvercharge(bool)`); tides go to `fallback`.
+- Unit size by tier: data/looks.json `tierScale` (T1 1.0 → T6 1.5), times the look's own scale.
 - `play(act, t)` maps the sim's `act` → clip: idle → ready, walk, attack, cast, stun → hit, dead.
 - Models face +z. Creatures are folded by `avatar-3d/js/mesh-merge.js` (1–3 draw calls); a Chibi 2
   body is 2 draw calls (templates shared per identical look). Team identity stays a ground ring.
@@ -402,8 +413,10 @@ icons.url('hero', 'druid'); icons.url('skill', 'firebolt'); icons.url('item', 'g
 icons.attach(createIconStudio(app.gfx.renderer, { looks })); await icons.get('unit', 'newthing')
 ```
 
-- Kinds and ids: `unit/<unit id>` (24), `hero/<hero id>` (4), `skill/<skill id>` (every skill in
-  data/heroes.json), `item/<base>` (generic bases: sword, longsword, greatsword, axe, greataxe, mace,
+- Kinds and ids: `unit/<unit id>` (48), `hero/<hero id>` (5) + `hero/druid.wolf`, `hero/druid.briarback`,
+  `skill/<skill id>` (every skill in data/heroes.json), `power/<power id>` (12 Sanctum powers, framed blue /
+  red / gold by kind), `building/<race>.<kind>` (`keep`, `shop`, `barracks`, `drillyard`, `sanctum` per race),
+  `gadget/turret_1..3`, `gadget/mine`, `item/<base>` (generic bases: sword, longsword, greatsword, axe, greataxe, mace,
   warhammer, spear, bow, staff, druid_staff, quarterstaff, wand, heater/kite/tower_shield, tome, quiver,
   plate_helm, leather_cap, hood, wizard_hat, plate_armour, chainmail, leather_armour, robe, boots,
   bracers, potion, oil, amulet, ring, scroll — `assets/icons/catalog.json`).
@@ -412,6 +425,75 @@ icons.attach(createIconStudio(app.gfx.renderer, { looks })); await icons.get('un
 - Rebake after changing a look, a creature or the catalog: `flock /tmp/claude-1000/farhold-pw.lock node
   prototypes/bannerline/tools/bake-icons.mjs` (writes the PNGs + index.json). `icons.html` is the gallery
   and re-render tool for people.
+
+### 10.4 Buildings: `js/view/structures.js` (+ `structures.html` preview)
+
+```js
+import { buildStructures } from './view/structures.js';
+import { loadIdentity } from './view/identity.js';
+const identity = await loadIdentity();
+const world = buildStructures(scene, layoutFromMap(sim.map), { identity, buildings: Q.buildingsInfo(state, data),
+  teams: [{ team: 0, race: 'freeholds', slot: 0 }, { team: 1, race: 'ashtusk', slot: 3 }] });
+world.setBanners(team, fraction)              // same as terrain.js buildWorld: 14 poles, fall one by one (0.28 s apart), stay down
+world.towns[team].barracks                    // also .shop (Outfitter), .drillyard, .sanctum
+  // each: { id: 't0.barracks', kind, team, group, position (Vector3), radius (ring, m), useRadius (sim radius or null),
+  //         setReady(bool), setHover(bool), update(dt) }
+world.buildings()                             // all of them, flat (picking: distance to `position` < `radius`)
+world.setReady(team, 'barracks', canAffordASend)   // ring pulses + the Barracks raises its tall banner and lights its windows
+world.setHover(team, kind, bool)              // ring brightens (hero inside / cursor over)
+world.flashPower(team, 'defensive' | 'offensive' | 'neutral')   // the Sanctum's matching orb pulses (on a `power` event)
+world.update(dt); world.restyle(teams); world.dispose()
+```
+
+- A drop-in for `buildWorld` (same `layout`, `setBanners`, `update`, `dispose`); `world.fields[i]` = `{ team, group, keep, banners, town }`.
+- Each race has its own style (data/identity.json `style`): Freeholds stone + slate, Ashtusk log palisade + hides
+  + tusks, Unburied pale crypt + cyan lights, Thornmane hedge walls + living-wood towers. Walls, gatehouses (with
+  portcullis + gate banners), the Keep (flag in the player's colour), the four buildings, the ford (water,
+  stones, reeds) and props outside the walls are all race-themed.
+- Every building has an interaction ring in the player's colour; the Outfitter's ring is the sim's 7 m shop radius.
+- Single models for other screens: `makeKeep(identity, race, color)`, `makeOutfitter`, `makeBarracks`,
+  `makeDrillYard`, `makeSanctum` (same args) and `MAKERS[kind]`.
+- Cost: a field is ~10 draw calls (everything static is merged per material by the `Kit`), ~45k triangles.
+
+### 10.5 Identity: `js/view/identity.js` + `data/identity.json`
+
+`identity.slotColor(0..5)` (slots 0-2 = team 0 blues, 3-5 = team 1 reds), `teamColor(t)`, `race(id)` (palette,
+emblem, style), `emblemCanvas(emblem)`, `bannerTexture(THREE, { race, color })`, `css()` (`--slot-N`, `--team-N`
+for the UI). Rule: units are never recoloured — the slot colour goes on the ground ring, banners and hero
+clothing; the team colour on HP bars.
+
+### 10.6 Skill + power effects: `js/view/skillfx.js` + `data/skill-fx.json` (+ `skillfx.html` preview)
+
+```js
+const spells = await createSkillFx({ scene, camera: viewports[0].camera, actors, tickHz });  // actors.get(id) -> { x, z, height, group }
+for (const ev of sim.drainEvents()) spells.onEvent(ev);   // cast, bolt, zone, zoneEnd, pulse, dash, trap, power, powerHit, status, heal, hit, form, remove/death
+spells.update(dt);
+```
+
+Every hero skill (incl. the Druid's wolf abilities `throat_leap`, `rending_bite`, `pack_run`, `running_howl` and the
+Engineer's kit) and every Sanctum power has a recipe; unknown skills fall back to shape + element. Statuses draw
+looping auras on the body (`statuses` map). It draws the spell on top of stream B's gameplay markers (fx.js).
+
+### 10.7 Sound: `js/view/sound.js`
+
+```js
+const sound = await createSound({ localPlayers: [myPlayerId], panOf: (x, z) => pan or null (off every view), entOf: id => ent, heroes: data.heroes });
+sound.unlock();                       // on the first click / key / pad press
+for (const ev of events) sound.onEvent(ev);
+sound.ui('click' | 'hover' | 'open' | 'close' | 'error' | 'tab' | 'buy');
+sound.result(won);                    // victory / defeat sting
+sound.setVolume(v); sound.setMuted(b); sound.setBusVolume('sfx' | 'ui' | 'ambience', v);   // saved in localStorage
+```
+
+Sends, Pay, banners lost (leak), level up, casts and hits by damage type, powers, statuses, deaths by body,
+items/sell/upgrade, rejects. Other players' sounds are quieter; one id at most every 70 ms, 10 starts a frame.
+
+### 10.8 Engineer gadgets: `js/view/engineer.js`
+
+`makeTurret({ level: 1|2|3, color })` → `{ group, height, aim(yaw), fire(), setOvercharge(bool), update(dt), dispose() }`
+(timber ballista → stone-footed twin repeater → steel cannon with a glowing core); `makeMine({ color })` →
+`{ group, setArmed(bool), blast(), update(dt) }`. The body factory builds turrets for `ent.kind === 'turret'`;
+mines are drawn from `zone` events of skill `shrapnel_mine` (zone kind `trap`) — B places `makeMine()` at the zone.
 
 ## 11. Items, town buildings, unit upgrades, powers (stream I, owner round 2)
 
@@ -520,3 +602,36 @@ and no player). State: `state.campaign` (progress, plain data) + `state.campaign
 UI (`js/ui/campaign.js`, stream F): `loadCampaign()`, `campaignProgress()` (localStorage), `createCampaignScreen`,
 `createCampaignOverlay` (call `update(sim)` each frame), `showDebrief`. `campaign.html` is a 2D preview that
 plays any mission with the real sim (`?mission=w1_first_banner&speed=8`).
+
+## 12. Hunters vs Farmers (stream H) — sim contract for the view / UI / AI
+
+Design: `docs/hvf-PLAN.md`. Mode entry `js/sim/modes/hvf/index.js` (default export in linewar.js's shape;
+`commands`, `phases`, `createState`, `buildMap(data, format, config)`, `queries`). Data: `data/hvf/*.json`
+(`data.hvf.<name>`). Until the registry hooks land (requests.md "Stream H"), `tests/hvf-helpers.mjs` runs the
+mode exactly like `js/sim/sim.js` does.
+
+- **Map** (`sim.map`, static, from `mapgen.js`): `{ size, cols, rows, cell: 2, cells (KIND), level (0/1), look,
+  doors, graph {nodes, edges}, hollows [{id, x, z, r, cells, entry, level, door, mouth, name, slots}], features,
+  commons, kennels, metrics }`. `KIND`: grass 0, trail 1, tree 2, briar 3, tallgrass 4, rock 5, water 6, ford 7,
+  cliff 8, ramp 9. The live grid (chopped cells + building footprints) is `grid.js liveGrid(ctx)`.
+- **State**: teams `[farmers(0), hunters(1)]`; players `{ role, gold, income, ent, ghost, out, copies, upgrades,
+  cd, inv (hunters), level, xp }`; ents `kind`: `farmer | hunter | animal | building | army | ward | snare | hawk |
+  hound` (plain JSON; `px/pz` for interpolation). `state.hvf = { chopped, vision[2], explored[2] (bitsets, 32
+  cells per int), seen[2], tracks, graves, flares, turn, turnWhy, releaseTick, endTick }`.
+- **Commands** (`{p, type, ...}`): `move {x,z}` (walks as close as the ground allows), `stop`, `build {kind,x,z}`,
+  `chop {cell}`, `attack {target}` (hunter; target must be visible), `revive {target: pid}`, `rally {building,x,z}`,
+  `cast {slot}` (farmer Q Scamper / W Lie Low / E Bell; hunter Q Pounce / W Snare / E Hawk / R Horn, with `x,z`),
+  `pullup {target}` (ward/snare), `upgrade {id}` (feed/shears/breeding/stuffing), `train {unit, building}`,
+  `order {ids, kind: move|amove|attack|stop, x?, z?, target?}`, `buy {id}` / `sell {slot}` / `use {slot, x?, z?}`
+  (hunter, at a lodge), `ward {x,z}`, `lodge {x,z}`, `surrender`. Refusals: `bad, role, dead, kennel, reach,
+  blocked, gold, onePer, needs, cap, max, cooldown, level, unseen, notAtShop, uniqueEquipped, group, full,
+  notUsable, none, over`.
+- **Events**: `built, buildStart, lost, animalBorn, animalKilled, flee, noise {x,z,kind,heard:[pid]}, chopped,
+  hit, attack, spear, shot, farmerDown {grave}, reviveStart, farmerRevived, respawn, hunterDown, hunterOut,
+  released, gold, upgrade, item, sell, use, cast, bell, lyingLow, pounce, snareSet, snared, snarePulled,
+  wardPlanted, wardPulled, flare, horn, levelUp, spawn, despawn, turn {value, reason}, reject, result`.
+- **Queries** (`js/sim/modes/hvf/query.js`, `q` = a sim or `{state, data, map}`): `clock`, `farmerInfo`,
+  `buildMenu` (cost, income, payback s, tell 0-3), `buildCheck` (placement ghost), `farmUpgrades`, `armyInfo`,
+  `hunterInfo` (skills + cooldowns, snares, wards, items, tracking), `hunterShop`, `sideInfo`, `turnInfo`,
+  `visibleAt / exploredAt / visibleEnt` (the view hides what `visibleEnt` says no to), `fogBits`,
+  `visibleTracks`, `seenBuildings`.

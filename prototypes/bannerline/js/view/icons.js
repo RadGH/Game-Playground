@@ -35,7 +35,7 @@ const CREATURE_FRAMES = {
   tuskback: { mode: 'full', yaw: 0.85, pad: 0.8 }, thornback: { mode: 'full', yaw: 0.8, pad: 0.76 },
   wolf: { mode: 'bust', yaw: 0.75, pad: 1.0 }, saber_cat: { mode: 'bust', yaw: 0.75, pad: 1.0 },
   rat: { mode: 'bust', yaw: 0.8, pad: 0.75 }, hyena: { mode: 'bust', yaw: 0.75, pad: 0.95 }, dire_wolf: { mode: 'bust', yaw: 0.75, pad: 1.0 },
-  bear: { mode: 'full', yaw: 0.8, pad: 0.72 }, elk: { mode: 'full', yaw: 0.8, pad: 0.78 }, titan: { mode: 'full', yaw: 0.45, pad: 0.82 },
+  bear: { mode: 'full', yaw: 0.8, pad: 0.95 }, elk: { mode: 'full', yaw: 0.8, pad: 0.78 }, titan: { mode: 'full', yaw: 0.45, pad: 0.82 },
   horror: { mode: 'full', yaw: 0.4, pad: 0.8 }, wraith: { mode: 'full', yaw: 0.3, pad: 0.85 },
 };
 

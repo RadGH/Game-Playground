@@ -8,9 +8,9 @@
 
 import * as THREE from 'three';
 
-const ZOOMS = [30, 42, 62];          // distance from target, metres
+const ZOOMS = [28, 38, 58];          // middle zoom closer + pitch 50 (stream C bench: Chibi 2 bodies read as hats at 56 deg / 50 m)          // distance from target, metres
 
-export function createRtsCamera({ fov = 38, pitchDeg = 56 } = {}) {
+export function createRtsCamera({ fov = 38, pitchDeg = 50 } = {}) {
   const camera = new THREE.PerspectiveCamera(fov, 1, 0.5, 600);
   const target = new THREE.Vector3();          // smoothed look-at point on the ground
   const goal = new THREE.Vector3();            // where target is heading

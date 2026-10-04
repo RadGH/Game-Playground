@@ -73,7 +73,8 @@ bl.replay = log => {
   const sim = createSim(log.config, data, { events: false });
   const out2 = {};
   const byTick = new Map(log.commands);
-  while (sim.tick < log.ticks) { sim.step(byTick.get(sim.tick + 1) || []); if (log.every && sim.tick % log.every === 0) out2[sim.tick] = sim.hash(); }
+  // a match that ends before the log does stops advancing ticks: stop with it
+  while (sim.tick < log.ticks && !sim.over) { sim.step(byTick.get(sim.tick + 1) || []); if (log.every && sim.tick % log.every === 0) out2[sim.tick] = sim.hash(); }
   return { hashes: out2, final: sim.hash(), dataHash: data.hash };
 };
 out.textContent = `ready (${kind}), data ${data.hash}`;

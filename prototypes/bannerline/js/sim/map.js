@@ -18,7 +18,7 @@ export function buildMap(data, mapId, mode, teamCount = 2) {
       id: t, team: t, cx,
       x0: cx - width / 2, x1: cx + width / 2, z0: 0, z1: length,
       gates,
-      keep: { x: cx, z: m.keep.z, w: m.keep.w, d: m.keep.d },
+      keep: { x: cx, z: m.keep.z, w: m.keep.w, d: m.keep.d, guard: m.keep.guard || null },
       leakZ: m.leakZ,
       armory: { x: cx + m.armory.x, z: m.armory.z, r: m.armory.r },
       spawn: { x: cx + m.spawn.x, z: m.spawn.z },

@@ -1,5 +1,5 @@
 {
- "_doc": "Ten ready-made creature designs built on the newer creature types (hyena, turtle, beetle, griffin, phoenix, centipede, slime, mushroom, mimic, crocodile). Not wired into any game: a game can copy an entry into its own looks table. Each entry is a full creature look (creature spec for avatar-3d/js/creatures.js createCreature, plus voice and speech sections from the shared character schema) and suggested level and attributes. Moved here from Emberveil, where they had been added as tavern hires by mistake. 2026-10-03: eight `bl_*` entries are Bannerline's send units (prototypes/bannerline, PLAN §14), on the new types tuskback/ghoul/bone_colossus/crow/thornback plus golem/wolf/saber_cat looks; `game` names the game that uses them, and the same looks are in library/data/defaults.json as `bl_<id>`.",
+ "_doc": "Ten ready-made creature designs built on the newer creature types (hyena, turtle, beetle, griffin, phoenix, centipede, slime, mushroom, mimic, crocodile). Not wired into any game: a game can copy an entry into its own looks table. Each entry is a full creature look (creature spec for avatar-3d/js/creatures.js createCreature, plus voice and speech sections from the shared character schema) and suggested level and attributes. Moved here from Emberveil, where they had been added as tavern hires by mistake. 2026-10-03: eight `bl_*` entries are Bannerline's send units (prototypes/bannerline, PLAN \u00a714), on the new types tuskback/ghoul/bone_colossus/crow/thornback plus golem/wolf/saber_cat looks; `game` names the game that uses them, and the same looks are in library/data/defaults.json as `bl_<id>`.",
  "schema": 1,
  "variants": {
   "ember_fennec": {
@@ -1194,9 +1194,9 @@
     "type": "dire_wolf",
     "size": 1.1,
     "colors": {
-     "body": "#5e6a4e",
-     "belly": "#a8ac86",
-     "accent": "#33402a",
+     "body": "#8a9670",
+     "belly": "#c8c8a0",
+     "accent": "#4a5a36",
      "eyes": "#b8ff6a"
     },
     "features": {

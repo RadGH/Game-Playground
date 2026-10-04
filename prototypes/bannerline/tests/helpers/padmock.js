@@ -35,7 +35,7 @@ export const XRAW = { A: 0, B: 1, X: 2, Y: 3, LB: 4, RB: 5, View: 6, Menu: 7, Gu
 
 /** Press and release a button. Pads are POLLED once per animation frame and headless WebGL can
  *  run at 5-10 fps, so the hold must outlast a slow frame or the press is never seen. */
-export async function tap(page, index, b, hold = 260) {
+export async function tap(page, index, b, hold = 350) {
   await page.evaluate(([i, x]) => window.__pad.down(i, x), [index, b]);
   await page.waitForTimeout(hold);
   await page.evaluate(([i, x]) => window.__pad.up(i, x), [index, b]);

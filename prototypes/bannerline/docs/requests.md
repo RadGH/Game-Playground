@@ -11,20 +11,20 @@ writes where it landed.
   `GEAR_SLOTS` / `GEAR_STEPS`.
 - [ ] (A -> lead) add `prototypes/bannerline/tests/*.test.js` to the playground `npm run test:unit`
   list in `package.json` (A does not own it). They run in about 7 s.
-- [ ] (A -> B) the sim rejects commands for AI slots (event `reject`, reason `bad`); a local seat
+- [x] (A -> B) the sim rejects commands for AI slots (event `reject`, reason `bad`); a local seat
   should only ever send its own `p`.
 
 ## Stream C (art) — notes and requests
 
-- [ ] (C -> B) Real bodies: `createBodyFactory(looks)` in `js/view/unit-looks.js` gives the
+- [x] (C -> B) Real bodies: `createBodyFactory(looks)` in `js/view/unit-looks.js` gives the
   `makeBody` your `createActors` takes; call `await bodies.preload()` before the match so heights are
   right on the first frame (actors.js reads `body.height` once). Usage in `docs/interfaces.md` §10.1.
   Note `play(act, t)` advances the animation clock from `t`, so call it every frame (you already do).
-- [ ] (C -> B) Portrait: `createPortrait({ gfx, slot: bar.portraitSlot, looks })` + `bar.onSelect(id =>
+- [x] (C -> B) Portrait: `createPortrait({ gfx, slot: bar.portraitSlot, looks })` + `bar.onSelect(id =>
   portrait.showEnt(ent))` + `portrait.react('hit')` on `damage` events to the selected entity. §10.2.
-- [ ] (C -> B) Icons for the command card / shop / deck: `createIconLibrary()` → `icons.url(kind, id)`;
+- [x] (C -> B) Icons for the command card / shop / deck: `createIconLibrary()` → `icons.url(kind, id)`;
   71 baked PNGs in `assets/icons/`. §10.3.
-- [ ] (C -> B) Camera note from the bench: at the middle zoom (50 m, pitch 56°) a Chibi 2 unit at
+- [x] (C -> B) Camera note from the bench: at the middle zoom (50 m, pitch 56°) a Chibi 2 unit at
   scale 1.6 reads mostly as the top of its head. Consider pitch ~48–50° or a closer middle zoom; the
   icons and portrait carry the faces either way.
 - [x] (C -> all) FYI file ownership C added beyond PLAN §21: `data/looks.json` (art only, the sim never
@@ -33,7 +33,7 @@ writes where it landed.
 - [x] (C -> lead) Farhold now imports `compactCreature` from `avatar-3d/js/mesh-merge.js`
   (`prototypes/farhold/js/actors.js` one import line; `farhold/js/mesh-merge.js` re-exports). Farhold
   node tests green.
-- [ ] (A -> B) M4 sim side is in (see interfaces.md): commands `upgrade` (now real items; same slot
+- [x] (A -> B) M4 sim side is in (see interfaces.md): commands `upgrade` (now real items; same slot
   index works), `buy {slot, step, kind?, equip?}`, `equip {uid}`, `unequip {slot}`, `sell {uid}`,
   `pick {index}`, `toll`; events `item`, `drop` (with `better`), `requisition`, `requisitionLost`,
   `pickOffer`, `power`, `sell`, `toll`; query `inventoryInfo`, `shopInfo`, `itemView`, `gearInfo`
@@ -92,12 +92,12 @@ the spam. **Removed** = done in the sim already; **Flag** = a judgement call for
 
 ## Stream A -> B: spam rules + Muster Hall (2026-10-03)
 
-- [ ] (A -> B) Stocks and tier locks are gone: drop the stock pips / restock timers / unlock
+- [x] (A -> B) Stocks and tier locks are gone: drop the stock pips / restock timers / unlock
   countdowns from the send panel; `sendInfo` lost `stock/max/restockIn/unlocked/unlockIn` and gained
   `role, roleText, paybackSeconds, traitsText, counters, vsRival` (interfaces.md §7). `roster()` is
   the Muster Hall list (12 per race). `clock()` lost `unlocked/nextUnlock`; the `unlock` event is gone.
-- [ ] (A -> B) Gate queue: `teamInfo().waiting` / `gateQueue(state, field)` = "+N waiting" for the HUD.
-- [ ] (A -> B) Sends fire repeatedly on a held / mashed key: no client-side cooldown, please.
+- [x] (A -> B) Gate queue: `teamInfo().waiting` / `gateQueue(state, field)` = "+N waiting" for the HUD.
+- [x] (A -> B) Sends fire repeatedly on a held / mashed key: no client-side cooldown, please.
 - [ ] (B -> I) Round 2 town UI. B is building the four panels now against these query shapes; if yours
   differ, write them in interfaces.md and B adapts (B reads every field defensively):
   - `buildingsInfo(state, data, pid)` -> `[{ id: 't0.outfitter', kind: 'outfitter'|'barracks'|'drillyard'|'sanctum',
@@ -161,7 +161,7 @@ the spam. **Removed** = done in the sim already; **Flag** = a judgement call for
   side is not the lever (no AI shopping 9.4; doubled item stats 10.4; free heals 13.1; no upgrades/powers 12.9). The old
   AI refilled potions and bought gear from anywhere; now heroes must visit the Outfitter. Owner says balance later;
   `gameplay.test.js` "matches end: median 15-30 min" is red until someone tunes.
-- [ ] (I -> B) UI contract in interfaces.md §11: buildings (`query.buildingsInfo`), Outfitter (`shopInfo`, `itemCard`,
+- [x] (I -> B) UI contract in interfaces.md §11: buildings (`query.buildingsInfo`), Outfitter (`shopInfo`, `itemCard`,
   `inventoryInfo`), Drill Yard (`upgradesInfo`), Sanctum (`powersInfo`, `powerTargetCheck` for the cast cursor).
   Shop needs the hero in range (`reason: 'notAtShop'`); the other three work from anywhere. Every item / upgrade /
   power row has `name`, `desc`, `stats` (lines) for tooltips. The B/G "buy cheapest" button has no command any more.
@@ -192,18 +192,18 @@ the spam. **Removed** = done in the sim already; **Flag** = a judgement call for
 
 ## Stream D (online, M5) -> B (2026-10-03)
 
-- [ ] (D -> B) Online lobby UI over `js/net/lobbysync.js` (interfaces.md §12): Title "Host Online" /
+- [x] (D -> B) Online lobby UI over `js/net/lobbysync.js` (interfaces.md §12): Title "Host Online" /
   "Join (code)" (R2.11: after the mode screen), room code shown big with a copy button, seats from
   `room.state.slots` (kind + owner name + ping + "(tab hidden)"), local devices claim seats with
   `room.claim(key, { local, device })` (couch players work online), host-only controls (format, AI seats,
   kick, Start), plain errors from `NET_MESSAGES`, `!isSecureContext` note as today.
-- [ ] (D -> B) Minimal main.js hook (D will NOT edit main.js without your OK — say "D: ok to hook main.js"
+- [x] (D -> B) Minimal main.js hook (D will NOT edit main.js without your OK — say "D: ok to hook main.js"
   here and D adds it): `startMatch(session, net)` where `net = { match, clock }` from `beginMatch` +
   `createNetClock`; use that clock instead of `createLocalClock`; at the top of every frame
   `m.sim = m.clock.sim` (a resync swaps the sim object); seats = `net.match.localPlayers`; disable the
   speed chip and pause in online matches; show `clock.waitingFor` as a banner; on `hostLeft` go to
   results; after results the HOST calls `room.backToLobby()` and every machine returns to the room.
-- [ ] (D -> B) Banners for lockstep events: takeover ("X left — an AI takes their seat"), rejoin
+- [x] (D -> B) Banners for lockstep events: takeover ("X left — an AI takes their seat"), rejoin
   ("X is back"), hostLeft, waiting ("Waiting for X (tab hidden)").
 
 ## Stream E (AI, round 2) — 2026-10-03
@@ -248,7 +248,7 @@ the spam. **Removed** = done in the sim already; **Flag** = a judgement call for
      : createState(...)`. HvF seats carry `role: 'farmer'|'hunter'`, no race/hero, unequal teams (5v2).
   3. **Per-mode data files**: `mode.dataFiles` (`['hvf/rules.json', 'hvf/mapgen.json']`, more in H2/H3) loaded as
      `data.hvf.rules`, `data.hvf.mapgen` and joined to the data hash (online peers must agree on them).
-  4. **Mode commands first**: in `applyCommand`, when `ctx.mode.commands[cmd.type]` exists, dispatch to it BEFORE the
+  4. **[x] Done (A, 2026-10-03):** commands.js checks `ctx.mode.commands[cmd.type]` right after the player/result checks and before line war's switch; line war registers none (identical hashes; test in modes.test.js). Original: **Mode commands first**: in `applyCommand`, when `ctx.mode.commands[cmd.type]` exists, dispatch to it BEFORE the
      line-war switch (HvF has its own `move`/`stop`/`attack`/`surrender` for characters that are not heroes).
   5. **Core step assumptions**: `Sim.step` copies `px/pz/face` for `state.ents`, filters `_gone`, and `minuteStats`
      reads `p.stats.incomeAt/goldAt`, `p.income`, `p.gold` — HvF state keeps all of these, so no change needed; just
@@ -267,16 +267,22 @@ the spam. **Removed** = done in the sim already; **Flag** = a judgement call for
   main.js rewrite, **B adds your `startMatch(session, net)` hook itself** in this round (net clock instead of
   the local clock, `m.sim = m.clock.sim` per frame, seats from `net.match.localPlayers`, no speed/pause online,
   `waitingFor` banner, hostLeft -> results, host `room.backToLobby()`), plus the lockstep banners. The online
-  lobby screens follow after the round-2 town UI. B will tick this when it lands.
+  lobby screens follow after the round-2 town UI. **Landed:** js/ui/netlobby.js (join by code with a pad
+  letter picker, room with code + copy, machines + ping, seats, host format / AI seats, auto-start 2 s after
+  all ready + Start button), main.js `startMatch(session, net)` through a sim proxy that always reads
+  `clock.sim`, waiting banner, takeover / rejoin / hostLeft toasts, results -> host `backToLobby()`.
+  `?net=channel` picks the BroadcastChannel transport (tests); default peerjs. tests/online-ui.spec.js green.
+  Not built in the UI: rejoin after a page reload (needs sessionStorage token handling) and host
+  kick / replace-with-AI buttons.
 - [x] (B -> E) `counter` toast for local targets: done (js/ui/hud.js onEvent `counter`).
 
 ## Stream F (campaign, M8) -> B (2026-10-03)
 
-- [ ] (F -> B) Reach the campaign from the title / mode screen (R2.11): a "Campaign" entry that shows
+- [x] (F -> B) Reach the campaign from the title / mode screen (R2.11): a "Campaign" entry that shows
   `createCampaignScreen({ screen, campaign: await loadCampaign(), progress: campaignProgress(), onPlay, onBack })`
   from `js/ui/campaign.js` (+ `<link rel="stylesheet" href="css/campaign.css">` in index.html). Pads: map
   d-pad/stick to `screen.nav(dx, dy)`, A to `screen.confirm()`, B to `screen.back()`.
-- [ ] (F -> B) `onPlay(mission)` -> `const { config, session } = campaignSession(mission, { device, deviceType })`;
+- [x] (F -> B) `onPlay(mission)` -> `const { config, session } = campaignSession(mission, { device, deviceType })`;
   in `startMatch`, when `session.campaign` is set, build the sim from `createSim({ ...config, seed }, data)` AS IS
   (the mission's players; `session.slots` has the one `local` seat to bind to the device); create
   `createCampaignOverlay({ root: <the match view root> })` and call `overlay.update(m.sim)` every frame;
@@ -287,3 +293,79 @@ the spam. **Removed** = done in the sim already; **Flag** = a judgement call for
 - [ ] (F -> lead) PLAN §13's old campaign title used a word the owner dislikes; the campaign is now
   "Banners of the Vale", Warrior chapter "The Iron Oath" (5 missions); Ranger / Pyromancer / Druid / Engineer
   chapters are stubs (status 'planned').
+- [x] (H, 2026-10-03) H2 + H3 sim are in (own files only): see interfaces.md §12 for commands/events/queries.
+  `tools/hvf-econ-sim.mjs` (advisory): the Turn crosses 0 at 15.5-18.5 min across formats (plan target 11-16).
+- [ ] (H -> B) HvF view/HUD/lobby can build against interfaces.md §12; `tests/hvf-helpers.mjs` shows how to drive a match.
+- [ ] (H -> E) HvF AI: `mode.ai` is `() => []`; the map carries hollow build slots, the graph and metrics; noise
+  events carry `heard` (hunter player ids) for the suspicion map.
+
+## Stream C round 2 (2026-10-03) — art landed, how to drop it in (interfaces.md §10)
+
+- [ ] (C -> B) **Buildings**: replace `buildWorld` with `buildStructures(scene, layout, { identity, buildings: Q.buildingsInfo(state, data), teams })`
+  (§10.4). Use `world.buildings()` for picking (distance to `position` < `radius`) and `world.setReady(team, 'barracks', canAffordASend)`;
+  `world.setHover(team, kind, true)` while the hero is in range / the cursor is over it; `world.flashPower(team, ev.kind)` on `power`.
+  There is no `buildMusterHall` (R2.9): the send building is `makeBarracks` / `world.towns[team].barracks`.
+  B's layout.js still carries a `musterHall` key (B's file, R2.9) — structures.js ignores it and reads the sim's building list.
+- [ ] (C -> B) **Bodies**: `createBodyFactory(looks, { makeTurret, colorOf, turretLevelOf, fallback })` now also builds hero colours,
+  pets (Grove Wolf), Engineer turrets (3 looks), and `body.setForm(ev.form)` on the `form` event, `body.setGhost(bool)` for stealth (A's
+  request: Briar Stalker half-transparent while no hero of the field's team is within 3 m). §10.1.
+- [ ] (C -> B) **Spell effects / sound / identity**: `createSkillFx` (§10.6), `createSound` (§10.7), `loadIdentity` (§10.5; `identity.css()`
+  gives `--slot-N` / `--team-N` for the UI). Preview pages: `structures.html`, `skillfx.html`, `icons.html`, `bench.html`.
+- [ ] (C -> B) **Camera proposal** (screenshots compared at 56°/50 m, 56°/34 m, 48°/38 m, 45°/42 m with the real units): at 56° every
+  Chibi 2 unit reads as the top of a head. Recommend **pitch 48°, FOV 38°, zoom steps [28, 40, 58] m (default the middle, 40 m)**,
+  bodies at `scale: 1.3` (body factory default) — the middle step then shows faces, weapons and creature silhouettes while
+  still holding ~35 m of field. If the field must show more, keep 48° and add a far step rather than raising the pitch.
+- [x] (C -> A) The 24 new unit looks are built: 11 new designed creature looks in avatar-3d (`bl_plague_rat`, `bl_wailing_shade`,
+  `bl_carrion_hulk`, `bl_ash_ogre`, `bl_hyena`, `bl_bear_warden`, `bl_elk_charger`, `bl_elder_bear`, + `bl_druid_wolf`,
+  `bl_briarback`, `bl_grove_wolf`) filed in library/data/defaults.json; humanoid parts per unit in data/looks.json; sizes by tier
+  (`tierScale`). Icons rebaked (48 units, 5 heroes + 2 forms, 25 skills, 12 powers, 20 buildings, 4 gadgets, 33 items).
+- [x] (C -> A) R2.9: identity.json _doc fixed; no C file uses the word.
+- [ ] (C -> A) Wolf-shape abilities: skill-fx.json already has recipes for `throat_leap`, `rending_bite`, `pack_run`, `running_howl`
+  (guessed ids from the wolf_shape desc). If the ids differ, tell C (or rename the keys in data/skill-fx.json); a skill
+  without a recipe still draws its shape default.
+
+## Stream A feel pass (2026-10-03)
+
+- [ ] (A -> B) The Keep now shoots (line war feel pass): event `keepShot { field, x, z, radius }` once a second
+  while enemies are within `sim.map.fields[i].keep.guard.range` m of the Keep. Please draw a bolt from the Keep
+  top to (x, z) and a small blast; the `hit` events it causes carry `skill: 'keep'` (floating numbers as usual).
+
+## Stream H -> B: Hunters vs Farmers is playable — the main.js hook (2026-10-03)
+
+HvF runs today on its own page `hvf.html` (same renderer, same data, same module). To open it from the main menu,
+B adds these lines to `js/main.js` (H owns everything they call; nothing else in main.js changes):
+
+```js
+// imports
+import { createHvfGame } from './ui/hvf/game.js';
+// index.html <head>: <link rel="stylesheet" href="css/hvf.css">
+// index.html, next to the other screens: <section id="screen-hvf" class="screen hvf-host" hidden></section>
+
+// boot(), after app.modes is created:
+app.hvf = createHvfGame({ gfx: app.gfx, data, host: $('screen-hvf'), params,
+  onExit: () => { $('screen-hvf').hidden = true; showModes(); } });
+
+// app.modes onPick, first line:
+if (mode.id === 'hvf') { endMatch(); app.title.hide(); app.lobby.hide(); setScreen('hvf'); $('screen-hvf').hidden = false; app.hvf.openSetup(); return; }
+
+// setScreen(name): add   $('screen-hvf').hidden = name !== 'hvf';
+// showTitle / showModes / showLobby: call   app.hvf?.end();   (leaving the mode restores your scene + viewports)
+
+// frame(dt), before app.gfx.render():
+if (app.screen === 'hvf') app.hvf.frame(dt);
+// and skip the fly-cam drift while app.screen === 'hvf' (the `if (!app.match)` block): add `&& app.screen !== 'hvf'`
+```
+
+- Then flip the card: in `js/sim/modes/hvf/index.js` set `playable: true` (H's file — tell H, or change that one
+  word yourself), and `js/ui/modes.js` BLURBS.hvf can drop "Coming next." (the registry `desc` already wins).
+- `createHvfGame` borrows `app.gfx`: while a match runs it hides every non-light scene child (the vale) and removes
+  the viewports, and restores both in `end()`. Window hooks for tests: `window.hvf` (`start`, `fastForward`,
+  `issue`, `state`, `probe`).
+- Not covered by the HvF view yet (H5 scope): gamepad, split screen, online. Keyboard + mouse only.
+- [x] (B -> C/F/A/I, 2026-10-03) Landed in B: C's body factory (+ preload, turrets via makeTurret, wolf
+  form via setForm on `player.form`), live portrait per control bar (follows selection, reacts to hits),
+  `buildStructures` replaces terrain.js's placeholders (team towns dressed in their race; terrain.js stays as
+  the fallback / `?world=plain`), skill + item + unit icons, camera pitch 50 / middle zoom 38 m. `?bodies=capsule`
+  keeps capsules. F's campaign: title "Campaign" -> createCampaignScreen (pads through nav/confirm/back) ->
+  mission in the real game with createCampaignOverlay -> showDebrief (pad-navigable) -> next / retry / map;
+  tests/campaign-ui.spec.js green. I's town UI: Outfitter / Barracks / Drill Yard / Sanctum panels.

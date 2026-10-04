@@ -87,7 +87,7 @@ export function createLobby({ screen, data, devices, session, onStart, onBack })
   }
   const aiLevels = AI_LEVELS.filter((a) => data.ai?.difficulties?.[a]);
   const cursors = new Map();          // slot key -> field index into fieldsFor(slot)
-  let countdown = -1;
+  let countdown = -1, countFrom = 0;
   let active = false;
   let justJoined = new Set();
   let flash = '';
@@ -217,11 +217,12 @@ export function createLobby({ screen, data, devices, session, onStart, onBack })
     // Countdown when every local player is ready.
     const ls = locals();
     const allReady = ls.length > 0 && ls.every((s) => s.ready && !s.lost) && teamsValid();
-    if (allReady && countdown < 0) { countdown = COUNTDOWN; changed = true; }
+    // Wall-clock countdown: a slow frame rate must not stretch "3-2-1" (frame dt is capped at 0.1 s).
+    if (allReady && countdown < 0) { countdown = COUNTDOWN; countFrom = performance.now(); changed = true; }
     if (!allReady && countdown >= 0) { countdown = -1; changed = true; }
     if (countdown >= 0) {
       const before = Math.ceil(countdown);
-      countdown -= dt;
+      countdown = COUNTDOWN - (performance.now() - countFrom) / 1000;
       if (Math.ceil(countdown) !== before) changed = true;
       if (countdown <= 0) { countdown = -1; active = false; onStart(session); return; }
     }

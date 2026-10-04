@@ -489,6 +489,30 @@ test('a human wave that counters the defence sends the defender a counter notice
   assert.equal(t.drainEvents().filter(e => e.type === 'counter').length, 0, 'no notice for a wave that does not counter');
 });
 
+test('the Keep guard splashes a swarm near the Keep; a big unit walks through; it hits harder later', () => {
+  const s = twoHumans();
+  parkHeroes(s);
+  const f = s.map.fields[0], G = f.keep.guard;
+  assert.ok(G && G.range > 0);
+  const swarm = [];
+  for (let i = 0; i < 6; i++) swarm.push(put(s, 'levy', 1, 0, (i - 3) * 0.8, f.keep.z - 12, { _spd: 0 }));
+  const golem = put(s, 'iron_golem', 1, 0, 6, f.keep.z - 12, { _spd: 0 });
+  const far = put(s, 'levy', 1, 0, 0, 40, { _spd: 0 });
+  s.drainEvents();
+  run(s, 100);
+  assert.ok(events(s, 'keepShot').length >= 3);
+  assert.ok(swarm.every(u => !s.state.ents.includes(u)), 'the swarm melted');
+  assert.ok(s.state.ents.includes(golem) && golem.hp > golem.hpMax * 0.8, 'the golem walks on');
+  assert.ok(s.state.ents.includes(far) && far.hp === far.hpMax, 'out of range');
+  // damage grows with time
+  const late = twoHumans(); parkHeroes(late); late.state.tick = 20 * 60 * 20;
+  const g2 = put(late, 'iron_golem', 1, 0, 0, f.keep.z - 12, { _spd: 0 });
+  late.drainEvents(); run(late, 20);
+  const hits = late.drainEvents().filter(e => e.type === 'hit' && e.skill === 'keep');
+  assert.ok(hits.length && hits[0].amount > G.damage * 2);
+  assert.ok(g2.hp < g2.hpMax);
+});
+
 // ── query helpers ───────────────────────────────────────────────────────────────────────────
 test('query helpers describe the state for the UI', () => {
   const s = twoHumans();

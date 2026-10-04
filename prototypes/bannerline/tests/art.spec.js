@@ -49,3 +49,43 @@ test('bench: portrait draws, draw calls stay in budget at 40 per viewport', asyn
   expect(r[1].triangles).toBeLessThanOrEqual(1_200_000);
   expect(errors).toEqual([]);
 });
+
+test('buildings: every race builds its town, banners fall, rings answer, draw calls stay low', async ({ page }) => {
+  test.setTimeout(180_000);
+  const errors = []; page.on('pageerror', e => errors.push(e.message));
+  for (const [west, east] of [['freeholds', 'ashtusk'], ['unburied', 'thornmane']]) {
+    await page.goto(`prototypes/bannerline/structures.html?view=field&west=${west}&east=${east}`);
+    await page.waitForFunction(() => window.structures?.ready && window.structures.world, null, { timeout: 90_000 });
+    const r = await page.evaluate(() => {
+      const w = window.structures.world, kinds = Object.fromEntries(Object.entries(w.towns).map(([t, town]) => [t, Object.keys(town).sort()]));
+      const b = w.towns[0].barracks; b.setReady(true); for (let i = 0; i < 40; i++) w.update(0.05);
+      w.setBanners(0, 0.5); for (let i = 0; i < 160; i++) w.update(0.05);
+      const down = w.fields[0].banners.poles.filter(p => p.userData.fall > 1.4).length;
+      return { kinds, ring: b.ring.material.opacity, down, poles: w.fields[0].banners.poles.length };
+    });
+    expect(r.kinds['0']).toEqual(['barracks', 'drillyard', 'sanctum', 'shop']);
+    expect(r.kinds['1']).toEqual(['barracks', 'drillyard', 'sanctum', 'shop']);
+    expect(r.ring).toBeGreaterThan(0.3);
+    expect(r.down).toBe(r.poles / 2);
+    await page.evaluate(() => window.structures.look(-44, 41, 143, -44, 0, 115));
+    await page.waitForTimeout(400);
+    const info = await page.evaluate(() => window.structures.info());
+    expect(info.calls).toBeLessThan(200);
+  }
+  expect(errors).toEqual([]);
+});
+
+test('spell effects: every skill and power plays without errors', async ({ page }) => {
+  test.setTimeout(180_000);
+  const errors = []; page.on('pageerror', e => errors.push(e.message)); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
+  await page.goto('prototypes/bannerline/skillfx.html');
+  await page.waitForFunction(() => window.skillfxPage?.ready, null, { timeout: 120_000 });
+  const n = await page.evaluate(async () => {
+    const p = window.skillfxPage, ids = p.fx.ids(); let n = 0;
+    for (const id of ids.skills) { p.fire('skill', id); n++; await new Promise(r => setTimeout(r, 40)); }
+    for (const id of ids.powers) { p.fire('power', id); n++; await new Promise(r => setTimeout(r, 40)); }
+    await new Promise(r => setTimeout(r, 2000)); return n;
+  });
+  expect(n).toBeGreaterThan(30);
+  expect(errors).toEqual([]);
+});

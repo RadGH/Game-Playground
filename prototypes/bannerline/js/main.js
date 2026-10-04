@@ -13,7 +13,12 @@ import { createRenderer } from './view/renderer.js';
 import { createRtsCamera } from './view/camera.js';
 import { buildWorld } from './view/terrain.js';
 import { layoutFromMap } from './view/layout.js';
-import { createActors } from './view/actors.js';
+import { createActors, capsuleBody } from './view/actors.js';
+import { loadLooks, createBodyFactory } from './view/unit-looks.js';
+import { createPortrait } from './view/portrait.js';
+import { buildStructures } from './view/structures.js';
+import { loadIdentity } from './view/identity.js';
+import { makeTurret } from './view/engineer.js';
 import { createFx } from './view/fx.js';
 import { createNumbers } from './view/numbers.js';
 import { loadBindings } from './input/bindings.js';
@@ -43,6 +48,8 @@ import { createTransport, cleanRoomCode } from './net/transport.js';
 import { createRoom, joinRoom, beginMatch } from './net/lobbysync.js';
 import { createNetClock } from './net/netclock.js';
 import { createJoinScreen, createNetLobby } from './ui/netlobby.js';
+import { loadCampaign, campaignProgress, campaignSession, createCampaignScreen, createCampaignOverlay, showDebrief } from './ui/campaign.js';
+import { createMenuNav } from './ui/menunav.js';
 import { loadData } from './sim/data.js';
 import { buildMap } from './sim/map.js';
 import * as Q from './sim/query.js';
@@ -71,6 +78,16 @@ async function boot() {
   installTooltips();
   installGameTips(() => (app.match ? { sim: app.match.sim, Q } : null));
   try { app.icons = await createIconLibrary(); } catch (err) { console.warn('icons unavailable', err); app.icons = null; }
+  // Stream C's art: identity (team/race colours), real bodies, structures. ?bodies=capsule keeps the
+  // M1 capsules (fast headless tests); any failure falls back to them too.
+  try { app.identity = await loadIdentity(); } catch (err) { console.warn('identity unavailable', err); app.identity = null; }
+  if (params.get('bodies') !== 'capsule') {
+    try {
+      app.looks = await loadLooks();
+      app.bodies = createBodyFactory(app.looks, { fallback: capsuleBody, makeTurret, colorOf: (ent) => teamColorOf(ent) });
+      app.bodiesReady = app.bodies.preload().catch((err) => console.warn('body preload', err));
+    } catch (err) { console.warn('looks unavailable', err); app.looks = null; app.bodies = null; }
+  }
 
   app.gfx = createRenderer($('view'));
   app.devices = createDeviceManager({ root: $('app') });
@@ -87,6 +104,7 @@ async function boot() {
     onPlay: () => { app.pendingOnline = false; showModes(); },
     onHost: () => { app.pendingOnline = true; showModes(); },
     onJoin: () => showJoin(),
+    onCampaign: () => showCampaign(),
   });
   app.join = createJoinScreen({ screen: $('screen-netjoin'), onJoin: (code) => joinOnline(code), onBack: () => showTitle() });
   app.netroom = createNetLobby({ screen: $('screen-netroom'), data, devices: app.devices, onLeave: () => showTitle() });
@@ -128,14 +146,23 @@ async function boot() {
   else showTitle();
 }
 
-function ensureWorld(map, format = '1v1') {
-  const key = map.id + ':' + map.fields.length + ':' + map.width + ':' + format;
+function ensureWorld(map, format = '1v1', teams = null) {
+  const key = map.id + ':' + map.fields.length + ':' + map.width + ':' + format + ':' + JSON.stringify(teams || []);
   if (app.world && app.worldKey === key) return;
   app.world?.dispose();
   let buildings = [];
   try { buildings = buildingsFor(app.data, map, format); } catch (err) { console.warn('no buildings', err); }
   app.layout = layoutFromMap(map, buildings);
-  app.world = buildWorld(app.gfx.scene, app.layout);
+  app.world = null;
+  if (app.identity && params.get('world') !== 'plain') {
+    try {
+      const w = buildStructures(app.gfx.scene, app.layout, { identity: app.identity, buildings, teams });
+      // Same surface as terrain.js: highlight(buildingId) maps to C's per-team setHover.
+      w.highlight = (bid, on) => { const b = buildings.find((x) => x.id === bid); if (b) w.setHover(b.team, b.kind, on); };
+      app.world = w;
+    } catch (err) { console.warn('structures failed, plain vale instead', err); }
+  }
+  if (!app.world) app.world = buildWorld(app.gfx.scene, app.layout);
   app.worldKey = key;
 }
 
@@ -145,6 +172,8 @@ function setScreen(name) {
   $('screen-lobby').hidden = name !== 'lobby';
   $('screen-modes').hidden = name !== 'modes';
   $('screen-netjoin').hidden = name !== 'netjoin';
+  $('screen-campaign').hidden = name !== 'campaign';
+  if (name !== 'campaign' && app.campaignScreen) { app.campaignScreen.destroy(); app.campaignScreen = null; }
   $('screen-netroom').hidden = name !== 'netroom';
   $('screen-match').hidden = name !== 'match' && name !== 'results';
   $('screen-results').hidden = name !== 'results';
@@ -153,6 +182,30 @@ function showTitle() {
   if (app.room) { const r = app.room; app.room = null; try { r.leave(); } catch { /* already closed */ } app.netroom.detach(); }
   endMatch(); app.lobby.hide(); setScreen('title'); app.title.show(); useFlyCam(); }
 function showModes() { endMatch(); app.title.hide(); app.lobby.hide(); setScreen('modes'); app.modes.show(); useFlyCam(); }
+// ---------------------------------------------------------------- campaign (stream F)
+
+async function showCampaign() {
+  endMatch(); app.title.hide();
+  try { app.campaign = app.campaign || await loadCampaign(); } catch (err) { alertBoot(err.message, 'Could not load the campaign'); showTitle(); return; }
+  app.progress = app.progress || campaignProgress();
+  setScreen('campaign');
+  app.campaignScreen = createCampaignScreen({ screen: $('screen-campaign'), campaign: app.campaign, progress: app.progress, onPlay: (mission) => playMission(mission), onBack: () => showTitle() });
+  useFlyCam();
+}
+function playMission(mission) {
+  const dev = app.devices.get(app.lastDevice) || app.devices.kbm;
+  const { config, session } = campaignSession(mission, { device: dev.id, deviceType: dev.type });
+  session.speed = Number(params.get('speed')) || 1;
+  startMatch(session, null, config);
+}
+function nextMissionOf(mission) {
+  for (const c of app.campaign?.index.chapters || []) {
+    const i = c.missions.indexOf(mission.id);
+    if (i >= 0 && c.missions[i + 1]) return app.campaign.missions[c.missions[i + 1]] || null;
+  }
+  return null;
+}
+
 function showJoin() { endMatch(); app.title.hide(); setScreen('netjoin'); app.join.show(); useFlyCam(); }
 function showNetRoom() { endMatch(); app.title.hide(); setScreen('netroom'); app.netroom.show(); useFlyCam(); }
 
@@ -210,7 +263,7 @@ function useFlyCam() {
 
 // ---------------------------------------------------------------- match
 
-function startMatch(session, net = null) {
+function startMatch(session, net = null, campaignConfig = null) {
   endMatch();
   const data = app.data;
   const seed = params.get('seed') ? Number(params.get('seed')) >>> 0 : ((Math.random() * 0xffffffff) >>> 0);
@@ -221,9 +274,14 @@ function startMatch(session, net = null) {
       const dev = app.devices.get(lp.device) || app.devices.kbm;
       return { player: lp.pid, slot: { key: 'net' + lp.pid, player: (lp.local | 0) + 1, device: dev.id, deviceType: dev.type, team: null } };
     });
+  } else if (campaignConfig) {
+    // A mission: its own players list as is; one local seat (mission.player) for the chosen device.
+    const slot = session.slots.find((x) => x.kind === 'local');
+    local = [{ player: session.campaign.player ?? 0, slot: { ...slot, key: 'cmp', player: 1 } }];
+    app.devices.claim(slot.device, 'cmp');
   } else ({ players, local } = sessionToPlayers(session, data));
   let base;
-  try { base = net ? net.clock.sim : createSim({ seed, mode: session.game || 'linewar', format: session.mode, map: session.map || 'vale', players }, data); } catch (err) {
+  try { base = net ? net.clock.sim : campaignConfig ? createSim({ ...campaignConfig, seed }, data) : createSim({ seed, mode: session.game || 'linewar', format: session.mode, map: session.map || 'vale', players }, data); } catch (err) {
     console.error(err);
     alertBoot(err.message);
     showLobby();
@@ -231,11 +289,13 @@ function startMatch(session, net = null) {
   }
   // Every reader goes through this proxy: online, a resync replaces the sim object under the clock.
   const sim = simProxy(() => (net ? net.clock.sim || base : base));
-  ensureWorld(sim.map, sim.state.mode);
+  // Each team's town is dressed in its first player's race.
+  const teamsArt = [0, 1].map((t) => { const p = sim.state.players.find((x) => x.team === t); return { team: t, race: p?.race, slot: p ? sim.state.players.filter((x) => x.team === t).indexOf(p) + t * 3 : t * 3 }; });
+  ensureWorld(sim.map, sim.state.mode, teamsArt);
   app.gfx.removeViewport(app.flyViewport);
 
   const firstTeam = local.length ? sim.state.players[local[0].player].team : 0;
-  const actors = createActors({ scene: app.gfx.scene, data, localTeam: firstTeam });
+  const actors = createActors({ scene: app.gfx.scene, data, localTeam: firstTeam, makeBody: app.bodies ? app.bodies.makeBody : capsuleBody });
   const fx = createFx({ scene: app.gfx.scene, actors, tickHz: data.econ?.clock?.tickHz || 20, data });
   const clock = net ? net.clock : createLocalClock({ sim: base, tickMs: TICK_MS, speed: Number(params.get('speed')) || session.speed || 1 });
   const m = { sim, net, clock, actors, fx, views: [], session, deathPos: new Map(), overDelay: 1.6, pausedBy: null, shown: false, aim: createAimOverlay(app.gfx.scene) };
@@ -248,6 +308,7 @@ function startMatch(session, net = null) {
 
   setScreen('match');
   app.title.hide(); app.lobby.hide();
+  if (campaignConfig && m.views[0]) m.overlay = createCampaignOverlay({ root: m.views[0].root });
   for (const v of m.views) {
     const w = document.createElement('div'); w.className = 'net-wait'; w.hidden = true; v.hudRoot.append(w); v.netWait = w;
   }
@@ -255,6 +316,12 @@ function startMatch(session, net = null) {
 }
 
 /** A read-only stand-in for the sim that always points at the current sim object. */
+/** Team colour for a hero body (C's identity slot colours when loaded). */
+function teamColorOf(ent) {
+  const id = app.identity;
+  try { return id ? id.teamColor(ent.team) : null; } catch { return null; }
+}
+
 function simProxy(get) {
   return {
     get state() { return get().state; }, get data() { return get().data; }, get map() { return get().map; },
@@ -325,6 +392,20 @@ function makeView(m, i, n, l, host) {
     sanctum: createSanctum({ root: hudRoot, sim, Q, player, isPad, iconUrl: itemIcon, onPick: (row) => beginAim(view, row) }),
   };
   view.panels.barracks.heldKey = (code) => app.devices.kbm.isDown(code);
+  // The live 3D portrait (stream C) shows the selected unit, or your hero.
+  if (app.looks) {
+    try {
+      view.portrait = createPortrait({ gfx: app.gfx, slot: view.bar.portraitSlot, looks: app.looks });
+      const showSel = (id) => {
+        const s = sim.state;
+        const e = (id >= 0 && s.ents.find((x) => x.id === id)) || s.ents.find((x) => x.id === s.players[player].heroEnt);
+        view.portraitId = e?.id ?? -1;
+        view.portrait.showEnt(e ? { kind: e.kind, type: e.type } : null);
+      };
+      view.bar.onSelect(showSel);
+      showSel(-1);
+    } catch (err) { console.warn('portrait unavailable', err); view.portrait = null; }
+  }
   view.openPanel = () => Object.values(view.panels).find((p) => p.open) || null;
   view.bar.onBuilding((kind) => togglePanel(view, kind, 'button'), () => view.openPanel()?.kind || null);
   view.hud.onArmy(() => lookAtField(view, 1));
@@ -515,6 +596,7 @@ function handleEvents(events, quiet = false) {
     for (const v of m.views) v.hud.onEvent(ev);
     switch (ev.type) {
       case 'hit': {
+        for (const v of m.views) if (v.portrait && v.portraitId === ev.dst) v.portrait.react?.('hit');
         const a = m.actors.get(ev.dst); if (!a) break;
         const src = s.ents.find((e) => e.id === ev.src);
         for (const v of m.views) {
@@ -578,11 +660,11 @@ function handleEvents(events, quiet = false) {
 function endMatch() {
   const m = app.match; if (!m) return;
   for (const v of m.views) {
-    v.hud.destroy(); v.bar.destroy(); for (const p of Object.values(v.panels)) p.destroy(); v.onboarding.destroy(); v.numbers.clear();
+    v.portrait?.dispose?.(); v.hud.destroy(); v.bar.destroy(); for (const p of Object.values(v.panels)) p.destroy(); v.onboarding.destroy(); v.numbers.clear();
     app.gfx.removeViewport(v.vp);
     v.root.remove();
   }
-  m.actors.dispose(); m.fx.dispose(); m.aim.dispose();
+  m.actors.dispose(); m.fx.dispose(); m.aim.dispose(); m.overlay?.destroy();
   app.match = null; app.results = null;
   $('screen-match').replaceChildren();
   document.body.classList.remove('targeting', 'over-pad', 'aiming', 'hall-hover');
@@ -692,6 +774,8 @@ function matchFrame(dt, frames) {
   if (events.length) handleEvents(events);
   m.actors.sync(s, m.clock.alpha, paused ? 0 : dt);
   m.fx.syncZones(s.zones, paused ? 0 : dt);
+  // Shape forms (the Druid's wolf): the body swaps to the form's look.
+  for (const p of s.players) { const a = m.actors.get(p.heroEnt); if (a?.body?.setForm && a._form !== (p.form || null)) { a._form = p.form || null; a.body.setForm(a._form); } }
   for (const t of s.teams) app.world.setBanners(t.id, t.bannersMax ? t.banners / t.bannersMax : 0);
   m.fx.update(paused ? 0 : dt);
   m.aim.update(dt);
@@ -709,6 +793,7 @@ function matchFrame(dt, frames) {
     if (v.onboarding.open && step !== 'send' && !paused) { v.obT += dt; if (v.obT > 14) v.onboarding.next(); }
     v.numbers.update(dt, v.project);
   }
+  m.overlay?.update(m.sim);
   if (m.sim.over && !m.shown) {
     m.overDelay -= dt;
     if (m.overDelay <= 0) {
@@ -720,6 +805,17 @@ function matchFrame(dt, frames) {
       app.session.last = r.winner === -1 ? { cls: 'draw', text: 'Last battle: a draw' }
         : localTeams.length > 1 ? { cls: 'win', text: `Last battle: the ${['Blue', 'Red'][r.winner]} banner won` }
         : { cls: r.winner === localTeams[0] ? 'win' : 'lose', text: r.winner === localTeams[0] ? 'Last battle: Victory' : 'Last battle: Defeat' };
+      if (m.session.campaign) {
+        const mission = m.session.campaign, next = nextMissionOf(mission);
+        const card = $('results-card');
+        showDebrief({ card, sim: m.sim, mission, progress: app.progress, next,
+          onNext: (n) => playMission(n), onRetry: (mi) => playMission(mi), onMap: () => showCampaign() });
+        const nav = createMenuNav(card, { selector: 'button', onBack: () => showCampaign() });
+        nav.focus(card.querySelector('[data-act="next"]') || card.querySelector('button'));
+        const shownAt = performance.now();
+        app.results = { frame(f) { if (performance.now() - shownAt > 600) nav.handle(f); } };
+        return;
+      }
       app.results = showResults({
         card: $('results-card'), sim: m.sim, players: m.views.map((v) => v.player), online: !!m.net,
         onLobby: () => { if (m.net) { if (m.net.room.isHost) m.net.room.backToLobby(); showNetRoom(); } else showLobby(); },
@@ -739,6 +835,17 @@ function dimCursor() {
 function frame(dt) {
   const frames = app.devices.poll();
   if (app.world) app.world.update(dt);
+  for (const [id, f] of frames) if (f.rawPressed?.length) app.lastDevice = id;
+  if (app.screen === 'campaign' && app.campaignScreen) {
+    // The campaign screen reads the keyboard itself; pads drive it through nav/confirm/back.
+    for (const [id, f] of frames) {
+      if (id === 'kbm') continue;
+      const p = f.pressed;
+      if (p.has('navUp')) app.campaignScreen.nav(0, -1); if (p.has('navDown')) app.campaignScreen.nav(0, 1);
+      if (p.has('navLeft')) app.campaignScreen.nav(-1, 0); if (p.has('navRight')) app.campaignScreen.nav(1, 0);
+      if (p.has('confirm')) app.campaignScreen.confirm(); if (p.has('back')) app.campaignScreen.back();
+    }
+  }
   if (app.screen === 'title') app.title.frame && frames.forEach((f) => app.title.frame(f));
   else if (app.screen === 'modes') frames.forEach((f) => app.modes.frame(f));
   else if (app.screen === 'lobby') app.lobby.frame(frames, dt);

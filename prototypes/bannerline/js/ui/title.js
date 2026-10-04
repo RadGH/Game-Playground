@@ -3,7 +3,7 @@
 
 import { createMenuNav } from './menunav.js';
 
-export function createTitle({ screen, onPlay, onHost = () => {}, onJoin = () => {} }) {
+export function createTitle({ screen, onPlay, onHost = () => {}, onJoin = () => {}, onCampaign = () => {} }) {
   const menu = screen.querySelector('#title-menu');
   const nav = createMenuNav(menu, { initial: '.primary' });
   menu.addEventListener('click', (e) => {
@@ -11,6 +11,7 @@ export function createTitle({ screen, onPlay, onHost = () => {}, onJoin = () => 
     if (act === 'play') onPlay();
     if (act === 'host') onHost();
     if (act === 'join') onJoin();
+    if (act === 'campaign') onCampaign();
   });
   let shownAt = 0;
   return {

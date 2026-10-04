@@ -91,3 +91,20 @@ test('mode hooks: hvf is registered but not playable; per-mode data loads as dat
     assert.equal(sim.state.game, 'probe');
   } finally { delete MODES.probe; }
 });
+
+test("a mode's own command handlers run BEFORE line war's (e.g. its own move); line war has none", async () => {
+  const { MODES } = await import('../js/sim/modes/index.js');
+  assert.deepEqual(Object.keys(MODES.linewar.commands || {}), []);
+  const seen = [];
+  MODES.probe2 = { ...MODES.linewar, id: 'probe2', formats: ['1v1'], defaultFormat: '1v1', commands: { move: (ctx, p, cmd) => { seen.push(cmd.x); return null; }, surrender: () => 'notHere' } };
+  try {
+    const s = createSim({ seed: 3, mode: 'probe2', format: '1v1', players: [
+      { team: 0, kind: 'human', race: 'freeholds', hero: 'warrior' }, { team: 1, kind: 'human', race: 'freeholds', hero: 'warrior' }] }, data);
+    const hero = s.state.ents.find(e => e.kind === 'hero');
+    s.step([{ p: 0, type: 'move', x: 5, z: 5 }, { p: 0, type: 'surrender' }]);
+    assert.deepEqual(seen, [5]);
+    assert.equal(hero._ord.k, 'idle', 'line war move did not run');
+    assert.equal(s.state.result, null, 'the mode refused surrender');
+    assert.equal(s.drainEvents().find(e => e.type === 'reject').reason, 'notHere');
+  } finally { delete MODES.probe2; }
+});

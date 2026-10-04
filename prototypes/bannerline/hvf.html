@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hunters vs Farmers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@500;700;800&family=Barlow+Semi+Condensed:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../../shared/tooltip.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/hvf.css">
+<script type="importmap">{ "imports": { "three": "../../vendor/three/three.module.js", "three/addons/": "../../vendor/three/addons/" } }</script>
+</head>
+<body>
+<!-- Hunters vs Farmers on its own (stream H): the same mode the main menu opens, without the line-war
+     front end. ?role=farmer|hunter&format=5v2&seed=7&speed=4&start=1 skips the setup card. -->
+<div id="app">
+  <canvas id="view" aria-label="The forest"></canvas>
+  <section id="hvf-host" class="screen hvf-host"></section>
+  <div id="boot" class="boot">Growing the forest…</div>
+</div>
+<script type="module" src="js/ui/hvf/page.js"></script>
+</body>
+</html>

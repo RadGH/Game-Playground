@@ -127,7 +127,7 @@ export function createNetLobby({ screen, data, devices, onLeave, heroes: heroLis
     justJoined = new Set([...justJoined].filter((id) => frames.get(id)?.held.has('join')));
     // The host starts by itself two seconds after every seat is ready (pad-only hosts have no mouse).
     if (room?.isHost && state.phase === 'lobby') {
-      if (canStart()) { readyFor += 1 / 60; if (readyFor > 2 && !started) { started = true; try { room.start(app().startOpts?.() || {}); } catch (e) { toast = e.message; render(); } } }
+      if (canStart()) { if (!readyFor) readyFor = performance.now(); if (performance.now() - readyFor > 2000 && !started) { started = true; try { room.start(app().startOpts?.() || {}); } catch (e) { toast = e.message; render(); } } }
       else { readyFor = 0; started = false; }
     }
   }

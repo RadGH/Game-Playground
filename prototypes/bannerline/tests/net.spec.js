@@ -98,8 +98,9 @@ async function nodeReplayLog() {
     if (c.length) commands.push([t, c]);
     sim.step(c);
     if (t % every === 0) hashes[t] = sim.hash();
+    if (sim.over) break;   // the match may end before the log does
   }
-  return { log: { config, commands, ticks, every }, hashes, final: sim.hash(), dataHash: data.hash };
+  return { log: { config, commands, ticks, every }, hashes, final: sim.hash(), dataHash: data.hash, endTick: sim.tick };
 }
 
 for (const [engine, launcher] of [['firefox', firefox], ['chromium', chromium]]) {
@@ -115,6 +116,7 @@ for (const [engine, launcher] of [['firefox', firefox], ['chromium', chromium]])
       expect(got.dataHash).toBe(ref.dataHash);
       for (const t of Object.keys(ref.hashes)) expect(got.hashes[t], `tick ${t} in ${engine}`).toBe(ref.hashes[t]);
       expect(got.final).toBe(ref.final);
+      expect(Object.keys(ref.hashes).length).toBeGreaterThan(5);   // a real stretch of match was compared
     } finally { await browser.close(); }
   });
 }

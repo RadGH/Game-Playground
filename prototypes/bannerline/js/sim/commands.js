@@ -22,6 +22,10 @@ export function applyCommand(ctx, cmd) {
   if (!cmd || typeof cmd !== 'object' || typeof cmd.p !== 'number' || !state.players[cmd.p]) return reject('bad', -1);
   const p = state.players[cmd.p];
   if (state.result) return reject('over');
+  // a mode's own command handlers come FIRST (Hunters vs Farmers has its own move/attack/surrender);
+  // line war registers none, so it falls through to the switch below unchanged
+  const own = ctx.mode && ctx.mode.commands && Object.prototype.hasOwnProperty.call(ctx.mode.commands, cmd.type) ? ctx.mode.commands[cmd.type] : null;
+  if (own) { const why = own(ctx, p, cmd); return why ? reject(why) : null; }
   const hero = state.ents.find(e => e.id === p.heroEnt);
   const ord = k => { if (!hero || !hero.alive) return reject('dead'); hero._ord = { k, x: 0, z: 0, target: -1, dir: 0, speed: 0 }; return null; };
 
@@ -114,11 +118,7 @@ export function applyCommand(ctx, cmd) {
       ctx.emit('result', { winner: state.result.winner, reason: 'surrender' });
       return null;
     }
-    default: {
-      const own = ctx.mode && ctx.mode.commands && ctx.mode.commands[cmd.type];   // a mode's extra commands (R2.10)
-      if (own) { const why = own(ctx, p, cmd); return why ? reject(why) : null; }
-      return reject('bad');
-    }
+    default: return reject('bad');
   }
 }
 

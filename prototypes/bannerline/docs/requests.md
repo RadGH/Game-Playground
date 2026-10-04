@@ -409,3 +409,43 @@ if (app.screen === 'hvf') app.hvf.frame(dt);
   - The gate-queue test asserts that the queue moves: the front send waits less than 30 s, and before the final 3 min
     the queue empties at least every 90 s. It no longer asserts a fixed peak (that peak was 139 in the final push).
   - Matchups stays skipped (freeholds/pyromancer 89%, a balance issue).
+- [ ] (B -> D) **Rejoin after a reload stalls in a real browser (two bugs in js/net/lockstep.js, D's file).**
+  B's side is in (main.js: room code + token in sessionStorage during an online match, a "Rejoin your match"
+  title button after a reload, `joinRoom({ rejoinToken })` -> `beginMatch(..., { rejoin })`, waits for the
+  snapshot, then starts the view). Measured on two pages (?net=channel): the resync lands and the view runs,
+  then both machines stall a few ticks later and the seat is never released back (stays `ai`).
+  1. `resync` sets `startAt = msg.rejoin.startAt` — the HOST's `performance.now()` value. Page clocks have
+     different origins (a reloaded page's clock restarts near 0), so the guest's `target(now)` stays at 0,
+     `sealInputs` never seals tick >= fromTick, the host waits for it forever. Send the age instead
+     (`elapsed = hostNow - startAt`) and set `startAt = localNow - elapsed` (minus half the ping). The loopback
+     test shares one virtual clock, which is why it passes.
+  2. `myPlayers` is computed once from `machine(me)`; a rejoining machine has a new id, so it is empty and the
+     guest's own commands are filtered out of its inputs even after the seat is released. Recompute it in the
+     `resync` rejoin branch from the new machine list. (The lockstep test's last assert, `sends > host - 1`,
+     passes even when the guest sends nothing.)
+  Repro: tests/online-ui.spec.js `test.fixme('rejoin after a reload ...')` — un-fixme it when fixed.
+- [x] (B) Host kick button on each machine in the online room (room.kick); host "Replace with AI" button on the
+  "Waiting for X" banner after 10 s (lockstep.replaceWithAI).
+
+## Stream E (AI) — Hunters vs Farmers AI (H4), 2026-10-03
+
+- [x] (E -> H, done by E, small) Wired the AI in: `js/sim/modes/hvf/index.js` imports `hvfAi` from `./ai/index.js`
+  (`ai: hvfAi`) and `DATA_FILES` gains `'hvf/ai.json'`; `js/sim/data.js` `MODE_DATA_FILES` gains it too (A's file,
+  one entry). Nothing else in H's or A's files was touched.
+- [ ] (E -> H) Fog leak in the sim: a hunter's `attack` order keeps chasing (and re-pathing to) its target after
+  the hunter can no longer see it (units.js `attack` checks visibility only when the order is given). A human can
+  click a farmer once and follow him through the trees forever. The AI plays fair (it drops the order and walks to
+  the last place it saw him); suggest the sim drop an attack whose target has been out of sight for ~1 s.
+- [ ] (E -> H) Performance: `findPath` with the default `maxNodes` 30000 walks most of a 160x160 map when the goal
+  cannot be reached; the attack chase re-paths every 10 ticks. That is where the 20-60 ms worst ticks on 9v3 come
+  from (average with 12 Commander seats is 0.33 ms). A lower cap for re-paths, or remembering a failed goal for a
+  second, would remove the spikes. The AI already caches its own failed routes for 5 s.
+- [ ] (E -> H, FYI) `p.copies` never goes down when a building is destroyed, so rebuilding a lost coop costs the
+  next copy's price. Intended? (The AI reads `priceOf`, so either way works.)
+- [ ] (E -> A) `tests/modes.test.js` "mode hooks: hvf is registered but not playable" fails since HvF became
+  playable (index.js `playable: true`, commit 7566368). The assertion needs flipping.
+- [ ] (E -> lead) HvF balance notes (not tuned, owner: balance later): farmers start at 60 g and a coop pays
+  0.3 g/s, so for the first two minutes there is almost nothing to hide; most downs happen in chases (the hunter
+  with a Pony is faster than a farmer, and the spear reaches 8 m). In 3v1 over 40 seeds hunters win 7-27 of 40
+  depending on the farmers' level; most matches end on the clock. Recruit farmers out-earn Veterans because
+  building in the open has no penalty except being found.

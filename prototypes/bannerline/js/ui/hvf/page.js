@@ -19,6 +19,7 @@ async function boot() {
   const game = createHvfGame({ gfx, data, host: $('hvf-host'), params, devices, transportKind: params.get('net') || 'peerjs', onExit: () => { location.href = './'; } });
   window.hvfGame = game;
   $('boot').classList.add('done'); setTimeout(() => $('boot').remove(), 500);
+  if (params.get('start')) await game.ready;
   if (params.get('start')) game.start({ seats: [{ role: params.get('role') || 'farmer', device: 'kbm' }], format: params.get('format') || data.hvf.rules.defaultFormat, ai: params.get('ai') || 'recruit', speed: Number(params.get('speed')) || 1, seed: params.get('seed') ? Number(params.get('seed')) : null });
   else game.openSetup();
   let last = performance.now();

@@ -32,6 +32,7 @@ import { createLocalClock } from '../../clock.js';
 import { createSim, restoreSim, TICK_MS } from '../../sim/sim.js';
 import { createHvfWorld, groundY } from '../../view/hvf/world.js';
 import { createHvfActors } from '../../view/hvf/actors.js';
+import { loadHvfModels } from '../../view/hvf/models.js';
 import { createHvfHud, REASONS } from './hud.js';
 import { createMenuNav } from '../menunav.js';
 import * as Q from '../../sim/modes/hvf/query.js';
@@ -49,6 +50,8 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
   const rules = data.hvf.rules;
   let m = null;                  // the running match
   let setup = null;              // the setup card { el, nav, seats }
+  let models = null;             // stream C's art (js/view/hvf/models.js), loaded in the background; stand-ins until then
+  const ready = params.get('models') !== '0' ? loadHvfModels().then((x) => { models = x; }) : Promise.resolve();
   const choice = { format: rules.defaultFormat, ai: 'veteran', speed: 1, seed: null, seats: [{ role: 'farmer', device: null }] };
   const devLabel = (id) => (!id ? 'press A / Enter to join' : id === 'kbm' ? 'Keyboard + mouse' : (devices?.get(id)?.label || 'Controller'));
 
@@ -206,7 +209,7 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
     for (const v of vpsWas) gfx.removeViewport(v);
     const simNow = () => (net ? net.clock.sim || sim : sim);
     const world = createHvfWorld(scene, sim.map);
-    const actors = createHvfActors({ scene, map: sim.map, data, fogify: world.fogify, localTeam: sim.state.players[local[0].player].team });
+    const actors = createHvfActors({ scene, map: sim.map, data, fogify: world.fogify, localTeam: sim.state.players[local[0].player].team, models });
     host.hidden = false;
     m = { get sim() { return simNow(); }, map: sim.map, net, clock, world, actors, views: [], opts, hidden, sceneWas, vpsWas, queue: [], over: false, overT: 1.5, paused: false, frameDt: 0, lastFogTick: -1 };
     const n = local.length;
@@ -616,6 +619,8 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
   // test hooks
   const api = {
     openSetup, start, frame, end, online,
+    /** Resolves once stream C's models are in (a match started before then uses the stand-ins). */
+    ready,
     get active() { return !!m || !!setup; },
     get match() { return m; },
     get choice() { return choice; },

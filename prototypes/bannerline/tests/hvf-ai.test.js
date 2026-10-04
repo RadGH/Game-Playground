@@ -14,8 +14,8 @@
 // Measured with the scratch harness on 40 seeds (2026-10-03, 3v1): hunters beat Recruit farmers 15/40,
 // Veteran 12/40, Commander 7/40; first farm found at 1.9 / 3.1 / 3.1 min. Recruit / Veteran / Commander
 // hunters win 5 / 8 / 9 of 30 against Veteran farmers and down 2.5 / 2.8 / 3.2 farmers a match. On this file's
-// seeds over 12 minutes: careless farms found at 3.0 min vs careful 6.6; hunter downs Commander 20 vs Recruit
-// 10; farmers downed Commander 12 vs Recruit 17.
+// seeds: careless farms found at 3.0 min vs careful 6.6 (12 min); farmers downed by Commander hunters 38 vs
+// Recruit 27 and their gold 38k vs 50k (16 seeds, 15 min); Commander farmers downed 14 times vs Recruit 27.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHvf, restoreHvf, seats, data, hvfData, ent } from './hvf-helpers.mjs';
@@ -227,7 +227,8 @@ function play(fd, hd, seed, format = '3v1', minutes = 12) {
     for (const e of s.drainEvents()) { if (e.type === 'farmerDown') downs++; if (e.type === 'reject') rejects++; }
     if (find == null && s.state.hvf.seen[1].length) find = s.tick;
   }
-  return { find: find ?? minutes * 1200, downs, hunters: !!(s.state.result && s.state.result.winner === 1), rejects };
+  const earned = s.state.players.filter(p => p.role === 'farmer').reduce((a, p) => a + p.stats.earned, 0);
+  return { find: find ?? minutes * 1200, downs, earned, hunters: !!(s.state.result && s.state.result.winner === 1), rejects };
 }
 
 test('the same hunter finds a careless (Recruit) farm sooner than a careful (Commander) one', () => {
@@ -236,16 +237,20 @@ test('the same hunter finds a careless (Recruit) farm sooner than a careful (Com
   assert.ok(rec < com, `recruit farms found after ${(rec / 8 / 1200).toFixed(1)} min, commander farms after ${(com / 8 / 1200).toFixed(1)} min`);
 });
 
-test('strength: Commander hunters down more farmers than Recruit hunters; Commander farmers are caught less than Recruit farmers', () => {
-  let hr = 0, hc = 0, fr = 0, fc = 0;
-  for (let i = 0; i < 8; i++) {
-    hr += play('veteran', 'recruit', 800 + i).downs;
-    hc += play('veteran', 'commander', 800 + i).downs;
-    fr += play('recruit', 'veteran', 800 + i).downs;
-    fc += play('commander', 'veteran', 800 + i).downs;
+test('strength (hunters): Commander hunters down more farmers and cost them more gold than Recruit hunters (16 seeds, 15 min)', () => {
+  let dr = 0, dc = 0, er = 0, ec = 0;
+  for (let i = 0; i < 16; i++) {
+    const r = play('veteran', 'recruit', 820 + i, '3v1', 15), c = play('veteran', 'commander', 820 + i, '3v1', 15);
+    dr += r.downs; dc += c.downs; er += r.earned; ec += c.earned;
   }
-  assert.ok(hc > hr, `hunters: commander downs ${hc} vs recruit ${hr}`);
-  assert.ok(fc < fr, `farmers: commander downed ${fc} times vs recruit ${fr}`);
+  assert.ok(dc > dr, `farmers downed: commander hunters ${dc} vs recruit ${dr}`);
+  assert.ok(ec < er, `farmers earned: under commander hunters ${Math.round(ec)} vs recruit ${Math.round(er)}`);
+});
+
+test('strength (farmers): Commander farmers are downed less often than Recruit farmers (8 seeds, 12 min)', () => {
+  let fr = 0, fc = 0;
+  for (let i = 0; i < 8; i++) { fr += play('recruit', 'veteran', 800 + i).downs; fc += play('commander', 'veteran', 800 + i).downs; }
+  assert.ok(fc < fr, `farmers downed: commander ${fc} vs recruit ${fr}`);
 });
 
 // ── legality, determinism, own streams ───────────────────────────────────────────────────────────
@@ -280,4 +285,13 @@ test('each seat draws only from its own stream', () => {
   for (let k = 0; k < 5; k++) think(s, 0);
   assert.deepEqual(s.state.players.slice(1).map(p => p.ai.rng), others);
   assert.equal(JSON.stringify(s.state.rng), shared);
+});
+
+test('budget: nine Commander farmers and three Commander hunters stay well inside the tick on average', () => {
+  const s = createHvf({ format: '9v3', seed: 11, players: aiSeats('9v3', 'commander', 'commander') }, data, { events: false });
+  const t0 = process.hrtime.bigint();
+  let n = 0;
+  while (!s.over && s.tick < 6 * 1200) { s.step(); n++; }
+  const ms = Number(process.hrtime.bigint() - t0) / 1e6 / n;
+  assert.ok(ms < 1.5, `${ms.toFixed(3)} ms a tick`);
 });

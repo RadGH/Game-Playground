@@ -5,7 +5,9 @@
 //   * online: two pages over BroadcastChannel (stream D's transport + lockstep), co-op farmers vs AI
 //     hunters, the same state hash at tick 1200
 import { test, expect } from '@playwright/test';
-import { PADMOCK, STD, tap } from './helpers/padmock.js';
+import { PADMOCK, STD, tap as tap0 } from './helpers/padmock.js';
+// headless WebGL with the real models runs at a few frames a second: hold each press long enough to be polled
+const tap = (page, i, b, hold = 700) => tap0(page, i, b, hold);
 
 const PAGE = 'prototypes/bannerline/hvf.html';
 const errorsOf = (page) => { const e = []; page.on('pageerror', (x) => e.push(x.message)); return e; };
@@ -56,6 +58,7 @@ test('pad only: join, start, walk, build a coop from the build menu', async ({ p
     await tap(page, 0, STD.A);
     await page.waitForTimeout(2500);
   }
+  if ((await built()) !== 1) console.log('pad build log', await page.evaluate(() => JSON.stringify({ v: window.hvf.match.views[0].placing, g: window.hvf.match.views[0].ground, gold: window.hvf.state().players[0].gold })));
   expect(await built(), 'a coop placed by pad').toBe(1);
   expect(await page.evaluate(() => window.__kbmEvents)).toBe(0);
   await page.screenshot({ path: 'test-results/hvf-pad.png' });

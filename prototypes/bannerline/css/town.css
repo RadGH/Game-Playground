@@ -95,7 +95,7 @@
 .bk-afford { position: absolute; right: 6px; top: 4px; font: 800 13px var(--ui); color: var(--ink); font-variant-numeric: tabular-nums; }
 .bk-card.can .bk-afford { color: #ffe39a; }
 .bk-key { position: absolute; right: 4px; bottom: 4px; font-size: 10px; line-height: 13px; padding: 0 3px; min-width: 0; }
-.bk-pop { position: absolute; left: 50%; top: 0; pointer-events: none; }
+.bk-pop { position: absolute; right: 30px; top: -4px; pointer-events: none; z-index: 3; }
 
 /* ---------- Outfitter ---------- */
 .ot-main { display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto; gap: 8px; min-height: 0; }

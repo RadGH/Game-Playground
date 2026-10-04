@@ -830,14 +830,36 @@ function matchFrame(dt, frames) {
     // Hint cards after the first step move on by themselves so they never block play (pads have no
     // spare button for "Next"); the first one waits for an actual send.
     const step = v.onboarding.step;
-    if (step !== v.obStep) { v.obStep = step; v.obT = 0; }
-    if (v.onboarding.open && step !== 'send' && !paused) { v.obT += dt; if (v.obT > 14) v.onboarding.next(); }
+    if (step !== v.obStep) { v.obStep = step; v.obAt = performance.now(); }
+    if (v.onboarding.open && step !== 'send' && !paused && performance.now() - v.obAt > 14000) v.onboarding.next();
+    // Down: a dim screen and a big "back in N" so a death is never confusing.
+    const me = s.players[v.player];
+    const heroE = s.ents.find((e) => e.id === me.heroEnt);
+    const down = heroE && heroE.alive === false;
+    if (down !== v.wasDown) { v.wasDown = down; v.root.classList.toggle('hero-down', !!down); }
+    if (down) {
+      if (!v.downEl) { v.downEl = document.createElement('div'); v.downEl.className = 'down-card'; v.hudRoot.append(v.downEl); }
+      const secs = Math.max(0, Math.ceil(((heroE.respawnAt ?? s.tick) - s.tick) / (m.sim.data.econ?.clock?.tickHz || 20)));
+      const txt = `<b>Your hero has fallen</b><span>Back at the Outfitter in <i>${secs}</i></span><small>Your units still march, and your town still works — hire, train and cast powers meanwhile.</small>`;
+      if (v.downEl._t !== txt) { v.downEl._t = txt; v.downEl.innerHTML = txt; }
+    } else if (v.downEl) { v.downEl.remove(); v.downEl = null; }
     v.numbers.update(dt, v.project);
   }
   m.overlay?.update(m.sim);
   if (m.sim.over && !m.shown) {
-    m.overDelay -= dt;
-    if (m.overDelay <= 0) {
+    // The result word shows at once over the field; the results card follows after a beat (wall clock).
+    if (!m.overAt) {
+      m.overAt = performance.now();
+      const r = s.result, localTeams = [...new Set(m.views.map((v) => v.myTeam))];
+      const word = r.winner === -1 ? 'Draw' : localTeams.length > 1 ? `${['Blue', 'Red'][r.winner]} banner wins` : r.winner === localTeams[0] ? 'Victory' : 'Defeat';
+      for (const v of m.views) {
+        const el = document.createElement('div');
+        el.className = 'end-word ' + (word === 'Defeat' ? 'lose' : 'win');
+        el.textContent = word;
+        v.hudRoot.append(el);
+      }
+    }
+    if (performance.now() - m.overAt > 2200) {
       m.shown = true;
       for (const v of m.views) { v.hud.setPaused?.(false); for (const p of Object.values(v.panels)) p.setOpen(false); endAim(v); v.onboarding.close(); }
       setScreen('results');

@@ -28,8 +28,9 @@ export function routeBudget(state) {
 const whoOf = e => (e.kind === 'hunter' || e.kind === 'army' ? 'hunter' : 'farmer');
 
 /** Would the sim find a route for `e` to cell `goal` (same options as units.js routeTo)? */
-export function canRoute(ctx, e, goal, near = false, closest = false) {
-  const path = findPath(ctx, liveGrid(ctx), cellOf(ctx.map, e.x, e.z), goal, { who: whoOf(e), near, closest });
+export function canRoute(ctx, e, goal, near = false, closest = false, maxNodes) {
+  // (the same search the sim runs; maxNodes caps it for "is it a SHORT walk?" questions)
+  const path = findPath(ctx, liveGrid(ctx), cellOf(ctx.map, e.x, e.z), goal, { who: whoOf(e), near, closest, maxNodes });
   return path ? path : null;
 }
 

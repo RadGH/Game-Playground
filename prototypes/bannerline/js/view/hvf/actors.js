@@ -110,7 +110,7 @@ function miscModel(kind) {
 
 // ── the actor set ─────────────────────────────────────────────────────────────────────────────────
 
-export function createHvfActors({ scene, map, data, fogify, localTeam }) {
+export function createHvfActors({ scene, map, data, fogify, localTeam, models = null }) {
   const group = new THREE.Group();
   group.name = 'hvf-actors';
   scene.add(group);
@@ -129,6 +129,24 @@ export function createHvfActors({ scene, map, data, fogify, localTeam }) {
     group.add(m);
     herds[kind] = m;
   }
+  // stream C's art when it loaded (js/view/hvf/models.js); the stand-ins above otherwise
+  const animalScale = { hen: 1.5, sheep: 1.45, pig: 1.4, cow: 1.45 };
+  if (models) {
+    for (const mm of models.materials()) { fogify(mm); mm.needsUpdate = true; }
+    const lam = fogify(new THREE.MeshLambertMaterial({ vertexColors: true }));
+    for (const kind of Object.keys(herds)) models.animal(kind).then(({ geometry }) => {
+      const h = herds[kind]; if (!h.parent) return;
+      h.geometry.dispose(); h.geometry = geometry; h.material = lam; h.userData.shared = true; h.userData.s = animalScale[kind] || 1.4;
+    }).catch(() => {});
+  }
+  const colourOf = (e, state) => (e.team === 1 ? HUNTER_COLOUR : FARMER_COLOURS[(state.players[e.owner]?.colour ?? 0) % FARMER_COLOURS.length]);
+  const LINKED = { fence: 1, wall: 1, hedge: 1 };
+  let linkMap = null;
+  const maskOf = (e) => {
+    if (!LINKED[e.type] || !e.cells) return 0;
+    const c = e.cells[0], x = c % map.cols, z = (c / map.cols) | 0, same = (cx, cz) => linkMap.get(cz * map.cols + cx) === e.type;
+    return (same(x, z - 1) ? 1 : 0) | (same(x + 1, z) ? 2 : 0) | (same(x, z + 1) ? 4 : 0) | (same(x - 1, z) ? 8 : 0);
+  };
   const graves = new Map();
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), s3 = new THREE.Vector3(1.5, 1.5, 1.5),   // animals drawn a little large so a flock reads from the RTS camera
   p3 = new THREE.Vector3(), Y = new THREE.Vector3(0, 1, 0);
@@ -145,6 +163,19 @@ export function createHvfActors({ scene, map, data, fogify, localTeam }) {
   }
 
   function makeItem(e, state, ghost = false) {
+    if (models) {
+      try {
+        if (e.kind === 'building' || e.kind === 'ward' || e.kind === 'snare') {
+          const def = BK[e.type], size = def ? def.size : null, mask = maskOf(e);
+          const obj = models.building(e.kind === 'building' ? e.type : e.kind, { color: colourOf(e, state), w: size ? size[0] * map.cell : null, d: size ? size[1] * map.cell : null, mask, seed: e.id });
+          group.add(obj.group);
+          return { mesh: obj.group, ent: e, obj, mask };
+        }
+        if (e.kind === 'farmer' || e.kind === 'hunter') { const b = models.body(e.kind, colourOf(e, state)); group.add(b.object); return { mesh: b.object, ent: e, body: b }; }
+        if (e.kind === 'army') { const b = models.creature('army', e.type); group.add(b.object); return { mesh: b.object, ent: e, body: b }; }
+        if (e.kind === 'hound' || e.kind === 'hawk') { const b = models.creature('pets', e.kind); group.add(b.object); return { mesh: b.object, ent: e, body: b }; }
+      } catch (err) { /* no look for this one: the stand-in below */ }
+    }
     const mesh = new THREE.Mesh(modelFor(e, state), ghost ? ghostMat : mat);
     mesh.name = 'hvf-' + e.kind + ':' + e.type;
     if (e.type === 'windmill') {
@@ -161,8 +192,10 @@ export function createHvfActors({ scene, map, data, fogify, localTeam }) {
    * Draw the state for `team` (what that team may see). alpha: interpolation between ticks.
    * visible(e) -> bool from the sim's query; remembered: [{id, kind, x, z}] enemy buildings.
    */
+  function dropItem(id, it) { group.remove(it.mesh); it.obj?.dispose(); it.body?.dispose(); items.delete(id); }
   function sync(state, alpha, dt, visible, remembered) {
     t += dt;
+    if (models) { linkMap = new Map(); for (const e of state.ents) if (e.kind === 'building' && LINKED[e.type] && e.alive && !e._gone && e.cells) linkMap.set(e.cells[0], e.type); }
     const seen = new Set();
     const counts = {};
     for (const k of Object.keys(herds)) counts[k] = 0;
@@ -176,6 +209,7 @@ export function createHvfActors({ scene, map, data, fogify, localTeam }) {
         p3.set(x, groundY(map, x, z) + (moving ? Math.abs(Math.sin(t * 9 + e.id)) * 0.08 : 0), z);
         q.setFromAxisAngle(Y, e.face || 0);
         m4.compose(p3, q, s3);
+        if (h.userData.s) { s3.setScalar(h.userData.s); m4.compose(p3, q, s3); s3.setScalar(1.5); }
         h.setMatrixAt(counts[e.type]++, m4);
         continue;
       }
@@ -185,6 +219,7 @@ export function createHvfActors({ scene, map, data, fogify, localTeam }) {
       if (!visible(e)) continue;
       seen.add(e.id);
       let it = items.get(e.id);
+      if (it && it.obj && LINKED[e.type] && maskOf(e) !== it.mask) { dropItem(e.id, it); it = null; }   // a fence that gained a neighbour re-joins
       if (!it) { it = makeItem(e, state); items.set(e.id, it); }
       it.ent = e;
       const x = e.px + (e.x - e.px) * alpha, z = e.pz + (e.z - e.pz) * alpha;
@@ -197,9 +232,19 @@ export function createHvfActors({ scene, map, data, fogify, localTeam }) {
         const moving = Math.abs(e.x - e.px) + Math.abs(e.z - e.pz) > 0.001;
         it.mesh.position.y += moving ? Math.abs(Math.sin(t * 10 + e.id)) * 0.1 : 0;
       }
-      if (e.kind === 'building' && e.done === false) it.mesh.scale.setScalar(0.55 + 0.45 * (e.hp / e.hpMax));
+      if (it.obj) {
+        if (e.done === false) it.obj.setProgress(e.hp / e.hpMax); else it.obj.setProgress(1);
+        it.obj.setDamage(e.hpMax > 0 ? 1 - e.hp / e.hpMax : 0);
+        if (dt > 0) it.obj.update(dt);
+      } else if (e.kind === 'building' && e.done === false) it.mesh.scale.setScalar(0.55 + 0.45 * (e.hp / e.hpMax));
       else if (e.kind === 'building') it.mesh.scale.setScalar(1);
-      const sails = it.mesh.getObjectByName('sails'); if (sails) sails.rotation.z = t * 0.8;
+      if (it.body) {
+        const moving = Math.abs(e.x - e.px) + Math.abs(e.z - e.pz) > 0.001;
+        if (moving) it.body.setAnim('walk'); else if (e.ord && e.ord.k === 'attack' && (e._atkAt || 0) > state.tick - 25) it.body.setAnim('attack'); else it.body.setAnim('ready');
+        if (dt > 0) it.body.update(dt, t);
+        it.mesh.position.y = y;   // a real body walks; no bob
+      }
+      if (!it.obj) { const sails = it.mesh.getObjectByName('sails'); if (sails) sails.rotation.z = t * 0.8; }
       it.mesh.visible = true;
     }
     // remembered enemy buildings (grey where the fog keeps them)
@@ -208,26 +253,30 @@ export function createHvfActors({ scene, map, data, fogify, localTeam }) {
       const key = 'mem:' + m.id;
       seen.add(key);
       let it = items.get(key);
-      if (!it) { it = makeItem(live || { kind: 'building', type: m.kind, owner: 0 }, state, false); items.set(key, it); }
+      if (!it) { it = makeItem(live || { kind: 'building', type: m.kind, owner: 0, team: 0, id: m.id }, state, false); items.set(key, it); }
       it.mesh.position.set(m.x, groundY(map, m.x, m.z), m.z);
-      const sails = it.mesh.getObjectByName('sails'); if (sails && live && visible(live)) sails.rotation.z = t * 0.8;
+      if (!it.obj) { const sails = it.mesh.getObjectByName('sails'); if (sails && live && visible(live)) sails.rotation.z = t * 0.8; }
       it.mesh.visible = true;
     }
     for (const [k, h] of Object.entries(herds)) { h.count = counts[k]; h.instanceMatrix.needsUpdate = true; }
     for (const [id, it] of items) if (!seen.has(id)) {
       if (typeof id === 'string') { it.mesh.visible = false; continue; }   // a remembered building: kept for the other half of a split screen
       if (state.ents.some((e) => e.id === id && !e._gone && (e.kind !== 'farmer' && e.kind !== 'hunter' || e.alive))) { it.mesh.visible = false; continue; }
-      group.remove(it.mesh); items.delete(id);
+      dropItem(id, it);
     }
     // graves (everyone sees a grave: hunters may camp it)
     const gk = new Set();
     for (const g of state.hvf.graves) {
       gk.add(g.pid);
       let m = graves.get(g.pid);
-      if (!m) { m = new THREE.Mesh(geo('grave', () => miscModel('grave')), mat); group.add(m); graves.set(g.pid, m); }
+      if (!m) {
+        if (models) { const o = models.building('grave', { color: FARMER_COLOURS[(state.players[g.pid]?.colour ?? 0) % FARMER_COLOURS.length], seed: g.pid }); m = o.group; m.userData.obj = o; }
+        else m = new THREE.Mesh(geo('grave', () => miscModel('grave')), mat);
+        group.add(m); graves.set(g.pid, m);
+      }
       m.position.set(g.x, groundY(map, g.x, g.z), g.z);
     }
-    for (const [pid, m] of graves) if (!gk.has(pid)) { group.remove(m); graves.delete(pid); }
+    for (const [pid, m] of graves) if (!gk.has(pid)) { group.remove(m); m.userData.obj?.dispose(); graves.delete(pid); }
   }
 
   /** Screen picking: the entity under a ground point (characters, animals, buildings), or null. */
@@ -246,6 +295,6 @@ export function createHvfActors({ scene, map, data, fogify, localTeam }) {
     group, sync, pick, items,
     /** A free-standing model for the placement ghost. */
     ghostFor(kind) { const def = BK[kind]; return new THREE.Mesh(buildingModel(kind, def.size[0] * map.cell, def.size[1] * map.cell), ghostMat); },
-    dispose() { scene.remove(group); for (const g of geoCache.values()) g.dispose(); for (const h of Object.values(herds)) { h.geometry.dispose(); h.dispose(); } mat.dispose(); ghostMat.dispose(); },
+    dispose() { scene.remove(group); for (const g of geoCache.values()) g.dispose(); for (const [id, it] of items) dropItem(id, it); for (const h of Object.values(herds)) { if (!h.userData.shared) h.geometry.dispose(); h.dispose(); } mat.dispose(); ghostMat.dispose(); },
   };
 }

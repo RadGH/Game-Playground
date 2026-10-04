@@ -214,8 +214,8 @@ body.over-pad .dim-cursor { opacity: 1; }
 .tb-stat.income { position: relative; }
 .tb-stat.income.bump { animation: incBump .25s ease-out; }
 @keyframes incBump { 40% { transform: scale(1.18); color: #c8ffd0; } }
-.inc-float { position: absolute; left: 50%; top: -2px; transform: translateX(-50%); font: 800 14px var(--ui); color: #a6f0b4; text-shadow: 0 1px 3px #000; pointer-events: none; white-space: nowrap; animation: incFloat .9s ease-out forwards; z-index: 5; }
-@keyframes incFloat { from { opacity: 1; transform: translate(-50%, 0); } to { opacity: 0; transform: translate(-50%, 34px); } }
+.inc-float { position: absolute; left: 50%; top: 100%; transform: translateX(-50%); font: 800 14px var(--ui); color: #a6f0b4; text-shadow: 0 1px 3px #000; pointer-events: none; white-space: nowrap; animation: incFloat .9s ease-out forwards; z-index: 5; }
+@keyframes incFloat { from { opacity: 1; transform: translate(-50%, 2px); } to { opacity: 0; transform: translate(-50%, 30px); } }
 @container (max-width: 1000px) { .army-chip { bottom: 192px; left: 6px; font-size: 12px; } }
 
 /* building labels over the town buildings */
@@ -240,3 +240,16 @@ body.hall-hover #view { cursor: pointer; }
 .hall-label.k-shop { color: #8fd0ff; border-color: #4f86b0; }
 .hall-label.k-drillyard { color: #ffb08a; border-color: #b0704f; }
 .hall-label.k-sanctum { color: #d6b8ff; border-color: #8a6ad0; }
+
+/* hero down: dim the view, a clear card with the respawn count */
+.view-root.hero-down .overlay { background: radial-gradient(ellipse at center, rgba(40,6,4,0) 40%, rgba(40,6,4,.45)); }
+.view-root.hero-down::before { content: ''; position: absolute; inset: 0; pointer-events: none; backdrop-filter: grayscale(.7); z-index: 0; }
+.down-card { position: absolute; left: 50%; top: 38%; transform: translate(-50%, -50%); display: grid; gap: 4px; justify-items: center; padding: 14px 26px; border-radius: 12px; text-align: center; pointer-events: none;
+  background: rgba(20,8,6,.85); border: 1px solid rgba(224,80,62,.6); box-shadow: var(--shadow); animation: alertIn .3s; max-width: calc(100% - 32px); }
+.down-card b { font: 800 26px var(--head); color: #ffb0a2; }
+.down-card span { font-size: 16px; color: var(--ink); }
+.down-card i { font-style: normal; font: 800 24px var(--head); color: var(--gold); }
+.down-card small { color: var(--ink2); font-size: 13px; max-width: 360px; }
+/* the result word over the field before the results card */
+.end-word { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); font: 800 clamp(48px, 9vw, 110px)/1 var(--head); letter-spacing: .05em; pointer-events: none; text-shadow: 0 4px 0 #000, 0 0 40px rgba(0,0,0,.6); animation: countIn .7s ease-out; white-space: nowrap; z-index: 30; }
+.end-word.win { color: var(--gold); } .end-word.lose { color: #e8dccb; }

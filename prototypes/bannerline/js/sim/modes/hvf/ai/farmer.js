@@ -156,7 +156,7 @@ function staysOpen(ctx, area, block, h, me) {
 function reachable(ctx, area, blocked, h) {
   const { map } = ctx, g = liveGrid(ctx);
   const anchor = anchorOf(map, h);
-  const cx = Math.floor(h.x / map.cell), cz = Math.floor(h.z / map.cell), R = 26;
+  const cx = Math.floor(h.x / map.cell), cz = Math.floor(h.z / map.cell), R = 16;
   const ok = c => { const x = c % map.cols, z = (c / map.cols) | 0; return Math.abs(x - cx) <= R && Math.abs(z - cz) <= R && !blocked.has(c) && WALK_FARMER[g.cells[c]] && g.occ[c] !== 1; };
   let starts = anchor >= 0 && ok(anchor) ? [anchor] : [];
   if (!starts.length) {
@@ -192,18 +192,27 @@ function findSpot(ctx, p, kind, mode = 'base', careless = false) {
   else {
     cands = [];
     const R = Math.ceil((careless ? 40 : 28) / map.cell), cx = Math.floor(h.x / map.cell), cz = Math.floor(h.z / map.cell);
+    // nearest first (distance buckets: no engine sort), so the candidate cap below keeps the closest
+    const buckets = [];
     for (let dz = -R; dz <= R; dz += 1) for (let dx = -R; dx <= R; dx += 1) {
       const x = cx + dx, z = cz + dz;
       if (x < 1 || z < 1 || x >= map.cols - 1 || z >= map.rows - 1) continue;
       const c = z * map.cols + x;
-      if (g.cells[c] === KIND.grass || g.cells[c] === KIND.tallgrass || (careless && g.cells[c] === KIND.trail)) if (careless || td[c] >= 2 || area.has(c)) cands.push(c);
+      if (g.cells[c] === KIND.grass || g.cells[c] === KIND.tallgrass || (careless && g.cells[c] === KIND.trail)) if (careless || td[c] >= 2 || area.has(c)) {
+        const b = Math.floor(Math.sqrt(dx * dx + dz * dz));
+        (buckets[b] || (buckets[b] = [])).push(c);
+      }
     }
+    for (const b of buckets) if (b) for (const c of b) cands.push(c);
   }
   const ok = [];
   for (const c of cands) {
     const x = cellX(map, c) + (def.size[0] % 2 ? 0 : map.cell / 2), z = cellZ(map, c) + (def.size[1] % 2 ? 0 : map.cell / 2);
-    if (buildRefusal(ctx, rich, kind, x, z)) continue;
     const fp = footprint(map, def, x, z);
+    // the cheap grid test first (buildRefusal walks every entity)
+    if (!fp || fp.cells.some(f => !BUILDABLE[g.cells[f]] || g.occ[f] !== 0 || map.level[f] !== map.level[fp.cells[0]])) continue;
+    if (mode === 'near' && ok.length > 120) break;
+    if (buildRefusal(ctx, rich, kind, x, z)) continue;
     if (mode === 'base' && !fp.cells.every(f => area.has(f))) continue;
     if (mode === 'near' && !careless && fp.cells.some(f => td[f] < 2)) continue;   // never on a trail's shoulder (a careless farmer does not mind)
     const s = mode === 'near' ? -d2(fp.x, fp.z, me ? me.x : h.x, me ? me.z : h.z) : d2(fp.x, fp.z, mouth.x, mouth.z);
@@ -225,7 +234,7 @@ function findSpot(ctx, p, kind, mode = 'base', careless = false) {
     tries++;
     if (!staysOpen(ctx, area, ok[k].fp.cells, h, me)) continue;
     tried++;
-    const path = canRoute(ctx, me || { kind: 'farmer', x: h.x, z: h.z }, cellOf(map, ok[k].fp.x - 0.01, ok[k].fp.z - 0.01), true, false);
+    const path = canRoute(ctx, me || { kind: 'farmer', x: h.x, z: h.z }, cellOf(map, ok[k].fp.x - 0.01, ok[k].fp.z - 0.01), true, false, limit * limit * 2);
     if (path && path.length <= limit && path.length < bl) { bl = path.length; best = ok[k]; }
   }
   return best;
@@ -310,8 +319,16 @@ export function farmerThink(ctx, p, K, rng, cmd) {
   const F = K.farm;
   const route = (type, args, goal, near, closest) => {
     if (args.x != null) { args.x = Math.max(1, Math.min(map.size - 1, args.x)); args.z = Math.max(1, Math.min(map.size - 1, args.z)); goal = cellOf(map, args.x, args.z); }
+    // a route that just failed is not searched again for five seconds (a failed search walks the
+    // whole map; doing that every think is most of the AI's cost)
+    const key = type + ':' + goal;
+    if (m.fail && m.fail[key] > state.tick) return false;
     if (!routeBudget(state)) { m.retry = true; return false; }
-    if (!canRoute(ctx, me, goal, near, closest)) return false;
+    if (!canRoute(ctx, me, goal, near, closest)) {
+      if (!m.fail || Object.keys(m.fail).length > 24) m.fail = {};
+      m.fail[key] = state.tick + 100;
+      return false;
+    }
     cmd(type, args); return true;
   };
   const busy = me.ord && me.ord.k !== 'idle' && me.ord.k !== 'move';
@@ -328,8 +345,12 @@ export function farmerThink(ctx, p, K, rng, cmd) {
   // staying put (Veteran+ check whether the hunter could actually reach them first)
   let reachable = true;
   if (near && nd < F.fleeAt && F.door && nd > 4) {
-    const path = canRoute(ctx, near, cellOf(map, me.x, me.z), true, false);
-    reachable = !!path && path.length < 60;
+    // (asked at most once a second: the answer only changes when a hedge falls)
+    if (!m.safe || state.tick - m.safe.at >= 20 || m.safe.id !== near.id) {
+      const path = canRoute(ctx, near, cellOf(map, me.x, me.z), true, false, 4000);
+      m.safe = { at: state.tick, id: near.id, ok: !!path && path.length < 60 };
+    }
+    reachable = m.safe.ok;
   }
   if (near && nd < F.fleeAt && reachable) {
     const after = near.ord && near.ord.k === 'attack' && near.ord.target === me.id;
@@ -343,7 +364,7 @@ export function farmerThink(ctx, p, K, rng, cmd) {
       if (F.door && m.hollow != null) {
         const hh = map.hollows[m.hollow];
         const myD = dist(me.x, me.z, hh.x, hh.z), hisD = dist(near.x, near.z, hh.x, hh.z);
-        if (myD > 3 && myD < hisD && !canRoute(ctx, near, cellOf(map, hh.x, hh.z), true, false)) t = { x: hh.x, z: hh.z };
+        if (myD > 3 && myD < hisD && !canRoute(ctx, near, cellOf(map, hh.x, hh.z), true, false, 4000)) t = { x: hh.x, z: hh.z };
       }
       if (!t) t = fleeTarget(ctx, p, me, near);
       if (t && route('move', { x: t.x, z: t.z }, cellOf(map, t.x, t.z), false, true)) m.flee = { x: t.x, z: t.z, until: state.tick + 160 };
@@ -401,6 +422,7 @@ export function farmerThink(ctx, p, K, rng, cmd) {
   if (state.tick >= (m.spendAt || 0)) {
     m.spendAt = state.tick + 20;
     if (spend(ctx, p, K, rng, me, cmd, route, animals)) return;
+    if (!m.retry) m.spendAt = state.tick + 60;   // nothing to do: look again in three seconds
   }
 
   // ── 6. army ──
@@ -528,7 +550,6 @@ function spend(ctx, p, K, rng, me, cmd, route, animals) {
     if (build(pick.kind, spot)) return true;
     m.why = 'buildfail:' + pick.kind;
   }
-  m.why = (m.why || '') + ' end:' + cands.map(c => c.kind + '=' + c.score.toFixed(5)).join(',');
   return false;
 }
 

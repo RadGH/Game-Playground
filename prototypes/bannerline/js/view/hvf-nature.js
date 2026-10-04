@@ -155,9 +155,12 @@ export function createNatureLayer(scene, map, { KIND, groundY = () => 0, materia
     const meshes = [];
     for (const [name, L] of lists) for (const lod of ['near', 'far']) {
       const geo = L[lod]; if (!geo) continue;
+      // rocks, briar and cliffs read the same at any distance: one mesh, drawn near AND far
+      if (lod === 'far' && L.far === L.near) continue;
+      const always = L.far === L.near;
       const im = new THREE.InstancedMesh(geo, material, L.m.length); im.name = name + ':' + lod;
       L.m.forEach((mx, j) => { im.setMatrixAt(j, mx); if (name.startsWith('tree') && lod === 'near') treeOf.set(L.cells[j], { name, j, base: mx.clone() }); });
-      im.instanceMatrix.needsUpdate = true; im.computeBoundingSphere(); im.userData = { lod, name, cells: L.cells };
+      im.instanceMatrix.needsUpdate = true; im.computeBoundingSphere(); im.userData = { lod: always ? 'always' : lod, name, cells: L.cells };
       root.add(im); meshes.push(im);
     }
     const c = new THREE.Vector3((cx0 + chunkCells / 2) * cell, 0, (cz0 + chunkCells / 2) * cell);
@@ -183,7 +186,8 @@ export function createNatureLayer(scene, map, { KIND, groundY = () => 0, materia
       camera.getWorldPosition(v);
       for (const ch of chunks) {
         const vis = frustum.intersectsBox(ch.box), near = ch.centre.distanceTo(new THREE.Vector3(v.x, 0, v.z)) < nearDistance + 32;
-        for (const im of ch.meshes) im.visible = vis && (im.userData.lod === 'near' ? near || !im.userData.name.startsWith('tree') && !im.userData.name.startsWith('rock') && im.userData.name !== 'briar' && im.userData.name !== 'cliff' : !near);
+        // a piece with a far version swaps at the near distance; a near-only piece (grass, reeds) just stops drawing
+        for (const im of ch.meshes) im.visible = vis && (im.userData.lod === 'always' || (im.userData.lod === 'near' ? near : !near));
       }
       // trees being cut shake and lean
       for (const [cellIndex, st] of chopping) {

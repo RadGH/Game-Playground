@@ -125,8 +125,16 @@ export function hunterThink(ctx, p, K, rng, cmd) {
   const route = (type, args, goal, near, closest) => {
     // a point projected from a track can fall off the map: keep every target inside it
     if (args.x != null) { args.x = Math.max(1, Math.min(map.size - 1, args.x)); args.z = Math.max(1, Math.min(map.size - 1, args.z)); goal = cellOf(map, args.x, args.z); }
+    // a route that just failed is not searched again for five seconds (a failed search walks the
+    // whole map; doing that every think is most of the AI's cost)
+    const key = type + ':' + goal;
+    if (m.fail && m.fail[key] > state.tick) return false;
     if (!routeBudget(state)) { m.retry = true; return false; }
-    if (!canRoute(ctx, me, goal, near, closest)) return false;
+    if (!canRoute(ctx, me, goal, near, closest)) {
+      if (!m.fail || Object.keys(m.fail).length > 24) m.fail = {};
+      m.fail[key] = state.tick + 100;
+      return false;
+    }
     cmd(type, args); return true;
   };
   const cast = (slot, x, z) => {
@@ -201,7 +209,18 @@ export function hunterThink(ctx, p, K, rng, cmd) {
       if (b && b.chop != null && route('chop', { cell: b.chop }, b.chop, true, false)) return;
     }
     if (!prog || prog.id !== target.id || td < prog.d - 0.5) m.progress = { id: target.id, d: td, tick: state.tick };
-    if (!(me.ord.k === 'attack' && me.ord.target === target.id) && !(me.ord.k === 'attack' && me.ord.target === m.breach && live(entById(state, m.breach)))) cmd('attack', { target: target.id });
+    if (!(me.ord.k === 'attack' && me.ord.target === target.id) && !(me.ord.k === 'attack' && me.ord.target === m.breach && live(entById(state, m.breach)))) {
+      // the sim drops an attack it cannot path to; re-issuing it every think is a whole-map search
+      // each time — after a drop, try the breach or leave that target alone for a few seconds
+      if (m.attacked && m.attacked.id === target.id && state.tick - m.attacked.at < 100) {
+        const b = breachToward(ctx, me, target.x, target.z);
+        if (b && b.attack) { cmd('attack', { target: b.attack.id }); m.breach = b.attack.id; return; }
+        if (b && b.chop != null && route('chop', { cell: b.chop }, b.chop, true, false)) return;
+        return;
+      }
+      m.attacked = { id: target.id, at: state.tick };
+      cmd('attack', { target: target.id });
+    }
     return;
   }
   // fair play: an attack order keeps chasing in the sim even into the fog; the AI lets go of what it

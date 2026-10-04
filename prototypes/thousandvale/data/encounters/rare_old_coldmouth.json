@@ -1,0 +1,143 @@
+{
+  "id": "rare_old_coldmouth",
+  "name": "Old Coldmouth",
+  "tier": "rare",
+  "zone": "coldwater",
+  "body": "glacier_maw",
+  "place": "lies half-sunk in the mere below Coldwater like an upturned boat; the water around it never warms",
+  "_doc": "Stream E (M2). A huge cold-blooded thing from the bottom of the mere. Its breath is a long freezing cone, it slams the ice so shards fall in scattered circles, and at half health the mere freezes: soak the cracking-ice circles or everyone goes through.",
+  "party": {
+    "solo": "Hard solo: two soaks and only one of you (one fails every time).",
+    "small": "Right for 2-3.",
+    "full": "Easy.",
+    "m5": "M5 drops to one crack for a solo player."
+  },
+  "hpMult": 2.1,
+  "arena": {
+    "radius": 26
+  },
+  "say": {
+    "pull": [
+      "The \"upturned boat\" opens an eye.",
+      "The water around your boots goes very cold, very fast."
+    ],
+    "death": "Old Coldmouth sinks back into the mere. The water warms, slowly.",
+    "reset": "Old Coldmouth settles back into the mud."
+  },
+  "abilities": {
+    "bite": {
+      "id": "bite",
+      "name": "Cold Bite",
+      "every": [
+        7,
+        9
+      ],
+      "range": 5.5,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 5,
+          "arc": 1.3,
+          "element": "ice",
+          "wind": 1.1,
+          "damage": 1.8
+        }
+      ]
+    },
+    "breath": {
+      "id": "breath",
+      "name": "Freezing Breath",
+      "every": [
+        14,
+        17
+      ],
+      "first": 5,
+      "range": 14,
+      "cast": 1,
+      "say": "Old Coldmouth draws a long breath — get out of the line of its mouth!",
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 14,
+          "arc": 0.7,
+          "element": "ice",
+          "status": "chill",
+          "wind": 1.5,
+          "damage": 1.9
+        }
+      ]
+    },
+    "shards": {
+      "id": "shards",
+      "name": "Ice Shards",
+      "every": [
+        11,
+        14
+      ],
+      "first": 8,
+      "cast": 0.4,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "r": 2.6,
+          "spread": 12,
+          "count": 5,
+          "delay": 0.2,
+          "element": "ice",
+          "wind": 1.5,
+          "damage": 1.3
+        }
+      ]
+    },
+    "cracking": {
+      "id": "cracking",
+      "name": "Cracking Ice",
+      "every": [
+        20,
+        24
+      ],
+      "first": 3,
+      "cast": 1,
+      "say": "The ice cracks in two places — someone stand on each crack!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3,
+          "count": 2,
+          "kind": "soak",
+          "need": 1,
+          "fail": 1.6,
+          "failSay": "The ice gives way under everyone!",
+          "element": "ice",
+          "wind": 5,
+          "damage": 0.8
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Waking",
+      "abilities": [
+        "bite",
+        "breath",
+        "shards"
+      ]
+    },
+    {
+      "name": "Frozen Mere",
+      "at": 0.5,
+      "say": "The whole mere freezes with a crack like thunder!",
+      "abilities": [
+        "bite",
+        "cracking",
+        "breath",
+        "shards"
+      ]
+    }
+  ]
+}

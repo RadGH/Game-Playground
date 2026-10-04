@@ -5,6 +5,7 @@
   "body": "shale_warden",
   "place": "dungeon mine_descent: the boss cavern of the last floor (28 m square)",
   "_doc": "Stream E. A stone-and-iron overseer built to keep the ninth shift working; it never stopped. P1 'Shift Start': pick swings for the tank, ore tossed at random players (each lump stays as cover), three drill lines, and a Shift Whistle you hide from behind the four timber props. P2 at 60% 'Blasting': it locks down in an iron shell and the shift rats pour in; light the three blasting fuses to crack the shell (it tries to stamp them out — interrupt it). P3 is a new health bar 'Overtime': the cracked floor caves into pits, the props must be HELD (stand on the soak circles at each standing prop or the roof falls on everyone), a three-player stack, a grinding spiral. Hard enrage at 5.5 minutes. The winch lever drops the ore bucket on it once.",
+  "party": "Solo: hold-the-props soaks (one per standing prop) cannot be covered — survivable fails only. 2-3: playable, some fails. 5: intended. M5 scaling: soaks = min(standing props, party); shift bell stack need = min(3, party); shift rats by party.",
   "hpMult": 4,
   "arena": {
     "radius": 15,

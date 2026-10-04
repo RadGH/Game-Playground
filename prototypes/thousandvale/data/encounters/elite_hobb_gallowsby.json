@@ -5,6 +5,7 @@
   "body": "brigand_captain",
   "place": "wilds: holds Fitockpi Ford with a brigand camp (zone 'test', ~1600, 832); respawn 20 min per copy",
   "_doc": "Stream E. The wilds ELITE. A talker. He demands a toll from the farthest player (a circle that follows them — run it away from the group), scatters caltrops that stay, and whistles for archers on the bank (three circles on random players). At 60% he calls two brigands; at 35% he stops talking and spins his cleaver (a get-in-close ring). He binds his own wounds with an interruptible bandage.",
+  "party": "Open world elite. Solo: tough at level — kite the toll circle, interrupt the bandage. 2-3: intended. 5+: quick. M5 scaling: health by players tagged; adds 2 -> 3 at five; archer circles +1 per extra player.",
   "hpMult": 1.6,
   "arena": { "radius": 24 },
   "say": {

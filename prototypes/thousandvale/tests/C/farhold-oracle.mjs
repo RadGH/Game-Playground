@@ -117,6 +117,11 @@ export function farholdField(F, seed) {
   });
   field.paused = true;
   field.statusData = F.skills.statuses;
+  // Farhold's aimOf returns "the player" before it reaches its untargetable check whenever the
+  // companion list is EMPTY, so a solo Bolt Step never made anything hold still. One fallen
+  // placeholder companion (never usable) lets the check run, which is the behaviour Farhold intends
+  // and Thousandvale has. Logged as a Farhold finding in js/rules/README.md.
+  field.setCompanions(() => [{ id: '__none', dying: 0, removed: true, x: 1e6, z: 1e6 }]);
   /**
    * main.js `onEnemyKilled` (line ~2646), the part that touches the fight's rng: the drop roll is
    * `rpg.rollDrops(e, { rng: field.rng, … })` — the SAME generator the strikes use, mid-swing. Set

@@ -133,16 +133,18 @@ test('equip / unequip / gear / rollLoot', () => {
   assert.equal(typeof r.ok, 'boolean');
 });
 
-test('monster ranks: elite is a champion with a modifier, boss is a boss', () => {
+test('monster ranks: elite is a champion, boss is a rare that never leashes; a SCRIPTED one rolls no random modifiers', () => {
   const { room } = setup({ wolves: 0 });
   const elite = room.spawn({ kind: 'monster', type: 'wolf', level: 5, x: 1100, z: 1100, rank: 'elite' });
   const boss = room.spawn({ kind: 'monster', type: 'wolf', level: 5, x: 1110, z: 1100, rank: 'boss' });
   const plain = room.spawn({ kind: 'monster', type: 'wolf', level: 5, x: 1120, z: 1100 });
   assert.equal(elite.r.unit.rank, 'champion');
-  assert.equal(elite.r.unit.modifiers.length, 1);
   assert.equal(boss.r.unit.rank, 'rare');
   assert.ok(boss.r.unit.boss, 'a boss never leashes');
-  assert.equal(boss.r.unit.modifiers.length, 2);
+  // both run scripts by default (packleader / briar_colossus), so the script's mechanics are their only ones
+  assert.deepEqual(elite.r.unit.modifiers, []);
+  assert.deepEqual(boss.r.unit.modifiers, []);
+  assert.equal(elite.name, 'Packleader');
   assert.ok(boss.hpMax > plain.hpMax && elite.hpMax > plain.hpMax);
 });
 
@@ -221,4 +223,44 @@ test('ENCOUNTERS in the real room: a boss pulls, its arena objects are entities,
   assert.deepEqual(room.rules.useObject(me, brazier), { ok: true });
   assert.equal(brazier.data.state, 'lit', 'the state is stored on the object (host.objState) for late joiners');
   assert.ok(boss.r.unit && room.rules.encounters.states.get(boss.r.unit)?.script?.id === 'barrow_warden');
+});
+
+test('E\'s asks: a scripted monster takes the script\'s name, keeps none of its body\'s own phases or random modifiers; objects keep their authored names', () => {
+  const terrain = standInTerrain(2, 2048);
+  const room = createRoom({ id: 'c-skein', kind: 'wilds', terrain, seed: 5, camps: [], createRules, hooks: { log: () => {} } });
+  const sx = terrain.spawn.x, sz = terrain.spawn.z;
+  room.addPlayer({ id: 91, name: 'Tank', cls: 'knight', level: 12, room: 'c-skein', x: sx, z: sz - 3 }, null);
+  const skein = room.spawn({ kind: 'monster', type: 'thornmother', level: 8, x: sx, z: sz, rank: 'boss', data: { encounter: 'event_grandmother_skein' } });
+  assert.equal(skein.name, 'Grandmother Skein');
+  assert.equal(skein.r.unit.name, 'Grandmother Skein');
+  assert.equal(skein.r.unit.phases, null, 'thornmother\'s own phases are not run');
+  assert.deepEqual(skein.r.unit.modifiers, []);
+  for (let k = 0; k < 60; k++) room.step();
+  const names = [...room.entities.values()].filter(e => e.kind === 'object').map(e => e.name);
+  assert.ok(names.includes('Hay rick'), names.join(','));
+  assert.equal(room.stats.rulesErrors, 0, room.stats.lastRulesError || '');
+});
+
+test('type specials: a moor hound uses its own type\'s list (specials_torbor.json) before its family\'s', () => {
+  const { room, pack } = setup({ wolves: 1 });
+  const enc = room.rules.encounters;
+  const list = enc.stateOf(pack[0].r.unit).abilities.map(a => a.id);
+  assert.deepEqual(list, ['hamstring', 'circling_snap']);
+});
+
+test('no banned names in stream C\'s encounter data (E\'s list)', async () => {
+  const fs = await import('node:fs');
+  // E's list, read as text (importing the file would run E's tests inside this one)
+  let BANNED = null;
+  try {
+    const src = fs.readFileSync(new URL('../E/content.test.js', import.meta.url), 'utf8');
+    const m = /export const BANNED = (\[[\s\S]*?\]);/.exec(src);
+    if (m) BANNED = JSON.parse(m[1].replace(/'/g, '"').replace(/,\s*\]/, ']'));
+  } catch { /* E's file moved: fall back below */ }
+  const words = BANNED || ['Maul', 'Heroic', 'Mythic', 'Horde', 'Alliance', 'Hearthstone', 'Delve', 'Renown'];
+  for (const f of ['specials.json', 'packleader.json', 'briar_colossus.json', 'barrow_warden.json']) {
+    const text = fs.readFileSync(new URL(`../../data/encounters/${f}`, import.meta.url), 'utf8').replace(/"_doc"\s*:\s*"[^"]*"/g, '');
+    for (const w of words) assert.ok(!new RegExp(`(^|[^A-Za-z])${w.replace(/[+]/g, '\\+')}($|[^A-Za-z])`, 'i').test(text), `${f}: "${w}"`);
+    assert.ok(!/ember|veil/i.test(text), `${f}: ember/veil`);
+  }
 });

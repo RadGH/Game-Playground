@@ -5,6 +5,7 @@
   "body": "ironback_beetle",
   "place": "dungeon mine_descent: floor 1's mini-boss (a 24 m gallery)",
   "_doc": "Stream E. An ore beetle grown huge on the seam. Its charge BREAKS whatever timber prop it hits: bait the charge into one of the three props and the roof drops on its back (stunned and exposed for 8 s) — but every broken prop is one less, and when all three are gone the gallery starts caving in. The ore cart's brake is a one-shot: release it when Rustjaw stands on the rails. P2 at 40% it burrows and erupts under each of you in turn.",
+  "party": "Solo: good — bait charges into props yourself. 2-3: intended. 5: everyone in the burrow circles at once is busy but fine. M5 scaling: props 3 -> 4 at five; burrow circles already per player.",
   "hpMult": 2.2,
   "arena": {
     "radius": 12,

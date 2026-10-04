@@ -66,7 +66,8 @@ export function createMemoryStore({ now = () => Date.now(), data = null, onChang
       r.lease_owner = owner; r.lease_fence++; r.lease_until = t + leaseMs;
       changed();
       const ch = unpackChar(r);
-      applyJournal(ch, (d.journal[id] || []).filter(j => j.seq > (ch.jseq || 0)).sort((a, b) => a.seq - b.seq));
+      // copies: the live character must never share objects with the stored rows (Postgres gives copies too)
+      applyJournal(ch, JSON.parse(JSON.stringify((d.journal[id] || []).filter(j => j.seq > (ch.jseq || 0)).sort((a, b) => a.seq - b.seq))));
       return { char: ch, fence: r.lease_fence };
     },
     async saveChar(ch, fence) {

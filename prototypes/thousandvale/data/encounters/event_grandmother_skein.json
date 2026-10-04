@@ -5,6 +5,7 @@
   "body": "thornmother",
   "place": "wilds: the zone event boss. Rises from the old sinkhole in Mawehaven's barley field (~832, 576); needs ~40 m of open, walkable ground. Rotates with the zone's other events; every player nearby is enrolled.",
   "_doc": "Stream E. The ZONE EVENT BOSS for Torborhold's zone (many players). A spider older than the village, who speaks like everyone's grandmother. P1 'Hush, Now': a spinneret lash for the front, webs flung at random players, and a LULLABY that puts the whole field to sleep unless someone interrupts it — or you stand behind a hay rick (line of sight). P2 at 60% 'The Brood': she climbs into the old barn behind a silk ward; her three egg sacs hatch spiders until you BURN them (use them like a brazier). Burning all three drops the ward. P3 is a new health bar 'Grandmother's Embrace': cocoon stacks, threads in six directions, a get-under-her ring, and the well's clean water heals anyone standing at it. Soft enrage from 4 minutes, hard at 7.",
+  "party": "Zone event, everyone nearby joins. Solo: not intended (cocoon stack needs 3, three egg sacs to burn under adds). 3-5: playable. 10+: intended. M5 scaling: health and spider adds by players enrolled; cocoon need = clamp(players/4, 2, 5); egg sacs 3 -> 5 at 15+.",
   "hpMult": 3,
   "arena": {
     "radius": 40,

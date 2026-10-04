@@ -57,21 +57,24 @@
       "kind": "village",
       "name": "Torborhold",
       "x": 1088,
-      "z": 1216
+      "z": 1216,
+      "radius": 65
     },
     {
       "type": "settlement",
       "kind": "hamlet",
       "name": "Wamonhold",
       "x": 1600,
-      "z": 832
+      "z": 832,
+      "radius": 40
     },
     {
       "type": "settlement",
       "kind": "hamlet",
       "name": "Mawehaven",
       "x": 832,
-      "z": 576
+      "z": 576,
+      "radius": 40
     },
     {
       "type": "crossing",
@@ -79,12 +82,35 @@
       "name": "Fitockpi Ford",
       "x": 1600,
       "z": 832
+    },
+    {
+      "type": "dungeon",
+      "id": "door_1",
+      "name": "Barrow entrance",
+      "x": 863,
+      "z": 1167,
+      "yaw": 2.077
+    },
+    {
+      "type": "event",
+      "id": "event_grandmother_skein",
+      "x": 731,
+      "z": 552,
+      "r": 40
+    },
+    {
+      "type": "camp",
+      "id": "elite_hobb_gallowsby",
+      "x": 1618,
+      "z": 746,
+      "r": 25
     }
   ],
   "spawn": {
     "x": 1048,
     "z": 1188
   },
+  "sitesVersion": 2,
   "summary": {
     "window": [
       52,
@@ -111,10 +137,13 @@
     },
     "rivers": 3,
     "sites": [
-      "village Torborhold",
-      "hamlet Wamonhold",
-      "hamlet Mawehaven",
-      "ford Fitockpi Ford"
+      "settlement village Torborhold 1088 1216 65 ",
+      "settlement hamlet Wamonhold 1600 832 40 ",
+      "settlement hamlet Mawehaven 832 576 40 ",
+      "crossing ford Fitockpi Ford 1600 832  ",
+      "dungeon door_1 Barrow entrance 863 1167  2.077",
+      "event event_grandmother_skein  731 552 40 ",
+      "camp elite_hobb_gallowsby  1618 746 25 "
     ],
     "spawn": {
       "x": 1048,
@@ -123,5 +152,5 @@
     "inputHash": "29b45356"
   },
   "file": "terrain.bin",
-  "bytes": 6305542
+  "bytes": 6305822
 }

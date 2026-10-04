@@ -4,7 +4,15 @@
 //
 //   node server/main.mjs [--port 8491] [--host 0.0.0.0] [--db pg|json|memory] [--db-file data.json]
 //                        [--build dev] [--rules auto|v0] [--terrain test|standin] [--linger 5000]
-//                        [--max-per-ip 4] [--save-every 10000] [--process p0]
+//                        [--max-per-ip 4] [--save-every 60000] [--process p0] [--env dev|stable]
+//                        [--public <dir>] [--journal-ms 2000]
+//
+// --env       dev | stable (default: stable on port 8490, else dev). With --db pg the database name must end
+//             in _<env> (thousandvale_dev / thousandvale_stable) or the server refuses to start: the two
+//             databases are never shared (PLAN §9.3).
+// --public    serve ONLY this published folder (tools/publish-thousandvale.sh, stream H) instead of the
+//             allow-listed playground tree (PLAN §11.2). Paths stay the same (/prototypes/thousandvale/…).
+// Endpoints:  /status (JSON), /status.html, /healthz (200 "ok" once the world ticks; for systemd/ops).
 //
 // pg settings come from PGHOST/PGPORT/PGDATABASE/PGUSER/PGPASSWORD or DATABASE_URL (ops/start-dev.sh).
 // SIGTERM / SIGINT: tell everyone, save everyone, exit (protocol.md §8.4).
@@ -23,13 +31,15 @@ import { startTicker } from '../js/net/clock.js';
 import { MAX_FRAME } from '../js/net/protocol.js';
 import { createStaticHandler } from './static.js';
 import { statusPage } from './status-page.js';
+import { turnstileFromEnv } from './turnstile.js';
+import { loadZoneContent } from '../js/sim/content.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const GAME = resolve(HERE, '..');
 const PLAYGROUND = resolve(GAME, '../..');
 
 function args(argv) {
-  const o = { port: 8491, host: '0.0.0.0', db: 'memory', dbFile: join(GAME, '.data/dev-store.json'), build: 'dev', rules: 'auto', terrain: 'test', linger: 5000, maxPerIp: 4, saveEvery: 10000, process: 'p0' };
+  const o = { port: 8491, host: '0.0.0.0', db: 'memory', dbFile: join(GAME, '.data/dev-store.json'), build: 'dev', rules: 'auto', terrain: 'test', linger: 5000, maxPerIp: 4, saveEvery: 60000, process: 'p0', env: null, publicDir: null, journalMs: 2000 };
   for (let i = 2; i < argv.length; i++) {
     const k = argv[i], v = argv[i + 1];
     const take = () => { i++; return v; };
@@ -43,7 +53,10 @@ function args(argv) {
     else if (k === '--linger') o.linger = +take();
     else if (k === '--max-per-ip') o.maxPerIp = +take();
     else if (k === '--save-every') o.saveEvery = +take();
-    else if (k === '--process') o.process = take();   // lease owner prefix: give a second server on the same DB its own name
+    else if (k === '--process') o.process = take();
+    else if (k === '--env') o.env = take();
+    else if (k === '--public') o.publicDir = resolve(take());
+    else if (k === '--journal-ms') o.journalMs = +take();   // lease owner prefix: give a second server on the same DB its own name
     else if (k === '--help') { console.log(readFileSync(fileURLToPath(import.meta.url), 'utf8').split('\n').slice(1, 12).join('\n')); process.exit(0); }
     else throw new Error('unknown flag ' + k);
   }
@@ -95,21 +108,32 @@ function clientIp(req) {
 
 export async function startServer(o) {
   const now = () => performance.now();
+  const env = o.env || process.env.TV_ENV || (o.port === 8490 ? 'stable' : 'dev');
+  if (!['dev', 'stable'].includes(env)) throw new Error('--env must be dev or stable');
+  if (o.db === 'pg') {
+    const dbName = process.env.PGDATABASE || (process.env.DATABASE_URL ? new URL(process.env.DATABASE_URL).pathname.slice(1) : '');
+    if (!dbName.endsWith('_' + env)) throw new Error(`refusing to start: env ${env} but database "${dbName}" (expected *_${env}); dev and stable never share a database`);
+  }
+  const verifyHuman = turnstileFromEnv(process.env, { log });
+  const content = await loadZoneContent(async f => JSON.parse(readFileSync(join(GAME, f), 'utf8')), o.terrain);
   const store = await makeStore(o);
   const terrain = loadTerrain(o.terrain);
   const { createRules, rules } = await loadRules(o.rules);
-  const world = createWorld({ store, terrain, build: o.build, createRules, classes: loadClasses(), now, log, lingerMs: o.linger, saveEveryMs: o.saveEvery, processName: o.process });
+  const world = createWorld({ store, terrain, build: o.build, createRules, classes: loadClasses(), now, log, lingerMs: o.linger, saveEveryMs: o.saveEvery, processName: o.process, journalMs: o.journalMs,
+    zoneSheet: content.sheet, encounterInfo: content.encounterInfo,
+    verifyHuman, humanSiteKey: verifyHuman ? process.env.TV_TURNSTILE_SITEKEY || null : null });
   await world.init();
 
-  const serveStatic = createStaticHandler(PLAYGROUND);
+  const serveStatic = o.publicDir ? createStaticHandler(o.publicDir, { allowAll: true }) : createStaticHandler(PLAYGROUND);
   const server = http.createServer((req, res) => {
     const path = req.url.split('?')[0];
     if (path === '/status') {
-      const s = { ...world.status(), rules, terrain: terrain.key || 'standin', heapMB: Math.round(process.memoryUsage().heapUsed / 1048576), rssMB: Math.round(process.memoryUsage().rss / 1048576) };
+      const s = { ...world.status(), env, human: !!verifyHuman, rules, terrain: terrain.key || 'standin', heapMB: Math.round(process.memoryUsage().heapUsed / 1048576), rssMB: Math.round(process.memoryUsage().rss / 1048576) };
       res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', 'Access-Control-Allow-Origin': '*' });
       res.end(JSON.stringify(s));
       return;
     }
+    if (path === '/healthz') { const ok = world.tickStats.summary().ticks > 0; res.writeHead(ok ? 200 : 503, { 'Content-Type': 'text/plain' }); res.end(ok ? 'ok' : 'starting'); return; }
     if (path === '/status.html') { res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' }); res.end(statusPage()); return; }
     if (req.method !== 'GET' && req.method !== 'HEAD') { res.writeHead(405); res.end(); return; }
     if (!serveStatic(req, res)) { res.writeHead(404, { 'Content-Type': 'text/plain' }); res.end('not found'); }
@@ -153,7 +177,7 @@ export async function startServer(o) {
 
   const ticker = startTicker(() => world.step(), { ms: 50, clock: { now, setTimeout, clearTimeout }, onSkip: k => world.tickStats.skip(k) });
   await new Promise((res, rej) => { server.once('error', rej); server.listen(o.port, o.host, res); });
-  log('thousandvale server up', { port: o.port, host: o.host, db: store.kind, rules, terrain: terrain.key || 'standin', build: o.build, owner: world.owner });
+  log('thousandvale server up', { port: o.port, host: o.host, env, human: !!verifyHuman, public: o.publicDir || null, db: store.kind, rules, terrain: terrain.key || 'standin', build: o.build, owner: world.owner });
 
   let stopping = null;
   async function stop(code = 'restart') {

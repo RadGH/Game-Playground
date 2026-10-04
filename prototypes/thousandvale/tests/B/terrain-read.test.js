@@ -140,3 +140,30 @@ test('groundAdapter: Farhold-style walker interface (rise/run slope, depth numbe
   assert.equal(g.waterAt(4, 4), 0); assert.equal(g.underwater(4, 4), false);
   assert.deepEqual(g.clampToWorld(-5, 50), [0, 8]);
 });
+
+test('test zone sites: town radius, a dungeon door facing out onto open ground, event + camp arenas clear', async () => {
+  const { discIsOpen } = await import('../../tools/lib/zone-sites.mjs');
+  const t = parseTerrain(readFileSync(BIN));
+  const sites = t.meta.sites;
+  for (const s of sites.filter(s => s.type === 'settlement')) assert.ok(s.radius > 0, `${s.name} has a radius`);
+  const town = sites.find(s => s.name === 'Torborhold');
+  const door = sites.find(s => s.type === 'dungeon');
+  assert.ok(door && Number.isFinite(door.yaw), 'a door with a facing');
+  const d = Math.hypot(door.x - town.x, door.z - town.z);
+  assert.ok(d > town.radius + 60 && d < 320, `door ${d.toFixed(0)} m from the town`);
+  assert.ok(t.walkable(door.x, door.z));
+  assert.ok(discIsOpen(t, door.x + Math.sin(door.yaw) * 8, door.z + Math.cos(door.yaw) * 8, 7, { step: 3, maxSlope: 16 }), 'flat apron in front of the door');
+  const toTown = Math.atan2(town.x - door.x, town.z - door.z);
+  const off = Math.abs(((door.yaw - toTown) % (2 * Math.PI) + 3 * Math.PI) % (2 * Math.PI) - Math.PI);
+  assert.ok(off < Math.PI / 2, 'the doorway faces the town side');
+  for (const [id, r] of [['event_grandmother_skein', 40], ['elite_hobb_gallowsby', 25]]) {
+    const s = sites.find(x => x.id === id);
+    assert.ok(s && s.r === r, `${id} published`);
+    assert.ok(discIsOpen(t, s.x, s.z, r), `${id} is open, dry, walkable ground`);
+  }
+  // nothing new sits on stream E's vignettes
+  const vig = JSON.parse(readFileSync(new URL('../../data/vignettes/placements/test.json', import.meta.url), 'utf8')).placements;
+  for (const s of sites.filter(s => ['dungeon', 'event', 'camp'].includes(s.type))) for (const v of vig) {
+    assert.ok(Math.hypot(s.x - v.x, s.z - v.z) > (s.r || 10) + (v.radius || 12), `${s.id} clear of ${v.id}`);
+  }
+});

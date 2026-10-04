@@ -25,7 +25,7 @@ import { createTickStats } from './tickstats.js';
 import { randomHex } from './sha256.js';
 import { createParties } from './party.js';
 import { createEconomyLog } from './economy.js';
-import { findTown, findDoor, townGate, wildsCamps } from './realm.js';
+import { findTown, findDoor, townGate, wildsCamps, zoneEncounterCamps } from './realm.js';
 import { dungeonTerrain, dungeonRoomSpec, describeDungeon } from './dungeon.js';
 import { JOURNAL_FLUSH_MS } from './journal.js';
 import { createTrades, TRADE_OPS, TRADE_RANGE } from './trade.js';
@@ -47,6 +47,7 @@ export function createWorld(opts) {
     journalMs = JOURNAL_FLUSH_MS, verifyHuman = null, guestsPerIpPerHour = 20, tradeMinLevel = 1,
     unlimitedIps = ['127.0.0.1', '::1', '::ffff:127.0.0.1', 'worker'],   // local bots/tests; the tunnel passes CF-Connecting-IP instead
     perfNow = now, copyCap = 300, copyIdleMs = 5 * 60000, instanceIdleMs = 30 * 60000, dungeonLevel = 3,
+    zoneSheet = null, encounterInfo = {}, zoneKey = terrain.key || 'standin',
     planDungeon = planTiers, filterText = t => t, chestResetMs = 30 * 60000, zoneName = 'The Test Vale',
   } = opts;
   const owner = processName + ':' + randomHex(4);
@@ -74,7 +75,7 @@ export function createWorld(opts) {
   const town = findTown(terrain, opts.townRadius);
   const door = findDoor(terrain, town);
   const gate = townGate(terrain, town, door);
-  const camps = opts.camps || wildsCamps(terrain, town, door);
+  const camps = opts.camps || [...wildsCamps(terrain, town, door, zoneSheet && zoneSheet.camps), ...zoneEncounterCamps(terrain, zoneKey, encounterInfo)];
   const rooms = new Map();
   const copies = [];
   const instances = new Map();   // key -> room
@@ -94,7 +95,7 @@ export function createWorld(opts) {
     loot: (ev, r) => { const e = r.entities.get(ev.to); const o = e && e.char && online.get(e.char.id); if (o && o.entity === e) grant(o, { items: ev.items, gold: 0, reason: 'kill', goldAdded: true }); },
   };
   function makeRoom(spec) {
-    const r = createRoom({ terrain, seed, createRules, hooks: roomHooks, ...spec });
+    const r = createRoom({ terrain, seed, createRules, hooks: roomHooks, encounterInfo, ...spec });
     rooms.set(r.id, r);
     return r;
   }
@@ -140,11 +141,14 @@ export function createWorld(opts) {
   function makeInstance(key, partyId, allowed) {
     const n = ++instanceN;
     const dseed = (seed * 7919 + n * 104729 + (++clock)) >>> 0;
-    const plan = planDungeon(dseed, { floors: 2, level: dungeonLevel });
+    // no `arenas` option: the encounter engine (stream C) spawns arena objects at the pull (E's ask)
+    const fams = (zoneSheet && zoneSheet.dungeon && zoneSheet.dungeon.families) || null;
+    const family = fams && fams.length ? fams[dseed % fams.length] : undefined;
+    const plan = planDungeon(dseed, { floors: (zoneSheet && zoneSheet.dungeon && zoneSheet.dungeon.floors) || 2, level: (zoneSheet && zoneSheet.dungeon && zoneSheet.dungeon.level) || dungeonLevel, ...(family ? { family } : {}) });
     const dterr = dungeonTerrain(plan);
     const spec = dungeonRoomSpec(plan, { exitTo: { room: 'wilds', x: door.x + 3, z: door.z + 3 } });
     const r = createRoom({
-      id: 'i:' + n, name: plan.name || 'The Barrow', kind: 'instance', terrain: dterr, seed: dseed, createRules, hooks: roomHooks,
+      id: 'i:' + n, name: plan.name || 'The Barrow', kind: 'instance', terrain: dterr, seed: dseed, createRules, hooks: roomHooks, encounterInfo,
       camps: spec.camps, objects: spec.objects, spawn: plan.floors[0].entry,
       meta: { key, party: partyId, allowed: new Set(allowed), emptySince: 0, plan, made: now() },
       describeExtra: { get dungeon() { return describeDungeon(plan, dterr); } },
@@ -634,9 +638,10 @@ export function createWorld(opts) {
       }
       ch.bag.splice(bagIdx, 1);
       for (const it of removed) ch.bag.push(it);
+      // order matters on replay: an item comes back to the bag only after the worn set no longer holds it
       journal(o, 'bagDel', { uid: item.uid });
-      for (const it of removed) journal(o, 'bagAdd', { item: it });
       journalGear(o);
+      for (const it of removed) journal(o, 'bagAdd', { item: it });
       o.dirty = true;
       s.sendJSON({ t: 'bag', add: removed, remove: [item.uid], gold: ch.gold });
       return s.sendJSON({ t: 'equip', slot, item, equipment: equipView(o) });
@@ -650,8 +655,8 @@ export function createWorld(opts) {
       if (rules.unequip) { const r = safeRules(o.room, 'unequip', e, slot); if (!r || !r.ok) return s.err('item', (r && r.text) || 'Not now.'); item = r.item; }
       else { item = ch.equipment[slot]; delete ch.equipment[slot]; }
       ch.bag.push(item);
-      journal(o, 'bagAdd', { item });
       journalGear(o);
+      journal(o, 'bagAdd', { item });
       o.dirty = true;
       s.sendJSON({ t: 'bag', add: [item], remove: [], gold: ch.gold });
       return s.sendJSON({ t: 'equip', slot, item: null, equipment: equipView(o) });
@@ -798,7 +803,8 @@ export function createWorld(opts) {
 
   // ---- the journal (PLAN §9.2; js/sim/journal.js) ----
   function journal(o, kind, payload) {
-    jpend.push({ char: o.char.id, seq: ++o.seq, kind, payload, fence: o.fence });
+    // a COPY: the row waits up to 2 s and the live objects (bag items, the worn set) keep changing
+    jpend.push({ char: o.char.id, seq: ++o.seq, kind, payload: JSON.parse(JSON.stringify(payload)), fence: o.fence });
   }
   function journalGear(o) {
     if (o.room.rules.saveGear) { const g = safeRules(o.room, 'saveGear', o.entity); if (g !== undefined) o.char.equipment = g; }

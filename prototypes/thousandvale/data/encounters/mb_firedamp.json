@@ -1,0 +1,46 @@
+{
+  "id": "mb_firedamp",
+  "name": "Old Smoky, the Firedamp",
+  "tier": "miniboss",
+  "body": "ash_wisp",
+  "place": "dungeon mine_descent SET B: floor 1's mini-boss (a 24 m gallery)",
+  "_doc": "Stream E (M2). The mine's bad air, grown a mind. Three gas pockets hiss in the walls: IGNITE one (use it) and it blows — it scorches Old Smoky and stuns it, but the flash comes back at you as a circle: light it and run. It drifts choking clouds that leave poison patches, and flares around itself. P2 at 50% 'Seepage': it splits off smaller wisps and starts dousing the lamps — darkness telegraphs (a ring you step into).",
+  "party": "Solo: use the gas pockets for damage, run the flashback. 2-3: one ignites while the tank turns it away. 5: clouds overlap and crowd the gallery — spread. M5 scaling: cloud count 2 -> 1 solo / 3 at five; wisp adds by party.",
+  "hpMult": 2.1,
+  "arena": {
+    "radius": 12,
+    "objects": [
+      { "id": "gas_w", "type": "brazier", "name": "Gas pocket", "x": -8, "z": 0, "onUse": [ { "say": "WHUMP! The gas pocket goes up — Old Smoky gutters!", "style": "warn" }, { "hurt": 0.06 }, { "stun": 2 }, { "ability": "flashback" } ] },
+      { "id": "gas_e", "type": "brazier", "name": "Gas pocket", "x": 8, "z": 2, "onUse": [ { "say": "WHUMP! The gas pocket goes up — Old Smoky gutters!", "style": "warn" }, { "hurt": 0.06 }, { "stun": 2 }, { "ability": "flashback" } ] },
+      { "id": "gas_n", "type": "brazier", "name": "Gas pocket", "x": 0, "z": -8, "onUse": [ { "say": "WHUMP! The gas pocket goes up — Old Smoky gutters!", "style": "warn" }, { "hurt": 0.06 }, { "stun": 2 }, { "ability": "flashback" } ] }
+    ]
+  },
+  "say": {
+    "pull": ["The air goes thick and sweet. A miner's warning bell, rusted shut, tries to ring.", "Something in the dark coughs. It is the dark."],
+    "death": "Old Smoky thins to a sigh and is gone. The air smells of nothing at all.",
+    "reset": "The air settles back into a lazy, poisonous haze."
+  },
+  "enrage": { "seconds": 300, "damage": 2.5, "say": "The whole gallery fills with fire-damp!" },
+  "abilities": {
+    "smoulder": { "id": "smoulder", "name": "Smoulder", "every": [5, 7], "range": 14,
+      "telegraphs": [ { "shape": "circle", "at": "target", "r": 2.4, "wind": 1.0, "damage": 1.4, "element": "fire", "status": "burn" } ] },
+    "choking_cloud": { "id": "choking_cloud", "name": "Choking Cloud", "every": [11, 14], "first": 3, "cast": 0.6,
+      "telegraphs": [ { "shape": "circle", "at": "random", "r": 2.6, "count": 2, "delay": 0.5, "wind": 1.4, "damage": 1, "status": "poison", "element": "poison",
+        "leave": { "type": "pool", "name": "Choke damp", "r": 2.3, "every": 1, "seconds": 16, "damage": 0.25, "status": "weaken", "element": "poison" } } ] },
+    "flare": { "id": "flare", "name": "Firedamp Flare", "every": [14, 17], "first": 8, "cast": 0.8,
+      "say": "Old Smoky flares up — back off!",
+      "telegraphs": [ { "shape": "circle", "at": "self", "r": 5.5, "wind": 1.5, "damage": 2, "element": "fire", "knock": 2 } ] },
+    "flashback": { "id": "flashback", "name": "Flashback", "every": [99, 99],
+      "telegraphs": [ { "shape": "circle", "at": "target", "r": 4, "wind": 1.6, "damage": 1.5, "element": "fire", "status": "burn" } ] },
+    "lamps_out": { "id": "lamps_out", "name": "Lamps Out", "every": [15, 18], "first": 4, "cast": 1,
+      "say": "The lamps die — step into the last ring of light!",
+      "telegraphs": [ { "shape": "donut", "at": "target", "r": 11, "r2": 3, "wind": 1.8, "damage": 1.8, "element": "shadow" } ] },
+    "split": { "id": "split", "name": "Seepage", "every": [22, 26], "first": 6,
+      "say": "Old Smoky leaks smaller clouds of itself.",
+      "actions": [ { "adds": { "type": "ash_wisp", "count": 2, "radius": 6 } } ] }
+  },
+  "phases": [
+    { "name": "Bad Air", "abilities": ["smoulder", "choking_cloud", "flare"] },
+    { "name": "Seepage", "at": 0.5, "say": "The firedamp spreads through the whole gallery!", "abilities": ["smoulder", "lamps_out", "split", "choking_cloud"] }
+  ]
+}

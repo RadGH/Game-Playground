@@ -4,7 +4,7 @@
     "beast/skirmisher": [
       { "id": "pounce", "name": "Pounce", "every": [9, 13], "range": 14, "minRange": 4, "cast": 0.4,
         "telegraphs": [ { "shape": "line", "at": "self", "len": 9, "w": 2.2, "wind": 0.9, "damage": 1.4, "knock": 2 } ] },
-      { "id": "maul", "name": "Maul", "every": [11, 16], "range": 4,
+      { "id": "savage_bite", "name": "Savage Bite", "every": [11, 16], "range": 4,
         "telegraphs": [ { "shape": "cone", "at": "self", "r": 4.2, "arc": 1.6, "wind": 1.0, "damage": 1.6, "status": "bleed" } ] }
     ],
     "beast/brute": [

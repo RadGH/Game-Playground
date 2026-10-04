@@ -1,0 +1,164 @@
+{
+  "id": "rare_mother_soot",
+  "name": "Mother Soot",
+  "tier": "rare",
+  "zone": "torbor_cross",
+  "body": "ash_wisp",
+  "place": "haunts the chimneys of Halsbridge's Mill End; the sweeps will not work there after dark",
+  "_doc": "Stream E (M2). A smoky spirit that lived in a chimney too long. It drops soot that burns where it lands (pools), breathes a smoke cone that weakens, and at half health draws all the smoke in: a big ring with a clear middle, then a burst you hide from behind the chimney stones it leaves.",
+  "party": {
+    "solo": "Solo-able if you keep a stone near you.",
+    "small": "Easy.",
+    "full": "Easy; save a stone for the draught.",
+    "m5": "M5 adds health per extra player and one more copy of the spread/scatter shapes for parties of 4-5; mechanics stay the same."
+  },
+  "hpMult": 1.8,
+  "arena": {
+    "radius": 22
+  },
+  "say": {
+    "pull": [
+      "A shape of black smoke uncurls from the chimney pot.",
+      "\"Who's been letting my fire go out?\""
+    ],
+    "death": "Mother Soot blows away on the wind, just a smudge on the roofs.",
+    "reset": "Mother Soot settles back into her chimney."
+  },
+  "abilities": {
+    "smoke": {
+      "id": "smoke",
+      "name": "Choking Smoke",
+      "every": [
+        7,
+        9
+      ],
+      "range": 7,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 6,
+          "arc": 1.2,
+          "status": "weaken",
+          "element": "fire",
+          "wind": 1.1,
+          "damage": 1.3
+        }
+      ]
+    },
+    "soot": {
+      "id": "soot",
+      "name": "Soot Fall",
+      "every": [
+        11,
+        14
+      ],
+      "first": 4,
+      "cast": 0.5,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 2.8,
+          "count": 2,
+          "delay": 0.4,
+          "element": "fire",
+          "status": "burn",
+          "leave": {
+            "type": "pool",
+            "name": "Smouldering soot",
+            "r": 2.4,
+            "every": 1,
+            "seconds": 12,
+            "damage": 0.3,
+            "element": "fire"
+          },
+          "wind": 1.4,
+          "damage": 1.2
+        }
+      ]
+    },
+    "stones": {
+      "id": "stones",
+      "name": "Tumbling Chimney",
+      "every": [
+        20,
+        24
+      ],
+      "first": 2,
+      "cast": 0.6,
+      "say": "Bricks rain down from the chimney!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "r": 2,
+          "spread": 8,
+          "count": 3,
+          "leave": {
+            "type": "rock",
+            "name": "Chimney stone",
+            "r": 1.2,
+            "hp": 2
+          },
+          "wind": 1.4,
+          "damage": 1
+        }
+      ]
+    },
+    "inhale": {
+      "id": "inhale",
+      "name": "Great Draught",
+      "every": [
+        22,
+        26
+      ],
+      "first": 7,
+      "cast": 1.5,
+      "say": "Mother Soot draws the smoke in — then hide behind a chimney stone!",
+      "telegraphs": [
+        {
+          "shape": "donut",
+          "at": "self",
+          "r": 20,
+          "r2": 4,
+          "knock": 3,
+          "pull": true,
+          "wind": 1.8,
+          "damage": 1.6
+        },
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 22,
+          "after": 2,
+          "los": true,
+          "element": "fire",
+          "wind": 1.8,
+          "damage": 2.3
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Smouldering",
+      "abilities": [
+        "smoke",
+        "soot",
+        "stones"
+      ]
+    },
+    {
+      "name": "Great Draught",
+      "at": 0.5,
+      "say": "The smoke roars up the chimney!",
+      "abilities": [
+        "smoke",
+        "inhale",
+        "soot",
+        "stones"
+      ]
+    }
+  ]
+}

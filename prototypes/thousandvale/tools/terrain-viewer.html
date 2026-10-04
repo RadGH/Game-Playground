@@ -9,7 +9,7 @@
 <body>
   <header>
     <h1>Thousandvale · terrain viewer</h1>
-    <label>Zone <select id="zone"><option value="test">test</option></select></label>
+    <label>Zone <select id="zone"><option value="z03_02">z03_02 (M1, Torborhold)</option><option value="test">test (M0)</option></select></label>
     <label>Layer
       <select id="layer">
         <option value="biome">biome + shade</option>
@@ -19,6 +19,8 @@
       </select>
     </label>
     <label><input type="checkbox" id="sites" checked> sites</label>
+    <label><input type="checkbox" id="plan" checked> town plan</label>
+    <label>Zoom <select id="zoom"><option value="1">whole zone</option><option value="town">town</option></select></label>
     <span id="status" class="status">loading…</span>
   </header>
   <main>

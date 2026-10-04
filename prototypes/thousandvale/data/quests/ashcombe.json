@@ -1,0 +1,191 @@
+{
+  "_doc": "Stream E (M2). Quests for zone 'ashcombe' (The Ashcombe Ruins). Format: data/quests/README.md. Rewards: xp = share of a level's XP at the quest level, gold = multiple of a kill's gold; item.tier rolls at your level. `killRare` {zone, slot} names the zone's rare by slot (data/provinces/rares.json). Story-chain quests carry `story: n` (data/quests/province.json).",
+  "zone": "ashcombe",
+  "npcs": {
+    "scholar_orla": {
+      "name": "Orla Coombe",
+      "role": "scholar",
+      "at": "Ashcombe",
+      "greeting": "Ruins are just history that's fallen over. I help it stand up again, on paper."
+    },
+    "digger_tobin": {
+      "name": "Old Tobin the digger",
+      "role": "trader",
+      "at": "Kettle Cross",
+      "greeting": "I dig. Sometimes I find things. Sometimes things find me."
+    },
+    "captain_rosamund": {
+      "name": "Captain Rosamund",
+      "role": "guard",
+      "at": "the Broken Keep",
+      "greeting": "The keep is broken. My temper is next."
+    },
+    "scav_jory": {
+      "name": "Mudfoot",
+      "role": "scavenger",
+      "at": "duel_stones",
+      "greeting": "Finders keepers. I find, you keep me alive, we split it."
+    }
+  },
+  "quests": [
+    {
+      "id": "the_broken_keep",
+      "name": "The Broken Keep",
+      "level": 4,
+      "giver": "captain_rosamund",
+      "story": 5,
+      "offer": "Millbrook sent you? Good. Scavengers have moved into what's left of my keep and they've better swords than my lads.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "road_brigand",
+          "count": 8,
+          "where": "the courtyard of the Broken Keep",
+          "text": "Scavengers routed"
+        },
+        {
+          "kind": "talk",
+          "npc": "scholar_orla",
+          "text": "Report to Orla Coombe in Ashcombe"
+        }
+      ],
+      "done": "Orla says there's something under the keep worth seeing. Orla always says that.",
+      "reward": {
+        "xp": 0.5,
+        "gold": 10,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      },
+      "next": "copper_and_candles"
+    },
+    {
+      "id": "bones_in_the_dust",
+      "name": "Bones in the Dust",
+      "level": 5,
+      "giver": "scholar_orla",
+      "offer": "The barrow hounds dig up my excavation every night. I need those bones in the right order and the hounds in no order at all.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "barrow_hound",
+          "count": 6,
+          "where": "the excavation trenches",
+          "text": "Barrow hounds"
+        }
+      ],
+      "done": "Splendid. The skeletons are back where they belong: in my catalogue.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 7
+      }
+    },
+    {
+      "id": "spore_season",
+      "name": "Spore Season",
+      "level": 5,
+      "giver": "digger_tobin",
+      "offer": "Mushroom-things walking about the ruins. Sporecap walkers. They make me sneeze and then they make me run.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "sporecap_walker",
+          "count": 5,
+          "where": "the damp rooms of the ruins",
+          "text": "Sporecap walkers"
+        }
+      ],
+      "done": "Achoo. Sorry. Thank you. Achoo.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 7
+      }
+    },
+    {
+      "id": "a_duellists_purse",
+      "name": "A Duellist's Purse",
+      "level": 4,
+      "giver": "scav_jory",
+      "offer": "Two dead men at the duelling stones and one good purse. Moths got there first. Clear 'em off and I'll split the purse. Fair-ish.",
+      "steps": [
+        {
+          "kind": "visit",
+          "vignette": "duel_stones",
+          "text": "Go to the duelling stones"
+        },
+        {
+          "kind": "kill",
+          "type": "carrion_moth",
+          "count": 3,
+          "where": "at the duelling stones",
+          "text": "Carrion moths"
+        }
+      ],
+      "done": "Here's your half. It's a big half. I'm feeling generous. And watched.",
+      "reward": {
+        "xp": 0.3,
+        "gold": 8,
+        "item": {
+          "tier": "common",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "under_the_broken_keep",
+      "name": "Under the Broken Keep",
+      "level": 6,
+      "giver": "scholar_orla",
+      "group": "a party of 3-5",
+      "offer": "The keep has cellars, the cellars have stairs, the stairs go further down than any keep should. Bring me back a description. And yourself.",
+      "steps": [
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "text": "Reach the lower levels",
+          "floor": 1
+        },
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "text": "Defeat the keep's last defender",
+          "boss": true
+        }
+      ],
+      "done": "Marvellous! I shall write a monograph. You'll be a footnote. A large one.",
+      "reward": {
+        "xp": 1.1,
+        "gold": 45,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "ashcombe_rare",
+      "name": "The Thing in the Rubble",
+      "level": 5,
+      "giver": "captain_rosamund",
+      "offer": "Something big lives in the rubble field. My lads call it names. Kill it and they'll call you names instead. Nice ones.",
+      "steps": [
+        {
+          "kind": "killRare",
+          "zone": "ashcombe",
+          "slot": 0,
+          "text": "The rubble field's rare slain"
+        }
+      ],
+      "done": "Good riddance. Drinks at the keep. What's left of it.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 22,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      }
+    }
+  ]
+}

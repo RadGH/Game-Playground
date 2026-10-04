@@ -22,7 +22,8 @@ const { elementOf, statusOf } = await import(new URL('rpg.js', FJS));
 /** Something that answers every method with nothing (spellfx, fx, sound, hud). */
 const sink = () => new Proxy(function () {}, {
   // a projectile resolves when it would land (a real timer), as the drawn one does in the game
-  get: (t, k) => (k === 'then' ? undefined : k === 'projectile' ? ({ ms = 0 } = {}) => new Promise(r => setTimeout(r, ms)) : sink()),
+  // (a thenable that runs its callback inside the timer, not on a microtask: the fixtures step synchronously)
+  get: (t, k) => (k === 'then' ? undefined : k === 'projectile' ? ({ ms = 0 } = {}) => ({ then(fn) { setTimeout(() => fn(), ms); return { catch() {} }; } }) : sink()),
   apply: () => undefined,
 });
 

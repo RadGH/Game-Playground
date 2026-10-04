@@ -369,6 +369,8 @@ export function createCombat(room) {
     return hits;
   }
   combat.resolveSwing = resolveSwing;
+  combat.resolveWand = (ch, w, step = 0) => resolveWand(ch, w, step);
+  combat.resolveArrow = (ch, w, power = 1, step = 0) => resolveArrow(ch, w, power, step);
 
   // ------------------------------------------------------------------ skills
 

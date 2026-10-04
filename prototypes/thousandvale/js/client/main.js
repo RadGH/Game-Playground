@@ -27,6 +27,13 @@ import { PLAYABLE_RACES, RACE_NAMES, loadLookData, defaultLook } from './looks.j
 import { connect, localTokenStore } from '../net/client.js';
 import { createMirror } from '../net/mirror.js';
 import { ANIMS, STATE, KIND_NAMES, TICK_MS, cleanName } from '../net/protocol.js';
+import { tabNext } from '../net/tab.js';
+import { createTelegraphs } from './telegraphs.js';
+import { createBossUi } from './boss.js';
+import { createObjects } from './objects.js';
+import { createDungeonView } from './dungeon-view.js';
+import { createSocial } from './social.js';
+import { createBag } from './bag.js';
 
 const q = new URLSearchParams(location.search);
 const $ = id => document.getElementById(id);
@@ -55,6 +62,15 @@ const view = createScene($('view'), { quality });
 const { scene, camera } = view;
 const actors = createActors(scene, { plateLayer: $('plates'), camera });
 const fx = createFx(scene, { layer: $('numbers'), camera });
+const vignette = document.getElementById('vignette');
+const tele = createTelegraphs(scene, {
+  serverNow: () => (S.net ? S.net.clock.serverNow() : 0),
+  posOf: id => { if (id === S.selfId) { const p = S.predictor.pos; return { x: p.x, z: p.z, yaw: S.lastInput?.yaw }; } const a = actors.get(id); return a ? { x: a.pos.x, z: a.pos.z, yaw: a.yaw } : null; },
+  selfPos: () => (S.selfId != null && S.phase === 'world' ? S.predictor.pos : null),
+  selfId: () => S.selfId,
+  onHitMe: () => { vignette.classList.add('hit'); setTimeout(() => vignette.classList.remove('hit'), 220); fx.shake(0.6); },
+});
+const objects = createObjects(scene, { onUse: id => S.net?.use(id) });
 
 // --- session state ----------------------------------------------------------------------------------
 const S = {
@@ -112,11 +128,40 @@ function placeCamp(at, before = null) {
     .then(d => { if (W.terrain !== T) return; if (old) scene.remove(old.group); if (W.decor && W.decor !== old) scene.remove(W.decor.group); W.decor = d; scene.add(d.group); })
     .catch(e => console.warn('[decor] failed', e));
 }
-const groundY = (x, z) => (W.terrain ? W.terrain.heightAt(x, z) : 0);
+const groundY = (x, z) => (D.view ? 0 : W.terrain ? W.terrain.heightAt(x, z) : 0);
+
+// --- dungeon instances (drawn from joined.room.dungeon; the outdoor ground is hidden, not thrown away) ---
+const D = { view: null, roomId: null };
+function enterDungeon(room) {
+  if (D.roomId !== room.id || !D.view) {
+    if (D.view) scene.remove(D.view.group);
+    D.view = createDungeonView(room.dungeon, { quality }); D.roomId = room.id;
+    scene.add(D.view.group);
+  }
+  if (W.ground) W.ground.group.visible = false;
+  if (W.decor) W.decor.group.visible = false;
+  view.setMood('dungeon');
+  S.predictor.terrain = { heightAt: () => 0, walkable: D.view.terrain.walkable, bounds: D.view.terrain.bounds };
+  controls.setHeightAt(D.view.cameraHeight);
+  tele.setGround(() => 0); objects.setGround(() => 0);
+}
+function leaveDungeon() {
+  if (D.view) { scene.remove(D.view.group); D.view = null; D.roomId = null; }
+  if (W.ground) W.ground.group.visible = true;
+  if (W.decor) W.decor.group.visible = true;
+  view.setMood('outdoor');
+  if (W.terrain) { S.predictor.terrain = { heightAt: W.terrain.heightAt, walkable: W.terrain.walkable, bounds: W.terrain.bounds }; controls.setHeightAt(W.terrain.heightAt); tele.setGround(W.terrain.heightAt); objects.setGround(W.terrain.heightAt); }
+}
+/** Ground for a room: the dungeon layout, or the zone terrain (kept when a handoff stays on it). */
+async function useRoom(room) {
+  if (room.dungeon) { enterDungeon(room); return; }
+  await useTerrain(room.terrain, room.kind === 'town' ? (room.area || room.spawn) : room.town ? { x: room.town.x, z: room.town.z } : null);
+  leaveDungeon();
+}
 
 const hud = createHud({
   onSlot: () => tryStrike(true),
-  onChatSubmit: text => S.net?.say(text),
+  onChatSubmit: text => social.command(text),
   onChatFocus: on => controls.setTyping(on),
   onRise: () => rise(),
 });
@@ -137,6 +182,16 @@ const controls = createControls({
   onChat: () => hud.focusChat(),
   onRise: () => rise(),
 });
+
+const boss = createBossUi({ actors, serverNow: () => (S.net ? S.net.clock.serverNow() : 0), toast: hud });
+const social = createSocial({ net: () => S.net, hud, actors, onTarget: id => setTarget(id), myChar: () => S.net?.joined?.you?.char ?? null });
+const bag = createBag({ net: () => S.net, hud });
+window.addEventListener('keydown', e => {
+  if (S.phase !== 'world' || (document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName))) return;
+  if (e.code === 'KeyE' && objects.useFocus()) { e.preventDefault(); e.stopImmediatePropagation(); }
+  else if (e.code === 'KeyB') bag.toggle();
+  else if (e.code === 'KeyP') social.toggleMenu();
+}, true);
 
 // --- title screen -------------------------------------------------------------------------------------
 let preview = null;
@@ -205,7 +260,8 @@ async function enterWorld() {
     await net.ready;
     let ch = net.chars.find(c => c.name.toLowerCase() === name.toLowerCase());
     if (!ch) ch = await net.createChar({ name, cls: S.cls, look: { race: S.look.race, seed: S.look.seed, v: 1 } });
-    await net.play(ch.id);
+    const join = (q.get('join') || '').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 8) || null;
+    await net.play(ch.id, join ? { join } : {});
     clearTimeout(timer);
   } catch (e) {
     clearTimeout(timer);
@@ -228,7 +284,7 @@ function wireNet(net) {
   net.on('joined', onJoined);
   net.on('info', ents => { S.mirror.info(ents); for (const i of ents) refreshFromInfo(i.id); });
   net.on('snap', onSnap);
-  net.on('ev', ({ e }) => { for (const ev of e) onEvent(ev); });
+  net.on('ev', ({ k, e }) => { S.evTick = k; for (const ev of e) onEvent(ev); });
   net.on('you', patch => {
     const levelled = patch.level != null && patch.level > S.self.level;
     if (patch.level != null) S.self.level = patch.level;
@@ -240,13 +296,23 @@ function wireNet(net) {
     if (levelled) levelFlash(S.selfId);
   });
   net.on('chat', m => {
-    hud.chat(m.text, m.ch === 'say' ? 'say' : 'system', m.ch === 'say' ? m.name : null);
+    hud.chat(m.text, m.ch === 'say' ? 'say' : m.ch === 'party' ? 'party' : 'system', m.ch === 'say' || m.ch === 'party' ? (m.ch === 'party' ? `Party] [${m.name}` : m.name) : null);
     if (m.ch === 'say' && m.from != null) actors.say(m.from, m.text);
   });
+  social.wire(net);
+  bag.wire(net);
+  net.on('used', u => {
+    if (!u.ok) { hud.toast(u.msg || ({ far: 'Too far away.', opened: 'Already emptied.', dead: 'You are dead.', unknown: 'Nothing happens.' }[u.why]) || 'Nothing happens.', 'warn'); if (u.why === 'opened') objects.markOpened(u.id); return; }
+    const o = objects.items.get(u.id);
+    if (o?.type === 'chest') objects.markOpened(u.id);
+    if (o?.type === 'lever' && D.view) { D.view.openGate(D.view.floorAt(o.x, o.z)); hud.toast('Somewhere, a gate grinds open.', 'info'); }
+    if (u.msg) hud.toast(u.msg, 'info');
+  });
+  net.on('targetR', r => { if (S.target === r.id) setTarget(null); hud.toast(r.why === 'range' ? 'Too far away to target.' : 'You cannot target that.', 'warn'); });
   net.on('castR', r => {
     if (r.why === 'cooldown') { S.swing.ms = Math.min(2500, S.swing.ms + 60); return; }
     if (r.why === 'range') { const t = actors.get(S.target); if (t) S.reach = Math.max(1.6, Math.min(S.reach, Math.hypot(t.pos.x - S.predictor.pos.x, t.pos.z - S.predictor.pos.z)) * 0.8); }
-    hud.toast(CASTR_TEXT[r.why] || 'You cannot do that.', 'warn');
+    hud.toast(r.text || CASTR_TEXT[r.why] || 'You cannot do that.', 'warn');
   });
 }
 
@@ -259,11 +325,12 @@ function onJoined(j) {
   for (const id of [...actors.actors.keys()]) if (id !== keep) actors.remove(id);
   if (keep != null) actors.rekey(keep, S.selfId);
   if (S.target != null) setTarget(null);
+  tele.clear(); objects.clear(); boss.clear();
   preview = null;
   const you = j.you;
   Object.assign(S.self, { name: you.name, cls: you.cls, level: you.level, xp: you.xp || 0, next: you.xpNext || 100, hp: you.hp, hpMax: you.hpMax, dead: you.hp <= 0 });
   S.predictor.locked = S.self.dead;
-  useTerrain(j.room.terrain, j.room.kind === 'town' ? j.room.spawn : null).then(() => {
+  useRoom(j.room).then(() => {
     S.predictor.reset({ x: you.x, y: you.y, z: you.z });
     const a = actors.get(S.selfId) || actors.add({ id: S.selfId, kind: 'player', name: you.name, level: you.level, hp: you.hp, hpMax: you.hpMax, hostile: false,
       look: lookFor(S.mirror.infos.get(S.selfId)?.look || { race: S.look.race, seed: S.look.seed }, you.char, you.cls), x: you.x, y: you.y, z: you.z, yaw: you.yaw }, { self: true });
@@ -271,7 +338,7 @@ function onJoined(j) {
     controls.setFacing(you.yaw || 0); controls.cam.yaw = you.yaw || 0;
     hud.setSelf(S.self);
     if (S.phase !== 'world') startWorld(j);
-    else if (prevRoom && prevRoom.id !== j.room.id && j.room.name !== prevRoom.name) { hud.zone(j.room.name); hud.chat(`You enter ${j.room.name}.`, 'system'); }
+    else if (prevRoom && prevRoom.id !== j.room.id && j.room.name !== prevRoom.name) { hud.zone(j.room.name); hud.chat(`You enter ${j.room.name}.`, 'system'); if (j.room.dungeon) hud.chat('Find the stairs down; the reward waits past the boss.', 'system'); }
     else if (!prevRoom || prevRoom.id === j.room.id) hud.toast('Reconnected.', 'good');
   });
 }
@@ -289,6 +356,11 @@ function ensureActor(id) {
   if (!a) {
     const info = e.info || S.mirror.infos.get(id) || {};
     const kind = info.kind || KIND_NAMES[e.kind] || 'monster';
+    if (kind === 'object') {
+      const opened = (S.net?.joined?.you?.opened || {});
+      objects.upsert({ id, type: info.type, name: info.name, x: e.x, z: e.z, yaw: e.yaw || 0, source: 'room', opened: info.type === 'chest' && !!(info.key && opened[info.key] && opened[info.key] > Date.now()) });
+      return null;
+    }
     const hpMax = info.hpMax || 100;
     const y = e.y ?? groundY(e.x, e.z);
     a = actors.add({
@@ -296,7 +368,7 @@ function ensureActor(id) {
       hp: Math.round((e.hp ?? 1) * hpMax), hpMax, hostile: info.team === 2 || (kind === 'monster' && info.team !== 1),
       look: kind === 'player' ? lookFor(info.look, info.char ?? id, info.cls) : null,
       creature: kind !== 'player' ? { type: info.type || 'wolf', seed: (id * 7919) >>> 0 } : null, family: info.type || null,
-      x: e.x, y, z: e.z, yaw: e.yaw || 0,
+      x: e.x, y, z: e.z, yaw: e.yaw || 0, rank: info.rank || null,
     });
     if (e.state & STATE.dead) actors.setDead(id, true);
   }
@@ -325,7 +397,7 @@ function onSnap(s) {
   }
   if (s.vitals) { S.self.hp = s.vitals.hp; S.self.hpMax = s.vitals.hpMax; actors.setHp(S.selfId, s.vitals.hp, s.vitals.hpMax); hud.setSelf(S.self); }
   if (S.selfId != null && !!s.dead !== S.self.dead) setSelfDead(!!s.dead);
-  for (const id of s.left) { actors.remove(id); if (S.target === id) setTarget(null); }
+  for (const id of s.left) { actors.remove(id); objects.remove(id); if (S.target === id) setTarget(null); }
   for (const r of s.ents) {
     if (r.id === S.selfId) continue;
     const a = ensureActor(r.id); if (!a) continue;
@@ -350,6 +422,7 @@ function onSnap(s) {
 
 function remember(ev) { S.events.push(ev); if (S.events.length > 200) S.events.shift(); }
 function onEvent(ev) {
+  if (!ev.type && ev.t) ev = { ...ev, type: ev.t };   // encounter events may still carry `t`
   remember(ev);
   const me = S.selfId;
   switch (ev.type) {
@@ -405,6 +478,18 @@ function onEvent(ev) {
         for (const it of ev.items || []) { hud.chat(`You loot: ${it.name}`, 'loot rarity-' + (it.rarity || 'common')); hud.toast(it.name, 'loot rarity-' + (it.rarity || 'common')); }
       }
       break;
+    case 'open': objects.markOpened(ev.d); break;
+    case 'tele': tele.add(ev, (S.evTick ?? 0) * TICK_MS); break;
+    case 'teleR': {
+      const t = tele.resolve(ev);
+      if (t && !ev.x) {
+        const at = { x: t.x, y: groundY(t.x, t.z) + 0.4, z: t.z };
+        fx.burst(at, { color: { fire: '#ff9a3d', frost: '#8fe4ff', poison: '#9ef06a', shadow: '#c08aff', lightning: '#fff08a' }[t.el] || '#ff6a4a', count: 14 });
+      }
+      break;
+    }
+    case 'boss': case 'phase': case 'castbar': case 'castX': case 'enrage': case 'say': boss.onEvent(ev); break;
+    case 'obj': objects.onObj(ev); break;
     case 'aggro':
       if (ev.d === me) { const a = actors.get(ev.s); if (a) fx.number({ x: a.pos.x, y: a.pos.y + a.height + 0.3, z: a.pos.z }, '!', 'in'); }
       break;
@@ -451,15 +536,11 @@ function retargetAfterKill() {
   if (next) { setTarget(next.id); if (wasChasing) controls.attack(next.id); }
 }
 function cycleTarget() {
-  const me = actors.get(S.selfId); if (!me) return;
-  const fx_ = Math.sin(controls.cam.yaw), fz_ = Math.cos(controls.cam.yaw);
-  const list = [...actors.actors.values()].filter(a => a.hostile && !a.dead && a.id !== S.selfId)
-    .map(a => { const dx = a.pos.x - me.pos.x, dz = a.pos.z - me.pos.z, d = Math.hypot(dx, dz); return { a, d, front: (dx * fx_ + dz * fz_) / (d || 1) }; })
-    .filter(o => o.d < 45 && o.front > -0.2)
-    .sort((p, r) => (p.d * (1.6 - p.front)) - (r.d * (1.6 - r.front)));
-  if (!list.length) { hud.toast('No enemies nearby.', 'warn'); return; }
-  const i = list.findIndex(o => o.a.id === S.target);
-  setTarget(list[(i + 1) % list.length].a.id);
+  if (S.selfId == null) return;
+  const p = S.predictor.pos;
+  const id = tabNext(S.mirror, { id: S.selfId, x: p.x, z: p.z, yaw: controls.cam.yaw }, S.target || 0, { range: 40, facing: controls.cam.yaw, arc: Math.PI * 0.9 });
+  if (!id) { hud.toast('No enemies nearby.', 'warn'); return; }
+  setTarget(id);
 }
 /** Swing at the target if we think the weapon is ready; the server decides (castR says no). */
 function tryStrike(fromKey, slot = 0) {
@@ -551,6 +632,11 @@ function frame(now) {
     view.follow(drawn);
     W.ground?.update(dt, drawn);
     W.decor?.update(dt, drawn);
+    D.view?.update(dt, drawn);
+    tele.update(dt);
+    boss.update(dt);
+    objects.update(dt, S.self.dead ? null : drawn);
+    vignette.classList.toggle('danger', tele.standingInDanger && !S.self.dead);
     hud.death(S.self.dead ? Math.max(0, 2.5 - (now - S.self.deadAt) / 1000) : null);
     if (S.self.dead && now - S.self.deadAt > 30000) rise();
     const tgt = S.target != null ? actors.get(S.target) : null;

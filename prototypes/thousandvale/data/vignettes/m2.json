@@ -1,0 +1,5006 @@
+{
+  "_doc": "Stream E, M2. More vignettes (same format as m1.json; read both). See data/vignettes/README.md.",
+  "vignettes": [
+    {
+      "id": "collapsed_mine_mouth",
+      "name": "The Collapsed Adit",
+      "blurb": "An old mine entrance fallen in; a trapped miner taps on the rubble. Clear the beetles, shift the beam, free him.",
+      "lore": "Tap. Tap-tap. Tap. Someone behind the rubble has been doing that for a while.",
+      "tags": {
+        "biomes": [
+          "hills",
+          "grassland",
+          "mountains",
+          "borealForest"
+        ],
+        "archetypes": [
+          "mine_country",
+          "pass",
+          "ruinfield",
+          "wilds"
+        ],
+        "band": [
+          2,
+          10
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 11,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "ruined_wall",
+          "x": 0,
+          "z": -3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "wood_pile",
+          "x": 2,
+          "z": -1,
+          "yaw": 0.4
+        },
+        {
+          "kind": "prop",
+          "id": "cart_wheel",
+          "x": -3,
+          "z": 1,
+          "yaw": 1.2
+        },
+        {
+          "kind": "ground",
+          "id": "ash_patch",
+          "x": 0,
+          "z": 1,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "torch_post",
+          "x": 3,
+          "z": 2,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "ironback_beetle",
+          "count": 2,
+          "level": 1,
+          "x": 0,
+          "z": 3,
+          "radius": 5
+        }
+      ],
+      "objects": [
+        {
+          "type": "use",
+          "name": "Rotten beam",
+          "x": 1,
+          "z": -2,
+          "text": "You heave the beam aside. A filthy hand waves at you through the gap."
+        },
+        {
+          "type": "npc",
+          "name": "Ossie the miner",
+          "x": 0,
+          "z": -1.5,
+          "says": [
+            "Air! Lovely air! I owe you a pint, and a pickaxe, and possibly my life.",
+            "Take my lucky lamp. It never once kept me out of trouble."
+          ]
+        },
+        {
+          "type": "chest",
+          "name": "Ossie's lunch tin",
+          "x": -1,
+          "z": -1,
+          "tier": "common"
+        }
+      ]
+    },
+    {
+      "id": "giants_cookfire",
+      "name": "The Giant's Cookfire",
+      "blurb": "A cold firepit the size of a cottage with a cart-sized spit and gnawed ox bones; crag hyenas scavenge. Whoever cooked here is not around. Probably.",
+      "lore": "The ashes are cold. The bones are large. The spoon is larger than you.",
+      "tags": {
+        "biomes": [
+          "hills",
+          "grassland",
+          "shrubland",
+          "mountains"
+        ],
+        "archetypes": [
+          "wilds",
+          "pass",
+          "frontier",
+          "mine_country"
+        ],
+        "band": [
+          4,
+          12
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 14,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "fire_ring",
+          "x": 0,
+          "z": 0,
+          "yaw": 0,
+          "scale": 3
+        },
+        {
+          "kind": "prop",
+          "id": "sawhorse",
+          "x": -3,
+          "z": 0,
+          "yaw": 1.57,
+          "scale": 2.2
+        },
+        {
+          "kind": "prop",
+          "id": "sawhorse",
+          "x": 3,
+          "z": 0,
+          "yaw": 1.57,
+          "scale": 2.2
+        },
+        {
+          "kind": "ground",
+          "id": "bone_scatter",
+          "x": 2,
+          "z": 3,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "bone_scatter",
+          "x": -2,
+          "z": -3,
+          "yaw": 1.2
+        },
+        {
+          "kind": "ground",
+          "id": "ash_patch",
+          "x": 0,
+          "z": 0,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "crag_hyena",
+          "count": 3,
+          "level": 1,
+          "x": 4,
+          "z": 4,
+          "radius": 6
+        }
+      ],
+      "objects": [
+        {
+          "type": "chest",
+          "name": "Under the giant's ladle",
+          "x": -4,
+          "z": 3,
+          "tier": "uncommon"
+        },
+        {
+          "type": "note",
+          "name": "Scratched on a bone",
+          "x": 3,
+          "z": 3,
+          "text": "COW. COW. GOAT. MAN? NO, TOO STRINGY."
+        }
+      ]
+    },
+    {
+      "id": "stone_circle_hum",
+      "name": "The Humming Stones",
+      "blurb": "A ring of standing stones that hums at night; a wisp sleeps at its heart. Touch the centre stone at night for a short blessing.",
+      "lore": "Nine stones, leaning in like old men sharing a secret. Put your hand on one and it is faintly warm.",
+      "tags": {
+        "biomes": [
+          "grassland",
+          "hills",
+          "shrubland",
+          "lake",
+          "beach"
+        ],
+        "archetypes": [
+          "holy_ground",
+          "wilds",
+          "heartland",
+          "ruinfield",
+          "coast"
+        ],
+        "band": [
+          1,
+          12
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 12,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "stone_marker",
+          "x": 0,
+          "z": -8,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "stone_marker",
+          "x": 6,
+          "z": -5,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "stone_marker",
+          "x": 8,
+          "z": 1,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "stone_marker",
+          "x": 5,
+          "z": 6,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "stone_marker",
+          "x": -1,
+          "z": 8,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "stone_marker",
+          "x": -6,
+          "z": 5,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "stone_marker",
+          "x": -8,
+          "z": -1,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "stone_marker",
+          "x": -5,
+          "z": -6,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "rune_stone",
+          "x": 0,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "lichen_patch",
+          "x": 2,
+          "z": 2,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "marsh_wisp",
+          "count": 1,
+          "level": 2,
+          "x": 0,
+          "z": 1,
+          "radius": 3
+        }
+      ],
+      "objects": [
+        {
+          "type": "use",
+          "name": "Centre stone",
+          "x": 0,
+          "z": 0.5,
+          "text": "The hum climbs through your arm. For a little while, your wounds close faster.",
+          "buff": {
+            "status": "regen",
+            "seconds": 300
+          }
+        }
+      ]
+    },
+    {
+      "id": "toppled_statue",
+      "name": "The Toppled King",
+      "blurb": "A broken statue of a forgotten king face-down in the grass; the hollow crown hides a compartment. Rats live in the plinth.",
+      "lore": "Someone pulled down this king a long time ago and nobody bothered to put him back up. His crown is hollow.",
+      "tags": {
+        "biomes": [
+          "grassland",
+          "shrubland",
+          "hills"
+        ],
+        "archetypes": [
+          "ruinfield",
+          "crown_ring",
+          "heartland",
+          "frontier"
+        ],
+        "band": [
+          1,
+          10
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 10,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "ruined_pillar",
+          "x": 0,
+          "z": 0,
+          "yaw": 1.57,
+          "scale": 1.6
+        },
+        {
+          "kind": "prop",
+          "id": "stone_step",
+          "x": -3,
+          "z": -2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "stone_step",
+          "x": -3,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "lichen_patch",
+          "x": 1,
+          "z": 2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "ruined_arch",
+          "x": 4,
+          "z": -4,
+          "yaw": 0.4
+        }
+      ],
+      "monsters": [
+        {
+          "type": "cairn_rat",
+          "count": 4,
+          "level": 0,
+          "x": -2,
+          "z": 2,
+          "radius": 4
+        }
+      ],
+      "objects": [
+        {
+          "type": "chest",
+          "name": "Compartment in the crown",
+          "x": 2.5,
+          "z": 0.5,
+          "tier": "uncommon",
+          "hidden": true,
+          "hint": "The stone crown sounds hollow when you knock on it."
+        },
+        {
+          "type": "note",
+          "name": "Chiselled on the plinth",
+          "x": -3,
+          "z": -1,
+          "text": "KING OSWIN THE UNREMARKABLE. HE TRIED."
+        }
+      ]
+    },
+    {
+      "id": "broken_caravan_survivor",
+      "name": "The Last Wagon",
+      "blurb": "A caravan smashed by something big; one survivor in the last wagon, hounds circling. Hold off the pack, then she gives you the caravan's strongbox key.",
+      "lore": "Three wagons on their sides and one still upright. From inside the upright one, a voice says, very calmly, \"Are the dogs still there?\"",
+      "tags": {
+        "biomes": [
+          "grassland",
+          "shrubland",
+          "hills",
+          "temperateForest"
+        ],
+        "archetypes": [
+          "heartland",
+          "frontier",
+          "pass",
+          "crown_ring",
+          "wilds"
+        ],
+        "band": [
+          2,
+          10
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 15,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "cart_wheel",
+          "x": -4,
+          "z": 0,
+          "yaw": 0.3
+        },
+        {
+          "kind": "prop",
+          "id": "cart_wheel",
+          "x": 4,
+          "z": 2,
+          "yaw": 1.9
+        },
+        {
+          "kind": "prop",
+          "id": "crate",
+          "x": -2,
+          "z": 3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "crate",
+          "x": 3,
+          "z": -3,
+          "yaw": 0.8
+        },
+        {
+          "kind": "prop",
+          "id": "barrel",
+          "x": 0,
+          "z": 4,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "barrel",
+          "x": -5,
+          "z": -3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "banner_pole",
+          "x": 6,
+          "z": -5,
+          "yaw": 0.2
+        }
+      ],
+      "monsters": [
+        {
+          "type": "moor_hound",
+          "count": 4,
+          "level": 1,
+          "x": 0,
+          "z": 6,
+          "radius": 7
+        }
+      ],
+      "objects": [
+        {
+          "type": "npc",
+          "name": "Wenna Coombe, spice trader",
+          "x": 0,
+          "z": 0,
+          "says": [
+            "They came out of the long grass, big as ponies. The others ran. I did not run. I am very slow.",
+            "The strongbox is under the second wagon. Take what you like, you have earned it."
+          ]
+        },
+        {
+          "type": "chest",
+          "name": "Caravan strongbox",
+          "x": -4,
+          "z": 1,
+          "tier": "uncommon"
+        }
+      ]
+    },
+    {
+      "id": "drowned_chapel",
+      "name": "The Drowned Chapel",
+      "blurb": "A chapel standing in a lake to its windowsills; the bell still rings when the wind is right. Serpents in the nave, a reliquary in the bell loft.",
+      "lore": "The water comes up to the windows. When the wind blows, the bell rings, and nobody has pulled its rope in forty years.",
+      "tags": {
+        "biomes": [
+          "lake",
+          "marsh",
+          "coast"
+        ],
+        "archetypes": [
+          "lakeland",
+          "marsh",
+          "holy_ground",
+          "coast"
+        ],
+        "band": [
+          3,
+          12
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 13,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "ruined_wall",
+          "x": -4,
+          "z": 0,
+          "yaw": 1.57
+        },
+        {
+          "kind": "prop",
+          "id": "ruined_wall",
+          "x": 4,
+          "z": 0,
+          "yaw": 1.57
+        },
+        {
+          "kind": "prop",
+          "id": "ruined_arch",
+          "x": 0,
+          "z": -5,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "puddle_ring",
+          "x": 0,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "puddle_ring",
+          "x": 2,
+          "z": 3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "stone_step",
+          "x": 0,
+          "z": 5,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "reed_serpent",
+          "count": 2,
+          "level": 1,
+          "x": 0,
+          "z": 1,
+          "radius": 4
+        }
+      ],
+      "objects": [
+        {
+          "type": "chest",
+          "name": "Reliquary in the bell loft",
+          "x": 0,
+          "z": -4,
+          "tier": "uncommon"
+        },
+        {
+          "type": "note",
+          "name": "Hymn book, swollen",
+          "x": 1,
+          "z": 4,
+          "text": "Verse four has been crossed out and someone has written: STOP SINGING, THEY CAN HEAR YOU."
+        }
+      ]
+    },
+    {
+      "id": "witch_stump",
+      "name": "The Wishing Stump",
+      "blurb": "A huge hollow stump stuffed with old wishes on scraps of cloth; a spider lives in it and eats them. Leave a coin and pull a wish out.",
+      "lore": "A hollow stump stuffed with knotted rags. Each one has a wish written on it. Something has been eating them.",
+      "tags": {
+        "biomes": [
+          "temperateForest",
+          "borealForest",
+          "marsh",
+          "shrubland"
+        ],
+        "archetypes": [
+          "wilds",
+          "marsh",
+          "heartland",
+          "holy_ground"
+        ],
+        "band": [
+          1,
+          10
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 10,
+      "props": [
+        {
+          "kind": "tree",
+          "id": "oak",
+          "x": 0,
+          "z": 0,
+          "yaw": 0,
+          "dead": true,
+          "scale": 0.6
+        },
+        {
+          "kind": "ground",
+          "id": "root_mat",
+          "x": 0,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "mushroom_ring",
+          "x": 3,
+          "z": 2,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "lichen_patch",
+          "x": -3,
+          "z": -2,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "veil_spider",
+          "count": 1,
+          "level": 1,
+          "x": 0,
+          "z": 2,
+          "radius": 3
+        }
+      ],
+      "objects": [
+        {
+          "type": "use",
+          "name": "Hollow stump",
+          "x": 0,
+          "z": 0.5,
+          "text": "You pull out a rag. It says: \"I wish my brother would give back my good hat.\" You leave a coin anyway.",
+          "cost": {
+            "gold": 1
+          },
+          "gives": {
+            "gold": 0
+          }
+        },
+        {
+          "type": "chest",
+          "name": "Wishes nobody collected",
+          "x": -1,
+          "z": 1,
+          "tier": "common"
+        }
+      ]
+    },
+    {
+      "id": "burned_farmstead",
+      "name": "The Burned Farmstead",
+      "blurb": "A farm burned in a raid; the family's dog still guards the ashes. Brigands come back for the root cellar. Feed the dog and it follows you to the cache.",
+      "lore": "The house is ash and the barn is ash. A thin grey dog sits in the middle of it all, waiting for somebody.",
+      "tags": {
+        "biomes": [
+          "grassland",
+          "shrubland",
+          "savanna"
+        ],
+        "archetypes": [
+          "frontier",
+          "heartland",
+          "blight",
+          "crown_ring"
+        ],
+        "band": [
+          2,
+          12
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 13,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "ruined_wall",
+          "x": -3,
+          "z": -3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "ruined_wall",
+          "x": 2,
+          "z": -4,
+          "yaw": 1.57
+        },
+        {
+          "kind": "ground",
+          "id": "ash_patch",
+          "x": 0,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "ash_patch",
+          "x": -2,
+          "z": 2,
+          "yaw": 1
+        },
+        {
+          "kind": "prop",
+          "id": "fence_post",
+          "x": 5,
+          "z": 3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "fence_rail",
+          "x": 5,
+          "z": 1,
+          "yaw": 1.57
+        },
+        {
+          "kind": "prop",
+          "id": "well",
+          "x": -5,
+          "z": 3,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "road_brigand",
+          "count": 3,
+          "level": 2,
+          "x": 3,
+          "z": 4,
+          "radius": 5
+        }
+      ],
+      "objects": [
+        {
+          "type": "npc",
+          "name": "A thin grey dog",
+          "x": 0,
+          "z": 0,
+          "says": [
+            "The dog wags once, then trots off and sits by a patch of scorched boards, looking at you."
+          ]
+        },
+        {
+          "type": "chest",
+          "name": "Root cellar under the boards",
+          "x": 1,
+          "z": 2,
+          "tier": "uncommon"
+        }
+      ]
+    },
+    {
+      "id": "smugglers_cove",
+      "name": "Smugglers' Cove",
+      "blurb": "A tide cave mouth with a rowing boat, barrels of untaxed brandy and a lookout who is mostly asleep.",
+      "lore": "Barrels stacked above the tide line, a rowing boat on the shingle, and a lookout snoring with his mouth open.",
+      "tags": {
+        "biomes": [
+          "beach",
+          "coast",
+          "lake"
+        ],
+        "archetypes": [
+          "coast",
+          "lakeland",
+          "frontier"
+        ],
+        "band": [
+          3,
+          12
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 12,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "barrel",
+          "x": -2,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "barrel",
+          "x": -1,
+          "z": 1,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "barrel",
+          "x": -3,
+          "z": 1,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "crate",
+          "x": 2,
+          "z": -1,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "torch_post",
+          "x": 0,
+          "z": -4,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "sand_ripple",
+          "x": 0,
+          "z": 3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "cart_wheel",
+          "x": 4,
+          "z": 3,
+          "yaw": 0.5
+        }
+      ],
+      "monsters": [
+        {
+          "type": "road_brigand",
+          "count": 2,
+          "level": 2,
+          "x": 1,
+          "z": 2,
+          "radius": 4
+        },
+        {
+          "type": "brigand_archer",
+          "count": 1,
+          "level": 2,
+          "x": -4,
+          "z": -3,
+          "radius": 2
+        }
+      ],
+      "objects": [
+        {
+          "type": "chest",
+          "name": "Untaxed brandy (and other things)",
+          "x": -2,
+          "z": 1,
+          "tier": "uncommon"
+        },
+        {
+          "type": "note",
+          "name": "Tide table, annotated",
+          "x": 2,
+          "z": -1.5,
+          "text": "Low water Thursday. Bring the good rope this time, Jory."
+        }
+      ]
+    },
+    {
+      "id": "wreck_on_the_rocks",
+      "name": "The Wreck of the Patience",
+      "blurb": "A merchant ship broken on the rocks; crabs and gulls picking it over. The captain's log and a waterlogged chest.",
+      "lore": "Half a ship lies on the rocks with her name still on the bow: PATIENCE. She ran out of it.",
+      "tags": {
+        "biomes": [
+          "beach",
+          "coast"
+        ],
+        "archetypes": [
+          "coast",
+          "lakeland"
+        ],
+        "band": [
+          2,
+          12
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 14,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "ruined_wall",
+          "x": 0,
+          "z": 0,
+          "yaw": 0.6,
+          "scale": 1.4
+        },
+        {
+          "kind": "prop",
+          "id": "crate",
+          "x": -3,
+          "z": 2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "barrel",
+          "x": 3,
+          "z": 3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "barrel",
+          "x": -4,
+          "z": -2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "cart_wheel",
+          "x": 2,
+          "z": -3,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "sand_ripple",
+          "x": 0,
+          "z": 4,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "puddle_ring",
+          "x": -2,
+          "z": 4,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "silt_lurker",
+          "count": 2,
+          "level": 3,
+          "x": 0,
+          "z": 3,
+          "radius": 5
+        }
+      ],
+      "objects": [
+        {
+          "type": "note",
+          "name": "Captain's log",
+          "x": 1,
+          "z": 0,
+          "text": "Day nine. The lighthouse is dark. I am told it is \"on strike\". I did not know lighthouses could do that."
+        },
+        {
+          "type": "chest",
+          "name": "Waterlogged sea chest",
+          "x": -3,
+          "z": 2,
+          "tier": "uncommon"
+        }
+      ]
+    },
+    {
+      "id": "dark_lighthouse",
+      "name": "The Dark Lighthouse",
+      "blurb": "A lighthouse whose keeper ran off; light it again with a full oil barrel and ships stop wrecking. Moths swarm the lamp room.",
+      "lore": "The lighthouse is dark. A note on the door says GONE FISHING. It is dated four winters ago.",
+      "tags": {
+        "biomes": [
+          "coast",
+          "beach",
+          "hills"
+        ],
+        "archetypes": [
+          "coast",
+          "lakeland",
+          "pass"
+        ],
+        "band": [
+          3,
+          12
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 10,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "ruined_pillar",
+          "x": 0,
+          "z": 0,
+          "yaw": 0,
+          "scale": 2.4
+        },
+        {
+          "kind": "prop",
+          "id": "barrel",
+          "x": 3,
+          "z": 1,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "stone_step",
+          "x": 0,
+          "z": 3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "torch_post",
+          "x": -3,
+          "z": 2,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "sand_ripple",
+          "x": 2,
+          "z": 4,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "carrion_moth",
+          "count": 4,
+          "level": 1,
+          "x": 0,
+          "z": 1,
+          "radius": 4
+        }
+      ],
+      "objects": [
+        {
+          "type": "use",
+          "name": "Lamp oil barrel",
+          "x": 3,
+          "z": 1,
+          "text": "You haul the oil up the stairs and light the lamp. Out on the water, somebody cheers.",
+          "gives": {
+            "gold": 8
+          }
+        },
+        {
+          "type": "note",
+          "name": "Keeper's note",
+          "x": 0,
+          "z": 2,
+          "text": "GONE FISHING. Back soon. Do not touch the lamp, it bites."
+        }
+      ]
+    },
+    {
+      "id": "gallows_crossroads",
+      "name": "Gallows Crossroads",
+      "blurb": "A crossroads gibbet with an empty cage and a signpost someone has turned to point the wrong way. Owls and a ghostly highwayman's stash.",
+      "lore": "The signpost has been turned round. Every arm points at the gibbet.",
+      "tags": {
+        "biomes": [
+          "grassland",
+          "shrubland",
+          "hills",
+          "temperateForest",
+          "blighted"
+        ],
+        "archetypes": [
+          "heartland",
+          "frontier",
+          "crown_ring",
+          "pass",
+          "blight"
+        ],
+        "band": [
+          1,
+          10
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 10,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "signpost",
+          "x": 0,
+          "z": 0,
+          "yaw": 0.7
+        },
+        {
+          "kind": "prop",
+          "id": "banner_pole",
+          "x": 3,
+          "z": -2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "stone_marker",
+          "x": -3,
+          "z": 2,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "bone_scatter",
+          "x": 3,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "fence_post",
+          "x": -4,
+          "z": -3,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "gallows_owl",
+          "count": 2,
+          "level": 1,
+          "x": 2,
+          "z": -2,
+          "radius": 3
+        }
+      ],
+      "objects": [
+        {
+          "type": "use",
+          "name": "Crooked signpost",
+          "x": 0,
+          "z": 0,
+          "text": "You turn the signpost back the right way. It creaks, and something drops out of a hollow arm.",
+          "gives": {
+            "gold": 5
+          }
+        },
+        {
+          "type": "chest",
+          "name": "Highwayman's stash, under the gibbet",
+          "x": 3,
+          "z": -1,
+          "tier": "common",
+          "hidden": true,
+          "hint": "The gibbet's base stone is newer than the rest."
+        }
+      ]
+    },
+    {
+      "id": "flooded_mill",
+      "name": "The Flooded Mill",
+      "blurb": "A watermill whose race has burst and flooded the yard; the wheel still turns. A miller asks you to clear the slimes from the sluice.",
+      "lore": "The mill wheel is still turning, but the millpond is in the yard, the kitchen and most of the bedroom.",
+      "tags": {
+        "biomes": [
+          "grassland",
+          "lake",
+          "marsh",
+          "temperateForest"
+        ],
+        "archetypes": [
+          "heartland",
+          "lakeland",
+          "marsh",
+          "crown_ring"
+        ],
+        "band": [
+          1,
+          8
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 12,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "cart_wheel",
+          "x": 0,
+          "z": 0,
+          "yaw": 1.57,
+          "scale": 2.2
+        },
+        {
+          "kind": "prop",
+          "id": "ruined_wall",
+          "x": -3,
+          "z": -2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "crate",
+          "x": 3,
+          "z": 2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "hay_bale",
+          "x": -4,
+          "z": 3,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "puddle_ring",
+          "x": 1,
+          "z": 3,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "puddle_ring",
+          "x": -2,
+          "z": 1,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "bog_slime",
+          "count": 2,
+          "level": 1,
+          "x": 2,
+          "z": 3,
+          "radius": 4
+        }
+      ],
+      "objects": [
+        {
+          "type": "npc",
+          "name": "Miller Hollis",
+          "x": -2,
+          "z": -1,
+          "says": [
+            "Something jammed the sluice and now it's jammed with THEM. Clear it and you can have a sack of flour. Or money. Mostly money."
+          ]
+        },
+        {
+          "type": "use",
+          "name": "Sluice gate",
+          "x": 2,
+          "z": 0,
+          "text": "You wrench the sluice open and the water drains with a long gurgle.",
+          "gives": {
+            "gold": 6
+          }
+        }
+      ]
+    },
+    {
+      "id": "beekeeper_hives",
+      "name": "The Angry Hives",
+      "blurb": "Skeps on a hillside where a bear-sized boar got into the honey; flitters swarm. Honey sells well.",
+      "lore": "Straw hives, all knocked over. The air is buzzing and the grass is sticky.",
+      "tags": {
+        "biomes": [
+          "grassland",
+          "shrubland",
+          "temperateForest",
+          "savanna"
+        ],
+        "archetypes": [
+          "heartland",
+          "holy_ground",
+          "wilds",
+          "lakeland"
+        ],
+        "band": [
+          1,
+          8
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 10,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "hay_bale",
+          "x": -2,
+          "z": 0,
+          "yaw": 0,
+          "scale": 0.6
+        },
+        {
+          "kind": "prop",
+          "id": "hay_bale",
+          "x": 0,
+          "z": -2,
+          "yaw": 0,
+          "scale": 0.6
+        },
+        {
+          "kind": "prop",
+          "id": "hay_bale",
+          "x": 2,
+          "z": 0,
+          "yaw": 0,
+          "scale": 0.6
+        },
+        {
+          "kind": "prop",
+          "id": "fence_post",
+          "x": -4,
+          "z": 3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "fence_rail",
+          "x": -2,
+          "z": 3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "fence_post",
+          "x": 0,
+          "z": 3,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "mushroom_ring",
+          "x": 3,
+          "z": -3,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "dusk_flitter",
+          "count": 3,
+          "level": 0,
+          "x": 0,
+          "z": 0,
+          "radius": 4
+        },
+        {
+          "type": "thicket_boar",
+          "count": 1,
+          "level": 1,
+          "x": 3,
+          "z": 2,
+          "radius": 2
+        }
+      ],
+      "objects": [
+        {
+          "type": "use",
+          "name": "Honeycomb",
+          "x": 0,
+          "z": -1,
+          "text": "You scoop out a slab of honeycomb. A market will pay for it, if the bees let you get that far.",
+          "gives": {
+            "gold": 5
+          }
+        }
+      ]
+    },
+    {
+      "id": "hermits_hollow",
+      "name": "The Hermit's Hollow",
+      "blurb": "A hermit living in a hollow under a fallen pine, who sells advice nobody wants and hints about a hidden cache in the zone.",
+      "lore": "A door built into the roots of a fallen pine. A sign says NO VISITORS. Under it, smaller: (well, maybe one).",
+      "tags": {
+        "biomes": [
+          "borealForest",
+          "temperateForest",
+          "hills",
+          "mountains"
+        ],
+        "archetypes": [
+          "wilds",
+          "pass",
+          "holy_ground",
+          "mine_country"
+        ],
+        "band": [
+          1,
+          12
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 9,
+      "props": [
+        {
+          "kind": "tree",
+          "id": "pine",
+          "x": 0,
+          "z": 0,
+          "yaw": 1.2,
+          "dead": true
+        },
+        {
+          "kind": "ground",
+          "id": "pine_cone_scatter",
+          "x": 2,
+          "z": 2,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "root_mat",
+          "x": -1,
+          "z": 1,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "wood_pile",
+          "x": 3,
+          "z": -2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "campfire",
+          "x": -3,
+          "z": 2,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "frost_stalker",
+          "count": 1,
+          "level": 2,
+          "x": 4,
+          "z": 4,
+          "radius": 2
+        }
+      ],
+      "objects": [
+        {
+          "type": "npc",
+          "name": "Brother Emrys, hermit",
+          "x": -2,
+          "z": 1,
+          "says": [
+            "Advice is a copper. Good advice is two. The truth is free, and nobody ever wants it.",
+            "There is a box under the third stone from the old well, in the next valley. I put it there. I forget why."
+          ]
+        },
+        {
+          "type": "chest",
+          "name": "Hermit's jar of coins",
+          "x": 1,
+          "z": 1,
+          "tier": "common"
+        }
+      ]
+    },
+    {
+      "id": "fairy_ring",
+      "name": "The Toadstool Ring",
+      "blurb": "A ring of huge mushrooms where sporecaps dance at dusk; step in and you are briefly very small (and fast). Harmless, mostly.",
+      "lore": "A perfect ring of toadstools, each one up to your knee. The grass inside is greener than it has any right to be.",
+      "tags": {
+        "biomes": [
+          "temperateForest",
+          "marsh",
+          "borealForest",
+          "grassland"
+        ],
+        "archetypes": [
+          "wilds",
+          "marsh",
+          "holy_ground",
+          "heartland"
+        ],
+        "band": [
+          2,
+          12
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 9,
+      "props": [
+        {
+          "kind": "ground",
+          "id": "mushroom_ring",
+          "x": 0,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "mushroom_ring",
+          "x": 0,
+          "z": 0,
+          "yaw": 1.1
+        },
+        {
+          "kind": "ground",
+          "id": "lichen_patch",
+          "x": 3,
+          "z": 3,
+          "yaw": 0
+        },
+        {
+          "kind": "tree",
+          "id": "birch",
+          "x": -5,
+          "z": -4,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "sporecap_walker",
+          "count": 2,
+          "level": 2,
+          "x": 0,
+          "z": 0,
+          "radius": 4
+        }
+      ],
+      "objects": [
+        {
+          "type": "use",
+          "name": "Step into the ring",
+          "x": 0,
+          "z": 0,
+          "text": "The world spins. For a few minutes you feel light on your feet and smell of mushrooms.",
+          "buff": {
+            "status": "haste",
+            "seconds": 120
+          }
+        }
+      ]
+    },
+    {
+      "id": "watchtower_ruin",
+      "name": "The Abandoned Watchtower",
+      "blurb": "A frontier watchtower left to rot; archers have moved into the top, the signal brazier is unlit. Light it for the garrison.",
+      "lore": "The watch has gone home. The archers in the tower are definitely not the watch.",
+      "tags": {
+        "biomes": [
+          "hills",
+          "grassland",
+          "shrubland",
+          "mountains"
+        ],
+        "archetypes": [
+          "frontier",
+          "pass",
+          "blight",
+          "ruinfield"
+        ],
+        "band": [
+          3,
+          12
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 12,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "ruined_pillar",
+          "x": 0,
+          "z": 0,
+          "yaw": 0,
+          "scale": 2
+        },
+        {
+          "kind": "prop",
+          "id": "palisade_stake",
+          "x": -4,
+          "z": -2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "palisade_stake",
+          "x": -4,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "palisade_stake",
+          "x": -4,
+          "z": 2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "torch_post",
+          "x": 2,
+          "z": -3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "crate",
+          "x": 3,
+          "z": 2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "banner_pole",
+          "x": -2,
+          "z": 4,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "brigand_archer",
+          "count": 3,
+          "level": 2,
+          "x": 0,
+          "z": 0,
+          "radius": 4
+        }
+      ],
+      "objects": [
+        {
+          "type": "use",
+          "name": "Signal brazier",
+          "x": 2,
+          "z": -3,
+          "text": "The brazier catches. Far off, another one answers it.",
+          "gives": {
+            "gold": 6
+          }
+        },
+        {
+          "type": "chest",
+          "name": "Watch-chest",
+          "x": 3,
+          "z": 2,
+          "tier": "common"
+        }
+      ]
+    },
+    {
+      "id": "siege_camp_leftovers",
+      "name": "The Abandoned Siege Camp",
+      "blurb": "A besieger's camp packed up in a hurry; a forgotten ram, cold fires, and hyenas in the latrine trench. Some loot left behind.",
+      "lore": "They left in a hurry. The battering ram is still here, along with a lot of opinions carved into it.",
+      "tags": {
+        "biomes": [
+          "grassland",
+          "shrubland",
+          "hills",
+          "blighted"
+        ],
+        "archetypes": [
+          "frontier",
+          "blight",
+          "ruinfield",
+          "pass"
+        ],
+        "band": [
+          4,
+          12
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 15,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "sawhorse",
+          "x": 0,
+          "z": 0,
+          "yaw": 0,
+          "scale": 1.8
+        },
+        {
+          "kind": "prop",
+          "id": "wood_pile",
+          "x": 2,
+          "z": 0,
+          "yaw": 1.57
+        },
+        {
+          "kind": "prop",
+          "id": "fire_ring",
+          "x": -4,
+          "z": 3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "fire_ring",
+          "x": 4,
+          "z": -3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "banner_pole",
+          "x": -5,
+          "z": -4,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "crate",
+          "x": 3,
+          "z": 4,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "palisade_stake",
+          "x": 6,
+          "z": 0,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "crag_hyena",
+          "count": 3,
+          "level": 2,
+          "x": -3,
+          "z": 4,
+          "radius": 5
+        }
+      ],
+      "objects": [
+        {
+          "type": "note",
+          "name": "Carved on the ram",
+          "x": 0,
+          "z": 0,
+          "text": "KICK HARDER — Sergeant. WE ARE KICKING — Everybody."
+        },
+        {
+          "type": "chest",
+          "name": "Quartermaster's crate",
+          "x": 3,
+          "z": 4,
+          "tier": "uncommon"
+        }
+      ]
+    },
+    {
+      "id": "bone_pit",
+      "name": "The Bone Pit",
+      "blurb": "A plague pit at a field edge where the dead have started crawling out; a wandering priest asks you to put them down and say the words.",
+      "lore": "A long hollow in the ground, grassed over, too regular to be natural. The grass is moving.",
+      "tags": {
+        "biomes": [
+          "grassland",
+          "blighted",
+          "shrubland",
+          "hills"
+        ],
+        "archetypes": [
+          "blight",
+          "holy_ground",
+          "frontier",
+          "ruinfield"
+        ],
+        "band": [
+          4,
+          12
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 12,
+      "props": [
+        {
+          "kind": "ground",
+          "id": "bone_scatter",
+          "x": 0,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "bone_scatter",
+          "x": 2,
+          "z": 1,
+          "yaw": 1.4
+        },
+        {
+          "kind": "ground",
+          "id": "ash_patch",
+          "x": -2,
+          "z": -1,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "stone_marker",
+          "x": 0,
+          "z": -5,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "skull_totem",
+          "x": 4,
+          "z": -3,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "ossuary_crawler",
+          "count": 2,
+          "level": 1,
+          "x": 0,
+          "z": 0,
+          "radius": 5
+        }
+      ],
+      "objects": [
+        {
+          "type": "npc",
+          "name": "Father Tobin",
+          "x": -4,
+          "z": 3,
+          "says": [
+            "They will not lie still. I have asked nicely. Would you ask less nicely?"
+          ]
+        },
+        {
+          "type": "use",
+          "name": "Grave marker",
+          "x": 0,
+          "z": -5,
+          "text": "You say the words Father Tobin taught you. The ground goes quiet.",
+          "gives": {
+            "gold": 4
+          }
+        }
+      ]
+    },
+    {
+      "id": "cultist_altar",
+      "name": "The Sky Altar",
+      "blurb": "A hilltop altar where sky cultists try to call down a storm; interrupt their chant (kill the zealot) before lightning hits.",
+      "lore": "A ring of robed people on the hilltop, chanting at a cloud. The cloud seems to be listening.",
+      "tags": {
+        "biomes": [
+          "hills",
+          "mountains",
+          "grassland",
+          "blighted"
+        ],
+        "archetypes": [
+          "blight",
+          "holy_ground",
+          "pass",
+          "wilds"
+        ],
+        "band": [
+          8,
+          12
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 13,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "dolmen",
+          "x": 0,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "rune_stone",
+          "x": -4,
+          "z": 2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "rune_stone",
+          "x": 4,
+          "z": 2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "torch_post",
+          "x": 0,
+          "z": 5,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "skull_totem",
+          "x": -3,
+          "z": -4,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "sky_cultist",
+          "count": 2,
+          "level": 0,
+          "x": 0,
+          "z": 2,
+          "radius": 4
+        },
+        {
+          "type": "cult_zealot",
+          "count": 1,
+          "level": 1,
+          "x": 0,
+          "z": -2,
+          "radius": 1
+        }
+      ],
+      "objects": [
+        {
+          "type": "note",
+          "name": "Chant sheet",
+          "x": 1,
+          "z": 1,
+          "text": "Line three: AND THEN THE SKY OPENS. (Bring an umbrella this time.)"
+        },
+        {
+          "type": "chest",
+          "name": "Offerings on the altar",
+          "x": 0,
+          "z": 0,
+          "tier": "uncommon"
+        }
+      ]
+    },
+    {
+      "id": "quarry_ledge",
+      "name": "The Quarry Ledge",
+      "blurb": "A half-cut quarry with a crane, blocks left mid-cut and a shale construct still following its last order: guard the stone.",
+      "lore": "Blocks of stone cut and left in neat rows. Something stony is walking up and down them, very seriously.",
+      "tags": {
+        "biomes": [
+          "hills",
+          "mountains",
+          "grassland"
+        ],
+        "archetypes": [
+          "mine_country",
+          "pass",
+          "ruinfield",
+          "crown_ring"
+        ],
+        "band": [
+          8,
+          12
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 14,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "sawhorse",
+          "x": -3,
+          "z": 0,
+          "yaw": 0,
+          "scale": 1.4
+        },
+        {
+          "kind": "prop",
+          "id": "stone_step",
+          "x": 2,
+          "z": 0,
+          "yaw": 0,
+          "scale": 1.6
+        },
+        {
+          "kind": "prop",
+          "id": "stone_step",
+          "x": 4,
+          "z": 0,
+          "yaw": 0,
+          "scale": 1.6
+        },
+        {
+          "kind": "prop",
+          "id": "stone_step",
+          "x": 2,
+          "z": 2,
+          "yaw": 0,
+          "scale": 1.6
+        },
+        {
+          "kind": "prop",
+          "id": "wood_pile",
+          "x": -4,
+          "z": 3,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "lichen_patch",
+          "x": 0,
+          "z": -4,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "shale_warden",
+          "count": 1,
+          "level": 0,
+          "x": 2,
+          "z": 1,
+          "radius": 3
+        }
+      ],
+      "objects": [
+        {
+          "type": "chest",
+          "name": "Mason's toolbox",
+          "x": -4,
+          "z": 3,
+          "tier": "uncommon"
+        },
+        {
+          "type": "note",
+          "name": "Work order",
+          "x": -3,
+          "z": 1,
+          "text": "Guard the stone. Do not let anyone take the stone. — Foreman (do NOT ask the golem to fetch tea again)"
+        }
+      ]
+    },
+    {
+      "id": "ore_cart_spill",
+      "name": "The Runaway Cart",
+      "blurb": "An ore cart that jumped its rails and spilled copper down a slope; beetles are eating the ore. Gather the nuggets.",
+      "lore": "A cart lies upside down at the bottom of the slope, and a glittering trail of copper ore leads back up to the rails.",
+      "tags": {
+        "biomes": [
+          "hills",
+          "grassland",
+          "mountains"
+        ],
+        "archetypes": [
+          "mine_country",
+          "pass",
+          "heartland"
+        ],
+        "band": [
+          2,
+          10
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 10,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "cart_wheel",
+          "x": 0,
+          "z": 0,
+          "yaw": 0.4
+        },
+        {
+          "kind": "prop",
+          "id": "cart_wheel",
+          "x": 1.5,
+          "z": 1,
+          "yaw": 1.9
+        },
+        {
+          "kind": "prop",
+          "id": "crate",
+          "x": -2,
+          "z": -2,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "sand_ripple",
+          "x": 0,
+          "z": 3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "fence_rail",
+          "x": 3,
+          "z": -3,
+          "yaw": 0.3
+        },
+        {
+          "kind": "prop",
+          "id": "fence_rail",
+          "x": 5,
+          "z": -3,
+          "yaw": 0.3
+        }
+      ],
+      "monsters": [
+        {
+          "type": "ironback_beetle",
+          "count": 2,
+          "level": 0,
+          "x": 1,
+          "z": 2,
+          "radius": 4
+        }
+      ],
+      "objects": [
+        {
+          "type": "use",
+          "name": "Copper nuggets",
+          "x": 0,
+          "z": 2,
+          "text": "You fill your pockets with copper. Somebody will pay for this. Probably the person whose cart it was.",
+          "gives": {
+            "gold": 7
+          }
+        }
+      ]
+    },
+    {
+      "id": "miners_shrine",
+      "name": "The Miners' Lamp Shrine",
+      "blurb": "A niche in the rock full of burnt-out miners' lamps, one for every miner who did not come back. Light one for a blessing.",
+      "lore": "Dozens of little lamps in a niche in the rock. One is still lit. Nobody seems to know who keeps lighting it.",
+      "tags": {
+        "biomes": [
+          "hills",
+          "mountains",
+          "grassland"
+        ],
+        "archetypes": [
+          "mine_country",
+          "holy_ground",
+          "pass"
+        ],
+        "band": [
+          1,
+          12
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 8,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "ruined_arch",
+          "x": 0,
+          "z": -2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "torch_post",
+          "x": -2,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "torch_post",
+          "x": 2,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "lichen_patch",
+          "x": 0,
+          "z": 2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "stone_marker",
+          "x": 3,
+          "z": 2,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "cairn_rat",
+          "count": 3,
+          "level": 0,
+          "x": 0,
+          "z": 3,
+          "radius": 3
+        }
+      ],
+      "objects": [
+        {
+          "type": "use",
+          "name": "Unlit lamp",
+          "x": 0,
+          "z": -1.5,
+          "text": "You light a lamp and set it among the others. The rock feels a little less heavy.",
+          "buff": {
+            "status": "guard",
+            "seconds": 180
+          }
+        }
+      ]
+    },
+    {
+      "id": "frozen_tarn",
+      "name": "The Frozen Tarn",
+      "blurb": "A mountain pool that never thaws; a frost stalker sleeps on the ice and something glints under it.",
+      "lore": "A small lake frozen solid, even in summer. Under the ice, something gold catches the light.",
+      "tags": {
+        "biomes": [
+          "mountains",
+          "hills",
+          "borealForest"
+        ],
+        "archetypes": [
+          "pass",
+          "wilds",
+          "mine_country"
+        ],
+        "band": [
+          6,
+          12
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 13,
+      "props": [
+        {
+          "kind": "ground",
+          "id": "snow_drift",
+          "x": 0,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "snow_drift",
+          "x": 3,
+          "z": -3,
+          "yaw": 1
+        },
+        {
+          "kind": "ground",
+          "id": "puddle_ring",
+          "x": 0,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "stone_marker",
+          "x": -5,
+          "z": 2,
+          "yaw": 0
+        },
+        {
+          "kind": "tree",
+          "id": "fir",
+          "x": 5,
+          "z": 4,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "frost_stalker",
+          "count": 2,
+          "level": 0,
+          "x": 1,
+          "z": 1,
+          "radius": 4
+        }
+      ],
+      "objects": [
+        {
+          "type": "use",
+          "name": "Thin ice",
+          "x": 0,
+          "z": 0,
+          "text": "You crack the ice with your heel and fish out a cold, heavy coin purse.",
+          "gives": {
+            "gold": 10
+          }
+        }
+      ]
+    },
+    {
+      "id": "avalanche_shelter",
+      "name": "The Avalanche Shelter",
+      "blurb": "A stone hut on the pass road with emergency supplies and a logbook of travellers' complaints; hyenas know people get stuck here.",
+      "lore": "A squat stone hut with a sign: SHELTER — IN CASE OF SNOW, OR WOLVES, OR BOTH.",
+      "tags": {
+        "biomes": [
+          "mountains",
+          "hills",
+          "borealForest"
+        ],
+        "archetypes": [
+          "pass",
+          "mine_country",
+          "frontier"
+        ],
+        "band": [
+          3,
+          12
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 10,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "ruined_wall",
+          "x": 0,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "wood_pile",
+          "x": 3,
+          "z": 1,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "campfire",
+          "x": -2,
+          "z": 2,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "snow_drift",
+          "x": 4,
+          "z": -3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "signpost",
+          "x": -4,
+          "z": -3,
+          "yaw": 0.5
+        }
+      ],
+      "monsters": [
+        {
+          "type": "crag_hyena",
+          "count": 2,
+          "level": 1,
+          "x": 4,
+          "z": 3,
+          "radius": 3
+        }
+      ],
+      "objects": [
+        {
+          "type": "note",
+          "name": "Travellers' logbook",
+          "x": -1,
+          "z": 1,
+          "text": "Snowed in three days. Ate the soap. Would not recommend. — G."
+        },
+        {
+          "type": "chest",
+          "name": "Emergency supplies",
+          "x": 3,
+          "z": 1,
+          "tier": "common"
+        }
+      ]
+    },
+    {
+      "id": "toll_bridge_trolls",
+      "name": "The Toll Bridge",
+      "blurb": "A narrow bridge with a toll booth manned by brigands pretending to be the reeve's men; their \"official\" badges are painted wood.",
+      "lore": "A wooden toll booth with a hand-painted sign: OFFISHUL TOLL. PAY HERE. NO ARGUING.",
+      "tags": {
+        "biomes": [
+          "grassland",
+          "hills",
+          "temperateForest",
+          "shrubland"
+        ],
+        "archetypes": [
+          "pass",
+          "heartland",
+          "frontier",
+          "lakeland"
+        ],
+        "band": [
+          2,
+          10
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 11,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "signpost",
+          "x": 0,
+          "z": -3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "fence_post",
+          "x": -3,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "fence_rail",
+          "x": -1.5,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "fence_post",
+          "x": 3,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "fence_rail",
+          "x": 1.5,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "barrel",
+          "x": 4,
+          "z": 3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "banner_pole",
+          "x": -4,
+          "z": 3,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "road_brigand",
+          "count": 2,
+          "level": 1,
+          "x": 0,
+          "z": 2,
+          "radius": 3
+        },
+        {
+          "type": "brigand_captain",
+          "count": 1,
+          "level": 0,
+          "x": 2,
+          "z": 3,
+          "radius": 1
+        }
+      ],
+      "objects": [
+        {
+          "type": "note",
+          "name": "Painted wooden badge",
+          "x": 0,
+          "z": 1,
+          "text": "OFFISHUL REEVE MAN. Number 1. (There is only one badge.)"
+        },
+        {
+          "type": "chest",
+          "name": "Toll box",
+          "x": -1,
+          "z": -2,
+          "tier": "uncommon"
+        }
+      ]
+    },
+    {
+      "id": "stilt_house",
+      "name": "The Empty Stilt House",
+      "blurb": "A fisher's house on stilts over the water, abandoned with dinner still on the table; croakers in the reeds below. A diary explains.",
+      "lore": "A house on stilts above the reeds. The door is open, the table is set, and the soup is very, very old.",
+      "tags": {
+        "biomes": [
+          "marsh",
+          "lake",
+          "coast"
+        ],
+        "archetypes": [
+          "marsh",
+          "lakeland",
+          "coast"
+        ],
+        "band": [
+          1,
+          10
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 10,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "palisade_stake",
+          "x": -2,
+          "z": -2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "palisade_stake",
+          "x": 2,
+          "z": -2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "palisade_stake",
+          "x": -2,
+          "z": 2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "palisade_stake",
+          "x": 2,
+          "z": 2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "crate",
+          "x": 0,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "puddle_ring",
+          "x": 3,
+          "z": 3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "drying_rack",
+          "x": -4,
+          "z": 0,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "fen_croaker",
+          "count": 3,
+          "level": 1,
+          "x": 3,
+          "z": 3,
+          "radius": 4
+        }
+      ],
+      "objects": [
+        {
+          "type": "note",
+          "name": "Fisher's diary",
+          "x": 0,
+          "z": 0,
+          "text": "The big frog is back. It ate the boat. I am going to my sister's. I am not coming back until it eats something else."
+        },
+        {
+          "type": "chest",
+          "name": "Pantry crock",
+          "x": 1,
+          "z": -1,
+          "tier": "common"
+        }
+      ]
+    },
+    {
+      "id": "eel_traps",
+      "name": "The Eel Weir",
+      "blurb": "A line of wicker eel traps across a stream; something has been raiding them and the fisher wants it gone. A serpent, it turns out.",
+      "lore": "A row of wicker traps across the stream. Every single one has been bitten open from the outside.",
+      "tags": {
+        "biomes": [
+          "marsh",
+          "lake",
+          "temperateForest",
+          "grassland"
+        ],
+        "archetypes": [
+          "lakeland",
+          "marsh",
+          "heartland"
+        ],
+        "band": [
+          2,
+          10
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 11,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "fence_post",
+          "x": -4,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "fence_post",
+          "x": -2,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "fence_post",
+          "x": 0,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "fence_post",
+          "x": 2,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "fence_post",
+          "x": 4,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "barrel",
+          "x": 0,
+          "z": 4,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "puddle_ring",
+          "x": -1,
+          "z": 2,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "reed_serpent",
+          "count": 1,
+          "level": 1,
+          "x": 0,
+          "z": 1,
+          "radius": 3
+        }
+      ],
+      "objects": [
+        {
+          "type": "npc",
+          "name": "Nell Pike, eel-catcher",
+          "x": 2,
+          "z": 4,
+          "says": [
+            "Something long and green has been eating my eels. I want it dead, and I want my eels back, and one of those is going to happen."
+          ]
+        },
+        {
+          "type": "chest",
+          "name": "Eel-catcher's tips jar",
+          "x": 0,
+          "z": 4,
+          "tier": "common"
+        }
+      ]
+    },
+    {
+      "id": "ferry_landing",
+      "name": "The Stranded Ferry",
+      "blurb": "A ferry pulled up on the bank with a broken rope; the ferryman offers a free crossing if you fetch new rope from bandits who stole it.",
+      "lore": "A flat ferry beached on the mud, its rope cut clean through. The ferryman is sitting on it looking at the sky.",
+      "tags": {
+        "biomes": [
+          "lake",
+          "marsh",
+          "grassland",
+          "coast"
+        ],
+        "archetypes": [
+          "lakeland",
+          "marsh",
+          "crown_ring",
+          "coast"
+        ],
+        "band": [
+          2,
+          10
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 12,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "crate",
+          "x": -2,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "barrel",
+          "x": 2,
+          "z": 1,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "fence_post",
+          "x": -4,
+          "z": 3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "signpost",
+          "x": 4,
+          "z": -3,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "puddle_ring",
+          "x": 0,
+          "z": 4,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "road_brigand",
+          "count": 2,
+          "level": 1,
+          "x": 5,
+          "z": 5,
+          "radius": 3
+        }
+      ],
+      "objects": [
+        {
+          "type": "npc",
+          "name": "Old Gaffer Wat, ferryman",
+          "x": 0,
+          "z": 0,
+          "says": [
+            "Somebody cut my rope and took it. Who steals a rope? Rope thieves, that's who.",
+            "The ones with the rope went thataway. Fetch it and you ride free for life. Or a week."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "heron_island",
+      "name": "Heron Island",
+      "blurb": "A reed island reached by stepping stones, with a heron rookery and a lost fishing tackle box; wisps over the water at dusk.",
+      "lore": "A little island of reeds, full of herons who stare at you like you owe them money.",
+      "tags": {
+        "biomes": [
+          "lake",
+          "marsh"
+        ],
+        "archetypes": [
+          "lakeland",
+          "marsh",
+          "wilds"
+        ],
+        "band": [
+          3,
+          12
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 10,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "stone_step",
+          "x": -4,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "stone_step",
+          "x": -2.5,
+          "z": 0.5,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "stone_step",
+          "x": -1,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "puddle_ring",
+          "x": 2,
+          "z": 2,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "lichen_patch",
+          "x": 2,
+          "z": -2,
+          "yaw": 0
+        },
+        {
+          "kind": "tree",
+          "id": "birch",
+          "x": 3,
+          "z": -3,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "marsh_wisp",
+          "count": 2,
+          "level": 1,
+          "x": 1,
+          "z": 1,
+          "radius": 3
+        }
+      ],
+      "objects": [
+        {
+          "type": "chest",
+          "name": "Lost tackle box",
+          "x": 2,
+          "z": 1,
+          "tier": "common"
+        },
+        {
+          "type": "note",
+          "name": "Scratched on a stone",
+          "x": -1,
+          "z": 0,
+          "text": "THE HERONS KNOW WHAT YOU DID."
+        }
+      ]
+    },
+    {
+      "id": "market_cross",
+      "name": "The Market Cross",
+      "blurb": "A stone market cross where a travelling pedlar sets up; he buys junk and sells rumours. Cutpurses work the crowd.",
+      "lore": "A worn stone cross where the road meets the lane. A pedlar has spread a blanket at its foot covered in things nobody needs.",
+      "tags": {
+        "biomes": [
+          "grassland",
+          "shrubland",
+          "beach"
+        ],
+        "archetypes": [
+          "crown_ring",
+          "heartland",
+          "lakeland",
+          "coast"
+        ],
+        "band": [
+          1,
+          12
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 10,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "stone_marker",
+          "x": 0,
+          "z": 0,
+          "yaw": 0,
+          "scale": 1.5
+        },
+        {
+          "kind": "prop",
+          "id": "crate",
+          "x": -2,
+          "z": 1,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "crate",
+          "x": 2,
+          "z": 1,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "barrel",
+          "x": -3,
+          "z": -1,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "banner_pole",
+          "x": 3,
+          "z": -2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "cart_wheel",
+          "x": -4,
+          "z": 3,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "road_brigand",
+          "count": 2,
+          "level": 0,
+          "x": 4,
+          "z": 4,
+          "radius": 4
+        }
+      ],
+      "objects": [
+        {
+          "type": "npc",
+          "name": "Cadoc the pedlar",
+          "x": 0,
+          "z": 2,
+          "says": [
+            "Rumours! Spoons! Rumours about spoons! Something for everyone.",
+            "They say a brigand in the hills buried his takings under a dolmen. They say a lot of things, mind."
+          ]
+        },
+        {
+          "type": "chest",
+          "name": "Pedlar's bargain box",
+          "x": -2,
+          "z": 1,
+          "tier": "common"
+        }
+      ]
+    },
+    {
+      "id": "sewer_grate",
+      "name": "The Rattling Grate",
+      "blurb": "A sewer outfall below a city wall, its grate rattling; rats pour out, and a city clerk's lost ledger is tangled in the bars.",
+      "lore": "A barred outfall at the foot of the wall. The grate rattles. The grate is not being rattled by the wind.",
+      "tags": {
+        "biomes": [
+          "grassland",
+          "shrubland",
+          "lake"
+        ],
+        "archetypes": [
+          "crown_ring",
+          "ruinfield",
+          "coast"
+        ],
+        "band": [
+          1,
+          8
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 9,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "ruined_wall",
+          "x": 0,
+          "z": -2,
+          "yaw": 0,
+          "scale": 1.4
+        },
+        {
+          "kind": "prop",
+          "id": "ruined_arch",
+          "x": 0,
+          "z": -1.5,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "puddle_ring",
+          "x": 0,
+          "z": 1,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "bone_scatter",
+          "x": 2,
+          "z": 2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "barrel",
+          "x": -3,
+          "z": 2,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "cairn_rat",
+          "count": 5,
+          "level": 0,
+          "x": 0,
+          "z": 2,
+          "radius": 4
+        }
+      ],
+      "objects": [
+        {
+          "type": "note",
+          "name": "Soggy city ledger",
+          "x": 0,
+          "z": -1,
+          "text": "Item: one (1) sewer grate, repairs to. Approved. Item: sewer grate repairs, cancelled. Reason: rats."
+        },
+        {
+          "type": "chest",
+          "name": "Lost in the bars",
+          "x": 1,
+          "z": -1,
+          "tier": "common"
+        }
+      ]
+    },
+    {
+      "id": "hanging_sign_inn",
+      "name": "The Shut-Up Inn",
+      "blurb": "A roadside inn boarded up after a \"small fire\"; the cellar still holds barrels, and the old landlord's ghost is a carrion moth swarm. Not really a ghost.",
+      "lore": "A boarded-up inn with a sign of a smiling pig. The windows are scorched. Somebody has written CLOSED on the door, then crossed it out and written REALLY CLOSED.",
+      "tags": {
+        "biomes": [
+          "grassland",
+          "shrubland",
+          "temperateForest",
+          "hills",
+          "beach",
+          "blighted"
+        ],
+        "archetypes": [
+          "crown_ring",
+          "heartland",
+          "pass",
+          "frontier",
+          "coast",
+          "blight"
+        ],
+        "band": [
+          2,
+          10
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 13,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "ruined_wall",
+          "x": -3,
+          "z": -3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "ruined_wall",
+          "x": 3,
+          "z": -3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "signpost",
+          "x": 0,
+          "z": -5,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "barrel",
+          "x": -2,
+          "z": 1,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "barrel",
+          "x": -1,
+          "z": 2,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "ash_patch",
+          "x": 0,
+          "z": -1,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "hay_bale",
+          "x": 4,
+          "z": 3,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "carrion_moth",
+          "count": 3,
+          "level": 1,
+          "x": 0,
+          "z": 0,
+          "radius": 4
+        }
+      ],
+      "objects": [
+        {
+          "type": "chest",
+          "name": "Cellar barrels",
+          "x": -2,
+          "z": 1,
+          "tier": "uncommon"
+        },
+        {
+          "type": "note",
+          "name": "Landlord's notice",
+          "x": 0,
+          "z": -4.5,
+          "text": "Small fire. Nobody hurt. Pig fine. Re-opening soon. (Not soon.)"
+        }
+      ]
+    },
+    {
+      "id": "noble_folly",
+      "name": "The Lord's Folly",
+      "blurb": "A fake ruin built by a bored noble as a garden ornament, now really ruined; a statue of the noble with a pompous plaque and a hidden wine cellar.",
+      "lore": "A fake ancient ruin, built twenty years ago by a lord who wanted one. Now it really is a ruin. He would be thrilled.",
+      "tags": {
+        "biomes": [
+          "grassland",
+          "shrubland",
+          "temperateForest"
+        ],
+        "archetypes": [
+          "crown_ring",
+          "ruinfield",
+          "heartland"
+        ],
+        "band": [
+          1,
+          10
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 11,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "ruined_arch",
+          "x": 0,
+          "z": -3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "ruined_pillar",
+          "x": -3,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "ruined_pillar",
+          "x": 3,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "stone_step",
+          "x": 0,
+          "z": 1,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "lichen_patch",
+          "x": 2,
+          "z": 3,
+          "yaw": 0
+        },
+        {
+          "kind": "tree",
+          "id": "oak",
+          "x": -5,
+          "z": 4,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "gallows_owl",
+          "count": 2,
+          "level": 1,
+          "x": 0,
+          "z": 0,
+          "radius": 4
+        }
+      ],
+      "objects": [
+        {
+          "type": "note",
+          "name": "Brass plaque",
+          "x": 0,
+          "z": -2.5,
+          "text": "THIS ANCIENT RUIN WAS BUILT BY LORD GARRICK MILLWARD. IT IS VERY OLD (FROM NOW ON)."
+        },
+        {
+          "type": "chest",
+          "name": "His lordship's wine cellar",
+          "x": -3,
+          "z": 1,
+          "tier": "uncommon",
+          "hidden": true,
+          "hint": "One column is hollow and has a keyhole."
+        }
+      ]
+    },
+    {
+      "id": "blighted_orchard",
+      "name": "The Grey Orchard",
+      "blurb": "An apple orchard turned grey by the blight; the apples are hard as stones and the sporecaps have moved in. One tree still bears a red apple.",
+      "lore": "Every tree is grey, every leaf is grey, every apple is grey. Except one. One red apple, right at the top.",
+      "tags": {
+        "biomes": [
+          "blighted",
+          "grassland",
+          "shrubland",
+          "temperateForest"
+        ],
+        "archetypes": [
+          "blight",
+          "heartland",
+          "frontier",
+          "wilds"
+        ],
+        "band": [
+          4,
+          12
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 13,
+      "props": [
+        {
+          "kind": "tree",
+          "id": "oak",
+          "x": -4,
+          "z": -3,
+          "yaw": 0,
+          "dead": true
+        },
+        {
+          "kind": "tree",
+          "id": "oak",
+          "x": 4,
+          "z": -3,
+          "yaw": 0.5,
+          "dead": true
+        },
+        {
+          "kind": "tree",
+          "id": "oak",
+          "x": -4,
+          "z": 3,
+          "yaw": 1,
+          "dead": true
+        },
+        {
+          "kind": "tree",
+          "id": "oak",
+          "x": 0,
+          "z": 0,
+          "yaw": 0.2
+        },
+        {
+          "kind": "tree",
+          "id": "oak",
+          "x": 4,
+          "z": 3,
+          "yaw": 2,
+          "dead": true
+        },
+        {
+          "kind": "ground",
+          "id": "ash_patch",
+          "x": 2,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "mushroom_ring",
+          "x": -2,
+          "z": 1,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "sporecap_walker",
+          "count": 2,
+          "level": 1,
+          "x": 2,
+          "z": 2,
+          "radius": 4
+        }
+      ],
+      "objects": [
+        {
+          "type": "use",
+          "name": "The last red apple",
+          "x": 0,
+          "z": 0,
+          "text": "You pick the apple. It is warm, and crisp, and for a moment the whole orchard looks green again.",
+          "buff": {
+            "status": "regen",
+            "seconds": 300
+          }
+        }
+      ]
+    },
+    {
+      "id": "warband_totem",
+      "name": "The Warband Totem",
+      "blurb": "A totem of skulls marking warband ground; smash it and the war grip weakens (later); for now a cache of plunder and a few imps.",
+      "lore": "A pole of skulls and rags, and a lot of scratches on the ground that look like a map of where they plan to burn next.",
+      "tags": {
+        "biomes": [
+          "blighted",
+          "hills",
+          "shrubland",
+          "grassland"
+        ],
+        "archetypes": [
+          "blight",
+          "frontier",
+          "wilds"
+        ],
+        "band": [
+          6,
+          12
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 11,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "skull_totem",
+          "x": 0,
+          "z": 0,
+          "yaw": 0,
+          "scale": 1.4
+        },
+        {
+          "kind": "prop",
+          "id": "banner_pole",
+          "x": -3,
+          "z": -2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "banner_pole",
+          "x": 3,
+          "z": -2,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "ash_patch",
+          "x": 0,
+          "z": 2,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "bone_scatter",
+          "x": -2,
+          "z": 3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "fire_ring",
+          "x": 3,
+          "z": 3,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "cinder_imp",
+          "count": 3,
+          "level": 1,
+          "x": 0,
+          "z": 3,
+          "radius": 4
+        }
+      ],
+      "objects": [
+        {
+          "type": "use",
+          "name": "Skull totem",
+          "x": 0,
+          "z": 0,
+          "text": "You topple the totem. The skulls roll off down the hill, and somewhere a warband will be very cross.",
+          "gives": {
+            "gold": 8
+          }
+        },
+        {
+          "type": "chest",
+          "name": "Plunder pile",
+          "x": -3,
+          "z": 2,
+          "tier": "uncommon"
+        }
+      ]
+    },
+    {
+      "id": "ash_wisp_crater",
+      "name": "The Smoking Crater",
+      "blurb": "A crater still smoking from something that fell; ash wisps dance in it and a hot, strange stone lies at the bottom.",
+      "lore": "A fresh crater, the grass around it scorched in a perfect circle. At the bottom, something glows like a coal.",
+      "tags": {
+        "biomes": [
+          "blighted",
+          "grassland",
+          "hills",
+          "shrubland"
+        ],
+        "archetypes": [
+          "blight",
+          "wilds",
+          "ruinfield",
+          "frontier"
+        ],
+        "band": [
+          5,
+          12
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 12,
+      "props": [
+        {
+          "kind": "ground",
+          "id": "ash_patch",
+          "x": 0,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "ash_patch",
+          "x": 3,
+          "z": 2,
+          "yaw": 1
+        },
+        {
+          "kind": "ground",
+          "id": "ash_patch",
+          "x": -3,
+          "z": -2,
+          "yaw": 2
+        },
+        {
+          "kind": "prop",
+          "id": "rune_stone",
+          "x": 0,
+          "z": 0,
+          "yaw": 0.4
+        },
+        {
+          "kind": "prop",
+          "id": "stone_marker",
+          "x": 5,
+          "z": -4,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "ash_wisp",
+          "count": 2,
+          "level": 1,
+          "x": 0,
+          "z": 1,
+          "radius": 4
+        }
+      ],
+      "objects": [
+        {
+          "type": "chest",
+          "name": "The glowing stone",
+          "x": 0,
+          "z": 0.5,
+          "tier": "uncommon"
+        },
+        {
+          "type": "note",
+          "name": "Farmer's complaint",
+          "x": 4,
+          "z": -3,
+          "text": "To the Reeve: a STAR has landed in my barley. Please send someone to remove it. Also my barley."
+        }
+      ]
+    },
+    {
+      "id": "chained_tree",
+      "name": "The Chained Oak",
+      "blurb": "A great oak bound in iron chains by a long-dead order; something under its roots still scratches. Break the chains at your own risk (a rift horror? no, just hounds, phew).",
+      "lore": "An old oak wrapped in rusted chains, padlocked, nailed. Someone really did not want this tree going anywhere.",
+      "tags": {
+        "biomes": [
+          "temperateForest",
+          "blighted",
+          "borealForest",
+          "grassland"
+        ],
+        "archetypes": [
+          "blight",
+          "wilds",
+          "holy_ground",
+          "ruinfield"
+        ],
+        "band": [
+          5,
+          12
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 11,
+      "props": [
+        {
+          "kind": "tree",
+          "id": "oak",
+          "x": 0,
+          "z": 0,
+          "yaw": 0.3,
+          "scale": 1.6
+        },
+        {
+          "kind": "ground",
+          "id": "root_mat",
+          "x": 0,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "stone_marker",
+          "x": -4,
+          "z": -3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "stone_marker",
+          "x": 4,
+          "z": -3,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "bone_scatter",
+          "x": 3,
+          "z": 3,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "barrow_hound",
+          "count": 2,
+          "level": 0,
+          "x": 0,
+          "z": 3,
+          "radius": 4
+        }
+      ],
+      "objects": [
+        {
+          "type": "use",
+          "name": "Rusted padlock",
+          "x": 0,
+          "z": 1,
+          "text": "The padlock falls apart in your hand. The roots go still. Nothing comes out. Probably good?",
+          "gives": {
+            "gold": 6
+          }
+        },
+        {
+          "type": "note",
+          "name": "Stone inscription",
+          "x": -4,
+          "z": -2.5,
+          "text": "BOUND BY THE ORDER OF THE LANTERN. DO NOT UNBIND. DO NOT EVEN ASK."
+        }
+      ]
+    },
+    {
+      "id": "pilgrim_camp",
+      "name": "The Pilgrims' Rest",
+      "blurb": "A pilgrim camp at a roadside shrine; pilgrims beg an escort past wolves on the next stretch and trade relic charms.",
+      "lore": "Tents, a cook-pot, a lot of sore feet. A dozen pilgrims look up at you with great hope and greater blisters.",
+      "tags": {
+        "biomes": [
+          "grassland",
+          "hills",
+          "shrubland"
+        ],
+        "archetypes": [
+          "holy_ground",
+          "heartland",
+          "pass",
+          "crown_ring"
+        ],
+        "band": [
+          1,
+          10
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 13,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "campfire",
+          "x": 0,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "banner_pole",
+          "x": -3,
+          "z": -3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "stone_marker",
+          "x": 3,
+          "z": -3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "wood_pile",
+          "x": -4,
+          "z": 2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "crate",
+          "x": 3,
+          "z": 3,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "lichen_patch",
+          "x": 0,
+          "z": 4,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "moor_hound",
+          "count": 3,
+          "level": 1,
+          "x": 7,
+          "z": 7,
+          "radius": 4
+        }
+      ],
+      "objects": [
+        {
+          "type": "npc",
+          "name": "Sister Edda",
+          "x": 0,
+          "z": 2,
+          "says": [
+            "Bless you for stopping. The hounds follow us like we were sausages.",
+            "Take a pilgrim's charm. It won't help, but it's very nicely carved."
+          ]
+        },
+        {
+          "type": "chest",
+          "name": "Pilgrims' offerings",
+          "x": 3,
+          "z": 3,
+          "tier": "common"
+        }
+      ]
+    },
+    {
+      "id": "roadside_shrine",
+      "name": "The Wayside Saint",
+      "blurb": "A tiny roadside shrine to Saint Orrin with a donation box someone has been robbing; catch the thief (a rat, very large).",
+      "lore": "A little roof over a little statue of a saint with one hand raised. The donation box has been gnawed open.",
+      "tags": {
+        "biomes": [
+          "grassland",
+          "shrubland",
+          "hills",
+          "temperateForest"
+        ],
+        "archetypes": [
+          "holy_ground",
+          "heartland",
+          "crown_ring",
+          "pass",
+          "lakeland"
+        ],
+        "band": [
+          1,
+          8
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 8,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "stone_marker",
+          "x": 0,
+          "z": 0,
+          "yaw": 0,
+          "scale": 1.2
+        },
+        {
+          "kind": "prop",
+          "id": "torch_post",
+          "x": -2,
+          "z": 1,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "torch_post",
+          "x": 2,
+          "z": 1,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "lichen_patch",
+          "x": 0,
+          "z": 2,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "cairn_rat",
+          "count": 2,
+          "level": 1,
+          "x": 1,
+          "z": 2,
+          "radius": 3
+        }
+      ],
+      "objects": [
+        {
+          "type": "use",
+          "name": "Donation box",
+          "x": 0,
+          "z": 0.5,
+          "text": "You leave a coin and straighten the saint's hat. You feel watched over, a bit.",
+          "cost": {
+            "gold": 1
+          },
+          "buff": {
+            "status": "guard",
+            "seconds": 300
+          }
+        }
+      ]
+    },
+    {
+      "id": "ruined_bell_tower",
+      "name": "The Fallen Bell",
+      "blurb": "A monastery bell tower collapsed, the great bell cracked on the ground; owls nest in it. Ring it once for a blessing and a swarm.",
+      "lore": "The bell lies on its side in the grass, cracked down the middle. Owls have nested inside it, which seems fair.",
+      "tags": {
+        "biomes": [
+          "grassland",
+          "hills",
+          "shrubland"
+        ],
+        "archetypes": [
+          "holy_ground",
+          "ruinfield",
+          "crown_ring"
+        ],
+        "band": [
+          2,
+          10
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 11,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "ruined_wall",
+          "x": -3,
+          "z": -3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "ruined_pillar",
+          "x": 3,
+          "z": -3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "ruined_arch",
+          "x": 0,
+          "z": -5,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "stone_step",
+          "x": 0,
+          "z": 2,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "lichen_patch",
+          "x": -2,
+          "z": 3,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "gallows_owl",
+          "count": 3,
+          "level": 1,
+          "x": 0,
+          "z": 0,
+          "radius": 4
+        }
+      ],
+      "objects": [
+        {
+          "type": "use",
+          "name": "Cracked bell",
+          "x": 0,
+          "z": 0,
+          "text": "BONNNG. The owls are furious. You feel oddly blessed.",
+          "buff": {
+            "status": "rally",
+            "seconds": 120
+          }
+        },
+        {
+          "type": "chest",
+          "name": "Under the bell",
+          "x": 1,
+          "z": 1,
+          "tier": "common"
+        }
+      ]
+    },
+    {
+      "id": "old_battlefield",
+      "name": "The Old Battlefield",
+      "blurb": "A field of rusted armour and a broken standard from a battle whose reason is long forgotten; barrow hounds hunt the bones.",
+      "lore": "Rusty helmets in the grass, a snapped spear every few paces. Nobody can say who won. Possibly nobody did.",
+      "tags": {
+        "biomes": [
+          "grassland",
+          "shrubland",
+          "hills",
+          "beach"
+        ],
+        "archetypes": [
+          "ruinfield",
+          "frontier",
+          "blight",
+          "pass",
+          "coast"
+        ],
+        "band": [
+          4,
+          12
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 15,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "banner_pole",
+          "x": 0,
+          "z": 0,
+          "yaw": 0.6
+        },
+        {
+          "kind": "ground",
+          "id": "bone_scatter",
+          "x": -3,
+          "z": 2,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "bone_scatter",
+          "x": 3,
+          "z": -2,
+          "yaw": 2
+        },
+        {
+          "kind": "ground",
+          "id": "bone_scatter",
+          "x": 4,
+          "z": 4,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "stone_marker",
+          "x": -5,
+          "z": -4,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "palisade_stake",
+          "x": 5,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "palisade_stake",
+          "x": 5,
+          "z": 2,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "barrow_hound",
+          "count": 3,
+          "level": 1,
+          "x": 0,
+          "z": 3,
+          "radius": 6
+        }
+      ],
+      "objects": [
+        {
+          "type": "chest",
+          "name": "A captain's rusted strongbox",
+          "x": -3,
+          "z": 2,
+          "tier": "uncommon"
+        },
+        {
+          "type": "note",
+          "name": "Torn standard",
+          "x": 0,
+          "z": 0.5,
+          "text": "Someone has embroidered on it: WE WERE RIGHT. Someone else has added underneath: NO."
+        }
+      ]
+    },
+    {
+      "id": "sunken_stair",
+      "name": "The Stair to Nowhere",
+      "blurb": "A grand stone stair rising out of the ground and ending in mid-air; at the top, a chest; at the bottom, a mimic pretending to be another chest.",
+      "lore": "A great stone staircase climbs out of the grass, twenty steps up, and stops. At the top, a chest. At the bottom, another chest. Hm.",
+      "tags": {
+        "biomes": [
+          "grassland",
+          "shrubland",
+          "hills"
+        ],
+        "archetypes": [
+          "ruinfield",
+          "crown_ring",
+          "wilds",
+          "holy_ground"
+        ],
+        "band": [
+          8,
+          12
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 10,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "stone_step",
+          "x": 0,
+          "z": 3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "stone_step",
+          "x": 0,
+          "z": 2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "stone_step",
+          "x": 0,
+          "z": 1,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "stone_step",
+          "x": 0,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "stone_step",
+          "x": 0,
+          "z": -1,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "ruined_pillar",
+          "x": -2,
+          "z": -2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "ruined_pillar",
+          "x": 2,
+          "z": -2,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "hoard_mimic",
+          "count": 1,
+          "level": 0,
+          "x": 1,
+          "z": 4,
+          "radius": 1
+        }
+      ],
+      "objects": [
+        {
+          "type": "chest",
+          "name": "The chest at the top",
+          "x": 0,
+          "z": -1.5,
+          "tier": "uncommon"
+        },
+        {
+          "type": "note",
+          "name": "Faded warning",
+          "x": -2,
+          "z": 3,
+          "text": "Only one of them is a chest."
+        }
+      ]
+    },
+    {
+      "id": "lone_archer_post",
+      "name": "The Reed Hide",
+      "blurb": "A hunter's hide in the reeds with a dead hunter, his bow and his last tally of a beast he never got; finish the count.",
+      "lore": "A neat little hide woven from reeds. Inside, a tally on a board: forty-one marks, and the word BIG next to the last.",
+      "tags": {
+        "biomes": [
+          "marsh",
+          "lake",
+          "temperateForest"
+        ],
+        "archetypes": [
+          "marsh",
+          "lakeland",
+          "wilds"
+        ],
+        "band": [
+          3,
+          12
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 9,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "palisade_stake",
+          "x": -1,
+          "z": -1,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "palisade_stake",
+          "x": 1,
+          "z": -1,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "drying_rack",
+          "x": 0,
+          "z": 1,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "puddle_ring",
+          "x": 3,
+          "z": 3,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "root_mat",
+          "x": -2,
+          "z": 2,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "silt_lurker",
+          "count": 1,
+          "level": 1,
+          "x": 4,
+          "z": 4,
+          "radius": 2
+        }
+      ],
+      "objects": [
+        {
+          "type": "chest",
+          "name": "Hunter's kit",
+          "x": 0,
+          "z": 0,
+          "tier": "uncommon",
+          "only": "weapon"
+        },
+        {
+          "type": "note",
+          "name": "Tally board",
+          "x": 0,
+          "z": -0.5,
+          "text": "41. BIG. Still out there. Will get it tomorrow."
+        }
+      ]
+    },
+    {
+      "id": "peat_cutters",
+      "name": "The Peat Cutters' Camp",
+      "blurb": "Peat cutters' camp with stacked turves drying; bog slimes have come up through the cuttings. Buy fuel, or take it.",
+      "lore": "Neat stacks of dark peat drying in the wind, and a hole in the bog where somebody dug too deep.",
+      "tags": {
+        "biomes": [
+          "marsh",
+          "grassland",
+          "lake",
+          "hills"
+        ],
+        "archetypes": [
+          "marsh",
+          "heartland",
+          "mine_country"
+        ],
+        "band": [
+          2,
+          10
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 12,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "wood_pile",
+          "x": -3,
+          "z": 0,
+          "yaw": 0,
+          "scale": 0.8
+        },
+        {
+          "kind": "prop",
+          "id": "wood_pile",
+          "x": -3,
+          "z": 2,
+          "yaw": 0,
+          "scale": 0.8
+        },
+        {
+          "kind": "prop",
+          "id": "drying_rack",
+          "x": 2,
+          "z": -2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "campfire",
+          "x": 3,
+          "z": 2,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "puddle_ring",
+          "x": 0,
+          "z": 3,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "bog_slime",
+          "count": 2,
+          "level": 1,
+          "x": 0,
+          "z": 3,
+          "radius": 3
+        }
+      ],
+      "objects": [
+        {
+          "type": "npc",
+          "name": "Orla the cutter",
+          "x": 2,
+          "z": 2,
+          "says": [
+            "Dug a bit too deep, didn't we. Now the bog's digging back."
+          ]
+        },
+        {
+          "type": "chest",
+          "name": "Cutters' wages box",
+          "x": -3,
+          "z": 1,
+          "tier": "common"
+        }
+      ]
+    },
+    {
+      "id": "will_o_lights",
+      "name": "The Lantern Path",
+      "blurb": "A path of floating lights across the fen that leads walkers astray; follow them backwards to a drowned traveller's purse.",
+      "lore": "Little lights bob over the fen in a neat row, like lanterns on a path. There is no path.",
+      "tags": {
+        "biomes": [
+          "marsh",
+          "lake"
+        ],
+        "archetypes": [
+          "marsh",
+          "lakeland",
+          "wilds"
+        ],
+        "band": [
+          2,
+          12
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 14,
+      "props": [
+        {
+          "kind": "ground",
+          "id": "puddle_ring",
+          "x": -4,
+          "z": -4,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "puddle_ring",
+          "x": 0,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "puddle_ring",
+          "x": 4,
+          "z": 4,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "stone_marker",
+          "x": -6,
+          "z": -5,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "root_mat",
+          "x": 3,
+          "z": -3,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "marsh_wisp",
+          "count": 3,
+          "level": 1,
+          "x": 0,
+          "z": 0,
+          "radius": 6
+        }
+      ],
+      "objects": [
+        {
+          "type": "chest",
+          "name": "Drowned traveller's purse",
+          "x": -5,
+          "z": -4,
+          "tier": "common"
+        },
+        {
+          "type": "note",
+          "name": "Waterlogged map",
+          "x": -5,
+          "z": -5,
+          "text": "Follow the lights. They know the way. (They did not.)"
+        }
+      ]
+    },
+    {
+      "id": "charcoal_clamps",
+      "name": "The Charcoal Burners",
+      "blurb": "Smoking charcoal clamps in a clearing; the burners have gone, leaving one clamp about to flare. Wolves circle.",
+      "lore": "Mounds of earth smoke quietly in the clearing. One of them is smoking rather more loudly than the others.",
+      "tags": {
+        "biomes": [
+          "temperateForest",
+          "borealForest",
+          "hills"
+        ],
+        "archetypes": [
+          "wilds",
+          "mine_country",
+          "heartland",
+          "frontier"
+        ],
+        "band": [
+          1,
+          10
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 12,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "wood_pile",
+          "x": -3,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "wood_pile",
+          "x": 3,
+          "z": 1,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "ash_patch",
+          "x": 0,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "ash_patch",
+          "x": -2,
+          "z": 3,
+          "yaw": 1
+        },
+        {
+          "kind": "prop",
+          "id": "campfire",
+          "x": 2,
+          "z": -3,
+          "yaw": 0
+        },
+        {
+          "kind": "tree",
+          "id": "pine",
+          "x": -6,
+          "z": -4,
+          "yaw": 0
+        },
+        {
+          "kind": "tree",
+          "id": "pine",
+          "x": 6,
+          "z": 4,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "moor_hound",
+          "count": 3,
+          "level": 1,
+          "x": 0,
+          "z": 4,
+          "radius": 5
+        }
+      ],
+      "objects": [
+        {
+          "type": "use",
+          "name": "Flaring clamp",
+          "x": 0,
+          "z": 0,
+          "text": "You shovel earth over the flaring clamp until it settles back to a sulky smoke.",
+          "gives": {
+            "gold": 4
+          }
+        },
+        {
+          "type": "chest",
+          "name": "Burners' forgotten bag",
+          "x": 3,
+          "z": 1,
+          "tier": "common"
+        }
+      ]
+    },
+    {
+      "id": "woodcutter_axe",
+      "name": "The Axe in the Stump",
+      "blurb": "A splendid axe stuck in a stump that nobody can pull out; a sign offers a prize to whoever can. You can, after the boar is dealt with.",
+      "lore": "A beautiful axe, buried head-deep in a stump. A sign: WHOEVER PULLS OUT THIS AXE MAY KEEP IT. (Please, somebody.)",
+      "tags": {
+        "biomes": [
+          "temperateForest",
+          "borealForest",
+          "grassland"
+        ],
+        "archetypes": [
+          "wilds",
+          "heartland",
+          "frontier",
+          "mine_country"
+        ],
+        "band": [
+          1,
+          10
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 9,
+      "props": [
+        {
+          "kind": "tree",
+          "id": "oak",
+          "x": 0,
+          "z": 0,
+          "yaw": 0,
+          "dead": true,
+          "scale": 0.4
+        },
+        {
+          "kind": "prop",
+          "id": "signpost",
+          "x": 2,
+          "z": -2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "wood_pile",
+          "x": -3,
+          "z": 1,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "pine_cone_scatter",
+          "x": 2,
+          "z": 2,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "thicket_boar",
+          "count": 2,
+          "level": 1,
+          "x": 3,
+          "z": 3,
+          "radius": 3
+        }
+      ],
+      "objects": [
+        {
+          "type": "chest",
+          "name": "The axe in the stump",
+          "x": 0,
+          "z": 0,
+          "tier": "uncommon",
+          "only": "weapon"
+        }
+      ]
+    },
+    {
+      "id": "antlered_skull",
+      "name": "The Stag Shrine",
+      "blurb": "A forest clearing with a stag's skull on a post and offerings of acorns; the old forest folk still come. A dread stag? No, just deer bones and owls.",
+      "lore": "A great stag skull on a pole, antlers hung with ribbons and acorns. The clearing is very quiet.",
+      "tags": {
+        "biomes": [
+          "temperateForest",
+          "borealForest",
+          "hills"
+        ],
+        "archetypes": [
+          "wilds",
+          "holy_ground",
+          "pass"
+        ],
+        "band": [
+          3,
+          12
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 10,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "skull_totem",
+          "x": 0,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "pine_cone_scatter",
+          "x": 2,
+          "z": 1,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "mushroom_ring",
+          "x": -3,
+          "z": 2,
+          "yaw": 0
+        },
+        {
+          "kind": "tree",
+          "id": "fir",
+          "x": -5,
+          "z": -4,
+          "yaw": 0
+        },
+        {
+          "kind": "tree",
+          "id": "birch",
+          "x": 5,
+          "z": -4,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "gallows_owl",
+          "count": 2,
+          "level": 1,
+          "x": 0,
+          "z": 2,
+          "radius": 3
+        }
+      ],
+      "objects": [
+        {
+          "type": "use",
+          "name": "Leave an acorn",
+          "x": 0,
+          "z": 0.5,
+          "text": "You leave an acorn. The wind moves through the trees like someone saying thank you.",
+          "buff": {
+            "status": "haste",
+            "seconds": 180
+          }
+        }
+      ]
+    },
+    {
+      "id": "trapper_lines",
+      "name": "The Trapper's Line",
+      "blurb": "A line of snares and a trapper's cache; one snare holds something too big for it (a hyena, very cross).",
+      "lore": "Snares strung between trees, and one of them has caught something that does not fit in it at all.",
+      "tags": {
+        "biomes": [
+          "temperateForest",
+          "borealForest",
+          "hills",
+          "shrubland",
+          "blighted"
+        ],
+        "archetypes": [
+          "wilds",
+          "pass",
+          "frontier",
+          "blight"
+        ],
+        "band": [
+          3,
+          12
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 12,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "fence_post",
+          "x": -4,
+          "z": -2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "fence_post",
+          "x": -1,
+          "z": -3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "fence_post",
+          "x": 2,
+          "z": -2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "drying_rack",
+          "x": 3,
+          "z": 2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "crate",
+          "x": -3,
+          "z": 3,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "pine_cone_scatter",
+          "x": 0,
+          "z": 0,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "crag_hyena",
+          "count": 1,
+          "level": 2,
+          "x": 0,
+          "z": 0,
+          "radius": 2
+        }
+      ],
+      "objects": [
+        {
+          "type": "chest",
+          "name": "Trapper's cache",
+          "x": -3,
+          "z": 3,
+          "tier": "common"
+        },
+        {
+          "type": "note",
+          "name": "Trapper's rules",
+          "x": 3,
+          "z": 2,
+          "text": "1. Check the snares. 2. If something big is in the snare, leave it there. 3. Leave."
+        }
+      ]
+    },
+    {
+      "id": "goblin_market_stones",
+      "name": "The Moonlight Stones",
+      "blurb": "Flat stones on a hilltop where pedlars of uncertain origin trade at night; by day only scattered trinkets and a moth swarm.",
+      "lore": "Flat stones in a ring, scattered with odd things: a glass eye, half a key, a very small boot.",
+      "tags": {
+        "biomes": [
+          "hills",
+          "grassland",
+          "shrubland",
+          "mountains"
+        ],
+        "archetypes": [
+          "wilds",
+          "ruinfield",
+          "pass",
+          "holy_ground"
+        ],
+        "band": [
+          2,
+          12
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 10,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "stone_step",
+          "x": -3,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "stone_step",
+          "x": 3,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "stone_step",
+          "x": 0,
+          "z": -3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "stone_step",
+          "x": 0,
+          "z": 3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "torch_post",
+          "x": 0,
+          "z": 0,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "carrion_moth",
+          "count": 3,
+          "level": 1,
+          "x": 0,
+          "z": 1,
+          "radius": 4
+        }
+      ],
+      "objects": [
+        {
+          "type": "chest",
+          "name": "Trinkets left behind",
+          "x": 2,
+          "z": 0,
+          "tier": "common"
+        },
+        {
+          "type": "note",
+          "name": "Price list on a slate",
+          "x": 0,
+          "z": -2.5,
+          "text": "One wish: three sneezes. One secret: a good one back. One boot: just the one boot."
+        }
+      ]
+    }
+  ]
+}

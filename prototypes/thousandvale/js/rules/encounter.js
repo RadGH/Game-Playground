@@ -56,6 +56,7 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
   // ================================================================== scripts and specials
 
   /** The script a monster runs: an explicit id, its type, its rank's default, else its specials. */
+  enc.scriptFor = u => scriptFor(u);
   function scriptFor(e) {
     const id = e.encounterId
       || D.byType?.[e.defId]
@@ -64,6 +65,8 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
     return id && D.scripts[id] ? D.scripts[id] : null;
   }
   function specialsFor(e) {
+    const byType = D.specials?.types?.[e.defId];
+    if (byType?.length) return byType;
     const fam = D.specials?.families || {};
     return fam[`${e.family}/${e.role}`] || fam[e.family] || fam[e.role] || fam.any || [];
   }
@@ -664,6 +667,7 @@ export function validateEncounters(D) {
     }
   }
   for (const [fam, list] of Object.entries(D.specials?.families || {})) for (const ab of list) checkAbility(`specials.${fam}`, ab);
+  for (const [type, list] of Object.entries(D.specials?.types || {})) for (const ab of list) checkAbility(`specials.types.${type}`, ab);
   for (const [k, v] of Object.entries(D.defaults || {})) for (const [rk, id] of Object.entries(v)) if (!D.scripts?.[id]) bad.push(`defaults.${k}.${rk}: unknown script "${id}"`);
   return bad;
 }

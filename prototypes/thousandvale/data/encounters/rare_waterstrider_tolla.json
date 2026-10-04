@@ -1,0 +1,149 @@
+{
+  "id": "rare_waterstrider_tolla",
+  "name": "Tolla Longlegs",
+  "tier": "rare",
+  "zone": "gullwick",
+  "body": "veil_spider",
+  "place": "skates across the shallows of the Gullwick Lakes faster than a boat",
+  "_doc": "Stream E (M2). A spider that walks on water. It skates across the fight in long lines, webs whoever stands still, and at half health strings threads between the lake posts — a lattice of lines that close one after another.",
+  "party": {
+    "solo": "Solo-able.",
+    "small": "Easy.",
+    "full": "Easy.",
+    "m5": "M5 adds health per extra player and one more copy of the spread/scatter shapes for parties of 4-5; mechanics stay the same."
+  },
+  "hpMult": 1.7,
+  "arena": {
+    "radius": 26
+  },
+  "say": {
+    "pull": [
+      "Rings spread across the water, very fast, toward you.",
+      "Tolla stops dead on the surface and turns all eight eyes on you."
+    ],
+    "death": "Tolla Longlegs crumples and floats away like a dead leaf.",
+    "reset": "Tolla skates off across the lake."
+  },
+  "abilities": {
+    "fang": {
+      "id": "fang",
+      "name": "Fang",
+      "every": [
+        6,
+        8
+      ],
+      "range": 4.5,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 4,
+          "arc": 1.2,
+          "status": "poison",
+          "element": "poison",
+          "wind": 0.9,
+          "damage": 1.5
+        }
+      ]
+    },
+    "skate": {
+      "id": "skate",
+      "name": "Skate",
+      "every": [
+        10,
+        13
+      ],
+      "first": 4,
+      "cast": 0.4,
+      "say": "{boss} skates straight at {target}!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 20,
+          "w": 2.4,
+          "knock": 2,
+          "wind": 1.2,
+          "damage": 1.6
+        }
+      ]
+    },
+    "web": {
+      "id": "web",
+      "name": "Web Net",
+      "every": [
+        13,
+        16
+      ],
+      "first": 7,
+      "cast": 0.5,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3.2,
+          "count": 2,
+          "delay": 0.4,
+          "status": "web",
+          "wind": 1.4,
+          "damage": 0.9
+        }
+      ]
+    },
+    "lattice": {
+      "id": "lattice",
+      "name": "Lattice",
+      "every": [
+        16,
+        19
+      ],
+      "first": 3,
+      "cast": 0.8,
+      "say": "Threads snap tight across the water — one after another!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 26,
+          "w": 2.4,
+          "count": 4,
+          "rotate": 0.785,
+          "delay": 0.5,
+          "yaw": "random",
+          "wind": 1.4,
+          "damage": 1.7
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Skating",
+      "abilities": [
+        "fang",
+        "skate",
+        "web"
+      ]
+    },
+    {
+      "name": "Lattice",
+      "at": 0.5,
+      "say": "Tolla spins threads from post to post!",
+      "abilities": [
+        "fang",
+        "lattice",
+        "web",
+        "skate"
+      ],
+      "onEnter": [
+        {
+          "adds": {
+            "type": "veil_spider",
+            "count": 2,
+            "radius": 8
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,147 @@
+{
+  "id": "rare_reedmother_ysolt",
+  "name": "Reedmother Ysolt",
+  "tier": "rare",
+  "zone": "brackwater",
+  "body": "reed_serpent",
+  "place": "coils in the channels between Brackwater and Eelwick; boatmen leave her eels",
+  "_doc": "Stream E (M2). A serpent as long as a barge. She snaps the farthest player toward her with a lash (pull), constricts in a ring around herself (get right up close or well away), and at half health starts spitting venom that leaves green pools.",
+  "party": {
+    "solo": "Solo-able by ranged classes who stay outside the coil.",
+    "small": "Easy.",
+    "full": "Easy; keep the pools out of the melee spot.",
+    "m5": "M5 adds health per extra player and one more copy of the spread/scatter shapes for parties of 4-5; mechanics stay the same."
+  },
+  "hpMult": 1.9,
+  "arena": {
+    "radius": 24
+  },
+  "say": {
+    "pull": [
+      "The water ripples in a long, long line toward you.",
+      "Ysolt rises out of the reeds, swaying."
+    ],
+    "death": "Reedmother Ysolt sinks, slowly, and the reeds close over her.",
+    "reset": "Ysolt slides back under the water."
+  },
+  "abilities": {
+    "fangs": {
+      "id": "fangs",
+      "name": "Fangs",
+      "every": [
+        6,
+        8
+      ],
+      "range": 4.5,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 4.2,
+          "arc": 1.2,
+          "status": "poison",
+          "element": "poison",
+          "wind": 0.9,
+          "damage": 1.6
+        }
+      ]
+    },
+    "lash": {
+      "id": "lash",
+      "name": "Tail Lash",
+      "every": [
+        12,
+        15
+      ],
+      "first": 4,
+      "cast": 0.6,
+      "say": "{boss} draws back her tail — whoever is behind {target} gets reeled in!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 16,
+          "w": 2.2,
+          "knock": 6,
+          "pull": true,
+          "wind": 1.2,
+          "damage": 0.9
+        }
+      ]
+    },
+    "coil": {
+      "id": "coil",
+      "name": "Constrict",
+      "every": [
+        15,
+        18
+      ],
+      "first": 8,
+      "cast": 0.8,
+      "say": "Ysolt coils around the spot — hug her or get well clear!",
+      "telegraphs": [
+        {
+          "shape": "donut",
+          "at": "self",
+          "r": 9,
+          "r2": 3,
+          "wind": 1.6,
+          "damage": 1.9
+        }
+      ]
+    },
+    "venom": {
+      "id": "venom",
+      "name": "Venom Spray",
+      "every": [
+        11,
+        14
+      ],
+      "first": 3,
+      "cast": 0.5,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 2.6,
+          "count": 2,
+          "delay": 0.5,
+          "element": "poison",
+          "status": "poison",
+          "leave": {
+            "type": "pool",
+            "name": "Venom slick",
+            "r": 2.2,
+            "every": 1,
+            "seconds": 12,
+            "damage": 0.25,
+            "element": "poison"
+          },
+          "wind": 1.4,
+          "damage": 1.2
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Swaying",
+      "abilities": [
+        "fangs",
+        "lash",
+        "coil"
+      ]
+    },
+    {
+      "name": "Spitting",
+      "at": 0.5,
+      "say": "Ysolt hisses and venom drips from her jaws!",
+      "abilities": [
+        "fangs",
+        "venom",
+        "coil",
+        "lash"
+      ]
+    }
+  ]
+}

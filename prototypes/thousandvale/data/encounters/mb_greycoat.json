@@ -1,0 +1,234 @@
+{
+  "id": "mb_greycoat",
+  "name": "Greycoat, the Kennel Cat",
+  "tier": "miniboss",
+  "body": "frost_stalker",
+  "place": "dungeon fortress_keep set B: floor 1 mini-boss (24 m kennels)",
+  "_doc": "Stream E (M2). The keep's kennel master kept a hunting cat. Now the cat keeps the kennels. A stalker: it POUNCES on whoever is farthest (the circle follows them until it lands — run it away from the group), rakes, and vanishes into the straw (it becomes untouchable, a ward, until its prey — three kennel hounds it lets loose — die). Kennel gates (levers) slam shut on it for a stun. Enrage 5 min.",
+  "party": "Solo: the pounce always targets you; fair. 2-3: ranged players get pounced. 5: fine; M5 +1 hound per player, health x1.5.",
+  "hpMult": 2,
+  "arena": {
+    "radius": 12,
+    "objects": [
+      {
+        "id": "gate_a",
+        "type": "lever",
+        "name": "Kennel gate",
+        "x": -8,
+        "z": -6,
+        "onUse": [
+          {
+            "stun": 2.5
+          },
+          {
+            "hurt": 0.04
+          },
+          {
+            "say": "The kennel gate slams on Greycoat's tail!",
+            "style": "warn"
+          }
+        ]
+      },
+      {
+        "id": "gate_b",
+        "type": "lever",
+        "name": "Kennel gate",
+        "x": 8,
+        "z": -6,
+        "onUse": [
+          {
+            "stun": 2.5
+          },
+          {
+            "hurt": 0.04
+          },
+          {
+            "say": "The kennel gate slams on Greycoat's tail!",
+            "style": "warn"
+          }
+        ]
+      },
+      {
+        "id": "straw",
+        "type": "pillar",
+        "name": "Straw stack",
+        "x": 0,
+        "z": 6,
+        "r": 1.5,
+        "hp": 2
+      }
+    ]
+  },
+  "say": {
+    "pull": [
+      "Two pale eyes open in the dark of the kennel. A tail twitches.",
+      "Greycoat yawns, showing every one of its teeth."
+    ],
+    "death": "Greycoat stretches out, as if for a nap, and does not get up.",
+    "reset": "Greycoat pads back into the straw."
+  },
+  "enrage": {
+    "seconds": 300,
+    "damage": 2.5,
+    "say": "Greycoat's fur stands on end!"
+  },
+  "abilities": {
+    "claws": {
+      "id": "claws",
+      "name": "Claw Swipe",
+      "every": [
+        6,
+        8
+      ],
+      "range": 5,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 4.6,
+          "arc": 1.5,
+          "status": "bleed",
+          "wind": 1.0,
+          "damage": 1.6
+        }
+      ]
+    },
+    "pounce": {
+      "id": "pounce",
+      "name": "Pounce",
+      "every": [
+        14,
+        17
+      ],
+      "first": 5,
+      "cast": 0.6,
+      "say": "Greycoat crouches, eyes on {target}... move away from the others!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "farthest",
+          "r": 3,
+          "follow": true,
+          "knock": 2,
+          "wind": 2.5,
+          "damage": 2.0
+        }
+      ]
+    },
+    "swipe": {
+      "id": "swipe",
+      "name": "Frost Swipe",
+      "every": [
+        12,
+        15
+      ],
+      "first": 8,
+      "range": 7,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 6,
+          "arc": 2,
+          "element": "ice",
+          "status": "chill",
+          "wind": 1.2,
+          "damage": 1.3
+        }
+      ]
+    },
+    "prey": {
+      "id": "prey",
+      "name": "Let Loose the Hounds",
+      "every": [
+        24,
+        28
+      ],
+      "first": 2,
+      "say": "Greycoat yowls and the kennel doors burst open!",
+      "actions": [
+        {
+          "adds": {
+            "type": "moor_hound",
+            "count": 3,
+            "radius": 7
+          }
+        }
+      ]
+    },
+    "ambush": {
+      "id": "ambush",
+      "name": "Ambush",
+      "every": [
+        10,
+        12
+      ],
+      "first": 4,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 2.6,
+          "count": 2,
+          "delay": 0.6,
+          "lead": 5,
+          "wind": 1.3,
+          "damage": 1.5
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Stalking",
+      "abilities": [
+        "claws",
+        "pounce",
+        "swipe"
+      ]
+    },
+    {
+      "name": "In the Straw",
+      "at": 0.5,
+      "say": "Greycoat vanishes into the straw. Something is let loose!",
+      "shieldWhileAdds": true,
+      "shieldDown": "The hounds are down — Greycoat leaps out, furious!",
+      "abilities": [
+        "ambush"
+      ],
+      "onEnter": [
+        {
+          "shield": true
+        },
+        {
+          "adds": {
+            "type": "moor_hound",
+            "count": 3,
+            "radius": 7
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cornered",
+      "at": 0.3,
+      "say": "Greycoat hisses — cornered, and very dangerous.",
+      "abilities": [
+        "claws",
+        "pounce",
+        "swipe",
+        "prey"
+      ],
+      "onEnter": [
+        {
+          "modifier": {
+            "id": "cornered",
+            "dmg": 1.2,
+            "attackEvery": 0.85,
+            "exact": true
+          }
+        }
+      ]
+    }
+  ]
+}

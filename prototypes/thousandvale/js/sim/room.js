@@ -212,16 +212,18 @@ export function createRoom(opts) {
       const tx = c.x + Math.cos(a) * r, tz = c.z + Math.sin(a) * r;
       if (room.walkable(tx, tz)) { x = tx; z = tz; break; }
     }
-    const m = room.spawn({ kind: 'monster', type: c.type, level: c.level || 1, x, z, yaw: host.random('spawn') * 6.283, rank: c.rank || 'normal', state: c.rank && c.rank !== 'normal' ? STATE.elite : 0, data: c.encounter ? { encounter: c.encounter } : null });
+    const m = room.spawn({ kind: 'monster', type: c.type, level: c.level || 1, x, z, yaw: host.random('spawn') * 6.283, rank: c.rank || 'normal', state: c.rank && c.rank !== 'normal' ? STATE.elite : 0, name: c.name || (c.encounter && opts.encounterInfo && opts.encounterInfo[c.encounter] ? opts.encounterInfo[c.encounter].name : undefined), data: c.encounter ? { encounter: c.encounter } : null });
     c.live.add(m.id);
   }
+  /** A camp's respawn delay: a number, or [min, max] picked on the room's 'spawn' stream (rares: 20-60 min). */
+  function respawnOf(c) { const r = c.respawnMs ?? 30000; return Array.isArray(r) ? r[0] + host.random('spawn') * (r[1] - r[0]) : r; }
   function fillCamps(now, initial = false) {
     for (const c of campState) {
       for (const idd of c.live) { const m = entities.get(idd); if (!m || m.dead) c.live.delete(idd); }
       if (initial) { while (c.live.size < c.count) spawnInCamp(c); continue; }
       if (c.live.size >= c.count) { c.nextAt = 0; continue; }
-      if (!c.nextAt) c.nextAt = now + (c.respawnMs ?? 30000);
-      if (now >= c.nextAt) { spawnInCamp(c); c.nextAt = c.live.size < c.count ? now + (c.respawnMs ?? 30000) : 0; }
+      if (!c.nextAt) c.nextAt = now + respawnOf(c);
+      if (now >= c.nextAt) { spawnInCamp(c); c.nextAt = c.live.size < c.count ? now + respawnOf(c) : 0; }
     }
   }
   room.camps = campState;

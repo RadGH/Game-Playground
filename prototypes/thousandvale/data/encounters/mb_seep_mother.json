@@ -5,6 +5,7 @@
   "body": "bog_slime",
   "place": "dungeon mine_descent: floor 2's mini-boss (a 24 m gallery)",
   "_doc": "Stream E. A slime that grew in the mine's flooded sump. Two seep pools HEAL her while she sits in them: the tank drags her out. Her caustic spit leaves burning puddles. A swelling bloat lands on the farthest player: someone must stand in it or it bursts over the whole party. At 66% and 33% she sheds a brood of small slimes.",
+  "party": "Solo: the bloat soak always needs you — doable but you must leave the tank spot. 2-3: intended. 5: easy. M5 scaling: shed adds 2/3 -> 1/2 solo, 3/4 at five.",
   "hpMult": 2.4,
   "arena": {
     "radius": 12,

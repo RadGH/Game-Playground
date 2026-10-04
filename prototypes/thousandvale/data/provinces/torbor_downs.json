@@ -1,49 +1,593 @@
 {
-  "_doc": "Stream E. Province sheet (PLAN §4.1) for the M1 starter province. M1 fills in ONE zone (`zones.test`, the baked test zone around Torborhold); the rest of the sheet is the M2 outline. Names are original (Name Forge style). `camps` are what the wilds of a zone should hold — types are Farhold bestiary ids, `level` is a band.",
+  "_doc": "Stream E. Province sheet (PLAN §4.1) for the starter province: 16 zones on a 4x4 grid (`grid` [x, y], 4-way neighbours). No two neighbours share an archetype. Bands rise by hops from the starting zone `test` (The Torbor Fields). Settlement/fort names are placeholders until B's world bake names real sites; B may move zones but keep the ids. M1 filled only `test` in detail; M2 adds per-zone camps, rares, quests and vignette lists (data/vignettes/placements/province.json).",
   "id": "torbor_downs",
   "name": "Torbor Downs",
   "culture": "human",
-  "band": [1, 8],
-  "capital": "Torborhold",
-  "palette": { "sky": "#9fc2dc", "fog": "#cfd8d0", "grass": "#7f9a4e", "accent": "#c79a3a" },
-  "weather": { "clear": 5, "cloud": 3, "rain": 2, "fog": 1 },
+  "band": [
+    1,
+    10
+  ],
+  "capital": "Halsbridge",
+  "palette": {
+    "sky": "#9fc2dc",
+    "fog": "#cfd8d0",
+    "grass": "#7f9a4e",
+    "accent": "#c79a3a"
+  },
+  "weather": {
+    "clear": 5,
+    "cloud": 3,
+    "rain": 2,
+    "fog": 1
+  },
   "music": "heartland_day",
-  "factions": ["the_reeve_watch", "the_furrow_guild"],
+  "factions": [
+    "the_reeve_watch",
+    "the_furrow_guild"
+  ],
   "warband": null,
-  "enemyFamilies": { "beast": 3, "humanoid": 3, "aberration": 1.5, "undead": 1 },
-  "worldBoss": { "id": "planned_m3", "note": "M3: the province world boss and its arena zone." },
+  "enemyFamilies": {
+    "beast": 3,
+    "humanoid": 3,
+    "aberration": 1.5,
+    "undead": 1
+  },
+  "worldBoss": {
+    "id": "planned_m3",
+    "note": "M3: the province world boss and its arena zone."
+  },
   "questline": {
     "name": "The Ford and the Fields",
     "steps": [
-      { "n": 1, "quest": "wolves_at_the_fold", "status": "m1" },
-      { "n": 2, "quest": "toll_at_fitockpi", "status": "m1" },
-      { "n": 3, "quest": "webs_in_the_barley", "status": "m1" },
-      { "n": 4, "quest": "what_lies_below", "status": "m1" },
-      { "n": 5, "quest": null, "status": "m2", "note": "The ford gang's paymaster leads to the next zone's fort." }
+      {
+        "n": 1,
+        "quest": "wolves_at_the_fold",
+        "status": "m1"
+      },
+      {
+        "n": 2,
+        "quest": "toll_at_fitockpi",
+        "status": "m1"
+      },
+      {
+        "n": 3,
+        "quest": "webs_in_the_barley",
+        "status": "m1"
+      },
+      {
+        "n": 4,
+        "quest": "what_lies_below",
+        "status": "m1"
+      },
+      {
+        "n": 5,
+        "quest": null,
+        "status": "m2",
+        "note": "The ford gang's paymaster leads to the next zone's fort."
+      }
     ]
   },
   "zones": {
+    "hollin_pass": {
+      "name": "Hollin Pass",
+      "grid": [
+        0,
+        0
+      ],
+      "archetype": "pass",
+      "band": [
+        6,
+        8
+      ],
+      "biomes": [
+        "hills",
+        "mountains",
+        "borealForest"
+      ],
+      "town": "Hollin Toll",
+      "hamlets": [
+        "Scree End"
+      ],
+      "fort": "Hollin Toll Fort",
+      "dungeon": {
+        "family": "tower_climb",
+        "floors": 3,
+        "level": 6
+      }
+    },
+    "ashcombe": {
+      "name": "The Ashcombe Ruins",
+      "grid": [
+        1,
+        0
+      ],
+      "archetype": "ruinfield",
+      "band": [
+        4,
+        6
+      ],
+      "biomes": [
+        "grassland",
+        "shrubland",
+        "hills"
+      ],
+      "town": "Ashcombe",
+      "hamlets": [
+        "Kettle Cross"
+      ],
+      "fort": "the Broken Keep",
+      "dungeon": {
+        "family": "fortress_keep",
+        "floors": 2,
+        "level": 4
+      }
+    },
+    "brackwater": {
+      "name": "Brackwater Fen",
+      "grid": [
+        2,
+        0
+      ],
+      "archetype": "marsh",
+      "band": [
+        5,
+        7
+      ],
+      "biomes": [
+        "marsh",
+        "lake",
+        "temperateForest"
+      ],
+      "town": "Brackwater",
+      "hamlets": [
+        "Eelwick"
+      ],
+      "fort": "Reedwall Tower",
+      "dungeon": {
+        "family": "sunken_temple",
+        "floors": 3,
+        "level": 5
+      }
+    },
+    "saltmouth": {
+      "name": "Saltmouth",
+      "grid": [
+        3,
+        0
+      ],
+      "archetype": "coast",
+      "band": [
+        6,
+        8
+      ],
+      "biomes": [
+        "beach",
+        "coast",
+        "grassland"
+      ],
+      "town": "Saltmouth",
+      "hamlets": [
+        "Gull Steps"
+      ],
+      "fort": "Saltmouth Battery",
+      "dungeon": {
+        "family": "flooded_cistern",
+        "floors": 3,
+        "level": 6
+      }
+    },
+    "delvers_hill": {
+      "name": "Delvers' Hill",
+      "grid": [
+        0,
+        1
+      ],
+      "archetype": "mine_country",
+      "band": [
+        4,
+        6
+      ],
+      "biomes": [
+        "hills",
+        "grassland",
+        "temperateForest"
+      ],
+      "town": "Copperdell",
+      "hamlets": [
+        "Pickaxe Row"
+      ],
+      "fort": "the Old Headframe Fort",
+      "dungeon": {
+        "family": "mine_descent",
+        "floors": 2,
+        "level": 4
+      }
+    },
     "test": {
       "name": "The Torbor Fields",
       "archetype": "heartland",
-      "band": [1, 6],
+      "band": [
+        1,
+        4
+      ],
       "town": "Torborhold",
-      "hamlets": ["Wamonhold", "Mawehaven"],
+      "hamlets": [
+        "Wamonhold",
+        "Mawehaven"
+      ],
       "hook": "the_singing_ford",
-      "dungeon": { "name": "chosen by dungeon-tiers.js", "families": ["crypt_spiral", "mine_descent"], "floors": 2, "level": 3 },
+      "dungeon": {
+        "family": "crypt_spiral",
+        "floors": 2,
+        "level": 3
+      },
       "eventBoss": "event_grandmother_skein",
       "elite": "elite_hobb_gallowsby",
-      "rares": ["rare_grisel_thornhide", "rare_sallowmaw"],
+      "rares": [
+        "rare_grisel_thornhide",
+        "rare_sallowmaw"
+      ],
       "camps": [
-        { "type": "moor_hound", "level": [1, 3], "count": [3, 4], "where": "the sheep folds and open grass around Torborhold" },
-        { "type": "thicket_boar", "level": [2, 4], "count": [2, 3], "where": "woodland edges and the fields toward Wamonhold" },
-        { "type": "road_brigand", "level": [2, 5], "count": [2, 4], "where": "along the road to Fitockpi Ford", "with": "brigand_archer" },
-        { "type": "bog_slime", "level": [3, 5], "count": [1, 3], "where": "the marsh south of Mawehaven" },
-        { "type": "fen_croaker", "level": [2, 4], "count": [2, 3], "where": "the marsh and riverbanks" },
-        { "type": "marsh_wisp", "level": [3, 6], "count": [1, 2], "where": "the marsh, at night" }
+        {
+          "type": "moor_hound",
+          "level": [
+            1,
+            3
+          ],
+          "count": [
+            3,
+            4
+          ],
+          "where": "the sheep folds and open grass around Torborhold"
+        },
+        {
+          "type": "thicket_boar",
+          "level": [
+            2,
+            4
+          ],
+          "count": [
+            2,
+            3
+          ],
+          "where": "woodland edges and the fields toward Wamonhold"
+        },
+        {
+          "type": "road_brigand",
+          "level": [
+            2,
+            5
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "along the road to Fitockpi Ford",
+          "with": "brigand_archer"
+        },
+        {
+          "type": "bog_slime",
+          "level": [
+            3,
+            5
+          ],
+          "count": [
+            1,
+            3
+          ],
+          "where": "the marsh south of Mawehaven"
+        },
+        {
+          "type": "fen_croaker",
+          "level": [
+            2,
+            4
+          ],
+          "count": [
+            2,
+            3
+          ],
+          "where": "the marsh and riverbanks"
+        },
+        {
+          "type": "marsh_wisp",
+          "level": [
+            3,
+            6
+          ],
+          "count": [
+            1,
+            2
+          ],
+          "where": "the marsh, at night"
+        }
       ],
       "vignettes": "data/vignettes/placements/test.json",
-      "quests": "data/quests/test.json"
+      "quests": "data/quests/test.json",
+      "grid": [
+        1,
+        1
+      ],
+      "biomes": [
+        "grassland",
+        "temperateForest",
+        "marsh"
+      ],
+      "fort": "Torbor Watchtower"
+    },
+    "torbor_cross": {
+      "name": "Torbor Cross",
+      "grid": [
+        2,
+        1
+      ],
+      "archetype": "crown_ring",
+      "band": [
+        3,
+        5
+      ],
+      "biomes": [
+        "grassland",
+        "shrubland"
+      ],
+      "town": "Halsbridge",
+      "hamlets": [
+        "Mill End"
+      ],
+      "fort": "Halsbridge Gatehouse",
+      "dungeon": {
+        "family": "flooded_cistern",
+        "floors": 2,
+        "level": 3
+      }
+    },
+    "gullwick": {
+      "name": "The Gullwick Lakes",
+      "grid": [
+        3,
+        1
+      ],
+      "archetype": "lakeland",
+      "band": [
+        5,
+        7
+      ],
+      "biomes": [
+        "lake",
+        "grassland",
+        "temperateForest"
+      ],
+      "town": "Gullwick",
+      "hamlets": [
+        "Ferry Hythe"
+      ],
+      "fort": "Stilt Fort",
+      "dungeon": {
+        "family": "cave_river",
+        "floors": 3,
+        "level": 5
+      }
+    },
+    "wychwood": {
+      "name": "Wychwood",
+      "grid": [
+        0,
+        2
+      ],
+      "archetype": "wilds",
+      "band": [
+        5,
+        7
+      ],
+      "biomes": [
+        "temperateForest",
+        "borealForest"
+      ],
+      "town": "Hermit's Rest",
+      "hamlets": [
+        "Charcoal Burners"
+      ],
+      "fort": "the Antler Stockade",
+      "dungeon": {
+        "family": "barrow_maze",
+        "floors": 3,
+        "level": 5
+      }
+    },
+    "saint_orrins_rise": {
+      "name": "Saint Orrin's Rise",
+      "grid": [
+        1,
+        2
+      ],
+      "archetype": "holy_ground",
+      "band": [
+        3,
+        5
+      ],
+      "biomes": [
+        "grassland",
+        "hills"
+      ],
+      "town": "Orrinsford",
+      "hamlets": [
+        "Pilgrim's Halt"
+      ],
+      "fort": "the Abbey Wall",
+      "dungeon": {
+        "family": "crypt_spiral",
+        "floors": 2,
+        "level": 3
+      }
+    },
+    "millbrook": {
+      "name": "Millbrook Vale",
+      "grid": [
+        2,
+        2
+      ],
+      "archetype": "heartland",
+      "band": [
+        3,
+        6
+      ],
+      "biomes": [
+        "grassland",
+        "shrubland",
+        "temperateForest"
+      ],
+      "town": "Millbrook",
+      "hamlets": [
+        "Three Wheels"
+      ],
+      "fort": "Millbrook Keep",
+      "dungeon": {
+        "family": "mine_descent",
+        "floors": 2,
+        "level": 3
+      }
+    },
+    "redcliff": {
+      "name": "The Redcliff Frontier",
+      "grid": [
+        3,
+        2
+      ],
+      "archetype": "frontier",
+      "band": [
+        6,
+        8
+      ],
+      "biomes": [
+        "hills",
+        "shrubland",
+        "grassland"
+      ],
+      "town": "Redcliff",
+      "hamlets": [
+        "Cinder Farm"
+      ],
+      "fort": "Redcliff Fort",
+      "dungeon": {
+        "family": "fortress_keep",
+        "floors": 3,
+        "level": 6
+      }
+    },
+    "blackthorn_scar": {
+      "name": "Blackthorn Scar",
+      "grid": [
+        0,
+        3
+      ],
+      "archetype": "blight",
+      "band": [
+        7,
+        10
+      ],
+      "biomes": [
+        "blighted",
+        "hills",
+        "temperateForest"
+      ],
+      "town": "Last Lantern",
+      "hamlets": [
+        "Thornwick"
+      ],
+      "fort": "the Warband Stockade",
+      "dungeon": {
+        "family": "barrow_maze",
+        "floors": 3,
+        "level": 7
+      }
+    },
+    "coldwater": {
+      "name": "Coldwater Mere",
+      "grid": [
+        1,
+        3
+      ],
+      "archetype": "lakeland",
+      "band": [
+        5,
+        7
+      ],
+      "biomes": [
+        "lake",
+        "marsh",
+        "grassland"
+      ],
+      "town": "Coldwater",
+      "hamlets": [
+        "Netherby"
+      ],
+      "fort": "Mere Tower",
+      "dungeon": {
+        "family": "sunken_temple",
+        "floors": 3,
+        "level": 5
+      }
+    },
+    "gorse_march": {
+      "name": "The Gorse March",
+      "grid": [
+        2,
+        3
+      ],
+      "archetype": "frontier",
+      "band": [
+        6,
+        8
+      ],
+      "biomes": [
+        "shrubland",
+        "grassland",
+        "hills"
+      ],
+      "town": "Gorsehold",
+      "hamlets": [
+        "Burnt Barns"
+      ],
+      "fort": "Gorsehold Redoubt",
+      "dungeon": {
+        "family": "tower_climb",
+        "floors": 3,
+        "level": 6
+      }
+    },
+    "sunken_wolds": {
+      "name": "The Sunken Wolds",
+      "grid": [
+        3,
+        3
+      ],
+      "archetype": "wilds",
+      "band": [
+        7,
+        10
+      ],
+      "biomes": [
+        "temperateForest",
+        "hills",
+        "marsh"
+      ],
+      "town": "Lowmoor",
+      "hamlets": [
+        "Deepdene"
+      ],
+      "fort": "the Mossy Bastion",
+      "dungeon": {
+        "family": "cave_river",
+        "floors": 3,
+        "level": 7
+      }
     }
+  },
+  "grid": {
+    "w": 4,
+    "h": 4,
+    "adjacency": "4-way (north/south/east/west)",
+    "start": "test",
+    "worldBossZone": "blackthorn_scar"
   }
 }

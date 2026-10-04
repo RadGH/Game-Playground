@@ -1,0 +1,182 @@
+{
+  "_doc": "Stream E (M2). Quests for zone 'torbor_cross' (Torbor Cross). Format: data/quests/README.md. Rewards: xp = share of a level's XP at the quest level, gold = multiple of a kill's gold; item.tier rolls at your level. `killRare` {zone, slot} names the zone's rare by slot (data/provinces/rares.json). Story-chain quests carry `story: n` (data/quests/province.json).",
+  "zone": "torbor_cross",
+  "npcs": {
+    "provost_isolde": {
+      "name": "Provost Isolde Hollis",
+      "role": "elder",
+      "at": "Halsbridge",
+      "greeting": "Halsbridge welcomes you. Halsbridge also taxes you. Both warmly."
+    },
+    "watch_sergeant_wat": {
+      "name": "Sergeant Wat",
+      "role": "guard",
+      "at": "Halsbridge Gatehouse",
+      "greeting": "State your business. Actually, don't, I'm on my break."
+    },
+    "miller_emrys": {
+      "name": "Emrys Millward",
+      "role": "farmer",
+      "at": "Mill End",
+      "greeting": "The wheel turns, the flour flows, the rats eat it. The circle of life."
+    },
+    "ratcatcher_jory": {
+      "name": "Jory the ratcatcher",
+      "role": "trader",
+      "at": "Halsbridge",
+      "greeting": "Rats is my trade. Business has never been better, which is the problem."
+    }
+  },
+  "quests": [
+    {
+      "id": "bells_for_halsbridge",
+      "name": "Bells for Halsbridge",
+      "level": 3,
+      "giver": "provost_isolde",
+      "story": 3,
+      "offer": "The Prior sent word you're useful. The road to Halsbridge is crawling with cutpurses. Make it crawl less.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "road_brigand",
+          "count": 6,
+          "where": "the roads into Halsbridge",
+          "text": "Cutpurses discouraged"
+        }
+      ],
+      "done": "The guild of honest merchants thanks you. Both of them.",
+      "reward": {
+        "xp": 0.45,
+        "gold": 8,
+        "item": {
+          "tier": "common",
+          "slot": "any"
+        }
+      },
+      "next": "millbrook_wheels"
+    },
+    {
+      "id": "under_the_cobbles",
+      "name": "Under the Cobbles",
+      "level": 4,
+      "giver": "ratcatcher_jory",
+      "offer": "The sewers under Halsbridge have rats the size of dogs. Bring me tails. I get paid by the tail.",
+      "steps": [
+        {
+          "kind": "collect",
+          "item": "Rat tail",
+          "count": 8,
+          "from": "cairn_rat",
+          "chance": 0.7,
+          "text": "Rat tails"
+        }
+      ],
+      "done": "Eight! You've a gift. A horrible gift, but a gift.",
+      "reward": {
+        "xp": 0.35,
+        "gold": 6
+      }
+    },
+    {
+      "id": "flour_and_fangs",
+      "name": "Flour and Fangs",
+      "level": 3,
+      "giver": "miller_emrys",
+      "offer": "Moor hounds have learned that the mill means bread, and bread means millers. Thin them out.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "moor_hound",
+          "count": 6,
+          "where": "around Mill End",
+          "text": "Moor hounds"
+        }
+      ],
+      "done": "Bless you. The wheel turns in peace.",
+      "reward": {
+        "xp": 0.35,
+        "gold": 5
+      }
+    },
+    {
+      "id": "archers_on_the_bridge",
+      "name": "Archers on the Bridge",
+      "level": 5,
+      "giver": "watch_sergeant_wat",
+      "offer": "Somebody's shooting at the bridge tolls from the far bank. It's not even their toll to rob. Sort it.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "brigand_archer",
+          "count": 5,
+          "where": "the far bank below the bridge",
+          "text": "Brigand archers"
+        }
+      ],
+      "done": "Right. I'll put that in the report as 'resolved by the watch'. Here's your share.",
+      "reward": {
+        "xp": 0.45,
+        "gold": 8,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "the_cisterns_below",
+      "name": "The Cisterns Below",
+      "level": 5,
+      "giver": "provost_isolde",
+      "group": "a party of 3-5",
+      "offer": "The old cisterns under the city have been gurgling in ways that sound like words. Go down and stop the conversation.",
+      "steps": [
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "text": "Reach the second cistern",
+          "floor": 1
+        },
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "text": "Silence what lives at the bottom",
+          "boss": true
+        }
+      ],
+      "done": "Silence. Glorious, municipal silence.",
+      "reward": {
+        "xp": 1.0,
+        "gold": 40,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "cross_rare",
+      "name": "Wanted in Halsbridge",
+      "level": 4,
+      "giver": "watch_sergeant_wat",
+      "offer": "There's a poster on my wall I'm sick of looking at. Take it down by killing whatever's on it.",
+      "steps": [
+        {
+          "kind": "killRare",
+          "zone": "torbor_cross",
+          "slot": 0,
+          "text": "The wanted beast slain"
+        }
+      ],
+      "done": "Lovely. I'll put up a poster of you. 'Do not anger.'",
+      "reward": {
+        "xp": 0.6,
+        "gold": 20,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      }
+    }
+  ]
+}

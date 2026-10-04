@@ -87,9 +87,9 @@ test('ordinary monsters get telegraphed specials by family, and rank makes them 
   const teles = s.events().filter(e => e.t === 'tele');
   const mine = teles.filter(e => e.s === plain.id), theirs = teles.filter(e => e.s === champ.id);
   assert.ok(mine.length > 2 && theirs.length > 2, `${mine.length} / ${theirs.length} specials`);
-  assert.ok(mine.every(e => ['pounce', 'maul'].includes(e.ab)), 'a skirmishing beast pounces and mauls');
-  const size = list => Math.max(...list.filter(e => e.ab === 'maul').map(e => e.r));
-  if (mine.some(e => e.ab === 'maul') && theirs.some(e => e.ab === 'maul')) assert.ok(size(theirs) > size(mine), 'a champion\'s maul is bigger');
+  assert.ok(mine.every(e => ['pounce', 'savage_bite', 'hamstring', 'circling_snap'].includes(e.ab)), 'a hound uses its own type\'s specials (or its family\'s)');
+  const size = list => Math.max(...list.filter(e => e.ab === 'savage_bite' || e.ab === 'circling_snap').map(e => e.r));
+  if (mine.some(e => e.ab === 'savage_bite' || e.ab === 'circling_snap') && theirs.some(e => e.ab === 'savage_bite' || e.ab === 'circling_snap')) assert.ok(size(theirs) > size(mine), 'a champion\'s bite is bigger');
   assert.ok(RANK_SCALE.champion.dmg > RANK_SCALE.normal.dmg);
 });
 

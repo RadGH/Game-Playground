@@ -1,0 +1,419 @@
+{
+  "id": "boss_sunken_coffer",
+  "name": "The Sunken Coffer",
+  "tier": "boss",
+  "body": "hoard_mimic",
+  "place": "dungeon flooded_cistern set B: the end boss in the treasury vault the flood sealed (28 m)",
+  "_doc": "Stream E (M2). The town's strongbox, sunk in the flood with the tax money inside, has grown teeth. Greedy and ridiculous. P1 \"Interest\": coin-spray cones, a lid slam on the tank, and GOLD PILES it spits around the room — walking through a pile pays it (heals the coffer: pools with boss heal). P2 at 60% \"Audit\": it locks itself shut (ward) and coin-golems... coin-gobbling slimes swarm out; open the three counting-house strongboxes (braziers) to break the lock. P3 new bar \"Bankrupt\": the vault floods — safe ledges, a three-player stack on the \"debt\", a spinning coin storm, and a soak on the scales (someone must stand on the tax scales or everyone is fined).",
+  "party": "Solo: needs a follower for the soak and the stack. 2-3: soak + stack are tight. 5: as designed. M5: stack need = min(3, party), soak need 1 for <=2 players, health x1.8 at 5.",
+  "hpMult": 4,
+  "arena": {
+    "radius": 16,
+    "objects": [
+      {
+        "id": "box_a",
+        "type": "brazier",
+        "name": "Counting-house strongbox",
+        "x": 10,
+        "z": -4
+      },
+      {
+        "id": "box_b",
+        "type": "brazier",
+        "name": "Counting-house strongbox",
+        "x": -10,
+        "z": -4
+      },
+      {
+        "id": "box_c",
+        "type": "brazier",
+        "name": "Counting-house strongbox",
+        "x": 0,
+        "z": 10
+      },
+      {
+        "id": "scales",
+        "type": "cracked_floor",
+        "name": "Tax scales",
+        "x": 0,
+        "z": -8,
+        "r": 2.6,
+        "blocks": false
+      },
+      {
+        "id": "pillar_a",
+        "type": "pillar",
+        "name": "Vault pillar",
+        "x": -7,
+        "z": 5,
+        "r": 1.3,
+        "hp": 2
+      },
+      {
+        "id": "pillar_b",
+        "type": "pillar",
+        "name": "Vault pillar",
+        "x": 7,
+        "z": 5,
+        "r": 1.3,
+        "hp": 2
+      },
+      {
+        "id": "flood_gate",
+        "type": "lever",
+        "name": "Flood gate wheel",
+        "x": -10,
+        "z": 8,
+        "onUse": [
+          {
+            "hurt": 0.05
+          },
+          {
+            "stun": 3
+          },
+          {
+            "say": "Water slams through the gate and bowls the Coffer over!",
+            "style": "warn"
+          }
+        ]
+      }
+    ]
+  },
+  "say": {
+    "pull": [
+      "The strongbox creaks open. Inside, where the coins should be, there are teeth.",
+      "\"PAYMENT,\" says the box. \"IS. DUE.\"",
+      "Kerr-CHUNK. The lock turns by itself."
+    ],
+    "death": "The Sunken Coffer spits out one last coin and falls open, empty at last.",
+    "reset": "The Coffer snaps shut. \"Account... closed.\""
+  },
+  "enrage": {
+    "seconds": 330,
+    "damage": 3,
+    "say": "\"FORECLOSURE.\""
+  },
+  "abilities": {
+    "lid": {
+      "id": "lid",
+      "name": "Lid Slam",
+      "every": [
+        7,
+        9
+      ],
+      "range": 6,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 6,
+          "arc": 1.4,
+          "knock": 2,
+          "wind": 1.1,
+          "damage": 2.0
+        }
+      ]
+    },
+    "coin_spray": {
+      "id": "coin_spray",
+      "name": "Coin Spray",
+      "every": [
+        12,
+        15
+      ],
+      "first": 5,
+      "cast": 0.6,
+      "say": "It sprays a fan of coins!",
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 12,
+          "arc": 0.9,
+          "count": 3,
+          "rotate": 0.9,
+          "yaw": "random",
+          "wind": 1.3,
+          "damage": 1.6
+        }
+      ]
+    },
+    "gold_pile": {
+      "id": "gold_pile",
+      "name": "Spill the Hoard",
+      "every": [
+        18,
+        22
+      ],
+      "first": 9,
+      "cast": 1,
+      "say": "Gold everywhere! Keep the Coffer OUT of the piles — it eats them!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "r": 2.4,
+          "count": 3,
+          "delay": 0.3,
+          "spread": 10,
+          "leave": {
+            "type": "pool",
+            "name": "Pile of gold (it wants it back)",
+            "r": 2.2,
+            "every": 1,
+            "seconds": 30,
+            "boss": [
+              {
+                "heal": 0.01
+              }
+            ]
+          },
+          "wind": 1.6,
+          "damage": 1.2
+        }
+      ]
+    },
+    "audit": {
+      "id": "audit",
+      "name": "Audit",
+      "every": [
+        16,
+        19
+      ],
+      "first": 6,
+      "cast": 1.5,
+      "say": "\"AUDIT.\" More hungry things crawl out of the coin!",
+      "actions": [
+        {
+          "adds": {
+            "type": "bog_slime",
+            "count": 2,
+            "radius": 9,
+            "at": "home"
+          }
+        }
+      ]
+    },
+    "penny_rain": {
+      "id": "penny_rain",
+      "name": "Penny Rain",
+      "every": [
+        10,
+        12
+      ],
+      "first": 3,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 2.5,
+          "count": 3,
+          "delay": 0.25,
+          "wind": 1.4,
+          "damage": 1.0
+        }
+      ]
+    },
+    "ledges": {
+      "id": "ledges",
+      "name": "The Vault Floods",
+      "every": [
+        26,
+        30
+      ],
+      "first": 16,
+      "cast": 1.5,
+      "say": "The vault is flooding — get up on a ledge!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "home",
+          "offset": [
+            9,
+            9
+          ],
+          "r": 3,
+          "kind": "safe",
+          "wind": 3.5,
+          "damage": 2.6
+        },
+        {
+          "shape": "circle",
+          "at": "home",
+          "offset": [
+            -9,
+            9
+          ],
+          "r": 3,
+          "kind": "safe",
+          "wind": 3.5,
+          "damage": 2.6
+        },
+        {
+          "shape": "circle",
+          "at": "home",
+          "offset": [
+            0,
+            -11
+          ],
+          "r": 3,
+          "kind": "safe",
+          "wind": 3.5,
+          "damage": 2.6
+        }
+      ]
+    },
+    "debt": {
+      "id": "debt",
+      "name": "Collected Debt",
+      "every": [
+        20,
+        24
+      ],
+      "first": 6,
+      "cast": 1,
+      "say": "{target} is in DEBT — three of you share it or it breaks them!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3,
+          "kind": "stack",
+          "need": 3,
+          "follow": true,
+          "wind": 4,
+          "damage": 3.0
+        }
+      ]
+    },
+    "scales": {
+      "id": "scales",
+      "name": "Weigh the Tax",
+      "every": [
+        24,
+        28
+      ],
+      "first": 11,
+      "cast": 1,
+      "say": "\"Weigh the tax!\" — someone stand on the tax scales!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "object",
+          "object": "cracked_floor",
+          "r": 2.8,
+          "kind": "soak",
+          "need": 1,
+          "fail": 2.0,
+          "failSay": "Nobody tipped the scales — everyone is FINED!",
+          "wind": 5,
+          "damage": 0.6
+        }
+      ]
+    },
+    "coin_storm": {
+      "id": "coin_storm",
+      "name": "Coin Storm",
+      "every": [
+        16,
+        19
+      ],
+      "first": 4,
+      "cast": 0.8,
+      "say": "It spins up into a storm of coins!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 16,
+          "w": 2.4,
+          "count": 8,
+          "rotate": 0.785,
+          "delay": 0.3,
+          "yaw": "random",
+          "wind": 1.2,
+          "damage": 1.7
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Interest",
+      "abilities": [
+        "lid",
+        "coin_spray",
+        "gold_pile",
+        "penny_rain"
+      ]
+    },
+    {
+      "name": "Audit",
+      "at": 0.6,
+      "say": "\"Your account has been FLAGGED.\"",
+      "abilities": [
+        "audit",
+        "penny_rain",
+        "lid"
+      ],
+      "onEnter": [
+        {
+          "shield": true
+        },
+        {
+          "adds": {
+            "type": "bog_slime",
+            "count": 3,
+            "radius": 8,
+            "at": "home"
+          }
+        },
+        {
+          "say": "The Coffer locks itself shut! Force open all three strongboxes!",
+          "style": "warn"
+        }
+      ]
+    },
+    {
+      "name": "Bankrupt",
+      "newBar": {
+        "hp": 0.55
+      },
+      "say": "\"I have NOTHING LEFT. So neither will YOU.\"",
+      "abilities": [
+        "lid",
+        "ledges",
+        "debt",
+        "scales",
+        "coin_storm"
+      ]
+    }
+  ],
+  "triggers": [
+    {
+      "when": {
+        "lit": 3,
+        "phase": 1
+      },
+      "do": [
+        {
+          "shield": false
+        },
+        {
+          "stun": 4
+        },
+        {
+          "vuln": {
+            "takeMore": 0.4,
+            "seconds": 10,
+            "name": "Lock Broken"
+          }
+        },
+        {
+          "say": "All three strongboxes are open! The Coffer's lock pops!",
+          "style": "warn"
+        }
+      ]
+    }
+  ]
+}

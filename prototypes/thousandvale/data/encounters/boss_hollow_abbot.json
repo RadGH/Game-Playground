@@ -5,6 +5,7 @@
   "body": "hollow_wraith",
   "place": "dungeon crypt_spiral: the central vault of the last floor (30-34 m square)",
   "_doc": "Stream E. End boss of the crypt spiral. P1 'Vespers': a frontal scythe for the tank, spread bells, and a line-of-sight Dirge you hide from behind the four pillars (each pillar survives two Dirges, so the room runs out of cover). P2 at 65% 'The Procession': he raises a ward and calls the dead; the ward only breaks when all four candle stands are lit, and he tries to SNUFF them with an interruptible breath. P3 'Unhallowed' is a new, shorter health bar: the cracked floor caves in (pits that stay), a three-player stack, a sweeping spiral, and safe circles in the candlelight. Hard enrage at 5.5 minutes. Objects sit inside the 30 m vault (offsets within 12 m of its centre).",
+  "party": "Solo: very hard — the Rite of Ash stack needs 3 and the candles must be lit while adds chase you. 2-3: playable, stack takes extra damage at 2. 5: intended. M5 scaling: Rite of Ash need = min(3, party); procession adds by party; candle stands 4 -> 3 at two players.",
   "hpMult": 4,
   "arena": {
     "radius": 17,

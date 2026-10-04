@@ -66,8 +66,14 @@ export function basic(s, step) {
   const castsOrShoots = w && (isStaff(w) || w.ranged);   // a staff, a wand, a bow: everything else (a quarterstaff too) swings
   if (castsOrShoots) {
     s.fs.rangedAttack(1.0, step);
-    s.tp.swing.mainReady = 0; s.tp.swing.readySince = -10; s.tp.swing.mainStep = step; s.tp.swing.lastAt = s.room.clock.now();
-    s.room.run(() => s.room.combat.attack(s.tp, { held: 1.0 }));
+    const plan = s.tp.derived.swing?.main;
+    // the oracle is the moment of release: a held weapon releases at once, a click weapon after its
+    // wind-up — so the click ones are resolved directly, as resolveSwing is for a sword
+    if (plan?.hold) {
+      s.tp.swing.mainReady = 0; s.tp.swing.readySince = -10; s.tp.swing.mainStep = step; s.tp.swing.lastAt = s.room.clock.now();
+      s.room.run(() => s.room.combat.attack(s.tp, { held: 1.0 }));
+    } else if (w.castElement && w.ranged) s.room.run(() => s.room.combat.resolveWand(s.tp, w, step));
+    else s.room.run(() => s.room.combat.resolveArrow(s.tp, w, plan?.power ?? 1, step));
   } else {
     O.farholdSwing(s.F, s.ff, s.control, s.fp, 'main', step);
     s.room.run(() => s.room.combat.resolveSwing(s.tp, 'main', step, s.tp.equipment.weapon));

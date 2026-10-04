@@ -1,0 +1,192 @@
+{
+  "_doc": "Stream E (M2). Quests for zone 'redcliff' (The Redcliff Frontier). Format: data/quests/README.md. Rewards: xp = share of a level's XP at the quest level, gold = multiple of a kill's gold; item.tier rolls at your level. `killRare` {zone, slot} names the zone's rare by slot (data/provinces/rares.json). Story-chain quests carry `story: n` (data/quests/province.json).",
+  "zone": "redcliff",
+  "npcs": {
+    "commander_hild": {
+      "name": "Commander Hild Barrowman",
+      "role": "guard",
+      "at": "Redcliff Fort",
+      "greeting": "Redcliff holds. Barely. Ask again tomorrow."
+    },
+    "farmer_wat": {
+      "name": "Wat of Cinder Farm",
+      "role": "farmer",
+      "at": "Cinder Farm",
+      "greeting": "They burned the barn twice. I've stopped building barns. I've started building grudges."
+    },
+    "quartermaster_pike": {
+      "name": "Quartermaster Pike",
+      "role": "trader",
+      "at": "Redcliff",
+      "greeting": "Arrows, bandages, and coffins. Two of those sell well."
+    },
+    "scout_orla": {
+      "name": "Scout Tamsin",
+      "role": "scout",
+      "at": "smugglers_cellar",
+      "greeting": "Shh. Smugglers. And worse than smugglers. Cultists. Who smuggle."
+    }
+  },
+  "quests": [
+    {
+      "id": "flags_over_redcliff",
+      "name": "Flags over Redcliff",
+      "level": 6,
+      "giver": "commander_hild",
+      "story": 9,
+      "offer": "The warden says you can fight. Good. Warband raiders and their pet fire-imps are burning the frontier farms. Burn back.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "cinder_imp",
+          "count": 6,
+          "where": "the burning farms",
+          "text": "Cinder imps"
+        },
+        {
+          "kind": "kill",
+          "type": "road_brigand",
+          "count": 6,
+          "where": "the raiders' camps",
+          "text": "Raiders"
+        }
+      ],
+      "done": "The farms will rebuild. The raiders came from Blackthorn Scar. That's where this ends.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      },
+      "next": "into_the_scar"
+    },
+    {
+      "id": "cinder_farm",
+      "name": "Cinder Farm",
+      "level": 6,
+      "giver": "farmer_wat",
+      "offer": "Hyenas came in after the fire and now they think the farm's theirs. It's mine. Mostly ash, but mine.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "crag_hyena",
+          "count": 6,
+          "where": "around Cinder Farm",
+          "text": "Crag hyenas"
+        }
+      ],
+      "done": "Thank you. I'll name a barn after you. When I build one.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 7
+      }
+    },
+    {
+      "id": "supply_run",
+      "name": "Supply Run",
+      "level": 6,
+      "giver": "quartermaster_pike",
+      "offer": "Bandages to the fort. The road's lively. Don't drop them; they're the clean ones.",
+      "steps": [
+        {
+          "kind": "deliver",
+          "item": "Crate of bandages",
+          "npc": "commander_hild",
+          "text": "Bring the bandages to Commander Hild"
+        }
+      ],
+      "done": "Clean bandages! Somebody hug the quartermaster. Not me.",
+      "reward": {
+        "xp": 0.35,
+        "gold": 6
+      }
+    },
+    {
+      "id": "cellar_cultists",
+      "name": "Cellar Cultists",
+      "level": 7,
+      "giver": "scout_orla",
+      "offer": "There's a cellar under the burned farm where cultists meet. Sky cultists, they call themselves. Mostly they shout at clouds.",
+      "steps": [
+        {
+          "kind": "visit",
+          "vignette": "smugglers_cellar",
+          "text": "Find the smugglers' cellar"
+        },
+        {
+          "kind": "kill",
+          "type": "sky_cultist",
+          "count": 5,
+          "where": "around the cellar",
+          "text": "Sky cultists"
+        }
+      ],
+      "done": "Fewer shouting people. The clouds thank you.",
+      "reward": {
+        "xp": 0.45,
+        "gold": 8,
+        "item": {
+          "tier": "common",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "the_frontier_keep",
+      "name": "The Frontier Keep",
+      "level": 7,
+      "giver": "commander_hild",
+      "group": "a party of 3-5",
+      "offer": "The raiders hold an old keep up the cliffs. Levels on levels of them. Take it apart floor by floor.",
+      "steps": [
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "text": "Take the upper halls",
+          "floor": 1
+        },
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "text": "Defeat the keep's warlord",
+          "boss": true
+        }
+      ],
+      "done": "The cliffs are ours again. Somebody fetch the flag.",
+      "reward": {
+        "xp": 1.2,
+        "gold": 55,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "redcliff_rare",
+      "name": "Wanted: The Red One",
+      "level": 7,
+      "giver": "commander_hild",
+      "offer": "There's a beast on the frontier the raiders themselves are afraid of. That's either good news or very bad news.",
+      "steps": [
+        {
+          "kind": "killRare",
+          "zone": "redcliff",
+          "slot": 0,
+          "text": "The frontier's rare slain"
+        }
+      ],
+      "done": "Good news, then. Excellent.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 26,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      }
+    }
+  ]
+}

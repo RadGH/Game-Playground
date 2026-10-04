@@ -1,0 +1,175 @@
+{
+  "id": "rare_deserter_gutch",
+  "name": "Sergeant Gutch",
+  "tier": "rare",
+  "zone": "gorse_march",
+  "body": "road_brigand",
+  "place": "a deserter who still drills his \"company\" of three men in the burnt barns of the Gorse March",
+  "_doc": "Stream E (M2). A drill sergeant gone bandit. He bellows orders: \"Form line!\" (his men charge in a row of lines), \"Volley!\" (circles on random players), and he must be interrupted when he calls a rally that heals his men. At half health he joins in with a two-handed sweep.",
+  "party": {
+    "solo": "Hard solo: the company keeps coming unless you interrupt.",
+    "small": "Right for 2-3.",
+    "full": "Easy.",
+    "m5": "M5 adds health per extra player and one more copy of the spread/scatter shapes for parties of 4-5; mechanics stay the same."
+  },
+  "hpMult": 1.8,
+  "arena": {
+    "radius": 26
+  },
+  "say": {
+    "pull": [
+      "\"COMPANY! ...Company? Get UP, you lot! We've got visitors!\"",
+      "Sergeant Gutch straightens his filthy tabard. \"Name and rank!\""
+    ],
+    "death": "\"Company... dismissed...\" Sergeant Gutch falls flat on his face.",
+    "reset": "\"As you were!\" Gutch goes back to shouting at his men."
+  },
+  "abilities": {
+    "jab": {
+      "id": "jab",
+      "name": "Pike Jab",
+      "every": [
+        6,
+        8
+      ],
+      "range": 6,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 6,
+          "arc": 0.5,
+          "wind": 1.0,
+          "damage": 1.6
+        }
+      ]
+    },
+    "form_line": {
+      "id": "form_line",
+      "name": "Form Line!",
+      "every": [
+        16,
+        19
+      ],
+      "first": 5,
+      "cast": 0.8,
+      "say": "\"FORM LINE! CHARGE!\" — out of the way of the line!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 20,
+          "w": 2.6,
+          "count": 3,
+          "delay": 0.3,
+          "yaw": "facing",
+          "wind": 1.6,
+          "damage": 1.6
+        }
+      ]
+    },
+    "volley": {
+      "id": "volley",
+      "name": "Volley!",
+      "every": [
+        13,
+        16
+      ],
+      "first": 8,
+      "cast": 0.6,
+      "say": "\"VOLLEY!\"",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3,
+          "count": 3,
+          "delay": 0.25,
+          "wind": 1.4,
+          "damage": 1.3
+        }
+      ]
+    },
+    "rally": {
+      "id": "rally",
+      "name": "On Your Feet!",
+      "every": [
+        22,
+        26
+      ],
+      "first": 9,
+      "cast": 2.5,
+      "interrupt": true,
+      "say": "Gutch bellows a rally — interrupt him!",
+      "onInterrupt": [
+        {
+          "say": "His voice cracks mid-bellow.",
+          "style": "emote"
+        }
+      ],
+      "actions": [
+        {
+          "heal": 0.08
+        },
+        {
+          "adds": {
+            "type": "road_brigand",
+            "count": 1,
+            "radius": 6
+          }
+        }
+      ]
+    },
+    "sweep": {
+      "id": "sweep",
+      "name": "Halberd Sweep",
+      "every": [
+        9,
+        11
+      ],
+      "first": 2,
+      "range": 6,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 6,
+          "arc": 2.4,
+          "wind": 1.2,
+          "damage": 1.9
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Drill",
+      "abilities": [
+        "jab",
+        "form_line",
+        "volley",
+        "rally"
+      ]
+    },
+    {
+      "name": "Front Rank",
+      "at": 0.5,
+      "say": "\"Fine! I'll do it MYSELF!\"",
+      "abilities": [
+        "sweep",
+        "form_line",
+        "volley",
+        "rally"
+      ],
+      "onEnter": [
+        {
+          "adds": {
+            "type": "road_brigand",
+            "count": 2,
+            "radius": 8
+          }
+        }
+      ]
+    }
+  ]
+}

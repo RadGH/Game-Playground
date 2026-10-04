@@ -5,6 +5,7 @@
   "body": "fen_croaker",
   "place": "wilds: the marsh south of Mawehaven; 20-60 min respawn per copy, called out in zone chat",
   "_doc": "Stream E. A RARE: a frog the size of a cart. Its tongue PULLS the farthest player into its mouth range (line + pull), it belly-slams where you stand, and burps a poison cone. At 50% it calls three ordinary croakers out of the reeds.",
+  "party": "Open world rare. Solo: doable; the tongue pulls you into the chomp. 2-3: intended. M5 scaling: health by players tagged; croaker adds 3 -> 2 solo, 4 at five.",
   "hpMult": 1.8,
   "arena": {
     "radius": 24

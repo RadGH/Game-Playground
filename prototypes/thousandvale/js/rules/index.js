@@ -27,7 +27,7 @@ import { makeRng } from './rng.js';
 import { attachEncounters } from './encounter.js';
 
 /** What an arena object is called on a nameplate. */
-const OBJECT_NAMES = { pillar: 'Stone pillar', rock: 'Fallen rock', brazier: 'Brazier', lever: 'Lever', pool: 'Pool' };
+const OBJECT_NAMES = { pillar: 'Stone pillar', rock: 'Fallen rock', brazier: 'Brazier', lever: 'Lever', pool: 'Pool', cracked_floor: 'Cracked floor' };
 import { validTarget, TAB } from './targeting.js';
 import { groundAdapter } from './terrain-read.js';
 import { serializeGear } from './character.js';
@@ -99,7 +99,7 @@ export function createRules(host, opts = {}) {
       const e = host.spawn({ kind: 'monster', type: def.id, level, x, z, rank });
       return e?.r?.unit || null;
     },
-    spawnObject: o => host.spawn({ kind: 'object', type: o.type, name: OBJECT_NAMES[o.type] || o.type, x: o.x, z: o.z, data: { rules: true, key: o.key } }),
+    spawnObject: o => host.spawn({ kind: 'object', type: o.type, name: o.spec?.name || OBJECT_NAMES[o.type] || o.type, x: o.x, z: o.z, data: { rules: true, key: o.key } }),
     objState: (o, state, extra) => {
       const ent = host.objState ? host.entities.get(o.id) : null;
       if (!ent || ent.kind !== 'object') return false;
@@ -267,9 +267,18 @@ export function createRules(host, opts = {}) {
       } else if (e.kind === 'monster') {
         const def = engine.enemyDef(TYPE_ALIASES[e.type] || e.type) || engine.enemyDef('moor_hound');
         const rk = rankFor(e, def);
-        const unit = spawnMonster(field, def, e.level || 1, e.x, e.z, { id: e.id, ...rk });
+        // a monster that runs an encounter script: the script's phases, name and mechanics are its only
+        // ones — no random rank modifiers, none of its Farhold body's own boss phases (E's asks 3/4)
+        const script = enc.scriptFor({ defId: def.id, boss: !!rk.boss, rank: rk.rank, encounterId: e.data?.encounter || null });
+        if (script) rk.modifiers = [];
+        const unit = spawnMonster(field, def, e.level || 1, e.x, e.z, { id: e.id, ...rk, name: script?.name || null });
         unit.encounterId = e.data?.encounter || null;
         if (rk.boss) unit.boss = true;
+        if (script) {
+          unit.phases = null; unit.spawns = null;
+          // the room has not described this entity to anyone yet (info goes out with the next snapshot)
+          e.name = script.name || e.name;
+        }
         e.r.unit = unit;
         e.setMax(unit.maxHp, 0);
         e.setHp(unit.hp);

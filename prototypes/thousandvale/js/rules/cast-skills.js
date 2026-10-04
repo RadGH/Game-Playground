@@ -1008,7 +1008,7 @@ export function echoFrom(combat, rt, ch, plan, a, o, share, intent = {}) {
   const mult = plan.mult * share;
   const opts = { power: mult, element: plan.element, skill: plan.skill?.id, rules: plan.rules ? { ...plan.rules, penBehind: plan.rules.penBehind || (plan.rules.afterimagePen ? 1 : 0) } : null, applyStatus: combat.hookFor(ch), kind: 'echo' };
   rt.withCaster(ch, () => {
-    if (plan.kind === 'melee') field.strike({ x: o.x, z: o.z, yaw: o.yaw }, ch, { reach: plan.reach, arc: plan.arc, ...opts });
+    if (plan.kind === 'melee') field.strike({ x: o.x, z: o.z, yaw: o.yaw }, ch, { reach: plan.reach, arc: plan.arc, strike: ch.lastStrike || null, ...opts });
     else if (plan.kind === 'around') field.strikeArea(o.x, o.z, plan.radius || 4, ch, { falloff: 0.6, ...opts });
     else if (plan.kind === 'ground' && plan.at) field.strikeArea(plan.at.x, plan.at.z, plan.radius || 4, ch, { falloff: 0.6, ...opts });
     else {

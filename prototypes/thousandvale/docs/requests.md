@@ -356,3 +356,25 @@ scatter (trees/rocks) off a vignette's `radius`, or move them and tell me.
 `data/encounters/specials.json` `beast/skirmisher` has an ability named **"Maul"** — on the convention-9 banned list (a WoW druid
 skill). tests/E/content.test.js checks only my files, so it did not fail; please rename (e.g. "Savage Bite"). The list I check is
 `BANNED` in tests/E/content.test.js (conv. 9 + PLAN §2/§16 + "muster", plus "ember"/"veil" inside words) — feel free to import it.
+
+## B (World bake) -> A, E, D — 2026-10-04: zone sites published (test zone re-baked, heights unchanged)
+`data/zones/test/terrain.bin` `meta.sites` now carries (heights/water/biomes identical — `inputHash` still `29b45356`,
+so E's vignette placements stay valid; new `meta.sitesVersion: 2`):
+- `settlement` + **`radius`**: Torborhold village 65, Wamonhold hamlet 40, Mawehaven hamlet 40.
+- **`{type:'dungeon', id:'door_1', name:'Barrow entrance', x:863, z:1167, yaw:2.077}`** — 230 m west of the town, dug into rising
+  ground, a flat dry apron 8 m in front. `yaw` = the way the doorway faces (protocol convention `atan2(dx, dz)`): stand at
+  `(x + sin(yaw)*4, z + cos(yaw)*4)` to look into it. **D**: draw the barrow mouth facing `yaw`.
+- **`{type:'event', id:'event_grandmother_skein', x:731, z:552, r:40}`** — 105 m from Mawehaven, an 80 m disc of open, dry,
+  walkable ground under 18° (checked every 4 m).
+- **`{type:'camp', id:'elite_hobb_gallowsby', x:1618, z:746, r:25}`** — 88 m from Fitockpi Ford, same checks.
+All three keep clear of every vignette disc in `data/vignettes/placements/test.json` (test in tests/B). Checked: A's
+`findTown` → r 65, `findDoor` → the baked door. Dev unit restarted. Placement code: `tools/lib/zone-sites.mjs`
+(`addZoneSites`, `placeDoor`, `placeOpenSite`, `discIsOpen`) — the M1 bake uses the same.
+
+## C (Combat core) -> E (Content), 2026-10-04 — your asks are done
+1. Type specials: `index.specials` may be a list (now `["specials.json", "specials_torbor.json"]`); `types` merge and win over
+   `family/role` in `specialsFor`; `validateEncounters` checks them. Your TODO test turned real and is green (tests/E 33/33).
+2. Arena objects spawn with `spec.name` ("Hay rick", "Egg sac", …); `cracked_floor` is non-blocking with no health.
+3. A monster that runs a script rolls no random modifiers and drops its Farhold body's own `phases`/`spawns`.
+4. Its name is the script's `name` (unit and entity) — nameplates read "Grandmother Skein".
+5. "Maul" renamed "Savage Bite" (`savage_bite`); tests/C/room-rules now checks stream C's encounter files against your BANNED list.

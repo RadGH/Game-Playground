@@ -1,0 +1,187 @@
+{
+  "_doc": "Stream E (M2). Quests for zone 'hollin_pass' (Hollin Pass). Format: data/quests/README.md. Rewards: xp = share of a level's XP at the quest level, gold = multiple of a kill's gold; item.tier rolls at your level. `killRare` {zone, slot} names the zone's rare by slot (data/provinces/rares.json). Story-chain quests carry `story: n` (data/quests/province.json).",
+  "zone": "hollin_pass",
+  "npcs": {
+    "tollkeeper_brann": {
+      "name": "Tollkeeper Brann",
+      "role": "elder",
+      "at": "Hollin Toll",
+      "greeting": "Toll's a copper. For the road, not for me. Mostly not for me."
+    },
+    "goatherd_isolde": {
+      "name": "Isolde the goatherd",
+      "role": "farmer",
+      "at": "Scree End",
+      "greeting": "Mind the goats. They don't mind you."
+    },
+    "fort_sergeant": {
+      "name": "Sergeant Kettle",
+      "role": "guard",
+      "at": "Hollin Toll Fort",
+      "greeting": "The fort guards the pass. The pass guards the fort. Nobody guards the sergeant."
+    },
+    "climber_cadoc": {
+      "name": "Cadoc the climber",
+      "role": "scout",
+      "at": "Scree End",
+      "greeting": "I climb things. Mostly to get away from other things."
+    }
+  },
+  "quests": [
+    {
+      "id": "snow_in_the_pass",
+      "name": "Snow in the Pass",
+      "level": 6,
+      "giver": "tollkeeper_brann",
+      "offer": "Frost stalkers came down early. They've been taking travellers at the switchbacks. I can't take a toll off a dead man. Well, I can, but it's rude.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "frost_stalker",
+          "count": 6,
+          "where": "the switchbacks",
+          "text": "Frost stalkers"
+        }
+      ],
+      "done": "The pass is open. The tolls are flowing. Everyone is happy except the stalkers.",
+      "reward": {
+        "xp": 0.45,
+        "gold": 9,
+        "item": {
+          "tier": "common",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "hyenas_and_goats",
+      "name": "Hyenas and Goats",
+      "level": 6,
+      "giver": "goatherd_isolde",
+      "offer": "Crag hyenas laugh at my goats. Then they eat my goats. I'd rather they just laughed.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "crag_hyena",
+          "count": 6,
+          "where": "the high pastures",
+          "text": "Crag hyenas"
+        }
+      ],
+      "done": "The goats are safe. They don't thank you; they're goats.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 7
+      }
+    },
+    {
+      "id": "beetles_on_the_road",
+      "name": "Beetles on the Road",
+      "level": 6,
+      "giver": "fort_sergeant",
+      "offer": "Ironback beetles keep rolling rocks onto the road. On purpose. I think. I hope not on purpose.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "ironback_beetle",
+          "count": 5,
+          "where": "the toll road",
+          "text": "Ironback beetles"
+        }
+      ],
+      "done": "Road's clear. If they were doing it on purpose, they'll stop now.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 7
+      },
+      "next": "rats_in_the_lift"
+    },
+    {
+      "id": "brigand_toll",
+      "name": "The Other Toll",
+      "level": 7,
+      "giver": "tollkeeper_brann",
+      "offer": "There's a second toll further up. Unofficial. Brigands. They charge more than me, which is the real crime.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "road_brigand",
+          "count": 6,
+          "where": "the upper pass",
+          "text": "Brigands"
+        },
+        {
+          "kind": "kill",
+          "type": "brigand_archer",
+          "count": 3,
+          "where": "the cliffs above",
+          "text": "Archers"
+        }
+      ],
+      "done": "One toll on Hollin Pass, as it should be. Mine.",
+      "reward": {
+        "xp": 0.5,
+        "gold": 10,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "the_old_tower",
+      "name": "The Old Tower",
+      "level": 8,
+      "giver": "climber_cadoc",
+      "group": "a party of 3-5",
+      "offer": "There's a tower up on the shoulder of the pass, older than the fort. Something keeps a lamp lit at the top. Climb it.",
+      "steps": [
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "text": "Reach the middle floors",
+          "floor": 1
+        },
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "text": "Reach the top",
+          "boss": true
+        }
+      ],
+      "done": "So that's what was up there. I'll stick to climbing rocks.",
+      "reward": {
+        "xp": 1.2,
+        "gold": 55,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "hollin_rare",
+      "name": "The Pass's Old Terror",
+      "level": 7,
+      "giver": "fort_sergeant",
+      "offer": "There's a beast up the pass the goats won't go near. Goats go near everything.",
+      "steps": [
+        {
+          "kind": "killRare",
+          "zone": "hollin_pass",
+          "slot": 0,
+          "text": "The pass's rare slain"
+        }
+      ],
+      "done": "The goats are going near it now. Mostly to sniff it.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 26,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      }
+    }
+  ]
+}

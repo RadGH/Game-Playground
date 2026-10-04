@@ -1,0 +1,226 @@
+{
+  "id": "mb_old_murkfin",
+  "name": "Old Murkfin",
+  "tier": "miniboss",
+  "body": "silt_lurker",
+  "place": "dungeon flooded_cistern set A: floor 2 mini-boss (24 m settling tank)",
+  "_doc": "Stream E (M2). A blind bottom-feeder grown fat in the settling tank. It hunts by SOUND: its Silt Cloud blinds the room and it charges whoever it hears — the charge breaks the rotten pump housings (cover). Every so often it stirs the silt into a whirlpool that pulls everyone in (run out). At 60% the tank drains and it flops about, calling silt crawlers; kill them to make it dive back (shield drops). Hard enrage 5 min.",
+  "party": "Solo: whirlpool + charge are dodgeable; the crawler phase is long alone. 2-3: ideal. 5: crawlers die fast; M5 should add crawlers per player (+1 each) and ~x1.5 health.",
+  "hpMult": 2.3,
+  "arena": {
+    "radius": 12,
+    "objects": [
+      {
+        "id": "pump_a",
+        "type": "pillar",
+        "name": "Pump housing",
+        "x": -6,
+        "z": -5,
+        "r": 1.2,
+        "hp": 2
+      },
+      {
+        "id": "pump_b",
+        "type": "pillar",
+        "name": "Pump housing",
+        "x": 6,
+        "z": -5,
+        "r": 1.2,
+        "hp": 2
+      },
+      {
+        "id": "pump_c",
+        "type": "pillar",
+        "name": "Pump housing",
+        "x": 0,
+        "z": 7,
+        "r": 1.2,
+        "hp": 2
+      }
+    ]
+  },
+  "say": {
+    "pull": [
+      "Something enormous stirs in the silt. Two milky eyes the size of plates turn toward the noise you made.",
+      "Old Murkfin rises out of the mud, whiskers twitching."
+    ],
+    "death": "Old Murkfin sinks back into the silt, and this time it does not come up.",
+    "reset": "The silt settles. Somewhere under it, Old Murkfin waits for a sound."
+  },
+  "enrage": {
+    "seconds": 300,
+    "damage": 2.5,
+    "say": "Old Murkfin goes into a blind thrashing frenzy!"
+  },
+  "abilities": {
+    "snap": {
+      "id": "snap",
+      "name": "Whisker Snap",
+      "every": [
+        6,
+        8
+      ],
+      "range": 5,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 4.8,
+          "arc": 1.5,
+          "wind": 1.0,
+          "damage": 1.6
+        }
+      ]
+    },
+    "silt_charge": {
+      "id": "silt_charge",
+      "name": "Blind Charge",
+      "every": [
+        12,
+        15
+      ],
+      "first": 5,
+      "range": 20,
+      "cast": 0.8,
+      "say": "Old Murkfin hears {target} — it charges! Don't stand in front of a pump unless you want it gone.",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 16,
+          "w": 3.2,
+          "knock": 3,
+          "breaks": true,
+          "wind": 1.4,
+          "damage": 2.0
+        }
+      ]
+    },
+    "whirlpool": {
+      "id": "whirlpool",
+      "name": "Silt Whirlpool",
+      "every": [
+        20,
+        24
+      ],
+      "first": 10,
+      "cast": 1,
+      "say": "The silt starts to swirl — swim OUT of the whirlpool!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 7,
+          "knock": 4,
+          "pull": true,
+          "wind": 1.8,
+          "damage": 1.4
+        },
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 3,
+          "after": 1.8,
+          "wind": 1.8,
+          "damage": 2.2
+        }
+      ]
+    },
+    "mudspit": {
+      "id": "mudspit",
+      "name": "Mud Spit",
+      "every": [
+        12,
+        15
+      ],
+      "first": 3,
+      "cast": 0.5,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 2.4,
+          "count": 3,
+          "delay": 0.35,
+          "status": "weaken",
+          "wind": 1.3,
+          "damage": 1.1
+        }
+      ]
+    },
+    "flop": {
+      "id": "flop",
+      "name": "Flop",
+      "every": [
+        9,
+        11
+      ],
+      "range": 10,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "target",
+          "r": 3.2,
+          "knock": 2,
+          "wind": 1.2,
+          "damage": 1.7
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Hunting by Sound",
+      "abilities": [
+        "snap",
+        "silt_charge",
+        "whirlpool",
+        "mudspit"
+      ]
+    },
+    {
+      "name": "Stranded",
+      "at": 0.6,
+      "say": "The tank drains! Old Murkfin flops in the mud and calls its brood!",
+      "shieldWhileAdds": true,
+      "shieldDown": "The last crawler dies — Old Murkfin dives back into the deep silt, wide open!",
+      "abilities": [
+        "flop",
+        "mudspit"
+      ],
+      "onEnter": [
+        {
+          "shield": true
+        },
+        {
+          "adds": {
+            "type": "bog_slime",
+            "count": 3,
+            "radius": 7
+          }
+        }
+      ]
+    },
+    {
+      "name": "Deep Silt",
+      "at": 0.35,
+      "say": "It is angry now, and it can hear EVERYTHING.",
+      "abilities": [
+        "snap",
+        "silt_charge",
+        "whirlpool",
+        "mudspit"
+      ],
+      "onEnter": [
+        {
+          "modifier": {
+            "id": "deep_silt",
+            "dmg": 1.2,
+            "attackEvery": 0.85,
+            "exact": true
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,188 @@
+{
+  "_doc": "Stream E (M2). Quests for zone 'millbrook' (Millbrook Vale). Format: data/quests/README.md. Rewards: xp = share of a level's XP at the quest level, gold = multiple of a kill's gold; item.tier rolls at your level. `killRare` {zone, slot} names the zone's rare by slot (data/provinces/rares.json). Story-chain quests carry `story: n` (data/quests/province.json).",
+  "zone": "millbrook",
+  "npcs": {
+    "reeve_garrick": {
+      "name": "Reeve Garrick Pike",
+      "role": "elder",
+      "at": "Millbrook",
+      "greeting": "Three mills, one river, endless arguments about whose water it is."
+    },
+    "goodwife_edda": {
+      "name": "Goodwife Edda",
+      "role": "farmer",
+      "at": "Three Wheels",
+      "greeting": "If you've come about the boar, get in line behind the boar."
+    },
+    "castellan_oswy": {
+      "name": "Castellan Oswy",
+      "role": "guard",
+      "at": "Millbrook Keep",
+      "greeting": "The keep is very secure. Mostly against us getting out."
+    },
+    "tinker_cadoc": {
+      "name": "Cadoc the tinker",
+      "role": "trader",
+      "at": "overturned_cart",
+      "greeting": "Pots mended, knives sharpened, carts un-overturned. Usually."
+    }
+  },
+  "quests": [
+    {
+      "id": "millbrook_wheels",
+      "name": "Millbrook Wheels",
+      "level": 3,
+      "giver": "reeve_garrick",
+      "story": 4,
+      "offer": "Halsbridge says you clear roads. Ours is blocked by boars who think it's theirs. It's a strong argument, they're very big.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "thicket_boar",
+          "count": 6,
+          "where": "the lanes between the mills",
+          "text": "Thicket boars"
+        }
+      ],
+      "done": "The carts roll again. Off you go to Ashcombe, they've a ruin that needs looking at.",
+      "reward": {
+        "xp": 0.45,
+        "gold": 8,
+        "item": {
+          "tier": "common",
+          "slot": "any"
+        }
+      },
+      "next": "the_broken_keep"
+    },
+    {
+      "id": "moth_eaten",
+      "name": "Moth-Eaten",
+      "level": 4,
+      "giver": "goodwife_edda",
+      "offer": "Carrion moths in the grain loft. They don't eat grain. They eat whatever died in the grain. Which is worse.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "carrion_moth",
+          "count": 6,
+          "where": "the grain lofts of Three Wheels",
+          "text": "Carrion moths"
+        }
+      ],
+      "done": "Lovely. Now I just have to find out what died.",
+      "reward": {
+        "xp": 0.35,
+        "gold": 5
+      },
+      "next": "burnt_barns"
+    },
+    {
+      "id": "the_tinkers_tools",
+      "name": "The Tinker's Tools",
+      "level": 3,
+      "giver": "tinker_cadoc",
+      "offer": "My tools went flying when the cart went over. Brigands picked them up. Brigands can't even use a solder iron.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "road_brigand",
+          "count": 4,
+          "where": "near the overturned cart",
+          "text": "Brigands"
+        },
+        {
+          "kind": "deliver",
+          "item": "Tinker's tool roll",
+          "npc": "tinker_cadoc",
+          "text": "Return the tools to Cadoc"
+        }
+      ],
+      "done": "My good pliers! I'll mend anything you like. Within reason. Not your love life.",
+      "reward": {
+        "xp": 0.35,
+        "gold": 6,
+        "item": {
+          "tier": "common",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "keep_watch",
+      "name": "Keep Watch",
+      "level": 4,
+      "giver": "castellan_oswy",
+      "offer": "My sentries keep seeing hounds circling the keep at night. My sentries also keep seeing their own feet. Go look.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "moor_hound",
+          "count": 8,
+          "where": "around Millbrook Keep",
+          "text": "Hounds around the keep"
+        }
+      ],
+      "done": "So they were real. I owe the sentries an apology. I won't give one.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 6
+      }
+    },
+    {
+      "id": "below_three_wheels",
+      "name": "Below Three Wheels",
+      "level": 5,
+      "giver": "reeve_garrick",
+      "group": "a party of 3-5",
+      "offer": "A millrace collapsed into old mine workings. Something came out. Go in and finish the job the collapse started.",
+      "steps": [
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "text": "Reach the lower workings",
+          "floor": 1
+        },
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "text": "Defeat what waits at the bottom",
+          "boss": true
+        }
+      ],
+      "done": "The millrace is ours again. Mostly ours. A bit shared with the bats.",
+      "reward": {
+        "xp": 1.0,
+        "gold": 40,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "millbrook_rare",
+      "name": "The Vale's Worst Neighbour",
+      "level": 5,
+      "giver": "goodwife_edda",
+      "offer": "There's one beast every farmer in the vale curses by name. Make the name a memory.",
+      "steps": [
+        {
+          "kind": "killRare",
+          "zone": "millbrook",
+          "slot": 0,
+          "text": "The vale's rare beast slain"
+        }
+      ],
+      "done": "We'll drink to you at harvest. We'll drink to anything at harvest, but mainly you.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 20,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      }
+    }
+  ]
+}

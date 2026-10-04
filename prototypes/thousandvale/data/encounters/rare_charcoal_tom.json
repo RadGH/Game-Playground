@@ -1,0 +1,166 @@
+{
+  "id": "rare_charcoal_tom",
+  "name": "Charcoal Tom",
+  "tier": "rare",
+  "zone": "wychwood",
+  "body": "road_brigand",
+  "place": "runs the charcoal clamps at the burners' camp and burns out anyone who cuts wood on \"his\" side",
+  "_doc": "Stream E (M2). A charcoal burner gone bad. He kicks open clamps (fire pools that last), throws a burning brand that follows a player (run it away), and at half health sets the whole clearing alight: rings of fire marching outward — step through the gaps.",
+  "party": {
+    "solo": "Solo-able; watch your feet.",
+    "small": "Easy.",
+    "full": "Easy.",
+    "m5": "M5 adds health per extra player and one more copy of the spread/scatter shapes for parties of 4-5; mechanics stay the same."
+  },
+  "hpMult": 1.8,
+  "arena": {
+    "radius": 24
+  },
+  "say": {
+    "pull": [
+      "\"That's MY wood you're standing on.\"",
+      "Charcoal Tom spits on his hands and picks up a burning log."
+    ],
+    "death": "Charcoal Tom falls into his own ash pile, coughing.",
+    "reset": "Tom goes back to tending his clamps."
+  },
+  "abilities": {
+    "log": {
+      "id": "log",
+      "name": "Burning Log",
+      "every": [
+        6,
+        8
+      ],
+      "range": 4.5,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 4.2,
+          "arc": 1.6,
+          "element": "fire",
+          "status": "burn",
+          "wind": 1.0,
+          "damage": 1.5
+        }
+      ]
+    },
+    "clamp": {
+      "id": "clamp",
+      "name": "Kick the Clamp",
+      "every": [
+        12,
+        15
+      ],
+      "first": 5,
+      "cast": 0.4,
+      "say": "Tom kicks a clamp open at {target}!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "target",
+          "r": 3,
+          "element": "fire",
+          "leave": {
+            "type": "pool",
+            "name": "Smoking clamp",
+            "r": 2.8,
+            "every": 1,
+            "seconds": 16,
+            "damage": 0.3,
+            "element": "fire"
+          },
+          "wind": 1.3,
+          "damage": 1.2
+        }
+      ]
+    },
+    "brand": {
+      "id": "brand",
+      "name": "Thrown Brand",
+      "every": [
+        16,
+        19
+      ],
+      "first": 8,
+      "cast": 0.6,
+      "say": "A brand sticks to {target} — get it away from the others!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3.2,
+          "follow": true,
+          "element": "fire",
+          "status": "burn",
+          "wind": 3,
+          "damage": 1.5
+        }
+      ]
+    },
+    "wildfire": {
+      "id": "wildfire",
+      "name": "Wildfire",
+      "every": [
+        18,
+        22
+      ],
+      "first": 3,
+      "cast": 0.8,
+      "say": "\"Burn it all!\" Rings of fire roll out from Tom!",
+      "telegraphs": [
+        {
+          "shape": "donut",
+          "at": "self",
+          "r": 6,
+          "r2": 2,
+          "element": "fire",
+          "wind": 1.4,
+          "damage": 1.6
+        },
+        {
+          "shape": "donut",
+          "at": "self",
+          "r": 11,
+          "r2": 7,
+          "after": 1.2,
+          "element": "fire",
+          "wind": 1.4,
+          "damage": 1.6
+        },
+        {
+          "shape": "donut",
+          "at": "self",
+          "r": 16,
+          "r2": 12,
+          "after": 2.4,
+          "element": "fire",
+          "wind": 1.4,
+          "damage": 1.6
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Tending",
+      "abilities": [
+        "log",
+        "clamp",
+        "brand"
+      ]
+    },
+    {
+      "name": "Wildfire",
+      "at": 0.5,
+      "say": "Tom tips over every clamp at once!",
+      "abilities": [
+        "log",
+        "wildfire",
+        "clamp",
+        "brand"
+      ]
+    }
+  ]
+}

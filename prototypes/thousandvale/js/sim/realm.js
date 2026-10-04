@@ -45,16 +45,63 @@ export function townGate(terrain, town, door) {
   return walkableNear(terrain, town.x, town.z, town.r + 6, a);
 }
 
-/** Wolf camps in rings outside the town, none near the door. */
-export function wildsCamps(terrain, town, door) {
+/**
+ * Monster camps in rings outside the town, none near the door. `mix` = the zone sheet's camp list
+ * (stream E: data/provinces/<p>.json zones.<zone>.camps: {type, level:[lo,hi], count:[lo,hi], with?});
+ * without one, wolves.
+ */
+export function wildsCamps(terrain, town, door, mix = null) {
   const out = [];
-  for (let i = 0; i < 8; i++) {
-    const a = i * 0.79 + 0.3, d = town.r + 50 + (i % 4) * 35;
+  const n = mix && mix.length ? Math.max(8, mix.length * 2) : 8;
+  for (let i = 0; i < n; i++) {
+    const a = i * (6.283 / n) + 0.3, d = town.r + 50 + (i % 4) * 35 + Math.floor(i / 8) * 60;
     let p = walkableNear(terrain, town.x, town.z, d, a);
     if (Math.hypot(p.x - door.x, p.z - door.z) < 30) p = walkableNear(terrain, town.x, town.z, d + 40, a + 0.4);
-    out.push({ type: 'wolf', level: 1 + (i >> 1), x: p.x, z: p.z, count: 3 + (i % 2), radius: 10, respawnMs: 30000 });
+    if (mix && mix.length) {
+      const m = mix[i % mix.length];
+      const [l0, l1] = Array.isArray(m.level) ? m.level : [m.level || 1, m.level || 1];
+      const [c0, c1] = Array.isArray(m.count) ? m.count : [m.count || 3, m.count || 3];
+      const level = l0 + (Math.floor(i / mix.length) % (l1 - l0 + 1)), count = c0 + (i % (c1 - c0 + 1));
+      out.push({ type: m.type, level, x: p.x, z: p.z, count, radius: 10, respawnMs: 30000 });
+      if (m.with) out.push({ type: m.with, level, x: p.x + 4, z: p.z + 3, count: Math.max(1, count >> 1), radius: 6, respawnMs: 30000 });
+    } else out.push({ type: 'wolf', level: 1 + (i >> 1), x: p.x, z: p.z, count: 3 + (i % 2), radius: 10, respawnMs: 30000 });
   }
   // a guard pack at the dungeon door
-  out.push({ type: 'wolf', level: 3, x: door.x + 14, z: door.z + 6, count: 2, radius: 5, respawnMs: 45000 });
+  const g = mix && mix.length ? mix[0] : { type: 'wolf' };
+  out.push({ type: g.type, level: 3, x: door.x + 14, z: door.z + 6, count: 2, radius: 5, respawnMs: 45000 });
+  return out;
+}
+
+/**
+ * The zone's named encounters (stream E's asks, zone `test`): the elite's camp at the ford, two roaming rares,
+ * the zone event boss on its event site. Positions come from the bake's sites when B publishes them
+ * (`{type:'camp'|'event', id}`), else from first guesses near the named settlements. `info` = encounter id ->
+ * { name, body } (the script files). Each camp carries `encounter` + `name` onto the monster it spawns.
+ */
+export const ZONE_ENCOUNTERS = {
+  test: [
+    { id: 'elite_hobb_gallowsby', rank: 'elite', level: 5, near: { site: 'Fitockpi Ford' }, respawnMs: 20 * 60000,
+      escort: [{ type: 'road_brigand', count: 2 }, { type: 'brigand_archer', count: 2 }] },
+    { id: 'rare_grisel_thornhide', rank: 'rare', level: 4, near: { between: ['Torborhold', 'Wamonhold'] }, respawnMs: [20 * 60000, 60 * 60000] },
+    { id: 'rare_sallowmaw', rank: 'rare', level: 5, near: { site: 'Mawehaven', dz: 110 }, respawnMs: [20 * 60000, 60 * 60000] },
+    { id: 'event_grandmother_skein', rank: 'boss', level: 7, near: { site: 'Mawehaven', dx: -100 }, respawnMs: 30 * 60000 },
+  ],
+};
+export function zoneEncounterCamps(terrain, zone, info = {}) {
+  const sites = terrain.reader?.meta?.sites || [];
+  const byName = n => sites.find(s => s.name === n);
+  const out = [];
+  for (const enc of ZONE_ENCOUNTERS[zone] || []) {
+    let p = null;
+    const placed = sites.find(s => s.id === enc.id && (s.type === 'camp' || s.type === 'event'));
+    if (placed) p = { x: placed.x, z: placed.z };
+    else if (enc.near.site && byName(enc.near.site)) { const s = byName(enc.near.site); p = { x: s.x + (enc.near.dx || 0), z: s.z + (enc.near.dz || 0) }; }
+    else if (enc.near.between) { const [a, b] = enc.near.between.map(byName); if (a && b) p = { x: (a.x + b.x) / 2, z: (a.z + b.z) / 2 }; }
+    if (!p) continue;
+    if (terrain.walkable && !terrain.walkable(p.x, p.z)) p = walkableNear(terrain, p.x, p.z, 8, 0);
+    const meta = info[enc.id] || {};
+    out.push({ type: meta.body || 'wolf', level: enc.level, x: p.x, z: p.z, count: 1, radius: 2, rank: enc.rank, encounter: enc.id, name: meta.name || null, respawnMs: enc.respawnMs });
+    for (const e of enc.escort || []) out.push({ type: e.type, level: Math.max(1, enc.level - 2), x: p.x + 5, z: p.z + 3, count: e.count, radius: 7, respawnMs: enc.respawnMs });
+  }
   return out;
 }

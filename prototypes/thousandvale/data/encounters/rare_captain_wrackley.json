@@ -1,0 +1,152 @@
+{
+  "id": "rare_captain_wrackley",
+  "name": "Captain Wrackley",
+  "tier": "rare",
+  "zone": "saltmouth",
+  "body": "brigand_captain",
+  "place": "holds a wrecked ship on the rocks south of Saltmouth with his wreckers",
+  "_doc": "Stream E (M2). A wrecker captain who lights false beacons. He fires a little swivel gun in a straight line, throws pitch that leaves burning pools, and at half health his crew come over the rail and he shouts \"Broadside!\": three lines in a fan, every few seconds.",
+  "party": {
+    "solo": "Hard solo once the crew arrives.",
+    "small": "Right for 2-3: one holds the crew.",
+    "full": "Easy.",
+    "m5": "M5 adds health per extra player and one more copy of the spread/scatter shapes for parties of 4-5; mechanics stay the same."
+  },
+  "hpMult": 1.9,
+  "arena": {
+    "radius": 26
+  },
+  "say": {
+    "pull": [
+      "\"Ship ahoy! Oh. It's just you. Even better, you float less.\"",
+      "Wrackley grins with every one of his six teeth."
+    ],
+    "death": "\"Douse... the lights...\" Captain Wrackley topples into the surf.",
+    "reset": "Wrackley goes back to polishing his false lantern."
+  },
+  "abilities": {
+    "cutlass": {
+      "id": "cutlass",
+      "name": "Cutlass Swing",
+      "every": [
+        6,
+        8
+      ],
+      "range": 5,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 4.5,
+          "arc": 1.9,
+          "wind": 1.0,
+          "damage": 1.6
+        }
+      ]
+    },
+    "swivel": {
+      "id": "swivel",
+      "name": "Swivel Gun",
+      "every": [
+        12,
+        15
+      ],
+      "first": 4,
+      "cast": 0.8,
+      "say": "\"Light the swivel!\" — out of the line, {target}!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 24,
+          "w": 2,
+          "knock": 3,
+          "wind": 1.3,
+          "damage": 2.0
+        }
+      ]
+    },
+    "pitch": {
+      "id": "pitch",
+      "name": "Pitch Pot",
+      "every": [
+        13,
+        16
+      ],
+      "first": 8,
+      "cast": 0.5,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3,
+          "element": "fire",
+          "status": "burn",
+          "leave": {
+            "type": "pool",
+            "name": "Burning pitch",
+            "r": 2.6,
+            "every": 1,
+            "seconds": 10,
+            "damage": 0.3,
+            "element": "fire"
+          },
+          "wind": 1.4,
+          "damage": 1.2
+        }
+      ]
+    },
+    "broadside": {
+      "id": "broadside",
+      "name": "Broadside!",
+      "every": [
+        16,
+        19
+      ],
+      "first": 3,
+      "cast": 1,
+      "say": "\"BROADSIDE!\" — get out of the fan!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 26,
+          "w": 2.6,
+          "count": 3,
+          "rotate": 0.35,
+          "wind": 1.6,
+          "damage": 2.0
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Wrecking",
+      "abilities": [
+        "cutlass",
+        "swivel",
+        "pitch"
+      ]
+    },
+    {
+      "name": "Boarders",
+      "at": 0.5,
+      "say": "\"All hands! Repel boarders! ...Wait, we're the boarders!\"",
+      "abilities": [
+        "cutlass",
+        "broadside",
+        "pitch"
+      ],
+      "onEnter": [
+        {
+          "adds": {
+            "type": "road_brigand",
+            "count": 2,
+            "radius": 8
+          }
+        }
+      ]
+    }
+  ]
+}

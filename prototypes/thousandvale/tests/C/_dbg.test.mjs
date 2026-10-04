@@ -4,7 +4,7 @@ test('dbg', async () => {
   mock.timers.enable({ apis: ['setTimeout'], now: 0 });
   const s = await pair({ classId: process.env.CLS || 'druid', seed: 4 });
   const logs = { F: [], T: [] };
-  const wrap = (rpg, tag, who) => { const o = rpg.strike.bind(rpg); rpg.strike = (a, d, r, opts = {}) => { const res = o(a, d, r, opts); logs[tag].push(`${who()} ${a.name?.slice(0,6)}>${(d.name||'').slice(0,6)} m${(opts.multiplier??1).toFixed(3)} el ${opts.element} sk ${opts.skill} = ${res.amount}${res.crit?'c':''}`); return res; }; };
+  const wrap = (rpg, tag, who) => { const o = rpg.strike.bind(rpg); rpg.strike = (a, d, r, opts = {}) => { const res = o(a, d, r, opts); logs[tag].push(`${who()} ${a.name?.slice(0,6)}>${(d.name||'').slice(0,6)} m${(opts.multiplier??1).toFixed(3)} el ${opts.element ?? 'physical'} sk ${opts.skill} = ${res.amount}${res.crit?'c':''}`); return res; }; };
   let fr = 'setup';
   wrap(s.F.rpg, 'F', () => fr); wrap(s.room.engine.rpg, 'T', () => fr);
   const upto = +(process.env.SLOT || 0);
@@ -12,7 +12,7 @@ test('dbg', async () => {
     s.fp.mp = s.fp.maxMp; s.tp.mp = s.tp.maxMp;
     fr = `basic${slot}`; basic(s, slot);
     fr = `cast${slot}`; s.fs.cast(slot, { x: 0, z: 5 }); s.room.run(() => s.room.combat.cast(s.tp, slot, { aim: { x: 0, z: 5 } }));
-    for (let k = 0; k < 50; k++) { fr = `s${slot}f${k}`; frame(s); const d = diff(s); if (d) { console.log('DIFF', fr, d); slot = 99; break; } }
+    for (let k = 0; k < 50; k++) { fr = `s${slot}f${k}`; frame(s); const d = diff(s); if (d) { console.log('DIFF', fr, d, JSON.stringify(s.fmobs.map(m=>[+m.x.toFixed(3),+m.z.toFixed(3),!!m.push])), JSON.stringify(s.tmobs.map(m=>[+m.x.toFixed(3),+m.z.toFixed(3),!!m.push])), s.control.x, s.control.z, s.tp.x, s.tp.z); for (const [n,L] of [['F',s.fmobs],['T',s.tmobs]]) console.log(n, JSON.stringify(L.map(m=>[m.state, m.facing?.toFixed(3), m.speed, Object.entries(m.statuses||{}).map(([k,v])=>k+':'+(v.remaining??0).toFixed(2)+':'+(v.slow||0))]))); slot = 99; break; } }
     s.control.teleport(0, 0); s.tp.x = 0; s.tp.z = 0;
   }
   const n = Math.max(logs.F.length, logs.T.length);

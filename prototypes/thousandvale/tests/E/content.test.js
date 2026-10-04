@@ -13,7 +13,8 @@ const root = new URL('../../', import.meta.url);
 const J = p => JSON.parse(readFileSync(new URL(p, root), 'utf8'));
 const ARCH = J('data/provinces/archetypes.json');
 const PROV = J('data/provinces/torbor_downs.json');
-const VIG = J('data/vignettes/m1.json').vignettes;
+const VIG_M1 = J('data/vignettes/m1.json').vignettes;
+const VIG = [...VIG_M1, ...J('data/vignettes/m2.json').vignettes];
 const PLACE = J('data/vignettes/placements/test.json');
 const QUESTS = J('data/quests/test.json');
 const HOOKS = J('data/hooks.json').hooks;
@@ -91,7 +92,7 @@ test('province sheet: zone test resolves (archetype, camps, encounters, hook, qu
   for (const n of [z.town, ...z.hamlets]) assert.ok(terrain.meta.sites.some(s => s.name === n), `${n} is a real site in the bake`);
 });
 
-test('vignettes: 8 for M1, unique ids, kit ids exist, monsters exist, tags resolve, things sit inside the radius', () => {
+test('vignettes: 8 for M1 + the M2 library, unique ids, kit ids exist, monsters exist, tags resolve, things sit inside the radius', () => {
   assert.ok(VIG.length >= 8);
   assert.equal(new Set(VIG.map(v => v.id)).size, VIG.length);
   const bad = [];
@@ -110,7 +111,7 @@ test('vignettes: 8 for M1, unique ids, kit ids exist, monsters exist, tags resol
 test('placements for zone test: every vignette placed once, on dry walkable ground over its radius, clear of town/door/each other', () => {
   const town = findTown(terrain), door = findDoor(terrain, town);
   assert.equal(PLACE.terrainHash, terrain.meta.inputHash, 'placements are stale: re-run tools/place-vignettes.mjs');
-  assert.deepEqual(PLACE.placements.map(p => p.id).sort(), VIG.map(v => v.id).sort());
+  assert.deepEqual(PLACE.placements.map(p => p.id).sort(), VIG_M1.map(v => v.id).sort());
   const bad = [];
   for (const p of PLACE.placements) {
     const v = VIG.find(x => x.id === p.id);
@@ -150,5 +151,26 @@ test('quests: unique ids, every reference resolves, chains point at real quests,
   for (const n of Object.values(QUESTS.npcs)) if (!terrain.meta.sites.some(s => s.name === n.at) && !vig(n.at)) bad.push(`npc ${n.name} at unknown place ${n.at}`);
   // every M1 wilds monster family has at least one quest that sends you at it
   for (const c of PROV.zones.test.camps.filter(c => c.type !== 'marsh_wisp' && c.type !== 'bog_slime')) if (!Q.some(q => q.steps.some(s => s.type === c.type))) bad.push(`no quest for ${c.type}`);
+  assert.deepEqual(bad, []);
+});
+
+test('M2 library: >= 56 vignettes, every archetype tagged by >= 12, hooks unique with valid zones and kit parts', () => {
+  assert.ok(VIG.length >= 56, `${VIG.length} vignettes`);
+  const bad = [];
+  for (const a of Object.keys(ARCH.archetypes)) { const n = VIG.filter(v => v.tags.archetypes.includes(a)).length; if (n < 12) bad.push(`${a}: ${n} vignettes`); }
+  for (const v of VIG.slice(VIG_M1.length)) if (!(v.tags.band[0] >= 1 && v.tags.band[1] <= 12 && v.tags.band[0] <= v.tags.band[1])) bad.push(`${v.id}: band`);
+  assert.equal(new Set(HOOKS.map(h => h.id)).size, HOOKS.length, 'hook ids unique');
+  assert.ok(HOOKS.length >= 20);
+  const zones = new Set(Object.keys(PROV.zones));
+  for (const h of HOOKS) {
+    if (h.zone != null && !zones.has(h.zone)) bad.push(`hook ${h.id}: zone ${h.zone}`);
+    if (!['compositional', 'bespoke'].includes(h.kind)) bad.push(`hook ${h.id}: kind ${h.kind}`);
+    if (h.kind === 'bespoke' && !h.model) bad.push(`hook ${h.id}: bespoke without a model brief`);
+    if (!h.lore || !h.what) bad.push(`hook ${h.id}: text`);
+    for (const p of h.parts || []) if (!KIT[p.kind]?.has(p.id)) bad.push(`hook ${h.id}: ${p.kind} ${p.id} not in the kit`);
+  }
+  const placed = HOOKS.filter(h => h.zone).map(h => h.zone);
+  assert.equal(new Set(placed).size, placed.length, 'one hook per zone');
+  for (const z of zones) if (!placed.includes(z)) bad.push(`zone ${z} has no hook`);
   assert.deepEqual(bad, []);
 });

@@ -36,20 +36,32 @@ export const FAMILIES = {
     blurb: 'Burial rooms in a ring that winds inward to one great vault.',
     roster: { normal: ['barrow_hound', 'cairn_rat', 'gallows_owl'], elite: 'barrow_hound' },
     // floor N's mini-boss is miniboss[N % length]; `type` is the Farhold body the encounter runs on
-    encounters: { miniboss: [{ id: 'mb_marrowgnaw', type: 'barrow_hound' }, { id: 'mb_gallowmother', type: 'gallows_owl' }], boss: { id: 'boss_hollow_abbot', type: 'hollow_wraith' } },
+    encounterSets: [{ name: 'The Abbot\'s Ossuary', miniboss: [{ id: 'mb_marrowgnaw', type: 'barrow_hound' }, { id: 'mb_gallowmother', type: 'gallows_owl' }], boss: { id: 'boss_hollow_abbot', type: 'hollow_wraith' } }],
   },
   mine_descent: {
     name: 'Mine descent', ready: true, look: 'warren', fallback: null,
     blurb: 'A switchback shaft cut ever deeper, galleries branching off it.',
     roster: { normal: ['cairn_rat', 'ironback_beetle', 'bog_slime', 'carrion_moth'], elite: 'ironback_beetle' },
-    encounters: { miniboss: [{ id: 'mb_rustjaw', type: 'ironback_beetle' }, { id: 'mb_seep_mother', type: 'bog_slime' }], boss: { id: 'boss_deep_foreman', type: 'shale_warden' } },
+    encounterSets: [{ name: 'The Ninth Shift', miniboss: [{ id: 'mb_rustjaw', type: 'ironback_beetle' }, { id: 'mb_seep_mother', type: 'bog_slime' }], boss: { id: 'boss_deep_foreman', type: 'shale_warden' } }],
   },
-  flooded_cistern: { name: 'Flooded cistern', ready: false, look: 'flooded', fallback: 'crypt_spiral', blurb: 'Channels and sluices; the water level is part of the fight.' },
-  fortress_keep: { name: 'Fortress keep levels', ready: false, look: 'ruin', fallback: 'crypt_spiral', blurb: 'Halls and barracks stacked floor on floor.' },
-  cave_river: { name: 'Cave river', ready: false, look: 'cave', fallback: 'mine_descent', blurb: 'A cave that follows an underground river downstream.' },
-  tower_climb: { name: 'Tower climb', ready: false, look: 'vault', fallback: 'crypt_spiral', blurb: 'Up, not down: a ruined tower floor by floor.' },
-  barrow_maze: { name: 'Barrow maze', ready: false, look: 'barrow', fallback: 'crypt_spiral', blurb: 'Low turf-roofed passages that double back.' },
-  sunken_temple: { name: 'Sunken temple', ready: false, look: 'hollow', fallback: 'mine_descent', blurb: 'A temple the marsh swallowed, roof first.' },
+  flooded_cistern: { name: 'Flooded cistern', ready: true, look: 'flooded', borrow: 'crypt_spiral',
+    blurb: 'Chambers on a lattice of channels and sluices; the water level is part of the fight.',
+    roster: { normal: ['bog_slime', 'reed_serpent', 'fen_croaker', 'barrow_hound'], elite: 'reed_serpent' } },
+  fortress_keep: { name: 'Fortress keep levels', ready: true, look: 'ruin', borrow: 'crypt_spiral',
+    blurb: 'Halls and barracks in pairs up a central axis, the great hall at the top.',
+    roster: { normal: ['road_brigand', 'brigand_archer', 'sky_cultist', 'cult_zealot'], elite: 'brigand_captain' } },
+  cave_river: { name: 'Cave river', ready: true, look: 'cave', borrow: 'mine_descent',
+    blurb: 'Caverns strung along an underground river, wide winding tunnels.',
+    roster: { normal: ['cairn_rat', 'reed_serpent', 'dusk_flitter', 'ironback_beetle'], elite: 'silt_lurker' } },
+  tower_climb: { name: 'Tower climb', ready: true, look: 'vault', borrow: 'fortress_keep', ascending: true,
+    blurb: 'Up, not down: rooms round the walls of each storey, the top chamber in the middle, narrower each floor.',
+    roster: { normal: ['sky_cultist', 'gallows_owl', 'marsh_wisp', 'ash_wisp'], elite: 'cult_zealot' } },
+  barrow_maze: { name: 'Barrow maze', ready: true, look: 'barrow', borrow: 'crypt_spiral',
+    blurb: 'Low barrows over the downs joined by passages that wind, loop and dead-end.',
+    roster: { normal: ['barrow_hound', 'cairn_rat', 'carrion_moth', 'gallows_owl'], elite: 'barrow_hound' } },
+  sunken_temple: { name: 'Sunken temple', ready: true, look: 'hollow', borrow: 'flooded_cistern',
+    blurb: 'A cross-shaped temple the marsh swallowed: nave, transept chapels, the apse at the head.',
+    roster: { normal: ['bog_slime', 'marsh_wisp', 'sporecap_walker', 'veil_spider'], elite: 'sporecap_walker' } },
 };
 
 export const ROOM_KINDS = ['entry', 'arrival', 'fight', 'key', 'miniboss', 'boss', 'reward'];
@@ -58,6 +70,12 @@ export const ROOM_KINDS = ['entry', 'arrival', 'fight', 'key', 'miniboss', 'boss
 const NAMES = {
   crypt_spiral: { a: ['Ossuary', 'Crypt', 'Undervault', 'Charnel Ring', 'Bone Cloister'], b: ['of the Hollow Abbot', 'of Saint Orrin', 'of the Quiet Brothers', 'Below Torborhold', 'of the Nine Lamps'] },
   mine_descent: { a: ['Delving', 'Shaft', 'Old Workings', 'Deepcut', 'Seam'], b: ['of the Lost Shift', 'of Gaffer Brann', 'Under the Moor', 'of the Black Seam', 'of the Ninth Ladder'] },
+  flooded_cistern: { a: ['Cistern', 'Sluiceworks', 'Drowned Vaults', 'Old Waterworks', 'Underlake'], b: ['of Halsbridge', 'of the Twelve Sluices', 'Under the Market', 'of the Lost Aqueduct', 'of Brother Weir'] },
+  fortress_keep: { a: ['Keep', 'Broken Keep', 'Hold', 'Bastion', 'Barracks'], b: ['of the Red Banner', 'of Captain Varro', 'of the Last Garrison', 'on Ashcombe Hill', 'of the Oath-Breakers'] },
+  cave_river: { a: ['Caves', 'Underriver', 'Grotto', 'Deeps', 'Echoing Caves'], b: ['of the Blind Eel', 'of the Gullwick Spring', 'Where the River Hides', 'of Dripping Stone', 'of the Lantern Moss'] },
+  tower_climb: { a: ['Tower', 'Spire', 'Stair', 'Watchtower', 'Lighthouse'], b: ['of the Mad Astronomer', 'of Hollin Pass', 'of the Seven Bells', 'of the Weathercock', 'of Magister Quill'] },
+  barrow_maze: { a: ['Barrows', 'Barrowdowns', 'Howes', 'Mounds', 'Long Barrow'], b: ['of the Nine Kings', 'of Wychwood', 'of the Sleeping Host', 'Under the Thorn', 'of Old Grimbold'] },
+  sunken_temple: { a: ['Sunken Temple', 'Drowned Chapel', 'Mire Sanctum', 'Flooded Abbey', 'Reedwater Shrine'], b: ['of the Frog Saint', 'of Brackwater', 'of the Silent Bell', 'of Mother Reed', 'of the Green Lamp'] },
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -75,6 +93,13 @@ function rngOf(seed) {
   f.range = (a, b) => a + f.int(b - a + 1);       // inclusive integers
   f.pick = arr => arr[f.int(arr.length)];
   return f;
+}
+
+/** The encounter sets a family uses: its own, else the family it borrows from (followed until one has sets). */
+export function encounterSetsFor(key) {
+  const seen = new Set();
+  while (FAMILIES[key] && !FAMILIES[key].encounterSets?.length && !seen.has(key)) { seen.add(key); key = FAMILIES[key].borrow || 'crypt_spiral'; }
+  return FAMILIES[key].encounterSets;
 }
 
 /** Which family a ready generator will actually build for `want`. */
@@ -327,6 +352,285 @@ function mineFloor(rng, kinds) {
   return { grid: g, rooms, gate, path, along };
 }
 
+
+// ------------------------------------------------------------------------------------------------
+// The CHAIN builder (M2): the six newer families are a room placement + this. Rooms are carved first,
+// then joined in order by A* corridors that keep 2 tiles of rock between themselves and anything they
+// may not touch. Corridors BEFORE the guarded room (boss on the last floor, else the mini-boss) may
+// cross each other (loops, side passages); the corridor INTO the guarded room and everything after it
+// touch nothing else, so a gate across that one corridor really shuts the guarded room off.
+
+function noiseField(rng, W, H, cells = 8) {
+  const n = cells + 2, v = new Float32Array(n * n).map(() => rng());
+  return (i, j) => {
+    const x = i / W * cells, y = j / H * cells, xi = Math.floor(x), yi = Math.floor(y), fx = x - xi, fy = y - yi;
+    const a = v[yi * n + xi], b = v[yi * n + xi + 1], c = v[(yi + 1) * n + xi], d = v[(yi + 1) * n + xi + 1];
+    return a + (b - a) * fx + (c - a) * fy + (a - b - c + d) * fx * fy;
+  };
+}
+
+/** A* over centreline tiles; `ok(i, j)` = the corridor may run here. Returns [[i, j], …] or null. */
+function astar(W, H, from, to, ok, cost) {
+  const N = W * H, g = new Float32Array(N).fill(Infinity), prev = new Int32Array(N).fill(-1);
+  const key = (i, j) => j * W + i, s = key(from[0], from[1]), t = key(to[0], to[1]);
+  const h = k => Math.abs(k % W - to[0]) + Math.abs(((k / W) | 0) - to[1]);
+  // binary heap of [f, k]
+  const heap = [];
+  const push = (f, k) => { heap.push([f, k]); let c = heap.length - 1; while (c > 0) { const p = (c - 1) >> 1; if (heap[p][0] <= heap[c][0]) break; [heap[p], heap[c]] = [heap[c], heap[p]]; c = p; } };
+  const pop = () => { const top = heap[0], last = heap.pop(); if (heap.length) { heap[0] = last; let c = 0; for (;;) { const l = 2 * c + 1, r = l + 1; let m = c; if (l < heap.length && heap[l][0] < heap[m][0]) m = l; if (r < heap.length && heap[r][0] < heap[m][0]) m = r; if (m === c) break; [heap[m], heap[c]] = [heap[c], heap[m]]; c = m; } } return top; };
+  const okMemo = new Int8Array(N);              // 0 unknown, 1 ok, -1 blocked
+  const allowed = k => { if (!okMemo[k]) okMemo[k] = ok(k % W, (k / W) | 0) ? 1 : -1; return okMemo[k] > 0; };
+  g[s] = 0; push(h(s), s);
+  const closed = new Uint8Array(N);
+  while (heap.length) {
+    const [, k] = pop();
+    if (closed[k]) continue; closed[k] = 1;
+    if (k === t) break;
+    const i = k % W, j = (k / W) | 0;
+    for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const ni = i + di, nj = j + dj;
+      if (ni < 2 || nj < 2 || ni >= W - 2 || nj >= H - 2) continue;
+      const nk = key(ni, nj);
+      if (closed[nk] || (nk !== t && !allowed(nk))) continue;
+      const turn = prev[k] >= 0 && (prev[k] % W === i) !== (di === 0) ? 0.4 : 0;
+      const ng = g[k] + cost(ni, nj) + turn;
+      if (ng < g[nk]) { g[nk] = ng; prev[nk] = k; push(ng + h(nk), nk); }
+    }
+  }
+  if (!closed[t]) return null;
+  const out = []; for (let k = t; k >= 0; k = prev[k]) out.push([k % W, (k / W) | 0]);
+  return out.reverse();
+}
+
+const inRect = (r, i, j, m = 0) => i >= r.i - m && j >= r.j - m && i < r.i + r.w + m && j < r.j + r.h + m;
+
+/**
+ * Join placed rooms into a floor. `L` = { W, H, rooms (in walk order, kinds set), half, wobble, loops,
+ * branches, round }. Returns { grid, rooms, gate } or null if a corridor cannot be routed cleanly.
+ */
+export const CHAIN_FAILS = {};
+const fail = why => { CHAIN_FAILS[why] = (CHAIN_FAILS[why] || 0) + 1; return null; };
+function chainFloor(rng, L) {
+  const { W, H, rooms } = L, half = L.half ?? 1, clear = half + 2;
+  const g = makeGrid(W, H);
+  const owner = new Int16Array(W * H).fill(-1);       // which room a tile belongs to
+  const ARENA = new Set(['miniboss', 'boss']);
+  for (let k = 0; k < rooms.length; k++) {
+    const r = rooms[k];
+    if (r.i < 2 || r.j < 2 || r.i + r.w > W - 2 || r.j + r.h > H - 2) return fail('room off the floor');
+    for (let q = 0; q < k; q++) if (overlaps(rooms[q], r, clear + 1)) return fail('rooms too close');
+    for (let j = r.j; j < r.j + r.h; j++) for (let i = r.i; i < r.i + r.w; i++) {
+      // rounded corners on ordinary rooms (caves); arenas stay full so their objects stand on floor
+      if (L.round && !ARENA.has(r.kind)) { const cx = Math.min(i - r.i, r.i + r.w - 1 - i), cz = Math.min(j - r.j, r.j + r.h - 1 - j); if (cx + cz < L.round) continue; }
+      g.carve(i, j); owner[j * W + i] = k;
+    }
+  }
+  const noise = noiseField(rng, W, H);
+  const cost = (i, j) => 1 + (L.wobble || 0) * noise(i, j) + (g.get(i, j) ? 0.3 : 0);
+  const gi = rooms.findIndex(r => r.kind === 'boss') >= 0 ? rooms.findIndex(r => r.kind === 'boss') : rooms.findIndex(r => r.kind === 'miniboss');
+  const carvePath = path => { for (const [i, j] of path) for (let dj = -half; dj <= half; dj++) for (let di = -half; di <= half; di++) g.carve(i + di, j + dj); };
+  const corridorTiles = new Uint8Array(W * H);
+  const markPath = path => { for (const [i, j] of path) for (let dj = -half; dj <= half; dj++) for (let di = -half; di <= half; di++) { const ii = i + di, jj = j + dj; if (ii >= 0 && jj >= 0 && ii < W && jj < H && owner[jj * W + ii] < 0) corridorTiles[jj * W + ii] = 1; } };
+  /** may a corridor between rooms a and b (b may be -1 = open rock) run with its centre on (i, j)? */
+  const okFor = (a, b, post) => (i, j) => {
+    for (let dj = -clear; dj <= clear; dj++) for (let di = -clear; di <= clear; di++) {
+      const ii = i + di, jj = j + dj;
+      if (ii < 1 || jj < 1 || ii >= W - 1 || jj >= H - 1) return false;
+      const k = jj * W + ii, o = owner[k];
+      if (o >= 0) { if (o !== a && o !== b) return false; continue; }
+      if (post && corridorTiles[k]) return false;
+    }
+    return true;
+  };
+  const centre = r => [r.i + (r.w >> 1), r.j + (r.h >> 1)];
+  let gatePath = null;
+  for (let k = 1; k < rooms.length; k++) {
+    const post = k >= gi;
+    const path = astar(W, H, centre(rooms[k - 1]), centre(rooms[k]), okFor(k - 1, k, post), cost);
+    if (!path) return fail(post ? 'post corridor' : 'pre corridor');
+    if (k === gi) gatePath = path;
+    carvePath(path); markPath(path);
+  }
+  // loops: extra links between rooms before the gate (pre rules)
+  for (let n = 0; n < (L.loops || 0); n++) {
+    if (gi < 3) break;
+    const a = rng.int(gi), b = rng.int(gi);
+    if (Math.abs(a - b) < 2) continue;
+    const path = astar(W, H, centre(rooms[a]), centre(rooms[b]), okFor(a, b, false), cost);
+    if (path && path.length < (W + H) * 0.9) { carvePath(path); markPath(path); }
+  }
+  // side passages: dead ends off a pre-gate room toward open rock
+  for (let n = 0; n < (L.branches || 0); n++) {
+    if (gi < 1) break;
+    const a = rng.int(gi);
+    const to = [3 + rng.int(W - 6), 3 + rng.int(H - 6)];
+    const okT = okFor(a, -1, false);
+    if (!okT(to[0], to[1])) continue;
+    const path = astar(W, H, centre(rooms[a]), to, okT, cost);
+    if (path && path.length > 8 && path.length < 40) { carvePath(path); markPath(path); }
+  }
+  // the gate: the corridor's full cross-section a few tiles outside the guarded room
+  const gr = rooms[gi], pr = rooms[gi - 1];
+  const enter = gatePath.findIndex(([i, j]) => inRect(gr, i, j));
+  let gate = null;
+  for (let back = 3; back <= 6 && !gate; back++) {
+    const q = enter - back;
+    if (q < 1) break;
+    const [i, j] = gatePath[q], [pi, pj] = gatePath[q - 1];
+    if (inRect(pr, i, j, 1) || inRect(gr, i, j, 1)) continue;
+    const horiz = pj === j;
+    gate = horiz ? { i, j: j - half, w: 1, h: 2 * half + 1 } : { i: i - half, j, w: 2 * half + 1, h: 1 };
+  }
+  if (!gate) return fail('no gate spot');
+  // the gate must be a clean cut: no floor tile beside its two ends
+  const ends = gate.w === 1 ? [[gate.i, gate.j - 1], [gate.i, gate.j + gate.h]] : [[gate.i - 1, gate.j], [gate.i + gate.w, gate.j]];
+  if (ends.some(([i, j]) => g.get(i, j))) return fail('gate not a clean cut');
+  return { grid: g, rooms, gate };
+}
+
+/** A family's floor: try its placement + chain until one routes cleanly (the seed stays the seed). */
+function buildChain(rng, place, kinds, tries = 40) {
+  for (let t = 0; t < tries; t++) {
+    const L = place(rng, kinds, t);
+    if (!L) continue;
+    L.rooms.forEach((r, k) => { r.kind = kinds[k]; });
+    const built = chainFloor(rng, L);
+    if (built) { if (L.extra) built.extra = L.extra; return built; }
+  }
+  return null;
+}
+
+const sizeFor = (rng, kind, lo = 8, hi = 11) => kind === 'boss' ? 14 + rng.int(2) * 2 : kind === 'miniboss' ? 12 : lo + rng.int(hi - lo + 1);
+const roomAt = (ci, cj, w, h) => ({ i: Math.round(ci - w / 2), j: Math.round(cj - h / 2), w, h });
+
+// FAMILY 3 — flooded cistern: chambers on a 4×4 lattice, walked as a snake; channels loop between them.
+function placeCistern(rng, kinds) {
+  const C = 4, S = 19, W = C * S + 6, H = C * S + 6, n = kinds.length;
+  // a random self-avoiding walk of n cells over the lattice
+  const walk = [[rng.int(C), rng.int(C)]];
+  const used = new Set([walk[0].join()]);
+  const step = () => {
+    if (walk.length === n) return true;
+    const [x, y] = walk[walk.length - 1];
+    const dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]].sort(() => rng() - 0.5);
+    for (const [dx, dy] of dirs) {
+      const nx = x + dx, ny = y + dy;
+      if (nx < 0 || ny < 0 || nx >= C || ny >= C || used.has(nx + ',' + ny)) continue;
+      walk.push([nx, ny]); used.add(nx + ',' + ny);
+      if (step()) return true;
+      walk.pop(); used.delete(nx + ',' + ny);
+    }
+    return false;
+  };
+  if (!step()) return null;
+  const rooms = walk.map(([x, y], k) => { const s = sizeFor(rng, kinds[k], 8, 10); return roomAt(3 + x * S + S / 2, 3 + y * S + S / 2, s, s); });
+  return { W, H, rooms, wobble: 0, loops: 3, branches: 0 };
+}
+
+// FAMILY 4 — fortress keep: a gate hall at the bottom, halls in pairs up a central axis, the great hall at the top.
+function placeKeep(rng, kinds) {
+  const W = 84, H = 106, cx = W / 2, rows = [93, 73, 53, 33, 12];
+  const slots = [[cx, rows[0]], [cx - 22, rows[1]], [cx + 22, rows[1]], [cx - 22, rows[2]], [cx + 22, rows[2]], [cx - 22, rows[3]], [cx + 22, rows[3]]];
+  const n = kinds.length, rooms = [];
+  const last = kinds.includes('boss');
+  for (let k = 0; k < n; k++) {
+    const kind = kinds[k];
+    let p;
+    if (kind === 'boss') p = [cx, rows[4] + 2];
+    else if (kind === 'reward') p = [cx + (rng() < 0.5 ? -24 : 24), rows[4]];
+    else if (kind === 'miniboss' && !last) p = [cx, rows[3] - 4];
+    else p = slots[k];
+    if (!p) return null;
+    const w = kind === 'boss' ? 18 : sizeFor(rng, kind, 9, 12), h = kind === 'boss' ? 14 : sizeFor(rng, kind, 8, 10);
+    rooms.push(roomAt(p[0] + (rng.int(3) - 1), p[1] + (rng.int(3) - 1), w, h));
+  }
+  return { W, H, rooms, wobble: 0, loops: 1, branches: 1 };
+}
+
+// FAMILY 5 — cave river: caverns strung along an underground river that meanders across the floor.
+function placeCave(rng, kinds) {
+  const n = kinds.length, W = 18 * n + 24, H = 80;
+  const amp = 10 + rng.int(8), ph = rng() * 6.28, freq = 1.5 + rng();
+  const riverZ = i => H / 2 + Math.sin(i / W * Math.PI * freq + ph) * amp;
+  const rooms = [];
+  for (let k = 0; k < n; k++) {
+    const ci = 10 + (W - 20) * (n === 1 ? 0 : k / (n - 1));
+    const side = k % 2 ? 1 : -1;
+    const s = sizeFor(rng, kinds[k], 9, 12);
+    const off = kinds[k] === 'boss' || kinds[k] === 'miniboss' ? 0 : side * (8 + rng.int(6));
+    rooms.push(roomAt(ci, Math.max(4 + s / 2, Math.min(H - 4 - s / 2, riverZ(ci) + off)), s, s - (kinds[k] === 'fight' ? rng.int(3) : 0)));
+  }
+  const river = []; for (let i = 0; i <= W; i += 4) river.push([i, +riverZ(i).toFixed(1)]);
+  return { W, H, rooms, half: 2, wobble: 2.5, loops: 1, branches: 2, round: 3, extra: { river } };
+}
+
+// FAMILY 6 — tower climb: rooms round the four walls of a square storey, the top chamber in the middle;
+// each storey up is a little narrower (the tower tapers).
+function placeTower(rng, kinds, t, storey = 0) {
+  const W = 70 - storey * 4, H = W, n = kinds.length, c = W / 2;
+  const guarded = kinds.includes('boss') ? 'boss' : 'miniboss';
+  const ringKinds = kinds.filter(k => k !== guarded && k !== 'reward');
+  const m = ringKinds.length, R = c - 9;
+  const start = rng.int(8);
+  const perim = q => { // 8 slots round a square: corners + mids
+    const s = [[-1, -1], [0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0]][(start + q) % 8];
+    return [c + s[0] * R, c + s[1] * R];
+  };
+  const rooms = [];
+  let ring = 0;
+  for (let k = 0; k < n; k++) {
+    const kind = kinds[k];
+    if (kind === guarded) { const s = sizeFor(rng, kind); rooms.push(roomAt(c, c, s, s)); continue; }
+    if (kind === 'reward') { const p = perim(ring + 1); rooms.push(roomAt(p[0], p[1], 8, 8)); continue; }
+    const p = perim(ring++); const s = sizeFor(rng, kind, 8, 9);
+    rooms.push(roomAt(p[0], p[1], s, s));
+  }
+  if (m > 7) return null;
+  return { W, H, rooms, wobble: 0.3, loops: 0, branches: 0 };
+}
+
+// FAMILY 7 — barrow maze: low barrows scattered over the downs, joined by winding passages that loop and dead-end.
+function placeBarrow(rng, kinds) {
+  const W = 84, H = 84, rooms = [];
+  for (let k = 0; k < kinds.length; k++) {
+    const s = sizeFor(rng, kinds[k], 7, 9);
+    let r = null;
+    for (let t = 0; t < 200 && !r; t++) {
+      const cand = roomAt(6 + s / 2 + rng() * (W - 12 - s), 6 + s / 2 + rng() * (H - 12 - s), s, s);
+      if (rooms.some(o => overlaps(o, cand, 9))) continue;
+      // keep the walk wandering but not absurd: each barrow within reach of the last
+      if (k && Math.hypot(cand.i - rooms[k - 1].i, cand.j - rooms[k - 1].j) > 42) continue;
+      r = cand;
+    }
+    if (!r) return null;
+    rooms.push(r);
+  }
+  return { W, H, rooms, wobble: 3.5, loops: 2, branches: 5 };
+}
+
+// FAMILY 8 — sunken temple: a cross-shaped temple — nave up the middle, chapels out on the transepts,
+// the apse (boss) at the head and a reliquary beside it.
+function placeTemple(rng, kinds) {
+  const W = 92, H = 100, cx = W / 2, n = kinds.length, last = kinds.includes('boss');
+  // the walk: west aisle up, across the nave below the crossing, east aisle down, then into the crossing
+  const slots = [[cx, 88], [cx - 30, 76], [cx - 30, 50], [cx + 30, 50], [cx + 30, 76]];
+  const rooms = [];
+  for (let k = 0; k < n; k++) {
+    const kind = kinds[k];
+    let p;
+    if (kind === 'boss') p = [cx, 15];
+    else if (kind === 'reward') p = [cx + (rng() < 0.5 ? -28 : 28), 14];
+    else if (kind === 'miniboss') p = last ? [cx, 46] : [cx, 24];
+    else p = slots[k];
+    if (!p) return null;
+    const s = sizeFor(rng, kind, 8, 11);
+    rooms.push(roomAt(p[0] + rng.int(3) - 1, p[1] + rng.int(3) - 1, kind === 'boss' ? s + 2 : s, s));
+  }
+  return { W, H, rooms, wobble: 0.2, loops: 1, branches: 0 };
+}
+
+const CHAIN = { flooded_cistern: placeCistern, fortress_keep: placeKeep, cave_river: placeCave, tower_climb: placeTower, barrow_maze: placeBarrow, sunken_temple: placeTemple };
+
 // ------------------------------------------------------------------------------------------------
 /** Floor kinds by position: first floor, a middle floor, the last floor. */
 function kindsFor(f, floors) {
@@ -349,22 +653,25 @@ function arenaProps(room, objects, floorIndex, roomCentre, encId) {
  * Plan a multi-floor dungeon. Pure; same seed + opts -> same plan.
  * @param {number} seed
  * @param {{floors?:number, level?:number, family?:string, encounters?:object, arenas?:object}} opts
- *        `encounters` overrides the family's { miniboss: [{id, type}], boss: {id, type} }.
+ *        `set` picks one of the family's encounter sets (default: the seed picks).
+ *        `encounters` overrides the set's { miniboss: [{id, type}], boss: {id, type} }.
  *        `arenas` = { encounterId: script.arena.objects } (the JSON in data/encounters/); when given,
  *        each boss/mini-boss room lists its arena objects as `props` (the encounter engine spawns the
  *        real objects itself — props are for the viewer, the client's dressing and the tests).
  */
-export function planDungeon(seed, { floors = 2, level = 3, family = 'crypt_spiral', encounters = null, arenas = null } = {}) {
+export function planDungeon(seed, { floors = 2, level = 3, family = 'crypt_spiral', encounters = null, arenas = null, set = null } = {}) {
   floors = Math.max(1, Math.min(4, floors | 0));
   const key = familyFor(family);
   const fam = FAMILIES[key];
   const rng = rngOf((seed >>> 0) ^ hash(key));
-  const enc = { ...fam.encounters, ...(encounters || {}) };
+  const sets = encounterSetsFor(key);
+  const setIndex = set != null ? set % sets.length : rng.int(sets.length);
+  const enc = { ...sets[setIndex], ...(encounters || {}) };
   const names = NAMES[key];
   const out = {
     family: key, familyName: fam.name, look: fam.look, level, seed: seed >>> 0, cell: CELL,
     name: `The ${rng.pick(names.a)} ${rng.pick(names.b)}`,
-    encounters: { miniboss: [], boss: null },
+    encounters: { set: setIndex, setName: sets[setIndex].name || null, miniboss: [], boss: null },
     floors: [],
   };
   if (key !== family) out.familyFallback = family;
@@ -380,10 +687,16 @@ export function planDungeon(seed, { floors = 2, level = 3, family = 'crypt_spira
       ring.length = n;
       if (last) ring[n - 1] = 'miniboss';               // the last ring room holds the floor's mini-boss
       built = cryptFloor(rng, { ring, centre: last ? 'boss' : 'miniboss', reward: last });
-    } else {
+    } else if (key === 'mine_descent') {
       const list = [start, 'fight', 'fight', 'key', 'fight', 'miniboss'];
       if (last) list.push('boss', 'reward');
       built = mineFloor(rng, { list });
+    } else {
+      const list = [start, 'fight', 'fight', 'key', 'fight', 'miniboss'];
+      if (last) list.push('boss', 'reward');
+      const place = key === 'tower_climb' ? (r, k, t) => placeTower(r, k, t, f) : CHAIN[key];
+      built = buildChain(rng, place, list);
+      if (!built) throw new Error(`dungeon-tiers: ${key} could not route floor ${f} for seed ${seed}`);
     }
     const { grid, rooms, gate } = built;
     const origin = { x: widthSoFar, z: 0 };
@@ -398,6 +711,7 @@ export function planDungeon(seed, { floors = 2, level = 3, family = 'crypt_spira
       rooms: rooms.map(r => ({ i: r.i, j: r.j, w: r.w, h: r.h, kind: r.kind, id: r.id, x: r.x, z: r.z })),
       entry: { x: sp.x, z: sp.z }, packs: [], props: [],
     };
+    if (built.extra?.river) floor.river = built.extra.river.map(([i, j]) => ({ x: origin.x + i * CELL, z: origin.z + j * CELL }));
     // packs
     let eliteGiven = false;
     const mbs = Array.isArray(enc.miniboss) ? enc.miniboss : [enc.miniboss];

@@ -5,6 +5,7 @@
   "body": "gallows_owl",
   "place": "dungeon crypt_spiral: floor 2's mini-boss (the last ring room, 24 m square)",
   "_doc": "Stream E. A huge owl nesting in the burial ring. P1: dives on whoever she fancies (the circle leads the target — keep moving), a feather storm you dodge by getting under her, and an interruptible hoot that fears the whole room. P2 at 45% 'The Roost': she takes to her perch behind a ward of feathers while owlets mob you; kill them to bring her down. Two gibbet posts give cover from her hoot if it gets off. Soft enrage from 3 minutes.",
+  "party": "Solo: hard in the Roost (3 owlet adds) — bring a follower. 2-3: intended. 5: the dive/feather storm are easy; two gibbet posts are too little cover for five if the hoot lands. M5 scaling: owlets 3 -> 2 solo / 4 at five; add a third post at five.",
   "hpMult": 2,
   "arena": {
     "radius": 12,

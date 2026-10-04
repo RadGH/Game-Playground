@@ -5,6 +5,7 @@
   "body": "thicket_boar",
   "place": "wilds: roams the farm fields between Torborhold and Wamonhold; 20-60 min respawn per copy, called out in zone chat",
   "_doc": "Stream E. A RARE: a huge old sow with brambles grown into her hide. She charges in long lines (sidestep), wallows to leave a sticky mud patch that snares, and bristles in a thorn ring. At 50% she charges three times in a row, re-aiming each time.",
+  "party": "Open world rare. Solo: at level, sidestep the charges and stay out of the mud — doable. 2-3: easy. M5 scaling: health by players tagged; the triple charge targets random players at 3+.",
   "hpMult": 1.8,
   "arena": {
     "radius": 26

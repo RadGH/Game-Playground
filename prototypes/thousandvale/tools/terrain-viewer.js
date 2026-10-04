@@ -4,7 +4,7 @@ import { parseTerrain, MAX_WALK_SLOPE } from '../js/rules/terrain-read.js';
 
 const $ = id => document.getElementById(id);
 const canvas = $('map'), ctx = canvas.getContext('2d');
-let terrain = null;
+let terrain = null, placements = [], view = { x0: 0, z0: 0, span: 2048 };
 
 const hex = h => { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
 
@@ -14,13 +14,16 @@ async function load(zone) {
     const res = await fetch(`../data/zones/${zone}/terrain.bin`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     terrain = parseTerrain(await res.arrayBuffer());
+    placements = [];
+    try { const pr = await fetch(`../data/zones/${zone}/placements.json`); if (pr.ok) placements = (await pr.json()).placements; } catch { /* M0 zones have none */ }
     canvas.width = canvas.height = terrain.size;
+    setView();
     draw();
     const m = terrain.meta;
     $('meta').innerHTML = `<b>${m.name}</b> · ${terrain.extent} m square, ${terrain.size}² samples at ${m.step} m<br>` +
       `heights ${m.heightMin}–${m.heightMax} m · bake v${m.bakeVersion} · input ${m.inputHash}<br>` +
-      `World Forge seed ${m.source.world.seed}, macro window ${m.source.macroWindow.join(',')}<br>` +
-      `spawn ${m.spawn.x}, ${m.spawn.z}<br>` + m.sites.map(s => `${s.kind}: ${s.name} (${Math.round(s.x)}, ${Math.round(s.z)})`).join('<br>');
+      `World Forge seed ${m.source.world.seed}, ${m.source.macroWindow ? `macro window ${m.source.macroWindow.join(",")}` : `zone ${m.zone} at world ${m.source.worldOrigin.x}, ${m.source.worldOrigin.z}`} · ${placements.length} placements<br>` +
+      `spawn ${m.spawn.x}, ${m.spawn.z}<br>` + m.sites.map(s => `${s.kind || s.type}: ${s.name || s.id} (${Math.round(s.x)}, ${Math.round(s.z)})${s.hub ? " — hub" : ""}`).join('<br>');
     $('status').textContent = 'ready';
     window.__terrainReady = true;
   } catch (err) {
@@ -28,14 +31,24 @@ async function load(zone) {
   }
 }
 
+function setView() {
+  const hub = terrain.meta.sites.find(s => s.hub) || terrain.meta.sites.find(s => s.type === 'settlement');
+  if ($('zoom').value === 'town' && hub) { const span = (hub.radius || 65) * 3; view = { x0: hub.x - span / 2, z0: hub.z - span / 2, span }; }
+  else view = { x0: terrain.origin.x, z0: terrain.origin.z, span: terrain.extent };
+}
+/** Canvas pixel for zone metres, and back. */
+const toPx = (x, z) => [(x - view.x0) / view.span * canvas.width, (z - view.z0) / view.span * canvas.height];
+
 function draw() {
   const t = terrain, S = t.size, img = ctx.createImageData(S, S), px = img.data;
   const layer = $('layer').value;
   const colors = t.biomes.map(b => hex(b.color));
   const { height, waterTop, biome } = t.layers;
   const span = t.meta.heightMax - t.meta.heightMin;
-  for (let j = 0; j < S; j++) for (let i = 0; i < S; i++) {
-    const k = j * S + i, x = i * t.step + t.origin.x, z = j * t.step + t.origin.z;
+  for (let pj = 0; pj < S; pj++) for (let pi = 0; pi < S; pi++) {
+    const x = view.x0 + (pi + 0.5) / S * view.span, z = view.z0 + (pj + 0.5) / S * view.span;
+    const i = Math.max(0, Math.min(S - 1, Math.round((x - t.origin.x) / t.step))), j = Math.max(0, Math.min(S - 1, Math.round((z - t.origin.z) / t.step)));
+    const k = j * S + i, o = pj * S + pi;
     const h = t.heightOfSample(i, j);
     // light from the north-west
     const hx = t.heightOfSample(Math.min(S - 1, i + 1), j) - t.heightOfSample(Math.max(0, i - 1), j);
@@ -54,18 +67,47 @@ function draw() {
       [r, g, b] = colors[biome[k]] || [255, 0, 255];
       r *= shade; g *= shade; b *= shade;
     }
-    px[k * 4] = r; px[k * 4 + 1] = g; px[k * 4 + 2] = b; px[k * 4 + 3] = 255;
+    px[o * 4] = r; px[o * 4 + 1] = g; px[o * 4 + 2] = b; px[o * 4 + 3] = 255;
   }
   ctx.putImageData(img, 0, 0);
+  if ($('plan').checked) drawPlan();
   if ($('sites').checked) {
     ctx.font = '22px system-ui'; ctx.textAlign = 'center';
-    for (const s of t.meta.sites) dot(s.x, s.z, '#ffd36b', s.name);
+    for (const s of t.meta.sites) dot(s.x, s.z, s.type === 'settlement' ? '#ffd36b' : s.type === 'dungeon' ? '#ff5ad1' : s.type === 'event' || s.type === 'camp' ? '#ff7b7b' : '#9ad', s.name || s.id);
     dot(t.meta.spawn.x, t.meta.spawn.z, '#6bff9a', 'spawn');
   }
 }
 
+function drawPlan() {
+  const k = canvas.width / view.span;   // pixels per metre
+  for (const p of placements) {
+    if (p.kind === 'street') {
+      ctx.strokeStyle = p.data.cls === 'main' ? '#d9c79a' : '#b9a57a'; ctx.lineWidth = Math.max(1, p.data.width * k); ctx.lineCap = 'round';
+      ctx.beginPath(); p.data.pts.forEach(([x, z], n) => { const [a, b] = toPx(x, z); n ? ctx.lineTo(a, b) : ctx.moveTo(a, b); }); ctx.stroke();
+    }
+  }
+  for (const p of placements) {
+    if (p.kind === 'building') {
+      const [a, b] = toPx(p.x, p.z);
+      ctx.save(); ctx.translate(a, b); ctx.rotate(p.data.angle);
+      ctx.fillStyle = '#8a5a3c'; ctx.strokeStyle = '#2a1a10'; ctx.lineWidth = 1;
+      ctx.fillRect(-p.data.w * k / 2, -p.data.d * k / 2, p.data.w * k, p.data.d * k); ctx.strokeRect(-p.data.w * k / 2, -p.data.d * k / 2, p.data.w * k, p.data.d * k);
+      ctx.rotate(-p.data.angle);
+      ctx.strokeStyle = '#ffe9a8'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.sin(p.yaw) * p.data.w * k * 0.7, Math.cos(p.yaw) * p.data.w * k * 0.7); ctx.stroke();   // facing
+      ctx.restore();
+    } else if (p.kind === 'settlement' || p.kind.endsWith('_site')) {
+      const [a, b] = toPx(p.x, p.z), r = (p.data.radius || p.data.r) * k;
+      ctx.strokeStyle = p.kind === 'settlement' ? (p.data.hub ? '#ffd36b' : '#c8b070') : '#ff7b7b'; ctx.setLineDash([6, 4]); ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(a, b, r, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+    } else if (p.kind === 'dungeon_door') {
+      const [a, b] = toPx(p.x, p.z);
+      ctx.strokeStyle = '#ff5ad1'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(a, b); ctx.lineTo(a + Math.sin(p.yaw) * 30, b + Math.cos(p.yaw) * 30); ctx.stroke();
+    }
+  }
+}
+
 function dot(x, z, color, label) {
-  const i = (x - terrain.origin.x) / terrain.step, j = (z - terrain.origin.z) / terrain.step;
+  const [i, j] = toPx(x, z);
   ctx.fillStyle = color; ctx.strokeStyle = '#000'; ctx.lineWidth = 3;
   ctx.beginPath(); ctx.arc(i, j, 7, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
   ctx.strokeText(label, i, j - 14); ctx.fillText(label, i, j - 14);
@@ -74,8 +116,8 @@ function dot(x, z, color, label) {
 canvas.addEventListener('mousemove', e => {
   if (!terrain) return;
   const r = canvas.getBoundingClientRect();
-  const x = terrain.origin.x + (e.clientX - r.left) / r.width * terrain.extent;
-  const z = terrain.origin.z + (e.clientY - r.top) / r.height * terrain.extent;
+  const x = view.x0 + (e.clientX - r.left) / r.width * view.span;
+  const z = view.z0 + (e.clientY - r.top) / r.height * view.span;
   const s = terrain.sample(x, z);
   $('readout').textContent =
     `x ${x.toFixed(1)}  z ${z.toFixed(1)}\n` +
@@ -88,5 +130,7 @@ canvas.addEventListener('mousemove', e => {
 });
 $('layer').addEventListener('change', () => terrain && draw());
 $('sites').addEventListener('change', () => terrain && draw());
+$('plan').addEventListener('change', () => terrain && draw());
+$('zoom').addEventListener('change', () => { if (terrain) { setView(); draw(); } });
 $('zone').addEventListener('change', () => load($('zone').value));
 load($('zone').value);

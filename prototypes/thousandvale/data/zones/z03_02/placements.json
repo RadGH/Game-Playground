@@ -1,0 +1,1672 @@
+{
+ "_doc": "Stream B zone placements (tools/bake-zone.mjs). Zone metres; yaw = atan2(dx, dz) the way the thing faces. kinds: settlement, town_square, street (data.pts), building (a proctown plot: data.w along `angle`, data.d across, want; yaw faces the nearest drawn street, data.streetGap = metres from the front to it), town_wall, dungeon_door, event_site, camp_site, landmark/dungeon/pass/crossing (World Forge nodes).",
+ "zone": "z03_02",
+ "terrainHash": "a0b48f24",
+ "placements": [
+  {
+   "kind": "settlement",
+   "id": "mackdackcrown",
+   "x": 320,
+   "z": 1088,
+   "yaw": 0,
+   "data": {
+    "kind": "city",
+    "name": "Mackdackcrown",
+    "radius": 140,
+    "hub": false
+   }
+  },
+  {
+   "kind": "settlement",
+   "id": "torborhold",
+   "x": 1440,
+   "z": 1680,
+   "yaw": 0,
+   "data": {
+    "kind": "village",
+    "name": "Torborhold",
+    "radius": 65,
+    "hub": true
+   }
+  },
+  {
+   "kind": "settlement",
+   "id": "tatihold",
+   "x": 1216,
+   "z": 576,
+   "yaw": 0,
+   "data": {
+    "kind": "village",
+    "name": "Tatihold",
+    "radius": 65,
+    "hub": false
+   }
+  },
+  {
+   "kind": "settlement",
+   "id": "mawehaven",
+   "x": 1344,
+   "z": 1344,
+   "yaw": 0,
+   "data": {
+    "kind": "hamlet",
+    "name": "Mawehaven",
+    "radius": 40,
+    "hub": false
+   }
+  },
+  {
+   "kind": "landmark",
+   "id": "the_elder_mopir",
+   "x": 64,
+   "z": 1984,
+   "yaw": 0,
+   "data": {
+    "kind": "ancientwood",
+    "name": "The Elder Mopir"
+   }
+  },
+  {
+   "kind": "crossing",
+   "id": "bilpintet_ford",
+   "x": 1216,
+   "z": 576,
+   "yaw": 0,
+   "data": {
+    "kind": "ford",
+    "name": "Bilpintet Ford"
+   }
+  },
+  {
+   "kind": "crossing",
+   "id": "tockte_ford",
+   "x": 320,
+   "z": 1088,
+   "yaw": 0,
+   "data": {
+    "kind": "ford",
+    "name": "Tockte Ford"
+   }
+  },
+  {
+   "kind": "dungeon_door",
+   "id": "door_1",
+   "x": 1294,
+   "z": 1858,
+   "yaw": 2.768,
+   "data": {
+    "name": "Barrow entrance"
+   }
+  },
+  {
+   "kind": "event_site",
+   "id": "event_grandmother_skein",
+   "x": 1243,
+   "z": 1320,
+   "yaw": 0,
+   "data": {
+    "r": 40
+   }
+  },
+  {
+   "kind": "camp_site",
+   "id": "elite_hobb_gallowsby",
+   "x": 1312,
+   "z": 633,
+   "yaw": 0,
+   "data": {
+    "r": 25
+   }
+  },
+  {
+   "kind": "town_square",
+   "id": "torborhold_square",
+   "x": 1439.03,
+   "z": 1685.45,
+   "yaw": 0,
+   "data": {
+    "r": 3.87,
+    "town": "torborhold"
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_0",
+   "x": 1400.22,
+   "z": 1666.53,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      1400.22,
+      1666.53
+     ],
+     [
+      1440.58,
+      1668.02
+     ],
+     [
+      1480.89,
+      1670.41
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_1",
+   "x": 1447.77,
+   "z": 1720.48,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      1447.77,
+      1720.48
+     ],
+     [
+      1448.72,
+      1696.78
+     ],
+     [
+      1448.14,
+      1673.06
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_2",
+   "x": 1403.17,
+   "z": 1693.25,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1403.17,
+      1693.25
+     ],
+     [
+      1422.64,
+      1696.93
+     ],
+     [
+      1442.21,
+      1700.02
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_3",
+   "x": 1417.47,
+   "z": 1714.87,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1417.47,
+      1714.87
+     ],
+     [
+      1418.19,
+      1707.28
+     ],
+     [
+      1418.19,
+      1699.65
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_4",
+   "x": 1408.13,
+   "z": 1707.36,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1408.13,
+      1707.36
+     ],
+     [
+      1410.65,
+      1707.47
+     ],
+     [
+      1416.35,
+      1707.76
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_5",
+   "x": 1412.06,
+   "z": 1706.44,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1412.06,
+      1706.44
+     ],
+     [
+      1412.05,
+      1702.9
+     ],
+     [
+      1412.39,
+      1699.37
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_6",
+   "x": 1426.18,
+   "z": 1715.29,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1426.18,
+      1715.29
+     ],
+     [
+      1426.93,
+      1707.69
+     ],
+     [
+      1426.9,
+      1700.06
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_7",
+   "x": 1419.27,
+   "z": 1707.84,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1419.27,
+      1707.84
+     ],
+     [
+      1422.15,
+      1707.95
+     ],
+     [
+      1425.03,
+      1708.12
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_8",
+   "x": 1428.09,
+   "z": 1706.51,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1428.09,
+      1706.51
+     ],
+     [
+      1432.39,
+      1706.88
+     ],
+     [
+      1436.71,
+      1706.92
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_9",
+   "x": 1425.93,
+   "z": 1694.52,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1425.93,
+      1694.52
+     ],
+     [
+      1427.56,
+      1686.63
+     ],
+     [
+      1430.18,
+      1679.01
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_10",
+   "x": 1416.27,
+   "z": 1691.87,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1416.27,
+      1691.87
+     ],
+     [
+      1418.74,
+      1684.21
+     ],
+     [
+      1420.52,
+      1676.37
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_11",
+   "x": 1407.99,
+   "z": 1683.44,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1407.99,
+      1683.44
+     ],
+     [
+      1412.2,
+      1684.67
+     ],
+     [
+      1416.44,
+      1685.76
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_12",
+   "x": 1419.35,
+   "z": 1686.11,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1419.35,
+      1686.11
+     ],
+     [
+      1422.67,
+      1687.17
+     ],
+     [
+      1426.06,
+      1687.95
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_13",
+   "x": 1429.4,
+   "z": 1687.99,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1429.4,
+      1687.99
+     ],
+     [
+      1434.87,
+      1689.51
+     ],
+     [
+      1440.36,
+      1690.99
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_14",
+   "x": 1431.7,
+   "z": 1696.1,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1431.7,
+      1696.1
+     ],
+     [
+      1432.58,
+      1693.18
+     ],
+     [
+      1433.31,
+      1690.22
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_15",
+   "x": 1434.09,
+   "z": 1688.11,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1434.09,
+      1688.11
+     ],
+     [
+      1434.92,
+      1684.32
+     ],
+     [
+      1436.14,
+      1680.65
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_16",
+   "x": 1451.52,
+   "z": 1697.2,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1451.52,
+      1697.2
+     ],
+     [
+      1464.43,
+      1696.29
+     ],
+     [
+      1477.36,
+      1695.95
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_17",
+   "x": 1466.33,
+   "z": 1712.72,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1466.33,
+      1712.72
+     ],
+     [
+      1465.68,
+      1708.19
+     ],
+     [
+      1464.94,
+      1698.61
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_18",
+   "x": 1452.79,
+   "z": 1707.31,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1452.79,
+      1707.31
+     ],
+     [
+      1458.6,
+      1707.01
+     ],
+     [
+      1464.33,
+      1706.04
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_19",
+   "x": 1459.49,
+   "z": 1717.2,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1459.49,
+      1717.2
+     ],
+     [
+      1458.97,
+      1713.33
+     ],
+     [
+      1458.52,
+      1708.12
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_20",
+   "x": 1453.4,
+   "z": 1712.79,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1453.4,
+      1712.79
+     ],
+     [
+      1455.58,
+      1712.57
+     ],
+     [
+      1457.76,
+      1712.31
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_21",
+   "x": 1460.3,
+   "z": 1713.17,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1460.3,
+      1713.17
+     ],
+     [
+      1462.67,
+      1712.85
+     ],
+     [
+      1465.06,
+      1712.64
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_22",
+   "x": 1458.86,
+   "z": 1705.2,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1458.86,
+      1705.2
+     ],
+     [
+      1458.53,
+      1702.28
+     ],
+     [
+      1458.21,
+      1699.35
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_23",
+   "x": 1467.3,
+   "z": 1707.1,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1467.3,
+      1707.1
+     ],
+     [
+      1472.1,
+      1706.71
+     ],
+     [
+      1472.45,
+      1706.66
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_24",
+   "x": 1471.23,
+   "z": 1705.42,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1471.23,
+      1705.42
+     ],
+     [
+      1470.99,
+      1701.7
+     ],
+     [
+      1470.41,
+      1698.01
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_25",
+   "x": 1463.08,
+   "z": 1693.55,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1463.08,
+      1693.55
+     ],
+     [
+      1464.55,
+      1685.28
+     ],
+     [
+      1464.93,
+      1676.88
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_26",
+   "x": 1453.27,
+   "z": 1682.51,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1453.27,
+      1682.51
+     ],
+     [
+      1457.93,
+      1682.75
+     ],
+     [
+      1462.54,
+      1683.54
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_27",
+   "x": 1457.71,
+   "z": 1692.96,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1457.71,
+      1692.96
+     ],
+     [
+      1458.43,
+      1688.75
+     ],
+     [
+      1458.64,
+      1684.49
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_28",
+   "x": 1458.25,
+   "z": 1681.68,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1458.25,
+      1681.68
+     ],
+     [
+      1458.69,
+      1678.96
+     ],
+     [
+      1458.86,
+      1676.21
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_29",
+   "x": 1465.58,
+   "z": 1685.91,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1465.58,
+      1685.91
+     ],
+     [
+      1470.12,
+      1686.22
+     ],
+     [
+      1474.62,
+      1686.91
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_30",
+   "x": 1432.65,
+   "z": 1660.46,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      1432.65,
+      1660.46
+     ],
+     [
+      1434.46,
+      1650.59
+     ],
+     [
+      1436.09,
+      1640.68
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_31",
+   "x": 1416.96,
+   "z": 1655.56,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1416.96,
+      1655.56
+     ],
+     [
+      1419.71,
+      1647.57
+     ],
+     [
+      1422.01,
+      1642.05
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_32",
+   "x": 1414.76,
+   "z": 1646.43,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1414.76,
+      1646.43
+     ],
+     [
+      1415.92,
+      1646.65
+     ],
+     [
+      1417.75,
+      1646.92
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_33",
+   "x": 1420.59,
+   "z": 1650.24,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1420.59,
+      1650.24
+     ],
+     [
+      1425.11,
+      1651.79
+     ],
+     [
+      1429.42,
+      1653.85
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_34",
+   "x": 1421.86,
+   "z": 1657.02,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1421.86,
+      1657.02
+     ],
+     [
+      1422.76,
+      1655
+     ],
+     [
+      1423.54,
+      1652.92
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_35",
+   "x": 1424.52,
+   "z": 1650.36,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1424.52,
+      1650.36
+     ],
+     [
+      1426.38,
+      1646.24
+     ],
+     [
+      1427.94,
+      1642
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_36",
+   "x": 1456.24,
+   "z": 1663.95,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1456.24,
+      1663.95
+     ],
+     [
+      1458.04,
+      1654.56
+     ],
+     [
+      1458.97,
+      1645.04
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_37",
+   "x": 1444.85,
+   "z": 1661.4,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1444.85,
+      1661.4
+     ],
+     [
+      1445.17,
+      1652.86
+     ],
+     [
+      1445.2,
+      1644.31
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_38",
+   "x": 1437.75,
+   "z": 1652.77,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1437.75,
+      1652.77
+     ],
+     [
+      1440.76,
+      1652.99
+     ],
+     [
+      1443.78,
+      1652.89
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_39",
+   "x": 1446.3,
+   "z": 1651.37,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1446.3,
+      1651.37
+     ],
+     [
+      1450.74,
+      1651.4
+     ],
+     [
+      1455.18,
+      1651.55
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_40",
+   "x": 1459.7,
+   "z": 1655.55,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1459.7,
+      1655.55
+     ],
+     [
+      1464.69,
+      1656.65
+     ],
+     [
+      1469.63,
+      1657.98
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_41",
+   "x": 1464.28,
+   "z": 1663.93,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1464.28,
+      1663.93
+     ],
+     [
+      1465.12,
+      1661.13
+     ],
+     [
+      1465.67,
+      1658.26
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_42",
+   "x": 1464.71,
+   "z": 1655.52,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1464.71,
+      1655.52
+     ],
+     [
+      1465.54,
+      1651.44
+     ],
+     [
+      1466.66,
+      1647.55
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_43",
+   "x": 1448.72,
+   "z": 1696.78,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1448.72,
+      1696.78
+     ],
+     [
+      1442.21,
+      1700.02
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_44",
+   "x": 1463.08,
+   "z": 1693.55,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1463.08,
+      1693.55
+     ],
+     [
+      1463.28,
+      1696.37
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_45",
+   "x": 1432.65,
+   "z": 1660.46,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1432.65,
+      1660.46
+     ],
+     [
+      1432.39,
+      1667.72
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_46",
+   "x": 1429.42,
+   "z": 1653.85,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1429.42,
+      1653.85
+     ],
+     [
+      1433.72,
+      1654.64
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_47",
+   "x": 1437.75,
+   "z": 1652.77,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1437.75,
+      1652.77
+     ],
+     [
+      1434.18,
+      1652.12
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_48",
+   "x": 1458.04,
+   "z": 1654.56,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1458.04,
+      1654.56
+     ],
+     [
+      1455.18,
+      1651.55
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_0",
+   "x": 1421.95,
+   "z": 1712.1,
+   "yaw": 3.0941,
+   "data": {
+    "town": "torborhold",
+    "want": "house",
+    "district": "residential",
+    "w": 4.77,
+    "d": 4.57,
+    "angle": 4.7599,
+    "front": 4.7599,
+    "streetGap": -0.33
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_1",
+   "x": 1422.37,
+   "z": 1703.35,
+   "yaw": -0.0475,
+   "data": {
+    "town": "torborhold",
+    "want": "hut",
+    "district": "craft",
+    "w": 5.8,
+    "d": 4.57,
+    "angle": 4.7599,
+    "front": 7.9014,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_2",
+   "x": 1432.16,
+   "z": 1711.77,
+   "yaw": 3.0941,
+   "data": {
+    "town": "torborhold",
+    "want": "granary",
+    "district": "residential",
+    "w": 6.39,
+    "d": 7.43,
+    "angle": 4.7599,
+    "front": 4.7599,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_3",
+   "x": 1432.58,
+   "z": 1702.89,
+   "yaw": -1.6183,
+   "data": {
+    "town": "torborhold",
+    "want": "hut",
+    "district": "craft",
+    "w": 3.91,
+    "d": 7.43,
+    "angle": 4.7599,
+    "front": 9.4722,
+    "streetGap": -0.14
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_4",
+   "x": 1411.28,
+   "z": 1688.03,
+   "yaw": 2.8741,
+   "data": {
+    "town": "torborhold",
+    "want": "house",
+    "district": "residential",
+    "w": 3.57,
+    "d": 7.56,
+    "angle": 4.9799,
+    "front": 4.9799,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_5",
+   "x": 1413.71,
+   "z": 1679.14,
+   "yaw": -0.2675,
+   "data": {
+    "town": "torborhold",
+    "want": "inn",
+    "district": "residential",
+    "w": 7.76,
+    "d": 7.56,
+    "angle": 4.9799,
+    "front": 8.1214,
+    "streetGap": -0.25
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_6",
+   "x": 1421.7,
+   "z": 1690.7,
+   "yaw": 2.8741,
+   "data": {
+    "town": "torborhold",
+    "want": "hut",
+    "district": "craft",
+    "w": 3.92,
+    "d": 5.75,
+    "angle": 4.9799,
+    "front": 4.9799,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_7",
+   "x": 1424.15,
+   "z": 1681.75,
+   "yaw": -1.8383,
+   "data": {
+    "town": "torborhold",
+    "want": "hut",
+    "district": "craft",
+    "w": 7.26,
+    "d": 5.75,
+    "angle": 4.9799,
+    "front": 9.6922,
+    "streetGap": -0.23
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_8",
+   "x": 1436.45,
+   "z": 1694.24,
+   "yaw": -1.8383,
+   "data": {
+    "town": "torborhold",
+    "want": "hut",
+    "district": "civic",
+    "w": 4.89,
+    "d": 4.63,
+    "angle": 4.9799,
+    "front": 9.6922,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_9",
+   "x": 1454.88,
+   "z": 1702.68,
+   "yaw": 1.6805,
+   "data": {
+    "town": "torborhold",
+    "want": "hut",
+    "district": "craft",
+    "w": 4.68,
+    "d": 3.96,
+    "angle": 4.6027,
+    "front": 6.1735,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_10",
+   "x": 1469.6,
+   "z": 1690.96,
+   "yaw": -1.6811,
+   "data": {
+    "town": "torborhold",
+    "want": "stable",
+    "district": "residential",
+    "w": 5.39,
+    "d": 7.89,
+    "angle": 4.8227,
+    "front": 9.5351,
+    "streetGap": -0.07
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_11",
+   "x": 1470.66,
+   "z": 1681.35,
+   "yaw": -0.1103,
+   "data": {
+    "town": "torborhold",
+    "want": "market",
+    "district": "residential",
+    "w": 6.41,
+    "d": 7.89,
+    "angle": 4.8227,
+    "front": 7.9643,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_12",
+   "x": 1440.67,
+   "z": 1657.71,
+   "yaw": 3.1215,
+   "data": {
+    "town": "torborhold",
+    "want": "house",
+    "district": "residential",
+    "w": 6.03,
+    "d": 4.83,
+    "angle": 4.7325,
+    "front": 4.7325,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_13",
+   "x": 1440.86,
+   "z": 1647.9,
+   "yaw": 1.5507,
+   "data": {
+    "town": "torborhold",
+    "want": "house",
+    "district": "residential",
+    "w": 6.15,
+    "d": 4.83,
+    "angle": 4.7325,
+    "front": 6.3033,
+    "streetGap": -0.19
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_14",
+   "x": 1450.63,
+   "z": 1657.07,
+   "yaw": -1.5909,
+   "data": {
+    "town": "torborhold",
+    "want": "forge",
+    "district": "residential",
+    "w": 7.71,
+    "d": 7.68,
+    "angle": 4.7325,
+    "front": 9.4449,
+    "streetGap": -0.33
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_15",
+   "x": 1450.82,
+   "z": 1647.36,
+   "yaw": -0.0201,
+   "data": {
+    "town": "torborhold",
+    "want": "house",
+    "district": "residential",
+    "w": 4.68,
+    "d": 7.68,
+    "angle": 4.7325,
+    "front": 7.8741,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_16",
+   "x": 1461.23,
+   "z": 1660.18,
+   "yaw": 2.9015,
+   "data": {
+    "town": "torborhold",
+    "want": "house",
+    "district": "residential",
+    "w": 4.63,
+    "d": 3.99,
+    "angle": 4.9525,
+    "front": 4.9525,
+    "streetGap": -0.22
+   }
+  }
+ ]
+}

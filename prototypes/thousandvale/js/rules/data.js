@@ -41,6 +41,12 @@ export async function loadEncounters(readJson) {
   const index = await readJson(new URL('index.json', dir));
   const scripts = {};
   for (const f of index.files || []) { const s = await readJson(new URL(f, dir)); scripts[s.id] = s; }
-  const specials = index.specials ? await readJson(new URL(index.specials, dir)) : { families: {} };
+  // `specials` may be one file or a list; each may hold `families` (family/role) and `types` (monster type id)
+  const specials = { families: {}, types: {} };
+  for (const f of [].concat(index.specials || [], index.typeSpecials || [])) {
+    const d = await readJson(new URL(f, dir));
+    Object.assign(specials.families, d.families || {});
+    Object.assign(specials.types, d.types || {});
+  }
   return { scripts, specials, defaults: index.defaults || {}, byType: index.byType || {} };
 }

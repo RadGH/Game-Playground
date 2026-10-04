@@ -1,0 +1,183 @@
+{
+  "_doc": "Stream E (M2). Quests for zone 'gorse_march' (The Gorse March). Format: data/quests/README.md. Rewards: xp = share of a level's XP at the quest level, gold = multiple of a kill's gold; item.tier rolls at your level. `killRare` {zone, slot} names the zone's rare by slot (data/provinces/rares.json). Story-chain quests carry `story: n` (data/quests/province.json).",
+  "zone": "gorse_march",
+  "npcs": {
+    "redoubt_captain": {
+      "name": "Captain Hollis Gorse",
+      "role": "guard",
+      "at": "Gorsehold Redoubt",
+      "greeting": "The redoubt holds the march. The gorse holds everything else, prickly."
+    },
+    "barn_widow": {
+      "name": "Widow Edda",
+      "role": "farmer",
+      "at": "Burnt Barns",
+      "greeting": "They burned the barns. I'm still here. They should be worried."
+    },
+    "march_trader": {
+      "name": "Garrick the pedlar",
+      "role": "trader",
+      "at": "Gorsehold",
+      "greeting": "Pins, needles, arrowheads. All pointy. It's that sort of country."
+    }
+  },
+  "quests": [
+    {
+      "id": "burnt_barns",
+      "name": "Burnt Barns",
+      "level": 6,
+      "giver": "barn_widow",
+      "offer": "Raiders burned the barns and left their pets behind. Fire imps in my hay. Get them out.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "cinder_imp",
+          "count": 6,
+          "where": "the burnt barns",
+          "text": "Cinder imps"
+        }
+      ],
+      "done": "The hay's safe. What's left of it.",
+      "reward": {
+        "xp": 0.45,
+        "gold": 8,
+        "item": {
+          "tier": "common",
+          "slot": "any"
+        }
+      },
+      "next": "cinder_farm"
+    },
+    {
+      "id": "hyenas_in_the_gorse",
+      "name": "Laughter in the Gorse",
+      "level": 6,
+      "giver": "redoubt_captain",
+      "offer": "Hyenas den in the gorse and laugh at my patrols. My patrols have feelings.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "crag_hyena",
+          "count": 6,
+          "where": "the gorse thickets",
+          "text": "Crag hyenas"
+        }
+      ],
+      "done": "No more laughing. My patrols are much happier.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 7
+      }
+    },
+    {
+      "id": "pointy_business",
+      "name": "Pointy Business",
+      "level": 6,
+      "giver": "march_trader",
+      "offer": "Raiders robbed my arrowhead shipment and are using it on me. That's double rude.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "brigand_archer",
+          "count": 5,
+          "where": "the raider camps",
+          "text": "Raider archers"
+        },
+        {
+          "kind": "collect",
+          "item": "Crate of arrowheads",
+          "count": 1,
+          "from": "brigand_archer",
+          "chance": 0.3,
+          "text": "Arrowheads recovered"
+        }
+      ],
+      "done": "Back in stock! Arrowheads, half price, slightly used.",
+      "reward": {
+        "xp": 0.45,
+        "gold": 9,
+        "item": {
+          "tier": "common",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "redoubt_relief",
+      "name": "Relief for the Redoubt",
+      "level": 7,
+      "giver": "redoubt_captain",
+      "offer": "Raiders keep probing the redoubt. Push back their camps before they find the soft spot. There's always a soft spot.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "road_brigand",
+          "count": 8,
+          "where": "the raider camps",
+          "text": "Raiders"
+        }
+      ],
+      "done": "Soft spot still secret. Good.",
+      "reward": {
+        "xp": 0.45,
+        "gold": 9
+      },
+      "next": "stalkers_in_the_moss"
+    },
+    {
+      "id": "the_march_tower",
+      "name": "The March Tower",
+      "level": 8,
+      "giver": "redoubt_captain",
+      "group": "a party of 3-5",
+      "offer": "The raiders have taken the watchtower on the hill. All the way up. Take it back, floor by floor.",
+      "steps": [
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "text": "Take the middle floors",
+          "floor": 1
+        },
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "text": "Retake the top",
+          "boss": true
+        }
+      ],
+      "done": "Our flag flies on the hill. The gorse looks almost friendly.",
+      "reward": {
+        "xp": 1.2,
+        "gold": 55,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "gorse_rare",
+      "name": "The March's Worst",
+      "level": 7,
+      "giver": "barn_widow",
+      "offer": "There's a beast out on the march that the raiders feed. Kill it and they'll go hungry.",
+      "steps": [
+        {
+          "kind": "killRare",
+          "zone": "gorse_march",
+          "slot": 0,
+          "text": "The march's rare slain"
+        }
+      ],
+      "done": "Let them go hungry. Good.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 26,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      }
+    }
+  ]
+}

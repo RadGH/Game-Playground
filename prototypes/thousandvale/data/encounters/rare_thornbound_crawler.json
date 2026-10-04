@@ -1,0 +1,147 @@
+{
+  "id": "rare_thornbound_crawler",
+  "name": "The Thornbound Crawler",
+  "tier": "rare",
+  "zone": "blackthorn_scar",
+  "body": "ossuary_crawler",
+  "place": "drags itself through the thorn thickets of the Scar, wrapped in its own briars",
+  "_doc": "Stream E (M2). A bone-crawler wound in black thorns. It lashes with thorn whips (cross), drops thorns that stay as cover AND hurt to touch, and at half health tears loose: a roar you hide from behind the thorn heaps, which crack each time.",
+  "party": {
+    "solo": "Hard solo at level 8.",
+    "small": "Right for 2-3.",
+    "full": "Easy.",
+    "m5": "M5 adds health per extra player and one more copy of the spread/scatter shapes for parties of 4-5; mechanics stay the same."
+  },
+  "hpMult": 2.1,
+  "arena": {
+    "radius": 24
+  },
+  "say": {
+    "pull": [
+      "The thicket moves. It is full of bones.",
+      "Thorns scrape over stone as something drags itself toward you."
+    ],
+    "death": "The Thornbound Crawler falls apart into bones and dead briars.",
+    "reset": "The Crawler drags itself back into the thicket."
+  },
+  "abilities": {
+    "crush": {
+      "id": "crush",
+      "name": "Bone Crush",
+      "every": [
+        7,
+        9
+      ],
+      "range": 5,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 5,
+          "arc": 1.5,
+          "wind": 1.1,
+          "damage": 1.9
+        }
+      ]
+    },
+    "whips": {
+      "id": "whips",
+      "name": "Thorn Whips",
+      "every": [
+        13,
+        16
+      ],
+      "first": 4,
+      "cast": 0.6,
+      "telegraphs": [
+        {
+          "shape": "cross",
+          "at": "self",
+          "r": 12,
+          "w": 2.4,
+          "yaw": "random",
+          "status": "bleed",
+          "wind": 1.5,
+          "damage": 1.8
+        }
+      ]
+    },
+    "thornfall": {
+      "id": "thornfall",
+      "name": "Thornfall",
+      "every": [
+        18,
+        21
+      ],
+      "first": 2,
+      "cast": 0.6,
+      "say": "Thorn heaps burst up out of the ground!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "r": 2.4,
+          "spread": 10,
+          "count": 3,
+          "leave": {
+            "type": "rock",
+            "name": "Thorn heap",
+            "r": 1.2,
+            "hp": 2
+          },
+          "wind": 1.5,
+          "damage": 1.2
+        }
+      ]
+    },
+    "roar": {
+      "id": "roar",
+      "name": "Tearing Roar",
+      "every": [
+        22,
+        26
+      ],
+      "first": 8,
+      "cast": 2.5,
+      "say": "The Crawler rears up — get behind a thorn heap!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 24,
+          "los": true,
+          "element": "shadow",
+          "status": "curse",
+          "wind": 0.6,
+          "damage": 2.6
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Dragging",
+      "abilities": [
+        "crush",
+        "whips",
+        "thornfall"
+      ]
+    },
+    {
+      "name": "Torn Loose",
+      "at": 0.5,
+      "say": "The Crawler rips free of its briars!",
+      "abilities": [
+        "crush",
+        "roar",
+        "thornfall",
+        "whips"
+      ]
+    }
+  ],
+  "enrage": {
+    "seconds": 300,
+    "damage": 2.5,
+    "say": "The Crawler goes berserk among the thorns!"
+  }
+}

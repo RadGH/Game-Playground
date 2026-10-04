@@ -1,3 +1,5 @@
+import { applyJournal } from '../../js/sim/journal.js';
+import { unpackChar } from '../../js/sim/save-fields.js';
 // Shared test helpers for stream A.
 import { createLoopbackServer } from '../../js/sim/loopback.js';
 import { createMemoryStore } from '../../js/sim/store-memory.js';
@@ -67,3 +69,9 @@ export function ent(srv, c) {
 }
 /** The room a client is in on the server. */
 export function roomOf(srv, c) { const o = srv.world.online.get(c.joined.you.char); return o ? o.room : null; }
+
+/** What a memory store would load for every character right now (blob + journal). */
+export function loadAll(store) {
+  const d = store.data;
+  return Object.values(d.chars).map(r => applyJournal(unpackChar(r), JSON.parse(JSON.stringify((d.journal[r.id] || []).slice().sort((a, b) => a.seq - b.seq)))));
+}

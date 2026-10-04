@@ -15,7 +15,7 @@
     "rare_sallowmaw.json",
     "event_grandmother_skein.json"
   ],
-  "specials": "specials.json",
+  "specials": ["specials.json", "specials_torbor.json"],
   "defaults": {
     "boss": {
       "instance": "barrow_warden",

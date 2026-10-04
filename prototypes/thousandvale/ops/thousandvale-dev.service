@@ -1,0 +1,32 @@
+# Thousandvale DEV game server (port 8491) as a systemd USER unit — stream H.
+# Install (no sudo; lingering is already on for radgh, so it runs without a login):
+#   prototypes/thousandvale/ops/install-dev-unit.sh
+# Then:
+#   systemctl --user status thousandvale-dev
+#   systemctl --user restart thousandvale-dev
+#   journalctl --user -u thousandvale-dev -f        # structured JSON logs (PLAN §11.4)
+# Stop it for good: systemctl --user disable --now thousandvale-dev
+#
+# This is the DEV server: the live working tree, thousandvale_dev, LAN only. The public STABLE server
+# (8490) runs as its own Linux user from a published copy with a hardened SYSTEM unit — see ops/SECURITY.md.
+
+[Unit]
+Description=Thousandvale dev game server (8491)
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=%h/claude/playground/prototypes/thousandvale/ops/start-dev.sh
+Environment=PORT=8491 DB=pg NODE_ENV=development
+Restart=on-failure
+RestartSec=2
+# a graceful restart saves everyone first (protocol.md §8.4); give it time before SIGKILL
+TimeoutStopSec=75
+KillSignal=SIGTERM
+# light hardening that still works in a user unit
+NoNewPrivileges=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=default.target

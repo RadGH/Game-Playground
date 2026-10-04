@@ -19,7 +19,7 @@
 //   §6 goods     js/trade.js + js/hold.js — twenty-two products in one weight-capped container
 //   §7 routes    js/trade.js    — real prices per town, so buying low and selling high is real
 //   §8 guards    js/colony.js + js/defence.js — a post is a structure, a guard is a person in it
-//   §9 muster    js/muster.js   — a wave defence you ask for, with nothing at stake if you lose
+//   §9 levy    js/levy.js   — a wave defence you ask for, with nothing at stake if you lose
 //
 // THE ONE RULE ALL OF IT FOLLOWS: a machine is "simple and calculable without any physics or
 // rendering" — pure data plus a tick. Nothing in this file or anything it imports has ever seen a
@@ -29,7 +29,7 @@ import { createHousing } from './housing.js';
 import { createVendors } from './vendors.js';
 import { createHold, holdCapacity } from './hold.js';
 import { createTrade, installTradeGoods } from './trade.js';
-import { createMuster } from './muster.js';
+import { createLevy } from './levy.js';
 
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
 
@@ -61,7 +61,7 @@ export function createCivics({
   const vendors = createVendors({ data });
   const hold = createHold({ goods: goods?.goods || [], capacity: data?.hold?.onBack ?? 40 });
   const trade = createTrade({ goods: goods?.goods || [], data, seed, powerAt });
-  const muster = createMuster({ data: raids, civics: { ...(data || {}), dayLengthSeconds }, bestiary, saved: null });
+  const levy = createLevy({ data: raids, civics: { ...(data || {}), dayLengthSeconds }, bestiary, saved: null });
 
   const AWAY = data?.away || { rate: { away: 1, closed: 0.55 }, capSeconds: 28800, mercyDays: 3, sliceSeconds: 20, minCardSeconds: 900 };
   const FOOD = data?.food || {};
@@ -561,7 +561,7 @@ export function createCivics({
   }
 
   return {
-    housing, vendors, hold, trade, muster,
+    housing, vendors, hold, trade, levy,
     rebuild, tick, away, report, facts, stationAt, madeOf,
     // R28 — the cart route's way in (the Trade tab's "Send a cart")
     cartCarriers, cartGoods, cartPlan, sendCart, setRepeat, resend, feedRefusal,
@@ -575,7 +575,7 @@ export function createCivics({
         v: 1, spent, lastVendorDay,
         housing: housing.toJSON(), vendors: vendors.toJSON(),
         hold: hold.toJSON(),
-        trade: trade.toJSON(), muster: muster.toJSON(),
+        trade: trade.toJSON(), levy: levy.toJSON(),
       };
     },
     loadJSON(json) {
@@ -586,7 +586,8 @@ export function createCivics({
       vendors.loadJSON(json.vendors);
       hold.loadJSON(json.hold);
       trade.loadJSON(json.trade);
-      muster.loadJSON(json.muster);
+      // 2026-10-03 — this block was saved as `muster` before the word was banned; read either.
+      levy.loadJSON(json.levy ?? json.muster);
     },
   };
 }

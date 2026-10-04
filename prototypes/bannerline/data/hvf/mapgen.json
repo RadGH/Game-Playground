@@ -1,0 +1,235 @@
+{
+ "_doc": "World generator knobs for Hunters vs Farmers (docs/hvf-PLAN.md \u00a73). Read by js/sim/modes/hvf/mapgen.js. Distances in METRES unless a key ends in Cells. Cell kinds are fixed in code (KIND in mapgen.js). `features` = how many of each stamped feature to TRY per map, scaled by map area / (256 m)^2 and rounded (min 0); each has its own validator and is skipped where it does not fit. `validate` = the acceptance rules; a failing world retries with seed + k up to `retries` times, then the generator throws. `names` = plain-word pieces for landmark names (minimap and pings: \"A sheep was taken near the Stone Ring\"). Tuning notes: validate.forest was the plan's 35-55%; after the first look (H1) it is 45-68%, because with 2 m cells and 3-5 m trails a half-open map read as a park, not a forest, and the plateaus' wooded tops count as forest.",
+ "cell": 2,
+ "plateau": {
+  "share": 0.18,
+  "noiseScale": 46,
+  "octave2": 0.45,
+  "smooth": 3,
+  "minCells": 50,
+  "trailBuffer": 3,
+  "ramps": [
+   1,
+   2
+  ],
+  "rampWidth": 2,
+  "glades": [
+   1,
+   2
+  ]
+ },
+ "glades": {
+  "spacing": 44,
+  "radius": [
+   6,
+   14
+  ],
+  "edgeMargin": 12
+ },
+ "commons": {
+  "radius": 15
+ },
+ "kennels": {
+  "radius": 6,
+  "rim": 0.4
+ },
+ "trails": {
+  "k": 4,
+  "loopShare": 0.25,
+  "width": [
+   3,
+   5
+  ],
+  "wobble": 0.18,
+  "depth": 3
+ },
+ "forest": {
+  "roughen": 0.32,
+  "specks": 0.012,
+  "looks": 3
+ },
+ "tallgrass": {
+  "noiseScale": 14,
+  "share": 0.3
+ },
+ "ponds": {
+  "noiseScale": 30,
+  "share": 0.025,
+  "minCells": 10
+ },
+ "stream": {
+  "candidates": 14,
+  "width": 3,
+  "fords": [
+   1,
+   2
+  ],
+  "wobble": 0.22
+ },
+ "rocks": {
+  "share": 0.006
+ },
+ "briarClumps": {
+  "per": 9,
+  "size": [
+   2,
+   5
+  ]
+ },
+ "hollows": {
+  "perFarmer": 2.2,
+  "minPerFarmer": 2,
+  "radius": [
+   3.5,
+   5
+  ],
+  "offTrail": [
+   6,
+   18
+  ],
+  "entry": {
+   "briar": 0.45,
+   "tree": 0.55
+  },
+  "spacing": 18,
+  "layouts": 3
+ },
+ "features": {
+  "pocketValley": 2,
+  "briarMaze": 1,
+  "pondIsland": 1,
+  "ravineTrail": 1,
+  "stoneRing": 1,
+  "oldOrchard": 1,
+  "deadfallWall": 1
+ },
+ "featureSize": {
+  "pocketValley": {
+   "radius": [
+    5,
+    7
+   ]
+  },
+  "briarMaze": {
+   "minRadius": 8
+  },
+  "pondIsland": {
+   "pond": 11,
+   "island": 4
+  },
+  "ravineTrail": {
+   "length": 28,
+   "wall": 4
+  },
+  "stoneRing": {
+   "minRadius": 7,
+   "stones": 9
+  },
+  "oldOrchard": {
+   "radius": 17,
+   "spacing": 5
+  },
+  "deadfallWall": {
+   "thickness": 2,
+   "gaps": [
+    1,
+    2
+   ]
+  }
+ },
+ "validate": {
+  "farmerReach": 1.0,
+  "hunterGlades": 0.85,
+  "forest": [
+   0.45,
+   0.68
+  ],
+  "loops": 3,
+  "kennelDistance": 60,
+  "retries": 8
+ },
+ "names": {
+  "glade": {
+   "first": [
+    "Foxglove",
+    "Thistle",
+    "Hazel",
+    "Crow's",
+    "Badger",
+    "Sorrel",
+    "Bracken",
+    "Elder",
+    "Hare's",
+    "Moss",
+    "Rowan",
+    "Owl's",
+    "Nettle",
+    "Willow",
+    "Alder",
+    "Larch",
+    "Clover",
+    "Bramble",
+    "Fern",
+    "Acorn",
+    "Wren's",
+    "Heron",
+    "Sloe",
+    "Yarrow"
+   ],
+   "second": [
+    "Glade",
+    "Clearing",
+    "Meadow",
+    "Dell",
+    "Green",
+    "Field",
+    "Lea",
+    "Patch"
+   ]
+  },
+  "stoneRing": [
+   "the Stone Ring",
+   "the Standing Stones",
+   "the Grey Circle",
+   "the Old Stones"
+  ],
+  "oldOrchard": [
+   "the Old Orchard",
+   "the Wild Orchard",
+   "the Apple Rows",
+   "the Forgotten Orchard"
+  ],
+  "briarMaze": [
+   "the Bramble Maze",
+   "the Thorn Tangle",
+   "the Briar Knot",
+   "the Hedge Maze"
+  ],
+  "pondIsland": [
+   "Heron Isle",
+   "the Reed Island",
+   "the Pond Isle",
+   "Duck Island"
+  ],
+  "ravineTrail": [
+   "the Narrows",
+   "the Cut",
+   "the Gully",
+   "the Chasm Path"
+  ],
+  "pocketValley": [
+   "the High Hollow",
+   "the Secret Shelf",
+   "the Eagle's Nook",
+   "the Hidden Ledge"
+  ],
+  "deadfallWall": [
+   "the Deadfall",
+   "the Fallen Wall",
+   "the Timber Line",
+   "the Long Tangle"
+  ],
+  "commons": "The Commons",
+  "kennel": "Kennel"
+ }
+}

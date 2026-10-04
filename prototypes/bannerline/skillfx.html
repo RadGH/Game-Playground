@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bannerline Spell Effects</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@500;700;800&family=Barlow+Semi+Condensed:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/bench.css">
+<script type="importmap">{ "imports": { "three": "../../vendor/three/three.module.js", "three/addons/": "../../vendor/three/addons/" } }</script>
+</head>
+<body class="tool-page">
+<!-- Every hero skill and Sanctum power from data/skill-fx.json, played on fake sim events through
+     js/view/skillfx.js, with the real hero and unit bodies. Click a chip to cast it. -->
+<div class="bench">
+  <header class="bench-bar">
+    <a class="back" href="./">&larr; Bannerline</a>
+    <h1>Spell Effects</h1>
+    <span class="muted" id="state">Loading&hellip;</span>
+    <span class="spacer"></span>
+    <label>Hero <select id="hero"></select></label>
+  </header>
+  <div class="bench-main" style="height: 64vh"><canvas id="view3d"></canvas></div>
+  <section class="bench-results"><div id="chips" class="fx-chips"></div></section>
+</div>
+<style>.fx-chips { display: flex; flex-wrap: wrap; gap: 8px; } .fx-chips h3 { width: 100%; margin: 10px 0 2px; font: 700 15px var(--head); color: var(--gold); } .fx-chips button { padding: 5px 10px; border-radius: 5px; border: 1px solid var(--line); background: #1c1f25; color: var(--ink); cursor: pointer; } .fx-chips button:hover { border-color: var(--gold); }</style>
+<script type="module" src="js/tools/skillfx-page.js"></script>
+</body>
+</html>

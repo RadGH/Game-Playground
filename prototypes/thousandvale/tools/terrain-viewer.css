@@ -1,0 +1,16 @@
+/* Thousandvale terrain viewer — stream B */
+:root { --bg: #14161a; --panel: #1e2127; --ink: #d8dbe0; --dim: #8a909a; --accent: #7fb3d5; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.4 system-ui, sans-serif; }
+header { padding: 10px 16px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; background: var(--panel); }
+header h1 { font-size: 16px; margin: 0 12px 0 0; }
+header label { color: var(--dim); display: flex; gap: 6px; align-items: center; }
+main { display: flex; flex-wrap: wrap; gap: 16px; padding: 16px; }
+.mapwrap { position: relative; flex: 0 1 auto; max-width: 100%; }
+canvas#map { display: block; width: min(820px, calc(100vw - 32px)); height: auto; aspect-ratio: 1; image-rendering: pixelated; cursor: crosshair; background: #000; }
+aside { flex: 1 1 260px; min-width: 240px; }
+.readout { background: var(--panel); padding: 10px 12px; border-radius: 6px; font-family: ui-monospace, monospace; font-size: 13px; white-space: pre; min-height: 9em; }
+.meta { margin-top: 12px; color: var(--dim); font-size: 13px; }
+.meta b { color: var(--ink); font-weight: 600; }
+.status { color: var(--accent); }
+.error { color: #e78; }

@@ -48,7 +48,7 @@ import { createCaravans } from './caravans.js';
 import { createWanderers } from './wanderers.js';
 import { createRumours } from './rumours.js';
 import { createWaypoints, boardSpotFor, hallSpotFor } from './waypoints.js';
-import { townExtent, musterFacts } from './town-plan.js';   // R27 M2
+import { townExtent, levyFacts } from './town-plan.js';   // R27 M2
 import { arrivalAt, arrivalCard } from './town-plan.js';   // R27 M3
 import { createCommand } from './command.js';
 import { createTownHall } from './townhall.js';
@@ -108,7 +108,7 @@ import { createOnboarding } from './onboarding.js';
 import { createHomes } from './homes.js';
 import { WorkBoard, progressText, progressFraction, creditLine, workLeft } from './work.js';
 import { createColony } from './colony.js';
-// the Civilization Expansion: one module owns housing, vendors, the hold, trade, the muster and
+// the Civilization Expansion: one module owns housing, vendors, the hold, trade, the levy and
 // the away half, so main.js constructs ONE thing and ticks ONE thing
 import { createCivics } from './civics.js';
 import { createCivicsScreen } from './civics-ui.js';
@@ -3426,7 +3426,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
    *    furnace to smelt it automatically, consuming work."
    *
    * One module, one tick, one save field. js/civics.js owns js/housing.js, js/vendors.js,
-   * js/hold.js, js/trade.js and js/muster.js, and it injects the twenty-two trade goods into the
+   * js/hold.js, js/trade.js and js/levy.js, and it injects the twenty-two trade goods into the
    * live resources and refining data before anything reads either — never into the files, which is
    * the rule data/items.json taught when it turned out to be shared with Emberveil.
    */
@@ -3699,12 +3699,12 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     getDay: () => Math.floor(state.elapsed / (balance.sky?.dayLengthSeconds ?? 900)) + 1,
     log: (t, c) => hud.log(t, c),
     /**
-     * WHERE A MUSTER WOULD BE CALLED, IF YOU CALLED ONE NOW.
+     * WHERE A LEVY WOULD BE CALLED, IF YOU CALLED ONE NOW.
      *
      * Your own holding if you are standing in it, otherwise the town you are in. `null` means
      * neither, and the tab says so in a sentence rather than showing four dead rows.
      */
-    musterAt: () => {
+    levyAt: () => {
       const home = defence.spot?.({ near: { x: control.x, z: control.z } });
       const town = features.settlementAt(control.x, control.z);
       if (home && Math.hypot(home.x - control.x, home.z - control.z) < 90) {
@@ -3718,18 +3718,18 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
           placeId: 't' + town.id, placeName: town.name,
           // R27 M2: the TOWN's numbers — its planned plots, its own guard bodies, its real wall.
           // `town.walled` was set by nothing, so the walled bonus never applied anywhere
-          base: civics.muster.baseForTown(town, musterFacts(town, folk.guardsOf?.(town.id) ?? 0)),
+          base: civics.levy.baseForTown(town, levyFacts(town, folk.guardsOf?.(town.id) ?? 0)),
           level: player.level, at: state.elapsed,
         };
       }
       return null;
     },
     /**
-     * CALL ONE. The muster builds the quest; `defence` adopts it so there is still exactly one
+     * CALL ONE. The levy builds the quest; `defence` adopts it so there is still exactly one
      * wave system, one kill counter and one `loseRaid` deciding what a loss costs.
      */
-    onMuster: (tier, spot) => {
-      const out = civics.muster.start({
+    onLevy: (tier, spot) => {
+      const out = civics.levy.start({
         placeId: spot.placeId, placeName: spot.placeName, tier, base: spot.base,
         level: player.level, biome: terrain.biomeAt(control.x, control.z).key,
         at: state.elapsed, hour: sky.dayFraction * 24,
@@ -3739,7 +3739,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       defence.adopt(out.quest);
       defence.rally?.({ level: player.level });
       defence.spawnWave({ level: player.level });
-      hud.log(`The muster is called at ${spot.placeName}. Stay near the ground or it is called off.`, 'bad');
+      hud.log(`The levy is called at ${spot.placeName}. Stay near the ground or it is called off.`, 'bad');
       sound.questDone();
       return out;
     },
@@ -5794,13 +5794,13 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       if (bell) return { kind: 'bell', bell };
 
       /**
-       * R18 — AND THE MUSTER STONE, which js/muster.js's own header says is one of the two ways to
-       * call a drill ("a MUSTER STONE at your own outpost"). `muster: true` was read by nobody, so
+       * R18 — AND THE LEVY STONE, which js/levy.js's own header says is one of the two ways to
+       * call a drill ("a LEVY STONE at your own outpost"). `levy: true` was read by nobody, so
        * the piece was a rock. Same shape as the bell above and matched the same way, on its flag.
        */
       const stone = (build.entries || [])
-        .find(e => build.defOf?.(e.key)?.muster && Math.hypot(e.x - control.x, e.z - control.z) < 4);
-      if (stone) return { kind: 'muster', stone };
+        .find(e => build.defOf?.(e.key)?.levy && Math.hypot(e.x - control.x, e.z - control.z) < 4);
+      if (stone) return { kind: 'levy', stone };
 
       /**
        * R15 — E ON A MACHINE OPENS ITS RECIPES.
@@ -8207,7 +8207,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       portal: portals.toJSON?.() || null,
       colony: colony.toJSON?.() || null,
       // who sleeps where, which traders moved in, what is in the hold and the Trade Post, the carts
-      // on the long roads, and the muster cooldowns. js/save.js's parameter list already has it.
+      // on the long roads, and the levy cooldowns. js/save.js's parameter list already has it.
       civics: civics.toJSON?.() || null,
       farm: farm.toJSON?.() || null,
       work: board.toJSON?.() || null,
@@ -8642,18 +8642,18 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
          * per minute from where you are standing, which is the rich-and-far trade-off in one number.
          */
         /**
-         * R18 — THE MUSTER STONE IS THE WAY IN, which is what it was built to be.
+         * R18 — THE LEVY STONE IS THE WAY IN, which is what it was built to be.
          *
-         * js/muster.js's own header says "a MUSTER STONE at your own outpost" is one of the two
-         * ways to call a drill, and `muster: true` sat in data/structures.json read by nobody, so
+         * js/levy.js's own header says "a LEVY STONE at your own outpost" is one of the two
+         * ways to call a drill, and `levy: true` sat in data/structures.json read by nobody, so
          * the piece was a rock you had paid for. The board itself already exists and works — it is
-         * a tab of the Holding — and `musterAt()` already recognises standing near home. So the
+         * a tab of the Holding — and `levyAt()` already recognises standing near home. So the
          * stone opens that board rather than growing a second copy of the logic beside it.
          */
-        else if (it.kind === 'muster') {
+        else if (it.kind === 'levy') {
           holding.show?.();
-          holding.tab = 'muster';
-          hud.log('The muster board. Pick a tier and they will come when you say.', 'level');
+          holding.tab = 'levy';
+          hud.log('The levy board. Pick a tier and they will come when you say.', 'level');
         }
         else if (it.kind === 'bell') {
           const st = defence.standing();
@@ -9901,7 +9901,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
          * as dense but closer" — the band is the density half of that, and you should be able to
          * read it off the ground without opening anything.
          */
-        : near.kind === 'muster' ? '<b>E</b> call a muster'
+        : near.kind === 'levy' ? '<b>E</b> call a levy'
         : near.kind === 'bell' ? (() => {
           const st = defence.standing();
           return st.state === 'offered' ? '<b>E</b> take the fight on'
@@ -10537,12 +10537,12 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       beacons.set(beaconRows);
     }
     /**
-     * R14 — THE MUSTER'S LEASH. Walk away from a drill and it is called off, which is the only
+     * R14 — THE LEVY'S LEASH. Walk away from a drill and it is called off, which is the only
      * thing that stops "call it and go and do something else" being the optimal play.
      */
-    if (civics.muster.quest) {
-      const out = civics.muster.tickLeash(dt, { x: control.x, z: control.z, spot: defence.spot?.() });
-      if (out?.warn) hud.log(`You are ${out.metres} m from the muster. ${out.seconds}s and it is over.`, 'warn');
+    if (civics.levy.quest) {
+      const out = civics.levy.tickLeash(dt, { x: control.x, z: control.z, spot: defence.spot?.() });
+      if (out?.warn) hud.log(`You are ${out.metres} m from the levy. ${out.seconds}s and it is over.`, 'warn');
       if (out?.over) { hud.log(out.line, ''); defence.adopt(null); }
     }
 
@@ -10881,7 +10881,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     get goodsMarket() { return civics.trade; },
     // R28 — the base economy (js/production.js), for the specs and the console
     get production() { return production; },
-    get muster() { return civics.muster; },
+    get levy() { return civics.levy; },
     get map() { return map; },
     /** Is the world under your feet a settled, multi-biome one? (round 10, for the specs) */
     liveableHere: () => isHabitableStart(planet),

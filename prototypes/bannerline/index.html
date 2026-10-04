@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bannerline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@500;700;800&family=Barlow+Semi+Condensed:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../../shared/tooltip.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/hud.css">
+<link rel="stylesheet" href="css/controlbar.css">
+<link rel="stylesheet" href="css/lobby.css">
+<link rel="stylesheet" href="css/town.css">
+<link rel="stylesheet" href="css/campaign.css">
+<link rel="stylesheet" href="css/hvf.css">
+<script type="importmap">{ "imports": { "three": "../../vendor/three/three.module.js", "three/addons/": "../../vendor/three/addons/" } }</script>
+</head>
+<body>
+<div id="app">
+  <!-- The 3D view sits behind every screen; the title uses it for a slow fly-over. -->
+  <canvas id="view" aria-label="Battlefield"></canvas>
+  <div id="overlay" class="overlay" aria-hidden="true"></div>
+
+  <section id="screen-title" class="screen title-screen" data-ui>
+    <div class="title-card">
+      <div class="crest" aria-hidden="true"></div>
+      <h1 class="logo">Bannerline</h1>
+      <p class="tagline">Hold your field. March on theirs. Keep your banners flying.</p>
+      <nav class="menu" id="title-menu">
+        <button class="menu-btn primary" data-act="play">Play <small>vs AI · two on one screen</small></button>
+        <button class="menu-btn" data-act="host">Host Online <small>room code · friends join</small></button>
+        <button class="menu-btn" data-act="join">Join by Code</button>
+        <button class="menu-btn" data-act="campaign">Campaign <small>Banners of the Vale</small></button>
+      </nav>
+      <p class="hint" id="title-hint">Keyboard, mouse or controller · <kbd>Enter</kbd> / <kbd class="pad">A</kbd> to begin</p>
+    </div>
+    <div class="title-foot">A playground prototype by Radley Sustaire</div>
+  </section>
+
+  <section id="screen-modes" class="screen lobby-screen" hidden data-ui></section>
+  <section id="screen-lobby" class="screen lobby-screen" hidden data-ui></section>
+  <section id="screen-campaign" class="screen lobby-screen" hidden data-ui></section>
+  <section id="screen-hvf" class="screen hvf-host" hidden></section>
+  <section id="screen-netjoin" class="screen lobby-screen" hidden data-ui></section>
+  <section id="screen-netroom" class="screen lobby-screen" hidden data-ui></section>
+
+  <section id="screen-match" class="screen match-screen" hidden>
+  </section>
+
+  <section id="screen-results" class="screen results-screen" hidden data-ui>
+    <div class="results-card" id="results-card"></div>
+  </section>
+
+  <div id="boot" class="boot">Loading the vale…</div>
+</div>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

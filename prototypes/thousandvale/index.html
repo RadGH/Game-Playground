@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thousandvale</title>
+<meta name="description" content="Thousandvale — a shared open world. Click the link, make a character, and you are standing next to your friends.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap">
+<link rel="stylesheet" href="css/client.css">
+<script type="importmap">{ "imports": { "three": "../../vendor/three/three.module.js", "three/addons/": "../../vendor/three/addons/" } }</script>
+</head>
+<body>
+<canvas id="view" aria-label="The world"></canvas>
+
+<!-- Everything drawn over the 3D view. -->
+<div id="plates" class="layer" aria-hidden="true"></div>
+<div id="numbers" class="layer" aria-hidden="true"></div>
+
+<div id="hud" class="layer hud" hidden>
+  <section class="unitframe self" id="self-frame" aria-label="You">
+    <div class="uf-portrait"><span id="self-initial">?</span><em id="self-level">1</em></div>
+    <div class="uf-body">
+      <div class="uf-name" id="self-name">—</div>
+      <div class="bar hp"><i id="self-hp-fill"></i><b id="self-hp-lag"></b><span id="self-hp-text">0 / 0</span></div>
+      <div class="bar xp" title="Experience"><i id="self-xp-fill"></i><span id="self-xp-text"></span></div>
+    </div>
+  </section>
+
+  <section class="unitframe target" id="target-frame" aria-label="Target" hidden>
+    <div class="uf-portrait"><span id="target-initial">?</span><em id="target-level">1</em></div>
+    <div class="uf-body">
+      <div class="uf-name" id="target-name">—</div>
+      <div class="bar hp"><i id="target-hp-fill"></i><b id="target-hp-lag"></b><span id="target-hp-text"></span></div>
+      <div class="uf-sub" id="target-sub"></div>
+    </div>
+  </section>
+
+  <div class="zone-banner" id="zone-banner"><small>You enter</small><strong id="zone-name">Greyfang Vale</strong></div>
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+
+  <div class="conn" id="conn" title="Connection"><i class="dot"></i><span id="conn-text">Connecting…</span></div>
+
+  <section class="chat" id="chat" aria-label="Chat">
+    <div class="chat-log" id="chat-log" role="log" aria-live="polite"></div>
+    <form class="chat-entry" id="chat-form" autocomplete="off">
+      <label for="chat-input" class="chat-ch">Say</label>
+      <input id="chat-input" maxlength="240" placeholder="Press Enter to talk" />
+    </form>
+  </section>
+
+  <nav class="actionbar" id="actionbar" aria-label="Action bar"></nav>
+
+  <aside class="help" id="help">
+    <button class="help-toggle" id="help-toggle" title="Controls">?</button>
+    <dl>
+      <dt>WASD</dt><dd>Move</dd>
+      <dt>Shift</dt><dd>Sprint</dd>
+      <dt>Space</dt><dd>Jump</dd>
+      <dt>Drag</dt><dd>Turn the camera</dd>
+      <dt>Click</dt><dd>Select / walk there</dd>
+      <dt>Right-click</dt><dd>Attack an enemy</dd>
+      <dt>Tab</dt><dd>Next enemy</dd>
+      <dt>1 / F</dt><dd>Strike</dd>
+      <dt>Enter</dt><dd>Chat</dd>
+    </dl>
+  </aside>
+
+  <div class="death" id="death" hidden>
+    <h2>You have fallen</h2>
+    <p id="death-wait">Gathering your strength… <b id="death-timer">3</b></p>
+    <button class="primary rise" id="rise" hidden>Rise at the waystone <small>(R)</small></button>
+  </div>
+</div>
+
+<!-- Title / character screen. -->
+<main id="title" class="title">
+  <header class="brand">
+    <h1>Thousandvale</h1>
+    <p>A thousand valleys. One world. Everyone in it.</p>
+  </header>
+  <form id="login" class="card" autocomplete="off">
+    <div class="field">
+      <label for="name">Name</label>
+      <div class="row">
+        <input id="name" maxlength="16" placeholder="Your name" required>
+        <button type="button" class="ghost icon" id="reroll" title="New face">&#9861;</button>
+      </div>
+    </div>
+    <div class="field">
+      <span class="label">People</span>
+      <div class="chips" id="races" role="radiogroup" aria-label="People"></div>
+    </div>
+    <div class="field">
+      <span class="label">Calling</span>
+      <div class="chips classes" id="classes" role="radiogroup" aria-label="Calling"></div>
+      <select id="class-more" aria-label="More callings"></select>
+    </div>
+    <p class="note" id="login-note"></p>
+    <button type="submit" class="primary" id="enter">Enter the world</button>
+    <p class="tiny" id="build-tag"></p>
+  </form>
+  <div class="loading" id="loading"><i></i><span id="loading-text">Waking the valley…</span></div>
+</main>
+
+<script type="module" src="js/client/main.js"></script>
+</body>
+</html>

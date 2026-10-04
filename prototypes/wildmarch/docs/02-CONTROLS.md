@@ -801,8 +801,8 @@ comma are the same command. **Emote names are original.** Page 15 owns what each
 | `/p`, `/party <text>` | your party |
 | `/pw <text>` | party warning: a centre-screen banner and a sound for your party (party leader) |
 | `/i`, `/instance <text>` | everyone in your dungeon, grouped or not |
-| `/mu`, `/muster <text>` | the **Muster** channel: everyone in a world-boss area (page 13, page 15) |
-| `/muster lead` | offer to lead the world-boss fight in that area (page 13) |
+| `/wc`, `/warcall <text>` | the **Warcall** channel: everyone in a world-boss area (page 13, page 15) |
+| `/warcall lead` | offer to lead the world-boss fight in that area (page 13) |
 | `/car <text>` | the **Carriage** channel: everyone riding the same Travel Method (page 20) |
 | `/g`, `/guild <text>` | your guild |
 | `/o`, `/officer <text>` | guild officers |

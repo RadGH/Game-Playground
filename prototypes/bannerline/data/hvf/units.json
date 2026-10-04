@@ -1,0 +1,125 @@
+{
+ "_doc": "Hunters vs Farmers characters and army (docs/hvf-PLAN.md \u00a76, \u00a77). Read by js/sim/modes/hvf/. Speeds m/s, radius m, sight m, damage per hit. `chop` = seconds to cut one tree cell (briar: `chopBriar`). Hunter HP and damage are multiplied by the format's `hunterMult` (rules.json) and grow `perLevel` per level (levels from kills only, H3). The farmer cannot attack. Farmer abilities (`cast` slots Q/W/E): scamper (speed bonus for seconds, cooldown), lieLow (stand still `still` s in tall grass or at a forest edge: seen only within `seen` m until you move), bell (own animals within radius go home). pullUp: channel seconds within range to remove a watchstone or snare. Army (Harvest Hall): scarecrow and crow (a Crow Flock is `flock` crows); `cap` bodies per farmer; Stuffing upgrades scale scarecrow hp and damage.",
+ "farmer": {
+  "name": "Farmer",
+  "hp": 260,
+  "speed": 5.6,
+  "radius": 0.35,
+  "sight": 16,
+  "chop": 4,
+  "chopBriar": 1,
+  "chopGold": 2,
+  "reviveSeconds": 4,
+  "reviveRange": 2.5,
+  "buildRange": 3,
+  "abilities": {
+   "Q": {
+    "id": "scamper",
+    "name": "Scamper",
+    "speed": 0.6,
+    "seconds": 2.5,
+    "cooldown": 18
+   },
+   "W": {
+    "id": "lieLow",
+    "name": "Lie Low",
+    "still": 1.5,
+    "seen": 3,
+    "cooldown": 2
+   },
+   "E": {
+    "id": "bell",
+    "name": "Bell",
+    "radius": 30,
+    "cooldown": 25
+   }
+  },
+  "pullUp": {
+   "seconds": 3,
+   "range": 2.5
+  },
+  "respawnHp": 1.0
+ },
+ "hunter": {
+  "name": "Hunter",
+  "hp": 1200,
+  "speed": 5.2,
+  "radius": 0.9,
+  "sight": 14,
+  "damage": 60,
+  "attackEvery": 1.0,
+  "range": 1.8,
+  "chop": 2,
+  "chopBriar": 1,
+  "chopGold": 2,
+  "respawn": 15,
+  "respawnPerDeath": 3,
+  "startGold": 150,
+  "goldPerSecond": 1,
+  "perLevel": 0.08,
+  "maxLevel": 10,
+  "xpTable": [
+   0,
+   60,
+   150,
+   280,
+   450,
+   680,
+   960,
+   1300,
+   1700,
+   2200
+  ],
+  "xp": {
+   "hen": 5,
+   "sheep": 10,
+   "pig": 16,
+   "cow": 30,
+   "farmer": 80,
+   "building": 20,
+   "scarecrow": 30,
+   "crow": 8
+  }
+ },
+ "bounty": {
+  "hen": 4,
+  "sheep": 10,
+  "pig": 18,
+  "cow": 40,
+  "farmer": 120,
+  "buildingShare": 0.3,
+  "scarecrow": 40,
+  "crow": 12
+ },
+ "farmerStartGold": 60,
+ "army": {
+  "cap": 30,
+  "scarecrow": {
+   "name": "Scarecrow",
+   "cost": 220,
+   "hp": 650,
+   "dps": 28,
+   "attackEvery": 1.0,
+   "range": 1.6,
+   "speed": 4.4,
+   "sight": 10,
+   "radius": 0.5,
+   "flying": false,
+   "bounty": 40
+  },
+  "crow": {
+   "name": "Crow",
+   "cost": 160,
+   "flock": 3,
+   "hp": 120,
+   "dps": 8,
+   "attackEvery": 0.8,
+   "range": 1.2,
+   "speed": 6.5,
+   "sight": 14,
+   "radius": 0.3,
+   "flying": true,
+   "bounty": 12
+  }
+ }
+}

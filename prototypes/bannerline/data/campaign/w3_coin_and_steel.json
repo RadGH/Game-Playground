@@ -1,0 +1,181 @@
+{
+ "id": "w3_coin_and_steel",
+ "chapter": "warrior",
+ "name": "Coin and Steel",
+ "place": "Merrow's Hold",
+ "briefing": [
+  "Our town behind the Keep has opened its doors: the Outfitter sells arms and tonics, the Drill Yard trains every unit we send, the Sanctum sells one-shot powers.",
+  "Captain Merrow: \"Gold is not only for hiring. Arm yourself, drill our troops, and when the field goes bad, call a power down on it.\""
+ ],
+ "config": {
+  "format": "1v1",
+  "map": "vale",
+  "players": [
+   {
+    "team": 0,
+    "kind": "human",
+    "race": "freeholds",
+    "hero": "warrior",
+    "name": "You"
+   },
+   {
+    "team": 1,
+    "kind": "ai",
+    "race": "ashtusk",
+    "hero": "pyromancer",
+    "name": "Ashtusk Firecallers",
+    "ai": {
+     "difficulty": "recruit"
+    }
+   }
+  ],
+  "rules": {
+   "banners": 60,
+   "startGold": 300
+  }
+ },
+ "player": 0,
+ "winWhen": "objectives",
+ "timeLimit": 1200,
+ "objectives": [
+  {
+   "id": "outfit",
+   "text": "Walk to the Outfitter and buy an item",
+   "kind": "items",
+   "args": {
+    "n": 1
+   }
+  },
+  {
+   "id": "drill",
+   "text": "Buy a level at the Drill Yard",
+   "kind": "upgrades",
+   "args": {
+    "n": 1
+   }
+  },
+  {
+   "id": "power",
+   "text": "Cast a power from the Sanctum",
+   "kind": "powers",
+   "args": {
+    "n": 1
+   }
+  },
+  {
+   "id": "press",
+   "text": "Hire 25 units",
+   "kind": "sends",
+   "args": {
+    "n": 25
+   }
+  },
+  {
+   "id": "kit",
+   "text": "Carry 4 items",
+   "kind": "items",
+   "args": {
+    "n": 4
+   },
+   "optional": true
+  },
+  {
+   "id": "fast",
+   "text": "Finish within 10 minutes",
+   "kind": "winBefore",
+   "args": {
+    "seconds": 600
+   },
+   "optional": true
+  }
+ ],
+ "stars": [
+  "kit",
+  "fast"
+ ],
+ "script": [
+  {
+   "id": "hello",
+   "when": {
+    "tick": 20
+   },
+   "do": [
+    {
+     "do": "say",
+     "who": "Captain Merrow",
+     "text": "The Outfitter is the stall beside the Armory. Walk your hero next to it to shop."
+    }
+   ]
+  },
+  {
+   "id": "after_outfit",
+   "when": {
+    "done": "outfit"
+   },
+   "do": [
+    {
+     "do": "say",
+     "who": "Captain Merrow",
+     "text": "The Drill Yard works from anywhere: its levels make every unit you send stronger."
+    }
+   ]
+  },
+  {
+   "id": "after_drill",
+   "when": {
+    "done": "drill"
+   },
+   "do": [
+    {
+     "do": "say",
+     "who": "Captain Merrow",
+     "text": "Now the Sanctum: pick a power and click where it should land."
+    }
+   ]
+  },
+  {
+   "id": "w1",
+   "when": {
+    "at": 60
+   },
+   "do": [
+    {
+     "do": "wave",
+     "player": 1,
+     "units": [
+      [
+       "raider_pair",
+       3
+      ],
+      [
+       "bonecaller",
+       1
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "w2",
+   "when": {
+    "at": 200
+   },
+   "do": [
+    {
+     "do": "wave",
+     "player": 1,
+     "units": [
+      [
+       "brute",
+       3
+      ],
+      [
+       "bonecaller",
+       1
+      ]
+     ]
+    }
+   ]
+  }
+ ]
+}

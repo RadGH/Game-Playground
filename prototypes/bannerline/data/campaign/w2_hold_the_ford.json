@@ -1,0 +1,198 @@
+{
+ "id": "w2_hold_the_ford",
+ "chapter": "warrior",
+ "name": "Hold the Ford",
+ "place": "Wren Ford",
+ "briefing": [
+  "The Ashtusk warband has found the ford in the middle of our field. Their charges slow in the water: that is where a Warrior earns his name.",
+  "Captain Merrow: \"Learn your skills as you rise: Cleave for crowds, Breaching Shove to throw them back into the water, War Cry when they swarm you. Hold for five minutes.\""
+ ],
+ "config": {
+  "format": "1v1",
+  "map": "vale",
+  "players": [
+   {
+    "team": 0,
+    "kind": "human",
+    "race": "freeholds",
+    "hero": "warrior",
+    "name": "You"
+   },
+   {
+    "team": 1,
+    "kind": "ai",
+    "race": "ashtusk",
+    "hero": "warrior",
+    "name": "Ashtusk Warband",
+    "ai": {
+     "difficulty": "recruit"
+    }
+   }
+  ],
+  "rules": {
+   "banners": 60
+  }
+ },
+ "player": 0,
+ "winWhen": "objectives",
+ "timeLimit": 900,
+ "objectives": [
+  {
+   "id": "skills",
+   "text": "Learn 3 skill ranks (the + on a skill)",
+   "kind": "learn",
+   "args": {
+    "n": 3
+   }
+  },
+  {
+   "id": "slay",
+   "text": "Cut down 40 enemies",
+   "kind": "kills",
+   "args": {
+    "n": 40
+   }
+  },
+  {
+   "id": "hold",
+   "text": "Hold the ford for 5 minutes",
+   "kind": "survive",
+   "args": {
+    "seconds": 300
+   }
+  },
+  {
+   "id": "banners",
+   "text": "Keep at least 45 banners",
+   "kind": "bannersAtLeast",
+   "args": {
+    "n": 45
+   },
+   "optional": true
+  },
+  {
+   "id": "unbowed",
+   "text": "Never fall",
+   "kind": "noHeroDeaths",
+   "args": {},
+   "optional": true
+  }
+ ],
+ "stars": [
+  "banners",
+  "unbowed"
+ ],
+ "script": [
+  {
+   "id": "hello",
+   "when": {
+    "tick": 20
+   },
+   "do": [
+    {
+     "do": "say",
+     "who": "Captain Merrow",
+     "text": "Spend your skill points: the plus sign on each skill, or Ctrl + the skill key."
+    }
+   ]
+  },
+  {
+   "id": "w1",
+   "when": {
+    "at": 40
+   },
+   "do": [
+    {
+     "do": "wave",
+     "player": 1,
+     "units": [
+      [
+       "raider_pair",
+       4
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "w2",
+   "when": {
+    "at": 100
+   },
+   "do": [
+    {
+     "do": "wave",
+     "player": 1,
+     "units": [
+      [
+       "brute",
+       1
+      ],
+      [
+       "spearthrower",
+       2
+      ]
+     ]
+    },
+    {
+     "do": "say",
+     "who": "Captain Merrow",
+     "text": "Brutes! Shove them back into the ford, they wade slowly."
+    }
+   ]
+  },
+  {
+   "id": "w3",
+   "when": {
+    "at": 170
+   },
+   "do": [
+    {
+     "do": "wave",
+     "player": 1,
+     "units": [
+      [
+       "raider_pair",
+       3
+      ],
+      [
+       "brute",
+       1
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "w4",
+   "when": {
+    "at": 240
+   },
+   "do": [
+    {
+     "do": "wave",
+     "player": 1,
+     "units": [
+      [
+       "skullsplitter",
+       1
+      ],
+      [
+       "sling_gang",
+       1
+      ],
+      [
+       "brute",
+       2
+      ]
+     ]
+    },
+    {
+     "do": "say",
+     "who": "Captain Merrow",
+     "text": "Their last rush. War Cry pulls them all onto you, then Cleave."
+    }
+   ]
+  }
+ ]
+}

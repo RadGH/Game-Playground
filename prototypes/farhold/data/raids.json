@@ -225,8 +225,8 @@
     "dmgPerPlayerLevel": 0.05,
     "maxDefenceScaling": 1.6
   },
-  "_musterDoc": "The Civilization Expansion §9. A MUSTER is an ordinary raid with `drill: true` on it, so every rule js/raid.js already keeps keeps itself for free: nothing spawns before the bell, night is harder and pays more, and the rare crate is a floor rather than a roll. What the flag changes is the two ends. You pick the rank instead of earning it (`forceTier`), and LOSING COSTS NOTHING — no broken structures, no materials taken, no citizen leaves, no standing lost, no repair bill. The only thing you are out is the time and the cooldown. The user's words: 'No need to penalize for a minigame.'\n\n`spoils` above are the materials a held muster pays into the nearest store pool, or into the materials bag if there is no pool within sixty metres. The crates are the loot and the spoils are the resources, which is the whole 'reward loot or resources' of the request — you get both.",
-  "muster": {
+  "_levyDoc": "The Civilization Expansion §9. A LEVY is an ordinary raid with `drill: true` on it, so every rule js/raid.js already keeps keeps itself for free: nothing spawns before the bell, night is harder and pays more, and the rare crate is a floor rather than a roll. What the flag changes is the two ends. You pick the rank instead of earning it (`forceTier`), and LOSING COSTS NOTHING — no broken structures, no materials taken, no citizen leaves, no standing lost, no repair bill. The only thing you are out is the time and the cooldown. The user's words: 'No need to penalize for a minigame.'\n\n`spoils` above are the materials a held levy pays into the nearest store pool, or into the materials bag if there is no pool within sixty metres. The crates are the loot and the spoils are the resources, which is the whole 'reward loot or resources' of the request — you get both.",
+  "levy": {
     "goldMultiplier": 0.6,
     "standing": 0,
     "cooldownHours": {

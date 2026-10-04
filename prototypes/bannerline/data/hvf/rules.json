@@ -1,0 +1,118 @@
+{
+ "_doc": "Hunters vs Farmers match rules (docs/hvf-PLAN.md \u00a79). `title` is the player-facing mode name (owner: \"Hunters vs Farmers\"). `formats`: farmers v hunters -> map size in metres (square), hunter HP/damage multiplier, head start (s before hunters leave their kennels) and the default clock (s). Read by js/sim/modes/hvf/ (stream H). incomeEvery = seconds between income payments (gold is paid per second). kennel: each hunter's starting lodge.",
+ "title": "Hunters vs Farmers",
+ "subtitle": "Hide, farm, and turn the hunt around",
+ "formats": {
+  "2v1": {
+   "farmers": 2,
+   "hunters": 1,
+   "size": 192,
+   "hunterMult": 0.8,
+   "headStart": 40,
+   "clock": 1200
+  },
+  "3v1": {
+   "farmers": 3,
+   "hunters": 1,
+   "size": 208,
+   "hunterMult": 1.0,
+   "headStart": 45,
+   "clock": 1200
+  },
+  "4v1": {
+   "farmers": 4,
+   "hunters": 1,
+   "size": 224,
+   "hunterMult": 1.2,
+   "headStart": 45,
+   "clock": 1500
+  },
+  "4v2": {
+   "farmers": 4,
+   "hunters": 2,
+   "size": 240,
+   "hunterMult": 0.8,
+   "headStart": 45,
+   "clock": 1500
+  },
+  "5v2": {
+   "farmers": 5,
+   "hunters": 2,
+   "size": 256,
+   "hunterMult": 0.9,
+   "headStart": 45,
+   "clock": 1500
+  },
+  "6v2": {
+   "farmers": 6,
+   "hunters": 2,
+   "size": 272,
+   "hunterMult": 1.0,
+   "headStart": 45,
+   "clock": 1800
+  },
+  "7v2": {
+   "farmers": 7,
+   "hunters": 2,
+   "size": 288,
+   "hunterMult": 1.1,
+   "headStart": 50,
+   "clock": 1800
+  },
+  "8v2": {
+   "farmers": 8,
+   "hunters": 2,
+   "size": 304,
+   "hunterMult": 1.2,
+   "headStart": 50,
+   "clock": 1800
+  },
+  "6v3": {
+   "farmers": 6,
+   "hunters": 3,
+   "size": 288,
+   "hunterMult": 0.85,
+   "headStart": 50,
+   "clock": 1800
+  },
+  "7v3": {
+   "farmers": 7,
+   "hunters": 3,
+   "size": 304,
+   "hunterMult": 0.95,
+   "headStart": 50,
+   "clock": 1800
+  },
+  "8v3": {
+   "farmers": 8,
+   "hunters": 3,
+   "size": 320,
+   "hunterMult": 1.05,
+   "headStart": 50,
+   "clock": 1800
+  },
+  "9v3": {
+   "farmers": 9,
+   "hunters": 3,
+   "size": 320,
+   "hunterMult": 1.15,
+   "headStart": 50,
+   "clock": 1800
+  }
+ },
+ "defaultFormat": "5v2",
+ "incomeEvery": 1,
+ "kennel": {
+  "name": "Kennel",
+  "radius": 6,
+  "hp": 1500
+ },
+ "turn": {
+  "_doc": "The Turn (docs/hvf-PLAN.md \u00a78.2): farmers' army + tower value vs hunters' combat value, both in gold; turn = (F - H) / (F + H), -1..+1, every second.",
+  "armyWeight": 1.0,
+  "towerWeight": 0.6,
+  "hunterBase": 900,
+  "hunterPerLevel": 220,
+  "itemWeight": 1.0
+ }
+}

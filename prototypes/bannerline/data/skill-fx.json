@@ -1,0 +1,738 @@
+{
+ "_doc": "Bannerline skill + power effects (stream C, art only; the sim never reads it). js/view/skillfx.js plays these on sim events with avatar-3d/js/spellfx.js (BatchedSpellFx). Each skill id has `cast` (played on the `cast` event), optional `bolt` (the `bolt` event: element + `trail` true for a sprite trail), `zone` (on `zone` for this skill: drawn for the zone's life), `pulse` (each `pulse`), `hit` (when a `hit` carries this skill), `dash` (on `dash`). A recipe is { fx, at, element, radius?, scale?, ms?, status?, seconds? }. fx: cast | ring | pillar | vortex | storm | heal | impact | breath | footfalls | status | flare. at: caster | point (the event's x,z) | target. radius 'event' = the event's radius. Unknown skills fall back to `default.<shape>` by the skill's element. `powers` uses the same recipes on the `power` event (`land` on `powerHit`). `statuses` maps sim status ids to spellfx STATUS_FX auras drawn on the body while on.",
+ "skills": {
+  "cleave": {
+   "cast": [
+    {
+     "fx": "ring",
+     "at": "caster",
+     "element": "physical",
+     "radius": "event",
+     "arc": true
+    }
+   ]
+  },
+  "breaching_shove": {
+   "cast": [
+    {
+     "fx": "impact",
+     "at": "point",
+     "element": "physical",
+     "scale": 1.3
+    }
+   ]
+  },
+  "warcry": {
+   "cast": [
+    {
+     "fx": "ring",
+     "at": "caster",
+     "element": "fire",
+     "radius": 7
+    },
+    {
+     "fx": "status",
+     "at": "caster",
+     "status": "rally",
+     "seconds": 1.5
+    }
+   ]
+  },
+  "iron_resolve": {
+   "cast": [
+    {
+     "fx": "status",
+     "at": "caster",
+     "status": "barrier",
+     "seconds": 6
+    },
+    {
+     "fx": "flare",
+     "at": "caster",
+     "element": "holy"
+    }
+   ]
+  },
+  "whirlwind": {
+   "cast": [
+    {
+     "fx": "vortex",
+     "at": "caster",
+     "element": "physical",
+     "radius": "event",
+     "ms": 900
+    }
+   ],
+   "pulse": [
+    {
+     "fx": "ring",
+     "at": "point",
+     "element": "physical",
+     "radius": "event"
+    }
+   ]
+  },
+  "firebolt": {
+   "cast": [
+    {
+     "fx": "cast",
+     "at": "caster",
+     "element": "fire",
+     "ms": 260
+    }
+   ],
+   "bolt": {
+    "element": "fire"
+   }
+  },
+  "fire_wall": {
+   "cast": [
+    {
+     "fx": "cast",
+     "at": "caster",
+     "element": "fire"
+    }
+   ],
+   "zone": [
+    {
+     "fx": "footfalls",
+     "element": "fire",
+     "every": 0.45
+    }
+   ]
+  },
+  "flashover": {
+   "cast": [
+    {
+     "fx": "cast",
+     "at": "caster",
+     "element": "fire"
+    }
+   ],
+   "zone": [
+    {
+     "fx": "ring",
+     "element": "fire",
+     "radius": "event"
+    },
+    {
+     "fx": "storm",
+     "element": "fire"
+    }
+   ]
+  },
+  "ember_stride": {
+   "cast": [
+    {
+     "fx": "status",
+     "at": "caster",
+     "status": "haste",
+     "seconds": 4
+    }
+   ],
+   "dash": [
+    {
+     "fx": "footfalls",
+     "element": "fire"
+    }
+   ]
+  },
+  "meteor": {
+   "cast": [
+    {
+     "fx": "cast",
+     "at": "caster",
+     "element": "fire",
+     "ms": 500
+    },
+    {
+     "fx": "warn",
+     "at": "point",
+     "element": "fire",
+     "radius": "event"
+    }
+   ],
+   "zone": [
+    {
+     "fx": "impact",
+     "at": "point",
+     "element": "fire",
+     "scale": 2.2,
+     "crit": true
+    },
+    {
+     "fx": "ring",
+     "element": "fire",
+     "radius": "event"
+    },
+    {
+     "fx": "storm",
+     "element": "fire",
+     "radius": "event",
+     "ms": 2500
+    }
+   ]
+  },
+  "aimed_shot": {
+   "cast": [
+    {
+     "fx": "cast",
+     "at": "caster",
+     "element": "physical",
+     "ms": 220
+    }
+   ],
+   "bolt": {
+    "element": "physical",
+    "speed": 26
+   }
+  },
+  "hunters_snare": {
+   "cast": [
+    {
+     "fx": "impact",
+     "at": "point",
+     "element": "nature"
+    }
+   ],
+   "zone": [
+    {
+     "fx": "ring",
+     "element": "nature",
+     "radius": "event"
+    }
+   ]
+  },
+  "multi_shot": {
+   "cast": [
+    {
+     "fx": "breath",
+     "at": "caster",
+     "element": "physical",
+     "length": 9,
+     "arc": 0.9,
+     "ms": 260
+    }
+   ],
+   "bolt": {
+    "element": "physical",
+    "speed": 24
+   }
+  },
+  "trackers_leap": {
+   "dash": [
+    {
+     "fx": "footfalls",
+     "element": "nature"
+    },
+    {
+     "fx": "impact",
+     "at": "point",
+     "element": "nature"
+    }
+   ]
+  },
+  "rain_of_arrows": {
+   "cast": [
+    {
+     "fx": "cast",
+     "at": "caster",
+     "element": "physical"
+    }
+   ],
+   "zone": [
+    {
+     "fx": "storm",
+     "element": "physical"
+    }
+   ]
+  },
+  "thornlash": {
+   "cast": [
+    {
+     "fx": "cast",
+     "at": "caster",
+     "element": "nature",
+     "ms": 260
+    }
+   ],
+   "bolt": {
+    "element": "nature"
+   }
+  },
+  "renew": {
+   "cast": [
+    {
+     "fx": "heal",
+     "at": "caster"
+    },
+    {
+     "fx": "status",
+     "at": "caster",
+     "status": "regen",
+     "seconds": 5
+    }
+   ]
+  },
+  "wolf_shape": {
+   "cast": [
+    {
+     "fx": "flare",
+     "at": "caster",
+     "element": "nature",
+     "scale": 1.6
+    },
+    {
+     "fx": "ring",
+     "at": "caster",
+     "element": "nature",
+     "radius": 3
+    }
+   ]
+  },
+  "briarback_shape": {
+   "cast": [
+    {
+     "fx": "flare",
+     "at": "caster",
+     "element": "nature",
+     "scale": 1.8
+    },
+    {
+     "fx": "ring",
+     "at": "caster",
+     "element": "nature",
+     "radius": 6
+    }
+   ]
+  },
+  "call_wolf": {
+   "cast": [
+    {
+     "fx": "vortex",
+     "at": "caster",
+     "element": "nature",
+     "radius": 2.5,
+     "ms": 1100
+    }
+   ]
+  },
+  "throat_leap": {
+   "dash": [
+    {
+     "fx": "footfalls",
+     "element": "bleed"
+    },
+    {
+     "fx": "impact",
+     "at": "point",
+     "element": "bleed",
+     "scale": 1.2
+    }
+   ]
+  },
+  "rending_bite": {
+   "cast": [
+    {
+     "fx": "impact",
+     "at": "point",
+     "element": "bleed",
+     "scale": 1.3
+    }
+   ]
+  },
+  "pack_run": {
+   "cast": [
+    {
+     "fx": "status",
+     "at": "caster",
+     "status": "haste",
+     "seconds": 4
+    },
+    {
+     "fx": "ring",
+     "at": "caster",
+     "element": "nature",
+     "radius": 6
+    }
+   ]
+  },
+  "running_howl": {
+   "cast": [
+    {
+     "fx": "ring",
+     "at": "caster",
+     "element": "nature",
+     "radius": 8
+    },
+    {
+     "fx": "status",
+     "at": "caster",
+     "status": "rally",
+     "seconds": 2
+    }
+   ]
+  },
+  "bolt_turret": {
+   "cast": [
+    {
+     "fx": "impact",
+     "at": "point",
+     "element": "physical",
+     "scale": 0.8
+    },
+    {
+     "fx": "ring",
+     "at": "point",
+     "element": "lightning",
+     "radius": 1.6
+    }
+   ]
+  },
+  "shrapnel_mine": {
+   "cast": [
+    {
+     "fx": "impact",
+     "at": "point",
+     "element": "physical",
+     "scale": 0.6
+    }
+   ],
+   "trap": [
+    {
+     "fx": "impact",
+     "at": "point",
+     "element": "fire",
+     "scale": 1.5
+    },
+    {
+     "fx": "ring",
+     "at": "point",
+     "element": "physical",
+     "radius": "event"
+    }
+   ]
+  },
+  "field_repair": {
+   "cast": [
+    {
+     "fx": "heal",
+     "at": "caster",
+     "color": "#7fd0ff"
+    },
+    {
+     "fx": "ring",
+     "at": "caster",
+     "element": "lightning",
+     "radius": 10
+    }
+   ]
+  },
+  "grapnel": {
+   "dash": [
+    {
+     "fx": "footfalls",
+     "element": "physical"
+    },
+    {
+     "fx": "impact",
+     "at": "point",
+     "element": "physical"
+    }
+   ]
+  },
+  "overcharge": {
+   "cast": [
+    {
+     "fx": "ring",
+     "at": "caster",
+     "element": "lightning",
+     "radius": 10
+    },
+    {
+     "fx": "status",
+     "at": "caster",
+     "status": "haste",
+     "seconds": 8
+    }
+   ]
+  }
+ },
+ "default": {
+  "melee": [
+   {
+    "fx": "ring",
+    "at": "caster",
+    "radius": "event",
+    "arc": true
+   }
+  ],
+  "around": [
+   {
+    "fx": "ring",
+    "at": "caster",
+    "radius": "event"
+   }
+  ],
+  "bolt": [
+   {
+    "fx": "cast",
+    "at": "caster",
+    "ms": 260
+   }
+  ],
+  "ground": [
+   {
+    "fx": "cast",
+    "at": "caster"
+   },
+   {
+    "fx": "ring",
+    "at": "point",
+    "radius": "event"
+   }
+  ],
+  "dash": [
+   {
+    "fx": "footfalls"
+   }
+  ],
+  "self": [
+   {
+    "fx": "flare",
+    "at": "caster"
+   }
+  ],
+  "summon": [
+   {
+    "fx": "vortex",
+    "at": "caster",
+    "radius": 2.5,
+    "ms": 900
+   }
+  ],
+  "turret": [
+   {
+    "fx": "ring",
+    "at": "point",
+    "radius": 1.6
+   }
+  ]
+ },
+ "powers": {
+  "frost_field": {
+   "cast": [
+    {
+     "fx": "storm",
+     "at": "point",
+     "element": "ice",
+     "radius": 7,
+     "ms": 10000
+    }
+   ]
+  },
+  "binding_roots": {
+   "cast": [
+    {
+     "fx": "ring",
+     "at": "point",
+     "element": "nature",
+     "radius": 5
+    },
+    {
+     "fx": "vortex",
+     "at": "point",
+     "element": "nature",
+     "radius": 5,
+     "ms": 1400
+    }
+   ]
+  },
+  "mending_light": {
+   "cast": [
+    {
+     "fx": "pillar",
+     "at": "point",
+     "element": "holy",
+     "radius": 10,
+     "ms": 1400
+    },
+    {
+     "fx": "heal",
+     "at": "point"
+    }
+   ]
+  },
+  "stone_ward": {
+   "cast": [
+    {
+     "fx": "ring",
+     "at": "point",
+     "element": "physical",
+     "radius": 8
+    },
+    {
+     "fx": "flare",
+     "at": "point",
+     "element": "holy",
+     "scale": 2
+    }
+   ]
+  },
+  "skyfall": {
+   "cast": [
+    {
+     "fx": "warn",
+     "at": "point",
+     "element": "fire",
+     "radius": 5,
+     "ms": 1500
+    }
+   ],
+   "land": [
+    {
+     "fx": "impact",
+     "at": "point",
+     "element": "fire",
+     "scale": 2.4,
+     "crit": true
+    },
+    {
+     "fx": "ring",
+     "at": "point",
+     "element": "fire",
+     "radius": 5
+    }
+   ]
+  },
+  "withering_hex": {
+   "cast": [
+    {
+     "fx": "vortex",
+     "at": "point",
+     "element": "shadow",
+     "radius": 7,
+     "ms": 1600
+    }
+   ]
+  },
+  "loose_the_pack": {
+   "cast": [
+    {
+     "fx": "vortex",
+     "at": "point",
+     "element": "nature",
+     "radius": 4,
+     "ms": 1200
+    },
+    {
+     "fx": "ring",
+     "at": "point",
+     "element": "bleed",
+     "radius": 5
+    }
+   ]
+  },
+  "war_banner": {
+   "cast": [
+    {
+     "fx": "flare",
+     "at": "point",
+     "element": "fire",
+     "scale": 2
+    },
+    {
+     "fx": "ring",
+     "at": "point",
+     "element": "fire",
+     "radius": 10
+    }
+   ]
+  },
+  "far_sight": {
+   "cast": [
+    {
+     "fx": "ring",
+     "at": "point",
+     "element": "arcane",
+     "radius": 14
+    },
+    {
+     "fx": "flare",
+     "at": "point",
+     "element": "arcane",
+     "scale": 2.5
+    }
+   ]
+  },
+  "thunderstorm": {
+   "cast": [
+    {
+     "fx": "storm",
+     "at": "point",
+     "element": "lightning",
+     "radius": 6,
+     "ms": 8000
+    }
+   ]
+  },
+  "earthshaker": {
+   "cast": [
+    {
+     "fx": "ring",
+     "at": "point",
+     "element": "physical",
+     "radius": 4
+    },
+    {
+     "fx": "impact",
+     "at": "point",
+     "element": "physical",
+     "scale": 2.4,
+     "crit": true
+    }
+   ]
+  },
+  "blessing_of_valour": {
+   "cast": [
+    {
+     "fx": "pillar",
+     "at": "point",
+     "element": "holy",
+     "radius": 3,
+     "ms": 1100
+    },
+    {
+     "fx": "ring",
+     "at": "point",
+     "element": "holy",
+     "radius": 10
+    }
+   ]
+  }
+ },
+ "statuses": {
+  "burn": "burn",
+  "bleed": "bleed",
+  "root": "root",
+  "stun": "stun",
+  "slow": "slow",
+  "quarry": "marked",
+  "might": "rally",
+  "regen": "regen",
+  "haste": "haste",
+  "taunt": "dazed",
+  "shred": "sunder",
+  "barrier": "barrier",
+  "howl": "rally",
+  "revealed": "marked",
+  "hex": "curse"
+ },
+ "dmgElements": {
+  "blade": "physical",
+  "pierce": "physical",
+  "fire": "fire",
+  "nature": "nature",
+  "physical": "physical"
+ }
+}

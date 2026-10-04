@@ -199,14 +199,14 @@ export function townExtent(node = {}, plan = null) {
 }
 
 /**
- * R27 M2 — WHAT A TOWN BRINGS TO A MUSTER: its planned plot count, its own guard bodies and its
- * real wall, for js/muster.js `baseForTown`. main.js used to hand over `town.size` as the plot
+ * R27 M2 — WHAT A TOWN BRINGS TO A LEVY: its planned plot count, its own guard bodies and its
+ * real wall, for js/levy.js `baseForTown`. main.js used to hand over `town.size` as the plot
  * count, YOUR colony's guards, and `town.walled` — which nothing ever set — so the walled bonus
  * never applied anywhere. One function, so the test builds its town through the same path.
  *
- *   civics.muster.baseForTown(town, musterFacts(town, folk.guardsOf(town.id)))
+ *   civics.levy.baseForTown(town, levyFacts(town, folk.guardsOf(town.id)))
  */
-export function musterFacts(node, guards = 0) {
+export function levyFacts(node, guards = 0) {
   const ext = townExtent(node);
   return { plots: ext.plots ?? 0, guards: guards || 0, walled: ext.walled };
 }

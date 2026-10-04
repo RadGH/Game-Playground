@@ -30,7 +30,7 @@ import { CHIBI2_COMBAT_RIDE } from '../../../avatar-3d/js/chibi2-motion.js';
 // R23: a body stands on a bridge deck, not on the river bed under it — see js/ground.js
 import { groundAt, wetAt, cliffStep, climbable } from './ground.js';
 import { leaderModifier, fitsRoom } from './warbands.js';   // R27 M10
-import { compactCreature } from './mesh-merge.js';            // R27 M8
+import { compactCreature } from '../../../avatar-3d/js/mesh-merge.js';   // R27 M8 (moved to avatar-3d)
 import { lookedAt, lastStruck } from './targetpick.js';        // R28
 
 /** `bleed` out of data/skills.json — the field applies it without owning the skill data. */
@@ -417,7 +417,7 @@ export class EnemyField {
     if (!pool.length) return null;
     /**
      * R26 — IN A HELD ZONE, THE WARBAND IS MOST OF WHAT YOU MEET. Its five members against the
-     * zone's thirty-odd beasts would otherwise be one spawn in seven, and "the Ashtusk Horde hold
+     * zone's thirty-odd beasts would otherwise be one spawn in seven, and "the Ashtusk Warhost hold
      * this valley" would be a claim the valley never backs up. The rng is only drawn when there is
      * a warband here, so every unheld zone rolls exactly the sequence it always did.
      */

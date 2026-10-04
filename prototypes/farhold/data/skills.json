@@ -24856,8 +24856,8 @@
      "lib": "burst",
      "nodes": [
       {
-       "id": "muster",
-       "name": "Muster",
+       "id": "close_ranks",
+       "name": "Close Ranks",
        "fx": "summon",
        "mod": {
         "dashWith": true

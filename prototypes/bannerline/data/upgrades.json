@@ -1,0 +1,119 @@
+{
+ "_doc": "Unit upgrades bought at the Drill Yard (owner round 2, R2.3). Read by js/sim/upgrades.js. Each row: `stat` (the handler), `perLevel` (added per level; fractions, 0.08 = 8%), `max` levels, cost of level L (1-based) = round(cost.base * cost.grow^(L-1)). Upgrades apply to EVERY unit the player sends: future sends AND the ones already on the field (re-stamped the tick after a purchase; health keeps its current share). No auto-buy. `desc`/`statText` are player-facing ({v} = the per-level number as shown).",
+ "order": [
+  "damage",
+  "attackSpeed",
+  "health",
+  "armour",
+  "lifeSteal",
+  "moveSpeed",
+  "regen",
+  "siege"
+ ],
+ "upgrades": {
+  "damage": {
+   "name": "Sharpened Steel",
+   "stat": "damage",
+   "perLevel": 0.12,
+   "max": 10,
+   "cost": {
+    "base": 120,
+    "grow": 1.35
+   },
+   "icon": "sword",
+   "desc": "Your units hit harder.",
+   "statText": "+{v}% unit damage per level"
+  },
+  "attackSpeed": {
+   "name": "Battle Drills",
+   "stat": "attackSpeed",
+   "perLevel": 0.09,
+   "max": 10,
+   "cost": {
+    "base": 130,
+    "grow": 1.35
+   },
+   "icon": "bracers",
+   "desc": "Your units attack faster.",
+   "statText": "+{v}% unit attack speed per level"
+  },
+  "health": {
+   "name": "Field Rations",
+   "stat": "health",
+   "perLevel": 0.12,
+   "max": 10,
+   "cost": {
+    "base": 120,
+    "grow": 1.35
+   },
+   "icon": "potion",
+   "desc": "Your units are tougher.",
+   "statText": "+{v}% unit health per level"
+  },
+  "armour": {
+   "name": "Riveted Plates",
+   "stat": "armour",
+   "perLevel": 0.06,
+   "max": 10,
+   "cost": {
+    "base": 140,
+    "grow": 1.38
+   },
+   "icon": "chainmail",
+   "desc": "Your units shrug off part of every hit.",
+   "statText": "-{v}% damage taken by your units per level"
+  },
+  "lifeSteal": {
+   "name": "Blood Oath",
+   "stat": "lifeSteal",
+   "perLevel": 0.06,
+   "max": 5,
+   "cost": {
+    "base": 200,
+    "grow": 1.5
+   },
+   "icon": "amulet",
+   "desc": "Your units heal from the damage they deal.",
+   "statText": "+{v}% unit life steal per level"
+  },
+  "moveSpeed": {
+   "name": "Forced March",
+   "stat": "moveSpeed",
+   "perLevel": 0.06,
+   "max": 5,
+   "cost": {
+    "base": 150,
+    "grow": 1.4
+   },
+   "icon": "boots",
+   "desc": "Your units reach the enemy Keep sooner.",
+   "statText": "+{v}% unit move speed per level"
+  },
+  "regen": {
+   "name": "Field Medics",
+   "stat": "regen",
+   "perLevel": 0.009,
+   "max": 5,
+   "cost": {
+    "base": 180,
+    "grow": 1.45
+   },
+   "icon": "scroll",
+   "desc": "Your units slowly heal while they fight.",
+   "statText": "+{v}% of max health regenerated per second per level"
+  },
+  "siege": {
+   "name": "Banner Breakers",
+   "stat": "siege",
+   "perLevel": 0.15,
+   "max": 5,
+   "cost": {
+    "base": 250,
+    "grow": 1.5
+   },
+   "icon": "warhammer",
+   "desc": "Units that reach the enemy Keep tear more banners.",
+   "statText": "+{v}% banner damage when your units leak per level"
+  }
+ }
+}

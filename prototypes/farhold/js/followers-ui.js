@@ -62,7 +62,7 @@ export function createFollowersScreen({
   /**
    * Where a mercenary could be hired, if anywhere. The settlement you are standing in, or null —
    * and null is a sentence on the tab rather than four dead rows, which is the rule the Holding
-   * screen's Muster tab already follows.
+   * screen's Levy tab already follows.
    */
   hireAt = () => null,
   log = null, mount = document.body, embedded = false,

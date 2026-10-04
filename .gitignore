@@ -12,3 +12,4 @@ voice-lab/samples/*.wav
 library/synced/
 !library/synced/.gitkeep
 tools/scratch/
+tools/certs/

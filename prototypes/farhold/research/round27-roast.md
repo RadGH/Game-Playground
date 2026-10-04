@@ -69,7 +69,7 @@ new system wearing an extension's coat?" is asked of every idea.
   safe circle stops at 113 m. **There are six answers, not five**: add `waypoints.js:52-56`
   `boundaryOf`. `sites.js:454` (`190 + 120·size`) is a keep-clear gap and is *legitimately* larger:
   it should be floored by the real wall, not replaced.
-- **The muster's `walled` is always false** (nothing ever sets `settlement.walled`), `guards` counts
+- **The levy's `walled` is always false** (nothing ever sets `settlement.walled`), `guards` counts
   your colony's guards, `plots` is the size. And `tests/civilization.test.js:682` hard-codes
   `walled: true`, which is why no test noticed.
 - **Planner gates thrown away.** Farhold reads no `plan.wall`; gates come only from
@@ -357,7 +357,7 @@ new system wearing an extension's coat?" is asked of every idea.
   - The footprint is the floor when not planned, because `sites.js` keep-clear runs earlier.
   - `sites.js`'s 190 + 120·size stays as a keep-clear gap, floored at extent + margin.
 - **Includes:**
-  - the muster's `walled` / `guards` / `plots`
+  - the levy's `walled` / `guards` / `plots`
   - `civilization.test.js`'s hard-coded `walled: true`
   - the six `size >= 4` sites collapsed to one tier function
 

@@ -1,0 +1,59 @@
+{
+ "_doc": "Damage type x armour class, in percent. A Latin square: every damage type has exactly one strong (115) and one weak (90) armour, and every armour has exactly one of each, so no race is hard-countered by two heroes. Heroes deal their class type (Warrior blade, Ranger pierce, Pyromancer fire, Druid nature) and can coat their weapon with a shop Oil to change half of it. A hero's OWN armour class comes from the chest item it wears, so the units' damage types (melee blade, ranged pierce, casters fire/nature) matter too. Read by js/sim/combat.js and tools/econ-sim.mjs. `fortified` (champions only) takes 100% from everything: the match-ending unit is never decided on the pick screen.",
+ "types": [
+  "blade",
+  "pierce",
+  "fire",
+  "nature"
+ ],
+ "armours": [
+  "light",
+  "heavy",
+  "spectral",
+  "hide",
+  "fortified"
+ ],
+ "pct": {
+  "blade": {
+   "light": 115,
+   "heavy": 90,
+   "spectral": 100,
+   "hide": 100,
+   "fortified": 100
+  },
+  "pierce": {
+   "light": 100,
+   "heavy": 100,
+   "spectral": 90,
+   "hide": 115,
+   "fortified": 100
+  },
+  "fire": {
+   "light": 100,
+   "heavy": 100,
+   "spectral": 115,
+   "hide": 90,
+   "fortified": 100
+  },
+  "nature": {
+   "light": 90,
+   "heavy": 115,
+   "spectral": 100,
+   "hide": 100,
+   "fortified": 100
+  }
+ },
+ "heroDefault": {
+  "warrior": "blade",
+  "ranger": "pierce",
+  "pyromancer": "fire",
+  "druid": "nature"
+ },
+ "chestArmour": {
+  "_doc": "chest item base tier -> the hero's armour class",
+  "cloth": "spectral",
+  "light": "light",
+  "medium": "hide",
+  "heavy": "heavy"
+ }
+}

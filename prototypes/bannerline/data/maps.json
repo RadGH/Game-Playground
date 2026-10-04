@@ -1,0 +1,69 @@
+{
+ "_doc": "Bannerline maps. Field-local coordinates: x = 0 is the field centre (negative left), z = 0 the gate end, z = length the Keep end (units walk +z). Fields of one match sit side by side along world x, `gap` metres apart. Per mode: field width and gate count (one gate per enemy player). leakZ: a unit reaching it tears banners and leaves. ford: a band across the field that slows walkers by `slow` (flying units ignore it). walls: axis-aligned blockers [x0,z0,x1,z1] (none on vale yet; per-gate lane walls arrive with 2v2/3v3 in M6). Read by js/sim/map.js. lanes (team modes, PLAN §4.2): one lane per gate for the first `wallTo` metres, split by walls `thickness` m thick; units can never cross them (each sender's units stay in its lane until the merge), heroes cross at `heroGaps` (z ranges). keep.guard: the Keep shoots (js/sim/keep.js): every `every` s it splashes `damage + damagePerMinute x minutes` on enemy bodies within `splash` m of the one nearest the leak line inside `range` m of the Keep.",
+ "maps": {
+  "vale": {
+   "name": "Vale",
+   "length": 140,
+   "gap": 40,
+   "modes": {
+    "1v1": {
+     "width": 48,
+     "gates": 1
+    },
+    "2v2": {
+     "width": 64,
+     "gates": 2
+    },
+    "3v3": {
+     "width": 80,
+     "gates": 3
+    }
+   },
+   "gateZ": 3,
+   "leakZ": 131,
+   "keep": {
+    "z": 135,
+    "w": 16,
+    "d": 8,
+    "guard": {
+     "range": 22,
+     "every": 1,
+     "damage": 30,
+     "damagePerMinute": 6,
+     "splash": 3.5,
+     "dmgType": "pierce"
+    }
+   },
+   "armory": {
+    "x": -15,
+    "z": 126,
+    "r": 4
+   },
+   "spawn": {
+    "x": -11,
+    "z": 124
+   },
+   "ford": {
+    "z0": 64,
+    "z1": 72,
+    "slow": 0.25
+   },
+   "walls": [],
+   "decorSeed": 7,
+   "lanes": {
+    "wallTo": 84,
+    "thickness": 1.0,
+    "heroGaps": [
+     [
+      33,
+      37
+     ],
+     [
+      59,
+      63
+     ]
+    ]
+   }
+  }
+ }
+}

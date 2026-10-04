@@ -79,7 +79,7 @@ order apply to followers only. This is a hard rule: nobody loses control of thei
 | 1 | `tactician_order_forward` | **Forward!** | 1 | Ally · `tag_spell`, `tag_duration` | +20% move speed and the next hit within 6 s deals +40% damage | Followers run to your aim point, then attack the nearest enemy |
 | 2 | `tactician_order_hold` | **Hold Fast** | 1 | Ally · `tag_spell`, `tag_duration`, `tag_shield` | Takes 20% less damage and cannot be knocked back or pulled for 6 s. In Tank focus this order becomes **Shield Wall** (§5.3) | Followers stop, face out and guard the spot (reuse: Farhold `ORDERS.guard`, `js/command.js`) |
 | 3 | `tactician_order_mark` | **On My Mark** | 1 | Auto-target (an **enemy**) · `tag_spell`, `tag_duration`, `tag_curse` | The enemy is **Designated** (new status) for 10 s — it takes +8% damage from your group and a red chalk arrow floats over it for everyone | Every follower switches to it at once and ignores other threats |
-| 4 | `tactician_order_fall_back` | **Fall Back** | 1 | Ally · `tag_spell`, `tag_movement` | +50% move speed for 3 s and the receiver's threat on every enemy drops by 50% | Followers disengage and run to you, or to your **Muster Point** / **Field Standard** if one is down |
+| 4 | `tactician_order_fall_back` | **Fall Back** | 1 | Ally · `tag_spell`, `tag_movement` | +50% move speed for 3 s and the receiver's threat on every enemy drops by 50% | Followers disengage and run to you, or to your **Rally Point** / **Field Standard** if one is down |
 | 5 | `tactician_order_all_in` | **All In** *(from level 40, calling 3)* | 3 | Ally · `tag_spell` | The receiver's next spell within 5 s costs no resource | Followers use their strongest ability now; follower ability cooldowns reset |
 
 Orders are **(new)**. The follower half is built on Farhold's Command Rod (reuse: `js/command.js` —
@@ -130,7 +130,7 @@ aura hears one drum hit. Internal cooldown **60 s**.
 | Slot | Level | id | Name | Cost | Cooldown | Cast | Targeting | Range | Shape | Tags | Main effect |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | 1 | 1 | `tactician_probing_bolt` | Probing Bolt | 30 Tempo | 5 s | instant | Auto-target | 30 m (spear 25 m) | target | `tag_attack` `tag_physical` `tag_ranged` `tag_projectile` | 150% WD, Exposed, +1 pip |
-| 2 | 4 | `tactician_muster_point` | Muster Point | 40 Tempo | 24 s | instant | Ground | 30 m | ground circle 6 m | `tag_spell` `tag_area` `tag_duration` `tag_heal` | Allies inside: 10% less damage, heal 1.5%/s, 10 s |
+| 2 | 4 | `tactician_rally_point` | Rally Point | 40 Tempo | 24 s | instant | Ground | 30 m | ground circle 6 m | `tag_spell` `tag_area` `tag_duration` `tag_heal` | Allies inside: 10% less damage, heal 1.5%/s, 10 s |
 | 3 | 10 | `tactician_outflank` | Outflank | 45 Tempo | 14 s | instant sidestep + shot | Auto-target | 30 m | target | `tag_attack` `tag_physical` `tag_ranged` `tag_projectile` `tag_movement` | 180% WD, Outflanked 8 s, +1 pip |
 | 4 | 18 | `tactician_redeploy` | Redeploy | 30 Tempo | 30 s | instant | Needs target (ally) | 30 m | ally | `tag_spell` `tag_movement` | Swap places, ally Braced 3 s |
 | 5 | 28 | `tactician_double_time` | Double-Time Drill | 60 Tempo | 60 s | instant | Self | self | 20 m aura | `tag_spell` `tag_aura` `tag_duration` | +10% attack/cast speed, cooldowns 15% faster, 12 s |
@@ -150,11 +150,11 @@ aura hears one drum hit. Internal cooldown **60 s**.
   A thrown spear spins once and flies back to the hand.
 - **Sound**: a crossbow thunk and a short quill scratch.
 
-**`tactician_muster_point` — Muster Point** · slot 2 · level 4
+**`tactician_rally_point` — Rally Point** · slot 2 · level 4
 - **Cost** 40 Tempo · **Cooldown** 24 s · **Cast** instant · **Range** 30 m · **Shape** ground circle, 6 m radius, lasts **10 s**.
 - **Targeting** Ground · **Tags** `tag_spell`, `tag_area`, `tag_duration`, `tag_heal`.
 - **Effect** allies standing inside take **10% less damage** and heal **1.5% of their max health a second**.
-  Only one Muster Point per tactician. It is the destination for **Fall Back** (followers run to it).
+  Only one Rally Point per tactician. It is the destination for **Fall Back** (followers run to it).
 - In Tank focus it plants the **Field Standard** instead (§5.2).
 - **Looks like**: a planted map pin with a small pennant; a thin gold ring on the ground (spellfx `ring`,
   holy colour) that ticks down clockwise.
@@ -213,7 +213,7 @@ aura hears one drum hit. Internal cooldown **60 s**.
 **Solo (open world, with followers).** Followers are the damage; you are the director. Open with
 **Probing Bolt** (+1 pip, Exposed) so the first follower hit lands +25%. **On My Mark** the dangerous enemy
 in a pack, **Outflank** it (+1 pip, Outflanked, your nearest follower goes round the other side). Keep
-**Muster Point** down where you want to fight and **Fall Back** to it if a follower is losing. With 5 pips
+**Rally Point** down where you want to fight and **Fall Back** to it if a follower is losing. With 5 pips
 and Decisive Hour down, spend pips freely — Execute the Plan (from 40) is worth more than holding pips.
 
 **Dungeon, Support focus (5 players).** Before the pull: Plan (Vanguard for most packs, Stonewall for a hard
@@ -240,7 +240,7 @@ up **Decisive Hour + Double-Time Drill** with a boss's "burn" phase (a phase whe
 
 | Mechanic (page 11 words) | What the tactician does |
 |---|---|
-| **Soak** | **Muster Point** on the soak shows everyone where to stand; **Hold Fast** on a soaker cuts their share 20%. The Signal Runner is a follower (it takes a party slot), so it **does** count as a soaker, unlike a class companion (00 §10). |
+| **Soak** | **Rally Point** on the soak shows everyone where to stand; **Hold Fast** on a soaker cuts their share 20%. The Signal Runner is a follower (it takes a party slot), so it **does** count as a soaker, unlike a class companion (00 §10). |
 | **Danger zone** | **Redeploy** pulls a stuck ally out (you take their spot — only use it if you can get out yourself). |
 | **Void zone** | **Fall Back** sends followers out of a void zone at once (followers do not path around void zones well on their own). |
 | **Targeted** (yellow) | **Redeploy** a targeted player out of the pack when they are rooted by something that is *not* a boss mechanic. |
@@ -254,7 +254,7 @@ up **Decisive Hour + Double-Time Drill** with a boss's "burn" phase (a phase whe
 ## 4. Alternate spells
 
 The **Orders bar** (§2.2) is the tactician's alternate bar: orders 1–4 from level 6, order 5 from level 40.
-The **Battle Plans** (§2.3) are a picker, not spells, and live on the gauge pennant. In Tank focus, Muster
+The **Battle Plans** (§2.3) are a picker, not spells, and live on the gauge pennant. In Tank focus, Rally
 Point becomes **Field Standard** and Hold Fast becomes **Shield Wall** (§5).
 
 ---
@@ -277,12 +277,12 @@ Setting the canon **Role focus** switch (00 §6: in the spellbook, out of combat
 | Gear | a **spear + shield** is the tank kit (a crossbow cannot block); a tactician with a crossbow may still tank but has no block chance |
 | **Guardian** state (×4 threat, page 05 §Threat) | on while you stand within **12 m** of your own Field Standard; off otherwise. A shield icon on the gauge shows it |
 | Probing Bolt | generates **×3 threat** on top of Guardian |
-| Muster Point | becomes **Field Standard** (§5.2) |
+| Rally Point | becomes **Field Standard** (§5.2) |
 | Hold Fast | becomes **Shield Wall** (§5.3) |
 | Outflank | also **Taunts** the target for 3 s (page 05 §Taunt) |
 | Shared taunt | the tactician is one of the tank-capable classes that gets the shared taunt **Provoke** at level 10 (page 07 ladder; page 05 §13.4) |
 
-### 5.2 Field Standard (Muster Point in Tank focus)
+### 5.2 Field Standard (Rally Point in Tank focus)
 
 - `tactician_field_standard` · **Cost** 40 Tempo · **Cooldown** 24 s · **Cast** instant · **Targeting** Ground ·
   **Range** 30 m · **Shape** a standard with a 6 m circle, lasts **20 s** · **Tags** `tag_spell`, `tag_area`,
@@ -291,7 +291,7 @@ Setting the canon **Role focus** switch (00 §6: in the spellbook, out of combat
   This is an area taunt on the plant only.
 - **Every 2 s** while it stands, it **draws attention**: every enemy within 12 m of the standard gains threat
   on you as if you had dealt it **60% WD** (threat only, no damage).
-- **Inside the 6 m circle**: allies take 10% less damage and heal 1.5% of max health a second (as Muster
+- **Inside the 6 m circle**: allies take 10% less damage and heal 1.5% of max health a second (as Rally
   Point); **you** take **20%** less instead of 10%.
 - The standard is not a body: it cannot be hit, does not block, and does not count for soaks.
 - **Looks like**: a tall pole with a square banner in your class colour, driven into the ground with a
@@ -318,7 +318,7 @@ Setting the canon **Role focus** switch (00 §6: in the spellbook, out of combat
 
 ### 5.5 Gear and talents that help the hybrid
 
-- Talents: Muster Point t4a **Hold the Ground**, t4c **Fortified Camp**; Outflank t3c **Draw Their Eye**;
+- Talents: Rally Point t4a **Hold the Ground**, t4c **Fortified Camp**; Outflank t3c **Draw Their Eye**;
   Redeploy t2b **Threat Handoff**; Decisive Hour t2a **Hour of Steel**.
 - Set: **Regalia of the War Table** 4-piece lengthens the Field Standard (§8).
 - Soul: `soul_unbroken_standard` (§9.3).
@@ -347,13 +347,13 @@ changing a pick costs gold at the Unbinder (reuse: Farhold `js/retrain.js`). Ids
 | 3 (32) | **Pinning Bolt** — the target is also Rooted for 2 s (non-boss) | **Read the Field** — also reveals the target's next ability as a timeline marker on its cast bar for 6 s | — |
 | 4 (45) | **Crack the Line** — the bolt pierces: it passes through up to 4 enemies in a 30 m line and Exposes each | **Masterful Probe** — resets Outflank's cooldown if it Exposes a Designated target | — |
 
-**Muster Point** (`tactician_muster_point`; the same talents apply to Field Standard)
+**Rally Point** (`tactician_rally_point`; the same talents apply to Field Standard)
 | Tier | a | b | c |
 |---|---|---|---|
-| 1 (12) | **Rolling Muster** — the circle follows the ally you cast it on (your friendly target) instead of staying on the ground | **Caltrops** — enemies entering the circle are Snared 40% for 2 s | — |
+| 1 (12) | **Rolling Rally** — the circle follows the ally you cast it on (your friendly target) instead of staying on the ground | **Caltrops** — enemies entering the circle are Snared 40% for 2 s | — |
 | 2 (22) | **Supply Cache** — allies inside regain resource instead of healing: 6 Tempo, 5 Momentum or 0.5% of max Mana a second | **Rearguard** — an ally who drops below 20% health inside it gets a barrier of 15% max health (once per ally per cast) | **Signal Fire** — the circle burns enemies inside for 25% WD a second as fire (adds `tag_fire`) |
 | 3 (32) | **Two Camps** — 2 charges; two points can stand at once | **Rally Horn** — casting it removes one Snare, Slow or Root from every ally within 20 m of the point | — |
-| 4 (45) | **Hold the Ground** — allies inside cannot be knocked back or pulled by non-mechanic effects | **Muster Relay** — an ally who steps into one Muster Point can jump to your other one once per 10 s (needs Two Camps or the legendary map) | **Fortified Camp** — 15% less damage inside instead of 10% (you: 25% in Tank focus), and the point lasts 16 s (the standard 26 s) |
+| 4 (45) | **Hold the Ground** — allies inside cannot be knocked back or pulled by non-mechanic effects | **Rally Relay** — an ally who steps into one Rally Point can jump to your other one once per 10 s (needs Two Camps or the legendary map) | **Fortified Camp** — 15% less damage inside instead of 10% (you: 25% in Tank focus), and the point lasts 16 s (the standard 26 s) |
 
 **Outflank** (`tactician_outflank`)
 | Tier | a | b | c |
@@ -415,10 +415,10 @@ changing a pick costs gold at the Unbinder (reuse: Farhold `js/retrain.js`). Ids
 | id | Name | Slot | Power (named) | Drop source |
 |---|---|---|---|---|
 | `leg_the_last_command` | The Last Command | main hand, crossbow | **Leads From the Front** — every Order you give also applies to **you** at 50% strength | `b_grief_in_iron`, Grief in Iron (world boss, [page 13](../13-WORLD-BOSSES.md)) |
-| `leg_ever_unfolding_map` | The Ever-Unfolding Map | off hand, field map | **Two Camps, One Road** — Muster Point has 2 charges; an ally stepping into one point may jump to the other (once per 10 s per ally) | `b_oddrin_the_unmaker` Vell Oddrin, the Unmaker (`d12_unmade_workshop` end boss, page 12) |
+| `leg_ever_unfolding_map` | The Ever-Unfolding Map | off hand, field map | **Two Camps, One Road** — Rally Point has 2 charges; an ally stepping into one point may jump to the other (once per 10 s per ally) | `b_oddrin_the_unmaker` Vell Oddrin, the Unmaker (`d12_unmade_workshop` end boss, page 12) |
 | `leg_forced_march_sabatons` | Sabatons of the Forced March | feet | **Forced March** — Outflank leaves a 10 m trail for 4 s: allies on it +30% move speed; Forward! lasts 12 s instead of 6 | `b_carrion_crown` The Carrion Crown (`cinder_steppe` world boss, page 13) |
 | `leg_signet_of_seven_armies` | Signet of Seven Armies | ring | **Seven Banners** — +1 follower slot; your followers take 25% less area damage; On My Mark makes each follower's next hit a critical | `b_castellan_vorhane` Lord Castellan Vorhane (`d13_cindergate` end boss, page 12; Normal and Challenge) |
-| `uq_quartermasters_coat` | The Quartermaster's Coat | chest | **Stores Opened** — while you stand in your Muster Point or Field Standard circle you regain 10 Tempo a second | `b_razorback_rider_krunn` Round Two: Krunn and Razorback (`d09_warmasters_pit` main boss) |
+| `uq_quartermasters_coat` | The Quartermaster's Coat | chest | **Stores Opened** — while you stand in your Rally Point or Field Standard circle you regain 10 Tempo a second | `b_razorback_rider_krunn` Round Two: Krunn and Razorback (`d09_warmasters_pit` main boss) |
 | `uq_drillmasters_whistle` | Drillmaster's Whistle | neck | **Sharp Blast** — Initiative fills every **5 s** instead of 6 | `b_oruvel_moon_drinker` Oruvel, That Which Drank the Moon (`d08_moonwell_ruins` end boss) |
 | `uq_turncoat_spur` | The Turncoat's Spur | feet | **Wrong Side of the Line** — Redeploy may target a non-boss enemy (swap places with it); 45 s cooldown when used that way | `d06_sandsworn_vault`, rare elite in the vault's side hall |
 
@@ -471,7 +471,7 @@ rough 0.1, speed 0.5, jitter 0.06) — a steady, clipped mid voice. Lines go thr
 - **Weapons**: crossbow and spear patterns (reuse: Farhold `js/weapons.js`; the polearm's 7.4 m pierce line
   is **not** used — a tactician spear stabs at 4.5 m and its spells throw it).
 - **Visual borrowing** (effects only; every spell above is new): Probing Bolt borrows the `arrow` projectile,
-  Outflank borrows `charge`'s dash trail, Muster Point borrows `rally`'s gold `arrow_up` aura, Decisive Hour
+  Outflank borrows `charge`'s dash trail, Rally Point borrows `rally`'s gold `arrow_up` aura, Decisive Hour
   borrows the `pillar` effect that `judgement` uses, Shield Wall the `barrier` aura. All spellfx elements used:
   `physical`, `holy`.
 - **The earlier tactician** in the Emberveil 2 prototype (`prototypes/emberveil/data/skills.json`:
@@ -491,7 +491,7 @@ rough 0.1, speed 0.5, jitter 0.06) — a steady, clipped mid voice. Lines go thr
 
 - **Build**: melee sword/sceptre → **ranged** crossbow or thrown spear (00 §6). **Resource**: Focus → **Tempo** (costs rewritten for a 25/s refill).
 - **Hybrid role added**: **Tank** — Field Standard, Shield Wall, Guardian near the standard (§5).
-- **Renamed**: `tactician_probing_cut` Probing Cut → `tactician_probing_bolt` **Probing Bolt**; Muster Point
+- **Renamed**: `tactician_probing_cut` Probing Cut → `tactician_probing_bolt` **Probing Bolt**; Rally Point
   talent "Last Stand" (banned) → **Rearguard**; Probing talents "Feint" → **Feint Shot**, "Thrown Blade" →
   **Pinning Bolt**; Double-Time talent "Grand Parade" (raid-only) → **Parade Ground**;
   `leg_baton_of_the_last_command` → `leg_the_last_command` (now a crossbow).

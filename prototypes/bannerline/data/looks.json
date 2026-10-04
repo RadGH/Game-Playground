@@ -1,0 +1,678 @@
+{
+ "_doc": "Bannerline art data (stream C, PLAN \u00a714/\u00a716). How each unit's `model` ref in units.json becomes a 3D body. `chibi2` refs: start from a Chibi 2 preset (`bases`, avatar-3d/data/chibi2-presets.json by name) or a Farhold warband member (`warband` = a def id in prototypes/farhold/data/warbands.json, read-only), dress it as a class (`outfit`, avatar-3d/data/class-outfits.json), then apply `units.<id>.parts` slot overrides and the race `paint` (top/cape/hat colour swaps). `creature` refs: the race's `creatures` table names a designed look in avatar-3d/data/creature-variants.json (falling back to the bare type). `scale` is a suggested world scale so a T4 reads bigger than a T1 from the RTS camera; the view may ignore it. `heroes` are the four hero bodies. Read by js/view/unit-looks.js only; the sim never reads this file. `heroes.<id>.team` names the slots painted in the player's colour (`{slot: 'color'|'color2'}`) by `forHero(id, { color })` \u2014 heroes are the one exception to never-recolour, because the owner wants a hero to read as his at a glance (5 heroes x 6 slot colours at most 30 Chibi 2 templates). `forms.<hero>.<form id>` is the creature look (creature-variants.json) a hero turns into while shaped (heroes.json skills `form.id`). `pets.<pet id>` is the creature look for a hero's summon (heroes.json `pets`). `tierScale` sizes a unit by tier (T1 1.0 .. T6 1.5) unless `units.<id>.scale` says otherwise; creature looks multiply it by their own designed size, so the eye reads a tier from across the field. `hvf` (Hunters vs Farmers): `farmer` / `hunter` Chibi 2 looks (`team` slots painted in the player's colour), `ghost` (how a downed farmer is drawn: tint, opacity, glow), and the creature looks for `animals`, `army` and `pets` (creature-variants.json ids).",
+ "bases": {
+  "human": "Human wayfarer",
+  "dwarf": "Dwarf smith (round)",
+  "halfling": "Halfling traveller (round)",
+  "elf": "Elf archer",
+  "orc": "Orc berserker (two two-handers)",
+  "undead": "Barrow wight",
+  "beast": "Beastkin hunter"
+ },
+ "races": {
+  "freeholds": {
+   "paint": {
+    "from": [
+     "#8a2a2a",
+     "#2a4a9a",
+     "#3a5a8a",
+     "#6a2a3a",
+     "#7a2a2a"
+    ],
+    "to": "#2f5d9e",
+    "trim": "#c9d1d9"
+   },
+   "creatures": {
+    "golem": "bl_iron_golem"
+   }
+  },
+  "ashtusk": {
+   "creatures": {
+    "tuskback": "bl_tuskback"
+   },
+   "paint": {
+    "from": [
+     "#2a4a9a",
+     "#3a5a8a",
+     "#2f6a8a",
+     "#b0301a"
+    ],
+    "to": "#8a2a22",
+    "trim": "#d8c8a0"
+   }
+  },
+  "unburied": {
+   "creatures": {
+    "ghoul": "bl_ghoul",
+    "bone_colossus": "bl_bone_colossus",
+    "crow": "bl_crow"
+   }
+  },
+  "thornmane": {
+   "creatures": {
+    "wolf": "bl_thornmane_wolf",
+    "saber_cat": "bl_saber_cat",
+    "thornback": "bl_thornback"
+   }
+  }
+ },
+ "units": {
+  "levy": {
+   "parts": {
+    "hat": {
+     "id": "leather_cap",
+     "color": "#6a5038"
+    },
+    "top": {
+     "id": "gambeson",
+     "color": "#2f5d9e",
+     "color2": "#c9d1d9"
+    },
+    "held": {
+     "id": "fh_spear",
+     "color": "#a8b0b8"
+    },
+    "offhand": {
+     "id": "round_shield",
+     "color": "#2f5d9e"
+    },
+    "cape": {
+     "id": "none"
+    }
+   }
+  },
+  "hill_slinger": {
+   "parts": {
+    "hat": {
+     "id": "feather_cap",
+     "color": "#2f5d9e"
+    },
+    "top": {
+     "id": "travel_shirt",
+     "color": "#2f5d9e"
+    },
+    "held": {
+     "id": "fh_javelin",
+     "color": "#a08060"
+    }
+   }
+  },
+  "shieldbearer": {
+   "parts": {
+    "held": {
+     "id": "fh_hammer",
+     "color": "#b0b8c2"
+    },
+    "offhand": {
+     "id": "fh_tower_shield",
+     "color": "#2f5d9e"
+    }
+   }
+  },
+  "hedge_priest": {
+   "parts": {
+    "hat": {
+     "id": "hood",
+     "color": "#2f5d9e"
+    },
+    "top": {
+     "id": "trim_robe",
+     "color": "#e8e0c8",
+     "color2": "#2f5d9e"
+    },
+    "held": {
+     "id": "staff_crook",
+     "color": "#8a6a40"
+    }
+   }
+  },
+  "iron_golem": {},
+  "banner_marshal": {
+   "parts": {
+    "decor": {
+     "id": "tabard",
+     "color": "#2f5d9e"
+    },
+    "held": {
+     "id": "fh_longsword",
+     "color": "#d8dee6"
+    },
+    "offhand": {
+     "id": "fh_kite_shield",
+     "color": "#2f5d9e"
+    }
+   }
+  },
+  "raider_pair": {},
+  "spearthrower": {},
+  "brute": {},
+  "bonecaller": {},
+  "tuskback": {},
+  "tuskchief": {},
+  "shambler": {},
+  "crow_murder": {},
+  "gravecreeper": {},
+  "ghoul": {},
+  "bone_colossus": {},
+  "deathmarshal": {},
+  "wolf_pair": {},
+  "tracker": {},
+  "mauler": {},
+  "saber_cat": {},
+  "thornback": {},
+  "packlord": {},
+  "fleetfoot": {
+   "parts": {
+    "hat": {
+     "id": "hood",
+     "color": "#2f5d9e"
+    },
+    "top": {
+     "id": "strapped_leather",
+     "color": "#5a4a3a",
+     "color2": "#2f5d9e"
+    },
+    "held": {
+     "id": "fh_dagger",
+     "color": "#c4ccd4"
+    },
+    "offhand": {
+     "id": "fh_dagger",
+     "color": "#c4ccd4"
+    },
+    "cape": {
+     "id": "half_cape",
+     "color": "#2f5d9e"
+    }
+   }
+  },
+  "crossbowman": {
+   "parts": {
+    "hat": {
+     "id": "leather_cap",
+     "color": "#6a5038"
+    },
+    "top": {
+     "id": "gambeson",
+     "color": "#2f5d9e",
+     "color2": "#c9d1d9"
+    },
+    "held": {
+     "id": "crossbow",
+     "color": "#7a5a38"
+    },
+    "offhand": {
+     "id": "none"
+    },
+    "decor": {
+     "id": "belt_pouches",
+     "color": "#5a4632"
+    }
+   }
+  },
+  "lantern_warden": {
+   "parts": {
+    "hat": {
+     "id": "hood",
+     "color": "#2f5d9e"
+    },
+    "top": {
+     "id": "trim_robe",
+     "color": "#e8e0c8",
+     "color2": "#2f5d9e"
+    },
+    "held": {
+     "id": "staff_crystal",
+     "color": "#8ab8e8"
+    },
+    "offhand": {
+     "id": "none"
+    },
+    "decor": {
+     "id": "belt_lantern",
+     "color": "#d8b040"
+    }
+   }
+  },
+  "halberdier": {
+   "parts": {
+    "hat": {
+     "id": "plate_helm",
+     "color": "#b8c0cc",
+     "color2": "#2f5d9e"
+    },
+    "top": {
+     "id": "surcoat",
+     "color": "#2f5d9e",
+     "color2": "#c9d1d9"
+    },
+    "held": {
+     "id": "fh_halberd",
+     "color": "#c4ccd4"
+    },
+    "offhand": {
+     "id": "none"
+    },
+    "cape": {
+     "id": "none"
+    }
+   }
+  },
+  "ballista_crew": {
+   "parts": {
+    "hat": {
+     "id": "goggles_up",
+     "color": "#8a6a3a"
+    },
+    "top": {
+     "id": "smith_apron",
+     "color": "#5a3a1a",
+     "color2": "#2f5d9e"
+    },
+    "held": {
+     "id": "crossbow",
+     "color": "#5a4028"
+    },
+    "offhand": {
+     "id": "none"
+    },
+    "decor": {
+     "id": "gear_pack",
+     "color": "#a88a4a"
+    }
+   }
+  },
+  "gate_warden": {
+   "parts": {
+    "hat": {
+     "id": "great_helm",
+     "color": "#c8ced6",
+     "color2": "#2f5d9e"
+    },
+    "top": {
+     "id": "scale_plate",
+     "color": "#a8b0b8",
+     "color2": "#2f5d9e"
+    },
+    "held": {
+     "id": "fh_maul",
+     "color": "#a8b0b8"
+    },
+    "offhand": {
+     "id": "fh_tower_shield",
+     "color": "#2f5d9e"
+    },
+    "cape": {
+     "id": "cape",
+     "color": "#2f5d9e"
+    }
+   }
+  },
+  "pyre_runner": {
+   "parts": {
+    "hat": {
+     "id": "bandana",
+     "color": "#d8602a"
+    },
+    "top": {
+     "id": "rags",
+     "color": "#5a3020"
+    },
+    "held": {
+     "id": "flame",
+     "color": "#ff7a2a"
+    },
+    "offhand": {
+     "id": "torch",
+     "color": "#6a4a2a"
+    },
+    "cape": {
+     "id": "none"
+    }
+   }
+  },
+  "skullsplitter": {
+   "parts": {
+    "hat": {
+     "id": "war_helm",
+     "color": "#6a645e"
+    },
+    "top": {
+     "id": "strapped_leather",
+     "color": "#5a2a20",
+     "color2": "#8a2a22"
+    },
+    "held": {
+     "id": "fh_axe",
+     "color": "#9aa0a8"
+    },
+    "offhand": {
+     "id": "fh_axe",
+     "color": "#9aa0a8"
+    },
+    "decor": {
+     "id": "trophy_belt",
+     "color": "#e6dcc4"
+    }
+   }
+  },
+  "sling_gang": {
+   "parts": {
+    "hat": {
+     "id": "bandana",
+     "color": "#8a2a22"
+    },
+    "top": {
+     "id": "rags",
+     "color": "#4a3628"
+    },
+    "held": {
+     "id": "fh_javelin",
+     "color": "#a08060"
+    },
+    "offhand": {
+     "id": "round_shield",
+     "color": "#6a3a24"
+    }
+   }
+  },
+  "ironhide_charger": {
+   "parts": {
+    "hat": {
+     "id": "horned_helm",
+     "color": "#6a645e"
+    },
+    "top": {
+     "id": "scale_plate",
+     "color": "#5a524a",
+     "color2": "#8a2a22"
+    },
+    "held": {
+     "id": "fh_spear",
+     "color": "#9aa0a8"
+    },
+    "offhand": {
+     "id": "fh_tower_shield",
+     "color": "#6a3a24"
+    },
+    "cape": {
+     "id": "fur_mantle",
+     "color": "#4a3424"
+    }
+   }
+  },
+  "blood_shaman": {
+   "parts": {
+    "hat": {
+     "id": "bone_headdress",
+     "color": "#e6dcc4"
+    },
+    "top": {
+     "id": "sash_robe",
+     "color": "#7a2018",
+     "color2": "#d8c8a0"
+    },
+    "held": {
+     "id": "staff_skull",
+     "color": "#6a4a2a"
+    },
+    "offhand": {
+     "id": "none"
+    },
+    "decor": {
+     "id": "bone_charms",
+     "color": "#e6dcc4"
+    }
+   }
+  },
+  "barrow_wight": {
+   "parts": {
+    "hat": {
+     "id": "crown",
+     "color": "#8a9898"
+    },
+    "top": {
+     "id": "scale_plate",
+     "color": "#3a4448",
+     "color2": "#7ff2ff"
+    },
+    "held": {
+     "id": "fh_greatsword",
+     "color": "#9ab8bc"
+    },
+    "offhand": {
+     "id": "none"
+    },
+    "cape": {
+     "id": "tattered_cape",
+     "color": "#24494c"
+    }
+   }
+  }
+ },
+ "heroes": {
+  "warrior": {
+   "chibi2": "human",
+   "outfit": "warrior",
+   "parts": {
+    "cape": {
+     "id": "cape",
+     "color": "#8a2a2a"
+    }
+   },
+   "team": {
+    "cape": "color",
+    "offhand": "color"
+   },
+   "scale": 1.6
+  },
+  "ranger": {
+   "chibi2": "elf",
+   "outfit": "ranger",
+   "team": {
+    "cape": "color"
+   },
+   "scale": 1.6
+  },
+  "pyromancer": {
+   "chibi2": "human",
+   "outfit": "pyromancer",
+   "parts": {
+    "held": {
+     "id": "staff_orb",
+     "color": "#e8642a"
+    },
+    "offhand": {
+     "id": "none"
+    },
+    "cape": {
+     "id": "shoulder_cape",
+     "color": "#5a1a0a"
+    }
+   },
+   "team": {
+    "cape": "color"
+   },
+   "scale": 1.6
+  },
+  "druid": {
+   "chibi2": "elf",
+   "outfit": "druid",
+   "parts": {
+    "cape": {
+     "id": "fur_mantle",
+     "color": "#6a5a3a"
+    }
+   },
+   "team": {
+    "top": "color2"
+   },
+   "scale": 1.6
+  },
+  "engineer": {
+   "chibi2": "dwarf",
+   "outfit": "tinker",
+   "parts": {
+    "hat": {
+     "id": "goggles_up",
+     "color": "#8a6a3a"
+    },
+    "bottom": {
+     "id": "pants",
+     "color": "#3a3430"
+    },
+    "shoes": {
+     "id": "boots",
+     "color": "#3a2a1a"
+    },
+    "decor": {
+     "id": "gear_pack",
+     "color": "#a88a4a"
+    },
+    "held": {
+     "id": "fh_hammer",
+     "color": "#a8b0b8"
+    },
+    "offhand": {
+     "id": "fh_scepter",
+     "color": "#c89a40"
+    },
+    "cape": {
+     "id": "none"
+    }
+   },
+   "team": {
+    "top": "color2"
+   },
+   "scale": 1.6
+  }
+ },
+ "forms": {
+  "druid": {
+   "wolf": "bl_druid_wolf",
+   "briarback": "bl_briarback"
+  }
+ },
+ "engineer": {
+  "turret": "bolt_turret",
+  "mine": "shrapnel_mine"
+ },
+ "pets": {
+  "grove_wolf": "bl_grove_wolf"
+ },
+ "tierScale": {
+  "1": 1.0,
+  "2": 1.06,
+  "3": 1.12,
+  "4": 1.2,
+  "5": 1.32,
+  "6": 1.5
+ },
+ "hvf": {
+  "farmer": {
+   "chibi2": "human",
+   "parts": {
+    "hat": {
+     "id": "straw",
+     "color": "#d8b55a",
+     "color2": "#c8302a"
+    },
+    "top": {
+     "id": "apron",
+     "color": "#6e8a4a",
+     "color2": "#e8dcc0"
+    },
+    "bottom": {
+     "id": "breeches",
+     "color": "#5a4a32"
+    },
+    "shoes": {
+     "id": "boots",
+     "color": "#4a3424"
+    },
+    "cape": {
+     "id": "none"
+    },
+    "decor": {
+     "id": "belt_pouches",
+     "color": "#6a4a2a"
+    },
+    "held": {
+     "id": "staff_crook",
+     "color": "#8a6a40"
+    },
+    "offhand": {
+     "id": "none"
+    }
+   },
+   "team": {
+    "hat": "color2",
+    "top": "color"
+   },
+   "scale": 1.35
+  },
+  "hunter": {
+   "chibi2": "human",
+   "parts": {
+    "hat": {
+     "id": "hood",
+     "color": "#3a3a32",
+     "color2": "#5a4a3a"
+    },
+    "top": {
+     "id": "strapped_leather",
+     "color": "#4a3a2a",
+     "color2": "#b23a2a"
+    },
+    "bottom": {
+     "id": "leggings",
+     "color": "#2e2a24"
+    },
+    "shoes": {
+     "id": "boots",
+     "color": "#2a1e14"
+    },
+    "cape": {
+     "id": "travel_cloak",
+     "color": "#2e3428"
+    },
+    "decor": {
+     "id": "trophy_belt",
+     "color": "#e6dcc4"
+    },
+    "held": {
+     "id": "fh_spear",
+     "color": "#9aa0a8"
+    },
+    "offhand": {
+     "id": "none"
+    }
+   },
+   "team": {
+    "top": "color2"
+   },
+   "scale": 1.6
+  },
+  "ghost": {
+   "color": "#9fd8ff",
+   "opacity": 0.45,
+   "emissive": 0.6,
+   "anim": "idle",
+   "bob": 0.25
+  },
+  "animals": {
+   "hen": "bl_hen",
+   "sheep": "bl_sheep",
+   "pig": "bl_pig",
+   "cow": "bl_cow"
+  },
+  "army": {
+   "scarecrow": "bl_scarecrow",
+   "crow": "bl_crow"
+  },
+  "pets": {
+   "hound": "bl_hunt_hound",
+   "hawk": "bl_hawk"
+  }
+ }
+}

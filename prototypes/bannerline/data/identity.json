@@ -1,0 +1,33 @@
+{
+ "_doc": "Bannerline visual identity (stream C, art only; the sim never reads it). `teams`: the two sides' colour families. `slots`: six player colours — slots 0-2 play for team 0, 3-5 for team 1 — each a shade inside its team's family so a 3v3 reads as two sides first and six players second. `races`: each race's palette for buildings and banners (`stone`, `wood`, `roof`, `trim`, `cloth`, `metal`, `glow`), its `emblem` (drawn by js/view/identity.js) and its building `style` (js/view/structures.js). RULES: a unit is never recoloured (that rebuilds Chibi 2 templates and muddies the race's look); team and player show as (1) the ground ring under every body in the SLOT colour, (2) the banner cloth on Keeps, gates and the Barracks in the slot colour with the race emblem in `trim`, (3) the HP bar in the team colour, (4) heroes only: a few clothing slots in the slot colour (data/looks.json heroes.<id>.team). The race reads from the units themselves (bodies + their own palette) and from the buildings.",
+ "teams": [
+  { "name": "West", "color": "#3f86ec", "dark": "#1d3f73", "light": "#9cc4ff" },
+  { "name": "East", "color": "#e0503e", "dark": "#6e2018", "light": "#ffa898" }
+ ],
+ "slots": [
+  { "team": 0, "color": "#3f86ec", "name": "Blue" },
+  { "team": 0, "color": "#33c2d6", "name": "Teal" },
+  { "team": 0, "color": "#8a74f2", "name": "Violet" },
+  { "team": 1, "color": "#e0503e", "name": "Red" },
+  { "team": 1, "color": "#f0a238", "name": "Amber" },
+  { "team": 1, "color": "#e04e9c", "name": "Rose" }
+ ],
+ "races": {
+  "freeholds": {
+   "name": "The Freeholds", "style": "stone", "emblem": "tower",
+   "stone": "#b9b4a6", "stoneDark": "#8a867b", "wood": "#7a5a3a", "roof": "#3e5a86", "trim": "#e8dfc4", "cloth": "#2f5d9e", "metal": "#c8ced6", "glow": "#ffc86a"
+  },
+  "ashtusk": {
+   "name": "Ashtusk", "style": "palisade", "emblem": "tusks",
+   "stone": "#6a5e54", "stoneDark": "#463c34", "wood": "#4a3424", "roof": "#8a2c22", "trim": "#e6dcc4", "cloth": "#8a2a22", "metal": "#7a7470", "glow": "#ff8a3a"
+  },
+  "unburied": {
+   "name": "The Unburied", "style": "crypt", "emblem": "skull",
+   "stone": "#8e9694", "stoneDark": "#545c5c", "wood": "#3a3434", "roof": "#2e3a40", "trim": "#bff6f0", "cloth": "#24494c", "metal": "#8a9898", "glow": "#7ff2ff"
+  },
+  "thornmane": {
+   "name": "Thornmane", "style": "grove", "emblem": "paw",
+   "stone": "#7e8064", "stoneDark": "#545640", "wood": "#5a4028", "roof": "#46602e", "trim": "#e8d8a0", "cloth": "#3e5424", "metal": "#8a8060", "glow": "#d8ff8a"
+  }
+ }
+}

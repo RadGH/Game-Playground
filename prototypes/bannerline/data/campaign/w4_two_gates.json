@@ -1,0 +1,136 @@
+{
+ "id": "w4_two_gates",
+ "chapter": "warrior",
+ "name": "Two Gates",
+ "place": "The Twin Roads",
+ "briefing": [
+  "Two Ashtusk chiefs march together, and the High Warden has sent you an ally: Warden Ilse holds the second gate.",
+  "Captain Merrow: \"Our field has two lanes now, one for each gate. Gold from every kill is shared by the team. If the field is overrun, ring the Toll of Iron from the Keep: it stuns every enemy in our field.\""
+ ],
+ "config": {
+  "format": "2v2",
+  "map": "vale",
+  "players": [
+   {
+    "team": 0,
+    "kind": "human",
+    "race": "freeholds",
+    "hero": "warrior",
+    "name": "You"
+   },
+   {
+    "team": 0,
+    "kind": "ai",
+    "race": "freeholds",
+    "hero": "pyromancer",
+    "name": "Warden Ilse",
+    "ai": {
+     "difficulty": "veteran"
+    }
+   },
+   {
+    "team": 1,
+    "kind": "ai",
+    "race": "ashtusk",
+    "hero": "warrior",
+    "name": "Chief Ruk",
+    "ai": {
+     "difficulty": "recruit"
+    }
+   },
+   {
+    "team": 1,
+    "kind": "ai",
+    "race": "ashtusk",
+    "hero": "ranger",
+    "name": "Chief Vasha",
+    "ai": {
+     "difficulty": "recruit"
+    }
+   }
+  ],
+  "rules": {
+   "banners": 50
+  }
+ },
+ "player": 0,
+ "winWhen": "result",
+ "objectives": [
+  {
+   "id": "win",
+   "text": "Tear down every enemy banner",
+   "kind": "win",
+   "args": {}
+  },
+  {
+   "id": "slay",
+   "text": "Cut down 60 enemies",
+   "kind": "kills",
+   "args": {
+    "n": 60
+   }
+  },
+  {
+   "id": "toll",
+   "text": "Ring the Toll of Iron once",
+   "kind": "toll",
+   "args": {
+    "n": 1
+   },
+   "optional": true
+  },
+  {
+   "id": "unbowed",
+   "text": "Never fall",
+   "kind": "noHeroDeaths",
+   "args": {},
+   "optional": true
+  }
+ ],
+ "stars": [
+  "toll",
+  "unbowed"
+ ],
+ "script": [
+  {
+   "id": "hello",
+   "when": {
+    "tick": 20
+   },
+   "do": [
+    {
+     "do": "say",
+     "who": "Warden Ilse",
+     "text": "I have the left gate. Send hard at Chief Ruk; I will keep Vasha busy."
+    }
+   ]
+  },
+  {
+   "id": "swarm",
+   "when": {
+    "at": 300
+   },
+   "do": [
+    {
+     "do": "wave",
+     "player": 2,
+     "units": [
+      [
+       "raider_pair",
+       6
+      ],
+      [
+       "brute",
+       3
+      ]
+     ]
+    },
+    {
+     "do": "say",
+     "who": "Captain Merrow",
+     "text": "A swarm on our road! This is what the Toll of Iron is for."
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,180 @@
+{
+ "_doc": "Bannerline economy + clock knobs. Read by js/sim/economy.js and tools/econ-sim.mjs. Times are seconds. Change a number here, re-run `node tools/econ-sim.mjs`, and check the verdict block before committing.",
+ "clock": {
+  "tickHz": 20,
+  "pay": 10,
+  "tide": 40,
+  "risingTide": 1260,
+  "risingEvery": 120,
+  "risingLeakMult": 1.5,
+  "risingTideLevels": 5,
+  "hardCap": 1920,
+  "_doc": "risingTide: from this second the match escalates every risingEvery s (step n = 1, 2, 3...): Tides jump risingTideLevels levels per step, leaks count x (risingLeakMult + risingLeakStep*(n-1)). This is the end clock: it guarantees a stronger defence eventually breaks.",
+  "risingLeakStep": 0.5
+ },
+ "start": {
+  "gold": 60,
+  "income": 20
+ },
+ "banners": {
+  "1v1": 70,
+  "2v2": 90,
+  "3v3": 110
+ },
+ "bounty": {
+  "share": 0.15,
+  "toTeamPool": true
+ },
+ "rally": {
+  "behindStep": 0.2,
+  "perStep": 0.1,
+  "cap": 0.3
+ },
+ "field": {
+  "length": 140,
+  "cap": 60,
+  "engageSlow": 0.3,
+  "engagedBodies": 6,
+  "engageDepth": 8,
+  "_doc": "cap = live bodies per field; sends beyond it wait at the gate. econ-sim peak is ~31, so 60 is headroom, and the render budget (PLAN §15) is sized to it."
+ },
+ "tide": {
+  "bodies": 4,
+  "hpBase": 140,
+  "hpPerLevel": 45,
+  "dpsBase": 6,
+  "dpsPerLevel": 1.6,
+  "gold": 6,
+  "goldPerLevel": 1.5,
+  "xp": 20,
+  "xpPerLevel": 6,
+  "leak": 1
+ },
+ "items": {
+  "_doc": "Shop model the econ sim uses: 8 equipment slots, each upgraded through 7 steps (5 base tiers, then rare and legendary rolls of the top base). A step REPLACES the last, so dps/hp/armor are the gain over the previous step. Steps unlock by match time. The real shop (data/shop.json) prices bases + rarity from these. `unlock` no longer gates the shop (lead decision 2026-10-03: gold is the gate); it is the second from which drops and champion picks may roll that step.",
+  "slots": 8,
+  "tiers": [
+   {
+    "cost": 60,
+    "unlock": 0,
+    "dps": 0.03,
+    "hp": 30,
+    "armor": 1
+   },
+   {
+    "cost": 160,
+    "unlock": 120,
+    "dps": 0.04,
+    "hp": 45,
+    "armor": 1
+   },
+   {
+    "cost": 380,
+    "unlock": 300,
+    "dps": 0.05,
+    "hp": 60,
+    "armor": 1
+   },
+   {
+    "cost": 850,
+    "unlock": 540,
+    "dps": 0.06,
+    "hp": 80,
+    "armor": 2
+   },
+   {
+    "cost": 1600,
+    "unlock": 780,
+    "dps": 0.07,
+    "hp": 100,
+    "armor": 2
+   },
+   {
+    "cost": 2800,
+    "unlock": 1020,
+    "dps": 0.08,
+    "hp": 120,
+    "armor": 2
+   },
+   {
+    "cost": 4500,
+    "unlock": 1260,
+    "dps": 0.09,
+    "hp": 150,
+    "armor": 3
+   }
+  ],
+  "potion": {
+   "cost": 25,
+   "heal": 0.4,
+   "belt": 2
+  }
+ },
+ "hero": {
+  "_doc": "Generic hero curve for the econ model; per-class numbers live in data/heroes.json. aoe = how much a crowd multiplies clear speed (1 + aoe * (min(bodies, 6) - 1) / 5).",
+  "dps": 24,
+  "dpsPerLevel": 9,
+  "hp": 560,
+  "hpPerLevel": 60,
+  "armor": 3,
+  "regen": 0.012,
+  "respawnBase": 5,
+  "respawnPerLevel": 1,
+  "respawnCap": 25,
+  "xpTable": [
+   0,
+   80,
+   200,
+   380,
+   620,
+   930,
+   1320,
+   1800,
+   2380,
+   3070,
+   3880,
+   4820,
+   5900,
+   7130,
+   8520,
+   10080,
+   11820,
+   13760,
+   15900,
+   18260
+  ],
+  "classes": {
+   "warrior": {
+    "dpsK": 1.06,
+    "hpK": 1.25,
+    "aoe": 0.9,
+    "type": "blade"
+   },
+   "ranger": {
+    "dpsK": 1.32,
+    "hpK": 0.9,
+    "aoe": 0.5,
+    "type": "pierce"
+   },
+   "pyromancer": {
+    "dpsK": 1.0,
+    "hpK": 0.8,
+    "aoe": 1.3,
+    "type": "fire"
+   },
+   "druid": {
+    "dpsK": 1.08,
+    "hpK": 1.05,
+    "aoe": 0.8,
+    "type": "nature",
+    "selfHeal": 0.01
+   },
+   "engineer": {
+    "dpsK": 0.95,
+    "hpK": 0.95,
+    "aoe": 0.7,
+    "type": "pierce"
+   }
+  }
+ }
+}

@@ -1,6 +1,6 @@
 # Farhold — the Civilization Expansion
 
-*Houses, workers, vendors, trade goods, guards and the muster.*
+*Houses, workers, vendors, trade goods, guards and the levy.*
 
 Design: `research/civilization-expansion.md` (1 748 lines, 13 sections). This file is what was
 actually built, where it lives, and the handful of places the code disagreed with the design and
@@ -357,7 +357,15 @@ punishment-for-playing shape again.
 
 ---
 
-## 8. The muster — `js/muster.js`, four edits to `js/raid.js`
+## 8. The levy — `js/levy.js`, four edits to `js/raid.js`
+
+> **Renamed 2026-10-03.** This was "the muster" until the owner banned the word. Everything moved:
+> `js/muster.js` → `js/levy.js`, `createLevy`, `levyFacts`, `civics.levy`, the Holding tab `levy`,
+> `raids.json`'s `levy` block, and the stone `muster_stone` → `levy_stone`. Old saves still load:
+> `civics.loadJSON` reads `json.levy ?? json.muster`, `buildplan.load` rewrites a saved
+> `muster_stone` through `RENAMED_STRUCTURES`, a saved drill of kind `muster` becomes `levy`, and
+> js/save.js maps the old talent pick `muster` to `close_ranks`. `tests/wording.test.js` scans the
+> whole game for the word and checks the old save loads.
 
 > *"Allow the town center to initiate wave defense minigames that reward loot or resources for
 > victory, or just nothing if defeated besides death penalty if the player dies. No need to penalize
@@ -384,17 +392,17 @@ Everything between — `canFire`, `acceptRaid`, `beginRaid`, `currentWave`, `wav
 itself for free.
 
 Two places you start one, both things that already stand on the ground: a town's **notice board**,
-and a **Muster Stone** (`{ block 14, iron 4 }`) at your own outpost. The existing **Alarm Bell stays
+and a **Levy Stone** (`{ block 14, iron 4 }`) at your own outpost. The existing **Alarm Bell stays
 exactly what it is** — that is the real raid, the one that pays standing and can cost you a wall.
 Two objects, two meanings.
 
-**Cooldown is per rank and per place**, so clearing rank 4 does not lock out rank 1 and a muster at
+**Cooldown is per rank and per place**, so clearing rank 4 does not lock out rank 1 and a levy at
 Ironmoor does not lock out one at your own holding. A **leash** of 300 m for 45 continuous seconds
 ends a drill you walked away from — and it ends it the same way dying does, which is to say with
 nothing taken.
 
-A walled city musters a harder rank 3 than a hamlet does, using arithmetic that was already written:
-`waveSpawns` scales off `base.defences` and your level, and `muster.baseForTown` only has to describe
+A walled city calls up a harder rank 3 than a hamlet does, using arithmetic that was already written:
+`waveSpawns` scales off `base.defences` and your level, and `levy.baseForTown` only has to describe
 a settlement in the same four numbers a base is described in.
 
 ---
@@ -408,7 +416,7 @@ a settlement in the same four numbers a base is described in.
 | `js/vendors.js` | the twelve, their conditions, their rent, their shelf |
 | `js/hold.js` | the one weight-capped container |
 | `js/trade.js` | `installTradeGoods`, town prices, the route planner |
-| `js/muster.js` | the drill board over `js/raid.js` |
+| `js/levy.js` | the drill board over `js/raid.js` |
 | `js/civics-ui.js` + `civics.css` | the Holding screen (People · Houses · Work · Traders · Trade), the away card, the HUD hold readout |
 | `js/colony.js` | extended: housing, `travelHoursOf`, `bind`/`station`, wages, rent, `tendMax`, two new appeal terms |
 | `js/refine.js` | extended: `labour`, `workBank`, `postLabour`, `credit`, `collectLabour`, the `unworked` state |
@@ -416,11 +424,11 @@ a settlement in the same four numbers a base is described in.
 | `js/raid.js` | four edits: `forceTier`, `drill`, the zeroed loss, `rollSpoils` |
 | `js/caravans.js` | trouble is a roll; a caravan can carry a manifest of yours |
 | `js/hire.js` | `guardContract()` — guards for a trip, at ten gold each |
-| `data/colony.json` | `labour`, `comfort`, `vendors`, `vendorJob`, `guard`, `away`, `muster`, `trade`, `carriers`, `hold`; `tendMax`/`wagePerDay` on the jobs; rebalanced appeal weights |
+| `data/colony.json` | `labour`, `comfort`, `vendors`, `vendorJob`, `guard`, `away`, `levy`, `trade`, `carriers`, `hold`; `tendMax`/`wagePerDay` on the jobs; rebalanced appeal weights |
 | `data/tradegoods.json` | the twenty-two goods |
-| `data/structures.json` | 6 houses, 8 utilities, a stable, 3 posts, the Muster Stone, the workshop, the manufactory, the Trade Post, the Tender Arm; two new catalogue categories |
+| `data/structures.json` | 6 houses, 8 utilities, a stable, 3 posts, the Levy Stone, the workshop, the manufactory, the Trade Post, the Tender Arm; two new catalogue categories |
 | `data/refining.json` | `labour` blocks; the workshop and the manufactory |
-| `data/raids.json` | `spoils` per tier, and the `muster` block |
+| `data/raids.json` | `spoils` per tier, and the `levy` block |
 | `tests/civilization.test.js` | 43 tests, all of the above |
 
 ---

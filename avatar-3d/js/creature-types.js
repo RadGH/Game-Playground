@@ -44,7 +44,7 @@ export const CREATURE_TYPES = {
   hyena:     { plan: 'quad', label: 'Hyena', body: { len: 0.82, r: 0.22, legLen: 0.4, legR: 0.055, headR: 0.17, snout: [0.1, 0.23], neck: 0.16, tail: { len: 0.35, r: 0.04, up: -0.15 } }, ears: 'round', colors: { body: '#8a7654', belly: '#c8b98f', accent: '#4a3522', eyes: '#e8b43a' }, features: { fangs: true, mane: true, claws: true } },
   saber_cat: { plan: 'quad', label: 'Saber cat', body: { len: 0.95, r: 0.24, legLen: 0.48, legR: 0.06, headR: 0.18, snout: [0.09, 0.2], neck: 0.18, tail: { len: 0.52, r: 0.04, up: 0.15 } }, ears: 'round', colors: { body: '#c08a4a', belly: '#e8cf9a', accent: '#6a3a1c', eyes: '#8ae06a' }, features: { fangs: true, claws: true, spikes: true } },
   crocodile: { plan: 'quad', label: 'Crocodile', body: { len: 1.35, r: 0.27, legLen: 0.28, legR: 0.06, headR: 0.2, snout: [0.16, 0.42], neck: 0.08, tail: { len: 1.0, r: 0.1, up: -0.25, spiky: true } }, ears: 'none', colors: { body: '#466b4a', belly: '#a7b878', accent: '#263d2b', eyes: '#dce84b' }, features: { fangs: true, spikes: true, plates: true } },
-  turtle:    { plan: 'quad', label: 'Turtle', body: { len: 0.8, r: 0.34, legLen: 0.2, legR: 0.07, headR: 0.14, snout: [0.08, 0.12], neck: 0.08, tail: { len: 0.16, r: 0.025, up: -0.1 } }, ears: 'none', colors: { body: '#3f704d', belly: '#c5b77b', accent: '#263e2b', eyes: '#e8d34b' }, features: { hooves: true, plates: true } },
+  turtle:    { plan: 'quad', label: 'Turtle', body: { shell: true, len: 0.8, r: 0.34, legLen: 0.2, legR: 0.07, headR: 0.14, snout: [0.08, 0.12], neck: 0.08, tail: { len: 0.16, r: 0.025, up: -0.1 } }, ears: 'none', colors: { body: '#3f704d', belly: '#c5b77b', accent: '#263e2b', eyes: '#e8d34b' }, features: { hooves: true, plates: true } },
   griffin:   { plan: 'quad', label: 'Griffin', body: { len: 1.05, r: 0.25, legLen: 0.58, legR: 0.065, headR: 0.2, snout: [0.1, 0.23], neck: 0.3, neckUp: 0.65, tail: { len: 0.45, r: 0.05, up: -0.15 } }, ears: 'pointed', colors: { body: '#a8783e', belly: '#e3cf9a', accent: '#70401e', eyes: '#63b9d6' }, features: { wings: true, claws: true, beak: true } },
   phoenix:   { plan: 'bat', label: 'Phoenix', body: { r: 0.16, span: 1.05, headR: 0.12 }, ears: 'pointed', colors: { body: '#d94a25', belly: '#ffb52e', accent: '#8f1e17', eyes: '#fff3a0' }, features: { wings: true, glow: true, fangs: false } },
   beetle:    { plan: 'spider', label: 'Beetle', body: { abdomenR: 0.35, thoraxR: 0.2, legLen: 0.48, legR: 0.035, headR: 0.1 }, colors: { body: '#263c48', belly: '#496b73', accent: '#8bd0b8', eyes: '#d9ff8a' }, features: { wings: true, spikes: true } },
@@ -55,9 +55,39 @@ export const CREATURE_TYPES = {
   // Farhold's tinker, whose "sentry" used to be a golem standing still — a sentry that cannot follow
   // you is a lamp post. The body plan is its own because nothing else here rolls.
   turret:    { plan: 'roller', label: 'Rolling turret', body: { chassis: [0.52, 0.22, 0.72], wheelR: 0.2, wheelW: 0.11, turretR: 0.24, turretH: 0.2, barrelR: 0.055, barrelLen: 0.66, mastH: 0.2 }, colors: { body: '#8a7a5a', belly: '#b0a080', accent: '#d8a040', eyes: '#ffd060' }, features: { core: true, plates: true, spikes: true } },
+  // ── Bannerline (2026-10-03, prototypes/bannerline/docs/PLAN.md §14). Six send units that had no body.
+  // tuskback:      a war beast for a raiding warband — a quad scaled up past the bear, with fan ears,
+  //                a hanging trunk, long tusks and a wooden howdah on its back (`trunk`, `howdah` are
+  //                new quad features; `body.tuskLen` stretches the tusks; `colors.cloth` is the banner).
+  // ghoul:         a biped that runs bent double — `body.hunch` tips the whole upper body forward
+  //                (legs stay upright) and the head is turned back up to look ahead. Arms reach the knee.
+  // bone_colossus: the titan frame as a skeleton — `ribs` draws a rib cage around a glowing core in
+  //                place of a solid torso, and `body.bony` swaps limbs for thin bones with knuckle joints.
+  // crow:          the bat plan with `feathers` — fanned feather blades instead of a membrane, a fan tail
+  //                and no ears.
+  // thornback:     a boar built like a siege ram — `plates` on a quad lays overlapping armour plates
+  //                down the spine (and the thorns grow out of them).
+  tuskback:  { plan: 'quad', label: 'Tuskback', body: { len: 1.9, r: 0.56, legLen: 0.82, legR: 0.17, headR: 0.38, snout: [0.13, 0.16], neck: 0.04, neckUp: 0.15, tuskLen: 3.4, trunk: { len: 0.95, r: 0.105, segs: 5 }, tail: { len: 0.42, r: 0.04, up: -0.7, hair: true } }, ears: 'fan', colors: { body: '#7a6a62', belly: '#9a8a7e', accent: '#4a3020', eyes: '#ffb040', cloth: '#a8282a' }, features: { tusks: true, trunk: true, howdah: true, hooves: true } },
+  ghoul:     { plan: 'biped', label: 'Ghoul', body: { legLen: 0.56, legR: 0.06, torsoH: 0.58, torsoR: 0.18, armLen: 0.92, armR: 0.05, headR: 0.145, neck: 0.03, hunch: 0.72, crouch: 0.42 }, colors: { body: '#8c9a88', belly: '#a9b29c', accent: '#4a4c42', eyes: '#8affe8' }, features: { claws: true, fangs: true, spine: true } },
+  bone_colossus: { plan: 'biped', label: 'Bone colossus', body: { bony: true, legLen: 0.95, legR: 0.12, torsoH: 1.15, torsoR: 0.5, armLen: 1.32, armR: 0.11, headR: 0.3, neck: 0.12 }, colors: { body: '#ddd4bc', belly: '#a89c80', accent: '#5e584c', eyes: '#7ff2ff' }, features: { ribs: true, core: true, horns: true, spikes: true, claws: true } },
+  crow:      { plan: 'bat', label: 'Crow', body: { r: 0.1, span: 0.78, headR: 0.085 }, ears: 'none', colors: { body: '#34344c', belly: '#4c4c68', accent: '#9090a6', eyes: '#8affe8' }, features: { wings: true, beak: true, feathers: true } },
+  thornback: { plan: 'quad', label: 'Thornback', body: { len: 1.35, r: 0.42, legLen: 0.4, legR: 0.1, headR: 0.29, snout: [0.15, 0.2], neck: 0.03, tuskLen: 1.5, tail: { len: 0.35, r: 0.06, up: -0.2, spiky: true } }, ears: 'round', colors: { body: '#5e5a3a', belly: '#8c7c56', accent: '#d6cca6', eyes: '#ffb040', nose: '#2c261a' }, features: { horns: true, plates: true, spikes: true, tusks: true } },
+  // ── Bannerline Hunters vs Farmers (2026-10-03, prototypes/bannerline/docs/hvf-PLAN.md §14): the farm.
+  // sheep:     a quad under a lumpy fleece (`wool`) with a dark face and legs — the main tell of the mode.
+  // hen:       the new `fowl` plan (two legs, folded wings, comb + wattle). Pecks when it grazes.
+  // pig:       round, short-legged, a flat snout disc (`snoutDisc`) and a curly little tail.
+  // cow:       the horse frame made heavier, short horns, patches (`spots`) and an udder.
+  // scarecrow: a biped of sticks and old clothes with a sack head (`sack`), a floppy hat and straw at
+  //            the cuffs (`straw`) — the farmers' army from the Harvest Hall.
+  // Quads also gained the `graze`, `bleat` and `panic` clips for a flock that eats, calls and bolts.
+  sheep:     { plan: 'quad', label: 'Sheep', body: { len: 0.82, r: 0.27, legLen: 0.34, legR: 0.04, headR: 0.15, snout: [0.08, 0.13], neck: 0.12, neckUp: 0.5, tail: { len: 0.1, r: 0.05, up: -0.4 } }, ears: 'round', colors: { body: '#3a3430', belly: '#efe9dc', accent: '#2a2420', eyes: '#d8b040' }, features: { wool: true, hooves: true } },
+  hen:       { plan: 'fowl', label: 'Hen', body: { r: 0.17, legLen: 0.13, legR: 0.013, headR: 0.072, neck: 0.06 }, colors: { body: '#c8783a', belly: '#e8b070', accent: '#d8302a', eyes: '#1a1410', nose: '#e8a030' }, features: { comb: true } },
+  pig:       { plan: 'quad', label: 'Pig', body: { len: 0.82, r: 0.27, legLen: 0.22, legR: 0.055, headR: 0.18, snout: [0.1, 0.1], neck: 0.02, tail: { len: 0.14, r: 0.025, up: 0.9 } }, ears: 'pointed', colors: { body: '#eba3a0', belly: '#f2b8b2', accent: '#c87a78', eyes: '#2a1a14', nose: '#d4807d' }, features: { hooves: true, snoutDisc: true } },
+  cow:       { plan: 'quad', label: 'Cow', body: { len: 1.45, r: 0.36, legLen: 0.62, legR: 0.07, headR: 0.2, snout: [0.13, 0.2], neck: 0.25, neckUp: 0.35, tail: { len: 0.7, r: 0.035, up: -1.2, hair: true } }, ears: 'round', colors: { body: '#f0ece4', belly: '#e8e0d4', accent: '#2a2622', eyes: '#1a1008', nose: '#e8b4a8' }, features: { horns: true, hooves: true, spots: true, udder: true } },
+  scarecrow: { plan: 'biped', label: 'Scarecrow', body: { legLen: 0.62, legR: 0.045, torsoH: 0.6, torsoR: 0.2, armLen: 0.7, armR: 0.045, headR: 0.2, neck: 0.04 }, colors: { body: '#6a7a4a', belly: '#c8a87a', accent: '#5a4632', eyes: '#ff9a2a' }, features: { sack: true, straw: true, claws: false } },
   mimic:     { plan: 'float', label: 'Mimic', body: { shape: 'mass', coreR: 0.38, y: 0.8, tentacles: 5, eyes: 4 }, colors: { body: '#78553b', belly: '#b67a45', accent: '#302019', eyes: '#ffcf50' }, features: { fangs: true, glow: false } },
 };
-export const CREATURE_ANIMS = ['idle', 'walk', 'run', 'attack', 'talk', 'dead', 'fly'];
+export const CREATURE_ANIMS = ['idle', 'walk', 'run', 'attack', 'talk', 'dead', 'fly', 'graze', 'bleat', 'panic'];
 
 export function normalizeCreature(spec = {}) {
   const type = CREATURE_TYPES[spec.type] ? spec.type : 'wolf'; const T = CREATURE_TYPES[type];

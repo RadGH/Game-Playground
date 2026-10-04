@@ -1,0 +1,53 @@
+{
+ "_doc": "Bannerline campaign (stream F, PLAN §13). One CHAPTER per hero, each a list of mission files in data/campaign/<id>.json (format: js/sim/campaign.js header). Chapters with status 'planned' are stubs for heroes whose missions come later. Progress is saved per mission in localStorage (js/ui/campaign.js).",
+ "title": "Banners of the Vale",
+ "chapters": [
+  {
+   "id": "warrior",
+   "name": "The Iron Oath",
+   "hero": "warrior",
+   "race": "freeholds",
+   "status": "ready",
+   "blurb": "A Freeholds Warrior learns to hold a field, and to break one.",
+   "missions": [
+    "w1_first_banner",
+    "w2_hold_the_ford",
+    "w3_coin_and_steel",
+    "w4_two_gates",
+    "w5_tuskchief"
+   ]
+  },
+  {
+   "id": "ranger",
+   "name": "The Long Watch",
+   "hero": "ranger",
+   "status": "planned",
+   "blurb": "Coming later.",
+   "missions": []
+  },
+  {
+   "id": "pyromancer",
+   "name": "Ashes and Oaths",
+   "hero": "pyromancer",
+   "status": "planned",
+   "blurb": "Coming later.",
+   "missions": []
+  },
+  {
+   "id": "druid",
+   "name": "The Green Pact",
+   "hero": "druid",
+   "status": "planned",
+   "blurb": "Coming later.",
+   "missions": []
+  },
+  {
+   "id": "engineer",
+   "name": "Iron and Gears",
+   "hero": "engineer",
+   "status": "planned",
+   "blurb": "Coming later.",
+   "missions": []
+  }
+ ]
+}

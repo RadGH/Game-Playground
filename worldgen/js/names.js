@@ -73,7 +73,7 @@ const LANDMARK_SHAPES = {
   dungeon:     ['the {~Sunken|Buried|Lost|Black} {W}', 'the {W} {~Vault|Crypt|Undercroft|Labyrinth}'],
   port:        ['{W} {~Harbour|Quay|Landing|Anchorage}'],
   bridge:      ['{W} {~Bridge|Span|Crossing|Ford}'],
-  camp:        ['the {W} {~Camp|Muster|Staging}'],
+  camp:        ['the {W} {~Camp|Rally|Staging}'],
   crater:      ['the {W} Crater', '{W} Basin', 'the {W} Pit'],
   vent:        ['the {W} {~Vents|Fumaroles|Smokers}'],
 };

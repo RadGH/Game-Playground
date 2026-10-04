@@ -317,7 +317,7 @@ is the shape.
 
 | Ch | Title | Region | Levels | Beat | Ends at |
 |---|---|---|---|---|---|
-| P | **Stick and Satchel** | Hearthvale | 1–3 | The player signs the Warden muster at the First Waystone in Brightwater (or at Oakhollow, §7), learns to fight, and meets Iris Vael of the Lantern House, who is measuring why the barrows woke. | The first barrow-dead killed at Harrow Watch |
+| P | **Stick and Satchel** | Hearthvale | 1–3 | The player signs the Warden roll at the First Waystone in Brightwater (or at Oakhollow, §7), learns to fight, and meets Iris Vael of the Lantern House, who is measuring why the barrows woke. | The first barrow-dead killed at Harrow Watch |
 | 1 | **The Barrow Wakes** | Hearthvale | 3–7 | The Sootwick goblins are robbing the barrows; the dead come up behind them. Something in the Hollow Barrow is calling them. Iris finds a Kindled mark burned into the barrow door — the Fire King's people were here first. | d01 The Hollow Barrow — its boss carries a letter in a hand nobody knows |
 | 2 | **Lights in the Fen** | Mossfen | 6–11 | Lights over the marsh lead people into the water; the Mire Sisters are drowning villagers "to feed the lamp". The Drowned Mill is grinding bones. First sighting of a **Drowned** — the dead of the far north-east have walked here underground. | d02 The Drowned Mill |
 | 3 | **The Crown Assembly** | Highcourt | 10–12 | The player walks the Fen Causeway to Highcourt with Iris's findings. The four seats argue; the Lampbearer's Seat is empty. A projection of the Fire King appears in the hall — his first offer. The Assembly sends the player north through the Kettle Pass. | A council scene; while the player is in Highcourt the bank, mail and Trading Post (11), waystones and **Travel Methods** (12) open (page 07 ladder) |
@@ -483,8 +483,8 @@ a starting cosmetic, a racial homeland you are welcomed in, and a small racial p
 
 | Starting town | id | Default for | First three quests | Joins the shared story at |
 |---|---|---|---|---|
-| **Brightwater** | `town_brightwater` | Human, Dwarf, Elf | Warden muster at the First Waystone (page 14 P.1–P.3) | P.4 (escort Iris Vael's cart on the south road) |
-| **Oakhollow** | `town_oakhollow` | Halfling | the Hearth Speaker's muster at the burrow gate (page 14 P.1b–P.3b) | P.4 — Oakhollow is 1.1 km west of Brightwater on the same south road |
+| **Brightwater** | `town_brightwater` | Human, Dwarf, Elf | Warden roll call at the First Waystone (page 14 P.1–P.3) | P.4 (escort Iris Vael's cart on the south road) |
+| **Oakhollow** | `town_oakhollow` | Halfling | the Hearth Speaker's roll call at the burrow gate (page 14 P.1b–P.3b) | P.4 — Oakhollow is 1.1 km west of Brightwater on the same south road |
 
 Both openings are the same length (about 20 minutes to P.4), teach the same things in the same order,
 and end on the same road, so friends who picked different towns meet at P.4 without a detour. Dwarf and
@@ -594,7 +594,7 @@ quartermaster (the faction and chapter are named in brackets).
 
 | id | Name | Role | Where | Voice role | Does |
 |---|---|---|---|---|---|
-| `npc_odile_marsh` | Warden-Captain Odile Marsh | Wardens commander (Vale watch) | Brightwater drill yard | `warrior` f | Prologue + Ch 1 giver; the muster; the Dungeon Finder and dungeon journal (`q_hv_the_barrow_bell`, level 6) |
+| `npc_odile_marsh` | Warden-Captain Odile Marsh | Wardens commander (Vale watch) | Brightwater drill yard | `warrior` f | Prologue + Ch 1 giver; the roll call; the Dungeon Finder and dungeon journal (`q_hv_the_barrow_bell`, level 6) |
 | `npc_bram_fenwick` | Elder Bram Fenwick | town elder | Brightwater hall | `elder` m | Side quests; the town's worries |
 | `npc_hesk` | Drillmaster Hesk | Warden drillmaster | Brightwater drill yard | `fighter` m | **Dodge roll lesson** (`q_hv_fall_and_rise`, level 5; page 07 names this giver `npc_hv_drillmaster_corran`), combat dummies |
 | `npc_sister_wren` | Sister Wren | chapel keeper | Brightwater chapel | `cleric` f | Revive point, curse removal, the perk-forest introduction |
@@ -753,7 +753,7 @@ flooded cellars are lit by glowing peat-fungus on the beams (§11).
 | `lm_old_rail_collapse` | The Old Seam | collapsed_mine | Dig out over three visits → a hidden instance, *the Old Seam* (reuse: Farhold instance `slumped_adit`) |
 | `lm_highcairn_stones` | The Nine Cairns | standing_stones | Puzzle; +1 perk point (once per character) |
 | `lm_stonebridge_toll` | Stonebridge | toll_bridge | 3 gold; the Stone Count (Deepforge Clans) |
-| `lm_ironmuster_field` | The Ironmuster | (world boss arena, reuse: Farhold setpiece `boss_ironmuster`) | World boss site |
+| `lm_ironfield` | The Ironfield | (world boss arena, reuse: Farhold setpiece `boss_ironpass`) | World boss site |
 
 **NPC cast**
 
@@ -789,7 +789,7 @@ Cairnwife tells its story.
 veins of pale-green **glowcap fungus** where the Deepworn have dug (§11); Bellows Keep's halls glow from
 its banked forges.
 
-**World boss site:** `wb_site_ironmuster` on the Bellows Heights — **Grief-in-Iron** (page 13)
+**World boss site:** `wb_site_ironfield` on the Bellows Heights — **Grief-in-Iron** (page 13)
 (`b_grief_in_iron`, a runic war-engine the Deepforge built and could not stop; level 21; reuse name:
 Farhold world boss tier 2).
 
@@ -1683,7 +1683,7 @@ feed strangers. Nobody speaks like a fantasy novel. Everybody speaks like someon
 4. **Nobody explains the controls.** The HUD does that. NPCs never say "press E".
 5. **Nobody knows they are in a game.** No "adventurer, level up". An NPC calls the player by their
    name, race or class ("you, the one with the hunting cat").
-6. **The player is not the chosen one.** Everybody is at the muster. The player is the one who kept
+6. **The player is not the chosen one.** Everybody answered the call. The player is the one who kept
    going. NPCs are grateful for work done, not in awe.
 7. **Every NPC wants something.** Even a vendor's idle line should be about their own day.
 8. **Humour is dry and small.** One joke per quest at most, never at the expense of the dead.
@@ -1761,7 +1761,7 @@ screens and settings. This page adds the following, all **proposed** (see §15):
 | Settlement | `town_<snake>` | `town_brightwater` |
 | Highcourt district | `hc_<snake>` | `hc_coinhall` |
 | Landmark | `lm_<snake>` | `lm_first_waystone` |
-| World boss site | `wb_site_<snake>` | `wb_site_ironmuster` |
+| World boss site | `wb_site_<snake>` | `wb_site_ironfield` |
 | Faction | `fac_<snake>` | `fac_wardens` |
 | Faction chapter | `chp_<snake>` (a label only; standing lives on the faction, §6.5) | `chp_vale_watch` |
 | Travel Method line | `tm_<snake>` (canon prefix; page 20 owns the ids) | `tm_kingsroad_wagons` |

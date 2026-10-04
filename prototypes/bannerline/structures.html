@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bannerline Buildings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@500;700;800&family=Barlow+Semi+Condensed:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/bench.css">
+<script type="importmap">{ "imports": { "three": "../../vendor/three/three.module.js", "three/addons/": "../../vendor/three/addons/" } }</script>
+</head>
+<body class="tool-page">
+<!-- The race-themed buildings (js/view/structures.js): the whole vale as the game lays it out, or a
+     line-up of every race's Keep and town buildings. Drag to orbit, wheel to zoom. -->
+<div class="bench">
+  <header class="bench-bar">
+    <a class="back" href="./">&larr; Bannerline</a>
+    <h1>Buildings</h1>
+    <span class="muted" id="state">Loading&hellip;</span>
+    <span class="spacer"></span>
+    <label>View <select id="view"><option value="field">The vale</option><option value="lineup">Line-up</option></select></label>
+    <label>Mode <select id="mode"><option>1v1</option><option>2v2</option><option>3v3</option></select></label>
+    <label>West <select id="race0"></select></label>
+    <label>East <select id="race1"></select></label>
+    <button class="btn" id="drop">Lose banners</button>
+    <button class="btn" id="rally">Restore</button>
+    <button class="btn primary" id="ready">Toggle ready</button>
+  </header>
+  <div class="bench-main" style="height: calc(100vh - 60px)"><canvas id="view3d"></canvas></div>
+</div>
+<script type="module" src="js/tools/structures-page.js"></script>
+</body>
+</html>

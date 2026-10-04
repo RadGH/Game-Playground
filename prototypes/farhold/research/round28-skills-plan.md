@@ -980,7 +980,7 @@ need that is not in `VOCAB` goes back to the lead as a request, never invented.
   Talent renames: Cold Blood → **Cool Nerve**; Rallying Cry → **Rousing Cry**; Heartseeker → **Next
   Quarry**; Pack Tactics → **Whole Pack**; Feral Bite → **Wild Bite**; Ironbark Hide → **Oakhide**;
   Rebirth → **Rewaking**; Avenging Oath → **Answering Oath**; Retribution → **Repayment**; Final
-  Verdict → **Last Sentence**; Purge the Wicked → **Rout the Wicked**; Beacon → **Muster**; Halo of
+  Verdict → **Last Sentence**; Purge the Wicked → **Rout the Wicked**; Beacon → **Close Ranks**; Halo of
   Morning → **Morning Ring**; Ambush (Umbral Step) → **Unseen Edge**; Shiv Throw → **Knife Throw**;
   Epidemic Dart → **Spreading Dart**; Kill Order → **Hunt Order**; Flare → **Signal Arrow**; Frost
   Armour → **Rime Coat**; Permafrost → **Hardfrost**; Infernal Pact → **Fiend's Bargain**; Vengeance
@@ -1014,7 +1014,7 @@ need that is not in `VOCAB` goes back to the lead as a request, never invented.
 | `shade_cut` | T3 a) Lingering Shade (taunt) → **Lingering Shade**: the afterimage stays 3 s and repeats your NEXT Shade Cut too. |
 | `inner_stillness` | base changed (absorbs). T1 b) Moving Meditation stays; T4 b) Perfect Balance stays; any "answered" text → "absorbed into Poise". |
 | `frost_nova`…`stillfrost` | Stillfrost talents: T1 keep; T2 b) Long Cold → **Deep Cold**: Frozen lasts 3 s, the shatter −20% (traded); T3 a) Cold Fusion `requires: spellrush`; T4 b) Ice Age stays. |
-| `daybreak_descent` | Re-sketch on the brainstorm's Dawnbreaker tiers: T1 a) Long Fall (24 m, traded: cd +6) / b) **Guarded Fall** (you take 50% less damage for 2 s after landing; Twin Descent moves to T4 because charges are T3/T4 only, and Second Dawn is dropped); T2 a) Pillar / b) **Muster** (followers teleport to you on landing); T3 a) Lift → stagger 1.8 s / b) Dawnfire → burn; T4 a) Twin Descent / b) **Morning Ring** (heal 25% to you and followers on landing, the base heal becomes 0). |
+| `daybreak_descent` | Re-sketch on the brainstorm's Dawnbreaker tiers: T1 a) Long Fall (24 m, traded: cd +6) / b) **Guarded Fall** (you take 50% less damage for 2 s after landing; Twin Descent moves to T4 because charges are T3/T4 only, and Second Dawn is dropped); T2 a) Pillar / b) **Close Ranks** (followers teleport to you on landing); T3 a) Lift → stagger 1.8 s / b) Dawnfire → burn; T4 a) Twin Descent / b) **Morning Ring** (heal 25% to you and followers on landing, the base heal becomes 0). |
 | `prophecy` | Base changed (follows the target). T1 a) Swift Fate / b) Grand Fate; T2 a) Binding Fate (root 1 s on cast) / b) Fated Wounds (curse); T3 a) Twice Foretold / b) Foreseen Opening (`consumes omen`, base already doubles — make it "removes the Omen and staggers 1 s"); T4 a) Inevitable / b) Fate's Pull. |
 | `song_of_ruin` | Base no longer suppresses. T4 b) Unmaking Hymn → **Silencing Hymn**: enemies inside are `strip`ped while inside. |
 | `discord_note` | riders keyed to Valour / Ruin / Mending; T3 b) Tempo applies to all three songs. |

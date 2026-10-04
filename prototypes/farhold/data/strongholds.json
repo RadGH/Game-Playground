@@ -211,7 +211,7 @@
           "the Keeper of the Gate",
           "Wallsworn",
           "the Shut Door",
-          "Iron Muster"
+          "the Iron Bar"
         ]
       },
       "chest": {
@@ -514,7 +514,7 @@
       "faction": "ashtusk",
       "warband": "ashtusk",
       "icon": "warcamp_ashtusk",
-      "blurb": "A ring of sharpened logs, skull-hung totems and a fire you can see from the next valley. The Horde is home.",
+      "blurb": "A ring of sharpened logs, skull-hung totems and a fire you can see from the next valley. The Warhost is home.",
       "garrison": {
         "count": [
           6,

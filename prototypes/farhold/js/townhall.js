@@ -78,7 +78,7 @@ export function createTownHall({ read = () => ({}), onRecruit = null, onTakeJob 
    * names: `.civics-head`, `.civics-rail` and `.civics-body` are what the Holding screen's own
    * tests reach for with `document.querySelector`, and two elements wearing them means the first
    * one in the document wins — which is how a hidden Town Hall silently became the thing a test
-   * was reading the Holding screen's muster text out of. The three structural names are ours;
+   * was reading the Holding screen's levy text out of. The three structural names are ours;
    * everything inside (`.civ-pane`, `.civ-row`, `.civ-grid`) is shared on purpose, because those
    * are components rather than landmarks.
    */

@@ -12470,6 +12470,1829 @@
     "kind": "npc",
     "source": "emberveil"
    }
+  },
+  {
+   "id": "bl_tuskback",
+   "kind": "enemy",
+   "name": "Tuskback",
+   "tags": [
+    "bannerline",
+    "enemy",
+    "tuskback"
+   ],
+   "notes": "A war beast as tall as a wall, with a fighting platform lashed to its back and a red banner over it.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "bl_tuskback",
+    "name": "Tuskback",
+    "short": "Tuskback",
+    "race": "beast",
+    "gender": "n",
+    "pronouns": "they",
+    "templateId": "tuskback",
+    "creature": {
+     "seed": 1,
+     "type": "tuskback",
+     "size": 1,
+     "colors": {
+      "body": "#7a6a62",
+      "belly": "#9a8a7e",
+      "accent": "#4a3020",
+      "eyes": "#ffb040",
+      "cloth": "#a8282a"
+     },
+     "features": {
+      "tusks": true,
+      "trunk": true,
+      "howdah": true,
+      "hooves": true
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "variant": "custom",
+     "gender": "n",
+     "pitch": 0.08,
+     "depth": 1,
+     "tone": 0.3,
+     "breath": 0.3,
+     "rough": 0.6,
+     "speed": 0.35,
+     "flutter": 0.12,
+     "intonation": 0.4,
+     "wordgap": 0.37,
+     "role": "brute",
+     "seed": 352426571
+    },
+    "speech": {
+     "traits": [
+      "bloodlust"
+     ],
+     "formality": 0.3,
+     "verbosity": 0.3,
+     "cheer": 0.2,
+     "aggression": 0.85,
+     "confidence": 0.75,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "enemy",
+    "source": "bannerline"
+   }
+  },
+  {
+   "id": "bl_ghoul",
+   "kind": "enemy",
+   "name": "Ghoul",
+   "tags": [
+    "bannerline",
+    "enemy",
+    "ghoul"
+   ],
+   "notes": "Runs bent double on long arms, quick as a dog, and heals by feeding on whatever falls.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "bl_ghoul",
+    "name": "Ghoul",
+    "short": "Ghoul",
+    "race": "beast",
+    "gender": "n",
+    "pronouns": "they",
+    "templateId": "ghoul",
+    "creature": {
+     "seed": 1,
+     "type": "ghoul",
+     "size": 1.1,
+     "colors": {
+      "body": "#8c9a88",
+      "belly": "#a9b29c",
+      "accent": "#4a4c42",
+      "eyes": "#8affe8"
+     },
+     "features": {
+      "claws": true,
+      "fangs": true,
+      "spine": true
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "variant": "custom",
+     "gender": "n",
+     "pitch": 0.35,
+     "depth": 0.6,
+     "tone": 0.3,
+     "breath": 0.3,
+     "rough": 0.85,
+     "speed": 0.35,
+     "flutter": 0.12,
+     "intonation": 0.4,
+     "wordgap": 0.37,
+     "role": "brute",
+     "seed": 1765040854
+    },
+    "speech": {
+     "traits": [
+      "bloodlust"
+     ],
+     "formality": 0.3,
+     "verbosity": 0.3,
+     "cheer": 0.2,
+     "aggression": 0.85,
+     "confidence": 0.75,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "enemy",
+    "source": "bannerline"
+   }
+  },
+  {
+   "id": "bl_bone_colossus",
+   "kind": "enemy",
+   "name": "Bone Colossus",
+   "tags": [
+    "bannerline",
+    "enemy",
+    "bone_colossus"
+   ],
+   "notes": "A giant's skeleton stitched round a cold blue fire; it shrugs off the first blow of every exchange.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "bl_bone_colossus",
+    "name": "Bone Colossus",
+    "short": "Bone",
+    "race": "beast",
+    "gender": "n",
+    "pronouns": "they",
+    "templateId": "bone_colossus",
+    "creature": {
+     "seed": 1,
+     "type": "bone_colossus",
+     "size": 1,
+     "colors": {
+      "body": "#ddd4bc",
+      "belly": "#a89c80",
+      "accent": "#5e584c",
+      "eyes": "#7ff2ff"
+     },
+     "features": {
+      "ribs": true,
+      "core": true,
+      "horns": true,
+      "spikes": true,
+      "claws": true
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "variant": "custom",
+     "gender": "n",
+     "pitch": 0.05,
+     "depth": 1,
+     "tone": 0.3,
+     "breath": 0.3,
+     "rough": 0.7,
+     "speed": 0.35,
+     "flutter": 0.12,
+     "intonation": 0.4,
+     "wordgap": 0.37,
+     "role": "brute",
+     "seed": 1020852356
+    },
+    "speech": {
+     "traits": [
+      "gruff"
+     ],
+     "formality": 0.3,
+     "verbosity": 0.3,
+     "cheer": 0.2,
+     "aggression": 0.85,
+     "confidence": 0.75,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "enemy",
+    "source": "bannerline"
+   }
+  },
+  {
+   "id": "bl_crow",
+   "kind": "enemy",
+   "name": "Grave Crow",
+   "tags": [
+    "bannerline",
+    "enemy",
+    "crow"
+   ],
+   "notes": "Comes in threes, flies over every wall and pecks at anything still standing.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "bl_crow",
+    "name": "Grave Crow",
+    "short": "Grave",
+    "race": "beast",
+    "gender": "n",
+    "pronouns": "they",
+    "templateId": "crow",
+    "creature": {
+     "seed": 1,
+     "type": "crow",
+     "size": 1,
+     "colors": {
+      "body": "#34344c",
+      "belly": "#4c4c68",
+      "accent": "#9090a6",
+      "eyes": "#8affe8"
+     },
+     "features": {
+      "wings": true,
+      "beak": true,
+      "feathers": true
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "variant": "custom",
+     "gender": "n",
+     "pitch": 0.8,
+     "depth": 0.2,
+     "tone": 0.3,
+     "breath": 0.3,
+     "rough": 0.8,
+     "speed": 0.35,
+     "flutter": 0.12,
+     "intonation": 0.4,
+     "wordgap": 0.37,
+     "role": "brute",
+     "seed": 1404312414
+    },
+    "speech": {
+     "traits": [
+      "coward"
+     ],
+     "formality": 0.3,
+     "verbosity": 0.3,
+     "cheer": 0.2,
+     "aggression": 0.85,
+     "confidence": 0.75,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "enemy",
+    "source": "bannerline"
+   }
+  },
+  {
+   "id": "bl_thornback",
+   "kind": "enemy",
+   "name": "Thornback",
+   "tags": [
+    "bannerline",
+    "enemy",
+    "thornback"
+   ],
+   "notes": "A boar the size of a cart, armoured in bark plates with thorns as long as a forearm.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "bl_thornback",
+    "name": "Thornback",
+    "short": "Thornback",
+    "race": "beast",
+    "gender": "n",
+    "pronouns": "they",
+    "templateId": "thornback",
+    "creature": {
+     "seed": 1,
+     "type": "thornback",
+     "size": 1,
+     "colors": {
+      "body": "#5e5a3a",
+      "belly": "#8c7c56",
+      "accent": "#d6cca6",
+      "eyes": "#ffb040",
+      "nose": "#2c261a"
+     },
+     "features": {
+      "horns": true,
+      "plates": true,
+      "spikes": true,
+      "tusks": true
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "variant": "custom",
+     "gender": "n",
+     "pitch": 0.12,
+     "depth": 0.95,
+     "tone": 0.3,
+     "breath": 0.3,
+     "rough": 0.7,
+     "speed": 0.35,
+     "flutter": 0.12,
+     "intonation": 0.4,
+     "wordgap": 0.37,
+     "role": "brute",
+     "seed": 95734992
+    },
+    "speech": {
+     "traits": [
+      "bloodlust"
+     ],
+     "formality": 0.3,
+     "verbosity": 0.3,
+     "cheer": 0.2,
+     "aggression": 0.85,
+     "confidence": 0.75,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "enemy",
+    "source": "bannerline"
+   }
+  },
+  {
+   "id": "bl_iron_golem",
+   "kind": "enemy",
+   "name": "Iron Golem",
+   "tags": [
+    "bannerline",
+    "enemy",
+    "golem"
+   ],
+   "notes": "Riveted steel round a furnace heart, built by the Freeholds to hold a road on its own.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "bl_iron_golem",
+    "name": "Iron Golem",
+    "short": "Iron",
+    "race": "beast",
+    "gender": "n",
+    "pronouns": "they",
+    "templateId": "iron_golem",
+    "creature": {
+     "seed": 1,
+     "type": "golem",
+     "size": 1.25,
+     "colors": {
+      "body": "#5f6d7a",
+      "belly": "#8c98a3",
+      "accent": "#2f3843",
+      "eyes": "#7fc8ff"
+     },
+     "features": {
+      "core": true,
+      "spikes": false
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "variant": "custom",
+     "gender": "n",
+     "pitch": 0.06,
+     "depth": 1,
+     "tone": 0.3,
+     "breath": 0.3,
+     "rough": 0.5,
+     "speed": 0.35,
+     "flutter": 0.12,
+     "intonation": 0.4,
+     "wordgap": 0.37,
+     "role": "brute",
+     "seed": 1986474135
+    },
+    "speech": {
+     "traits": [
+      "gruff"
+     ],
+     "formality": 0.3,
+     "verbosity": 0.3,
+     "cheer": 0.2,
+     "aggression": 0.85,
+     "confidence": 0.75,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "enemy",
+    "source": "bannerline"
+   }
+  },
+  {
+   "id": "bl_thornmane_wolf",
+   "kind": "enemy",
+   "name": "Thornmane Wolf",
+   "tags": [
+    "bannerline",
+    "enemy",
+    "wolf"
+   ],
+   "notes": "Runs with the Thornmane packs; mossy fur and a ridge of thorns down the back.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "bl_thornmane_wolf",
+    "name": "Thornmane Wolf",
+    "short": "Thornmane",
+    "race": "beast",
+    "gender": "n",
+    "pronouns": "they",
+    "templateId": "thornmane_wolf",
+    "creature": {
+     "seed": 1,
+     "type": "wolf",
+     "size": 1.05,
+     "colors": {
+      "body": "#5a5a3e",
+      "belly": "#9a9070",
+      "accent": "#33301e",
+      "eyes": "#f2c14e"
+     },
+     "features": {
+      "fangs": true,
+      "spikes": true
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "variant": "custom",
+     "gender": "n",
+     "pitch": 0.3,
+     "depth": 0.7,
+     "tone": 0.3,
+     "breath": 0.3,
+     "rough": 0.6,
+     "speed": 0.35,
+     "flutter": 0.12,
+     "intonation": 0.4,
+     "wordgap": 0.37,
+     "role": "brute",
+     "seed": 1800648388
+    },
+    "speech": {
+     "traits": [
+      "bloodlust"
+     ],
+     "formality": 0.3,
+     "verbosity": 0.3,
+     "cheer": 0.2,
+     "aggression": 0.85,
+     "confidence": 0.75,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "enemy",
+    "source": "bannerline"
+   }
+  },
+  {
+   "id": "bl_saber_cat",
+   "kind": "enemy",
+   "name": "Saber Cat",
+   "tags": [
+    "bannerline",
+    "enemy",
+    "saber_cat"
+   ],
+   "notes": "Pounces from eight metres away; the Thornmane ride them into the worst of a fight.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "bl_saber_cat",
+    "name": "Saber Cat",
+    "short": "Saber",
+    "race": "beast",
+    "gender": "n",
+    "pronouns": "they",
+    "templateId": "saber_cat",
+    "creature": {
+     "seed": 1,
+     "type": "saber_cat",
+     "size": 1.15,
+     "colors": {
+      "body": "#8a7448",
+      "belly": "#cdb88a",
+      "accent": "#4a3a1e",
+      "eyes": "#9ae06a"
+     },
+     "features": {
+      "fangs": true,
+      "claws": true,
+      "spikes": true
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "variant": "custom",
+     "gender": "n",
+     "pitch": 0.25,
+     "depth": 0.75,
+     "tone": 0.3,
+     "breath": 0.3,
+     "rough": 0.55,
+     "speed": 0.35,
+     "flutter": 0.12,
+     "intonation": 0.4,
+     "wordgap": 0.37,
+     "role": "brute",
+     "seed": 1845208470
+    },
+    "speech": {
+     "traits": [
+      "bloodlust"
+     ],
+     "formality": 0.3,
+     "verbosity": 0.3,
+     "cheer": 0.2,
+     "aggression": 0.85,
+     "confidence": 0.75,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "enemy",
+    "source": "bannerline"
+   }
+  },
+  {
+   "id": "bl_druid_wolf",
+   "kind": "enemy",
+   "name": "Druid Wolf Shape",
+   "tags": [
+    "bannerline",
+    "enemy",
+    "dire_wolf"
+   ],
+   "notes": "The druid as a great grey-green wolf with a mane of leaves and a glow of sap in its eyes.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "bl_druid_wolf",
+    "name": "Druid Wolf Shape",
+    "short": "Druid",
+    "race": "beast",
+    "gender": "n",
+    "pronouns": "they",
+    "templateId": "druid_wolf",
+    "creature": {
+     "seed": 1,
+     "type": "dire_wolf",
+     "size": 1.1,
+     "colors": {
+      "body": "#8a9670",
+      "belly": "#c8c8a0",
+      "accent": "#4a5a36",
+      "eyes": "#b8ff6a"
+     },
+     "features": {
+      "fangs": true,
+      "spikes": false,
+      "mane": true,
+      "claws": true
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "variant": "custom",
+     "gender": "n",
+     "pitch": 0.3,
+     "depth": 0.7,
+     "tone": 0.3,
+     "breath": 0.3,
+     "rough": 0.5,
+     "speed": 0.35,
+     "flutter": 0.12,
+     "intonation": 0.4,
+     "wordgap": 0.37,
+     "role": "brute",
+     "seed": 492212589
+    },
+    "speech": {
+     "traits": [
+      "loyal"
+     ],
+     "formality": 0.3,
+     "verbosity": 0.3,
+     "cheer": 0.2,
+     "aggression": 0.85,
+     "confidence": 0.75,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "enemy",
+    "source": "bannerline"
+   }
+  },
+  {
+   "id": "bl_grove_wolf",
+   "kind": "enemy",
+   "name": "Grove Wolf",
+   "tags": [
+    "bannerline",
+    "enemy",
+    "wolf"
+   ],
+   "notes": "A wolf called out of the trees by a druid; moss along the spine, bark-brown legs.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "bl_grove_wolf",
+    "name": "Grove Wolf",
+    "short": "Grove",
+    "race": "beast",
+    "gender": "n",
+    "pronouns": "they",
+    "templateId": "grove_wolf",
+    "creature": {
+     "seed": 1,
+     "type": "wolf",
+     "size": 1,
+     "colors": {
+      "body": "#6a6448",
+      "belly": "#a89c76",
+      "accent": "#3e4a2a",
+      "eyes": "#b8ff6a"
+     },
+     "features": {
+      "fangs": true,
+      "spikes": true
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "variant": "custom",
+     "gender": "n",
+     "pitch": 0.32,
+     "depth": 0.65,
+     "tone": 0.3,
+     "breath": 0.3,
+     "rough": 0.5,
+     "speed": 0.35,
+     "flutter": 0.12,
+     "intonation": 0.4,
+     "wordgap": 0.37,
+     "role": "brute",
+     "seed": 1982296858
+    },
+    "speech": {
+     "traits": [
+      "loyal"
+     ],
+     "formality": 0.3,
+     "verbosity": 0.3,
+     "cheer": 0.2,
+     "aggression": 0.85,
+     "confidence": 0.75,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "enemy",
+    "source": "bannerline"
+   }
+  },
+  {
+   "id": "bl_briarback",
+   "kind": "enemy",
+   "name": "Briarback",
+   "tags": [
+    "bannerline",
+    "enemy",
+    "thornback"
+   ],
+   "notes": "The druid as a bramble-armoured boar that drags every eye in the lane onto itself.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "bl_briarback",
+    "name": "Briarback",
+    "short": "Briarback",
+    "race": "beast",
+    "gender": "n",
+    "pronouns": "they",
+    "templateId": "briarback",
+    "creature": {
+     "seed": 1,
+     "type": "thornback",
+     "size": 0.95,
+     "colors": {
+      "body": "#6b4f2a",
+      "belly": "#8a6f48",
+      "accent": "#cfe08a",
+      "eyes": "#e0c060",
+      "nose": "#2a1e10"
+     },
+     "features": {
+      "horns": true,
+      "plates": true,
+      "spikes": true,
+      "tusks": true
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "variant": "custom",
+     "gender": "n",
+     "pitch": 0.15,
+     "depth": 0.9,
+     "tone": 0.3,
+     "breath": 0.3,
+     "rough": 0.6,
+     "speed": 0.35,
+     "flutter": 0.12,
+     "intonation": 0.4,
+     "wordgap": 0.37,
+     "role": "brute",
+     "seed": 2022773139
+    },
+    "speech": {
+     "traits": [
+      "loyal"
+     ],
+     "formality": 0.3,
+     "verbosity": 0.3,
+     "cheer": 0.2,
+     "aggression": 0.85,
+     "confidence": 0.75,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "enemy",
+    "source": "bannerline"
+   }
+  },
+  {
+   "id": "bl_plague_rat",
+   "kind": "enemy",
+   "name": "Plague Rat",
+   "tags": [
+    "bannerline",
+    "enemy",
+    "rat"
+   ],
+   "notes": "Grave rats swollen with sickness; they come in threes and nobody wants to stamp on them.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "bl_plague_rat",
+    "name": "Plague Rat",
+    "short": "Plague",
+    "race": "beast",
+    "gender": "n",
+    "pronouns": "they",
+    "templateId": "plague_rat",
+    "creature": {
+     "seed": 1,
+     "type": "rat",
+     "size": 1.45,
+     "colors": {
+      "body": "#6a6458",
+      "belly": "#9a9a7a",
+      "accent": "#c890a0",
+      "eyes": "#9aff6a"
+     },
+     "features": {
+      "whiskers": true,
+      "spikes": true
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "variant": "custom",
+     "gender": "n",
+     "pitch": 0.9,
+     "depth": 0.1,
+     "tone": 0.3,
+     "breath": 0.3,
+     "rough": 0.8,
+     "speed": 0.35,
+     "flutter": 0.12,
+     "intonation": 0.4,
+     "wordgap": 0.37,
+     "role": "brute",
+     "seed": 1643214520
+    },
+    "speech": {
+     "traits": [
+      "hungry"
+     ],
+     "formality": 0.3,
+     "verbosity": 0.3,
+     "cheer": 0.2,
+     "aggression": 0.85,
+     "confidence": 0.75,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "enemy",
+    "source": "bannerline"
+   }
+  },
+  {
+   "id": "bl_wailing_shade",
+   "kind": "enemy",
+   "name": "Wailing Shade",
+   "tags": [
+    "bannerline",
+    "enemy",
+    "wraith"
+   ],
+   "notes": "A drowned ghost in rags that drifts over walls and shields the dead around it.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "bl_wailing_shade",
+    "name": "Wailing Shade",
+    "short": "Wailing",
+    "race": "beast",
+    "gender": "n",
+    "pronouns": "they",
+    "templateId": "wailing_shade",
+    "creature": {
+     "seed": 1,
+     "type": "wraith",
+     "size": 1.05,
+     "colors": {
+      "body": "#3e5a5e",
+      "belly": "#7ab0b4",
+      "accent": "#122024",
+      "eyes": "#8affe8"
+     },
+     "features": {
+      "glow": true,
+      "claws": true
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "variant": "custom",
+     "gender": "n",
+     "pitch": 0.7,
+     "depth": 0.4,
+     "tone": 0.3,
+     "breath": 0.3,
+     "rough": 0.9,
+     "speed": 0.35,
+     "flutter": 0.12,
+     "intonation": 0.4,
+     "wordgap": 0.37,
+     "role": "brute",
+     "seed": 152109328
+    },
+    "speech": {
+     "traits": [
+      "grieving"
+     ],
+     "formality": 0.3,
+     "verbosity": 0.3,
+     "cheer": 0.2,
+     "aggression": 0.85,
+     "confidence": 0.75,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "enemy",
+    "source": "bannerline"
+   }
+  },
+  {
+   "id": "bl_carrion_hulk",
+   "kind": "enemy",
+   "name": "Carrion Hulk",
+   "tags": [
+    "bannerline",
+    "enemy",
+    "horror"
+   ],
+   "notes": "A heap of the fallen stitched into one shape; cut it down and smaller pieces crawl on.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "bl_carrion_hulk",
+    "name": "Carrion Hulk",
+    "short": "Carrion",
+    "race": "beast",
+    "gender": "n",
+    "pronouns": "they",
+    "templateId": "carrion_hulk",
+    "creature": {
+     "seed": 1,
+     "type": "horror",
+     "size": 1.35,
+     "colors": {
+      "body": "#5a5048",
+      "belly": "#8a6a5a",
+      "accent": "#2a1e1a",
+      "eyes": "#8affe8"
+     },
+     "features": {
+      "glow": true,
+      "fangs": true
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "variant": "custom",
+     "gender": "n",
+     "pitch": 0.08,
+     "depth": 1,
+     "tone": 0.3,
+     "breath": 0.3,
+     "rough": 0.9,
+     "speed": 0.35,
+     "flutter": 0.12,
+     "intonation": 0.4,
+     "wordgap": 0.37,
+     "role": "brute",
+     "seed": 222782795
+    },
+    "speech": {
+     "traits": [
+      "hungry"
+     ],
+     "formality": 0.3,
+     "verbosity": 0.3,
+     "cheer": 0.2,
+     "aggression": 0.85,
+     "confidence": 0.75,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "enemy",
+    "source": "bannerline"
+   }
+  },
+  {
+   "id": "bl_ash_ogre",
+   "kind": "enemy",
+   "name": "Ash Ogre",
+   "tags": [
+    "bannerline",
+    "enemy",
+    "titan"
+   ],
+   "notes": "A soot-black giant that carries embers in its chest and bursts when it falls.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "bl_ash_ogre",
+    "name": "Ash Ogre",
+    "short": "Ash",
+    "race": "beast",
+    "gender": "n",
+    "pronouns": "they",
+    "templateId": "ash_ogre",
+    "creature": {
+     "seed": 1,
+     "type": "titan",
+     "size": 1.05,
+     "colors": {
+      "body": "#4a3a32",
+      "belly": "#7a5a46",
+      "accent": "#1e1612",
+      "eyes": "#ff7a2a"
+     },
+     "features": {
+      "core": true,
+      "horns": true,
+      "spikes": true,
+      "claws": true
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "variant": "custom",
+     "gender": "n",
+     "pitch": 0.05,
+     "depth": 1,
+     "tone": 0.3,
+     "breath": 0.3,
+     "rough": 0.8,
+     "speed": 0.35,
+     "flutter": 0.12,
+     "intonation": 0.4,
+     "wordgap": 0.37,
+     "role": "brute",
+     "seed": 1497676916
+    },
+    "speech": {
+     "traits": [
+      "bloodlust"
+     ],
+     "formality": 0.3,
+     "verbosity": 0.3,
+     "cheer": 0.2,
+     "aggression": 0.85,
+     "confidence": 0.75,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "enemy",
+    "source": "bannerline"
+   }
+  },
+  {
+   "id": "bl_hyena",
+   "kind": "enemy",
+   "name": "Thornmane Hyena",
+   "tags": [
+    "bannerline",
+    "enemy",
+    "hyena"
+   ],
+   "notes": "Lean, spotted and laughing; packs of three strip a wounded hero in seconds.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "bl_hyena",
+    "name": "Thornmane Hyena",
+    "short": "Thornmane",
+    "race": "beast",
+    "gender": "n",
+    "pronouns": "they",
+    "templateId": "hyena",
+    "creature": {
+     "seed": 1,
+     "type": "hyena",
+     "size": 1,
+     "colors": {
+      "body": "#8a7a50",
+      "belly": "#c8b98f",
+      "accent": "#3a2e1a",
+      "eyes": "#f0c040"
+     },
+     "features": {
+      "fangs": true,
+      "mane": true,
+      "claws": true
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "variant": "custom",
+     "gender": "n",
+     "pitch": 0.6,
+     "depth": 0.4,
+     "tone": 0.3,
+     "breath": 0.3,
+     "rough": 0.6,
+     "speed": 0.35,
+     "flutter": 0.12,
+     "intonation": 0.4,
+     "wordgap": 0.37,
+     "role": "brute",
+     "seed": 1472919628
+    },
+    "speech": {
+     "traits": [
+      "cruel"
+     ],
+     "formality": 0.3,
+     "verbosity": 0.3,
+     "cheer": 0.2,
+     "aggression": 0.85,
+     "confidence": 0.75,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "enemy",
+    "source": "bannerline"
+   }
+  },
+  {
+   "id": "bl_bear_warden",
+   "kind": "enemy",
+   "name": "Bear Warden",
+   "tags": [
+    "bannerline",
+    "enemy",
+    "bear"
+   ],
+   "notes": "A moss-backed bear that the Thornmane send in front to soak the blows; its wounds close by themselves.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "bl_bear_warden",
+    "name": "Bear Warden",
+    "short": "Bear",
+    "race": "beast",
+    "gender": "n",
+    "pronouns": "they",
+    "templateId": "bear_warden",
+    "creature": {
+     "seed": 1,
+     "type": "bear",
+     "size": 1,
+     "colors": {
+      "body": "#4e4430",
+      "belly": "#7a6a48",
+      "accent": "#2c3a1e",
+      "eyes": "#d8ff8a"
+     },
+     "features": {
+      "claws": true,
+      "spikes": true
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "variant": "custom",
+     "gender": "n",
+     "pitch": 0.12,
+     "depth": 0.9,
+     "tone": 0.3,
+     "breath": 0.3,
+     "rough": 0.6,
+     "speed": 0.35,
+     "flutter": 0.12,
+     "intonation": 0.4,
+     "wordgap": 0.37,
+     "role": "brute",
+     "seed": 414778312
+    },
+    "speech": {
+     "traits": [
+      "gruff"
+     ],
+     "formality": 0.3,
+     "verbosity": 0.3,
+     "cheer": 0.2,
+     "aggression": 0.85,
+     "confidence": 0.75,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "enemy",
+    "source": "bannerline"
+   }
+  },
+  {
+   "id": "bl_elk_charger",
+   "kind": "enemy",
+   "name": "Elk Charger",
+   "tags": [
+    "bannerline",
+    "enemy",
+    "elk"
+   ],
+   "notes": "A war elk with antlers like a hedge of spears; nothing slows it once it runs.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "bl_elk_charger",
+    "name": "Elk Charger",
+    "short": "Elk",
+    "race": "beast",
+    "gender": "n",
+    "pronouns": "they",
+    "templateId": "elk_charger",
+    "creature": {
+     "seed": 1,
+     "type": "elk",
+     "size": 1.15,
+     "colors": {
+      "body": "#6a5638",
+      "belly": "#c8b48a",
+      "accent": "#d8cca0",
+      "eyes": "#2a1a08"
+     },
+     "features": {
+      "antlers": true,
+      "hooves": true,
+      "mane": true
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "variant": "custom",
+     "gender": "n",
+     "pitch": 0.2,
+     "depth": 0.8,
+     "tone": 0.3,
+     "breath": 0.3,
+     "rough": 0.5,
+     "speed": 0.35,
+     "flutter": 0.12,
+     "intonation": 0.4,
+     "wordgap": 0.37,
+     "role": "brute",
+     "seed": 773857571
+    },
+    "speech": {
+     "traits": [
+      "brave"
+     ],
+     "formality": 0.3,
+     "verbosity": 0.3,
+     "cheer": 0.2,
+     "aggression": 0.85,
+     "confidence": 0.75,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "enemy",
+    "source": "bannerline"
+   }
+  },
+  {
+   "id": "bl_elder_bear",
+   "kind": "enemy",
+   "name": "Elder Bear",
+   "tags": [
+    "bannerline",
+    "enemy",
+    "bear"
+   ],
+   "notes": "The oldest bear of the Thornmane: grey-muzzled, thorn-crowned and twice the Warden's size.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "bl_elder_bear",
+    "name": "Elder Bear",
+    "short": "Elder",
+    "race": "beast",
+    "gender": "n",
+    "pronouns": "they",
+    "templateId": "elder_bear",
+    "creature": {
+     "seed": 1,
+     "type": "bear",
+     "size": 1.55,
+     "colors": {
+      "body": "#5a5448",
+      "belly": "#9a907a",
+      "accent": "#d6cca6",
+      "eyes": "#d8ff8a"
+     },
+     "features": {
+      "claws": true,
+      "spikes": true,
+      "horns": true,
+      "plates": true
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "variant": "custom",
+     "gender": "n",
+     "pitch": 0.04,
+     "depth": 1,
+     "tone": 0.3,
+     "breath": 0.3,
+     "rough": 0.7,
+     "speed": 0.35,
+     "flutter": 0.12,
+     "intonation": 0.4,
+     "wordgap": 0.37,
+     "role": "brute",
+     "seed": 1548253823
+    },
+    "speech": {
+     "traits": [
+      "gruff"
+     ],
+     "formality": 0.3,
+     "verbosity": 0.3,
+     "cheer": 0.2,
+     "aggression": 0.85,
+     "confidence": 0.75,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "enemy",
+    "source": "bannerline"
+   }
+  },
+  {
+   "id": "bl_sheep",
+   "kind": "enemy",
+   "name": "Sheep",
+   "tags": [
+    "bannerline",
+    "enemy",
+    "sheep"
+   ],
+   "notes": "A black-faced sheep in a thick fleece; it wanders, it bleats, and it gives the farm away.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "bl_sheep",
+    "name": "Sheep",
+    "short": "Sheep",
+    "race": "beast",
+    "gender": "n",
+    "pronouns": "they",
+    "templateId": "sheep",
+    "creature": {
+     "seed": 1,
+     "type": "sheep",
+     "size": 1,
+     "colors": {
+      "body": "#3a3430",
+      "belly": "#efe9dc",
+      "accent": "#2a2420",
+      "eyes": "#d8b040"
+     },
+     "features": {
+      "wool": true,
+      "hooves": true
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "variant": "custom",
+     "gender": "n",
+     "pitch": 0.6,
+     "depth": 0.3,
+     "tone": 0.4,
+     "breath": 0.3,
+     "rough": 0.4,
+     "speed": 0.4,
+     "flutter": 0.15,
+     "intonation": 0.5,
+     "wordgap": 0.37,
+     "role": "villager",
+     "seed": 356381394
+    },
+    "speech": {
+     "traits": [
+      "nervous"
+     ],
+     "formality": 0.3,
+     "verbosity": 0.3,
+     "cheer": 0.5,
+     "aggression": 0.2,
+     "confidence": 0.5,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "enemy",
+    "source": "bannerline"
+   }
+  },
+  {
+   "id": "bl_hen",
+   "kind": "enemy",
+   "name": "Hen",
+   "tags": [
+    "bannerline",
+    "enemy",
+    "hen"
+   ],
+   "notes": "A russet hen that pecks round the coop and clucks quietly.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "bl_hen",
+    "name": "Hen",
+    "short": "Hen",
+    "race": "beast",
+    "gender": "n",
+    "pronouns": "they",
+    "templateId": "hen",
+    "creature": {
+     "seed": 1,
+     "type": "hen",
+     "size": 1,
+     "colors": {
+      "body": "#c8783a",
+      "belly": "#e8b070",
+      "accent": "#d8302a",
+      "eyes": "#1a1410",
+      "nose": "#e8a030"
+     },
+     "features": {
+      "comb": true
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "variant": "custom",
+     "gender": "n",
+     "pitch": 0.9,
+     "depth": 0.1,
+     "tone": 0.4,
+     "breath": 0.3,
+     "rough": 0.3,
+     "speed": 0.4,
+     "flutter": 0.15,
+     "intonation": 0.5,
+     "wordgap": 0.37,
+     "role": "villager",
+     "seed": 1542257304
+    },
+    "speech": {
+     "traits": [
+      "nervous"
+     ],
+     "formality": 0.3,
+     "verbosity": 0.3,
+     "cheer": 0.5,
+     "aggression": 0.2,
+     "confidence": 0.5,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "enemy",
+    "source": "bannerline"
+   }
+  },
+  {
+   "id": "bl_pig",
+   "kind": "enemy",
+   "name": "Pig",
+   "tags": [
+    "bannerline",
+    "enemy",
+    "pig"
+   ],
+   "notes": "A pink pig that never stops snuffling; loud enough to hear through the trees.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "bl_pig",
+    "name": "Pig",
+    "short": "Pig",
+    "race": "beast",
+    "gender": "n",
+    "pronouns": "they",
+    "templateId": "pig",
+    "creature": {
+     "seed": 1,
+     "type": "pig",
+     "size": 1,
+     "colors": {
+      "body": "#eba3a0",
+      "belly": "#f2b8b2",
+      "accent": "#c87a78",
+      "eyes": "#2a1a14",
+      "nose": "#d4807d"
+     },
+     "features": {
+      "hooves": true,
+      "snoutDisc": true
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "variant": "custom",
+     "gender": "n",
+     "pitch": 0.4,
+     "depth": 0.6,
+     "tone": 0.4,
+     "breath": 0.3,
+     "rough": 0.7,
+     "speed": 0.4,
+     "flutter": 0.15,
+     "intonation": 0.5,
+     "wordgap": 0.37,
+     "role": "villager",
+     "seed": 1634214482
+    },
+    "speech": {
+     "traits": [
+      "hungry"
+     ],
+     "formality": 0.3,
+     "verbosity": 0.3,
+     "cheer": 0.5,
+     "aggression": 0.2,
+     "confidence": 0.5,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "enemy",
+    "source": "bannerline"
+   }
+  },
+  {
+   "id": "bl_cow",
+   "kind": "enemy",
+   "name": "Cow",
+   "tags": [
+    "bannerline",
+    "enemy",
+    "cow"
+   ],
+   "notes": "A patched dairy cow, slow and huge and worth a fortune.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "bl_cow",
+    "name": "Cow",
+    "short": "Cow",
+    "race": "beast",
+    "gender": "n",
+    "pronouns": "they",
+    "templateId": "cow",
+    "creature": {
+     "seed": 1,
+     "type": "cow",
+     "size": 1,
+     "colors": {
+      "body": "#f0ece4",
+      "belly": "#e8e0d4",
+      "accent": "#2a2622",
+      "eyes": "#1a1008",
+      "nose": "#e8b4a8"
+     },
+     "features": {
+      "horns": true,
+      "hooves": true,
+      "spots": true,
+      "udder": true
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "variant": "custom",
+     "gender": "n",
+     "pitch": 0.2,
+     "depth": 0.9,
+     "tone": 0.4,
+     "breath": 0.3,
+     "rough": 0.4,
+     "speed": 0.4,
+     "flutter": 0.15,
+     "intonation": 0.5,
+     "wordgap": 0.37,
+     "role": "villager",
+     "seed": 1650455371
+    },
+    "speech": {
+     "traits": [
+      "gruff"
+     ],
+     "formality": 0.3,
+     "verbosity": 0.3,
+     "cheer": 0.5,
+     "aggression": 0.2,
+     "confidence": 0.5,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "enemy",
+    "source": "bannerline"
+   }
+  },
+  {
+   "id": "bl_scarecrow",
+   "kind": "enemy",
+   "name": "Scarecrow",
+   "tags": [
+    "bannerline",
+    "enemy",
+    "scarecrow"
+   ],
+   "notes": "Sticks, straw and an old shirt, walked out of the Harvest Hall to hunt the hunters.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "bl_scarecrow",
+    "name": "Scarecrow",
+    "short": "Scarecrow",
+    "race": "beast",
+    "gender": "n",
+    "pronouns": "they",
+    "templateId": "scarecrow",
+    "creature": {
+     "seed": 1,
+     "type": "scarecrow",
+     "size": 1,
+     "colors": {
+      "body": "#6a7a4a",
+      "belly": "#c8a87a",
+      "accent": "#5a4632",
+      "eyes": "#ff9a2a"
+     },
+     "features": {
+      "sack": true,
+      "straw": true,
+      "claws": false
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "variant": "custom",
+     "gender": "n",
+     "pitch": 0.3,
+     "depth": 0.6,
+     "tone": 0.4,
+     "breath": 0.3,
+     "rough": 0.9,
+     "speed": 0.4,
+     "flutter": 0.15,
+     "intonation": 0.5,
+     "wordgap": 0.37,
+     "role": "brute",
+     "seed": 1782877135
+    },
+    "speech": {
+     "traits": [
+      "cruel"
+     ],
+     "formality": 0.3,
+     "verbosity": 0.3,
+     "cheer": 0.5,
+     "aggression": 0.2,
+     "confidence": 0.5,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "enemy",
+    "source": "bannerline"
+   }
+  },
+  {
+   "id": "bl_hunt_hound",
+   "kind": "enemy",
+   "name": "Hunting Hound",
+   "tags": [
+    "bannerline",
+    "enemy",
+    "hound"
+   ],
+   "notes": "A lean brown hound bred to run down strays and bay at them.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "bl_hunt_hound",
+    "name": "Hunting Hound",
+    "short": "Hunting",
+    "race": "beast",
+    "gender": "n",
+    "pronouns": "they",
+    "templateId": "hunt_hound",
+    "creature": {
+     "seed": 1,
+     "type": "hound",
+     "size": 0.95,
+     "colors": {
+      "body": "#6a4a2e",
+      "belly": "#a8845a",
+      "accent": "#3a2a1a",
+      "eyes": "#2a1a08"
+     },
+     "features": {
+      "fangs": true,
+      "spikes": false,
+      "claws": false
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "variant": "custom",
+     "gender": "n",
+     "pitch": 0.4,
+     "depth": 0.6,
+     "tone": 0.4,
+     "breath": 0.3,
+     "rough": 0.5,
+     "speed": 0.4,
+     "flutter": 0.15,
+     "intonation": 0.5,
+     "wordgap": 0.37,
+     "role": "brute",
+     "seed": 855030060
+    },
+    "speech": {
+     "traits": [
+      "loyal"
+     ],
+     "formality": 0.3,
+     "verbosity": 0.3,
+     "cheer": 0.5,
+     "aggression": 0.2,
+     "confidence": 0.5,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "enemy",
+    "source": "bannerline"
+   }
+  },
+  {
+   "id": "bl_hawk",
+   "kind": "enemy",
+   "name": "Hunter's Hawk",
+   "tags": [
+    "bannerline",
+    "enemy",
+    "owl"
+   ],
+   "notes": "A red-brown hawk that circles over the forest and sees what hides in it.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "bl_hawk",
+    "name": "Hunter's Hawk",
+    "short": "Hunter's",
+    "race": "beast",
+    "gender": "n",
+    "pronouns": "they",
+    "templateId": "hawk",
+    "creature": {
+     "seed": 1,
+     "type": "owl",
+     "size": 0.9,
+     "colors": {
+      "body": "#8a5a2a",
+      "belly": "#e8dcc0",
+      "accent": "#4a3018",
+      "eyes": "#f0c040"
+     },
+     "features": {
+      "wings": true,
+      "beak": true
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "variant": "custom",
+     "gender": "n",
+     "pitch": 0.8,
+     "depth": 0.2,
+     "tone": 0.4,
+     "breath": 0.3,
+     "rough": 0.6,
+     "speed": 0.4,
+     "flutter": 0.15,
+     "intonation": 0.5,
+     "wordgap": 0.37,
+     "role": "brute",
+     "seed": 667814567
+    },
+    "speech": {
+     "traits": [
+      "brave"
+     ],
+     "formality": 0.3,
+     "verbosity": 0.3,
+     "cheer": 0.5,
+     "aggression": 0.2,
+     "confidence": 0.5,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "enemy",
+    "source": "bannerline"
+   }
   }
  ]
 }

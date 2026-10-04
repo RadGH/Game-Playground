@@ -219,7 +219,7 @@ it were accepted. Answer only the ones you disagree with.
 | H39 | The Finder refuses a premade party unless **every** member has discovered the dungeon. | yes | 14, 15 |
 | H40 | Dynamic events scale only up to 5 players. | yes | 14 |
 | H41 | Keep three new late faction chapters (so every faction has a town at 52+), and the friendly orcs as a Crown Assembly chapter? | yes | 01 |
-| H42 | World bosses: the loose **Muster** channel is enough (no temporary open group with frames). | yes | 13, 15 |
+| H42 | World bosses: the loose **Warcall** channel is enough (no temporary open group with frames). | yes | 13, 15 |
 | H43 | World bosses: two "Ascendant" bosses a week raised to 60; seasonal bosses one chest per event; shared legendary pool (no per-boss legendary). | yes | 13 |
 | H44 | Group duels (up to 5 v 5)? Hardcore realms? | no; later | 15 |
 

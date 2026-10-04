@@ -42,6 +42,12 @@ const TAU = Math.PI * 2;
  * the rest of the game keeps its precise ones. `costText` prints the catalogue's word, because
  * "6 timber" is what a fence is made of however the bag spells it.
  */
+/**
+ * Structure ids renamed after saves already held them (old id -> new id). `load()` rewrites a saved
+ * piece through this. 2026-10-03: `muster_stone` became `levy_stone` (the owner banned the word).
+ */
+export const RENAMED_STRUCTURES = { muster_stone: 'levy_stone' };
+
 export const MATERIAL_ALIASES = {
   timber: 'log',
   iron: 'iron_ingot',
@@ -1588,6 +1594,12 @@ export function createBuildPlan({
     load(data) {
       entries = (data?.entries || []).map(e => {
         const copy = { ...e };
+        // A catalogue id renamed after saves already held it: point the old piece at the new row
+        // and take the catalogue's name, so an old base keeps its stone instead of losing it.
+        if (RENAMED_STRUCTURES[copy.key]) {
+          copy.key = RENAMED_STRUCTURES[copy.key];
+          if (byId.get(copy.key)) copy.name = byId.get(copy.key).name;
+        }
         const def = byId.get(copy.key);
         if (def) copy.cat = def.cat;
         /**

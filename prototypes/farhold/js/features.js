@@ -1271,7 +1271,7 @@ export function createFeatures(scene, terrain, opts = {}) {
     if (Number.isFinite(plan.ring)) ring = plan.ring;
     if (Number.isFinite(plan.wallRadius)) wallR = plan.wallRadius;
     // R27 M2 — …and so does everybody else: js/town.js's safe circle, the waypoint boundary, "you
-    // are in town", the town hall and the muster all read this through `townExtent`
+    // are in town", the town hall and the levy all read this through `townExtent`
     rememberPlan(node, plan);
 
     const toWorld = (lx, lz) => [cx + lx, cz + lz];
@@ -2318,7 +2318,7 @@ export function createFeatures(scene, terrain, opts = {}) {
         /**
          * R27 M2 — "you are in town" is the WALL for a walled town. It was `30 + size * 15`, which
          * for a grown size-5 city (a 157 m wall) said you had left town while you were still 50 m
-         * inside it — no muster, no town hall. An open settlement keeps the old, generous circle
+         * inside it — no levy, no town hall. An open settlement keeps the old, generous circle
          * (a hamlet has no edge to agree with), floored at its real ring.
          */
         const ext = townExtent(s);

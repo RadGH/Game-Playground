@@ -10,7 +10,7 @@
     "fires": "[{ r, a }] — a lit brazier at radius r, angle a. These become real lights.",
     "hostile": "true if the layout belongs to something that will fight you (used by the POI test)"
   },
-  "_worldBossDoc": "The four world-boss arenas used by data/worldbosses.json — boss_bonefield, boss_barrow, boss_slagpit, boss_ironmuster. They are built WIDE on purpose: the thing standing in the middle is six to nine metres tall and keeps calling bodies up, so the ring has to be somewhere you can actually back off inside. No new geometry — all four are composed out of the same nineteen pieces the strongholds already use.",
+  "_worldBossDoc": "The four world-boss arenas used by data/worldbosses.json — boss_bonefield, boss_barrow, boss_slagpit, boss_ironpass. They are built WIDE on purpose: the thing standing in the middle is six to nine metres tall and keeps calling bodies up, so the ring has to be somewhere you can actually back off inside. No new geometry — all four are composed out of the same nineteen pieces the strongholds already use.",
   "_instanceDoc": "The twenty `inst_*` layouts are the MOUTHS of data/instances.json — what an instance looks like from outside, before you press E. Each one has to read as what it is from the next ridge: a cave is a den with rubble and bones round it, a fallow farmstead is a hut with its fence gone to stakes, a barrow is a mound with its doorstone lying flat, and the dragon's lair is a den at more than twice scale with bones in a ring and fires still lit. `tall` on every one of them is COMPUTED from the tallest piece it places times that piece's scale, not guessed — the gibbet above says 9 for a 6.16 m cage, and a set piece that lies about its height is culled at the wrong distance.",
   "layouts": {
     "wayshrine": {
@@ -1585,7 +1585,7 @@
         }
       ]
     },
-    "boss_ironmuster": {
+    "boss_ironpass": {
       "tall": 22,
       "hostile": true,
       "centre": [
@@ -2938,7 +2938,7 @@
     "warcamp_ashtusk": {
       "tall": 12,
       "hostile": true,
-      "_r27": "R27 M10 — the Ashtusk Horde's palisade (M3's orc wall) with bone totems.",
+      "_r27": "R27 M10 — the Ashtusk Warhost's palisade (M3's orc wall) with bone totems.",
       "centre": [
         {
           "piece": "pyre",

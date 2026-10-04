@@ -1,0 +1,122 @@
+{
+ "_doc": "Bannerline races: armour mix, the one visible economy trait, and the unit roster (6 per race in v1). Player-facing names only; never show Farhold warband `name` fields (one contains a banned word). `hpMult` is a per-race HP scale set by tools/econ-sim.mjs balancing (race-vs-race win rates 45-55%); it applies at runtime on top of units.json hp. `econModelHpMult` (optional) is the HP scale tools/econ-sim.mjs uses instead of hpMult for a race whose real-sim strength the model cannot see (the model has no positions, so pack bodies swarming a hero's engage limit are invisible to it). hpMult is tuned on the REAL sim with tools/matchups.mjs.",
+ "traits": {
+  "cheap_steel": {
+   "name": "Cheap Steel",
+   "desc": "Tier 1-3 units cost 15% less but add 15% less income.",
+   "cost": 0.85,
+   "income": 0.85,
+   "maxTier": 3
+  },
+  "grave_tithe": {
+   "name": "Grave Tithe",
+   "desc": "A unit that reaches the enemy Keep refunds a quarter of its cost.",
+   "leakRefund": 0.25
+  },
+  "running_packs": {
+   "name": "Running Packs",
+   "desc": "Pack units run 20% faster.",
+   "packSpeed": 1.2
+  },
+  "drilled_ranks": {
+   "name": "Drilled Ranks",
+   "desc": "Unit upgrades at the Drill Yard cost 30% less.",
+   "upgradeCost": 0.7
+  }
+ },
+ "races": {
+  "freeholds": {
+   "name": "The Freeholds",
+   "armour": [
+    "light",
+    "heavy"
+   ],
+   "trait": "drilled_ranks",
+   "hpMult": 0.946,
+   "units": [
+    "levy",
+    "hill_slinger",
+    "fleetfoot",
+    "shieldbearer",
+    "crossbowman",
+    "lantern_warden",
+    "hedge_priest",
+    "halberdier",
+    "iron_golem",
+    "ballista_crew",
+    "gate_warden",
+    "banner_marshal"
+   ]
+  },
+  "ashtusk": {
+   "name": "Ashtusk",
+   "armour": [
+    "light",
+    "hide"
+   ],
+   "trait": "cheap_steel",
+   "hpMult": 0.96,
+   "units": [
+    "raider_pair",
+    "spearthrower",
+    "pyre_runner",
+    "brute",
+    "skullsplitter",
+    "sling_gang",
+    "bonecaller",
+    "ironhide_charger",
+    "tuskback",
+    "blood_shaman",
+    "ash_ogre",
+    "tuskchief"
+   ],
+   "econModelHpMult": 0.996
+  },
+  "unburied": {
+   "name": "The Unburied",
+   "armour": [
+    "spectral",
+    "heavy"
+   ],
+   "trait": "grave_tithe",
+   "hpMult": 0.965,
+   "units": [
+    "shambler",
+    "crow_murder",
+    "plague_rats",
+    "gravecreeper",
+    "bone_archer",
+    "wailing_shade",
+    "ghoul",
+    "carrion_hulk",
+    "bone_colossus",
+    "grave_hexer",
+    "barrow_wight",
+    "deathmarshal"
+   ]
+  },
+  "thornmane": {
+   "name": "Thornmane",
+   "armour": [
+    "hide",
+    "light"
+   ],
+   "trait": "running_packs",
+   "hpMult": 1.093,
+   "units": [
+    "wolf_pair",
+    "tracker",
+    "briar_stalker",
+    "mauler",
+    "hyena_pack",
+    "moon_seer",
+    "saber_cat",
+    "bear_warden",
+    "thornback",
+    "elk_charger",
+    "elder_bear",
+    "packlord"
+   ]
+  }
+ }
+}

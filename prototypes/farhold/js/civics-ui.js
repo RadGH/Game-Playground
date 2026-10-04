@@ -69,7 +69,7 @@ export const CIVICS_TABS = [
   { key: 'traders', name: 'Traders' },
   { key: 'trade', name: 'Trade' },
   /**
-   * R14 — THE MUSTER.
+   * R14 — THE LEVY.
    *
    *   "Allow the town center to initiate wave defense minigames that reward loot or resources for
    *    victory, or just nothing if defeated besides death penalty if the player dies. No need to
@@ -79,7 +79,7 @@ export const CIVICS_TABS = [
    * world's work is and this is yours. Four ranks, always all four, each greyed with the SENTENCE
    * saying why — a greyed row with no reason is the one answer a player cannot act on.
    */
-  { key: 'muster', name: 'Muster' },
+  { key: 'levy', name: 'Levy' },
 ];
 
 export function createCivicsScreen({
@@ -103,11 +103,11 @@ export function createCivicsScreen({
    */
   embedded = false, awayMount = document.body,
   /**
-   * R14 — the muster needs two things this module must not know how to do: where you are standing
+   * R14 — the levy needs two things this module must not know how to do: where you are standing
    * (so a drill is called AT somewhere) and how to put the wave on the ground. Both are callbacks,
    * so js/civics-ui.js stays a screen and nothing else.
    */
-  musterAt = () => null, onMuster = null,
+  levyAt = () => null, onLevy = null,
   /**
    * R28 — the base economy (js/production.js) and the callbacks its tab drives, and the People
    * tab's own buttons: `people.post(id)` / `people.standDown(id)` / `people.accept(offerId)` /
@@ -292,22 +292,22 @@ export function createCivicsScreen({
    * practice fight and losing a granary to it.
    *
    * Losing costs nothing at all beyond whatever dying already costs you. That is the user's own
-   * condition, and js/muster.js enforces it in `loseRaid` rather than at the call site — a call
+   * condition, and js/levy.js enforces it in `loseRaid` rather than at the call site — a call
    * site that re-derived the loss from raids.json would bypass the flag and a minigame would
    * quietly start eating walls.
    */
-  function drawMuster(r) {
-    const spot = musterAt() || null;
+  function drawLevy(r) {
+    const spot = levyAt() || null;
     if (!spot) {
-      return [pane('Call a muster', empty(
+      return [pane('Call a levy', empty(
         'Stand at your own holding, or at a town notice board, and the ranks appear here. '
-        + 'A muster is a practice fight: you pick the rank, it pays on a win, and losing one costs '
+        + 'A levy is a practice fight: you pick the rank, it pays on a win, and losing one costs '
         + 'nothing beyond whatever dying already costs you.'))];
     }
-    const rows = civics?.muster?.board?.({
+    const rows = civics?.levy?.board?.({
       placeId: spot.placeId, base: spot.base, level: spot.level, at: spot.at,
     }) || [];
-    const live = civics?.muster?.quest || null;
+    const live = civics?.levy?.quest || null;
 
     const list = rows.map(t => {
       const line = el('div', { class: 'civ-row' + (t.ready ? '' : ' civ-dim') },
@@ -317,20 +317,20 @@ export function createCivicsScreen({
       if (t.ready && !live) {
         line.append(el('button', {
           class: 'civ-go', text: 'Call it',
-          onclick: () => { onMuster?.(t.key, spot); draw(); },
+          onclick: () => { onLevy?.(t.key, spot); draw(); },
         }));
       }
       return line;
     });
 
     return [
-      pane(live ? 'On the field now' : `Call a muster at ${spot.placeName || 'here'}`,
+      pane(live ? 'On the field now' : `Call a levy at ${spot.placeName || 'here'}`,
         live
-          ? [el('div', { class: 'civ-row' }, el('b', { text: live.name || 'A muster' }),
+          ? [el('div', { class: 'civ-row' }, el('b', { text: live.name || 'A levy' }),
             el('span', { class: 'civ-note', text: `wave ${live.wave || 1} of ${live.count || '?'}` })),
-          el('div', { class: 'civ-sub', text: 'Stay near the muster ground or it is called off.' })]
+          el('div', { class: 'civ-sub', text: 'Stay near the field or it is called off.' })]
           : list),
-      pane('What a muster is', [
+      pane('What a levy is', [
         el('div', { class: 'civ-sub', text:
           'A practice fight you ask for. Win it and you are paid in gold and crates; lose it and '
           + 'nothing happens at all — no wall comes down, no materials are taken, nobody leaves, and '
@@ -525,7 +525,7 @@ export function createCivicsScreen({
       : tab === 'work' ? drawWork(r)
       : tab === 'traders' ? drawTraders(r)
       : tab === 'trade' ? drawTrade(r)
-      : drawMuster(r);
+      : drawLevy(r);
     body.appendChild(el('div', { class: 'civ-grid' }, panes));
   }
 

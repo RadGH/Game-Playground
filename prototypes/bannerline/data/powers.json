@@ -1,0 +1,321 @@
+{
+ "_doc": "One-shot powers bought at the Sanctum (owner round 2, R2.3). Read by js/sim/powers.js. Buying a power casts it at once at the chosen point (command `power {id, x, z}`); there is no income from powers. `kind` decides where the point may be: defensive = inside your own team's field, offensive = inside an enemy field, neutral = inside any field. `cost` is the main limit; `cooldown` (s, per player per power) is short. Usable while your hero is dead. `effects` run in order; each `do` has a handler in powers.js EFFECTS: zone {radius, seconds, slow?, perSecond?, dmgType?} lingering area hurting/slowing the caster's enemies; status {who, radius, status, seconds, power?} (who: enemies | enemyHeroes | allyHeroes | ownUnits); heal {who, radius, pct of max health}; barrier {who, radius, pct, seconds}; blast {radius, amount, pctMaxHp, dmgType, delay s} on enemies; summon {unit, count, mk (health and damage multiplier)} as the caster's own units; reveal {radius, seconds} shows stealthed units. `name/desc/statLines` are player-facing.",
+ "order": [
+  "frost_field",
+  "binding_roots",
+  "mending_light",
+  "stone_ward",
+  "skyfall",
+  "withering_hex",
+  "loose_the_pack",
+  "war_banner",
+  "far_sight",
+  "thunderstorm",
+  "earthshaker",
+  "blessing_of_valour"
+ ],
+ "kinds": {
+  "defensive": {
+   "name": "Defensive",
+   "desc": "Cast inside your own field."
+  },
+  "offensive": {
+   "name": "Offensive",
+   "desc": "Cast inside an enemy field."
+  },
+  "neutral": {
+   "name": "Neutral",
+   "desc": "Cast inside any field."
+  }
+ },
+ "powers": {
+  "frost_field": {
+   "name": "Frost Field",
+   "kind": "defensive",
+   "cost": 110,
+   "cooldown": 20,
+   "icon": "scroll",
+   "desc": "Biting ice spreads over the ground: every enemy that walks through it is slowed and frozen raw.",
+   "statLines": [
+    "8 m radius for 10 s",
+    "Enemies inside are slowed by 60%",
+    "80 nature damage per second to enemies inside"
+   ],
+   "effects": [
+    {
+     "do": "zone",
+     "radius": 8,
+     "seconds": 10,
+     "slow": 0.6,
+     "perSecond": 80,
+     "dmgType": "nature"
+    }
+   ]
+  },
+  "binding_roots": {
+   "name": "Binding Roots",
+   "kind": "defensive",
+   "cost": 200,
+   "cooldown": 25,
+   "icon": "scroll",
+   "desc": "Roots burst from the ground and hold every enemy in place.",
+   "statLines": [
+    "5 m radius",
+    "Enemies are rooted for 3 s"
+   ],
+   "effects": [
+    {
+     "do": "status",
+     "who": "enemies",
+     "radius": 5,
+     "status": "root",
+     "seconds": 3
+    }
+   ]
+  },
+  "mending_light": {
+   "name": "Mending Light",
+   "kind": "defensive",
+   "cost": 160,
+   "cooldown": 30,
+   "icon": "potion",
+   "desc": "A column of warm light heals your heroes and keeps healing them.",
+   "statLines": [
+    "10 m radius",
+    "Heroes heal 40% of max health",
+    "Then Mending for 10 s"
+   ],
+   "effects": [
+    {
+     "do": "heal",
+     "who": "allyHeroes",
+     "radius": 10,
+     "pct": 0.4
+    },
+    {
+     "do": "status",
+     "who": "allyHeroes",
+     "radius": 10,
+     "status": "regen",
+     "seconds": 10
+    }
+   ]
+  },
+  "stone_ward": {
+   "name": "Stone Ward",
+   "kind": "defensive",
+   "cost": 180,
+   "cooldown": 30,
+   "icon": "tower_shield",
+   "desc": "A shell of stone forms around your heroes and soaks damage.",
+   "statLines": [
+    "8 m radius",
+    "Shield of 30% of max health for 10 s"
+   ],
+   "effects": [
+    {
+     "do": "barrier",
+     "who": "allyHeroes",
+     "radius": 8,
+     "pct": 0.3,
+     "seconds": 10
+    }
+   ]
+  },
+  "skyfall": {
+   "name": "Skyfall",
+   "kind": "offensive",
+   "cost": 250,
+   "cooldown": 25,
+   "icon": "scroll",
+   "desc": "A burning rock falls on the enemy after a short warning.",
+   "statLines": [
+    "Lands after 1.5 s",
+    "5 m radius",
+    "150 fire damage + 15% of the target's max health"
+   ],
+   "effects": [
+    {
+     "do": "blast",
+     "radius": 5,
+     "amount": 150,
+     "pctMaxHp": 0.15,
+     "dmgType": "fire",
+     "delay": 1.5
+    }
+   ]
+  },
+  "withering_hex": {
+   "name": "Withering Hex",
+   "kind": "offensive",
+   "cost": 200,
+   "cooldown": 30,
+   "icon": "scroll",
+   "desc": "Curses enemy heroes: they take more damage and drag their feet.",
+   "statLines": [
+    "7 m radius, heroes only",
+    "Take 25% more damage for 10 s",
+    "Slowed by 30% for 6 s"
+   ],
+   "effects": [
+    {
+     "do": "status",
+     "who": "enemyHeroes",
+     "radius": 7,
+     "status": "quarry",
+     "seconds": 10,
+     "power": 0.25
+    },
+    {
+     "do": "status",
+     "who": "enemyHeroes",
+     "radius": 7,
+     "status": "slow",
+     "seconds": 6,
+     "power": 0.3
+    }
+   ]
+  },
+  "loose_the_pack": {
+   "name": "Loose the Pack",
+   "kind": "offensive",
+   "cost": 300,
+   "cooldown": 35,
+   "icon": "scroll",
+   "desc": "Unleash a pack of wolves into the enemy field. They fight for you but pay no income and no bounty.",
+   "statLines": [
+    "3 wolf pairs (6 wolves)",
+    "Each wolf 8x as strong as a hired one"
+   ],
+   "effects": [
+    {
+     "do": "summon",
+     "unit": "wolf_pair",
+     "count": 3,
+     "mk": 8
+    }
+   ]
+  },
+  "war_banner": {
+   "name": "War Banner",
+   "kind": "offensive",
+   "cost": 220,
+   "cooldown": 30,
+   "icon": "scroll",
+   "desc": "Plant a banner among your attacking units: they hit harder and move faster.",
+   "statLines": [
+    "10 m radius, your units",
+    "+30% damage for 10 s",
+    "Hastened for 8 s"
+   ],
+   "effects": [
+    {
+     "do": "status",
+     "who": "ownUnits",
+     "radius": 10,
+     "status": "might",
+     "seconds": 10,
+     "power": 0.3
+    },
+    {
+     "do": "status",
+     "who": "ownUnits",
+     "radius": 10,
+     "status": "haste",
+     "seconds": 8
+    }
+   ]
+  },
+  "far_sight": {
+   "name": "Far Sight",
+   "kind": "neutral",
+   "cost": 60,
+   "cooldown": 15,
+   "icon": "scroll",
+   "desc": "Reveals hidden units in an area so heroes can see and strike them.",
+   "statLines": [
+    "14 m radius for 15 s",
+    "Stealthed units are revealed"
+   ],
+   "effects": [
+    {
+     "do": "reveal",
+     "radius": 14,
+     "seconds": 15
+    }
+   ]
+  },
+  "thunderstorm": {
+   "name": "Thunderstorm",
+   "kind": "neutral",
+   "cost": 220,
+   "cooldown": 30,
+   "icon": "scroll",
+   "desc": "A storm cloud lashes your enemies with lightning wherever you put it.",
+   "statLines": [
+    "6 m radius for 8 s",
+    "60 nature damage per second to enemies"
+   ],
+   "effects": [
+    {
+     "do": "zone",
+     "radius": 6,
+     "seconds": 8,
+     "perSecond": 60,
+     "dmgType": "nature"
+    }
+   ]
+  },
+  "earthshaker": {
+   "name": "Earthshaker",
+   "kind": "neutral",
+   "cost": 240,
+   "cooldown": 35,
+   "icon": "warhammer",
+   "desc": "The ground heaves and knocks every enemy off its feet.",
+   "statLines": [
+    "4 m radius",
+    "Enemies are stunned for 1.5 s"
+   ],
+   "effects": [
+    {
+     "do": "status",
+     "who": "enemies",
+     "radius": 4,
+     "status": "stun",
+     "seconds": 1.5
+    }
+   ]
+  },
+  "blessing_of_valour": {
+   "name": "Blessing of Valour",
+   "kind": "neutral",
+   "cost": 150,
+   "cooldown": 40,
+   "icon": "amulet",
+   "desc": "Your heroes in the area fight harder and move faster for a while.",
+   "statLines": [
+    "10 m radius, your heroes",
+    "+25% damage for 15 s",
+    "Hastened for 15 s"
+   ],
+   "effects": [
+    {
+     "do": "status",
+     "who": "allyHeroes",
+     "radius": 10,
+     "status": "might",
+     "seconds": 15,
+     "power": 0.25
+    },
+    {
+     "do": "status",
+     "who": "allyHeroes",
+     "radius": 10,
+     "status": "haste",
+     "seconds": 15
+    }
+   ]
+  }
+ }
+}

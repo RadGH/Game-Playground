@@ -1,0 +1,296 @@
+{
+ "_doc": "Farmer buildings (docs/hvf-PLAN.md \u00a76). Read by js/sim/modes/hvf/farm.js. size = footprint in 2 m cells [w, d]; cost in gold, each further copy of the same building by the same farmer x copyMult; makes = animal kind and capacity (cap) for producers; flat = gold/s without animals; incomePct = added to all the farmer's income; tell 0-3 (how loud: shown in the build menu); hp. Gold is the only gate: no build timers, no tech locks. A building is placed when its farmer reaches it (buildRange in units.json) and still has the gold. `blocks`: who cannot walk through its cells (all = everyone and animals; hunters = hunters and army only). blocks 'none' = walkable (Mud Patch). herd/mud/sight/shoot/needsProducers/trains are the defensive and army rows. `upgrades` (command `upgrade {id}`): costs per rank.",
+ "copyMult": 1.15,
+ "order": [
+  "coop",
+  "pen",
+  "sty",
+  "barn",
+  "hive",
+  "granary",
+  "windmill",
+  "farmhouse",
+  "sheepdog",
+  "fence",
+  "wall",
+  "hedge",
+  "mud",
+  "lookout",
+  "tower",
+  "hall"
+ ],
+ "kinds": {
+  "coop": {
+   "name": "Hen Coop",
+   "size": [
+    2,
+    2
+   ],
+   "cost": 30,
+   "makes": "hen",
+   "cap": 3,
+   "tell": 1,
+   "hp": 200,
+   "blocks": "all",
+   "desc": "Three hens. Small and quiet."
+  },
+  "pen": {
+   "name": "Sheep Pen",
+   "size": [
+    3,
+    3
+   ],
+   "cost": 90,
+   "makes": "sheep",
+   "cap": 4,
+   "tell": 2,
+   "hp": 300,
+   "blocks": "all",
+   "desc": "Four sheep. They bleat."
+  },
+  "sty": {
+   "name": "Pigsty",
+   "size": [
+    3,
+    2
+   ],
+   "cost": 220,
+   "makes": "pig",
+   "cap": 3,
+   "tell": 3,
+   "hp": 350,
+   "blocks": "all",
+   "desc": "Three pigs. Loud."
+  },
+  "barn": {
+   "name": "Cow Barn",
+   "size": [
+    3,
+    3
+   ],
+   "cost": 600,
+   "makes": "cow",
+   "cap": 2,
+   "tell": 3,
+   "hp": 500,
+   "blocks": "all",
+   "desc": "Two cows. Big, slow and easy to spot."
+  },
+  "hive": {
+   "name": "Beehive",
+   "size": [
+    1,
+    1
+   ],
+   "cost": 160,
+   "flat": 0.4,
+   "tell": 0,
+   "hp": 80,
+   "blocks": "all",
+   "desc": "Silent gold."
+  },
+  "granary": {
+   "name": "Granary",
+   "size": [
+    2,
+    2
+   ],
+   "cost": 400,
+   "incomePct": 0.1,
+   "tell": 0,
+   "hp": 300,
+   "blocks": "all",
+   "desc": "+10% to all your income."
+  },
+  "windmill": {
+   "name": "Windmill",
+   "size": [
+    2,
+    2
+   ],
+   "cost": 1500,
+   "incomePct": 0.35,
+   "tell": 2,
+   "hp": 400,
+   "blocks": "all",
+   "tall": 40,
+   "desc": "+35% to all your income. Tall: seen over the trees."
+  },
+  "farmhouse": {
+   "name": "Farmhouse",
+   "size": [
+    2,
+    2
+   ],
+   "cost": 200,
+   "tell": 1,
+   "hp": 700,
+   "blocks": "all",
+   "onePer": true,
+   "respawn": 40,
+   "desc": "Your respawn point. One per farmer."
+  },
+  "fence": {
+   "name": "Fence",
+   "size": [
+    1,
+    1
+   ],
+   "cost": 8,
+   "tell": 0,
+   "hp": 120,
+   "blocks": "all",
+   "opaque": true,
+   "desc": "Stops everyone and the animals; blocks sight."
+  },
+  "wall": {
+   "name": "Stone Wall",
+   "size": [
+    1,
+    1
+   ],
+   "cost": 25,
+   "tell": 0,
+   "hp": 600,
+   "blocks": "all",
+   "opaque": true,
+   "desc": "A tougher fence."
+  },
+  "hedge": {
+   "name": "Briar Hedge",
+   "size": [
+    1,
+    1
+   ],
+   "cost": 15,
+   "tell": 0,
+   "hp": 200,
+   "blocks": "hunters",
+   "desc": "Farmers and animals squeeze through; hunters cannot."
+  },
+  "sheepdog": {
+   "name": "Sheepdog",
+   "size": [
+    1,
+    1
+   ],
+   "cost": 120,
+   "tell": 0,
+   "hp": 150,
+   "blocks": "all",
+   "herd": {
+    "radius": 18,
+    "wanderMult": 0.5
+   },
+   "desc": "Halves how far animals within 18 m wander."
+  },
+  "mud": {
+   "name": "Mud Patch",
+   "size": [
+    2,
+    2
+   ],
+   "cost": 20,
+   "tell": 0,
+   "hp": 50,
+   "blocks": "none",
+   "mud": {
+    "speedMult": 0.6,
+    "attackMult": 0.6
+   },
+   "desc": "Hunters wade: -40% speed and attack speed."
+  },
+  "lookout": {
+   "name": "Lookout Post",
+   "size": [
+    1,
+    1
+   ],
+   "cost": 25,
+   "tell": 0,
+   "hp": 80,
+   "blocks": "all",
+   "sight": 20,
+   "desc": "Sees 20 m."
+  },
+  "tower": {
+   "name": "Arrow Tower",
+   "size": [
+    2,
+    2
+   ],
+   "cost": 180,
+   "tell": 1,
+   "hp": 500,
+   "blocks": "all",
+   "sight": 16,
+   "shoot": {
+    "dps": 24,
+    "attackEvery": 1.0,
+    "range": 12
+   },
+   "desc": "Shoots hunters within 12 m."
+  },
+  "hall": {
+   "name": "Harvest Hall",
+   "size": [
+    3,
+    3
+   ],
+   "cost": 1200,
+   "tell": 2,
+   "hp": 1200,
+   "blocks": "all",
+   "needsProducers": 3,
+   "trains": [
+    "scarecrow",
+    "crow"
+   ],
+   "desc": "Raise scarecrows and crow flocks. Needs 3 producer buildings."
+  }
+ },
+ "upgrades": {
+  "order": [
+   "feed",
+   "shears",
+   "breeding",
+   "stuffing"
+  ],
+  "feed": {
+   "name": "Feed",
+   "costs": [
+    150,
+    450,
+    1200
+   ],
+   "animalIncomePct": 0.25,
+   "desc": "+25% animal income per rank."
+  },
+  "shears": {
+   "name": "Shears",
+   "costs": [
+    300
+   ],
+   "sheepPct": 0.5,
+   "desc": "Sheep earn +50%."
+  },
+  "breeding": {
+   "name": "Breeding",
+   "costs": [
+    200
+   ],
+   "breedMult": 0.5,
+   "desc": "Animals breed twice as fast."
+  },
+  "stuffing": {
+   "name": "Stuffing",
+   "costs": [
+    400,
+    900,
+    1800
+   ],
+   "armyPct": 0.25,
+   "desc": "Scarecrow health and damage +25% per rank."
+  }
+ }
+}

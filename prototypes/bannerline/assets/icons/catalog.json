@@ -1,0 +1,414 @@
+{
+ "_doc": "What tools/bake-icons.mjs bakes (stream C, PLAN \u00a716). Units and heroes come from data/units.json and data/looks.json automatically; skills from data/heroes.json (`sprite` here picks the assets/data/fx sprite, else the element default). `items` are generic shop/drop bases by look: `held`/`offhand` are Chibi 2 part ids built on their own, `armour` dresses the warrior in `part` and frames it, `glyph` is a 2D flask/ring/amulet/scroll. The bake writes assets/icons/<kind>/<id>.png and assets/icons/index.json. `powerSprites.<power id>` = [fx sprite, element] for the Sanctum's powers (kind `power`, framed in `powerFrames[kind]`). Kind `building` = every town building + Keep for every race (`<race>.<kind>`). `hvf` (Hunters vs Farmers): kind `hvf-unit` (farmer/hunter/ghost + the animals, army and pets), `hvf-item` (data/hvf/hunter-items.json ids: `creature` = a creature spec, `object` = an hvf-structures kind, `role` armour = dressed on that role), `hvf-building` (every hvf-structures kind).",
+ "size": 128,
+ "skillSprites": {
+  "cleave": "slash",
+  "breaching_shove": "streak",
+  "warcry": "ring",
+  "iron_resolve": "shield_ring",
+  "whirlwind": "swirl",
+  "firebolt": "flame",
+  "fire_wall": "scorch",
+  "flashover": "flare",
+  "ember_stride": "footprint",
+  "meteor": "ember",
+  "aimed_shot": "arrow_up",
+  "hunters_snare": "chain",
+  "multi_shot": "streak",
+  "trackers_leap": "feather",
+  "rain_of_arrows": "arrow_down",
+  "thornlash": "thorn",
+  "renew": "leaf",
+  "briarback_shape": "root_vine",
+  "call_wolf": "wisp",
+  "quarry": "target",
+  "wolf_shape": "shadow_claw",
+  "bolt_turret": "bolt",
+  "shrapnel_mine": "crack",
+  "field_repair": "shield_ring",
+  "grapnel": "chain",
+  "overcharge": "crackle"
+ },
+ "elementSprites": {
+  "physical": "slash",
+  "fire": "flame",
+  "nature": "leaf",
+  "pierce": "arrow_up"
+ },
+ "skillHero": {
+  "default": null
+ },
+ "items": {
+  "sword": {
+   "held": "fh_sword",
+   "color": "#c4ccd4"
+  },
+  "longsword": {
+   "held": "fh_longsword",
+   "color": "#d0d8e0"
+  },
+  "greatsword": {
+   "held": "fh_greatsword",
+   "color": "#c8d0d8"
+  },
+  "axe": {
+   "held": "fh_axe",
+   "color": "#b8bec6"
+  },
+  "greataxe": {
+   "held": "fh_greataxe",
+   "color": "#a8aeb6"
+  },
+  "mace": {
+   "held": "fh_mace",
+   "color": "#b0b6be"
+  },
+  "warhammer": {
+   "held": "fh_maul",
+   "color": "#9aa0a8"
+  },
+  "spear": {
+   "held": "fh_spear",
+   "color": "#b8c0c8"
+  },
+  "bow": {
+   "held": "bow",
+   "color": "#8a5a30",
+   "rot": [
+    0,
+    1.5708,
+    0.785
+   ]
+  },
+  "staff": {
+   "held": "staff_orb",
+   "color": "#e8642a"
+  },
+  "druid_staff": {
+   "held": "staff_crook",
+   "color": "#7a5a30"
+  },
+  "quarterstaff": {
+   "held": "fh_quarterstaff",
+   "color": "#8a6a40"
+  },
+  "wand": {
+   "held": "fh_wand",
+   "color": "#c8a060"
+  },
+  "heater_shield": {
+   "offhand": "fh_heater_shield",
+   "color": "#2f5d9e"
+  },
+  "kite_shield": {
+   "offhand": "fh_kite_shield",
+   "color": "#8a2a2a"
+  },
+  "tower_shield": {
+   "offhand": "fh_tower_shield",
+   "color": "#5a6a50"
+  },
+  "tome": {
+   "offhand": "book",
+   "color": "#5a2a2a"
+  },
+  "quiver": {
+   "offhand": "quiver",
+   "color": "#6a4a2a",
+   "rot": [
+    0,
+    0,
+    0
+   ]
+  },
+  "plate_helm": {
+   "armour": "hat",
+   "part": {
+    "id": "plate_helm",
+    "color": "#b8c0cc",
+    "color2": "#2f5d9e"
+   }
+  },
+  "leather_cap": {
+   "armour": "hat",
+   "part": {
+    "id": "leather_cap",
+    "color": "#7a5a3a"
+   }
+  },
+  "hood": {
+   "armour": "hat",
+   "part": {
+    "id": "hood",
+    "color": "#4a5a3a"
+   }
+  },
+  "wizard_hat": {
+   "armour": "hat",
+   "part": {
+    "id": "wizard",
+    "color": "#7a2a2a"
+   }
+  },
+  "plate_armour": {
+   "armour": "top",
+   "part": {
+    "id": "plate",
+    "color": "#c0c8d0",
+    "color2": "#8a2a2a"
+   }
+  },
+  "chainmail": {
+   "armour": "top",
+   "part": {
+    "id": "chainmail",
+    "color": "#a8b0b8"
+   }
+  },
+  "leather_armour": {
+   "armour": "top",
+   "part": {
+    "id": "leather",
+    "color": "#7a5034"
+   }
+  },
+  "robe": {
+   "armour": "top",
+   "part": {
+    "id": "robe",
+    "color": "#6a2a6a",
+    "color2": "#d9b477"
+   }
+  },
+  "boots": {
+   "armour": "shoes",
+   "part": {
+    "id": "boots",
+    "color": "#5a4232"
+   }
+  },
+  "bracers": {
+   "armour": "decor",
+   "part": {
+    "id": "rune_bracers",
+    "color": "#8a7a5a"
+   }
+  },
+  "potion": {
+   "glyph": "potion",
+   "color": "#d83838"
+  },
+  "oil": {
+   "glyph": "oil",
+   "color": "#e0a030"
+  },
+  "amulet": {
+   "glyph": "amulet",
+   "color": "#3a8ad8"
+  },
+  "ring": {
+   "glyph": "ring",
+   "color": "#d83850"
+  },
+  "scroll": {
+   "glyph": "scroll",
+   "color": "#8a6a3a"
+  }
+ },
+ "powerSprites": {
+  "frost_field": [
+   "snowflake",
+   "ice"
+  ],
+  "binding_roots": [
+   "root_vine",
+   "nature"
+  ],
+  "mending_light": [
+   "holy_mote",
+   "holy"
+  ],
+  "stone_ward": [
+   "shield_ring",
+   "physical"
+  ],
+  "skyfall": [
+   "ember",
+   "fire"
+  ],
+  "withering_hex": [
+   "skull",
+   "shadow"
+  ],
+  "loose_the_pack": [
+   "shadow_claw",
+   "nature"
+  ],
+  "war_banner": [
+   "arrow_up",
+   "fire"
+  ],
+  "far_sight": [
+   "target",
+   "arcane"
+  ],
+  "thunderstorm": [
+   "bolt",
+   "lightning"
+  ],
+  "earthshaker": [
+   "crack",
+   "physical"
+  ],
+  "blessing_of_valour": [
+   "holy_rune",
+   "holy"
+  ]
+ },
+ "powerFrames": {
+  "defensive": "#4fa8ff",
+  "offensive": "#ff5a3a",
+  "neutral": "#ffd24a"
+ },
+ "hvf": {
+  "units": {
+   "farmer": {
+    "role": "farmer"
+   },
+   "hunter": {
+    "role": "hunter"
+   },
+   "ghost": {
+    "role": "farmer",
+    "ghost": true
+   },
+   "sheep": {
+    "hvf": [
+     "animals",
+     "sheep"
+    ]
+   },
+   "hen": {
+    "hvf": [
+     "animals",
+     "hen"
+    ]
+   },
+   "pig": {
+    "hvf": [
+     "animals",
+     "pig"
+    ]
+   },
+   "cow": {
+    "hvf": [
+     "animals",
+     "cow"
+    ]
+   },
+   "scarecrow": {
+    "hvf": [
+     "army",
+     "scarecrow"
+    ]
+   },
+   "crow": {
+    "hvf": [
+     "army",
+     "crow"
+    ]
+   },
+   "hound": {
+    "hvf": [
+     "pets",
+     "hound"
+    ]
+   },
+   "hawk": {
+    "hvf": [
+     "pets",
+     "hawk"
+    ]
+   }
+  },
+  "items": {
+   "horse1": {
+    "creature": {
+     "type": "pony",
+     "colors": {
+      "body": "#8a6a44"
+     }
+    }
+   },
+   "horse2": {
+    "creature": {
+     "type": "horse",
+     "colors": {
+      "body": "#6a4a2a"
+     }
+    }
+   },
+   "horse3": {
+    "creature": {
+     "type": "courser",
+     "colors": {
+      "body": "#2e2a28"
+     },
+     "features": {
+      "spikes": true
+     }
+    }
+   },
+   "axe": {
+    "held": "fh_axe",
+    "color": "#9aa0a8"
+   },
+   "spyglass": {
+    "glyph": "spyglass",
+    "color": "#c89a40"
+   },
+   "watchstone": {
+    "object": "watchstone"
+   },
+   "flare": {
+    "glyph": "flare",
+    "color": "#ff7a2a"
+   },
+   "hound": {
+    "hvf": [
+     "pets",
+     "hound"
+    ]
+   },
+   "torch": {
+    "offhand": "torch",
+    "color": "#6a4a2a",
+    "rot": [
+     0,
+     0,
+     0.6
+    ]
+   },
+   "snarekit": {
+    "object": "snare"
+   },
+   "blade": {
+    "held": "fh_dagger",
+    "color": "#c4ccd4"
+   },
+   "leathers": {
+    "armour": "top",
+    "role": "hunter",
+    "part": {
+     "id": "strapped_leather",
+     "color": "#4a3a2a",
+     "color2": "#b23a2a"
+    }
+   },
+   "salve": {
+    "glyph": "potion",
+    "color": "#5ab04a"
+   }
+  }
+ }
+}

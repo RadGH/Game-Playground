@@ -123,7 +123,7 @@ export function snapshot({
   props, logistics, away, research,
   /**
    * The Civilization Expansion: houses and who sleeps in them, the traders who moved in, what is in
-   * the hold and in the Trade Post, the carts on the long roads, and the muster cooldowns.
+   * the hold and in the Trade Post, the carts on the long roads, and the levy cooldowns.
    *
    * ONE FIELD, `civics`, on purpose: js/civics.js owns all six modules and hands back one blob, so
    * there is no chance of this list and js/main.js's call drifting apart the way `world`, `quests`
@@ -349,7 +349,7 @@ export function restore(save, { rpg, player, control, map }) {
   player.bonusPerks = p.bonusPerks || 0;
   // R20 — see the note beside `skillTalents` in `snapshot`. An older save has none, which loads as
   // an empty board rather than as a crash.
-  player.skillTalents = p.skillTalents || {};
+  player.skillTalents = renameTalentPicks(p.skillTalents || {});
   player.kills = p.kills ?? 0;
   player.deaths = p.deaths ?? 0;
   player.equipment = p.equipment || {};
@@ -401,4 +401,20 @@ export function playtimeText(seconds) {
   const s = Math.max(0, Math.round(seconds));
   const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
   return h ? `${h}h ${m}m` : `${m}m`;
+}
+
+/**
+ * Talent node ids that were renamed after saves already held them. A save stores the NODE id a
+ * player picked on each tier, so a rename would silently un-pick it on load; this maps the old id
+ * to the new one instead. 2026-10-03: daybreak_descent's tier-2 "muster" became "close_ranks"
+ * (the owner banned the word).
+ */
+const RENAMED_TALENTS = { muster: 'close_ranks' };
+export function renameTalentPicks(all) {
+  const out = {};
+  for (const [skillId, picks] of Object.entries(all || {})) {
+    out[skillId] = {};
+    for (const [tier, id] of Object.entries(picks || {})) out[skillId][tier] = RENAMED_TALENTS[id] || id;
+  }
+  return out;
 }

@@ -5,7 +5,10 @@
    GET  /api/library/sync   → the last synced library JSON (or {} )
    POST /api/inbox/<name>   body = any JSON → library/synced/inbox/<name>-<timestamp>.json  (generic "send this to Claude")
 
-Run: python3 tools/serve.py [port]   (serve.sh does this)
+Run: python3 tools/serve.py [port] [--https]   (serve.sh does this)
+     --https wraps the socket in TLS with tools/certs/dev.{crt,key} (make them once with
+     tools/make-dev-cert.sh). Browsers only expose gamepads on secure pages, and the owner
+     cannot use localhost, so the LAN dev URL needs https for controller testing (8441).
 
 ---------------------------------------------------------------------------------------------------
 Why this file is more than four lines of http.server (round 16)
@@ -50,7 +53,9 @@ import urllib.parse
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SYNC_DIR = os.path.join(ROOT, 'library', 'synced'); INBOX = os.path.join(SYNC_DIR, 'inbox')
 os.makedirs(INBOX, exist_ok=True)
-PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8400
+_ARGS = [a for a in sys.argv[1:] if not a.startswith('--')]
+HTTPS = '--https' in sys.argv[1:]
+PORT = int(_ARGS[0]) if _ARGS else 8400
 
 # Text types worth compressing. Images, fonts and audio are already compressed; gzipping them
 # spends CPU to make them very slightly bigger.
@@ -211,5 +216,14 @@ class Server(socketserver.ThreadingTCPServer):
 
 if __name__ == '__main__':
     with Server(('0.0.0.0', PORT), Handler) as httpd:
-        print('serving %s on port %d  (HTTP/1.1 keep-alive, gzip)' % (ROOT, PORT))
+        if HTTPS:
+            import ssl
+            cert_dir = os.path.join(ROOT, 'tools', 'certs')
+            crt, key = os.path.join(cert_dir, 'dev.crt'), os.path.join(cert_dir, 'dev.key')
+            if not (os.path.exists(crt) and os.path.exists(key)):
+                sys.exit('no dev certificate: run tools/make-dev-cert.sh first')
+            ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+            ctx.load_cert_chain(crt, key)
+            httpd.socket = ctx.wrap_socket(httpd.socket, server_side=True)
+        print('serving %s on port %d  (%s, HTTP/1.1 keep-alive, gzip)' % (ROOT, PORT, 'https' if HTTPS else 'http'))
         httpd.serve_forever()

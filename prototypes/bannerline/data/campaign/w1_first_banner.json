@@ -1,0 +1,234 @@
+{
+ "id": "w1_first_banner",
+ "chapter": "warrior",
+ "name": "First Banner",
+ "place": "Thornfold Vale",
+ "briefing": [
+  "The Freeholds have raised a Keep at the mouth of Thornfold Vale, and Ashtusk scouts are already probing the far gate.",
+  "Captain Merrow: \"A Keep is only as strong as the road in front of it. Hire men at the Barracks and march them on the enemy: every one you send pays you back at every Pay. Stand in your own field and cut down what comes for our banners.\""
+ ],
+ "config": {
+  "format": "1v1",
+  "map": "vale",
+  "players": [
+   {
+    "team": 0,
+    "kind": "human",
+    "race": "freeholds",
+    "hero": "warrior",
+    "name": "You"
+   },
+   {
+    "team": 1,
+    "kind": "human",
+    "race": "ashtusk",
+    "hero": "warrior",
+    "name": "Ashtusk Scouts",
+    "scripted": true
+   }
+  ],
+  "rules": {
+   "banners": 50
+  }
+ },
+ "player": 0,
+ "winWhen": "objectives",
+ "timeLimit": 720,
+ "objectives": [
+  {
+   "id": "hire",
+   "text": "Hire 5 units at the Barracks (B)",
+   "kind": "sends",
+   "args": {
+    "n": 5
+   }
+  },
+  {
+   "id": "income",
+   "text": "Raise your income to 30",
+   "kind": "income",
+   "args": {
+    "n": 30
+   },
+   "after": "hire"
+  },
+  {
+   "id": "defend",
+   "text": "Cut down 15 enemies with your hero",
+   "kind": "kills",
+   "args": {
+    "n": 15
+   }
+  },
+  {
+   "id": "fast",
+   "text": "Win within 6 minutes",
+   "kind": "winBefore",
+   "args": {
+    "seconds": 360
+   },
+   "optional": true
+  },
+  {
+   "id": "income_hi",
+   "text": "Reach an income of 60",
+   "kind": "income",
+   "args": {
+    "n": 60
+   },
+   "optional": true
+  }
+ ],
+ "stars": [
+  "fast",
+  "income_hi"
+ ],
+ "script": [
+  {
+   "id": "hello",
+   "when": {
+    "tick": 20
+   },
+   "do": [
+    {
+     "do": "say",
+     "who": "Captain Merrow",
+     "text": "Open the Barracks with B and hire a few Levies. They leave at once and march on the Ashtusk gate."
+    }
+   ]
+  },
+  {
+   "id": "hired",
+   "when": {
+    "done": "hire"
+   },
+   "do": [
+    {
+     "do": "say",
+     "who": "Captain Merrow",
+     "text": "Good. Every unit you hire adds to your income: gold arrives at every Pay, the ring at the top of the screen."
+    }
+   ]
+  },
+  {
+   "id": "rich",
+   "when": {
+    "done": "income"
+   },
+   "do": [
+    {
+     "do": "say",
+     "who": "Captain Merrow",
+     "text": "The more you send, the more you earn. Keep the road busy."
+    }
+   ]
+  },
+  {
+   "id": "first_wave",
+   "when": {
+    "at": 45
+   },
+   "do": [
+    {
+     "do": "wave",
+     "player": 1,
+     "units": [
+      [
+       "raider_pair",
+       2
+      ],
+      [
+       "spearthrower",
+       1
+      ]
+     ]
+    },
+    {
+     "do": "say",
+     "who": "Captain Merrow",
+     "text": "Raiders at the gate! Right-click them to fight. Q is Cleave."
+    }
+   ]
+  },
+  {
+   "id": "second_wave",
+   "when": {
+    "at": 120
+   },
+   "do": [
+    {
+     "do": "wave",
+     "player": 1,
+     "units": [
+      [
+       "raider_pair",
+       3
+      ],
+      [
+       "spearthrower",
+       2
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "third_wave",
+   "when": {
+    "at": 200
+   },
+   "do": [
+    {
+     "do": "wave",
+     "player": 1,
+     "units": [
+      [
+       "raider_pair",
+       3
+      ],
+      [
+       "spearthrower",
+       2
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "fourth_wave",
+   "when": {
+    "at": 290
+   },
+   "do": [
+    {
+     "do": "wave",
+     "player": 1,
+     "units": [
+      [
+       "raider_pair",
+       4
+      ],
+      [
+       "brute",
+       1
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "won",
+   "when": {
+    "done": "defend"
+   },
+   "do": [
+    {
+     "do": "say",
+     "who": "Captain Merrow",
+     "text": "They falter. One more push and the Vale is ours."
+    }
+   ]
+  }
+ ],
+ "_doc": "The Ashtusk seat is `scripted`: no AI and no player; only this mission's script sends its waves (a first mission must be gentle)."
+}

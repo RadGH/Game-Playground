@@ -58,8 +58,11 @@ if [ "$FORCE" -eq 0 ]; then
   done < <(find "$TMP" -name '*.js' -not -path '*/node_modules/*' -not -path '*/vendor/*')
   [ "$BAD" -eq 0 ] || { echo "Refusing to publish: that commit does not parse."; exit 1; }
 
-  npm run test:unit --silent >/dev/null 2>&1 \
-    || { echo "Refusing to publish: npm run test:unit fails. Use --force if you really mean it."; exit 1; }
+  # Run the unit tests on THAT commit, not on the working tree: agents keep half-finished edits in
+  # the working tree, and testing those made this gate refuse good commits (and could pass bad ones).
+  ln -s "$PWD/node_modules" "$TMP/node_modules"
+  ( cd "$TMP" && npm run test:unit --silent >/dev/null 2>&1 ) \
+    || { echo "Refusing to publish: npm run test:unit fails at $SHA. Use --force if you really mean it."; exit 1; }
   echo "  …it parses and the tests pass."
 fi
 

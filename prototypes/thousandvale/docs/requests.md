@@ -447,3 +447,34 @@ The server creates its tables itself on first boot (server/db/schema-v*.sql) and
   (by `id`), else near the named places, else 320 m out from the hub; each spawn carries `data.encounter` + the script's `name`;
   the sheet's `camps` mix sets the wilds monster types/levels (+ `with`). No `arenas` option is passed to `planDungeon`;
   the dungeon family is picked from the sheet's `dungeon.families`. Vignette placements are NOT spawned yet (next).
+
+## E (Content) -> A (Server core), 2026-10-04 — M2: all 8 dungeon families + encounter sets
+- `planDungeon` now builds all 8 families (`crypt_spiral`, `mine_descent`, `flooded_cistern`, `fortress_keep`, `cave_river`, `tower_climb`,
+  `barrow_maze`, `sunken_temple`), same plan shape. Pick the family per zone door from `data/provinces/torbor_downs.json`
+  `zones.<id>.dungeon {family, floors, level}` (2 floors under band 7, 3 above).
+- Each family has encounter sets (crypt/mine/cistern/keep have 2 of their own; the other four borrow by theme). The seed picks one;
+  `planDungeon(seed, {…, set: n})` forces it. `plan.encounters = { set, setName, miniboss: [...], boss }`. Packs carry `encounter` + `type`.
+- Extras you may ignore: `floor.river` (cave_river: polyline in metres, decoration), `FAMILIES.tower_climb.ascending` (stairs go UP —
+  only the art differs). Cost: 2-30 ms a plan (cave_river is the slow one) — plan once per instance, never per tick.
+- Index now lists 59 E scripts (8 dungeon bosses, 16 mini-bosses, 32 rares, elite, zone event boss, province world boss
+  `world_grimtallow` for zone `blackthorn_scar`, a realm event per PLAN §5.2; arena radius 50, needs ~100 m clear ground).
+- Every script has a `party` note (how it plays at 1 / 2-3 / 5, what M5 scaling should change).
+
+## E (Content) -> B (World bake), 2026-10-04 — M2 province layout (heard: you are re-choosing the world)
+`data/provinces/torbor_downs.json` is a DESIGN layout: 16 zone ids on a 4×4 grid (`grid: [x, y]`), archetype + band + biomes + dungeon
+family per zone, `start: 'test'`, world boss in `blackthorn_scar` (corner). When the ~200-zone world is published, please pick a
+4×4-ish block of land zones for Torbor Downs and post the mapping `{ myZoneId: yourZoneId }` (or adopt my ids) in requests.md; I will
+re-run `tools/assign-vignettes.mjs` (which vignettes go where — grid-based, already meets the variety rule) and
+`tools/place-vignettes.mjs` (coordinates) against your new bake. I am NOT placing anything at coordinates until then. Per zone the
+bake needs: an event site (~40 m clear; ~100 m in blackthorn_scar for the world boss), the zone's town/hamlet/fort sites (names in my
+sheet are placeholders — yours win), and the dungeon door. `data/provinces/sites.json` lists fort/farm/cave kinds per archetype.
+
+## E (Content) -> D (Client), 2026-10-04 — M2 dungeon looks
+New `plan.look` values: `flooded` (cistern), `ruin` (keep), `cave` (cave river), `vault` (tower), `barrow` (barrow maze), `hollow` (sunken
+temple) — all Farhold `DUNGEON_LOOKS` keys. `floor.river` (cave_river) is a polyline you can draw as water down the middle of the caves.
+
+## A (Server core) -> C (Combat core), 2026-10-04 — one hot spot left
+In a 50-real-bot profile of the server, `shared/format.js fmt` (skill description text) is still the top JS self-time
+after the socket writes and the snapshot encoder (~6% of busy time). Anything the tick calls that formats text
+(descriptions, tooltips) should be cached or done on demand for the client only.
+G: after socket corking + spreading saves, tests/load bots20 p99 3.0 ms and bots50 p99 5.2 ms (load 7–10) — both green.

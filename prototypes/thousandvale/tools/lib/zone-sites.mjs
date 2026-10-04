@@ -115,7 +115,7 @@ export function addZoneSites(t, sites, { asks = [], avoid = [], doorName, town: 
   }
   for (const ask of asks) {
     if (sites.some(s => s.type === ask.type && s.id === ask.id)) continue;
-    const near = ask.near || sites.find(s => s.name === ask.nearSite) || town;
+    const near = ask.near || sites.find(s => (s.name || s.id) === ask.nearSite) || town;
     if (!near) continue;
     const p = placeOpenSite(t, near, ask.r, { avoid: keep });
     if (p) { const site = { type: ask.type, id: ask.id, x: p.x, z: p.z, r: ask.r }; sites.push(site); keep.push(site); }

@@ -150,7 +150,7 @@
       "zone": "ashcombe",
       "zones": [
         "ashcombe",
-        "delvers_hill"
+        "hollin_pass"
       ],
       "steps": [
         {
@@ -165,26 +165,26 @@
           "at": {
             "site": "the Broken Keep"
           },
-          "text": "In the Broken Keep's chapel, a monk's note: 'The reliquary went west, to the copper hills, for safe keeping.'"
+          "text": "In the Broken Keep's chapel, a monk's note: 'The reliquary went north, up the pass, for safe keeping.'"
         },
         {
-          "zone": "delvers_hill",
+          "zone": "hollin_pass",
           "clue": "carved_arrow",
           "at": {
-            "site": "the Old Headframe Fort"
+            "site": "Hollin Toll Fort"
           },
-          "text": "On the headframe's footing, the same monk's sign — a little cross and an arrow down the old shaft."
+          "text": "On the toll fort's oldest stone, the same monk's sign — a little cross and an arrow up the scree."
         }
       ],
       "cache": {
-        "zone": "delvers_hill",
+        "zone": "hollin_pass",
         "at": {
-          "landmark": "the bottom of the old shaft below the headframe"
+          "landmark": "a hermit's niche in the scree above Hollin Toll Fort"
         },
         "how": "chest",
         "shimmer": 15,
         "tier": "rare",
-        "hint": "At the foot of the old shaft, behind a rotten ladder."
+        "hint": "A niche in the scree above the fort."
       }
     },
     {
@@ -417,7 +417,7 @@
       "zone": "redcliff",
       "zones": [
         "redcliff",
-        "gorse_march"
+        "millbrook"
       ],
       "steps": [
         {
@@ -426,7 +426,7 @@
           "at": {
             "site": "Redcliff Fort"
           },
-          "text": "A captured raider's orders: 'Pay chest stays at the burned farm until the march clears.'"
+          "text": "A captured raider's orders: 'Pay chest stays at the burned farm until the vale road clears.'"
         },
         {
           "zone": "redcliff",
@@ -434,26 +434,26 @@
           "at": {
             "site": "Cinder Farm"
           },
-          "text": "A raider's mark burned into Cinder Farm's gatepost, pointing south to the march."
+          "text": "A raider's mark burned into Cinder Farm's gatepost, pointing west toward Millbrook Vale."
         },
         {
-          "zone": "gorse_march",
+          "zone": "millbrook",
           "clue": "map_piece",
           "at": {
-            "site": "Burnt Barns"
+            "site": "Millbrook Keep"
           },
-          "text": "In the Burnt Barns, a map piece: the redoubt, and an X in the gorse beside it."
+          "text": "Tucked in a crack of Millbrook Keep's gate: a raider's map piece, an X in the gorse behind the keep."
         }
       ],
       "cache": {
-        "zone": "gorse_march",
+        "zone": "millbrook",
         "at": {
-          "landmark": "in the gorse beside Gorsehold Redoubt"
+          "landmark": "in the gorse behind Millbrook Keep"
         },
         "how": "dig",
         "shimmer": 15,
         "tier": "rare",
-        "hint": "In the gorse by the redoubt."
+        "hint": "In the gorse behind the keep."
       }
     },
     {

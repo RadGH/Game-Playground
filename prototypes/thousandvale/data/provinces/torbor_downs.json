@@ -33,39 +33,13 @@
     "undead": 1
   },
   "worldBoss": {
-    "id": "planned_m3",
-    "note": "M3: the province world boss and its arena zone."
+    "id": "world_grimtallow",
+    "zone": "blackthorn_scar",
+    "note": "Province world boss: a realm event (PLAN §5.2), arena radius 50."
   },
   "questline": {
     "name": "The Ford and the Fields",
-    "steps": [
-      {
-        "n": 1,
-        "quest": "wolves_at_the_fold",
-        "status": "m1"
-      },
-      {
-        "n": 2,
-        "quest": "toll_at_fitockpi",
-        "status": "m1"
-      },
-      {
-        "n": 3,
-        "quest": "webs_in_the_barley",
-        "status": "m1"
-      },
-      {
-        "n": 4,
-        "quest": "what_lies_below",
-        "status": "m1"
-      },
-      {
-        "n": 5,
-        "quest": null,
-        "status": "m2",
-        "note": "The ford gang's paymaster leads to the next zone's fort."
-      }
-    ]
+    "file": "data/quests/province.json"
   },
   "zones": {
     "hollin_pass": {
@@ -93,7 +67,13 @@
         "family": "tower_climb",
         "floors": 3,
         "level": 6
-      }
+      },
+      "rares": [
+        "rare_old_hookclaw",
+        "rare_scree_mother"
+      ],
+      "quests": "data/quests/hollin_pass.json",
+      "hook": "the_long_stair"
     },
     "ashcombe": {
       "name": "The Ashcombe Ruins",
@@ -120,7 +100,13 @@
         "family": "fortress_keep",
         "floors": 2,
         "level": 4
-      }
+      },
+      "rares": [
+        "rare_gravel_jack",
+        "rare_sir_hollowell"
+      ],
+      "quests": "data/quests/ashcombe.json",
+      "hook": "the_ashcombe_colossus"
     },
     "brackwater": {
       "name": "Brackwater Fen",
@@ -147,7 +133,13 @@
         "family": "sunken_temple",
         "floors": 3,
         "level": 5
-      }
+      },
+      "rares": [
+        "rare_reedmother_ysolt",
+        "rare_lantern_drowner"
+      ],
+      "quests": "data/quests/brackwater.json",
+      "hook": "the_drowned_bells"
     },
     "saltmouth": {
       "name": "Saltmouth",
@@ -174,7 +166,13 @@
         "family": "flooded_cistern",
         "floors": 3,
         "level": 6
-      }
+      },
+      "rares": [
+        "rare_saltjaw",
+        "rare_captain_wrackley"
+      ],
+      "quests": "data/quests/saltmouth.json",
+      "hook": "the_whale_bones"
     },
     "delvers_hill": {
       "name": "Delvers' Hill",
@@ -201,7 +199,13 @@
         "family": "mine_descent",
         "floors": 2,
         "level": 4
-      }
+      },
+      "rares": [
+        "rare_blind_gammer",
+        "rare_copperback"
+      ],
+      "quests": "data/quests/delvers_hill.json",
+      "hook": "the_singing_seam"
     },
     "test": {
       "name": "The Torbor Fields",
@@ -339,7 +343,13 @@
         "family": "flooded_cistern",
         "floors": 2,
         "level": 3
-      }
+      },
+      "rares": [
+        "rare_tithe_collector",
+        "rare_mother_soot"
+      ],
+      "quests": "data/quests/torbor_cross.json",
+      "hook": "the_bridge_city"
     },
     "gullwick": {
       "name": "The Gullwick Lakes",
@@ -366,7 +376,13 @@
         "family": "cave_river",
         "floors": 3,
         "level": 5
-      }
+      },
+      "rares": [
+        "rare_ferryman_odo",
+        "rare_waterstrider_tolla"
+      ],
+      "quests": "data/quests/gullwick.json",
+      "hook": "the_floating_isle"
     },
     "wychwood": {
       "name": "Wychwood",
@@ -392,7 +408,13 @@
         "family": "barrow_maze",
         "floors": 3,
         "level": 5
-      }
+      },
+      "rares": [
+        "rare_antlered_shade",
+        "rare_charcoal_tom"
+      ],
+      "quests": "data/quests/wychwood.json",
+      "hook": "the_great_hollow_oak"
     },
     "saint_orrins_rise": {
       "name": "Saint Orrin's Rise",
@@ -418,7 +440,13 @@
         "family": "crypt_spiral",
         "floors": 2,
         "level": 3
-      }
+      },
+      "rares": [
+        "rare_brother_penance",
+        "rare_vesper_bell_owl"
+      ],
+      "quests": "data/quests/saint_orrins_rise.json",
+      "hook": "the_thousand_candles"
     },
     "millbrook": {
       "name": "Millbrook Vale",
@@ -445,7 +473,13 @@
         "family": "mine_descent",
         "floors": 2,
         "level": 3
-      }
+      },
+      "rares": [
+        "rare_laughing_hettie",
+        "rare_old_mould"
+      ],
+      "quests": "data/quests/millbrook.json",
+      "hook": "the_three_wheels"
     },
     "redcliff": {
       "name": "The Redcliff Frontier",
@@ -472,7 +506,13 @@
         "family": "fortress_keep",
         "floors": 3,
         "level": 6
-      }
+      },
+      "rares": [
+        "rare_redfang",
+        "rare_wynn_two_strings"
+      ],
+      "quests": "data/quests/redcliff.json",
+      "hook": "the_red_cliff_face"
     },
     "blackthorn_scar": {
       "name": "Blackthorn Scar",
@@ -499,7 +539,13 @@
         "family": "barrow_maze",
         "floors": 3,
         "level": 7
-      }
+      },
+      "rares": [
+        "rare_thornbound_crawler",
+        "rare_scab"
+      ],
+      "quests": "data/quests/blackthorn_scar.json",
+      "hook": "the_thorn_wall"
     },
     "coldwater": {
       "name": "Coldwater Mere",
@@ -526,7 +572,13 @@
         "family": "sunken_temple",
         "floors": 3,
         "level": 5
-      }
+      },
+      "rares": [
+        "rare_old_coldmouth",
+        "rare_mere_moth_queen"
+      ],
+      "quests": "data/quests/coldwater.json",
+      "hook": "the_reflection_mere"
     },
     "gorse_march": {
       "name": "The Gorse March",
@@ -553,7 +605,13 @@
         "family": "tower_climb",
         "floors": 3,
         "level": 6
-      }
+      },
+      "rares": [
+        "rare_deserter_gutch",
+        "rare_burnt_barns_hound"
+      ],
+      "quests": "data/quests/gorse_march.json",
+      "hook": "the_burning_fields"
     },
     "sunken_wolds": {
       "name": "The Sunken Wolds",
@@ -580,7 +638,13 @@
         "family": "cave_river",
         "floors": 3,
         "level": 7
-      }
+      },
+      "rares": [
+        "rare_green_shard",
+        "rare_nightjar"
+      ],
+      "quests": "data/quests/sunken_wolds.json",
+      "hook": "the_sunken_road"
     }
   },
   "grid": {

@@ -13,6 +13,7 @@ export const RULES_DATA_FILES = {
   talents: '../../../farhold/data/talents.json',
   uniques: '../../../farhold/data/uniques.json',
   tools: '../../../farhold/data/tools.json',
+  mercenaries: '../../../farhold/data/mercenaries.json',
 };
 
 /** URL of one data file, resolved against this module. */

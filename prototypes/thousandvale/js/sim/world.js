@@ -25,7 +25,7 @@ import { createTickStats } from './tickstats.js';
 import { randomHex } from './sha256.js';
 import { createParties } from './party.js';
 import { createEconomyLog } from './economy.js';
-import { findTown, findDoor, townGate, wildsCamps, zoneEncounterCamps } from './realm.js';
+import { findTown, findDoor, townGate, wildsCamps, zoneEncounterCamps, zoneEncounterIds } from './realm.js';
 import { dungeonTerrain, dungeonRoomSpec, describeDungeon } from './dungeon.js';
 import { JOURNAL_FLUSH_MS } from './journal.js';
 import { createTrades, TRADE_OPS, TRADE_RANGE } from './trade.js';
@@ -37,7 +37,8 @@ const FLOOD_LIMIT = 300;               // over-rate messages are dropped quietly
 export const BAG_MAX = 120;
 export const TOWN_EDGE = 2;              // metres of hysteresis at the town edge (no flapping)
 export const TARGET_RANGE = 60;          // a Tab target must be this close
-export const EDGE_PER_TICK = 3;          // town-edge handoffs done per tick (a crowd crossing together is spread out)
+export const EDGE_PER_TICK = 3;
+export const SAVES_PER_TICK = 4;         // periodic blob saves started per tick          // town-edge handoffs done per tick (a crowd crossing together is spread out)
 const RARE = new Set(['rare', 'unique', 'legendary', 'set']);
 
 export function createWorld(opts) {
@@ -75,7 +76,7 @@ export function createWorld(opts) {
   const town = findTown(terrain, opts.townRadius);
   const door = findDoor(terrain, town);
   const gate = townGate(terrain, town, door);
-  const camps = opts.camps || [...wildsCamps(terrain, town, door, zoneSheet && zoneSheet.camps), ...zoneEncounterCamps(terrain, zoneKey, encounterInfo)];
+  const camps = opts.camps || [...wildsCamps(terrain, town, door, zoneSheet && zoneSheet.camps), ...(terrain.reader ? zoneEncounterCamps(terrain, zoneEncounterIds(zoneSheet), encounterInfo) : [])];
   const rooms = new Map();
   const copies = [];
   const instances = new Map();   // key -> room
@@ -1008,9 +1009,10 @@ export function createWorld(opts) {
     if (tickTimers.length) for (let i = tickTimers.length - 1; i >= 0; i--) if (tickTimers[i].at <= ticks) { const f = tickTimers[i].fn; tickTimers.splice(i, 1); f(); }
     if (ticks % 10 === 0) sendPartyFrames();
     const t = now();
-    for (const o of online.values()) {
+    let started = 0;                       // at most SAVES_PER_TICK periodic blob saves begin per tick (a crowd that
+    for (const o of online.values()) {     // logged in together does not save together)
       if (!o.conn && o.lingerUntil && o.lingerUntil <= t) { logout(o); continue; }
-      if (!o.saving && t - o.lastSaveAt >= saveEveryMs && (o.dirty || sig(o) !== o.lastSig)) saveNow(o);
+      if (started < SAVES_PER_TICK && !o.saving && t - o.lastSaveAt >= saveEveryMs && (o.dirty || sig(o) !== o.lastSig)) { saveNow(o); started++; }
     }
     if (ticks % 20 === 0) closeEmptyRooms(t);
     if (t - lastJFlush >= journalMs) { lastJFlush = t; flushJournal(); }

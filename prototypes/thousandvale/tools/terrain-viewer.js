@@ -1,10 +1,10 @@
 // Thousandvale terrain viewer (stream B): draws a baked zone and reads it back through
 // js/rules/terrain-read.js on hover, so what you see is what the server and client measure.
-import { parseTerrain, MAX_WALK_SLOPE } from '../js/rules/terrain-read.js';
+import { parseTerrain, parseScatter, parseNav, MAX_WALK_SLOPE, NAV } from '../js/rules/terrain-read.js';
 
 const $ = id => document.getElementById(id);
 const canvas = $('map'), ctx = canvas.getContext('2d');
-let terrain = null, placements = [], view = { x0: 0, z0: 0, span: 2048 };
+let terrain = null, scatter = null, nav = null, placements = [], view = { x0: 0, z0: 0, span: 2048 };
 
 const hex = h => { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
 
@@ -16,6 +16,9 @@ async function load(zone) {
     terrain = parseTerrain(await res.arrayBuffer());
     placements = [];
     try { const pr = await fetch(`../data/zones/${zone}/placements.json`); if (pr.ok) placements = (await pr.json()).placements; } catch { /* M0 zones have none */ }
+    scatter = nav = null;
+    try { const r = await fetch(`../data/zones/${zone}/scatter.bin`); if (r.ok) scatter = parseScatter(await r.arrayBuffer()); } catch { /* none */ }
+    try { const r = await fetch(`../data/zones/${zone}/nav.bin`); if (r.ok) nav = parseNav(await r.arrayBuffer()); } catch { /* none */ }
     canvas.width = canvas.height = terrain.size;
     setView();
     draw();
@@ -59,6 +62,11 @@ function draw() {
     else if (layer === 'slope') {
       const s = t.slopeAt(x + 0.5, z + 0.5);
       if (s > MAX_WALK_SLOPE) { r = 230; g = 60; b = 80; } else { const v = s / MAX_WALK_SLOPE * 255; r = v; g = 255 - v * 0.5; b = 80; }
+    } else if (layer === 'nav' && nav) {
+      const v = nav.bits[k];
+      if (v & NAV.BUILDING) { r = 150; g = 80; b = 50; } else if (v & NAV.SOLID) { r = 20; g = 60; b = 20; } else if (v & NAV.DEEP) { r = 20; g = 40; b = 140; }
+      else if (v & NAV.STEEP) { r = 200; g = 60; b = 80; } else if (v & NAV.ROAD) { r = 210; g = 190; b = 140; } else if (v & NAV.SHALLOW) { r = 80; g = 140; b = 200; }
+      else if (v & NAV.TOWN) { r = 120; g = 110; b = 80; } else { r = g = b = 70 * shade; g += 30; }
     } else if (layer === 'water') {
       const w = t.waterOfSample(i, j);
       const d = Number.isNaN(w) ? 0 : Math.max(0, w - h);
@@ -70,6 +78,7 @@ function draw() {
     px[o * 4] = r; px[o * 4 + 1] = g; px[o * 4 + 2] = b; px[o * 4 + 3] = 255;
   }
   ctx.putImageData(img, 0, 0);
+  if ($('scatter').checked && scatter) drawScatter();
   if ($('plan').checked) drawPlan();
   if ($('sites').checked) {
     ctx.font = '22px system-ui'; ctx.textAlign = 'center';
@@ -78,8 +87,29 @@ function draw() {
   }
 }
 
+const SC_COL = ['#1f5a24', '#183f2a', '#6d7a2a', '#5a4a3a', '#3f7a3a', '#8a8a80', '#77776c', '#66665a', '#9aa86a'];
+function drawScatter() {
+  const k = canvas.width / view.span;
+  for (let i = 0; i < scatter.count; i++) {
+    const [a, b] = toPx(scatter.x[i], scatter.z[i]);
+    if (a < -4 || b < -4 || a > canvas.width + 4 || b > canvas.height + 4) continue;
+    ctx.fillStyle = SC_COL[scatter.kind[i]] || '#f0f';
+    const r = Math.max(0.8, scatter.kinds[scatter.kind[i]].r * scatter.scale[i] * k * (scatter.kind[i] < 4 ? 3 : 1.4));
+    ctx.beginPath(); ctx.arc(a, b, r, 0, Math.PI * 2); ctx.fill();
+  }
+}
+
 function drawPlan() {
   const k = canvas.width / view.span;   // pixels per metre
+  for (const p of placements) {
+    if (p.kind === 'road') {
+      ctx.strokeStyle = p.data.spur ? '#c9b48a' : '#a8916a'; ctx.lineWidth = Math.max(1.5, p.data.width * k); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      ctx.beginPath(); p.data.pts.forEach(([x, z], n) => { const [a, b] = toPx(x, z); n ? ctx.lineTo(a, b) : ctx.moveTo(a, b); }); ctx.stroke();
+    } else if (p.kind === 'bridge') {
+      const [a, b] = toPx(p.x, p.z), L = p.data.span * k / 2 + 3;
+      ctx.strokeStyle = '#6b4a2a'; ctx.lineWidth = Math.max(3, 6 * k); ctx.beginPath(); ctx.moveTo(a - Math.sin(p.yaw) * L, b - Math.cos(p.yaw) * L); ctx.lineTo(a + Math.sin(p.yaw) * L, b + Math.cos(p.yaw) * L); ctx.stroke();
+    }
+  }
   for (const p of placements) {
     if (p.kind === 'street') {
       ctx.strokeStyle = p.data.cls === 'main' ? '#d9c79a' : '#b9a57a'; ctx.lineWidth = Math.max(1, p.data.width * k); ctx.lineCap = 'round';
@@ -131,6 +161,7 @@ canvas.addEventListener('mousemove', e => {
 $('layer').addEventListener('change', () => terrain && draw());
 $('sites').addEventListener('change', () => terrain && draw());
 $('plan').addEventListener('change', () => terrain && draw());
+$('scatter').addEventListener('change', () => terrain && draw());
 $('zoom').addEventListener('change', () => { if (terrain) { setView(); draw(); } });
 $('zone').addEventListener('change', () => load($('zone').value));
 load($('zone').value);

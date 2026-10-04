@@ -68,7 +68,7 @@
       "steps": [
         {
           "kind": "killOne",
-          "encounter": "world_province",
+          "encounter": "world_grimtallow",
           "credit": "event",
           "text": "The province's world boss defeated (event credit counts)"
         }

@@ -50,3 +50,22 @@ export function defaultLook(charId, cls) {
   let h = 2166136261; for (const c of String(charId)) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); }
   return { race: PLAYABLE_RACES[(h >>> 0) % 4], seed: (h >>> 0) || 1, cls };
 }
+
+/**
+ * Monster looks by type id, from Farhold's bestiary (prototypes/farhold/data/enemies.json: enemies, bosses,
+ * pets): `{ avatar }` = a Chibi 2 humanoid (brigands, cultists, knights), `{ creature }` = a beast spec.
+ * Thousandvale-only monsters can add `data/monster-looks.json` ({ type: look }) later; it wins when present.
+ */
+let monsterLooks = null;
+export function loadMonsterLooks() {
+  if (!monsterLooks) monsterLooks = (async () => {
+    const out = {};
+    try {
+      const d = await (await fetch(new URL('../../../farhold/data/enemies.json', import.meta.url))).json();
+      for (const k of ['enemies', 'bosses', 'pets']) for (const e of d[k] || []) if (e.look) out[e.id] = e.look;
+    } catch {}
+    try { const r = await fetch(new URL('../../data/monster-looks.json', import.meta.url)); if (r.ok) Object.assign(out, await r.json()); } catch {}
+    return out;
+  })();
+  return monsterLooks;
+}

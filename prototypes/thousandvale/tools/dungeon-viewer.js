@@ -45,7 +45,7 @@ function draw() {
   plan.floors.forEach(f => wrap.appendChild(drawFloor(plan, f)));
   $('status').textContent = `${plan.name} · ${ms.toFixed(1)} ms`;
   const s = plan.floors.map(f => `<li>Floor ${f.index + 1} (lv ${f.level}): ${f.rooms.length} rooms, ${f.packs.reduce((a, p) => a + p.count, 0)} monsters, ${f.props.length} props</li>`).join('');
-  $('summary').innerHTML = `<b>${plan.name}</b><br>${plan.familyName}${plan.familyFallback ? ` (asked for ${plan.familyFallback})` : ''} · look <b>${plan.look}</b><ul>${s}</ul>`;
+  $('summary').innerHTML = `<b>${plan.name}</b><br>${plan.encounters.setName ? 'Encounter set: <b>' + plan.encounters.setName + '</b><br>' : ''}${plan.familyName}${plan.familyFallback ? ` (asked for ${plan.familyFallback})` : ''} · look <b>${plan.look}</b><ul>${s}</ul>`;
   const encLine = id => { const e = encounters[id]; return e ? `<li><b>${e.name}</b> — ${e.phases ? e.phases.length + ' phases, ' : ''}${Object.keys(e.abilities || {}).length} abilities${e.enrage ? ', enrage at ' + e.enrage.seconds + ' s' : ''}</li>` : `<li>${id} <span class="error">(not loaded)</span></li>`; };
   $('enc').innerHTML = `<b>Encounters</b><ul>${plan.encounters.miniboss.map(encLine).join('')}${encLine(plan.encounters.boss)}</ul>`;
 }
@@ -69,6 +69,8 @@ function drawFloor(plan, f) {
   }
   const toPx = p => [(p.x - f.origin.x) / plan.cell * PX, (p.z - f.origin.z) / plan.cell * PX];
   const dot = (p, col, r = 4, sq = false) => { const [x, y] = toPx(p); g.fillStyle = col; g.beginPath(); if (sq) g.rect(x - r, y - r, 2 * r, 2 * r); else g.arc(x, y, r, 0, Math.PI * 2); g.fill(); g.strokeStyle = '#000'; g.lineWidth = 1; g.stroke(); };
+  // an underground river (cave_river): drawn as a line over the floor
+  if (f.river) { g.strokeStyle = 'rgba(80,160,220,0.7)'; g.lineWidth = 3; g.beginPath(); f.river.forEach((p, k) => { const [x, y] = toPx(p); k ? g.lineTo(x, y) : g.moveTo(x, y); }); g.stroke(); g.lineWidth = 1; }
   // gate
   g.fillStyle = '#e33'; g.fillRect(f.gate.i * PX, f.gate.j * PX, f.gate.w * PX, f.gate.h * PX);
   for (const p of f.props) {

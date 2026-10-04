@@ -23,7 +23,7 @@ import { loadClientTerrain } from './terrain.js';
 import { findTown } from '../sim/realm.js';
 import { campPlacements, CAMP_RADIUS } from './camp.js';
 import { Predictor, MOVE } from './predict.js';
-import { PLAYABLE_RACES, RACE_NAMES, loadLookData, defaultLook } from './looks.js';
+import { PLAYABLE_RACES, RACE_NAMES, loadLookData, defaultLook, loadMonsterLooks } from './looks.js';
 import { connect, localTokenStore } from '../net/client.js';
 import { createMirror } from '../net/mirror.js';
 import { ANIMS, STATE, KIND_NAMES, TICK_MS, cleanName } from '../net/protocol.js';
@@ -368,7 +368,7 @@ function ensureActor(id) {
       id, kind, name: displayName(info.name, kind), level: info.level || 1,
       hp: Math.round((e.hp ?? 1) * hpMax), hpMax, hostile: info.team === 2 || (kind === 'monster' && info.team !== 1),
       look: kind === 'player' ? lookFor(info.look, info.char ?? id, info.cls) : null,
-      creature: kind !== 'player' ? { type: info.type || 'wolf', seed: (id * 7919) >>> 0 } : null, family: info.type || null,
+      creature: kind !== 'player' ? { type: info.type || 'wolf', seed: (id * 7919) >>> 0 } : null, family: info.type ? displayName(info.type, 'monster') : null,
       x: e.x, y, z: e.z, yaw: e.yaw || 0, rank: info.rank || null,
     });
     if (e.state & STATE.dead) actors.setDead(id, true);
@@ -462,7 +462,7 @@ function onEvent(ev) {
     case 'die': {
       actors.setDead(ev.d, true);
       const a = actors.get(ev.d), by = actors.get(ev.by);
-      if (ev.d === me) { setSelfDead(true); hud.chat(`You were slain by ${by?.name || 'something'}.`, 'bad'); }
+      if (ev.d === me) { setSelfDead(true); hud.chat(by ? `You were slain by ${by.name}.` : 'You have fallen.', 'bad'); }
       else if (a && ev.by === me) hud.chat(`You have slain ${a.name}.`, 'combat');
       if (S.target === ev.d) retargetAfterKill();
       break;
@@ -672,7 +672,7 @@ function frame(now) {
 initTitle();
 requestAnimationFrame(frame);
 // The title screen stands on the test zone (where M0 puts everyone); joined.room.terrain decides after that.
-Promise.all([useTerrain('test'), loadLookData()]).then(() => {
+Promise.all([useTerrain('test'), loadLookData(), loadMonsterLooks()]).then(() => {
   rebuildPreview();
   $('loading').classList.add('done');
   const auto = q.get('autoplay') === '1' || q.get('auto') === '1';
@@ -709,6 +709,33 @@ const tv = {
   },
   attack(targetId) { setTarget(targetId); controls.attack(targetId); },
   target: setTarget, say: text => S.net?.say(text), rise,
+  /**
+   * Client-only showcase: plays a fake boss fight's events through the real handlers (every telegraph
+   * shape, phases with a new bar, a cast bar, call-outs, enrage) around you. Nothing is sent to the server.
+   * Console: tv.demoEncounter()
+   */
+  demoEncounter() {
+    const p = S.predictor.pos, me = S.selfId;
+    const mons = [...actors.actors.values()].filter(a => a.kind === 'monster' && !a.dead);
+    const b = mons.sort((x, y) => Math.hypot(x.pos.x - p.x, x.pos.z - p.z) - Math.hypot(y.pos.x - p.x, y.pos.z - p.z))[0];
+    const id = b ? b.id : me;
+    const tick = () => Math.round(S.net.clock.serverNow() / TICK_MS);
+    const fire = evs => { S.evTick = tick(); for (const ev of evs) onEvent(ev); };
+    let n = 9000;
+    const at = (dx, dz) => ({ x: p.x + dx, z: p.z + dz });
+    fire([{ type: 'boss', id, name: b ? b.name : 'The Screelhag', title: 'Mother of the Moor', bars: 2, phases: [{ n: 0, name: 'The Hunt', at: 1 }, { n: 1, name: 'Shrieking Gale', at: 0.6 }, { n: 2, name: 'Last Breath', at: 0.25 }], enrageMs: 185000 }]);
+    setTimeout(() => fire([{ type: 'say', id, text: `${b ? b.name : 'The Screelhag'} draws breath!`, style: 'warn' }, { type: 'castbar', id, ab: 'shriek', name: 'Rending Shriek', ms: 2600, int: 1 },
+      { type: 'tele', id: ++n, s: id, ab: 'shriek', k: 'harm', ms: 2600, shape: 'cone', ...at(0, 0), yaw: controls.cam.yaw, r: 14, arc: 1.1 }]), 600);
+    setTimeout(() => fire([{ type: 'tele', id: ++n, s: id, ab: 'stomp', k: 'harm', ms: 1800, shape: 'circle', ...at(-7, 4), r: 3.5, el: 'fire' },
+      { type: 'tele', id: ++n, s: id, ab: 'ring', k: 'harm', ms: 2400, shape: 'ring', ...at(0, 0), r: 9, r2: 5, el: 'frost' },
+      { type: 'tele', id: ++n, s: id, ab: 'beam', k: 'harm', ms: 2000, shape: 'line', ...at(6, -6), yaw: 0.8, len: 16, w: 2.5, el: 'shadow' },
+      { type: 'tele', id: ++n, s: id, ab: 'cross', k: 'harm', ms: 2800, shape: 'cross', ...at(10, 8), yaw: 0.3, r: 7, w: 2, el: 'lightning' },
+      { type: 'tele', id: ++n, s: id, ab: 'pool', k: 'harm', ms: 3000, shape: 'donut', ...at(-12, -9), r: 5, r2: 2, el: 'poison' }]), 1400);
+    setTimeout(() => fire([9001, 9002, 9003, 9004, 9005, 9006].map(i => ({ type: 'teleR', id: i, hits: i === 9001 ? [me] : [] }))), 4600);
+    setTimeout(() => fire([{ type: 'phase', id, n: 1, name: 'Shrieking Gale', bar: 1, hpMax: b ? b.hpMax : 1000 }]), 5400);
+    setTimeout(() => fire([{ type: 'enrage', id, hard: 1 }]), 7600);
+    return { boss: id };
+  },
 };
 window.tv = tv;
-window.thousandvale = { S, W, actors, camera, controls, hud, fx, tv };
+window.thousandvale = { S, W, D, actors, camera, controls, hud, fx, tv, tele, boss, objects, social, bag };

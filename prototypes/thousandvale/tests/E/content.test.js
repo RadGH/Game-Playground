@@ -14,9 +14,10 @@ const J = p => JSON.parse(readFileSync(new URL(p, root), 'utf8'));
 const ARCH = J('data/provinces/archetypes.json');
 const PROV = J('data/provinces/torbor_downs.json');
 const VIG_M1 = J('data/vignettes/m1.json').vignettes;
-const VIG = [...VIG_M1, ...J('data/vignettes/m2.json').vignettes];
+const VIG = [...VIG_M1, ...J('data/vignettes/m2.json').vignettes, ...J('data/vignettes/m2b.json').vignettes];
 const PLACE = J('data/vignettes/placements/test.json');
 const QUESTS = J('data/quests/test.json');
+const ALL_QUEST_IDS = new Set(readdirSync(new URL('data/quests/', root)).filter(f => f.endsWith('.json') && !['jobs.json', 'treasure.json', 'province.json'].includes(f)).flatMap(f => (J('data/quests/' + f).quests || []).map(q => q.id)));
 const HOOKS = J('data/hooks.json').hooks;
 const NAMES = J('data/names/torbor.json');
 const ENC_FILES = readdirSync(new URL('data/encounters/', root)).filter(f => f.endsWith('.json'));
@@ -88,7 +89,7 @@ test('province sheet: zone test resolves (archetype, camps, encounters, hook, qu
   for (const c of z.camps) { assert.ok(BESTIARY.has(c.type), c.type); if (c.with) assert.ok(BESTIARY.has(c.with)); }
   for (const id of [z.eventBoss, z.elite, ...z.rares]) assert.ok(SCRIPTS[id], id);
   assert.ok(HOOKS.some(h => h.id === z.hook && h.zone === 'test'));
-  for (const s of PROV.questline.steps) if (s.quest) assert.ok(QUESTS.quests.some(q => q.id === s.quest), s.quest);
+  for (const s of J(PROV.questline.file).steps) if (s.quest) assert.ok(ALL_QUEST_IDS.has(s.quest), s.quest);
   for (const n of [z.town, ...z.hamlets]) assert.ok(terrain.meta.sites.some(s => s.name === n), `${n} is a real site in the bake`);
 });
 
@@ -134,7 +135,7 @@ test('quests: unique ids, every reference resolves, chains point at real quests,
   const vig = id => VIG.some(v => v.id === id);
   for (const q of Q) {
     if (!QUESTS.npcs[q.giver]) bad.push(`${q.id}: giver ${q.giver}`);
-    if (q.next && !ids.has(q.next)) bad.push(`${q.id}: next ${q.next}`);
+    if (q.next && !ids.has(q.next) && !ALL_QUEST_IDS.has(q.next)) bad.push(`${q.id}: next ${q.next}`);
     if (!q.offer || !q.done || !q.steps.length) bad.push(`${q.id}: text/steps`);
     if (!(q.reward.xp > 0 && q.reward.xp <= 2)) bad.push(`${q.id}: xp should be a share of a level (0..2)`);
     for (const s of q.steps) {

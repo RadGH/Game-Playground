@@ -11,7 +11,12 @@ export const PROVINCE_FILES = ['data/provinces/torbor_downs.json'];
 export async function loadZoneContent(readJson, zone = 'test') {
   const out = { sheet: null, encounterInfo: {} };
   for (const f of PROVINCE_FILES) {
-    try { const p = await readJson(f); if (p && p.zones && p.zones[zone]) { out.sheet = { ...p.zones[zone], province: p.name || null }; break; } } catch { /* no sheet */ }
+    try {
+      const p = await readJson(f);
+      // the zone's own sheet; M1 has one sheet, so a re-baked starter zone falls back to the first one
+      const z = p && p.zones && (p.zones[zone] || Object.values(p.zones)[0]);
+      if (z) { out.sheet = { ...z, province: p.name || null }; break; }
+    } catch { /* no sheet */ }
   }
   try {
     const idx = await readJson('data/encounters/index.json');

@@ -13,7 +13,8 @@ import * as THREE from 'three';
 import { createChibi2Character } from '../../../../avatar-3d/js/chibi2.js';
 import { createCreature, randomCreature } from '../../../../avatar-3d/js/creatures.js';
 import { compactCreature } from '../../../../avatar-3d/js/mesh-merge.js';
-import { avatarFor, bodyTypeFor } from './looks.js';
+import { avatarFor, bodyTypeFor, loadMonsterLooks } from './looks.js';
+import { normalizeAvatar } from '../../../../avatar-2d/js/render.js';
 
 /** A creature spec from what the server sent: `{ type, size?, seed, colors? }` — colour varied by seed within its family. */
 function creatureFor(spec) {
@@ -63,7 +64,18 @@ export function createActors(scene, { plateLayer, camera }) {
     try {
       let body;
       if (a.kind === 'monster') {
-        body = await createCreature(creatureFor({ ...(a.creature || { type: 'wolf' }), size: a.rank === 'boss' ? 1.9 : a.rank === 'elite' || a.rank === 'champion' || a.rank === 'rare' ? 1.3 : 1 }), { detail: a.rank === 'boss' ? 1 : 0.8 });
+        const looks = await loadMonsterLooks();
+        const look = looks[a.creature?.type] || null;
+        const big = a.rank === 'boss' ? 1.45 : a.rank === 'elite' || a.rank === 'champion' || a.rank === 'rare' ? 1.18 : 1;
+        if (look?.avatar) {
+          // A humanoid monster (brigand, cultist, knight): a Chibi 2 body, scaled up when it is an elite or boss.
+          body = await createChibi2Character(normalizeAvatar(look.avatar), { anims: CHIBI_ANIMS });
+          a.humanoid = true;
+          body.group.scale.setScalar(big);
+        } else {
+          const spec = look?.creature ? { ...look.creature, seed: a.creature?.seed, size: (look.creature.size || 1) * big } : { ...(a.creature || { type: 'wolf' }), size: big };
+          body = await createCreature(look?.creature ? spec : creatureFor(spec), { detail: a.rank === 'boss' ? 1 : 0.8 });
+        }
         // One draw call per moving part instead of one per eye and toe (Farhold R27 M8).
         try { compactCreature(body); } catch (e) { console.warn('[actors] compact failed', e); }
       } else {
@@ -82,7 +94,7 @@ export function createActors(scene, { plateLayer, camera }) {
 
   function setAnim(a, name) {
     if (!a.body) { a.anim = name; return; }
-    if (a.kind === 'monster') { if (a.anim !== name) a.body.setAnim(name); }
+    if (a.kind === 'monster' && !a.humanoid) { if (a.anim !== name) a.body.setAnim(name); }
     else a.body.setAnim(name, 0.14, name === 'attack' || name === 'hit');
     a.anim = name;
   }
@@ -177,7 +189,7 @@ export function createActors(scene, { plateLayer, camera }) {
       }
       if (want !== a.anim) setAnim(a, want);
       if (a.body?.setRate) {
-        if (a.kind === 'player') {
+        if (a.kind === 'player' || a.humanoid) {
           const run = a.anim === 'run';
           a.body.setRate(a.anim === 'run' || a.anim === 'walk' ? Math.max(0.5, a.speed * (run ? 0.65 : 1.05) / (run ? 3.4 : 2.0)) : 1);
         } else a.body.setRate(a.anim === 'run' ? Math.max(0.6, a.speed / 5.2) : a.anim === 'walk' ? Math.max(0.5, a.speed / 1.5) : 1);

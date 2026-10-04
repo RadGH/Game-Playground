@@ -44,18 +44,20 @@ const FRAG = /* glsl */`
   varying float vF; varying float vE; varying float vS;
   #include <fog_pars_fragment>
   void main() {
-    float edge = 1.0 - smoothstep(0.0, 0.22, vE);                 // crisp outline
+    float edge = 1.0 - smoothstep(0.06, 0.3, vE);                 // crisp outline
     float glow = (1.0 - smoothstep(0.0, 0.9, vE)) * 0.35;         // soft halo just inside it
     float filled = 1.0 - smoothstep(uProg - 0.015, uProg, vF);    // the swept area
     float lead = (1.0 - smoothstep(0.0, 0.035, abs(vF - uProg))) * step(0.02, uProg) * (1.0 - step(0.999, uProg));
     float stripes = smoothstep(0.45, 0.55, fract(vS * 0.9 - uTime * 0.8)) * 0.07;
     float last = smoothstep(0.82, 1.0, uProg);
     float pulse = last * (0.5 + 0.5 * sin(uTime * 28.0));
-    float a = 0.16 + stripes;                                      // the tinted floor
-    a += filled * (0.22 + 0.18 * last);                            // the fill thickens as it nears
-    a += glow + edge * (0.75 + 0.25 * pulse + 0.25 * uMine);
-    a += lead * 0.6;
-    vec3 col = uColor * (0.75 + 0.6 * filled) + vec3(1.0, 0.95, 0.85) * (lead * 0.7 + edge * 0.25 + pulse * filled * 0.25);
+    float a = 0.10 + stripes;                                      // the tinted floor
+    a += filled * (0.20 + 0.16 * last);                            // the fill thickens as it nears
+    a += glow * 0.8 + edge * (0.85 + 0.15 * pulse + 0.15 * uMine);
+    a += lead * 0.7;
+    vec3 base = uColor * (0.55 + 0.45 * filled);
+    vec3 rim = mix(uColor, vec3(1.0, 0.96, 0.9), 0.45 + 0.25 * uMine);
+    vec3 col = mix(base, rim, clamp(edge + lead, 0.0, 1.0)) + vec3(1.0, 0.9, 0.75) * pulse * filled * 0.18;
     col = mix(col, vec3(1.0), uFlash);
     a = clamp(a + uFlash * 0.6, 0.0, 1.0) * uFade;
     gl_FragColor = vec4(col, a);

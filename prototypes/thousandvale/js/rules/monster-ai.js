@@ -259,6 +259,30 @@ function nearestFriend(field, e, friends) {
   return { friend: best, dist: bd };
 }
 
+/**
+ * actors.js `aimOf` rules 1 and 2, for companions: whatever bit it in the last few seconds and is
+ * still within THREAT_LEASH holds it; failing that, a companion standing in its way — inside its
+ * reach + THREAT_BLOCK and closer than the player — is what it swings at.
+ */
+export const THREAT_LEASH = 16, THREAT_BLOCK = 1.6;
+function companionAim(e, playerDist, allies, field) {
+  if (!allies.length) return null;
+  const usable = p => p && p.dying == null && !p.removed && (p.hp ?? 1) > 0;
+  if (e.threatFor > 0 && e.threatOn != null) {
+    const held = allies.find(p => p.id === e.threatOn);
+    if (usable(held) && Math.hypot(held.x - e.x, held.z - e.z) <= THREAT_LEASH) return held;
+    e.threatOn = null; e.threatFor = 0;
+  }
+  let best = null, bestD = Math.min(playerDist, (e.reach || 2.4) + THREAT_BLOCK);
+  for (const p of allies) {
+    if (!usable(p)) continue;
+    const d = Math.hypot(p.x - e.x, p.z - e.z);
+    if (d < bestD) { bestD = d; best = p; }
+  }
+  void field;
+  return best;
+}
+
 /** Give up: walk home, heal, forget everybody (the leash). */
 export function resetMonster(field, e) {
   clearThreat(e);
@@ -280,7 +304,10 @@ export function resetMonster(field, e) {
  *   onStrike(e, victim)         override the melee swing (default: monsterStrike)
  */
 export function tickMonsters(field, dt, hooks = {}) {
-  const friends = field.friends().filter(field.usable);
+  // who a monster NOTICES is a player (actors.js measures everything from the player); companions
+  // draw it by biting it or by standing in its way (aimOf rules 1 and 2, below)
+  const friends = field.players.filter(field.usable);
+  const allies = field.allies;
   const list = [...field.monsters];
   const awakeBands = new Set();
   for (const e of list) {
@@ -464,7 +491,9 @@ export function tickMonsters(field, dt, hooks = {}) {
       clearThreat(e);
     }
 
-    // who it is going for: the threat table (Farhold: aimOf)
+    // who it is going for: the threat table (Farhold: aimOf). A companion's bite clock runs down every tick.
+    e.threatFor = Math.max(0, (e.threatFor || 0) - dt);
+    if (e.state !== 'chase' && !e.statuses?.turned) { e.threatOn = null; e.threatFor = 0; }
     let target = null, foe = null;
     if (e.statuses?.turned) {
       e.state = 'chase';
@@ -475,7 +504,7 @@ export function tickMonsters(field, dt, hooks = {}) {
         if (d < bd) { bd = d; foe = o; }
       }
     } else if (e.state === 'chase') {
-      target = pickTarget(e, lookup, field.usable, dt);
+      target = (e.tauntFor > 0 ? null : companionAim(e, dist, allies, field)) || pickTarget(e, lookup, field.usable, dt);
       // woken (pack, band, hit by a DoT) with nothing on the table yet: the nearest friend
       if (!target && near) { noticeThreat(e, near); target = near; }
     } else if (e.feared && !e.statuses?.fear && e.state === 'flee') {

@@ -155,9 +155,17 @@ export async function startServer(o) {
     if (!loop && n >= o.maxPerIp) { socket.write('HTTP/1.1 429 Too Many Requests\r\n\r\n'); socket.destroy(); return; }
     wss.handleUpgrade(req, socket, head, ws => {
       perIp.set(ip, (perIp.get(ip) || 0) + 1);
+      // cork the socket for the rest of this tick: a client's info + events + snapshot leave in ONE write
+      // (writev was the top cost in a 50-bot profile), uncorked on the next turn of the event loop
+      let corked = false;
+      const sock = ws._socket;
       const conn = {
         ip,
-        send(d) { if (ws.readyState === 1) ws.send(d, { binary: typeof d !== 'string' }); },
+        send(d) {
+          if (ws.readyState !== 1) return;
+          if (!corked && sock && sock.cork) { corked = true; sock.cork(); setImmediate(() => { corked = false; try { sock.uncork(); } catch { /* closed */ } }); }
+          ws.send(d, { binary: typeof d !== 'string' });
+        },
         close(code, reason) { try { ws.close(code >= 4000 ? code : 4000, String(reason || '').slice(0, 100)); } catch { /* ignore */ } },
       };
       const h = world.accept(path, conn);

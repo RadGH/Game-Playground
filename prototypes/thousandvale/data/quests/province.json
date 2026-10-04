@@ -1,5 +1,5 @@
 {
-  "_doc": "Stream E (M2). The province story chain 'The Ford and the Fields' for Torbor Downs: 10 steps through 10 zones in rising band order, ending at the province world boss in Blackthorn Scar. Each step names its zone and quest id; the quest bodies live in data/quests/<zone>.json (and each story quest's `next` points to the next step's quest, so the chain also works quest-to-quest). Step 1 is M1's toll_at_fitockpi in zone `test`; its zone file continues to what_lies_below, whose `next` should be set to the_restless_cloister by the owner of test.json. The final step's encounter id `world_province` is a PLACEHOLDER: the parent stream wires it to the real world-boss script id.",
+  "_doc": "Stream E (M2). The province story chain 'The Ford and the Fields' for Torbor Downs: 10 steps through 10 zones in rising band order, ending at the province world boss in Blackthorn Scar. Each step names its zone and quest id; the quest bodies live in data/quests/<zone>.json (and each story quest's `next` points to the next step's quest, so the chain also works quest-to-quest). Step 1 is M1's toll_at_fitockpi in zone `test`; its zone file continues to what_lies_below, whose `next` is the_restless_cloister. The final step is the province world boss, world_grimtallow (Grimtallow, the Siege-Husk).",
   "province": "torbor_downs",
   "name": "The Ford and the Fields",
   "steps": [
@@ -63,7 +63,7 @@
       "quest": "into_the_scar",
       "then": "the_heart_of_the_scar",
       "kind": "killOne",
-      "encounter": "world_province",
+      "encounter": "world_grimtallow",
       "beat": "Clear the thorn roads, then stand with the whole province against what wakes at the heart of the Scar."
     }
   ],

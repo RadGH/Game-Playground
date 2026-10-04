@@ -263,3 +263,69 @@ export function groundAdapter(t) {
     walkable: t.walkable,
   };
 }
+
+// ---------------------------------------------------------------------------------------------------
+// Zone side layers (M1 bake, tools/bake-zone.mjs). Same rules: load the bytes yourself, pure decode,
+// refuse a wrong magic/version. Both are in the zone's own metres, the same frame as terrain.bin.
+
+/** Scatter kinds (index = wire id in scatter.bin). APPEND ONLY. `solid` = blocks movement (in nav.bin). */
+export const SCATTER_KINDS = Object.freeze([
+  { key: 'tree_broadleaf', solid: true, r: 0.5 }, { key: 'tree_conifer', solid: true, r: 0.45 },
+  { key: 'tree_acacia', solid: true, r: 0.4 }, { key: 'tree_dead', solid: true, r: 0.35 },
+  { key: 'bush', solid: false, r: 0.9 }, { key: 'rock_small', solid: false, r: 0.5 },
+  { key: 'rock_large', solid: true, r: 1.4 }, { key: 'boulder', solid: true, r: 2.4 },
+  { key: 'reed', solid: false, r: 0.6 },
+]);
+export const SCATTER_VERSION = 1;
+export const NAV_VERSION = 1;
+/** nav.bin bits per 2 m sample (same grid as terrain.bin). */
+export const NAV = Object.freeze({ WALK: 1, ROAD: 2, SHALLOW: 4, DEEP: 8, STEEP: 16, SOLID: 32, TOWN: 64, BUILDING: 128 });
+
+function readHeader(bytes, magic, version, what) {
+  const m = String.fromCharCode(bytes[0], bytes[1], bytes[2], bytes[3]);
+  if (m !== magic) throw new Error(`${what}: bad magic "${m}"`);
+  const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  const v = dv.getUint32(4, true);
+  if (v !== version) throw new Error(`${what}: version ${v}, reader reads ${version}`);
+  const jl = dv.getUint32(8, true);
+  const meta = JSON.parse(decodeUtf8(bytes.subarray(12, 12 + jl)));
+  return { meta, dv, off: (12 + jl + 3) & ~3 };
+}
+
+/**
+ * scatter.bin: 'TVSC' | u32 version | u32 jsonBytes | JSON {extent, count, terrainHash} | pad4 |
+ *   count × 8-byte records: u16 x, u16 z (metres = v / 65535 * extent), u8 kind, u8 scale (0.5 + v/255*1.5),
+ *   u8 yaw (v/256 * 2π), u8 variant
+ * Returns { meta, count, x: Float32Array, z, kind: Uint8Array, scale: Float32Array, yaw: Float32Array, variant: Uint8Array }.
+ */
+export function parseScatter(buffer) {
+  const bytes = toBytes(buffer);
+  const { meta, dv, off } = readHeader(bytes, 'TVSC', SCATTER_VERSION, 'scatter');
+  const n = meta.count, E = meta.extent;
+  if (bytes.length < off + n * 8) throw new Error('scatter: file too short');
+  const x = new Float32Array(n), z = new Float32Array(n), kind = new Uint8Array(n), scale = new Float32Array(n), yaw = new Float32Array(n), variant = new Uint8Array(n);
+  for (let i = 0; i < n; i++) {
+    const o = off + i * 8;
+    x[i] = dv.getUint16(o, true) / 65535 * E; z[i] = dv.getUint16(o + 2, true) / 65535 * E;
+    kind[i] = bytes[o + 4]; scale[i] = 0.5 + bytes[o + 5] / 255 * 1.5; yaw[i] = bytes[o + 6] / 256 * Math.PI * 2; variant[i] = bytes[o + 7];
+  }
+  return { meta, count: n, x, z, kind, scale, yaw, variant, kinds: SCATTER_KINDS };
+}
+
+/**
+ * nav.bin: 'TVNV' | u32 version | u32 jsonBytes | JSON {size, step, terrainHash} | pad4 | u8[size*size] bits (NAV).
+ * Returns { meta, size, step, bits, at(x,z) -> bits of the nearest sample, passable(x,z) -> WALK and not SOLID/BUILDING/DEEP }.
+ */
+export function parseNav(buffer) {
+  const bytes = toBytes(buffer);
+  const { meta, off } = readHeader(bytes, 'TVNV', NAV_VERSION, 'nav');
+  const size = meta.size, step = meta.step;
+  if (bytes.length < off + size * size) throw new Error('nav: file too short');
+  const bits = bytes.slice(off, off + size * size);
+  const at = (x, z) => {
+    const i = Math.min(size - 1, Math.max(0, Math.round(x / step))), j = Math.min(size - 1, Math.max(0, Math.round(z / step)));
+    return bits[j * size + i];
+  };
+  const passable = (x, z) => { const b = at(x, z); return (b & NAV.WALK) !== 0 && (b & (NAV.SOLID | NAV.BUILDING | NAV.DEEP)) === 0; };
+  return { meta, size, step, bits, at, passable };
+}

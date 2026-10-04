@@ -17,8 +17,13 @@ export const MACRO_MAGIC = 'TVWM';
 export const MACRO_VERSION = 1;
 export const WORLD_BAKE_VERSION = 1;
 
+// World choice (2026-10-04, coordinator ruling "fix the land count now"): a scan of 54 combinations
+// (plates/pangea/noise × sea level 0.20/0.28/0.35 × ocean/land frame × 3 seeds) for ~200 zones that are
+// more than half land; pangea seed 1001 at sea level 0.20 gives 202 of 252, cut into exactly 12 regions
+// of 10–29 zones (the provinces), with the most relief variety of the near-200 candidates (hills 25 %,
+// grassland 25 %, savanna 11 %, mountains 10 %, forests 15 %).
 export const WORLD = {
-  seed: 1000, width: 288, height: 224, method: 'plates',   // PLAN §3.1–3.2: 16 samples per zone edge
+  seed: 1001, width: 288, height: 224, method: 'pangea', seaLevel: 0.2, regionCount: 12,   // PLAN §3.1–3.2: 16 samples per zone edge
   zoneCells: 16, macroMetres: 128,                          // a zone = 16 × 128 m = 2,048 m
   landMetres: 1400, seaMetres: 160,
 };

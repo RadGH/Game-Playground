@@ -45,6 +45,8 @@ export { installFoci } from '../../../farhold/js/foci.js';
 export { talentPlan, pickTalent, tiersOpen, treeFor } from '../../../farhold/js/skilltalents.js';
 export { groundAt, wetAt, cliffStep, climbable } from '../../../farhold/js/ground.js';
 export { makeRng, hashStr } from '../../../emberveil/js/rng.js';
+export { scaleFollower, slotsForLevel, perTypeCapFor, admit as admitFollower, followerBonus } from '../../../farhold/js/followers.js';
+export { toggleForm, leaveForm, leaveShapes, tickForms } from '../../../farhold/js/skillmech.js';
 
 /** Where Farhold lives, relative to this file — for the drift guard and the data loader. */
 export const FARHOLD_JS = F;

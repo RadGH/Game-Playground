@@ -13,12 +13,19 @@ export const TOWN_RADIUS = { city: 140, town: 90, village: 65, hamlet: 40 };
 export function findTown(terrain, radius = null) {
   const sites = terrain.reader?.meta?.sites || [];
   const rank = { city: 0, town: 1, village: 2, hamlet: 3 };
-  const s = sites.filter(x => x.type === 'settlement').sort((a, b) => (rank[a.kind] ?? 9) - (rank[b.kind] ?? 9))[0];
+  // the bake marks the zone's hub settlement (`hub: true`, stream B); else the biggest settlement
+  const s = sites.find(x => x.type === 'settlement' && x.hub) || sites.filter(x => x.type === 'settlement').sort((a, b) => (rank[a.kind] ?? 9) - (rank[b.kind] ?? 9))[0];
   const c = s ? { x: s.x, z: s.z } : { ...terrain.spawn };
   const r = radius ?? (s ? (Number.isFinite(s.radius) ? s.radius : TOWN_RADIUS[s.kind] || 60) : 60);   // B's bake may give `radius`
   let centre = c;
   if (terrain.walkable && !terrain.walkable(c.x, c.z)) centre = findWalkable(terrain, c) || c;
   return { x: centre.x, z: centre.z, r, name: s ? s.name : 'Town', kind: s ? s.kind : 'village' };
+}
+
+/** Inside (or within `pad` m of) any settlement circle the bake lists (hub, hamlets, cities)? */
+export function inSettlement(terrain, p, pad = 0) {
+  for (const s of terrain.reader?.meta?.sites || []) if (s.type === 'settlement' && Math.hypot(p.x - s.x, p.z - s.z) < (s.radius || 40) + pad) return true;
+  return false;
 }
 
 /** A walkable point at about `dist` metres from (x, z), searching round from bearing `a0`. */
@@ -56,7 +63,8 @@ export function wildsCamps(terrain, town, door, mix = null) {
   for (let i = 0; i < n; i++) {
     const a = i * (6.283 / n) + 0.3, d = town.r + 50 + (i % 4) * 35 + Math.floor(i / 8) * 60;
     let p = walkableNear(terrain, town.x, town.z, d, a);
-    if (Math.hypot(p.x - door.x, p.z - door.z) < 30) p = walkableNear(terrain, town.x, town.z, d + 40, a + 0.4);
+    for (let k = 0; k < 6 && (Math.hypot(p.x - door.x, p.z - door.z) < 30 || inSettlement(terrain, p, 20)); k++) p = walkableNear(terrain, town.x, town.z, d + 40 * (k + 1), a + 0.4 * (k + 1));
+    if (inSettlement(terrain, p, 20)) continue;
     if (mix && mix.length) {
       const m = mix[i % mix.length];
       const [l0, l1] = Array.isArray(m.level) ? m.level : [m.level || 1, m.level || 1];
@@ -73,31 +81,40 @@ export function wildsCamps(terrain, town, door, mix = null) {
 }
 
 /**
- * The zone's named encounters (stream E's asks, zone `test`): the elite's camp at the ford, two roaming rares,
+ * The zone's named encounters (stream E's asks): the elite's camp at the ford, two roaming rares,
  * the zone event boss on its event site. Positions come from the bake's sites when B publishes them
  * (`{type:'camp'|'event', id}`), else from first guesses near the named settlements. `info` = encounter id ->
  * { name, body } (the script files). Each camp carries `encounter` + `name` onto the monster it spawns.
  */
-export const ZONE_ENCOUNTERS = {
-  test: [
-    { id: 'elite_hobb_gallowsby', rank: 'elite', level: 5, near: { site: 'Fitockpi Ford' }, respawnMs: 20 * 60000,
-      escort: [{ type: 'road_brigand', count: 2 }, { type: 'brigand_archer', count: 2 }] },
-    { id: 'rare_grisel_thornhide', rank: 'rare', level: 4, near: { between: ['Torborhold', 'Wamonhold'] }, respawnMs: [20 * 60000, 60 * 60000] },
-    { id: 'rare_sallowmaw', rank: 'rare', level: 5, near: { site: 'Mawehaven', dz: 110 }, respawnMs: [20 * 60000, 60 * 60000] },
-    { id: 'event_grandmother_skein', rank: 'boss', level: 7, near: { site: 'Mawehaven', dx: -100 }, respawnMs: 30 * 60000 },
-  ],
+export const ENCOUNTER_PLACES = {
+  elite_hobb_gallowsby: { rank: 'elite', level: 5, near: { kind: 'ford' }, respawnMs: 20 * 60000,
+    escort: [{ type: 'road_brigand', count: 2 }, { type: 'brigand_archer', count: 2 }] },
+  rare_grisel_thornhide: { rank: 'rare', level: 4, near: { between: ['Torborhold', 'Wamonhold'] }, respawnMs: [20 * 60000, 60 * 60000] },
+  rare_sallowmaw: { rank: 'rare', level: 5, near: { site: 'Mawehaven', dz: 110 }, respawnMs: [20 * 60000, 60 * 60000] },
+  event_grandmother_skein: { rank: 'boss', level: 7, near: { site: 'Mawehaven', dx: -100 }, respawnMs: 30 * 60000 },
 };
-export function zoneEncounterCamps(terrain, zone, info = {}) {
+/** Which named encounters a zone has: the zone sheet's `elite`, `rares`, `eventBoss` (stream E), else all known. */
+export function zoneEncounterIds(sheet) {
+  if (!sheet) return Object.keys(ENCOUNTER_PLACES);
+  return [sheet.elite, ...(sheet.rares || []), sheet.eventBoss].filter(Boolean);
+}
+export function zoneEncounterCamps(terrain, ids, info = {}) {
   const sites = terrain.reader?.meta?.sites || [];
   const byName = n => sites.find(s => s.name === n);
   const out = [];
-  for (const enc of ZONE_ENCOUNTERS[zone] || []) {
+  for (const id of ids) {
+    const enc = ENCOUNTER_PLACES[id] ? { id, ...ENCOUNTER_PLACES[id] } : null;
+    if (!enc) continue;
     let p = null;
     const placed = sites.find(s => s.id === enc.id && (s.type === 'camp' || s.type === 'event'));
     if (placed) p = { x: placed.x, z: placed.z };
     else if (enc.near.site && byName(enc.near.site)) { const s = byName(enc.near.site); p = { x: s.x + (enc.near.dx || 0), z: s.z + (enc.near.dz || 0) }; }
+    else if (enc.near.kind && sites.find(s => s.kind === enc.near.kind)) { const s = sites.find(x => x.kind === enc.near.kind); p = { x: s.x + 18, z: s.z - 86 }; }
     else if (enc.near.between) { const [a, b] = enc.near.between.map(byName); if (a && b) p = { x: (a.x + b.x) / 2, z: (a.z + b.z) / 2 }; }
-    if (!p) continue;
+    if (!p) {                              // the named places are not in this zone: out in the wilds, away from the hub
+      const hub = sites.find(x => x.type === 'settlement' && x.hub) || terrain.spawn;
+      p = walkableNear(terrain, hub.x, hub.z, 320 + out.length * 15, 1.3 + out.length * 0.9);
+    }
     if (terrain.walkable && !terrain.walkable(p.x, p.z)) p = walkableNear(terrain, p.x, p.z, 8, 0);
     const meta = info[enc.id] || {};
     out.push({ type: meta.body || 'wolf', level: enc.level, x: p.x, z: p.z, count: 1, radius: 2, rank: enc.rank, encounter: enc.id, name: meta.name || null, respawnMs: enc.respawnMs });

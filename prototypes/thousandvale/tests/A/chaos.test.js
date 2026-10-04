@@ -54,6 +54,7 @@ test(`chaos: ${ROUNDS} crashes mid-trade/mid-save; items held exactly once, gold
   for (const o of W0.online.values()) await waitP(clock, Promise.resolve(W0.saveNow(o)));
   await run(clock, 500);
   const before = loadAll(base);
+  if (process.env.TV_CHAOS_DEBUG) for (const r of Object.values(base.data.chars)) console.log('INIT', r.id, r.cols.journal_seq, r.version, (r.blob.bag||[]).map(i=>i.name).join('|'), JSON.stringify(Object.values(r.blob.equipment||{}).map(i=>i&&i.name)));
   const allUids = new Set(before.flatMap(heldUids));
   const goldTotal = before.reduce((s, c) => s + c.gold, 0);
   assert.equal(allUids.size, 16); assert.equal(goldTotal, 400);
@@ -63,15 +64,15 @@ test(`chaos: ${ROUNDS} crashes mid-trade/mid-save; items held exactly once, gold
     b.on('tradeAsk', m => b.tradeOp('accept', { id: m.trade }));
     b.on('trade', m => {
       const t = m.trade;
-      if (!t || t.state !== 'open') return;
+      if (!t || t.state !== 'open') { b._tid = null; return; }
       const me = t.you;
-      if (!me.offered) {
+      if (b._tid !== t.id) {
+        b._tid = t.id;
         const bag = b.joined ? b.joined.you.bag : [];
         const items = bag.length && next(rng) < 0.7 ? [bag[int(rng, bag.length)].uid] : [];
         b.tradeOp('offer', { id: t.id, items, gold: int(rng, Math.max(1, Math.min(30, (b.joined ? b.joined.you.gold : 0) + 1))) });
-        me.offered = true; b._offered = t.id;
-      } else if (!me.locked) b.tradeOp('lock', { id: t.id });
-      else if (t.them.locked && !me.confirmed) b.tradeOp('confirm', { id: t.id });
+      } else if (!me.locked && (t.them.items.length || t.them.gold || t.them.locked || next(rng) < 0.5)) b.tradeOp('lock', { id: t.id });
+      else if (me.locked && t.them.locked && !me.confirmed) b.tradeOp('confirm', { id: t.id });
     });
   }
   let trades = 0, checks = 0, crashedMidTrade = 0;
@@ -97,6 +98,7 @@ test(`chaos: ${ROUNDS} crashes mid-trade/mid-save; items held exactly once, gold
     }
     if (srv.world.trades.byId.size) crashedMidTrade++;
     trades += srv.world.status().trades.done;
+    if (process.env.TV_CHAOS_DEBUG) { const r4 = base.data.chars[4]; console.log('PRE', round, r4.version, r4.cols.journal_seq, JSON.stringify(Object.values(r4.blob.equipment||{}).map(i=>i&&i.name)), JSON.stringify(Object.values(srv.world.online.get(4)?.char.equipment||{}).map(i=>i&&i.name)), srv.world.online.get(4)?.seq); }
     // CRASH: no goodbyes, unlanded writes are lost
     srv.crash(); store.kill();
     store = slowStore(base, clock, rng);
@@ -114,7 +116,7 @@ test(`chaos: ${ROUNDS} crashes mid-trade/mid-save; items held exactly once, gold
       const d = Object.entries(seen).filter(([, v]) => v.length > 1);
       console.log('DUPES', JSON.stringify(d));
       for (const c of now) console.log(c.name, 'jseq', c.jseq, 'bag', c.bag.map(i => i.name).join('|'), 'eq', JSON.stringify(Object.fromEntries(Object.entries(c.equipment||{}).map(([k,v])=>[k,v&&v.name]))));
-      for (const r of Object.values(base.data.chars)) console.log(r.id, 'blob jseq', r.cols.journal_seq, 'v', r.version, JSON.stringify((base.data.journal[r.id]||[]).map(j => [j.seq, j.kind, j.payload.item ? j.payload.item.name : j.payload.uid || (j.payload.equipment ? Object.values(j.payload.equipment).map(x=>x&&x.name).join('+') : '')])));
+      for (const r of Object.values(base.data.chars)) console.log(r.id, 'blob jseq', r.cols.journal_seq, 'v', r.version, 'BAG', (r.blob.bag||[]).map(i=>i.name).join('|'), 'EQ', JSON.stringify(Object.values(r.blob.equipment||{}).map(i=>i&&i.name)), JSON.stringify((base.data.journal[r.id]||[]).map(j => [j.seq, j.kind, j.payload.item ? j.payload.item.name : j.payload.uid || (j.payload.equipment ? Object.values(j.payload.equipment).map(x=>x&&x.name).join('+') : '')])));
     }
     assert.equal(uids.length, allUids.size, `round ${round}: item count ${uids.length}`);
     assert.equal(new Set(uids).size, uids.length, `round ${round}: an item is held twice`);

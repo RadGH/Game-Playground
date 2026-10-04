@@ -52,6 +52,33 @@ test('pg store: guest, characters, leases, fencing, versions', { skip: !HAVE_PG 
     const er = await st.pool.query("SELECT gold, items, count FROM economy_log WHERE reason = 'pgtest'");
     assert.deepEqual(er.rows[0], { gold: 12, items: 1, count: 2 });
     await st.pool.query("DELETE FROM economy_log WHERE reason = 'pgtest'");
+    // journal (schema v2): rows apply on load, a fenced-out writer's rows are refused, a blob save prunes
+    const t5 = await st.takeChar(g.account, char.id, 'ptest:b', 30000);
+    const j0 = t5.char.jseq || 0;
+    const kept = await st.appendJournal([
+      { char: char.id, seq: j0 + 1, kind: 'gold', payload: { d: 5 }, fence: t5.fence },
+      { char: char.id, seq: j0 + 2, kind: 'bagAdd', payload: { item: { uid: 'p0-aa-9', name: 'Journal gem' } }, fence: t5.fence },
+      { char: char.id, seq: j0 + 3, kind: 'gold', payload: { d: 1000 }, fence: t5.fence - 1 },
+    ]);
+    assert.equal(kept, 2);
+    const t6 = await st.takeChar(g.account, char.id, 'ptest:b', 30000);
+    assert.equal(t6.char.gold, t5.char.gold + 5);
+    assert.ok(t6.char.bag.some(i => i.uid === 'p0-aa-9'));
+    assert.equal(t6.char.jseq, j0 + 2);
+    assert.equal(await st.saveChar(t6.char, t6.fence), true);
+    const left = await st.pool.query('SELECT count(*)::int AS n FROM char_journal WHERE char_id = $1', [char.id]);
+    assert.equal(left.rows[0].n, 0, 'pruned by the blob save');
+    // trade transaction: both or neither
+    const g2 = await st.createGuest('Tester2'); made.push(g2.account);
+    const { char: c2 } = await st.createChar(g2.account, { name: nm + 'b', cls: 'mage' });
+    const A = await st.takeChar(g.account, char.id, 'ptest:b', 30000), B = await st.takeChar(g2.account, c2.id, 'ptest:b', 30000);
+    A.char.gold -= 3; B.char.gold = (B.char.gold || 0) + 3;
+    const staleB = { ...B.char, version: B.char.version + 7 };
+    assert.equal(await st.tradeChars([{ ch: { ...A.char }, fence: A.fence }, { ch: staleB, fence: B.fence }]), false);
+    const A2 = await st.takeChar(g.account, char.id, 'ptest:b', 30000);
+    assert.equal(A2.char.gold, A.char.gold + 3, 'rolled back: A unchanged');
+    A2.char.gold -= 3;
+    assert.equal(await st.tradeChars([{ ch: A2.char, fence: A2.fence }, { ch: B.char, fence: B.fence }]), true);
   } finally {
     for (const id of made) await st.pool.query('DELETE FROM accounts WHERE id = $1', [id]);
     await st.close();

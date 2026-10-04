@@ -1,6 +1,6 @@
 # Thousandvale — world data and the terrain reader (stream B)
 
-**Status:** M0, 2026-10-04. Owner: stream B (`tools/bake-*.mjs`, `data/world/**`, `data/zones/**`,
+**Status:** M1 bake v1, 2026-10-04 (M0 test zone kept). Owner: stream B (`tools/bake-*.mjs`, `data/world/**`, `data/zones/**`,
 `js/rules/terrain-read.js` ★, the viewers). Changes to the reader go through stream B (`docs/requests.md`).
 
 ## 1. What exists at M0
@@ -97,3 +97,42 @@ A file with the wrong magic or version throws (PLAN §3.2.5).
 
 Known M0 limits (M1 bake fixes): no roads, town footprint or placements yet; the river sources start
 abruptly where World Forge's river begins; no zone-edge test yet (one zone).
+
+
+## 6. M1: world bake + zone bake v1 (2026-10-04)
+
+| File | What |
+|---|---|
+| `tools/bake-world.mjs` → `data/world/world.json` (301 KB) + `data/world/macro.bin` (441 KB) | World Forge 288 × 224 (seed 1000), an **18 × 14 grid of 2,048 m zones** (`z00_00` … `z17_13`; zone `(zx, zy)` covers world x ∈ [zx·2048, +2048]). Holds everything a zone needs that must not depend on which zone is baked: rivers as smoothed, meandering polylines in world metres **with their water surface per point**, lakes with one level each, settlements/landmarks/dungeons/passes/roads in world metres, a per-zone summary. ~1 s. |
+| `tools/bake-zone.mjs <zXX_YY> \| --m1` → `data/zones/<id>/{terrain.bin, placements.json, zone.json}` | Same `terrain.bin` format and reader as M0. ~2 s a zone. `--check` fails if stale. |
+| `tools/lib/world-core.mjs` | The shared pure core: macro file format, base ground at world coordinates, biome warp, the **world-fixed** height range (`heightRange`: −240 … 1,660 m, 2.9 cm steps). |
+| `tools/lib/zone-sites.mjs` | Site placement: town radius, dungeon door, open discs for event/camp sites. |
+| `tests/B/zone-bake.test.js` | World + zone bakes deterministic and checked in; **edges agree bit for bit** with the east and south neighbours (height, water surface, water kind, biome — a river crosses the east edge and rock lies on the south edge, so it is not a vacuous check); hub town sound; sites sound. |
+
+**Edges agree by construction:** every value is a function of world coordinates and the world bake only.
+Neighbour-dependent work (rock on steep ground, the wet ring) runs on a grid with a one-sample apron, and
+zone-local work (moving and levelling the hub town) stays ≥ 200 m from every edge.
+
+**The M1 zone `z03_02`** (Torborhold's): grassland/forest/marsh, 4 rivers. Sites: hub **Torborhold**
+(village, r 65, `hub: true`) — moved 340 m in from where World Forge put it (its macro cell sat 64 m from the
+zone's south edge; a hub circle may not cross a zone edge), on the flattest dry spot, then levelled (85 %
+toward the disc's mean height, easing out over 40 m); Mackdackcrown (city, r 140, not planned yet),
+Tatihold (village), Mawehaven (hamlet), two fords, an ancient wood. Door `door_1` (1294, 1858) yaw 2.77; event
+`event_grandmother_skein` (1243, 1320) r 40 near Mawehaven; camp `elite_hobb_gallowsby` (1312, 633) r 25 at
+Bilpintet Ford. The hub's spawn is in its square.
+
+**Town placement** (`placements.json`, typed records `{kind, id, x, z, yaw, data}` in zone metres, yaw =
+`atan2(dx, dz)` the way the thing faces):
+`settlement` (data.radius, data.hub) · `town_square` (data.r) · `street` (data.pts [[x,z]…], cls main/side/alley,
+width) · `building` (a proctown plot: centre, `data.w` along `data.angle`, `data.d` across, `data.want`
+house/inn/forge/market/…; **yaw faces the nearest drawn street** — proctown's own `facing` points at the nearest
+block edge, which after its connectivity pass is a street only about half the time, so the bake picks the side
+whose front meets a street; `data.streetGap` ≤ 0 means the front is on it) · `town_wall` (size 4+ only) ·
+`dungeon_door` · `event_site` · `camp_site` · World Forge `landmark`/`crossing`/`pass`. The plan comes from
+`proctown/js/townplan.js` `planTown` (the one planner Farhold uses too), human culture, size by kind
+(village = 2 → 17 plots, 49 streets, 0 overlaps), told the river is unbuildable.
+
+Known gaps (later milestones): only the hub is planned (Mackdackcrown and the others are sites only);
+no world roads drawn into the zone yet (`world.json` has them); no scatter/nav layers yet; and **seed 1000 has
+only 101 zones that are more than half land** (PLAN wants ~200) — World Forge's default sea level is 0.58; the
+M4 world needs a lower sea level, which moves every place, so it waits until the M4 world is chosen.

@@ -358,7 +358,8 @@ function ensureActor(id) {
     const kind = info.kind || KIND_NAMES[e.kind] || 'monster';
     if (kind === 'object') {
       const opened = (S.net?.joined?.you?.opened || {});
-      objects.upsert({ id, type: info.type, name: info.name, x: e.x, z: e.z, yaw: e.yaw || 0, source: 'room', opened: info.type === 'chest' && !!(info.key && opened[info.key] && opened[info.key] > Date.now()) });
+      objects.upsert({ id, type: info.type, name: info.name, x: e.x, z: e.z, yaw: e.yaw || 0, r: info.r, state: info.state, source: 'room', opened: info.type === 'chest' && !!(info.key && opened[info.key] && opened[info.key] > Date.now()) });
+      objectState(id, info);
       return null;
     }
     const hpMax = info.hpMax || 100;
@@ -379,7 +380,13 @@ function displayName(n, kind) {
   if (!n) return kind === 'monster' ? 'Creature' : 'Adventurer';
   return kind === 'player' ? n : n.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
+function objectState(id, info) {
+  if (!info || info.kind !== 'object') return;
+  objects.upsert({ id, state: info.state, name: info.name });
+  if (info.type === 'gate' && info.state === 'open' && D.view) { const o = objects.items.get(id); if (o) D.view.openGate(D.view.floorAt(o.x, o.z)); }
+}
 function refreshFromInfo(id) {
+  objectState(id, S.mirror.infos.get(id));
   const a = actors.get(id), info = S.mirror.infos.get(id);
   if (!a || !info) return;
   const levelled = info.level > a.level;

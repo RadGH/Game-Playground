@@ -57,13 +57,13 @@ export function createActors(scene, { plateLayer, camera }) {
     queue.push(a);
     return a;
   }
-  function pick(i) { return { name: i.name, level: i.level, hp: i.hp, hpMax: i.hpMax, hostile: !!i.hostile, look: i.look, creature: i.creature, family: i.family }; }
+  function pick(i) { return { name: i.name, level: i.level, hp: i.hp, hpMax: i.hpMax, hostile: !!i.hostile, look: i.look, creature: i.creature, family: i.family, rank: i.rank || null }; }
 
   async function build(a) {
     try {
       let body;
       if (a.kind === 'monster') {
-        body = await createCreature(creatureFor(a.creature || { type: 'wolf' }), { detail: 0.8 });
+        body = await createCreature(creatureFor({ ...(a.creature || { type: 'wolf' }), size: a.rank === 'boss' ? 1.9 : a.rank === 'elite' || a.rank === 'champion' || a.rank === 'rare' ? 1.3 : 1 }), { detail: a.rank === 'boss' ? 1 : 0.8 });
         // One draw call per moving part instead of one per eye and toe (Farhold R27 M8).
         try { compactCreature(body); } catch (e) { console.warn('[actors] compact failed', e); }
       } else {
@@ -97,7 +97,7 @@ export function createActors(scene, { plateLayer, camera }) {
   function makePlate(a) {
     if (!plateLayer) return null;
     const root = document.createElement('div');
-    root.className = `plate ${a.kind} ${a.hostile ? 'hostile' : 'friendly'}${a.self ? ' self' : ''}`;
+    root.className = `plate ${a.kind} ${a.hostile ? 'hostile' : 'friendly'}${a.self ? ' self' : ''}${a.rank && a.rank !== 'normal' ? ' rank-' + a.rank : ''}`;
     root.innerHTML = `<div class="plate-bubble"></div><div class="plate-name"><span class="plate-lvl"></span><span class="plate-n"></span></div><div class="plate-bar"><i></i><b></b></div>`;
     plateLayer.appendChild(root);
     const p = { root, bubble: root.querySelector('.plate-bubble'), bubbleUntil: 0, name: root.querySelector('.plate-n'), lvl: root.querySelector('.plate-lvl'), bar: root.querySelector('.plate-bar i'), lag: root.querySelector('.plate-bar b'), lagW: 1 };

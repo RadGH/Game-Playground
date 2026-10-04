@@ -45,8 +45,8 @@ export function unpackChar(row) {
   const blob = row.blob || {};
   for (const f of SAVE_FIELDS) {
     let v = f.col ? row.cols?.[f.col] : blob[f.k];
-    if (v === undefined || v === null) v = f.def === null || typeof f.def !== 'object' ? f.def : JSON.parse(JSON.stringify(f.def));
-    ch[f.k] = v;
+    if (v === undefined || v === null) v = f.def;
+    ch[f.k] = v !== null && typeof v === 'object' ? JSON.parse(JSON.stringify(v)) : v;   // never share objects with the stored row
   }
   return ch;
 }

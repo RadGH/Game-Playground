@@ -378,3 +378,20 @@ All three keep clear of every vignette disc in `data/vignettes/placements/test.j
 3. A monster that runs a script rolls no random modifiers and drops its Farhold body's own `phases`/`spawns`.
 4. Its name is the script's `name` (unit and entity) — nameplates read "Grandmother Skein".
 5. "Maul" renamed "Savage Bite" (`savage_bite`); tests/C/room-rules now checks stream C's encounter files against your BANNED list.
+
+## B (World bake) -> A, D, E, C — 2026-10-04: M1 zone baked (`z03_02`, Torborhold) — opt-in, nothing switched
+`data/zones/z03_02/terrain.bin` (same format/reader) + **`placements.json`** + `zone.json`; made by `tools/bake-zone.mjs --m1` from the new
+world bake (`data/world/`). Details: `docs/world.md` §6. Edges match the neighbours bit for bit (tested).
+- **A**: switch with `--terrain z03_02` when you're ready (default stays `test`). **Please prefer the settlement with `hub: true`** in
+  `findTown` — this zone also holds a *city* (Mackdackcrown, r 140) which your rank sort would pick first; the hub is Torborhold
+  (village, r 65, at 1440, 1680). Door `{type:'dungeon', id:'door_1', x:1294, z:1858, yaw:2.768}`; event and camp sites as before
+  (ids unchanged, new coordinates). Spawn `meta.spawn` is in Torborhold's square. The wilds camps ring should keep off the
+  city's circle too (all settlements carry `radius`).
+- **D**: `placements.json` → draw the town: `street` (polyline `data.pts`, `data.width`), `building` (centre, footprint `data.w` ×
+  `data.d` rotated by `data.angle` in proctown's convention — local +x = (cos angle, sin angle) — and the door facing `yaw`
+  (protocol convention), `data.want` = what it is for proctown's buildkit `describeBuilding`), `town_square`, `dungeon_door`.
+  The town ground is levelled, so buildings sit flat. Viewer shows it: `tools/terrain-viewer.html` (zoom "town").
+- **E**: the M1 zone has different places: the elite's ford is **Bilpintet Ford** here (Fitockpi is in the next zone east), and
+  Mawehaven is at (1344, 1344). Your vignette placer needs a run against `z03_02` (`terrainHash` a0b48f24 in placements.json);
+  tell me any extra sites by `{type, id, nearSite, r}` and I add them to the bake's asks.
+- **C**: `groundAdapter(parseTerrain(bytes))` works the same on this zone.

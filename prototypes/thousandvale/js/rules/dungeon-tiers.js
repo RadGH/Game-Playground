@@ -36,20 +36,28 @@ export const FAMILIES = {
     blurb: 'Burial rooms in a ring that winds inward to one great vault.',
     roster: { normal: ['barrow_hound', 'cairn_rat', 'gallows_owl'], elite: 'barrow_hound' },
     // floor N's mini-boss is miniboss[N % length]; `type` is the Farhold body the encounter runs on
-    encounterSets: [{ name: 'The Abbot\'s Ossuary', miniboss: [{ id: 'mb_marrowgnaw', type: 'barrow_hound' }, { id: 'mb_gallowmother', type: 'gallows_owl' }], boss: { id: 'boss_hollow_abbot', type: 'hollow_wraith' } }],
+    encounterSets: [{ name: 'The Abbot\'s Ossuary', miniboss: [{ id: 'mb_marrowgnaw', type: 'barrow_hound' }, { id: 'mb_gallowmother', type: 'gallows_owl' }], boss: { id: 'boss_hollow_abbot', type: 'hollow_wraith' } },
+      { name: 'The Bell and the Lantern', miniboss: [{ id: 'mb_bell_ringer', type: 'cult_zealot' }, { id: 'mb_chained_saint', type: 'stone_sentinel' }], boss: { id: 'boss_lantern_bishop', type: 'sky_cultist' } }],
   },
   mine_descent: {
     name: 'Mine descent', ready: true, look: 'warren', fallback: null,
     blurb: 'A switchback shaft cut ever deeper, galleries branching off it.',
     roster: { normal: ['cairn_rat', 'ironback_beetle', 'bog_slime', 'carrion_moth'], elite: 'ironback_beetle' },
-    encounterSets: [{ name: 'The Ninth Shift', miniboss: [{ id: 'mb_rustjaw', type: 'ironback_beetle' }, { id: 'mb_seep_mother', type: 'bog_slime' }], boss: { id: 'boss_deep_foreman', type: 'shale_warden' } }],
+    encounterSets: [{ name: 'The Ninth Shift', miniboss: [{ id: 'mb_rustjaw', type: 'ironback_beetle' }, { id: 'mb_seep_mother', type: 'bog_slime' }], boss: { id: 'boss_deep_foreman', type: 'shale_warden' } },
+      { name: 'The Gassy Seam', miniboss: [{ id: 'mb_firedamp', type: 'ash_wisp' }, { id: 'mb_glimmerback', type: 'glass_shard' }], boss: { id: 'boss_hungry_cart', type: 'hoard_mimic' } }],
   },
   flooded_cistern: { name: 'Flooded cistern', ready: true, look: 'flooded', borrow: 'crypt_spiral',
     blurb: 'Chambers on a lattice of channels and sluices; the water level is part of the fight.',
-    roster: { normal: ['bog_slime', 'reed_serpent', 'fen_croaker', 'barrow_hound'], elite: 'reed_serpent' } },
+    roster: { normal: ['bog_slime', 'reed_serpent', 'fen_croaker', 'barrow_hound'], elite: 'reed_serpent' },
+    encounterSets: [
+      { name: 'The Drowned Reeve', miniboss: [{ id: 'mb_sluicegrip', type: 'reed_serpent' }, { id: 'mb_old_murkfin', type: 'silt_lurker' }], boss: { id: 'boss_drowned_reeve', type: 'ossuary_crawler' } },
+      { name: 'The Sunken Coffer', miniboss: [{ id: 'mb_drowned_lamp', type: 'ash_wisp' }, { id: 'mb_pipewalker', type: 'dune_centipede' }], boss: { id: 'boss_sunken_coffer', type: 'hoard_mimic' } }] },
   fortress_keep: { name: 'Fortress keep levels', ready: true, look: 'ruin', borrow: 'crypt_spiral',
     blurb: 'Halls and barracks in pairs up a central axis, the great hall at the top.',
-    roster: { normal: ['road_brigand', 'brigand_archer', 'sky_cultist', 'cult_zealot'], elite: 'brigand_captain' } },
+    roster: { normal: ['road_brigand', 'brigand_archer', 'sky_cultist', 'cult_zealot'], elite: 'brigand_captain' },
+    encounterSets: [
+      { name: 'The Oathbroken Garrison', miniboss: [{ id: 'mb_sergeant_wark', type: 'road_brigand' }, { id: 'mb_drummer_ossa', type: 'sky_cultist' }], boss: { id: 'boss_castellan_odrun', type: 'cult_zealot' } },
+      { name: 'The Red Banner', miniboss: [{ id: 'mb_greycoat', type: 'frost_stalker' }, { id: 'mb_spit_imp', type: 'cinder_imp' }], boss: { id: 'boss_warlord_hask', type: 'brigand_captain' } }] },
   cave_river: { name: 'Cave river', ready: true, look: 'cave', borrow: 'mine_descent',
     blurb: 'Caverns strung along an underground river, wide winding tunnels.',
     roster: { normal: ['cairn_rat', 'reed_serpent', 'dusk_flitter', 'ironback_beetle'], elite: 'silt_lurker' } },
@@ -473,15 +481,15 @@ function chainFloor(rng, L) {
   const gr = rooms[gi], pr = rooms[gi - 1];
   const enter = gatePath.findIndex(([i, j]) => inRect(gr, i, j));
   let gate = null;
-  for (let back = 3; back <= 6 && !gate; back++) {
+  for (let back = 3; back <= 24 && !gate; back++) {
     const q = enter - back;
     if (q < 1) break;
     const [i, j] = gatePath[q], [pi, pj] = gatePath[q - 1];
-    if (inRect(pr, i, j, 1) || inRect(gr, i, j, 1)) continue;
+    if (inRect(pr, i, j, half + 1) || inRect(gr, i, j, half + 1)) continue;
     const horiz = pj === j;
     gate = horiz ? { i, j: j - half, w: 1, h: 2 * half + 1 } : { i: i - half, j, w: 2 * half + 1, h: 1 };
   }
-  if (!gate) return fail('no gate spot');
+  if (!gate) { CHAIN_FAILS.lastNoGate = { enter, len: gatePath.length, gr: { ...gr }, pr: { ...pr } }; return fail('no gate spot'); }
   // the gate must be a clean cut: no floor tile beside its two ends
   const ends = gate.w === 1 ? [[gate.i, gate.j - 1], [gate.i, gate.j + gate.h]] : [[gate.i - 1, gate.j], [gate.i + gate.w, gate.j]];
   if (ends.some(([i, j]) => g.get(i, j))) return fail('gate not a clean cut');

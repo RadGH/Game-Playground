@@ -23,11 +23,13 @@ const DT = 0.05;
 let ENGINE = null;
 const engine = async () => (ENGINE ||= await engineFor(1));
 
-test('stream E ships the M1 set: 3 crypt + 3 mine dungeon fights, an elite, rares and the zone event boss', () => {
+test('stream E ships M1 + M2: 8 dungeon bosses, 16 mini-bosses, an elite, 2 rares per zone, a zone event boss, a world boss; every script has a party note', () => {
   const tiers = MINE.map(([, d]) => d.tier);
-  assert.equal(tiers.filter(t => t === 'boss').length, 2);
-  assert.equal(tiers.filter(t => t === 'miniboss').length, 4);
-  assert.ok(tiers.includes('elite') && tiers.includes('rare') && tiers.includes('event'));
+  assert.ok(tiers.filter(t => t === 'boss').length >= 8);
+  assert.ok(tiers.filter(t => t === 'miniboss').length >= 16);
+  assert.ok(tiers.filter(t => t === 'rare').length >= 32);
+  assert.ok(tiers.includes('elite') && tiers.includes('event') && tiers.includes('world'));
+  for (const [f, d] of MINE) assert.ok(d.party, `${f}: party note`);
 });
 
 test('every E script is listed in index.json, and the bundle validates with C\'s validator', async () => {
@@ -48,10 +50,10 @@ test('content rules: bodies exist, statuses exist, adds exist, every phase has a
   };
   for (const [f, d] of MINE) {
     if (!BESTIARY.has(d.body)) bad.push(`${f}: body ${d.body}`);
-    if (!(d.phases.length >= 2 && d.phases.length <= 3)) bad.push(`${f}: ${d.phases.length} phases`);
+    if (!(d.phases.length >= 2 && d.phases.length <= (d.tier === 'world' ? 4 : 3))) bad.push(`${f}: ${d.phases.length} phases`);
     if (!d.say?.pull || !d.say?.death) bad.push(`${f}: pull/death lines`);
-    if (['boss', 'event', 'miniboss'].includes(d.tier) && !d.enrage) bad.push(`${f}: no enrage`);
-    if (['boss', 'event'].includes(d.tier) && !d.phases.some(p => p.newBar)) bad.push(`${f}: a boss needs a new health bar phase`);
+    if (['boss', 'event', 'miniboss', 'world'].includes(d.tier) && !d.enrage) bad.push(`${f}: no enrage`);
+    if (['boss', 'event', 'world'].includes(d.tier) && !d.phases.some(p => p.newBar)) bad.push(`${f}: a boss needs a new health bar phase`);
     for (const [k, ab] of Object.entries(d.abilities)) {
       for (const [i, t] of (ab.telegraphs || []).entries()) {
         tele(`${f} ${k}[${i}]`, t);
@@ -97,7 +99,7 @@ for (const [f, d] of MINE) {
   test(`FIGHT ${d.id}: pulls, uses telegraphs, walks every phase and bar, honours its triggers, enrages, dies`, async () => {
     const s = await arena(3);
     const rank = d.tier === 'elite' ? 'champion' : d.tier === 'rare' ? 'rare' : 'normal';
-    const boss = s.room.run(() => spawnMonster(s.room.field, s.eng.enemyDef(d.body), 7, 0, 0, { rank, boss: ['boss', 'event', 'miniboss'].includes(d.tier) }));
+    const boss = s.room.run(() => spawnMonster(s.room.field, s.eng.enemyDef(d.body), 7, 0, 0, { rank, boss: ['boss', 'event', 'miniboss', 'world'].includes(d.tier) }));
     boss.encounterId = d.id;
     s.step(10);
     const st = s.enc.states.get(boss);

@@ -969,7 +969,10 @@ export function createWorld(opts) {
     o.saving = true; o.dirty = false; o.lastSig = sig(o);
     const snapSeq = o.seq;
     const t0 = now();
-    o.savingP = store.saveChar(o.char, o.fence).then(ok => {
+    // the store gets a SNAPSHOT: the live character keeps changing while the write is in flight
+    const snap = JSON.parse(JSON.stringify(o.char));
+    o.savingP = store.saveChar(snap, o.fence).then(ok => {
+      if (ok) o.char.version = snap.version;
       o.saving = false; o.lastSaveAt = now();
       counters.saveMs = now() - t0;
       if (ok) { counters.saves++; o.savedSeq = Math.max(o.savedSeq, snapSeq); }

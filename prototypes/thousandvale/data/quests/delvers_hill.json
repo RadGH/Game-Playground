@@ -68,7 +68,7 @@
       "name": "Lamp Oil",
       "level": 4,
       "giver": "lampwoman_gwen",
-      "offer": "Ash wisps keep stealing the flame out of my lamps. I need their embers — er, their sparks — for new wicks.",
+      "offer": "Ash wisps keep stealing the flame out of my lamps. I need their sparks for new wicks. Don't ask how. Wick-making is a dark art.",
       "steps": [
         {
           "kind": "collect",

@@ -1,0 +1,1255 @@
+{
+  "_doc": "Stream E (M2). Site templates for the PLAN §3.4 floor: forts (every zone has >= 1), farms (>= 2), caves (1-2 single-floor dungeons). Props are relative metres, `kind` as in vignettes (prop/ground = highdef-3d kit ids, tree = species). Fort `garrison`: friendly forts hold NPC roles; hostile ones hold monster camps (`blight`/`undead` = alternative mixes the bake picks by archetype). Caves are dungeon-tiers plans with floors: 1 and a small boss (an elite of a bestiary id). `byArchetype` = relative weights the bake uses. Bodies for buildings come from F's proctown fort/farm kits; these templates say what goes in and around them.",
+  "forts": {
+    "watchtower_garrison": {
+      "name": "Watchtower garrison",
+      "friendly": true,
+      "radius": 16,
+      "blurb": "A stone tower and a yard; a handful of guards, a sergeant, a job board.",
+      "garrison": {
+        "npcs": [
+          {
+            "role": "guard",
+            "count": 3
+          },
+          {
+            "role": "sergeant",
+            "count": 1
+          }
+        ]
+      },
+      "props": [
+        {
+          "kind": "prop",
+          "id": "ruined_pillar",
+          "x": 0,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "banner_pole",
+          "x": 3,
+          "z": -2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "torch_post",
+          "x": -4,
+          "z": 4,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "torch_post",
+          "x": 4,
+          "z": 4,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "crate",
+          "x": -3,
+          "z": -3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "barrel",
+          "x": -2,
+          "z": -4,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "signpost",
+          "x": 0,
+          "z": 8,
+          "yaw": 0
+        }
+      ]
+    },
+    "palisade_fort": {
+      "name": "Palisade fort",
+      "friendly": true,
+      "radius": 24,
+      "blurb": "A timber stockade with a gate, a quartermaster and the fort's Callboard.",
+      "garrison": {
+        "npcs": [
+          {
+            "role": "guard",
+            "count": 5
+          },
+          {
+            "role": "quartermaster",
+            "count": 1
+          },
+          {
+            "role": "captain",
+            "count": 1
+          }
+        ]
+      },
+      "props": [
+        {
+          "kind": "prop",
+          "id": "palisade_stake",
+          "x": -10,
+          "z": -10,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "palisade_stake",
+          "x": -6,
+          "z": -11,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "palisade_stake",
+          "x": 6,
+          "z": -11,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "palisade_stake",
+          "x": 10,
+          "z": -10,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "banner_pole",
+          "x": 0,
+          "z": -12,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "torch_post",
+          "x": -3,
+          "z": -12,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "torch_post",
+          "x": 3,
+          "z": -12,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "crate",
+          "x": 4,
+          "z": 3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "barrel",
+          "x": 5,
+          "z": 4,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "wood_pile",
+          "x": -5,
+          "z": 5,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "campfire",
+          "x": 0,
+          "z": 0,
+          "yaw": 0
+        }
+      ]
+    },
+    "stone_keep": {
+      "name": "Stone keep",
+      "friendly": true,
+      "radius": 28,
+      "blurb": "A squat keep: the province's grip on a road or a pass. Trainers and a smith.",
+      "garrison": {
+        "npcs": [
+          {
+            "role": "guard",
+            "count": 6
+          },
+          {
+            "role": "smith",
+            "count": 1
+          },
+          {
+            "role": "castellan",
+            "count": 1
+          }
+        ]
+      },
+      "props": [
+        {
+          "kind": "prop",
+          "id": "ruined_wall",
+          "x": -8,
+          "z": -8,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "ruined_wall",
+          "x": 8,
+          "z": -8,
+          "yaw": 1.57
+        },
+        {
+          "kind": "prop",
+          "id": "ruined_arch",
+          "x": 0,
+          "z": -10,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "banner_pole",
+          "x": -3,
+          "z": -10,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "banner_pole",
+          "x": 3,
+          "z": -10,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "torch_post",
+          "x": -6,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "torch_post",
+          "x": 6,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "well",
+          "x": 0,
+          "z": 4,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "crate",
+          "x": -5,
+          "z": 6,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "barrel",
+          "x": 5,
+          "z": 6,
+          "yaw": 0
+        }
+      ]
+    },
+    "warband_stockade": {
+      "name": "Warband stockade",
+      "friendly": false,
+      "radius": 26,
+      "blurb": "A hostile camp of stakes and skull totems; a leader and its escort. Clearing it plants your banner (phased per character).",
+      "garrison": {
+        "monsters": [
+          {
+            "type": "road_brigand",
+            "count": [
+              4,
+              6
+            ]
+          },
+          {
+            "type": "brigand_archer",
+            "count": [
+              2,
+              3
+            ]
+          },
+          {
+            "type": "brigand_captain",
+            "count": 1,
+            "rank": "elite"
+          }
+        ],
+        "blight": [
+          {
+            "type": "cult_zealot",
+            "count": [
+              3,
+              5
+            ]
+          },
+          {
+            "type": "sky_cultist",
+            "count": [
+              2,
+              3
+            ]
+          },
+          {
+            "type": "cinder_imp",
+            "count": [
+              2,
+              4
+            ]
+          }
+        ]
+      },
+      "props": [
+        {
+          "kind": "prop",
+          "id": "palisade_stake",
+          "x": -9,
+          "z": -9,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "palisade_stake",
+          "x": 9,
+          "z": -9,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "palisade_stake",
+          "x": -9,
+          "z": 9,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "palisade_stake",
+          "x": 9,
+          "z": 9,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "skull_totem",
+          "x": 0,
+          "z": -10,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "skull_totem",
+          "x": -6,
+          "z": 6,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "fire_ring",
+          "x": 0,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "crate",
+          "x": 4,
+          "z": -3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "wood_pile",
+          "x": -4,
+          "z": -4,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "banner_pole",
+          "x": 0,
+          "z": 10,
+          "yaw": 0
+        }
+      ]
+    },
+    "ruined_fort": {
+      "name": "Ruined fort",
+      "friendly": false,
+      "radius": 22,
+      "blurb": "Broken walls held by scavengers or the dead; a chest in the old armoury.",
+      "garrison": {
+        "monsters": [
+          {
+            "type": "road_brigand",
+            "count": [
+              3,
+              5
+            ]
+          },
+          {
+            "type": "carrion_moth",
+            "count": [
+              2,
+              3
+            ]
+          }
+        ],
+        "undead": [
+          {
+            "type": "barrow_hound",
+            "count": [
+              3,
+              5
+            ]
+          },
+          {
+            "type": "cairn_rat",
+            "count": [
+              3,
+              6
+            ]
+          }
+        ]
+      },
+      "props": [
+        {
+          "kind": "prop",
+          "id": "ruined_wall",
+          "x": -7,
+          "z": -6,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "ruined_wall",
+          "x": 6,
+          "z": -7,
+          "yaw": 1.2
+        },
+        {
+          "kind": "prop",
+          "id": "ruined_arch",
+          "x": 0,
+          "z": -8,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "ruined_pillar",
+          "x": -5,
+          "z": 4,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "ruined_pillar",
+          "x": 5,
+          "z": 4,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "stone_step",
+          "x": 0,
+          "z": 6,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "bone_scatter",
+          "x": 2,
+          "z": 1,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "lichen_patch",
+          "x": -3,
+          "z": -2,
+          "yaw": 0
+        }
+      ],
+      "loot": {
+        "chest": "uncommon"
+      }
+    },
+    "toll_fort": {
+      "name": "Toll fort",
+      "friendly": true,
+      "radius": 20,
+      "blurb": "A gatehouse across a road or a pass; pays out bounties, charges a copper.",
+      "garrison": {
+        "npcs": [
+          {
+            "role": "guard",
+            "count": 4
+          },
+          {
+            "role": "tollkeeper",
+            "count": 1
+          }
+        ]
+      },
+      "props": [
+        {
+          "kind": "prop",
+          "id": "ruined_arch",
+          "x": 0,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "fence_rail",
+          "x": -4,
+          "z": 0,
+          "yaw": 1.57
+        },
+        {
+          "kind": "prop",
+          "id": "fence_rail",
+          "x": 4,
+          "z": 0,
+          "yaw": 1.57
+        },
+        {
+          "kind": "prop",
+          "id": "torch_post",
+          "x": -2,
+          "z": 1,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "torch_post",
+          "x": 2,
+          "z": 1,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "signpost",
+          "x": 0,
+          "z": 5,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "barrel",
+          "x": -4,
+          "z": 3,
+          "yaw": 0
+        }
+      ]
+    }
+  },
+  "farms": {
+    "arable": {
+      "name": "Arable farm",
+      "radius": 22,
+      "blurb": "Crop rows, a barn, haystacks, a farmer with a grievance.",
+      "npcs": [
+        {
+          "role": "farmer",
+          "count": 1
+        },
+        {
+          "role": "farmhand",
+          "count": [
+            1,
+            2
+          ]
+        }
+      ],
+      "pests": [
+        "thicket_boar",
+        "carrion_moth",
+        "cairn_rat"
+      ],
+      "props": [
+        {
+          "kind": "prop",
+          "id": "hay_bale",
+          "x": -4,
+          "z": 2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "hay_bale",
+          "x": -2.5,
+          "z": 3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "hay_bale",
+          "x": 5,
+          "z": -3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "fence_post",
+          "x": -8,
+          "z": -6,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "fence_rail",
+          "x": -6,
+          "z": -6,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "fence_post",
+          "x": -4,
+          "z": -6,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "well",
+          "x": 3,
+          "z": 4,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "sawhorse",
+          "x": 6,
+          "z": 2,
+          "yaw": 0
+        }
+      ]
+    },
+    "sheep": {
+      "name": "Sheep farm",
+      "radius": 24,
+      "blurb": "Folds and pasture; moor hounds are the usual trouble.",
+      "npcs": [
+        {
+          "role": "shepherd",
+          "count": 1
+        }
+      ],
+      "pests": [
+        "moor_hound",
+        "crag_hyena"
+      ],
+      "props": [
+        {
+          "kind": "prop",
+          "id": "fence_post",
+          "x": -8,
+          "z": -8,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "fence_rail",
+          "x": -5,
+          "z": -8,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "fence_post",
+          "x": -2,
+          "z": -8,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "fence_rail",
+          "x": -8,
+          "z": -5,
+          "yaw": 1.57
+        },
+        {
+          "kind": "prop",
+          "id": "fence_post",
+          "x": -8,
+          "z": -2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "hay_bale",
+          "x": 3,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "drying_rack",
+          "x": 5,
+          "z": 4,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "well",
+          "x": -2,
+          "z": 4,
+          "yaw": 0
+        }
+      ]
+    },
+    "pig": {
+      "name": "Pig farm",
+      "radius": 18,
+      "blurb": "Sties, a muddy yard, a smell. Boars come to visit their cousins.",
+      "npcs": [
+        {
+          "role": "farmer",
+          "count": 1
+        }
+      ],
+      "pests": [
+        "thicket_boar",
+        "cairn_rat"
+      ],
+      "props": [
+        {
+          "kind": "prop",
+          "id": "fence_post",
+          "x": -5,
+          "z": -5,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "fence_rail",
+          "x": -3,
+          "z": -5,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "fence_post",
+          "x": -1,
+          "z": -5,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "puddle_ring",
+          "x": -3,
+          "z": -2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "barrel",
+          "x": 3,
+          "z": 2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "wood_pile",
+          "x": 4,
+          "z": -3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "hay_bale",
+          "x": 2,
+          "z": 4,
+          "yaw": 0
+        }
+      ]
+    },
+    "orchard": {
+      "name": "Orchard",
+      "radius": 24,
+      "blurb": "Rows of fruit trees and a cider press; moths and owls at night.",
+      "npcs": [
+        {
+          "role": "farmer",
+          "count": 1
+        }
+      ],
+      "pests": [
+        "carrion_moth",
+        "gallows_owl",
+        "dusk_flitter"
+      ],
+      "props": [
+        {
+          "kind": "tree",
+          "id": "oak",
+          "x": -6,
+          "z": -6,
+          "yaw": 0
+        },
+        {
+          "kind": "tree",
+          "id": "oak",
+          "x": 0,
+          "z": -6,
+          "yaw": 0.5
+        },
+        {
+          "kind": "tree",
+          "id": "oak",
+          "x": 6,
+          "z": -6,
+          "yaw": 1
+        },
+        {
+          "kind": "tree",
+          "id": "birch",
+          "x": -6,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "tree",
+          "id": "birch",
+          "x": 6,
+          "z": 0,
+          "yaw": 0.3
+        },
+        {
+          "kind": "prop",
+          "id": "barrel",
+          "x": 0,
+          "z": 3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "barrel",
+          "x": 1.2,
+          "z": 3.4,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "crate",
+          "x": -2,
+          "z": 4,
+          "yaw": 0
+        }
+      ]
+    },
+    "fishing_plot": {
+      "name": "Fishing plot",
+      "radius": 16,
+      "blurb": "Drying racks, nets and a jetty stub on a lake or river bank (Coast/Lakeland farms).",
+      "npcs": [
+        {
+          "role": "fisher",
+          "count": 1
+        }
+      ],
+      "pests": [
+        "fen_croaker",
+        "reed_serpent",
+        "bog_slime"
+      ],
+      "props": [
+        {
+          "kind": "prop",
+          "id": "drying_rack",
+          "x": -3,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "drying_rack",
+          "x": -1,
+          "z": 0.5,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "barrel",
+          "x": 2,
+          "z": 1,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "crate",
+          "x": 3,
+          "z": -1,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "stone_step",
+          "x": 0,
+          "z": 4,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "campfire",
+          "x": -4,
+          "z": -4,
+          "yaw": 0
+        }
+      ],
+      "needs": "water within 12 m"
+    },
+    "mill": {
+      "name": "Mill",
+      "radius": 20,
+      "blurb": "A mill by running water; the heart of a Heartland zone.",
+      "npcs": [
+        {
+          "role": "miller",
+          "count": 1
+        }
+      ],
+      "pests": [
+        "cairn_rat",
+        "moor_hound"
+      ],
+      "props": [
+        {
+          "kind": "prop",
+          "id": "cart_wheel",
+          "x": 0,
+          "z": 0,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "crate",
+          "x": -3,
+          "z": 2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "crate",
+          "x": -2,
+          "z": 3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "barrel",
+          "x": 3,
+          "z": 3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "hay_bale",
+          "x": 4,
+          "z": -2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "fence_post",
+          "x": -6,
+          "z": -4,
+          "yaw": 0
+        }
+      ],
+      "needs": "a river"
+    }
+  },
+  "caves": {
+    "beast_den": {
+      "name": "Beast den",
+      "plan": {
+        "family": "cave_river",
+        "floors": 1
+      },
+      "theme": "A den dug into a hillside; bones at the mouth.",
+      "packs": [
+        "moor_hound",
+        "crag_hyena",
+        "frost_stalker"
+      ],
+      "boss": {
+        "type": "crag_hyena",
+        "rank": "elite"
+      }
+    },
+    "spider_hollow": {
+      "name": "Spider hollow",
+      "plan": {
+        "family": "cave_river",
+        "floors": 1
+      },
+      "theme": "Webs from wall to wall; cocooned travellers.",
+      "packs": [
+        "veil_spider"
+      ],
+      "boss": {
+        "type": "veil_spider",
+        "rank": "elite"
+      }
+    },
+    "old_shaft": {
+      "name": "Old mine shaft",
+      "plan": {
+        "family": "mine_descent",
+        "floors": 1
+      },
+      "theme": "An abandoned working; beetles in the seam.",
+      "packs": [
+        "ironback_beetle",
+        "cairn_rat"
+      ],
+      "boss": {
+        "type": "ironback_beetle",
+        "rank": "elite"
+      }
+    },
+    "smugglers_cave": {
+      "name": "Smugglers' cave",
+      "plan": {
+        "family": "flooded_cistern",
+        "floors": 1
+      },
+      "theme": "A sea or river cave with crates and a lookout.",
+      "packs": [
+        "road_brigand",
+        "brigand_archer"
+      ],
+      "boss": {
+        "type": "brigand_captain",
+        "rank": "elite"
+      }
+    },
+    "barrow_mound": {
+      "name": "Barrow mound",
+      "plan": {
+        "family": "barrow_maze",
+        "floors": 1
+      },
+      "theme": "A small grave mound with its door forced open.",
+      "packs": [
+        "barrow_hound",
+        "cairn_rat"
+      ],
+      "boss": {
+        "type": "barrow_hound",
+        "rank": "elite"
+      }
+    },
+    "sump_grotto": {
+      "name": "Sump grotto",
+      "plan": {
+        "family": "sunken_temple",
+        "floors": 1
+      },
+      "theme": "A drowned grotto, glowing with fen light.",
+      "packs": [
+        "bog_slime",
+        "marsh_wisp",
+        "fen_croaker"
+      ],
+      "boss": {
+        "type": "bog_slime",
+        "rank": "elite"
+      }
+    }
+  },
+  "byArchetype": {
+    "heartland": {
+      "forts": {
+        "watchtower_garrison": 3,
+        "palisade_fort": 2,
+        "ruined_fort": 1
+      },
+      "farms": {
+        "arable": 4,
+        "sheep": 3,
+        "pig": 2,
+        "orchard": 2,
+        "mill": 2
+      },
+      "caves": {
+        "beast_den": 2,
+        "old_shaft": 1,
+        "barrow_mound": 1
+      }
+    },
+    "marsh": {
+      "forts": {
+        "watchtower_garrison": 3,
+        "ruined_fort": 1
+      },
+      "farms": {
+        "fishing_plot": 4,
+        "pig": 1
+      },
+      "caves": {
+        "sump_grotto": 3,
+        "spider_hollow": 1
+      }
+    },
+    "crown_ring": {
+      "forts": {
+        "stone_keep": 3,
+        "watchtower_garrison": 2
+      },
+      "farms": {
+        "arable": 3,
+        "orchard": 2,
+        "mill": 3,
+        "sheep": 1
+      },
+      "caves": {
+        "smugglers_cave": 2,
+        "barrow_mound": 1
+      }
+    },
+    "frontier": {
+      "forts": {
+        "palisade_fort": 3,
+        "warband_stockade": 3,
+        "ruined_fort": 1
+      },
+      "farms": {
+        "arable": 2,
+        "sheep": 2
+      },
+      "caves": {
+        "beast_den": 2,
+        "smugglers_cave": 1
+      }
+    },
+    "wilds": {
+      "forts": {
+        "ruined_fort": 2,
+        "palisade_fort": 1
+      },
+      "farms": {
+        "sheep": 1
+      },
+      "caves": {
+        "beast_den": 3,
+        "spider_hollow": 2,
+        "barrow_mound": 1
+      }
+    },
+    "ruinfield": {
+      "forts": {
+        "ruined_fort": 4,
+        "watchtower_garrison": 1
+      },
+      "farms": {
+        "arable": 1,
+        "sheep": 1
+      },
+      "caves": {
+        "barrow_mound": 3,
+        "old_shaft": 1
+      }
+    },
+    "lakeland": {
+      "forts": {
+        "watchtower_garrison": 2,
+        "palisade_fort": 1
+      },
+      "farms": {
+        "fishing_plot": 4,
+        "orchard": 1
+      },
+      "caves": {
+        "sump_grotto": 2,
+        "smugglers_cave": 1
+      }
+    },
+    "pass": {
+      "forts": {
+        "toll_fort": 4,
+        "watchtower_garrison": 1
+      },
+      "farms": {
+        "sheep": 3
+      },
+      "caves": {
+        "beast_den": 2,
+        "old_shaft": 2
+      }
+    },
+    "blight": {
+      "forts": {
+        "warband_stockade": 4,
+        "ruined_fort": 2
+      },
+      "farms": {
+        "pig": 1
+      },
+      "caves": {
+        "barrow_mound": 2,
+        "spider_hollow": 2
+      }
+    },
+    "holy_ground": {
+      "forts": {
+        "watchtower_garrison": 2,
+        "stone_keep": 1
+      },
+      "farms": {
+        "orchard": 3,
+        "arable": 2,
+        "sheep": 1
+      },
+      "caves": {
+        "barrow_mound": 3
+      }
+    },
+    "mine_country": {
+      "forts": {
+        "palisade_fort": 2,
+        "watchtower_garrison": 2
+      },
+      "farms": {
+        "pig": 1,
+        "sheep": 1
+      },
+      "caves": {
+        "old_shaft": 4,
+        "beast_den": 1
+      }
+    },
+    "coast": {
+      "forts": {
+        "stone_keep": 2,
+        "watchtower_garrison": 2
+      },
+      "farms": {
+        "fishing_plot": 4,
+        "sheep": 1
+      },
+      "caves": {
+        "smugglers_cave": 4,
+        "sump_grotto": 1
+      }
+    }
+  }
+}

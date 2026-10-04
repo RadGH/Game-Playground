@@ -24,7 +24,7 @@ import {
   applyStatus, tickStatuses, slowOf, incomingFrom, outgoingFrom, groundAt, wetAt, cliffStep,
   climbable, crossesWall, COMBAT_FEEL,
 } from './farhold.js';
-import { pickTarget, notice as noticeThreat, clearThreat, threatFromDamage } from './threat.js';
+import { pickTarget, notice as noticeThreat, clearThreat, threatFromDamage, taunt as threatTaunt } from './threat.js';
 
 export const AI = {
   LEASH_METRES: 40,
@@ -107,6 +107,14 @@ export function statusOnHit(field, e, target) {
  * `rpg.strike` with the buffs both sides carry, life steal, the bite's status. Returns the result.
  */
 export function monsterStrike(field, e, victim, { element = 'physical', ranged = false, mult = 1, kind = null } = {}) {
+  if (victim?.side === 'foe') {
+    // a monster swinging at another monster (it was hard-taunted by a turned one): actors.js strikes
+    // the body plainly, `rpg.strike(e, object, rng, {})`, and kills it if it drops
+    const res = field.rpg.strike(e, victim, field.rng, {});
+    field.report(e, victim, res, 'bite');
+    if (res.dead) field.kill(victim);
+    return res;
+  }
   if (victim?.kind === 'object') {
     // a taunting post, banner or wall takes the swing (actors.js onEnemyStrikeObject)
     field.hooks?.onObjectStruck?.(e, victim);
@@ -470,6 +478,11 @@ export function tickMonsters(field, dt, hooks = {}) {
       target = pickTarget(e, lookup, field.usable, dt);
       // woken (pack, band, hit by a DoT) with nothing on the table yet: the nearest friend
       if (!target && near) { noticeThreat(e, near); target = near; }
+    } else if (e.feared && !e.statuses?.fear && e.state === 'flee') {
+      // a fear that runs out THIS tick turns the body back to the chase with something to chase
+      // (Farhold's aimOf answers "the player" for a fleeing body, so its aim is ready either way)
+      target = pickTarget(e, lookup, field.usable, 0) || near;
+      if (target && !e.threat?.has(target.id)) noticeThreat(e, target);
     }
     const aimAt = foe || target || (e.statuses?.turned?.follow ? near : null);
     const adx = aimAt ? aimAt.x - e.x : 0, adz = aimAt ? aimAt.z - e.z : 0;
@@ -517,7 +530,7 @@ export function tickMonsters(field, dt, hooks = {}) {
         e.turnedHits = (e.turnedHits || 0) + 1;
         field.land(foe, res, { fromX: e.x, fromZ: e.z, by: null });
         field.report(e, foe, res, 'bite');
-        threatFromDamage(foe, e, res.amount);
+        threatTaunt(foe, e, 3);              // actors.js: the side it hit answers it (a hard taunt, 3 s)
         if (res.dead) field.kill(foe);
       } else if (adist > e.reach) {
         speed = e.speed;

@@ -318,3 +318,13 @@ button.icon { font-size: 20px; line-height: 1; }
   .boss { width: calc(100vw - 28px); top: 150px; }
   .bag { left: 14px; right: 14px; width: auto; }
 }
+
+/* elite / boss nameplates */
+.plate.rank-elite .plate-name, .plate.rank-champion .plate-name { color: #ffd56a; }
+.plate.rank-elite .plate-bar, .plate.rank-champion .plate-bar { width: 96px; border-color: #c99a3a; }
+.plate.rank-rare .plate-name { color: #8fb4ff; }
+.plate.rank-boss .plate-name { color: #ff9a7a; font-family: var(--serif); font-size: 16px; }
+.plate.rank-boss .plate-bar { display: none; }
+.plate.rank-elite .plate-lvl::after, .plate.rank-champion .plate-lvl::after { content: '+'; }
+.plate.rank-boss .plate-lvl { background: #6b1d14; }
+.chat-ch.party { color: #8fc7ff; }

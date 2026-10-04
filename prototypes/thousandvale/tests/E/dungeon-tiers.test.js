@@ -3,14 +3,15 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { planDungeon, FAMILIES, familyFor, flood, tileIndex, floorPoints, ROOM_KINDS } from '../../js/rules/dungeon-tiers.js';
+import { planDungeon, FAMILIES, familyFor, encounterSetsFor, flood, tileIndex, floorPoints, ROOM_KINDS } from '../../js/rules/dungeon-tiers.js';
 import { dungeonTerrain, dungeonRoomSpec, describeDungeon, unrleTiles } from '../../js/sim/dungeon.js';
 
 const ENC_DIR = new URL('../../data/encounters/', import.meta.url);
 const script = id => JSON.parse(readFileSync(new URL(id + '.json', ENC_DIR), 'utf8'));
 /** arena objects of every encounter the ready families use (what the encounter engine will spawn) */
 const ARENAS = {};
-for (const f of Object.values(FAMILIES)) if (f.ready) for (const e of [...f.encounters.miniboss, f.encounters.boss]) ARENAS[e.id] = script(e.id).arena?.objects || [];
+const SETS = k => encounterSetsFor(k);
+for (const k of Object.keys(FAMILIES)) if (FAMILIES[k].ready) for (const set of SETS(k)) for (const e of [...set.miniboss, set.boss]) ARENAS[e.id] = script(e.id).arena?.objects || [];
 
 const READY = Object.keys(FAMILIES).filter(k => FAMILIES[k].ready);
 const SEEDS = Array.from({ length: 80 }, (_, k) => (k * 2654435761 + 17) >>> 0);
@@ -19,13 +20,27 @@ for (const family of READY) for (const floors of [1, 2, 3, 4]) for (const seed o
 
 const walk = (f, p) => { const k = tileIndex(f, p.x, p.z); return k >= 0 && f.tiles[k] === 1; };
 
-test('at least two families are ready and every planned family falls back to a ready one', () => {
-  assert.ok(READY.length >= 2, 'M1 needs 2 families');
+test('all 8 families are ready; an unknown family falls back; at least 4 families have 2 encounter sets of their own', () => {
   assert.equal(Object.keys(FAMILIES).length, 8);
-  for (const k of Object.keys(FAMILIES)) assert.ok(FAMILIES[familyFor(k)].ready, k);
-  const p = planDungeon(5, { family: 'tower_climb' });
-  assert.equal(p.familyFallback, 'tower_climb');
+  assert.equal(READY.length, 8, 'M2: every layout family');
+  for (const k of Object.keys(FAMILIES)) { assert.ok(FAMILIES[familyFor(k)].ready, k); assert.ok(SETS(k).length >= 1, k); }
+  const p = planDungeon(5, { family: 'no_such_family' });
+  assert.equal(p.familyFallback, 'no_such_family');
   assert.ok(FAMILIES[p.family].ready);
+  assert.ok(Object.values(FAMILIES).filter(f => (f.encounterSets || []).length >= 2).length >= 4);
+});
+
+test('every family x every encounter set plans, places its bosses, and fits their arenas', () => {
+  const bad = [];
+  for (const fam of READY) SETS(fam).forEach((set, si) => {
+    for (const seed of [1, 2, 3]) {
+      const p = planDungeon(seed, { family: fam, floors: 3, set: si, arenas: ARENAS });
+      if (p.encounters.boss !== set.boss.id) bad.push(`${fam} set ${si}: boss ${p.encounters.boss}`);
+      if (p.encounters.miniboss[0] !== set.miniboss[0].id) bad.push(`${fam} set ${si}: mini-boss`);
+      for (const f of p.floors) for (const pr of f.props) { const k = tileIndex(f, pr.x, pr.z); if (k < 0 || !f.tiles[k]) bad.push(`${fam} set ${si} s${seed}: ${pr.id} on a wall`); }
+    }
+  });
+  assert.deepEqual(bad, []);
 });
 
 test('protocol §10.3 shape', () => {
@@ -139,7 +154,7 @@ test('every encounter body is a real bestiary id and every encounter script exis
   const ids = new Set([...enemies.enemies, ...enemies.bosses].map(e => e.id));
   for (const [k, f] of Object.entries(FAMILIES)) if (f.ready) {
     for (const t of [...f.roster.normal, f.roster.elite]) assert.ok(ids.has(t), `${k} roster ${t}`);
-    for (const e of [...f.encounters.miniboss, f.encounters.boss]) { assert.ok(ids.has(e.type), `${e.id} body ${e.type}`); assert.equal(script(e.id).body, e.type, `${e.id}: script body and family body agree`); }
+    for (const e of SETS(k).flatMap(set => [...set.miniboss, set.boss])) { assert.ok(ids.has(e.type), `${e.id} body ${e.type}`); assert.equal(script(e.id).body, e.type, `${e.id}: script body and family body agree`); }
   }
 });
 

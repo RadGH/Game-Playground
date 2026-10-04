@@ -1,0 +1,104 @@
+{
+  "_doc": "Stream E. Vignette placements for zone 'test' (absolute metres, zone coordinates). Made by tools/place-vignettes.mjs from data/vignettes/m1.json against data/zones/test/terrain.bin (input 29b45356); re-run after a re-bake. The recipe's relative coordinates are rotated by yaw around (x, z).",
+  "zone": "test",
+  "terrainHash": "29b45356",
+  "town": {
+    "r": 60
+  },
+  "rules": {
+    "townGap": 160,
+    "doorGap": 70,
+    "spacing": 140,
+    "margin": 60
+  },
+  "placements": [
+    {
+      "id": "hanging_oak",
+      "type": "vignette",
+      "name": "The Hanging Oak",
+      "x": 445,
+      "z": 269,
+      "yaw": 3.01,
+      "radius": 12,
+      "biome": "grassland",
+      "level": 1
+    },
+    {
+      "id": "overturned_cart",
+      "type": "vignette",
+      "name": "The Overturned Cart",
+      "x": 578,
+      "z": 737,
+      "yaw": 2.75,
+      "radius": 14,
+      "biome": "temperateForest",
+      "level": 1
+    },
+    {
+      "id": "dry_well",
+      "type": "vignette",
+      "name": "The Dry Well",
+      "x": 1799,
+      "z": 1634,
+      "yaw": 0.15,
+      "radius": 10,
+      "biome": "grassland",
+      "level": 1
+    },
+    {
+      "id": "boar_wallow",
+      "type": "vignette",
+      "name": "Boar Wallow",
+      "x": 925,
+      "z": 1233,
+      "yaw": 2.52,
+      "radius": 13,
+      "biome": "grassland",
+      "level": 1
+    },
+    {
+      "id": "smugglers_cellar",
+      "type": "vignette",
+      "name": "The Smugglers' Cellar",
+      "x": 154,
+      "z": 117,
+      "yaw": 4.84,
+      "radius": 14,
+      "biome": "grassland",
+      "level": 1
+    },
+    {
+      "id": "drowned_shrine",
+      "type": "vignette",
+      "name": "The Drowned Shrine",
+      "x": 1749,
+      "z": 630,
+      "yaw": 3.8,
+      "radius": 11,
+      "biome": "marsh",
+      "level": 1
+    },
+    {
+      "id": "duel_stones",
+      "type": "vignette",
+      "name": "The Duelling Stones",
+      "x": 1226,
+      "z": 1499,
+      "yaw": 2.85,
+      "radius": 10,
+      "biome": "grassland",
+      "level": 1
+    },
+    {
+      "id": "hedge_witch_garden",
+      "type": "vignette",
+      "name": "The Hedge-Witch's Garden",
+      "x": 1813,
+      "z": 1033,
+      "yaw": 4.84,
+      "radius": 12,
+      "biome": "temperateForest",
+      "level": 1
+    }
+  ]
+}

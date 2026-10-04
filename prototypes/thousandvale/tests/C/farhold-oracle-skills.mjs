@@ -29,7 +29,7 @@ const sink = () => new Proxy(function () {}, {
  * Farhold's skill machinery around one player. `control` = { x, z, yaw }. `barRng` is what the
  * bar draws its dice from (Farhold: `rpg.rng`). Returns { bar, mech, cast(slot, aimPoint), tick(dt) }.
  */
-export function farholdSkills(F, field, player, control, barRng) {
+export function farholdSkills(F, field, player, control, barRng, { followers = false } = {}) {
   F.rpg.rng = barRng;
   Object.assign(control, {
     y: 0, swing: 0, moving: 0,
@@ -259,14 +259,16 @@ export function farholdSkills(F, field, player, control, barRng) {
    * main.js `swingWith` staff / wand / bow branches (line ~9166-9440), effects left out. `held` is
    * the seconds the button was held (the controller's chargeAt / drawPower on release).
    */
-  function rangedAttack(held = 0) {
+  function rangedAttack(held = 0, step = 0) {
     const hands = W.handsOf(player);
     const weapon = hands.main;
     const kind = W.isStaff(weapon) ? 'staff' : (weapon?.castElement && weapon?.ranged) ? 'bolt' : weapon?.ranged ? 'arrow' : 'melee';
     const mods = F.rpg.attackMods(player, kind, { weapon, hand: 'main' });
     const share = mods.power || 1;
-    if (kind === 'staff') W.chargeAt(held, player.derived.swing?.main?.charge || W.STAFF_CHARGE);
-    const shape = { ...W.withArea(W.strikeAt(weapon, 0), player.derived.areaPct || 0) };
+    // the controller drinks the staff's mana while the button is held (player.js spendMana): the
+    // released total is chargeAt's own `mana`
+    if (kind === 'staff') { const c = W.chargeAt(held, player.derived.swing?.main?.charge || W.STAFF_CHARGE); if (c.mana > 0) player.mp = Math.max(0, player.mp - c.mana); }
+    const shape = { ...W.withArea(W.strikeAt(weapon, step), player.derived.areaPct || 0) };
     if (mods.scale && mods.scale !== 1) shape.scale = (shape.scale || 1) * mods.scale;
     const element = mods.element || elementOf(weapon);
     const leaves = mods.element ? statusForElement(mods.element) : statusOf(weapon);

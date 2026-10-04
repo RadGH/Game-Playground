@@ -1,0 +1,40 @@
+{
+  "_doc": "Stream E. Zone archetypes (PLAN §3.3): a content mix layered ON TOP of the floor every zone has (§3.4: a town + hamlets, 2+ farms, a fort, a dungeon door, 1-2 caves, 8-12 vignettes, a hook, a zone event boss, 2 rares, a treasure chain). Weights are relative odds the bake uses when it picks vignettes, monster families and extras; `extras` are what this archetype adds above the floor. M1 ships two in full (heartland, marsh); the other ten are named so vignette tags resolve, and get filled in at M2. Rule: neighbouring zones never share an archetype.",
+  "floor": { "towns": 1, "hamlets": [1, 2], "farms": 2, "forts": 1, "dungeonDoors": 1, "caves": [1, 2], "vignettes": [8, 12], "hooks": 1, "eventBoss": 1, "rares": 2, "treasureChains": 1 },
+  "archetypes": {
+    "heartland": {
+      "name": "Heartland", "status": "ready",
+      "feel": "Rolling farmland and mills; the safe-looking country that brigands and beasts prey on.",
+      "biomes": ["grassland", "shrubland", "temperateForest", "savanna"],
+      "extras": { "villages": 2, "farms": [4, 7], "mill": 1, "banditCamps": [1, 2] },
+      "event": "harvest_festival",
+      "families": { "beast": 3, "humanoid": 3, "aberration": 1, "undead": 0.5 },
+      "monsters": ["moor_hound", "thicket_boar", "road_brigand", "brigand_archer", "brigand_captain", "cairn_rat", "gallows_owl", "carrion_moth"],
+      "vignetteWeights": { "overturned_cart": 3, "hanging_oak": 2, "dry_well": 2, "boar_wallow": 2, "smugglers_cellar": 2, "duel_stones": 1, "hedge_witch_garden": 1 },
+      "dungeonFamilies": ["crypt_spiral", "barrow_maze", "mine_descent"],
+      "music": "heartland_day", "weather": { "clear": 5, "cloud": 3, "rain": 2, "fog": 1 }
+    },
+    "marsh": {
+      "name": "Marsh", "status": "ready",
+      "feel": "Fen and mist, stilt hamlets, drowned chapels; lights in the reeds that are not lanterns.",
+      "biomes": ["marsh", "lake", "temperateForest"],
+      "extras": { "stiltHamlets": 1, "sunkenChapel": 1, "wispLights": true, "fogNights": true },
+      "event": "drowning_bell",
+      "families": { "aberration": 3, "beast": 2, "elemental": 1.5, "undead": 1 },
+      "monsters": ["bog_slime", "fen_croaker", "marsh_wisp", "carrion_moth", "veil_spider", "reed_serpent"],
+      "vignetteWeights": { "drowned_shrine": 3, "hedge_witch_garden": 3, "boar_wallow": 1, "duel_stones": 1 },
+      "dungeonFamilies": ["sunken_temple", "flooded_cistern", "mine_descent"],
+      "music": "marsh_mist", "weather": { "fog": 4, "rain": 3, "cloud": 2, "clear": 1 }
+    },
+    "crown_ring": { "name": "Crown ring", "status": "planned", "feel": "A walled city and its suburbs." },
+    "frontier": { "name": "Frontier", "status": "planned", "feel": "Contested border: a second fort, siege camps, burned farms." },
+    "wilds": { "name": "Wilds", "status": "planned", "feel": "Few people, the best treasure, beast dens." },
+    "ruinfield": { "name": "Ruinfield", "status": "planned", "feel": "One huge old ruin with extra dungeon doors." },
+    "lakeland": { "name": "Lakeland", "status": "planned", "feel": "Lakes, ferries, fishing hamlets, a lake serpent." },
+    "pass": { "name": "Pass", "status": "planned", "feel": "Mountain road, toll fort, switchbacks." },
+    "blight": { "name": "Blight", "status": "planned", "feel": "Corrupted ground held by a warband." },
+    "holy_ground": { "name": "Holy ground", "status": "planned", "feel": "Shrines, pilgrims, a monastery." },
+    "mine_country": { "name": "Mine country", "status": "planned", "feel": "Hills and shafts, a mining town." },
+    "coast": { "name": "Coast", "status": "planned", "feel": "Cliffs, harbours, smugglers' coves, wrecks." }
+  }
+}

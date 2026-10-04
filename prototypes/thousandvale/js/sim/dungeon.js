@@ -163,8 +163,8 @@ export function dungeonRoomSpec(plan, { exitTo, type = 'wolf' } = {}) {
     if (f.chest) objects.push({ type: 'chest', name: 'Reward chest', x: f.chest.x, z: f.chest.z, chest: { tier: 'reward', level: plan.level + 2 * f.index + 2, key: 'reward' } });
     if (f.gate) objects.push({ type: 'gate', name: 'Iron gate', x: f.gate.x, z: f.gate.z, key: 'f' + f.index + '-gate', state: 'closed', gate: { floor: f.index } });
     if (f.lever) objects.push({ type: 'lever', name: 'Lever', x: f.lever.x, z: f.lever.z, key: 'f' + f.index + '-lever', state: 'idle', lever: { floor: f.index } });
-    // arena props: rules-owned objects the encounter scripts find by key (docs/encounters.md §5)
-    for (const pr of f.props || []) objects.push({ type: pr.type, name: pr.type.replace(/_/g, ' '), x: pr.x, z: pr.z, key: pr.id, r: pr.r, rules: true, state: 'idle', room: pr.room });
+    // arena props (`f.props`) are NOT spawned here: the encounter engine (stream C) spawns the real arena
+    // objects when the fight starts; E's props are for the viewer and the client's dressing.
   }
   return { camps, objects };
 }

@@ -296,7 +296,7 @@ tests in tests/A use the stand-in unless they say otherwise (`tests/A/m1-crules.
   state, and building a Farhold unit is the most expensive thing a tick does.
 - Monsters carry `e.rank` (`normal` / `elite` / `boss`; elite and boss also have `STATE.elite`).
 - A camp or dungeon pack with `encounter: '<script id>'` gives its monsters `e.data.encounter` (E's plans name a script per mini-boss / boss room).
-- Dungeon instances (stream E's `js/rules/dungeon-tiers.js`) spawn their `props` as rules-owned objects (`data.rules`, `data.key` = the prop id, `data.room` = the plan room index) before any monster: an encounter script can find them by key or room instead of spawning its own. Levers and gates are the server's (a lever opens its floor's gate: `obj` `used` + `open`).
+- Arena objects are spawned by the encounter engine itself when a fight starts (`host.spawn({kind:'object', …, data:{rules:true, key}})`); the dungeon plan's `props` are NOT spawned by the room (they are for E's viewer and the client's dressing). Levers and gates are the server's (a lever opens its floor's gate: `obj` `used` + `open`).
 - Players carry `e.data.partyId` (null when alone), updated on every party change (+ `onParty`).
 - **Loot**: pass items in `host.award(e, {xp, gold, items, from})` (or emit `{type:'loot', to, items}` —
   the room turns that into the same grant and swallows the event). Every item gets a server-wide `uid`
@@ -467,7 +467,7 @@ Also for the client:
   instance you left if it still lives and you may enter; a gone instance puts you at the door outside.
 
 ### 10.3 Dungeon plan shape (stream E's `js/rules/dungeon-tiers.js` must return this)
-The world uses stream E's `js/rules/dungeon-tiers.js` `planDungeon` (families `crypt_spiral`, `mine_descent`); `js/sim/dungeon.js` keeps a stand-in with the same shape. Extra fields the server honours: `gate` (tiles shut until the floor's `lever` is used), `lever`, `shortcutUp` (stairs to floor 0), `props` (arena objects), `packs[].type` / `.encounter`, `name`. Shape:
+The world uses stream E's `js/rules/dungeon-tiers.js` `planDungeon` (families `crypt_spiral`, `mine_descent`); `js/sim/dungeon.js` keeps a stand-in with the same shape. Extra fields the server honours: `gate` (tiles shut until the floor's `lever` is used), `lever`, `shortcutUp` (stairs to floor 0), `packs[].type` / `.encounter`, `name` (`props` are ignored: C spawns arena objects). Shape:
 ```js
 { family, level, seed, cell: 2,
   floors: [ { index, origin: {x, z}, w, h,             // w×h tiles of `cell` metres; floors laid side by side

@@ -125,6 +125,9 @@ export function createCombat(room) {
     // ---- a held weapon (a drawn bow, a charged staff): the release is the attack. The client says
     // how long it held; the server never believes more than the time since the weapon was ready.
     if (hand === 'main' && (plan?.hold === 'draw' || plan?.hold === 'charge')) {
+      // the pattern step walks on every release, as the controller's mainStep does (it picks the shape)
+      if (t - (clock.lastAt ?? -Infinity) > CAST.COMBO_RESET + (clock.lastEvery || 0)) { clock.mainStep = 0; ch.combo = 0; }
+      const hstep = clock.mainStep++;
       const h = Math.max(0, Math.min(Number.isFinite(held) ? held : 0, t - (clock.readySince ?? clock[readyKey] ?? 0), 5));
       if (plan.hold === 'draw') {
         const d = drawPower(plan.draw, h);
@@ -133,7 +136,7 @@ export function createCombat(room) {
         clock.readySince = clock[readyKey];
         clock.lastAt = t; clock.lastEvery = plan.afterShot ?? 0.12;
         field.emit({ t: 'swing', id: ch.id, hand, step: 0, clip: 'shoot', wind: 0, every: plan.afterShot ?? 0.12 });
-        resolveArrow(ch, weapon, d.power);
+        resolveArrow(ch, weapon, d.power, hstep);
         return { ok: true, hand, kind, power: d.power };
       }
       // the staff's channel drinks mana while held: hold no longer than you can pay for
@@ -144,7 +147,7 @@ export function createCombat(room) {
       clock.readySince = clock[readyKey];
       clock.lastAt = t; clock.lastEvery = plan.afterCast ?? 0.28;
       field.emit({ t: 'swing', id: ch.id, hand, step: 0, clip: 'castStaff', wind: 0, every: plan.afterCast ?? 0.28 });
-      resolveStaff(ch, weapon, hh, c);
+      resolveStaff(ch, weapon, hh, c, hstep);
       return { ok: true, hand, kind, held: hh };
     }
 
@@ -171,7 +174,7 @@ export function createCombat(room) {
 
     const fire = kind === 'melee' ? () => resolveSwing(ch, hand, step, weapon)
       : kind === 'bolt' ? () => resolveWand(ch, weapon, step)
-        : () => resolveArrow(ch, weapon, plan?.power ?? 1);
+        : () => resolveArrow(ch, weapon, plan?.power ?? 1, step);
     if (wind <= 0) fire(); else pending.push({ at: t + wind, fn: fire, who: ch.id });
     field.emit({ t: 'swing', id: ch.id, hand, step, clip: stepRow?.clip || 'attack', wind, every });
     return { ok: true, hand, kind, step, wind, every };
@@ -190,8 +193,11 @@ export function createCombat(room) {
    * where it was aimed — on the first body along the shot, or at full range — after its flight,
    * and strikes everything within the arrow splash at the draw's power.
    */
-  function resolveArrow(ch, weapon, power) {
+  function resolveArrow(ch, weapon, power, step = 0) {
     const mods = rpg.attackMods(ch, 'arrow', { weapon, hand: 'main' });
+    // swingWith posts the weapon's strike shape for every kind of attack; a melee skill borrows it
+    feel.swing.charge = null;
+    ch.lastStrike = { ...withArea(strikeAt(weapon, step), ch.derived.areaPct || 0) };
     const element = mods.element || elementOf(weapon);
     const leaves = mods.element ? ELEMENT_LEAVES[mods.element] || null : statusOf(weapon);
     const plan = ch.derived.swing?.main;
@@ -262,12 +268,12 @@ export function createCombat(room) {
    * A STAFF (main.js `swingWith` staff branch): a close-range spell by element, free to cast. A tap
    * is the ordinary spell; a real charge is its charged form (jet, dome, wall, mortar, storm).
    */
-  function resolveStaff(ch, weapon, held, c) {
+  function resolveStaff(ch, weapon, held, c, step = 0) {
     const mods = rpg.attackMods(ch, 'staff', { weapon, hand: 'main' });
     const share = mods.power || 1;
     const charge = chargeAt(held, c);                       // posts the charge for withArea to fold in
     if (charge.mana > 0) ch.mp = Math.max(0, (ch.mp || 0) - charge.mana);
-    const shape = { ...withArea(strikeAt(weapon, 0), ch.derived.areaPct || 0) };
+    const shape = { ...withArea(strikeAt(weapon, step), ch.derived.areaPct || 0) };
     if (mods.scale && mods.scale !== 1) shape.scale = (shape.scale || 1) * mods.scale;
     ch.lastStrike = shape;
     const element = mods.element || elementOf(weapon);

@@ -291,3 +291,63 @@ entities), shapes as `wireShape()`, `follow` = entity id. **Added `boss`**: on e
 **One difference, please adjust:** `obj` carries the object kind as **`otype`** (not `type` — `type` is the event's own
 key and would collide). It is also in the entity's `info.type`.
 **A**: `rank` on monster `info` is yours (the entity has `e.rank`); please add it (`elite`/`boss`/`normal`).
+
+## E (Content) -> A (Server core), 2026-10-04 — dungeon-tiers.js is ready (the one-line swap)
+`js/rules/dungeon-tiers.js` `planDungeon(seed, {floors, level, family})` returns protocol §10.3 exactly; tests/E/dungeon-tiers.test.js
+runs your `dungeonTerrain` / `dungeonRoomSpec` / `describeDungeon` on it (232 dungeons: every point reachable, stairs/landings walkable,
+gate shuts the guarded room, lever reachable). I see you already read `type`, `encounter`, `gate`, `lever`, `shortcutUp` — thank you.
+1. **Swap**: `planDungeon` from `../rules/dungeon-tiers.js` in world.js. Families ready: `crypt_spiral` (default), `mine_descent`; any
+   of the 8 planned family names falls back to a ready one. Pick the family per door (M1: one door, either is fine — the mine reads
+   well for a zone with "hills", the crypt for "the Barrow").
+2. **Don't pass `arenas`** (and so `plan.props` stays `[]`): the encounter engine spawns each script's arena objects itself at the
+   pull. If props ever arrive, your `dungeonRoomSpec` would spawn them AS WELL — duplicates. `props` exist for the viewer and tests.
+3. **Camps need `data.encounter` and `name`** on the spawned monster entity (`room.spawn({… data: {encounter: c.encounter}})`),
+   C reads `e.data.encounter` (rules/index.js ~265). Without it the mini-bosses fall back to C's `packleader` default and the boss to
+   `barrow_warden` — playable, but not the authored fights. Display names come from the script's `name` (see C ask below).
+4. Wilds encounters for zone `test` (place when you have the spots; coordinates are first guesses, B may move them):
+   - elite `elite_hobb_gallowsby` (body `brigand_captain`, lv 5) + 2 `road_brigand` + 2 `brigand_archer` camp at Fitockpi Ford (~1600, 832), respawn 20 min;
+   - rare `rare_grisel_thornhide` (body `thicket_boar`, lv 4, rank rare) roaming the fields between Torborhold and Wamonhold, respawn 20–60 min;
+   - rare `rare_sallowmaw` (body `fen_croaker`, lv 5, rank rare) in the marsh south of Mawehaven, respawn 20–60 min;
+   - zone event boss `event_grandmother_skein` (body `thornmother`, lv 7, rank boss) near Mawehaven (~832, 576): needs ~40 m radius of open walkable ground (B's bake).
+   - wilds monster mix in `data/provinces/torbor_downs.json` → `zones.test.camps` (types + level bands).
+5. Vignette placements for zone `test`: `data/vignettes/placements/test.json` (absolute metres, walkable-checked) — format in data/vignettes/README.md.
+
+## E (Content) -> C (Combat core), 2026-10-04 — encounter content is in; four small asks
+Ten scripts are listed in `data/encounters/index.json` (3 crypt, 3 mine, elite, 2 rares, zone event boss). tests/E/encounters.test.js fights
+every one in your engine (pull, phases, new bars, shields broken via adds + braziers, triggers, enrage, death) — all green; your suite too.
+1. **Specials by monster TYPE**: `data/encounters/specials_torbor.json` has `types: { moor_hound: [...], thicket_boar: [...], … }` for all
+   14 M1 types (a boar and a beetle share `beast/brute` but should not fight alike). Please let `index.specials` be a list (or add
+   `index.typeSpecials`), merge `types`, and check `D.specials.types?.[e.defId]` before `family/role` in `specialsFor`. My test is a
+   TODO until then (it turns into a real assertion by itself).
+2. **Object names**: arena objects carry `name` ("Hay rick", "Egg sac", "Timber prop", "Candle stand", "Blasting fuse"). Please spawn with
+   `o.spec.name || OBJECT_NAMES[o.type]`; `pool`s with `name` too ("Open grave", "Caltrops", "Sucking mud"). New non-blocking type
+   `cracked_floor` (decal, `blocks:false`, no hp) — abilities target it with `at:'object', object:'cracked_floor'` and then `remove` it.
+3. **Scripted monsters should skip Farhold def `phases` and random rank modifiers**: `event_grandmother_skein` runs on `thornmother` (a Farhold
+   boss def whose own `phases` add venomous/fleet at 70/35%), and a non-boss body at rank boss gets 2 random modifiers in `rankFor`. When a
+   unit has a script, its phases/modifiers should be the script's only.
+4. **Display name**: use the script's `name` for the unit (`spawnMonster(..., {name})`) so the nameplate reads "The Hollow Abbot", not
+   "Hollow Wraith".
+
+## E (Content) -> D (Client), 2026-10-04
+- Arena object types you will see: `pillar` (grave pillars, timber props, hay ricks, gibbet posts — name says which), `rock` (bone heaps,
+  ore lumps, fallen rock), `brazier` (candle stands, blasting fuses, EGG SACS — "use" burns them), `lever` (ore cart brake, bucket winch),
+  `pool` (seep pools, open graves/shafts = pits, caustic puddles, caltrops, sucking mud, the village well that HEALS), and new
+  `cracked_floor` (a crack decal, r 2.6, that later caves in and becomes an `Open grave`/`Open shaft` pool). Please draw by name when
+  C passes it (see E -> C 2).
+- Dungeon plans now carry `look` (Farhold DUNGEON_LOOKS key: `crypt`/`warren`), `name` ("The Ossuary of Saint Orrin"), `gate`, `lever`,
+  `shortcutUp`. Viewer: `tools/dungeon-viewer.html`.
+
+## E (Content) -> B (World bake), 2026-10-04
+For zone `test` (and the M1 bake): the zone event boss needs an **event site**: a ~40 m radius of open, walkable, dry ground (no trees
+or props in it) near Mawehaven, emitted as `sites[{type:'event', id:'event_grandmother_skein', x, z, r:40}]`; the elite's camp needs
+~25 m clear at Fitockpi Ford (`sites[{type:'camp', id:'elite_hobb_gallowsby'}]`). Vignette spots are in
+`data/vignettes/placements/test.json` (picked against terrain.bin: walkable, dry, ≥ 160 m from the town centre, ≥ 120 m apart) — please keep
+scatter (trees/rocks) off a vignette's `radius`, or move them and tell me.
+
+## A (Server core) -> C, D, E, B, G — 2026-10-04: encounter events + arena objects on the wire
+- **Protocol** (`js/net/protocol.js` `EVENT_TYPES`/`EVENT_FIELDS`/`TELE_SHAPES`/`OBJ_STATES`/`OBJ_TYPES`, protocol.md §6): `tele teleR castbar castX phase enrage say obj boss` are in, exactly as D's "encounter events" note and encounters.md §7 (key `type`, local entity ids, the room fills `x, z` from `id` too). `boss {id, name, title?, bars, phases:[{n,name,at}], enrageMs?, arena?}` / `boss {id, end:1, won}`. Monster `info.rank` was already there. A test checks every `emit({ t: … })` in js/rules/encounter.js is a known type (tests/A/m1-encounter). tests/A/m1-crules pulls the real boss and sees `boss, say, obj, phase` arrive — C already sends `boss`, thanks.
+- **C**: (1) `use` on an object with `data.rules` calls `rules.useObject(e, obj)` and answers `used {ok, why, msg: text}`. (2) camp/pack `encounter` → `e.data.encounter`. (3) `host.terrain.reader` is there for baked zones (null in dungeons: flat floors, `walkable` honours closed gates) — use `groundAdapter(host.terrain.reader)`. (4) New `host.objState(obj, state, extra?)`: sets `info.state` (late joiners see a broken pillar / lit brazier) and emits `obj {id, state, …extra}` — please use it for your arena objects instead of a bare `obj` event, so the state sticks. (5) Telegraph knockback via `moveTo` is fine (the self record is resent every snapshot it moves).
+- **E**: `dungeon-tiers.js` is now the world's generator (js/sim/world.js; the stand-in stays in js/sim/dungeon.js). Honoured: `name` (room + `joined.room.dungeon.name`), `look`, `packs[].type` + `.encounter`, `gate` (tiles shut until the floor's `lever` is used: server-owned `lever`/`gate` objects, `obj` `used`/`open`, `dungeon.floors[i].gate.open`), `shortcutUp` (stairs to floor 0). `props` are not spawned by the room (you said C spawns the real arena objects).
+- **D**: object types the client will see: `portal stairs exit chest gate lever` (server's) and arena props `pillar rock brazier pool cracked_floor sarcophagus support_beam ore_cart` (`info.rules:1`); every object `info` may have `key`, `r`, `state`. Gates: draw closed until `obj {state:'open'}` (also `joined.room.dungeon.floors[i].gate.open`).
+- **B**: realm reads `sites[].radius` (town circle) and a `{type:'dungeon', x, z, name?}` site (door) when your bake provides them; until then village = 65 m and the door is placed ~175 m out.
+- **G**: town-edge handoffs are queued, 3 per tick (20 walking out together: 3,3,3,3,3,3,2 over 7 ticks, worst tick 4.9 ms with C's rules; tests/A/m1-encounter "crowd"). Your 101 ms tick should be gone — please re-run tests/load/bots20.

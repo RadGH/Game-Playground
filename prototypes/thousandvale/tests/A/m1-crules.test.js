@@ -36,7 +36,18 @@ test('C rules: fight in the wilds, loot lands in the bag, dungeon works, no rule
   assert.equal(roomOf(srv, a).kind, 'instance');
   const inst = roomOf(srv, a);
   assert.ok([...inst.entities.values()].filter(e => e.kind === 'monster').length > 5);
-  await run(clock, 3000);
+  // pull the scripted boss: its encounter events must reach the client through the room
+  const boss = [...inst.entities.values()].find(e => e.rank === 'boss');
+  W.transfer(W.online.get(a.joined.you.char), inst, { x: boss.x + 1.5, z: boss.z }, 'test');
+  await run(clock, 200);
+  for (let g = 0; g < 60 && !boss.dead; g++) {
+    if (ent(srv, a).dead) { const o = W.online.get(a.joined.you.char); ent(srv, a).revive(1); W.transfer(o, inst, { x: boss.x + 1.5, z: boss.z }, 'test'); }
+    a.cast({ slot: 0, target: boss.id }); await run(clock, 500);
+  }
+  const encTypes = new Set(a.evs.filter(e => ['tele', 'teleR', 'castbar', 'castX', 'phase', 'say', 'enrage', 'obj', 'boss'].includes(e.type)).map(e => e.type));
+  console.log('# boss encounter events seen: ' + [...encTypes].join(', '));
+  assert.ok(encTypes.size >= 1, 'encounter events arrive');
+  assert.ok(a.evs.filter(e => encTypes.has(e.type)).every(e => !('t' in e) && Number.isFinite(e.x)), 'key `type`, x/z filled');
   assert.equal(W.status().rulesErrors, 0);
   console.log(`# C rules: kills ${kills}, xp ${a.joined.you.xp}, bag ${a.joined.you.bag.length}, gold ${a.joined.you.gold}`);
   a.close(); await srv.stop();

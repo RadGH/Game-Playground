@@ -1,0 +1,49 @@
+{
+  "_doc": "Stream E. Province sheet (PLAN §4.1) for the M1 starter province. M1 fills in ONE zone (`zones.test`, the baked test zone around Torborhold); the rest of the sheet is the M2 outline. Names are original (Name Forge style). `camps` are what the wilds of a zone should hold — types are Farhold bestiary ids, `level` is a band.",
+  "id": "torbor_downs",
+  "name": "Torbor Downs",
+  "culture": "human",
+  "band": [1, 8],
+  "capital": "Torborhold",
+  "palette": { "sky": "#9fc2dc", "fog": "#cfd8d0", "grass": "#7f9a4e", "accent": "#c79a3a" },
+  "weather": { "clear": 5, "cloud": 3, "rain": 2, "fog": 1 },
+  "music": "heartland_day",
+  "factions": ["the_reeve_watch", "the_furrow_guild"],
+  "warband": null,
+  "enemyFamilies": { "beast": 3, "humanoid": 3, "aberration": 1.5, "undead": 1 },
+  "worldBoss": { "id": "planned_m3", "note": "M3: the province world boss and its arena zone." },
+  "questline": {
+    "name": "The Ford and the Fields",
+    "steps": [
+      { "n": 1, "quest": "wolves_at_the_fold", "status": "m1" },
+      { "n": 2, "quest": "toll_at_fitockpi", "status": "m1" },
+      { "n": 3, "quest": "webs_in_the_barley", "status": "m1" },
+      { "n": 4, "quest": "what_lies_below", "status": "m1" },
+      { "n": 5, "quest": null, "status": "m2", "note": "The ford gang's paymaster leads to the next zone's fort." }
+    ]
+  },
+  "zones": {
+    "test": {
+      "name": "The Torbor Fields",
+      "archetype": "heartland",
+      "band": [1, 6],
+      "town": "Torborhold",
+      "hamlets": ["Wamonhold", "Mawehaven"],
+      "hook": "the_singing_ford",
+      "dungeon": { "name": "chosen by dungeon-tiers.js", "families": ["crypt_spiral", "mine_descent"], "floors": 2, "level": 3 },
+      "eventBoss": "event_grandmother_skein",
+      "elite": "elite_hobb_gallowsby",
+      "rares": ["rare_grisel_thornhide", "rare_sallowmaw"],
+      "camps": [
+        { "type": "moor_hound", "level": [1, 3], "count": [3, 4], "where": "the sheep folds and open grass around Torborhold" },
+        { "type": "thicket_boar", "level": [2, 4], "count": [2, 3], "where": "woodland edges and the fields toward Wamonhold" },
+        { "type": "road_brigand", "level": [2, 5], "count": [2, 4], "where": "along the road to Fitockpi Ford", "with": "brigand_archer" },
+        { "type": "bog_slime", "level": [3, 5], "count": [1, 3], "where": "the marsh south of Mawehaven" },
+        { "type": "fen_croaker", "level": [2, 4], "count": [2, 3], "where": "the marsh and riverbanks" },
+        { "type": "marsh_wisp", "level": [3, 6], "count": [1, 2], "where": "the marsh, at night" }
+      ],
+      "vignettes": "data/vignettes/placements/test.json",
+      "quests": "data/quests/test.json"
+    }
+  }
+}

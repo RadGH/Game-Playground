@@ -7,7 +7,7 @@ import { randomAvatar, makeRng } from '../../../../avatar-2d/js/random.js';
 import { partIds } from '../../../../avatar-2d/js/parts/index.js';
 import { randomChibi2, CHIBI2_RACES } from '../../../../avatar-3d/js/chibi2-races.js';
 import { loadClassOutfits, dressAs } from '../../../../avatar-3d/js/class-outfits.js';
-import { randomCreature, CREATURE_TYPES } from '../../../../avatar-3d/js/creatures.js';
+import { CREATURE_TYPES } from '../../../../avatar-3d/js/creature-types.js';
 
 export const PLAYABLE_RACES = ['human', 'elf', 'dwarf', 'halfling'];
 export const RACE_NAMES = Object.fromEntries(PLAYABLE_RACES.map(r => [r, CHIBI2_RACES[r]?.name?.replace(/^Chibi 2 /, '') || r]));
@@ -39,15 +39,8 @@ export async function avatarFor(look) {
   return a;
 }
 
-/** A creature spec from what the server sent: `{ type, size, seed }` (+ optional colours). */
-export function creatureFor(spec) {
-  // Server monster type ids map onto avatar-3d creature types; a type with no body yet is drawn as a wolf.
-  const type = MONSTER_BODIES[spec?.type] || (CREATURE_TYPES[spec?.type] ? spec.type : 'wolf');
-  const c = randomCreature(type, (spec?.seed >>> 0) || 1);
-  if (spec?.size) c.size = +(c.size * spec.size).toFixed(2);
-  if (spec?.colors) c.colors = { ...c.colors, ...spec.colors };
-  return c;
-}
+/** The avatar-3d creature type for a server monster type id (a type with no body yet is drawn as a wolf). */
+export function bodyTypeFor(type) { return MONSTER_BODIES[type] || (CREATURE_TYPES[type] ? type : 'wolf'); }
 
 /** Monster type ids (server) whose avatar-3d body has a different name. */
 export const MONSTER_BODIES = { grey_wolf: 'wolf', direwolf: 'dire_wolf', dire_wolf: 'dire_wolf' };

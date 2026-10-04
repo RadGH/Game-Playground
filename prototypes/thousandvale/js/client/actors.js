@@ -11,9 +11,17 @@
 
 import * as THREE from 'three';
 import { createChibi2Character } from '../../../../avatar-3d/js/chibi2.js';
-import { createCreature } from '../../../../avatar-3d/js/creatures.js';
+import { createCreature, randomCreature } from '../../../../avatar-3d/js/creatures.js';
 import { compactCreature } from '../../../../avatar-3d/js/mesh-merge.js';
-import { avatarFor, creatureFor } from './looks.js';
+import { avatarFor, bodyTypeFor } from './looks.js';
+
+/** A creature spec from what the server sent: `{ type, size?, seed, colors? }` — colour varied by seed within its family. */
+function creatureFor(spec) {
+  const c = randomCreature(bodyTypeFor(spec?.type), (spec?.seed >>> 0) || 1);
+  if (spec?.size) c.size = +(c.size * spec.size).toFixed(2);
+  if (spec?.colors) c.colors = { ...c.colors, ...spec.colors };
+  return c;
+}
 const TAU = Math.PI * 2;
 /** Shortest signed difference between two angles. */
 export function angleDelta(a, b) { let d = (b - a) % TAU; if (d > Math.PI) d -= TAU; if (d < -Math.PI) d += TAU; return d; }
@@ -235,5 +243,12 @@ export function createActors(scene, { plateLayer, camera }) {
     return best;
   }
 
-  return { actors, add, remove, update, playAttack, playHit, setDead, setHp, pickAt, get: id => actors.get(id), refreshPlate };
+  /** A room change gives the same body a new id: keep the model, move the key. */
+  function rekey(oldId, newId) {
+    const a = actors.get(oldId); if (!a || oldId === newId) return a;
+    actors.delete(oldId); a.id = newId; a.group.userData.actorId = newId; actors.set(newId, a);
+    return a;
+  }
+
+  return { actors, add, remove, rekey, update, playAttack, playHit, setDead, setHp, pickAt, get: id => actors.get(id), refreshPlate };
 }

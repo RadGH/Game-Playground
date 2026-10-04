@@ -76,11 +76,16 @@ test('two players see each other move and hit a wolf together', async ({ browser
   const landed = { A: false, B: false }, sawOther = { A: false, B: false };
   const end = Date.now() + 75000;
   while (Date.now() < end && !(landed.A && landed.B && sawOther.A && sawOther.B)) {
-    for (const [key, P, me, other] of [['A', A, a0.you.id, b0.you.id], ['B', B, b0.you.id, a0.you.id]]) {
+    // ids are local to a ROOM: after the town -> wilds handoff every id changed, so look myself up
+    // fresh and find the other player by name
+    for (const [key, P, otherName] of [['A', A, 'Brem'], ['B', B, 'Alda']]) {
       const s = await st(P.page);
-      const w = s.ents.find(e => e.id === wolf.id);
-      if (!w || w.dead) continue;
+      const me = s.you.id, other = s.ents.find(e => e.kind === 'player' && e.name === otherName)?.id;
+      let w = s.ents.find(e => e.id === wolf.id && !e.dead);
+      if (!w) w = s.ents.filter(e => e.kind === 'monster' && !e.dead).sort((p, q) => Math.hypot(p.x - s.you.x, p.z - s.you.z) - Math.hypot(q.x - s.you.x, q.z - s.you.z))[0];
+      if (!w) continue;
       const d = Math.hypot(w.x - s.you.x, w.z - s.you.z);
+      if (process.env.TV_DEBUG) console.log(key, 'you', s.you.x.toFixed(1), s.you.z.toFixed(1), 'wolf', w.id, w.x, w.z, 'd', d.toFixed(1), 'dead', s.you.dead, 'hp', s.you.hp);
       if (d > 2.2) await P.page.evaluate(([x, z]) => window.tv.walkTo(x, z), [w.x, w.z]);
       else await P.page.evaluate(id => { window.tv.stop(); window.tv.cast(0, id); }, w.id);
       // a swing hits whatever wolf of the pack is in its arc, not only the one targeted — so "together" =
@@ -89,7 +94,7 @@ test('two players see each other move and hit a wolf together', async ({ browser
       for (const ev of s.events) {
         if (ev.type !== 'hit' || ev.kind !== 'dmg' || !monsters.has(ev.d)) continue;
         if (ev.s === me) landed[key] = true;
-        if (ev.s === other) sawOther[key] = true;
+        if (other != null && ev.s === other) sawOther[key] = true;
       }
     }
     await A.page.waitForTimeout(250);

@@ -180,3 +180,11 @@ button.icon { font-size: 20px; line-height: 1; }
   .help { display: none; }
   .slot { width: 46px; height: 46px; }
 }
+
+/* loot lines and toasts, coloured by rarity */
+.chat-log .loot { color: #e9d9a6; }
+.chat-log .rarity-magic, .toast.rarity-magic { color: #6fa8ff; }
+.chat-log .rarity-rare, .toast.rarity-rare { color: #ffd54d; }
+.chat-log .rarity-legendary, .toast.rarity-legendary, .chat-log .rarity-unique, .toast.rarity-unique { color: #ff9a3d; }
+.chat-log .rarity-set, .toast.rarity-set { color: #63e07a; }
+.toast.loot { font-family: var(--serif); font-size: 18px; }

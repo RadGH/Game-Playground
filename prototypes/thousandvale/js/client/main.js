@@ -248,21 +248,28 @@ function wireNet(net) {
 }
 
 function onJoined(j) {
+  const prevRoom = S.room, prevSelf = S.selfId;
   S.room = j.room; S.selfId = j.you.id;
   S.mirror.reset();
-  for (const id of [...actors.actors.keys()]) actors.remove(id);
+  // Every id in the old room is void now — except our own body, which keeps its model under the new id.
+  const keep = prevSelf != null && actors.get(prevSelf) ? prevSelf : null;
+  for (const id of [...actors.actors.keys()]) if (id !== keep) actors.remove(id);
+  if (keep != null) actors.rekey(keep, S.selfId);
+  if (S.target != null) setTarget(null);
   preview = null;
   const you = j.you;
   Object.assign(S.self, { name: you.name, cls: you.cls, level: you.level, xp: you.xp || 0, next: you.xpNext || 100, hp: you.hp, hpMax: you.hpMax, dead: you.hp <= 0 });
   S.predictor.locked = S.self.dead;
   useTerrain(j.room.terrain, j.room.kind === 'town' ? j.room.spawn : null).then(() => {
     S.predictor.reset({ x: you.x, y: you.y, z: you.z });
-    const a = actors.add({ id: S.selfId, kind: 'player', name: you.name, level: you.level, hp: you.hp, hpMax: you.hpMax, hostile: false,
+    const a = actors.get(S.selfId) || actors.add({ id: S.selfId, kind: 'player', name: you.name, level: you.level, hp: you.hp, hpMax: you.hpMax, hostile: false,
       look: lookFor(S.mirror.infos.get(S.selfId)?.look || { race: S.look.race, seed: S.look.seed }, you.char, you.cls), x: you.x, y: you.y, z: you.z, yaw: you.yaw }, { self: true });
     a.self = true;
     controls.setFacing(you.yaw || 0); controls.cam.yaw = you.yaw || 0;
     hud.setSelf(S.self);
-    if (S.phase !== 'world') startWorld(j); else hud.toast('Reconnected.', 'good');
+    if (S.phase !== 'world') startWorld(j);
+    else if (prevRoom && prevRoom.id !== j.room.id && j.room.name !== prevRoom.name) { hud.zone(j.room.name); hud.chat(`You enter ${j.room.name}.`, 'system'); }
+    else if (!prevRoom || prevRoom.id === j.room.id) hud.toast('Reconnected.', 'good');
   });
 }
 
@@ -282,7 +289,7 @@ function ensureActor(id) {
     const hpMax = info.hpMax || 100;
     const y = e.y ?? groundY(e.x, e.z);
     a = actors.add({
-      id, kind, name: info.name || (kind === 'monster' ? 'Creature' : 'Adventurer'), level: info.level || 1,
+      id, kind, name: displayName(info.name, kind), level: info.level || 1,
       hp: Math.round((e.hp ?? 1) * hpMax), hpMax, hostile: info.team === 2 || (kind === 'monster' && info.team !== 1),
       look: kind === 'player' ? lookFor(info.look, info.char ?? id, info.cls) : null,
       creature: kind !== 'player' ? { type: info.type || 'wolf', seed: (id * 7919) >>> 0 } : null, family: info.type || null,
@@ -292,11 +299,16 @@ function ensureActor(id) {
   }
   return a;
 }
+/** Monster names arrive as type ids ("wolf", "moor_hound"); show them as names. */
+function displayName(n, kind) {
+  if (!n) return kind === 'monster' ? 'Creature' : 'Adventurer';
+  return kind === 'player' ? n : n.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
 function refreshFromInfo(id) {
   const a = actors.get(id), info = S.mirror.infos.get(id);
   if (!a || !info) return;
   const levelled = info.level > a.level;
-  a.name = info.name || a.name; a.level = info.level || a.level; a.hpMax = info.hpMax || a.hpMax;
+  a.name = info.name ? displayName(info.name, a.kind) : a.name; a.level = info.level || a.level; a.hpMax = info.hpMax || a.hpMax;
   actors.refreshPlate(a);
   if (levelled && id !== S.selfId) levelFlash(id);
 }
@@ -384,6 +396,12 @@ function onEvent(ev) {
       levelFlash(ev.d);
       break;
     }
+    case 'loot':
+      if (ev.d === me || ev.to === me) {
+        if (ev.gold) hud.chat(`You pick up ${ev.gold} gold.`, 'loot');
+        for (const it of ev.items || []) { hud.chat(`You loot: ${it.name}`, 'loot rarity-' + (it.rarity || 'common')); hud.toast(it.name, 'loot rarity-' + (it.rarity || 'common')); }
+      }
+      break;
     case 'aggro':
       if (ev.d === me) { const a = actors.get(ev.s); if (a) fx.number({ x: a.pos.x, y: a.pos.y + a.height + 0.3, z: a.pos.z }, '!', 'in'); }
       break;

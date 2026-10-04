@@ -26,7 +26,8 @@ import { randomHex } from './sha256.js';
 import { createParties } from './party.js';
 import { createEconomyLog } from './economy.js';
 import { findTown, findDoor, townGate, wildsCamps } from './realm.js';
-import { planDungeon as planStandIn, dungeonTerrain, dungeonRoomSpec, describeDungeon } from './dungeon.js';
+import { dungeonTerrain, dungeonRoomSpec, describeDungeon } from './dungeon.js';
+import { planDungeon as planTiers } from '../rules/dungeon-tiers.js';     // stream E's generator (js/sim/dungeon.js keeps the stand-in)
 
 const TICKET_MS = 30000, LEASE_MS = 30000, HEARTBEAT_MS = 10000;
 const BAD_LIMIT = 20, BAD_WINDOW_MS = 10000;
@@ -34,6 +35,7 @@ const FLOOD_LIMIT = 300;               // over-rate messages are dropped quietly
 export const BAG_MAX = 120;
 export const TOWN_EDGE = 2;              // metres of hysteresis at the town edge (no flapping)
 export const TARGET_RANGE = 60;          // a Tab target must be this close
+export const EDGE_PER_TICK = 3;          // town-edge handoffs done per tick (a crowd crossing together is spread out)
 const RARE = new Set(['rare', 'unique', 'legendary', 'set']);
 
 export function createWorld(opts) {
@@ -41,7 +43,7 @@ export function createWorld(opts) {
     store, terrain, build = 'dev', seed = 1, createRules = rulesV0, classes = null,
     now = () => Date.now(), wallNow = () => Date.now(), log = () => {}, processName = 'p0', lingerMs = 5000, saveEveryMs = 10000,
     perfNow = now, copyCap = 300, copyIdleMs = 5 * 60000, instanceIdleMs = 30 * 60000, dungeonLevel = 3,
-    planDungeon = planStandIn, filterText = t => t, chestResetMs = 30 * 60000, zoneName = 'The Test Vale',
+    planDungeon = planTiers, filterText = t => t, chestResetMs = 30 * 60000, zoneName = 'The Test Vale',
   } = opts;
   const owner = processName + ':' + randomHex(4);
   const bootNonce = randomHex(4);
@@ -130,10 +132,10 @@ export function createWorld(opts) {
     const dterr = dungeonTerrain(plan);
     const spec = dungeonRoomSpec(plan, { exitTo: { room: 'wilds', x: door.x + 3, z: door.z + 3 } });
     const r = createRoom({
-      id: 'i:' + n, name: 'The Barrow', kind: 'instance', terrain: dterr, seed: dseed, createRules, hooks: roomHooks,
+      id: 'i:' + n, name: plan.name || 'The Barrow', kind: 'instance', terrain: dterr, seed: dseed, createRules, hooks: roomHooks,
       camps: spec.camps, objects: spec.objects, spawn: plan.floors[0].entry,
       meta: { key, party: partyId, allowed: new Set(allowed), emptySince: 0, plan, made: now() },
-      describeExtra: { dungeon: describeDungeon(plan) },
+      describeExtra: { get dungeon() { return describeDungeon(plan, dterr); } },
     });
     rooms.set(r.id, r); instances.set(key, r); counters.instancesMade++;
     return r;
@@ -449,14 +451,29 @@ export function createWorld(opts) {
   }
   function safeRules(r, fn, ...a) { try { return r.rules[fn](...a); } catch (err) { log('rules ' + fn, err && err.message); return undefined; } }
 
-  /** Town edge: walk in -> the town room; walk out -> your wilds copy. Every 5th tick. */
-  function checkEdges() {
-    for (const o of online.values()) {
-      if (!o.conn || o.entity.dead) continue;
+  /** Town edge: walk in -> the town room; walk out -> your wilds copy. Checked every 5th tick; the
+   *  handoffs themselves are queued and done EDGE_PER_TICK a tick, so a crowd walking out together costs
+   *  a few small ticks instead of one long one (stream G's 101 ms tick). */
+  const edgeQueue = new Set();
+  const edgeDir = o => {
+    if (!o.conn || o.entity.dead) return null;
+    const e = o.entity, d = Math.hypot(e.x - town.x, e.z - town.z);
+    if (o.room.kind === 'wilds' && d < town.r - TOWN_EDGE) return 'in';
+    if (o.room === townRoom && d > town.r + TOWN_EDGE) return 'out';
+    return null;
+  };
+  function checkEdges() { for (const [id, o] of online) if (edgeDir(o)) edgeQueue.add(id); }
+  function drainEdges() {
+    let n = 0;
+    for (const id of edgeQueue) {
+      if (n >= EDGE_PER_TICK) break;
+      edgeQueue.delete(id);
+      const o = online.get(id);
+      const dir = o && edgeDir(o);
+      if (!dir) continue;
       const e = o.entity;
-      const d = Math.hypot(e.x - town.x, e.z - town.z);
-      if (o.room.kind === 'wilds' && d < town.r - TOWN_EDGE) transfer(o, townRoom, { x: e.x, z: e.z }, 'gate');
-      else if (o.room === townRoom && d > town.r + TOWN_EDGE) transfer(o, pickCopy(o.char, o), { x: e.x, z: e.z }, 'gate');
+      transfer(o, dir === 'in' ? townRoom : pickCopy(o.char, o), { x: e.x, z: e.z }, 'gate');
+      n++;
     }
   }
 
@@ -473,6 +490,17 @@ export function createWorld(opts) {
       if (d.portal.to === 'dungeon') return enterDungeon(o, obj);
     }
     if (d.chest) return openChest(o, obj);
+    if (d.lever) {
+      if (d.state === 'used') return s.sendJSON({ t: 'used', id, ok: false, why: 'used', msg: 'It will not move again.' });
+      const opened = o.room.terrain.openGate ? o.room.terrain.openGate(d.lever.floor) : false;
+      o.room.objState(obj, 'used');
+      for (const g of o.room.objects.values()) if (g.data && g.data.gate && g.data.gate.floor === d.lever.floor) o.room.objState(g, 'open');
+      return s.sendJSON({ t: 'used', id, ok: true, kind: 'lever', opened });
+    }
+    if (d.rules && o.room.rules.useObject) {
+      const res = safeRules(o.room, 'useObject', e, obj) || { ok: false, why: 'unknown' };
+      return s.sendJSON({ t: 'used', id, ok: !!res.ok, why: res.ok ? undefined : (res.why || 'unknown'), msg: res.text, kind: obj.type });
+    }
     return s.sendJSON({ t: 'used', id, ok: false, why: 'unknown' });
   }
 
@@ -770,6 +798,7 @@ export function createWorld(opts) {
     ticks++;
     for (const r of rooms.values()) r.step();
     if (ticks % 5 === 0) checkEdges();
+    if (edgeQueue.size) drainEdges();
     if (ticks % 10 === 0) sendPartyFrames();
     const t = now();
     for (const o of online.values()) {

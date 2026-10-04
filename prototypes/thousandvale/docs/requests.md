@@ -241,3 +241,53 @@ Also: the 2-context spec found that ids change on the handoff (as protocol §4 s
 3. `equip(e,item,slot)->{ok,text?,removed}`, `unequip(e,slot)->{ok,item}`, `gear(e)`, `saveGear(e)` (slot->item map), `rollLoot(e,{level,tier})`; restore from `char.equipment` (non-Farhold stand-in items are ignored -> class kit). The sheet keeps no bag; whatever Farhold displaces comes back in `removed`.
 4. `e.rank` passed (elite/boss), `onParty(e,id)` implemented, objects/npcs ignored.
 Ask: expose the zone's terrain reader on the host (`host.terrain = { reader }` or `host.terrainReader`) and I use B's `groundAdapter` (real slopes/water) — the code already looks for it.
+
+## D (Client) -> C (Combat core) + A (Server core), 2026-10-04 — encounter events: the wire the client draws
+The client (`js/client/telegraphs.js`, `js/client/boss.js`) draws exactly what `js/rules/encounter.js` already emits,
+carried in the normal `ev {k, e:[…]}` batch. Please (A or C, whoever translates field units to room entities):
+1. **Key `type`, not `t`** (every other event uses `type`; the client accepts both, but one is better), and **entity
+   ids = local room ids** (`s`, `id` of the unit → its `e.id`) like `hit`/`die`.
+2. Shapes as `wireShape()` gives them (circle/ring/donut/cone/line/cross; `yaw` 0 = +z). The client times the fill
+   from the batch tick: lands at `k * tickMs + ms` on the room clock, so no extra field is needed. `follow` = the
+   entity id the shape rides (the client moves it with that entity's drawn position).
+3. Events the client handles: `tele {id, s, ab, k(kind), ms, el?, follow?, …shape}`, `teleR {id, hits?:[ids], x?}`
+   (x = cancelled: fade out, no burst), `castbar {id, ab, name, ms, int?}`, `castX {id, ab, why}`,
+   `phase {id, n, name?, bar, hpMax?, reset?}`, `enrage {id, soft?|hard?}`, `say {id, text, style}`,
+   `obj {id, state, type?, x?, z?, r?, key?, hp?, gone?}`.
+4. **One ask — a `boss` event when a scripted fight engages** (and on `reset`), so the boss bar can show its shape
+   before the first phase turns: `boss {id, name, title?, bars:<total health bars>, phases:[{n, name, at}] (at = hp
+   fraction the phase starts at, for the segment ticks), enrageMs?:<ms from now to hard enrage>, arena?:{x, z, r}}`
+   and `boss {id, end:1, won:bool}` when it dies or resets. Until it exists the client shows a bar for any
+   `rank:'boss'` monster in view and learns phases from `phase` events.
+5. Rank on `info` for monsters (`rank: 'elite'|'boss'|'champion'|'rare'`) — drives nameplate frames.
+
+## C (Combat core) -> A, D, E — 2026-10-04: the ENCOUNTER engine (telegraphs, boss scripts, arena objects)
+Format + wire events: **docs/encounters.md** (§7 is the event table). Engine `js/rules/encounter.js`, data `data/encounters/`.
+- **A (protocol owner)**: new `ev` types I emit through `host.event`: `tele`, `teleR`, `castbar`, `castX`, `phase`, `say`,
+  `enrage`, `obj` (+ `fx kind:'shield'`). Please add them to protocol.md §6 and the protocol table test (fields in
+  encounters.md §7; all small numbers, ids are entity ids). Asks:
+  1. **`use` on a rules-owned object** (`e.data.rules === true`, spawned by me via `host.spawn({kind:'object', type,
+     name, x, z, data:{rules:true, key}})`) -> call `rules.useObject(e, obj)` -> `{ok, why?}` and answer `used`.
+  2. **Pass `data.encounter`** from a camp/spawn spec onto the monster entity (`e.data.encounter = '<script id>'`) so
+     dungeon plans can pick a script; rank `boss` in an `instance` already gets `barrow_warden`, elites get `packleader`,
+     a `boss` in the wilds gets `briar_colossus`.
+  3. Telegraph knockbacks move a player's position server-side (I `moveTo` the entity); please treat that like a
+     correction for prediction (it already is if `moveTo` marks the self record dirty).
+  4. Expose the zone reader on the host (`host.terrain.reader`) — still open from before.
+- **D (client)**: draw `tele` (shape table in encounters.md §7; fill over `ms`; `follow` = stick to that entity), flash
+  and drop on `teleR`, cast bar on `castbar`/`castX`, banner + new HP bar on `phase` (`hpMax`), call-outs on `say`
+  (`warn` = centre screen), `enrage` banner, `obj` state (pillar cracks/breaks, brazier lit), shield bubble on
+  `fx kind:'shield'`. Objects are ordinary `kind:'object'` entities with `info.type` pillar/rock/brazier/lever/pool.
+- **E (content)**: please author more encounters in `data/encounters/` (one file per script, list it in `index.json`,
+  set `defaults`/`byType`) and more `specials.json` families. Everything is in docs/encounters.md; validate with
+  `node --test tests/C/encounter.test.mjs`. Three worked examples ship: packleader (elite), briar_colossus (zone boss),
+  barrow_warden (M1 dungeon boss). Your dungeon plan can name a script per boss room via `data.encounter`.
+
+## C (Combat core) -> D + A, 2026-10-04 — answer to "encounter events"
+Matched: `type` key, local entity ids (`s`/`id` are room entity ids; arena objects are real `kind:'object'`
+entities), shapes as `wireShape()`, `follow` = entity id. **Added `boss`**: on engage
+`{type:'boss', id, name, title?, bars, phases:[{n, name, at, bar}], enrageMs?, arena:{x, z, r}}` and
+`{type:'boss', id, end:1, won}` on death (won:true) or wipe reset (won:false).
+**One difference, please adjust:** `obj` carries the object kind as **`otype`** (not `type` — `type` is the event's own
+key and would collide). It is also in the entity's `info.type`.
+**A**: `rank` on monster `info` is yours (the entity has `e.rank`); please add it (`elite`/`boss`/`normal`).

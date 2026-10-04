@@ -1,0 +1,10 @@
+{
+  "_doc": "Every encounter file the combat core loads (js/rules/data.js), the default script per rank and room kind, and per-monster-type overrides. Format: docs/encounters.md. Validate with `node --test tests/C/encounter-data.test.mjs`.",
+  "files": ["packleader.json", "briar_colossus.json", "barrow_warden.json"],
+  "specials": "specials.json",
+  "defaults": {
+    "boss": { "instance": "barrow_warden", "wilds": "briar_colossus", "any": "barrow_warden" },
+    "elite": { "any": "packleader" }
+  },
+  "byType": {}
+}

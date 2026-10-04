@@ -65,7 +65,7 @@ export function createRoom(opts) {
     /** Emit without interception (the world's own loot events). */
     emit(ev) {
       if (ev.x === undefined) {
-        const ref = entities.get(ev.d) || entities.get(ev.s) || entities.get(ev.to);
+        const ref = entities.get(ev.d) || entities.get(ev.s) || entities.get(ev.id) || entities.get(ev.to);
         if (ref) { ev.x = ref.x; ev.z = ref.z; }
       }
       events.push(ev);
@@ -90,6 +90,7 @@ export function createRoom(opts) {
     despawn(e, delayMs = 0) { if (delayMs > 0) despawns.push({ at: room.now() + delayMs, e }); else room.remove(e); },
     award: (e, a) => room.award(e, a),
     newUid: () => (hooks.newUid ? hooks.newUid() : id + ':' + (++uidN)),
+    terrain,                       // the room's terrain; `terrain.reader` = B's reader for a baked zone (groundAdapter)
     safeZones,
     inSafeZone(x, z) { for (const c of safeZones) if ((x - c.x) ** 2 + (z - c.z) ** 2 <= c.r * c.r) return true; return false; },
     kind,
@@ -118,15 +119,18 @@ export function createRoom(opts) {
     entities.set(e.id, e);
     grid.add(e);
     stats.spawned++;
+    if (e.kind === 'object') room.objects.set(e.id, e);      // also rules-spawned arena objects
     safe('addEntity', e);
     return e;
   };
+  room.objects = new Map();
   room.remove = function (e) {
     if (e.removed) return;
     e.removed = true;
     safe('removeEntity', e);
     grid.remove(e);
     entities.delete(e.id);
+    room.objects.delete(e.id);
     clients.delete(e.id);
   };
 
@@ -208,7 +212,7 @@ export function createRoom(opts) {
       const tx = c.x + Math.cos(a) * r, tz = c.z + Math.sin(a) * r;
       if (room.walkable(tx, tz)) { x = tx; z = tz; break; }
     }
-    const m = room.spawn({ kind: 'monster', type: c.type, level: c.level || 1, x, z, yaw: host.random('spawn') * 6.283, rank: c.rank || 'normal', state: c.rank && c.rank !== 'normal' ? STATE.elite : 0 });
+    const m = room.spawn({ kind: 'monster', type: c.type, level: c.level || 1, x, z, yaw: host.random('spawn') * 6.283, rank: c.rank || 'normal', state: c.rank && c.rank !== 'normal' ? STATE.elite : 0, data: c.encounter ? { encounter: c.encounter } : null });
     c.live.add(m.id);
   }
   function fillCamps(now, initial = false) {
@@ -411,12 +415,18 @@ export function createRoom(opts) {
   }
   function stripTo(ev) { const o = { ...ev }; delete o.to; return o; }
 
-  // objects: portals, stairs, exits, chests (team 0: nobody fights them)
-  room.objects = new Map();
+  // objects: portals, stairs, exits, chests, gates, levers, arena props (team 0: nobody fights them)
   for (const o of objects) {
-    const e = room.spawn({ kind: 'object', type: o.type, name: o.name || o.type, x: o.x, z: o.z, yaw: o.yaw || 0, team: 0, data: { portal: o.portal || null, chest: o.chest || null } });
-    room.objects.set(e.id, e);
+    room.spawn({ kind: 'object', type: o.type, name: o.name || o.type, x: o.x, z: o.z, yaw: o.yaw || 0, team: 0,
+      data: { portal: o.portal || null, chest: o.chest || null, gate: o.gate || null, lever: o.lever || null, rules: !!o.rules, key: o.key || null, r: o.r || null, state: o.state || null, room: o.room ?? null } });
   }
+  /** Change an object's state (lit, used, broken, open…): late joiners see it in `info`, everyone near gets `obj`. */
+  room.objState = function (o, state, extra = {}) {
+    o.data = { ...(o.data || {}), state };
+    o.infoVer++;
+    room.emit({ type: 'obj', id: o.id, state, x: o.x, z: o.z, ...extra });
+  };
+  host.objState = room.objState;
   /** The object `objId` if `e` stands within reach of it. */
   room.objectNear = function (e, objId, reach = 4) {
     const o = room.objects.get(objId);

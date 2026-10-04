@@ -25,6 +25,8 @@ It runs the same under Node (server), in a Web Worker (offline play) and on the 
 | `character.js` | `createCharacter` (class kit as Farhold's `begin()` hands it out, plus Farhold's skill bar) and `serializeGear`/`restoreGear`. | main.js ~843 |
 | `cast.js` | `createCombat(room)`: **basic attacks** (melee pattern clock + wind-up, bow draw, crossbow/javelin, wand bolt, staff tap/charge + charged forms), status landing, **kill rewards** (shared tagging, xp, gold, loot with `uid`), the tick. | main.js `swingWith`, `onArrowLand`, `landStatus`, `onEnemyKilled` |
 | `cast-skills.js` | **Skills**: the plan comes from Farhold's skill bar; this file carries it out (beam/ground/line/repeats/dash/self/melee/around/bolt), plus afterCast (taunt, barrier, heal, revive, cleanse, link, selfBuff, place, pool, burst, wall), placed objects, pools, links, kill rules, and on-hurt events (counter, burst, reflect, link share). | main.js `castSkill`/`fireBolt`/`dropPool`, skillrun.js |
+| `encounter.js` | **Encounter engine**: boss scripts (phases by health, new health bars, adds, shields, enrage, triggers, arena objects — pillars, rocks, braziers, levers, pools), telegraphed specials for every ordinary monster by family and rank, mechanics (stack, soak, safe spots, line of sight, interrupts, tank swaps). Data in `data/encounters/`, format in `docs/encounters.md`. | new |
+| `telegraph.js` | Telegraph geometry: circle, ring/donut, cone, line, cross; line-of-sight test. | new |
 | `targeting.js` | Tab targeting: `tabOrder`, `nextTarget`, `validTarget` (hostile or friendly lists). | new |
 | `terrain-flat.js` | The terrain interface every walker reads, as a flat stand-in for tests. | — |
 

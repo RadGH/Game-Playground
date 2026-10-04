@@ -106,7 +106,7 @@ export function statusOnHit(field, e, target) {
  * A monster's melee swing lands on `victim` (main.js `onEnemyStrike`, line ~9584): Farhold's
  * `rpg.strike` with the buffs both sides carry, life steal, the bite's status. Returns the result.
  */
-export function monsterStrike(field, e, victim, { element = 'physical', ranged = false } = {}) {
+export function monsterStrike(field, e, victim, { element = 'physical', ranged = false, mult = 1, kind = null } = {}) {
   if (victim?.kind === 'object') {
     // a taunting post, banner or wall takes the swing (actors.js onEnemyStrikeObject)
     field.hooks?.onObjectStruck?.(e, victim);
@@ -114,13 +114,13 @@ export function monsterStrike(field, e, victim, { element = 'physical', ranged =
     return null;
   }
   // the victim's own skill statuses (wards, counters, "every N hits" bursts) act as the victim
-  const hit = () => field.rpg.strike(e, victim, field.rng, { multiplier: incomingFrom(victim) * outgoingFrom(e), element, ranged });
+  const hit = () => field.rpg.strike(e, victim, field.rng, { multiplier: mult * incomingFrom(victim) * outgoingFrom(e), element, ranged });
   const result = field.hooks?.asActor ? field.hooks.asActor(victim, hit) : hit();
   field.hooks?.onHurt?.(result, e, victim);                 // skill wards/counters (cast.js, M1)
   if (e.lifeSteal) e.hp = Math.min(e.maxHp, e.hp + Math.round(result.amount * e.lifeSteal));
   if (e.onHit?.length) statusOnHit(field, e, victim);
   e.lastCombatAt = field.clock;
-  field.report(e, victim, result, ranged ? 'shot' : 'bite');
+  field.report(e, victim, result, kind || (ranged ? 'shot' : 'bite'));
   if (result.dead && victim.hp <= 0) {
     if (victim.kind === 'player') {
       victim.dead = true;
@@ -475,6 +475,12 @@ export function tickMonsters(field, dt, hooks = {}) {
     const adx = aimAt ? aimAt.x - e.x : 0, adz = aimAt ? aimAt.z - e.z : 0;
     const adist = Math.hypot(adx, adz);
     e.aimingAt = target && target.kind !== 'player' ? target : null;
+
+    // an encounter's special or boss ability (js/rules/encounter.js): while it casts, it holds still
+    if (field.hooks?.think && e.state === 'chase' && !e.statuses?.turned && field.hooks.think(e, target, adist, dt)) {
+      e.y = ground(field, e.x, e.z, e.y);
+      continue;
+    }
 
     const standOff = e.ranged && !e.statuses?.silence && !e.statuses?.turned ? Math.min(e.ranged.range * 0.65, e.ranged.range - 6) : 0;
     let speed = 0;

@@ -1,0 +1,85 @@
+{
+  "_doc": "Stream E. Telegraphed specials for every monster TYPE that lives in Torborhold's zone and its two dungeon families (M1). Looked up by monster type id (Farhold bestiary id) BEFORE the family/role table in specials.json, so a boar and a beetle that share 'beast/brute' still fight differently. Same ability format as specials.json (docs/encounters.md); rank scales them (champion/rare: bigger, faster, +extraPerRank copies). Every type gets at least one telegraph you can step out of; wind-ups are never under 0.9 s.",
+  "types": {
+    "moor_hound": [
+      { "id": "hamstring", "name": "Hamstring Lunge", "every": [10, 14], "range": 12, "minRange": 3, "cast": 0.4,
+        "telegraphs": [ { "shape": "line", "at": "self", "len": 8, "w": 2, "wind": 0.9, "damage": 1.3, "status": "chill" } ] },
+      { "id": "circling_snap", "name": "Circling Snap", "every": [12, 16], "range": 4,
+        "telegraphs": [ { "shape": "cone", "at": "self", "r": 3.8, "arc": 1.6, "wind": 0.9, "damage": 1.4, "status": "bleed" } ] }
+    ],
+    "thicket_boar": [
+      { "id": "tusk_charge", "name": "Tusk Charge", "every": [12, 16], "range": 16, "minRange": 5, "cast": 0.6,
+        "telegraphs": [ { "shape": "line", "at": "self", "len": 13, "w": 2.8, "wind": 1.2, "damage": 1.7, "knock": 3.5 } ] },
+      { "id": "root_up", "name": "Root Up", "every": [15, 19], "range": 4,
+        "telegraphs": [ { "shape": "circle", "at": "self", "r": 3.8, "wind": 1.2, "damage": 1.3, "status": "web" } ] }
+    ],
+    "road_brigand": [
+      { "id": "dirty_trick", "name": "Fistful of Grit", "every": [12, 16], "range": 4, "cast": 0.3,
+        "telegraphs": [ { "shape": "cone", "at": "self", "r": 4, "arc": 1.2, "wind": 0.9, "damage": 0.8, "status": "weaken" } ] },
+      { "id": "leaping_cut", "name": "Leaping Cut", "every": [13, 17], "range": 11, "minRange": 3, "cast": 0.5,
+        "telegraphs": [ { "shape": "circle", "at": "target", "r": 2.5, "wind": 1.1, "damage": 1.5 } ] }
+    ],
+    "brigand_archer": [
+      { "id": "pinning_shot", "name": "Pinning Shot", "every": [11, 15], "range": 26, "cast": 0.8,
+        "telegraphs": [ { "shape": "line", "at": "self", "len": 24, "w": 1.4, "wind": 1.1, "damage": 1.3, "status": "root" } ] },
+      { "id": "arrow_rain", "name": "Arrow Rain", "every": [15, 19], "range": 30, "cast": 1,
+        "telegraphs": [ { "shape": "circle", "at": "target", "r": 3.5, "count": 2, "delay": 0.5, "jitter": 2, "wind": 1.3, "damage": 1, "extraPerRank": 1 } ] }
+    ],
+    "brigand_captain": [
+      { "id": "shield_bash", "name": "Shield Bash", "every": [11, 14], "range": 4,
+        "telegraphs": [ { "shape": "cone", "at": "self", "r": 3.6, "arc": 1.4, "wind": 1, "damage": 1.4, "knock": 3 } ] },
+      { "id": "rally_cry", "name": "Rally Cry", "every": [22, 26], "range": 20, "cast": 1.5, "interrupt": true,
+        "telegraphs": [ { "shape": "circle", "at": "self", "r": 6, "wind": 1.5, "damage": 1.1, "knock": 2 } ] }
+    ],
+    "bog_slime": [
+      { "id": "gobbet", "name": "Gobbet", "every": [12, 16], "range": 14, "cast": 0.6,
+        "telegraphs": [ { "shape": "circle", "at": "target", "r": 2.4, "wind": 1.3, "damage": 1.1, "element": "poison",
+          "leave": { "type": "pool", "name": "Slime puddle", "r": 2, "every": 1, "seconds": 8, "damage": 0.2, "element": "poison" } } ] },
+      { "id": "squelch", "name": "Squelch Ring", "every": [16, 20], "range": 8, "cast": 0.6,
+        "telegraphs": [ { "shape": "ring", "at": "self", "r": 7, "r2": 3, "wind": 1.4, "damage": 1.4, "element": "poison", "status": "poison" } ] }
+    ],
+    "fen_croaker": [
+      { "id": "tongue_flick", "name": "Tongue Flick", "every": [11, 15], "range": 12, "minRange": 4, "cast": 0.5,
+        "telegraphs": [ { "shape": "line", "at": "self", "len": 11, "w": 1.8, "wind": 1, "damage": 0.8, "knock": 4, "pull": true } ] },
+      { "id": "hop_slam", "name": "Hop Slam", "every": [13, 17], "range": 14, "cast": 0.4,
+        "telegraphs": [ { "shape": "circle", "at": "target", "r": 2.8, "wind": 1.2, "damage": 1.4 } ] }
+    ],
+    "marsh_wisp": [
+      { "id": "will_light", "name": "Will-light", "every": [10, 14], "range": 22, "cast": 0.8,
+        "telegraphs": [ { "shape": "circle", "at": "target", "r": 2.6, "count": 2, "delay": 0.6, "jitter": 1.5, "wind": 1.3, "damage": 1.1, "element": "lightning", "status": "shock" } ] }
+    ],
+    "barrow_hound": [
+      { "id": "grave_lunge", "name": "Grave Lunge", "every": [10, 14], "range": 13, "minRange": 3, "cast": 0.4,
+        "telegraphs": [ { "shape": "line", "at": "self", "len": 9, "w": 2.2, "wind": 0.9, "damage": 1.4, "knock": 2 } ] },
+      { "id": "cold_howl", "name": "Cold Howl", "every": [16, 20], "range": 6, "cast": 0.8,
+        "telegraphs": [ { "shape": "circle", "at": "self", "r": 5, "wind": 1.3, "damage": 1.1, "element": "ice", "status": "chill" } ] }
+    ],
+    "cairn_rat": [
+      { "id": "swarm_nip", "name": "Swarm Nip", "every": [11, 15], "range": 3,
+        "telegraphs": [ { "shape": "circle", "at": "self", "r": 2.6, "wind": 0.9, "damage": 1.1, "status": "poison", "element": "poison" } ] }
+    ],
+    "gallows_owl": [
+      { "id": "owl_dive", "name": "Owl Dive", "every": [11, 15], "range": 18, "cast": 0.5,
+        "telegraphs": [ { "shape": "circle", "at": "target", "r": 2.4, "lead": 6, "wind": 1.2, "damage": 1.4 } ] },
+      { "id": "screech", "name": "Screech", "every": [16, 20], "range": 7, "cast": 0.6,
+        "telegraphs": [ { "shape": "cone", "at": "self", "r": 7, "arc": 1.1, "wind": 1.1, "damage": 0.9, "status": "silence" } ] }
+    ],
+    "ironback_beetle": [
+      { "id": "shell_roll", "name": "Shell Roll", "every": [12, 16], "range": 15, "minRange": 4, "cast": 0.7,
+        "telegraphs": [ { "shape": "line", "at": "self", "len": 12, "w": 3, "wind": 1.3, "damage": 1.6, "knock": 3 } ] },
+      { "id": "burrow_up", "name": "Burrow Up", "every": [16, 20], "range": 16, "cast": 0.8,
+        "telegraphs": [ { "shape": "circle", "at": "target", "r": 2.8, "wind": 1.5, "damage": 1.6, "knock": 2 } ] }
+    ],
+    "carrion_moth": [
+      { "id": "dust_cloud", "name": "Dust Cloud", "every": [13, 17], "range": 6, "cast": 0.5,
+        "telegraphs": [ { "shape": "circle", "at": "self", "r": 4, "wind": 1.2, "damage": 0.7, "status": "poison", "element": "poison",
+          "leave": { "type": "pool", "name": "Wing dust", "r": 3.5, "every": 1, "seconds": 6, "damage": 0.15, "status": "weaken" } } ] }
+    ],
+    "veil_spider": [
+      { "id": "web_spit", "name": "Web Spit", "every": [11, 15], "range": 16, "cast": 0.5,
+        "telegraphs": [ { "shape": "circle", "at": "target", "r": 2.6, "wind": 1.2, "damage": 0.8, "status": "web" } ] },
+      { "id": "fang_lunge", "name": "Fang Lunge", "every": [12, 16], "range": 10, "minRange": 3, "cast": 0.4,
+        "telegraphs": [ { "shape": "line", "at": "self", "len": 8, "w": 2, "wind": 0.9, "damage": 1.3, "status": "poison", "element": "poison" } ] }
+    ]
+  }
+}

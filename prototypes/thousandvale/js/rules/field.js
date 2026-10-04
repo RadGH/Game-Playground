@@ -142,9 +142,10 @@ export function attachField(room, { terrain = null, safeZones = [] } = {}) {
       e.push = { dx: dx / len, dz: dz / len, metres: push, t: span, span, done: 0 };
       if (strike.carry && by) e.push.carry = { mult: strike.carry.mult ?? 0.6, stagger: strike.carry.stagger ?? 0.4, by, hit: new Set([e]) };
     }
-    if (strike.interrupt && result.amount > 0) e.swingTimer = Math.max(e.swingTimer || 0, e.attackEvery || 1);
+    if (strike.interrupt && result.amount > 0) { e.swingTimer = Math.max(e.swingTimer || 0, e.attackEvery || 1); e.lastInterruptAt = field.clock; }
     const stagger = staggerFor(e, (strike.stagger || 0) * share, field.clock);
     if (stagger > 0.01) {
+      e.lastInterruptAt = field.clock;             // a stagger breaks a cast bar too (encounter.js)
       e.stagger = Math.max(e.stagger || 0, stagger);
       e.anim = 'hit';
       if (stagger > 0.4) field.emit({ t: 'fx', kind: 'status', id: e.id, status: 'stun', on: true });
@@ -184,6 +185,8 @@ export function attachField(room, { terrain = null, safeZones = [] } = {}) {
    */
   field.kill = (e) => {
     if (e.dying != null) return;
+    // an encounter may refuse a death: a boss with another health bar to go (js/rules/encounter.js)
+    if (field.hooks?.beforeKill?.(e)) return;
     e.dying = 0;
     e.anim = 'dead';
     e.stagger = 0; e.push = null;

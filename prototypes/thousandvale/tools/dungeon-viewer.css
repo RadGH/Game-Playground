@@ -1,0 +1,23 @@
+/* Thousandvale dungeon floor viewer — stream E */
+:root { --bg: #14161a; --panel: #1e2127; --ink: #d8dbe0; --dim: #8a909a; --accent: #d5b27f; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.4 system-ui, sans-serif; }
+header { padding: 10px 16px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; background: var(--panel); }
+header h1 { font-size: 16px; margin: 0 12px 0 0; }
+header label { color: var(--dim); display: flex; gap: 6px; align-items: center; }
+header input[type=number] { width: 7em; background: #111; color: var(--ink); border: 1px solid #333; padding: 2px 4px; }
+header select, header button { background: #111; color: var(--ink); border: 1px solid #333; padding: 2px 6px; }
+main { display: flex; flex-wrap: wrap; gap: 16px; padding: 16px; }
+.floors { display: flex; flex-wrap: wrap; gap: 14px; flex: 1 1 600px; }
+.floor { background: var(--panel); padding: 8px; border-radius: 6px; }
+.floor h2 { font-size: 13px; margin: 0 0 6px; color: var(--dim); font-weight: 600; }
+.floor canvas { display: block; width: min(460px, calc(100vw - 48px)); height: auto; image-rendering: pixelated; cursor: crosshair; background: #000; }
+aside { flex: 0 1 320px; min-width: 260px; }
+.readout { background: var(--panel); padding: 10px 12px; border-radius: 6px; font-family: ui-monospace, monospace; font-size: 12px; white-space: pre-wrap; min-height: 8em; }
+.meta { margin-top: 12px; color: var(--dim); font-size: 13px; }
+.meta b { color: var(--ink); font-weight: 600; }
+.meta ul { margin: 4px 0; padding-left: 18px; }
+.legend { margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; font-size: 12px; color: var(--dim); }
+.legend span i { display: inline-block; width: 10px; height: 10px; margin-right: 6px; vertical-align: -1px; border-radius: 2px; }
+.status { color: var(--accent); }
+.error { color: #e78; }

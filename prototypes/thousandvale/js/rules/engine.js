@@ -46,5 +46,6 @@ export function createEngine(data, { seed = 1, levelCap = DEFAULT_LEVEL_CAP } = 
     bestiary,
     enemyDef: id => (bestiary.enemies || []).find(d => d.id === id) || (bestiary.bosses || []).find(d => d.id === id) || null,
     levelCap,
+    encounters: data.encounters || { scripts: {}, specials: { families: {} }, defaults: {}, byType: {} },
   };
 }

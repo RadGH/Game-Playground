@@ -200,3 +200,24 @@ test('a target message names a living body in reach, or is refused', () => {
   assert.deepEqual(room.intent(me, { t: 'target', id: 0 }), { ok: true });
   assert.equal(me.target, 0);
 });
+
+test('ENCOUNTERS in the real room: a boss pulls, its arena objects are entities, telegraphs and call-outs reach the clients, a brazier can be used', () => {
+  const terrain = standInTerrain(2, 2048);
+  const events = [];
+  const room = createRoom({ id: 'c-boss', kind: 'instance', terrain, seed: 5, camps: [], createRules, hooks: { log: () => {} } });
+  const orig = room.host.event;
+  room.host.event = ev => { events.push(ev); return orig(ev); };
+  const sx = terrain.spawn.x, sz = terrain.spawn.z;
+  const me = room.addPlayer({ id: 90, name: 'Tank', cls: 'knight', level: 12, xp: 0, gold: 0, room: 'c-boss', x: sx, z: sz - 3 }, null);
+  const boss = room.spawn({ kind: 'monster', type: 'barrow_hound', level: 8, x: sx, z: sz, rank: 'boss' });
+  for (let k = 0; k < 300; k++) { room.step(); if (me.dead) room.respawn(me); }
+  assert.equal(room.stats.rulesErrors, 0, room.stats.lastRulesError || '');
+  const types = new Set(events.map(e => e.type));
+  for (const t of ['say', 'phase', 'tele', 'teleR', 'obj']) assert.ok(types.has(t), `a ${t} event reached the room (${[...types]})`);
+  const objs = [...room.entities.values()].filter(e => e.kind === 'object' && e.data?.rules);
+  assert.ok(objs.length >= 6, `${objs.length} arena objects are room entities`);
+  const brazier = objs.find(o => o.type === 'brazier');
+  me.moveTo(brazier.x, brazier.z);
+  assert.deepEqual(room.rules.useObject(me, brazier), { ok: true });
+  assert.ok(boss.r.unit && room.rules.encounters.states.get(boss.r.unit)?.script?.id === 'barrow_warden');
+});

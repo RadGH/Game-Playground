@@ -138,7 +138,38 @@ export const CHAT_CHANNELS = Object.freeze(['party']);
 /** Room kinds (`joined.room.kind`). */
 export const ROOM_KINDS = Object.freeze(['wilds', 'town', 'instance']);
 
-export const EVENT_TYPES = Object.freeze(['cast', 'hit', 'miss', 'die', 'xp', 'level', 'loot', 'aggro', 'fx', 'open']);
+export const EVENT_TYPES = Object.freeze(['cast', 'hit', 'miss', 'die', 'xp', 'level', 'loot', 'aggro', 'fx', 'open',
+  'tele', 'teleR', 'castbar', 'castX', 'phase', 'enrage', 'say', 'obj', 'boss']);
+
+/**
+ * Event fields (docs/protocol.md §6, encounter rows from docs/encounters.md §7). Every event also has
+ * `type`, and `x, z` (the room fills them in). Ids are local room entity ids. `?` = optional.
+ */
+export const EVENT_FIELDS = Object.freeze({
+  cast: ['s', 'slot?', 'skill', 'aim?', 'target?'],
+  hit: ['s', 'd', 'n', 'crit?', 'el?', 'kind', 'skill?'],
+  miss: ['s', 'd', 'why'],
+  die: ['d', 'by?'],
+  xp: ['n', 'total'],
+  level: ['d', 'level'],
+  loot: ['d', 'items', 'gold?'],
+  aggro: ['s', 'd'],
+  fx: ['id', 'kind'],
+  open: ['d'],
+  tele: ['id', 's', 'ab', 'k', 'ms', 'shape', 'yaw?', 'r?', 'r2?', 'arc?', 'len?', 'w?', 'el?', 'follow?'],
+  teleR: ['id', 'hits?', 'x?'],
+  castbar: ['id', 'ab', 'name', 'ms', 'int?'],
+  castX: ['id', 'ab', 'why'],
+  phase: ['id', 'n', 'name?', 'bar', 'hpMax?', 'reset?'],
+  enrage: ['id', 'soft?', 'hard?'],
+  say: ['id', 'text', 'style'],
+  obj: ['id', 'state?', 'otype?', 'r?', 'key?', 'hp?', 'gone?'],
+  boss: ['id', 'name?', 'title?', 'bars?', 'phases?', 'enrageMs?', 'arena?', 'end?', 'won?'],
+});
+/** Telegraph shapes (`tele.shape`) and object states (`obj.state`, `info.state`). */
+export const TELE_SHAPES = Object.freeze(['circle', 'ring', 'donut', 'cone', 'line', 'cross']);
+export const OBJ_STATES = Object.freeze(['idle', 'lit', 'used', 'broken', 'open', 'closed']);
+export const OBJ_TYPES = Object.freeze(['portal', 'stairs', 'exit', 'chest', 'gate', 'lever', 'pillar', 'rock', 'brazier', 'pool', 'cracked_floor', 'sarcophagus', 'support_beam', 'ore_cart']);
 
 /** Validate a decoded client message. Returns null when fine, else a reason. */
 export function validate(msg, socketKind = null) {

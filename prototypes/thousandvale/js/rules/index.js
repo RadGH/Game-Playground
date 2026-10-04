@@ -24,6 +24,10 @@ import { createCharacter } from './character.js';
 import { spawnMonster, tickMonsters } from './monster-ai.js';
 import { clearThreat } from './threat.js';
 import { makeRng } from './rng.js';
+import { attachEncounters } from './encounter.js';
+
+/** What an arena object is called on a nameplate. */
+const OBJECT_NAMES = { pillar: 'Stone pillar', rock: 'Fallen rock', brazier: 'Brazier', lever: 'Lever', pool: 'Pool' };
 import { validTarget, TAB } from './targeting.js';
 import { groundAdapter } from './terrain-read.js';
 import { serializeGear } from './character.js';
@@ -86,6 +90,21 @@ export function createRules(host, opts = {}) {
   const combat = createCombat(room);
   room.combat = combat;
   combat.tickMonsters = dt => tickMonsters(field, dt);
+  // the encounter engine: telegraphs, boss scripts, arena objects (js/rules/encounter.js)
+  const enc = attachEncounters(room, {
+    data: engine.encounters,
+    roomKind: host.kind || 'wilds',
+    // adds and arena objects are room entities, so every client sees them
+    spawn: (def, level, x, z, { rank = 'normal' } = {}) => {
+      const e = host.spawn({ kind: 'monster', type: def.id, level, x, z, rank });
+      return e?.r?.unit || null;
+    },
+    spawnObject: o => host.spawn({ kind: 'object', type: o.type, name: OBJECT_NAMES[o.type] || o.type, x: o.x, z: o.z, data: { rules: true, key: o.key } }),
+    despawn: thing => {
+      const ent = thing?.kind === 'monster' || thing?.defId ? host.entities.get(thing.id) : host.entities.get(thing?.id);
+      if (ent) host.despawn(ent);
+    },
+  });
   const entOf = unit => (unit?.id != null ? host.entities.get(unit.id) : null);
   let regenClock = 0;
   let builds = 0, handoffs = 0;
@@ -167,6 +186,12 @@ export function createRules(host, opts = {}) {
           host.event({ ...ev, t: undefined, type: 'fx', id: ev.id ?? 0, x: ev.x ?? at?.x, z: ev.z ?? at?.z });
           break;
         }
+        // the encounter engine's events go out as they are (docs/encounters.md "Events")
+        case 'tele': case 'teleR': case 'castbar': case 'castX': case 'phase': case 'say': case 'enrage': case 'obj': case 'boss': {
+          const { t, ...rest } = ev;
+          host.event({ ...rest, type: t });
+          break;
+        }
         default: break;              // spawn/gone/death/reward/move are carried by the entities themselves
       }
     }
@@ -237,6 +262,7 @@ export function createRules(host, opts = {}) {
         const def = engine.enemyDef(TYPE_ALIASES[e.type] || e.type) || engine.enemyDef('moor_hound');
         const rk = rankFor(e, def);
         const unit = spawnMonster(field, def, e.level || 1, e.x, e.z, { id: e.id, ...rk });
+        unit.encounterId = e.data?.encounter || null;
         if (rk.boss) unit.boss = true;
         e.r.unit = unit;
         e.setMax(unit.maxHp, 0);
@@ -365,10 +391,17 @@ export function createRules(host, opts = {}) {
     if (one) items.push(one);
     return items;
   }
+  /** A player used a rules-owned object (an arena brazier or lever): the room routes `use` here. */
+  function useObject(e, obj) {
+    const u = e.r.unit;
+    if (!u || !obj) return { ok: false, why: 'gone' };
+    return run(() => enc.use(u, obj.id));
+  }
   function onParty(e, id) { const u = e.r.unit; if (u) u.partyId = id ?? null; }
 
   return {
-    equip, unequip, gear, saveGear, rollLoot, onParty,
+    equip, unequip, gear, saveGear, rollLoot, onParty, useObject,
+    encounters: enc,
     stats: () => ({ builds, handoffs }),
     addEntity, removeEntity, intent, step, respawn, onLevel,
     levelFor: xp => levelFromXp(xp, engine.levelCap),

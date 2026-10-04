@@ -1,0 +1,26 @@
+{
+  "id": "packleader",
+  "name": "Packleader",
+  "_doc": "The ELITE example (a dungeon mini-boss or a rare out in the wilds). Two phases, a charge to sidestep, a howl that calls the pack, and a ring to step into the middle of below half health. Format: docs/encounters.md.",
+  "hpMult": 1.2,
+  "arena": { "radius": 30 },
+  "say": { "pull": "{boss} bares its teeth.", "death": "The pack scatters." },
+  "abilities": {
+    "pounce": { "id": "pounce", "name": "Pounce", "every": [7, 10], "range": 18, "minRange": 3, "cast": 0.5,
+      "say": "{boss} crouches, eyes on {target}!",
+      "telegraphs": [ { "shape": "line", "at": "self", "len": 13, "w": 2.6, "wind": 1.0, "damage": 1.6, "knock": 2.5 } ] },
+    "rend": { "id": "rend", "name": "Rend", "every": [6, 8], "range": 5,
+      "telegraphs": [ { "shape": "cone", "at": "self", "r": 4.5, "arc": 1.8, "wind": 0.9, "damage": 1.4, "status": "bleed" } ] },
+    "howl": { "id": "howl", "name": "Rallying Howl", "every": [24, 28], "first": 6, "cast": 1.5, "interrupt": true,
+      "say": "{boss} draws breath to howl!",
+      "onInterrupt": [ { "say": "The howl breaks off in a cough.", "style": "emote" } ],
+      "actions": [ { "adds": { "type": "moor_hound", "count": 2, "radius": 7 } } ] },
+    "frenzy_ring": { "id": "frenzy_ring", "name": "Whirling Frenzy", "every": [12, 15], "first": 2, "cast": 1.0,
+      "say": "{boss} spins — get inside its reach!",
+      "telegraphs": [ { "shape": "donut", "at": "self", "r": 11, "r2": 3, "wind": 1.6, "damage": 2.2 } ] }
+  },
+  "phases": [
+    { "name": "Hunting", "abilities": ["pounce", "rend", "howl"] },
+    { "name": "Frenzy", "at": 0.5, "say": "{boss} froths and snarls!", "abilities": ["pounce", "rend", "frenzy_ring"], "onEnter": [ { "modifier": { "id": "frenzied_pl", "dmg": 1.2, "attackEvery": 0.85, "exact": true } } ] }
+  ]
+}

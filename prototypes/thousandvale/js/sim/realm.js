@@ -15,7 +15,7 @@ export function findTown(terrain, radius = null) {
   const rank = { city: 0, town: 1, village: 2, hamlet: 3 };
   const s = sites.filter(x => x.type === 'settlement').sort((a, b) => (rank[a.kind] ?? 9) - (rank[b.kind] ?? 9))[0];
   const c = s ? { x: s.x, z: s.z } : { ...terrain.spawn };
-  const r = radius ?? (s ? TOWN_RADIUS[s.kind] || 60 : 60);
+  const r = radius ?? (s ? (Number.isFinite(s.radius) ? s.radius : TOWN_RADIUS[s.kind] || 60) : 60);   // B's bake may give `radius`
   let centre = c;
   if (terrain.walkable && !terrain.walkable(c.x, c.z)) centre = findWalkable(terrain, c) || c;
   return { x: centre.x, z: centre.z, r, name: s ? s.name : 'Town', kind: s ? s.kind : 'village' };
@@ -33,7 +33,11 @@ export function walkableNear(terrain, x, z, dist, a0 = 0) {
 function inside(t, x, z) { const b = t.bounds; return x > b.minX + 8 && z > b.minZ + 8 && x < b.maxX - 8 && z < b.maxZ - 8; }
 
 /** Where the dungeon door stands: outside the town, on walkable ground. */
-export function findDoor(terrain, town) { return walkableNear(terrain, town.x, town.z, town.r + 110, 0.8); }
+export function findDoor(terrain, town) {
+  const site = (terrain.reader?.meta?.sites || []).find(x => x.type === 'dungeon');   // B's bake may place it
+  if (site && (!terrain.walkable || terrain.walkable(site.x, site.z))) return { x: site.x, z: site.z, name: site.name || null };
+  return walkableNear(terrain, town.x, town.z, town.r + 110, 0.8);
+}
 
 /** Where you appear when you walk out of the town (just outside its edge, toward the door). */
 export function townGate(terrain, town, door) {

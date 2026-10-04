@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dungeon Viewer</title>
+  <link rel="stylesheet" href="dungeon-viewer.css">
+</head>
+<body>
+  <header>
+    <h1>Thousandvale · dungeon floors</h1>
+    <label>Family <select id="family"></select></label>
+    <label>Seed <button id="prev" title="previous seed">◀</button><input id="seed" type="number" value="1" min="0"><button id="next" title="next seed">▶</button></label>
+    <label>Floors <select id="floors"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></label>
+    <label>Level <input id="level" type="number" value="3" min="1" max="50"></label>
+    <label><input type="checkbox" id="shut" checked> gate shut (shade what's behind it)</label>
+    <label><input type="checkbox" id="labels" checked> labels</label>
+    <span id="status" class="status"></span>
+  </header>
+  <main>
+    <div class="floors" id="floors-wrap"></div>
+    <aside>
+      <div id="readout" class="readout">hover a floor</div>
+      <div id="summary" class="meta"></div>
+      <div class="legend" id="legend"></div>
+      <div id="enc" class="meta"></div>
+    </aside>
+  </main>
+  <script type="module" src="dungeon-viewer.js"></script>
+</body>
+</html>

@@ -113,7 +113,14 @@ export class Entity {
     if (this.kind === 'player') { o.cls = this.cls; if (this.look) o.look = this.look; }
     else if (this.type) o.type = this.type;
     if (this.rank !== 'normal') o.rank = this.rank;
-    if (this.kind === 'object' && this.data && this.data.chest) o.key = this.data.chest.key;
+    if (this.kind === 'object' && this.data) {
+      const d = this.data;
+      const key = d.key || (d.chest && d.chest.key);
+      if (key) o.key = key;
+      if (d.r) o.r = d.r;
+      if (d.state) o.state = d.state;
+      if (d.rules) o.rules = 1;
+    }
     return o;
   }
 }

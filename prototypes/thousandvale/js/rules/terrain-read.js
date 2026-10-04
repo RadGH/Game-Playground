@@ -233,3 +233,33 @@ export function gridIndices(size, stride = 1) {
   }
   return out;
 }
+
+/**
+ * The walker interface the combat core uses (Farhold ground.js style — the same shape as
+ * js/rules/terrain-flat.js), over a parsed terrain. Requested by stream C.
+ *   slopeAt(x, z, s)      rise/run (NOT degrees), measured as a central difference over ±s metres
+ *                         (s omitted: the exact triangle under the point)
+ *   normalAt(x, z, s, out) unit normal; s > 0 smooths it the same way
+ *   waterAt(x, z)          depth in metres, 0 when dry;  underwater(x, z) deeper than WADE_DEPTH
+ *   roadAt                 0 until the M1 bake has roads;  clampToWorld(x, z) -> [x, z];  biomeIdAt(x, z)
+ */
+export function groundAdapter(t) {
+  function grad(x, z, s) {
+    if (!(s > 0)) { const n = t.normalAt(x, z); return [-n[0] / n[1], -n[2] / n[1]]; }
+    return [(t.heightAt(x + s, z) - t.heightAt(x - s, z)) / (2 * s), (t.heightAt(x, z + s) - t.heightAt(x, z - s)) / (2 * s)];
+  }
+  return {
+    heightAt: t.heightAt,
+    slopeAt(x, z, s) { const [gx, gz] = grad(x, z, s); return Math.hypot(gx, gz); },
+    normalAt(x, z, s, out = [0, 1, 0]) {
+      const [gx, gz] = grad(x, z, s), len = Math.hypot(gx, 1, gz);
+      out[0] = -gx / len; out[1] = 1 / len; out[2] = -gz / len; return out;
+    },
+    waterAt: (x, z) => t.waterAt(x, z).depth,
+    underwater: (x, z) => t.waterAt(x, z).depth > WADE_DEPTH,
+    roadAt: () => 0,
+    clampToWorld: t.clamp,
+    biomeIdAt: t.biomeAt,
+    walkable: t.walkable,
+  };
+}

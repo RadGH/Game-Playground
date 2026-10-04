@@ -1,12 +1,15 @@
 // Thousandvale client — boot, title screen, the connection, and the frame loop.
 //
+// The connection is stream A's `js/net/client.js` (gateway + province sockets, guest token, reconnect,
+// binary snapshots decoded), the entity table is `js/net/mirror.js`, and prediction runs stream A's
+// `stepMove` — so this file only turns what the server says into pictures and what you press into inputs.
+//
 // Query flags (all optional):
-//   ?offline=1            play against an in-browser server (stand-in now, stream A's Worker later)
-//   &shared=0             offline in a plain Worker instead of a SharedWorker (each tab alone)
-//   ?server=ws://h:p/gw   connect to a specific game server (default: same host, /gw)
-//   ?lag=120              add artificial round-trip delay (ms) to feel a real network on the LAN
-//   ?name=Aldra&race=elf&cls=ranger&auto=1   skip the title screen (tests, bots, join links later)
-//   ?quality=low|medium|high
+//   ?offline=1                      play against the whole server sim in a Web Worker (no server needed)
+//   ?server=ws://host:8491          a specific game server (default: the page's own host)
+//   ?autoplay=1&name=Aldra&cls=warrior[&race=elf]   skip the title screen (tests, bots, quick second tab)
+//   ?quality=low|medium|high        default: high, or low on a software renderer
+//   ?build=<id>                     the build id sent in hello (default 'dev')
 
 import * as THREE from 'three';
 import { createScene } from './scene.js';
@@ -16,12 +19,14 @@ import { createActors } from './actors.js';
 import { createFx } from './fx.js';
 import { createHud } from './hud.js';
 import { createControls } from './controls.js';
-import { createConnection, connectionOptionsFromQuery } from './net.js';
+import { loadClientTerrain } from './terrain.js';
+import { findTown } from '../sim/realm.js';
+import { campPlacements, CAMP_RADIUS } from './camp.js';
 import { Predictor, MOVE } from './predict.js';
-import { ServerClock } from './interp.js';
-import * as P from './protocol.js';
-import { PLAYABLE_RACES, RACE_NAMES, loadLookData } from './looks.js';
-import { standinTerrain, STANDIN } from './dev/standin-terrain.js';
+import { PLAYABLE_RACES, RACE_NAMES, loadLookData, defaultLook } from './looks.js';
+import { connect, localTokenStore } from '../net/client.js';
+import { createMirror } from '../net/mirror.js';
+import { ANIMS, STATE, KIND_NAMES, TICK_MS, cleanName } from '../net/protocol.js';
 
 const q = new URLSearchParams(location.search);
 const $ = id => document.getElementById(id);
@@ -29,66 +34,97 @@ const store = {
   get(k, d = null) { try { const v = localStorage.getItem('tv.' + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
   set(k, v) { try { localStorage.setItem('tv.' + k, JSON.stringify(v)); } catch {} },
 };
-
-const STRIKE = { slot: 0, cooldownMs: 1050, reach: 3.0 };       // client-side guesses for feel; the server decides
+const INTERP_MS = 130;                              // others are drawn this far behind the server (PLAN §8.3)
 const STARTERS = ['warrior', 'paladin', 'ranger', 'rogue', 'cleric', 'mage'];
-const CLASS_NAMES = { dragon_knight: 'Dragon Knight' };
-const className = id => CLASS_NAMES[id] || id.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-const ZONE_NAME = 'Greyfang Vale';
+const ONE_SHOT = new Set(['attack', 'attack2', 'cast', 'bite', 'howl', 'emote', 'interact']);
+const CASTR_TEXT = { range: 'Out of range.', target: 'You need a target.', dead: 'You are dead.', mana: 'Not enough mana.', unknown: 'You cannot do that yet.' };
 
-// --- world ------------------------------------------------------------------------------------------
-/**
- * Software rendering (SwiftShader: headless test browsers, machines with no GPU driver) draws the high
- * setting at about one frame a second, so it starts on low unless ?quality= says otherwise.
- */
+// --- quality ----------------------------------------------------------------------------------------
+/** Software rendering (headless test browsers, no GPU driver) draws "high" at ~1 fps, so it starts low. */
 function detectQuality() {
   if (q.get('quality')) return q.get('quality');
   try {
     const g = document.createElement('canvas').getContext('webgl2');
     const e = g && g.getExtension('WEBGL_debug_renderer_info');
-    const r = e ? String(g.getParameter(e.UNMASKED_RENDERER_WEBGL)) : '';
-    if (/swiftshader|llvmpipe|software/i.test(r)) return 'low';
+    if (/swiftshader|llvmpipe|software/i.test(e ? String(g.getParameter(e.UNMASKED_RENDERER_WEBGL)) : '')) return 'low';
   } catch {}
   return 'high';
 }
 const quality = detectQuality();
 const view = createScene($('view'), { quality });
 const { scene, camera } = view;
-// Terrain: stream B's reader replaces the stand-in here (docs/requests.md "D -> B").
-const terrain = standinTerrain(7);
-const ground = createTerrainView(terrain, { paths: STANDIN.paths, seed: 7, textureSize: quality === 'low' ? 256 : 512, clearings: [STANDIN.clearing] });
-scene.add(ground.group);
-let decor = null;
-const decorReady = createDecor(terrain, { placements: STANDIN.placements, paths: STANDIN.paths, seed: 7, avoid: [{ ...STANDIN.clearing, r: 34 }], density: quality === 'low' ? 0.35 : 1, lodFar: quality === 'low' ? [30, 120] : undefined })
-  .then(d => { decor = d; scene.add(d.group); return d; })
-  .catch(e => { console.warn('[decor] failed', e); });
-
 const actors = createActors(scene, { plateLayer: $('plates'), camera });
 const fx = createFx(scene, { layer: $('numbers'), camera });
 
 // --- session state ----------------------------------------------------------------------------------
 const S = {
-  phase: 'title',       // title -> joining -> world
-  conn: null, selfId: null, token: null, tickMs: P.TICK_MS,
-  predictor: new Predictor({ heightAt: terrain.heightAt, stepSec: P.TICK_MS / 1000 }),
-  clock: new ServerClock(),
+  phase: 'title',            // title -> joining -> world
+  net: null, mirror: createMirror({ tickMs: TICK_MS, keep: 12 }), selfId: null, room: null,
+  predictor: new Predictor({ stepMs: TICK_MS }),
   target: null, hover: null,
-  self: { name: '', level: 1, hp: 1, hpMax: 1, xp: 0, next: 100, dead: false, deadAt: 0 },
-  nextSwingAt: 0, acc: 0, lastInput: null, movingSpeed: 0, rtt: null,
-  look: store.get('look', { race: 'human', cls: 'warrior', seed: (Math.random() * 1e9) >>> 0 }),
-  stats: { snaps: 0, corrections: 0, maxCorrection: 0 },
+  self: { name: '', cls: 'warrior', level: 1, hp: 1, hpMax: 1, xp: 0, next: 100, dead: false, deadAt: 0 },
+  acc: 0, lastInput: null, movingSpeed: 0,
+  swing: { last: 0, attempt: 0, ms: 1000 }, reach: 2.4,
+  look: store.get('look', { race: 'human', seed: (Math.random() * 1e9) >>> 0 }),
+  cls: q.get('cls') || store.get('cls', 'warrior'),
+  events: [], stats: { snaps: 0, bytes: 0, corrections: 0, maxCorrection: 0 },
 };
+
+// --- the world's ground (rebuilt if the server puts us on a different terrain) ------------------------
+const W = { key: undefined, terrain: null, ground: null, decor: null, loading: null, loadingKey: undefined };
+async function useTerrain(key, campAt = null) {
+  if (W.key === key && W.terrain) { if (campAt) placeCamp(campAt); return W.terrain; }
+  if (W.loading && W.loadingKey === key) { const T = await W.loading; if (campAt) placeCamp(campAt); return T; }
+  W.loadingKey = key;
+  W.loading = (async () => {
+    const T = await loadClientTerrain(key);
+    if (W.ground) { scene.remove(W.ground.group); W.ground = null; }
+    const biomeColors = T.reader ? Object.fromEntries(T.reader.biomes.map(b => [b.key, b.color])) : null;
+    W.terrain = T; W.key = key; W.camp = null;
+    S.predictor.terrain = { heightAt: T.heightAt, walkable: T.walkable, bounds: T.bounds };
+    controls.setHeightAt(T.heightAt);
+    let town = null; try { town = findTown(T); } catch {}
+    placeCamp(campAt || town || T.spawn, () => {
+      W.ground = createTerrainView(T, { quality, textureSize: quality === 'low' ? 256 : 512, clearings: [{ ...W.camp, r: CAMP_RADIUS + 6 }], biomeColors });
+      scene.add(W.ground.group);
+    });
+    return T;
+  })();
+  return W.loading;
+}
+/** The waystone camp (and the trees kept clear of it) at `at`; rebuilt only if it moves more than 10 m. */
+function placeCamp(at, before = null) {
+  const T = W.terrain;
+  if (W.camp && Math.hypot(W.camp.x - at.x, W.camp.z - at.z) < 10) return;
+  const moved = !!W.camp;
+  W.camp = { x: at.x, z: at.z };
+  if (before) before();
+  else if (moved && W.ground) {
+    // The ground's trodden clearing follows the camp too.
+    scene.remove(W.ground.group);
+    const biomeColors = T.reader ? Object.fromEntries(T.reader.biomes.map(b => [b.key, b.color])) : null;
+    W.ground = createTerrainView(T, { quality, textureSize: quality === 'low' ? 256 : 512, clearings: [{ ...W.camp, r: CAMP_RADIUS + 6 }], biomeColors });
+    scene.add(W.ground.group);
+  }
+  const old = W.decor;
+  createDecor(T, { placements: campPlacements(W.camp, T), seed: 7, avoid: [{ ...W.camp, r: CAMP_RADIUS + 4 }],
+    density: quality === 'low' ? 0.3 : 1, lodFar: quality === 'low' ? [0, 90] : undefined, cheap: quality === 'low' })
+    .then(d => { if (W.terrain !== T) return; if (old) scene.remove(old.group); if (W.decor && W.decor !== old) scene.remove(W.decor.group); W.decor = d; scene.add(d.group); })
+    .catch(e => console.warn('[decor] failed', e));
+}
+const groundY = (x, z) => (W.terrain ? W.terrain.heightAt(x, z) : 0);
 
 const hud = createHud({
   onSlot: () => tryStrike(true),
-  onChatSubmit: text => { if (S.conn) S.conn.send(P.encodeChat('say', text)); },
+  onChatSubmit: text => S.net?.say(text),
   onChatFocus: on => controls.setTyping(on),
+  onRise: () => rise(),
 });
 
 const controls = createControls({
-  dom: $('view'), camera, heightAt: terrain.heightAt,
+  dom: $('view'), camera, heightAt: groundY,
   getTarget: () => S.target,
-  onSelect: (ndc) => {
+  onSelect: ndc => {
     if (S.phase !== 'world') return null;
     const a = actors.pickAt(ndc, { exclude: S.selfId });
     if (a) { setTarget(a.id); return { id: a.id, hostile: a.hostile && !a.dead }; }
@@ -99,227 +135,299 @@ const controls = createControls({
   onCycleTarget: () => cycleTarget(),
   onClearTarget: () => setTarget(null),
   onChat: () => hud.focusChat(),
+  onRise: () => rise(),
 });
 
 // --- title screen -------------------------------------------------------------------------------------
 let preview = null;
+async function loadClasses() {
+  try { const d = await (await fetch(new URL('../../../farhold/data/classes.json', import.meta.url))).json(); return d.classes.map(c => ({ id: c.id, name: c.name || c.id })); }
+  catch { return STARTERS.map(id => ({ id, name: id[0].toUpperCase() + id.slice(1) })); }
+}
 function initTitle() {
-  const nameIn = $('name');
-  nameIn.value = q.get('name') || store.get('name', '') || '';
-  if (q.get('race')) S.look.race = q.get('race');
-  if (q.get('cls')) S.look.cls = q.get('cls');
-  const races = $('races');
+  $('name').value = q.get('name') || store.get('name', '') || '';
+  if (PLAYABLE_RACES.includes(q.get('race'))) S.look.race = q.get('race');
   for (const r of PLAYABLE_RACES) {
     const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.role = 'radio'; b.dataset.race = r; b.textContent = RACE_NAMES[r];
     b.onclick = () => { S.look.race = r; refreshChips(); rebuildPreview(); };
-    races.appendChild(b);
+    $('races').appendChild(b);
   }
-  loadLookData().then(({ outfits }) => {
-    const all = Object.keys(outfits || {});
-    const box = $('classes'), more = $('class-more');
-    for (const c of STARTERS.filter(c => all.includes(c))) {
-      const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.role = 'radio'; b.dataset.cls = c; b.textContent = className(c);
-      b.onclick = () => { S.look.cls = c; refreshChips(); rebuildPreview(); };
-      box.appendChild(b);
+  loadClasses().then(list => {
+    const name = id => list.find(c => c.id === id)?.name || id;
+    for (const id of STARTERS.filter(id => list.some(c => c.id === id))) {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.role = 'radio'; b.dataset.cls = id; b.textContent = name(id);
+      b.onclick = () => { S.cls = id; refreshChips(); rebuildPreview(); };
+      $('classes').appendChild(b);
     }
-    more.innerHTML = '<option value="">More callings…</option>' + all.filter(c => !STARTERS.includes(c)).map(c => `<option value="${c}">${className(c)}</option>`).join('');
-    more.onchange = () => { if (more.value) { S.look.cls = more.value; refreshChips(); rebuildPreview(); } };
-    if (!all.includes(S.look.cls)) S.look.cls = 'warrior';
+    const more = $('class-more');
+    more.innerHTML = '<option value="">More callings…</option>' + list.filter(c => !STARTERS.includes(c.id)).map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+    more.onchange = () => { if (more.value) { S.cls = more.value; refreshChips(); rebuildPreview(); } };
+    if (!list.some(c => c.id === S.cls)) S.cls = 'warrior';
     refreshChips(); rebuildPreview();
   });
   $('reroll').onclick = () => { S.look.seed = (Math.random() * 1e9) >>> 0; rebuildPreview(); };
-  $('build-tag').textContent = `${P.CLIENT_BUILD} · ${connectionOptionsFromQuery().mode === 'ws' ? 'online' : 'offline (in-browser server)'}`;
+  $('build-tag').textContent = `client ${q.get('build') || 'dev'} · ${netMode() === 'ws' ? 'online' : 'offline (in-browser server)'}`;
   $('login').addEventListener('submit', e => { e.preventDefault(); enterWorld(); });
   refreshChips();
 }
 function refreshChips() {
   for (const b of document.querySelectorAll('#races .chip')) b.setAttribute('aria-checked', String(b.dataset.race === S.look.race));
-  for (const b of document.querySelectorAll('#classes .chip')) b.setAttribute('aria-checked', String(b.dataset.cls === S.look.cls));
-  const more = $('class-more'); if (more) more.value = STARTERS.includes(S.look.cls) ? '' : S.look.cls;
+  for (const b of document.querySelectorAll('#classes .chip')) b.setAttribute('aria-checked', String(b.dataset.cls === S.cls));
+  const more = $('class-more'); if (more) more.value = STARTERS.includes(S.cls) ? '' : S.cls;
 }
-let previewSeq = 0;
 function rebuildPreview() {
-  const seq = ++previewSeq;
-  if (preview) { actors.remove('preview'); preview = null; }
-  const x = STANDIN.spawn.x, z = STANDIN.spawn.z;
-  preview = actors.add({ id: 'preview', kind: 'player', name: '', level: 1, hp: 1, hpMax: 1, look: { ...S.look }, x, y: terrain.heightAt(x, z), z, yaw: 0.35 });
-  preview.noPlate = true; if (preview.plate) preview.plate.root.style.display = 'none';
-  preview.buffer.push({ t: 0, x, y: terrain.heightAt(x, z), z, yaw: 0.35 });
-  store.set('look', S.look);
-  return seq;
+  if (!W.terrain || S.phase === 'world') return;
+  actors.remove('preview');
+  const { x, z } = W.camp || W.terrain.spawn, y = groundY(x, z);
+  preview = actors.add({ id: 'preview', kind: 'player', name: '', level: 1, hp: 1, hpMax: 1, look: { ...S.look, cls: S.cls }, x, y, z, yaw: 0.35 });
+  preview.noPlate = true;
+  preview.still = { x, y, z, yaw: 0.35 };
+  store.set('look', S.look); store.set('cls', S.cls);
 }
 
 // --- connecting -----------------------------------------------------------------------------------------
-function enterWorld() {
-  const name = P.cleanName($('name').value);
-  if (!name) { $('login-note').textContent = 'Pick a name of 2–16 letters.'; return; }
+const netMode = () => (q.has('offline') && q.get('offline') !== '0' ? 'worker' : 'ws');
+async function enterWorld() {
+  const name = cleanName($('name').value);
+  if (!name || name.length < 2) { $('login-note').textContent = 'Pick a name of 2–16 letters.'; return; }
   $('login-note').textContent = '';
-  store.set('name', name); store.set('look', S.look);
+  store.set('name', name); store.set('look', S.look); store.set('cls', S.cls);
   S.self.name = name;
-  $('enter').disabled = true; $('enter').textContent = 'Entering…';
-  const opts = connectionOptionsFromQuery();
-  S.tokenKey = 'token.' + (opts.mode === 'ws' ? opts.url : 'offline');
-  const conn = createConnection(opts);
-  S.conn = conn; S.phase = 'joining';
-  conn.onStatus((st) => {
-    hud.conn(st, { rtt: S.rtt, mode: conn.mode });
-    if (st === 'open') login();
-    if (st === 'reconnecting' && S.phase === 'world') hud.toast('Connection lost — reconnecting…', 'warn');
-  });
-  conn.on(raw => handle(P.decode(raw)));
-  hud.conn(conn.status, { mode: conn.mode });
-  setTimeout(() => { if (S.phase === 'joining' && conn.status !== 'open') { $('login-note').textContent = conn.mode === 'ws' ? 'Cannot reach the game server. Try ?offline=1 to play against an in-browser server.' : 'The in-browser server did not start.'; $('enter').disabled = false; $('enter').textContent = 'Enter the world'; } }, 6000);
-}
-function login() {
-  S.conn.send(P.encodeHello());
-  const token = store.get(S.tokenKey);
-  S.conn.send(token ? P.encodeResume(token) : P.encodeGuest(S.self.name, S.look));
-}
-
-// --- messages ---------------------------------------------------------------------------------------------
-function handle(m) {
-  switch (m.type) {
-    case 'welcome': {
-      S.selfId = m.you; S.token = m.token; S.tickMs = m.tickMs || P.TICK_MS;
-      if (m.token) store.set(S.tokenKey, m.token);
-      S.clock.seed(m.serverTime);
-      if (S.phase !== 'world') startWorld(m);
-      else { hud.toast('Reconnected.', 'good'); }
-      break;
-    }
-    case 'refuse':
-      if (m.reason === 'token') { store.set(S.tokenKey, null); S.conn.send(P.encodeGuest(S.self.name, S.look)); break; }
-      $('login-note').textContent = m.text || ('Refused: ' + m.reason);
-      hud.toast(m.text || m.reason, 'bad');
-      break;
-    case 'spawn':
-      for (const e of m.ents) {
-        const self = e.id === S.selfId;
-        const a = actors.add(e, { self });
-        if (self) {
-          a.self = true;
-          S.self.name = e.name; S.self.level = e.level; S.self.hp = e.hp; S.self.hpMax = e.hpMax;
-          S.predictor.reset({ x: e.x, y: e.y, z: e.z });
-          controls.setFacing(e.yaw); controls.cam.yaw = e.yaw;
-          hud.setSelf(S.self);
-        } else if (a.buffer.s.length === 0) {
-          a.buffer.push({ t: S.clock.time() - P.INTERP_DELAY_MS - 50, x: e.x, y: e.y, z: e.z, yaw: e.yaw });
-        }
-        if (e.hp <= 0) actors.setDead(e.id, true);
-      }
-      break;
-    case 'snap': {
-      S.stats.snaps++;
-      S.clock.observe(m.time);
-      if (m.you && S.selfId != null) {
-        const d = S.predictor.reconcile(m.ack, m.you);
-        if (d > 0.02) { S.stats.corrections++; S.stats.maxCorrection = Math.max(S.stats.maxCorrection, d); }
-        if (m.you.hp != null) { S.self.hp = m.you.hp; if (m.you.hpMax) S.self.hpMax = m.you.hpMax; actors.setHp(S.selfId, S.self.hp, S.self.hpMax); hud.setSelf(S.self); }
-      }
-      for (const e of m.ents) {
-        const a = actors.get(e.id); if (!a) continue;
-        a.buffer.push({ t: m.time, x: e.x, y: e.y, z: e.z, yaw: e.yaw });
-        if (e.hp != null && e.hp !== a.hp) actors.setHp(e.id, e.hp);
-        if (e.anim === 'dead' && !a.dead) actors.setDead(e.id, true);
-        a.tgt = e.tgt;
-      }
-      for (const id of m.gone) { actors.remove(id); if (S.target === id) setTarget(null); }
-      if (S.target != null) hud.setTarget(actors.get(S.target));
-      break;
-    }
-    case 'cast':
-      if (m.src !== S.selfId) {
-        if (m.slot === 9) { const a = actors.get(m.src); if (a && m.target === S.selfId) fx.number({ x: a.pos.x, y: a.pos.y + a.height, z: a.pos.z }, '!', 'in'); }
-        else actors.playAttack(m.src, m.target);
-      }
-      break;
-    case 'hit': {
-      const dst = actors.get(m.dst), src = actors.get(m.src);
-      if (m.hp != null) { actors.setHp(m.dst, m.hp); if (m.dst === S.selfId) { S.self.hp = m.hp; hud.setSelf(S.self); } }
-      if (!dst) break;
-      const at = { x: dst.pos.x, y: dst.pos.y + dst.height * 0.75, z: dst.pos.z };
-      const mine = m.src === S.selfId, onMe = m.dst === S.selfId;
-      if (m.kind === 'miss' || m.amount <= 0) { fx.number(at, onMe ? 'Dodged' : 'Miss', 'miss'); break; }
-      actors.playHit(m.dst, m.src, m.amount);
-      fx.burst(at, { blood: dst.kind === 'monster', count: m.crit ? 12 : 7 });
-      if (mine) { fx.number(at, m.crit ? `${m.amount}!` : `${m.amount}`, m.crit ? 'crit' : 'out'); fx.shake(m.crit ? 0.55 : 0.28); fx.hitStop(m.crit ? 90 : 55); }
-      else if (onMe) { fx.number(at, `-${m.amount}`, 'in'); fx.shake(0.35); }
-      else fx.number(at, `${m.amount}`, 'other');
-      break;
-    }
-    case 'death': {
-      actors.setDead(m.id, true);
-      const a = actors.get(m.id), by = actors.get(m.by);
-      if (m.id === S.selfId) {
-        S.self.dead = true; S.self.deadAt = performance.now(); S.predictor.locked = true; controls.stopChase();
-        hud.chat(`You were slain by ${by?.name || 'something'}.`, 'bad');
-      } else if (a && m.by === S.selfId) {
-        hud.chat(`You have slain ${a.name}.`, 'combat');
-      }
-      if (S.target === m.id) {
-        // Your target fell: if something is still biting you, turn to it and keep fighting.
-        const wasChasing = controls.chasing != null;
-        controls.stopChase();
-        const me = actors.get(S.selfId);
-        const next = me && [...actors.actors.values()].filter(x => x.hostile && !x.dead && x.tgt === S.selfId)
-          .sort((p, r) => Math.hypot(p.pos.x - me.pos.x, p.pos.z - me.pos.z) - Math.hypot(r.pos.x - me.pos.x, r.pos.z - me.pos.z))[0];
-        if (next) { setTarget(next.id); if (wasChasing) controls.attack(next.id); }
-      }
-      break;
-    }
-    case 'respawn': {
-      actors.setDead(m.id, false); actors.setHp(m.id, m.hp);
-      const a = actors.get(m.id);
-      if (m.id === S.selfId) {
-        S.self.dead = false; S.self.hp = m.hp; S.predictor.locked = false; S.predictor.reset({ x: m.x, y: m.y, z: m.z });
-        hud.death(null); hud.setSelf(S.self); hud.toast('You rise again.', 'good');
-      } else if (a) { a.buffer.clear(); a.buffer.push({ t: S.clock.time(), x: m.x, y: m.y, z: m.z, yaw: a.yaw }); }
-      break;
-    }
-    case 'xp': {
-      const levelled = m.level > S.self.level;
-      if (m.amount > 0) { const me = actors.get(S.selfId); if (me) fx.number({ x: me.pos.x, y: me.pos.y + me.height + 0.4, z: me.pos.z }, `+${m.amount} XP`, 'xp'); }
-      S.self.xp = m.total; S.self.level = m.level; S.self.next = m.next;
-      hud.setSelf(S.self);
-      if (levelled) { const me = actors.get(S.selfId); if (me) { me.level = m.level; actors.refreshPlate(me); fx.burst({ x: me.pos.x, y: me.pos.y + 1, z: me.pos.z }, { color: '#ffe08a', count: 24 }); } }
-      break;
-    }
-    case 'chat':
-      if (m.ch === 'say') hud.chat(m.text, 'say', m.from); else hud.chat(m.text, m.ch === 'system' ? 'system' : m.ch);
-      break;
-    case 'notice':
-      hud.toast(m.text, m.tone);
-      if (m.tone === 'good') hud.chat(m.text, 'system');
-      break;
-    case 'pong':
-      S.clock.pong(m.c, m.s); S.rtt = S.clock.rtt;
-      hud.conn(S.conn.status, { rtt: S.rtt, mode: S.conn.mode });
-      break;
+  const btn = $('enter'); btn.disabled = true; btn.textContent = 'Entering…';
+  const mode = netMode();
+  const net = connect({ mode, url: q.get('server') || undefined, build: q.get('build') || 'dev', guestName: name,
+    tokenStore: localTokenStore('thousandvale.token.' + (mode === 'ws' ? (q.get('server') || location.host) : 'offline')) });
+  S.net = net; S.phase = 'joining';
+  wireNet(net);
+  const fail = text => { $('login-note').textContent = text; btn.disabled = false; btn.textContent = 'Enter the world'; S.phase = 'title'; net.close(); S.net = null; };
+  const timer = setTimeout(() => { if (S.phase === 'joining' && net.status !== 'online') fail(mode === 'ws' ? 'Cannot reach the game server. Add ?offline=1 to play against an in-browser server.' : 'The in-browser server did not start.'); }, 20000);
+  try {
+    await net.ready;
+    let ch = net.chars.find(c => c.name.toLowerCase() === name.toLowerCase());
+    if (!ch) ch = await net.createChar({ name, cls: S.cls, look: { race: S.look.race, seed: S.look.seed, v: 1 } });
+    await net.play(ch.id);
+    clearTimeout(timer);
+  } catch (e) {
+    clearTimeout(timer);
+    fail(e.code === 'name' ? 'That name is taken. Try another.' : e.code === 'full' ? 'This account has all the characters it can hold.' : (e.message || 'Could not enter the world.'));
   }
 }
 
-function startWorld(m) {
+function wireNet(net) {
+  net.on('status', st => {
+    const pill = st === 'online' ? 'open' : st === 'reconnecting' ? 'reconnecting' : ['refused', 'kicked', 'closed', 'left'].includes(st) ? 'closed' : 'connecting';
+    hud.conn(pill, { rtt: net.clock.rtt, mode: netMode() });
+    if (st === 'reconnecting' && S.phase === 'world') hud.toast('Connection lost — reconnecting…', 'warn');
+  });
+  net.on('pong', p => hud.conn(net.status === 'online' ? 'open' : 'connecting', { rtt: p.rtt, mode: netMode() }));
+  net.on('kick', k => {
+    const text = k.code === 'elsewhere' ? 'You logged in from another tab.' : k.code === 'version' || k.code === 'build' ? 'A new version is out — reload the page.' : k.msg || 'Disconnected.';
+    hud.toast(text, 'bad'); hud.chat(text, 'bad');
+    if (S.phase !== 'world') $('login-note').textContent = text;
+  });
+  net.on('joined', onJoined);
+  net.on('info', ents => { S.mirror.info(ents); for (const i of ents) refreshFromInfo(i.id); });
+  net.on('snap', onSnap);
+  net.on('ev', ({ e }) => { for (const ev of e) onEvent(ev); });
+  net.on('you', patch => {
+    const levelled = patch.level != null && patch.level > S.self.level;
+    if (patch.level != null) S.self.level = patch.level;
+    if (patch.xp != null) S.self.xp = patch.xp;
+    if (patch.xpNext != null) S.self.next = patch.xpNext;
+    if (patch.hpMax != null) S.self.hpMax = patch.hpMax;
+    if (patch.hp != null) S.self.hp = patch.hp;
+    hud.setSelf(S.self);
+    if (levelled) levelFlash(S.selfId);
+  });
+  net.on('chat', m => hud.chat(m.text, m.ch === 'say' ? 'say' : 'system', m.ch === 'say' ? m.name : null));
+  net.on('castR', r => {
+    if (r.why === 'cooldown') { S.swing.ms = Math.min(2500, S.swing.ms + 60); return; }
+    if (r.why === 'range') { const t = actors.get(S.target); if (t) S.reach = Math.max(1.6, Math.min(S.reach, Math.hypot(t.pos.x - S.predictor.pos.x, t.pos.z - S.predictor.pos.z)) * 0.8); }
+    hud.toast(CASTR_TEXT[r.why] || 'You cannot do that.', 'warn');
+  });
+}
+
+function onJoined(j) {
+  S.room = j.room; S.selfId = j.you.id;
+  S.mirror.reset();
+  for (const id of [...actors.actors.keys()]) actors.remove(id);
+  preview = null;
+  const you = j.you;
+  Object.assign(S.self, { name: you.name, cls: you.cls, level: you.level, xp: you.xp || 0, next: you.xpNext || 100, hp: you.hp, hpMax: you.hpMax, dead: you.hp <= 0 });
+  S.predictor.locked = S.self.dead;
+  useTerrain(j.room.terrain, j.room.kind === 'town' ? j.room.spawn : null).then(() => {
+    S.predictor.reset({ x: you.x, y: you.y, z: you.z });
+    const a = actors.add({ id: S.selfId, kind: 'player', name: you.name, level: you.level, hp: you.hp, hpMax: you.hpMax, hostile: false,
+      look: lookFor(S.mirror.infos.get(S.selfId)?.look || { race: S.look.race, seed: S.look.seed }, you.char, you.cls), x: you.x, y: you.y, z: you.z, yaw: you.yaw }, { self: true });
+    a.self = true;
+    controls.setFacing(you.yaw || 0); controls.cam.yaw = you.yaw || 0;
+    hud.setSelf(S.self);
+    if (S.phase !== 'world') startWorld(j); else hud.toast('Reconnected.', 'good');
+  });
+}
+
+function lookFor(look, charId, cls) {
+  if (look && (look.race || look.avatar || look.body)) return { ...look, cls: look.cls || cls };
+  return defaultLook(charId ?? 0, cls);
+}
+
+/** Make sure an actor exists for a mirrored entity. */
+function ensureActor(id) {
+  if (id === S.selfId) return actors.get(id);
+  const e = S.mirror.ents.get(id); if (!e || e.x === undefined) return null;
+  let a = actors.get(id);
+  if (!a) {
+    const info = e.info || S.mirror.infos.get(id) || {};
+    const kind = info.kind || KIND_NAMES[e.kind] || 'monster';
+    const hpMax = info.hpMax || 100;
+    const y = e.y ?? groundY(e.x, e.z);
+    a = actors.add({
+      id, kind, name: info.name || (kind === 'monster' ? 'Creature' : 'Adventurer'), level: info.level || 1,
+      hp: Math.round((e.hp ?? 1) * hpMax), hpMax, hostile: info.team === 2 || (kind === 'monster' && info.team !== 1),
+      look: kind === 'player' ? lookFor(info.look, info.char ?? id, info.cls) : null,
+      creature: kind !== 'player' ? { type: info.type || 'wolf', seed: (id * 7919) >>> 0 } : null, family: info.type || null,
+      x: e.x, y, z: e.z, yaw: e.yaw || 0,
+    });
+    if (e.state & STATE.dead) actors.setDead(id, true);
+  }
+  return a;
+}
+function refreshFromInfo(id) {
+  const a = actors.get(id), info = S.mirror.infos.get(id);
+  if (!a || !info) return;
+  const levelled = info.level > a.level;
+  a.name = info.name || a.name; a.level = info.level || a.level; a.hpMax = info.hpMax || a.hpMax;
+  actors.refreshPlate(a);
+  if (levelled && id !== S.selfId) levelFlash(id);
+}
+
+function onSnap(s) {
+  S.stats.snaps++; S.stats.bytes += s.bytes || 0;
+  S.mirror.snap(s);
+  if (s.self && S.selfId != null && W.terrain) {
+    const d = S.predictor.reconcile(s.ack, s.self);
+    if (d > 0.02) { S.stats.corrections++; S.stats.maxCorrection = Math.max(S.stats.maxCorrection, d); }
+  }
+  if (s.vitals) { S.self.hp = s.vitals.hp; S.self.hpMax = s.vitals.hpMax; actors.setHp(S.selfId, s.vitals.hp, s.vitals.hpMax); hud.setSelf(S.self); }
+  if (S.selfId != null && !!s.dead !== S.self.dead) setSelfDead(!!s.dead);
+  for (const id of s.left) { actors.remove(id); if (S.target === id) setTarget(null); }
+  for (const r of s.ents) {
+    if (r.id === S.selfId) continue;
+    const a = ensureActor(r.id); if (!a) continue;
+    if (r.hp !== undefined) actors.setHp(r.id, Math.round(r.hp * (a.hpMax || 1)));
+    if (r.state !== undefined) {
+      const dead = !!(r.state & STATE.dead);
+      if (dead !== a.dead) actors.setDead(r.id, dead);
+      if (r.state & STATE.combat) a.lastCombat = performance.now();
+    }
+    if (r.target !== undefined) a.tgt = r.target;
+    if (r.anim !== undefined && r.animSeq !== a.animSeq) {
+      const first = a.animSeq === undefined;
+      a.animSeq = r.animSeq;
+      const name = ANIMS[r.anim];
+      if (name === 'hit') actors.playHit(r.id, null, 1);
+      else if (name === 'die' || name === 'dead') actors.setDead(r.id, true);
+      else if (ONE_SHOT.has(name) && !first) actors.playAttack(r.id, a.tgt);
+    }
+  }
+  if (S.target != null) hud.setTarget(actors.get(S.target));
+}
+
+function remember(ev) { S.events.push(ev); if (S.events.length > 200) S.events.shift(); }
+function onEvent(ev) {
+  remember(ev);
+  const me = S.selfId;
+  switch (ev.type) {
+    case 'cast':
+      if (ev.s === me) S.swing.last = performance.now();
+      else actors.playAttack(ev.s, ev.target);
+      break;
+    case 'hit': {
+      const dst = actors.get(ev.d), src = actors.get(ev.s);
+      if (!dst) break;
+      const at = { x: dst.pos.x, y: dst.pos.y + dst.height * 0.75, z: dst.pos.z };
+      const mine = ev.s === me, onMe = ev.d === me;
+      if (ev.kind === 'heal') { fx.number(at, `+${ev.n}`, 'heal'); break; }
+      if (ev.kind === 'absorb') { fx.number(at, 'Absorbed', 'miss'); break; }
+      if (dst.id !== me) actors.setHp(dst.id, Math.max(0, dst.hp - ev.n));   // the snapshot confirms a moment later
+      actors.playHit(ev.d, ev.s, ev.n);
+      fx.burst(at, { blood: dst.kind === 'monster', count: ev.crit ? 12 : 7 });
+      if (mine) {
+        fx.number(at, ev.crit ? `${ev.n}!` : `${ev.n}`, ev.crit ? 'crit' : 'out'); fx.shake(ev.crit ? 0.55 : 0.28); fx.hitStop(ev.crit ? 90 : 55);
+        if (src) S.reach = Math.max(S.reach, Math.min(30, Math.hypot(dst.pos.x - src.pos.x, dst.pos.z - src.pos.z)));
+      } else if (onMe) { fx.number(at, `-${ev.n}`, 'in'); fx.shake(0.35); }
+      else fx.number(at, `${ev.n}`, 'other');
+      break;
+    }
+    case 'miss': {
+      const dst = actors.get(ev.d); if (!dst) break;
+      fx.number({ x: dst.pos.x, y: dst.pos.y + dst.height * 0.75, z: dst.pos.z }, ev.d === me ? 'Dodged' : ev.why === 'block' ? 'Blocked' : 'Miss', 'miss');
+      break;
+    }
+    case 'die': {
+      actors.setDead(ev.d, true);
+      const a = actors.get(ev.d), by = actors.get(ev.by);
+      if (ev.d === me) { setSelfDead(true); hud.chat(`You were slain by ${by?.name || 'something'}.`, 'bad'); }
+      else if (a && ev.by === me) hud.chat(`You have slain ${a.name}.`, 'combat');
+      if (S.target === ev.d) retargetAfterKill();
+      break;
+    }
+    case 'xp': {
+      const a = actors.get(me);
+      if (a && ev.n > 0) fx.number({ x: a.pos.x, y: a.pos.y + a.height + 0.4, z: a.pos.z }, `+${ev.n} XP`, 'xp');
+      if (ev.total != null) { S.self.xp = ev.total; hud.setSelf(S.self); }
+      break;
+    }
+    case 'level': {
+      if (ev.d === me) { S.self.level = ev.level; hud.setSelf(S.self); hud.toast(`You reached level ${ev.level}!`, 'good'); hud.chat(`You reached level ${ev.level}.`, 'system'); }
+      const a = actors.get(ev.d); if (a) { a.level = ev.level; actors.refreshPlate(a); }
+      levelFlash(ev.d);
+      break;
+    }
+    case 'aggro':
+      if (ev.d === me) { const a = actors.get(ev.s); if (a) fx.number({ x: a.pos.x, y: a.pos.y + a.height + 0.3, z: a.pos.z }, '!', 'in'); }
+      break;
+  }
+}
+function levelFlash(id) { const a = actors.get(id); if (a) fx.burst({ x: a.pos.x, y: a.pos.y + 1, z: a.pos.z }, { color: '#ffe08a', count: 24 }); }
+
+function setSelfDead(dead) {
+  if (S.self.dead === dead) return;
+  S.self.dead = dead; S.predictor.locked = dead;
+  actors.setDead(S.selfId, dead);
+  if (dead) { S.self.deadAt = performance.now(); controls.stopChase(); }
+  else hud.toast('You rise again.', 'good');
+}
+function rise() { if (S.self.dead && S.net && performance.now() - S.self.deadAt > 2500) S.net.respawn(); }
+
+function startWorld(j) {
   S.phase = 'world';
-  actors.remove('preview'); preview = null;
   $('title').classList.add('leaving');
   setTimeout(() => { $('title').hidden = true; }, 650);
   hud.show();
   hud.setSelf(S.self);
-  hud.zone(ZONE_NAME);
-  hud.chat(`Welcome to ${ZONE_NAME}.`, 'system');
-  if (m.motd) hud.chat(m.motd, 'system');
-  hud.chat('Wolves hunt the meadow to the north. Right-click one to attack.', 'system');
-  setInterval(() => { if (S.conn) S.conn.send(P.encodePing(performance.now())); }, 2000);
-  S.conn.send(P.encodePing(performance.now()));
-  window.addEventListener('pagehide', () => S.conn?.close());
+  const zone = j.room.name || W.terrain?.name || 'The Vale';
+  hud.zone(zone);
+  hud.chat(`Welcome to ${zone}.`, 'system');
+  if (netMode() !== 'ws') hud.chat('Offline: the whole server is running inside this tab.', 'system');
+  hud.chat('Wolves prowl near the waystone. Right-click one to attack; Tab picks the next.', 'system');
+  window.addEventListener('pagehide', () => S.net?.leave());
 }
 
 // --- targeting and combat --------------------------------------------------------------------------------
 function setTarget(id) {
   if (id === S.selfId) id = null;
-  S.target = id;
-  if (S.conn && S.phase === 'world') S.conn.send(P.encodeTarget(id));
+  S.target = id ?? null;
+  if (S.net && S.phase === 'world') S.net.target(id || undefined);
   hud.setTarget(id != null ? actors.get(id) : null);
+}
+function retargetAfterKill() {
+  const wasChasing = controls.chasing != null;
+  controls.stopChase();
+  const me = actors.get(S.selfId); if (!me) return;
+  const next = [...actors.actors.values()].filter(x => x.hostile && !x.dead && x.tgt === S.selfId)
+    .sort((p, r) => Math.hypot(p.pos.x - me.pos.x, p.pos.z - me.pos.z) - Math.hypot(r.pos.x - me.pos.x, r.pos.z - me.pos.z))[0];
+  if (next) { setTarget(next.id); if (wasChasing) controls.attack(next.id); }
 }
 function cycleTarget() {
   const me = actors.get(S.selfId); if (!me) return;
@@ -332,20 +440,22 @@ function cycleTarget() {
   const i = list.findIndex(o => o.a.id === S.target);
   setTarget(list[(i + 1) % list.length].a.id);
 }
-function tryStrike(fromKey) {
-  if (S.phase !== 'world' || S.self.dead) return;
-  const t = actors.get(S.target), me = actors.get(S.selfId);
-  if (!t || !t.hostile) { if (fromKey) hud.toast('You need a target.', 'warn'); return; }
-  if (t.dead) { if (fromKey) hud.toast('That target is dead.', 'warn'); return; }
+/** Swing at the target if we think the weapon is ready; the server decides (castR says no). */
+function tryStrike(fromKey, slot = 0) {
+  if (S.phase !== 'world' || S.self.dead || !S.net) return false;
+  const t = actors.get(S.target);
+  if (!t || !t.hostile) { if (fromKey) hud.toast('You need a target.', 'warn'); return false; }
+  if (t.dead) { if (fromKey) hud.toast('That target is dead.', 'warn'); return false; }
   const now = performance.now();
   const d = Math.hypot(t.pos.x - S.predictor.pos.x, t.pos.z - S.predictor.pos.z);
-  if (d > STRIKE.reach + 0.4) return;           // controls walk us into range; the auto-strike fires there
-  if (now < S.nextSwingAt) return;
-  S.nextSwingAt = now + STRIKE.cooldownMs;
+  if (d > S.reach + 0.6) return false;                 // controls walk us into range; the auto-strike fires there
+  if (now - S.swing.attempt < 250 || now - S.swing.last < S.swing.ms * 0.92) return false;
+  S.swing.attempt = now;
   controls.setFacing(Math.atan2(t.pos.x - S.predictor.pos.x, t.pos.z - S.predictor.pos.z));
-  S.conn.send(P.encodeCast(STRIKE.slot, t.id, { x: t.pos.x, z: t.pos.z }, S.clock.time()));
+  S.net.cast({ slot, target: t.id, aim: { x: t.pos.x, z: t.pos.z } });
   actors.playAttack(S.selfId, t.id);
-  hud.cooldown(0, STRIKE.cooldownMs); hud.press(0);
+  hud.cooldown(0, S.swing.ms); hud.press(0);
+  return true;
 }
 
 const _ray = new THREE.Raycaster();
@@ -353,12 +463,11 @@ function pickGround(ndc) {
   _ray.setFromCamera(ndc, camera);
   const o = _ray.ray.origin, dir = _ray.ray.direction;
   let prev = 0;
-  for (let t = 0.5; t < 400; t += t < 40 ? 0.5 : 2) {
+  for (let t = 0.5; t < 500; t += t < 40 ? 0.5 : 2) {
     const x = o.x + dir.x * t, y = o.y + dir.y * t, z = o.z + dir.z * t;
-    if (y <= terrain.heightAt(x, z)) {
-      // refine between prev and t
+    if (y <= groundY(x, z)) {
       let a = prev, b = t;
-      for (let i = 0; i < 10; i++) { const m = (a + b) / 2; const mx = o.x + dir.x * m, mz = o.z + dir.z * m; if (o.y + dir.y * m <= terrain.heightAt(mx, mz)) b = m; else a = m; }
+      for (let i = 0; i < 12; i++) { const m = (a + b) / 2; if (o.y + dir.y * m <= groundY(o.x + dir.x * m, o.z + dir.z * m)) b = m; else a = m; }
       return { x: o.x + dir.x * b, z: o.z + dir.z * b };
     }
     prev = t;
@@ -366,10 +475,27 @@ function pickGround(ndc) {
   return null;
 }
 
-// Hover: highlight what is under the mouse.
 let mouseNdc = null;
 $('view').addEventListener('pointermove', e => { const r = $('view').getBoundingClientRect(); mouseNdc = { x: ((e.clientX - r.left) / r.width) * 2 - 1, y: -((e.clientY - r.top) / r.height) * 2 + 1 }; });
 $('view').addEventListener('pointerleave', () => { mouseNdc = null; });
+
+// Interpolation: the mirror's samples, with the ground filled in for entities the server sends no y for.
+function sampleEnt(id, t) {
+  const p = S.mirror.sample(id, t);
+  if (!p || p.x === undefined) return null;
+  if (p.y === undefined || p.y === null) p.y = groundY(p.x, p.z);
+  return p;
+}
+function speedOf(id, t) {
+  const e = S.mirror.ents.get(id); if (!e) return 0;
+  const sm = e.samples; if (sm.length < 2) return 0;
+  let i = sm.length - 1;
+  while (i > 1 && sm[i - 1].t > t) i--;
+  const a = sm[i - 1], b = sm[i];
+  if (t - b.t > 350) return 0;                         // no samples for a while: it is standing still
+  const dt = (b.t - a.t) / 1000;
+  return dt > 0 ? Math.hypot(b.x - a.x, b.z - a.z) / dt : 0;
+}
 
 // --- frame loop ----------------------------------------------------------------------------------------
 let last = performance.now(), elapsed = 0, titleOrbit = 0;
@@ -377,51 +503,53 @@ function frame(now) {
   requestAnimationFrame(frame);
   const dt = Math.min(0.1, (now - last) / 1000); last = now; elapsed += dt;
 
-  if (S.phase === 'world' && S.selfId != null) {
-    // Fixed sim-rate input steps: predict locally, send to the server.
+  if (S.phase === 'world' && S.selfId != null && W.terrain && actors.get(S.selfId)) {
+    // Fixed 20 Hz input steps: predict locally, send the same step to the server.
+    const online = S.net?.status === 'online';
     S.acc += dt * 1000;
     let steps = 0;
-    while (S.acc >= S.tickMs && steps < 4) {
-      S.acc -= S.tickMs; steps++;
+    while (online && S.acc >= TICK_MS && steps < 4) {
+      S.acc -= TICK_MS; steps++;
       const t = S.target != null ? actors.get(S.target) : null;
-      const chasingTarget = controls.chasing != null && t && !t.dead ? t.pos : null;
-      const it = controls.intent(S.predictor.pos, { targetPos: chasingTarget, reach: STRIKE.reach - 0.4, dead: S.self.dead });
-      const step = S.predictor.apply(it);
-      S.conn.send(P.encodeInput(step.seq, step.mx, step.mz, step.yaw, step.run));
+      const chasing = controls.chasing != null && t && !t.dead ? t.pos : null;
+      const it = controls.intent(S.predictor.pos, { targetPos: chasing, reach: Math.max(1.4, S.reach - 0.3), dead: S.self.dead });
+      const inp = S.predictor.apply(it);
+      S.net.input(inp);
       S.lastInput = it;
-      S.movingSpeed = Math.hypot(it.mx, it.mz) > 0.01 && !S.self.dead ? (it.run ? MOVE.run : MOVE.walk) : 0;
+      S.movingSpeed = Math.hypot(it.mx, it.mz) > 0.01 && !S.self.dead ? (it.b & 1 ? MOVE.sprint : MOVE.run) : 0;
       if (it.inRange && controls.chasing != null) tryStrike(false);
     }
-    if (steps === 4) S.acc = 0;   // a stalled tab does not try to catch up forever
-    const drawn = S.predictor.render(S.acc / S.tickMs, dt);
-    const renderTime = S.clock.time() - P.INTERP_DELAY_MS;
-    if (mouseNdc && !controls.cam.dragging) { const h = actors.pickAt(mouseNdc, { exclude: S.selfId }); S.hover = h ? h.id : null; $('view').style.cursor = h ? (h.hostile && !h.dead ? 'crosshair' : 'pointer') : 'default'; }
-    const stopped = fx.stopped;
-    actors.update(stopped ? dt * 0.1 : dt, renderTime, { selfPos: drawn, selfYaw: S.lastInput?.yaw ?? 0, selfMoving: S.movingSpeed, targetId: S.target, hoverId: S.hover });
+    if (steps === 4 || !online) S.acc = 0;
+    const drawn = S.predictor.render(S.acc / TICK_MS, dt);
+    const renderTime = S.net ? S.net.clock.serverNow() - INTERP_MS : 0;
+    if (mouseNdc) { const h = actors.pickAt(mouseNdc, { exclude: S.selfId }); S.hover = h ? h.id : null; $('view').style.cursor = h ? (h.hostile && !h.dead ? 'crosshair' : 'pointer') : 'default'; }
+    actors.update(fx.stopped ? dt * 0.1 : dt, renderTime, { selfPos: drawn, selfYaw: S.lastInput?.yaw ?? 0, selfMoving: S.movingSpeed, targetId: S.target, hoverId: S.hover, sample: sampleEnt, speed: speedOf });
     const me = actors.get(S.selfId);
     controls.updateCamera(drawn, dt, me ? Math.min(1.9, me.height * 0.8) : 1.5);
     fx.applyShake(camera, elapsed);
     view.follow(drawn);
-    decor?.update(dt, drawn);
-    if (S.self.dead) hud.death(6 - (now - S.self.deadAt) / 1000); else hud.death(null);
+    W.ground?.update(dt, drawn);
+    W.decor?.update(dt, drawn);
+    hud.death(S.self.dead ? Math.max(0, 2.5 - (now - S.self.deadAt) / 1000) : null);
+    if (S.self.dead && now - S.self.deadAt > 30000) rise();
     const tgt = S.target != null ? actors.get(S.target) : null;
-    if (tgt) { hud.setTarget(tgt); hud.usable(0, !tgt.dead && Math.hypot(tgt.pos.x - drawn.x, tgt.pos.z - drawn.z) <= STRIKE.reach + 0.4); }
+    if (tgt) { hud.setTarget(tgt); hud.usable(0, !tgt.dead && Math.hypot(tgt.pos.x - drawn.x, tgt.pos.z - drawn.z) <= S.reach + 0.6); }
     else hud.usable(0, false);
-  } else {
-    // Title screen: a slow orbit around the preview character, framed to the right of the panel.
+  } else if (W.terrain) {
+    // Title screen (and while joining): a slow orbit around the preview character, framed right of the panel.
     titleOrbit += dt * 0.06;
-    const px = STANDIN.spawn.x, pz = STANDIN.spawn.z, py = terrain.heightAt(px, pz);
+    const { x: px, z: pz } = W.camp || W.terrain.spawn, py = groundY(px, pz);
     const ang = 0.35 + Math.sin(titleOrbit) * 0.35, dist = 6.2;
     camera.position.set(px + Math.sin(ang) * dist, py + 2.2, pz + Math.cos(ang) * dist);
-    const side = new THREE.Vector3(-Math.cos(ang), 0, Math.sin(ang)).multiplyScalar(window.innerWidth > 760 ? 1.9 : 0);
-    camera.lookAt(px + side.x, py + 1.15, pz + side.z);
-    if (preview?.buffer.s[0]) preview.buffer.s[0].yaw = ang;
-    actors.update(dt, 0, { });
+    const side = window.innerWidth > 760 ? 1.9 : 0;
+    camera.lookAt(px - Math.cos(ang) * side, py + 1.15, pz + Math.sin(ang) * side);
+    if (preview?.still) preview.still.yaw = ang;
+    actors.update(dt, 0, {});
     view.follow({ x: px, y: py, z: pz });
-    decor?.update(dt, { x: px, z: pz });
+    W.ground?.update(dt, { x: px, z: pz });
+    W.decor?.update(dt, { x: px, z: pz });
   }
   fx.update(dt);
-  ground.update(elapsed);
   hud.tick(dt);
   view.render();
 }
@@ -429,24 +557,44 @@ function frame(now) {
 // --- boot ----------------------------------------------------------------------------------------------
 initTitle();
 requestAnimationFrame(frame);
-Promise.all([decorReady, loadLookData()]).then(() => {
+// The title screen stands on the test zone (where M0 puts everyone); joined.room.terrain decides after that.
+Promise.all([useTerrain('test'), loadLookData()]).then(() => {
+  rebuildPreview();
   $('loading').classList.add('done');
-  if (q.get('auto') === '1' && q.get('name')) enterWorld();
+  const auto = q.get('autoplay') === '1' || q.get('auto') === '1';
+  if (auto && q.get('name')) enterWorld();
 });
 
-// For tests, bots and the console. Read-only use please.
-window.thousandvale = {
-  S, actors, terrain, camera, controls, hud, fx,
-  get selfId() { return S.selfId; }, get phase() { return S.phase; }, get target() { return S.target; },
-  setTarget, tryStrike, cycleTarget,
-  info() {
+// --- test hook (stream G's two-player spec; also handy in the console) -----------------------------------
+const tv = {
+  state() {
     const me = actors.get(S.selfId);
     return {
-      phase: S.phase, selfId: S.selfId, conn: S.conn?.status, mode: S.conn?.mode, rtt: S.rtt,
-      pos: me ? { x: me.pos.x, y: me.pos.y, z: me.pos.z } : null, hp: S.self.hp, level: S.self.level, xp: S.self.xp,
-      target: S.target, actors: actors.actors.size, players: [...actors.actors.values()].filter(a => a.kind === 'player').map(a => ({ id: a.id, name: a.name, x: +a.pos.x.toFixed(2), z: +a.pos.z.toFixed(2) })),
-      monsters: [...actors.actors.values()].filter(a => a.kind === 'monster').map(a => ({ id: a.id, name: a.name, hp: a.hp, dead: a.dead, x: +a.pos.x.toFixed(1), z: +a.pos.z.toFixed(1) })),
-      stats: { ...S.stats, pending: S.predictor.pending.length, draws: view.renderer.info.render.calls, tris: view.renderer.info.render.triangles },
+      status: S.net?.status || 'idle', phase: S.phase,
+      you: S.selfId != null ? { id: S.selfId, x: S.predictor.pos.x, z: S.predictor.pos.z, hp: S.self.hp, hpMax: S.self.hpMax, level: S.self.level, xp: S.self.xp, dead: S.self.dead } : null,
+      target: S.target,
+      ents: [...S.mirror.ents.values()].filter(e => e.id !== S.selfId).map(e => {
+        const info = e.info || S.mirror.infos.get(e.id) || {};
+        const a = actors.get(e.id);
+        return { id: e.id, kind: info.kind || KIND_NAMES[e.kind], type: info.type || null, name: info.name || '', x: e.x, z: e.z, hp: Math.round((e.hp ?? 1) * (info.hpMax || 1)), dead: !!(e.state & STATE.dead) || !!a?.dead };
+      }),
+      events: S.events.slice(),
+      drawn: me ? { x: me.pos.x, y: me.pos.y, z: me.pos.z } : null,
+      stats: { ...S.stats, pending: S.predictor.pending.length, rtt: S.net?.clock.rtt ?? null, draws: view.renderer.info.render.calls, tris: view.renderer.info.render.triangles, quality },
     };
   },
+  walkTo(x, z) { controls.walkTo(x, z); },
+  stop() { controls.stop(); },
+  cast(slot = 0, targetId) {
+    if (!S.net) return false;
+    const t = targetId != null ? actors.get(targetId) : actors.get(S.target);
+    if (t) setTarget(t.id);
+    S.net.cast({ slot, target: t?.id, aim: t ? { x: t.pos.x, z: t.pos.z } : undefined });
+    actors.playAttack(S.selfId, t?.id);
+    return true;
+  },
+  attack(targetId) { setTarget(targetId); controls.attack(targetId); },
+  target: setTarget, say: text => S.net?.say(text), rise,
 };
+window.tv = tv;
+window.thousandvale = { S, W, actors, camera, controls, hud, fx, tv };

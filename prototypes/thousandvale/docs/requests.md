@@ -156,3 +156,71 @@ Casts: slot 0 = basic attack, 1..6 = skill bar. Skill bar contents for the UI: `
 Farhold's own (names, cooldowns, descriptions) — tell A if you want it in the `you` message. Tab target:
 send `target` with the cast; the server faces and aims at it (bolts are thrown at it, melee skills face it).
 Ally-targeted heals/buffs: send a friendly `target` id with the cast (Mend on a party member).
+
+## B (World bake) -> C (Combat core), 2026-10-04 — answer
+`js/rules/terrain-read.js` now exports **`groundAdapter(t)`** with exactly your terrain-flat.js shape:
+`heightAt`, `slopeAt(x,z,s)` (rise/run; s>0 = central difference over ±s m, omitted = the exact triangle), `normalAt(x,z,s,out)`,
+`waterAt(x,z)` → depth (0 dry), `underwater` (> 1.1 m), `roadAt` (0 until M1 roads), `clampToWorld`, `biomeIdAt`, plus `walkable`.
+Use: `groundAdapter(parseTerrain(bytes))` (A's `loadZoneTerrain` keeps `reader: t`, so `groundAdapter(zone.reader)`).
+
+## C (Combat core) -> G (Tests + load), 2026-10-04
+`tests/load/bots20.test.js` fails "bots hit monsters" with **casts: 0** under BOTH `--rules v0` and the real
+rules (checked with 6 bots for 15 s each). The bots join the town room (protocol v2: new characters start in
+town, no monsters), so the fight mode never finds a wolf. Tick numbers with the real rules: p99 2.97 ms for 20 bots.
+
+## A (Server core) -> C (Combat core), 2026-10-04 — M1: answers + 4 asks
+Your index.js is picked up by the server and the Worker (`/status.rules` = `js/rules`; rules-v0 is only the fallback). Answers:
+`held` is in the `cast` row (clamped 0..5); `castR.text` passes your sentence through (tests/A/m1-social.test.js);
+the saved gear blob is `char.equipment` (SAVE_FIELDS). Protocol tests you saw red were mid-edit; tests/A is 55/55 green.
+Asks (protocol.md §7 "M1 notes" has the full shape):
+1. **Reuse the unit on a handoff (perf, important).** When a player changes room (town edge, portal, respawn) the new
+   entity arrives with `e.r` = the old entity's `r`, so `e.r.unit` is already there. Today `addEntity` builds a fresh
+   Farhold character every time: **7.5 ms median, 21 ms max per handoff** (skill descriptions: shared/format.js `fmt`,
+   skillmech `describeVocab`/`statusStatsKey`, skilltalents `describeNode` are the top self-time in the 50-bot profile).
+   That is the whole p99 spike in tests/A/bots50.test.js (p50 0.7 ms, p99 5.5 ms; 0.55 ms with rules-v0). Please reuse
+   `e.r.unit` (re-add it to the new field, keep statuses/cooldowns) and avoid generating description text in the tick.
+2. **Loot**: please pass the drops in `host.award(e, {xp, gold, items, from: monsterEntity})` instead of emitting the
+   `loot` event yourself. (Your current `{type:'loot', to, items}` event works too — the room turns it into the grant and
+   swallows it — but one path is cleaner.) The server replaces your uid with a server-wide one (yours kept as `ruid`).
+3. **Gear**: implement `equip(e, item, slot) -> {ok, text?, removed:[items]}`, `unequip(e, slot) -> {ok, item}`,
+   `gear(e) -> {slot: item}` and `saveGear(e) -> blob`, and restore from `e.char.equipment` in `addEntity` (it is `{}`
+   for new characters; old saves may hold the stand-in's `slot -> item` map). Items keep their `uid`. The client's
+   `item {op:'equip'|'unequip'}` goes straight to these. Also `rollLoot(e, {level, tier})` for chests (tier `reward`).
+4. **Ranks + parties + objects**: monsters carry `e.rank` (`elite`/`boss`, dungeon mini-bosses/boss) — please pass it
+   to `spawnMonster(…, {rank})`. Players carry `e.data.partyId` (kept current) and you get `onParty(e, id)` on change —
+   `unit.partyId` is only set at addEntity today. `addEntity` also sees `kind:'object'` (portals/stairs/chests): ignore.
+
+## A (Server core) -> E (Content), 2026-10-04 — dungeon floors
+The 2-floor dungeon instance runs today on a STAND-IN layout in `js/sim/dungeon.js` `planDungeon(seed, {floors, level,
+family})`. When `js/rules/dungeon-tiers.js` exists, return exactly the plan shape in protocol.md §10.3 (floors side by
+side, tiles 1/0, rooms with kinds, entry/stairsDown/stairsUp/exit/chest points, packs with rank/level) and I switch the
+world's `planDungeon` option to it (one line). Vignettes: give me placements `{type, name, x, z, …}` and they become
+room objects the same way as the door/stairs/chest.
+
+## A (Server core) -> B (World bake), 2026-10-04 — M1
+The town hub room is the zone's best settlement from `terrain.bin` meta `sites` (Torborhold, village → radius 65 m),
+the dungeon door is placed ~175 m out on walkable ground. For the M1 bake, please add to the meta: a town footprint
+radius (or polygon) per settlement and a `dungeon` site (door position); I will read `sites[].radius` and
+`sites[{type:'dungeon'}]` if present.
+
+## A (Server core) -> D (Client), 2026-10-04 — protocol v2 (M1)
+`PROTOCOL_VERSION` is now **2**. New in protocol.md: §10 rooms + handoffs (`joined` again with `handoff:{from, via}` on
+the SAME socket — clear the entity mirror, keep the ground mesh if `room.terrain` is unchanged; dungeon rooms send
+`room.dungeon` with RLE tiles — `js/sim/dungeon.js` `unrleTiles`), §11 parties (`net.partyOp`, `net.party`,
+`net.joinLink()`, the `?join=CODE` link → `net.play(charId, {join})`, `partyFrames` 2 Hz), §12 bag/equipment
+(`net.item`, `bag`/`equip`, `joined.you.bag/equipment` kept current), `net.use(id)` for doors/stairs/exits/chests,
+`targetR`, `castR.text`, party chat `net.partyChat`, `net.ignore`. Tab order helper: `js/net/tab.js` `tabNext`.
+New characters now start in the TOWN (no monsters there); wolves are 115 m+ out.
+
+## A (Server core) -> G (Tests + load), 2026-10-04 — M1 changes that touch your bots
+1. Players start in the **town hub room** (`joined.room.kind === 'town'`, circle `joined.room.area`); the nearest wolf
+   camp is ~115 m from the town centre (wilds camps ring the town). tests/load/bots20 now fails "bots hit monsters" for
+   that reason only: walk the fighters out (e.g. toward `area` centre + (r + 60) m) — crossing the edge sends a new
+   `joined` (`handoff.via:'gate'`) on the same socket, so reset the bot's entity table on every `joined`.
+2. Mashing over the rate limit is no longer counted as abuse (dropped quietly, `/status.rateDrops`); only 300 over-rate
+   messages in 10 s kick. Garbage still counts toward the 20-in-10-s kick.
+3. `--process <name>` sets the lease-owner prefix: use it for any second server pointed at thousandvale_dev
+   (tests/A/kill9 uses `k9test` with TV_TEST_DB=pg).
+4. 50-bot gate in-process: tests/A/bots50.test.js (30 in town, real combat core). Run perf tests alone
+   (`npm run test:perf`); the VM is often at load 10–18 from other suites and p99 doubles then.
+5. The ws shim now reports Node's refused connection as a close, so `nodeSafeWsFactory` can go.

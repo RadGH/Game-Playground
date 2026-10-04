@@ -29,7 +29,7 @@ async function waitFor(fn, ms = 10000) { const end = Date.now() + ms; while (Dat
 
 test('kill -9 + restart: the client reconnects and resumes at the last save', { timeout: 60000 }, async () => {
   const dir = mkdtempSync(join(tmpdir(), 'tv-kill9-'));
-  const dbArgs = process.env.TV_TEST_DB === 'pg' ? ['--db', 'pg'] : ['--db', 'json', '--db-file', join(dir, 'store.json')];
+  const dbArgs = process.env.TV_TEST_DB === 'pg' ? ['--db', 'pg', '--process', 'k9test'] : ['--db', 'json', '--db-file', join(dir, 'store.json')];
   let srv = await startServer(dbArgs);
   const net = connect({ mode: 'ws', url: 'ws://127.0.0.1:' + PORT, tokenStore: memoryTokenStore(), build: 'dev' });
   let joins = 0, self = null;

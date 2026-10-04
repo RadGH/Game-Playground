@@ -1,8 +1,8 @@
 // Third-person camera and the controls that drive your character.
 //
-// Keys:   W A S D / arrows   move (camera-relative)      Shift (hold)   walk
+// Keys:   W A S D / arrows   move (camera-relative)      Shift (hold)   sprint      Space   jump
 //         Tab                next enemy in front          1 / F          attack the target
-//         Esc                clear target / stop          Enter          chat
+//         Esc                clear target / stop          Enter          chat        R   rise (when fallen)
 //         Mouse wheel        zoom                         Q / E          turn the camera
 // Mouse:  left click         select (an enemy: select; the ground: walk there)
 //         right click        on an enemy: attack it (walks into range first) — on the ground: walk there
@@ -11,10 +11,10 @@
 // Pure-ish: no three.js import; it is handed a camera and a heightAt. The step function `intent()` is
 // what the game loop samples once per sim step to build an input message.
 
-export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCycleTarget, onClearTarget, onChat, onPickGround, getTarget }) {
+export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCycleTarget, onClearTarget, onChat, onPickGround, getTarget, onRise }) {
   const keys = new Set();
   const cam = { yaw: Math.PI, pitch: 0.38, dist: 9, distWant: 9, focus: { x: 0, y: 0, z: 0 }, ready: false };
-  let drag = null, moveGoal = null, chase = null, typing = false, facing = Math.PI;
+  let drag = null, moveGoal = null, chase = null, typing = false, facing = Math.PI, jumpQueued = false;
 
   const isTyping = () => typing || (document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName));
 
@@ -24,6 +24,8 @@ export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCy
     if (k === 'Tab') { e.preventDefault(); onCycleTarget?.(); return; }
     if (k === 'Enter') { e.preventDefault(); onChat?.(); return; }
     if (k === 'Escape') { moveGoal = null; chase = null; onClearTarget?.(); return; }
+    if (k === 'Space') { e.preventDefault(); if (!e.repeat) jumpQueued = true; return; }
+    if (k === 'KeyR') { onRise?.(); return; }
     if (k === 'Digit1' || k === 'KeyF') { e.preventDefault(); const t = getTarget?.(); if (t != null) { chase = t; onAttack?.(t); } return; }
     if (['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(k)) { moveGoal = null; chase = null; }
     keys.add(k);
@@ -68,7 +70,7 @@ export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCy
    * Returns { mx, mz, yaw, run, attacking }.
    */
   function intent(self, { targetPos = null, reach = 2.9, dead = false } = {}) {
-    if (dead) { moveGoal = null; chase = null; return { mx: 0, mz: 0, yaw: facing, run: 1 }; }
+    if (dead) { moveGoal = null; chase = null; jumpQueued = false; return { mx: 0, mz: 0, yaw: facing, b: 0 }; }
     let fx = 0, fz = 0;
     if (keys.has('KeyW') || keys.has('ArrowUp')) fz += 1;
     if (keys.has('KeyS') || keys.has('ArrowDown')) fz -= 1;
@@ -93,7 +95,10 @@ export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCy
     const len = Math.hypot(mx, mz);
     if (len > 1e-3) { mx /= len; mz /= len; if (!(fz < 0 && fx === 0)) facing = Math.atan2(mx, mz); else facing = cam.yaw; }
     if (chase != null && !targetPos) chase = null;
-    return { mx, mz, yaw: facing, run: keys.has('ShiftLeft') || keys.has('ShiftRight') ? 0 : 1, inRange, chasing: chase };
+    const sprint = keys.has('ShiftLeft') || keys.has('ShiftRight');
+    const b = (sprint && len > 1e-3 ? 1 : 0) | (jumpQueued ? 2 : 0);   // IN.SPRINT = 1, IN.JUMP = 2
+    jumpQueued = false;
+    return { mx, mz, yaw: facing, b, sprint, inRange, chasing: chase };
   }
 
   /** Place the camera behind `p` (the drawn player position). Keeps it above the ground. */
@@ -122,6 +127,9 @@ export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCy
     setTyping(v) { typing = v; if (v) keys.clear(); },
     stopChase() { chase = null; },
     attack(id) { chase = id; moveGoal = null; onAttack?.(id); },
+    walkTo(x, z) { moveGoal = { x, z }; chase = null; },
+    stop() { moveGoal = null; chase = null; },
+    setHeightAt(f) { heightAt = f; },
     setFacing(y) { facing = y; },
     get chasing() { return chase; },
     get moveGoal() { return moveGoal; },

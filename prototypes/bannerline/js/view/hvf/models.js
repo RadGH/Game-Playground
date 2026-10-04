@@ -9,10 +9,14 @@
 //   models.creature('army' | 'pets', id)           // same shape (scarecrow, crow, hound, hawk)
 //   models.animal(kind) -> Promise<{ geometry, scale }>   // bind-pose geometry with vertex colours, metres
 //   models.materials()                             // C's shared building materials (fogify each once per match)
+//   models.animalPoses(kind) -> Promise<{ idle, walkA, walkB, run, graze, bleat, ... }>   // C's crowd poses (one InstancedMesh each)
+//   models.linked(kind, mask) -> { std, metal, glow } geometries + models.material(key)   // joined fences / walls / hedges
+//   models.ghost(group) -> restore()                // a downed farmer drawn translucent (looks.json hvf.ghost)
 
 import * as THREE from 'three';
-import { loadLooks, buildActor } from '../unit-looks.js';
-import { makeHvfBuilding, hvfMaterials } from '../hvf-structures.js';
+import { loadLooks, buildActor, applyGhost } from '../unit-looks.js';
+import { makeHvfBuilding, hvfMaterials, hvfMaterial, linkedPiece } from '../hvf-structures.js';
+import { creaturePoses } from '../../../../../avatar-3d/js/creature-poses.js';
 
 let LOADING = null;
 export function loadHvfModels() {
@@ -21,7 +25,7 @@ export function loadHvfModels() {
 }
 
 function createModels(looks) {
-  const animalCache = new Map();
+  const animalCache = new Map(), poseCache = new Map();
   function holder(promise, scale = 1) {
     const object = new THREE.Group();
     object.scale.setScalar(scale);
@@ -36,6 +40,13 @@ function createModels(looks) {
   return {
     looks,
     materials: hvfMaterials,
+    material: (k) => hvfMaterial(k),
+    linked: (kind, mask) => linkedPiece(kind, mask),
+    ghost: (group) => applyGhost(group, looks.ghostStyle()),
+    animalPoses(kind) {
+      if (!poseCache.has(kind)) poseCache.set(kind, creaturePoses(looks.forHvf('animals', kind).spec));
+      return poseCache.get(kind);
+    },
     building(kind, opts) { return makeHvfBuilding(kind === 'ward' ? 'watchstone' : kind, opts); },
     body(role, color) { const look = looks.forRole(role, { color }); return holder(buildActor(look), look.scale || 1); },
     creature(kind, id) { const look = looks.forHvf(kind, id); return holder(buildActor(look), look.scale || 1); },

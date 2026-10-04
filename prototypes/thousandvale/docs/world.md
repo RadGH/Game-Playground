@@ -12,7 +12,7 @@
 | `js/rules/terrain-read.js` ★ | The pure reader. Server, client, bots and tests all read heights through it. |
 | `tools/bake-test-zone.mjs` | The M0 one-off bake (World Forge → refine → rivers → biomes → file). ~5 s. `--check` fails if the checked-in file is stale. The full bake tools are M1 (PLAN §3.2) and keep this format. |
 | `tools/terrain-viewer.html` | Tiny viewer: biome/height/slope/water layers, sites, spawn, and a hover readout that calls the reader. Dev server: `http://<LAN-IP>:8401/prototypes/thousandvale/tools/terrain-viewer.html` (or 8491 once stream A serves `tools/` — it does not by design, so use the playground dev server). |
-| `tests/B/terrain-read.test.js` | 10 node tests: purity, round trip, refused bad files, known-plane maths, clamping, **drawn = measured** (the reader against `gridIndices()` triangles), water depth, the baked zone is sane, bake determinism. |
+| `tests/B/terrain-read.test.js` | 11 node tests: purity, round trip, refused bad files, known-plane maths, clamping, **drawn = measured** (the reader against `gridIndices()` triangles), water depth, the baked zone is sane, bake determinism. |
 
 ## 2. Coordinates
 
@@ -51,6 +51,9 @@ t.heightGrid()       // Float32Array(size*size) metres, index j*size+i (cached)
 t.waterGrid()        // Float32Array water surface, NaN = dry (cached)
 gridIndices(size, stride = 1)   // Uint32Array triangle indices, CCW from above, SAME diagonal as heightAt
 t.heightOfSample(i, j), t.waterOfSample(i, j)
+
+// combat core / walkers (Farhold ground.js shape, same as js/rules/terrain-flat.js):
+groundAdapter(t) -> { heightAt, slopeAt(x,z,s) /* rise/run */, normalAt(x,z,s,out), waterAt /* depth */, underwater, roadAt, clampToWorld, biomeIdAt, walkable }
 ```
 
 **Drawn = measured.** Each grid square is cut along the diagonal from `(i+1, j)` to `(i, j+1)` — the same

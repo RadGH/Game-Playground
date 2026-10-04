@@ -59,3 +59,11 @@ export async function waitP(clock, p, maxMs = 10000) {
   if (err) throw err;
   return val;
 }
+
+/** The server-side entity of a connected client (whatever room it is in). */
+export function ent(srv, c) {
+  const o = srv.world.online.get(c.joined.you.char);
+  return o ? o.entity : null;
+}
+/** The room a client is in on the server. */
+export function roomOf(srv, c) { const o = srv.world.online.get(c.joined.you.char); return o ? o.room : null; }

@@ -20,6 +20,14 @@ const PORTED = {
   'actors.js strike/strikeArea/strikeSegment/land': '890a4d0b5becbd35',
   'actors.js add': '083a91f79fbc1f5a',
   'actors.js spread/shove/slide': 'da77860a7597e155',
+  'main.js fireBolt': '40eac2d1011ac7cf',
+  'main.js dropPool/tickPools': '713c1028b7c65d42',
+  'main.js onArrowLand': 'a9e3b67cc5dd188c',
+  'skillrun.js allies/heal/mechEnv/place/runPlaced': 'b14b018a5f8da84e',
+  'skillrun.js dash/line/repeats': 'eb77cd993245b1b2',
+  'skillrun.js afterBolt/afterCast': 'bdc90cd559658435',
+  'skillrun.js onHurt': '2bb60b1d60e2b329',
+  'skillrun.js tick': 'c4a56ef84b6871e5',
 };
 
 test('every mirrored Farhold block is found and unchanged since it was ported', () => {

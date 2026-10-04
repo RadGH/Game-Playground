@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createVirtualClock } from '../../js/net/clock.js';
 import { makeServer, joinAs, run } from './helpers.js';
+import { ent as entOf_, roomOf as roomOf_ } from './helpers.js';
 import { createRoom, VIEW } from '../../js/sim/room.js';
 import { standInTerrain } from '../../js/sim/terrain.js';
 import { decodeSnap } from '../../js/net/snapshot.js';
@@ -113,7 +114,7 @@ test('speed hack: inputs claiming more time than passed are clamped to real time
   const srv = makeServer({ clock });
   await srv.ready;
   const a = await joinAs(srv, clock, 'Speedy');
-  const e = srv.world.room.entities.get(a.you);
+  const e = entOf_(srv, a);
   const x0 = e.x;
   let s = 0;
   // 2 seconds of real time, but 5 inputs of dt=100 every 50 ms (5x too many)

@@ -125,7 +125,23 @@ export async function startBot(opts = {}) {
     bot.pos = { x: j.you.x, y: j.you.y, z: j.you.z };
     if (!bot.stats.firstPos) bot.stats.firstPos = { ...bot.pos };
     bot.stats.joinPos = { ...bot.pos };          // where the server put me on this (re)join
-    bot.home ||= { x: j.room.spawn?.x ?? j.you.x, z: j.room.spawn?.z ?? j.you.z };
+    // protocol v2: new characters start in the TOWN room (no monsters; a circle j.room.area). A fighting
+    // or walking bot heads out through the edge on its own bearing; crossing it hands it to the wilds room.
+    bot.town = j.room.kind === 'town' ? (j.room.area || null) : null;
+    if (bot.town) {
+      const a = rnd() * Math.PI * 2, r = bot.town.r + 30;
+      bot.exit = { x: bot.town.x + Math.cos(a) * r, z: bot.town.z + Math.sin(a) * r };
+    } else {
+      bot.exit = null;
+      if (!bot.home || bot.homeFromTown) { bot.home = { x: j.you.x, z: j.you.z }; bot.homeFromTown = false; }
+      // keep wandering out here, away from the town edge so it does not bounce back in
+      if (j.room.town) {
+        const t = j.room.town, dx = j.you.x - t.x, dz = j.you.z - t.z, d = Math.hypot(dx, dz) || 1;
+        const push = Math.max(0, t.r + radius + 10 - d);
+        bot.home = { x: j.you.x + dx / d * push, z: j.you.z + dz / d * push };
+      }
+    }
+    bot.roomKind = j.room.kind || 'wilds';
     bot.ents.clear(); bot.target = null; bot.waypoint = null;
   });
   net.on('info', ents => {
@@ -187,10 +203,12 @@ export async function startBot(opts = {}) {
         if (bestD < 2.0) goal = null;   // close enough: stand and swing
       }
     }
+    if (!goal && bot.exit && mode !== 'idle') goal = bot.exit;
     if (!goal && mode !== 'idle' && !(mode === 'fight' && bot.target != null)) {
       if (!bot.waypoint || Math.hypot(bot.waypoint.x - bot.pos.x, bot.waypoint.z - bot.pos.z) < 3) {
         const a = rnd() * Math.PI * 2, r = radius * Math.sqrt(rnd());
-        bot.waypoint = { x: bot.home.x + Math.cos(a) * r, z: bot.home.z + Math.sin(a) * r };
+        const h = bot.home || bot.pos;
+        bot.waypoint = { x: h.x + Math.cos(a) * r, z: h.z + Math.sin(a) * r };
       }
       goal = bot.waypoint;
     }

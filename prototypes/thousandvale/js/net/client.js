@@ -2,10 +2,13 @@
 // and the bots (stream G). docs/protocol.md §9 is the manual.
 //
 //   const net = connect({ mode: 'ws'|'worker'|'loopback', url?, server?, tokenStore, build, clock?, guestName? })
-//   net.on(event, fn) -> unsubscribe     events: status chars joined snap info ev you chat castR kick err pong
+//   net.on(event, fn) -> unsubscribe     events: status chars joined snap info ev you chat castR targetR used bag equip
+//                                        party partyInvite partyFrames ignored kick err pong lost
 //   await net.ready                      authed (guest made if there was no token / it was refused)
 //   await net.createChar({ name, cls, look }) -> { id, name, cls, level, room }
-//   await net.play(charId) -> joined payload  (and 'joined' fires again after every reconnect)
+//   await net.play(charId, { join }) -> joined payload  ('joined' fires again after every reconnect AND every room
+//                                        change — `joined.handoff` set: same socket, new room, clear your entity mirror)
+//   net.use(id) ; net.item(op, uid, slot?) ; net.partyOp(op, {...}) ; net.partyChat(text) ; net.ignore(name, on) ; net.joinLink()
 //   net.input({ s, dt, mx, mz, yaw, b }) ; net.cast({ slot, aim, target, ct }) ; net.target(id)
 //   net.say(text) ; net.respawn() ; net.leave() ; net.close()
 //   net.clock.serverNow() ; net.clock.rtt ; net.status ; net.joined ; net.you (local id)
@@ -63,7 +66,7 @@ export function connect(opts = {}) {
       case 'charList':
         net.chars = m.chars; emit('chars', m.chars);
         readyResolve(net);
-        if (wantChar != null) sendJ(s, { t: 'play', char: wantChar });
+        if (wantChar != null) sendPlay();
         else setStatus('select');
         return;
       case 'created':
@@ -79,6 +82,11 @@ export function connect(opts = {}) {
         return;
       case 'kick': net.lastKick = m; emit('kick', m); if (NO_RETRY.has(m.code)) { setStatus('kicked'); stop(); } return;
       case 'pong': onPong(m); return;
+      case 'partyState': net.party = m.party; emit('party', m.party); return;
+      case 'partyInvite': emit('partyInvite', m); return;
+      case 'partyFrames': emit('partyFrames', m.m.map(r => ({ char: r[0], hp: r[1], hpMax: r[2], room: r[3], x: r[4], z: r[5], dead: !!r[6], online: !!r[7], id: r[8] }))); return;
+      case 'chat': emit('chat', m); return;
+      case 'ignored': if (net.joined) net.joined.you.ignore = m.list; emit('ignored', m.list); return;
     }
   }
 
@@ -114,6 +122,18 @@ export function connect(opts = {}) {
       case 'you': { const p = { ...m }; delete p.t; if (net.joined) Object.assign(net.joined.you, p); emit('you', p); return; }
       case 'chat': emit('chat', m); return;
       case 'castR': emit('castR', m); return;
+      case 'targetR': emit('targetR', m); return;
+      case 'used': emit('used', m); return;
+      case 'bag': {
+        if (net.joined) {
+          const y = net.joined.you;
+          const gone = new Set(m.remove);
+          y.bag = y.bag.filter(i => !gone.has(i.uid)).concat(m.add);
+          y.gold = m.gold;
+        }
+        emit('bag', m); return;
+      }
+      case 'equip': if (net.joined) net.joined.you.equipment = m.equipment; emit('equip', m); return;
       case 'pong': onPong(m); return;
       case 'err': emit('err', m); if (m.code === 'state' && playWaiter) { playWaiter.reject(Object.assign(new Error(m.msg), { code: m.code })); playWaiter = null; } return;
       case 'refuse': net.lastKick = m; emit('kick', m); setStatus('refused'); stop(); return;
@@ -172,22 +192,46 @@ export function connect(opts = {}) {
       sendJ(gw, o);
     });
   };
-  net.play = function (charId) {
-    wantChar = charId;
+  let wantJoin = null;
+  /** Enter the world as charId. `join` = a party code from a "join my party" link: you land next to the leader. */
+  net.play = function (charId, { join = null } = {}) {
+    wantChar = charId; wantJoin = join;
     return new Promise((resolve, reject) => {
       playWaiter = { resolve, reject };
-      if (net.status === 'select' || net.status === 'online') sendJ(gw, { t: 'play', char: charId });
+      if (net.status === 'select' || net.status === 'online') sendPlay();
     });
   };
+  function sendPlay() {
+    const o = { t: 'play', char: wantChar };
+    if (wantJoin) { o.join = wantJoin; wantJoin = null; }   // only on the first entry, not on reconnects
+    sendJ(gw, o);
+  }
   net.input = m => sendJ(game, { t: 'in', s: m.s, dt: m.dt, mx: m.mx, mz: m.mz, yaw: m.yaw, b: m.b | 0 });
-  net.cast = ({ slot = 0, aim, target, ct } = {}) => {
+  net.cast = ({ slot = 0, aim, target, ct, held } = {}) => {
     const o = { t: 'cast', slot };
+    if (held != null) o.held = held;
     if (aim) o.aim = { x: aim.x, z: aim.z };
     if (target) o.target = target;
     o.ct = ct ?? net.clock.serverNow();
     sendJ(game, o);
   };
   net.target = id => sendJ(game, id ? { t: 'target', id } : { t: 'target' });
+  net.use = id => sendJ(game, { t: 'use', id });
+  net.item = (op, uid, slot) => sendJ(game, slot ? { t: 'item', op, uid, slot } : { t: 'item', op, uid });
+  /** party('invite', {name}) | ('accept'|'decline', {party: id}) | ('join', {code}) | ('code') | ('leave') | ('kick'|'lead', {char}) */
+  net.partyOp = (op, a = {}) => {
+    const o = { t: 'party', op };
+    if (a.name) o.name = a.name;
+    if (a.code) o.code = a.code;
+    if (a.char != null) o.char = a.char;
+    if (a.party != null) o.char = a.party;      // accept/decline carry the party id in `char`
+    sendJ(gw, o);
+  };
+  net.party = null;
+  /** The "join my party" link for the current party (needs a party: partyOp('code') makes one). */
+  net.joinLink = (base = globalThis.location ? location.origin + location.pathname : '') => (net.party ? `${base}?join=${net.party.code}` : null);
+  net.partyChat = text => sendJ(gw, { t: 'chat', ch: 'party', text: String(text).slice(0, 200) });
+  net.ignore = (name, on = true) => sendJ(gw, { t: 'ignore', name, on });
   net.say = text => sendJ(game, { t: 'say', text: String(text).slice(0, 200) });
   net.respawn = () => sendJ(game, { t: 'respawn' });
   net.leave = () => { sendJ(game, { t: 'leave' }); sendJ(gw, { t: 'leave' }); stop(); setStatus('left'); };

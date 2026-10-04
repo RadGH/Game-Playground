@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 import { performance } from 'node:perf_hooks';
 import { createVirtualClock } from '../../js/net/clock.js';
 import { makeServer, makeClient, run, until, waitP } from './helpers.js';
+import { ent as entOf_, roomOf as roomOf_ } from './helpers.js';
 import { seedStream, next, range } from '../../js/sim/rng.js';
 
 test('20 bots walking and fighting for 60 s: tick p99 < 5 ms', async () => {
@@ -21,21 +22,21 @@ test('20 bots walking and fighting for 60 s: tick p99 < 5 ms', async () => {
     b.on('snap', s => { b.bytes += s.bytes; });
     bots.push(b);
   }
-  const room = srv.world.room;
-  const sp = room.spawnPoint;
-  for (const b of bots) { b.goal = { x: sp.x + range(b.rng, -60, 60), z: sp.z + range(b.rng, -60, 60) }; }
+  const camps = srv.world.room.camps;
+  const goalOf = b => { const c = camps[Math.floor(next(b.rng) * camps.length)]; return { x: c.x + range(b.rng, -15, 15), z: c.z + range(b.rng, -15, 15) }; };
+  for (const b of bots) b.goal = goalOf(b);
   // warm up 2 s, then measure 60 s
   const step = async () => {
     for (const b of bots) {
       const me = b.lastSnap && b.lastSnap.self ? b.lastSnap.self : null;
-      const e = room.entities.get(b.you); if (!e) continue;
+      const e = entOf_(srv, b); if (!e) continue;
       if (e.dead) { if (next(b.rng) < 0.05) b.respawn(); continue; }
       let target = null, best = 30;
       for (const m of b.mirror.ents.values()) if (m.kind === 'monster' && m.hp > 0) { const d = Math.hypot(m.x - e.x, m.z - e.z); if (d < best) { best = d; target = m; } }
       let gx = b.goal.x, gz = b.goal.z;
       if (target) { gx = target.x; gz = target.z; if (best < 3) b.cast({ slot: 0, target: target.id }); }
       const dx = gx - e.x, dz = gz - e.z, d = Math.hypot(dx, dz);
-      if (!target && d < 2) b.goal = { x: sp.x + range(b.rng, -60, 60), z: sp.z + range(b.rng, -60, 60) };
+      if (!target && d < 2) b.goal = goalOf(b);
       b.input({ s: ++b.s, dt: 50, mx: d > 1.5 ? dx / d : 0, mz: d > 1.5 ? dz / d : 0, yaw: Math.atan2(dx, dz), b: 0 });
       void me;
     }

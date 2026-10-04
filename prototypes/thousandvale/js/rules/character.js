@@ -12,13 +12,14 @@ import { attuneWeapon, createSkillBar } from './farhold.js';
  * `engine` from js/rules/engine.js. `rng` rolls the starter kit (a seeded stream; the server passes
  * the character's own). Returns the unit — the same object is the room entity.
  */
-export function createCharacter(engine, { id, classId = 'warrior', level = 1, name = 'Wayfarer', rng = null, x = 0, z = 0, y = 0, yaw = 0, kit = true } = {}) {
+export function createCharacter(engine, { id, classId = 'warrior', level = 1, name = 'Wayfarer', rng = null, x = 0, z = 0, y = 0, yaw = 0, kit = true, gear = null } = {}) {
   const rpg = engine.rpg;
   const classDef = engine.classById(classId) || engine.classes[0];
   const roll = rng || rpg.rng;
   const ch = rpg.createPlayer({ name, classId: classDef.id, level });
 
-  if (kit) {
+  if (gear) restoreGear(engine, ch, gear);
+  else if (kit) {
     const starter = attuneWeapon(rpg.loot.generate(classDef.starter || 'sword', 'normal', 'low', { rng: roll }));
     if (starter) rpg.equip(ch, starter, { force: true });
     const offStarter = classDef.offStarter ? attuneWeapon(rpg.loot.generate(classDef.offStarter, 'normal', 'low', { rng: roll })) : null;
@@ -48,3 +49,26 @@ export function createCharacter(engine, { id, classId = 'warrior', level = 1, na
 
 /** A character's current skill ids, slot by slot (empty slots are null). */
 export const skillIds = ch => ch.skills.slots.map(s => (s.empty ? null : s.id));
+
+/**
+ * The character's gear as plain JSON for the save (Farhold items are plain objects already):
+ * `{ v: 1, equipment: { slot: item }, bag: [item] }`. Items keep their `uid` when they have one.
+ */
+export function serializeGear(ch) {
+  const equipment = {};
+  for (const [slot, item] of Object.entries(ch.equipment || {})) if (item) equipment[slot] = JSON.parse(JSON.stringify(item));
+  return { v: 1, equipment, bag: JSON.parse(JSON.stringify(ch.bag || [])) };
+}
+
+/** Put saved gear back on a sheet (forced: a save is trusted, its level rules were checked when it was equipped). */
+export function restoreGear(engine, ch, blob) {
+  if (!blob || typeof blob !== 'object') return ch;
+  for (const slot of Object.keys(ch.equipment || {})) ch.equipment[slot] = null;
+  for (const [slot, item] of Object.entries(blob.equipment || {})) {
+    if (!item || typeof item !== 'object') continue;
+    engine.rpg.equip(ch, JSON.parse(JSON.stringify(item)), { into: slot, force: true });
+  }
+  ch.bag = Array.isArray(blob.bag) ? JSON.parse(JSON.stringify(blob.bag)) : [];
+  engine.rpg.refresh(ch, { full: true });
+  return ch;
+}

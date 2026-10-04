@@ -55,7 +55,8 @@
     <button class="help-toggle" id="help-toggle" title="Controls">?</button>
     <dl>
       <dt>WASD</dt><dd>Move</dd>
-      <dt>Shift</dt><dd>Walk</dd>
+      <dt>Shift</dt><dd>Sprint</dd>
+      <dt>Space</dt><dd>Jump</dd>
       <dt>Drag</dt><dd>Turn the camera</dd>
       <dt>Click</dt><dd>Select / walk there</dd>
       <dt>Right-click</dt><dd>Attack an enemy</dd>
@@ -67,7 +68,8 @@
 
   <div class="death" id="death" hidden>
     <h2>You have fallen</h2>
-    <p>You will rise at the waystone in <b id="death-timer">6</b>…</p>
+    <p id="death-wait">Gathering your strength… <b id="death-timer">3</b></p>
+    <button class="primary rise" id="rise" hidden>Rise at the waystone <small>(R)</small></button>
   </div>
 </div>
 

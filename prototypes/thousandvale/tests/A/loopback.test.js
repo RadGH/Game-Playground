@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { makeServer, joinAs, run, until } from './helpers.js';
+import { ent as entOf_, roomOf as roomOf_ } from './helpers.js';
 import { createVirtualClock } from '../../js/net/clock.js';
 
 test('two players join, see each other move, and fight a wolf together', async () => {
@@ -16,23 +17,26 @@ test('two players join, see each other move, and fight a wolf together', async (
   assert.equal(a.mirror.ents.get(b.you).info.name, 'Bren');
 
   // A walks east for 1 s
-  const startX = srv.world.room.entities.get(a.you).x;
+  const startX = entOf_(srv, a).x;
   let s = 0;
   for (let i = 0; i < 20; i++) { a.input({ s: ++s, dt: 50, mx: 1, mz: 0, yaw: Math.PI / 2, b: 0 }); await run(clock, 50); }
   await run(clock, 200);
-  const ax = srv.world.room.entities.get(a.you).x;
+  const ax = entOf_(srv, a).x;
   assert.ok(Math.abs(ax - startX - 5.4) < 0.3, `moved ${ax - startX} m (expected ~5.4)`);
   const seen = b.mirror.ents.get(a.you);
   assert.ok(Math.abs(seen.x - ax) < 0.2, `B sees A at ${seen.x}, server ${ax}`);
   assert.ok(Math.abs(a.lastSnap ? 0 : 0) === 0);
 
   // teleport both next to a wolf (server side, test only) and swing until it dies
-  const room = srv.world.room;
+  const room = srv.world.room;      // the first wilds copy
   const wolf = [...room.entities.values()].find(e => e.kind === 'monster');
   assert.ok(wolf, 'room has wolves');
-  const ea = room.entities.get(a.you), eb = room.entities.get(b.you);
-  ea.moveTo(wolf.x + 1.5, wolf.z); eb.moveTo(wolf.x - 1.5, wolf.z);
-  await run(clock, 200);
+  const W = srv.world;
+  W.transfer(W.online.get(a.joined.you.char), room, { x: wolf.x + 1.5, z: wolf.z }, 'test');
+  W.transfer(W.online.get(b.joined.you.char), room, { x: wolf.x - 1.5, z: wolf.z }, 'test');
+  await run(clock, 300);
+  assert.equal(a.joined.room.kind, 'wilds');
+  assert.equal(a.joined.handoff.from, 'town');
   let guard = 0;
   while (!wolf.dead && guard++ < 200) {
     a.cast({ slot: 0, target: wolf.id }); b.cast({ slot: 0, target: wolf.id });
@@ -45,7 +49,7 @@ test('two players join, see each other move, and fight a wolf together', async (
   assert.ok(a.evs.some(e => e.type === 'die' && e.d === wolf.id));
   assert.ok(a.evs.some(e => e.type === 'xp'), 'A got xp');
   assert.ok(b.evs.some(e => e.type === 'xp'), 'B got xp (shared credit)');
-  assert.ok(room.entities.get(a.you).char.xp > 0);
+  assert.ok(entOf_(srv, a).char.xp > 0);
   a.close(); b.close();
   await srv.stop();
 });

@@ -50,9 +50,14 @@ export function createTerrainView(T, { textureSize = 512, quality = 'high', clea
 
   // --- material --------------------------------------------------------------------------------
   const surf = k => { const s = makeSurface(k, { size: textureSize, seed: 7 }); s.map.anisotropy = 8; s.map.wrapS = s.map.wrapT = THREE.RepeatWrapping; return s.map; };
-  const tex = { grass: surf('grass'), floor: surf('forest_floor'), rock: surf('rock'), sand: surf('sand'), path: surf('dirt') };
-  const material = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, metalness: 0 });
-  material.onBeforeCompile = shader => {
+  const tex = quality === 'low' ? null : { grass: surf('grass'), floor: surf('forest_floor'), rock: surf('rock'), sand: surf('sand'), path: surf('dirt') };
+  // Low quality (software renderers, weak GPUs): one Lambert pass with the surfaces pre-mixed into the
+  // vertex colour. The splat shader fills every ground pixel with five texture reads, which is what
+  // costs a software renderer 90% of its frame.
+  const cheap = quality === 'low';
+  const LOW = { grass: new THREE.Color('#5f7d3c'), floor: new THREE.Color('#4d4630'), rock: new THREE.Color('#7b766d'), sand: new THREE.Color('#b8a676'), path: new THREE.Color('#7a6446') };
+  const material = cheap ? new THREE.MeshLambertMaterial({ vertexColors: true }) : new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, metalness: 0 });
+  if (!cheap) material.onBeforeCompile = shader => {
     Object.assign(shader.uniforms, { tGrass: { value: tex.grass }, tFloor: { value: tex.floor }, tRock: { value: tex.rock }, tSand: { value: tex.sand }, tPath: { value: tex.path } });
     shader.vertexShader = shader.vertexShader
       .replace('#include <common>', '#include <common>\nattribute vec4 aSplat; varying vec4 vSplat; varying vec3 vW; varying vec3 vWN;')
@@ -97,7 +102,13 @@ export function createTerrainView(T, { textureSize = 512, quality = 'high', clea
       const ddx = (H(i + 1, j) - H(i - 1, j)) / (2 * step), ddz = (H(i, j + 1) - H(i, j - 1)) / (2 * step), l = Math.hypot(ddx, 1, ddz);
       nor[v * 3] = -ddx / l; nor[v * 3 + 1] = 1 / l; nor[v * 3 + 2] = -ddz / l;
       const c = surface(x, z, spl, v * 4);
-      cols[v * 3] = c.r; cols[v * 3 + 1] = c.g; cols[v * 3 + 2] = c.b;
+      if (cheap) {
+        const wf = spl[v * 4], wr = spl[v * 4 + 1], ws = spl[v * 4 + 2], wp = spl[v * 4 + 3], wg = Math.max(0, 1 - wf - wr - ws - wp);
+        const n = 0.92 + 0.16 * (((i * 73856093) ^ (j * 19349663)) >>> 0) / 4294967296;   // a little grain per vertex
+        cols[v * 3] = (LOW.grass.r * wg + LOW.floor.r * wf + LOW.rock.r * wr + LOW.sand.r * ws + LOW.path.r * wp) * c.r * n;
+        cols[v * 3 + 1] = (LOW.grass.g * wg + LOW.floor.g * wf + LOW.rock.g * wr + LOW.sand.g * ws + LOW.path.g * wp) * c.g * n;
+        cols[v * 3 + 2] = (LOW.grass.b * wg + LOW.floor.b * wf + LOW.rock.b * wr + LOW.sand.b * ws + LOW.path.b * wp) * c.b * n;
+      } else { cols[v * 3] = c.r; cols[v * 3 + 1] = c.g; cols[v * 3 + 2] = c.b; }
     }
     const idx = [];
     for (let b = 0; b < nz - 1; b++) for (let a = 0; a < nx - 1; a++) {

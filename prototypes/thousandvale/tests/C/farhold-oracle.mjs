@@ -51,6 +51,14 @@ export const DRIFT = [
   { name: 'actors.js EnemyField.update', file: 'actors.js', start: /^  update\(dt, player, playerUnit, hooks = \{\}\) \{/, end: /^  spread\(dt\) \{/, mirror: 'js/rules/monster-ai.js tickMonsters' },
   { name: 'actors.js strike/strikeArea/strikeSegment/land', file: 'actors.js', start: /^  land\(e, result,/, end: /^  bleed\(e, amount = 1\) \{/, mirror: 'js/rules/field.js' },
   { name: 'actors.js add', file: 'actors.js', start: /^  async add\(def, level, x, z,/, end: /this\.pending\+\+;/, mirror: 'js/rules/monster-ai.js spawnMonster' },
+  { name: 'main.js fireBolt', file: 'main.js', start: /^  function fireBolt\(plan, a, dx, dy, dz/, end: /^  function regrab\(\)/, mirror: 'js/rules/cast-skills.js fireBolt' },
+  { name: 'main.js dropPool/tickPools', file: 'main.js', start: /^  function dropPool\(\{ x, z, r, seconds/, end: /if \(p\.left <= 0\) \{/, mirror: 'js/rules/cast-skills.js dropPool/tickPools' },
+  { name: 'main.js onArrowLand', file: 'main.js', start: /onArrowLand: arrow => \{/, end: /^  \}\);/, mirror: 'js/rules/cast.js resolveArrow' },
+  { name: 'skillrun.js allies/heal/mechEnv/place/runPlaced', file: 'skillrun.js', start: /^  function allies\(\) \{/, end: /^  function onObjectStruck/, mirror: 'js/rules/cast-skills.js runtimeOf' },
+  { name: 'skillrun.js dash/line/repeats', file: 'skillrun.js', start: /^  function dash\(plan, a, opts\) \{/, end: /^  function afterimage/, mirror: 'js/rules/cast-skills.js dash/line/repeats' },
+  { name: 'skillrun.js afterBolt/afterCast', file: 'skillrun.js', start: /^  function afterBolt\(/, end: /^  function summonFrom/, mirror: 'js/rules/cast-skills.js afterCast' },
+  { name: 'skillrun.js onHurt', file: 'skillrun.js', start: /^  function onHurt\(result, attacker, victim\) \{/, end: /^  function onKill\(e\) \{/, mirror: 'js/rules/cast-skills.js installSkillRuntime onHurt' },
+  { name: 'skillrun.js tick', file: 'skillrun.js', start: /^  function tick\(dt, \{ fighting = false \} = \{\}\) \{/, end: /^  function reset\(\) \{/, mirror: 'js/rules/cast-skills.js rt.tick' },
   { name: 'actors.js spread/shove/slide', file: 'actors.js', start: /^  spread\(dt\) \{/, end: /^  applyModifier\(e, id\) \{/, mirror: 'js/rules/monster-ai.js spread' },
 ];
 
@@ -204,8 +212,9 @@ export function farholdSwing(F, field, control, player, hand = 'main', stepIndex
 }
 
 /** main.js `onEnemyStrike` (line ~9584) with no companions: the enemy hits the player. */
-export function farholdEnemyStrike(F, field, player, e) {
+export function farholdEnemyStrike(F, field, player, e, mech = null) {
   const result = F.rpg.strike(e, player, field.rng, { multiplier: incomingFrom(player) * outgoingFrom(e) });
+  mech?.onHurt(result, e, player);
   if (e.lifeSteal) e.hp = Math.min(e.maxHp, e.hp + Math.round(result.amount * e.lifeSteal));
   if (e.onHit?.length) field.statusOnHit(e, player, F.skills.statuses);
   return result;

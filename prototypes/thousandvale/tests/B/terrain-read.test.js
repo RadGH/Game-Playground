@@ -131,3 +131,12 @@ test('heightGrid / waterGrid match the per-sample readers', () => {
   assert.ok(Number.isNaN(w[0]) && Math.abs(w[6] - t.waterOfSample(1, 1)) < 1e-3);
   assert.equal(t.heightGrid(), g, 'cached');
 });
+
+test('groundAdapter: Farhold-style walker interface (rise/run slope, depth number)', async () => {
+  const { groundAdapter } = await import('../../js/rules/terrain-read.js');
+  const g = groundAdapter(createTerrain(plane(0.5, 0, 3)));
+  assert.ok(Math.abs(g.slopeAt(4, 4) - 0.5) < 1e-3 && Math.abs(g.slopeAt(4, 4, 1) - 0.5) < 1e-3);
+  const n = g.normalAt(4, 4, 1, [0, 0, 0]); assert.ok(Math.abs(n[0] + 0.5 / Math.hypot(0.5, 1)) < 1e-3);
+  assert.equal(g.waterAt(4, 4), 0); assert.equal(g.underwater(4, 4), false);
+  assert.deepEqual(g.clampToWorld(-5, 50), [0, 8]);
+});

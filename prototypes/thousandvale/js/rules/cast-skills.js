@@ -269,16 +269,16 @@ function runtimeOf(combat) {
 
   // ---- per-tick: placed objects, walls, corpses, links, tracked buffs, imbue
   rt.tick = (dt) => {
-    tickPools(dt);
+    // skillrun.js tick order: refresh a sheet whose statuses changed, placed objects, walls, corpses, imbue
+    for (const p of field.players) {
+      const key = statusStatsKey(p);
+      if (p.mechDirty || key !== p._statsKey) { p.mechDirty = false; p._statsKey = key; rpg.refresh(p); }
+    }
     rt.runPlaced(dt);
     tickWalls(dt);
     for (const corpse of mechWorld.corpses) corpse.left -= dt;
     mechWorld.corpses = mechWorld.corpses.filter(x => x.left > 0);
-    for (const p of field.players) {
-      if (p.imbue) { p.imbue.left -= dt; if (p.imbue.left <= 0) p.imbue = null; }
-      const key = statusStatsKey(p);
-      if (p.mechDirty || key !== p._statsKey) { p.mechDirty = false; p._statsKey = key; rpg.refresh(p); }
-    }
+    for (const p of field.players) if (p.imbue) { p.imbue.left -= dt; if (p.imbue.left <= 0) p.imbue = null; }
     for (const [id, link] of rt.links) {
       link.left -= dt;
       const owner = field.get(id);
@@ -299,6 +299,7 @@ function runtimeOf(combat) {
         rt.withCaster(ch, () => castPlan(combat, ch, sub, { echo: true }));
       }
     }
+    tickPools(dt);                     // main.js ticks the pools last in the frame
   };
   return rt;
 }
@@ -475,7 +476,10 @@ export function castPlan(combat, ch, plan, { echo = false, intent = {} } = {}) {
       const cone = () => {
         if (ch.dead) return;
         rt.withCaster(ch, () => {
-          const hits = field.strike(ch, ch, { reach: plan.reach, arc: plan.arc, ...strikeOpts });
+          // Farhold's field.strike borrows the LAST basic swing's shape (feel.swing.strike) when a skill
+          // passes none: its weapon traits, armour pierce and — when the skill has no knock — its knock.
+          // Per player here, never a global.
+          const hits = field.strike(ch, ch, { reach: plan.reach, arc: plan.arc, strike: ch.lastStrike || null, ...strikeOpts });
           if (!plan.breath && plan.splash > 0) {
             const sx = Math.sin(ch.yaw), sz = Math.cos(ch.yaw);
             const already = new Set(hits.map(h => h.enemy));
@@ -959,6 +963,64 @@ export function installSkillRuntime(combat) {
       }
     }
   };
+  /**
+   * skillrun.js `onKill` (kill rules): a gnawed body passes its curse on, a killer's `onKill` buffs pay
+   * out, and the killing skill's own rules (reset, refund, burst, spread, corpse, heal, mana, tag,
+   * pool). `killedBy` is recorded by skillmech's afterHit on the body. Runs before the rewards.
+   */
+  const rewards = field.onKill;
+  field.onKill = (e) => {
+    const killer = field.get(lastHitter(e));
+    if (killer && killer.kind === 'player') rt.withCaster(killer, () => onKillRules(killer, e));
+    rewards?.(e);
+  };
+  function lastHitter(e) { let best = null, bv = -1; for (const [id, v] of e.damageBy || []) if (v > bv) { bv = v; best = id; } return best; }
+  function onKillRules(p, e) {
+    const statuses = combat.room.engine.statuses;
+    const statusSpec = id => statuses[id] || null;
+    const g = e.statuses?.gnawed;
+    if (g && g.remaining > 0) {
+      const next = field.nearestTo(e.x, e.z, statusSpec('gnawed')?.onDeath?.jump ?? 8, e);
+      if (next) { next.statuses = next.statuses || {}; next.statuses.gnawed = { ...g }; }
+    }
+    for (const st of Object.values(p.statuses || {})) {
+      const k = st.onKill;
+      if (!k || typeof k !== 'object') continue;
+      if (k.heal) rt.healUnit(p, p, Math.round(p.maxHp * k.heal));
+      if (k.mana) p.mp = Math.min(p.maxMp, p.mp + Math.round(p.maxMp * k.mana));
+      if (k.resource) gainResource(p, k.resource.id, k.resource.n ?? 1);
+      if (k.haste) applyStatus(p, 'haste', { ...statusSpec('haste'), seconds: k.haste }, 1);
+      if (k.reset) queueMech(p, { reset: k.reset });
+    }
+    const rules = e.killedBy;
+    if (!rules) return;
+    e.killedBy = null;
+    const k = rules.onKill;
+    const slot = p.skills.slots.find(s => s.id === rules.skill);
+    const plan = { mult: 1, baseMult: 1, element: e.element || 'physical', skill: { id: rules.skill }, rules };
+    if (rules.resetOn && String(rules.resetOn.when || rules.resetOn) === 'kill') queueMech(p, { reset: rules.skill });
+    if (!k) return;
+    if (k.corpse) addCorpse(e.x, e.z, (k.corpse.worth ?? 2) - 1);
+    if (k.burst) rt.burst(p, { ...plan, mult: rules.scale || 1 }, e.x, e.z, k.burst.radius ?? 3, k.burst.mult ?? 1, { element: k.burst.element || null });
+    if (k.spread) {
+      for (const other of field.near(e.x, e.z, k.spread.radius ?? 5, e)) {
+        for (const t of k.spread.types || []) { const st = e.statuses?.[t]; if (st) { other.statuses = other.statuses || {}; other.statuses[t] = { ...st }; } }
+      }
+    }
+    if (k.reset) queueMech(p, { reset: rules.skill });
+    if (k.refund && slot) queueMech(p, { cut: { skill: rules.skill, seconds: p.skills.cooldownFor(slot) * k.refund } });
+    if (k.heal) rt.healUnit(p, p, Math.round(p.maxHp * k.heal));
+    if (k.mana) p.mp = Math.min(p.maxMp, p.mp + Math.round(p.maxMp * k.mana));
+    if (k.gold) p.gold = (p.gold || 0) + k.gold;
+    if (k.tag) {
+      const next = field.nearestTo(e.x, e.z, 12, e);
+      if (next) { next.statuses = next.statuses || {}; next.statuses[k.tag.id] = { type: k.tag.id, kind: 'tag', name: statusSpec(k.tag.id)?.name || k.tag.id, remaining: k.tag.seconds ?? 6, power: 1, ...(statusSpec(k.tag.id) || {}) }; }
+    }
+    if (k.pool) rt.place(p, plan, poolSpec({ element: k.pool.element || 'poison', ...k.pool }), e.x, e.z);
+    if (k.haste) applyStatus(p, 'haste', { ...statusSpec('haste'), seconds: k.haste }, 1);
+  }
+
+  field.hooks.asActor = (u, fn) => (u?.kind === 'player' ? rt.withCaster(u, fn) : fn());
   field.hooks.onObjectStruck = (e, obj) => {
     const ref = obj.ref;
     if (!ref || ref.hp == null) return;
@@ -968,5 +1030,12 @@ export function installSkillRuntime(combat) {
   };
   return rt;
 }
+
+/** A bolt thrown by a basic attack (a wand, a staff's lob) through the same flight as a skill's. */
+export function throwBolt(combat, ch, plan, a, dx, dz, strikeOpts, intent = {}, collect = h => h) {
+  const rt = runtimeOf(combat);
+  rt.withCaster(ch, () => fireBolt(combat, rt, ch, plan, a, dx, dz, strikeOpts, collect, intent));
+}
+export const runtimeFor = runtimeOf;
 
 export { addCorpse, repeatsOf, formOf };

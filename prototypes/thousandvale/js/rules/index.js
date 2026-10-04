@@ -24,6 +24,9 @@ import { createCharacter } from './character.js';
 import { spawnMonster, tickMonsters } from './monster-ai.js';
 import { clearThreat } from './threat.js';
 import { makeRng } from './rng.js';
+import { validTarget, TAB } from './targeting.js';
+export { serializeGear, restoreGear } from './character.js';
+export { nextTarget, tabOrder, validTarget } from './targeting.js';
 import { xpForLevel, levelFromXp, hashStr } from './farhold.js';
 
 let shared = null;
@@ -77,6 +80,7 @@ export function createRules(host, opts = {}) {
   const field = attachField(room, { terrain: terrainFrom(host) });
   const combat = createCombat(room);
   room.combat = combat;
+  combat.tickMonsters = dt => tickMonsters(field, dt);
   const entOf = unit => (unit?.id != null ? host.entities.get(unit.id) : null);
   let regenClock = 0;
 
@@ -177,6 +181,7 @@ export function createRules(host, opts = {}) {
         const unit = createCharacter(engine, {
           id: e.id, classId: ch.cls || e.cls || 'warrior', level: ch.level || e.level || 1, name: e.name,
           rng: makeRng(hashStr(`${ch.id ?? ch.name ?? e.name}:kit`)), x: e.x, z: e.z, y: e.y, yaw: e.yaw,
+          gear: ch.gear || null,          // a saved gear blob (serializeGear) wins over the class kit
         });
         unit.roomRng = room.streams.get('bars');
         unit.partyId = ch.partyId ?? e.data?.partyId ?? null;
@@ -206,7 +211,12 @@ export function createRules(host, opts = {}) {
   function intent(e, msg) {
     const u = e.r.unit;
     if (!u) return { ok: false, why: 'unknown' };
-    if (msg.t === 'target') { e.setTarget(msg.id || 0); return { ok: true }; }
+    if (msg.t === 'target') {
+      const t = msg.id ? host.entities.get(msg.id) : null;
+      if (msg.id && !validTarget(u, t, { range: TAB.RANGE * 1.5 })) return { ok: false, why: 'target' };
+      e.setTarget(msg.id || 0);
+      return { ok: true };
+    }
     if (msg.t !== 'cast' || !Number.isInteger(msg.slot)) return { ok: false, why: 'unknown' };
     return run(() => {
       // face what the cast is aimed at: the Tab target, else the ground point
@@ -226,8 +236,7 @@ export function createRules(host, opts = {}) {
     const dt = dtMs / 1000;
     run(() => {
       room.clock.advance(dt);
-      tickMonsters(field, dt);
-      combat.tick(dt);
+      combat.tick(dt);                 // due wind-ups, then the monsters (tickMonsters below), bars, runtime
       // Farhold's one-second regen tick (main.js ~9762) and the cast barrier running down
       regenClock += dt;
       const second = regenClock >= 1;

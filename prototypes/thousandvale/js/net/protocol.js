@@ -86,13 +86,13 @@ export const CLIENT_MSGS = Object.freeze({
   chars:   { on: 'gw', fields: {}, rate: 2, burst: 4 },
   create:  { on: 'gw', fields: { name: 'str:24', cls: 'str:32', look: '?obj' }, rate: 1, burst: 3 },
   play:    { on: 'gw', fields: { char: 'int', join: '?str:8' }, rate: 1, burst: 3 },
-  party:   { on: 'gw', fields: { op: 'str:8', name: '?str:24', code: '?str:8', char: '?int' }, rate: 2, burst: 6 },
+  party:   { on: 'gw', fields: { op: 'str:8', name: '?str:24', code: '?str:8', char: '?int' }, rate: 2, burst: 10 },
   chat:    { on: 'gw', fields: { ch: 'str:8', text: 'str:200' }, rate: 1, burst: 5 },
   ignore:  { on: 'gw', fields: { name: 'str:24', on: 'bool' }, rate: 1, burst: 5 },
   ping:    { on: 'both', fields: { c: 'num' }, rate: 2, burst: 4 },
   enter:   { on: 'p', fields: { ticket: 'str:256' }, rate: 1, burst: 3 },
   in:      { on: 'p', fields: { s: 'int', dt: 'num', mx: 'num', mz: 'num', yaw: 'num', b: 'int' }, rate: 40, burst: 60 },
-  cast:    { on: 'p', fields: { slot: 'int', aim: '?vec2', target: '?id', ct: '?num' }, rate: 10, burst: 15 },
+  cast:    { on: 'p', fields: { slot: 'int', aim: '?vec2', target: '?id', ct: '?num', held: '?num' }, rate: 10, burst: 15 },
   target:  { on: 'p', fields: { id: '?id' }, rate: 10, burst: 20 },
   say:     { on: 'p', fields: { text: 'str:200' }, rate: 1, burst: 5 },
   respawn: { on: 'p', fields: {}, rate: 1, burst: 2 },
@@ -125,6 +125,7 @@ export const SERVER_MSGS = Object.freeze({
   partyInvite: ['from', 'name', 'party'],
   partyFrames: ['m'],
   targetR: ['id', 'ok', 'why'],
+  ignored: ['list'],
 });
 
 /** Party ops (`party {op}`); docs/protocol.md §3.3. */

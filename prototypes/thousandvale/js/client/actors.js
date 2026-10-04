@@ -14,7 +14,9 @@ import { createChibi2Character } from '../../../../avatar-3d/js/chibi2.js';
 import { createCreature } from '../../../../avatar-3d/js/creatures.js';
 import { compactCreature } from '../../../../avatar-3d/js/mesh-merge.js';
 import { avatarFor, creatureFor } from './looks.js';
-import { SnapshotBuffer, angleDelta } from './interp.js';
+const TAU = Math.PI * 2;
+/** Shortest signed difference between two angles. */
+export function angleDelta(a, b) { let d = (b - a) % TAU; if (d > Math.PI) d -= TAU; if (d < -Math.PI) d += TAU; return d; }
 
 const CHIBI_ANIMS = ['idle', 'ready', 'walk', 'run', 'attack', 'cast', 'hit', 'guard', 'wave', 'talk', 'jump', 'dead'];
 
@@ -33,7 +35,7 @@ export function createActors(scene, { plateLayer, camera }) {
     let a = actors.get(info.id);
     if (a) { Object.assign(a, pick(info)); a.dead = a.hp <= 0; refreshPlate(a); return a; }
     a = {
-      id: info.id, kind: info.kind, self, ...pick(info), buffer: new SnapshotBuffer(),
+      id: info.id, kind: info.kind, self, ...pick(info), still: null,
       group: new THREE.Group(), model: null, body: null, anim: 'idle', oneShot: null, oneShotUntil: 0,
       recoil: new THREE.Vector3(), punch: 0, dead: info.hp <= 0, speed: 0, yaw: info.yaw || 0, height: info.kind === 'monster' ? 1.2 : 1.9,
       pos: new THREE.Vector3(info.x, info.y, info.z), plate: null, lastSeen: performance.now(), deathAt: 0, fade: 1,
@@ -129,7 +131,7 @@ export function createActors(scene, { plateLayer, camera }) {
   }
 
   // --- per frame --------------------------------------------------------------------------------
-  function update(dt, renderTime, { selfPos = null, selfYaw = 0, selfMoving = 0, selfRun = true, targetId = null, hoverId = null } = {}) {
+  function update(dt, renderTime, { selfPos = null, selfYaw = 0, selfMoving = 0, targetId = null, hoverId = null, sample = null, speed = null } = {}) {
     if (queue.length) { const a = queue.shift(); if (actors.has(a.id)) build(a); }
     const now = performance.now();
     for (const a of actors.values()) {
@@ -138,13 +140,13 @@ export function createActors(scene, { plateLayer, camera }) {
         a.yaw += angleDelta(a.yaw, selfYaw) * Math.min(1, dt * 16);
         a.speed = selfMoving;
       } else {
-        const s = a.buffer.sample(renderTime);
+        const s = a.still || (sample ? sample(a.id, renderTime) : null);
         if (s) {
           a.pos.set(s.x, s.y, s.z);
           // Turn smoothly toward the sampled facing (sample yaw already interpolates; this hides 3 Hz far updates).
           a.yaw += angleDelta(a.yaw, s.yaw) * Math.min(1, dt * 12);
         }
-        a.speed = a.buffer.speedAt(renderTime);
+        a.speed = a.still ? 0 : speed ? speed(a.id, renderTime) : 0;
       }
       // Hit recoil and punch decay.
       a.recoil.multiplyScalar(Math.exp(-dt * 10));

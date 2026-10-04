@@ -4,8 +4,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createVirtualClock } from '../../js/net/clock.js';
-import { CLIENT_MSGS } from '../../js/net/protocol.js';
+import { CLIENT_MSGS, PROTOCOL_VERSION } from '../../js/net/protocol.js';
 import { makeServer, joinAs, run, until } from './helpers.js';
+import { ent as entOf_, roomOf as roomOf_ } from './helpers.js';
 import { seedStream, next, int } from '../../js/sim/rng.js';
 
 const VALUES = [null, true, false, 0, -1, -1e9, 1e300, 0.5, 65536, 2 ** 53, '', 'x'.repeat(300), '\u0000', '<script>', [], [1, 2], {}, { x: 1 }, { x: 'a', z: 1 }, { __proto__: { a: 1 } }];
@@ -55,12 +56,12 @@ test('fuzz: 5,000 hostile frames from one socket on each path; server keeps tick
   assert.equal(good.status, 'online');
   assert.equal(victim.status, 'online');
   // the good client still moves and is still seen
-  const e = srv.world.room.entities.get(good.you), x0 = e.x;
+  const e = entOf_(srv, good), x0 = e.x;
   let s = 1000;
   for (let i = 0; i < 10; i++) { good.input({ s: ++s, dt: 50, mx: 1, mz: 0, yaw: 0, b: 0 }); await run(clock, 50); }
   assert.ok(e.x > x0 + 2);
   assert.ok(victim.mirror.ents.has(good.you));
-  assert.equal(srv.world.room.entities.get(victim.you).dead, false);
+  assert.equal(entOf_(srv, victim).dead, false);
   good.close(); victim.close(); await srv.stop();
 });
 
@@ -73,7 +74,7 @@ test('order rules: game messages before enter, gateway messages before hello, ar
   s.onmessage = ev => got.push(typeof ev.data === 'string' ? JSON.parse(ev.data) : 'bin');
   await run(clock, 20);
   s.send(JSON.stringify({ t: 'in', s: 1, dt: 50, mx: 1, mz: 0, yaw: 0, b: 0 }));
-  s.send(JSON.stringify({ t: 'hello', v: 1, build: 'dev' }));
+  s.send(JSON.stringify({ t: 'hello', v: PROTOCOL_VERSION, build: 'dev' }));
   s.send(JSON.stringify({ t: 'say', text: 'hi' }));
   s.send(JSON.stringify({ t: 'enter', ticket: 'forged' }));
   await run(clock, 100);
@@ -87,7 +88,7 @@ test('handshake: wrong protocol version or build is refused with a reload messag
   const clock = createVirtualClock();
   const srv = makeServer({ clock });
   await srv.ready;
-  for (const [v, build, code] of [[2, 'dev', 'version'], [1, 'old', 'build']]) {
+  for (const [v, build, code] of [[PROTOCOL_VERSION + 1, 'dev', 'version'], [PROTOCOL_VERSION, 'old', 'build']]) {
     const s = srv.connect('/gw');
     const got = []; let closed = false;
     s.onmessage = ev => got.push(JSON.parse(ev.data)); s.onclose = () => { closed = true; };
@@ -105,8 +106,8 @@ test('casting at another player\'s id or a missing id does not hurt them or cras
   const srv = makeServer({ clock });
   await srv.ready;
   const a = await joinAs(srv, clock, 'Attacker'), b = await joinAs(srv, clock, 'Target');
-  const eb = srv.world.room.entities.get(b.you);
-  srv.world.room.entities.get(a.you).moveTo(eb.x + 1, eb.z);
+  const eb = entOf_(srv, b);
+  entOf_(srv, a).moveTo(eb.x + 1, eb.z);
   await run(clock, 100);
   for (let i = 0; i < 5; i++) { a.cast({ slot: 0, target: b.you }); a.cast({ slot: 0, target: 65000 }); a.cast({ slot: 99 }); await run(clock, 1000); }
   assert.equal(eb.hp, eb.hpMax, 'no friendly fire');

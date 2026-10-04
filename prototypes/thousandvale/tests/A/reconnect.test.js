@@ -4,6 +4,7 @@ import { createVirtualClock } from '../../js/net/clock.js';
 import { createMemoryStore } from '../../js/sim/store-memory.js';
 import { connect, memoryTokenStore } from '../../js/net/client.js';
 import { makeServer, makeClient, joinAs, run, until, waitP } from './helpers.js';
+import { ent as entOf_, roomOf as roomOf_ } from './helpers.js';
 
 test('crash (kill -9 style) + restart: the client reconnects by itself and resumes from the last save', async () => {
   const clock = createVirtualClock();
@@ -30,7 +31,7 @@ test('crash (kill -9 style) + restart: the client reconnects by itself and resum
   await srv.ready;
   const ok = await until(clock, () => a.status === 'online' && joins === 2, 15000);
   assert.ok(ok, 'reconnected; status ' + a.status);
-  const e = srv.world.room.entities.get(a.you);
+  const e = entOf_(srv, a);
   assert.ok(Math.abs(e.x - savedX) < 0.01, `resumed at the saved x ${savedX}, got ${e.x}`);
   a.close(); await srv.stop();
 });
@@ -50,7 +51,7 @@ test('the same character logging in from a second tab takes over; the first is t
   assert.equal(a.status, 'kicked'); assert.equal(a.lastKick.code, 'elsewhere');
   assert.equal(b.status, 'online');
   assert.equal(b.you, a.you, 'same entity taken over');
-  assert.equal([...srv.world.room.entities.values()].filter(e => e.kind === 'player').length, 1);
+  assert.equal([...srv.world.rooms.values()].reduce((n, r) => n + [...r.entities.values()].filter(e => e.kind === 'player').length, 0), 1);
   b.close(); await srv.stop();
 });
 
@@ -61,7 +62,6 @@ test('a dropped connection lingers a few seconds; reconnecting inside that keeps
   const a = await joinAs(srv, clock, 'Flaky');
   const id = a.you;
   // drop just the sockets (network blip): close them from the server side
-  for (const s of srv.world.room.clients.values()) void s;
   const g = [...srv.world.online.values()][0];
   g.conn.closeSoon('blip');
   await until(clock, () => a.status === 'online' && a.you, 8000);
@@ -92,7 +92,7 @@ test('logout saves and releases the lease; the next login resumes the position',
   let s = 0;
   for (let i = 0; i < 20; i++) { a.input({ s: ++s, dt: 50, mx: 0, mz: 1, yaw: 0, b: 0 }); await run(clock, 50); }
   await run(clock, 100);
-  const z = srv.world.room.entities.get(a.you).z;
+  const z = entOf_(srv, a).z;
   a.leave();
   await run(clock, 500);
   const row = Object.values(store.data.chars)[0];
@@ -102,6 +102,6 @@ test('logout saves and releases the lease; the next login resumes the position',
   await waitP(clock, b.ready);
   b.play(row.id);
   await until(clock, () => b.status === 'online');
-  assert.ok(Math.abs(srv.world.room.entities.get(b.you).z - z) < 1e-9);
+  assert.ok(Math.abs(entOf_(srv, b).z - z) < 1e-9);
   b.close(); await srv.stop();
 });

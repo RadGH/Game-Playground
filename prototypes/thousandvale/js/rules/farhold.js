@@ -35,6 +35,7 @@ export {
 export {
   strikeAt, withArea, handsOf as weaponHands, OFFHAND_DAMAGE, isStaff, isWand, isRangedWeapon,
   traitsOf, wandBehaviour, staffSpell, tuneWeapons, meleeSpanOf, swingTiming, profileOf,
+  chargeAt, drawPower, chargedForm, rangedPlan, STAFF_CHARGE,
 } from '../../../farhold/js/weapons.js';
 
 export { feel, tuneFeel, staggerFor, pushFor, COMBAT_FEEL, PUSH_RESIST } from '../../../farhold/js/combat-feel.js';

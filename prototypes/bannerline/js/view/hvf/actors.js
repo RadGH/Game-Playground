@@ -131,13 +131,38 @@ export function createHvfActors({ scene, map, data, fogify, localTeam, models = 
   }
   // stream C's art when it loaded (js/view/hvf/models.js); the stand-ins above otherwise
   const animalScale = { hen: 1.5, sheep: 1.45, pig: 1.4, cow: 1.45 };
+  // C's crowd poses: one InstancedMesh per (species, pose); an animal swaps between them (walkA / walkB
+  // while it moves, run while it flees, bleat when it calls, graze or idle at rest)
+  const POSES = ['idle', 'walkA', 'walkB', 'run', 'graze', 'bleat'];
+  const poseHerds = {};
+  const bleatUntil = new Map();
+  const poseMat = fogify(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9 }));
   if (models) {
     for (const mm of models.materials()) { fogify(mm); mm.needsUpdate = true; }
-    const lam = fogify(new THREE.MeshLambertMaterial({ vertexColors: true }));
-    for (const kind of Object.keys(herds)) models.animal(kind).then(({ geometry }) => {
-      const h = herds[kind]; if (!h.parent) return;
-      h.geometry.dispose(); h.geometry = geometry; h.material = lam; h.userData.shared = true; h.userData.s = animalScale[kind] || 1.4;
-    }).catch(() => {});
+    for (const kind of Object.keys(herds)) models.animalPoses(kind).then((poses) => {
+      if (!group.parent) return;
+      const set = {};
+      for (const pose of POSES) {
+        const geo = poses[pose] || poses.idle; if (!geo) continue;
+        const im = new THREE.InstancedMesh(geo, poseMat, 480);
+        im.count = 0; im.frustumCulled = false; im.name = `hvf-${kind}-${pose}`; im.userData.shared = true;
+        group.add(im); set[pose] = im;
+      }
+      poseHerds[kind] = set;
+      herds[kind].visible = false;
+    }).catch((e) => console.warn('hvf poses', kind, e));
+  }
+  // joined fences / walls / briar hedges: one InstancedMesh per (kind, link shape, material) for the whole map
+  const linked = new Map();   // 'fence:5:std' -> InstancedMesh
+  function linkedMesh(kind, mask, key, geo, need) {
+    const k = `${kind}:${mask}:${key}`;
+    let im = linked.get(k);
+    if (!im || im.instanceMatrix.count < need) {
+      if (im) { group.remove(im); im.dispose(); }
+      im = new THREE.InstancedMesh(geo, models.material(key), Math.max(16, need * 2));
+      im.frustumCulled = false; im.name = 'hvf-' + k; group.add(im); linked.set(k, im);
+    }
+    return im;
   }
   const colourOf = (e, state) => (e.team === 1 ? HUNTER_COLOUR : FARMER_COLOURS[(state.players[e.owner]?.colour ?? 0) % FARMER_COLOURS.length]);
   const LINKED = { fence: 1, wall: 1, hedge: 1 };
@@ -199,6 +224,8 @@ export function createHvfActors({ scene, map, data, fogify, localTeam, models = 
     const seen = new Set();
     const counts = {};
     for (const k of Object.keys(herds)) counts[k] = 0;
+    const pcount = {};
+    const links = new Map();   // 'fence:5' -> [ent]
     for (const e of state.ents) {
       if (e._gone) continue;
       if (e.kind === 'animal') {
@@ -206,6 +233,16 @@ export function createHvfActors({ scene, map, data, fogify, localTeam, models = 
         const h = herds[e.type]; if (!h) continue;
         const x = e.px + (e.x - e.px) * alpha, z = e.pz + (e.z - e.pz) * alpha;
         const moving = Math.abs(e.x - e.px) + Math.abs(e.z - e.pz) > 0.001;
+        const ph = poseHerds[e.type];
+        if (ph) {
+          const pose = e.fleeUntil > state.tick ? 'run' : (bleatUntil.get(e.id) || 0) > t ? 'bleat' : moving ? ((Math.floor(t * 4 + e.id * 0.37) & 1) ? 'walkA' : 'walkB') : (e.id % 3 ? 'graze' : 'idle');
+          const im = ph[pose] || ph.idle; if (!im) continue;
+          p3.set(x, groundY(map, x, z), z); q.setFromAxisAngle(Y, e.face || 0); s3.setScalar(animalScale[e.type] || 1.4);
+          m4.compose(p3, q, s3); s3.setScalar(1.5);
+          const key = e.type + ':' + pose; const n = pcount[key] || 0; pcount[key] = n + 1;
+          if (n < im.instanceMatrix.count) im.setMatrixAt(n, m4);
+          continue;
+        }
         p3.set(x, groundY(map, x, z) + (moving ? Math.abs(Math.sin(t * 9 + e.id)) * 0.08 : 0), z);
         q.setFromAxisAngle(Y, e.face || 0);
         m4.compose(p3, q, s3);
@@ -214,7 +251,26 @@ export function createHvfActors({ scene, map, data, fogify, localTeam, models = 
         continue;
       }
       const isChar = e.kind === 'farmer' || e.kind === 'hunter';
-      if (isChar && !e.alive) continue;   // ghosts show as graves
+      if (isChar && !e.alive) {
+        // a downed farmer stands as a ghost at his grave (C's ghost style); hunters simply vanish until they respawn
+        const gr = e.kind === 'farmer' && models ? state.hvf.graves.find((g) => g.pid === e.owner) : null;
+        const it0 = items.get(e.id);
+        if (!gr || !it0 || !it0.body) continue;
+        seen.add(e.id);
+        if (!it0.ghost && it0.body.actor) it0.ghost = models.ghost(it0.body.object);
+        it0.mesh.position.set(gr.x + 0.6, groundY(map, gr.x, gr.z) + 0.25 + Math.sin(t * 2) * 0.12, gr.z);
+        it0.body.setAnim('idle'); if (dt > 0) it0.body.update(dt, t);
+        it0.mesh.visible = true;
+        continue;
+      }
+      if (e.kind === 'farmer') { const it1 = items.get(e.id); if (it1 && it1.ghost) { it1.ghost(); it1.ghost = null; } }
+      if (models && e.kind === 'building' && LINKED[e.type] && e.team === localTeam && e.alive && e.cells) {
+        if (!visible(e)) continue;
+        const key = e.type + ':' + maskOf(e);
+        if (!links.has(key)) links.set(key, []);
+        links.get(key).push(e);
+        continue;
+      }
       if (e.kind === 'building' && e.team !== localTeam) continue;   // drawn from memory below
       if (!visible(e)) continue;
       seen.add(e.id);
@@ -259,6 +315,23 @@ export function createHvfActors({ scene, map, data, fogify, localTeam, models = 
       it.mesh.visible = true;
     }
     for (const [k, h] of Object.entries(herds)) { h.count = counts[k]; h.instanceMatrix.needsUpdate = true; }
+    for (const [kind, set] of Object.entries(poseHerds)) for (const [pose, im] of Object.entries(set)) { im.count = Math.min(im.instanceMatrix.count, pcount[kind + ':' + pose] || 0); im.instanceMatrix.needsUpdate = true; }
+    if (models) {
+      const used = new Set();
+      for (const [key, list] of links) {
+        const [kind, mask] = key.split(':');
+        const geos = models.linked(kind, +mask);
+        for (const [mk, geo] of Object.entries(geos)) {
+          if (!geo) continue;
+          const im = linkedMesh(kind, +mask, mk, geo, list.length);
+          list.forEach((e, n) => { const x = (e.cells[0] % map.cols + 0.5) * map.cell, z = ((e.cells[0] / map.cols | 0) + 0.5) * map.cell; p3.set(x, groundY(map, x, z), z); q.identity(); s3.setScalar(1); m4.compose(p3, q, s3); im.setMatrixAt(n, m4); });
+          im.count = list.length; im.instanceMatrix.needsUpdate = true; im.visible = true;
+          used.add(`${kind}:${mask}:${mk}`);
+        }
+      }
+      for (const [k, im] of linked) if (!used.has(k)) { im.count = 0; im.visible = false; }
+      s3.setScalar(1.5);
+    }
     for (const [id, it] of items) if (!seen.has(id)) {
       if (typeof id === 'string') { it.mesh.visible = false; continue; }   // a remembered building: kept for the other half of a split screen
       if (state.ents.some((e) => e.id === id && !e._gone && (e.kind !== 'farmer' && e.kind !== 'hunter' || e.alive))) { it.mesh.visible = false; continue; }
@@ -293,8 +366,11 @@ export function createHvfActors({ scene, map, data, fogify, localTeam, models = 
 
   return {
     group, sync, pick, items,
+    /** Sim events the crowd reacts to: an animal calling bleats for a moment. */
+    onEvent(ev) { if (ev.type === 'noise' && ev.src != null) bleatUntil.set(ev.src, t + 0.9); if (bleatUntil.size > 2000) bleatUntil.clear(); },
+    stats() { let calls = 0, tris = 0; group.traverse((o) => { if (o.isMesh && o.visible && (o.count == null || o.count > 0)) { calls++; tris += ((o.geometry.index?.count || o.geometry.attributes.position.count) / 3) * (o.isInstancedMesh ? o.count : 1); } }); return { calls, tris }; },
     /** A free-standing model for the placement ghost. */
     ghostFor(kind) { const def = BK[kind]; return new THREE.Mesh(buildingModel(kind, def.size[0] * map.cell, def.size[1] * map.cell), ghostMat); },
-    dispose() { scene.remove(group); for (const g of geoCache.values()) g.dispose(); for (const [id, it] of items) dropItem(id, it); for (const h of Object.values(herds)) { if (!h.userData.shared) h.geometry.dispose(); h.dispose(); } mat.dispose(); ghostMat.dispose(); },
+    dispose() { scene.remove(group); for (const g of geoCache.values()) g.dispose(); for (const [id, it] of items) dropItem(id, it); for (const h of Object.values(herds)) { if (!h.userData.shared) h.geometry.dispose(); h.dispose(); } for (const set of Object.values(poseHerds)) for (const im of Object.values(set)) im.dispose(); for (const im of linked.values()) im.dispose(); poseMat.dispose(); mat.dispose(); ghostMat.dispose(); },
   };
 }

@@ -8,13 +8,13 @@ const ICONS = {
   lock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>',
 };
 
-export function createHud({ onSlot, onChatSubmit, onChatFocus } = {}) {
+export function createHud({ onSlot, onChatSubmit, onChatFocus, onRise } = {}) {
   const el = {
     hud: $('hud'), selfName: $('self-name'), selfLevel: $('self-level'), selfInitial: $('self-initial'),
     selfHp: $('self-hp-fill'), selfLag: $('self-hp-lag'), selfHpText: $('self-hp-text'), selfXp: $('self-xp-fill'), selfXpText: $('self-xp-text'),
     tFrame: $('target-frame'), tName: $('target-name'), tLevel: $('target-level'), tInitial: $('target-initial'), tHp: $('target-hp-fill'), tLag: $('target-hp-lag'), tHpText: $('target-hp-text'), tSub: $('target-sub'),
     toasts: $('toasts'), conn: $('conn'), connText: $('conn-text'), chatLog: $('chat-log'), chatForm: $('chat-form'), chatInput: $('chat-input'),
-    bar: $('actionbar'), death: $('death'), deathTimer: $('death-timer'), banner: $('zone-banner'), zoneName: $('zone-name'), help: $('help'),
+    bar: $('actionbar'), death: $('death'), deathTimer: $('death-timer'), deathWait: $('death-wait'), rise: $('rise'), banner: $('zone-banner'), zoneName: $('zone-name'), help: $('help'),
   };
   const lag = { self: 1, target: 1, targetId: null };
 
@@ -29,6 +29,8 @@ export function createHud({ onSlot, onChatSubmit, onChatFocus } = {}) {
     el.bar.appendChild(b);
     slots.push({ b, cd: b.querySelector('.cd'), until: 0, len: 1 });
   }
+
+  el.rise.addEventListener('click', () => onRise?.());
 
   // --- chat ---
   el.chatForm.addEventListener('submit', e => {
@@ -107,6 +109,7 @@ export function createHud({ onSlot, onChatSubmit, onChatFocus } = {}) {
     death(secondsLeft) {
       if (secondsLeft == null) { el.death.hidden = true; return; }
       el.death.hidden = false; el.deathTimer.textContent = Math.max(0, Math.ceil(secondsLeft));
+      el.deathWait.hidden = secondsLeft <= 0; el.rise.hidden = secondsLeft > 0;
     },
     zone(name) {
       el.zoneName.textContent = name;

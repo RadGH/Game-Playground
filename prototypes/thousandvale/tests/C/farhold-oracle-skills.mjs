@@ -9,12 +9,15 @@
 import * as O from './farhold-oracle.mjs';
 
 const FJS = new URL('../../../farhold/js/', import.meta.url);
-const THREE = await import(new URL('../../../vendor/three/three.module.js', import.meta.url));
+const THREE = await import('three');   // through Farhold's three-loader, registered by farhold-oracle.mjs
 const { createSkillBar, applyStatus, STATUS_POWER_SHARE } = await import(new URL('skills.js', FJS));
 const { createSkillRuntime } = await import(new URL('skillrun.js', FJS));
 const { setMechEnv } = await import(new URL('skillmech.js', FJS));
 const { CAST_ELEMENTS } = await import(new URL('rpg.js', FJS));
 const { pushFor } = await import(new URL('combat-feel.js', FJS));
+const W = await import(new URL('weapons.js', FJS));
+const { talentPlan } = await import(new URL('skilltalents.js', FJS));
+const { elementOf, statusOf } = await import(new URL('rpg.js', FJS));
 
 /** Something that answers every method with nothing (spellfx, fx, sound, hud). */
 const sink = () => new Proxy(function () {}, {
@@ -76,6 +79,9 @@ export function farholdSkills(F, field, player, control, barRng) {
     rpgApply: (u, id, spec) => applyStatus(u, id, spec, 1), gathering: () => false, building: () => false,
   });
   setMechEnv(mech.mechEnv);
+  // Farhold keeps traps, walls and corpses in ONE module-level world (the very thing js/rules/room.js
+  // exists to split); a previous fixture's Rampart would otherwise still be standing here
+  mech.reset();
 
   function dropPool({ x, z, r, seconds, element = 'physical', power = 0.5 }) {
     pools.push({ x, z, r, left: seconds, life: seconds, every: 0.75, next: 0.75, element, power });
@@ -249,8 +255,93 @@ export function farholdSkills(F, field, player, control, barRng) {
     return plan;
   }
 
+  /**
+   * main.js `swingWith` staff / wand / bow branches (line ~9166-9440), effects left out. `held` is
+   * the seconds the button was held (the controller's chargeAt / drawPower on release).
+   */
+  function rangedAttack(held = 0) {
+    const hands = W.handsOf(player);
+    const weapon = hands.main;
+    const kind = W.isStaff(weapon) ? 'staff' : (weapon?.castElement && weapon?.ranged) ? 'bolt' : weapon?.ranged ? 'arrow' : 'melee';
+    const mods = F.rpg.attackMods(player, kind, { weapon, hand: 'main' });
+    const share = mods.power || 1;
+    if (kind === 'staff') W.chargeAt(held, player.derived.swing?.main?.charge || W.STAFF_CHARGE);
+    const shape = { ...W.withArea(W.strikeAt(weapon, 0), player.derived.areaPct || 0) };
+    if (mods.scale && mods.scale !== 1) shape.scale = (shape.scale || 1) * mods.scale;
+    const element = mods.element || elementOf(weapon);
+    const leaves = mods.element ? statusForElement(mods.element) : statusOf(weapon);
+    const brandHit = (enemy, result) => { if (leaves && statuses[leaves] && result?.amount > 0) landStatus(leaves, statuses[leaves], enemy, Math.max(1, result.amount * 0.7)); };
+    const meleeOpts = { element, onHit: brandHit, applyStatus: statusHook, power: share * shape.damage };
+    const a = aim();
+    if (kind === 'staff') {
+      const spell = W.staffSpell(weapon, element);
+      const charged = shape.charge && !shape.charge.tap ? W.chargedForm(spell) : null;
+      const base = Math.max(1, Math.round((player.derived.damage[1] || 6) * (spell.mult || 1) * share));
+      const radius = (spell.radius || spell.width || 3) * shape.scale;
+      if (charged && charged.shape === 'jet') {
+        const range = (spell.range || 9) * shape.scale * (charged.rangeScale || 1.45);
+        const wide = (spell.arc || 0.9) * shape.scale * 0.8;
+        const ticks = charged.ticks || 5;
+        for (let i = 0; i < ticks; i++) setTimeout(() => {
+          for (const { enemy } of field.strike(control, player, { reach: range, arc: wide, ...meleeOpts, power: meleeOpts.power / ticks })) if (spell.status) landStatus(spell.status, statuses[spell.status], enemy, Math.max(1, base * 0.4));
+        }, i * 130);
+        return;
+      }
+      if (charged && charged.shape === 'dome') {
+        for (const { enemy, result } of field.strikeArea(control.x, control.z, radius, player, { falloff: 0.2, element, power: share * (spell.mult || 1) * (shape.charge?.power || 1) })) {
+          brandHit(enemy, result);
+          if (spell.status) landStatus(spell.status, statuses[spell.status], enemy, Math.max(1, base * 0.6));
+          const dx = enemy.x - control.x, dz = enemy.z - control.z, len = Math.hypot(dx, dz) || 1;
+          const metres = pushFor(enemy, charged.push || 2.4);
+          if (metres > 0.01) enemy.push = { dx: dx / len, dz: dz / len, metres, t: 0.18, span: 0.18, done: 0 };
+        }
+        return;
+      }
+      if (charged && charged.shape === 'wall') {
+        const ahead = 4.5 * shape.scale;
+        dropPool({ x: control.x + a.dx * ahead, z: control.z + a.dz * ahead, r: radius * 1.15, seconds: charged.seconds || 3, element, power: share * (spell.mult || 1) * (shape.charge?.power || 1) * 0.5 });
+        return;
+      }
+      if (spell.shape === 'nova') {
+        for (const { enemy, result } of field.strikeArea(control.x, control.z, radius, player, { falloff: 0.35, element, power: share * (spell.mult || 1) * (shape.charge?.power || 1) })) {
+          brandHit(enemy, result);
+          if (spell.status) landStatus(spell.status, statuses[spell.status], enemy, Math.max(1, base * 0.6));
+        }
+      } else if (spell.shape === 'cone' || spell.shape === 'wave') {
+        const range = (spell.range || 9) * shape.scale;
+        const wide = spell.shape === 'cone' ? (spell.arc || 0.9) * shape.scale : 0.45;
+        for (const { enemy } of field.strike(control, player, { reach: range, arc: wide, ...meleeOpts })) if (spell.status) landStatus(spell.status, statuses[spell.status], enemy, Math.max(1, base * 0.6));
+      } else {
+        const plan = talentPlan(player, 'staff:' + spell.key, { element, range: (spell.range || 12) * shape.scale, splash: radius, projectiles: 1, spread: 0, status: spell.status || leaves, statusSpec: (spell.status || leaves) ? statuses[spell.status || leaves] : null });
+        if (charged?.shape === 'mortar') { plan.kind = 'ground'; plan.radius = radius * 1.4; plan.groundRadius = radius * 1.4; plan.ground = Math.max(plan.ground || 0, 3); }
+        else if (charged?.shape === 'storm') plan.chains = charged.chains || 5;
+        fireBolt(plan, a, a.dx, a.dy, a.dz, { ...meleeOpts, power: (spell.mult || 1) * (shape.charge?.power || 1) * (mods.power || 1) });
+      }
+      return;
+    }
+    if (kind === 'bolt') {
+      const how = W.wandBehaviour(weapon);
+      const plan = { element, range: (weapon.castRange ?? 34) * (how.slow ? 0.85 : 1), splash: (how.splash ?? 2.2) * shape.scale, projectiles: how.projectiles || 1, spread: how.spread || 0, chains: how.chains || 0, homing: how.homing || 0, status: leaves, statusSpec: leaves ? statuses[leaves] : null };
+      fireBolt(plan, a, a.dx, a.dy, a.dz, { ...meleeOpts, power: (how.mult || 1) * share });
+      return;
+    }
+    if (kind === 'arrow') {
+      // the arrow's landing (onArrowLand) at the first body along the shot, at the draw's power
+      const plan = player.derived.swing?.main;
+      const range = plan?.range ?? F.balance.player?.arrowRange ?? 46;
+      const power = plan?.hold === 'draw' ? W.drawPower(plan.draw, held).power : (plan?.power ?? 1);
+      const target = field.hitScan(control.x, 0.9, control.z, a.dx, 0, a.dz, { range, width: 1.1 + (player.derived.arrowHoming || 0) * 2.6 });
+      const dist = target ? target.distance : range;
+      const at = { x: control.x + a.dx * dist, z: control.z + a.dz * dist };
+      setTimeout(() => {
+        const hits = field.strikeArea(at.x, at.z, F.balance.player?.arrowSplash ?? 2.6, player, { element, applyStatus: statusHook, power });
+        for (const { enemy, result } of hits) if (leaves && statuses[leaves] && result.amount > 0) landStatus(leaves, statuses[leaves], enemy, Math.max(1, result.amount * 0.7));
+      }, dist / (F.balance.player?.arrowSpeed ?? 42) * 1000);
+    }
+  }
+
   return {
-    bar, mech,
+    bar, mech, rangedAttack,
     cast(slot, aimPoint = null) { aimAt = aimPoint; return castSkill(slot); },
     /** one frame: the skill bar's clocks, the runtime's tick (placed objects, walls, links), the pools */
     tick(dt) { bar.update(dt, { fighting: true }); mech.tick(dt, { fighting: true }); tickPools(dt); },

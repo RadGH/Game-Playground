@@ -57,7 +57,13 @@ export function createRoom(opts) {
       if (opts.describeExtra) Object.assign(d, opts.describeExtra);
       return d;
     },
+    /** Emit an event to clients (§6); the rules' `loot` events are turned into grants (hooks.loot). */
     event(ev) {
+      if (ev.type === 'loot' && ev.items && hooks.loot) { hooks.loot(ev, room); return; }
+      room.emit(ev);
+    },
+    /** Emit without interception (the world's own loot events). */
+    emit(ev) {
       if (ev.x === undefined) {
         const ref = entities.get(ev.d) || entities.get(ev.s) || entities.get(ev.to);
         if (ref) { ev.x = ref.x; ev.z = ref.z; }
@@ -158,9 +164,13 @@ export function createRoom(opts) {
     if (msg.target) { const t = entities.get(msg.target); if (!t) msg = { ...msg, target: undefined }; }
     return safe('intent', e, msg) || { ok: false, why: 'unknown' };
   };
-  room.say = function (e, text) {
+  /** Say chat to everyone within VIEW.sayR; `deliver(recipientChar)` may veto (ignore lists). */
+  room.say = function (e, text, deliver = null) {
     const msg = JSON.stringify({ t: 'chat', ch: 'say', from: e.id, name: e.name, text });
-    for (const o of grid.query(e.x, e.z, VIEW.sayR)) { const c = clients.get(o.id); if (c) c.send(msg); }
+    for (const o of grid.query(e.x, e.z, VIEW.sayR)) {
+      const c = clients.get(o.id);
+      if (c && (!deliver || deliver(o.char))) c.send(msg);
+    }
   };
   room.respawn = function (e) {
     if (!e.dead) return false;

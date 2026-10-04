@@ -39,6 +39,19 @@ test('pg store: guest, characters, leases, fencing, versions', { skip: !HAVE_PG 
     assert.equal(await st.saveChar(t2.char, t2.fence), true);
     assert.equal(await st.clearLeases('ptest:'), 1);
     assert.equal((await st.takeChar(g.account + 999999, char.id, 'ptest:c')).err, 'missing');
+    // bag + equipment blob round trip, and the economy log upsert (schema v1)
+    t2.char.bag = [{ uid: 'p0-aa-1', name: 'Rusty sword', rarity: 'rare' }]; t2.char.equipment = { head: { uid: 'p0-aa-2' } };
+    const t3 = await st.takeChar(g.account, char.id, 'ptest:b', 30000);
+    t2.char.version = t3.char.version;
+    assert.equal(await st.saveChar(t2.char, t3.fence), true);
+    const t4 = await st.takeChar(g.account, char.id, 'ptest:b', 30000);
+    assert.equal(t4.char.bag[0].uid, 'p0-aa-1'); assert.equal(t4.char.equipment.head.uid, 'p0-aa-2');
+    const hour = '2001-01-01T00:00:00.000Z';
+    await st.logEconomy([{ hour, band: 9, kind: 'faucet', reason: 'pgtest', gold: 5, items: 1, count: 1 }]);
+    await st.logEconomy([{ hour, band: 9, kind: 'faucet', reason: 'pgtest', gold: 7, items: 0, count: 1 }]);
+    const er = await st.pool.query("SELECT gold, items, count FROM economy_log WHERE reason = 'pgtest'");
+    assert.deepEqual(er.rows[0], { gold: 12, items: 1, count: 2 });
+    await st.pool.query("DELETE FROM economy_log WHERE reason = 'pgtest'");
   } finally {
     for (const id of made) await st.pool.query('DELETE FROM accounts WHERE id = $1', [id]);
     await st.close();

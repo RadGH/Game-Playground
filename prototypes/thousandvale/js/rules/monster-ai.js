@@ -113,7 +113,9 @@ export function monsterStrike(field, e, victim, { element = 'physical', ranged =
     e.lastCombatAt = field.clock;
     return null;
   }
-  const result = field.rpg.strike(e, victim, field.rng, { multiplier: incomingFrom(victim) * outgoingFrom(e), element, ranged });
+  // the victim's own skill statuses (wards, counters, "every N hits" bursts) act as the victim
+  const hit = () => field.rpg.strike(e, victim, field.rng, { multiplier: incomingFrom(victim) * outgoingFrom(e), element, ranged });
+  const result = field.hooks?.asActor ? field.hooks.asActor(victim, hit) : hit();
   field.hooks?.onHurt?.(result, e, victim);                 // skill wards/counters (cast.js, M1)
   if (e.lifeSteal) e.hp = Math.min(e.maxHp, e.hp + Math.round(result.amount * e.lifeSteal));
   if (e.onHit?.length) statusOnHit(field, e, victim);

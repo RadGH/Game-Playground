@@ -165,6 +165,9 @@ button.icon { font-size: 20px; line-height: 1; }
 .death { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; background: radial-gradient(ellipse at center, rgba(40, 0, 0, 0.25), rgba(0, 0, 0, 0.65)); }
 .death h2 { font-family: var(--serif); font-size: 44px; color: #ffb3a3; margin: 0; letter-spacing: 0.08em; text-shadow: 0 2px 16px #000; }
 .death p { color: var(--ink-dim); font-size: 17px; }
+.death .rise { pointer-events: auto; width: auto; padding: 12px 28px; margin-top: 8px; justify-self: center; }
+.death .rise small { font-family: var(--sans); opacity: 0.7; letter-spacing: 0; }
+.dmg.heal { color: #7fe08a; font-size: 20px; }
 
 /* ---------------------------------------------------------------- small screens */
 @media (max-width: 760px) {

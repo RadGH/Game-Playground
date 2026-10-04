@@ -97,3 +97,25 @@ test('levelFor / xpFor are Farhold\'s curve at the realm cap', () => {
   assert.ok(rules.xpFor(2) > 0);
   for (let l = 2; l <= 50; l++) assert.equal(rules.levelFor(rules.xpFor(l)), l, `level ${l}`);
 });
+
+test('gear survives a save: serializeGear -> char.gear -> a fresh room puts the same items back on', async () => {
+  const { serializeGear } = await import('../../js/rules/index.js');
+  const a = setup({ cls: 'rogue', level: 5 });
+  const blob = serializeGear(a.me.r.unit);
+  assert.ok(blob.equipment.weapon, 'the dagger is in the blob');
+  blob.equipment.weapon.uid = 'test:1';
+  const b = setup({ cls: 'rogue', level: 5 });
+  b.room.remove(b.me);
+  const char = { id: 78, name: 'Loaded', cls: 'rogue', level: 5, xp: 0, gold: 0, room: 'c-test', x: 1000, z: 1000, gear: blob };
+  const me = b.room.addPlayer(char, null);
+  assert.equal(me.r.unit.equipment.weapon.uid, 'test:1');
+  assert.deepEqual(me.r.unit.derived.damage, a.me.r.unit.derived.damage);
+});
+
+test('a target message names a living body in reach, or is refused', () => {
+  const { room, me, pack } = setup();
+  assert.deepEqual(room.intent(me, { t: 'target', id: pack[0].id }), { ok: true });
+  assert.equal(me.target, pack[0].id);
+  assert.deepEqual(room.intent(me, { t: 'target', id: 0 }), { ok: true });
+  assert.equal(me.target, 0);
+});

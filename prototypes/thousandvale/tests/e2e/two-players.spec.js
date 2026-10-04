@@ -33,7 +33,7 @@ async function joinAs(browser, name) {
 const st = p => p.evaluate(() => window.tv.state());
 
 test('two players see each other move and hit a wolf together', async ({ browser }) => {
-  test.setTimeout(120000);
+  test.setTimeout(180000);
   const A = await joinAs(browser, 'Alda');
   const B = await joinAs(browser, 'Brem');
   const a0 = await st(A.page), b0 = await st(B.page);
@@ -52,7 +52,18 @@ test('two players see each other move and hit a wolf together', async ({ browser
   await A.page.screenshot({ path: 'test-results/thousandvale-two-players-A.png' });
   await B.page.screenshot({ path: 'test-results/thousandvale-two-players-B.png' });
 
-  // 3. both go to the same wolf (the nearest one to A) and swing until each has landed a hit on it
+  // 3. protocol v2: characters start in the town hub (no monsters). Both walk out through the same side of
+  //    the town circle (S.room.area) and are handed over to the wilds room.
+  const area = await A.page.evaluate(() => window.thousandvale.S.room?.area || null);
+  if (area) {
+    // head for the edge that faces the zone's middle, where the wolf camps are
+    const ang = Math.atan2(1024 - area.z, 1024 - area.x) || 0;
+    const out = { x: area.x + Math.cos(ang) * (area.r + 25), z: area.z + Math.sin(ang) * (area.r + 25) };
+    for (const [P, dx] of [[A, 0], [B, 3]]) await P.page.evaluate(([x, z]) => window.tv.walkTo(x, z), [out.x + dx, out.z]);
+    for (const P of [A, B]) await P.page.waitForFunction(() => window.thousandvale.S.room?.kind === 'wilds', null, { timeout: 60000 });
+  }
+
+  // 4. both go to the same wolf (the nearest one to A) and swing until each has landed a hit on it
   let wolf = null;
   await expect.poll(async () => {
     const s = await st(A.page);
@@ -60,10 +71,10 @@ test('two players see each other move and hit a wolf together', async ({ browser
     wolves.sort((p, q) => Math.hypot(p.x - s.you.x, p.z - s.you.z) - Math.hypot(q.x - s.you.x, q.z - s.you.z));
     wolf = wolves[0] || null;
     return !!wolf;
-  }, { timeout: 15000, message: 'a wolf is in view' }).toBe(true);
+  }, { timeout: 20000, message: 'a wolf is in view' }).toBe(true);
 
   const landed = { A: false, B: false }, sawOther = { A: false, B: false };
-  const end = Date.now() + 45000;
+  const end = Date.now() + 75000;
   while (Date.now() < end && !(landed.A && landed.B && sawOther.A && sawOther.B)) {
     for (const [key, P, me, other] of [['A', A, a0.you.id, b0.you.id], ['B', B, b0.you.id, a0.you.id]]) {
       const s = await st(P.page);
@@ -72,8 +83,11 @@ test('two players see each other move and hit a wolf together', async ({ browser
       const d = Math.hypot(w.x - s.you.x, w.z - s.you.z);
       if (d > 2.2) await P.page.evaluate(([x, z]) => window.tv.walkTo(x, z), [w.x, w.z]);
       else await P.page.evaluate(id => { window.tv.stop(); window.tv.cast(0, id); }, w.id);
+      // a swing hits whatever wolf of the pack is in its arc, not only the one targeted — so "together" =
+      // both players land hits on monsters while fighting the same pack, and each sees the other's hits
+      const monsters = new Set(s.ents.filter(e => e.kind === 'monster').map(e => e.id));
       for (const ev of s.events) {
-        if (ev.type !== 'hit' || ev.d !== wolf.id) continue;
+        if (ev.type !== 'hit' || ev.kind !== 'dmg' || !monsters.has(ev.d)) continue;
         if (ev.s === me) landed[key] = true;
         if (ev.s === other) sawOther[key] = true;
       }
@@ -84,10 +98,10 @@ test('two players see each other move and hit a wolf together', async ({ browser
     const w = s.ents.find(e => e.id === wolf.id);
     if ((!w || w.dead) && !(landed.A && landed.B)) {
       const next = s.ents.filter(e => e.kind === 'monster' && !e.dead).sort((p, q) => Math.hypot(p.x - s.you.x, p.z - s.you.z) - Math.hypot(q.x - s.you.x, q.z - s.you.z))[0];
-      if (next) { wolf = next; landed.A = landed.B = sawOther.A = sawOther.B = false; }
+      if (next) wolf = next;
     }
   }
-  expect(landed, 'both players hit the same wolf').toEqual({ A: true, B: true });
+  expect(landed, 'both players hit wolves of the same pack').toEqual({ A: true, B: true });
   expect(sawOther, "each player saw the other's hit").toEqual({ A: true, B: true });
   await A.page.screenshot({ path: 'test-results/thousandvale-two-players-fight.png' });
   expect(A.errors, 'no page errors in A').toEqual([]);

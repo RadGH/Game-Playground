@@ -37,7 +37,7 @@ function addWind(material, amount) {
   return material;
 }
 
-export async function createDecor(hf, { placements = [], paths = [], seed = 7, avoid = [], density = 1, lodFar = [70, 220] } = {}) {
+export async function createDecor(hf, { placements = [], paths = [], seed = 7, avoid = [], density = 1, lodFar = [70, 220], cheap = false } = {}) {
   const LOD_FAR = lodFar;   // metres: lod0 inside [0], lod1 inside [1], billboard beyond
   const group = new THREE.Group(); group.name = 'decor';
   const rng = makeRng(seed * 101 + 9);
@@ -47,7 +47,13 @@ export async function createDecor(hf, { placements = [], paths = [], seed = 7, a
   const atlas = await loadFoliageAtlas();
   const bark = makeSurface('bark_pine', { size: 256, seed: 3 });
   bark.map.wrapS = bark.map.wrapT = THREE.RepeatWrapping;
-  const mats = {
+  // Cheap mode (software renderers): Lambert, no wind, so a leaf pixel costs one texture read.
+  const mats = cheap ? {
+    bark: new THREE.MeshLambertMaterial({ map: bark.map, vertexColors: true }),
+    leaf: new THREE.MeshLambertMaterial({ map: atlas.texture, alphaTest: 0.35, side: THREE.DoubleSide, vertexColors: true, emissive: '#1c2a12', emissiveMap: atlas.texture, emissiveIntensity: 0.5 }),
+    rock: new THREE.MeshLambertMaterial({ vertexColors: true, color: '#a29d94' }),
+    prop: new THREE.MeshLambertMaterial({ vertexColors: true }),
+  } : {
     bark: addWind(new THREE.MeshStandardMaterial({ map: bark.map, vertexColors: true, roughness: 0.95 }), 0.25),
     leaf: addWind(new THREE.MeshStandardMaterial({ map: atlas.texture, alphaTest: 0.3, side: THREE.DoubleSide, vertexColors: true, roughness: 0.85, emissive: '#1c2a12', emissiveMap: atlas.texture, emissiveIntensity: 0.55 }), 0.5),
     rock: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, color: '#a29d94' }),
@@ -165,7 +171,7 @@ export async function createDecor(hf, { placements = [], paths = [], seed = 7, a
   const batches = new Map();   // id -> [{ x, y, z, yaw }]
   const place = (id, x, z, yaw, data = {}) => {
     const g = propGeo(id);
-    if (!g) return;
+    if (!g || hf.waterAt(x, z).depth > 0) return;
     const y = hf.heightAt(x, z) - 0.02;
     if (!batches.has(id)) batches.set(id, []);
     batches.get(id).push({ x, y, z, yaw: yaw || 0 });

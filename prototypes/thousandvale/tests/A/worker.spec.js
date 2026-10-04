@@ -3,7 +3,7 @@
 // server needed.
 import { test, expect } from '@playwright/test';
 
-test('worker mode: two connections join the in-browser server and see each other', async ({ page }) => {
+test('worker mode: two connections join the in-browser server (in the town) and see each other', async ({ page }) => {
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
   await page.goto('/');
@@ -24,14 +24,14 @@ test('worker mode: two connections join the in-browser server and see each other
     for (let i = 0; i < 20; i++) { a.net.input({ s: ++s, dt: 50, mx: 1, mz: 0, yaw: 0, b: 0 }); await new Promise(r => setTimeout(r, 50)); }
     await new Promise(r => setTimeout(r, 500));
     const seenA = b.m.ents.get(a.net.you);
-    const wolves = [...a.m.ents.values()].filter(e => e.kind === 'monster').length;
-    return { aSeesB: a.m.ents.has(b.net.you), bSeesA: !!seenA, ax: seenA && seenA.x, startX: a.net.joined.you.x, wolves, status: a.net.status, terrain: a.net.joined.room.terrain };
+    return { aSeesB: a.m.ents.has(b.net.you), bSeesA: !!seenA, ax: seenA && seenA.x, startX: a.net.joined.you.x, kind: a.net.joined.room.kind, area: a.net.joined.room.area, status: a.net.status, terrain: a.net.joined.room.terrain };
   });
   expect(errors).toEqual([]);
   expect(r.status).toBe('online');
   expect(r.aSeesB).toBe(true);
   expect(r.bSeesA).toBe(true);
   expect(r.ax - r.startX).toBeGreaterThan(3);
-  expect(r.wolves).toBeGreaterThan(0);
+  expect(r.kind).toBe('town');
+  expect(r.area.r).toBeGreaterThan(20);
   expect(r.terrain).toBe('test');
 });

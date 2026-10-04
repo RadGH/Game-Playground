@@ -83,16 +83,22 @@ test('a guest that comes back rejoins: snapshot, then its seat is released back 
   const pj = t2.join('ABCDE'); room.hub.advance(300); await pj;
   const events = [];
   const g2 = { hashes: new Map() };
-  const ls2 = createLockstep({ onTick: (t, sm) => { if (t % 20 === 0) g2.hashes.set(t, sm.hash()); }, transport: t2, sim: null, restore: room.restore, isHost: false, me: t2.id, hostId: h.transport.id, machines: room.mlist, delay: 6, tickMs: 50, startAt: room.startAt, rejoinToken: 'tok-guest', onEvent: (type, e) => events.push({ type, ...e }) });
-  Object.assign(g2, { name: 'guest2', transport: t2, ls: ls2, events, script: g.script, alive: true });
+  // a reloaded page: its clock starts near 0 (the host's is ~15 s in) and it knows no start time
+  const clock = -room.hub.now + 7;
+  const ls2 = createLockstep({ onTick: (t, sm) => { if (t % 20 === 0) g2.hashes.set(t, sm.hash()); }, transport: t2, sim: null, restore: room.restore, isHost: false, me: t2.id, hostId: h.transport.id, machines: room.mlist, delay: 6, tickMs: 50, startAt: undefined, rejoinToken: 'tok-guest', onEvent: (type, e) => events.push({ type, ...e }) });
+  Object.assign(g2, { name: 'guest2', transport: t2, ls: ls2, events, script: g.script, alive: true, clock });
   room.nodes.push(g2);
   room.hub.runUntil(() => { room.step(); return events.some(e => e.type === 'resync' && e.rejoin); }, 20000, 0);
   const rel = h.events.find(e => e.type === 'rejoin');
   assert.ok(rel, 'host announced the rejoin');
-  room.hub.runUntil(() => { room.step(); return g2.ls.tick >= rel.atTick + 300; }, 60000, 0);
+  room.hub.runUntil(() => { room.step(); return h.ls.tick >= rel.atTick; }, 60000, 0);
+  const sendsAtRelease = h.ls.sim.state.players[2].stats.sends;
+  room.hub.runUntil(() => { room.step(); return g2.ls.tick >= rel.atTick + 300 && h.ls.tick >= rel.atTick + 300; }, 60000, 0);
+  assert.ok(g2.ls.tick >= rel.atTick + 300 && h.ls.tick >= rel.atTick + 300, `both kept ticking (${h.ls.tick} / ${g2.ls.tick})`);
   assert.equal(h.ls.sim.state.players[2].kind, 'human', 'seat released');
   assert.deepEqual(sameHashes(h, g2, rel.atTick), []);
-  assert.ok(g2.ls.sim.state.players[2].stats.sends > h.ls.sim.state.players[2].stats.sends - 1);
+  // the rejoined guest's OWN commands reach the sim (the seat is human now, so nobody else sends for it)
+  assert.ok(h.ls.sim.state.players[2].stats.sends > sendsAtRelease, `guest sends after the rejoin: ${sendsAtRelease} -> ${h.ls.sim.state.players[2].stats.sends}`);
 });
 
 test('three machines in a 3v3 with AI seats stay in step', async () => {

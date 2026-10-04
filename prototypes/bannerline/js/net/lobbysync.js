@@ -248,6 +248,6 @@ export function beginMatch(room, packet, { data, createSim, restoreSim, now, onE
   const startAt = now() + packet.startIn - (room.isHost ? 0 : ping / 2);
   const restore = snap => restoreSim(snap, data);
   const sim = rejoin ? null : createSim(packet.config, data);
-  const lockstep = createLockstep({ transport: transport || room.transport, sim, restore, isHost: room.isHost, me, hostId: packet.hostId, machines: packet.machines, delay: packet.delay, tickMs: packet.tickMs, startAt, onEvent, onTick, dump, rejoinToken: rejoin ? rejoin.machine.token : null });
+  const lockstep = createLockstep({ transport: transport || room.transport, sim, restore, isHost: room.isHost, me, hostId: packet.hostId, machines: packet.machines, delay: packet.delay, tickMs: packet.tickMs, startAt, onEvent, onTick, dump, rttMs: ping, rejoinToken: rejoin ? rejoin.machine.token : null });
   return { sim: lockstep.sim, lockstep, localPlayers: mine ? mine.locals.slice() : [], packet };
 }

@@ -77,10 +77,9 @@ test('host + guest by room code -> match on both -> results -> back to the room'
   await context.close();
 });
 
-// Rejoin after a reload: B's side (token in sessionStorage, title button, rejoin -> snapshot -> view) is
-// built; the lockstep stalls after the resync because of two bugs in js/net/lockstep.js reported to
-// stream D in docs/requests.md (host clock sent across machines; myPlayers not refreshed). Un-fixme then.
-test.fixme('rejoin after a reload puts the guest back in its seat', async ({ browser }) => {
+// Rejoin after a reload: token in sessionStorage, title button, rejoin -> snapshot -> view. The lockstep
+// sends the match's age (not the host's clock) and recomputes the guest's own players on rejoin.
+test('rejoin after a reload puts the guest back in its seat', async ({ browser }) => {
   test.setTimeout(150_000);
   const context = await browser.newContext({ viewport: { width: 1000, height: 700 } });
   const host = await open(context), guest = await open(context);

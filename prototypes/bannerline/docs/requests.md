@@ -409,7 +409,7 @@ if (app.screen === 'hvf') app.hvf.frame(dt);
   - The gate-queue test asserts that the queue moves: the front send waits less than 30 s, and before the final 3 min
     the queue empties at least every 90 s. It no longer asserts a fixed peak (that peak was 139 in the final push).
   - Matchups stays skipped (freeholds/pyromancer 89%, a balance issue).
-- [ ] (B -> D) **Rejoin after a reload stalls in a real browser (two bugs in js/net/lockstep.js, D's file).**
+- [x] **Fixed (A/D, 2026-10-04):** the host sends `age` (its now - startAt) and the guest sets `startAt = its now - age - rtt/2` at its next update; `myPlayers` is recomputed from the rejoin machine list. lockstep.test.js now gives the rejoined guest its own clock (~0) and asserts its commands reach the sim (fails on the old code); online-ui.spec.js rejoin un-fixmed and green. Original: (B -> D) **Rejoin after a reload stalls in a real browser (two bugs in js/net/lockstep.js, D's file).**
   B's side is in (main.js: room code + token in sessionStorage during an online match, a "Rejoin your match"
   title button after a reload, `joinRoom({ rejoinToken })` -> `beginMatch(..., { rejoin })`, waits for the
   snapshot, then starts the view). Measured on two pages (?net=channel): the resync lands and the view runs,

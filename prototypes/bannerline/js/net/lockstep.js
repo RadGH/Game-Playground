@@ -51,7 +51,11 @@ export function createLockstep(o) {
   const machines = o.machines.map((m, i) => ({ ...m, order: i, live: true, fromTick: 1, hidden: false }));
   const machine = id => machines.find(m => m.id === id) || null;
   const mine = machine(me);
-  const myPlayers = new Set(mine ? mine.players : []);
+  // recomputed on a rejoin: the machine comes back under a NEW connection id
+  let myPlayers = new Set(mine ? mine.players : []);
+  // page clocks have different origins (a reloaded page restarts near 0), so times never cross the wire:
+  // the host sends the match's AGE and the guest rebuilds startAt on its own clock at its next update
+  let lastNow = null, rejoinAge = null;
 
   // ── local inputs ──
   let localQueue = [];
@@ -192,7 +196,7 @@ export function createLockstep(o) {
     const list = sysAt.get(m.fromTick) || [];
     for (const p of m.players) list.push({ sys: true, type: 'release', player: p });
     sysAt.set(m.fromTick, list);
-    resync(newId, { rejoin: { fromTick: m.fromTick, oldId: old, startAt: startAt, machines: machines.map(x => ({ id: x.id, name: x.name, players: x.players, token: x.token })) } });
+    resync(newId, { rejoin: { fromTick: m.fromTick, oldId: old, age: lastNow == null ? 0 : lastNow - startAt, machines: machines.map(x => ({ id: x.id, name: x.name, players: x.players, token: x.token })) } });
     const notice = { t: 'notice', kind: 'rejoin', machine: newId, name: m.name, players: m.players, atTick: m.fromTick };
     broadcast(notice);
     onEvent('rejoin', notice);
@@ -238,10 +242,12 @@ export function createLockstep(o) {
         for (const [t, c] of history) if (t > sim.tick && !turns.has(t)) turns.set(t, c);
         history.clear();
         if (msg.rejoin) {
-          startAt = msg.rejoin.startAt;
+          rejoinAge = msg.rejoin.age;   // applied on our own clock at the next update (half the round trip added)
           sendCursor = msg.rejoin.fromTick; unacked.clear();
           machines.length = 0;
           msg.rejoin.machines.forEach((x, i) => machines.push({ ...x, order: i, live: true, fromTick: 1, hidden: false }));
+          const meNow = machines.find(x => x.id === me);
+          myPlayers = new Set(meNow ? meNow.players : []);
         }
         onEvent('resync', { tick: sim.tick, rejoin: !!msg.rejoin });
         break;
@@ -283,6 +289,8 @@ export function createLockstep(o) {
     },
     queue(cmds) { if (Array.isArray(cmds)) for (const c of cmds) localQueue.push(c); },
     update(now) {
+      lastNow = now;
+      if (rejoinAge != null) { startAt = now - rejoinAge - (o.rttMs || 0) / 2; rejoinAge = null; }
       if (closed || ended || !sim) return 0;
       sealInputs(now);
       if (isHost) assemble(); else clientSend(now);

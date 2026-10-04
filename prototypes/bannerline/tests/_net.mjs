@@ -51,7 +51,7 @@ export async function makeRoom({ hubOpts = {}, machines, config, delay = 6, code
     for (const n of nodes) {
       if (!n.alive) continue;
       if (n.ls.sim && Math.floor(hub.now / 50) % 4 === 0) n.ls.queue(n.script(n.ls.sim));
-      n.ls.update(hub.now);
+      n.ls.update(hub.now + (n.clock || 0));   // a node may run its own page clock (a reloaded tab starts near 0)
     }
   }
   return { hub, nodes, step, restore, mlist, startAt, ts };

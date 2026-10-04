@@ -146,8 +146,22 @@ function useLine(u) {
 
 function tierOf(price) { return price < 300 ? 1 : price < 800 ? 2 : price < 2000 ? 3 : 4; }
 
+// FEEL PASS (stream A, 2026-10-03): items have to swing fights. Measured (tools/feel-report.mjs + a paid
+// purchase test): at the hand-written numbers ~1,700 g of gear bought on a schedule won 50% of Veteran
+// mirrors — a coin flip, because a level-12 hero already hits for ~120/s and +20 damage is a rounding
+// error. The hero's power stats are scaled up and every equipment price cut by a fifth, which took the
+// same paid schedule to ~67-77%. Percent stats grow less (they hit caps), and economy / movement /
+// cooldown stats not at all. The rows below stay at their original hand-written values; the scale is
+// applied here so a later tuning pass changes three numbers, not ninety.
+const STAT_SCALE = { damage: 2.5, maxHp: 2.5, armor: 2.5, hpRegen: 2.5, spellPower: 2.5, mana: 2.5, manaRegen: 2.5,
+  attackSpeed: 1.5, critChance: 1.5, critDamage: 1.5, lifeSteal: 1.5, magicResist: 1.5 };
+const PRICE_SCALE = 0.8;   // equipment only; consumables keep their price
+const scaleStat = (k, v) => { const m = STAT_SCALE[k] || 1; return m === 1 ? v : (Math.abs(v) < 5 ? Math.round(v * m * 10) / 10 : Math.round(v * m)); };
+
 const items = {};
-for (const [id, name, cat, price, stats, icon, flavour, extra = {}] of ITEMS) {
+for (const [id, name, cat, price0, stats0, icon, flavour, extra = {}] of ITEMS) {
+  const stats = extra.use ? stats0 : Object.fromEntries(Object.entries(stats0).map(([k, v]) => [k, scaleStat(k, v)]));
+  const price = extra.use ? price0 : Math.round(price0 * PRICE_SCALE / 5) * 5;
   if (items[id]) fail(`duplicate item "${id}"`);
   if (!CATEGORIES.find(c => c.id === cat)) fail(`unknown category "${cat}" on ${id}`);
   const lines = Object.entries(stats).map(([k, v]) => statLine(k, v));

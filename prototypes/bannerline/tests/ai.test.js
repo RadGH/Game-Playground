@@ -470,14 +470,16 @@ test('decisions bar: the Commander\'s DECISIONS with the Veteran\'s hero play an
   assert.ok(r.w >= 22, `decisions only: ${r.w}-${r.l}`);
 });
 
-test('a new player beats the Recruit: a scripted beginner (spends most of its gold on the two cheapest rows every Pay, stands mid-field, presses Q) wins >= 10 of 12', () => {
+// The beginner sends from the first three rows: since the Keep guard (js/sim/keep.js) melts swarms of
+// tier-1 bodies, a beginner who only ever pressed the first two rows is not a fair model of a new player.
+test('a new player beats the Recruit: a scripted beginner (spends most of its gold on the three cheapest rows every Pay, stands mid-field, presses Q) wins >= 10 of 12', () => {
   let wins = 0;
   for (let i = 0; i < 12; i++) {
     const race = RACES[i % 4], heroId = HEROES[(i >> 2) % 5];
     const s = createSim({ seed: 900 + i, mode: '1v1', map: 'vale', players: [
       { team: 0, kind: 'human', race, hero: heroId }, { team: 1, kind: 'ai', ai: { difficulty: 'recruit' }, race, hero: heroId }] }, data, { events: false });
     const p = s.state.players[0], f = s.map.fields[0];
-    const cheap = data.races.races[race].units.map(u => data.derived.units[u]).filter(u => u.tier <= 2);
+    const cheap = data.races.races[race].units.map(u => data.derived.units[u]).filter(u => u.tier <= 3);
     while (!s.over && s.tick < 30 * 1200) {
       const c = [];
       if (s.tick % 200 === 5) { let g = p.gold * 0.7, k = Math.floor(s.tick / 200); while (g >= 12) { const ok = cheap.filter(u => u.cost <= g); if (!ok.length) break; const u = ok[k++ % ok.length]; c.push({ p: 0, type: 'send', unit: u.id }); g -= u.cost; } }

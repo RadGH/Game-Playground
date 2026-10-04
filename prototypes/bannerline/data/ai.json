@@ -1,5 +1,5 @@
 {
- "_doc": "AI difficulty settings (PLAN \u00a78, stream E). The three levels differ in DECISIONS, never in stats: every AI plays by the same rules and the same commands as a human (js/sim/ai/**). reaction = ticks between decisions (20 = 1 s). sends.style: spam (Recruit: once a Pay, random share `greed` [min,max] of the purse, mostly cheap units, `noise` on every pick, never reads the defence) | balanced (Veteran: once a Pay, fixed share, half income / half pressure, reads the rival hero's damage type and armour class on a `counter` chance) | adaptive (Commander: every think; reads every defender's damage mix, armour, magic resist, kit, turrets and pets; invests in income while it can pay back; saves for the cheapest wave that should leak; dumps the purse when the defence is down, a teammate pushes, near the Rising Tide or when behind; greed slides from greed[1] early to greed[0] by minute 10). sends.toast = seconds between counter-send notices (0 = none). hero.tier 0/1/2 = hero play (positioning, targeting, kiting, retreat, skill aim; js/sim/ai/hero.js + skills.js); hero.retreatAt = health share at which it walks home when it has no draught; hero.potionAt = health share at which it drinks; hero.skillChance = chance a ready skill is considered each think. shop.style: impulse (Recruit) | value (Veteran) | build (Commander, BUILDS in js/sim/ai/shop.js); shop.trips = walks to the Outfitter between waves when its fund buys something. town.upgrades: none | cheapest | planned (Drill Yard). town.powers: none | basic | full (Sanctum). team: 0 ignores teammates, 1 helps a lane that leaks far worse, 2 also pushes with teammates and mixes armour with them.",
+ "_doc": "AI difficulty settings (PLAN §8, stream E). The three levels differ in DECISIONS, never in stats: every AI plays by the same rules and the same commands as a human (js/sim/ai/**). reaction = ticks between decisions (20 = 1 s). sends.style: spam (Recruit: once a Pay, random share `greed` [min,max] of the purse, mostly cheap units, `noise` on every pick, never reads the defence) | balanced (Veteran: once a Pay, fixed share, half income / half pressure, reads the rival hero's damage type and armour class on a `counter` chance) | adaptive (Commander: every think; reads every defender's damage mix, armour, magic resist, kit, turrets and pets; invests in income while it can pay back; saves for the cheapest wave that should leak; dumps the purse when the defence is down, a teammate pushes, near the Rising Tide or when behind; greed slides from greed[1] early to greed[0] by minute 10). sends.toast = seconds between counter-send notices (0 = none). hero.tier 0/1/2 = hero play (positioning, targeting, kiting, retreat, skill aim; js/sim/ai/hero.js + skills.js); hero.retreatAt = health share at which it walks home when it has no draught; hero.potionAt = health share at which it drinks; hero.skillChance = chance a ready skill is considered each think. shop.style: impulse (Recruit) | value (Veteran) | build (Commander, BUILDS in js/sim/ai/shop.js); shop.trips = walks to the Outfitter between waves when its fund buys something. town.upgrades: none | cheapest | planned (Drill Yard). town.powers: none | basic | full (Sanctum). team: 0 ignores teammates, 1 helps a lane that leaks far worse, 2 also pushes with teammates and mixes armour with them.",
  "order": [
   "recruit",
   "veteran",
@@ -43,8 +43,8 @@
    "sends": {
     "style": "balanced",
     "greed": [
-     0.9,
-     0.9
+     0.8,
+     0.8
     ],
     "noise": 0.2,
     "counter": 0.5,

@@ -28,8 +28,8 @@
     "guard": {
      "range": 22,
      "every": 1,
-     "damage": 60,
-     "damagePerMinute": 14,
+     "damage": 30,
+     "damagePerMinute": 6,
      "splash": 3.5,
      "dmgType": "pierce"
     }

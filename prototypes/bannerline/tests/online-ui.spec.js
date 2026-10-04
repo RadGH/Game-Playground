@@ -4,7 +4,9 @@
 // host's "Back to the lobby" brings both machines back to the room with their seats kept.
 import { test, expect } from '@playwright/test';
 
-const URL = 'prototypes/bannerline/?net=channel&speed=2&seed=21';
+// Capsule bodies + the plain vale: two WebGL pages with the full art are too slow for headless
+// software rendering, and this test is about the network UI, not the art.
+const URL = 'prototypes/bannerline/?net=channel&speed=2&seed=21&bodies=capsule&world=plain';
 
 async function open(context) {
   const page = await context.newPage();

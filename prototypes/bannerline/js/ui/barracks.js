@@ -85,7 +85,7 @@ export function createBarracks({ root, sim, Q, player, seat, isPad = false, icon
     e.preventDefault();
     focusUnit = c.dataset.unit; base.nav.focus(c);
     hire(focusUnit);
-    hold = { unit: focusUnit, t: 0, next: REPEAT_DELAY, src: 'mouse' };
+    hold = { unit: focusUnit, at: performance.now(), next: REPEAT_DELAY, src: 'mouse' };
   });
   const stopHold = () => { if (hold?.src === 'mouse') hold = null; };
   window.addEventListener('pointerup', stopHold);
@@ -119,9 +119,11 @@ export function createBarracks({ root, sim, Q, player, seat, isPad = false, icon
     }
     const fu = (base.nav.current && base.nav.current.dataset.unit) || focusUnit;
     if (fu) { focusUnit = fu; drawDetail(ro.find((r) => r.unit === fu)); }
+    // Repeat-buy on the wall clock: a slow frame rate must not slow the hiring (frame dt is capped).
     if (hold && dt > 0) {
-      hold.t += dt;
-      while (hold && hold.t >= hold.next) { hold.next += REPEAT_EVERY; hire(hold.unit); }
+      const t = (performance.now() - hold.at) / 1000;
+      let n = 0;
+      while (hold && t >= hold.next && n++ < 6) { hold.next += REPEAT_EVERY; hire(hold.unit); }
     }
   }
 
@@ -162,13 +164,13 @@ export function createBarracks({ root, sim, Q, player, seat, isPad = false, icon
       const pressed = new Set(f.pressed); pressed.delete('confirm');
       base.nav.handle({ pressed });
       if (base.nav.current) focusUnit = base.nav.current.dataset.unit;
-      if (confirm && focusUnit) { hire(focusUnit); hold = { unit: focusUnit, t: 0, next: REPEAT_DELAY, src: 'nav' }; }
+      if (confirm && focusUnit) { hire(focusUnit); hold = { unit: focusUnit, at: performance.now(), next: REPEAT_DELAY, src: 'nav' }; }
       if (hold?.src === 'nav' && !f.held.has('confirm')) hold = null;
       // Grid letter keys (keyboard only): press = hire, hold = keep hiring.
       if (f.device === 'kbm') {
         for (const code of f.rawPressed || []) {
           const i = GRID_KEYS.indexOf(code);
-          if (i >= 0 && order[i]) { focusUnit = order[i]; base.nav.focus(cards.get(order[i])); hire(order[i]); hold = { unit: order[i], t: 0, next: REPEAT_DELAY, src: 'key', code }; }
+          if (i >= 0 && order[i]) { focusUnit = order[i]; base.nav.focus(cards.get(order[i])); hire(order[i]); hold = { unit: order[i], at: performance.now(), next: REPEAT_DELAY, src: 'key', code }; }
         }
         if (hold?.src === 'key' && !base.heldKey?.(hold.code)) hold = null;
       }

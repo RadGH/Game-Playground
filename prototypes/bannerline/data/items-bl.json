@@ -140,14 +140,14 @@
    "name": "Training Sword",
    "category": "weapons",
    "tier": 1,
-   "price": 90,
+   "price": 70,
    "icon": "sword",
    "desc": "A blunt practice blade. Better than bare hands.",
    "stats": {
-    "damage": 6
+    "damage": 15
    },
    "statLines": [
-    "+6 damage"
+    "+15 damage"
    ]
   },
   "hand_axe": {
@@ -155,16 +155,16 @@
    "name": "Hand Axe",
    "category": "weapons",
    "tier": 1,
-   "price": 140,
+   "price": 110,
    "icon": "axe",
    "desc": "Light, cheap and mean.",
    "stats": {
-    "damage": 8,
-    "critChance": 3
+    "damage": 20,
+    "critChance": 4.5
    },
    "statLines": [
-    "+8 damage",
-    "+3% critical chance"
+    "+20 damage",
+    "+4.5% critical chance"
    ]
   },
   "light_spear": {
@@ -172,14 +172,14 @@
    "name": "Light Spear",
    "category": "weapons",
    "tier": 1,
-   "price": 150,
+   "price": 120,
    "icon": "spear",
    "desc": "Quick thrusts, quick recovery.",
    "stats": {
-    "attackSpeed": 12
+    "attackSpeed": 18
    },
    "statLines": [
-    "+12% attack speed"
+    "+18% attack speed"
    ]
   },
   "hunting_bow": {
@@ -187,31 +187,31 @@
    "name": "Hunting Bow",
    "category": "weapons",
    "tier": 1,
-   "price": 200,
+   "price": 160,
    "icon": "bow",
    "desc": "Strung for game, works on raiders too.",
    "stats": {
-    "damage": 6,
-    "attackSpeed": 10
+    "damage": 15,
+    "attackSpeed": 15
    },
    "statLines": [
-    "+6 damage",
-    "+10% attack speed"
+    "+15 damage",
+    "+15% attack speed"
    ]
   },
   "iron_mace": {
    "id": "iron_mace",
    "name": "Iron Mace",
    "category": "weapons",
-   "tier": 2,
-   "price": 320,
+   "tier": 1,
+   "price": 255,
    "icon": "mace",
    "desc": "A solid head on a solid haft.",
    "stats": {
-    "damage": 16
+    "damage": 40
    },
    "statLines": [
-    "+16 damage"
+    "+40 damage"
    ]
   },
   "longsword": {
@@ -219,16 +219,16 @@
    "name": "Longsword",
    "category": "weapons",
    "tier": 2,
-   "price": 450,
+   "price": 360,
    "icon": "longsword",
    "desc": "A soldier's blade with reach.",
    "stats": {
-    "damage": 20,
-    "critChance": 4
+    "damage": 50,
+    "critChance": 6
    },
    "statLines": [
-    "+20 damage",
-    "+4% critical chance"
+    "+50 damage",
+    "+6% critical chance"
    ]
   },
   "war_spear": {
@@ -236,48 +236,48 @@
    "name": "War Spear",
    "category": "weapons",
    "tier": 2,
-   "price": 520,
+   "price": 415,
    "icon": "spear",
    "desc": "Balanced for a fast, steady rhythm.",
    "stats": {
-    "damage": 14,
-    "attackSpeed": 18
+    "damage": 35,
+    "attackSpeed": 27
    },
    "statLines": [
-    "+14 damage",
-    "+18% attack speed"
+    "+35 damage",
+    "+27% attack speed"
    ]
   },
   "warhammer": {
    "id": "warhammer",
    "name": "Warhammer",
    "category": "weapons",
-   "tier": 3,
-   "price": 850,
+   "tier": 2,
+   "price": 680,
    "icon": "warhammer",
    "desc": "Each blow lands like a falling gate.",
    "stats": {
-    "damage": 34
+    "damage": 85
    },
    "statLines": [
-    "+34 damage"
+    "+85 damage"
    ]
   },
   "bloodletter": {
    "id": "bloodletter",
    "name": "Bloodletter",
    "category": "weapons",
-   "tier": 3,
-   "price": 950,
+   "tier": 2,
+   "price": 760,
    "icon": "sword",
    "desc": "Every cut feeds the hand that holds it.",
    "stats": {
-    "damage": 22,
-    "lifeSteal": 12
+    "damage": 55,
+    "lifeSteal": 18
    },
    "statLines": [
-    "+22 damage",
-    "+12% life steal"
+    "+55 damage",
+    "+18% life steal"
    ]
   },
   "windstring_bow": {
@@ -285,16 +285,16 @@
    "name": "Windstring Bow",
    "category": "weapons",
    "tier": 3,
-   "price": 1100,
+   "price": 880,
    "icon": "bow",
    "desc": "Looses before the last arrow lands.",
    "stats": {
-    "damage": 15,
-    "attackSpeed": 35
+    "damage": 38,
+    "attackSpeed": 53
    },
    "statLines": [
-    "+15 damage",
-    "+35% attack speed"
+    "+38 damage",
+    "+53% attack speed"
    ]
   },
   "reavers_greataxe": {
@@ -302,18 +302,18 @@
    "name": "Reaver's Greataxe",
    "category": "weapons",
    "tier": 3,
-   "price": 1250,
+   "price": 1000,
    "icon": "greataxe",
    "desc": "Built to end fights in one swing.",
    "stats": {
-    "damage": 40,
-    "critChance": 10,
-    "critDamage": 25
+    "damage": 100,
+    "critChance": 15,
+    "critDamage": 38
    },
    "statLines": [
-    "+40 damage",
-    "+10% critical chance",
-    "+25% critical damage"
+    "+100 damage",
+    "+15% critical chance",
+    "+38% critical damage"
    ]
   },
   "kingsbane": {
@@ -321,20 +321,20 @@
    "name": "Kingsbane",
    "category": "weapons",
    "tier": 4,
-   "price": 2600,
+   "price": 2080,
    "icon": "greatsword",
    "desc": "Only one blade like it was ever forged.",
    "stats": {
-    "damage": 75,
-    "critChance": 15,
-    "critDamage": 50,
-    "lifeSteal": 8
+    "damage": 188,
+    "critChance": 23,
+    "critDamage": 75,
+    "lifeSteal": 12
    },
    "statLines": [
-    "+75 damage",
-    "+15% critical chance",
-    "+50% critical damage",
-    "+8% life steal",
+    "+188 damage",
+    "+23% critical chance",
+    "+75% critical damage",
+    "+12% life steal",
     "Unique: you can carry only one"
    ],
    "uniqueEquipped": true
@@ -344,16 +344,16 @@
    "name": "Leather Cap",
    "category": "armour",
    "tier": 1,
-   "price": 80,
+   "price": 65,
    "icon": "leather_cap",
    "desc": "Keeps the worst knocks off.",
    "stats": {
-    "armor": 2,
-    "maxHp": 40
+    "armor": 5,
+    "maxHp": 100
    },
    "statLines": [
-    "+2 armour",
-    "+40 health"
+    "+5 armour",
+    "+100 health"
    ]
   },
   "travellers_boots": {
@@ -361,7 +361,7 @@
    "name": "Traveller's Boots",
    "category": "armour",
    "tier": 1,
-   "price": 120,
+   "price": 95,
    "icon": "boots",
    "desc": "Worn soft by many roads.",
    "stats": {
@@ -376,14 +376,14 @@
    "name": "Leather Armour",
    "category": "armour",
    "tier": 1,
-   "price": 160,
+   "price": 130,
    "icon": "leather_armour",
    "desc": "Boiled hide, stitched tight.",
    "stats": {
-    "armor": 4
+    "armor": 10
    },
    "statLines": [
-    "+4 armour"
+    "+10 armour"
    ]
   },
   "iron_bracers": {
@@ -391,16 +391,16 @@
    "name": "Iron Bracers",
    "category": "armour",
    "tier": 1,
-   "price": 180,
+   "price": 145,
    "icon": "bracers",
    "desc": "Guards the wrists, frees the swing.",
    "stats": {
-    "armor": 2,
-    "attackSpeed": 6
+    "armor": 5,
+    "attackSpeed": 9
    },
    "statLines": [
-    "+2 armour",
-    "+6% attack speed"
+    "+5 armour",
+    "+9% attack speed"
    ]
   },
   "plate_helm": {
@@ -408,16 +408,16 @@
    "name": "Plate Helm",
    "category": "armour",
    "tier": 2,
-   "price": 380,
+   "price": 305,
    "icon": "plate_helm",
    "desc": "Heavy, hot and worth it.",
    "stats": {
-    "armor": 5,
-    "maxHp": 150
+    "armor": 13,
+    "maxHp": 375
    },
    "statLines": [
-    "+5 armour",
-    "+150 health"
+    "+13 armour",
+    "+375 health"
    ]
   },
   "chainmail": {
@@ -425,16 +425,16 @@
    "name": "Chainmail",
    "category": "armour",
    "tier": 2,
-   "price": 420,
+   "price": 335,
    "icon": "chainmail",
    "desc": "Rings of iron that turn a blade.",
    "stats": {
-    "armor": 8,
-    "maxHp": 120
+    "armor": 20,
+    "maxHp": 300
    },
    "statLines": [
-    "+8 armour",
-    "+120 health"
+    "+20 armour",
+    "+300 health"
    ]
   },
   "heater_shield": {
@@ -442,16 +442,16 @@
    "name": "Heater Shield",
    "category": "armour",
    "tier": 2,
-   "price": 500,
+   "price": 400,
    "icon": "heater_shield",
    "desc": "A plain shield, painted and proven.",
    "stats": {
-    "armor": 9,
-    "magicResist": 10
+    "armor": 23,
+    "magicResist": 15
    },
    "statLines": [
-    "+9 armour",
-    "+10% magic resist"
+    "+23 armour",
+    "+15% magic resist"
    ]
   },
   "fleetfoot_boots": {
@@ -459,16 +459,16 @@
    "name": "Fleetfoot Boots",
    "category": "armour",
    "tier": 2,
-   "price": 550,
+   "price": 440,
    "icon": "boots",
    "desc": "Light enough to run all day.",
    "stats": {
     "moveSpeed": 18,
-    "hpRegen": 2
+    "hpRegen": 5
    },
    "statLines": [
     "+18% move speed",
-    "+2 health regen per second"
+    "+5 health regen per second"
    ]
   },
   "warded_robe": {
@@ -476,16 +476,16 @@
    "name": "Warded Robe",
    "category": "armour",
    "tier": 2,
-   "price": 700,
+   "price": 560,
    "icon": "robe",
    "desc": "Stitched with signs that drink flame.",
    "stats": {
-    "magicResist": 25,
-    "mana": 80
+    "magicResist": 38,
+    "mana": 200
    },
    "statLines": [
-    "+25% magic resist",
-    "+80 mana"
+    "+38% magic resist",
+    "+200 mana"
    ]
   },
   "plate_harness": {
@@ -493,16 +493,16 @@
    "name": "Plate Harness",
    "category": "armour",
    "tier": 3,
-   "price": 1000,
+   "price": 800,
    "icon": "plate_armour",
    "desc": "A wall you can wear.",
    "stats": {
-    "armor": 15,
-    "maxHp": 250
+    "armor": 38,
+    "maxHp": 625
    },
    "statLines": [
-    "+15 armour",
-    "+250 health"
+    "+38 armour",
+    "+625 health"
    ]
   },
   "tower_shield": {
@@ -510,18 +510,18 @@
    "name": "Tower Shield",
    "category": "armour",
    "tier": 3,
-   "price": 1400,
+   "price": 1120,
    "icon": "tower_shield",
    "desc": "Hide behind it and let them tire.",
    "stats": {
-    "armor": 18,
-    "maxHp": 300,
-    "magicResist": 10
+    "armor": 45,
+    "maxHp": 750,
+    "magicResist": 15
    },
    "statLines": [
-    "+18 armour",
-    "+300 health",
-    "+10% magic resist"
+    "+45 armour",
+    "+750 health",
+    "+15% magic resist"
    ]
   },
   "bannerguard_aegis": {
@@ -529,20 +529,20 @@
    "name": "Bannerguard Aegis",
    "category": "armour",
    "tier": 4,
-   "price": 2800,
+   "price": 2240,
    "icon": "kite_shield",
    "desc": "Carried by the last guard of the last banner.",
    "stats": {
-    "armor": 25,
-    "maxHp": 600,
-    "magicResist": 20,
-    "hpRegen": 6
+    "armor": 63,
+    "maxHp": 1500,
+    "magicResist": 30,
+    "hpRegen": 15
    },
    "statLines": [
-    "+25 armour",
-    "+600 health",
-    "+20% magic resist",
-    "+6 health regen per second",
+    "+63 armour",
+    "+1500 health",
+    "+30% magic resist",
+    "+15 health regen per second",
     "Unique: you can carry only one"
    ],
    "uniqueEquipped": true
@@ -552,14 +552,14 @@
    "name": "Copper Ring",
    "category": "trinkets",
    "tier": 1,
-   "price": 100,
+   "price": 80,
    "icon": "ring",
    "desc": "A plain band that steadies the heart.",
    "stats": {
-    "maxHp": 80
+    "maxHp": 200
    },
    "statLines": [
-    "+80 health"
+    "+200 health"
    ]
   },
   "sapphire_ring": {
@@ -567,16 +567,16 @@
    "name": "Sapphire Ring",
    "category": "trinkets",
    "tier": 1,
-   "price": 220,
+   "price": 175,
    "icon": "ring",
    "desc": "Cool to the touch, always.",
    "stats": {
-    "mana": 60,
-    "manaRegen": 0.6
+    "mana": 150,
+    "manaRegen": 1.5
    },
    "statLines": [
-    "+60 mana",
-    "+0.6 mana regen per second"
+    "+150 mana",
+    "+1.5 mana regen per second"
    ]
   },
   "apprentice_wand": {
@@ -584,16 +584,16 @@
    "name": "Apprentice Wand",
    "category": "trinkets",
    "tier": 1,
-   "price": 240,
+   "price": 190,
    "icon": "wand",
    "desc": "Every caster starts somewhere.",
    "stats": {
-    "spellPower": 10,
-    "mana": 40
+    "spellPower": 25,
+    "mana": 100
    },
    "statLines": [
-    "+10% spell power",
-    "+40 mana"
+    "+25% spell power",
+    "+100 mana"
    ]
   },
   "ring_of_vigour": {
@@ -601,16 +601,16 @@
    "name": "Ring of Vigour",
    "category": "trinkets",
    "tier": 1,
-   "price": 260,
+   "price": 210,
    "icon": "ring",
    "desc": "Warm as a hearth stone.",
    "stats": {
-    "maxHp": 180,
-    "hpRegen": 1.5
+    "maxHp": 450,
+    "hpRegen": 3.8
    },
    "statLines": [
-    "+180 health",
-    "+1.5 health regen per second"
+    "+450 health",
+    "+3.8 health regen per second"
    ]
   },
   "sages_amulet": {
@@ -618,15 +618,15 @@
    "name": "Sage's Amulet",
    "category": "trinkets",
    "tier": 2,
-   "price": 450,
+   "price": 360,
    "icon": "amulet",
    "desc": "Quickens thought between spells.",
    "stats": {
-    "spellPower": 12,
+    "spellPower": 30,
     "cdr": 5
    },
    "statLines": [
-    "+12% spell power",
+    "+30% spell power",
     "+5% cooldown reduction"
    ]
   },
@@ -635,14 +635,14 @@
    "name": "Tome of Kindling",
    "category": "trinkets",
    "tier": 2,
-   "price": 600,
+   "price": 480,
    "icon": "tome",
    "desc": "Its pages are always slightly warm.",
    "stats": {
-    "spellPower": 20
+    "spellPower": 50
    },
    "statLines": [
-    "+20% spell power"
+    "+50% spell power"
    ]
   },
   "shadow_hood": {
@@ -650,15 +650,15 @@
    "name": "Shadow Hood",
    "category": "trinkets",
    "tier": 2,
-   "price": 650,
+   "price": 520,
    "icon": "hood",
    "desc": "Strike from where they are not looking.",
    "stats": {
-    "critChance": 8,
+    "critChance": 12,
     "moveSpeed": 6
    },
    "statLines": [
-    "+8% critical chance",
+    "+12% critical chance",
     "+6% move speed"
    ]
   },
@@ -666,19 +666,19 @@
    "id": "starweave_hat",
    "name": "Starweave Hat",
    "category": "trinkets",
-   "tier": 3,
-   "price": 900,
+   "tier": 2,
+   "price": 720,
    "icon": "wizard_hat",
    "desc": "Spun from thread that remembers the night sky.",
    "stats": {
-    "spellPower": 18,
-    "mana": 120,
-    "manaRegen": 1.5
+    "spellPower": 45,
+    "mana": 300,
+    "manaRegen": 3.8
    },
    "statLines": [
-    "+18% spell power",
-    "+120 mana",
-    "+1.5 mana regen per second"
+    "+45% spell power",
+    "+300 mana",
+    "+3.8 mana regen per second"
    ]
   },
   "grove_staff": {
@@ -686,18 +686,18 @@
    "name": "Grove Staff",
    "category": "trinkets",
    "tier": 3,
-   "price": 1100,
+   "price": 880,
    "icon": "druid_staff",
    "desc": "Still grows a leaf each spring.",
    "stats": {
-    "spellPower": 22,
-    "hpRegen": 4,
-    "manaRegen": 2
+    "spellPower": 55,
+    "hpRegen": 10,
+    "manaRegen": 5
    },
    "statLines": [
-    "+22% spell power",
-    "+4 health regen per second",
-    "+2 mana regen per second"
+    "+55% spell power",
+    "+10 health regen per second",
+    "+5 mana regen per second"
    ]
   },
   "archmage_staff": {
@@ -705,16 +705,16 @@
    "name": "Archmage Staff",
    "category": "trinkets",
    "tier": 3,
-   "price": 1500,
+   "price": 1200,
    "icon": "staff",
    "desc": "Heavy with old, patient power.",
    "stats": {
-    "spellPower": 40,
-    "mana": 150
+    "spellPower": 100,
+    "mana": 375
    },
    "statLines": [
-    "+40% spell power",
-    "+150 mana"
+    "+100% spell power",
+    "+375 mana"
    ]
   },
   "sigil_of_the_long_night": {
@@ -722,18 +722,18 @@
    "name": "Sigil of the Long Night",
    "category": "trinkets",
    "tier": 4,
-   "price": 3000,
+   "price": 2400,
    "icon": "amulet",
    "desc": "Spells come back before the echo fades.",
    "stats": {
-    "spellPower": 60,
+    "spellPower": 150,
     "cdr": 20,
-    "mana": 250
+    "mana": 625
    },
    "statLines": [
-    "+60% spell power",
+    "+150% spell power",
     "+20% cooldown reduction",
-    "+250 mana",
+    "+625 mana",
     "Unique: you can carry only one"
    ],
    "uniqueEquipped": true
@@ -743,14 +743,14 @@
    "name": "Spring Charm",
    "category": "charms",
    "tier": 1,
-   "price": 200,
+   "price": 160,
    "icon": "amulet",
    "desc": "A drop of clear water in glass.",
    "stats": {
-    "hpRegen": 3
+    "hpRegen": 7.5
    },
    "statLines": [
-    "+3 health regen per second"
+    "+7.5 health regen per second"
    ]
   },
   "moonstone": {
@@ -758,14 +758,14 @@
    "name": "Moonstone",
    "category": "charms",
    "tier": 1,
-   "price": 220,
+   "price": 175,
    "icon": "ring",
    "desc": "Glows faintly when you are tired.",
    "stats": {
-    "manaRegen": 1.2
+    "manaRegen": 3
    },
    "statLines": [
-    "+1.2 mana regen per second"
+    "+3 mana regen per second"
    ]
   },
   "hawk_feather": {
@@ -773,22 +773,22 @@
    "name": "Hawk Feather",
    "category": "charms",
    "tier": 1,
-   "price": 250,
+   "price": 200,
    "icon": "amulet",
    "desc": "Find the gap and strike it.",
    "stats": {
-    "critChance": 6
+    "critChance": 9
    },
    "statLines": [
-    "+6% critical chance"
+    "+9% critical chance"
    ]
   },
   "gold_tooth": {
    "id": "gold_tooth",
    "name": "Gold Tooth",
    "category": "charms",
-   "tier": 2,
-   "price": 300,
+   "tier": 1,
+   "price": 240,
    "icon": "ring",
    "desc": "Somebody's lucky tooth. Now yours.",
    "stats": {
@@ -803,14 +803,14 @@
    "name": "Blood Charm",
    "category": "charms",
    "tier": 2,
-   "price": 380,
+   "price": 305,
    "icon": "amulet",
    "desc": "A red bead that beats like a heart.",
    "stats": {
-    "lifeSteal": 8
+    "lifeSteal": 12
    },
    "statLines": [
-    "+8% life steal"
+    "+12% life steal"
    ]
   },
   "quicksilver_charm": {
@@ -818,15 +818,15 @@
    "name": "Quicksilver Charm",
    "category": "charms",
    "tier": 2,
-   "price": 400,
+   "price": 320,
    "icon": "ring",
    "desc": "Never sits still.",
    "stats": {
-    "attackSpeed": 12,
+    "attackSpeed": 18,
     "moveSpeed": 5
    },
    "statLines": [
-    "+12% attack speed",
+    "+18% attack speed",
     "+5% move speed"
    ]
   },
@@ -835,35 +835,35 @@
    "name": "Banner Charm",
    "category": "charms",
    "tier": 2,
-   "price": 700,
+   "price": 560,
    "icon": "amulet",
    "desc": "A scrap of an old standard, sewn into a token.",
    "stats": {
-    "damage": 10,
-    "armor": 4,
-    "maxHp": 100
+    "damage": 25,
+    "armor": 10,
+    "maxHp": 250
    },
    "statLines": [
-    "+10 damage",
-    "+4 armour",
-    "+100 health"
+    "+25 damage",
+    "+10 armour",
+    "+250 health"
    ]
   },
   "heart_of_the_mountain": {
    "id": "heart_of_the_mountain",
    "name": "Heart of the Mountain",
    "category": "charms",
-   "tier": 4,
-   "price": 2400,
+   "tier": 3,
+   "price": 1920,
    "icon": "amulet",
    "desc": "A stone that refuses to break, and so do you.",
    "stats": {
-    "maxHp": 900,
-    "hpRegen": 10
+    "maxHp": 2250,
+    "hpRegen": 25
    },
    "statLines": [
-    "+900 health",
-    "+10 health regen per second",
+    "+2250 health",
+    "+25 health regen per second",
     "Unique: you can carry only one"
    ],
    "uniqueEquipped": true

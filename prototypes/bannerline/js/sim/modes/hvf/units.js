@@ -13,6 +13,13 @@ import { placeBuilding } from './farm.js';
 import { liveEnt, entById, secToTicks, FARMERS, HUNTERS } from './state.js';
 import { gear, gainXp, hunterDamage } from './hunter.js';
 import { ringBell } from './animals.js';
+import { canSee } from './vision.js';
+
+// a chase re-plan may search this many cells (an unreachable target must not walk the whole map every
+// half second: 9v3 ticks spiked 20-60 ms before the cap); a failed plan waits CHASE_RETRY ticks
+export const CHASE_NODES = 4000, CHASE_RETRY = 20, CHASE_GIVEUP = 3;
+// a target out of sight this long is lost: the hunter walks to where he last saw it and stops
+export const LOSE_SIGHT = 20;
 import { faceOf } from '../../mathx.js';
 
 const whoOf = e => (e.kind === 'hunter' || e.kind === 'army' ? 'hunter' : 'farmer');
@@ -20,9 +27,9 @@ const whoOf = e => (e.kind === 'hunter' || e.kind === 'army' ? 'hunter' : 'farme
 export function released(state) { return state.tick >= state.hvf.releaseTick; }
 
 /** Path an entity toward cell `goal` (near: stop next to it). Returns false when there is no way. */
-export function routeTo(ctx, e, goal, near = false, closest = false) {
+export function routeTo(ctx, e, goal, near = false, closest = false, maxNodes = undefined) {
   const g = liveGrid(ctx);
-  const path = findPath(ctx, g, cellOf(ctx.map, e.x, e.z), goal, { who: whoOf(e), near, closest });
+  const path = findPath(ctx, g, cellOf(ctx.map, e.x, e.z), goal, { who: whoOf(e), near, closest, maxNodes });
   if (!path) return false;
   e.ord.path = path; e.ord.i = 0;
   return true;
@@ -106,6 +113,9 @@ export function hurt(ctx, src, dst, amount) {
     ctx.emit('despawn', { id: dst.id, why: 'killed' });
   } else if (dst.kind === 'building') {
     dst.alive = false; dst._gone = true;
+    // the next copy's price counts the copies you OWN: a destroyed coop makes the next one cheaper again
+    const owner = state.players[dst.owner];
+    if (owner && owner.copies && owner.copies[dst.type] > 0) owner.copies[dst.type]--;
     if (dst.cells) buildingsChanged(ctx);
     if (dst.team === FARMERS) { pay(Math.round((dst.paid || 0) * U.bounty.buildingShare)); xp('building'); }
     ctx.emit('lost', { id: dst.id, kind: dst.type, owner: dst.owner, x: dst.x, z: dst.z });
@@ -212,9 +222,23 @@ export function unitTick(ctx) {
       case 'attack': {
         const t = liveEnt(state, o.target);
         if (!t) { e.ord = { k: 'idle' }; break; }
+        // the fog: an order does not see through trees. Out of sight, the hunter keeps on toward where
+        // he last saw the target for LOSE_SIGHT ticks, then walks to that spot and stops there.
+        const seen = canSee(ctx, e.team, t);
+        if (seen) { o.lastX = t.x; o.lastZ = t.z; o.lostAt = -1; }
+        else {
+          if (o.lastX == null) { o.lastX = t.x; o.lastZ = t.z; }
+          if (o.lostAt == null || o.lostAt < 0) o.lostAt = state.tick;
+          if (state.tick - o.lostAt > LOSE_SIGHT) {
+            const gx = o.lastX, gz = o.lastZ;
+            e.ord = { k: 'move' };
+            if (!routeTo(ctx, e, cellOf(map, gx, gz), true, true, CHASE_NODES)) e.ord = { k: 'idle' };
+            break;
+          }
+        }
         const reach = U.hunter.range + e.r + t.r + (t.kind === 'building' ? t.r : 0);
         const d2 = (t.x - e.x) * (t.x - e.x) + (t.z - e.z) * (t.z - e.z);
-        if (d2 <= reach * reach) {
+        if (seen && d2 <= reach * reach) {
           e.face = faceOf(t.x - e.x, t.z - e.z);
           if (state.tick >= (e._atkAt || 0)) {
             e._atkAt = state.tick + secToTicks(U.hunter.attackEvery / (inMud(ctx, e.x, e.z) ? data.hvf.buildings.kinds.mud.mud.attackMult : 1));
@@ -225,18 +249,24 @@ export function unitTick(ctx) {
         }
         // the thrown spear: a target out of reach but inside spear range, when it is ready
         const SP = data.hvf.hunter.spear;
-        if (d2 <= (SP.range + t.r) * (SP.range + t.r) && state.tick >= (e._spearAt || 0)) {
+        if (seen && d2 <= (SP.range + t.r) * (SP.range + t.r) && state.tick >= (e._spearAt || 0)) {
           e._spearAt = state.tick + secToTicks(SP.cooldown);
           ctx.emit('spear', { src: e.id, dst: t.id });
           hurt(ctx, e, t, hunterDamage(ctx, e) * SP.damageMult);
           if (!t.alive || t._gone) { e.ord = { k: 'idle' }; break; }
         }
         // chase: re-plan every half second toward where the target is now
-        if (!o.path || o.i >= o.path.length || state.tick >= (o.repathAt || 0)) {
+        if ((!o.path || o.i >= o.path.length || state.tick >= (o.repathAt || 0)) && state.tick >= (o.failUntil || 0)) {
           o.repathAt = state.tick + 10;
-          if (!routeTo(ctx, e, cellOf(map, t.x, t.z), true)) { e.ord = { k: 'idle' }; break; }
+          const gx = seen ? t.x : o.lastX, gz = seen ? t.z : o.lastZ;
+          if (!routeTo(ctx, e, cellOf(map, gx, gz), true, false, CHASE_NODES)) {
+            o.fails = (o.fails || 0) + 1;
+            o.failUntil = state.tick + CHASE_RETRY;
+            if (o.fails >= CHASE_GIVEUP) { e.ord = { k: 'idle' }; break; }
+            o.path = null;
+          } else o.fails = 0;
         }
-        walk(ctx, e);
+        if (o.path) walk(ctx, e);
         break;
       }
       case 'revive': {
@@ -268,7 +298,7 @@ export function unitTick(ctx) {
         if (e.kind !== 'hunter') break;
         let best = null, bd = 1e9;
         for (const t of state.ents) {
-          if (t.team !== FARMERS || !t.alive || t._gone || t.kind === 'building') continue;
+          if (t.team !== FARMERS || !t.alive || t._gone || t.kind === 'building' || !canSee(ctx, e.team, t)) continue;
           const reach = U.hunter.range + e.r + t.r + 0.5, d2 = (t.x - e.x) * (t.x - e.x) + (t.z - e.z) * (t.z - e.z);
           if (d2 <= reach * reach && d2 < bd) { bd = d2; best = t; }
         }

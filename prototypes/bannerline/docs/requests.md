@@ -432,15 +432,24 @@ if (app.screen === 'hvf') app.hvf.frame(dt);
 - [x] (E -> H, done by E, small) Wired the AI in: `js/sim/modes/hvf/index.js` imports `hvfAi` from `./ai/index.js`
   (`ai: hvfAi`) and `DATA_FILES` gains `'hvf/ai.json'`; `js/sim/data.js` `MODE_DATA_FILES` gains it too (A's file,
   one entry). Nothing else in H's or A's files was touched.
-- [ ] (E -> H) Fog leak in the sim: a hunter's `attack` order keeps chasing (and re-pathing to) its target after
+- [x] (E -> H) **Done (H, 2026-10-04):** units.js `attack` re-checks `canSee` every tick; out of sight for
+  `LOSE_SIGHT` (20 ticks) the hunter walks to where he last saw the target and stops; no melee or spear while unseen;
+  an idle hunter only auto-swings at what his team can see. Test: hvf-sim "an attack order does not see through the fog".
+  Original: Fog leak in the sim: a hunter's `attack` order keeps chasing (and re-pathing to) its target after
   the hunter can no longer see it (units.js `attack` checks visibility only when the order is given). A human can
   click a farmer once and follow him through the trees forever. The AI plays fair (it drops the order and walks to
   the last place it saw him); suggest the sim drop an attack whose target has been out of sight for ~1 s.
-- [ ] (E -> H) Performance: `findPath` with the default `maxNodes` 30000 walks most of a 160x160 map when the goal
+- [x] (E -> H) **Done (H, 2026-10-04):** chase re-plans search at most `CHASE_NODES` (4000) cells; a failed plan
+  waits `CHASE_RETRY` (20 ticks) and three failures drop the order; the army's chase remembers a failed plan for a
+  second. 9v3 x 12 Commander AIs, 5 min: average tick 3.99 -> 0.37 ms, ticks over 5 ms 47% -> 0.8%. The remaining
+  worst ticks (~40-90 ms) are ticks 1-2: `farmer.js` scoring hollows for every AI farmer at once (E's, see below).
+  Test: hvf-sim "tick budget" (fails with the old numbers). Original: Performance: `findPath` with the default `maxNodes` 30000 walks most of a 160x160 map when the goal
   cannot be reached; the attack chase re-paths every 10 ticks. That is where the 20-60 ms worst ticks on 9v3 come
   from (average with 12 Commander seats is 0.33 ms). A lower cap for re-paths, or remembering a failed goal for a
   second, would remove the spikes. The AI already caches its own failed routes for 5 s.
-- [ ] (E -> H, FYI) `p.copies` never goes down when a building is destroyed, so rebuilding a lost coop costs the
+- [x] (E -> H) **Decided (H, 2026-10-04): no.** `p.copies` counts the copies STANDING: a destroyed building
+  decrements it, so rebuilding a lost coop costs what that coop cost (each copy you own raises the price, not each
+  you ever built). `priceOf` is unchanged. Test: hvf-sim "a destroyed building no longer counts". Original: `p.copies` never goes down when a building is destroyed, so rebuilding a lost coop costs the
   next copy's price. Intended? (The AI reads `priceOf`, so either way works.)
 - [ ] (E -> A) `tests/modes.test.js` "mode hooks: hvf is registered but not playable" fails since HvF became
   playable (index.js `playable: true`, commit 7566368). The assertion needs flipping.
@@ -449,3 +458,33 @@ if (app.screen === 'hvf') app.hvf.frame(dt);
   with a Pony is faster than a farmer, and the spear reaches 8 m). In 3v1 over 40 seeds hunters win 7-27 of 40
   depending on the farmers' level; most matches end on the clock. Recruit farmers out-earn Veterans because
   building in the open has no penalty except being found.
+- [ ] (H -> E) Start-of-match spike: on ticks 1-2 of a 9v3 with nine AI farmers, `farmerThink` (hollow scoring) takes
+  36-42 ms in one tick. Staggering the first think per seat (e.g. `nextAt = id % reaction`) would spread it.
+- [x] (H, 2026-10-04) HvF gamepad (pad-only setup + play for both roles: stick walk, aim ring, A acts / places,
+  d-pad build menu, shop, skills, items), split screen (two local seats, own camera / HUD / fog per half, "no
+  peeking" for mixed roles) and online (js/ui/hvf/online.js room on D's transport; D's beginMatch + lockstep +
+  netclock unchanged; co-op seats) are in `js/ui/hvf/game.js`. Stream C's buildings, Chibi 2 farmer / hunter,
+  army / pet creatures and baked animals are drawn via `js/view/hvf/models.js` (stand-ins only until they load).
+  Specs: tests/hvf-modes.spec.js (pad only, split, two-page online same hash at tick 1200).
+- [ ] (H -> D, optional) `lobbysync.js` is line-war shaped (FORMAT_SIZE 1v1-3v3, slots with race/hero), so HvF keeps
+  its own small room (js/ui/hvf/online.js) and only calls `beginMatch`. If D makes lobbysync mode-aware later, HvF
+  can switch to it; the packet shape is the same.
+
+
+## Stream C -> H: Hunters vs Farmers art landed (2026-10-04) — interfaces.md §10.9, preview `hvf-art.html`
+
+- [ ] (C -> H) **Models for `MODELS[kind]` in js/view/hvf/actors.js**: buildings `makeHvfBuilding(kind, { color, w, d, mask })`
+  (all 16 farmer kinds + kennel, lodge, watchstone, snare, grave; `setProgress` on buildStart, `setDamage` from hp, `fire()` on
+  a tower `shot`, `setReady` on the Hall); fences/walls/hedges JOIN their neighbours — use `linkMask` + `linkedPiece` (16
+  shapes, instancable). Fogify `hvfMaterials()` once.
+- [ ] (C -> H) **Animals**: `creaturePoses(looks.forHvf('animals', id).spec)` gives per-pose geometries for your one-InstancedMesh-
+  per-species plan (walkA/walkB swap while moving, graze when idle, run on `flee`, bleat on `noise`). Live actors with the same
+  clips via `looks.build()` if you'd rather animate the few near the camera.
+- [ ] (C -> H) **People**: `looks.forRole('farmer'|'hunter', { color })` (Chibi 2) and `applyGhost(group, looks.ghostStyle())`
+  for a downed farmer at his grave; scarecrows/crows/hound/hawk via `looks.forHvf(...)`.
+- [ ] (C -> H) **Forest**: `createNatureLayer(scene, map, { KIND, groundY, material: fogify(natureMaterial()) })` can replace
+  world.js's tree/rock/briar/tuft buckets (3 tree looks from `map.look`, chunked near/far, culled, `chop(cell, k)` shakes a tree
+  being cut and leaves a stump + log, `syncChopped`). Adds reeds/lilies at water edges, ford stones and cliff boulders.
+- [ ] (C -> H) Icons: 46 HvF icons (`hvf-unit`, `hvf-building`, `hvf-item`) in assets/icons.
+- [ ] (C -> lead) NOT done: the HvF sound ids from hvf-PLAN §14 (bleat, cluck, oink, moo, bell, horn, hawk, chop, snare, ward
+  pull) — they need new recipes in sfx/ (`tools/build-catalog.py` + synth methods), a separate piece of work; say if C should take it.

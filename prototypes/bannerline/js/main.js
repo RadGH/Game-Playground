@@ -19,6 +19,8 @@ import { createPortrait } from './view/portrait.js';
 import { buildStructures } from './view/structures.js';
 import { loadIdentity } from './view/identity.js';
 import { makeTurret } from './view/engineer.js';
+import { createSkillFx } from './view/skillfx.js';
+import { createSound } from './view/sound.js';
 import { createFx } from './view/fx.js';
 import { createNumbers } from './view/numbers.js';
 import { loadBindings } from './input/bindings.js';
@@ -329,10 +331,25 @@ function startMatch(session, net = null, campaignConfig = null) {
 
   const firstTeam = local.length ? sim.state.players[local[0].player].team : 0;
   const actors = createActors({ scene: app.gfx.scene, data, localTeam: firstTeam, makeBody: app.bodies ? app.bodies.makeBody : capsuleBody });
-  const fx = createFx({ scene: app.gfx.scene, actors, tickHz: data.econ?.clock?.tickHz || 20, data });
+  const tickHz = data.econ?.clock?.tickHz || 20;
+  const useSpells = params.get('bodies') !== 'capsule';
+  const fx = createFx({ scene: app.gfx.scene, actors, tickHz, data, map: sim.map });
   const clock = net ? net.clock : createLocalClock({ sim: base, tickMs: TICK_MS, speed: Number(params.get('speed')) || session.speed || 1 });
   const m = { sim, net, clock, actors, fx, views: [], session, deathPos: new Map(), overDelay: 1.6, pausedBy: null, shown: false, aim: createAimOverlay(app.gfx.scene) };
   app.match = m;
+  // Stream C's spell effects and sound load in the background; until they land fx.js draws the spells.
+  if (useSpells) {
+    createSkillFx({ scene: app.gfx.scene, camera: app.flyCam.camera, actors, tickHz, heroes: data.heroes })
+      .then((sp) => { if (app.match === m) { m.spells = sp; fx.spellsElsewhere = true; } else sp.dispose?.(); })
+      .catch((err) => console.warn('skill fx unavailable', err));
+  }
+  if (params.get('mute') !== '1') {
+    createSound({ localPlayers: local.map((l) => l.player), heroes: data.heroes, tickHz,
+      entOf: (id) => m.sim.state.ents.find((e) => e.id === id),
+      panOf: (x, z) => { const v = m.views[0]; if (!v) return null; const p = v.project(x, 1, z); return p.visible ? Math.max(-1, Math.min(1, (p.x / v.vp.rect.w) * 2 - 1)) : null; } })
+      .then((snd) => { if (app.match === m) { m.sound = snd; snd.unlock?.(); } })
+      .catch((err) => console.warn('sound unavailable', err));
+  }
 
   const seats = local.slice(0, MAX_LOCAL);
   const host = $('screen-match');
@@ -547,6 +564,7 @@ function togglePanel(view, kind, by, forceOpen = false) {
   const open = forceOpen || !p.open;
   for (const o of Object.values(view.panels)) if (o !== p) o.setOpen(false);
   if (open) view.openedBy = by;
+  if (open !== p.open) app.match?.sound?.ui?.(open ? 'open' : 'close');
   p.setOpen(open);
   if (open && kind === 'barracks') view.onboarding.did('openHall');
 }
@@ -626,6 +644,8 @@ function handleEvents(events, quiet = false) {
     m.actors.onEvent(ev);
     if (quiet) continue;
     m.fx.onEvent(ev, s);
+    if (m.spells) { try { m.spells.onEvent(ev.fx ? { ...ev, skill: ev.fx } : ev); } catch (err) { console.warn('skillfx', err); } }
+    if (m.sound) { try { m.sound.onEvent(ev); } catch { /* sound is optional */ } }
     for (const v of m.views) v.hud.onEvent(ev);
     switch (ev.type) {
       case 'hit': {
@@ -697,7 +717,7 @@ function endMatch() {
     app.gfx.removeViewport(v.vp);
     v.root.remove();
   }
-  m.actors.dispose(); m.fx.dispose(); m.aim.dispose(); m.overlay?.destroy();
+  m.spells?.dispose?.(); m.sound?.stopAll?.(); m.actors.dispose(); m.fx.dispose(); m.aim.dispose(); m.overlay?.destroy();
   app.match = null; app.results = null;
   $('screen-match').replaceChildren();
   document.body.classList.remove('targeting', 'over-pad', 'aiming', 'hall-hover');
@@ -819,6 +839,7 @@ function matchFrame(dt, frames) {
   for (const p of s.players) { const a = m.actors.get(p.heroEnt); if (a?.body?.setForm && a._form !== (p.form || null)) { a._form = p.form || null; a.body.setForm(a._form); } }
   for (const t of s.teams) app.world.setBanners(t.id, t.bannersMax ? t.banners / t.bannersMax : 0);
   m.fx.update(paused ? 0 : dt);
+  m.spells?.update(paused ? 0 : dt);
   m.aim.update(dt);
   for (const v of m.views) {
     const r = v.vp.rect;
@@ -852,7 +873,10 @@ function matchFrame(dt, frames) {
       m.overAt = performance.now();
       const r = s.result, localTeams = [...new Set(m.views.map((v) => v.myTeam))];
       const word = r.winner === -1 ? 'Draw' : localTeams.length > 1 ? `${['Blue', 'Red'][r.winner]} banner wins` : r.winner === localTeams[0] ? 'Victory' : 'Defeat';
+      m.sound?.result?.(word !== 'Defeat');
       for (const v of m.views) {
+        v.hud.hideTransient?.(); v.onboarding.close(); for (const p of Object.values(v.panels)) p.setOpen(false); endAim(v);
+        v.downEl?.remove(); v.downEl = null; v.root.classList.remove('hero-down');
         const el = document.createElement('div');
         el.className = 'end-word ' + (word === 'Defeat' ? 'lose' : 'win');
         el.textContent = word;

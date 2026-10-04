@@ -6,7 +6,7 @@ import { baseEnt, liveEnt, secToTicks, FARMERS, HUNTERS } from './state.js';
 import { liveGrid, cellOf, canStand, canStep, cellX, cellZ, nearestStandable } from './grid.js';
 import { findPath } from './path.js';
 import { canSee } from './vision.js';
-import { hurt } from './units.js';
+import { hurt, CHASE_NODES, CHASE_RETRY } from './units.js';
 import { faceOf } from '../../mathx.js';
 
 const AR = data => data.hvf.units.army;
@@ -87,8 +87,9 @@ function followPath(ctx, u, gx, gz, speed) {
   if (u.flying) return stepToward(ctx, u, gx, gz, speed);
   const o = u.ord;
   if (!o.path) {
-    o.path = findPath(ctx, liveGrid(ctx), cellOf(map, u.x, u.z), cellOf(map, gx, gz), { who: 'army', near: true, closest: true, maxNodes: 12000 }) || [];
+    o.path = findPath(ctx, liveGrid(ctx), cellOf(map, u.x, u.z), cellOf(map, gx, gz), { who: 'army', near: true, closest: true, maxNodes: CHASE_NODES }) || [];
     o.i = 0;
+    if (!o.path.length) o.failAt = ctx.state.tick;   // no way: don't search again for a second
   }
   if (o.i >= o.path.length) return true;
   const c = o.path[o.i];
@@ -133,7 +134,7 @@ export function armyTick(ctx) {
           ctx.emit('attack', { src: u.id, dst: t.id });
         }
       } else {
-        if (state.tick % 10 === 0) o.path = null;
+        if (state.tick % 10 === 0 && !(o.failAt > state.tick - CHASE_RETRY)) o.path = null;
         followPath(ctx, u, t.x, t.z, speed);
       }
     }

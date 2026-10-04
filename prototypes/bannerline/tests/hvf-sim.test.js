@@ -6,7 +6,7 @@ import { createHvf, restoreHvf, hvfData, data, seats, ent } from './hvf-helpers.
 import { KIND } from '../js/sim/modes/hvf/mapgen.js';
 import { liveGrid, cellOf, canStand } from '../js/sim/modes/hvf/grid.js';
 import { seeFrom, stamp, hasBit, updateVision, canSee } from '../js/sim/modes/hvf/vision.js';
-import { priceOf, comfortOf } from '../js/sim/modes/hvf/farm.js';
+import { priceOf, comfortOf, placeBuilding } from '../js/sim/modes/hvf/farm.js';
 import { hurt } from '../js/sim/modes/hvf/units.js';
 import { ringBell } from '../js/sim/modes/hvf/animals.js';
 import * as Q from '../js/sim/modes/hvf/query.js';
@@ -335,4 +335,46 @@ test('performance: a 9v3 minute with animals stays inside the tick budget', () =
   s.run(20 * 30);
   const ms = (performance.now() - t0) / 600;
   assert.ok(ms < 3, `${ms.toFixed(2)} ms per tick`);
+});
+
+// ── stream E's requests (2026-10-04) ──
+test('an attack order does not see through the fog: lost for a second, the hunter goes to the last spot and stops', async () => {
+  const { LOSE_SIGHT } = await import('../js/sim/modes/hvf/units.js');
+  const s = createHvf({ format: '2v1', seed: 5 });
+  released(s);
+  const h = ent(s, 2), f = ent(s, 0);
+  at(s, h, f.x + 5, f.z); h.ord = { k: 'idle' };
+  for (let i = 0; i < 4; i++) s.step([]);
+  s.step([{ p: 2, type: 'attack', target: f.id }]);
+  assert.equal(h.ord.k, 'attack');
+  // the farmer vanishes into a far glade (teleport: out of every hunter eye)
+  const far = s.map.hollows[0];
+  at(s, f, far.x, far.z); f.ord = { k: 'idle' };
+  s.run(LOSE_SIGHT + 8);
+  assert.notEqual(h.ord.k, 'attack', 'the order is dropped');
+  assert.ok(h.ord.k === 'move' || h.ord.k === 'idle');
+});
+
+test('tick budget: 9v3 with twelve Commander AIs — chase re-plans are capped, slow ticks are rare', () => {
+  // before the cap (findPath 30000 nodes, re-plan every 10 ticks) this run averaged 1.6 ms with ~17% of
+  // ticks over 5 ms; with CHASE_NODES / CHASE_RETRY it averages ~0.3 ms. Ticks 1-2 (the farmer AI scoring
+  // hollows) are left out.
+  const pl = seats('9v3', { farmer: 'ai', hunter: 'ai' }).map((p) => ({ ...p, ai: { difficulty: 'commander' } }));
+  const s = createHvf({ format: '9v3', seed: 1, players: pl }, data, { events: false });
+  let sum = 0, slow = 0, n = 0;
+  // CPU time of this process, not wall time: node --test runs files side by side and wall time would count them
+  const cpu = () => { const c = process.cpuUsage(); return (c.user + c.system) / 1000; };
+  for (let t = 0; t < 20 * 240 && !s.over; t++) { const t0 = cpu(); s.step([]); const d = cpu() - t0; if (s.tick > 20) { sum += d; n++; if (d > 5) slow++; } }
+  assert.ok(sum / n < 1.0, `average ${(sum / n).toFixed(2)} ms`);
+  assert.ok(slow / n < 0.04, `${slow} of ${n} ticks over 5 ms`);
+});
+
+test('a destroyed building no longer counts toward the next copy\'s price', () => {
+  const s = createHvf({ format: '2v1', seed: 3 });
+  const p = s.state.players[0]; p.gold = 1e4;
+  buildNow(s, 0, 'coop', commonsSpot(s, 6).x, commonsSpot(s, 6).z);
+  const two = priceOf(data, p, 'coop');
+  assert.ok(two > data.hvf.buildings.kinds.coop.cost);
+  hurt(s.ctx(), null, s.state.ents.find((e) => e.type === 'coop'), 1e6);
+  assert.equal(priceOf(data, p, 'coop'), data.hvf.buildings.kinds.coop.cost);
 });

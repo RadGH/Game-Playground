@@ -24,7 +24,7 @@ export function showResults({ card, sim, players, onLobby, onRematch, onTitle, o
     const ps = s.players.filter((p) => p.team === t.id);
     const label = localTeams.length > 1 ? TEAM_WORDS[t.id] : t.id === myTeam ? 'Your side' : 'Rival side';
     return `<div class="result-team t${t.id}">
-      <h3><span>${label}</span><span class="ban">${Math.ceil(t.banners)} / ${t.bannersMax} banners</span></h3>
+      <h3><span>${label}</span><span class="ban">${Math.max(0, Math.ceil(t.banners))} / ${t.bannersMax} banners</span></h3>
       ${ps.map((p) => `<dl class="stat-list">
         <dt class="who">${p.name}</dt><dd class="who">${data.heroes?.heroes?.[p.hero]?.name || p.hero} · level ${p.level}</dd>
         <dt>Income at the end</dt><dd>+${Math.round(p.income)}</dd>

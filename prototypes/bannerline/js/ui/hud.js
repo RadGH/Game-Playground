@@ -157,7 +157,7 @@ export function createHud({ root, overlay, sim, Q, player, seat, project, onPaus
     for (const [blk, teamId] of [[banL, myTeam], [banR, enemyTeam]]) {
       const ti = Q.teamInfo(s, data, teamId);
       const f = ti.bannersMax ? Math.max(0, ti.banners / ti.bannersMax) : 0;
-      setText(blk.v, Math.ceil(ti.banners));
+      setText(blk.v, Math.max(0, Math.ceil(ti.banners)));
       setStyle(blk.fill, 'width', (f * 100).toFixed(2) + '%');
       blk.ghostF += (f - blk.ghostF) * Math.min(1, dt * 1.5);
       if (blk.ghostF < f) blk.ghostF = f;
@@ -273,7 +273,8 @@ export function createHud({ root, overlay, sim, Q, player, seat, project, onPaus
       case 'unlock': alert(`Tier ${ev.tier} sends are open`, 'good'); break;
       case 'rising': alert(`The Rising Tide — step ${ev.step}. Leaks hit harder.`, 'warn', 3800); break;
       case 'heroDown':
-        if (ev.player === player) alert(`Your hero is down — back in ${Math.ceil((ev.respawnTick - s.tick) / tickHz)}s`, 'bad', 3000);
+        if (ev.player === player) break;   // the big "Your hero has fallen" card says it (main.js)
+        if (s.players[ev.player]?.team === myTeam) alert(`${s.players[ev.player].name} is down`, 'bad', 2000);
         else if (s.players[ev.player]?.team !== myTeam) alert('Rival hero is down', 'good', 2000);
         break;
       case 'levelUp': if (ev.player === player) alert(`Level ${ev.level} — a skill point is ready (Ctrl + Q/W/E/R)`, 'good', 2200); break;
@@ -300,6 +301,8 @@ export function createHud({ root, overlay, sim, Q, player, seat, project, onPaus
     update, onEvent, alert,
     get paused() { return paused; },
     togglePause() { setPaused(!paused); },
+    /** Match over: clear the talent pick, alerts and the reject line so the result word stands alone. */
+    hideTransient() { talent.hidden = true; talentShown = true; alerts.replaceChildren(); reject.classList.remove('show'); board.hidden = true; },
     onArmy(fn) { onArmyClick = fn; },
     reasonText(r) { return REJECT_TEXT[r] || r; },
     /** A send was bought: "+1.8 income" floats up from the income counter. */

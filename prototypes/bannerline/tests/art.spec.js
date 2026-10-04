@@ -89,3 +89,15 @@ test('spell effects: every skill and power plays without errors', async ({ page 
   expect(n).toBeGreaterThan(30);
   expect(errors).toEqual([]);
 });
+
+test('Hunters vs Farmers art: forest, farm and cast render without errors in budget', async ({ page }) => {
+  test.setTimeout(180_000);
+  const errors = []; page.on('pageerror', e => errors.push(e.message));
+  await page.goto('prototypes/bannerline/hvf-art.html?view=world');
+  await page.waitForFunction(() => window.hvfArt?.ready && window.hvfArt.map, null, { timeout: 120_000 });
+  await page.waitForTimeout(800);
+  const info = await page.evaluate(() => window.hvfArt.info());
+  expect(info.calls).toBeLessThan(250);
+  for (const v of ['lineup', 'cast']) { await page.evaluate(v => window.hvfArt.setView(v), v); await page.waitForTimeout(500); }
+  expect(errors).toEqual([]);
+});

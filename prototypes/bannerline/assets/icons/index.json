@@ -165,6 +165,58 @@
    "turret_2",
    "turret_3",
    "mine"
+  ],
+  "hvf-unit": [
+   "farmer",
+   "hunter",
+   "ghost",
+   "sheep",
+   "hen",
+   "pig",
+   "cow",
+   "scarecrow",
+   "crow",
+   "hound",
+   "hawk"
+  ],
+  "hvf-item": [
+   "horse1",
+   "horse2",
+   "horse3",
+   "axe",
+   "spyglass",
+   "watchstone",
+   "flare",
+   "hound",
+   "torch",
+   "snarekit",
+   "blade",
+   "leathers",
+   "salve"
+  ],
+  "hvf-building": [
+   "coop",
+   "pen",
+   "sty",
+   "barn",
+   "hive",
+   "granary",
+   "windmill",
+   "farmhouse",
+   "sheepdog",
+   "fence",
+   "wall",
+   "hedge",
+   "mud",
+   "lookout",
+   "tower",
+   "hall",
+   "kennel",
+   "lodge",
+   "watchstone",
+   "snare",
+   "grave",
+   "mine"
   ]
  }
 }

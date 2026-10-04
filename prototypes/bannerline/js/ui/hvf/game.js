@@ -420,7 +420,12 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
       const l = Math.hypot(v.cursor.dx, v.cursor.dz), max = 18;
       if (l > max) { v.cursor.dx *= max / l; v.cursor.dz *= max / l; }
     }
-    if (v.menuOpen) { v.nav.handle(f); return; }
+    if (v.menuOpen) {
+      // the button that opened the menu is a d-pad direction too: ignore it until it is let go
+      if (v.menuGuard && f.held.has(v.menuGuard)) return;
+      v.menuGuard = null;
+      v.nav.handle(f); return;
+    }
     // left stick walks: a short move order ahead, refreshed while held
     const L = f.stickL || { x: 0, y: 0 }, mag = Math.hypot(L.x, L.y);
     const e = charOf(v);
@@ -441,10 +446,10 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
       if (v.role === 'hunter' && k !== 'R') { setAim(v, { skill: k }); if (k !== 'R' && cur) { /* aim then confirm with A */ } }
       else setAim(v, { skill: k });
     }
-    if (p.has('barracks')) openMenu(v, v.role === 'farmer' ? '.hv-build button' : '.hv-skills button');
+    if (p.has('barracks')) { openMenu(v, v.role === 'farmer' ? '.hv-build button' : '.hv-skills button'); v.menuGuard = 'barracks'; }
     if (p.has('drillyard')) setAim(v, v.role === 'farmer' ? { army: true } : { lodge: true });
     if (v.role === 'hunter') {
-      if (p.has('outfitter')) { v.hud.toggleShop(true); openMenu(v, '.hv-shop .hv-item'); }
+      if (p.has('outfitter')) { v.hud.toggleShop(true); openMenu(v, '.hv-shop .hv-item'); v.menuGuard = 'outfitter'; }
       const usable = (m.sim.state.players[v.player].inv || []).map((it, i) => (it && data.hvf['hunter-items'].items[it.id].use ? i : -1)).filter((i) => i >= 0);
       if (p.has('useFirst') && usable[0] != null) v.hud.useSlot(usable[0]);
       if (p.has('useSecond') && usable[1] != null) v.hud.useSlot(usable[1]);

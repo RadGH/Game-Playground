@@ -3,10 +3,13 @@
 // draws; each card has a download link. window.iconForge.renderAll() is what tools/bake-icons.mjs calls.
 import * as THREE from 'three';
 import { loadLooks } from '../view/unit-looks.js';
-import { createIconStudio, createIconLibrary, ICON_TINTS } from '../view/icons.js';
+import { createIconStudio, createIconLibrary, ICON_TINTS, finishIcon } from '../view/icons.js';
 import { loadIdentity } from '../view/identity.js';
 import { makeKeep, MAKERS } from '../view/structures.js';
 import { makeTurret, makeMine } from '../view/engineer.js';
+import { makeHvfBuilding, HVF_KINDS } from '../view/hvf-structures.js';
+import { applyGhost } from '../view/unit-looks.js';
+import { normalizeCreature } from '../../../../avatar-3d/js/creatures.js';
 
 const $ = id => document.getElementById(id);
 const here = p => new URL(p, import.meta.url).href;
@@ -43,11 +46,22 @@ function jobs() {
   for (const L of [1, 2, 3]) out.push({ kind: 'gadget', id: 'turret_' + L, label: `Bolt Turret ${'I'.repeat(L)}`, make: () => { const t = makeTurret({ level: L, color: identity.slotColor(0) }); t.aim(0.6); t.update(1); return studio.object(t.group, { tint: ICON_TINTS.item, yaw: 0.9, pitch: 0.35, pad: 0.75 }); } });
   out.push({ kind: 'gadget', id: 'mine', label: 'Shrapnel Mine', make: () => { const m = makeMine({}); m.setArmed(true); m.update(0.3); return studio.object(m.group, { tint: ICON_TINTS.item, yaw: 0.5, pitch: 0.7, pad: 0.7 }); } });
   for (const [hero, form] of [['druid', 'wolf'], ['druid', 'briarback']]) out.push({ kind: 'hero', id: `${hero}.${form}`, label: `${hero} (${form})`, make: () => studio.lookIcon(looks.forForm(hero, form)) });
+  // Hunters vs Farmers
+  const H = catalog.hvf || {}, FARM = ['#6a8a4a', '#1a2410'], HUNT = ['#8a3a2a', '#200c08'];
+  const hvfLook = spec => spec.role ? looks.forRole(spec.role, { color: spec.role === 'farmer' ? '#4fa3e8' : '#b23a2a' }) : spec.hvf ? looks.forHvf(...spec.hvf) : { kind: 'creature', spec: normalizeCreature(spec.creature), scale: 1 };
+  for (const [id, spec] of Object.entries(H.units || {})) out.push({ kind: 'hvf-unit', id, label: id[0].toUpperCase() + id.slice(1), make: async () => {
+    const look = hvfLook(spec);
+    if (!spec.ghost) return studio.lookIcon(look, { tint: spec.role === 'hunter' || /hound|hawk/.test(id) ? HUNT : FARM });
+    const a = await looks.build(look); applyGhost(a.group, looks.ghostStyle()); const c = await studio.raw(a, { mode: 'bust' }); a.dispose(); return finishIcon(c, { tint: ['#3a5a7a', '#0a1420'] });
+  } });
+  for (const [id, spec] of Object.entries(H.items || {})) out.push({ kind: 'hvf-item', id, label: id, make: () => spec.object ? (() => { const b = makeHvfBuilding(spec.object, { color: '#b23a2a' }); b.update(0.5); return studio.object(b.group, { tint: ICON_TINTS.item, yaw: 0.5, pitch: 0.6, pad: 0.7 }); })()
+    : spec.creature || spec.hvf ? studio.lookIcon(hvfLook(spec), { tint: ICON_TINTS.item }) : studio.item(spec) });
+  for (const kind of HVF_KINDS) out.push({ kind: 'hvf-building', id: kind, label: kind, make: () => { const b = makeHvfBuilding(kind, { color: ['kennel', 'lodge', 'snare', 'watchstone'].includes(kind) ? '#b23a2a' : '#4fa3e8', mask: 10 }); b.setReady(false); b.update(0.5); return studio.object(b.group, { tint: ['kennel', 'lodge'].includes(kind) ? HUNT : FARM, yaw: 0.6, pitch: kind === 'fence' || kind === 'wall' || kind === 'hedge' || kind === 'mud' ? 0.6 : 0.45, pad: kind === 'windmill' ? 0.78 : ['barn', 'farmhouse', 'granary', 'hall', 'kennel'].includes(kind) ? 1.05 : kind === 'wall' || kind === 'fence' || kind === 'hedge' ? 1.15 : 0.85 }); } });
   return out;
 }
 const BUILDING_NAMES = { shop: 'Outfitter', barracks: 'Barracks', drillyard: 'Drill Yard', sanctum: 'Sanctum' };
 
-const KIND_NAMES = { unit: 'Units', hero: 'Heroes', item: 'Item bases', skill: 'Skills', power: 'Powers', building: 'Buildings', gadget: 'Engineer gadgets' };
+const KIND_NAMES = { unit: 'Units', hero: 'Heroes', item: 'Item bases', skill: 'Skills', power: 'Powers', building: 'Buildings', gadget: 'Engineer gadgets', 'hvf-unit': 'Hunters vs Farmers: people and animals', 'hvf-building': 'Hunters vs Farmers: buildings', 'hvf-item': 'Hunters vs Farmers: hunter items' };
 function gallery(list, images) {
   const byKind = new Map(); for (const j of list) { if (!byKind.has(j.kind)) byKind.set(j.kind, []); byKind.get(j.kind).push(j); }
   $('gallery').replaceChildren(...[...byKind].map(([kind, js]) => {

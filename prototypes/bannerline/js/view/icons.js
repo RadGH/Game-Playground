@@ -37,6 +37,9 @@ const CREATURE_FRAMES = {
   rat: { mode: 'bust', yaw: 0.8, pad: 0.75 }, hyena: { mode: 'bust', yaw: 0.75, pad: 0.95 }, dire_wolf: { mode: 'bust', yaw: 0.75, pad: 1.0 },
   bear: { mode: 'full', yaw: 0.8, pad: 0.95 }, elk: { mode: 'full', yaw: 0.8, pad: 0.78 }, titan: { mode: 'full', yaw: 0.45, pad: 0.82 },
   horror: { mode: 'full', yaw: 0.4, pad: 0.8 }, wraith: { mode: 'full', yaw: 0.3, pad: 0.85 },
+  sheep: { mode: 'full', yaw: 0.75, pad: 0.72, anim: 'idle' }, hen: { mode: 'full', yaw: 0.7, pad: 0.95, anim: 'idle' }, pig: { mode: 'full', yaw: 0.75, pad: 0.72, anim: 'idle' },
+  cow: { mode: 'full', yaw: 0.75, pad: 0.74, anim: 'idle' }, scarecrow: { mode: 'full', yaw: 0.35, pad: 0.72 }, owl: { mode: 'full', yaw: 0.5, pad: 0.7, anim: 'idle' },
+  hound: { mode: 'bust', yaw: 0.75, pad: 1.0 }, pony: { mode: 'full', yaw: 0.8, pad: 0.75, anim: 'idle' }, horse: { mode: 'full', yaw: 0.8, pad: 0.75, anim: 'idle' }, courser: { mode: 'full', yaw: 0.8, pad: 0.75, anim: 'idle' },
 };
 
 /** The background each kind of icon sits on: [inner, outer] radial colours. */
@@ -223,7 +226,7 @@ export function createIconStudio(renderer, { looks = null, size = ICON_SIZE, sup
         const actor = await looks.build(look);
         const plan = look.kind === 'creature' ? CREATURE_FRAMES[look.spec.type] || { mode: 'full', yaw: 0.7, pad: 0.85 } : { mode: 'bust' };
         const shot = await figure(actor, { ...plan, ...opts }); actor.dispose();
-        return finishIcon(shot, { tint: ICON_TINTS.hero, size });
+        return finishIcon(shot, { tint: opts.tint || ICON_TINTS.hero, size });
       });
     },
     async hero(id, opts = {}) {
@@ -253,7 +256,7 @@ export function createIconStudio(renderer, { looks = null, size = ICON_SIZE, sup
           frameCamera(holder, camera, { mode: 'full', yaw: spec.yaw ?? 0.25, pitch: spec.pitch ?? 0.1, pad: spec.offhand ? 0.85 : 0.78 });
           shot = shoot(); scene.remove(obj); disposeTree(obj);
         } else if (spec.armour) {
-          const look = looks.forHero(spec.hero || 'warrior');
+          const look = spec.role ? looks.forRole(spec.role) : looks.forHero(spec.hero || 'warrior');
           const avatar = JSON.parse(JSON.stringify(look.avatar));
           for (const s of ['held', 'offhand']) avatar[s] = { id: 'none' };
           avatar[spec.armour] = spec.part;
@@ -326,6 +329,16 @@ async function glyph(spec, px) {
     g.fillStyle = '#e0b850'; g.beginPath(); g.arc(0, 18, 24, 0, Math.PI * 2); g.fill();
     g.fillStyle = col; g.beginPath(); g.arc(0, 18, 15, 0, Math.PI * 2); g.fill();
     g.fillStyle = '#ffffffaa'; g.beginPath(); g.arc(-5, 12, 5, 0, Math.PI * 2); g.fill();
+  } else if (spec.glyph === 'spyglass') {
+    g.rotate(-0.7);
+    g.fillStyle = '#5a3a20'; g.fillRect(-46, -11, 40, 22); g.fillStyle = col; g.fillRect(-8, -14, 30, 28); g.fillStyle = '#8a6a40'; g.fillRect(22, -17, 26, 34);
+    for (const x of [-8, 22]) { g.fillStyle = '#e8d080'; g.fillRect(x - 2, -15, 4, 30); }
+    g.fillStyle = '#9fd8ff'; g.beginPath(); g.ellipse(48, 0, 4, 15, 0, 0, Math.PI * 2); g.fill();
+  } else if (spec.glyph === 'flare') {
+    g.fillStyle = '#8a2a1a'; g.fillRect(-9, -6, 18, 50); g.fillStyle = '#e8dcc0'; g.fillRect(-9, 10, 18, 6);
+    const f = g.createRadialGradient(0, -20, 2, 0, -20, 34); f.addColorStop(0, '#fff6c0'); f.addColorStop(0.4, col); f.addColorStop(1, 'rgba(255,90,20,0)');
+    g.fillStyle = f; g.beginPath(); g.arc(0, -20, 34, 0, Math.PI * 2); g.fill();
+    g.strokeStyle = '#ffd070'; g.lineWidth = 3; for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; g.beginPath(); g.moveTo(Math.cos(a) * 18, -20 + Math.sin(a) * 18); g.lineTo(Math.cos(a) * 30, -20 + Math.sin(a) * 30); g.stroke(); }
   } else {
     g.fillStyle = '#efe6cc'; g.fillRect(-30, -36, 60, 72); g.fillStyle = '#c8b890'; g.fillRect(-36, -42, 72, 12); g.fillRect(-36, 30, 72, 12);
     g.fillStyle = col; for (let i = 0; i < 4; i++) g.fillRect(-20, -20 + i * 12, 40 - (i % 2) * 12, 4);

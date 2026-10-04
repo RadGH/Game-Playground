@@ -149,3 +149,10 @@
   .cb-inv { grid-template-columns: repeat(3, 1fr); width: 128px; }
   .cb-side { grid-template-rows: auto auto; }
 }
+/* phone width: the card and a single row of item slots; the minimap gives way */
+@container (max-width: 700px) {
+  .controlbar { grid-template-columns: auto; padding: 6px; gap: 6px; }
+  .cb-side { display: flex; gap: 4px; }
+  .cb-inv { grid-template-columns: repeat(6, 32px); width: auto; }
+  .minimap { display: none; }
+}

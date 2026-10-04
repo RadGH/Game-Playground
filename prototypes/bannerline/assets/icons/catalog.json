@@ -1,5 +1,5 @@
 {
- "_doc": "What tools/bake-icons.mjs bakes (stream C, PLAN \u00a716). Units and heroes come from data/units.json and data/looks.json automatically; skills from data/heroes.json (`sprite` here picks the assets/data/fx sprite, else the element default). `items` are generic shop/drop bases by look: `held`/`offhand` are Chibi 2 part ids built on their own, `armour` dresses the warrior in `part` and frames it, `glyph` is a 2D flask/ring/amulet/scroll. The bake writes assets/icons/<kind>/<id>.png and assets/icons/index.json. `powerSprites.<power id>` = [fx sprite, element] for the Sanctum's powers (kind `power`, framed in `powerFrames[kind]`). Kind `building` = every town building + Keep for every race (`<race>.<kind>`).",
+ "_doc": "What tools/bake-icons.mjs bakes (stream C, PLAN \u00a716). Units and heroes come from data/units.json and data/looks.json automatically; skills from data/heroes.json (`sprite` here picks the assets/data/fx sprite, else the element default). `items` are generic shop/drop bases by look: `held`/`offhand` are Chibi 2 part ids built on their own, `armour` dresses the warrior in `part` and frames it, `glyph` is a 2D flask/ring/amulet/scroll. The bake writes assets/icons/<kind>/<id>.png and assets/icons/index.json. `powerSprites.<power id>` = [fx sprite, element] for the Sanctum's powers (kind `power`, framed in `powerFrames[kind]`). Kind `building` = every town building + Keep for every race (`<race>.<kind>`). `hvf` (Hunters vs Farmers): kind `hvf-unit` (farmer/hunter/ghost + the animals, army and pets), `hvf-item` (data/hvf/hunter-items.json ids: `creature` = a creature spec, `object` = an hvf-structures kind, `role` armour = dressed on that role), `hvf-building` (every hvf-structures kind).",
  "size": 128,
  "skillSprites": {
   "cleave": "slash",
@@ -269,5 +269,146 @@
   "defensive": "#4fa8ff",
   "offensive": "#ff5a3a",
   "neutral": "#ffd24a"
+ },
+ "hvf": {
+  "units": {
+   "farmer": {
+    "role": "farmer"
+   },
+   "hunter": {
+    "role": "hunter"
+   },
+   "ghost": {
+    "role": "farmer",
+    "ghost": true
+   },
+   "sheep": {
+    "hvf": [
+     "animals",
+     "sheep"
+    ]
+   },
+   "hen": {
+    "hvf": [
+     "animals",
+     "hen"
+    ]
+   },
+   "pig": {
+    "hvf": [
+     "animals",
+     "pig"
+    ]
+   },
+   "cow": {
+    "hvf": [
+     "animals",
+     "cow"
+    ]
+   },
+   "scarecrow": {
+    "hvf": [
+     "army",
+     "scarecrow"
+    ]
+   },
+   "crow": {
+    "hvf": [
+     "army",
+     "crow"
+    ]
+   },
+   "hound": {
+    "hvf": [
+     "pets",
+     "hound"
+    ]
+   },
+   "hawk": {
+    "hvf": [
+     "pets",
+     "hawk"
+    ]
+   }
+  },
+  "items": {
+   "horse1": {
+    "creature": {
+     "type": "pony",
+     "colors": {
+      "body": "#8a6a44"
+     }
+    }
+   },
+   "horse2": {
+    "creature": {
+     "type": "horse",
+     "colors": {
+      "body": "#6a4a2a"
+     }
+    }
+   },
+   "horse3": {
+    "creature": {
+     "type": "courser",
+     "colors": {
+      "body": "#2e2a28"
+     },
+     "features": {
+      "spikes": true
+     }
+    }
+   },
+   "axe": {
+    "held": "fh_axe",
+    "color": "#9aa0a8"
+   },
+   "spyglass": {
+    "glyph": "spyglass",
+    "color": "#c89a40"
+   },
+   "watchstone": {
+    "object": "watchstone"
+   },
+   "flare": {
+    "glyph": "flare",
+    "color": "#ff7a2a"
+   },
+   "hound": {
+    "hvf": [
+     "pets",
+     "hound"
+    ]
+   },
+   "torch": {
+    "offhand": "torch",
+    "color": "#6a4a2a",
+    "rot": [
+     0,
+     0,
+     0.6
+    ]
+   },
+   "snarekit": {
+    "object": "snare"
+   },
+   "blade": {
+    "held": "fh_dagger",
+    "color": "#c4ccd4"
+   },
+   "leathers": {
+    "armour": "top",
+    "role": "hunter",
+    "part": {
+     "id": "strapped_leather",
+     "color": "#4a3a2a",
+     "color2": "#b23a2a"
+    }
+   },
+   "salve": {
+    "glyph": "potion",
+    "color": "#5ab04a"
+   }
+  }
  }
 }

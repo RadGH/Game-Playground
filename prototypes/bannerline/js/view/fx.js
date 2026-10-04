@@ -7,7 +7,8 @@ import { TICK_HZ_FALLBACK } from './consts.js';
 
 const ELEMENT_COLORS = { blade: 0xf2f2f2, pierce: 0xd8c27a, fire: 0xff7a2a, nature: 0x7ad84a, physical: 0xf2f2f2 };
 
-export function createFx({ scene, actors, tickHz = TICK_HZ_FALLBACK, data = null }) {
+export function createFx({ scene, actors, tickHz = TICK_HZ_FALLBACK, data = null, map = null, spellsElsewhere = false }) {
+  // spellsElsewhere: stream C's skillfx draws casts / bolts / pulses; this file then draws only gameplay markers.
   const root = new THREE.Group(); root.name = 'fx'; scene.add(root);
   const live = [];
   const projGeo = new THREE.SphereGeometry(0.14, 6, 4);
@@ -76,11 +77,27 @@ export function createFx({ scene, actors, tickHz = TICK_HZ_FALLBACK, data = null
   }
 
   return {
+    spellsElsewhere,
     onEvent(ev, state) {
+      if (this.spellsElsewhere && (ev.type === 'cast' || ev.type === 'bolt' || ev.type === 'pulse')) return;
       switch (ev.type) {
+        case 'keepShot': {
+          // The Keep guard (stream A, js/sim/keep.js): a bolt from the Keep's top to (x, z) and a blast.
+          const f = map?.fields?.[ev.field];
+          const kx = f ? f.keep.x : ev.x, kz = f ? f.keep.z : ev.z + 20;
+          const head = new THREE.Mesh(boltGeo, new THREE.MeshBasicMaterial({ color: 0xfff2c0 }));
+          const glow = new THREE.Mesh(boltGeo, new THREE.MeshBasicMaterial({ color: 0x8fd0ff, transparent: true, opacity: 0.6, depthWrite: false }));
+          glow.scale.setScalar(2.4);
+          const g = new THREE.Group(); g.add(head, glow);
+          add(g, 0.35, (k) => {
+            g.position.set(kx + (ev.x - kx) * k, 9 * (1 - k) + 0.8 * k + Math.sin(k * Math.PI) * 3, kz + (ev.z - kz) * k);
+            if (k >= 0.999) groundShape(ev.x, ev.z, ev.radius || 3, 0x8fd0ff, { life: 0.5, fill: 0.4 });
+          });
+          break;
+        }
         case 'bolt': {
           // A skill bolt (Firebolt): a bright head with a glowing tail, homing on `dst` if it lives.
-          const el = data?.heroes?.skills?.[ev.skill]?.element;
+          const el = data?.heroes?.skills?.[ev.fx || ev.skill]?.element || data?.heroes?.skills?.[ev.skill]?.element;
           const color = ELEMENT_COLORS[el] ?? 0xff7a2a;
           const head = new THREE.Mesh(boltGeo, new THREE.MeshBasicMaterial({ color: 0xfff2c0 }));
           const glow = new THREE.Mesh(boltGeo, new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.55, depthWrite: false }));
@@ -119,7 +136,7 @@ export function createFx({ scene, actors, tickHz = TICK_HZ_FALLBACK, data = null
           break;
         }
         case 'cast': {
-          const el = ev.element || data?.heroes?.skills?.[ev.skill]?.element;
+          const el = ev.element || data?.heroes?.skills?.[ev.fx || ev.skill]?.element || data?.heroes?.skills?.[ev.skill]?.element;
           const color = ELEMENT_COLORS[el] ?? 0xffd66b;
           const r = ev.radius || ev.reach || 2;
           groundShape(ev.x, ev.z, r, color, { arc: ev.arc || null, face: ev.face || 0, life: 0.5 });

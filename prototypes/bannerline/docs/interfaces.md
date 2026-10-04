@@ -495,6 +495,48 @@ items/sell/upgrade, rejects. Other players' sounds are quieter; one id at most e
 `{ group, setArmed(bool), blast(), update(dt) }`. The body factory builds turrets for `ent.kind === 'turret'`;
 mines are drawn from `zone` events of skill `shrapnel_mine` (zone kind `trap`) — B places `makeMine()` at the zone.
 
+### 10.9 Hunters vs Farmers art (stream C -> stream H's `js/view/hvf/`; preview `hvf-art.html`)
+
+**Characters and creatures** (`js/view/unit-looks.js`, data `data/looks.json` `hvf`):
+```js
+looks.forRole('farmer', { color })    // Chibi 2: straw hat (band in the player's colour), apron smock, crook
+looks.forRole('hunter', { color })    // Chibi 2: hood, strapped leathers, cloak, spear
+const restore = applyGhost(actor.group, looks.ghostStyle());   // a downed farmer: translucent pale blue, glowing; restore() undoes
+looks.forHvf('animals', 'sheep' | 'hen' | 'pig' | 'cow')     // creature looks (avatar-3d bl_sheep ...)
+looks.forHvf('army', 'scarecrow' | 'crow'); looks.forHvf('pets', 'hound' | 'hawk')
+await looks.build(look)               // a live actor: setAnim('idle'|'walk'|'run'|'graze'|'bleat'|'panic'|'attack'|'talk'|'dead')
+```
+**Animals in crowds** (`avatar-3d/js/creature-poses.js`): `await creaturePoses(looks.forHvf('animals', 'sheep').spec)` →
+`{ idle, walkA, walkB, run, graze, bleat, attack, dead }` vertex-coloured BufferGeometries (~0.8-1.7k triangles), for
+one InstancedMesh per (species, pose) with `MeshStandardMaterial({ vertexColors: true })` — fogify it. Alternate walkA/walkB
+a few times a second while an animal moves; graze when idle at home; run/bleat on `flee` / `noise`.
+
+**Buildings** (`js/view/hvf-structures.js`):
+```js
+const b = makeHvfBuilding(kind, { color, w, d, mask })   // kind = data/hvf/buildings.json kind, or kennel | lodge | watchstone | snare | grave | mine
+// w/d metres = buildings.json size x 2; color = the owner's colour; mask = fence/wall/hedge neighbours (N1 E2 S4 W8, linkMask(cx, cz, same))
+b.setProgress(0..1)   // buildStart -> built: scaffold, building rising
+b.setDamage(0..1)     // smoke from 0.6, flames from 0.75
+b.setReady(bool)      // Harvest Hall can train / a lodge or kennel ring
+b.fire(yaw)           // Arrow Tower shot (archer turns, muzzle flash)
+b.update(dt); b.radius; b.dispose()
+hvfMaterials()        // the four shared materials: world.fogify() each once
+linkedPiece('fence' | 'wall' | 'hedge', mask) / hvfBuildingGeometry(kind)   // { std, metal, glow, cloth } geometries for InstancedMeshes
+```
+Windmill sails turn; the tower has an archer; kennel/lodge carry the hunter's colour; graves carry the farmer's.
+
+**Nature** (`js/view/hvf-nature.js`): `natureGeometries()` → `tree[look]` (0 oak, 1 pine, 2 birch = `map.look`) with
+`near` (≤ 200 tris), `far` (≤ 40), `stump`, `log`; `rock[0..2]`, `briar`, `tuft`, `reeds`, `lily`, `fordStone`,
+`cliffBoulder`, `rampEdge` — all one vertex-coloured geometry each, matching H's single `vegMat`. Or the whole layer:
+```js
+const layer = createNatureLayer(scene, map, { KIND, groundY, material: world.fogify(natureMaterial()) });
+layer.update(camera, dt)        // 64 m chunks: frustum culled, near/far swap at 70 m (seed 3, 5v2: < 150 draws, < 700k tris)
+layer.chop(cell, 0.5)           // being cut: shakes and leans;  layer.chop(cell, 1) -> stump + fallen log
+layer.syncChopped(state.hvf.chopped)
+```
+**Icons**: `hvf-unit/<farmer|hunter|ghost|sheep|hen|pig|cow|scarecrow|crow|hound|hawk>`, `hvf-building/<kind>` (22),
+`hvf-item/<data/hvf/hunter-items.json id>` (13) — `icons.url(kind, id)` as in §10.3.
+
 ## 11. Items, town buildings, unit upgrades, powers (stream I, owner round 2)
 
 Owner rulings: six inventory slots with **no slot types**; simple stat items in the classic hero-arena

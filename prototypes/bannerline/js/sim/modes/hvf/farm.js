@@ -9,7 +9,8 @@ import { baseEnt, secToTicks, liveEnt, entById, FARMERS } from './state.js';
 const BK = data => data.hvf.buildings;
 const BUILDABLE = { [KIND.grass]: 1, [KIND.tallgrass]: 1, [KIND.trail]: 1 };
 
-/** Price of the next copy of `kind` for this farmer (repeated multiply, never Math.pow). */
+/** Price of the next copy of `kind` for this farmer: x copyMult for every copy STANDING (p.copies goes
+ *  down when one is destroyed — decided 2026-10-04, stream E asked). Repeated multiply, never Math.pow. */
 export function priceOf(data, p, kind) {
   const B = BK(data), def = B.kinds[kind];
   let c = def.cost;

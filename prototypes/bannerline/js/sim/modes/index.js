@@ -19,7 +19,7 @@
 //     commands: { type: fn(ctx, player, cmd) -> reason | null },   // extra command types
 //     ai: fn(ctx, player) -> [commands] }
 //
-// REGISTERED but not playable yet: 'hvf' Hunters vs Farmers (stream H). PLANNED (R2.20, not built):
+// REGISTERED: 'hvf' Hunters vs Farmers (stream H, playable since 2026-10-03). PLANNED (R2.20, not built):
 // 'td' tower defense, 'moba', 'empires' (heroes and empires). Nothing here assumes lanes, banners or
 // sends outside linewar.js, so those can bring their own map, economy and win rule.
 

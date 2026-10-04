@@ -1,0 +1,8254 @@
+{
+ "_doc": "Stream B zone placements (tools/bake-zone.mjs). Zone metres; yaw = atan2(dx, dz), the way the thing faces. kinds: settlement (data.radius, hub, planned), town_square, street (data.pts, width, cls), building (a proctown plot: data.w along `angle` (local +x = (cos angle, sin angle)), data.d across, want; yaw faces the nearest drawn street, data.streetGap = metres from the front to it), town_wall, road (data.pts [[x,z,h]], width, cls, spur), bridge (yaw along the road, span, deck height), dungeon_door, event_site, camp_site, landmark/dungeon/pass/crossing (World Forge nodes).",
+ "zone": "z11_02",
+ "terrainHash": "e8887525",
+ "placements": [
+  {
+   "kind": "settlement",
+   "id": "fengate",
+   "x": 352,
+   "z": 448,
+   "yaw": 0,
+   "data": {
+    "kind": "city",
+    "name": "Fengate",
+    "radius": 140,
+    "hub": true,
+    "planned": true
+   }
+  },
+  {
+   "kind": "settlement",
+   "id": "miminhold",
+   "x": 1008,
+   "z": 1664,
+   "yaw": 0,
+   "data": {
+    "kind": "village",
+    "name": "Miminhold",
+    "radius": 65,
+    "hub": false,
+    "planned": true
+   }
+  },
+  {
+   "kind": "settlement",
+   "id": "ashhaven",
+   "x": 768,
+   "z": 944,
+   "yaw": 0,
+   "data": {
+    "kind": "hamlet",
+    "name": "Ashhaven",
+    "radius": 46,
+    "hub": false,
+    "planned": true
+   }
+  },
+  {
+   "kind": "landmark",
+   "id": "old_bitbilwood",
+   "x": 1856,
+   "z": 1088,
+   "yaw": 0,
+   "data": {
+    "kind": "ancientwood",
+    "name": "Old Bitbilwood"
+   }
+  },
+  {
+   "kind": "landmark",
+   "id": "old_medewood",
+   "x": 832,
+   "z": 320,
+   "yaw": 0,
+   "data": {
+    "kind": "ancientwood",
+    "name": "Old Medewood"
+   }
+  },
+  {
+   "kind": "dungeon_door",
+   "id": "door_1",
+   "x": 146,
+   "z": 490,
+   "yaw": -3.593,
+   "data": {
+    "name": "Barrow entrance"
+   }
+  },
+  {
+   "kind": "event_site",
+   "id": "event_delvers_hill",
+   "x": 688,
+   "z": 736,
+   "yaw": 0,
+   "data": {
+    "r": 40
+   }
+  },
+  {
+   "kind": "town_square",
+   "id": "fengate_square",
+   "x": 353.94,
+   "z": 434.47,
+   "yaw": 0,
+   "data": {
+    "r": 6.13,
+    "town": "fengate",
+    "culture": "halfling"
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_0",
+   "x": 433.54,
+   "z": 439.36,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      433.54,
+      439.36
+     ],
+     [
+      354.1,
+      455.69
+     ],
+     [
+      277.36,
+      481.95
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_1",
+   "x": 351.19,
+   "z": 383.47,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      351.19,
+      383.47
+     ],
+     [
+      363.81,
+      408.01
+     ],
+     [
+      375.49,
+      433
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_2",
+   "x": 387.05,
+   "z": 397.01,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      387.05,
+      397.01
+     ],
+     [
+      378.44,
+      402.74
+     ],
+     [
+      370.2,
+      408.98
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_3",
+   "x": 378.83,
+   "z": 387.4,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      378.83,
+      387.4
+     ],
+     [
+      371.73,
+      393.23
+     ],
+     [
+      365.37,
+      399.87
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_4",
+   "x": 363.32,
+   "z": 387.55,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      363.32,
+      387.55
+     ],
+     [
+      366.18,
+      390.89
+     ],
+     [
+      369.29,
+      393.99
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_5",
+   "x": 373.14,
+   "z": 394.9,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      373.14,
+      394.9
+     ],
+     [
+      375.6,
+      397.49
+     ],
+     [
+      377.99,
+      400.13
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_6",
+   "x": 377.1,
+   "z": 406.41,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      377.1,
+      406.41
+     ],
+     [
+      380.9,
+      413.4
+     ],
+     [
+      385.1,
+      420.15
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_7",
+   "x": 391.7,
+   "z": 404.99,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      391.7,
+      404.99
+     ],
+     [
+      386.7,
+      408.34
+     ],
+     [
+      381.33,
+      411.03
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_8",
+   "x": 379.4,
+   "z": 413,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      379.4,
+      413
+     ],
+     [
+      377.57,
+      413.92
+     ],
+     [
+      375.86,
+      415.06
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_9",
+   "x": 324.5,
+   "z": 399.05,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      324.5,
+      399.05
+     ],
+     [
+      334.79,
+      422.6
+     ],
+     [
+      344.41,
+      446.44
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_10",
+   "x": 363.66,
+   "z": 421.48,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      363.66,
+      421.48
+     ],
+     [
+      352.5,
+      427.18
+     ],
+     [
+      340.84,
+      431.78
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_11",
+   "x": 354.51,
+   "z": 401.22,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      354.51,
+      401.22
+     ],
+     [
+      343.24,
+      406.67
+     ],
+     [
+      331.69,
+      411.52
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_12",
+   "x": 335.43,
+   "z": 395.9,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      335.43,
+      395.9
+     ],
+     [
+      337.7,
+      401.05
+     ],
+     [
+      340.06,
+      406.17
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_13",
+   "x": 340.82,
+   "z": 393.47,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      340.82,
+      393.47
+     ],
+     [
+      343.46,
+      398.45
+     ],
+     [
+      345.46,
+      403.73
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_14",
+   "x": 341.68,
+   "z": 408.58,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      341.68,
+      408.58
+     ],
+     [
+      345.07,
+      417.52
+     ],
+     [
+      349.54,
+      425.98
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_15",
+   "x": 359.11,
+   "z": 411.42,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      359.11,
+      411.42
+     ],
+     [
+      353.28,
+      414.32
+     ],
+     [
+      347.24,
+      416.78
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_16",
+   "x": 344.84,
+   "z": 419.69,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      344.84,
+      419.69
+     ],
+     [
+      340.81,
+      421.25
+     ],
+     [
+      336.98,
+      423.24
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_17",
+   "x": 356.22,
+   "z": 426.71,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      356.22,
+      426.71
+     ],
+     [
+      358.64,
+      432.34
+     ],
+     [
+      361.27,
+      437.89
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_18",
+   "x": 346.52,
+   "z": 431.09,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      346.52,
+      431.09
+     ],
+     [
+      348.85,
+      436.77
+     ],
+     [
+      351.57,
+      442.27
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_19",
+   "x": 332.04,
+   "z": 434.63,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      332.04,
+      434.63
+     ],
+     [
+      317.76,
+      437.96
+     ],
+     [
+      303.34,
+      440.57
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_20",
+   "x": 317.8,
+   "z": 409.1,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      317.8,
+      409.1
+     ],
+     [
+      320.88,
+      421.95
+     ],
+     [
+      323.16,
+      434.98
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_21",
+   "x": 328.1,
+   "z": 415.6,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      328.1,
+      415.6
+     ],
+     [
+      324.55,
+      416.37
+     ],
+     [
+      321,
+      417.07
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_22",
+   "x": 330.68,
+   "z": 428.06,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      330.68,
+      428.06
+     ],
+     [
+      327.17,
+      428.99
+     ],
+     [
+      323.57,
+      429.53
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_23",
+   "x": 318.67,
+   "z": 420.75,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      318.67,
+      420.75
+     ],
+     [
+      309.43,
+      423.06
+     ],
+     [
+      300.03,
+      424.61
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_24",
+   "x": 307.23,
+   "z": 411.29,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      307.23,
+      411.29
+     ],
+     [
+      307.99,
+      416.29
+     ],
+     [
+      309.28,
+      421.17
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_25",
+   "x": 309.97,
+   "z": 424.07,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      309.97,
+      424.07
+     ],
+     [
+      311.05,
+      430.67
+     ],
+     [
+      312.67,
+      437.15
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_26",
+   "x": 311.31,
+   "z": 440.42,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      311.31,
+      440.42
+     ],
+     [
+      312.26,
+      446.22
+     ],
+     [
+      313.69,
+      451.92
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_27",
+   "x": 320.58,
+   "z": 438.5,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      320.58,
+      438.5
+     ],
+     [
+      321.47,
+      444.31
+     ],
+     [
+      322.96,
+      450
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_28",
+   "x": 349.68,
+   "z": 470.13,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      349.68,
+      470.13
+     ],
+     [
+      354.41,
+      492.2
+     ],
+     [
+      360.24,
+      514.01
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_29",
+   "x": 392.67,
+   "z": 460.62,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      392.67,
+      460.62
+     ],
+     [
+      397.53,
+      481.59
+     ],
+     [
+      404.08,
+      502.11
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_30",
+   "x": 417.69,
+   "z": 466.18,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      417.69,
+      466.18
+     ],
+     [
+      408.55,
+      470.07
+     ],
+     [
+      399.14,
+      473.22
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_31",
+   "x": 405.27,
+   "z": 460.45,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      405.27,
+      460.45
+     ],
+     [
+      406.61,
+      464.36
+     ],
+     [
+      408.2,
+      468.18
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_32",
+   "x": 421.88,
+   "z": 477.23,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      421.88,
+      477.23
+     ],
+     [
+      412.5,
+      480.47
+     ],
+     [
+      403.33,
+      484.27
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_33",
+   "x": 406.49,
+   "z": 472.03,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      406.49,
+      472.03
+     ],
+     [
+      408.04,
+      476.21
+     ],
+     [
+      409.65,
+      480.37
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_34",
+   "x": 409.13,
+   "z": 483.57,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      409.13,
+      483.57
+     ],
+     [
+      411.63,
+      489.99
+     ],
+     [
+      414.02,
+      496.46
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_35",
+   "x": 395.05,
+   "z": 486.78,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      395.05,
+      486.78
+     ],
+     [
+      378.09,
+      489.85
+     ],
+     [
+      360.94,
+      491.68
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_36",
+   "x": 382.65,
+   "z": 467.11,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      382.65,
+      467.11
+     ],
+     [
+      384.26,
+      476.74
+     ],
+     [
+      385.42,
+      486.43
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_37",
+   "x": 394.04,
+   "z": 479.75,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      394.04,
+      479.75
+     ],
+     [
+      390.01,
+      480.36
+     ],
+     [
+      385.97,
+      480.9
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_38",
+   "x": 375.17,
+   "z": 468.18,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      375.17,
+      468.18
+     ],
+     [
+      376.23,
+      477.89
+     ],
+     [
+      377.94,
+      487.5
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_39",
+   "x": 382.13,
+   "z": 472.88,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      382.13,
+      472.88
+     ],
+     [
+      379.75,
+      473.12
+     ],
+     [
+      377.39,
+      473.57
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_40",
+   "x": 375.6,
+   "z": 481.22,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      375.6,
+      481.22
+     ],
+     [
+      367.62,
+      481.95
+     ],
+     [
+      359.77,
+      483.49
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_41",
+   "x": 365.78,
+   "z": 469.53,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      365.78,
+      469.53
+     ],
+     [
+      366.48,
+      475.22
+     ],
+     [
+      367.41,
+      480.87
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_42",
+   "x": 367.62,
+   "z": 483.88,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      367.62,
+      483.88
+     ],
+     [
+      367.89,
+      486.39
+     ],
+     [
+      368.34,
+      488.88
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_43",
+   "x": 370.4,
+   "z": 492.06,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      370.4,
+      492.06
+     ],
+     [
+      371.19,
+      499.58
+     ],
+     [
+      372.55,
+      507.01
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_44",
+   "x": 387.45,
+   "z": 489.61,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      387.45,
+      489.61
+     ],
+     [
+      388.59,
+      497.08
+     ],
+     [
+      389.59,
+      504.57
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_45",
+   "x": 396.62,
+   "z": 497.69,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      396.62,
+      497.69
+     ],
+     [
+      393.25,
+      497.99
+     ],
+     [
+      389.92,
+      498.65
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_46",
+   "x": 387.01,
+   "z": 494.76,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      387.01,
+      494.76
+     ],
+     [
+      379.78,
+      496.02
+     ],
+     [
+      372.49,
+      496.85
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_47",
+   "x": 378,
+   "z": 490.97,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      378,
+      490.97
+     ],
+     [
+      378.28,
+      492.81
+     ],
+     [
+      378.53,
+      494.66
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_48",
+   "x": 383.05,
+   "z": 496.66,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      383.05,
+      496.66
+     ],
+     [
+      383.79,
+      500.97
+     ],
+     [
+      384.29,
+      505.33
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_49",
+   "x": 370.6,
+   "z": 503.24,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      370.6,
+      503.24
+     ],
+     [
+      366.68,
+      503.76
+     ],
+     [
+      362.77,
+      504.37
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_50",
+   "x": 333.58,
+   "z": 479.48,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      333.58,
+      479.48
+     ],
+     [
+      334.49,
+      498.31
+     ],
+     [
+      335.4,
+      517.14
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_51",
+   "x": 348.19,
+   "z": 497.93,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      348.19,
+      497.93
+     ],
+     [
+      342.44,
+      497.46
+     ],
+     [
+      336.68,
+      497.68
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_52",
+   "x": 348.45,
+   "z": 486.22,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      348.45,
+      486.22
+     ],
+     [
+      342.69,
+      486.3
+     ],
+     [
+      336.93,
+      485.97
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_53",
+   "x": 348.02,
+   "z": 505.87,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      348.02,
+      505.87
+     ],
+     [
+      342.26,
+      505.97
+     ],
+     [
+      336.51,
+      505.62
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_54",
+   "x": 329.66,
+   "z": 490.34,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      329.66,
+      490.34
+     ],
+     [
+      318.48,
+      492.97
+     ],
+     [
+      307.14,
+      494.87
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_55",
+   "x": 319.89,
+   "z": 482.89,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      319.89,
+      482.89
+     ],
+     [
+      320.76,
+      486.67
+     ],
+     [
+      321.41,
+      490.49
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_56",
+   "x": 318.71,
+   "z": 494.05,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      318.71,
+      494.05
+     ],
+     [
+      320.17,
+      504.4
+     ],
+     [
+      322.81,
+      514.5
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_57",
+   "x": 331.09,
+   "z": 497.47,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      331.09,
+      497.47
+     ],
+     [
+      326.29,
+      498.38
+     ],
+     [
+      321.51,
+      499.4
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_58",
+   "x": 318.27,
+   "z": 500.49,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      318.27,
+      500.49
+     ],
+     [
+      313.46,
+      501.46
+     ],
+     [
+      308.66,
+      502.42
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_59",
+   "x": 283.77,
+   "z": 493.49,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      283.77,
+      493.49
+     ],
+     [
+      289.63,
+      477.75
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_60",
+   "x": 328.1,
+   "z": 415.6,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      328.1,
+      415.6
+     ],
+     [
+      331.15,
+      414.27
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_61",
+   "x": 363.81,
+   "z": 408.01,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      363.81,
+      408.01
+     ],
+     [
+      359.11,
+      411.42
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_62",
+   "x": 365.37,
+   "z": 399.87,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      365.37,
+      399.87
+     ],
+     [
+      360.82,
+      402.21
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_63",
+   "x": 354.1,
+   "z": 455.69,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      354.1,
+      455.69
+     ],
+     [
+      344.41,
+      446.44
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_64",
+   "x": 349.68,
+   "z": 470.13,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      349.68,
+      470.13
+     ],
+     [
+      345.72,
+      458.55
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_65",
+   "x": 362.77,
+   "z": 504.37,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      362.77,
+      504.37
+     ],
+     [
+      358,
+      505.64
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_66",
+   "x": 348.19,
+   "z": 497.93,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      348.19,
+      497.93
+     ],
+     [
+      355.42,
+      496
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_67",
+   "x": 397.53,
+   "z": 481.59,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      397.53,
+      481.59
+     ],
+     [
+      394.04,
+      479.75
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_68",
+   "x": 336.93,
+   "z": 485.97,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      336.93,
+      485.97
+     ],
+     [
+      333.9,
+      486.11
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_69",
+   "x": 331.09,
+   "z": 497.47,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      331.09,
+      497.47
+     ],
+     [
+      334.44,
+      497.31
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "fengate_street_70",
+   "x": 399.14,
+   "z": 473.22,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      399.14,
+      473.22
+     ],
+     [
+      395.77,
+      474
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "building",
+   "id": "fengate_plot_0",
+   "x": 379.39,
+   "z": 393.98,
+   "yaw": -0.8235,
+   "data": {
+    "town": "fengate",
+    "want": "house",
+    "district": "residential",
+    "w": 5.93,
+    "d": 6.93,
+    "angle": 0.8235,
+    "front": 2.3943,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "fengate_plot_1",
+   "x": 371.82,
+   "z": 400.99,
+   "yaw": 2.3181,
+   "data": {
+    "town": "fengate",
+    "want": "hut",
+    "district": "craft",
+    "w": 5.93,
+    "d": 6.73,
+    "angle": 0.8235,
+    "front": 5.5358,
+    "streetGap": -0.32
+   }
+  },
+  {
+   "kind": "building",
+   "id": "fengate_plot_2",
+   "x": 389.35,
+   "z": 412.88,
+   "yaw": -2.6143,
+   "data": {
+    "town": "fengate",
+    "want": "barracks",
+    "district": "craft",
+    "w": 7.1,
+    "d": 10.8,
+    "angle": 1.0435,
+    "front": 4.1851,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "fengate_plot_3",
+   "x": 348.03,
+   "z": 396.39,
+   "yaw": -1.1467,
+   "data": {
+    "town": "fengate",
+    "want": "hut",
+    "district": "craft",
+    "w": 10.06,
+    "d": 6.63,
+    "angle": 1.1467,
+    "front": 2.7175,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "fengate_plot_4",
+   "x": 332.74,
+   "z": 403.29,
+   "yaw": 1.9949,
+   "data": {
+    "town": "fengate",
+    "want": "mill",
+    "district": "craft",
+    "w": 10.06,
+    "d": 7.48,
+    "angle": 1.1467,
+    "front": 5.859,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "fengate_plot_5",
+   "x": 350.89,
+   "z": 409.04,
+   "yaw": -2.7175,
+   "data": {
+    "town": "fengate",
+    "want": "inn",
+    "district": "craft",
+    "w": 7.22,
+    "d": 11.82,
+    "angle": 1.1467,
+    "front": 4.2883,
+    "streetGap": -0.24
+   }
+  },
+  {
+   "kind": "building",
+   "id": "fengate_plot_6",
+   "x": 355.37,
+   "z": 418.96,
+   "yaw": -2.7175,
+   "data": {
+    "town": "fengate",
+    "want": "stable",
+    "district": "civic",
+    "w": 6.79,
+    "d": 11.82,
+    "angle": 1.1467,
+    "front": 4.2883,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "fengate_plot_7",
+   "x": 338.29,
+   "z": 415.65,
+   "yaw": 0.4241,
+   "data": {
+    "town": "fengate",
+    "want": "hut",
+    "district": "craft",
+    "w": 8.89,
+    "d": 7.43,
+    "angle": 1.1467,
+    "front": 1.1467,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "fengate_plot_8",
+   "x": 342.77,
+   "z": 425.57,
+   "yaw": 1.9949,
+   "data": {
+    "town": "fengate",
+    "want": "hut",
+    "district": "civic",
+    "w": 5.12,
+    "d": 7.43,
+    "angle": 1.1467,
+    "front": 5.859,
+    "streetGap": -0.01
+   }
+  },
+  {
+   "kind": "building",
+   "id": "fengate_plot_9",
+   "x": 363.36,
+   "z": 430.21,
+   "yaw": -1.1467,
+   "data": {
+    "town": "fengate",
+    "want": "hut",
+    "district": "civic",
+    "w": 11.07,
+    "d": 6.52,
+    "angle": 1.1467,
+    "front": 2.7175,
+    "streetGap": -0.18
+   }
+  },
+  {
+   "kind": "building",
+   "id": "fengate_plot_10",
+   "x": 323.57,
+   "z": 411.64,
+   "yaw": 0.2041,
+   "data": {
+    "town": "fengate",
+    "want": "hut",
+    "district": "craft",
+    "w": 6.12,
+    "d": 6.05,
+    "angle": 1.3667,
+    "front": 1.3667,
+    "streetGap": -0.33
+   }
+  },
+  {
+   "kind": "building",
+   "id": "fengate_plot_11",
+   "x": 325.82,
+   "z": 422.49,
+   "yaw": -2.9375,
+   "data": {
+    "town": "fengate",
+    "want": "hut",
+    "district": "craft",
+    "w": 9.09,
+    "d": 6.05,
+    "angle": 1.3667,
+    "front": 4.5083,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "fengate_plot_12",
+   "x": 313.47,
+   "z": 415.15,
+   "yaw": -1.3667,
+   "data": {
+    "town": "fengate",
+    "want": "house",
+    "district": "residential",
+    "w": 8.9,
+    "d": 6.71,
+    "angle": 1.3667,
+    "front": 2.9375,
+    "streetGap": 0.14
+   }
+  },
+  {
+   "kind": "building",
+   "id": "fengate_plot_13",
+   "x": 302.81,
+   "z": 417.36,
+   "yaw": 1.7749,
+   "data": {
+    "town": "fengate",
+    "want": "house",
+    "district": "residential",
+    "w": 8.9,
+    "d": 7.18,
+    "angle": 1.3667,
+    "front": 6.079,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "fengate_plot_14",
+   "x": 316.5,
+   "z": 429.54,
+   "yaw": -2.9375,
+   "data": {
+    "town": "fengate",
+    "want": "chapel",
+    "district": "craft",
+    "w": 12.15,
+    "d": 6.62,
+    "angle": 1.3667,
+    "front": 4.5083,
+    "streetGap": -0.17
+   }
+  },
+  {
+   "kind": "building",
+   "id": "fengate_plot_15",
+   "x": 305.83,
+   "z": 431.75,
+   "yaw": 1.7749,
+   "data": {
+    "town": "fengate",
+    "want": "forge",
+    "district": "residential",
+    "w": 12.15,
+    "d": 7.26,
+    "angle": 1.3667,
+    "front": 6.079,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "fengate_plot_16",
+   "x": 328.34,
+   "z": 442.89,
+   "yaw": -2.9375,
+   "data": {
+    "town": "fengate",
+    "want": "hall",
+    "district": "craft",
+    "w": 10.54,
+    "d": 9.39,
+    "angle": 1.3667,
+    "front": 4.5083,
+    "streetGap": -0.17
+   }
+  },
+  {
+   "kind": "building",
+   "id": "fengate_plot_17",
+   "x": 317.11,
+   "z": 445.21,
+   "yaw": 1.7749,
+   "data": {
+    "town": "fengate",
+    "want": "hut",
+    "district": "craft",
+    "w": 10.54,
+    "d": 5.51,
+    "angle": 1.3667,
+    "front": 6.079,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "fengate_plot_18",
+   "x": 308,
+   "z": 447.1,
+   "yaw": 1.7749,
+   "data": {
+    "town": "fengate",
+    "want": "house",
+    "district": "residential",
+    "w": 10.54,
+    "d": 5.29,
+    "angle": 1.3667,
+    "front": 6.079,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "fengate_plot_19",
+   "x": 411.79,
+   "z": 462.4,
+   "yaw": -1.2082,
+   "data": {
+    "town": "fengate",
+    "want": "house",
+    "district": "residential",
+    "w": 7.07,
+    "d": 7.14,
+    "angle": 1.2082,
+    "front": 2.779,
+    "streetGap": -0.13
+   }
+  },
+  {
+   "kind": "building",
+   "id": "fengate_plot_20",
+   "x": 401.36,
+   "z": 466.35,
+   "yaw": 1.9334,
+   "data": {
+    "town": "fengate",
+    "want": "house",
+    "district": "residential",
+    "w": 7.07,
+    "d": 7.83,
+    "angle": 1.2082,
+    "front": 5.9206,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "fengate_plot_21",
+   "x": 388.92,
+   "z": 472.77,
+   "yaw": 0.1426,
+   "data": {
+    "town": "fengate",
+    "want": "market",
+    "district": "residential",
+    "w": 11.79,
+    "d": 6.95,
+    "angle": 1.4282,
+    "front": 1.4282,
+    "streetGap": -0.33
+   }
+  },
+  {
+   "kind": "building",
+   "id": "fengate_plot_22",
+   "x": 371.19,
+   "z": 474.54,
+   "yaw": 1.7134,
+   "data": {
+    "town": "fengate",
+    "want": "house",
+    "district": "residential",
+    "w": 10.25,
+    "d": 5.63,
+    "angle": 1.4282,
+    "front": 6.1406,
+    "streetGap": -0.26
+   }
+  },
+  {
+   "kind": "building",
+   "id": "fengate_plot_23",
+   "x": 362.06,
+   "z": 475.85,
+   "yaw": 1.7134,
+   "data": {
+    "town": "fengate",
+    "want": "house",
+    "district": "residential",
+    "w": 10.25,
+    "d": 5.52,
+    "angle": 1.4282,
+    "front": 6.1406,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "fengate_plot_24",
+   "x": 392.52,
+   "z": 492.93,
+   "yaw": 0.1426,
+   "data": {
+    "town": "fengate",
+    "want": "house",
+    "district": "residential",
+    "w": 6.82,
+    "d": 5.56,
+    "angle": 1.4282,
+    "front": 1.4282,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "fengate_plot_25",
+   "x": 377.88,
+   "z": 501.82,
+   "yaw": -2.999,
+   "data": {
+    "town": "fengate",
+    "want": "house",
+    "district": "residential",
+    "w": 7.56,
+    "d": 8.06,
+    "angle": 1.4282,
+    "front": 4.5698,
+    "streetGap": -0.32
+   }
+  },
+  {
+   "kind": "building",
+   "id": "fengate_plot_26",
+   "x": 365.81,
+   "z": 497.74,
+   "yaw": 0.1426,
+   "data": {
+    "town": "fengate",
+    "want": "house",
+    "district": "residential",
+    "w": 8.75,
+    "d": 6.72,
+    "angle": 1.4282,
+    "front": 1.4282,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "fengate_plot_27",
+   "x": 342.56,
+   "z": 491.88,
+   "yaw": -0.0218,
+   "data": {
+    "town": "fengate",
+    "want": "warehouse",
+    "district": "residential",
+    "w": 7.76,
+    "d": 10.31,
+    "angle": 1.5926,
+    "front": 1.5926,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "fengate_plot_28",
+   "x": 342.16,
+   "z": 510.42,
+   "yaw": 3.1198,
+   "data": {
+    "town": "fengate",
+    "want": "house",
+    "district": "residential",
+    "w": 5.5,
+    "d": 10.31,
+    "angle": 1.5926,
+    "front": 4.7342,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "fengate_plot_29",
+   "x": 325.22,
+   "z": 485.77,
+   "yaw": -1.3726,
+   "data": {
+    "town": "fengate",
+    "want": "house",
+    "district": "residential",
+    "w": 6.56,
+    "d": 5.71,
+    "angle": 1.3726,
+    "front": 2.9434,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "fengate_plot_30",
+   "x": 312.78,
+   "z": 488.27,
+   "yaw": 1.769,
+   "data": {
+    "town": "fengate",
+    "want": "granary",
+    "district": "residential",
+    "w": 6.56,
+    "d": 12.45,
+    "angle": 1.3726,
+    "front": 6.085,
+    "streetGap": -0.18
+   }
+  },
+  {
+   "kind": "town_wall",
+   "id": "fengate_wall",
+   "x": 352,
+   "z": 448,
+   "yaw": 0,
+   "data": {
+    "town": "fengate",
+    "radius": 82,
+    "gates": [
+     {
+      "angle": -0.10557478911641031,
+      "road": true,
+      "x": 0.9944321564503709,
+      "z": -0.10537877498559736
+     },
+     {
+      "angle": 2.714771156641043,
+      "road": true,
+      "x": -0.9102861809784598,
+      "z": 0.4139795510887593
+     }
+    ]
+   }
+  },
+  {
+   "kind": "town_square",
+   "id": "miminhold_square",
+   "x": 1014.54,
+   "z": 1662.75,
+   "yaw": 0,
+   "data": {
+    "r": 2.79,
+    "town": "miminhold",
+    "culture": "halfling"
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_0",
+   "x": 1029.57,
+   "z": 1627.96,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      1029.57,
+      1627.96
+     ],
+     [
+      1003.03,
+      1659.98
+     ],
+     [
+      977.26,
+      1692.62
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_1",
+   "x": 980.67,
+   "z": 1636.41,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      980.67,
+      1636.41
+     ],
+     [
+      990,
+      1646.16
+     ],
+     [
+      1000,
+      1655.22
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_2",
+   "x": 988.65,
+   "z": 1631.62,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      988.65,
+      1631.62
+     ],
+     [
+      998.4,
+      1638.58
+     ],
+     [
+      1007.76,
+      1646.05
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_3",
+   "x": 1010.53,
+   "z": 1626.02,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1010.53,
+      1626.02
+     ],
+     [
+      1004.9,
+      1631.15
+     ],
+     [
+      999.91,
+      1636.9
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_4",
+   "x": 996.75,
+   "z": 1623.74,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      996.75,
+      1623.74
+     ],
+     [
+      1000.44,
+      1627.05
+     ],
+     [
+      1003.84,
+      1630.66
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_5",
+   "x": 1005.52,
+   "z": 1622.07,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1005.52,
+      1622.07
+     ],
+     [
+      1003.68,
+      1624
+     ],
+     [
+      1001.32,
+      1626.37
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_6",
+   "x": 1000.83,
+   "z": 1629.56,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1000.83,
+      1629.56
+     ],
+     [
+      998.65,
+      1631.56
+     ],
+     [
+      996.71,
+      1633.78
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_7",
+   "x": 1006.99,
+   "z": 1631.87,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1006.99,
+      1631.87
+     ],
+     [
+      1009.74,
+      1634.48
+     ],
+     [
+      1012.41,
+      1637.17
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_8",
+   "x": 998.52,
+   "z": 1641.59,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      998.52,
+      1641.59
+     ],
+     [
+      997.44,
+      1643.13
+     ],
+     [
+      996.55,
+      1644.78
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_9",
+   "x": 967.84,
+   "z": 1651.71,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      967.84,
+      1651.71
+     ],
+     [
+      975.79,
+      1660.61
+     ],
+     [
+      983.36,
+      1670
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_10",
+   "x": 991.36,
+   "z": 1653.35,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      991.36,
+      1653.35
+     ],
+     [
+      985.89,
+      1658.43
+     ],
+     [
+      980.29,
+      1663.39
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_11",
+   "x": 984.42,
+   "z": 1645.69,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      984.42,
+      1645.69
+     ],
+     [
+      979.01,
+      1650.85
+     ],
+     [
+      973.34,
+      1655.73
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_12",
+   "x": 972.91,
+   "z": 1648.13,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      972.91,
+      1648.13
+     ],
+     [
+      974.53,
+      1649.79
+     ],
+     [
+      976.02,
+      1651.56
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_13",
+   "x": 979.06,
+   "z": 1652.29,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      979.06,
+      1652.29
+     ],
+     [
+      981.78,
+      1655.12
+     ],
+     [
+      984.34,
+      1658.11
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_14",
+   "x": 984.07,
+   "z": 1661.57,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      984.07,
+      1661.57
+     ],
+     [
+      986.04,
+      1663.49
+     ],
+     [
+      987.77,
+      1665.64
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_15",
+   "x": 972.89,
+   "z": 1661.4,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      972.89,
+      1661.4
+     ],
+     [
+      968.62,
+      1664.45
+     ],
+     [
+      966.05,
+      1665.96
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_16",
+   "x": 969.4,
+   "z": 1665.26,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      969.4,
+      1665.26
+     ],
+     [
+      972.43,
+      1669.51
+     ],
+     [
+      975.07,
+      1674
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_17",
+   "x": 976.07,
+   "z": 1666.3,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      976.07,
+      1666.3
+     ],
+     [
+      974.53,
+      1667.32
+     ],
+     [
+      972.97,
+      1668.32
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_18",
+   "x": 970.43,
+   "z": 1669.29,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      970.43,
+      1669.29
+     ],
+     [
+      968.71,
+      1670.42
+     ],
+     [
+      966.97,
+      1671.53
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_19",
+   "x": 998.89,
+   "z": 1676.62,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      998.89,
+      1676.62
+     ],
+     [
+      1015.83,
+      1686.91
+     ],
+     [
+      1031.19,
+      1699.02
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_20",
+   "x": 1015.78,
+   "z": 1655.61,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1015.78,
+      1655.61
+     ],
+     [
+      1029.89,
+      1666.5
+     ],
+     [
+      1042.97,
+      1678.6
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_21",
+   "x": 1040.32,
+   "z": 1647.34,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1040.32,
+      1647.34
+     ],
+     [
+      1033.98,
+      1653.13
+     ],
+     [
+      1027.21,
+      1658.42
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_22",
+   "x": 1029.57,
+   "z": 1645.69,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1029.57,
+      1645.69
+     ],
+     [
+      1031.69,
+      1648.33
+     ],
+     [
+      1033.94,
+      1650.86
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_23",
+   "x": 1048.72,
+   "z": 1657.28,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1048.72,
+      1657.28
+     ],
+     [
+      1042.1,
+      1662.75
+     ],
+     [
+      1035.6,
+      1668.36
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_24",
+   "x": 1034.25,
+   "z": 1654.34,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1034.25,
+      1654.34
+     ],
+     [
+      1037.5,
+      1658.4
+     ],
+     [
+      1040.96,
+      1662.28
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_25",
+   "x": 1043.56,
+   "z": 1651.17,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1043.56,
+      1651.17
+     ],
+     [
+      1040.57,
+      1653.77
+     ],
+     [
+      1037.52,
+      1656.28
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_26",
+   "x": 1036.71,
+   "z": 1659.17,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1036.71,
+      1659.17
+     ],
+     [
+      1034.06,
+      1661.28
+     ],
+     [
+      1031.53,
+      1663.54
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_27",
+   "x": 1040.61,
+   "z": 1665.67,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1040.61,
+      1665.67
+     ],
+     [
+      1042.39,
+      1667.99
+     ],
+     [
+      1044.39,
+      1670.14
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_28",
+   "x": 1045.85,
+   "z": 1661.24,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1045.85,
+      1661.24
+     ],
+     [
+      1047.64,
+      1663.57
+     ],
+     [
+      1049.63,
+      1665.72
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_29",
+   "x": 1030.35,
+   "z": 1671.25,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1030.35,
+      1671.25
+     ],
+     [
+      1025.18,
+      1677.62
+     ],
+     [
+      1020.43,
+      1684.31
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_30",
+   "x": 1025.24,
+   "z": 1667.37,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1025.24,
+      1667.37
+     ],
+     [
+      1020.29,
+      1673.91
+     ],
+     [
+      1015.32,
+      1680.43
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_31",
+   "x": 1007.35,
+   "z": 1668.46,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1007.35,
+      1668.46
+     ],
+     [
+      1012.09,
+      1672.54
+     ],
+     [
+      1017.29,
+      1676.01
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_32",
+   "x": 1018.99,
+   "z": 1662.63,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1018.99,
+      1662.63
+     ],
+     [
+      1015.98,
+      1666.75
+     ],
+     [
+      1012.82,
+      1670.76
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_33",
+   "x": 1010.29,
+   "z": 1664.58,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1010.29,
+      1664.58
+     ],
+     [
+      1012.02,
+      1666.07
+     ],
+     [
+      1013.92,
+      1667.33
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_34",
+   "x": 1015.4,
+   "z": 1669.34,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1015.4,
+      1669.34
+     ],
+     [
+      1017.63,
+      1670.98
+     ],
+     [
+      1019.81,
+      1672.69
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_35",
+   "x": 1011.13,
+   "z": 1673.2,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1011.13,
+      1673.2
+     ],
+     [
+      1010.1,
+      1674.44
+     ],
+     [
+      1009.18,
+      1675.76
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_36",
+   "x": 1020.79,
+   "z": 1675.07,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1020.79,
+      1675.07
+     ],
+     [
+      1022.36,
+      1676.25
+     ],
+     [
+      1023.92,
+      1677.45
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_37",
+   "x": 1026.69,
+   "z": 1678.33,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1026.69,
+      1678.33
+     ],
+     [
+      1031.25,
+      1681.36
+     ],
+     [
+      1035.4,
+      1684.94
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_38",
+   "x": 1036.34,
+   "z": 1675.8,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1036.34,
+      1675.8
+     ],
+     [
+      1034.4,
+      1678.35
+     ],
+     [
+      1032.47,
+      1680.9
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_39",
+   "x": 1030.96,
+   "z": 1683.39,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1030.96,
+      1683.39
+     ],
+     [
+      1028.81,
+      1686.21
+     ],
+     [
+      1026.67,
+      1689.04
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_40",
+   "x": 1015.99,
+   "z": 1693.57,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1015.99,
+      1693.57
+     ],
+     [
+      1011.9,
+      1700.59
+     ],
+     [
+      1009.39,
+      1705.98
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_41",
+   "x": 1008.14,
+   "z": 1689.9,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1008.14,
+      1689.9
+     ],
+     [
+      1005.27,
+      1696.89
+     ],
+     [
+      1002,
+      1703.71
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_42",
+   "x": 995.25,
+   "z": 1689.05,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      995.25,
+      1689.05
+     ],
+     [
+      1000.23,
+      1691.16
+     ],
+     [
+      1005.13,
+      1693.45
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_43",
+   "x": 999.86,
+   "z": 1686.21,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      999.86,
+      1686.21
+     ],
+     [
+      999.25,
+      1687.73
+     ],
+     [
+      998.53,
+      1689.19
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_44",
+   "x": 1001.2,
+   "z": 1693.02,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1001.2,
+      1693.02
+     ],
+     [
+      999.08,
+      1697.24
+     ],
+     [
+      997.36,
+      1701.65
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_45",
+   "x": 1005.34,
+   "z": 1699.43,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1005.34,
+      1699.43
+     ],
+     [
+      1007.45,
+      1700.49
+     ],
+     [
+      1009.65,
+      1701.34
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_46",
+   "x": 1014.75,
+   "z": 1701.33,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1014.75,
+      1701.33
+     ],
+     [
+      1017.81,
+      1703.58
+     ],
+     [
+      1019.06,
+      1704.52
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_47",
+   "x": 974.25,
+   "z": 1689,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      974.25,
+      1689
+     ],
+     [
+      977.86,
+      1691.85
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_48",
+   "x": 1015.83,
+   "z": 1686.91,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1015.83,
+      1686.91
+     ],
+     [
+      1020.43,
+      1684.31
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_49",
+   "x": 1003.03,
+   "z": 1659.98,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1003.03,
+      1659.98
+     ],
+     [
+      1010.29,
+      1664.58
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_50",
+   "x": 1015.99,
+   "z": 1693.57,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1015.99,
+      1693.57
+     ],
+     [
+      1019.17,
+      1689.54
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_51",
+   "x": 1007.76,
+   "z": 1646.05,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1007.76,
+      1646.05
+     ],
+     [
+      1011.8,
+      1649.4
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_52",
+   "x": 1000,
+   "z": 1655.22,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1000,
+      1655.22
+     ],
+     [
+      1004.13,
+      1658.65
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_53",
+   "x": 1014.75,
+   "z": 1701.33,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1014.75,
+      1701.33
+     ],
+     [
+      1012.3,
+      1699.9
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "miminhold_street_54",
+   "x": 984.42,
+   "z": 1645.69,
+   "yaw": 0,
+   "data": {
+    "town": "miminhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      984.42,
+      1645.69
+     ],
+     [
+      987.09,
+      1643.13
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "building",
+   "id": "miminhold_plot_0",
+   "x": 995.82,
+   "z": 1628.79,
+   "yaw": 0.7975,
+   "data": {
+    "town": "miminhold",
+    "want": "house",
+    "district": "residential",
+    "w": 4.53,
+    "d": 4.7,
+    "angle": 0.7733,
+    "front": 0.7733,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "miminhold_plot_1",
+   "x": 1012.43,
+   "z": 1631.72,
+   "yaw": -0.7733,
+   "data": {
+    "town": "miminhold",
+    "want": "house",
+    "district": "residential",
+    "w": 6.39,
+    "d": 4.31,
+    "angle": 0.7733,
+    "front": 2.3441,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "miminhold_plot_2",
+   "x": 1006.31,
+   "z": 1637.99,
+   "yaw": 2.3683,
+   "data": {
+    "town": "miminhold",
+    "want": "market",
+    "district": "residential",
+    "w": 6.39,
+    "d": 6.19,
+    "angle": 0.7733,
+    "front": 5.4857,
+    "streetGap": -0.29
+   }
+  },
+  {
+   "kind": "building",
+   "id": "miminhold_plot_3",
+   "x": 985.26,
+   "z": 1651.97,
+   "yaw": -0.8342,
+   "data": {
+    "town": "miminhold",
+    "want": "inn",
+    "district": "residential",
+    "w": 6.66,
+    "d": 5.99,
+    "angle": 0.8342,
+    "front": 2.405,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "miminhold_plot_4",
+   "x": 978.83,
+   "z": 1657.8,
+   "yaw": -2.405,
+   "data": {
+    "town": "miminhold",
+    "want": "house",
+    "district": "residential",
+    "w": 6.66,
+    "d": 4.14,
+    "angle": 0.8342,
+    "front": 3.9758,
+    "streetGap": -0.28
+   }
+  },
+  {
+   "kind": "building",
+   "id": "miminhold_plot_5",
+   "x": 990.43,
+   "z": 1659.51,
+   "yaw": -0.8342,
+   "data": {
+    "town": "miminhold",
+    "want": "hut",
+    "district": "craft",
+    "w": 4.3,
+    "d": 8.46,
+    "angle": 0.8342,
+    "front": 2.405,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "miminhold_plot_6",
+   "x": 1034.94,
+   "z": 1645.59,
+   "yaw": -0.8695,
+   "data": {
+    "town": "miminhold",
+    "want": "house",
+    "district": "residential",
+    "w": 5.58,
+    "d": 4.77,
+    "angle": 0.8695,
+    "front": 2.4402,
+    "streetGap": -0.24
+   }
+  },
+  {
+   "kind": "building",
+   "id": "miminhold_plot_7",
+   "x": 1027.47,
+   "z": 1651.89,
+   "yaw": 2.2721,
+   "data": {
+    "town": "miminhold",
+    "want": "forge",
+    "district": "craft",
+    "w": 5.58,
+    "d": 7.64,
+    "angle": 0.8695,
+    "front": 5.5818,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "miminhold_plot_8",
+   "x": 1043.11,
+   "z": 1656.77,
+   "yaw": -2.4402,
+   "data": {
+    "town": "miminhold",
+    "want": "house",
+    "district": "residential",
+    "w": 4.45,
+    "d": 6.71,
+    "angle": 0.8695,
+    "front": 4.011,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "miminhold_plot_9",
+   "x": 1020.22,
+   "z": 1667.57,
+   "yaw": -0.6495,
+   "data": {
+    "town": "miminhold",
+    "want": "hut",
+    "district": "civic",
+    "w": 4.34,
+    "d": 5.18,
+    "angle": 0.6495,
+    "front": 2.2202,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "miminhold_plot_10",
+   "x": 1031.51,
+   "z": 1676.15,
+   "yaw": 0.9213,
+   "data": {
+    "town": "miminhold",
+    "want": "hut",
+    "district": "craft",
+    "w": 3.86,
+    "d": 5.2,
+    "angle": 0.6495,
+    "front": 0.6495,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "miminhold_plot_11",
+   "x": 1025.8,
+   "z": 1683.93,
+   "yaw": 0.9213,
+   "data": {
+    "town": "miminhold",
+    "want": "hut",
+    "district": "craft",
+    "w": 4.16,
+    "d": 5.9,
+    "angle": 0.6495,
+    "front": 0.6495,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "miminhold_plot_12",
+   "x": 995.46,
+   "z": 1695.63,
+   "yaw": 1.152,
+   "data": {
+    "town": "miminhold",
+    "want": "granary",
+    "district": "residential",
+    "w": 4.52,
+    "d": 8.24,
+    "angle": 0.4188,
+    "front": 0.4188,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "miminhold_plot_13",
+   "x": 1009.75,
+   "z": 1695.33,
+   "yaw": -1.9896,
+   "data": {
+    "town": "miminhold",
+    "want": "house",
+    "district": "residential",
+    "w": 3.52,
+    "d": 7.43,
+    "angle": 0.4188,
+    "front": 3.5604,
+    "streetGap": -0.31
+   }
+  },
+  {
+   "kind": "town_square",
+   "id": "ashhaven_square",
+   "x": 765.06,
+   "z": 947.04,
+   "yaw": 0,
+   "data": {
+    "r": 4.53,
+    "town": "ashhaven",
+    "culture": "halfling"
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashhaven_street_0",
+   "x": 788.72,
+   "z": 912.5,
+   "yaw": 0,
+   "data": {
+    "town": "ashhaven",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      788.72,
+      912.5
+     ],
+     [
+      761.59,
+      935.75
+     ],
+     [
+      732.35,
+      956.26
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashhaven_street_1",
+   "x": 752.01,
+   "z": 914.89,
+   "yaw": 0,
+   "data": {
+    "town": "ashhaven",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      752.01,
+      914.89
+     ],
+     [
+      754.71,
+      920.8
+     ],
+     [
+      758.01,
+      926.41
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashhaven_street_2",
+   "x": 759.58,
+   "z": 912.81,
+   "yaw": 0,
+   "data": {
+    "town": "ashhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      759.58,
+      912.81
+     ],
+     [
+      762.67,
+      917.1
+     ],
+     [
+      766.13,
+      921.11
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashhaven_street_3",
+   "x": 736.54,
+   "z": 923.26,
+   "yaw": 0,
+   "data": {
+    "town": "ashhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      736.54,
+      923.26
+     ],
+     [
+      739.46,
+      928.64
+     ],
+     [
+      741.84,
+      934.29
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashhaven_street_4",
+   "x": 746.32,
+   "z": 919.77,
+   "yaw": 0,
+   "data": {
+    "town": "ashhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      746.32,
+      919.77
+     ],
+     [
+      747.6,
+      924.9
+     ],
+     [
+      749.4,
+      929.87
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashhaven_street_5",
+   "x": 751.63,
+   "z": 921.28,
+   "yaw": 0,
+   "data": {
+    "town": "ashhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      751.63,
+      921.28
+     ],
+     [
+      750.09,
+      921.86
+     ],
+     [
+      748.5,
+      922.24
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashhaven_street_6",
+   "x": 746.27,
+   "z": 924.27,
+   "yaw": 0,
+   "data": {
+    "town": "ashhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      746.27,
+      924.27
+     ],
+     [
+      743.5,
+      925.21
+     ],
+     [
+      740.69,
+      925.98
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashhaven_street_7",
+   "x": 738.79,
+   "z": 931.63,
+   "yaw": 0,
+   "data": {
+    "town": "ashhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      738.79,
+      931.63
+     ],
+     [
+      735.84,
+      933.21
+     ],
+     [
+      732.98,
+      934.93
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashhaven_street_8",
+   "x": 775.84,
+   "z": 928.82,
+   "yaw": 0,
+   "data": {
+    "town": "ashhaven",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      775.84,
+      928.82
+     ],
+     [
+      789.09,
+      945.67
+     ],
+     [
+      802.09,
+      960.09
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashhaven_street_9",
+   "x": 804.37,
+   "z": 935.38,
+   "yaw": 0,
+   "data": {
+    "town": "ashhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      804.37,
+      935.38
+     ],
+     [
+      798.79,
+      939.69
+     ],
+     [
+      792.95,
+      943.64
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashhaven_street_10",
+   "x": 798.95,
+   "z": 928.75,
+   "yaw": 0,
+   "data": {
+    "town": "ashhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      798.95,
+      928.75
+     ],
+     [
+      794.19,
+      932.95
+     ],
+     [
+      789.36,
+      937.08
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashhaven_street_11",
+   "x": 786.16,
+   "z": 925.75,
+   "yaw": 0,
+   "data": {
+    "town": "ashhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      786.16,
+      925.75
+     ],
+     [
+      789.06,
+      929.52
+     ],
+     [
+      792.39,
+      932.92
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashhaven_street_12",
+   "x": 794.64,
+   "z": 934.01,
+   "yaw": 0,
+   "data": {
+    "town": "ashhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      794.64,
+      934.01
+     ],
+     [
+      796.12,
+      935.78
+     ],
+     [
+      797.66,
+      937.49
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashhaven_street_13",
+   "x": 805.54,
+   "z": 947.45,
+   "yaw": 0,
+   "data": {
+    "town": "ashhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      805.54,
+      947.45
+     ],
+     [
+      804.59,
+      947.96
+     ],
+     [
+      799.17,
+      951.25
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashhaven_street_14",
+   "x": 800.52,
+   "z": 940.8,
+   "yaw": 0,
+   "data": {
+    "town": "ashhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      800.52,
+      940.8
+     ],
+     [
+      802.22,
+      943.93
+     ],
+     [
+      804.05,
+      947
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashhaven_street_15",
+   "x": 804.64,
+   "z": 949.62,
+   "yaw": 0,
+   "data": {
+    "town": "ashhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      804.64,
+      949.62
+     ],
+     [
+      805.13,
+      950.51
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashhaven_street_16",
+   "x": 756.59,
+   "z": 948.68,
+   "yaw": 0,
+   "data": {
+    "town": "ashhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      756.59,
+      948.68
+     ],
+     [
+      769.76,
+      961.73
+     ],
+     [
+      784.31,
+      973.21
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashhaven_street_17",
+   "x": 781.4,
+   "z": 947.02,
+   "yaw": 0,
+   "data": {
+    "town": "ashhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      781.4,
+      947.02
+     ],
+     [
+      777.11,
+      952.71
+     ],
+     [
+      772.96,
+      958.49
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashhaven_street_18",
+   "x": 766.82,
+   "z": 941.26,
+   "yaw": 0,
+   "data": {
+    "town": "ashhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      766.82,
+      941.26
+     ],
+     [
+      772.41,
+      945.46
+     ],
+     [
+      778.07,
+      949.55
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashhaven_street_19",
+   "x": 777.38,
+   "z": 944.06,
+   "yaw": 0,
+   "data": {
+    "town": "ashhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      777.38,
+      944.06
+     ],
+     [
+      776.61,
+      945.26
+     ],
+     [
+      775.69,
+      946.35
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashhaven_street_20",
+   "x": 770.27,
+   "z": 945.25,
+   "yaw": 0,
+   "data": {
+    "town": "ashhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      770.27,
+      945.25
+     ],
+     [
+      767.61,
+      948.92
+     ],
+     [
+      764.89,
+      952.55
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashhaven_street_21",
+   "x": 790.57,
+   "z": 953.77,
+   "yaw": 0,
+   "data": {
+    "town": "ashhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      790.57,
+      953.77
+     ],
+     [
+      786.31,
+      959.48
+     ],
+     [
+      782.12,
+      965.24
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashhaven_street_22",
+   "x": 780.06,
+   "z": 950.83,
+   "yaw": 0,
+   "data": {
+    "town": "ashhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      780.06,
+      950.83
+     ],
+     [
+      783.54,
+      953.74
+     ],
+     [
+      787.35,
+      956.2
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashhaven_street_23",
+   "x": 787.48,
+   "z": 959.91,
+   "yaw": 0,
+   "data": {
+    "town": "ashhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      787.48,
+      959.91
+     ],
+     [
+      788.9,
+      960.84
+     ],
+     [
+      790.21,
+      961.92
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashhaven_street_24",
+   "x": 764.54,
+   "z": 960.16,
+   "yaw": 0,
+   "data": {
+    "town": "ashhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      764.54,
+      960.16
+     ],
+     [
+      758.19,
+      966.3
+     ],
+     [
+      751.23,
+      971.74
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashhaven_street_25",
+   "x": 753.55,
+   "z": 957.7,
+   "yaw": 0,
+   "data": {
+    "town": "ashhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      753.55,
+      957.7
+     ],
+     [
+      755.97,
+      960.56
+     ],
+     [
+      758.48,
+      963.36
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashhaven_street_26",
+   "x": 747.55,
+   "z": 962.92,
+   "yaw": 0,
+   "data": {
+    "town": "ashhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      747.55,
+      962.92
+     ],
+     [
+      749.94,
+      965.81
+     ],
+     [
+      752.48,
+      968.58
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashhaven_street_27",
+   "x": 771.48,
+   "z": 968.13,
+   "yaw": 0,
+   "data": {
+    "town": "ashhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      771.48,
+      968.13
+     ],
+     [
+      764.52,
+      973.57
+     ],
+     [
+      758.17,
+      979.72
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashhaven_street_28",
+   "x": 760.47,
+   "z": 965.77,
+   "yaw": 0,
+   "data": {
+    "town": "ashhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      760.47,
+      965.77
+     ],
+     [
+      762.8,
+      968.67
+     ],
+     [
+      765.35,
+      971.39
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashhaven_street_29",
+   "x": 766.93,
+   "z": 974.17,
+   "yaw": 0,
+   "data": {
+    "town": "ashhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      766.93,
+      974.17
+     ],
+     [
+      769.78,
+      977.81
+     ],
+     [
+      772.99,
+      981.13
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashhaven_street_30",
+   "x": 740.83,
+   "z": 970.14,
+   "yaw": 0,
+   "data": {
+    "town": "ashhaven",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      740.83,
+      970.14
+     ],
+     [
+      748.37,
+      963.91
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashhaven_street_31",
+   "x": 769.76,
+   "z": 961.73,
+   "yaw": 0,
+   "data": {
+    "town": "ashhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      769.76,
+      961.73
+     ],
+     [
+      772.96,
+      958.49
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashhaven_street_32",
+   "x": 761.59,
+   "z": 935.75,
+   "yaw": 0,
+   "data": {
+    "town": "ashhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      761.59,
+      935.75
+     ],
+     [
+      766.82,
+      941.26
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashhaven_street_33",
+   "x": 799.17,
+   "z": 951.25,
+   "yaw": 0,
+   "data": {
+    "town": "ashhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      799.17,
+      951.25
+     ],
+     [
+      796.39,
+      953.77
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashhaven_street_34",
+   "x": 758.01,
+   "z": 926.41,
+   "yaw": 0,
+   "data": {
+    "town": "ashhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      758.01,
+      926.41
+     ],
+     [
+      764.15,
+      933.56
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashhaven_street_35",
+   "x": 759.58,
+   "z": 912.81,
+   "yaw": 0,
+   "data": {
+    "town": "ashhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      759.58,
+      912.81
+     ],
+     [
+      752.53,
+      916.03
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "building",
+   "id": "ashhaven_plot_0",
+   "x": 766.85,
+   "z": 913.8,
+   "yaw": -1.0631,
+   "data": {
+    "town": "ashhaven",
+    "want": "house",
+    "district": "residential",
+    "w": 7.52,
+    "d": 5.01,
+    "angle": 1.0631,
+    "front": 2.6339,
+    "streetGap": 0.74
+   }
+  },
+  {
+   "kind": "building",
+   "id": "ashhaven_plot_1",
+   "x": 744.56,
+   "z": 928.69,
+   "yaw": -2.8457,
+   "data": {
+    "town": "ashhaven",
+    "want": "house",
+    "district": "residential",
+    "w": 3.88,
+    "d": 4.63,
+    "angle": 1.2749,
+    "front": 4.4165,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "ashhaven_plot_2",
+   "x": 792.7,
+   "z": 926.36,
+   "yaw": 0.7148,
+   "data": {
+    "town": "ashhaven",
+    "want": "house",
+    "district": "residential",
+    "w": 8.3,
+    "d": 5.09,
+    "angle": 0.856,
+    "front": 0.856,
+    "streetGap": -0.33
+   }
+  },
+  {
+   "kind": "building",
+   "id": "ashhaven_plot_3",
+   "x": 799.02,
+   "z": 945.76,
+   "yaw": 2.0888,
+   "data": {
+    "town": "ashhaven",
+    "want": "house",
+    "district": "residential",
+    "w": 5.94,
+    "d": 3.98,
+    "angle": 1.0528,
+    "front": 5.7651,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "ashhaven_plot_4",
+   "x": 771.59,
+   "z": 951.86,
+   "yaw": -2.2056,
+   "data": {
+    "town": "ashhaven",
+    "want": "hut",
+    "district": "civic",
+    "w": 6.5,
+    "d": 7.86,
+    "angle": 0.6348,
+    "front": 3.7764,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "ashhaven_plot_5",
+   "x": 780.22,
+   "z": 958.25,
+   "yaw": 2.5068,
+   "data": {
+    "town": "ashhaven",
+    "want": "granary",
+    "district": "craft",
+    "w": 7.86,
+    "d": 7.8,
+    "angle": 0.6348,
+    "front": 5.3472,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "ashhaven_plot_6",
+   "x": 758.97,
+   "z": 957.96,
+   "yaw": -0.8548,
+   "data": {
+    "town": "ashhaven",
+    "want": "hut",
+    "district": "civic",
+    "w": 6.31,
+    "d": 4.33,
+    "angle": 0.8548,
+    "front": 2.4256,
+    "streetGap": -0.3
+   }
+  },
+  {
+   "kind": "building",
+   "id": "ashhaven_plot_7",
+   "x": 753.03,
+   "z": 963.13,
+   "yaw": 2.2868,
+   "data": {
+    "town": "ashhaven",
+    "want": "hut",
+    "district": "craft",
+    "w": 6.31,
+    "d": 4.41,
+    "angle": 0.8548,
+    "front": 5.5672,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "ashhaven_plot_8",
+   "x": 765.93,
+   "z": 965.95,
+   "yaw": -0.8548,
+   "data": {
+    "town": "ashhaven",
+    "want": "hut",
+    "district": "craft",
+    "w": 6.24,
+    "d": 4.32,
+    "angle": 0.8548,
+    "front": 2.4256,
+    "streetGap": -0.11
+   }
+  },
+  {
+   "kind": "building",
+   "id": "ashhaven_plot_9",
+   "x": 758.33,
+   "z": 972.56,
+   "yaw": 2.2868,
+   "data": {
+    "town": "ashhaven",
+    "want": "shrine",
+    "district": "residential",
+    "w": 6.24,
+    "d": 8.44,
+    "angle": 0.8548,
+    "front": 5.5672,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "ashhaven_plot_10",
+   "x": 773.26,
+   "z": 974.78,
+   "yaw": -0.8548,
+   "data": {
+    "town": "ashhaven",
+    "want": "house",
+    "district": "residential",
+    "w": 8.03,
+    "d": 4.85,
+    "angle": 0.8548,
+    "front": 2.4256,
+    "streetGap": 0.08
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_92",
+   "x": 64,
+   "z": -576,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": false,
+    "pts": [
+     [
+      64,
+      -576,
+      62.11
+     ],
+     [
+      62,
+      -574,
+      61.85
+     ],
+     [
+      58,
+      -570,
+      61.72
+     ],
+     [
+      52,
+      -564,
+      61.73
+     ],
+     [
+      44,
+      -556,
+      61.6
+     ],
+     [
+      34,
+      -546,
+      61.33
+     ],
+     [
+      22,
+      -534,
+      61.19
+     ],
+     [
+      8,
+      -520,
+      61.11
+     ],
+     [
+      -8,
+      -504,
+      60.97
+     ],
+     [
+      -22,
+      -488,
+      60.91
+     ],
+     [
+      -34,
+      -472,
+      60.78
+     ],
+     [
+      -44,
+      -456,
+      60.79
+     ],
+     [
+      -52,
+      -440,
+      61.19
+     ],
+     [
+      -58,
+      -424,
+      61.82
+     ],
+     [
+      -62,
+      -408,
+      62.69
+     ],
+     [
+      -64,
+      -392,
+      64.15
+     ],
+     [
+      -64,
+      -376,
+      65.74
+     ],
+     [
+      -64,
+      -360,
+      67.6
+     ],
+     [
+      -64,
+      -344,
+      69.51
+     ],
+     [
+      -64,
+      -328,
+      71.59
+     ],
+     [
+      -64,
+      -312,
+      74.01
+     ],
+     [
+      -64,
+      -296,
+      76.55
+     ],
+     [
+      -64,
+      -280,
+      78.91
+     ],
+     [
+      -64,
+      -264,
+      81.26
+     ],
+     [
+      -64,
+      -248,
+      83.4
+     ],
+     [
+      -62,
+      -232,
+      85.3
+     ],
+     [
+      -58,
+      -216,
+      86.88
+     ],
+     [
+      -52,
+      -200,
+      87.77
+     ],
+     [
+      -44,
+      -184,
+      88.09
+     ],
+     [
+      -34,
+      -168,
+      87.83
+     ],
+     [
+      -22,
+      -152,
+      87.49
+     ],
+     [
+      -8,
+      -136,
+      87.29
+     ],
+     [
+      8,
+      -120,
+      87.21
+     ],
+     [
+      22,
+      -104,
+      87.48
+     ],
+     [
+      34,
+      -88,
+      88
+     ],
+     [
+      44,
+      -72,
+      89
+     ],
+     [
+      52,
+      -56,
+      90.7
+     ],
+     [
+      58,
+      -40,
+      92.65
+     ],
+     [
+      62,
+      -24,
+      94.85
+     ],
+     [
+      64,
+      -8,
+      97.28
+     ],
+     [
+      64,
+      8,
+      99.72
+     ],
+     [
+      64,
+      24,
+      102.35
+     ],
+     [
+      64,
+      40,
+      105.08
+     ],
+     [
+      64,
+      56,
+      107.67
+     ],
+     [
+      64,
+      72,
+      109.92
+     ],
+     [
+      64,
+      88,
+      111.95
+     ],
+     [
+      64,
+      104,
+      113.89
+     ],
+     [
+      64,
+      120,
+      115.53
+     ],
+     [
+      64,
+      136,
+      117
+     ],
+     [
+      64,
+      150,
+      118.21
+     ],
+     [
+      64,
+      162,
+      119.11
+     ],
+     [
+      64,
+      172,
+      119.97
+     ],
+     [
+      64,
+      180,
+      120.58
+     ],
+     [
+      64,
+      186,
+      120.87
+     ],
+     [
+      64,
+      190,
+      121.12
+     ],
+     [
+      64,
+      192,
+      121.24
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_94",
+   "x": 64,
+   "z": 192,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": false,
+    "pts": [
+     [
+      64,
+      192,
+      121.57
+     ],
+     [
+      64,
+      194,
+      121.69
+     ],
+     [
+      64,
+      198,
+      121.78
+     ],
+     [
+      64,
+      204,
+      121.76
+     ],
+     [
+      64,
+      212,
+      121.76
+     ],
+     [
+      64,
+      222,
+      121.97
+     ],
+     [
+      64,
+      234,
+      122.59
+     ],
+     [
+      64,
+      248,
+      123.39
+     ],
+     [
+      64,
+      264,
+      124.49
+     ],
+     [
+      64,
+      280,
+      125.8
+     ],
+     [
+      64,
+      296,
+      127.66
+     ],
+     [
+      64,
+      312,
+      129.87
+     ],
+     [
+      64,
+      328,
+      132.04
+     ],
+     [
+      64,
+      344,
+      134.14
+     ],
+     [
+      64,
+      360,
+      136.39
+     ],
+     [
+      64,
+      376,
+      138.53
+     ],
+     [
+      64,
+      392,
+      140.63
+     ],
+     [
+      66,
+      408,
+      142.2
+     ],
+     [
+      70,
+      424,
+      143.6
+     ],
+     [
+      76,
+      440,
+      145.11
+     ],
+     [
+      84,
+      456,
+      146.57
+     ],
+     [
+      94,
+      472,
+      148.12
+     ],
+     [
+      106,
+      488,
+      149.65
+     ],
+     [
+      120,
+      504,
+      151.11
+     ],
+     [
+      136,
+      520,
+      152.58
+     ],
+     [
+      150,
+      536,
+      153.92
+     ],
+     [
+      162,
+      552,
+      155.16
+     ],
+     [
+      172,
+      568,
+      156.04
+     ],
+     [
+      180,
+      584,
+      156.55
+     ],
+     [
+      186,
+      600,
+      157.29
+     ],
+     [
+      190,
+      616,
+      158.24
+     ],
+     [
+      192,
+      632,
+      159.47
+     ],
+     [
+      192,
+      648,
+      160.94
+     ],
+     [
+      194,
+      664,
+      162.28
+     ],
+     [
+      198,
+      680,
+      163.81
+     ],
+     [
+      204,
+      696,
+      165.35
+     ],
+     [
+      212,
+      712,
+      166.58
+     ],
+     [
+      222,
+      728,
+      167.61
+     ],
+     [
+      234,
+      744,
+      168.5
+     ],
+     [
+      248,
+      760,
+      169.08
+     ],
+     [
+      264,
+      776,
+      169.31
+     ],
+     [
+      280,
+      792,
+      169.23
+     ],
+     [
+      296,
+      808,
+      169.02
+     ],
+     [
+      312,
+      824,
+      168.93
+     ],
+     [
+      328,
+      840,
+      168.79
+     ],
+     [
+      344,
+      856,
+      169.03
+     ],
+     [
+      360,
+      872,
+      169.86
+     ],
+     [
+      376,
+      888,
+      171.73
+     ],
+     [
+      392,
+      904,
+      174.31
+     ],
+     [
+      408,
+      918,
+      177.36
+     ],
+     [
+      424,
+      930,
+      180.35
+     ],
+     [
+      440,
+      940,
+      183.42
+     ],
+     [
+      456,
+      948,
+      186.02
+     ],
+     [
+      472,
+      954,
+      187.89
+     ],
+     [
+      488,
+      958,
+      188.9
+     ],
+     [
+      504,
+      960,
+      189.32
+     ],
+     [
+      520,
+      960,
+      189.11
+     ],
+     [
+      536,
+      962,
+      188.76
+     ],
+     [
+      552,
+      966,
+      188.1
+     ],
+     [
+      568,
+      972,
+      187.37
+     ],
+     [
+      584,
+      980,
+      187.08
+     ],
+     [
+      600,
+      990,
+      187.21
+     ],
+     [
+      616,
+      1002,
+      187.36
+     ],
+     [
+      632,
+      1016,
+      187.69
+     ],
+     [
+      648,
+      1032,
+      188
+     ],
+     [
+      662,
+      1046,
+      188.33
+     ],
+     [
+      674,
+      1058,
+      188.8
+     ],
+     [
+      684,
+      1068,
+      189.1
+     ],
+     [
+      692,
+      1076,
+      189.11
+     ],
+     [
+      698,
+      1082,
+      189.12
+     ],
+     [
+      702,
+      1086,
+      189.07
+     ],
+     [
+      704,
+      1088,
+      189.02
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_95",
+   "x": 704,
+   "z": 1088,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": false,
+    "pts": [
+     [
+      704,
+      1088,
+      190.26
+     ],
+     [
+      704,
+      1090,
+      190.67
+     ],
+     [
+      704,
+      1094,
+      191.24
+     ],
+     [
+      704,
+      1100,
+      191.96
+     ],
+     [
+      704,
+      1108,
+      193.34
+     ],
+     [
+      704,
+      1118,
+      195.07
+     ],
+     [
+      704,
+      1130,
+      196.81
+     ],
+     [
+      704,
+      1144,
+      198.39
+     ],
+     [
+      704,
+      1160,
+      199.93
+     ],
+     [
+      706,
+      1176,
+      201.24
+     ],
+     [
+      710,
+      1192,
+      202.01
+     ],
+     [
+      716,
+      1208,
+      202.15
+     ],
+     [
+      724,
+      1224,
+      202.1
+     ],
+     [
+      734,
+      1240,
+      202.36
+     ],
+     [
+      746,
+      1256,
+      203.13
+     ],
+     [
+      760,
+      1272,
+      204.03
+     ],
+     [
+      776,
+      1288,
+      204.95
+     ],
+     [
+      792,
+      1304,
+      205.93
+     ],
+     [
+      808,
+      1320,
+      206.74
+     ],
+     [
+      824,
+      1336,
+      207.04
+     ],
+     [
+      840,
+      1352,
+      206.55
+     ],
+     [
+      856,
+      1368,
+      205.55
+     ],
+     [
+      872,
+      1384,
+      204.28
+     ],
+     [
+      888,
+      1400,
+      203.19
+     ],
+     [
+      904,
+      1416,
+      202.33
+     ],
+     [
+      920,
+      1432,
+      201.85
+     ],
+     [
+      936,
+      1448,
+      201.73
+     ],
+     [
+      952,
+      1464,
+      201.92
+     ],
+     [
+      968,
+      1480,
+      202.19
+     ],
+     [
+      984,
+      1496,
+      202.71
+     ],
+     [
+      1000,
+      1512,
+      203.25
+     ],
+     [
+      1016,
+      1528,
+      203.91
+     ],
+     [
+      1032,
+      1544,
+      204.68
+     ],
+     [
+      1046,
+      1558,
+      205.47
+     ],
+     [
+      1058,
+      1570,
+      206.36
+     ],
+     [
+      1068,
+      1580,
+      207.17
+     ],
+     [
+      1076,
+      1588,
+      207.73
+     ],
+     [
+      1082,
+      1594,
+      208.03
+     ],
+     [
+      1086,
+      1598,
+      208.24
+     ],
+     [
+      1088,
+      1600,
+      208.34
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_96",
+   "x": 1088,
+   "z": 1600,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": false,
+    "pts": [
+     [
+      1088,
+      1600,
+      208.62
+     ],
+     [
+      1088,
+      1602,
+      209.06
+     ],
+     [
+      1088,
+      1606,
+      209.66
+     ],
+     [
+      1088,
+      1612,
+      210.18
+     ],
+     [
+      1088,
+      1620,
+      211.05
+     ],
+     [
+      1088,
+      1630,
+      212.02
+     ],
+     [
+      1088,
+      1642,
+      213.03
+     ],
+     [
+      1088,
+      1656,
+      214.02
+     ],
+     [
+      1088,
+      1672,
+      215.06
+     ],
+     [
+      1090,
+      1688,
+      216.01
+     ],
+     [
+      1094,
+      1704,
+      217.07
+     ],
+     [
+      1100,
+      1720,
+      218.3
+     ],
+     [
+      1108,
+      1736,
+      219.72
+     ],
+     [
+      1118,
+      1752,
+      221.27
+     ],
+     [
+      1130,
+      1768,
+      222.75
+     ],
+     [
+      1144,
+      1784,
+      224.12
+     ],
+     [
+      1160,
+      1800,
+      225.24
+     ],
+     [
+      1176,
+      1816,
+      226.21
+     ],
+     [
+      1192,
+      1832,
+      226.86
+     ],
+     [
+      1208,
+      1848,
+      227.23
+     ],
+     [
+      1224,
+      1864,
+      227.12
+     ],
+     [
+      1240,
+      1880,
+      226.76
+     ],
+     [
+      1256,
+      1896,
+      226.12
+     ],
+     [
+      1272,
+      1912,
+      225.23
+     ],
+     [
+      1288,
+      1928,
+      223.9
+     ],
+     [
+      1302,
+      1944,
+      222.3
+     ],
+     [
+      1314,
+      1960,
+      220.54
+     ],
+     [
+      1324,
+      1976,
+      219.14
+     ],
+     [
+      1332,
+      1992,
+      218.13
+     ],
+     [
+      1338,
+      2008,
+      217.42
+     ],
+     [
+      1342,
+      2024,
+      217.2
+     ],
+     [
+      1344,
+      2040,
+      217.55
+     ],
+     [
+      1344,
+      2056,
+      218.31
+     ],
+     [
+      1344,
+      2072,
+      219.04
+     ],
+     [
+      1344,
+      2088,
+      219.54
+     ],
+     [
+      1344,
+      2104,
+      220.03
+     ],
+     [
+      1344,
+      2120,
+      220.47
+     ],
+     [
+      1344,
+      2136,
+      220.92
+     ],
+     [
+      1344,
+      2152,
+      221.52
+     ],
+     [
+      1344,
+      2168,
+      222.36
+     ],
+     [
+      1344,
+      2184,
+      223.53
+     ],
+     [
+      1344,
+      2198,
+      224.95
+     ],
+     [
+      1344,
+      2210,
+      226.31
+     ],
+     [
+      1344,
+      2220,
+      227.7
+     ],
+     [
+      1344,
+      2228,
+      228.96
+     ],
+     [
+      1344,
+      2234,
+      229.64
+     ],
+     [
+      1344,
+      2238,
+      230.12
+     ],
+     [
+      1344,
+      2240,
+      230.52
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_98",
+   "x": 1344,
+   "z": 2240,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": false,
+    "pts": [
+     [
+      1344,
+      2240,
+      231.04
+     ],
+     [
+      1346,
+      2240,
+      230.89
+     ],
+     [
+      1350,
+      2240,
+      230.59
+     ],
+     [
+      1356,
+      2240,
+      230.37
+     ],
+     [
+      1364,
+      2240,
+      230.03
+     ],
+     [
+      1374,
+      2240,
+      229.58
+     ],
+     [
+      1386,
+      2240,
+      229.22
+     ],
+     [
+      1400,
+      2240,
+      228.95
+     ],
+     [
+      1416,
+      2240,
+      228.93
+     ],
+     [
+      1432,
+      2240,
+      229.11
+     ],
+     [
+      1448,
+      2240,
+      229.33
+     ],
+     [
+      1464,
+      2240,
+      229.84
+     ],
+     [
+      1480,
+      2240,
+      230.67
+     ],
+     [
+      1496,
+      2240,
+      231.58
+     ],
+     [
+      1512,
+      2240,
+      232.62
+     ],
+     [
+      1528,
+      2240,
+      233.57
+     ],
+     [
+      1544,
+      2240,
+      234.8
+     ],
+     [
+      1560,
+      2240,
+      236.06
+     ],
+     [
+      1576,
+      2240,
+      237.16
+     ],
+     [
+      1592,
+      2240,
+      238.32
+     ],
+     [
+      1608,
+      2240,
+      239.29
+     ],
+     [
+      1624,
+      2240,
+      240.06
+     ],
+     [
+      1640,
+      2240,
+      240.69
+     ],
+     [
+      1656,
+      2240,
+      240.8
+     ],
+     [
+      1672,
+      2240,
+      240.81
+     ],
+     [
+      1688,
+      2238,
+      240.65
+     ],
+     [
+      1704,
+      2234,
+      240.3
+     ],
+     [
+      1720,
+      2228,
+      239.97
+     ],
+     [
+      1736,
+      2220,
+      239.78
+     ],
+     [
+      1752,
+      2210,
+      239.42
+     ],
+     [
+      1768,
+      2198,
+      239.19
+     ],
+     [
+      1784,
+      2184,
+      238.59
+     ],
+     [
+      1800,
+      2168,
+      237.85
+     ],
+     [
+      1816,
+      2152,
+      236.87
+     ],
+     [
+      1832,
+      2136,
+      235.63
+     ],
+     [
+      1848,
+      2120,
+      233.94
+     ],
+     [
+      1864,
+      2104,
+      232.32
+     ],
+     [
+      1880,
+      2088,
+      230.9
+     ],
+     [
+      1896,
+      2072,
+      229.82
+     ],
+     [
+      1912,
+      2056,
+      228.84
+     ],
+     [
+      1928,
+      2040,
+      227.93
+     ],
+     [
+      1944,
+      2026,
+      227.39
+     ],
+     [
+      1960,
+      2014,
+      227.23
+     ],
+     [
+      1976,
+      2004,
+      227.23
+     ],
+     [
+      1992,
+      1996,
+      227.29
+     ],
+     [
+      2008,
+      1990,
+      227.52
+     ],
+     [
+      2024,
+      1986,
+      227.86
+     ],
+     [
+      2040,
+      1984,
+      228.37
+     ],
+     [
+      2056,
+      1984,
+      228.76
+     ],
+     [
+      2070,
+      1984,
+      228.99
+     ],
+     [
+      2082,
+      1984,
+      229.14
+     ],
+     [
+      2092,
+      1984,
+      229.08
+     ],
+     [
+      2100,
+      1984,
+      228.9
+     ],
+     [
+      2106,
+      1984,
+      228.8
+     ],
+     [
+      2110,
+      1984,
+      228.6
+     ],
+     [
+      2112,
+      1984,
+      228.38
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_99",
+   "x": 2112,
+   "z": 1984,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": false,
+    "pts": [
+     [
+      2112,
+      1984,
+      227.78
+     ],
+     [
+      2114,
+      1984,
+      227.54
+     ],
+     [
+      2118,
+      1984,
+      227.24
+     ],
+     [
+      2124,
+      1984,
+      226.97
+     ],
+     [
+      2132,
+      1984,
+      226.57
+     ],
+     [
+      2142,
+      1984,
+      226.16
+     ],
+     [
+      2154,
+      1984,
+      225.56
+     ],
+     [
+      2168,
+      1984,
+      224.81
+     ],
+     [
+      2184,
+      1984,
+      223.97
+     ],
+     [
+      2200,
+      1984,
+      223.29
+     ],
+     [
+      2216,
+      1984,
+      222.6
+     ],
+     [
+      2232,
+      1984,
+      221.92
+     ],
+     [
+      2248,
+      1984,
+      221.14
+     ],
+     [
+      2264,
+      1984,
+      220.53
+     ],
+     [
+      2280,
+      1984,
+      220.1
+     ],
+     [
+      2296,
+      1984,
+      219.75
+     ],
+     [
+      2312,
+      1984,
+      219.19
+     ],
+     [
+      2328,
+      1984,
+      218.49
+     ],
+     [
+      2344,
+      1984,
+      217.73
+     ],
+     [
+      2360,
+      1984,
+      216.99
+     ],
+     [
+      2376,
+      1984,
+      216.37
+     ],
+     [
+      2392,
+      1984,
+      215.92
+     ],
+     [
+      2408,
+      1984,
+      215.69
+     ],
+     [
+      2424,
+      1984,
+      215.71
+     ],
+     [
+      2440,
+      1984,
+      215.95
+     ],
+     [
+      2456,
+      1986,
+      216.46
+     ],
+     [
+      2472,
+      1990,
+      217.26
+     ],
+     [
+      2488,
+      1996,
+      218.44
+     ],
+     [
+      2504,
+      2004,
+      220.08
+     ],
+     [
+      2520,
+      2014,
+      222
+     ],
+     [
+      2536,
+      2026,
+      224.31
+     ],
+     [
+      2552,
+      2040,
+      227.03
+     ],
+     [
+      2568,
+      2056,
+      230.13
+     ],
+     [
+      2584,
+      2070,
+      233.38
+     ],
+     [
+      2600,
+      2082,
+      236.14
+     ],
+     [
+      2616,
+      2092,
+      238.45
+     ],
+     [
+      2632,
+      2100,
+      240.56
+     ],
+     [
+      2648,
+      2106,
+      242.19
+     ],
+     [
+      2664,
+      2110,
+      243.29
+     ],
+     [
+      2680,
+      2112,
+      243.84
+     ],
+     [
+      2696,
+      2112,
+      244.11
+     ],
+     [
+      2710,
+      2112,
+      244.45
+     ],
+     [
+      2722,
+      2112,
+      244.62
+     ],
+     [
+      2732,
+      2112,
+      244.55
+     ],
+     [
+      2740,
+      2112,
+      244.49
+     ],
+     [
+      2746,
+      2112,
+      244.55
+     ],
+     [
+      2750,
+      2112,
+      244.6
+     ],
+     [
+      2752,
+      2112,
+      244.6
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_122_0",
+   "x": 1088,
+   "z": 1600,
+   "yaw": 0,
+   "data": {
+    "cls": "road",
+    "width": 6,
+    "spur": false,
+    "pts": [
+     [
+      1088,
+      1600,
+      208.76
+     ],
+     [
+      1086,
+      1600,
+      209.14
+     ],
+     [
+      1082,
+      1600,
+      209.33
+     ],
+     [
+      1076,
+      1600,
+      209.44
+     ],
+     [
+      1068,
+      1600,
+      209.74
+     ],
+     [
+      1058,
+      1600,
+      209.98
+     ],
+     [
+      1046,
+      1600,
+      210.15
+     ],
+     [
+      1032,
+      1600,
+      210.28
+     ],
+     [
+      1019.36,
+      1600,
+      210.35
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_122_1",
+   "x": 954.7,
+   "z": 1701.2,
+   "yaw": 0,
+   "data": {
+    "cls": "road",
+    "width": 6,
+    "spur": false,
+    "pts": [
+     [
+      954.7,
+      1701.2,
+      215.69
+     ],
+     [
+      954,
+      1704,
+      215.88
+     ],
+     [
+      948,
+      1720,
+      217.35
+     ],
+     [
+      940,
+      1736,
+      219.26
+     ],
+     [
+      930,
+      1752,
+      221.27
+     ],
+     [
+      918,
+      1768,
+      223.16
+     ],
+     [
+      904,
+      1784,
+      224.73
+     ],
+     [
+      888,
+      1800,
+      225.6
+     ],
+     [
+      872,
+      1816,
+      226.06
+     ],
+     [
+      856,
+      1832,
+      225.82
+     ],
+     [
+      840,
+      1848,
+      225.35
+     ],
+     [
+      824,
+      1864,
+      225.08
+     ],
+     [
+      808,
+      1880,
+      225.11
+     ],
+     [
+      792,
+      1896,
+      225.51
+     ],
+     [
+      776,
+      1912,
+      226.52
+     ],
+     [
+      760,
+      1928,
+      227.77
+     ],
+     [
+      744,
+      1942,
+      229.46
+     ],
+     [
+      728,
+      1954,
+      231
+     ],
+     [
+      712,
+      1964,
+      231.99
+     ],
+     [
+      696,
+      1972,
+      232.58
+     ],
+     [
+      680,
+      1978,
+      232.84
+     ],
+     [
+      664,
+      1982,
+      232.85
+     ],
+     [
+      648,
+      1984,
+      232.88
+     ],
+     [
+      632,
+      1984,
+      232.99
+     ],
+     [
+      616,
+      1986,
+      233.06
+     ],
+     [
+      600,
+      1990,
+      233.35
+     ],
+     [
+      584,
+      1996,
+      233.48
+     ],
+     [
+      568,
+      2004,
+      233.81
+     ],
+     [
+      552,
+      2014,
+      234.67
+     ],
+     [
+      536,
+      2026,
+      236.32
+     ],
+     [
+      520,
+      2040,
+      238.66
+     ],
+     [
+      504,
+      2056,
+      241.92
+     ],
+     [
+      490,
+      2072,
+      246.03
+     ],
+     [
+      478,
+      2088,
+      251.37
+     ],
+     [
+      468,
+      2104,
+      257.09
+     ],
+     [
+      460,
+      2120,
+      262.71
+     ],
+     [
+      454,
+      2136,
+      267.9
+     ],
+     [
+      450,
+      2152,
+      272.65
+     ],
+     [
+      448,
+      2168,
+      277.06
+     ],
+     [
+      448,
+      2184,
+      281.05
+     ],
+     [
+      446,
+      2198,
+      284.01
+     ],
+     [
+      442,
+      2210,
+      286.56
+     ],
+     [
+      436,
+      2220,
+      288.53
+     ],
+     [
+      428,
+      2228,
+      289.82
+     ],
+     [
+      418,
+      2234,
+      290.5
+     ],
+     [
+      406,
+      2238,
+      290.66
+     ],
+     [
+      392,
+      2240,
+      290.45
+     ],
+     [
+      376,
+      2240,
+      290.32
+     ],
+     [
+      360,
+      2240,
+      290.14
+     ],
+     [
+      344,
+      2240,
+      290.23
+     ],
+     [
+      328,
+      2240,
+      290.7
+     ],
+     [
+      312,
+      2240,
+      291.44
+     ],
+     [
+      296,
+      2240,
+      292.14
+     ],
+     [
+      280,
+      2240,
+      292.88
+     ],
+     [
+      264,
+      2240,
+      293.74
+     ],
+     [
+      248,
+      2240,
+      294.84
+     ],
+     [
+      234,
+      2240,
+      295.96
+     ],
+     [
+      222,
+      2240,
+      296.98
+     ],
+     [
+      212,
+      2240,
+      297.97
+     ],
+     [
+      204,
+      2240,
+      299.04
+     ],
+     [
+      198,
+      2240,
+      299.69
+     ],
+     [
+      194,
+      2240,
+      300.35
+     ],
+     [
+      192,
+      2240,
+      300.95
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_302",
+   "x": 704,
+   "z": 1088,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": false,
+    "pts": [
+     [
+      704,
+      1088,
+      190.26
+     ],
+     [
+      704,
+      1090,
+      190.67
+     ],
+     [
+      704,
+      1094,
+      191.24
+     ],
+     [
+      704,
+      1100,
+      191.96
+     ],
+     [
+      704,
+      1108,
+      193.34
+     ],
+     [
+      704,
+      1118,
+      195.07
+     ],
+     [
+      704,
+      1130,
+      196.85
+     ],
+     [
+      704,
+      1144,
+      198.52
+     ],
+     [
+      704,
+      1160,
+      200.27
+     ],
+     [
+      704,
+      1176,
+      201.82
+     ],
+     [
+      704,
+      1192,
+      203.05
+     ],
+     [
+      704,
+      1208,
+      203.64
+     ],
+     [
+      704,
+      1224,
+      203.95
+     ],
+     [
+      704,
+      1240,
+      204.46
+     ],
+     [
+      704,
+      1256,
+      205.23
+     ],
+     [
+      704,
+      1272,
+      206.31
+     ],
+     [
+      704,
+      1288,
+      207.68
+     ],
+     [
+      704,
+      1304,
+      209.56
+     ],
+     [
+      704,
+      1320,
+      212.07
+     ],
+     [
+      704,
+      1336,
+      214.78
+     ],
+     [
+      704,
+      1352,
+      217.34
+     ],
+     [
+      704,
+      1368,
+      219.8
+     ],
+     [
+      704,
+      1384,
+      221.85
+     ],
+     [
+      704,
+      1400,
+      223.63
+     ],
+     [
+      704,
+      1416,
+      224.95
+     ],
+     [
+      704,
+      1432,
+      225.86
+     ],
+     [
+      704,
+      1448,
+      226.27
+     ],
+     [
+      704,
+      1464,
+      226.12
+     ],
+     [
+      704,
+      1480,
+      225.72
+     ],
+     [
+      704,
+      1496,
+      225.1
+     ],
+     [
+      704,
+      1512,
+      224.39
+     ],
+     [
+      704,
+      1528,
+      223.85
+     ],
+     [
+      704,
+      1544,
+      223.28
+     ],
+     [
+      702,
+      1560,
+      222.91
+     ],
+     [
+      698,
+      1576,
+      222.88
+     ],
+     [
+      692,
+      1592,
+      222.72
+     ],
+     [
+      684,
+      1608,
+      222.47
+     ],
+     [
+      674,
+      1624,
+      222.43
+     ],
+     [
+      662,
+      1640,
+      222.59
+     ],
+     [
+      648,
+      1656,
+      223.12
+     ],
+     [
+      632,
+      1672,
+      223.82
+     ],
+     [
+      618,
+      1688,
+      224.97
+     ],
+     [
+      606,
+      1704,
+      226.62
+     ],
+     [
+      596,
+      1720,
+      228.73
+     ],
+     [
+      588,
+      1736,
+      230.75
+     ],
+     [
+      582,
+      1752,
+      232.4
+     ],
+     [
+      578,
+      1768,
+      233.59
+     ],
+     [
+      576,
+      1784,
+      234.79
+     ],
+     [
+      576,
+      1800,
+      235.75
+     ],
+     [
+      574,
+      1816,
+      236.58
+     ],
+     [
+      570,
+      1832,
+      237.19
+     ],
+     [
+      564,
+      1848,
+      237.83
+     ],
+     [
+      556,
+      1864,
+      238.78
+     ],
+     [
+      546,
+      1880,
+      239.85
+     ],
+     [
+      534,
+      1896,
+      240.53
+     ],
+     [
+      520,
+      1912,
+      241.07
+     ],
+     [
+      504,
+      1928,
+      241.5
+     ],
+     [
+      488,
+      1942,
+      241.85
+     ],
+     [
+      472,
+      1954,
+      242.01
+     ],
+     [
+      456,
+      1964,
+      242
+     ],
+     [
+      440,
+      1972,
+      242.42
+     ],
+     [
+      424,
+      1978,
+      242.88
+     ],
+     [
+      408,
+      1982,
+      243.58
+     ],
+     [
+      392,
+      1984,
+      244.54
+     ],
+     [
+      376,
+      1984,
+      245.72
+     ],
+     [
+      362,
+      1986,
+      247.21
+     ],
+     [
+      350,
+      1990,
+      248.97
+     ],
+     [
+      340,
+      1996,
+      250.42
+     ],
+     [
+      332,
+      2004,
+      252.14
+     ],
+     [
+      326,
+      2014,
+      253.85
+     ],
+     [
+      322,
+      2026,
+      255.78
+     ],
+     [
+      320,
+      2040,
+      258.19
+     ],
+     [
+      320,
+      2056,
+      260.88
+     ],
+     [
+      320,
+      2072,
+      263.54
+     ],
+     [
+      320,
+      2088,
+      266.4
+     ],
+     [
+      320,
+      2104,
+      269.4
+     ],
+     [
+      320,
+      2120,
+      272.2
+     ],
+     [
+      320,
+      2136,
+      274.71
+     ],
+     [
+      320,
+      2152,
+      277
+     ],
+     [
+      320,
+      2168,
+      279.05
+     ],
+     [
+      320,
+      2184,
+      281.02
+     ],
+     [
+      318,
+      2198,
+      282.94
+     ],
+     [
+      314,
+      2210,
+      284.92
+     ],
+     [
+      308,
+      2220,
+      287.12
+     ],
+     [
+      300,
+      2228,
+      289.22
+     ],
+     [
+      290,
+      2234,
+      290.81
+     ],
+     [
+      278,
+      2238,
+      292.24
+     ],
+     [
+      264,
+      2240,
+      293.53
+     ],
+     [
+      248,
+      2240,
+      294.77
+     ],
+     [
+      234,
+      2240,
+      295.93
+     ],
+     [
+      222,
+      2240,
+      296.98
+     ],
+     [
+      212,
+      2240,
+      297.97
+     ],
+     [
+      204,
+      2240,
+      299.04
+     ],
+     [
+      198,
+      2240,
+      299.69
+     ],
+     [
+      194,
+      2240,
+      300.35
+     ],
+     [
+      192,
+      2240,
+      300.95
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_313",
+   "x": 2624,
+   "z": 1216,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": false,
+    "pts": [
+     [
+      2624,
+      1216,
+      177.05
+     ],
+     [
+      2622,
+      1218,
+      176.89
+     ],
+     [
+      2618,
+      1222,
+      176.68
+     ],
+     [
+      2612,
+      1228,
+      176.6
+     ],
+     [
+      2604,
+      1236,
+      176.64
+     ],
+     [
+      2594,
+      1246,
+      176.85
+     ],
+     [
+      2582,
+      1258,
+      177.37
+     ],
+     [
+      2568,
+      1272,
+      178.35
+     ],
+     [
+      2552,
+      1288,
+      179.63
+     ],
+     [
+      2536,
+      1304,
+      181.06
+     ],
+     [
+      2520,
+      1320,
+      182.43
+     ],
+     [
+      2504,
+      1336,
+      183.55
+     ],
+     [
+      2488,
+      1352,
+      184.66
+     ],
+     [
+      2472,
+      1368,
+      185.56
+     ],
+     [
+      2456,
+      1384,
+      186.05
+     ],
+     [
+      2440,
+      1400,
+      186.37
+     ],
+     [
+      2424,
+      1416,
+      187.08
+     ],
+     [
+      2408,
+      1430,
+      188.13
+     ],
+     [
+      2392,
+      1442,
+      189.59
+     ],
+     [
+      2376,
+      1452,
+      191.3
+     ],
+     [
+      2360,
+      1460,
+      193.07
+     ],
+     [
+      2344,
+      1466,
+      194.97
+     ],
+     [
+      2328,
+      1470,
+      197.06
+     ],
+     [
+      2312,
+      1472,
+      198.91
+     ],
+     [
+      2296,
+      1472,
+      200.61
+     ],
+     [
+      2280,
+      1474,
+      201.99
+     ],
+     [
+      2264,
+      1478,
+      203.17
+     ],
+     [
+      2248,
+      1484,
+      204.17
+     ],
+     [
+      2232,
+      1492,
+      205.02
+     ],
+     [
+      2216,
+      1502,
+      205.83
+     ],
+     [
+      2200,
+      1514,
+      206.51
+     ],
+     [
+      2184,
+      1528,
+      207.01
+     ],
+     [
+      2168,
+      1544,
+      207.55
+     ],
+     [
+      2154,
+      1560,
+      208.11
+     ],
+     [
+      2142,
+      1576,
+      208.96
+     ],
+     [
+      2132,
+      1592,
+      210.06
+     ],
+     [
+      2124,
+      1608,
+      211.24
+     ],
+     [
+      2118,
+      1624,
+      212.51
+     ],
+     [
+      2114,
+      1640,
+      213.91
+     ],
+     [
+      2112,
+      1656,
+      215.35
+     ],
+     [
+      2112,
+      1672,
+      216.48
+     ],
+     [
+      2112,
+      1688,
+      217.37
+     ],
+     [
+      2112,
+      1704,
+      218.15
+     ],
+     [
+      2112,
+      1720,
+      218.71
+     ],
+     [
+      2112,
+      1736,
+      218.98
+     ],
+     [
+      2112,
+      1752,
+      219.35
+     ],
+     [
+      2112,
+      1768,
+      219.82
+     ],
+     [
+      2112,
+      1784,
+      220.38
+     ],
+     [
+      2112,
+      1800,
+      220.88
+     ],
+     [
+      2112,
+      1816,
+      221.35
+     ],
+     [
+      2112,
+      1832,
+      221.9
+     ],
+     [
+      2112,
+      1848,
+      222.47
+     ],
+     [
+      2112,
+      1864,
+      222.83
+     ],
+     [
+      2112,
+      1880,
+      223.07
+     ],
+     [
+      2112,
+      1896,
+      223.39
+     ],
+     [
+      2112,
+      1912,
+      223.93
+     ],
+     [
+      2112,
+      1928,
+      224.58
+     ],
+     [
+      2112,
+      1942,
+      225.16
+     ],
+     [
+      2112,
+      1954,
+      225.84
+     ],
+     [
+      2112,
+      1964,
+      226.52
+     ],
+     [
+      2112,
+      1972,
+      227.09
+     ],
+     [
+      2112,
+      1978,
+      227.48
+     ],
+     [
+      2112,
+      1982,
+      227.78
+     ],
+     [
+      2112,
+      1984,
+      227.93
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "spur_fengate",
+   "x": 235.51,
+   "z": 525.66,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": true,
+    "pts": [
+     [
+      235.51,
+      525.66,
+      149.47
+     ],
+     [
+      223.43,
+      533.71,
+      150.85
+     ],
+     [
+      210.57,
+      542.29,
+      152.2
+     ],
+     [
+      197.71,
+      550.86,
+      152.96
+     ],
+     [
+      184.86,
+      559.43,
+      153.72
+     ],
+     [
+      172,
+      568,
+      154.39
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "spur_miminhold",
+   "x": 955.77,
+   "z": 1702.69,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": true,
+    "pts": [
+     [
+      955.77,
+      1702.69,
+      213.09
+     ],
+     [
+      954,
+      1704,
+      213.09
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "spur_ashhaven",
+   "x": 734.85,
+   "z": 975.9,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": true,
+    "pts": [
+     [
+      734.85,
+      975.9,
+      176.67
+     ],
+     [
+      732.67,
+      978,
+      176.83
+     ],
+     [
+      720.89,
+      989.33,
+      178.28
+     ],
+     [
+      709.11,
+      1000.67,
+      180.21
+     ],
+     [
+      697.33,
+      1012,
+      182.22
+     ],
+     [
+      685.56,
+      1023.33,
+      183.11
+     ],
+     [
+      673.78,
+      1034.67,
+      184.21
+     ],
+     [
+      662,
+      1046,
+      185.46
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "bridge",
+   "id": "bridge_96_21_0",
+   "x": 1209.15,
+   "z": 1849.15,
+   "yaw": 0.7854,
+   "data": {
+    "span": 12,
+    "deck": 227.231,
+    "road": "road_96"
+   }
+  },
+  {
+   "kind": "bridge",
+   "id": "bridge_98_9_1",
+   "x": 1929.81,
+   "z": 2038.42,
+   "yaw": 2.2896,
+   "data": {
+    "span": 12,
+    "deck": 228.178,
+    "road": "road_98"
+   }
+  }
+ ]
+}

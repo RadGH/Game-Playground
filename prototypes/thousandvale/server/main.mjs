@@ -120,7 +120,7 @@ export async function startServer(o) {
   const terrain = loadTerrain(o.terrain);
   const { createRules, rules } = await loadRules(o.rules);
   const world = createWorld({ store, terrain, build: o.build, createRules, classes: loadClasses(), now, log, lingerMs: o.linger, saveEveryMs: o.saveEvery, processName: o.process, journalMs: o.journalMs,
-    zoneSheet: content.sheet, encounterInfo: content.encounterInfo,
+    zoneSheet: content.sheet, encounterInfo: content.encounterInfo, vignettes: content.vignettes,
     verifyHuman, humanSiteKey: verifyHuman ? process.env.TV_TURNSTILE_SITEKEY || null : null });
   await world.init();
 

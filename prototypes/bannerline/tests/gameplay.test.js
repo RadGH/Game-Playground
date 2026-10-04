@@ -516,6 +516,35 @@ test('the Keep guard splashes a swarm near the Keep; a big unit walks through; i
   assert.ok(g2.hp < g2.hpMax);
 });
 
+test('a move to an unreachable point ends once the hero stops making progress, and the hero defends again', () => {
+  const s = twoHumans();
+  const h = hero(s, 0), f = s.map.fields[h.field];
+  for (const p of s.state.players) if (p.id !== 0) { const o = hero(s, p.id); o.x = s.map.fields[o.field].x0 + 1; o.z = 2; o._ord.k = 'stop'; }
+  // far outside the field (the clamp holds the hero at the wall)
+  s.step([{ p: 0, type: 'move', x: f.x1 + 500, z: h.z }]);
+  run(s, 200);
+  assert.equal(h._ord.k, 'idle', 'the order ended');
+  // a foe walks up: an idle hero takes it on (a stuck 'move' would have ignored it forever)
+  const foe = put(s, 'levy', 1, h.field, h.x - f.cx, h.z - 1.5, { _spd: 0 });
+  run(s, 20);
+  assert.equal(h.target, foe.id);
+  // a reachable move still walks all the way
+  foe.hp = 0; foe.alive = false;
+  const tz = h.z - 12;
+  s.step([{ p: 0, type: 'move', x: f.cx, z: tz }]);
+  run(s, 200);
+  assert.ok(Math.abs(h.z - tz) < 0.5 && Math.abs(h.x - f.cx) < 0.5, `reached (${h.x.toFixed(1)}, ${h.z.toFixed(1)})`);
+});
+
+test('a rooted hero keeps its move order (being rooted is not being stuck)', () => {
+  const s = twoHumans();
+  const h = hero(s, 0), f = s.map.fields[h.field];
+  s.step([{ p: 0, type: 'move', x: f.cx, z: h.z - 20 }]);
+  h.statuses.push({ id: 'root', until: s.state.tick + 60, src: -1 });
+  run(s, 50);
+  assert.equal(h._ord.k, 'move');
+});
+
 // ── query helpers ───────────────────────────────────────────────────────────────────────────
 test('query helpers describe the state for the UI', () => {
   const s = twoHumans();

@@ -1,0 +1,7222 @@
+{
+ "_doc": "Stream B zone placements (tools/bake-zone.mjs). Zone metres; yaw = atan2(dx, dz), the way the thing faces. kinds: settlement (data.radius, hub, planned), town_square, street (data.pts, width, cls), building (a proctown plot: data.w along `angle` (local +x = (cos angle, sin angle)), data.d across, want; yaw faces the nearest drawn street, data.streetGap = metres from the front to it), town_wall, road (data.pts [[x,z,h]], width, cls, spur), bridge (yaw along the road, span, deck height), dungeon_door, event_site, camp_site, landmark/dungeon/pass/crossing (World Forge nodes).",
+ "zone": "z12_02",
+ "terrainHash": "c9413658",
+ "placements": [
+  {
+   "kind": "settlement",
+   "id": "torborhold",
+   "x": 592,
+   "z": 1264,
+   "yaw": 0,
+   "data": {
+    "kind": "town",
+    "name": "Torborhold",
+    "radius": 90,
+    "hub": true,
+    "planned": true
+   }
+  },
+  {
+   "kind": "settlement",
+   "id": "pohelrow",
+   "x": 256,
+   "z": 1920,
+   "yaw": 0,
+   "data": {
+    "kind": "hamlet",
+    "name": "Pohelrow",
+    "radius": 40,
+    "hub": false,
+    "planned": true
+   }
+  },
+  {
+   "kind": "settlement",
+   "id": "ashford",
+   "x": 1344,
+   "z": 1568,
+   "yaw": 0,
+   "data": {
+    "kind": "hamlet",
+    "name": "Ashford",
+    "radius": 46,
+    "hub": false,
+    "planned": true
+   }
+  },
+  {
+   "kind": "crossing",
+   "id": "mipider_ford",
+   "x": 64,
+   "z": 1984,
+   "yaw": 0,
+   "data": {
+    "kind": "ford",
+    "name": "Mipider Ford"
+   }
+  },
+  {
+   "kind": "crossing",
+   "id": "milhot_ford",
+   "x": 1344,
+   "z": 1472,
+   "yaw": 0,
+   "data": {
+    "kind": "ford",
+    "name": "Milhot Ford"
+   }
+  },
+  {
+   "kind": "dungeon_door",
+   "id": "door_1",
+   "x": 354,
+   "z": 1292,
+   "yaw": 1.185,
+   "data": {
+    "name": "Barrow entrance"
+   }
+  },
+  {
+   "kind": "event_site",
+   "id": "event_grandmother_skein",
+   "x": 357,
+   "z": 1944,
+   "yaw": 0,
+   "data": {
+    "r": 40
+   }
+  },
+  {
+   "kind": "camp_site",
+   "id": "elite_hobb_gallowsby",
+   "x": 75,
+   "z": 1973,
+   "yaw": 0,
+   "data": {
+    "r": 25
+   }
+  },
+  {
+   "kind": "town_square",
+   "id": "torborhold_square",
+   "x": 580.26,
+   "z": 1279.73,
+   "yaw": 0,
+   "data": {
+    "r": 4.9,
+    "town": "torborhold",
+    "culture": "halfling"
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_0",
+   "x": 554.32,
+   "z": 1223.94,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      554.32,
+      1223.94
+     ],
+     [
+      590.24,
+      1265.6
+     ],
+     [
+      628.47,
+      1305.17
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_1",
+   "x": 546.78,
+   "z": 1292.27,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      546.78,
+      1292.27
+     ],
+     [
+      561.35,
+      1276.05
+     ],
+     [
+      576.87,
+      1260.72
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_2",
+   "x": 539.17,
+   "z": 1250.1,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      539.17,
+      1250.1
+     ],
+     [
+      548.85,
+      1262.09
+     ],
+     [
+      559.29,
+      1273.43
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_3",
+   "x": 538.44,
+   "z": 1276.49,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      538.44,
+      1276.49
+     ],
+     [
+      542.49,
+      1270.87
+     ],
+     [
+      547.55,
+      1264.96
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_4",
+   "x": 537.04,
+   "z": 1261.96,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      537.04,
+      1261.96
+     ],
+     [
+      538.62,
+      1263.1
+     ],
+     [
+      543.74,
+      1267.49
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_5",
+   "x": 537.24,
+   "z": 1269.09,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      537.24,
+      1269.09
+     ],
+     [
+      539.48,
+      1265.91
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_6",
+   "x": 538.36,
+   "z": 1269.53,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      538.36,
+      1269.53
+     ],
+     [
+      539.48,
+      1270.5
+     ],
+     [
+      540.7,
+      1271.36
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_7",
+   "x": 541.79,
+   "z": 1264.19,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      541.79,
+      1264.19
+     ],
+     [
+      542.67,
+      1263.01
+     ],
+     [
+      543.62,
+      1261.87
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_8",
+   "x": 542.47,
+   "z": 1273.74,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      542.47,
+      1273.74
+     ],
+     [
+      545.47,
+      1276.2
+     ],
+     [
+      548.56,
+      1278.53
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_9",
+   "x": 546.72,
+   "z": 1255.52,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      546.72,
+      1255.52
+     ],
+     [
+      552.83,
+      1251.06
+     ],
+     [
+      558.43,
+      1245.97
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_10",
+   "x": 548.04,
+   "z": 1243.51,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      548.04,
+      1243.51
+     ],
+     [
+      550.07,
+      1246.35
+     ],
+     [
+      552.44,
+      1248.9
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_11",
+   "x": 556.02,
+   "z": 1266.92,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      556.02,
+      1266.92
+     ],
+     [
+      562.01,
+      1262.31
+     ],
+     [
+      567.73,
+      1257.37
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_12",
+   "x": 551.06,
+   "z": 1253.93,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      551.06,
+      1253.93
+     ],
+     [
+      554.59,
+      1258.72
+     ],
+     [
+      558.58,
+      1263.15
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_13",
+   "x": 550.4,
+   "z": 1260.03,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      550.4,
+      1260.03
+     ],
+     [
+      551.58,
+      1259.13
+     ],
+     [
+      552.7,
+      1258.15
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_14",
+   "x": 555.01,
+   "z": 1256.58,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      555.01,
+      1256.58
+     ],
+     [
+      558.71,
+      1253.72
+     ],
+     [
+      562.26,
+      1250.66
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_15",
+   "x": 564.92,
+   "z": 1261.35,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      564.92,
+      1261.35
+     ],
+     [
+      566.38,
+      1263.23
+     ],
+     [
+      567.93,
+      1265.05
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_16",
+   "x": 576.95,
+   "z": 1315.98,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      576.95,
+      1315.98
+     ],
+     [
+      588.1,
+      1300.68
+     ],
+     [
+      599.53,
+      1285.59
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_17",
+   "x": 567.85,
+   "z": 1279.46,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      567.85,
+      1279.46
+     ],
+     [
+      578.68,
+      1286.78
+     ],
+     [
+      589.94,
+      1293.42
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_18",
+   "x": 566.26,
+   "z": 1305.92,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      566.26,
+      1305.92
+     ],
+     [
+      571.73,
+      1296.53
+     ],
+     [
+      577.87,
+      1287.56
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_19",
+   "x": 558.86,
+   "z": 1293.69,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      558.86,
+      1293.69
+     ],
+     [
+      563.77,
+      1296.5
+     ],
+     [
+      568.41,
+      1299.73
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_20",
+   "x": 559.53,
+   "z": 1301.67,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      559.53,
+      1301.67
+     ],
+     [
+      560.79,
+      1299.49
+     ],
+     [
+      562.22,
+      1297.42
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_21",
+   "x": 562.87,
+   "z": 1287.34,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      562.87,
+      1287.34
+     ],
+     [
+      567.78,
+      1290.15
+     ],
+     [
+      572.42,
+      1293.38
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_22",
+   "x": 562.25,
+   "z": 1294.23,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      562.25,
+      1294.23
+     ],
+     [
+      563.5,
+      1292.19
+     ],
+     [
+      564.82,
+      1290.17
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_23",
+   "x": 566.8,
+   "z": 1288.23,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      566.8,
+      1288.23
+     ],
+     [
+      568.61,
+      1285.54
+     ],
+     [
+      570.26,
+      1282.76
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_24",
+   "x": 573.86,
+   "z": 1296.69,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      573.86,
+      1296.69
+     ],
+     [
+      578.72,
+      1300.09
+     ],
+     [
+      583.87,
+      1303.02
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_25",
+   "x": 574.28,
+   "z": 1310.99,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      574.28,
+      1310.99
+     ],
+     [
+      577.18,
+      1306.62
+     ],
+     [
+      579.89,
+      1302.13
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_26",
+   "x": 569.67,
+   "z": 1303.34,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      569.67,
+      1303.34
+     ],
+     [
+      572.5,
+      1305.21
+     ],
+     [
+      575.4,
+      1306.96
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_27",
+   "x": 578.57,
+   "z": 1306.48,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      578.57,
+      1306.48
+     ],
+     [
+      579.7,
+      1307.16
+     ],
+     [
+      580.8,
+      1307.89
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_28",
+   "x": 581.01,
+   "z": 1299.58,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      581.01,
+      1299.58
+     ],
+     [
+      583.48,
+      1296.12
+     ],
+     [
+      585.54,
+      1292.41
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_29",
+   "x": 581.51,
+   "z": 1286.31,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      581.51,
+      1286.31
+     ],
+     [
+      584.01,
+      1282.09
+     ],
+     [
+      586.74,
+      1278.03
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_30",
+   "x": 573.82,
+   "z": 1281.45,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      573.82,
+      1281.45
+     ],
+     [
+      576.35,
+      1277.26
+     ],
+     [
+      579.05,
+      1273.17
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_31",
+   "x": 591.14,
+   "z": 1302.43,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      591.14,
+      1302.43
+     ],
+     [
+      595.9,
+      1307.55
+     ],
+     [
+      601.04,
+      1312.29
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_32",
+   "x": 583.9,
+   "z": 1315.05,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      583.9,
+      1315.05
+     ],
+     [
+      588.38,
+      1310.56
+     ],
+     [
+      592.86,
+      1306.07
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_33",
+   "x": 587.8,
+   "z": 1305.79,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      587.8,
+      1305.79
+     ],
+     [
+      588.78,
+      1306.71
+     ],
+     [
+      589.7,
+      1307.68
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_34",
+   "x": 589,
+   "z": 1311.5,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      589,
+      1311.5
+     ],
+     [
+      592.05,
+      1314.87
+     ],
+     [
+      595.44,
+      1317.91
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_35",
+   "x": 599.07,
+   "z": 1308.41,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      599.07,
+      1308.41
+     ],
+     [
+      603.92,
+      1303.44
+     ],
+     [
+      608.88,
+      1298.57
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_36",
+   "x": 596.39,
+   "z": 1297.17,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      596.39,
+      1297.17
+     ],
+     [
+      599.44,
+      1300.24
+     ],
+     [
+      602.52,
+      1303.29
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_37",
+   "x": 603.93,
+   "z": 1305.2,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      603.93,
+      1305.2
+     ],
+     [
+      604.97,
+      1306.25
+     ],
+     [
+      606.02,
+      1307.29
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_38",
+   "x": 606.01,
+   "z": 1268.78,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      606.01,
+      1268.78
+     ],
+     [
+      623.09,
+      1258.72
+     ],
+     [
+      638.92,
+      1246.78
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_39",
+   "x": 593.53,
+   "z": 1246.9,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      593.53,
+      1246.9
+     ],
+     [
+      607.59,
+      1235.16
+     ],
+     [
+      622.69,
+      1224.78
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_40",
+   "x": 598.26,
+   "z": 1209.36,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      598.26,
+      1209.36
+     ],
+     [
+      605.37,
+      1217.99
+     ],
+     [
+      613.21,
+      1229.46
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_41",
+   "x": 581.63,
+   "z": 1230.99,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      581.63,
+      1230.99
+     ],
+     [
+      591.64,
+      1223.97
+     ],
+     [
+      601.18,
+      1216.31
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_42",
+   "x": 587.92,
+   "z": 1213.74,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      587.92,
+      1213.74
+     ],
+     [
+      590.32,
+      1217.26
+     ],
+     [
+      593.04,
+      1220.55
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_43",
+   "x": 583.75,
+   "z": 1216.87,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      583.75,
+      1216.87
+     ],
+     [
+      586.5,
+      1220.13
+     ],
+     [
+      588.86,
+      1223.69
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_44",
+   "x": 590.15,
+   "z": 1226.47,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      590.15,
+      1226.47
+     ],
+     [
+      595.22,
+      1232.81
+     ],
+     [
+      599.9,
+      1239.45
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_45",
+   "x": 586.6,
+   "z": 1237.61,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      586.6,
+      1237.61
+     ],
+     [
+      589.85,
+      1235.12
+     ],
+     [
+      593.15,
+      1232.7
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_46",
+   "x": 594.53,
+   "z": 1230.06,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      594.53,
+      1230.06
+     ],
+     [
+      599.97,
+      1226.01
+     ],
+     [
+      605.38,
+      1221.91
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_47",
+   "x": 596.89,
+   "z": 1221.41,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      596.89,
+      1221.41
+     ],
+     [
+      598.27,
+      1223.1
+     ],
+     [
+      599.51,
+      1224.89
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_48",
+   "x": 601.64,
+   "z": 1226.14,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      601.64,
+      1226.14
+     ],
+     [
+      604.62,
+      1229.91
+     ],
+     [
+      607.41,
+      1233.81
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_49",
+   "x": 606.88,
+   "z": 1218.16,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      606.88,
+      1218.16
+     ],
+     [
+      610.21,
+      1215.54
+     ],
+     [
+      613.33,
+      1213.31
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_50",
+   "x": 601.27,
+   "z": 1210.7,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      601.27,
+      1210.7
+     ],
+     [
+      602.23,
+      1209.96
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_51",
+   "x": 609.5,
+   "z": 1221.66,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      609.5,
+      1221.66
+     ],
+     [
+      612.92,
+      1219.15
+     ],
+     [
+      616.28,
+      1216.57
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_52",
+   "x": 611.1,
+   "z": 1238.19,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      611.1,
+      1238.19
+     ],
+     [
+      614.79,
+      1245.36
+     ],
+     [
+      619.31,
+      1252.04
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_53",
+   "x": 603.92,
+   "z": 1255.9,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      603.92,
+      1255.9
+     ],
+     [
+      609.95,
+      1252.71
+     ],
+     [
+      615.64,
+      1248.95
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_54",
+   "x": 604.62,
+   "z": 1242.03,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      604.62,
+      1242.03
+     ],
+     [
+      607.32,
+      1246.32
+     ],
+     [
+      609.8,
+      1250.75
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_55",
+   "x": 601.72,
+   "z": 1252.2,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      601.72,
+      1252.2
+     ],
+     [
+      604.43,
+      1250.45
+     ],
+     [
+      607.28,
+      1248.91
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_56",
+   "x": 608.64,
+   "z": 1246.38,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      608.64,
+      1246.38
+     ],
+     [
+      610.69,
+      1245.23
+     ],
+     [
+      612.69,
+      1243.98
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_57",
+   "x": 607.94,
+   "z": 1255.18,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      607.94,
+      1255.18
+     ],
+     [
+      608.81,
+      1256.47
+     ],
+     [
+      609.52,
+      1257.85
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_58",
+   "x": 615.43,
+   "z": 1242.38,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      615.43,
+      1242.38
+     ],
+     [
+      621.15,
+      1238.77
+     ],
+     [
+      627.06,
+      1235.48
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_59",
+   "x": 619.72,
+   "z": 1233.07,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      619.72,
+      1233.07
+     ],
+     [
+      620.81,
+      1235.06
+     ],
+     [
+      622.03,
+      1236.97
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_60",
+   "x": 620.33,
+   "z": 1240.97,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      620.33,
+      1240.97
+     ],
+     [
+      622.76,
+      1244.76
+     ],
+     [
+      624.92,
+      1248.71
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_61",
+   "x": 624.69,
+   "z": 1262.19,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      624.69,
+      1262.19
+     ],
+     [
+      628.9,
+      1270.39
+     ],
+     [
+      632.35,
+      1278.94
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_62",
+   "x": 615.55,
+   "z": 1273.62,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      615.55,
+      1273.62
+     ],
+     [
+      620.05,
+      1271.12
+     ],
+     [
+      624.34,
+      1268.26
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_63",
+   "x": 616.59,
+   "z": 1267.6,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      616.59,
+      1267.6
+     ],
+     [
+      617.41,
+      1269.02
+     ],
+     [
+      618.3,
+      1270.41
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_64",
+   "x": 622.04,
+   "z": 1271.2,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      622.04,
+      1271.2
+     ],
+     [
+      624.8,
+      1275.25
+     ],
+     [
+      627.14,
+      1279.55
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_65",
+   "x": 629.92,
+   "z": 1267.61,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      629.92,
+      1267.61
+     ],
+     [
+      636.74,
+      1264.87
+     ],
+     [
+      643.83,
+      1262.88
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_66",
+   "x": 633.93,
+   "z": 1258.92,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      633.93,
+      1258.92
+     ],
+     [
+      634.86,
+      1261.48
+     ],
+     [
+      635.68,
+      1264.07
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_67",
+   "x": 637.78,
+   "z": 1266.53,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      637.78,
+      1266.53
+     ],
+     [
+      639.22,
+      1270.36
+     ],
+     [
+      640.41,
+      1274.27
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_68",
+   "x": 537.9,
+   "z": 1254.1,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      537.9,
+      1254.1
+     ],
+     [
+      540.62,
+      1251.9
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_69",
+   "x": 618.85,
+   "z": 1216,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      618.85,
+      1216
+     ],
+     [
+      616.28,
+      1216.57
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_70",
+   "x": 538.94,
+   "z": 1278.47,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      538.94,
+      1278.47
+     ],
+     [
+      538.44,
+      1276.49
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_71",
+   "x": 561.35,
+   "z": 1276.05,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      561.35,
+      1276.05
+     ],
+     [
+      567.85,
+      1279.46
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_72",
+   "x": 590.24,
+   "z": 1265.6,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      590.24,
+      1265.6
+     ],
+     [
+      586.74,
+      1278.03
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_73",
+   "x": 547.55,
+   "z": 1264.96,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      547.55,
+      1264.96
+     ],
+     [
+      549.68,
+      1263
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_74",
+   "x": 606.01,
+   "z": 1268.78,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      606.01,
+      1268.78
+     ],
+     [
+      599.44,
+      1275.12
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_75",
+   "x": 616.59,
+   "z": 1267.6,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      616.59,
+      1267.6
+     ],
+     [
+      614.38,
+      1263.85
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_76",
+   "x": 624.92,
+   "z": 1248.71,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      624.92,
+      1248.71
+     ],
+     [
+      629.07,
+      1254.21
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_77",
+   "x": 607.59,
+   "z": 1235.16,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      607.59,
+      1235.16
+     ],
+     [
+      611.1,
+      1238.19
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "torborhold_street_78",
+   "x": 624.69,
+   "z": 1262.19,
+   "yaw": 0,
+   "data": {
+    "town": "torborhold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      624.69,
+      1262.19
+     ],
+     [
+      622.76,
+      1258.91
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_0",
+   "x": 548.99,
+   "z": 1271.72,
+   "yaw": -0.6665,
+   "data": {
+    "town": "torborhold",
+    "want": "inn",
+    "district": "craft",
+    "w": 7.65,
+    "d": 6.55,
+    "angle": 5.3788,
+    "front": 8.5204,
+    "streetGap": -0.24
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_1",
+   "x": 546.39,
+   "z": 1249.35,
+   "yaw": 2.2551,
+   "data": {
+    "town": "torborhold",
+    "want": "house",
+    "district": "residential",
+    "w": 6.1,
+    "d": 5.76,
+    "angle": 5.5988,
+    "front": 5.5988,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_2",
+   "x": 553.27,
+   "z": 1243.74,
+   "yaw": -0.8865,
+   "data": {
+    "town": "torborhold",
+    "want": "house",
+    "district": "residential",
+    "w": 3.97,
+    "d": 5.76,
+    "angle": 5.5988,
+    "front": 8.7404,
+    "streetGap": 0.05
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_3",
+   "x": 561.34,
+   "z": 1256.94,
+   "yaw": -2.4573,
+   "data": {
+    "town": "torborhold",
+    "want": "mill",
+    "district": "craft",
+    "w": 8.15,
+    "d": 4.92,
+    "angle": 5.5988,
+    "front": 10.3112,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_4",
+   "x": 561.94,
+   "z": 1266.86,
+   "yaw": 2.2551,
+   "data": {
+    "town": "torborhold",
+    "want": "hut",
+    "district": "craft",
+    "w": 8.06,
+    "d": 3.57,
+    "angle": 5.5988,
+    "front": 5.5988,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_5",
+   "x": 564.11,
+   "z": 1301.59,
+   "yaw": -2.1344,
+   "data": {
+    "town": "torborhold",
+    "want": "hut",
+    "district": "craft",
+    "w": 3.83,
+    "d": 4.07,
+    "angle": 5.276,
+    "front": 9.9884,
+    "streetGap": -0.21
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_6",
+   "x": 567.45,
+   "z": 1294.68,
+   "yaw": 1.0072,
+   "data": {
+    "town": "torborhold",
+    "want": "hut",
+    "district": "craft",
+    "w": 3.61,
+    "d": 5.81,
+    "angle": 5.276,
+    "front": 6.8468,
+    "streetGap": -0.37
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_7",
+   "x": 572.2,
+   "z": 1287.81,
+   "yaw": -2.1344,
+   "data": {
+    "town": "torborhold",
+    "want": "hut",
+    "district": "civic",
+    "w": 5.27,
+    "d": 5.12,
+    "angle": 5.276,
+    "front": 9.9884,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_8",
+   "x": 574.58,
+   "z": 1301.91,
+   "yaw": 2.578,
+   "data": {
+    "town": "torborhold",
+    "want": "hut",
+    "district": "craft",
+    "w": 4.11,
+    "d": 5.59,
+    "angle": 5.276,
+    "front": 5.276,
+    "streetGap": -0.28
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_9",
+   "x": 579.5,
+   "z": 1293.61,
+   "yaw": 2.578,
+   "data": {
+    "town": "torborhold",
+    "want": "hut",
+    "district": "civic",
+    "w": 7.28,
+    "d": 5.05,
+    "angle": 5.276,
+    "front": 5.276,
+    "streetGap": -0.27
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_10",
+   "x": 573.35,
+   "z": 1275.36,
+   "yaw": 1.0072,
+   "data": {
+    "town": "torborhold",
+    "want": "hut",
+    "district": "civic",
+    "w": 8.59,
+    "d": 3.71,
+    "angle": 5.276,
+    "front": 6.8468,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_11",
+   "x": 589.27,
+   "z": 1285.42,
+   "yaw": -2.1344,
+   "data": {
+    "town": "torborhold",
+    "want": "hall",
+    "district": "civic",
+    "w": 8.59,
+    "d": 8.48,
+    "angle": 5.276,
+    "front": 9.9884,
+    "streetGap": -0.12
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_12",
+   "x": 595.01,
+   "z": 1311.9,
+   "yaw": -2.3544,
+   "data": {
+    "town": "torborhold",
+    "want": "house",
+    "district": "residential",
+    "w": 4.03,
+    "d": 7.88,
+    "angle": 5.496,
+    "front": 10.2084,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_13",
+   "x": 596.92,
+   "z": 1302.77,
+   "yaw": 2.358,
+   "data": {
+    "town": "torborhold",
+    "want": "hut",
+    "district": "craft",
+    "w": 3.75,
+    "d": 7.47,
+    "angle": 5.496,
+    "front": 5.496,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_14",
+   "x": 602.61,
+   "z": 1297.06,
+   "yaw": -0.7836,
+   "data": {
+    "town": "torborhold",
+    "want": "warehouse",
+    "district": "craft",
+    "w": 5.51,
+    "d": 7.47,
+    "angle": 5.496,
+    "front": 8.6376,
+    "streetGap": -0.37
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_15",
+   "x": 581.7,
+   "z": 1223.74,
+   "yaw": 2.215,
+   "data": {
+    "town": "torborhold",
+    "want": "forge",
+    "district": "residential",
+    "w": 7.63,
+    "d": 7.32,
+    "angle": 5.639,
+    "front": 5.639,
+    "streetGap": 0.09
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_16",
+   "x": 594.61,
+   "z": 1214.04,
+   "yaw": -0.9266,
+   "data": {
+    "town": "torborhold",
+    "want": "granary",
+    "district": "residential",
+    "w": 6.56,
+    "d": 7.32,
+    "angle": 5.639,
+    "front": 8.7806,
+    "streetGap": -0.01
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_17",
+   "x": 587.5,
+   "z": 1231.99,
+   "yaw": 0.6442,
+   "data": {
+    "town": "torborhold",
+    "want": "house",
+    "district": "residential",
+    "w": 6.99,
+    "d": 4.44,
+    "angle": 5.639,
+    "front": 7.2098,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_18",
+   "x": 593.06,
+   "z": 1239.39,
+   "yaw": -2.4974,
+   "data": {
+    "town": "torborhold",
+    "want": "market",
+    "district": "residential",
+    "w": 6.99,
+    "d": 7.11,
+    "angle": 5.639,
+    "front": 10.3514,
+    "streetGap": -0.31
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_19",
+   "x": 600.83,
+   "z": 1232.75,
+   "yaw": -2.4974,
+   "data": {
+    "town": "torborhold",
+    "want": "stable",
+    "district": "residential",
+    "w": 5.63,
+    "d": 8.4,
+    "angle": 5.639,
+    "front": 10.3514,
+    "streetGap": -0.38
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_20",
+   "x": 602.33,
+   "z": 1246.9,
+   "yaw": 0.5354,
+   "data": {
+    "town": "torborhold",
+    "want": "house",
+    "district": "residential",
+    "w": 5.26,
+    "d": 4.84,
+    "angle": 5.7477,
+    "front": 7.3185,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_21",
+   "x": 626.86,
+   "z": 1242.33,
+   "yaw": -1.0354,
+   "data": {
+    "town": "torborhold",
+    "want": "chapel",
+    "district": "residential",
+    "w": 6.14,
+    "d": 7.8,
+    "angle": 5.7477,
+    "front": 8.8893,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_22",
+   "x": 619.99,
+   "z": 1275.67,
+   "yaw": -2.5939,
+   "data": {
+    "town": "torborhold",
+    "want": "house",
+    "district": "residential",
+    "w": 4.26,
+    "d": 4.29,
+    "angle": 5.7355,
+    "front": 10.4478,
+    "streetGap": -0.3
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_23",
+   "x": 622.23,
+   "z": 1279.33,
+   "yaw": 2.1185,
+   "data": {
+    "town": "torborhold",
+    "want": "house",
+    "district": "residential",
+    "w": 4.26,
+    "d": 4.29,
+    "angle": 5.7355,
+    "front": 5.7355,
+    "streetGap": -0.02
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_24",
+   "x": 631.13,
+   "z": 1262.74,
+   "yaw": 1.8985,
+   "data": {
+    "town": "torborhold",
+    "want": "house",
+    "district": "residential",
+    "w": 4.24,
+    "d": 4.24,
+    "angle": 5.9555,
+    "front": 5.9555,
+    "streetGap": -0.29
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_25",
+   "x": 639.18,
+   "z": 1260.01,
+   "yaw": -1.2431,
+   "data": {
+    "town": "torborhold",
+    "want": "house",
+    "district": "residential",
+    "w": 5.74,
+    "d": 4.24,
+    "angle": 5.9555,
+    "front": 9.097,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_26",
+   "x": 634.82,
+   "z": 1271.85,
+   "yaw": 1.8985,
+   "data": {
+    "town": "torborhold",
+    "want": "house",
+    "district": "residential",
+    "w": 5.36,
+    "d": 6.97,
+    "angle": 5.9555,
+    "front": 5.9555,
+    "streetGap": -0.14
+   }
+  },
+  {
+   "kind": "building",
+   "id": "torborhold_plot_27",
+   "x": 642.94,
+   "z": 1269.09,
+   "yaw": -1.2431,
+   "data": {
+    "town": "torborhold",
+    "want": "house",
+    "district": "residential",
+    "w": 4.47,
+    "d": 6.97,
+    "angle": 5.9555,
+    "front": 9.097,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "town_square",
+   "id": "pohelrow_square",
+   "x": 253.2,
+   "z": 1923.47,
+   "yaw": 0,
+   "data": {
+    "r": 3.1,
+    "town": "pohelrow",
+    "culture": "halfling"
+   }
+  },
+  {
+   "kind": "street",
+   "id": "pohelrow_street_0",
+   "x": 255.8,
+   "z": 1949,
+   "yaw": 0,
+   "data": {
+    "town": "pohelrow",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      255.8,
+      1949
+     ],
+     [
+      265.53,
+      1923.09
+     ],
+     [
+      272.87,
+      1896.41
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "pohelrow_street_1",
+   "x": 282.27,
+   "z": 1932.28,
+   "yaw": 0,
+   "data": {
+    "town": "pohelrow",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      282.27,
+      1932.28
+     ],
+     [
+      274.69,
+      1929.67
+     ],
+     [
+      266.82,
+      1927.27
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "pohelrow_street_2",
+   "x": 273.52,
+   "z": 1943.11,
+   "yaw": 0,
+   "data": {
+    "town": "pohelrow",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      273.52,
+      1943.11
+     ],
+     [
+      270.5,
+      1942.51
+     ],
+     [
+      263.73,
+      1941.65
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "pohelrow_street_3",
+   "x": 270.43,
+   "z": 1945.16,
+   "yaw": 0,
+   "data": {
+    "town": "pohelrow",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      270.43,
+      1945.16
+     ],
+     [
+      270.44,
+      1944.91
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "pohelrow_street_4",
+   "x": 271.1,
+   "z": 1941.29,
+   "yaw": 0,
+   "data": {
+    "town": "pohelrow",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      271.1,
+      1941.29
+     ],
+     [
+      272.08,
+      1937.37
+     ],
+     [
+      272.66,
+      1933.38
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "pohelrow_street_5",
+   "x": 284.99,
+   "z": 1919.09,
+   "yaw": 0,
+   "data": {
+    "town": "pohelrow",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      284.99,
+      1919.09
+     ],
+     [
+      278.7,
+      1916.57
+     ],
+     [
+      271.9,
+      1913.85
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "pohelrow_street_6",
+   "x": 274.74,
+   "z": 1925.12,
+   "yaw": 0,
+   "data": {
+    "town": "pohelrow",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      274.74,
+      1925.12
+     ],
+     [
+      276.69,
+      1921.99
+     ],
+     [
+      278.64,
+      1918.87
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "pohelrow_street_7",
+   "x": 282.76,
+   "z": 1908.83,
+   "yaw": 0,
+   "data": {
+    "town": "pohelrow",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      282.76,
+      1908.83
+     ],
+     [
+      281.93,
+      1908.53
+     ],
+     [
+      275.29,
+      1906.33
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "pohelrow_street_8",
+   "x": 276.87,
+   "z": 1914.4,
+   "yaw": 0,
+   "data": {
+    "town": "pohelrow",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      276.87,
+      1914.4
+     ],
+     [
+      278.02,
+      1911.69
+     ],
+     [
+      278.82,
+      1908.85
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "pohelrow_street_9",
+   "x": 256.5,
+   "z": 1933.94,
+   "yaw": 0,
+   "data": {
+    "town": "pohelrow",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      256.5,
+      1933.94
+     ],
+     [
+      240.69,
+      1928.44
+     ],
+     [
+      227.37,
+      1924.64
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "pohelrow_street_10",
+   "x": 238.17,
+   "z": 1942.75,
+   "yaw": 0,
+   "data": {
+    "town": "pohelrow",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      238.17,
+      1942.75
+     ],
+     [
+      240.27,
+      1938.41
+     ],
+     [
+      242.49,
+      1934.14
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "pohelrow_street_11",
+   "x": 232.56,
+   "z": 1937.07,
+   "yaw": 0,
+   "data": {
+    "town": "pohelrow",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      232.56,
+      1937.07
+     ],
+     [
+      233.54,
+      1935.07
+     ],
+     [
+      236.02,
+      1931.34
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "pohelrow_street_12",
+   "x": 260.32,
+   "z": 1919.78,
+   "yaw": 0,
+   "data": {
+    "town": "pohelrow",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      260.32,
+      1919.78
+     ],
+     [
+      244.94,
+      1916.89
+     ],
+     [
+      230,
+      1912.21
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "pohelrow_street_13",
+   "x": 239.18,
+   "z": 1924.39,
+   "yaw": 0,
+   "data": {
+    "town": "pohelrow",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      239.18,
+      1924.39
+     ],
+     [
+      239.52,
+      1921.3
+     ],
+     [
+      240.15,
+      1918.26
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "pohelrow_street_14",
+   "x": 249.52,
+   "z": 1926.03,
+   "yaw": 0,
+   "data": {
+    "town": "pohelrow",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      249.52,
+      1926.03
+     ],
+     [
+      250.04,
+      1922.97
+     ],
+     [
+      250.49,
+      1919.9
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "pohelrow_street_15",
+   "x": 238.88,
+   "z": 1909.66,
+   "yaw": 0,
+   "data": {
+    "town": "pohelrow",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      238.88,
+      1909.66
+     ],
+     [
+      242.72,
+      1899.63
+     ],
+     [
+      245.44,
+      1892.99
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "pohelrow_street_16",
+   "x": 260.73,
+   "z": 1908.19,
+   "yaw": 0,
+   "data": {
+    "town": "pohelrow",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      260.73,
+      1908.19
+     ],
+     [
+      252,
+      1905.04
+     ],
+     [
+      243.49,
+      1901.36
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "pohelrow_street_17",
+   "x": 252.29,
+   "z": 1914.96,
+   "yaw": 0,
+   "data": {
+    "town": "pohelrow",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      252.29,
+      1914.96
+     ],
+     [
+      253.84,
+      1911.26
+     ],
+     [
+      255.24,
+      1907.5
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "pohelrow_street_18",
+   "x": 245.93,
+   "z": 1912.45,
+   "yaw": 0,
+   "data": {
+    "town": "pohelrow",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      245.93,
+      1912.45
+     ],
+     [
+      247.59,
+      1908.79
+     ],
+     [
+      248.89,
+      1904.99
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "pohelrow_street_19",
+   "x": 252.6,
+   "z": 1903.48,
+   "yaw": 0,
+   "data": {
+    "town": "pohelrow",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      252.6,
+      1903.48
+     ],
+     [
+      254.73,
+      1898.57
+     ],
+     [
+      256.54,
+      1893.54
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "pohelrow_street_20",
+   "x": 262.98,
+   "z": 1902.49,
+   "yaw": 0,
+   "data": {
+    "town": "pohelrow",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      262.98,
+      1902.49
+     ],
+     [
+      259.35,
+      1900.79
+     ],
+     [
+      255.53,
+      1899.54
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "pohelrow_street_21",
+   "x": 254.27,
+   "z": 1895.83,
+   "yaw": 0,
+   "data": {
+    "town": "pohelrow",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      254.27,
+      1895.83
+     ],
+     [
+      250.61,
+      1894.22
+     ],
+     [
+      246.84,
+      1892.89
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "pohelrow_street_22",
+   "x": 240.99,
+   "z": 1901.01,
+   "yaw": 0,
+   "data": {
+    "town": "pohelrow",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      240.99,
+      1901.01
+     ],
+     [
+      238.24,
+      1899.8
+     ],
+     [
+      235.99,
+      1899.01
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "pohelrow_street_23",
+   "x": 242.99,
+   "z": 1895.96,
+   "yaw": 0,
+   "data": {
+    "town": "pohelrow",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      242.99,
+      1895.96
+     ],
+     [
+      241.07,
+      1895.14
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "pohelrow_street_24",
+   "x": 252.29,
+   "z": 1914.96,
+   "yaw": 0,
+   "data": {
+    "town": "pohelrow",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      252.29,
+      1914.96
+     ],
+     [
+      251.68,
+      1918.16
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "pohelrow_street_25",
+   "x": 240.69,
+   "z": 1928.44,
+   "yaw": 0,
+   "data": {
+    "town": "pohelrow",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      240.69,
+      1928.44
+     ],
+     [
+      239.18,
+      1924.39
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "pohelrow_street_26",
+   "x": 236.02,
+   "z": 1931.34,
+   "yaw": 0,
+   "data": {
+    "town": "pohelrow",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      236.02,
+      1931.34
+     ],
+     [
+      237.14,
+      1927.43
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "pohelrow_street_27",
+   "x": 242.49,
+   "z": 1934.14,
+   "yaw": 0,
+   "data": {
+    "town": "pohelrow",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      242.49,
+      1934.14
+     ],
+     [
+      244.07,
+      1929.61
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "pohelrow_street_28",
+   "x": 272.66,
+   "z": 1933.38,
+   "yaw": 0,
+   "data": {
+    "town": "pohelrow",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      272.66,
+      1933.38
+     ],
+     [
+      273.87,
+      1929.42
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "building",
+   "id": "pohelrow_plot_0",
+   "x": 267.8,
+   "z": 1936.53,
+   "yaw": 1.3763,
+   "data": {
+    "town": "pohelrow",
+    "want": "house",
+    "district": "residential",
+    "w": 4.51,
+    "d": 6.86,
+    "angle": 3.336,
+    "front": 6.4776,
+    "streetGap": 0
+   }
+  },
+  {
+   "kind": "building",
+   "id": "pohelrow_plot_1",
+   "x": 273.69,
+   "z": 1920.13,
+   "yaw": 1.0138,
+   "data": {
+    "town": "pohelrow",
+    "want": "house",
+    "district": "residential",
+    "w": 3.66,
+    "d": 6.17,
+    "angle": 3.6986,
+    "front": 6.8402,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "pohelrow_plot_2",
+   "x": 245.05,
+   "z": 1940.81,
+   "yaw": -1.8736,
+   "data": {
+    "town": "pohelrow",
+    "want": "granary",
+    "district": "residential",
+    "w": 5.78,
+    "d": 7,
+    "angle": 3.4444,
+    "front": 3.4444,
+    "streetGap": 0.39
+   }
+  },
+  {
+   "kind": "building",
+   "id": "pohelrow_plot_3",
+   "x": 244.89,
+   "z": 1922.15,
+   "yaw": 1.414,
+   "data": {
+    "town": "pohelrow",
+    "want": "hut",
+    "district": "civic",
+    "w": 6.88,
+    "d": 5,
+    "angle": 3.2984,
+    "front": 6.44,
+    "streetGap": -0.32
+   }
+  },
+  {
+   "kind": "building",
+   "id": "pohelrow_plot_4",
+   "x": 235.25,
+   "z": 1920.63,
+   "yaw": 1.414,
+   "data": {
+    "town": "pohelrow",
+    "want": "house",
+    "district": "residential",
+    "w": 5.25,
+    "d": 5,
+    "angle": 3.2984,
+    "front": 6.44,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "pohelrow_plot_5",
+   "x": 243.85,
+   "z": 1907.31,
+   "yaw": -1.9476,
+   "data": {
+    "town": "pohelrow",
+    "want": "house",
+    "district": "residential",
+    "w": 3.86,
+    "d": 6.82,
+    "angle": 3.5184,
+    "front": 3.5184,
+    "streetGap": -0.23
+   }
+  },
+  {
+   "kind": "building",
+   "id": "pohelrow_plot_6",
+   "x": 248.9,
+   "z": 1898.53,
+   "yaw": -1.9476,
+   "data": {
+    "town": "pohelrow",
+    "want": "shrine",
+    "district": "residential",
+    "w": 6.79,
+    "d": 5.29,
+    "angle": 3.5184,
+    "front": 3.5184,
+    "streetGap": -0.19
+   }
+  },
+  {
+   "kind": "building",
+   "id": "pohelrow_plot_7",
+   "x": 236.35,
+   "z": 1904.57,
+   "yaw": 1.194,
+   "data": {
+    "town": "pohelrow",
+    "want": "house",
+    "district": "residential",
+    "w": 4.82,
+    "d": 6.4,
+    "angle": 3.5184,
+    "front": 6.66,
+    "streetGap": -0.32
+   }
+  },
+  {
+   "kind": "town_square",
+   "id": "ashford_square",
+   "x": 1343.94,
+   "z": 1567.14,
+   "yaw": 0,
+   "data": {
+    "r": 4.62,
+    "town": "ashford",
+    "culture": "halfling"
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_0",
+   "x": 1376.26,
+   "z": 1587.5,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      1376.26,
+      1587.5
+     ],
+     [
+      1356.17,
+      1559.71
+     ],
+     [
+      1337.68,
+      1530.83
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_1",
+   "x": 1370.33,
+   "z": 1547.15,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      1370.33,
+      1547.15
+     ],
+     [
+      1366.44,
+      1550.79
+     ],
+     [
+      1362.75,
+      1554.63
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_2",
+   "x": 1376.54,
+   "z": 1554.53,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1376.54,
+      1554.53
+     ],
+     [
+      1373.2,
+      1556.73
+     ],
+     [
+      1369.98,
+      1559.1
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_3",
+   "x": 1360.9,
+   "z": 1538.31,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1360.9,
+      1538.31
+     ],
+     [
+      1357.62,
+      1541.95
+     ],
+     [
+      1354.26,
+      1545.53
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_4",
+   "x": 1357.45,
+   "z": 1569.03,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      1357.45,
+      1569.03
+     ],
+     [
+      1338.19,
+      1582.71
+     ],
+     [
+      1317.44,
+      1594.03
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_5",
+   "x": 1351.55,
+   "z": 1604.46,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1351.55,
+      1604.46
+     ],
+     [
+      1345.41,
+      1594.92
+     ],
+     [
+      1338.43,
+      1586
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_6",
+   "x": 1362.41,
+   "z": 1582.93,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1362.41,
+      1582.93
+     ],
+     [
+      1355.34,
+      1589.14
+     ],
+     [
+      1348.04,
+      1595.08
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_7",
+   "x": 1363.71,
+   "z": 1594.31,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1363.71,
+      1594.31
+     ],
+     [
+      1361.23,
+      1591.01
+     ],
+     [
+      1358.38,
+      1588.01
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_8",
+   "x": 1356.59,
+   "z": 1600.34,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1356.59,
+      1600.34
+     ],
+     [
+      1353.89,
+      1597.22
+     ],
+     [
+      1351.26,
+      1594.04
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_9",
+   "x": 1351.6,
+   "z": 1590.39,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1351.6,
+      1590.39
+     ],
+     [
+      1348.22,
+      1586.72
+     ],
+     [
+      1345.16,
+      1582.78
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_10",
+   "x": 1357.48,
+   "z": 1585.41,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1357.48,
+      1585.41
+     ],
+     [
+      1354.47,
+      1581.43
+     ],
+     [
+      1351.04,
+      1577.8
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_11",
+   "x": 1359.79,
+   "z": 1579.83,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1359.79,
+      1579.83
+     ],
+     [
+      1358.24,
+      1581.09
+     ],
+     [
+      1356.74,
+      1582.41
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_12",
+   "x": 1354.3,
+   "z": 1583.77,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1354.3,
+      1583.77
+     ],
+     [
+      1352.38,
+      1585.39
+     ],
+     [
+      1350.46,
+      1587.02
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_13",
+   "x": 1346.47,
+   "z": 1586.36,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1346.47,
+      1586.36
+     ],
+     [
+      1344.84,
+      1587.87
+     ],
+     [
+      1343.09,
+      1589.23
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_14",
+   "x": 1345.2,
+   "z": 1601.61,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1345.2,
+      1601.61
+     ],
+     [
+      1338.72,
+      1605.33
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_15",
+   "x": 1342.29,
+   "z": 1605.66,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1342.29,
+      1605.66
+     ],
+     [
+      1341.88,
+      1604.94
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_16",
+   "x": 1340.43,
+   "z": 1602.51,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1340.43,
+      1602.51
+     ],
+     [
+      1337.17,
+      1597.07
+     ],
+     [
+      1334.56,
+      1591.29
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_17",
+   "x": 1340.54,
+   "z": 1592.71,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1340.54,
+      1592.71
+     ],
+     [
+      1339.08,
+      1593.36
+     ],
+     [
+      1337.73,
+      1594.18
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_18",
+   "x": 1337.59,
+   "z": 1600.24,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1337.59,
+      1600.24
+     ],
+     [
+      1333.16,
+      1602.75
+     ],
+     [
+      1331.48,
+      1603.56
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_19",
+   "x": 1332.96,
+   "z": 1601.23,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1332.96,
+      1601.23
+     ],
+     [
+      1331.05,
+      1597.67
+     ],
+     [
+      1329.21,
+      1594.08
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_20",
+   "x": 1326.54,
+   "z": 1579.94,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1326.54,
+      1579.94
+     ],
+     [
+      1319.63,
+      1564.32
+     ],
+     [
+      1313.31,
+      1548.46
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_21",
+   "x": 1341.07,
+   "z": 1551.22,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1341.07,
+      1551.22
+     ],
+     [
+      1331.35,
+      1556.7
+     ],
+     [
+      1321.17,
+      1561.26
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_22",
+   "x": 1339.87,
+   "z": 1572.66,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1339.87,
+      1572.66
+     ],
+     [
+      1336.4,
+      1564.9
+     ],
+     [
+      1332.22,
+      1557.5
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_23",
+   "x": 1346.15,
+   "z": 1561.28,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1346.15,
+      1561.28
+     ],
+     [
+      1342.01,
+      1563.33
+     ],
+     [
+      1337.91,
+      1565.44
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_24",
+   "x": 1336.53,
+   "z": 1569.36,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1336.53,
+      1569.36
+     ],
+     [
+      1332.03,
+      1571.6
+     ],
+     [
+      1327.54,
+      1573.89
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_25",
+   "x": 1332.92,
+   "z": 1576.17,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1332.92,
+      1576.17
+     ],
+     [
+      1332.16,
+      1574.69
+     ],
+     [
+      1331.42,
+      1573.2
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_26",
+   "x": 1333.38,
+   "z": 1563.1,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1333.38,
+      1563.1
+     ],
+     [
+      1328.75,
+      1565.1
+     ],
+     [
+      1324.39,
+      1567.64
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_27",
+   "x": 1330.4,
+   "z": 1571.19,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1330.4,
+      1571.19
+     ],
+     [
+      1329.33,
+      1569.22
+     ],
+     [
+      1328.38,
+      1567.19
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_28",
+   "x": 1328.85,
+   "z": 1563.81,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1328.85,
+      1563.81
+     ],
+     [
+      1328.01,
+      1561.93
+     ],
+     [
+      1327,
+      1560.14
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_29",
+   "x": 1334.68,
+   "z": 1552.62,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1334.68,
+      1552.62
+     ],
+     [
+      1332.01,
+      1547.83
+     ],
+     [
+      1329.74,
+      1542.84
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_30",
+   "x": 1338.33,
+   "z": 1545.8,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1338.33,
+      1545.8
+     ],
+     [
+      1336.14,
+      1547.02
+     ],
+     [
+      1333.86,
+      1548.06
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_31",
+   "x": 1329.64,
+   "z": 1555.17,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1329.64,
+      1555.17
+     ],
+     [
+      1327.05,
+      1550.34
+     ],
+     [
+      1324.7,
+      1545.39
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_32",
+   "x": 1331.08,
+   "z": 1548.42,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1331.08,
+      1548.42
+     ],
+     [
+      1329.73,
+      1549.18
+     ],
+     [
+      1328.31,
+      1549.82
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_33",
+   "x": 1326.27,
+   "z": 1551.22,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1326.27,
+      1551.22
+     ],
+     [
+      1322.32,
+      1553.47
+     ],
+     [
+      1318.16,
+      1555.31
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_34",
+   "x": 1316.95,
+   "z": 1565.15,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1316.95,
+      1565.15
+     ],
+     [
+      1312.37,
+      1566.06
+     ],
+     [
+      1307.91,
+      1567.44
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_35",
+   "x": 1319.43,
+   "z": 1574.98,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1319.43,
+      1574.98
+     ],
+     [
+      1314.88,
+      1575.98
+     ],
+     [
+      1310.4,
+      1577.27
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_36",
+   "x": 1315.02,
+   "z": 1557.54,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1315.02,
+      1557.54
+     ],
+     [
+      1310.5,
+      1558.67
+     ],
+     [
+      1307.27,
+      1559.49
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_37",
+   "x": 1367.15,
+   "z": 1538.24,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      1367.15,
+      1538.24
+     ],
+     [
+      1360.9,
+      1538.31
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_38",
+   "x": 1316.95,
+   "z": 1565.15,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1316.95,
+      1565.15
+     ],
+     [
+      1319.55,
+      1564.11
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_39",
+   "x": 1319.43,
+   "z": 1574.98,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1319.43,
+      1574.98
+     ],
+     [
+      1323.54,
+      1573.17
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_40",
+   "x": 1338.19,
+   "z": 1582.71,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1338.19,
+      1582.71
+     ],
+     [
+      1332.92,
+      1576.17
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_41",
+   "x": 1354.26,
+   "z": 1545.53,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1354.26,
+      1545.53
+     ],
+     [
+      1349.18,
+      1548.79
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_42",
+   "x": 1362.75,
+   "z": 1554.63,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1362.75,
+      1554.63
+     ],
+     [
+      1355.78,
+      1559.09
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "ashford_street_43",
+   "x": 1369.98,
+   "z": 1559.1,
+   "yaw": 0,
+   "data": {
+    "town": "ashford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1369.98,
+      1559.1
+     ],
+     [
+      1363.99,
+      1553.34
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "building",
+   "id": "ashford_plot_0",
+   "x": 1376.97,
+   "z": 1562.15,
+   "yaw": -2.7214,
+   "data": {
+    "town": "ashford",
+    "want": "house",
+    "district": "residential",
+    "w": 5.31,
+    "d": 7.41,
+    "angle": 2.7214,
+    "front": 4.2921,
+    "streetGap": 0.86
+   }
+  },
+  {
+   "kind": "building",
+   "id": "ashford_plot_1",
+   "x": 1354.59,
+   "z": 1539.17,
+   "yaw": 0.7118,
+   "data": {
+    "town": "ashford",
+    "want": "house",
+    "district": "residential",
+    "w": 7.06,
+    "d": 3.72,
+    "angle": 2.4298,
+    "front": 7.1422,
+    "streetGap": 0.17
+   }
+  },
+  {
+   "kind": "building",
+   "id": "ashford_plot_2",
+   "x": 1363.98,
+   "z": 1588.68,
+   "yaw": -0.8685,
+   "data": {
+    "town": "ashford",
+    "want": "house",
+    "district": "residential",
+    "w": 3.82,
+    "d": 7.05,
+    "angle": 2.4393,
+    "front": 2.4393,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "ashford_plot_3",
+   "x": 1357.41,
+   "z": 1594.24,
+   "yaw": -2.4393,
+   "data": {
+    "town": "ashford",
+    "want": "house",
+    "district": "residential",
+    "w": 5.64,
+    "d": 7.05,
+    "angle": 2.4393,
+    "front": 4.0101,
+    "streetGap": -0.37
+   }
+  },
+  {
+   "kind": "building",
+   "id": "ashford_plot_4",
+   "x": 1349.87,
+   "z": 1582.43,
+   "yaw": 0.7023,
+   "data": {
+    "town": "ashford",
+    "want": "hut",
+    "district": "craft",
+    "w": 3.83,
+    "d": 4.36,
+    "angle": 2.4393,
+    "front": 7.1517,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "ashford_plot_5",
+   "x": 1339.59,
+   "z": 1558.54,
+   "yaw": 0.4675,
+   "data": {
+    "town": "ashford",
+    "want": "granary",
+    "district": "civic",
+    "w": 8.04,
+    "d": 7.31,
+    "angle": 2.6741,
+    "front": 7.3865,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "ashford_plot_6",
+   "x": 1334.36,
+   "z": 1543.49,
+   "yaw": 0.4675,
+   "data": {
+    "town": "ashford",
+    "want": "house",
+    "district": "residential",
+    "w": 3.81,
+    "d": 4.11,
+    "angle": 2.6741,
+    "front": 7.3865,
+    "streetGap": -0.2
+   }
+  },
+  {
+   "kind": "building",
+   "id": "ashford_plot_7",
+   "x": 1313.68,
+   "z": 1571.26,
+   "yaw": 0.2475,
+   "data": {
+    "town": "ashford",
+    "want": "shrine",
+    "district": "residential",
+    "w": 8.12,
+    "d": 6.35,
+    "angle": 2.8941,
+    "front": 7.6065,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "ashford_plot_8",
+   "x": 1311.44,
+   "z": 1562.37,
+   "yaw": 0.2475,
+   "data": {
+    "town": "ashford",
+    "want": "house",
+    "district": "residential",
+    "w": 8.12,
+    "d": 4.2,
+    "angle": 2.8941,
+    "front": 7.6065,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_98",
+   "x": -704,
+   "z": 2240,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": false,
+    "pts": [
+     [
+      -704,
+      2240,
+      231.04
+     ],
+     [
+      -702,
+      2240,
+      230.89
+     ],
+     [
+      -698,
+      2240,
+      230.59
+     ],
+     [
+      -692,
+      2240,
+      230.37
+     ],
+     [
+      -684,
+      2240,
+      230.03
+     ],
+     [
+      -674,
+      2240,
+      229.58
+     ],
+     [
+      -662,
+      2240,
+      229.22
+     ],
+     [
+      -648,
+      2240,
+      228.95
+     ],
+     [
+      -632,
+      2240,
+      228.93
+     ],
+     [
+      -616,
+      2240,
+      229.11
+     ],
+     [
+      -600,
+      2240,
+      229.33
+     ],
+     [
+      -584,
+      2240,
+      229.84
+     ],
+     [
+      -568,
+      2240,
+      230.67
+     ],
+     [
+      -552,
+      2240,
+      231.58
+     ],
+     [
+      -536,
+      2240,
+      232.62
+     ],
+     [
+      -520,
+      2240,
+      233.57
+     ],
+     [
+      -504,
+      2240,
+      234.8
+     ],
+     [
+      -488,
+      2240,
+      236.06
+     ],
+     [
+      -472,
+      2240,
+      237.16
+     ],
+     [
+      -456,
+      2240,
+      238.32
+     ],
+     [
+      -440,
+      2240,
+      239.29
+     ],
+     [
+      -424,
+      2240,
+      240.06
+     ],
+     [
+      -408,
+      2240,
+      240.69
+     ],
+     [
+      -392,
+      2240,
+      240.8
+     ],
+     [
+      -376,
+      2240,
+      240.81
+     ],
+     [
+      -360,
+      2238,
+      240.65
+     ],
+     [
+      -344,
+      2234,
+      240.3
+     ],
+     [
+      -328,
+      2228,
+      239.97
+     ],
+     [
+      -312,
+      2220,
+      239.78
+     ],
+     [
+      -296,
+      2210,
+      239.42
+     ],
+     [
+      -280,
+      2198,
+      239.19
+     ],
+     [
+      -264,
+      2184,
+      238.59
+     ],
+     [
+      -248,
+      2168,
+      237.85
+     ],
+     [
+      -232,
+      2152,
+      236.87
+     ],
+     [
+      -216,
+      2136,
+      235.63
+     ],
+     [
+      -200,
+      2120,
+      233.94
+     ],
+     [
+      -184,
+      2104,
+      232.32
+     ],
+     [
+      -168,
+      2088,
+      230.9
+     ],
+     [
+      -152,
+      2072,
+      229.82
+     ],
+     [
+      -136,
+      2056,
+      228.84
+     ],
+     [
+      -120,
+      2040,
+      227.93
+     ],
+     [
+      -104,
+      2026,
+      227.39
+     ],
+     [
+      -88,
+      2014,
+      227.23
+     ],
+     [
+      -72,
+      2004,
+      227.23
+     ],
+     [
+      -56,
+      1996,
+      227.29
+     ],
+     [
+      -40,
+      1990,
+      227.52
+     ],
+     [
+      -24,
+      1986,
+      227.86
+     ],
+     [
+      -8,
+      1984,
+      228.37
+     ],
+     [
+      8,
+      1984,
+      228.76
+     ],
+     [
+      22,
+      1984,
+      228.99
+     ],
+     [
+      34,
+      1984,
+      229.14
+     ],
+     [
+      44,
+      1984,
+      229.08
+     ],
+     [
+      52,
+      1984,
+      228.9
+     ],
+     [
+      58,
+      1984,
+      228.8
+     ],
+     [
+      62,
+      1984,
+      228.6
+     ],
+     [
+      64,
+      1984,
+      228.38
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_99",
+   "x": 64,
+   "z": 1984,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": false,
+    "pts": [
+     [
+      64,
+      1984,
+      227.78
+     ],
+     [
+      66,
+      1984,
+      227.54
+     ],
+     [
+      70,
+      1984,
+      227.24
+     ],
+     [
+      76,
+      1984,
+      226.97
+     ],
+     [
+      84,
+      1984,
+      226.57
+     ],
+     [
+      94,
+      1984,
+      226.16
+     ],
+     [
+      106,
+      1984,
+      225.56
+     ],
+     [
+      120,
+      1984,
+      224.81
+     ],
+     [
+      136,
+      1984,
+      223.97
+     ],
+     [
+      152,
+      1984,
+      223.29
+     ],
+     [
+      168,
+      1984,
+      222.6
+     ],
+     [
+      184,
+      1984,
+      221.92
+     ],
+     [
+      200,
+      1984,
+      221.14
+     ],
+     [
+      216,
+      1984,
+      220.53
+     ],
+     [
+      232,
+      1984,
+      220.1
+     ],
+     [
+      248,
+      1984,
+      219.75
+     ],
+     [
+      264,
+      1984,
+      219.19
+     ],
+     [
+      280,
+      1984,
+      218.49
+     ],
+     [
+      296,
+      1984,
+      217.73
+     ],
+     [
+      312,
+      1984,
+      216.99
+     ],
+     [
+      328,
+      1984,
+      216.37
+     ],
+     [
+      344,
+      1984,
+      215.92
+     ],
+     [
+      360,
+      1984,
+      215.69
+     ],
+     [
+      376,
+      1984,
+      215.71
+     ],
+     [
+      392,
+      1984,
+      215.95
+     ],
+     [
+      408,
+      1986,
+      216.46
+     ],
+     [
+      424,
+      1990,
+      217.26
+     ],
+     [
+      440,
+      1996,
+      218.44
+     ],
+     [
+      456,
+      2004,
+      220.08
+     ],
+     [
+      472,
+      2014,
+      222
+     ],
+     [
+      488,
+      2026,
+      224.31
+     ],
+     [
+      504,
+      2040,
+      227.03
+     ],
+     [
+      520,
+      2056,
+      230.13
+     ],
+     [
+      536,
+      2070,
+      233.38
+     ],
+     [
+      552,
+      2082,
+      236.14
+     ],
+     [
+      568,
+      2092,
+      238.45
+     ],
+     [
+      584,
+      2100,
+      240.56
+     ],
+     [
+      600,
+      2106,
+      242.19
+     ],
+     [
+      616,
+      2110,
+      243.29
+     ],
+     [
+      632,
+      2112,
+      243.84
+     ],
+     [
+      648,
+      2112,
+      244.11
+     ],
+     [
+      662,
+      2112,
+      244.45
+     ],
+     [
+      674,
+      2112,
+      244.62
+     ],
+     [
+      684,
+      2112,
+      244.55
+     ],
+     [
+      692,
+      2112,
+      244.49
+     ],
+     [
+      698,
+      2112,
+      244.55
+     ],
+     [
+      702,
+      2112,
+      244.6
+     ],
+     [
+      704,
+      2112,
+      244.6
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_100",
+   "x": 704,
+   "z": 2112,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": false,
+    "pts": [
+     [
+      704,
+      2112,
+      244.6
+     ],
+     [
+      702,
+      2112,
+      244.6
+     ],
+     [
+      698,
+      2112,
+      244.55
+     ],
+     [
+      692,
+      2112,
+      244.49
+     ],
+     [
+      684,
+      2112,
+      244.55
+     ],
+     [
+      674,
+      2112,
+      244.62
+     ],
+     [
+      662,
+      2112,
+      244.68
+     ],
+     [
+      648,
+      2112,
+      244.77
+     ],
+     [
+      632,
+      2112,
+      245.37
+     ],
+     [
+      616,
+      2114,
+      246.21
+     ],
+     [
+      600,
+      2118,
+      247.38
+     ],
+     [
+      584,
+      2124,
+      248.81
+     ],
+     [
+      568,
+      2132,
+      250.64
+     ],
+     [
+      552,
+      2142,
+      252.82
+     ],
+     [
+      536,
+      2154,
+      255.16
+     ],
+     [
+      520,
+      2168,
+      257
+     ],
+     [
+      504,
+      2184,
+      258.81
+     ],
+     [
+      490,
+      2200,
+      260.3
+     ],
+     [
+      478,
+      2216,
+      261.55
+     ],
+     [
+      468,
+      2232,
+      262.49
+     ],
+     [
+      460,
+      2248,
+      263.24
+     ],
+     [
+      454,
+      2264,
+      264.15
+     ],
+     [
+      450,
+      2280,
+      265.34
+     ],
+     [
+      448,
+      2296,
+      266.49
+     ],
+     [
+      448,
+      2312,
+      267.38
+     ],
+     [
+      446,
+      2328,
+      267.76
+     ],
+     [
+      442,
+      2344,
+      267.72
+     ],
+     [
+      436,
+      2360,
+      266.82
+     ],
+     [
+      428,
+      2376,
+      264.61
+     ],
+     [
+      418,
+      2392,
+      261.77
+     ],
+     [
+      406,
+      2408,
+      258.23
+     ],
+     [
+      392,
+      2424,
+      254.79
+     ],
+     [
+      376,
+      2440,
+      251.79
+     ],
+     [
+      362,
+      2456,
+      249.49
+     ],
+     [
+      350,
+      2472,
+      248.1
+     ],
+     [
+      340,
+      2488,
+      247.94
+     ],
+     [
+      332,
+      2504,
+      248.45
+     ],
+     [
+      326,
+      2520,
+      249.81
+     ],
+     [
+      322,
+      2536,
+      251.39
+     ],
+     [
+      320,
+      2552,
+      252.78
+     ],
+     [
+      320,
+      2568,
+      253.84
+     ],
+     [
+      320,
+      2582,
+      254.6
+     ],
+     [
+      320,
+      2594,
+      254.99
+     ],
+     [
+      320,
+      2604,
+      255.07
+     ],
+     [
+      320,
+      2612,
+      254.88
+     ],
+     [
+      320,
+      2618,
+      254.73
+     ],
+     [
+      320,
+      2622,
+      254.67
+     ],
+     [
+      320,
+      2624,
+      254.52
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_101",
+   "x": 704,
+   "z": 2112,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": false,
+    "pts": [
+     [
+      704,
+      2112,
+      242.87
+     ],
+     [
+      704,
+      2110,
+      241.83
+     ],
+     [
+      704,
+      2106,
+      240.59
+     ],
+     [
+      704,
+      2100,
+      239.13
+     ],
+     [
+      704,
+      2092,
+      236.63
+     ],
+     [
+      704,
+      2082,
+      233.86
+     ],
+     [
+      704,
+      2070,
+      230.83
+     ],
+     [
+      704,
+      2056,
+      227.57
+     ],
+     [
+      704,
+      2040,
+      224.42
+     ],
+     [
+      704,
+      2024,
+      221.38
+     ],
+     [
+      704,
+      2008,
+      218.62
+     ],
+     [
+      704,
+      1992,
+      216.26
+     ],
+     [
+      704,
+      1976,
+      214.2
+     ],
+     [
+      704,
+      1960,
+      212.49
+     ],
+     [
+      704,
+      1944,
+      211.26
+     ],
+     [
+      704,
+      1928,
+      210.21
+     ],
+     [
+      704,
+      1912,
+      209.34
+     ],
+     [
+      704,
+      1896,
+      208.71
+     ],
+     [
+      704,
+      1880,
+      208.06
+     ],
+     [
+      704,
+      1864,
+      207.35
+     ],
+     [
+      704,
+      1848,
+      206.64
+     ],
+     [
+      704,
+      1832,
+      205.86
+     ],
+     [
+      704,
+      1816,
+      204.87
+     ],
+     [
+      704,
+      1800,
+      203.56
+     ],
+     [
+      704,
+      1784,
+      201.9
+     ],
+     [
+      702,
+      1768,
+      200.14
+     ],
+     [
+      698,
+      1752,
+      198.35
+     ],
+     [
+      692,
+      1736,
+      196.25
+     ],
+     [
+      684,
+      1720,
+      193.96
+     ],
+     [
+      674,
+      1704,
+      192.09
+     ],
+     [
+      662,
+      1688,
+      190.56
+     ],
+     [
+      648,
+      1672,
+      189.3
+     ],
+     [
+      632,
+      1656,
+      188.3
+     ],
+     [
+      616,
+      1640,
+      187.56
+     ],
+     [
+      600,
+      1624,
+      187.1
+     ],
+     [
+      584,
+      1608,
+      186.62
+     ],
+     [
+      568,
+      1592,
+      186.16
+     ],
+     [
+      552,
+      1576,
+      186.01
+     ],
+     [
+      536,
+      1560,
+      186.08
+     ],
+     [
+      520,
+      1544,
+      186.13
+     ],
+     [
+      504,
+      1528,
+      186.09
+     ],
+     [
+      490,
+      1512,
+      185.98
+     ],
+     [
+      478,
+      1496,
+      186.22
+     ],
+     [
+      468,
+      1480,
+      186.36
+     ],
+     [
+      460,
+      1464,
+      186.31
+     ],
+     [
+      454,
+      1448,
+      186.03
+     ],
+     [
+      450,
+      1432,
+      185.69
+     ],
+     [
+      448,
+      1416,
+      185.44
+     ],
+     [
+      448,
+      1400,
+      185.41
+     ],
+     [
+      450,
+      1384,
+      185.18
+     ],
+     [
+      454,
+      1368,
+      184.69
+     ],
+     [
+      460,
+      1352,
+      183.97
+     ],
+     [
+      468,
+      1336,
+      183.12
+     ],
+     [
+      478,
+      1320,
+      182.13
+     ],
+     [
+      490,
+      1304,
+      180.81
+     ],
+     [
+      504,
+      1288,
+      179.39
+     ],
+     [
+      504.99,
+      1287.01,
+      179.32
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_102",
+   "x": 668.13,
+   "z": 1216,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": false,
+    "pts": [
+     [
+      668.13,
+      1216,
+      172.26
+     ],
+     [
+      680,
+      1216,
+      171.45
+     ],
+     [
+      696,
+      1216,
+      170.24
+     ],
+     [
+      712,
+      1216,
+      168.74
+     ],
+     [
+      728,
+      1216,
+      167.62
+     ],
+     [
+      744,
+      1216,
+      166.54
+     ],
+     [
+      760,
+      1216,
+      165.46
+     ],
+     [
+      776,
+      1216,
+      164.3
+     ],
+     [
+      792,
+      1216,
+      163.01
+     ],
+     [
+      808,
+      1216,
+      161.6
+     ],
+     [
+      824,
+      1216,
+      160.12
+     ],
+     [
+      840,
+      1216,
+      158.67
+     ],
+     [
+      856,
+      1216,
+      157.53
+     ],
+     [
+      872,
+      1216,
+      156.67
+     ],
+     [
+      888,
+      1216,
+      155.89
+     ],
+     [
+      904,
+      1216,
+      155.19
+     ],
+     [
+      920,
+      1216,
+      154.45
+     ],
+     [
+      936,
+      1216,
+      153.81
+     ],
+     [
+      952,
+      1216,
+      152.91
+     ],
+     [
+      968,
+      1216,
+      151.76
+     ],
+     [
+      984,
+      1216,
+      150.47
+     ],
+     [
+      1000,
+      1216,
+      149.12
+     ],
+     [
+      1016,
+      1216,
+      147.83
+     ],
+     [
+      1032,
+      1216,
+      146.62
+     ],
+     [
+      1048,
+      1216,
+      145.44
+     ],
+     [
+      1064,
+      1216,
+      144.21
+     ],
+     [
+      1080,
+      1216,
+      143.17
+     ],
+     [
+      1096,
+      1216,
+      142.27
+     ],
+     [
+      1112,
+      1216,
+      141.4
+     ],
+     [
+      1128,
+      1216,
+      140.36
+     ],
+     [
+      1144,
+      1216,
+      139.29
+     ],
+     [
+      1160,
+      1216,
+      138.32
+     ],
+     [
+      1176,
+      1218,
+      137.72
+     ],
+     [
+      1192,
+      1222,
+      137.13
+     ],
+     [
+      1208,
+      1228,
+      136.41
+     ],
+     [
+      1224,
+      1236,
+      135.44
+     ],
+     [
+      1240,
+      1246,
+      134.38
+     ],
+     [
+      1256,
+      1258,
+      133.46
+     ],
+     [
+      1272,
+      1272,
+      132.5
+     ],
+     [
+      1288,
+      1288,
+      131.31
+     ],
+     [
+      1302,
+      1304,
+      130
+     ],
+     [
+      1314,
+      1320,
+      128.68
+     ],
+     [
+      1324,
+      1336,
+      127.66
+     ],
+     [
+      1332,
+      1352,
+      126.94
+     ],
+     [
+      1338,
+      1368,
+      126.53
+     ],
+     [
+      1342,
+      1384,
+      126.41
+     ],
+     [
+      1344,
+      1400,
+      126.53
+     ],
+     [
+      1344,
+      1416,
+      126.8
+     ],
+     [
+      1344,
+      1430,
+      127.2
+     ],
+     [
+      1344,
+      1442,
+      127.72
+     ],
+     [
+      1344,
+      1452,
+      128.25
+     ],
+     [
+      1344,
+      1460,
+      128.54
+     ],
+     [
+      1344,
+      1466,
+      128.66
+     ],
+     [
+      1344,
+      1470,
+      128.71
+     ],
+     [
+      1344,
+      1472,
+      128.73
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_103",
+   "x": 1344,
+   "z": 1472,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": false,
+    "pts": [
+     [
+      1344,
+      1472,
+      128.19
+     ],
+     [
+      1346,
+      1474,
+      127.8
+     ],
+     [
+      1350,
+      1478,
+      127.46
+     ],
+     [
+      1356,
+      1484,
+      127.07
+     ],
+     [
+      1364,
+      1492,
+      126.6
+     ],
+     [
+      1374,
+      1502,
+      126.14
+     ],
+     [
+      1386,
+      1514,
+      125.62
+     ],
+     [
+      1400,
+      1528,
+      125.14
+     ],
+     [
+      1416,
+      1544,
+      124.71
+     ],
+     [
+      1432,
+      1560,
+      124.33
+     ],
+     [
+      1448,
+      1576,
+      124.13
+     ],
+     [
+      1464,
+      1592,
+      123.92
+     ],
+     [
+      1480,
+      1608,
+      123.94
+     ],
+     [
+      1496,
+      1624,
+      123.79
+     ],
+     [
+      1512,
+      1640,
+      123.23
+     ],
+     [
+      1528,
+      1656,
+      122.59
+     ],
+     [
+      1544,
+      1672,
+      121.74
+     ],
+     [
+      1560,
+      1686,
+      120.57
+     ],
+     [
+      1576,
+      1698,
+      119.21
+     ],
+     [
+      1592,
+      1708,
+      117.34
+     ],
+     [
+      1608,
+      1716,
+      115.52
+     ],
+     [
+      1624,
+      1722,
+      113.74
+     ],
+     [
+      1640,
+      1726,
+      111.95
+     ],
+     [
+      1656,
+      1728,
+      110.33
+     ],
+     [
+      1672,
+      1728,
+      108.8
+     ],
+     [
+      1688,
+      1728,
+      106.91
+     ],
+     [
+      1704,
+      1728,
+      105.03
+     ],
+     [
+      1720,
+      1728,
+      103.41
+     ],
+     [
+      1736,
+      1728,
+      102
+     ],
+     [
+      1752,
+      1728,
+      100.73
+     ],
+     [
+      1768,
+      1728,
+      99.36
+     ],
+     [
+      1784,
+      1728,
+      97.72
+     ],
+     [
+      1800,
+      1728,
+      96.33
+     ],
+     [
+      1816,
+      1728,
+      94.95
+     ],
+     [
+      1832,
+      1728,
+      93.57
+     ],
+     [
+      1848,
+      1728,
+      92.35
+     ],
+     [
+      1864,
+      1728,
+      91.11
+     ],
+     [
+      1880,
+      1728,
+      90.25
+     ],
+     [
+      1896,
+      1728,
+      89.99
+     ],
+     [
+      1912,
+      1728,
+      89.84
+     ],
+     [
+      1928,
+      1728,
+      89.75
+     ],
+     [
+      1944,
+      1728,
+      89.52
+     ],
+     [
+      1960,
+      1728,
+      89.02
+     ],
+     [
+      1976,
+      1728,
+      88.4
+     ],
+     [
+      1992,
+      1728,
+      87.41
+     ],
+     [
+      2008,
+      1728,
+      85.97
+     ],
+     [
+      2024,
+      1728,
+      84.28
+     ],
+     [
+      2040,
+      1728,
+      82.64
+     ],
+     [
+      2056,
+      1728,
+      81.18
+     ],
+     [
+      2070,
+      1728,
+      79.96
+     ],
+     [
+      2082,
+      1728,
+      78.96
+     ],
+     [
+      2092,
+      1728,
+      78.12
+     ],
+     [
+      2100,
+      1728,
+      77.61
+     ],
+     [
+      2106,
+      1728,
+      77.45
+     ],
+     [
+      2110,
+      1728,
+      77.44
+     ],
+     [
+      2112,
+      1728,
+      77.41
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_104",
+   "x": 2112,
+   "z": 1728,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": false,
+    "pts": [
+     [
+      2112,
+      1728,
+      77.29
+     ],
+     [
+      2114,
+      1728,
+      77.12
+     ],
+     [
+      2118,
+      1728,
+      76.81
+     ],
+     [
+      2124,
+      1728,
+      76.45
+     ],
+     [
+      2132,
+      1728,
+      75.82
+     ],
+     [
+      2142,
+      1728,
+      75.07
+     ],
+     [
+      2154,
+      1728,
+      74.34
+     ],
+     [
+      2168,
+      1728,
+      73.48
+     ],
+     [
+      2184,
+      1728,
+      72.54
+     ],
+     [
+      2200,
+      1728,
+      71.54
+     ],
+     [
+      2216,
+      1728,
+      70.62
+     ],
+     [
+      2232,
+      1728,
+      69.74
+     ],
+     [
+      2248,
+      1728,
+      68.83
+     ],
+     [
+      2264,
+      1728,
+      67.84
+     ],
+     [
+      2280,
+      1728,
+      67.21
+     ],
+     [
+      2296,
+      1728,
+      66.97
+     ],
+     [
+      2312,
+      1728,
+      67.19
+     ],
+     [
+      2328,
+      1728,
+      67.56
+     ],
+     [
+      2344,
+      1728,
+      68.29
+     ],
+     [
+      2360,
+      1728,
+      69.39
+     ],
+     [
+      2376,
+      1728,
+      70.56
+     ],
+     [
+      2392,
+      1728,
+      71.37
+     ],
+     [
+      2408,
+      1728,
+      71.93
+     ],
+     [
+      2424,
+      1728,
+      72.19
+     ],
+     [
+      2440,
+      1728,
+      72.22
+     ],
+     [
+      2456,
+      1728,
+      71.93
+     ],
+     [
+      2472,
+      1728,
+      71.33
+     ],
+     [
+      2488,
+      1728,
+      70.69
+     ],
+     [
+      2504,
+      1728,
+      70.11
+     ],
+     [
+      2520,
+      1728,
+      69.6
+     ],
+     [
+      2536,
+      1728,
+      69.24
+     ],
+     [
+      2552,
+      1728,
+      68.99
+     ],
+     [
+      2568,
+      1728,
+      68.77
+     ],
+     [
+      2584,
+      1726,
+      68.66
+     ],
+     [
+      2600,
+      1722,
+      68.65
+     ],
+     [
+      2616,
+      1716,
+      68.65
+     ],
+     [
+      2632,
+      1708,
+      68.55
+     ],
+     [
+      2648,
+      1698,
+      68.48
+     ],
+     [
+      2664,
+      1686,
+      68.45
+     ],
+     [
+      2680,
+      1672,
+      68.4
+     ],
+     [
+      2696,
+      1656,
+      68.31
+     ],
+     [
+      2710,
+      1642,
+      68.05
+     ],
+     [
+      2722,
+      1630,
+      67.81
+     ],
+     [
+      2732,
+      1620,
+      67.63
+     ],
+     [
+      2740,
+      1612,
+      67.32
+     ],
+     [
+      2746,
+      1606,
+      67.1
+     ],
+     [
+      2750,
+      1602,
+      66.91
+     ],
+     [
+      2752,
+      1600,
+      66.66
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_313",
+   "x": 504.99,
+   "z": 1287.01,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": false,
+    "pts": [
+     [
+      504.99,
+      1287.01,
+      179.55
+     ],
+     [
+      504,
+      1288,
+      179.63
+     ],
+     [
+      488,
+      1304,
+      181.06
+     ],
+     [
+      472,
+      1320,
+      182.43
+     ],
+     [
+      456,
+      1336,
+      183.55
+     ],
+     [
+      440,
+      1352,
+      184.66
+     ],
+     [
+      424,
+      1368,
+      185.56
+     ],
+     [
+      408,
+      1384,
+      186.05
+     ],
+     [
+      392,
+      1400,
+      186.37
+     ],
+     [
+      376,
+      1416,
+      187.08
+     ],
+     [
+      360,
+      1430,
+      188.13
+     ],
+     [
+      344,
+      1442,
+      189.59
+     ],
+     [
+      328,
+      1452,
+      191.3
+     ],
+     [
+      312,
+      1460,
+      193.07
+     ],
+     [
+      296,
+      1466,
+      194.97
+     ],
+     [
+      280,
+      1470,
+      197.06
+     ],
+     [
+      264,
+      1472,
+      198.91
+     ],
+     [
+      248,
+      1472,
+      200.61
+     ],
+     [
+      232,
+      1474,
+      201.99
+     ],
+     [
+      216,
+      1478,
+      203.17
+     ],
+     [
+      200,
+      1484,
+      204.17
+     ],
+     [
+      184,
+      1492,
+      205.02
+     ],
+     [
+      168,
+      1502,
+      205.83
+     ],
+     [
+      152,
+      1514,
+      206.51
+     ],
+     [
+      136,
+      1528,
+      207.01
+     ],
+     [
+      120,
+      1544,
+      207.55
+     ],
+     [
+      106,
+      1560,
+      208.11
+     ],
+     [
+      94,
+      1576,
+      208.96
+     ],
+     [
+      84,
+      1592,
+      210.06
+     ],
+     [
+      76,
+      1608,
+      211.24
+     ],
+     [
+      70,
+      1624,
+      212.51
+     ],
+     [
+      66,
+      1640,
+      213.91
+     ],
+     [
+      64,
+      1656,
+      215.35
+     ],
+     [
+      64,
+      1672,
+      216.48
+     ],
+     [
+      64,
+      1688,
+      217.37
+     ],
+     [
+      64,
+      1704,
+      218.15
+     ],
+     [
+      64,
+      1720,
+      218.71
+     ],
+     [
+      64,
+      1736,
+      218.98
+     ],
+     [
+      64,
+      1752,
+      219.35
+     ],
+     [
+      64,
+      1768,
+      219.82
+     ],
+     [
+      64,
+      1784,
+      220.38
+     ],
+     [
+      64,
+      1800,
+      220.88
+     ],
+     [
+      64,
+      1816,
+      221.35
+     ],
+     [
+      64,
+      1832,
+      221.9
+     ],
+     [
+      64,
+      1848,
+      222.47
+     ],
+     [
+      64,
+      1864,
+      222.83
+     ],
+     [
+      64,
+      1880,
+      223.07
+     ],
+     [
+      64,
+      1896,
+      223.39
+     ],
+     [
+      64,
+      1912,
+      223.93
+     ],
+     [
+      64,
+      1928,
+      224.58
+     ],
+     [
+      64,
+      1942,
+      225.16
+     ],
+     [
+      64,
+      1954,
+      225.84
+     ],
+     [
+      64,
+      1964,
+      226.52
+     ],
+     [
+      64,
+      1972,
+      227.09
+     ],
+     [
+      64,
+      1978,
+      227.48
+     ],
+     [
+      64,
+      1982,
+      227.78
+     ],
+     [
+      64,
+      1984,
+      227.93
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "spur_torborhold",
+   "x": 505.17,
+   "z": 1287.68,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": true,
+    "pts": [
+     [
+      505.17,
+      1287.68,
+      177.04
+     ],
+     [
+      504,
+      1288,
+      177.08
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "spur_pohelrow",
+   "x": 242.39,
+   "z": 1882.38,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": true,
+    "pts": [
+     [
+      242.39,
+      1882.38,
+      216.08
+     ],
+     [
+      239.68,
+      1874.88,
+      216.13
+     ],
+     [
+      234.24,
+      1859.84,
+      216.4
+     ],
+     [
+      228.8,
+      1844.8,
+      216.7
+     ],
+     [
+      223.36,
+      1829.76,
+      217.16
+     ],
+     [
+      217.92,
+      1814.72,
+      217.46
+     ],
+     [
+      212.48,
+      1799.68,
+      217.53
+     ],
+     [
+      207.04,
+      1784.64,
+      217.35
+     ],
+     [
+      201.6,
+      1769.6,
+      216.95
+     ],
+     [
+      196.16,
+      1754.56,
+      216.26
+     ],
+     [
+      190.72,
+      1739.52,
+      215.23
+     ],
+     [
+      185.28,
+      1724.48,
+      213.96
+     ],
+     [
+      179.84,
+      1709.44,
+      212.77
+     ],
+     [
+      174.4,
+      1694.4,
+      211.92
+     ],
+     [
+      168.96,
+      1679.36,
+      211.28
+     ],
+     [
+      163.52,
+      1664.32,
+      210.92
+     ],
+     [
+      158.08,
+      1649.28,
+      210.79
+     ],
+     [
+      152.64,
+      1634.24,
+      210.85
+     ],
+     [
+      147.2,
+      1619.2,
+      210.85
+     ],
+     [
+      141.76,
+      1604.16,
+      210.55
+     ],
+     [
+      136.32,
+      1589.12,
+      210.13
+     ],
+     [
+      130.88,
+      1574.08,
+      210.04
+     ],
+     [
+      125.44,
+      1559.04,
+      209.75
+     ],
+     [
+      120,
+      1544,
+      209.37
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "spur_ashford",
+   "x": 1372.24,
+   "z": 1531.69,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": true,
+    "pts": [
+     [
+      1372.24,
+      1531.69,
+      127.3
+     ],
+     [
+      1375.5,
+      1527.5,
+      127.3
+     ],
+     [
+      1386,
+      1514,
+      127.03
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "bridge",
+   "id": "bridge_99_83_0",
+   "x": 433.82,
+   "z": 1993.68,
+   "yaw": 1.212,
+   "data": {
+    "span": 12,
+    "deck": 218.443,
+    "road": "road_99"
+   }
+  },
+  {
+   "kind": "bridge",
+   "id": "bridge_101_9_1",
+   "x": 453.51,
+   "z": 1446.02,
+   "yaw": -2.8966,
+   "data": {
+    "span": 12,
+    "deck": 186.707,
+    "road": "road_101"
+   }
+  },
+  {
+   "kind": "bridge",
+   "id": "bridge_101_83_2",
+   "x": 585.37,
+   "z": 1609.37,
+   "yaw": -2.3562,
+   "data": {
+    "span": 12,
+    "deck": 187.204,
+    "road": "road_101"
+   }
+  },
+  {
+   "kind": "bridge",
+   "id": "bridge_102_9_3",
+   "x": 1344,
+   "z": 1426.64,
+   "yaw": 0,
+   "data": {
+    "span": 12,
+    "deck": 129.94,
+    "road": "road_102"
+   }
+  },
+  {
+   "kind": "bridge",
+   "id": "bridge_313_9_4",
+   "x": 64,
+   "z": 1846.99,
+   "yaw": 0,
+   "data": {
+    "span": 12,
+    "deck": 222.655,
+    "road": "road_313"
+   }
+  }
+ ]
+}

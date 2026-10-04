@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 // Thousandvale — ZONE bake v1 (stream B, PLAN §3.2.2).
 //
-//   node prototypes/thousandvale/tools/bake-zone.mjs z15_02     # one zone → data/zones/z15_02/
+//   node prototypes/thousandvale/tools/bake-zone.mjs z12_02     # one zone → data/zones/z12_02/
 //   node prototypes/thousandvale/tools/bake-zone.mjs --m1       # the starter / M1 zone (Torborhold's)
-//   node prototypes/thousandvale/tools/bake-zone.mjs z15_02 --check
+//   node prototypes/thousandvale/tools/bake-zone.mjs z12_02 --check
+//   node prototypes/thousandvale/tools/bake-zone.mjs --province torbor_downs   # every zone of an E sheet (data/world/province-map.json)
 //
 // Reads data/world/{world.json, macro.bin} (tools/bake-world.mjs) and writes data/zones/<id>/:
 //   terrain.bin      the terrain-read.js format (v1): 1025² samples at 2 m (height, water, kind, surface)
@@ -37,7 +38,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const WORLD_DIR = join(HERE, '..', 'data', 'world');
 const ZONES_DIR = join(HERE, '..', 'data', 'zones');
 export const ZONE_BAKE_VERSION = 2;
-export const M1_ZONE = 'z15_02';          // the starter zone (world.json `starter`; Torborhold, Petbeck Basin)
+export const M1_ZONE = 'z12_02';          // the starter zone (world.json `starter`; Torborhold, Petbeck Basin)
 const SIZE = 1025, STEP = 2, ZM = 2048;
 /** Proctown size by settlement kind. */
 const TOWN_SIZE = { hamlet: 1, village: 2, town: 3, city: 4, capital: 5 };
@@ -45,16 +46,36 @@ const ROAD_SURFACE_ID = BIOMES.length;    // an extra entry appended to meta.bio
 const LEVEL_EASE = 40;                    // metres a levelled town eases back into the land
 const SPUR_EDGE = 120;                    // a spur road never comes nearer a zone edge than this
 
-/** Sites other streams ask for (starter zone): event arena by the 2nd settlement, elite camp at the ford. */
+/**
+ * Sites other streams ask for. Every zone that one of stream E's province sheets uses (data/world/province-map.json)
+ * gets an event arena (`event_<E zone id>`, r 40; the sheet's world-boss zone also gets `<worldBoss.id>`, r 100 for an
+ * arena of 50 plus room). The starter zone keeps E's named M1 ids: `event_grandmother_skein` by the zone's second
+ * settlement and `elite_hobb_gallowsby` at its ford.
+ */
 function asksFor(id, sites, W) {
-  if (id !== W.starter?.zone) return [];
+  const asks = [];
   const hub = sites.find(s => s.hub);
-  const other = sites.filter(s => s.type === 'settlement' && !s.hub).sort((a, b) => Math.hypot(a.x - hub.x, a.z - hub.z) - Math.hypot(b.x - hub.x, b.z - hub.z))[0];
-  const ford = sites.find(s => s.type === 'crossing');
-  return [
-    { type: 'event', id: 'event_grandmother_skein', ...(other ? { nearSite: other.name } : { near: { x: 1024, z: 1024 } }), r: 40 },
-    { type: 'camp', id: 'elite_hobb_gallowsby', ...(ford ? { nearSite: ford.name } : { near: { x: (hub.x + 1024) / 2, z: (hub.z + 1024) / 2 } }), r: 25 },
-  ];
+  for (const [sheetId, pm] of Object.entries(PROVINCE_MAP.provinces || {})) {
+    const eid = Object.entries(pm.map || {}).find(([, z]) => z === id)?.[0];
+    if (!eid) continue;
+    let sheet = null; try { sheet = JSON.parse(readFileSync(join(HERE, '..', 'data', 'provinces', `${sheetId}.json`), 'utf8')); } catch { /* no sheet */ }
+    if (sheet?.worldBoss?.zone === eid) asks.push({ type: 'event', id: sheet.worldBoss.id, near: { x: 1024, z: 1024 }, r: 100 });
+    if (id !== W.starter?.zone) asks.push({ type: 'event', id: `event_${eid}`, near: hub ? { x: (hub.x + 1024) / 2, z: (hub.z + 1024) / 2 } : { x: 1024, z: 1024 }, r: 40 });
+  }
+  if (id === W.starter?.zone && hub) {
+    const other = sites.filter(s => s.type === 'settlement' && !s.hub).sort((a, b) => Math.hypot(a.x - hub.x, a.z - hub.z) - Math.hypot(b.x - hub.x, b.z - hub.z))[0];
+    const ford = sites.find(s => s.type === 'crossing');
+    asks.push({ type: 'event', id: 'event_grandmother_skein', ...(other ? { nearSite: other.name } : { near: { x: 1024, z: 1024 } }), r: 40 });
+    asks.push({ type: 'camp', id: 'elite_hobb_gallowsby', ...(ford ? { nearSite: ford.name } : { near: { x: (hub.x + 1024) / 2, z: (hub.z + 1024) / 2 } }), r: 25 });
+  }
+  return asks;
+}
+let PROVINCE_MAP = {};
+try { PROVINCE_MAP = JSON.parse(readFileSync(join(HERE, '..', 'data', 'world', 'province-map.json'), 'utf8')); } catch { /* none yet */ }
+/** The E sheet zone id for a world zone, if any (written into meta so E can match on its own ids). */
+function sheetIdFor(id) {
+  for (const [sheetId, pm] of Object.entries(PROVINCE_MAP.provinces || {})) { const e = Object.entries(pm.map || {}).find(([, z]) => z === id); if (e) return { sheet: sheetId, zone: e[0] }; }
+  return null;
 }
 
 let worldCache = null;
@@ -121,7 +142,9 @@ export function bakeZone(id, opts = {}) {
 
   // 3. settlements: pick spots (move inward / off water if needed), hub first
   const rank = { capital: 0, city: 1, town: 2, village: 3, hamlet: 4 };
-  const sites = W.nodes.filter(n => n.zone === id).map(n => ({ nodeId: n.id, type: n.type, kind: n.kind, name: n.name, size: n.size, x: n.x - ox, z: n.z - oz, ...(n.starter ? { starter: true } : {}) }));
+  // World Forge's own `dungeon` nodes (kind dungeon/lair) become `lair` marks: `type:'dungeon'` is reserved for the
+  // door record the server reads ({id, x, z, yaw}); a lair mark anchors the door in a zone with no town
+  const sites = W.nodes.filter(n => n.zone === id).map(n => ({ nodeId: n.id, type: n.type === 'dungeon' ? 'lair' : n.type, kind: n.kind, name: n.name, size: n.size, x: n.x - ox, z: n.z - oz, ...(n.starter ? { starter: true } : {}) }));
   const settlements = sites.filter(s => s.type === 'settlement');
   const hub = settlements.find(s => (opts.hub ? s.name === opts.hub : s.starter)) || settlements.slice().sort((a, b) => (rank[a.kind] ?? 9) - (rank[b.kind] ?? 9) || (b.size || 0) - (a.size || 0))[0];
   if (hub) hub.hub = true;
@@ -300,7 +323,7 @@ export function bakeZone(id, opts = {}) {
 
   const metaSites = sites.map(s => { const o = { ...s }; delete o.size; delete o.nodeId; return o; });
   const meta = {
-    name: hub ? `${hub.name} (${id})` : id, zone: id, province: province ? { id: province.id, name: province.name } : null,
+    name: hub ? `${hub.name} (${id})` : id, zone: id, sheet: sheetIdFor(id), province: province ? { id: province.id, name: province.name } : null,
     size: SIZE, step: STEP, origin: { x: 0, z: 0 }, heightMin: hMin, heightMax: hMax,
     bakeVersion: ZONE_BAKE_VERSION, inputHash: null,
     biomes: [...BIOMES.map(b => [b.key, b.name, b.color]), ['road', 'Road', '#b39a6e']], waterKinds: ['none', 'sea', 'lake', 'river'],
@@ -550,19 +573,27 @@ export function zoneFiles(b) {
 
 const isMain = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
 if (isMain) {
-  const id = process.argv.includes('--m1') ? M1_ZONE : process.argv.slice(2).find(a => /^z\d\d_\d\d$/.test(a));
-  if (!id) { console.error('usage: bake-zone.mjs <zXX_YY> | --m1 [--check]'); process.exit(2); }
+  const pi = process.argv.indexOf('--province');
+  const ids = process.argv.includes('--m1') ? [M1_ZONE]
+    : pi > 0 ? Object.values(PROVINCE_MAP.provinces?.[process.argv[pi + 1]]?.map || {})
+    : process.argv.slice(2).filter(a => /^z\d\d_\d\d$/.test(a));
+  if (!ids.length) { console.error('usage: bake-zone.mjs <zXX_YY>… | --m1 | --province <sheet id> [--check]'); process.exit(2); }
+  let staleAny = false;
+  for (const id of ids) {
   const t0 = performance.now();
   const b = bakeZone(id);
   const files = zoneFiles(b), dir = join(ZONES_DIR, id);
   if (process.argv.includes('--check')) {
     const stale = Object.entries(files).filter(([f, v]) => !existsSync(join(dir, f)) || Buffer.compare(readFileSync(join(dir, f)), Buffer.from(v)) !== 0).map(([f]) => f);
-    console.log(stale.length ? `${id} is STALE: ${stale.join(', ')}` : `${id} is up to date`); process.exit(stale.length ? 1 : 0);
+    console.log(stale.length ? `${id} is STALE: ${stale.join(', ')}` : `${id} is up to date`); if (stale.length) staleAny = true; continue;
   }
   mkdirSync(dir, { recursive: true });
   for (const [f, v] of Object.entries(files)) writeFileSync(join(dir, f), v);
   const info = summarise(b);
   writeFileSync(join(dir, 'zone.json'), JSON.stringify({ ...b.meta, biomes: undefined, summary: info, files: Object.fromEntries(Object.entries(files).map(([f, v]) => [f, v.length])) }, null, 2) + '\n');
-  console.log(JSON.stringify(info, null, 2));
+  if (ids.length === 1) console.log(JSON.stringify(info, null, 2));
+  else console.log(`${id} ${b.meta.sheet?.zone || ''}: ${info.towns.map(t => `${t.name}${t.hub ? '*' : ''}(${t.plots})`).join(', ') || 'no settlement'}; sites ${b.meta.sites.filter(s => ['event', 'camp', 'dungeon'].includes(s.type)).map(s => s.id).join(' ')}; scatter ${info.scatter}`);
   console.log(`wrote ${dir} in ${Math.round(performance.now() - t0)} ms`);
+  }
+  if (staleAny) process.exit(1);
 }

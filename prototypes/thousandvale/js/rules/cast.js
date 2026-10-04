@@ -194,6 +194,7 @@ export function createCombat(room) {
    * and strikes everything within the arrow splash at the draw's power.
    */
   function resolveArrow(ch, weapon, power, step = 0) {
+    if (runtimeFor(combat).formBasic(ch, 'main')) return;
     const mods = rpg.attackMods(ch, 'arrow', { weapon, hand: 'main' });
     // swingWith posts the weapon's strike shape for every kind of attack; a melee skill borrows it
     feel.swing.charge = null;
@@ -243,6 +244,7 @@ export function createCombat(room) {
 
   /** A WAND (main.js `swingWith` wand branch): its behaviour row decides the bolt. */
   function resolveWand(ch, weapon, step) {
+    if (runtimeFor(combat).formBasic(ch, 'main')) return;
     const mods = rpg.attackMods(ch, 'bolt', { weapon, hand: 'main' });
     const share = mods.power || 1;
     feel.swing.charge = null;
@@ -269,6 +271,7 @@ export function createCombat(room) {
    * is the ordinary spell; a real charge is its charged form (jet, dome, wall, mortar, storm).
    */
   function resolveStaff(ch, weapon, held, c, step = 0) {
+    if (runtimeFor(combat).formBasic(ch, 'main')) return;
     const mods = rpg.attackMods(ch, 'staff', { weapon, hand: 'main' });
     const share = mods.power || 1;
     const charge = chargeAt(held, c);                       // posts the charge for withArea to fold in
@@ -338,6 +341,8 @@ export function createCombat(room) {
   /** The damage half of a swing — exactly `swingWith`'s melee branch, at the moment it lands. */
   function resolveSwing(ch, hand, step, weapon) {
     if (ch.dead || ch.removed) return [];
+    // main.js swingWith's first line: in a shape form the basic attack is the form's own
+    if (runtimeFor(combat).formBasic(ch, hand)) return [];
     const kind = 'melee';
     const mods = rpg.attackMods(ch, kind, { weapon, hand });
     const share = (hand === 'off' ? OFFHAND_DAMAGE : 1) * (mods.power || 1);
@@ -398,6 +403,8 @@ export function createCombat(room) {
     }
     // main.js frame order: timers (above), the field (monsters), the skill bars, the skill runtime, pools
     combat.tickMonsters?.(dt);
+    // main.js frame order: the field, then the companions, then the skill bars
+    room.followers?.tick(dt, runtimeFor(combat).petHooks);
     for (const p of field.players) if (!p.dead) p.skills.update(dt, { fighting: true });
     combat.tickExtra?.(dt);
   };

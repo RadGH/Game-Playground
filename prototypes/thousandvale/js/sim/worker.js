@@ -36,7 +36,7 @@ async function boot() {
   }
   if (typeof createRules !== 'function') createRules = (await import('./rules-v0.js')).createRules;
   const content = await loadZoneContent(async f => (await fetch(new URL('../../' + f, import.meta.url))).json(), zone);
-  const w = createWorld({ store: createMemoryStore(), terrain, createRules, classes, zoneSheet: content.sheet, encounterInfo: content.encounterInfo, now: realClock.now, log: (...a) => console.log('[sim]', ...a), lingerMs: 3000 });
+  const w = createWorld({ store: createMemoryStore(), terrain, createRules, classes, zoneSheet: content.sheet, encounterInfo: content.encounterInfo, vignettes: content.vignettes, now: realClock.now, log: (...a) => console.log('[sim]', ...a), lingerMs: 3000 });
   await w.init();
   startTicker(() => w.step(), { ms: 50, clock: realClock, onSkip: k => w.tickStats.skip(k) });
   world = w;

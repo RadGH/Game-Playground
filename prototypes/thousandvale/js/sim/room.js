@@ -119,7 +119,7 @@ export function createRoom(opts) {
     entities.set(e.id, e);
     grid.add(e);
     stats.spawned++;
-    if (e.kind === 'object') room.objects.set(e.id, e);      // also rules-spawned arena objects
+    if (e.kind === 'object' || (e.kind === 'npc' && e.data)) room.objects.set(e.id, e);      // also rules-spawned arena objects; NPCs you can talk to
     safe('addEntity', e);
     return e;
   };
@@ -419,8 +419,10 @@ export function createRoom(opts) {
 
   // objects: portals, stairs, exits, chests, gates, levers, arena props (team 0: nobody fights them)
   for (const o of objects) {
-    room.spawn({ kind: 'object', type: o.type, name: o.name || o.type, x: o.x, z: o.z, yaw: o.yaw || 0, team: 0,
-      data: { portal: o.portal || null, chest: o.chest || null, gate: o.gate || null, lever: o.lever || null, rules: !!o.rules, key: o.key || null, r: o.r || null, state: o.state || null, room: o.room ?? null } });
+    const npc = o.type === 'npc';
+    room.spawn({ kind: npc ? 'npc' : 'object', type: o.type, name: o.name || o.type, x: o.x, z: o.z, yaw: o.yaw || 0, team: npc ? 1 : 0, state: npc ? STATE.friendly : 0,
+      data: { portal: o.portal || null, chest: o.chest || null, gate: o.gate || null, lever: o.lever || null, rules: !!o.rules, key: o.key || null, r: o.r || null, state: o.state || null, room: o.room ?? null,
+        note: o.note || null, use: o.use || null, npc: o.npc || null, hidden: !!o.hidden, hint: o.hint || null, lore: o.lore || null, waystone: o.waystone || null, schedule: o.schedule || null } });
   }
   /** Change an object's state (lit, used, broken, open…): late joiners see it in `info`, everyone near gets `obj`. */
   room.objState = function (o, state, extra = {}) {

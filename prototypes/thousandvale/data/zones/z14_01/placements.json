@@ -1,0 +1,1165 @@
+{
+ "_doc": "Stream B zone placements (tools/bake-zone.mjs). Zone metres; yaw = atan2(dx, dz), the way the thing faces. kinds: settlement (data.radius, hub, planned), town_square, street (data.pts, width, cls), building (a proctown plot: data.w along `angle` (local +x = (cos angle, sin angle)), data.d across, want; yaw faces the nearest drawn street, data.streetGap = metres from the front to it), town_wall, road (data.pts [[x,z,h]], width, cls, spur), bridge (yaw along the road, span, deck height), dungeon_door, event_site, camp_site, landmark/dungeon/pass/crossing (World Forge nodes).",
+ "zone": "z14_01",
+ "terrainHash": "4bce3b89",
+ "placements": [
+  {
+   "kind": "settlement",
+   "id": "hollowwick",
+   "x": 1120,
+   "z": 1808,
+   "yaw": 0,
+   "data": {
+    "kind": "hamlet",
+    "name": "Hollowwick",
+    "radius": 46,
+    "hub": true,
+    "planned": true
+   }
+  },
+  {
+   "kind": "dungeon_door",
+   "id": "door_1",
+   "x": 1005,
+   "z": 1683,
+   "yaw": 1.245,
+   "data": {
+    "name": "Barrow entrance"
+   }
+  },
+  {
+   "kind": "event_site",
+   "id": "event_saltmouth",
+   "x": 1072,
+   "z": 1416,
+   "yaw": 0,
+   "data": {
+    "r": 40
+   }
+  },
+  {
+   "kind": "town_square",
+   "id": "hollowwick_square",
+   "x": 1121.9,
+   "z": 1820.26,
+   "yaw": 0,
+   "data": {
+    "r": 4.53,
+    "town": "hollowwick",
+    "culture": "halfling"
+   }
+  },
+  {
+   "kind": "street",
+   "id": "hollowwick_street_0",
+   "x": 1154.42,
+   "z": 1823.38,
+   "yaw": 0,
+   "data": {
+    "town": "hollowwick",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      1154.42,
+      1823.38
+     ],
+     [
+      1119.2,
+      1810.11
+     ],
+     [
+      1084.04,
+      1796.67
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "hollowwick_street_1",
+   "x": 1141.69,
+   "z": 1782.69,
+   "yaw": 0,
+   "data": {
+    "town": "hollowwick",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      1141.69,
+      1782.69
+     ],
+     [
+      1134.55,
+      1794.77
+     ],
+     [
+      1127.43,
+      1806.87
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "hollowwick_street_2",
+   "x": 1146.97,
+   "z": 1807.52,
+   "yaw": 0,
+   "data": {
+    "town": "hollowwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1146.97,
+      1807.52
+     ],
+     [
+      1141.46,
+      1802.74
+     ],
+     [
+      1135.6,
+      1798.4
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "hollowwick_street_3",
+   "x": 1151.07,
+   "z": 1791.6,
+   "yaw": 0,
+   "data": {
+    "town": "hollowwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1151.07,
+      1791.6
+     ],
+     [
+      1146.91,
+      1796.81
+     ],
+     [
+      1143.11,
+      1802.29
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "hollowwick_street_4",
+   "x": 1128.08,
+   "z": 1775.65,
+   "yaw": 0,
+   "data": {
+    "town": "hollowwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1128.08,
+      1775.65
+     ],
+     [
+      1122.67,
+      1787.28
+     ],
+     [
+      1116.78,
+      1798.67
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "hollowwick_street_5",
+   "x": 1133.16,
+   "z": 1789.38,
+   "yaw": 0,
+   "data": {
+    "town": "hollowwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1133.16,
+      1789.38
+     ],
+     [
+      1129.21,
+      1787.31
+     ],
+     [
+      1125.02,
+      1785.76
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "hollowwick_street_6",
+   "x": 1121.23,
+   "z": 1783.8,
+   "yaw": 0,
+   "data": {
+    "town": "hollowwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1121.23,
+      1783.8
+     ],
+     [
+      1114.43,
+      1778.99
+     ],
+     [
+      1107.86,
+      1773.87
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "hollowwick_street_7",
+   "x": 1121.03,
+   "z": 1775.56,
+   "yaw": 0,
+   "data": {
+    "town": "hollowwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1121.03,
+      1775.56
+     ],
+     [
+      1119.6,
+      1777.74
+     ],
+     [
+      1117.92,
+      1779.74
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "hollowwick_street_8",
+   "x": 1112.39,
+   "z": 1778.84,
+   "yaw": 0,
+   "data": {
+    "town": "hollowwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1112.39,
+      1778.84
+     ],
+     [
+      1108.17,
+      1784.01
+     ],
+     [
+      1104.43,
+      1789.54
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "hollowwick_street_9",
+   "x": 1115.05,
+   "z": 1812.51,
+   "yaw": 0,
+   "data": {
+    "town": "hollowwick",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      1115.05,
+      1812.51
+     ],
+     [
+      1110.37,
+      1827.13
+     ],
+     [
+      1105.09,
+      1841.54
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "hollowwick_street_10",
+   "x": 1139.16,
+   "z": 1821.18,
+   "yaw": 0,
+   "data": {
+    "town": "hollowwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1139.16,
+      1821.18
+     ],
+     [
+      1135.17,
+      1835.39
+     ],
+     [
+      1132.5,
+      1843.57
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "hollowwick_street_11",
+   "x": 1139.95,
+   "z": 1839.99,
+   "yaw": 0,
+   "data": {
+    "town": "hollowwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1139.95,
+      1839.99
+     ],
+     [
+      1136.82,
+      1839.62
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "hollowwick_street_12",
+   "x": 1131.14,
+   "z": 1837.59,
+   "yaw": 0,
+   "data": {
+    "town": "hollowwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1131.14,
+      1837.59
+     ],
+     [
+      1122.04,
+      1833.84
+     ],
+     [
+      1112.95,
+      1830.09
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "hollowwick_street_13",
+   "x": 1128.56,
+   "z": 1819.79,
+   "yaw": 0,
+   "data": {
+    "town": "hollowwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1128.56,
+      1819.79
+     ],
+     [
+      1126.14,
+      1826.57
+     ],
+     [
+      1123.08,
+      1833.08
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "hollowwick_street_14",
+   "x": 1135.29,
+   "z": 1827.53,
+   "yaw": 0,
+   "data": {
+    "town": "hollowwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1135.29,
+      1827.53
+     ],
+     [
+      1131.81,
+      1825.85
+     ],
+     [
+      1128.15,
+      1824.58
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "hollowwick_street_15",
+   "x": 1124.5,
+   "z": 1825.82,
+   "yaw": 0,
+   "data": {
+    "town": "hollowwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1124.5,
+      1825.82
+     ],
+     [
+      1120.35,
+      1824.02
+     ],
+     [
+      1116.13,
+      1822.37
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "hollowwick_street_16",
+   "x": 1120.48,
+   "z": 1834.38,
+   "yaw": 0,
+   "data": {
+    "town": "hollowwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1120.48,
+      1834.38
+     ],
+     [
+      1118.78,
+      1838.92
+     ],
+     [
+      1116.79,
+      1843.33
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "hollowwick_street_17",
+   "x": 1109.55,
+   "z": 1821.36,
+   "yaw": 0,
+   "data": {
+    "town": "hollowwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1109.55,
+      1821.36
+     ],
+     [
+      1096.02,
+      1815.72
+     ],
+     [
+      1082.39,
+      1810.57
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "hollowwick_street_18",
+   "x": 1100.6,
+   "z": 1810.43,
+   "yaw": 0,
+   "data": {
+    "town": "hollowwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1100.6,
+      1810.43
+     ],
+     [
+      1099.34,
+      1812.22
+     ],
+     [
+      1098.28,
+      1814.14
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "hollowwick_street_19",
+   "x": 1097.04,
+   "z": 1818.31,
+   "yaw": 0,
+   "data": {
+    "town": "hollowwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1097.04,
+      1818.31
+     ],
+     [
+      1093.82,
+      1826.81
+     ],
+     [
+      1091.79,
+      1833
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "hollowwick_street_20",
+   "x": 1105.44,
+   "z": 1829.38,
+   "yaw": 0,
+   "data": {
+    "town": "hollowwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1105.44,
+      1829.38
+     ],
+     [
+      1100.66,
+      1827.46
+     ],
+     [
+      1095.73,
+      1825.95
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "hollowwick_street_21",
+   "x": 1093.95,
+   "z": 1823.12,
+   "yaw": 0,
+   "data": {
+    "town": "hollowwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1093.95,
+      1823.12
+     ],
+     [
+      1086.99,
+      1820.6
+     ],
+     [
+      1084.13,
+      1819.61
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "hollowwick_street_22",
+   "x": 1091.81,
+   "z": 1816.46,
+   "yaw": 0,
+   "data": {
+    "town": "hollowwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1091.81,
+      1816.46
+     ],
+     [
+      1091.15,
+      1818.57
+     ],
+     [
+      1090.34,
+      1820.62
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "hollowwick_street_23",
+   "x": 1086.81,
+   "z": 1821.82,
+   "yaw": 0,
+   "data": {
+    "town": "hollowwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1086.81,
+      1821.82
+     ],
+     [
+      1085.9,
+      1824.07
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "hollowwick_street_24",
+   "x": 1136.82,
+   "z": 1839.62,
+   "yaw": 0,
+   "data": {
+    "town": "hollowwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1136.82,
+      1839.62
+     ],
+     [
+      1134.08,
+      1838.72
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "hollowwick_street_25",
+   "x": 1127.43,
+   "z": 1806.87,
+   "yaw": 0,
+   "data": {
+    "town": "hollowwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1127.43,
+      1806.87
+     ],
+     [
+      1125.34,
+      1812.42
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "hollowwick_street_26",
+   "x": 1133.16,
+   "z": 1789.38,
+   "yaw": 0,
+   "data": {
+    "town": "hollowwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1133.16,
+      1789.38
+     ],
+     [
+      1136.55,
+      1791.39
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "building",
+   "id": "hollowwick_plot_0",
+   "x": 1145.25,
+   "z": 1791.79,
+   "yaw": 0.9305,
+   "data": {
+    "town": "hollowwick",
+    "want": "house",
+    "district": "residential",
+    "w": 6.07,
+    "d": 5.26,
+    "angle": 2.2111,
+    "front": 6.9235,
+    "streetGap": -0.3
+   }
+  },
+  {
+   "kind": "building",
+   "id": "hollowwick_plot_1",
+   "x": 1141.62,
+   "z": 1796.66,
+   "yaw": 0.9305,
+   "data": {
+    "town": "hollowwick",
+    "want": "house",
+    "district": "residential",
+    "w": 6.07,
+    "d": 5.26,
+    "angle": 2.2111,
+    "front": 6.9235,
+    "streetGap": -0.3
+   }
+  },
+  {
+   "kind": "building",
+   "id": "hollowwick_plot_2",
+   "x": 1131.23,
+   "z": 1782.77,
+   "yaw": -0.4189,
+   "data": {
+    "town": "hollowwick",
+    "want": "house",
+    "district": "residential",
+    "w": 6.53,
+    "d": 7.71,
+    "angle": 1.9897,
+    "front": 1.9897,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "hollowwick_plot_3",
+   "x": 1125.91,
+   "z": 1794.72,
+   "yaw": 2.7227,
+   "data": {
+    "town": "hollowwick",
+    "want": "shrine",
+    "district": "residential",
+    "w": 11.66,
+    "d": 7.71,
+    "angle": 1.9897,
+    "front": 5.1313,
+    "streetGap": 0.17
+   }
+  },
+  {
+   "kind": "building",
+   "id": "hollowwick_plot_4",
+   "x": 1113.01,
+   "z": 1787.61,
+   "yaw": 2.5027,
+   "data": {
+    "town": "hollowwick",
+    "want": "granary",
+    "district": "residential",
+    "w": 12.14,
+    "d": 7.46,
+    "angle": 2.2097,
+    "front": 5.3513,
+    "streetGap": -0.31
+   }
+  },
+  {
+   "kind": "building",
+   "id": "hollowwick_plot_5",
+   "x": 1129.61,
+   "z": 1831.19,
+   "yaw": -0.3913,
+   "data": {
+    "town": "hollowwick",
+    "want": "hut",
+    "district": "craft",
+    "w": 7.26,
+    "d": 6.53,
+    "angle": 1.9621,
+    "front": 1.9621,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "hollowwick_plot_6",
+   "x": 1114.07,
+   "z": 1836.97,
+   "yaw": 2.7503,
+   "data": {
+    "town": "hollowwick",
+    "want": "hut",
+    "district": "craft",
+    "w": 8.48,
+    "d": 6.14,
+    "angle": 1.9621,
+    "front": 5.1036,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "hollowwick_plot_7",
+   "x": 1102.08,
+   "z": 1823.45,
+   "yaw": -0.3399,
+   "data": {
+    "town": "hollowwick",
+    "want": "hut",
+    "district": "craft",
+    "w": 5.12,
+    "d": 9.09,
+    "angle": 1.9107,
+    "front": 1.9107,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_120",
+   "x": 1472,
+   "z": 2496,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": false,
+    "pts": [
+     [
+      1472,
+      2496,
+      39.29
+     ],
+     [
+      1472,
+      2494,
+      39
+     ],
+     [
+      1472,
+      2490,
+      38.6
+     ],
+     [
+      1472,
+      2484,
+      38.17
+     ],
+     [
+      1472,
+      2476,
+      37.47
+     ],
+     [
+      1472,
+      2466,
+      36.8
+     ],
+     [
+      1472,
+      2454,
+      36.3
+     ],
+     [
+      1472,
+      2440,
+      35.96
+     ],
+     [
+      1472,
+      2424,
+      35.78
+     ],
+     [
+      1472,
+      2408,
+      35.87
+     ],
+     [
+      1472,
+      2392,
+      36.3
+     ],
+     [
+      1472,
+      2376,
+      36.8
+     ],
+     [
+      1472,
+      2360,
+      37.27
+     ],
+     [
+      1472,
+      2344,
+      37.59
+     ],
+     [
+      1472,
+      2328,
+      37.88
+     ],
+     [
+      1472,
+      2312,
+      38.1
+     ],
+     [
+      1472,
+      2296,
+      38.41
+     ],
+     [
+      1470,
+      2280,
+      38.57
+     ],
+     [
+      1466,
+      2264,
+      38.74
+     ],
+     [
+      1460,
+      2248,
+      39.08
+     ],
+     [
+      1452,
+      2232,
+      39.75
+     ],
+     [
+      1442,
+      2216,
+      40.51
+     ],
+     [
+      1430,
+      2200,
+      41.35
+     ],
+     [
+      1416,
+      2184,
+      42
+     ],
+     [
+      1400,
+      2168,
+      42.91
+     ],
+     [
+      1384,
+      2152,
+      43.92
+     ],
+     [
+      1368,
+      2136,
+      44.87
+     ],
+     [
+      1352,
+      2120,
+      45.66
+     ],
+     [
+      1336,
+      2104,
+      46.45
+     ],
+     [
+      1320,
+      2088,
+      47.1
+     ],
+     [
+      1304,
+      2072,
+      47.62
+     ],
+     [
+      1288,
+      2056,
+      47.76
+     ],
+     [
+      1272,
+      2040,
+      47.86
+     ],
+     [
+      1256,
+      2026,
+      47.99
+     ],
+     [
+      1240,
+      2014,
+      48.01
+     ],
+     [
+      1224,
+      2004,
+      47.69
+     ],
+     [
+      1208,
+      1996,
+      47.27
+     ],
+     [
+      1192,
+      1990,
+      46.84
+     ],
+     [
+      1176,
+      1986,
+      46.41
+     ],
+     [
+      1160,
+      1984,
+      46.07
+     ],
+     [
+      1144,
+      1984,
+      45.62
+     ],
+     [
+      1128,
+      1984,
+      45.06
+     ],
+     [
+      1112,
+      1984,
+      44.66
+     ],
+     [
+      1096,
+      1984,
+      44.37
+     ],
+     [
+      1080,
+      1984,
+      44.31
+     ],
+     [
+      1064,
+      1984,
+      44.42
+     ],
+     [
+      1048,
+      1984,
+      44.39
+     ],
+     [
+      1032,
+      1984,
+      44.46
+     ],
+     [
+      1016,
+      1984,
+      44.67
+     ],
+     [
+      1002,
+      1984,
+      44.94
+     ],
+     [
+      990,
+      1984,
+      45.27
+     ],
+     [
+      980,
+      1984,
+      45.55
+     ],
+     [
+      972,
+      1984,
+      45.75
+     ],
+     [
+      966,
+      1984,
+      45.91
+     ],
+     [
+      962,
+      1984,
+      45.97
+     ],
+     [
+      960,
+      1984,
+      46
+     ]
+    ]
+   }
+  }
+ ]
+}

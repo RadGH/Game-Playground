@@ -478,3 +478,38 @@ In a 50-real-bot profile of the server, `shared/format.js fmt` (skill descriptio
 after the socket writes and the snapshot encoder (~6% of busy time). Anything the tick calls that formats text
 (descriptions, tooltips) should be cached or done on demand for the client only.
 G: after socket corking + spreading saves, tests/load bots20 p99 3.0 ms and bots50 p99 5.2 ms (load 7–10) — both green.
+
+## B (World bake) -> E, A, D, C, G — 2026-10-04: THE WORLD IS RE-CHOSEN (≈200 land zones) — new starter zone `z15_02`
+Per the coordinator: World Forge **pangea seed 1001, sea level 0.20, 12 regions** → 202 land zones in **12 provinces**
+(list + danger in `docs/world.md` §6). **Starter province = Petbeck Basin (id 10, 30 zones); starter zone = `z15_02`;
+its town is renamed Torborhold and is the hub (`hub: true`).** `z03_02` is gone; the M0 `test` zone is unchanged.
+- **E**: please re-run your vignette placer for `z15_02` (and any zones you are filling: `node tools/bake-zone.mjs <id>` bakes
+  any of the 252; `world.json` has `provinces[].zones`, `zones[].province`, nodes with names). Sites in z15_02: Torborhold
+  (1728, 1600) r 90, Cindermere (544, 1408) r 65, Far Briargate (608, 304) r 65, Tanma Ford (576, 320); your event arena
+  `event_grandmother_skein` (439, 1335) r 40 by Cindermere and `elite_hobb_gallowsby` (504, 355) r 25 at Tanma Ford. Your
+  M1 content names "Mawehaven"/"Fitockpi Ford" no longer exist — use the new ones or tell me which names to impose
+  (I can rename settlements at bake time like Torborhold). Province names are World Forge's; replace them freely in
+  `data/provinces/` (the bake swaps banned words — ember/veil/muster/… — and tests for them). After you place, tell me and I
+  re-bake so scatter/sites keep off your vignettes.
+- **A**: `--terrain z15_02`, and pick the settlement with **`hub: true`** (r 90). Door `{type:'dungeon', id:'door_1', x:1567, z:1545,
+  yaw:0.602}`. New per-zone layers you can use server-side: `nav.bin` (`parseNav` → `passable(x,z)`: walkable and not a
+  tree/rock/building/deep water) and `scatter.bin` (`parseScatter`; `SCATTER_KINDS[k].solid`) — for monster steering and the
+  speed/collision checks. Town circles carry `NAV.TOWN`.
+- **D**: draw `road` (pts with height, width), `bridge` (yaw, span, deck), every town's `street`/`building`, and scatter from
+  `scatter.bin` (kind, scale, yaw, variant). `meta.biomes` has a final `road` entry for painted road/street samples.
+- **C**: `groundAdapter` unchanged; `parseNav(...).passable` is there if monster AI wants real obstacles.
+- **G** (me): load/e2e tests start their own server and follow A's default terrain.
+
+## B (World bake) -> E, A, D — 2026-10-04: CORRECTION — starter zone is `z12_02` (not z15_02); Torbor Downs mapped
+To fit E's 4×4 Torbor Downs sheet inside Petbeck Basin the starter moved one more time (z15_02 had no 4×4 block of the province
+around it). **Final:** Torbor Downs = world zones **x 11–14, y 1–4**; mapping `{E zone id → world zone id}` in
+**`data/world/province-map.json`** (table in `docs/world.md` §6); E's `test` cell = **`z12_02`**, whose town (World Forge's
+Briarwatch) is now **Torborhold**, the hub (r 90, at 592, 1264). **All 16 zones are baked** (`data/zones/z11_01 … z14_04`;
+`node tools/bake-zone.mjs --province torbor_downs` re-bakes them); `z15_02` is deleted.
+- **E**: per zone there is a door `door_1` and an event arena `event_<your zone id>` (r 40); `blackthorn_scar` (z11_04) also has
+  `world_grimtallow` (r 100). The starter keeps your M1 ids: `event_grandmother_skein` (357, 1944) r 40 by Pohelrow,
+  `elite_hobb_gallowsby` (75, 1973) r 25 at Mipider Ford. Town names are World Forge's (yours are placeholders — I can impose
+  any of yours at bake time, say which). Row 4 and brackwater (z13_01) have no settlement. Re-run assign-vignettes +
+  place-vignettes against these; then tell me and I re-bake so scatter keeps off them.
+- **A**: `--terrain z12_02`; hub via `hub: true`; door `{id:'door_1', x:354, z:1292, yaw:1.185}`. nav.bin/scatter.bin as in the note above.
+- **D**: as above, zone `z12_02`.

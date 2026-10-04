@@ -2,7 +2,7 @@
 // checked in, the M1 zone's town plan and sites are sound.   node --test prototypes/thousandvale/tests/B/
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { parseTerrain } from '../../js/rules/terrain-read.js';
 import { bakeWorld } from '../../tools/bake-world.mjs';
 import { bakeZone, zoneFiles, M1_ZONE } from '../../tools/bake-zone.mjs';
@@ -54,7 +54,7 @@ test('M1 zone: the hub town is planned, levelled, away from the edges; doors fac
   assert.ok(Math.min(hub.x, hub.z, 2048 - hub.x, 2048 - hub.z) >= hub.radius + 200, 'hub is well inside the zone');
   const P = b.placements, ids = new Set(P.map(p => p.id));
   assert.equal(ids.size, P.length, 'placement ids are unique');
-  const known = new Set(['settlement', 'town_square', 'street', 'building', 'town_wall', 'road', 'bridge', 'dungeon_door', 'event_site', 'camp_site', 'landmark', 'dungeon', 'pass', 'crossing', 'port']);
+  const known = new Set(['lair', 'settlement', 'town_square', 'street', 'building', 'town_wall', 'road', 'bridge', 'dungeon_door', 'event_site', 'camp_site', 'landmark', 'dungeon', 'pass', 'crossing', 'port']);
   for (const p of P) { assert.ok(known.has(p.kind), p.kind); assert.ok(Number.isFinite(p.x) && Number.isFinite(p.z) && Number.isFinite(p.yaw), p.id); }
   const blds = P.filter(p => p.kind === 'building');
   assert.ok(blds.filter(p => p.data.town === 'torborhold').length >= 12, 'the hub has a real town');
@@ -126,6 +126,7 @@ test('roads: drawn into the zone, continuous across the zone edge, buildings nev
   for (const st of a.placements.filter(p => p.kind === 'settlement')) {
     const near = roads.some(r => r.data.pts.some(([x, z]) => Math.hypot(x - st.x, z - st.z) < st.data.radius + 20));
     assert.ok(near, `${st.id} has a road to it`);
+    for (const r of roads) for (const [x, z] of r.data.pts) assert.ok(Math.hypot(x - st.x, z - st.z) >= st.data.radius - 0.5, `${r.id} runs inside ${st.id} (streets take over at the rim)`);
   }
 });
 
@@ -148,4 +149,26 @@ test('scatter: plausible, world-aligned (no tree twice across an edge), clear of
   const nearEdgeA = a.scatter.filter(p => p.x > 2040).length, nearEdgeB = east.scatter.filter(p => p.x < 8).length;
   assert.ok(a.scatter.every(p => p.x < 2048) && east.scatter.every(p => p.x >= 0), 'half-open ownership');
   assert.ok(nearEdgeA + nearEdgeB >= 0);
+});
+
+test('every checked-in zone: edges bit-exact with every checked-in neighbour; each has a door and an event arena', () => {
+  const ids = readdirSync(new URL('../../data/zones/', import.meta.url)).filter(d => /^z\d\d_\d\d$/.test(d));
+  assert.ok(ids.length >= 1);
+  const T = new Map(ids.map(id => [id, parseTerrain(readFileSync(zoneFile(id, 'terrain.bin')))]));
+  let pairs = 0;
+  for (const id of ids) {
+    const t = T.get(id), zx = +id.slice(1, 3), zy = +id.slice(4, 6), S = t.size, L = S - 1;
+    assert.ok(t.meta.sites.some(s => s.type === 'dungeon' && s.id && Number.isFinite(s.yaw)), `${id} has a door`);
+    assert.ok(t.meta.sites.some(s => s.type === 'event'), `${id} has an event arena`);
+    for (const [nid, A, B] of [[`z${String(zx + 1).padStart(2, '0')}_${String(zy).padStart(2, '0')}`, j => j * S + L, j => j * S], [`z${String(zx).padStart(2, '0')}_${String(zy + 1).padStart(2, '0')}`, i => L * S + i, i => i]]) {
+      const n = T.get(nid); if (!n) continue;
+      pairs++;
+      const la = t.layers, lb = n.layers;
+      for (let k = 0; k < S; k++) {
+        const a = A(k), b = B(k);
+        if (la.height[a] !== lb.height[b] || la.waterTop[a] !== lb.waterTop[b] || la.biome[a] !== lb.biome[b]) assert.fail(`${id}/${nid} edge differs at ${k}`);
+      }
+    }
+  }
+  console.log(`# ${ids.length} zones, ${pairs} shared edges compared`);
 });

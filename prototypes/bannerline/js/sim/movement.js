@@ -19,6 +19,7 @@ export const UNIT_AGGRO = 7;
 export const UNIT_LEASH = 12;
 const ARRIVE = 0.25;
 const CAST_HOLD = 8;   // ticks the 'cast' animation hint is held
+const STUCK_TICKS = 20, STUCK_DIST = 0.3;   // a walk that moved < 0.3 m in 1 s has arrived as far as it can
 
 function setAct(e, a, tick) {
   if (e.act === 'cast' && tick - e.actTick < CAST_HOLD && a !== 'dead' && a !== 'stun') return;
@@ -53,6 +54,16 @@ function heroThink(ctx, hero, def) {
   const walkTo = (x, z) => {
     const d2 = dist2(hero.x, hero.z, x, z);
     if (d2 <= ARRIVE * ARRIVE) return true;
+    // a point the hero cannot reach (outside the field, inside a wall, behind the Keep) would hold the
+    // order forever, and a 'move' ignores enemies: count "less than STUCK_DIST over STUCK_TICKS while
+    // free to walk" as arrived. A root or a stun is not being stuck, so the check restarts after one.
+    if (isRooted(hero)) { o.st = 0; } else {
+      if (o.st == null || o.st === 0) { o.sx = hero.x; o.sz = hero.z; o.st = state.tick; }
+      else if (state.tick - o.st >= STUCK_TICKS) {
+        if (dist2(hero.x, hero.z, o.sx, o.sz) < STUCK_DIST * STUCK_DIST) return true;
+        o.sx = hero.x; o.sz = hero.z; o.st = state.tick;
+      }
+    }
     hero._vx = x - hero.x; hero._vz = z - hero.z;
     return false;
   };

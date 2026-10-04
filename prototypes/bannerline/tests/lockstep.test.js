@@ -101,6 +101,43 @@ test('a guest that comes back rejoins: snapshot, then its seat is released back 
   assert.ok(h.ls.sim.state.players[2].stats.sends > sendsAtRelease, `guest sends after the rejoin: ${sendsAtRelease} -> ${h.ls.sim.state.players[2].stats.sends}`);
 });
 
+test('a guest that reloads before its old connection times out takes its live seat back (no refusal, no AI)', async () => {
+  const room = await makeRoom({ hubOpts: { seed: 11, latency: [10, 60] }, machines: MACHINES, config: config2v2() });
+  const [h, g] = room.nodes;
+  room.hub.runUntil(() => { room.step(); return h.ls.tick >= 300; }, 60000, 0);
+  g.alive = false;                        // the page reloaded: the old connection is silent but not yet declared gone
+  const t2 = room.hub.transport('guest2');
+  const pj = t2.join('ABCDE'); room.hub.advance(100); await pj;
+  const events = [], g2 = { hashes: new Map() };
+  const ls2 = createLockstep({ onTick: (t, sm) => { if (t % 20 === 0) g2.hashes.set(t, sm.hash()); }, transport: t2, sim: null, restore: room.restore, isHost: false, me: t2.id, hostId: h.transport.id, machines: room.mlist, delay: 6, tickMs: 50, startAt: undefined, rejoinToken: 'tok-guest', onEvent: (type, e) => events.push({ type, ...e }) });
+  Object.assign(g2, { name: 'guest2', transport: t2, ls: ls2, events, script: g.script, alive: true, clock: -room.hub.now + 3 });
+  room.nodes.push(g2);
+  room.hub.runUntil(() => { room.step(); return events.some(e => e.type === 'resync' && e.rejoin) || events.some(e => e.type === 'refused'); }, 20000, 0);
+  assert.ok(!events.some(e => e.type === 'refused'), 'not refused');
+  const rel = h.events.find(e => e.type === 'rejoin');
+  assert.ok(rel, 'rejoined');
+  g.transport.close();                    // the old connection finally drops: nobody is taken over
+  room.hub.runUntil(() => { room.step(); return h.ls.tick >= rel.atTick; }, 60000, 0);
+  const at = h.ls.sim.state.players[2].stats.sends;
+  room.hub.runUntil(() => { room.step(); return g2.ls.tick >= rel.atTick + 300 && h.ls.tick >= rel.atTick + 300; }, 60000, 0);
+  assert.ok(!h.events.some(e => e.type === 'takeover'), 'no AI takeover');
+  assert.equal(h.ls.sim.state.players[2].kind, 'human');
+  assert.deepEqual(sameHashes(h, g2, rel.atTick), []);
+  assert.ok(h.ls.sim.state.players[2].stats.sends > at, 'the rejoined guest\'s commands arrive');
+});
+
+test('a rejoin with an unknown token is refused', async () => {
+  const room = await makeRoom({ hubOpts: { seed: 12, latency: [10, 30] }, machines: MACHINES, config: config2v2() });
+  const [h] = room.nodes;
+  room.hub.runUntil(() => { room.step(); return h.ls.tick >= 100; }, 60000, 0);
+  const t2 = room.hub.transport('stranger');
+  const pj = t2.join('ABCDE'); room.hub.advance(100); await pj;
+  const events = [];
+  createLockstep({ transport: t2, sim: null, restore: room.restore, isHost: false, me: t2.id, hostId: h.transport.id, machines: room.mlist, delay: 6, tickMs: 50, rejoinToken: 'nope', onEvent: (type, e) => events.push({ type, ...e }) });
+  room.hub.runUntil(() => { room.step(); return events.length > 0; }, 5000, 0);
+  assert.deepEqual(events.map(e => e.type), ['refused']);
+});
+
 test('three machines in a 3v3 with AI seats stay in step', async () => {
   const cfg = { seed: 12, mode: 'linewar', format: '3v3', players: [
     { team: 0, kind: 'human', race: 'freeholds', hero: 'warrior' }, { team: 0, kind: 'human', race: 'ashtusk', hero: 'engineer' }, { team: 0, kind: 'ai', race: 'unburied', hero: 'druid' },

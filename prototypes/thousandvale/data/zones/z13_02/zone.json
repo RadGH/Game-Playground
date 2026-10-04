@@ -1,0 +1,253 @@
+{
+  "name": "Sablegate (z13_02)",
+  "zone": "z13_02",
+  "sheet": {
+    "sheet": "torbor_downs",
+    "zone": "torbor_cross"
+  },
+  "province": {
+    "id": 10,
+    "name": "Petbeck Basin"
+  },
+  "size": 1025,
+  "step": 2,
+  "origin": {
+    "x": 0,
+    "z": 0
+  },
+  "heightMin": -240,
+  "heightMax": 1660,
+  "bakeVersion": 2,
+  "inputHash": "224b638b",
+  "waterKinds": [
+    "none",
+    "sea",
+    "lake",
+    "river"
+  ],
+  "source": {
+    "tool": "tools/bake-zone.mjs",
+    "world": {
+      "seed": 1001,
+      "width": 288,
+      "height": 224,
+      "method": "pangea",
+      "seaLevel": 0.2,
+      "inputHash": "9803699e"
+    },
+    "zone": {
+      "zx": 13,
+      "zy": 2
+    },
+    "worldOrigin": {
+      "x": 26624,
+      "z": 4096
+    },
+    "zoneMetres": 2048
+  },
+  "rivers": [
+    {
+      "id": 9,
+      "name": "The Fackfalpot"
+    },
+    {
+      "id": 73,
+      "name": "Depockflow"
+    }
+  ],
+  "sites": [
+    {
+      "type": "settlement",
+      "kind": "city",
+      "name": "Sablegate",
+      "x": 1696,
+      "z": 1184,
+      "hub": true,
+      "radius": 140,
+      "movedFrom": {
+        "x": 1728,
+        "z": 1344
+      }
+    },
+    {
+      "type": "settlement",
+      "kind": "town",
+      "name": "Tetatcross",
+      "x": 208,
+      "z": 1456,
+      "radius": 90,
+      "movedFrom": {
+        "x": 64,
+        "z": 1728
+      }
+    },
+    {
+      "type": "settlement",
+      "kind": "hamlet",
+      "name": "Lower Mossgate",
+      "x": 704,
+      "z": 1552,
+      "radius": 46,
+      "movedFrom": {
+        "x": 704,
+        "z": 1600
+      }
+    },
+    {
+      "type": "settlement",
+      "kind": "hamlet",
+      "name": "Mirestead",
+      "x": 1136,
+      "z": 1072,
+      "radius": 46,
+      "movedFrom": {
+        "x": 1088,
+        "z": 1088
+      }
+    },
+    {
+      "type": "crossing",
+      "kind": "bridge",
+      "name": "Mobon Bridge",
+      "x": 1728,
+      "z": 1344
+    },
+    {
+      "type": "dungeon",
+      "id": "door_1",
+      "name": "Barrow entrance",
+      "x": 1593,
+      "z": 1344,
+      "yaw": 2.429
+    },
+    {
+      "type": "event",
+      "id": "event_torbor_cross",
+      "x": 1360,
+      "z": 1104,
+      "r": 40
+    }
+  ],
+  "spawn": {
+    "x": 1696,
+    "z": 1180
+  },
+  "summary": {
+    "zone": "z13_02",
+    "province": "Petbeck Basin",
+    "inputHash": "224b638b",
+    "rivers": 2,
+    "wetShare": 0.007,
+    "unwalkableShare": 0.004,
+    "towns": [
+      {
+        "name": "Sablegate",
+        "kind": "city",
+        "hub": true,
+        "at": [
+          1696,
+          1184
+        ],
+        "radius": 140,
+        "movedFrom": {
+          "x": 1728,
+          "z": 1344
+        },
+        "culture": "halfling",
+        "plots": 32,
+        "streets": 87,
+        "links": 1,
+        "overlaps": 0
+      },
+      {
+        "name": "Tetatcross",
+        "kind": "town",
+        "hub": false,
+        "at": [
+          208,
+          1456
+        ],
+        "radius": 90,
+        "movedFrom": {
+          "x": 64,
+          "z": 1728
+        },
+        "culture": "halfling",
+        "plots": 21,
+        "streets": 50,
+        "links": 1,
+        "overlaps": 0
+      },
+      {
+        "name": "Lower Mossgate",
+        "kind": "hamlet",
+        "hub": false,
+        "at": [
+          704,
+          1552
+        ],
+        "radius": 46,
+        "movedFrom": {
+          "x": 704,
+          "z": 1600
+        },
+        "culture": "halfling",
+        "plots": 9,
+        "streets": 27,
+        "links": 2,
+        "overlaps": 0
+      },
+      {
+        "name": "Mirestead",
+        "kind": "hamlet",
+        "hub": false,
+        "at": [
+          1136,
+          1072
+        ],
+        "radius": 46,
+        "movedFrom": {
+          "x": 1088,
+          "z": 1088
+        },
+        "culture": "halfling",
+        "plots": 8,
+        "streets": 28,
+        "links": 1,
+        "overlaps": 0
+      }
+    ],
+    "roads": 15,
+    "bridges": 5,
+    "scatter": 13003,
+    "scatterKinds": {
+      "bush": 4048,
+      "tree_broadleaf": 7687,
+      "rock_small": 1005,
+      "rock_large": 127,
+      "reed": 125,
+      "tree_dead": 11
+    },
+    "sites": [
+      "settlement(HUB) city Sablegate 1696 1184 140",
+      "settlement town Tetatcross 208 1456 90",
+      "settlement hamlet Lower Mossgate 704 1552 46",
+      "settlement hamlet Mirestead 1136 1072 46",
+      "crossing bridge Mobon Bridge 1728 1344",
+      "dungeon door_1 Barrow entrance 1593 1344  2.429",
+      "event event_torbor_cross  1360 1104 40"
+    ],
+    "spawn": {
+      "x": 1696,
+      "z": 1180
+    },
+    "placements": 294,
+    "vignettesAvoided": 0
+  },
+  "files": {
+    "terrain.bin": 6306062,
+    "nav.bin": 1050717,
+    "scatter.bin": 104108,
+    "placements.json": 125160
+  }
+}

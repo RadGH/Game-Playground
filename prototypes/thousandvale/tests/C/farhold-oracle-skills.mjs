@@ -18,6 +18,10 @@ const { pushFor } = await import(new URL('combat-feel.js', FJS));
 const W = await import(new URL('weapons.js', FJS));
 const { talentPlan } = await import(new URL('skilltalents.js', FJS));
 const { elementOf, statusOf } = await import(new URL('rpg.js', FJS));
+const { createPets } = await import(new URL('pets.js', FJS));
+const { createFollowers } = await import(new URL('followers.js', FJS));
+import { readFileSync } from 'node:fs';
+const MERC = JSON.parse(readFileSync(new URL('../../../farhold/data/mercenaries.json', import.meta.url), 'utf8'));
 
 /** Something that answers every method with nothing (spellfx, fx, sound, hud). */
 const sink = () => new Proxy(function () {}, {
@@ -40,7 +44,7 @@ export function farholdSkills(F, field, player, control, barRng, { followers = f
   });
   player.x = control.x; player.z = control.z;
   const statuses = F.skills.statuses;
-  const bar = createSkillBar({ data: F.skills, player, rpg: F.rpg });
+  const bar = createSkillBar({ data: F.skills, player, rpg: F.rpg, canSummon: (petId, sl) => pets?.canAdmit?.(petId, { name: sl?.name }) ?? { ok: true } });
   const pools = [];
   let aimAt = null;
   const statusForElement = el => CAST_ELEMENTS.find(e => e.element === el)?.status || null;
@@ -70,7 +74,23 @@ export function farholdSkills(F, field, player, control, barRng, { followers = f
     },
     arc() {},
   };
-  const pets = { pets: [], register() {}, summon: () => Promise.resolve([]), order: () => 0, reviveAll: () => Promise.resolve([]), canAdmit: () => ({ ok: true }) };
+  // the REAL companion system when the fixture wants followers (main.js line ~2928: createPets, then
+  // createFollowers installs the slot gate, then the class companion); summons are async there (a mesh
+  // is built), so every summon promise is kept in `inflight` for the fixture to await
+  const inflight = [];
+  let pets;
+  if (followers) {
+    pets = createPets({ scene: { add() {}, remove() {} }, terrain: O.flat(), rpg: F.rpg, defs: F.enemies.pets || [], balance: { ...F.balance, seed: field.seedUsed ?? 4 }, field, statuses });
+    createFollowers({ data: MERC, skillData: F.skills, pets, getPlayer: () => player, getAt: () => control, log: () => {} });
+    const raw = pets.summon;
+    pets.summon = (...args) => { const pr = raw(...args); inflight.push(pr); return pr; };
+    const rawRevive = pets.reviveAll;
+    pets.reviveAll = (...args) => { const pr = rawRevive(...args); inflight.push(pr); return pr; };
+    const none = [{ id: '__none', dying: 0, removed: true, x: 1e6, z: 1e6 }];
+    field.setCompanions(() => (pets.pets.length ? pets.pets : none));
+  } else {
+    pets = { pets: [], register() {}, summon: () => Promise.resolve([]), order: () => 0, reviveAll: () => Promise.resolve([]), canAdmit: () => ({ ok: true }) };
+  }
   const mech = createSkillRuntime({
     THREE, makeActor: async () => null, setActorAnim() {},
     scene: { add() {}, remove() {} }, spellfx: sink(), fx: sink(), sound: sink(), rpg: F.rpg, skillData: F.skills,
@@ -166,8 +186,10 @@ export function farholdSkills(F, field, player, control, barRng, { followers = f
     }
     if (plan.kind === 'summon' && plan.summon && typeof plan.summon === 'object') {
       /* nothing drawn */
+    } else if (plan.kind === 'summon' && plan.howl && pets.canAdmit?.(plan.pet)?.ok === false) {
+      mech.howl(plan);
     } else if (plan.kind === 'summon') {
-      /* followers: not in the fixtures */
+      pets.summon(plan.pet, player, { count: plan.petCount, at: control });
     } else if (plan.kind === 'beam' && plan.delay > 0 && !plan.beamFired) {
       const strikeOnly = { ...plan, beamFired: true, sub: true, frozenAim: { ...a }, place: null, pool: null, selfBuff: null, summon: null, taunt: null, command: null, barrier: null, ward: null, counter: null, imbue: null, link: null, burst: null, again: null, afterimage: null, empowerNext: null, empowerRepeat: null, wall: null, rewind: null, cleanse: null, revive: null, healPets: null, overflowBarrier: null, allyStatus: null, corpseBurst: null, clusters: null, dashWith: null, resetOn: null };
       setTimeout(() => castSkill(strikeOnly, { echo: true }), plan.delay * 1000);
@@ -217,7 +239,10 @@ export function farholdSkills(F, field, player, control, barRng, { followers = f
         const lift = 1 + F.rpg.fx.sum(player, 'healBonus');
         player.hp = Math.min(player.maxHp, player.hp + Math.round(plan.heal * lift));
       }
-      if (plan.status && plan.statusSpec) applyStatus(player, plan.status, plan.statusSpec, 1);
+      if (plan.status && plan.statusSpec) {
+        applyStatus(player, plan.status, plan.statusSpec, 1);
+        if (plan.pets || plan.status === 'regen') for (const pet of pets.pets) if (pet.dying == null) applyStatus(pet, plan.status, plan.statusSpec, 1);
+      }
       if (plan.trail) player.trail = { left: plan.trail.seconds, step: plan.trail.step || 1.4, radius: plan.trail.radius, burns: plan.trail.burns, power: plan.mult, element: plan.element, lastX: control.x, lastZ: control.z };
     } else if (plan.kind === 'melee') {
       const cone = () => {
@@ -348,6 +373,12 @@ export function farholdSkills(F, field, player, control, barRng, { followers = f
     bar, mech, rangedAttack,
     cast(slot, aimPoint = null) { aimAt = aimPoint; return castSkill(slot); },
     /** one frame: the skill bar's clocks, the runtime's tick (placed objects, walls, links), the pools */
-    tick(dt) { bar.update(dt, { fighting: true }); mech.tick(dt, { fighting: true }); tickPools(dt); },
+    tick(dt) {
+      if (followers) pets.update(dt, control, player, { ...mech.petHooks });
+      bar.update(dt, { fighting: true }); mech.tick(dt, { fighting: true }); tickPools(dt);
+    },
+    pets, inflight,
+    /** wait for every async summon (a mesh build in Farhold) to land */
+    async settle() { while (inflight.length) await inflight.shift(); },
   };
 }

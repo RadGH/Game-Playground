@@ -1,0 +1,122 @@
+{
+  "name": "z11_04",
+  "zone": "z11_04",
+  "sheet": {
+    "sheet": "torbor_downs",
+    "zone": "blackthorn_scar"
+  },
+  "province": {
+    "id": 10,
+    "name": "Petbeck Basin"
+  },
+  "size": 1025,
+  "step": 2,
+  "origin": {
+    "x": 0,
+    "z": 0
+  },
+  "heightMin": -240,
+  "heightMax": 1660,
+  "bakeVersion": 2,
+  "inputHash": "bdad0477",
+  "waterKinds": [
+    "none",
+    "sea",
+    "lake",
+    "river"
+  ],
+  "source": {
+    "tool": "tools/bake-zone.mjs",
+    "world": {
+      "seed": 1001,
+      "width": 288,
+      "height": 224,
+      "method": "pangea",
+      "seaLevel": 0.2,
+      "inputHash": "9803699e"
+    },
+    "zone": {
+      "zx": 11,
+      "zy": 4
+    },
+    "worldOrigin": {
+      "x": 22528,
+      "z": 8192
+    },
+    "zoneMetres": 2048
+  },
+  "rivers": [],
+  "sites": [
+    {
+      "type": "lair",
+      "kind": "dungeon",
+      "name": "The Black Filfit",
+      "x": 1344,
+      "z": 960
+    },
+    {
+      "type": "dungeon",
+      "id": "door_1",
+      "name": "Barrow entrance",
+      "x": 1164,
+      "z": 898,
+      "yaw": 1.481
+    },
+    {
+      "type": "event",
+      "id": "world_grimtallow",
+      "x": 1161,
+      "z": 1305,
+      "r": 100
+    },
+    {
+      "type": "event",
+      "id": "event_blackthorn_scar",
+      "x": 871,
+      "z": 1071,
+      "r": 40
+    }
+  ],
+  "spawn": {
+    "x": 1024,
+    "z": 1024
+  },
+  "summary": {
+    "zone": "z11_04",
+    "province": "Petbeck Basin",
+    "inputHash": "bdad0477",
+    "rivers": 0,
+    "wetShare": 0,
+    "unwalkableShare": 0.113,
+    "towns": [],
+    "roads": 2,
+    "bridges": 0,
+    "scatter": 12184,
+    "scatterKinds": {
+      "rock_large": 3393,
+      "rock_small": 4773,
+      "tree_conifer": 2062,
+      "bush": 863,
+      "boulder": 1091,
+      "tree_broadleaf": 2
+    },
+    "sites": [
+      "lair dungeon The Black Filfit 1344 960",
+      "dungeon door_1 Barrow entrance 1164 898  1.481",
+      "event world_grimtallow  1161 1305 100",
+      "event event_blackthorn_scar  871 1071 40"
+    ],
+    "spawn": {
+      "x": 1024,
+      "z": 1024
+    },
+    "placements": 6,
+    "vignettesAvoided": 0
+  },
+  "files": {
+    "terrain.bin": 6305574,
+    "nav.bin": 1050717,
+    "scatter.bin": 97556,
+    "placements.json": 28228
+  }
+}

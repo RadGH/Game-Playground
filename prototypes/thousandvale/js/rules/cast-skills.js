@@ -18,13 +18,13 @@
 // checked against so a cast that carries one reports it in `result.pending`.
 
 import {
-  applyStatus, controlFor, mechWorld, placeObject, tickPlaced, tickWalls, addWall, addCorpse,
+  applyStatus, controlFor, mechWorld, placeObject, tickPlaced, tickWalls, addWall, addCorpse, takeCorpses,
   pushFor, queueMech, statusRef, gainResource, formOf, repeatsOf, statusStatsKey,
 } from './farhold.js';
 import { taunt as threatTaunt, threatFromHeal } from './threat.js';
 
 /** plan keys this file does not act on yet — reported, never silently dropped */
-export const PENDING_KEYS = ['summon', 'mimic', 'clusters', 'corpseBurst', 'command', 'howl', 'allyStatus'];
+export const PENDING_KEYS = [];   // everything a plan can carry is acted on (followers via js/rules/followers.js)
 /** kinds of plan the dispatcher refuses (no follower system yet) */
 const REFUSED_KINDS = { summon: 'summons arrive with followers (M2)', form: 'shape forms arrive with followers (M2)' };
 
@@ -110,10 +110,17 @@ function runtimeOf(combat) {
   Object.assign(env, {
     near: (x, z, r, except) => field.near(x, z, r, except),
     allies: () => (C() ? allies(C()) : []),
-    followers: () => (C() ? allies(C()).filter(f => f.owner === C()).length : 0),
+    followers: () => (C() ? allies(C()).filter(f => f.owner === C() && !f.decoy).length : 0),
     healMostHurt: amount => (C() ? healMostHurt(C(), amount) : 0),
     healAllies: share => (C() ? healAllies(C(), share) : 0),
-    healNearestPet: () => 0,
+    healNearestPet: share => {
+      const c = C();
+      if (!c) return 0;
+      let best = null, bd = Infinity;
+      for (const p of allies(c)) { if (p.owner !== c || p.dying != null) continue; const d = Math.hypot(p.x - c.x, p.z - c.z); if (d < bd) { bd = d; best = p; } }
+      if (best) best.hp = Math.min(best.maxHp, best.hp + Math.round(best.maxHp * share));
+      return 0;
+    },
     statusSpec,
     applyStatus: (t, id, spec, power) => (C() ? combat.landStatus(C(), id, spec, t, power) : applyStatus(t, id, spec, power)),
     statusFx: (u, type, on) => field.emit({ t: 'fx', kind: 'status', id: u?.id, status: type, on: !!on }),
@@ -265,6 +272,183 @@ function runtimeOf(combat) {
       }
       if (p.left <= 0) rt.pools.splice(i, 1);
     }
+  }
+
+  // ---- followers and forms (skillrun.js formCast / exitEffects / petBuffOn / castSub / howl / summonFrom / basicAttack / petHooks)
+  const PF = () => room.followers || null;
+  const petsOf = ch => (PF() ? PF().of(ch) : []);
+  rt.petsOf = petsOf;
+  function petBuffOn(ch, form, on) {
+    const pb = form?.spec?.petBuff;
+    if (!pb) return;
+    for (const pet of petsOf(ch)) {
+      if (pet.dying != null) continue;
+      pet.statuses = pet.statuses || {};
+      const key = `formbuff:${form.id}`;
+      if (on) {
+        pet.statuses[key] = { type: key, name: pb.name || form.name, kind: 'buff', remaining: Infinity, power: 1, perSecond: 0, slow: 0, damage: pb.damage || 0, resist: pb.resist || 0, healPerSecond: pb.healPerSecond || 0 };
+        if (pb.biteStatus) pet.biteStatus = pb.biteStatus;
+      } else {
+        delete pet.statuses[key];
+        if (pb.biteStatus && pet.biteStatus === pb.biteStatus) pet.biteStatus = null;
+      }
+    }
+  }
+  const slotOf = (ch, id) => ch.skills.slots.find(sl => sl.id === id) || null;
+  function castSub(ch, sub, parent, { shape = 'around' } = {}) {
+    const slot = slotOf(ch, parent?.skill?.id) || parent?.skill || null;
+    const plan = ch.skills.planFor(sub, slot, { shape, element: sub.element || parent?.element || 'arcane' });
+    return castPlan(combat, ch, plan, { echo: true });
+  }
+  rt.castSub = castSub;
+  rt.formCast = (ch, plan) => {
+    const res = plan.form;
+    const left = res?.left, entered = res?.entered;
+    if (left) exitEffects(ch, left, plan);
+    if (entered) {
+      const spec = entered.spec;
+      petBuffOn(ch, entered, true);
+      if (spec.aura) {
+        const a = spec.aura;
+        entered.aura = rt.place(ch, plan, { kind: 'zone', seconds: Infinity, radius: a.radius ?? 10, every: 1, follow: 'self', buff: a.buff || null, debuff: a.debuff || null, heal: a.heal || 0 }, ch.x, ch.z, 'self');
+        entered.aura.left = Infinity; entered.aura.life = Infinity;
+      }
+      if (spec.onEnter) castSub(ch, spec.onEnter, plan, { shape: spec.onEnter.shape || 'around' });
+      if (spec.threatDrop) for (const e of field.monsters) if (e.dying == null && Math.hypot(e.x - ch.x, e.z - ch.z) > (spec.threatDrop.beyond ?? 10)) { e.state = 'wander'; e.threatFor = 0; e.threat?.delete(ch.id); }
+      field.emit({ t: 'fx', kind: 'form', id: ch.id, form: entered.id, group: entered.group, body: spec.body?.creature || null, on: true });
+    } else if (left) field.emit({ t: 'fx', kind: 'form', id: ch.id, form: left.id, group: left.group, on: false });
+    for (const sl of ch.skills.slots) sl.views = null;
+  };
+  function exitEffects(ch, left, plan = null) {
+    const spec = left.spec || {};
+    petBuffOn(ch, left, false);
+    if (left.aura) { left.aura.left = 0; const i = mechWorld.placed.indexOf(left.aura); if (i >= 0) mechWorld.placed.splice(i, 1); field.emit({ t: 'fx', kind: 'unplace', obj: left.aura.id }); }
+    if (left.why === 'expired' || left.why === 'toggle' || left.why === 'swap') {
+      const parent = plan || { skill: { id: left.skill, unlockAt: slotOf(ch, left.skill)?.unlockAt || 1 }, element: spec.element || 'nature' };
+      if (spec.onExit) castSub(ch, spec.onExit, parent, { shape: spec.onExit.shape || 'around' });
+      if (spec.finale) castSub(ch, spec.finale, plan || { ...parent, element: spec.element || 'arcane' }, { shape: spec.finale.shape || 'around' });
+    }
+  }
+  rt.formExpired = (ch, form) => { exitEffects(ch, form); for (const sl of ch.skills.slots) sl.views = null; field.emit({ t: 'fx', kind: 'form', id: ch.id, form: form.id, on: false }); };
+  rt.cutFollowers = (ch, seconds) => PF()?.cutAbilities(ch, seconds);
+  rt.howl = (ch, plan) => {
+    const h = plan.howl || {};
+    for (const pet of petsOf(ch)) {
+      if (pet.dying != null || (h.only !== false && pet.defId !== plan.pet)) continue;
+      const r = statusRef(h.status || 'haste');
+      applyStatus(pet, r.id, { ...statusSpec(r.id), ...r, seconds: h.seconds ?? r.seconds ?? 6, ...(h.damage ? { damage: h.damage } : {}) }, 1);
+      if (h.taunt) for (const e of field.near(ch.x, ch.z, h.taunt.radius ?? 4)) PF().petTaunt(e, pet, h.taunt.seconds ?? 4);
+    }
+  };
+  /** skillrun.js `summonFrom`: a summon block on any skill (temporary, decoys, from corpses). */
+  rt.summonFrom = (ch, plan, spot) => {
+    const s = plan.summon, Fo = PF();
+    if (!Fo) return;
+    registerTemps(ch);
+    const def = s.def || plan.pet || 'shade';
+    let count = s.count ?? 1;
+    let at = s.at === 'aim' ? spot : { x: ch.x, z: ch.z };
+    let corpses = null;
+    if (s.at === 'corpses') {
+      const found = takeCorpses(spot.x ?? ch.x, spot.z ?? ch.z, s.radius ?? 12, s.maxCorpses ?? count);
+      if (found.length) at = found[0];
+      corpses = found;
+      count = s.perCorpse ? Math.min(s.max ?? 8, found.reduce((n, x) => n + x.worth, 0) + (s.plus || 0)) : count;
+      if (!found.length && s.needsCorpse) return;
+    }
+    const made = Fo.summon(def, ch, {
+      count, at, temporary: s.temporary !== false && !!(s.temporary || s.lifetime || s.decoy), lifetime: s.lifetime || 10,
+      decoy: s.decoy || null, burstOnExpire: s.burstOnExpire || null, heal: s.heal || null, taunt: s.decoy ? (s.decoy.taunt ?? 4) : (s.taunt || 0),
+    });
+    for (const [i, u] of made.entries()) {
+      const cp = corpses?.[i];
+      if (cp) { u.x = cp.x + (i % 2 ? 0.4 : -0.4); u.z = cp.z; }
+      if (s.hpMult) { u.maxHp = Math.round(u.maxHp * s.hpMult); u.hp = u.maxHp; }
+      if (s.biteStatus) u.biteStatus = s.biteStatus;
+      if (s.mimic || plan.mimic) u.mimic = (s.mimic || plan.mimic).mult ?? 0.4;
+      u.fromPlan = plan;
+    }
+  };
+  /** skillrun.js `registerTemps`: the temporary bodies some skills summon. */
+  let tempsDone = false;
+  function registerTemps() {
+    if (tempsDone || !PF()) return;
+    tempsDone = true;
+    const reg = PF().register;
+    reg({ id: 'holy_wisp', name: 'Guardian Light', kind: 'spirit', family: 'elemental', role: 'caster', hp: 30, dmg: [4, 7], armor: 2, speed: 6, reach: 2.4, attackEvery: 1.6, flying: true, ranged: { range: 16, element: 'holy' } });
+    reg({ id: 'phantom_decoy', name: 'Decoy', kind: 'humanoid', family: 'human', role: 'brute', hp: 40, dmg: [1, 1], armor: 4, speed: 0, reach: 1, attackEvery: 99 });
+    reg({ id: 'shade', name: 'Shade', kind: 'humanoid', family: 'human', role: 'skirmisher', hp: 40, dmg: [5, 9], armor: 3, speed: 5.4, reach: 2.4, attackEvery: 1.2 });
+    reg({ id: 'buried_thrall', name: 'Buried Thrall', kind: 'humanoid', family: 'undead', role: 'skirmisher', hp: 20, dmg: [2, 4], armor: 2, speed: 4.6, reach: 2.4, attackEvery: 1.5 });
+    reg({ id: 'spirit_warrior', name: 'Spirit Warrior', kind: 'spirit', family: 'elemental', role: 'brute', hp: 50, dmg: [6, 10], armor: 6, speed: 5, reach: 2.6, attackEvery: 1.4 });
+    reg({ id: 'puffball', name: 'Puffball', kind: 'beast', family: 'beast', role: 'brute', hp: 20, dmg: [1, 1], armor: 1, speed: 0, reach: 1, attackEvery: 99 });
+  }
+  rt.registerTemps = registerTemps;
+  /** skillmech's petHooks, per pet (its owner acts) */
+  rt.petHooks = {
+    onPetStrike(p, target, result) { if (p.resourceOnHit && result?.amount > 0) gainResource(p.owner, p.resourceOnHit.resource || p.resourceOnHit.id, p.resourceOnHit.n ?? 1); },
+    onExpire(p) {
+      const b = p.burstOnExpire;
+      if (!b || !p.owner) return;
+      const plan = p.fromPlan || { mult: 1, baseMult: 1, element: 'poison' };
+      rt.withCaster(p.owner, () => burst(p.owner, plan, p.x, p.z, b.radius ?? 3, b.mult ?? 0.8, { element: b.element || null, heal: b.heal || 0 }));
+    },
+    onHealPulse(p, h) {
+      const owner = p.owner;
+      if (!owner) return;
+      const lift0 = 1 + (owner.derived?.healingPct || 0);
+      let worst = null, frac = 1;
+      for (const u of allies(owner)) { const f = u.hp / Math.max(1, u.maxHp); if (f < frac - 0.01) { frac = f; worst = u; } }
+      if (worst && frac < 0.97) healUnit(owner, worst, Math.round(worst.maxHp * (h.share ?? 0.06) * lift0));
+      else if (h.strike) {
+        const e = field.nearestTo(p.x, p.z, 16);
+        if (e) rt.withCaster(owner, () => field.strikeArea(e.x, e.z, 1, owner, { power: h.strike, element: 'holy', falloff: 1, proc: true, kind: 'pet' }));
+      }
+    },
+  };
+  /** skillrun.js `basicAttack`: in a shape form your basic attack is the form's own. True = handled. */
+  rt.formBasic = (ch, hand) => {
+    const f = formOf(ch, 'shape');
+    const b = f?.spec?.basic;
+    if (!b || hand === 'off') return !!b;
+    const plan = { mult: b.mult ?? 1, baseMult: b.mult ?? 1, element: b.element || 'nature', skill: { id: `form:${f.id}` } };
+    if (b.shape === 'bolt') {
+      const spot = groundTargetOf(ch, {}, b.range ?? 14);
+      const ms = Math.max(0.16, Math.hypot(spot.x - ch.x, spot.z - ch.z) / 22);
+      combat.later(ms, () => rt.withCaster(ch, () => {
+        const sts = [...(b.status ? [b.status] : []), ...[].concat(b.statuses || [])];
+        field.strikeArea(spot.x, spot.z, b.splash ?? 1.5, ch, { power: b.mult ?? 0.7, element: plan.element, falloff: 0.7, applyStatus: combat.hookFor(ch), rules: sts.length ? { skill: plan.skill.id, statuses: sts } : null, kind: 'form' });
+        if (b.healAllies) healAllies(ch, b.healAllies, { x: spot.x, z: spot.z, r: b.splash ?? 1.5 });
+      }), ch.id);
+    } else {
+      for (let k = 0; k < (b.hits ?? 1); k++) {
+        const strikeIt = () => rt.withCaster(ch, () => {
+          const first = !!f.firstCritPending;
+          f.firstCritPending = false;
+          const rules = { skill: plan.skill.id, ...(first ? { crit: true } : {}), ...(b.statuses ? { statuses: b.statuses } : {}) };
+          const hits = field.strike(ch, ch, { reach: b.reach ?? 2.6, arc: b.arc ?? 2.4, power: b.mult ?? 1, element: plan.element, applyStatus: combat.hookFor(ch), knock: knockShape(b.knock), rules, strike: ch.lastStrike || null, kind: 'form' });
+          if (b.every && hits.some(h => h.result.amount > 0)) {
+            f.bites = (f.bites || 0) + 1;
+            if (f.bites % (b.every.n ?? 3) === 0 && b.every.stack) for (const h of hits) addStackFx(ch, h.enemy, b.every.stack);
+          }
+          for (const h of hits) {
+            if (b.behindStatus && h.result.amount > 0) {
+              const away = Math.atan2(ch.x - h.enemy.x, ch.z - h.enemy.z);
+              const delta = Math.abs(((away - (h.enemy.facing || 0) + Math.PI * 3) % (Math.PI * 2)) - Math.PI);
+              if (delta > 1.75) combat.landStatus(ch, b.behindStatus, statusSpec(b.behindStatus), h.enemy, Math.max(1, h.result.amount * 0.4));
+            }
+            if (b.status && h.result.amount > 0) combat.landStatus(ch, b.status, statusSpec(b.status), h.enemy, Math.max(1, h.result.amount * 0.4));
+            if (b.heal && h.result.amount > 0) ch.hp = Math.min(ch.maxHp, ch.hp + Math.round(ch.maxHp * b.heal));
+          }
+        });
+        combat.later(k * 0.16, strikeIt, ch.id);       // skillrun.js `later`, the first one too (next frame)
+      }
+    }
+    return true;
+  };
+  function addStackFx(ch, e, st) {
+    const spec = statusSpec(st.status);
+    if (!spec || e.dying != null) return;
+    for (let k = 0; k < (st.add ?? 1); k++) combat.landStatus(ch, st.status, { ...spec, stackMax: st.max ?? 5 }, e, Math.max(1, (ch.derived?.damage?.[1] || 8) * 0.35));
   }
 
   /** A unit left this room (handed to another, or gone): nothing here acts for it any more. */
@@ -420,15 +604,18 @@ function aimedEnemy(field, ch, intent, a, range) {
  * starts the cooldown, applies talents/forms/resources), then carry it out.
  */
 export function castSkillPlan(combat, ch, slot, intent = {}) {
+  // the bar asks this before a summon (Farhold main.js passes `pets.canAdmit`)
+  ch.canSummon = (petId, sl) => combat.room.followers?.canAdmit(ch, petId, { name: sl?.name }) ?? { ok: true };
   const pre = ch.skills.check(slot);
   if (!pre.ok) return { ok: false, why: pre.why || 'not ready' };
   const row = ch.skills.rowFor(slot);
   const kind = row?.shape;
-  if (row?.form) return { ok: false, why: REFUSED_KINDS.form };
-  if (kind === 'summon' && !row.summon?.temporary) return { ok: false, why: REFUSED_KINDS.summon };
+  const hasFollowers = !!combat.room.followers;
+  if (!hasFollowers && row?.form) return { ok: false, why: REFUSED_KINDS.form };
+  if (!hasFollowers && kind === 'summon' && !row.summon?.temporary) return { ok: false, why: REFUSED_KINDS.summon };
   const plan = ch.skills.use(slot);
   if (!plan.ok) return { ok: false, why: plan.why };
-  if (REFUSED_KINDS[plan.kind]) return { ok: false, why: REFUSED_KINDS[plan.kind] };
+  if (!hasFollowers && REFUSED_KINDS[plan.kind]) return { ok: false, why: REFUSED_KINDS[plan.kind] };
   return castPlan(combat, ch, plan, { intent, slot });
 }
 
@@ -469,8 +656,13 @@ export function castPlan(combat, ch, plan, { echo = false, intent = {}, slot = n
 
     const ground = range => { const s = groundTargetOf(ch, intent, range); plan.at = s; return s; };
 
-    if (plan.kind === 'summon') {
-      // a temporary summon (Guardian Light): not ported yet — the follower system is M2
+    if (plan.kind === 'summon' && plan.summon && typeof plan.summon === 'object') {
+      // summonFrom in afterCast puts it down
+    } else if (plan.kind === 'summon' && plan.howl && room.followers?.canAdmit(ch, plan.pet)?.ok === false) {
+      rt.howl(ch, plan);
+    } else if (plan.kind === 'summon') {
+      const made = room.followers?.summon(plan.pet, ch, { count: plan.petCount, at: { x: ch.x, z: ch.z } }) || [];
+      if (made.refused && !made.length) out.why = made.refused;
     } else if (plan.kind === 'beam' && plan.delay > 0 && !plan.beamFired) {
       const strikeOnly = { ...plan, beamFired: true, sub: true, frozenAim: { ...a }, place: null, pool: null, selfBuff: null, summon: null, taunt: null, command: null, barrier: null, ward: null, counter: null, imbue: null, link: null, burst: null, again: null, afterimage: null, empowerNext: null, empowerRepeat: null, wall: null, rewind: null, cleanse: null, revive: null, healPets: null, overflowBarrier: null, allyStatus: null, corpseBurst: null, clusters: null, dashWith: null, resetOn: null };
       combat.later(plan.delay, () => castPlan(combat, ch, strikeOnly, { echo: true, intent }), ch.id);
@@ -815,6 +1007,7 @@ function afterCast(combat, rt, ch, plan, ctx) {
   const spot = plan.at || { x: ch.x, z: ch.z };
   const hitsN = plan._hits || 0;
   const apply = (u, id, spec) => applyStatus(u, id, spec, 1);
+  const Fo = combat.room.followers;
 
   if (plan.taunt) {
     const t = plan.taunt;
@@ -823,8 +1016,11 @@ function afterCast(combat, rt, ch, plan, ctx) {
     let n = 0;
     for (const e of list) {
       if (t.only === 'ranged' && !e.ranged) continue;
-      if (t.by === 'pet') continue;                   // a pet taunt needs followers (M2)
-      threatTaunt(e, ch, secs);
+      if (t.by === 'pet') {
+        const wolves = (Fo?.of(ch) || []).filter(x => x.dying == null && !x.decoy).sort((x, y) => Math.hypot(x.x - e.x, x.z - e.z) - Math.hypot(y.x - e.x, y.z - e.z));
+        if (!wolves[0]) continue;
+        Fo.petTaunt(e, wolves[0], secs);
+      } else threatTaunt(e, ch, secs);
       n++;
     }
     if (n) {
@@ -836,12 +1032,24 @@ function afterCast(combat, rt, ch, plan, ctx) {
       if (t.barrierPer) { const b = Math.round(ch.maxHp * Math.min(0.35, t.barrierPer * n)); ch.barrier = Math.max(ch.barrier || 0, b); ch.castBarrierFor = Math.max(ch.castBarrierFor || 0, 6); }
     }
   }
+  if (plan.command && Fo) {
+    const cm = plan.command;
+    const target = aimedEnemy(field, ch, ctx.intent, a, plan.range || 40) || field.nearestTo(ch.x, ch.z, 20);
+    Fo.order(ch, cm.order || 'focus', target, { seconds: cm.seconds ?? 6, petOnly: !!cm.petOnly, from: { x: ch.x, z: ch.z } });
+    for (const pet of Fo.of(ch)) {
+      if (!pet.order) continue;
+      if (cm.biteStatus) { pet.biteStatus = cm.biteStatus; combat.later(cm.seconds ?? 6, () => { if (pet.biteStatus === cm.biteStatus) pet.biteStatus = null; }); }
+      if (cm.gain) { pet.resourceOnHit = cm.gain; combat.later(cm.seconds ?? 6, () => { if (pet.resourceOnHit === cm.gain) pet.resourceOnHit = null; }); }
+    }
+  }
+  if (plan.summon && typeof plan.summon === 'object' && Fo) rt.summonFrom(ch, plan, spot);
   if (plan.barrier && typeof plan.barrier === 'object') {
     const b = plan.barrier;
     const to = allyTargetOf(rt, ch, ctx.intent);
     const worth = b.of === 'paid' ? (plan.hpPaid || 0) : Math.round(to.maxHp * (b.share ?? 0.2));
     to.barrier = Math.max(to.barrier || 0, worth);
     to.castBarrierFor = b.seconds ?? 6;
+    if (b.pets) Fo?.barrierAll(ch, worth, b.seconds ?? 6);
   }
   if (plan.healPets) {
     // MMO: "your followers" becomes the rest of your party (pets included) — a group heal
@@ -865,11 +1073,12 @@ function afterCast(combat, rt, ch, plan, ctx) {
       u.revivedBy = ch.id;
       field.emit({ t: 'revive', id: u.id, by: ch.id, hp: u.hp });
     }
+    Fo?.reviveAll(ch, share);                 // and fallen followers, as Farhold does
   }
   if (plan.cleanse) {
     const cl = plan.cleanse;
     rt.cleanseUnit(allyTargetOf(rt, ch, ctx.intent), cl.count ?? 1, cl.types || null);
-    if (cl.pets) for (const u of rt.allies(ch)) if (u !== ch) rt.cleanseUnit(u, cl.count ?? 1);
+    if (cl.pets) { for (const u of rt.allies(ch)) if (u !== ch && !u.owner) rt.cleanseUnit(u, cl.count ?? 1); Fo?.cleanseAll(ch, cl.count ?? 1); }
   }
   if (plan.link) {
     const l = plan.link;
@@ -890,6 +1099,13 @@ function afterCast(combat, rt, ch, plan, ctx) {
     const id = `buff:${plan.skill?.id || 'skill'}`;
     if (!b.petsOnly) apply(ch, id, { name: b.name || plan.skill?.name || 'Buff', kind: 'buff', element: plan.element, ...b, seconds: b.seconds ?? 8 });
     if (b.pets || b.petsOnly) for (const u of rt.allies(ch)) if (u !== ch) apply(u, id, { name: b.name || 'Buff', kind: 'buff', ...b, seconds: b.seconds ?? 8 });
+    if (b.petsShare) {
+      for (const pet of rt.petsOf(ch)) {
+        if (pet.dying != null || Math.hypot(pet.x - ch.x, pet.z - ch.z) > 8) continue;
+        const rf = b.resistPerFoe ? { ...b.resistPerFoe, per: (b.resistPerFoe.per ?? 0.06) * b.petsShare, cap: (b.resistPerFoe.cap ?? 0.36) * b.petsShare } : null;
+        apply(pet, id, { name: b.name || 'Buff', kind: 'buff', seconds: b.seconds ?? 8, resistPerFoe: rf, resist: (b.resist || 0) * b.petsShare });
+      }
+    }
     if (b.movePct || b.hastePct || b.armorPct || b.maxHpPct) ch.mechDirty = true;
     rt.tracked.push({ unit: ch, id, onEnd: b.onEnd || null, plan, dirty: !!(b.movePct || b.hastePct || b.armorPct || b.maxHpPct) });
   }
@@ -938,6 +1154,22 @@ function afterCast(combat, rt, ch, plan, ctx) {
       }
     }
     if (b.knock && !b.mult) for (const e of field.near(ch.x, ch.z, r)) rt.push(e, ch.x, ch.z, typeof b.knock === 'number' ? b.knock : b.knock.push || 0);
+  }
+  if (plan.dashWith && plan.kind !== 'dash') Fo?.bringAlong(ch, { x: ch.x, z: ch.z }, { x: ch.x, z: ch.z }, 15);
+  if (plan.corpseBurst) corpseBurst(combat, rt, ch, plan, spot);
+  if (plan.clusters && plan.kind === 'ground') clusterStrikes(combat, rt, ch, plan, spot);
+  if (plan.allyStatus) {
+    const as = plan.allyStatus;
+    const list = as.target === 'all' ? (Fo?.of(ch) || []).filter(x => x.dying == null) : [allyTargetOf(rt, ch, ctx.intent, plan.range || 30)].filter(u => u && u !== ch);
+    const r = statusRef(as.status);
+    for (const u of list) apply(u, r.id, { ...statusSpec(r.id), ...r, seconds: as.seconds ?? r.seconds ?? statusSpec(r.id)?.seconds ?? 4 });
+    if (as.self) apply(ch, r.id, { ...statusSpec(r.id), ...r, seconds: as.seconds ?? 4 });
+  }
+  if (!plan.sub && plan.kind !== 'form') {
+    for (const pet of Fo?.of(ch) || []) {
+      if (pet.dying != null || !pet.mimic || pet.fromPlan === plan) continue;   // (not the cast that made it)
+      combat.later(0.15, () => { if (pet.dying == null) echoFrom(combat, rt, ch, plan, a, { x: pet.x, z: pet.z, yaw: pet.facing || ch.yaw }, pet.mimic, ctx.intent); }, ch.id);
+    }
   }
   if (plan.empowerNext?.pets) for (const u of rt.allies(ch)) if (u.owner === ch) u.empowered = Math.max(u.empowered || 0, plan.empowerNext.mult ?? 0.5);
   if (plan.resetOn && String(plan.resetOn.when || plan.resetOn).startsWith('crowd')) {
@@ -1017,6 +1249,37 @@ export function echoFrom(combat, rt, ch, plan, a, o, share, intent = {}) {
     }
   });
   field.emit({ t: 'fx', kind: 'afterimage', id: ch.id, x: o.x, z: o.z });
+}
+
+/** skillrun.js `clusterStrikes`: extra strikes on groups standing away from the main spot. */
+function clusterStrikes(combat, rt, ch, plan, spot) {
+  const field = combat.field, c = plan.clusters;
+  const r = c.radius ?? plan.radius ?? 5;
+  const left = field.near(ch.x, ch.z, c.range ?? 30).filter(e => Math.hypot(e.x - spot.x, e.z - spot.z) > (plan.radius || 5));
+  const used = new Set();
+  let n = 0;
+  for (const e of left) {
+    if (used.has(e) || n >= (c.max ?? 4)) continue;
+    const group = left.filter(o => !used.has(o) && Math.hypot(o.x - e.x, o.z - e.z) <= r);
+    if (group.length < (c.min ?? 2)) continue;
+    for (const g of group) used.add(g);
+    const x = group.reduce((t, g) => t + g.x, 0) / group.length, z = group.reduce((t, g) => t + g.z, 0) / group.length;
+    combat.later(0.25 + n * 0.15, () => rt.withCaster(ch, () => field.strikeArea(x, z, r, ch, { power: plan.mult * (c.mult ?? 0.4), element: plan.element, falloff: 0.6, rules: plan.rules, skill: plan.skill?.id, applyStatus: combat.hookFor(ch), kind: 'skill' })), ch.id);
+    n++;
+  }
+  return n;
+}
+
+/** skillrun.js `corpseBurst`: corpses near the spot go up; with none, a follower pays (fallback). */
+function corpseBurst(combat, rt, ch, plan, spot) {
+  const cb = plan.corpseBurst;
+  const found = takeCorpses(spot.x, spot.z, cb.radius ?? 10, cb.max ?? 5);
+  for (const [i, cp] of found.entries()) combat.later(i * 0.12, () => rt.withCaster(ch, () => rt.burst(ch, plan, cp.x, cp.z, cb.burst ?? 4, (cb.mult ?? 1) * (cp.worth || 1), { element: cb.element || null, status: cb.status || null })), ch.id);
+  if (!found.length && cb.fallback) {
+    const pet = rt.petsOf(ch).filter(x => x.dying == null && !x.decoy && Math.hypot(x.x - spot.x, x.z - spot.z) <= (cb.radius ?? 10))[0];
+    if (pet) { pet.hp = Math.max(1, pet.hp - Math.round(pet.maxHp * cb.fallback)); rt.burst(ch, plan, pet.x, pet.z, cb.burst ?? 4, cb.mult ?? 1, { element: cb.element || null }); }
+  }
+  return found.length;
 }
 
 /** skillrun.js `startChannel` (the ticks run in rt.tick). */
@@ -1108,6 +1371,13 @@ export function installSkillRuntime(combat) {
           default: break;
         }
       });
+    }
+    // a temporary summon that dies bursts; a struck decoy answers its attacker (skillrun.js onHurt)
+    if (victim?.temporary && result.dead && victim.burstOnExpire && !victim.burst) { victim.burst = true; rt.petHooks.onExpire(victim); }
+    if (victim?.decoy && victim.fromPlan?.summon?.decoy?.onStruck && attacker && victim.owner) {
+      const r = statusRef(victim.fromPlan.summon.decoy.onStruck);
+      const ctl = controlFor(attacker, r.id, r.seconds ?? 2);
+      combat.landStatus(victim.owner, ctl.id, { ...(combat.room.engine.statuses[ctl.id] || {}), ...r, seconds: ctl.seconds }, attacker, 1);
     }
     // links: a tank carrying a share of what a party member takes (Sworn Ward / Sworn Guard)
     if (result.amount > 0) {

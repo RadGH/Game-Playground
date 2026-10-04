@@ -306,7 +306,8 @@ export function resetMonster(field, e) {
 export function tickMonsters(field, dt, hooks = {}) {
   // who a monster NOTICES is a player (actors.js measures everything from the player); companions
   // draw it by biting it or by standing in its way (aimOf rules 1 and 2, below)
-  const friends = field.players.filter(field.usable);
+  // (an untargetable player is still THERE: it is noticed and keeps the brain awake, it just is not swung at)
+  const friends = field.players.filter(p => !p.dead && !p.removed && (p.hp ?? 1) > 0);
   const allies = field.allies;
   const list = [...field.monsters];
   const awakeBands = new Set();
@@ -506,11 +507,11 @@ export function tickMonsters(field, dt, hooks = {}) {
     } else if (e.state === 'chase') {
       target = (e.tauntFor > 0 ? null : companionAim(e, dist, allies, field)) || pickTarget(e, lookup, field.usable, dt);
       // woken (pack, band, hit by a DoT) with nothing on the table yet: the nearest friend
-      if (!target && near) { noticeThreat(e, near); target = near; }
+      if (!target && near && field.usable(near)) { noticeThreat(e, near); target = near; }
     } else if (e.feared && !e.statuses?.fear && e.state === 'flee') {
       // a fear that runs out THIS tick turns the body back to the chase with something to chase
       // (Farhold's aimOf answers "the player" for a fleeing body, so its aim is ready either way)
-      target = pickTarget(e, lookup, field.usable, 0) || near;
+      target = pickTarget(e, lookup, field.usable, 0) || (field.usable(near) ? near : null);
       if (target && !e.threat?.has(target.id)) noticeThreat(e, target);
     }
     const aimAt = foe || target || (e.statuses?.turned?.follow ? near : null);
@@ -566,7 +567,15 @@ export function tickMonsters(field, dt, hooks = {}) {
       } else if (e.swingTimer <= 0) {
         e.swingTimer = e.attackEvery;
         e.anim = 'attack';
-        if (hooks.onStrike) hooks.onStrike(e, target); else monsterStrike(field, e, target);
+        // main.js onEnemyStrike: it hits the companion it walked up to; with none, a companion standing
+        // within reach takes the hit 55% of the time
+        let victim = target;
+        if (target?.kind === 'player' && field.allies.length) {
+          let pet = null, bd = (e.reach || 2.4) + 0.6;
+          for (const p of field.allies) { if (p.dying != null) continue; const d = Math.hypot(p.x - e.x, p.z - e.z); if (d < bd) { bd = d; pet = p; } }
+          if (pet && field.rng() < 0.55) victim = pet;
+        }
+        if (hooks.onStrike) hooks.onStrike(e, victim); else monsterStrike(field, e, victim);
       }
     } else {
       e.wanderTimer -= dt;

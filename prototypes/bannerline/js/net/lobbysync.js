@@ -3,7 +3,7 @@
 // Couch players (several local seats on one machine), remote players and AI seats mix freely.
 // Stream B's lobby UI calls this API; it never touches the transport.
 //
-//   const room = await createRoom({ transport, name, dataHash, clock?, code? })     // host
+//   const room = await createRoom({ transport, name, dataHash, clock?, code?, roomMode? })     // host
 //   const room = await joinRoom({ transport, code, name, dataHash, clock?, timeoutMs? })   // client
 //   room.code, room.isHost, room.me, room.state                    (read-only plain data, below)
 //   room.on('change' | 'start' | 'lobby' | 'error' | 'closed', fn) → unsubscribe
@@ -23,6 +23,13 @@
 //   machines: [{ id, name, ping, hidden, host }],
 // }
 // A slot of kind 'human' whose owner === room.me is one of THIS machine's local seats.
+//
+// MODE-AWARE: the slot list, what a free slot falls back to, who may claim what, the start check and
+// the sim players come from a ROOM MODE (`roomMode`, default LINE_WAR_ROOM below). Hunters vs Farmers
+// passes its own (js/ui/hvf/online.js `hvfRoomMode(rules)`: farmer/hunter seats that default to AI).
+// A room mode: { formats: [ids], slots(format, old) -> slots, vacant(slot) (reset a freed slot in place),
+//   claimable(slot) -> bool, check(slots) -> null | reason (why the match cannot start),
+//   players(usedSlots) -> sim players[], config?(state) -> extra config fields }
 
 import { NetError, NET_MESSAGES, newRoomCode } from './transport.js';
 import { delayFor, createLockstep } from './lockstep.js';
@@ -31,6 +38,23 @@ const MAX_MACHINES = 6;
 const PING_MS = 1000;
 const FORMAT_SIZE = { '1v1': 1, '2v2': 2, '3v3': 3 };
 const realClock = { now: () => (typeof performance !== 'undefined' ? performance.now() : Date.now()), setTimeout: (f, ms) => setTimeout(f, ms), clearTimeout: id => clearTimeout(id), setInterval: (f, ms) => setInterval(f, ms), clearInterval: id => clearInterval(id) };
+
+/** Line war: two teams of 1-3, empty slots are 'open' (no player), race + hero per slot. */
+export const LINE_WAR_ROOM = {
+  formats: Object.keys(FORMAT_SIZE),
+  slots: (format, old) => makeSlots(format, old),
+  vacant: s => Object.assign(s, { kind: 'open', owner: null, name: '', ready: false, device: null }),
+  claimable: s => s.kind === 'open',
+  check(slots) {
+    const used = slots.filter(s => s.kind === 'human' || s.kind === 'ai');
+    for (const team of [0, 1]) if (!used.some(s => s.team === team)) return `team ${team + 1} has nobody: take a seat or add an AI`;
+    return null;
+  },
+  players: used => used.map(s => s.kind === 'ai'
+    ? { team: s.team, kind: 'ai', ai: { difficulty: s.difficulty }, race: s.race, hero: s.hero, name: s.name || 'AI' }
+    : { team: s.team, kind: 'human', race: s.race, hero: s.hero, name: s.name }),
+  config: state => ({ map: state.map }),
+};
 
 function makeSlots(format, old = []) {
   const n = FORMAT_SIZE[format] || 1, out = [];
@@ -53,7 +77,8 @@ function emitter() {
 const clone = o => JSON.parse(JSON.stringify(o));
 
 /** Host: open a room. Retries with a new code when the broker says the code is taken. */
-export async function createRoom({ transport, name = 'Host', dataHash, clock = realClock, code, mode = 'linewar', format = '1v1', map = 'vale' }) {
+export async function createRoom({ transport, name = 'Host', dataHash, clock = realClock, code, mode = 'linewar', format = '1v1', map = 'vale', roomMode = LINE_WAR_ROOM }) {
+  const RM = roomMode;
   let tries = 0;
   for (;;) {
     const c = code || newRoomCode();
@@ -63,7 +88,7 @@ export async function createRoom({ transport, name = 'Host', dataHash, clock = r
     }
   }
   const ev = emitter();
-  const state = { code, hostId: transport.id, phase: 'lobby', mode, format, map, slots: makeSlots(format), machines: [{ id: transport.id, name, ping: 0, hidden: false, host: true }] };
+  const state = { code, hostId: transport.id, phase: 'lobby', mode, format, map, slots: RM.slots(format, []), machines: [{ id: transport.id, name, ping: 0, hidden: false, host: true }] };
   const pingsOut = new Map();
   let lastPacket = null, tokens = new Map();
 
@@ -71,14 +96,14 @@ export async function createRoom({ transport, name = 'Host', dataHash, clock = r
   const refuse = (to, code2) => transport.send(to, { t: 'l:error', code: code2, message: NET_MESSAGES[code2] || code2 });
   const machine = id => state.machines.find(m => m.id === id);
 
-  function freeSlotsOf(id) { for (const s of state.slots) if (s.owner === id) Object.assign(s, { kind: 'open', owner: null, name: '', ready: false, device: null }); }
+  function freeSlotsOf(id) { for (const s of state.slots) if (s.owner === id) RM.vacant(s); }
 
   // requests from any machine, the host's own included (applied directly)
   function request(from, msg) {
     const s = msg.key != null ? state.slots.find(x => x.key === msg.key) : null;
     switch (msg.t) {
       case 'l:claim':
-        if (!s || s.kind !== 'open' || state.phase !== 'lobby') return 'taken';
+        if (!s || !RM.claimable(s) || state.phase !== 'lobby') return 'taken';
         Object.assign(s, { kind: 'human', owner: from, local: msg.local | 0, name: String(msg.name || machine(from)?.name || 'Player').slice(0, 24), race: msg.race || s.race, hero: msg.hero || s.hero, device: msg.device || null, ready: false });
         return null;
       case 'l:update':
@@ -88,7 +113,7 @@ export async function createRoom({ transport, name = 'Host', dataHash, clock = r
         return null;
       case 'l:release':
         if (!s || s.owner !== from) return 'bad';
-        Object.assign(s, { kind: 'open', owner: null, name: '', ready: false, device: null });
+        RM.vacant(s);
         return null;
       case 'l:ready':
         if (!s || s.owner !== from) return 'bad';
@@ -134,7 +159,7 @@ export async function createRoom({ transport, name = 'Host', dataHash, clock = r
     configure({ mode: md, format: fm, map: mp } = {}) {
       if (state.phase !== 'lobby') return;
       if (md) state.mode = md;
-      if (fm && FORMAT_SIZE[fm]) { state.format = fm; const keep = state.slots; state.slots = makeSlots(fm, keep); for (const old of keep) if (!state.slots.some(s => s.key === old.key) && old.kind === 'human') { /* seat dropped by a smaller format */ } }
+      if (fm && RM.formats.includes(fm)) { state.format = fm; state.slots = RM.slots(fm, state.slots); }
       if (mp) state.map = mp;
       for (const s of state.slots) s.ready = false;
       push();
@@ -158,10 +183,12 @@ export async function createRoom({ transport, name = 'Host', dataHash, clock = r
       if (!humans.length) throw new NetError('bad', 'nobody has taken a seat');
       const notReady = humans.filter(s => !s.ready);
       if (notReady.length) throw new NetError('not-ready', `${notReady.map(s => s.name || s.key).join(', ')} not ready`);
+      // checked BEFORE the phase changes: a config the sim refuses would throw on every machine after the
+      // host had already switched to 'match', leaving the room stuck
+      const why = RM.check(state.slots, state);
+      if (why) throw new NetError('bad', why);
       const used = state.slots.filter(s => s.kind === 'human' || s.kind === 'ai');
-      const players = used.map(s => s.kind === 'ai'
-        ? { team: s.team, kind: 'ai', ai: { difficulty: s.difficulty }, race: s.race, hero: s.hero, name: s.name || 'AI' }
-        : { team: s.team, kind: 'human', race: s.race, hero: s.hero, name: s.name });
+      const players = RM.players(used);
       const owners = [];
       for (const m of state.machines) {
         const mine = used.map((s, pid) => ({ s, pid })).filter(x => x.s.kind === 'human' && x.s.owner === m.id).sort((a, b) => a.s.local - b.s.local);
@@ -172,7 +199,7 @@ export async function createRoom({ transport, name = 'Host', dataHash, clock = r
       const maxPing = remote.reduce((a, m) => Math.max(a, m.ping || 0), 0);
       const packet = {
         v: 1, seed: (seed ?? Math.floor(Math.random() * 4294967296)) >>> 0, dataHash,
-        config: { mode: state.mode, format: state.format, map: state.map, players },
+        config: { mode: state.mode, format: state.format, ...(RM.config ? RM.config(state) : {}), players },
         delay: delayFor(maxPing, tickMs, remote.length > 0), tickMs, startIn, hostId: transport.id, machines: owners,
       };
       packet.config.seed = packet.seed;
@@ -187,7 +214,7 @@ export async function createRoom({ transport, name = 'Host', dataHash, clock = r
       state.phase = 'lobby';
       for (const s of state.slots) if (s.kind === 'human') s.ready = false;
       state.machines = state.machines.filter(m => !m.left);
-      for (const s of state.slots) if (s.owner && !state.machines.some(m => m.id === s.owner)) Object.assign(s, { kind: 'open', owner: null, name: '', ready: false });
+      for (const s of state.slots) if (s.owner && !state.machines.some(m => m.id === s.owner)) RM.vacant(s);
       transport.broadcast({ t: 'l:lobby' });
       push(); ev.emit('lobby', clone(state));
     },

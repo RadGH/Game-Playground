@@ -5,9 +5,12 @@
 //   * 10 s connect timeout with the plain message "Your networks can't reach each other directly..."
 //   * "ID is taken" -> NetError('taken') (lobbysync retries with a fresh code)
 //   * heartbeats every second; a peer silent for 8 s (or whose channel closes) has left
+//   * a message over chunks.js CHUNK characters (a snapshot) goes as frames on the reliable channel;
+//     a send that throws is logged and drops that peer (a lost reliable message would desync it)
 // The library is vendored (vendor/peerjs, MIT) and loaded only when someone hosts or joins.
 
 import { listeners, NetError } from './transport.js';
+import { split, createJoiner } from './chunks.js';
 
 const PREFIX = 'bannerline-';
 let loading = null;
@@ -30,15 +33,15 @@ export async function createPeerTransport({ broker = {}, connectTimeoutMs = 1000
   const l = listeners();
   let peer = null, hostId = null, open = true;
   const conns = new Map();     // peer id -> { r, u, seen }
-  let hb = 0;
+  let hb = 0, chunkId = 0;
   const now = () => performance.now();
 
   function wire(conn) {
     const id = conn.peer;
-    const c = conns.get(id) || { r: null, u: null, seen: now(), joined: false };
+    const c = conns.get(id) || { r: null, u: null, seen: now(), joined: false, join: createJoiner() };
     conns.set(id, c);
     c[conn.label === 'u' ? 'u' : 'r'] = conn;
-    conn.on('data', m => { c.seen = now(); if (m && m.k === 'hb') return; l.emitMessage(id, m); });
+    conn.on('data', m => { c.seen = now(); if (m && m.k === 'hb') return; const whole = c.join(m); if (whole != null) l.emitMessage(id, whole); });
     conn.on('close', () => drop(id));
     conn.on('error', () => drop(id));
     return c;
@@ -84,8 +87,15 @@ export async function createPeerTransport({ broker = {}, connectTimeoutMs = 1000
     send(to, msg, opts = {}) {
       const c = conns.get(to);
       if (!c) return;
-      const ch = opts.reliable === false && c.u && c.u.open ? c.u : c.r;
-      try { if (ch && ch.open) ch.send(msg); } catch {}
+      const frames = split(msg, ++chunkId);
+      // frames must arrive in order and all of them: big messages always take the reliable channel
+      const ch = frames.length === 1 && opts.reliable === false && c.u && c.u.open ? c.u : c.r;
+      if (!ch || !ch.open) return;
+      try { for (const f of frames) ch.send(f); } catch (err) {
+        if (ch === c.u) { console.warn('peerjs: unreliable send failed', err); return; }   // inputs repeat anyway
+        console.error('peerjs: reliable send failed — dropping', to, err);
+        drop(to);
+      }
     },
     broadcast(msg, opts) { for (const id of conns.keys()) t.send(id, msg, opts); },
     onMessage: l.onMessage, onPeer: l.onPeer,

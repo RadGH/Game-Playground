@@ -1,0 +1,7262 @@
+{
+ "_doc": "Stream B zone placements (tools/bake-zone.mjs). Zone metres; yaw = atan2(dx, dz), the way the thing faces. kinds: settlement (data.radius, hub, planned), town_square, street (data.pts, width, cls), building (a proctown plot: data.w along `angle` (local +x = (cos angle, sin angle)), data.d across, want; yaw faces the nearest drawn street, data.streetGap = metres from the front to it), town_wall, road (data.pts [[x,z,h]], width, cls, spur), bridge (yaw along the road, span, deck height), dungeon_door, event_site, camp_site, landmark/dungeon/pass/crossing (World Forge nodes).",
+ "zone": "z12_03",
+ "terrainHash": "c5264009",
+ "placements": [
+  {
+   "kind": "settlement",
+   "id": "wolfkeep",
+   "x": 336,
+   "z": 576,
+   "yaw": 0,
+   "data": {
+    "kind": "village",
+    "name": "Wolfkeep",
+    "radius": 65,
+    "hub": true,
+    "planned": true
+   }
+  },
+  {
+   "kind": "settlement",
+   "id": "duskhaven",
+   "x": 672,
+   "z": 240,
+   "yaw": 0,
+   "data": {
+    "kind": "hamlet",
+    "name": "Duskhaven",
+    "radius": 46,
+    "hub": false,
+    "planned": true
+   }
+  },
+  {
+   "kind": "landmark",
+   "id": "the_heme_heartwood",
+   "x": 448,
+   "z": 1472,
+   "yaw": 0,
+   "data": {
+    "kind": "ancientwood",
+    "name": "The Heme Heartwood"
+   }
+  },
+  {
+   "kind": "crossing",
+   "id": "tethen_ford",
+   "x": 320,
+   "z": 576,
+   "yaw": 0,
+   "data": {
+    "kind": "ford",
+    "name": "Tethen Ford"
+   }
+  },
+  {
+   "kind": "dungeon_door",
+   "id": "door_1",
+   "x": 350,
+   "z": 735,
+   "yaw": -2.692,
+   "data": {
+    "name": "Barrow entrance"
+   }
+  },
+  {
+   "kind": "event_site",
+   "id": "event_saint_orrins_rise",
+   "x": 327,
+   "z": 872,
+   "yaw": 0,
+   "data": {
+    "r": 40
+   }
+  },
+  {
+   "kind": "town_square",
+   "id": "wolfkeep_square",
+   "x": 328.84,
+   "z": 568.61,
+   "yaw": 0,
+   "data": {
+    "r": 3.52,
+    "town": "wolfkeep",
+    "culture": "halfling"
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_0",
+   "x": 364.81,
+   "z": 545.44,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      364.81,
+      545.44
+     ],
+     [
+      340.66,
+      579.24
+     ],
+     [
+      317.45,
+      613.68
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_1",
+   "x": 299.3,
+   "z": 560.79,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      299.3,
+      560.79
+     ],
+     [
+      312.01,
+      573.58
+     ],
+     [
+      325.7,
+      585.33
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_2",
+   "x": 318.99,
+   "z": 543.48,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      318.99,
+      543.48
+     ],
+     [
+      329.47,
+      555.06
+     ],
+     [
+      338.62,
+      567.73
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_3",
+   "x": 337.2,
+   "z": 540.59,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      337.2,
+      540.59
+     ],
+     [
+      332.47,
+      545.29
+     ],
+     [
+      327.73,
+      549.99
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_4",
+   "x": 327.58,
+   "z": 539.81,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      327.58,
+      539.81
+     ],
+     [
+      329.64,
+      542.16
+     ],
+     [
+      331.97,
+      544.23
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_5",
+   "x": 343.29,
+   "z": 546.73,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      343.29,
+      546.73
+     ],
+     [
+      338.43,
+      551.29
+     ],
+     [
+      333.83,
+      556.13
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_6",
+   "x": 334.42,
+   "z": 544.9,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      334.42,
+      544.9
+     ],
+     [
+      336.72,
+      547.03
+     ],
+     [
+      338.83,
+      549.34
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_7",
+   "x": 339.94,
+   "z": 551.88,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      339.94,
+      551.88
+     ],
+     [
+      342.98,
+      555.12
+     ],
+     [
+      346.19,
+      558.18
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_8",
+   "x": 329.48,
+   "z": 563.01,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      329.48,
+      563.01
+     ],
+     [
+      323.76,
+      566.89
+     ],
+     [
+      317.79,
+      570.37
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_9",
+   "x": 322.19,
+   "z": 551.43,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      322.19,
+      551.43
+     ],
+     [
+      316.41,
+      555.21
+     ],
+     [
+      310.5,
+      558.78
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_10",
+   "x": 312.68,
+   "z": 552.02,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      312.68,
+      552.02
+     ],
+     [
+      313.58,
+      553.42
+     ],
+     [
+      314.45,
+      554.85
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_11",
+   "x": 319.61,
+   "z": 554.5,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      319.61,
+      554.5
+     ],
+     [
+      322.77,
+      559.08
+     ],
+     [
+      325.53,
+      563.91
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_12",
+   "x": 327.13,
+   "z": 559.29,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      327.13,
+      559.29
+     ],
+     [
+      326.06,
+      559.91
+     ],
+     [
+      325.03,
+      560.61
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_13",
+   "x": 322.6,
+   "z": 561.76,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      322.6,
+      561.76
+     ],
+     [
+      318.85,
+      563.94
+     ],
+     [
+      315.27,
+      566.37
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_14",
+   "x": 323.3,
+   "z": 568.48,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      323.3,
+      568.48
+     ],
+     [
+      324.94,
+      571.07
+     ],
+     [
+      326.56,
+      573.66
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_15",
+   "x": 307.51,
+   "z": 573.56,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      307.51,
+      573.56
+     ],
+     [
+      302.45,
+      580.82
+     ],
+     [
+      296.54,
+      587.41
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_16",
+   "x": 294.02,
+   "z": 577.26,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      294.02,
+      577.26
+     ],
+     [
+      294.92,
+      577.9
+     ],
+     [
+      299.3,
+      580.3
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_17",
+   "x": 302.05,
+   "z": 570.56,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      302.05,
+      570.56
+     ],
+     [
+      299.7,
+      573.99
+     ],
+     [
+      297.63,
+      577.6
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_18",
+   "x": 295.98,
+   "z": 579.87,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      295.98,
+      579.87
+     ],
+     [
+      294.83,
+      581.57
+     ],
+     [
+      294.46,
+      582.2
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_19",
+   "x": 303.56,
+   "z": 582.37,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      303.56,
+      582.37
+     ],
+     [
+      309.03,
+      587.62
+     ],
+     [
+      314.32,
+      593.04
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_20",
+   "x": 314.22,
+   "z": 579.8,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      314.22,
+      579.8
+     ],
+     [
+      311.43,
+      582.74
+     ],
+     [
+      308.51,
+      585.55
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_21",
+   "x": 308.12,
+   "z": 588.61,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      308.12,
+      588.61
+     ],
+     [
+      306.28,
+      590.57
+     ],
+     [
+      304.34,
+      592.43
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_22",
+   "x": 341.67,
+   "z": 589.96,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      341.67,
+      589.96
+     ],
+     [
+      353.61,
+      596.57
+     ],
+     [
+      365.24,
+      603.73
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_23",
+   "x": 351.8,
+   "z": 575.98,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      351.8,
+      575.98
+     ],
+     [
+      362.98,
+      581.11
+     ],
+     [
+      373.91,
+      586.74
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_24",
+   "x": 369.54,
+   "z": 560.65,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      369.54,
+      560.65
+     ],
+     [
+      364.54,
+      568.69
+     ],
+     [
+      359.81,
+      576.88
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_25",
+   "x": 360.29,
+   "z": 561.88,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      360.29,
+      561.88
+     ],
+     [
+      362.89,
+      563.42
+     ],
+     [
+      365.48,
+      564.99
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_26",
+   "x": 356.31,
+   "z": 568.53,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      356.31,
+      568.53
+     ],
+     [
+      358.87,
+      570.14
+     ],
+     [
+      361.49,
+      571.63
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_27",
+   "x": 365.32,
+   "z": 570.12,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      365.32,
+      570.12
+     ],
+     [
+      371.1,
+      573.92
+     ],
+     [
+      377.17,
+      577.22
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_28",
+   "x": 373.91,
+   "z": 563.27,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      373.91,
+      563.27
+     ],
+     [
+      371.71,
+      567.14
+     ],
+     [
+      369.33,
+      570.9
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_29",
+   "x": 371.48,
+   "z": 575.43,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      371.48,
+      575.43
+     ],
+     [
+      369.66,
+      578.57
+     ],
+     [
+      367.75,
+      581.64
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_30",
+   "x": 360.37,
+   "z": 583.25,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      360.37,
+      583.25
+     ],
+     [
+      358.71,
+      588.11
+     ],
+     [
+      357.14,
+      593.01
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_31",
+   "x": 350.03,
+   "z": 585.38,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      350.03,
+      585.38
+     ],
+     [
+      353.82,
+      586.68
+     ],
+     [
+      357.62,
+      587.9
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_32",
+   "x": 360.47,
+   "z": 586.6,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      360.47,
+      586.6
+     ],
+     [
+      365.01,
+      587.94
+     ],
+     [
+      369.46,
+      589.58
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_33",
+   "x": 356.66,
+   "z": 603.63,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      356.66,
+      603.63
+     ],
+     [
+      350.06,
+      612.97
+     ],
+     [
+      346.89,
+      616.56
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_34",
+   "x": 338.64,
+   "z": 601.26,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      338.64,
+      601.26
+     ],
+     [
+      343.58,
+      605.63
+     ],
+     [
+      348.21,
+      610.33
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_35",
+   "x": 349.25,
+   "z": 599.51,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      349.25,
+      599.51
+     ],
+     [
+      346.76,
+      602.14
+     ],
+     [
+      344.27,
+      604.77
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_36",
+   "x": 344.43,
+   "z": 608.57,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      344.43,
+      608.57
+     ],
+     [
+      340.95,
+      612.36
+     ],
+     [
+      337.35,
+      616.04
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_37",
+   "x": 335.09,
+   "z": 605,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      335.09,
+      605
+     ],
+     [
+      338.04,
+      607.73
+     ],
+     [
+      340.93,
+      610.54
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_38",
+   "x": 341.72,
+   "z": 613.16,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      341.72,
+      613.16
+     ],
+     [
+      342.7,
+      614.13
+     ],
+     [
+      343.73,
+      615.06
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_39",
+   "x": 320,
+   "z": 537.17,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      320,
+      537.17
+     ],
+     [
+      318.99,
+      543.48
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_40",
+   "x": 329.47,
+   "z": 555.06,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      329.47,
+      555.06
+     ],
+     [
+      327.13,
+      559.29
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_41",
+   "x": 312.01,
+   "z": 573.58,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      312.01,
+      573.58
+     ],
+     [
+      317.79,
+      570.37
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_42",
+   "x": 340.66,
+   "z": 579.24,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      340.66,
+      579.24
+     ],
+     [
+      338.62,
+      567.73
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_43",
+   "x": 341.67,
+   "z": 589.96,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      341.67,
+      589.96
+     ],
+     [
+      336.01,
+      586.14
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_44",
+   "x": 360.29,
+   "z": 561.88,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      360.29,
+      561.88
+     ],
+     [
+      355.51,
+      558.46
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_45",
+   "x": 360.37,
+   "z": 583.25,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      360.37,
+      583.25
+     ],
+     [
+      361.64,
+      580.49
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_46",
+   "x": 349.25,
+   "z": 599.51,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      349.25,
+      599.51
+     ],
+     [
+      351.52,
+      595.41
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wolfkeep_street_47",
+   "x": 350.06,
+   "z": 612.97,
+   "yaw": 0,
+   "data": {
+    "town": "wolfkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      350.06,
+      612.97
+     ],
+     [
+      348.21,
+      610.33
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wolfkeep_plot_0",
+   "x": 332.46,
+   "z": 539.35,
+   "yaw": 0.7816,
+   "data": {
+    "town": "wolfkeep",
+    "want": "house",
+    "district": "residential",
+    "w": 5.04,
+    "d": 3.78,
+    "angle": 0.7891,
+    "front": 0.7891,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wolfkeep_plot_1",
+   "x": 326.81,
+   "z": 544.96,
+   "yaw": 2.3524,
+   "data": {
+    "town": "wolfkeep",
+    "want": "hut",
+    "district": "craft",
+    "w": 5.04,
+    "d": 4.57,
+    "angle": 0.7891,
+    "front": 5.5015,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wolfkeep_plot_2",
+   "x": 333.23,
+   "z": 550.49,
+   "yaw": -2.3599,
+   "data": {
+    "town": "wolfkeep",
+    "want": "hut",
+    "district": "craft",
+    "w": 5.06,
+    "d": 5.9,
+    "angle": 0.7891,
+    "front": 3.9307,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wolfkeep_plot_3",
+   "x": 345.63,
+   "z": 552.48,
+   "yaw": -0.7891,
+   "data": {
+    "town": "wolfkeep",
+    "want": "hut",
+    "district": "craft",
+    "w": 7.68,
+    "d": 3.58,
+    "angle": 0.7891,
+    "front": 2.3599,
+    "streetGap": -0.15
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wolfkeep_plot_4",
+   "x": 340.03,
+   "z": 558.04,
+   "yaw": 2.3524,
+   "data": {
+    "town": "wolfkeep",
+    "want": "granary",
+    "district": "craft",
+    "w": 7.68,
+    "d": 4.91,
+    "angle": 0.7891,
+    "front": 5.5015,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wolfkeep_plot_5",
+   "x": 316.54,
+   "z": 560.26,
+   "yaw": 0.5616,
+   "data": {
+    "town": "wolfkeep",
+    "want": "inn",
+    "district": "craft",
+    "w": 5.29,
+    "d": 7.45,
+    "angle": 1.0091,
+    "front": 1.0091,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wolfkeep_plot_6",
+   "x": 315.12,
+   "z": 586.4,
+   "yaw": -2.3516,
+   "data": {
+    "town": "wolfkeep",
+    "want": "forge",
+    "district": "craft",
+    "w": 7.01,
+    "d": 6.91,
+    "angle": 0.7808,
+    "front": 3.9224,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wolfkeep_plot_7",
+   "x": 303.1,
+   "z": 587.42,
+   "yaw": 0.79,
+   "data": {
+    "town": "wolfkeep",
+    "want": "house",
+    "district": "residential",
+    "w": 5.27,
+    "d": 4.17,
+    "angle": 0.7808,
+    "front": 0.7808,
+    "streetGap": -0.26
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wolfkeep_plot_8",
+   "x": 309.32,
+   "z": 593.58,
+   "yaw": -2.3516,
+   "data": {
+    "town": "wolfkeep",
+    "want": "house",
+    "district": "residential",
+    "w": 5.15,
+    "d": 4.17,
+    "angle": 0.7808,
+    "front": 3.9224,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wolfkeep_plot_9",
+   "x": 360.91,
+   "z": 566.73,
+   "yaw": 1.0308,
+   "data": {
+    "town": "wolfkeep",
+    "want": "house",
+    "district": "residential",
+    "w": 4.85,
+    "d": 4.28,
+    "angle": 0.54,
+    "front": 0.54,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wolfkeep_plot_10",
+   "x": 365.68,
+   "z": 576.18,
+   "yaw": 1.0308,
+   "data": {
+    "town": "wolfkeep",
+    "want": "stable",
+    "district": "residential",
+    "w": 5.66,
+    "d": 6.04,
+    "angle": 0.54,
+    "front": 0.54,
+    "streetGap": -0.29
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wolfkeep_plot_11",
+   "x": 363.64,
+   "z": 592.07,
+   "yaw": -1.8908,
+   "data": {
+    "town": "wolfkeep",
+    "want": "market",
+    "district": "residential",
+    "w": 8.26,
+    "d": 4.69,
+    "angle": 0.32,
+    "front": 3.4616,
+    "streetGap": -0.33
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wolfkeep_plot_12",
+   "x": 344,
+   "z": 599.52,
+   "yaw": 0.8124,
+   "data": {
+    "town": "wolfkeep",
+    "want": "house",
+    "district": "residential",
+    "w": 4.2,
+    "d": 6.04,
+    "angle": 0.7584,
+    "front": 0.7584,
+    "streetGap": -0.39
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wolfkeep_plot_13",
+   "x": 349.59,
+   "z": 604.82,
+   "yaw": -2.3292,
+   "data": {
+    "town": "wolfkeep",
+    "want": "house",
+    "district": "residential",
+    "w": 4.38,
+    "d": 6.04,
+    "angle": 0.7584,
+    "front": 3.9,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wolfkeep_plot_14",
+   "x": 335.39,
+   "z": 610.53,
+   "yaw": 2.3832,
+   "data": {
+    "town": "wolfkeep",
+    "want": "house",
+    "district": "residential",
+    "w": 6.85,
+    "d": 4.1,
+    "angle": 0.7584,
+    "front": 5.4708,
+    "streetGap": -0.3
+   }
+  },
+  {
+   "kind": "town_square",
+   "id": "duskhaven_square",
+   "x": 670.21,
+   "z": 245.48,
+   "yaw": 0,
+   "data": {
+    "r": 2.53,
+    "town": "duskhaven",
+    "culture": "halfling"
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_0",
+   "x": 677.8,
+   "z": 202.75,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      677.8,
+      202.75
+     ],
+     [
+      661.28,
+      235.42
+     ],
+     [
+      649.09,
+      269.94
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_1",
+   "x": 637.34,
+   "z": 238.37,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      637.34,
+      238.37
+     ],
+     [
+      645.36,
+      240.14
+     ],
+     [
+      653.18,
+      242.66
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_2",
+   "x": 644.77,
+   "z": 213.93,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      644.77,
+      213.93
+     ],
+     [
+      651.94,
+      216.55
+     ],
+     [
+      659.34,
+      218.43
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_3",
+   "x": 657.4,
+   "z": 206.82,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      657.4,
+      206.82
+     ],
+     [
+      655.84,
+      210.97
+     ],
+     [
+      654.49,
+      215.19
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_4",
+   "x": 642.01,
+   "z": 230.34,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      642.01,
+      230.34
+     ],
+     [
+      648.14,
+      231.22
+     ],
+     [
+      654.31,
+      231.75
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_5",
+   "x": 648.28,
+   "z": 218.99,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      648.28,
+      218.99
+     ],
+     [
+      647.37,
+      224.28
+     ],
+     [
+      647.06,
+      229.63
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_6",
+   "x": 643.05,
+   "z": 221.29,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      643.05,
+      221.29
+     ],
+     [
+      644.81,
+      221.45
+     ],
+     [
+      646.56,
+      221.69
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_7",
+   "x": 649.01,
+   "z": 224.93,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      649.01,
+      224.93
+     ],
+     [
+      652.01,
+      225.31
+     ],
+     [
+      655.02,
+      225.62
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_8",
+   "x": 650.27,
+   "z": 232.57,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      650.27,
+      232.57
+     ],
+     [
+      649.99,
+      234.25
+     ],
+     [
+      649.88,
+      235.96
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_9",
+   "x": 645.23,
+   "z": 243.51,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      645.23,
+      243.51
+     ],
+     [
+      645.08,
+      248.97
+     ],
+     [
+      644.36,
+      254.37
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_10",
+   "x": 672.44,
+   "z": 235.4,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      672.44,
+      235.4
+     ],
+     [
+      688.46,
+      244.46
+     ],
+     [
+      705,
+      252.54
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_11",
+   "x": 705.38,
+   "z": 222.48,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      705.38,
+      222.48
+     ],
+     [
+      698.1,
+      231.14
+     ],
+     [
+      691.39,
+      240.5
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_12",
+   "x": 685.27,
+   "z": 220.2,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      685.27,
+      220.2
+     ],
+     [
+      691.04,
+      225.11
+     ],
+     [
+      696.65,
+      230.2
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_13",
+   "x": 699.66,
+   "z": 219.12,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      699.66,
+      219.12
+     ],
+     [
+      696.46,
+      222.36
+     ],
+     [
+      693.66,
+      225.95
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_14",
+   "x": 689.01,
+   "z": 225.11,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      689.01,
+      225.11
+     ],
+     [
+      685.89,
+      228.84
+     ],
+     [
+      682.6,
+      232.41
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_15",
+   "x": 701.75,
+   "z": 231.18,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      701.75,
+      231.18
+     ],
+     [
+      705.41,
+      232.96
+     ],
+     [
+      708.89,
+      235.09
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_16",
+   "x": 697.54,
+   "z": 238.86,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      697.54,
+      238.86
+     ],
+     [
+      701.17,
+      240.72
+     ],
+     [
+      704.69,
+      242.77
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_17",
+   "x": 687.23,
+   "z": 246.47,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      687.23,
+      246.47
+     ],
+     [
+      679.45,
+      260.65
+     ],
+     [
+      673.47,
+      275.68
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_18",
+   "x": 664.58,
+   "z": 256.3,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      664.58,
+      256.3
+     ],
+     [
+      670.74,
+      258.16
+     ],
+     [
+      676.82,
+      260.27
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_19",
+   "x": 667.09,
+   "z": 248.59,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      667.09,
+      248.59
+     ],
+     [
+      673.12,
+      250.86
+     ],
+     [
+      679.33,
+      252.57
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_20",
+   "x": 674.01,
+   "z": 244.05,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      674.01,
+      244.05
+     ],
+     [
+      673.18,
+      246.44
+     ],
+     [
+      672.45,
+      248.87
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_21",
+   "x": 671.81,
+   "z": 251.59,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      671.81,
+      251.59
+     ],
+     [
+      670.84,
+      254.16
+     ],
+     [
+      670.12,
+      256.8
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_22",
+   "x": 673.14,
+   "z": 260.37,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      673.14,
+      260.37
+     ],
+     [
+      671.53,
+      265.17
+     ],
+     [
+      670.02,
+      270
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_23",
+   "x": 663.03,
+   "z": 261.08,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      663.03,
+      261.08
+     ],
+     [
+      667.01,
+      262.17
+     ],
+     [
+      670.87,
+      263.63
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_24",
+   "x": 672.03,
+   "z": 267.55,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      672.03,
+      267.55
+     ],
+     [
+      673.11,
+      267.95
+     ],
+     [
+      674.23,
+      268.26
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_25",
+   "x": 685.16,
+   "z": 259.41,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      685.16,
+      259.41
+     ],
+     [
+      690.4,
+      262.78
+     ],
+     [
+      695.87,
+      265.75
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_26",
+   "x": 694.68,
+   "z": 252.85,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      694.68,
+      252.85
+     ],
+     [
+      692.55,
+      256.91
+     ],
+     [
+      690.02,
+      260.73
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_27",
+   "x": 680.19,
+   "z": 267.8,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      680.19,
+      267.8
+     ],
+     [
+      685.73,
+      270.66
+     ],
+     [
+      689.67,
+      273.3
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_28",
+   "x": 690.42,
+   "z": 264.08,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      690.42,
+      264.08
+     ],
+     [
+      688.66,
+      267.08
+     ],
+     [
+      686.88,
+      270.07
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_29",
+   "x": 685.38,
+   "z": 272.56,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      685.38,
+      272.56
+     ],
+     [
+      684.04,
+      274.82
+     ],
+     [
+      683.38,
+      275.94
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_30",
+   "x": 642.41,
+   "z": 216.64,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      642.41,
+      216.64
+     ],
+     [
+      644.77,
+      213.93
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_31",
+   "x": 680.19,
+   "z": 267.8,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      680.19,
+      267.8
+     ],
+     [
+      677.09,
+      266.57
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_32",
+   "x": 691.39,
+   "z": 240.5,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      691.39,
+      240.5
+     ],
+     [
+      689.26,
+      244.85
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_33",
+   "x": 697.54,
+   "z": 238.86,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      697.54,
+      238.86
+     ],
+     [
+      694.25,
+      236.5
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_34",
+   "x": 661.28,
+   "z": 235.42,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      661.28,
+      235.42
+     ],
+     [
+      672.44,
+      235.4
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_35",
+   "x": 653.18,
+   "z": 242.66,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      653.18,
+      242.66
+     ],
+     [
+      658.11,
+      244.4
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_36",
+   "x": 701.75,
+   "z": 231.18,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      701.75,
+      231.18
+     ],
+     [
+      699.59,
+      229.37
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_37",
+   "x": 649.88,
+   "z": 235.96,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      649.88,
+      235.96
+     ],
+     [
+      648.23,
+      241.07
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "duskhaven_street_38",
+   "x": 651.94,
+   "z": 216.55,
+   "yaw": 0,
+   "data": {
+    "town": "duskhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      651.94,
+      216.55
+     ],
+     [
+      648.28,
+      218.99
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "building",
+   "id": "duskhaven_plot_0",
+   "x": 639.84,
+   "z": 248.55,
+   "yaw": 1.3656,
+   "data": {
+    "town": "duskhaven",
+    "want": "house",
+    "district": "residential",
+    "w": 4.87,
+    "d": 8.02,
+    "angle": 0.2052,
+    "front": 0.2052,
+    "streetGap": 0.72
+   }
+  },
+  {
+   "kind": "building",
+   "id": "duskhaven_plot_1",
+   "x": 693.65,
+   "z": 217.27,
+   "yaw": 0.8501,
+   "data": {
+    "town": "duskhaven",
+    "want": "house",
+    "district": "residential",
+    "w": 7.53,
+    "d": 3.94,
+    "angle": 0.7207,
+    "front": 0.7207,
+    "streetGap": -0.29
+   }
+  },
+  {
+   "kind": "building",
+   "id": "duskhaven_plot_2",
+   "x": 691.05,
+   "z": 220.24,
+   "yaw": -0.7207,
+   "data": {
+    "town": "duskhaven",
+    "want": "house",
+    "district": "residential",
+    "w": 7.53,
+    "d": 3.94,
+    "angle": 0.7207,
+    "front": 2.2915,
+    "streetGap": -0.35
+   }
+  },
+  {
+   "kind": "building",
+   "id": "duskhaven_plot_3",
+   "x": 683.07,
+   "z": 226.36,
+   "yaw": 2.4208,
+   "data": {
+    "town": "duskhaven",
+    "want": "hut",
+    "district": "craft",
+    "w": 3.64,
+    "d": 8.52,
+    "angle": 0.7207,
+    "front": 5.4331,
+    "streetGap": -0.24
+   }
+  },
+  {
+   "kind": "building",
+   "id": "duskhaven_plot_4",
+   "x": 689.68,
+   "z": 232.16,
+   "yaw": -2.2915,
+   "data": {
+    "town": "duskhaven",
+    "want": "granary",
+    "district": "residential",
+    "w": 6.68,
+    "d": 8.52,
+    "angle": 0.7207,
+    "front": 3.8623,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "duskhaven_plot_5",
+   "x": 703.2,
+   "z": 237.02,
+   "yaw": -0.5007,
+   "data": {
+    "town": "duskhaven",
+    "want": "house",
+    "district": "residential",
+    "w": 6.94,
+    "d": 5.04,
+    "angle": 0.5007,
+    "front": 2.0715,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "duskhaven_plot_6",
+   "x": 677.44,
+   "z": 247.82,
+   "yaw": -1.8848,
+   "data": {
+    "town": "duskhaven",
+    "want": "hut",
+    "district": "civic",
+    "w": 5.32,
+    "d": 3.86,
+    "angle": 0.314,
+    "front": 3.4556,
+    "streetGap": -0.28
+   }
+  },
+  {
+   "kind": "building",
+   "id": "duskhaven_plot_7",
+   "x": 675.09,
+   "z": 255.54,
+   "yaw": -0.314,
+   "data": {
+    "town": "duskhaven",
+    "want": "hut",
+    "district": "civic",
+    "w": 5.02,
+    "d": 4.28,
+    "angle": 0.314,
+    "front": 1.8848,
+    "streetGap": -0.33
+   }
+  },
+  {
+   "kind": "building",
+   "id": "duskhaven_plot_8",
+   "x": 665.77,
+   "z": 265.98,
+   "yaw": 1.2568,
+   "data": {
+    "town": "duskhaven",
+    "want": "hut",
+    "district": "craft",
+    "w": 7.05,
+    "d": 3.83,
+    "angle": 0.314,
+    "front": 0.314,
+    "streetGap": -0.37
+   }
+  },
+  {
+   "kind": "building",
+   "id": "duskhaven_plot_9",
+   "x": 696.19,
+   "z": 259.06,
+   "yaw": -2.1048,
+   "data": {
+    "town": "duskhaven",
+    "want": "shrine",
+    "district": "residential",
+    "w": 5.06,
+    "d": 7.95,
+    "angle": 0.534,
+    "front": 3.6756,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "duskhaven_plot_10",
+   "x": 685.2,
+   "z": 265.03,
+   "yaw": 1.0368,
+   "data": {
+    "town": "duskhaven",
+    "want": "house",
+    "district": "residential",
+    "w": 4.6,
+    "d": 5.76,
+    "angle": 0.534,
+    "front": 0.534,
+    "streetGap": -0.38
+   }
+  },
+  {
+   "kind": "building",
+   "id": "duskhaven_plot_11",
+   "x": 680.6,
+   "z": 272.79,
+   "yaw": 1.0368,
+   "data": {
+    "town": "duskhaven",
+    "want": "house",
+    "district": "residential",
+    "w": 4.58,
+    "d": 4.05,
+    "angle": 0.534,
+    "front": 0.534,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_98",
+   "x": -704,
+   "z": 192,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": false,
+    "pts": [
+     [
+      -704,
+      192,
+      231.04
+     ],
+     [
+      -702,
+      192,
+      230.89
+     ],
+     [
+      -698,
+      192,
+      230.59
+     ],
+     [
+      -692,
+      192,
+      230.37
+     ],
+     [
+      -684,
+      192,
+      230.03
+     ],
+     [
+      -674,
+      192,
+      229.58
+     ],
+     [
+      -662,
+      192,
+      229.22
+     ],
+     [
+      -648,
+      192,
+      228.95
+     ],
+     [
+      -632,
+      192,
+      228.93
+     ],
+     [
+      -616,
+      192,
+      229.11
+     ],
+     [
+      -600,
+      192,
+      229.33
+     ],
+     [
+      -584,
+      192,
+      229.84
+     ],
+     [
+      -568,
+      192,
+      230.67
+     ],
+     [
+      -552,
+      192,
+      231.58
+     ],
+     [
+      -536,
+      192,
+      232.62
+     ],
+     [
+      -520,
+      192,
+      233.57
+     ],
+     [
+      -504,
+      192,
+      234.8
+     ],
+     [
+      -488,
+      192,
+      236.06
+     ],
+     [
+      -472,
+      192,
+      237.16
+     ],
+     [
+      -456,
+      192,
+      238.32
+     ],
+     [
+      -440,
+      192,
+      239.29
+     ],
+     [
+      -424,
+      192,
+      240.06
+     ],
+     [
+      -408,
+      192,
+      240.69
+     ],
+     [
+      -392,
+      192,
+      240.8
+     ],
+     [
+      -376,
+      192,
+      240.81
+     ],
+     [
+      -360,
+      190,
+      240.65
+     ],
+     [
+      -344,
+      186,
+      240.3
+     ],
+     [
+      -328,
+      180,
+      239.97
+     ],
+     [
+      -312,
+      172,
+      239.78
+     ],
+     [
+      -296,
+      162,
+      239.42
+     ],
+     [
+      -280,
+      150,
+      239.19
+     ],
+     [
+      -264,
+      136,
+      238.59
+     ],
+     [
+      -248,
+      120,
+      237.85
+     ],
+     [
+      -232,
+      104,
+      236.87
+     ],
+     [
+      -216,
+      88,
+      235.63
+     ],
+     [
+      -200,
+      72,
+      233.94
+     ],
+     [
+      -184,
+      56,
+      232.32
+     ],
+     [
+      -168,
+      40,
+      230.9
+     ],
+     [
+      -152,
+      24,
+      229.82
+     ],
+     [
+      -136,
+      8,
+      228.84
+     ],
+     [
+      -120,
+      -8,
+      227.93
+     ],
+     [
+      -104,
+      -22,
+      227.39
+     ],
+     [
+      -88,
+      -34,
+      227.23
+     ],
+     [
+      -72,
+      -44,
+      227.23
+     ],
+     [
+      -56,
+      -52,
+      227.29
+     ],
+     [
+      -40,
+      -58,
+      227.52
+     ],
+     [
+      -24,
+      -62,
+      227.86
+     ],
+     [
+      -8,
+      -64,
+      228.37
+     ],
+     [
+      8,
+      -64,
+      228.76
+     ],
+     [
+      22,
+      -64,
+      228.99
+     ],
+     [
+      34,
+      -64,
+      229.14
+     ],
+     [
+      44,
+      -64,
+      229.08
+     ],
+     [
+      52,
+      -64,
+      228.9
+     ],
+     [
+      58,
+      -64,
+      228.8
+     ],
+     [
+      62,
+      -64,
+      228.6
+     ],
+     [
+      64,
+      -64,
+      228.38
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_99",
+   "x": 64,
+   "z": -64,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": false,
+    "pts": [
+     [
+      64,
+      -64,
+      227.78
+     ],
+     [
+      66,
+      -64,
+      227.54
+     ],
+     [
+      70,
+      -64,
+      227.24
+     ],
+     [
+      76,
+      -64,
+      226.97
+     ],
+     [
+      84,
+      -64,
+      226.57
+     ],
+     [
+      94,
+      -64,
+      226.16
+     ],
+     [
+      106,
+      -64,
+      225.56
+     ],
+     [
+      120,
+      -64,
+      224.81
+     ],
+     [
+      136,
+      -64,
+      223.97
+     ],
+     [
+      152,
+      -64,
+      223.29
+     ],
+     [
+      168,
+      -64,
+      222.6
+     ],
+     [
+      184,
+      -64,
+      221.92
+     ],
+     [
+      200,
+      -64,
+      221.14
+     ],
+     [
+      216,
+      -64,
+      220.53
+     ],
+     [
+      232,
+      -64,
+      220.1
+     ],
+     [
+      248,
+      -64,
+      219.75
+     ],
+     [
+      264,
+      -64,
+      219.19
+     ],
+     [
+      280,
+      -64,
+      218.49
+     ],
+     [
+      296,
+      -64,
+      217.73
+     ],
+     [
+      312,
+      -64,
+      216.99
+     ],
+     [
+      328,
+      -64,
+      216.37
+     ],
+     [
+      344,
+      -64,
+      215.92
+     ],
+     [
+      360,
+      -64,
+      215.69
+     ],
+     [
+      376,
+      -64,
+      215.71
+     ],
+     [
+      392,
+      -64,
+      215.95
+     ],
+     [
+      408,
+      -62,
+      216.46
+     ],
+     [
+      424,
+      -58,
+      217.26
+     ],
+     [
+      440,
+      -52,
+      218.44
+     ],
+     [
+      456,
+      -44,
+      220.08
+     ],
+     [
+      472,
+      -34,
+      222
+     ],
+     [
+      488,
+      -22,
+      224.31
+     ],
+     [
+      504,
+      -8,
+      227.03
+     ],
+     [
+      520,
+      8,
+      230.13
+     ],
+     [
+      536,
+      22,
+      233.38
+     ],
+     [
+      552,
+      34,
+      236.14
+     ],
+     [
+      568,
+      44,
+      238.45
+     ],
+     [
+      584,
+      52,
+      240.56
+     ],
+     [
+      600,
+      58,
+      242.19
+     ],
+     [
+      616,
+      62,
+      243.29
+     ],
+     [
+      632,
+      64,
+      243.84
+     ],
+     [
+      648,
+      64,
+      244.11
+     ],
+     [
+      662,
+      64,
+      244.45
+     ],
+     [
+      674,
+      64,
+      244.62
+     ],
+     [
+      684,
+      64,
+      244.55
+     ],
+     [
+      692,
+      64,
+      244.49
+     ],
+     [
+      698,
+      64,
+      244.55
+     ],
+     [
+      702,
+      64,
+      244.6
+     ],
+     [
+      704,
+      64,
+      244.6
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_100",
+   "x": 704,
+   "z": 64,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": false,
+    "pts": [
+     [
+      704,
+      64,
+      244.6
+     ],
+     [
+      702,
+      64,
+      244.6
+     ],
+     [
+      698,
+      64,
+      244.55
+     ],
+     [
+      692,
+      64,
+      244.49
+     ],
+     [
+      684,
+      64,
+      244.55
+     ],
+     [
+      674,
+      64,
+      244.62
+     ],
+     [
+      662,
+      64,
+      244.68
+     ],
+     [
+      648,
+      64,
+      244.77
+     ],
+     [
+      632,
+      64,
+      245.37
+     ],
+     [
+      616,
+      66,
+      246.21
+     ],
+     [
+      600,
+      70,
+      247.38
+     ],
+     [
+      584,
+      76,
+      248.81
+     ],
+     [
+      568,
+      84,
+      250.64
+     ],
+     [
+      552,
+      94,
+      252.82
+     ],
+     [
+      536,
+      106,
+      255.16
+     ],
+     [
+      520,
+      120,
+      257
+     ],
+     [
+      504,
+      136,
+      258.81
+     ],
+     [
+      490,
+      152,
+      260.3
+     ],
+     [
+      478,
+      168,
+      261.55
+     ],
+     [
+      468,
+      184,
+      262.49
+     ],
+     [
+      460,
+      200,
+      263.24
+     ],
+     [
+      454,
+      216,
+      264.15
+     ],
+     [
+      450,
+      232,
+      265.34
+     ],
+     [
+      448,
+      248,
+      266.49
+     ],
+     [
+      448,
+      264,
+      267.38
+     ],
+     [
+      446,
+      280,
+      267.76
+     ],
+     [
+      442,
+      296,
+      267.72
+     ],
+     [
+      436,
+      312,
+      266.82
+     ],
+     [
+      428,
+      328,
+      264.61
+     ],
+     [
+      418,
+      344,
+      261.77
+     ],
+     [
+      406,
+      360,
+      258.23
+     ],
+     [
+      392,
+      376,
+      254.79
+     ],
+     [
+      376,
+      392,
+      251.79
+     ],
+     [
+      362,
+      408,
+      249.49
+     ],
+     [
+      350,
+      424,
+      248.1
+     ],
+     [
+      340,
+      440,
+      247.94
+     ],
+     [
+      332,
+      456,
+      248.45
+     ],
+     [
+      326,
+      472,
+      249.81
+     ],
+     [
+      322,
+      488,
+      251.39
+     ],
+     [
+      320,
+      504,
+      252.78
+     ],
+     [
+      320,
+      513,
+      253.38
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_101",
+   "x": 704,
+   "z": 64,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": false,
+    "pts": [
+     [
+      704,
+      64,
+      242.87
+     ],
+     [
+      704,
+      62,
+      241.83
+     ],
+     [
+      704,
+      58,
+      240.59
+     ],
+     [
+      704,
+      52,
+      239.13
+     ],
+     [
+      704,
+      44,
+      236.63
+     ],
+     [
+      704,
+      34,
+      233.86
+     ],
+     [
+      704,
+      22,
+      230.83
+     ],
+     [
+      704,
+      8,
+      227.57
+     ],
+     [
+      704,
+      -8,
+      224.42
+     ],
+     [
+      704,
+      -24,
+      221.38
+     ],
+     [
+      704,
+      -40,
+      218.62
+     ],
+     [
+      704,
+      -56,
+      216.26
+     ],
+     [
+      704,
+      -72,
+      214.2
+     ],
+     [
+      704,
+      -88,
+      212.49
+     ],
+     [
+      704,
+      -104,
+      211.26
+     ],
+     [
+      704,
+      -120,
+      210.21
+     ],
+     [
+      704,
+      -136,
+      209.34
+     ],
+     [
+      704,
+      -152,
+      208.71
+     ],
+     [
+      704,
+      -168,
+      208.06
+     ],
+     [
+      704,
+      -184,
+      207.35
+     ],
+     [
+      704,
+      -200,
+      206.64
+     ],
+     [
+      704,
+      -216,
+      205.86
+     ],
+     [
+      704,
+      -232,
+      204.87
+     ],
+     [
+      704,
+      -248,
+      203.56
+     ],
+     [
+      704,
+      -264,
+      201.9
+     ],
+     [
+      702,
+      -280,
+      200.14
+     ],
+     [
+      698,
+      -296,
+      198.35
+     ],
+     [
+      692,
+      -312,
+      196.25
+     ],
+     [
+      684,
+      -328,
+      193.96
+     ],
+     [
+      674,
+      -344,
+      192.09
+     ],
+     [
+      662,
+      -360,
+      190.56
+     ],
+     [
+      648,
+      -376,
+      189.3
+     ],
+     [
+      632,
+      -392,
+      188.3
+     ],
+     [
+      616,
+      -408,
+      187.56
+     ],
+     [
+      600,
+      -424,
+      187.1
+     ],
+     [
+      584,
+      -440,
+      186.62
+     ],
+     [
+      568,
+      -456,
+      186.16
+     ],
+     [
+      552,
+      -472,
+      186.01
+     ],
+     [
+      536,
+      -488,
+      186.08
+     ],
+     [
+      520,
+      -504,
+      186.13
+     ],
+     [
+      504,
+      -520,
+      186.09
+     ],
+     [
+      490,
+      -536,
+      185.98
+     ],
+     [
+      478,
+      -552,
+      186.22
+     ],
+     [
+      468,
+      -568,
+      186.36
+     ],
+     [
+      460,
+      -584,
+      186.31
+     ],
+     [
+      454,
+      -600,
+      186.03
+     ],
+     [
+      450,
+      -616,
+      185.69
+     ],
+     [
+      448,
+      -632,
+      185.44
+     ],
+     [
+      448,
+      -648,
+      185.41
+     ],
+     [
+      450,
+      -664,
+      185.18
+     ],
+     [
+      454,
+      -680,
+      184.69
+     ],
+     [
+      460,
+      -696,
+      183.97
+     ],
+     [
+      468,
+      -712,
+      183.12
+     ],
+     [
+      478,
+      -728,
+      182.13
+     ],
+     [
+      490,
+      -744,
+      180.81
+     ],
+     [
+      504,
+      -760,
+      179.39
+     ],
+     [
+      520,
+      -776,
+      178.21
+     ],
+     [
+      534,
+      -790,
+      177.35
+     ],
+     [
+      546,
+      -802,
+      176.85
+     ],
+     [
+      556,
+      -812,
+      176.64
+     ],
+     [
+      564,
+      -820,
+      176.6
+     ],
+     [
+      570,
+      -826,
+      176.68
+     ],
+     [
+      574,
+      -830,
+      176.89
+     ],
+     [
+      576,
+      -832,
+      177.05
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_121",
+   "x": 2496,
+   "z": 448,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": false,
+    "pts": [
+     [
+      2496,
+      448,
+      79.37
+     ],
+     [
+      2496,
+      450,
+      79.41
+     ],
+     [
+      2496,
+      454,
+      79.42
+     ],
+     [
+      2496,
+      460,
+      79.57
+     ],
+     [
+      2496,
+      468,
+      79.78
+     ],
+     [
+      2496,
+      478,
+      79.94
+     ],
+     [
+      2496,
+      490,
+      80.2
+     ],
+     [
+      2496,
+      504,
+      80.48
+     ],
+     [
+      2496,
+      520,
+      80.76
+     ],
+     [
+      2494,
+      536,
+      81.18
+     ],
+     [
+      2490,
+      552,
+      81.69
+     ],
+     [
+      2484,
+      568,
+      82.08
+     ],
+     [
+      2476,
+      584,
+      82.66
+     ],
+     [
+      2466,
+      600,
+      83.28
+     ],
+     [
+      2454,
+      616,
+      84.07
+     ],
+     [
+      2440,
+      632,
+      85.05
+     ],
+     [
+      2424,
+      648,
+      86.28
+     ],
+     [
+      2412,
+      664,
+      87.51
+     ],
+     [
+      2404,
+      680,
+      88.8
+     ],
+     [
+      2400,
+      696,
+      90
+     ],
+     [
+      2400,
+      712,
+      91.14
+     ],
+     [
+      2404,
+      728,
+      92.13
+     ],
+     [
+      2412,
+      744,
+      93.06
+     ],
+     [
+      2424,
+      760,
+      93.62
+     ],
+     [
+      2440,
+      776,
+      93.74
+     ],
+     [
+      2454,
+      792,
+      93.78
+     ],
+     [
+      2466,
+      808,
+      93.74
+     ],
+     [
+      2476,
+      824,
+      93.8
+     ],
+     [
+      2484,
+      840,
+      93.87
+     ],
+     [
+      2490,
+      856,
+      93.99
+     ],
+     [
+      2494,
+      872,
+      94.28
+     ],
+     [
+      2496,
+      888,
+      95.16
+     ],
+     [
+      2496,
+      904,
+      96.48
+     ],
+     [
+      2496,
+      920,
+      98.19
+     ],
+     [
+      2496,
+      936,
+      100.13
+     ],
+     [
+      2496,
+      952,
+      102.29
+     ],
+     [
+      2496,
+      968,
+      104.58
+     ],
+     [
+      2496,
+      984,
+      107
+     ],
+     [
+      2496,
+      1000,
+      109.5
+     ],
+     [
+      2496,
+      1016,
+      111.95
+     ],
+     [
+      2496,
+      1032,
+      114.38
+     ],
+     [
+      2496,
+      1048,
+      116.91
+     ],
+     [
+      2496,
+      1064,
+      119.47
+     ],
+     [
+      2496,
+      1080,
+      122.23
+     ],
+     [
+      2496,
+      1096,
+      125.34
+     ],
+     [
+      2496,
+      1112,
+      128.1
+     ],
+     [
+      2496,
+      1128,
+      130.72
+     ],
+     [
+      2496,
+      1144,
+      133.47
+     ],
+     [
+      2496,
+      1160,
+      136.15
+     ],
+     [
+      2494,
+      1176,
+      138.94
+     ],
+     [
+      2490,
+      1192,
+      141.29
+     ],
+     [
+      2484,
+      1208,
+      143.38
+     ],
+     [
+      2476,
+      1224,
+      145.74
+     ],
+     [
+      2466,
+      1240,
+      148.1
+     ],
+     [
+      2454,
+      1256,
+      150.2
+     ],
+     [
+      2440,
+      1272,
+      152.21
+     ],
+     [
+      2424,
+      1288,
+      153.96
+     ],
+     [
+      2408,
+      1304,
+      155.69
+     ],
+     [
+      2392,
+      1320,
+      157.62
+     ],
+     [
+      2376,
+      1336,
+      159.97
+     ],
+     [
+      2360,
+      1352,
+      162.87
+     ],
+     [
+      2344,
+      1368,
+      166.03
+     ],
+     [
+      2328,
+      1384,
+      169.42
+     ],
+     [
+      2312,
+      1400,
+      173.38
+     ],
+     [
+      2296,
+      1416,
+      177.85
+     ],
+     [
+      2280,
+      1430,
+      182.12
+     ],
+     [
+      2264,
+      1442,
+      185.69
+     ],
+     [
+      2248,
+      1452,
+      188.57
+     ],
+     [
+      2232,
+      1460,
+      190.97
+     ],
+     [
+      2216,
+      1466,
+      192.85
+     ],
+     [
+      2200,
+      1470,
+      193.61
+     ],
+     [
+      2184,
+      1472,
+      193.13
+     ],
+     [
+      2168,
+      1472,
+      191.98
+     ],
+     [
+      2154,
+      1472,
+      190.38
+     ],
+     [
+      2142,
+      1472,
+      188.39
+     ],
+     [
+      2132,
+      1472,
+      186.23
+     ],
+     [
+      2124,
+      1472,
+      183.98
+     ],
+     [
+      2118,
+      1472,
+      182.65
+     ],
+     [
+      2114,
+      1472,
+      181.65
+     ],
+     [
+      2112,
+      1472,
+      180.66
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_290",
+   "x": -960,
+   "z": 832,
+   "yaw": 0,
+   "data": {
+    "cls": "road",
+    "width": 6,
+    "spur": false,
+    "pts": [
+     [
+      -960,
+      832,
+      273.25
+     ],
+     [
+      -958,
+      834,
+      273.89
+     ],
+     [
+      -954,
+      838,
+      274.43
+     ],
+     [
+      -948,
+      844,
+      275.05
+     ],
+     [
+      -940,
+      852,
+      276.35
+     ],
+     [
+      -930,
+      862,
+      278.07
+     ],
+     [
+      -918,
+      874,
+      280.09
+     ],
+     [
+      -904,
+      888,
+      282.36
+     ],
+     [
+      -888,
+      904,
+      284.52
+     ],
+     [
+      -874,
+      920,
+      286.65
+     ],
+     [
+      -862,
+      936,
+      288.77
+     ],
+     [
+      -852,
+      952,
+      290.87
+     ],
+     [
+      -844,
+      968,
+      292.88
+     ],
+     [
+      -838,
+      984,
+      294.77
+     ],
+     [
+      -834,
+      1000,
+      296.5
+     ],
+     [
+      -832,
+      1016,
+      298.25
+     ],
+     [
+      -832,
+      1032,
+      299.91
+     ],
+     [
+      -830,
+      1048,
+      301.3
+     ],
+     [
+      -826,
+      1064,
+      302.4
+     ],
+     [
+      -820,
+      1080,
+      303.17
+     ],
+     [
+      -812,
+      1096,
+      304.05
+     ],
+     [
+      -802,
+      1112,
+      304.94
+     ],
+     [
+      -790,
+      1128,
+      305.48
+     ],
+     [
+      -776,
+      1144,
+      305.77
+     ],
+     [
+      -760,
+      1160,
+      306.31
+     ],
+     [
+      -744,
+      1174,
+      307.17
+     ],
+     [
+      -728,
+      1186,
+      308.54
+     ],
+     [
+      -712,
+      1196,
+      310.33
+     ],
+     [
+      -696,
+      1204,
+      312.74
+     ],
+     [
+      -680,
+      1210,
+      315.97
+     ],
+     [
+      -664,
+      1214,
+      320.09
+     ],
+     [
+      -648,
+      1216,
+      324.49
+     ],
+     [
+      -632,
+      1216,
+      328.6
+     ],
+     [
+      -616,
+      1216,
+      332.51
+     ],
+     [
+      -600,
+      1216,
+      335.8
+     ],
+     [
+      -584,
+      1216,
+      338.34
+     ],
+     [
+      -568,
+      1216,
+      340.46
+     ],
+     [
+      -552,
+      1216,
+      342.37
+     ],
+     [
+      -536,
+      1216,
+      343.92
+     ],
+     [
+      -520,
+      1216,
+      345.24
+     ],
+     [
+      -504,
+      1216,
+      346.32
+     ],
+     [
+      -488,
+      1218,
+      347.29
+     ],
+     [
+      -472,
+      1222,
+      348.49
+     ],
+     [
+      -456,
+      1228,
+      349.73
+     ],
+     [
+      -440,
+      1236,
+      351.25
+     ],
+     [
+      -424,
+      1246,
+      353.64
+     ],
+     [
+      -408,
+      1258,
+      356.83
+     ],
+     [
+      -392,
+      1272,
+      360.28
+     ],
+     [
+      -376,
+      1288,
+      363.76
+     ],
+     [
+      -362,
+      1304,
+      367.09
+     ],
+     [
+      -350,
+      1320,
+      370.26
+     ],
+     [
+      -340,
+      1336,
+      372.58
+     ],
+     [
+      -332,
+      1352,
+      374.01
+     ],
+     [
+      -326,
+      1368,
+      375.06
+     ],
+     [
+      -322,
+      1384,
+      376.18
+     ],
+     [
+      -320,
+      1400,
+      377.36
+     ],
+     [
+      -320,
+      1416,
+      378.46
+     ],
+     [
+      -318,
+      1432,
+      379.63
+     ],
+     [
+      -314,
+      1448,
+      381.33
+     ],
+     [
+      -308,
+      1464,
+      383.44
+     ],
+     [
+      -300,
+      1480,
+      385.6
+     ],
+     [
+      -290,
+      1496,
+      387.84
+     ],
+     [
+      -278,
+      1512,
+      389.96
+     ],
+     [
+      -264,
+      1528,
+      392.76
+     ],
+     [
+      -248,
+      1544,
+      395.72
+     ],
+     [
+      -232,
+      1560,
+      398.86
+     ],
+     [
+      -216,
+      1576,
+      402.32
+     ],
+     [
+      -200,
+      1592,
+      405.73
+     ],
+     [
+      -184,
+      1608,
+      408.99
+     ],
+     [
+      -168,
+      1624,
+      412.62
+     ],
+     [
+      -152,
+      1640,
+      415.76
+     ],
+     [
+      -136,
+      1656,
+      418.86
+     ],
+     [
+      -120,
+      1672,
+      421.74
+     ],
+     [
+      -106,
+      1688,
+      424.27
+     ],
+     [
+      -94,
+      1704,
+      426.99
+     ],
+     [
+      -84,
+      1720,
+      430.04
+     ],
+     [
+      -76,
+      1736,
+      433.31
+     ],
+     [
+      -70,
+      1752,
+      436.69
+     ],
+     [
+      -66,
+      1768,
+      439.99
+     ],
+     [
+      -64,
+      1784,
+      443.05
+     ],
+     [
+      -64,
+      1800,
+      445.78
+     ],
+     [
+      -62,
+      1814,
+      448.33
+     ],
+     [
+      -58,
+      1826,
+      450.52
+     ],
+     [
+      -52,
+      1836,
+      452.42
+     ],
+     [
+      -44,
+      1844,
+      454.31
+     ],
+     [
+      -34,
+      1850,
+      456.3
+     ],
+     [
+      -22,
+      1854,
+      458.42
+     ],
+     [
+      -8,
+      1856,
+      460.43
+     ],
+     [
+      8,
+      1856,
+      462.45
+     ],
+     [
+      22,
+      1858,
+      464.36
+     ],
+     [
+      34,
+      1862,
+      466.2
+     ],
+     [
+      44,
+      1868,
+      468.18
+     ],
+     [
+      52,
+      1876,
+      470.49
+     ],
+     [
+      58,
+      1886,
+      472.98
+     ],
+     [
+      62,
+      1898,
+      475.91
+     ],
+     [
+      64,
+      1912,
+      479.25
+     ],
+     [
+      64,
+      1928,
+      483.01
+     ],
+     [
+      64,
+      1944,
+      487.66
+     ],
+     [
+      64,
+      1960,
+      492.87
+     ],
+     [
+      64,
+      1976,
+      498.38
+     ],
+     [
+      64,
+      1992,
+      504.16
+     ],
+     [
+      64,
+      2008,
+      510.42
+     ],
+     [
+      64,
+      2024,
+      516.73
+     ],
+     [
+      64,
+      2040,
+      523
+     ],
+     [
+      64,
+      2056,
+      528.34
+     ],
+     [
+      64,
+      2072,
+      532.86
+     ],
+     [
+      64,
+      2088,
+      537.03
+     ],
+     [
+      64,
+      2104,
+      540.78
+     ],
+     [
+      64,
+      2120,
+      544.29
+     ],
+     [
+      64,
+      2136,
+      547.54
+     ],
+     [
+      64,
+      2152,
+      550.53
+     ],
+     [
+      64,
+      2168,
+      553.46
+     ],
+     [
+      64,
+      2184,
+      556.29
+     ],
+     [
+      66,
+      2200,
+      559.07
+     ],
+     [
+      70,
+      2216,
+      562
+     ],
+     [
+      76,
+      2232,
+      565.18
+     ],
+     [
+      84,
+      2248,
+      569.22
+     ],
+     [
+      94,
+      2264,
+      574.39
+     ],
+     [
+      106,
+      2280,
+      580.36
+     ],
+     [
+      120,
+      2296,
+      586.86
+     ],
+     [
+      136,
+      2312,
+      593.89
+     ],
+     [
+      152,
+      2328,
+      601.73
+     ],
+     [
+      168,
+      2344,
+      609.75
+     ],
+     [
+      184,
+      2360,
+      616.96
+     ],
+     [
+      200,
+      2376,
+      623.64
+     ],
+     [
+      216,
+      2392,
+      630.24
+     ],
+     [
+      232,
+      2408,
+      636.42
+     ],
+     [
+      248,
+      2424,
+      641.78
+     ],
+     [
+      264,
+      2440,
+      646.03
+     ],
+     [
+      278,
+      2456,
+      648.95
+     ],
+     [
+      290,
+      2472,
+      651.58
+     ],
+     [
+      300,
+      2488,
+      653.58
+     ],
+     [
+      308,
+      2504,
+      655.11
+     ],
+     [
+      314,
+      2520,
+      657.06
+     ],
+     [
+      318,
+      2536,
+      659.43
+     ],
+     [
+      320,
+      2552,
+      662.66
+     ],
+     [
+      320,
+      2568,
+      667.43
+     ],
+     [
+      320,
+      2584,
+      672.87
+     ],
+     [
+      320,
+      2600,
+      678.65
+     ],
+     [
+      320,
+      2616,
+      684.78
+     ],
+     [
+      320,
+      2632,
+      691.19
+     ],
+     [
+      320,
+      2648,
+      697.93
+     ],
+     [
+      320,
+      2664,
+      704.51
+     ],
+     [
+      320,
+      2680,
+      710.88
+     ],
+     [
+      320,
+      2696,
+      717.19
+     ],
+     [
+      320,
+      2712,
+      723.72
+     ],
+     [
+      320,
+      2728,
+      729.76
+     ],
+     [
+      320,
+      2744,
+      735.25
+     ],
+     [
+      320,
+      2760,
+      740.1
+     ],
+     [
+      320,
+      2776,
+      744.61
+     ],
+     [
+      320,
+      2792,
+      748.76
+     ],
+     [
+      320,
+      2808,
+      752.73
+     ],
+     [
+      320,
+      2824,
+      756.34
+     ],
+     [
+      320,
+      2840,
+      760.73
+     ],
+     [
+      320,
+      2856,
+      765.41
+     ],
+     [
+      320,
+      2872,
+      769.93
+     ],
+     [
+      320,
+      2888,
+      774.49
+     ],
+     [
+      320,
+      2904,
+      779.22
+     ],
+     [
+      320,
+      2920,
+      784.29
+     ],
+     [
+      320,
+      2936,
+      790.16
+     ],
+     [
+      320,
+      2952,
+      796.12
+     ],
+     [
+      320,
+      2968,
+      801.61
+     ],
+     [
+      320,
+      2984,
+      807.25
+     ],
+     [
+      320,
+      3000,
+      813.26
+     ],
+     [
+      320,
+      3016,
+      819.12
+     ],
+     [
+      320,
+      3032,
+      824.89
+     ],
+     [
+      320,
+      3048,
+      830.18
+     ],
+     [
+      320,
+      3064,
+      834.87
+     ],
+     [
+      320,
+      3080,
+      839.91
+     ],
+     [
+      320,
+      3096,
+      845.71
+     ],
+     [
+      320,
+      3112,
+      851.96
+     ],
+     [
+      320,
+      3128,
+      858.93
+     ],
+     [
+      320,
+      3144,
+      866.69
+     ],
+     [
+      320,
+      3160,
+      875.17
+     ],
+     [
+      320,
+      3176,
+      884.84
+     ],
+     [
+      320,
+      3192,
+      895.17
+     ],
+     [
+      320,
+      3208,
+      906.22
+     ],
+     [
+      318,
+      3224,
+      916.61
+     ],
+     [
+      314,
+      3240,
+      925.63
+     ],
+     [
+      308,
+      3256,
+      932.85
+     ],
+     [
+      300,
+      3272,
+      938.54
+     ],
+     [
+      290,
+      3288,
+      943.56
+     ],
+     [
+      278,
+      3304,
+      949.37
+     ],
+     [
+      264,
+      3320,
+      954.83
+     ],
+     [
+      248,
+      3336,
+      960.37
+     ],
+     [
+      234,
+      3352,
+      966.67
+     ],
+     [
+      222,
+      3368,
+      974.05
+     ],
+     [
+      212,
+      3384,
+      982.24
+     ],
+     [
+      204,
+      3400,
+      990.27
+     ],
+     [
+      198,
+      3416,
+      997.39
+     ],
+     [
+      194,
+      3432,
+      1003.85
+     ],
+     [
+      192,
+      3448,
+      1009.87
+     ],
+     [
+      192,
+      3464,
+      1015.15
+     ],
+     [
+      192,
+      3480,
+      1019.56
+     ],
+     [
+      192,
+      3496,
+      1023.3
+     ],
+     [
+      192,
+      3512,
+      1026.35
+     ],
+     [
+      192,
+      3528,
+      1029.21
+     ],
+     [
+      192,
+      3544,
+      1032.35
+     ],
+     [
+      192,
+      3560,
+      1036.43
+     ],
+     [
+      192,
+      3576,
+      1041.45
+     ],
+     [
+      192,
+      3592,
+      1047.2
+     ],
+     [
+      190,
+      3608,
+      1053.58
+     ],
+     [
+      186,
+      3624,
+      1060.6
+     ],
+     [
+      180,
+      3640,
+      1067.74
+     ],
+     [
+      172,
+      3656,
+      1074.65
+     ],
+     [
+      162,
+      3672,
+      1080.95
+     ],
+     [
+      150,
+      3688,
+      1086.84
+     ],
+     [
+      136,
+      3704,
+      1092.15
+     ],
+     [
+      120,
+      3720,
+      1096.57
+     ],
+     [
+      104,
+      3736,
+      1099.55
+     ],
+     [
+      88,
+      3752,
+      1100.46
+     ],
+     [
+      72,
+      3768,
+      1099.33
+     ],
+     [
+      56,
+      3784,
+      1097.07
+     ],
+     [
+      40,
+      3800,
+      1092.99
+     ],
+     [
+      24,
+      3816,
+      1088.31
+     ],
+     [
+      8,
+      3832,
+      1082.87
+     ],
+     [
+      -8,
+      3848,
+      1077.5
+     ],
+     [
+      -22,
+      3864,
+      1072.62
+     ],
+     [
+      -34,
+      3880,
+      1068.59
+     ],
+     [
+      -44,
+      3896,
+      1064.95
+     ],
+     [
+      -52,
+      3912,
+      1062.15
+     ],
+     [
+      -58,
+      3928,
+      1059.46
+     ],
+     [
+      -62,
+      3944,
+      1057.51
+     ],
+     [
+      -64,
+      3960,
+      1055.97
+     ],
+     [
+      -64,
+      3976,
+      1054.99
+     ],
+     [
+      -66,
+      3992,
+      1054.12
+     ],
+     [
+      -70,
+      4008,
+      1053
+     ],
+     [
+      -76,
+      4024,
+      1051.61
+     ],
+     [
+      -84,
+      4040,
+      1050.11
+     ],
+     [
+      -94,
+      4056,
+      1048.52
+     ],
+     [
+      -106,
+      4072,
+      1046.99
+     ],
+     [
+      -120,
+      4088,
+      1045.57
+     ],
+     [
+      -136,
+      4104,
+      1044.37
+     ],
+     [
+      -152,
+      4120,
+      1043.52
+     ],
+     [
+      -168,
+      4136,
+      1043.32
+     ],
+     [
+      -184,
+      4152,
+      1043.61
+     ],
+     [
+      -200,
+      4168,
+      1044.03
+     ],
+     [
+      -216,
+      4184,
+      1043.94
+     ],
+     [
+      -232,
+      4200,
+      1043.17
+     ],
+     [
+      -248,
+      4216,
+      1041.84
+     ],
+     [
+      -264,
+      4232,
+      1039.96
+     ],
+     [
+      -280,
+      4246,
+      1037.58
+     ],
+     [
+      -296,
+      4258,
+      1034.73
+     ],
+     [
+      -312,
+      4268,
+      1031.68
+     ],
+     [
+      -328,
+      4276,
+      1029.08
+     ],
+     [
+      -344,
+      4282,
+      1027.03
+     ],
+     [
+      -360,
+      4286,
+      1025.65
+     ],
+     [
+      -376,
+      4288,
+      1025.06
+     ],
+     [
+      -392,
+      4288,
+      1024.88
+     ],
+     [
+      -406,
+      4288,
+      1024.89
+     ],
+     [
+      -418,
+      4288,
+      1025.11
+     ],
+     [
+      -428,
+      4288,
+      1025.38
+     ],
+     [
+      -436,
+      4288,
+      1025.67
+     ],
+     [
+      -442,
+      4288,
+      1025.85
+     ],
+     [
+      -446,
+      4288,
+      1025.75
+     ],
+     [
+      -448,
+      4288,
+      1025.58
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_313",
+   "x": 576,
+   "z": -832,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": false,
+    "pts": [
+     [
+      576,
+      -832,
+      177.05
+     ],
+     [
+      574,
+      -830,
+      176.89
+     ],
+     [
+      570,
+      -826,
+      176.68
+     ],
+     [
+      564,
+      -820,
+      176.6
+     ],
+     [
+      556,
+      -812,
+      176.64
+     ],
+     [
+      546,
+      -802,
+      176.85
+     ],
+     [
+      534,
+      -790,
+      177.37
+     ],
+     [
+      520,
+      -776,
+      178.35
+     ],
+     [
+      504,
+      -760,
+      179.63
+     ],
+     [
+      488,
+      -744,
+      181.06
+     ],
+     [
+      472,
+      -728,
+      182.43
+     ],
+     [
+      456,
+      -712,
+      183.55
+     ],
+     [
+      440,
+      -696,
+      184.66
+     ],
+     [
+      424,
+      -680,
+      185.56
+     ],
+     [
+      408,
+      -664,
+      186.05
+     ],
+     [
+      392,
+      -648,
+      186.37
+     ],
+     [
+      376,
+      -632,
+      187.08
+     ],
+     [
+      360,
+      -618,
+      188.13
+     ],
+     [
+      344,
+      -606,
+      189.59
+     ],
+     [
+      328,
+      -596,
+      191.3
+     ],
+     [
+      312,
+      -588,
+      193.07
+     ],
+     [
+      296,
+      -582,
+      194.97
+     ],
+     [
+      280,
+      -578,
+      197.06
+     ],
+     [
+      264,
+      -576,
+      198.91
+     ],
+     [
+      248,
+      -576,
+      200.61
+     ],
+     [
+      232,
+      -574,
+      201.99
+     ],
+     [
+      216,
+      -570,
+      203.17
+     ],
+     [
+      200,
+      -564,
+      204.17
+     ],
+     [
+      184,
+      -556,
+      205.02
+     ],
+     [
+      168,
+      -546,
+      205.83
+     ],
+     [
+      152,
+      -534,
+      206.51
+     ],
+     [
+      136,
+      -520,
+      207.01
+     ],
+     [
+      120,
+      -504,
+      207.55
+     ],
+     [
+      106,
+      -488,
+      208.11
+     ],
+     [
+      94,
+      -472,
+      208.96
+     ],
+     [
+      84,
+      -456,
+      210.06
+     ],
+     [
+      76,
+      -440,
+      211.24
+     ],
+     [
+      70,
+      -424,
+      212.51
+     ],
+     [
+      66,
+      -408,
+      213.91
+     ],
+     [
+      64,
+      -392,
+      215.35
+     ],
+     [
+      64,
+      -376,
+      216.48
+     ],
+     [
+      64,
+      -360,
+      217.37
+     ],
+     [
+      64,
+      -344,
+      218.15
+     ],
+     [
+      64,
+      -328,
+      218.71
+     ],
+     [
+      64,
+      -312,
+      218.98
+     ],
+     [
+      64,
+      -296,
+      219.35
+     ],
+     [
+      64,
+      -280,
+      219.82
+     ],
+     [
+      64,
+      -264,
+      220.38
+     ],
+     [
+      64,
+      -248,
+      220.88
+     ],
+     [
+      64,
+      -232,
+      221.35
+     ],
+     [
+      64,
+      -216,
+      221.9
+     ],
+     [
+      64,
+      -200,
+      222.47
+     ],
+     [
+      64,
+      -184,
+      222.83
+     ],
+     [
+      64,
+      -168,
+      223.07
+     ],
+     [
+      64,
+      -152,
+      223.39
+     ],
+     [
+      64,
+      -136,
+      223.93
+     ],
+     [
+      64,
+      -120,
+      224.58
+     ],
+     [
+      64,
+      -106,
+      225.16
+     ],
+     [
+      64,
+      -94,
+      225.84
+     ],
+     [
+      64,
+      -84,
+      226.52
+     ],
+     [
+      64,
+      -76,
+      227.09
+     ],
+     [
+      64,
+      -70,
+      227.48
+     ],
+     [
+      64,
+      -66,
+      227.78
+     ],
+     [
+      64,
+      -64,
+      227.93
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_317",
+   "x": -448,
+   "z": 4288,
+   "yaw": 0,
+   "data": {
+    "cls": "road",
+    "width": 6,
+    "spur": false,
+    "pts": [
+     [
+      -448,
+      4288,
+      1025.55
+     ],
+     [
+      -446,
+      4286,
+      1025.66
+     ],
+     [
+      -442,
+      4282,
+      1025.73
+     ],
+     [
+      -436,
+      4276,
+      1025.83
+     ],
+     [
+      -428,
+      4268,
+      1026.1
+     ],
+     [
+      -418,
+      4258,
+      1026.72
+     ],
+     [
+      -406,
+      4246,
+      1027.81
+     ],
+     [
+      -392,
+      4232,
+      1029.27
+     ],
+     [
+      -376,
+      4216,
+      1030.99
+     ],
+     [
+      -360,
+      4200,
+      1032.92
+     ],
+     [
+      -344,
+      4184,
+      1034.86
+     ],
+     [
+      -328,
+      4168,
+      1036.59
+     ],
+     [
+      -312,
+      4152,
+      1037.95
+     ],
+     [
+      -296,
+      4136,
+      1038.89
+     ],
+     [
+      -280,
+      4120,
+      1039.5
+     ],
+     [
+      -264,
+      4104,
+      1039.77
+     ],
+     [
+      -248,
+      4088,
+      1039.87
+     ],
+     [
+      -234,
+      4072,
+      1040.11
+     ],
+     [
+      -222,
+      4056,
+      1040.61
+     ],
+     [
+      -212,
+      4040,
+      1041.29
+     ],
+     [
+      -204,
+      4024,
+      1041.99
+     ],
+     [
+      -198,
+      4008,
+      1042.79
+     ],
+     [
+      -194,
+      3992,
+      1043.76
+     ],
+     [
+      -192,
+      3976,
+      1044.96
+     ],
+     [
+      -192,
+      3960,
+      1046.22
+     ],
+     [
+      -190,
+      3946,
+      1047.41
+     ],
+     [
+      -186,
+      3934,
+      1048.64
+     ],
+     [
+      -180,
+      3924,
+      1049.96
+     ],
+     [
+      -172,
+      3916,
+      1051.13
+     ],
+     [
+      -162,
+      3910,
+      1052.2
+     ],
+     [
+      -150,
+      3906,
+      1053.15
+     ],
+     [
+      -136,
+      3904,
+      1054.09
+     ],
+     [
+      -120,
+      3904,
+      1055.22
+     ],
+     [
+      -104,
+      3902,
+      1056.66
+     ],
+     [
+      -88,
+      3898,
+      1058.49
+     ],
+     [
+      -72,
+      3892,
+      1061.15
+     ],
+     [
+      -56,
+      3884,
+      1064.12
+     ],
+     [
+      -40,
+      3874,
+      1068.05
+     ],
+     [
+      -24,
+      3862,
+      1072.23
+     ],
+     [
+      -8,
+      3848,
+      1077.22
+     ],
+     [
+      8,
+      3832,
+      1082.75
+     ],
+     [
+      24,
+      3816,
+      1088.28
+     ],
+     [
+      40,
+      3800,
+      1092.99
+     ],
+     [
+      56,
+      3784,
+      1097.07
+     ],
+     [
+      72,
+      3768,
+      1099.33
+     ],
+     [
+      88,
+      3752,
+      1100.46
+     ],
+     [
+      104,
+      3736,
+      1099.55
+     ],
+     [
+      120,
+      3720,
+      1096.57
+     ],
+     [
+      136,
+      3704,
+      1092.15
+     ],
+     [
+      150,
+      3688,
+      1086.84
+     ],
+     [
+      162,
+      3672,
+      1080.95
+     ],
+     [
+      172,
+      3656,
+      1074.65
+     ],
+     [
+      180,
+      3640,
+      1067.74
+     ],
+     [
+      186,
+      3624,
+      1060.6
+     ],
+     [
+      190,
+      3608,
+      1053.58
+     ],
+     [
+      192,
+      3592,
+      1047.2
+     ],
+     [
+      192,
+      3576,
+      1041.45
+     ],
+     [
+      192,
+      3560,
+      1036.43
+     ],
+     [
+      192,
+      3544,
+      1032.35
+     ],
+     [
+      192,
+      3528,
+      1029.21
+     ],
+     [
+      192,
+      3512,
+      1026.35
+     ],
+     [
+      192,
+      3496,
+      1023.3
+     ],
+     [
+      192,
+      3480,
+      1019.56
+     ],
+     [
+      192,
+      3464,
+      1015.15
+     ],
+     [
+      192,
+      3448,
+      1009.87
+     ],
+     [
+      194,
+      3432,
+      1003.85
+     ],
+     [
+      198,
+      3416,
+      997.39
+     ],
+     [
+      204,
+      3400,
+      990.27
+     ],
+     [
+      212,
+      3384,
+      982.24
+     ],
+     [
+      222,
+      3368,
+      974.05
+     ],
+     [
+      234,
+      3352,
+      966.67
+     ],
+     [
+      248,
+      3336,
+      960.37
+     ],
+     [
+      264,
+      3320,
+      954.83
+     ],
+     [
+      278,
+      3304,
+      949.37
+     ],
+     [
+      290,
+      3288,
+      943.56
+     ],
+     [
+      300,
+      3272,
+      938.54
+     ],
+     [
+      308,
+      3256,
+      932.85
+     ],
+     [
+      314,
+      3240,
+      925.63
+     ],
+     [
+      318,
+      3224,
+      916.61
+     ],
+     [
+      320,
+      3208,
+      906.22
+     ],
+     [
+      320,
+      3192,
+      895.17
+     ],
+     [
+      320,
+      3176,
+      884.84
+     ],
+     [
+      320,
+      3160,
+      875.17
+     ],
+     [
+      320,
+      3144,
+      866.69
+     ],
+     [
+      320,
+      3128,
+      858.93
+     ],
+     [
+      320,
+      3112,
+      851.96
+     ],
+     [
+      320,
+      3096,
+      845.71
+     ],
+     [
+      320,
+      3080,
+      839.91
+     ],
+     [
+      320,
+      3064,
+      834.87
+     ],
+     [
+      320,
+      3048,
+      830.18
+     ],
+     [
+      320,
+      3032,
+      824.89
+     ],
+     [
+      320,
+      3016,
+      819.12
+     ],
+     [
+      320,
+      3000,
+      813.26
+     ],
+     [
+      320,
+      2984,
+      807.25
+     ],
+     [
+      320,
+      2968,
+      801.61
+     ],
+     [
+      320,
+      2952,
+      796.12
+     ],
+     [
+      320,
+      2936,
+      790.16
+     ],
+     [
+      320,
+      2920,
+      784.29
+     ],
+     [
+      320,
+      2904,
+      779.22
+     ],
+     [
+      320,
+      2888,
+      774.49
+     ],
+     [
+      320,
+      2872,
+      769.93
+     ],
+     [
+      320,
+      2856,
+      765.41
+     ],
+     [
+      320,
+      2840,
+      760.73
+     ],
+     [
+      320,
+      2824,
+      756.34
+     ],
+     [
+      320,
+      2808,
+      752.73
+     ],
+     [
+      320,
+      2792,
+      748.76
+     ],
+     [
+      320,
+      2776,
+      744.61
+     ],
+     [
+      320,
+      2760,
+      740.1
+     ],
+     [
+      320,
+      2744,
+      735.25
+     ],
+     [
+      320,
+      2728,
+      729.76
+     ],
+     [
+      320,
+      2712,
+      723.72
+     ],
+     [
+      320,
+      2696,
+      717.19
+     ],
+     [
+      320,
+      2680,
+      710.88
+     ],
+     [
+      320,
+      2664,
+      704.51
+     ],
+     [
+      320,
+      2648,
+      697.93
+     ],
+     [
+      320,
+      2632,
+      691.19
+     ],
+     [
+      320,
+      2616,
+      684.78
+     ],
+     [
+      320,
+      2600,
+      678.65
+     ],
+     [
+      320,
+      2584,
+      672.87
+     ],
+     [
+      320,
+      2568,
+      667.43
+     ],
+     [
+      320,
+      2552,
+      662.66
+     ],
+     [
+      318,
+      2536,
+      659.43
+     ],
+     [
+      314,
+      2520,
+      657.06
+     ],
+     [
+      308,
+      2504,
+      655.11
+     ],
+     [
+      300,
+      2488,
+      653.58
+     ],
+     [
+      290,
+      2472,
+      651.58
+     ],
+     [
+      278,
+      2456,
+      648.95
+     ],
+     [
+      264,
+      2440,
+      646.03
+     ],
+     [
+      248,
+      2424,
+      641.78
+     ],
+     [
+      232,
+      2408,
+      636.42
+     ],
+     [
+      216,
+      2392,
+      630.24
+     ],
+     [
+      200,
+      2376,
+      623.64
+     ],
+     [
+      184,
+      2360,
+      616.96
+     ],
+     [
+      168,
+      2344,
+      609.75
+     ],
+     [
+      152,
+      2328,
+      601.73
+     ],
+     [
+      136,
+      2312,
+      593.89
+     ],
+     [
+      120,
+      2296,
+      586.86
+     ],
+     [
+      106,
+      2280,
+      580.36
+     ],
+     [
+      94,
+      2264,
+      574.39
+     ],
+     [
+      84,
+      2248,
+      569.22
+     ],
+     [
+      76,
+      2232,
+      565.18
+     ],
+     [
+      70,
+      2216,
+      562
+     ],
+     [
+      66,
+      2200,
+      559.07
+     ],
+     [
+      64,
+      2184,
+      556.29
+     ],
+     [
+      64,
+      2168,
+      553.46
+     ],
+     [
+      64,
+      2152,
+      550.53
+     ],
+     [
+      64,
+      2136,
+      547.54
+     ],
+     [
+      64,
+      2120,
+      544.29
+     ],
+     [
+      64,
+      2104,
+      540.78
+     ],
+     [
+      64,
+      2088,
+      537.03
+     ],
+     [
+      64,
+      2072,
+      532.86
+     ],
+     [
+      64,
+      2056,
+      528.34
+     ],
+     [
+      64,
+      2040,
+      523
+     ],
+     [
+      64,
+      2024,
+      516.73
+     ],
+     [
+      64,
+      2008,
+      510.42
+     ],
+     [
+      64,
+      1992,
+      504.16
+     ],
+     [
+      64,
+      1976,
+      498.38
+     ],
+     [
+      64,
+      1960,
+      492.87
+     ],
+     [
+      64,
+      1944,
+      487.68
+     ],
+     [
+      64,
+      1928,
+      482.97
+     ],
+     [
+      64,
+      1912,
+      478.94
+     ],
+     [
+      64,
+      1896,
+      475.47
+     ],
+     [
+      64,
+      1880,
+      472.32
+     ],
+     [
+      64,
+      1864,
+      469.07
+     ],
+     [
+      64,
+      1848,
+      465.36
+     ],
+     [
+      64,
+      1832,
+      461.5
+     ],
+     [
+      64,
+      1816,
+      457.43
+     ],
+     [
+      64,
+      1800,
+      453.6
+     ],
+     [
+      64,
+      1784,
+      449.68
+     ],
+     [
+      64,
+      1768,
+      445.91
+     ],
+     [
+      64,
+      1752,
+      442.65
+     ],
+     [
+      64,
+      1736,
+      440.01
+     ],
+     [
+      64,
+      1720,
+      437.93
+     ],
+     [
+      64,
+      1704,
+      436.32
+     ],
+     [
+      64,
+      1688,
+      434.44
+     ],
+     [
+      64,
+      1672,
+      432.04
+     ],
+     [
+      64,
+      1656,
+      429.19
+     ],
+     [
+      64,
+      1640,
+      425.62
+     ],
+     [
+      64,
+      1624,
+      421.54
+     ],
+     [
+      64,
+      1608,
+      417.31
+     ],
+     [
+      64,
+      1592,
+      412.47
+     ],
+     [
+      64,
+      1576,
+      407.88
+     ],
+     [
+      64,
+      1560,
+      403.78
+     ],
+     [
+      64,
+      1544,
+      399.72
+     ],
+     [
+      64,
+      1528,
+      396.12
+     ],
+     [
+      64,
+      1512,
+      392.58
+     ],
+     [
+      64,
+      1496,
+      388.73
+     ],
+     [
+      64,
+      1480,
+      385.03
+     ],
+     [
+      64,
+      1464,
+      381.2
+     ],
+     [
+      64,
+      1448,
+      376.9
+     ],
+     [
+      64,
+      1432,
+      372.61
+     ],
+     [
+      64,
+      1416,
+      367.79
+     ],
+     [
+      64,
+      1400,
+      363.47
+     ],
+     [
+      64,
+      1384,
+      359.58
+     ],
+     [
+      64,
+      1368,
+      356.14
+     ],
+     [
+      64,
+      1352,
+      352.75
+     ],
+     [
+      64,
+      1336,
+      349.54
+     ],
+     [
+      64,
+      1320,
+      346.45
+     ],
+     [
+      64,
+      1304,
+      343.66
+     ],
+     [
+      64,
+      1288,
+      340.52
+     ],
+     [
+      64,
+      1272,
+      337.26
+     ],
+     [
+      64,
+      1256,
+      334.12
+     ],
+     [
+      64,
+      1240,
+      330.91
+     ],
+     [
+      64,
+      1224,
+      327.95
+     ],
+     [
+      64,
+      1208,
+      325.23
+     ],
+     [
+      64,
+      1192,
+      322.76
+     ],
+     [
+      64,
+      1176,
+      320.82
+     ],
+     [
+      64,
+      1160,
+      319.19
+     ],
+     [
+      64,
+      1144,
+      317.51
+     ],
+     [
+      64,
+      1128,
+      316.29
+     ],
+     [
+      64,
+      1112,
+      315.34
+     ],
+     [
+      64,
+      1096,
+      314.49
+     ],
+     [
+      64,
+      1080,
+      313.83
+     ],
+     [
+      64,
+      1064,
+      313
+     ],
+     [
+      64,
+      1048,
+      311.89
+     ],
+     [
+      64,
+      1032,
+      310.63
+     ],
+     [
+      64,
+      1016,
+      309.14
+     ],
+     [
+      64,
+      1000,
+      307.46
+     ],
+     [
+      64,
+      984,
+      305.73
+     ],
+     [
+      64,
+      968,
+      304.08
+     ],
+     [
+      64,
+      952,
+      302.51
+     ],
+     [
+      64,
+      936,
+      300.87
+     ],
+     [
+      64,
+      920,
+      299.12
+     ],
+     [
+      64,
+      904,
+      297.42
+     ],
+     [
+      64,
+      888,
+      295.6
+     ],
+     [
+      64,
+      872,
+      293.13
+     ],
+     [
+      64,
+      856,
+      290.07
+     ],
+     [
+      64,
+      840,
+      286.8
+     ],
+     [
+      64,
+      824,
+      283.67
+     ],
+     [
+      64,
+      808,
+      280.69
+     ],
+     [
+      64,
+      792,
+      277.68
+     ],
+     [
+      64,
+      776,
+      274.9
+     ],
+     [
+      64,
+      760,
+      272.79
+     ],
+     [
+      66,
+      744,
+      271.39
+     ],
+     [
+      70,
+      728,
+      270.17
+     ],
+     [
+      76,
+      712,
+      269.43
+     ],
+     [
+      84,
+      696,
+      268.98
+     ],
+     [
+      94,
+      680,
+      268.77
+     ],
+     [
+      106,
+      664,
+      268.56
+     ],
+     [
+      120,
+      648,
+      268.35
+     ],
+     [
+      136,
+      632,
+      268.03
+     ],
+     [
+      152,
+      618,
+      267.8
+     ],
+     [
+      168,
+      606,
+      267.07
+     ],
+     [
+      184,
+      596,
+      266.18
+     ],
+     [
+      200,
+      588,
+      265.22
+     ],
+     [
+      216,
+      582,
+      264.32
+     ],
+     [
+      232,
+      578,
+      263.31
+     ],
+     [
+      248,
+      576,
+      262.07
+     ],
+     [
+      264,
+      576,
+      260.65
+     ],
+     [
+      271,
+      576,
+      260.06
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "spur_wolfkeep",
+   "x": 271,
+   "z": 576,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": true,
+    "pts": [
+     [
+      271,
+      576,
+      258.17
+     ],
+     [
+      264,
+      576,
+      258.61
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "spur_duskhaven",
+   "x": 635.9,
+   "z": 211.5,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": true,
+    "pts": [
+     [
+      635.9,
+      211.5,
+      279.46
+     ],
+     [
+      634,
+      210,
+      279.26
+     ],
+     [
+      621.33,
+      200,
+      276.96
+     ],
+     [
+      608.67,
+      190,
+      274.71
+     ],
+     [
+      596,
+      180,
+      272.56
+     ],
+     [
+      583.33,
+      170,
+      270.5
+     ],
+     [
+      570.67,
+      160,
+      268.38
+     ],
+     [
+      558,
+      150,
+      265.88
+     ],
+     [
+      545.33,
+      140,
+      265
+     ],
+     [
+      532.67,
+      130,
+      264.19
+     ],
+     [
+      520,
+      120,
+      263.36
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "bridge",
+   "id": "bridge_317_83_0",
+   "x": 318.57,
+   "z": 576,
+   "yaw": 1.5708,
+   "data": {
+    "span": 12,
+    "deck": 255.087,
+    "road": "road_317"
+   }
+  }
+ ]
+}

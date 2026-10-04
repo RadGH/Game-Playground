@@ -279,7 +279,7 @@ button.icon { font-size: 20px; line-height: 1; }
 .chat-log .yell { color: #ffb08f; font-weight: 700; } .chat-log .emote { color: #e9e2d0; font-style: italic; }
 .chat-log .party b, .chat-log .party { color: #8fc7ff; }
 .vignette { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 0.25s; box-shadow: inset 0 0 120px 30px rgba(255,30,20,0.55); }
-.vignette.danger { opacity: 1; animation: pulse 0.6s infinite; }
+.vignette.danger { opacity: 0.65; animation: pulse 0.6s infinite; box-shadow: inset 0 0 90px 10px rgba(255,30,20,0.5); }
 .vignette.hit { opacity: 1; transition: none; box-shadow: inset 0 0 160px 50px rgba(255,20,10,0.75); }
 .interact { position: absolute; bottom: 92px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 8px; padding: 7px 14px; background: var(--panel); border: 1px solid var(--edge-strong); border-radius: 20px; font-weight: 700; color: var(--gold-hi); text-shadow: 0 1px 2px #000; animation: rise 0.25s ease-out; }
 .interact kbd { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 5px; background: #2a2016; border: 1px solid var(--gold); color: #fff; font-family: var(--sans); }

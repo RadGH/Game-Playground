@@ -6,8 +6,9 @@
 // Farhold's real skill bar + runtime + EnemyField on one side, Thousandvale on the other, compared
 // every frame (tests/C/parity-kit.mjs). Two seeds per class.
 //
-// Left out on BOTH sides until the follower system lands (and listed by the last test so the gap is
-// visible): permanent summons and shape forms.
+// The follower system runs on both sides (js/rules/followers.js vs Farhold's pets.js + followers.js
+// gate): class companions from the first frame, summons, temporary summons, decoys, shape forms,
+// songs, stances and tempers — every follower's health, place and statuses compared every frame too.
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -23,19 +24,17 @@ for (let i = 0; i < CLASSES.length; i += 6) {
   test(`classes ${i + 1}-${i + batch.length} (${batch.join(', ')}): every skill lands the same in Farhold and Thousandvale`, async t => {
     for (const classId of batch) {
       for (const seed of [4, 17]) {
-        const r = await runBar({ classId, seed, skip: NEEDS_FOLLOWERS });
+        const r = await runBar({ classId, seed, followers: true });
         assert.deepEqual(r.problems, [], `${classId} seed ${seed}`);
-        const expected = (SKILLS.classes[classId] || []).filter(id => SKILLS.skills[id] && !NEEDS_FOLLOWERS(SKILLS.skills[id])).length;
-        assert.equal(r.casts, expected, `${classId}: every skill that needs no follower was compared`);
+        assert.equal(r.casts, (SKILLS.classes[classId] || []).length, `${classId}: every skill on the bar was compared`);
         if (seed === 4) t.diagnostic(`${classId}: ${r.casts} skills, ${Math.round(r.dealt)} damage, identical`);
       }
     }
   });
 }
 
-test('the skills still waiting on the follower system (summons, shape forms) — the visible gap', t => {
-  const waiting = [];
-  for (const c of CLASSES) for (const id of SKILLS.classes[c] || []) if (SKILLS.skills[id] && NEEDS_FOLLOWERS(SKILLS.skills[id])) waiting.push(`${c}/${id}`);
-  t.diagnostic(`${waiting.length} skills need followers: ${waiting.join(' ')}`);
-  assert.ok(waiting.length < 40);
+test('every skill of every class is covered — nothing waits on the follower system any more', () => {
+  let n = 0;
+  for (const c of CLASSES) n += (SKILLS.classes[c] || []).length;
+  assert.equal(n, 180);
 });

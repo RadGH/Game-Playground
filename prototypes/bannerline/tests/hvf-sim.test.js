@@ -378,3 +378,22 @@ test('a destroyed building no longer counts toward the next copy\'s price', () =
   hurt(s.ctx(), null, s.state.ents.find((e) => e.type === 'coop'), 1e6);
   assert.equal(priceOf(data, p, 'coop'), data.hvf.buildings.kinds.coop.cost);
 });
+
+test('every event the sound bridge places in the world carries its own x/z (none falls back to "everywhere")', async () => {
+  // a 'pos' sound with no position used to play at full volume with no fog check: a hunter heard a farmer
+  // chopping in a hidden hollow from across the map. The bridge now drops those, so the sim must carry x/z.
+  const { HVF_SOUNDS } = await import('../js/view/hvf-sound.js');
+  const pos = new Set(Object.entries(HVF_SOUNDS).filter(([, r]) => r[1] === 'pos').map(([k]) => k));
+  const pl = seats('6v2', { farmer: 'ai', hunter: 'ai' }).map((p) => ({ ...p, ai: { difficulty: 'commander' } }));
+  const s = createHvf({ format: '6v2', seed: 3, players: pl, rules: { headStart: 5 } });
+  const seen = new Map();
+  for (let t = 0; t < 20 * 360 && !s.over; t++) {
+    s.step([]);
+    for (const ev of s.drainEvents()) if (pos.has(ev.type)) {
+      seen.set(ev.type, (seen.get(ev.type) || 0) + 1);
+      const p = ev.x != null ? ev : ev.grave;
+      assert.ok(p && Number.isFinite(p.x) && Number.isFinite(p.z), `${ev.type} has no position: ${JSON.stringify(ev)}`);
+    }
+  }
+  for (const k of ['chopped', 'attack', 'hit', 'buildStart']) assert.ok(seen.get(k) > 0, `the match never produced ${k} (seen: ${[...seen.keys()]})`);
+});

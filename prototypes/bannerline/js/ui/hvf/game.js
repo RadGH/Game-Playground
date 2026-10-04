@@ -669,6 +669,8 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
     ready,
     get active() { return !!m || !!setup; },
     get match() { return m; },
+    /** Is this spot in sight for any seat at this screen (tests; the sound bridge uses the same rule). */
+    visibleAt(x, z) { return !!m && m.views.some((v) => Q.visibleAt(m.sim, v.team, x, z)); },
     get choice() { return choice; },
     state: () => m?.sim.state,
     issue: (c, seat = 0) => m && issue(m.views[seat], c),

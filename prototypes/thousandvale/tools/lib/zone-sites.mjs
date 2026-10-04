@@ -34,7 +34,7 @@ const farFrom = (avoid, x, z, extra = 0) => avoid.every(a => Math.hypot(a.x - x,
  * The nearest open disc of radius r to `near`, searching rings outwards to `maxDist`.
  * avoid: [{x, z, r}] — keep (r + gap) away from each.
  */
-export function placeOpenSite(t, near, r, { avoid = [], gap = 20, maxDist = 320, edge = 40 } = {}) {
+export function placeOpenSite(t, near, r, { avoid = [], gap = 20, maxDist = 320, edge = 40, maxSlope = 18 } = {}) {
   for (let d = 0; d <= maxDist; d += 8) {
     const n = Math.max(1, Math.round(TAU * d / 12));
     let best = null, bestS = Infinity;
@@ -42,7 +42,7 @@ export function placeOpenSite(t, near, r, { avoid = [], gap = 20, maxDist = 320,
       const a = k / n * TAU, x = near.x + Math.cos(a) * d, z = near.z + Math.sin(a) * d;
       if (x < t.bounds.minX + r + edge || z < t.bounds.minZ + r + edge || x > t.bounds.maxX - r - edge || z > t.bounds.maxZ - r - edge) continue;
       if (!farFrom(avoid, x, z, r + gap)) continue;
-      if (!discIsOpen(t, x, z, r)) continue;
+      if (!discIsOpen(t, x, z, r, { maxSlope })) continue;
       const s = t.slopeAt(x, z);
       if (s < bestS) { bestS = s; best = { x: Math.round(x), z: Math.round(z) }; }
     }
@@ -109,15 +109,22 @@ export function addZoneSites(t, sites, { asks = [], avoid = [], doorName, town: 
   const rank = { capital: 0, city: 1, town: 2, village: 3, hamlet: 4 };
   const town = hubTown || sites.filter(s => s.type === 'settlement').sort((a, b) => (rank[a.kind] ?? 9) - (rank[b.kind] ?? 9))[0];
   const keep = [...avoid, ...sites.filter(s => s.type === 'settlement').map(s => ({ x: s.x, z: s.z, r: s.radius }))];
-  if (town && !sites.some(s => s.type === 'dungeon')) {
-    const door = placeDoor(t, town, { avoid: keep, name: doorName });
+  if (!sites.some(s => s.type === 'dungeon' && s.id)) {
+    // near the hub town; a zone with no town gets it by World Forge's own dungeon/lair mark, else near the middle;
+    // widen the ring if it is crowded or rough
+    const wf = sites.find(s => s.type === 'lair');
+    const at = town || (wf ? { x: wf.x, z: wf.z, radius: 0 } : { x: 1024, z: 1024, radius: 0 });
+    const door = placeDoor(t, at, { avoid: keep, name: doorName, minDist: town ? 150 : 0, maxDist: 280 })
+      || placeDoor(t, at, { avoid: keep, name: doorName, minDist: town ? 120 : 0, maxDist: 700 });
     if (door) { sites.push(door); keep.push({ x: door.x, z: door.z, r: 30 }); }
   }
   for (const ask of asks) {
     if (sites.some(s => s.type === ask.type && s.id === ask.id)) continue;
     const near = ask.near || sites.find(s => (s.name || s.id) === ask.nearSite) || town;
     if (!near) continue;
-    const p = placeOpenSite(t, near, ask.r, { avoid: keep });
+    const p = placeOpenSite(t, near, ask.r, { avoid: keep })
+      || placeOpenSite(t, near, ask.r, { avoid: keep, maxDist: 900, gap: 10 })
+      || placeOpenSite(t, near, ask.r, { avoid: keep, maxDist: 900, gap: 10, maxSlope: 24 });
     if (p) { const site = { type: ask.type, id: ask.id, x: p.x, z: p.z, r: ask.r }; sites.push(site); keep.push(site); }
   }
   return sites;

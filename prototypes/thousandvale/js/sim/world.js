@@ -26,6 +26,7 @@ import { randomHex } from './sha256.js';
 import { createParties } from './party.js';
 import { createEconomyLog } from './economy.js';
 import { findTown, findDoor, townGate, wildsCamps, zoneEncounterCamps, zoneEncounterIds } from './realm.js';
+import { vignetteContent } from './vignettes.js';
 import { dungeonTerrain, dungeonRoomSpec, describeDungeon } from './dungeon.js';
 import { JOURNAL_FLUSH_MS } from './journal.js';
 import { createTrades, TRADE_OPS, TRADE_RANGE } from './trade.js';
@@ -48,7 +49,7 @@ export function createWorld(opts) {
     journalMs = JOURNAL_FLUSH_MS, verifyHuman = null, guestsPerIpPerHour = 20, tradeMinLevel = 1,
     unlimitedIps = ['127.0.0.1', '::1', '::ffff:127.0.0.1', 'worker'],   // local bots/tests; the tunnel passes CF-Connecting-IP instead
     perfNow = now, copyCap = 300, copyIdleMs = 5 * 60000, instanceIdleMs = 30 * 60000, dungeonLevel = 3,
-    zoneSheet = null, encounterInfo = {}, zoneKey = terrain.key || 'standin',
+    zoneSheet = null, encounterInfo = {}, zoneKey = terrain.key || 'standin', vignettes = null,
     planDungeon = planTiers, filterText = t => t, chestResetMs = 30 * 60000, zoneName = 'The Test Vale',
   } = opts;
   const owner = processName + ':' + randomHex(4);
@@ -76,7 +77,8 @@ export function createWorld(opts) {
   const town = findTown(terrain, opts.townRadius);
   const door = findDoor(terrain, town);
   const gate = townGate(terrain, town, door);
-  const camps = opts.camps || [...wildsCamps(terrain, town, door, zoneSheet && zoneSheet.camps), ...(terrain.reader ? zoneEncounterCamps(terrain, zoneEncounterIds(zoneSheet), encounterInfo) : [])];
+  const vig = vignettes ? vignetteContent(vignettes.placements, vignettes.recipes, { band: (zoneSheet && zoneSheet.band) || [1, 6] }) : { camps: [], objects: [] };
+  const camps = opts.camps || [...vig.camps, ...wildsCamps(terrain, town, door, zoneSheet && zoneSheet.camps), ...(terrain.reader ? zoneEncounterCamps(terrain, zoneEncounterIds(zoneSheet), encounterInfo) : [])];
   const rooms = new Map();
   const copies = [];
   const instances = new Map();   // key -> room
@@ -106,7 +108,7 @@ export function createWorld(opts) {
     const r = makeRoom({
       id: 'wilds:' + n, name: zoneName, kind: 'wilds', camps, spawn: gate,
       safeZones: [{ x: town.x, z: town.z, r: town.r }], meta: { n, emptySince: 0 },
-      objects: [{ type: 'portal', name: 'Barrow entrance', x: door.x, z: door.z, portal: { to: 'dungeon' } }],
+      objects: [{ type: 'portal', name: door.name || 'Barrow entrance', x: door.x, z: door.z, portal: { to: 'dungeon' } }, ...vig.objects],
       describeExtra: { town: { x: town.x, z: town.z, r: town.r, name: town.name } },
     });
     copies.push(r); counters.copiesMade++;
@@ -520,6 +522,9 @@ export function createWorld(opts) {
       if (d.portal.to === 'dungeon') return enterDungeon(o, obj);
     }
     if (d.chest) return openChest(o, obj);
+    if (d.note) return s.sendJSON({ t: 'used', id, ok: true, kind: 'note', name: obj.name, text: d.note.text, quest: d.note.quest || undefined });
+    if (d.npc) return s.sendJSON({ t: 'used', id, ok: true, kind: 'npc', name: obj.name, says: d.npc.says, quest: d.npc.quest || undefined, role: d.npc.role || undefined });
+    if (d.use) return useThing(o, obj);
     if (d.lever) {
       if (d.state === 'used') return s.sendJSON({ t: 'used', id, ok: false, why: 'used', msg: 'It will not move again.' });
       const opened = o.room.terrain.openGate ? o.room.terrain.openGate(d.lever.floor) : false;
@@ -544,13 +549,32 @@ export function createWorld(opts) {
     transfer(o, inst, inst.spawnPoint, 'portal');
   }
 
+  /** Per-character key for an object: instance objects are per run; open-world ones are per zone, shared by copies. */
+  const objKey = (o, k) => (o.room.kind === 'instance' ? o.room.id : zoneKey) + ':' + k;
+  function pruneOpened(ch, t) { ch.opened ||= {}; for (const k of Object.keys(ch.opened)) if (ch.opened[k] <= t) delete ch.opened[k]; }
+  /** A vignette `use` object: once per character per reset; may cost gold, give gold, give a buff. */
+  function useThing(o, obj) {
+    const ch = o.char, s = o.conn, u = obj.data.use, t = wallNow();
+    const key = objKey(o, obj.data.key || obj.id);
+    pruneOpened(ch, t);
+    if ((ch.opened[key] || 0) > t) return s.sendJSON({ t: 'used', id: obj.id, ok: false, why: 'opened', msg: 'Nothing more to do here for now.' });
+    const cost = (u.cost && u.cost.gold) || 0;
+    if (cost > (ch.gold || 0)) return s.sendJSON({ t: 'used', id: obj.id, ok: false, why: 'gold', msg: 'You need ' + cost + ' gold.' });
+    if (cost) { ch.gold -= cost; journal(o, 'gold', { d: -cost }); econ.add('sink', 'offering', { gold: cost }, ch.level); s.sendJSON({ t: 'bag', add: [], remove: [], gold: ch.gold }); }
+    ch.opened[key] = t + chestResetMs;
+    journal(o, 'opened', { key, until: ch.opened[key] });
+    if (u.buff && o.room.rules.buff) safeRules(o.room, 'buff', o.entity, u.buff);
+    s.sendJSON({ t: 'used', id: obj.id, ok: true, kind: 'use', name: obj.name, text: u.text, buff: u.buff || undefined });
+    const gold = (u.gives && u.gives.gold) || 0;
+    if (gold) grant(o, { items: [], gold, reason: 'vignette', from: obj });
+  }
   function openChest(o, obj) {
     const ch = o.char, e = o.entity, c = obj.data.chest, s = o.conn;
-    const key = o.room.id + ':' + c.key;
+    const key = o.room.kind === 'instance' ? o.room.id + ':' + c.key : objKey(o, c.key);
     const t = wallNow();
-    ch.opened ||= {};
-    for (const k of Object.keys(ch.opened)) if (ch.opened[k] <= t) delete ch.opened[k];
+    pruneOpened(ch, t);
     if ((ch.opened[key] || 0) > t) return s.sendJSON({ t: 'used', id: obj.id, ok: false, why: 'opened', msg: 'You already emptied this chest.' });
+    if (c.after && !((ch.opened[objKey(o, c.after)] || 0) > t)) return s.sendJSON({ t: 'used', id: obj.id, ok: false, why: 'locked', msg: (c.afterName ? 'Try the ' + c.afterName.toLowerCase() + ' first.' : 'It will not open yet.') });
     const lvl = c.level || e.level;
     const items = (o.room.rules.rollLoot ? safeRules(o.room, 'rollLoot', e, { level: lvl, tier: c.tier }) : null) || [];
     const gold = Math.round(lvl * 4 + 5);

@@ -1,0 +1,60 @@
+{
+ "_doc": "Stream B zone placements (tools/bake-zone.mjs). Zone metres; yaw = atan2(dx, dz), the way the thing faces. kinds: settlement (data.radius, hub, planned), town_square, street (data.pts, width, cls), building (a proctown plot: data.w along `angle` (local +x = (cos angle, sin angle)), data.d across, want; yaw faces the nearest drawn street, data.streetGap = metres from the front to it), town_wall, road (data.pts [[x,z,h]], width, cls, spur), bridge (yaw along the road, span, deck height), dungeon_door, event_site, camp_site, landmark/dungeon/pass/crossing (World Forge nodes).",
+ "zone": "z13_04",
+ "terrainHash": "d1f5fae1",
+ "placements": [
+  {
+   "kind": "landmark",
+   "id": "the_becktack_forge",
+   "x": 960,
+   "z": 1984,
+   "yaw": 0,
+   "data": {
+    "kind": "volcano",
+    "name": "The Becktack Forge"
+   }
+  },
+  {
+   "kind": "lair",
+   "id": "the_fitfe_undercroft",
+   "x": 1472,
+   "z": 704,
+   "yaw": 0,
+   "data": {
+    "kind": "dungeon",
+    "name": "The Fitfe Undercroft"
+   }
+  },
+  {
+   "kind": "lair",
+   "id": "the_hitindack_lair",
+   "x": 64,
+   "z": 960,
+   "yaw": 0,
+   "data": {
+    "kind": "lair",
+    "name": "The Hitindack Lair"
+   }
+  },
+  {
+   "kind": "dungeon_door",
+   "id": "door_1",
+   "x": 1357,
+   "z": 579,
+   "yaw": 1.016,
+   "data": {
+    "name": "Barrow entrance"
+   }
+  },
+  {
+   "kind": "event_site",
+   "id": "event_gorse_march",
+   "x": 1218,
+   "z": 1071,
+   "yaw": 0,
+   "data": {
+    "r": 40
+   }
+  }
+ ]
+}

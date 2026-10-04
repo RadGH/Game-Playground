@@ -122,3 +122,47 @@ export function zoneEncounterCamps(terrain, ids, info = {}) {
   }
   return out;
 }
+
+/**
+ * A province LAYOUT: everything the province process needs to build its rooms (PLAN §8.2).
+ *   buildLayout({ key, name, terrain, zones: [{ key, sheet, vignettes }], encounterInfo, copyCap, starter })
+ * `terrain` covers the whole province (one zone bake, or several stitched — js/sim/province-terrain.js);
+ * every settlement the bake marks `hub` (or the biggest one) becomes a TOWN hub room; every dungeon site a door.
+ * Returns { key, name, terrain, towns: [{x,z,r,name,id}], doors: [{x,z,name,zone,sheet}], camps, objects,
+ *           waystones, sheet (first zone's), copyCap, zoneOf(x,z) }.
+ */
+export function buildLayout({ key, name = null, terrain, zones = [], encounterInfo = {}, copyCap = 300, vignetteContent = null, townRadius = null }) {
+  const sites = terrain.reader?.meta?.sites || [];
+  const towns = [];
+  const hubs = sites.filter(s => s.type === 'settlement' && (s.hub || s.kind === 'city' || s.kind === 'town'));
+  if (!hubs.length) { const t = findTown(terrain, townRadius); towns.push({ ...t }); }
+  for (const s of hubs) {
+    let c = { x: s.x, z: s.z };
+    if (terrain.walkable && !terrain.walkable(c.x, c.z)) c = findWalkable(terrain, c) || c;
+    towns.push({ x: c.x, z: c.z, r: townRadius ?? (Number.isFinite(s.radius) ? s.radius : TOWN_RADIUS[s.kind] || 60), name: s.name, kind: s.kind, hub: !!s.hub });
+  }
+  towns.sort((a, b) => (b.hub ? 1 : 0) - (a.hub ? 1 : 0));
+  towns.forEach((t, i) => { t.id = i; });
+  const main = towns[0];
+  const doorSites = sites.filter(s => s.type === 'dungeon');
+  const doors = doorSites.length ? doorSites.map(s => ({ x: s.x, z: s.z, name: s.name || 'Dungeon entrance', yaw: s.yaw || 0, zone: s.zone || zones[0]?.key || key }))
+    : [{ ...findDoor(terrain, main), name: 'Barrow entrance', zone: zones[0]?.key || key }];
+  const sheet = zones[0]?.sheet || null;
+  for (const d of doors) d.sheet = (zones.find(z => z.key === d.zone) || zones[0] || {}).sheet || sheet;
+  const camps = [], objects = [];
+  for (const z of zones) {
+    if (z.vignettes && vignetteContent) { const v = vignetteContent(z.vignettes.placements, z.vignettes.recipes, { band: (z.sheet && z.sheet.band) || [1, 6] }); camps.push(...v.camps); objects.push(...v.objects); }
+  }
+  camps.push(...wildsCamps(terrain, main, doors[0], sheet && sheet.camps));
+  if (terrain.reader) for (const z of zones.length ? zones : [{ sheet }]) camps.push(...zoneEncounterCamps(terrain, zoneEncounterIds(z.sheet), encounterInfo));
+  // waystones: one in every town square, one by every dungeon door (PLAN §5.2, NB4: they need discovering)
+  const waystones = [];
+  towns.forEach((t, i) => waystones.push({ key: `ws:${key}:t${i}`, name: t.name, x: t.x + 6, z: t.z + 6, town: i }));
+  doors.forEach((d, i) => { const p = walkableNear(terrain, d.x, d.z, 10, 2.2); waystones.push({ key: `ws:${key}:d${i}`, name: d.name, x: p.x, z: p.z, door: i }); });
+  const zoneOf = (x, z) => {
+    const zs = zones.filter(q => q.bounds);
+    for (const q of zs) if (x >= q.bounds.minX && x < q.bounds.maxX && z >= q.bounds.minZ && z < q.bounds.maxZ) return q.key;
+    return zones[0]?.key || key;
+  };
+  return { key, name: name || main.name, terrain, towns, doors, camps, objects, waystones, sheet, copyCap, zoneOf, zones, gate: townGate(terrain, main, doors[0]) };
+}

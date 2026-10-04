@@ -1,0 +1,12219 @@
+{
+ "_doc": "Stream B zone placements (tools/bake-zone.mjs). Zone metres; yaw = atan2(dx, dz), the way the thing faces. kinds: settlement (data.radius, hub, planned), town_square, street (data.pts, width, cls), building (a proctown plot: data.w along `angle` (local +x = (cos angle, sin angle)), data.d across, want; yaw faces the nearest drawn street, data.streetGap = metres from the front to it), town_wall, road (data.pts [[x,z,h]], width, cls, spur), bridge (yaw along the road, span, deck height), dungeon_door, event_site, camp_site, landmark/dungeon/pass/crossing (World Forge nodes).",
+ "zone": "z11_03",
+ "terrainHash": "af932954",
+ "placements": [
+  {
+   "kind": "settlement",
+   "id": "wehackkeep",
+   "x": 1104,
+   "z": 560,
+   "yaw": 0,
+   "data": {
+    "kind": "city",
+    "name": "Wehackkeep",
+    "radius": 140,
+    "hub": true,
+    "planned": true
+   }
+  },
+  {
+   "kind": "settlement",
+   "id": "weephaven",
+   "x": 256,
+   "z": 224,
+   "yaw": 0,
+   "data": {
+    "kind": "village",
+    "name": "Weephaven",
+    "radius": 65,
+    "hub": false,
+    "planned": true
+   }
+  },
+  {
+   "kind": "settlement",
+   "id": "wildhaven",
+   "x": 1280,
+   "z": 224,
+   "yaw": 0,
+   "data": {
+    "kind": "hamlet",
+    "name": "Wildhaven",
+    "radius": 46,
+    "hub": false,
+    "planned": true
+   }
+  },
+  {
+   "kind": "lair",
+   "id": "the_fifar_undercroft",
+   "x": 192,
+   "z": 1344,
+   "yaw": 0,
+   "data": {
+    "kind": "dungeon",
+    "name": "The Fifar Undercroft"
+   }
+  },
+  {
+   "kind": "crossing",
+   "id": "wiwat_ford",
+   "x": 1344,
+   "z": 192,
+   "yaw": 0,
+   "data": {
+    "kind": "ford",
+    "name": "Wiwat Ford"
+   }
+  },
+  {
+   "kind": "crossing",
+   "id": "fahibeck_ford",
+   "x": 1088,
+   "z": 832,
+   "yaw": 0,
+   "data": {
+    "kind": "ford",
+    "name": "Fahibeck Ford"
+   }
+  },
+  {
+   "kind": "dungeon_door",
+   "id": "door_1",
+   "x": 873,
+   "z": 718,
+   "yaw": 2.73,
+   "data": {
+    "name": "Barrow entrance"
+   }
+  },
+  {
+   "kind": "event_site",
+   "id": "event_wychwood",
+   "x": 1112,
+   "z": 792,
+   "yaw": 0,
+   "data": {
+    "r": 40
+   }
+  },
+  {
+   "kind": "town_square",
+   "id": "wehackkeep_square",
+   "x": 1103.85,
+   "z": 553.51,
+   "yaw": 0,
+   "data": {
+    "r": 3.4,
+    "town": "wehackkeep",
+    "culture": "halfling"
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_0",
+   "x": 1054.89,
+   "z": 494.33,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      1054.89,
+      494.33
+     ],
+     [
+      1081.23,
+      569.11
+     ],
+     [
+      1113.75,
+      641.42
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_1",
+   "x": 1048.49,
+   "z": 588.06,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      1048.49,
+      588.06
+     ],
+     [
+      1061.7,
+      581.02
+     ],
+     [
+      1074.85,
+      573.86
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_2",
+   "x": 1040.69,
+   "z": 570.93,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1040.69,
+      570.93
+     ],
+     [
+      1053.07,
+      564.27
+     ],
+     [
+      1064.9,
+      556.67
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_3",
+   "x": 1033.2,
+   "z": 556.2,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1033.2,
+      556.2
+     ],
+     [
+      1043.86,
+      548.7
+     ],
+     [
+      1054.64,
+      541.36
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_4",
+   "x": 1032.77,
+   "z": 539.49,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1032.77,
+      539.49
+     ],
+     [
+      1036.58,
+      544.63
+     ],
+     [
+      1040.05,
+      550
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_5",
+   "x": 1030.01,
+   "z": 551.59,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1030.01,
+      551.59
+     ],
+     [
+      1033.14,
+      549.21
+     ],
+     [
+      1036.47,
+      547.12
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_6",
+   "x": 1038.1,
+   "z": 535.81,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1038.1,
+      535.81
+     ],
+     [
+      1041.53,
+      541.21
+     ],
+     [
+      1045.37,
+      546.32
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_7",
+   "x": 1036.86,
+   "z": 543.09,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1036.86,
+      543.09
+     ],
+     [
+      1038.38,
+      541.95
+     ],
+     [
+      1039.99,
+      540.92
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_8",
+   "x": 1043.9,
+   "z": 541.82,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1043.9,
+      541.82
+     ],
+     [
+      1047.63,
+      539.23
+     ],
+     [
+      1051.37,
+      536.64
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_9",
+   "x": 1047.9,
+   "z": 547.48,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1047.9,
+      547.48
+     ],
+     [
+      1051.58,
+      553.13
+     ],
+     [
+      1055.58,
+      558.57
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_10",
+   "x": 1039.38,
+   "z": 553.37,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1039.38,
+      553.37
+     ],
+     [
+      1043.44,
+      558.77
+     ],
+     [
+      1047.06,
+      564.47
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_11",
+   "x": 1038.86,
+   "z": 564.39,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1038.86,
+      564.39
+     ],
+     [
+      1041.1,
+      562.95
+     ],
+     [
+      1043.24,
+      561.36
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_12",
+   "x": 1044.19,
+   "z": 557.91,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1044.19,
+      557.91
+     ],
+     [
+      1047.43,
+      555.84
+     ],
+     [
+      1050.52,
+      553.53
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_13",
+   "x": 1052.72,
+   "z": 552.16,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1052.72,
+      552.16
+     ],
+     [
+      1055.8,
+      549.82
+     ],
+     [
+      1059.07,
+      547.77
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_14",
+   "x": 1050.53,
+   "z": 567.41,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1050.53,
+      567.41
+     ],
+     [
+      1053.39,
+      573.53
+     ],
+     [
+      1056.97,
+      579.26
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_15",
+   "x": 1044.33,
+   "z": 575.15,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1044.33,
+      575.15
+     ],
+     [
+      1047.66,
+      573.28
+     ],
+     [
+      1051.04,
+      571.51
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_16",
+   "x": 1056.51,
+   "z": 564.16,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1056.51,
+      564.16
+     ],
+     [
+      1059.43,
+      570.25
+     ],
+     [
+      1062.95,
+      576.02
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_17",
+   "x": 1055.77,
+   "z": 573.87,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1055.77,
+      573.87
+     ],
+     [
+      1057.47,
+      572.97
+     ],
+     [
+      1059.15,
+      572.04
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_18",
+   "x": 1061.28,
+   "z": 569.93,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1061.28,
+      569.93
+     ],
+     [
+      1065.16,
+      567.72
+     ],
+     [
+      1069.13,
+      565.67
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_19",
+   "x": 1061.11,
+   "z": 604.2,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1061.11,
+      604.2
+     ],
+     [
+      1072.38,
+      600.14
+     ],
+     [
+      1083.9,
+      596.84
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_20",
+   "x": 1068.99,
+   "z": 585.62,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1068.99,
+      585.62
+     ],
+     [
+      1071.7,
+      591.2
+     ],
+     [
+      1074.19,
+      596.87
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_21",
+   "x": 1061.36,
+   "z": 597.88,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1061.36,
+      597.88
+     ],
+     [
+      1066.32,
+      595.69
+     ],
+     [
+      1071.21,
+      593.33
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_22",
+   "x": 1065.05,
+   "z": 587.44,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1065.05,
+      587.44
+     ],
+     [
+      1066.35,
+      590.55
+     ],
+     [
+      1067.87,
+      593.55
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_23",
+   "x": 1066.97,
+   "z": 596.6,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1066.97,
+      596.6
+     ],
+     [
+      1067.67,
+      598.09
+     ],
+     [
+      1068.34,
+      599.58
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_24",
+   "x": 1071.57,
+   "z": 588.3,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1071.57,
+      588.3
+     ],
+     [
+      1074.64,
+      586.76
+     ],
+     [
+      1077.8,
+      585.42
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_25",
+   "x": 1069.56,
+   "z": 603.67,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1069.56,
+      603.67
+     ],
+     [
+      1071.14,
+      611.33
+     ],
+     [
+      1072.87,
+      618.96
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_26",
+   "x": 1066.09,
+   "z": 616.2,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1066.09,
+      616.2
+     ],
+     [
+      1068.48,
+      615.75
+     ],
+     [
+      1070.85,
+      615.18
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_27",
+   "x": 1064.47,
+   "z": 608.71,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1064.47,
+      608.71
+     ],
+     [
+      1066.87,
+      608.27
+     ],
+     [
+      1069.23,
+      607.68
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_28",
+   "x": 1072.17,
+   "z": 610.15,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1072.17,
+      610.15
+     ],
+     [
+      1078.91,
+      608.23
+     ],
+     [
+      1085.84,
+      607.19
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_29",
+   "x": 1078.79,
+   "z": 601.67,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1078.79,
+      601.67
+     ],
+     [
+      1079.44,
+      604.26
+     ],
+     [
+      1079.92,
+      606.88
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_30",
+   "x": 1076.97,
+   "z": 610.7,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1076.97,
+      610.7
+     ],
+     [
+      1077.67,
+      614.23
+     ],
+     [
+      1078.5,
+      617.75
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_31",
+   "x": 1096.41,
+   "z": 571.63,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      1096.41,
+      571.63
+     ],
+     [
+      1131.27,
+      562.06
+     ],
+     [
+      1166.01,
+      552.08
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_32",
+   "x": 1096.36,
+   "z": 502.34,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1096.36,
+      502.34
+     ],
+     [
+      1108.26,
+      531.94
+     ],
+     [
+      1117.92,
+      562.34
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_33",
+   "x": 1094.36,
+   "z": 542.16,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1094.36,
+      542.16
+     ],
+     [
+      1099.23,
+      539.56
+     ],
+     [
+      1104.24,
+      537.21
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_34",
+   "x": 1087.94,
+   "z": 529.36,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1087.94,
+      529.36
+     ],
+     [
+      1092.85,
+      526.81
+     ],
+     [
+      1097.82,
+      524.41
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_35",
+   "x": 1087.62,
+   "z": 516.37,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1087.62,
+      516.37
+     ],
+     [
+      1089.88,
+      521.15
+     ],
+     [
+      1092.36,
+      525.83
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_36",
+   "x": 1086.1,
+   "z": 525.69,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1086.1,
+      525.69
+     ],
+     [
+      1088.08,
+      524.83
+     ],
+     [
+      1089.96,
+      523.75
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_37",
+   "x": 1091.51,
+   "z": 521.4,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1091.51,
+      521.4
+     ],
+     [
+      1093.43,
+      520.43
+     ],
+     [
+      1095.35,
+      519.47
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_38",
+   "x": 1091.67,
+   "z": 536.8,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1091.67,
+      536.8
+     ],
+     [
+      1096.46,
+      534.02
+     ],
+     [
+      1101.55,
+      531.85
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_39",
+   "x": 1094.69,
+   "z": 527.3,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1094.69,
+      527.3
+     ],
+     [
+      1095.87,
+      529.9
+     ],
+     [
+      1097.24,
+      532.4
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_40",
+   "x": 1096.57,
+   "z": 535.96,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1096.57,
+      535.96
+     ],
+     [
+      1097.26,
+      537.46
+     ],
+     [
+      1098.05,
+      538.92
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_41",
+   "x": 1098.86,
+   "z": 551.15,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1098.86,
+      551.15
+     ],
+     [
+      1103.86,
+      548.8
+     ],
+     [
+      1108.74,
+      546.2
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_42",
+   "x": 1098.19,
+   "z": 541.64,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1098.19,
+      541.64
+     ],
+     [
+      1100.03,
+      544.95
+     ],
+     [
+      1101.58,
+      548.41
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_43",
+   "x": 1106.54,
+   "z": 548.69,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1106.54,
+      548.69
+     ],
+     [
+      1107.99,
+      551.43
+     ],
+     [
+      1109.32,
+      554.24
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_44",
+   "x": 1108.59,
+   "z": 517.99,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1108.59,
+      517.99
+     ],
+     [
+      1128.68,
+      513.41
+     ],
+     [
+      1148.56,
+      508.01
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_45",
+   "x": 1127.84,
+   "z": 495.5,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1127.84,
+      495.5
+     ],
+     [
+      1129.38,
+      503.18
+     ],
+     [
+      1131.62,
+      510.67
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_46",
+   "x": 1110.65,
+   "z": 499.79,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1110.65,
+      499.79
+     ],
+     [
+      1113.03,
+      507.26
+     ],
+     [
+      1114.44,
+      514.96
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_47",
+   "x": 1106.84,
+   "z": 510.97,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1106.84,
+      510.97
+     ],
+     [
+      1109.13,
+      510.24
+     ],
+     [
+      1111.5,
+      509.8
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_48",
+   "x": 1113.9,
+   "z": 506.21,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1113.9,
+      506.21
+     ],
+     [
+      1121.08,
+      504.74
+     ],
+     [
+      1128.11,
+      502.66
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_49",
+   "x": 1118.9,
+   "z": 497.73,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1118.9,
+      497.73
+     ],
+     [
+      1119.57,
+      500.45
+     ],
+     [
+      1120.26,
+      503.17
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_50",
+   "x": 1119.13,
+   "z": 506.36,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1119.13,
+      506.36
+     ],
+     [
+      1119.78,
+      509.91
+     ],
+     [
+      1120.87,
+      513.35
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_51",
+   "x": 1131.43,
+   "z": 503.84,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1131.43,
+      503.84
+     ],
+     [
+      1139.1,
+      502.36
+     ],
+     [
+      1146.58,
+      500.06
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_52",
+   "x": 1137.64,
+   "z": 493.06,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1137.64,
+      493.06
+     ],
+     [
+      1138.73,
+      496.62
+     ],
+     [
+      1139.44,
+      500.28
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_53",
+   "x": 1142.79,
+   "z": 502.57,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1142.79,
+      502.57
+     ],
+     [
+      1143.56,
+      505.03
+     ],
+     [
+      1144.03,
+      507.57
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_54",
+   "x": 1138.03,
+   "z": 503.76,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1138.03,
+      503.76
+     ],
+     [
+      1138.76,
+      506.23
+     ],
+     [
+      1139.27,
+      508.76
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_55",
+   "x": 1135.31,
+   "z": 512.89,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1135.31,
+      512.89
+     ],
+     [
+      1139.24,
+      531.31
+     ],
+     [
+      1144.42,
+      549.41
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_56",
+   "x": 1112.28,
+   "z": 532.76,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1112.28,
+      532.76
+     ],
+     [
+      1124.72,
+      530.13
+     ],
+     [
+      1136.93,
+      526.61
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_57",
+   "x": 1120.84,
+   "z": 516.5,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1120.84,
+      516.5
+     ],
+     [
+      1122.14,
+      522.43
+     ],
+     [
+      1123.78,
+      528.29
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_58",
+   "x": 1109.9,
+   "z": 523.22,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1109.9,
+      523.22
+     ],
+     [
+      1115.25,
+      521.99
+     ],
+     [
+      1120.54,
+      520.57
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_59",
+   "x": 1115.86,
+   "z": 517.74,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1115.86,
+      517.74
+     ],
+     [
+      1116.19,
+      519.04
+     ],
+     [
+      1116.5,
+      520.33
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_60",
+   "x": 1116.86,
+   "z": 522.73,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1116.86,
+      522.73
+     ],
+     [
+      1117.84,
+      526.12
+     ],
+     [
+      1118.57,
+      529.59
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_61",
+   "x": 1123.17,
+   "z": 520.57,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1123.17,
+      520.57
+     ],
+     [
+      1128.89,
+      518.96
+     ],
+     [
+      1134.7,
+      517.69
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_62",
+   "x": 1125.92,
+   "z": 515.23,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1125.92,
+      515.23
+     ],
+     [
+      1126.28,
+      516.81
+     ],
+     [
+      1126.71,
+      518.37
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_63",
+   "x": 1127.47,
+   "z": 520.82,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1127.47,
+      520.82
+     ],
+     [
+      1128.16,
+      523.92
+     ],
+     [
+      1129.01,
+      526.98
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_64",
+   "x": 1121.2,
+   "z": 532.14,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1121.2,
+      532.14
+     ],
+     [
+      1123.55,
+      543.09
+     ],
+     [
+      1126.62,
+      553.85
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_65",
+   "x": 1114.55,
+   "z": 541.87,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1114.55,
+      541.87
+     ],
+     [
+      1118.14,
+      541.1
+     ],
+     [
+      1121.67,
+      540.1
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_66",
+   "x": 1117.04,
+   "z": 551.84,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1117.04,
+      551.84
+     ],
+     [
+      1120.64,
+      551.12
+     ],
+     [
+      1124.15,
+      550.07
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_67",
+   "x": 1124.63,
+   "z": 539.76,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1124.63,
+      539.76
+     ],
+     [
+      1132.03,
+      538.19
+     ],
+     [
+      1139.3,
+      536.1
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_68",
+   "x": 1129.75,
+   "z": 530.01,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1129.75,
+      530.01
+     ],
+     [
+      1130.46,
+      533.36
+     ],
+     [
+      1131.41,
+      536.65
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_69",
+   "x": 1134.3,
+   "z": 538.76,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1134.3,
+      538.76
+     ],
+     [
+      1135.7,
+      545
+     ],
+     [
+      1137.4,
+      551.17
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_70",
+   "x": 1126.63,
+   "z": 547.8,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1126.63,
+      547.8
+     ],
+     [
+      1130.71,
+      546.86
+     ],
+     [
+      1134.76,
+      545.77
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_71",
+   "x": 1137.37,
+   "z": 545.89,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1137.37,
+      545.89
+     ],
+     [
+      1139.4,
+      545.25
+     ],
+     [
+      1141.49,
+      544.87
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_72",
+   "x": 1143.62,
+   "z": 538.99,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1143.62,
+      538.99
+     ],
+     [
+      1149.62,
+      537.64
+     ],
+     [
+      1155.55,
+      536.02
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_73",
+   "x": 1141.31,
+   "z": 529.71,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1141.31,
+      529.71
+     ],
+     [
+      1147.2,
+      527.94
+     ],
+     [
+      1153.23,
+      526.73
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_74",
+   "x": 1138.92,
+   "z": 520.16,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1138.92,
+      520.16
+     ],
+     [
+      1144.81,
+      518.37
+     ],
+     [
+      1150.85,
+      517.19
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_75",
+   "x": 1141.07,
+   "z": 511.45,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1141.07,
+      511.45
+     ],
+     [
+      1142.04,
+      514.57
+     ],
+     [
+      1142.65,
+      517.78
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_76",
+   "x": 1145.94,
+   "z": 519.86,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1145.94,
+      519.86
+     ],
+     [
+      1146.84,
+      523.27
+     ],
+     [
+      1147.64,
+      526.7
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_77",
+   "x": 1147.8,
+   "z": 529.52,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1147.8,
+      529.52
+     ],
+     [
+      1148.44,
+      532.93
+     ],
+     [
+      1149.48,
+      536.25
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_78",
+   "x": 1152.06,
+   "z": 538.17,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1152.06,
+      538.17
+     ],
+     [
+      1152.97,
+      542.61
+     ],
+     [
+      1154.25,
+      546.96
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_79",
+   "x": 1136.61,
+   "z": 566.93,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1136.61,
+      566.93
+     ],
+     [
+      1139.55,
+      584.84
+     ],
+     [
+      1141.13,
+      602.92
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_80",
+   "x": 1109.12,
+   "z": 587.17,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1109.12,
+      587.17
+     ],
+     [
+      1122.53,
+      585.25
+     ],
+     [
+      1135.79,
+      582.44
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_81",
+   "x": 1115.69,
+   "z": 570.87,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1115.69,
+      570.87
+     ],
+     [
+      1116.48,
+      577.51
+     ],
+     [
+      1118.03,
+      584.01
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_82",
+   "x": 1107.93,
+   "z": 580.48,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1107.93,
+      580.48
+     ],
+     [
+      1111.75,
+      579.59
+     ],
+     [
+      1115.65,
+      579.11
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_83",
+   "x": 1125.1,
+   "z": 569.2,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1125.1,
+      569.2
+     ],
+     [
+      1126.11,
+      575.8
+     ],
+     [
+      1127.43,
+      582.34
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_84",
+   "x": 1117.77,
+   "z": 574.08,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1117.77,
+      574.08
+     ],
+     [
+      1121.13,
+      573.5
+     ],
+     [
+      1124.48,
+      572.89
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_85",
+   "x": 1127.29,
+   "z": 574.34,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1127.29,
+      574.34
+     ],
+     [
+      1130.7,
+      573.68
+     ],
+     [
+      1134.14,
+      573.13
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_86",
+   "x": 1124.4,
+   "z": 586.03,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1124.4,
+      586.03
+     ],
+     [
+      1126.38,
+      594.67
+     ],
+     [
+      1127.49,
+      603.45
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_87",
+   "x": 1110.98,
+   "z": 597.68,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1110.98,
+      597.68
+     ],
+     [
+      1117.67,
+      596.14
+     ],
+     [
+      1124.48,
+      595.29
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_88",
+   "x": 1115.22,
+   "z": 587.66,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1115.22,
+      587.66
+     ],
+     [
+      1115.68,
+      591.48
+     ],
+     [
+      1116.56,
+      595.22
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_89",
+   "x": 1118.3,
+   "z": 597.85,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1118.3,
+      597.85
+     ],
+     [
+      1119,
+      601.34
+     ],
+     [
+      1119.55,
+      604.86
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_90",
+   "x": 1127.64,
+   "z": 595.51,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1127.64,
+      595.51
+     ],
+     [
+      1132.68,
+      594.42
+     ],
+     [
+      1137.78,
+      593.71
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_91",
+   "x": 1130.59,
+   "z": 584.93,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1130.59,
+      584.93
+     ],
+     [
+      1131.47,
+      589.15
+     ],
+     [
+      1132.1,
+      593.41
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_92",
+   "x": 1132.51,
+   "z": 595.95,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1132.51,
+      595.95
+     ],
+     [
+      1133.06,
+      599.16
+     ],
+     [
+      1133.65,
+      602.36
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_93",
+   "x": 1142.94,
+   "z": 581.79,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1142.94,
+      581.79
+     ],
+     [
+      1153.81,
+      582.19
+     ],
+     [
+      1164.67,
+      582.76
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_94",
+   "x": 1157.92,
+   "z": 568.32,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1157.92,
+      568.32
+     ],
+     [
+      1157.55,
+      574.78
+     ],
+     [
+      1157.34,
+      581.25
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_95",
+   "x": 1147.75,
+   "z": 567.86,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1147.75,
+      567.86
+     ],
+     [
+      1147.49,
+      574.33
+     ],
+     [
+      1147.17,
+      580.79
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_96",
+   "x": 1143.33,
+   "z": 573,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1143.33,
+      573
+     ],
+     [
+      1144.85,
+      573.11
+     ],
+     [
+      1146.38,
+      573.13
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_97",
+   "x": 1148.71,
+   "z": 571.68,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1148.71,
+      571.68
+     ],
+     [
+      1152.65,
+      571.66
+     ],
+     [
+      1156.57,
+      572.03
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_98",
+   "x": 1158.77,
+   "z": 575.78,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1158.77,
+      575.78
+     ],
+     [
+      1161.87,
+      575.97
+     ],
+     [
+      1164.97,
+      576.06
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_99",
+   "x": 1150.15,
+   "z": 583.3,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1150.15,
+      583.3
+     ],
+     [
+      1150.03,
+      590.55
+     ],
+     [
+      1149.51,
+      597.78
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_100",
+   "x": 1142.57,
+   "z": 590.15,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1142.57,
+      590.15
+     ],
+     [
+      1145.54,
+      590.46
+     ],
+     [
+      1148.53,
+      590.42
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_101",
+   "x": 1151.27,
+   "z": 587.4,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1151.27,
+      587.4
+     ],
+     [
+      1157.87,
+      587.32
+     ],
+     [
+      1164.44,
+      587.99
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_102",
+   "x": 1155.94,
+   "z": 583.56,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1155.94,
+      583.56
+     ],
+     [
+      1155.95,
+      584.85
+     ],
+     [
+      1155.82,
+      586.13
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_103",
+   "x": 1159.59,
+   "z": 589.24,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1159.59,
+      589.24
+     ],
+     [
+      1159.42,
+      593.73
+     ],
+     [
+      1159.19,
+      598.21
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_104",
+   "x": 1088,
+   "z": 479.58,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      1088,
+      479.58
+     ],
+     [
+      1096.36,
+      502.34
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_105",
+   "x": 1088,
+   "z": 640.42,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      1088,
+      640.42
+     ],
+     [
+      1109.05,
+      630.96
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_106",
+   "x": 1095.42,
+   "z": 478.45,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      1095.42,
+      478.45
+     ],
+     [
+      1088.52,
+      480.98
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_107",
+   "x": 1108.26,
+   "z": 531.94,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1108.26,
+      531.94
+     ],
+     [
+      1104.24,
+      537.21
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_108",
+   "x": 1115.69,
+   "z": 570.87,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1115.69,
+      570.87
+     ],
+     [
+      1114.54,
+      566.66
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_109",
+   "x": 1081.23,
+   "z": 569.11,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1081.23,
+      569.11
+     ],
+     [
+      1096.41,
+      571.63
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_110",
+   "x": 1069.13,
+   "z": 565.67,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1069.13,
+      565.67
+     ],
+     [
+      1078.82,
+      562.26
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_111",
+   "x": 1061.7,
+   "z": 581.02,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1061.7,
+      581.02
+     ],
+     [
+      1056.97,
+      579.26
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wehackkeep_street_112",
+   "x": 1065.05,
+   "z": 587.44,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1065.05,
+      587.44
+     ],
+     [
+      1061.65,
+      581.05
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_0",
+   "x": 1045.16,
+   "z": 552.55,
+   "yaw": 2.1761,
+   "data": {
+    "town": "wehackkeep",
+    "want": "house",
+    "district": "residential",
+    "w": 6.5,
+    "d": 4.02,
+    "angle": 5.6779,
+    "front": 5.6779,
+    "streetGap": -0.28
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_1",
+   "x": 1049.71,
+   "z": 559.12,
+   "yaw": -2.5363,
+   "data": {
+    "town": "wehackkeep",
+    "want": "house",
+    "district": "residential",
+    "w": 6.5,
+    "d": 4.58,
+    "angle": 5.6779,
+    "front": 10.3903,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_2",
+   "x": 1053.66,
+   "z": 546.73,
+   "yaw": 0.6053,
+   "data": {
+    "town": "wehackkeep",
+    "want": "house",
+    "district": "residential",
+    "w": 6.52,
+    "d": 4.12,
+    "angle": 5.6779,
+    "front": 7.2487,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_3",
+   "x": 1058.22,
+   "z": 553.32,
+   "yaw": -0.9655,
+   "data": {
+    "town": "wehackkeep",
+    "want": "house",
+    "district": "residential",
+    "w": 6.52,
+    "d": 4.42,
+    "angle": 5.6779,
+    "front": 8.8195,
+    "streetGap": -0.13
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_4",
+   "x": 1050.26,
+   "z": 578.07,
+   "yaw": -2.6443,
+   "data": {
+    "town": "wehackkeep",
+    "want": "forge",
+    "district": "residential",
+    "w": 6.43,
+    "d": 7.29,
+    "angle": 5.7859,
+    "front": 10.4982,
+    "streetGap": -0.3
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_5",
+   "x": 1063.17,
+   "z": 564.05,
+   "yaw": 0.4973,
+   "data": {
+    "town": "wehackkeep",
+    "want": "barracks",
+    "district": "craft",
+    "w": 7.73,
+    "d": 4.96,
+    "angle": 5.7859,
+    "front": 7.3567,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_6",
+   "x": 1066.96,
+   "z": 571.02,
+   "yaw": -2.6443,
+   "data": {
+    "town": "wehackkeep",
+    "want": "hut",
+    "district": "craft",
+    "w": 7.73,
+    "d": 3.75,
+    "angle": 5.7859,
+    "front": 10.4982,
+    "streetGap": -0.22
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_7",
+   "x": 1062.4,
+   "z": 592.37,
+   "yaw": 2.0038,
+   "data": {
+    "town": "wehackkeep",
+    "want": "house",
+    "district": "residential",
+    "w": 5.31,
+    "d": 5.53,
+    "angle": 5.8502,
+    "front": 5.8502,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_8",
+   "x": 1076.8,
+   "z": 591.45,
+   "yaw": -1.1378,
+   "data": {
+    "town": "wehackkeep",
+    "want": "watchpost",
+    "district": "residential",
+    "w": 5.66,
+    "d": 6.46,
+    "angle": 5.8502,
+    "front": 8.9918,
+    "streetGap": -0.35
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_9",
+   "x": 1067.66,
+   "z": 611.95,
+   "yaw": -2.9286,
+   "data": {
+    "town": "wehackkeep",
+    "want": "house",
+    "district": "residential",
+    "w": 3.66,
+    "d": 4.12,
+    "angle": 6.0702,
+    "front": 10.7826,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_10",
+   "x": 1074.74,
+   "z": 605.28,
+   "yaw": -1.3578,
+   "data": {
+    "town": "wehackkeep",
+    "want": "house",
+    "district": "residential",
+    "w": 5.87,
+    "d": 4.13,
+    "angle": 6.0702,
+    "front": 9.2118,
+    "streetGap": -0.29
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_11",
+   "x": 1082.9,
+   "z": 613.1,
+   "yaw": -1.3578,
+   "data": {
+    "town": "wehackkeep",
+    "want": "chapel",
+    "district": "residential",
+    "w": 7.05,
+    "d": 6.02,
+    "angle": 6.0702,
+    "front": 9.2118,
+    "streetGap": -0.28
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_12",
+   "x": 1092.31,
+   "z": 531.68,
+   "yaw": 2.0354,
+   "data": {
+    "town": "wehackkeep",
+    "want": "hut",
+    "district": "craft",
+    "w": 4.54,
+    "d": 4.5,
+    "angle": 5.8186,
+    "front": 5.8186,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_13",
+   "x": 1103.75,
+   "z": 543.08,
+   "yaw": -1.1062,
+   "data": {
+    "town": "wehackkeep",
+    "want": "hut",
+    "district": "civic",
+    "w": 4.92,
+    "d": 6.37,
+    "angle": 5.8186,
+    "front": 8.9602,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_14",
+   "x": 1107.82,
+   "z": 504.97,
+   "yaw": 0.2446,
+   "data": {
+    "town": "wehackkeep",
+    "want": "house",
+    "district": "residential",
+    "w": 3.61,
+    "d": 7.47,
+    "angle": 6.0386,
+    "front": 7.6094,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_15",
+   "x": 1115.69,
+   "z": 501.42,
+   "yaw": 1.8154,
+   "data": {
+    "town": "wehackkeep",
+    "want": "house",
+    "district": "residential",
+    "w": 4.6,
+    "d": 4.4,
+    "angle": 6.0386,
+    "front": 6.0386,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_16",
+   "x": 1123.87,
+   "z": 499.38,
+   "yaw": -1.3262,
+   "data": {
+    "town": "wehackkeep",
+    "want": "house",
+    "district": "residential",
+    "w": 5.44,
+    "d": 4.4,
+    "angle": 6.0386,
+    "front": 9.1802,
+    "streetGap": -0.39
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_17",
+   "x": 1125.31,
+   "z": 508.53,
+   "yaw": -2.897,
+   "data": {
+    "town": "wehackkeep",
+    "want": "granary",
+    "district": "residential",
+    "w": 7.09,
+    "d": 6.01,
+    "angle": 6.0386,
+    "front": 10.751,
+    "streetGap": -0.27
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_18",
+   "x": 1134.94,
+   "z": 507.19,
+   "yaw": 1.8154,
+   "data": {
+    "town": "wehackkeep",
+    "want": "house",
+    "district": "residential",
+    "w": 4.01,
+    "d": 3.96,
+    "angle": 6.0386,
+    "front": 6.0386,
+    "streetGap": -0.17
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_19",
+   "x": 1113.78,
+   "z": 527.14,
+   "yaw": -2.897,
+   "data": {
+    "town": "wehackkeep",
+    "want": "hut",
+    "district": "craft",
+    "w": 4.44,
+    "d": 5.87,
+    "angle": 6.0386,
+    "front": 10.751,
+    "streetGap": -0.35
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_20",
+   "x": 1132.58,
+   "z": 522.81,
+   "yaw": -1.3262,
+   "data": {
+    "town": "wehackkeep",
+    "want": "hut",
+    "district": "craft",
+    "w": 5.41,
+    "d": 5.16,
+    "angle": 6.0386,
+    "front": 9.1802,
+    "streetGap": -0.25
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_21",
+   "x": 1117.01,
+   "z": 536.6,
+   "yaw": 0.2446,
+   "data": {
+    "town": "wehackkeep",
+    "want": "hut",
+    "district": "civic",
+    "w": 6.13,
+    "d": 5.42,
+    "angle": 6.0386,
+    "front": 7.6094,
+    "streetGap": -0.17
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_22",
+   "x": 1119.35,
+   "z": 545.94,
+   "yaw": -2.897,
+   "data": {
+    "town": "wehackkeep",
+    "want": "warehouse",
+    "district": "civic",
+    "w": 6.13,
+    "d": 6.58,
+    "angle": 6.0386,
+    "front": 10.751,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_23",
+   "x": 1126.43,
+   "z": 534.37,
+   "yaw": 1.8154,
+   "data": {
+    "town": "wehackkeep",
+    "want": "hut",
+    "district": "craft",
+    "w": 4.91,
+    "d": 5.65,
+    "angle": 6.0386,
+    "front": 6.0386,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_24",
+   "x": 1134.95,
+   "z": 532.24,
+   "yaw": 1.8154,
+   "data": {
+    "town": "wehackkeep",
+    "want": "hut",
+    "district": "craft",
+    "w": 5.36,
+    "d": 5.65,
+    "angle": 6.0386,
+    "front": 6.0386,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_25",
+   "x": 1129.72,
+   "z": 542.86,
+   "yaw": 1.8154,
+   "data": {
+    "town": "wehackkeep",
+    "want": "hut",
+    "district": "craft",
+    "w": 7.17,
+    "d": 4.55,
+    "angle": 6.0386,
+    "front": 6.0386,
+    "streetGap": -0.32
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_26",
+   "x": 1146.41,
+   "z": 513.48,
+   "yaw": -1.3262,
+   "data": {
+    "town": "wehackkeep",
+    "want": "house",
+    "district": "residential",
+    "w": 5.62,
+    "d": 5.32,
+    "angle": 6.0386,
+    "front": 9.1802,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_27",
+   "x": 1142.9,
+   "z": 524.25,
+   "yaw": 1.8154,
+   "data": {
+    "town": "wehackkeep",
+    "want": "house",
+    "district": "residential",
+    "w": 4.53,
+    "d": 5.85,
+    "angle": 6.0386,
+    "front": 6.0386,
+    "streetGap": -0.3
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_28",
+   "x": 1144.93,
+   "z": 533.81,
+   "yaw": 1.8154,
+   "data": {
+    "town": "wehackkeep",
+    "want": "house",
+    "district": "residential",
+    "w": 3.84,
+    "d": 5.74,
+    "angle": 6.0386,
+    "front": 6.0386,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_29",
+   "x": 1148.46,
+   "z": 543.73,
+   "yaw": 1.8154,
+   "data": {
+    "town": "wehackkeep",
+    "want": "inn",
+    "district": "residential",
+    "w": 5.89,
+    "d": 7.86,
+    "angle": 6.0386,
+    "front": 6.0386,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_30",
+   "x": 1110.97,
+   "z": 575.16,
+   "yaw": 0.1755,
+   "data": {
+    "town": "wehackkeep",
+    "want": "mill",
+    "district": "civic",
+    "w": 6.63,
+    "d": 5.6,
+    "angle": 6.1077,
+    "front": 7.6785,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_31",
+   "x": 1122.08,
+   "z": 578.87,
+   "yaw": -2.9661,
+   "data": {
+    "town": "wehackkeep",
+    "want": "stable",
+    "district": "craft",
+    "w": 5.61,
+    "d": 7.51,
+    "angle": 6.1077,
+    "front": 10.8201,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_32",
+   "x": 1131.5,
+   "z": 578.19,
+   "yaw": -2.9661,
+   "data": {
+    "town": "wehackkeep",
+    "want": "hut",
+    "district": "craft",
+    "w": 5.76,
+    "d": 5.55,
+    "angle": 6.1077,
+    "front": 10.8201,
+    "streetGap": -0.29
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_33",
+   "x": 1120.37,
+   "z": 590.65,
+   "yaw": -2.9661,
+   "data": {
+    "town": "wehackkeep",
+    "want": "shrine",
+    "district": "craft",
+    "w": 5.27,
+    "d": 6.48,
+    "angle": 6.1077,
+    "front": 10.8201,
+    "streetGap": -0.3
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_34",
+   "x": 1114.81,
+   "z": 602.09,
+   "yaw": 1.7463,
+   "data": {
+    "town": "wehackkeep",
+    "want": "house",
+    "district": "residential",
+    "w": 4.8,
+    "d": 5.92,
+    "angle": 6.1077,
+    "front": 6.1077,
+    "streetGap": -0.24
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_35",
+   "x": 1122.72,
+   "z": 600.68,
+   "yaw": -1.3953,
+   "data": {
+    "town": "wehackkeep",
+    "want": "house",
+    "district": "residential",
+    "w": 4.15,
+    "d": 5.92,
+    "angle": 6.1077,
+    "front": 9.2493,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_36",
+   "x": 1152.41,
+   "z": 577.09,
+   "yaw": -1.6153,
+   "data": {
+    "town": "wehackkeep",
+    "want": "market",
+    "district": "residential",
+    "w": 6.67,
+    "d": 6.67,
+    "angle": 6.3277,
+    "front": 9.4693,
+    "streetGap": -0.39
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_37",
+   "x": 1162.06,
+   "z": 571.64,
+   "yaw": -0.0445,
+   "data": {
+    "town": "wehackkeep",
+    "want": "house",
+    "district": "residential",
+    "w": 5.01,
+    "d": 5.07,
+    "angle": 6.3277,
+    "front": 7.8985,
+    "streetGap": -0.3
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_38",
+   "x": 1145.74,
+   "z": 586.06,
+   "yaw": 3.0971,
+   "data": {
+    "town": "wehackkeep",
+    "want": "house",
+    "district": "residential",
+    "w": 4.77,
+    "d": 4.71,
+    "angle": 6.3277,
+    "front": 11.0401,
+    "streetGap": -0.29
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_39",
+   "x": 1145.36,
+   "z": 594.57,
+   "yaw": 3.0971,
+   "data": {
+    "town": "wehackkeep",
+    "want": "house",
+    "district": "residential",
+    "w": 4.77,
+    "d": 4.84,
+    "angle": 6.3277,
+    "front": 11.0401,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wehackkeep_plot_40",
+   "x": 1154.63,
+   "z": 593.52,
+   "yaw": 1.5263,
+   "data": {
+    "town": "wehackkeep",
+    "want": "hall",
+    "district": "residential",
+    "w": 6.06,
+    "d": 7.78,
+    "angle": 6.3277,
+    "front": 6.3277,
+    "streetGap": -0.34
+   }
+  },
+  {
+   "kind": "town_wall",
+   "id": "wehackkeep_wall",
+   "x": 1104,
+   "z": 560,
+   "yaw": 0,
+   "data": {
+    "town": "wehackkeep",
+    "radius": 82,
+    "gates": [
+     {
+      "angle": -2.2128880654055,
+      "road": true,
+      "x": -0.5988719083299225,
+      "z": -0.8008448273000688
+     },
+     {
+      "angle": 1.4516230822461618,
+      "road": true,
+      "x": 0.11889135651755581,
+      "z": 0.9929072692580186
+     }
+    ]
+   }
+  },
+  {
+   "kind": "town_square",
+   "id": "weephaven_square",
+   "x": 251.76,
+   "z": 223.1,
+   "yaw": 0,
+   "data": {
+    "r": 3.16,
+    "town": "weephaven",
+    "culture": "halfling"
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_0",
+   "x": 269.03,
+   "z": 170.98,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      269.03,
+      170.98
+     ],
+     [
+      280.74,
+      218.96
+     ],
+     [
+      288.74,
+      267.69
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_1",
+   "x": 205.83,
+   "z": 209.01,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      205.83,
+      209.01
+     ],
+     [
+      236.81,
+      207.28
+     ],
+     [
+      267.7,
+      204.34
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_2",
+   "x": 233.43,
+   "z": 182.89,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      233.43,
+      182.89
+     ],
+     [
+      234.32,
+      193.12
+     ],
+     [
+      235.94,
+      203.27
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_3",
+   "x": 219.04,
+   "z": 186.28,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      219.04,
+      186.28
+     ],
+     [
+      222.02,
+      194.43
+     ],
+     [
+      223.93,
+      202.9
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_4",
+   "x": 210.57,
+   "z": 197.44,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      210.57,
+      197.44
+     ],
+     [
+      215.1,
+      195.8
+     ],
+     [
+      219.8,
+      194.73
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_5",
+   "x": 222.68,
+   "z": 192.8,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      222.68,
+      192.8
+     ],
+     [
+      226.58,
+      191.53
+     ],
+     [
+      230.55,
+      190.49
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_6",
+   "x": 247.68,
+   "z": 181.78,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      247.68,
+      181.78
+     ],
+     [
+      248.23,
+      191.33
+     ],
+     [
+      248.94,
+      200.88
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_7",
+   "x": 237.04,
+   "z": 192.75,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      237.04,
+      192.75
+     ],
+     [
+      242.1,
+      192.29
+     ],
+     [
+      247.18,
+      192.08
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_8",
+   "x": 243.82,
+   "z": 182.03,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      243.82,
+      182.03
+     ],
+     [
+      244.12,
+      186.53
+     ],
+     [
+      244.42,
+      191.03
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_9",
+   "x": 241.03,
+   "z": 193.72,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      241.03,
+      193.72
+     ],
+     [
+      241.05,
+      197.56
+     ],
+     [
+      241.54,
+      201.37
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_10",
+   "x": 249.27,
+   "z": 188.07,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      249.27,
+      188.07
+     ],
+     [
+      255.65,
+      187.69
+     ],
+     [
+      262.03,
+      187.23
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_11",
+   "x": 252.92,
+   "z": 181.43,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      252.92,
+      181.43
+     ],
+     [
+      252.93,
+      184.06
+     ],
+     [
+      253.26,
+      186.66
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_12",
+   "x": 254.39,
+   "z": 188.88,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      254.39,
+      188.88
+     ],
+     [
+      254.61,
+      194.68
+     ],
+     [
+      255.15,
+      200.47
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_13",
+   "x": 249.7,
+   "z": 194.52,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      249.7,
+      194.52
+     ],
+     [
+      251.59,
+      194.44
+     ],
+     [
+      253.48,
+      194.26
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_14",
+   "x": 255.86,
+   "z": 192.07,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      255.86,
+      192.07
+     ],
+     [
+      259.09,
+      191.82
+     ],
+     [
+      262.32,
+      191.65
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_15",
+   "x": 211.97,
+   "z": 248.14,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      211.97,
+      248.14
+     ],
+     [
+      238.43,
+      251.04
+     ],
+     [
+      264.95,
+      253.32
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_16",
+   "x": 246.74,
+   "z": 216.55,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      246.74,
+      216.55
+     ],
+     [
+      248.02,
+      230.68
+     ],
+     [
+      249.49,
+      244.79
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_17",
+   "x": 218.85,
+   "z": 227.33,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      218.85,
+      227.33
+     ],
+     [
+      232.66,
+      226.72
+     ],
+     [
+      246.33,
+      224.65
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_18",
+   "x": 227.13,
+   "z": 218.47,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      227.13,
+      218.47
+     ],
+     [
+      227.56,
+      221.53
+     ],
+     [
+      227.73,
+      224.63
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_19",
+   "x": 233.82,
+   "z": 217.81,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      233.82,
+      217.81
+     ],
+     [
+      234.18,
+      220.89
+     ],
+     [
+      234.42,
+      223.98
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_20",
+   "x": 241.65,
+   "z": 217.05,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      241.65,
+      217.05
+     ],
+     [
+      242.02,
+      220.13
+     ],
+     [
+      242.25,
+      223.22
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_21",
+   "x": 235.67,
+   "z": 227.53,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      235.67,
+      227.53
+     ],
+     [
+      236.31,
+      236.77
+     ],
+     [
+      237.47,
+      245.96
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_22",
+   "x": 220.13,
+   "z": 240.5,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      220.13,
+      240.5
+     ],
+     [
+      227.82,
+      240.24
+     ],
+     [
+      235.42,
+      239.01
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_23",
+   "x": 224.31,
+   "z": 228.63,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      224.31,
+      228.63
+     ],
+     [
+      225.03,
+      233.49
+     ],
+     [
+      225.27,
+      238.4
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_24",
+   "x": 219.41,
+   "z": 233.12,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      219.41,
+      233.12
+     ],
+     [
+      221.4,
+      233.05
+     ],
+     [
+      223.37,
+      232.73
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_25",
+   "x": 225.93,
+   "z": 231.37,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      225.93,
+      231.37
+     ],
+     [
+      230.25,
+      230.8
+     ],
+     [
+      234.59,
+      230.52
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_26",
+   "x": 230.25,
+   "z": 241.11,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      230.25,
+      241.11
+     ],
+     [
+      230.63,
+      243.85
+     ],
+     [
+      230.79,
+      246.62
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_27",
+   "x": 237.79,
+   "z": 235.2,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      237.79,
+      235.2
+     ],
+     [
+      242.52,
+      234.71
+     ],
+     [
+      247.27,
+      234.28
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_28",
+   "x": 249.02,
+   "z": 227.59,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      249.02,
+      227.59
+     ],
+     [
+      254.97,
+      226.74
+     ],
+     [
+      260.96,
+      226.43
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_29",
+   "x": 255.35,
+   "z": 215.72,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      255.35,
+      215.72
+     ],
+     [
+      255.87,
+      220.61
+     ],
+     [
+      256.31,
+      225.51
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_30",
+   "x": 248.22,
+   "z": 219.32,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      248.22,
+      219.32
+     ],
+     [
+      251.34,
+      218.85
+     ],
+     [
+      254.5,
+      218.71
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_31",
+   "x": 257.14,
+   "z": 222.29,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      257.14,
+      222.29
+     ],
+     [
+      258.83,
+      222.06
+     ],
+     [
+      260.53,
+      221.96
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_32",
+   "x": 249.7,
+   "z": 234.54,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      249.7,
+      234.54
+     ],
+     [
+      255.65,
+      233.73
+     ],
+     [
+      261.64,
+      233.37
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_33",
+   "x": 252.99,
+   "z": 228.59,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      252.99,
+      228.59
+     ],
+     [
+      253.23,
+      230.71
+     ],
+     [
+      253.41,
+      232.85
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_34",
+   "x": 254.39,
+   "z": 235.4,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      254.39,
+      235.4
+     ],
+     [
+      254.57,
+      239.84
+     ],
+     [
+      255.25,
+      244.23
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_35",
+   "x": 230.52,
+   "z": 251.79,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      230.52,
+      251.79
+     ],
+     [
+      229.32,
+      259.61
+     ],
+     [
+      228.58,
+      267.49
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_36",
+   "x": 213.03,
+   "z": 257.47,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      213.03,
+      257.47
+     ],
+     [
+      220.59,
+      258.78
+     ],
+     [
+      228.25,
+      259.35
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_37",
+   "x": 223.53,
+   "z": 250.93,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      223.53,
+      250.93
+     ],
+     [
+      223.05,
+      254.04
+     ],
+     [
+      222.75,
+      257.18
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_38",
+   "x": 223.79,
+   "z": 260.29,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      223.79,
+      260.29
+     ],
+     [
+      223.5,
+      263.55
+     ],
+     [
+      222.98,
+      266.79
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_39",
+   "x": 216.58,
+   "z": 259.4,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      216.58,
+      259.4
+     ],
+     [
+      216.43,
+      261.62
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_40",
+   "x": 241.4,
+   "z": 253.14,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      241.4,
+      253.14
+     ],
+     [
+      240.79,
+      261.03
+     ],
+     [
+      239.46,
+      268.83
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_41",
+   "x": 230.66,
+   "z": 261.59,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      230.66,
+      261.59
+     ],
+     [
+      234.68,
+      262.34
+     ],
+     [
+      238.77,
+      262.59
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_42",
+   "x": 249.72,
+   "z": 254.16,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      249.72,
+      254.16
+     ],
+     [
+      248.31,
+      261.96
+     ],
+     [
+      247.78,
+      269.86
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_43",
+   "x": 241.69,
+   "z": 262.72,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      241.69,
+      262.72
+     ],
+     [
+      244.37,
+      262.93
+     ],
+     [
+      247.03,
+      263.38
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_44",
+   "x": 250.36,
+   "z": 261.47,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      250.36,
+      261.47
+     ],
+     [
+      256.23,
+      262.08
+     ],
+     [
+      262.07,
+      262.92
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_45",
+   "x": 257.53,
+   "z": 255.13,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      257.53,
+      255.13
+     ],
+     [
+      257.28,
+      258.1
+     ],
+     [
+      256.8,
+      261.04
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_46",
+   "x": 255.74,
+   "z": 263.36,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      255.74,
+      263.36
+     ],
+     [
+      255.14,
+      267.02
+     ],
+     [
+      254.83,
+      270.73
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_47",
+   "x": 284.89,
+   "z": 211.58,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      284.89,
+      211.58
+     ],
+     [
+      294.38,
+      209.32
+     ],
+     [
+      303.52,
+      205.91
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_48",
+   "x": 279.67,
+   "z": 188.41,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      279.67,
+      188.41
+     ],
+     [
+      287.95,
+      186.22
+     ],
+     [
+      294.47,
+      185.26
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_49",
+   "x": 285.02,
+   "z": 179.99,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      285.02,
+      179.99
+     ],
+     [
+      285.52,
+      182.63
+     ],
+     [
+      286.29,
+      185.21
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_50",
+   "x": 282.77,
+   "z": 196,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      282.77,
+      196
+     ],
+     [
+      290.1,
+      196.31
+     ],
+     [
+      297.41,
+      195.73
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_51",
+   "x": 289.9,
+   "z": 189.31,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      289.9,
+      189.31
+     ],
+     [
+      289.88,
+      191.82
+     ],
+     [
+      289.99,
+      194.32
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_52",
+   "x": 289.43,
+   "z": 197.43,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      289.43,
+      197.43
+     ],
+     [
+      289.65,
+      200.78
+     ],
+     [
+      289.55,
+      204.14
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_53",
+   "x": 294.8,
+   "z": 242.56,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      294.8,
+      242.56
+     ],
+     [
+      303.33,
+      239.72
+     ],
+     [
+      308.59,
+      238.68
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_54",
+   "x": 292.55,
+   "z": 227.37,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      292.55,
+      227.37
+     ],
+     [
+      299.07,
+      224.4
+     ],
+     [
+      305.54,
+      221.33
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_55",
+   "x": 292.91,
+   "z": 216.6,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      292.91,
+      216.6
+     ],
+     [
+      294.73,
+      220.42
+     ],
+     [
+      296.48,
+      224.28
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_56",
+   "x": 296.87,
+   "z": 226.63,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      296.87,
+      226.63
+     ],
+     [
+      299.47,
+      231.48
+     ],
+     [
+      301.5,
+      236.59
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_57",
+   "x": 294.26,
+   "z": 231.05,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      294.26,
+      231.05
+     ],
+     [
+      295.52,
+      230.41
+     ],
+     [
+      296.81,
+      229.86
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_58",
+   "x": 300.24,
+   "z": 230.53,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      300.24,
+      230.53
+     ],
+     [
+      304.16,
+      228.67
+     ],
+     [
+      308.12,
+      226.87
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_59",
+   "x": 305.93,
+   "z": 241.78,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      305.93,
+      241.78
+     ],
+     [
+      306.56,
+      244.61
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_60",
+   "x": 296.69,
+   "z": 247.08,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      296.69,
+      247.08
+     ],
+     [
+      301.06,
+      245.9
+     ],
+     [
+      305.53,
+      245.15
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_61",
+   "x": 300.24,
+   "z": 192,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      300.24,
+      192
+     ],
+     [
+      297.41,
+      195.73
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_62",
+   "x": 211.76,
+   "z": 192,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      211.76,
+      192
+     ],
+     [
+      213.36,
+      196.43
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_63",
+   "x": 208.19,
+   "z": 197.62,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      208.19,
+      197.62
+     ],
+     [
+      210.57,
+      197.44
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_64",
+   "x": 238.43,
+   "z": 251.04,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      238.43,
+      251.04
+     ],
+     [
+      237.47,
+      245.96
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_65",
+   "x": 236.81,
+   "z": 207.28,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      236.81,
+      207.28
+     ],
+     [
+      241.65,
+      217.05
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_66",
+   "x": 235.94,
+   "z": 203.27,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      235.94,
+      203.27
+     ],
+     [
+      236.17,
+      207.32
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_67",
+   "x": 230.55,
+   "z": 190.49,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      230.55,
+      190.49
+     ],
+     [
+      234.06,
+      190.19
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_68",
+   "x": 269.03,
+   "z": 170.98,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      269.03,
+      170.98
+     ],
+     [
+      262.03,
+      187.23
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_69",
+   "x": 284.89,
+   "z": 211.58,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      284.89,
+      211.58
+     ],
+     [
+      279.28,
+      212.95
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_70",
+   "x": 292.91,
+   "z": 216.6,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      292.91,
+      216.6
+     ],
+     [
+      291.34,
+      210.04
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_71",
+   "x": 289.55,
+   "z": 204.14,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      289.55,
+      204.14
+     ],
+     [
+      290.98,
+      210.13
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_72",
+   "x": 303.33,
+   "z": 239.72,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      303.33,
+      239.72
+     ],
+     [
+      301.5,
+      236.59
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "weephaven_street_73",
+   "x": 287.95,
+   "z": 186.22,
+   "yaw": 0,
+   "data": {
+    "town": "weephaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      287.95,
+      186.22
+     ],
+     [
+      289.9,
+      189.31
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "building",
+   "id": "weephaven_plot_0",
+   "x": 216.65,
+   "z": 201.08,
+   "yaw": -2.8555,
+   "data": {
+    "town": "weephaven",
+    "want": "inn",
+    "district": "residential",
+    "w": 8.42,
+    "d": 6.41,
+    "angle": 5.9971,
+    "front": 10.7095,
+    "streetGap": -0.32
+   }
+  },
+  {
+   "kind": "building",
+   "id": "weephaven_plot_1",
+   "x": 225.41,
+   "z": 187.56,
+   "yaw": 0.2861,
+   "data": {
+    "town": "weephaven",
+    "want": "house",
+    "district": "residential",
+    "w": 7,
+    "d": 4.87,
+    "angle": 5.9971,
+    "front": 7.5679,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "weephaven_plot_2",
+   "x": 228.21,
+   "z": 197.05,
+   "yaw": -2.8555,
+   "data": {
+    "town": "weephaven",
+    "want": "market",
+    "district": "residential",
+    "w": 7,
+    "d": 7.61,
+    "angle": 5.9971,
+    "front": 10.7095,
+    "streetGap": -0.15
+   }
+  },
+  {
+   "kind": "building",
+   "id": "weephaven_plot_3",
+   "x": 239.84,
+   "z": 186.82,
+   "yaw": 1.6369,
+   "data": {
+    "town": "weephaven",
+    "want": "shrine",
+    "district": "residential",
+    "w": 5.17,
+    "d": 7.82,
+    "angle": 6.2171,
+    "front": 6.2171,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "weephaven_plot_4",
+   "x": 245.06,
+   "z": 197.29,
+   "yaw": 1.6369,
+   "data": {
+    "town": "weephaven",
+    "want": "hut",
+    "district": "craft",
+    "w": 3.71,
+    "d": 6.47,
+    "angle": 6.2171,
+    "front": 6.2171,
+    "streetGap": -0.36
+   }
+  },
+  {
+   "kind": "building",
+   "id": "weephaven_plot_5",
+   "x": 258.06,
+   "z": 183.72,
+   "yaw": 0.0661,
+   "data": {
+    "town": "weephaven",
+    "want": "house",
+    "district": "residential",
+    "w": 6.24,
+    "d": 4.05,
+    "angle": 6.2171,
+    "front": 7.7879,
+    "streetGap": -0.33
+   }
+  },
+  {
+   "kind": "building",
+   "id": "weephaven_plot_6",
+   "x": 259.4,
+   "z": 196.58,
+   "yaw": -3.0755,
+   "data": {
+    "town": "weephaven",
+    "want": "hut",
+    "district": "craft",
+    "w": 5.27,
+    "d": 5.99,
+    "angle": 6.2171,
+    "front": 10.9295,
+    "streetGap": -0.33
+   }
+  },
+  {
+   "kind": "building",
+   "id": "weephaven_plot_7",
+   "x": 222.29,
+   "z": 222.05,
+   "yaw": 1.6679,
+   "data": {
+    "town": "weephaven",
+    "want": "hut",
+    "district": "craft",
+    "w": 6.67,
+    "d": 4.99,
+    "angle": 6.1861,
+    "front": 6.1861,
+    "streetGap": -0.14
+   }
+  },
+  {
+   "kind": "building",
+   "id": "weephaven_plot_8",
+   "x": 238.03,
+   "z": 220.52,
+   "yaw": -1.4737,
+   "data": {
+    "town": "weephaven",
+    "want": "hut",
+    "district": "civic",
+    "w": 4.33,
+    "d": 4.99,
+    "angle": 6.1861,
+    "front": 9.3277,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "weephaven_plot_9",
+   "x": 230.66,
+   "z": 235.01,
+   "yaw": 1.6679,
+   "data": {
+    "town": "weephaven",
+    "want": "hut",
+    "district": "craft",
+    "w": 7.51,
+    "d": 4.49,
+    "angle": 6.1861,
+    "front": 6.1861,
+    "streetGap": -0.33
+   }
+  },
+  {
+   "kind": "building",
+   "id": "weephaven_plot_10",
+   "x": 224.93,
+   "z": 244.41,
+   "yaw": -3.0445,
+   "data": {
+    "town": "weephaven",
+    "want": "house",
+    "district": "residential",
+    "w": 7.61,
+    "d": 4.33,
+    "angle": 6.1861,
+    "front": 10.8985,
+    "streetGap": -0.19
+   }
+  },
+  {
+   "kind": "building",
+   "id": "weephaven_plot_11",
+   "x": 242.09,
+   "z": 230.27,
+   "yaw": 0.0971,
+   "data": {
+    "town": "weephaven",
+    "want": "mill",
+    "district": "civic",
+    "w": 8.32,
+    "d": 5.51,
+    "angle": 6.1861,
+    "front": 7.7569,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "weephaven_plot_12",
+   "x": 243.1,
+   "z": 240.62,
+   "yaw": -3.0445,
+   "data": {
+    "town": "weephaven",
+    "want": "forge",
+    "district": "craft",
+    "w": 8.32,
+    "d": 8.35,
+    "angle": 6.1861,
+    "front": 10.8985,
+    "streetGap": -0.33
+   }
+  },
+  {
+   "kind": "building",
+   "id": "weephaven_plot_13",
+   "x": 259.18,
+   "z": 239.39,
+   "yaw": -3.0445,
+   "data": {
+    "town": "weephaven",
+    "want": "hut",
+    "district": "civic",
+    "w": 4.86,
+    "d": 7.67,
+    "angle": 6.1861,
+    "front": 10.8985,
+    "streetGap": -0.07
+   }
+  },
+  {
+   "kind": "building",
+   "id": "weephaven_plot_14",
+   "x": 217.77,
+   "z": 253.39,
+   "yaw": 1.4479,
+   "data": {
+    "town": "weephaven",
+    "want": "house",
+    "district": "residential",
+    "w": 7.22,
+    "d": 5.1,
+    "angle": 6.4061,
+    "front": 6.4061,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "weephaven_plot_15",
+   "x": 235.39,
+   "z": 256.6,
+   "yaw": -1.6937,
+   "data": {
+    "town": "weephaven",
+    "want": "stable",
+    "district": "residential",
+    "w": 6.97,
+    "d": 7.15,
+    "angle": 6.4061,
+    "front": 9.5477,
+    "streetGap": -0.05
+   }
+  },
+  {
+   "kind": "building",
+   "id": "weephaven_plot_16",
+   "x": 234.25,
+   "z": 265.79,
+   "yaw": 3.0187,
+   "data": {
+    "town": "weephaven",
+    "want": "house",
+    "district": "residential",
+    "w": 6.97,
+    "d": 3.55,
+    "angle": 6.4061,
+    "front": 11.1185,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "weephaven_plot_17",
+   "x": 245.01,
+   "z": 257.74,
+   "yaw": -0.1229,
+   "data": {
+    "town": "weephaven",
+    "want": "house",
+    "district": "residential",
+    "w": 4.18,
+    "d": 7.05,
+    "angle": 6.4061,
+    "front": 7.9769,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "weephaven_plot_18",
+   "x": 243.89,
+   "z": 266.8,
+   "yaw": -1.6937,
+   "data": {
+    "town": "weephaven",
+    "want": "house",
+    "district": "residential",
+    "w": 4.18,
+    "d": 3.92,
+    "angle": 6.4061,
+    "front": 9.5477,
+    "streetGap": -0.16
+   }
+  },
+  {
+   "kind": "building",
+   "id": "weephaven_plot_19",
+   "x": 253.42,
+   "z": 257.62,
+   "yaw": -0.1229,
+   "data": {
+    "town": "weephaven",
+    "want": "house",
+    "district": "residential",
+    "w": 3.92,
+    "d": 4.76,
+    "angle": 6.4061,
+    "front": 7.9769,
+    "streetGap": -0.34
+   }
+  },
+  {
+   "kind": "building",
+   "id": "weephaven_plot_20",
+   "x": 259,
+   "z": 267.5,
+   "yaw": 3.0187,
+   "data": {
+    "town": "weephaven",
+    "want": "house",
+    "district": "residential",
+    "w": 3.77,
+    "d": 6.23,
+    "angle": 6.4061,
+    "front": 11.1185,
+    "streetGap": -0.24
+   }
+  },
+  {
+   "kind": "building",
+   "id": "weephaven_plot_21",
+   "x": 282.02,
+   "z": 183.48,
+   "yaw": 1.8094,
+   "data": {
+    "town": "weephaven",
+    "want": "house",
+    "district": "residential",
+    "w": 3.79,
+    "d": 4.17,
+    "angle": 6.0446,
+    "front": 6.0446,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "weephaven_plot_22",
+   "x": 285.74,
+   "z": 191.89,
+   "yaw": 1.5894,
+   "data": {
+    "town": "weephaven",
+    "want": "house",
+    "district": "residential",
+    "w": 4.88,
+    "d": 3.82,
+    "angle": 6.2646,
+    "front": 6.2646,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "weephaven_plot_23",
+   "x": 285.55,
+   "z": 200.85,
+   "yaw": -3.123,
+   "data": {
+    "town": "weephaven",
+    "want": "house",
+    "district": "residential",
+    "w": 4.16,
+    "d": 5.51,
+    "angle": 6.2646,
+    "front": 10.977,
+    "streetGap": -0.12
+   }
+  },
+  {
+   "kind": "building",
+   "id": "weephaven_plot_24",
+   "x": 294.13,
+   "z": 200.69,
+   "yaw": -1.5522,
+   "data": {
+    "town": "weephaven",
+    "want": "house",
+    "district": "residential",
+    "w": 5.55,
+    "d": 5.51,
+    "angle": 6.2646,
+    "front": 9.4062,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "weephaven_plot_25",
+   "x": 299.5,
+   "z": 218.2,
+   "yaw": -1.1351,
+   "data": {
+    "town": "weephaven",
+    "want": "granary",
+    "district": "residential",
+    "w": 7.12,
+    "d": 7.27,
+    "angle": 5.8475,
+    "front": 8.9891,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "weephaven_plot_26",
+   "x": 305.69,
+   "z": 231.94,
+   "yaw": -2.7059,
+   "data": {
+    "town": "weephaven",
+    "want": "house",
+    "district": "residential",
+    "w": 7.49,
+    "d": 3.69,
+    "angle": 5.8475,
+    "front": 10.5599,
+    "streetGap": -0.33
+   }
+  },
+  {
+   "kind": "town_square",
+   "id": "wildhaven_square",
+   "x": 1284.52,
+   "z": 222.14,
+   "yaw": 0,
+   "data": {
+    "r": 3.82,
+    "town": "wildhaven",
+    "culture": "halfling"
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_0",
+   "x": 1272.46,
+   "z": 187.06,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      1272.46,
+      187.06
+     ],
+     [
+      1269.54,
+      223.46
+     ],
+     [
+      1268.67,
+      259.96
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_1",
+   "x": 1243.41,
+   "z": 232.08,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      1243.41,
+      232.08
+     ],
+     [
+      1253.2,
+      233.92
+     ],
+     [
+      1263.12,
+      234.71
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_2",
+   "x": 1247.71,
+   "z": 210.38,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1247.71,
+      210.38
+     ],
+     [
+      1256.19,
+      210.44
+     ],
+     [
+      1264.65,
+      211.09
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_3",
+   "x": 1260.02,
+   "z": 196.53,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1260.02,
+      196.53
+     ],
+     [
+      1258.91,
+      202.69
+     ],
+     [
+      1258.2,
+      208.91
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_4",
+   "x": 1249.36,
+   "z": 202.04,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1249.36,
+      202.04
+     ],
+     [
+      1253.3,
+      202.83
+     ],
+     [
+      1257.72,
+      203.24
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_5",
+   "x": 1260.24,
+   "z": 203.99,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1260.24,
+      203.99
+     ],
+     [
+      1262.05,
+      204.27
+     ],
+     [
+      1263.87,
+      204.52
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_6",
+   "x": 1256.48,
+   "z": 212.63,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1256.48,
+      212.63
+     ],
+     [
+      1256.97,
+      220.32
+     ],
+     [
+      1256.88,
+      228.02
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_7",
+   "x": 1247.83,
+   "z": 220.05,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1247.83,
+      220.05
+     ],
+     [
+      1251.55,
+      220.05
+     ],
+     [
+      1255.27,
+      219.86
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_8",
+   "x": 1258.15,
+   "z": 223.18,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1258.15,
+      223.18
+     ],
+     [
+      1260.97,
+      223.04
+     ],
+     [
+      1263.79,
+      223.03
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_9",
+   "x": 1255.97,
+   "z": 237.22,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1255.97,
+      237.22
+     ],
+     [
+      1253.67,
+      244.59
+     ],
+     [
+      1252.6,
+      249.89
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_10",
+   "x": 1246.2,
+   "z": 240.7,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1246.2,
+      240.7
+     ],
+     [
+      1248.29,
+      241.12
+     ],
+     [
+      1252.53,
+      241.74
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_11",
+   "x": 1257.29,
+   "z": 242.65,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1257.29,
+      242.65
+     ],
+     [
+      1258.92,
+      243.32
+     ],
+     [
+      1260.56,
+      244
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_12",
+   "x": 1278.81,
+   "z": 232.55,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      1278.81,
+      232.55
+     ],
+     [
+      1296.38,
+      230.33
+     ],
+     [
+      1314.07,
+      229.47
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_13",
+   "x": 1295.89,
+   "z": 195.36,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1295.89,
+      195.36
+     ],
+     [
+      1295.85,
+      211.5
+     ],
+     [
+      1296.39,
+      227.64
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_14",
+   "x": 1279.72,
+   "z": 213.79,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1279.72,
+      213.79
+     ],
+     [
+      1286.63,
+      212.97
+     ],
+     [
+      1293.56,
+      212.2
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_15",
+   "x": 1283.67,
+   "z": 198.29,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1283.67,
+      198.29
+     ],
+     [
+      1284.42,
+      205.16
+     ],
+     [
+      1285.24,
+      212.02
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_16",
+   "x": 1278.71,
+   "z": 204.98,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1278.71,
+      204.98
+     ],
+     [
+      1280.96,
+      204.65
+     ],
+     [
+      1283.23,
+      204.46
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_17",
+   "x": 1285.63,
+   "z": 205.47,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1285.63,
+      205.47
+     ],
+     [
+      1289.16,
+      205.02
+     ],
+     [
+      1292.69,
+      204.66
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_18",
+   "x": 1288.83,
+   "z": 213.88,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1288.83,
+      213.88
+     ],
+     [
+      1289.77,
+      219.36
+     ],
+     [
+      1290.1,
+      224.91
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_19",
+   "x": 1280.21,
+   "z": 218.06,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1280.21,
+      218.06
+     ],
+     [
+      1284.01,
+      217.68
+     ],
+     [
+      1287.79,
+      217.19
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_20",
+   "x": 1290.91,
+   "z": 219.65,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1290.91,
+      219.65
+     ],
+     [
+      1292.63,
+      219.35
+     ],
+     [
+      1294.37,
+      219.25
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_21",
+   "x": 1298.7,
+   "z": 214.01,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1298.7,
+      214.01
+     ],
+     [
+      1304.08,
+      214.27
+     ],
+     [
+      1309.41,
+      215.15
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_22",
+   "x": 1299.84,
+   "z": 203.22,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1299.84,
+      203.22
+     ],
+     [
+      1305.17,
+      204.02
+     ],
+     [
+      1310.55,
+      204.35
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_23",
+   "x": 1307.94,
+   "z": 199.03,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1307.94,
+      199.03
+     ],
+     [
+      1307.63,
+      200.85
+     ],
+     [
+      1307.55,
+      202.7
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_24",
+   "x": 1304.62,
+   "z": 205.06,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1304.62,
+      205.06
+     ],
+     [
+      1303.98,
+      209.08
+     ],
+     [
+      1303.76,
+      213.13
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_25",
+   "x": 1303.2,
+   "z": 215.91,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1303.2,
+      215.91
+     ],
+     [
+      1302.92,
+      219.91
+     ],
+     [
+      1302.35,
+      223.87
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_26",
+   "x": 1294.52,
+   "z": 235.75,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1294.52,
+      235.75
+     ],
+     [
+      1296.16,
+      244.66
+     ],
+     [
+      1298.74,
+      253.34
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_27",
+   "x": 1284.47,
+   "z": 248.02,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1284.47,
+      248.02
+     ],
+     [
+      1289.43,
+      247.28
+     ],
+     [
+      1294.44,
+      246.91
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_28",
+   "x": 1289.49,
+   "z": 238.58,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1289.49,
+      238.58
+     ],
+     [
+      1289.68,
+      242.35
+     ],
+     [
+      1290.32,
+      246.08
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_29",
+   "x": 1288.53,
+   "z": 248.87,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1288.53,
+      248.87
+     ],
+     [
+      1288.89,
+      251.44
+     ],
+     [
+      1289.1,
+      254.02
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_30",
+   "x": 1299.77,
+   "z": 246.64,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1299.77,
+      246.64
+     ],
+     [
+      1305.58,
+      244.49
+     ],
+     [
+      1311.48,
+      242.62
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_31",
+   "x": 1301.39,
+   "z": 235.23,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1301.39,
+      235.23
+     ],
+     [
+      1302.93,
+      239.47
+     ],
+     [
+      1304.32,
+      243.76
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_32",
+   "x": 1308.18,
+   "z": 245.07,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1308.18,
+      245.07
+     ],
+     [
+      1309.01,
+      247.24
+     ],
+     [
+      1309.2,
+      247.85
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_33",
+   "x": 1299.93,
+   "z": 192,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      1299.93,
+      192
+     ],
+     [
+      1295.89,
+      195.36
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_34",
+   "x": 1257.4,
+   "z": 193.82,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      1257.4,
+      193.82
+     ],
+     [
+      1260.02,
+      196.53
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_35",
+   "x": 1301.39,
+   "z": 235.23,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1301.39,
+      235.23
+     ],
+     [
+      1301.14,
+      230.1
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_36",
+   "x": 1296.16,
+   "z": 244.66,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1296.16,
+      244.66
+     ],
+     [
+      1299.77,
+      246.64
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_37",
+   "x": 1269.54,
+   "z": 223.46,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1269.54,
+      223.46
+     ],
+     [
+      1280.21,
+      218.06
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_38",
+   "x": 1263.79,
+   "z": 223.03,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1263.79,
+      223.03
+     ],
+     [
+      1269.54,
+      223.46
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_39",
+   "x": 1263.12,
+   "z": 234.71,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1263.12,
+      234.71
+     ],
+     [
+      1269.27,
+      234.86
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "wildhaven_street_40",
+   "x": 1257.29,
+   "z": 242.65,
+   "yaw": 0,
+   "data": {
+    "town": "wildhaven",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1257.29,
+      242.65
+     ],
+     [
+      1254.54,
+      241.79
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wildhaven_plot_0",
+   "x": 1251.44,
+   "z": 215.75,
+   "yaw": 0.0255,
+   "data": {
+    "town": "wildhaven",
+    "want": "house",
+    "district": "residential",
+    "w": 6.25,
+    "d": 4.79,
+    "angle": -0.0255,
+    "front": 1.5453,
+    "streetGap": -0.19
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wildhaven_plot_1",
+   "x": 1251.67,
+   "z": 224.65,
+   "yaw": -3.1161,
+   "data": {
+    "town": "wildhaven",
+    "want": "shrine",
+    "district": "residential",
+    "w": 6.25,
+    "d": 5.8,
+    "angle": -0.0255,
+    "front": 4.6869,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wildhaven_plot_2",
+   "x": 1260.77,
+   "z": 215.18,
+   "yaw": -1.5453,
+   "data": {
+    "town": "wildhaven",
+    "want": "house",
+    "district": "residential",
+    "w": 4.44,
+    "d": 4.11,
+    "angle": -0.0255,
+    "front": 3.1161,
+    "streetGap": -0.21
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wildhaven_plot_3",
+   "x": 1260.87,
+   "z": 219.28,
+   "yaw": 0.0255,
+   "data": {
+    "town": "wildhaven",
+    "want": "house",
+    "district": "residential",
+    "w": 4.44,
+    "d": 4.11,
+    "angle": -0.0255,
+    "front": 1.5453,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wildhaven_plot_4",
+   "x": 1288.68,
+   "z": 200.84,
+   "yaw": 0.1143,
+   "data": {
+    "town": "wildhaven",
+    "want": "hut",
+    "district": "craft",
+    "w": 5.9,
+    "d": 5.01,
+    "angle": -0.1143,
+    "front": 1.4565,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wildhaven_plot_5",
+   "x": 1289.6,
+   "z": 208.84,
+   "yaw": 0.1143,
+   "data": {
+    "town": "wildhaven",
+    "want": "hut",
+    "district": "craft",
+    "w": 5.9,
+    "d": 4.12,
+    "angle": -0.1143,
+    "front": 1.4565,
+    "streetGap": -0.38
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wildhaven_plot_6",
+   "x": 1306.43,
+   "z": 220.28,
+   "yaw": -1.6765,
+   "data": {
+    "town": "wildhaven",
+    "want": "hut",
+    "district": "craft",
+    "w": 3.65,
+    "d": 6.8,
+    "angle": 0.1057,
+    "front": 3.2473,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wildhaven_plot_7",
+   "x": 1286.25,
+   "z": 242.74,
+   "yaw": 1.6817,
+   "data": {
+    "town": "wildhaven",
+    "want": "hut",
+    "district": "craft",
+    "w": 3.51,
+    "d": 6.34,
+    "angle": -0.1109,
+    "front": -0.1109,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wildhaven_plot_8",
+   "x": 1292.43,
+   "z": 251.04,
+   "yaw": -1.4599,
+   "data": {
+    "town": "wildhaven",
+    "want": "house",
+    "district": "residential",
+    "w": 3.72,
+    "d": 3.99,
+    "angle": -0.1109,
+    "front": 3.0307,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "wildhaven_plot_9",
+   "x": 1306.79,
+   "z": 238.15,
+   "yaw": -1.2399,
+   "data": {
+    "town": "wildhaven",
+    "want": "granary",
+    "district": "residential",
+    "w": 4.77,
+    "d": 7.82,
+    "angle": -0.3309,
+    "front": 2.8107,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_96",
+   "x": 1088,
+   "z": -448,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": false,
+    "pts": [
+     [
+      1088,
+      -448,
+      208.62
+     ],
+     [
+      1088,
+      -446,
+      209.06
+     ],
+     [
+      1088,
+      -442,
+      209.66
+     ],
+     [
+      1088,
+      -436,
+      210.18
+     ],
+     [
+      1088,
+      -428,
+      211.05
+     ],
+     [
+      1088,
+      -418,
+      212.02
+     ],
+     [
+      1088,
+      -406,
+      213.03
+     ],
+     [
+      1088,
+      -392,
+      214.02
+     ],
+     [
+      1088,
+      -376,
+      215.06
+     ],
+     [
+      1090,
+      -360,
+      216.01
+     ],
+     [
+      1094,
+      -344,
+      217.07
+     ],
+     [
+      1100,
+      -328,
+      218.3
+     ],
+     [
+      1108,
+      -312,
+      219.72
+     ],
+     [
+      1118,
+      -296,
+      221.27
+     ],
+     [
+      1130,
+      -280,
+      222.75
+     ],
+     [
+      1144,
+      -264,
+      224.12
+     ],
+     [
+      1160,
+      -248,
+      225.24
+     ],
+     [
+      1176,
+      -232,
+      226.21
+     ],
+     [
+      1192,
+      -216,
+      226.86
+     ],
+     [
+      1208,
+      -200,
+      227.23
+     ],
+     [
+      1224,
+      -184,
+      227.12
+     ],
+     [
+      1240,
+      -168,
+      226.76
+     ],
+     [
+      1256,
+      -152,
+      226.12
+     ],
+     [
+      1272,
+      -136,
+      225.23
+     ],
+     [
+      1288,
+      -120,
+      223.9
+     ],
+     [
+      1302,
+      -104,
+      222.3
+     ],
+     [
+      1314,
+      -88,
+      220.54
+     ],
+     [
+      1324,
+      -72,
+      219.14
+     ],
+     [
+      1332,
+      -56,
+      218.13
+     ],
+     [
+      1338,
+      -40,
+      217.42
+     ],
+     [
+      1342,
+      -24,
+      217.2
+     ],
+     [
+      1344,
+      -8,
+      217.55
+     ],
+     [
+      1344,
+      8,
+      218.31
+     ],
+     [
+      1344,
+      24,
+      219.04
+     ],
+     [
+      1344,
+      40,
+      219.54
+     ],
+     [
+      1344,
+      56,
+      220.03
+     ],
+     [
+      1344,
+      72,
+      220.47
+     ],
+     [
+      1344,
+      88,
+      220.92
+     ],
+     [
+      1344,
+      104,
+      221.52
+     ],
+     [
+      1344,
+      120,
+      222.36
+     ],
+     [
+      1344,
+      136,
+      223.53
+     ],
+     [
+      1344,
+      150,
+      224.95
+     ],
+     [
+      1344,
+      162,
+      226.31
+     ],
+     [
+      1344,
+      172,
+      227.7
+     ],
+     [
+      1344,
+      180,
+      228.96
+     ],
+     [
+      1344,
+      186,
+      229.64
+     ],
+     [
+      1344,
+      190,
+      230.12
+     ],
+     [
+      1344,
+      192,
+      230.52
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_97_0",
+   "x": 1344,
+   "z": 192,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": false,
+    "pts": [
+     [
+      1344,
+      192,
+      231.84
+     ],
+     [
+      1342,
+      192,
+      232.09
+     ],
+     [
+      1338,
+      192,
+      232.31
+     ],
+     [
+      1332,
+      192,
+      232.39
+     ],
+     [
+      1324,
+      192,
+      232.7
+     ],
+     [
+      1314,
+      192,
+      233.03
+     ],
+     [
+      1313.05,
+      192,
+      233.05
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_97_1",
+   "x": 1242.49,
+   "z": 197.38,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": false,
+    "pts": [
+     [
+      1242.49,
+      197.38,
+      233.84
+     ],
+     [
+      1240,
+      198,
+      233.89
+     ],
+     [
+      1224,
+      204,
+      234.2
+     ],
+     [
+      1208,
+      212,
+      234.64
+     ],
+     [
+      1192,
+      222,
+      235.39
+     ],
+     [
+      1176,
+      234,
+      236.34
+     ],
+     [
+      1160,
+      248,
+      237.66
+     ],
+     [
+      1144,
+      264,
+      239.04
+     ],
+     [
+      1130,
+      280,
+      240.64
+     ],
+     [
+      1118,
+      296,
+      242.39
+     ],
+     [
+      1108,
+      312,
+      243.99
+     ],
+     [
+      1100,
+      328,
+      245.45
+     ],
+     [
+      1094,
+      344,
+      246.79
+     ],
+     [
+      1090,
+      360,
+      247.99
+     ],
+     [
+      1088,
+      376,
+      249.28
+     ],
+     [
+      1088,
+      392,
+      250.41
+     ],
+     [
+      1088,
+      408,
+      251.54
+     ],
+     [
+      1088,
+      420.92,
+      252.58
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_97_2",
+   "x": 1088,
+   "z": 699.08,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": false,
+    "pts": [
+     [
+      1088,
+      699.08,
+      262.81
+     ],
+     [
+      1088,
+      712,
+      264.13
+     ],
+     [
+      1088,
+      728,
+      265.7
+     ],
+     [
+      1088,
+      744,
+      266.96
+     ],
+     [
+      1088,
+      760,
+      268.05
+     ],
+     [
+      1088,
+      776,
+      268.92
+     ],
+     [
+      1088,
+      790,
+      269.66
+     ],
+     [
+      1088,
+      802,
+      270.17
+     ],
+     [
+      1088,
+      812,
+      270.65
+     ],
+     [
+      1088,
+      820,
+      271.11
+     ],
+     [
+      1088,
+      826,
+      271.31
+     ],
+     [
+      1088,
+      830,
+      271.45
+     ],
+     [
+      1088,
+      832,
+      271.74
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_98",
+   "x": 1344,
+   "z": 192,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": false,
+    "pts": [
+     [
+      1344,
+      192,
+      231.04
+     ],
+     [
+      1346,
+      192,
+      230.89
+     ],
+     [
+      1350,
+      192,
+      230.59
+     ],
+     [
+      1356,
+      192,
+      230.37
+     ],
+     [
+      1364,
+      192,
+      230.03
+     ],
+     [
+      1374,
+      192,
+      229.58
+     ],
+     [
+      1386,
+      192,
+      229.22
+     ],
+     [
+      1400,
+      192,
+      228.95
+     ],
+     [
+      1416,
+      192,
+      228.93
+     ],
+     [
+      1432,
+      192,
+      229.11
+     ],
+     [
+      1448,
+      192,
+      229.33
+     ],
+     [
+      1464,
+      192,
+      229.84
+     ],
+     [
+      1480,
+      192,
+      230.67
+     ],
+     [
+      1496,
+      192,
+      231.58
+     ],
+     [
+      1512,
+      192,
+      232.62
+     ],
+     [
+      1528,
+      192,
+      233.57
+     ],
+     [
+      1544,
+      192,
+      234.8
+     ],
+     [
+      1560,
+      192,
+      236.06
+     ],
+     [
+      1576,
+      192,
+      237.16
+     ],
+     [
+      1592,
+      192,
+      238.32
+     ],
+     [
+      1608,
+      192,
+      239.29
+     ],
+     [
+      1624,
+      192,
+      240.06
+     ],
+     [
+      1640,
+      192,
+      240.69
+     ],
+     [
+      1656,
+      192,
+      240.8
+     ],
+     [
+      1672,
+      192,
+      240.81
+     ],
+     [
+      1688,
+      190,
+      240.65
+     ],
+     [
+      1704,
+      186,
+      240.3
+     ],
+     [
+      1720,
+      180,
+      239.97
+     ],
+     [
+      1736,
+      172,
+      239.78
+     ],
+     [
+      1752,
+      162,
+      239.42
+     ],
+     [
+      1768,
+      150,
+      239.19
+     ],
+     [
+      1784,
+      136,
+      238.59
+     ],
+     [
+      1800,
+      120,
+      237.85
+     ],
+     [
+      1816,
+      104,
+      236.87
+     ],
+     [
+      1832,
+      88,
+      235.63
+     ],
+     [
+      1848,
+      72,
+      233.94
+     ],
+     [
+      1864,
+      56,
+      232.32
+     ],
+     [
+      1880,
+      40,
+      230.9
+     ],
+     [
+      1896,
+      24,
+      229.82
+     ],
+     [
+      1912,
+      8,
+      228.84
+     ],
+     [
+      1928,
+      -8,
+      227.93
+     ],
+     [
+      1944,
+      -22,
+      227.39
+     ],
+     [
+      1960,
+      -34,
+      227.23
+     ],
+     [
+      1976,
+      -44,
+      227.23
+     ],
+     [
+      1992,
+      -52,
+      227.29
+     ],
+     [
+      2008,
+      -58,
+      227.52
+     ],
+     [
+      2024,
+      -62,
+      227.86
+     ],
+     [
+      2040,
+      -64,
+      228.37
+     ],
+     [
+      2056,
+      -64,
+      228.76
+     ],
+     [
+      2070,
+      -64,
+      228.99
+     ],
+     [
+      2082,
+      -64,
+      229.14
+     ],
+     [
+      2092,
+      -64,
+      229.08
+     ],
+     [
+      2100,
+      -64,
+      228.9
+     ],
+     [
+      2106,
+      -64,
+      228.8
+     ],
+     [
+      2110,
+      -64,
+      228.6
+     ],
+     [
+      2112,
+      -64,
+      228.38
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_99",
+   "x": 2112,
+   "z": -64,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": false,
+    "pts": [
+     [
+      2112,
+      -64,
+      227.78
+     ],
+     [
+      2114,
+      -64,
+      227.54
+     ],
+     [
+      2118,
+      -64,
+      227.24
+     ],
+     [
+      2124,
+      -64,
+      226.97
+     ],
+     [
+      2132,
+      -64,
+      226.57
+     ],
+     [
+      2142,
+      -64,
+      226.16
+     ],
+     [
+      2154,
+      -64,
+      225.56
+     ],
+     [
+      2168,
+      -64,
+      224.81
+     ],
+     [
+      2184,
+      -64,
+      223.97
+     ],
+     [
+      2200,
+      -64,
+      223.29
+     ],
+     [
+      2216,
+      -64,
+      222.6
+     ],
+     [
+      2232,
+      -64,
+      221.92
+     ],
+     [
+      2248,
+      -64,
+      221.14
+     ],
+     [
+      2264,
+      -64,
+      220.53
+     ],
+     [
+      2280,
+      -64,
+      220.1
+     ],
+     [
+      2296,
+      -64,
+      219.75
+     ],
+     [
+      2312,
+      -64,
+      219.19
+     ],
+     [
+      2328,
+      -64,
+      218.49
+     ],
+     [
+      2344,
+      -64,
+      217.73
+     ],
+     [
+      2360,
+      -64,
+      216.99
+     ],
+     [
+      2376,
+      -64,
+      216.37
+     ],
+     [
+      2392,
+      -64,
+      215.92
+     ],
+     [
+      2408,
+      -64,
+      215.69
+     ],
+     [
+      2424,
+      -64,
+      215.71
+     ],
+     [
+      2440,
+      -64,
+      215.95
+     ],
+     [
+      2456,
+      -62,
+      216.46
+     ],
+     [
+      2472,
+      -58,
+      217.26
+     ],
+     [
+      2488,
+      -52,
+      218.44
+     ],
+     [
+      2504,
+      -44,
+      220.08
+     ],
+     [
+      2520,
+      -34,
+      222
+     ],
+     [
+      2536,
+      -22,
+      224.31
+     ],
+     [
+      2552,
+      -8,
+      227.03
+     ],
+     [
+      2568,
+      8,
+      230.13
+     ],
+     [
+      2584,
+      22,
+      233.38
+     ],
+     [
+      2600,
+      34,
+      236.14
+     ],
+     [
+      2616,
+      44,
+      238.45
+     ],
+     [
+      2632,
+      52,
+      240.56
+     ],
+     [
+      2648,
+      58,
+      242.19
+     ],
+     [
+      2664,
+      62,
+      243.29
+     ],
+     [
+      2680,
+      64,
+      243.84
+     ],
+     [
+      2696,
+      64,
+      244.11
+     ],
+     [
+      2710,
+      64,
+      244.45
+     ],
+     [
+      2722,
+      64,
+      244.62
+     ],
+     [
+      2732,
+      64,
+      244.55
+     ],
+     [
+      2740,
+      64,
+      244.49
+     ],
+     [
+      2746,
+      64,
+      244.55
+     ],
+     [
+      2750,
+      64,
+      244.6
+     ],
+     [
+      2752,
+      64,
+      244.6
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_122_0",
+   "x": 1088,
+   "z": -448,
+   "yaw": 0,
+   "data": {
+    "cls": "road",
+    "width": 6,
+    "spur": false,
+    "pts": [
+     [
+      1088,
+      -448,
+      208.76
+     ],
+     [
+      1086,
+      -448,
+      209.14
+     ],
+     [
+      1082,
+      -448,
+      209.33
+     ],
+     [
+      1076,
+      -448,
+      209.44
+     ],
+     [
+      1068,
+      -448,
+      209.74
+     ],
+     [
+      1058,
+      -448,
+      209.98
+     ],
+     [
+      1046,
+      -448,
+      210.15
+     ],
+     [
+      1032,
+      -448,
+      210.28
+     ],
+     [
+      1016,
+      -448,
+      210.37
+     ],
+     [
+      1002,
+      -446,
+      210.6
+     ],
+     [
+      990,
+      -442,
+      210.95
+     ],
+     [
+      980,
+      -436,
+      211.45
+     ],
+     [
+      972,
+      -428,
+      212
+     ],
+     [
+      966,
+      -418,
+      212.41
+     ],
+     [
+      962,
+      -406,
+      212.84
+     ],
+     [
+      960,
+      -392,
+      213.33
+     ],
+     [
+      960,
+      -376,
+      213.88
+     ],
+     [
+      958,
+      -360,
+      214.78
+     ],
+     [
+      954,
+      -344,
+      215.88
+     ],
+     [
+      948,
+      -328,
+      217.35
+     ],
+     [
+      940,
+      -312,
+      219.26
+     ],
+     [
+      930,
+      -296,
+      221.27
+     ],
+     [
+      918,
+      -280,
+      223.16
+     ],
+     [
+      904,
+      -264,
+      224.73
+     ],
+     [
+      888,
+      -248,
+      225.6
+     ],
+     [
+      872,
+      -232,
+      226.06
+     ],
+     [
+      856,
+      -216,
+      225.82
+     ],
+     [
+      840,
+      -200,
+      225.35
+     ],
+     [
+      824,
+      -184,
+      225.08
+     ],
+     [
+      808,
+      -168,
+      225.11
+     ],
+     [
+      792,
+      -152,
+      225.51
+     ],
+     [
+      776,
+      -136,
+      226.52
+     ],
+     [
+      760,
+      -120,
+      227.77
+     ],
+     [
+      744,
+      -106,
+      229.46
+     ],
+     [
+      728,
+      -94,
+      231
+     ],
+     [
+      712,
+      -84,
+      231.99
+     ],
+     [
+      696,
+      -76,
+      232.58
+     ],
+     [
+      680,
+      -70,
+      232.84
+     ],
+     [
+      664,
+      -66,
+      232.85
+     ],
+     [
+      648,
+      -64,
+      232.88
+     ],
+     [
+      632,
+      -64,
+      232.99
+     ],
+     [
+      616,
+      -62,
+      233.06
+     ],
+     [
+      600,
+      -58,
+      233.35
+     ],
+     [
+      584,
+      -52,
+      233.48
+     ],
+     [
+      568,
+      -44,
+      233.81
+     ],
+     [
+      552,
+      -34,
+      234.67
+     ],
+     [
+      536,
+      -22,
+      236.32
+     ],
+     [
+      520,
+      -8,
+      238.66
+     ],
+     [
+      504,
+      8,
+      241.92
+     ],
+     [
+      490,
+      24,
+      246.03
+     ],
+     [
+      478,
+      40,
+      251.37
+     ],
+     [
+      468,
+      56,
+      257.09
+     ],
+     [
+      460,
+      72,
+      262.71
+     ],
+     [
+      454,
+      88,
+      267.9
+     ],
+     [
+      450,
+      104,
+      272.65
+     ],
+     [
+      448,
+      120,
+      277.06
+     ],
+     [
+      448,
+      136,
+      281.05
+     ],
+     [
+      446,
+      150,
+      284.01
+     ],
+     [
+      442,
+      162,
+      286.56
+     ],
+     [
+      436,
+      172,
+      288.53
+     ],
+     [
+      428,
+      180,
+      289.82
+     ],
+     [
+      418,
+      186,
+      290.5
+     ],
+     [
+      406,
+      190,
+      290.66
+     ],
+     [
+      392,
+      192,
+      290.45
+     ],
+     [
+      376,
+      192,
+      290.32
+     ],
+     [
+      360,
+      192,
+      290.14
+     ],
+     [
+      344,
+      192,
+      290.23
+     ],
+     [
+      328,
+      192,
+      290.7
+     ],
+     [
+      312.58,
+      192,
+      291.42
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_122_1",
+   "x": 199.42,
+   "z": 192,
+   "yaw": 0,
+   "data": {
+    "cls": "road",
+    "width": 6,
+    "spur": false,
+    "pts": [
+     [
+      199.42,
+      192,
+      299.54
+     ],
+     [
+      198,
+      192,
+      299.69
+     ],
+     [
+      194,
+      192,
+      300.35
+     ],
+     [
+      192,
+      192,
+      300.95
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_290",
+   "x": 1088,
+   "z": 832,
+   "yaw": 0,
+   "data": {
+    "cls": "road",
+    "width": 6,
+    "spur": false,
+    "pts": [
+     [
+      1088,
+      832,
+      273.25
+     ],
+     [
+      1090,
+      834,
+      273.89
+     ],
+     [
+      1094,
+      838,
+      274.43
+     ],
+     [
+      1100,
+      844,
+      275.05
+     ],
+     [
+      1108,
+      852,
+      276.35
+     ],
+     [
+      1118,
+      862,
+      278.07
+     ],
+     [
+      1130,
+      874,
+      280.09
+     ],
+     [
+      1144,
+      888,
+      282.36
+     ],
+     [
+      1160,
+      904,
+      284.52
+     ],
+     [
+      1174,
+      920,
+      286.65
+     ],
+     [
+      1186,
+      936,
+      288.77
+     ],
+     [
+      1196,
+      952,
+      290.87
+     ],
+     [
+      1204,
+      968,
+      292.88
+     ],
+     [
+      1210,
+      984,
+      294.77
+     ],
+     [
+      1214,
+      1000,
+      296.5
+     ],
+     [
+      1216,
+      1016,
+      298.25
+     ],
+     [
+      1216,
+      1032,
+      299.91
+     ],
+     [
+      1218,
+      1048,
+      301.3
+     ],
+     [
+      1222,
+      1064,
+      302.4
+     ],
+     [
+      1228,
+      1080,
+      303.17
+     ],
+     [
+      1236,
+      1096,
+      304.05
+     ],
+     [
+      1246,
+      1112,
+      304.94
+     ],
+     [
+      1258,
+      1128,
+      305.48
+     ],
+     [
+      1272,
+      1144,
+      305.77
+     ],
+     [
+      1288,
+      1160,
+      306.31
+     ],
+     [
+      1304,
+      1174,
+      307.17
+     ],
+     [
+      1320,
+      1186,
+      308.54
+     ],
+     [
+      1336,
+      1196,
+      310.33
+     ],
+     [
+      1352,
+      1204,
+      312.74
+     ],
+     [
+      1368,
+      1210,
+      315.97
+     ],
+     [
+      1384,
+      1214,
+      320.09
+     ],
+     [
+      1400,
+      1216,
+      324.49
+     ],
+     [
+      1416,
+      1216,
+      328.6
+     ],
+     [
+      1432,
+      1216,
+      332.51
+     ],
+     [
+      1448,
+      1216,
+      335.8
+     ],
+     [
+      1464,
+      1216,
+      338.34
+     ],
+     [
+      1480,
+      1216,
+      340.46
+     ],
+     [
+      1496,
+      1216,
+      342.37
+     ],
+     [
+      1512,
+      1216,
+      343.92
+     ],
+     [
+      1528,
+      1216,
+      345.24
+     ],
+     [
+      1544,
+      1216,
+      346.32
+     ],
+     [
+      1560,
+      1218,
+      347.29
+     ],
+     [
+      1576,
+      1222,
+      348.49
+     ],
+     [
+      1592,
+      1228,
+      349.73
+     ],
+     [
+      1608,
+      1236,
+      351.25
+     ],
+     [
+      1624,
+      1246,
+      353.64
+     ],
+     [
+      1640,
+      1258,
+      356.83
+     ],
+     [
+      1656,
+      1272,
+      360.28
+     ],
+     [
+      1672,
+      1288,
+      363.76
+     ],
+     [
+      1686,
+      1304,
+      367.09
+     ],
+     [
+      1698,
+      1320,
+      370.26
+     ],
+     [
+      1708,
+      1336,
+      372.58
+     ],
+     [
+      1716,
+      1352,
+      374.01
+     ],
+     [
+      1722,
+      1368,
+      375.06
+     ],
+     [
+      1726,
+      1384,
+      376.18
+     ],
+     [
+      1728,
+      1400,
+      377.36
+     ],
+     [
+      1728,
+      1416,
+      378.46
+     ],
+     [
+      1730,
+      1432,
+      379.63
+     ],
+     [
+      1734,
+      1448,
+      381.33
+     ],
+     [
+      1740,
+      1464,
+      383.44
+     ],
+     [
+      1748,
+      1480,
+      385.6
+     ],
+     [
+      1758,
+      1496,
+      387.84
+     ],
+     [
+      1770,
+      1512,
+      389.96
+     ],
+     [
+      1784,
+      1528,
+      392.76
+     ],
+     [
+      1800,
+      1544,
+      395.72
+     ],
+     [
+      1816,
+      1560,
+      398.86
+     ],
+     [
+      1832,
+      1576,
+      402.32
+     ],
+     [
+      1848,
+      1592,
+      405.73
+     ],
+     [
+      1864,
+      1608,
+      408.99
+     ],
+     [
+      1880,
+      1624,
+      412.62
+     ],
+     [
+      1896,
+      1640,
+      415.76
+     ],
+     [
+      1912,
+      1656,
+      418.86
+     ],
+     [
+      1928,
+      1672,
+      421.74
+     ],
+     [
+      1942,
+      1688,
+      424.27
+     ],
+     [
+      1954,
+      1704,
+      426.99
+     ],
+     [
+      1964,
+      1720,
+      430.04
+     ],
+     [
+      1972,
+      1736,
+      433.31
+     ],
+     [
+      1978,
+      1752,
+      436.69
+     ],
+     [
+      1982,
+      1768,
+      439.99
+     ],
+     [
+      1984,
+      1784,
+      443.05
+     ],
+     [
+      1984,
+      1800,
+      445.78
+     ],
+     [
+      1986,
+      1814,
+      448.33
+     ],
+     [
+      1990,
+      1826,
+      450.52
+     ],
+     [
+      1996,
+      1836,
+      452.42
+     ],
+     [
+      2004,
+      1844,
+      454.31
+     ],
+     [
+      2014,
+      1850,
+      456.3
+     ],
+     [
+      2026,
+      1854,
+      458.42
+     ],
+     [
+      2040,
+      1856,
+      460.43
+     ],
+     [
+      2056,
+      1856,
+      462.45
+     ],
+     [
+      2070,
+      1858,
+      464.36
+     ],
+     [
+      2082,
+      1862,
+      466.2
+     ],
+     [
+      2092,
+      1868,
+      468.18
+     ],
+     [
+      2100,
+      1876,
+      470.49
+     ],
+     [
+      2106,
+      1886,
+      472.98
+     ],
+     [
+      2110,
+      1898,
+      475.91
+     ],
+     [
+      2112,
+      1912,
+      479.25
+     ],
+     [
+      2112,
+      1928,
+      483.01
+     ],
+     [
+      2112,
+      1944,
+      487.66
+     ],
+     [
+      2112,
+      1960,
+      492.87
+     ],
+     [
+      2112,
+      1976,
+      498.38
+     ],
+     [
+      2112,
+      1992,
+      504.16
+     ],
+     [
+      2112,
+      2008,
+      510.42
+     ],
+     [
+      2112,
+      2024,
+      516.73
+     ],
+     [
+      2112,
+      2040,
+      523
+     ],
+     [
+      2112,
+      2056,
+      528.34
+     ],
+     [
+      2112,
+      2072,
+      532.86
+     ],
+     [
+      2112,
+      2088,
+      537.03
+     ],
+     [
+      2112,
+      2104,
+      540.78
+     ],
+     [
+      2112,
+      2120,
+      544.29
+     ],
+     [
+      2112,
+      2136,
+      547.54
+     ],
+     [
+      2112,
+      2152,
+      550.53
+     ],
+     [
+      2112,
+      2168,
+      553.46
+     ],
+     [
+      2112,
+      2184,
+      556.29
+     ],
+     [
+      2114,
+      2200,
+      559.07
+     ],
+     [
+      2118,
+      2216,
+      562
+     ],
+     [
+      2124,
+      2232,
+      565.18
+     ],
+     [
+      2132,
+      2248,
+      569.22
+     ],
+     [
+      2142,
+      2264,
+      574.39
+     ],
+     [
+      2154,
+      2280,
+      580.36
+     ],
+     [
+      2168,
+      2296,
+      586.86
+     ],
+     [
+      2184,
+      2312,
+      593.89
+     ],
+     [
+      2200,
+      2328,
+      601.73
+     ],
+     [
+      2216,
+      2344,
+      609.75
+     ],
+     [
+      2232,
+      2360,
+      616.96
+     ],
+     [
+      2248,
+      2376,
+      623.64
+     ],
+     [
+      2264,
+      2392,
+      630.24
+     ],
+     [
+      2280,
+      2408,
+      636.42
+     ],
+     [
+      2296,
+      2424,
+      641.78
+     ],
+     [
+      2312,
+      2440,
+      646.03
+     ],
+     [
+      2326,
+      2456,
+      648.95
+     ],
+     [
+      2338,
+      2472,
+      651.58
+     ],
+     [
+      2348,
+      2488,
+      653.58
+     ],
+     [
+      2356,
+      2504,
+      655.11
+     ],
+     [
+      2362,
+      2520,
+      657.06
+     ],
+     [
+      2366,
+      2536,
+      659.43
+     ],
+     [
+      2368,
+      2552,
+      662.66
+     ],
+     [
+      2368,
+      2568,
+      667.43
+     ],
+     [
+      2368,
+      2584,
+      672.87
+     ],
+     [
+      2368,
+      2600,
+      678.65
+     ],
+     [
+      2368,
+      2616,
+      684.78
+     ],
+     [
+      2368,
+      2632,
+      691.19
+     ],
+     [
+      2368,
+      2648,
+      697.93
+     ],
+     [
+      2368,
+      2664,
+      704.51
+     ],
+     [
+      2368,
+      2680,
+      710.88
+     ],
+     [
+      2368,
+      2696,
+      717.19
+     ],
+     [
+      2368,
+      2712,
+      723.72
+     ],
+     [
+      2368,
+      2728,
+      729.76
+     ],
+     [
+      2368,
+      2744,
+      735.25
+     ],
+     [
+      2368,
+      2760,
+      740.1
+     ],
+     [
+      2368,
+      2776,
+      744.61
+     ],
+     [
+      2368,
+      2792,
+      748.76
+     ],
+     [
+      2368,
+      2808,
+      752.73
+     ],
+     [
+      2368,
+      2824,
+      756.34
+     ],
+     [
+      2368,
+      2840,
+      760.73
+     ],
+     [
+      2368,
+      2856,
+      765.41
+     ],
+     [
+      2368,
+      2872,
+      769.93
+     ],
+     [
+      2368,
+      2888,
+      774.49
+     ],
+     [
+      2368,
+      2904,
+      779.22
+     ],
+     [
+      2368,
+      2920,
+      784.29
+     ],
+     [
+      2368,
+      2936,
+      790.16
+     ],
+     [
+      2368,
+      2952,
+      796.12
+     ],
+     [
+      2368,
+      2968,
+      801.61
+     ],
+     [
+      2368,
+      2984,
+      807.25
+     ],
+     [
+      2368,
+      3000,
+      813.26
+     ],
+     [
+      2368,
+      3016,
+      819.12
+     ],
+     [
+      2368,
+      3032,
+      824.89
+     ],
+     [
+      2368,
+      3048,
+      830.18
+     ],
+     [
+      2368,
+      3064,
+      834.87
+     ],
+     [
+      2368,
+      3080,
+      839.91
+     ],
+     [
+      2368,
+      3096,
+      845.71
+     ],
+     [
+      2368,
+      3112,
+      851.96
+     ],
+     [
+      2368,
+      3128,
+      858.93
+     ],
+     [
+      2368,
+      3144,
+      866.69
+     ],
+     [
+      2368,
+      3160,
+      875.17
+     ],
+     [
+      2368,
+      3176,
+      884.84
+     ],
+     [
+      2368,
+      3192,
+      895.17
+     ],
+     [
+      2368,
+      3208,
+      906.22
+     ],
+     [
+      2366,
+      3224,
+      916.61
+     ],
+     [
+      2362,
+      3240,
+      925.63
+     ],
+     [
+      2356,
+      3256,
+      932.85
+     ],
+     [
+      2348,
+      3272,
+      938.54
+     ],
+     [
+      2338,
+      3288,
+      943.56
+     ],
+     [
+      2326,
+      3304,
+      949.37
+     ],
+     [
+      2312,
+      3320,
+      954.83
+     ],
+     [
+      2296,
+      3336,
+      960.37
+     ],
+     [
+      2282,
+      3352,
+      966.67
+     ],
+     [
+      2270,
+      3368,
+      974.05
+     ],
+     [
+      2260,
+      3384,
+      982.24
+     ],
+     [
+      2252,
+      3400,
+      990.27
+     ],
+     [
+      2246,
+      3416,
+      997.39
+     ],
+     [
+      2242,
+      3432,
+      1003.85
+     ],
+     [
+      2240,
+      3448,
+      1009.87
+     ],
+     [
+      2240,
+      3464,
+      1015.15
+     ],
+     [
+      2240,
+      3480,
+      1019.56
+     ],
+     [
+      2240,
+      3496,
+      1023.3
+     ],
+     [
+      2240,
+      3512,
+      1026.35
+     ],
+     [
+      2240,
+      3528,
+      1029.21
+     ],
+     [
+      2240,
+      3544,
+      1032.35
+     ],
+     [
+      2240,
+      3560,
+      1036.43
+     ],
+     [
+      2240,
+      3576,
+      1041.45
+     ],
+     [
+      2240,
+      3592,
+      1047.2
+     ],
+     [
+      2238,
+      3608,
+      1053.58
+     ],
+     [
+      2234,
+      3624,
+      1060.6
+     ],
+     [
+      2228,
+      3640,
+      1067.74
+     ],
+     [
+      2220,
+      3656,
+      1074.65
+     ],
+     [
+      2210,
+      3672,
+      1080.95
+     ],
+     [
+      2198,
+      3688,
+      1086.84
+     ],
+     [
+      2184,
+      3704,
+      1092.15
+     ],
+     [
+      2168,
+      3720,
+      1096.57
+     ],
+     [
+      2152,
+      3736,
+      1099.55
+     ],
+     [
+      2136,
+      3752,
+      1100.46
+     ],
+     [
+      2120,
+      3768,
+      1099.33
+     ],
+     [
+      2104,
+      3784,
+      1097.07
+     ],
+     [
+      2088,
+      3800,
+      1092.99
+     ],
+     [
+      2072,
+      3816,
+      1088.31
+     ],
+     [
+      2056,
+      3832,
+      1082.87
+     ],
+     [
+      2040,
+      3848,
+      1077.5
+     ],
+     [
+      2026,
+      3864,
+      1072.62
+     ],
+     [
+      2014,
+      3880,
+      1068.59
+     ],
+     [
+      2004,
+      3896,
+      1064.95
+     ],
+     [
+      1996,
+      3912,
+      1062.15
+     ],
+     [
+      1990,
+      3928,
+      1059.46
+     ],
+     [
+      1986,
+      3944,
+      1057.51
+     ],
+     [
+      1984,
+      3960,
+      1055.97
+     ],
+     [
+      1984,
+      3976,
+      1054.99
+     ],
+     [
+      1982,
+      3992,
+      1054.12
+     ],
+     [
+      1978,
+      4008,
+      1053
+     ],
+     [
+      1972,
+      4024,
+      1051.61
+     ],
+     [
+      1964,
+      4040,
+      1050.11
+     ],
+     [
+      1954,
+      4056,
+      1048.52
+     ],
+     [
+      1942,
+      4072,
+      1046.99
+     ],
+     [
+      1928,
+      4088,
+      1045.57
+     ],
+     [
+      1912,
+      4104,
+      1044.37
+     ],
+     [
+      1896,
+      4120,
+      1043.52
+     ],
+     [
+      1880,
+      4136,
+      1043.32
+     ],
+     [
+      1864,
+      4152,
+      1043.61
+     ],
+     [
+      1848,
+      4168,
+      1044.03
+     ],
+     [
+      1832,
+      4184,
+      1043.94
+     ],
+     [
+      1816,
+      4200,
+      1043.17
+     ],
+     [
+      1800,
+      4216,
+      1041.84
+     ],
+     [
+      1784,
+      4232,
+      1039.96
+     ],
+     [
+      1768,
+      4246,
+      1037.58
+     ],
+     [
+      1752,
+      4258,
+      1034.73
+     ],
+     [
+      1736,
+      4268,
+      1031.68
+     ],
+     [
+      1720,
+      4276,
+      1029.08
+     ],
+     [
+      1704,
+      4282,
+      1027.03
+     ],
+     [
+      1688,
+      4286,
+      1025.65
+     ],
+     [
+      1672,
+      4288,
+      1025.06
+     ],
+     [
+      1656,
+      4288,
+      1024.88
+     ],
+     [
+      1642,
+      4288,
+      1024.89
+     ],
+     [
+      1630,
+      4288,
+      1025.11
+     ],
+     [
+      1620,
+      4288,
+      1025.38
+     ],
+     [
+      1612,
+      4288,
+      1025.67
+     ],
+     [
+      1606,
+      4288,
+      1025.85
+     ],
+     [
+      1602,
+      4288,
+      1025.75
+     ],
+     [
+      1600,
+      4288,
+      1025.58
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_302_0",
+   "x": 704,
+   "z": -960,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": false,
+    "pts": [
+     [
+      704,
+      -960,
+      190.26
+     ],
+     [
+      704,
+      -958,
+      190.67
+     ],
+     [
+      704,
+      -954,
+      191.24
+     ],
+     [
+      704,
+      -948,
+      191.96
+     ],
+     [
+      704,
+      -940,
+      193.34
+     ],
+     [
+      704,
+      -930,
+      195.07
+     ],
+     [
+      704,
+      -918,
+      196.85
+     ],
+     [
+      704,
+      -904,
+      198.52
+     ],
+     [
+      704,
+      -888,
+      200.27
+     ],
+     [
+      704,
+      -872,
+      201.82
+     ],
+     [
+      704,
+      -856,
+      203.05
+     ],
+     [
+      704,
+      -840,
+      203.64
+     ],
+     [
+      704,
+      -824,
+      203.95
+     ],
+     [
+      704,
+      -808,
+      204.46
+     ],
+     [
+      704,
+      -792,
+      205.23
+     ],
+     [
+      704,
+      -776,
+      206.31
+     ],
+     [
+      704,
+      -760,
+      207.68
+     ],
+     [
+      704,
+      -744,
+      209.56
+     ],
+     [
+      704,
+      -728,
+      212.07
+     ],
+     [
+      704,
+      -712,
+      214.78
+     ],
+     [
+      704,
+      -696,
+      217.34
+     ],
+     [
+      704,
+      -680,
+      219.8
+     ],
+     [
+      704,
+      -664,
+      221.85
+     ],
+     [
+      704,
+      -648,
+      223.63
+     ],
+     [
+      704,
+      -632,
+      224.95
+     ],
+     [
+      704,
+      -616,
+      225.86
+     ],
+     [
+      704,
+      -600,
+      226.27
+     ],
+     [
+      704,
+      -584,
+      226.12
+     ],
+     [
+      704,
+      -568,
+      225.72
+     ],
+     [
+      704,
+      -552,
+      225.1
+     ],
+     [
+      704,
+      -536,
+      224.39
+     ],
+     [
+      704,
+      -520,
+      223.85
+     ],
+     [
+      704,
+      -504,
+      223.28
+     ],
+     [
+      702,
+      -488,
+      222.91
+     ],
+     [
+      698,
+      -472,
+      222.88
+     ],
+     [
+      692,
+      -456,
+      222.72
+     ],
+     [
+      684,
+      -440,
+      222.47
+     ],
+     [
+      674,
+      -424,
+      222.43
+     ],
+     [
+      662,
+      -408,
+      222.59
+     ],
+     [
+      648,
+      -392,
+      223.12
+     ],
+     [
+      632,
+      -376,
+      223.82
+     ],
+     [
+      618,
+      -360,
+      224.97
+     ],
+     [
+      606,
+      -344,
+      226.62
+     ],
+     [
+      596,
+      -328,
+      228.73
+     ],
+     [
+      588,
+      -312,
+      230.75
+     ],
+     [
+      582,
+      -296,
+      232.4
+     ],
+     [
+      578,
+      -280,
+      233.59
+     ],
+     [
+      576,
+      -264,
+      234.79
+     ],
+     [
+      576,
+      -248,
+      235.75
+     ],
+     [
+      574,
+      -232,
+      236.58
+     ],
+     [
+      570,
+      -216,
+      237.19
+     ],
+     [
+      564,
+      -200,
+      237.83
+     ],
+     [
+      556,
+      -184,
+      238.78
+     ],
+     [
+      546,
+      -168,
+      239.85
+     ],
+     [
+      534,
+      -152,
+      240.53
+     ],
+     [
+      520,
+      -136,
+      241.07
+     ],
+     [
+      504,
+      -120,
+      241.5
+     ],
+     [
+      488,
+      -106,
+      241.85
+     ],
+     [
+      472,
+      -94,
+      242.01
+     ],
+     [
+      456,
+      -84,
+      242
+     ],
+     [
+      440,
+      -76,
+      242.42
+     ],
+     [
+      424,
+      -70,
+      242.88
+     ],
+     [
+      408,
+      -66,
+      243.58
+     ],
+     [
+      392,
+      -64,
+      244.54
+     ],
+     [
+      376,
+      -64,
+      245.72
+     ],
+     [
+      362,
+      -62,
+      247.21
+     ],
+     [
+      350,
+      -58,
+      248.97
+     ],
+     [
+      340,
+      -52,
+      250.42
+     ],
+     [
+      332,
+      -44,
+      252.14
+     ],
+     [
+      326,
+      -34,
+      253.85
+     ],
+     [
+      322,
+      -22,
+      255.78
+     ],
+     [
+      320,
+      -8,
+      258.19
+     ],
+     [
+      320,
+      8,
+      260.88
+     ],
+     [
+      320,
+      24,
+      263.54
+     ],
+     [
+      320,
+      40,
+      266.4
+     ],
+     [
+      320,
+      56,
+      269.4
+     ],
+     [
+      320,
+      72,
+      272.2
+     ],
+     [
+      320,
+      88,
+      274.71
+     ],
+     [
+      320,
+      104,
+      277
+     ],
+     [
+      320,
+      120,
+      279.05
+     ],
+     [
+      320,
+      136,
+      281.02
+     ],
+     [
+      318,
+      150,
+      282.94
+     ],
+     [
+      314,
+      162,
+      284.92
+     ],
+     [
+      308,
+      172,
+      287.12
+     ],
+     [
+      301.96,
+      178.04,
+      288.7
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_302_1",
+   "x": 199.42,
+   "z": 192,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": false,
+    "pts": [
+     [
+      199.42,
+      192,
+      299.54
+     ],
+     [
+      198,
+      192,
+      299.69
+     ],
+     [
+      194,
+      192,
+      300.35
+     ],
+     [
+      192,
+      192,
+      300.95
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_313",
+   "x": 2624,
+   "z": -832,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": false,
+    "pts": [
+     [
+      2624,
+      -832,
+      177.05
+     ],
+     [
+      2622,
+      -830,
+      176.89
+     ],
+     [
+      2618,
+      -826,
+      176.68
+     ],
+     [
+      2612,
+      -820,
+      176.6
+     ],
+     [
+      2604,
+      -812,
+      176.64
+     ],
+     [
+      2594,
+      -802,
+      176.85
+     ],
+     [
+      2582,
+      -790,
+      177.37
+     ],
+     [
+      2568,
+      -776,
+      178.35
+     ],
+     [
+      2552,
+      -760,
+      179.63
+     ],
+     [
+      2536,
+      -744,
+      181.06
+     ],
+     [
+      2520,
+      -728,
+      182.43
+     ],
+     [
+      2504,
+      -712,
+      183.55
+     ],
+     [
+      2488,
+      -696,
+      184.66
+     ],
+     [
+      2472,
+      -680,
+      185.56
+     ],
+     [
+      2456,
+      -664,
+      186.05
+     ],
+     [
+      2440,
+      -648,
+      186.37
+     ],
+     [
+      2424,
+      -632,
+      187.08
+     ],
+     [
+      2408,
+      -618,
+      188.13
+     ],
+     [
+      2392,
+      -606,
+      189.59
+     ],
+     [
+      2376,
+      -596,
+      191.3
+     ],
+     [
+      2360,
+      -588,
+      193.07
+     ],
+     [
+      2344,
+      -582,
+      194.97
+     ],
+     [
+      2328,
+      -578,
+      197.06
+     ],
+     [
+      2312,
+      -576,
+      198.91
+     ],
+     [
+      2296,
+      -576,
+      200.61
+     ],
+     [
+      2280,
+      -574,
+      201.99
+     ],
+     [
+      2264,
+      -570,
+      203.17
+     ],
+     [
+      2248,
+      -564,
+      204.17
+     ],
+     [
+      2232,
+      -556,
+      205.02
+     ],
+     [
+      2216,
+      -546,
+      205.83
+     ],
+     [
+      2200,
+      -534,
+      206.51
+     ],
+     [
+      2184,
+      -520,
+      207.01
+     ],
+     [
+      2168,
+      -504,
+      207.55
+     ],
+     [
+      2154,
+      -488,
+      208.11
+     ],
+     [
+      2142,
+      -472,
+      208.96
+     ],
+     [
+      2132,
+      -456,
+      210.06
+     ],
+     [
+      2124,
+      -440,
+      211.24
+     ],
+     [
+      2118,
+      -424,
+      212.51
+     ],
+     [
+      2114,
+      -408,
+      213.91
+     ],
+     [
+      2112,
+      -392,
+      215.35
+     ],
+     [
+      2112,
+      -376,
+      216.48
+     ],
+     [
+      2112,
+      -360,
+      217.37
+     ],
+     [
+      2112,
+      -344,
+      218.15
+     ],
+     [
+      2112,
+      -328,
+      218.71
+     ],
+     [
+      2112,
+      -312,
+      218.98
+     ],
+     [
+      2112,
+      -296,
+      219.35
+     ],
+     [
+      2112,
+      -280,
+      219.82
+     ],
+     [
+      2112,
+      -264,
+      220.38
+     ],
+     [
+      2112,
+      -248,
+      220.88
+     ],
+     [
+      2112,
+      -232,
+      221.35
+     ],
+     [
+      2112,
+      -216,
+      221.9
+     ],
+     [
+      2112,
+      -200,
+      222.47
+     ],
+     [
+      2112,
+      -184,
+      222.83
+     ],
+     [
+      2112,
+      -168,
+      223.07
+     ],
+     [
+      2112,
+      -152,
+      223.39
+     ],
+     [
+      2112,
+      -136,
+      223.93
+     ],
+     [
+      2112,
+      -120,
+      224.58
+     ],
+     [
+      2112,
+      -106,
+      225.16
+     ],
+     [
+      2112,
+      -94,
+      225.84
+     ],
+     [
+      2112,
+      -84,
+      226.52
+     ],
+     [
+      2112,
+      -76,
+      227.09
+     ],
+     [
+      2112,
+      -70,
+      227.48
+     ],
+     [
+      2112,
+      -66,
+      227.78
+     ],
+     [
+      2112,
+      -64,
+      227.93
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_317",
+   "x": 1600,
+   "z": 4288,
+   "yaw": 0,
+   "data": {
+    "cls": "road",
+    "width": 6,
+    "spur": false,
+    "pts": [
+     [
+      1600,
+      4288,
+      1025.55
+     ],
+     [
+      1602,
+      4286,
+      1025.66
+     ],
+     [
+      1606,
+      4282,
+      1025.73
+     ],
+     [
+      1612,
+      4276,
+      1025.83
+     ],
+     [
+      1620,
+      4268,
+      1026.1
+     ],
+     [
+      1630,
+      4258,
+      1026.72
+     ],
+     [
+      1642,
+      4246,
+      1027.81
+     ],
+     [
+      1656,
+      4232,
+      1029.27
+     ],
+     [
+      1672,
+      4216,
+      1030.99
+     ],
+     [
+      1688,
+      4200,
+      1032.92
+     ],
+     [
+      1704,
+      4184,
+      1034.86
+     ],
+     [
+      1720,
+      4168,
+      1036.59
+     ],
+     [
+      1736,
+      4152,
+      1037.95
+     ],
+     [
+      1752,
+      4136,
+      1038.89
+     ],
+     [
+      1768,
+      4120,
+      1039.5
+     ],
+     [
+      1784,
+      4104,
+      1039.77
+     ],
+     [
+      1800,
+      4088,
+      1039.87
+     ],
+     [
+      1814,
+      4072,
+      1040.11
+     ],
+     [
+      1826,
+      4056,
+      1040.61
+     ],
+     [
+      1836,
+      4040,
+      1041.29
+     ],
+     [
+      1844,
+      4024,
+      1041.99
+     ],
+     [
+      1850,
+      4008,
+      1042.79
+     ],
+     [
+      1854,
+      3992,
+      1043.76
+     ],
+     [
+      1856,
+      3976,
+      1044.96
+     ],
+     [
+      1856,
+      3960,
+      1046.22
+     ],
+     [
+      1858,
+      3946,
+      1047.41
+     ],
+     [
+      1862,
+      3934,
+      1048.64
+     ],
+     [
+      1868,
+      3924,
+      1049.96
+     ],
+     [
+      1876,
+      3916,
+      1051.13
+     ],
+     [
+      1886,
+      3910,
+      1052.2
+     ],
+     [
+      1898,
+      3906,
+      1053.15
+     ],
+     [
+      1912,
+      3904,
+      1054.09
+     ],
+     [
+      1928,
+      3904,
+      1055.22
+     ],
+     [
+      1944,
+      3902,
+      1056.66
+     ],
+     [
+      1960,
+      3898,
+      1058.49
+     ],
+     [
+      1976,
+      3892,
+      1061.15
+     ],
+     [
+      1992,
+      3884,
+      1064.12
+     ],
+     [
+      2008,
+      3874,
+      1068.05
+     ],
+     [
+      2024,
+      3862,
+      1072.23
+     ],
+     [
+      2040,
+      3848,
+      1077.22
+     ],
+     [
+      2056,
+      3832,
+      1082.75
+     ],
+     [
+      2072,
+      3816,
+      1088.28
+     ],
+     [
+      2088,
+      3800,
+      1092.99
+     ],
+     [
+      2104,
+      3784,
+      1097.07
+     ],
+     [
+      2120,
+      3768,
+      1099.33
+     ],
+     [
+      2136,
+      3752,
+      1100.46
+     ],
+     [
+      2152,
+      3736,
+      1099.55
+     ],
+     [
+      2168,
+      3720,
+      1096.57
+     ],
+     [
+      2184,
+      3704,
+      1092.15
+     ],
+     [
+      2198,
+      3688,
+      1086.84
+     ],
+     [
+      2210,
+      3672,
+      1080.95
+     ],
+     [
+      2220,
+      3656,
+      1074.65
+     ],
+     [
+      2228,
+      3640,
+      1067.74
+     ],
+     [
+      2234,
+      3624,
+      1060.6
+     ],
+     [
+      2238,
+      3608,
+      1053.58
+     ],
+     [
+      2240,
+      3592,
+      1047.2
+     ],
+     [
+      2240,
+      3576,
+      1041.45
+     ],
+     [
+      2240,
+      3560,
+      1036.43
+     ],
+     [
+      2240,
+      3544,
+      1032.35
+     ],
+     [
+      2240,
+      3528,
+      1029.21
+     ],
+     [
+      2240,
+      3512,
+      1026.35
+     ],
+     [
+      2240,
+      3496,
+      1023.3
+     ],
+     [
+      2240,
+      3480,
+      1019.56
+     ],
+     [
+      2240,
+      3464,
+      1015.15
+     ],
+     [
+      2240,
+      3448,
+      1009.87
+     ],
+     [
+      2242,
+      3432,
+      1003.85
+     ],
+     [
+      2246,
+      3416,
+      997.39
+     ],
+     [
+      2252,
+      3400,
+      990.27
+     ],
+     [
+      2260,
+      3384,
+      982.24
+     ],
+     [
+      2270,
+      3368,
+      974.05
+     ],
+     [
+      2282,
+      3352,
+      966.67
+     ],
+     [
+      2296,
+      3336,
+      960.37
+     ],
+     [
+      2312,
+      3320,
+      954.83
+     ],
+     [
+      2326,
+      3304,
+      949.37
+     ],
+     [
+      2338,
+      3288,
+      943.56
+     ],
+     [
+      2348,
+      3272,
+      938.54
+     ],
+     [
+      2356,
+      3256,
+      932.85
+     ],
+     [
+      2362,
+      3240,
+      925.63
+     ],
+     [
+      2366,
+      3224,
+      916.61
+     ],
+     [
+      2368,
+      3208,
+      906.22
+     ],
+     [
+      2368,
+      3192,
+      895.17
+     ],
+     [
+      2368,
+      3176,
+      884.84
+     ],
+     [
+      2368,
+      3160,
+      875.17
+     ],
+     [
+      2368,
+      3144,
+      866.69
+     ],
+     [
+      2368,
+      3128,
+      858.93
+     ],
+     [
+      2368,
+      3112,
+      851.96
+     ],
+     [
+      2368,
+      3096,
+      845.71
+     ],
+     [
+      2368,
+      3080,
+      839.91
+     ],
+     [
+      2368,
+      3064,
+      834.87
+     ],
+     [
+      2368,
+      3048,
+      830.18
+     ],
+     [
+      2368,
+      3032,
+      824.89
+     ],
+     [
+      2368,
+      3016,
+      819.12
+     ],
+     [
+      2368,
+      3000,
+      813.26
+     ],
+     [
+      2368,
+      2984,
+      807.25
+     ],
+     [
+      2368,
+      2968,
+      801.61
+     ],
+     [
+      2368,
+      2952,
+      796.12
+     ],
+     [
+      2368,
+      2936,
+      790.16
+     ],
+     [
+      2368,
+      2920,
+      784.29
+     ],
+     [
+      2368,
+      2904,
+      779.22
+     ],
+     [
+      2368,
+      2888,
+      774.49
+     ],
+     [
+      2368,
+      2872,
+      769.93
+     ],
+     [
+      2368,
+      2856,
+      765.41
+     ],
+     [
+      2368,
+      2840,
+      760.73
+     ],
+     [
+      2368,
+      2824,
+      756.34
+     ],
+     [
+      2368,
+      2808,
+      752.73
+     ],
+     [
+      2368,
+      2792,
+      748.76
+     ],
+     [
+      2368,
+      2776,
+      744.61
+     ],
+     [
+      2368,
+      2760,
+      740.1
+     ],
+     [
+      2368,
+      2744,
+      735.25
+     ],
+     [
+      2368,
+      2728,
+      729.76
+     ],
+     [
+      2368,
+      2712,
+      723.72
+     ],
+     [
+      2368,
+      2696,
+      717.19
+     ],
+     [
+      2368,
+      2680,
+      710.88
+     ],
+     [
+      2368,
+      2664,
+      704.51
+     ],
+     [
+      2368,
+      2648,
+      697.93
+     ],
+     [
+      2368,
+      2632,
+      691.19
+     ],
+     [
+      2368,
+      2616,
+      684.78
+     ],
+     [
+      2368,
+      2600,
+      678.65
+     ],
+     [
+      2368,
+      2584,
+      672.87
+     ],
+     [
+      2368,
+      2568,
+      667.43
+     ],
+     [
+      2368,
+      2552,
+      662.66
+     ],
+     [
+      2366,
+      2536,
+      659.43
+     ],
+     [
+      2362,
+      2520,
+      657.06
+     ],
+     [
+      2356,
+      2504,
+      655.11
+     ],
+     [
+      2348,
+      2488,
+      653.58
+     ],
+     [
+      2338,
+      2472,
+      651.58
+     ],
+     [
+      2326,
+      2456,
+      648.95
+     ],
+     [
+      2312,
+      2440,
+      646.03
+     ],
+     [
+      2296,
+      2424,
+      641.78
+     ],
+     [
+      2280,
+      2408,
+      636.42
+     ],
+     [
+      2264,
+      2392,
+      630.24
+     ],
+     [
+      2248,
+      2376,
+      623.64
+     ],
+     [
+      2232,
+      2360,
+      616.96
+     ],
+     [
+      2216,
+      2344,
+      609.75
+     ],
+     [
+      2200,
+      2328,
+      601.73
+     ],
+     [
+      2184,
+      2312,
+      593.89
+     ],
+     [
+      2168,
+      2296,
+      586.86
+     ],
+     [
+      2154,
+      2280,
+      580.36
+     ],
+     [
+      2142,
+      2264,
+      574.39
+     ],
+     [
+      2132,
+      2248,
+      569.22
+     ],
+     [
+      2124,
+      2232,
+      565.18
+     ],
+     [
+      2118,
+      2216,
+      562
+     ],
+     [
+      2114,
+      2200,
+      559.07
+     ],
+     [
+      2112,
+      2184,
+      556.29
+     ],
+     [
+      2112,
+      2168,
+      553.46
+     ],
+     [
+      2112,
+      2152,
+      550.53
+     ],
+     [
+      2112,
+      2136,
+      547.54
+     ],
+     [
+      2112,
+      2120,
+      544.29
+     ],
+     [
+      2112,
+      2104,
+      540.78
+     ],
+     [
+      2112,
+      2088,
+      537.03
+     ],
+     [
+      2112,
+      2072,
+      532.86
+     ],
+     [
+      2112,
+      2056,
+      528.34
+     ],
+     [
+      2112,
+      2040,
+      523
+     ],
+     [
+      2112,
+      2024,
+      516.73
+     ],
+     [
+      2112,
+      2008,
+      510.42
+     ],
+     [
+      2112,
+      1992,
+      504.16
+     ],
+     [
+      2112,
+      1976,
+      498.38
+     ],
+     [
+      2112,
+      1960,
+      492.87
+     ],
+     [
+      2112,
+      1944,
+      487.68
+     ],
+     [
+      2112,
+      1928,
+      482.97
+     ],
+     [
+      2112,
+      1912,
+      478.94
+     ],
+     [
+      2112,
+      1896,
+      475.47
+     ],
+     [
+      2112,
+      1880,
+      472.32
+     ],
+     [
+      2112,
+      1864,
+      469.07
+     ],
+     [
+      2112,
+      1848,
+      465.36
+     ],
+     [
+      2112,
+      1832,
+      461.5
+     ],
+     [
+      2112,
+      1816,
+      457.43
+     ],
+     [
+      2112,
+      1800,
+      453.6
+     ],
+     [
+      2112,
+      1784,
+      449.68
+     ],
+     [
+      2112,
+      1768,
+      445.91
+     ],
+     [
+      2112,
+      1752,
+      442.65
+     ],
+     [
+      2112,
+      1736,
+      440.01
+     ],
+     [
+      2112,
+      1720,
+      437.93
+     ],
+     [
+      2112,
+      1704,
+      436.32
+     ],
+     [
+      2112,
+      1688,
+      434.44
+     ],
+     [
+      2112,
+      1672,
+      432.04
+     ],
+     [
+      2112,
+      1656,
+      429.19
+     ],
+     [
+      2112,
+      1640,
+      425.62
+     ],
+     [
+      2112,
+      1624,
+      421.54
+     ],
+     [
+      2112,
+      1608,
+      417.31
+     ],
+     [
+      2112,
+      1592,
+      412.47
+     ],
+     [
+      2112,
+      1576,
+      407.88
+     ],
+     [
+      2112,
+      1560,
+      403.78
+     ],
+     [
+      2112,
+      1544,
+      399.72
+     ],
+     [
+      2112,
+      1528,
+      396.12
+     ],
+     [
+      2112,
+      1512,
+      392.58
+     ],
+     [
+      2112,
+      1496,
+      388.73
+     ],
+     [
+      2112,
+      1480,
+      385.03
+     ],
+     [
+      2112,
+      1464,
+      381.2
+     ],
+     [
+      2112,
+      1448,
+      376.9
+     ],
+     [
+      2112,
+      1432,
+      372.61
+     ],
+     [
+      2112,
+      1416,
+      367.79
+     ],
+     [
+      2112,
+      1400,
+      363.47
+     ],
+     [
+      2112,
+      1384,
+      359.58
+     ],
+     [
+      2112,
+      1368,
+      356.14
+     ],
+     [
+      2112,
+      1352,
+      352.75
+     ],
+     [
+      2112,
+      1336,
+      349.54
+     ],
+     [
+      2112,
+      1320,
+      346.45
+     ],
+     [
+      2112,
+      1304,
+      343.66
+     ],
+     [
+      2112,
+      1288,
+      340.52
+     ],
+     [
+      2112,
+      1272,
+      337.26
+     ],
+     [
+      2112,
+      1256,
+      334.12
+     ],
+     [
+      2112,
+      1240,
+      330.91
+     ],
+     [
+      2112,
+      1224,
+      327.95
+     ],
+     [
+      2112,
+      1208,
+      325.23
+     ],
+     [
+      2112,
+      1192,
+      322.76
+     ],
+     [
+      2112,
+      1176,
+      320.82
+     ],
+     [
+      2112,
+      1160,
+      319.19
+     ],
+     [
+      2112,
+      1144,
+      317.51
+     ],
+     [
+      2112,
+      1128,
+      316.29
+     ],
+     [
+      2112,
+      1112,
+      315.34
+     ],
+     [
+      2112,
+      1096,
+      314.49
+     ],
+     [
+      2112,
+      1080,
+      313.83
+     ],
+     [
+      2112,
+      1064,
+      313
+     ],
+     [
+      2112,
+      1048,
+      311.89
+     ],
+     [
+      2112,
+      1032,
+      310.63
+     ],
+     [
+      2112,
+      1016,
+      309.14
+     ],
+     [
+      2112,
+      1000,
+      307.46
+     ],
+     [
+      2112,
+      984,
+      305.73
+     ],
+     [
+      2112,
+      968,
+      304.08
+     ],
+     [
+      2112,
+      952,
+      302.51
+     ],
+     [
+      2112,
+      936,
+      300.87
+     ],
+     [
+      2112,
+      920,
+      299.12
+     ],
+     [
+      2112,
+      904,
+      297.42
+     ],
+     [
+      2112,
+      888,
+      295.6
+     ],
+     [
+      2112,
+      872,
+      293.13
+     ],
+     [
+      2112,
+      856,
+      290.07
+     ],
+     [
+      2112,
+      840,
+      286.8
+     ],
+     [
+      2112,
+      824,
+      283.67
+     ],
+     [
+      2112,
+      808,
+      280.69
+     ],
+     [
+      2112,
+      792,
+      277.68
+     ],
+     [
+      2112,
+      776,
+      274.9
+     ],
+     [
+      2112,
+      760,
+      272.79
+     ],
+     [
+      2114,
+      744,
+      271.39
+     ],
+     [
+      2118,
+      728,
+      270.17
+     ],
+     [
+      2124,
+      712,
+      269.43
+     ],
+     [
+      2132,
+      696,
+      268.98
+     ],
+     [
+      2142,
+      680,
+      268.77
+     ],
+     [
+      2154,
+      664,
+      268.56
+     ],
+     [
+      2168,
+      648,
+      268.35
+     ],
+     [
+      2184,
+      632,
+      268.03
+     ],
+     [
+      2200,
+      618,
+      267.8
+     ],
+     [
+      2216,
+      606,
+      267.07
+     ],
+     [
+      2232,
+      596,
+      266.18
+     ],
+     [
+      2248,
+      588,
+      265.22
+     ],
+     [
+      2264,
+      582,
+      264.32
+     ],
+     [
+      2280,
+      578,
+      263.31
+     ],
+     [
+      2296,
+      576,
+      262.07
+     ],
+     [
+      2312,
+      576,
+      260.65
+     ],
+     [
+      2326,
+      576,
+      259.47
+     ],
+     [
+      2338,
+      576,
+      258.35
+     ],
+     [
+      2348,
+      576,
+      257.25
+     ],
+     [
+      2356,
+      576,
+      256.19
+     ],
+     [
+      2362,
+      576,
+      255.6
+     ],
+     [
+      2366,
+      576,
+      255.09
+     ],
+     [
+      2368,
+      576,
+      254.8
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "spur_wehackkeep",
+   "x": 1089.34,
+   "z": 420.77,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": true,
+    "pts": [
+     [
+      1089.34,
+      420.77,
+      253.99
+     ],
+     [
+      1088,
+      408,
+      253.46
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "spur_weephaven",
+   "x": 199.09,
+   "z": 192.6,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": true,
+    "pts": [
+     [
+      199.09,
+      192.6,
+      297.43
+     ],
+     [
+      198,
+      192,
+      297.46
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "spur_wildhaven",
+   "x": 1313.5,
+   "z": 192.47,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": true,
+    "pts": [
+     [
+      1313.5,
+      192.47,
+      233.23
+     ],
+     [
+      1314,
+      192,
+      233.23
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "bridge",
+   "id": "bridge_96_87_0",
+   "x": 1344,
+   "z": 70.05,
+   "yaw": 0,
+   "data": {
+    "span": 12,
+    "deck": 220.535,
+    "road": "road_96"
+   }
+  },
+  {
+   "kind": "bridge",
+   "id": "bridge_97_87_1",
+   "x": 1277.56,
+   "z": 192,
+   "yaw": -1.5708,
+   "data": {
+    "span": 12,
+    "deck": 233.434,
+    "road": "road_97"
+   }
+  },
+  {
+   "kind": "bridge",
+   "id": "bridge_97_87_2",
+   "x": 1088,
+   "z": 710.42,
+   "yaw": 0,
+   "data": {
+    "span": 12,
+    "deck": 265.08,
+    "road": "road_97"
+   }
+  }
+ ]
+}

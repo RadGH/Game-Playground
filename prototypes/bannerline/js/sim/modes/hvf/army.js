@@ -131,7 +131,7 @@ export function armyTick(ctx) {
         if (state.tick >= u._atkAt) {
           u._atkAt = state.tick + secToTicks(def.attackEvery);
           hurt(ctx, u, t, def.dps * def.attackEvery * armyMult(data, p, u.type));
-          ctx.emit('attack', { src: u.id, dst: t.id });
+          ctx.emit('attack', { src: u.id, dst: t.id, x: t.x, z: t.z });
         }
       } else {
         if (state.tick % 10 === 0 && !(o.failAt > state.tick - CHASE_RETRY)) o.path = null;
@@ -156,7 +156,7 @@ export function towerTick(ctx) {
     }
     if (!best) continue;
     b._atkAt = state.tick + secToTicks(T.attackEvery);
-    ctx.emit('shot', { src: b.id, dst: best.id });
+    ctx.emit('shot', { src: b.id, dst: best.id, x: b.x, z: b.z });
     hurt(ctx, b, best, T.dps * T.attackEvery);
   }
 }

@@ -125,6 +125,7 @@ export function farholdField(F, seed) {
   // placeholder companion (never usable) lets the check run, which is the behaviour Farhold intends
   // and Thousandvale has. Logged as a Farhold finding in js/rules/README.md.
   field.setCompanions(() => [{ id: '__none', dying: 0, removed: true, x: 1e6, z: 1e6 }]);
+  field.seedUsed = seed;
   /**
    * main.js `onEnemyKilled` (line ~2646), the part that touches the fight's rng: the drop roll is
    * `rpg.rollDrops(e, { rng: field.rng, … })` — the SAME generator the strikes use, mid-swing. Set
@@ -221,10 +222,17 @@ export function farholdSwing(F, field, control, player, hand = 'main', stepIndex
 }
 
 /** main.js `onEnemyStrike` (line ~9584) with no companions: the enemy hits the player. */
-export function farholdEnemyStrike(F, field, player, e, mech = null) {
-  const result = F.rpg.strike(e, player, field.rng, { multiplier: incomingFrom(player) * outgoingFrom(e) });
-  mech?.onHurt(result, e, player);
+export function farholdEnemyStrike(F, field, player, e, mech = null, pets = null) {
+  // main.js onEnemyStrike: the companion it walked up to, else a nearby one 55% of the time, else you
+  let victim = player;
+  if (pets) {
+    const pet = e.aimingAt || pets.nearest(e.x, e.z, (e.reach || 2.4) + 0.6);
+    victim = pet && (e.aimingAt || field.rng() < 0.55) ? pet : player;
+  }
+  const result = F.rpg.strike(e, victim, field.rng, { multiplier: incomingFrom(victim) * outgoingFrom(e) });
+  mech?.onHurt(result, e, victim);
   if (e.lifeSteal) e.hp = Math.min(e.maxHp, e.hp + Math.round(result.amount * e.lifeSteal));
-  if (e.onHit?.length) field.statusOnHit(e, player, F.skills.statuses);
+  if (e.onHit?.length) field.statusOnHit(e, victim, F.skills.statuses);
+  if (victim !== player && result.dead) pets.fall(victim);
   return result;
 }

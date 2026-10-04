@@ -106,6 +106,8 @@ export const CLIENT_MSGS = Object.freeze({
   respawn: { on: 'p', fields: {}, rate: 1, burst: 2 },
   use:     { on: 'p', fields: { id: 'id' }, rate: 4, burst: 8 },
   item:    { on: 'p', fields: { op: 'str:8', uid: 'str:40', slot: '?str:16' }, rate: 5, burst: 10 },
+  travel:  { on: 'p', fields: { to: 'str:48' }, rate: 1, burst: 3 },
+  trace:   { on: 'p', fields: { kind: 'str:16' }, rate: 1, burst: 2 },
   trade:   { on: 'p', fields: { op: 'str:8', id: '?int', items: '?uids', gold: '?int' }, rate: 5, burst: 10 },
   leave:   { on: 'both', fields: {}, rate: 1, burst: 2 },
 });
@@ -136,11 +138,16 @@ export const SERVER_MSGS = Object.freeze({
   targetR: ['id', 'ok', 'why'],
   ignored: ['list'],
   tradeAsk: ['trade', 'from', 'name'],
+  relocate: ['path', 'ticket', 'province'],
+  groupHint: ['key', 'with'],
+  realm: ['kind', 'ev', 'at', 'won'],
+  zone: ['zone', 'name', 'deeds'],
+  travelR: ['ok', 'why', 'cost'],
   tradeState: ['trade', 'done', 'why'],
 });
 
 /** Party ops (`party {op}`); docs/protocol.md §3.3. */
-export const PARTY_OPS = Object.freeze(['invite', 'accept', 'decline', 'leave', 'kick', 'lead', 'join', 'code']);
+export const PARTY_OPS = Object.freeze(['invite', 'accept', 'decline', 'leave', 'kick', 'lead', 'join', 'code', 'group']);
 export const PARTY_MAX = 5;
 /** Item ops (`item {op}`). */
 export const ITEM_OPS = Object.freeze(['equip', 'unequip', 'destroy']);

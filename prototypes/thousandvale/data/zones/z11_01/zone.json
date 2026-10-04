@@ -1,0 +1,233 @@
+{
+  "name": "Fiderow (z11_01)",
+  "zone": "z11_01",
+  "sheet": {
+    "sheet": "torbor_downs",
+    "zone": "hollin_pass"
+  },
+  "province": {
+    "id": 10,
+    "name": "Petbeck Basin"
+  },
+  "size": 1025,
+  "step": 2,
+  "origin": {
+    "x": 0,
+    "z": 0
+  },
+  "heightMin": -240,
+  "heightMax": 1660,
+  "bakeVersion": 2,
+  "inputHash": "740c92aa",
+  "waterKinds": [
+    "none",
+    "sea",
+    "lake",
+    "river"
+  ],
+  "source": {
+    "tool": "tools/bake-zone.mjs",
+    "world": {
+      "seed": 1001,
+      "width": 288,
+      "height": 224,
+      "method": "pangea",
+      "seaLevel": 0.2,
+      "inputHash": "9803699e"
+    },
+    "zone": {
+      "zx": 11,
+      "zy": 1
+    },
+    "worldOrigin": {
+      "x": 22528,
+      "z": 2048
+    },
+    "zoneMetres": 2048
+  },
+  "rivers": [
+    {
+      "id": 21,
+      "name": "Tackmonflow"
+    },
+    {
+      "id": 57,
+      "name": "The Walmanmouth"
+    },
+    {
+      "id": 86,
+      "name": null
+    }
+  ],
+  "sites": [
+    {
+      "type": "settlement",
+      "kind": "town",
+      "name": "Fiderow",
+      "x": 1728,
+      "z": 560,
+      "hub": true,
+      "radius": 90,
+      "movedFrom": {
+        "x": 1856,
+        "z": 448
+      }
+    },
+    {
+      "type": "settlement",
+      "kind": "hamlet",
+      "name": "Old Mosshearth",
+      "x": 112,
+      "z": 1472,
+      "radius": 46,
+      "movedFrom": {
+        "x": 64,
+        "z": 1472
+      }
+    },
+    {
+      "type": "settlement",
+      "kind": "hamlet",
+      "name": "Wolditford",
+      "x": 448,
+      "z": 880,
+      "radius": 46,
+      "movedFrom": {
+        "x": 448,
+        "z": 832
+      }
+    },
+    {
+      "type": "landmark",
+      "kind": "ancientwood",
+      "name": "The Mihackmo Heartwood",
+      "x": 1728,
+      "z": 1984
+    },
+    {
+      "type": "landmark",
+      "kind": "ancientwood",
+      "name": "The Petmato Heartwood",
+      "x": 832,
+      "z": 1600
+    },
+    {
+      "type": "dungeon",
+      "id": "door_1",
+      "name": "Barrow entrance",
+      "x": 1908,
+      "z": 560,
+      "yaw": -1.933
+    },
+    {
+      "type": "event",
+      "id": "event_hollin_pass",
+      "x": 1387,
+      "z": 781,
+      "r": 40
+    }
+  ],
+  "spawn": {
+    "x": 1732,
+    "z": 560
+  },
+  "summary": {
+    "zone": "z11_01",
+    "province": "Petbeck Basin",
+    "inputHash": "740c92aa",
+    "rivers": 3,
+    "wetShare": 0.01,
+    "unwalkableShare": 0.044,
+    "towns": [
+      {
+        "name": "Fiderow",
+        "kind": "town",
+        "hub": true,
+        "at": [
+          1728,
+          560
+        ],
+        "radius": 90,
+        "movedFrom": {
+          "x": 1856,
+          "z": 448
+        },
+        "culture": "halfling",
+        "plots": 24,
+        "streets": 77,
+        "links": 1,
+        "overlaps": 0
+      },
+      {
+        "name": "Old Mosshearth",
+        "kind": "hamlet",
+        "hub": false,
+        "at": [
+          112,
+          1472
+        ],
+        "radius": 46,
+        "movedFrom": {
+          "x": 64,
+          "z": 1472
+        },
+        "culture": "halfling",
+        "plots": 10,
+        "streets": 39,
+        "links": 1,
+        "overlaps": 0
+      },
+      {
+        "name": "Wolditford",
+        "kind": "hamlet",
+        "hub": false,
+        "at": [
+          448,
+          880
+        ],
+        "radius": 46,
+        "movedFrom": {
+          "x": 448,
+          "z": 832
+        },
+        "culture": "halfling",
+        "plots": 11,
+        "streets": 37,
+        "links": 1,
+        "overlaps": 0
+      }
+    ],
+    "roads": 10,
+    "bridges": 1,
+    "scatter": 16443,
+    "scatterKinds": {
+      "tree_conifer": 9963,
+      "rock_small": 1261,
+      "bush": 2902,
+      "tree_broadleaf": 1015,
+      "rock_large": 1270,
+      "boulder": 32
+    },
+    "sites": [
+      "settlement(HUB) town Fiderow 1728 560 90",
+      "settlement hamlet Old Mosshearth 112 1472 46",
+      "settlement hamlet Wolditford 448 880 46",
+      "landmark ancientwood The Mihackmo Heartwood 1728 1984",
+      "landmark ancientwood The Petmato Heartwood 832 1600",
+      "dungeon door_1 Barrow entrance 1908 560  -1.933",
+      "event event_hollin_pass  1387 781 40"
+    ],
+    "spawn": {
+      "x": 1732,
+      "z": 560
+    },
+    "placements": 219,
+    "vignettesAvoided": 0
+  },
+  "files": {
+    "terrain.bin": 6306062,
+    "nav.bin": 1050717,
+    "scatter.bin": 131628,
+    "placements.json": 99355
+  }
+}

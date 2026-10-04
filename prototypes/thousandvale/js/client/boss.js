@@ -95,11 +95,11 @@ export function createBossUi({ actors, serverNow, toast } = {}) {
       }
       case 'enrage':
         if (ev.id !== B.id && !actors.get(ev.id)) break;
-        if (ev.hard) { B.enraged = true; el.root.classList.add('enraged'); callout(`${actors.get(ev.id)?.name || B.name} is enraged!`, 'enrage'); setAura(ev.id); }
+        if (ev.hard) { B.enraged = true; el.root.classList.add('enraged'); callout(`${ev.id === B.id ? B.name : actors.get(ev.id)?.name || B.name} is enraged!`, 'enrage'); setAura(ev.id); }
         else if (ev.soft) { B.soft = ev.soft; el.enrage.dataset.soft = ev.soft; }
         break;
       case 'say': {
-        const who = actors.get(ev.id)?.name;
+        const who = ev.id === B.id ? B.name : actors.get(ev.id)?.name;
         callout(ev.text, ev.style || 'yell', who);
         break;
       }

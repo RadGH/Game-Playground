@@ -97,6 +97,8 @@ export async function createHvfSound({ localPlayers = [0], roleOf = () => 'farme
       if (how === 'global') return play(id);
       if (how === 'mine') return mine(ev.player) ? play(id) : false;
       const p = ev.x != null ? { x: ev.x, z: ev.z } : ev.grave ? ev.grave : at(ev.dst ?? ev.src ?? ev.id);
+      // a positional sound with nowhere to put it stays SILENT: playing it everywhere would leak what the fog hides
+      if (p.x == null) return false;
       let sid = id;
       if (ev.type === 'flee') { const e = entOf?.(ev.id); sid = e && ANIMAL_CALLS[e.type] || id; }
       if (ev.type === 'animalKilled' && ev.kind === 'hen') sid = 'animal.hen.cluck';

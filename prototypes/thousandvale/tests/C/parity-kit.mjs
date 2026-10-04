@@ -10,6 +10,7 @@ import { createCharacter } from '../../js/rules/character.js';
 import { spawnMonster, tickMonsters } from '../../js/rules/monster-ai.js';
 import { makeRng } from '../../js/rules/rng.js';
 import { isStaff } from '../../js/rules/farhold.js';
+import { attachFollowers } from '../../js/rules/followers.js';
 
 export const DT = 0.05;
 export const PACK = [['moor_hound', 24, 0.5, 3.5], ['moor_hound', 24, -1.6, 4.4], ['moor_hound', 24, 1.9, 5.2], ['barrow_hound', 24, 0, 8]];
@@ -31,7 +32,19 @@ export async function pair({ classId, level = 30, seed = 4, pack = PACK, followe
   room.field.add(tp, 'player');
   const tmobs = pack.map(([id, lvl, x, z], i) => spawnMonster(room.field, engine.enemyDef(id), lvl, x, z, { id: `m${i}` }));
   for (const m of [...fmobs, ...tmobs]) { m.hp = m.maxHp = m.maxHp * 40; m.dmg = [1, 2]; }
-  return { F, fp, ff, fmobs, fs, control, room, tp, tmobs };
+  const s = { F, fp, ff, fmobs, fs, control, room, tp, tmobs, followers: null };
+  if (followers) {
+    // the follower system on both sides, and the class companion Farhold's begin() hands out
+    attachFollowers(room, { rng: makeRng(((seed) ^ 0x9e11) >>> 0) });
+    const classDef = F.classes.find(c => c.id === classId);
+    if (classDef?.pet) {
+      fs.inflight.push(fs.pets.summonForClass(classId, fp, { ...classDef.pet }));
+      room.run(() => room.followers.summonForClass(tp, { ...classDef.pet }));
+    }
+    await fs.settle();
+    s.followers = petDiff;
+  }
+  return s;
 }
 
 /** Farhold's Rewind keeps its history on `performance.now()`: the fixtures run it on the fake clock. */
@@ -42,7 +55,7 @@ export function fakePerformance(on) { fakeMs = 0; performance.now = on ? () => f
 export function frame(s) {
   fakeMs += DT * 1000;
   mock.timers.tick(DT * 1000);
-  s.ff.update(DT, s.control, s.fp, { onEnemyStrike: e => O.farholdEnemyStrike(s.F, s.ff, s.fp, e, s.fs.mech) });
+  s.ff.update(DT, s.control, s.fp, { onEnemyStrike: e => O.farholdEnemyStrike(s.F, s.ff, s.fp, e, s.fs.mech, s.followers ? s.fs.pets : null) });
   s.fs.tick(DT);
   s.room.run(() => { s.room.clock.advance(DT); s.room.combat.tick(DT); });
 }
@@ -66,9 +79,25 @@ export function diff(s) {
   return null;
 }
 
+/** The companions on both sides: the same bodies, health, places and statuses. */
+function petDiff(s) {
+  const a = s.fs.pets.pets, b = s.room.followers.of(s.tp);
+  if (a.length !== b.length) return `followers ${b.length} vs ${a.length} (${b.map(p => p.defId)} vs ${a.map(p => p.defId)})`;
+  for (let i = 0; i < a.length; i++) {
+    const f = a[i], t = b[i];
+    if (t.defId !== f.defId) return `follower ${i} is ${t.defId} vs ${f.defId}`;
+    if (Math.round(t.hp) !== Math.round(f.hp)) return `follower ${i} (${f.defId}) hp ${t.hp} vs ${f.hp}`;
+    if (Math.abs(t.x - f.x) > 1e-6 || Math.abs(t.z - f.z) > 1e-6) return `follower ${i} (${f.defId}) position ${t.x},${t.z} vs ${f.x},${f.z}`;
+    if (keys(t) !== keys(f)) return `follower ${i} statuses [${keys(t)}] vs [${keys(f)}]`;
+  }
+  return null;
+}
+
 /** A basic attack on both sides (a melee skill borrows the last swing's shape). */
 export function basic(s, step) {
   const w = s.tp.equipment.weapon;
+  // main.js swingWith's first line: a shape form's own basic attack (skillrun.js basicAttack)
+  if (s.fs.mech.basicAttack('main')) { s.room.run(() => s.room.combat.resolveSwing(s.tp, 'main', step, w)); return; }
   const castsOrShoots = w && (isStaff(w) || w.ranged);   // a staff, a wand, a bow: everything else (a quarterstaff too) swings
   if (castsOrShoots) {
     s.fs.rangedAttack(1.0, step);
@@ -105,15 +134,18 @@ export async function runBar({ classId, seed = 4, level = 30, frames = 50, skip 
       s.control.yaw = 0; s.tp.yaw = 0;
       s.fp.mp = s.fp.maxMp; s.tp.mp = s.tp.maxMp;
       basic(s, slot);
+      await s.fs.settle();
       let d = diff(s);
       if (d) { problems.push(`${classId}/${id} after the basic attack: ${d}`); break; }
       const before = s.fmobs.reduce((n, m) => n + m.hp, 0);
       const a = s.fs.cast(slot, aim);
       const b = s.room.run(() => s.room.combat.cast(s.tp, slot, { aim }));
+      await s.fs.settle();
       if (b.ok !== (a?.ok !== false)) { problems.push(`${classId}/${id}: cast ok ${b.ok} (${b.why || ''}) vs ${a?.ok} (${a?.why || ''})`); break; }
       casts++;
       for (let k = 0; k < frames; k++) {
         frame(s);
+        await s.fs.settle();
         d = diff(s);
         if (d) { problems.push(`${classId}/${id} +${k}: ${d}`); break; }
       }

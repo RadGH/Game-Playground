@@ -107,9 +107,18 @@ test('sound: the bridge loads, the hawk cries for its owner, fogged fights are s
     await new Promise((res) => setTimeout(res, 150));
     const turn = snd.onEvent({ type: 'turn' });
     const far = snd.onEvent({ type: 'hit', x: e.x + 200, z: e.z + 200 });     // in the fog / out of earshot
-    return { hawk, turn, far, shown: !document.querySelector('[data-k=soundw]').hidden };
+    // a farmer chopping in a hidden hollow: fogged for the hunter -> silent, even close enough to be in earshot
+    let chopFog = null;
+    for (let d = 14; d < 40 && chopFog == null; d += 2) for (let a = 0; a < 6.28; a += 0.4) {
+      const x = e.x + Math.cos(a) * d, z = e.z + Math.sin(a) * d;
+      if (!window.hvf.visibleAt(x, z)) { chopFog = snd.onEvent({ type: 'chopped', player: 0, cell: 1, gold: 1, x, z }); break; }
+    }
+    const chopBare = snd.onEvent({ type: 'chopped', player: 0, cell: 1, gold: 1 });   // the old shape, no position: silent too
+    await new Promise((res) => setTimeout(res, 150));
+    const chopNear = snd.onEvent({ type: 'chopped', player: 0, cell: 1, gold: 1, x: e.x + 1, z: e.z });   // in sight: heard
+    return { hawk, turn, far, chopFog, chopBare, chopNear, shown: !document.querySelector('[data-k=soundw]').hidden };
   });
-  expect(r).toEqual({ hawk: true, turn: true, far: false, shown: true });
+  expect(r).toEqual({ hawk: true, turn: true, far: false, chopFog: false, chopBare: false, chopNear: true, shown: true });
   await page.keyboard.press('KeyM');
   expect(await page.evaluate(() => window.hvf.match.sound.settings.muted)).toBe(true);
   expect(await page.locator('[data-k=mute]').first().textContent()).toBe('🔇');

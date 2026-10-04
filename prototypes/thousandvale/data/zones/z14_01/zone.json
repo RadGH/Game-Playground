@@ -1,0 +1,144 @@
+{
+  "name": "Hollowwick (z14_01)",
+  "zone": "z14_01",
+  "sheet": {
+    "sheet": "torbor_downs",
+    "zone": "saltmouth"
+  },
+  "province": {
+    "id": 10,
+    "name": "Petbeck Basin"
+  },
+  "size": 1025,
+  "step": 2,
+  "origin": {
+    "x": 0,
+    "z": 0
+  },
+  "heightMin": -240,
+  "heightMax": 1660,
+  "bakeVersion": 2,
+  "inputHash": "4bce3b89",
+  "waterKinds": [
+    "none",
+    "sea",
+    "lake",
+    "river"
+  ],
+  "source": {
+    "tool": "tools/bake-zone.mjs",
+    "world": {
+      "seed": 1001,
+      "width": 288,
+      "height": 224,
+      "method": "pangea",
+      "seaLevel": 0.2,
+      "inputHash": "9803699e"
+    },
+    "zone": {
+      "zx": 14,
+      "zy": 1
+    },
+    "worldOrigin": {
+      "x": 28672,
+      "z": 2048
+    },
+    "zoneMetres": 2048
+  },
+  "rivers": [
+    {
+      "id": 12,
+      "name": "The Batpate Run"
+    }
+  ],
+  "sites": [
+    {
+      "type": "settlement",
+      "kind": "hamlet",
+      "name": "Hollowwick",
+      "x": 1120,
+      "z": 1808,
+      "hub": true,
+      "radius": 46,
+      "movedFrom": {
+        "x": 960,
+        "z": 1984
+      }
+    },
+    {
+      "type": "dungeon",
+      "id": "door_1",
+      "name": "Barrow entrance",
+      "x": 1005,
+      "z": 1683,
+      "yaw": 1.245
+    },
+    {
+      "type": "event",
+      "id": "event_saltmouth",
+      "x": 1072,
+      "z": 1416,
+      "r": 40
+    }
+  ],
+  "spawn": {
+    "x": 1120,
+    "z": 1804
+  },
+  "summary": {
+    "zone": "z14_01",
+    "province": "Petbeck Basin",
+    "inputHash": "4bce3b89",
+    "rivers": 1,
+    "wetShare": 0,
+    "unwalkableShare": 0,
+    "towns": [
+      {
+        "name": "Hollowwick",
+        "kind": "hamlet",
+        "hub": true,
+        "at": [
+          1120,
+          1808
+        ],
+        "radius": 46,
+        "movedFrom": {
+          "x": 960,
+          "z": 1984
+        },
+        "culture": "halfling",
+        "plots": 8,
+        "streets": 27,
+        "links": 0,
+        "overlaps": 0
+      }
+    ],
+    "roads": 1,
+    "bridges": 0,
+    "scatter": 5755,
+    "scatterKinds": {
+      "rock_small": 942,
+      "bush": 2971,
+      "tree_broadleaf": 1420,
+      "tree_conifer": 414,
+      "rock_large": 8
+    },
+    "sites": [
+      "settlement(HUB) hamlet Hollowwick 1120 1808 46",
+      "dungeon door_1 Barrow entrance 1005 1683  1.245",
+      "event event_saltmouth  1072 1416 40"
+    ],
+    "spawn": {
+      "x": 1120,
+      "z": 1804
+    },
+    "placements": 40,
+    "vignettesAvoided": 0
+  },
+  "files": {
+    "terrain.bin": 6305598,
+    "nav.bin": 1050717,
+    "scatter.bin": 46124,
+    "placements.json": 15773
+  }
+}

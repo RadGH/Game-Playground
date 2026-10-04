@@ -39,7 +39,7 @@ export function cleanName(name) {
  * The starter province's hub (PLAN §5.1). World Forge names places at random, so the bake renames the
  * chosen settlement to Torborhold — the name every earlier doc, test and quest uses.
  */
-export const STARTER = { zone: 'z15_02', settlementId: null, name: 'Torborhold' };   // Petbeck Basin, the safest province (danger 0.167, 30 zones, grassland); its town (World Forge: Fencross) becomes Torborhold
+export const STARTER = { zone: 'z12_02', settlementId: null, name: 'Torborhold' };   // Petbeck Basin (danger 0.167, 30 zones, grassland), E's Torbor Downs block x11-14 y1-4 at E's start cell [1,1]; its biggest settlement becomes Torborhold
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 export const OUT_DIR = join(HERE, '..', 'data', 'world');

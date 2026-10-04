@@ -40,7 +40,7 @@ import { createMenuNav } from '../menunav.js';
 import * as Q from '../../sim/modes/hvf/query.js';
 import { KIND } from '../../sim/modes/hvf/mapgen.js';
 import { cellOf, liveGrid } from '../../sim/modes/hvf/grid.js';
-import { hostHvfRoom, joinHvfRoom } from './online.js';
+import { hvfRoomMode } from './online.js';
 
 const BUILD_KEYS = ['Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Digit0', 'Minus', 'Equal'];
 const AI_LEVELS = [['recruit', 'Recruit'], ['veteran', 'Veteran'], ['commander', 'Commander']];
@@ -118,7 +118,7 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
     if (!st) return '<p class="info">Connecting…</p>';
     const mine = (s) => s.kind === 'human' && s.owner === o.room.me;
     return `<h3>Room <b class="code">${st.code}</b> <small>${o.room.isHost ? 'you host' : 'joined'} · ${st.machines.length} machine(s)</small></h3>
-      <div class="seats">${st.seats.map((s) => `<div class="seat ${mine(s) ? 'me' : ''}"><b>${s.role === 'farmer' ? '🌾' : '🏹'} ${s.role} ${s.index + 1}</b>
+      <div class="seats">${st.slots.map((s) => `<div class="seat ${mine(s) ? 'me' : ''}"><b>${s.role === 'farmer' ? '🌾' : '🏹'} ${s.role} ${s.index + 1}</b>
         <span class="dev">${s.kind === 'human' ? `${s.name}${s.ready ? ' ✓ ready' : ''}` : s.kind === 'ai' ? `AI (${s.difficulty})` : 'open'}</span>
         ${mine(s) ? `<button class="mini" data-act="ready" data-key="${s.key}">${s.ready ? 'Not ready' : 'Ready'}</button><button class="mini" data-act="release" data-key="${s.key}">Leave seat</button>` : s.kind !== 'human' ? `<button class="mini" data-act="claim" data-key="${s.key}">Take</button>` : ''}</div>`).join('')}</div>
       ${o.error ? `<p class="warn">${o.error}</p>` : ''}
@@ -132,7 +132,7 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
       else if (act === 'join') await api.online.join(setup.el.querySelector('[data-k="code"]').value);
       else if (act === 'claim') api.online.claim(el.dataset.key);
       else if (act === 'release') o.room.release(el.dataset.key);
-      else if (act === 'ready') { const s = o.room.state.seats.find((x) => x.key === el.dataset.key); o.room.ready(el.dataset.key, !s.ready); }
+      else if (act === 'ready') { const s = o.room.state.slots.find((x) => x.key === el.dataset.key); o.room.ready(el.dataset.key, !s.ready); }
       else if (act === 'netstart') api.online.start({ seed: choice.seed });
     } catch (err) { o.error = err.message || String(err); }
     drawSetup();
@@ -620,7 +620,7 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
     if (window.hvf === api) delete window.hvf;
   }
 
-  // ── online (stream D's transport + lockstep; HvF's own room: online.js) ────────────────────────
+  // ── online (stream D's room + transport + lockstep: js/net/lobbysync.js with HvF's room mode, online.js) ──
   const online = {
     room: null, hashes: {},
     async transport() { const { createTransport } = await import('../../net/transport.js'); return createTransport(transportKind || params.get('net') || 'peerjs'); },
@@ -633,12 +633,14 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
       room.on('closed', () => { if (m?.net) for (const v of m.views) v.hud.alert('Host left — match ended', 'bad', 4000); });
     },
     async host(code, { format = choice.format, name = 'Host' } = {}) {
-      const room = await hostHvfRoom({ transport: await online.transport(), code, name, dataHash: data.hash, rules, format });
+      const { createRoom } = await import('../../net/lobbysync.js');
+      const room = await createRoom({ transport: await online.transport(), code, name, dataHash: data.hash, mode: 'hvf', format, roomMode: hvfRoomMode(rules) });
       online.attach(room); return room.code;
     },
     async join(code, { name = 'Guest' } = {}) {
       const { cleanRoomCode } = await import('../../net/transport.js');
-      const room = await joinHvfRoom({ transport: await online.transport(), code: cleanRoomCode(code), name, dataHash: data.hash });
+      const { joinRoom } = await import('../../net/lobbysync.js');
+      const room = await joinRoom({ transport: await online.transport(), code: cleanRoomCode(code), name, dataHash: data.hash });
       online.attach(room); return true;
     },
     claim(key, o = {}) { const dev = choice.seats[0].device || 'kbm'; return online.room.claim(key, { local: 0, device: dev, name: o.name || (online.room.isHost ? 'Host' : 'Guest'), ...o }); },
@@ -656,9 +658,14 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
       });
       const clock = createNetClock({ lockstep: match.lockstep, tickMs: packet.tickMs });
       const detach = clock.attachVisibility?.(document);
-      const local = match.localPlayers.map((lp, i) => ({ player: lp.pid, device: lp.device || 'kbm', slot: i }));
-      if (!local.length) { console.warn('online: no local seat'); return; }
-      begin({ sim: match.sim, clock, local, opts: { format: packet.config.format, online: true }, net: { match, clock, room: online.room, detach } });
+      let local = match.localPlayers.map((lp, i) => ({ player: lp.pid, device: lp.device || 'kbm', slot: i }));
+      // A machine with no seat (a host who left every seat to guests and AI) still has to run: the host
+      // assembles every turn, so if it never pumps its clock everyone waits forever. It WATCHES from
+      // the first farmer's side; anything it issues is dropped by the lockstep (it owns no players).
+      const watching = !local.length;
+      if (watching) local = [{ player: 0, device: 'kbm', slot: 0 }];
+      begin({ sim: match.sim, clock, local, opts: { format: packet.config.format, online: true, watching }, net: { match, clock, room: online.room, detach } });
+      if (watching) for (const v of m.views) v.hud.alert('You have no seat in this match: watching from the farmers\' side.', 'info', 6000);
     },
   };
 

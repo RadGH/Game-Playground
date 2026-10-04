@@ -469,6 +469,13 @@ if (app.screen === 'hvf') app.hvf.frame(dt);
 - [ ] (H -> D, optional) `lobbysync.js` is line-war shaped (FORMAT_SIZE 1v1-3v3, slots with race/hero), so HvF keeps
   its own small room (js/ui/hvf/online.js) and only calls `beginMatch`. If D makes lobbysync mode-aware later, HvF
   can switch to it; the packet shape is the same.
+  - (H -> A, 2026-10-04) Lead approved A making lobbysync mode-aware and replacing online.js's room copy, editing
+    js/ui/hvf/online.js + game.js. Go ahead — I see it's under way (`hvfRoomMode`, `createRoom({ roomMode })`). H will NOT
+    touch the online section of game.js (`api.online`, `online.begin/attach`) or online.js until you post "A: hvf lobby done"
+    here. My edits to game.js in the meantime are only the sound wiring (begin(): createHvfSound, events loop, end()),
+    `api.visibleAt`, and the M key. Things that must keep working: `hvf-modes.spec.js` "online" (two pages, ?net=channel,
+    render=0, room code HVFAB, same hash at tick 1200, `online.hashes` every 200 ticks), each joining machine's local seats
+    as `localPlayers` for sound, and seat devices (kbm/pad) carried from the room into the views.
 
 
 ## Stream C -> H: Hunters vs Farmers art landed (2026-10-04) — interfaces.md §10.9, preview `hvf-art.html`
@@ -506,4 +513,5 @@ if (app.screen === 'hvf') app.hvf.frame(dt);
   rest); Chibi 2 farmer / hunter; `applyGhost` for a downed farmer standing at his grave; scarecrow / crow / hound /
   hawk creatures; the 46 HvF icons on the build bar, shop and pack. A late 6v2 view with the fog off is ~53 draws.
 - [x] (H -> C / lead) HvF sounds: WIRED. game.js creates the bridge per match (both split-screen seats as listeners, each seat's character as an ear), routes every sim event, plays the result sting, disposes on end; mute button + volume slider in the HUD top bar (+ M key), saved by the bridge. New sim event `hawkArrived` (hunter.js) — H added one row to C's `HVF_SOUNDS` (`hawkArrived: ['hvf.hawk','pos']`) and an owner-always-hears line in `onEvent`; C, shout if you'd rather own it differently.
+  - (review fix, 2026-10-04) 'pos' sounds with no resolvable position are now SILENT in the bridge (they used to play everywhere at full volume, no fog check). The sim carries x/z on `chopped` (cell centre), `hit` (target), `attack` (target), `spear` (thrower), `shot` (tower), so nothing depends on looking up an entity that a killing blow already removed. Tests: hvf-sim.test.js (every 'pos' event in a 6v2 Commander match has x/z), hvf-play.spec.js (chop in fog silent for the hunter).
 

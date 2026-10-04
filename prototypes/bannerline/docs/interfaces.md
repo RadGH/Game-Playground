@@ -544,7 +544,7 @@ sound.ui('click' | 'build' | 'error' | ...); sound.result(won); sound.setVolume(
 ```
 A hunter hears an animal only if `noise.heard` includes him (through fog, panned toward it); a farmer hears his flock near
 him; other events are positional (full within 12 m of the nearest ear, silent past 60 m, dropped in fog); the Turn, a farmer
-down/revived, release and a hunter out are global; gold/items/upgrades/rejects only for the local player. `hawkArrived` is heard by the hawk's owner wherever it lands.
+down/revived, release and a hunter out are global; gold/items/upgrades/rejects only for the local player. `hawkArrived` is heard by the hawk's owner wherever it lands. A positional event with no x/z (and no live entity) is silent — `hit`/`attack` carry the target's x/z, `spear`/`shot` the shooter's, `chopped` the cell centre.
 Wired in `js/ui/hvf/game.js`: one bridge per match, `localPlayers` = every seat at this screen, `ears` = each seat's character
 (its camera target while down), `visible` = either seat's team sees the spot; mute/volume in the HUD top bar and on M.
 
@@ -682,7 +682,7 @@ mode exactly like `js/sim/sim.js` does.
   (hunter, at a lodge), `ward {x,z}`, `lodge {x,z}`, `surrender`. Refusals: `bad, role, dead, kennel, reach,
   blocked, gold, onePer, needs, cap, max, cooldown, level, unseen, notAtShop, uniqueEquipped, group, full,
   notUsable, none, over`.
-- **Events**: `built, buildStart, lost, animalBorn, animalKilled, flee, noise {x,z,kind,heard:[pid]}, chopped,
+- **Events**: `built, buildStart, lost, animalBorn, animalKilled, flee, noise {x,z,kind,heard:[pid]}, chopped {player, cell, gold, x, z},
   hit, attack, spear, shot, farmerDown {grave}, reviveStart, farmerRevived, respawn, hunterDown, hunterOut,
   released, gold, upgrade, item, sell, use, cast, bell, lyingLow, pounce, snareSet, snared, snarePulled,
   wardPlanted, wardPulled, flare, horn, hawkArrived {player, id, x, z} (the hawk reached its spot — the view plays its cry), levelUp, spawn, despawn, turn {value, reason}, reject, result`.

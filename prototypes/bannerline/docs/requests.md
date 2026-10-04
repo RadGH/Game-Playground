@@ -515,3 +515,16 @@ if (app.screen === 'hvf') app.hvf.frame(dt);
 - [x] (H -> C / lead) HvF sounds: WIRED. game.js creates the bridge per match (both split-screen seats as listeners, each seat's character as an ear), routes every sim event, plays the result sting, disposes on end; mute button + volume slider in the HUD top bar (+ M key), saved by the bridge. New sim event `hawkArrived` (hunter.js) — H added one row to C's `HVF_SOUNDS` (`hawkArrived: ['hvf.hawk','pos']`) and an owner-always-hears line in `onEvent`; C, shout if you'd rather own it differently.
   - (review fix, 2026-10-04) 'pos' sounds with no resolvable position are now SILENT in the bridge (they used to play everywhere at full volume, no fog check). The sim carries x/z on `chopped` (cell centre), `hit` (target), `attack` (target), `spear` (thrower), `shot` (tower), so nothing depends on looking up an entity that a killing blow already removed. Tests: hvf-sim.test.js (every 'pos' event in a 6v2 Commander match has x/z), hvf-play.spec.js (chop in fog silent for the hunter).
 
+
+## Stream A — code-review fixes (2026-10-04)
+
+- [x] (A -> H, lead OK) **HvF online now runs on lobbysync.** `js/ui/hvf/online.js` is only a ROOM MODE
+  (`hvfRoomMode(rules)`: seats default to AI, a freed seat goes back to AI, every seat must be a player or
+  an AI). game.js: `online.host/join` call `createRoom({ ..., mode: 'hvf', roomMode })` / `joinRoom`; the room
+  state is `state.slots` (was `seats`), host seat changes are `room.setSlot`. The HvF room gains measured
+  ping -> input delay, rejoin by token, `backToLobby()` (not yet called from HvF's results screen — H's call),
+  and the empty-team / open-seat check before start. A host with NO seat now WATCHES (first farmer's view,
+  `m.opts.watching`) and keeps pumping the lockstep. Specs: hvf-modes.spec.js (3 old + new "host with no seat").
+- [ ] (A -> B) `main.js` ignores the lockstep's `refused` event (bad rejoin token): the player waits 20 s and
+  then loses the seat silently. Please show "Could not rejoin: the match no longer has your seat" and return to
+  the title. (With A's fix a valid token is never refused, even inside PeerJS's 8 s heartbeat.)

@@ -116,9 +116,9 @@ test('online: two pages over BroadcastChannel, co-op farmers vs AI hunter, same 
   await guest.evaluate(() => window.hvfGame.online.join('HVFAB'));
   await host.evaluate(() => { const o = window.hvfGame.online; o.claim('farmer-0', { name: 'Host' }); o.ready('farmer-0'); });
   await guest.evaluate(() => window.hvfGame.online.claim('farmer-1', { name: 'Guest' }));
-  await expect.poll(() => host.evaluate(() => window.hvfGame.online.room.state.seats.find((s) => s.key === 'farmer-1').kind)).toBe('human');
+  await expect.poll(() => host.evaluate(() => window.hvfGame.online.room.state.slots.find((s) => s.key === 'farmer-1').kind)).toBe('human');
   await guest.evaluate(() => window.hvfGame.online.ready('farmer-1'));
-  await expect.poll(() => host.evaluate(() => window.hvfGame.online.room.state.seats.every((s) => s.kind !== 'human' || s.ready))).toBe(true);
+  await expect.poll(() => host.evaluate(() => window.hvfGame.online.room.state.slots.every((s) => s.kind !== 'human' || s.ready))).toBe(true);
   await host.evaluate(() => window.hvfGame.online.start({ seed: 777, tickMs: 10, startIn: 600 }));
   for (const p of [host, guest]) await p.waitForFunction(() => window.hvf && window.hvf.match, null, { timeout: 30_000 });
   const local = await guest.evaluate(() => window.hvf.match.views.map((v) => ({ role: v.role, player: v.player })));
@@ -135,5 +135,30 @@ test('online: two pages over BroadcastChannel, co-op farmers vs AI hunter, same 
   const coops = await host.evaluate(() => window.hvf.state().ents.filter((e) => e.type === 'coop').map((e) => e.owner));
   expect(coops.length, 'commands from both machines reached the sim').toBeGreaterThanOrEqual(1);
   await host.screenshot({ path: 'test-results/hvf-online-host.png' });
+  expect(errors).toEqual([]);
+});
+
+test('online: a host with NO seat still runs the match (it assembles every turn) and watches; the guest plays', async ({ context }) => {
+  test.setTimeout(150_000);
+  const host = await context.newPage(), guest = await context.newPage();
+  const errors = [...errorsOf(host), ...errorsOf(guest)];
+  for (const p of [host, guest]) { await p.setViewportSize({ width: 960, height: 600 }); await p.goto(`${PAGE}?seed=3&net=channel&render=0`); }
+  for (const p of [host, guest]) await p.waitForFunction(() => window.hvfGame && document.querySelector('.hvf-setup'), null, { timeout: 30_000 });
+  await host.evaluate(() => window.hvfGame.online.host('HVFCD', { format: '2v1' }));
+  await guest.evaluate(() => window.hvfGame.online.join('HVFCD'));
+  await guest.evaluate(() => window.hvfGame.online.claim('farmer-0', { name: 'Guest' }));
+  await expect.poll(() => host.evaluate(() => window.hvfGame.online.room.state.slots.find((s) => s.key === 'farmer-0').kind)).toBe('human');
+  await guest.evaluate(() => window.hvfGame.online.ready('farmer-0'));
+  await expect.poll(() => host.evaluate(() => window.hvfGame.online.room.state.slots.every((s) => s.kind !== 'human' || s.ready))).toBe(true);
+  // the delay comes from the measured ping (lobbysync), not a fixed 2 ticks
+  const packet = await host.evaluate(() => window.hvfGame.online.start({ seed: 778, tickMs: 10, startIn: 600 }));
+  expect(packet.delay).toBeGreaterThanOrEqual(2);
+  expect(packet.machines.find((m) => m.id === packet.hostId).players).toEqual([]);
+  for (const p of [host, guest]) await p.waitForFunction(() => window.hvf && window.hvf.match, null, { timeout: 30_000 });
+  expect(await host.evaluate(() => window.hvf.match.opts.watching)).toBe(true);
+  await expect.poll(() => guest.evaluate(() => window.hvfGame.online.hashes[600] || null), { timeout: 90_000 }).toBeTruthy();
+  await expect.poll(() => host.evaluate(() => window.hvfGame.online.hashes[600] || null), { timeout: 30_000 }).toBeTruthy();
+  const hh = await host.evaluate(() => window.hvfGame.online.hashes), gh = await guest.evaluate(() => window.hvfGame.online.hashes);
+  expect(gh[600]).toBe(hh[600]);
   expect(errors).toEqual([]);
 });

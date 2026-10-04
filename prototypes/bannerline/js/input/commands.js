@@ -31,6 +31,7 @@ export function createSeat({ player, device = 'kbm', viewport, camera, actors, g
   let lastStick = { dir: -1, speed: 0 };
   let disconnectedSent = false;
   let stickFrozen = false;           // a power is being aimed with the left stick
+  let idleHeld = 0;                  // frames the stick has been held while the hero stood idle
 
   function issue(cmd) { queue.push({ ...cmd, p: player }); }
 
@@ -73,7 +74,13 @@ export function createSeat({ player, device = 'kbm', viewport, camera, actors, g
       const speed = m < 0.05 ? 0 : m < 0.45 ? 1 : m < 0.8 ? 2 : 3;
       // Stick +y is screen-down = world +z, so the world direction is (x, y): d = atan2(x, y).
       const dir = speed ? Math.round((Math.atan2(x, y) / (Math.PI * 2)) * 16 + 16) % 16 : 0;
-      if ((speed && dir !== lastStick.dir) || speed !== lastStick.speed) {
+      // The sim drops the stick order when the hero dies, respawns or is teleported (Recall), and
+      // rejects it while the hero is down. So: forget what was sent while the hero is down, and if
+      // the stick is held but the hero has stood idle for a moment, send the order again.
+      if (!hero || hero.alive === false) { lastStick = { dir: -1, speed: 0 }; idleHeld = 0; }
+      else if (speed && lastStick.speed && hero.act === 'idle') { if (++idleHeld >= 6) { lastStick = { dir: -1, speed: 0 }; idleHeld = 0; } }
+      else idleHeld = 0;
+      if (hero && hero.alive !== false && ((speed && dir !== lastStick.dir) || speed !== lastStick.speed)) {
         issue({ type: 'moveDir', dir, speed });
         lastStick = { dir, speed };
       }

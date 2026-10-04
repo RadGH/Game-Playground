@@ -644,7 +644,17 @@ for Radley (tab hidden)". Lockstep events through `onEvent`: `takeover` / `rejoi
 (debug), `status`. Speed and pause are fixed online. Sim events `takeover` / `release` (`{ player }`) mark a
 seat changing hands. Rejoin: `joinRoom({ ..., rejoinToken })` then `beginMatch(room, room.rejoin.packet,
 { ..., rejoin: room.rejoin })`; keep `{ code, token }` (`packet.machines[].token` of this machine) in
-sessionStorage so a reload can rejoin.
+sessionStorage so a reload can rejoin. A valid token takes its seat back even while the old connection
+still looks live (a reload inside the transport's heartbeat timeout); a bad token gets the lockstep event
+`refused { reason: 'no-seat' }` — show it and go back to the title.
+
+**Room modes (2026-10-04).** `createRoom({ ..., roomMode })` takes the mode's seat rules (header of
+`js/net/lobbysync.js`); default `LINE_WAR_ROOM`, Hunters vs Farmers passes `hvfRoomMode(rules)` from
+`js/ui/hvf/online.js`. `room.start()` throws `NetError('bad', reason)` and stays in the lobby when the room
+mode's `check` fails (line war: a team with nobody; HvF: an open or closed seat). A machine with no seat
+still runs `beginMatch` and pumps the clock (`localPlayers` is empty): the host assembles every turn.
+**Big messages:** `peerjs.js` splits any message over 16,000 JSON characters into frames on the reliable
+channel (`js/net/chunks.js`) — late-match snapshots are 100-600 KB; a failed reliable send drops that peer.
 
 ## 13. Campaign (stream F, PLAN §13) — "Banners of the Vale"
 

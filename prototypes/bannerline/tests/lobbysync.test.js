@@ -154,3 +154,47 @@ test('rejoin through the lobby: a guest that dropped mid-match comes back to its
   assert.equal(H.lockstep.sim.state.players[1].kind, 'human');
   assert.equal(G2.lockstep.sim.hash() === H.lockstep.sim.hash() || G2.lockstep.tick !== H.lockstep.tick, true);
 });
+
+test('start refuses a line-war room with an empty team BEFORE switching to the match (the room stays usable)', async () => {
+  const { hub, host, guest } = await lobby();
+  host.claim('0-0', { local: 0, name: 'Radley' }); host.ready('0-0');
+  hub.advance(200);
+  let started = 0; guest.on('start', () => started++);
+  assert.throws(() => host.start({ seed: 1 }), /team 2 has nobody/);
+  hub.advance(300);
+  assert.equal(host.state.phase, 'lobby'); assert.equal(started, 0);
+  host.setSlot('1-0', { kind: 'ai' });
+  const p = host.start({ seed: 1 });
+  assert.equal(p.config.players.length, 2);
+  assert.doesNotThrow(() => createSim(p.config, data));
+});
+
+test('Hunters vs Farmers on the same room: seats default to AI, a freed seat goes back to AI, delay from the ping, the sim builds', async () => {
+  const { hvfRoomMode } = await import('../js/ui/hvf/online.js');
+  const hub = createLoopbackHub({ seed: 5, latency: [60, 90] });
+  const th = hub.transport('host'), tg = hub.transport('guest');
+  const host = await createRoom({ transport: th, name: 'Host', dataHash: data.hash, clock: hub.clock, code: 'HVFQQ', mode: 'hvf', format: '3v1', roomMode: hvfRoomMode(data.hvf.rules) });
+  const guest = await settle(hub, joinRoom({ transport: tg, code: 'HVFQQ', name: 'Friend', dataHash: data.hash, clock: hub.clock }));
+  hub.advance(200);
+  const st = host.state;
+  assert.deepEqual(st.slots.map(s => [s.key, s.kind]), [['farmer-0', 'ai'], ['farmer-1', 'ai'], ['farmer-2', 'ai'], ['hunter-0', 'ai']]);
+  guest.claim('hunter-0', { local: 0, name: 'Friend', device: 'kbm' });   // an AI seat can be taken
+  hub.advance(300);
+  assert.equal(host.state.slots.find(s => s.key === 'hunter-0').owner, tg.id);
+  guest.release('hunter-0'); hub.advance(300);
+  assert.equal(host.state.slots.find(s => s.key === 'hunter-0').kind, 'ai', 'freed -> AI');
+  guest.claim('farmer-1', { local: 0, name: 'Friend', device: 'kbm' }); hub.advance(300);
+  guest.ready('farmer-1'); hub.advance(3000);   // pings flow
+  host.setSlot('farmer-2', { kind: 'open' });
+  assert.throws(() => host.start({ seed: 9 }), /every seat/);
+  assert.equal(host.state.phase, 'lobby');
+  host.setSlot('farmer-2', { kind: 'ai' });
+  const p = host.start({ seed: 9 });
+  assert.ok(p.delay >= 3, `delay ${p.delay} from a ~150 ms round trip`);
+  assert.equal(p.config.mode, 'hvf'); assert.equal(p.config.map, undefined);
+  assert.deepEqual(p.machines.find(m => m.id === th.id).players, [], 'the host has no seat');
+  assert.deepEqual(p.machines.find(m => m.id === tg.id).players, [1]);
+  const s = createSim(p.config, data);
+  assert.equal(s.state.players[1].kind, 'human');
+  assert.deepEqual(s.state.players.map(x => x.role), ['farmer', 'farmer', 'farmer', 'hunter']);
+});

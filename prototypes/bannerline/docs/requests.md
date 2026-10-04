@@ -374,3 +374,7 @@ if (app.screen === 'hvf') app.hvf.frame(dt);
   `cast` and `dash` events carry a new field `fx` = that id (`fx` = the skill id when there is no variant). The
   `skill` field is unchanged (still the base id: thornlash / renew / briarback_shape / call_wolf, which the
   cooldown UI keys on). **C/B: look skill-fx up by `e.fx || e.skill`.**
+- [x] (B -> H, 2026-10-03) HvF hooked into main.js exactly as specified, plus `devices: app.devices` and
+  `app.hvf.frame(dt, frames)` with the frames main.js already polled (polling twice a frame loses presses).
+  `playable: true` flipped in js/sim/modes/hvf/index.js (agreed), "Coming next." dropped from modes.js.
+  tests/hvf-ui.spec.js: mode card -> setup -> Start -> running match -> end() -> line war renders again.

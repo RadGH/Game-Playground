@@ -50,6 +50,7 @@ import { createNetClock } from './net/netclock.js';
 import { createJoinScreen, createNetLobby } from './ui/netlobby.js';
 import { loadCampaign, campaignProgress, campaignSession, createCampaignScreen, createCampaignOverlay, showDebrief } from './ui/campaign.js';
 import { createMenuNav } from './ui/menunav.js';
+import { createHvfGame } from './ui/hvf/game.js';
 import { loadData } from './sim/data.js';
 import { buildMap } from './sim/map.js';
 import * as Q from './sim/query.js';
@@ -106,11 +107,15 @@ async function boot() {
     onJoin: () => showJoin(),
     onCampaign: () => showCampaign(),
   });
+  // Hunters vs Farmers (stream H) owns its whole session: setup card, match, results.
+  app.hvf = createHvfGame({ gfx: app.gfx, data, host: $('screen-hvf'), devices: app.devices, params,
+    onExit: () => { $('screen-hvf').hidden = true; showModes(); } });
   app.join = createJoinScreen({ screen: $('screen-netjoin'), onJoin: (code) => joinOnline(code), onBack: () => showTitle() });
   app.netroom = createNetLobby({ screen: $('screen-netroom'), data, devices: app.devices, onLeave: () => showTitle() });
   app.modes = createModeScreen({
     screen: $('screen-modes'), modes: modeList(data),
     onPick: (mode) => {
+      if (mode.id === 'hvf') { endMatch(); app.title.hide(); app.lobby.hide(); setScreen('hvf'); $('screen-hvf').hidden = false; app.hvf.openSetup(); return; }
       const s = app.session;
       Object.assign(s, { game: mode.id, gameName: mode.name, heroes: mode.heroes, races: mode.races });
       if (!mode.formats.includes(s.mode)) s.mode = mode.defaultFormat || mode.formats[0];
@@ -172,6 +177,7 @@ function setScreen(name) {
   $('screen-lobby').hidden = name !== 'lobby';
   $('screen-modes').hidden = name !== 'modes';
   $('screen-netjoin').hidden = name !== 'netjoin';
+  $('screen-hvf').hidden = name !== 'hvf';
   $('screen-campaign').hidden = name !== 'campaign';
   if (name !== 'campaign' && app.campaignScreen) { app.campaignScreen.destroy(); app.campaignScreen = null; }
   $('screen-netroom').hidden = name !== 'netroom';
@@ -180,8 +186,8 @@ function setScreen(name) {
 }
 function showTitle() {
   if (app.room) { const r = app.room; app.room = null; try { r.leave(); } catch { /* already closed */ } app.netroom.detach(); }
-  endMatch(); app.lobby.hide(); setScreen('title'); app.title.show(); useFlyCam(); }
-function showModes() { endMatch(); app.title.hide(); app.lobby.hide(); setScreen('modes'); app.modes.show(); useFlyCam(); }
+  app.hvf?.end(); endMatch(); app.lobby.hide(); setScreen('title'); app.title.show(); useFlyCam(); }
+function showModes() { app.hvf?.end(); endMatch(); app.title.hide(); app.lobby.hide(); setScreen('modes'); app.modes.show(); useFlyCam(); }
 // ---------------------------------------------------------------- campaign (stream F)
 
 async function showCampaign() {
@@ -255,7 +261,8 @@ function netEvent(type, e = {}) {
 /** Debug speed for online tests: the host's start packet runs faster ticks (everyone follows). */
 app.startOpts = () => ({ tickMs: 50 / (Number(params.get('speed')) || 1) });
 
-function showLobby() { endMatch(); app.title.hide(); setScreen('lobby'); app.lobby.show(); useFlyCam(); }
+function showLobby() {
+  app.hvf?.end(); endMatch(); app.title.hide(); setScreen('lobby'); app.lobby.show(); useFlyCam(); }
 function useFlyCam() {
   if (!app.gfx.viewports.includes(app.flyViewport)) app.gfx.addViewport(app.flyViewport);
   app.flyCam.setBounds({ x0: -1e9, x1: 1e9, z0: -1e9, z1: 1e9 });
@@ -853,7 +860,8 @@ function frame(dt) {
   else if (app.screen === 'netroom') app.netroom.frame(frames);
   if (app.match) matchFrame(dt, frames);
   if (app.screen === 'results' && app.results) frames.forEach((f) => app.results.frame(f));
-  if (!app.match) {
+  if (app.screen === 'hvf') app.hvf.frame(dt, frames);   // frames polled once above (a second poll would lose presses)
+  if (!app.match && app.screen !== 'hvf') {
     // Title / lobby: drift slowly up the first field and back.
     const f0 = app.layout.fields[0];
     const t = performance.now() / 1000;

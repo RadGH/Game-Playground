@@ -11,7 +11,7 @@ import { icon } from './icons.js';
 // Player-facing blurbs for the cards (the registry's `desc` wins when it has one).
 const BLURBS = {
   linewar: 'Two sides, two walled fields. Hire units to march on your rival while your hero holds your own field. Tear down their banners first.',
-  hvf: 'Farmers hide, build and breed sheep in a wild, random world; hunters roam to find them before the farmers grow too strong. Coming next.',
+  hvf: 'Farmers hide, build and breed sheep in a wild, random world; hunters roam to find them before the farmers grow too strong.',
   td: 'Hold a winding road against waves with towers. Planned.',
   moba: 'Lanes, towers and heroes on one shared map. Planned.',
   empires: 'Build a realm and lead heroes across a campaign map. Planned.',

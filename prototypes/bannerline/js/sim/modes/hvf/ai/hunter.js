@@ -123,6 +123,8 @@ export function hunterThink(ctx, p, K, rng, cmd) {
   const me = entById(state, p.ent);
   if (!me || !me.alive || p.out) return;
   const route = (type, args, goal, near, closest) => {
+    // a point projected from a track can fall off the map: keep every target inside it
+    if (args.x != null) { args.x = Math.max(1, Math.min(map.size - 1, args.x)); args.z = Math.max(1, Math.min(map.size - 1, args.z)); goal = cellOf(map, args.x, args.z); }
     if (!routeBudget(state)) { m.retry = true; return false; }
     if (!canRoute(ctx, me, goal, near, closest)) return false;
     cmd(type, args); return true;

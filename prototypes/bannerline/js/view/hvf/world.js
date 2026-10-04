@@ -50,10 +50,13 @@ export function createHvfWorld(scene, map) {
   const disposables = [];
 
   // ── fog of war texture + shader patch ──
-  const fogData = new Uint8Array(cols * rows * 4).fill(0);
-  const fogTex = new THREE.DataTexture(fogData, cols, rows, THREE.RGBAFormat);
-  fogTex.magFilter = THREE.LinearFilter; fogTex.minFilter = THREE.LinearFilter;
-  fogTex.needsUpdate = true;
+  // one texture per team: split screen with a farmer and a hunter draws each half with its own fog
+  const fogTexes = [0, 1].map(() => {
+    const t = new THREE.DataTexture(new Uint8Array(cols * rows * 4), cols, rows, THREE.RGBAFormat);
+    t.magFilter = THREE.LinearFilter; t.minFilter = THREE.LinearFilter; t.needsUpdate = true;
+    return t;
+  });
+  const fogTex = fogTexes[0];
   const fogUniforms = { uFogTex: { value: fogTex }, uFogSize: { value: new THREE.Vector2(cols * cell, rows * cell) }, uFogOn: { value: 1 } };
   function fogify(mat) {
     mat.onBeforeCompile = (sh) => {
@@ -215,13 +218,14 @@ export function createHvfWorld(scene, map) {
 
   // ── fog update ──
   let fogOn = true;
-  function setFog(vision, explored) {
+  function setFog(vision, explored, team = 0) {
+    const fogData = fogTexes[team].image.data;
     for (let i = 0, n = cols * rows; i < n; i++) {
       const w = i >> 5, b = 1 << (i & 31);
       const v = (vision[w] & b) ? 255 : (explored[w] & b) ? 120 : 0;
       fogData[i * 4] = v;
     }
-    fogTex.needsUpdate = true;
+    fogTexes[team].needsUpdate = true;
   }
 
   let choppedSeen = 0;
@@ -243,9 +247,11 @@ export function createHvfWorld(scene, map) {
 
   return {
     group, fogify, setFog, syncChopped, meshes,
+    /** Draw with this team's fog (call before rendering a viewport). */
+    useTeam(team) { fogUniforms.uFogTex.value = fogTexes[team]; },
     get fogOn() { return fogOn; },
     setFogOn(v) { fogOn = !!v; fogUniforms.uFogOn.value = fogOn ? 1 : 0; },
     bounds: { x0: 0, x1: cols * cell, z0: 0, z1: rows * cell },
-    dispose() { scene.remove(group); for (const d of disposables) d.dispose(); for (const m of Object.values(meshes)) m.dispose(); fogTex.dispose(); },
+    dispose() { scene.remove(group); for (const d of disposables) d.dispose(); for (const m of Object.values(meshes)) m.dispose(); for (const t of fogTexes) t.dispose(); },
   };
 }

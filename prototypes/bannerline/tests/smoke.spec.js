@@ -19,8 +19,9 @@ test('keyboard: title -> lobby -> match -> surrender -> results -> lobby (kept) 
   // Title -> lobby -> join (Enter) -> ready (Enter) -> 3-2-1 -> match.
   await page.keyboard.press('Enter');
   await expect(page.locator('#screen-modes')).toBeVisible();
-  await expect(page.locator('.md-card.ready')).toHaveCount(1);                 // Line War
-  await expect(page.locator('.md-card.locked, .md-card.next')).not.toHaveCount(0);
+  await expect(page.locator('.md-card.ready[data-mode="linewar"]')).toHaveCount(1);
+  await expect(page.locator('.md-card.ready[data-mode="linewar"]')).toHaveClass(/nav-focus/);
+  await expect(page.locator('.md-card.locked')).not.toHaveCount(0);
   await page.keyboard.press('Enter');
   await expect(page.locator('#screen-lobby')).toBeVisible();
   await page.keyboard.press('Enter');

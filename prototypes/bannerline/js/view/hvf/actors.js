@@ -215,6 +215,7 @@ export function createHvfActors({ scene, map, data, fogify, localTeam }) {
     }
     for (const [k, h] of Object.entries(herds)) { h.count = counts[k]; h.instanceMatrix.needsUpdate = true; }
     for (const [id, it] of items) if (!seen.has(id)) {
+      if (typeof id === 'string') { it.mesh.visible = false; continue; }   // a remembered building: kept for the other half of a split screen
       if (state.ents.some((e) => e.id === id && !e._gone && (e.kind !== 'farmer' && e.kind !== 'hunter' || e.alive))) { it.mesh.visible = false; continue; }
       group.remove(it.mesh); items.delete(id);
     }

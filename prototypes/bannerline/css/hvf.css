@@ -120,3 +120,38 @@
 .hv-bt, .hv-sk { padding-right: 20px; }
 .hv-row .hv-bt { min-width: 78px; }
 .hv-sk { width: 96px; }
+
+/* ---------- split screen, gamepad, online ---------- */
+.hvf-root.split { border-left: 2px solid rgba(0,0,0,.6); }
+.hvf-root.split .hv-top { min-width: 0; grid-template-columns: auto auto auto; gap: 10px; padding: 5px 10px; font-size: 13px; }
+.hvf-root.split .hv-sides { display: none; }
+.hvf-root.split .hv-build { grid-template-columns: repeat(4, 74px); }
+.hvf-root.split .hv-slots { grid-template-columns: repeat(3, 66px); }
+.hvf-root.split .hv-mini { width: 120px; height: 120px; }
+.hvf-root.split .hv-shop { bottom: 230px; }
+.hv-seat { position: absolute; top: 6px; left: 8px; padding: 2px 10px; border-radius: 6px; background: rgba(0,0,0,.6); color: var(--seat); font: 700 14px var(--head); border: 1px solid var(--seat); }
+.pad-view .hv-bt kbd, .pad-view .hv-slot kbd { display: none; }
+.pad-view .hv-sk kbd { background: rgba(127,208,255,.15); }
+.hv-cursor { position: absolute; left: 0; top: 0; width: 26px; height: 16px; margin: -8px 0 0 -13px; border: 2px solid var(--seat, #f2c45a); border-radius: 50%; box-shadow: 0 0 8px rgba(0,0,0,.6); pointer-events: none; }
+.hv-cursor.aiming { border-color: #ffe08a; width: 34px; height: 20px; margin: -10px 0 0 -17px; }
+.hv-padlegend { position: absolute; left: 50%; transform: translateX(-50%); bottom: 4px; font-size: 12px; color: var(--ink2); background: rgba(0,0,0,.55); padding: 2px 10px; border-radius: 6px; white-space: nowrap; pointer-events: none; }
+.pad-view .hv-bar { padding-bottom: 26px; }
+.menu-open .hv-main { outline: 2px solid var(--seat, #f2c45a); outline-offset: 3px; border-radius: 10px; }
+.hvf-hud .nav-focus { border-color: var(--seat, #f2c45a) !important; box-shadow: 0 0 0 2px var(--seat, #f2c45a) inset, 0 0 12px rgba(242,196,90,.35); }
+.hv-wait { position: absolute; top: 40%; left: 50%; transform: translateX(-50%); padding: 8px 18px; border-radius: 8px; background: rgba(0,0,0,.8); color: var(--ink); }
+.hvf-setup .tabs { display: flex; gap: 6px; margin: 6px 0 4px; }
+.hvf-setup .tab, .hvf-setup .mini { background: rgba(255,255,255,.04); border: 1px solid var(--line); color: var(--ink2); border-radius: 6px; padding: 4px 12px; cursor: pointer; font: 600 14px var(--ui); }
+.hvf-setup .tab.on, .hvf-setup .mini.on { border-color: var(--gold); color: var(--ink); background: rgba(242,196,90,.12); }
+.hvf-setup .mini.wide { padding: 6px 16px; align-self: flex-end; }
+.hvf-setup .roles-help { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; color: var(--ink2); font-size: 13px; margin-top: 8px; }
+.hvf-setup .seats { display: flex; flex-direction: column; gap: 5px; }
+.hvf-setup .seat { display: flex; gap: 8px; align-items: center; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); border-left: 3px solid var(--seat, var(--line)); background: rgba(255,255,255,.03); }
+.hvf-setup .seat b { min-width: 92px; font: 700 15px var(--head); color: var(--seat, var(--ink)); text-transform: capitalize; }
+.hvf-setup .seat .dev { flex: 1; color: var(--ink2); font-size: 13px; }
+.hvf-setup .seat.add { opacity: .65; border-style: dashed; }
+.hvf-setup .seat.me { border-color: var(--gold); }
+.hvf-setup .peek { color: #ffd9a0; margin: 6px 0 0; } .hvf-setup .warn { color: #ff9a8a; margin: 6px 0 0; }
+.hvf-setup .code { color: var(--gold); letter-spacing: .12em; }
+.hvf-setup .hint { color: var(--ink3); font-size: 12px; text-align: center; margin: 8px 0 0; }
+.hvf-setup .nav-focus { outline: 2px solid var(--gold); outline-offset: 2px; }
+.hvf-setup .start:disabled { opacity: .5; }

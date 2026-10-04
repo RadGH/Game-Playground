@@ -53,7 +53,7 @@ export default {
   desc: 'Farmers hide in the forest and raise animals for gold; hunters track them by the animals they leave in the open. Late on, the farmers turn the hunt around.',
   formats: FORMATS,
   defaultFormat: '5v2',
-  playable: false,
+  playable: true,
   heroes: [],       // no heroes: seats carry a role
   races: [],
   roles: ['farmer', 'hunter'],

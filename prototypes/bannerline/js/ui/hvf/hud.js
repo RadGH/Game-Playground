@@ -58,6 +58,7 @@ export function createHvfHud({ root, sim, player, onCmd, onPlace, onAim, onMinim
     <div class="hv-alerts" data-k="alerts"></div>
     <div class="hv-ghost" data-k="ghost" hidden></div>
     <div class="hv-placehint" data-k="placehint" hidden></div>
+    <div class="hv-wait" data-k="wait" hidden></div>
     <div class="hv-shop" data-k="shop" hidden data-ui></div>
     <footer class="hv-bar" data-ui>
       <canvas class="hv-mini" data-k="mini" width="168" height="168" data-tip="Minimap: click to look, right-click to walk there"></canvas>
@@ -346,6 +347,7 @@ export function createHvfHud({ root, sim, player, onCmd, onPlace, onAim, onMinim
   return {
     el, update, onEvent, alert, showResult, useSlot, toggleShop,
     get shopOpen() { return shopOpen; },
+    setWaiting(text) { K.wait.hidden = !text; setT(K.wait, text || ''); },
     setPlaceHint(html) { K.placehint.hidden = !html; if (html) setH(K.placehint, html); },
     destroy() { el.remove(); },
   };

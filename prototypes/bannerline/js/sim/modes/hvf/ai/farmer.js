@@ -144,14 +144,25 @@ function staysOpen(ctx, area, block, h, me) {
   const blocked = new Set(block);
   const free = [...area].filter(c => !blocked.has(c) && WALK_FARMER[g.cells[c]] && g.occ[c] !== 1);
   if (free.length < 3) return false;
-  const anchor = h ? anchorOf(map, h) : -1;
+  const seen = reachable(ctx, area, blocked, h);
+  if (!seen) return false;
+  if (me) { const mc = cellOf(map, me.x, me.z); if (area.has(mc) && !blocked.has(mc) && WALK_FARMER[g.cells[mc]] && g.occ[mc] !== 1 && !seen.has(mc)) return false; }   // (standing on the footprint is fine: placing it moves him aside)
+  let lost = 0;
+  for (const c of free) if (!seen.has(c)) lost++;
+  return lost <= 1;   // one walled-off corner cell is an acceptable price for a building
+}
+
+/** Cells of the box around home a farmer can walk to from the world, with `blocked` cells built on. */
+function reachable(ctx, area, blocked, h) {
+  const { map } = ctx, g = liveGrid(ctx);
+  const anchor = anchorOf(map, h);
   const cx = Math.floor(h.x / map.cell), cz = Math.floor(h.z / map.cell), R = 26;
   const ok = c => { const x = c % map.cols, z = (c / map.cols) | 0; return Math.abs(x - cx) <= R && Math.abs(z - cz) <= R && !blocked.has(c) && WALK_FARMER[g.cells[c]] && g.occ[c] !== 1; };
   let starts = anchor >= 0 && ok(anchor) ? [anchor] : [];
   if (!starts.length) {
     // no trail within the box: fall back to the area's own entrances
-    starts = free.filter(c => n8(map, c).some(j => !area.has(j) && ok(j)));
-    if (!starts.length) return false;
+    starts = [...area].filter(c => ok(c) && n8(map, c).some(j => !area.has(j) && ok(j)));
+    if (!starts.length) return null;
   }
   const seen = new Set(starts), q = starts.slice();
   for (let k = 0; k < q.length; k++) {
@@ -162,9 +173,7 @@ function staysOpen(ctx, area, block, h, me) {
       seen.add(j); q.push(j);
     }
   }
-  if (me) { const mc = cellOf(map, me.x, me.z); if (blocked.has(mc) || (ok(mc) && !seen.has(mc))) return false; }
-  for (const c of free) if (!seen.has(c)) return false;
-  return true;
+  return seen;
 }
 
 /** A spot for `kind`: inside the base area (mode 'base') or on open ground near it ('near'). */
@@ -197,7 +206,7 @@ function findSpot(ctx, p, kind, mode = 'base', careless = false) {
     const fp = footprint(map, def, x, z);
     if (mode === 'base' && !fp.cells.every(f => area.has(f))) continue;
     if (mode === 'near' && !careless && fp.cells.some(f => td[f] < 2)) continue;   // never on a trail's shoulder (a careless farmer does not mind)
-    const s = d2(fp.x, fp.z, mouth.x, mouth.z) - (mode === 'near' ? d2(fp.x, fp.z, h.x, h.z) * 1.5 : 0);
+    const s = mode === 'near' ? -d2(fp.x, fp.z, me ? me.x : h.x, me ? me.z : h.z) : d2(fp.x, fp.z, mouth.x, mouth.z);
     ok.push({ c, x, z, fp, s });
   }
   // best first; outside home only a spot a SHORT walk from home counts (a straight-line neighbour can be
@@ -205,15 +214,21 @@ function findSpot(ctx, p, kind, mode = 'base', careless = false) {
   for (let i = 1; i < ok.length; i++) for (let j = i; j > 0 && (ok[j].s > ok[j - 1].s || (ok[j].s === ok[j - 1].s && ok[j].c < ok[j - 1].c)); j--) { const t = ok[j]; ok[j] = ok[j - 1]; ok[j - 1] = t; }
   // the connectivity check is the expensive part: only on the best few
   let tries = 0;
-  for (let k = 0; k < ok.length && tries < 6; k++) { tries++; if (staysOpen(ctx, area, ok[k].fp.cells, h, me)) { ok[k].open = true; break; } ok[k].bad = true; }
-  const good = ok.filter(o => !o.bad);
-  if (mode === 'base') return good.length && good[0].open ? good[0] : null;
-  for (let k = 0; k < good.length && k < 1; k++) {
-    if (!good[k].open) break;
-    const path = canRoute(ctx, { kind: 'farmer', x: cellX(map, [...area][0]), z: cellZ(map, [...area][0]) }, cellOf(map, good[k].fp.x - 0.01, good[k].fp.z - 0.01), true, false);
-    if (path && path.length <= (careless ? 40 : 16)) return good[k];
+  if (mode === 'base') {
+    for (let k = 0; k < ok.length && tries < 6; k++) { tries++; if (staysOpen(ctx, area, ok[k].fp.cells, h, me)) return ok[k]; }
+    return null;
   }
-  return null;
+  // the shortest WALK among the best few (straight-line neighbours are often behind a tree wall)
+  const limit = careless ? 40 : 16;
+  let best = null, bl = Infinity, tried = 0;
+  for (let k = 0; k < ok.length && tries < 24 && tried < 10; k++) {
+    tries++;
+    if (!staysOpen(ctx, area, ok[k].fp.cells, h, me)) continue;
+    tried++;
+    const path = canRoute(ctx, me || { kind: 'farmer', x: h.x, z: h.z }, cellOf(map, ok[k].fp.x - 0.01, ok[k].fp.z - 0.01), true, false);
+    if (path && path.length <= limit && path.length < bl) { bl = path.length; best = ok[k]; }
+  }
+  return best;
 }
 
 /** A tree to chop out of the wall: grows home without opening it to the trail. */
@@ -224,7 +239,8 @@ function expansionTree(ctx, p) {
   const lvl = map.level[h.cells[0]];
   let best = null, bs = -Infinity;
   const seen = new Set();
-  for (const c of area) if (WALK_FARMER[g.cells[c]] && g.occ[c] !== 1) for (const j of [c + 1, c - 1, c + map.cols, c - map.cols]) {   // next to FREE ground: he must reach it
+  const reach = reachable(ctx, area, new Set(), h) || new Set();
+  for (const c of area) if (reach.has(c)) for (const j of [c + 1, c - 1, c + map.cols, c - map.cols]) {   // next to ground he can REACH
     if (j < 0 || j >= g.cells.length || seen.has(j) || area.has(j)) continue;
     seen.add(j);
     if (g.cells[j] !== KIND.tree || map.level[j] !== lvl || td[j] < 2) continue;
@@ -293,6 +309,7 @@ export function farmerThink(ctx, p, K, rng, cmd) {
   if (!me || !me.alive || p.ghost) return;
   const F = K.farm;
   const route = (type, args, goal, near, closest) => {
+    if (args.x != null) { args.x = Math.max(1, Math.min(map.size - 1, args.x)); args.z = Math.max(1, Math.min(map.size - 1, args.z)); goal = cellOf(map, args.x, args.z); }
     if (!routeBudget(state)) { m.retry = true; return false; }
     if (!canRoute(ctx, me, goal, near, closest)) return false;
     cmd(type, args); return true;
@@ -307,14 +324,28 @@ export function farmerThink(ctx, p, K, rng, cmd) {
     m.seenHunter = { x: near.x, z: near.z, tick: state.tick };
     if (m.hollow != null) { const c = centreOf(ctx, p); if (dist(near.x, near.z, c.x, c.z) < 24) m.found = state.tick; }
   }
-  if (near && nd < F.fleeAt) {
+  // behind my own hedges / walls a hunter cannot walk to me: running out into the open is worse than
+  // staying put (Veteran+ check whether the hunter could actually reach them first)
+  let reachable = true;
+  if (near && nd < F.fleeAt && F.door && nd > 4) {
+    const path = canRoute(ctx, near, cellOf(map, me.x, me.z), true, false);
+    reachable = !!path && path.length < 60;
+  }
+  if (near && nd < F.fleeAt && reachable) {
     const after = near.ord && near.ord.k === 'attack' && near.ord.target === me.id;
     // Commander: in cover, not chased, a little way off -> lie low and let it pass
     if (me.low && !after && nd > 3.5) return;   // lying low (or settling into it): stay down
     if (F.lieLow && !after && nd > 7 && coverAt(ctx, me) && state.tick >= (p.cd.W || 0)) { cmd('cast', { slot: 'W' }); m.flee = null; return; }
     if (nd < 10 && state.tick >= (p.cd.Q || 0)) cmd('cast', { slot: 'Q' });
     if (!m.flee || state.tick >= m.flee.until || d2(me.x, me.z, m.flee.x, m.flee.z) < 9) {
-      const t = fleeTarget(ctx, p, me, near);
+      let t = null;
+      // a walled home is a refuge: if the hunter cannot walk into it and I can get there first, run home
+      if (F.door && m.hollow != null) {
+        const hh = map.hollows[m.hollow];
+        const myD = dist(me.x, me.z, hh.x, hh.z), hisD = dist(near.x, near.z, hh.x, hh.z);
+        if (myD > 3 && myD < hisD && !canRoute(ctx, near, cellOf(map, hh.x, hh.z), true, false)) t = { x: hh.x, z: hh.z };
+      }
+      if (!t) t = fleeTarget(ctx, p, me, near);
       if (t && route('move', { x: t.x, z: t.z }, cellOf(map, t.x, t.z), false, true)) m.flee = { x: t.x, z: t.z, until: state.tick + 160 };
     }
     return;
@@ -474,7 +505,9 @@ function spend(ctx, p, K, rng, me, cmd, route, animals) {
       if (t != null && route('chop', { cell: t }, t, true, false)) { m.cleared.push(t); return true; }
     }
     if (pick.kind[0] === '#') { if (p.gold >= pick.cost) { cmd('upgrade', { id: pick.kind.slice(1) }); return true; } m.why = 'saveUp:' + pick.kind; return false; }
-    let spot = findSpot(ctx, p, pick.kind, 'base') || (F.spillOut ? findSpot(ctx, p, pick.kind, 'near', true) : null);
+    // a careless farmer sprawls: the open ground around home first (trails included), home second
+    let spot = F.sprawl ? findSpot(ctx, p, pick.kind, 'near', true) || findSpot(ctx, p, pick.kind, 'base')
+      : findSpot(ctx, p, pick.kind, 'base') || (F.spillOut ? findSpot(ctx, p, pick.kind, 'near', true) : null);
     if (!spot && F.expand && !chopped) {
       // home is full: chop out a tree that keeps the wall shut
       const t = expansionTree(ctx, p);
@@ -482,7 +515,7 @@ function spend(ctx, p, K, rng, me, cmd, route, animals) {
       if (t != null && route('chop', { cell: t }, t, true, false)) { m.cleared.push(t); return true; }
     }
     // this hollow is full (or never had room): move on to another (one find must not find everything)
-    const stuck = !spot && chopped && !m.retry;
+    const stuck = !spot && (chopped || !F.expand) && !m.retry;
     if (!spot && stuck && (F.second || producers === 0) && (m.homes || []).length < (F.maxHollows || 2) - 1 + (producers === 0 ? 1 : 0)) {
       const pool = map.hollows.filter(o => o.id !== m.hollow && !(m.homes || []).includes(o.id) && !taken(ctx, p, o.id) && dist(o.x, o.z, map.hollows[m.hollow].x, map.hollows[m.hollow].z) < 150);
       let b = null;

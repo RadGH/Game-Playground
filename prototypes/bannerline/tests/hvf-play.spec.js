@@ -11,8 +11,8 @@ test('setup card -> farmer match: build with the mouse, the animals wander', asy
   const errors = errorsOf(page);
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto(`${PAGE}?seed=5`);
-  await expect(page.locator('.hvf-setup .role')).toHaveCount(2);
-  await page.locator('.hvf-setup [data-role="farmer"]').click();
+  await expect(page.locator('.hvf-setup .seat [data-role]')).toHaveCount(2);
+  await page.locator('.hvf-setup [data-seat="0"][data-role="farmer"]').click();
   await page.locator('.hvf-setup select[data-k="format"]').selectOption('3v1');
   await page.locator('.hvf-setup [data-act="start"]').click();
   await page.waitForFunction(() => window.hvf && window.hvf.match, null, { timeout: 30_000 });
@@ -48,7 +48,7 @@ test('setup card -> farmer match: build with the mouse, the animals wander', asy
   const moved = b.filter(([id, x, z]) => { const o = a.find((q) => q[0] === id); return o && Math.hypot(o[1] - x, o[2] - z) > 0.3; }).length;
   expect(moved, 'animals wander').toBeGreaterThan(0);
   await page.waitForTimeout(600);
-  const probe = await page.evaluate(() => window.hvf.probe());
+  const probe = await page.evaluate(() => window.hvf.probe()[0]);
   expect(probe.sd).toBeGreaterThan(8);
   expect(probe.calls).toBeLessThan(250);
   await page.screenshot({ path: 'test-results/hvf-farmer.png' });
@@ -61,7 +61,7 @@ test('hunter: waits in the kennel, then walks under the fog; the farmers stay hi
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto(`${PAGE}?seed=5`);
   await page.waitForFunction(() => window.hvfGame, null, { timeout: 30_000 });
-  await page.evaluate(() => window.hvfGame.start({ role: 'hunter', format: '3v1', seed: 5, headStart: 2, ai: 'recruit' }));
+  await page.evaluate(() => window.hvfGame.start({ seats: [{ role: 'hunter', device: 'kbm' }], format: '3v1', seed: 5, headStart: 2, ai: 'recruit' }));
   await page.waitForFunction(() => window.hvf && window.hvf.match);
   // right-click toward the Commons
   const before = await page.evaluate(() => { const g = window.hvf, s = g.state(), e = s.ents.find((x) => x.id === s.players[g.match.me].ent); return { x: e.x, z: e.z }; });
@@ -81,10 +81,11 @@ test('hunter: waits in the kennel, then walks under the fog; the farmers stay hi
   });
   expect(fog.share).toBeLessThan(0.2);
   expect(await page.evaluate(() => window.hvf.match.actors.items.size >= 1)).toBe(true);
+  await page.evaluate(() => window.hvf.probe());
   const farmersShown = await page.evaluate(() => [...window.hvf.match.actors.items.values()].filter((it) => it.ent.kind === 'farmer' && it.mesh.visible).length);
   expect(farmersShown, 'no farmer drawn inside the fog').toBe(0);
   await page.waitForTimeout(600);
-  expect((await page.evaluate(() => window.hvf.probe())).sd).toBeGreaterThan(5);
+  expect((await page.evaluate(() => window.hvf.probe()[0])).sd).toBeGreaterThan(5);
   await page.screenshot({ path: 'test-results/hvf-hunter.png' });
   expect(errors).toEqual([]);
 });

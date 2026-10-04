@@ -41,7 +41,7 @@ test(`${BOTS} bots for ${SECONDS}s: tick p99 < ${TICK_BUDGET_MS} ms, everyone jo
     const cpuPerTick = (cpuMs(pid) - cpu0) / Math.max(1, st.tick.ticks - ticks0);
     const load = loadavg()[0], cores = availableParallelism();
     const p99s = samples.map(s => s.tick.p99), maxes = samples.map(s => s.tick.max);
-    console.log(`# ccu ${st.ccu} | tick p50 ${st.tick.p50} p95 ${st.tick.p95} p99 ${st.tick.p99} max ${st.tick.max} | worst p99 seen ${Math.max(...p99s)} worst max ${Math.max(...maxes)} | server CPU per tick ${cpuPerTick.toFixed(2)} ms (incl. sockets) | load ${load.toFixed(1)} on ${cores} threads${load > cores ? ' — MACHINE OVERLOADED, tick times include waiting for a core' : ''} | bots: ${JSON.stringify(r)}`);
+    console.log(`# ccu ${st.ccu} | tick p50 ${st.tick.p50} p95 ${st.tick.p95} p99 ${st.tick.p99} max ${st.tick.max} | worst p99 seen ${Math.max(...p99s)} worst max ${Math.max(...maxes)} | heap ${st.heapMB} MB | server CPU per tick ${cpuPerTick.toFixed(2)} ms (incl. sockets) | load ${load.toFixed(1)} on ${cores} threads${load > cores ? ' — MACHINE OVERLOADED, tick times include waiting for a core' : ''} | bots: ${JSON.stringify(r)}`);
     assert.ok(st.ccu >= BOTS, `ccu ${st.ccu} >= ${BOTS}`);
     const steady = SECONDS >= 66;   // shorter runs still include warm-up in the window: report, judge loosely
     assert.ok(st.tick.p99 < (steady ? TICK_BUDGET_MS : TICK_BUDGET_MS * 3), `steady-state tick p99 ${st.tick.p99} ms must stay under ${TICK_BUDGET_MS} ms${steady ? '' : ' (x3 allowance: run includes warm-up)'}`);

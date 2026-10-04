@@ -179,7 +179,7 @@ u8   mask            bit0 POS, bit1 Y, bit2 YAW, bit3 HP, bit4 ANIM, bit5 STATE,
 Decoded shape (`decodeSnap(bytes)`):
 
 ```js
-{ tick, ack, self: { x, y, z, vy } | null, vitals: { hp, hpMax, mp, mpMax } | null, dead: bool,
+{ tick, ack, bytes, self: { x, y, z, vy } | null, vitals: { hp, hpMax, mp, mpMax } | null, dead: bool,
   left: [id, …],
   ents: [ { id, full: bool, kind?, x?, z?, y?, yaw?, hp?(fraction 0..1), anim?, animSeq?, state?, target? } ] }
 ```
@@ -239,6 +239,7 @@ export function createRules(host, opts) {
     step(dtMs),              // once per tick, AFTER movement: AI, swings resolving, statuses, regen
     respawn(e),              // optional: a dead player pressed respawn (room already moved them)
     levelFor(xp) -> level,   // optional: XP curve; xpFor(level) -> xp needed for that level
+    onLevel(e),              // optional: a player levelled up (room already set e.level): refresh stats
     dispose(),
   };
 }

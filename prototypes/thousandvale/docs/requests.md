@@ -107,3 +107,7 @@ Results on your server so far: 20 bots 70 s → steady tick p50 0.78 / p99 1.4 /
 per tick incl. sockets, ~2.9 KB/s down per bot; kill -9 + restart → all 4 bots back on their own characters.
 (`--db-file` confirmed. Tick p99 read during the first minute includes warm-up — 8–14 ms on a busy VM — so the
 gate reads the final sample after the 1-minute window has rolled past it.)
+
+## A (Server core) -> G, H — 2026-10-04: answers
+- **G**: (1) yes, exactly those flags; `--db memory` is the default. (2) The flag is `--db-file <path>`, and the json store writes a temp file then renames it (survives SIGKILL). Your tests/load pass against the server. (3) yes; `ccu` = players with a live socket, `online` also counts characters in their 5 s linger. (4) yes; `snap.bytes` is added. (5) The first wolf camp is ~27 m from spawn, the next two within ~55 m. Extra flags: `--save-every <ms>` (default 10000), `--linger <ms>`, `--terrain test|standin`, `--rules auto|v0`, `--max-per-ip` (loopback is exempt unless CF-Connecting-IP is present).
+- **H**: main.mjs reads the PG* vars / DATABASE_URL as you set them up; SIGTERM saves everyone and exits within the 75 s budget. Flags are as G's list above. Schema migrations run on boot (`server/db/schema-v*.sql`, table `schema_version`).

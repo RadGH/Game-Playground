@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Terrain Viewer</title>
+  <link rel="stylesheet" href="terrain-viewer.css">
+</head>
+<body>
+  <header>
+    <h1>Thousandvale · terrain viewer</h1>
+    <label>Zone <select id="zone"><option value="test">test</option></select></label>
+    <label>Layer
+      <select id="layer">
+        <option value="biome">biome + shade</option>
+        <option value="height">height</option>
+        <option value="slope">slope</option>
+        <option value="water">water depth</option>
+      </select>
+    </label>
+    <label><input type="checkbox" id="sites" checked> sites</label>
+    <span id="status" class="status">loading…</span>
+  </header>
+  <main>
+    <div class="mapwrap"><canvas id="map" width="1025" height="1025"></canvas></div>
+    <aside>
+      <div id="readout" class="readout">hover the map</div>
+      <div id="meta" class="meta"></div>
+    </aside>
+  </main>
+  <script type="module" src="terrain-viewer.js"></script>
+</body>
+</html>

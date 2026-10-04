@@ -1,0 +1,127 @@
+{
+  "name": "Test Vale",
+  "size": 1025,
+  "step": 2,
+  "origin": {
+    "x": 0,
+    "z": 0
+  },
+  "heightMin": 126,
+  "heightMax": 452,
+  "bakeVersion": 1,
+  "inputHash": "29b45356",
+  "waterKinds": [
+    "none",
+    "sea",
+    "lake",
+    "river"
+  ],
+  "source": {
+    "tool": "tools/bake-test-zone.mjs",
+    "world": {
+      "seed": 1000,
+      "width": 288,
+      "height": 224,
+      "method": "plates"
+    },
+    "macroWindow": [
+      52,
+      38
+    ],
+    "zoneCells": 16,
+    "macroMetres": 128,
+    "worldOrigin": {
+      "x": 6656,
+      "z": 4864
+    },
+    "landMetres": 1400,
+    "seaMetres": 160
+  },
+  "rivers": [
+    {
+      "id": 8,
+      "name": "The Skezsnut"
+    },
+    {
+      "id": 10,
+      "name": "The Perparmouth"
+    },
+    {
+      "id": 14,
+      "name": "The Stolarmouth"
+    }
+  ],
+  "sites": [
+    {
+      "type": "settlement",
+      "kind": "village",
+      "name": "Torborhold",
+      "x": 1088,
+      "z": 1216
+    },
+    {
+      "type": "settlement",
+      "kind": "hamlet",
+      "name": "Wamonhold",
+      "x": 1600,
+      "z": 832
+    },
+    {
+      "type": "settlement",
+      "kind": "hamlet",
+      "name": "Mawehaven",
+      "x": 832,
+      "z": 576
+    },
+    {
+      "type": "crossing",
+      "kind": "ford",
+      "name": "Fitockpi Ford",
+      "x": 1600,
+      "z": 832
+    }
+  ],
+  "spawn": {
+    "x": 1048,
+    "z": 1188
+  },
+  "summary": {
+    "window": [
+      52,
+      38
+    ],
+    "heights": [
+      126,
+      452
+    ],
+    "slope": {
+      "median": 6.7,
+      "p95": 21.8,
+      "max": 49.3,
+      "unwalkableShare": 0
+    },
+    "wetShare": 0.009,
+    "biomes": {
+      "grassland": 0.62,
+      "temperateForest": 0.251,
+      "marsh": 0.11,
+      "hills": 0.011,
+      "lake": 0.007,
+      "mountains": 0.001
+    },
+    "rivers": 3,
+    "sites": [
+      "village Torborhold",
+      "hamlet Wamonhold",
+      "hamlet Mawehaven",
+      "ford Fitockpi Ford"
+    ],
+    "spawn": {
+      "x": 1048,
+      "z": 1188
+    },
+    "inputHash": "29b45356"
+  },
+  "file": "terrain.bin",
+  "bytes": 6305542
+}

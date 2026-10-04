@@ -36,7 +36,7 @@ export const ENCOUNTER = {
   MAX_LIVE: 400,
 };
 
-export function attachEncounters(room, { data = null, spawn = null, spawnObject = null, despawn = null, roomKind = 'wilds' } = {}) {
+export function attachEncounters(room, { data = null, spawn = null, spawnObject = null, despawn = null, objState = null, roomKind = 'wilds' } = {}) {
   const field = room.field, combat = room.combat;
   const D = data || { scripts: {}, specials: { families: {} }, defaults: {} };
   const rng = room.streams.get('encounter');
@@ -486,7 +486,10 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
     despawn?.(o);
   }
   function emitObj(o, full = false) {
-    const ev = { t: 'obj', id: o.id, state: o.broken ? 'broken' : o.lit ? 'lit' : o.used ? 'used' : 'idle' };
+    const state = o.broken ? 'broken' : o.lit ? 'lit' : o.used ? 'used' : 'idle';
+    // a room object: the room stores the state in its info (late joiners see it) and sends `obj`
+    if (objState && objState(o, state, o.hp != null ? { hp: o.hp, r: o.r, key: o.key || undefined } : { r: o.r, key: o.key || undefined })) return;
+    const ev = { t: 'obj', id: o.id, state };
     if (full) Object.assign(ev, { otype: o.type, x: Math.round(o.x * 100) / 100, z: Math.round(o.z * 100) / 100, r: o.r, key: o.key || undefined });
     if (o.hp != null) ev.hp = o.hp;
     emit(ev);

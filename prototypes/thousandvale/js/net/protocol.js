@@ -59,6 +59,13 @@ export const CODES = Object.freeze({
   item: 'You do not have that item.',
   far: 'Too far away.',
   bagFull: 'Your bag is full.',
+  human: 'Please finish the "are you human" check.',
+  tooMany: 'Too many new accounts from your network. Try again later.',
+  trade: 'Trade not possible.',
+  tradeBusy: 'One of you is already trading.',
+  tradeFar: 'Too far apart to trade.',
+  tradeFailed: 'The trade did not go through. Nothing changed hands.',
+  busy: 'Busy, try again in a moment.',
 });
 
 // ---- field types -------------------------------------------------------------------------------
@@ -71,6 +78,7 @@ function check(type, v) {
   if (type === 'id') return isInt(v) && v >= 0 && v <= 0xFFFF;
   if (type === 'vec2') return v !== null && typeof v === 'object' && !Array.isArray(v) && isNum(v.x) && isNum(v.z) && Object.keys(v).length === 2;
   if (type === 'obj') return v !== null && typeof v === 'object' && !Array.isArray(v);
+  if (type === 'uids') return Array.isArray(v) && v.length <= 12 && v.every(u => typeof u === 'string' && u.length <= 40);
   if (type.startsWith('str:')) return typeof v === 'string' && v.length <= +type.slice(4);
   return false;
 }
@@ -81,7 +89,7 @@ function check(type, v) {
  */
 export const CLIENT_MSGS = Object.freeze({
   hello:   { on: 'both', fields: { v: 'int', build: 'str:64' }, rate: 2, burst: 2 },
-  guest:   { on: 'gw', fields: { name: '?str:24' }, rate: 1, burst: 3 },
+  guest:   { on: 'gw', fields: { name: '?str:24', human: '?str:2048' }, rate: 1, burst: 3 },
   auth:    { on: 'gw', fields: { token: 'str:64' }, rate: 1, burst: 3 },
   chars:   { on: 'gw', fields: {}, rate: 2, burst: 4 },
   create:  { on: 'gw', fields: { name: 'str:24', cls: 'str:32', look: '?obj' }, rate: 1, burst: 3 },
@@ -98,6 +106,7 @@ export const CLIENT_MSGS = Object.freeze({
   respawn: { on: 'p', fields: {}, rate: 1, burst: 2 },
   use:     { on: 'p', fields: { id: 'id' }, rate: 4, burst: 8 },
   item:    { on: 'p', fields: { op: 'str:8', uid: 'str:40', slot: '?str:16' }, rate: 5, burst: 10 },
+  trade:   { on: 'p', fields: { op: 'str:8', id: '?int', items: '?uids', gold: '?int' }, rate: 5, burst: 10 },
   leave:   { on: 'both', fields: {}, rate: 1, burst: 2 },
 });
 
@@ -126,6 +135,8 @@ export const SERVER_MSGS = Object.freeze({
   partyFrames: ['m'],
   targetR: ['id', 'ok', 'why'],
   ignored: ['list'],
+  tradeAsk: ['trade', 'from', 'name'],
+  tradeState: ['trade', 'done', 'why'],
 });
 
 /** Party ops (`party {op}`); docs/protocol.md §3.3. */

@@ -8,11 +8,24 @@ import { createHash, randomBytes } from 'node:crypto';
 import { migrate } from './migrate.js';
 import { packChar, unpackChar } from '../../js/sim/save-fields.js';
 import { MAX_CHARS_PER_ACCOUNT } from '../../js/sim/store-memory.js';
+import { applyJournal } from '../../js/sim/journal.js';
 
 // bigint columns (ids, xp, gold, fences) come back as JS numbers; they stay far below 2^53
 pg.types.setTypeParser(20, v => Number(v));
 
 const sha = t => createHash('sha256').update(String(t)).digest('hex');
+// one statement: write the blob (version + fence checked) and prune the journal rows it now contains
+const SAVE_SQL = `WITH u AS (
+    UPDATE characters SET name = $4, cls = $5, level = $6, xp = $7, gold = $8, room = $9, x = $10, z = $11, blob = $12,
+      journal_seq = $13, version = version + 1, updated_at = now()
+    WHERE id = $1 AND version = $2 AND lease_fence = $3 RETURNING id, version
+  ), d AS (
+    DELETE FROM char_journal WHERE char_id = $1 AND seq <= $13 AND EXISTS (SELECT 1 FROM u)
+  ) SELECT version FROM u`;
+function saveParams(ch, fence) {
+  const { cols, blob } = packChar(ch);
+  return [ch.id, ch.version, fence, cols.name, cols.cls, cols.level, cols.xp, cols.gold, cols.room, cols.x, cols.z, blob, cols.journal_seq || 0];
+}
 const brief = r => ({ id: r.id, name: r.name, cls: r.cls, level: r.level, room: r.room });
 
 export function createPgStore({ connectionString = process.env.DATABASE_URL, realm = 'vale', max = 10, log = () => {} } = {}) {
@@ -23,7 +36,7 @@ export function createPgStore({ connectionString = process.env.DATABASE_URL, rea
   function rowToChar(r) {
     return unpackChar({
       id: r.id, account: r.account_id, version: r.version,
-      cols: { name: r.name, cls: r.cls, level: r.level, xp: r.xp, gold: r.gold, room: r.room, x: r.x, z: r.z },
+      cols: { name: r.name, cls: r.cls, level: r.level, xp: r.xp, gold: r.gold, room: r.room, x: r.x, z: r.z, journal_seq: r.journal_seq },
       blob: r.blob,
     });
   }
@@ -66,20 +79,48 @@ export function createPgStore({ connectionString = process.env.DATABASE_URL, rea
         `UPDATE characters SET lease_owner = $3, lease_fence = lease_fence + 1, lease_until = now() + make_interval(secs => $4::float8 / 1000)
          WHERE id = $1 AND account_id = $2 AND (lease_owner IS NULL OR lease_owner = $3 OR lease_until < now())
          RETURNING *`, [id, account, owner, leaseMs]);
-      if (r.rows.length) return { char: rowToChar(r.rows[0]), fence: r.rows[0].lease_fence };
+      if (r.rows.length) {
+        const ch = rowToChar(r.rows[0]);
+        const j = await q('SELECT seq, kind, payload FROM char_journal WHERE char_id = $1 AND seq > $2 ORDER BY seq', [id, ch.jseq || 0]);
+        applyJournal(ch, j.rows);
+        return { char: ch, fence: r.rows[0].lease_fence };
+      }
       const e = await q('SELECT 1 FROM characters WHERE id = $1 AND account_id = $2', [id, account]);
       return { err: e.rows.length ? 'lease' : 'missing' };
     },
     async saveChar(ch, fence) {
-      const { cols, blob } = packChar(ch);
-      const r = await q(
-        `UPDATE characters SET name = $4, cls = $5, level = $6, xp = $7, gold = $8, room = $9, x = $10, z = $11, blob = $12,
-           version = version + 1, updated_at = now()
-         WHERE id = $1 AND version = $2 AND lease_fence = $3 RETURNING version`,
-        [ch.id, ch.version, fence, cols.name, cols.cls, cols.level, cols.xp, cols.gold, cols.room, cols.x, cols.z, blob]);
+      const r = await q(SAVE_SQL, saveParams(ch, fence));
       if (!r.rows.length) return false;
       ch.version = r.rows[0].version;
       return true;
+    },
+    async appendJournal(rows) {
+      if (!rows.length) return 0;
+      const r = await q(
+        `INSERT INTO char_journal (char_id, seq, kind, payload)
+         SELECT j.char_id, j.seq, j.kind, j.payload
+         FROM jsonb_to_recordset($1::jsonb) AS j(char_id bigint, seq bigint, kind text, payload jsonb, fence bigint)
+         JOIN characters c ON c.id = j.char_id AND c.lease_fence = j.fence
+         ON CONFLICT (char_id, seq) DO NOTHING`,
+        [JSON.stringify(rows.map(x => ({ char_id: x.char, seq: x.seq, kind: x.kind, payload: x.payload || {}, fence: x.fence })))]);
+      return r.rowCount;
+    },
+    /** Both characters' blobs in one transaction (trades): all or nothing. */
+    async tradeChars(list) {
+      const c = await pool.connect();
+      try {
+        await c.query('BEGIN');
+        const versions = [];
+        for (const { ch, fence } of list) {
+          const r = await c.query(SAVE_SQL, saveParams(ch, fence));
+          if (!r.rows.length) { await c.query('ROLLBACK'); return false; }
+          versions.push(r.rows[0].version);
+        }
+        await c.query('COMMIT');
+        list.forEach(({ ch }, i) => { ch.version = versions[i]; });
+        return true;
+      } catch (err) { try { await c.query('ROLLBACK'); } catch { /* ignore */ } throw err; }
+      finally { c.release(); }
     },
     async releaseChar(id, owner) {
       await q('UPDATE characters SET lease_owner = NULL, lease_until = NULL WHERE id = $1 AND lease_owner = $2', [id, owner]);

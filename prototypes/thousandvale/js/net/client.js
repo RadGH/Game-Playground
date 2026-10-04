@@ -8,6 +8,7 @@
 //   await net.createChar({ name, cls, look }) -> { id, name, cls, level, room }
 //   await net.play(charId, { join }) -> joined payload  ('joined' fires again after every reconnect AND every room
 //                                        change — `joined.handoff` set: same socket, new room, clear your entity mirror)
+//   net.tradeOp(op, {...}) -> 'tradeAsk' / 'trade' events ; opts.human = token or async fn for Turnstile
 //   net.use(id) ; net.item(op, uid, slot?) ; net.partyOp(op, {...}) ; net.partyChat(text) ; net.ignore(name, on) ; net.joinLink()
 //   net.input({ s, dt, mx, mz, yaw, b }) ; net.cast({ slot, aim, target, ct }) ; net.target(id)
 //   net.say(text) ; net.respawn() ; net.leave() ; net.close()
@@ -23,6 +24,8 @@ const NO_RETRY = new Set(['version', 'build', 'elsewhere', 'banned', 'abuse']);
 
 export function connect(opts = {}) {
   const { mode = 'ws', build = 'dev', clock = realClock, guestName = null } = opts;
+  // the "are you human" token for a new guest: a string, or async ({siteKey}) => token (the client shows Turnstile)
+  const human = opts.human || null;
   const tokenStore = opts.tokenStore || memoryTokenStore();
   const open = opts.socketFactory || socketFactory(mode, opts);
   const handlers = new Map();
@@ -52,9 +55,10 @@ export function connect(opts = {}) {
   function onGateway(s, m) {
     switch (m.t) {
       case 'welcome': {
+        net.humanCheck = m.human || null;
         const tok = tokenStore.get();
         if (tok) sendJ(s, { t: 'auth', token: tok });
-        else sendJ(s, guestName ? { t: 'guest', name: guestName } : { t: 'guest' });
+        else sendGuest(s);
         return;
       }
       case 'refuse': net.lastKick = m; emit('kick', m); setStatus('refused'); stop(); return;
@@ -75,7 +79,7 @@ export function connect(opts = {}) {
         return;
       case 'ticket': openGame(m.path, m.ticket); return;
       case 'err':
-        if (m.code === 'auth') { tokenStore.set(null); sendJ(s, guestName ? { t: 'guest', name: guestName } : { t: 'guest' }); return; }
+        if (m.code === 'auth') { tokenStore.set(null); sendGuest(s); return; }
         emit('err', m);
         if (createWaiter) { createWaiter.reject(Object.assign(new Error(m.msg), { code: m.code })); createWaiter = null; }
         else if (playWaiter && m.code === 'state') { playWaiter.reject(Object.assign(new Error(m.msg), { code: m.code })); playWaiter = null; }
@@ -88,6 +92,15 @@ export function connect(opts = {}) {
       case 'chat': emit('chat', m); return;
       case 'ignored': if (net.joined) net.joined.you.ignore = m.list; emit('ignored', m.list); return;
     }
+  }
+
+  async function sendGuest(s) {
+    const o = { t: 'guest' };
+    if (guestName) o.name = guestName;
+    if (net.humanCheck && human) {
+      try { o.human = typeof human === 'function' ? await human(net.humanCheck) : human; } catch (err) { emit('err', { code: 'human', msg: String(err && err.message) }); return; }
+    }
+    sendJ(s, o);
   }
 
   // ---- game socket ----
@@ -134,6 +147,8 @@ export function connect(opts = {}) {
         emit('bag', m); return;
       }
       case 'equip': if (net.joined) net.joined.you.equipment = m.equipment; emit('equip', m); return;
+      case 'tradeAsk': emit('tradeAsk', m); return;
+      case 'tradeState': net.trade = m.trade; emit('trade', m); return;
       case 'pong': onPong(m); return;
       case 'err': emit('err', m); if (m.code === 'state' && playWaiter) { playWaiter.reject(Object.assign(new Error(m.msg), { code: m.code })); playWaiter = null; } return;
       case 'refuse': net.lastKick = m; emit('kick', m); setStatus('refused'); stop(); return;
@@ -230,6 +245,15 @@ export function connect(opts = {}) {
   net.party = null;
   /** The "join my party" link for the current party (needs a party: partyOp('code') makes one). */
   net.joinLink = (base = globalThis.location ? location.origin + location.pathname : '') => (net.party ? `${base}?join=${net.party.code}` : null);
+  net.trade = null;
+  /** trade('ask', {id: entityId}) | ('accept', {id: tradeId}) | ('offer', {id, items:[uids], gold}) | ('lock'|'confirm', {id}) | ('cancel') */
+  net.tradeOp = (op, a = {}) => {
+    const o = { t: 'trade', op };
+    if (a.id != null) o.id = a.id;
+    if (a.items) o.items = a.items;
+    if (a.gold != null) o.gold = a.gold;
+    sendJ(game, o);
+  };
   net.partyChat = text => sendJ(gw, { t: 'chat', ch: 'party', text: String(text).slice(0, 200) });
   net.ignore = (name, on = true) => sendJ(gw, { t: 'ignore', name, on });
   net.say = text => sendJ(game, { t: 'say', text: String(text).slice(0, 200) });

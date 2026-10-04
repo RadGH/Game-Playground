@@ -4,9 +4,9 @@ import { CLIENT_MSGS, SERVER_MSGS, validate, parseFrame, createBuckets, cleanNam
 import { readFileSync } from 'node:fs';
 
 const GOOD = {
-  hello: { v: 1, build: 'dev' }, guest: {}, auth: { token: 'a'.repeat(64) }, chars: {}, create: { name: 'Aldra', cls: 'warrior', look: { race: 'elf' } },
+  hello: { v: 1, build: 'dev' }, guest: { human: 'XXXX.DUMMY.TOKEN.XXXX' }, auth: { token: 'a'.repeat(64) }, chars: {}, create: { name: 'Aldra', cls: 'warrior', look: { race: 'elf' } },
   play: { char: 3, join: 'ABCDE' }, party: { op: 'invite', name: 'Bren' }, chat: { ch: 'party', text: 'hi all' }, ignore: { name: 'Bren', on: true },
-  use: { id: 12 }, item: { op: 'equip', uid: 'p0-ab12cd34-1f', slot: 'head' }, ping: { c: 12.5 }, enter: { ticket: 'abc' }, in: { s: 1, dt: 50, mx: 0.5, mz: -0.5, yaw: 1.2, b: 1 },
+  use: { id: 12 }, trade: { op: 'offer', id: 3, items: ['p0-ab12cd34-1f'], gold: 10 }, item: { op: 'equip', uid: 'p0-ab12cd34-1f', slot: 'head' }, ping: { c: 12.5 }, enter: { ticket: 'abc' }, in: { s: 1, dt: 50, mx: 0.5, mz: -0.5, yaw: 1.2, b: 1 },
   cast: { slot: 0, aim: { x: 1, z: 2 }, target: 7, ct: 1000, held: 1.5 }, target: { id: 4 }, say: { text: 'hi' }, respawn: {}, leave: {},
 };
 

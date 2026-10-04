@@ -7,7 +7,8 @@
 //
 // CLI:
 //   node prototypes/thousandvale/tools/bot-client.mjs --url ws://127.0.0.1:8491 --bots 20 --seconds 60
-//     --mode fight|walk|idle   fight (default): wander, chase wolves within 30 m and swing at them
+//     --mode fight|walk|idle|town   fight (default): leave the town, wander, chase wolves within 30 m and swing
+//                              walk: leave the town and wander; town: wander inside the town hub; idle: stand
 //     --radius 60              wander radius around the spawn, metres
 //     --cls warrior            Farhold class id for new characters
 //     --stagger 100            ms between bot logins
@@ -97,7 +98,8 @@ export async function startBot(opts = {}) {
 
   const net = connect({
     mode: 'ws', url,
-    socketFactory: nodeSafeWsFactory(url),
+    // stream A's ws shim now reports Node's refused connection as a close; opts.nodeSafe keeps our own copy for A/B checks
+    ...(opts.nodeSafe ? { socketFactory: nodeSafeWsFactory(url) } : {}),
     tokenStore: { get: () => token, set: t => { token = t; } },
     build: opts.build || 'dev',
   });
@@ -128,12 +130,17 @@ export async function startBot(opts = {}) {
     // protocol v2: new characters start in the TOWN room (no monsters; a circle j.room.area). A fighting
     // or walking bot heads out through the edge on its own bearing; crossing it hands it to the wilds room.
     bot.town = j.room.kind === 'town' ? (j.room.area || null) : null;
-    if (bot.town) {
+    if (bot.town && mode === 'town') {
+      bot.exit = null;
+      bot.home = { x: bot.town.x, z: bot.town.z };      // town idlers wander the streets and stay inside
+    } else if (bot.town) {
       const a = rnd() * Math.PI * 2, r = bot.town.r + 30;
       bot.exit = { x: bot.town.x + Math.cos(a) * r, z: bot.town.z + Math.sin(a) * r };
     } else {
       bot.exit = null;
-      if (!bot.home || bot.homeFromTown) { bot.home = { x: j.you.x, z: j.you.z }; bot.homeFromTown = false; }
+      if (mode === 'town' && j.room.town) {   // a town bot dropped in the wilds (respawn elsewhere, reconnect) walks back in
+        bot.exit = { x: j.room.town.x, z: j.room.town.z };
+      } else if (!bot.home || bot.homeFromTown) { bot.home = { x: j.you.x, z: j.you.z }; bot.homeFromTown = false; }
       // keep wandering out here, away from the town edge so it does not bounce back in
       if (j.room.town) {
         const t = j.room.town, dx = j.you.x - t.x, dz = j.you.z - t.z, d = Math.hypot(dx, dz) || 1;
@@ -206,7 +213,8 @@ export async function startBot(opts = {}) {
     if (!goal && bot.exit && mode !== 'idle') goal = bot.exit;
     if (!goal && mode !== 'idle' && !(mode === 'fight' && bot.target != null)) {
       if (!bot.waypoint || Math.hypot(bot.waypoint.x - bot.pos.x, bot.waypoint.z - bot.pos.z) < 3) {
-        const a = rnd() * Math.PI * 2, r = radius * Math.sqrt(rnd());
+        const lim = mode === 'town' && bot.town ? Math.min(radius, bot.town.r - 8) : radius;
+        const a = rnd() * Math.PI * 2, r = lim * Math.sqrt(rnd());
         const h = bot.home || bot.pos;
         bot.waypoint = { x: h.x + Math.cos(a) * r, z: h.z + Math.sin(a) * r };
       }

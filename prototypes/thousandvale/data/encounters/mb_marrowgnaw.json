@@ -4,7 +4,7 @@
   "tier": "miniboss",
   "body": "barrow_hound",
   "place": "dungeon crypt_spiral: floor 1's mini-boss (central vault, 30-34 m) — written to fit a 24 m room",
-  "_doc": "Stream E. The ossuary's guard dog, fat on old bones. P1: a bleeding maul for the tank, a lunge, and a howl you must interrupt or rats pour in. P2 at 50% 'Bone-mad': it buries bones across the floor — the heaps it leaves are COVER — then shrieks with a line-of-sight scream: hide behind a bone heap. Heaps crack after two shrieks. Soft enrage from 3 minutes.",
+  "_doc": "Stream E. The ossuary's guard dog, fat on old bones. P1: a bleeding bite for the tank, a lunge, and a howl you must interrupt or rats pour in. P2 at 50% 'Bone-mad': it buries bones across the floor — the heaps it leaves are COVER — then shrieks with a line-of-sight scream: hide behind a bone heap. Heaps crack after two shrieks. Soft enrage from 3 minutes.",
   "hpMult": 2.2,
   "arena": {
     "radius": 13
@@ -29,9 +29,9 @@
     }
   },
   "abilities": {
-    "maul": {
-      "id": "maul",
-      "name": "Marrow Maul",
+    "gnash": {
+      "id": "gnash",
+      "name": "Marrow Gnash",
       "every": [
         6,
         8
@@ -158,7 +158,7 @@
     {
       "name": "Gnawing",
       "abilities": [
-        "maul",
+        "gnash",
         "lunge",
         "howl"
       ]
@@ -168,7 +168,7 @@
       "at": 0.5,
       "say": "{boss} digs frantically, flinging bones everywhere!",
       "abilities": [
-        "maul",
+        "gnash",
         "bury",
         "shriek",
         "lunge"

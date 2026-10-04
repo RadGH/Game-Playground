@@ -100,6 +100,12 @@ export function createRules(host, opts = {}) {
       return e?.r?.unit || null;
     },
     spawnObject: o => host.spawn({ kind: 'object', type: o.type, name: OBJECT_NAMES[o.type] || o.type, x: o.x, z: o.z, data: { rules: true, key: o.key } }),
+    objState: (o, state, extra) => {
+      const ent = host.objState ? host.entities.get(o.id) : null;
+      if (!ent || ent.kind !== 'object') return false;
+      host.objState(ent, state, extra);
+      return true;
+    },
     despawn: thing => {
       const ent = thing?.kind === 'monster' || thing?.defId ? host.entities.get(thing.id) : host.entities.get(thing?.id);
       if (ent) host.despawn(ent);

@@ -9,6 +9,7 @@ import { engineFor, roomFor } from './setup.mjs';
 import { createCharacter } from '../../js/rules/character.js';
 import { spawnMonster, tickMonsters } from '../../js/rules/monster-ai.js';
 import { makeRng } from '../../js/rules/rng.js';
+import { isStaff } from '../../js/rules/farhold.js';
 
 export const DT = 0.05;
 export const PACK = [['moor_hound', 24, 0.5, 3.5], ['moor_hound', 24, -1.6, 4.4], ['moor_hound', 24, 1.9, 5.2], ['barrow_hound', 24, 0, 8]];
@@ -62,7 +63,7 @@ export function diff(s) {
 /** A basic attack on both sides (a melee skill borrows the last swing's shape). */
 export function basic(s, step) {
   const w = s.tp.equipment.weapon;
-  const castsOrShoots = w && (/staff/.test(w.subtype || '') || w.ranged);   // a staff, a wand, a bow: everything else swings
+  const castsOrShoots = w && (isStaff(w) || w.ranged);   // a staff, a wand, a bow: everything else (a quarterstaff too) swings
   if (castsOrShoots) {
     s.fs.rangedAttack(1.0, step);
     s.tp.swing.mainReady = 0; s.tp.swing.readySince = -10; s.tp.swing.mainStep = step; s.tp.swing.lastAt = s.room.clock.now();

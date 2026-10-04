@@ -27,6 +27,8 @@ import { createParties } from './party.js';
 import { createEconomyLog } from './economy.js';
 import { findTown, findDoor, townGate, wildsCamps } from './realm.js';
 import { dungeonTerrain, dungeonRoomSpec, describeDungeon } from './dungeon.js';
+import { JOURNAL_FLUSH_MS } from './journal.js';
+import { createTrades, TRADE_OPS, TRADE_RANGE } from './trade.js';
 import { planDungeon as planTiers } from '../rules/dungeon-tiers.js';     // stream E's generator (js/sim/dungeon.js keeps the stand-in)
 
 const TICKET_MS = 30000, LEASE_MS = 30000, HEARTBEAT_MS = 10000;
@@ -41,7 +43,9 @@ const RARE = new Set(['rare', 'unique', 'legendary', 'set']);
 export function createWorld(opts) {
   const {
     store, terrain, build = 'dev', seed = 1, createRules = rulesV0, classes = null,
-    now = () => Date.now(), wallNow = () => Date.now(), log = () => {}, processName = 'p0', lingerMs = 5000, saveEveryMs = 10000,
+    now = () => Date.now(), wallNow = () => Date.now(), log = () => {}, processName = 'p0', lingerMs = 5000, saveEveryMs = 60000,
+    journalMs = JOURNAL_FLUSH_MS, verifyHuman = null, guestsPerIpPerHour = 20, tradeMinLevel = 1,
+    unlimitedIps = ['127.0.0.1', '::1', '::ffff:127.0.0.1', 'worker'],   // local bots/tests; the tunnel passes CF-Connecting-IP instead
     perfNow = now, copyCap = 300, copyIdleMs = 5 * 60000, instanceIdleMs = 30 * 60000, dungeonLevel = 3,
     planDungeon = planTiers, filterText = t => t, chestResetMs = 30 * 60000, zoneName = 'The Test Vale',
   } = opts;
@@ -56,9 +60,12 @@ export function createWorld(opts) {
   const gwByChar = new Map();    // char id -> gateway session (party + chat delivery)
   const names = new Map();       // char id -> { name, cls, level } (party rosters for offline members)
   const tickStats = createTickStats({ tickMs: TICK_MS });
-  const counters = { msgsIn: 0, bytesIn: 0, bytesOut: 0, bad: 0, saves: 0, saveFails: 0, saveMs: 0, kicks: 0, logins: 0, transfers: 0, instancesMade: 0, instancesClosed: 0, copiesMade: 0 };
+  const counters = { journalRows: 0, journalFlushes: 0, journalMs: 0, journalRefused: 0, trades: 0, tradeFails: 0, msgsIn: 0, bytesIn: 0, bytesOut: 0, bad: 0, saves: 0, saveFails: 0, saveMs: 0, kicks: 0, logins: 0, transfers: 0, instancesMade: 0, instancesClosed: 0, copiesMade: 0 };
   const rateWin = { at: now(), msgsIn: 0, bytesOut: 0, perSec: { msgsIn: 0, bytesOut: 0 } };
   const parties = createParties();
+  const trades = createTrades();
+  let jpend = [], jflushing = null, lastJFlush = now();
+  const guestLog = new Map();      // ip -> [wall ms of recent guest creations]
   const econ = createEconomyLog({ now: wallNow });
   let lastHeartbeat = now(), lastEconFlush = now(), lastPartySweep = now(), ticks = 0;
   const started = now();
@@ -76,7 +83,12 @@ export function createWorld(opts) {
   const roomHooks = {
     log,
     dirty: (ch, urgent) => { const o = online.get(ch.id); if (o) { o.dirty = true; if (urgent) saveNow(o); } },
-    award: (e, a) => { const o = e.char && online.get(e.char.id); if (o && o.entity === e) grant(o, { ...a, goldAdded: true }); },
+    award: (e, a) => {
+      const o = e.char && online.get(e.char.id);
+      if (!o || o.entity !== e) return;
+      if (a.xp) journal(o, 'xp', { d: a.xp, level: a.level });
+      grant(o, { ...a, goldAdded: true });
+    },
     newUid,
     // a rules module that announces loot itself ({type:'loot', to, items}) gets the items granted here
     loot: (ev, r) => { const e = r.entities.get(ev.to); const o = e && e.char && online.get(e.char.id); if (o && o.entity === e) grant(o, { items: ev.items, gold: 0, reason: 'kill', goldAdded: true }); },
@@ -206,7 +218,9 @@ export function createWorld(opts) {
     if (m.v !== PROTOCOL_VERSION) { s.sendJSON({ t: 'refuse', code: 'version', msg: CODES.version }); return s.closeSoon('version'); }
     if (m.build !== build) { s.sendJSON({ t: 'refuse', code: 'build', msg: CODES.build }); return s.closeSoon('build'); }
     s.state = s.kind === 'gw' ? 'anon' : 'await';
-    s.sendJSON({ t: 'welcome', v: PROTOCOL_VERSION, build, server: 'thousandvale', tickMs: TICK_MS, time: ticks * TICK_MS });
+    const w = { t: 'welcome', v: PROTOCOL_VERSION, build, server: 'thousandvale', tickMs: TICK_MS, time: ticks * TICK_MS };
+    if (s.kind === 'gw' && opts.humanSiteKey) w.human = { provider: 'turnstile', siteKey: opts.humanSiteKey };
+    s.sendJSON(w);
   }
   function pong(s, m) { s.sendJSON({ t: 'pong', c: m.c, s: ticks * TICK_MS, k: ticks }); }
 
@@ -215,13 +229,23 @@ export function createWorld(opts) {
     switch (m.t) {
       case 'hello': return s.state === 'hello' ? hello(s, m) : bad(s, 'order');
       case 'ping': return pong(s, m);
-      case 'guest':
+      case 'guest': {
         if (s.state !== 'anon') return bad(s, 'order');
+        // per-network limit on new accounts (PLAN §11.6); the human check (Turnstile) when configured
+        const t = wallNow(), key = s.ip || '?';
+        const recent = (guestLog.get(key) || []).filter(x => x > t - 3600000);
+        if (recent.length >= guestsPerIpPerHour && !unlimitedIps.includes(key)) { guestLog.set(key, recent); return s.err('tooMany'); }
         s.state = 'busy';
-        return store.createGuest(m.name ? cleanName(m.name) : null).then(({ account, token }) => {
+        const check = verifyHuman ? Promise.resolve(m.human ? verifyHuman(m.human, s.ip) : false).catch(err => { log('human check failed', err && err.message); return false; }) : Promise.resolve(true);
+        return check.then(ok => {
+          if (!ok) { s.state = 'anon'; counters.humanFails = (counters.humanFails || 0) + 1; return s.err('human'); }
+          recent.push(t); guestLog.set(key, recent);
+          return store.createGuest(m.name ? cleanName(m.name) : null).then(({ account, token }) => {
           s.account = account; s.state = 'authed'; counters.logins++;
           s.sendJSON({ t: 'authed', account, token, claimed: false });
-        }, err => { log('guest failed', err); s.state = 'anon'; s.err('auth'); });
+          });
+        }).catch(err => { log('guest failed', err); s.state = 'anon'; s.err('auth'); });
+      }
       case 'auth':
         if (s.state !== 'anon') return bad(s, 'order');
         s.state = 'busy';
@@ -325,6 +349,7 @@ export function createWorld(opts) {
       case 'respawn': return respawn(o);
       case 'use': return use(o, m.id);
       case 'item': return itemOp(o, m);
+      case 'trade': return tradeOp(o, m);
       default: return bad(s, 'socket');
     }
   }
@@ -351,7 +376,7 @@ export function createWorld(opts) {
       names.set(ch.id, { name: ch.name, cls: ch.cls, level: ch.level });
       const place = placeFor(ch, tk.near);
       const client = makeClient(s);
-      const o = { char: ch, fence: r.fence, entity: null, room: place.room, conn: s, lingerUntil: 0, dirty: false, saving: false, savePending: false, lastSaveAt: now(), homeCopy: null };
+      const o = { char: ch, fence: r.fence, entity: null, room: place.room, conn: s, lingerUntil: 0, dirty: false, saving: false, savePending: false, lastSaveAt: now(), homeCopy: null, seq: ch.jseq || 0, savedSeq: ch.jseq || 0, lastPos: null, frozen: false };
       online.set(ch.id, o);
       o.entity = place.room.addPlayer(ch, client, place.at);
       tagParty(o);
@@ -526,6 +551,7 @@ export function createWorld(opts) {
     const gold = Math.round(lvl * 4 + 5);
     ch.gold = (ch.gold || 0) + gold;
     ch.opened[key] = t + (o.room.kind === 'instance' ? 24 * 3600000 : chestResetMs);
+    journal(o, 'opened', { key, until: ch.opened[key] });
     s.sendJSON({ t: 'used', id: obj.id, ok: true, kind: 'chest' });
     o.room.emit({ type: 'open', to: e.id, d: obj.id, x: obj.x, z: obj.z });
     grant(o, { items, gold, reason: 'chest', goldAdded: true, from: obj });
@@ -535,6 +561,11 @@ export function createWorld(opts) {
   /** Give a character items (each gets a server uid) and log the gold/items as faucets. */
   function grant(o, { items = [], gold = 0, reason = 'kill', goldAdded = false, from = null }) {
     const ch = o.char;
+    if (o.frozen) {                       // a trade is being written: hold new loot until it lands
+      if (goldAdded && gold) { ch.gold -= gold; goldAdded = false; }
+      setTimeoutTicks(() => grant(o, { items, gold, reason, goldAdded, from }), 2);
+      return;
+    }
     ch.bag ||= [];
     if (gold && !goldAdded) ch.gold = (ch.gold || 0) + gold;
     const added = [];
@@ -550,6 +581,8 @@ export function createWorld(opts) {
       if (RARE.has(item.rarity)) urgent = true;
     }
     if (overflow) ch.gold = (ch.gold || 0) + overflow;
+    if (gold || overflow) journal(o, 'gold', { d: gold + overflow });
+    for (const it of added) journal(o, 'bagAdd', { item: it });
     const lvl = ch.level || 1;
     if (gold) econ.add('faucet', reason, { gold }, lvl);
     if (added.length) econ.add('faucet', reason, { items: added.length }, lvl);
@@ -572,12 +605,15 @@ export function createWorld(opts) {
   function itemOp(o, m) {
     const ch = o.char, s = o.conn, e = o.entity;
     if (!ITEM_OPS.includes(m.op)) return bad(s, 'op');
+    if (o.frozen) return s.err('busy');
+    if (trades.offered(ch.id, m.uid)) return s.err('item', 'That item is in your trade window.');
     ch.bag ||= []; ch.equipment ||= {};
     const rules = o.room.rules;
     const bagIdx = ch.bag.findIndex(i => i.uid === m.uid);
     if (m.op === 'destroy') {
       if (bagIdx < 0) return s.err('item');
       const [it] = ch.bag.splice(bagIdx, 1);
+      journal(o, 'bagDel', { uid: it.uid });
       econ.add('sink', 'destroy', { items: 1 }, ch.level);
       o.dirty = true;
       return s.sendJSON({ t: 'bag', add: [], remove: [it.uid], gold: ch.gold });
@@ -598,6 +634,9 @@ export function createWorld(opts) {
       }
       ch.bag.splice(bagIdx, 1);
       for (const it of removed) ch.bag.push(it);
+      journal(o, 'bagDel', { uid: item.uid });
+      for (const it of removed) journal(o, 'bagAdd', { item: it });
+      journalGear(o);
       o.dirty = true;
       s.sendJSON({ t: 'bag', add: removed, remove: [item.uid], gold: ch.gold });
       return s.sendJSON({ t: 'equip', slot, item, equipment: equipView(o) });
@@ -611,6 +650,8 @@ export function createWorld(opts) {
       if (rules.unequip) { const r = safeRules(o.room, 'unequip', e, slot); if (!r || !r.ok) return s.err('item', (r && r.text) || 'Not now.'); item = r.item; }
       else { item = ch.equipment[slot]; delete ch.equipment[slot]; }
       ch.bag.push(item);
+      journal(o, 'bagAdd', { item });
+      journalGear(o);
       o.dirty = true;
       s.sendJSON({ t: 'bag', add: [item], remove: [], gold: ch.gold });
       return s.sendJSON({ t: 'equip', slot, item: null, equipment: equipView(o) });
@@ -734,11 +775,12 @@ export function createWorld(opts) {
       if (!t) return s.err('notFound');
       if (t.char.id !== ch.id && !ch.ignore.some(i => i.id === t.char.id)) ch.ignore.push({ id: t.char.id, name: t.char.name });
     } else ch.ignore = ch.ignore.filter(i => i.name.toLowerCase() !== m.name.toLowerCase());
+    journal(o, 'set', { k: 'ignore', v: ch.ignore });
     o.dirty = true;
     s.sendJSON({ t: 'ignored', list: ch.ignore });
   }
   /** Admin hook: mute a character's chat until `untilMs` (wall clock). */
-  function mute(charId, untilMs) { const o = online.get(charId); if (!o) return false; o.char.mutedUntil = untilMs; o.dirty = true; return true; }
+  function mute(charId, untilMs) { const o = online.get(charId); if (!o) return false; o.char.mutedUntil = untilMs; journal(o, 'set', { k: 'mutedUntil', v: untilMs }); o.dirty = true; return true; }
 
   function handleClose(s) {
     if (s.closed) return;
@@ -754,11 +796,164 @@ export function createWorld(opts) {
     if (lingerMs <= 0) logout(o);
   }
 
+  // ---- the journal (PLAN §9.2; js/sim/journal.js) ----
+  function journal(o, kind, payload) {
+    jpend.push({ char: o.char.id, seq: ++o.seq, kind, payload, fence: o.fence });
+  }
+  function journalGear(o) {
+    if (o.room.rules.saveGear) { const g = safeRules(o.room, 'saveGear', o.entity); if (g !== undefined) o.char.equipment = g; }
+    journal(o, 'equip', { equipment: o.char.equipment || {} });
+  }
+  /** Group commit: every pending row (minus the ones a blob already holds) + a position row per mover. */
+  function flushJournal() {
+    if (jflushing) return jflushing;
+    for (const o of online.values()) {
+      const e = o.entity;
+      const lp = o.lastPos;
+      if (!lp || lp.room !== o.room.id || Math.abs(lp.x - e.x) + Math.abs(lp.z - e.z) > 0.5 || lp.exit !== o.char.exit) {
+        o.lastPos = { room: o.room.id, x: e.x, z: e.z, exit: o.char.exit };
+        journal(o, 'pos', { room: o.room.id, x: e.x, y: e.y, z: e.z, yaw: e.yaw, exit: o.char.exit ?? null });
+      }
+    }
+    const rows = jpend.filter(r => { const o = online.get(r.char); return !o || r.seq > o.savedSeq; });
+    jpend = [];
+    if (!rows.length) return Promise.resolve(0);
+    const t0 = now();
+    jflushing = store.appendJournal(rows).then(kept => {
+      counters.journalRows += kept; counters.journalFlushes++; counters.journalMs = now() - t0;
+      if (kept < rows.length) counters.journalRefused += rows.length - kept;
+      return kept;
+    }, err => {
+      log('journal flush failed', err && err.message);
+      jpend = rows.concat(jpend);          // keep them for the next try
+      return 0;
+    }).finally(() => { jflushing = null; });
+    return jflushing;
+  }
+
+  // ---- trades (M1.5; js/sim/trade.js) ----
+  function tradeView(t, me) {
+    const mine = trades.side(t, me), theirs = mine === t.a ? t.b : t.a;
+    const items = side => { const o = online.get(side.char); const bag = o ? o.char.bag || [] : []; return side.items.map(u => bag.find(i => i.uid === u)).filter(Boolean); };
+    const sv = side => { const o = online.get(side.char); return { char: side.char, name: o ? o.char.name : '?', id: o ? o.entity.id : 0, items: items(side), gold: side.gold, locked: side.locked, confirmed: side.confirmed }; };
+    return { id: t.id, state: t.state, you: sv(mine), them: sv(theirs) };
+  }
+  function tradeTell(t, extra = {}) {
+    for (const c of [t.a.char, t.b.char]) { const o = online.get(c); if (o && o.conn) o.conn.sendJSON({ t: 'tradeState', trade: tradeView(t, c), ...extra }); }
+  }
+  function cancelTrade(c, why) {
+    const t = trades.of(c);
+    if (!t || t.committing) return;
+    trades.end(c);
+    for (const x of [t.a.char, t.b.char]) { const o = online.get(x); if (o && o.conn) o.conn.sendJSON({ t: 'tradeState', trade: null, done: false, why }); }
+  }
+  const near = (a, b) => a.room === b.room && !a.entity.dead && !b.entity.dead && Math.hypot(a.entity.x - b.entity.x, a.entity.z - b.entity.z) <= TRADE_RANGE;
+  function watchTrades() {
+    for (const t of [...trades.byId.values()]) {
+      const a = online.get(t.a.char), b = online.get(t.b.char);
+      if (!a || !b || !a.conn || !b.conn) cancelTrade(t.a.char, 'gone');
+      else if (!near(a, b)) cancelTrade(t.a.char, 'tradeFar');
+    }
+  }
+  function tradeOp(o, m) {
+    const s = o.conn, me = o.char.id;
+    if (!TRADE_OPS.includes(m.op)) return bad(s, 'op');
+    let r;
+    switch (m.op) {
+      case 'ask': {
+        const te = o.room.entities.get(m.id);
+        const to = te && te.char && online.get(te.char.id);
+        if (!to || to.entity !== te || to === o) return s.err('trade');
+        if (!near(o, to)) return s.err('tradeFar');
+        if ((o.char.level || 1) < tradeMinLevel || (to.char.level || 1) < tradeMinLevel) return s.err('trade', 'Trading opens at level ' + tradeMinLevel + '.');
+        if (ignores(to.char, me)) return s.err('trade');
+        r = trades.ask(me, to.char.id);
+        if (r.ok && to.conn) to.conn.sendJSON({ t: 'tradeAsk', trade: r.trade.id, from: o.entity.id, name: o.char.name });
+        break;
+      }
+      case 'accept': r = trades.accept(me, m.id ?? -1); break;
+      case 'offer': {
+        const t = trades.get(m.id ?? -1);
+        const items = m.items || [], gold = m.gold || 0;
+        if (gold < 0 || gold > (o.char.gold || 0)) return s.err('trade', 'You do not have that much gold.');
+        const bag = new Set((o.char.bag || []).map(i => i.uid));
+        if (!items.every(u => bag.has(u))) return s.err('item');
+        if (t && items.some(u => { const other = trades.of(me); return other && other !== t && trades.offered(me, u); })) return s.err('item');
+        r = trades.offer(me, m.id ?? -1, { items, gold });
+        break;
+      }
+      case 'lock': r = trades.lock(me, m.id ?? -1); break;
+      case 'confirm': r = trades.confirm(me, m.id ?? -1); break;
+      case 'cancel': return cancelTrade(me, 'cancelled');
+    }
+    if (!r || !r.ok) return s.err((r && r.why) || 'trade');
+    if (m.op === 'ask') return tradeTell(r.trade);
+    tradeTell(r.trade);
+    if (r.ready) commitTrade(r.trade);
+  }
+  /** Both sides confirmed: move everything in ONE store transaction, or nothing at all. */
+  function commitTrade(t) {
+    const a = online.get(t.a.char), b = online.get(t.b.char);
+    const fail = why => { t.committing = false; counters.tradeFails++; trades.end(t.a.char); for (const o of [a, b]) if (o && o.conn) o.conn.sendJSON({ t: 'tradeState', trade: null, done: false, why }); };
+    if (!a || !b || !near(a, b)) return fail('tradeFar');
+    if (a.saving || b.saving || a.frozen || b.frozen) { t.committing = true; setTimeoutTicks(() => { t.committing = false; commitTrade(t); }, 2); return; }
+    // re-check everything against the live characters
+    const take = (o, side) => {
+      const bag = o.char.bag || [];
+      const items = side.items.map(u => bag.find(i => i.uid === u));
+      if (items.some(x => !x) || side.gold > (o.char.gold || 0)) return null;
+      return items;
+    };
+    const ia = take(a, t.a), ib = take(b, t.b);
+    if (!ia || !ib) return fail('tradeFailed');
+    if ((a.char.bag.length - ia.length + ib.length) > BAG_MAX || (b.char.bag.length - ib.length + ia.length) > BAG_MAX) return fail('bagFull');
+    t.committing = true;
+    a.frozen = b.frozen = true; a.saving = b.saving = true;
+    syncChar(a); syncChar(b);
+    const next = (o, give, get, giveGold, getGold) => {
+      const ch = JSON.parse(JSON.stringify(o.char));
+      const out = new Set(give.map(i => i.uid));
+      ch.bag = ch.bag.filter(i => !out.has(i.uid)).concat(JSON.parse(JSON.stringify(get)));
+      ch.gold = (ch.gold || 0) - giveGold + getGold;
+      return ch;
+    };
+    const na = next(a, ia, ib, t.a.gold, t.b.gold), nb = next(b, ib, ia, t.b.gold, t.a.gold);
+    const seqA = a.seq, seqB = b.seq;
+    store.tradeChars([{ ch: na, fence: a.fence }, { ch: nb, fence: b.fence }]).then(ok => {
+      a.saving = b.saving = false; a.frozen = b.frozen = false;
+      if (!ok) { counters.tradeFails++; return fail('tradeFailed'); }
+      // apply the same moves to the live characters (as deltas: anything that arrived meanwhile stays)
+      for (const [o, give, get, dg, nx, sq] of [[a, ia, ib, t.b.gold - t.a.gold, na, seqA], [b, ib, ia, t.a.gold - t.b.gold, nb, seqB]]) {
+        const out = new Set(give.map(i => i.uid));
+        o.char.bag = o.char.bag.filter(i => !out.has(i.uid)).concat(JSON.parse(JSON.stringify(get)));
+        o.char.gold = (o.char.gold || 0) + dg;
+        o.char.version = nx.version;
+        o.savedSeq = Math.max(o.savedSeq, sq);
+        o.lastSaveAt = now();
+        if (o.conn) o.conn.sendJSON({ t: 'bag', add: get, remove: [...out], gold: o.char.gold });
+      }
+      t.committing = false;
+      counters.trades++;
+      econ.add('faucet', 'trade', { items: 0 }, 1);
+      tradeTell(t, { done: true });
+      trades.end(t.a.char);
+      for (const o of [a, b]) if (o.conn) o.conn.sendJSON({ t: 'tradeState', trade: null, done: true });
+      for (const o of [a, b]) if (o.savePending) { o.savePending = false; saveNow(o); }
+    }, err => {
+      a.saving = b.saving = false; a.frozen = b.frozen = false;
+      log('trade failed', err && err.message);
+      fail('tradeFailed');
+    });
+  }
+  const tickTimers = [];
+  function setTimeoutTicks(fn, n) { tickTimers.push({ at: ticks + n, fn }); }
+
   // ---- saving ----
   function syncChar(o) {
     const e = o.entity, ch = o.char;
     ch.x = e.x; ch.y = e.y; ch.z = e.z; ch.yaw = e.yaw; ch.hp = e.dead ? 0 : e.hp; ch.mp = Math.round(e.mp);
     ch.level = e.level; ch.room = o.room.id;
+    ch.jseq = o.seq;                       // every journal row so far is in this blob
     if (o.room.rules.saveGear) { const g = safeRules(o.room, 'saveGear', e); if (g !== undefined) ch.equipment = g; }
   }
   function sig(o) { const e = o.entity, ch = o.char; return [Math.round(e.x * 4), Math.round(e.z * 4), e.hp, ch.xp, ch.gold, ch.level, o.room.id, (ch.bag || []).length].join(','); }
@@ -766,11 +961,12 @@ export function createWorld(opts) {
     if (o.saving) { o.savePending = true; return o.savingP; }
     syncChar(o);
     o.saving = true; o.dirty = false; o.lastSig = sig(o);
+    const snapSeq = o.seq;
     const t0 = now();
     o.savingP = store.saveChar(o.char, o.fence).then(ok => {
       o.saving = false; o.lastSaveAt = now();
       counters.saveMs = now() - t0;
-      if (ok) counters.saves++;
+      if (ok) { counters.saves++; o.savedSeq = Math.max(o.savedSeq, snapSeq); }
       else {
         counters.saveFails++;
         log('save refused (lease lost?)', o.char.id);
@@ -785,6 +981,7 @@ export function createWorld(opts) {
   }
   function logout(o) {
     if (o.loggingOut) return o.loggingOut;
+    cancelTrade(o.char.id, 'gone');
     online.delete(o.char.id);
     o.room.remove(o.entity);
     partyChanged([parties.of(o.char.id)]);
@@ -799,6 +996,7 @@ export function createWorld(opts) {
     for (const r of rooms.values()) r.step();
     if (ticks % 5 === 0) checkEdges();
     if (edgeQueue.size) drainEdges();
+    if (tickTimers.length) for (let i = tickTimers.length - 1; i >= 0; i--) if (tickTimers[i].at <= ticks) { const f = tickTimers[i].fn; tickTimers.splice(i, 1); f(); }
     if (ticks % 10 === 0) sendPartyFrames();
     const t = now();
     for (const o of online.values()) {
@@ -806,6 +1004,8 @@ export function createWorld(opts) {
       if (!o.saving && t - o.lastSaveAt >= saveEveryMs && (o.dirty || sig(o) !== o.lastSig)) saveNow(o);
     }
     if (ticks % 20 === 0) closeEmptyRooms(t);
+    if (t - lastJFlush >= journalMs) { lastJFlush = t; flushJournal(); }
+    if (ticks % 5 === 0 && trades.byId.size) watchTrades();
     if (t - lastHeartbeat >= HEARTBEAT_MS) {
       lastHeartbeat = t;
       const ids = [...online.keys()];
@@ -847,6 +1047,7 @@ export function createWorld(opts) {
   async function shutdown(code = 'restart') {
     for (const s of [...sessions]) if (s.kind === 'p') s.kick(code);
     await Promise.all([...online.values()].map(o => logout(o)));
+    await flushJournal();
     flushEconomy();
     for (const s of [...sessions]) s.closeSoon(code);
   }
@@ -869,6 +1070,9 @@ export function createWorld(opts) {
       rulesErrors,
       saves: { done: counters.saves, failed: counters.saveFails, lastMs: counters.saveMs, inFlight: [...online.values()].filter(o => o.saving).length },
       economy: econ.lastHour(),
+      journal: { rows: counters.journalRows, flushes: counters.journalFlushes, lastMs: counters.journalMs, queue: jpend.length, refused: counters.journalRefused },
+      trades: { open: trades.byId.size, done: counters.trades, failed: counters.tradeFails },
+      humanFails: counters.humanFails || 0,
       sessions: sessions.size,
       db: store.kind,
     };
@@ -876,6 +1080,6 @@ export function createWorld(opts) {
 
   return {
     accept, step, init, shutdown, status, rooms, room, townRoom, copies, instances, online, parties, econ, tickStats, owner, counters,
-    saveNow, logout, transfer, grant, mute, town, door, gate, flushEconomy, newUid,
+    saveNow, logout, transfer, grant, mute, town, door, gate, flushEconomy, newUid, flushJournal, trades,
   };
 }

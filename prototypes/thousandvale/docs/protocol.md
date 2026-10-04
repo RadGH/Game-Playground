@@ -97,7 +97,7 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `t` | Socket | Fields | Rate / burst | Meaning |
 |---|---|---|---|---|
 | `hello` | both | `v:int, build:str:64` | 2 / 2 | Must be first. |
-| `guest` | gw | `name?:str:24` | 1 / 3 | Make a guest account. |
+| `guest` | gw | `name?:str:24, human?:str:2048` | 1 / 3 | Make a guest account. `human` = the Turnstile token when `welcome.human` asked for one (§14); 20 new accounts per network per hour. |
 | `auth` | gw | `token:str:64` | 1 / 3 | Log into an account. |
 | `chars` | gw | — | 2 / 4 | List my characters. |
 | `create` | gw | `name:str:24, cls:str:32, look?:obj` | 1 / 3 | New character (`cls` = a Farhold class id; `look` = Chibi 2 avatar JSON, ≤ 4 KB). Names: 2–16 letters/spaces/'-, unique per realm, banned-name filter. |
@@ -114,13 +114,14 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `respawn` | p | — | 1 / 2 | Get up after dying: in the wilds or town you wake in the town (a `joined` handoff, `via:'respawn'`); in a dungeon, at its entrance. |
 | `use` | p | `id:id` | 4 / 8 | Use an object within 4 m: a portal/door (dungeon entrance), stairs, an exit, a chest. Answer `used {id, ok, why?, kind?}`; a move arrives as a `joined` handoff. |
 | `item` | p | `op:str:8, uid:str:40, slot?:str:16` | 5 / 10 | `equip {uid, slot?}` (slot defaults to the item's own), `unequip {uid, slot?}`, `destroy {uid}`. The uid must be in YOUR bag (or worn, for unequip). Answers `bag` + `equip`, or `err {code:'item'|'bagFull'}`. |
+| `trade` | p | `op:str:8, id?:int, items?:uids, gold?:int` | 5 / 10 | The trade window (§13): `ask {id: entity}` (within 10 m) → they get `tradeAsk`; `accept {id: trade}`; `offer {id, items:[≤12 uids], gold}` (unlocks both); `lock {id}`; `confirm {id}` (both locked); `cancel`. Both confirmed → one all-or-nothing store write; `tradeState` throughout, `trade:null` + `done` at the end. |
 | `leave` | both | — | 1 / 2 | Log out cleanly (save now). |
 
 ### 3.2 Server → client
 
 | `t` | Fields | Meaning |
 |---|---|---|
-| `welcome` | `v, build, server, tickMs, time` | Handshake OK. |
+| `welcome` | `v, build, server, tickMs, time, human?:{provider:'turnstile', siteKey}` | Handshake OK. With `human`, show the Turnstile widget (that site key) and send its token in `guest {human}`. |
 | `refuse` | `code, msg` | Handshake refused (`version`, `build`, `full`, `banned`); socket closes. |
 | `authed` | `account:int, token?:str, claimed:bool` | `token` only on `guest` (store it). |
 | `charList` | `chars:[{id, name, cls, level, room}]` | |
@@ -141,6 +142,8 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `partyInvite` | `from, name, party` | (gateway) Someone invited me; answer `party {op:'accept'\|'decline', char: party}`. |
 | `partyFrames` | `m:[[char, hp, hpMax, room, x, z, dead, online, id]…]` | (gateway) Party frames, 2 Hz, every member (`id` = local entity id in `room`). |
 | `ignored` | `list:[{id, name}]` | (gateway) My ignore list. |
+| `tradeAsk` | `trade, from, name` | Someone (entity `from`) wants to trade: answer `trade {op:'accept', id: trade}` or `cancel`. |
+| `tradeState` | `trade:{id, state, you:{char, name, id, items, gold, locked, confirmed}, them:{…}}\|null, done?, why?` | The trade window; `trade:null` = closed (`done:true` = it went through, else `why`: `cancelled`, `tradeFar`, `tradeFailed`, `bagFull`, `gone`). |
 | `err` | `code, msg` | Request failed (`auth`, `name`, `cls`, `full`, `ticket`, `state`, `party`, `partyFull`, `noCode`, `notFound`, `muted`, `item`, `bagFull`). `msg` is plain language. |
 | `kick` | `code, msg` | About to close: `elsewhere` (logged in from another tab), `abuse`, `restart`, `idle`. |
 

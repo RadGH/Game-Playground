@@ -1,0 +1,12 @@
+{
+  "_doc": "Stream E. Zone hooks (PLAN §3.5): ONE memorable thing per zone, never twice in a province, never within 6 zones of itself. `kind`: compositional (built from kit parts + parameters) or bespoke (needs a model, stream F). M1 has one; the ~85 arrive M2-M4.",
+  "hooks": [
+    { "id": "the_singing_ford", "name": "The Singing Ford", "kind": "compositional", "zone": "test",
+      "at": { "site": "Fitockpi Ford" },
+      "what": "The stepping stones of Fitockpi Ford are hollow; when the river runs fast (after rain) they hum a low chord you can hear 300 m away. Locals cross only in the dry. The brigands chose it because nobody hears them coming over the noise.",
+      "parts": [ { "kind": "prop", "id": "stone_step", "count": 9, "line": "across the river at the ford", "spacing": 1.6 }, { "kind": "prop", "id": "rune_stone", "count": 1, "note": "a worn carving of a mouth on the far bank" } ],
+      "sound": { "id": "ambience.ford_hum", "when": "weather in [rain] or the hour after", "radius": 300 },
+      "lore": "The stones are humming. It is not a tune, exactly. It is closer to the river clearing its throat.",
+      "tags": { "biomes": ["grassland", "temperateForest"], "needs": "a ford" } }
+  ]
+}

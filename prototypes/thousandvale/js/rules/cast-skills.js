@@ -24,9 +24,9 @@ import {
 import { taunt as threatTaunt, threatFromHeal } from './threat.js';
 
 /** plan keys this file does not act on yet — reported, never silently dropped */
-export const PENDING_KEYS = ['summon', 'channel', 'rewind', 'afterimage', 'mimic', 'clusters', 'corpseBurst', 'imbue', 'command', 'howl', 'again', 'empowerRepeat', 'returns', 'ricochet', 'split', 'allyStatus', 'ward', 'counter'];
+export const PENDING_KEYS = ['summon', 'mimic', 'clusters', 'corpseBurst', 'command', 'howl', 'allyStatus'];
 /** kinds of plan the dispatcher refuses (no follower system yet) */
-const REFUSED_KINDS = { summon: 'summons arrive with followers (M2)', form: 'shape forms arrive with followers (M2)', channelEnd: 'channels are not ported yet' };
+const REFUSED_KINDS = { summon: 'summons arrive with followers (M2)', form: 'shape forms arrive with followers (M2)' };
 
 export const BOLT_SPEED = 48;          // main.js
 const ALLY_RANGE = 30;                 // how far an ally-targeted heal/buff reaches
@@ -287,7 +287,28 @@ function runtimeOf(combat) {
     tickWalls(dt);
     for (const corpse of mechWorld.corpses) corpse.left -= dt;
     mechWorld.corpses = mechWorld.corpses.filter(x => x.left > 0);
-    for (const p of field.players) if (p.imbue) { p.imbue.left -= dt; if (p.imbue.left <= 0) p.imbue = null; }
+    for (const p of field.players) {
+      // skillrun.js recordHistory (for Rewind), every 0.1 s, the last 6 s
+      p.histT = (p.histT || 0) + dt;
+      if (p.histT >= 0.1) { p.histT = 0; (p.history || (p.history = [])).push({ x: p.x, z: p.z, hp: p.hp, mp: p.mp, t: combat.room.clock.now() }); while (p.history.length > 60) p.history.shift(); }
+      // skillrun.js tickChannel
+      const chn = p.mech?.channel;
+      if (chn) {
+        const moved = Math.hypot(p.x - chn.x, p.z - chn.z);
+        if (moved > 0.6 && !chn.moveK) { p.mech.channel = null; field.emit({ t: 'castX', id: p.id, ab: chn.plan.skill?.id, why: 'moved' }); }
+        else {
+          chn.x = p.x; chn.z = p.z; chn.left -= dt; chn.next -= dt;
+          if (chn.next <= 0) {
+            chn.next = chn.every;
+            const k = 1 + (chn.grow || 0) * chn.ticks;
+            chn.ticks++;
+            castPlan(combat, p, { ...chn.plan, mult: chn.plan.mult * k, damage: Math.round(chn.plan.damage * k) }, { echo: true, intent: chn.intent });
+          }
+          if (chn.left <= 0) p.mech.channel = null;
+        }
+      }
+      if (p.imbue) { p.imbue.left -= dt; if (p.imbue.left <= 0) p.imbue = null; }
+    }
     for (const [id, link] of rt.links) {
       link.left -= dt;
       const owner = field.get(id);
@@ -302,11 +323,36 @@ function runtimeOf(combat) {
       if (st) { t.last = st; continue; }
       rt.tracked.splice(i, 1);
       if (t.dirty) t.unit.mechDirty = true;
+      if (t.counter) {
+        // skillrun.js: a counter that took hits grows the next cast; an unused one refunds cooldown
+        const ch = t.unit;
+        const g = t.plan.counter?.grow;
+        if (g && t.last?.counter?.taken) (ch.mech || (ch.mech = { res: {} })).grow = { ...(ch.mech.grow || {}), [t.plan.skill?.id]: Math.min(g.cap ?? 0.5, (g.per ?? 0.1) * t.last.counter.taken) };
+        if (!t.last?.counter?.used && t.plan.counter?.onUnused?.refund) {
+          const slot = ch.skills.slots.find(sl => sl.id === t.plan.skill?.id);
+          queueMech(ch, { cut: { skill: t.plan.skill?.id, seconds: (slot ? ch.skills.cooldownFor(slot) : 8) * t.plan.counter.onUnused.refund } });
+        }
+        continue;
+      }
       if (t.onEnd) {
         const ch = t.unit;
         const sub = ch.skills.planFor(t.onEnd, t.plan.skill, { shape: t.onEnd.shape || 'around' });
         rt.withCaster(ch, () => castPlan(combat, ch, sub, { echo: true }));
       }
+    }
+    // skillrun.js tick: the events a strike or a form left on the player
+    for (const p of field.players) {
+      const evs = p.mechEvents;
+      if (!evs?.length) continue;
+      p.mechEvents = [];
+      rt.withCaster(p, () => {
+        for (const ev of evs) {
+          if (ev.kind === 'formExpired') rt.formExpired?.(p, ev.form);
+          else if (ev.kind === 'cutFollowers') rt.cutFollowers?.(p, ev.seconds);
+          else if (ev.kind === 'imbueBurst') { const b = ev.spec; field.strikeArea(ev.at.x, ev.at.z, b.radius ?? 3, p, { power: b.mult ?? 1, element: ev.element, falloff: 0.6, proc: true, kind: 'imbue' }); }
+          else if (ev.kind === 'imbueSplash') field.strikeArea(ev.at.x, ev.at.z, ev.radius, p, { power: 0.5, element: ev.element, falloff: 0.5, proc: true, kind: 'imbue' }).filter(h => h.enemy !== ev.except);
+        }
+      });
     }
     tickPools(dt);                     // main.js ticks the pools last in the frame
   };
@@ -383,15 +429,19 @@ export function castSkillPlan(combat, ch, slot, intent = {}) {
   const plan = ch.skills.use(slot);
   if (!plan.ok) return { ok: false, why: plan.why };
   if (REFUSED_KINDS[plan.kind]) return { ok: false, why: REFUSED_KINDS[plan.kind] };
-  return castPlan(combat, ch, plan, { intent });
+  return castPlan(combat, ch, plan, { intent, slot });
 }
 
 /** Carry out a plan (also used for echoes, delayed beams and a buff's `onEnd`). */
-export function castPlan(combat, ch, plan, { echo = false, intent = {} } = {}) {
+export function castPlan(combat, ch, plan, { echo = false, intent = {}, slot = null } = {}) {
   const rt = runtimeOf(combat);
   const field = combat.field, room = combat.room, rpg = room.engine.rpg;
   return rt.withCaster(ch, () => {
     const out = { ok: true, skill: plan.skill?.id, kind: plan.kind, hits: [], pending: PENDING_KEYS.filter(k => plan[k] != null && plan[k] !== false) };
+    // skillrun.js `intercept`: a channel starts (and ticks in rt.tick), a second press ended it already
+    if (plan.kind === 'channelEnd') { field.emit({ t: 'castX', id: ch.id, ab: plan.skill?.id, why: 'released' }); return out; }
+    if (plan.kind === 'form' && rt.formCast) { rt.formCast(ch, plan); return out; }
+    if (plan.channel && !plan.sub) { startChannel(rt, ch, plan, intent); ch.mech.channel.slot = slot; field.emit({ t: 'castbar', id: ch.id, ab: plan.skill?.id, name: plan.skill?.name, ms: Math.round((plan.channel.seconds ?? 3) * 1000), ch: 1 }); return out; }
     const a = plan.frozenAim || aimOf(ch, intent);
     const castFrom = { x: ch.x, z: ch.z, yaw: ch.yaw };
     const hpBefore = ch.hp;
@@ -584,6 +634,7 @@ function fireBolt(combat, rt, ch, plan, a, dx, dz, strikeOpts, collect, intent, 
     const splash = plan.splash * (combat.room.engine.rpg.fx.sum(ch, 'boltSplash') || 1);
     rt.withCaster(ch, () => {
       const hits = collect(field.strikeArea(at.x, at.z, splash, ch, { falloff: 0.5, ...strikeOpts }));
+      if (!hop && plan.skill) afterBolt(combat, rt, ch, plan, at, hits, strikeOpts, collect);
       const left = (plan.chains || 0) - hop;
       if (left > 0) {
         const conductors = field.near(at.x, at.z, 12, chase).filter(e => e.statuses?.shock);
@@ -842,6 +893,18 @@ function afterCast(combat, rt, ch, plan, ctx) {
     if (b.movePct || b.hastePct || b.armorPct || b.maxHpPct) ch.mechDirty = true;
     rt.tracked.push({ unit: ch, id, onEnd: b.onEnd || null, plan, dirty: !!(b.movePct || b.hastePct || b.armorPct || b.maxHpPct) });
   }
+  if (plan.counter) {
+    // skillrun.js: a counter window as a buff; the hit it answers is handled in onHurt
+    const id = `counter:${plan.skill?.id || 'skill'}`;
+    apply(ch, id, { name: plan.skill?.name || 'Counter', kind: 'buff', element: plan.element, seconds: plan.counter.window ?? 1.5, counter: { ...plan.counter, hitsLeft: plan.counter.hits ?? 1, taken: 0 }, ccImmune: !!plan.counter.ccImmune, skill: plan.skill?.id });
+    rt.tracked.push({ unit: ch, id, plan, counter: true });
+  }
+  if (plan.ward) {
+    const w = plan.ward;
+    const give = u => apply(u, `ward:${plan.skill?.id}`, { name: plan.skill?.name || 'Ward', kind: 'buff', element: plan.element, seconds: w.seconds ?? 10, ward: { charges: w.charges ?? 1, threshold: w.threshold ?? null, cap: w.cap ?? null } });
+    give(ch);
+    if (w.pets) for (const u of rt.allies(ch)) if (u.owner === ch) give(u);
+  }
   if (plan.place && plan.kind !== 'ground' && !plan.dash) {
     const follow = plan.place.follow === 'self' ? 'self' : plan.place.follow === 'target' ? aimedEnemy(field, ch, ctx.intent, a, plan.range || 30) : null;
     const at = plan.place.follow === 'self' || plan.kind === 'self' || plan.kind === 'around' ? { x: ch.x, z: ch.z } : spot;
@@ -881,7 +944,98 @@ function afterCast(combat, rt, ch, plan, ctx) {
     const need = +String(plan.resetOn.when || plan.resetOn).split(':')[1] || 5;
     if (hitsN >= need) queueMech(ch, { reset: plan.skill?.id });
   }
+  if (plan.imbue) {
+    const im = plan.imbue;
+    ch.imbue = { ...im, left: im.seconds ?? 10, count: 0, element: im.element || null, statusSpec: im.status ? statusSpec(im.status) : null };
+  }
+  if (plan.again && !plan.sub) {
+    const g = plan.again, k = g.mult ?? 1;
+    combat.later(g.delay ?? 2, () => castPlan(combat, ch, { ...plan, again: null, sub: true, afterimage: null, mult: plan.mult * k, damage: Math.round(plan.damage * k) }, { echo: true, intent: ctx.intent }), ch.id);
+  }
+  if (plan.empowerRepeat) {
+    const er = plan.empowerRepeat;
+    for (let k = 1; k < er.count; k++) combat.later(0.3 * k, () => castPlan(combat, ch, { ...plan, empowerRepeat: null, mult: plan.mult * er.mult, damage: Math.round(plan.damage * er.mult), sub: true }, { echo: true, intent: ctx.intent }), ch.id);
+  }
+  if (plan.rewind) doRewind(rt, ch, plan.rewind, combat);
+  afterimage(combat, rt, ch, plan, ctx.a, ctx.origin, ctx.intent);
   if (plan.wall) raiseWall(combat, rt, ch, plan, spot, a);
+}
+
+/** skillrun.js `afterBolt`: a ricochet, a split on a condition, a bolt that comes back. */
+function afterBolt(combat, rt, ch, plan, at, hits, opts, collect) {
+  const field = combat.field;
+  const struck = hits.find(h => h.result?.amount > 0)?.enemy || null;
+  if (struck) plan._struck = struck;
+  const used = new Set(hits.map(h => h.enemy));
+  const hit = (from, e, keep) => { used.add(e); collect(field.strikeArea(e.x, e.z, 1.1, ch, { ...opts, falloff: 1, power: (opts.power ?? plan.mult) * keep })); return e; };
+  const jump = (from, keep, n, range) => {
+    let cur = from;
+    for (let i = 0; i < n; i++) {
+      const next = field.nearestTo(cur.x, cur.z, range, null);
+      if (!next || used.has(next)) {
+        const alt = (field.near(cur.x, cur.z, range) || []).find(e => !used.has(e));
+        if (!alt) break;
+        cur = hit(cur, alt, keep);
+      } else cur = hit(cur, next, keep);
+    }
+  };
+  if (plan.ricochet && struck) jump(struck, plan.ricochet.keep ?? 0.6, plan.ricochet.bounces ?? 1, plan.ricochet.range ?? 8);
+  const sp = plan.split;
+  if (sp) {
+    const when = sp.when || 'hit';
+    const ok = when === 'hit' ? !!struck : when === 'kill' ? hits.some(h => h.result?.dead) : when.startsWith('tag:') ? hits.some(h => h.enemy.statuses?.[when.slice(4)]) : false;
+    if (ok) for (const e of (field.near(at.x, at.z, sp.range ?? 8) || []).filter(e => !used.has(e)).slice(0, sp.shards ?? 2)) hit(at, e, sp.keep ?? 0.5);
+  }
+  if (plan.returns) {
+    // the bolt flies back to its caster: a line from where it landed to where the caster is when it arrives
+    const keep = typeof plan.returns === 'number' ? plan.returns : plan.returns.keep ?? 0.8;
+    const from = { x: at.x, z: at.z }, to = { x: ch.x, z: ch.z };      // aimed at where the caster stood
+    const ms = Math.max(0.12, Math.hypot(to.x - from.x, to.z - from.z) / 40);
+    combat.later(ms, () => rt.withCaster(ch, () => collect(field.strikeSegment(from.x, from.z, to.x, to.z, 1.4, ch, { ...opts, falloff: 1, power: (opts.power ?? plan.mult) * keep }))), ch.id);
+  }
+}
+
+/** skillrun.js `afterimage` + `echoFrom`: a shade repeats the cast from where it started, at a share. */
+function afterimage(combat, rt, ch, plan, a, origin, intent) {
+  const ai = plan.afterimage;
+  if (!ai || plan.sub) return;
+  for (let k = 0; k < (ai.count ?? 1); k++) {
+    combat.later((ai.delay ?? 0.5) * (k + 1), () => echoFrom(combat, rt, ch, plan, a, ai.at === 'end' ? { x: ch.x, z: ch.z, yaw: ch.yaw } : origin, ai.mult ?? 0.5, intent), ch.id);
+  }
+}
+export function echoFrom(combat, rt, ch, plan, a, o, share, intent = {}) {
+  const field = combat.field;
+  const mult = plan.mult * share;
+  const opts = { power: mult, element: plan.element, skill: plan.skill?.id, rules: plan.rules ? { ...plan.rules, penBehind: plan.rules.penBehind || (plan.rules.afterimagePen ? 1 : 0) } : null, applyStatus: combat.hookFor(ch), kind: 'echo' };
+  rt.withCaster(ch, () => {
+    if (plan.kind === 'melee') field.strike({ x: o.x, z: o.z, yaw: o.yaw }, ch, { reach: plan.reach, arc: plan.arc, ...opts });
+    else if (plan.kind === 'around') field.strikeArea(o.x, o.z, plan.radius || 4, ch, { falloff: 0.6, ...opts });
+    else if (plan.kind === 'ground' && plan.at) field.strikeArea(plan.at.x, plan.at.z, plan.radius || 4, ch, { falloff: 0.6, ...opts });
+    else {
+      const target = plan._struck || aimedEnemy(field, ch, intent, a, plan.range || 20);
+      if (target && target.dying == null) field.strikeArea(target.x, target.z, 1.2, ch, { falloff: 1, ...opts });
+    }
+  });
+  field.emit({ t: 'fx', kind: 'afterimage', id: ch.id, x: o.x, z: o.z });
+}
+
+/** skillrun.js `startChannel` (the ticks run in rt.tick). */
+function startChannel(rt, ch, plan, intent) {
+  const c = plan.channel;
+  ch.mech = ch.mech || { res: {} };
+  ch.mech.channel = { plan: { ...plan, channel: null, sub: true }, left: c.seconds ?? 3, every: c.every ?? 0.5, next: 0, moveK: c.moveK || 0, x: ch.x, z: ch.z, ticks: 0, grow: c.grow || 0, intent };
+}
+
+/** skillrun.js `doRewind`, on the room clock: back to where you were `seconds` ago, health too. */
+function doRewind(rt, ch, r, combat) {
+  const secs = typeof r === 'number' ? r : r.seconds ?? 4;
+  const t = combat.room.clock.now();
+  const hist = ch.history || [];
+  const then = hist.find(h => t - h.t <= secs + 0.05) || hist[0];
+  if (!then) return;
+  ch.x = then.x; ch.z = then.z;
+  if (r.health !== false) ch.hp = Math.max(ch.hp, Math.min(ch.maxHp, then.hp));
+  combat.field.emit({ t: 'move', id: ch.id, x: ch.x, z: ch.z, why: 'rewind' });
 }
 
 /** skillrun.js `raiseWall` (no mesh): a wall in skillmech's list; a taunting wall draws the swing. */

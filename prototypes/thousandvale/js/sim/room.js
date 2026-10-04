@@ -201,7 +201,7 @@ export function createRoom(opts) {
     }
     if (c && c.you) c.you({ xp: ch.xp, level: ch.level, gold: ch.gold, xpNext: rules.xpFor ? safe('xpFor', (ch.level || 1) + 1) : undefined, hpMax: e.hpMax, mpMax: e.mpMax });
     hooks.dirty && hooks.dirty(ch, urgent);
-    if (hooks.award) hooks.award(e, { gold, items: items || [], reason, from });
+    if (hooks.award) hooks.award(e, { gold, xp, level: ch.level, items: items || [], reason, from });
   };
 
   // ---- camps (monster spawners) ----

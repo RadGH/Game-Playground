@@ -213,11 +213,12 @@ test('ENCOUNTERS in the real room: a boss pulls, its arena objects are entities,
   for (let k = 0; k < 300; k++) { room.step(); if (me.dead) room.respawn(me); }
   assert.equal(room.stats.rulesErrors, 0, room.stats.lastRulesError || '');
   const types = new Set(events.map(e => e.type));
-  for (const t of ['say', 'phase', 'tele', 'teleR', 'obj']) assert.ok(types.has(t), `a ${t} event reached the room (${[...types]})`);
+  for (const t of ['say', 'phase', 'tele', 'teleR', 'boss']) assert.ok(types.has(t), `a ${t} event reached the room (${[...types]})`);
   const objs = [...room.entities.values()].filter(e => e.kind === 'object' && e.data?.rules);
   assert.ok(objs.length >= 6, `${objs.length} arena objects are room entities`);
   const brazier = objs.find(o => o.type === 'brazier');
   me.moveTo(brazier.x, brazier.z);
   assert.deepEqual(room.rules.useObject(me, brazier), { ok: true });
+  assert.equal(brazier.data.state, 'lit', 'the state is stored on the object (host.objState) for late joiners');
   assert.ok(boss.r.unit && room.rules.encounters.states.get(boss.r.unit)?.script?.id === 'barrow_warden');
 });

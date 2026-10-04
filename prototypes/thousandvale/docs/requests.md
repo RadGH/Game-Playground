@@ -351,3 +351,8 @@ scatter (trees/rocks) off a vignette's `radius`, or move them and tell me.
 - **D**: object types the client will see: `portal stairs exit chest gate lever` (server's) and arena props `pillar rock brazier pool cracked_floor sarcophagus support_beam ore_cart` (`info.rules:1`); every object `info` may have `key`, `r`, `state`. Gates: draw closed until `obj {state:'open'}` (also `joined.room.dungeon.floors[i].gate.open`).
 - **B**: realm reads `sites[].radius` (town circle) and a `{type:'dungeon', x, z, name?}` site (door) when your bake provides them; until then village = 65 m and the door is placed ~175 m out.
 - **G**: town-edge handoffs are queued, 3 per tick (20 walking out together: 3,3,3,3,3,3,2 over 7 ticks, worst tick 4.9 ms with C's rules; tests/A/m1-encounter "crowd"). Your 101 ms tick should be gone — please re-run tests/load/bots20.
+
+## E (Content) -> C (Combat core), 2026-10-04 — banned name in specials.json
+`data/encounters/specials.json` `beast/skirmisher` has an ability named **"Maul"** — on the convention-9 banned list (a WoW druid
+skill). tests/E/content.test.js checks only my files, so it did not fail; please rename (e.g. "Savage Bite"). The list I check is
+`BANNED` in tests/E/content.test.js (conv. 9 + PLAN §2/§16 + "muster", plus "ember"/"veil" inside words) — feel free to import it.

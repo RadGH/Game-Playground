@@ -1,0 +1,8 @@
+{
+  "_doc": "Stream E. Name pools for Torbor Downs (human, rustic). Used for quest givers, townsfolk and the Name Forge 'rare' callout when a zone needs a fresh name. Original; checked by tests/E/content.test.js against the banned list.",
+  "culture": "human",
+  "given": { "f": ["Maud", "Tamsin", "Bryn", "Mabry", "Edda", "Hild", "Wenna", "Orla", "Gwen", "Isolde", "Nell", "Rosamund"], "m": ["Corwin", "Aled", "Pell", "Dunnet", "Hobb", "Oswy", "Tobin", "Garrick", "Wat", "Emrys", "Cadoc", "Jory"] },
+  "family": ["Torbor", "Ashby", "Harl", "Reed", "Gallowsby", "Fenwick", "Thatcher", "Millward", "Coombe", "Barrowman", "Hollis", "Pike"],
+  "titles": ["the carter", "the bonesetter", "the reeve", "the miller", "the fisher", "the shepherd", "Goody", "Old", "Elder"],
+  "rareEpithets": ["Thornhide", "Sallowmaw", "Bristleback", "Mudwallow", "the Pale", "Oldtusk", "Reedgut", "Grey Gammer"]
+}

@@ -8,7 +8,7 @@ const $ = id => document.getElementById(id);
 const PX = 6;                                         // canvas pixels per tile
 const KIND = { entry: '#3d7a4a', arrival: '#3d6a7a', fight: '#4a4f58', key: '#8a7a2a', miniboss: '#8a4a2a', boss: '#9a2a2a', reward: '#b08a20' };
 const RANK = { normal: '#c8ccd2', elite: '#f0a040', boss: '#ff4040' };
-const PROP = { pillar: '#9aa0aa', brazier: '#ff9a30', cracked_floor: '#7a5a3a', sarcophagus: '#b0a890', support_beam: '#a07a4a', ore_cart: '#8a8a7a' };
+const PROP = { pillar: '#9aa0aa', brazier: '#ff9a30', cracked_floor: '#7a5a3a', lever: '#ffee55', pool: '#4aa0a0', rock: '#8a7a6a' };
 let encounters = {};
 
 for (const [k, f] of Object.entries(FAMILIES)) $('family').add(new Option(f.name + (f.ready ? '' : ' (planned → ' + FAMILIES[f.fallback].name + ')'), k));
@@ -19,7 +19,7 @@ if (q.get('floors')) $('floors').value = q.get('floors');
 
 $('legend').innerHTML = [...Object.entries(KIND).map(([k, c]) => `<span><i style="background:${c}"></i>${k}</span>`),
   ...Object.entries(RANK).map(([k, c]) => `<span><i style="background:${c};border-radius:50%"></i>${k} pack</span>`),
-  ...Object.entries(PROP).map(([k, c]) => `<span><i style="background:${c}"></i>${k.replace('_', ' ')}</span>`),
+  ...Object.entries(PROP).map(([k, c]) => `<span><i style="background:${c}"></i>arena ${k.replace('_', ' ')}</span>`),
   '<span><i style="background:#e33"></i>gate</span>', '<span><i style="background:#ff0"></i>lever</span>',
   '<span><i style="background:#6cf"></i>stairs</span>', '<span><i style="background:#6f6"></i>exit</span>',
   '<span><i style="background:#c6f"></i>shortcut up</span>', '<span><i style="background:#ffd700"></i>reward chest</span>'].join('');
@@ -28,7 +28,7 @@ fetch('../data/encounters/index.json').then(r => r.ok ? r.json() : null).then(as
   if (!idx) return;
   for (const file of idx.files || []) {
     const d = await (await fetch('../data/encounters/' + file)).json();
-    for (const e of d.encounters || []) encounters[e.id] = e;
+    if (d.id && d.phases) encounters[d.id] = d;
   }
   draw();
 }).catch(() => {});
@@ -36,7 +36,8 @@ fetch('../data/encounters/index.json').then(r => r.ok ? r.json() : null).then(as
 function draw() {
   const seed = (+$('seed').value) >>> 0, floors = +$('floors').value, level = +$('level').value || 3;
   const t0 = performance.now();
-  const plan = planDungeon(seed, { floors, level, family: $('family').value });
+  const arenas = Object.fromEntries(Object.values(encounters).map(e => [e.id, e.arena?.objects || []]));
+  const plan = planDungeon(seed, { floors, level, family: $('family').value, arenas });
   const ms = performance.now() - t0;
   history.replaceState(null, '', `?family=${$('family').value}&seed=${seed}&floors=${floors}`);
   const wrap = $('floors-wrap');
@@ -45,7 +46,7 @@ function draw() {
   $('status').textContent = `${plan.name} · ${ms.toFixed(1)} ms`;
   const s = plan.floors.map(f => `<li>Floor ${f.index + 1} (lv ${f.level}): ${f.rooms.length} rooms, ${f.packs.reduce((a, p) => a + p.count, 0)} monsters, ${f.props.length} props</li>`).join('');
   $('summary').innerHTML = `<b>${plan.name}</b><br>${plan.familyName}${plan.familyFallback ? ` (asked for ${plan.familyFallback})` : ''} · look <b>${plan.look}</b><ul>${s}</ul>`;
-  const encLine = id => { const e = encounters[id]; return e ? `<li><b>${e.name}</b> — ${e.phases ? e.phases.length + ' phases, ' : ''}${(e.abilities || []).length} abilities${e.enrage ? ', enrage ' + e.enrage.at + ' s' : ''}</li>` : `<li>${id} <span class="error">(not loaded)</span></li>`; };
+  const encLine = id => { const e = encounters[id]; return e ? `<li><b>${e.name}</b> — ${e.phases ? e.phases.length + ' phases, ' : ''}${Object.keys(e.abilities || {}).length} abilities${e.enrage ? ', enrage at ' + e.enrage.seconds + ' s' : ''}</li>` : `<li>${id} <span class="error">(not loaded)</span></li>`; };
   $('enc').innerHTML = `<b>Encounters</b><ul>${plan.encounters.miniboss.map(encLine).join('')}${encLine(plan.encounters.boss)}</ul>`;
 }
 
@@ -75,6 +76,7 @@ function drawFloor(plan, f) {
     g.fillStyle = PROP[p.type] || '#fff';
     if (p.r) { g.globalAlpha = 0.55; g.beginPath(); g.arc(x, y, p.r / plan.cell * PX, 0, Math.PI * 2); g.fill(); g.globalAlpha = 1; }
     else g.fillRect(x - 4, y - 4, 8, 8);
+    g.strokeStyle = '#000'; g.strokeRect(x - 4, y - 4, 8, 8);
   }
   for (const p of f.packs) {
     dot(p, RANK[p.rank], p.rank === 'boss' ? 8 : p.rank === 'elite' ? 6 : 4);
@@ -102,7 +104,7 @@ function drawFloor(plan, f) {
     const x = f.origin.x + (i + 0.5) * plan.cell, z = f.origin.z + (j + 0.5) * plan.cell;
     const k = tileIndex(f, x, z);
     const r = k >= 0 && roomOf[k] >= 0 ? f.rooms[roomOf[k]] : null;
-    const near = [...f.packs.map(p => ['pack ' + p.rank + ' ' + p.type + ' x' + p.count + (p.encounter ? ' → ' + p.encounter : ''), p]), ...f.props.map(p => ['prop ' + p.id, p])]
+    const near = [...f.packs.map(p => ['pack ' + p.rank + ' ' + p.type + ' x' + p.count + (p.encounter ? ' → ' + p.encounter : ''), p]), ...f.props.map(p => ['prop ' + p.name + ' (' + p.type + ')', p])]
       .filter(([, p]) => Math.hypot(p.x - x, p.z - z) < 4).map(([s]) => s);
     $('readout').textContent = `floor ${f.index + 1}  tile ${i},${j}\nmetres ${x.toFixed(0)}, ${z.toFixed(0)}\n${k >= 0 && f.tiles[k] ? 'floor' : 'wall'}${r ? '  room ' + r.id + ' (' + r.kind + ')' : ''}${shut && k >= 0 && f.tiles[k] && !shut[k] ? '\nbehind the gate' : ''}${near.length ? '\n' + near.join('\n') : ''}`;
   });

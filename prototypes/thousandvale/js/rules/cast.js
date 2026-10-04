@@ -385,9 +385,14 @@ export function createCombat(room) {
 
   /** Fire every pending wind-up / delayed strike that is due, then tick the skill bars. */
   combat.tick = (dt) => {
+    // due timers fire in the order they fall due (as setTimeout does), ties in the order they were set;
+    // something a timer schedules for "now" fires in this same pass
     const t = now();
-    for (let i = 0; i < pending.length;) {
-      if (pending[i].at <= t + 1e-9) { const p = pending.splice(i, 1)[0]; p.fn(); } else i++;
+    for (;;) {
+      let best = -1;
+      for (let i = 0; i < pending.length; i++) if (pending[i].at <= t + 1e-9 && (best < 0 || pending[i].at < pending[best].at - 1e-12)) best = i;
+      if (best < 0) break;
+      pending.splice(best, 1)[0].fn();
     }
     // main.js frame order: timers (above), the field (monsters), the skill bars, the skill runtime, pools
     combat.tickMonsters?.(dt);

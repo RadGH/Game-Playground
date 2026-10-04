@@ -1,14 +1,19 @@
 // Area-of-interest grid (stream A): 32 m cells over a room (PLAN §8.3). Pure.
 //   const g = createGrid(sizeMetres, origin)
 //   g.cellOf(x, z) -> index ; g.add(e) ; g.move(e) ; g.remove(e) ; g.query(x, z, r, out, filter?)
-//   g.cells[i] = Set of entities ; g.center(i) -> {x, z}
-// Entities carry e.cell (index or -1).
+//   g.at(i) = Set of entities in cell i (sparse: empty cells hold nothing) ; g.center(i) -> {x, z}
+// Entities carry e.cell (index or -1). The grid is sparse (a Map of occupied cells), so a whole 14 km
+// province at 32 m (190,000 cells) costs only the cells somebody stands in.
 
 export const CELL = 32;
 
 export function createGrid(size, origin = { x: 0, z: 0 }, cell = CELL) {
   const cols = Math.max(1, Math.ceil(size / cell));
-  const cells = Array.from({ length: cols * cols }, () => new Set());
+  const cells = new Map();
+  const EMPTY = new Set();
+  const at = i => cells.get(i) || EMPTY;
+  const put = (i, e) => { let c = cells.get(i); if (!c) { c = new Set(); cells.set(i, c); } c.add(e); };
+  const take = (i, e) => { const c = cells.get(i); if (c) { c.delete(e); if (!c.size) cells.delete(i); } };
   const ox = origin.x, oz = origin.z;
   function cellOf(x, z) {
     let cx = Math.floor((x - ox) / cell), cz = Math.floor((z - oz) / cell);
@@ -17,27 +22,29 @@ export function createGrid(size, origin = { x: 0, z: 0 }, cell = CELL) {
     return cz * cols + cx;
   }
   const g = {
-    cols, cell, cells, origin: { x: ox, z: oz },
-    cellOf,
+    cols, cell, cells, origin: { x: ox, z: oz }, count: cols * cols,
+    cellOf, at,
     cx: i => i % cols, cz: i => (i / cols) | 0,
     center(i) { return { x: ox + (i % cols + 0.5) * cell, z: oz + (((i / cols) | 0) + 0.5) * cell }; },
-    add(e) { e.cell = cellOf(e.x, e.z); cells[e.cell].add(e); return e.cell; },
+    add(e) { e.cell = cellOf(e.x, e.z); put(e.cell, e); return e.cell; },
     /** Returns true when the entity changed cell. */
     move(e) {
       const c = cellOf(e.x, e.z);
       if (c === e.cell) return false;
-      if (e.cell >= 0) cells[e.cell].delete(e);
-      e.cell = c; cells[c].add(e);
+      if (e.cell >= 0) take(e.cell, e);
+      e.cell = c; put(c, e);
       return true;
     },
-    remove(e) { if (e.cell >= 0) cells[e.cell].delete(e); e.cell = -1; },
+    remove(e) { if (e.cell >= 0) take(e.cell, e); e.cell = -1; },
     /** Entities within r of (x, z). */
     query(x, z, r, out = [], filter = null) {
       const c0x = Math.max(0, Math.floor((x - r - ox) / cell)), c1x = Math.min(cols - 1, Math.floor((x + r - ox) / cell));
       const c0z = Math.max(0, Math.floor((z - r - oz) / cell)), c1z = Math.min(cols - 1, Math.floor((z + r - oz) / cell));
       const r2 = r * r;
       for (let cz = c0z; cz <= c1z; cz++) for (let cx = c0x; cx <= c1x; cx++) {
-        for (const e of cells[cz * cols + cx]) {
+        const set = cells.get(cz * cols + cx);
+        if (!set) continue;
+        for (const e of set) {
           const dx = e.x - x, dz = e.z - z;
           if (dx * dx + dz * dz <= r2 && (!filter || filter(e))) out.push(e);
         }

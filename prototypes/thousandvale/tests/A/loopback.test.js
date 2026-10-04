@@ -36,7 +36,7 @@ test('two players join, see each other move, and fight a wolf together', async (
   W.transfer(W.online.get(b.joined.you.char), room, { x: wolf.x - 1.5, z: wolf.z }, 'test');
   await run(clock, 300);
   assert.equal(a.joined.room.kind, 'wilds');
-  assert.equal(a.joined.handoff.from, 'town');
+  assert.ok(a.joined.handoff.from.endsWith('/town:0'));
   let guard = 0;
   while (!wolf.dead && guard++ < 200) {
     a.cast({ slot: 0, target: wolf.id }); b.cast({ slot: 0, target: wolf.id });

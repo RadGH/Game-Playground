@@ -25,6 +25,7 @@ import { spawnMonster, tickMonsters } from './monster-ai.js';
 import { clearThreat } from './threat.js';
 import { makeRng } from './rng.js';
 import { attachEncounters } from './encounter.js';
+import { attachFollowers } from './followers.js';
 
 /** What an arena object is called on a nameplate. */
 const OBJECT_NAMES = { pillar: 'Stone pillar', rock: 'Fallen rock', brazier: 'Brazier', lever: 'Lever', pool: 'Pool', cracked_floor: 'Cracked floor' };
@@ -84,12 +85,26 @@ function terrainFrom(host) {
 const ONE_SHOT_ANIMS = new Set(['attack', 'hit', 'bite', 'cast']);
 
 export function createRules(host, opts = {}) {
+  const rulesOpts = opts;
   const engine = shared;
   const room = createRoomContext({ id: String(opts.roomId ?? host.roomId ?? 'room'), seed: opts.seed ?? 1, engine });
   const field = attachField(room, { terrain: terrainFrom(host), safeZones: host.safeZones || [] });
   const combat = createCombat(room);
   room.combat = combat;
   combat.tickMonsters = dt => tickMonsters(field, dt);
+  // followers (companions, summons, decoys, hirelings): units in this field AND room entities
+  // (kind npc, team 1, friendly) so every client draws them; `adopting` hands the unit to addEntity
+  let adopting = null;
+  attachFollowers(room, {
+    spawnEntity: p => {
+      adopting = p;
+      try {
+        const ent = host.spawn({ kind: 'npc', type: p.defId, name: p.name, level: p.level, x: p.x, z: p.z, yaw: p.facing || 0, team: 1, state: 128, data: { pet: true, owner: p.owner?.id ?? null, temporary: !!p.temporary } });
+        return ent?.id ?? null;
+      } finally { adopting = null; }
+    },
+    despawnEntity: p => { const ent = host.entities.get(p.id); if (ent && ent.r?.unit === p) host.despawn(ent); },
+  });
   // the encounter engine: telegraphs, boss scripts, arena objects (js/rules/encounter.js)
   const enc = attachEncounters(room, {
     data: engine.encounters,
@@ -132,8 +147,8 @@ export function createRules(host, opts = {}) {
   }
 
   function syncOut() {
-    for (const list of [field.players, field.monsters]) {
-      const monsters = list === field.monsters;
+    for (const list of [field.players, field.monsters, field.allies]) {
+      const monsters = list !== field.players;
       for (const u of list) {
         const e = entOf(u);
         if (!e || e.removed) continue;
@@ -152,7 +167,7 @@ export function createRules(host, opts = {}) {
             else if (u.anim !== 'dead') e.loop(u.anim);
             u._sentAnim = u.anim;
           }
-          if (u.dying != null && !e.dead) { e.setHp(0); e.kill(entOf({ id: lastHitBy(u) })); host.despawn(e, 8000); continue; }
+          if (u.dying != null && !e.dead) { e.setHp(0); e.kill(u.owner ? null : entOf({ id: lastHitBy(u) })); if (!u.owner) host.despawn(e, 8000); continue; }
         } else if (u.x !== e.x || u.z !== e.z) {
           e.moveTo(u.x, u.z);                         // a dash or a knock moved a player
         }
@@ -232,11 +247,19 @@ export function createRules(host, opts = {}) {
   }
 
   function addEntity(e) {
+    if (e.kind === 'npc' && adopting) {
+      // a follower this module is putting down (spawnEntity above)
+      e.r.unit = adopting;
+      e.setMax(adopting.maxHp, 0);
+      e.setHp(adopting.hp);
+      return;
+    }
     if (e.kind === 'object' || e.kind === 'npc') return;
     run(() => {
       if (e.kind === 'player') {
         const ch = e.char || {};
         let unit = e.r.unit;
+        const handed = !!(unit && unit.skills);
         if (unit && unit.skills) {
           // A HANDOFF (protocol.md §7 M1 notes): the entity arrives with the old room's `r`. Keep the
           // sheet — statuses, cooldowns, mana, barrier — and move it into this room's field.
@@ -261,6 +284,12 @@ export function createRules(host, opts = {}) {
         unit.roomRng = room.streams.get('bars');
         unit.partyId = e.data?.partyId ?? ch.partyId ?? null;
         field.add(unit, 'player');
+        if (handed) room.followers.receive(unit);          // its followers came with it
+        else if (rulesOpts.companions !== false) {
+          // the class companion (classes.json `pet`), as Farhold's begin() hands it out
+          const classDef = engine.classById(unit.classId);
+          if (classDef?.pet) room.followers.summonForClass(unit, { ...classDef.pet });
+        }
         e.r.unit = unit;
         e.setMax(unit.maxHp, unit.maxMp ?? 0);
         e.setHp(unit.hp); e.setMp(unit.mp ?? unit.maxMp);
@@ -292,7 +321,8 @@ export function createRules(host, opts = {}) {
       for (const p of room.combat.pending) if (p.who === e.id) p.fn = () => {};
       if (!u) return;
       combat.skillRt?.forget(u);
-      if (e.kind === 'player') field.detach(u);       // the sheet may live on in the next room
+      if (e.kind === 'player') { room.followers.release(u); field.detach(u); }   // sheet and followers live on in the next room
+      else if (e.kind === 'npc') field.detach(u);
       else field.remove(u);
     });
   }
@@ -332,7 +362,6 @@ export function createRules(host, opts = {}) {
       if (second) regenClock -= 1;
       for (const p of field.players) {
         if (p.dead) continue;
-        if (p.castBarrierFor > 0) { p.castBarrierFor -= dt; if (p.castBarrierFor <= 0) { p.castBarrierFor = 0; p.barrier = 0; } }
         if (!second) continue;
         const fighting = field.monsters.some(m => m.dying == null && m.targetId === p.id);
         const mending = fighting ? 0 : p.maxHp * (engine.balance.player?.outOfCombatRegen ?? 0.015);

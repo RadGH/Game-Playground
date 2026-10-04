@@ -15,7 +15,7 @@ test('grid query matches brute force; moves keep cells right', () => {
     const want = es.filter(e => (e.x - x) ** 2 + (e.z - z) ** 2 <= rad * rad).map(e => e.id).sort((a, b) => a - b);
     assert.deepEqual(got, want);
   }
-  let n = 0; for (const c of g.cells) n += c.size;
+  let n = 0; for (const c of g.cells.values()) n += c.size;
   assert.equal(n, 800);
   g.remove(es[0]); assert.equal(es[0].cell, -1);
 });

@@ -20,6 +20,7 @@
 import {
   applyStatus, controlFor, mechWorld, placeObject, tickPlaced, tickWalls, addWall, addCorpse, takeCorpses,
   pushFor, queueMech, statusRef, gainResource, formOf, repeatsOf, statusStatsKey,
+  resolveAttack, uniquesAfterKill, uniquesAfterDamaged, tickAuras, tickStatuses,
 } from './farhold.js';
 import { taunt as threatTaunt, threatFromHeal } from './threat.js';
 
@@ -451,6 +452,94 @@ function runtimeOf(combat) {
     for (let k = 0; k < (st.add ?? 1); k++) combat.landStatus(ch, st.status, { ...spec, stackMax: st.max ?? 5 }, e, Math.max(1, (ch.derived?.damage?.[1] || 8) * 0.35));
   }
 
+  // ---- unique-weapon powers (js/uniques.js is pure and takes an env; main.js's `uniqueEnv`, per caster)
+  const uniqueEnvs = new WeakMap();
+  rt.uniqueEnvFor = ch => {
+    let env = uniqueEnvs.get(ch);
+    if (env) return env;
+    const hook = combat.hookFor(ch);
+    env = {
+      get player() { return ch; },
+      at: () => ({ x: ch.x, z: ch.z }),
+      rng: () => room.rng(),
+      near: (x, z, r, except) => field.near(x, z, r, except),
+      strikeOne(e, { power = 1, element = 'physical' } = {}) {
+        if (!e || e.dying != null || e.removed) return null;
+        return rt.withCaster(ch, () => {
+          const result = rpg.strike(ch, e, room.rng, { multiplier: power, element, proc: true, applyStatus: hook });
+          field.land(e, result, { fromX: ch.x, fromZ: ch.z, element, share: power, by: ch });
+          field.report(ch, e, result, 'unique');
+          if (result.dead) field.kill(e);
+          return result;
+        });
+      },
+      strikeArea: (x, z, r, { power = 1, element = 'physical', falloff = 0.5 } = {}) =>
+        rt.withCaster(ch, () => field.strikeArea(x, z, r, ch, { power, element, falloff, proc: true, applyStatus: hook, kind: 'unique' })),
+      push,
+      dropPool: spec => rt.dropPool(ch, spec),
+      later: (ms, fn) => combat.later(ms / 1000, () => { if (!ch.removed) fn(); }, ch.id),
+      applyStatus: (t, type, spec, power = 1) => { if (t && spec) combat.landStatus(ch, type, spec, t, power); },
+      applySelf: (type, spec) => applyStatus(ch, type, spec, 1),
+      statusSpec: type => statuses[type] || null,
+      kill: e => field.kill(e),
+      burstFx: (x, z, r, element) => field.emit({ t: 'fx', kind: 'burst', id: ch.id, x, z, r, element }),
+      arc: (from, to, element) => { if (from && to) field.emit({ t: 'fx', kind: 'arc', id: ch.id, from: { x: from.x, z: from.z }, to: to.id ?? null, element }); },
+    };
+    uniqueEnvs.set(ch, env);
+    return env;
+  };
+  rt.resolveAttack = (ch, mods, hits, where) => { if (mods) resolveAttack(rt.uniqueEnvFor(ch), mods, hits, where); };
+  rt.afterKill = (ch, post, e) => uniquesAfterKill(rt.uniqueEnvFor(ch), post, e);
+  rt.afterDamaged = (ch, result, attacker) => uniquesAfterDamaged(rt.uniqueEnvFor(ch), result, attacker);
+
+  /** main.js startOrbs: Storm Orbs as `always` auras on the player, counted down in rt.tick */
+  rt.startOrbs = (ch, plan) => {
+    const o = plan.orbs;
+    const clock = rpg.fx.rt(ch).auraClock || (rpg.fx.rt(ch).auraClock = {});
+    ch.skillAuras = [];
+    for (let k = 0; k < o.count; k++) {
+      const id = `storm_orb_${k}`;
+      clock[id] = -k * (o.every / o.count);
+      ch.skillAuras.push({ id, left: o.seconds, every: o.every, radius: o.radius, power: plan.mult, element: plan.element, nearestOnly: true, status: o.status || null, always: true });
+    }
+    field.emit({ t: 'fx', kind: 'orbs', id: ch.id, count: o.count, seconds: o.seconds, element: plan.element });
+  };
+
+  /**
+   * main.js's per-frame player block (line ~9737): a fight starting (combatStart), the aura powers
+   * and Storm Orbs (tickAuras), Ember Stride's trail, the player's own statuses, the cast barrier.
+   */
+  rt.tickPlayers = dt => {
+    for (const p of field.players) {
+      if (p.dead || p.removed) continue;
+      const wasFighting = !!p.fighting;
+      p.fighting = field.monsters.some(m => m.dying == null && m.state === 'chase' && Math.hypot(m.x - p.x, m.z - p.z) < 60);
+      if (p.fighting && !wasFighting) {
+        const start = rpg.fx.combatStart({ self: p });
+        if (start.strip) {
+          const big = field.monsters.find(e => e.dying == null && e.rank !== 'normal' && Math.hypot(e.x - p.x, e.z - p.z) < 60);
+          if (big?.modifiers?.length) big.modifiers.pop();
+        }
+      }
+      rt.withCaster(p, () => {
+        tickAuras(rt.uniqueEnvFor(p), rpg, p, dt, { fighting: p.fighting });
+        if (p.skillAuras?.length) { for (const a of p.skillAuras) a.left -= dt; if (p.skillAuras.every(a => a.left <= 0)) p.skillAuras = []; }
+        const tr = p.trail;
+        if (tr) {
+          tr.left -= dt;
+          if (tr.left <= 0 || p.hp <= 0) p.trail = null;
+          else if (Math.hypot(p.x - tr.lastX, p.z - tr.lastZ) >= tr.step) {
+            tr.lastX = p.x; tr.lastZ = p.z;
+            rt.dropPool(p, { x: p.x, z: p.z, r: tr.radius, seconds: tr.burns, element: tr.element, power: tr.power });
+          }
+        }
+      });
+      const selfTick = tickStatuses(p, dt, { resist: rpg.fx.product(p, 'statusIn') });
+      if (selfTick > 0 && p.hp <= 0 && !p.dead) { p.dead = true; field.emit({ t: 'death', id: p.id, by: null }); }
+      if (p.castBarrierFor > 0) { p.castBarrierFor -= dt; if (p.castBarrierFor <= 0) { p.castBarrierFor = 0; p.barrier = 0; } }
+    }
+  };
+
   /** A unit left this room (handed to another, or gone): nothing here acts for it any more. */
   rt.forget = (u) => {
     rt.links.delete(u.id);
@@ -538,6 +627,7 @@ function runtimeOf(combat) {
         }
       });
     }
+    rt.tickPlayers(dt);                // main.js: auras, orbs, trail, the player's statuses, the cast barrier
     tickPools(dt);                     // main.js ticks the pools last in the frame
   };
   return rt;
@@ -723,6 +813,7 @@ export function castPlan(combat, ch, plan, { echo = false, intent = {}, slot = n
         if (plan.pets || plan.status === 'regen') for (const u of rt.allies(ch)) if (u.owner === ch) applyStatus(u, plan.status, plan.statusSpec, 1);
       }
       if (plan.trail) ch.trail = { left: plan.trail.seconds, step: plan.trail.step || 1.4, radius: plan.trail.radius, burns: plan.trail.burns, power: plan.mult, element: plan.element, lastX: ch.x, lastZ: ch.z };
+      if (plan.orbs) rt.startOrbs(ch, plan);
     } else if (plan.kind === 'melee') {
       const cone = () => {
         if (ch.dead) return;
@@ -826,6 +917,7 @@ function fireBolt(combat, rt, ch, plan, a, dx, dz, strikeOpts, collect, intent, 
     const splash = plan.splash * (combat.room.engine.rpg.fx.sum(ch, 'boltSplash') || 1);
     rt.withCaster(ch, () => {
       const hits = collect(field.strikeArea(at.x, at.z, splash, ch, { falloff: 0.5, ...strikeOpts }));
+      if (plan.mods && !hop) rt.resolveAttack(ch, plan.mods, hits, { x: ch.x, z: ch.z, at: { x: at.x, z: at.z }, element: plan.element });
       if (!hop && plan.skill) afterBolt(combat, rt, ch, plan, at, hits, strikeOpts, collect);
       const left = (plan.chains || 0) - hop;
       if (left > 0) {
@@ -953,7 +1045,21 @@ function dash(combat, rt, ch, plan, a, intent, opts, collect) {
   }
   let to = null, face = null, struck = null;
   const toward = (x, z, keep) => { const dx = x - from.x, dz = z - from.z, len = Math.hypot(dx, dz) || 1; return { x: x - dx / len * keep, z: z - dz / len * keep }; };
-  const allyAlong = () => { const t = allyTargetOf(rt, ch, intent, range); return t === ch ? null : t; };
+  // a named party member first; else skillrun.js `aimedFollower`: your own follower best lined up with the aim
+  const allyAlong = () => {
+    const t = allyTargetOf(rt, ch, intent, range);
+    if (t !== ch) return t;
+    let best = null, bd = Infinity;
+    for (const p of rt.petsOf(ch)) {
+      if (p.dying != null || p.decoy) continue;
+      const ex = p.x - ch.x, ez = p.z - ch.z;
+      const along = ex * a.dx + ez * a.dz;
+      if (along < -2 || Math.hypot(ex, ez) > range) continue;
+      const score = Math.abs(ex * a.dz - ez * a.dx) + Math.max(0, -along);
+      if (score < bd) { bd = score; best = p; }
+    }
+    return best;
+  };
   switch (d.to || 'aim') {
     case 'target': { const e = aimedEnemy(field, ch, intent, a, range); if (e) { to = toward(e.x, e.z, 1.3); struck = e; face = e; } break; }
     case 'behind': {
@@ -1372,6 +1478,8 @@ export function installSkillRuntime(combat) {
         }
       });
     }
+    // main.js onEnemyStrike: a frost nova off the hit, a barrier that bursts, thorns that kill (js/uniques.js)
+    if (owner) rt.withCaster(owner, () => rt.afterDamaged(owner, result, attacker));
     // a temporary summon that dies bursts; a struck decoy answers its attacker (skillrun.js onHurt)
     if (victim?.temporary && result.dead && victim.burstOnExpire && !victim.burst) { victim.burst = true; rt.petHooks.onExpire(victim); }
     if (victim?.decoy && victim.fromPlan?.summon?.decoy?.onStruck && attacker && victim.owner) {

@@ -31,7 +31,7 @@ test('new characters start in the town; walking out hands off to the wilds and b
   const out = { x: W.town.x + W.town.r + 15, z: W.town.z };
   await walk(clock, a, out, srv);
   assert.equal(roomOf(srv, a).kind, 'wilds');
-  assert.equal(joins.at(-1).handoff.from, 'town');
+  assert.ok(joins.at(-1).handoff.from.endsWith('/town:0'));
   assert.equal(joins.at(-1).handoff.via, 'gate');
   assert.equal(joins.at(-1).room.terrain, a.joined.room.terrain, 'same terrain: the client keeps its ground mesh');
   const hp = ent(srv, a).hp;

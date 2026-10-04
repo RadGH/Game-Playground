@@ -86,6 +86,20 @@ export function createCombat(room) {
       if (post.gold) p.gold += foundGold(p, post.gold);
       if (post.cooldownCut) p.skills.refresh(post.cooldownCut);
       if (post.rally) applyStatus(p, 'rally', statuses.rally, 1);
+      if (post.petHeal) room.followers?.heal(p, post.petHeal);
+      const rtk = runtimeFor(combat);
+      rtk.withCaster(p, () => {
+        if (post.breath) {
+          for (const other of field.near(e.x, e.z, post.breath.radius, e)) {
+            field.strikeArea(other.x, other.z, 1.5, p, { element: post.breath.element, power: 0.6, kind: 'unique' });
+            applyStatus(other, post.breath.status, statuses[post.breath.status], 6);
+          }
+        }
+        if (post.spreadStatuses && e.statuses) {
+          for (const other of field.near(e.x, e.z, post.spreadStatuses, e)) for (const [type, st] of Object.entries(e.statuses)) applyStatus(other, type, statuses[type], st.power);
+        }
+        rtk.afterKill(p, post, e);
+      });
       const award = rpg.killXpFor(p, e, xpCfg);
       const coin = foundGold(p, e.gold);
       const drops = rpg.rollDrops(e, { rng: lootRng, magicFind: p.derived.magicFind }) || [];
@@ -227,6 +241,7 @@ export function createCombat(room) {
         if (ch.removed) return;
         const hits = field.strikeArea(at.x, at.z, balance.player?.arrowSplash ?? 2.6, ch, { element, applyStatus: hookFor(ch), power, kind: 'arrow' });   // main.js onArrowLand: the draw's power and nothing else
         for (const { enemy, result } of hits) brand(enemy, result);
+        runtimeFor(combat).resolveAttack(ch, mods, hits, { x: ch.x, z: ch.z, at: { x: at.x, z: at.z }, element });
       }, ch.id);
     }
   }
@@ -263,7 +278,10 @@ export function createCombat(room) {
     const opts = { element, onHit: brandFor(ch, leaves), applyStatus: hookFor(ch), power: (how.mult || 1) * share * shape.damage, kind: 'bolt' };
     // main.js passes `{ ...meleeOpts, power: how.mult * share }`, so the strike shape's own share is NOT in a wand bolt
     opts.power = (how.mult || 1) * share;
+    plan.mods = mods;
     throwBolt(combat, ch, plan, a, a.dx, a.dz, opts);
+    // Twin Bolt: a second bolt a beat behind the first, at a share of its damage
+    if (mods.twin) combat.later(mods.twin.ms / 1000, () => throwBolt(combat, ch, { ...plan, mods: null }, aimOfCh(ch), Math.sin(ch.yaw), Math.cos(ch.yaw), { ...opts, power: (how.mult || 1) * share * mods.twin.power }), ch.id);
   }
 
   /**
@@ -305,7 +323,9 @@ export function createCombat(room) {
       return;
     }
     if (charged?.shape === 'dome') {
-      for (const { enemy, result } of field.strikeArea(ch.x, ch.z, radius, ch, { falloff: 0.2, element, power: share * (spell.mult || 1) * (shape.charge?.power || 1), kind: 'staff' })) {
+      const domeHits = field.strikeArea(ch.x, ch.z, radius, ch, { falloff: 0.2, element, power: share * (spell.mult || 1) * (shape.charge?.power || 1), kind: 'staff' });
+      rt.resolveAttack(ch, mods, domeHits, { x: ch.x, z: ch.z, at: null, element });
+      for (const { enemy, result } of domeHits) {
         brand(enemy, result); statusOn(enemy, 0.6);
         rt.push(enemy, ch.x, ch.z, charged.push || 2.4);
       }
@@ -317,11 +337,15 @@ export function createCombat(room) {
       return;
     }
     if (spell.shape === 'nova') {
-      for (const { enemy, result } of field.strikeArea(ch.x, ch.z, radius, ch, { falloff: 0.35, element, power: share * (spell.mult || 1) * (shape.charge?.power || 1), kind: 'staff' })) { brand(enemy, result); statusOn(enemy, 0.6); }
+      const novaHits = field.strikeArea(ch.x, ch.z, radius, ch, { falloff: 0.35, element, power: share * (spell.mult || 1) * (shape.charge?.power || 1), kind: 'staff' });
+      for (const { enemy, result } of novaHits) { brand(enemy, result); statusOn(enemy, 0.6); }
+      rt.resolveAttack(ch, mods, novaHits, { x: ch.x, z: ch.z, at: null, element });
     } else if (spell.shape === 'cone' || spell.shape === 'wave') {
       const range = (spell.range || 9) * shape.scale;
       const wide = spell.shape === 'cone' ? (spell.arc || 0.9) * shape.scale : 0.45;
-      for (const { enemy } of field.strike(ch, ch, { reach: range, arc: wide, ...coneOpts })) statusOn(enemy, 0.6);
+      const coneHits = field.strike(ch, ch, { reach: range, arc: wide, ...coneOpts });
+      for (const { enemy } of coneHits) statusOn(enemy, 0.6);
+      rt.resolveAttack(ch, mods, coneHits, { x: ch.x, z: ch.z, at: null, element });
     } else {
       const plan = talentPlan(ch, 'staff:' + spell.key, {
         element, range: (spell.range || 12) * shape.scale, splash: radius, projectiles: 1, spread: 0,
@@ -334,6 +358,7 @@ export function createCombat(room) {
         plan.kind = 'ground'; plan.radius = radius * 1.4; plan.groundRadius = radius * 1.4; plan.ground = Math.max(plan.ground || 0, 3);
       }
       if (charged?.shape === 'storm') plan.chains = charged.chains || 5;
+      plan.mods = mods;
       throwBolt(combat, ch, plan, a, a.dx, a.dz, { ...opts, power: (spell.mult || 1) * (shape.charge?.power || 1) * (mods.power || 1) });
     }
   }
@@ -359,6 +384,7 @@ export function createCombat(room) {
     };
     const opts = { element, onHit: brandHit, applyStatus: hookFor(ch), power: share * shape.damage, strike: shape, kind: 'swing' };
     const hits = field.strike(ch, ch, { reach, arc, ...opts });
+    runtimeFor(combat).resolveAttack(ch, mods, hits, { x: ch.x, z: ch.z, at: null, element });   // unique powers
     if (ch.perkFlags?.sunder && shape.last) for (const h of hits) h.enemy.armor = Math.max(0, (h.enemy.armor || 0) - 8);
     const swung = { self: ch, mana: 0 };
     rpg.fx.onSwing(swung);

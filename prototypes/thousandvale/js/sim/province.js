@@ -115,6 +115,7 @@ export function createProvince(opts) {
       town: { x: L.towns[0].x, z: L.towns[0].z, r: L.towns[0].r, name: L.towns[0].name },
       waystones: L.waystones.map(w => ({ key: w.key, name: w.name, x: w.x, z: w.z })),
       horizon: { world: 'data/world/world.json', macro: 'data/world/macro.bin', province: L.key },
+      zones: L.zones.map(z => ({ key: z.key, bounds: z.bounds || null })),
       clock: realmClock,
     };
   }
@@ -233,7 +234,7 @@ export function createProvince(opts) {
   }
   function hello(s, m) {
     if (m.v !== PROTOCOL_VERSION) { s.sendJSON({ t: 'refuse', code: 'version', msg: CODES.version }); return s.closeSoon('version'); }
-    if (m.build !== opts.build && opts.build !== undefined) { s.sendJSON({ t: 'refuse', code: 'build', msg: CODES.build }); return s.closeSoon('build'); }
+    if (m.build !== (opts.build || 'dev')) { s.sendJSON({ t: 'refuse', code: 'build', msg: CODES.build }); return s.closeSoon('build'); }
     s.state = 'await';
     s.sendJSON({ t: 'welcome', v: PROTOCOL_VERSION, build: opts.build || 'dev', server: 'thousandvale', tickMs: TICK_MS, time: ticks * TICK_MS, clock: { ...realmClock, now: wallNow() } });
   }

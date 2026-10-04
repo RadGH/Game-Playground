@@ -39,7 +39,7 @@ export {
 } from '../../../farhold/js/weapons.js';
 
 export { feel, tuneFeel, staggerFor, pushFor, COMBAT_FEEL, PUSH_RESIST } from '../../../farhold/js/combat-feel.js';
-export { installUniques } from '../../../farhold/js/uniques.js';
+export { installUniques, resolveAttack, afterKill as uniquesAfterKill, afterDamaged as uniquesAfterDamaged, tickAuras } from '../../../farhold/js/uniques.js';
 export { EFFECTS } from '../../../farhold/js/effects.js';
 export { installFoci } from '../../../farhold/js/foci.js';
 export { talentPlan, pickTalent, tiersOpen, treeFor } from '../../../farhold/js/skilltalents.js';

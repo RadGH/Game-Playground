@@ -4,8 +4,8 @@
 // Hovering any item shows its card. DOM only.
 
 const $ = id => document.getElementById(id);
-const SLOTS = ['head', 'chest', 'legs', 'feet', 'hands', 'mainhand', 'offhand', 'neck', 'ring', 'ring2'];
-const SLOT_NAME = { head: 'Head', chest: 'Chest', legs: 'Legs', feet: 'Feet', hands: 'Hands', mainhand: 'Weapon', offhand: 'Off hand', neck: 'Neck', ring: 'Ring', ring2: 'Ring', weapon: 'Weapon', shield: 'Off hand' };
+const SLOTS = ['weapon', 'offhand', 'head', 'chest', 'legs', 'hands', 'feet', 'necklace', 'ring', 'ring2'];   // Farhold's rpg.js SLOTS (mount/light/tool shown when worn)
+const SLOT_NAME = { head: 'Head', chest: 'Chest', legs: 'Legs', feet: 'Feet', hands: 'Hands', mainhand: 'Weapon', offhand: 'Off hand', neck: 'Neck', necklace: 'Neck', ring: 'Ring', ring2: 'Ring', weapon: 'Weapon', shield: 'Off hand', mount: 'Mount', light: 'Light', tool: 'Tool' };
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const title = s => String(s || '').replace(/_/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2').replace(/\b\w/g, c => c.toUpperCase());
 
@@ -54,7 +54,7 @@ export function createBag({ net: getNet, hud }) {
     if (el.root.hidden) return;
     el.doll.innerHTML = '';
     const worn = S.equipment || {};
-    const slots = [...new Set([...SLOTS, ...Object.keys(worn)])].slice(0, 10);
+    const slots = [...new Set([...SLOTS, ...Object.keys(worn).filter(k => worn[k])])];
     for (const sl of slots) {
       const it = worn[sl] || null;
       const d = slotEl(it, SLOT_NAME[sl] || title(sl));

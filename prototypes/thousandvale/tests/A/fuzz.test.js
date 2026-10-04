@@ -77,7 +77,7 @@ test('order rules: game messages before enter, gateway messages before hello, ar
   s.send(JSON.stringify({ t: 'hello', v: PROTOCOL_VERSION, build: 'dev' }));
   s.send(JSON.stringify({ t: 'say', text: 'hi' }));
   s.send(JSON.stringify({ t: 'enter', ticket: 'forged' }));
-  await run(clock, 100);
+  await run(clock, 3500);                     // an unknown ticket is waited for (the gateway's bus message), then refused
   assert.equal(got[0].t, 'welcome');
   assert.ok(got.some(m => m.t === 'err' && m.code === 'ticket'), 'forged ticket refused');
   assert.equal(srv.world.status().bad, 2);

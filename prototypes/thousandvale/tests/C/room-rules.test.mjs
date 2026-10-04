@@ -264,3 +264,30 @@ test('no banned names in stream C\'s encounter data (E\'s list)', async () => {
     assert.ok(!/ember|veil/i.test(text), `${f}: ember/veil`);
   }
 });
+
+test('FOLLOWERS in the real room: a ranger arrives with its cat, the cat is a friendly entity that fights, and it follows its owner through a handoff', () => {
+  const terrain = standInTerrain(2, 2048);
+  const A = createRoom({ id: 'c-pets', terrain, seed: 5, camps: [], createRules, hooks: { log: () => {} } });
+  const sx = terrain.spawn.x, sz = terrain.spawn.z;
+  const char = { id: 92, name: 'Ranger', cls: 'ranger', level: 12, room: 'c-pets', x: sx, z: sz };
+  const me = A.addPlayer(char, null);
+  const pets = A.rules.room.followers.of(me.r.unit);
+  assert.equal(pets.length, 1);
+  const catEnt = A.entities.get(pets[0].id);
+  assert.ok(catEnt && catEnt.kind === 'npc' && catEnt.team === 1 && catEnt.data.pet, 'the hunting cat is a friendly room entity');
+  const wolf = A.spawn({ kind: 'monster', type: 'wolf', level: 3, x: sx + 3, z: sz + 3 });
+  for (let k = 0; k < 200 && !wolf.dead; k++) A.step();
+  assert.ok(wolf.dead || wolf.hp < wolf.hpMax, 'the cat (and the ranger\'s neighbourhood) fought');
+  assert.ok(Math.hypot(catEnt.x - pets[0].x, catEnt.z - pets[0].z) < 0.01, 'the entity follows the unit');
+  // handoff
+  const B = createRoom({ id: 'c-pets-2', terrain, seed: 6, camps: [], createRules, hooks: { log: () => {} } });
+  const carry = me.r;
+  A.remove(me);
+  assert.ok(!A.entities.has(catEnt.id) || A.stats, 'the cat left with its owner');
+  const me2 = B.addPlayer({ ...char, room: 'c-pets-2' }, null, { carry });
+  const pets2 = B.rules.room.followers.of(me2.r.unit);
+  assert.equal(pets2.length, 1);
+  assert.equal(pets2[0], pets[0], 'the same cat, same sheet');
+  assert.ok(B.entities.get(pets2[0].id)?.kind === 'npc');
+  assert.equal(A.stats.rulesErrors + B.stats.rulesErrors, 0, (A.stats.lastRulesError || '') + (B.stats.lastRulesError || ''));
+});

@@ -114,6 +114,8 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `respawn` | p | — | 1 / 2 | Get up after dying: in the wilds or town you wake in the town (a `joined` handoff, `via:'respawn'`); in a dungeon, at its entrance. |
 | `use` | p | `id:id` | 4 / 8 | Use an object within 4 m: a portal/door (dungeon entrance), stairs, an exit, a chest. Answer `used {id, ok, why?, kind?}`; a move arrives as a `joined` handoff. |
 | `item` | p | `op:str:8, uid:str:40, slot?:str:16` | 5 / 10 | `equip {uid, slot?}` (slot defaults to the item's own), `unequip {uid, slot?}`, `destroy {uid}`. The uid must be in YOUR bag (or worn, for unequip). Answers `bag` + `equip`, or `err {code:'item'|'bagFull'}`. |
+| `travel` | p | `to:str:48` | 1 / 3 | Travel: a waystone `key` you have discovered (stand at any waystone; a gold fare by distance; not in combat or a dungeon), or `'event'` = free travel to the live realm event (§16). Answer `travelR`; the move is a `joined` handoff (or a `relocate` to another process). |
+| `trace` | p | `kind:str:16` | 1 / 2 | Leave a trace: `campfire` (10 min, one per player, wilds only). Graves appear by themselves where a player dies (1 h). |
 | `trade` | p | `op:str:8, id?:int, items?:uids, gold?:int` | 5 / 10 | The trade window (§13): `ask {id: entity}` (within 10 m) → they get `tradeAsk`; `accept {id: trade}`; `offer {id, items:[≤12 uids], gold}` (unlocks both); `lock {id}`; `confirm {id}` (both locked); `cancel`. Both confirmed → one all-or-nothing store write; `tradeState` throughout, `trade:null` + `done` at the end. |
 | `leave` | both | — | 1 / 2 | Log out cleanly (save now). |
 
@@ -142,6 +144,12 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `partyInvite` | `from, name, party` | (gateway) Someone invited me; answer `party {op:'accept'\|'decline', char: party}`. |
 | `partyFrames` | `m:[[char, hp, hpMax, room, x, z, dead, online, id]…]` | (gateway) Party frames, 2 Hz, every member (`id` = local entity id in `room`). |
 | `ignored` | `list:[{id, name}]` | (gateway) My ignore list. |
+| `relocate` | `path, ticket` | (game socket) You are moving to a province another process holds: open `path`, send `enter {ticket}`; the old socket closes. client.js does it (`joined` follows with `handoff.via:'relocate'`). |
+| `groupHint` | `key, with:[{char, name}]` | (gateway) You and others are fighting the same monster: "Group up?" — `party {op:'group', code: key}` (the first click makes the party, the rest join it). |
+| `realm` | `kind:'eventSoon'\|'eventStart'\|'eventEnd', ev:{id, uid, name, province, x, z, r, level, kind}, at?, won?` | (gateway, everyone) The realm event: announced ahead (`at` = wall ms it starts), started (free travel: `travel {to:'event'}`), ended. |
+| `eventFrame` | `uid, name, boss, hp, players` | (game socket, 1 Hz) You are in the realm event's arena: the temporary event group's frame (no invite needed). |
+| `zone` | `zone, name, band, deeds:{rares, bosses, elites, deaths, visitors}, heat:[[x, z, n]…]` | You walked into a zone: what happened here this hour, and where people walk (footprints). |
+| `travelR` | `ok, why?, msg?, cost?, to?` | Answer to `travel` (`why`: `undiscovered`, `far`, `gold`, `combat`, `instance`, `noEvent`, `dead`, `unknown`). |
 | `tradeAsk` | `trade, from, name` | Someone (entity `from`) wants to trade: answer `trade {op:'accept', id: trade}` or `cancel`. |
 | `tradeState` | `trade:{id, state, you:{char, name, id, items, gold, locked, confirmed}, them:{…}}\|null, done?, why?` | The trade window; `trade:null` = closed (`done:true` = it went through, else `why`: `cancelled`, `tradeFar`, `tradeFailed`, `bagFull`, `gone`). |
 | `err` | `code, msg` | Request failed (`auth`, `name`, `cls`, `full`, `ticket`, `state`, `party`, `partyFull`, `noCode`, `notFound`, `muted`, `item`, `bagFull`). `msg` is plain language. |

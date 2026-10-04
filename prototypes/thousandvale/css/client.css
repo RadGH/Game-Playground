@@ -197,7 +197,7 @@ button.icon { font-size: 20px; line-height: 1; }
 .plate.self .plate-name, .plate.self .plate-bar { display: none; }
 
 /* ---------------------------------------------------------------- party frames + tools */
-.party { position: absolute; top: 84px; left: 14px; display: flex; flex-direction: column; gap: 5px; pointer-events: auto; }
+.partyframes { position: absolute; top: 84px; left: 14px; display: flex; flex-direction: column; gap: 5px; pointer-events: auto; }
 .pmember { display: flex; align-items: center; gap: 7px; width: 214px; padding: 5px 8px; background: var(--panel); border: 1px solid var(--edge); border-radius: 8px; cursor: pointer; }
 .pmember:hover { border-color: var(--gold); }
 .pmember .pm-icon { width: 26px; height: 26px; flex: none; border-radius: 50%; display: grid; place-items: center; font-family: var(--serif); font-size: 13px; color: var(--gold-hi); background: radial-gradient(circle at 35% 30%, #5d4a33, #1f1812 70%); border: 1px solid var(--edge-strong); }
@@ -312,7 +312,7 @@ button.icon { font-size: 20px; line-height: 1; }
 .itemcard .line { color: #9fd0ff; } .itemcard .value { color: #ffd56a; margin-top: 4px; }
 .itemcard .r-magic { color: #8fb4ff; } .itemcard .r-rare { color: #ffe17a; } .itemcard .r-legendary, .itemcard .r-unique { color: #ffb36a; } .itemcard .r-set { color: #8ff0a0; } .itemcard .r-common { color: #eee; }
 @media (max-width: 760px) {
-  .party { top: 140px; transform: scale(0.85); transform-origin: top left; }
+  .partyframes { top: 140px; transform: scale(0.85); transform-origin: top left; }
   .party-tools { right: 14px; top: 52px; }
   .party-menu { right: 14px; left: 14px; width: auto; top: 90px; }
   .boss { width: calc(100vw - 28px); top: 150px; }

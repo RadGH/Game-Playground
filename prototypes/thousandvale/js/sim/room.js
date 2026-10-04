@@ -31,13 +31,15 @@ export function createRoom(opts) {
   const bounds = terrain.bounds;
   const size = Math.max(bounds.maxX - bounds.minX, bounds.maxZ - bounds.minZ);
   const q = Math.max(VIEW.q, size / 65535);
-  const grid = createGrid(size, { x: bounds.minX, z: bounds.minZ });
+  // a town room only ever holds its own circle: its grid covers that, not the whole province
+  const ga = opts.gridArea;
+  const grid = ga ? createGrid(2 * ga.r, { x: ga.x - ga.r, z: ga.z - ga.r }) : createGrid(size, { x: bounds.minX, z: bounds.minZ });
   const entities = new Map();
   const clients = new Map();       // entity id -> client
   const streams = new Map();
   const despawns = [];             // { at, e }
   let tick = 0, nextId = 1, events = [], uidN = 0;
-  const awake = new Uint32Array(grid.cells.length);   // == awakeGen when awake this tick
+  const awake = new Uint32Array(grid.count);   // == awakeGen when awake this tick
   let awakeGen = 0;
   const stats = { rulesErrors: 0, lastRulesError: '', spawned: 0 };
   const writer = new ByteWriter(4096), snapWriter = new ByteWriter(2048);
@@ -60,17 +62,19 @@ export function createRoom(opts) {
     /** Emit an event to clients (§6); the rules' `loot` events are turned into grants (hooks.loot). */
     event(ev) {
       if (ev.type === 'loot' && ev.items && hooks.loot) { hooks.loot(ev, room); return; }
+      if (hooks.observe) { if (ev.x === undefined) fillXZ(ev); hooks.observe(ev, room); }
       room.emit(ev);
     },
     /** Emit without interception (the world's own loot events). */
     emit(ev) {
-      if (ev.x === undefined) {
-        const ref = entities.get(ev.d) || entities.get(ev.s) || entities.get(ev.id) || entities.get(ev.to);
-        if (ref) { ev.x = ref.x; ev.z = ref.z; }
-      }
+      if (ev.x === undefined) fillXZ(ev);
       events.push(ev);
     },
   };
+  function fillXZ(ev) {
+    const ref = entities.get(ev.d) || entities.get(ev.s) || entities.get(ev.id) || entities.get(ev.to);
+    if (ref) { ev.x = ref.x; ev.z = ref.z; }
+  }
 
   // ---- the host the rules module sees (docs/protocol.md §7.1) ----
   const host = {
@@ -304,12 +308,12 @@ export function createRoom(opts) {
   function encodeCell(cell, band, full) {
     writer.reset();
     const fulls = full ? null : new Set();
-    for (const e of grid.cells[cell]) {
-      if (full) { encodeRecord(writer, e, F.FULL, q); continue; }
+    for (const e of grid.at(cell)) {
+      if (full) { encodeRecord(writer, e, F.FULL, q, bounds.minX, bounds.minZ); continue; }
       const d = e.dirty[band];
       if (!d) continue;
       if (d & F.FULL) fulls.add(e.id);
-      encodeRecord(writer, e, d, q);
+      encodeRecord(writer, e, d, q, bounds.minX, bounds.minZ);
     }
     return { bytes: writer.out(), fulls };
   }
@@ -347,7 +351,7 @@ export function createRoom(opts) {
             const ci = cz * cols + cx;
             const dx = ox + (cx + 0.5) * cell - me.x, d2 = dx * dx + dz2;
             if (d2 > R2 && ci !== myCell) continue;
-            if (!grid.cells[ci].size && !c.cellBand.has(ci)) continue;
+            if (!grid.at(ci).size && !c.cellBand.has(ci)) continue;
             let v = viewTmp[nv];
             if (!v) v = viewTmp[nv] = { ci: 0, d: 0, band: 0 };
             v.ci = ci; v.d = d2; v.band = d2 <= b0 ? 0 : d2 <= b1 ? 1 : 2;
@@ -360,7 +364,7 @@ export function createRoom(opts) {
       const inView = new Map();
       let count = 0;
       for (const v of viewTmp) {
-        const n = grid.cells[v.ci].size;
+        const n = grid.at(v.ci).size;
         if (count + n > VIEW.cap && inView.size) break;
         count += n; inView.set(v.ci, v.band);
       }
@@ -381,15 +385,15 @@ export function createRoom(opts) {
           if (dc.bytes.length) chunks.push(dc.bytes);
           fulls = dc.fulls;
         }
-        for (const e of grid.cells[ci]) {
+        for (const e of grid.at(ci)) {
           const k = c.known.get(e.id);
           if (!k) {
-            if (!fullSent && !fulls.has(e.id)) { extra ||= new ByteWriter(64); encodeRecord(extra, e, F.FULL, q); }
+            if (!fullSent && !fulls.has(e.id)) { extra ||= new ByteWriter(64); encodeRecord(extra, e, F.FULL, q, bounds.minX, bounds.minZ); }
             c.known.set(e.id, { e, ver: e.infoVer });
             newInfo.push(e.info());
           } else if (k.e !== e) {   // id reused after a despawn: treat as new
             c.known.set(e.id, { e, ver: e.infoVer }); newInfo.push(e.info());
-            if (!fullSent && !fulls.has(e.id)) { extra ||= new ByteWriter(64); encodeRecord(extra, e, F.FULL, q); }
+            if (!fullSent && !fulls.has(e.id)) { extra ||= new ByteWriter(64); encodeRecord(extra, e, F.FULL, q, bounds.minX, bounds.minZ); }
           } else if (k.ver !== e.infoVer) { k.ver = e.infoVer; newInfo.push(e.info()); }
         }
       }
@@ -412,7 +416,7 @@ export function createRoom(opts) {
       if (c.bytesOut !== undefined) c.bytesOut += frame.length;
     }
     // clear the dirty bits that were just encoded for each band
-    for (const dc of deltaCache.values()) for (const e of grid.cells[dc.ci]) e.dirty[dc.band] = 0;
+    for (const dc of deltaCache.values()) for (const e of grid.at(dc.ci)) e.dirty[dc.band] = 0;
     // bands nobody looked at keep accumulating; a FULL record goes out when someone starts looking
   }
   function stripTo(ev) { const o = { ...ev }; delete o.to; return o; }

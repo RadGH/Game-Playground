@@ -11,7 +11,9 @@
           "hills",
           "grassland",
           "mountains",
-          "borealForest"
+          "borealForest",
+          "savanna",
+          "badlands"
         ],
         "archetypes": [
           "mine_country",
@@ -112,7 +114,9 @@
           "hills",
           "grassland",
           "shrubland",
-          "mountains"
+          "mountains",
+          "savanna",
+          "badlands"
         ],
         "archetypes": [
           "wilds",
@@ -214,7 +218,10 @@
           "hills",
           "shrubland",
           "lake",
-          "beach"
+          "beach",
+          "savanna",
+          "badlands",
+          "mountains"
         ],
         "archetypes": [
           "holy_ground",
@@ -337,7 +344,10 @@
         "biomes": [
           "grassland",
           "shrubland",
-          "hills"
+          "hills",
+          "savanna",
+          "badlands",
+          "mountains"
         ],
         "archetypes": [
           "ruinfield",
@@ -431,7 +441,10 @@
           "grassland",
           "shrubland",
           "hills",
-          "temperateForest"
+          "temperateForest",
+          "savanna",
+          "badlands",
+          "mountains"
         ],
         "archetypes": [
           "heartland",
@@ -637,7 +650,9 @@
           "temperateForest",
           "borealForest",
           "marsh",
-          "shrubland"
+          "shrubland",
+          "savanna",
+          "badlands"
         ],
         "archetypes": [
           "wilds",
@@ -728,7 +743,8 @@
         "biomes": [
           "grassland",
           "shrubland",
-          "savanna"
+          "savanna",
+          "badlands"
         ],
         "archetypes": [
           "frontier",
@@ -1047,7 +1063,9 @@
         "biomes": [
           "coast",
           "beach",
-          "hills"
+          "hills",
+          "badlands",
+          "mountains"
         ],
         "archetypes": [
           "coast",
@@ -1142,7 +1160,10 @@
           "shrubland",
           "hills",
           "temperateForest",
-          "blighted"
+          "blighted",
+          "savanna",
+          "badlands",
+          "mountains"
         ],
         "archetypes": [
           "heartland",
@@ -1239,7 +1260,8 @@
           "grassland",
           "lake",
           "marsh",
-          "temperateForest"
+          "temperateForest",
+          "savanna"
         ],
         "archetypes": [
           "heartland",
@@ -1343,7 +1365,8 @@
           "grassland",
           "shrubland",
           "temperateForest",
-          "savanna"
+          "savanna",
+          "badlands"
         ],
         "archetypes": [
           "heartland",
@@ -1455,7 +1478,8 @@
           "borealForest",
           "temperateForest",
           "hills",
-          "mountains"
+          "mountains",
+          "badlands"
         ],
         "archetypes": [
           "wilds",
@@ -1550,7 +1574,8 @@
           "temperateForest",
           "marsh",
           "borealForest",
-          "grassland"
+          "grassland",
+          "savanna"
         ],
         "archetypes": [
           "wilds",
@@ -1631,7 +1656,9 @@
           "hills",
           "grassland",
           "shrubland",
-          "mountains"
+          "mountains",
+          "savanna",
+          "badlands"
         ],
         "archetypes": [
           "frontier",
@@ -1740,7 +1767,10 @@
           "grassland",
           "shrubland",
           "hills",
-          "blighted"
+          "blighted",
+          "savanna",
+          "badlands",
+          "mountains"
         ],
         "archetypes": [
           "frontier",
@@ -1846,7 +1876,10 @@
           "grassland",
           "blighted",
           "shrubland",
-          "hills"
+          "hills",
+          "savanna",
+          "badlands",
+          "mountains"
         ],
         "archetypes": [
           "blight",
@@ -1942,7 +1975,9 @@
           "hills",
           "mountains",
           "grassland",
-          "blighted"
+          "blighted",
+          "savanna",
+          "badlands"
         ],
         "archetypes": [
           "blight",
@@ -2040,7 +2075,9 @@
         "biomes": [
           "hills",
           "mountains",
-          "grassland"
+          "grassland",
+          "savanna",
+          "badlands"
         ],
         "archetypes": [
           "mine_country",
@@ -2141,7 +2178,9 @@
         "biomes": [
           "hills",
           "grassland",
-          "mountains"
+          "mountains",
+          "savanna",
+          "badlands"
         ],
         "archetypes": [
           "mine_country",
@@ -2233,7 +2272,9 @@
         "biomes": [
           "hills",
           "mountains",
-          "grassland"
+          "grassland",
+          "savanna",
+          "badlands"
         ],
         "archetypes": [
           "mine_country",
@@ -2319,7 +2360,8 @@
         "biomes": [
           "mountains",
           "hills",
-          "borealForest"
+          "borealForest",
+          "badlands"
         ],
         "archetypes": [
           "pass",
@@ -2404,7 +2446,8 @@
         "biomes": [
           "mountains",
           "hills",
-          "borealForest"
+          "borealForest",
+          "badlands"
         ],
         "archetypes": [
           "pass",
@@ -2494,7 +2537,10 @@
           "grassland",
           "hills",
           "temperateForest",
-          "shrubland"
+          "shrubland",
+          "savanna",
+          "badlands",
+          "mountains"
         ],
         "archetypes": [
           "pass",
@@ -2710,7 +2756,8 @@
           "marsh",
           "lake",
           "temperateForest",
-          "grassland"
+          "grassland",
+          "savanna"
         ],
         "archetypes": [
           "lakeland",
@@ -2816,7 +2863,8 @@
           "lake",
           "marsh",
           "grassland",
-          "coast"
+          "coast",
+          "savanna"
         ],
         "archetypes": [
           "lakeland",
@@ -2997,7 +3045,9 @@
         "biomes": [
           "grassland",
           "shrubland",
-          "beach"
+          "beach",
+          "savanna",
+          "badlands"
         ],
         "archetypes": [
           "crown_ring",
@@ -3098,7 +3148,9 @@
         "biomes": [
           "grassland",
           "shrubland",
-          "lake"
+          "lake",
+          "savanna",
+          "badlands"
         ],
         "archetypes": [
           "crown_ring",
@@ -3191,7 +3243,10 @@
           "temperateForest",
           "hills",
           "beach",
-          "blighted"
+          "blighted",
+          "savanna",
+          "badlands",
+          "mountains"
         ],
         "archetypes": [
           "crown_ring",
@@ -3297,7 +3352,9 @@
         "biomes": [
           "grassland",
           "shrubland",
-          "temperateForest"
+          "temperateForest",
+          "savanna",
+          "badlands"
         ],
         "archetypes": [
           "crown_ring",
@@ -3396,7 +3453,9 @@
           "blighted",
           "grassland",
           "shrubland",
-          "temperateForest"
+          "temperateForest",
+          "savanna",
+          "badlands"
         ],
         "archetypes": [
           "blight",
@@ -3502,7 +3561,10 @@
           "blighted",
           "hills",
           "shrubland",
-          "grassland"
+          "grassland",
+          "savanna",
+          "badlands",
+          "mountains"
         ],
         "archetypes": [
           "blight",
@@ -3603,7 +3665,10 @@
           "blighted",
           "grassland",
           "hills",
-          "shrubland"
+          "shrubland",
+          "savanna",
+          "badlands",
+          "mountains"
         ],
         "archetypes": [
           "blight",
@@ -3694,7 +3759,8 @@
           "temperateForest",
           "blighted",
           "borealForest",
-          "grassland"
+          "grassland",
+          "savanna"
         ],
         "archetypes": [
           "blight",
@@ -3788,7 +3854,10 @@
         "biomes": [
           "grassland",
           "hills",
-          "shrubland"
+          "shrubland",
+          "savanna",
+          "badlands",
+          "mountains"
         ],
         "archetypes": [
           "holy_ground",
@@ -3889,7 +3958,10 @@
           "grassland",
           "shrubland",
           "hills",
-          "temperateForest"
+          "temperateForest",
+          "savanna",
+          "badlands",
+          "mountains"
         ],
         "archetypes": [
           "holy_ground",
@@ -3974,7 +4046,10 @@
         "biomes": [
           "grassland",
           "hills",
-          "shrubland"
+          "shrubland",
+          "savanna",
+          "badlands",
+          "mountains"
         ],
         "archetypes": [
           "holy_ground",
@@ -4068,7 +4143,10 @@
           "grassland",
           "shrubland",
           "hills",
-          "beach"
+          "beach",
+          "savanna",
+          "badlands",
+          "mountains"
         ],
         "archetypes": [
           "ruinfield",
@@ -4173,7 +4251,10 @@
         "biomes": [
           "grassland",
           "shrubland",
-          "hills"
+          "hills",
+          "savanna",
+          "badlands",
+          "mountains"
         ],
         "archetypes": [
           "ruinfield",
@@ -4368,7 +4449,10 @@
           "marsh",
           "grassland",
           "lake",
-          "hills"
+          "hills",
+          "savanna",
+          "badlands",
+          "mountains"
         ],
         "archetypes": [
           "marsh",
@@ -4549,7 +4633,9 @@
         "biomes": [
           "temperateForest",
           "borealForest",
-          "hills"
+          "hills",
+          "badlands",
+          "mountains"
         ],
         "archetypes": [
           "wilds",
@@ -4656,7 +4742,8 @@
         "biomes": [
           "temperateForest",
           "borealForest",
-          "grassland"
+          "grassland",
+          "savanna"
         ],
         "archetypes": [
           "wilds",
@@ -4735,7 +4822,9 @@
         "biomes": [
           "temperateForest",
           "borealForest",
-          "hills"
+          "hills",
+          "badlands",
+          "mountains"
         ],
         "archetypes": [
           "wilds",
@@ -4823,7 +4912,10 @@
           "borealForest",
           "hills",
           "shrubland",
-          "blighted"
+          "blighted",
+          "savanna",
+          "badlands",
+          "mountains"
         ],
         "archetypes": [
           "wilds",
@@ -4921,7 +5013,9 @@
           "hills",
           "grassland",
           "shrubland",
-          "mountains"
+          "mountains",
+          "savanna",
+          "badlands"
         ],
         "archetypes": [
           "wilds",

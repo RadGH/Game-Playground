@@ -26,6 +26,7 @@ import { clearThreat } from './threat.js';
 import { makeRng } from './rng.js';
 import { attachEncounters } from './encounter.js';
 import { attachFollowers } from './followers.js';
+import { attachWarbands, escortFor } from './warband.js';
 
 /** What an arena object is called on a nameplate. */
 const OBJECT_NAMES = { pillar: 'Stone pillar', rock: 'Fallen rock', brazier: 'Brazier', lever: 'Lever', pool: 'Pool', cracked_floor: 'Cracked floor' };
@@ -66,7 +67,8 @@ function terrainFrom(host) {
   // a monster's step (monster-ai.js `blocked`); without it monsters read slopes and water only
   const nav = host.terrain?.nav || host.nav || null;
   const blocked = nav?.passable ? (x, z) => !nav.passable(x, z) : null;
-  if (reader) { const g = groundAdapter(reader); if (blocked) g.blocked = blocked; return g; }
+  // a real zone plans round cliffs and deep water too (pathfind.js), nav.bin or not
+  if (reader) { const g = groundAdapter(reader); g.pathing = true; if (blocked) g.blocked = blocked; return g; }
   const h = (x, z) => host.groundAt(x, z);
   const S = 0.75;
   return {
@@ -110,6 +112,20 @@ export function createRules(host, opts = {}) {
     },
     despawnEntity: p => { const ent = host.entities.get(p.id); if (ent && ent.r?.unit === p) host.despawn(ent); },
   });
+  // warbands (js/rules/warband.js): a leader's escort and standard-bearer are room entities like any
+  // monster (every client draws them, they despawn like any corpse; the camp counts only the leader)
+  attachWarbands(field, {
+    cfg: engine.balance.warbands || {},
+    packRadius: engine.balance.zones?.packRadius ?? 9,
+    spawn: (defId, x, z, level, rank, leader) => {
+      const e = host.spawn({ kind: 'monster', type: defId, level, x, z, rank, data: { escortOf: leader.id } });
+      return e?.r?.unit || null;
+    },
+  });
+  // a siege needs something built to break: the room may hand over `structures(ax, az, bx, bz)` and
+  // `strikeStructure(monsterEntity, id)` (no room does yet — Thousandvale v1 has no player building)
+  if (host.structures) field.structures = host.structures;
+  if (host.strikeStructure) field.strikeStructure = (u, id) => host.strikeStructure(host.entities.get(u.id) || u, id);
   // the encounter engine: telegraphs, boss scripts, arena objects (js/rules/encounter.js)
   const enc = attachEncounters(room, {
     data: engine.encounters,
@@ -316,6 +332,8 @@ export function createRules(host, opts = {}) {
         e.r.unit = unit;
         e.setMax(unit.maxHp, 0);
         e.setHp(unit.hp);
+        // a warband leader brings its escort and standard-bearer (Farhold actors.js spawnPack)
+        if (def.leads?.length && e.data?.escortOf == null && !script) escortFor(field, unit, def);
       }
     });
   }

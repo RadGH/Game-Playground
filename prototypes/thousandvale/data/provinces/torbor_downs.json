@@ -1,5 +1,5 @@
 {
-  "_doc": "Stream E. Province sheet (PLAN §4.1) for the starter province: 16 zones on a 4x4 grid (`grid` [x, y], 4-way neighbours). No two neighbours share an archetype. Bands rise by hops from the starting zone `test` (The Torbor Fields). Settlement/fort names are placeholders until B's world bake names real sites; B may move zones but keep the ids. M1 filled only `test` in detail; M2 adds per-zone camps, rares, quests and vignette lists (data/vignettes/placements/province.json).",
+  "_doc": "Stream E. Province sheet (PLAN §4.1) for the starter province: 16 zones on a 4x4 grid (`grid` [x, y], 4-way neighbours). No two neighbours share an archetype. Bands rise by hops from the starting zone `test` (The Torbor Fields). Town/hamlet names are imposed on stream B's baked settlements by data/provinces/torbor_downs-places.json (zones without a World Forge settlement ask B for one there). M1 filled only `test` in detail; M2 adds per-zone camps, rares, quests and vignette lists (data/vignettes/assignment/torbor_downs.json; coordinates in data/vignettes/placements/<world zone>.json).",
   "id": "torbor_downs",
   "name": "Torbor Downs",
   "culture": "human",
@@ -73,7 +73,105 @@
         "rare_scree_mother"
       ],
       "quests": "data/quests/hollin_pass.json",
-      "hook": "the_long_stair"
+      "hook": "the_long_stair",
+      "camps": [
+        {
+          "type": "frost_stalker",
+          "level": [
+            6,
+            8
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the switchbacks"
+        },
+        {
+          "type": "crag_hyena",
+          "level": [
+            7,
+            8
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the high pastures"
+        },
+        {
+          "type": "ironback_beetle",
+          "level": [
+            6,
+            8
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the toll road"
+        },
+        {
+          "type": "road_brigand",
+          "level": [
+            7,
+            8
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the upper pass"
+        },
+        {
+          "type": "brigand_archer",
+          "level": [
+            6,
+            8
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the cliffs above"
+        },
+        {
+          "type": "ridge_griffin",
+          "level": [
+            7,
+            8
+          ],
+          "count": [
+            1,
+            2
+          ],
+          "where": "the wilds of Hollin Pass"
+        },
+        {
+          "type": "stone_sentinel",
+          "level": [
+            6,
+            8
+          ],
+          "count": [
+            1,
+            2
+          ],
+          "where": "the wilds of Hollin Pass"
+        },
+        {
+          "type": "glacier_maw",
+          "level": [
+            7,
+            8
+          ],
+          "count": [
+            1,
+            2
+          ],
+          "where": "the wilds of Hollin Pass"
+        }
+      ]
     },
     "ashcombe": {
       "name": "The Ashcombe Ruins",
@@ -106,7 +204,94 @@
         "rare_sir_hollowell"
       ],
       "quests": "data/quests/ashcombe.json",
-      "hook": "the_ashcombe_colossus"
+      "hook": "the_ashcombe_colossus",
+      "camps": [
+        {
+          "type": "road_brigand",
+          "level": [
+            4,
+            6
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the courtyard of the Broken Keep",
+          "with": "brigand_archer"
+        },
+        {
+          "type": "barrow_hound",
+          "level": [
+            5,
+            6
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the excavation trenches"
+        },
+        {
+          "type": "sporecap_walker",
+          "level": [
+            4,
+            6
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the damp rooms of the ruins"
+        },
+        {
+          "type": "carrion_moth",
+          "level": [
+            5,
+            6
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "at the duelling stones"
+        },
+        {
+          "type": "ossuary_crawler",
+          "level": [
+            4,
+            6
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of The Ashcombe Ruins"
+        },
+        {
+          "type": "shale_warden",
+          "level": [
+            5,
+            6
+          ],
+          "count": [
+            1,
+            2
+          ],
+          "where": "the wilds of The Ashcombe Ruins"
+        },
+        {
+          "type": "cursed_knight",
+          "level": [
+            4,
+            6
+          ],
+          "count": [
+            1,
+            2
+          ],
+          "where": "the wilds of The Ashcombe Ruins"
+        }
+      ]
     },
     "brackwater": {
       "name": "Brackwater Fen",
@@ -139,7 +324,81 @@
         "rare_lantern_drowner"
       ],
       "quests": "data/quests/brackwater.json",
-      "hook": "the_drowned_bells"
+      "hook": "the_drowned_bells",
+      "camps": [
+        {
+          "type": "reed_serpent",
+          "level": [
+            5,
+            7
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the reed beds"
+        },
+        {
+          "type": "bog_slime",
+          "level": [
+            6,
+            7
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "around the stilt hut"
+        },
+        {
+          "type": "fen_croaker",
+          "level": [
+            5,
+            7
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "around Eelwick"
+        },
+        {
+          "type": "marsh_wisp",
+          "level": [
+            6,
+            7
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of Brackwater Fen"
+        },
+        {
+          "type": "carrion_moth",
+          "level": [
+            5,
+            7
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of Brackwater Fen"
+        },
+        {
+          "type": "veil_spider",
+          "level": [
+            6,
+            7
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of Brackwater Fen"
+        }
+      ]
     },
     "saltmouth": {
       "name": "Saltmouth",
@@ -172,7 +431,105 @@
         "rare_captain_wrackley"
       ],
       "quests": "data/quests/saltmouth.json",
-      "hook": "the_whale_bones"
+      "hook": "the_whale_bones",
+      "camps": [
+        {
+          "type": "road_brigand",
+          "level": [
+            6,
+            8
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the night beaches"
+        },
+        {
+          "type": "dune_centipede",
+          "level": [
+            7,
+            8
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the dunes"
+        },
+        {
+          "type": "reed_serpent",
+          "level": [
+            6,
+            8
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the rock pools"
+        },
+        {
+          "type": "brigand_archer",
+          "level": [
+            7,
+            8
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the cliffs above the cove"
+        },
+        {
+          "type": "carrion_moth",
+          "level": [
+            6,
+            8
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the battery stores"
+        },
+        {
+          "type": "silt_lurker",
+          "level": [
+            7,
+            8
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of Saltmouth"
+        },
+        {
+          "type": "brigand_captain",
+          "level": [
+            6,
+            8
+          ],
+          "count": [
+            1,
+            2
+          ],
+          "where": "the wilds of Saltmouth"
+        },
+        {
+          "type": "fen_croaker",
+          "level": [
+            7,
+            8
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of Saltmouth"
+        }
+      ]
     },
     "delvers_hill": {
       "name": "Delvers' Hill",
@@ -205,7 +562,82 @@
         "rare_copperback"
       ],
       "quests": "data/quests/delvers_hill.json",
-      "hook": "the_singing_seam"
+      "hook": "the_singing_seam",
+      "camps": [
+        {
+          "type": "ironback_beetle",
+          "level": [
+            4,
+            6
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the upper galleries"
+        },
+        {
+          "type": "cairn_rat",
+          "level": [
+            5,
+            6
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the lift house"
+        },
+        {
+          "type": "shale_warden",
+          "level": [
+            4,
+            6
+          ],
+          "count": [
+            1,
+            2
+          ],
+          "where": "the wilds of Delvers' Hill"
+        },
+        {
+          "type": "sporecap_walker",
+          "level": [
+            5,
+            6
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of Delvers' Hill"
+        },
+        {
+          "type": "road_brigand",
+          "level": [
+            4,
+            6
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of Delvers' Hill",
+          "with": "brigand_archer"
+        },
+        {
+          "type": "crag_hyena",
+          "level": [
+            5,
+            6
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of Delvers' Hill"
+        }
+      ]
     },
     "test": {
       "name": "The Torbor Fields",
@@ -306,7 +738,7 @@
           "where": "the marsh, at night"
         }
       ],
-      "vignettes": "data/vignettes/placements/test.json",
+      "vignettes": "data/vignettes/placements/z12_02.json",
       "quests": "data/quests/test.json",
       "grid": [
         1,
@@ -349,7 +781,81 @@
         "rare_mother_soot"
       ],
       "quests": "data/quests/torbor_cross.json",
-      "hook": "the_bridge_city"
+      "hook": "the_bridge_city",
+      "camps": [
+        {
+          "type": "road_brigand",
+          "level": [
+            3,
+            5
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the roads into Halsbridge"
+        },
+        {
+          "type": "moor_hound",
+          "level": [
+            4,
+            5
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "around Mill End"
+        },
+        {
+          "type": "brigand_archer",
+          "level": [
+            3,
+            5
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the far bank below the bridge"
+        },
+        {
+          "type": "cairn_rat",
+          "level": [
+            4,
+            5
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of Torbor Cross"
+        },
+        {
+          "type": "sky_cultist",
+          "level": [
+            3,
+            5
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of Torbor Cross"
+        },
+        {
+          "type": "cult_zealot",
+          "level": [
+            4,
+            5
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of Torbor Cross"
+        }
+      ]
     },
     "gullwick": {
       "name": "The Gullwick Lakes",
@@ -382,7 +888,93 @@
         "rare_waterstrider_tolla"
       ],
       "quests": "data/quests/gullwick.json",
-      "hook": "the_floating_isle"
+      "hook": "the_floating_isle",
+      "camps": [
+        {
+          "type": "reed_serpent",
+          "level": [
+            5,
+            7
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the ferry crossings"
+        },
+        {
+          "type": "fen_croaker",
+          "level": [
+            6,
+            7
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the lake shallows"
+        },
+        {
+          "type": "dusk_flitter",
+          "level": [
+            5,
+            7
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "under the stilt fort"
+        },
+        {
+          "type": "marsh_wisp",
+          "level": [
+            6,
+            7
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "by the drowned shrine"
+        },
+        {
+          "type": "silt_lurker",
+          "level": [
+            5,
+            7
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of The Gullwick Lakes"
+        },
+        {
+          "type": "bog_slime",
+          "level": [
+            6,
+            7
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of The Gullwick Lakes"
+        },
+        {
+          "type": "carrion_moth",
+          "level": [
+            5,
+            7
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of The Gullwick Lakes"
+        }
+      ]
     },
     "wychwood": {
       "name": "Wychwood",
@@ -414,7 +1006,105 @@
         "rare_charcoal_tom"
       ],
       "quests": "data/quests/wychwood.json",
-      "hook": "the_great_hollow_oak"
+      "hook": "the_great_hollow_oak",
+      "camps": [
+        {
+          "type": "veil_spider",
+          "level": [
+            5,
+            7
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the forest road"
+        },
+        {
+          "type": "gallows_owl",
+          "level": [
+            6,
+            7
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "around Hermit's Rest"
+        },
+        {
+          "type": "moor_hound",
+          "level": [
+            5,
+            7
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "near the wallow"
+        },
+        {
+          "type": "thicket_boar",
+          "level": [
+            6,
+            7
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of Wychwood"
+        },
+        {
+          "type": "frost_stalker",
+          "level": [
+            5,
+            7
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of Wychwood"
+        },
+        {
+          "type": "crag_hyena",
+          "level": [
+            6,
+            7
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of Wychwood"
+        },
+        {
+          "type": "dread_stag",
+          "level": [
+            5,
+            7
+          ],
+          "count": [
+            1,
+            2
+          ],
+          "where": "the wilds of Wychwood"
+        },
+        {
+          "type": "ridge_griffin",
+          "level": [
+            6,
+            7
+          ],
+          "count": [
+            1,
+            2
+          ],
+          "where": "the wilds of Wychwood"
+        }
+      ]
     },
     "saint_orrins_rise": {
       "name": "Saint Orrin's Rise",
@@ -446,7 +1136,81 @@
         "rare_vesper_bell_owl"
       ],
       "quests": "data/quests/saint_orrins_rise.json",
-      "hook": "the_thousand_candles"
+      "hook": "the_thousand_candles",
+      "camps": [
+        {
+          "type": "barrow_hound",
+          "level": [
+            3,
+            5
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the old cloister garth"
+        },
+        {
+          "type": "gallows_owl",
+          "level": [
+            4,
+            5
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "around the abbey"
+        },
+        {
+          "type": "sky_cultist",
+          "level": [
+            3,
+            5
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of Saint Orrin's Rise"
+        },
+        {
+          "type": "hollow_wraith",
+          "level": [
+            4,
+            5
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of Saint Orrin's Rise"
+        },
+        {
+          "type": "moor_hound",
+          "level": [
+            3,
+            5
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of Saint Orrin's Rise"
+        },
+        {
+          "type": "carrion_moth",
+          "level": [
+            4,
+            5
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of Saint Orrin's Rise"
+        }
+      ]
     },
     "millbrook": {
       "name": "Millbrook Vale",
@@ -479,7 +1243,105 @@
         "rare_old_mould"
       ],
       "quests": "data/quests/millbrook.json",
-      "hook": "the_three_wheels"
+      "hook": "the_three_wheels",
+      "camps": [
+        {
+          "type": "thicket_boar",
+          "level": [
+            3,
+            5
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the lanes between the mills"
+        },
+        {
+          "type": "carrion_moth",
+          "level": [
+            4,
+            6
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the grain lofts of Three Wheels"
+        },
+        {
+          "type": "road_brigand",
+          "level": [
+            3,
+            5
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "near the tinker's wagon"
+        },
+        {
+          "type": "moor_hound",
+          "level": [
+            4,
+            6
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "around Millbrook Keep"
+        },
+        {
+          "type": "brigand_archer",
+          "level": [
+            3,
+            5
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of Millbrook Vale"
+        },
+        {
+          "type": "brigand_captain",
+          "level": [
+            4,
+            6
+          ],
+          "count": [
+            1,
+            2
+          ],
+          "where": "the wilds of Millbrook Vale"
+        },
+        {
+          "type": "cairn_rat",
+          "level": [
+            3,
+            5
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of Millbrook Vale"
+        },
+        {
+          "type": "gallows_owl",
+          "level": [
+            4,
+            6
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of Millbrook Vale"
+        }
+      ]
     },
     "redcliff": {
       "name": "The Redcliff Frontier",
@@ -512,7 +1374,93 @@
         "rare_wynn_two_strings"
       ],
       "quests": "data/quests/redcliff.json",
-      "hook": "the_red_cliff_face"
+      "hook": "the_red_cliff_face",
+      "camps": [
+        {
+          "type": "cinder_imp",
+          "level": [
+            6,
+            8
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the burning farms"
+        },
+        {
+          "type": "road_brigand",
+          "level": [
+            7,
+            8
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the raiders' camps"
+        },
+        {
+          "type": "crag_hyena",
+          "level": [
+            6,
+            8
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "around Cinder Farm"
+        },
+        {
+          "type": "sky_cultist",
+          "level": [
+            7,
+            8
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "around the cellar"
+        },
+        {
+          "type": "brigand_archer",
+          "level": [
+            6,
+            8
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of The Redcliff Frontier"
+        },
+        {
+          "type": "brigand_captain",
+          "level": [
+            7,
+            8
+          ],
+          "count": [
+            1,
+            2
+          ],
+          "where": "the wilds of The Redcliff Frontier"
+        },
+        {
+          "type": "frost_stalker",
+          "level": [
+            6,
+            8
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of The Redcliff Frontier"
+        }
+      ]
     },
     "blackthorn_scar": {
       "name": "Blackthorn Scar",
@@ -545,7 +1493,81 @@
         "rare_scab"
       ],
       "quests": "data/quests/blackthorn_scar.json",
-      "hook": "the_thorn_wall"
+      "hook": "the_thorn_wall",
+      "camps": [
+        {
+          "type": "cult_zealot",
+          "level": [
+            7,
+            9
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the thorn roads"
+        },
+        {
+          "type": "ossuary_crawler",
+          "level": [
+            8,
+            10
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the bone pits"
+        },
+        {
+          "type": "cinder_imp",
+          "level": [
+            7,
+            9
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of Blackthorn Scar"
+        },
+        {
+          "type": "sky_cultist",
+          "level": [
+            8,
+            10
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of Blackthorn Scar"
+        },
+        {
+          "type": "hollow_wraith",
+          "level": [
+            7,
+            9
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of Blackthorn Scar"
+        },
+        {
+          "type": "sporecap_walker",
+          "level": [
+            8,
+            10
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of Blackthorn Scar"
+        }
+      ]
     },
     "coldwater": {
       "name": "Coldwater Mere",
@@ -578,7 +1600,81 @@
         "rare_mere_moth_queen"
       ],
       "quests": "data/quests/coldwater.json",
-      "hook": "the_reflection_mere"
+      "hook": "the_reflection_mere",
+      "camps": [
+        {
+          "type": "bog_slime",
+          "level": [
+            5,
+            7
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the peat cuttings"
+        },
+        {
+          "type": "reed_serpent",
+          "level": [
+            6,
+            7
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "around Netherby"
+        },
+        {
+          "type": "marsh_wisp",
+          "level": [
+            5,
+            7
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "along the mere shore"
+        },
+        {
+          "type": "fen_croaker",
+          "level": [
+            6,
+            7
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "around the village well"
+        },
+        {
+          "type": "silt_lurker",
+          "level": [
+            5,
+            7
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of Coldwater Mere"
+        },
+        {
+          "type": "carrion_moth",
+          "level": [
+            6,
+            7
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of Coldwater Mere"
+        }
+      ]
     },
     "gorse_march": {
       "name": "The Gorse March",
@@ -611,7 +1707,81 @@
         "rare_burnt_barns_hound"
       ],
       "quests": "data/quests/gorse_march.json",
-      "hook": "the_burning_fields"
+      "hook": "the_burning_fields",
+      "camps": [
+        {
+          "type": "cinder_imp",
+          "level": [
+            6,
+            8
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the burnt barns"
+        },
+        {
+          "type": "crag_hyena",
+          "level": [
+            7,
+            8
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the gorse thickets"
+        },
+        {
+          "type": "brigand_archer",
+          "level": [
+            6,
+            8
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the raider camps"
+        },
+        {
+          "type": "road_brigand",
+          "level": [
+            7,
+            8
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the raider camps"
+        },
+        {
+          "type": "brigand_captain",
+          "level": [
+            6,
+            8
+          ],
+          "count": [
+            1,
+            2
+          ],
+          "where": "the wilds of The Gorse March"
+        },
+        {
+          "type": "frost_stalker",
+          "level": [
+            7,
+            8
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of The Gorse March"
+        }
+      ]
     },
     "sunken_wolds": {
       "name": "The Sunken Wolds",
@@ -644,7 +1814,129 @@
         "rare_nightjar"
       ],
       "quests": "data/quests/sunken_wolds.json",
-      "hook": "the_sunken_road"
+      "hook": "the_sunken_road",
+      "camps": [
+        {
+          "type": "frost_stalker",
+          "level": [
+            7,
+            9
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the mossy hollows"
+        },
+        {
+          "type": "sporecap_walker",
+          "level": [
+            8,
+            10
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "around Lowmoor"
+        },
+        {
+          "type": "silt_lurker",
+          "level": [
+            7,
+            9
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the sinkholes"
+        },
+        {
+          "type": "hoard_mimic",
+          "level": [
+            8,
+            10
+          ],
+          "count": [
+            1,
+            2
+          ],
+          "where": "the caves of Deepdene"
+        },
+        {
+          "type": "moor_hound",
+          "level": [
+            7,
+            9
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of The Sunken Wolds"
+        },
+        {
+          "type": "thicket_boar",
+          "level": [
+            8,
+            10
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of The Sunken Wolds"
+        },
+        {
+          "type": "crag_hyena",
+          "level": [
+            7,
+            9
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of The Sunken Wolds"
+        },
+        {
+          "type": "dread_stag",
+          "level": [
+            8,
+            10
+          ],
+          "count": [
+            1,
+            2
+          ],
+          "where": "the wilds of The Sunken Wolds"
+        },
+        {
+          "type": "veil_spider",
+          "level": [
+            7,
+            9
+          ],
+          "count": [
+            2,
+            4
+          ],
+          "where": "the wilds of The Sunken Wolds"
+        },
+        {
+          "type": "ridge_griffin",
+          "level": [
+            8,
+            10
+          ],
+          "count": [
+            1,
+            2
+          ],
+          "where": "the wilds of The Sunken Wolds"
+        }
+      ]
     }
   },
   "grid": {

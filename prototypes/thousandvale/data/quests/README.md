@@ -31,3 +31,24 @@ player's level. Nothing here locks a place (PLAN §0.2 "go anywhere").
 
 Tests: `tests/E/content.test.js` resolves every giver, type, encounter, vignette, NPC and chain link,
 and checks every wilds monster family has a quest.
+
+## Events (`events.json`) — the event director (PLAN §5.2)
+
+`director`: one realm event at a time, announced 10 minutes ahead (reminders at 5 and 1), waystone travel to it free
+while it runs, sized by the players who enrol (health per player, an extra add per N players). `realm[]`: the big
+events — **Grimtallow** (`world_grimtallow`, the province world boss) on a fixed schedule (every 3 h at :30, plus on
+demand when 12+ in band are online), a raider attack on Torborhold (the first-hour scene, public), a warband siege of
+Halsbridge, a drake flyover across four zones. `zone[]`: one event per zone, run on its own in every zone copy at stream
+B's arena `event_<zone>` (Torbor Fields: `event_grandmother_skein`): two waves from the zone's camp mix, then a boss
+(an encounter script id). Everyone within `autoEnrolMetres` joins a temporary event group.
+
+## Radiant jobs (`jobs.json`)
+
+Frames fill slots from what exists in the zone copy: `monster`, `vignette`, `settlement`, `fort`, **`farm`** (with
+`from: 'farm.pests'`), **`cave`**, `rare`, `dungeon` — all from the zone's placement file (data/vignettes/placements/).
+
+## Where things are
+
+Quest NPCs, quest vignettes and treasure steps get coordinates in `data/vignettes/placements/<world zone>.json`
+(`tools/place-vignettes.mjs`). A quest NPC whose `at` is a settlement name stands near that town's square; the names
+are the sheet's, imposed on stream B's settlements via `data/provinces/torbor_downs-places.json`.

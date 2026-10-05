@@ -23,7 +23,7 @@
     "lost_hunter": {
       "name": "Hob the hunter",
       "role": "hunter",
-      "at": "boar_wallow",
+      "at": "hunters_hide",
       "greeting": "Lost my bow, lost my dog, lost my way. Found a lot of boar."
     }
   },
@@ -111,7 +111,7 @@
       "steps": [
         {
           "kind": "visit",
-          "vignette": "boar_wallow",
+          "vignette": "hunters_hide",
           "text": "Search the boar wallow"
         },
         {

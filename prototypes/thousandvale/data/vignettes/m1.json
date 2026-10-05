@@ -6,7 +6,7 @@
       "name": "The Hanging Oak",
       "blurb": "A lone dead oak with a frayed rope and a shepherd's satchel under it; owls roost in it at night. Starts the 'A Rope for Old Pell' quest.",
       "lore": "Somebody cut the rope down, but not before the crows had their turn. A satchel lies in the grass beneath.",
-      "tags": { "biomes": ["grassland", "shrubland"], "archetypes": ["heartland", "frontier", "wilds"], "band": [1, 12], "cultures": ["any"] },
+      "tags": { "biomes": ["grassland", "shrubland", "savanna", "badlands"], "archetypes": ["heartland", "frontier", "wilds"], "band": [1, 12], "cultures": ["any"] },
       "radius": 12,
       "props": [
         { "kind": "tree", "id": "oak", "dead": true, "x": 0, "z": 0, "yaw": 0.4, "scale": 1.4 },
@@ -24,7 +24,7 @@
       "name": "The Overturned Cart",
       "blurb": "A trader's cart tipped in a ditch; brigands are picking it over. A wounded carter hides under it and points you at the ford.",
       "lore": "Turnips everywhere, a broken axle, and three men arguing over a barrel. Someone under the cart is trying very hard not to breathe.",
-      "tags": { "biomes": ["grassland", "temperateForest", "shrubland"], "archetypes": ["heartland", "frontier", "pass"], "band": [1, 14], "cultures": ["any"] },
+      "tags": { "biomes": ["grassland", "temperateForest", "shrubland", "savanna", "badlands"], "archetypes": ["heartland", "frontier", "pass"], "band": [1, 14], "cultures": ["any"] },
       "radius": 14,
       "props": [
         { "kind": "prop", "id": "cart_wheel", "x": 0, "z": 0, "yaw": 1.4 },
@@ -46,7 +46,7 @@
       "name": "The Dry Well",
       "blurb": "An abandoned farm well that rats have turned into a nest; a hidden cache sits on a ledge halfway down.",
       "lore": "The bucket rope has been chewed through. Something down there is squeaking, a lot.",
-      "tags": { "biomes": ["grassland", "shrubland", "savanna"], "archetypes": ["heartland", "mine_country", "wilds"], "band": [1, 10], "cultures": ["human", "halfling", "dwarf"] },
+      "tags": { "biomes": ["grassland", "shrubland", "savanna", "badlands"], "archetypes": ["heartland", "mine_country", "wilds"], "band": [1, 10], "cultures": ["human", "halfling", "dwarf"] },
       "radius": 10,
       "props": [
         { "kind": "prop", "id": "well", "x": 0, "z": 0, "yaw": 0 },
@@ -65,7 +65,7 @@
       "name": "Boar Wallow",
       "blurb": "A churned-up mud hollow under the trees where a sounder of boars beds down; truffles in the roots. Grisel Thornhide's favourite spot.",
       "lore": "The ground here is torn to black mud and smells strongly of pig. Something has been digging for truffles.",
-      "tags": { "biomes": ["temperateForest", "grassland"], "archetypes": ["heartland", "wilds"], "band": [1, 10], "cultures": ["any"] },
+      "tags": { "biomes": ["temperateForest", "grassland", "savanna"], "archetypes": ["heartland", "wilds"], "band": [1, 10], "cultures": ["any"] },
       "radius": 13,
       "props": [
         { "kind": "ground", "id": "puddle_ring", "x": 0, "z": 0, "yaw": 0 },
@@ -84,7 +84,7 @@
       "name": "The Smugglers' Cellar",
       "blurb": "A burned-out farmstead whose hay hides a trapdoor; two brigand archers watch it. The cellar holds the ford gang's stash.",
       "lore": "The farmhouse burned years ago, but the hay bales are fresh. Nobody keeps fresh hay at a burned farm.",
-      "tags": { "biomes": ["grassland", "shrubland"], "archetypes": ["heartland", "coast", "frontier"], "band": [2, 16], "cultures": ["any"] },
+      "tags": { "biomes": ["grassland", "shrubland", "savanna", "badlands"], "archetypes": ["heartland", "coast", "frontier"], "band": [2, 16], "cultures": ["any"] },
       "radius": 14,
       "props": [
         { "kind": "prop", "id": "ruined_wall", "x": -4, "z": -3, "yaw": 0 },
@@ -124,7 +124,7 @@
       "name": "The Duelling Stones",
       "blurb": "A dolmen on a rise with two dead men in front of it and one fine sword between them; moths are at the bodies. Free weapon, small mystery.",
       "lore": "Two men, two wounds, one sword. Whatever they were fighting over, neither of them won it.",
-      "tags": { "biomes": ["grassland", "hills", "shrubland"], "archetypes": ["heartland", "pass", "ruinfield", "wilds"], "band": [1, 20], "cultures": ["any"] },
+      "tags": { "biomes": ["grassland", "hills", "shrubland", "savanna", "badlands", "mountains"], "archetypes": ["heartland", "pass", "ruinfield", "wilds"], "band": [1, 20], "cultures": ["any"] },
       "radius": 10,
       "props": [
         { "kind": "prop", "id": "dolmen", "x": 0, "z": -3, "yaw": 0 },
@@ -143,7 +143,7 @@
       "name": "The Hedge-Witch's Garden",
       "blurb": "A fenced herb garden with drying racks and a skull on a pole; her experiments (slimes) have got out of their pots. Her recipe note and herbs.",
       "lore": "Neat rows of herbs, a drying rack, a skull on a stick. The skull has a little hat on. Something green and wobbling is eating the cabbages.",
-      "tags": { "biomes": ["marsh", "temperateForest", "grassland"], "archetypes": ["marsh", "heartland", "wilds"], "band": [1, 14], "cultures": ["any"] },
+      "tags": { "biomes": ["marsh", "temperateForest", "grassland", "savanna"], "archetypes": ["marsh", "heartland", "wilds"], "band": [1, 14], "cultures": ["any"] },
       "radius": 12,
       "props": [
         { "kind": "prop", "id": "drying_rack", "x": -2, "z": -2, "yaw": 0.3 },

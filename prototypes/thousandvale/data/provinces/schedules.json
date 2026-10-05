@@ -1,0 +1,98 @@
+{
+  "_doc": "Stream E (M2). NPC day/night schedules for town roles (PLAN §4.3: shop by day, inn by night). A day is `clock.dayMinutes` real minutes; a schedule is a list of blocks, each starting at a named phase (or a day fraction 0-1) and naming an ANCHOR to stand at and what to do there. Anchors resolve against stream B's town plan (data/zones/<zone>/placements.json): `want` = a proctown building plot's `want` (the NPC stands at the plot's front, `yaw` toward the street), `placement` = a placement kind, `special` = computed (gate = where a road crosses the settlement ring; home = the role's own house/hut plot, picked once per NPC by a seeded hash of its id). If a town lacks an anchor, walk `fallback` in order. RULE (genre feel, PLAN §0.2): a role's service is never switched off — at night the role is somewhere else (the inn, home) but still serves when you talk to them there, and the map/tooltip says where they are. Walking between anchors uses streets; an NPC takes `travelMinutes` at most to get there and teleports the remainder if nobody is watching (no client is within 80 m). Quest NPCs (data/quests/<zone>.json) use `questNpc`; guards use `guard`. `says` pools are short barks by phase, said when a player walks within 6 m (one bark per NPC per 90 s).",
+  "clock": {
+    "dayMinutes": 120,
+    "phases": { "dawn": 0.2, "day": 0.27, "dusk": 0.75, "night": 0.82, "late": 0.95 },
+    "note": "Fractions of the day at which each phase STARTS; night runs past midnight (fraction 1 = 0) until dawn. Matches the client's sun: 0.25 = sunrise, 0.79 = sunset."
+  },
+  "travelMinutes": 2,
+  "anchors": {
+    "forge": { "want": ["forge"], "fallback": ["market", "square"] },
+    "market": { "want": ["market"], "fallback": ["square"] },
+    "inn": { "want": ["inn"], "fallback": ["hall", "square"] },
+    "hall": { "want": ["hall"], "fallback": ["chapel", "square"] },
+    "chapel": { "want": ["chapel", "shrine"], "fallback": ["hall", "square"] },
+    "stable": { "want": ["stable"], "fallback": ["gate"] },
+    "store": { "want": ["warehouse", "granary"], "fallback": ["market"] },
+    "mill": { "want": ["mill"], "fallback": ["store"] },
+    "square": { "placement": "town_square", "fallback": ["centre"] },
+    "centre": { "special": "settlement centre" },
+    "gate": { "special": "gate", "fallback": ["square"] },
+    "home": { "want": ["house", "hut"], "special": "home", "fallback": ["inn"] },
+    "fields": { "special": "nearest farm placement of type farm (data/vignettes/placements/<zone>.json) with settlement = this town", "fallback": ["gate"] },
+    "spot": { "special": "the NPC's own placement (quest NPCs: data/vignettes/placements/<zone>.json type npc)" }
+  },
+  "roles": {
+    "smith": {
+      "name": "Smith", "service": ["repair", "sell weapons", "sell armour"],
+      "blocks": [ { "from": "dawn", "at": "forge", "do": "work" }, { "from": "dusk", "at": "inn", "do": "drink" }, { "from": "late", "at": "home", "do": "sleep" } ],
+      "says": { "day": ["Mind the sparks.", "Bring it here, I'll take the dent out.", "Good steel doesn't care who swings it."], "night": ["Forge is banked. I can still fix a strap.", "One more cup, then bed."] }
+    },
+    "merchant": {
+      "name": "Merchant", "service": ["buy", "sell", "buyback"],
+      "blocks": [ { "from": "day", "at": "market", "do": "trade" }, { "from": "night", "at": "inn", "do": "trade" }, { "from": "late", "at": "home", "do": "sleep" } ],
+      "says": { "day": ["Fair prices! Fairish prices!", "Everything must go. Most things must go."], "night": ["Stall's shut, but my purse isn't.", "Buying at night costs the same. Selling too. I'm generous."] }
+    },
+    "innkeeper": {
+      "name": "Innkeeper", "service": ["food", "drink", "rumours", "bind recall"],
+      "blocks": [ { "from": "dawn", "at": "inn", "do": "serve" } ],
+      "says": { "day": ["Stew's on. It's always on.", "Rooms upstairs, rats downstairs, everyone's happy."], "night": ["Busy night. Grab a stool if you can find one.", "Heard a good one tonight. Buy a drink and I'll tell it."] }
+    },
+    "elder": {
+      "name": "Elder", "service": ["quests", "town news"],
+      "blocks": [ { "from": "dawn", "at": "square", "do": "stand" }, { "from": "day", "at": "hall", "do": "work" }, { "from": "dusk", "at": "square", "do": "stand" }, { "from": "night", "at": "inn", "do": "drink" }, { "from": "late", "at": "home", "do": "sleep" } ],
+      "says": { "day": ["Ah. You look like someone who gets things done.", "The town needs you. The town always needs someone."], "night": ["Business can wait for morning. Mostly."] }
+    },
+    "healer": {
+      "name": "Healer", "service": ["heal", "cure", "sell potions"],
+      "blocks": [ { "from": "dawn", "at": "chapel", "do": "tend" }, { "from": "late", "at": "chapel", "do": "tend" } ],
+      "says": { "day": ["Sit. Bleed less. Thank you.", "Herbs for the cough, a stick for the bite."], "night": ["Somebody always gets hurt after dark. Usually somebody who should be in bed."] }
+    },
+    "unbinder": {
+      "name": "Unbinder", "service": ["retrain spells", "retrain perks", "retrain talents"],
+      "blocks": [ { "from": "day", "at": "hall", "do": "work" }, { "from": "night", "at": "inn", "do": "work" } ],
+      "says": { "day": ["Change your mind? I can help with that. For a fee.", "Nothing learned is gone. Only put away."], "night": ["Unbinding is quieter work by candle."] }
+    },
+    "broker": {
+      "name": "Broker", "service": ["hire followers", "dismiss followers"],
+      "blocks": [ { "from": "day", "at": "market", "do": "trade" }, { "from": "dusk", "at": "inn", "do": "trade" } ],
+      "says": { "day": ["Need a sword arm? I know several. Some are attached to people."], "night": ["The best hires drink here. Look for the ones still standing."] }
+    },
+    "stablehand": {
+      "name": "Stablehand", "service": ["mounts", "carts"],
+      "blocks": [ { "from": "dawn", "at": "stable", "do": "work" }, { "from": "night", "at": "home", "do": "sleep" } ],
+      "says": { "day": ["Don't stand behind that one.", "Fed, watered, brushed. The horse, not me."], "night": ["Stable's locked. Knock if it's urgent. It's never urgent."] }
+    },
+    "farmer": {
+      "name": "Farmer", "service": ["quests", "sell produce"],
+      "blocks": [ { "from": "dawn", "at": "fields", "do": "work" }, { "from": "dusk", "at": "inn", "do": "drink" }, { "from": "late", "at": "home", "do": "sleep" } ],
+      "says": { "day": ["Rain'd be nice. Not too much. A medium amount of rain."], "night": ["Up at dawn. Don't keep me."] }
+    },
+    "miller": {
+      "name": "Miller", "service": ["sell flour", "quests"],
+      "blocks": [ { "from": "dawn", "at": "mill", "do": "work" }, { "from": "night", "at": "inn", "do": "drink" } ],
+      "says": { "day": ["Mind the wheel."], "night": ["Wheel's stopped. My ears haven't."] }
+    },
+    "townsfolk": {
+      "name": "Townsfolk", "service": [],
+      "blocks": [ { "from": "dawn", "at": "market", "do": "wander" }, { "from": "day", "at": "square", "do": "wander" }, { "from": "dusk", "at": "inn", "do": "drink" }, { "from": "night", "at": "home", "do": "sleep" } ],
+      "says": { "day": ["Morning.", "Lovely day for it.", "Have you seen my goat?"], "night": ["Shouldn't you be indoors?", "Mind the dark lanes."] }
+    }
+  },
+  "guard": {
+    "name": "Guard",
+    "blocks": [ { "from": "dawn", "at": "gate", "do": "post" }, { "from": "day", "at": "square", "do": "patrol", "route": "the settlement's main streets (street placements cls main), round trip" }, { "from": "dusk", "at": "gate", "do": "post", "torch": true } ],
+    "night": "Guards at a gate carry torches and stand to attention when a player passes (Farhold R27 'greet by standing'); a guard never leaves the town ring.",
+    "says": { "day": ["Move along.", "Keep your blade sheathed in town."], "night": ["Late to be out.", "Stay where the torches are."] }
+  },
+  "questNpc": {
+    "blocks": [ { "from": "dawn", "at": "spot", "do": "stand" }, { "from": "night", "at": "inn", "do": "drink", "onlyIf": "the NPC's `at` is a settlement" } ],
+    "note": "Quest NPCs standing at a vignette, fort or the wilds keep their spot day and night (a campfire is lit there at night). Town quest NPCs go to the inn at night and still offer and take quests there."
+  },
+  "perTown": {
+    "town": ["smith", "merchant", "innkeeper", "elder", "healer", "unbinder", "broker", "stablehand", "townsfolk", "townsfolk", "townsfolk"],
+    "city": ["smith", "smith", "merchant", "merchant", "innkeeper", "innkeeper", "elder", "healer", "unbinder", "broker", "stablehand", "townsfolk", "townsfolk", "townsfolk", "townsfolk", "townsfolk"],
+    "hamlet": ["merchant", "innkeeper", "farmer", "miller", "townsfolk"],
+    "guards": { "town": 4, "city": 8, "hamlet": 1 }
+  }
+}

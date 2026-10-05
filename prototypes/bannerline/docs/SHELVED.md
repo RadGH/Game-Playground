@@ -1,7 +1,7 @@
 # Bannerline — shelved and parked work
 
 Everything that is deliberately NOT done, each with a one-line reason and where its notes live.
-Bring these up when a round turns to polish or balance. Snapshot at release, 2026-10-04.
+Bring these up when a round turns to polish or balance. Snapshot at release, 2026-10-04 (updated after the code review, 2026-10-04).
 Open cross-stream items are also tracked in `docs/requests.md` (unchecked `- [ ]` lines).
 
 ## Balance (owner: "forget snowballing, balance later")
@@ -14,7 +14,6 @@ Open cross-stream items are also tracked in `docs/requests.md` (unchecked `- [ ]
 | AI: the Commander barely buys items | Its build favours sends and the Drill Yard; E improved the Veteran's shopping (deny test 28% -> 47%) but not the Commander's item value | `~/claude/agent/bannerline/E-checklist.md` round 3; `js/sim/ai/shop.js` |
 | Hunters vs Farmers balance | Advisory model only: farmers have little to hide in the first two minutes, most downs happen in chases, most 3v1 matches end on the clock, Recruit farmers out-earn Veterans | `docs/requests.md` "(E -> lead) HvF balance notes"; `tools/hvf-econ-sim.mjs` |
 | HvF **Commander vs Veteran hunter gap** is ~0 (23 vs 22 downs of 80) | Hunters act alone: a real gap needs hunter teamwork (splitting up, driving a farmer into a partner, ambushes at a farm). Farmhouse-first and grave-camping were added and did not open the gap | `~/claude/agent/bannerline/E-checklist.md` round 3; `docs/hvf-PLAN.md` §10 (the bar: Commander beats Veteran ≥ 60%) |
-| HvF AI start-of-match spike | Ticks 1-2 of a 9v3 with nine AI farmers take 36-42 ms (every farmer scores hollows at once); staggering the first think per seat would spread it | `docs/requests.md` "(H -> E) Start-of-match spike" |
 
 ## Content
 
@@ -22,7 +21,6 @@ Open cross-stream items are also tracked in `docs/requests.md` (unchecked `- [ ]
 |---|---|---|
 | Campaign chapters for the Ranger ("The Long Watch"), Pyromancer ("Ashes and Oaths"), Druid ("The Green Pact"), Engineer ("Iron and Gears") | Only the Warrior chapter "The Iron Oath" (5 missions) was built; the others are stubs (`status: planned`) so the map shows them | `data/campaign/index.json`; mission format in `docs/interfaces.md` §13 |
 | Future modes: **Tower defense**, **Lanes and towers (MOBA)**, **Heroes and Empires** | Owner R2.20: planned, not scheduled. The mode registry (own map, roles, unequal teams, own data, own pipeline, own commands) was built so they are not blocked | `js/sim/modes/index.js` (PLANNED list, greyed on the mode screen); `docs/hvf-PLAN.md` §19 |
-| Hunters vs Farmers sound ids (bleat, cluck, oink, moo, bell, horn, hawk, chop, snare, ward pull) | Need new recipes in `sfx/` (catalog + synth methods), a separate piece of work | `docs/requests.md` "(C -> lead) NOT done: the HvF sound ids"; `docs/hvf-PLAN.md` §14 |
 
 ## Hunters vs Farmers — parked from `docs/hvf-PLAN.md`
 
@@ -53,3 +51,9 @@ Open cross-stream items are also tracked in `docs/requests.md` (unchecked `- [ ]
 | `js/sim/shop.js` `aiShopping` / `aiHealSlot` are no longer called | The AI's town decisions moved to `js/sim/ai/shop.js` + `town.js`; safe to delete, left for stream I | `docs/requests.md` "(E -> I)" |
 | PLAN.md still describes the removed stock system, the deck, Oil and "Muster" | It is the historical spec; the owner reversals are recorded in `README.md` "For future Claude" and `docs/requests.md` | `docs/PLAN.md` §2-§3 |
 | Older unchecked lines in `docs/requests.md` (Muster Hall model, the round-2 UI port notes, stealth draw, C's art hand-offs to B/H) | Most were superseded (the Muster Hall became the Barracks) or done without the box being ticked; check the line's newest reply before acting on one | `docs/requests.md` |
+
+## Done since the first snapshot (removed from the lists above)
+
+- **HvF sounds**: 16 new Sound Lab recipes (animals, bell, horn, hawk, chop, snare, building, stings) and the fog-aware sound bridge `js/view/hvf-sound.js` (a25691f, 2189b32, 899c0dd).
+- **HvF AI start-of-match spike**: first thinks staggered per seat, worst early tick 93 -> 27 ms (5be187b).
+- **Code review (10 findings)**: all fixed — seatless HvF host, HvF ping delay / rejoin / back to lobby on the shared lobby sync, rejoin while the old link is still live, large PeerJS messages split into chunks, unreachable move targets, team check before start, no sound through fog, pad stuck after death, AI double Toll of Iron (ff3b04b, 899c0dd, 68f96bc and earlier), and a refused rejoin now returns to the title with "Could not rejoin" (`js/main.js` netEvent).

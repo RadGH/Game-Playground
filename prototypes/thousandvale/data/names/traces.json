@@ -1,0 +1,71 @@
+{
+  "_doc": "Stream E (M2). Text pools for signs of other players (PLAN §5.4). The server (A) records the trace; the client (D) fills a template picked by a seeded hash of the trace id (so every client shows the SAME line for the same grave). Placeholders: {name} character name, {level}, {class} class name, {killer} what killed them (monster/encounter display name), {party} leader name + \"'s party\" or just the name when solo, {ago} 'a minute ago' / '4 minutes ago' (client formats from the timestamp), {place} dungeon / fort / site name, {count}, {zone} zone name, {what} thing counted. Lines are plain language, no banned names. `fadeMinutes` = how long the trace lasts; `max` = how many of that kind a zone copy keeps (oldest drops first).",
+  "grave": {
+    "fadeMinutes": 60, "max": 40,
+    "title": ["Here fell {name}", "{name}'s grave", "A fresh mound: {name}"],
+    "lines": [
+      "{name}, level {level} {class}. Killed by {killer}, {ago}.",
+      "{name} (level {level}) met {killer} here, {ago}. {killer} won.",
+      "Someone has scratched '{name} — {killer} — {ago}' on a flat stone.",
+      "{name}, {class}, level {level}. The {killer} was not impressed. {ago}.",
+      "A dented helmet on a stick. {name}, level {level}, fell to {killer} {ago}."
+    ],
+    "elite": [
+      "{name}, level {level}, fought {killer} and lost. Most do. {ago}.",
+      "{name} stood against {killer} here. The ground keeps the mark, for an hour."
+    ],
+    "fall": ["{name} found out how high this was. {ago}.", "{name}, level {level}: the drop won. {ago}."],
+    "drown": ["{name} could not swim as far as they hoped. {ago}.", "Bubbles, then nothing. {name}, level {level}, {ago}."]
+  },
+  "campfire": {
+    "fadeMinutes": 30, "max": 20,
+    "lines": [
+      "A campfire, still warm. {name} sat here {ago}.",
+      "Someone's fire. {name} left a pot and most of a sausage.",
+      "Warm coals and a bedroll shape in the grass. {name} rested here {ago}.",
+      "{party} camped here {ago}. They left the fire going, which is rude, but warm.",
+      "Ashes, still glowing. A note in the dirt: '{name} was here'."
+    ],
+    "restBuff": "Sitting by a player's fire gives the same out-of-combat regeneration as your own."
+  },
+  "banner": {
+    "fadeMinutes": 30, "max": 12,
+    "dungeon": [
+      "{place}: cleared by {party}, {ago}.",
+      "A banner on the door of {place}: '{party} went in. {party} came out.' {ago}.",
+      "{party} cleared {place} {ago}. The boss is having a lie-down.",
+      "Fresh paint on {place}: '{party} — {ago} — all of us came back'."
+    ],
+    "fort": [
+      "{place} was relieved by {party}, {ago}.",
+      "A banner over {place}: held by {party}, {ago}.",
+      "{party} took back {place} {ago}. The quartermaster is still counting arrows."
+    ],
+    "event": [
+      "{party} turned back {place} {ago}.",
+      "The marks of a big fight. {place} ended {ago}; {count} fought."
+    ],
+    "worldboss": [
+      "Here {count} adventurers brought down {killer}, {ago}.",
+      "The ground is churned for a hundred metres. {killer} fell here {ago}, to {count} of them."
+    ]
+  },
+  "deeds": {
+    "_doc": "The zone deed feed on the map (one line per counter, last 60 minutes). {count} >= 1; the client hides a counter at 0.",
+    "windowMinutes": 60,
+    "lines": {
+      "rares": ["{count} rare slain in {zone} this hour.", "{count} rares slain in {zone} this hour."],
+      "events": ["{count} zone event won here this hour.", "{count} zone events won here this hour."],
+      "dungeon": ["{count} party cleared the dungeon this hour.", "{count} parties cleared the dungeon this hour."],
+      "treasure": ["{count} treasure dug up in {zone} this hour.", "{count} treasures dug up in {zone} this hour."],
+      "deaths": ["{count} adventurer fell in {zone} this hour.", "{count} adventurers fell in {zone} this hour."],
+      "levels": ["{count} adventurer grew stronger here this hour.", "{count} adventurers grew stronger here this hour."],
+      "quests": ["{count} job done for the folk of {zone} this hour.", "{count} jobs done for the folk of {zone} this hour."]
+    },
+    "pluralRule": "lines[0] when count is 1, lines[1] otherwise"
+  },
+  "footprints": {
+    "_doc": "No text: a path decal where many players walked (A counts steps per 8 m cell per hour; D draws a worn path above `minStepsPerHour`).",
+    "minStepsPerHour": 400, "fadeMinutes": 120
+  }
+}

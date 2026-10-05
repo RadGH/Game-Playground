@@ -1,0 +1,831 @@
+{
+ "_doc": "Stream E. Content placements for world zone z12_02 (E zone 'test', The Torbor Fields) — tools/place-vignettes.mjs against stream B's bake (terrain c9413658). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
+ "zone": "z12_02",
+ "sheetZone": "test",
+ "province": "torbor_downs",
+ "terrainHash": "c9413658",
+ "band": [
+  1,
+  4
+ ],
+ "archetype": "heartland",
+ "rules": {
+  "vignette": {
+   "townGap": 60,
+   "gap": 30,
+   "slope": 20,
+   "sameKindSpacing": 140
+  },
+  "fort": {
+   "townGap": 80,
+   "gap": 40,
+   "slope": 16
+  },
+  "farm": {
+   "townGap": 25,
+   "gap": 30,
+   "slope": 12
+  },
+  "cave": {
+   "townGap": 120,
+   "gap": 40,
+   "slope": 28
+  },
+  "camp": {
+   "townGap": 120,
+   "gap": 25,
+   "slope": 24
+  },
+  "rare": {
+   "townGap": 150,
+   "gap": 30,
+   "slope": 24
+  },
+  "hook": {
+   "townGap": 40,
+   "gap": 30,
+   "slope": 26
+  },
+  "settlement": {
+   "townGap": 300,
+   "gap": 60,
+   "slope": 10
+  }
+ },
+ "mainWalkableShare": 0.941,
+ "settlements": [
+  {
+   "name": "Torborhold",
+   "kind": "town",
+   "x": 592,
+   "z": 1264,
+   "r": 90,
+   "source": "bake",
+   "bakeId": "torborhold"
+  },
+  {
+   "name": "Mawehaven",
+   "kind": "hamlet",
+   "x": 256,
+   "z": 1920,
+   "r": 40,
+   "source": "bake",
+   "bakeId": "pohelrow"
+  },
+  {
+   "name": "Wamonhold",
+   "kind": "hamlet",
+   "x": 1344,
+   "z": 1568,
+   "r": 46,
+   "source": "bake",
+   "bakeId": "ashford"
+  }
+ ],
+ "checks": [
+  {
+   "id": "door_1",
+   "kind": "dungeon_door",
+   "x": 354,
+   "z": 1292,
+   "reachable": true,
+   "openShare": 1
+  },
+  {
+   "id": "event_grandmother_skein",
+   "kind": "event_site",
+   "x": 357,
+   "z": 1944,
+   "reachable": true,
+   "openShare": 1
+  },
+  {
+   "id": "elite_hobb_gallowsby",
+   "kind": "camp_site",
+   "x": 75,
+   "z": 1973,
+   "reachable": true,
+   "openShare": 1
+  }
+ ],
+ "problems": [],
+ "placements": [
+  {
+   "type": "fort",
+   "id": "fort_test_0",
+   "name": "Torbor Watchtower",
+   "template": "watchtower_garrison",
+   "friendly": true,
+   "x": 718,
+   "z": 1744,
+   "yaw": -2.36,
+   "radius": 16,
+   "level": 1
+  },
+  {
+   "type": "farm",
+   "id": "farm_test_0",
+   "name": "Torborhold Sheepfold",
+   "template": "sheep",
+   "flavour": null,
+   "settlement": "Torborhold",
+   "x": 677,
+   "z": 1151,
+   "yaw": 0,
+   "radius": 24,
+   "level": 1
+  },
+  {
+   "type": "farm",
+   "id": "farm_test_1",
+   "name": "Mawehaven Piggery",
+   "template": "pig",
+   "flavour": null,
+   "settlement": "Mawehaven",
+   "x": 164,
+   "z": 1902,
+   "yaw": 1.18,
+   "radius": 18,
+   "level": 1
+  },
+  {
+   "type": "farm",
+   "id": "farm_test_2",
+   "name": "Wamonhold Mill",
+   "template": "mill",
+   "flavour": null,
+   "settlement": "Wamonhold",
+   "x": 1420,
+   "z": 1466,
+   "yaw": -0.79,
+   "radius": 20,
+   "level": 1
+  },
+  {
+   "type": "farm",
+   "id": "farm_test_3",
+   "name": "Torborhold Farm",
+   "template": "arable",
+   "flavour": null,
+   "settlement": "Torborhold",
+   "x": 542,
+   "z": 1409,
+   "yaw": -1.18,
+   "radius": 22,
+   "level": 1
+  },
+  {
+   "type": "farm",
+   "id": "farm_test_4",
+   "name": "Mawehaven Farm",
+   "template": "arable",
+   "flavour": null,
+   "settlement": "Mawehaven",
+   "x": 388,
+   "z": 1856,
+   "yaw": -1.18,
+   "radius": 22,
+   "level": 1
+  },
+  {
+   "type": "farm",
+   "id": "farm_test_5",
+   "name": "Wamonhold Piggery",
+   "template": "pig",
+   "flavour": null,
+   "settlement": "Wamonhold",
+   "x": 1303,
+   "z": 1663,
+   "yaw": 2.75,
+   "radius": 18,
+   "level": 1
+  },
+  {
+   "type": "farm",
+   "id": "farm_test_6",
+   "name": "Torborhold Piggery",
+   "template": "pig",
+   "flavour": null,
+   "settlement": "Torborhold",
+   "x": 449,
+   "z": 1227,
+   "yaw": 0.79,
+   "radius": 18,
+   "level": 1
+  },
+  {
+   "type": "cave",
+   "id": "cave_test_0",
+   "name": "Beast den",
+   "template": "beast_den",
+   "plan": {
+    "family": "cave_river",
+    "floors": 1,
+    "level": 2
+   },
+   "x": 312,
+   "z": 170,
+   "yaw": 0.79,
+   "radius": 10,
+   "level": 2
+  },
+  {
+   "type": "cave",
+   "id": "cave_test_1",
+   "name": "Old mine shaft",
+   "template": "old_shaft",
+   "plan": {
+    "family": "mine_descent",
+    "floors": 1,
+    "level": 2
+   },
+   "x": 1030,
+   "z": 557,
+   "yaw": 1.18,
+   "radius": 10,
+   "level": 2
+  },
+  {
+   "type": "vignette",
+   "id": "blighted_orchard",
+   "name": "The Grey Orchard",
+   "x": 1758,
+   "z": 800,
+   "yaw": 2.45,
+   "radius": 13,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "boar_wallow",
+   "name": "Boar Wallow",
+   "x": 1742,
+   "z": 128,
+   "yaw": 3.91,
+   "radius": 13,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "charcoal_clamps",
+   "name": "The Charcoal Burners",
+   "x": 1973,
+   "z": 1607,
+   "yaw": 4.59,
+   "radius": 12,
+   "biome": "temperateForest",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "fishwife_stall",
+   "name": "The Abandoned Fish Stall",
+   "x": 820,
+   "z": 120,
+   "yaw": 3.24,
+   "radius": 9,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "hanging_oak",
+   "name": "The Hanging Oak",
+   "x": 338,
+   "z": 709,
+   "yaw": 5.47,
+   "radius": 12,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "hedge_witch_garden",
+   "name": "The Hedge-Witch's Garden",
+   "x": 1179,
+   "z": 1036,
+   "yaw": 1.25,
+   "radius": 12,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "market_cross",
+   "name": "The Market Cross",
+   "x": 1670,
+   "z": 1979,
+   "yaw": 2.94,
+   "radius": 10,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "overturned_cart",
+   "name": "The Overturned Cart",
+   "x": 1291,
+   "z": 174,
+   "yaw": 0.65,
+   "radius": 14,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "plague_pit_cairn",
+   "name": "The Lime Cairn",
+   "x": 77,
+   "z": 1477,
+   "yaw": 4.18,
+   "radius": 10,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "slag_heap_shrine",
+   "name": "The Slag Saint",
+   "x": 1768,
+   "z": 1210,
+   "yaw": 0.69,
+   "radius": 10,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_0_0",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    3
+   ],
+   "count": [
+    3,
+    4
+   ],
+   "x": 911,
+   "z": 1439,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_0_1",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    3
+   ],
+   "count": [
+    3,
+    4
+   ],
+   "x": 619,
+   "z": 859,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_1_0",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1681,
+   "z": 1593,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_1_1",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1185,
+   "z": 1326,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_2_0",
+   "monster": "road_brigand",
+   "with": "brigand_archer",
+   "level": [
+    2,
+    5
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 80,
+   "z": 1705,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_2_1",
+   "monster": "road_brigand",
+   "with": "brigand_archer",
+   "level": [
+    2,
+    5
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 190,
+   "z": 1688,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_3_0",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    1,
+    3
+   ],
+   "x": 484,
+   "z": 1713,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_3_1",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    1,
+    3
+   ],
+   "x": 372,
+   "z": 1594,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_4_0",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 640,
+   "z": 1571,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_4_1",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1616,
+   "z": 1380,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_5_0",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    3,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1844,
+   "z": 1398,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_5_1",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    3,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 504,
+   "z": 1938,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "rare",
+   "id": "rare_grisel_thornhide",
+   "slot": 0,
+   "name": "Grisel Thornhide",
+   "x": 137,
+   "z": 1035,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     44,
+     1062
+    ],
+    [
+     137,
+     963
+    ],
+    [
+     227,
+     982
+    ],
+    [
+     180,
+     1089
+    ],
+    [
+     117,
+     1126
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 4
+  },
+  {
+   "type": "rare",
+   "id": "rare_sallowmaw",
+   "slot": 1,
+   "name": "Sallowmaw",
+   "x": 536,
+   "z": 1820,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     646,
+     1815
+    ],
+    [
+     539,
+     1911
+    ],
+    [
+     456,
+     1864
+    ],
+    [
+     493,
+     1744
+    ],
+    [
+     604,
+     1722
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 4
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z12_02_torborhold",
+   "name": "Torborhold",
+   "x": 680.6,
+   "z": 1208.4,
+   "yaw": 0,
+   "settlement": "Torborhold",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z12_02_mawehaven",
+   "name": "Mawehaven",
+   "x": 275.1,
+   "z": 1976.8,
+   "yaw": 0,
+   "settlement": "Mawehaven",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z12_02_wamonhold",
+   "name": "Wamonhold",
+   "x": 1373.8,
+   "z": 1513.9,
+   "yaw": 0,
+   "settlement": "Wamonhold",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z12_02_door",
+   "name": "Barrow entrance",
+   "x": 317.9,
+   "z": 1270.5,
+   "yaw": 0,
+   "door": "door_1",
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "elder_maud",
+   "name": "Elder Maud Torbor",
+   "role": "elder",
+   "at": "Torborhold",
+   "x": 583.1,
+   "z": 1278.7,
+   "yaw": 3.83,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "reeve_corwin",
+   "name": "Reeve Corwin Ashby",
+   "role": "guard",
+   "at": "Torborhold",
+   "x": 579.5,
+   "z": 1276.7,
+   "yaw": 4.56,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "bryn_bonesetter",
+   "name": "Bryn the Bonesetter",
+   "role": "healer",
+   "at": "Torborhold",
+   "x": 580.4,
+   "z": 1283,
+   "yaw": 1.17,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "goody_harl",
+   "name": "Goody Harl",
+   "role": "farmer",
+   "at": "Wamonhold",
+   "x": 1344.2,
+   "z": 1570.1,
+   "yaw": 3.17,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "old_pell",
+   "name": "Old Pell",
+   "role": "shepherd",
+   "at": "Wamonhold",
+   "x": 1346.9,
+   "z": 1566.6,
+   "yaw": 4.19,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "tamsin_reed",
+   "name": "Tamsin Reed",
+   "role": "fisher",
+   "at": "Mawehaven",
+   "x": 250.6,
+   "z": 1922,
+   "yaw": 2.23,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "dunnet",
+   "name": "Dunnet the carter",
+   "role": "trader",
+   "at": "overturned_cart",
+   "x": 1291.9,
+   "z": 176.4,
+   "yaw": 4.68,
+   "radius": 1
+  },
+  {
+   "type": "treasure_clue",
+   "id": "pells_flock_money_0",
+   "chain": "pells_flock_money",
+   "step": 0,
+   "clue": "note",
+   "how": null,
+   "shimmer": null,
+   "x": 335,
+   "z": 708.3,
+   "yaw": 0,
+   "where": "vignette hanging_oak",
+   "radius": 1
+  },
+  {
+   "type": "treasure_clue",
+   "id": "pells_flock_money_1",
+   "chain": "pells_flock_money",
+   "step": 1,
+   "clue": "carved_arrow",
+   "how": null,
+   "shimmer": null,
+   "x": 41.9,
+   "z": 2006.6,
+   "yaw": 0,
+   "where": "crossing Fitockpi Ford",
+   "radius": 1
+  },
+  {
+   "type": "treasure_cache",
+   "id": "pells_flock_money_2",
+   "chain": "pells_flock_money",
+   "step": 2,
+   "clue": null,
+   "how": "dig",
+   "shimmer": 15,
+   "x": 125.3,
+   "z": 1988.4,
+   "yaw": 0,
+   "where": "near Fitockpi Ford",
+   "radius": 1
+  }
+ ],
+ "features": [
+  {
+   "type": "hook",
+   "id": "the_singing_ford",
+   "name": "The Singing Ford",
+   "kind": "compositional",
+   "x": 64,
+   "z": 1984,
+   "yaw": 0,
+   "where": "at the crossing",
+   "needMet": false
+  }
+ ]
+}

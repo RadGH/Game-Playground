@@ -7,7 +7,7 @@
 // js/rules/room.js, never here.
 
 import {
-  Rpg, installUniques, installFoci, tuneFeel, tuneWeapons, setLevelCap, EFFECTS,
+  Rpg, installUniques, installFoci, installWarbands, tuneFeel, tuneWeapons, setLevelCap, EFFECTS,
 } from './farhold.js';
 
 /** The same describe hook main.js passes, so a unique's power text matches Farhold's tooltip. */
@@ -36,6 +36,8 @@ export function createEngine(data, { seed = 1, levelCap = DEFAULT_LEVEL_CAP } = 
   const rpg = new Rpg(items, { ...balance, seed }, talents);
   const classList = classes?.classes || [];
   const bestiary = enemies || { enemies: [], bosses: [], modifiers: [] };
+  // main.js line ~307: the five warbands (members + warlords) into the bestiary, in memory
+  if (data.warbands) { installWarbands(bestiary, data.warbands); bestiary.warbands = data.warbands; }
 
   return {
     rpg, items, balance,

@@ -23,7 +23,7 @@
     "scout_orla": {
       "name": "Scout Tamsin",
       "role": "scout",
-      "at": "smugglers_cellar",
+      "at": "cult_cellar",
       "greeting": "Shh. Smugglers. And worse than smugglers. Cultists. Who smuggle."
     }
   },
@@ -112,7 +112,7 @@
       "steps": [
         {
           "kind": "visit",
-          "vignette": "smugglers_cellar",
+          "vignette": "cult_cellar",
           "text": "Find the smugglers' cellar"
         },
         {

@@ -1,0 +1,865 @@
+{
+ "_doc": "Stream E. Content placements for world zone z11_04 (E zone 'blackthorn_scar', Blackthorn Scar) — tools/place-vignettes.mjs against stream B's bake (terrain bdad0477). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
+ "zone": "z11_04",
+ "sheetZone": "blackthorn_scar",
+ "province": "torbor_downs",
+ "terrainHash": "bdad0477",
+ "band": [
+  7,
+  10
+ ],
+ "archetype": "blight",
+ "rules": {
+  "vignette": {
+   "townGap": 60,
+   "gap": 30,
+   "slope": 20,
+   "sameKindSpacing": 140
+  },
+  "fort": {
+   "townGap": 80,
+   "gap": 40,
+   "slope": 16
+  },
+  "farm": {
+   "townGap": 25,
+   "gap": 30,
+   "slope": 12
+  },
+  "cave": {
+   "townGap": 120,
+   "gap": 40,
+   "slope": 28
+  },
+  "camp": {
+   "townGap": 120,
+   "gap": 25,
+   "slope": 24
+  },
+  "rare": {
+   "townGap": 150,
+   "gap": 30,
+   "slope": 24
+  },
+  "hook": {
+   "townGap": 40,
+   "gap": 30,
+   "slope": 26
+  },
+  "settlement": {
+   "townGap": 300,
+   "gap": 60,
+   "slope": 10
+  }
+ },
+ "mainWalkableShare": 0.843,
+ "settlements": [
+  {
+   "name": "Last Lantern",
+   "kind": "town",
+   "x": 890,
+   "z": 1305,
+   "r": 70,
+   "source": "ask",
+   "bakeId": null
+  },
+  {
+   "name": "Thornwick",
+   "kind": "hamlet",
+   "x": 1772,
+   "z": 1900,
+   "r": 40,
+   "source": "ask",
+   "bakeId": null
+  }
+ ],
+ "checks": [
+  {
+   "id": "door_1",
+   "kind": "dungeon_door",
+   "x": 1164,
+   "z": 898,
+   "reachable": true,
+   "openShare": 1
+  },
+  {
+   "id": "world_grimtallow",
+   "kind": "event_site",
+   "x": 1161,
+   "z": 1305,
+   "reachable": true,
+   "openShare": 1
+  },
+  {
+   "id": "event_blackthorn_scar",
+   "kind": "event_site",
+   "x": 871,
+   "z": 1071,
+   "reachable": true,
+   "openShare": 1
+  }
+ ],
+ "problems": [],
+ "placements": [
+  {
+   "type": "fort",
+   "id": "fort_blackthorn_scar_0",
+   "name": "the Warband Stockade",
+   "template": "warband_stockade",
+   "friendly": false,
+   "x": 1953,
+   "z": 1896,
+   "yaw": -2.36,
+   "radius": 26,
+   "level": 7
+  },
+  {
+   "type": "farm",
+   "id": "farm_blackthorn_scar_0",
+   "name": "Last Lantern Piggery",
+   "template": "pig",
+   "flavour": null,
+   "settlement": "Last Lantern",
+   "x": 897,
+   "z": 1192,
+   "yaw": 1.18,
+   "radius": 18,
+   "level": 7
+  },
+  {
+   "type": "farm",
+   "id": "farm_blackthorn_scar_1",
+   "name": "Thornwick Piggery",
+   "template": "pig",
+   "flavour": null,
+   "settlement": "Thornwick",
+   "x": 1676,
+   "z": 1913,
+   "yaw": 0.79,
+   "radius": 18,
+   "level": 7
+  },
+  {
+   "type": "farm",
+   "id": "farm_blackthorn_scar_2",
+   "name": "Blighted Last Lantern Piggery",
+   "template": "pig",
+   "flavour": "corrupted",
+   "settlement": "Last Lantern",
+   "x": 881,
+   "z": 1418,
+   "yaw": 1.18,
+   "radius": 18,
+   "level": 7
+  },
+  {
+   "type": "farm",
+   "id": "farm_blackthorn_scar_3",
+   "name": "Blighted Thornwick Piggery",
+   "template": "pig",
+   "flavour": "corrupted",
+   "settlement": "Thornwick",
+   "x": 1812,
+   "z": 1826,
+   "yaw": 0.79,
+   "radius": 18,
+   "level": 7
+  },
+  {
+   "type": "cave",
+   "id": "cave_blackthorn_scar_0",
+   "name": "Spider hollow",
+   "template": "spider_hollow",
+   "plan": {
+    "family": "cave_river",
+    "floors": 1,
+    "level": 8
+   },
+   "x": 478,
+   "z": 269,
+   "yaw": 0.79,
+   "radius": 10,
+   "level": 8
+  },
+  {
+   "type": "cave",
+   "id": "cave_blackthorn_scar_1",
+   "name": "Spider hollow",
+   "template": "spider_hollow",
+   "plan": {
+    "family": "cave_river",
+    "floors": 1,
+    "level": 8
+   },
+   "x": 1429,
+   "z": 112,
+   "yaw": -3.14,
+   "radius": 10,
+   "level": 8
+  },
+  {
+   "type": "vignette",
+   "id": "ash_choir_stones",
+   "name": "The Burnt Choir",
+   "x": 238,
+   "z": 1088,
+   "yaw": 0.79,
+   "radius": 12,
+   "biome": "mountains",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "bone_orchard",
+   "name": "The Bone Orchard",
+   "x": 1969,
+   "z": 142,
+   "yaw": 4.8,
+   "radius": 12,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "burned_farmstead",
+   "name": "The Burned Farmstead",
+   "x": 354,
+   "z": 1723,
+   "yaw": 4.97,
+   "radius": 13,
+   "biome": "mountains",
+   "biomeFits": false,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "cult_cellar",
+   "name": "The Cloud-Shouters' Cellar",
+   "x": 1457,
+   "z": 965,
+   "yaw": 1.92,
+   "radius": 13,
+   "biome": "mountains",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "cultist_altar",
+   "name": "The Sky Altar",
+   "x": 1092,
+   "z": 1983,
+   "yaw": 4.72,
+   "radius": 13,
+   "biome": "hills",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "gallows_crossroads",
+   "name": "Gallows Crossroads",
+   "x": 1932,
+   "z": 1256,
+   "yaw": 4.24,
+   "radius": 10,
+   "biome": "mountains",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "heretic_stake",
+   "name": "The Heretic's Stake",
+   "x": 1031,
+   "z": 483,
+   "yaw": 3.08,
+   "radius": 10,
+   "biome": "mountains",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "old_battlefield",
+   "name": "The Old Battlefield",
+   "x": 1759,
+   "z": 581,
+   "yaw": 0.03,
+   "radius": 15,
+   "biome": "hills",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "rotting_gibbet_cage",
+   "name": "The Crow Cage",
+   "x": 97,
+   "z": 602,
+   "yaw": 3.66,
+   "radius": 10,
+   "biome": "mountains",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "siege_camp_leftovers",
+   "name": "The Abandoned Siege Camp",
+   "x": 1381,
+   "z": 1481,
+   "yaw": 1.68,
+   "radius": 15,
+   "biome": "mountains",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_0_0",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    7,
+    9
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 925,
+   "z": 69,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_0_1",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    7,
+    9
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 66,
+   "z": 1450,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_1_0",
+   "monster": "ossuary_crawler",
+   "with": null,
+   "level": [
+    8,
+    10
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 704,
+   "z": 1928,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_1_1",
+   "monster": "ossuary_crawler",
+   "with": null,
+   "level": [
+    8,
+    10
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1107,
+   "z": 841,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_2_0",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    9
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 464,
+   "z": 746,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_2_1",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    9
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1963,
+   "z": 894,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_3_0",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    8,
+    10
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 495,
+   "z": 1368,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_3_1",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    8,
+    10
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1102,
+   "z": 1642,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_4_0",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    7,
+    9
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 76,
+   "z": 1915,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_4_1",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    7,
+    9
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1603,
+   "z": 1255,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_5_0",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    8,
+    10
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 76,
+   "z": 255,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_5_1",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    8,
+    10
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 697,
+   "z": 952,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "rare",
+   "id": "rare_thornbound_crawler",
+   "slot": 0,
+   "name": "The Thornbound Crawler",
+   "x": 1278,
+   "z": 1148,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     1271,
+     1080
+    ],
+    [
+     1307,
+     1114
+    ],
+    [
+     1311,
+     1179
+    ],
+    [
+     1258,
+     1210
+    ],
+    [
+     1210,
+     1142
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 10
+  },
+  {
+   "type": "rare",
+   "id": "rare_scab",
+   "slot": 1,
+   "name": "Scab",
+   "x": 1332,
+   "z": 1808,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     1393,
+     1766
+    ],
+    [
+     1385,
+     1858
+    ],
+    [
+     1324,
+     1865
+    ],
+    [
+     1277,
+     1810
+    ],
+    [
+     1337,
+     1732
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 10
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z11_04_last_lantern",
+   "name": "Last Lantern",
+   "x": 983.8,
+   "z": 1337.3,
+   "yaw": 0,
+   "settlement": "Last Lantern",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z11_04_thornwick",
+   "name": "Thornwick",
+   "x": 1841.1,
+   "z": 1906.8,
+   "yaw": 0,
+   "settlement": "Thornwick",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z11_04_door",
+   "name": "Barrow entrance",
+   "x": 1206,
+   "z": 900.9,
+   "yaw": 0,
+   "door": "door_1",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z11_04_worldboss",
+   "name": "Grimtallow's Hollow",
+   "x": 1041.5,
+   "z": 1331.4,
+   "yaw": 0,
+   "event": "world_grimtallow",
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "lantern_keeper_rosa",
+   "name": "Rosa of Last Lantern",
+   "role": "elder",
+   "at": "Last Lantern",
+   "x": 889.5,
+   "z": 1301.7,
+   "yaw": 1.61,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "penitent_jory",
+   "name": "Jory the penitent",
+   "role": "pilgrim",
+   "at": "Thornwick",
+   "x": 1773.2,
+   "z": 1902.8,
+   "yaw": 1.63,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "outrider_garrick",
+   "name": "Outrider Garrick",
+   "role": "scout",
+   "at": "the Warband Stockade",
+   "x": 1954.4,
+   "z": 1897.5,
+   "yaw": 3.88,
+   "radius": 1
+  },
+  {
+   "type": "treasure_clue",
+   "id": "lantern_oil_0",
+   "chain": "lantern_oil",
+   "step": 0,
+   "clue": "drunks_story",
+   "how": null,
+   "shimmer": null,
+   "x": 1797.5,
+   "z": 1937.3,
+   "yaw": 0,
+   "where": "edge of Thornwick",
+   "radius": 1
+  },
+  {
+   "type": "treasure_clue",
+   "id": "lantern_oil_1",
+   "chain": "lantern_oil",
+   "step": 1,
+   "clue": "gravestone",
+   "how": null,
+   "shimmer": null,
+   "x": 846.4,
+   "z": 1243.8,
+   "yaw": 0,
+   "where": "edge of Last Lantern",
+   "radius": 1
+  },
+  {
+   "type": "treasure_cache",
+   "id": "lantern_oil_2",
+   "chain": "lantern_oil",
+   "step": 2,
+   "clue": null,
+   "how": "chest",
+   "shimmer": 15,
+   "x": 1071.2,
+   "z": 1160.4,
+   "yaw": 0,
+   "where": "near Last Lantern",
+   "radius": 1
+  }
+ ],
+ "features": [
+  {
+   "type": "hook",
+   "id": "the_thorn_wall",
+   "name": "The Thorn Wall",
+   "kind": "bespoke",
+   "x": 983,
+   "z": 1024,
+   "yaw": 0,
+   "pts": [
+    [
+     1015,
+     80
+    ],
+    [
+     1030,
+     120
+    ],
+    [
+     1044,
+     160
+    ],
+    [
+     1100,
+     400
+    ],
+    [
+     1102,
+     440
+    ],
+    [
+     1103,
+     480
+    ],
+    [
+     1101,
+     520
+    ],
+    [
+     1098,
+     560
+    ],
+    [
+     1092,
+     600
+    ],
+    [
+     1008,
+     880
+    ],
+    [
+     992,
+     920
+    ],
+    [
+     976,
+     960
+    ],
+    [
+     960,
+     1000
+    ],
+    [
+     945,
+     1040
+    ],
+    [
+     930,
+     1080
+    ],
+    [
+     916,
+     1120
+    ],
+    [
+     903,
+     1160
+    ],
+    [
+     863,
+     1440
+    ],
+    [
+     866,
+     1480
+    ],
+    [
+     870,
+     1520
+    ],
+    [
+     877,
+     1560
+    ],
+    [
+     885,
+     1600
+    ],
+    [
+     896,
+     1640
+    ],
+    [
+     907,
+     1680
+    ],
+    [
+     920,
+     1720
+    ],
+    [
+     934,
+     1760
+    ],
+    [
+     949,
+     1800
+    ],
+    [
+     965,
+     1840
+    ],
+    [
+     981,
+     1880
+    ],
+    [
+     997,
+     1920
+    ],
+    [
+     1013,
+     1960
+    ]
+   ],
+   "where": "a line north to south; gaps where the ground or a road breaks it",
+   "needMet": true
+  }
+ ]
+}

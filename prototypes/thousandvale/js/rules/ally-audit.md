@@ -5,7 +5,7 @@ hurt, poisoned party member 2.5 m away. **Reaches the ally** = what the plan pro
 checked to land on that ally (and on nobody outside the party, and on nobody 120 m away). A row with nothing in it
 is a skill that does nothing for friends (damage, control, personal buffs).
 
-2301 casts, 548 of them do something for an ally.
+2301 casts, 565 of them do something for an ally.
 
 | Cast | Reaches the ally |
 |---|---|
@@ -70,6 +70,7 @@ is a skill that does nothing for friends (damage, control, personal buffs).
 | ranger/multi_shot | — |
 | ranger/quarry_call | — |
 | ranger/quarry_call +blood_scent | heal |
+| ranger/quarry_call +hunt_order | empower |
 | ranger/trackers_leap | — |
 | ranger/rain_of_arrows | — |
 | ranger/rain_of_arrows +covering_storm | status |
@@ -212,7 +213,7 @@ is a skill that does nothing for friends (damage, control, personal buffs).
 | demon_hunter/unleash_hound +shared_hide | barrier, revive |
 | demon_hunter/unleash_hound +deepen | revive |
 | demon_hunter/unleash_hound +blood_bond | link, revive |
-| demon_hunter/unleash_hound +shared_kill | revive |
+| demon_hunter/unleash_hound +shared_kill | empower, revive |
 | demon_hunter/unleash_hound +hunger | revive |
 | demon_hunter/unleash_hound +alpha_hide | revive, status |
 | demon_hunter/unleash_hound +night_bond | revive |
@@ -366,6 +367,7 @@ is a skill that does nothing for friends (damage, control, personal buffs).
 | oracle/last_prophecy +retold | status |
 | oracle/last_prophecy +crescendo | status |
 | tactician/exploit_gap | — |
+| tactician/exploit_gap +marked_opening | empower |
 | tactician/rally | status |
 | tactician/rally +hold_the_line | status |
 | tactician/rally +second_breath | heal, status |
@@ -379,12 +381,25 @@ is a skill that does nothing for friends (damage, control, personal buffs).
 | tactician/rally +standard | status |
 | tactician/rally +undaunted | status |
 | tactician/rally +wellspring | status |
-| tactician/charge | — |
+| tactician/charge | empower |
+| tactician/charge +pincer | empower |
+| tactician/charge +long_charge | empower |
+| tactician/charge +quick | empower |
+| tactician/charge +shock_troops | empower |
+| tactician/charge +breach | empower |
+| tactician/charge +burst | empower |
+| tactician/charge +fall_back | empower |
+| tactician/charge +covered_advance | empower |
+| tactician/charge +bulwark | empower |
+| tactician/charge +momentum | empower |
+| tactician/charge +full_assault | empower |
+| tactician/charge +crescendo | empower |
 | tactician/reposition | — |
 | tactician/reposition +out_of_danger | cleanse |
 | tactician/seize_initiative | — |
 | tactician/seize_initiative +tactical_ward | barrier |
 | tactician/seize_initiative +change_of_plan | cleanse |
+| tactician/seize_initiative +grand_order | empower |
 | tactician/seize_initiative +contingency | ward |
 | tactician/battle_plan | status |
 | tactician/battle_plan +opening_volley | status |
@@ -423,6 +438,7 @@ is a skill that does nothing for friends (damage, control, personal buffs).
 | chronomancer/stop_the_clock +stillness_ward | barrier |
 | monk/open_palm | — |
 | monk/wind_step | — |
+| monk/wind_step +gale_path | empower |
 | monk/sweeping_heel | — |
 | monk/inner_stillness | heal |
 | monk/inner_stillness +quick_stillness | heal |
